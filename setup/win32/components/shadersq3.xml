@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<component>
+  <dir name="modules">
+    <file name="shadersq3.dll"/>
+  </dir>
+  <dir name="bitmaps">
+    <file name="notex.bmp"/>
+    <file name="shadernotex.bmp"/>
+  </dir>
+</component>

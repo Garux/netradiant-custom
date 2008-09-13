@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+build commands
+[RadiantPath]: path to Radiant .. C:\Program Files\Gtkradiant
+[EnginePath]: path to the engine .. C:\quake3\ C:\Program Files\Quake III Arena\ /usr/local/games/quake3/
+-->
+<project version="2.0">
+<var name="q3map2">"[RadiantPath]q3map2.[ExecutableType]" -v<cond value="[MonitorAddress]"> -connect [MonitorAddress]</cond> -game quake3 -fs_basepath "[EnginePath]"<cond value="[GameName]"> -fs_game [GameName]</cond></var>
+<build name="Q3Map2: (single) BSP -meta">
+<command>[q3map2] -meta "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (single) -vis">
+<command>[q3map2] -vis "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (single test) -vis -fast">
+<command>[q3map2] -vis -fast "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (single test) -light -deluxe -faster">
+<command>[q3map2] -light -deluxe -faster "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (single test) -light -deluxe -fast">
+<command>[q3map2] -light -deluxe -fast "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (single) -light -deluxe -fast -super 2">
+<command>[q3map2] -light -deluxe -fast -super 2 "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (single) -light -deluxe -fast -super 2 -filter">
+<command>[q3map2] -light -deluxe -fast -super 2 -filter "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (single) -light -deluxe -fast -super 2 -filter -bounce 8">
+<command>[q3map2] -light -deluxe -fast -super 2 -filter -bounce 8 "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (test) BSP -meta, -vis, -light -deluxe -fast -filter">
+<command>[q3map2] -meta "[MapFile]"</command>
+<command>[q3map2] -vis -saveprt "[MapFile]"</command>
+<command>[q3map2] -light -deluxe -fast -filter "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (test) BSP -meta, -vis -fast, -light -deluxe -fast -super 2 -filter">
+<command>[q3map2] -meta "[MapFile]"</command>
+<command>[q3map2] -vis -saveprt -fast "[MapFile]"</command>
+<command>[q3map2] -light -deluxe -fast -super 2 -filter "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (final) BSP -meta, -vis, -light -deluxe -fast -filter -super 2">
+<command>[q3map2] -meta "[MapFile]"</command>
+<command>[q3map2] -vis -saveprt "[MapFile]"</command>
+<command>[q3map2] -light -deluxe -fast -filter -super 2 "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (final) BSP -meta, -vis, -light -deluxe -fast -filter -super 2 -bounce 8">
+<command>[q3map2] -meta "[MapFile]"</command>
+<command>[q3map2] -vis -saveprt "[MapFile]"</command>
+<command>[q3map2] -light -deluxe -fast -super 2 -filter -bounce 8 "[MapFile]"</command>
+</build>
+<build name="Q3Map2: (simulate old style -light -deluxe -extra) BSP -meta, -vis, -light -deluxe -super 2">
+<command>[q3map2] -meta "[MapFile]"</command>
+<command>[q3map2] -vis -saveprt "[MapFile]"</command>
+<command>[q3map2] -light -deluxe -super 2 "[MapFile]"</command>
+</build>
+</project>
+
