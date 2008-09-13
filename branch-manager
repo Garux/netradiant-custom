@@ -1,0 +1,343 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+sub OutputOf($@)
+{
+	my ($cmd, @args) = @_;
+	$cmd =~ s/#(\d)/"\$ARG$1"/g;
+	$ENV{"ARG$_"} = $args[$_-1]
+		for 1..@args;
+
+	open my $fh, '-|', $cmd
+		or die "popen $cmd: $!";
+
+	$ENV{"ARG$_"} = ''
+		for 1..@args;
+
+	undef local $/;
+	my $ret = <$fh>;
+	close $fh;
+
+	return $ret;
+}
+
+my %conf = 
+(
+	master => '',
+	revisions_applied => ''
+);
+my @revisions_applied = (); # array of [first, last] ranges
+
+sub LoadSettings()
+{
+	open my $fh, '<', ".patchsets"
+		or return;
+	while(<$fh>)
+	{
+		chomp;
+		/^([^=]*?)\s*=\s*(.*?)$/s
+			or next;
+		die "Invalid config item: $1 (allowed: @{[sort keys %conf]})"
+			if not exists $conf{$1};
+		$conf{$1} = $2;
+	}
+
+	@revisions_applied = map { /^(\d+)-(\d+)$/s or die "Invalid revision spec $_"; [$1, $2]; } split /,/, $conf{revisions_applied};
+}
+
+sub WriteSettings()
+{
+	$conf{revisions_applied} = join ',', map { "$_->[0]-$_->[1]" } @revisions_applied;
+
+	open my $fh, '>', ".patchsets"
+		or die "writing settings: $!";
+	for(sort keys %conf)
+	{
+		print $fh "$_ = $conf{$_}\n";
+	}
+}
+
+sub AddPatch($$)
+{
+	my ($first, $last) = @_;
+	die "Invalid range" if $first > $last;
+
+	my @rev = sort { $a->[0] <=> $b->[0] } (@revisions_applied, [$first, $last]);
+
+	my $i = 0;
+	while($i < @rev - 1)
+	{
+		my $a = $rev[$i][0];
+		my $b = $rev[$i][1];
+		my $c = $rev[$i+1][0];
+		my $d = $rev[$i+1][1];
+
+		if($b >= $c)
+		{
+			die "overlapping patch: $a-$b overlaps $c-$d";
+		}
+		if($b == $c - 1)
+		{
+			splice @rev, $i, 2, [$a, $d];
+			next;
+		}
+		++$i;
+	}
+
+	@revisions_applied = @rev;
+}
+
+sub RemovePatch($$)
+{
+	my ($first, $last) = @_;
+	die "Invalid range" if $first > $last;
+
+	my @rev = sort { $a->[0] <=> $b->[0] } (@revisions_applied);
+
+	my $i = 0;
+	while($i < @rev)
+	{
+		my $a = $rev[$i][0];
+		my $b = $rev[$i][1];
+
+		if($first >= $a && $last <= $b)
+		{
+			# this is the range
+			my @replacement;
+
+			if($first == $a && $last == $b)
+			{
+				@replacement = ();
+			}
+			elsif($first == $a)
+			{
+				@replacement = ([$last + 1, $b]);
+			}
+			elsif($last == $b)
+			{
+				@replacement = ([$a, $first - 1]);
+			}
+			else
+			{
+				@replacement = ([$a, $first - 1], [$last + 1, $b]);
+			}
+			splice @rev, $i, 1, @replacement;
+			@revisions_applied = @rev;
+			return;
+		}
+	}
+
+	die "could not remove range: not in set";
+}
+
+sub GetUnappliedRanges($)
+{
+	my ($lastrev) = @_;
+	my @unapplied = ();
+
+	my $cur = 0;
+	for(@revisions_applied)
+	{
+		my ($a, $b) = @$_;
+		if($a - 1 >= $cur + 1)
+		{
+			push @unapplied, [$cur + 1, $a - 1];
+		}
+		$cur = $b;
+	}
+	if($lastrev >= $cur + 1)
+	{
+		push @unapplied, [$cur + 1, $lastrev];
+	}
+	return @unapplied;
+}
+
+sub GetMasterRev()
+{
+	my $svninfo = OutputOf 'svn info #1', $conf{master};
+	$svninfo =~ /^Last Changed Rev: (\d+)$/m
+		or die "could not get svn info";
+	return $1;
+}
+
+sub GetLog($$)
+{
+	my ($first, $last) = @_;
+	my $log = OutputOf 'svn log -r#1:#2 #3', $first, $last, $conf{master};
+	$log =~ s/^-*$//gm;
+	$log =~ s/\n+/\n/gs;
+	$log =~ s/^\n//s;
+	$log =~ s/\n$//s;
+	return $log;
+}
+
+sub GetDiff($$)
+{
+	my ($first, $last) = @_;
+	return OutputOf 'svn diff -r#1:#2 #3', $first-1, $last, $conf{master};
+}
+
+my ($cmd, @args) = @ARGV;
+$cmd = 'help' if not defined $cmd;
+
+if($cmd eq 'info')
+{
+	LoadSettings();
+	for(@revisions_applied)
+	{
+		my ($a, $b) = @$_;
+		print "Applied: $a to $b\n";
+	}
+	for(GetUnappliedRanges(GetMasterRev()))
+	{
+		my ($a, $b) = @$_;
+		print "Unapplied: $a to $b\n";
+	}
+}
+elsif($cmd eq 'unmerged-diff')
+{
+	LoadSettings();
+	my @autoadd = ();
+	for(GetUnappliedRanges(GetMasterRev()))
+	{
+		my ($a, $b) = @$_;
+		my $log = GetLog $a, $b;
+		if($log eq '')
+		{
+			push @autoadd, [$a, $b];
+			next;
+		}
+		$log =~ s/^/  /gm;
+		print "Unapplied: $a to $b\n";
+		print "$log\n";
+		print GetDiff $a, $b;
+		print "\n";
+	}
+	for(@autoadd)
+	{
+		my ($a, $b) = @$_;
+		print "Autofilled revision hole $a to $b\n";
+		AddPatch $a, $b;
+	}
+	WriteSettings() if @autoadd;
+}
+elsif($cmd eq 'unmerged')
+{
+	LoadSettings();
+	my @autoadd = ();
+	for(GetUnappliedRanges(GetMasterRev()))
+	{
+		my ($a, $b) = @$_;
+		my $log = GetLog $a, $b;
+		if($log eq '')
+		{
+			push @autoadd, [$a, $b];
+			next;
+		}
+		$log =~ s/^/  /gm;
+		print "Unapplied: $a to $b\n";
+		print "$log\n\n";
+	}
+	for(@autoadd)
+	{
+		my ($a, $b) = @$_;
+		print "Autofilled revision hole $a to $b\n";
+		AddPatch $a, $b;
+	}
+	WriteSettings() if @autoadd;
+}
+elsif($cmd eq 'merge')
+{
+	my ($first, $last, $force) = @args;
+	die "Usage: $0 merge first last [--force]"
+		if not defined $first;
+	$last = $first if not defined $last;
+
+	die "Usage: $0 merge first last"
+		if "$first$last" =~ /[^0-9]/;
+
+	die "There is an uncommitted merge"
+		if -f '.commitmsg' and $force ne '--force';
+
+	LoadSettings();
+	AddPatch $first, $last;
+
+	print OutputOf 'svn merge -r#1:#2 #3', ($first - 1), $last, $conf{master};
+	print "You may also want to run $0 unmerged to fill possible revision holes\n";
+	print "Make sure there are no conflicts, then run $0 commit\n";
+	print "To abort, use $0 revert\n";
+	
+	open my $fh, '>>', '.commitmsg'
+		or die "open .commitmsg";
+	print $fh GetLog $first, $last;
+	close $fh;
+
+	WriteSettings();
+}
+elsif($cmd eq 'undo')
+{
+	my ($first, $last, $force) = @args;
+	die "Usage: $0 undo first last"
+		if not defined $first;
+	$last = $first if not defined $last;
+
+	die "Usage: $0 merge first last"
+		if "$first$last" =~ /[^0-9]/;
+
+	die "There is an uncommitted merge"
+		if -f '.commitmsg' and $force ne '--force';
+
+	LoadSettings();
+	RemovePatch $first, $last;
+
+	print OutputOf 'svn merge -r#2:#1 #3', ($first - 1), $last, $conf{master};
+	print "Make sure there are no conflicts, then run $0 commit\n";
+	print "To abort, use $0 revert\n";
+
+	open my $fh, '>>', '.commitmsg'
+		or die "open .commitmsg";
+	print $fh "undo the following merge:\n", GetLog $first, last;
+	close $fh;
+
+	WriteSettings();
+}
+elsif($cmd eq 'commit')
+{
+	system 'vim .commitmsg';
+	print "Hit Enter if OK to commit, Ctrl-C otherwise...\n";
+	my $ok = <STDIN>;
+	if(!system 'svn commit -F .commitmsg')
+	{
+		unlink '.commitmsg';
+	}
+}
+elsif($cmd eq 'revert')
+{
+	if(!system 'svn revert -R .')
+	{
+		unlink '.commitmsg';
+	}
+}
+elsif($cmd eq 'init')
+{
+	my ($master, $rev) = @args;
+	$conf{master} = $master;
+	@revisions_applied = [1, $rev];
+	WriteSettings();
+}
+else
+{
+	print <<EOF;
+Usage:
+  $0 init masterrepo rev
+  $0 info
+  $0 unmerged
+  $0 unmerged-diff
+  $0 merge rev1 [rev2] [--force]
+  $0 undo rev1 [rev2] [--force]
+  $0 commit
+  $0 revert
+EOF
+}
