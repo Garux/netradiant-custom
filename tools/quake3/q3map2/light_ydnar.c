@@ -2063,6 +2063,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 					origin = SUPER_ORIGIN( x, y );
 					normal = SUPER_NORMAL( x, y );
 
+#if 0
 					////////// 27's temp hack for testing edge clipping ////
 					if( origin[0]==0 && origin[1]==0 && origin[2]==0 )
 					{
@@ -2071,6 +2072,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 						totalLighted++;
 					}
 					else
+#endif
 					{
 						/* set contribution count */
 						lightLuxel[ 3 ] = 1.0f;
