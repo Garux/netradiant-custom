@@ -1759,7 +1759,7 @@ void LightWorld( void )
 		/* flag bouncing */
 		bouncing = qtrue;
 		VectorClear( ambientColor );
-		floodlighty = false;
+		floodlighty = qfalse;
 		
 		/* generate diffuse lights */
 		RadFreeLights();
