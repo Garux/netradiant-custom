@@ -3,6 +3,8 @@
 	  plugins, will add these back later
 	* all: got rid of libmhash dependency, using mdfour.c from DarkPlaces
 	  instead
+	* q2data: remove RSA security copyrighted md4.c, using mdfour.c from DP
+	  instead as a drop-in replacement
 
 2008-09-13 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: update to ZeroRadiant's q3map2
