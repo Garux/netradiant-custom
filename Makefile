@@ -703,4 +703,4 @@ install-data:
 	$(CP_R) setup/data/tools/* install/
 	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
 
--include $(shell `find . -name \*.d`)
+-include $(shell find . -name \*.d)
