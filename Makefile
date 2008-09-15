@@ -470,14 +470,13 @@ makeversion:
 
 .PHONY: install-data
 install-data:
+	$(MKDIR) install/games
 	set -ex; \
 	for GAME in games/*; do \
 		for GAMEFILE in $$GAME/games/*.game; do \
-			$(MKDIR) install/games; \
 			$(CP) "$$GAMEFILE" install/games/; \
 		done; \
 		for GAMEDIR in $$GAME/*.game; do \
-			$(MKDIR) install; \
 			$(CP_R) "$$GAMEDIR" install/; \
 		done; \
 	done
