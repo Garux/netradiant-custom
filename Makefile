@@ -2,7 +2,8 @@ CFLAGS = -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -g3 -fPIC
 CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 CPPFLAGS_COMMON = -DPOSIX -DXWINDOWS -D_DEBUG -D_LINUX
 LDFLAGS_COMMON = 
-LDFLAGS_DLL = -fPIC -Wl,-fini,fini_stub -static-libgcc -ldl
+#LDFLAGS_DLL = -fPIC -Wl,-fini,fini_stub -static-libgcc -ldl
+LDFLAGS_DLL = -fPIC -ldl
 
 EXE = x86
 A = a
@@ -25,19 +26,19 @@ TEE_STDERR ?= | tee /dev/stderr
 LIBS_PTHREAD = -lpthread
 
 CPPFLAGS_GLIB = `pkg-config glib-2.0 --cflags`
-LIBS_GLIB = `pkg-config glib-2.0 --libs`
+LIBS_GLIB = `pkg-config glib-2.0 --libs-only-l --libs-only-L`
 
 CPPFLAGS_XML = `xml2-config --cflags`
 LIBS_XML = `xml2-config --libs`
 
 CPPFLAGS_PNG = `libpng-config --cflags`
-LIBS_PNG = `libpng-config --libs`
+LIBS_PNG = `libpng-config --libs-only-l --libs-only-L`
 
 CPPFLAGS_GTK = `pkg-config gtk+-2.0 --cflags`
-LIBS_GTK = `pkg-config gtk+-2.0 --libs`
+LIBS_GTK = `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
 
 CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
-LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs`
+LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
 
 LDFLAGS := $(LDFLAGS_COMMON)
 
@@ -53,6 +54,7 @@ LDFLAGS := $(LDFLAGS_COMMON)
 # from qe3.cpp: #endif
 # from qe3.cpp: ;
 
+
 .PHONY: all
 all: \
 	makeversion \
@@ -60,8 +62,6 @@ all: \
 	install/modules/archivepak.$(DLL) \
 	install/modules/archivewad.$(DLL) \
 	install/modules/archivezip.$(DLL) \
-	install/modules/bobtoolz.$(DLL) \
-	install/modules/brushexport.$(DLL) \
 	install/modules/entity.$(DLL) \
 	install/modules/image.$(DLL) \
 	install/modules/imagehl.$(DLL) \
@@ -71,12 +71,14 @@ all: \
 	install/modules/mapxml.$(DLL) \
 	install/modules/md3model.$(DLL) \
 	install/modules/model.$(DLL) \
-	install/modules/prtview.$(DLL) \
-	install/modules/shaderplug.$(DLL) \
 	install/modules/shaders.$(DLL) \
-	install/modules/sunplug.$(DLL) \
-	install/modules/ufoaiplug.$(DLL) \
 	install/modules/vfspk3.$(DLL) \
+	install/plugins/bobtoolz.$(DLL) \
+	install/plugins/brushexport.$(DLL) \
+	install/plugins/prtview.$(DLL) \
+	install/plugins/shaderplug.$(DLL) \
+	install/plugins/sunplug.$(DLL) \
+	install/plugins/ufoaiplug.$(DLL) \
 	install/q2map.$(EXE) \
 	install/q3data.$(EXE) \
 	install/q3map2.$(EXE) \
@@ -500,9 +502,9 @@ install/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/vfs.o \
 	plugins/vfspk3/vfspk3.o \
 
-install/modules/bobtoolz.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/modules/bobtoolz.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/modules/bobtoolz.$(DLL): \
+install/plugins/bobtoolz.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/plugins/bobtoolz.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/bobToolz-GTK.o \
 	contrib/bobtoolz/bsploader.o \
 	contrib/bobtoolz/cportals.o \
@@ -530,18 +532,18 @@ install/modules/bobtoolz.$(DLL): \
 	libmathlib.$(A) \
 	libprofile.$(A) \
 
-install/modules/brushexport.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/modules/brushexport.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/modules/brushexport.$(DLL): \
+install/plugins/brushexport.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/plugins/brushexport.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/brushexport.$(DLL): \
 	contrib/brushexport/callbacks.o \
 	contrib/brushexport/export.o \
 	contrib/brushexport/interface.o \
 	contrib/brushexport/plugin.o \
 	contrib/brushexport/support.o \
 
-install/modules/prtview.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/modules/prtview.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/modules/prtview.$(DLL): \
+install/plugins/prtview.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/plugins/prtview.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/prtview.$(DLL): \
 	contrib/prtview/AboutDialog.o \
 	contrib/prtview/ConfigDialog.o \
 	contrib/prtview/LoadPortalFileDialog.o \
@@ -549,15 +551,15 @@ install/modules/prtview.$(DLL): \
 	contrib/prtview/prtview.o \
 	libprofile.$(A) \
 
-install/modules/shaderplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_XML)
-install/modules/shaderplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
-install/modules/shaderplug.$(DLL): \
+install/plugins/shaderplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_XML)
+install/plugins/shaderplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
+install/plugins/shaderplug.$(DLL): \
 	contrib/shaderplug/shaderplug.o \
 	libxmllib.$(A) \
 
-install/modules/sunplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/modules/sunplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/modules/sunplug.$(DLL): \
+install/plugins/sunplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/plugins/sunplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
 
 install/qdata3.$(EXE): LIBS := $(LIBS_XML) $(LIBS_PTHREAD)
@@ -620,9 +622,9 @@ install/q2map.$(EXE): \
 	tools/quake2/q2map/writebsp.o \
 	libl_net.$(A) \
 
-install/modules/ufoaiplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/modules/ufoaiplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/modules/ufoaiplug.$(DLL): \
+install/plugins/ufoaiplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/plugins/ufoaiplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_filters.o \
 	contrib/ufoaiplug/ufoai_gtk.o \
 	contrib/ufoaiplug/ufoai_level.o \
