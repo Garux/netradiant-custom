@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "qdata.h"
 #include "inout.h"
+#include "md4.h"
 
 qboolean	g_compress_pak;
 qboolean	g_release;			// don't grab, copy output data to new tree
@@ -46,8 +47,6 @@ void InitPaths( int *argc, char **argv );
 
 =======================================================
 */
-
-unsigned Com_BlockChecksum (void *buffer, int length);
 
 typedef struct
 {

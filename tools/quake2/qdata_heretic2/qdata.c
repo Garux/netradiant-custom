@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #include "qdata.h"
+#include "md4.h"
 
 void TK_Init();
 
@@ -54,8 +55,6 @@ extern qboolean	g_nomkdir;
 
 =======================================================
 */
-
-unsigned Com_BlockChecksum (void *buffer, int length);
 
 typedef struct
 {
