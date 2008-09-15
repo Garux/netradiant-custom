@@ -32,7 +32,7 @@ CPPFLAGS_XML = `xml2-config --cflags`
 LIBS_XML = `xml2-config --libs`
 
 CPPFLAGS_PNG = `libpng-config --cflags`
-LIBS_PNG = `libpng-config --libs-only-l --libs-only-L`
+LIBS_PNG = `libpng-config --libs`
 
 CPPFLAGS_GTK = `pkg-config gtk+-2.0 --cflags`
 LIBS_GTK = `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
@@ -105,7 +105,7 @@ clean:
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-install/q3map2.$(EXE): LIBS := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
+install/q3map2.$(EXE): LIBS := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_PTHREAD)
 install/q3map2.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
 install/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
