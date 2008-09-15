@@ -9,6 +9,8 @@ A = a
 DLL = so
 NETAPI = berkley
 
+RADIANT_ABOUTMSG = Custom build
+
 LDD ?= ldd
 FIND ?= find
 RANLIB ?= ranlib
@@ -48,6 +50,7 @@ LDFLAGS := $(LDFLAGS_COMMON)
 
 .PHONY: all
 all: \
+	makeversion \
 	install/q3map2.$(EXE) \
 	install/q3data.$(EXE) \
 	install/radiant.$(EXE) \
@@ -444,4 +447,20 @@ install/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/archive.o \
 	plugins/vfspk3/vfs.o \
 	plugins/vfspk3/vfspk3.o \
+
+.PHONY: makeversion
+makeversion:
+	set -ex; \
+	ver=`cat include/version.default`; \
+	major=`echo $$ver | cut -d . -f 2`; \
+	minor=`echo $$ver | cut -d . -f 3 | cut -d - -f 1`; \
+	echo "// generated header, see Makefile" > include/version.h; \
+	echo "#define RADIANT_VERSION \"$$ver\"" >> include/version.h; \
+	echo "#define RADIANT_MAJOR_VERSION \"$$major\"" >> include/version.h; \
+	echo "#define RADIANT_MINOR_VERSION \"$$minor\"" >> include/version.h; \
+	echo "$$major" > include/RADIANT_MAJOR; \
+	echo "$$minor" > include/RADIANT_MINOR; \
+	echo "$$ver" > include/version; \
+	echo "// generated header, see Makefile" > include/aboutmsg.h; \
+	echo "#define RADIANT_ABOUTMSG \"$(RADIANT_ABOUTMSG)\"" >> include/aboutmsg.h; \
 
