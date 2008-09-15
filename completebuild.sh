@@ -19,7 +19,7 @@ CFLAGS_MAPXML="-c `xml2-config --cflags` `pkg-config glib-2.0 --cflags`  -Ibuild
 CFLAGS_XML="-c `pkg-config glib-2.0 --cflags` `xml2-config --cflags` -Ibuild/debug/include -Iinclude -Ibuild/debug/libs -Ilibs"
 CFLAGS_VFSPK3="-c `pkg-config glib-2.0 --cflags`  -Ibuild/debug/libs -Ilibs -Ibuild/debug/include -Iinclude"
 
-LDFLAG_DYNAMICLIB="-fPIC -Wl,-fini,fini_stub -L. -static-libgcc -ldl -shared"
+LDFLAG_DYNAMICLIB="-fPIC -Wl,-fini,fini_stub -static-libgcc -ldl -shared"
 
 gcc()
 {
@@ -495,8 +495,8 @@ mv "build/debug/shaderplug.so" "install/plugins/shaderplug.so"
 mv "build/debug/sunplug.so" "install/plugins/sunplug.so"
 mv "build/debug/ufoaiplug.so" "install/plugins/ufoaiplug.so"
 mv "build/debug/quake2_tools/q2map" "install/q2map"
-mv "build/debug/q3data.x86" "install/q3data.x86"
-mv "build/debug/q3map2.x86" "install/q3map2.x86"
+## mv "build/debug/q3data.x86" "install/q3data.x86"
+## mv "build/debug/q3map2.x86" "install/q3map2.x86"
 mv "build/debug/quake2_tools/qdata3" "install/qdata3"
 mv "build/debug/radiant.x86" "install/radiant.x86"
 

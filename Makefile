@@ -34,7 +34,9 @@ LDFLAGS_PNG = `libpng-config --libs`
 # from qe3.cpp: ;
 
 .PHONY: all
-all: install/q3map2.$(EXE)
+all: \
+	install/q3map2.$(EXE) \
+	install/q3data.$(EXE) \
 
 .PHONY: clean
 clean:
@@ -170,4 +172,31 @@ libpicomodel.$(A): \
 libddslib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
+
+install/q3data.$(EXE): LIBS := -lmhash
+install/q3data.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
+install/q3data.$(EXE): LDFLAGS := $(LDFLAGS_COMMON) $(LDFLAGS_XML) $(LDFLAGS_GLIB)
+install/q3data.$(EXE): \
+	tools/quake3/common/aselib.o \
+	tools/quake3/common/bspfile.o \
+	tools/quake3/common/cmdlib.o \
+	tools/quake3/common/imagelib.o \
+	tools/quake3/common/inout.o \
+	tools/quake3/common/md4.o \
+	tools/quake3/common/scriplib.o \
+	tools/quake3/common/trilib.o \
+	tools/quake3/common/unzip.o \
+	tools/quake3/common/vfs.o \
+	tools/quake3/q3data/3dslib.o \
+	tools/quake3/q3data/compress.o \
+	tools/quake3/q3data/images.o \
+	tools/quake3/q3data/md3lib.o \
+	tools/quake3/q3data/models.o \
+	tools/quake3/q3data/p3dlib.o \
+	tools/quake3/q3data/polyset.o \
+	tools/quake3/q3data/q3data.o \
+	tools/quake3/q3data/stripper.o \
+	tools/quake3/q3data/video.o \
+	libmathlib.$(A) \
+	libl_net.$(A) \
 
