@@ -4,6 +4,7 @@ CPPFLAGS_COMMON = -DPOSIX -DXWINDOWS -D_DEBUG -D_LINUX
 LDFLAGS_COMMON = 
 #LDFLAGS_DLL = -fPIC -Wl,-fini,fini_stub -static-libgcc -ldl
 LDFLAGS_DLL = -fPIC -ldl
+LIBS_COMMON = -lpthread
 
 EXE = x86
 A = a
@@ -23,8 +24,6 @@ RM_R ?= $(RM) -r
 
 TEE_STDERR ?= | tee /dev/stderr
 
-LIBS_PTHREAD = -lpthread
-
 CPPFLAGS_GLIB = `pkg-config glib-2.0 --cflags`
 LIBS_GLIB = `pkg-config glib-2.0 --libs-only-l --libs-only-L`
 
@@ -39,8 +38,6 @@ LIBS_GTK = `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
 
 CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
 LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
-
-LDFLAGS := $(LDFLAGS_COMMON)
 
 # from qe3.cpp: const char* const EXECUTABLE_TYPE = 
 # from qe3.cpp: #if defined(__linux__) || defined (__FreeBSD__)
@@ -93,7 +90,7 @@ clean:
 
 %.$(EXE):
 	dir=$@; $(MKDIR) $${dir%/*}
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS_COMMON) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.$(A):
@@ -105,8 +102,14 @@ clean:
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-install/q3map2.$(EXE): LIBS := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_PTHREAD)
-install/q3map2.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
+%.o: %.cpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS)
+
+%.o: %.c
+	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS)
+
+install/q3map2.$(EXE): LIBS := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
+install/q3map2.$(EXE): CPPFLAGS := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
 install/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
@@ -161,7 +164,7 @@ install/q3map2.$(EXE): \
 	libmathlib.$(A) \
 	libpicomodel.$(A) \
 
-libmathlib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
+libmathlib.$(A): CPPFLAGS := -Ilibs
 libmathlib.$(A): \
 	libs/mathlib/bbox.o \
 	libs/mathlib/line.o \
@@ -169,12 +172,12 @@ libmathlib.$(A): \
 	libs/mathlib/mathlib.o \
 	libs/mathlib/ray.o \
 
-libl_net.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
+libl_net.$(A): CPPFLAGS := -Ilibs
 libl_net.$(A): \
 	libs/l_net/l_net.o \
 	libs/l_net/l_net_$(NETAPI).o \
 
-libjpeg6.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs/jpeg6 -Ilibs
+libjpeg6.$(A): CPPFLAGS := -Ilibs/jpeg6 -Ilibs
 libjpeg6.$(A): \
 	libs/jpeg6/jcomapi.o \
 	libs/jpeg6/jdapimin.o \
@@ -199,7 +202,7 @@ libjpeg6.$(A): \
 	libs/jpeg6/jpgload.o \
 	libs/jpeg6/jutils.o \
 
-libpicomodel.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
+libpicomodel.$(A): CPPFLAGS := -Ilibs
 libpicomodel.$(A): \
 	libs/picomodel/lwo/clip.o \
 	libs/picomodel/lwo/envelope.o \
@@ -225,12 +228,12 @@ libpicomodel.$(A): \
 	libs/picomodel/pm_obj.o \
 	libs/picomodel/pm_terrain.o \
 
-libddslib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
+libddslib.$(A): CPPFLAGS := -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
 
 install/q3data.$(EXE): LIBS := $(LIBS_XML) $(LIBS_GLIB)
-install/q3data.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
+install/q3data.$(EXE): CPPFLAGS := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
 install/q3data.$(EXE): \
 	tools/quake3/common/aselib.o \
 	tools/quake3/common/bspfile.o \
@@ -256,7 +259,7 @@ install/q3data.$(EXE): \
 	libmathlib.$(A) \
 
 install/radiant.$(EXE): LIBS := -ldl -lGL -static-libgcc $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
-install/radiant.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
+install/radiant.$(EXE): CPPFLAGS := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
 install/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brushmanip.o \
@@ -345,16 +348,16 @@ install/radiant.$(EXE): \
 	libprofile.$(A) \
 	libxmllib.$(A) \
 
-libcmdlib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
+libcmdlib.$(A): CPPFLAGS := -Ilibs
 libcmdlib.$(A): \
 	libs/cmdlib/cmdlib.o \
 
-libprofile.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+libprofile.$(A): CPPFLAGS := -Ilibs -Iinclude
 libprofile.$(A): \
 	libs/profile/file.o \
 	libs/profile/profile.o \
 
-libgtkutil.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
+libgtkutil.$(A): CPPFLAGS := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
 libgtkutil.$(A): \
 	libs/gtkutil/accelerator.o \
 	libs/gtkutil/button.o \
@@ -380,7 +383,7 @@ libgtkutil.$(A): \
 	libs/gtkutil/window.o \
 	libs/gtkutil/xorrectangle.o \
 
-libxmllib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+libxmllib.$(A): CPPFLAGS := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
 libxmllib.$(A): \
 	libs/xml/ixml.o \
 	libs/xml/xmlelement.o \
@@ -389,26 +392,26 @@ libxmllib.$(A): \
 	libs/xml/xmlwriter.o \
 
 install/modules/archivezip.$(DLL): LIBS := -lz
-install/modules/archivezip.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/archivezip.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/archivezip.$(DLL): \
 	plugins/archivezip/archive.o \
 	plugins/archivezip/pkzip.o \
 	plugins/archivezip/plugin.o \
 	plugins/archivezip/zlibstream.o \
 
-install/modules/archivewad.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/archivewad.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/archivewad.$(DLL): \
 	plugins/archivewad/archive.o \
 	plugins/archivewad/plugin.o \
 	plugins/archivewad/wad.o \
 
-install/modules/archivepak.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/archivepak.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/archivepak.$(DLL): \
 	plugins/archivepak/archive.o \
 	plugins/archivepak/pak.o \
 	plugins/archivepak/plugin.o \
 
-install/modules/entity.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/entity.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/entity.$(DLL): \
 	plugins/entity/angle.o \
 	plugins/entity/angles.o \
@@ -431,7 +434,7 @@ install/modules/entity.$(DLL): \
 	plugins/entity/skincache.o \
 	plugins/entity/targetable.o \
 
-install/modules/image.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/image.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/image.$(DLL): \
 	plugins/image/bmp.o \
 	plugins/image/dds.o \
@@ -442,13 +445,13 @@ install/modules/image.$(DLL): \
 	libddslib.$(A) \
 	libjpeg6.$(A) \
 
-install/modules/imageq2.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/imageq2.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/imageq2.$(DLL): \
 	plugins/imageq2/imageq2.o \
 	plugins/imageq2/wal32.o \
 	plugins/imageq2/wal.o \
 
-install/modules/imagehl.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/imagehl.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/imagehl.$(DLL): \
 	plugins/imagehl/hlw.o \
 	plugins/imagehl/imagehl.o \
@@ -456,24 +459,24 @@ install/modules/imagehl.$(DLL): \
 	plugins/imagehl/sprite.o \
 
 install/modules/imagepng.$(DLL): LIBS := $(LIBS_PNG)
-install/modules/imagepng.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_PNG) -Ilibs -Iinclude
+install/modules/imagepng.$(DLL): CPPFLAGS := $(CPPFLAGS_PNG) -Ilibs -Iinclude
 install/modules/imagepng.$(DLL): \
 	plugins/imagepng/plugin.o \
 
-install/modules/mapq3.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/mapq3.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/mapq3.$(DLL): \
 	plugins/mapq3/parse.o \
 	plugins/mapq3/plugin.o \
 	plugins/mapq3/write.o \
 
 install/modules/mapxml.$(DLL): LIBS := $(LIBS_XML) $(LIBS_GLIB)
-install/modules/mapxml.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+install/modules/mapxml.$(DLL): CPPFLAGS := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
 install/modules/mapxml.$(DLL): \
 	plugins/mapxml/plugin.o \
 	plugins/mapxml/xmlparse.o \
 	plugins/mapxml/xmlwrite.o \
 
-install/modules/md3model.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/md3model.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/md3model.$(DLL): \
 	plugins/md3model/md2.o \
 	plugins/md3model/md3.o \
@@ -483,27 +486,27 @@ install/modules/md3model.$(DLL): \
 	plugins/md3model/mdl.o \
 	plugins/md3model/plugin.o \
 
-install/modules/model.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/model.$(DLL): CPPFLAGS := -Ilibs -Iinclude
 install/modules/model.$(DLL): \
 	plugins/model/model.o \
 	plugins/model/plugin.o \
 	libpicomodel.$(A) \
 
 install/modules/shaders.$(DLL): LIBS := $(LIBS_GLIB)
-install/modules/shaders.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+install/modules/shaders.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
 install/modules/shaders.$(DLL): \
 	plugins/shaders/plugin.o \
 	plugins/shaders/shaders.o \
 
 install/modules/vfspk3.$(DLL): LIBS := $(LIBS_GLIB)
-install/modules/vfspk3.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+install/modules/vfspk3.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
 install/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/archive.o \
 	plugins/vfspk3/vfs.o \
 	plugins/vfspk3/vfspk3.o \
 
 install/plugins/bobtoolz.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/bobtoolz.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/bobtoolz.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/bobToolz-GTK.o \
 	contrib/bobtoolz/bsploader.o \
@@ -533,7 +536,7 @@ install/plugins/bobtoolz.$(DLL): \
 	libprofile.$(A) \
 
 install/plugins/brushexport.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/brushexport.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/brushexport.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/plugins/brushexport.$(DLL): \
 	contrib/brushexport/callbacks.o \
 	contrib/brushexport/export.o \
@@ -542,7 +545,7 @@ install/plugins/brushexport.$(DLL): \
 	contrib/brushexport/support.o \
 
 install/plugins/prtview.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/prtview.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/prtview.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/plugins/prtview.$(DLL): \
 	contrib/prtview/AboutDialog.o \
 	contrib/prtview/ConfigDialog.o \
@@ -552,18 +555,18 @@ install/plugins/prtview.$(DLL): \
 	libprofile.$(A) \
 
 install/plugins/shaderplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_XML)
-install/plugins/shaderplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
+install/plugins/shaderplug.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
 install/plugins/shaderplug.$(DLL): \
 	contrib/shaderplug/shaderplug.o \
 	libxmllib.$(A) \
 
 install/plugins/sunplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/sunplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/sunplug.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/plugins/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
 
-install/qdata3.$(EXE): LIBS := $(LIBS_XML) $(LIBS_PTHREAD)
-install/qdata3.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+install/qdata3.$(EXE): LIBS := $(LIBS_XML)
+install/qdata3.$(EXE): CPPFLAGS := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
 install/qdata3.$(EXE): \
 	tools/quake2/common/bspfile.o \
 	tools/quake2/common/cmdlib.o \
@@ -585,8 +588,8 @@ install/qdata3.$(EXE): \
 	tools/quake2/qdata/video.o \
 	libl_net.$(A) \
 
-install/q2map.$(EXE): LIBS := $(LIBS_XML) $(LIBS_PTHREAD)
-install/q2map.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+install/q2map.$(EXE): LIBS := $(LIBS_XML)
+install/q2map.$(EXE): CPPFLAGS := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
 install/q2map.$(EXE): \
 	tools/quake2/common/bspfile.o \
 	tools/quake2/common/cmdlib.o \
@@ -623,15 +626,15 @@ install/q2map.$(EXE): \
 	libl_net.$(A) \
 
 install/plugins/ufoaiplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/ufoaiplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/plugins/ufoaiplug.$(DLL): CPPFLAGS := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_filters.o \
 	contrib/ufoaiplug/ufoai_gtk.o \
 	contrib/ufoaiplug/ufoai_level.o \
 	contrib/ufoaiplug/ufoai.o \
 
-install/heretic2/h2data.$(EXE): LIBS := $(LIBS_XML) $(LIBS_PTHREAD)
-install/heretic2/h2data.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
+install/heretic2/h2data.$(EXE): LIBS := $(LIBS_XML)
+install/heretic2/h2data.$(EXE): CPPFLAGS := $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
 install/heretic2/h2data.$(EXE): \
 	tools/quake2/qdata_heretic2/common/bspfile.o \
 	tools/quake2/qdata_heretic2/common/cmdlib.o \
