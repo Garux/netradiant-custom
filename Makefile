@@ -9,24 +9,29 @@ A = a
 DLL = so
 NETAPI = berkley
 
+LDD ?= ldd
 FIND ?= find
 RANLIB ?= ranlib
 AR ?= ar
 
+TEE_STDERR ?= | tee /dev/stderr
+
 CPPFLAGS_GLIB = `pkg-config glib-2.0 --cflags`
-LDFLAGS_GLIB = `pkg-config glib-2.0 --libs`
+LIBS_GLIB = `pkg-config glib-2.0 --libs`
 
 CPPFLAGS_XML = `xml2-config --cflags`
-LDFLAGS_XML = `xml2-config --libs`
+LIBS_XML = `xml2-config --libs`
 
 CPPFLAGS_PNG = `libpng-config --cflags`
-LDFLAGS_PNG = `libpng-config --libs`
+LIBS_PNG = `libpng-config --libs`
 
 CPPFLAGS_GTK = `pkg-config gtk+-2.0 --cflags`
-LDFLAGS_GTK = `pkg-config gtk+-2.0 --libs`
+LIBS_GTK = `pkg-config gtk+-2.0 --libs`
 
 CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
-LDFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs`
+LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs`
+
+LDFLAGS := $(LDFLAGS_COMMON)
 
 # from qe3.cpp: const char* const EXECUTABLE_TYPE = 
 # from qe3.cpp: #if defined(__linux__) || defined (__FreeBSD__)
@@ -48,6 +53,12 @@ all: \
 	install/modules/archivezip.$(DLL) \
 	install/modules/entity.$(DLL) \
 	install/modules/image.$(DLL) \
+	install/modules/imagepng.$(DLL) \
+	install/modules/mapq3.$(DLL) \
+	install/modules/md3model.$(DLL) \
+	install/modules/model.$(DLL) \
+	install/modules/shaders.$(DLL) \
+	install/modules/vfspk3.$(DLL) \
 
 .PHONY: clean
 clean:
@@ -55,6 +66,7 @@ clean:
 
 %.$(EXE):
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
+	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.$(A):
 	$(AR) rc $@ $^
@@ -62,10 +74,10 @@ clean:
 
 %.$(DLL):
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS)
+	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-install/q3map2.$(EXE): LIBS := -lmhash
+install/q3map2.$(EXE): LIBS := -lmhash $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
 install/q3map2.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
-install/q3map2.$(EXE): LDFLAGS := $(LDFLAGS_COMMON) $(LDFLAGS_XML) $(LDFLAGS_GLIB) $(LDFLAGS_PNG) 
 install/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
@@ -187,9 +199,8 @@ libddslib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
 
-install/q3data.$(EXE): LIBS := -lmhash
+install/q3data.$(EXE): LIBS := -lmhash $(LIBS_XML) $(LIBS_GLIB)
 install/q3data.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
-install/q3data.$(EXE): LDFLAGS := $(LDFLAGS_COMMON) $(LDFLAGS_XML) $(LDFLAGS_GLIB)
 install/q3data.$(EXE): \
 	tools/quake3/common/aselib.o \
 	tools/quake3/common/bspfile.o \
@@ -214,9 +225,9 @@ install/q3data.$(EXE): \
 	libmathlib.$(A) \
 	libl_net.$(A) \
 
-install/radiant.$(EXE): LIBS := -lmhash -ldl -lGL -static-libgcc 
+install/radiant.$(EXE): LIBS := -lmhash -ldl -lGL -static-libgcc $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
 install/radiant.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
-install/radiant.$(EXE): LDFLAGS := -fPIC -Wl,-fini,fini_stub $(LDFLAGS_COMMON) $(LDFLAGS_XML) $(LDFLAGS_GLIB) $(LDFLAGS_GTK) $(LDFLAGS_GTKGLEXT)
+#install/radiant.$(EXE): LDFLAGS := -fPIC -Wl,-fini,fini_stub $(LDFLAGS_COMMON)
 install/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brush.o \
@@ -389,4 +400,44 @@ install/modules/image.$(DLL): \
 	plugins/image/dds.o \
 	libjpeg6.$(A) \
 	libddslib.$(A) \
+
+install/modules/imagepng.$(DLL): LIBS := $(LIBS_PNG)
+install/modules/imagepng.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_PNG) -Ilibs -Iinclude
+install/modules/imagepng.$(DLL): \
+	plugins/imagepng/plugin.o \
+
+install/modules/mapq3.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/mapq3.$(DLL): \
+	plugins/mapq3/plugin.o \
+	plugins/mapq3/parse.o \
+	plugins/mapq3/write.o \
+
+install/modules/md3model.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/md3model.$(DLL): \
+	plugins/md3model/plugin.o \
+	plugins/md3model/mdl.o \
+	plugins/md3model/md3.o \
+	plugins/md3model/md2.o \
+	plugins/md3model/mdc.o \
+	plugins/md3model/mdlimage.o \
+	plugins/md3model/md5.o \
+
+install/modules/model.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/model.$(DLL): \
+	plugins/model/plugin.o \
+	plugins/model/model.o \
+	libpicomodel.$(A) \
+
+install/modules/shaders.$(DLL): LIBS := $(LIBS_GLIB)
+install/modules/shaders.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+install/modules/shaders.$(DLL): \
+	plugins/shaders/plugin.o \
+	plugins/shaders/shaders.o \
+
+install/modules/vfspk3.$(DLL): LIBS := $(LIBS_GLIB)
+install/modules/vfspk3.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+install/modules/vfspk3.$(DLL): \
+	plugins/vfspk3/archive.o \
+	plugins/vfspk3/vfs.o \
+	plugins/vfspk3/vfspk3.o \
 
