@@ -2,11 +2,12 @@ CFLAGS = -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -g3 -fPIC
 CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 CPPFLAGS_COMMON = -DPOSIX -DXWINDOWS -D_DEBUG -D_LINUX
 LDFLAGS_COMMON = 
+LDFLAGS_DLL = -fPIC -Wl,-fini,fini_stub -static-libgcc -ldl
+
 EXE = x86
 A = a
-SO = so
+DLL = so
 NETAPI = berkley
-LDFLAGS_SO = -fPIC -Wl,-fini,fini_stub -static-libgcc -ldl -shared
 
 FIND ?= find
 RANLIB ?= ranlib
@@ -44,6 +45,7 @@ all: \
 	install/q3map2.$(EXE) \
 	install/q3data.$(EXE) \
 	install/radiant.$(EXE) \
+	install/modules/archivezip.$(DLL) \
 
 .PHONY: clean
 clean:
@@ -55,6 +57,9 @@ clean:
 %.$(A):
 	$(AR) rc $@ $^
 	$(RANLIB) $@
+
+%.$(DLL):
+	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS)
 
 install/q3map2.$(EXE): LIBS := -lmhash
 install/q3map2.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
@@ -340,4 +345,12 @@ libxmllib.$(A): \
 	libs/xml/xmlwriter.o \
 	libs/xml/xmlelement.o \
 	libs/xml/xmltextags.o \
+
+install/modules/archivezip.$(DLL): LIBS := -lz
+install/modules/archivezip.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/archivezip.$(DLL): \
+	plugins/archivezip/plugin.o \
+	plugins/archivezip/archive.o \
+	plugins/archivezip/pkzip.o \
+	plugins/archivezip/zlibstream.o \
 
