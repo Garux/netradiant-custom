@@ -1,7 +1,7 @@
 include Makefile.conf
 
 CFLAGS   = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fPIC
-CPPFLAGS = -DPOSIX -DXWINDOWS -D_LINUX
+CPPFLAGS = 
 CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 
 CFLAGS_OPT ?= -O3
@@ -17,6 +17,7 @@ $(error Unsupported build type)
 endif
 
 ifeq ($(OS),Linux)
+	CPPFLAGS += -DPOSIX -DXWINDOWS -D_LINUX
 	LDFLAGS_DLL = -fPIC -ldl
 	LIBS = -lpthread
 	EXE = x86
