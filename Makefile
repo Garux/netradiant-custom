@@ -687,15 +687,28 @@ makeversion:
 	ver=`cat include/version.default`; \
 	major=`echo $$ver | cut -d . -f 2`; \
 	minor=`echo $$ver | cut -d . -f 3 | cut -d - -f 1`; \
-	echo "// generated header, see Makefile" > include/version.h; \
-	echo "#define RADIANT_VERSION \"$$ver\"" >> include/version.h; \
-	echo "#define RADIANT_MAJOR_VERSION \"$$major\"" >> include/version.h; \
-	echo "#define RADIANT_MINOR_VERSION \"$$minor\"" >> include/version.h; \
-	echo "$$major" > include/RADIANT_MAJOR; \
-	echo "$$minor" > include/RADIANT_MINOR; \
-	echo "$$ver" > include/version; \
-	echo "// generated header, see Makefile" > include/aboutmsg.h; \
-	echo "#define RADIANT_ABOUTMSG \"$(RADIANT_ABOUTMSG)\"" >> include/aboutmsg.h; \
+	echo "// generated header, see Makefile" > include/version.h.new; \
+	echo "#define RADIANT_VERSION \"$$ver\"" >> include/version.h.new; \
+	echo "#define RADIANT_MAJOR_VERSION \"$$major\"" >> include/version.h.new; \
+	echo "#define RADIANT_MINOR_VERSION \"$$minor\"" >> include/version.h.new; \
+	echo "$$major" > include/RADIANT_MAJOR.new; \
+	echo "$$minor" > include/RADIANT_MINOR.new; \
+	echo "$$ver" > include/version.new; \
+	echo "// generated header, see Makefile" > include/aboutmsg.h.new; \
+	echo "#define RADIANT_ABOUTMSG \"$(RADIANT_ABOUTMSG)\"" >> include/aboutmsg.h.new; \
+	mv_if_diff() \
+	{ \
+		if diff $$1 $$2 >/dev/null 2>&1; then \
+			rm -f $$1; \
+		else \
+			mv $$1 $$2; \
+		fi; \
+	}; \
+	mv_if_diff include/version.h.new include/version.h; \
+	mv_if_diff include/RADIANT_MAJOR.new include/RADIANT_MAJOR; \
+	mv_if_diff include/RADIANT_MINOR.new include/RADIANT_MINOR; \
+	mv_if_diff include/version.new include/version; \
+	mv_if_diff include/aboutmsg.h.new include/aboutmsg.h
 
 .PHONY: install-data
 install-data:
