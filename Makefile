@@ -1,4 +1,4 @@
-CFLAGS = -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -g3 -fPIC
+CFLAGS = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -g3 -fPIC
 CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 CPPFLAGS_COMMON = -DPOSIX -DXWINDOWS -D_DEBUG -D_LINUX
 LDFLAGS_COMMON = 
@@ -89,7 +89,7 @@ all: \
 .PHONY: clean
 clean:
 	$(RM_R) install/
-	$(FIND) . \( -name \*.o -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
+	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
 
 %.$(EXE):
 	dir=$@; $(MKDIR) $${dir%/*}
@@ -698,3 +698,4 @@ install-data:
 	$(CP_R) setup/data/tools/* install/
 	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
 
+-include $(shell `find . -name \*.d`)
