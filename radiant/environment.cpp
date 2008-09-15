@@ -150,18 +150,16 @@ void environment_init(int argc, char* argv[])
 #elif defined(WIN32)
 
 #include <windows.h>
-#include <shfolder.h>
 
 void environment_init(int argc, char* argv[])
 {
   args_init(argc, argv);
 
   {
-    char appdata[MAX_PATH+1];
-    SHGetFolderPath(0, CSIDL_APPDATA, 0, 0, appdata);
+    char *appdata = getenv("APPDATA");
 
     StringOutputStream home(256);
-    if(string_empty(appdata))
+    if(!appdata || string_empty(appdata))
     {
       ERROR_MESSAGE("Application Data folder not available.\n"
         "Please install shfolder redistributable package.\n"

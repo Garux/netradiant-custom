@@ -1,10 +1,38 @@
 include Makefile.conf
 
-CFLAGS   = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fPIC
-CPPFLAGS = 
-CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
+CFLAGS     = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fPIC
+CPPFLAGS   = 
+LDFLAGS    =
+LIBS       =
+CXXFLAGS   = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
+CFLAGS_OPT = -O3
 
-CFLAGS_OPT ?= -O3
+ifneq ($(MINGW),)
+	MINGWPREFIX ?= i586-mingw32msvc-
+	CC = $(MINGWPREFIX)gcc
+	CXX = $(MINGWPREFIX)g++
+	RANLIB = $(MINGWPREFIX)ranlib
+	AR = $(MINGWPREFIX)ar
+	OS := Win32
+	CPPFLAGS += -I$(MINGW)/include -D_inline=inline
+	CFLAGS   += -mms-bitfields
+	LDFLAGS  += -L$(MINGW)/lib
+
+	CPPFLAGS_GLIB = -I$(MINGW)/include/glib-2.0 -I$(MINGW)/lib/glib-2.0/include
+	LIBS_GLIB = -lglib-2.0
+	CPPFLAGS_XML = -I$(MINGW)/include/libxml2
+	LIBS_XML = -lxml2
+	CPPFLAGS_PNG = -I$(MINGW)/include/libpng12 -DPNG_NO_MMX_CODE
+	LIBS_PNG = -lpng12
+	CPPFLAGS_GTK = -I$(MINGW)/include/gtk-2.0 -I$(MINGW)/lib/gtk-2.0/include -I$(MINGW)/include/atk-1.0 -I$(MINGW)/include/cairo -I$(MINGW)/include/pango-1.0 -I$(MINGW)/include/glib-2.0 -I$(MINGW)/lib/glib-2.0/include -I$(MINGW)/include/libpng12 -DPNG_NO_MMX_CODE
+	LIBS_GTK = -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lpangowin32-1.0
+	CPPFLAGS_GTKGLEXT = -I$(MINGW)/include/gtkglext-1.0 -I$(MINGW)/lib/gtkglext-1.0/include 
+	LIBS_GTKGLEXT = -lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lpangowin32-1.0
+	CPPFLAGS_GL =
+	LIBS_GL = -lopengl32
+	CPPFLAGS_DL =
+	LIBS_DL =
+endif
 
 ifeq ($(BUILD),debug)
 	CFLAGS += -g3
@@ -23,24 +51,33 @@ ifeq ($(OS),Linux)
 	EXE = x86
 	A = a
 	DLL = so
-	NETAPI = berkley
-	CPPFLAGS_GLIB = `pkg-config glib-2.0 --cflags`
-	LIBS_GLIB = `pkg-config glib-2.0 --libs-only-l --libs-only-L`
-	CPPFLAGS_XML = `xml2-config --cflags`
-	LIBS_XML = `xml2-config --libs`
-	CPPFLAGS_PNG = `libpng-config --cflags`
-	LIBS_PNG = `libpng-config --libs`
-	CPPFLAGS_GTK = `pkg-config gtk+-2.0 --cflags`
-	LIBS_GTK = `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
-	CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
-	LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
 else ifeq ($(OS),Win32)
-$(error Unsupported build OS)
+	CPPFLAGS += -DWIN32 -D_WIN32
+	LDFLAGS_DLL = -fPIC
+	LIBS = -lws2_32 -luser32 -lgdi32
+	EXE = exe
+	A = a
+	DLL = dll
 else ifeq ($(OS),Darwin)
 $(error Unsupported build OS)
 else
 $(error Unsupported build OS)
 endif
+
+CPPFLAGS_GLIB ?= `pkg-config glib-2.0 --cflags`
+LIBS_GLIB ?= `pkg-config glib-2.0 --libs-only-l --libs-only-L`
+CPPFLAGS_XML ?= `xml2-config --cflags`
+LIBS_XML ?= `xml2-config --libs`
+CPPFLAGS_PNG ?= `libpng-config --cflags`
+LIBS_PNG ?= `libpng-config --libs`
+CPPFLAGS_GTK ?= `pkg-config gtk+-2.0 --cflags`
+LIBS_GTK ?= `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
+CPPFLAGS_GTKGLEXT ?= `pkg-config gtkglext-1.0 --cflags`
+LIBS_GTKGLEXT ?= `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
+CPPFLAGS_GL ?=
+LIBS_GL ?= -lGL
+CPPFLAGS_DL ?=
+LIBS_DL ?= -ldl
 
 RADIANT_ABOUTMSG = Custom build
 
@@ -68,6 +105,7 @@ TEE_STDERR ?= | tee /dev/stderr
 
 .PHONY: all
 all: \
+	makeversion \
 	install/heretic2/h2data.$(EXE) \
 	install/modules/archivepak.$(DLL) \
 	install/modules/archivewad.$(DLL) \
@@ -103,7 +141,7 @@ clean:
 
 %.$(EXE):
 	dir=$@; $(MKDIR) $${dir%/*}
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBS_EXTRA)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS_EXTRA) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.$(A):
@@ -112,13 +150,13 @@ clean:
 
 %.$(DLL):
 	dir=$@; $(MKDIR) $${dir%/*}
-	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS) $(LIBS_EXTRA)
+	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS_EXTRA) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-%.o: %.cpp makeversion
+%.o: %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(CPPFLAGS) $(CPPFLAGS_EXTRA)
 
-%.o: %.c makeversion
+%.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS) $(CPPFLAGS_EXTRA)
 
 install/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
@@ -188,7 +226,7 @@ libmathlib.$(A): \
 libl_net.$(A): CPPFLAGS_EXTRA := -Ilibs
 libl_net.$(A): \
 	libs/l_net/l_net.o \
-	libs/l_net/l_net_$(NETAPI).o \
+	$(if $(findstring $(OS),Win32),libs/l_net/l_net_wins.o,libs/l_net/l_net_berkley.o) \
 
 libjpeg6.$(A): CPPFLAGS_EXTRA := -Ilibs/jpeg6 -Ilibs
 libjpeg6.$(A): \
@@ -271,8 +309,8 @@ install/q3data.$(EXE): \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 
-install/radiant.$(EXE): LIBS_EXTRA := -ldl -lGL -static-libgcc $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
-install/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
+install/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
+install/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
 install/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brushmanip.o \
@@ -313,6 +351,7 @@ install/radiant.$(EXE): \
 	radiant/mainframe.o \
 	radiant/main.o \
 	radiant/map.o \
+	$(if $(findstring $(OS),Win32),radiant/multimon.o,) \
 	radiant/mru.o \
 	radiant/nullmodel.o \
 	radiant/parse.o \
