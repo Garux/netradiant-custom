@@ -33,9 +33,9 @@ ifeq ($(OS),Linux)
 	LIBS_GTK = `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
 	CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
 	LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
-else ifeq($(OS),Win32)
+else ifeq ($(OS),Win32)
 	$(error Unsupported build OS)
-else ifeq($(OS),Darwin)
+else ifeq ($(OS),Darwin)
 	$(error Unsupported build OS)
 else
 	$(error Unsupported build OS)
