@@ -13,7 +13,7 @@ else ifeq ($(BUILD),release)
 	CFLAGS += $(CFLAGS_OPT)
 	LDFLAGS += -s
 else
-	$(error Unsupported build type)
+$(error Unsupported build type)
 endif
 
 ifeq ($(OS),Linux)
@@ -34,11 +34,11 @@ ifeq ($(OS),Linux)
 	CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
 	LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
 else ifeq ($(OS),Win32)
-	$(error Unsupported build OS)
+$(error Unsupported build OS)
 else ifeq ($(OS),Darwin)
-	$(error Unsupported build OS)
+$(error Unsupported build OS)
 else
-	$(error Unsupported build OS)
+$(error Unsupported build OS)
 endif
 
 RADIANT_ABOUTMSG = Custom build
