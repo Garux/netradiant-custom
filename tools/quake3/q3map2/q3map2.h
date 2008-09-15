@@ -79,7 +79,7 @@ dependencies
 #include "inout.h"
 #include "vfs.h"
 #include "png.h"
-#include "mhash.h"
+#include "md4.h"
 
 #include <stdlib.h>
 

@@ -79,7 +79,7 @@ clean:
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-install/q3map2.$(EXE): LIBS := -lmhash $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
+install/q3map2.$(EXE): LIBS := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
 install/q3map2.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
 install/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
@@ -91,6 +91,7 @@ install/q3map2.$(EXE): \
 	tools/quake3/common/threads.o \
 	tools/quake3/common/unzip.o \
 	tools/quake3/common/vfs.o \
+	tools/quake3/common/md4.o \
 	tools/quake3/q3map2/brush.o \
 	tools/quake3/q3map2/brush_primit.o \
 	tools/quake3/q3map2/bspfile_abstract.o \
@@ -202,7 +203,7 @@ libddslib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
 
-install/q3data.$(EXE): LIBS := -lmhash $(LIBS_XML) $(LIBS_GLIB)
+install/q3data.$(EXE): LIBS := $(LIBS_XML) $(LIBS_GLIB)
 install/q3data.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
 install/q3data.$(EXE): \
 	tools/quake3/common/aselib.o \
@@ -228,7 +229,7 @@ install/q3data.$(EXE): \
 	libmathlib.$(A) \
 	libl_net.$(A) \
 
-install/radiant.$(EXE): LIBS := -lmhash -ldl -lGL -static-libgcc $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
+install/radiant.$(EXE): LIBS := -ldl -lGL -static-libgcc $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
 install/radiant.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
 #install/radiant.$(EXE): LDFLAGS := -fPIC -Wl,-fini,fini_stub $(LDFLAGS_COMMON)
 install/radiant.$(EXE): \

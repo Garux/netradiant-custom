@@ -71,20 +71,7 @@ calculates an md4 checksum for a block of data
 
 static int MD4BlockChecksum( void *buffer, int length )
 {
-	MHASH	mh;
-	int		digest[ 4 ], checksum;
-	
-	
-	/* make md4 hash */
-	mh = mhash_init( MHASH_MD4 );
-	if( !mh )
-		Error( "Unable to initialize MD4 hash context" );
-	mhash( mh, buffer, length );
-	mhash_deinit( mh, digest );
-	
-	/* xor the bits and return */
-	checksum = digest[ 0 ] ^ digest[ 1 ] ^ digest[ 2 ] ^ digest[ 3 ];
-	return checksum;
+	return Com_BlockChecksum(buffer, length);
 }
 
 
