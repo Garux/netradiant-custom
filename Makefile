@@ -21,6 +21,12 @@ LDFLAGS_XML = `xml2-config --libs`
 CPPFLAGS_PNG = `libpng-config --cflags`
 LDFLAGS_PNG = `libpng-config --libs`
 
+CPPFLAGS_GTK = `pkg-config gtk+-2.0 --cflags`
+LDFLAGS_GTK = `pkg-config gtk+-2.0 --libs`
+
+CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
+LDFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs`
+
 # from qe3.cpp: const char* const EXECUTABLE_TYPE = 
 # from qe3.cpp: #if defined(__linux__) || defined (__FreeBSD__)
 # from qe3.cpp: "x86"
@@ -37,6 +43,7 @@ LDFLAGS_PNG = `libpng-config --libs`
 all: \
 	install/q3map2.$(EXE) \
 	install/q3data.$(EXE) \
+	install/radiant.$(EXE) \
 
 .PHONY: clean
 clean:
@@ -199,4 +206,138 @@ install/q3data.$(EXE): \
 	tools/quake3/q3data/video.o \
 	libmathlib.$(A) \
 	libl_net.$(A) \
+
+install/radiant.$(EXE): LIBS := -lmhash
+install/radiant.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
+install/radiant.$(EXE): LDFLAGS := $(LDFLAGS_COMMON) $(LDFLAGS_XML) $(LDFLAGS_GLIB) $(LDFLAGS_GTK) $(LDFLAGS_GTKGLEXT)
+install/radiant.$(EXE): \
+	radiant/autosave.o \
+	radiant/brush.o \
+	radiant/brushmanip.o \
+	radiant/brushmodule.o \
+	radiant/brushnode.o \
+	radiant/brushtokens.o \
+	radiant/brushxml.o \
+	radiant/brush_primit.o \
+	radiant/build.o \
+	radiant/camwindow.o \
+	radiant/clippertool.o \
+	radiant/commands.o \
+	radiant/console.o \
+	radiant/csg.o \
+	radiant/dialog.o \
+	radiant/eclass.o \
+	radiant/eclass_def.o \
+	radiant/eclass_doom3.o \
+	radiant/eclass_fgd.o \
+	radiant/eclass_xml.o \
+	radiant/entity.o \
+	radiant/entityinspector.o \
+	radiant/entitylist.o \
+	radiant/environment.o \
+	radiant/error.o \
+	radiant/feedback.o \
+	radiant/filetypes.o \
+	radiant/filters.o \
+	radiant/findtexturedialog.o \
+	radiant/glwidget.o \
+	radiant/grid.o \
+	radiant/groupdialog.o \
+	radiant/gtkdlgs.o \
+	radiant/gtkmisc.o \
+	radiant/help.o \
+	radiant/image.o \
+	radiant/main.o \
+	radiant/mainframe.o \
+	radiant/map.o \
+	radiant/mru.o \
+	radiant/nullmodel.o \
+	radiant/parse.o \
+	radiant/patch.o \
+	radiant/patchdialog.o \
+	radiant/patchmanip.o \
+	radiant/patchmodule.o \
+	radiant/plugin.o \
+	radiant/pluginapi.o \
+	radiant/pluginmanager.o \
+	radiant/pluginmenu.o \
+	radiant/plugintoolbar.o \
+	radiant/points.o \
+	radiant/preferencedictionary.o \
+	radiant/preferences.o \
+	radiant/qe3.o \
+	radiant/qgl.o \
+	radiant/referencecache.o \
+	radiant/renderer.o \
+	radiant/renderstate.o \
+	radiant/scenegraph.o \
+	radiant/stacktrace.o \
+	radiant/select.o \
+	radiant/selection.o \
+	radiant/server.o \
+	radiant/shaders.o \
+	radiant/sockets.o \
+	radiant/surfacedialog.o \
+	radiant/texmanip.o \
+	radiant/textures.o \
+	radiant/texwindow.o \
+	radiant/timer.o \
+	radiant/treemodel.o \
+	radiant/undo.o \
+	radiant/url.o \
+	radiant/view.o \
+	radiant/watchbsp.o \
+	radiant/winding.o \
+	radiant/windowobservers.o \
+	radiant/xmlstuff.o \
+	radiant/xywindow.o \
+	libmathlib.$(A) \
+	libcmdlib.$(A) \
+	libl_net.$(A) \
+	libprofile.$(A) \
+	libgtkutil.$(A) \
+	libxmllib.$(A) \
+
+libcmdlib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
+libcmdlib.$(A): \
+	libs/cmdlib/cmdlib.o \
+
+libprofile.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+libprofile.$(A): \
+	libs/profile/profile.o \
+	libs/profile/file.o \
+
+libgtkutil.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
+libgtkutil.$(A): \
+	libs/gtkutil/accelerator.o \
+	libs/gtkutil/button.o \
+	libs/gtkutil/clipboard.o \
+	libs/gtkutil/closure.o \
+	libs/gtkutil/container.o \
+	libs/gtkutil/cursor.o \
+	libs/gtkutil/dialog.o \
+	libs/gtkutil/entry.o \
+	libs/gtkutil/frame.o \
+	libs/gtkutil/filechooser.o \
+	libs/gtkutil/glfont.o \
+	libs/gtkutil/glwidget.o \
+	libs/gtkutil/image.o \
+	libs/gtkutil/idledraw.o \
+	libs/gtkutil/menu.o \
+	libs/gtkutil/messagebox.o \
+	libs/gtkutil/nonmodal.o \
+	libs/gtkutil/paned.o \
+	libs/gtkutil/pointer.o \
+	libs/gtkutil/toolbar.o \
+	libs/gtkutil/widget.o \
+	libs/gtkutil/window.o \
+	libs/gtkutil/xorrectangle.o \
+
+libxmllib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+libxmllib.$(A): \
+	libs/xml/ixml.o \
+	libs/xml/xmlparser.o \
+	libs/xml/xmlwriter.o \
+	libs/xml/xmlelement.o \
+	libs/xml/xmltextags.o \
 
