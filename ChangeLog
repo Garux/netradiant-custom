@@ -1,11 +1,10 @@
 2008-09-15 Rudolf Polzer divVerent(at)alientrap.org
-	* all: added a Makefile to build GtkRadiant with q3map2. Currently without
-	  plugins, will add these back later
+	* all: added a Makefile to build GtkRadiant; this replaces scons and
+	  python install.py
 	* all: got rid of libmhash dependency, using mdfour.c from DarkPlaces
 	  instead
 	* q2data: remove RSA security copyrighted md4.c, using mdfour.c from DP
 	  instead as a drop-in replacement
-	* all: get rid of makeversion.py and install.py
 
 2008-09-13 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: update to ZeroRadiant's q3map2
