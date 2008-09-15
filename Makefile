@@ -68,7 +68,6 @@ TEE_STDERR ?= | tee /dev/stderr
 
 .PHONY: all
 all: \
-	makeversion \
 	install/heretic2/h2data.$(EXE) \
 	install/modules/archivepak.$(DLL) \
 	install/modules/archivewad.$(DLL) \
@@ -116,10 +115,10 @@ clean:
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS) $(LIBS_EXTRA)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-%.o: %.cpp
+%.o: %.cpp makeversion
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(CPPFLAGS) $(CPPFLAGS_EXTRA)
 
-%.o: %.c
+%.o: %.c makeversion
 	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS) $(CPPFLAGS_EXTRA)
 
 install/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
@@ -712,7 +711,7 @@ makeversion:
 	mv_if_diff include/aboutmsg.h.new include/aboutmsg.h
 
 .PHONY: install-data
-install-data:
+install-data: makeversion
 	$(MKDIR) install/games
 	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
 	set -ex; \
