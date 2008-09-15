@@ -1,17 +1,45 @@
-#CFLAGS = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -g3 -fPIC
-CFLAGS = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fPIC -O3
-LDFLAGS = -s
-CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
-#CPPFLAGS = -DPOSIX -DXWINDOWS -D_DEBUG -D_LINUX
-CPPFLAGS = -DPOSIX -DXWINDOWS -D_LINUX
-#LDFLAGS_DLL = -fPIC -Wl,-fini,fini_stub -static-libgcc -ldl
-LDFLAGS_DLL = -fPIC -ldl
-LIBS = -lpthread
+include Makefile.conf
 
-EXE = x86
-A = a
-DLL = so
-NETAPI = berkley
+CFLAGS   = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fPIC
+CPPFLAGS = -DPOSIX -DXWINDOWS -D_LINUX
+CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
+
+CFLAGS_OPT ?= -O3
+
+ifeq ($(BUILD),debug)
+	CFLAGS += -g3
+	CPPFLAGS += -D_DEBUG
+else ifeq ($(BUILD),release)
+	CFLAGS += $(CFLAGS_OPT)
+	LDFLAGS += -s
+else
+	$(error Unsupported build type)
+endif
+
+ifeq ($(OS),Linux)
+	LDFLAGS_DLL = -fPIC -ldl
+	LIBS = -lpthread
+	EXE = x86
+	A = a
+	DLL = so
+	NETAPI = berkley
+	CPPFLAGS_GLIB = `pkg-config glib-2.0 --cflags`
+	LIBS_GLIB = `pkg-config glib-2.0 --libs-only-l --libs-only-L`
+	CPPFLAGS_XML = `xml2-config --cflags`
+	LIBS_XML = `xml2-config --libs`
+	CPPFLAGS_PNG = `libpng-config --cflags`
+	LIBS_PNG = `libpng-config --libs`
+	CPPFLAGS_GTK = `pkg-config gtk+-2.0 --cflags`
+	LIBS_GTK = `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
+	CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
+	LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
+else ifeq($(OS),Win32)
+	$(error Unsupported build OS)
+else ifeq($(OS),Darwin)
+	$(error Unsupported build OS)
+else
+	$(error Unsupported build OS)
+endif
 
 RADIANT_ABOUTMSG = Custom build
 
@@ -23,23 +51,7 @@ MKDIR ?= mkdir -p
 CP ?= cp
 CP_R ?= $(CP) -r
 RM_R ?= $(RM) -r
-
 TEE_STDERR ?= | tee /dev/stderr
-
-CPPFLAGS_GLIB = `pkg-config glib-2.0 --cflags`
-LIBS_GLIB = `pkg-config glib-2.0 --libs-only-l --libs-only-L`
-
-CPPFLAGS_XML = `xml2-config --cflags`
-LIBS_XML = `xml2-config --libs`
-
-CPPFLAGS_PNG = `libpng-config --cflags`
-LIBS_PNG = `libpng-config --libs`
-
-CPPFLAGS_GTK = `pkg-config gtk+-2.0 --cflags`
-LIBS_GTK = `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
-
-CPPFLAGS_GTKGLEXT = `pkg-config gtkglext-1.0 --cflags`
-LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
 
 # from qe3.cpp: const char* const EXECUTABLE_TYPE = 
 # from qe3.cpp: #if defined(__linux__) || defined (__FreeBSD__)
@@ -52,7 +64,6 @@ LIBS_GTKGLEXT = `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
 # from qe3.cpp: #error "unknown platform"
 # from qe3.cpp: #endif
 # from qe3.cpp: ;
-
 
 .PHONY: all
 all: \
