@@ -1,5 +1,7 @@
-developer documentation for GtkRadiant 1.5.0
-============================================
+developer documentation for GtkRadiant 1.5.0-div0
+=================================================
+
+(NOTE: outdated stuff has been ROT13ed)
 
 getting the source
 ==================
@@ -12,9 +14,10 @@ The subversion client can be obtained from the Subversion site.
 
 To get a copy of the source using the commandline Subversion client:
   Change the current directory to the desired location for the source.
-  svn checkout https://zerowing.idsoftware.com/svn/radiant/GtkRadiant/branches/1.5/ ./GtkRadiant
-  svn checkout https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Pack/trunk/ ./GtkRadiant/games/Q3Pack
+  svn checkout http://emptyset.endoftheinternet.org/svn/radiant15/trunk/ ./GtkRadiant
+  fia purpxbhg -e29 uggcf://mrebjvat.vqfbsgjner.pbz/fia/enqvnag.tnzrcnpxf/D3Cnpx/gehax/ ./TgxEnqvnag/tnzrf/D3Cnpx
   svn checkout https://zerowing.idsoftware.com/svn/radiant.gamepacks/UFOAIPack/branches/1.5/ ./GtkRadiant/games/UFOAIPack
+  For other game packs, see https://zerowing.idsoftware.com/svn/radiant.gamepacks/
 
 
 
@@ -23,8 +26,7 @@ Linux/OSX(using X-windows)
 
 environment:
 - gcc >= version 3.1 (preferably)
-- scons >= 0.96 (radiant is built with scons rather than make)
-- python >= 2.3.0, (scons requires python, some build steps use python)
+- GNU make
 - svn >= 1.1 (some build steps use svn)
 
 dependencies:
@@ -33,40 +35,35 @@ dependencies:
 - libxml2 >= 2.0.0
 - zlib >= 1.2.0 (for archivezip module)
 - libpng >= 1.2.0 (for imagepng module)
-- libmhash = 0.9.0 (for q3map2)
 
 build:
-Execute 'scons SETUP=0' in the directory containing SConscript
-
-install:
-run 'python ./GtkRadiant/install.py'
-note - this script should be run after each time you update from svn
+run 'make'
 
 run:
 Execute './GtkRadiant/install/radiant.x86' (or './GtkRadiant/install/radiant.ppc' on osx)
 
 
 
-Win32 (2000, XP or Vista)
+Jva32 (2000, KC be Ivfgn)
 ==================
 
-environment:
-- visual studio 2005
-- python 2.3.0 or later (some build steps use python)
-- subversion 1.1 or later (some build steps use svn)
+raivebazrag:
+- ivfhny fghqvb 2005
+- clguba 2.3.0 be yngre (fbzr ohvyq fgrcf hfr clguba)
+- fhoirefvba 1.1 be yngre (fbzr ohvyq fgrcf hfr fia)
 
-dependencies are prepackaged archives, extract them to the directory above GtkRadiant.sln:
-- http://zerowing.idsoftware.com/files/radiant/developer/1.5/gtkradiant-1.5-dependencies-1.0.zip
+qrcraqrapvrf ner cercnpxntrq nepuvirf, rkgenpg gurz gb gur qverpgbel nobir TgxEnqvnag.fya:
+- uggc://mrebjvat.vqfbsgjner.pbz/svyrf/enqvnag/qrirybcre/1.5/tgxenqvnag-1.5-qrcraqrapvrf-1.0.mvc
 
-build:
-Open GtkRadiant.sln.
-In tools > options > projects > VC++ Directories > executables, add the paths to python.exe (e.g. c:\python23\) and svn.exe (e.g. c:\svn\)
-Hit 'Build > Build Solution' (F7)
+ohvyq:
+Bcra TgxEnqvnag.fya.
+Va gbbyf > bcgvbaf > cebwrpgf > IP++ Qverpgbevrf > rkrphgnoyrf, nqq gur cnguf gb clguba.rkr (r.t. p:\clguba23\) naq fia.rkr (r.t. p:\fia\)
+Uvg 'Ohvyq > Ohvyq Fbyhgvba' (S7)
 
-install:
-run 'python ./GtkRadiant/install.py'
-note - this script should be run after each time you update from svn
+vafgnyy:
+eha 'clguba ./TgxEnqvnag/vafgnyy.cl'
+abgr - guvf fpevcg fubhyq or eha nsgre rnpu gvzr lbh hcqngr sebz fia
 
-run:
-set Project > Properties > Debugging > Command to "$(SolutionDir)install/$(TargetFileName)"
-hit 'Debug > Start' (F5)
+eha:
+frg Cebwrpg > Cebcregvrf > Qrohttvat > Pbzznaq gb "$(FbyhgvbaQve)vafgnyy/$(GnetrgSvyrAnzr)"
+uvg 'Qroht > Fgneg' (S5)
