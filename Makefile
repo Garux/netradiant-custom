@@ -67,6 +67,7 @@ all: \
 	install/modules/shaders.$(DLL) \
 	install/modules/vfspk3.$(DLL) \
 	install/modules/bobtoolz.$(DLL) \
+	install/modules/brushexport.$(DLL) \
 	install-data \
 
 .PHONY: clean
@@ -483,6 +484,36 @@ install/modules/bobtoolz.$(DLL): \
 	libmathlib.$(A) \
 	libcmdlib.$(A) \
 	libprofile.$(A) \
+
+install/modules/brushexport.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/modules/brushexport.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/modules/brushexport.$(DLL): \
+	contrib/brushexport/plugin.o \
+	contrib/brushexport/interface.o \
+	contrib/brushexport/callbacks.o \
+	contrib/brushexport/support.o \
+	contrib/brushexport/export.o \
+
+install/modules/prtview.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/modules/prtview.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/modules/prtview.$(DLL): \
+	contrib/prtview/AboutDialog.o \
+	contrib/prtview/ConfigDialog.o \
+	contrib/prtview/LoadPortalFileDialog.o \
+	contrib/prtview/portals.o \
+	contrib/prtview/prtview.o \
+	libprofile.$(A) \
+
+install/modules/shaderplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_XML)
+install/modules/shaderplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
+install/modules/shaderplug.$(DLL): \
+	contrib/shaderplug/shaderplug.o \
+	libxmllib.$(A) \
+
+install/modules/sunplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/modules/sunplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/modules/sunplug.$(DLL): \
+	contrib/sunplug/sunplug.o \
 
 .PHONY: makeversion
 makeversion:
