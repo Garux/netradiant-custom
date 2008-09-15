@@ -16,6 +16,9 @@ FIND ?= find
 RANLIB ?= ranlib
 AR ?= ar
 MKDIR ?= mkdir -p
+CP ?= cp
+CP_R ?= $(CP) -r
+RM_R ?= $(RM) -r
 
 TEE_STDERR ?= | tee /dev/stderr
 
@@ -63,6 +66,7 @@ all: \
 	install/modules/model.$(DLL) \
 	install/modules/shaders.$(DLL) \
 	install/modules/vfspk3.$(DLL) \
+	install-data \
 
 .PHONY: clean
 clean:
@@ -464,3 +468,20 @@ makeversion:
 	echo "// generated header, see Makefile" > include/aboutmsg.h; \
 	echo "#define RADIANT_ABOUTMSG \"$(RADIANT_ABOUTMSG)\"" >> include/aboutmsg.h; \
 
+.PHONY: install-data
+install-data:
+	set -ex; \
+	for GAME in games/*; do \
+		for GAMEFILE in $$GAME/games/*.game; do \
+			$(MKDIR) install/games; \
+			$(CP) "$$GAMEFILE" install/games/; \
+		done; \
+		for GAMEDIR in $$GAME/*.game; do \
+			$(MKDIR) install; \
+			$(CP_R) "$$GAMEDIR" install/; \
+		done; \
+	done
+	$(CP) include/RADIANT_MAJOR install/
+	$(CP) include/RADIANT_MINOR install/
+	$(CP_R) setup/data/tools/* install/
+	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
