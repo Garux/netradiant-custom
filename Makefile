@@ -6,7 +6,7 @@ CXXFLAGS = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 CPPFLAGS = -DPOSIX -DXWINDOWS -D_LINUX
 #LDFLAGS_DLL = -fPIC -Wl,-fini,fini_stub -static-libgcc -ldl
 LDFLAGS_DLL = -fPIC -ldl
-LIBS_COMMON = -lpthread
+LIBS = -lpthread
 
 EXE = x86
 A = a
