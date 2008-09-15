@@ -695,3 +695,4 @@ install-data:
 	$(CP) include/RADIANT_MINOR install/
 	$(CP_R) setup/data/tools/* install/
 	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
+
