@@ -46,6 +46,8 @@ all: \
 	install/q3data.$(EXE) \
 	install/radiant.$(EXE) \
 	install/modules/archivezip.$(DLL) \
+	install/modules/entity.$(DLL) \
+	install/modules/image.$(DLL) \
 
 .PHONY: clean
 clean:
@@ -353,4 +355,38 @@ install/modules/archivezip.$(DLL): \
 	plugins/archivezip/archive.o \
 	plugins/archivezip/pkzip.o \
 	plugins/archivezip/zlibstream.o \
+
+install/modules/entity.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/entity.$(DLL): \
+	plugins/entity/plugin.o \
+	plugins/entity/entity.o \
+	plugins/entity/eclassmodel.o \
+	plugins/entity/generic.o \
+	plugins/entity/group.o \
+	plugins/entity/light.o \
+	plugins/entity/miscmodel.o \
+	plugins/entity/doom3group.o \
+	plugins/entity/skincache.o \
+	plugins/entity/angle.o \
+	plugins/entity/angles.o \
+	plugins/entity/colour.o \
+	plugins/entity/filters.o \
+	plugins/entity/model.o \
+	plugins/entity/namedentity.o \
+	plugins/entity/origin.o \
+	plugins/entity/scale.o \
+	plugins/entity/targetable.o \
+	plugins/entity/rotation.o \
+	plugins/entity/modelskinkey.o \
+
+install/modules/image.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/image.$(DLL): \
+	plugins/image/bmp.o \
+	plugins/image/jpeg.o \
+	plugins/image/image.o \
+	plugins/image/pcx.o \
+	plugins/image/tga.o \
+	plugins/image/dds.o \
+	libjpeg6.$(A) \
+	libddslib.$(A) \
 
