@@ -207,9 +207,9 @@ install/q3data.$(EXE): \
 	libmathlib.$(A) \
 	libl_net.$(A) \
 
-install/radiant.$(EXE): LIBS := -lmhash
+install/radiant.$(EXE): LIBS := -lmhash -ldl -lGL -static-libgcc 
 install/radiant.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
-install/radiant.$(EXE): LDFLAGS := $(LDFLAGS_COMMON) $(LDFLAGS_XML) $(LDFLAGS_GLIB) $(LDFLAGS_GTK) $(LDFLAGS_GTKGLEXT)
+install/radiant.$(EXE): LDFLAGS := -fPIC -Wl,-fini,fini_stub $(LDFLAGS_COMMON) $(LDFLAGS_XML) $(LDFLAGS_GLIB) $(LDFLAGS_GTK) $(LDFLAGS_GTKGLEXT)
 install/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brush.o \
