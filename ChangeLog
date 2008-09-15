@@ -1,22 +1,44 @@
+2008-09-15 Rudolf Polzer divVerent(at)alientrap.org
+	* all: added a Makefile to build GtkRadiant with q3map2. Currently without
+	  plugins, will add these back later
+
 2008-09-13 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: update to ZeroRadiant's q3map2
 	* q3map2: added lightmap exposure feature: -exposure 4.2 (Urban Terror)
-	* q3map2: check whether a lightmap sample is actually in the triangle (Urban Terror)
+	* q3map2: check whether a lightmap sample is actually in the triangle
+	  (Urban Terror)
 	* q3map2: nudge light sample origin by 1qu away from planes (Urban Terror)
-	* q3map2: floodlight: usage is "_floodlight" "red green blue distance intensity", default "240 240 255 1024 128"; works somewhat similar to dirtmapping (Urban Terror); uses a switch -lowquality
+	* q3map2: floodlight: usage is "_floodlight" "red green blue distance
+	  intensity", default "240 240 255 1024 128"; works somewhat similar to
+	  dirtmapping (Urban Terror); uses a switch -lowquality
 	* q3map2: added -debugnormals feature (Urban Terror)
-	* q3map2: fix -convert -format map decompiling (note: outputs map in "Alternate Texture Projection" format); no longer messes up texcoords
+	* q3map2: fix -convert -format map decompiling (note: outputs map in
+	  "Alternate Texture Projection" format); no longer messes up texcoords
 	* q3map2: added -game nexuiz to use good default paths for Nexuiz
 	* q3map2: added -game quakelive to enable in-game adverts
 	* q3map2: fix incorrect plane snapping often causing holes in terrain
-	* q3map2: spawnflags on misc_model: 8 extrudes with original normals, 16 extrudes with up/down normals (terrain), default: extrudes with axial normals (like before)
-	* q3map2: fix obvious (and reported, and patch sent in) bug when importing models when the normals were pointing in a 45 degrees direction
-	* q3map2: when importing models, allow "surfaceparms structural". This also turns off any plane snapping, as it is intended for caulk brushes inside a model
-	* q3map2: added parameters -ne to set normal epsilon, and -de to set distance epsilon (to customize plane snapping)
+	* q3map2: spawnflags on misc_model: 8 extrudes with original normals, 16
+	  extrudes with up/down normals (terrain), default: extrudes with axial
+	  normals (like before)
+	* q3map2: fix obvious (and reported, and patch sent in) bug when importing
+	  models when the normals were pointing in a 45 degrees direction
+	* q3map2: when importing models, allow "surfaceparms structural". This
+	  also turns off any plane snapping, as it is intended for caulk brushes
+	  inside a model
+	* q3map2: added parameters -ne to set normal epsilon, and -de to set
+	  distance epsilon (to customize plane snapping)
 	* q3map2: fix q3map_lightRGB (Urban Terror)
 	* q3map2: add a build script to cross compile q3map2 to Win32
-	* radiant: when displaying normals on a model, scale them to 8 unit size on the output (so "modelscale" can be used without LOTS of lines on the screen)
-	* radiant: also support "killtarget" as target key for drawing the targeting lines
-	* radiant: "expand selection to whole entities" now also selects the entity ITSELF; result: Ctrl-Alt-E Space makes a NEW entity now, instead of just duplicating the brush (old behaviour caused bugs in maps with copied func_ladders)
-	* picomodel: support .obj format as exported by Blender, with a .mtl file defining the shader names for each material; to export using Blender, enable "Materials" and "Material Groups" in the .obj export dialog
+	* radiant: when displaying normals on a model, scale them to 8 unit size
+	  on the output (so "modelscale" can be used without LOTS of lines on the
+	  screen)
+	* radiant: also support "killtarget" as target key for drawing the
+	  targeting lines
+	* radiant: "expand selection to whole entities" now also selects the
+	  entity ITSELF; result: Ctrl-Alt-E Space makes a NEW entity now, instead of
+	  just duplicating the brush (old behaviour caused bugs in maps with copied
+	  func_ladders)
+	* picomodel: support .obj format as exported by Blender, with a .mtl file
+	  defining the shader names for each material; to export using Blender,
+	  enable "Materials" and "Material Groups" in the .obj export dialog
 	* all: bump version to 1.5.0-div0

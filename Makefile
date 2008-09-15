@@ -13,6 +13,7 @@ LDD ?= ldd
 FIND ?= find
 RANLIB ?= ranlib
 AR ?= ar
+MKDIR ?= mkdir -p
 
 TEE_STDERR ?= | tee /dev/stderr
 
@@ -65,6 +66,7 @@ clean:
 	$(FIND) . \( -name \*.o -o -name \*.$(SO) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
 
 %.$(EXE):
+	dir=$@; $(MKDIR) $${dir%/*}
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
@@ -73,6 +75,7 @@ clean:
 	$(RANLIB) $@
 
 %.$(DLL):
+	dir=$@; $(MKDIR) $${dir%/*}
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
