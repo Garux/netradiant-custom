@@ -714,8 +714,12 @@ makeversion:
 .PHONY: install-data
 install-data:
 	$(MKDIR) install/games
+	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
 	set -ex; \
 	for GAME in games/*; do \
+		if [ -d "$$GAME/tools" ]; then \
+			GAME=$$GAME/tools; \
+		fi; \
 		for GAMEFILE in $$GAME/games/*.game; do \
 			$(CP) "$$GAMEFILE" install/games/; \
 		done; \
