@@ -1,6 +1,6 @@
 include Makefile.conf
 
-CFLAGS     = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fPIC
+CFLAGS     = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter
 CPPFLAGS   = 
 LDFLAGS    =
 LIBS       =
@@ -16,7 +16,7 @@ ifneq ($(MINGW),)
 	OS := Win32
 	CPPFLAGS += -I$(MINGW)/include -D_inline=inline
 	CFLAGS   += -mms-bitfields
-	LDFLAGS  += -L$(MINGW)/lib
+	LDFLAGS  += -mms-bitfields -L$(MINGW)/lib
 
 	CPPFLAGS_GLIB = -I$(MINGW)/include/glib-2.0 -I$(MINGW)/lib/glib-2.0/include
 	LIBS_GLIB = -lglib-2.0
@@ -46,18 +46,22 @@ endif
 
 ifeq ($(OS),Linux)
 	CPPFLAGS += -DPOSIX -DXWINDOWS -D_LINUX
+	CFLAGS += -fPIC
 	LDFLAGS_DLL = -fPIC -ldl
 	LIBS = -lpthread
 	EXE = x86
 	A = a
 	DLL = so
+	MWINDOWS =
 else ifeq ($(OS),Win32)
 	CPPFLAGS += -DWIN32 -D_WIN32
-	LDFLAGS_DLL = -fPIC
+	CFLAGS +=
+	LDFLAGS_DLL =
 	LIBS = -lws2_32 -luser32 -lgdi32
 	EXE = exe
 	A = a
 	DLL = dll
+	MWINDOWS = -mwindows
 else ifeq ($(OS),Darwin)
 $(error Unsupported build OS)
 else
@@ -141,7 +145,7 @@ clean:
 
 %.$(EXE):
 	dir=$@; $(MKDIR) $${dir%/*}
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS_EXTRA) $(LIBS)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.$(A):
@@ -150,7 +154,7 @@ clean:
 
 %.$(DLL):
 	dir=$@; $(MKDIR) $${dir%/*}
-	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LIBS_EXTRA) $(LIBS)
+	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS)
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.o: %.cpp
@@ -309,6 +313,7 @@ install/q3data.$(EXE): \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 
+install/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
 install/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
 install/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
 install/radiant.$(EXE): \
