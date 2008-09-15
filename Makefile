@@ -66,11 +66,13 @@ all: \
 	install/modules/model.$(DLL) \
 	install/modules/shaders.$(DLL) \
 	install/modules/vfspk3.$(DLL) \
+	install/modules/bobtoolz.$(DLL) \
 	install-data \
 
 .PHONY: clean
 clean:
-	$(FIND) . \( -name \*.o -o -name \*.$(SO) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
+	$(RM_R) install/
+	$(FIND) . \( -name \*.o -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
 
 %.$(EXE):
 	dir=$@; $(MKDIR) $${dir%/*}
@@ -451,6 +453,36 @@ install/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/archive.o \
 	plugins/vfspk3/vfs.o \
 	plugins/vfspk3/vfspk3.o \
+
+install/modules/bobtoolz.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/modules/bobtoolz.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/modules/bobtoolz.$(DLL): \
+	contrib/bobtoolz/dialogs/dialogs-gtk.os \
+	contrib/bobtoolz/bobToolz-GTK.os \
+	contrib/bobtoolz/bsploader.os \
+	contrib/bobtoolz/cportals.os \
+	contrib/bobtoolz/DBobView.os \
+	contrib/bobtoolz/DBrush.os \
+	contrib/bobtoolz/DEntity.os \
+	contrib/bobtoolz/DEPair.os \
+	contrib/bobtoolz/DMap.os \
+	contrib/bobtoolz/DPatch.os \
+	contrib/bobtoolz/DPlane.os \
+	contrib/bobtoolz/DPoint.os \
+	contrib/bobtoolz/DShape.os \
+	contrib/bobtoolz/DTrainDrawer.os \
+	contrib/bobtoolz/DTreePlanter.os \
+	contrib/bobtoolz/DVisDrawer.os \
+	contrib/bobtoolz/DWinding.os \
+	contrib/bobtoolz/funchandlers-GTK.os \
+	contrib/bobtoolz/lists.os \
+	contrib/bobtoolz/misc.os \
+	contrib/bobtoolz/ScriptParser.os \
+	contrib/bobtoolz/shapes.os \
+	contrib/bobtoolz/visfind.os \
+	libmathlib.$(A) \
+	libcmdlib.$(A) \
+	libprofile.$(A) \
 
 .PHONY: makeversion
 makeversion:
