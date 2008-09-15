@@ -22,6 +22,8 @@ RM_R ?= $(RM) -r
 
 TEE_STDERR ?= | tee /dev/stderr
 
+LIBS_PTHREAD = -lpthread
+
 CPPFLAGS_GLIB = `pkg-config glib-2.0 --cflags`
 LIBS_GLIB = `pkg-config glib-2.0 --libs`
 
@@ -54,20 +56,32 @@ LDFLAGS := $(LDFLAGS_COMMON)
 .PHONY: all
 all: \
 	makeversion \
-	install/q3map2.$(EXE) \
-	install/q3data.$(EXE) \
-	install/radiant.$(EXE) \
+	install/heretic2/h2data.$(EXE) \
+	install/modules/archivepak.$(DLL) \
+	install/modules/archivewad.$(DLL) \
 	install/modules/archivezip.$(DLL) \
-	install/modules/entity.$(DLL) \
-	install/modules/image.$(DLL) \
-	install/modules/imagepng.$(DLL) \
-	install/modules/mapq3.$(DLL) \
-	install/modules/md3model.$(DLL) \
-	install/modules/model.$(DLL) \
-	install/modules/shaders.$(DLL) \
-	install/modules/vfspk3.$(DLL) \
 	install/modules/bobtoolz.$(DLL) \
 	install/modules/brushexport.$(DLL) \
+	install/modules/entity.$(DLL) \
+	install/modules/image.$(DLL) \
+	install/modules/imagehl.$(DLL) \
+	install/modules/imagepng.$(DLL) \
+	install/modules/imageq2.$(DLL) \
+	install/modules/mapq3.$(DLL) \
+	install/modules/mapxml.$(DLL) \
+	install/modules/md3model.$(DLL) \
+	install/modules/model.$(DLL) \
+	install/modules/prtview.$(DLL) \
+	install/modules/shaderplug.$(DLL) \
+	install/modules/shaders.$(DLL) \
+	install/modules/sunplug.$(DLL) \
+	install/modules/ufoaiplug.$(DLL) \
+	install/modules/vfspk3.$(DLL) \
+	install/q2map.$(EXE) \
+	install/q3data.$(EXE) \
+	install/q3map2.$(EXE) \
+	install/qdata3.$(EXE) \
+	install/radiant.$(EXE) \
 	install-data \
 
 .PHONY: clean
@@ -95,13 +109,13 @@ install/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
 	tools/quake3/common/inout.o \
+	tools/quake3/common/md4.o \
 	tools/quake3/common/mutex.o \
 	tools/quake3/common/polylib.o \
 	tools/quake3/common/scriplib.o \
 	tools/quake3/common/threads.o \
 	tools/quake3/common/unzip.o \
 	tools/quake3/common/vfs.o \
-	tools/quake3/common/md4.o \
 	tools/quake3/q3map2/brush.o \
 	tools/quake3/q3map2/brush_primit.o \
 	tools/quake3/q3map2/bspfile_abstract.o \
@@ -139,18 +153,18 @@ install/q3map2.$(EXE): \
 	tools/quake3/q3map2/visflow.o \
 	tools/quake3/q3map2/vis.o \
 	tools/quake3/q3map2/writebsp.o \
-	libmathlib.$(A) \
-	libl_net.$(A) \
-	libjpeg6.$(A) \
-	libpicomodel.$(A) \
 	libddslib.$(A) \
+	libjpeg6.$(A) \
+	libl_net.$(A) \
+	libmathlib.$(A) \
+	libpicomodel.$(A) \
 
 libmathlib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
 libmathlib.$(A): \
-	libs/mathlib/mathlib.o \
 	libs/mathlib/bbox.o \
 	libs/mathlib/line.o \
 	libs/mathlib/m4x4.o \
+	libs/mathlib/mathlib.o \
 	libs/mathlib/ray.o \
 
 libl_net.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
@@ -161,43 +175,30 @@ libl_net.$(A): \
 libjpeg6.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs/jpeg6 -Ilibs
 libjpeg6.$(A): \
 	libs/jpeg6/jcomapi.o \
-	libs/jpeg6/jdcoefct.o \
-	libs/jpeg6/jdinput.o \
-	libs/jpeg6/jdpostct.o \
-	libs/jpeg6/jfdctflt.o \
-	libs/jpeg6/jpgload.o \
 	libs/jpeg6/jdapimin.o \
-	libs/jpeg6/jdcolor.o \
-	libs/jpeg6/jdmainct.o \
-	libs/jpeg6/jdsample.o \
-	libs/jpeg6/jidctflt.o \
-	libs/jpeg6/jutils.o \
 	libs/jpeg6/jdapistd.o \
-	libs/jpeg6/jddctmgr.o \
-	libs/jpeg6/jdmarker.o \
-	libs/jpeg6/jdtrans.o \
-	libs/jpeg6/jmemmgr.o \
 	libs/jpeg6/jdatasrc.o \
+	libs/jpeg6/jdcoefct.o \
+	libs/jpeg6/jdcolor.o \
+	libs/jpeg6/jddctmgr.o \
 	libs/jpeg6/jdhuff.o \
+	libs/jpeg6/jdinput.o \
+	libs/jpeg6/jdmainct.o \
+	libs/jpeg6/jdmarker.o \
 	libs/jpeg6/jdmaster.o \
+	libs/jpeg6/jdpostct.o \
+	libs/jpeg6/jdsample.o \
+	libs/jpeg6/jdtrans.o \
 	libs/jpeg6/jerror.o \
+	libs/jpeg6/jfdctflt.o \
+	libs/jpeg6/jidctflt.o \
+	libs/jpeg6/jmemmgr.o \
 	libs/jpeg6/jmemnobs.o \
+	libs/jpeg6/jpgload.o \
+	libs/jpeg6/jutils.o \
 
 libpicomodel.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
 libpicomodel.$(A): \
-	libs/picomodel/picointernal.o \
-	libs/picomodel/picomodel.o \
-	libs/picomodel/picomodules.o \
-	libs/picomodel/pm_3ds.o \
-	libs/picomodel/pm_ase.o \
-	libs/picomodel/pm_md3.o \
-	libs/picomodel/pm_obj.o \
-	libs/picomodel/pm_ms3d.o \
-	libs/picomodel/pm_mdc.o \
-	libs/picomodel/pm_fm.o \
-	libs/picomodel/pm_md2.o \
-	libs/picomodel/pm_lwo.o \
-	libs/picomodel/pm_terrain.o \
 	libs/picomodel/lwo/clip.o \
 	libs/picomodel/lwo/envelope.o \
 	libs/picomodel/lwo/list.o \
@@ -208,6 +209,19 @@ libpicomodel.$(A): \
 	libs/picomodel/lwo/surface.o \
 	libs/picomodel/lwo/vecmath.o \
 	libs/picomodel/lwo/vmap.o \
+	libs/picomodel/picointernal.o \
+	libs/picomodel/picomodel.o \
+	libs/picomodel/picomodules.o \
+	libs/picomodel/pm_3ds.o \
+	libs/picomodel/pm_ase.o \
+	libs/picomodel/pm_fm.o \
+	libs/picomodel/pm_lwo.o \
+	libs/picomodel/pm_md2.o \
+	libs/picomodel/pm_md3.o \
+	libs/picomodel/pm_mdc.o \
+	libs/picomodel/pm_ms3d.o \
+	libs/picomodel/pm_obj.o \
+	libs/picomodel/pm_terrain.o \
 
 libddslib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
 libddslib.$(A): \
@@ -236,21 +250,20 @@ install/q3data.$(EXE): \
 	tools/quake3/q3data/q3data.o \
 	tools/quake3/q3data/stripper.o \
 	tools/quake3/q3data/video.o \
-	libmathlib.$(A) \
 	libl_net.$(A) \
+	libmathlib.$(A) \
 
 install/radiant.$(EXE): LIBS := -ldl -lGL -static-libgcc $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
 install/radiant.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
-#install/radiant.$(EXE): LDFLAGS := -fPIC -Wl,-fini,fini_stub $(LDFLAGS_COMMON)
 install/radiant.$(EXE): \
 	radiant/autosave.o \
-	radiant/brush.o \
 	radiant/brushmanip.o \
 	radiant/brushmodule.o \
 	radiant/brushnode.o \
+	radiant/brush.o \
+	radiant/brush_primit.o \
 	radiant/brushtokens.o \
 	radiant/brushxml.o \
-	radiant/brush_primit.o \
 	radiant/build.o \
 	radiant/camwindow.o \
 	radiant/clippertool.o \
@@ -258,14 +271,14 @@ install/radiant.$(EXE): \
 	radiant/console.o \
 	radiant/csg.o \
 	radiant/dialog.o \
-	radiant/eclass.o \
 	radiant/eclass_def.o \
 	radiant/eclass_doom3.o \
 	radiant/eclass_fgd.o \
+	radiant/eclass.o \
 	radiant/eclass_xml.o \
-	radiant/entity.o \
 	radiant/entityinspector.o \
 	radiant/entitylist.o \
+	radiant/entity.o \
 	radiant/environment.o \
 	radiant/error.o \
 	radiant/feedback.o \
@@ -279,20 +292,20 @@ install/radiant.$(EXE): \
 	radiant/gtkmisc.o \
 	radiant/help.o \
 	radiant/image.o \
-	radiant/main.o \
 	radiant/mainframe.o \
+	radiant/main.o \
 	radiant/map.o \
 	radiant/mru.o \
 	radiant/nullmodel.o \
 	radiant/parse.o \
-	radiant/patch.o \
 	radiant/patchdialog.o \
 	radiant/patchmanip.o \
 	radiant/patchmodule.o \
-	radiant/plugin.o \
+	radiant/patch.o \
 	radiant/pluginapi.o \
 	radiant/pluginmanager.o \
 	radiant/pluginmenu.o \
+	radiant/plugin.o \
 	radiant/plugintoolbar.o \
 	radiant/points.o \
 	radiant/preferencedictionary.o \
@@ -303,12 +316,12 @@ install/radiant.$(EXE): \
 	radiant/renderer.o \
 	radiant/renderstate.o \
 	radiant/scenegraph.o \
-	radiant/stacktrace.o \
-	radiant/select.o \
 	radiant/selection.o \
+	radiant/select.o \
 	radiant/server.o \
 	radiant/shaders.o \
 	radiant/sockets.o \
+	radiant/stacktrace.o \
 	radiant/surfacedialog.o \
 	radiant/texmanip.o \
 	radiant/textures.o \
@@ -323,11 +336,11 @@ install/radiant.$(EXE): \
 	radiant/windowobservers.o \
 	radiant/xmlstuff.o \
 	radiant/xywindow.o \
-	libmathlib.$(A) \
 	libcmdlib.$(A) \
-	libl_net.$(A) \
-	libprofile.$(A) \
 	libgtkutil.$(A) \
+	libl_net.$(A) \
+	libmathlib.$(A) \
+	libprofile.$(A) \
 	libxmllib.$(A) \
 
 libcmdlib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs
@@ -336,8 +349,8 @@ libcmdlib.$(A): \
 
 libprofile.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
 libprofile.$(A): \
-	libs/profile/profile.o \
 	libs/profile/file.o \
+	libs/profile/profile.o \
 
 libgtkutil.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
 libgtkutil.$(A): \
@@ -349,12 +362,12 @@ libgtkutil.$(A): \
 	libs/gtkutil/cursor.o \
 	libs/gtkutil/dialog.o \
 	libs/gtkutil/entry.o \
-	libs/gtkutil/frame.o \
 	libs/gtkutil/filechooser.o \
+	libs/gtkutil/frame.o \
 	libs/gtkutil/glfont.o \
 	libs/gtkutil/glwidget.o \
-	libs/gtkutil/image.o \
 	libs/gtkutil/idledraw.o \
+	libs/gtkutil/image.o \
 	libs/gtkutil/menu.o \
 	libs/gtkutil/messagebox.o \
 	libs/gtkutil/nonmodal.o \
@@ -368,52 +381,77 @@ libgtkutil.$(A): \
 libxmllib.$(A): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
 libxmllib.$(A): \
 	libs/xml/ixml.o \
-	libs/xml/xmlparser.o \
-	libs/xml/xmlwriter.o \
 	libs/xml/xmlelement.o \
+	libs/xml/xmlparser.o \
 	libs/xml/xmltextags.o \
+	libs/xml/xmlwriter.o \
 
 install/modules/archivezip.$(DLL): LIBS := -lz
 install/modules/archivezip.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
 install/modules/archivezip.$(DLL): \
-	plugins/archivezip/plugin.o \
 	plugins/archivezip/archive.o \
 	plugins/archivezip/pkzip.o \
+	plugins/archivezip/plugin.o \
 	plugins/archivezip/zlibstream.o \
+
+install/modules/archivewad.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/archivewad.$(DLL): \
+	plugins/archivewad/archive.o \
+	plugins/archivewad/plugin.o \
+	plugins/archivewad/wad.o \
+
+install/modules/archivepak.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/archivepak.$(DLL): \
+	plugins/archivepak/archive.o \
+	plugins/archivepak/pak.o \
+	plugins/archivepak/plugin.o \
 
 install/modules/entity.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
 install/modules/entity.$(DLL): \
-	plugins/entity/plugin.o \
-	plugins/entity/entity.o \
+	plugins/entity/angle.o \
+	plugins/entity/angles.o \
+	plugins/entity/colour.o \
+	plugins/entity/doom3group.o \
 	plugins/entity/eclassmodel.o \
+	plugins/entity/entity.o \
+	plugins/entity/filters.o \
 	plugins/entity/generic.o \
 	plugins/entity/group.o \
 	plugins/entity/light.o \
 	plugins/entity/miscmodel.o \
-	plugins/entity/doom3group.o \
-	plugins/entity/skincache.o \
-	plugins/entity/angle.o \
-	plugins/entity/angles.o \
-	plugins/entity/colour.o \
-	plugins/entity/filters.o \
 	plugins/entity/model.o \
+	plugins/entity/modelskinkey.o \
 	plugins/entity/namedentity.o \
 	plugins/entity/origin.o \
-	plugins/entity/scale.o \
-	plugins/entity/targetable.o \
+	plugins/entity/plugin.o \
 	plugins/entity/rotation.o \
-	plugins/entity/modelskinkey.o \
+	plugins/entity/scale.o \
+	plugins/entity/skincache.o \
+	plugins/entity/targetable.o \
 
 install/modules/image.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
 install/modules/image.$(DLL): \
 	plugins/image/bmp.o \
-	plugins/image/jpeg.o \
+	plugins/image/dds.o \
 	plugins/image/image.o \
+	plugins/image/jpeg.o \
 	plugins/image/pcx.o \
 	plugins/image/tga.o \
-	plugins/image/dds.o \
-	libjpeg6.$(A) \
 	libddslib.$(A) \
+	libjpeg6.$(A) \
+
+install/modules/imageq2.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/imageq2.$(DLL): \
+	plugins/imageq2/imageq2.o \
+	plugins/imageq2/wal32.o \
+	plugins/imageq2/wal.o \
+
+install/modules/imagehl.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
+install/modules/imagehl.$(DLL): \
+	plugins/imagehl/hlw.o \
+	plugins/imagehl/imagehl.o \
+	plugins/imagehl/mip.o \
+	plugins/imagehl/sprite.o \
 
 install/modules/imagepng.$(DLL): LIBS := $(LIBS_PNG)
 install/modules/imagepng.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_PNG) -Ilibs -Iinclude
@@ -422,24 +460,31 @@ install/modules/imagepng.$(DLL): \
 
 install/modules/mapq3.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
 install/modules/mapq3.$(DLL): \
-	plugins/mapq3/plugin.o \
 	plugins/mapq3/parse.o \
+	plugins/mapq3/plugin.o \
 	plugins/mapq3/write.o \
+
+install/modules/mapxml.$(DLL): LIBS := $(LIBS_XML) $(LIBS_GLIB)
+install/modules/mapxml.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+install/modules/mapxml.$(DLL): \
+	plugins/mapxml/plugin.o \
+	plugins/mapxml/xmlparse.o \
+	plugins/mapxml/xmlwrite.o \
 
 install/modules/md3model.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
 install/modules/md3model.$(DLL): \
-	plugins/md3model/plugin.o \
-	plugins/md3model/mdl.o \
-	plugins/md3model/md3.o \
 	plugins/md3model/md2.o \
+	plugins/md3model/md3.o \
+	plugins/md3model/md5.o \
 	plugins/md3model/mdc.o \
 	plugins/md3model/mdlimage.o \
-	plugins/md3model/md5.o \
+	plugins/md3model/mdl.o \
+	plugins/md3model/plugin.o \
 
 install/modules/model.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) -Ilibs -Iinclude
 install/modules/model.$(DLL): \
-	plugins/model/plugin.o \
 	plugins/model/model.o \
+	plugins/model/plugin.o \
 	libpicomodel.$(A) \
 
 install/modules/shaders.$(DLL): LIBS := $(LIBS_GLIB)
@@ -458,41 +503,41 @@ install/modules/vfspk3.$(DLL): \
 install/modules/bobtoolz.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
 install/modules/bobtoolz.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/modules/bobtoolz.$(DLL): \
-	contrib/bobtoolz/dialogs/dialogs-gtk.os \
-	contrib/bobtoolz/bobToolz-GTK.os \
-	contrib/bobtoolz/bsploader.os \
-	contrib/bobtoolz/cportals.os \
-	contrib/bobtoolz/DBobView.os \
-	contrib/bobtoolz/DBrush.os \
-	contrib/bobtoolz/DEntity.os \
-	contrib/bobtoolz/DEPair.os \
-	contrib/bobtoolz/DMap.os \
-	contrib/bobtoolz/DPatch.os \
-	contrib/bobtoolz/DPlane.os \
-	contrib/bobtoolz/DPoint.os \
-	contrib/bobtoolz/DShape.os \
-	contrib/bobtoolz/DTrainDrawer.os \
-	contrib/bobtoolz/DTreePlanter.os \
-	contrib/bobtoolz/DVisDrawer.os \
-	contrib/bobtoolz/DWinding.os \
-	contrib/bobtoolz/funchandlers-GTK.os \
-	contrib/bobtoolz/lists.os \
-	contrib/bobtoolz/misc.os \
-	contrib/bobtoolz/ScriptParser.os \
-	contrib/bobtoolz/shapes.os \
-	contrib/bobtoolz/visfind.os \
-	libmathlib.$(A) \
+	contrib/bobtoolz/bobToolz-GTK.o \
+	contrib/bobtoolz/bsploader.o \
+	contrib/bobtoolz/cportals.o \
+	contrib/bobtoolz/DBobView.o \
+	contrib/bobtoolz/DBrush.o \
+	contrib/bobtoolz/DEntity.o \
+	contrib/bobtoolz/DEPair.o \
+	contrib/bobtoolz/dialogs/dialogs-gtk.o \
+	contrib/bobtoolz/DMap.o \
+	contrib/bobtoolz/DPatch.o \
+	contrib/bobtoolz/DPlane.o \
+	contrib/bobtoolz/DPoint.o \
+	contrib/bobtoolz/DShape.o \
+	contrib/bobtoolz/DTrainDrawer.o \
+	contrib/bobtoolz/DTreePlanter.o \
+	contrib/bobtoolz/DVisDrawer.o \
+	contrib/bobtoolz/DWinding.o \
+	contrib/bobtoolz/funchandlers-GTK.o \
+	contrib/bobtoolz/lists.o \
+	contrib/bobtoolz/misc.o \
+	contrib/bobtoolz/ScriptParser.o \
+	contrib/bobtoolz/shapes.o \
+	contrib/bobtoolz/visfind.o \
 	libcmdlib.$(A) \
+	libmathlib.$(A) \
 	libprofile.$(A) \
 
 install/modules/brushexport.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
 install/modules/brushexport.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/modules/brushexport.$(DLL): \
-	contrib/brushexport/plugin.o \
-	contrib/brushexport/interface.o \
 	contrib/brushexport/callbacks.o \
-	contrib/brushexport/support.o \
 	contrib/brushexport/export.o \
+	contrib/brushexport/interface.o \
+	contrib/brushexport/plugin.o \
+	contrib/brushexport/support.o \
 
 install/modules/prtview.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
 install/modules/prtview.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
@@ -514,6 +559,109 @@ install/modules/sunplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
 install/modules/sunplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
 install/modules/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
+
+install/qdata3.$(EXE): LIBS := $(LIBS_XML) $(LIBS_PTHREAD)
+install/qdata3.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+install/qdata3.$(EXE): \
+	tools/quake2/common/bspfile.o \
+	tools/quake2/common/cmdlib.o \
+	tools/quake2/common/inout.o \
+	tools/quake2/common/l3dslib.o \
+	tools/quake2/common/lbmlib.o \
+	tools/quake2/common/mathlib.o \
+	tools/quake2/common/md4.o \
+	tools/quake2/common/path_init.o \
+	tools/quake2/common/polylib.o \
+	tools/quake2/common/scriplib.o \
+	tools/quake2/common/threads.o \
+	tools/quake2/common/trilib.o \
+	tools/quake2/qdata/images.o \
+	tools/quake2/qdata/models.o \
+	tools/quake2/qdata/qdata.o \
+	tools/quake2/qdata/sprites.o \
+	tools/quake2/qdata/tables.o \
+	tools/quake2/qdata/video.o \
+	libl_net.$(A) \
+
+install/q2map.$(EXE): LIBS := $(LIBS_XML) $(LIBS_PTHREAD)
+install/q2map.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+install/q2map.$(EXE): \
+	tools/quake2/common/bspfile.o \
+	tools/quake2/common/cmdlib.o \
+	tools/quake2/common/inout.o \
+	tools/quake2/common/l3dslib.o \
+	tools/quake2/common/lbmlib.o \
+	tools/quake2/common/mathlib.o \
+	tools/quake2/common/md4.o \
+	tools/quake2/common/path_init.o \
+	tools/quake2/common/polylib.o \
+	tools/quake2/common/scriplib.o \
+	tools/quake2/common/threads.o \
+	tools/quake2/common/trilib.o \
+	tools/quake2/q2map/brushbsp.o \
+	tools/quake2/q2map/csg.o \
+	tools/quake2/q2map/faces.o \
+	tools/quake2/q2map/flow.o \
+	tools/quake2/q2map/glfile.o \
+	tools/quake2/q2map/leakfile.o \
+	tools/quake2/q2map/lightmap.o \
+	tools/quake2/q2map/main.o \
+	tools/quake2/q2map/map.o \
+	tools/quake2/q2map/nodraw.o \
+	tools/quake2/q2map/patches.o \
+	tools/quake2/q2map/portals.o \
+	tools/quake2/q2map/prtfile.o \
+	tools/quake2/q2map/qbsp.o \
+	tools/quake2/q2map/qrad.o \
+	tools/quake2/q2map/qvis.o \
+	tools/quake2/q2map/textures.o \
+	tools/quake2/q2map/trace.o \
+	tools/quake2/q2map/tree.o \
+	tools/quake2/q2map/writebsp.o \
+	libl_net.$(A) \
+
+install/modules/ufoaiplug.$(DLL): LIBS := $(LIBS_GLIB) $(LIBS_GTK)
+install/modules/ufoaiplug.$(DLL): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+install/modules/ufoaiplug.$(DLL): \
+	contrib/ufoaiplug/ufoai_filters.o \
+	contrib/ufoaiplug/ufoai_gtk.o \
+	contrib/ufoaiplug/ufoai_level.o \
+	contrib/ufoaiplug/ufoai.o \
+
+install/heretic2/h2data.$(EXE): LIBS := $(LIBS_XML) $(LIBS_PTHREAD)
+install/heretic2/h2data.$(EXE): CPPFLAGS := $(CPPFLAGS_COMMON) $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
+install/heretic2/h2data.$(EXE): \
+	tools/quake2/qdata_heretic2/common/bspfile.o \
+	tools/quake2/qdata_heretic2/common/cmdlib.o \
+	tools/quake2/qdata_heretic2/common/inout.o \
+	tools/quake2/qdata_heretic2/common/l3dslib.o \
+	tools/quake2/qdata_heretic2/common/lbmlib.o \
+	tools/quake2/qdata_heretic2/common/mathlib.o \
+	tools/quake2/qdata_heretic2/common/md4.o \
+	tools/quake2/qdata_heretic2/common/path_init.o \
+	tools/quake2/qdata_heretic2/common/qfiles.o \
+	tools/quake2/qdata_heretic2/common/scriplib.o \
+	tools/quake2/qdata_heretic2/common/threads.o \
+	tools/quake2/qdata_heretic2/common/token.o \
+	tools/quake2/qdata_heretic2/common/trilib.o \
+	tools/quake2/qdata_heretic2/qcommon/reference.o \
+	tools/quake2/qdata_heretic2/qcommon/resourcemanager.o \
+	tools/quake2/qdata_heretic2/qcommon/skeletons.o \
+	tools/quake2/qdata_heretic2/animcomp.o \
+	tools/quake2/qdata_heretic2/book.o \
+	tools/quake2/qdata_heretic2/fmodels.o \
+	tools/quake2/qdata_heretic2/images.o \
+	tools/quake2/qdata_heretic2/jointed.o \
+	tools/quake2/qdata_heretic2/models.o \
+	tools/quake2/qdata_heretic2/pics.o \
+	tools/quake2/qdata_heretic2/qdata.o \
+	tools/quake2/qdata_heretic2/qd_skeletons.o \
+	tools/quake2/qdata_heretic2/sprites.o \
+	tools/quake2/qdata_heretic2/svdcmp.o \
+	tools/quake2/qdata_heretic2/tables.o \
+	tools/quake2/qdata_heretic2/tmix.o \
+	tools/quake2/qdata_heretic2/video.o \
+	libl_net.$(A) \
 
 .PHONY: makeversion
 makeversion:
