@@ -132,6 +132,7 @@ all: \
 clean:
 	$(RM_R) install/
 	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
+	$(RM) include/aboutmsg.h include/RADIANT_MAJOR include/version.h include/RADIANT_MINOR include/version
 
 %.$(EXE):
 	file=$@; $(MKDIR) $${file%/*}
