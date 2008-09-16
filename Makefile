@@ -1,122 +1,100 @@
-include Makefile.conf
+-include Makefile.conf
 
+## CONFIGURATION SETTINGS
+# user customizable stuf
+# you may override this in Makefile.conf or the environment
+BUILD              ?= debug
+# or: release
+OS                 ?= $(shell uname)
+# or: Linux, Win32, Darwin
+CFLAGS             ?=
+CXXFLAGS           ?=
+CPPFLAGS           ?=
+LIBS               ?=
+RADIANT_ABOUTMSG   ?= Custom build
+CC                 ?= gcc
+CXX                ?= g++
+LDD                ?= ldd # nothing on Win32
+FIND               ?= find
+RANLIB             ?= ranlib
+AR                 ?= ar
+MKDIR              ?= mkdir -p
+CP                 ?= cp
+CP_R               ?= $(CP) -r
+RM_R               ?= $(RM) -r
+PKGCONFIG          ?= pkg-config
+TEE_STDERR         ?= | tee /dev/stderr
+CPPFLAGS_GLIB      ?= `$(PKGCONFIG) glib-2.0 --cflags`
+LIBS_GLIB          ?= `$(PKGCONFIG) glib-2.0 --libs-only-L` `pkg-config glib-2.0 --libs-only-l`
+CPPFLAGS_XML       ?= `$(PKGCONFIG) libxml-2.0 --cflags`
+LIBS_XML           ?= `$(PKGCONFIG) libxml-2.0 --libs-only-L` `pkg-config libxml-2.0 --libs-only-l`
+CPPFLAGS_PNG       ?= `$(PKGCONFIG) libpng --cflags`
+LIBS_PNG           ?= `$(PKGCONFIG) libpng --libs-only-L` `pkg-config libpng --libs-only-l`
+CPPFLAGS_GTK       ?= `$(PKGCONFIG) gtk+-2.0 --cflags`
+LIBS_GTK           ?= `$(PKGCONFIG) gtk+-2.0 --libs-only-L` `pkg-config gtk+-2.0 --libs-only-l`
+CPPFLAGS_GTKGLEXT  ?= `$(PKGCONFIG) gtkglext-1.0 --cflags`
+LIBS_GTKGLEXT      ?= `$(PKGCONFIG) gtkglext-1.0 --libs-only-L` `pkg-config gtkglext-1.0 --libs-only-l`
+CPPFLAGS_GL        ?=
+LIBS_GL            ?= -lGL # -lopengl32 on Win32
+CPPFLAGS_DL        ?=
+LIBS_DL            ?= -ldl # nothing on Win32
+CPPFLAGS_ZLIB      ?=
+LIBS_ZLIB          ?= -lz
+DEPEND_ON_MAKEFILE ?= yes
+
+# alias mingw32 OSes
 ifeq ($(OS),MINGW32_NT-6.0)
 	OS = Win32
 endif
 
-CFLAGS     = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter
-CPPFLAGS   = 
-LDFLAGS    =
-LIBS       =
-CXXFLAGS   = $(CFLAGS) -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
-CFLAGS_OPT = -O3
-
-ifneq ($(MINGW),)
-	MINGWPREFIX ?= i586-mingw32msvc-
-	CC = $(MINGWPREFIX)gcc
-	CXX = $(MINGWPREFIX)g++
-	RANLIB = $(MINGWPREFIX)ranlib
-	AR = $(MINGWPREFIX)ar
-	OS := Win32
-	CPPFLAGS += -I$(MINGW)/include -D_inline=inline
-	CFLAGS   += 
-	LDFLAGS  += -L$(MINGW)/lib
-
-	CPPFLAGS_GLIB = -I$(MINGW)/include/glib-2.0 -I$(MINGW)/lib/glib-2.0/include
-	LIBS_GLIB = -lglib-2.0
-	CPPFLAGS_XML = -I$(MINGW)/include/libxml2
-	LIBS_XML = -lxml2
-	CPPFLAGS_PNG = -I$(MINGW)/include/libpng12 -DPNG_NO_MMX_CODE
-	LIBS_PNG = -lpng12
-	CPPFLAGS_GTK = -I$(MINGW)/include/gtk-2.0 -I$(MINGW)/lib/gtk-2.0/include -I$(MINGW)/include/atk-1.0 -I$(MINGW)/include/cairo -I$(MINGW)/include/pango-1.0 -I$(MINGW)/include/glib-2.0 -I$(MINGW)/lib/glib-2.0/include -I$(MINGW)/include/libpng12 -DPNG_NO_MMX_CODE
-	LIBS_GTK = -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lpangowin32-1.0
-	CPPFLAGS_GTKGLEXT = -I$(MINGW)/include/gtkglext-1.0 -I$(MINGW)/lib/gtkglext-1.0/include 
-	LIBS_GTKGLEXT = -lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lpangowin32-1.0
-	CPPFLAGS_GL =
-	LIBS_GL = -lopengl32
-	CPPFLAGS_DL =
-	LIBS_DL =
-	CPPFLAGS_ZLIB =
-	LIBS_ZLIB = -lz
-endif
+CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter
+CPPFLAGS_COMMON =
+LDFLAGS_COMMON =
+LIBS_COMMON =
+CXXFLAGS_COMMON = -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 
 ifeq ($(BUILD),debug)
-	CFLAGS += -g3
-	CPPFLAGS += -D_DEBUG
+	CFLAGS_COMMON += -g3
+	CPPFLAGS_COMMON += -D_DEBUG
+	LDFLAGS_COMMON +=
 else ifeq ($(BUILD),release)
-	CFLAGS += $(CFLAGS_OPT)
-	LDFLAGS += -s
+	CFLAGS_COMMON += -O3
+	CPPFLAGS_COMMON +=
+	LDFLAGS_COMMON += -s
 else
-$(error Unsupported build type)
+$(error Unsupported build type: $(BUILD))
 endif
 
 ifeq ($(OS),Linux)
-	CPPFLAGS += -DPOSIX -DXWINDOWS -D_LINUX
-	CFLAGS += -fPIC
+	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS -D_LINUX
+	CFLAGS_COMMON += -fPIC
 	LDFLAGS_DLL = -fPIC -ldl
-	LIBS = -lpthread
+	LIBS_COMMON = -lpthread
 	EXE = x86
 	A = a
 	DLL = so
 	MWINDOWS =
 else ifeq ($(OS),Win32)
-	CPPFLAGS += -DWIN32 -D_WIN32 -D_inline=inline
-	CFLAGS += -mms-bitfields
+	CPPFLAGS_COMMON += -DWIN32 -D_WIN32 -D_inline=inline
+	CFLAGS_COMMON += -mms-bitfields
 	LDFLAGS_DLL = --dll -Wl,--add-stdcall-alias
-	LIBS = -lws2_32 -luser32 -lgdi32
+	LIBS_COMMON = -lws2_32 -luser32 -lgdi32
 	EXE = exe
 	A = a
 	DLL = dll
 	MWINDOWS = -mwindows
+
+	# workaround: we have no "ldd" for Win32, so...
 	LDD =
+	# workaround: OpenGL library for Win32 is called opengl32.dll
 	LIBS_GL ?= -lopengl32
+	# workaround: no -ldl on Win32
 	LIBS_DL ?= 
 #else ifeq ($(OS),Darwin)
+#	EXE = ppc
 else
 $(error Unsupported build OS: $(OS))
 endif
-
-CPPFLAGS_GLIB ?= `pkg-config glib-2.0 --cflags`
-LIBS_GLIB ?= `pkg-config glib-2.0 --libs-only-L` `pkg-config glib-2.0 --libs-only-l`
-CPPFLAGS_XML ?= `pkg-config libxml-2.0 --cflags`
-LIBS_XML ?= `pkg-config libxml-2.0 --libs-only-L` `pkg-config libxml-2.0 --libs-only-l`
-CPPFLAGS_PNG ?= `pkg-config libpng --cflags`
-LIBS_PNG ?= `pkg-config libpng --libs-only-L` `pkg-config libpng --libs-only-l`
-CPPFLAGS_GTK ?= `pkg-config gtk+-2.0 --cflags`
-LIBS_GTK ?= `pkg-config gtk+-2.0 --libs-only-L` `pkg-config gtk+-2.0 --libs-only-l`
-CPPFLAGS_GTKGLEXT ?= `pkg-config gtkglext-1.0 --cflags`
-LIBS_GTKGLEXT ?= `pkg-config gtkglext-1.0 --libs-only-L` `pkg-config gtkglext-1.0 --libs-only-l`
-CPPFLAGS_GL ?=
-LIBS_GL ?= -lGL
-CPPFLAGS_DL ?=
-LIBS_DL ?= -ldl
-CPPFLAGS_ZLIB =
-LIBS_ZLIB = -lz
-
-RADIANT_ABOUTMSG = Custom build
-
-LDD ?= ldd
-FIND ?= find
-RANLIB ?= ranlib
-AR ?= ar
-OBJDUMP ?= objdump
-MKDIR ?= mkdir -p
-CP ?= cp
-CP_R ?= $(CP) -r
-RM_R ?= $(RM) -r
-TEE_STDERR ?= | tee /dev/stderr
-
-# from qe3.cpp: const char* const EXECUTABLE_TYPE = 
-# from qe3.cpp: #if defined(__linux__) || defined (__FreeBSD__)
-# from qe3.cpp: "x86"
-# from qe3.cpp: #elif defined(__APPLE__)
-# from qe3.cpp: "ppc"
-# from qe3.cpp: #elif defined(WIN32)
-# from qe3.cpp: "exe"
-# from qe3.cpp: #else
-# from qe3.cpp: #error "unknown platform"
-# from qe3.cpp: #endif
-# from qe3.cpp: ;
 
 .PHONY: all
 all: \
@@ -156,8 +134,8 @@ clean:
 	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
 
 %.$(EXE):
-	dir=$@; $(MKDIR) $${dir%/*}
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS)
+	file=$@; $(MKDIR) $${file%/*}
+	$(CXX) $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS) $(LIBS_COMMON) $(LIBS_EXTRA) $^ -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.$(A):
@@ -165,15 +143,15 @@ clean:
 	$(RANLIB) $@
 
 %.$(DLL):
-	dir=$@; $(MKDIR) $${dir%/*}
-	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(LDFLAGS_DLL) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS)
+	file=$@; $(MKDIR) $${file%/*}
+	$(CXX) $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LDFLAGS_DLL) $(LIBS) $(LIBS_COMMON) $(LIBS_EXTRA) -shared $^ -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-%.o: %.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS) $(CPPFLAGS) $(CPPFLAGS_EXTRA)
+%.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
+	$(CXX) $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c $< -o $@
 
-%.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS) $(CPPFLAGS_EXTRA)
+%.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
+	$(CC) $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c $< -o $@
 
 install/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
 install/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
