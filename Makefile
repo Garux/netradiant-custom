@@ -12,12 +12,16 @@ CXXFLAGS           ?=
 CPPFLAGS           ?=
 LIBS               ?=
 RADIANT_ABOUTMSG   ?= Custom build
+
 CC                 ?= gcc
 CXX                ?= g++
 LDD                ?= ldd # nothing on Win32
-FIND               ?= find
 RANLIB             ?= ranlib
 AR                 ?= ar
+PKGCONFIG          ?= pkg-config
+PKG_CONFIG_PATH    ?=
+
+FIND               ?= find
 MKDIR              ?= mkdir -p
 CP                 ?= cp
 CAT                ?= cat
@@ -26,7 +30,7 @@ ECHO               ?= echo
 DIFF               ?= diff
 CP_R               ?= $(CP) -r
 RM_R               ?= $(RM) -r
-PKGCONFIG          ?= pkg-config
+
 TEE_STDERR         ?= | tee /dev/stderr
 CPPFLAGS_GLIB      ?= `$(PKGCONFIG) glib-2.0 --cflags`
 LIBS_GLIB          ?= `$(PKGCONFIG) glib-2.0 --libs-only-L` `pkg-config glib-2.0 --libs-only-l`
@@ -49,6 +53,13 @@ DEPEND_ON_MAKEFILE ?= yes
 # these are used on Win32 only
 GTKDIR             ?= `$(PKGCONFIG) gtk+-2.0 --variable=prefix`
 WHICHDLL           ?= which
+
+export WHICHDLL
+export GTKDIR
+export CP
+export CAT
+export MKDIR
+export PKG_CONFIG_PATH
 
 # alias mingw32 OSes
 ifeq ($(OS),MINGW32_NT-6.0)
@@ -144,7 +155,7 @@ clean:
 
 %.$(EXE):
 	file=$@; $(MKDIR) $${file%/*}
-	$(CXX) $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS) $(LIBS_COMMON) $(LIBS_EXTRA) $^ -o $@
+	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.$(A):
@@ -153,14 +164,14 @@ clean:
 
 %.$(DLL):
 	file=$@; $(MKDIR) $${file%/*}
-	$(CXX) $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LDFLAGS_DLL) $(LIBS) $(LIBS_COMMON) $(LIBS_EXTRA) -shared $^ -o $@
+	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LDFLAGS_DLL) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -shared -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
-	$(CXX) $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c $< -o $@
+	$(CXX) $< $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c -o $@
 
 %.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
-	$(CC) $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c $< -o $@
+	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c -o $@
 
 install/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
 install/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
@@ -777,7 +788,7 @@ install-data: makeversion
 .PHONY: install-dll
 ifeq ($(OS),Win32)
 install-dll:
-	WHICHDLL="$(WHICHDLL)" GTKDIR="$(GTKDIR)" CP="$(CP)" CAT="$(CAT)" MKDIR="$(MKDIR)" $(SH) install-dlls.sh
+	$(SH) install-dlls.sh
 else
 install-dll:
 	echo No DLL inclusion required for this target.
