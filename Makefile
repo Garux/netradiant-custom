@@ -36,6 +36,8 @@ ifneq ($(MINGW),)
 	LIBS_GL = -lopengl32
 	CPPFLAGS_DL =
 	LIBS_DL =
+	CPPFLAGS_ZLIB =
+	LIBS_ZLIB = -lz
 endif
 
 ifeq ($(BUILD),debug)
@@ -58,33 +60,38 @@ ifeq ($(OS),Linux)
 	DLL = so
 	MWINDOWS =
 else ifeq ($(OS),Win32)
-	CPPFLAGS += -DWIN32 -D_WIN32
+	CPPFLAGS += -DWIN32 -D_WIN32 -D_inline=inline
 	CFLAGS += -mms-bitfields
-	LDFLAGS_DLL =
+	LDFLAGS_DLL = --dll
 	LIBS = -lws2_32 -luser32 -lgdi32
 	EXE = exe
 	A = a
 	DLL = dll
 	MWINDOWS = -mwindows
+	LDD =
+	LIBS_GL ?= -lopengl32
+	LIBS_DL ?= 
 #else ifeq ($(OS),Darwin)
 else
 $(error Unsupported build OS: $(OS))
 endif
 
 CPPFLAGS_GLIB ?= `pkg-config glib-2.0 --cflags`
-LIBS_GLIB ?= `pkg-config glib-2.0 --libs-only-l --libs-only-L`
-CPPFLAGS_XML ?= `xml2-config --cflags`
-LIBS_XML ?= `xml2-config --libs`
-CPPFLAGS_PNG ?= `libpng-config --cflags`
-LIBS_PNG ?= `libpng-config --libs`
+LIBS_GLIB ?= `pkg-config glib-2.0 --libs-only-L` `pkg-config glib-2.0 --libs-only-l`
+CPPFLAGS_XML ?= `pkg-config libxml-2.0 --cflags`
+LIBS_XML ?= `pkg-config libxml-2.0 --libs-only-L` `pkg-config libxml-2.0 --libs-only-l`
+CPPFLAGS_PNG ?= `pkg-config libpng --cflags`
+LIBS_PNG ?= `pkg-config libpng --libs-only-L` `pkg-config libpng --libs-only-l`
 CPPFLAGS_GTK ?= `pkg-config gtk+-2.0 --cflags`
-LIBS_GTK ?= `pkg-config gtk+-2.0 --libs-only-l --libs-only-L`
+LIBS_GTK ?= `pkg-config gtk+-2.0 --libs-only-L` `pkg-config gtk+-2.0 --libs-only-l`
 CPPFLAGS_GTKGLEXT ?= `pkg-config gtkglext-1.0 --cflags`
-LIBS_GTKGLEXT ?= `pkg-config gtkglext-1.0 --libs-only-l --libs-only-L`
+LIBS_GTKGLEXT ?= `pkg-config gtkglext-1.0 --libs-only-L` `pkg-config gtkglext-1.0 --libs-only-l`
 CPPFLAGS_GL ?=
 LIBS_GL ?= -lGL
 CPPFLAGS_DL ?=
 LIBS_DL ?= -ldl
+CPPFLAGS_ZLIB =
+LIBS_ZLIB = -lz
 
 RADIANT_ABOUTMSG = Custom build
 
@@ -451,8 +458,8 @@ libxmllib.$(A): \
 	libs/xml/xmltextags.o \
 	libs/xml/xmlwriter.o \
 
-install/modules/archivezip.$(DLL): LIBS_EXTRA := -lz
-install/modules/archivezip.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+install/modules/archivezip.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
+install/modules/archivezip.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs -Iinclude
 install/modules/archivezip.$(DLL): \
 	plugins/archivezip/archive.o \
 	plugins/archivezip/pkzip.o \

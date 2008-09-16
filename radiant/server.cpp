@@ -204,7 +204,7 @@ public:
 
 class DynamicLibraryModule
 {
-  typedef void (RADIANT_DLLEXPORT* RegisterModulesFunc)(ModuleServer& server);
+  typedef void (RADIANT_DLLIMPORT* RegisterModulesFunc)(ModuleServer& server);
   DynamicLibrary m_library;
   RegisterModulesFunc m_registerModule;
 public:
@@ -214,6 +214,10 @@ public:
     if(!m_library.failed())
     {
       m_registerModule = reinterpret_cast<RegisterModulesFunc>(m_library.findSymbol("Radiant_RegisterModules"));
+#if 0
+      if(!m_registerModule)
+	      m_registerModule = reinterpret_cast<RegisterModulesFunc>(m_library.findSymbol("Radiant_RegisterModules@4"));
+#endif
     }
   }
   bool failed()
