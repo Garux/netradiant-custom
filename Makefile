@@ -20,6 +20,10 @@ RANLIB             ?= ranlib
 AR                 ?= ar
 MKDIR              ?= mkdir -p
 CP                 ?= cp
+CAT                ?= cat
+SH                 ?= sh
+ECHO               ?= echo
+DIFF               ?= diff
 CP_R               ?= $(CP) -r
 RM_R               ?= $(RM) -r
 PKGCONFIG          ?= pkg-config
@@ -41,6 +45,10 @@ LIBS_DL            ?= -ldl # nothing on Win32
 CPPFLAGS_ZLIB      ?=
 LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
+
+# these are used on Win32 only
+GTKDIR             ?= `$(PKGCONFIG) gtk+-2.0 --variable=prefix`
+WHICHDLL           ?= which
 
 # alias mingw32 OSes
 ifeq ($(OS),MINGW32_NT-6.0)
@@ -719,21 +727,21 @@ install/heretic2/h2data.$(EXE): \
 .PHONY: makeversion
 makeversion:
 	set -ex; \
-	ver=`cat include/version.default`; \
-	major=`echo $$ver | cut -d . -f 2`; \
-	minor=`echo $$ver | cut -d . -f 3 | cut -d - -f 1`; \
-	echo "// generated header, see Makefile" > include/version.h.new; \
-	echo "#define RADIANT_VERSION \"$$ver\"" >> include/version.h.new; \
-	echo "#define RADIANT_MAJOR_VERSION \"$$major\"" >> include/version.h.new; \
-	echo "#define RADIANT_MINOR_VERSION \"$$minor\"" >> include/version.h.new; \
-	echo "$$major" > include/RADIANT_MAJOR.new; \
-	echo "$$minor" > include/RADIANT_MINOR.new; \
-	echo "$$ver" > include/version.new; \
-	echo "// generated header, see Makefile" > include/aboutmsg.h.new; \
-	echo "#define RADIANT_ABOUTMSG \"$(RADIANT_ABOUTMSG)\"" >> include/aboutmsg.h.new; \
+	ver=`$(CAT) include/version.default`; \
+	major=`$(ECHO) $$ver | cut -d . -f 2`; \
+	minor=`$(ECHO) $$ver | cut -d . -f 3 | cut -d - -f 1`; \
+	$(ECHO) "// generated header, see Makefile" > include/version.h.new; \
+	$(ECHO) "#define RADIANT_VERSION \"$$ver\"" >> include/version.h.new; \
+	$(ECHO) "#define RADIANT_MAJOR_VERSION \"$$major\"" >> include/version.h.new; \
+	$(ECHO) "#define RADIANT_MINOR_VERSION \"$$minor\"" >> include/version.h.new; \
+	$(ECHO) "$$major" > include/RADIANT_MAJOR.new; \
+	$(ECHO) "$$minor" > include/RADIANT_MINOR.new; \
+	$(ECHO) "$$ver" > include/version.new; \
+	$(ECHO) "// generated header, see Makefile" > include/aboutmsg.h.new; \
+	$(ECHO) "#define RADIANT_ABOUTMSG \"$(RADIANT_ABOUTMSG)\"" >> include/aboutmsg.h.new; \
 	mv_if_diff() \
 	{ \
-		if diff $$1 $$2 >/dev/null 2>&1; then \
+		if $(DIFF) $$1 $$2 >/dev/null 2>&1; then \
 			rm -f $$1; \
 		else \
 			mv $$1 $$2; \
@@ -769,7 +777,7 @@ install-data: makeversion
 .PHONY: install-dll
 ifeq ($(OS),Win32)
 install-dll:
-	sh install-dlls.sh
+	WHICHDLL="$(WHICHDLL)" GTKDIR="$(GTKDIR)" CP="$(CP)" CAT="$(CAT)" MKDIR="$(MKDIR)" $(SH) install-dlls.sh
 else
 install-dll:
 	echo No DLL inclusion required for this target.

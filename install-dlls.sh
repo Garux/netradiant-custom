@@ -5,6 +5,8 @@ set -ex
 : ${WHICHDLL:=which}
 : ${GTKDIR:=/gtk}
 : ${CP:=cp}
+: ${CAT:=cat}
+: ${MKDIR:=mkdir -p}
 
 for DLL in \
 	intl.dll \
@@ -28,9 +30,9 @@ for DLL in \
 	$CP "`$WHICHDLL $DLL`" install/
 done
 
-cp "$GTKDIR/lib/gtk-2.0/2.10.0/loaders/libpixbufloader-bmp.dll" install/libgdk-win32-2.0-0-pixbufloader-bmp.dll
-mkdir -p install/etc/gtk-2.0
-cat > install/etc/gtk-2.0/gdk-pixbuf.loaders <<'EOF'
+$CP "$GTKDIR/lib/gtk-2.0/2.10.0/loaders/libpixbufloader-bmp.dll" install/libgdk-win32-2.0-0-pixbufloader-bmp.dll
+$MKDIR install/etc/gtk-2.0
+$CAT > install/etc/gtk-2.0/gdk-pixbuf.loaders <<'EOF'
 # GdkPixbuf Image Loader Modules file
 #
 #
