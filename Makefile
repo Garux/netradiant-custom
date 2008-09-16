@@ -62,7 +62,7 @@ ifeq ($(OS),Linux)
 else ifeq ($(OS),Win32)
 	CPPFLAGS += -DWIN32 -D_WIN32 -D_inline=inline
 	CFLAGS += -mms-bitfields
-	LDFLAGS_DLL = --dll
+	LDFLAGS_DLL = --dll -Wl,--add-stdcall-alias
 	LIBS = -lws2_32 -luser32 -lgdi32
 	EXE = exe
 	A = a
