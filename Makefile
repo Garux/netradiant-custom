@@ -20,7 +20,6 @@ RANLIB             ?= ranlib
 AR                 ?= ar
 PKGCONFIG          ?= pkg-config
 PKG_CONFIG_PATH    ?=
-export PKG_CONFIG_PATH
 
 FIND               ?= find
 MKDIR              ?= mkdir -p
@@ -60,12 +59,6 @@ DEPEND_ON_MAKEFILE ?= yes
 GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix)
 WHICHDLL           ?= which
 
-export MKDIR
-export CP
-export CAT
-export GTKDIR
-export WHICHDLL
-
 # alias mingw32 OSes
 ifeq ($(OS),MINGW32_NT-6.0)
 	OS = Win32
@@ -82,7 +75,11 @@ ifeq ($(BUILD),debug)
 	CPPFLAGS_COMMON += -D_DEBUG
 	LDFLAGS_COMMON +=
 else ifeq ($(BUILD),release)
+ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O3
+	# only add -O3 if no -O flag is in $(CFLAGS)
+	# to allow overriding the optimizations
+endif
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -s
 else
@@ -120,9 +117,20 @@ else
 $(error Unsupported build OS: $(OS))
 endif
 
+# VERSION!
+RADIANT_VERSION = 1.5.0-div0
+RADIANT_MAJOR_VERSION = 5
+RADIANT_MINOR_VERSION = 0
+CPPFLAGS += -DRADIANT_VERSION="\"$(RADIANT_VERSION)\"" -DRADIANT_MAJOR_VERSION="\"$(RADIANT_MAJOR_VERSION)\"" -DRADIANT_MINOR_VERSION="\"$(RADIANT_MINOR_VERSION)\"" -DRADIANT_ABOUTMSG="\"$(RADIANT_ABOUTMSG)\""
+
 .PHONY: all
 all: \
-	makeversion \
+	binaries \
+	install-data \
+	install-dll \
+
+.PHONY: binaries
+binaries: \
 	install/heretic2/h2data.$(EXE) \
 	install/modules/archivepak.$(DLL) \
 	install/modules/archivewad.$(DLL) \
@@ -149,8 +157,6 @@ all: \
 	install/q3map2.$(EXE) \
 	install/qdata3.$(EXE) \
 	install/radiant.$(EXE) \
-	install-data \
-	install-dll \
 
 .PHONY: clean
 clean:
@@ -740,37 +746,8 @@ install/heretic2/h2data.$(EXE): \
 	tools/quake2/qdata_heretic2/video.o \
 	libl_net.$(A) \
 
-.PHONY: makeversion
-makeversion:
-	set -ex; \
-	ver=`$(CAT) include/version.default`; \
-	major=`$(ECHO) $$ver | cut -d . -f 2`; \
-	minor=`$(ECHO) $$ver | cut -d . -f 3 | cut -d - -f 1`; \
-	$(ECHO) "// generated header, see Makefile" > include/version.h.new; \
-	$(ECHO) "#define RADIANT_VERSION \"$$ver\"" >> include/version.h.new; \
-	$(ECHO) "#define RADIANT_MAJOR_VERSION \"$$major\"" >> include/version.h.new; \
-	$(ECHO) "#define RADIANT_MINOR_VERSION \"$$minor\"" >> include/version.h.new; \
-	$(ECHO) "$$major" > include/RADIANT_MAJOR.new; \
-	$(ECHO) "$$minor" > include/RADIANT_MINOR.new; \
-	$(ECHO) "$$ver" > include/version.new; \
-	$(ECHO) "// generated header, see Makefile" > include/aboutmsg.h.new; \
-	$(ECHO) "#define RADIANT_ABOUTMSG \"$(RADIANT_ABOUTMSG)\"" >> include/aboutmsg.h.new; \
-	mv_if_diff() \
-	{ \
-		if $(DIFF) $$1 $$2 >/dev/null 2>&1; then \
-			rm -f $$1; \
-		else \
-			mv $$1 $$2; \
-		fi; \
-	}; \
-	mv_if_diff include/version.h.new include/version.h; \
-	mv_if_diff include/RADIANT_MAJOR.new include/RADIANT_MAJOR; \
-	mv_if_diff include/RADIANT_MINOR.new include/RADIANT_MINOR; \
-	mv_if_diff include/version.new include/version; \
-	mv_if_diff include/aboutmsg.h.new include/aboutmsg.h
-
 .PHONY: install-data
-install-data: makeversion
+install-data: binaries
 	$(MKDIR) install/games
 	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune
 	set -ex; \
@@ -785,18 +762,18 @@ install-data: makeversion
 			$(CP_R) "$$GAMEDIR" install/; \
 		done; \
 	done
-	$(CP) include/RADIANT_MAJOR install/
-	$(CP) include/RADIANT_MINOR install/
+	$(ECHO) $(RADIANT_MINOR_VERSION) > install/RADIANT_MINOR
+	$(ECHO) $(RADIANT_MAJOR_VERSION) > install/RADIANT_MAJOR
 	$(CP_R) setup/data/tools/* install/
 	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune
 
 .PHONY: install-dll
 ifeq ($(OS),Win32)
-install-dll:
-	$(SH) install-dlls.sh
+install-dll: binaries
+	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" $(SH) install-dlls.sh
 else
-install-dll:
-	echo No DLL inclusion required for this target.
+install-dll: binaries
+	@echo No DLL inclusion implemented for this target.
 endif
 
 -include $(shell find . -name \*.d)
