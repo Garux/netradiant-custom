@@ -1,5 +1,9 @@
 include Makefile.conf
 
+ifeq ($(OS),MINGW32_NT-6.0)
+	OS = Win32
+endif
+
 CFLAGS     = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter
 CPPFLAGS   = 
 LDFLAGS    =
@@ -15,8 +19,8 @@ ifneq ($(MINGW),)
 	AR = $(MINGWPREFIX)ar
 	OS := Win32
 	CPPFLAGS += -I$(MINGW)/include -D_inline=inline
-	CFLAGS   += -mms-bitfields
-	LDFLAGS  += -mms-bitfields -L$(MINGW)/lib
+	CFLAGS   += 
+	LDFLAGS  += -L$(MINGW)/lib
 
 	CPPFLAGS_GLIB = -I$(MINGW)/include/glib-2.0 -I$(MINGW)/lib/glib-2.0/include
 	LIBS_GLIB = -lglib-2.0
@@ -55,17 +59,16 @@ ifeq ($(OS),Linux)
 	MWINDOWS =
 else ifeq ($(OS),Win32)
 	CPPFLAGS += -DWIN32 -D_WIN32
-	CFLAGS +=
+	CFLAGS += -mms-bitfields
 	LDFLAGS_DLL =
 	LIBS = -lws2_32 -luser32 -lgdi32
 	EXE = exe
 	A = a
 	DLL = dll
 	MWINDOWS = -mwindows
-else ifeq ($(OS),Darwin)
-$(error Unsupported build OS)
+#else ifeq ($(OS),Darwin)
 else
-$(error Unsupported build OS)
+$(error Unsupported build OS: $(OS))
 endif
 
 CPPFLAGS_GLIB ?= `pkg-config glib-2.0 --cflags`
