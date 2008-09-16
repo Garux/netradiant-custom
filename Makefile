@@ -99,6 +99,7 @@ LDD ?= ldd
 FIND ?= find
 RANLIB ?= ranlib
 AR ?= ar
+OBJDUMP ?= objdump
 MKDIR ?= mkdir -p
 CP ?= cp
 CP_R ?= $(CP) -r
@@ -147,6 +148,7 @@ all: \
 	install/qdata3.$(EXE) \
 	install/radiant.$(EXE) \
 	install-data \
+	install-dll \
 
 .PHONY: clean
 clean:
@@ -767,7 +769,7 @@ makeversion:
 .PHONY: install-data
 install-data: makeversion
 	$(MKDIR) install/games
-	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
+	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune
 	set -ex; \
 	for GAME in games/*; do \
 		if [ -d "$$GAME/tools" ]; then \
@@ -783,6 +785,36 @@ install-data: makeversion
 	$(CP) include/RADIANT_MAJOR install/
 	$(CP) include/RADIANT_MINOR install/
 	$(CP_R) setup/data/tools/* install/
-	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune; \
+	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune
+
+.PHONY: install-dll
+ifeq ($(OS),Win32)
+install-dll:
+	set -e; \
+	dllfetch() \
+	{ \
+		dll=$$1; \
+		[ -f "install/$$dll" ] && return; \
+		dllsource=`which $$dll`; \
+		echo "Fetching $$dll..."; \
+		$(CP) $$dllsource install/$$dll; \
+		dlldeps install/$$dll; \
+	}; \
+	dlldeps() \
+	{ \
+		echo "Looking for dependencies of $$1..."; \
+		$(OBJDUMP) -p $$1 | grep "DLL Name" | grep -- '-' | while read -r DUMMY1 DUMMY2 dll; do \
+			dllfetch $$dll; \
+		done; \
+	}; \
+	dllfetch zlib1.dll; \
+	dllfetch intl.dll; \
+	for obj in install/*.$(EXE) install/*/*.$(DLL); do \
+		dlldeps $$obj; \
+	done
+else
+install-dll:
+	echo No DLL inclusion required for this target.
+endif
 
 -include $(shell find . -name \*.d)
