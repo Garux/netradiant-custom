@@ -20,6 +20,7 @@ RANLIB             ?= ranlib
 AR                 ?= ar
 PKGCONFIG          ?= pkg-config
 PKG_CONFIG_PATH    ?=
+export PKG_CONFIG_PATH
 
 FIND               ?= find
 MKDIR              ?= mkdir -p
@@ -32,16 +33,16 @@ CP_R               ?= $(CP) -r
 RM_R               ?= $(RM) -r
 
 TEE_STDERR         ?= | tee /dev/stderr
-CPPFLAGS_GLIB      ?= `$(PKGCONFIG) glib-2.0 --cflags`
-LIBS_GLIB          ?= `$(PKGCONFIG) glib-2.0 --libs-only-L` `pkg-config glib-2.0 --libs-only-l`
-CPPFLAGS_XML       ?= `$(PKGCONFIG) libxml-2.0 --cflags`
-LIBS_XML           ?= `$(PKGCONFIG) libxml-2.0 --libs-only-L` `pkg-config libxml-2.0 --libs-only-l`
-CPPFLAGS_PNG       ?= `$(PKGCONFIG) libpng --cflags`
-LIBS_PNG           ?= `$(PKGCONFIG) libpng --libs-only-L` `pkg-config libpng --libs-only-l`
-CPPFLAGS_GTK       ?= `$(PKGCONFIG) gtk+-2.0 --cflags`
-LIBS_GTK           ?= `$(PKGCONFIG) gtk+-2.0 --libs-only-L` `pkg-config gtk+-2.0 --libs-only-l`
-CPPFLAGS_GTKGLEXT  ?= `$(PKGCONFIG) gtkglext-1.0 --cflags`
-LIBS_GTKGLEXT      ?= `$(PKGCONFIG) gtkglext-1.0 --libs-only-L` `pkg-config gtkglext-1.0 --libs-only-l`
+CPPFLAGS_GLIB      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --cflags)
+LIBS_GLIB          ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --libs-only-L) $(shellpkg-config glib-2.0 --libs-only-l)
+CPPFLAGS_XML       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --cflags)
+LIBS_XML           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --libs-only-L) $(shellpkg-config libxml-2.0 --libs-only-l)
+CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --cflags)
+LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L) $(shellpkg-config libpng --libs-only-l)
+CPPFLAGS_GTK       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --cflags)
+LIBS_GTK           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-L) $(shellpkg-config gtk+-2.0 --libs-only-l)
+CPPFLAGS_GTKGLEXT  ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --cflags)
+LIBS_GTKGLEXT      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-L) $(shellpkg-config gtkglext-1.0 --libs-only-l)
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -51,15 +52,14 @@ LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
 
 # these are used on Win32 only
-GTKDIR             ?= `$(PKGCONFIG) gtk+-2.0 --variable=prefix`
+GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix)
 WHICHDLL           ?= which
 
-export WHICHDLL
-export GTKDIR
+export MKDIR
 export CP
 export CAT
-export MKDIR
-export PKG_CONFIG_PATH
+export GTKDIR
+export WHICHDLL
 
 # alias mingw32 OSes
 ifeq ($(OS),MINGW32_NT-6.0)
@@ -106,9 +106,9 @@ else ifeq ($(OS),Win32)
 	# workaround: we have no "ldd" for Win32, so...
 	LDD =
 	# workaround: OpenGL library for Win32 is called opengl32.dll
-	LIBS_GL ?= -lopengl32
+	LIBS_GL = -lopengl32
 	# workaround: no -ldl on Win32
-	LIBS_DL ?= 
+	LIBS_DL = 
 #else ifeq ($(OS),Darwin)
 #	EXE = ppc
 else
