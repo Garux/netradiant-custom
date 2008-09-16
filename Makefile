@@ -790,28 +790,7 @@ install-data: makeversion
 .PHONY: install-dll
 ifeq ($(OS),Win32)
 install-dll:
-	set -e; \
-	dllfetch() \
-	{ \
-		dll=$$1; \
-		[ -f "install/$$dll" ] && return; \
-		dllsource=`which $$dll`; \
-		echo "Fetching $$dll..."; \
-		$(CP) $$dllsource install/$$dll; \
-		dlldeps install/$$dll; \
-	}; \
-	dlldeps() \
-	{ \
-		echo "Looking for dependencies of $$1..."; \
-		$(OBJDUMP) -p $$1 | grep "DLL Name" | grep -- '-' | while read -r DUMMY1 DUMMY2 dll; do \
-			dllfetch $$dll; \
-		done; \
-	}; \
-	dllfetch zlib1.dll; \
-	dllfetch intl.dll; \
-	for obj in install/*.$(EXE) install/*/*.$(DLL); do \
-		dlldeps $$obj; \
-	done
+	sh install-dlls.sh
 else
 install-dll:
 	echo No DLL inclusion required for this target.
