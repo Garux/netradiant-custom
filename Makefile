@@ -59,6 +59,7 @@ LIBS_DL            ?= -ldl # nothing on Win32
 CPPFLAGS_ZLIB      ?=
 LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
+DEPENDENCIES_CHECK ?= quiet
 
 # these are used on Win32 only
 GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix $(STDERR_TO_DEVNULL))
@@ -159,6 +160,7 @@ dependencies-check:
 	$(AR) --help $(TO_DEVNULL); [ $$? != 127 ]
 	@$(ECHO)
 	@$(ECHO) checking that the dependencies exist
+	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
 	checkheader() \
 	{ \
 		$(ECHO_NOLF) "Checking for $$1... "; \
@@ -171,17 +173,18 @@ dependencies-check:
 		else \
 			$(RM) conftest conftest.o; \
 			$(ECHO) "not found, please install it or set PKG_CONFIG_PATH right!"; \
+			$(ECHO) "To see the failed commands, set DEPENDENCIES_CHECK=verbose"; \
 			exit 1; \
 		fi; \
 	}; \
-	checkheader glib glib/gutils.h g_path_is_absolute "$(CPPFLAGS_GLIB)" "$(LIBS_GLIB)"; \
-	checkheader libxml2 libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
-	checkheader libpng png.h png_create_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
-	checkheader libGL GL/gl.h glClear "$(CPPFLAGS_GL)" "$(LIBS_GL)"; \
-	checkheader gtk2 gtk/gtkdialog.h gtk_dialog_run "$(CPPFLAGS_GTK)" "$(LIBS_GTK)"; \
-	checkheader gtkglext gtk/gtkglwidget.h gtk_widget_get_gl_context "$(CPPFLAGS_GTKGLEXT)" "$(LIBS_GTKGLEXT)"; \
-	[ "$(OS)" != "Win32" ] && checkheader libdl dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
-	checkheader zlib libz.h deflateInit "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
+	checkheader libglib2.0-dev glib/gutils.h g_path_is_absolute "$(CPPFLAGS_GLIB)" "$(LIBS_GLIB)"; \
+	checkheader libxml2-dev libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
+	checkheader libpng12-dev png.h png_create_read_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
+	checkheader "mesa-common-dev (or another OpenGL library)" GL/gl.h glClear "$(CPPFLAGS_GL)" "$(LIBS_GL)"; \
+	checkheader libgtk2.0-dev gtk/gtkdialog.h gtk_dialog_run "$(CPPFLAGS_GTK)" "$(LIBS_GTK)"; \
+	checkheader libgtkglext1-dev gtk/gtkglwidget.h gtk_widget_get_gl_context "$(CPPFLAGS_GTKGLEXT)" "$(LIBS_GTKGLEXT)"; \
+	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
+	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
 	$(ECHO) All required libraries have been found!
 
 .PHONY: binaries
