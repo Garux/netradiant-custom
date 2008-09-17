@@ -27,26 +27,31 @@ CP                 ?= cp
 CAT                ?= cat
 SH                 ?= sh
 ECHO               ?= echo
+ECHO_NOLF          ?= echo -n
 DIFF               ?= diff
 CP_R               ?= $(CP) -r
 RM_R               ?= $(RM) -r
-
 TEE_STDERR         ?= | tee /dev/stderr
-CPPFLAGS_GLIB      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --cflags)
-LIBS_GLIB          ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --libs-only-L) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --libs-only-l)
-CPPFLAGS_XML       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --cflags)
-LIBS_XML           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --libs-only-L) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --libs-only-l)
-CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --cflags)
-LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-l)
-CPPFLAGS_GTK       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --cflags)
-LIBS_GTK           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-L) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-l)
-CPPFLAGS_GTKGLEXT  ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --cflags)
-LIBS_GTKGLEXT      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-L) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-l)
+STDOUT_TO_DEVNULL  ?= >/dev/null
+STDERR_TO_DEVNULL  ?= 2>/dev/null
+STDERR_TO_STDOUT   ?= 2>&1
+TO_DEVNULL         ?= $(STDOUT_TO_DEVNULL) $(STDERR_TO_STDOUT)
+
+CPPFLAGS_GLIB      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --cflags $(STDERR_TO_DEVNULL))
+LIBS_GLIB          ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) glib-2.0 --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_XML       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --cflags $(STDERR_TO_DEVNULL))
+LIBS_XML           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libxml-2.0 --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --cflags $(STDERR_TO_DEVNULL))
+LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_GTK       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --cflags $(STDERR_TO_DEVNULL))
+LIBS_GTK           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_GTKGLEXT  ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --cflags $(STDERR_TO_DEVNULL))
+LIBS_GTKGLEXT      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtkglext-1.0 --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_GL        ?=
 LIBS_GL            ?= -lGL # -lopengl32 on Win32
 CPPFLAGS_DL        ?=
@@ -56,7 +61,7 @@ LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
 
 # these are used on Win32 only
-GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix)
+GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix $(STDERR_TO_DEVNULL))
 WHICHDLL           ?= which
 
 # alias mingw32 OSes
@@ -125,9 +130,59 @@ CPPFLAGS += -DRADIANT_VERSION="\"$(RADIANT_VERSION)\"" -DRADIANT_MAJOR_VERSION="
 
 .PHONY: all
 all: \
+	dependencies-check \
 	binaries \
 	install-data \
 	install-dll \
+
+.PHONY: dependencies-check
+dependencies-check:
+	@$(ECHO)
+	@$(ECHO) checking that the system tools exist
+	$(FIND) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(MKDIR) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(CP) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(CAT) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(SH) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(ECHO) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(ECHO_NOLF) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(DIFF) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(CP_R) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(RM_R) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(ECHO) 42 $(TEE_STDERR) $(TO_DEVNULL); [ $$? != 127 ]
+	@$(ECHO)
+	@$(ECHO) checking that the build tools exist
+	$(CC) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(CXX) --help $(TO_DEVNULL); [ $$? != 127 ]
+	[ -n "$(LDD)" ] && $(LDD) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(RANLIB) --help $(TO_DEVNULL); [ $$? != 127 ]
+	$(AR) --help $(TO_DEVNULL); [ $$? != 127 ]
+	@$(ECHO)
+	@$(ECHO) checking that the dependencies exist
+	checkheader() \
+	{ \
+		$(ECHO_NOLF) "Checking for $$1... "; \
+		if \
+			$(CXX) conftest.cpp $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $$4 -DCONFTEST_HEADER="<$$2>" -DCONFTEST_SYMBOL="$$3" $(TARGET_ARCH) $(LDFLAGS) -c -o conftest.o $(TO_DEVNULL) && \
+			$(CXX) conftest.o $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest $(TO_DEVNULL); \
+		then \
+			$(RM) conftest conftest.o; \
+			$(ECHO) "found."; \
+		else \
+			$(RM) conftest conftest.o; \
+			$(ECHO) "not found, please install it or set PKG_CONFIG_PATH right!"; \
+			exit 1; \
+		fi; \
+	}; \
+	checkheader glib glib/gutils.h g_path_is_absolute "$(CPPFLAGS_GLIB)" "$(LIBS_GLIB)"; \
+	checkheader libxml2 libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
+	checkheader libpng png.h png_create_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
+	checkheader libGL GL/gl.h glClear "$(CPPFLAGS_GL)" "$(LIBS_GL)"; \
+	checkheader gtk2 gtk/gtkdialog.h gtk_dialog_run "$(CPPFLAGS_GTK)" "$(LIBS_GTK)"; \
+	checkheader gtkglext gtk/gtkglwidget.h gtk_widget_get_gl_context "$(CPPFLAGS_GTKGLEXT)" "$(LIBS_GTKGLEXT)"; \
+	[ "$(OS)" != "Win32" ] && checkheader libdl dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
+	checkheader zlib libz.h deflateInit "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
+	$(ECHO) All required libraries have been found!
 
 .PHONY: binaries
 binaries: \
@@ -166,7 +221,7 @@ clean:
 %.$(EXE):
 	file=$@; $(MKDIR) $${file%/*}
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -o $@
-	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
+	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ $(STDERR_TO_STDOUT) $(STDOUT_TO_DEVNULL) $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.$(A):
 	$(AR) rc $@ $^
@@ -175,7 +230,7 @@ clean:
 %.$(DLL):
 	file=$@; $(MKDIR) $${file%/*}
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LDFLAGS_DLL) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -shared -o $@
-	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ 2>&1 >/dev/null $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
+	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ $(STDERR_TO_STDOUT) $(STDOUT_TO_DEVNULL) $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
 %.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
 	$(CXX) $< $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c -o $@
@@ -772,7 +827,7 @@ install-dll: binaries
 	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" $(SH) install-dlls.sh
 else
 install-dll: binaries
-	@echo No DLL inclusion implemented for this target.
+	@$(ECHO) No DLL inclusion implemented for this target.
 endif
 
 -include $(shell find . -name \*.d)
