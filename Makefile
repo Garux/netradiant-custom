@@ -15,23 +15,26 @@ RADIANT_ABOUTMSG   ?= Custom build
 
 CC                 ?= gcc
 CXX                ?= g++
-LDD                ?= ldd # nothing on Win32
 RANLIB             ?= ranlib
 AR                 ?= ar
+LDD                ?= ldd # nothing on Win32
+
 PKGCONFIG          ?= pkg-config
 PKG_CONFIG_PATH    ?=
 
-FIND               ?= find
-MKDIR              ?= mkdir -p
-CP                 ?= cp
-CAT                ?= cat
-SH                 ?= sh
+SH                 ?= $(SHELL)
 ECHO               ?= echo
 ECHO_NOLF          ?= echo -n
-DIFF               ?= diff
+CAT                ?= cat
+MKDIR              ?= mkdir -p
+CP                 ?= cp
 CP_R               ?= $(CP) -r
+RM                 ?= rm
 RM_R               ?= $(RM) -r
 TEE_STDERR         ?= | tee /dev/stderr
+FIND               ?= find
+DIFF               ?= diff
+
 STDOUT_TO_DEVNULL  ?= >/dev/null
 STDERR_TO_DEVNULL  ?= 2>/dev/null
 STDERR_TO_STDOUT   ?= 2>&1
@@ -144,45 +147,59 @@ dependencies-check:
 else
 dependencies-check:
 	@$(ECHO)
-	@$(ECHO) checking that the system tools exist
-	$(FIND) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(MKDIR) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(CP) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(CAT) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(SH) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(ECHO) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(ECHO_NOLF) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(DIFF) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(CP_R) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(RM_R) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(ECHO) 42 $(TEE_STDERR) $(TO_DEVNULL); [ $$? != 127 ]
+	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
+	checkbinary() \
+	{ \
+		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
+		$$2 --help $(TO_DEVNULL); \
+		if [ $$? != 127 ]; then \
+			$(ECHO) "found."; \
+		else \
+			$(ECHO) "not found, please install it or set PATH right!"; \
+			$(ECHO) "To see the failed commands, set DEPENDENCIES_CHECK=verbose"; \
+			$(ECHO) "To proceed anyway, set DEPENDENCIES_CHECK=off"; \
+			exit 1; \
+		fi; \
+	}; \
+	$(ECHO) checking that the build tools exist; \
+	checkbinary "bash (or another shell)" "$(SH)"; \
+	checkbinary coreutils "$(ECHO)"; \
+	checkbinary coreutils "$(ECHO_NOLF)"; \
+	checkbinary coreutils "$(CAT)"; \
+	checkbinary coreutils "$(MKDIR)"; \
+	checkbinary coreutils "$(CP)"; \
+	checkbinary coreutils "$(CP_R)"; \
+	checkbinary coreutils "$(RM)"; \
+	checkbinary coreutils "$(RM_R)"; \
+	checkbinary coreutils "$(ECHO) test $(TEE_STDERR)"; \
+	checkbinary findutils "$(FIND)"; \
+	checkbinary diff "$(DIFF)"; \
+	checkbinary gcc "$(CC)"; \
+	checkbinary g++ "$(CXX)"; \
+	checkbinary binutils "$(RANLIB)"; \
+	checkbinary binutils "$(AR)"; \
+	[ "$(OS)" != "Win32" ] && checkbinary libc6 "$(LDD)"; \
+	$(ECHO) All required tools have been found!
 	@$(ECHO)
-	@$(ECHO) checking that the build tools exist
-	$(CC) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(CXX) --help $(TO_DEVNULL); [ $$? != 127 ]
-	[ -n "$(LDD)" ] && $(LDD) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(RANLIB) --help $(TO_DEVNULL); [ $$? != 127 ]
-	$(AR) --help $(TO_DEVNULL); [ $$? != 127 ]
-	@$(ECHO)
-	@$(ECHO) checking that the dependencies exist
 	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
 	checkheader() \
 	{ \
-		$(ECHO_NOLF) "Checking for $$1... "; \
+		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
 		if \
 			$(CXX) conftest.cpp $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $$4 -DCONFTEST_HEADER="<$$2>" -DCONFTEST_SYMBOL="$$3" $(TARGET_ARCH) $(LDFLAGS) -c -o conftest.o $(TO_DEVNULL) && \
 			$(CXX) conftest.o $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest $(TO_DEVNULL); \
 		then \
-			$(RM) conftest conftest.o; \
+			$(RM) conftest conftest.o conftest.d; \
 			$(ECHO) "found."; \
 		else \
-			$(RM) conftest conftest.o; \
+			$(RM) conftest conftest.o conftest.d; \
 			$(ECHO) "not found, please install it or set PKG_CONFIG_PATH right!"; \
 			$(ECHO) "To see the failed commands, set DEPENDENCIES_CHECK=verbose"; \
 			$(ECHO) "To proceed anyway, set DEPENDENCIES_CHECK=off"; \
 			exit 1; \
 		fi; \
 	}; \
+	$(ECHO) checking that the dependencies exist; \
 	checkheader libglib2.0-dev glib/gutils.h g_path_is_absolute "$(CPPFLAGS_GLIB)" "$(LIBS_GLIB)"; \
 	checkheader libxml2-dev libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
 	checkheader libpng12-dev png.h png_create_read_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
@@ -192,6 +209,7 @@ dependencies-check:
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
 	$(ECHO) All required libraries have been found!
+	@$(ECHO)
 endif
 
 .PHONY: binaries
