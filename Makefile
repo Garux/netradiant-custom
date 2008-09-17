@@ -33,8 +33,12 @@ CP_R               ?= $(CP) -r
 RM                 ?= rm
 RM_R               ?= $(RM) -r
 TEE_STDERR         ?= | tee /dev/stderr
+TR                 ?= tr
 FIND               ?= find
 DIFF               ?= diff
+
+# optional:
+SVNVERSION         ?= svnversion
 
 STDOUT_TO_DEVNULL  ?= >/dev/null
 STDERR_TO_DEVNULL  ?= 2>/dev/null
@@ -146,6 +150,12 @@ endif
 RADIANT_VERSION = 1.5.0
 RADIANT_MAJOR_VERSION = 5
 RADIANT_MINOR_VERSION = 0
+
+SVN_VERSION := $(shell $(SVNVERSION) -n $(STDERR_TO_DEVNULL) | $(TR) -cd 0-9:)
+ifneq ($(SVN_VERSION),)
+	RADIANT_VERSION := $(RADIANT_VERSION)-svn$(SVN_VERSION)
+endif
+
 CPPFLAGS += -DRADIANT_VERSION="\"$(RADIANT_VERSION)\"" -DRADIANT_MAJOR_VERSION="\"$(RADIANT_MAJOR_VERSION)\"" -DRADIANT_MINOR_VERSION="\"$(RADIANT_MINOR_VERSION)\"" -DRADIANT_ABOUTMSG="\"$(RADIANT_ABOUTMSG)\""
 
 .PHONY: all
@@ -187,6 +197,7 @@ dependencies-check:
 	checkbinary coreutils "$(RM)"; \
 	checkbinary coreutils "$(RM_R)"; \
 	checkbinary coreutils "$(ECHO) test $(TEE_STDERR)"; \
+	checkbinary coreutils "$(TR)"; \
 	checkbinary findutils "$(FIND)"; \
 	checkbinary diff "$(DIFF)"; \
 	checkbinary gcc "$(CC)"; \
