@@ -190,7 +190,7 @@ void DoSaveCamera() {
 					break;
       } else if( !strcmp( fullpathtofile, checkCam->GetFileName() ) ) {
         char error[PATH_MAX+64];
-        sprintf( error, "Camera file \'%s\' is currently loaded by GtkRadiant.\nPlease select a different filename.", fullpathtofile );
+        sprintf( error, "Camera file \'%s\' is currently loaded by NetRadiant.\nPlease select a different filename.", fullpathtofile );
         g_FuncTable.m_pfnMessageBox( (GtkWidget *)g_pRadiantWnd, error, "Save error", eMB_OK );
         return;
       }

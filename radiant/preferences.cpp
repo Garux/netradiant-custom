@@ -751,7 +751,7 @@ GtkWindow* PrefsDlg::BuildDialog()
   PreferencesDialog_addInterfacePreferences(FreeCaller1<PreferencesPage&, Interface_constructPreferences>());
   Mouse_registerPreferencesPage();
 
-  GtkWindow* dialog = create_floating_window("GtkRadiant Preferences", m_parent);
+  GtkWindow* dialog = create_floating_window("NetRadiant Preferences", m_parent);
 
   {
     GtkWidget* mainvbox = gtk_vbox_new(FALSE, 5);

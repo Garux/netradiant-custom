@@ -674,7 +674,7 @@ int main( int argc, char **argv )
 	
 	Sys_Printf( "Q3Map         - v1.0r (c) 1999 Id Software Inc.\n" );
 	Sys_Printf( "Q3Map (ydnar) - v" Q3MAP_VERSION "\n" );
-	Sys_Printf( "GtkRadiant    - v" RADIANT_VERSION " " __DATE__ " " __TIME__ "\n" );
+	Sys_Printf( "NetRadiant    - v" RADIANT_VERSION " " __DATE__ " " __TIME__ "\n" );
 	Sys_Printf( "%s\n", Q3MAP_MOTD );
 	
 	/* ydnar: new path initialization */

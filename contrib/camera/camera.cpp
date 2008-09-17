@@ -49,7 +49,7 @@ int       g_iEditMode = 0;				// 0: editting points 1: adding points
 int       g_iActiveTarget = -1;
 int				g_iPreviewRunning = 0;	// 0: no preview 1: start preview 2: preview in progress
 
-static const char *PLUGIN_ABOUT = "Camera v1.0 for GtkRadiant\n"
+static const char *PLUGIN_ABOUT = "Camera v1.0 for NetRadiant\n"
                                   "by Arnout van Meer (rr2do2@splashdamage.com)\n\n"
                                   "This product contains software technology\n"
                                   "from id Software, Inc. ('id Technology').\n"
@@ -84,7 +84,7 @@ const char* QERPlug_Init(void* hApp, void* pMainWidget)
 
   GetFileTypeRegistry()->addType("camera", "", filetype_t("Camera file", "*.camera"));
 
-  return "Camera for GtkRadiant";
+  return "Camera for NetRadiant";
 }
 
 const char* QERPlug_GetName()

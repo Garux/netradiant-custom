@@ -558,7 +558,7 @@ int main (int argc, char **argv)
 
   // using GtkRadiant's versioning next to Id's versioning
   printf ("Q3Data      - (c) 1999 Id Software Inc.\n");
-  printf ("GtkRadiant  - v" RADIANT_VERSION " " __DATE__ "\n");
+  printf ("NetRadiant  - v" RADIANT_VERSION " " __DATE__ "\n");
 
 	ExpandWildcards (&argc, &argv);
 

@@ -1957,7 +1957,7 @@ GtkMenuItem* create_file_menu()
   menu_separator(menu);
   MRU_constructMenu(menu);
   menu_separator(menu);
-  create_menu_item_with_mnemonic(menu, "Check for GtkRadiant update (web)", "CheckForUpdate");
+  create_menu_item_with_mnemonic(menu, "Check for NetRadiant update (web)", "CheckForUpdate"); // FIXME
   create_menu_item_with_mnemonic(menu, "E_xit", "Exit");
 
   return file_menu_item;

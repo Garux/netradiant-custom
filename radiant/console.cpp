@@ -66,7 +66,7 @@ void Sys_LogFile(bool enable)
       time_t localtime;
       time(&localtime);
       globalOutputStream() << "Today is: " << ctime(&localtime)
-        << "This is GtkRadiant '" RADIANT_VERSION "' compiled " __DATE__ "\n" RADIANT_ABOUTMSG "\n";
+        << "This is NetRadiant '" RADIANT_VERSION "' compiled " __DATE__ "\n" RADIANT_ABOUTMSG "\n";
     }
     else
       gtk_MessageBox (0, "Failed to create log file, check write permissions in Radiant directory.\n",

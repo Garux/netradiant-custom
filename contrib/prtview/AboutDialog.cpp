@@ -72,7 +72,7 @@ void DoAboutDlg ()
   label = gtk_label_new ("Version 1.000\n\n"
 			 "Gtk port by Leonardo Zide\nleo@lokigames.com\n\n"
 			 "Written by Geoffrey DeWan\ngdewan@prairienet.org\n\n"
-       "Built against GtkRadiant " RADIANT_VERSION "\n"
+       "Built against NetRadiant " RADIANT_VERSION "\n"
        __DATE__
        );
   gtk_widget_show (label);

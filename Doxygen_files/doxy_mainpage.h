@@ -7,7 +7,7 @@
 		<img src="../images/gtkr_splash.jpg" align="right" hspace="2" vspace="2">
 		\section intro Introduction
 
-		This documentation was generated from GtkRadiant source code using Doxygen.<br>
+		This documentation was generated from NetRadiant source code using Doxygen.<br>
 		Generated from source in: +target+
 		
 		\section links Links

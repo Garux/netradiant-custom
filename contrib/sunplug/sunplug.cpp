@@ -288,7 +288,7 @@ void about_plugin_window()
     vbox = gtk_vbox_new(FALSE, 10); // create a box to arrange new objects vertically
     gtk_container_add(GTK_CONTAINER(window), vbox); // add the box to the window
 
-    label = gtk_label_new("SunPlug v1.0 for GtkRadiant 1.5\nby Topsun"); // create a label
+    label = gtk_label_new("SunPlug v1.0 for NetRadiant 1.5\nby Topsun"); // create a label
     gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT); // text align left
     gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 2); // insert the label in the box
 

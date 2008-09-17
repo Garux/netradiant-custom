@@ -26,6 +26,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 typedef struct _GtkWidget GtkWidget;
 /// \brief Shows a modal message-box.
-EMessageBoxReturn gtk_MessageBox(GtkWidget *parent, const char* text, const char* title = "GtkRadiant", EMessageBoxType type = eMB_OK, EMessageBoxIcon icon = eMB_ICONDEFAULT);
+EMessageBoxReturn gtk_MessageBox(GtkWidget *parent, const char* text, const char* title = "NetRadiant", EMessageBoxType type = eMB_OK, EMessageBoxIcon icon = eMB_ICONDEFAULT);
 
 #endif

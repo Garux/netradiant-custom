@@ -304,7 +304,7 @@ bool ExportDataAsWavefront::WriteToFile(const std::string& path, collapsemode mo
 			return false;
 		}
 
-		outMtl << "# Wavefront material file exported with GtkRadiants brushexport plugin.\n";
+		outMtl << "# Wavefront material file exported with NetRadiants brushexport plugin.\n";
 		outMtl << "# Material Count: " << (const Unsigned)materials.size() << "\n\n";
 		for(std::set<std::string>::const_iterator it(materials.begin()); it != materials.end(); ++it)
 		{

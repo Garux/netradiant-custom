@@ -65,7 +65,7 @@ enum EMessageBoxReturn
 
 // simple Message Box, see above for the 'type' flags
 
-typedef EMessageBoxReturn (* PFN_QERAPP_MESSAGEBOX) (GtkWidget *parent, const char* text, const char* caption/* = "GtkRadiant"*/, EMessageBoxType type/* = eMB_OK*/, EMessageBoxIcon icon/* = eMB_ICONDEFAULT*/);
+typedef EMessageBoxReturn (* PFN_QERAPP_MESSAGEBOX) (GtkWidget *parent, const char* text, const char* caption/* = "NetRadiant"*/, EMessageBoxType type/* = eMB_OK*/, EMessageBoxIcon icon/* = eMB_ICONDEFAULT*/);
 
 // file and directory selection functions return null if the user hits cancel
 // - 'title' is the dialog title (can be null)
