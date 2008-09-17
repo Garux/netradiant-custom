@@ -82,7 +82,21 @@ LIBS_COMMON =
 CXXFLAGS_COMMON = -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 
 ifeq ($(BUILD),debug)
+ifeq ($(findstring $(CFLAGS),-g),)
+	CFLAGS_COMMON += -g
+	# only add -g if no -g flag is in $(CFLAGS)
+endif
+ifeq ($(findstring $(CFLAGS),-O),)
+	CFLAGS_COMMON += -O
+	# only add -O if no -O flag is in $(CFLAGS)
+endif
+	CPPFLAGS_COMMON +=
+	LDFLAGS_COMMON +=
+else ifeq ($(BUILD),extradebug)
+ifeq ($(findstring $(CFLAGS),-g),)
 	CFLAGS_COMMON += -g3
+	# only add -g3 if no -g flag is in $(CFLAGS)
+endif
 	CPPFLAGS_COMMON += -D_DEBUG
 	LDFLAGS_COMMON +=
 else ifeq ($(BUILD),release)
@@ -793,6 +807,13 @@ install/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_gtk.o \
 	contrib/ufoaiplug/ufoai_level.o \
 	contrib/ufoaiplug/ufoai.o \
+
+#install/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+#install/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+#install/plugins/bkgrnd2d.$(DLL): \
+#	contrib/bkgrnd2d/bkgrnd2d.o \
+#	contrib/bkgrnd2d/dialog.o \
+#	contrib/bkgrnd2d/plugin.o \
 
 install/heretic2/h2data.$(EXE): LIBS_EXTRA := $(LIBS_XML)
 install/heretic2/h2data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
