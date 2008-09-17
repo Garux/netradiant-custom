@@ -60,6 +60,7 @@ CPPFLAGS_ZLIB      ?=
 LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
 DEPENDENCIES_CHECK ?= quiet
+# or: off, verbose
 
 # these are used on Win32 only
 GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix $(STDERR_TO_DEVNULL))
@@ -137,6 +138,10 @@ all: \
 	install-dll \
 
 .PHONY: dependencies-check
+ifeq ($(findstring $(DEPENDENCIES_CHECK),off),off)
+dependencies-check:
+	@$(ECHO) dependencies checking disabled, good luck...
+else
 dependencies-check:
 	@$(ECHO)
 	@$(ECHO) checking that the system tools exist
@@ -174,6 +179,7 @@ dependencies-check:
 			$(RM) conftest conftest.o; \
 			$(ECHO) "not found, please install it or set PKG_CONFIG_PATH right!"; \
 			$(ECHO) "To see the failed commands, set DEPENDENCIES_CHECK=verbose"; \
+			$(ECHO) "To proceed anyway, set DEPENDENCIES_CHECK=off"; \
 			exit 1; \
 		fi; \
 	}; \
@@ -186,6 +192,7 @@ dependencies-check:
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
 	$(ECHO) All required libraries have been found!
+endif
 
 .PHONY: binaries
 binaries: \
