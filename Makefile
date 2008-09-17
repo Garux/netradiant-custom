@@ -7,6 +7,7 @@ BUILD              ?= debug
 # or: release
 OS                 ?= $(shell uname)
 # or: Linux, Win32, Darwin
+LDFLAGS            ?=
 CFLAGS             ?=
 CXXFLAGS           ?=
 CPPFLAGS           ?=
@@ -187,7 +188,7 @@ dependencies-check:
 		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
 		if \
 			$(CXX) conftest.cpp $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $$4 -DCONFTEST_HEADER="<$$2>" -DCONFTEST_SYMBOL="$$3" $(TARGET_ARCH) $(LDFLAGS) -c -o conftest.o $(TO_DEVNULL) && \
-			$(CXX) conftest.o $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest $(TO_DEVNULL); \
+			$(CXX) conftest.o $(LDFLAGS) $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest $(TO_DEVNULL); \
 		then \
 			$(RM) conftest conftest.o conftest.d; \
 			$(ECHO) "found."; \
