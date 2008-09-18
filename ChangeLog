@@ -1,3 +1,8 @@
+2008-09-19 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: add a "Strafe Mode" option
+	* radiant: ctrl-tab now focuses all XYZ views in the three-part view (as
+	  that is what the user is likely to want there)
+
 2008-09-18 Rudolf Polzer divVerent(at)alientrap.org
 	* radiant: handle missing anisotropy extension; fixes display bug on
 	  Windows XP software renderer

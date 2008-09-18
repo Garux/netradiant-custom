@@ -82,6 +82,7 @@ struct camwindow_globals_private_t
   bool m_bCamDiscrete;
   bool m_bCubicClipping;
   bool m_showStats;
+  int m_nStrafeMode;
 
   camwindow_globals_private_t() :
     m_nMoveSpeed(100),
@@ -90,7 +91,8 @@ struct camwindow_globals_private_t
     m_bCamInverseMouse(false),
     m_bCamDiscrete(true),
     m_bCubicClipping(true),
-    m_showStats(true)
+    m_showStats(true),
+	m_nStrafeMode(0)
   {
   }
 
@@ -671,12 +673,25 @@ void Camera_motionDelta(int x, int y, unsigned int state, void* data)
   camera_t* cam = reinterpret_cast<camera_t*>(data);
 
   cam->m_mouseMove.motion_delta(x, y, state);
-  cam->m_strafe = (state & GDK_CONTROL_MASK) != 0;
 
-  if(cam->m_strafe)
-    cam->m_strafe_forward = (state & GDK_SHIFT_MASK) != 0;
-  else
-    cam->m_strafe_forward = false;
+	switch(g_camwindow_globals_private.m_nStrafeMode)
+	{
+		case 0:
+			cam->m_strafe = (state & GDK_CONTROL_MASK) != 0;
+			if(cam->m_strafe)
+				cam->m_strafe_forward = (state & GDK_SHIFT_MASK) != 0;
+			else
+				cam->m_strafe_forward = false;
+			break;
+		case 1:
+			cam->m_strafe = (state & GDK_CONTROL_MASK) != 0 && (state & GDK_SHIFT_MASK) == 0;
+			cam->m_strafe_forward = false;
+			break;
+		case 2:
+			cam->m_strafe = (state & GDK_CONTROL_MASK) != 0 && (state & GDK_SHIFT_MASK) == 0;
+			cam->m_strafe_forward = cam->m_strafe;
+			break;
+	}
 }
 
 class CamWnd
@@ -1989,6 +2004,14 @@ void Camera_constructPreferences(PreferencesPage& page)
       IntExportCallback(RenderModeExportCaller())
     );
   }
+
+    const char* strafe_mode[] = { "Both", "Forward", "Up" };
+
+    page.appendCombo(
+      "Strafe Mode",
+      g_camwindow_globals_private.m_nStrafeMode,
+      STRING_ARRAY_RANGE(strafe_mode)
+    );
 }
 void Camera_constructPage(PreferenceGroup& group)
 {
@@ -2080,6 +2103,7 @@ void CamWnd_Construct()
   GlobalPreferenceSystem().registerPreference("SI_Colors4", Vector3ImportStringCaller(g_camwindow_globals.color_cameraback), Vector3ExportStringCaller(g_camwindow_globals.color_cameraback));
   GlobalPreferenceSystem().registerPreference("SI_Colors12", Vector3ImportStringCaller(g_camwindow_globals.color_selbrushes3d), Vector3ExportStringCaller(g_camwindow_globals.color_selbrushes3d));
   GlobalPreferenceSystem().registerPreference("CameraRenderMode", makeIntStringImportCallback(RenderModeImportCaller()), makeIntStringExportCallback(RenderModeExportCaller()));
+  GlobalPreferenceSystem().registerPreference("StrafeMode", IntImportStringCaller(g_camwindow_globals_private.m_nStrafeMode), IntExportStringCaller(g_camwindow_globals_private.m_nStrafeMode));
 
   CamWnd_constructStatic();
 
