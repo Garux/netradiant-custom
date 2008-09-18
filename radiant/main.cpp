@@ -325,7 +325,7 @@ void paths_init()
 
   {
     StringOutputStream path(256);
-    path << home << RADIANT_VERSION << '/';
+    path << home << "1." << RADIANT_MAJOR_VERSION "." << RADIANT_MINOR_VERSION << '/';
     g_strSettingsPath = path.c_str();
   }
 

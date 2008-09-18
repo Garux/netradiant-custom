@@ -54,6 +54,8 @@ void Sys_LogFile(bool enable)
   if (enable && !g_hLogFile)
   {
     // settings say we should be logging and we don't have a log file .. so create it
+	if(!SettingsPath_get()[0])
+		return; // cannot open a log file yet
     // open a file to log the console (if user prefs say so)
     // the file handle is g_hLogFile
     // the log file is erased

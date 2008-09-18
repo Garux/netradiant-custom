@@ -1,3 +1,9 @@
+2008-09-18 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: handle missing anisotropy extension; fixes display bug on
+	  Windows XP software renderer
+	* radiant: make logging kick in earlier
+	* radiant: add svn release to the version number
+
 2008-09-15 Rudolf Polzer divVerent(at)alientrap.org
 	* all: added a Makefile to build GtkRadiant; this replaces scons and
 	  python install.py

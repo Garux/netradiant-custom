@@ -162,7 +162,6 @@ void environment_init(int argc, char* argv[])
     if(!appdata || string_empty(appdata))
     {
       ERROR_MESSAGE("Application Data folder not available.\n"
-        "Please install shfolder redistributable package.\n"
         "Radiant will use C:\\ for user preferences.\n");
       home << "C:";
     }

@@ -19,6 +19,7 @@ CXX                ?= g++
 RANLIB             ?= ranlib
 AR                 ?= ar
 LDD                ?= ldd # nothing on Win32
+WINDRES            ?= # only used on Win32
 
 PKGCONFIG          ?= pkg-config
 PKG_CONFIG_PATH    ?=
@@ -204,6 +205,7 @@ dependencies-check:
 	checkbinary g++ "$(CXX)"; \
 	checkbinary binutils "$(RANLIB)"; \
 	checkbinary binutils "$(AR)"; \
+	[ "$(OS)" = "Win32" ] && checkbinary mingw32 "$(WINDRES)"; \
 	[ "$(OS)" != "Win32" ] && checkbinary libc6 "$(LDD)"; \
 	$(ECHO) All required tools have been found!
 	@$(ECHO)
@@ -286,6 +288,14 @@ clean:
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LDFLAGS_DLL) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -shared -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ $(STDERR_TO_STDOUT) $(STDOUT_TO_DEVNULL) $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
+%.rc: %.ico
+	$(ECHO) '1 ICON "$<"' > $@
+
+ifeq ($(OS),Win32)
+%.o: %.rc
+	$(WINDRES) $< $@
+endif
+
 %.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
 	$(CXX) $< $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c -o $@
 
@@ -347,6 +357,7 @@ install/q3map2.$(EXE): \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	libpicomodel.$(A) \
+	$(if $(findstring $(OS),Win32),icons/q3map2.o,) \
 
 libmathlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libmathlib.$(A): \
@@ -441,6 +452,7 @@ install/q3data.$(EXE): \
 	tools/quake3/q3data/video.o \
 	libl_net.$(A) \
 	libmathlib.$(A) \
+	$(if $(findstring $(OS),Win32),icons/q3data.o,) \
 
 install/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
 install/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
@@ -533,6 +545,7 @@ install/radiant.$(EXE): \
 	libmathlib.$(A) \
 	libprofile.$(A) \
 	libxmllib.$(A) \
+	$(if $(findstring $(OS),Win32),icons/radiant.o,) \
 
 libcmdlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libcmdlib.$(A): \
@@ -773,6 +786,7 @@ install/qdata3.$(EXE): \
 	tools/quake2/qdata/tables.o \
 	tools/quake2/qdata/video.o \
 	libl_net.$(A) \
+	$(if $(findstring $(OS),Win32),icons/qdata3.o,) \
 
 install/q2map.$(EXE): LIBS_EXTRA := $(LIBS_XML)
 install/q2map.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
@@ -810,6 +824,7 @@ install/q2map.$(EXE): \
 	tools/quake2/q2map/tree.o \
 	tools/quake2/q2map/writebsp.o \
 	libl_net.$(A) \
+	$(if $(findstring $(OS),Win32),icons/q2map.o,) \
 
 install/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
 install/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
@@ -860,6 +875,7 @@ install/heretic2/h2data.$(EXE): \
 	tools/quake2/qdata_heretic2/tmix.o \
 	tools/quake2/qdata_heretic2/video.o \
 	libl_net.$(A) \
+	$(if $(findstring $(OS),Win32),icons/h2data.o,) \
 
 .PHONY: install-data
 install-data: binaries
