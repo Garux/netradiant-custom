@@ -181,8 +181,13 @@ void error_redirect (const gchar *domain, GLogLevelFlags log_level, const gchar 
   else
     strcat (buf, "\n");
 
-  printf ("%s\n", buf);
+  // spam it...
+  globalErrorStream() << buf << "\n";
 
+  // FIXME why are warnings is_fatal?
+#ifndef _DEBUG
+  if(is_fatal)
+#endif
   ERROR_MESSAGE("GTK+ error: " << buf);
 }
 

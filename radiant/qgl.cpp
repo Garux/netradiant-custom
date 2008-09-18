@@ -1599,6 +1599,7 @@ void QGL_sharedContextCreated(OpenGLBinding& table)
   else
   {
     globalOutputStream() << "No Anisotropic filtering available\n";
+	g_maxTextureAnisotropy = 0;
   }
 }
 
@@ -1608,7 +1609,7 @@ void QGL_sharedContextDestroyed(OpenGLBinding& table)
 }
 
 
-void QGL_assertNoErrors()
+void QGL_assertNoErrors(const char *file, int line)
 {
   GLenum error = GlobalOpenGL().m_glGetError();
   while (error != GL_NO_ERROR)
@@ -1616,11 +1617,11 @@ void QGL_assertNoErrors()
     const char* errorString = reinterpret_cast<const char*>(qgluErrorString(error));
     if (error == GL_OUT_OF_MEMORY)
     {
-      ERROR_MESSAGE("OpenGL out of memory error: " << errorString);
+      ERROR_MESSAGE("OpenGL out of memory error at " << file << ":" << line << ": " << errorString);
     }
     else
     {
-      ERROR_MESSAGE("OpenGL error: " << errorString);
+      ERROR_MESSAGE("OpenGL error at " << file << ":" << line << ": " << errorString);
     }
     error = GlobalOpenGL().m_glGetError();
   }

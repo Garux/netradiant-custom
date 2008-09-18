@@ -91,7 +91,12 @@ texture_globals_t g_texture_globals(GL_RGBA);
 
 void SetTexParameters(ETexturesMode mode)
 {
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+	float maxAniso = QGL_maxTextureAnisotropy();
+	if(maxAniso > 1)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+	else
+		if(mode == eTextures_MAX_ANISOTROPY)
+			mode = eTextures_LINEAR_MIPMAP_LINEAR;
 
   switch (mode)
   {
@@ -120,7 +125,7 @@ void SetTexParameters(ETexturesMode mode)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     break;
   case eTextures_MAX_ANISOTROPY:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, QGL_maxTextureAnisotropy());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
     break;
   default:
     globalOutputStream() << "invalid texture mode\n";

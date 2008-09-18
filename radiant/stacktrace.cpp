@@ -49,9 +49,7 @@ void write_stack_trace(TextOutputStream& outputStream)
      free(symbol_names);
   }
 }	
-#endif
-
-#if defined (WIN32) && defined (_MSC_VER) && defined (DEBUG)
+#elif defined (WIN32) && defined (_MSC_VER)
 
 #include "windows.h"
 #include "winnt.h"
@@ -308,11 +306,14 @@ void write_stack_trace(TextOutputStream& outputStream)
   __try{ RaiseException(0,0,0,0); } __except(write_stack_trace((GetExceptionInformation())->ContextRecord, outputStream), EXCEPTION_CONTINUE_EXECUTION) {}
 }
 
-#else
-#if defined (WIN32)
+#elif defined (WIN32)
 void write_stack_trace(TextOutputStream& outputStream)
 {
-	outputStream << "\nStacktrace is disabled in release-builds\n";
+	outputStream << "\nStacktrace is disabled on this compiler\n";
 }
-#endif
+#else
+void write_stack_trace(TextOutputStream& outputStream)
+{
+	outputStream << "\nStacktrace is disabled on this platform\n";
+}
 #endif

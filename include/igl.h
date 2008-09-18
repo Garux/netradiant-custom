@@ -1995,7 +1995,7 @@ struct OpenGLBinding
   }
 
   /// \brief Asserts that there no OpenGL errors have occurred since the last call to glGetError.
-  void (*assertNoErrors)();
+  void (*assertNoErrors)(const char *file, int line);
 
   GLuint m_font;
   int m_fontHeight;
@@ -2818,14 +2818,9 @@ inline OpenGLBinding& GlobalOpenGL()
 }
 
 #if defined(_DEBUG)
-inline void GlobalOpenGL_debugAssertNoErrors()
-{
-  GlobalOpenGL().assertNoErrors();
-}
+#define GlobalOpenGL_debugAssertNoErrors() GlobalOpenGL().assertNoErrors(__FILE__, __LINE__)
 #else
-inline void GlobalOpenGL_debugAssertNoErrors()
-{
-}
+#define GlobalOpenGL_debugAssertNoErrors()
 #endif
 
 
