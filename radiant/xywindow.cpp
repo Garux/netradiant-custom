@@ -2577,12 +2577,28 @@ void XY_Split_Focus()
 
 void XY_Focus()
 {
+  if (g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating)
+  {
+	  // cannot do this in a split window
+	  // do something else that the user may want here
+	  XY_Split_Focus();
+	  return;
+  }
+
   XYWnd* xywnd = g_pParentWnd->GetXYWnd();
   XYWnd_Focus(xywnd);
 }
 
 void XY_Top()
 {
+  if (g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating)
+  {
+	  // cannot do this in a split window
+	  // do something else that the user may want here
+	  XY_Split_Focus();
+	  return;
+  }
+
   XYWnd* xywnd = g_pParentWnd->GetXYWnd();
   xywnd->SetViewType(XY);
   XYWnd_Focus(xywnd);
@@ -2590,6 +2606,14 @@ void XY_Top()
 
 void XY_Side()
 {
+  if (g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating)
+  {
+	  // cannot do this in a split window
+	  // do something else that the user may want here
+	  XY_Split_Focus();
+	  return;
+  }
+
   XYWnd* xywnd = g_pParentWnd->GetXYWnd();
   xywnd->SetViewType(XZ);
   XYWnd_Focus(xywnd);
@@ -2597,12 +2621,29 @@ void XY_Side()
 
 void XY_Front()
 {
-  g_pParentWnd->GetXYWnd()->SetViewType(YZ);
-  XYWnd_Focus(g_pParentWnd->GetXYWnd());
+  if (g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating)
+  {
+	  // cannot do this in a split window
+	  // do something else that the user may want here
+	  XY_Split_Focus();
+	  return;
+  }
+
+  XYWnd* xywnd = g_pParentWnd->GetXYWnd();
+  xywnd->SetViewType(XY);
+  XYWnd_Focus(xywnd);
 }
 
 void XY_Next()
 {
+  if (g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating)
+  {
+	  // cannot do this in a split window
+	  // do something else that the user may want here
+	  XY_Split_Focus();
+	  return;
+  }
+
   XYWnd* xywnd = g_pParentWnd->GetXYWnd();
   if (xywnd->GetViewType() == XY)
     xywnd->SetViewType(XZ);
@@ -2906,7 +2947,6 @@ void XYWindow_Construct()
   GlobalCommands_insert("ViewSide", FreeCaller<XY_Side>());
   GlobalCommands_insert("ViewFront", FreeCaller<XY_Front>());
   GlobalCommands_insert("Zoom100", FreeCaller<XY_Zoom100>());
-  GlobalCommands_insert("CenterXYViews", FreeCaller<XY_Split_Focus>(), Accelerator(GDK_Tab, (GdkModifierType)(GDK_SHIFT_MASK|GDK_CONTROL_MASK)));
   GlobalCommands_insert("CenterXYView", FreeCaller<XY_Focus>(), Accelerator(GDK_Tab, (GdkModifierType)(GDK_SHIFT_MASK|GDK_CONTROL_MASK)));
 
   GlobalPreferenceSystem().registerPreference("ClipCaulk", BoolImportStringCaller(g_clip_useCaulk), BoolExportStringCaller(g_clip_useCaulk));

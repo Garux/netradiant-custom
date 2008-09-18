@@ -2127,14 +2127,7 @@ GtkMenuItem* create_view_menu(MainFrame::EViewStyle style)
     create_menu_item_with_mnemonic(menu_in_menu, "Set Se_lected Brushes", "RegionSetSelection");
   }
 
-  if(style == MainFrame::eSplit || style == MainFrame::eFloating)
-  {
-    command_connect_accelerator("CenterXYViews");
-  }
-  else
-  {
-    command_connect_accelerator("CenterXYView");
-  }
+  command_connect_accelerator("CenterXYView");
 
   return view_menu_item;
 }
