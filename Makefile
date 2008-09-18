@@ -273,6 +273,7 @@ binaries: \
 clean:
 	$(RM_R) install/
 	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
+	$(RM) icons/*.rc
 
 %.$(EXE):
 	file=$@; $(MKDIR) $${file%/*}
