@@ -4,7 +4,7 @@
 # user customizable stuf
 # you may override this in Makefile.conf or the environment
 BUILD              ?= debug
-# or: release
+# or: release, or: extradebug, or: profile
 OS                 ?= $(shell uname)
 # or: Linux, Win32, Darwin
 LDFLAGS            ?=
@@ -104,6 +104,15 @@ ifeq ($(findstring $(CFLAGS),-g),)
 endif
 	CPPFLAGS_COMMON += -D_DEBUG
 	LDFLAGS_COMMON +=
+else ifeq ($(BUILD),profile)
+ifeq ($(findstring $(CFLAGS),-O),)
+	CFLAGS_COMMON += -O
+	# only add -O3 if no -O flag is in $(CFLAGS)
+	# to allow overriding the optimizations
+endif
+	CFLAGS_COMMON += -pg
+	CPPFLAGS_COMMON +=
+	LDFLAGS_COMMON += -pg
 else ifeq ($(BUILD),release)
 ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O3
