@@ -105,10 +105,13 @@ endif
 	CPPFLAGS_COMMON += -D_DEBUG
 	LDFLAGS_COMMON +=
 else ifeq ($(BUILD),profile)
+ifeq ($(findstring $(CFLAGS),-g),)
+	CFLAGS_COMMON += -g
+	# only add -g if no -g flag is in $(CFLAGS)
+endif
 ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O
-	# only add -O3 if no -O flag is in $(CFLAGS)
-	# to allow overriding the optimizations
+	# only add -O if no -O flag is in $(CFLAGS)
 endif
 	CFLAGS_COMMON += -pg
 	CPPFLAGS_COMMON +=

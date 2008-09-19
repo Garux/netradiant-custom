@@ -2,6 +2,7 @@
 	* radiant: add a "Strafe Mode" option
 	* radiant: ctrl-tab now focuses all XYZ views in the three-part view (as
 	  that is what the user is likely to want there)
+	* radiant: make rotate/scale dialogs non-modal
 
 2008-09-18 Rudolf Polzer divVerent(at)alientrap.org
 	* radiant: handle missing anisotropy extension; fixes display bug on
