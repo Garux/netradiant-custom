@@ -492,7 +492,7 @@ attempts to create a valid tri-strip w/o degenerate triangles from a brush face 
 based on SurfaceAsTriStrip()
 */
 
-#define MAX_INDEXES		1024
+#define MAX_INDEXES		4096
 
 void StripFaceSurface( mapDrawSurface_t *ds ) 
 {

@@ -181,7 +181,7 @@ constants
 
 /* bsp */
 #define	MAX_PATCH_SIZE			32
-#define	MAX_BRUSH_SIDES			1024
+#define	MAX_BRUSH_SIDES			4096
 #define MAX_BUILD_SIDES			300
 
 #define	MAX_EXPANDED_AXIS		128
@@ -213,7 +213,7 @@ constants
 
 #define	MAX_PORTALS				32768
 #define MAX_SEPERATORS			MAX_POINTS_ON_WINDING
-#define	MAX_POINTS_ON_FIXED_WINDING	24	/* ydnar: increased this from 12 at the expense of more memory */
+#define	MAX_POINTS_ON_FIXED_WINDING	36	/* ydnar: increased this from 12 at the expense of more memory */
 #define	MAX_PORTALS_ON_LEAF		128
 
 
@@ -303,22 +303,22 @@ abstracted bsp file
 /* ok to increase these at the expense of more memory */
 #define	MAX_MAP_MODELS			0x400
 #define	MAX_MAP_BRUSHES			0x8000
-#define	MAX_MAP_ENTITIES		0x1000		//%	0x800	/* ydnar */
+#define	MAX_MAP_ENTITIES		0x8000		//%	0x800	/* ydnar */
 #define	MAX_MAP_ENTSTRING		0x80000		//%	0x40000	/* ydnar */
 #define	MAX_MAP_SHADERS			0x800		//%	0x400	/* ydnar */
 
 #define	MAX_MAP_AREAS			0x100		/* MAX_MAP_AREA_BYTES in q_shared must match! */
 #define	MAX_MAP_FOGS			30			//& 0x100	/* RBSP (32 - world fog - goggles) */
-#define	MAX_MAP_PLANES			0x100000	//%	0x20000	/* ydnar for md */
+#define	MAX_MAP_PLANES			0x400000	//%	0x20000	/* ydnar for md */
 #define	MAX_MAP_NODES			0x20000
-#define	MAX_MAP_BRUSHSIDES		0x100000	//%	0x20000	/* ydnar */
+#define	MAX_MAP_BRUSHSIDES		0x400000	//%	0x20000	/* ydnar */
 #define	MAX_MAP_LEAFS			0x20000
 #define	MAX_MAP_LEAFFACES		0x100000	//%	0x20000	/* ydnar */
 #define	MAX_MAP_LEAFBRUSHES		0x40000
 #define	MAX_MAP_PORTALS			0x20000
 #define	MAX_MAP_LIGHTING		0x800000
 #define	MAX_MAP_LIGHTGRID		0x100000	//%	0x800000 /* ydnar: set to points, not bytes */
-#define	MAX_MAP_VISIBILITY		0x200000
+#define	MAX_MAP_VISIBILITY		0x800000
 
 #define	MAX_MAP_DRAW_SURFS		0x20000
 #define	MAX_MAP_DRAW_VERTS		0x80000
