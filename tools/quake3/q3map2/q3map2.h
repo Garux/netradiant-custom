@@ -248,6 +248,7 @@ constants
 #define GRID_EPSILON			0.0f
 
 #define DEFAULT_LIGHTMAP_SAMPLE_SIZE	16
+#define DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE	0
 #define DEFAULT_LIGHTMAP_SAMPLE_OFFSET	1.0f
 #define DEFAULT_SUBDIVIDE_THRESHOLD		1.0f
 
@@ -1656,6 +1657,7 @@ int							GetSurfaceExtraEntityNum( int num );
 int							GetSurfaceExtraCastShadows( int num );
 int							GetSurfaceExtraRecvShadows( int num );
 int							GetSurfaceExtraSampleSize( int num );
+int							GetSurfaceExtraMinSampleSize( int num );
 float						GetSurfaceExtraLongestCurve( int num );
 void						GetSurfaceExtraLightmapAxis( int num, vec3_t lightmapAxis );
 
@@ -1953,6 +1955,7 @@ Q_EXTERN char				source[ 1024 ];
 Q_EXTERN char				outbase[ 32 ];
 
 Q_EXTERN int				sampleSize;						/* lightmap sample size in units */
+Q_EXTERN int				minSampleSize;                  /* minimum sample size to use at all */
 
 Q_EXTERN int				mapEntityNum Q_ASSIGN( 0 );
 
@@ -2079,6 +2082,7 @@ Q_EXTERN qboolean			loMem Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			noStyles Q_ASSIGN( qfalse );
 
 Q_EXTERN int				sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );
+Q_EXTERN int				minSampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE );
 Q_EXTERN qboolean			noVertexLighting Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			noGridLighting Q_ASSIGN( qfalse );
 

@@ -2216,6 +2216,14 @@ int LightMain( int argc, char **argv )
 			i++;
 			Sys_Printf( "Default lightmap sample size set to %dx%d units\n", sampleSize, sampleSize );
 		}
+		else if( !strcmp( argv[ i ], "-minsamplesize" ) )
+		{
+			minSampleSize = atoi( argv[ i + 1 ] );
+			if( minSampleSize < 1 )
+				minSampleSize = 1;
+			i++;
+			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
+		}
 		else if( !strcmp( argv[ i ], "-novertex" ) )
 		{
 			noVertexLighting = qtrue;

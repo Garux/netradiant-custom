@@ -640,7 +640,9 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds )
 				ds->sampleSize *= ds->lightmapScale;
 			if( ds->sampleSize <= 0 )
 				ds->sampleSize = 1;
-			else if( ds->sampleSize > 16384 )	/* powers of 2 are preferred */
+			if(ds->sampleSize < minSampleSize)
+				ds->sampleSize = minSampleSize;
+			if( ds->sampleSize > 16384 )	/* powers of 2 are preferred */
 				ds->sampleSize = 16384;
 		}
 	}
