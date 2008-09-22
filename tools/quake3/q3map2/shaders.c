@@ -98,8 +98,20 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts )
 					VectorSet( mult, c, c, c );
 					break;
 				
+				case CM_COLOR_DOT_PRODUCT_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c = cm2->data[4] + c * (cm2->data[5] - cm2->data[4]);
+					VectorSet( mult, c, c, c );
+					break;
+				
 				case CM_ALPHA_DOT_PRODUCT:
 					mult[ 3 ] = DotProduct( dv->normal, cm2->data );
+					break;
+				
+				case CM_ALPHA_DOT_PRODUCT_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c = cm2->data[4] + c * (cm2->data[5] - cm2->data[4]);
+					mult[ 3 ] = c;
 					break;
 				
 				case CM_COLOR_DOT_PRODUCT_2:
@@ -108,9 +120,23 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts )
 					VectorSet( mult, c, c, c );
 					break;
 				
+				case CM_COLOR_DOT_PRODUCT_2_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c *= c;
+					c = cm2->data[4] + c * (cm2->data[5] - cm2->data[4]);
+					VectorSet( mult, c, c, c );
+					break;
+				
 				case CM_ALPHA_DOT_PRODUCT_2:
 					mult[ 3 ] = DotProduct( dv->normal, cm2->data );
 					mult[ 3 ] *= mult[ 3 ];
+					break;
+				
+				case CM_ALPHA_DOT_PRODUCT_2_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c *= c;
+					c = cm2->data[4] + c * (cm2->data[5] - cm2->data[4]);
+					mult[ 3 ] = c;
 					break;
 				
 				default:
@@ -1751,6 +1777,13 @@ static void ParseShaderFile( const char *filename )
 					{
 						cm->type = CM_COLOR_DOT_PRODUCT_2 + alpha;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
+					}
+					
+					/* dotProduct2scale ( X Y Z MIN MAX ) */
+					else if( !Q_stricmp( token, "dotProduct2scale" ) )
+					{
+						cm->type = CM_COLOR_DOT_PRODUCT_2_SCALE + alpha;
+						Parse1DMatrixAppend( shaderText, 5, cm->data );
 					}
 					
 					/* volume */
