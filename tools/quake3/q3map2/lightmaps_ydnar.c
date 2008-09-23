@@ -694,8 +694,8 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
 			info->maxs[0],
 			info->maxs[1],
 			info->maxs[2],
-			lm->sampleSize,
-			sampleSize);
+			(double) lm->sampleSize,
+			(double) sampleSize);
 	}
 	
 	/* set actual sample size */
