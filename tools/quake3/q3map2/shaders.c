@@ -123,7 +123,7 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts )
 				case CM_COLOR_DOT_PRODUCT_2_SCALE:
 					c = DotProduct( dv->normal, cm2->data );
 					c *= c;
-					c = cm2->data[4] + c * (cm2->data[5] - cm2->data[4]);
+					c = (c - cm2->data[4]) / (cm2->data[5] - cm2->data[4]);
 					VectorSet( mult, c, c, c );
 					break;
 				
@@ -135,7 +135,7 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts )
 				case CM_ALPHA_DOT_PRODUCT_2_SCALE:
 					c = DotProduct( dv->normal, cm2->data );
 					c *= c;
-					c = cm2->data[4] + c * (cm2->data[5] - cm2->data[4]);
+					c = (c - cm2->data[4]) / (cm2->data[5] - cm2->data[4]);
 					mult[ 3 ] = c;
 					break;
 				
