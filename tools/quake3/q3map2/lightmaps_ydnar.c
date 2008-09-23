@@ -684,6 +684,19 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
 			sampleSize += 1.0f;
 		}
 	}
+
+	if(sampleSize != lm->sampleSize)
+	{
+		Sys_FPrintf(SYS_VRB,"WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize combination, increased samplesize from %.1f to %.1f\n",
+			info->mins[0],
+			info->mins[1],
+			info->mins[2],
+			info->maxs[0],
+			info->maxs[1],
+			info->maxs[2],
+			lm->sampleSize,
+			sampleSize);
+	}
 	
 	/* set actual sample size */
 	lm->actualSampleSize = sampleSize;
