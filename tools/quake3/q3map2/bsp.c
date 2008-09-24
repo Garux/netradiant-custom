@@ -863,7 +863,10 @@ int BSPMain( int argc, char **argv )
 		else if( !strcmp( argv[ i ], "-bsp" ) )
 			Sys_Printf( "-bsp argument unnecessary\n" );
 		else
-			Sys_Printf( "WARNING: Unknown option \"%s\"\n", argv[ i ] );
+		{
+			Sys_Printf( "WARNING: Unknown option \"%s\"\a\n", argv[ i ] );
+			sleep(1);
+		}
 	}
 	
 	/* fixme: print more useful usage here */
