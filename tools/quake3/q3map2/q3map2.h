@@ -266,7 +266,7 @@ constants
 #define SUPER_ORIGIN_SIZE		3
 #define SUPER_NORMAL_SIZE		4
 #define SUPER_DELUXEL_SIZE		4
-#define BSP_DELUXEL_SIZE		3
+#define BSP_DELUXEL_SIZE		4
 #define SUPER_FLOODLIGHT_SIZE	1
 
 #define VERTEX_LUXEL( s, v )	(vertexLuxels[ s ] + ((v) * VERTEX_LUXEL_SIZE))
@@ -1714,6 +1714,7 @@ void						RadFreeLights();
 
 /* light_ydnar.c */
 void						ColorToBytes( const float *color, byte *colorBytes, float scale );
+void						ColorToBytesDeluxe( const float *color, byte *colorBytes, float scale, const float *deluxel, byte *deluxeBytes );
 void						SmoothNormals( void );
 
 void						MapRawLightmap( int num );

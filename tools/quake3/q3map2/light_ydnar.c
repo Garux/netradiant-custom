@@ -44,12 +44,14 @@ ColorToBytes()
 ydnar: moved to here 2001-02-04
 */
 
-void ColorToBytes( const float *color, byte *colorBytes, float scale )
+void ColorToBytesDeluxe( const float *color, byte *colorBytes, float scale, const float *deluxel, byte *deluxeBytes)
 {
 	int		i;
 	float	max, gamma;
-	vec3_t	sample;
+	vec3_t	sample, direction;
 	float 	inv, dif;
+	float   colorMultiplier;
+	float   temp;
 	
 	
 	/* ydnar: scaling necessary for simulating r_overbrightBits on external lightmaps */
@@ -64,7 +66,7 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 	for( i = 0; i < 3; i++ )
 	{
 		/* handle negative light */
-		if( sample[ i ] < 0.0f )
+		if( sample[ i ] <= 0.0f )
 		{
 			sample[ i ] = 0.0f;
 			continue;
@@ -74,6 +76,8 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 		sample[ i ] = pow( sample[ i ] / 255.0f, gamma ) * 255.0f;
 	}
 
+	colorMultiplier = 1;
+
 	if (lightmapExposure == 1)
 	{
 		/* clamp with color normalization */
@@ -82,16 +86,15 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 			max = sample[ 1 ];
 		if( sample[ 2 ] > max )
 			max = sample[ 2 ];
-		if( max > 255.0f )
-			VectorScale( sample, (255.0f / max), sample );
+		if(max * colorMultiplier > 255.0f)
+			colorMultiplier *= 255.0 / max;
 	}
 	else
 	{
 		if (lightmapExposure==0)
-		{
-			lightmapExposure=1.0f;
-		}
-		inv=1.f/lightmapExposure;
+			inv = 1.f;
+		else
+			inv = 1.f/lightmapExposure;
 		//Exposure
 
 		max = sample[ 0 ];
@@ -99,6 +102,7 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 			max = sample[ 1 ];
 		if( sample[ 2 ] > max )
 			max = sample[ 2 ];
+		max *= colorMultiplier;
 
 		dif = (1-  exp(-max * inv) )  *  255;
 
@@ -111,20 +115,64 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 			dif = 0;
 		}
 
-		for (i=0;i<3;i++)
-		{
-			sample[i]*=dif;
-		}
+		colorMultiplier *= dif;
 	}
 
-	
 	/* compensate for ingame overbrighting/bitshifting */
-	VectorScale( sample, (1.0f / lightmapCompensate), sample );
-	
+	VectorScale( sample, (colorMultiplier / lightmapCompensate), sample );
+
 	/* store it off */
 	colorBytes[ 0 ] = sample[ 0 ];
 	colorBytes[ 1 ] = sample[ 1 ];
 	colorBytes[ 2 ] = sample[ 2 ];
+
+				
+	/* store direction */
+	if( deluxel )
+	{
+		if(normalizeDeluxemap)
+		{
+			if(!VectorNormalize(deluxel, direction))
+				VectorClear(direction);
+		}
+		else
+		{
+			if(deluxel[3])
+			{
+				VectorScale(deluxel, 1 / deluxel[3], direction);
+				// NOTE:
+				// if the light was scaled down due to it being too bright...
+				// we need to reduce the directionality so ADDING light can't
+				// make stuff DARKER!
+				if(colorMultiplier < 1)
+					VectorScale(direction, colorMultiplier, direction);
+				// TODO find out the best renderer equation for this
+			}
+			else
+				VectorClear(direction);
+		}
+
+		/* normalize average light direction */
+		//if(direction[0] != 0 || direction[1] != 0 || direction[2] != 0)
+		{
+			/* encode [-1,1] in [0,255] */
+			for( i = 0; i < 3; i++ )
+			{
+				temp = (direction[ i ] + 1.0f) * 127.5f;
+				if( temp < 0 )
+					deluxeBytes[ i ] = 0;
+				else if( temp > 255 )
+					deluxeBytes[ i ] = 255;
+				else
+					deluxeBytes[ i ] = temp;
+			}
+		}
+	}
+}
+
+void ColorToBytes( const float *color, byte *colorBytes, float scale )
+{
+	ColorToBytesDeluxe(color, colorBytes, scale, NULL, NULL);
 }
 
 
@@ -1863,7 +1911,8 @@ void IlluminateRawLightmap( int rawLightmapNum )
 	float				brightness;
 	float				*origin, *normal, *dirt, *luxel, *luxel2, *deluxel, *deluxel2;
 	float				*lightLuxels, *lightLuxel, samples, filterRadius, weight;
-	vec3_t				color, averageColor, averageDir, total, temp, temp2;
+	vec3_t				color, averageColor, total, temp, temp2;
+	float               averageDir[4];
 	float				tests[ 4 ][ 2 ] = { { 0.0f, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } };
 	trace_t				trace;
 	float				stackLightLuxels[ STACK_LL_SIZE ];
@@ -2103,9 +2152,12 @@ void IlluminateRawLightmap( int rawLightmapNum )
 						/* color to grayscale (photoshop rgb weighting) */
 						brightness = trace.color[ 0 ] * 0.3f + trace.color[ 1 ] * 0.59f + trace.color[ 2 ] * 0.11f;
 						brightness *= (1.0 / 255.0);
-						VectorScale( trace.direction, brightness, temp );
-						VectorAdd( deluxel, temp, deluxel );
-						deluxel[3] += brightness;
+						if(brightness != 0)
+						{
+							VectorScale( trace.direction, brightness, temp );
+							VectorAdd( deluxel, temp, deluxel );
+							deluxel[3] += brightness;
+						}
 					}
 				}
 			}
@@ -2487,6 +2539,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				/* choose seed amount */
 				VectorClear( averageColor );
 				VectorClear( averageDir );
+				averageDir[3] = 0.0f;
 				samples = 0.0f;
 				
 				/* walk 3x3 matrix */
@@ -2514,7 +2567,10 @@ void IlluminateRawLightmap( int rawLightmapNum )
 						VectorAdd( averageColor, luxel2, averageColor );
 						samples += luxel2[ 3 ];
 						if( filterDir )
+						{
 							VectorAdd( averageDir, deluxel2, averageDir );
+							averageDir[3] += deluxel2[3];
+						}
 					}
 				}
 				
@@ -2537,7 +2593,10 @@ void IlluminateRawLightmap( int rawLightmapNum )
 					luxel[ 3 ] = 1.0f;
 				}
 				if( filterDir )
+				{
 					VectorDivide( averageDir, samples, deluxel );
+					deluxel[3] = averageDir[3] / samples;
+				}
 				
 				/* set cluster to -3 */
 				if( *cluster < 0 )
