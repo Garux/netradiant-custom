@@ -1750,6 +1750,7 @@ void LightWorld( void )
 	{
 		/* store off the bsp between bounces */
 		StoreSurfaceLightmaps();
+		UnparseEntities();
 		Sys_Printf( "Writing %s\n", source );
 		WriteBSPFile( source );
 		
