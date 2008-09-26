@@ -1999,6 +1999,12 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "Generating deluxemaps for average light direction\n" );
 		}
 		
+		else if( !strcmp( argv[ i ], "-nodeluxenormalize" ) )
+		{
+			normalizeDeluxemap = qfalse;
+			Sys_Printf( "Not normalizing deluxemaps\n" );
+		}
+		
 		else if( !strcmp( argv[ i ], "-external" ) )
 		{
 			externalLightmaps = qtrue;
@@ -2322,7 +2328,14 @@ int LightMain( int argc, char **argv )
 				dirtGain = 1.0f;
 			Sys_Printf( "Dirtmapping gain set to %.1f\n", dirtGain );
 		}
-		
+		else if( !strcmp( argv[ i ], "-trianglecheck" ) )
+		{
+			lightmapTriangleCheck = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-extravisnudge" ) )
+		{
+			lightmapExtraVisClusterNudge = qtrue;
+		}
 		/* unhandled args */
 		else
 		{

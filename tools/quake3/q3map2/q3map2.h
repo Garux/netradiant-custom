@@ -265,7 +265,7 @@ constants
 #define SUPER_LUXEL_SIZE		4
 #define SUPER_ORIGIN_SIZE		3
 #define SUPER_NORMAL_SIZE		4
-#define SUPER_DELUXEL_SIZE		3
+#define SUPER_DELUXEL_SIZE		4
 #define BSP_DELUXEL_SIZE		3
 #define SUPER_FLOODLIGHT_SIZE	1
 
@@ -1935,7 +1935,8 @@ Q_EXTERN qboolean			emitFlares Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debugSurfaces Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debugInset Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debugPortals Q_ASSIGN( qfalse );
-
+Q_EXTERN qboolean           lightmapTriangleCheck Q_ASSIGN(qfalse);
+Q_EXTERN qboolean           lightmapExtraVisClusterNudge Q_ASSIGN(qfalse);
 Q_EXTERN double				normalEpsilon Q_ASSIGN( 0.00001 );
 Q_EXTERN double				distanceEpsilon Q_ASSIGN( 0.01 );
 
@@ -2093,6 +2094,7 @@ Q_EXTERN qboolean			cpmaHack Q_ASSIGN( qfalse );
 
 Q_EXTERN qboolean			deluxemap Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debugDeluxemap Q_ASSIGN( qfalse );
+Q_EXTERN qboolean			normalizeDeluxemap Q_ASSIGN( qtrue );
 
 Q_EXTERN qboolean			fast Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			faster Q_ASSIGN( qfalse );

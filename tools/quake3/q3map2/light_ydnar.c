@@ -533,7 +533,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 	//1) Test the sample origin to see if it lays on the wrong side of any edge (x/y)
 	//2) if it does, nudge it onto the correct side.
 
-	if (worldverts!=NULL)
+	if (worldverts!=NULL && lightmapTriangleCheck)
 	{
 		for (j=0;j<3;j++)
 		{
@@ -604,9 +604,12 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 		origin[ lm->axisNum ] += lightmapSampleOffset;
 	
 	VectorCopy(origin,origintwo);
-	origintwo[0]+=vecs[2][0];
-	origintwo[1]+=vecs[2][1];
-	origintwo[2]+=vecs[2][2];
+	if(lightmapExtraVisClusterNudge)
+	{
+		origintwo[0]+=vecs[2][0];
+		origintwo[1]+=vecs[2][1];
+		origintwo[2]+=vecs[2][2];
+	}
 
 	/* get cluster */
 	pointCluster = ClusterForPointExtFilter( origintwo, LUXEL_EPSILON, numClusters, clusters );
@@ -631,8 +634,8 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 			
 			/* get pvs cluster */
 			pointCluster = ClusterForPointExtFilter( nudged, LUXEL_EPSILON, numClusters, clusters ); //% + 0.625 );
-			//if( pointCluster >= 0 )
-   			//	VectorCopy( nudged, origin );
+			if( pointCluster >= 0 )
+   				VectorCopy( nudged, origin );
 			luxel[ 1 ] += 1.0f;
 		}
 	}
@@ -642,8 +645,8 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 	{
 		VectorMA( dv->xyz, lightmapSampleOffset, dv->normal, nudged );
 		pointCluster = ClusterForPointExtFilter( nudged, LUXEL_EPSILON, numClusters, clusters );
-		//if( pointCluster >= 0 )
-		//	VectorCopy( nudged, origin );
+		if( pointCluster >= 0 )
+			VectorCopy( nudged, origin );
 		luxel[ 1 ] += 1.0f;
 	}
 	
@@ -2004,7 +2007,10 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				{
 					VectorCopy( ambientColor, luxel );
 					if( deluxemap )
+					{
 						VectorScale( normal, 0.00390625f, deluxel );
+						deluxel[3] = 0.00390625f;
+					}
 					luxel[ 3 ] = 1.0f;
 				}
 			}
@@ -2097,8 +2103,9 @@ void IlluminateRawLightmap( int rawLightmapNum )
 						/* color to grayscale (photoshop rgb weighting) */
 						brightness = trace.color[ 0 ] * 0.3f + trace.color[ 1 ] * 0.59f + trace.color[ 2 ] * 0.11f;
 						brightness *= (1.0 / 255.0);
-						VectorScale( trace.direction, brightness, trace.direction );
-						VectorAdd( deluxel, trace.direction, deluxel );
+						VectorScale( trace.direction, brightness, temp );
+						VectorAdd( deluxel, temp, deluxel );
+						deluxel[3] += brightness;
 					}
 				}
 			}
@@ -2353,8 +2360,8 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				{
 					/* get cluster */
 					cluster	= SUPER_CLUSTER( x, y );
-					//%	if( *cluster < 0 )
-					//%		continue;
+					if( *cluster < 0 )
+						continue;
 
 					/* get particulars */
 					luxel = SUPER_LUXEL( lightmapNum, x, y );
@@ -2425,7 +2432,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				{
 					/* get cluster */
 					cluster	= SUPER_CLUSTER( x, y );
-					//%	if( *cluster < 0 )
+					//%	if( *cluster < 0 ) // TODO why not do this check? These pixels should be zero anyway
 					//%		continue;
 					
 					/* get particulars */
@@ -2538,6 +2545,44 @@ void IlluminateRawLightmap( int rawLightmapNum )
 			}
 		}
 	}
+
+
+#if 0
+	// audit pass
+	for( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	{
+		/* early out */
+		if( lm->superLuxels[ lightmapNum ] == NULL )
+			continue;
+		for( y = 0; y < lm->sh; y++ )
+			for( x = 0; x < lm->sw; x++ )
+			{
+				/* get cluster */
+				cluster	= SUPER_CLUSTER( x, y );
+				luxel = SUPER_LUXEL( lightmapNum, x, y );
+				deluxel = SUPER_DELUXEL( x, y );
+				if(!luxel || !deluxel || !cluster)
+				{
+					Sys_FPrintf(SYS_VRB, "WARNING: I got NULL'd.\n");
+					continue;
+				}
+				else if(*cluster < 0)
+				{
+					// unmapped pixel
+					// should have neither deluxemap nor lightmap
+					if(deluxel[3])
+						Sys_FPrintf(SYS_VRB, "WARNING: I have written deluxe to an unmapped luxel. Sorry.\n");
+				}
+				else
+				{
+					// mapped pixel
+					// should have both deluxemap and lightmap
+					if(deluxel[3])
+						Sys_FPrintf(SYS_VRB, "WARNING: I forgot to write deluxe to a mapped luxel. Sorry.\n");
+				}
+			}
+	}
+#endif
 }
 
 

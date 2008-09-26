@@ -2172,8 +2172,21 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 				/* store direction */
 				if( deluxemap )
 				{
+					if(normalizeDeluxemap)
+					{
+						if(!VectorNormalize(deluxel, direction))
+							VectorClear(direction);
+					}
+					else
+					{
+						if(deluxel[3])
+							VectorScale(deluxel, 1 / deluxel[3], direction);
+						else
+							VectorClear(direction);
+					}
+
 					/* normalize average light direction */
-					if( VectorNormalize( deluxel, direction ) )
+					if(direction[0] != 0 || direction[1] != 0 || direction[2] != 0)
 					{
 						/* encode [-1,1] in [0,255] */
 						pixel = olm->bspDirBytes + (((oy * olm->customWidth) + ox) * 3);
