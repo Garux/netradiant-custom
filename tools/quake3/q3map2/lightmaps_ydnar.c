@@ -2145,7 +2145,7 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 				}
 				else
 					VectorCopy( luxel, color );
-				
+
 				/* styles are not affected by minlight */
 				if( lightmapNum == 0 )
 				{
@@ -2167,6 +2167,7 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 				
 				/* store color */
 				pixel = olm->bspLightBytes + (((oy * olm->customWidth) + ox) * 3);
+
 				if(deluxemap)
 					ColorToBytesDeluxe( color, pixel, lm->brightness, deluxel, olm->bspDirBytes + (((oy * olm->customWidth) + ox) * 3));
 				else
@@ -2238,7 +2239,8 @@ void StoreSurfaceLightmaps( void )
 	int					i, j, k, x, y, lx, ly, sx, sy, *cluster, mappedSamples;
 	int					style, size, lightmapNum, lightmapNum2;
 	float				*normal, *luxel, *bspLuxel, *bspLuxel2, *radLuxel, samples, occludedSamples;
-	vec3_t				sample, occludedSample, dirSample, colorMins, colorMaxs;
+	vec3_t				sample, occludedSample, colorMins, colorMaxs;
+	vec_t               dirSample[4];
 	float				*deluxel, *bspDeluxel, *bspDeluxel2;
 	byte				*lb;
 	int					numUsed, numTwins, numTwinLuxels, numStored;
@@ -2444,7 +2446,7 @@ void StoreSurfaceLightmaps( void )
 					/* get luxels */
 					luxel = SUPER_LUXEL( lightmapNum, x, y );
 					deluxel = SUPER_DELUXEL( x, y );
-					
+
 					/* copy light direction */
 					if( deluxemap && lightmapNum == 0 )
 					{
@@ -2513,7 +2515,7 @@ void StoreSurfaceLightmaps( void )
 							}
 						}
 					}
-					
+
 					/* scale the sample */
 					VectorScale( sample, (1.0f / samples), sample );
 					
