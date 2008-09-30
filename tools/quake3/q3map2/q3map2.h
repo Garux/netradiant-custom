@@ -265,8 +265,8 @@ constants
 #define SUPER_LUXEL_SIZE		4
 #define SUPER_ORIGIN_SIZE		3
 #define SUPER_NORMAL_SIZE		4
-#define SUPER_DELUXEL_SIZE		4
-#define BSP_DELUXEL_SIZE		4
+#define SUPER_DELUXEL_SIZE		3
+#define BSP_DELUXEL_SIZE		3
 #define SUPER_FLOODLIGHT_SIZE	1
 
 #define VERTEX_LUXEL( s, v )	(vertexLuxels[ s ] + ((v) * VERTEX_LUXEL_SIZE))
@@ -1714,7 +1714,6 @@ void						RadFreeLights();
 
 /* light_ydnar.c */
 void						ColorToBytes( const float *color, byte *colorBytes, float scale );
-void						ColorToBytesDeluxe( const float *color, byte *colorBytes, float scale, const float *deluxel, byte *deluxeBytes );
 void						SmoothNormals( void );
 
 void						MapRawLightmap( int num );
@@ -2095,7 +2094,6 @@ Q_EXTERN qboolean			cpmaHack Q_ASSIGN( qfalse );
 
 Q_EXTERN qboolean			deluxemap Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debugDeluxemap Q_ASSIGN( qfalse );
-Q_EXTERN qboolean			normalizeDeluxemap Q_ASSIGN( qtrue );
 
 Q_EXTERN qboolean			fast Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			faster Q_ASSIGN( qfalse );

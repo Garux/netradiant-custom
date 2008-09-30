@@ -2145,7 +2145,7 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 				}
 				else
 					VectorCopy( luxel, color );
-
+				
 				/* styles are not affected by minlight */
 				if( lightmapNum == 0 )
 				{
@@ -2167,11 +2167,28 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 				
 				/* store color */
 				pixel = olm->bspLightBytes + (((oy * olm->customWidth) + ox) * 3);
-
-				if(deluxemap)
-					ColorToBytesDeluxe( color, pixel, lm->brightness, deluxel, olm->bspDirBytes + (((oy * olm->customWidth) + ox) * 3));
-				else
-					ColorToBytes( color, pixel, lm->brightness );
+				ColorToBytes( color, pixel, lm->brightness );
+				
+				/* store direction */
+				if( deluxemap )
+				{
+					/* normalize average light direction */
+					if( VectorNormalize( deluxel, direction ) )
+					{
+						/* encode [-1,1] in [0,255] */
+						pixel = olm->bspDirBytes + (((oy * olm->customWidth) + ox) * 3);
+						for( i = 0; i < 3; i++ )
+						{
+							temp = (direction[ i ] + 1.0f) * 127.5f;
+							if( temp < 0 )
+								pixel[ i ] = 0;
+							else if( temp > 255 )
+								pixel[ i ] = 255;
+							else
+								pixel[ i ] = temp;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -2239,8 +2256,7 @@ void StoreSurfaceLightmaps( void )
 	int					i, j, k, x, y, lx, ly, sx, sy, *cluster, mappedSamples;
 	int					style, size, lightmapNum, lightmapNum2;
 	float				*normal, *luxel, *bspLuxel, *bspLuxel2, *radLuxel, samples, occludedSamples;
-	vec3_t				sample, occludedSample, colorMins, colorMaxs;
-	vec_t               dirSample[4];
+	vec3_t				sample, occludedSample, dirSample, colorMins, colorMaxs;
 	float				*deluxel, *bspDeluxel, *bspDeluxel2;
 	byte				*lb;
 	int					numUsed, numTwins, numTwinLuxels, numStored;
@@ -2334,10 +2350,7 @@ void StoreSurfaceLightmaps( void )
 							
 							/* sample deluxemap */
 							if( deluxemap && lightmapNum == 0 )
-							{
 								VectorAdd( dirSample, deluxel, dirSample );
-								dirSample[3] += deluxel[3];
-							}
 							
 							/* keep track of used/occluded samples */
 							if( *cluster != CLUSTER_UNMAPPED )
@@ -2403,10 +2416,7 @@ void StoreSurfaceLightmaps( void )
 					
 					/* store light direction */
 					if( deluxemap && lightmapNum == 0 )
-					{
 						VectorCopy( dirSample, deluxel );
-						dirSample[3] = deluxel[3];
-					}
 					
 					/* store the sample back in super luxels */
 					if( samples > 0.01f )
@@ -2446,13 +2456,10 @@ void StoreSurfaceLightmaps( void )
 					/* get luxels */
 					luxel = SUPER_LUXEL( lightmapNum, x, y );
 					deluxel = SUPER_DELUXEL( x, y );
-
+					
 					/* copy light direction */
 					if( deluxemap && lightmapNum == 0 )
-					{
 						VectorCopy( deluxel, dirSample );
-						dirSample[3] = deluxel[3];
-					}
 					
 					/* is this a valid sample? */
 					if( luxel[ 3 ] > 0.0f )
@@ -2515,7 +2522,7 @@ void StoreSurfaceLightmaps( void )
 							}
 						}
 					}
-
+					
 					/* scale the sample */
 					VectorScale( sample, (1.0f / samples), sample );
 					
@@ -2536,10 +2543,7 @@ void StoreSurfaceLightmaps( void )
 					
 					VectorAdd( bspLuxel, sample, bspLuxel );
 					if( deluxemap && lightmapNum == 0 )
-					{
 						VectorAdd( bspDeluxel, dirSample, bspDeluxel );
-						bspDeluxel[3] += dirSample[3];
-					}
 					
 					/* add color to bounds for solid checking */
 					if( samples > 0.0f )
@@ -2595,7 +2599,6 @@ void StoreSurfaceLightmaps( void )
 						VectorAdd( bspDeluxel, bspDeluxel2, bspDeluxel );
 						VectorScale( bspDeluxel, 0.5f, bspDeluxel );
 						VectorCopy( bspDeluxel, bspDeluxel2 );
-						bspDeluxel2[3] = bspDeluxel[3] = (bspDeluxel[3] + bspDeluxel2[3]) * 0.5f;
 					}
 				}
 			}
@@ -2615,7 +2618,6 @@ void StoreSurfaceLightmaps( void )
 						VectorAdd( bspDeluxel, bspDeluxel2, bspDeluxel );
 						VectorScale( bspDeluxel, 0.5f, bspDeluxel );
 						VectorCopy( bspDeluxel, bspDeluxel2 );
-						bspDeluxel2[3] = bspDeluxel[3] = (bspDeluxel[3] + bspDeluxel2[3]) * 0.5f;
 					}
 				}
 			}

@@ -1750,7 +1750,6 @@ void LightWorld( void )
 	{
 		/* store off the bsp between bounces */
 		StoreSurfaceLightmaps();
-		UnparseEntities();
 		Sys_Printf( "Writing %s\n", source );
 		WriteBSPFile( source );
 		
@@ -1998,12 +1997,6 @@ int LightMain( int argc, char **argv )
 		{
 			deluxemap = qtrue;
 			Sys_Printf( "Generating deluxemaps for average light direction\n" );
-		}
-		
-		else if( !strcmp( argv[ i ], "-nodeluxenormalize" ) )
-		{
-			normalizeDeluxemap = qfalse;
-			Sys_Printf( "Not normalizing deluxemaps\n" );
 		}
 		
 		else if( !strcmp( argv[ i ], "-external" ) )
