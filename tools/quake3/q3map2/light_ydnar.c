@@ -2007,7 +2007,11 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				{
 					VectorCopy( ambientColor, luxel );
 					if( deluxemap )
-						VectorScale( normal, 0.00390625f, deluxel );
+					{
+						brightness = ambientColor[ 0 ] * 0.3f + ambientColor[ 1 ] * 0.59f + ambientColor[ 2 ] * 0.11f;
+						brightness *= (1.0 / 255.0);
+						VectorScale( normal, brightness, deluxel );
+					}
 					luxel[ 3 ] = 1.0f;
 				}
 			}
@@ -2374,6 +2378,11 @@ void IlluminateRawLightmap( int rawLightmapNum )
 					luxel[2]+=flood[2];
 
 					if (luxel[3]==0) luxel[3]=1;
+
+					brightness = flood[ 0 ] * 0.3f + flood[ 1 ] * 0.59f + flood[ 2 ] * 0.11f;
+					brightness *= (1.0 / 255.0);
+					VectorScale( normal, brightness, temp );
+					VectorAdd( deluxel, temp, deluxel );
 				}
 			}
 		}
