@@ -27,7 +27,7 @@ noise: Sound to be played on the control point when it's captured.  Only players
 noise1: Sound to be played to all players when the control point is captured.  Also good for an announcer voice ("Red Team has captured a control point")
 */
 
-/*QUAKED func_assault_destructible (.5 0 .5) (-8 -8 -8) (8 8 8) 
+/*QUAKED func_assault_destructible (.5 0 .5) ?
 This is a brush model which can be damaged. Once triggered it's active and will happily receive damage players inflict upon it. Once all health is consumed it'll disappear and trigger the targeted entity/entities. As damage is received the brush model will be tinted in an increasingly visible flavor of red to give visible feedback.
 -------- KEYS --------
 health: The damage this trigger can take
@@ -35,7 +35,7 @@ target: The entity/entities to be triggered once this entity gets invisible
 targetname: The name other entities can use to target this entity
 */
 
-/*QUAKED func_assault_wall (.5 0 .5) (-8 -8 -8) (8 8 8) 
+/*QUAKED func_assault_wall (.5 0 .5) ?
 Brush model that will disappear once the targeted target_objective is fulfilled. This can be used to restrict access to parts of the map until a certain objective has been conquered.
 -------- KEYS --------
 target: targetname of a target_objective
@@ -547,11 +547,10 @@ EXTRUDE_NORMALS: for converting triangles to clip brushes, extrude along the mod
 EXTRUDE_TERRAIN: always extrude downwards (for terrain)
 */
 
-/*QUAKED misc_models (0 .5 .8) ? 
-A non-solid brush entity, or a way to load models from a map (e.g. self-animated zym models).
-Behaves just like non-solid brushes otherwise.
-The keys below actually apply to most brush entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
-_receiveshadows only works if this is a brush model (that is, if "model" is not defined).
+/*QUAKED misc_gamemodel (0 .5 .8) (-8 -8 -8) (8 8 8)
+A way to load models from a map by the engine (e.g. self-animated zym models).
+Is non-solid by default.
+The keys below actually apply to most engine-loaded model entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
 -------- KEYS --------
 model: when used as a point entity, file name of model to load; when used as a brush entity, do not specify that
 frame: animation frame to play (for self-animated zym models)
@@ -564,6 +563,38 @@ colormap: 1024 + 16 * pantscolor + shirtcolor
 velocity: when movetype isn't 0, initial velocity vector
 angles: initial looking direction
 effects: sum of 1 = BRIGHTFIELD, 4 = BRIGHTLIGHT, 8 = DIMLIGHT, 32 = ADDITIVE, 64 = BLUE, 128 = RED, 512 = FULLBRIGHT, 1024 = FLAME, 2048 = STARDUST, 4096 = NOSHADOW, 8192 = NODEPTHTEST, 32768 = DOUBLESIDED, 8388608 = NOMODELFLAGS (ignores the following coming from a model file), 16777216 = ROCKET, 33554432 = GRENADE, 67108864 = GIB, 134217728 = ROTATE, 268435456 = TRACER, 536870912 = ZOMGIB, 1073741824 = TRACER2, -2147483648 = TRACER3
+loddistance1: distance after which to show the first LOD model replacement (default: 1000)
+loddistance2: distance after which to show the second LOD model replacement (default: 2000)
+lodmodel1: file name of the first LOD model replacement
+lodmodel2: file name of the second LOD model replacement
+-------- Q3MAP2 KEYS --------
+_frame: frame of model to include (set equal to frame if _castshadows is set)
+modelscale: scaling factor (set equal to scale if _castshadows is set)
+_castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
+_clone: copies brushes from entity with identical _clonename. Still needs a single brush that will get replaced.
+_clonename: template name so one can clone from it
+min: override automatically found minimum coordinate bounds
+max: override automatically found maximum coordinate bounds
+targetname: if targeted by a misc_model, its brushes get inserted into this
+_celshader: Sets the cel shader used for this geometry. Note: omit the "textures/" prefix.
+*/
+
+/*QUAKED func_static (0 .5 .8) ? 
+A non-solid brush entity. Use func_wall if you want it solid.
+The keys below actually apply to most brush entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
+-------- KEYS --------
+movetype: way in which it moves: one of 0 = NONE, 1 = ANGLENOCLIP, 2 = ANGLECLIP, 3 = WALK, 4 = STEP, 5 = FLY, 6 = TOSS, 7 = PUSH, 8 = NOCLIP, 9 = FLYMISSILE, 10 = BOUNCE, 11 = BOUNCEMISSILE
+solid: solidity: one of 0 = NOT, 1 = TRIGGER, 2 = BBOX, 3 = SLIDEBOX, 4 = BSP, 5 = CORPSE
+avelocity: vector giving its angular velocity (useful for spinning models)
+scale: scale factor of the model (range: 0.0625 to 15.9375)
+colormap: 1024 + 16 * pantscolor + shirtcolor
+velocity: when movetype isn't 0, initial velocity vector
+angles: initial looking direction
+effects: sum of 1 = BRIGHTFIELD, 4 = BRIGHTLIGHT, 8 = DIMLIGHT, 32 = ADDITIVE, 64 = BLUE, 128 = RED, 512 = FULLBRIGHT, 1024 = FLAME, 2048 = STARDUST, 4096 = NOSHADOW, 8192 = NODEPTHTEST, 32768 = DOUBLESIDED, 8388608 = NOMODELFLAGS (ignores the following coming from a model file), 16777216 = ROCKET, 33554432 = GRENADE, 67108864 = GIB, 134217728 = ROTATE, 268435456 = TRACER, 536870912 = ZOMGIB, 1073741824 = TRACER2, -2147483648 = TRACER3
+loddistance1: distance after which to show the first LOD model replacement (default: 1000)
+loddistance2: distance after which to show the second LOD model replacement (default: 2000)
+lodtarget1: targetname of the first LOD model entity (can be used instead of lodmodel1 to use a brush model instead)
+lodtarget2: targetname of the second LOD model entity (can be used instead of lodmodel2 to use a brush model instead)
 -------- Q3MAP2 KEYS --------
 _frame: frame of model to include (set equal to frame if _castshadows is set)
 modelscale: scaling factor (set equal to scale if _castshadows is set)
@@ -938,7 +969,7 @@ NOTE for race_place: when the race starts after the qualifying, the player with 
 -------- KEYS --------
 target: this should point to a trigger_race_checkpoint to decide when this spawning point is active. The checkpoint has to be AFTER this spawn.
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
-race_place: if target points to the trigger_race_checkpoint with cnt 0 (finish line), this sets which place the spawn corresponds to
+race_place: if target points to the trigger_race_checkpoint with cnt 0 (finish line), this sets which place the spawn corresponds to; the special value 0 stands for spawns for players who come in later (have to be behind the ones with race_place set to an actual place), and -1 marks the spawnpoint for qualifying mode only
 */
 
 /*QUAKED func_pointparticles (.5 .5 .5) ? START_ON
