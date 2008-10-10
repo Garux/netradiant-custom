@@ -2334,7 +2334,6 @@ int LightMain( int argc, char **argv )
 		else
 		{
 			Sys_Printf( "WARNING: Unknown argument \"%s\"\a\n", argv[ i ] );
-			sleep(1);
 		}
 
 	}
