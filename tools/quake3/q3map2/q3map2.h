@@ -303,7 +303,7 @@ abstracted bsp file
 
 /* ok to increase these at the expense of more memory */
 #define	MAX_MAP_MODELS			0x400
-#define	MAX_MAP_BRUSHES			0x8000
+#define	MAX_MAP_BRUSHES			0x10000
 #define	MAX_MAP_ENTITIES		0x8000		//%	0x800	/* ydnar */
 #define	MAX_MAP_ENTSTRING		0x80000		//%	0x40000	/* ydnar */
 #define	MAX_MAP_SHADERS			0x800		//%	0x400	/* ydnar */
