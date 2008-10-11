@@ -864,7 +864,7 @@ int BSPMain( int argc, char **argv )
 			Sys_Printf( "-bsp argument unnecessary\n" );
 		else
 		{
-			Sys_Printf( "WARNING: Unknown option \"%s\"\a\n", argv[ i ] );
+			Sys_Printf( "WARNING: Unknown option \"%s\"\n", argv[ i ] );
 		}
 	}
 	

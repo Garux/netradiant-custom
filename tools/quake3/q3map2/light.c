@@ -2300,6 +2300,7 @@ int LightMain( int argc, char **argv )
 				Sys_Printf( "Enabling randomized dirtmapping\n" );
 			else
 				Sys_Printf( "Enabling ordered dir mapping\n" );
+			i++;
 		}
 		else if( !strcmp( argv[ i ], "-dirtdepth" ) )
 		{
@@ -2307,6 +2308,7 @@ int LightMain( int argc, char **argv )
 			if( dirtDepth <= 0.0f )
 				dirtDepth = 128.0f;
 			Sys_Printf( "Dirtmapping depth set to %.1f\n", dirtDepth );
+			i++;
 		}
 		else if( !strcmp( argv[ i ], "-dirtscale" ) )
 		{
@@ -2314,6 +2316,7 @@ int LightMain( int argc, char **argv )
 			if( dirtScale <= 0.0f )
 				dirtScale = 1.0f;
 			Sys_Printf( "Dirtmapping scale set to %.1f\n", dirtScale );
+			i++;
 		}
 		else if( !strcmp( argv[ i ], "-dirtgain" ) )
 		{
@@ -2321,6 +2324,7 @@ int LightMain( int argc, char **argv )
 			if( dirtGain <= 0.0f )
 				dirtGain = 1.0f;
 			Sys_Printf( "Dirtmapping gain set to %.1f\n", dirtGain );
+			i++;
 		}
 		else if( !strcmp( argv[ i ], "-trianglecheck" ) )
 		{
@@ -2333,7 +2337,7 @@ int LightMain( int argc, char **argv )
 		/* unhandled args */
 		else
 		{
-			Sys_Printf( "WARNING: Unknown argument \"%s\"\a\n", argv[ i ] );
+			Sys_Printf( "WARNING: Unknown argument \"%s\"\n", argv[ i ] );
 		}
 
 	}
