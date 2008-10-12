@@ -2010,6 +2010,9 @@ void IlluminateRawLightmap( int rawLightmapNum )
 					{
 						brightness = ambientColor[ 0 ] * 0.3f + ambientColor[ 1 ] * 0.59f + ambientColor[ 2 ] * 0.11f;
 						brightness *= (1.0 / 255.0);
+						// use AT LEAST this amount of contribution from ambient for the deluxemap, fixes points that receive ZERO light
+						if(brightness < 0.00390625f)
+							brightness = 0.00390625f;
 						VectorScale( normal, brightness, deluxel );
 					}
 					luxel[ 3 ] = 1.0f;
