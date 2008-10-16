@@ -2385,10 +2385,13 @@ void IlluminateRawLightmap( int rawLightmapNum )
 
 					if (luxel[3]==0) luxel[3]=1;
 
-					brightness = flood[ 0 ] * 0.3f + flood[ 1 ] * 0.59f + flood[ 2 ] * 0.11f;
-					brightness *= (1.0 / 255.0);
-					VectorScale( normal, brightness, temp );
-					VectorAdd( deluxel, temp, deluxel );
+					if(deluxemap)
+					{
+						brightness = flood[ 0 ] * 0.3f + flood[ 1 ] * 0.59f + flood[ 2 ] * 0.11f;
+						brightness *= (1.0 / 255.0);
+						VectorScale( normal, brightness, temp );
+						VectorAdd( deluxel, temp, deluxel );
+					}
 				}
 			}
 		}
