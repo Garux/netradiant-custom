@@ -2162,6 +2162,9 @@ Q_EXTERN qboolean			exactPointToPolygon Q_ASSIGN( qtrue );
 Q_EXTERN float				formFactorValueScale Q_ASSIGN( 3.0f );
 Q_EXTERN float				linearScale Q_ASSIGN( 1.0f / 8000.0f );
 
+// for .ase conversion
+Q_EXTERN qboolean			shadersAsBitmap Q_ASSIGN( qfalse );
+
 Q_EXTERN light_t			*lights;
 Q_EXTERN int				numPointLights;
 Q_EXTERN int				numSpotLights;
@@ -2355,7 +2358,6 @@ Q_EXTERN bspFog_t			bspFogs[ MAX_MAP_FOGS ];
 
 Q_EXTERN int				numBSPAds Q_ASSIGN( 0 );
 Q_EXTERN bspAdvertisement_t	bspAds[ MAX_MAP_ADVERTISEMENTS ];
-
 
 /* end marker */
 #endif

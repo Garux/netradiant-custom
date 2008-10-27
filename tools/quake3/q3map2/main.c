@@ -540,6 +540,8 @@ int ConvertBSPMain( int argc, char **argv )
  			i++;
 			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
  		}
+		else if( !strcmp( argv[ i ],  "-shadersasbitmap" ) )
+			shadersAsBitmap = qtrue;
 	}
 	
 	/* clean up map name */

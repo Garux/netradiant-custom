@@ -271,7 +271,10 @@ static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum )
 	fprintf( f, "\t\t\t*MAP_SUBNO\t1\r\n" );
 	fprintf( f, "\t\t\t*MAP_AMOUNT\t1.0\r\n" );
 	fprintf( f, "\t\t\t*MAP_TYPE\tScreen\r\n" );
-	fprintf( f, "\t\t\t*BITMAP\t\"..\\%s\"\r\n", filename );
+	if(...)
+		fprintf( f, "\t\t\t*BITMAP\t\"..\\%s\"\r\n", filename );
+	else
+		fprintf( f, "\t\t\t*BITMAP\t\"%s\"\r\n", shader->shader );
 	fprintf( f, "\t\t\t*BITMAP_FILTER\tPyramidal\r\n" );
 	fprintf( f, "\t\t}\r\n" );
 	
