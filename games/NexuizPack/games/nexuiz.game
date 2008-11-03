@@ -17,7 +17,7 @@
   shaderpath="scripts"
   archivetypes="pk3"
   texturetypes="tga jpg png"
-  modeltypes="md3 mdl md2 ase"
+  modeltypes="md3 mdl md2 ase obj"
   maptypes="mapq3"
   shaders="quake3"
   entityclass="quake3"
