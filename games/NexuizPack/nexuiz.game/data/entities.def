@@ -51,6 +51,7 @@ noise: path/name of .wav or .ogg file to play. Use looping sounds only (e.g. sou
 dmg: damage a player who gets crushed by it receives
 dmgtime: interval to apply dmg to a player who is s in the way
 message: death message when a player gets crushed
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 -------- SPAWNFLAGS --------
 X_AXIS: entity will bob along the X axis.
 Y_AXIS: entity will bob along the Y axis.
@@ -71,7 +72,8 @@ health: (default 0) if set to any non-zero value, the button must take damage (a
 Normal sliding door entity. By default, the door will activate when player walks close to it or when damage is inflicted to it.
 If DOOR_DONT_LINK is not set, the door will be linked with all doors it touches.
 -------- KEYS --------
-message: is printed when the door is touched if it is a trigger door and it hasn't been fired yet
+message: is printed when the door is touched if it is a trigger door and it hasn't been fired yet, or death message if dmg is set
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 angle: determines the opening direction
 targetname: if set, no touch field will be spawned and a remote button or trigger field activates the door.
 health: if set, door must be shot open
@@ -97,7 +99,8 @@ key2: second entity key with one-line description
 t_width: override WIDTH to move back (or height if going down)
 t_length: override LENGTH to move sideways
 dmg: damage to inflict when blocked (2 default)
-message: text to display when activating the door
+message: text to display when activating the door, or death message if dmg is set
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 noise1: sound when opening backwards or closing
 noise2: sound when opening sideways
 noise3: sound when stopping
@@ -140,6 +143,7 @@ sounds: 2 for alternate sound set, -1 for silence, or use the fields below
 sound1: platform starts moving sound
 sound2: platform stop sound
 message: kill message, when someone gets killed by this plat
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 -------- SPAWNFLAGS --------
 CRUSH: crush players hit by the platform instantly
 -------- NOTES --------
@@ -163,6 +167,7 @@ noise: path/name of looping .wav file to play.
 dmg: Do this much dmg every .dmgtime interval when blocked
 dmgtime: See above. (0.25s default)
 message: kill message when crushed by this
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 -------- SPAWNFLAGS --------
 X_AXIS: rotate around the X axis
 Y_AXIS: rotate around the Y axis
@@ -191,13 +196,6 @@ Trains cannot be block-stopped just by getting in their way, the player must be 
 -------- KEYS --------
 speed: default/initial speed of train (default 100 or overridden by speed value of targeted path_corner)
 target: targetname of first path_corner to move to at the default speed; ideally, this path_corner shall be exactly where the train starts
-*/
-
-/*QUAKED func_wall (0 .5 .8) ? 
-A solid brush entity.
-Behaves just like solid brushes, except that it is a separate entity (a submodel) and can be targeted.
--------- KEYS --------
-targetname: when invoking it by a button etc., it changes the color to the initiator of the action (e.g. the one pressing a button). In Onslaught, this can be used to color control points for team who owns them. In other game types, this can be used as a fun feature.
 */
 
 /*QUAKED info_location (1 1 0) (-8 -8 -8) (8 8 8) 
@@ -562,29 +560,25 @@ scale: scale factor of the model (range: 0.0625 to 15.9375)
 colormap: 1024 + 16 * pantscolor + shirtcolor
 velocity: when movetype isn't 0, initial velocity vector
 angles: initial looking direction
+modelscale: scaling factor
 effects: sum of 1 = BRIGHTFIELD, 4 = BRIGHTLIGHT, 8 = DIMLIGHT, 32 = ADDITIVE, 64 = BLUE, 128 = RED, 512 = FULLBRIGHT, 1024 = FLAME, 2048 = STARDUST, 4096 = NOSHADOW, 8192 = NODEPTHTEST, 32768 = DOUBLESIDED, 8388608 = NOMODELFLAGS (ignores the following coming from a model file), 16777216 = ROCKET, 33554432 = GRENADE, 67108864 = GIB, 134217728 = ROTATE, 268435456 = TRACER, 536870912 = ZOMGIB, 1073741824 = TRACER2, -2147483648 = TRACER3
 loddistance1: distance after which to show the first LOD model replacement (default: 1000)
 loddistance2: distance after which to show the second LOD model replacement (default: 2000)
 lodmodel1: file name of the first LOD model replacement
 lodmodel2: file name of the second LOD model replacement
+targetname: when invoking it by a button etc., it changes the color to the initiator of the action (e.g. the one pressing a button). In Onslaught, this can be used to color control points for team who owns them. In other game types, this can be used as a fun feature.
 -------- Q3MAP2 KEYS --------
 _frame: frame of model to include (set equal to frame if _castshadows is set)
-modelscale: scaling factor (set equal to scale if _castshadows is set)
 _castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
-_clone: copies brushes from entity with identical _clonename. Still needs a single brush that will get replaced.
-_clonename: template name so one can clone from it
-min: override automatically found minimum coordinate bounds
-max: override automatically found maximum coordinate bounds
 targetname: if targeted by a misc_model, its brushes get inserted into this
 _celshader: Sets the cel shader used for this geometry. Note: omit the "textures/" prefix.
 */
 
-/*QUAKED func_static (0 .5 .8) ? 
+/*QUAKED func_illusionary (0 .5 .8) ? 
 A non-solid brush entity. Use func_wall if you want it solid.
 The keys below actually apply to most brush entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
 -------- KEYS --------
 movetype: way in which it moves: one of 0 = NONE, 1 = ANGLENOCLIP, 2 = ANGLECLIP, 3 = WALK, 4 = STEP, 5 = FLY, 6 = TOSS, 7 = PUSH, 8 = NOCLIP, 9 = FLYMISSILE, 10 = BOUNCE, 11 = BOUNCEMISSILE
-solid: solidity: one of 0 = NOT, 1 = TRIGGER, 2 = BBOX, 3 = SLIDEBOX, 4 = BSP, 5 = CORPSE
 avelocity: vector giving its angular velocity (useful for spinning models)
 scale: scale factor of the model (range: 0.0625 to 15.9375)
 colormap: 1024 + 16 * pantscolor + shirtcolor
@@ -595,9 +589,36 @@ loddistance1: distance after which to show the first LOD model replacement (defa
 loddistance2: distance after which to show the second LOD model replacement (default: 2000)
 lodtarget1: targetname of the first LOD model entity (can be used instead of lodmodel1 to use a brush model instead)
 lodtarget2: targetname of the second LOD model entity (can be used instead of lodmodel2 to use a brush model instead)
+targetname: when invoking it by a button etc., it changes the color to the initiator of the action (e.g. the one pressing a button). In Onslaught, this can be used to color control points for team who owns them. In other game types, this can be used as a fun feature. Works only with _shirt and _pants textures.
 -------- Q3MAP2 KEYS --------
-_frame: frame of model to include (set equal to frame if _castshadows is set)
-modelscale: scaling factor (set equal to scale if _castshadows is set)
+_castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
+_receiveshadows: Allows per-entity control over shadow reception. Defaults to 1 on everything (world shadows). 0 = receives NO shadows. > 1 = receive shadows only from corresponding keyed entities (see above) and world. < 1 = receive shadows ONLY from corresponding keyed entities.
+_clone: copies brushes from entity with identical _clonename. Still needs a single brush that will get replaced.
+_clonename: template name so one can clone from it
+min: override automatically found minimum coordinate bounds
+max: override automatically found maximum coordinate bounds
+targetname: if targeted by a misc_model, its brushes get inserted into this
+_celshader: Sets the cel shader used for this geometry. Note: omit the "textures/" prefix.
+*/
+
+/*QUAKED func_wall (0 .5 .8) ? 
+A solid brush entity. Use func_illusionary if you want it solid.
+The keys below actually apply to most brush entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
+-------- KEYS --------
+movetype: way in which it moves: one of 0 = NONE, 1 = ANGLENOCLIP, 2 = ANGLECLIP, 3 = WALK, 4 = STEP, 5 = FLY, 6 = TOSS, 7 = PUSH, 8 = NOCLIP, 9 = FLYMISSILE, 10 = BOUNCE, 11 = BOUNCEMISSILE
+solid: solidity: one of 1 = TRIGGER, 2 = BBOX, 3 = SLIDEBOX, 4 = BSP, 5 = CORPSE
+avelocity: vector giving its angular velocity (useful for spinning models)
+scale: scale factor of the model (range: 0.0625 to 15.9375)
+colormap: 1024 + 16 * pantscolor + shirtcolor
+velocity: when movetype isn't 0, initial velocity vector
+angles: initial looking direction
+effects: sum of 1 = BRIGHTFIELD, 4 = BRIGHTLIGHT, 8 = DIMLIGHT, 32 = ADDITIVE, 64 = BLUE, 128 = RED, 512 = FULLBRIGHT, 1024 = FLAME, 2048 = STARDUST, 4096 = NOSHADOW, 8192 = NODEPTHTEST, 32768 = DOUBLESIDED, 8388608 = NOMODELFLAGS (ignores the following coming from a model file), 16777216 = ROCKET, 33554432 = GRENADE, 67108864 = GIB, 134217728 = ROTATE, 268435456 = TRACER, 536870912 = ZOMGIB, 1073741824 = TRACER2, -2147483648 = TRACER3
+loddistance1: distance after which to show the first LOD model replacement (default: 1000)
+loddistance2: distance after which to show the second LOD model replacement (default: 2000)
+lodtarget1: targetname of the first LOD model entity (can be used instead of lodmodel1 to use a brush model instead)
+lodtarget2: targetname of the second LOD model entity (can be used instead of lodmodel2 to use a brush model instead)
+targetname: when invoking it by a button etc., it changes the color to the initiator of the action (e.g. the one pressing a button). In Onslaught, this can be used to color control points for team who owns them. In other game types, this can be used as a fun feature. Works only with _shirt and _pants textures.
+-------- Q3MAP2 KEYS --------
 _castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
 _receiveshadows: Allows per-entity control over shadow reception. Defaults to 1 on everything (world shadows). 0 = receives NO shadows. > 1 = receive shadows only from corresponding keyed entities (see above) and world. < 1 = receive shadows ONLY from corresponding keyed entities.
 _clone: copies brushes from entity with identical _clonename. Still needs a single brush that will get replaced.
@@ -736,7 +757,8 @@ Any object touching this will be hurt.
 Has the useful effect of automatically returning flags, keys and runes when they touch it.
 -------- KEYS --------
 dmg: amount of damage to deal (default: 1000)
-message: kill message when someone gets killed by this (default: "was in the wrong place.")
+message: kill message when someone gets killed by this (default: "was in the wrong place")
+message2: kill message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 */
 
 /*QUAKED trigger_impulse (.5 .5 .5) ? 
@@ -955,6 +977,7 @@ A checkpoint, for the race game mode. Be sure to make them quite long, so they a
 -------- KEYS --------
 cnt: Number of the checkpoint. 0 for finish line, and at least two other checkpoints have to exist. They MUST be touched in sequential order!
 message: Death message, when touching checkpoints in the wrong order.
+message2: Death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 targetname: Name of the checkpoint. info_player_race can target this to assign a spawn to a checkpoint. Also used for triggering a checkpoint by an event.
 target: when the checkpoint is passed, these entities are triggered. Useful for forcing items in certain areas using trigger_items
 -------- SPAWNFLAGS --------
@@ -1052,13 +1075,13 @@ FLOATING: the item will float in air, instead of aligning to the floor by fallin
 model="models/weapons/g_porto.md3"
 */
 
-/*QUAKED target_items (0 0 1) ? AND OR ANDNOT
+/*QUAKED target_items (0 0 1) (-8 -8 -8) (8 8 8) AND OR ANDNOT
 Sets the items of any player who triggers this.
 For the number fields, not specifying a value means not changing it. To clear armor, you need to explicitly set "armor" to "-1".
 You may want to target this by a race checkpoint, a teleporter, or a trigger_multiple with ALLENTS set (so it removes weapons thrown through the field to avoid getting a weapon through it).
 -------- KEYS --------
 targetname: used to trigger this
-netname: space separated list of items (either weapon short names (like in g_start_weapon_* cvars), or item short names "unlimited_ammo", "invincible" and "strength"
+netname: space separated list of items (either weapon short names (like in g_start_weapon_* cvars), or item short names "unlimited_ammo", "unlimited_weapon_ammo", "unlimited_superweapons", "invincible" and "strength"
 message: message to print
 ammo_shells: amount of shells
 ammo_nails: amount of bullets
@@ -1072,4 +1095,92 @@ invincible_finished: if "invincible" is specified, the time in seconds for which
 AND: any items not listed will get removed, and none will get added
 OR: the player may keep items not listed
 ANDNOT: the items listed will get removed from the player
+*/
+
+/*QUAKED target_spawn (1 0 1) (-8 -8 -8) (8 8 8) - ONLOAD
+Spawns or modifies an entity when triggered.
+The entity field list is a single string of the form:
+'field' 'value' 'field' 'value' ... 'classname' 'item_bullets' ... 'field' 'value'
+The special "field" name $ calls a void(void) function, for example a spawn function.
+Special function names available are _setmodel and _setsize.
+Field values can use various variable replacements:
+$E
+$E.field
+$E.field+offset
+$E.field+offset+randomoffset
+where "E" can be self, activator, target (the entity being created/modified) and pusher.
+Example is a Mario-style question mark block which could throw a new weapon_nex when activated like this:
+{
+"classname" "func_button"
+"angle" "-1"
+"wait" "5"
+"target" "makenex"
+"speed" "1000"
+"lip" "64"
+...
+}
+{
+"classname" "target_spawn"
+"origin" "0 0 448"
+"targetname" "makenex"
+"message" "origin $self.origin owner $activator flags 65536 colormap $activator.colormap classname droppedweapon $ spawnfunc_weapon_nex think thrown_wep_think nextthink $time+0.5 velocity $activator.velocity velocity_z 512 movetype 3"
+}
+-------- KEYS --------
+targetname: used to trigger this
+message: entity field list
+target: when set, target_spawn edits entities, instead of creating new ones
+count: make sure no more than count entities have been created by this (refuse to spawn new ones if exceeded)
+-------- SPAWNFLAGS --------
+ONLOAD: create a first entity on map load
+*/
+
+/*QUAKED func_breakable (1 0 0) ? DISABLED INDICATE
+This is a brush model which can be damaged.
+Once all health is consumed it'll disappear and trigger the targeted entity/entities.
+When triggered, it resets to full health, and unbreaks.
+-------- KEYS --------
+health: The damage this trigger can take
+target: The entity/entities to be triggered once this entity gets invisible
+targetname: The name other entities can use to target this entity
+mdl: particle effect name to show when destroyed
+count: particle effect multiplier
+mdl_dead: optional replacement model to show when destroyed
+debris: names of debris models to show when destroyed, separated by spaces
+-------- SPAWNFLAGS --------
+DISABLED: do not allow damaging this until it is first activated
+INDICATE: indicate amount of damage already taken by coloring
+*/
+
+/*QUAKED trigger_relay_if (0 1 0) (-8 -8 -8) (8 8 8) NEGATE
+Relays the trigger event if a cvar is set to a specified value.
+-------- KEYS --------
+target: The entity/entities to relay the trigger events to
+targetname: The name other entities can use to target this entity
+netname: The name of the cvar to check
+message: The value of the cvar to check
+count: The count of entities that must be found
+-------- SPAWNFLAGS --------
+NEGATE: trigger if the cvar does NOT match the value.
+*/
+
+/*QUAKED weapon_hlac (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
+the Heavy Laser Assault Cannon.
+-------- KEYS --------
+respawntime: time till it respawns (default: 30)
+team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+-------- SPAWNFLAGS --------
+FLOATING: the item will float in air, instead of aligning to the floor by falling
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/g_hlac.md3"
+*/
+
+/*QUAKED weapon_seeker (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
+the T.A.G. Seeker.
+-------- KEYS --------
+respawntime: time till it respawns (default: 30)
+team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+-------- SPAWNFLAGS --------
+FLOATING: the item will float in air, instead of aligning to the floor by falling
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/g_seeker.md3"
 */
