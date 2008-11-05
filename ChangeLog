@@ -1,3 +1,36 @@
+2008-10-27 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: -convert -format ase -shadersasbitmap convert mode that writes
+	  the shader names in the *BITMAP field in the .ase. That way, the .ase
+	  files work without changing as mapobjects.
+
+2008-10-12 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: fix the deluxemap contribution from ambient lighting. minLight
+	  is still broken with deluxemapping. If you must use minLight, combine it
+	  with 1/2 or 1/4 of its amount in ambient.
+
+2008-09-30 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: fix deluxemap when lit from the wrong side as good as possible
+	  (by ignoring the deluxemap contribution). now the invariant "deluxemap
+	  vector points away from the surface" should hold. Avoids sudden black
+	  spots when deluxemapping.
+
+2008-09-26 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: turn the Urban Terror vis nudge and triangle check into options
+	  -extravisnudge and -trianglecheck, as they break some Nexuiz maps.
+	  Evaluate the usefulness of these options later.
+	* q3map2: make sure the intermediate .bsp when bouncing always is loadable
+	  into the game (by unparsing the entities, so if gridsize got modified,
+	  that change gets written too)
+
+2008-09-23 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: print a warning if the specified samplesize cannot be used with
+	  the current lightmap size
+
+2008-09-22 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: add dotProduct2scale alphamod
+	* q3map2: add -minsamplesize command line option to override lightmapscale
+	  specified in map files
+
 2008-09-19 Rudolf Polzer divVerent(at)alientrap.org
 	* radiant: add a "Strafe Mode" option
 	* radiant: ctrl-tab now focuses all XYZ views in the three-part view (as
