@@ -52,7 +52,11 @@ public:
 	bool Build(char *def);
 };
 
+#ifdef PATH_MAX
+#define PRTVIEW_PATH_MAX PATH_MAX
+#else
 #define PRTVIEW_PATH_MAX 260
+#endif
 typedef guint32 PackedColour;
 #define RGB(r, g, b) ((guint32)(((guint8) (r) | ((guint16) (g) << 8))|(((guint32) (guint8) (b)) << 16)))
 #define GetRValue(rgb)      ((guint8)(rgb))

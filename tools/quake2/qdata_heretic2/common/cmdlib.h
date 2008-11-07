@@ -57,7 +57,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   #include "q_typedef.h"
 #endif
 
+#ifdef PATH_MAX
+#define	MAX_OS_PATH		PATH_MAX
+#else
 #define	MAX_OS_PATH		1024
+#endif
 #define MEM_BLOCKSIZE 4096
 /*
 extern	qboolean verbose;

@@ -79,7 +79,9 @@ extern idCameraDef camera[MAX_CAMERAS];
 
 extern "C" qboolean loadCamera(int camNum, const	char *name);
 
+#ifndef PATH_MAX
 #define PATH_MAX 260
+#endif
 
 //
 // CCamera
