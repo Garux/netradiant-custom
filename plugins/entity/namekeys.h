@@ -143,7 +143,8 @@ inline bool keyIsNameQuake3(const char* key)
 {
   return string_equal(key, "target")
     || string_equal(key, "targetname")
-    || string_equal(key, "killtarget");
+    || string_equal(key, "killtarget")
+    || (string_equal_n(key, "target", 6) && string_is_integer(key + 6)); // Nexuiz
 }
 
 #endif
