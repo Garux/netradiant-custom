@@ -64,7 +64,7 @@ void IncDrawVerts()
 
 	if(bspDrawVerts == 0)
 	{
-		numBSPDrawVertsBuffer = MAX_MAP_DRAW_VERTS / 37;
+		numBSPDrawVertsBuffer = 1024;
 		
 		bspDrawVerts = safe_malloc_info(sizeof(bspDrawVert_t) * numBSPDrawVertsBuffer, "IncDrawVerts");
 
@@ -73,9 +73,6 @@ void IncDrawVerts()
 	{
 		numBSPDrawVertsBuffer *= 3; // multiply by 1.5
 		numBSPDrawVertsBuffer /= 2;
-
-		if(numBSPDrawVertsBuffer > MAX_MAP_DRAW_VERTS)
-			numBSPDrawVertsBuffer = MAX_MAP_DRAW_VERTS;
 
 		bspDrawVerts = realloc(bspDrawVerts, sizeof(bspDrawVert_t) * numBSPDrawVertsBuffer);
 

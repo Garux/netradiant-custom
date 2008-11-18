@@ -2250,8 +2250,6 @@ void EmitDrawVerts( mapDrawSurface_t *ds, bspDrawSurface_t *out )
 	for( i = 0; i < ds->numVerts; i++ )
 	{
 		/* allocate a new vert */
-		if( numBSPDrawVerts == MAX_MAP_DRAW_VERTS )
-			Error( "MAX_MAP_DRAW_VERTS" );
 		IncDrawVerts();
 		dv = &bspDrawVerts[ numBSPDrawVerts - 1 ];
 		
