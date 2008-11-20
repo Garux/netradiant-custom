@@ -1041,7 +1041,7 @@ size_t picoInputStreamReam(void* inputStream, unsigned char* buffer, size_t leng
 
 scene::Node& loadPicoModel(const picoModule_t* module, ArchiveFile& file)
 {
-  picoModel_t* model = PicoModuleLoadModelStream(module, &file.getInputStream(), picoInputStreamReam, file.size(), 0);
+  picoModel_t* model = PicoModuleLoadModelStream(module, &file.getInputStream(), picoInputStreamReam, file.size(), 0, file.getName());
   PicoModelNode* modelNode = new PicoModelNode(model);
   PicoFreeModel(model);
   return modelNode->node();

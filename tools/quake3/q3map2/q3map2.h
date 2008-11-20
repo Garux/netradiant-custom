@@ -303,14 +303,14 @@ abstracted bsp file
 
 /* ok to increase these at the expense of more memory */
 #define	MAX_MAP_MODELS			0x400
-#define	MAX_MAP_BRUSHES			0x8000
+#define	MAX_MAP_BRUSHES			0x10000
 #define	MAX_MAP_ENTITIES		0x1000		//%	0x800	/* ydnar */
 #define	MAX_MAP_ENTSTRING		0x80000		//%	0x40000	/* ydnar */
 #define	MAX_MAP_SHADERS			0x800		//%	0x400	/* ydnar */
 
 #define	MAX_MAP_AREAS			0x100		/* MAX_MAP_AREA_BYTES in q_shared must match! */
 #define	MAX_MAP_FOGS			30			//& 0x100	/* RBSP (32 - world fog - goggles) */
-#define	MAX_MAP_PLANES			0x100000	//%	0x20000	/* ydnar for md */
+#define	MAX_MAP_PLANES			0x200000	//%	0x20000	/* ydnar for md */
 #define	MAX_MAP_NODES			0x20000
 #define	MAX_MAP_BRUSHSIDES		0x100000	//%	0x20000	/* ydnar */
 #define	MAX_MAP_LEAFS			0x20000

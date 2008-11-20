@@ -259,7 +259,7 @@ picoModel_t	*PicoLoadModel( char *fileName, int frameNum )
 	return model;
 }
 
-picoModel_t	*PicoModuleLoadModelStream( const picoModule_t* module, void* inputStream, PicoInputStreamReadFunc inputStreamRead, size_t streamLength, int frameNum )
+picoModel_t	*PicoModuleLoadModelStream( const picoModule_t* module, void* inputStream, PicoInputStreamReadFunc inputStreamRead, size_t streamLength, int frameNum, const char *fileName )
 {
 	picoModel_t			*model;
 	picoByte_t			*buffer;
@@ -286,14 +286,7 @@ picoModel_t	*PicoModuleLoadModelStream( const picoModule_t* module, void* inputS
 	bufSize = (int)inputStreamRead(inputStream, buffer, streamLength);
 	buffer[bufSize] = '\0';
 
-	{
-		// dummy filename
-		char fileName[128];
-		fileName[0] = '.';
-		strncpy(fileName + 1, module->defaultExts[0], 126);
-		fileName[127] = '\0';
-		model = PicoModuleLoadModel(module, fileName, buffer, bufSize, frameNum);
-	}
+	model = PicoModuleLoadModel(module, fileName, buffer, bufSize, frameNum);
 	
   if(model != 0)
   {
