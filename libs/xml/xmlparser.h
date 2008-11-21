@@ -99,7 +99,7 @@ public:
   }
 };
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #if _MSC_VER < 1400 
 #define vsnprintf std::vsnprintf
 #endif

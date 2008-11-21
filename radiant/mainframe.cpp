@@ -3304,7 +3304,9 @@ void GlobalGL_sharedContextCreated()
   GlobalShaderCache().realise();
   Textures_Realise();
 
-#ifdef __linux__
+#if defined(WIN32)
+  g_font = glfont_create("courier new 8");
+#elif defined(__linux__)
   g_font = glfont_create("fixed 8");
 #else
   g_font = glfont_create("courier 8");
