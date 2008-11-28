@@ -221,6 +221,7 @@ targetname: the entity that requires an aiming direction points to this.
 Attacking team's player spawning location in Assault. Should touch the floor, but not the walls, and should point where the player should look when he spawns there.
 -------- KEYS --------
 target: this should point to a target_objective to decide when this spawning point is active.
+target2: trigger all entities with this targetname when someone spawns
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
 */
 
@@ -228,6 +229,7 @@ cnt: weight of spawn point for random selection. Set to a lower value if you hav
 Normal player spawning location in game types without team spawns. Should touch the floor, but not the walls, and should point where the player should look when he spawns there.
 -------- KEYS --------
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
+target: trigger all entities with this targetname when someone spawns
 targetname: when targeted by a func_button, pressing the button will assign the spawn point to the team of the activator as an additional spawn point, or reassign it if it was already assigned. Also used to assign spawn points to Onslaught control points.
 */
 
@@ -235,6 +237,7 @@ targetname: when targeted by a func_button, pressing the button will assign the 
 Defending team's player spawning location in Assault. Should touch the floor, but not the walls, and should point where the player should look when he spawns there.
 -------- KEYS --------
 target: this should point to a target_objective to decide when this spawning point is active.
+target2: trigger all entities with this targetname when someone spawns
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
 */
 
@@ -242,6 +245,7 @@ cnt: weight of spawn point for random selection. Set to a lower value if you hav
 Red team's player spawning location in e.g. CTF and Onslaught. Should touch the floor, but not the walls, and should point where the player should look when he spawns there.
 -------- KEYS --------
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
+target: trigger all entities with this targetname when someone spawns
 targetname: when targeted by a func_button, pressing the button will reassign the spawn point to the team of the activator. If a team has no more spawn point left, it immediately loses.
 */
 
@@ -249,6 +253,7 @@ targetname: when targeted by a func_button, pressing the button will reassign th
 Blue team's player spawning location in e.g. CTF and Onslaught. Should touch the floor, but not the walls, and should point where the player should look when he spawns there.
 -------- KEYS --------
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
+target: trigger all entities with this targetname when someone spawns
 targetname: when targeted by a func_button, pressing the button will reassign the spawn point to the team of the activator. If a team has no more spawn point left, it immediately loses.
 */
 
@@ -256,6 +261,7 @@ targetname: when targeted by a func_button, pressing the button will reassign th
 Yellow team's player spawning location, but there is no game mode to use this yet. Anyway, should touch the floor, but not the walls, and should point where the player should look when he spawns there.
 -------- KEYS --------
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
+target: trigger all entities with this targetname when someone spawns
 targetname: when targeted by a func_button, pressing the button will reassign the spawn point to the team of the activator. If a team has no more spawn point left, it immediately loses.
 */
 
@@ -263,6 +269,7 @@ targetname: when targeted by a func_button, pressing the button will reassign th
 Pink team's player spawning location, but there is no game mode to use this yet. Anyway, should touch the floor, but not the walls, and should point where the player should look when he spawns there.
 -------- KEYS --------
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
+target: trigger all entities with this targetname when someone spawns
 targetname: when targeted by a func_button, pressing the button will reassign the spawn point to the team of the activator. If a team has no more spawn point left, it immediately loses.
 */
 
@@ -545,7 +552,7 @@ EXTRUDE_NORMALS: for converting triangles to clip brushes, extrude along the mod
 EXTRUDE_TERRAIN: always extrude downwards (for terrain)
 */
 
-/*QUAKED misc_gamemodel (0 .5 .8) (-8 -8 -8) (8 8 8)
+/*QUAKED misc_gamemodel (0 .5 .8) (-8 -8 -8) (8 8 8) ALIGN_ORIGIN ALIGN_BOTTOM
 A way to load models from a map by the engine (e.g. self-animated zym models).
 Is non-solid by default.
 The keys below actually apply to most engine-loaded model entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
@@ -572,6 +579,9 @@ _frame: frame of model to include (set equal to frame if _castshadows is set)
 _castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
 targetname: if targeted by a misc_model, its brushes get inserted into this
 _celshader: Sets the cel shader used for this geometry. Note: omit the "textures/" prefix.
+-------- SPAWNFLAGS --------
+ALIGN_ORIGN: align the origin to the surface below the model
+ALIGN_BOTTOM: align the bottom of the model to the surface below it
 */
 
 /*QUAKED func_illusionary (0 .5 .8) ? 
@@ -684,20 +694,25 @@ This entity ends the current assault round if triggered or if the timelimit is r
 Ending a round means swapping attacker/defender teams, resetting objectives and rewarding the winning team.
 Every assault map needs this entity. There should only be one per map.
 -------- KEYS --------
-health: Time in seconds how long a round in assault shall last. Default is 300 seconds.
 targetname: Name to target this entity
 */
 
 /*QUAKED target_assault_roundstart (.5 0 .5) (-8 -8 -8) (8 8 8) 
 This entity triggers its targets whenever a new assault round is started. This can be used to e.g. activate the first objective.
 -------- KEYS --------
-target: targetname of the entity/entities to be triggered
+target: targetname of entities to be enabled/triggered on round start (e.g. the first target_objective)
+target2: targetname of entities to be enabled/triggered on round start (e.g. the func_assault_destructibles targeting the target_objective)
+target3: targetname of entities to be enabled/triggered on round start
+target4: targetname of entities to be enabled/triggered on round start
 */
 
 /*QUAKED target_objective (.5 0 .5) (-8 -8 -8) (8 8 8) 
 target_objective controls an objective. Once triggered the objective is active and has 100 "health" points. If this "health" falls below zero it is assumed this objective has been fulfilled and entities targeted will be triggered (e.g. to activate the next objective or to end this round). Use target_objective_decrease to decrease the objective health.
 -------- KEYS --------
-target: targetname of the entity to be triggered once this objective is fulfilled.
+target: targetname of entities to be enabled/triggered on objective fulfilling (e.g. the next target_objective, or target_assault_roundend)
+target2: targetname of entities to be enabled/triggered on objective fulfilling (e.g. the func_assault_destructibles targeting the target_objective)
+target3: targetname of entities to be enabled/triggered on objective fulfilling
+target4: targetname of entities to be enabled/triggered on objective fulfilling
 targetname: targetname for this entity so it can be triggered by other entities.
 */
 
@@ -707,7 +722,7 @@ If you want e.g. two events to happen to conquer an objective you'd need two tar
 -------- KEYS --------
 target: The targetname of the target_objective you want to manipulate.
 targetname: Name for other entities to target this entity.
-dmg: The amount of "health"-points you want to subtract from the objective health. Defaults to 101.
+dmg: The amount of "health"-points you want to subtract from the objective health. Defaults to 101. Also used as score for triggering this objective.
 */
 
 /*QUAKED target_position (0 .5 0) (-8 -8 -8) (8 8 8) 
@@ -782,6 +797,9 @@ wait: prevent triggering again for this amount of time
 sounds: 1 to play misc/secret.wav, 2 to play misc/talk.wav, 3 to play misc/trigger1.wav
 noise: path to sound file, if you want to play something else
 target: trigger all entities with this targetname when triggered
+target2: trigger all entities with this targetname when triggered
+target3: trigger all entities with this targetname when triggered
+target4: trigger all entities with this targetname when triggered
 targetname: name that identifies this entity so it can be triggered
 delay: delay the triggering by the given time
 message: print this message to the player who activated the trigger
@@ -991,6 +1009,7 @@ Race spawn point.
 NOTE for race_place: when the race starts after the qualifying, the player with the fastest map ends up at the info_player_race with race_place 1, and so on. If there are too many players, or if someone comes in later, he will spawn at an info_player_race with race_place not set. So for each trigger_race_checkpoint, there must be at least one corresponding info_player_race with race_place NOT set.
 -------- KEYS --------
 target: this should point to a trigger_race_checkpoint to decide when this spawning point is active. The checkpoint has to be AFTER this spawn.
+target2: trigger all entities with this targetname when someone spawns
 cnt: weight of spawn point for random selection. Set to a lower value if you have many spawn points close together. Default value is 1.
 race_place: if target points to the trigger_race_checkpoint with cnt 0 (finish line), this sets which place the spawn corresponds to; the special value 0 stands for spawns for players who come in later (have to be behind the ones with race_place set to an actual place), and -1 marks the spawnpoint for qualifying mode only
 */
@@ -1146,6 +1165,13 @@ mdl: particle effect name to show when destroyed
 count: particle effect multiplier
 mdl_dead: optional replacement model to show when destroyed
 debris: names of debris models to show when destroyed, separated by spaces
+noise: sound to play when destroyed
+dmg: damage to deal to the environment when destroyed
+dmg_edge: edge damage to deal to the environment when destroyed
+dmg_radius: damage radius
+dmg_force: damage force
+message: death message when a player gets hit by the explosion
+message2: death message when someone gets pushed into this (default: "was pushed into an explosion by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 -------- SPAWNFLAGS --------
 DISABLED: do not allow damaging this until it is first activated
 INDICATE: indicate amount of damage already taken by coloring
@@ -1183,4 +1209,23 @@ team: out of items with the same value here, only one (random one) will spawn. U
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
 model="models/weapons/g_seeker.md3"
+*/
+
+/*QUAKED weapon_hook (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
+the on-hand Grappling Hook.
+-------- KEYS --------
+respawntime: time till it respawns (default: 30)
+team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+-------- SPAWNFLAGS --------
+FLOATING: the item will float in air, instead of aligning to the floor by falling
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/g_hookgun.md3"
+*/
+
+/*QUAKED trigger_heal (.5 .5 .5) ?
+Any object touching this will be healed.
+-------- KEYS --------
+health: health to give per second (default 10)
+max_health: max health this trigger will give (default 200)
+noise: sound file to play (use misc/null.wav to make it silent), default = item_health_medium sound
 */
