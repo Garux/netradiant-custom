@@ -280,6 +280,7 @@ respawntime: time till it respawns (default: 30)
 armorvalue: amount of armor it gives (default: 100 (g_pickup_armorlarge))
 max_armorvalue: max of armor it increases to (default: 999 (g_pickup_armorlarge_max))
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -293,6 +294,7 @@ respawntime: time till it respawns (default: 20)
 armorvalue: amount of armor it gives (default: 25 (g_pickup_armormedium))
 max_armorvalue: max of armor it increases to (default: 999 (g_pickup_armormedium_max))
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -306,6 +308,7 @@ respawntime: time till it respawns (default: 15)
 armorvalue: amount of armor it gives (default: 5 (g_pickup_armorsmall))
 max_armorvalue: max of armor it increases to (default: 999 (g_pickup_armorsmall_max))
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -318,6 +321,7 @@ Machine Gun ammo
 ammo_nails: bullets gained by this item (if unset, g_pickup_nails is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -330,6 +334,7 @@ Nex, Electro and Crylink ammo
 ammo_cells: cells gained by this item (if unset, g_pickup_cells is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -365,6 +370,7 @@ respawntime: time till it respawns (default: 20)
 health: amount of health it gives (default: 50 (g_pickup_healthlarge))
 max_health: max of health it increases to (default: 999 (g_pickup_healthlarge_max))
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -378,6 +384,7 @@ respawntime: time till it respawns (default: 15)
 health: amount of health it gives (default: 25 (g_pickup_healthmedium))
 max_health: max of health it increases to (default: 999 (g_pickup_healthmedium_max))
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -392,6 +399,7 @@ respawntime: time till it respawns (default: 30)
 health: amount of health it gives (default: 100 (g_pickup_healthmega))
 max_health: max of health it increases to (default: 999 (g_pickup_healthmega_max))
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -405,6 +413,7 @@ respawntime: time till it respawns (default: 15)
 health: amount of health it gives (default: 5 (g_pickup_healthsmall))
 max_health: max of health it increases to (default: 5 (g_pickup_healthsmall_max))
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -417,6 +426,7 @@ In Minstagib, this randomly turns into either an invisibility, an extra lives or
 -------- KEYS --------
 respawntime: time till it respawns (default: 120)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -430,6 +440,7 @@ It only appears when playing Minstagib and prevents auto-replacement of weapon_n
 -------- KEYS --------
 respawntime: time till it respawns (default: 45)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -442,6 +453,7 @@ Rocket Launcher, Hagar and Mortar ammo
 ammo_rockets: rockets gained by this item (if unset, g_pickup_rockets is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -454,6 +466,7 @@ Shotgun ammo
 ammo_shells: shells gained by this item (if unset, g_pickup_shells is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -466,6 +479,7 @@ In Minstagib, this randomly turns into either an invisibility, an extra lives or
 -------- KEYS --------
 respawntime: time till it respawns (default: 120)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -872,6 +886,7 @@ the Crylink
 ammo_cells: initial cells of the weapon (if unset, g_pickup_cells is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -884,6 +899,7 @@ the Electro
 ammo_cells: initial cells of the weapon (if unset, g_pickup_cells is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -896,6 +912,7 @@ the Mortar
 ammo_rockets: initial rockets of the weapon (if unset, g_pickup_rockets is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -908,6 +925,7 @@ the Hagar
 ammo_rockets: initial rockets of the weapon (if unset, g_pickup_rockets is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -921,6 +939,7 @@ In Minstagib, this turns into an item_minst_cells if no explicit item_minst_cell
 ammo_cells: initial cells of the weapon (if unset, g_pickup_cells is used)
 respawntime: time till it respawns (default: 15 * g_balance_nex_respawntime_modifier)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -934,6 +953,7 @@ In Minstagib, this turns into an item_minst_cells if no explicit item_minst_cell
 ammo_rockets: initial rockets of the weapon (if unset, g_pickup_rockets is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -946,6 +966,7 @@ the Shotgun
 ammo_shells: initial shells of the weapon (if unset, g_pickup_shells is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -958,6 +979,7 @@ the Machine Gun
 ammo_nails: initial bullets of the weapon (if unset, g_pickup_nails is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -1076,6 +1098,7 @@ the MinstaGib Nex. Always kills with one shot.
 ammo_cells: initial cells of the weapon (if unset, g_pickup_cells is used)
 respawntime: time till it respawns (default: 15)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -1088,6 +1111,7 @@ Portals cannot be made on noimpact surfaces, and the portal missile will bounce 
 -------- KEYS --------
 respawntime: time till it respawns (default: 120)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -1194,6 +1218,7 @@ the Heavy Laser Assault Cannon.
 -------- KEYS --------
 respawntime: time till it respawns (default: 30)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -1205,6 +1230,7 @@ the T.A.G. Seeker.
 -------- KEYS --------
 respawntime: time till it respawns (default: 30)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -1216,6 +1242,7 @@ the on-hand Grappling Hook.
 -------- KEYS --------
 respawntime: time till it respawns (default: 30)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
