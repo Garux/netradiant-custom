@@ -36,7 +36,7 @@
 
 2008-09-30 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: fix deluxemap when lit from the wrong side as good as possible
-	  (by ignoring the deluxemap contribution). now the invariant "deluxemap
+	  by ignoring the deluxemap contribution. Now the invariant "deluxemap
 	  vector points away from the surface" should hold. Avoids sudden black
 	  spots when deluxemapping.
 
