@@ -1,3 +1,29 @@
+2008-11-28 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: -dirty: don't treat skybox surfaces as solid for dirtmapping;
+	  prevents Quake 2-ish "dark near skybox" effect.
+
+2008-11-21 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: applied win32 font and build fix by ingar
+
+2008-11-20 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: extend some more limits but just by a bit this time to not
+	  let memory usage rise too high
+	* radiant: fix finding the .mtl file for .obj models
+
+2008-11-18 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: get rid of the MAX_MAP_DRAW_VERTS limit (the array already was
+	  dynamic anyway); allows creating BSPs of over 400 MB in size ;)
+
+2008-11-10 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: draw targeting arrows also for target2, etc. keys even in Q3
+	  map mode; this is good for Nexuiz which now supports target, target2,
+	  target3 and target4.
+
+2008-11-07 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: fix buffer overruns because of using the realpath function
+	  with an insufficient buffer; there might be more of these in the code
+	  base
+
 2008-10-27 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: -convert -format ase -shadersasbitmap convert mode that writes
 	  the shader names in the *BITMAP field in the .ase. That way, the .ase

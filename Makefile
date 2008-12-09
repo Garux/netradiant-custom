@@ -1,4 +1,5 @@
--include Makefile.conf
+MAKEFILE_CONF      ?= Makefile.conf
+-include $(MAKEFILE_CONF)
 
 ## CONFIGURATION SETTINGS
 # user customizable stuf
