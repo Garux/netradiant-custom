@@ -1772,6 +1772,13 @@ static void ParseShaderFile( const char *filename )
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 					}
 					
+					/* dotProductScale ( X Y Z MIN MAX ) */
+					else if( !Q_stricmp( token, "dotProductScale" ) )
+					{
+						cm->type = CM_COLOR_DOT_PRODUCT_SCALE + alpha;
+						Parse1DMatrixAppend( shaderText, 3, cm->data );
+					}
+					
 					/* dotProduct2 ( X Y Z ) */
 					else if( !Q_stricmp( token, "dotProduct2" ) )
 					{
