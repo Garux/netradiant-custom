@@ -544,8 +544,9 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 					{
 						/* set up brush sides */
 						buildBrush->numsides = 5;
-						for( j = 0; j < buildBrush->numsides; j++ )
-							buildBrush->sides[ j ].shaderInfo = si;
+						buildBrush->sides[ 0 ].shaderInfo = si;
+						for( j = 1; j < buildBrush->numsides; j++ )
+							buildBrush->sides[ j ].shaderInfo = NULL; // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 
 						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
 						buildBrush->sides[ 1 ].planenum = FindFloatPlane( pa, pa[ 3 ], 2, &points[ 1 ] ); // pa contains points[1] and points[2]
