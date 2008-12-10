@@ -25,14 +25,6 @@ extern "C"
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef boolean
-#ifdef __cplusplus
-#define	boolean	bool
-#else
-typedef int boolean;
-#endif
-#endif
-
 #endif
 
 #ifdef __MACOS__
@@ -42,6 +34,14 @@ typedef int boolean;
 #define	register
 #define	INT32	int
 
+#endif
+
+#ifndef boolean
+#ifdef __cplusplus
+#define	boolean	bool
+#else
+#define boolean int
+#endif
 #endif
 
 // rad additions
