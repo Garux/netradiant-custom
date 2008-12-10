@@ -88,8 +88,8 @@ SKeyInfo g_Keys[] =
   {"NumPad7", GDK_KP_7},
   {"NumPad8", GDK_KP_8},
   {"NumPad9", GDK_KP_9},
-  {"[", 219},
-  {"]", 221},
+  {"[", GDK_bracketleft},
+  {"]", GDK_bracketright},
   {"\\", 220},
   {"Home", GDK_Home}
 };
