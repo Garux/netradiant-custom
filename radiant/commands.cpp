@@ -267,6 +267,7 @@ void SaveCommandMap(const char* path)
         m_file << name << "=";
 
         const char* key = global_keys_find(accelerator.key);
+
         if(!string_empty(key))
         {
           m_file << key;
@@ -328,6 +329,7 @@ public:
       int modifiers = 0;
       const char* last = value + string_length(value);
       const char* keyEnd = stringrange_find(value, last, '+');
+
       for(const char* modifier = keyEnd; modifier != last;)
       {
         const char* next = stringrange_find(modifier + 1, last, '+');
@@ -357,7 +359,7 @@ public:
 
       // strBuff has been cleaned of it's modifiers .. switch between a regular key and a virtual one
       // based on length
-      if(keyEnd - value == 1) // most often case.. deal with first
+      if(keyEnd - value == 1 && std::isalpha(value[0])) // most often case.. deal with first
       {
         accelerator.key = std::toupper(value[0]);
         ++m_count;
