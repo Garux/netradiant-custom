@@ -47,6 +47,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "entity.h"
 
+/// The "origin" key directly controls the entity's local-to-parent transform.
+
 class Group
 {
   EntityKeyValues m_entity;
@@ -58,36 +60,47 @@ class Group
   NamedEntity m_named;
   NameKeys m_nameKeys;
 
+  OriginKey m_originKey;
+  Vector3 m_origin;
+
   RenderableNamedEntity m_renderName;
   mutable Vector3 m_name_origin;
 
   Callback m_transformChanged;
+  Callback m_evaluateTransform;
 
   void construct()
   {
     m_keyObservers.insert("classname", ClassnameFilter::ClassnameChangedCaller(m_filter));
     m_keyObservers.insert(Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller(m_named));
+	m_keyObservers.insert("origin", OriginKey::OriginChangedCaller(m_originKey));
   }
  
 public:
-  Group(EntityClass* eclass, scene::Node& node, const Callback& transformChanged) :
+  Group(EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform) :
     m_entity(eclass),
     m_filter(m_entity, node),
     m_named(m_entity),
     m_nameKeys(m_entity),
+    m_originKey(OriginChangedCaller(*this)),
+    m_origin(ORIGINKEY_IDENTITY),
     m_renderName(m_named, m_name_origin),
 	m_name_origin(g_vector3_identity),
-    m_transformChanged(transformChanged)
+    m_transformChanged(transformChanged),
+    m_evaluateTransform(evaluateTransform)
   {
     construct();
   }
-  Group(const Group& other, scene::Node& node, const Callback& transformChanged) :
+  Group(const Group& other, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform) :
     m_entity(other.m_entity),
     m_filter(m_entity, node),
     m_named(m_entity),
     m_nameKeys(m_entity),
+    m_originKey(OriginChangedCaller(*this)),
+    m_origin(ORIGINKEY_IDENTITY),
     m_renderName(m_named, g_vector3_identity),
-    m_transformChanged(transformChanged)
+    m_transformChanged(transformChanged),
+    m_evaluateTransform(evaluateTransform)
   {
     construct();
   }
@@ -170,6 +183,42 @@ public:
       renderer.addRenderable(m_renderName, localToWorld);
     }
   }
+
+  void updateTransform()
+  {
+    m_transform.localToParent() = g_matrix4_identity;
+    matrix4_translate_by_vec3(m_transform.localToParent(), m_origin);
+    m_transformChanged();
+  }
+  typedef MemberCaller<Group, &Group::updateTransform> UpdateTransformCaller;
+  void originChanged()
+  {
+    m_origin = m_originKey.m_origin;
+    updateTransform();
+  }
+  typedef MemberCaller<Group, &Group::originChanged> OriginChangedCaller;
+
+  void translate(const Vector3& translation)
+  {
+    m_origin = origin_translated(m_origin, translation);
+  }
+
+  void revertTransform()
+  {
+    m_origin = m_originKey.m_origin;
+  }
+  void freezeTransform()
+  {
+    m_originKey.m_origin = m_origin;
+    m_originKey.write(&m_entity);
+  }
+  void transformChanged()
+  {
+    revertTransform();
+    m_evaluateTransform();
+    updateTransform();
+  }
+  typedef MemberCaller<Group, &Group::transformChanged> TransformChangedCaller;
 };
 
 #if 0
@@ -244,6 +293,7 @@ inline void Scene_forEachChildTransformable(const Functor& functor, const scene:
 
 class GroupInstance :
   public TargetableInstance,
+  public TransformModifier,
 #if 0
   public Transformable,
 #endif
@@ -273,6 +323,7 @@ public:
 
   GroupInstance(const scene::Path& path, scene::Instance* parent, Group& group) :
     TargetableInstance(path, parent, this, StaticTypeCasts::instance().get(), group.getEntity(), *this),
+	TransformModifier(Group::TransformChangedCaller(group), ApplyTransformCaller(*this)),
     m_contained(group)
   {
     m_contained.instanceAttach(Instance::path());
@@ -291,6 +342,8 @@ public:
   {
 	  m_contained.renderWireframe(renderer, volume, Instance::localToWorld(), Instance::childBounds());
   }
+
+  STRING_CONSTANT(Name, "GroupInstance");
 
 #if 0
   void setType(TransformModifierType type)
@@ -318,6 +371,21 @@ public:
   {
   }
 #endif
+
+  void evaluateTransform()
+  {
+    if(getType() == TRANSFORM_PRIMITIVE)
+    {
+      m_contained.translate(getTranslation());
+    }
+  }
+  void applyTransform()
+  {
+    m_contained.revertTransform();
+    evaluateTransform();
+    m_contained.freezeTransform();
+  }
+  typedef MemberCaller<GroupInstance, &GroupInstance::applyTransform> ApplyTransformCaller;
 };
 
 class GroupNode :
@@ -387,7 +455,7 @@ public:
 
   GroupNode(EntityClass* eclass) :
     m_node(this, this, StaticTypeCasts::instance().get()),
-    m_contained(eclass, m_node, InstanceSet::TransformChangedCaller(m_instances))
+    m_contained(eclass, m_node, InstanceSet::TransformChangedCaller(m_instances), InstanceSetEvaluateTransform<GroupInstance>::Caller(m_instances))
   {
     construct();
   }
@@ -397,7 +465,7 @@ public:
     scene::Cloneable(other),
     scene::Traversable::Observer(other),
     m_node(this, this, StaticTypeCasts::instance().get()),
-    m_contained(other.m_contained, m_node, InstanceSet::TransformChangedCaller(m_instances))
+    m_contained(other.m_contained, m_node, InstanceSet::TransformChangedCaller(m_instances), InstanceSetEvaluateTransform<GroupInstance>::Caller(m_instances))
   {
     construct();
   }
