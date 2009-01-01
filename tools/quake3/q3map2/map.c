@@ -595,6 +595,19 @@ produces a final brush based on the buildBrush->sides array
 and links it to the current entity
 */
 
+static void MergeOrigin(entity_t *ent, vec3_t origin)
+{
+	vec3_t adjustment;
+
+	VectorMA(origin, -1, ent->originbrush_origin, adjustment);
+	VectorAdd(adjustment, ent->origin, ent->origin);
+	VectorCopy(origin, ent->originbrush_origin);
+
+	char string[128];
+	sprintf(string, "%f %f %f", ent->origin[0], ent->origin[1], ent->origin[2]);
+	SetKeyValue(ent, "origin", string);
+}
+
 brush_t *FinishBrush( void )
 {
 	brush_t		*b;
@@ -621,10 +634,7 @@ brush_t *FinishBrush( void )
 		VectorAdd (buildBrush->mins, buildBrush->maxs, origin);
 		VectorScale (origin, 0.5, origin);
 
-		sprintf( string, "%i %i %i", (int) origin[ 0 ], (int) origin[ 1 ], (int) origin[ 2 ] );
-		SetKeyValue( &entities[ numEntities - 1 ], "origin", string);
-
-		VectorCopy( origin, entities[ numEntities - 1 ].origin);
+		MergeOrigin(&entities[ numEntities - 1 ], origin);
 
 		/* don't keep this brush */
 		return NULL;

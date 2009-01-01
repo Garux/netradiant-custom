@@ -1076,6 +1076,7 @@ typedef struct
 	int					mapEntityNum, firstDrawSurf;
 	int					firstBrush, numBrushes;		/* only valid during BSP compile */
 	epair_t				*epairs;
+	vec3_t				originbrush_origin;
 }
 entity_t;
 
