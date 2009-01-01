@@ -1186,7 +1186,9 @@ void SelectFaceMode()
 
 class CloneSelected : public scene::Graph::Walker
 {
+  bool doFixNames;
 public:
+  CloneSelected(bool d): doFixNames(d) { }
   bool pre(const scene::Path& path, scene::Instance& instance) const
   {
     if(path.size() == 1)
@@ -1223,9 +1225,9 @@ public:
   }
 };
 
-void Scene_Clone_Selected(scene::Graph& graph)
+void Scene_Clone_Selected(scene::Graph& graph, bool doFixNames)
 {
-  graph.traverse(CloneSelected());
+  graph.traverse(CloneSelected(doFixNames));
 
   Map_mergeClonedNames();
 }
@@ -1297,7 +1299,20 @@ void Selection_Clone()
   {
     UndoableCommand undo("cloneSelected");
 
-    Scene_Clone_Selected(GlobalSceneGraph());
+    Scene_Clone_Selected(GlobalSceneGraph(), false);
+
+    //NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+    //NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+  }
+}
+
+void Selection_Clone_FixNames()
+{
+  if(GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive)
+  {
+    UndoableCommand undo("cloneSelected");
+
+    Scene_Clone_Selected(GlobalSceneGraph(), true);
 
     //NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
     //NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
@@ -3393,6 +3408,7 @@ void MainFrame_Construct()
   GlobalCommands_insert("Paste", FreeCaller<Paste>(), Accelerator('V', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("PasteToCamera", FreeCaller<PasteToCamera>(), Accelerator('V', (GdkModifierType)GDK_MOD1_MASK));
   GlobalCommands_insert("CloneSelection", FreeCaller<Selection_Clone>(), Accelerator(GDK_space));
+  GlobalCommands_insert("CloneSelectionAndFixNames", FreeCaller<Selection_Clone_FixNames>(), Accelerator(GDK_space, (GdkModifierType)GDK_SHIFT_MASK));
   GlobalCommands_insert("DeleteSelection", FreeCaller<deleteSelection>(), Accelerator(GDK_BackSpace));
   GlobalCommands_insert("ParentSelection", FreeCaller<Scene_parentSelected>());
   GlobalCommands_insert("UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator(GDK_Escape));
