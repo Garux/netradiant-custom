@@ -1186,9 +1186,9 @@ void SelectFaceMode()
 
 class CloneSelected : public scene::Graph::Walker
 {
-  bool doFixNames;
+  bool doMakeUnique;
 public:
-  CloneSelected(bool d): doFixNames(d) { }
+  CloneSelected(bool d): doMakeUnique(d) { }
   bool pre(const scene::Path& path, scene::Instance& instance) const
   {
     if(path.size() == 1)
@@ -1218,16 +1218,17 @@ public:
         && selectable->isSelected())
       {
         NodeSmartReference clone(Node_Clone(path.top()));
-        Map_gatherNamespaced(clone);
+		if(doMakeUnique)
+			Map_gatherNamespaced(clone);
         Node_getTraversable(path.parent().get())->insert(clone);
       }
     }
   }
 };
 
-void Scene_Clone_Selected(scene::Graph& graph, bool doFixNames)
+void Scene_Clone_Selected(scene::Graph& graph, bool doMakeUnique)
 {
-  graph.traverse(CloneSelected(doFixNames));
+  graph.traverse(CloneSelected(doMakeUnique));
 
   Map_mergeClonedNames();
 }
@@ -1306,11 +1307,11 @@ void Selection_Clone()
   }
 }
 
-void Selection_Clone_FixNames()
+void Selection_Clone_MakeUnique()
 {
   if(GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive)
   {
-    UndoableCommand undo("cloneSelected");
+    UndoableCommand undo("cloneSelectedMakeUnique");
 
     Scene_Clone_Selected(GlobalSceneGraph(), true);
 
@@ -1993,6 +1994,7 @@ GtkMenuItem* create_edit_menu()
   create_menu_item_with_mnemonic(menu, "P_aste To Camera", "PasteToCamera");
   menu_separator(menu);
   create_menu_item_with_mnemonic(menu, "_Duplicate", "CloneSelection");
+  create_menu_item_with_mnemonic(menu, "Duplicate, make uni_que", "CloneSelectionAndMakeUnique");
   create_menu_item_with_mnemonic(menu, "D_elete", "DeleteSelection");
   menu_separator(menu);
   create_menu_item_with_mnemonic(menu, "Pa_rent", "ParentSelection");
@@ -3408,7 +3410,7 @@ void MainFrame_Construct()
   GlobalCommands_insert("Paste", FreeCaller<Paste>(), Accelerator('V', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("PasteToCamera", FreeCaller<PasteToCamera>(), Accelerator('V', (GdkModifierType)GDK_MOD1_MASK));
   GlobalCommands_insert("CloneSelection", FreeCaller<Selection_Clone>(), Accelerator(GDK_space));
-  GlobalCommands_insert("CloneSelectionAndFixNames", FreeCaller<Selection_Clone_FixNames>(), Accelerator(GDK_space, (GdkModifierType)GDK_SHIFT_MASK));
+  GlobalCommands_insert("CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator(GDK_space, (GdkModifierType)GDK_SHIFT_MASK));
   GlobalCommands_insert("DeleteSelection", FreeCaller<deleteSelection>(), Accelerator(GDK_BackSpace));
   GlobalCommands_insert("ParentSelection", FreeCaller<Scene_parentSelected>());
   GlobalCommands_insert("UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator(GDK_Escape));
