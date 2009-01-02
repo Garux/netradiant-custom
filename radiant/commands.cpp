@@ -359,7 +359,7 @@ public:
 
       // strBuff has been cleaned of it's modifiers .. switch between a regular key and a virtual one
       // based on length
-      if(keyEnd - value == 1 && std::isalpha(value[0])) // most often case.. deal with first
+      if(keyEnd - value == 1 && std::isalnum(value[0])) // most often case.. deal with first
       {
         accelerator.key = std::toupper(value[0]);
         ++m_count;

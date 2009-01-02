@@ -599,6 +599,9 @@ static void MergeOrigin(entity_t *ent, vec3_t origin)
 {
 	vec3_t adjustment;
 
+	/* we have not parsed the brush completely yet... */
+	GetVectorForKey( ent, "origin", ent->origin );
+
 	VectorMA(origin, -1, ent->originbrush_origin, adjustment);
 	VectorAdd(adjustment, ent->origin, ent->origin);
 	VectorCopy(origin, ent->originbrush_origin);
@@ -623,6 +626,9 @@ brush_t *FinishBrush( void )
 	{
 		char	string[ 32 ];
 		vec3_t	origin;
+
+		Sys_Printf( "Entity %i, Brush %i: origin brush detected\n", 
+				mapEnt->mapEntityNum, entitySourceBrushes );
 
 		if( numEntities == 1 )
 		{
@@ -1079,11 +1085,17 @@ adds them to the world's brush list
 (used by func_group)
 */
 
+void AdjustBrushesForOrigin( entity_t *ent );
 void MoveBrushesToWorld( entity_t *ent )
 {
 	brush_t		*b, *next;
 	parseMesh_t	*pm;
 
+	/* we need to undo the common/origin adjustment, and instead shift them by the entity key origin */
+	VectorScale(ent->origin, -1, ent->originbrush_origin);
+	Sys_Printf("func_group: adjusting by %f %f %f\n", ent->originbrush_origin[0], ent->originbrush_origin[1], ent->originbrush_origin[2]);
+	AdjustBrushesForOrigin(ent);
+	VectorClear(ent->originbrush_origin);
 	
 	/* move brushes */
 	for( b = ent->brushes; b != NULL; b = next )
@@ -1146,7 +1158,8 @@ void AdjustBrushesForOrigin( entity_t *ent )
 	brush_t		*b;
 	parseMesh_t	*p;
 	
-	
+	Sys_Printf("origin: adjusting by %f %f %f\n", ent->originbrush_origin[0], ent->originbrush_origin[1], ent->originbrush_origin[2]);
+
 	/* walk brush list */
 	for( b = ent->brushes; b != NULL; b = b->next )
 	{
@@ -1157,7 +1170,7 @@ void AdjustBrushesForOrigin( entity_t *ent )
 			s = &b->sides[ i ];
 			
 			/* offset side plane */
-			newdist = mapplanes[ s->planenum ].dist - DotProduct( mapplanes[ s->planenum ].normal, ent->origin );
+			newdist = mapplanes[ s->planenum ].dist - DotProduct( mapplanes[ s->planenum ].normal, ent->originbrush_origin );
 			
 			/* find a new plane */
 			s->planenum = FindFloatPlane( mapplanes[ s->planenum ].normal, newdist, 0, NULL );
@@ -1171,7 +1184,7 @@ void AdjustBrushesForOrigin( entity_t *ent )
 	for( p = ent->patches; p != NULL; p = p->next )
 	{
 		for( i = 0; i < (p->mesh.width * p->mesh.height); i++ )
-			VectorSubtract( p->mesh.verts[ i ].xyz, ent->origin, p->mesh.verts[ i ].xyz );
+			VectorSubtract( p->mesh.verts[ i ].xyz, ent->originbrush_origin, p->mesh.verts[ i ].xyz );
 	}
 }
 
@@ -1595,7 +1608,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	
 	/* get entity origin and adjust brushes */
 	GetVectorForKey( mapEnt, "origin", mapEnt->origin );
-	if( mapEnt->origin[ 0 ] || mapEnt->origin[ 1 ] || mapEnt->origin[ 2 ] )
+	if( mapEnt->originbrush_origin[ 0 ] || mapEnt->originbrush_origin[ 1 ] || mapEnt->originbrush_origin[ 2 ] )
 		AdjustBrushesForOrigin( mapEnt );
 
 	/* group_info entities are just for editor grouping (fixme: leak!) */

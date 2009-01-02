@@ -156,6 +156,88 @@ void Entity_ungroupSelected()
 }
 
 
+class EntityFindSelected : public scene::Graph::Walker
+{
+public:
+  mutable const scene::Path *groupPath;
+  mutable scene::Instance *groupInstance;
+  EntityFindSelected(): groupPath(0), groupInstance(0)
+  {
+  }
+  bool pre(const scene::Path& path, scene::Instance& instance) const
+  {
+    return true;
+  }
+  void post(const scene::Path& path, scene::Instance& instance) const
+  {
+    Entity* entity = Node_getEntity(path.top());
+    if(entity != 0
+      && Instance_getSelectable(instance)->isSelected()
+	  && node_is_group(path.top())
+	  && !groupPath)
+    { 
+	  groupPath = &path;
+	  groupInstance = &instance;
+    }
+  }
+};
+
+class EntityGroupSelected : public scene::Graph::Walker
+{
+  NodeSmartReference group;
+public:
+  EntityGroupSelected(const scene::Path &p): group(p.top().get())
+  {
+  }
+  bool pre(const scene::Path& path, scene::Instance& instance) const
+  {
+    return true;
+  }
+  void post(const scene::Path& path, scene::Instance& instance) const
+  {
+    if(Instance_getSelectable(instance)->isSelected())
+    { 
+	  Entity* entity = Node_getEntity(path.top());
+	  if(entity == 0 && Node_isPrimitive(path.top()))
+	  {
+		  NodeSmartReference child(path.top().get());
+		  NodeSmartReference parent(path.parent().get());
+
+		  Node_getTraversable(parent)->erase(child);
+		  Node_getTraversable(group)->insert(child);
+
+		  if(Node_getTraversable(parent)->empty() && path.size() >= 3 && parent != Map_FindOrInsertWorldspawn(g_map))
+		  {
+			  NodeSmartReference parentparent(path[path.size() - 3].get());
+			  Node_getTraversable(parentparent)->erase(parent);
+		  }
+	  }
+    }
+  }
+};
+
+void Entity_groupSelected()
+{
+  if (GlobalSelectionSystem().countSelected() < 1) return;
+
+  UndoableCommand undo("groupSelectedEntities");
+
+  scene::Path world_path(makeReference(GlobalSceneGraph().root()));
+  world_path.push(makeReference(Map_FindOrInsertWorldspawn(g_map)));
+
+  EntityFindSelected fse;
+  GlobalSceneGraph().traverse(fse);
+  if(fse.groupPath)
+  {
+	  GlobalSceneGraph().traverse(EntityGroupSelected(*fse.groupPath));
+  }
+  else
+  {
+	  GlobalSceneGraph().traverse(EntityGroupSelected(world_path));
+  }
+}
+
+
 
 void Entity_connectSelected()
 {
@@ -454,6 +536,7 @@ void Entity_registerPreferencesPage()
 
 void Entity_constructMenu(GtkMenu* menu)
 {
+  create_menu_item_with_mnemonic(menu, "_Regroup", "GroupSelection");
   create_menu_item_with_mnemonic(menu, "_Ungroup", "UngroupSelection");
   create_menu_item_with_mnemonic(menu, "_Connect", "ConnectSelection");
   create_menu_item_with_mnemonic(menu, "_Select Color...", "EntityColor");
@@ -468,6 +551,7 @@ void Entity_Construct()
 {
   GlobalCommands_insert("EntityColor", FreeCaller<Entity_setColour>(), Accelerator('K'));
   GlobalCommands_insert("ConnectSelection", FreeCaller<Entity_connectSelected>(), Accelerator('K', (GdkModifierType)GDK_CONTROL_MASK));
+  GlobalCommands_insert("GroupSelection", FreeCaller<Entity_groupSelected>());
   GlobalCommands_insert("UngroupSelection", FreeCaller<Entity_ungroupSelected>());
 
   GlobalPreferenceSystem().registerPreference("SI_Colors5", Vector3ImportStringCaller(g_entity_globals.color_entity), Vector3ExportStringCaller(g_entity_globals.color_entity));
