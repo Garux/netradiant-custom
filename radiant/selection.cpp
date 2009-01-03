@@ -54,12 +54,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 TextOutputStream& ostream_write(TextOutputStream& t, const Vector4& v)
 {
-  return t << "[ " << v.x() << " " << v.y() << " " << v.z() << " " << v.w() << " ]";
+	return t << "[ " << v.x() << " " << v.y() << " " << v.z() << " " << v.w() << " ]";
 }
 
 TextOutputStream& ostream_write(TextOutputStream& t, const Matrix4& m)
 {
-  return t << "[ " << m.x() << " " << m.y() << " " << m.z() << " " << m.t() << " ]";
+	return t << "[ " << m.x() << " " << m.y() << " " << m.z() << " " << m.t() << " ]";
 }
 
 struct Pivot2World
@@ -2315,42 +2315,68 @@ Vector3 get_local_pivot(const Vector3& world_pivot, const Matrix4& localToWorld)
   );
 }
 
-void translation_for_pivoted_rotation(Vector3& parent_translation, const Quaternion& local_rotation, const Vector3& world_pivot, const Matrix4& localToWorld, const Matrix4& localToParent)
+void translation_for_pivoted_matrix_transform(Vector3& parent_translation, const Matrix4& local_transform, const Vector3& world_pivot, const Matrix4& localToWorld, const Matrix4& localToParent)
 {
-  Vector3 local_pivot(get_local_pivot(world_pivot, localToWorld));
+	// we need a translation inside the parent system to move the origin of this object to the right place
+	
+	// mathematically, it must fulfill:
+	//
+	//   local_translation local_transform local_pivot = local_pivot
+	//   local_translation = local_pivot - local_transform local_pivot
+	//
+	//   or maybe?
+	//   local_transform local_translation local_pivot = local_pivot
+	//                   local_translation local_pivot = local_transform^-1 local_pivot
+	//                 local_translation + local_pivot = local_transform^-1 local_pivot
+	//                   local_translation             = local_transform^-1 local_pivot - local_pivot
+	
+	Vector3 local_pivot(get_local_pivot(world_pivot, localToWorld));
 
-  Vector3 translation(
-    vector3_added(
-      local_pivot,
-      matrix4_transformed_point(
-        matrix4_rotation_for_quaternion_quantised(local_rotation),
-        vector3_negated(local_pivot)
-      )
-    )
-  );
+	Vector3 local_translation(
+		vector3_subtracted(
+			local_pivot,
+			matrix4_transformed_point(
+				local_transform,
+				local_pivot
+			)
+		/*
+			matrix4_transformed_point(
+				matrix4_full_inverse(local_transform),
+				local_pivot
+			),
+			local_pivot
+		*/
+		)
+	);
+	
+	translation_local2object(parent_translation, local_translation, localToParent);
 
-  //globalOutputStream() << "translation: " << translation << "\n";
-
-  translation_local2object(parent_translation, translation, localToParent);
-
-  //globalOutputStream() << "parent_translation: " << parent_translation << "\n";
+	// verify it!
+	globalOutputStream() << "World pivot is at " << world_pivot << "\n";
+	globalOutputStream() << "Local pivot is at " << local_pivot << "\n";
+	globalOutputStream() << "Transformation " << local_transform << " moves it to: " << matrix4_transformed_point(local_transform, local_pivot) << "\n";
+	globalOutputStream() << "Must move by " << local_translation << " in the local system" << "\n";
+	globalOutputStream() << "Must move by " << parent_translation << " in the parent system" << "\n";
 }
 
-void translation_for_pivoted_scale(Vector3& parent_translation, const Vector3& local_scale, const Vector3& world_pivot, const Matrix4& localToWorld, const Matrix4& localToParent)
+void translation_for_pivoted_rotation(Vector3& parent_translation, const Quaternion& local_rotation, const Vector3& world_pivot, const Matrix4& localToWorld, const Matrix4& localToParent)
 {
-  Vector3 local_pivot(get_local_pivot(world_pivot, localToWorld));
+  translation_for_pivoted_matrix_transform(parent_translation, matrix4_rotation_for_quaternion_quantised(local_rotation), world_pivot, localToWorld, localToParent);
+}
 
-  Vector3 translation(
-    vector3_added(
-      local_pivot,
-      vector3_scaled(
-        vector3_negated(local_pivot),
-        local_scale
-      )
-    )
+void translation_for_pivoted_scale(Vector3& parent_translation, const Vector3& world_scale, const Vector3& world_pivot, const Matrix4& localToWorld, const Matrix4& localToParent)
+{
+  Matrix4 local_transform(
+  	matrix4_multiplied_by_matrix4(
+		matrix4_full_inverse(localToWorld),
+		matrix4_multiplied_by_matrix4(
+			matrix4_scale_for_vec3(world_scale),
+			localToWorld
+		)
+	)
   );
-
-  translation_local2object(parent_translation, translation, localToParent);
+  local_transform.tx() = local_transform.ty() = local_transform.tz() = 0; // cancel translation parts
+  translation_for_pivoted_matrix_transform(parent_translation, local_transform, world_pivot, localToWorld, localToParent);
 }
 
 class rotate_selected : public SelectionSystem::Visitor
@@ -2422,8 +2448,6 @@ public:
       Transformable* transform = Instance_getTransformable(instance);
       if(transform != 0)
       {
-		  Matrix4 previousTransform = instance.localToWorld();
-
         transform->setType(TRANSFORM_PRIMITIVE);
         transform->setScale(c_scale_identity);
         transform->setTranslation(c_translation_identity);
@@ -2433,11 +2457,17 @@ public:
         {
           Editable* editable = Node_getEditable(instance.path().top());
           const Matrix4& localPivot = editable != 0 ? editable->getLocalPivot() : g_matrix4_identity;
+    
+          Vector3 parent_translation;
+          translation_for_pivoted_scale(
+            parent_translation,
+            m_scale,
+            m_world_pivot,
+            matrix4_multiplied_by_matrix4(instance.localToWorld(), localPivot),
+            matrix4_multiplied_by_matrix4(transformNode->localToParent(), localPivot)
+          );
 
-		  Vector3 previousOrigin = matrix4_get_translation_vec3(matrix4_multiplied_by_matrix4(previousTransform, localPivot));
-		  Vector3 currentOrigin = matrix4_get_translation_vec3(matrix4_multiplied_by_matrix4(instance.localToWorld(), localPivot));
-		  Vector3 wishOrigin = vector3_added(m_world_pivot, vector3_scaled(vector3_subtracted(previousOrigin, m_world_pivot), m_scale));
-          transform->setTranslation(vector3_subtracted(wishOrigin, currentOrigin));
+          transform->setTranslation(parent_translation);
         }
       }
     }
