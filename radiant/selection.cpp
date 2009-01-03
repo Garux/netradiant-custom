@@ -52,6 +52,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "grid.h"
 
+TextOutputStream& ostream_write(TextOutputStream& t, const Vector4& v)
+{
+  return t << "[ " << v.x() << " " << v.y() << " " << v.z() << " " << v.w() << " ]";
+}
+
+TextOutputStream& ostream_write(TextOutputStream& t, const Matrix4& m)
+{
+  return t << "[ " << m.x() << " " << m.y() << " " << m.z() << " " << m.t() << " ]";
+}
+
 struct Pivot2World
 {
   Matrix4 m_worldSpace;
@@ -2412,6 +2422,8 @@ public:
       Transformable* transform = Instance_getTransformable(instance);
       if(transform != 0)
       {
+		  Matrix4 previousTransform = instance.localToWorld();
+
         transform->setType(TRANSFORM_PRIMITIVE);
         transform->setScale(c_scale_identity);
         transform->setTranslation(c_translation_identity);
@@ -2421,17 +2433,11 @@ public:
         {
           Editable* editable = Node_getEditable(instance.path().top());
           const Matrix4& localPivot = editable != 0 ? editable->getLocalPivot() : g_matrix4_identity;
-    
-          Vector3 parent_translation;
-          translation_for_pivoted_scale(
-            parent_translation,
-            m_scale,
-            m_world_pivot,
-            matrix4_multiplied_by_matrix4(instance.localToWorld(), localPivot),
-            matrix4_multiplied_by_matrix4(transformNode->localToParent(), localPivot)
-          );
 
-          transform->setTranslation(parent_translation);
+		  Vector3 previousOrigin = matrix4_get_translation_vec3(matrix4_multiplied_by_matrix4(previousTransform, localPivot));
+		  Vector3 currentOrigin = matrix4_get_translation_vec3(matrix4_multiplied_by_matrix4(instance.localToWorld(), localPivot));
+		  Vector3 wishOrigin = vector3_added(m_world_pivot, vector3_scaled(vector3_subtracted(previousOrigin, m_world_pivot), m_scale));
+          transform->setTranslation(vector3_subtracted(wishOrigin, currentOrigin));
         }
       }
     }
