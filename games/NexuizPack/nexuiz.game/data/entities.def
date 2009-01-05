@@ -90,6 +90,31 @@ DOOR_DONT_LINK: the door won't link with another door it touches
 TOGGLE: causes the door to wait in both the start and end states for a trigger event.
 */
 
+/*QUAKED func_door_rotating (0 .5 .8) ? START_OPEN BIDIR DOOR_DONT_LINK BIDIR_IN_DOWN - TOGGLE X_AXIS Y_AXIS
+Normal rotating door entity. By default, the door will activate when player walks close to it or when damage is inflicted to it.
+If DOOR_DONT_LINK is not set, the door will be linked with all doors it touches.
+BIDIR makes the door work bidirectional, so that the opening direction is always away from the requestor.
+The usage of bidirectional doors requires two manually instantiated triggers (trigger_multiple), the one to open it in the other direction
+must have set trigger_reverse to 1.
+BIDIR_IN_DOWN will the door prevent from reopening while closing if it is triggered from the other side.
+-------- KEYS --------
+message: is printed when the door is touched if it is a trigger door and it hasn't been fired yet, or death message if dmg is set
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
+angle: determines the destination angle for opening. negative values reverse the direction (90 default)
+targetname: if set, no touch field will be spawned and a remote button or trigger field activates the door.
+health: if set, door must be shot open
+speed: speed to rotate (in degrees per second)
+wait: wait before returning (3 default, -1 = never return)
+dmg: damage to inflict when blocked (when triggered and someone is in the way)
+sounds: when 1, use default door sounds
+noise1: sound when the door opens
+noise2: sound when the door closes
+-------- SPAWNFLAGS --------
+START_OPEN: causes the door to move to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or damage triggered doors).
+DOOR_DONT_LINK: the door won't link with another door it touches
+TOGGLE: causes the door to wait in both the start and end states for a trigger event.
+*/
+
 /*QUAKED func_door_secret (0 .5 .8) ? OPEN_ONCE 1ST_LEFT 1ST_DOWN NO_SHOOT ALWAYS_SHOOT
 Basic secret door. Slides back, then to the side. Angle determines direction. Opens when targeted or when shot; does not create its own trigger field like func_door does.
 -------- KEYS --------
@@ -350,6 +375,8 @@ noise: sound played when flag is picked up
 noise1: sound played when flag is returned
 noise2: sound played when flag is captured
 noise3: sound played when flag is lost in the field and respawns itself
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/ctf/radiant/flag_red_radiant.md3"
 */
 
 /*QUAKED item_flag_team2 (0 0 1) (-48 -48 -37) (48 48 37) 
@@ -361,6 +388,8 @@ noise: sound played when flag is picked up
 noise1: sound played when flag is returned
 noise2: sound played when flag is captured
 noise3: sound played when flag is lost in the field and respawns itself
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/ctf/radiant/flag_blue_radiant.md3"
 */
 
 /*QUAKED item_health_large (.9 .3 .3) (-30 -30 0) (30 30 48) FLOATING
@@ -1085,6 +1114,16 @@ respawntime: "off" cycle time (default: same as wait)
 START_ON: assume it is already turned on (when targeted)
 */
 
+/*QUAKED trigger_gamestart (.5 .5 .5) (-8 -8 -8) (8 8 8)
+Triggers once when the game starts, then no longer does anything.
+-------- KEYS --------
+target: trigger all entities with this targetname when starting the game
+target2: trigger all entities with this targetname when starting the game
+target3: trigger all entities with this targetname when starting the game
+target4: trigger all entities with this targetname when starting the game
+wait: wait so many seconds before triggering
+*/
+
 /*QUAKED misc_follow (.5 .5 .5) (-8 -8 -8) (8 8 8)
 Makes one entity follow another. Will not work with all entities.
 -------- KEYS --------
@@ -1216,6 +1255,7 @@ NEGATE: trigger if the cvar does NOT match the value.
 /*QUAKED weapon_hlac (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
 the Heavy Laser Assault Cannon.
 -------- KEYS --------
+ammo_cells: initial cells of the weapon (if unset, g_pickup_cells is used)
 respawntime: time till it respawns (default: 30)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
 cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
@@ -1228,6 +1268,7 @@ model="models/weapons/g_hlac.md3"
 /*QUAKED weapon_seeker (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
 the T.A.G. Seeker.
 -------- KEYS --------
+ammo_rockets: initial rockets of the weapon (if unset, g_pickup_rockets is used)
 respawntime: time till it respawns (default: 30)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
 cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
@@ -1240,6 +1281,7 @@ model="models/weapons/g_seeker.md3"
 /*QUAKED weapon_hook (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
 the on-hand Grappling Hook.
 -------- KEYS --------
+ammo_cells: initial cells of the weapon (if unset, g_pickup_cells is used)
 respawntime: time till it respawns (default: 30)
 team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
 cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
@@ -1256,3 +1298,19 @@ health: health to give per second (default 10)
 max_health: max health this trigger will give (default 200)
 noise: sound file to play (use misc/null.wav to make it silent), default = item_health_medium sound
 */
+
+/*QUAKED weapon_campingrifle (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
+the Camping Rifle.
+WARNING: DO NOT PLACE THIS ON MAPS YET.
+The weapon is subject to change in behaviour and appearance, and such a change may break weapon balance on your map. So don't place it yet, use it as server weapon replacement option ONLY.
+-------- KEYS --------
+ammo_nails: initial bullets of the weapon (if unset, g_pickup_nails is used)
+respawntime: time till it respawns (default: 30)
+team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
+-------- SPAWNFLAGS --------
+FLOATING: the item will float in air, instead of aligning to the floor by falling
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/g_campingrifle.md3"
+*/
+
