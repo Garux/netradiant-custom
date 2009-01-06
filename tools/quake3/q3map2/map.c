@@ -1093,7 +1093,6 @@ void MoveBrushesToWorld( entity_t *ent )
 
 	/* we need to undo the common/origin adjustment, and instead shift them by the entity key origin */
 	VectorScale(ent->origin, -1, ent->originbrush_origin);
-	Sys_Printf("func_group: adjusting by %f %f %f\n", ent->originbrush_origin[0], ent->originbrush_origin[1], ent->originbrush_origin[2]);
 	AdjustBrushesForOrigin(ent);
 	VectorClear(ent->originbrush_origin);
 	
@@ -1158,8 +1157,6 @@ void AdjustBrushesForOrigin( entity_t *ent )
 	brush_t		*b;
 	parseMesh_t	*p;
 	
-	Sys_Printf("origin: adjusting by %f %f %f\n", ent->originbrush_origin[0], ent->originbrush_origin[1], ent->originbrush_origin[2]);
-
 	/* walk brush list */
 	for( b = ent->brushes; b != NULL; b = b->next )
 	{
