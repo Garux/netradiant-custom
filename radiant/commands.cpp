@@ -241,7 +241,7 @@ void DoCommandListDlg()
 
 #include "profile/profile.h"
 
-const char* const COMMANDS_VERSION = "1.0";
+const char* const COMMANDS_VERSION = "1.0-gdk-keynames";
 
 void SaveCommandMap(const char* path)
 {
