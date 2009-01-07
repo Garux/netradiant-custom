@@ -15,6 +15,10 @@ CPPFLAGS           ?=
 LIBS               ?=
 RADIANT_ABOUTMSG   ?= Custom build
 
+# warning: this directory may NOT contain any files other than the ones written by this Makefile!
+# NEVER SET THIS TO A SYSTEM WIDE "bin" DIRECTORY!
+INSTALLDIR         ?= install
+
 CC                 ?= gcc
 CXX                ?= g++
 RANLIB             ?= ranlib
@@ -261,36 +265,36 @@ endif
 
 .PHONY: binaries
 binaries: \
-	install/heretic2/h2data.$(EXE) \
-	install/modules/archivepak.$(DLL) \
-	install/modules/archivewad.$(DLL) \
-	install/modules/archivezip.$(DLL) \
-	install/modules/entity.$(DLL) \
-	install/modules/image.$(DLL) \
-	install/modules/imagehl.$(DLL) \
-	install/modules/imagepng.$(DLL) \
-	install/modules/imageq2.$(DLL) \
-	install/modules/mapq3.$(DLL) \
-	install/modules/mapxml.$(DLL) \
-	install/modules/md3model.$(DLL) \
-	install/modules/model.$(DLL) \
-	install/modules/shaders.$(DLL) \
-	install/modules/vfspk3.$(DLL) \
-	install/plugins/bobtoolz.$(DLL) \
-	install/plugins/brushexport.$(DLL) \
-	install/plugins/prtview.$(DLL) \
-	install/plugins/shaderplug.$(DLL) \
-	install/plugins/sunplug.$(DLL) \
-	install/plugins/ufoaiplug.$(DLL) \
-	install/q2map.$(EXE) \
-	install/q3data.$(EXE) \
-	install/q3map2.$(EXE) \
-	install/qdata3.$(EXE) \
-	install/radiant.$(EXE) \
+	$(INSTALLDIR)/heretic2/h2data.$(EXE) \
+	$(INSTALLDIR)/modules/archivepak.$(DLL) \
+	$(INSTALLDIR)/modules/archivewad.$(DLL) \
+	$(INSTALLDIR)/modules/archivezip.$(DLL) \
+	$(INSTALLDIR)/modules/entity.$(DLL) \
+	$(INSTALLDIR)/modules/image.$(DLL) \
+	$(INSTALLDIR)/modules/imagehl.$(DLL) \
+	$(INSTALLDIR)/modules/imagepng.$(DLL) \
+	$(INSTALLDIR)/modules/imageq2.$(DLL) \
+	$(INSTALLDIR)/modules/mapq3.$(DLL) \
+	$(INSTALLDIR)/modules/mapxml.$(DLL) \
+	$(INSTALLDIR)/modules/md3model.$(DLL) \
+	$(INSTALLDIR)/modules/model.$(DLL) \
+	$(INSTALLDIR)/modules/shaders.$(DLL) \
+	$(INSTALLDIR)/modules/vfspk3.$(DLL) \
+	$(INSTALLDIR)/plugins/bobtoolz.$(DLL) \
+	$(INSTALLDIR)/plugins/brushexport.$(DLL) \
+	$(INSTALLDIR)/plugins/prtview.$(DLL) \
+	$(INSTALLDIR)/plugins/shaderplug.$(DLL) \
+	$(INSTALLDIR)/plugins/sunplug.$(DLL) \
+	$(INSTALLDIR)/plugins/ufoaiplug.$(DLL) \
+	$(INSTALLDIR)/q2map.$(EXE) \
+	$(INSTALLDIR)/q3data.$(EXE) \
+	$(INSTALLDIR)/q3map2.$(EXE) \
+	$(INSTALLDIR)/qdata3.$(EXE) \
+	$(INSTALLDIR)/radiant.$(EXE) \
 
 .PHONY: clean
 clean:
-	$(RM_R) install/
+	$(RM_R) $(INSTALLDIR)/
 	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
 	$(RM) icons/*.rc
 
@@ -322,9 +326,9 @@ endif
 %.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(TARGET_ARCH) -c -o $@
 
-install/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
-install/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
-install/q3map2.$(EXE): \
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG)
+$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
+$(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
 	tools/quake3/common/inout.o \
@@ -447,9 +451,9 @@ libddslib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
 
-install/q3data.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB)
-install/q3data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
-install/q3data.$(EXE): \
+$(INSTALLDIR)/q3data.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB)
+$(INSTALLDIR)/q3data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
+$(INSTALLDIR)/q3data.$(EXE): \
 	tools/quake3/common/aselib.o \
 	tools/quake3/common/bspfile.o \
 	tools/quake3/common/cmdlib.o \
@@ -474,10 +478,10 @@ install/q3data.$(EXE): \
 	libmathlib.$(A) \
 	$(if $(findstring $(OS),Win32),icons/q3data.o,) \
 
-install/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
-install/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
-install/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
-install/radiant.$(EXE): \
+$(INSTALLDIR)/radiant.$(EXE): LDFLAGS_EXTRA := $(MWINDOWS)
+$(INSTALLDIR)/radiant.$(EXE): LIBS_EXTRA := $(LIBS_GL) $(LIBS_DL) $(LIBS_XML) $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_GTKGLEXT)
+$(INSTALLDIR)/radiant.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_GL) $(CPPFLAGS_DL) $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_GTKGLEXT) -Ilibs -Iinclude
+$(INSTALLDIR)/radiant.$(EXE): \
 	radiant/autosave.o \
 	radiant/brushmanip.o \
 	radiant/brushmodule.o \
@@ -610,28 +614,28 @@ libxmllib.$(A): \
 	libs/xml/xmltextags.o \
 	libs/xml/xmlwriter.o \
 
-install/modules/archivezip.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
-install/modules/archivezip.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs -Iinclude
-install/modules/archivezip.$(DLL): \
+$(INSTALLDIR)/modules/archivezip.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
+$(INSTALLDIR)/modules/archivezip.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs -Iinclude
+$(INSTALLDIR)/modules/archivezip.$(DLL): \
 	plugins/archivezip/archive.o \
 	plugins/archivezip/pkzip.o \
 	plugins/archivezip/plugin.o \
 	plugins/archivezip/zlibstream.o \
 
-install/modules/archivewad.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/archivewad.$(DLL): \
+$(INSTALLDIR)/modules/archivewad.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/archivewad.$(DLL): \
 	plugins/archivewad/archive.o \
 	plugins/archivewad/plugin.o \
 	plugins/archivewad/wad.o \
 
-install/modules/archivepak.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/archivepak.$(DLL): \
+$(INSTALLDIR)/modules/archivepak.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/archivepak.$(DLL): \
 	plugins/archivepak/archive.o \
 	plugins/archivepak/pak.o \
 	plugins/archivepak/plugin.o \
 
-install/modules/entity.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/entity.$(DLL): \
+$(INSTALLDIR)/modules/entity.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/entity.$(DLL): \
 	plugins/entity/angle.o \
 	plugins/entity/angles.o \
 	plugins/entity/colour.o \
@@ -653,8 +657,8 @@ install/modules/entity.$(DLL): \
 	plugins/entity/skincache.o \
 	plugins/entity/targetable.o \
 
-install/modules/image.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/image.$(DLL): \
+$(INSTALLDIR)/modules/image.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/bmp.o \
 	plugins/image/dds.o \
 	plugins/image/image.o \
@@ -664,39 +668,39 @@ install/modules/image.$(DLL): \
 	libddslib.$(A) \
 	libjpeg6.$(A) \
 
-install/modules/imageq2.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/imageq2.$(DLL): \
+$(INSTALLDIR)/modules/imageq2.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/imageq2.$(DLL): \
 	plugins/imageq2/imageq2.o \
 	plugins/imageq2/wal32.o \
 	plugins/imageq2/wal.o \
 
-install/modules/imagehl.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/imagehl.$(DLL): \
+$(INSTALLDIR)/modules/imagehl.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/imagehl.$(DLL): \
 	plugins/imagehl/hlw.o \
 	plugins/imagehl/imagehl.o \
 	plugins/imagehl/mip.o \
 	plugins/imagehl/sprite.o \
 
-install/modules/imagepng.$(DLL): LIBS_EXTRA := $(LIBS_PNG)
-install/modules/imagepng.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_PNG) -Ilibs -Iinclude
-install/modules/imagepng.$(DLL): \
+$(INSTALLDIR)/modules/imagepng.$(DLL): LIBS_EXTRA := $(LIBS_PNG)
+$(INSTALLDIR)/modules/imagepng.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_PNG) -Ilibs -Iinclude
+$(INSTALLDIR)/modules/imagepng.$(DLL): \
 	plugins/imagepng/plugin.o \
 
-install/modules/mapq3.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/mapq3.$(DLL): \
+$(INSTALLDIR)/modules/mapq3.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/mapq3.$(DLL): \
 	plugins/mapq3/parse.o \
 	plugins/mapq3/plugin.o \
 	plugins/mapq3/write.o \
 
-install/modules/mapxml.$(DLL): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB)
-install/modules/mapxml.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
-install/modules/mapxml.$(DLL): \
+$(INSTALLDIR)/modules/mapxml.$(DLL): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB)
+$(INSTALLDIR)/modules/mapxml.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+$(INSTALLDIR)/modules/mapxml.$(DLL): \
 	plugins/mapxml/plugin.o \
 	plugins/mapxml/xmlparse.o \
 	plugins/mapxml/xmlwrite.o \
 
-install/modules/md3model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/md3model.$(DLL): \
+$(INSTALLDIR)/modules/md3model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/md3model.$(DLL): \
 	plugins/md3model/md2.o \
 	plugins/md3model/md3.o \
 	plugins/md3model/md5.o \
@@ -705,28 +709,28 @@ install/modules/md3model.$(DLL): \
 	plugins/md3model/mdl.o \
 	plugins/md3model/plugin.o \
 
-install/modules/model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
-install/modules/model.$(DLL): \
+$(INSTALLDIR)/modules/model.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/model.$(DLL): \
 	plugins/model/model.o \
 	plugins/model/plugin.o \
 	libpicomodel.$(A) \
 
-install/modules/shaders.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
-install/modules/shaders.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
-install/modules/shaders.$(DLL): \
+$(INSTALLDIR)/modules/shaders.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
+$(INSTALLDIR)/modules/shaders.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+$(INSTALLDIR)/modules/shaders.$(DLL): \
 	plugins/shaders/plugin.o \
 	plugins/shaders/shaders.o \
 
-install/modules/vfspk3.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
-install/modules/vfspk3.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
-install/modules/vfspk3.$(DLL): \
+$(INSTALLDIR)/modules/vfspk3.$(DLL): LIBS_EXTRA := $(LIBS_GLIB)
+$(INSTALLDIR)/modules/vfspk3.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) -Ilibs -Iinclude
+$(INSTALLDIR)/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/archive.o \
 	plugins/vfspk3/vfs.o \
 	plugins/vfspk3/vfspk3.o \
 
-install/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/plugins/bobtoolz.$(DLL): \
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/bobtoolz.$(DLL): \
 	contrib/bobtoolz/bobToolz-GTK.o \
 	contrib/bobtoolz/bsploader.o \
 	contrib/bobtoolz/cportals.o \
@@ -754,18 +758,18 @@ install/plugins/bobtoolz.$(DLL): \
 	libmathlib.$(A) \
 	libprofile.$(A) \
 
-install/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/plugins/brushexport.$(DLL): \
+$(INSTALLDIR)/plugins/brushexport.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+$(INSTALLDIR)/plugins/brushexport.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/brushexport.$(DLL): \
 	contrib/brushexport/callbacks.o \
 	contrib/brushexport/export.o \
 	contrib/brushexport/interface.o \
 	contrib/brushexport/plugin.o \
 	contrib/brushexport/support.o \
 
-install/plugins/prtview.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/plugins/prtview.$(DLL): \
+$(INSTALLDIR)/plugins/prtview.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+$(INSTALLDIR)/plugins/prtview.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/prtview.$(DLL): \
 	contrib/prtview/AboutDialog.o \
 	contrib/prtview/ConfigDialog.o \
 	contrib/prtview/LoadPortalFileDialog.o \
@@ -773,20 +777,20 @@ install/plugins/prtview.$(DLL): \
 	contrib/prtview/prtview.o \
 	libprofile.$(A) \
 
-install/plugins/shaderplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_XML)
-install/plugins/shaderplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
-install/plugins/shaderplug.$(DLL): \
+$(INSTALLDIR)/plugins/shaderplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK) $(LIBS_XML)
+$(INSTALLDIR)/plugins/shaderplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) $(CPPFLAGS_XML) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/shaderplug.$(DLL): \
 	contrib/shaderplug/shaderplug.o \
 	libxmllib.$(A) \
 
-install/plugins/sunplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/sunplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/plugins/sunplug.$(DLL): \
+$(INSTALLDIR)/plugins/sunplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+$(INSTALLDIR)/plugins/sunplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/sunplug.$(DLL): \
 	contrib/sunplug/sunplug.o \
 
-install/qdata3.$(EXE): LIBS_EXTRA := $(LIBS_XML)
-install/qdata3.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
-install/qdata3.$(EXE): \
+$(INSTALLDIR)/qdata3.$(EXE): LIBS_EXTRA := $(LIBS_XML)
+$(INSTALLDIR)/qdata3.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+$(INSTALLDIR)/qdata3.$(EXE): \
 	tools/quake2/common/bspfile.o \
 	tools/quake2/common/cmdlib.o \
 	tools/quake2/common/inout.o \
@@ -808,9 +812,9 @@ install/qdata3.$(EXE): \
 	libl_net.$(A) \
 	$(if $(findstring $(OS),Win32),icons/qdata3.o,) \
 
-install/q2map.$(EXE): LIBS_EXTRA := $(LIBS_XML)
-install/q2map.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
-install/q2map.$(EXE): \
+$(INSTALLDIR)/q2map.$(EXE): LIBS_EXTRA := $(LIBS_XML)
+$(INSTALLDIR)/q2map.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/common -Ilibs -Iinclude
+$(INSTALLDIR)/q2map.$(EXE): \
 	tools/quake2/common/bspfile.o \
 	tools/quake2/common/cmdlib.o \
 	tools/quake2/common/inout.o \
@@ -846,24 +850,24 @@ install/q2map.$(EXE): \
 	libl_net.$(A) \
 	$(if $(findstring $(OS),Win32),icons/q2map.o,) \
 
-install/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-install/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-install/plugins/ufoaiplug.$(DLL): \
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_filters.o \
 	contrib/ufoaiplug/ufoai_gtk.o \
 	contrib/ufoaiplug/ufoai_level.o \
 	contrib/ufoaiplug/ufoai.o \
 
-#install/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-#install/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-#install/plugins/bkgrnd2d.$(DLL): \
+#$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+#$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+#$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): \
 #	contrib/bkgrnd2d/bkgrnd2d.o \
 #	contrib/bkgrnd2d/dialog.o \
 #	contrib/bkgrnd2d/plugin.o \
 
-install/heretic2/h2data.$(EXE): LIBS_EXTRA := $(LIBS_XML)
-install/heretic2/h2data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
-install/heretic2/h2data.$(EXE): \
+$(INSTALLDIR)/heretic2/h2data.$(EXE): LIBS_EXTRA := $(LIBS_XML)
+$(INSTALLDIR)/heretic2/h2data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
+$(INSTALLDIR)/heretic2/h2data.$(EXE): \
 	tools/quake2/qdata_heretic2/common/bspfile.o \
 	tools/quake2/qdata_heretic2/common/cmdlib.o \
 	tools/quake2/qdata_heretic2/common/inout.o \
@@ -899,24 +903,24 @@ install/heretic2/h2data.$(EXE): \
 
 .PHONY: install-data
 install-data: binaries
-	$(MKDIR) install/games
-	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune
+	$(MKDIR) $(INSTALLDIR)/games
+	$(FIND) $(INSTALLDIR)/ -name .svn -exec $(RM_R) {} \; -prune
 	set -ex; \
 	for GAME in games/*; do \
 		if [ -d "$$GAME/tools" ]; then \
 			GAME=$$GAME/tools; \
 		fi; \
 		for GAMEFILE in $$GAME/games/*.game; do \
-			$(CP) "$$GAMEFILE" install/games/; \
+			$(CP) "$$GAMEFILE" $(INSTALLDIR)/games/; \
 		done; \
 		for GAMEDIR in $$GAME/*.game; do \
-			$(CP_R) "$$GAMEDIR" install/; \
+			$(CP_R) "$$GAMEDIR" $(INSTALLDIR)/; \
 		done; \
 	done
-	$(ECHO) $(RADIANT_MINOR_VERSION) > install/RADIANT_MINOR
-	$(ECHO) $(RADIANT_MAJOR_VERSION) > install/RADIANT_MAJOR
-	$(CP_R) setup/data/tools/* install/
-	$(FIND) install/ -name .svn -exec $(RM_R) {} \; -prune
+	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
+	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
+	$(CP_R) setup/data/tools/* $(INSTALLDIR)/
+	$(FIND) $(INSTALLDIR)/ -name .svn -exec $(RM_R) {} \; -prune
 
 .PHONY: install-dll
 ifeq ($(OS),Win32)
