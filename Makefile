@@ -926,7 +926,7 @@ install-data: binaries
 .PHONY: install-dll
 ifeq ($(OS),Win32)
 install-dll: binaries
-	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" $(SH) install-dlls.sh
+	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dlls.sh
 else
 install-dll: binaries
 	@$(ECHO) No DLL inclusion implemented for this target.
