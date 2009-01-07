@@ -42,6 +42,7 @@ TEE_STDERR         ?= | tee /dev/stderr
 TR                 ?= tr
 FIND               ?= find
 DIFF               ?= diff
+SED                ?= sed
 
 # optional:
 SVNVERSION         ?= svnversion
@@ -175,7 +176,7 @@ RADIANT_VERSION = 1.5.0
 RADIANT_MAJOR_VERSION = 5
 RADIANT_MINOR_VERSION = 0
 
-SVN_VERSION := $(shell $(SVNVERSION) -n $(STDERR_TO_DEVNULL) | $(TR) -cd 0-9:)
+SVN_VERSION := $(shell $(SVNVERSION) -n $(STDERR_TO_DEVNULL) | $(SED) 's/M$$//g; s/.*://g;')
 ifneq ($(SVN_VERSION),)
 	RADIANT_VERSION := $(RADIANT_VERSION)-svn$(SVN_VERSION)
 endif
@@ -221,7 +222,7 @@ dependencies-check:
 	checkbinary coreutils "$(RM)"; \
 	checkbinary coreutils "$(RM_R)"; \
 	checkbinary coreutils "$(ECHO) test $(TEE_STDERR)"; \
-	checkbinary coreutils "$(TR)"; \
+	checkbinary sed "$(SED)"; \
 	checkbinary findutils "$(FIND)"; \
 	checkbinary diff "$(DIFF)"; \
 	checkbinary gcc "$(CC)"; \
