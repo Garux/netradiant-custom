@@ -154,8 +154,14 @@ else ifeq ($(OS),Win32)
 	LIBS_GL = -lopengl32
 	# workaround: no -ldl on Win32
 	LIBS_DL = 
-#else ifeq ($(OS),Darwin)
-#	EXE = ppc
+else ifeq ($(OS),Darwin)
+	CFLAGS_COMMON += -force-cpusubtype_ALL -fPIC
+	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
+	CPPFLAGS_COMMON += -I/sw/include -I/usr/X11R6/include
+	LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
+	LDFLAGS_DLL += -dynamiclib -ldl
+	EXE = ppc
+	$(error Unsupported build OS: $(OS) - please complete the Darwin support in this Makefile and submit a patch)
 else
 $(error Unsupported build OS: $(OS))
 endif
