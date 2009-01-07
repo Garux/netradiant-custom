@@ -1,3 +1,23 @@
+2009-01-07 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: handle ALL key binds properly using GDK methods
+
+2009-01-03 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: fix the translation of entities used by mirroring or scaling
+
+2009-01-02 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: command "regroup entities", allows moving brushes in/out of
+	  entities
+
+2009-01-01 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: "clone selection" no longer changes targetnames by default.
+	  Hold shift while pressing space to do change them as before.
+	* all: handle "origin" keys for brush entities (more consistency, should
+	  break no maps)
+
+2008-12-10 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: properly handle the [ and ] keys on german layout
+	* q3map2: fix dotProduct2scale to match the documentation
+
 2008-11-28 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: -dirty: don't treat skybox surfaces as solid for dirtmapping;
 	  prevents Quake 2-ish "dark near skybox" effect.
