@@ -113,6 +113,7 @@ endif
 	CPPFLAGS_COMMON += -D_DEBUG
 	LDFLAGS_COMMON +=
 else
+
 ifeq ($(BUILD),profile)
 ifeq ($(findstring $(CFLAGS),-g),)
 	CFLAGS_COMMON += -g
@@ -125,8 +126,8 @@ endif
 	CFLAGS_COMMON += -pg
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -pg
-
 else
+
 ifeq ($(BUILD),release)
 ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O3
@@ -135,8 +136,8 @@ ifeq ($(findstring $(CFLAGS),-O),)
 endif
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -s
-
 else
+
 $(error Unsupported build type: $(BUILD))
 endif
 endif
@@ -152,7 +153,9 @@ ifeq ($(OS),Linux)
 	A = a
 	DLL = so
 	MWINDOWS =
-else ifeq ($(OS),Win32)
+else
+
+ifeq ($(OS),Win32)
 	CPPFLAGS_COMMON += -DWIN32 -D_WIN32 -D_inline=inline
 	CFLAGS_COMMON += -mms-bitfields
 	LDFLAGS_DLL = --dll -Wl,--add-stdcall-alias
@@ -168,7 +171,9 @@ else ifeq ($(OS),Win32)
 	LIBS_GL = -lopengl32
 	# workaround: no -ldl on Win32
 	LIBS_DL = 
-else ifeq ($(OS),Darwin)
+else
+
+ifeq ($(OS),Darwin)
 	CFLAGS_COMMON += -force-cpusubtype_ALL -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
 	CPPFLAGS_COMMON += -I/sw/include -I/usr/X11R6/include
@@ -177,7 +182,10 @@ else ifeq ($(OS),Darwin)
 	EXE = ppc
 	$(error Unsupported build OS: $(OS) - please complete the Darwin support in this Makefile and submit a patch)
 else
+
 $(error Unsupported build OS: $(OS))
+endif
+endif
 endif
 
 # VERSION!
