@@ -221,6 +221,11 @@ Trains cannot be block-stopped just by getting in their way, the player must be 
 -------- KEYS --------
 speed: default/initial speed of train (default 100 or overridden by speed value of targeted path_corner)
 target: targetname of first path_corner to move to at the default speed; ideally, this path_corner shall be exactly where the train starts
+noise: path/name of .wav or .ogg file to play while moving. Use looping sounds only (e.g. sound/world/drone6.wav - See Notes).
+dmg: damage a player who gets crushed by it receives
+dmgtime: interval to apply dmg to a player who is s in the way
+message: death message when a player gets crushed
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
 */
 
 /*QUAKED info_location (1 1 0) (-8 -8 -8) (8 8 8) 
@@ -1314,3 +1319,34 @@ FLOATING: the item will float in air, instead of aligning to the floor by fallin
 model="models/weapons/g_campingrifle.md3"
 */
 
+/*QUAKED func_fourier (0 .5 .8) ?
+Solid entity that oscillates according to a sum of sine waves.
+-------- KEYS --------
+speed: amount of time in seconds for one complete oscillation cycle in the base frequency (default 4).
+height: sets the amount of travel of the oscillation movement (default 32). 
+phase: sets the start offset of the oscillation cycle. Values must be 0 < phase < 1. Any integer phase value is the same as no offset (default 0).
+noise: path/name of .wav or .ogg file to play. Use looping sounds only (e.g. sound/world/drone6.wav - See Notes).
+dmg: damage a player who gets crushed by it receives
+dmgtime: interval to apply dmg to a player who is s in the way
+message: death message when a player gets crushed
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
+netname: list of <frequencymultiplier> <phase> <x> <y> <z> quadruples, separated by spaces; note that phase 0 represents a sine wave, and phase 0.25 a cosine wave (by default, it uses 1 0 0 0 1, to match func_bobbing's defaults
+*/
+
+/*QUAKED func_vectormamamam (0 .5 .8) ?
+Solid entity that moves according to the movement of multiple given entities (max 4)
+-------- KEYS --------
+target: first reference entity
+targetfactor: factor by which to take the first reference entity (default 1).
+target2: second reference entity
+target2factor: factor by which to take the second reference entity (default 1).
+target3: third reference entity (optional)
+target3factor: factor by which to take the third reference entity (default 1).
+target4: fourth reference entity (optional)
+target4factor: factor by which to take the fourth reference entity (default 1).
+noise: path/name of .wav or .ogg file to play. Use looping sounds only (e.g. sound/world/drone6.wav - See Notes).
+dmg: damage a player who gets crushed by it receives
+dmgtime: interval to apply dmg to a player who is s in the way
+message: death message when a player gets crushed
+message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
+*/
