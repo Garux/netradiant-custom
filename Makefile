@@ -180,7 +180,14 @@ ifeq ($(OS),Darwin)
 	LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
 	EXE = ppc
-$(error Unsupported build OS: $(OS) - please complete the Darwin support in this Makefile and submit a patch)
+	A = a
+	DLL = dylib
+	MWINDOWS =
+
+	# workaround: http://developer.apple.com/qa/qa2007/qa1567.html
+	LIBS_GL=-lGL -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
+
+#$(error Unsupported build OS: $(OS) - please complete the Darwin support in this Makefile and submit a patch)
 else
 
 $(error Unsupported build OS: $(OS))
