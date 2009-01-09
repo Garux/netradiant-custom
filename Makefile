@@ -103,14 +103,17 @@ ifeq ($(findstring $(CFLAGS),-O),)
 endif
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON +=
-else ifeq ($(BUILD),extradebug)
+else
+
+ifeq ($(BUILD),extradebug)
 ifeq ($(findstring $(CFLAGS),-g),)
 	CFLAGS_COMMON += -g3
 	# only add -g3 if no -g flag is in $(CFLAGS)
 endif
 	CPPFLAGS_COMMON += -D_DEBUG
 	LDFLAGS_COMMON +=
-else ifeq ($(BUILD),profile)
+else
+ifeq ($(BUILD),profile)
 ifeq ($(findstring $(CFLAGS),-g),)
 	CFLAGS_COMMON += -g
 	# only add -g if no -g flag is in $(CFLAGS)
@@ -122,7 +125,9 @@ endif
 	CFLAGS_COMMON += -pg
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -pg
-else ifeq ($(BUILD),release)
+
+else
+ifeq ($(BUILD),release)
 ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O3
 	# only add -O3 if no -O flag is in $(CFLAGS)
@@ -130,8 +135,12 @@ ifeq ($(findstring $(CFLAGS),-O),)
 endif
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -s
+
 else
 $(error Unsupported build type: $(BUILD))
+endif
+endif
+endif
 endif
 
 ifeq ($(OS),Linux)
