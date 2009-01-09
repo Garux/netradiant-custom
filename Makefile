@@ -187,6 +187,8 @@ ifeq ($(OS),Darwin)
 	# workaround: http://developer.apple.com/qa/qa2007/qa1567.html
 	LIBS_GL += -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
 	LIBS_GTKGLEXT += -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
+	# workaround: we have no "ldd" for OS X, so...
+	LDD =
 
 #$(error Unsupported build OS: $(OS) - please complete the Darwin support in this Makefile and submit a patch)
 else
