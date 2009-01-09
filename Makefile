@@ -246,6 +246,7 @@ dependencies-check:
 	checkbinary g++ "$(CXX)"; \
 	checkbinary binutils "$(RANLIB)"; \
 	checkbinary binutils "$(AR)"; \
+	checkbinary pkg-config "$(PKGCONFIG)"; \
 	[ "$(OS)" = "Win32" ] && checkbinary mingw32 "$(WINDRES)"; \
 	[ "$(OS)" != "Win32" ] && checkbinary libc6 "$(LDD)"; \
 	$(ECHO) All required tools have been found!
