@@ -145,7 +145,7 @@ endif
 endif
 
 ifeq ($(OS),Linux)
-	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS -D_LINUX
+	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	LDFLAGS_DLL = -fPIC -ldl
 	LIBS_COMMON = -lpthread
@@ -174,6 +174,7 @@ ifeq ($(OS),Win32)
 else
 
 ifeq ($(OS),Darwin)
+	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
 	CPPFLAGS_COMMON += -I/sw/include -I/usr/X11R6/include
