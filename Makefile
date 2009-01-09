@@ -174,7 +174,7 @@ ifeq ($(OS),Win32)
 else
 
 ifeq ($(OS),Darwin)
-	CFLAGS_COMMON += -force-cpusubtype_ALL -fPIC
+	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
 	CPPFLAGS_COMMON += -I/sw/include -I/usr/X11R6/include
 	LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
