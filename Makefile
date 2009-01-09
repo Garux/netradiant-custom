@@ -259,7 +259,7 @@ dependencies-check:
 	checkbinary binutils "$(AR)"; \
 	checkbinary pkg-config "$(PKGCONFIG)"; \
 	[ "$(OS)" = "Win32" ] && checkbinary mingw32 "$(WINDRES)"; \
-	[ "$(OS)" != "Win32" ] && checkbinary libc6 "$(LDD)"; \
+	[ -n "$(lDD)" ] && checkbinary libc6 "$(LDD)"; \
 	$(ECHO) All required tools have been found!
 	@$(ECHO)
 	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
@@ -481,8 +481,8 @@ libddslib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
 
-$(INSTALLDIR)/q3data.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB)
-$(INSTALLDIR)/q3data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) -Itools/quake3/common -Ilibs -Iinclude
+$(INSTALLDIR)/q3data.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_ZLIB)
+$(INSTALLDIR)/q3data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_ZLIB) -Itools/quake3/common -Ilibs -Iinclude
 $(INSTALLDIR)/q3data.$(EXE): \
 	tools/quake3/common/aselib.o \
 	tools/quake3/common/bspfile.o \

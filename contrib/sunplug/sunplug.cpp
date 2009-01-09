@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 void about_plugin_window();
 void MapCoordinator();
 
-#ifdef __linux__
+#ifndef _WIN32
 // linux itoa implementation
 char* itoa( int value, char* result, int base )
 {	

@@ -1917,7 +1917,7 @@ void TextureBrowser_searchTags()
     {
 	   size_t shaders_found = g_TextureBrowser.m_found_shaders.size();
 
-       globalOutputStream() << "Found " << shaders_found << " textures and shaders with " << tags_searched << "\n";
+       globalOutputStream() << "Found " << (unsigned int)shaders_found << " textures and shaders with " << (unsigned int)tags_searched << "\n";
 	   ScopeDisableScreenUpdates disableScreenUpdates("Searching...", "Loading Textures");
 
 	  std::set<CopiedString>::iterator iter;
