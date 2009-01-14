@@ -2351,12 +2351,14 @@ void translation_for_pivoted_matrix_transform(Vector3& parent_translation, const
 	
 	translation_local2object(parent_translation, local_translation, localToParent);
 
+	/*
 	// verify it!
 	globalOutputStream() << "World pivot is at " << world_pivot << "\n";
 	globalOutputStream() << "Local pivot is at " << local_pivot << "\n";
 	globalOutputStream() << "Transformation " << local_transform << " moves it to: " << matrix4_transformed_point(local_transform, local_pivot) << "\n";
 	globalOutputStream() << "Must move by " << local_translation << " in the local system" << "\n";
 	globalOutputStream() << "Must move by " << parent_translation << " in the parent system" << "\n";
+	*/
 }
 
 void translation_for_pivoted_rotation(Vector3& parent_translation, const Quaternion& local_rotation, const Vector3& world_pivot, const Matrix4& localToWorld, const Matrix4& localToParent)
