@@ -87,7 +87,7 @@ inline void write_angles(const Vector3& angles, Entity* entity)
     }
     else
     {
-      sprintf(value, "%g %g %g", angles[1], angles[2], angles[0]);
+      sprintf(value, "%f %f %f", angles[1], angles[2], angles[0]);
       entity->setKeyValue("angle", "");
       entity->setKeyValue("angles", value);
     }

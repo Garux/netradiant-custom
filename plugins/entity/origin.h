@@ -44,7 +44,7 @@ inline void read_origin(Vector3& origin, const char* value)
 inline void write_origin(const Vector3& origin, Entity* entity, const char* key)
 {
   char value[64];
-  sprintf(value, "%g %g %g", origin[0], origin[1], origin[2]);
+  sprintf(value, "%f %f %f", origin[0], origin[1], origin[2]);
   entity->setKeyValue(key, value);
 }
 

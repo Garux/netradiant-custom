@@ -58,7 +58,7 @@ inline void write_angle(float angle, Entity* entity)
   else
   {
     char value[64];
-    sprintf(value, "%g", angle);
+    sprintf(value, "%f", angle);
     entity->setKeyValue("angle", value);
   }
 }
