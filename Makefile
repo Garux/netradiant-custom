@@ -193,8 +193,6 @@ ifeq ($(OS),Darwin)
 
 	INSTALLDIR_BASE := $(INSTALLDIR)
 	INSTALLDIR := $(INSTALLDIR_BASE)/NetRadiant.app/Contents/MacOS/install
-endif
-
 else
 
 $(error Unsupported build OS: $(OS))
@@ -328,6 +326,7 @@ binaries: \
 .PHONY: clean
 clean:
 	$(RM_R) $(INSTALLDIR)/
+	[ "$(OS)" != "Darwin" ] || $(RM_R) $(INSTALLDIR_BASE)/
 	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
 	$(RM) icons/*.rc
 
