@@ -191,7 +191,10 @@ ifeq ($(OS),Darwin)
 	# workaround: we have no "ldd" for OS X, so...
 	LDD =
 
-#$(error Unsupported build OS: $(OS) - please complete the Darwin support in this Makefile and submit a patch)
+	INSTALLDIR_BASE := $(INSTALLDIR)
+	INSTALLDIR := $(INSTALLDIR_BASE)/NetRadiant.app/Contents/MacOS/install
+endif
+
 else
 
 $(error Unsupported build OS: $(OS))
@@ -935,6 +938,7 @@ $(INSTALLDIR)/heretic2/h2data.$(EXE): \
 install-data: binaries
 	$(MKDIR) $(INSTALLDIR)/games
 	$(FIND) $(INSTALLDIR)/ -name .svn -exec $(RM_R) {} \; -prune
+	[ "$(OS)" != "Darwin" ] || $(CP_R) setup/data/osx/NetRadiant.app/* $(INSTALLDIR_BASE)/NetRadiant.app/
 	set -ex; \
 	for GAME in games/*; do \
 		if [ -d "$$GAME/tools" ]; then \
