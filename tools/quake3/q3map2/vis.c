@@ -1107,6 +1107,10 @@ int VisMain (int argc, char **argv)
 	/* ydnar: for getting far plane */
 	ParseEntities();
 	
+	/* inject command line parameters */
+	InjectCommandLine(argv, 0, argc - 1);
+	UnparseEntities();
+	
 	if( mergevis )
 	{
 		MergeLeaves();

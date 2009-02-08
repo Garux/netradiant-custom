@@ -473,6 +473,9 @@ int ScaleBSPMain( int argc, char **argv )
 	VectorScale( vec, scale, vec );
 	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 	SetKeyValue( &entities[ 0 ], "gridsize", str );
+
+	/* inject command line parameters */
+	InjectCommandLine(argv, 0, argc - 1);
 	
 	/* write the bsp */
 	UnparseEntities();

@@ -613,7 +613,7 @@ this is probably broken unless teamed with a radiant version that preserves enti
 void OnlyEnts( void )
 {
 	char out[ 1024 ];
-
+	// TODO save and restore _q3map2_cmdline when doing this
 	
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
@@ -912,6 +912,9 @@ int BSPMain( int argc, char **argv )
 		LoadMapFile( tempSource, qfalse );
 	else
 		LoadMapFile( name, qfalse );
+	
+	/* div0: inject command line parameters */
+	InjectCommandLine(argv, 1, argc - 1);
 	
 	/* ydnar: decal setup */
 	ProcessDecals();

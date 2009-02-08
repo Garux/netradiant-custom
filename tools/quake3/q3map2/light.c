@@ -1750,6 +1750,7 @@ void LightWorld( void )
 	{
 		/* store off the bsp between bounces */
 		StoreSurfaceLightmaps();
+		UnparseEntities();
 		Sys_Printf( "Writing %s\n", source );
 		WriteBSPFile( source );
 		
@@ -2368,6 +2369,9 @@ int LightMain( int argc, char **argv )
 	
 	/* parse bsp entities */
 	ParseEntities();
+
+	/* inject command line parameters */
+	InjectCommandLine(argv, 0, argc - 1);
 	
 	/* load map file */
 	value = ValueForKey( &entities[ 0 ], "_keepLights" );

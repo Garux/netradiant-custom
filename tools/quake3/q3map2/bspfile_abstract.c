@@ -578,7 +578,44 @@ void ParseEntities( void )
 	numBSPEntities = numEntities;
 }
 
+/*
+ * must be called before UnparseEntities
+ */
+void InjectCommandLine(char **argv, int beginArgs, int endArgs)
+{
+	const char *previousCommandLine;
+	char newCommandLine[1024];
+	const char *inpos;
+	char *outpos = newCommandLine;
+	char *sentinel = newCommandLine + sizeof(newCommandLine) - 1;
+	int i;
 
+	previousCommandLine = ValueForKey(&entities[0], "_q3map2_cmdline");
+	if(previousCommandLine && *previousCommandLine)
+	{
+		inpos = previousCommandLine;
+		while(outpos != sentinel && *inpos)
+			*outpos++ = *inpos++;
+		if(outpos != sentinel)
+			*outpos++ = ';';
+		if(outpos != sentinel)
+			*outpos++ = ' ';
+	}
+
+	for(i = beginArgs; i < endArgs; ++i)
+	{
+		if(outpos != sentinel && i != beginArgs)
+			*outpos++ = ' ';
+		inpos = argv[i];
+		while(outpos != sentinel && *inpos)
+			if(*inpos != '\\' && *inpos != '"' && *inpos != ';' && (unsigned char) *inpos >= ' ')
+				*outpos++ = *inpos++;
+	}
+
+	*outpos = 0;
+	SetKeyValue(&entities[0], "_q3map2_cmdline", newCommandLine);
+	SetKeyValue(&entities[0], "_q3map2_version", Q3MAP_VERSION);
+}
 
 /*
 UnparseEntities()
