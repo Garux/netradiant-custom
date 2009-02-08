@@ -1,3 +1,23 @@
+2009-02-08 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: put the command line parameters into a worldspawn key
+	  _q3map2_cmdline; currently not yet supported for -onlyents
+
+2009-02-07 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: use gtk default font instead of defined ones for linux/windows
+	  which could happen to be not installed (merged from uforadiant)
+
+2009-02-06 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: OS X icon by airscout
+
+2009-01-15 Rudolf Polzer divVerent(at)alientrap.org
+	* all: more fixes for OS X
+
+2009-01-14 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: use %f format for angles, prevents weird looking angles
+
+2009-01-09 Rudolf Polzer divVerent(at)alientrap.org
+	* all: lots of fixes for compiling on OS X
+
 2009-01-07 Rudolf Polzer divVerent(at)alientrap.org
 	* radiant: handle ALL key binds properly using GDK methods
 
