@@ -144,6 +144,8 @@ endif
 endif
 endif
 
+INSTALLDIR_BASE := $(INSTALLDIR)
+
 ifeq ($(OS),Linux)
 	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
@@ -191,7 +193,6 @@ ifeq ($(OS),Darwin)
 	# workaround: we have no "ldd" for OS X, so...
 	LDD =
 
-	INSTALLDIR_BASE := $(INSTALLDIR)
 	INSTALLDIR := $(INSTALLDIR_BASE)/NetRadiant.app/Contents/MacOS/install
 else
 
@@ -325,8 +326,7 @@ binaries: \
 
 .PHONY: clean
 clean:
-	$(RM_R) $(INSTALLDIR)/
-	[ "$(OS)" != "Darwin" ] || $(RM_R) $(INSTALLDIR_BASE)/
+	$(RM_R) $(INSTALLDIR_BASE)/
 	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
 	$(RM) icons/*.rc
 
