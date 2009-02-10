@@ -30,7 +30,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 int					numSortShaders;
-mapDrawSurface_t	*surfsOnShader[ MAX_MAP_SHADERS ];
+mapDrawSurface_t	**surfsOnShader;
+int allocatedSurfsOnShader;
 
 
 int		allocated[ LIGHTMAP_WIDTH ];
@@ -416,8 +417,7 @@ void AllocateLightmaps( entity_t *e )
 		/* new shader */
 		if( j == numSortShaders )
 		{
-			if( numSortShaders >= MAX_MAP_SHADERS )
-				Error( "MAX_MAP_SHADERS" );
+			EXPAND_BY_REALLOC(surfsOnShader, numSortShaders, allocatedSurfsOnShader, 1024);
 			surfsOnShader[ j ] = ds;
 			ds->nextOnShader = NULL;
 			numSortShaders++;
@@ -457,8 +457,7 @@ void AllocateLightmaps( entity_t *e )
 		/* new shader */
 		if( j == numSortShaders )
 		{
-			if( numSortShaders >= MAX_MAP_SHADERS )
-				Error( "MAX_MAP_SHADERS" );
+			EXPAND_BY_REALLOC(surfsOnShader, numSortShaders, allocatedSurfsOnShader, 1024);
 			surfsOnShader[ j ] = ds;
 			ds->nextOnShader = NULL;
 			numSortShaders++;

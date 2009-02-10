@@ -66,13 +66,15 @@ int	EmitShader( const char *shader, int *contentFlags, int *surfaceFlags )
 		if( !Q_stricmp( shader, bspShaders[ i ].shader ) )
 			return i;
 	}
+
+	// i == numBSPShaders
 	
 	/* get shaderinfo */
 	si = ShaderInfoForShader( shader );
 	
 	/* emit a new shader */
-	if( i == MAX_MAP_SHADERS )
-		Error( "MAX_MAP_SHADERS" );
+	AUTOEXPAND_BY_REALLOC_BSP(Shaders, 1024);
+
 	numBSPShaders++;
 	strcpy( bspShaders[ i ].shader, shader );
 	bspShaders[ i ].surfaceFlags = si->surfaceFlags;
@@ -165,8 +167,7 @@ void EmitLeaf( node_t *node )
 		//%	if( b->guard != 0xDEADBEEF )
 		//%		Sys_Printf( "Brush %6d: 0x%08X Guard: 0x%08X Next: 0x%08X Original: 0x%08X Sides: %d\n", b->brushNum, b, b, b->next, b->original, b->numsides );
 		
-		if( numBSPLeafBrushes >= MAX_MAP_LEAFBRUSHES )
-			Error( "MAX_MAP_LEAFBRUSHES" );
+		AUTOEXPAND_BY_REALLOC_BSP(LeafBrushes, 1024);
 		bspLeafBrushes[ numBSPLeafBrushes ] = b->original->outputNum;
 		numBSPLeafBrushes++;
 	}
@@ -181,8 +182,7 @@ void EmitLeaf( node_t *node )
 	leaf_p->firstBSPLeafSurface = numBSPLeafSurfaces;
 	for ( dsr = node->drawSurfReferences; dsr; dsr = dsr->nextRef )
 	{
-		if( numBSPLeafSurfaces >= MAX_MAP_LEAFFACES )
-			Error( "MAX_MAP_LEAFFACES" );
+		AUTOEXPAND_BY_REALLOC_BSP(LeafSurfaces, 1024);
 		bspLeafSurfaces[ numBSPLeafSurfaces ] = dsr->outputNum;
 		numBSPLeafSurfaces++;			
 	}
@@ -210,8 +210,7 @@ int EmitDrawNode_r( node_t *node )
 	}
 	
 	/* emit a node */
-	if( numBSPNodes == MAX_MAP_NODES )
-		Error( "MAX_MAP_NODES" );
+	AUTOEXPAND_BY_REALLOC_BSP(Nodes, 1024);
 	n = &bspNodes[ numBSPNodes ];
 	numBSPNodes++;
 	
@@ -441,8 +440,7 @@ void EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes )
 	for( b = brushes; b != NULL; b = b->next )
 	{
 		/* check limits */
-		if( numBSPBrushes == MAX_MAP_BRUSHES )
-			Error( "MAX_MAP_BRUSHES (%d)", numBSPBrushes );
+		AUTOEXPAND_BY_REALLOC_BSP(Brushes, 1024);
 		
 		/* get bsp brush */
 		b->outputNum = numBSPBrushes;
@@ -462,8 +460,7 @@ void EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes )
 			b->sides[ j ].outputNum = -1;
 			
 			/* check count */
-			if( numBSPBrushSides == MAX_MAP_BRUSHSIDES )
-				Error( "MAX_MAP_BRUSHSIDES ");
+			AUTOEXPAND_BY_REALLOC_BSP(BrushSides, 1024);
 			
 			/* emit side */
 			b->sides[ j ].outputNum = numBSPBrushSides;
@@ -553,8 +550,7 @@ void BeginModel( void )
 	
 	
 	/* test limits */
-	if( numBSPModels == MAX_MAP_MODELS )
-		Error( "MAX_MAP_MODELS" );
+	AUTOEXPAND_BY_REALLOC_BSP(Models, 256);
 	
 	/* get model and entity */
 	mod = &bspModels[ numBSPModels ];

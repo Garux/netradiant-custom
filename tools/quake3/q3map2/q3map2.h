@@ -305,20 +305,13 @@ abstracted bsp file
 #define MAX_LIGHTMAP_SHADERS	256
 
 /* ok to increase these at the expense of more memory */
-#define	MAX_MAP_MODELS			0x400
-#define	MAX_MAP_BRUSHES			0x10000
 #define	MAX_MAP_ENTITIES		0x1000		//%	0x800	/* ydnar */
 #define	MAX_MAP_ENTSTRING		0x80000		//%	0x40000	/* ydnar */
-#define	MAX_MAP_SHADERS			0x800		//%	0x400	/* ydnar */
 
 #define	MAX_MAP_AREAS			0x100		/* MAX_MAP_AREA_BYTES in q_shared must match! */
 #define	MAX_MAP_FOGS			30			//& 0x100	/* RBSP (32 - world fog - goggles) */
 #define	MAX_MAP_PLANES			0x200000	//%	0x20000	/* ydnar for md */
-#define	MAX_MAP_NODES			0x20000
-#define	MAX_MAP_BRUSHSIDES		0x100000	//%	0x20000	/* ydnar */
 #define	MAX_MAP_LEAFS			0x20000
-#define	MAX_MAP_LEAFFACES		0x100000	//%	0x20000	/* ydnar */
-#define	MAX_MAP_LEAFBRUSHES		0x40000
 #define	MAX_MAP_PORTALS			0x20000
 #define	MAX_MAP_LIGHTING		0x800000
 #define	MAX_MAP_LIGHTGRID		0x100000	//%	0x800000 /* ydnar: set to points, not bytes */
@@ -1797,6 +1790,7 @@ void						SwapBlock( int *block, int size );
 int							GetLumpElements( bspHeader_t *header, int lump, int size );
 void						*GetLump( bspHeader_t *header, int lump );
 int							CopyLump( bspHeader_t *header, int lump, void *dest, int size );
+int							CopyLump_Allocate( bspHeader_t *header, int lump, void **dest, int size, int *allocationVariable );
 void						AddLump( FILE *file, bspHeader_t *header, int lumpNum, const void *data, int length );
 
 void						LoadBSPFile( const char *filename );
@@ -2308,10 +2302,12 @@ Q_EXTERN int				numBSPEntities Q_ASSIGN( 0 );
 Q_EXTERN entity_t			entities[ MAX_MAP_ENTITIES ];
 
 Q_EXTERN int				numBSPModels Q_ASSIGN( 0 );
-Q_EXTERN bspModel_t			bspModels[ MAX_MAP_MODELS ];
+Q_EXTERN int				allocatedBSPModels Q_ASSIGN( 0 );
+Q_EXTERN bspModel_t*		bspModels Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPShaders Q_ASSIGN( 0 );
-Q_EXTERN bspShader_t		bspShaders[ MAX_MAP_MODELS ];
+Q_EXTERN int				allocatedBSPShaders Q_ASSIGN( 0 );
+Q_EXTERN bspShader_t*		bspShaders Q_ASSIGN(0);
 
 Q_EXTERN int				bspEntDataSize Q_ASSIGN( 0 );
 Q_EXTERN char				bspEntData[ MAX_MAP_ENTSTRING ];
@@ -2323,19 +2319,24 @@ Q_EXTERN int				numBSPPlanes Q_ASSIGN( 0 );
 Q_EXTERN bspPlane_t			bspPlanes[ MAX_MAP_PLANES ];
 
 Q_EXTERN int				numBSPNodes Q_ASSIGN( 0 );
-Q_EXTERN bspNode_t			bspNodes[ MAX_MAP_NODES ];
+Q_EXTERN int				allocatedBSPNodes Q_ASSIGN( 0 );
+Q_EXTERN bspNode_t*			bspNodes Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPLeafSurfaces Q_ASSIGN( 0 );
-Q_EXTERN int				bspLeafSurfaces[ MAX_MAP_LEAFFACES ];
+Q_EXTERN int				allocatedBSPLeafSurfaces Q_ASSIGN( 0 );
+Q_EXTERN int*				bspLeafSurfaces Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPLeafBrushes Q_ASSIGN( 0 );
-Q_EXTERN int				bspLeafBrushes[ MAX_MAP_LEAFBRUSHES ];
+Q_EXTERN int				allocatedBSPLeafBrushes Q_ASSIGN( 0 );
+Q_EXTERN int*				bspLeafBrushes Q_ASSIGN(0);
 
 Q_EXTERN int				numBSPBrushes Q_ASSIGN( 0 );
-Q_EXTERN bspBrush_t			bspBrushes[ MAX_MAP_BRUSHES ];
+Q_EXTERN int				allocatedBSPBrushes Q_ASSIGN( 0 );
+Q_EXTERN bspBrush_t*		bspBrushes Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPBrushSides Q_ASSIGN( 0 );
-Q_EXTERN bspBrushSide_t		bspBrushSides[ MAX_MAP_BRUSHSIDES ];
+Q_EXTERN int				allocatedBSPBrushSides Q_ASSIGN( 0 );
+Q_EXTERN bspBrushSide_t*	bspBrushSides Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPLightBytes Q_ASSIGN( 0 );
 Q_EXTERN byte				*bspLightBytes Q_ASSIGN( NULL );
@@ -2363,6 +2364,28 @@ Q_EXTERN bspFog_t			bspFogs[ MAX_MAP_FOGS ];
 
 Q_EXTERN int				numBSPAds Q_ASSIGN( 0 );
 Q_EXTERN bspAdvertisement_t	bspAds[ MAX_MAP_ADVERTISEMENTS ];
+
+#define AUTOEXPAND_BY_REALLOC(ptr, reqitem, allocated, def) \
+	do \
+	{ \
+		if(reqitem >= allocated) \
+		{ \
+			if(allocated == 0) \
+				allocated = def; \
+			while(reqitem >= allocated && allocated) \
+				allocated *= 2; \
+			if(allocated > 2147483647 / sizeof(*ptr)) \
+			{ \
+				Error(#ptr " over 2 GB"); \
+			} \
+			ptr = realloc(ptr, sizeof(*ptr) * allocated); \
+			if(!ptr) \
+				Error(#ptr " out of memory"); \
+		} \
+	} \
+	while(0)
+
+#define AUTOEXPAND_BY_REALLOC_BSP(suffix, def) AUTOEXPAND_BY_REALLOC(bsp##suffix, numBSP##suffix, allocatedBSP##suffix, def)
 
 /* end marker */
 #endif
