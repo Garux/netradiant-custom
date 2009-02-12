@@ -14,6 +14,9 @@ In order to get Domination working well in your map, you need to place dom_team 
 message: message to be displayed to all players when this point is captured, preceded by the team's name.  This defaults to " has captured a control point".  You can specify different names for each point, for example " has captured the Lava Room".
 wait: How often this point gives its controlling team frags.
 frags: How many frags this point gives each wait cycle.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/domination/dom_unclaimed.md3"
+
 */
 
 /*QUAKED dom_team (.3 .3 1) (-16 -16 -16) (16 16 16) 
@@ -91,7 +94,8 @@ TOGGLE: causes the door to wait in both the start and end states for a trigger e
 */
 
 /*QUAKED func_door_rotating (0 .5 .8) ? START_OPEN BIDIR DOOR_DONT_LINK BIDIR_IN_DOWN - TOGGLE X_AXIS Y_AXIS
-Normal rotating door entity. By default, the door will activate when player walks close to it or when damage is inflicted to it.
+Normal rotating door entity that opens by rotating around an axis (default: Z). Use an origin brush to specify the rotation axis.
+By default, the door will activate when player walks close to it or when damage is inflicted to it.
 If DOOR_DONT_LINK is not set, the door will be linked with all doors it touches.
 BIDIR makes the door work bidirectional, so that the opening direction is always away from the requestor.
 The usage of bidirectional doors requires two manually instantiated triggers (trigger_multiple), the one to open it in the other direction
@@ -184,7 +188,7 @@ count: adjusts density, this many particles fall every second for a 1024x1024 ar
 */
 
 /*QUAKED func_rotating (0 .5 .8) ? - - X_AXIS Y_AXIS
-Brush entity that spins in place on one axis (default Z). Use an origin brush to specify define the rotation axis.
+Brush entity that spins in place on one axis (default Z). Use an origin brush to specify the rotation axis.
 To rotate around another axis, make a func_wall with an explicit avelocity given.
 -------- KEYS --------
 speed: speed to rotate (in degrees per second)
@@ -355,7 +359,7 @@ cnt: weight of this item for random selection using "team". Set to a lower value
 -------- SPAWNFLAGS --------
 FLOATING: the item will float in air, instead of aligning to the floor by falling
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
-model="models/items/a_bullets.mdl"
+model="models/items/a_bullets.md3"
 */
 
 /*QUAKED item_cells (.3 .3 1) (-30 -30 0) (30 30 32) FLOATING
@@ -371,7 +375,7 @@ FLOATING: the item will float in air, instead of aligning to the floor by fallin
 model="models/items/a_cells.md3"
 */
 
-/*QUAKED item_flag_team1 (1 0 0) (-48 -48 -37) (48 48 37) 
+/*QUAKED item_flag_team1 (1 0 0) (-32 -32 -37) (32 32 37) 
 CTF flag for team one (Red). Use more than one if you really insist.
 -------- KEYS --------
 model: model to use
@@ -380,11 +384,11 @@ noise: sound played when flag is picked up
 noise1: sound played when flag is returned
 noise2: sound played when flag is captured
 noise3: sound played when flag is lost in the field and respawns itself
--------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
-model="models/ctf/radiant/flag_red_radiant.md3"
+-------- ZBQRY SBE ENQVNAG BAYL - QB ABG FRG GUVF NF N XRL --------
+zbqry="zbqryf/pgs/enqvnag/synt_erq_enqvnag.zq3"
 */
 
-/*QUAKED item_flag_team2 (0 0 1) (-48 -48 -37) (48 48 37) 
+/*QUAKED item_flag_team2 (0 0 1) (-32 -32 -37) (32 32 37) 
 CTF flag for team two (Blue). Use more than one if you really insist.
 -------- KEYS --------
 model: model to use
@@ -393,8 +397,8 @@ noise: sound played when flag is picked up
 noise1: sound played when flag is returned
 noise2: sound played when flag is captured
 noise3: sound played when flag is lost in the field and respawns itself
--------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
-model="models/ctf/radiant/flag_blue_radiant.md3"
+-------- ZBQRY SBE ENQVNAG BAYL - QB ABG FRG GUVF NF N XRL --------
+zbqry="zbqryf/pgs/enqvnag/synt_oyhr_enqvnag.zq3"
 */
 
 /*QUAKED item_health_large (.9 .3 .3) (-30 -30 0) (30 30 48) FLOATING
@@ -572,6 +576,8 @@ colormod: color of the laser beam (default: red, that is, 1 0 0)
 dmg: damage inflicted by the beam per second, or -1 for an instant-death ray
 targetname: name to target this (then its state is toggled)
 alpha: when set, makes a dark laser of the given strength; may be combined with colormod
+scale: scales the beam thickness (default 1)
+modelscale: scales the dynamic light radius at the endpoint (default 1, -1 to turn off)
 -------- SPAWNFLAGS --------
 START_ON: when targeted, the laser will start switched on
 FINITE: the laser does not extend over its target like light would do, but stops there (takes more bandwidth)
@@ -694,6 +700,7 @@ targetname: make the trigger_teleporter point to this.
 target: target to activate when a teleporter targeting this is used
 angle: direction in which player will look when teleported, OR use
 angles: pitch and yaw when coming out of the teleporter (also specifies the direction the player will aim when coming out)
+cnt: weight for random selection, in case a teleporter points at multiple misc_teleporter_dest
 */
 
 /*QUAKED onslaught_controlpoint (0 .5 .8) (-32 -32 0) (32 32 128) 
@@ -735,6 +742,7 @@ wait: number of seconds func_train will pause on this path corner before moving 
 
 /*QUAKED runematch_spawn_point (.3 .3 1) (-16 -16 -16) (16 16 16) 
 Spawn point for runes in a runematch.
+Runematch can work without runes also, it then spawn runes at random safe locations.
 */
 
 /*QUAKED target_assault_roundend (1 0 0) (-8 -8 -8) (8 8 8) 
@@ -893,6 +901,9 @@ One possible use is to trigger entities with more than one targetname on an acti
 More than one "trigger event" can be delayed at once, as opposed to trigger_delay.
 -------- KEYS --------
 target: trigger all entities with this targetname when triggered
+target2: trigger all entities with this targetname when triggered
+target3: trigger all entities with this targetname when triggered
+target4: trigger all entities with this targetname when triggered
 targetname: name that identifies this entity so it can be triggered
 delay: delay the triggering by the given time
 message: print this message to the player who activated the trigger
@@ -911,7 +922,7 @@ swamp_slowdown: amount of slowdown caused by the swamp (default is 0.5)
 Touching this will teleport players to the location of the targeted misc_teleporter_dest entity.
 Note that in Nexuiz, teleporters preserve momentum of the player using them.
 -------- KEYS --------
-target: this must point to a misc_teleporter_dest entity.
+target: this must point to a misc_teleporter_dest entity. If it points to more than one, a destination is randomly selected on teleport.
 */
 
 /*QUAKED weapon_crylink (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
@@ -966,6 +977,20 @@ FLOATING: the item will float in air, instead of aligning to the floor by fallin
 model="models/weapons/g_hagar.md3"
 */
 
+/*QUAKED weapon_laser (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
+the Laser. Note that unless you use
+  settemp_for_type all g_start_weapon_laser 0
+in your mapinfo file, everyone will already spawn with one, making this pickup useless.
+-------- KEYS --------
+respawntime: time till it respawns (default: 15)
+team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
+-------- SPAWNFLAGS --------
+FLOATING: the item will float in air, instead of aligning to the floor by falling
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/g_laser.md3"
+*/
+
 /*QUAKED weapon_nex (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
 the Nex
 In Minstagib, this turns into an item_minst_cells if no explicit item_minst_cells have been placed.
@@ -995,7 +1020,9 @@ model="models/weapons/g_rl.md3"
 */
 
 /*QUAKED weapon_shotgun (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
-the Shotgun
+the Shotgun. Note that unless you use
+  settemp_for_type all g_start_weapon_shotgun 0
+in your mapinfo file, everyone will already spawn with one, making this pickup useless.
 -------- KEYS --------
 ammo_shells: initial shells of the weapon (if unset, g_pickup_shells is used)
 respawntime: time till it respawns (default: 15)
@@ -1333,20 +1360,53 @@ message2: death message when someone gets pushed into this (default: "was thrown
 netname: list of <frequencymultiplier> <phase> <x> <y> <z> quadruples, separated by spaces; note that phase 0 represents a sine wave, and phase 0.25 a cosine wave (by default, it uses 1 0 0 0 1, to match func_bobbing's defaults
 */
 
-/*QUAKED func_vectormamamam (0 .5 .8) ?
+/*QUAKED func_vectormamamam (0 .5 .8) ? PROJECT_ON_TARGETNORMAL TARGET2NORMAL_IS_DIRECTION TARGET3NORMAL_IS_DIRECTION TARGET4NORMAL_IS_DIRECTION
 Solid entity that moves according to the movement of multiple given entities (max 4)
 -------- KEYS --------
 target: first reference entity
 targetfactor: factor by which to take the first reference entity (default 1).
+targetnormal: if set, the first reference entity's location is first projected onto a plane with that normal
 target2: second reference entity
 target2factor: factor by which to take the second reference entity (default 1).
+target2normal: if set, the second reference entity's location is first projected onto a plane with that normal
 target3: third reference entity (optional)
 target3factor: factor by which to take the third reference entity (default 1).
+target3normal: if set, the third reference entity's location is first projected onto a plane with that normal
 target4: fourth reference entity (optional)
 target4factor: factor by which to take the fourth reference entity (default 1).
+target4normal: if set, the fourth reference entity's location is first projected onto a plane with that normal
 noise: path/name of .wav or .ogg file to play. Use looping sounds only (e.g. sound/world/drone6.wav - See Notes).
 dmg: damage a player who gets crushed by it receives
 dmgtime: interval to apply dmg to a player who is s in the way
 message: death message when a player gets crushed
 message2: death message when someone gets pushed into this (default: "was thrown into a world of hurt by"). The # character is replaced by the attacker name if present (and it instead does not get appended to the end)
+-------- SPAWNFLAGS --------
+PROJECT_ON_TARGETNORMAL: target's origin is projected onto the given direction vector, not on the plane perpendicular to it
+PROJECT_ON_TARGET2NORMAL: target2's origin is projected onto the given direction vector, not on the plane perpendicular to it
+PROJECT_ON_TARGET3NORMAL: target3's origin is projected onto the given direction vector, not on the plane perpendicular to it
+PROJECT_ON_TARGET4NORMAL: target4's origin is projected onto the given direction vector, not on the plane perpendicular to it
+*/
+
+/*QUAKED trigger_relay_teamcheck (.5 .5 .5) (-8 -8 -8) (8 8 8) NOTEAM_TOO INVERT
+Works similar to trigger_relay, but only relays trigger events if the team of the activator matches this entity's team
+-------- KEYS --------
+target: trigger all entities with this targetname when triggered
+target2: trigger all entities with this targetname when triggered
+target3: trigger all entities with this targetname when triggered
+target4: trigger all entities with this targetname when triggered
+targetname: name that identifies this entity so it can be triggered
+delay: delay the triggering by the given time
+message: print this message to the player who activated the trigger
+killtarget: remove all entities with this targetname when triggered
+team: 5 for red, 14 for blue, 13 for yellow, 10 for pink team
+-------- SPAWNFLAGS --------
+NOTEAM_TOO: also relay events if the activator has no team set
+INVERT: only relay the event if this entity has the matching team
+*/
+
+/*QUAKED trigger_disablerelay (.5 .5 .5) (-8 -8 -8) (8 8 8) 
+Disables a trigger_relay temporarily (until triggered again)
+-------- KEYS --------
+target: disable/enable all relays with this targetname when triggered
+targetname: name that identifies this entity so it can be triggered
 */
