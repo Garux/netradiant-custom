@@ -63,14 +63,14 @@ typedef struct {
 	bspDrawVert_t	*dv[2];
 } originalEdge_t;
 
-#define	MAX_ORIGINAL_EDGES	0x100000
-originalEdge_t	originalEdges[MAX_ORIGINAL_EDGES];
+originalEdge_t	*originalEdges = NULL;
 int				numOriginalEdges;
+int				allocatedOriginalEdges = 0;
 
 
-#define	MAX_EDGE_LINES		0x100000
-edgeLine_t		edgeLines[MAX_EDGE_LINES];
+edgeLine_t		*edgeLines = NULL;
 int				numEdgeLines;
+int				allocatedEdgeLines = 0;
 
 int				c_degenerateEdges;
 int				c_addedVerts;
@@ -153,9 +153,7 @@ int AddEdge( vec3_t v1, vec3_t v2, qboolean createNonAxial ) {
 
 	if ( !createNonAxial ) {
 		if ( fabs( dir[0] + dir[1] + dir[2] ) != 1.0 ) {
-			if ( numOriginalEdges == MAX_ORIGINAL_EDGES ) {
-				Error( "MAX_ORIGINAL_EDGES" );
-			}
+			AUTOEXPAND_BY_REALLOC(originalEdges, numOriginalEdges, allocatedOriginalEdges, 1024);
 			originalEdges[ numOriginalEdges ].dv[0] = (bspDrawVert_t *)v1;
 			originalEdges[ numOriginalEdges ].dv[1] = (bspDrawVert_t *)v2;
 			originalEdges[ numOriginalEdges ].length = d;
@@ -192,9 +190,7 @@ int AddEdge( vec3_t v1, vec3_t v2, qboolean createNonAxial ) {
 	}
 
 	// create a new edge
-	if ( numEdgeLines >= MAX_EDGE_LINES ) {
-		Error( "MAX_EDGE_LINES" );
-	}
+	AUTOEXPAND_BY_REALLOC(edgeLines, numEdgeLines, allocatedEdgeLines, 1024);
 
 	e = &edgeLines[ numEdgeLines ];
 	numEdgeLines++;
