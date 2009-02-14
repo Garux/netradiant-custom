@@ -375,7 +375,7 @@ FLOATING: the item will float in air, instead of aligning to the floor by fallin
 model="models/items/a_cells.md3"
 */
 
-/*QUAKED item_flag_team1 (1 0 0) (-32 -32 -37) (32 32 37) 
+/*QUAKED item_flag_team1 (1 0 0) (-32 -32 0) (32 32 74) 
 CTF flag for team one (Red). Use more than one if you really insist.
 -------- KEYS --------
 model: model to use
@@ -388,7 +388,7 @@ noise3: sound played when flag is lost in the field and respawns itself
 zbqry="zbqryf/pgs/enqvnag/synt_erq_enqvnag.zq3"
 */
 
-/*QUAKED item_flag_team2 (0 0 1) (-32 -32 -37) (32 32 37) 
+/*QUAKED item_flag_team2 (0 0 1) (-32 -32 0) (32 32 74) 
 CTF flag for team two (Blue). Use more than one if you really insist.
 -------- KEYS --------
 model: model to use
