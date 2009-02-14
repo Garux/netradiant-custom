@@ -199,7 +199,7 @@ recursively emit the bsp nodes
 int EmitDrawNode_r( node_t *node )
 {
 	bspNode_t	*n;
-	int			i;
+	int			i, n0;
 	
 	
 	/* check for leafnode */
@@ -211,7 +211,8 @@ int EmitDrawNode_r( node_t *node )
 	
 	/* emit a node */
 	AUTOEXPAND_BY_REALLOC_BSP(Nodes, 1024);
-	n = &bspNodes[ numBSPNodes ];
+	n0 = numBSPNodes;
+	n = &bspNodes[ n0 ];
 	numBSPNodes++;
 	
 	VectorCopy (node->mins, n->mins);
@@ -235,6 +236,8 @@ int EmitDrawNode_r( node_t *node )
 		{
 			n->children[i] = numBSPNodes;	
 			EmitDrawNode_r (node->children[i]);
+			// n may have become invalid here, so...
+			n = &bspNodes[ n0 ];
 		}
 	}
 

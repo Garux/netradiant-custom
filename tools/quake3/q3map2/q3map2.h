@@ -1421,7 +1421,7 @@ rawGridPoint_t;
 
 typedef struct surfaceInfo_s
 {
-	bspModel_t			*model;
+	int					modelindex;
 	shaderInfo_t		*si;
 	rawLightmap_t		*lm;
 	int					parentSurfaceNum, childSurfaceNum;
@@ -2328,7 +2328,7 @@ Q_EXTERN int*				bspLeafSurfaces Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPLeafBrushes Q_ASSIGN( 0 );
 Q_EXTERN int				allocatedBSPLeafBrushes Q_ASSIGN( 0 );
-Q_EXTERN int*				bspLeafBrushes Q_ASSIGN(0);
+Q_EXTERN int*				bspLeafBrushes Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPBrushes Q_ASSIGN( 0 );
 Q_EXTERN int				allocatedBSPBrushes Q_ASSIGN( 0 );

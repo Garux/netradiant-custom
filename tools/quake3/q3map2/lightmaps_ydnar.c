@@ -865,9 +865,9 @@ static int CompareSurfaceInfo( const void *a, const void *b )
 	bInfo = &surfaceInfos[ *((int*) b) ];
 	
 	/* model first */
-	if( aInfo->model < bInfo->model )
+	if( aInfo->modelindex < bInfo->modelindex )
 		return 1;
-	else if( aInfo->model > bInfo->model )
+	else if( aInfo->modelindex > bInfo->modelindex )
 		return -1;
 	
 	/* then lightmap status */
@@ -997,7 +997,7 @@ void SetupSurfaceLightmaps( void )
 				VectorClear( entityOrigin );
 			
 			/* basic setup */
-			info->model = model;
+			info->modelindex = i;
 			info->lm = NULL;
 			info->plane = NULL;
 			info->firstSurfaceCluster = numSurfaceClusters;
