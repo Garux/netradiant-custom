@@ -2374,7 +2374,7 @@ Q_EXTERN bspAdvertisement_t	bspAds[ MAX_MAP_ADVERTISEMENTS ];
 				allocated = def; \
 			while(reqitem >= allocated && allocated) \
 				allocated *= 2; \
-			if(allocated > 2147483647 / sizeof(*ptr)) \
+			if(!allocated || allocated > 2147483647 / sizeof(*ptr)) \
 			{ \
 				Error(#ptr " over 2 GB"); \
 			} \

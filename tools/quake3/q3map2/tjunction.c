@@ -55,7 +55,7 @@ typedef struct edgeLine_s {
 	vec3_t		origin;
 	vec3_t		dir;
 
-	edgePoint_t	chain;		// unused element of doubly linked list
+	edgePoint_t	*chain;		// unused element of doubly linked list
 } edgeLine_t;
 
 typedef struct {
@@ -100,14 +100,14 @@ void InsertPointOnEdge( vec3_t v, edgeLine_t *e ) {
 	p->intercept = d;
 	VectorCopy( v, p->xyz );
 
-	if ( e->chain.next == &e->chain ) {
-		e->chain.next = e->chain.prev = p;
-		p->next = p->prev = &e->chain;
+	if ( e->chain->next == e->chain ) {
+		e->chain->next = e->chain->prev = p;
+		p->next = p->prev = e->chain;
 		return;
 	}
 
-	scan = e->chain.next;
-	for ( ; scan != &e->chain ; scan = scan->next ) {
+	scan = e->chain->next;
+	for ( ; scan != e->chain ; scan = scan->next ) {
 		d = p->intercept - scan->intercept;
 		if ( d > -LINE_POSITION_EPSILON && d < LINE_POSITION_EPSILON ) {
 			free( p );
@@ -195,7 +195,8 @@ int AddEdge( vec3_t v1, vec3_t v2, qboolean createNonAxial ) {
 	e = &edgeLines[ numEdgeLines ];
 	numEdgeLines++;
 
-	e->chain.next = e->chain.prev = &e->chain;
+	e->chain = safe_malloc( sizeof(edgePoint_t) );
+	e->chain->next = e->chain->prev = e->chain;
 
 	VectorCopy( v1, e->origin );
 	VectorCopy( dir, e->dir );
@@ -373,12 +374,12 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 
 
 		if ( start < end ) {
-			p = e->chain.next;
+			p = e->chain->next;
 		} else {
-			p = e->chain.prev;
+			p = e->chain->prev;
 		}
 
-		for (  ; p != &e->chain ;  ) {
+		for (  ; p != e->chain ;  ) {
 			if ( start < end ) {
 				if ( p->intercept > end - ON_EPSILON ) {
 					break;
@@ -628,7 +629,7 @@ void FixTJunctions( entity_t *ent )
 	shaderInfo_t		*si;
 	int					axialEdgeLines;
 	originalEdge_t		*e;
-	
+	bspDrawVert_t	*dv;
 	
 	/* meta mode has its own t-junction code (currently not as good as this code) */
 	//%	if( meta )
@@ -679,7 +680,8 @@ void FixTJunctions( entity_t *ent )
 	// this gives the most accurate edge description
 	for ( i = 0 ; i < numOriginalEdges ; i++ ) {
 		e = &originalEdges[i];
-		e->dv[ 0 ]->lightmap[ 0 ][ 0 ] = AddEdge( e->dv[ 0 ]->xyz, e->dv[ 1 ]->xyz, qtrue );
+		dv = e->dv[0]; // e might change during AddEdge
+		dv->lightmap[ 0 ][ 0 ] = AddEdge( e->dv[ 0 ]->xyz, e->dv[ 1 ]->xyz, qtrue );
 	}
 
 	Sys_FPrintf( SYS_VRB, "%9d axial edge lines\n", axialEdgeLines );
