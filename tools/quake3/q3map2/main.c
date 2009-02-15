@@ -380,9 +380,11 @@ amaze and confuse your enemies with wierd scaled maps!
 int ScaleBSPMain( int argc, char **argv )
 {
 	int			i;
-	float		f, scale;
+	float		f, a;
+	vec3_t scale;
 	vec3_t		vec;
 	char		str[ 1024 ];
+	int uniform;
 	
 	
 	/* arg checking */
@@ -393,10 +395,17 @@ int ScaleBSPMain( int argc, char **argv )
 	}
 	
 	/* get scale */
-	scale = atof( argv[ argc - 2 ] );
-	if( scale == 0.0f )
+	scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
+	if(argc >= 3)
+		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
+	if(argc >= 4)
+		scale[0] = atof( argv[ argc - 4 ] );
+	
+	uniform = ((scale[0] == scale[1]) && (scale[1] == scale[2]));
+
+	if( scale[0] == 0.0f || scale[1] == 0.0f || scale[2] == 0.0f )
 	{
-		Sys_Printf( "Usage: q3map -scale <value> [-v] <mapname>\n" );
+		Sys_Printf( "Usage: q3map -scale <value> <mapname>\n" );
 		Sys_Printf( "Non-zero scale value required.\n" );
 		return 0;
 	}
@@ -420,18 +429,26 @@ int ScaleBSPMain( int argc, char **argv )
 	{
 		/* scale origin */
 		GetVectorForKey( &entities[ i ], "origin", vec );
-		if( (vec[ 0 ] + vec[ 1 ] + vec[ 2 ]) )
+		if( (vec[ 0 ] || vec[ 1 ] || vec[ 2 ]) )
 		{
-			VectorScale( vec, scale, vec );
+			vec[0] *= scale[0];
+			vec[1] *= scale[1];
+			vec[2] *= scale[2];
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 			SetKeyValue( &entities[ i ], "origin", str );
 		}
 		
 		/* scale door lip */
 		f = FloatForKey( &entities[ i ], "lip" );
+		a = FloatForKey( &entities[ i ], "angle" );
 		if( f )
 		{
-			f *= scale;
+			if(a == -1 || a == -2) // z scale
+				f *= scale[2];
+			else if(fabs(sin(DEG2RAD(a))) < 0.707)
+				f *= scale[0];
+			else
+				f *= scale[1];
 			sprintf( str, "%f", f );
 			SetKeyValue( &entities[ i ], "lip", str );
 		}
@@ -440,37 +457,76 @@ int ScaleBSPMain( int argc, char **argv )
 	/* scale models */
 	for( i = 0; i < numBSPModels; i++ )
 	{
-		VectorScale( bspModels[ i ].mins, scale, bspModels[ i ].mins );
-		VectorScale( bspModels[ i ].maxs, scale, bspModels[ i ].maxs );
+		bspModels[ i ].mins[0] *= scale[0];
+		bspModels[ i ].mins[1] *= scale[1];
+		bspModels[ i ].mins[2] *= scale[2];
+		bspModels[ i ].maxs[0] *= scale[0];
+		bspModels[ i ].maxs[1] *= scale[1];
+		bspModels[ i ].maxs[2] *= scale[2];
 	}
 	
 	/* scale nodes */
 	for( i = 0; i < numBSPNodes; i++ )
 	{
-		VectorScale( bspNodes[ i ].mins, scale, bspNodes[ i ].mins );
-		VectorScale( bspNodes[ i ].maxs, scale, bspNodes[ i ].maxs );
+		bspNodes[ i ].mins[0] *= scale[0];
+		bspNodes[ i ].mins[1] *= scale[1];
+		bspNodes[ i ].mins[2] *= scale[2];
+		bspNodes[ i ].maxs[0] *= scale[0];
+		bspNodes[ i ].maxs[1] *= scale[1];
+		bspNodes[ i ].maxs[2] *= scale[2];
 	}
 	
 	/* scale leafs */
 	for( i = 0; i < numBSPLeafs; i++ )
 	{
-		VectorScale( bspLeafs[ i ].mins, scale, bspLeafs[ i ].mins );
-		VectorScale( bspLeafs[ i ].maxs, scale, bspLeafs[ i ].maxs );
+		bspLeafs[ i ].mins[0] *= scale[0];
+		bspLeafs[ i ].mins[1] *= scale[1];
+		bspLeafs[ i ].mins[2] *= scale[2];
+		bspLeafs[ i ].maxs[0] *= scale[0];
+		bspLeafs[ i ].maxs[1] *= scale[1];
+		bspLeafs[ i ].maxs[2] *= scale[2];
 	}
 	
 	/* scale drawverts */
 	for( i = 0; i < numBSPDrawVerts; i++ )
-		VectorScale( bspDrawVerts[ i ].xyz, scale, bspDrawVerts[ i ].xyz );
+	{
+		bspDrawVerts[i].xyz[0] *= scale[0];
+		bspDrawVerts[i].xyz[1] *= scale[1];
+		bspDrawVerts[i].xyz[2] *= scale[2];
+		bspDrawVerts[i].normal[0] /= scale[0];
+		bspDrawVerts[i].normal[1] /= scale[1];
+		bspDrawVerts[i].normal[2] /= scale[2];
+		VectorNormalize(bspDrawVerts[i].normal, bspDrawVerts[i].normal);
+	}
 	
 	/* scale planes */
-	for( i = 0; i < numBSPPlanes; i++ )
-		bspPlanes[ i ].dist *= scale;
+	if(uniform)
+	{
+		for( i = 0; i < numBSPPlanes; i++ )
+		{
+			bspPlanes[ i ].dist *= scale[0];
+		}
+	}
+	else
+	{
+		for( i = 0; i < numBSPPlanes; i++ )
+		{
+			bspPlanes[ i ].normal[0] /= scale[0];
+			bspPlanes[ i ].normal[1] /= scale[1];
+			bspPlanes[ i ].normal[2] /= scale[2];
+			f = 1/VectorLength(bspPlanes[i].normal);
+			VectorScale(bspPlanes[i].normal, f, bspPlanes[i].normal);
+			bspPlanes[ i ].dist *= f;
+		}
+	}
 	
 	/* scale gridsize */
 	GetVectorForKey( &entities[ 0 ], "gridsize", vec );
 	if( (vec[ 0 ] + vec[ 1 ] + vec[ 2 ]) == 0.0f )
 		VectorCopy( gridSize, vec );
-	VectorScale( vec, scale, vec );
+	vec[0] *= scale[0];
+	vec[1] *= scale[1];
+	vec[2] *= scale[2];
 	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 	SetKeyValue( &entities[ 0 ], "gridsize", str );
 
