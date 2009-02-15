@@ -384,7 +384,7 @@ int ScaleBSPMain( int argc, char **argv )
 	vec3_t scale;
 	vec3_t		vec;
 	char		str[ 1024 ];
-	int uniform;
+	int uniform, axis;
 	
 	
 	/* arg checking */
@@ -437,21 +437,34 @@ int ScaleBSPMain( int argc, char **argv )
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 			SetKeyValue( &entities[ i ], "origin", str );
 		}
+
+		a = FloatForKey( &entities[ i ], "angle" );
+		if(a == -1 || a == -2) // z scale
+			axis = 2;
+		else if(fabs(sin(DEG2RAD(a))) < 0.707)
+			axis = 0;
+		else
+			axis = 1;
 		
 		/* scale door lip */
 		f = FloatForKey( &entities[ i ], "lip" );
-		a = FloatForKey( &entities[ i ], "angle" );
 		if( f )
 		{
-			if(a == -1 || a == -2) // z scale
-				f *= scale[2];
-			else if(fabs(sin(DEG2RAD(a))) < 0.707)
-				f *= scale[0];
-			else
-				f *= scale[1];
+			f *= scale[axis];
 			sprintf( str, "%f", f );
 			SetKeyValue( &entities[ i ], "lip", str );
 		}
+		
+		/* scale plat height */
+		f = FloatForKey( &entities[ i ], "height" );
+		if( f )
+		{
+			f *= scale[2];
+			sprintf( str, "%f", f );
+			SetKeyValue( &entities[ i ], "height", str );
+		}
+
+		// TODO maybe allow a definition file for entities to specify which values are scaled how?
 	}
 	
 	/* scale models */
