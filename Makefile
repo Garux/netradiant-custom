@@ -24,7 +24,7 @@ CXX                ?= g++
 RANLIB             ?= ranlib
 AR                 ?= ar
 LDD                ?= ldd # nothing on Win32
-WINDRES            ?= # only used on Win32
+WINDRES            ?= windres # only used on Win32
 
 PKGCONFIG          ?= pkg-config
 PKG_CONFIG_PATH    ?=
