@@ -544,7 +544,7 @@ qboolean FixBrokenSurface( mapDrawSurface_t *ds )
 		dist = VectorLength( avg.xyz );
 		if( dist < DEGENERATE_EPSILON )
 		{
-			valid = qfalse;
+			//valid = qfalse; // no, valid = qfalse is only done if less than 3 verts are left
 			Sys_FPrintf( SYS_VRB, "WARNING: Degenerate T-junction edge found, fixing...\n" );
 
 			/* create an average drawvert */
