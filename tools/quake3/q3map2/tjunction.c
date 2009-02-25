@@ -516,7 +516,6 @@ int		c_broken = 0;
 
 qboolean FixBrokenSurface( mapDrawSurface_t *ds )
 {
-	qboolean	valid = qtrue;
 	bspDrawVert_t	*dv1, *dv2, avg;
 	int			i, j, k;
 	float		dist;
@@ -531,10 +530,6 @@ qboolean FixBrokenSurface( mapDrawSurface_t *ds )
 	/* check all verts */
 	for( i = 0; i < ds->numVerts; i++ )
 	{
-		/* don't remove points if winding is a triangle */
-		if( ds->numVerts == 3 )
-			return valid;
-		
 		/* get verts */
 		dv1 = &ds->verts[ i ];
 		dv2 = &ds->verts[ (i + 1) % ds->numVerts ];
@@ -544,7 +539,6 @@ qboolean FixBrokenSurface( mapDrawSurface_t *ds )
 		dist = VectorLength( avg.xyz );
 		if( dist < DEGENERATE_EPSILON )
 		{
-			//valid = qfalse; // no, valid = qfalse is only done if less than 3 verts are left
 			Sys_FPrintf( SYS_VRB, "WARNING: Degenerate T-junction edge found, fixing...\n" );
 
 			/* create an average drawvert */
@@ -578,13 +572,16 @@ qboolean FixBrokenSurface( mapDrawSurface_t *ds )
 				memcpy( dv2, dv1, sizeof( bspDrawVert_t ) );
 			}
 			ds->numVerts--;
+			
+			/* after welding, we have to consider the same vertex again, as it now has a new neighbor dv2 */
+			--i;
+
+			/* should ds->numVerts have become 0, then i is now -1. In the next iteration, the loop will abort. */
 		}
 	}
 	
 	/* one last check and return */
-	if( ds->numVerts < 3 )
-		valid = qfalse;
-	return valid;
+	return ds->numVerts >= 3;
 }
 
 
