@@ -2027,6 +2027,15 @@ int LightMain( int argc, char **argv )
 			}
 		}
 		
+		else if( !strcmp( argv[ i ], "-lightmapdir" ) )
+		{
+			lmCustomDir = argv[i + 1];
+			i++;
+			Sys_Printf( "Lightmap directory set to %s\n", lmCustomDir );
+			externalLightmaps = qtrue;
+			Sys_Printf( "Storing all lightmaps externally\n" );
+		}
+		
 		/* ydnar: add this to suppress warnings */
 		else if( !strcmp( argv[ i ],  "-custinfoparms") )
 		{

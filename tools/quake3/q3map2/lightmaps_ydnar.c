@@ -2278,8 +2278,15 @@ void StoreSurfaceLightmaps( void )
 	Sys_Printf( "--- StoreSurfaceLightmaps ---\n");
 	
 	/* setup */
-	strcpy( dirname, source );
-	StripExtension( dirname );
+	if(lmCustomDir)
+	{
+		strcpy( dirname, lmCustomDir );
+	}
+	else
+	{
+		strcpy( dirname, source );
+		StripExtension( dirname );
+	}
 	memset( rgbGenValues, 0, sizeof( rgbGenValues ) );
 	memset( alphaGenValues, 0, sizeof( alphaGenValues ) );
 	
