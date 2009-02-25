@@ -233,7 +233,7 @@ void LoadRBSPFile( const char *filename )
 	
 	numBSPModels = CopyLump_Allocate( (bspHeader_t*) header, LUMP_MODELS, (void **) &bspModels, sizeof( bspModel_t ), &allocatedBSPModels );
 	
-	numBSPPlanes = CopyLump( (bspHeader_t*) header, LUMP_PLANES, bspPlanes, sizeof( bspPlane_t ) );
+	numBSPPlanes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_PLANES, (void **) &bspPlanes, sizeof( bspPlane_t ), &allocatedBSPPlanes );
 	
 	numBSPLeafs = CopyLump( (bspHeader_t*) header, LUMP_LEAFS, bspLeafs, sizeof( bspLeaf_t ) );
 	

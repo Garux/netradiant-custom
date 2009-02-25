@@ -116,6 +116,7 @@ void EmitPlanes( void )
 	mp = mapplanes;
 	for( i = 0; i < nummapplanes; i++, mp++ )
 	{
+		AUTOEXPAND_BY_REALLOC_BSP(Planes, 1024);
 		bp = &bspPlanes[ numBSPPlanes ];
 		VectorCopy( mp->normal, bp->normal );
 		bp->dist = mp->dist;

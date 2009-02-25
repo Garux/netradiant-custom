@@ -409,20 +409,11 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 				((si->compileFlags & C_TRANSLUCENT) || !(si->compileFlags & C_SOLID)) )
 				continue;
 			
-			/* overflow check */
-			if( (nummapplanes + 64) >= (MAX_MAP_PLANES >> 1) )
-				continue;
-			
 			/* walk triangle list */
 			for( i = 0; i < ds->numIndexes; i += 3 )
 			{
 				/* overflow hack */
-				if( (nummapplanes + 64) >= (MAX_MAP_PLANES >> 1) )
-				{
-					Sys_Printf( "WARNING: MAX_MAP_PLANES (%d) hit generating clip brushes for model %s.\n",
-						MAX_MAP_PLANES, name );
-					break;
-				}
+				AUTOEXPAND_BY_REALLOC(mapplanes, (nummapplanes+64) << 1, allocatedmapplanes, 1024);
 				
 				/* make points and back points */
 				for( j = 0; j < 3; j++ )

@@ -310,7 +310,6 @@ abstracted bsp file
 
 #define	MAX_MAP_AREAS			0x100		/* MAX_MAP_AREA_BYTES in q_shared must match! */
 #define	MAX_MAP_FOGS			30			//& 0x100	/* RBSP (32 - world fog - goggles) */
-#define	MAX_MAP_PLANES			0x200000	//%	0x20000	/* ydnar for md */
 #define	MAX_MAP_LEAFS			0x20000
 #define	MAX_MAP_PORTALS			0x20000
 #define	MAX_MAP_LIGHTING		0x800000
@@ -791,7 +790,7 @@ typedef struct plane_s
 	vec3_t				normal;
 	vec_t				dist;
 	int					type;
-	struct plane_s		*hash_chain;
+	int					hash_chain;
 }
 plane_t;
 
@@ -1961,8 +1960,9 @@ Q_EXTERN int				mapEntityNum Q_ASSIGN( 0 );
 
 Q_EXTERN int				entitySourceBrushes;
 
-Q_EXTERN plane_t			mapplanes[ MAX_MAP_PLANES ];	/* mapplanes[ num ^ 1 ] will always be the mirror or mapplanes[ num ] */
-Q_EXTERN int				nummapplanes;					/* nummapplanes will always be even */
+Q_EXTERN plane_t			*mapplanes Q_ASSIGN(NULL);	/* mapplanes[ num ^ 1 ] will always be the mirror or mapplanes[ num ] */
+Q_EXTERN int				nummapplanes Q_ASSIGN(0);		/* nummapplanes will always be even */
+Q_EXTERN int				allocatedmapplanes Q_ASSIGN(0);
 Q_EXTERN int				numMapPatches;
 Q_EXTERN vec3_t				mapMins, mapMaxs;
 
@@ -2317,7 +2317,8 @@ Q_EXTERN int				numBSPLeafs Q_ASSIGN( 0 );
 Q_EXTERN bspLeaf_t			bspLeafs[ MAX_MAP_LEAFS ];
 
 Q_EXTERN int				numBSPPlanes Q_ASSIGN( 0 );
-Q_EXTERN bspPlane_t			bspPlanes[ MAX_MAP_PLANES ];
+Q_EXTERN int				allocatedBSPPlanes Q_ASSIGN(0);
+Q_EXTERN bspPlane_t			*bspPlanes;
 
 Q_EXTERN int				numBSPNodes Q_ASSIGN( 0 );
 Q_EXTERN int				allocatedBSPNodes Q_ASSIGN( 0 );

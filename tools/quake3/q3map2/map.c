@@ -44,7 +44,7 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 #define	USE_HASHING
 #define	PLANE_HASHES	8192
 
-plane_t					*planehash[ PLANE_HASHES ];
+int						planehash[ PLANE_HASHES ];
 
 int						c_boxbevels;
 int						c_edgebevels;
@@ -96,7 +96,7 @@ void AddPlaneToHash( plane_t *p )
 	hash = (PLANE_HASHES - 1) & (int) fabs( p->dist );
 
 	p->hash_chain = planehash[hash];
-	planehash[hash] = p;
+	planehash[hash] = p - mapplanes + 1;
 }
 
 /*
@@ -115,8 +115,7 @@ int CreateNewFloatPlane (vec3_t normal, vec_t dist)
 	}
 
 	// create a new plane
-	if (nummapplanes+2 > MAX_MAP_PLANES)
-		Error ("MAX_MAP_PLANES");
+	AUTOEXPAND_BY_REALLOC(mapplanes, nummapplanes+1, allocatedmapplanes, 1024);
 
 	p = &mapplanes[nummapplanes];
 	VectorCopy (normal, p->normal);
@@ -219,6 +218,7 @@ int FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points ) /
 
 {
 	int		i, j, hash, h;
+	int pidx;
 	plane_t	*p;
 	vec_t	d;
 	vec3_t centerofweight;
@@ -235,8 +235,10 @@ int FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points ) /
 	for( i = -1; i <= 1; i++ )
 	{
 		h = (hash + i) & (PLANE_HASHES - 1);
-		for( p = planehash[ h ]; p != NULL; p = p->hash_chain )
+		for( pidx = planehash[ h ] - 1; pidx != -1; pidx = mapplanes[pidx].hash_chain - 1 )
 		{
+			p = &mapplanes[pidx];
+
 			/* do standard plane compare */
 			if( !PlaneEqual( p, normal, dist ) )
 				continue;
