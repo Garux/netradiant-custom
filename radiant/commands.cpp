@@ -212,7 +212,11 @@ void DoCommandListDlg()
  
             if(!m_commandList.failed())
             {
-              m_commandList << makeLeftJustified(name, 25) << " " << modifiers.c_str() << '\n';
+              int l = strlen(name);
+              m_commandList << name;
+              while(l++ < 25)
+		m_commandList << ' ';
+              m_commandList << modifiers.c_str() << '\n';
             }
           }
         } visitor(path.c_str(), store);
