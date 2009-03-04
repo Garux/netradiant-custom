@@ -1,5 +1,5 @@
 [Pango]
-ModuleFiles = ../pango.modules
+ModuleFiles = ./pango.modules
 
 [PangoX]
-AliasFiles = ../pangox.aliases
+AliasFiles = ./pangox.aliases
