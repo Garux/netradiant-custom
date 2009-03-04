@@ -35,7 +35,7 @@ case "$NEX_DIRECTORY" in
 esac
 
 if [ -x /usr/bin/open-x11 ]; then
-	exec /usr/bin/open-x11 ./radiant.ppc "$@"
+	/usr/bin/open-x11 ./radiant.ppc "$@" &
 else
-	exec ./radiant.ppc "$@"
+	./radiant.ppc "$@" &
 fi
