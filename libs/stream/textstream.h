@@ -252,59 +252,6 @@ inline TextOutputStreamType& ostream_write(TextOutputStreamType& ostream, const 
   return ostream;
 }
 
-template<typename T>
-class LeftJustified
-{
-public:
-  const T& m_t;
-  std::size_t m_size;
-  LeftJustified(const T& t, std::size_t size) : m_t(t), m_size(size)
-  {
-  }
-};
-
-template<typename T>
-LeftJustified<T> makeLeftJustified(const T& t, std::size_t size)
-{
-  return LeftJustified<T>(t, size);
-}
-
-template<typename TextOutputStreamType>
-class CountingOutputStream
-{
-  TextOutputStreamType& m_ostream;
-public:
-  std::size_t m_count;
-  CountingOutputStream(TextOutputStreamType& ostream) : m_ostream(ostream)
-  {
-  }
-  std::size_t write(const char* buffer, std::size_t length)
-  {
-    m_count += length;
-    return m_ostream.write(buffer, length);
-  }
-};
-
-template<typename TextOutputStreamType, typename T>
-inline CountingOutputStream<TextOutputStreamType>& operator<<(CountingOutputStream<TextOutputStreamType>& ostream, const T& t)
-{
-  return ostream_write(ostream, t);
-}
-
-
-/// \brief Writes any type to \p ostream padded with spaces afterwards.
-template<typename TextOutputStreamType, typename T>
-inline TextOutputStreamType& ostream_write(TextOutputStreamType& ostream, const LeftJustified<T>& justified)
-{
-  CountingOutputStream<TextOutputStreamType> count(ostream);
-  count << justified.m_t;
-  while(justified.m_size > count.m_count)
-  {
-    count << ' ';
-  }
-  return ostream;
-}
-
 class FloatFormat
 {
 public:
