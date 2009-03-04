@@ -92,6 +92,7 @@ public:
     }
     else
     {
+      m_cache.erase(name);
       m_cache.insert(PreferenceCache::value_type(name, value));
     }
   }

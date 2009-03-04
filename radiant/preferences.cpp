@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 #include "preferences.h"
+#include "environment.h"
 
 #include "debugging/debugging.h"
 
@@ -187,17 +188,31 @@ CGameDescription *g_pGameDescription; ///< shortcut to g_GamesDialog.m_pCurrentD
 
 const char* const PREFERENCES_VERSION = "1.0";
 
-bool Preferences_Load(PreferenceDictionary& preferences, const char* filename)
+bool Preferences_Load(PreferenceDictionary& preferences, const char* filename, const char *cmdline_prefix)
 {
+  bool ret = false;
   TextFileInputStream file(filename);
   if(!file.failed())
   {
     XMLStreamParser parser(file);
     XMLPreferenceDictionaryImporter importer(preferences, PREFERENCES_VERSION);
     parser.exportXML(importer);
-    return true;
+    ret = true;
   }
-  return false;
+
+  int l = strlen(cmdline_prefix);
+  for(int i = 1; i < g_argc - 1; ++i)
+  {
+    if(g_argv[i][0] == '-')
+    {
+      if(!strncmp(g_argv[i]+1, cmdline_prefix, l))
+        if(g_argv[i][l+1] == '-')
+	  preferences.importPref(g_argv[i]+l+2, g_argv[i+1]);
+      ++i;
+    }
+  } 
+
+  return ret;
 }
 
 bool Preferences_Save(PreferenceDictionary& preferences, const char* filename)
@@ -259,7 +274,7 @@ void CGameDialog::LoadPrefs()
 
   globalOutputStream() << "loading global preferences from " << makeQuoted(strGlobalPref.c_str()) << "\n";
 
-  if(!Preferences_Load(g_global_preferences, strGlobalPref.c_str()))
+  if(!Preferences_Load(g_global_preferences, strGlobalPref.c_str(), "global"))
   {
     globalOutputStream() << "failed to load global preferences from " << strGlobalPref.c_str() << "\n";
   }
@@ -948,7 +963,7 @@ void Preferences_Load()
 
   globalOutputStream() << "loading local preferences from " << g_Preferences.m_inipath->str << "\n";
 
-  if(!Preferences_Load(g_preferences, g_Preferences.m_inipath->str))
+  if(!Preferences_Load(g_preferences, g_Preferences.m_inipath->str, g_GamesDialog.m_sGameFile.c_str()))
   {
     globalOutputStream() << "failed to load local preferences from " << g_Preferences.m_inipath->str << "\n";
   }
