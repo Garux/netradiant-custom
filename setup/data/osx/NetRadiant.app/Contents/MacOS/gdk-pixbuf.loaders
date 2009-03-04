@@ -1,0 +1,12 @@
+# GdkPixbuf Image Loader Modules file
+# Automatically generated file, do not edit
+# Created by gdk-pixbuf-query-loaders from gtk+-2.6.10
+#
+# LoaderDir = /sw.haha/lib/gtk-2.0/2.4.0/loaders
+#
+"./libpixbufloader-bmp.so"
+"bmp" 5 "gtk20" "The BMP image format"
+"image/bmp" "image/x-bmp" "image/x-MS-bmp" ""
+"bmp" ""
+"BM" "" 100
+

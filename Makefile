@@ -24,6 +24,7 @@ CXX                ?= g++
 RANLIB             ?= ranlib
 AR                 ?= ar
 LDD                ?= ldd # nothing on Win32
+OTOOL              ?= # only used on OS X
 WINDRES            ?= windres # only used on Win32
 
 PKGCONFIG          ?= pkg-config
@@ -195,6 +196,7 @@ ifeq ($(OS),Darwin)
 	LIBS_GTKGLEXT += -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
 	# workaround: we have no "ldd" for OS X, so...
 	LDD =
+	OTOOL = otool
 
 	INSTALLDIR := $(INSTALLDIR_BASE)/NetRadiant.app/Contents/MacOS/install
 else
@@ -266,7 +268,8 @@ dependencies-check:
 	checkbinary binutils "$(AR)"; \
 	checkbinary pkg-config "$(PKGCONFIG)"; \
 	[ "$(OS)" = "Win32" ] && checkbinary mingw32 "$(WINDRES)"; \
-	[ -n "$(lDD)" ] && checkbinary libc6 "$(LDD)"; \
+	[ -n "$(LDD)" ] && checkbinary libc6 "$(LDD)"; \
+	[ -n "$(OTOOL)" ] && checkbinary xcode "$(OTOOL)"; \
 	$(ECHO) All required tools have been found!
 	@$(ECHO)
 	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
@@ -965,8 +968,13 @@ ifeq ($(OS),Win32)
 install-dll: binaries
 	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dlls.sh
 else
+ifeq ($(OS),Darwin)
+install-dll: binaries
+	CP="$(CP)" OTOOL="$(OTOOL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dylibs.sh
+else
 install-dll: binaries
 	@$(ECHO) No DLL inclusion implemented for this target.
+endif
 endif
 
 -include $(shell find . -name \*.d)
