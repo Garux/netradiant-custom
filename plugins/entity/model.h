@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "os/path.h"
 #include "moduleobserver.h"
 
-class Model : public ModuleObserver
+class EModel : public ModuleObserver
 {
   ResourceReference m_resource;
   scene::Traversable& m_traverse;
@@ -37,12 +37,12 @@ class Model : public ModuleObserver
   Callback m_modelChanged;
 
 public:
-  Model(scene::Traversable& traversable, const Callback& modelChanged)
+  EModel(scene::Traversable& traversable, const Callback& modelChanged)
     : m_resource(""), m_traverse(traversable), m_node(0), m_modelChanged(modelChanged)
   {
     m_resource.attach(*this);
   }
-  ~Model()
+  ~EModel()
   {
     m_resource.detach(*this);
   }
@@ -73,7 +73,7 @@ public:
     m_resource.attach(*this);
     m_modelChanged();
   }
-  typedef MemberCaller1<Model, const char*, &Model::modelChanged> ModelChangedCaller;
+  typedef MemberCaller1<EModel, const char*, &EModel::modelChanged> ModelChangedCaller;
 
   const char* getName() const
   {
@@ -88,7 +88,7 @@ public:
 class SingletonModel
 {
   TraversableNode m_traverse;
-  Model m_model;
+  EModel m_model;
 public:
   SingletonModel()
     : m_model(m_traverse, Callback())

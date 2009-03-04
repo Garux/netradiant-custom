@@ -22,8 +22,8 @@ To get a copy of the source using the commandline Subversion client:
 
 
 
-Linux/OSX(using X-windows)
-==========================
+Linux(using X-windows)
+======================
 
 environment:
 - gcc >= version 3.1 (preferably)
@@ -43,7 +43,22 @@ run 'make'
 run:
 Execute './GtkRadiant/install/radiant.x86' (or './GtkRadiant/install/radiant.ppc' on osx)
 
+OSX(using X-windows)
+====================
 
+environment:
+- OS X 10.5
+- Xcode developer tools installed
+- X11 (from the OS X DVD)
+- fink installed
+- the following fink packages installed:
+  gtkglext1 pkgconfig glib2-dev libxml2 gtk+2-dev pango1-xft2-dev atk-dev atk1 gettext-dev
+
+build:
+run 'make'
+
+run:
+???
 
 Jva32 (2000, KC be Ivfgn)
 ==================

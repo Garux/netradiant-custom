@@ -6,7 +6,7 @@
   name="Nexuiz"
   enginepath_win32="C:/Program Files/Nexuiz/"
   enginepath_linux="/usr/share/games/nexuiz/"
-  enginepath_macos="/Applications/Nexuiz/"
+  enginepath_macos="../../../../.."
   engine_win32="nexuiz-sdl.exe"
   engine_linux="nexuiz-sdl"
   engine_macos="Nexuiz.app"

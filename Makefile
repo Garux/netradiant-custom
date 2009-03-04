@@ -187,6 +187,9 @@ ifeq ($(OS),Darwin)
 	DLL = dylib
 	MWINDOWS =
 
+	# workaround for weird prints
+	ECHO_NOLF = /bin/echo -n
+
 	# workaround: http://developer.apple.com/qa/qa2007/qa1567.html
 	LIBS_GL += -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
 	LIBS_GTKGLEXT += -lX11 -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
@@ -938,7 +941,7 @@ $(INSTALLDIR)/heretic2/h2data.$(EXE): \
 .PHONY: install-data
 install-data: binaries
 	$(MKDIR) $(INSTALLDIR)/games
-	$(FIND) $(INSTALLDIR)/ -name .svn -exec $(RM_R) {} \; -prune
+	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
 	[ "$(OS)" != "Darwin" ] || $(CP_R) setup/data/osx/NetRadiant.app/* $(INSTALLDIR_BASE)/NetRadiant.app/
 	set -ex; \
 	for GAME in games/*; do \
@@ -955,7 +958,7 @@ install-data: binaries
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
 	$(CP_R) setup/data/tools/* $(INSTALLDIR)/
-	$(FIND) $(INSTALLDIR)/ -name .svn -exec $(RM_R) {} \; -prune
+	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
 
 .PHONY: install-dll
 ifeq ($(OS),Win32)
