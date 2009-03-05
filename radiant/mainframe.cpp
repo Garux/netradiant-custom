@@ -976,11 +976,13 @@ void OpenUpdateURL()
 {
   // build the URL
   StringOutputStream URL(256);
-  URL << "http://www.qeradiant.com/index.php?data=dlupdate&query_dlup=1";
+  URL << "http://www.icculus.org/netradiant/?cmd=update&data=dlupdate&query_dlup=1";
 #ifdef WIN32
   URL << "&OS_dlup=1";
-#else
+#elif defined(__APPLE__)
   URL << "&OS_dlup=2";
+#else
+  URL << "&OS_dlup=3";
 #endif
   URL << "&Version_dlup=" RADIANT_VERSION;
   g_GamesDialog.AddPacksURL(URL);
@@ -998,7 +1000,7 @@ void OpenHelpURL()
 
 void OpenBugReportURL()
 {
-  OpenURL("http://www.qeradiant.com/?data=bugreport");
+  OpenURL("http://www.icculus.org/netradiant/?cmd=bugs");
 }
 
 

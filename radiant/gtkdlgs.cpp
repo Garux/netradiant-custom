@@ -507,7 +507,7 @@ void DoAbout()
           "licensed under the GNU GPL.\n\n"
           "NetRadiant is unsupported, however\n"
           "you may report your problems at\n"
-          "http://www.alientrap.org/forum/" // FIXME real URL
+          "http://www.icculus.org/netradiant/"
         ));
                        
         gtk_widget_show(GTK_WIDGET(label));
