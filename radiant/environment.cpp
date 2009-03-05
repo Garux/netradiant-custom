@@ -127,7 +127,7 @@ void gamedetect()
 	  // we found nothing
 	  // go backwards
 	  --p;
-	  while(p != buf && *p != '/')
+	  while(p != buf && *p != '/' && *p != '\\')
 	    --p;
 	}
   }
