@@ -26,8 +26,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "stream/stringstream.h"
 #include "debugging/debugging.h"
 #include "os/path.h"
+#include "os/file.h"
 #include "cmdlib.h"
-
 
 int g_argc;
 char** g_argv;
@@ -53,6 +53,84 @@ void args_init(int argc, char* argv[])
 
   g_argc = argc;
   g_argv = argv;
+}
+
+char *gamedetect_argv_buffer[1024];
+void gamedetect_found_game(char *game, char *path)
+{
+  int argc;
+  static char buf[128];
+
+  if(g_argv == gamedetect_argv_buffer)
+    return;
+
+  globalOutputStream() << "Detected game " << game << " in " << path << "\n";
+
+  sprintf(buf, "-%s-EnginePath", game);
+  argc = 0;
+  gamedetect_argv_buffer[argc++] = "-global-gamefile";
+  gamedetect_argv_buffer[argc++] = game;
+  gamedetect_argv_buffer[argc++] = buf;
+  gamedetect_argv_buffer[argc++] = path;
+  if((size_t) (argc + g_argc) >= sizeof(gamedetect_argv_buffer) / sizeof(*gamedetect_argv_buffer) - 1)
+    g_argc = sizeof(gamedetect_argv_buffer) / sizeof(*gamedetect_argv_buffer) - g_argc - 1;
+  memcpy(gamedetect_argv_buffer + 4, g_argv, sizeof(*gamedetect_argv_buffer) * g_argc);
+  g_argc += argc;
+  g_argv = gamedetect_argv_buffer;
+}
+
+void gamedetect()
+{
+  // if we're inside a Nexuiz install
+  // default to nexuiz.game (unless the user used an option to inhibit this)
+  bool nogamedetect = false;
+  int i;
+  for(i = 1; i < g_argc - 1; ++i)
+    if(g_argv[i][0] == '-')
+	{
+      if(!strcmp(g_argv[i], "-gamedetect"))
+	    nogamedetect = !strcmp(g_argv[i+1], "false");
+	  ++i;
+	}
+  if(!nogamedetect)
+  {
+	static char buf[1024 + 64];
+	strncpy(buf, environment_get_app_path(), sizeof(buf));
+	buf[sizeof(buf) - 1 - 64] = 0;
+	if(!strlen(buf))
+	  return;
+
+	char *p = buf + strlen(buf) - 1; // point directly on the slash of get_app_path
+	while(p != buf)
+	{
+	  // TODO add more games to this
+	  // try to detect Nexuiz installs
+	  strcpy(p, "/data/common-spog.pk3");
+	  globalOutputStream() << "Checking for a game file in " << buf << "\n";
+	  if(file_exists(buf))
+	  {
+#if defined(WIN32)
+	    strcpy(p, "/nexuiz.exe");
+#elif defined(__APPLE__)
+	    strcpy(p, "/Nexuiz.app/Contents/Info.plist");
+#else
+	    strcpy(p, "/nexuiz-linux-glx.sh");
+#endif
+		if(file_exists(buf))
+		{
+		  p[1] = 0;
+		  gamedetect_found_game("nexuiz.game", buf);
+		  return;
+		}
+      }
+
+	  // we found nothing
+	  // go backwards
+	  --p;
+	  while(p != buf && *p != '/')
+	    --p;
+	}
+  }
 }
 
 namespace
@@ -145,6 +223,7 @@ void environment_init(int argc, char* argv[])
     app_path = getexename(real);
     ASSERT_MESSAGE(!string_empty(app_path.c_str()), "failed to deduce app path");
   }
+  gamedetect();
 }
 
 #elif defined(WIN32)
@@ -190,6 +269,7 @@ void environment_init(int argc, char* argv[])
     app << PathCleaned(filename);
     app_path = app.c_str();
   }
+  gamedetect();
 }
 
 #else
