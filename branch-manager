@@ -272,6 +272,7 @@ elsif($cmd eq 'merge')
 	open my $fh, '>>', '.commitmsg'
 		or die "open .commitmsg";
 	print $fh GetLog $first, $last;
+	print $fh "\n";
 	close $fh;
 
 	WriteSettings();
@@ -298,7 +299,7 @@ elsif($cmd eq 'undo')
 
 	open my $fh, '>>', '.commitmsg'
 		or die "open .commitmsg";
-	print $fh "undo the following merge:\n", GetLog $first, last;
+	print $fh "undo the following merge:\n", GetLog $first, $last;
 	close $fh;
 
 	WriteSettings();
