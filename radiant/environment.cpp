@@ -79,6 +79,25 @@ void gamedetect_found_game(char *game, char *path)
   g_argv = gamedetect_argv_buffer;
 }
 
+bool gamedetect_check_game(char *gamefile, const char *checkfile1, const char *checkfile2, char *buf /* must have 64 bytes free after bufpos */, int bufpos)
+{
+	buf[bufpos] = '/';
+
+	strcpy(buf + bufpos + 1, checkfile1);
+	globalOutputStream() << "Checking for a game file in " << buf << "\n";
+	if(!file_exists(buf))
+		return false;
+
+	strcpy(buf + bufpos + 1, checkfile2);
+	globalOutputStream() << "Checking for a game file in " << buf << "\n";
+	if(!file_exists(buf))
+		return false;
+
+	buf[bufpos + 1] = 0;
+	gamedetect_found_game(gamefile, buf);
+	return true;
+}
+
 void gamedetect()
 {
   // if we're inside a Nexuiz install
@@ -104,25 +123,20 @@ void gamedetect()
 	while(p != buf)
 	{
 	  // TODO add more games to this
+
 	  // try to detect Nexuiz installs
-	  strcpy(p, "/data/common-spog.pk3");
-	  globalOutputStream() << "Checking for a game file in " << buf << "\n";
-	  if(file_exists(buf))
-	  {
 #if defined(WIN32)
-	    strcpy(p, "/nexuiz.exe");
+	  if(gamedetect_check_game("nexuiz.game", "data/common-spog.pk3", "nexuiz.exe", buf, p - buf))
 #elif defined(__APPLE__)
-	    strcpy(p, "/Nexuiz.app/Contents/Info.plist");
+	  if(gamedetect_check_game("nexuiz.game", "data/common-spog.pk3", "Nexuiz.app/Contents/Info.plist", buf, p - buf))
 #else
-	    strcpy(p, "/nexuiz-linux-glx.sh");
+	  if(gamedetect_check_game("nexuiz.game", "data/common-spog.pk3", "nexuiz-linux-glx.sh", buf, p - buf))
 #endif
-		if(file_exists(buf))
-		{
-		  p[1] = 0;
-		  gamedetect_found_game("nexuiz.game", buf);
-		  return;
-		}
-      }
+	    return;
+
+	  // try to detect Q2World installs
+	  if(gamedetect_check_game("q2w.game", "default/quake2world.version", NULL, buf, p - buf))
+	    return;
 
 	  // we found nothing
 	  // go backwards
