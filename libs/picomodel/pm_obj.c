@@ -500,8 +500,33 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 	int				curVertex	= 0;
 	int				curFace		= 0;
 
+	int autoGroupNumber = 0;
+	char autoGroupNameBuf[64];
+
+#define AUTO_GROUPNAME(namebuf) \
+	sprintf(namebuf, "__autogroup_%d", autoGroupNumber++)
+#define NEW_SURFACE(name) \
+{ \
+	picoSurface_t *newSurface; \
+	/* allocate a pico surface */ \
+	newSurface = PicoNewSurface( model ); \
+	if (newSurface == NULL) \
+	_obj_error_return("Error allocating surface"); \
+	/* reset face index for surface */ \
+	curFace = 0; \
+	/* if we can, assign the previous shader to this surface */ \
+	if(curSurface) \
+		PicoSetSurfaceShader(newSurface, curSurface->shader); \
+	/* set ptr to current surface */ \
+	curSurface = newSurface; \
+	/* we use triangle meshes */ \
+	PicoSetSurfaceType( newSurface,PICO_TRIANGLES ); \
+	/* set surface name */ \
+	PicoSetSurfaceName( newSurface,name ); \
+}
+
 	/* helper */
-	#define _obj_error_return(m) \
+#define _obj_error_return(m) \
 	{ \
 		_pico_printf( PICO_ERROR,"%s in OBJ, line %d.",m,p->curLine); \
 		_pico_free_parser( p ); \
@@ -616,7 +641,6 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 		/* new group (for us this means a new surface) */
 		else if (!_pico_stricmp(p->token,"g"))
 		{
-			picoSurface_t *newSurface;
 			char *groupName;
 
 			/* get first group name (ignore 2nd,3rd,etc.) */
@@ -632,22 +656,15 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 				_obj_error_return("Invalid or missing group name");
 #endif
 			}
-			/* allocate a pico surface */
-			newSurface = PicoNewSurface( model );
-			if (newSurface == NULL)
-				_obj_error_return("Error allocating surface");
 
-			/* reset face index for surface */
-			curFace = 0;
-
-			/* set ptr to current surface */
-			curSurface = newSurface;
-
-			/* we use triangle meshes */
-			PicoSetSurfaceType( newSurface,PICO_TRIANGLES );
-
-			/* set surface name */
-			PicoSetSurfaceName( newSurface,groupName );
+			if(curFace == 0)
+			{
+				PicoSetSurfaceName( curSurface,groupName );
+			}
+			else
+			{
+				NEW_SURFACE(groupName);
+			}
 
 #ifdef DEBUG_PM_OBJ_EX
 			printf("Group: '%s'\n",groupName);
@@ -674,6 +691,13 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 			int slashcount;
 			int doubleslash;
 			int i;
+
+			if(curSurface == NULL)
+			{
+				_pico_printf( PICO_ERROR,"No group defined for faces, so creating an autoSurface in OBJ, line %d.",p->curLine);
+				AUTO_GROUPNAME(autoGroupNameBuf);
+				NEW_SURFACE(autoGroupNameBuf);
+			}
 
 			/* group defs *must* come before faces */
 			if (curSurface == NULL)
@@ -842,6 +866,13 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 
 			/* get material name */
 			name = _pico_parse( p,0 );
+
+			if(curFace != 0 || curSurface == NULL)
+			{
+				_pico_printf( PICO_ERROR,"No group defined for usemtl, so creating an autoSurface in OBJ, line %d.",p->curLine);
+				AUTO_GROUPNAME(autoGroupNameBuf);
+				NEW_SURFACE(autoGroupNameBuf);
+			}
 
 			/* validate material name */
 			if (name == NULL || !strlen(name))
