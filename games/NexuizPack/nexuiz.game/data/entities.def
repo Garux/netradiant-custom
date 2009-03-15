@@ -15,7 +15,7 @@ message: message to be displayed to all players when this point is captured, pre
 wait: How often this point gives its controlling team frags.
 frags: How many frags this point gives each wait cycle.
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
-model="models/domination/dom_unclaimed.md3"
+zbqry="zbqryf/qbzvangvba/qbz_hapynvzrq.zq3"
 
 */
 
@@ -321,6 +321,20 @@ FLOATING: the item will float in air, instead of aligning to the floor by fallin
 model="models/items/g_a25.md3"
 */
 
+/*QUAKED item_armor_big (.4 .8 .4) (-30 -30 0) (30 30 32) FLOATING
+Big Armor (default 50 armor points)
+-------- KEYS --------
+respawntime: time till it respawns (default: 20)
+armorvalue: amount of armor it gives (default: 50 (g_pickup_armorlarge))
+max_armorvalue: max of armor it increases to (default: 999 (g_pickup_armorlarge_max))
+team: out of items with the same value here, only one (random one) will spawn. Useful to put multiple items on one spot.
+cnt: weight of this item for random selection using "team". Set to a lower value for items you want to see less likely.
+-------- SPAWNFLAGS --------
+FLOATING: the item will float in air, instead of aligning to the floor by falling
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/g_a50.md3"
+*/
+
 /*QUAKED item_armor_medium (.4 .8 .4) (-30 -30 0) (30 30 32) FLOATING
 Medium Armor (default 25 armor points)
 -------- KEYS --------
@@ -609,7 +623,7 @@ EXTRUDE_TERRAIN: always extrude downwards (for terrain)
 /*QUAKED misc_gamemodel (0 .5 .8) (-8 -8 -8) (8 8 8) ALIGN_ORIGIN ALIGN_BOTTOM
 A way to load models from a map by the engine (e.g. self-animated zym models).
 Is non-solid by default.
-The keys below actually apply to most engine-loaded model entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
+The keys below actually apply to most engine-loaded model entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_gamemodel. Its q3map2 keys below will work on any brush entity!
 -------- KEYS --------
 model: when used as a point entity, file name of model to load; when used as a brush entity, do not specify that
 frame: animation frame to play (for self-animated zym models)
@@ -628,6 +642,10 @@ loddistance2: distance after which to show the second LOD model replacement (def
 lodmodel1: file name of the first LOD model replacement
 lodmodel2: file name of the second LOD model replacement
 targetname: when invoking it by a button etc., it changes the color to the initiator of the action (e.g. the one pressing a button). In Onslaught, this can be used to color control points for team who owns them. In other game types, this can be used as a fun feature.
+originjitter: a vector describing a random offset this entity will be moved on initial spawn. This corresponds to the "origin" field. Works on any non-q3map2-only entity.
+anglesjitter: a vector in the order "pitch yaw roll" describing a random angles change on this entity on initial spawn. The value 180 180 180 makes the angles entirely random and uniformly distributed (among euler angles). This corresponds to the "angles" field. Works on any non-q3map2-only entity.
+anglejitter: a float describing a random yaw angle change on this entity on initial spawn. The value 180 makes the yaw angle entirely random (maybe good for items). This corresponds to the "angle" field. Works on any non-q3map2-only entity.
+gametypefilter: either a + sign and a comma separated list of game types or the aliases "teams" and "noteams" to ONLY show the entity in the listed game types, or a - sign and a comma separated list of game types or the aliases "teams" and "noteams" to NOT show the entity in the listed game types. The syntax is the same as in sbar_columns_set strings. Works on any non-q3map2-only entity.
 -------- Q3MAP2 KEYS --------
 _frame: frame of model to include (set equal to frame if _castshadows is set)
 _castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
@@ -639,6 +657,7 @@ ALIGN_BOTTOM: align the bottom of the model to the surface below it
 */
 
 /*QUAKED func_illusionary (0 .5 .8) ? 
+NOTE: THIS ENTITY IS BROKEN REGARDING CLIENT AND PROJECTILE PREDICTION. DO NOT USE IT. USE NONSOLID SHADERS INSTEAD.
 A non-solid brush entity. Use func_wall if you want it solid.
 The keys below actually apply to most brush entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
 -------- KEYS --------
@@ -654,6 +673,10 @@ loddistance2: distance after which to show the second LOD model replacement (def
 lodtarget1: targetname of the first LOD model entity (can be used instead of lodmodel1 to use a brush model instead)
 lodtarget2: targetname of the second LOD model entity (can be used instead of lodmodel2 to use a brush model instead)
 targetname: when invoking it by a button etc., it changes the color to the initiator of the action (e.g. the one pressing a button). In Onslaught, this can be used to color control points for team who owns them. In other game types, this can be used as a fun feature. Works only with _shirt and _pants textures.
+originjitter: a vector describing a random offset this entity will be moved on initial spawn. This corresponds to the "origin" field. Works on any non-q3map2-only entity.
+anglesjitter: a vector in the order "pitch yaw roll" describing a random angles change on this entity on initial spawn. The value 180 180 180 makes the angles entirely random and uniformly distributed (among euler angles). This corresponds to the "angles" field. Works on any non-q3map2-only entity.
+anglejitter: a float describing a random yaw angle change on this entity on initial spawn. The value 180 makes the yaw angle entirely random (maybe good for items). This corresponds to the "angle" field. Works on any non-q3map2-only entity.
+gametypefilter: either a + sign and a comma separated list of game types or the aliases "teams" and "noteams" to ONLY show the entity in the listed game types, or a - sign and a comma separated list of game types or the aliases "teams" and "noteams" to NOT show the entity in the listed game types. The syntax is the same as in sbar_columns_set strings. Works on any non-q3map2-only entity.
 -------- Q3MAP2 KEYS --------
 _castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
 _receiveshadows: Allows per-entity control over shadow reception. Defaults to 1 on everything (world shadows). 0 = receives NO shadows. > 1 = receive shadows only from corresponding keyed entities (see above) and world. < 1 = receive shadows ONLY from corresponding keyed entities.
@@ -670,7 +693,7 @@ A solid brush entity. Use func_illusionary if you want it solid.
 The keys below actually apply to most brush entities as they are engine features; however, they are described here as they aren't overridden by game code in misc_models. Its q3map2 keys below will work on any brush entity!
 -------- KEYS --------
 movetype: way in which it moves: one of 0 = NONE, 1 = ANGLENOCLIP, 2 = ANGLECLIP, 3 = WALK, 4 = STEP, 5 = FLY, 6 = TOSS, 7 = PUSH, 8 = NOCLIP, 9 = FLYMISSILE, 10 = BOUNCE, 11 = BOUNCEMISSILE
-solid: solidity: one of 1 = TRIGGER, 2 = BBOX, 3 = SLIDEBOX, 4 = BSP, 5 = CORPSE
+solid: solidity: one of 1 = TRIGGER, 2 = BBOX, 3 = SLIDEBOX, 4 = BSP, 5 = CORPSE (default: 4, any other value causes prediction problems and should not be used until further notice)
 avelocity: vector giving its angular velocity (useful for spinning models)
 scale: scale factor of the model (range: 0.0625 to 15.9375)
 colormap: 1024 + 16 * pantscolor + shirtcolor
@@ -682,6 +705,10 @@ loddistance2: distance after which to show the second LOD model replacement (def
 lodtarget1: targetname of the first LOD model entity (can be used instead of lodmodel1 to use a brush model instead)
 lodtarget2: targetname of the second LOD model entity (can be used instead of lodmodel2 to use a brush model instead)
 targetname: when invoking it by a button etc., it changes the color to the initiator of the action (e.g. the one pressing a button). In Onslaught, this can be used to color control points for team who owns them. In other game types, this can be used as a fun feature. Works only with _shirt and _pants textures.
+originjitter: a vector describing a random offset this entity will be moved on initial spawn. This corresponds to the "origin" field. Works on any non-q3map2-only entity.
+anglesjitter: a vector in the order "pitch yaw roll" describing a random angles change on this entity on initial spawn. The value 180 180 180 makes the angles entirely random and uniformly distributed (among euler angles). This corresponds to the "angles" field. Works on any non-q3map2-only entity.
+anglejitter: a float describing a random yaw angle change on this entity on initial spawn. The value 180 makes the yaw angle entirely random (maybe good for items). This corresponds to the "angle" field. Works on any non-q3map2-only entity.
+gametypefilter: either a + sign and a comma separated list of game types or the aliases "teams" and "noteams" to ONLY show the entity in the listed game types, or a - sign and a comma separated list of game types or the aliases "teams" and "noteams" to NOT show the entity in the listed game types. The syntax is the same as in sbar_columns_set strings. Works on any non-q3map2-only entity.
 -------- Q3MAP2 KEYS --------
 _castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
 _receiveshadows: Allows per-entity control over shadow reception. Defaults to 1 on everything (world shadows). 0 = receives NO shadows. > 1 = receive shadows only from corresponding keyed entities (see above) and world. < 1 = receive shadows ONLY from corresponding keyed entities.
@@ -1164,6 +1191,7 @@ killtarget: points to the entity that is to be used as the source (e.g. a func_p
 */
 
 /*QUAKED weapon_minstanex (1 0 .5) (-30 -30 0) (30 30 32) FLOATING
+Placing this entity on a map kills your cat, voids the warranty on your toaster, and makes your map an unenjoyable campers' paradise.
 the MinstaGib Nex. Always kills with one shot.
 -------- KEYS --------
 ammo_cells: initial cells of the weapon (if unset, g_pickup_cells is used)
