@@ -49,7 +49,7 @@ int						numBasePaths;
 char					*basePaths[ MAX_BASE_PATHS ];
 int						numGamePaths;
 char					*gamePaths[ MAX_GAME_PATHS ];
-
+char					*homeBasePath = NULL;
 
 
 /*
@@ -378,6 +378,16 @@ void InitPaths( int *argc, char **argv )
 			AddGamePath( argv[ i ] );
 			argv[ i ] = NULL;
 		}
+		
+		/* -fs_nohomebase */
+		else if( strcmp( argv[ i ], "-fs_homebase" ) == 0 )
+		{
+			if( ++i >= *argc )
+				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
+			argv[ i - 1 ] = NULL;
+			homeBasePath = argv[i];
+			argv[ i ] = NULL;
+		}
 	}
 	
 	/* remove processed arguments */
@@ -433,7 +443,10 @@ void InitPaths( int *argc, char **argv )
 	}
 	
 	/* this only affects unix */
-	AddHomeBasePath( game->homeBasePath );
+	if(homeBasePath)
+		AddHomeBasePath( homeBasePath );
+	else
+		AddHomeBasePath( game->homeBasePath );
 	
 	/* initialize vfs paths */
 	if( numBasePaths > MAX_BASE_PATHS )
