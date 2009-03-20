@@ -2035,6 +2035,7 @@ Q_EXTERN qboolean			nosort;
 Q_EXTERN qboolean			saveprt;
 Q_EXTERN qboolean			hint;	/* ydnar */
 Q_EXTERN char				inbase[ MAX_QPATH ];
+Q_EXTERN char				globalCelShader[ MAX_QPATH ];
 
 /* other bits */
 Q_EXTERN int				totalvis;

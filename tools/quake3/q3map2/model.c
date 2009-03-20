@@ -729,7 +729,7 @@ void AddTriangleModels( entity_t *e )
 			celShader = ShaderInfoForShader( shader );
 		}
 		else
-			celShader = NULL;
+			celShader = *globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL;
 		
 		/* get lightmap scale */
 		lightmapScale = FloatForKey( e2, "_lightmapscale" );

@@ -1578,7 +1578,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader );
 	}
 	else
-		celShader = NULL;
+		celShader = *globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL;
 	
 	/* attach stuff to everything in the entity */
 	for( brush = mapEnt->brushes; brush != NULL; brush = brush->next )

@@ -672,6 +672,7 @@ int BSPMain( int argc, char **argv )
 	numMapDrawSurfs = 0;
 	
 	tempSource[ 0 ] = '\0';
+	globalCelShader[0] = 0;
 	
 	/* set standard game flags */
 	maxSurfaceVerts = game->maxSurfaceVerts;
@@ -835,6 +836,15 @@ int BSPMain( int argc, char **argv )
 		{
 			Sys_Printf( "Flatshading enabled\n" );
 			flat = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-celshader" ) )
+		{
+			++i;
+			if(argv[i][0])
+				sprintf( globalCelShader, "textures/%s", argv[ i ] );
+			else
+				*globalCelShader = 0;
+			Sys_Printf( "Global cel shader set to \"%s\"\n", globalCelShader );
 		}
 		else if( !strcmp( argv[ i ], "-meta" ) )
 		{
