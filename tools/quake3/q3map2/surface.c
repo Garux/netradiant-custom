@@ -181,6 +181,7 @@ mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si )
 	/* do some fixups for celshading */
 	ds->planar = qfalse;
 	ds->planeNum = -1;
+	ds->celShader = NULL; /* don't cel shade cels :P */
 	
 	/* return the surface */
 	return ds;

@@ -195,7 +195,8 @@ public:
   }
   void post(const scene::Path& path, scene::Instance& instance) const
   {
-    if(Instance_getSelectable(instance)->isSelected())
+	Selectable *selectable = Instance_getSelectable(instance);
+    if(selectable && selectable->isSelected())
     { 
 	  Entity* entity = Node_getEntity(path.top());
 	  if(entity == 0 && Node_isPrimitive(path.top()))
