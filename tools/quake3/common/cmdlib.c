@@ -352,13 +352,41 @@ void Q_getwd (char *out)
 
 void Q_mkdir (const char *path)
 {
+	char parentbuf[256];
+	const char *p = NULL;
+	int retry = 2;
+	while(retry--)
+	{
 #ifdef WIN32
-	if (_mkdir (path) != -1)
-		return;
+		const char *q = NULL;
+		if (_mkdir (path) != -1)
+			return;
+		if(errno == ENOENT)
+		{
+			p = strrchr(path, '/');
+			q = strrchr(path, '\\');
+			if(q && (!p || q < p))
+				p = q;
+		}
 #else
-	if (mkdir (path, 0777) != -1)
-		return;
+		if (mkdir (path, 0777) != -1)
+			return;
+		if(errno == ENOENT)
+			p = strrchr(path, '/');
 #endif
+		if(p)
+		{
+			strncpy(parentbuf, path, sizeof(parentbuf));
+			if((int) (p - path) < (int) sizeof(parentbuf))
+			{
+				parentbuf[p - path] = 0;
+				Sys_Printf ("mkdir: %s: creating parent %s first\n", path, parentbuf);
+				Q_mkdir(parentbuf);
+				continue;
+			}
+		}
+		break;
+	}
 	if (errno != EEXIST)
 		Error ("mkdir %s: %s",path, strerror(errno));
 }
