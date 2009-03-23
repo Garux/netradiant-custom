@@ -280,7 +280,7 @@ void AddHomeBasePath( char *path )
 			return;
 
 		/* make a hole */
-		for( i = 0; i < (MAX_BASE_PATHS - 1); i++ )
+		for( i = (MAX_BASE_PATHS - 2); i >= 0; i-- )
 			basePaths[ i + 1 ] = basePaths[ i ];
 		
 		/* concatenate home dir and path */
