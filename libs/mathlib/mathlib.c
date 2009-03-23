@@ -269,17 +269,25 @@ void _Vector53Copy (vec5_t in, vec3_t out)
 }
 
 // NOTE: added these from Ritual's Q3Radiant
+#define INVALID_BOUNDS 99999
 void ClearBounds (vec3_t mins, vec3_t maxs)
 {
-	mins[0] = mins[1] = mins[2] = 99999;
-	maxs[0] = maxs[1] = maxs[2] = -99999;
+	mins[0] = mins[1] = mins[2] = +INVALID_BOUNDS;
+	maxs[0] = maxs[1] = maxs[2] = -INVALID_BOUNDS;
 }
 
 void AddPointToBounds (vec3_t v, vec3_t mins, vec3_t maxs)
 {
 	int		i;
 	vec_t	val;
-	
+
+	if(mins[0] == +INVALID_BOUNDS)
+	if(maxs[0] == -INVALID_BOUNDS)
+	{
+		VectorCopy(v, mins);
+		VectorCopy(v, maxs);
+	}
+
 	for (i=0 ; i<3 ; i++)
 	{
 		val = v[i];
