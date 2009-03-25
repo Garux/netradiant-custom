@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "generic/callback.h"
 
 // ignore numlock
-#define ALLOWED_MODIFIERS (~(GDK_MOD2_MASK | GDK_LOCK_MASK))
+#define ALLOWED_MODIFIERS (~(GDK_MOD2_MASK | GDK_LOCK_MASK | GDK_MOD3_MASK | GDK_MOD4_MASK | GDK_MOD5_MASK))
 
 struct Accelerator
 {

@@ -263,8 +263,31 @@ gboolean accelerator_window_key_press(GtkWidget *widget, GdkEventKey *event, gpo
 
 	if(!dialog.m_waiting_for_key)
 		return false;
+
+#if 0
 	if(event->is_modifier)
 		return false;
+#else
+	switch(event->keyval)
+	{
+		case GDK_Shift_L:
+		case GDK_Shift_R:
+		case GDK_Control_L:
+		case GDK_Control_R:
+		case GDK_Caps_Lock:
+		case GDK_Shift_Lock:
+		case GDK_Meta_L:
+		case GDK_Meta_R:
+		case GDK_Alt_L:
+		case GDK_Alt_R:
+		case GDK_Super_L:
+		case GDK_Super_R:
+		case GDK_Hyper_L:
+		case GDK_Hyper_R:
+			return false;
+	}
+#endif
+
 	dialog.m_waiting_for_key = false;
 
 	// 7. find the name of the accelerator
@@ -560,7 +583,6 @@ public:
         accelerator.modifiers = (GdkModifierType)0;
         return;
       }
-      int modifiers = 0;
 
 	  gtk_accelerator_parse(value, &accelerator.key, &accelerator.modifiers);
 	  accelerator = accelerator; // fix modifiers
