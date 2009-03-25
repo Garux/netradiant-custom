@@ -28,8 +28,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "string/string.h"
 #include "versionlib.h"
 #include "gtkutil/accelerator.h"
+#include "gtkutil/messagebox.h"
+#include <gtk/gtktreeselection.h>
+#include <gtk/gtkbutton.h>
+#include "gtkmisc.h"
 
-typedef std::pair<Accelerator, bool> ShortcutValue; // accelerator, isRegistered
+typedef std::pair<Accelerator, int> ShortcutValue; // accelerator, isRegistered
 typedef std::map<CopiedString, ShortcutValue> Shortcuts;
 
 void Shortcuts_foreach(Shortcuts& shortcuts, CommandVisitor& visitor)
@@ -52,12 +56,12 @@ void GlobalShortcuts_foreach(CommandVisitor& visitor)
   Shortcuts_foreach(g_shortcuts, visitor);
 }
 
-void GlobalShortcuts_register(const char* name)
+void GlobalShortcuts_register(const char* name, int type)
 {
   Shortcuts::iterator i = g_shortcuts.find(name);
   if(i != g_shortcuts.end())
   {
-    (*i).second.second = true;
+    (*i).second.second = type;
   }
 }
 
@@ -124,6 +128,43 @@ const KeyEvent& GlobalKeyEvents_find(const char* name)
 }
 
 
+void disconnect_accelerator(const char *name)
+{
+	Shortcuts::iterator i = g_shortcuts.find(name);
+	if(i != g_shortcuts.end())
+	{
+		switch((*i).second.second)
+		{
+			case 1:
+				// command
+				command_disconnect_accelerator(name);
+				break;
+			case 2:
+				// toggle
+				toggle_remove_accelerator(name);
+				break;
+		}
+	}
+}
+
+void connect_accelerator(const char *name)
+{
+	Shortcuts::iterator i = g_shortcuts.find(name);
+	if(i != g_shortcuts.end())
+	{
+		switch((*i).second.second)
+		{
+			case 1:
+				// command
+				command_connect_accelerator(name);
+				break;
+			case 2:
+				// toggle
+				toggle_add_accelerator(name);
+				break;
+		}
+	}
+}
 
 
 #include <cctype>
@@ -144,17 +185,215 @@ const KeyEvent& GlobalKeyEvents_find(const char* name)
 struct command_list_dialog_t : public ModalDialog
 {
   command_list_dialog_t()
-    : m_close_button(*this, eIDCANCEL)
+    : m_close_button(*this, eIDCANCEL), m_list(NULL), m_command_iter(), m_model(NULL), m_waiting_for_key(false)
   {
   }
   ModalDialogButton m_close_button;
+
+  GtkTreeView *m_list;
+  GtkTreeIter m_command_iter;
+  GtkTreeModel *m_model;
+  bool m_waiting_for_key;
 };
+
+void accelerator_clear_button_clicked(GtkButton *btn, gpointer dialogptr)
+{
+	command_list_dialog_t &dialog = * (command_list_dialog_t *) dialogptr;
+
+	if(dialog.m_waiting_for_key)
+	{
+		// just unhighlight, user wanted to cancel
+		dialog.m_waiting_for_key = false;
+		gtk_list_store_set(GTK_LIST_STORE(dialog.m_model), &dialog.m_command_iter, 2, false, -1);
+		gtk_widget_set_sensitive(GTK_WIDGET(dialog.m_list), true);
+		dialog.m_model = NULL;
+		return;
+	}
+
+	GtkTreeSelection *sel = gtk_tree_view_get_selection(dialog.m_list);
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	if(!gtk_tree_selection_get_selected(sel, &model, &iter))
+		return;
+
+	GValue val;
+	memset(&val, 0, sizeof(val));
+	gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 0, &val);
+	const char *commandName = g_value_get_string(&val);;
+
+	// clear the ACTUAL accelerator too!
+	disconnect_accelerator(commandName);
+
+	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find(commandName);
+	if(thisShortcutIterator == g_shortcuts.end())
+		return;
+	thisShortcutIterator->second.first = accelerator_null();
+
+	gtk_list_store_set(GTK_LIST_STORE(model), &iter, 1, "", -1);
+
+	g_value_unset(&val);
+}
+
+void accelerator_edit_button_clicked(GtkButton *btn, gpointer dialogptr)
+{
+	command_list_dialog_t &dialog = * (command_list_dialog_t *) dialogptr;
+
+	// 1. find selected row
+	GtkTreeSelection *sel = gtk_tree_view_get_selection(dialog.m_list);
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	if(!gtk_tree_selection_get_selected(sel, &model, &iter))
+		return;
+	dialog.m_command_iter = iter;
+	dialog.m_model = model;
+	
+	// 2. disallow changing the row
+	//gtk_widget_set_sensitive(GTK_WIDGET(dialog.m_list), false);
+
+	// 3. highlight the row
+	gtk_list_store_set(GTK_LIST_STORE(model), &iter, 2, true, -1);
+
+	// 4. grab keyboard focus
+	dialog.m_waiting_for_key = true;
+}
+
+gboolean accelerator_window_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dialogptr)
+{
+	command_list_dialog_t &dialog = * (command_list_dialog_t *) dialogptr;
+
+	if(!dialog.m_waiting_for_key)
+		return false;
+	if(event->is_modifier)
+		return false;
+	dialog.m_waiting_for_key = false;
+
+	// 7. find the name of the accelerator
+	GValue val;
+	memset(&val, 0, sizeof(val));
+	gtk_tree_model_get_value(GTK_TREE_MODEL(dialog.m_model), &dialog.m_command_iter, 0, &val);
+	const char *commandName = g_value_get_string(&val);;
+	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find(commandName);
+	if(thisShortcutIterator == g_shortcuts.end())
+	{
+		gtk_list_store_set(GTK_LIST_STORE(dialog.m_model), &dialog.m_command_iter, 2, false, -1);
+		gtk_widget_set_sensitive(GTK_WIDGET(dialog.m_list), true);
+		return true;
+	}
+
+	// 8. build an Accelerator
+	Accelerator newAccel(event->keyval, (GdkModifierType) event->state);
+
+	// 8. verify the key is still free, show a dialog to ask what to do if not
+	class VerifyAcceleratorNotTaken : public CommandVisitor
+	{
+		const char *commandName;
+		const Accelerator &newAccel;
+		GtkWidget *widget;
+		GtkTreeModel *model;
+		public:
+		bool allow;
+		VerifyAcceleratorNotTaken(const char *name, const Accelerator &accelerator, GtkWidget *w, GtkTreeModel *m) : commandName(name), newAccel(accelerator), widget(w), model(m), allow(true)
+		{
+		}
+		void visit(const char* name, Accelerator& accelerator)
+		{
+			if(!strcmp(name, commandName))
+				return;
+			if(!allow)
+				return;
+			if(accelerator.key == 0)
+				return;
+			if(accelerator == newAccel)
+			{
+				StringOutputStream msg;
+				msg << "The command " << name << " is already assigned to the key " << accelerator << ".\n\n"
+				    << "Do you want to unassign " << name << " first?";
+				EMessageBoxReturn r = gtk_MessageBox (widget, msg.c_str(), "Key already used", eMB_YESNOCANCEL);
+				if(r == eIDYES)
+				{
+					// clear the ACTUAL accelerator too!
+					disconnect_accelerator(name);
+					// delete the modifier
+					accelerator = accelerator_null();
+					// empty the cell of the key binds dialog
+					GtkTreeIter i;
+					if(gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &i))
+					{
+						for(;;)
+						{
+							GValue val;
+							memset(&val, 0, sizeof(val));
+							gtk_tree_model_get_value(GTK_TREE_MODEL(model), &i, 0, &val);
+							const char *thisName = g_value_get_string(&val);;
+							if(!strcmp(thisName, name))
+								gtk_list_store_set(GTK_LIST_STORE(model), &i, 1, "", -1);
+							g_value_unset(&val);
+							if(!gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &i))
+								break;
+						}
+					}
+				}
+				else if(r == eIDCANCEL)
+				{
+					// aborted
+					allow = false;
+				}
+			}
+		}
+	} verify_visitor(commandName, newAccel, widget, dialog.m_model);
+	GlobalShortcuts_foreach(verify_visitor);
+
+	gtk_list_store_set(GTK_LIST_STORE(dialog.m_model), &dialog.m_command_iter, 2, false, -1);
+	gtk_widget_set_sensitive(GTK_WIDGET(dialog.m_list), true);
+
+	if(verify_visitor.allow)
+	{
+		// clear the ACTUAL accelerator first
+		disconnect_accelerator(commandName);
+
+		thisShortcutIterator->second.first = newAccel;
+
+		// write into the cell
+		StringOutputStream modifiers;
+		modifiers << newAccel;
+		gtk_list_store_set(GTK_LIST_STORE(dialog.m_model), &dialog.m_command_iter, 1, modifiers.c_str(), -1);
+
+		// set the ACTUAL accelerator too!
+		connect_accelerator(commandName);
+	}
+
+	g_value_unset(&val);
+
+	dialog.m_model = NULL;
+
+	return true;
+}
+
+/*
+	GtkTreeIter row;
+	GValue val;
+	if(!model) {g_error("Unable to get model from cell renderer");}
+	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(model), &row, path_string);
+
+	gtk_tree_model_get_value(GTK_TREE_MODEL(model), &row, 0, &val);
+	const char *name = g_value_get_string(&val);
+	Shortcuts::iterator i = g_shortcuts.find(name);
+	if(i != g_shortcuts.end())
+	{
+		accelerator_parse(i->second.first, new_text);
+		StringOutputStream modifiers;
+		modifiers << i->second.first;
+		gtk_list_store_set(GTK_LIST_STORE(model), &row, 1, modifiers.c_str(), -1);
+	}
+};
+*/
 
 void DoCommandListDlg()
 {
   command_list_dialog_t dialog;
 
   GtkWindow* window = create_modal_dialog_window(MainFrame_getWindow(), "Mapped Commands", dialog, -1, 400);
+  g_signal_connect(G_OBJECT(window), "key-press-event", (GCallback) accelerator_window_key_press, &dialog);
 
   GtkAccelGroup* accel = gtk_accel_group_new();
   gtk_window_add_accel_group(window, accel);
@@ -167,19 +406,22 @@ void DoCommandListDlg()
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(scr), TRUE, TRUE, 0);
 
     {
-      GtkListStore* store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+      GtkListStore* store = gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_INT);
 
       GtkWidget* view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	  dialog.m_list = GTK_TREE_VIEW(view);
+
+	  gtk_tree_view_set_enable_search(GTK_TREE_VIEW(view), false); // annoying
 
       {
         GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", 0, 0);
+        GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", 0, "weight-set", 2, "weight", 3, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
       }
 
       {
         GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", 1, 0);
+        GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", 1, "weight-set", 2, "weight", 3, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
       }
 
@@ -207,7 +449,7 @@ void DoCommandListDlg()
             {
               GtkTreeIter iter;
               gtk_list_store_append(m_store, &iter);
-              gtk_list_store_set(m_store, &iter, 0, name, 1, modifiers.c_str(), -1);
+              gtk_list_store_set(m_store, &iter, 0, name, 1, modifiers.c_str(), 2, false, 3, 800, -1);
             }
  
             if(!m_commandList.failed())
@@ -215,7 +457,7 @@ void DoCommandListDlg()
               int l = strlen(name);
               m_commandList << name;
               while(l++ < 25)
-		m_commandList << ' ';
+				  m_commandList << ' ';
               m_commandList << modifiers.c_str() << '\n';
             }
           }
@@ -229,12 +471,22 @@ void DoCommandListDlg()
   }
 
   GtkVBox* vbox = create_dialog_vbox(4);
-  gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(vbox), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(vbox), TRUE, TRUE, 0);
   {
+    GtkButton* editbutton = create_dialog_button("Edit", (GCallback) accelerator_edit_button_clicked, &dialog);
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(editbutton), FALSE, FALSE, 0);
+
+    GtkButton* clearbutton = create_dialog_button("Clear", (GCallback) accelerator_clear_button_clicked, &dialog);
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(clearbutton), FALSE, FALSE, 0);
+
+	GtkWidget *spacer = gtk_image_new();
+	gtk_widget_show(spacer);
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(spacer), TRUE, TRUE, 0);
+
     GtkButton* button = create_modal_dialog_button("Close", dialog.m_close_button);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(button), FALSE, FALSE, 0);
     widget_make_default(GTK_WIDGET(button));
-    gtk_widget_grab_focus(GTK_WIDGET(button));
+    gtk_widget_grab_default(GTK_WIDGET(button));
     gtk_widget_add_accelerator(GTK_WIDGET(button), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0);
     gtk_widget_add_accelerator(GTK_WIDGET(button), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0);
   }
@@ -245,7 +497,7 @@ void DoCommandListDlg()
 
 #include "profile/profile.h"
 
-const char* const COMMANDS_VERSION = "1.0-gdk-keynames";
+const char* const COMMANDS_VERSION = "1.0-gtk-accelnames";
 
 void SaveCommandMap(const char* path)
 {
@@ -270,26 +522,8 @@ void SaveCommandMap(const char* path)
       {
         m_file << name << "=";
 
-        const char* key = global_keys_find(accelerator.key);
-
-        if(!string_empty(key))
-        {
-          m_file << key;
-        }
-
-        if(accelerator.modifiers & GDK_MOD1_MASK)
-        {
-          m_file << "+Alt";
-        }
-        if(accelerator.modifiers & GDK_CONTROL_MASK)
-        {
-          m_file << "+Ctrl";
-        }
-        if(accelerator.modifiers & GDK_SHIFT_MASK)
-        {
-          m_file << "+Shift";
-        }
-
+        const char* key = gtk_accelerator_name(accelerator.key, accelerator.modifiers);
+		m_file << key;
         m_file << "\n";
       }
     } visitor(file);
@@ -327,51 +561,18 @@ public:
         return;
       }
       int modifiers = 0;
-      const char* last = value + string_length(value);
-      const char* keyEnd = stringrange_find(value, last, '+');
 
-      for(const char* modifier = keyEnd; modifier != last;)
-      {
-        const char* next = stringrange_find(modifier + 1, last, '+');
-        if(next - modifier == 4
-          && string_equal_nocase_n(modifier, "+alt", 4))
-        {
-          modifiers |= GDK_MOD1_MASK;
-        }
-        else if(next - modifier == 5
-          && string_equal_nocase_n(modifier, "+ctrl", 5) != 0)
-        {
-          modifiers |= GDK_CONTROL_MASK;
-        }
-        else if(next - modifier == 6
-          && string_equal_nocase_n(modifier, "+shift", 6) != 0)
-        {
-          modifiers |= GDK_SHIFT_MASK;
-        }
-        else
-        {
-          globalOutputStream() << "WARNING: failed to parse user command " << makeQuoted(value) << ": unknown modifier " << makeQuoted(StringRange(modifier, next)) << "\n";
-        }
-        modifier = next;
-      }
-      accelerator.modifiers = (GdkModifierType)modifiers;
+	  gtk_accelerator_parse(value, &accelerator.key, &accelerator.modifiers);
+	  accelerator = accelerator; // fix modifiers
 
-
-        CopiedString keyName(StringRange(value, keyEnd));
-        accelerator.key = global_keys_find(keyName.c_str());
-        if(accelerator.key != 0)
-        {
-          ++m_count;
-        }
-        else
-        {
-          globalOutputStream() << "WARNING: failed to parse user command " << makeQuoted(value) << ": unknown key " << makeQuoted(keyName.c_str()) << "\n";
-        }
-	
-	accelerator.key = gdk_keyval_from_name(CopiedString(StringRange(value, keyEnd)).c_str());
-	if(accelerator.key == GDK_VoidSymbol)
-		accelerator.key = 0;
-
+	  if(accelerator.key != 0)
+	  {
+		  ++m_count;
+	  }
+	  else
+	  {
+		  globalOutputStream() << "WARNING: failed to parse user command " << makeQuoted(name) << ": unknown key " << makeQuoted(value) << "\n";
+	  }
     }
   }
   std::size_t count() const

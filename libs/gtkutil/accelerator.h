@@ -24,22 +24,48 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <gdk/gdktypes.h>
 #include <gdk/gdkkeysyms.h>
+#include <gdk/gdkkeys.h>
 
 #include "generic/callback.h"
+
+// ignore numlock
+#define ALLOWED_MODIFIERS (~(GDK_MOD2_MASK | GDK_LOCK_MASK))
 
 struct Accelerator
 {
   Accelerator(guint _key)
-    : key(_key), modifiers((GdkModifierType)0)
+    : key(gdk_keyval_to_upper(_key)), modifiers((GdkModifierType)0)
   {
   }
   Accelerator(guint _key, GdkModifierType _modifiers)
-    : key(_key), modifiers(_modifiers)
+    : key(gdk_keyval_to_upper(_key)), modifiers((GdkModifierType) (_modifiers & ALLOWED_MODIFIERS))
+  {
+  }
+  Accelerator(const Accelerator &src)
+    : key(gdk_keyval_to_upper(src.key)), modifiers((GdkModifierType) (src.modifiers & ALLOWED_MODIFIERS))
   {
   }
   bool operator<(const Accelerator& other) const
   {
-    return key < other.key || (!(other.key < key) && modifiers < other.modifiers);
+    guint k1 = key;
+    guint k2 = other.key;
+	int mod1 = modifiers & ALLOWED_MODIFIERS;
+	int mod2 = other.modifiers & ALLOWED_MODIFIERS;
+    return k1 < k2 || (!(k2 < k1) && mod1 < mod2);
+  }
+  bool operator==(const Accelerator& other) const
+  {
+    guint k1 = key;
+    guint k2 = other.key;
+	int mod1 = modifiers & ALLOWED_MODIFIERS;
+	int mod2 = other.modifiers & ALLOWED_MODIFIERS;
+    return k1 == k2 && mod1 == mod2;
+  }
+  Accelerator &operator=(const Accelerator& other)
+  {
+  	key = other.key;
+	modifiers = (GdkModifierType) (other.modifiers & ALLOWED_MODIFIERS);
+	return *this;
   }
   guint key;
   GdkModifierType modifiers;

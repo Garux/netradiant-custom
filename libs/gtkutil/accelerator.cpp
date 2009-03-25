@@ -63,6 +63,7 @@ unsigned int global_keys_find(const char* name)
 
 void accelerator_write(const Accelerator& accelerator, TextOutputStream& ostream)
 {
+#if 0
   if(accelerator.modifiers & GDK_SHIFT_MASK)
   {
     ostream << "Shift + ";
@@ -85,6 +86,8 @@ void accelerator_write(const Accelerator& accelerator, TextOutputStream& ostream
   {
     ostream << static_cast<char>(accelerator.key);
   }
+#endif
+  ostream << gtk_accelerator_get_label(accelerator.key, accelerator.modifiers);
 }
 
 typedef std::map<Accelerator, Callback> AcceleratorMap;

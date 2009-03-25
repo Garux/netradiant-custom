@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 const Accelerator& GlobalShortcuts_insert(const char* name, const Accelerator& accelerator);
-void GlobalShortcuts_register(const char* name);
+void GlobalShortcuts_register(const char* name, int type); // 1 = command, 2 = toggle
 void GlobalShortcuts_reportUnregistered();
 
 class CommandVisitor

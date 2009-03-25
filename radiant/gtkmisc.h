@@ -44,6 +44,7 @@ inline void process_gui()
 void command_connect_accelerator(const char* commandName);
 void command_disconnect_accelerator(const char* commandName);
 void toggle_add_accelerator(const char* commandName);
+void toggle_remove_accelerator(const char* name);
 
 typedef struct _GtkMenu GtkMenu;
 typedef struct _GtkMenuItem GtkMenuItem;
