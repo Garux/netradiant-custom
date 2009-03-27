@@ -184,37 +184,49 @@ public:
 
 class EntityGroupSelected : public scene::Graph::Walker
 {
-  NodeSmartReference group;
-public:
-  EntityGroupSelected(const scene::Path &p): group(p.top().get())
-  {
-  }
-  bool pre(const scene::Path& path, scene::Instance& instance) const
-  {
-    return true;
-  }
-  void post(const scene::Path& path, scene::Instance& instance) const
-  {
-	Selectable *selectable = Instance_getSelectable(instance);
-    if(selectable && selectable->isSelected())
-    { 
-	  Entity* entity = Node_getEntity(path.top());
-	  if(entity == 0 && Node_isPrimitive(path.top()))
-	  {
-		  NodeSmartReference child(path.top().get());
-		  NodeSmartReference parent(path.parent().get());
+	NodeSmartReference group;
+	//typedef std::pair<NodeSmartReference, NodeSmartReference> DeletionPair;
+	//Stack<DeletionPair> deleteme;
+	public:
+	EntityGroupSelected(const scene::Path &p): group(p.top().get())
+	{
+	}
+	bool pre(const scene::Path& path, scene::Instance& instance) const
+	{
+		return true;
+	}
+	void post(const scene::Path& path, scene::Instance& instance) const
+	{
+		Selectable *selectable = Instance_getSelectable(instance);
+		if(selectable && selectable->isSelected())
+		{ 
+			Entity* entity = Node_getEntity(path.top());
+			if(entity == 0 && Node_isPrimitive(path.top()))
+			{
+				NodeSmartReference child(path.top().get());
+				NodeSmartReference parent(path.parent().get());
 
-		  Node_getTraversable(parent)->erase(child);
-		  Node_getTraversable(group)->insert(child);
+				if(path.size() >= 3 && parent != Map_FindOrInsertWorldspawn(g_map))
+				{
+					NodeSmartReference parentparent(path[path.size() - 3].get());
 
-		  if(Node_getTraversable(parent)->empty() && path.size() >= 3 && parent != Map_FindOrInsertWorldspawn(g_map))
-		  {
-			  NodeSmartReference parentparent(path[path.size() - 3].get());
-			  Node_getTraversable(parentparent)->erase(parent);
-		  }
-	  }
-    }
-  }
+					Node_getTraversable(parent)->erase(child);
+					Node_getTraversable(group)->insert(child);
+
+					if(Node_getTraversable(parent)->empty())
+					{
+						//deleteme.push(DeletionPair(parentparent, parent));
+						Node_getTraversable(parentparent)->erase(parent);
+					}
+				}
+				else
+				{
+					Node_getTraversable(parent)->erase(child);
+					Node_getTraversable(group)->insert(child);
+				}
+			}
+		}
+	}
 };
 
 void Entity_groupSelected()
