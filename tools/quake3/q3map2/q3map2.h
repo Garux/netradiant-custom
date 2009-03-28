@@ -1639,6 +1639,7 @@ void						MakeEntityMetaTriangles( entity_t *e );
 void						FixMetaTJunctions( void );
 void						SmoothMetaTriangles( void );
 void						MergeMetaTriangles( void );
+void						EmitMetaStats(); // vortex: print meta statistics even in no-verbose mode
 
 
 /* surface_extra.c */

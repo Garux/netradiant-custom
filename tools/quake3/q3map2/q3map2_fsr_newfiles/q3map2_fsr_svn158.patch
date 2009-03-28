@@ -1,65 +1,3 @@
-Index: brush.c
-===================================================================
---- brush.c	(revision 158)
-+++ brush.c	(working copy)
-@@ -78,7 +78,7 @@
- 	
- 	
- 	/* count brushes */
--	for( brushes; brushes != NULL; brushes = brushes->next )
-+	for( ; brushes != NULL; brushes = brushes->next )
- 		c++;
- 	return c;
- }
-@@ -122,7 +122,7 @@
- 	
- 	
- 	/* error check */
--	if( *((int*) b) == 0xFEFEFEFE )
-+	if( *((unsigned int*) b) == 0xFEFEFEFE )
- 	{
- 		Sys_FPrintf( SYS_VRB, "WARNING: Attempt to free an already freed brush!\n" );
- 		return;
-@@ -135,7 +135,7 @@
- 	
- 	/* ydnar: overwrite it */
- 	memset( b, 0xFE, (int) &(((brush_t*) 0)->sides[ b->numsides ]) );
--	*((int*) b) = 0xFEFEFEFE;
-+	*((unsigned int*) b) = 0xFEFEFEFE;
- 	
- 	/* free it */
- 	free( b );
-@@ -156,7 +156,7 @@
- 	
- 	
- 	/* walk brush list */
--	for( brushes; brushes != NULL; brushes = next )
-+	for( ; brushes != NULL; brushes = next )
- 	{
- 		next = brushes->next;
- 		FreeBrush( brushes );
-Index: bsp.c
-===================================================================
---- bsp.c	(revision 158)
-+++ bsp.c	(working copy)
-@@ -194,7 +194,6 @@
- 	char		level[ 2 ], shader[ 1024 ];
- 	const char	*value;
- 	
--	
- 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
- 	value = ValueForKey( &entities[ 0 ], "_blocksize" );
- 	if( value[ 0 ] == '\0' )
-@@ -531,6 +530,9 @@
- 	
- 	/* write fogs */
- 	EmitFogs();
-+
-+	/* vortex: emit meta stats */
-+	EmitMetaStats();
- }
- 
- 
 Index: bspfile_abstract.c
 ===================================================================
 --- bspfile_abstract.c	(revision 158)
@@ -119,19 +57,6 @@ Index: bspfile_abstract.c
 +	}
  }
  
-Index: facebsp.c
-===================================================================
---- facebsp.c	(revision 158)
-+++ facebsp.c	(working copy)
-@@ -180,7 +180,7 @@
- 	
- 
- 	c = 0;
--	for( list; list != NULL; list = list->next )
-+	for( ; list != NULL; list = list->next )
- 		c++;
- 	return c;
- }
 Index: game_ef.h
 ===================================================================
 --- game_ef.h	(revision 158)
@@ -2763,121 +2688,6 @@ Index: main.c
  	
  	/* check if we have enough options left to attempt something */
  	if( argc < 2 )
-Index: map.c
-===================================================================
---- map.c	(revision 158)
-+++ map.c	(working copy)
-@@ -1515,14 +1515,18 @@
- 	/* get explicit shadow flags */
- 	GetEntityShadowFlags( mapEnt, NULL, &castShadows, &recvShadows );
- 	
-+	/* vortex: added _ls key (short name of lightmapscale) */
- 	/* ydnar: get lightmap scaling value for this entity */
- 	if( strcmp( "", ValueForKey( mapEnt, "lightmapscale" ) ) ||
--		strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) )
-+		strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) || 
-+		strcmp( "", ValueForKey( mapEnt, "_ls" ) ) )
- 	{
- 		/* get lightmap scale from entity */
- 		lightmapScale = FloatForKey( mapEnt, "lightmapscale" );
- 		if( lightmapScale <= 0.0f )
- 			lightmapScale = FloatForKey( mapEnt, "_lightmapscale" );
-+		if( lightmapScale <= 0.0f )
-+			lightmapScale = FloatForKey( mapEnt, "_ls" );
- 		if( lightmapScale > 0.0f )
- 			Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt->mapEntityNum, classname, lightmapScale );
- 	}
-Index: mesh.c
-===================================================================
---- mesh.c	(revision 158)
-+++ mesh.c	(working copy)
-@@ -563,7 +563,7 @@
- 	}
- 	
- 	/* keep chopping */
--	for( iterations; iterations > 0; iterations-- )
-+	for( ; iterations > 0; iterations-- )
- 	{
- 		/* horizontal subdivisions */
- 		for( j = 0; j + 2 < out.width; j += 4 )
-Index: model.c
-===================================================================
---- model.c	(revision 158)
-+++ model.c	(working copy)
-@@ -266,7 +266,7 @@
- 			continue;
- 		
- 		/* fix the surface's normals */
--		PicoFixSurfaceNormals( surface );
-+		//PicoFixSurfaceNormals( surface );
- 		
- 		/* allocate a surface (ydnar: gs mods) */
- 		ds = AllocDrawSurface( SURFACE_TRIANGLES );
-@@ -521,7 +521,15 @@
- 						else
- 							free( buildBrush );
- 					}
-+					else
-+					{
-+						Sys_Printf( "WARNING: Model %s unable to generate brush - Case 1.\n", name );  
-+					}
- 				}
-+				else
-+				{
-+					Sys_Printf( "WARNING: Model %s unable to generate brush - Case 2.\n", name );  
-+				}  
- 			}
- 		}
- 	}
-@@ -566,8 +574,11 @@
- 	}
- 	
- 	/* get lightmap scale */
-+	/* vortex: added _ls key (short name of lightmapscale) */
- 	baseLightmapScale = FloatForKey( e, "_lightmapscale" );
- 	if( baseLightmapScale <= 0.0f )
-+		baseLightmapScale = FloatForKey( e, "_ls" );
-+	if( baseLightmapScale <= 0.0f )
- 		baseLightmapScale = 0.0f;
- 	
- 	/* walk the entity list */
-@@ -688,8 +699,11 @@
- 			celShader = NULL;
- 		
- 		/* get lightmap scale */
-+		/* vortex: added _ls key (short name of lightmapscale) */
- 		lightmapScale = FloatForKey( e2, "_lightmapscale" );
- 		if( lightmapScale <= 0.0f )
-+			lightmapScale = FloatForKey( e2, "_ls" );
-+		if( lightmapScale <= 0.0f )
- 			lightmapScale = baseLightmapScale;
- 		
- 		/* insert the model */
-Index: patch.c
-===================================================================
---- patch.c	(revision 158)
-+++ patch.c	(working copy)
-@@ -227,7 +227,6 @@
- 	float			longestCurve;
- 	int				maxIterations;
- 	
--	
- 	MatchToken( "{" );
- 	
- 	/* get texture */
-Index: path_init.c
-===================================================================
---- path_init.c	(revision 158)
-+++ path_init.c	(working copy)
-@@ -383,7 +383,7 @@
- 	/* remove processed arguments */
- 	for( i = 0, j = 0, k = 0; i < *argc && j < *argc; i++, j++ )
- 	{
--		for( j; j < *argc && argv[ j ] == NULL; j++ );
-+		for( ; j < *argc && argv[ j ] == NULL; j++ );
- 		argv[ i ] = argv[ j ];
- 		if( argv[ i ] != NULL )
- 			k++;
 Index: q3map2.h
 ===================================================================
 --- q3map2.h	(revision 158)
@@ -3038,14 +2848,6 @@ Index: q3map2.h
  
  
  /* surface_fur.c */
-@@ -1627,6 +1654,7 @@
- void						FixMetaTJunctions( void );
- void						SmoothMetaTriangles( void );
- void						MergeMetaTriangles( void );
-+void						EmitMetaStats(); // vortex: print meta statistics even in no-verbose mode
- 
- 
- /* surface_extra.c */
 @@ -1704,6 +1732,12 @@
  float						DirtForSample( trace_t *trace );
  void						DirtyRawLightmap( int num );
@@ -3484,29 +3286,6 @@ Index: surface_meta.c
  	subdivided = SubdivideMesh2( src, iterations );	//%	ds->maxIterations
  	
  	/* fit it to the curve and remove colinear verts on rows/columns */
-@@ -599,7 +617,22 @@
- }
- 
- 
-+/*
-+EmitMetaStatictics
-+vortex: prints meta statistics in general output
-+*/
- 
-+void EmitMetaStats()
-+{
-+	Sys_Printf( "--- EmitMetaStats ---\n" );
-+	Sys_Printf( "%9d total meta surfaces\n", numMetaSurfaces );
-+	Sys_Printf( "%9d stripped surfaces\n", numStripSurfaces );
-+	Sys_Printf( "%9d fanned surfaces\n", numFanSurfaces );
-+	Sys_Printf( "%9d patch meta surfaces\n", numPatchMetaSurfaces );
-+	Sys_Printf( "%9d meta verts\n", numMetaVerts );
-+	Sys_Printf( "%9d meta triangles\n", numMetaTriangles );
-+}
-+
- /*
- MakeEntityMetaTriangles()
- builds meta triangles from brush faces (tristrips and fans)
 @@ -652,12 +685,12 @@
  				break;
  			

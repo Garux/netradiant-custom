@@ -597,8 +597,23 @@ void StripFaceSurface( mapDrawSurface_t *ds )
 	/* classify it */
 	ClassifySurfaces( 1, ds );
 }
+ 
+ 
+/*
+EmitMetaStatictics
+vortex: prints meta statistics in general output
+*/
 
-
+void EmitMetaStats()
+{
+	Sys_Printf( "--- EmitMetaStats ---\n" );
+	Sys_Printf( "%9d total meta surfaces\n", numMetaSurfaces );
+	Sys_Printf( "%9d stripped surfaces\n", numStripSurfaces );
+	Sys_Printf( "%9d fanned surfaces\n", numFanSurfaces );
+	Sys_Printf( "%9d patch meta surfaces\n", numPatchMetaSurfaces );
+	Sys_Printf( "%9d meta verts\n", numMetaVerts );
+	Sys_Printf( "%9d meta triangles\n", numMetaTriangles );
+}
 
 /*
 MakeEntityMetaTriangles()

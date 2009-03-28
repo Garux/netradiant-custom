@@ -268,7 +268,7 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 			continue;
 		
 		/* fix the surface's normals */
-		PicoFixSurfaceNormals( surface );
+		PicoFixSurfaceNormals( surface ); /* why did vortex comment this out? FIXME */
 		
 		/* allocate a surface (ydnar: gs mods) */
 		ds = AllocDrawSurface( SURFACE_TRIANGLES );
@@ -610,7 +610,10 @@ void AddTriangleModels( entity_t *e )
 	}
 	
 	/* get lightmap scale */
+	/* vortex: added _ls key (short name of lightmapscale) */
 	baseLightmapScale = FloatForKey( e, "_lightmapscale" );
+	if( baseLightmapScale <= 0.0f )
+		baseLightmapScale = FloatForKey( e, "_ls" );
 	if( baseLightmapScale <= 0.0f )
 		baseLightmapScale = 0.0f;
 	
@@ -732,7 +735,10 @@ void AddTriangleModels( entity_t *e )
 			celShader = *globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL;
 		
 		/* get lightmap scale */
+		/* vortex: added _ls key (short name of lightmapscale) */
 		lightmapScale = FloatForKey( e2, "_lightmapscale" );
+		if( lightmapScale <= 0.0f )
+			lightmapScale = FloatForKey( e2, "_ls" );
 		if( lightmapScale <= 0.0f )
 			lightmapScale = baseLightmapScale;
 		

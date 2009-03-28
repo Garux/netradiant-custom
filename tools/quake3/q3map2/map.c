@@ -1553,14 +1553,18 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	/* get explicit shadow flags */
 	GetEntityShadowFlags( mapEnt, NULL, &castShadows, &recvShadows );
 	
+	/* vortex: added _ls key (short name of lightmapscale) */
 	/* ydnar: get lightmap scaling value for this entity */
 	if( strcmp( "", ValueForKey( mapEnt, "lightmapscale" ) ) ||
-		strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) )
+		strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) || 
+		strcmp( "", ValueForKey( mapEnt, "_ls" ) ) )
 	{
 		/* get lightmap scale from entity */
 		lightmapScale = FloatForKey( mapEnt, "lightmapscale" );
 		if( lightmapScale <= 0.0f )
 			lightmapScale = FloatForKey( mapEnt, "_lightmapscale" );
+		if( lightmapScale <= 0.0f )
+			lightmapScale = FloatForKey( mapEnt, "_ls" );
 		if( lightmapScale > 0.0f )
 			Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt->mapEntityNum, classname, lightmapScale );
 	}

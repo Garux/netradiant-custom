@@ -227,7 +227,6 @@ void ParsePatch( qboolean onlyLights )
 	float			longestCurve;
 	int				maxIterations;
 	
-	
 	MatchToken( "{" );
 	
 	/* get texture */
