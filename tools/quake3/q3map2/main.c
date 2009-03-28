@@ -458,7 +458,7 @@ int ScaleBSPMain( int argc, char **argv )
 	
 	
 	/* arg checking */
-	if( argc < 2 )
+	if( argc < 3 )
 	{
 		Sys_Printf( "Usage: q3map [-v] -scale [-tex] <value> <mapname>\n" );
 		return 0;
@@ -466,9 +466,9 @@ int ScaleBSPMain( int argc, char **argv )
 	
 	/* get scale */
 	scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
-	if(argc >= 3)
-		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
 	if(argc >= 4)
+		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
+	if(argc >= 5)
 		scale[0] = atof( argv[ argc - 4 ] );
 
 	texscale = !strcmp(argv[1], "-tex");
