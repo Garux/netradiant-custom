@@ -280,18 +280,19 @@ sets style keys for entity lights
 void SetLightStyles( void )
 {
 	int			i, j, style, numStyles;
-	qboolean	keepLights;
 	const char	*t;
 	entity_t	*e;
 	epair_t		*ep, *next;
 	char		value[ 10 ];
 	char		lightTargets[ MAX_SWITCHED_LIGHTS ][ 64 ];
 	int			lightStyles[ MAX_SWITCHED_LIGHTS ];
-	
-	
+
 	/* ydnar: determine if we keep lights in the bsp */
-	t = ValueForKey( &entities[ 0 ], "_keepLights" );
-	keepLights = (t[ 0 ] == '1') ? qtrue : qfalse;
+	if (KeyExists(&entities[ 0 ], "_keepLights") == qtrue)
+	{
+		t = ValueForKey( &entities[ 0 ], "_keepLights" );
+		keepLights = (t[ 0 ] == '1') ? qtrue : qfalse;
+	}
 	
 	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
 	numStyles = 0;

@@ -312,23 +312,41 @@ TriangulatePatchSurface()
 creates triangles from a patch
 */
 
-void TriangulatePatchSurface( mapDrawSurface_t *ds )
+void TriangulatePatchSurface( entity_t *e , mapDrawSurface_t *ds )
 {
 	int					iterations, x, y, pw[ 5 ], r;
 	mapDrawSurface_t	*dsNew;
 	mesh_t				src, *subdivided, *mesh;
-	
-	
+	int					forcePatchMeta;
+	int					patchQuality;
+	int					patchSubdivision;
+
+	/* vortex: _patchMeta, _patchQuality, _patchSubdivide support */
+	forcePatchMeta = IntForKey(e, "_patchMeta" );
+	if (!forcePatchMeta)
+		forcePatchMeta = IntForKey(e, "patchMeta" );
+	patchQuality = IntForKey(e, "_patchQuality" );
+	if (!patchQuality)
+		patchQuality = IntForKey(e, "patchQuality" );
+	if (!patchQuality)
+		patchQuality = 1.0;
+	patchSubdivision = IntForKey(e, "_patchSubdivide" );
+	if (!patchSubdivision)
+		patchSubdivision = IntForKey(e, "patchSubdivide" );
+
 	/* try to early out */
-	if( ds->numVerts == 0 || ds->type != SURFACE_PATCH || patchMeta == qfalse )
+	if(ds->numVerts == 0 || ds->type != SURFACE_PATCH || ( patchMeta == qfalse && !forcePatchMeta) )
 		return;
-	
 	/* make a mesh from the drawsurf */ 
 	src.width = ds->patchWidth;
 	src.height = ds->patchHeight;
 	src.verts = ds->verts;
 	//%	subdivided = SubdivideMesh( src, 8, 999 );
-	iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions );
+	if (patchSubdivision)
+		iterations = IterationsForCurve( ds->longestCurve, patchSubdivision );
+	else
+		iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions / patchQuality );
+
 	subdivided = SubdivideMesh2( src, iterations );	//%	ds->maxIterations
 	
 	/* fit it to the curve and remove colinear verts on rows/columns */
@@ -667,12 +685,12 @@ void MakeEntityMetaTriangles( entity_t *e )
 				break;
 			
 			case SURFACE_PATCH:
-				TriangulatePatchSurface( ds );
+				TriangulatePatchSurface(e, ds );
 				break;
 			
 			case SURFACE_TRIANGLES:
 				break;
-			
+		
 			case SURFACE_FORCED_META:
 			case SURFACE_META:
 				SurfaceToMetaTriangles( ds );
@@ -987,7 +1005,7 @@ void SmoothMetaTriangles( void )
 	vec3_t			average, diff;
 	int				indexes[ MAX_SAMPLES ];
 	vec3_t			votes[ MAX_SAMPLES ];
-	
+	const char		*classname;
 	
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SmoothMetaTriangles ---\n" );
@@ -1009,11 +1027,31 @@ void SmoothMetaTriangles( void )
 	   and set per-vertex smoothing angle */
 	for( i = 0, tri = &metaTriangles[ i ]; i < numMetaTriangles; i++, tri++ )
 	{
+		/* vortex: try get smoothing from entity key */
+		shadeAngle = FloatForKey(&entities[tri->entityNum], "_smoothnormals");
+		if (shadeAngle <= 0.0f)
+			shadeAngle = FloatForKey(&entities[tri->entityNum], "_sn");
+		if (shadeAngle <= 0.0f)
+			shadeAngle = FloatForKey(&entities[tri->entityNum], "_smooth");
+		if (shadeAngle > 0.0f)
+		{
+			if (entities[tri->entityNum].forceNormalSmoothing == qfalse)
+			{
+				entities[tri->entityNum].forceNormalSmoothing = qtrue;
+				classname = ValueForKey( &entities[tri->entityNum], "classname" );
+				Sys_Printf( "Entity %d (%s) has vertex normal smoothing with breaking angle of %3.0f\n", tri->entityNum, classname, shadeAngle );
+			}
+			shadeAngle = DEG2RAD( shadeAngle );
+		}
+
 		/* get shader for shade angle */
-		if( tri->si->shadeAngleDegrees > 0.0f )
-			shadeAngle = DEG2RAD( tri->si->shadeAngleDegrees );
-		else
-			shadeAngle = defaultShadeAngle;
+		if (shadeAngle <= 0.0f)
+		{
+			if( tri->si->shadeAngleDegrees > 0.0f )
+				shadeAngle = DEG2RAD( tri->si->shadeAngleDegrees );
+			else
+				shadeAngle = defaultShadeAngle;
+		}
 		if( shadeAngle > maxShadeAngle )
 			maxShadeAngle = shadeAngle;
 		

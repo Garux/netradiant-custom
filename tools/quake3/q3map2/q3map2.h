@@ -237,6 +237,7 @@ constants
 #define LIGHT_FAST_TEMP			512
 #define LIGHT_FAST_ACTUAL		(LIGHT_FAST | LIGHT_FAST_TEMP)
 #define LIGHT_NEGATIVE			1024
+#define LIGHT_UNNORMALIZED		2048	/* vortex: do not normalize _color */
 
 #define LIGHT_SUN_DEFAULT		(LIGHT_ATTEN_ANGLE | LIGHT_GRID | LIGHT_SURFACES)
 #define LIGHT_AREA_DEFAULT		(LIGHT_ATTEN_ANGLE | LIGHT_ATTEN_DISTANCE | LIGHT_GRID | LIGHT_SURFACES)	/* q3a and wolf are the same */
@@ -270,7 +271,7 @@ constants
 #define SUPER_NORMAL_SIZE		4
 #define SUPER_DELUXEL_SIZE		3
 #define BSP_DELUXEL_SIZE		3
-#define SUPER_FLOODLIGHT_SIZE	1
+#define SUPER_FLOODLIGHT_SIZE	4
 
 #define VERTEX_LUXEL( s, v )	(vertexLuxels[ s ] + ((v) * VERTEX_LUXEL_SIZE))
 #define RAD_VERTEX_LUXEL( s, v )(radVertexLuxels[ s ] + ((v) * VERTEX_LUXEL_SIZE))
@@ -550,6 +551,14 @@ typedef struct game_s
 	float				lightmapGamma;					/* default lightmap gamma */
 	float				lightmapExposure;				/* default lightmap exposure */
 	float				lightmapCompensate;				/* default lightmap compensate value */
+	float				gridScale;						/* vortex: default lightgrid scale (affects both directional and ambient spectres) */
+	float				gridAmbientScale;				/* vortex: default lightgrid ambient spectre scale */
+	qboolean			noStyles;						/* use lightstyles hack or not */
+	qboolean			keepLights;						/* keep light entities on bsp */
+	int					patchSubdivisions;				/* default patch subdivisions tolerance */
+	qboolean			patchShadows;					/* patch casting enabled */
+	qboolean			deluxeMap;						/* compile deluxemaps */
+	int					deluxeMode;						/* deluxemap mode (0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization) */
 	char				*bspIdent;						/* 4-letter bsp file prefix */
 	int					bspVersion;						/* bsp version to use */
 	qboolean			lumpSwap;						/* cod-style len/ofs order */
@@ -672,6 +681,7 @@ typedef struct shaderInfo_s
 	char				*backShader;					/* for surfaces that generate different front and back passes */
 	char				*cloneShader;					/* ydnar: for cloning of a surface */
 	char				*remapShader;					/* ydnar: remap a shader in final stage */
+	char				*deprecateShader;				/* vortex: shader is deprecated and replaced by this on use */
 
 	surfaceModel_t		*surfaceModel;					/* ydnar: for distribution of models */
 	foliage_t			*foliage;						/* ydnar/splash damage: wolf et foliage */
@@ -747,7 +757,13 @@ typedef struct shaderInfo_s
 	
 	vec3_t				color;							/* normalized color */
 	vec3_t				averageColor;
-	byte				lightStyle;
+	byte				lightStyle;					
+
+	/* vortex: per-surface floodlight */
+	float				floodlightDirectionScale;
+	vec3_t				floodlightRGB; 
+	float				floodlightIntensity;
+	float				floodlightDistance;
 	
 	qb_t				lmMergable;						/* ydnar */
 	int					lmCustomWidth, lmCustomHeight;	/* ydnar */
@@ -1023,7 +1039,7 @@ typedef struct mapDrawSurface_s
 	int					maxIterations;
 	int					patchWidth, patchHeight;
 	vec3_t				bounds[ 2 ];
-	
+
 	/* ydnar/sd: for foliage */
 	int					numFoliageInstances;
 	
@@ -1072,6 +1088,7 @@ typedef struct
 	int					firstBrush, numBrushes;		/* only valid during BSP compile */
 	epair_t				*epairs;
 	vec3_t				originbrush_origin;
+	qboolean			forceNormalSmoothing; /* vortex: true if entity has _smoothnormals/_sn/_smooth key */
 }
 entity_t;
 
@@ -1307,7 +1324,8 @@ typedef struct
 	
 	/* input and output */
 	vec3_t				color;			/* starts out at full color, may be reduced if transparent surfaces are crossed */
-	
+	vec3_t				colorNoShadow;	/* result color with no shadow casting */
+
 	/* output */
 	vec3_t				hit;
 	int					compileFlags;	/* for determining surface compile flags traced through */
@@ -1378,6 +1396,13 @@ typedef struct rawLightmap_s
 	int						numLightClusters, *lightClusters;
 	
 	int						sampleSize, actualSampleSize, axisNum;
+
+	/* vortex: per-surface floodlight */
+	float					floodlightDirectionScale;
+	vec3_t					floodlightRGB; 
+	float					floodlightIntensity;
+	float					floodlightDistance;
+
 	int						entityNum;
 	int						recvShadows;
 	vec3_t					mins, maxs, axis, origin, *vecs;
@@ -1432,8 +1457,6 @@ typedef struct surfaceInfo_s
 	int					firstSurfaceCluster, numSurfaceClusters;
 }
 surfaceInfo_t;
-
-
 
 /* -------------------------------------------------------------------------------
 
@@ -1568,6 +1591,7 @@ void						FreeTreePortals_r( node_t *node );
 void						ParsePatch( qboolean onlyLights );
 mesh_t						*SubdivideMesh( mesh_t in, float maxError, float minLength );
 void						PatchMapDrawSurfs( entity_t *e );
+void						TriangulatePatchSurface( entity_t *e , mapDrawSurface_t *ds );
 
 
 /* tjunction.c */
@@ -1622,6 +1646,8 @@ void						SubdivideFaceSurfaces( entity_t *e, tree_t *tree );
 void						AddEntitySurfaceModels( entity_t *e );
 int							AddSurfaceModels( mapDrawSurface_t *ds );
 void						FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree );
+void						EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds );
+void						EmitTriangleSurface( mapDrawSurface_t *ds );
 
 
 /* surface_fur.c */
@@ -1719,7 +1745,9 @@ float						DirtForSample( trace_t *trace );
 void						DirtyRawLightmap( int num );
 
 void						SetupFloodLight();
-float						FloodLightForSample( trace_t *trace );
+void						FloodlightRawLightmaps();
+void						FloodlightIlluminateLightmap( rawLightmap_t *lm );
+float						FloodLightForSample( trace_t *trace , float floodLightDistance, qboolean floodLightLowQuality);
 void						FloodLightRawLightmap( int num );
 
 void						IlluminateRawLightmap( int num );
@@ -1871,6 +1899,12 @@ Q_EXTERN game_t				games[]
 								,
 								#include "game_qfusion.h"	/* qfusion game */
 								,
+								#include "game_darkplaces.h"	/* vortex: darkplaces q1 engine */
+								,
+								#include "game_dq.h"	/* vortex: deluxe quake game ( darkplaces q1 engine) */
+								,
+								#include "game_prophecy.h"	/* vortex: prophecy game ( darkplaces q1 engine) */
+								,
 								{ NULL }	/* null game */
 							};
 #endif
@@ -1957,6 +1991,7 @@ Q_EXTERN char				outbase[ 32 ];
 
 Q_EXTERN int				sampleSize;						/* lightmap sample size in units */
 Q_EXTERN int				minSampleSize;                  /* minimum sample size to use at all */
+Q_EXTERN int				sampleScale;					/* vortex: lightmap sample scale (ie quality)*/
 
 Q_EXTERN int				mapEntityNum Q_ASSIGN( 0 );
 
@@ -2083,6 +2118,7 @@ light global variables
 Q_EXTERN qboolean			wolfLight Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			loMem Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			noStyles Q_ASSIGN( qfalse );
+Q_EXTERN qboolean			keepLights Q_ASSIGN( qfalse );
 
 Q_EXTERN int				sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );
 Q_EXTERN int				minSampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE );
@@ -2096,6 +2132,7 @@ Q_EXTERN qboolean			cpmaHack Q_ASSIGN( qfalse );
 
 Q_EXTERN qboolean			deluxemap Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debugDeluxemap Q_ASSIGN( qfalse );
+Q_EXTERN int				deluxemode Q_ASSIGN( 0 );	/* deluxemap format (0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization) */
 
 Q_EXTERN qboolean			fast Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			faster Q_ASSIGN( qfalse );
@@ -2130,12 +2167,13 @@ Q_EXTERN float				dirtDepth Q_ASSIGN( 128.0f );
 Q_EXTERN float				dirtScale Q_ASSIGN( 1.0f );
 Q_EXTERN float				dirtGain Q_ASSIGN( 1.0f );
 
-Q_EXTERN qboolean			debugnormals Q_ASSIGN( qfalse );
-Q_EXTERN qboolean			floodlighty Q_ASSIGN( qfalse );
-Q_EXTERN qboolean			floodlight_lowquality Q_ASSIGN( qfalse );
-Q_EXTERN vec3_t				floodlightRGB;
-Q_EXTERN float				floodlightIntensity Q_ASSIGN( 512 );
-Q_EXTERN float				floodlightDistance Q_ASSIGN( 1024 );
+/* 27: floodlighting */
+Q_EXTERN qboolean					debugnormals Q_ASSIGN( qfalse );
+Q_EXTERN qboolean					floodlighty Q_ASSIGN( qfalse );
+Q_EXTERN qboolean					floodlight_lowquality Q_ASSIGN( qfalse );
+Q_EXTERN vec3_t						floodlightRGB;
+Q_EXTERN float						floodlightIntensity Q_ASSIGN( 512.0f );
+Q_EXTERN float						floodlightDistance Q_ASSIGN( 1024.0f );
 
 Q_EXTERN qboolean			dump Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debug Q_ASSIGN( qfalse );
@@ -2153,6 +2191,10 @@ Q_EXTERN float				pointScale Q_ASSIGN( 7500.0f );
 Q_EXTERN float				areaScale Q_ASSIGN( 0.25f );
 Q_EXTERN float				skyScale Q_ASSIGN( 1.0f );
 Q_EXTERN float				bounceScale Q_ASSIGN( 0.25f );
+ 
+/* vortex: gridscale and gridambientscale */
+Q_EXTERN float				gridScale Q_ASSIGN( 1.0f );
+Q_EXTERN float				gridAmbientScale Q_ASSIGN( 1.0f );
 
 /* ydnar: lightmap gamma/compensation */
 Q_EXTERN float				lightmapGamma Q_ASSIGN( 1.0f );
@@ -2263,6 +2305,9 @@ Q_EXTERN int				numOutLightmaps Q_ASSIGN( 0 );
 Q_EXTERN int				numBSPLightmaps Q_ASSIGN( 0 );
 Q_EXTERN int				numExtLightmaps Q_ASSIGN( 0 );
 Q_EXTERN outLightmap_t		*outLightmaps Q_ASSIGN( NULL );
+
+/* vortex: per surface floodlight statictics */
+Q_EXTERN int				numSurfacesFloodlighten Q_ASSIGN( 0 );
 
 /* grid points */
 Q_EXTERN int				numRawGridPoints Q_ASSIGN( 0 );

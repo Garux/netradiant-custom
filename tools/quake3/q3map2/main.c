@@ -795,7 +795,7 @@ int main( int argc, char **argv )
 	
 	/* set exit call */
 	atexit( ExitQ3Map );
-	
+
 	/* read general options first */
 	for( i = 1; i < argc; i++ )
 	{
@@ -871,6 +871,10 @@ int main( int argc, char **argv )
 	
 	/* ydnar: new path initialization */
 	InitPaths( &argc, argv );
+
+	/* set game options */
+	if (!patchSubdivisions)
+		patchSubdivisions = game->patchSubdivisions;
 	
 	/* check if we have enough options left to attempt something */
 	if( argc < 2 )

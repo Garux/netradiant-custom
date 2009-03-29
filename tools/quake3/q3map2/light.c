@@ -313,7 +313,15 @@ void CreateEntityLights( void )
 			flags |= LIGHT_GRID;
 			flags &= ~LIGHT_SURFACES;
 		}
-		
+
+		/* vortex: unnormalized? */
+		if (spawnflags & 32)
+			flags |= LIGHT_UNNORMALIZED;
+
+		/* vortex: distance atten? */
+		if (spawnflags & 64)
+			flags |= LIGHT_ATTEN_DISTANCE;
+
 		/* store the flags */
 		light->flags = flags;
 		
@@ -385,14 +393,16 @@ void CreateEntityLights( void )
 		if( _color && _color[ 0 ] )
 		{
 			sscanf( _color, "%f %f %f", &light->color[ 0 ], &light->color[ 1 ], &light->color[ 2 ] );
-			ColorNormalize( light->color, light->color );
+			if (!(light->flags & LIGHT_UNNORMALIZED))
+			{
+				ColorNormalize( light->color, light->color );
+			}
 		}
 		else
 			light->color[ 0 ] = light->color[ 1 ] = light->color[ 2 ] = 1.0f;
-		
+
 		intensity = intensity * pointScale;
 		light->photons = intensity;
-		
 		light->type = EMIT_POINT;
 		
 		/* set falloff threshold */
@@ -741,6 +751,7 @@ int LightContributionToSample( trace_t *trace )
 	
 	/* clear color */
 	VectorClear( trace->color );
+	VectorClear( trace->colorNoShadow );
 	
 	/* ydnar: early out */
 	if( !(light->flags & LIGHT_SURFACES) || light->envelope <= 0.0f )
@@ -765,7 +776,6 @@ int LightContributionToSample( trace_t *trace )
 		float		factor;
 		float		d;
 		vec3_t		pushedOrigin;
-		
 		
 		/* project sample point into light plane */
 		d = DotProduct( trace->origin, light->normal ) - light->dist;
@@ -881,8 +891,7 @@ int LightContributionToSample( trace_t *trace )
 		{
 			float	distByNormal, radiusAtDist, sampleRadius;
 			vec3_t	pointAtDist, distToSample;
-			
-			
+	
 			/* do cone calculation */
 			distByNormal = -DotProduct( trace->displacement, light->normal );
 			if( distByNormal < 0.0f )
@@ -922,6 +931,9 @@ int LightContributionToSample( trace_t *trace )
 		add = light->photons * angle;
 		if( add <= 0.0f )
 			return 0;
+
+		/* VorteX: set noShadow color */
+		VectorScale(light->color, add, trace->colorNoShadow);
 		
 		/* setup trace */
 		trace->testAll = qtrue;
@@ -942,6 +954,9 @@ int LightContributionToSample( trace_t *trace )
 		/* return to sender */
 		return 1;
 	}
+
+	/* VorteX: set noShadow color */
+	VectorScale(light->color, add, trace->colorNoShadow);
 	
 	/* ydnar: changed to a variable number */
 	if( add <= 0.0f || (add <= light->falloffTolerance && (light->flags & LIGHT_FAST_ACTUAL)) )
@@ -1409,7 +1424,7 @@ void TraceGrid( int num )
 				trace.normal[2]=-1;
 			}
 
-			f = FloodLightForSample(&trace);
+			f = FloodLightForSample(&trace, floodlightDistance, floodlight_lowquality);
 
 			contributions[ numCon ].color[0]=col[0]*f;
 			contributions[ numCon ].color[1]=col[1]*f;
@@ -1470,6 +1485,9 @@ void TraceGrid( int num )
 		
 		/* ambient light will be at 1/4 the value of directed light */
 		/* (ydnar: nuke this in favor of more dramatic lighting?) */
+		/* (PM: how about actually making it work? d=1 when it got here for single lights/sun :P */
+//		d = 0.25f;
+		/* (Hobbes: always setting it to .25 is hardly any better) */
 		d = 0.25f * (1.0f - d);
 		VectorMA( gp->ambient[ j ], d, contributions[ i ].color, gp->ambient[ j ] );
 	}
@@ -1487,8 +1505,10 @@ void TraceGrid( int num )
 		for( j = 0; j < 3; j++ )
 			if( color[ j ] < minGridLight[ j ] )
 				color[ j ] = minGridLight[ j ];
-		ColorToBytes( color, bgp->ambient[ i ], 1.0f );
-		ColorToBytes( gp->directed[ i ], bgp->directed[ i ], 1.0f );
+
+		/* vortex: apply gridscale and gridambientscale here */
+		ColorToBytes( color, bgp->ambient[ i ], gridScale*gridAmbientScale );
+		ColorToBytes( gp->directed[ i ], bgp->directed[ i ], gridScale );
 	}
 	
 	/* debug code */
@@ -1711,12 +1731,8 @@ void LightWorld( void )
 		RunThreadsOnIndividual( numRawLightmaps, qtrue, DirtyRawLightmap );
 	}
 	
-	/* floodlight them up */
-	if( floodlighty )
-	{
-		Sys_Printf( "--- FloodlightRawLightmap ---\n" );
-		RunThreadsOnIndividual( numRawLightmaps, qtrue, FloodLightRawLightmap );
-	}
+	/* floodlight pass */
+	FloodlightRawLightmaps();
 
 	/* ydnar: set up light envelopes */
 	SetupEnvelopes( qfalse, fast );
@@ -1832,12 +1848,64 @@ int LightMain( int argc, char **argv )
 	
 	/* note it */
 	Sys_Printf( "--- Light ---\n" );
-	
+	Sys_Printf( "--- ProcessGameSpecific ---\n" );
+
 	/* set standard game flags */
 	wolfLight = game->wolfLight;
+	if (wolfLight == qtrue)
+		Sys_Printf( " lightning model: wolf\n" );
+	else
+		Sys_Printf( " lightning model: quake3\n" );
+
 	lmCustomSize = game->lightmapSize;
+	Sys_Printf( " lightmap size: %d x %d pixels\n", lmCustomSize, lmCustomSize );
+
 	lightmapGamma = game->lightmapGamma;
+	Sys_Printf( " lightning gamma: %f\n", lightmapGamma );
+
 	lightmapCompensate = game->lightmapCompensate;
+	Sys_Printf( " lightning compensation: %f\n", lightmapCompensate );
+
+	lightmapExposure = game->lightmapExposure;
+	Sys_Printf( " lightning exposure: %f\n", lightmapExposure );
+
+	gridScale = game->gridScale;
+	Sys_Printf( " lightgrid scale: %f\n", gridScale );
+
+	gridAmbientScale = game->gridAmbientScale;
+	Sys_Printf( " lightgrid ambient scale: %f\n", gridAmbientScale );
+
+	noStyles = game->noStyles;
+	if (noStyles == qtrue)
+		Sys_Printf( " shader lightstyles hack: disabled\n" );
+	else
+		Sys_Printf( " shader lightstyles hack: enabled\n" );
+
+	keepLights = game->keepLights;
+	if (keepLights == qtrue)
+		Sys_Printf( " keep lights: enabled\n" );
+	else
+		Sys_Printf( " keep lights: disabled\n" );
+
+	patchShadows = game->patchShadows;
+	if (patchShadows == qtrue)
+		Sys_Printf( " patch shadows: enabled\n" );
+	else
+		Sys_Printf( " patch shadows: disabled\n" );
+
+	deluxemap = game->deluxeMap;
+	deluxemode = game->deluxeMode;
+ 	if (deluxemap == qtrue)
+	{
+		if (deluxemode)
+			Sys_Printf( " deluxemapping: enabled with tangentspace deluxemaps\n" );
+		else
+			Sys_Printf( " deluxemapping: enabled with modelspace deluxemaps\n" );
+	}
+	else
+		Sys_Printf( " deluxemapping: disabled\n" );
+
+	Sys_Printf( "--- ProcessCommandLine ---\n" );
 	
 	/* process commandline arguments */
 	for( i = 1; i < (argc - 1); i++ )
@@ -1883,6 +1951,22 @@ int LightMain( int argc, char **argv )
 			skyScale *= f;
 			bounceScale *= f;
 			Sys_Printf( "All light scaled by %f\n", f );
+			i++;
+		}
+
+		else if( !strcmp( argv[ i ], "-gridscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			Sys_Printf( "Grid lightning scaled by %f\n", f );
+			gridScale *= f;
+			i++;
+		}
+
+		else if( !strcmp( argv[ i ], "-gridambientscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			Sys_Printf( "Grid ambient lightning scaled by %f\n", f );
+			gridAmbientScale *= f;
 			i++;
 		}
 		
@@ -1955,12 +2039,6 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "Dark lightmap seams enabled\n" );
 		}
 		
-
-
-
-
-
-
 		else if( !strcmp( argv[ i ], "-shadeangle" ) )
 		{
 			shadeAngleDegrees = atof( argv[ i + 1 ] );
@@ -1993,13 +2071,28 @@ int LightMain( int argc, char **argv )
 				Sys_Printf( "Approximating lightmaps within a byte tolerance of %d\n", approximateTolerance );
 			i++;
 		}
-		
 		else if( !strcmp( argv[ i ], "-deluxe" ) || !strcmp( argv[ i ], "-deluxemap" ) )
 		{
 			deluxemap = qtrue;
 			Sys_Printf( "Generating deluxemaps for average light direction\n" );
 		}
-		
+		else if( !strcmp( argv[ i ], "-deluxemode" ))
+		{
+			deluxemode = atoi( argv[ i + 1 ] );
+			if (deluxemode == 0 || deluxemode > 1 || deluxemode < 0)
+			{
+				Sys_Printf( "Generating modelspace deluxemaps\n" );
+				deluxemode = 0;
+			}
+			else 
+				Sys_Printf( "Generating tangentspace deluxemaps\n" );
+			i++;
+		}
+		else if( !strcmp( argv[ i ], "-nodeluxe" ) || !strcmp( argv[ i ], "-nodeluxemap" ) )
+		{
+			deluxemap = qfalse;
+			Sys_Printf( "Disabling generating of deluxemaps for average light direction\n" );
+		}
 		else if( !strcmp( argv[ i ], "-external" ) )
 		{
 			externalLightmaps = qtrue;
@@ -2234,6 +2327,12 @@ int LightMain( int argc, char **argv )
 			i++;
 			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
 		}
+		else if( !strcmp( argv[ i ],  "-samplescale" ) )
+ 		{
+			sampleScale = atoi( argv[ i + 1 ] );
+ 			i++;
+			Sys_Printf( "Lightmaps sample scale set to %d\n", sampleScale);
+ 		}
 		else if( !strcmp( argv[ i ], "-novertex" ) )
 		{
 			noVertexLighting = qtrue;
@@ -2268,6 +2367,16 @@ int LightMain( int argc, char **argv )
 		{
 			noStyles = qtrue;
 			Sys_Printf( "Disabling lightstyles\n" );
+		}
+		else if( !strcmp( argv[ i ], "-style" ) || !strcmp( argv[ i ], "-styles" ) )
+		{
+			noStyles = qfalse;
+			Sys_Printf( "Enabling lightstyles\n" );
+		}
+		else if( !strcmp( argv[ i ], "-keeplights" ))
+		{
+			keepLights = qtrue;
+			Sys_Printf( "Leaving light entities on map after compile\n" );
 		}
 		else if( !strcmp( argv[ i ], "-cpma" ) )
 		{

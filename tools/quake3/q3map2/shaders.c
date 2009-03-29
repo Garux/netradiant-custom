@@ -827,13 +827,15 @@ ShaderInfoForShader()
 finds a shaderinfo for a named shader
 */
 
+#define MAX_SHADER_DEPRECATION_DEPTH 16
+
 shaderInfo_t *ShaderInfoForShader( const char *shaderName )
 {
 	int				i;
+	int				deprecationDepth;
 	shaderInfo_t	*si;
 	char			shader[ MAX_QPATH ];
-	
-	
+
 	/* dummy check */
 	if( shaderName == NULL || shaderName[ 0 ] == '\0' )
 	{
@@ -846,11 +848,27 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName )
 	StripExtension( shader );
 	
 	/* search for it */
+	deprecationDepth = 0;
 	for( i = 0; i < numShaderInfo; i++ )
 	{
 		si = &shaderInfo[ i ];
 		if( !Q_stricmp( shader, si->shader ) )
 		{
+			/* check if shader is deprecated */
+			if (deprecationDepth < MAX_SHADER_DEPRECATION_DEPTH && si->deprecateShader && si->deprecateShader[ 0 ] )
+			{
+				/* override name */
+				strcpy( shader, si->deprecateShader );
+				StripExtension( shader );
+				/* increase deprecation depth */
+				deprecationDepth++;
+				if (deprecationDepth == MAX_SHADER_DEPRECATION_DEPTH)
+					Sys_Printf("WARNING: Max deprecation depth of %i is reached on shader '%s'\n", MAX_SHADER_DEPRECATION_DEPTH, shader);
+				/* search again from beginning */
+				i = -1;
+				continue;
+			}
+
 			/* load image if necessary */
 			if( si->finished == qfalse )
 			{
@@ -1363,7 +1381,6 @@ static void ParseShaderFile( const char *filename )
 				{
 					surfaceModel_t	*model;
 					
-					
 					/* allocate new model and attach it */
 					model = safe_malloc( sizeof( *model ) );
 					memset( model, 0, sizeof( *model ) );
@@ -1488,6 +1505,24 @@ static void ParseShaderFile( const char *filename )
 					GetTokenAppend( shaderText, qfalse );
 					si->backsplashDistance = atof( token );
 				}
+
+				/* q3map_floodLight <r> <g> <b> <diste> <intensity> <light_direction_power> */
+				else if( !Q_stricmp( token, "q3map_floodLight" ) )
+				{
+					/* get color */
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightRGB[ 0 ] = atof( token );
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightRGB[ 1 ] = atof( token );
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightRGB[ 2 ] = atof( token );
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightDistance = atof( token ); 
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightIntensity = atof( token ); 
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightDirectionScale = atof( token ); 
+				}
 				
 				/* q3map_lightmapSampleSize <value> */
 				else if( !Q_stricmp( token, "q3map_lightmapSampleSize" ) )
@@ -1611,6 +1646,18 @@ static void ParseShaderFile( const char *filename )
 					{
 						si->remapShader = safe_malloc( strlen( token ) + 1 );
 						strcpy( si->remapShader, token );
+					}
+				}
+
+				/* q3map_deprecateShader <shader> */
+				else if( !Q_stricmp( token, "q3map_deprecateShader" ) )
+				{
+					GetTokenAppend( shaderText, qfalse );
+					if( token[ 0 ] != '\0' )
+					{
+
+						si->deprecateShader = safe_malloc( strlen( token ) + 1 );
+						strcpy( si->deprecateShader, token );
 					}
 				}
 				
@@ -1933,12 +1980,14 @@ static void ParseShaderFile( const char *filename )
 					si->styleMarker = 2;
 				
 				/* ydnar: default to searching for q3map_<surfaceparm> */
-				else
+#if 0
+ 				else
 				{
-					//%	Sys_FPrintf( SYS_VRB, "Attempting to match %s with a known surfaceparm\n", token );
+					Sys_FPrintf( SYS_VRB, "Attempting to match %s with a known surfaceparm\n", token );
 					if( ApplySurfaceParm( &token[ 6 ], &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) == qfalse )
-						;//%	Sys_Printf( "WARNING: Unknown q3map_* directive \"%s\"\n", token );
+						Sys_Printf( "WARNING: Unknown q3map_* directive \"%s\"\n", token );
 				}
+#endif
 			}
 			
 			

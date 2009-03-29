@@ -2446,25 +2446,27 @@ void EmitFlareSurface( mapDrawSurface_t *ds )
 	numSurfacesByType[ ds->type ]++;
 }
 
-
-
 /*
 EmitPatchSurface()
 emits a bsp patch drawsurface
 */
 
-void EmitPatchSurface( mapDrawSurface_t *ds )
+void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds )
 {
 	int					i, j;
 	bspDrawSurface_t	*out;
 	int					surfaceFlags, contentFlags;
-	
+	int					forcePatchMeta;
+
+	/* vortex: _patchMeta support */
+	forcePatchMeta = IntForKey(e, "_patchMeta" );
+	if (!forcePatchMeta)
+		forcePatchMeta = IntForKey(e, "patchMeta" );
 	
 	/* invert the surface if necessary */
 	if( ds->backSide || ds->shaderInfo->invert )
 	{
 		bspDrawVert_t	*dv1, *dv2, temp;
-		
 
 		/* walk the verts, flip the normal */
 		for( i = 0; i < ds->numVerts; i++ )
@@ -2486,7 +2488,7 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 		/* invert facing */
 		VectorScale( ds->lightmapVecs[ 2 ], -1.0f, ds->lightmapVecs[ 2 ] );
 	}
-	
+
 	/* allocate a new surface */
 	if( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS )
 		Error( "MAX_MAP_DRAW_SURFS" );
@@ -2494,12 +2496,12 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 	ds->outputNum = numBSPDrawSurfaces;
 	numBSPDrawSurfaces++;
 	memset( out, 0, sizeof( *out ) );
-	
+
 	/* set it up */
 	out->surfaceType = MST_PATCH;
 	if( debugSurfaces )
 		out->shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
-	else if( patchMeta )
+	else if( patchMeta || forcePatchMeta )
 	{
 		/* patch meta requires that we have nodraw patches for collision */
 		surfaceFlags = ds->shaderInfo->surfaceFlags;
@@ -2548,8 +2550,6 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 	/* add to count */
 	numSurfacesByType[ ds->type ]++;
 }
-
-
 
 /*
 OptimizeTriangleSurface() - ydnar
@@ -2674,12 +2674,11 @@ EmitTriangleSurface()
 creates a bsp drawsurface from arbitrary triangle surfaces
 */
 
-static void EmitTriangleSurface( mapDrawSurface_t *ds )
+void EmitTriangleSurface( mapDrawSurface_t *ds )
 {
 	int						i, temp;
 	bspDrawSurface_t		*out;
-	
-	
+
 	/* invert the surface if necessary */
 	if( ds->backSide || ds->shaderInfo->invert )
 	{
@@ -2690,15 +2689,15 @@ static void EmitTriangleSurface( mapDrawSurface_t *ds )
 			ds->indexes[ i ] = ds->indexes[ i + 1 ];
 			ds->indexes[ i + 1 ] = temp;
 		}
-		
+			
 		/* walk the verts, flip the normal */
 		for( i = 0; i < ds->numVerts; i++ )
 			VectorScale( ds->verts[ i ].normal, -1.0f, ds->verts[ i ].normal );
-		
+			
 		/* invert facing */
 		VectorScale( ds->lightmapVecs[ 2 ], -1.0f, ds->lightmapVecs[ 2 ] );
 	}
-	
+		
 	/* allocate a new surface */
 	if( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS )
 		Error( "MAX_MAP_DRAW_SURFS" );
@@ -2805,13 +2804,12 @@ EmitFaceSurface()
 emits a bsp planar winding (brush face) drawsurface
 */
 
-static void EmitFaceSurface( mapDrawSurface_t *ds )
+static void EmitFaceSurface(mapDrawSurface_t *ds )
 {
 	/* strip/fan finding was moved elsewhere */
 	StripFaceSurface( ds );
-	EmitTriangleSurface( ds );
+	EmitTriangleSurface(ds);
 }
-
 
 
 /*
@@ -3503,7 +3501,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 				if( refs == 0 )
 					refs = FilterPatchIntoTree( ds, tree );
 				if( refs > 0 )
-					EmitPatchSurface( ds );
+					EmitPatchSurface( e, ds );
 				break;
 			
 			/* handle triangle surfaces */

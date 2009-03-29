@@ -69,6 +69,14 @@ game_t struct
 	1.0f,				/* lightmap gamma */
 	1.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
+	1.0f,				/* lightgrid scale */
+	1.0f,				/* lightgrid ambient scale */
+	qfalse,				/* disable shader lightstyles hack */
+	qfalse,				/* keep light entities on bsp */
+	8,					/* default patchMeta subdivisions tolerance */
+	qfalse,				/* patch casting enabled */
+	qfalse,				/* compile deluxemaps */
+	0,					/* deluxemaps default mode */
 	"RBSP",				/* bsp file prefix */
 	1,					/* bsp file version */
 	qfalse,				/* cod-style lump len/ofs order */

@@ -46,7 +46,7 @@ game_t struct
 	".darkplaces ",		/* unix home sub-dir */
 	"darkplaces",		/* magic path word */
 	"scripts",			/* shader directory */
-	64,					/* max lightmapped surface verts */
+	999,				/* max lightmapped surface verts */
 	999,				/* max surface verts */
 	6000,				/* max surface indexes */
 	qfalse,				/* flares */

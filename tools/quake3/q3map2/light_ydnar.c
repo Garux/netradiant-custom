@@ -2107,7 +2107,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 						if(DotProduct(normal, trace.direction) > 0) // do not take light from the back side
 						{
 							/* color to grayscale (photoshop rgb weighting) */
-							brightness = trace.color[ 0 ] * 0.3f + trace.color[ 1 ] * 0.59f + trace.color[ 2 ] * 0.11f;
+							brightness = trace.colorNoShadow[ 0 ] * 0.3f + trace.colorNoShadow[ 1 ] * 0.59f + trace.colorNoShadow[ 2 ] * 0.11f;
 							brightness *= (1.0 / 255.0);
 							VectorScale( trace.direction, brightness, trace.direction );
 							VectorAdd( deluxel, trace.direction, deluxel );
@@ -2346,56 +2346,8 @@ void IlluminateRawLightmap( int rawLightmapNum )
 	/* free light list */
 	FreeTraceLights( &trace );
 	
-	/*	-----------------------------------------------------------------
-		floodlight pass
-		----------------------------------------------------------------- */
-
-	if( floodlighty )
-	{
-		/* walk lightmaps */
-		for( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-		{
-			/* early out */
-			if( lm->superLuxels[ lightmapNum ] == NULL )
-				continue;
-
-			/* apply floodlight to each luxel */
-			for( y = 0; y < lm->sh; y++ )
-			{
-				for( x = 0; x < lm->sw; x++ )
-				{
-					/* get cluster */
-					cluster	= SUPER_CLUSTER( x, y );
-					if( *cluster < 0 )
-						continue;
-
-					/* get particulars */
-					luxel = SUPER_LUXEL( lightmapNum, x, y );
-					floodlight = SUPER_FLOODLIGHT( x, y );
-
-					flood[0]=floodlightRGB[0]*floodlightIntensity;
-					flood[1]=floodlightRGB[1]*floodlightIntensity;
-					flood[2]=floodlightRGB[2]*floodlightIntensity;
-
-					/* scale light value */
-					VectorScale( flood, *floodlight, flood );
-					luxel[0]+=flood[0];
-					luxel[1]+=flood[1];
-					luxel[2]+=flood[2];
-
-					if (luxel[3]==0) luxel[3]=1;
-
-					if(deluxemap)
-					{
-						brightness = flood[ 0 ] * 0.3f + flood[ 1 ] * 0.59f + flood[ 2 ] * 0.11f;
-						brightness *= (1.0 / 255.0);
-						VectorScale( normal, brightness, temp );
-						VectorAdd( deluxel, temp, deluxel );
-					}
-				}
-			}
-		}
-	}
+	/* floodlight pass */
+	FloodlightIlluminateLightmap(lm);
 
 	if (debugnormals)
 	{
@@ -2404,7 +2356,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 			/* early out */
 			if( lm->superLuxels[ lightmapNum ] == NULL )
 				continue;
-
+			
 			for( y = 0; y < lm->sh; y++ )
 			{
 				for( x = 0; x < lm->sw; x++ )
@@ -2413,11 +2365,11 @@ void IlluminateRawLightmap( int rawLightmapNum )
 					cluster	= SUPER_CLUSTER( x, y );
 					//%	if( *cluster < 0 )
 					//%		continue;
-
+					
 					/* get particulars */
 					luxel = SUPER_LUXEL( lightmapNum, x, y );
 					normal = SUPER_NORMAL (  x, y );
-
+               
 					luxel[0]=(normal[0]*127)+127;
 					luxel[1]=(normal[1]*127)+127;
 					luxel[2]=(normal[2]*127)+127;
@@ -2425,7 +2377,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 			}
 		}
 	}
-
+	
 	/*	-----------------------------------------------------------------
 		dirt pass
 		----------------------------------------------------------------- */
@@ -3908,137 +3860,13 @@ void SetupFloodLight( void )
 	VectorNormalize(floodlightRGB,floodlightRGB);
 }
 
-//27 - lighttracer style ambient occlusion light hack.
-//Kudos to the dirtmapping author for most of this source.
-void FloodLightRawLightmap( int rawLightmapNum )
-{
-	int					i, x, y, sx, sy, *cluster;
-	float				*origin, *normal, *floodlight, *floodlight2, average, samples;
-	rawLightmap_t		*lm;
-	surfaceInfo_t		*info;
-	trace_t				trace;
-
-	/* bail if this number exceeds the number of raw lightmaps */
-	if( rawLightmapNum >= numRawLightmaps )
-		return;
-
-	/* get lightmap */
-	lm = &rawLightmaps[ rawLightmapNum ];
-
-	memset(&trace,0,sizeof(trace_t));
-	/* setup trace */
-	trace.testOcclusion = qtrue;
-	trace.forceSunlight = qfalse;
-	trace.twoSided = qtrue;
-	trace.recvShadows = lm->recvShadows;
-	trace.numSurfaces = lm->numLightSurfaces;
-	trace.surfaces = &lightSurfaces[ lm->firstLightSurface ];
-	trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
-	trace.testAll = qfalse;
-	trace.distance = 1024;
-
-	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
-	//trace.twoSided = qfalse;
-	for( i = 0; i < trace.numSurfaces; i++ )
-	{
-		/* get surface */
-		info = &surfaceInfos[ trace.surfaces[ i ] ];
-
-		/* check twosidedness */
-		if( info->si->twoSided )
-		{
-			trace.twoSided = qtrue;
-			break;
-		}
-	}
-
-	/* gather dirt */
-	for( y = 0; y < lm->sh; y++ )
-	{
-		for( x = 0; x < lm->sw; x++ )
-		{
-			/* get luxel */
-			cluster = SUPER_CLUSTER( x, y );
-			origin = SUPER_ORIGIN( x, y );
-			normal = SUPER_NORMAL( x, y );
-			floodlight = SUPER_FLOODLIGHT( x, y );
-
-			/* set default dirt */
-			*floodlight = 0.0f;
-
-			/* only look at mapped luxels */
-			if( *cluster < 0 )
-				continue;
-
-			/* copy to trace */
-			trace.cluster = *cluster;
-			VectorCopy( origin, trace.origin );
-			VectorCopy( normal, trace.normal );
-
-
-
-			/* get dirt */
-			*floodlight = FloodLightForSample( &trace );
-		}
-	}
-
-	/* testing no filtering */
-	return;
-
-	/* filter "dirt" */
-	for( y = 0; y < lm->sh; y++ )
-	{
-		for( x = 0; x < lm->sw; x++ )
-		{
-			/* get luxel */
-			cluster = SUPER_CLUSTER( x, y );
-			floodlight = SUPER_FLOODLIGHT( x, y );
-
-			/* filter dirt by adjacency to unmapped luxels */
-			average = *floodlight;
-			samples = 1.0f;
-			for( sy = (y - 1); sy <= (y + 1); sy++ )
-			{
-				if( sy < 0 || sy >= lm->sh )
-					continue;
-
-				for( sx = (x - 1); sx <= (x + 1); sx++ )
-				{
-					if( sx < 0 || sx >= lm->sw || (sx == x && sy == y) )
-						continue;
-
-					/* get neighboring luxel */
-					cluster = SUPER_CLUSTER( sx, sy );
-					floodlight2 = SUPER_FLOODLIGHT( sx, sy );
-					if( *cluster < 0 || *floodlight2 <= 0.0f )
-						continue;
-
-					/* add it */
-					average += *floodlight2;
-					samples += 1.0f;
-				}
-
-				/* bail */
-				if( samples <= 0.0f )
-					break;
-			}
-
-			/* bail */
-			if( samples <= 0.0f )
-				continue;
-
-			/* scale dirt */
-			*floodlight = average / samples;
-		}
-	}
-}
-
 /*
 FloodLightForSample()
 calculates floodlight value for a given sample
 once again, kudos to the dirtmapping coder
 */
-float FloodLightForSample( trace_t *trace )
+
+float FloodLightForSample( trace_t *trace , float floodLightDistance, qboolean floodLightLowQuality)
 {
 	int		i;
 	float 	d;
@@ -4048,23 +3876,23 @@ float FloodLightForSample( trace_t *trace )
 	vec3_t	normal, worldUp, myUp, myRt, direction, displacement;
 	float 	dd;
 	int 	vecs = 0;
-
+ 
 	gatherLight=0;
 	/* dummy check */
 	//if( !dirty )
 	//	return 1.0f;
 	if( trace == NULL || trace->cluster < 0 )
 		return 0.0f;
-
+	
 
 	/* setup */
-	dd = floodlightDistance;
+	dd = floodLightDistance;
 	VectorCopy( trace->normal, normal );
-
+	
 	/* check if the normal is aligned to the world-up */
 	if( normal[ 0 ] == 0.0f && normal[ 1 ] == 0.0f )
 	{
-		if( normal[ 2 ] == 1.0f )
+		if( normal[ 2 ] == 1.0f )		
 		{
 			VectorSet( myRt, 1.0f, 0.0f, 0.0f );
 			VectorSet( myUp, 0.0f, 1.0f, 0.0f );
@@ -4084,55 +3912,60 @@ float FloodLightForSample( trace_t *trace )
 		VectorNormalize( myUp, myUp );
 	}
 
-	/* iterate through ordered vectors */
-	for( i = 0; i < numFloodVectors; i++ )
-	{
-		if (floodlight_lowquality==qtrue)
-        {
+	/* vortex: optimise floodLightLowQuality a bit */
+	if ( floodLightLowQuality == qtrue )
+    {
+		/* iterate through ordered vectors */
+		for( i = 0; i < numFloodVectors; i++ )
 			if (rand()%10 != 0 ) continue;
-		}
-
-		vecs++;
-
-		/* transform vector into tangent space */
-		direction[ 0 ] = myRt[ 0 ] * floodVectors[ i ][ 0 ] + myUp[ 0 ] * floodVectors[ i ][ 1 ] + normal[ 0 ] * floodVectors[ i ][ 2 ];
-		direction[ 1 ] = myRt[ 1 ] * floodVectors[ i ][ 0 ] + myUp[ 1 ] * floodVectors[ i ][ 1 ] + normal[ 1 ] * floodVectors[ i ][ 2 ];
-		direction[ 2 ] = myRt[ 2 ] * floodVectors[ i ][ 0 ] + myUp[ 2 ] * floodVectors[ i ][ 1 ] + normal[ 2 ] * floodVectors[ i ][ 2 ];
-
-		/* set endpoint */
-		VectorMA( trace->origin, dd, direction, trace->end );
-
-		//VectorMA( trace->origin, 1, direction, trace->origin );
-
-		SetupTrace( trace );
-		/* trace */
-	  	TraceLine( trace );
-		contribution=1;
-
-		if (trace->compileFlags & C_SKY )
-		{
-			contribution=1.0f;
-		}
-		else if ( trace->opaque )
-		{
-			VectorSubtract( trace->hit, trace->origin, displacement );
-			d=VectorLength( displacement );
-
-			// d=trace->distance;
-			//if (d>256) gatherDirt+=1;
-			contribution=d/dd;
-			if (contribution>1) contribution=1.0f;
-
-			//gatherDirt += 1.0f - ooDepth * VectorLength( displacement );
-		}
-
-		gatherLight+=contribution;
 	}
+	else
+	{
+		/* iterate through ordered vectors */
+		for( i = 0; i < numFloodVectors; i++ )
+		{
+			vecs++;
+	         
+			/* transform vector into tangent space */
+			direction[ 0 ] = myRt[ 0 ] * floodVectors[ i ][ 0 ] + myUp[ 0 ] * floodVectors[ i ][ 1 ] + normal[ 0 ] * floodVectors[ i ][ 2 ];
+			direction[ 1 ] = myRt[ 1 ] * floodVectors[ i ][ 0 ] + myUp[ 1 ] * floodVectors[ i ][ 1 ] + normal[ 1 ] * floodVectors[ i ][ 2 ];
+			direction[ 2 ] = myRt[ 2 ] * floodVectors[ i ][ 0 ] + myUp[ 2 ] * floodVectors[ i ][ 1 ] + normal[ 2 ] * floodVectors[ i ][ 2 ];
 
+			/* set endpoint */
+			VectorMA( trace->origin, dd, direction, trace->end );
+
+			//VectorMA( trace->origin, 1, direction, trace->origin );
+				
+			SetupTrace( trace );
+			/* trace */
+	  		TraceLine( trace );
+			contribution=1;
+
+			if (trace->compileFlags & C_SKY )
+			{
+				contribution=1.0f;
+			}
+			else if ( trace->opaque )
+			{
+				VectorSubtract( trace->hit, trace->origin, displacement );
+				d=VectorLength( displacement );
+
+				// d=trace->distance;            
+				//if (d>256) gatherDirt+=1;
+				contribution=d/dd;
+				if (contribution>1) contribution=1.0f; 
+	             
+				//gatherDirt += 1.0f - ooDepth * VectorLength( displacement );
+			}
+	         
+			gatherLight+=contribution;
+		}
+	}
+   
 	/* early out */
 	if( gatherLight <= 0.0f )
 		return 0.0f;
-
+   	
 	sub=vecs;
 
 	if (sub<1) sub=1;
@@ -4141,8 +3974,233 @@ float FloodLightForSample( trace_t *trace )
 	outLight=gatherLight;
 	if( outLight > 1.0f )
 		outLight = 1.0f;
-
+	
 	/* return to sender */
 	return outLight;
 }
 
+/*
+FloodLightRawLightmap
+lighttracer style ambient occlusion light hack.
+Kudos to the dirtmapping author for most of this source.
+VorteX: modified to floodlight up custom surfaces (q3map_floodLight)
+VorteX: fixed problems with deluxemapping
+*/
+
+// floodlight pass on a lightmap
+void FloodLightRawLightmapPass( rawLightmap_t *lm , vec3_t lmFloodLightRGB, float lmFloodLightIntensity, float lmFloodLightDistance, qboolean lmFloodLightLowQuality, float floodlightDirectionScale)
+{
+	int					i, x, y, *cluster;
+	float				*origin, *normal, *floodlight, floodLightAmount;
+	surfaceInfo_t		*info;
+	trace_t				trace;
+	// int sx, sy;
+	// float samples, average, *floodlight2;
+	
+	memset(&trace,0,sizeof(trace_t));
+
+	/* setup trace */
+	trace.testOcclusion = qtrue;
+	trace.forceSunlight = qfalse;
+	trace.twoSided = qtrue;
+	trace.recvShadows = lm->recvShadows;
+	trace.numSurfaces = lm->numLightSurfaces;
+	trace.surfaces = &lightSurfaces[ lm->firstLightSurface ];
+	trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
+	trace.testAll = qfalse;
+	trace.distance = 1024;
+	
+	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
+	//trace.twoSided = qfalse;
+	for( i = 0; i < trace.numSurfaces; i++ )
+	{
+		/* get surface */
+		info = &surfaceInfos[ trace.surfaces[ i ] ];
+		
+		/* check twosidedness */
+		if( info->si->twoSided )
+		{
+			trace.twoSided = qtrue;
+			break;
+		}
+	}
+	
+	/* gather floodlight */
+	for( y = 0; y < lm->sh; y++ )
+	{
+		for( x = 0; x < lm->sw; x++ )
+		{
+			/* get luxel */
+			cluster = SUPER_CLUSTER( x, y );
+			origin = SUPER_ORIGIN( x, y );
+			normal = SUPER_NORMAL( x, y );
+			floodlight = SUPER_FLOODLIGHT( x, y );
+			
+			/* set default dirt */
+			*floodlight = 0.0f;
+			
+			/* only look at mapped luxels */
+			if( *cluster < 0 )
+				continue;
+			
+			/* copy to trace */
+			trace.cluster = *cluster;
+			VectorCopy( origin, trace.origin );
+			VectorCopy( normal, trace.normal );
+   
+			/* get floodlight */
+			floodLightAmount = FloodLightForSample( &trace , lmFloodLightDistance, lmFloodLightLowQuality)*lmFloodLightIntensity;
+			
+			/* add floodlight */
+			floodlight[0] += lmFloodLightRGB[0]*floodLightAmount;
+			floodlight[1] += lmFloodLightRGB[1]*floodLightAmount;
+			floodlight[2] += lmFloodLightRGB[2]*floodLightAmount;
+			floodlight[3] += floodlightDirectionScale;
+		}
+	}
+	
+	/* testing no filtering */
+	return;
+
+#if 0
+	
+	/* filter "dirt" */
+	for( y = 0; y < lm->sh; y++ )
+	{
+		for( x = 0; x < lm->sw; x++ )
+		{
+			/* get luxel */
+			cluster = SUPER_CLUSTER( x, y );
+			floodlight = SUPER_FLOODLIGHT(x, y );
+			
+			/* filter dirt by adjacency to unmapped luxels */
+			average = *floodlight;
+			samples = 1.0f;
+			for( sy = (y - 1); sy <= (y + 1); sy++ )
+			{
+				if( sy < 0 || sy >= lm->sh )
+					continue;
+				
+				for( sx = (x - 1); sx <= (x + 1); sx++ )
+				{
+					if( sx < 0 || sx >= lm->sw || (sx == x && sy == y) )
+						continue;
+					
+					/* get neighboring luxel */
+					cluster = SUPER_CLUSTER( sx, sy );
+					floodlight2 = SUPER_FLOODLIGHT( sx, sy );
+					if( *cluster < 0 || *floodlight2 <= 0.0f )
+						continue;
+					
+					/* add it */
+					average += *floodlight2;
+					samples += 1.0f;
+				}
+				
+				/* bail */
+				if( samples <= 0.0f )
+					break;
+			}
+			
+			/* bail */
+			if( samples <= 0.0f )
+				continue;
+			
+			/* scale dirt */
+			*floodlight = average / samples;
+		}
+	}
+#endif
+}
+
+void FloodLightRawLightmap( int rawLightmapNum )
+{
+	rawLightmap_t		*lm;
+
+	/* bail if this number exceeds the number of raw lightmaps */
+	if( rawLightmapNum >= numRawLightmaps )
+		return;
+	/* get lightmap */
+	lm = &rawLightmaps[ rawLightmapNum ];
+
+	/* global pass */
+	if (floodlighty && floodlightIntensity)
+		FloodLightRawLightmapPass(lm, floodlightRGB, floodlightIntensity, floodlightDistance, floodlight_lowquality, 0);
+
+	/* custom pass */
+	if (lm->floodlightIntensity)
+	{
+		FloodLightRawLightmapPass(lm, lm->floodlightRGB, lm->floodlightIntensity, lm->floodlightDistance, qfalse, lm->floodlightDirectionScale);
+		numSurfacesFloodlighten += 1;
+	}
+}
+
+void FloodlightRawLightmaps()
+{
+	Sys_Printf( "--- FloodlightRawLightmap ---\n" );
+	numSurfacesFloodlighten = 0;
+	RunThreadsOnIndividual( numRawLightmaps, qtrue, FloodLightRawLightmap );
+	Sys_Printf( "%9d custom lightmaps floodlighted\n", numSurfacesFloodlighten );
+}
+
+/*
+FloodLightIlluminate()
+illuminate floodlight into lightmap luxels
+*/
+
+void FloodlightIlluminateLightmap( rawLightmap_t *lm )
+{
+	float				*luxel, *floodlight, *deluxel, *normal;
+	int					*cluster;
+	float				brightness;
+	vec3_t				lightvector;
+	int					x, y, lightmapNum;
+
+	/* walk lightmaps */
+	for( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	{
+		/* early out */
+		if( lm->superLuxels[ lightmapNum ] == NULL )
+			continue;
+
+		/* apply floodlight to each luxel */
+		for( y = 0; y < lm->sh; y++ )
+		{
+			for( x = 0; x < lm->sw; x++ )
+			{
+				/* get floodlight */
+				floodlight = SUPER_FLOODLIGHT( x, y );
+				if (!floodlight[0] && !floodlight[1] && !floodlight[2])
+					continue;
+						
+				/* get cluster */
+				cluster	= SUPER_CLUSTER( x, y );
+
+				/* only process mapped luxels */
+				if( *cluster < 0 )
+					continue;
+
+				/* get particulars */
+				luxel = SUPER_LUXEL( lightmapNum, x, y );
+				deluxel = SUPER_DELUXEL( x, y );
+
+				/* add to lightmap */
+				luxel[0]+=floodlight[0];
+				luxel[1]+=floodlight[1];
+				luxel[2]+=floodlight[2];
+
+				if (luxel[3]==0) luxel[3]=1;
+
+				/* add to deluxemap */
+				if (deluxemap && floodlight[3] > 0)
+				{
+					normal = SUPER_NORMAL( x, y );
+					brightness = floodlight[ 0 ] * 0.3f + floodlight[ 1 ] * 0.59f + floodlight[ 2 ] * 0.11f;
+					brightness *= ( 1.0f / 255.0f ) * floodlight[3];
+					VectorScale( normal, brightness, lightvector );
+					VectorAdd( deluxel, lightvector, deluxel );
+				}
+			}
+		}
+	}
+}

@@ -56,7 +56,7 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 #define GROW_TRACE_NODES		16384		//%	16384
 #define GROW_NODE_ITEMS			16			//%	256
 
-#define MAX_TW_VERTS			12
+#define MAX_TW_VERTS			24 // vortex: increased from 12 to 24 for ability co compile some insane maps with large curve count
 
 #define	TRACE_ON_EPSILON		0.1f
 

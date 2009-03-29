@@ -1111,12 +1111,20 @@ void SetupSurfaceLightmaps( void )
 		lm->splotchFix = info->si->splotchFix;
 		lm->firstLightSurface = numLightSurfaces;
 		lm->numLightSurfaces = 0;
-		lm->sampleSize = info->sampleSize;
-		lm->actualSampleSize = info->sampleSize;
+		/* vortex: multiply lightmap sample size by -samplescale */
+		if (sampleScale > 0)
+			lm->sampleSize = info->sampleSize*sampleScale;
+		else
+			lm->sampleSize = info->sampleSize;
+		lm->actualSampleSize = lm->sampleSize;
 		lm->entityNum = info->entityNum;
 		lm->recvShadows = info->recvShadows;
 		lm->brightness = info->si->lmBrightness;
 		lm->filterRadius = info->si->lmFilterRadius;
+		VectorCopy(info->si->floodlightRGB, lm->floodlightRGB);
+		lm->floodlightDistance = info->si->floodlightDistance;
+		lm->floodlightIntensity = info->si->floodlightIntensity;
+		lm->floodlightDirectionScale = info->si->floodlightDirectionScale;
 		VectorCopy( info->axis, lm->axis );
 		lm->plane = info->plane;	
 		VectorCopy( info->mins, lm->mins );
@@ -2295,7 +2303,7 @@ void StoreSurfaceLightmaps( void )
 	   ----------------------------------------------------------------- */
 	
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "Subsampling..." );
+	Sys_Printf( "Subsampling..." );
 	
 	/* walk the list of raw lightmaps */
 	numUsed = 0;
@@ -2632,13 +2640,142 @@ void StoreSurfaceLightmaps( void )
 	}
 	
 	/* -----------------------------------------------------------------
+	   convert modelspace deluxemaps to tangentspace
+	   ----------------------------------------------------------------- */
+	/* note it */
+	if( !bouncing )
+	{
+		if( deluxemap && deluxemode == 1)
+		{
+			vec3_t	worldUp, myNormal, myTangent, myBinormal;
+			float dist;
+
+			Sys_Printf( "converting..." );
+
+			for( i = 0; i < numRawLightmaps; i++ )
+			{
+				/* get lightmap */
+				lm = &rawLightmaps[ i ];
+
+				/* walk lightmap samples */
+				for( y = 0; y < lm->sh; y++ )
+				{
+					for( x = 0; x < lm->sw; x++ )
+					{
+						/* get normal and deluxel */
+						normal = SUPER_NORMAL(x, y);
+						cluster = SUPER_CLUSTER(x, y);
+						bspDeluxel = BSP_DELUXEL( x, y );
+						deluxel = SUPER_DELUXEL( x, y ); 
+
+						/* get normal */
+						VectorSet( myNormal, normal[0], normal[1], normal[2] );
+		
+						/* get tangent vectors */
+						if( myNormal[ 0 ] == 0.0f && myNormal[ 1 ] == 0.0f )
+						{
+							if( myNormal[ 2 ] == 1.0f )		
+							{
+								VectorSet( myTangent, 1.0f, 0.0f, 0.0f );
+								VectorSet( myBinormal, 0.0f, 1.0f, 0.0f );
+							}
+							else if( myNormal[ 2 ] == -1.0f )
+							{
+								VectorSet( myTangent, -1.0f, 0.0f, 0.0f );
+								VectorSet( myBinormal,  0.0f, 1.0f, 0.0f );
+							}
+						}
+						else
+						{
+							VectorSet( worldUp, 0.0f, 0.0f, 1.0f );
+							CrossProduct( myNormal, worldUp, myTangent );
+							VectorNormalize( myTangent, myTangent );
+							CrossProduct( myTangent, myNormal, myBinormal );
+							VectorNormalize( myBinormal, myBinormal );
+						}
+
+						/* project onto plane */
+						dist = -DotProduct(myTangent, myNormal); 
+						VectorMA(myTangent, dist, myNormal, myTangent);
+						dist = -DotProduct(myBinormal, myNormal); 
+						VectorMA(myBinormal, dist, myNormal, myBinormal);
+
+						/* renormalize */
+						VectorNormalize( myTangent, myTangent );
+						VectorNormalize( myBinormal, myBinormal );
+
+						/* convert modelspace deluxel to tangentspace */
+						dirSample[0] = bspDeluxel[0];
+						dirSample[1] = bspDeluxel[1];
+						dirSample[2] = bspDeluxel[2];
+						VectorNormalize(dirSample, dirSample);
+
+						/* fix tangents to world matrix */
+						if (myNormal[0] > 0 || myNormal[1] < 0 || myNormal[2] < 0)
+							VectorNegate(myTangent, myTangent);
+
+						/* build tangentspace vectors */
+						bspDeluxel[0] = DotProduct(dirSample, myTangent);
+						bspDeluxel[1] = DotProduct(dirSample, myBinormal);
+						bspDeluxel[2] = DotProduct(dirSample, myNormal);
+					}
+				}
+			}
+		}
+	}
+
+	/* -----------------------------------------------------------------
+	   blend lightmaps
+	   ----------------------------------------------------------------- */
+
+#ifdef sdfsdfwq312323
+	/* note it */
+	Sys_Printf( "blending..." );
+
+	for( i = 0; i < numRawLightmaps; i++ )
+	{
+		vec3_t	myColor;
+		float myBrightness;
+
+		/* get lightmap */
+		lm = &rawLightmaps[ i ];
+
+		/* walk individual lightmaps */
+		for( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+		{
+			/* early outs */
+			if( lm->superLuxels[ lightmapNum ] == NULL )
+				continue;
+
+			/* walk lightmap samples */
+			for( y = 0; y < lm->sh; y++ )
+			{
+				for( x = 0; x < lm->sw; x++ )
+				{
+					/* get luxel */
+					bspLuxel = BSP_LUXEL( lightmapNum, x, y );
+
+					/* get color */
+					VectorNormalize(bspLuxel, myColor);
+					myBrightness = VectorLength(bspLuxel);
+					myBrightness *= (1 / 127.0f);
+					myBrightness = myBrightness*myBrightness;
+					myBrightness *= 127.0f;
+					VectorScale(myColor, myBrightness, bspLuxel);
+				}
+			}
+		}
+	}
+#endif
+
+	/* -----------------------------------------------------------------
 	   collapse non-unique lightmaps
 	   ----------------------------------------------------------------- */
 	
 	if( noCollapse == qfalse && deluxemap == qfalse )
 	{
 		/* note it */
-		Sys_FPrintf( SYS_VRB, "collapsing..." );
+		Sys_Printf( "collapsing..." );
 		
 		/* set all twin refs to null */
 		for( i = 0; i < numRawLightmaps; i++ )
@@ -2706,7 +2843,7 @@ void StoreSurfaceLightmaps( void )
 	   ----------------------------------------------------------------- */
 	
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "sorting..." );
+	Sys_Printf( "sorting..." );
 	
 	/* allocate a new sorted list */
 	if( sortLightmaps == NULL )
@@ -2722,7 +2859,7 @@ void StoreSurfaceLightmaps( void )
 	   ----------------------------------------------------------------- */
 	
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "allocating..." );
+	Sys_Printf( "allocating..." );
 	
 	/* kill all existing output lightmaps */
 	if( outLightmaps != NULL )
@@ -2775,7 +2912,7 @@ void StoreSurfaceLightmaps( void )
 	   ----------------------------------------------------------------- */
 	
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "storing..." );
+	Sys_Printf( "storing..." );
 	
 	/* count the bsp lightmaps and allocate space */
 	if( bspLightBytes != NULL )
@@ -2843,7 +2980,7 @@ void StoreSurfaceLightmaps( void )
 	}
 	
 	if( numExtLightmaps > 0 )
-		Sys_FPrintf( SYS_VRB, "\n" );
+		Sys_Printf( "\n" );
 	
 	/* delete unused external lightmaps */
 	for( i = numExtLightmaps; i; i++ )
@@ -2862,7 +2999,7 @@ void StoreSurfaceLightmaps( void )
 	   ----------------------------------------------------------------- */
 	
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "projecting..." );
+	Sys_Printf( "projecting..." );
 	
 	/* walk the list of surfaces */
 	for( i = 0; i < numBSPDrawSurfaces; i++ )
@@ -3134,7 +3271,7 @@ void StoreSurfaceLightmaps( void )
 	}
 	
 	/* finish */
-	Sys_FPrintf( SYS_VRB, "done.\n" );
+	Sys_Printf( "done.\n" );
 	
 	/* calc num stored */
 	numStored = numBSPLightBytes / 3;

@@ -65,6 +65,14 @@ game_t struct
 	1.0f,				/* lightmap gamma */
 	1.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
+	1.0f,				/* lightgrid scale */
+	1.0f,				/* lightgrid ambient scale */
+	qtrue,				/* disable shader lightstyles hack */
+	qtrue,				/* keep light entities on bsp */
+	8,					/* default patchMeta subdivisions tolerance */
+	qfalse,				/* patch casting enabled */
+	qfalse,				/* compile deluxemaps */
+	0,					/* deluxemaps default mode */
 	"IBSP",				/* bsp file prefix */
 	46,					/* bsp file version */
 	qfalse,				/* cod-style lump len/ofs order */
@@ -130,6 +138,7 @@ game_t struct
 		{ "nosteps",		0,							0,							Q_SURF_NOSTEPS,				0,							0,							0 },
 		{ "nodlight",		0,							0,							Q_SURF_NODLIGHT,			0,							0,							0 },
 		{ "dust",			0,							0,							Q_SURF_DUST,				0,							0,							0 },
+		
 		
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
