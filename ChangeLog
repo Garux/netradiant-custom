@@ -1,3 +1,69 @@
+2009-03-29 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: _ls key shorthand for _lighmapscale (VorteX)
+	* q3map2: -samplescale switch (VorteX)
+	* q3map2: in dq and prophecy games, func_wall casts shadows by default (VorteX)
+	* q3map2: some more prints (VorteX)
+	* q3map2: q3map_floodlight <red> <green> <blue> <distance> <brightness> <power> shader keyword (VorteX)
+	* q3map2: more MAX_TW_VERTS (VorteX)
+	* q3map2: _patchMeta 1 entity keyword (VorteX)
+	* q3map2: q3map_deprecateShader <newershader> shader keyword (VorteX)
+	* q3map2: tangentspace deluxemaps (-deluxemode 1) (VorteX)
+	* q3map2: _smoothnormals entity key to easier set shadeangle (VorteX)
+	* q3map2: -keeplights switch in -light (VorteX)
+	* q3map2: spawnflag 32 on light: unnormalized color (VorteX)
+	* q3map2: spawnflag 64 on light: distance falloff (VorteX)
+	* q3map2: option -gridscale, -gridambientscale (VorteX)
+
+2009-03-27 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: fix a crash on "regroup entities"
+
+2009-03-25 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: editable keyboard shortcuts
+
+2009-03-23 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: avoid a crash if a surface is huge
+
+2009-03-20 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: command line option -celshader
+	* q3map2: let Q_mkdir create all parent directories too
+	* q3map2: fix some crashes
+
+2009-03-16 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: command line option -fs_homebase
+
+2009-03-13 Rudolf Polzer divVerent(at)alientrap.org
+	* all: support objs without material groups
+
+2009-03-11 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: detect being installed inside Q2World
+
+2009-03-08 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: indicate the direction of the clip plane in the 2D view
+
+2009-03-11 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: detect being installed inside Nexuiz
+
+2009-03-09 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: OS X compile fixes
+
+2009-03-04 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: -global-Key Value and -gamename.game-Key Value options to set
+	  config settings from the command line
+
+2009-02-25 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: fix two bugs in tjunction fixing
+	* q3map2: -lightmapdir option
+	* q3map2: eliminate MAX_MAP_PLANES limit
+
+2009-02-23 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: -scale -tex ("no texture lock while scaling")
+
+2009-02-15 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: non-uniform -scale x y z
+
+2009-02-10 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: remove LOTS of limits
+
 2009-02-08 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: put the command line parameters into a worldspawn key
 	  _q3map2_cmdline; currently not yet supported for -onlyents
