@@ -1,62 +1,3 @@
-Index: bspfile_abstract.c
-===================================================================
---- bspfile_abstract.c	(revision 158)
-+++ bspfile_abstract.c	(working copy)
-@@ -683,8 +683,26 @@
- 	ep->value = copystring( value );
- }
- 
-+/*
-+KeyExists()
-+returns true if entity has this key
-+*/
- 
-+qboolean KeyExists( const entity_t *ent, const char *key )
-+{
-+	epair_t	*ep;
-+	
-+	/* walk epair list */
-+	for( ep = ent->epairs; ep != NULL; ep = ep->next )
-+	{
-+		if( !EPAIR_STRCMP( ep->key, key ) )
-+			return qtrue;
-+	}
- 
-+	/* no match */
-+	return qfalse;
-+}
-+
- /*
- ValueForKey()
- gets the value for an entity key
-@@ -803,7 +821,6 @@
- {
- 	const char	*value;
- 	
--	
- 	/* get cast shadows */
- 	if( castShadows != NULL )
- 	{
-@@ -831,5 +848,19 @@
- 		if( value[ 0 ] != '\0' )
- 			*recvShadows = atoi( value );
- 	}
-+
-+	/* vortex: game-specific default eneity keys */
-+	value = ValueForKey( ent, "classname" );
-+	if (!Q_stricmp( game->magic, "dq" ) || !Q_stricmp( game->magic, "prophecy" ) )
-+	{
-+		/* vortex: deluxe quake default shadow flags */
-+		if (!Q_stricmp( value, "func_wall" ) )
-+		{
-+			if( recvShadows != NULL )
-+				*recvShadows = 1;
-+			if( castShadows != NULL )
-+				*castShadows = 1;
-+		}
-+	}
- }
- 
 Index: game_ef.h
 ===================================================================
 --- game_ef.h	(revision 158)
@@ -2869,14 +2810,6 @@ Index: q3map2.h
  /* image.c */
  void						ImageFree( image_t *image );
  image_t						*ImageFind( const char *filename );
-@@ -1783,6 +1816,7 @@
- void						UnparseEntities( void );
- void						PrintEntity( const entity_t *ent );
- void						SetKeyValue( entity_t *ent, const char *key, const char *value );
-+qboolean					KeyExists( const entity_t *ent, const char *key ); /* VorteX: check if key exists */
- const char					*ValueForKey( const entity_t *ent, const char *key );
- int							IntForKey( const entity_t *ent, const char *key );
- vec_t						FloatForKey( const entity_t *ent, const char *key );
 @@ -1845,6 +1879,12 @@
  								,
  								#include "game_qfusion.h"	/* qfusion game */

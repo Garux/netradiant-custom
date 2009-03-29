@@ -744,7 +744,25 @@ void SetKeyValue( entity_t *ent, const char *key, const char *value )
 	ep->value = copystring( value );
 }
 
+/*
+KeyExists()
+returns true if entity has this key
+*/
 
+qboolean KeyExists( const entity_t *ent, const char *key )
+{
+	epair_t	*ep;
+	
+	/* walk epair list */
+	for( ep = ent->epairs; ep != NULL; ep = ep->next )
+	{
+		if( !EPAIR_STRCMP( ep->key, key ) )
+			return qtrue;
+	}
+
+	/* no match */
+	return qfalse;
+}
 
 /*
 ValueForKey()
@@ -864,7 +882,6 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 {
 	const char	*value;
 	
-	
 	/* get cast shadows */
 	if( castShadows != NULL )
 	{
@@ -891,6 +908,20 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 			value = ValueForKey( ent2, "_rs" );
 		if( value[ 0 ] != '\0' )
 			*recvShadows = atoi( value );
+	}
+
+	/* vortex: game-specific default eneity keys */
+	value = ValueForKey( ent, "classname" );
+	if (!Q_stricmp( game->magic, "dq" ) || !Q_stricmp( game->magic, "prophecy" ) )
+	{
+		/* vortex: deluxe quake default shadow flags */
+		if (!Q_stricmp( value, "func_wall" ) )
+		{
+			if( recvShadows != NULL )
+				*recvShadows = 1;
+			if( castShadows != NULL )
+				*castShadows = 1;
+		}
 	}
 }
 

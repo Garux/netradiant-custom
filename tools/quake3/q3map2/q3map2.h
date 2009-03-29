@@ -1802,6 +1802,7 @@ void						ParseEntities( void );
 void						UnparseEntities( void );
 void						PrintEntity( const entity_t *ent );
 void						SetKeyValue( entity_t *ent, const char *key, const char *value );
+qboolean					KeyExists( const entity_t *ent, const char *key ); /* VorteX: check if key exists */
 const char					*ValueForKey( const entity_t *ent, const char *key );
 int							IntForKey( const entity_t *ent, const char *key );
 vec_t						FloatForKey( const entity_t *ent, const char *key );
