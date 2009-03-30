@@ -27,6 +27,11 @@ extern "C"
 
 #endif
 
+#ifdef _WIN32
+#include "windows.h"
+#include "stdio.h"
+#endif
+
 #ifdef __MACOS__
 
 // JDC: stuff to make mac version compile
@@ -48,10 +53,6 @@ extern "C"
 // 11.29.99
 
 //#include "cmdlib.h"
-#ifdef _WIN32
-#include "windows.h"
-#include "stdio.h"
-#endif
 
 #ifndef INT32
 #define	INT32	int
