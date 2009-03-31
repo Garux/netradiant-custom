@@ -403,6 +403,7 @@ void CreateEntityLights( void )
 
 		intensity = intensity * pointScale;
 		light->photons = intensity;
+
 		light->type = EMIT_POINT;
 		
 		/* set falloff threshold */

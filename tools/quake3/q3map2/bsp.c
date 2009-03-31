@@ -888,6 +888,11 @@ int BSPMain( int argc, char **argv )
 			Sys_Printf( "Debug portal surfaces enabled\n" );
 			debugPortals = qtrue;
 		}
+		else if( !strcmp( argv[ i ], "-altsplit" ) )
+		{
+			Sys_Printf( "Alternate BSP splitting (by 27) enabled\n" );
+			bspAlternateSplitWeights = qtrue;
+		}
 		else if( !strcmp( argv[ i ], "-bsp" ) )
 			Sys_Printf( "-bsp argument unnecessary\n" );
 		else
