@@ -86,6 +86,9 @@ WHICHDLL           ?= which
 ifeq ($(OS),MINGW32_NT-6.0)
 	OS = Win32
 endif
+ifeq ($(OS),Windows_NT)
+	OS = Win32
+endif
 
 CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter
 CPPFLAGS_COMMON =
