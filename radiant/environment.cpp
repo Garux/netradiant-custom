@@ -163,6 +163,17 @@ const char* environment_get_app_path()
   return app_path.c_str();
 }
 
+bool portable_app_setup()
+{
+	StringOutputStream confdir(256);
+	confdir << app_path.c_str() << "settings/";
+	if(file_exists(confdir.c_str()))
+	{
+		home_path = confdir.c_str();
+		return true;
+	}
+	return false;
+}
 
 #if defined(POSIX)
 
@@ -227,15 +238,17 @@ void environment_init(int argc, char* argv[])
   args_init(argc, argv);
 
   {
+    char real[PATH_MAX];
+    app_path = getexename(real);
+    ASSERT_MESSAGE(!string_empty(app_path.c_str()), "failed to deduce app path");
+  }
+
+  if(!portable_app_setup())
+  {
     StringOutputStream home(256);
     home << DirectoryCleaned(g_get_home_dir()) << ".netradiant/";
     Q_mkdir(home.c_str());
     home_path = home.c_str();
-  }
-  {
-    char real[PATH_MAX];
-    app_path = getexename(real);
-    ASSERT_MESSAGE(!string_empty(app_path.c_str()), "failed to deduce app path");
   }
   gamedetect();
 }
@@ -248,24 +261,6 @@ void environment_init(int argc, char* argv[])
 {
   args_init(argc, argv);
 
-  {
-    char *appdata = getenv("APPDATA");
-
-    StringOutputStream home(256);
-    if(!appdata || string_empty(appdata))
-    {
-      ERROR_MESSAGE("Application Data folder not available.\n"
-        "Radiant will use C:\\ for user preferences.\n");
-      home << "C:";
-    }
-    else
-    {
-      home << PathCleaned(appdata);
-    }
-    home << "/NetRadiantSettings/";
-    Q_mkdir(home.c_str());
-    home_path = home.c_str();
-  }
   {
     // get path to the editor
     char filename[MAX_PATH+1];
@@ -282,6 +277,25 @@ void environment_init(int argc, char* argv[])
     StringOutputStream app(256);
     app << PathCleaned(filename);
     app_path = app.c_str();
+  }
+
+  if(!portable_app_setup())
+  {
+    char *appdata = getenv("APPDATA");
+    StringOutputStream home(256);
+    if(!appdata || string_empty(appdata))
+    {
+      ERROR_MESSAGE("Application Data folder not available.\n"
+        "Radiant will use C:\\ for user preferences.\n");
+      home << "C:";
+    }
+    else
+    {
+      home << PathCleaned(appdata);
+    }
+    home << "/NetRadiantSettings/";
+    Q_mkdir(home.c_str());
+    home_path = home.c_str();
   }
   gamedetect();
 }
