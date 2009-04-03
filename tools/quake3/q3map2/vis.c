@@ -1046,6 +1046,9 @@ int VisMain (int argc, char **argv)
 		} else if (!strcmp(argv[i], "-merge")) {
 			Sys_Printf ("merge = true\n");
 			mergevis = qtrue;
+		} else if (!strcmp(argv[i], "-mergeportals")) {
+			Sys_Printf ("mergeportals = true\n");
+			mergevisportals = qtrue;
 		} else if (!strcmp(argv[i], "-nopassage")) {
 			Sys_Printf ("nopassage = true\n");
 			noPassageVis = qtrue;
@@ -1112,10 +1115,10 @@ int VisMain (int argc, char **argv)
 	UnparseEntities();
 	
 	if( mergevis )
-	{
 		MergeLeaves();
+
+	if( mergevis || mergevisportals )
 		MergeLeafPortals();
-	}
 	
 	CountActivePortals();
 	/* WritePortals( "maps/hints.prs" );*/
