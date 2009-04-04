@@ -477,6 +477,7 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
 	
 	/* convert bsp planes to map planes */
 	nummapplanes = numBSPPlanes;
+	AUTOEXPAND_BY_REALLOC(mapplanes, nummapplanes, allocatedmapplanes, 1024);
 	for( i = 0; i < numBSPPlanes; i++ )
 	{
 		VectorCopy( bspPlanes[ i ].normal, mapplanes[ i ].normal );
