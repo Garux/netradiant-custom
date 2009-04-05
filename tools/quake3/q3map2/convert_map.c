@@ -145,6 +145,42 @@ exwinding:
 	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide->shaderInfo->shader, matches, best);
 }
 
+static void ConvertOriginBrush( FILE *f, int num, vec3_t origin )
+{
+	char pattern[6][3][3] = {
+		{ "+++", "+-+", "-++" },
+		{ "+++", "-++", "++-" },
+		{ "+++", "++-", "+-+" },
+		{ "---", "+--", "-+-" },
+		{ "---", "--+", "+--" },
+		{ "---", "-+-", "--+" }
+	};
+	int i;
+
+	/* start brush */
+	fprintf( f, "\t// brush %d\n", num );
+	fprintf( f, "\t{\n" );
+	fprintf( f, "\tbrushDef\n" );
+	fprintf( f, "\t{\n" );
+	/* print brush side */
+	/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
+
+	for(i = 0; i < 6; ++i)
+		fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
+				origin[0] + (pattern[i][0][0] == '+' ? +8 : -8), origin[1] + (pattern[i][0][1] == '+' ? +8 : -8), origin[2] + (pattern[i][0][2] == '+' ? +8 : -8),
+				origin[0] + (pattern[i][1][0] == '+' ? +8 : -8), origin[1] + (pattern[i][1][1] == '+' ? +8 : -8), origin[2] + (pattern[i][1][2] == '+' ? +8 : -8),
+				origin[0] + (pattern[i][2][0] == '+' ? +8 : -8), origin[1] + (pattern[i][2][1] == '+' ? +8 : -8), origin[2] + (pattern[i][2][2] == '+' ? +8 : -8),
+				1/64.0, 0.0, 0.0, // TODO make these show the actual "ORIGIN" text properly
+				0.0, 1/64.0, 0.0,
+				"common/origin",
+				0
+			   );
+	
+	/* end brush */
+	fprintf( f, "\t}\n" );
+	fprintf( f, "\t}\n\n" );
+}
+
 static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin )
 {
 	int				i, j;
@@ -490,6 +526,9 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
 	buildBrush = AllocBrush( 512 );
 	buildBrush->entityNum = 0;
 	buildBrush->original = buildBrush;
+
+	if(origin[0] != 0 || origin[1] != 0 || origin[2] != 0)
+		ConvertOriginBrush(f, -1, origin);
 	
 	/* go through each brush in the model */
 	for( i = 0; i < model->numBSPBrushes; i++ )
@@ -521,7 +560,7 @@ ConvertEPairs()
 exports entity key/value pairs to a map file
 */
 
-static void ConvertEPairs( FILE *f, entity_t *e )
+static void ConvertEPairs( FILE *f, entity_t *e, qboolean skip_origin )
 {
 	epair_t	*ep;
 	
@@ -535,6 +574,10 @@ static void ConvertEPairs( FILE *f, entity_t *e )
 
 		/* ignore model keys with * prefixed values */
 		if( !Q_stricmp( ep->key, "model" ) && ep->value[ 0 ] == '*' )
+			continue;
+		
+		/* ignore origin keys if skip_origin is set */
+		if( skip_origin && !Q_stricmp( ep->key, "origin" ) )
 			continue;
 		
 		/* emit the epair */
@@ -590,10 +633,6 @@ int ConvertBSPToMap( char *bspName )
 		fprintf( f, "// entity %d\n", i );
 		fprintf( f, "{\n" );
 		
-		/* export keys */
-		ConvertEPairs( f, e );
-		fprintf( f, "\n" );
-		
 		/* get model num */
 		if( i == 0 )
 			modelNum = 0;
@@ -605,6 +644,10 @@ int ConvertBSPToMap( char *bspName )
 			else
 				modelNum = -1;
 		}
+		
+		/* export keys */
+		ConvertEPairs( f, e, modelNum >= 0 );
+		fprintf( f, "\n" );
 		
 		/* only handle bsp models */
 		if( modelNum >= 0 )
