@@ -147,15 +147,17 @@ exwinding:
 
 static void ConvertOriginBrush( FILE *f, int num, vec3_t origin )
 {
-	char pattern[6][3][3] = {
-		{ "+++", "+-+", "-++" },
-		{ "+++", "-++", "++-" },
-		{ "+++", "++-", "+-+" },
-		{ "---", "+--", "-+-" },
-		{ "---", "--+", "+--" },
-		{ "---", "-+-", "--+" }
+	char pattern[6][5][3] = {
+		{ "+++", "+-+", "-++", " - ", "-  " },
+		{ "+++", "-++", "++-", "+  ", "  +" },
+		{ "+++", "++-", "+-+", " - ", "  +" },
+		{ "---", "+--", "-+-", " - ", "+  " },
+		{ "---", "--+", "+--", "-  ", "  +" },
+		{ "---", "-+-", "--+", " + ", "  +" }
 	};
 	int i;
+#define S(a,b,c) (pattern[a][b][c] == '+' ? +1 : pattern[a][b][c] == '-' ? -1 : 0)
+#define FRAC(x) ((x) - floor(x))
 
 	/* start brush */
 	fprintf( f, "\t// brush %d\n", num );
@@ -167,14 +169,16 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin )
 
 	for(i = 0; i < 6; ++i)
 		fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
-				origin[0] + (pattern[i][0][0] == '+' ? +8 : -8), origin[1] + (pattern[i][0][1] == '+' ? +8 : -8), origin[2] + (pattern[i][0][2] == '+' ? +8 : -8),
-				origin[0] + (pattern[i][1][0] == '+' ? +8 : -8), origin[1] + (pattern[i][1][1] == '+' ? +8 : -8), origin[2] + (pattern[i][1][2] == '+' ? +8 : -8),
-				origin[0] + (pattern[i][2][0] == '+' ? +8 : -8), origin[1] + (pattern[i][2][1] == '+' ? +8 : -8), origin[2] + (pattern[i][2][2] == '+' ? +8 : -8),
-				1/64.0, 0.0, 0.0, // TODO make these show the actual "ORIGIN" text properly
-				0.0, 1/64.0, 0.0,
+				origin[0] + 8 * S(i,0,0), origin[1] + 8 * S(i,0,1), origin[2] + 8 * S(i,0,2),
+				origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
+				origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
+				1/16.0, 0.0, FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
+				0.0, 1/16.0, FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
 				"common/origin",
 				0
 			   );
+#undef FRAC
+#undef S
 	
 	/* end brush */
 	fprintf( f, "\t}\n" );
