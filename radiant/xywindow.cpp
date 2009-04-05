@@ -2630,7 +2630,7 @@ void XY_Front()
   }
 
   XYWnd* xywnd = g_pParentWnd->GetXYWnd();
-  xywnd->SetViewType(XY);
+  xywnd->SetViewType(YZ);
   XYWnd_Focus(xywnd);
 }
 
