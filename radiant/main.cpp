@@ -89,6 +89,10 @@ DefaultAllocator - Memory allocation using new/delete, compliant with std::alloc
 #include "referencecache.h"
 #include "stacktrace.h"
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 void show_splash();
 void hide_splash();
 
