@@ -558,6 +558,18 @@ int main (int argc, char* argv[])
 
   streams_init();
 
+#ifdef WIN32
+  HMODULE lib;
+  lib = LoadLibrary("dwmapi.dll");
+  if(lib != 0)
+  {
+	  void (WINAPI *DwmEnableComposition) (bool bEnable) = (void (WINAPI *) (bool bEnable)) GetProcAddress(lib, "DwmEnableComposition");
+	  if(DwmEnableComposition)
+		  DwmEnableComposition(FALSE);
+	  FreeLibrary(lib);
+  }
+#endif
+
   gtk_disable_setlocale();
   gtk_init(&argc, &argv);
 
