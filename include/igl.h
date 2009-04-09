@@ -1999,6 +1999,8 @@ struct OpenGLBinding
 
   GLuint m_font;
   int m_fontHeight;
+  int m_fontAscent;
+  int m_fontDescent;
 
   /// \brief Renders \p string at the current raster-position of the current context.
   void drawString(const char* string) const

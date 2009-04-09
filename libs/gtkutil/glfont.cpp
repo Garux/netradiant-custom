@@ -107,7 +107,7 @@ void glfont_release(GLFont& font)
 GLFont glfont_create(const char* font_string)
 {
   GLuint font_list_base = glGenLists (256);
-  gint font_height = 0;
+  gint font_height = 0, font_ascent = 0, font_descent = 0;
 
   PangoFontDescription* font_desc = pango_font_description_from_string (font_string);
 
@@ -117,8 +117,12 @@ GLFont glfont_create(const char* font_string)
   {
     PangoFontMetrics* font_metrics = pango_font_get_metrics (font, 0);
 
-    font_height = pango_font_metrics_get_ascent (font_metrics) +
-                  pango_font_metrics_get_descent (font_metrics);
+    font_ascent = pango_font_metrics_get_ascent (font_metrics);
+	font_descent = pango_font_metrics_get_descent (font_metrics);
+	font_height = font_ascent + font_descent;
+
+    font_ascent = PANGO_PIXELS (font_ascent);
+    font_descent = PANGO_PIXELS (font_descent);
     font_height = PANGO_PIXELS (font_height);
 
     pango_font_metrics_unref (font_metrics);
@@ -127,15 +131,15 @@ GLFont glfont_create(const char* font_string)
   pango_font_description_free (font_desc);
 
   // fix for pango/gtkglext metrix bug
-  if(font_height > 16)
+  if(font_height > 256)
 	  font_height = 16;
 
-  return GLFont(font_list_base, font_height);
+  return GLFont(font_list_base, font_ascent, font_descent, font_height);
 }
 
 void glfont_release(GLFont& font)
 {
   glDeleteLists(font.getDisplayList(), 256);
-  font = GLFont(0, 0);
+  font = GLFont(0, 0, 0, 0);
 }
 #endif

@@ -3305,7 +3305,7 @@ void GridStatus_onTextureLockEnabledChanged()
 
 namespace
 {
-  GLFont g_font(0, 0);
+  GLFont g_font(0, 0, 0, 0);
 }
 
 void GlobalGL_sharedContextCreated()
@@ -3331,6 +3331,8 @@ void GlobalGL_sharedContextCreated()
 
   GlobalOpenGL().m_font = g_font.getDisplayList();
   GlobalOpenGL().m_fontHeight = g_font.getPixelHeight();
+  GlobalOpenGL().m_fontAscent = g_font.getPixelAscent();
+  GlobalOpenGL().m_fontDescent = g_font.getPixelDescent();
 }
 
 void GlobalGL_sharedContextDestroyed()

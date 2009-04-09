@@ -28,8 +28,10 @@ class GLFont
 {
   GLuint m_displayList;
   int m_pixelHeight;
+  int m_pixelAscent;
+  int m_pixelDescent;
 public:
-  GLFont(GLuint displayList, int pixelHeight) : m_displayList(displayList), m_pixelHeight(pixelHeight)
+  GLFont(GLuint displayList, int asc, int desc, int pixelHeight) : m_displayList(displayList), m_pixelHeight(pixelHeight), m_pixelAscent(asc), m_pixelDescent(desc)
   {
   }
   GLuint getDisplayList() const
@@ -39,6 +41,14 @@ public:
   int getPixelHeight() const
   {
     return m_pixelHeight;
+  }
+  int getPixelAscent() const
+  {
+    return m_pixelAscent;
+  }
+  int getPixelDescent() const
+  {
+    return m_pixelDescent;
   }
 };
 

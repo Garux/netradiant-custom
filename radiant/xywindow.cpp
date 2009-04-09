@@ -1842,7 +1842,8 @@ void XYWnd::XY_DrawGrid(void) {
 	// draw coordinate text if needed
 	if ( g_xywindow_globals_private.show_coordinates) {
 		glColor3fv(vector3_to_array(g_xywindow_globals.color_gridtext));
-		float offx = m_vOrigin[nDim2] + h - 6 / m_fScale, offy = m_vOrigin[nDim1] - w + 1 / m_fScale;
+		float offx = m_vOrigin[nDim2] + h - (1 + GlobalOpenGL().m_fontAscent) / m_fScale;
+		float offy = m_vOrigin[nDim1] - w +  1                                / m_fScale;
 		for (x = xb - fmod(xb, stepx); x <= xe ; x += stepx) {
 			glRasterPos2f (x, offx);
 			sprintf (text, "%g", x);
