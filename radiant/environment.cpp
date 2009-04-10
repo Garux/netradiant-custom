@@ -138,6 +138,10 @@ void gamedetect()
 	  if(gamedetect_check_game("q2w.game", "default/quake2world.version", NULL, buf, p - buf))
 	    return;
 
+	  // try to detect Warsow installs
+	  if(gamedetect_check_game("warsow.game", "basewsw/dedicated_autoexec.cfg", NULL, buf, p - buf))
+	    return;
+
 	  // we found nothing
 	  // go backwards
 	  --p;
