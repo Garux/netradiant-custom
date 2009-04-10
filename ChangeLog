@@ -1,3 +1,36 @@
+2009-04-10 Rudolf Polzer divVerent(at)alientrap.org
+	* all: add WarsowPack
+	* q3map2: add alias _shadeangle to _smoothnormals
+
+2009-04-09 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: fix font size handling
+
+2009-04-08 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: force disable composition on Vista (should fix "white 3D window" issues)
+
+2009-04-05 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: fix ViewSide command (no longer does the same as ViewTop)
+	* q3map2: generate origin brushes when decompiling
+	* q3map2: allow more portals per leaf, to help with -bsp -deep
+
+2009-04-04 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: -bsp -deep also including detail brushes into the BSP tree at lowest priority, should give higher fps while increasing compile time and BSP size
+	* q3map2: fix crash when decompiling to .map
+
+2009-04-03 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: -vis -mergeportals speeding up vis a lot, while not making vis much worse
+
+2009-04-02 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: portable radiant: when a subdir "settings" exists where radiant.exe resides, config is stored there so you can take it with you on a USB stick
+
+2009-04-01 Rudolf Polzer divVerent(at)alientrap.org
+	* all: compile fix on Win64
+
+2009-03-31 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: merged feature -bsp -altsplit (27), alternate way to weight BSP splits, should give higher fps in original Q3 engine (needs testing)
+	* q3map2: also compare shaders when comparing surfaces for sorting (27)
+	* q3map2: misc_model spawnflag 32 copies vertex alpha from color, for terrain blending on models (27)
+
 2009-03-29 Rudolf Polzer divVerent(at)alientrap.org
 	* q3map2: _ls key shorthand for _lighmapscale (VorteX)
 	* q3map2: -samplescale switch (VorteX)
