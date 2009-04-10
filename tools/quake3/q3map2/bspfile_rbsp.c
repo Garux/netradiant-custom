@@ -243,9 +243,9 @@ void LoadRBSPFile( const char *filename )
 	
 	numBSPLeafBrushes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_LEAFBRUSHES, (void **) &bspLeafBrushes, sizeof( bspLeafBrushes[ 0 ] ), &allocatedBSPLeafBrushes );
 	
-	numBSPBrushes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_BRUSHES, &bspBrushes, sizeof( bspBrush_t ), &allocatedBSPLeafBrushes );
+	numBSPBrushes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_BRUSHES, (void **) &bspBrushes, sizeof( bspBrush_t ), &allocatedBSPLeafBrushes );
 	
-	numBSPBrushSides = CopyLump( (bspHeader_t*) header, LUMP_BRUSHSIDES, bspBrushSides, sizeof( bspBrushSide_t ) );
+	numBSPBrushSides = CopyLump_Allocate( (bspHeader_t*) header, LUMP_BRUSHSIDES, (void **) &bspBrushSides, sizeof( bspBrushSide_t ), &allocatedBSPBrushSides );
 	
 	numBSPDrawVerts = GetLumpElements( (bspHeader_t*) header, LUMP_DRAWVERTS, sizeof( bspDrawVerts[ 0 ] ) );
 		SetDrawVerts( numBSPDrawVerts );
