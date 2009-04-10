@@ -1028,7 +1028,9 @@ void SmoothMetaTriangles( void )
 	for( i = 0, tri = &metaTriangles[ i ]; i < numMetaTriangles; i++, tri++ )
 	{
 		/* vortex: try get smoothing from entity key */
-		shadeAngle = FloatForKey(&entities[tri->entityNum], "_smoothnormals");
+		shadeAngle = FloatForKey(&entities[tri->entityNum], "_shadeangle");
+		if (shadeAngle <= 0.0f)
+			shadeAngle = FloatForKey(&entities[tri->entityNum], "_smoothnormals");
 		if (shadeAngle <= 0.0f)
 			shadeAngle = FloatForKey(&entities[tri->entityNum], "_sn");
 		if (shadeAngle <= 0.0f)
