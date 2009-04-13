@@ -600,6 +600,7 @@ and links it to the current entity
 static void MergeOrigin(entity_t *ent, vec3_t origin)
 {
 	vec3_t adjustment;
+	char string[128];
 
 	/* we have not parsed the brush completely yet... */
 	GetVectorForKey( ent, "origin", ent->origin );
@@ -608,7 +609,6 @@ static void MergeOrigin(entity_t *ent, vec3_t origin)
 	VectorAdd(adjustment, ent->origin, ent->origin);
 	VectorCopy(origin, ent->originbrush_origin);
 
-	char string[128];
 	sprintf(string, "%f %f %f", ent->origin[0], ent->origin[1], ent->origin[2]);
 	SetKeyValue(ent, "origin", string);
 }
