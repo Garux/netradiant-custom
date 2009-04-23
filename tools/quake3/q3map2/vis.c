@@ -382,10 +382,10 @@ void CalcVis (void)
 	
   Sys_Printf( "Total clusters: %i\n", portalclusters );
   Sys_Printf( "Total visible clusters: %.0f\n", totalvis );
-  Sys_Printf( "Average clusters visible: %.2f (%.3f %%/total)\n", mu, mu / portalclusters * 100.0);
-  Sys_Printf( "  Standard deviation: %.2f (%.3f %%/total, %.3f %%/avg)\n", sigma, sigma / portalclusters * 100.0, sigma / mu * 100.0);
-  Sys_Printf( "  Minimum: %i (%.3f %%/total, %.3f %%/avg)\n", minvis, minvis / (double) portalclusters * 100.0, minvis / mu * 100.0);
-  Sys_Printf( "  Maximum: %i (%.3f %%/total, %.3f %%/avg)\n", maxvis, maxvis / (double) portalclusters * 100.0, maxvis / mu * 100.0);
+  Sys_Printf( "Average clusters visible: %.2f (%.3f%%/total)\n", mu, mu / portalclusters * 100.0);
+  Sys_Printf( "  Standard deviation: %.2f (%.3f%%/total, %.3f%%/avg)\n", sigma, sigma / portalclusters * 100.0, sigma / mu * 100.0);
+  Sys_Printf( "  Minimum: %i (%.3f%%/total, %.3f%%/avg)\n", minvis, minvis / (double) portalclusters * 100.0, minvis / mu * 100.0);
+  Sys_Printf( "  Maximum: %i (%.3f%%/total, %.3f%%/avg)\n", maxvis, maxvis / (double) portalclusters * 100.0, maxvis / mu * 100.0);
 }
 
 /*
