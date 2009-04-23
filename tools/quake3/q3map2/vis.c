@@ -310,7 +310,7 @@ CalcVis
 */
 void CalcVis (void)
 {
-	int			i;
+	int			i, minvis, maxvis;
 	const char	*value;
 	double mu, sigma, totalvis, totalvis2;
 	
@@ -361,13 +361,20 @@ void CalcVis (void)
 	
 	totalvis = 0;
 	totalvis2 = 0;
+	minvis = -1;
+	maxvis = -1;
 	for(i = 0; i < MAX_MAP_LEAFS; ++i)
 		if(clustersizehistogram[i])
 		{
-			Sys_FPrintf(SYS_VRB, "%4i clusters have exactly %4i visible clusters\n", clustersizehistogram[i], i);
+			if(debugCluster)
+				Sys_FPrintf(SYS_VRB, "%4i clusters have exactly %4i visible clusters\n", clustersizehistogram[i], i);
+			/* cast is to prevent integer overflow */
 			totalvis  += ((double) i)                * ((double) clustersizehistogram[i]);
 			totalvis2 += ((double) i) * ((double) i) * ((double) clustersizehistogram[i]);
-			/* cast is to prevent integer overflow */
+
+			if(minvis < 0)
+				minvis = i;
+			maxvis = i;
 		}
 	
 	mu = totalvis / portalclusters;
@@ -375,7 +382,10 @@ void CalcVis (void)
 	
   Sys_Printf( "Total clusters: %i\n", portalclusters );
   Sys_Printf( "Total visible clusters: %.0f\n", totalvis );
-  Sys_Printf( "Average clusters visible: %.2f sdev=%.2f\n", mu, sigma);
+  Sys_Printf( "Average clusters visible: %.2f (%.3f %%/total)\n", mu, mu / portalclusters * 100.0);
+  Sys_Printf( "  Standard deviation: %.2f (%.3f %%/total, %.3f %%/avg)\n", sigma, sigma / portalclusters * 100.0, sigma / mu * 100.0);
+  Sys_Printf( "  Minimum: %i (%.3f %%/total, %.3f %%/avg)\n", minvis, minvis / (double) portalclusters * 100.0, minvis / mu * 100.0);
+  Sys_Printf( "  Maximum: %i (%.3f %%/total, %.3f %%/avg)\n", maxvis, maxvis / (double) portalclusters * 100.0, maxvis / mu * 100.0);
 }
 
 /*
@@ -1077,6 +1087,9 @@ int VisMain (int argc, char **argv)
 		} else if (!strcmp (argv[i],"-saveprt")) {
 			Sys_Printf ("saveprt = true\n");
 			saveprt = qtrue;
+		} else if( !strcmp( argv[ i ], "-v" ) ) {
+			debugCluster = qtrue;
+			Sys_Printf( "Extra verbous mode enabled\n" );
 		} else if (!strcmp (argv[i],"-tmpin")) {
 			strcpy (inbase, "/tmp");
 		} else if (!strcmp (argv[i],"-tmpout")) {

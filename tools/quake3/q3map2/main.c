@@ -811,8 +811,11 @@ int main( int argc, char **argv )
 		/* verbose */
 		else if( !strcmp( argv[ i ], "-v" ) )
 		{
-			verbose = qtrue;
-			argv[ i ] = NULL;
+			if(!verbose)
+			{
+				verbose = qtrue;
+				argv[ i ] = NULL;
+			}
 		}
 		
 		/* force */
