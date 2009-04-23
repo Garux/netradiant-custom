@@ -2082,9 +2082,6 @@ Q_EXTERN qboolean			hint;	/* ydnar */
 Q_EXTERN char				inbase[ MAX_QPATH ];
 Q_EXTERN char				globalCelShader[ MAX_QPATH ];
 
-/* other bits */
-Q_EXTERN int				totalvis;
-
 Q_EXTERN float				farPlaneDist;	/* rr2do2, rf, mre, ydnar all contributed to this one... */
 
 Q_EXTERN int				numportals;

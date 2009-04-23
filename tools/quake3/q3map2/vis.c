@@ -167,6 +167,7 @@ ClusterMerge
 Merges the portal visibility for a leaf
 ===============
 */
+static int clustersizehistogram[MAX_MAP_LEAFS] = {0};
 void ClusterMerge (int leafnum)
 {
 	leaf_t		*leaf;
@@ -212,9 +213,8 @@ void ClusterMerge (int leafnum)
 
 	numvis++;		// count the leaf itself
 
-	totalvis += numvis;
-
-	Sys_FPrintf (SYS_VRB,"cluster %4i : %4i visible\n", leafnum, numvis);
+	//Sys_FPrintf (SYS_VRB,"cluster %4i : %4i visible\n", leafnum, numvis);
+	++clustersizehistogram[numvis];
 
 	memcpy (bspVisBytes + VIS_HEADER_SIZE + leafnum*leafbytes, uncompressed, leafbytes);
 }
@@ -312,6 +312,7 @@ void CalcVis (void)
 {
 	int			i;
 	const char	*value;
+	double mu, sigma, totalvis, totalvis2;
 	
 	
 	/* ydnar: rr2do2's farplane code */
@@ -357,9 +358,24 @@ void CalcVis (void)
 	Sys_Printf("creating leaf vis...\n");
 	for (i=0 ; i<portalclusters ; i++)
 		ClusterMerge (i);
-
-  Sys_Printf( "Total visible clusters: %i\n", totalvis );
-  Sys_Printf( "Average clusters visible: %i\n", totalvis / portalclusters );
+	
+	totalvis = 0;
+	totalvis2 = 0;
+	for(i = 0; i < MAX_MAP_LEAFS; ++i)
+		if(clustersizehistogram[i])
+		{
+			Sys_FPrintf(SYS_VRB, "%4i clusters have exactly %4i visible clusters\n", clustersizehistogram[i], i);
+			totalvis  += ((double) i)                * ((double) clustersizehistogram[i]);
+			totalvis2 += ((double) i) * ((double) i) * ((double) clustersizehistogram[i]);
+			/* cast is to prevent integer overflow */
+		}
+	
+	mu = totalvis / portalclusters;
+	sigma = sqrt(totalvis2 / portalclusters - mu * mu);
+	
+  Sys_Printf( "Total clusters: %i\n", portalclusters );
+  Sys_Printf( "Total visible clusters: %.0f\n", totalvis );
+  Sys_Printf( "Average clusters visible: %.2f sdev=%.2f\n", mu, sigma);
 }
 
 /*
