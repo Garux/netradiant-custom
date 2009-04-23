@@ -273,6 +273,8 @@ void m4x4_transform_normal(const m4x4_t matrix, vec3_t normal);
 void m4x4_transpose(m4x4_t matrix);
 /*! invert an orthogonal 4x3 subset of a 4x4 matrix */
 int m4x4_orthogonal_invert(m4x4_t matrix);
+/*! m4_det */
+float m4_det( m4x4_t mr );
 /*! invert any m4x4 using Kramer's rule.. return 1 if matrix is singular, else return 0 */
 int m4x4_invert(m4x4_t matrix);
 

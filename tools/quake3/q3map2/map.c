@@ -626,7 +626,6 @@ brush_t *FinishBrush( void )
 	   after the entire entity is parsed, the planenums and texinfos will be adjusted for the origin brush */
 	if( buildBrush->compileFlags & C_ORIGIN )
 	{
-		char	string[ 32 ];
 		vec3_t	origin;
 
 		Sys_Printf( "Entity %i, Brush %i: origin brush detected\n", 

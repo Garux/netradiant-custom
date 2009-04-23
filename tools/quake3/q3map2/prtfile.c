@@ -65,11 +65,9 @@ void WriteFloat (FILE *f, vec_t v)
 
 void CountVisportals_r(node_t *node)
 {
-	int			i, s;	
+	int			s;	
 	portal_t	*p;
 	winding_t	*w;
-	vec3_t		normal;
-	vec_t		dist;
 
 	// decision node
 	if (node->planenum != PLANENUM_LEAF) {
@@ -170,7 +168,7 @@ void WritePortalFile_r (node_t *node)
 
 void CountSolidFaces_r (node_t *node)
 {
-	int			i, s;	
+	int			s;	
 	portal_t	*p;
 	winding_t	*w;
 
@@ -273,8 +271,9 @@ NumberLeafs_r
 */
 void NumberLeafs_r (node_t *node, int c)
 {
+#if 0
 	portal_t	*p;
-
+#endif
 	if ( node->planenum != PLANENUM_LEAF ) {
 		// decision node
 		node->cluster = -99;

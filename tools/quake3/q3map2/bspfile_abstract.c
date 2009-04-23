@@ -331,8 +331,6 @@ int CopyLump( bspHeader_t *header, int lump, void *dest, int size )
 
 int CopyLump_Allocate( bspHeader_t *header, int lump, void **dest, int size, int *allocationVariable )
 {
-	int		length, offset;
-	
 	/* get lump length and offset */
 	*allocationVariable = header->lumps[ lump ].length / size;
 	*dest = realloc(*dest, size * *allocationVariable);

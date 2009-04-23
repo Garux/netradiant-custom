@@ -268,7 +268,8 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 			continue;
 		
 		/* fix the surface's normals */
-		PicoFixSurfaceNormals( surface ); /* why did vortex comment this out? FIXME */
+		if( !(spawnFlags & 64) )
+			PicoFixSurfaceNormals( surface );
 		
 		/* allocate a surface (ydnar: gs mods) */
 		ds = AllocDrawSurface( SURFACE_TRIANGLES );

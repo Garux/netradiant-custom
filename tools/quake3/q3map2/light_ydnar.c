@@ -1867,8 +1867,6 @@ void IlluminateRawLightmap( int rawLightmapNum )
 	float				tests[ 4 ][ 2 ] = { { 0.0f, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } };
 	trace_t				trace;
 	float				stackLightLuxels[ STACK_LL_SIZE ];
-	vec3_t				flood;
-	float				*floodlight;
 	
 	
 	/* bail if this number exceeds the number of raw lightmaps */

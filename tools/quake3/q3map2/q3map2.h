@@ -83,7 +83,7 @@ dependencies
 #include "vfs.h"
 #include "png.h"
 #include "md4.h"
-
+#include "radiant_jpeglib.h"
 #include <stdlib.h>
 
 
