@@ -59,13 +59,16 @@ int	GetThreadWork (void)
 		return -1;
 	}
 
-	f = 10*dispatch / workcount;
+	f = 40*dispatch / workcount;
 	if (f != oldf)
 	{
 		oldf = f;
 		if (pacifier)
 		{
-			Sys_Printf ("%i...", f);
+			if(f % 4 == 0)
+				Sys_Printf("%i", f / 4);
+			else
+				Sys_Printf (".");
 			fflush( stdout );	/* ydnar */
 		}
 	}
