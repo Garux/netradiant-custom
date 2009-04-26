@@ -1,6 +1,24 @@
+2009-04-26 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: minimap generation for Nexuiz
+	* q3map2: better progress indicators
+
+2009-04-23 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: misc_model spawnflag 64 turns off normal smoothing
+	* q3map2: improved output of vis
+
+2009-04-21 Rudolf Polzer divVerent(at)alientrap.org
+	* q3map2: more MAX_MAP_VISIBILITY
+
+2009-04-15 Rudolf Polzer divVerent(at)alientrap.org
+	* radiant: new toolbar bitmaps by sev
+
+2009-04-13 Rudolf Polzer divVerent(at)alientrap.org
+	* all: fix some MSVC compile errors
+
 2009-04-10 Rudolf Polzer divVerent(at)alientrap.org
 	* all: add WarsowPack
 	* q3map2: add alias _shadeangle to _smoothnormals
+	* q3map2: fix crash in reading RBSP files
 
 2009-04-09 Rudolf Polzer divVerent(at)alientrap.org
 	* radiant: fix font size handling
