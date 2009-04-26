@@ -346,6 +346,7 @@ void MiniMapSetupBrushes( void )
 		b = minimap.model->firstBSPBrush + i;
 		brush = &bspBrushes[ b ];
 		
+#if 0
 		/* check all sides */
 		compileFlags = 0;
 		for( j = 0; j < brush->numSides; j++ )
@@ -362,6 +363,14 @@ void MiniMapSetupBrushes( void )
 			/* or together compile flags */
 			compileFlags |= si->compileFlags;
 		}
+#else
+		shader = &bspShaders[ brush->shaderNum ];
+		si = ShaderInfoForShader( shader->shader );
+		if( si == NULL )
+			compileFlags = 0;
+		else
+			compileFlags = si->compileFlags;
+#endif
 		
 		/* determine if this brush is solid */
 		if( (compileFlags & (C_SOLID | C_SKY)) == C_SOLID )
