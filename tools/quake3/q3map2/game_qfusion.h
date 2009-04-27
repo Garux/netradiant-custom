@@ -128,7 +128,7 @@ game_t struct
 	512,                /* minimap size */
 	0.0f,               /* minimap sharpener */
 	0.0f,               /* minimap border */
-	qfalse,             /* minimap keep aspect */
+	qtrue,              /* minimap keep aspect */
 	MINIMAP_MODE_WHITE, /* minimap mode */
 	"../minimaps/%s.tga", /* minimap name format */
 	"FBSP",				/* bsp file prefix */
