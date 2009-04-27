@@ -1844,7 +1844,7 @@ void XYWnd::XY_DrawGrid(void) {
 		glColor3fv(vector3_to_array(g_xywindow_globals.color_gridtext));
 		// why does this not work on windows:
 		//   float offx = m_vOrigin[nDim2] + h - (1 + GlobalOpenGL().m_fontAscent) / m_fScale;
-		float offx = m_vOrigin[nDim2] + h - 14                                / m_fScale;
+		float offx = m_vOrigin[nDim2] + h - 13                                / m_fScale;
 		float offy = m_vOrigin[nDim1] - w +  1                                / m_fScale;
 		for (x = xb - fmod(xb, stepx); x <= xe ; x += stepx) {
 			glRasterPos2f (x, offx);

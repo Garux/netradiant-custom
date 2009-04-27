@@ -3323,11 +3323,16 @@ void GlobalGL_sharedContextCreated()
   GlobalShaderCache().realise();
   Textures_Realise();
 
+#ifdef WIN32
+  /* win32 is dodgy here, just use courier new then */
+  g_font = glfont_create("courier new 8");
+#else
   /* use default font here (Sans 10 is gtk default) */
   GtkSettings *settings = gtk_settings_get_default();
   gchar *fontname;
   g_object_get(settings, "gtk-font-name", &fontname, NULL);
   g_font = glfont_create(fontname);
+#endif
 
   GlobalOpenGL().m_font = g_font.getDisplayList();
   GlobalOpenGL().m_fontHeight = g_font.getPixelHeight();
