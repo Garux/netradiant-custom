@@ -73,6 +73,10 @@ game_t struct
 	qfalse,				/* patch casting enabled */
 	qfalse,				/* compile deluxemaps */
 	0,					/* deluxemaps default mode */
+	512,                /* minimap size */
+	1.0f,               /* minimap sharpener */
+	1.0f/66.0f,         /* minimap border */
+	"../gfx/%s_mini.tga", /* minimap name format */
 	"IBSP",				/* bsp file prefix */
 	46,					/* bsp file version */
 	qfalse,				/* cod-style lump len/ofs order */

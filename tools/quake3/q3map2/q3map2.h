@@ -561,6 +561,10 @@ typedef struct game_s
 	qboolean			patchShadows;					/* patch casting enabled */
 	qboolean			deluxeMap;						/* compile deluxemaps */
 	int					deluxeMode;						/* deluxemap mode (0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization) */
+	int                 miniMapSize;                    /* minimap size */
+	float               miniMapSharpen;                 /* minimap sharpening coefficient */
+	float               miniMapBorder;                  /* minimap border amount */
+	char                *miniMapNameFormat;             /* minimap name format */
 	char				*bspIdent;						/* 4-letter bsp file prefix */
 	int					bspVersion;						/* bsp version to use */
 	qboolean			lumpSwap;						/* cod-style len/ofs order */
