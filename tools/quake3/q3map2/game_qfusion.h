@@ -129,7 +129,7 @@ game_t struct
 	0.0f,               /* minimap sharpener */
 	0.0f,               /* minimap border */
 	qfalse,             /* minimap keep aspect */
-	"%s.tga",           /* minimap name format */
+	"../minimaps/%s.tga", /* minimap name format */
 	"FBSP",				/* bsp file prefix */
 	1,					/* bsp file version */
 	qfalse,				/* cod-style lump len/ofs order */
