@@ -126,8 +126,9 @@ game_t struct
 	qfalse,				/* compile deluxemaps */
 	0,					/* deluxemaps default mode */
 	512,                /* minimap size */
-	1.0f,               /* minimap sharpener */
+	0.0f,               /* minimap sharpener */
 	0.0f,               /* minimap border */
+	qfalse,             /* minimap keep aspect */
 	"%s.tga",           /* minimap name format */
 	"FBSP",				/* bsp file prefix */
 	1,					/* bsp file version */

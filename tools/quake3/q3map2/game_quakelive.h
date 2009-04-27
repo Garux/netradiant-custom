@@ -77,6 +77,7 @@ game_t struct
 	512,                /* minimap size */
 	1.0f,               /* minimap sharpener */
 	0.0f,               /* minimap border */
+	qtrue,              /* minimap keep aspect */
 	"%s.tga",           /* minimap name format */
 	"IBSP",				/* bsp file prefix */
 	47,					/* bsp file version */
