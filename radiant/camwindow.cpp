@@ -1967,9 +1967,9 @@ typedef FreeCaller1<const IntImportCallback&, RenderModeExport> RenderModeExport
 
 void Camera_constructPreferences(PreferencesPage& page)
 {
-  page.appendSlider("Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 100, MIN_CAM_SPEED, MAX_CAM_SPEED, 1, 10, 10);
+  page.appendSlider("Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 100, MIN_CAM_SPEED, MAX_CAM_SPEED, 1, 10);
   page.appendCheckBox("", "Link strafe speed to movement speed", g_camwindow_globals_private.m_bCamLinkSpeed);
-  page.appendSlider("Rotation Speed", g_camwindow_globals_private.m_nAngleSpeed, TRUE, 0, 0, 3, 1, 180, 1, 10, 10);
+  page.appendSlider("Rotation Speed", g_camwindow_globals_private.m_nAngleSpeed, TRUE, 0, 0, 3, 1, 180, 1, 10);
   page.appendCheckBox("", "Invert mouse vertical axis", g_camwindow_globals_private.m_bCamInverseMouse);
   page.appendCheckBox(
     "", "Discrete movement",

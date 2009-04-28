@@ -96,7 +96,7 @@ GtkSpinButton* DialogSpinner_new(double value, double lower, double upper, int f
   {
     ++digits;
   }
-  GtkSpinButton* spin = GTK_SPIN_BUTTON(gtk_spin_button_new(GTK_ADJUSTMENT(gtk_adjustment_new(value, lower, upper, step, 10, 10)), step, digits)); 
+  GtkSpinButton* spin = GTK_SPIN_BUTTON(gtk_spin_button_new(GTK_ADJUSTMENT(gtk_adjustment_new(value, lower, upper, step, 10, 0)), step, digits)); 
   gtk_widget_show(GTK_WIDGET(spin));
   gtk_widget_set_size_request(GTK_WIDGET(spin), 64, -1);
   return spin;
@@ -591,7 +591,7 @@ void Dialog::addCombo(GtkWidget* vbox, const char* name, int& data, StringArrayR
   addCombo(vbox, name, values, IntImportCaller(data), IntExportCaller(data));
 }
 
-void Dialog::addSlider(GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment, double page_size)
+void Dialog::addSlider(GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment)
 {
 #if 0
   if(draw_value == FALSE)
@@ -613,7 +613,7 @@ void Dialog::addSlider(GtkWidget* vbox, const char* name, int& data, gboolean dr
 #endif
 
   // adjustment
-  GtkObject* adj = gtk_adjustment_new(value, lower, upper, step_increment, page_increment, page_size);
+  GtkObject* adj = gtk_adjustment_new(value, lower, upper, step_increment, page_increment, 0);
   AddIntAdjustmentData(*GTK_ADJUSTMENT(adj), IntImportCaller(data), IntExportCaller(data));
 
   // scale

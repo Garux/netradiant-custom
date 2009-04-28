@@ -154,7 +154,7 @@ public:
   GtkWidget* addCheckBox(GtkWidget* vbox, const char* name, const char* flag, bool& data);
   void addCombo(GtkWidget* vbox, const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback);
   void addCombo(GtkWidget* vbox, const char* name, int& data, StringArrayRange values);
-  void addSlider(GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment, double page_size);
+  void addSlider(GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment);
   void addRadio(GtkWidget* vbox, const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback);
   void addRadio(GtkWidget* vbox, const char* name, int& data, StringArrayRange names);
   void addRadioIcons(GtkWidget* vbox, const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback);

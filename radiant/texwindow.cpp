@@ -2085,7 +2085,7 @@ GtkWidget* TextureBrowser_constructWindow(GtkWindow* toplevel)
 	gtk_widget_show(GTK_WIDGET(g_TextureBrowser.m_treeViewTree));
   }
   { // gl_widget scrollbar
-	GtkWidget* w = gtk_vscrollbar_new(GTK_ADJUSTMENT(gtk_adjustment_new (0,0,0,1,1,1)));
+	GtkWidget* w = gtk_vscrollbar_new(GTK_ADJUSTMENT(gtk_adjustment_new (0,0,0,1,1,0)));
 	gtk_table_attach(GTK_TABLE (table), w, 2, 3, 1, 2, GTK_SHRINK, GTK_FILL, 0, 0);
 	gtk_widget_show(w);
 	g_TextureBrowser.m_texture_scroll = w;

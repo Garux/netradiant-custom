@@ -937,7 +937,7 @@ GtkWindow* PatchInspector::BuildDialog()
               // so we need to have at least one initialisation somewhere
               entry_set_float(entry, g_pi_globals.shift[0]);
 
-              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -8192, 8192, 1, 1, 1));
+              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -8192, 8192, 1, 1, 0));
               g_signal_connect(G_OBJECT(adj), "value_changed", G_CALLBACK(OnSpinChanged), entry);
               g_object_set_data(G_OBJECT(window), "hshift_adj", adj);
 
@@ -958,7 +958,7 @@ GtkWindow* PatchInspector::BuildDialog()
               gtk_widget_set_usize(GTK_WIDGET(entry), 50, -2);
               entry_set_float(entry, g_pi_globals.shift[1]);
 
-              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -8192, 8192, 1, 1, 1));
+              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -8192, 8192, 1, 1, 0));
               g_signal_connect(G_OBJECT(adj), "value_changed", G_CALLBACK(OnSpinChanged), entry);
               g_object_set_data(G_OBJECT(window), "vshift_adj", adj);
 
@@ -979,7 +979,7 @@ GtkWindow* PatchInspector::BuildDialog()
               gtk_widget_set_usize(GTK_WIDGET(entry), 50, -2);
               entry_set_float(entry, g_pi_globals.scale[0]);
 
-              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -1000, 1000, 1, 1, 1));
+              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -1000, 1000, 1, 1, 0));
               g_signal_connect(G_OBJECT(adj), "value_changed", G_CALLBACK(OnSpinChanged), entry);
               g_object_set_data(G_OBJECT(window), "hscale_adj", adj);
 
@@ -1000,7 +1000,7 @@ GtkWindow* PatchInspector::BuildDialog()
               gtk_widget_set_usize(GTK_WIDGET(entry), 50, -2);
               entry_set_float(entry, g_pi_globals.scale[1]);
 
-              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -1000, 1000, 1, 1, 1));
+              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -1000, 1000, 1, 1, 0));
               g_signal_connect(G_OBJECT(adj), "value_changed", G_CALLBACK(OnSpinChanged), entry);
               g_object_set_data(G_OBJECT(window), "vscale_adj", adj);
 
@@ -1021,7 +1021,7 @@ GtkWindow* PatchInspector::BuildDialog()
               gtk_widget_set_usize(GTK_WIDGET(entry), 50, -2);
               entry_set_float(entry, g_pi_globals.rotate);
 
-              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -1000, 1000, 1, 1, 1));	// NOTE: Arnout - this really should be 360 but can't change it anymore as it could break existing maps
+              GtkAdjustment* adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, -1000, 1000, 1, 1, 0));	// NOTE: Arnout - this really should be 360 but can't change it anymore as it could break existing maps
               g_signal_connect(G_OBJECT(adj), "value_changed", G_CALLBACK(OnSpinChanged), entry);
               g_object_set_data(G_OBJECT(window), "rotate_adj", adj);
 

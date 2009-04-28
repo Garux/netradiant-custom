@@ -387,10 +387,10 @@ void MapCoordinator()
     globalOutputStream() << "SunPlug: adviced mapcoordsmins=" << minX << " " << maxY << "\n"; // console info about mapcoordsmins
     globalOutputStream() << "SunPlug: adviced mapcoordsmaxs=" << maxX << " " << minY << "\n"; // console info about mapcoordsmaxs
 
-    spinner_adj_MinX = (GtkAdjustment *)gtk_adjustment_new(map_minX, -65536.0, 65536.0, 1.0, 5.0, 5.0); // create adjustment for value and range of minimum x value
-    spinner_adj_MinY = (GtkAdjustment *)gtk_adjustment_new(map_minY, -65536.0, 65536.0, 1.0, 5.0, 5.0); // create adjustment for value and range of minimum y value
-    spinner_adj_MaxX = (GtkAdjustment *)gtk_adjustment_new(map_maxX, -65536.0, 65536.0, 1.0, 5.0, 5.0); // create adjustment for value and range of maximum x value
-    spinner_adj_MaxY = (GtkAdjustment *)gtk_adjustment_new(map_maxY, -65536.0, 65536.0, 1.0, 5.0, 5.0); // create adjustment for value and range of maximum y value
+    spinner_adj_MinX = (GtkAdjustment *)gtk_adjustment_new(map_minX, -65536.0, 65536.0, 1.0, 5.0, 0); // create adjustment for value and range of minimum x value
+    spinner_adj_MinY = (GtkAdjustment *)gtk_adjustment_new(map_minY, -65536.0, 65536.0, 1.0, 5.0, 0); // create adjustment for value and range of minimum y value
+    spinner_adj_MaxX = (GtkAdjustment *)gtk_adjustment_new(map_maxX, -65536.0, 65536.0, 1.0, 5.0, 0); // create adjustment for value and range of maximum x value
+    spinner_adj_MaxY = (GtkAdjustment *)gtk_adjustment_new(map_maxY, -65536.0, 65536.0, 1.0, 5.0, 0); // create adjustment for value and range of maximum y value
  
     button = gtk_button_new_with_label("Get optimal mapcoords"); // create button with text
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(input_optimal), NULL); // connect button with callback function
