@@ -238,6 +238,7 @@ else
 dependencies-check:
 	@$(ECHO)
 	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
+	failed=0; \
 	checkbinary() \
 	{ \
 		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
@@ -248,7 +249,7 @@ dependencies-check:
 			$(ECHO) "not found, please install it or set PATH right!"; \
 			$(ECHO) "To see the failed commands, set DEPENDENCIES_CHECK=verbose"; \
 			$(ECHO) "To proceed anyway, set DEPENDENCIES_CHECK=off"; \
-			exit 1; \
+			failed=1; \
 		fi; \
 	}; \
 	$(ECHO) checking that the build tools exist; \
@@ -273,9 +274,10 @@ dependencies-check:
 	[ "$(OS)" = "Win32" ] && checkbinary mingw32 "$(WINDRES)"; \
 	[ -n "$(LDD)" ] && checkbinary libc6 "$(LDD)"; \
 	[ -n "$(OTOOL)" ] && checkbinary xcode "$(OTOOL)"; \
-	$(ECHO) All required tools have been found!
+	[ "$$failed" = "0" ] && $(ECHO) All required tools have been found!
 	@$(ECHO)
 	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
+	failed=0; \
 	checkheader() \
 	{ \
 		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
@@ -290,7 +292,7 @@ dependencies-check:
 			$(ECHO) "not found, please install it or set PKG_CONFIG_PATH right!"; \
 			$(ECHO) "To see the failed commands, set DEPENDENCIES_CHECK=verbose"; \
 			$(ECHO) "To proceed anyway, set DEPENDENCIES_CHECK=off"; \
-			exit 1; \
+			failed=1; \
 		fi; \
 	}; \
 	$(ECHO) checking that the dependencies exist; \
@@ -302,7 +304,7 @@ dependencies-check:
 	checkheader libgtkglext1-dev gtk/gtkglwidget.h gtk_widget_get_gl_context "$(CPPFLAGS_GTKGLEXT)" "$(LIBS_GTKGLEXT)"; \
 	[ "$(OS)" != "Win32" ] && checkheader libc6-dev dlfcn.h dlopen "$(CPPFLAGS_DL)" "$(LIBS_DL)"; \
 	checkheader zlib1g-dev zlib.h zlibVersion "$(CPPFLAGS_ZLIB)" "$(LIBS_ZLIB)"; \
-	$(ECHO) All required libraries have been found!
+	[ "$$failed" = "0" ] && $(ECHO) All required libraries have been found!
 	@$(ECHO)
 endif
 
