@@ -113,6 +113,20 @@ GLFont glfont_create(const char* font_string)
 
   PangoFont* font = gdk_gl_font_use_pango_font (font_desc, 0, 256, font_list_base);
 
+  if(font == 0)
+  {
+	  pango_font_description_free (font_desc);
+	  font_desc = pango_font_description_from_string ("fixed 8");
+	  font = gdk_gl_font_use_pango_font (font_desc, 0, 256, font_list_base);
+  }
+
+  if(font == 0)
+  {
+	  pango_font_description_free (font_desc);
+	  font_desc = pango_font_description_from_string ("courier new 8");
+	  font = gdk_gl_font_use_pango_font (font_desc, 0, 256, font_list_base);
+  }
+
   if(font != 0)
   {
     PangoFontMetrics* font_metrics = pango_font_get_metrics (font, 0);
