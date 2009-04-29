@@ -125,8 +125,8 @@ game_t struct
 	qfalse,				/* patch casting enabled */
 	qfalse,				/* compile deluxemaps */
 	0,					/* deluxemaps default mode */
-	512,                /* minimap size */
-	0.0f,               /* minimap sharpener */
+	256,                /* minimap size */
+	1.0f,               /* minimap sharpener */
 	0.0f,               /* minimap border */
 	qtrue,              /* minimap keep aspect */
 	MINIMAP_MODE_WHITE, /* minimap mode */
