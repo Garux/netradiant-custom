@@ -461,7 +461,21 @@ void CGameDialog::Init()
   ScanForGames();
   if (mGames.empty())
   {
-    Error("Didn't find any valid game file descriptions, aborting\n");
+	  Error("Didn't find any valid game file descriptions, aborting\n");
+  }
+  else
+  {
+	  std::list<CGameDescription *>::iterator iGame, iPrevGame;
+	  for(iGame=mGames.begin(), iPrevGame = mGames.end(); iGame!=mGames.end(); iPrevGame = iGame, ++iGame)
+	  {
+		  if(iPrevGame != mGames.end())
+			  if(strcmp((*iGame)->getRequiredKeyValue("name"), (*iPrevGame)->getRequiredKeyValue("name")) < 0)
+			  {
+				  CGameDescription *h = *iGame;
+				  *iGame = *iPrevGame;
+				  *iPrevGame = h;
+			  }
+	  }
   }
  
   CGameDescription* currentGameDescription = 0;
