@@ -890,6 +890,7 @@ typedef struct brush_s
 	
 	/* ydnar: gs mods */
 	float				lightmapScale;
+	float				shadeAngleDegrees; /* jal : entity based _shadeangle */
 	vec3_t				eMins, eMaxs;
 	indexMap_t			*im;
 
@@ -1037,6 +1038,9 @@ typedef struct mapDrawSurface_s
 	
 	/* ydnar: per-surface (per-entity, actually) lightmap sample size scaling */
 	float				lightmapScale;
+
+	/* jal: per-surface (per-entity, actually) shadeangle */
+	float				shadeAngleDegrees;
 	
 	/* ydnar: surface classification */
 	vec3_t				mins, maxs;
@@ -1080,6 +1084,7 @@ typedef struct metaTriangle_s
 	shaderInfo_t		*si;
 	side_t				*side;
 	int					entityNum, surfaceNum, planeNum, fogNum, sampleSize, castShadows, recvShadows;
+	float				shadeAngleDegrees;
 	vec4_t				plane;
 	vec3_t				lightmapAxis;
 	int					indexes[ 3 ];
@@ -1104,7 +1109,6 @@ typedef struct
 	int					firstBrush, numBrushes;		/* only valid during BSP compile */
 	epair_t				*epairs;
 	vec3_t				originbrush_origin;
-	qboolean			forceNormalSmoothing; /* vortex: true if entity has _smoothnormals/_sn/_smooth key */
 }
 entity_t;
 
@@ -1635,7 +1639,7 @@ void						PicoPrintFunc( int level, const char *str );
 void						PicoLoadFileFunc( char *name, byte **buffer, int *bufSize );
 picoModel_t					*FindModel( char *name, int frame );
 picoModel_t					*LoadModel( char *name, int frame );
-void						InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale );
+void						InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, float shadeAngle );
 void						AddTriangleModels( entity_t *e );
 
 

@@ -1415,7 +1415,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 {
 	epair_t			*ep;
 	const char		*classname, *value;
-	float			lightmapScale;
+	float			lightmapScale, shadeAngle;
 	char			shader[ MAX_QPATH ];
 	shaderInfo_t	*celShader = NULL;
 	brush_t			*brush;
@@ -1569,7 +1569,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	}
 	else
 		lightmapScale = 0.0f;
-	
+
 	/* ydnar: get cel shader :) for this entity */
 	value = ValueForKey( mapEnt, "_celshader" );
 	if( value[ 0 ] == '\0' )	
@@ -1582,6 +1582,25 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	}
 	else
 		celShader = *globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL;
+
+	/* jal : entity based _shadeangle */
+	shadeAngle = 0.0f;
+	if ( strcmp( "", ValueForKey( mapEnt, "_shadeangle" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_shadeangle" );
+	/* vortex' aliases */
+	else if ( strcmp( "", ValueForKey( mapEnt, "_smoothnormals" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_smoothnormals" );
+	else if ( strcmp( "", ValueForKey( mapEnt, "_sn" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_sn" );
+	else if ( strcmp( "", ValueForKey( mapEnt, "_smooth" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_smooth" );
+	
+	if( shadeAngle < 0.0f )
+		shadeAngle = 0.0f;
+
+	if( shadeAngle > 0.0f )
+		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt->mapEntityNum, classname, shadeAngle );
+	
 	
 	/* attach stuff to everything in the entity */
 	for( brush = mapEnt->brushes; brush != NULL; brush = brush->next )
@@ -1591,6 +1610,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		brush->recvShadows = recvShadows;
 		brush->lightmapScale = lightmapScale;
 		brush->celShader = celShader;
+		brush->shadeAngleDegrees = shadeAngle;
 	}
 	
 	for( patch = mapEnt->patches; patch != NULL; patch = patch->next )

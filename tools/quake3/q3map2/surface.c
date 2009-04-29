@@ -989,6 +989,12 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	
 	/* set cel shader */
 	ds->celShader = b->celShader;
+
+	/* set shade angle */
+	if( si->shadeAngleDegrees )
+		ds->shadeAngleDegrees = ds->shadeAngleDegrees;
+	else
+		ds->shadeAngleDegrees = b->shadeAngleDegrees; /* otherwise it's 0 */
 	
 	/* ydnar: gs mods: moved st biasing elsewhere */
 	return ds;
@@ -3127,7 +3133,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			}
 			
 			/* insert the model */
-			InsertModel( (char *) model->model, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale );
+			InsertModel( (char *) model->model, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0 );
 			
 			/* return to sender */
 			return 1;

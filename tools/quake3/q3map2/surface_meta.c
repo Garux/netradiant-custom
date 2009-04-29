@@ -288,6 +288,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds )
 			src.recvShadows = ds->recvShadows;
 			src.fogNum = ds->fogNum;
 			src.sampleSize = ds->sampleSize;
+			src.shadeAngleDegrees = ds->shadeAngleDegrees;
 			VectorCopy( ds->lightmapAxis, src.lightmapAxis );
 			
 			/* copy drawverts */
@@ -1005,7 +1006,6 @@ void SmoothMetaTriangles( void )
 	vec3_t			average, diff;
 	int				indexes[ MAX_SAMPLES ];
 	vec3_t			votes[ MAX_SAMPLES ];
-	const char		*classname;
 	
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SmoothMetaTriangles ---\n" );
@@ -1027,33 +1027,18 @@ void SmoothMetaTriangles( void )
 	   and set per-vertex smoothing angle */
 	for( i = 0, tri = &metaTriangles[ i ]; i < numMetaTriangles; i++, tri++ )
 	{
-		/* vortex: try get smoothing from entity key */
-		shadeAngle = FloatForKey(&entities[tri->entityNum], "_shadeangle");
-		if (shadeAngle <= 0.0f)
-			shadeAngle = FloatForKey(&entities[tri->entityNum], "_smoothnormals");
-		if (shadeAngle <= 0.0f)
-			shadeAngle = FloatForKey(&entities[tri->entityNum], "_sn");
-		if (shadeAngle <= 0.0f)
-			shadeAngle = FloatForKey(&entities[tri->entityNum], "_smooth");
-		if (shadeAngle > 0.0f)
-		{
-			if (entities[tri->entityNum].forceNormalSmoothing == qfalse)
-			{
-				entities[tri->entityNum].forceNormalSmoothing = qtrue;
-				classname = ValueForKey( &entities[tri->entityNum], "classname" );
-				Sys_Printf( "Entity %d (%s) has vertex normal smoothing with breaking angle of %3.0f\n", tri->entityNum, classname, shadeAngle );
-			}
-			shadeAngle = DEG2RAD( shadeAngle );
-		}
+		shadeAngle = defaultShadeAngle;
 
-		/* get shader for shade angle */
-		if (shadeAngle <= 0.0f)
-		{
-			if( tri->si->shadeAngleDegrees > 0.0f )
-				shadeAngle = DEG2RAD( tri->si->shadeAngleDegrees );
-			else
-				shadeAngle = defaultShadeAngle;
-		}
+		/* get shade angle from shader */
+		if( tri->si->shadeAngleDegrees > 0.0f )
+			shadeAngle = DEG2RAD( tri->si->shadeAngleDegrees );
+		/* get shade angle from entity */
+		else if( tri->shadeAngleDegrees > 0.0f )
+			shadeAngle = DEG2RAD( tri->shadeAngleDegrees );
+		
+		if( shadeAngle <= 0.0f ) 
+			shadeAngle = defaultShadeAngle;
+
 		if( shadeAngle > maxShadeAngle )
 			maxShadeAngle = shadeAngle;
 		
