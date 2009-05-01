@@ -1416,6 +1416,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	epair_t			*ep;
 	const char		*classname, *value;
 	float			lightmapScale, shadeAngle;
+	int				lightmapSampleSize;
 	char			shader[ MAX_QPATH ];
 	shaderInfo_t	*celShader = NULL;
 	brush_t			*brush;
@@ -1554,6 +1555,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	
 	/* vortex: added _ls key (short name of lightmapscale) */
 	/* ydnar: get lightmap scaling value for this entity */
+	lightmapScale = 0.0f;
 	if( strcmp( "", ValueForKey( mapEnt, "lightmapscale" ) ) ||
 		strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) || 
 		strcmp( "", ValueForKey( mapEnt, "_ls" ) ) )
@@ -1564,12 +1566,12 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 			lightmapScale = FloatForKey( mapEnt, "_lightmapscale" );
 		if( lightmapScale <= 0.0f )
 			lightmapScale = FloatForKey( mapEnt, "_ls" );
+		if( lightmapScale < 0.0f )
+			lightmapScale = 0.0f;
 		if( lightmapScale > 0.0f )
 			Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt->mapEntityNum, classname, lightmapScale );
 	}
-	else
-		lightmapScale = 0.0f;
-
+	
 	/* ydnar: get cel shader :) for this entity */
 	value = ValueForKey( mapEnt, "_celshader" );
 	if( value[ 0 ] == '\0' )	
@@ -1601,6 +1603,18 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	if( shadeAngle > 0.0f )
 		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt->mapEntityNum, classname, shadeAngle );
 	
+	/* jal : entity based _samplesize */
+	lightmapSampleSize = 0;
+	if ( strcmp( "", ValueForKey( mapEnt, "_lightmapsamplesize" ) ) )
+		lightmapSampleSize = IntForKey( mapEnt, "_lightmapsamplesize" );
+	else if ( strcmp( "", ValueForKey( mapEnt, "_samplesize" ) ) )
+		lightmapSampleSize = IntForKey( mapEnt, "_samplesize" );
+	
+	if( lightmapSampleSize < 0 )
+		lightmapSampleSize = 0;
+
+	if( lightmapSampleSize > 0 )
+		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", mapEnt->mapEntityNum, classname, lightmapSampleSize );
 	
 	/* attach stuff to everything in the entity */
 	for( brush = mapEnt->brushes; brush != NULL; brush = brush->next )
@@ -1608,6 +1622,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		brush->entityNum = mapEnt->mapEntityNum;
 		brush->castShadows = castShadows;
 		brush->recvShadows = recvShadows;
+		brush->lightmapSampleSize = lightmapSampleSize;
 		brush->lightmapScale = lightmapScale;
 		brush->celShader = celShader;
 		brush->shadeAngleDegrees = shadeAngle;
@@ -1618,6 +1633,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		patch->entityNum = mapEnt->mapEntityNum;
 		patch->castShadows = castShadows;
 		patch->recvShadows = recvShadows;
+		patch->lightmapSampleSize = lightmapSampleSize;
 		patch->lightmapScale = lightmapScale;
 		patch->celShader = celShader;
 	}

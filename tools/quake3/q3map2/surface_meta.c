@@ -1462,6 +1462,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		ds->planeNum = seed->planeNum;
 		ds->fogNum = seed->fogNum;
 		ds->sampleSize = seed->sampleSize;
+		ds->shadeAngleDegrees = seed->shadeAngleDegrees;
 		ds->verts = verts;
 		ds->indexes = indexes;
 		VectorCopy( seed->lightmapAxis, ds->lightmapAxis );

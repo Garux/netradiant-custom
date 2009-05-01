@@ -1531,7 +1531,7 @@ static void ParseShaderFile( const char *filename )
 					si->lightmapSampleSize = atoi( token );
 				}
 				
-				/* q3map_lightmapSampleSffset <value> */
+				/* q3map_lightmapSampleOffset <value> */
 				else if( !Q_stricmp( token, "q3map_lightmapSampleOffset" ) )
 				{
 					GetTokenAppend( shaderText, qfalse );

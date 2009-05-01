@@ -631,21 +631,26 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds )
 			//% 	Sys_Printf( "Failed to map axis %d onto patch\n", bestAxis );
 		}
 		
-		/* get lightmap sample size */
-		if( ds->sampleSize <= 0 )
+		/* calculate lightmap sample size */
+		if( ds->shaderInfo->lightmapSampleSize > 0 ) /* shader value overrides every other */
+			ds->sampleSize = ds->shaderInfo->lightmapSampleSize;
+		else if( ds->sampleSize <= 0 ) /* may contain the entity asigned value */
+			ds->sampleSize = sampleSize; /* otherwise use global default */
+
+		if( ds->lightmapScale > 0.0f ) /* apply surface lightmap scaling factor */
 		{
- 			ds->sampleSize = sampleSize;
- 			if( ds->shaderInfo->lightmapSampleSize )
- 				ds->sampleSize = ds->shaderInfo->lightmapSampleSize;
-			if( ds->lightmapScale > 0 )
-				ds->sampleSize *= ds->lightmapScale;
-			if( ds->sampleSize <= 0 )
-				ds->sampleSize = 1;
-			if(ds->sampleSize < minSampleSize)
-				ds->sampleSize = minSampleSize;
-			if( ds->sampleSize > 16384 )	/* powers of 2 are preferred */
-				ds->sampleSize = 16384;
+			ds->sampleSize = ds->lightmapScale * (float)ds->sampleSize;
+			ds->lightmapScale = 0; /* applied */
 		}
+
+		if( ds->sampleSize < minSampleSize )
+			ds->sampleSize = minSampleSize;
+
+		if( ds->sampleSize < 1 )
+			ds->sampleSize = 1;
+
+		if( ds->sampleSize > 16384 ) /* powers of 2 are preferred */
+			ds->sampleSize = 16384;
 	}
 }
 
@@ -914,6 +919,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	ds->mapBrush = b;
 	ds->sideRef = AllocSideRef( s, NULL );
 	ds->fogNum = -1;
+	ds->sampleSize = b->lightmapSampleSize;
 	ds->lightmapScale = b->lightmapScale;
 	ds->numVerts = w->numpoints;
 	ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
@@ -991,10 +997,8 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	ds->celShader = b->celShader;
 
 	/* set shade angle */
-	if( si->shadeAngleDegrees )
-		ds->shadeAngleDegrees = ds->shadeAngleDegrees;
-	else
-		ds->shadeAngleDegrees = b->shadeAngleDegrees; /* otherwise it's 0 */
+	if( b->shadeAngleDegrees > 0.0f )
+		ds->shadeAngleDegrees = b->shadeAngleDegrees;
 	
 	/* ydnar: gs mods: moved st biasing elsewhere */
 	return ds;
@@ -1103,6 +1107,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 	
 	ds->shaderInfo = si;
 	ds->mapMesh = p;
+	ds->sampleSize = p->lightmapSampleSize;
 	ds->lightmapScale = p->lightmapScale;	/* ydnar */
 	ds->patchWidth = mesh->width;
 	ds->patchHeight = mesh->height;
@@ -3133,7 +3138,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			}
 			
 			/* insert the model */
-			InsertModel( (char *) model->model, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0 );
+			InsertModel( (char *) model->model, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0 );
 			
 			/* return to sender */
 			return 1;

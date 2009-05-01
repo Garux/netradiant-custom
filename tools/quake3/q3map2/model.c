@@ -206,7 +206,7 @@ InsertModel() - ydnar
 adds a picomodel into the bsp
 */
 
-void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, float shadeAngle )
+void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle )
 {
 	int					i, j, k, s, numSurfaces;
 	m4x4_t				identity, nTransform;
@@ -252,6 +252,10 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 	/* fix bogus lightmap scale */
 	if( lightmapScale <= 0.0f )
 		lightmapScale = 1.0f;
+
+	/* fix bogus shade angle */
+	if( shadeAngle <= 0.0f )
+		shadeAngle = 0.0f;
 	
 	/* each surface on the model will become a new map drawsurface */
 	numSurfaces = PicoGetModelNumSurfaces( model );
@@ -322,18 +326,21 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 		if( (si != NULL && si->forceMeta) || (spawnFlags & 4) )	/* 3rd bit */
 			ds->type = SURFACE_FORCED_META;
 
-		/* get shading angle from shader or entity */
-		if( si->shadeAngleDegrees )
-			ds->shadeAngleDegrees = si->shadeAngleDegrees;
-		else if( shadeAngle )
-			ds->shadeAngleDegrees = shadeAngle; /* otherwise it's 0 */
-
 		/* fix the surface's normals (jal: conditioned by shader info) */
 		if( !(spawnFlags & 64) && ( shadeAngle == 0.0f || ds->type != SURFACE_FORCED_META ) )
 			PicoFixSurfaceNormals( surface );
+
+		/* set sample size */
+		if( lightmapSampleSize > 0.0f )
+			ds->sampleSize = lightmapSampleSize;
 		
 		/* set lightmap scale */
-		ds->lightmapScale = lightmapScale;
+		if( lightmapScale > 0.0f )
+			ds->lightmapScale = lightmapScale;
+
+		/* set shading angle */
+		if( shadeAngle > 0.0f )
+			ds->shadeAngleDegrees = shadeAngle;
 		
 		/* set particulars */
 		ds->numVerts = PicoGetSurfaceNumVertexes( surface );
@@ -605,6 +612,7 @@ void AddTriangleModels( entity_t *e )
 	shaderInfo_t	*celShader;
 	float			temp, baseLightmapScale, lightmapScale;
 	float			shadeAngle;
+	int				lightmapSampleSize;
 	vec3_t			origin, scale, angles;
 	m4x4_t			transform;
 	epair_t			*ep;
@@ -629,11 +637,22 @@ void AddTriangleModels( entity_t *e )
 	
 	/* get lightmap scale */
 	/* vortex: added _ls key (short name of lightmapscale) */
-	baseLightmapScale = FloatForKey( e, "_lightmapscale" );
-	if( baseLightmapScale <= 0.0f )
-		baseLightmapScale = FloatForKey( e, "_ls" );
-	if( baseLightmapScale <= 0.0f )
-		baseLightmapScale = 0.0f;
+	baseLightmapScale = 0.0f;
+	if( strcmp( "", ValueForKey( e, "lightmapscale" ) ) ||
+		strcmp( "", ValueForKey( e, "_lightmapscale" ) ) || 
+		strcmp( "", ValueForKey( e, "_ls" ) ) )
+	{
+		baseLightmapScale = FloatForKey( e, "lightmapscale" );
+		if( baseLightmapScale <= 0.0f )
+			baseLightmapScale = FloatForKey( e, "_lightmapscale" );
+		if( baseLightmapScale <= 0.0f )
+			baseLightmapScale = FloatForKey( e, "_ls" );
+		if( baseLightmapScale < 0.0f )
+			baseLightmapScale = 0.0f;
+		if( baseLightmapScale > 0.0f )
+			Sys_Printf( "World Entity has lightmap scale of %.4f\n", baseLightmapScale );
+	}
+	
 	
 	/* walk the entity list */
 	for( num = 1; num < numEntities; num++ )
@@ -751,14 +770,37 @@ void AddTriangleModels( entity_t *e )
 		}
 		else
 			celShader = *globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL;
-		
+
+		/* jal : entity based _samplesize */
+		lightmapSampleSize = 0;
+		if ( strcmp( "", ValueForKey( e2, "_lightmapsamplesize" ) ) )
+			lightmapSampleSize = IntForKey( e2, "_lightmapsamplesize" );
+		else if ( strcmp( "", ValueForKey( e2, "_samplesize" ) ) )
+			lightmapSampleSize = IntForKey( e2, "_samplesize" );
+
+		if( lightmapSampleSize < 0 )
+			lightmapSampleSize = 0;
+
+		if( lightmapSampleSize > 0.0f )
+			Sys_Printf( "misc_model has lightmap sample size of %.d\n", lightmapSampleSize );
+
 		/* get lightmap scale */
 		/* vortex: added _ls key (short name of lightmapscale) */
-		lightmapScale = FloatForKey( e2, "_lightmapscale" );
-		if( lightmapScale <= 0.0f )
-			lightmapScale = FloatForKey( e2, "_ls" );
-		if( lightmapScale <= 0.0f )
-			lightmapScale = baseLightmapScale;
+		lightmapScale = 0.0f;
+		if( strcmp( "", ValueForKey( e2, "lightmapscale" ) ) ||
+			strcmp( "", ValueForKey( e2, "_lightmapscale" ) ) || 
+			strcmp( "", ValueForKey( e2, "_ls" ) ) )
+		{
+			lightmapScale = FloatForKey( e2, "lightmapscale" );
+			if( lightmapScale <= 0.0f )
+				lightmapScale = FloatForKey( e2, "_lightmapscale" );
+			if( lightmapScale <= 0.0f )
+				lightmapScale = FloatForKey( e2, "_ls" );
+			if( lightmapScale < 0.0f )
+				lightmapScale = 0.0f;
+			if( lightmapScale > 0.0f )
+				Sys_Printf( "misc_model has lightmap scale of %.4f\n", lightmapScale );
+		}
 
 		/* jal : entity based _shadeangle */
 		shadeAngle = 0.0f;
@@ -779,7 +821,7 @@ void AddTriangleModels( entity_t *e )
 			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
 		
 		/* insert the model */
-		InsertModel( (char*) model, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, shadeAngle );
+		InsertModel( (char*) model, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle );
 		
 		/* free shader remappings */
 		while( remap != NULL )

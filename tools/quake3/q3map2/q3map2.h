@@ -889,6 +889,7 @@ typedef struct brush_s
 	shaderInfo_t		*celShader;			/* :) */
 	
 	/* ydnar: gs mods */
+	int					lightmapSampleSize; /* jal : entity based _lightmapsamplesize */
 	float				lightmapScale;
 	float				shadeAngleDegrees; /* jal : entity based _shadeangle */
 	vec3_t				eMins, eMaxs;
@@ -941,6 +942,7 @@ typedef struct parseMesh_s
 	shaderInfo_t		*celShader;				/* :) */
 	
 	/* ydnar: gs mods */
+	int					lightmapSampleSize;		/* jal : entity based _lightmapsamplesize */
 	float				lightmapScale;
 	vec3_t				eMins, eMaxs;
 	indexMap_t			*im;
@@ -1639,7 +1641,7 @@ void						PicoPrintFunc( int level, const char *str );
 void						PicoLoadFileFunc( char *name, byte **buffer, int *bufSize );
 picoModel_t					*FindModel( char *name, int frame );
 picoModel_t					*LoadModel( char *name, int frame );
-void						InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, float shadeAngle );
+void						InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle );
 void						AddTriangleModels( entity_t *e );
 
 
