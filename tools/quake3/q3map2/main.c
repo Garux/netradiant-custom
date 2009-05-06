@@ -1580,12 +1580,6 @@ int main( int argc, char **argv )
 		}
 	}
 
-#if MAC_STATIC_HACK
-	if(numthreads > 1)
-		Sys_Printf("MAC_STATIC_HACK does not allow using threads\n");
-	numthreads = 1;
-#endif
-	
 	/* init model library */
 	PicoInit();
 	PicoSetMallocFunc( safe_malloc );
