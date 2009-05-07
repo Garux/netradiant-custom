@@ -137,7 +137,11 @@ static void SetCloneModelNumbers( void )
 			continue;
 		
 		/* is this a clone? */
-		value = ValueForKey( &entities[ i ], "_clone" );
+		value = ValueForKey( &entities[ i ], "_ins" );
+		if( value[ 0 ] == '\0' )
+			value = ValueForKey( &entities[ i ], "_instance" );
+		if( value[ 0 ] == '\0' )
+			value = ValueForKey( &entities[ i ], "_clone" );
 		if( value[ 0 ] != '\0' )
 			continue;
 		
