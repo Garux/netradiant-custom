@@ -345,6 +345,9 @@ void SetBrushContents( brush_t *b )
 			continue;
 		if( s->contentFlags != contentFlags || s->compileFlags != compileFlags )
 			mixed = qtrue;
+
+		contentFlags |= s->contentFlags;
+		compileFlags |= s->compileFlags;
 	}
 	
 	/* ydnar: getting rid of this stupid warning */
