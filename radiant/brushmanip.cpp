@@ -1474,6 +1474,7 @@ void Brush_constructMenu(GtkMenu* menu)
   menu_separator(menu);
   create_menu_item_with_mnemonic(menu, "Make detail", "MakeDetail");
   create_menu_item_with_mnemonic(menu, "Make structural", "MakeStructural");
+  create_menu_item_with_mnemonic(menu, "Snap selection to _grid", "SnapToGrid");
 
   create_check_menu_item_with_mnemonic(menu, "Texture Lock", "TogTexLock");
   menu_separator(menu);
