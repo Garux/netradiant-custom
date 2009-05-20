@@ -2179,6 +2179,7 @@ Q_EXTERN qboolean			dark Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			sunOnly Q_ASSIGN( qfalse );
 Q_EXTERN int				approximateTolerance Q_ASSIGN( 0 );
 Q_EXTERN qboolean			noCollapse Q_ASSIGN( qfalse );
+Q_EXTERN qboolean			noLightmapSearch Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			exportLightmaps Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			externalLightmaps Q_ASSIGN( qfalse );
 Q_EXTERN int				lmCustomSize Q_ASSIGN( LIGHTMAP_WIDTH );

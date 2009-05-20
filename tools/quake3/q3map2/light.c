@@ -2168,6 +2168,12 @@ int LightMain( int argc, char **argv )
 			noCollapse = qtrue;
 			Sys_Printf( "Identical lightmap collapsing disabled\n" );
 		}
+
+		else if( !strcmp( argv[ i ], "-nolightmapsearch" ) )
+		{
+			noLightmapSearch = qtrue;
+			Sys_Printf( "No lightmap searching - all lightmaps will be sequential\n" );
+		}
 		
 		else if( !strcmp( argv[ i ], "-shade" ) )
 		{

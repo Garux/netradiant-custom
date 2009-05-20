@@ -2015,7 +2015,7 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 			y = 0;
 			
 			/* walk the list of lightmap pages */
-			for( i = 0; i < numOutLightmaps; i++ )
+			for( i = noLightmapSearch ? numOutLightmaps - 2 : 0; i < numOutLightmaps; i++ )
 			{
 				/* get the output lightmap */
 				olm = &outLightmaps[ i ];
