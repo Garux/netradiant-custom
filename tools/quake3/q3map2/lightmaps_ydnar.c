@@ -2075,7 +2075,7 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 			olm = safe_malloc( numOutLightmaps * sizeof( outLightmap_t ) );
 			if( outLightmaps != NULL && numOutLightmaps > LIGHTMAP_RESERVE_COUNT )
 			{
-				memcpy( olm, outLightmaps, (numOutLightmaps - 2) * sizeof( outLightmap_t ) );
+				memcpy( olm, outLightmaps, (numOutLightmaps - LIGHTMAP_RESERVE_COUNT) * sizeof( outLightmap_t ) );
 				free( outLightmaps );
 			}
 			outLightmaps = olm;
