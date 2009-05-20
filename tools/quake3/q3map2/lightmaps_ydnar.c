@@ -1918,9 +1918,10 @@ FindOutLightmaps()
 for a given surface lightmap, find output lightmap pages and positions for it
 */
 
+#define LIGHTMAP_RESERVE_COUNT 1
 static void FindOutLightmaps( rawLightmap_t *lm )
 {
-	int					i, j, lightmapNum, xMax, yMax, x, y, sx, sy, ox, oy, offset, temp;
+	int					i, j, k, lightmapNum, xMax, yMax, x, y, sx, sy, ox, oy, offset, temp;
 	outLightmap_t		*olm;
 	surfaceInfo_t		*info;
 	float				*luxel, *deluxel;
@@ -2015,7 +2016,7 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 			y = 0;
 			
 			/* walk the list of lightmap pages */
-			for( i = noLightmapSearch ? numOutLightmaps - 2 : 0; i < numOutLightmaps; i++ )
+			for( i = noLightmapSearch ? numOutLightmaps - LIGHTMAP_RESERVE_COUNT : 0; i < numOutLightmaps; i++ )
 			{
 				/* get the output lightmap */
 				olm = &outLightmaps[ i ];
@@ -2069,10 +2070,10 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 		/* no match? */
 		if( ok == qfalse )
 		{
-			/* allocate two new output lightmaps */
-			numOutLightmaps += 2;
+			/* allocate LIGHTMAP_RESERVE_COUNT new output lightmaps */
+			numOutLightmaps += LIGHTMAP_RESERVE_COUNT;
 			olm = safe_malloc( numOutLightmaps * sizeof( outLightmap_t ) );
-			if( outLightmaps != NULL && numOutLightmaps > 2 )
+			if( outLightmaps != NULL && numOutLightmaps > LIGHTMAP_RESERVE_COUNT )
 			{
 				memcpy( olm, outLightmaps, (numOutLightmaps - 2) * sizeof( outLightmap_t ) );
 				free( outLightmaps );
@@ -2080,11 +2081,11 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 			outLightmaps = olm;
 			
 			/* initialize both out lightmaps */
-			SetupOutLightmap( lm, &outLightmaps[ numOutLightmaps - 2 ] );
-			SetupOutLightmap( lm, &outLightmaps[ numOutLightmaps - 1 ] );
+			for(k = numOutLightmaps - LIGHTMAP_RESERVE_COUNT; k < numOutLightmaps; ++k)
+				SetupOutLightmap( lm, &outLightmaps[ k ] );
 			
 			/* set out lightmap */
-			i = numOutLightmaps - 2;
+			i = numOutLightmaps - LIGHTMAP_RESERVE_COUNT;
 			olm = &outLightmaps[ i ];
 			
 			/* set stamp xy origin to the first surface lightmap */
