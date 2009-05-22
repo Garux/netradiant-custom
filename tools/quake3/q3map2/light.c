@@ -1845,6 +1845,7 @@ int LightMain( int argc, char **argv )
 	float		f;
 	char		mapSource[ 1024 ];
 	const char	*value;
+	int lightmapMergeSize = 0;
 	
 	
 	/* note it */
@@ -2171,8 +2172,22 @@ int LightMain( int argc, char **argv )
 
 		else if( !strcmp( argv[ i ], "-nolightmapsearch" ) )
 		{
-			noLightmapSearch = qtrue;
+			lightmapSearchBlockSize = 1;
 			Sys_Printf( "No lightmap searching - all lightmaps will be sequential\n" );
+		}
+		
+		else if( !strcmp( argv[ i ], "-lightmapsearchpower" ) )
+		{
+			lightmapMergeSize = (game->lightmapSize << atoi(argv[i+1]));
+			++i;
+			Sys_Printf( "Restricted lightmap searching enabled - optimize for lightmap merge power %d (size %d)\n", atoi(argv[i]), lightmapMergeSize );
+		}
+		
+		else if( !strcmp( argv[ i ], "-lightmapsearchblocksize" ) )
+		{
+			lightmapSearchBlockSize = atoi(argv[i+1]);
+			++i;
+			Sys_Printf( "Restricted lightmap searching enabled - block size set to %d\n", lightmapSearchBlockSize );
 		}
 		
 		else if( !strcmp( argv[ i ], "-shade" ) )
@@ -2466,6 +2481,16 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "WARNING: Unknown argument \"%s\"\n", argv[ i ] );
 		}
 
+	}
+
+	/* fix up lightmap search power */
+	if(lightmapMergeSize)
+	{
+		lightmapSearchBlockSize = (lightmapMergeSize / lmCustomSize) * (lightmapMergeSize / lmCustomSize);
+		if(lightmapSearchBlockSize < 1)
+			lightmapSearchBlockSize = 1;
+
+		Sys_Printf( "Restricted lightmap searching enabled - block size adjusted to %d\n", lightmapSearchBlockSize );
 	}
 	
 	/* clean up map name */
