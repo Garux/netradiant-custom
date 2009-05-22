@@ -678,7 +678,7 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
  		size[ i ] = (maxs[ i ] - mins[ i ]) / sampleSize + 1.0f;
 		
 		/* hack (god this sucks) */
-		if( size[ i ] > lm->customWidth || size[ i ] > lm->customHeight  || size[i] > lmLimitSize)
+		if( size[ i ] > lm->customWidth || size[ i ] > lm->customHeight  || (lmLimitSize && size[i] > lmLimitSize))
 		{
 			i = -1;
 			sampleSize += 1.0f;
