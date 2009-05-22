@@ -678,14 +678,14 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
  		size[ i ] = (maxs[ i ] - mins[ i ]) / sampleSize + 1.0f;
 		
 		/* hack (god this sucks) */
-		if( size[ i ] > lm->customWidth || size[ i ] > lm->customHeight )
+		if( size[ i ] > lm->customWidth || size[ i ] > lm->customHeight  || size[i] > lmLimitSize)
 		{
 			i = -1;
 			sampleSize += 1.0f;
 		}
 	}
 
-	if(sampleSize != lm->sampleSize)
+	if(sampleSize != lm->sampleSize && lmLimitSize == 0)
 	{
 		Sys_FPrintf(SYS_VRB,"WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
 			info->mins[0],

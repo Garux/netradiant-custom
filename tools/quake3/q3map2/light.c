@@ -2122,6 +2122,14 @@ int LightMain( int argc, char **argv )
 			}
 		}
 		
+		else if( !strcmp( argv[ i ], "-rawlightmapsizelimit" ) )
+		{
+			lmLimitSize = atoi( argv[ i + 1 ] );
+			
+			i++;
+			Sys_Printf( "Raw lightmap size limit set to %d x %d pixels\n", lmLimitSize, lmLimitSize );
+		}
+		
 		else if( !strcmp( argv[ i ], "-lightmapdir" ) )
 		{
 			lmCustomDir = argv[i + 1];
