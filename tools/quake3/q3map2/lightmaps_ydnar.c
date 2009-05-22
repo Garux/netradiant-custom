@@ -2016,7 +2016,7 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 			y = 0;
 			
 			/* walk the list of lightmap pages */
-			if(lightmapSearchBlockSize <= 0)
+			if(lightmapSearchBlockSize <= 0 || numOutLightmaps < LIGHTMAP_RESERVE_COUNT)
 				i = 0;
 			else
 				i = ((numOutLightmaps - LIGHTMAP_RESERVE_COUNT) / lightmapSearchBlockSize) * lightmapSearchBlockSize;
