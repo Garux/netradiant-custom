@@ -201,6 +201,9 @@ static int AllocTraceNode( void )
 	memset( &traceNodes[ numTraceNodes ], 0, sizeof( traceNode_t ) );
 	traceNodes[ numTraceNodes ].type = TRACE_LEAF;
 	ClearBounds( traceNodes[ numTraceNodes ].mins, traceNodes[ numTraceNodes ].maxs );
+
+	/* Sys_Printf("alloc node %d\n", numTraceNodes); */
+
 	numTraceNodes++;
 	
 	/* return the count */
@@ -362,7 +365,7 @@ recursively create the initial trace node structure from the bsp tree
 
 static int SetupTraceNodes_r( int bspNodeNum )
 {
-	int				i, nodeNum, bspLeafNum;
+	int				i, nodeNum, bspLeafNum, newNode;
 	bspPlane_t		*plane;
 	bspNode_t 		*bspNode;
 	
@@ -388,7 +391,10 @@ static int SetupTraceNodes_r( int bspNodeNum )
 			bspLeafNum = -bspNode->children[ i ] - 1;
 			
 			/* new code */
-			traceNodes[ nodeNum ].children[ i ] = AllocTraceNode();
+			newNode = AllocTraceNode();
+			traceNodes[ nodeNum ].children[ i ] = newNode;
+			/* have to do this separately, as gcc first executes LHS, then RHS, and if a realloc took place, this fails */
+
 			if( bspLeafs[ bspLeafNum ].cluster == -1 )
 				traceNodes[ traceNodes[ nodeNum ].children[ i ] ].type = TRACE_LEAF_SOLID;
 		}
@@ -397,6 +403,8 @@ static int SetupTraceNodes_r( int bspNodeNum )
 		else
 			traceNodes[ nodeNum ].children[ i ] = SetupTraceNodes_r( bspNode->children[ i ] );
 	}
+
+	/* Sys_Printf("node %d children: %d %d\n", nodeNum, traceNodes[ nodeNum ].children[0], traceNodes[ nodeNum ].children[1]); */
 	
 	/* return node number */
 	return nodeNum;
