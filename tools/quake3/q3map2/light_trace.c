@@ -401,7 +401,13 @@ static int SetupTraceNodes_r( int bspNodeNum )
 		
 		/* normal node */
 		else
-			traceNodes[ nodeNum ].children[ i ] = SetupTraceNodes_r( bspNode->children[ i ] );
+		{
+			newNode = SetupTraceNodes_r( bspNode->children[ i ] );
+			traceNodes[ nodeNum ].children[ i ] = newNode;
+		}
+
+		if(traceNodes[ nodeNum ].children[ i ] == 0)
+			Error( "Invalid tracenode allocated" );
 	}
 
 	/* Sys_Printf("node %d children: %d %d\n", nodeNum, traceNodes[ nodeNum ].children[0], traceNodes[ nodeNum ].children[1]); */
