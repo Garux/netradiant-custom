@@ -685,24 +685,34 @@ NOTE: for texture window layout:
   ( the GL textures are not flushed though)
 ==============
 */
+
+bool endswith(const char *haystack, const char *needle)
+{
+	size_t lh = strlen(haystack);
+	size_t ln = strlen(needle);
+	if(lh < ln)
+		return false;
+	return !memcmp(haystack + (lh - ln), needle, ln);
+}
+
 bool texture_name_ignore(const char* name)
 {
   StringOutputStream strTemp(string_length(name));
   strTemp << LowerCase(name);
 
   return
-	  strstr(strTemp.c_str(), ".specular.") != 0 ||
-	  strstr(strTemp.c_str(), ".glow.") != 0 ||
-	  strstr(strTemp.c_str(), ".bump.") != 0 ||
-	  strstr(strTemp.c_str(), ".diffuse.") != 0 ||
-	  strstr(strTemp.c_str(), ".blend.") != 0 ||
-	  strstr(strTemp.c_str(), ".alpha.") != 0 ||
-	  strstr(strTemp.c_str(), "_norm.") != 0 ||
-	  strstr(strTemp.c_str(), "_bump.") != 0 ||
-	  strstr(strTemp.c_str(), "_glow.") != 0 ||
-	  strstr(strTemp.c_str(), "_gloss.") != 0 ||
-	  strstr(strTemp.c_str(), "_pants.") != 0 ||
-	  strstr(strTemp.c_str(), "_shirt.") != 0 ||
+	  endswith(strTemp.c_str(), ".specular") ||
+	  endswith(strTemp.c_str(), ".glow") ||
+	  endswith(strTemp.c_str(), ".bump") ||
+	  endswith(strTemp.c_str(), ".diffuse") ||
+	  endswith(strTemp.c_str(), ".blend") ||
+	  endswith(strTemp.c_str(), ".alpha") ||
+	  endswith(strTemp.c_str(), "_norm") ||
+	  endswith(strTemp.c_str(), "_bump") ||
+	  endswith(strTemp.c_str(), "_glow") ||
+	  endswith(strTemp.c_str(), "_gloss") ||
+	  endswith(strTemp.c_str(), "_pants") ||
+	  endswith(strTemp.c_str(), "_shirt") ||
 	  0;
 }
 
