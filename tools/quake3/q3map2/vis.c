@@ -897,6 +897,9 @@ void LoadPortals (char *name)
 	Sys_Printf ("%6i portalclusters\n", portalclusters);
 	Sys_Printf ("%6i numportals\n", numportals);
 	Sys_Printf ("%6i numfaces\n", numfaces);
+
+	if(numportals > MAX_PORTALS)
+		Error("MAX_PORTALS");
 	
 	// these counts should take advantage of 64 bit systems automatically
 	leafbytes = ((portalclusters+63)&~63)>>3;

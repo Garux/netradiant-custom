@@ -215,7 +215,7 @@ constants
 
 #define	PORTALFILE				"PRT1"
 
-#define	MAX_PORTALS				32768
+#define	MAX_PORTALS				0x20000 /* same as MAX_MAP_PORTALS */
 #define MAX_SEPERATORS			MAX_POINTS_ON_WINDING
 #define	MAX_POINTS_ON_FIXED_WINDING	24	/* ydnar: increased this from 12 at the expense of more memory */
 #define	MAX_PORTALS_ON_LEAF		1024
