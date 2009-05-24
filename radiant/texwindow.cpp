@@ -690,12 +690,20 @@ bool texture_name_ignore(const char* name)
   StringOutputStream strTemp(string_length(name));
   strTemp << LowerCase(name);
 
-  return strstr(strTemp.c_str(), ".specular") != 0 ||
-    strstr(strTemp.c_str(), ".glow") != 0 ||
-    strstr(strTemp.c_str(), ".bump") != 0 ||
-    strstr(strTemp.c_str(), ".diffuse") != 0 ||
-    strstr(strTemp.c_str(), ".blend") != 0 ||
-	  strstr(strTemp.c_str(), ".alpha") != 0;
+  return
+	  strstr(strTemp.c_str(), ".specular.") != 0 ||
+	  strstr(strTemp.c_str(), ".glow.") != 0 ||
+	  strstr(strTemp.c_str(), ".bump.") != 0 ||
+	  strstr(strTemp.c_str(), ".diffuse.") != 0 ||
+	  strstr(strTemp.c_str(), ".blend.") != 0 ||
+	  strstr(strTemp.c_str(), ".alpha.") != 0 ||
+	  strstr(strTemp.c_str(), "_norm.") != 0 ||
+	  strstr(strTemp.c_str(), "_bump.") != 0 ||
+	  strstr(strTemp.c_str(), "_glow.") != 0 ||
+	  strstr(strTemp.c_str(), "_gloss.") != 0 ||
+	  strstr(strTemp.c_str(), "_pants.") != 0 ||
+	  strstr(strTemp.c_str(), "_shirt.") != 0 ||
+	  0;
 }
 
 class LoadShaderVisitor : public Archive::Visitor
