@@ -270,6 +270,62 @@ void Brush_ConstructSphere(Brush& brush, const AABB& bounds, std::size_t sides, 
   }
 }
 
+const std::size_t c_brushRock_minSides = 10;
+const std::size_t c_brushRock_maxSides = 1000;
+const char* const c_brushRock_name = "brushRock";
+
+void Brush_ConstructRock(Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection)
+{
+  if(sides < c_brushRock_minSides)
+  {
+    globalErrorStream() << c_brushRock_name << ": sides " << Unsigned(sides) << ": too few sides, minimum is " << Unsigned(c_brushRock_minSides) << "\n";
+    return;
+  }
+  if(sides > c_brushRock_maxSides)
+  {
+    globalErrorStream() << c_brushRock_name << ": sides " << Unsigned(sides) << ": too many sides, maximum is " << Unsigned(c_brushRock_maxSides) << "\n";
+    return;
+  }
+
+  brush.clear();
+  brush.reserve(sides*sides);
+
+  float radius = max_extent(bounds.extents);
+  const Vector3& mid = bounds.origin;
+  Vector3 planepts[3];
+
+  for(std::size_t j=0;j < sides; j++)
+  {
+	  planepts[0][0] = rand() - (RAND_MAX/2);
+	  planepts[0][1] = rand() - (RAND_MAX/2);
+	  planepts[0][2] = rand() - (RAND_MAX/2);
+	  vector3_normalise(planepts[0]);
+
+	  // find two vectors that are perpendicular to planepts[0]
+	  ComputeAxisBase(planepts[0], planepts[1], planepts[2]);
+
+	  planepts[0] = vector3_added(mid, vector3_scaled(planepts[0], radius));
+	  planepts[1] = vector3_added(planepts[0], vector3_scaled(planepts[1], radius));
+	  planepts[2] = vector3_added(planepts[0], vector3_scaled(planepts[2], radius));
+
+#if 0
+	  // make sure the orientation is right
+	  if(vector3_dot(vector3_subtracted(planepts[0], mid), vector3_cross(vector3_subtracted(planepts[1], mid), vector3_subtracted(planepts[2], mid))) > 0)
+	  {
+		  Vector3 h;
+		  h = planepts[1];
+		  planepts[1] = planepts[2];
+		  planepts[2] = h;
+		  globalOutputStream() << "flip\n";
+	  }
+	  else
+		  globalOutputStream() << "no flip\n";
+#endif
+
+	  brush.addPlane(planepts[0], planepts[1], planepts[2], shader, projection);
+  }
+}
+
 int GetViewAxis()
 {
   switch(GlobalXYWnd_getCurrentViewType())
@@ -321,6 +377,15 @@ void Brush_ConstructPrefab(Brush& brush, EBrushPrefab type, const AABB& bounds, 
       UndoableCommand undo(command.c_str());
 
       Brush_ConstructSphere(brush, bounds, sides, shader, projection);
+    }
+    break;
+  case eBrushRock:
+    {
+      StringOutputStream command;
+      command << c_brushRock_name << " -sides " << Unsigned(sides);
+      UndoableCommand undo(command.c_str());
+
+      Brush_ConstructRock(brush, bounds, sides, shader, projection);
     }
     break;
   }
@@ -1375,6 +1440,7 @@ public:
 BrushPrefab g_brushprism(eBrushPrism);
 BrushPrefab g_brushcone(eBrushCone);
 BrushPrefab g_brushsphere(eBrushSphere);
+BrushPrefab g_brushrock(eBrushRock);
 
 
 void FlipClip();
@@ -1430,6 +1496,7 @@ void Brush_registerCommands()
   GlobalCommands_insert("BrushPrism", BrushPrefab::SetCaller(g_brushprism));
   GlobalCommands_insert("BrushCone", BrushPrefab::SetCaller(g_brushcone));
   GlobalCommands_insert("BrushSphere", BrushPrefab::SetCaller(g_brushsphere));
+  GlobalCommands_insert("BrushRock", BrushPrefab::SetCaller(g_brushrock));
 
   GlobalCommands_insert("Brush3Sided", BrushMakeSided::SetCaller(g_brushmakesided3), Accelerator('3', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("Brush4Sided", BrushMakeSided::SetCaller(g_brushmakesided4), Accelerator('4', (GdkModifierType)GDK_CONTROL_MASK));
@@ -1452,6 +1519,7 @@ void Brush_constructMenu(GtkMenu* menu)
   create_menu_item_with_mnemonic(menu, "Prism...", "BrushPrism");
   create_menu_item_with_mnemonic(menu, "Cone...", "BrushCone");
   create_menu_item_with_mnemonic(menu, "Sphere...", "BrushSphere");
+  create_menu_item_with_mnemonic(menu, "Rock...", "BrushRock");
   menu_separator (menu);
   {
     GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic (menu, "CSG");

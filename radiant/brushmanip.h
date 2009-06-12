@@ -32,6 +32,7 @@ enum EBrushPrefab
   eBrushPrism,
   eBrushCone,
   eBrushSphere,
+  eBrushRock,
 };
 
 class TextureProjection;

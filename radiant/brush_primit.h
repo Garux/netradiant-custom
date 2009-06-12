@@ -137,4 +137,6 @@ struct bp_globals_t
 extern bp_globals_t g_bp_globals;
 extern float g_texdef_default_scale;
 
+void ComputeAxisBase(const Vector3& normal, Vector3& texS, Vector3& texT);
+
 #endif
