@@ -185,7 +185,7 @@ constants
 /* bsp */
 #define	MAX_PATCH_SIZE			32
 #define	MAX_BRUSH_SIDES			1024
-#define MAX_BUILD_SIDES			300
+#define MAX_BUILD_SIDES			1024
 
 #define	MAX_EXPANDED_AXIS		128
 
