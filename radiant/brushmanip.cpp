@@ -215,7 +215,7 @@ void Brush_ConstructCone(Brush& brush, const AABB& bounds, std::size_t sides, co
 }
 
 const std::size_t c_brushSphere_minSides = 3;
-const std::size_t c_brushSphere_maxSides = 7;
+const std::size_t c_brushSphere_maxSides = 31;
 const char* const c_brushSphere_name = "brushSphere";
 
 void Brush_ConstructSphere(Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection)
