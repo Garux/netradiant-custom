@@ -642,9 +642,11 @@ void UnparseEntities( void )
 	
 	
 	/* setup */
+	AUTOEXPAND_BY_REALLOC(bspEntData, 0, allocatedBSPEntData, 1024);
 	buf = bspEntData;
 	end = buf;
 	*end = 0;
+
 	
 	/* run through entity list */
 	for( i = 0; i < numBSPEntities && i < numEntities; i++ )
