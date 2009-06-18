@@ -2385,7 +2385,8 @@ Q_EXTERN int				allocatedBSPShaders Q_ASSIGN( 0 );
 Q_EXTERN bspShader_t*		bspShaders Q_ASSIGN(0);
 
 Q_EXTERN int				bspEntDataSize Q_ASSIGN( 0 );
-Q_EXTERN char				bspEntData[ MAX_MAP_ENTSTRING ];
+Q_EXTERN int				allocatedBSPEntData Q_ASSIGN( 0 );
+Q_EXTERN char				*bspEntData Q_ASSIGN(0);
 
 Q_EXTERN int				numBSPLeafs Q_ASSIGN( 0 );
 Q_EXTERN bspLeaf_t			bspLeafs[ MAX_MAP_LEAFS ];

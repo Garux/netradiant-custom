@@ -509,7 +509,7 @@ void LoadIBSPFile( const char *filename )
 		bspLightBytes = safe_malloc( numBSPLightBytes );
 		CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes, 1 );
 	
-	bspEntDataSize = CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData, 1);
+	bspEntDataSize = CopyLump_Allocate( (bspHeader_t*) header, LUMP_ENTITIES, (void **) &bspEntData, 1, &allocatedBSPEntData);
 	
 	CopyLightGridLumps( header );
 

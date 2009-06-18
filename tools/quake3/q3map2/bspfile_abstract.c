@@ -649,6 +649,13 @@ void UnparseEntities( void )
 	/* run through entity list */
 	for( i = 0; i < numBSPEntities && i < numEntities; i++ )
 	{
+		{
+			int sz = end - buf;
+			AUTOEXPAND_BY_REALLOC(bspEntData, sz + 65536, allocatedBSPEntData, 1024);
+			buf = bspEntData;
+			end = buf + sz;
+		}
+
 		/* get epair */
 		ep = entities[ i ].epairs;
 		if( ep == NULL )
@@ -685,7 +692,7 @@ void UnparseEntities( void )
 		end += 2;
 		
 		/* check for overflow */
-		if( end > buf + MAX_MAP_ENTSTRING )
+		if( end > buf + allocatedBSPEntData )
 			Error( "Entity text too long" );
 	}
 	
