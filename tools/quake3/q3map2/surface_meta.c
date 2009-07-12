@@ -1226,14 +1226,15 @@ returns the score of the triangle added
 #define ST_SCORE2			(2 * (ST_SCORE))
 
 #define ADEQUATE_SCORE		((AXIS_MIN) + 1 * (VERT_SCORE))
-#define GOOD_SCORE			((AXIS_MIN) + 2 * (VERT_SCORE) + 4 * (ST_SCORE))
-#define PERFECT_SCORE		((AXIS_MIN) + + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE))
+#define GOOD_SCORE			((AXIS_MIN) + 2 * (VERT_SCORE)                   + 4 * (ST_SCORE))
+#define PERFECT_SCORE		((AXIS_MIN) + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE))
+#define MAX_BBOX_DISTANCE   16
 
 static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, qboolean testAdd )
 {
 	int					i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
 	float				lmMax;
-	vec3_t				mins, maxs;
+	vec3_t				mins, maxs, p;
 	qboolean			inTexRange, es, et;
 	mapDrawSurface_t	old;
 	
@@ -1264,6 +1265,32 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 		if( tri->planeNum >= 0 && tri->planeNum != ds->planeNum )
 			return 0;
 	}
+
+#if MAX_BBOX_DISTANCE > 0
+	VectorCopy( mins, ds->mins );
+	VectorCopy( maxs, ds->maxs );
+	mins[0] -= MAX_BBOX_DISTANCE;
+	mins[1] -= MAX_BBOX_DISTANCE;
+	mins[2] -= MAX_BBOX_DISTANCE;
+	maxs[0] += MAX_BBOX_DISTANCE;
+	maxs[1] += MAX_BBOX_DISTANCE;
+	maxs[2] += MAX_BBOX_DISTANCE;
+#define CHECK_1D(mins, v, maxs) ((mins) <= (v) && (v) <= (maxs))
+#define CHECK_3D(mins, v, maxs) (CHECK_1D((mins)[0], (v)[0], (maxs)[0]) && CHECK_1D((mins)[1], (v)[1], (maxs)[1]) && CHECK_1D((mins)[2], (v)[2], (maxs)[2]))
+	VectorCopy(p, metaVerts[ tri->indexes[ 0 ] ].xyz);
+	if(!CHECK_3D(mins, p, maxs))
+	{
+		VectorCopy(p, metaVerts[ tri->indexes[ 1 ] ].xyz);
+		if(!CHECK_3D(mins, p, maxs))
+		{
+			VectorCopy(p, metaVerts[ tri->indexes[ 2 ] ].xyz);
+			if(!CHECK_3D(mins, p, maxs))
+				return 0;
+		}
+	}
+#undef CHECK_3D
+#undef CHECK_1D
+#endif
 	
 	/* set initial score */
 	score = tri->surfaceNum == ds->surfaceNum ? SURFACE_SCORE : 0;
