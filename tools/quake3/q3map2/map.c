@@ -1585,12 +1585,19 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		value = ValueForKey( &entities[ 0 ], "_celshader" );
 	if( value[ 0 ] != '\0' )
 	{
-		sprintf( shader, "textures/%s", value );
-		celShader = ShaderInfoForShader( shader );
-		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader );
+		if(strcmp(value, "none"))
+		{
+			sprintf( shader, "textures/%s", value );
+			celShader = ShaderInfoForShader( shader );
+			Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader );
+		}
+		else
+		{
+			celShader = NULL;
+		}
 	}
 	else
-		celShader = *globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL;
+		celShader = (*globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL);
 
 	/* jal : entity based _shadeangle */
 	shadeAngle = 0.0f;
