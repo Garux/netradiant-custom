@@ -1228,7 +1228,7 @@ returns the score of the triangle added
 #define ADEQUATE_SCORE		((AXIS_MIN) + 1 * (VERT_SCORE))
 #define GOOD_SCORE			((AXIS_MIN) + 2 * (VERT_SCORE)                   + 4 * (ST_SCORE))
 #define PERFECT_SCORE		((AXIS_MIN) + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE))
-#define MAX_BBOX_DISTANCE   16
+//#define MAX_BBOX_DISTANCE   16
 
 static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, qboolean testAdd )
 {
