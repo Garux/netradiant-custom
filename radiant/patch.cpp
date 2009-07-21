@@ -396,6 +396,47 @@ void Patch::Redisperse(EMatrixMajor mt)
   controlPointsChanged();
 }
 
+void Patch::Smooth(EMatrixMajor mt)
+{
+  std::size_t w, h, width, height, row_stride, col_stride;
+  PatchControl* p1, * p2, * p3;
+
+  undoSave();
+
+  switch(mt)
+  {
+  case COL:
+    width = (m_width-1)>>1;
+    height = m_height;
+    col_stride = 1;
+    row_stride = m_width;
+    break;
+  case ROW:
+    width = (m_height-1)>>1;
+    height = m_width;
+    col_stride = m_width;
+    row_stride = 1;
+    break;
+  default:
+    ERROR_MESSAGE("neither row-major nor column-major");
+    return;
+  }
+
+  for(h=0;h<height;h++)
+  {
+    p1 = m_ctrl.data()+(h*row_stride)+col_stride;
+    for(w=0;w<width-1;w++)
+    {
+      p2 = p1+col_stride;
+      p3 = p2+col_stride;
+      p2->m_vertex = vector3_mid(p1->m_vertex, p3->m_vertex);
+      p1 = p3;
+    }
+  }
+  
+  controlPointsChanged();
+}
+
 void Patch::InsertRemove(bool bInsert, bool bColumn, bool bFirst)
 {
   undoSave();

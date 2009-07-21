@@ -294,6 +294,24 @@ void Scene_PatchRedisperse_Selected(scene::Graph& graph, EMatrixMajor major)
   Scene_forEachVisibleSelectedPatch(PatchRedisperse(major));
 }
 
+class PatchSmooth
+{
+  EMatrixMajor m_major;
+public:
+  PatchSmooth(EMatrixMajor major) : m_major(major)
+  {
+  }
+  void operator()(Patch& patch) const
+  {
+    patch.Smooth(m_major);
+  }
+};
+
+void Scene_PatchSmooth_Selected(scene::Graph& graph, EMatrixMajor major)
+{
+  Scene_forEachVisibleSelectedPatch(PatchSmooth(major));
+}
+
 class PatchTransposeMatrix
 {
 public:
@@ -547,7 +565,7 @@ void Patch_RedisperseRows()
 {
   UndoableCommand undo("patchRedisperseRows");
 
-  Scene_PatchRedisperse_Selected(GlobalSceneGraph(), COL);
+  Scene_PatchRedisperse_Selected(GlobalSceneGraph(), ROW);
 }
 
 void Patch_RedisperseCols()
@@ -555,6 +573,20 @@ void Patch_RedisperseCols()
   UndoableCommand undo("patchRedisperseColumns");
 
   Scene_PatchRedisperse_Selected(GlobalSceneGraph(), COL);
+}
+
+void Patch_SmoothRows()
+{
+  UndoableCommand undo("patchSmoothRows");
+
+  Scene_PatchSmooth_Selected(GlobalSceneGraph(), ROW);
+}
+
+void Patch_SmoothCols()
+{
+  UndoableCommand undo("patchSmoothColumns");
+
+  Scene_PatchSmooth_Selected(GlobalSceneGraph(), COL);
 }
 
 void Patch_Transpose()
@@ -724,6 +756,8 @@ void Patch_registerCommands()
   GlobalCommands_insert("InvertCurve", FreeCaller<Patch_Invert>(), Accelerator('I', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("RedisperseRows", FreeCaller<Patch_RedisperseRows>(), Accelerator('E', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("RedisperseCols", FreeCaller<Patch_RedisperseCols>(), Accelerator('E', (GdkModifierType)(GDK_SHIFT_MASK|GDK_CONTROL_MASK)));
+  GlobalCommands_insert("SmoothRows", FreeCaller<Patch_SmoothRows>(), Accelerator('W', (GdkModifierType)GDK_CONTROL_MASK));
+  GlobalCommands_insert("SmoothCols", FreeCaller<Patch_SmoothCols>(), Accelerator('W', (GdkModifierType)(GDK_SHIFT_MASK|GDK_CONTROL_MASK)));
   GlobalCommands_insert("MatrixTranspose", FreeCaller<Patch_Transpose>(), Accelerator('M', (GdkModifierType)(GDK_SHIFT_MASK|GDK_CONTROL_MASK)));
   GlobalCommands_insert("CapCurrentCurve", FreeCaller<Patch_Cap>(), Accelerator('C', (GdkModifierType)GDK_SHIFT_MASK));
   GlobalCommands_insert("CycleCapTexturePatch", FreeCaller<Patch_CycleProjection>(), Accelerator('N', (GdkModifierType)(GDK_SHIFT_MASK|GDK_CONTROL_MASK)));
@@ -793,6 +827,11 @@ void Patch_constructMenu(GtkMenu* menu)
       menu_tearoff (menu_3);
     create_menu_item_with_mnemonic(menu_3, "Rows", "RedisperseRows");
     create_menu_item_with_mnemonic(menu_3, "Columns", "RedisperseCols");
+    GtkMenu* menu_4 = create_sub_menu_with_mnemonic (menu_in_menu, "Smooth");
+    if (g_Layout_enableDetachableMenus.m_value)
+      menu_tearoff (menu_4);
+    create_menu_item_with_mnemonic(menu_4, "Rows", "SmoothRows");
+    create_menu_item_with_mnemonic(menu_4, "Columns", "SmoothCols");
     create_menu_item_with_mnemonic(menu_in_menu, "Transpose", "MatrixTranspose");
   }
   menu_separator (menu);

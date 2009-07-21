@@ -973,6 +973,7 @@ public:
   void InvertMatrix();
   void TransposeMatrix();
   void Redisperse(EMatrixMajor mt);
+  void Smooth(EMatrixMajor mt);
   void InsertRemove(bool bInsert, bool bColumn, bool bFirst);
   Patch* MakeCap(Patch* patch, EPatchCap eType, EMatrixMajor mt, bool bFirst);
   void ConstructSeam(EPatchCap eType, Vector3* p, std::size_t width);
