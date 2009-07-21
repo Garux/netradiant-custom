@@ -54,7 +54,7 @@ void Patch_Construct(EPatchType type)
   }
   else
   {
-    MAX_PATCH_WIDTH = MAX_PATCH_HEIGHT = 15;
+    MAX_PATCH_WIDTH = MAX_PATCH_HEIGHT = 31; // matching q3map2
   }
 }
 
