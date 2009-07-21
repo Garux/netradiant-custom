@@ -900,6 +900,14 @@ void DoNewPatchDlg()
         gtk_combo_box_append_text(combo, "11");
         gtk_combo_box_append_text(combo, "13");
         gtk_combo_box_append_text(combo, "15");
+        gtk_combo_box_append_text(combo, "17");
+        gtk_combo_box_append_text(combo, "19");
+        gtk_combo_box_append_text(combo, "21");
+        gtk_combo_box_append_text(combo, "23");
+        gtk_combo_box_append_text(combo, "25");
+        gtk_combo_box_append_text(combo, "27");
+        gtk_combo_box_append_text(combo, "29");
+        gtk_combo_box_append_text(combo, "31"); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 0, 1,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -916,6 +924,14 @@ void DoNewPatchDlg()
         gtk_combo_box_append_text(combo, "11");
         gtk_combo_box_append_text(combo, "13");
         gtk_combo_box_append_text(combo, "15");
+        gtk_combo_box_append_text(combo, "17");
+        gtk_combo_box_append_text(combo, "19");
+        gtk_combo_box_append_text(combo, "21");
+        gtk_combo_box_append_text(combo, "23");
+        gtk_combo_box_append_text(combo, "25");
+        gtk_combo_box_append_text(combo, "27");
+        gtk_combo_box_append_text(combo, "29");
+        gtk_combo_box_append_text(combo, "31"); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 1, 2,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
