@@ -1336,7 +1336,7 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
         {
           pCtrl->m_vertex[0] = vPos[1][0];
           pCtrl->m_vertex[1] = vPos[1][1];
-          pCtrl->m_vertex[2] = vPos[2][2];
+          pCtrl->m_vertex[2] = vPos[0][2];
         }
       }
       {
@@ -1348,6 +1348,7 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
           pCtrl->m_vertex[2] = vPos[2][2];
         }
       }
+	  break;
     default:
       ERROR_MESSAGE("this should be unreachable");
       return;

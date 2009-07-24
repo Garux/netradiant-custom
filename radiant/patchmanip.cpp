@@ -474,6 +474,13 @@ void Patch_Bevel()
   Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eBevel, GlobalXYWnd_getCurrentViewType());
 }
 
+void Patch_Sphere()
+{
+  UndoableCommand undo("patchCreateSphere");
+
+  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eSphere, GlobalXYWnd_getCurrentViewType());
+}
+
 void Patch_SquareBevel()
 {
 }
@@ -744,6 +751,7 @@ void Patch_registerCommands()
   GlobalCommands_insert("PatchSquareBevel", FreeCaller<Patch_SquareBevel>());
   GlobalCommands_insert("PatchSquareEndcap", FreeCaller<Patch_SquareEndcap>());
   GlobalCommands_insert("PatchCone", FreeCaller<Patch_Cone>());
+  GlobalCommands_insert("PatchSphere", FreeCaller<Patch_Sphere>());
   GlobalCommands_insert("SimplePatchMesh", FreeCaller<Patch_Plane>(), Accelerator('P', (GdkModifierType)GDK_SHIFT_MASK));
   GlobalCommands_insert("PatchInsertInsertColumn", FreeCaller<Patch_InsertInsertColumn>());
   GlobalCommands_insert("PatchInsertAddColumn", FreeCaller<Patch_InsertAddColumn>());
@@ -793,6 +801,7 @@ void Patch_constructMenu(GtkMenu* menu)
   }
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Cone", "PatchCone");
+  create_menu_item_with_mnemonic(menu, "Sphere", "PatchSphere");
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Simple Patch Mesh...", "SimplePatchMesh");
   menu_separator (menu);
