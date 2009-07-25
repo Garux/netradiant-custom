@@ -399,7 +399,8 @@ void Patch::Redisperse(EMatrixMajor mt)
 void Patch::Smooth(EMatrixMajor mt)
 {
   std::size_t w, h, width, height, row_stride, col_stride;
-  PatchControl* p1, * p2, * p3;
+  bool wrap;
+  PatchControl* p1, * p2, * p3, * p2b;
 
   undoSave();
 
@@ -422,6 +423,20 @@ void Patch::Smooth(EMatrixMajor mt)
     return;
   }
 
+  wrap = true;
+  for(h=0;h<height;h++)
+  {
+	p1 = m_ctrl.data()+(h*row_stride);
+	p2 = p1+(2*width)*col_stride;
+	//globalErrorStream() << "compare " << p1->m_vertex << " and " << p2->m_vertex << "\n";
+	if(vector3_length_squared(vector3_subtracted(p1->m_vertex, p2->m_vertex)) > 1.0)
+	{
+	  //globalErrorStream() << "too far\n";
+	  wrap = false;
+	  break;
+	}
+  }
+
   for(h=0;h<height;h++)
   {
     p1 = m_ctrl.data()+(h*row_stride)+col_stride;
@@ -432,6 +447,14 @@ void Patch::Smooth(EMatrixMajor mt)
       p2->m_vertex = vector3_mid(p1->m_vertex, p3->m_vertex);
       p1 = p3;
     }
+	if(wrap)
+	{
+	  p1 = m_ctrl.data()+(h*row_stride)+(2*width-1)*col_stride;
+	  p2 = m_ctrl.data()+(h*row_stride);
+	  p2b = m_ctrl.data()+(h*row_stride)+(2*width)*col_stride;
+	  p3 = m_ctrl.data()+(h*row_stride)+col_stride;
+	  p2->m_vertex = p2b->m_vertex = vector3_mid(p1->m_vertex, p3->m_vertex);
+	}
   }
   
   controlPointsChanged();
