@@ -170,23 +170,10 @@ bool ConfirmModified(const char* title)
   return true;
 }
 
-
-const char* const EXECUTABLE_TYPE = 
-#if defined(__linux__) || defined (__FreeBSD__)
-"x86"
-#elif defined(__APPLE__)
-"ppc"
-#elif defined(WIN32)
-"exe"
-#else
-#error "unknown platform"
-#endif
-;
-
 void bsp_init()
 {
   build_set_variable("RadiantPath", AppPath_get());
-  build_set_variable("ExecutableType", EXECUTABLE_TYPE);
+  build_set_variable("ExecutableType", RADIANT_EXECUTABLE);
   build_set_variable("EnginePath", EnginePath_get());
   build_set_variable("MonitorAddress", (g_WatchBSP_Enabled) ? "127.0.0.1:39000" : "");
   build_set_variable("GameName", gamename_get());
