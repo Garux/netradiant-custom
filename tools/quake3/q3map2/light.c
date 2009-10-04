@@ -1260,7 +1260,7 @@ grid samples are for quickly determining the lighting
 of dynamically placed entities in the world
 */
 
-#define	MAX_CONTRIBUTIONS	1024
+#define	MAX_CONTRIBUTIONS	32768
 
 typedef struct
 {
@@ -1449,6 +1449,7 @@ void TraceGrid( int num )
 	
 	/* now that we have identified the primary light direction,
 	   go back and separate all the light into directed and ambient */
+
 	numStyles = 1;
 	for( i = 0; i < numCon; i++ )
 	{
@@ -1491,15 +1492,30 @@ void TraceGrid( int num )
 		/* (Hobbes: always setting it to .25 is hardly any better) */
 		d = 0.25f * (1.0f - d);
 		VectorMA( gp->ambient[ j ], d, contributions[ i ].color, gp->ambient[ j ] );
+
+/*
+ * div0:
+ * the total light average = ambient value + 0.25 * sum of all directional values
+ * we can also get the total light average as 0.25 * the sum of all contributions
+ *
+ * 0.25 * sum(contribution_i) == ambient + 0.25 * sum(d_i contribution_i)
+ *
+ * THIS YIELDS:
+ * ambient == 0.25 * sum((1 - d_i) contribution_i)
+ *
+ * So, 0.25f * (1.0f - d) IS RIGHT. If you want to tune it, tune d BEFORE.
+ */
 	}
 	
 	
 	/* store off sample */
 	for( i = 0; i < MAX_LIGHTMAPS; i++ )
 	{
+#if 0
 		/* do some fudging to keep the ambient from being too low (2003-07-05: 0.25 -> 0.125) */
 		if( !bouncing )
 			VectorMA( gp->ambient[ i ], 0.125f, gp->directed[ i ], gp->ambient[ i ] );
+#endif
 		
 		/* set minimum light and copy off to bytes */
 		VectorCopy( gp->ambient[ i ], color );
