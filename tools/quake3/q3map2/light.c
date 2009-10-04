@@ -1274,7 +1274,7 @@ void TraceGrid( int num )
 {
 	int						i, j, x, y, z, mod, step, numCon, numStyles;
 	float					d;
-	vec3_t					baseOrigin, cheapColor, color;
+	vec3_t					baseOrigin, cheapColor, color, thisdir;
 	rawGridPoint_t			*gp;
 	bspGridPoint_t			*bgp;
 	contribution_t			contributions[ MAX_CONTRIBUTIONS ];
@@ -1311,25 +1311,25 @@ void TraceGrid( int num )
 	{
 		/* try to nudge the origin around to find a valid point */
 		VectorCopy( trace.origin, baseOrigin );
-		for( step = 9; step <= 18; step += 9 )
+		for( step = 0.05; step <= 0.5; step += 0.05 )
 		{
 			for( i = 0; i < 8; i++ )
 			{
 				VectorCopy( baseOrigin, trace.origin );
 				if( i & 1 )
-					trace.origin[ 0 ] += step;
+					trace.origin[ 0 ] += step * gridSize[0];
 				else
-					trace.origin[ 0 ] -= step;
+					trace.origin[ 0 ] -= step * gridSize[0];
 				
 				if( i & 2 )
-					trace.origin[ 1 ] += step;
+					trace.origin[ 1 ] += step * gridSize[1];
 				else
-					trace.origin[ 1 ] -= step;
+					trace.origin[ 1 ] -= step * gridSize[1];
 				
 				if( i & 4 )
-					trace.origin[ 2 ] += step;
+					trace.origin[ 2 ] += step * gridSize[2];
 				else
-					trace.origin[ 2 ] -= step;
+					trace.origin[ 2 ] -= step * gridSize[2];
 				
 				/* ydnar: changed to find cluster num */
 				trace.cluster = ClusterForPointExt( trace.origin, VERTEX_EPSILON );
@@ -1342,7 +1342,7 @@ void TraceGrid( int num )
 		}
 		
 		/* can't find a valid point at all */
-		if( step > 18 )
+		if( step > 0.5 )
 			return;
 	}
 	
@@ -1445,7 +1445,7 @@ void TraceGrid( int num )
 	/////////////////////
 
 	/* normalize to get primary light direction */
-	VectorNormalize( gp->dir, gp->dir );
+	VectorNormalize( gp->dir, thisdir );
 	
 	/* now that we have identified the primary light direction,
 	   go back and separate all the light into directed and ambient */
@@ -1454,7 +1454,7 @@ void TraceGrid( int num )
 	for( i = 0; i < numCon; i++ )
 	{
 		/* get relative directed strength */
-		d = DotProduct( contributions[ i ].dir, gp->dir );
+		d = DotProduct( contributions[ i ].dir, thisdir );
 		/* we map 1 to gridDirectionality, and 0 to gridAmbientDirectionality */
 		d = gridAmbientDirectionality + d * (gridDirectionality - gridAmbientDirectionality);
 		if( d < 0.0f )
@@ -1540,8 +1540,7 @@ void TraceGrid( int num )
 	#endif
 	
 	/* store direction */
-	if( !bouncing )
-		NormalToLatLong( gp->dir, bgp->latLong );
+	NormalToLatLong( thisdir, bgp->latLong );
 }
 
 
@@ -2003,7 +2002,7 @@ int LightMain( int argc, char **argv )
 		else if( !strcmp( argv[ i ], "-gridambientdirectionality" ) )
 		{
 			f = atof( argv[ i + 1 ] );
-			if(f > gridDirectionality) f = gridDirectionality
+			if(f > gridDirectionality) f = gridDirectionality;
 			if(f > 1) f = 1;
 			Sys_Printf( "Grid ambient directionality is %f\n", f );
 			gridAmbientDirectionality *= f;
