@@ -1272,8 +1272,8 @@ contribution_t;
 
 void TraceGrid( int num )
 {
-	int						i, j, x, y, z, mod, step, numCon, numStyles;
-	float					d;
+	int						i, j, x, y, z, mod, numCon, numStyles;
+	float					d, step;
 	vec3_t					baseOrigin, cheapColor, color, thisdir;
 	rawGridPoint_t			*gp;
 	bspGridPoint_t			*bgp;
@@ -1311,33 +1311,16 @@ void TraceGrid( int num )
 	{
 		/* try to nudge the origin around to find a valid point */
 		VectorCopy( trace.origin, baseOrigin );
-		for( step = 0.05; step <= 0.5; step += 0.05 )
+		for( step = 0; (step += 0.005) <= 1.0; )
 		{
-			for( i = 0; i < 8; i++ )
-			{
-				VectorCopy( baseOrigin, trace.origin );
-				if( i & 1 )
-					trace.origin[ 0 ] += step * gridSize[0];
-				else
-					trace.origin[ 0 ] -= step * gridSize[0];
+			VectorCopy( baseOrigin, trace.origin );
+			trace.origin[ 0 ] += step * (Random() - 0.5) * gridSize[0];
+			trace.origin[ 1 ] += step * (Random() - 0.5) * gridSize[1];
+			trace.origin[ 2 ] += step * (Random() - 0.5) * gridSize[2];
 				
-				if( i & 2 )
-					trace.origin[ 1 ] += step * gridSize[1];
-				else
-					trace.origin[ 1 ] -= step * gridSize[1];
-				
-				if( i & 4 )
-					trace.origin[ 2 ] += step * gridSize[2];
-				else
-					trace.origin[ 2 ] -= step * gridSize[2];
-				
-				/* ydnar: changed to find cluster num */
-				trace.cluster = ClusterForPointExt( trace.origin, VERTEX_EPSILON );
-				if( trace.cluster >= 0 )
-					break;
-			}
-			
-			if( i != 8 )
+			/* ydnar: changed to find cluster num */
+			trace.cluster = ClusterForPointExt( trace.origin, VERTEX_EPSILON );
+			if( trace.cluster >= 0 )
 				break;
 		}
 		
