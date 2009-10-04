@@ -1455,6 +1455,8 @@ void TraceGrid( int num )
 	{
 		/* get relative directed strength */
 		d = DotProduct( contributions[ i ].dir, gp->dir );
+		/* we map 1 to gridDirectionality, and 0 to gridAmbientDirectionality */
+		d = gridAmbientDirectionality + d * (gridDirectionality - gridAmbientDirectionality);
 		if( d < 0.0f )
 			d = 0.0f;
 		
@@ -1985,6 +1987,26 @@ int LightMain( int argc, char **argv )
 			f = atof( argv[ i + 1 ] );
 			Sys_Printf( "Grid ambient lightning scaled by %f\n", f );
 			gridAmbientScale *= f;
+			i++;
+		}
+
+		else if( !strcmp( argv[ i ], "-griddirectionality" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			if(f < 0) f = 0;
+			if(f > gridAmbientDirectionality) f = gridAmbientDirectionality;
+			Sys_Printf( "Grid directionality is %f\n", f );
+			gridDirectionality *= f;
+			i++;
+		}
+
+		else if( !strcmp( argv[ i ], "-gridambientdirectionality" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			if(f > gridDirectionality) f = gridDirectionality
+			if(f > 1) f = 1;
+			Sys_Printf( "Grid ambient directionality is %f\n", f );
+			gridAmbientDirectionality *= f;
 			i++;
 		}
 		
