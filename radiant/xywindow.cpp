@@ -1737,7 +1737,7 @@ void XYWnd::XY_DrawBackground(void)
 
 void XYWnd::XY_DrawGrid(void) {
 	float	x, y, xb, xe, yb, ye;
-	float		w, h;
+	float		w, h, a;
 	char	text[32];
 	float step, minor_step, stepx, stepy;
 	step = minor_step = stepx = stepy = GetGridSize();
@@ -1760,6 +1760,7 @@ void XYWnd::XY_DrawGrid(void) {
 	while ((stepy * m_fScale) <= 32.0f) // text step y must be at least 32
 		stepy *= 2;
 
+	a = ((GetSnapGridSize() > 0.0f) ? 1.0f : 0.3f);
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_TEXTURE_1D);
@@ -1800,9 +1801,12 @@ void XYWnd::XY_DrawGrid(void) {
 
 	// djbob
 	// draw minor blocks
-	if (g_xywindow_globals_private.d_showgrid) {
+	if (g_xywindow_globals_private.d_showgrid || a < 1.0f) {
+		if(a < 1.0f)
+			glEnable(GL_BLEND);
+
 		if (COLORS_DIFFER(g_xywindow_globals.color_gridminor, g_xywindow_globals.color_gridback)) {
-			glColor3fv(vector3_to_array(g_xywindow_globals.color_gridminor));
+			glColor4fv(vector4_to_array(Vector4(g_xywindow_globals.color_gridminor, a)));
 
 			glBegin (GL_LINES);
 			int i = 0;
@@ -1823,8 +1827,8 @@ void XYWnd::XY_DrawGrid(void) {
 		}
 
 		// draw major blocks
-		if (COLORS_DIFFER(g_xywindow_globals.color_gridmajor, g_xywindow_globals.color_gridback)) {
-			glColor3fv(vector3_to_array(g_xywindow_globals.color_gridmajor));
+		if (COLORS_DIFFER(g_xywindow_globals.color_gridmajor, g_xywindow_globals.color_gridminor)) {
+			glColor4fv(vector4_to_array(Vector4(g_xywindow_globals.color_gridmajor, a)));
 
 			glBegin (GL_LINES);
 			for (x = xb ; x <= xe ; x += step) {
@@ -1837,11 +1841,14 @@ void XYWnd::XY_DrawGrid(void) {
 			}
 			glEnd();
 		}
+
+		if(a < 1.0f)
+			glDisable(GL_BLEND);
 	}
 
 	// draw coordinate text if needed
 	if ( g_xywindow_globals_private.show_coordinates) {
-		glColor3fv(vector3_to_array(g_xywindow_globals.color_gridtext));
+		glColor4fv(vector4_to_array(Vector4(g_xywindow_globals.color_gridtext, 1.0f)));
 		// why does this not work on windows:
 		//   float offx = m_vOrigin[nDim2] + h - (1 + GlobalOpenGL().m_fontAscent) / m_fScale;
 		float offx = m_vOrigin[nDim2] + h - 13                                / m_fScale;
@@ -1873,7 +1880,7 @@ void XYWnd::XY_DrawGrid(void) {
 	// show current work zone?
 	// the work zone is used to place dropped points and brushes
 	if (g_xywindow_globals_private.d_show_work) {
-		glColor3f( 1.0f, 0.0f, 0.0f );
+		glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
 		glBegin( GL_LINES );
 		glVertex2f( xb, Select_getWorkZone().d_work_min[nDim2] );
 		glVertex2f( xe, Select_getWorkZone().d_work_min[nDim2] );
@@ -2973,10 +2980,6 @@ void XYWindow_Construct()
   GlobalPreferenceSystem().registerPreference("SI_Colors6", Vector3ImportStringCaller(g_xywindow_globals.color_gridblock), Vector3ExportStringCaller(g_xywindow_globals.color_gridblock));
   GlobalPreferenceSystem().registerPreference("SI_Colors7", Vector3ImportStringCaller(g_xywindow_globals.color_gridtext), Vector3ExportStringCaller(g_xywindow_globals.color_gridtext));
   GlobalPreferenceSystem().registerPreference("SI_Colors8", Vector3ImportStringCaller(g_xywindow_globals.color_brushes), Vector3ExportStringCaller(g_xywindow_globals.color_brushes));
-  GlobalPreferenceSystem().registerPreference("SI_Colors9", Vector3ImportStringCaller(g_xywindow_globals.color_selbrushes), Vector3ExportStringCaller(g_xywindow_globals.color_selbrushes));
-  GlobalPreferenceSystem().registerPreference("SI_Colors10", Vector3ImportStringCaller(g_xywindow_globals.color_clipper), Vector3ExportStringCaller(g_xywindow_globals.color_clipper));
-  GlobalPreferenceSystem().registerPreference("SI_Colors11", Vector3ImportStringCaller(g_xywindow_globals.color_viewname), Vector3ExportStringCaller(g_xywindow_globals.color_viewname));
-  GlobalPreferenceSystem().registerPreference("SI_Colors13", Vector3ImportStringCaller(g_xywindow_globals.color_gridminor_alt), Vector3ExportStringCaller(g_xywindow_globals.color_gridminor_alt));
   GlobalPreferenceSystem().registerPreference("SI_Colors14", Vector3ImportStringCaller(g_xywindow_globals.color_gridmajor_alt), Vector3ExportStringCaller(g_xywindow_globals.color_gridmajor_alt));
 
 
