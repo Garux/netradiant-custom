@@ -718,7 +718,7 @@ void PasteToCamera()
   // Work out the delta
   Vector3 mid;
   Select_GetMid(mid);
-  Vector3 delta = vector3_subtracted(vector3_snapped(Camera_getOrigin(camwnd), GetGridSize()), mid);
+  Vector3 delta = vector3_subtracted(vector3_snapped(Camera_getOrigin(camwnd), GetSnapGridSize()), mid);
 
   // Move to camera
   GlobalSelectionSystem().translateSelected(delta);
@@ -3288,7 +3288,7 @@ void MainFrame::SetGridStatus()
 {
   StringOutputStream status(64);
   const char* lock = (GridStatus_getTextureLockEnabled()) ? "ON" : "OFF";
-  status << "G:" << GridStatus_getGridSize()
+  status << (GetSnapGridSize() > 0 ? "G:" : "g:") << GridStatus_getGridSize()
     << "  R:" << GridStatus_getRotateIncrement()
     << "  C:" << GridStatus_getFarClipDistance()
     << "  L:" << lock;

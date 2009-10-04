@@ -2223,6 +2223,7 @@ Q_EXTERN float				gridScale Q_ASSIGN( 1.0f );
 Q_EXTERN float				gridAmbientScale Q_ASSIGN( 1.0f );
 Q_EXTERN float				gridDirectionality Q_ASSIGN( 1.0f );
 Q_EXTERN float				gridAmbientDirectionality Q_ASSIGN( 0.0f );
+Q_EXTERN qboolean			inGrid Q_ASSIGN(0);
 
 /* ydnar: lightmap gamma/compensation */
 Q_EXTERN float				lightmapGamma Q_ASSIGN( 1.0f );

@@ -98,6 +98,8 @@ int g_grid_default = GridDefault_forGridPower(GRIDPOWER_8);
 
 int g_grid_power = GridPower_forGridDefault(g_grid_default);
 
+bool g_grid_snap = true;
+
 int Grid_getPower()
 {
   return g_grid_power;
@@ -109,6 +111,11 @@ inline float GridSize_forGridPower(int gridPower)
 }
 
 float g_gridsize = GridSize_forGridPower(g_grid_power);
+
+float GetSnapGridSize()
+{
+  return g_grid_snap ? g_gridsize : 0;
+}
 
 float GetGridSize()
 {
@@ -159,6 +166,7 @@ GridMenuItem g_gridMenu256(GRIDPOWER_256);
 
 void setGridPower(GridPower power)
 {
+  g_grid_snap = true;
   g_gridsize = GridSize_forGridPower(power);
 
   g_gridMenu0125.m_item.update();
@@ -178,6 +186,7 @@ void setGridPower(GridPower power)
 
 void GridPrev()
 {
+  g_grid_snap = true;
   if(g_grid_power > GRIDPOWER_0125)
   {
     setGridPower(static_cast<GridPower>(--g_grid_power));
@@ -186,17 +195,25 @@ void GridPrev()
 
 void GridNext()
 {
+  g_grid_snap = true;
   if(g_grid_power < GRIDPOWER_256)
   {
     setGridPower(static_cast<GridPower>(++g_grid_power));
   }
 }
 
+void ToggleGridSnap()
+{
+  g_grid_snap = !g_grid_snap;
+  GridChangeNotify();
+}
 
 void Grid_registerCommands()
 {
   GlobalCommands_insert("GridDown", FreeCaller<GridPrev>(), Accelerator('['));
   GlobalCommands_insert("GridUp", FreeCaller<GridNext>(), Accelerator(']'));
+
+  GlobalCommands_insert("ToggleGridSnap", FreeCaller<ToggleGridSnap>());
 
   GlobalToggles_insert("SetGrid0.125", GridMenuItem::SetCaller(g_gridMenu0125), ToggleItem::AddCallbackCaller(g_gridMenu0125.m_item));
   GlobalToggles_insert("SetGrid0.25", GridMenuItem::SetCaller(g_gridMenu025), ToggleItem::AddCallbackCaller(g_gridMenu025.m_item));
@@ -234,6 +251,7 @@ void Grid_registerShortcuts()
   command_connect_accelerator("ToggleGrid");
   command_connect_accelerator("GridDown");
   command_connect_accelerator("GridUp");
+  command_connect_accelerator("ToggleGridSnap");
 }
 
 void Grid_constructPreferences(PreferencesPage& page)

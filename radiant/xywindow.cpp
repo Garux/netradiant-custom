@@ -966,7 +966,7 @@ void XYWnd::DropClipPoint(int pointx, int pointy)
   g_clip_viewtype = static_cast<VIEWTYPE>(GetViewType());
   const int nDim = (g_clip_viewtype == YZ ) ? 0 : ( (g_clip_viewtype == XZ) ? 1 : 2 );
   point[nDim] = mid[nDim];
-  vector3_snap(point, GetGridSize());
+  vector3_snap(point, GetSnapGridSize());
   NewClipPoint(point);
 }
 
@@ -1093,8 +1093,8 @@ void XYWnd::NewBrushDrag(int x, int y)
 
   int nDim = (m_viewType == XY) ? 2 : (m_viewType == YZ) ? 0 : 1;
 
-  mins[nDim] = float_snapped(Select_getWorkZone().d_work_min[nDim], GetGridSize());
-  maxs[nDim] = float_snapped(Select_getWorkZone().d_work_max[nDim], GetGridSize());
+  mins[nDim] = float_snapped(Select_getWorkZone().d_work_min[nDim], GetSnapGridSize());
+  maxs[nDim] = float_snapped(Select_getWorkZone().d_work_max[nDim], GetSnapGridSize());
 
   if (maxs[nDim] <= mins[nDim])
     maxs[nDim] = mins[nDim] + GetGridSize();
@@ -1555,18 +1555,18 @@ void XYWnd::XY_SnapToGrid(Vector3& point)
 {
   if (m_viewType == XY)
   {
-    point[0] = float_snapped(point[0], GetGridSize());
-    point[1] = float_snapped(point[1], GetGridSize());
+    point[0] = float_snapped(point[0], GetSnapGridSize());
+    point[1] = float_snapped(point[1], GetSnapGridSize());
   }
   else if (m_viewType == YZ)
   {
-    point[1] = float_snapped(point[1], GetGridSize());
-    point[2] = float_snapped(point[2], GetGridSize());
+    point[1] = float_snapped(point[1], GetSnapGridSize());
+    point[2] = float_snapped(point[2], GetSnapGridSize());
   }
   else
   {
-    point[0] = float_snapped(point[0], GetGridSize());
-    point[2] = float_snapped(point[2], GetGridSize());
+    point[0] = float_snapped(point[0], GetSnapGridSize());
+    point[2] = float_snapped(point[2], GetSnapGridSize());
   }
 }
 

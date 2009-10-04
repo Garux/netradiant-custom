@@ -318,7 +318,7 @@ public:
     current = vector3_scaled(m_axis, distance_for_axis(m_start, current, m_axis));
 
     translation_local2object(current, current, manip2object);
-    vector3_snap(current, GetGridSize());
+    vector3_snap(current, GetSnapGridSize());
 
     m_translatable.translate(current);
   }
@@ -350,7 +350,7 @@ public:
     current = vector3_subtracted(current, m_start);
 
     translation_local2object(current, current, manip2object);
-    vector3_snap(current, GetGridSize());
+    vector3_snap(current, GetSnapGridSize());
     
     m_translatable.translate(current);
   }
@@ -386,9 +386,9 @@ public:
     Vector3 delta = vector3_subtracted(current, m_start);
 
     translation_local2object(delta, delta, manip2object);
-    vector3_snap(delta, GetGridSize());
+    vector3_snap(delta, GetSnapGridSize());
     
-    Vector3 start(vector3_snapped(m_start, GetGridSize()));
+    Vector3 start(vector3_snapped(m_start, GetSnapGridSize()));
     Vector3 scale(
       start[0] == 0 ? 1 : 1 + delta[0] / start[0],
       start[1] == 0 ? 1 : 1 + delta[1] / start[1],
@@ -424,9 +424,9 @@ public:
     Vector3 delta = vector3_subtracted(current, m_start);
 
     translation_local2object(delta, delta, manip2object);
-    vector3_snap(delta, GetGridSize());
+    vector3_snap(delta, GetSnapGridSize());
     
-    Vector3 start(vector3_snapped(m_start, GetGridSize()));
+    Vector3 start(vector3_snapped(m_start, GetSnapGridSize()));
     Vector3 scale(
       start[0] == 0 ? 1 : 1 + delta[0] / start[0],
       start[1] == 0 ? 1 : 1 + delta[1] / start[1],
@@ -3730,7 +3730,7 @@ void RadiantSelectionSystem::ConstructPivot() const
       m_object_pivot = bounds.origin;
     }
 
-    vector3_snap(m_object_pivot, GetGridSize());
+    vector3_snap(m_object_pivot, GetSnapGridSize());
     m_pivot2world = matrix4_translation_for_vec3(m_object_pivot);
 
     switch(m_manipulator_mode)

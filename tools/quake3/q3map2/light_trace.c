@@ -73,7 +73,7 @@ traceVert_t;
 typedef struct traceInfo_s
 {
 	shaderInfo_t				*si;
-	int							surfaceNum, castShadows;
+	int							surfaceNum, castShadows, skipGrid;
 }
 traceInfo_t;
 
@@ -144,7 +144,8 @@ static int AddTraceInfo( traceInfo_t *ti )
 	{
 		if( traceInfos[ num ].si == ti->si &&
 			traceInfos[ num ].surfaceNum == ti->surfaceNum &&
-			traceInfos[ num ].castShadows == ti->castShadows )
+			traceInfos[ num ].castShadows == ti->castShadows &&
+			traceInfos[ num ].skipGrid == ti->skipGrid )
 			return num;
 	}
 	
@@ -974,6 +975,7 @@ static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform )
 		ti.si = info->si;
 		ti.castShadows = info->castShadows;
 		ti.surfaceNum = model->firstBSPBrush + i;
+		ti.skipGrid = (ds->surfaceType == MST_PATCH);
 		
 		/* choose which node (normal or skybox) */
 		if( info->parentSurfaceNum >= 0 )
@@ -1143,6 +1145,7 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, m4x4_t t
 		/* setup trace info */
 		ti.castShadows = castShadows;
 		ti.surfaceNum = -1;
+		ti.skipGrid = qtrue; // also ignore picomodels when skipping patches
 		
 		/* setup trace winding */
 		memset( &tw, 0, sizeof( tw ) );
@@ -1426,7 +1429,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 		if( ti->castShadows != 1 )
 			return qfalse;
 	}
-	
+
 	/* receive shadows from same group and worldspawn group */
 	else if( trace->recvShadows > 1 )
 	{
@@ -1439,6 +1442,13 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 	else
 	{
 		if( abs( ti->castShadows ) != abs( trace->recvShadows ) )
+			return qfalse;
+	}
+	
+	/* skip patches when doing the grid (FIXME this is an ugly hack) */
+	if( inGrid )
+	{
+		if (ti->skipGrid)
 			return qfalse;
 	}
 	

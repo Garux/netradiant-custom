@@ -1701,10 +1701,9 @@ void LightWorld( void )
 		SetupEnvelopes( qtrue, fastgrid );
 		
 		Sys_Printf( "--- TraceGrid ---\n" );
-		ps = patchShadows;
-		patchShadows = qfalse; /* patch shadows + lightgrid sampling tends to sample between patch and caulk, so let's turn that off for now FIXME */
+		inGrid = qtrue;
 		RunThreadsOnIndividual( numRawGridPoints, qtrue, TraceGrid );
-		patchShadows = ps;
+		inGrid = qfalse;
 		Sys_Printf( "%d x %d x %d = %d grid\n",
 			gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], numBSPGridPoints );
 		
@@ -1800,10 +1799,9 @@ void LightWorld( void )
 			gridBoundsCulled = 0;
 			
 			Sys_Printf( "--- BounceGrid ---\n" );
-			ps = patchShadows;
-			patchShadows = qfalse; /* patch shadows + lightgrid sampling tends to sample between patch and caulk, so let's turn that off for now FIXME */
+			inGrid = qtrue;
 			RunThreadsOnIndividual( numRawGridPoints, qtrue, TraceGrid );
-			patchShadows = ps;
+			inGrid = qfalse;
 			Sys_FPrintf( SYS_VRB, "%9d grid points envelope culled\n", gridEnvelopeCulled );
 			Sys_FPrintf( SYS_VRB, "%9d grid points bounds culled\n", gridBoundsCulled );
 		}

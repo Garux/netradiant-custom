@@ -105,6 +105,8 @@ template<typename Element, typename OtherElement>
 inline Element float_snapped(const Element& f, const OtherElement& snap)
 {
   //return Element(float_to_integer(f / snap) * snap);
+  if(snap == 0)
+  	return f;
   return Element(llrint(f / snap) * snap); // llrint has more significant bits
 }
 
