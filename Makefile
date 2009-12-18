@@ -184,9 +184,11 @@ ifeq ($(OS),Darwin)
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
 	CPPFLAGS_COMMON += -I/sw/include -I/usr/X11R6/include
-	LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
+	LDFLAGS_COMMON += -L/sw/lib  -L/usr/X11R6/lib
+	#LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
 	EXE ?= ppc
+	MACLIBDIR ?= /sw/lib
 	A = a
 	DLL = dylib
 	MWINDOWS =
@@ -906,12 +908,12 @@ $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_level.o \
 	contrib/ufoaiplug/ufoai.o \
 
-#$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
-#$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
-#$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): \
-#	contrib/bkgrnd2d/bkgrnd2d.o \
-#	contrib/bkgrnd2d/dialog.o \
-#	contrib/bkgrnd2d/plugin.o \
+$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): \
+	contrib/bkgrnd2d/bkgrnd2d.o \
+	contrib/bkgrnd2d/dialog.o \
+	contrib/bkgrnd2d/plugin.o \
 
 $(INSTALLDIR)/heretic2/h2data.$(EXE): LIBS_EXTRA := $(LIBS_XML)
 $(INSTALLDIR)/heretic2/h2data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) -Itools/quake2/qdata_heretic2/common -Itools/quake2/qdata_heretic2/qcommon -Itools/quake2/qdata_heretic2 -Itools/quake2/common -Ilibs -Iinclude
@@ -978,7 +980,7 @@ install-dll: binaries
 else
 ifeq ($(OS),Darwin)
 install-dll: binaries
-	CP="$(CP)" OTOOL="$(OTOOL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dylibs.sh
+	EXE="$(EXE)" MACLIBDIR="$(MACLIBDIR)" CP="$(CP)" OTOOL="$(OTOOL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dylibs.sh
 else
 install-dll: binaries
 	@$(ECHO) No DLL inclusion implemented for this target.

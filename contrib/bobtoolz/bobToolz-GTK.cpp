@@ -62,7 +62,7 @@ void BobToolz_destroy()
 char* PLUGIN_NAME = "bobToolz";
 
 // commands in the menu
-static char* PLUGIN_COMMANDS = "About...,-,Reset Textures...,PitOMatic,-,Vis Viewer,Brush Cleanup,Polygon Builder,Caulk Selection,-,Tree Planter,Drop Entity,Plot Splines,-,Merge Patches,Split patches,Turn edge";
+static char* PLUGIN_COMMANDS = "About...,-,Reset Textures...,PitOMatic,-,Vis Viewer,Brush Cleanup,Polygon Builder,Caulk Selection,-,Tree Planter,Drop Entity,Plot Splines,-,Merge Patches,Split patches,Split patches cols,Split patches rows,Turn edge";
 
 // globals
 GtkWidget *g_pRadiantWnd = NULL;
@@ -106,6 +106,10 @@ extern "C" void QERPlug_Dispatch (const char *p, vec3_t vMin, vec3_t vMax, bool 
     DoMergePatches();
   } else if( string_equal_nocase( p, "split patches" ) ) {
     DoSplitPatch();
+  } else if( string_equal_nocase( p, "split patches rows" ) ) {
+	DoSplitPatchRows();
+  } else if( string_equal_nocase( p, "split patches cols" ) ) {
+	DoSplitPatchCols();
   } else if( string_equal_nocase( p, "turn edge" ) ) {
     DoFlipTerrain();
   } else if( string_equal_nocase(p, "reset textures...") ) {

@@ -499,11 +499,69 @@ void DoSplitPatch() {
 
 	patch.LoadFromPatch(instance);
 
-	std::list<DPatch> patchList = patch.Split( true, true );
+	std::list<DPatch> patchList = patch.Split();
 	for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++) {
 		(*patches).BuildInRadiant();
 	}
 
+	Path_deleteTop(instance.path());
+}
+
+void DoSplitPatchCols() {
+	UndoableCommand undo("bobToolz.splitPatchCols");
+	
+	DPatch patch;
+	
+	// ensure we have something selected
+	if( GlobalSelectionSystem().countSelected() != 1 )
+	{
+		DoMessageBox("Invalid number of patches selected, choose 1 only", "Error", eMB_OK);
+		return; 
+	}
+	
+	scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+	
+	if( !Node_isPatch(instance.path().top()) ) {
+		DoMessageBox("You must select ONLY patches", "Error", eMB_OK);
+		return; 
+	}
+	
+	patch.LoadFromPatch(instance);
+	
+	std::list<DPatch> patchList = patch.SplitCols();
+	for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++) {
+		(*patches).BuildInRadiant();
+	}
+	
+	Path_deleteTop(instance.path());
+}
+
+void DoSplitPatchRows() {
+	UndoableCommand undo("bobToolz.splitPatchRows");
+	
+	DPatch patch;
+	
+	// ensure we have something selected
+	if( GlobalSelectionSystem().countSelected() != 1 )
+	{
+		DoMessageBox("Invalid number of patches selected, choose 1 only", "Error", eMB_OK);
+		return; 
+	}
+	
+	scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+	
+	if( !Node_isPatch(instance.path().top()) ) {
+		DoMessageBox("You must select ONLY patches", "Error", eMB_OK);
+		return; 
+	}
+	
+	patch.LoadFromPatch(instance);
+	
+	std::list<DPatch> patchList = patch.SplitRows();
+	for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++) {
+		(*patches).BuildInRadiant();
+	}
+	
 	Path_deleteTop(instance.path());
 }
 
