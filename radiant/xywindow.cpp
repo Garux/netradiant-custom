@@ -2587,7 +2587,7 @@ void XY_Split_Focus()
 
 void XY_Focus()
 {
-  if (g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating)
+  if (g_pParentWnd->CurrentStyle() == MainFrame::eSplit)
   {
 	  // cannot do this in a split window
 	  // do something else that the user may want here
