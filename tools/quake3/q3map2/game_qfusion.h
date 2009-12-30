@@ -119,11 +119,11 @@ game_t struct
 	1.0f,				/* lightmap compensate */
 	1.0f,				/* lightgrid scale */
 	1.0f,				/* lightgrid ambient scale */
-	qfalse,				/* disable shader lightstyles hack */
+	qtrue,				/* disable shader lightstyles hack */
 	qfalse,				/* keep light entities on bsp */
 	8,					/* default patchMeta subdivisions tolerance */
 	qfalse,				/* patch casting enabled */
-	qfalse,				/* compile deluxemaps */
+	qtrue,				/* compile deluxemaps */
 	0,					/* deluxemaps default mode */
 	256,                /* minimap size */
 	1.0f,               /* minimap sharpener */
