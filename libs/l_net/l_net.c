@@ -480,7 +480,7 @@ void NMSG_WriteString(netmessage_t *msg, char *string)
 		WinPrint("NMSG_WriteString: overflow\n");
 		return;
 	} //end if
-	strcpy(&msg->data[msg->size], string);
+	memcpy(&msg->data[msg->size], string, strlen(string) + 1);
 	msg->size += strlen(string) + 1;
 } //end of the function NMSG_WriteString
 //===========================================================================
@@ -502,7 +502,7 @@ void NMSG_ReadStart(netmessage_t *msg)
 //===========================================================================
 int NMSG_ReadChar(netmessage_t *msg)
 {
-	if (msg->size + 1 > msg->size)
+	if (msg->read + 1 > msg->size)
 	{
 		msg->readoverflow = qtrue;
 		WinPrint("NMSG_ReadChar: read overflow\n");
