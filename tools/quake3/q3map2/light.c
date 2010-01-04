@@ -1324,7 +1324,7 @@ void TraceGrid( int num )
 		}
 		
 		/* can't find a valid point at all */
-		if( step > 0.5 )
+		if( step > 1.0 )
 			return;
 	}
 	
