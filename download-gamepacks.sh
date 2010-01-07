@@ -69,6 +69,7 @@ pack()
 	esac
 }
 
+mkdir -p games
 pack NexuizPack      GPL         svn svn://svn.icculus.org/nexuiz/trunk/misc/netradiant-NexuizPack
 pack Quake2WorldPack GPL         svn svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
 pack DarkPlacesPack  GPL         svn https://zerowing.idsoftware.com/svn/radiant.gamepacks/DarkPlacesPack/branches/1.5/
