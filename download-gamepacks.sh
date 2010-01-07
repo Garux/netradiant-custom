@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Usage:
+#   sh download-gamepack.sh
+#   LICENSEFILTER=GPL BATCH=1 sh download-gamepack.sh
+
 pack()
 {
 	pack=$1; shift
