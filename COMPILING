@@ -66,7 +66,7 @@ Win32 (2000, XP, Vista or Windows 7)
 environment:
 - MinGW
   http://www.mingw.org/wiki/HOWTO_Install_the_MinGW_GCC_Compiler_Suite (the installer link)
-  Install this to c:\mingw
+  Install this to c:\mingw, and select the components C compiler, C++ compiler, Make
 - MSYS
   http://www.mingw.org/wiki/msys (you need the installer MSYS-versionnumber.exe)
   Install this to c:\msys\1.0
