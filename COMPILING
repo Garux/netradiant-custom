@@ -51,6 +51,7 @@ environment:
 - fink installed
 - the following fink packages installed:
   gtkglext1 pkgconfig glib2-dev libxml2 gtk+2-dev pango1-xft2-dev atk-dev atk1 gettext-dev
+- Subversion must be installed and available in PATH to download the game packs
 
 build:
 run 'make'
@@ -71,6 +72,7 @@ environment:
 - Prepackaged Radiant dependencies (Gtk and other stuff):
   http://www.icculus.org/netradiant/files/radiant-deps-mingw32.zip
   Preferably extract this one to c:\mingw\radiant-deps-mingw32
+- Subversion must be installed and available in PATH to download the game packs
 
 build:
 - Start the MSYS shell (to be found in c:\msys\1.0\msys.bat)
