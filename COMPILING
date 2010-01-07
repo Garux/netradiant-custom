@@ -58,28 +58,29 @@ build:
 run 'make'
 
 run:
-???
+Switch into the install folder, and run NetRadiant.app
 
-Jva32 (2000, KC be Ivfgn)
+Win32 (2000, XP, Vista or Windows 7)
 ==================
 
-raivebazrag:
-- ivfhny fghqvb 2005
-- clguba 2.3.0 be yngre (fbzr ohvyq fgrcf hfr clguba)
-- fhoirefvba 1.1 be yngre (fbzr ohvyq fgrcf hfr fia)
+environment:
+- MinGW
+  http://www.mingw.org/wiki/HOWTO_Install_the_MinGW_GCC_Compiler_Suite (the installer link)
+  Install this to c:\mingw
+- MSYS
+  http://www.mingw.org/wiki/msys (you need the installer MSYS-versionnumber.exe)
+  Install this to c:\msys\1.0
+- Prepackaged Radiant dependencies (Gtk and other stuff):
+  http://www.icculus.org/netradiant/files/radiant-deps-mingw32.zip
+  Preferably extract this one to c:\mingw\radiant-deps-mingw32
 
-qrcraqrapvrf ner cercnpxntrq nepuvirf, rkgenpg gurz gb gur qverpgbel nobir TgxEnqvnag.fya:
-- uggc://mrebjvat.vqfbsgjner.pbz/svyrf/enqvnag/qrirybcre/1.5/tgxenqvnag-1.5-qrcraqrapvrf-1.0.mvc
+build:
+- Start the MSYS shell (to be found in c:\msys\1.0\msys.bat)
+- Switch to the directory with NetRadiant source
+- cp mingw-Makefile.conf Makefile.conf
+- (edit mingw-Makefile.conf in case you installed anything to other locations
+  than the recommended ones)
+- make
 
-ohvyq:
-Bcra TgxEnqvnag.fya.
-Va gbbyf > bcgvbaf > cebwrpgf > IP++ Qverpgbevrf > rkrphgnoyrf, nqq gur cnguf gb clguba.rkr (r.t. p:\clguba23\) naq fia.rkr (r.t. p:\fia\)
-Uvg 'Ohvyq > Ohvyq Fbyhgvba' (S7)
-
-vafgnyy:
-eha 'clguba ./TgxEnqvnag/vafgnyy.cl'
-abgr - guvf fpevcg fubhyq or eha nsgre rnpu gvzr lbh hcqngr sebz fia
-
-eha:
-frg Cebwrpg > Cebcregvrf > Qrohttvat > Pbzznaq gb "$(FbyhgvbaQve)vafgnyy/$(GnetrgSvyrAnzr)"
-uvg 'Qroht > Fgneg' (S5)
+run:
+- in the "install" directory, double click netradiant.exe
