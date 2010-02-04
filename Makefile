@@ -958,19 +958,7 @@ install-data: binaries
 	[ "$(OS)" != "Darwin" ] || $(CP_R) setup/data/osx/NetRadiant.app/* $(INSTALLDIR_BASE)/NetRadiant.app/
 	set -ex; \
 	for GAME in games/*; do \
-		if [ x"$$GAME" = x"games/*" ]; then \
-			echo; echo "*** NO GAME PACKS FOUND ***"; echo "Please run download-gamepacks.sh and try again."; echo; echo; \
-			continue; \
-		fi; \
-		if [ -d "$$GAME/tools" ]; then \
-			GAME=$$GAME/tools; \
-		fi; \
-		for GAMEFILE in $$GAME/games/*.game; do \
-			$(CP) "$$GAMEFILE" $(INSTALLDIR)/games/; \
-		done; \
-		for GAMEDIR in $$GAME/*.game; do \
-			$(CP_R) "$$GAMEDIR" $(INSTALLDIR)/; \
-		done; \
+		CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepack.sh "$$GAME" "$(INSTALLDIR)"; \
 	done
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
