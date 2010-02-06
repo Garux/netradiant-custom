@@ -227,6 +227,7 @@ void Filters_constructMenu(GtkMenu* menu_in_menu)
   if(g_pGameDescription->mGameType != "doom3")
   {
     create_check_menu_item_with_mnemonic(menu_in_menu, "Botclips", "FilterBotClips");
+	create_check_menu_item_with_mnemonic(menu_in_menu, "Decals", "FilterDecals");
   }
   // filter manipulation
   menu_separator(menu_in_menu);
@@ -278,6 +279,7 @@ void ConstructFilters()
   if(g_pGameDescription->mGameType != "doom3")
   {
     add_filter_command(EXCLUDE_BOTCLIP, "FilterBotClips", Accelerator('M', (GdkModifierType)GDK_MOD1_MASK));
+	add_filter_command(EXCLUDE_DECALS, "FilterDecals", Accelerator('D', (GdkModifierType)GDK_SHIFT_MASK));
   }
 
   PerformFiltering();

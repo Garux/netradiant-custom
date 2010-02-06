@@ -1128,6 +1128,9 @@ filter_brush_all_faces g_filter_brush_translucent(&g_filter_face_translucent);
 filter_face_contents g_filter_face_detail(BRUSH_DETAIL_MASK);
 filter_brush_all_faces g_filter_brush_detail(&g_filter_face_detail);
 
+filter_face_shader_prefix g_filter_face_decals("textures/decals/");
+filter_brush_any_face g_filter_brush_decals(&g_filter_face_decals);
+
 
 void BrushFilters_construct()
 {
@@ -1152,6 +1155,7 @@ void BrushFilters_construct()
   add_brush_filter(g_filter_brush_detail, EXCLUDE_DETAILS);
   add_brush_filter(g_filter_brush_detail, EXCLUDE_STRUCTURAL, true);
   add_brush_filter(g_filter_brush_lightgrid, EXCLUDE_LIGHTGRID);
+  add_brush_filter(g_filter_brush_decals, EXCLUDE_DECALS);
 }
 
 #if 0
