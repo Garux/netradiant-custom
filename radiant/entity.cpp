@@ -419,7 +419,7 @@ void Entity_createFromSelection(const char* name, const Vector3& origin)
   }
 }
 
-
+#if 0
 bool DoNormalisedColor(Vector3& color)
 {
   if(!color_dialog(GTK_WIDGET(MainFrame_getWindow()), color))
@@ -454,13 +454,75 @@ bool DoNormalisedColor(Vector3& color)
 
   return true;
 }
+#endif 
+
+void NormalizeColor(Vector3& color)
+{
+  // scale colors so that at least one component is at 1.0F 
+
+  float largest = 0.0F;
+
+  if ( color[0] > largest )
+    largest = color[0];
+  if ( color[1] > largest )
+    largest = color[1];
+  if ( color[2] > largest )
+    largest = color[2];
+
+  if ( largest == 0.0F )
+  {
+    color[0] = 1.0F;
+    color[1] = 1.0F;
+    color[2] = 1.0F;
+  }
+  else
+  {
+    float scaler = 1.0F / largest;
+
+    color[0] *= scaler;
+    color[1] *= scaler;
+    color[2] *= scaler;
+  }
+}
+
+void Entity_normalizeColor()
+{
+	if(GlobalSelectionSystem().countSelected() != 0)
+	{
+		const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
+		Entity* entity = Node_getEntity(path.top());
+
+		if(entity != 0)
+		{
+			const char* strColor = entity->getKeyValue("_color");
+			if(!string_empty(strColor))
+			{
+				Vector3 rgb;
+				if (string_parse_vector3(strColor, rgb))
+				{
+					g_entity_globals.color_entity = rgb;
+					NormalizeColor(g_entity_globals.color_entity);
+
+					char buffer[128];
+					sprintf(buffer, "%g %g %g", g_entity_globals.color_entity[0],
+						g_entity_globals.color_entity[1],
+						g_entity_globals.color_entity[2]);
+
+					Scene_EntitySetKeyValue_Selected("_color", buffer);
+				}
+			}
+		}
+	}
+}
 
 void Entity_setColour()
 {
   if(GlobalSelectionSystem().countSelected() != 0)
   {
+	bool normalize = false;
     const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
     Entity* entity = Node_getEntity(path.top());
+
     if(entity != 0)
     {
       const char* strColor = entity->getKeyValue("_color");
@@ -473,17 +535,21 @@ void Entity_setColour()
         }
       }
 
-      if(g_pGameDescription->mGameType == "doom3"
-        ? color_dialog(GTK_WIDGET(MainFrame_getWindow()), g_entity_globals.color_entity)
-        : DoNormalisedColor(g_entity_globals.color_entity))
-      {
-        char buffer[128];
-        sprintf(buffer, "%g %g %g", g_entity_globals.color_entity[0],
-                g_entity_globals.color_entity[1],
-                g_entity_globals.color_entity[2]);
+	  if( g_pGameDescription->mGameType == "doom3" )
+		  normalize = false;
 
-        Scene_EntitySetKeyValue_Selected("_color", buffer);
-      }
+	  if(color_dialog(GTK_WIDGET(MainFrame_getWindow()), g_entity_globals.color_entity))
+	  {
+		  if( normalize )
+			  NormalizeColor(g_entity_globals.color_entity);
+
+		  char buffer[128];
+		  sprintf(buffer, "%g %g %g", g_entity_globals.color_entity[0],
+			  g_entity_globals.color_entity[1],
+			  g_entity_globals.color_entity[2]);
+
+		  Scene_EntitySetKeyValue_Selected("_color", buffer);
+	  }
     }
   }
 }
@@ -553,6 +619,7 @@ void Entity_constructMenu(GtkMenu* menu)
   create_menu_item_with_mnemonic(menu, "_Ungroup", "UngroupSelection");
   create_menu_item_with_mnemonic(menu, "_Connect", "ConnectSelection");
   create_menu_item_with_mnemonic(menu, "_Select Color...", "EntityColor");
+  create_menu_item_with_mnemonic(menu, "_Normalize Color...", "NormalizeColor");
 }
 
 
@@ -563,6 +630,7 @@ void Entity_constructMenu(GtkMenu* menu)
 void Entity_Construct()
 {
   GlobalCommands_insert("EntityColor", FreeCaller<Entity_setColour>(), Accelerator('K'));
+  GlobalCommands_insert("NormalizeColor", FreeCaller<Entity_normalizeColor>());
   GlobalCommands_insert("ConnectSelection", FreeCaller<Entity_connectSelected>(), Accelerator('K', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("GroupSelection", FreeCaller<Entity_groupSelected>());
   GlobalCommands_insert("UngroupSelection", FreeCaller<Entity_ungroupSelected>());
