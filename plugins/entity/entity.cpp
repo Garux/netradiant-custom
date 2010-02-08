@@ -132,12 +132,23 @@ class ConnectEntities
 public:
   Entity* m_e1;
   Entity* m_e2;
-  ConnectEntities(Entity* e1, Entity* e2) : m_e1(e1), m_e2(e2)
+  int m_index;
+  ConnectEntities(Entity* e1, Entity* e2, int index) : m_e1(e1), m_e2(e2), m_index(index)
   {
+  }
+  const char *keyname()
+  {
+    StringOutputStream key(16);
+    if(m_index <= 0)
+      return "target";
+    if(m_index == 1)
+      return "killtarget";
+    key << "target" << m_index;
+    return key.c_str();
   }
   void connect(const char* name)
   {
-	  m_e1->setKeyValue("target", name);
+	  m_e1->setKeyValue(keyname(), name);
 	  m_e2->setKeyValue("targetname", name);
   }
   typedef MemberCaller1<ConnectEntities, const char*, &ConnectEntities::connect> ConnectCaller;
@@ -168,7 +179,7 @@ public:
   {
     EntityKeyValues::setCounter(counter);
   }
-  void connectEntities(const scene::Path& path, const scene::Path& targetPath)
+  void connectEntities(const scene::Path& path, const scene::Path& targetPath, int index)
   {
     Entity* e1 = ScenePath_getEntity(path);
     Entity* e2 = ScenePath_getEntity(targetPath);
@@ -191,29 +202,42 @@ public:
     if(g_gameType == eGameTypeDoom3)
     {
       StringOutputStream key(16);
-      for(unsigned int i = 0; ; ++i)
+      if(index >= 0)
       {
-        key << "target";
-        if(i != 0)
-        {
-           key << i;
-        }
-        const char* value = e1->getKeyValue(key.c_str());
-        if(string_empty(value))
-        {
-          e1->setKeyValue(key.c_str(), e2->getKeyValue("name"));
-          break;
-        }
-        key.clear();
+	  key << "target";
+	  if(index != 0)
+	  {
+	    key << index;
+	  }
+	  e1->setKeyValue(key.c_str(), e2->getKeyValue("name"));
+	  key.clear();
+      }
+      else
+      {
+	for(unsigned int i = 0; ; ++i)
+	{
+	  key << "target";
+	  if(i != 0)
+	  {
+	    key << i;
+	  }
+	  const char* value = e1->getKeyValue(key.c_str());
+	  if(string_empty(value))
+	  {
+	    e1->setKeyValue(key.c_str(), e2->getKeyValue("name"));
+	    break;
+	  }
+	  key.clear();
+	}
       }
     }
     else
     {
-      ConnectEntities connector(e1, e2);
+      ConnectEntities connector(e1, e2, index);
       const char* value = e2->getKeyValue("targetname");
       if(string_empty(value))
       {
-        value = e1->getKeyValue("target");
+        value = e1->getKeyValue(connector.keyname());
       }
       if(!string_empty(value))
       {

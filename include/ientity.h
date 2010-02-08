@@ -124,7 +124,7 @@ public:
 
   virtual void setCounter(Counter* counter) = 0;
 
-  virtual void connectEntities(const scene::Path& e1, const scene::Path& e2) = 0;
+  virtual void connectEntities(const scene::Path& e1, const scene::Path& e2, int index) = 0;
 
   virtual void setLightRadii(bool lightRadii) = 0;
   virtual bool getLightRadii() = 0;

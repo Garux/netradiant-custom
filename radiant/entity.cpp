@@ -258,12 +258,29 @@ void Entity_connectSelected()
   {
     GlobalEntityCreator().connectEntities(
       GlobalSelectionSystem().penultimateSelected().path(),
-      GlobalSelectionSystem().ultimateSelected().path()
+      GlobalSelectionSystem().ultimateSelected().path(),
+      0
     );
   }
   else
   {
     globalErrorStream() << "entityConnectSelected: exactly two instances must be selected\n";
+  }
+}
+
+void Entity_killconnectSelected()
+{
+  if(GlobalSelectionSystem().countSelected() == 2)
+  {
+    GlobalEntityCreator().connectEntities(
+      GlobalSelectionSystem().penultimateSelected().path(),
+      GlobalSelectionSystem().ultimateSelected().path(),
+      1
+    );
+  }
+  else
+  {
+    globalErrorStream() << "entityKillConnectSelected: exactly two instances must be selected\n";
   }
 }
 
@@ -618,6 +635,7 @@ void Entity_constructMenu(GtkMenu* menu)
   create_menu_item_with_mnemonic(menu, "_Regroup", "GroupSelection");
   create_menu_item_with_mnemonic(menu, "_Ungroup", "UngroupSelection");
   create_menu_item_with_mnemonic(menu, "_Connect", "ConnectSelection");
+  create_menu_item_with_mnemonic(menu, "_KillConnect", "KillConnectSelection");
   create_menu_item_with_mnemonic(menu, "_Select Color...", "EntityColor");
   create_menu_item_with_mnemonic(menu, "_Normalize Color...", "NormalizeColor");
 }
@@ -632,6 +650,7 @@ void Entity_Construct()
   GlobalCommands_insert("EntityColor", FreeCaller<Entity_setColour>(), Accelerator('K'));
   GlobalCommands_insert("NormalizeColor", FreeCaller<Entity_normalizeColor>());
   GlobalCommands_insert("ConnectSelection", FreeCaller<Entity_connectSelected>(), Accelerator('K', (GdkModifierType)GDK_CONTROL_MASK));
+  GlobalCommands_insert("KillConnectSelection", FreeCaller<Entity_killconnectSelected>(), Accelerator('K', (GdkModifierType)(GDK_SHIFT_MASK)));
   GlobalCommands_insert("GroupSelection", FreeCaller<Entity_groupSelected>());
   GlobalCommands_insert("UngroupSelection", FreeCaller<Entity_ungroupSelected>());
 
