@@ -39,7 +39,7 @@ public:
   {
     return m_value;
   }
-  void write(char* buffer)
+  void write(char* buffer) const
   {
     sprintf(buffer, "%u", m_value);
   }
@@ -136,9 +136,11 @@ inline name_t name_read(const char* name)
 
 class PostFixes
 {
+public:
   typedef std::map<Postfix, unsigned int> postfixes_t;
   postfixes_t m_postfixes;
 
+private:
   Postfix find_first_empty() const
   {
     Postfix postfix("1");
@@ -207,15 +209,33 @@ class UniqueNames
 public:
   name_t make_unique(const name_t& name) const
   {
+    char buf[80];
+    name_t r("","");
+	name_write(buf, name);
+    globalErrorStream() << "find unique name for " << buf << "\n";
+	globalErrorStream() << "> currently registered names:\n";
+	for(names_t::const_iterator i = m_names.begin(); i != m_names.end(); ++i)
+	{
+		globalErrorStream() << ">> " << i->first.c_str() << ": ";
+		for(PostFixes::postfixes_t::const_iterator j = i->second.m_postfixes.begin(); j != i->second.m_postfixes.end(); ++j)
+		{
+			j->first.write(buf);
+			globalErrorStream() << " '" << buf << "'";
+		}
+		globalErrorStream() << "\n";
+	}
     names_t::const_iterator i = m_names.find(name.first);
     if(i == m_names.end())
     {
-      return name;
+      r = name;
     }
     else
     {
-      return name_t(name.first, (*i).second.make_unique(name.second));
+      r = name_t(name.first, (*i).second.make_unique(name.second));
     }
+	name_write(buf, r);
+    globalErrorStream() << "> unique name is " << buf << "\n";
+	return r;
   }
 
   void insert(const name_t& name)
