@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "targetable.h"
 #include "origin.h"
-#include "angle.h"
+#include "angles.h"
 #include "filters.h"
 #include "namedentity.h"
 #include "keyobservers.h"
@@ -53,17 +53,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 class RenderableArrow : public OpenGLRenderable
 {
-  const Ray& m_ray;
+  const Vector3& m_origin;
+  const Vector3& m_angles;
 
 public:
-  RenderableArrow(const Ray& ray)
-    : m_ray(ray)
+  RenderableArrow(const Vector3& origin, const Vector3& angles)
+    : m_origin(origin), m_angles(angles)
   {
   }
 
   void render(RenderStateFlags state) const
   {
-    arrow_draw(m_ray.origin, m_ray.direction);
+    Matrix4 mat = matrix4_rotation_for_euler_xyz_degrees(m_angles);
+    arrow_draw(m_origin, matrix4_transformed_direction(mat, Vector3(1, 0, 0)), matrix4_transformed_direction(mat, Vector3(0, 1, 0)), matrix4_transformed_direction(mat, Vector3(0, 0, 1)));
   }
 };
 
@@ -84,15 +86,14 @@ class GenericEntity :
 
   OriginKey m_originKey;
   Vector3 m_origin;
-  AngleKey m_angleKey;
-  float m_angle;
+  AnglesKey m_anglesKey;
+  Vector3 m_angles;
 
   ClassnameFilter m_filter;
   NamedEntity m_named;
   NameKeys m_nameKeys;
 
   AABB m_aabb_local;
-  Ray m_ray;
 
   RenderableArrow m_arrow;
   RenderableSolidAABB m_aabb_solid;
@@ -105,14 +106,11 @@ class GenericEntity :
   void construct()
   {
     read_aabb(m_aabb_local, m_entity.getEntityClass());
-    m_ray.origin = m_aabb_local.origin;
-    m_ray.direction[0] = 1;
-    m_ray.direction[1] = 0;
-    m_ray.direction[2] = 0;
 
     m_keyObservers.insert("classname", ClassnameFilter::ClassnameChangedCaller(m_filter));
     m_keyObservers.insert(Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller(m_named));
-    m_keyObservers.insert("angle", AngleKey::AngleChangedCaller(m_angleKey));
+    m_keyObservers.insert("angle", AnglesKey::AngleChangedCaller(m_anglesKey));
+    m_keyObservers.insert("angles", AnglesKey::AnglesChangedCaller(m_anglesKey));
     m_keyObservers.insert("origin", OriginKey::OriginChangedCaller(m_originKey));
   }
 
@@ -125,7 +123,6 @@ class GenericEntity :
   {
     m_transform.localToParent() = g_matrix4_identity;
     matrix4_translate_by_vec3(m_transform.localToParent(), m_origin);
-    m_ray.direction = matrix4_transformed_direction(matrix4_rotation_for_z(degrees_to_radians(m_angle)), Vector3(1, 0, 0));
     m_transformChanged();
   }
   typedef MemberCaller<GenericEntity, &GenericEntity::updateTransform> UpdateTransformCaller;
@@ -135,24 +132,24 @@ class GenericEntity :
     updateTransform();
   }
   typedef MemberCaller<GenericEntity, &GenericEntity::originChanged> OriginChangedCaller;
-  void angleChanged()
+  void anglesChanged()
   {
-    m_angle = m_angleKey.m_angle;
+    m_angles = m_anglesKey.m_angles;
     updateTransform();
   }
-  typedef MemberCaller<GenericEntity, &GenericEntity::angleChanged> AngleChangedCaller;
+  typedef MemberCaller<GenericEntity, &GenericEntity::anglesChanged> AnglesChangedCaller;
 public:
 
   GenericEntity(EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform) :
     m_entity(eclass),
     m_originKey(OriginChangedCaller(*this)),
     m_origin(ORIGINKEY_IDENTITY),
-    m_angleKey(AngleChangedCaller(*this)),
-    m_angle(ANGLEKEY_IDENTITY),
+    m_anglesKey(AnglesChangedCaller(*this)),
+    m_angles(ANGLESKEY_IDENTITY),
     m_filter(m_entity, node),
     m_named(m_entity),
     m_nameKeys(m_entity),
-    m_arrow(m_ray),
+    m_arrow(m_aabb_local.origin, m_angles),
     m_aabb_solid(m_aabb_local),
     m_aabb_wire(m_aabb_local),
     m_renderName(m_named, g_vector3_identity),
@@ -165,12 +162,12 @@ public:
     m_entity(other.m_entity),
     m_originKey(OriginChangedCaller(*this)),
     m_origin(ORIGINKEY_IDENTITY),
-    m_angleKey(AngleChangedCaller(*this)),
-    m_angle(ANGLEKEY_IDENTITY),
+    m_anglesKey(AnglesChangedCaller(*this)),
+    m_angles(ANGLESKEY_IDENTITY),
     m_filter(m_entity, node),
     m_named(m_entity),
     m_nameKeys(m_entity),
-    m_arrow(m_ray),
+    m_arrow(m_aabb_local.origin, m_angles),
     m_aabb_solid(m_aabb_local),
     m_aabb_wire(m_aabb_local),
     m_renderName(m_named, g_vector3_identity),
@@ -275,7 +272,7 @@ public:
   }
   void rotate(const Quaternion& rotation)
   {
-    m_angle = angle_rotated(m_angle, rotation);
+    m_angles = angles_rotated(m_angles, rotation);
   }
   void snapto(float snap)
   {
@@ -285,14 +282,14 @@ public:
   void revertTransform()
   {
     m_origin = m_originKey.m_origin;
-    m_angle = m_angleKey.m_angle;
+    m_angles = m_anglesKey.m_angles;
   }
   void freezeTransform()
   {
     m_originKey.m_origin = m_origin;
     m_originKey.write(&m_entity);
-    m_angleKey.m_angle = m_angle;
-    m_angleKey.write(&m_entity);
+    m_anglesKey.m_angles = m_angles;
+    m_anglesKey.write(&m_entity);
   }
   void transformChanged()
   {

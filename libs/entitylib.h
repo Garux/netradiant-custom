@@ -43,17 +43,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include <set>
 
-inline void arrow_draw(const Vector3& origin, const Vector3& direction)
+inline void arrow_draw(const Vector3& origin, const Vector3& direction_forward, const Vector3& direction_left, const Vector3& direction_up)
 {
-  Vector3 up(0, 0, 1);
-  Vector3 left(-direction[1], direction[0], 0);
+	Vector3 endpoint(vector3_added(origin, vector3_scaled(direction_forward, 32.0)));
 
-	Vector3 endpoint(vector3_added(origin, vector3_scaled(direction, 32.0)));
-
-  Vector3 tip1(vector3_added(vector3_added(endpoint, vector3_scaled(direction, -8.0)), vector3_scaled(up, -4.0)));
-	Vector3 tip2(vector3_added(tip1, vector3_scaled(up, 8.0)));
-  Vector3 tip3(vector3_added(vector3_added(endpoint, vector3_scaled(direction, -8.0)), vector3_scaled(left, -4.0)));
-	Vector3 tip4(vector3_added(tip3, vector3_scaled(left, 8.0)));
+  Vector3 tip1(vector3_added(vector3_added(endpoint, vector3_scaled(direction_forward, -8.0)), vector3_scaled(direction_up, -4.0)));
+	Vector3 tip2(vector3_added(tip1, vector3_scaled(direction_up, 8.0)));
+  Vector3 tip3(vector3_added(vector3_added(endpoint, vector3_scaled(direction_forward, -8.0)), vector3_scaled(direction_left, -4.0)));
+	Vector3 tip4(vector3_added(tip3, vector3_scaled(direction_left, 8.0)));
 
   glBegin (GL_LINES);
 
