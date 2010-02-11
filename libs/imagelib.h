@@ -46,7 +46,7 @@ public:
   }
   ~RGBAImage()
   {
-    delete pixels;
+    delete[] pixels;
   }
 
   void release()
