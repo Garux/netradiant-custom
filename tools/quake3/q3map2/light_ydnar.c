@@ -1425,7 +1425,7 @@ float DirtForSample( trace_t *trace )
 	VectorCopy( trace->normal, normal );
 	
 	/* check if the normal is aligned to the world-up */
-	if( normal[ 0 ] == 0.0f && normal[ 1 ] == 0.0f )
+	if( normal[ 0 ] == 0.0f && normal[ 1 ] == 0.0f && ( normal[ 2 ] == 1.0f || normal[ 2 ] == -1.0f ) )
 	{
 		if( normal[ 2 ] == 1.0f )		
 		{
