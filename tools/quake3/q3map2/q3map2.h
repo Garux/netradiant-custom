@@ -562,6 +562,7 @@ typedef struct game_s
 	float				lightmapCompensate;				/* default lightmap compensate value */
 	float				gridScale;						/* vortex: default lightgrid scale (affects both directional and ambient spectres) */
 	float				gridAmbientScale;				/* vortex: default lightgrid ambient spectre scale */
+	qboolean			lightAngleHL;					/* jal: use half-lambert curve for light angle attenuation */
 	qboolean			noStyles;						/* use lightstyles hack or not */
 	qboolean			keepLights;						/* keep light entities on bsp */
 	int					patchSubdivisions;				/* default patch subdivisions tolerance */
@@ -2217,6 +2218,9 @@ Q_EXTERN float				pointScale Q_ASSIGN( 7500.0f );
 Q_EXTERN float				areaScale Q_ASSIGN( 0.25f );
 Q_EXTERN float				skyScale Q_ASSIGN( 1.0f );
 Q_EXTERN float				bounceScale Q_ASSIGN( 0.25f );
+
+/* jal: alternative angle attenuation curve */
+Q_EXTERN qboolean			lightAngleHL Q_ASSIGN( qfalse );
  
 /* vortex: gridscale and gridambientscale */
 Q_EXTERN float				gridScale Q_ASSIGN( 1.0f );

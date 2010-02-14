@@ -865,17 +865,39 @@ int LightContributionToSample( trace_t *trace )
 			dist = 16.0f;
 		
 		/* angle attenuation */
-		angle = (light->flags & LIGHT_ATTEN_ANGLE) ? DotProduct( trace->normal, trace->direction ) : 1.0f;
+		if( light->flags & LIGHT_ATTEN_ANGLE )
+		{
+			/* standard Lambert attenuation */
+			float dot = DotProduct( trace->normal, trace->direction ); 
+
+			/* twosided lighting */
+			if( trace->twoSided )
+				dot = fabs( dot );
+
+			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
+			if( lightAngleHL )
+			{
+				if( dot > 0.001f ) // skip coplanar
+				{
+					if( dot > 1.0f ) dot = 1.0f;
+					dot = ( dot * 0.5f ) + 0.5f;
+					dot *= dot;
+				}
+				else
+					dot = 0;
+			}
+
+			angle = dot;
+		}
+		else
+			angle = 1.0f;
+
 		if( light->angleScale != 0.0f )
 		{
 			angle /= light->angleScale;
 			if( angle > 1.0f )
 				angle = 1.0f;
 		}
-		
-		/* twosided lighting */
-		if( trace->twoSided )
-			angle = fabs( angle );
 		
 		/* attenuate */
 		if( light->flags & LIGHT_ATTEN_LINEAR )
@@ -918,15 +940,34 @@ int LightContributionToSample( trace_t *trace )
 		/* get origin and direction */
 		VectorAdd( trace->origin, light->origin, trace->end );
 		dist = SetupTrace( trace );
-		
+
 		/* angle attenuation */
-		angle = (light->flags & LIGHT_ATTEN_ANGLE)
-			? DotProduct( trace->normal, trace->direction )
-			: 1.0f;
-		
-		/* twosided lighting */
-		if( trace->twoSided )
-			angle = fabs( angle );
+		if( light->flags & LIGHT_ATTEN_ANGLE )
+		{
+			/* standard Lambert attenuation */
+			float dot = DotProduct( trace->normal, trace->direction ); 
+
+			/* twosided lighting */
+			if( trace->twoSided )
+				dot = fabs( dot );
+
+			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
+			if( lightAngleHL )
+			{
+				if( dot > 0.001f ) // skip coplanar
+				{
+					if( dot > 1.0f ) dot = 1.0f;
+					dot = ( dot * 0.5f ) + 0.5f;
+					dot *= dot;
+				}
+				else
+					dot = 0;
+			}
+			
+			angle = dot;
+		}
+		else
+			angle = 1.0f;
 		
 		/* attenuate */
 		add = light->photons * angle;
@@ -1880,6 +1921,10 @@ int LightMain( int argc, char **argv )
 	gridAmbientScale = game->gridAmbientScale;
 	Sys_Printf( " lightgrid ambient scale: %f\n", gridAmbientScale );
 
+	lightAngleHL = game->lightAngleHL;
+	if( lightAngleHL )
+		Sys_Printf( " half lambert light angle attenuation enabled \n" );
+
 	noStyles = game->noStyles;
 	if (noStyles == qtrue)
 		Sys_Printf( " shader lightstyles hack: disabled\n" );
@@ -2415,6 +2460,17 @@ int LightMain( int argc, char **argv )
 		{
 			loMem = qtrue;
 			Sys_Printf( "Enabling low-memory (potentially slower) lighting mode\n" );
+		}
+		else if( !strcmp( argv[ i ], "-lightanglehl" ) )
+		{
+			if( ( atoi( argv[ i + 1 ] ) != 0 ) != lightAngleHL )
+			{
+				lightAngleHL = ( atoi( argv[ i + 1 ] ) != 0 );
+				if( lightAngleHL )
+					Sys_Printf( "Enabling half lambert light angle attenuation\n" );
+				else
+					Sys_Printf( "Disabling half lambert light angle attenuation\n" );
+			}
 		}
 		else if( !strcmp( argv[ i ], "-nostyle" ) || !strcmp( argv[ i ], "-nostyles" ) )
 		{

@@ -58,6 +58,7 @@ game_t struct
 	1.0f,				/* lightmap compensate */
 	0.4f,				/* lightgrid scale */
 	0.6f,				/* lightgrid ambient scale */
+	qfalse,				/* light angle attenuation uses half-lambert curve */
 	qtrue,				/* disable shader lightstyles hack */
 	qtrue,				/* keep light entities on bsp */
 	4,					/* default patchMeta subdivisions tolerance */

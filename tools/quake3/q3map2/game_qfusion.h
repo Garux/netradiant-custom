@@ -119,10 +119,11 @@ game_t struct
 	1.0f,				/* lightmap compensate */
 	1.0f,				/* lightgrid scale */
 	1.0f,				/* lightgrid ambient scale */
+	qtrue,				/* light angle attenuation uses half-lambert curve */
 	qtrue,				/* disable shader lightstyles hack */
-	qfalse,				/* keep light entities on bsp */
+	qtrue,				/* keep light entities on bsp */
 	8,					/* default patchMeta subdivisions tolerance */
-	qfalse,				/* patch casting enabled */
+	qtrue,				/* patch casting enabled */
 	qtrue,				/* compile deluxemaps */
 	0,					/* deluxemaps default mode */
 	256,                /* minimap size */
