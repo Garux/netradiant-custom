@@ -1965,6 +1965,44 @@ int FilterPointIntoTree_r( vec3_t point, mapDrawSurface_t *ds, node_t *node )
 	return AddReferenceToLeaf( ds, node );
 }
 
+/*
+FilterBoxIntoTree_r() - ydnar
+filters a box from a surface into the tree
+*/
+
+int FilterBoxIntoTree_r( vec3_t mins, vec3_t maxs, mapDrawSurface_t *ds, node_t *node )
+{
+	float			d, d0, d1, d2, dmin, dmax;
+	plane_t			*plane;
+	int				refs = 0;
+	
+	
+	/* is this a decision node? */
+	if( node->planenum != PLANENUM_LEAF )
+	{
+		/* classify the point in relation to the plane */
+		plane = &mapplanes[ node->planenum ];
+		d = DotProduct( mins, plane->normal ) - plane->dist;
+		d0 = (maxs[0] - mins[0]) * plane->normal[0];
+		d1 = (maxs[1] - mins[1]) * plane->normal[1];
+		d2 = (maxs[2] - mins[2]) * plane->normal[2];
+		dmax = d + (d0>0 ? d0 : 0) + (d1>0 ? d1 : 0) + (d2>0 ? d2 : 0);
+		dmin = d + (d0<0 ? d0 : 0) + (d1<0 ? d1 : 0) + (d2<0 ? d2 : 0);
+		
+		/* filter by this plane */
+		refs = 0;
+		if( dmax >= -ON_EPSILON )
+			refs += FilterBoxIntoTree_r( mins, maxs, ds, node->children[ 0 ] );
+		if( dmin <= ON_EPSILON )
+			refs += FilterBoxIntoTree_r( mins, maxs, ds, node->children[ 1 ] );
+		
+		/* return */
+		return refs;
+	}
+	
+	/* add a reference */
+	return AddReferenceToLeaf( ds, node );
+}
 
 
 /*
@@ -2095,13 +2133,12 @@ static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree )
 	mesh_t				src, *mesh;
 	winding_t			*w;
 	
-	
+#if 0
 	/* subdivide the surface */
 	src.width = ds->patchWidth;
 	src.height = ds->patchHeight;
 	src.verts = ds->verts;
 	mesh = SubdivideMesh( src, FILTER_SUBDIVISION, 32 );
-	
 	
 	/* filter each quad into the tree (fixme: use new patch x-triangulation code?) */
 	refs = 0;
@@ -2133,6 +2170,25 @@ static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree )
 	
 	/* free the subdivided mesh and return */
 	FreeMesh( mesh );
+#else
+	for(y = 0; y + 2 < ds->patchHeight; y += 2)
+		for(x = 0; x + 2 < ds->patchWidth; x += 2)
+		{
+			vec3_t mins, maxs;
+			ClearBounds(mins, maxs);
+			AddPointToBounds(ds->verts[(y+0) * ds->patchWidth + (x+0)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+0) * ds->patchWidth + (x+1)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+0) * ds->patchWidth + (x+2)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+1) * ds->patchWidth + (x+0)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+1) * ds->patchWidth + (x+1)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+1) * ds->patchWidth + (x+2)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+2) * ds->patchWidth + (x+0)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+2) * ds->patchWidth + (x+1)].xyz, mins, maxs);
+			AddPointToBounds(ds->verts[(y+2) * ds->patchWidth + (x+2)].xyz, mins, maxs);
+			refs += FilterBoxIntoTree_r(mins, maxs, ds, tree->headnode);
+		}
+#endif
+
 	return refs;
 }
 
