@@ -1966,35 +1966,42 @@ int FilterPointIntoTree_r( vec3_t point, mapDrawSurface_t *ds, node_t *node )
 }
 
 /*
-FilterBoxIntoTree_r() - ydnar
-filters a box from a surface into the tree
+FilterPointConvexHullIntoTree_r() - ydnar
+filters the convex hull of multiple points from a surface into the tree
 */
 
-int FilterBoxIntoTree_r( vec3_t mins, vec3_t maxs, mapDrawSurface_t *ds, node_t *node )
+int FilterPointConvexHullIntoTree_r( vec_t **points, int npoints, mapDrawSurface_t *ds, node_t *node )
 {
-	float			d, d0, d1, d2, dmin, dmax;
+	float			d, dmin, dmax;
 	plane_t			*plane;
 	int				refs = 0;
-	
+	int				i;
+
+	if(!points)
+		return 0;
 	
 	/* is this a decision node? */
 	if( node->planenum != PLANENUM_LEAF )
 	{
 		/* classify the point in relation to the plane */
 		plane = &mapplanes[ node->planenum ];
-		d = DotProduct( mins, plane->normal ) - plane->dist;
-		d0 = (maxs[0] - mins[0]) * plane->normal[0];
-		d1 = (maxs[1] - mins[1]) * plane->normal[1];
-		d2 = (maxs[2] - mins[2]) * plane->normal[2];
-		dmax = d + (d0>0 ? d0 : 0) + (d1>0 ? d1 : 0) + (d2>0 ? d2 : 0);
-		dmin = d + (d0<0 ? d0 : 0) + (d1<0 ? d1 : 0) + (d2<0 ? d2 : 0);
+
+		dmin = dmax = DotProduct( points[0], plane->normal ) - plane->dist;
+		for(i = 1; i < npoints; ++i)
+		{
+			d = DotProduct( points[i], plane->normal ) - plane->dist;
+			if(d > dmax)
+				dmax = d;
+			if(d < dmin)
+				dmin = d;
+		}
 		
 		/* filter by this plane */
 		refs = 0;
 		if( dmax >= -ON_EPSILON )
-			refs += FilterBoxIntoTree_r( mins, maxs, ds, node->children[ 0 ] );
+			refs += FilterPointConvexHullIntoTree_r( points, npoints, ds, node->children[ 0 ] );
 		if( dmin <= ON_EPSILON )
-			refs += FilterBoxIntoTree_r( mins, maxs, ds, node->children[ 1 ] );
+			refs += FilterPointConvexHullIntoTree_r( points, npoints, ds, node->children[ 1 ] );
 		
 		/* return */
 		return refs;
@@ -2129,65 +2136,23 @@ subdivides a patch into an approximate curve and filters it into the tree
 
 static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree )
 {
-	int					i, x, y, refs;
-	mesh_t				src, *mesh;
-	winding_t			*w;
+	int					x, y, refs;
 	
-#if 0
-	/* subdivide the surface */
-	src.width = ds->patchWidth;
-	src.height = ds->patchHeight;
-	src.verts = ds->verts;
-	mesh = SubdivideMesh( src, FILTER_SUBDIVISION, 32 );
-	
-	/* filter each quad into the tree (fixme: use new patch x-triangulation code?) */
-	refs = 0;
-	for( y = 0; y < (mesh->height - 1); y++ )
-	{
-		for( x = 0; x < (mesh->width - 1); x++ )
-		{
-			/* triangle 1 */
-			w = AllocWinding( 3 );
-			w->numpoints = 3;
-			VectorCopy( mesh->verts[ y * mesh->width + x ].xyz, w->p[ 0 ] );
-			VectorCopy( mesh->verts[ y * mesh->width + x + 1 ].xyz, w->p[ 1 ] );
-			VectorCopy( mesh->verts[ (y + 1) * mesh->width + x ].xyz, w->p[ 2 ] );
-			refs += FilterWindingIntoTree_r( w, ds, tree->headnode );
-			
-			/* triangle 2 */
-			w = AllocWinding( 3 );
-			w->numpoints = 3;
-			VectorCopy( mesh->verts[ y * mesh->width + x + 1 ].xyz, w->p[ 0 ] );
-			VectorCopy( mesh->verts[ (y + 1 ) * mesh->width + x + 1 ].xyz, w->p[ 1 ] );
-			VectorCopy( mesh->verts[ (y + 1 ) * mesh->width + x ].xyz, w->p[ 2 ] );
-			refs += FilterWindingIntoTree_r( w, ds, tree->headnode );
-		}
-	}
-	
-	/* use point filtering as well */
-	for( i = 0; i < (mesh->width * mesh->height); i++ )
-		refs += FilterPointIntoTree_r( mesh->verts[ i ].xyz, ds, tree->headnode );
-	
-	/* free the subdivided mesh and return */
-	FreeMesh( mesh );
-#else
 	for(y = 0; y + 2 < ds->patchHeight; y += 2)
 		for(x = 0; x + 2 < ds->patchWidth; x += 2)
 		{
-			vec3_t mins, maxs;
-			ClearBounds(mins, maxs);
-			AddPointToBounds(ds->verts[(y+0) * ds->patchWidth + (x+0)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+0) * ds->patchWidth + (x+1)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+0) * ds->patchWidth + (x+2)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+1) * ds->patchWidth + (x+0)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+1) * ds->patchWidth + (x+1)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+1) * ds->patchWidth + (x+2)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+2) * ds->patchWidth + (x+0)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+2) * ds->patchWidth + (x+1)].xyz, mins, maxs);
-			AddPointToBounds(ds->verts[(y+2) * ds->patchWidth + (x+2)].xyz, mins, maxs);
-			refs += FilterBoxIntoTree_r(mins, maxs, ds, tree->headnode);
+			vec_t *points[9];
+			points[0] = ds->verts[(y+0) * ds->patchWidth + (x+0)].xyz;
+			points[1] = ds->verts[(y+0) * ds->patchWidth + (x+1)].xyz;
+			points[2] = ds->verts[(y+0) * ds->patchWidth + (x+2)].xyz;
+			points[3] = ds->verts[(y+1) * ds->patchWidth + (x+0)].xyz;
+			points[4] = ds->verts[(y+1) * ds->patchWidth + (x+1)].xyz;
+			points[5] = ds->verts[(y+1) * ds->patchWidth + (x+2)].xyz;
+			points[6] = ds->verts[(y+2) * ds->patchWidth + (x+0)].xyz;
+			points[7] = ds->verts[(y+2) * ds->patchWidth + (x+1)].xyz;
+			points[8] = ds->verts[(y+2) * ds->patchWidth + (x+2)].xyz;
+			refs += FilterPointConvexHullIntoTree_r(points, 9, ds, tree->headnode);
 		}
-#endif
 
 	return refs;
 }
