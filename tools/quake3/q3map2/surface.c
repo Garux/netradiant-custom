@@ -1970,7 +1970,7 @@ FilterPointConvexHullIntoTree_r() - ydnar
 filters the convex hull of multiple points from a surface into the tree
 */
 
-int FilterPointConvexHullIntoTree_r( vec_t **points, int npoints, mapDrawSurface_t *ds, node_t *node )
+int FilterPointConvexHullIntoTree_r( vec3_t **points, int npoints, mapDrawSurface_t *ds, node_t *node )
 {
 	float			d, dmin, dmax;
 	plane_t			*plane;
@@ -1986,10 +1986,10 @@ int FilterPointConvexHullIntoTree_r( vec_t **points, int npoints, mapDrawSurface
 		/* classify the point in relation to the plane */
 		plane = &mapplanes[ node->planenum ];
 
-		dmin = dmax = DotProduct( points[0], plane->normal ) - plane->dist;
+		dmin = dmax = DotProduct( *(points[0]), plane->normal ) - plane->dist;
 		for(i = 1; i < npoints; ++i)
 		{
-			d = DotProduct( points[i], plane->normal ) - plane->dist;
+			d = DotProduct( *(points[i]), plane->normal ) - plane->dist;
 			if(d > dmax)
 				dmax = d;
 			if(d < dmin)
@@ -2141,16 +2141,16 @@ static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree )
 	for(y = 0; y + 2 < ds->patchHeight; y += 2)
 		for(x = 0; x + 2 < ds->patchWidth; x += 2)
 		{
-			vec_t *points[9];
-			points[0] = ds->verts[(y+0) * ds->patchWidth + (x+0)].xyz;
-			points[1] = ds->verts[(y+0) * ds->patchWidth + (x+1)].xyz;
-			points[2] = ds->verts[(y+0) * ds->patchWidth + (x+2)].xyz;
-			points[3] = ds->verts[(y+1) * ds->patchWidth + (x+0)].xyz;
-			points[4] = ds->verts[(y+1) * ds->patchWidth + (x+1)].xyz;
-			points[5] = ds->verts[(y+1) * ds->patchWidth + (x+2)].xyz;
-			points[6] = ds->verts[(y+2) * ds->patchWidth + (x+0)].xyz;
-			points[7] = ds->verts[(y+2) * ds->patchWidth + (x+1)].xyz;
-			points[8] = ds->verts[(y+2) * ds->patchWidth + (x+2)].xyz;
+			vec3_t *points[9];
+			points[0] = &ds->verts[(y+0) * ds->patchWidth + (x+0)].xyz;
+			points[1] = &ds->verts[(y+0) * ds->patchWidth + (x+1)].xyz;
+			points[2] = &ds->verts[(y+0) * ds->patchWidth + (x+2)].xyz;
+			points[3] = &ds->verts[(y+1) * ds->patchWidth + (x+0)].xyz;
+			points[4] = &ds->verts[(y+1) * ds->patchWidth + (x+1)].xyz;
+			points[5] = &ds->verts[(y+1) * ds->patchWidth + (x+2)].xyz;
+			points[6] = &ds->verts[(y+2) * ds->patchWidth + (x+0)].xyz;
+			points[7] = &ds->verts[(y+2) * ds->patchWidth + (x+1)].xyz;
+			points[8] = &ds->verts[(y+2) * ds->patchWidth + (x+2)].xyz;
 			refs += FilterPointConvexHullIntoTree_r(points, 9, ds, tree->headnode);
 		}
 
