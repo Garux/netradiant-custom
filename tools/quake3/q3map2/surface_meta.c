@@ -1267,8 +1267,8 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	}
 
 #if MAX_BBOX_DISTANCE > 0
-	VectorCopy( mins, ds->mins );
-	VectorCopy( maxs, ds->maxs );
+	VectorCopy( ds->mins, mins );
+	VectorCopy( ds->maxs, maxs );
 	mins[0] -= MAX_BBOX_DISTANCE;
 	mins[1] -= MAX_BBOX_DISTANCE;
 	mins[2] -= MAX_BBOX_DISTANCE;
@@ -1277,13 +1277,13 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	maxs[2] += MAX_BBOX_DISTANCE;
 #define CHECK_1D(mins, v, maxs) ((mins) <= (v) && (v) <= (maxs))
 #define CHECK_3D(mins, v, maxs) (CHECK_1D((mins)[0], (v)[0], (maxs)[0]) && CHECK_1D((mins)[1], (v)[1], (maxs)[1]) && CHECK_1D((mins)[2], (v)[2], (maxs)[2]))
-	VectorCopy(p, metaVerts[ tri->indexes[ 0 ] ].xyz);
+	VectorCopy(metaVerts[ tri->indexes[ 0 ] ].xyz, p);
 	if(!CHECK_3D(mins, p, maxs))
 	{
-		VectorCopy(p, metaVerts[ tri->indexes[ 1 ] ].xyz);
+		VectorCopy(metaVerts[ tri->indexes[ 1 ] ].xyz, p);
 		if(!CHECK_3D(mins, p, maxs))
 		{
-			VectorCopy(p, metaVerts[ tri->indexes[ 2 ] ].xyz);
+			VectorCopy(metaVerts[ tri->indexes[ 2 ] ].xyz, p);
 			if(!CHECK_3D(mins, p, maxs))
 				return 0;
 		}
