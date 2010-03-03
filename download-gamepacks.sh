@@ -31,6 +31,10 @@ pack()
 				mv zipdownload/*/* "games/$pack/"
 				rm -rf zipdownload
 				;;
+			gitdir)
+				rm -rf "games/$pack"
+				git archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
+				;;
 		esac
 		return
 	fi
@@ -95,17 +99,21 @@ pack()
 			mv zipdownload/*/* "games/$pack/"
 			rm -rf zipdownload
 			;;
+		gitdir)
+			rm -rf "games/$pack"
+			git archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
+			;;
 	esac
 }
 
 mkdir -p games
-pack DarkPlacesPack  GPL         svn  https://zerowing.idsoftware.com/svn/radiant.gamepacks/DarkPlacesPack/branches/1.5/
-pack NexuizPack      GPL         svn  svn://svn.icculus.org/nexuiz/trunk/misc/netradiant-NexuizPack
-pack OpenArenaPack   unknown     zip1 http://ingar.satgnu.net/files/gtkradiant/gamepacks/OpenArenaPack.zip
-pack Q3Pack          proprietary svn  https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Pack/trunk/ -r29
-pack Quake2Pack      proprietary zip1 http://ingar.satgnu.net/files/gtkradiant/gamepacks/Quake2Pack.zip
-pack Quake2WorldPack GPL         svn  svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
-pack QuakePack       proprietary zip1 http://ingar.satgnu.net/files/gtkradiant/gamepacks/QuakePack.zip
-pack TremulousPack   proprietary zip1 http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
-pack UFOAIPack       proprietary svn  https://zerowing.idsoftware.com/svn/radiant.gamepacks/UFOAIPack/branches/1.5/
-pack WarsowPack      GPL         svn  http://opensvn.csie.org/warsowgamepack/netradiant/games/WarsowPack/
+pack DarkPlacesPack  GPL         svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/DarkPlacesPack/branches/1.5/
+pack NexuizPack      GPL         gitdir git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
+pack OpenArenaPack   unknown     zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/OpenArenaPack.zip
+pack Q3Pack          proprietary svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Pack/trunk/ -r29
+pack Quake2Pack      proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/Quake2Pack.zip
+pack Quake2WorldPack GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
+pack QuakePack       proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/QuakePack.zip
+pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
+pack UFOAIPack       proprietary svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/UFOAIPack/branches/1.5/
+pack WarsowPack      GPL         svn    http://opensvn.csie.org/warsowgamepack/netradiant/games/WarsowPack/
