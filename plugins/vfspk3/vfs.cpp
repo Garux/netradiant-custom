@@ -353,6 +353,26 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
           break;
 
         const char *ext = strrchr (name, '.');
+
+	if(ext && !string_compare_nocase_upper(ext, ".pk3dir"))
+	{
+	  if (g_numDirs == (VFS_MAXDIRS-1))
+	    continue;
+	  snprintf(g_strDirs[g_numDirs], PATH_MAX, "%s%s/", path, name);
+	  g_strDirs[g_numDirs][PATH_MAX] = '\0';
+	  FixDOSName (g_strDirs[g_numDirs]);
+	  AddSlash (g_strDirs[g_numDirs]);
+	  g_numDirs++;
+
+	  {
+	    archive_entry_t entry;
+	    entry.name = g_strDirs[g_numDirs-1];
+	    entry.archive = OpenArchive(g_strDirs[g_numDirs-1]);
+	    entry.is_pakfile = false;
+	    g_archives.push_back(entry);
+	  }
+	}
+
         if ((ext == 0) || *(++ext) == '\0' || GetArchiveTable(archiveModules, ext) == 0)
           continue;
 

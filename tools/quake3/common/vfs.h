@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _VFS_H_
 #define _VFS_H_
 
-#define VFS_MAXDIRS 8
+#define VFS_MAXDIRS 64
 
 void vfsInitDirectory (const char *path);
 void vfsShutdown ();
