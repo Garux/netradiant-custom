@@ -390,7 +390,7 @@ struct xywindow_globals_private_t
 
     m_bCamXYUpdate(true),
     m_bChaseMouse(true),
-    m_bSizePaint(false)
+    m_bSizePaint(true)
   {
   }
 
