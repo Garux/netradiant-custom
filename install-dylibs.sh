@@ -47,7 +47,7 @@ cp -L "$MACLIBDIR"/../etc/fonts/fonts.dtd "$INSTALLDIR"
 cp -L "$MACLIBDIR"/../etc/gtk-2.0/gdk-pixbuf.loaders "$INSTALLDIR"
 cp -L "$MACLIBDIR"/../etc/pango/pangorc "$INSTALLDIR"
 
-$CAT > $INSTALLDIR/../netradiant.sh <<EOF
+$CAT > "$INSTALLDIR/../netradiant.sh" <<EOF
 #!/bin/sh
 
 MY_DIRECTORY="\${0%/*}" # cut off the script name
@@ -65,5 +65,7 @@ if [ -x /usr/bin/open-x11 ]; then
 else
 	env LC_ALL="en_US.UTF-8" ./radiant.$EXE "$@" &
 fi
-
 EOF
+
+chmod 755 "$INSTALLDIR/../netradiant.sh"
+

@@ -193,7 +193,7 @@ ifeq ($(OS),Darwin)
 	DLL = dylib
 	MWINDOWS =
 	MACVERSION ?= 16
-	CPPFLAGS += -DMACVERSION="$(MACVERSION)"
+	CPPFLAGS_COMMON += -DMACVERSION="$(MACVERSION)"
 	# workaround for weird prints
 	ECHO_NOLF = /bin/echo -n
 
