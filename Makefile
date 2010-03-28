@@ -184,13 +184,16 @@ ifeq ($(OS),Darwin)
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
 	CPPFLAGS_COMMON += -I/sw/include -I/usr/X11R6/include
-	LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
+	LDFLAGS_COMMON += -L/sw/lib  -L/usr/X11R6/lib
+	#LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
 	EXE ?= ppc
+	MACLIBDIR ?= /sw/lib
 	A = a
 	DLL = dylib
 	MWINDOWS =
-
+	MACVERSION ?= 16
+	CPPFLAGS += -DMACVERSION="$(MACVERSION)"
 	# workaround for weird prints
 	ECHO_NOLF = /bin/echo -n
 
@@ -373,6 +376,7 @@ endif
 
 %.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
+
 
 $(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_ZLIB)
 $(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
@@ -969,6 +973,8 @@ install-data: binaries
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
 	$(CP_R) setup/data/tools/* $(INSTALLDIR)/
+	$(MKDIR) $(INSTALLDIR)/docs
+	$(CP_R) docs/* $(INSTALLDIR)/docs/
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
 
 .PHONY: install-dll
@@ -978,7 +984,7 @@ install-dll: binaries
 else
 ifeq ($(OS),Darwin)
 install-dll: binaries
-	CP="$(CP)" OTOOL="$(OTOOL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dylibs.sh
+	EXE="$(EXE)" MACLIBDIR="$(MACLIBDIR)" CP="$(CP)" OTOOL="$(OTOOL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dylibs.sh
 else
 install-dll: binaries
 	@$(ECHO) No DLL inclusion implemented for this target.

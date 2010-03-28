@@ -62,6 +62,8 @@ void DoPitBuilder();
 void DoCTFColourChanger();
 void DoMergePatches();
 void DoSplitPatch();
+void DoSplitPatchRows();
+void DoSplitPatchCols();
 void DoVisAnalyse();
 void DoTrainThing();
 void DoTrainPathPlot();

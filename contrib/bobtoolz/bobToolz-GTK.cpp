@@ -62,7 +62,7 @@ void BobToolz_destroy()
 char* PLUGIN_NAME = "bobToolz";
 
 // commands in the menu
-static char* PLUGIN_COMMANDS = "About...,-,Reset Textures...,PitOMatic,-,Vis Viewer,Brush Cleanup,Polygon Builder,Caulk Selection,-,Tree Planter,Drop Entity,Plot Splines,-,Merge Patches,Split patches,Turn edge";
+static char* PLUGIN_COMMANDS = "About...,-,Vis Viewer,Path Plotter...,-,Stair Builder...,PitOMatic,Make Chain...,Door Builder...,-,Texture Reset...,Intersect...";
 
 // globals
 GtkWidget *g_pRadiantWnd = NULL;
@@ -90,30 +90,22 @@ extern "C" const char* QERPlug_GetCommandList() {
 extern "C" void QERPlug_Dispatch (const char *p, vec3_t vMin, vec3_t vMax, bool bSingleBrush) {
 	LoadLists();
 
-	if( string_equal_nocase( p, "brush cleanup" ) ) {
-    DoFixBrushes();
-  } else if( string_equal_nocase( p, "polygon builder" ) ) {
-    DoPolygonsTB();
-  } else if( string_equal_nocase( p, "caulk selection" ) ) {
-    DoCaulkSelection();
-  } else if( string_equal_nocase( p, "tree planter" ) ) {
-    DoTreePlanter();
-  } else if( string_equal_nocase( p, "plot splines" ) ) {
-    DoTrainPathPlot();
-  } else if( string_equal_nocase( p, "drop entity" ) ) {
-    DoDropEnts();
-  } else if( string_equal_nocase( p, "merge patches" ) ) {
-    DoMergePatches();
-  } else if( string_equal_nocase( p, "split patches" ) ) {
-    DoSplitPatch();
-  } else if( string_equal_nocase( p, "turn edge" ) ) {
-    DoFlipTerrain();
-  } else if( string_equal_nocase(p, "reset textures...") ) {
+	if( string_equal_nocase(p, "texture reset...") ) {
 		DoResetTextures();
 	} else if( string_equal_nocase(p, "pitomatic") ) {
 		DoPitBuilder();
 	} else if( string_equal_nocase(p, "vis viewer") ) {
 		DoVisAnalyse();
+	} else if( string_equal_nocase(p, "stair builder...") ) {
+		DoBuildStairs();
+	} else if( string_equal_nocase(p, "door builder...") ) {
+		DoBuildDoors();
+	} else if( string_equal_nocase(p, "intersect...") ) {
+		DoIntersect();
+	} else if( string_equal_nocase(p, "make chain...") ) {
+		DoMakeChain();
+	} else if( string_equal_nocase(p, "path plotter...") ) {
+		DoPathPlotter();
 	} else if( string_equal_nocase(p, "about...") ) {
 		DoMessageBox(PLUGIN_ABOUT, "About", eMB_OK);
 	}
@@ -125,7 +117,7 @@ const char* QERPlug_GetCommandTitleList()
 }
 
 
-#define NUM_TOOLBARBUTTONS 9
+#define NUM_TOOLBARBUTTONS 14
 
 std::size_t ToolbarButtonCount( void ) {
 	return NUM_TOOLBARBUTTONS;
@@ -137,22 +129,30 @@ public:
   virtual const char* getImage() const
   {
     switch( mIndex ) {
-      case 0: return "bobtoolz_cleanup.bmp";
-      case 1: return "bobtoolz_poly.bmp";
-      case 2: return "bobtoolz_caulk.bmp";
-      case 3: return "bobtoolz_treeplanter.bmp";
-      case 4: return "bobtoolz_trainpathplot.bmp";
-      case 5: return "bobtoolz_dropent.bmp";
-      case 6: return "bobtoolz_merge.bmp";
-      case 7: return "bobtoolz_split.bmp";
-      case 8: return "bobtoolz_turnedge.bmp";
+		case 0: return "bobtoolz_cleanup.bmp";
+		case 1: return "bobtoolz_poly.bmp";
+		case 2: return "bobtoolz_caulk.bmp";
+		case 3: return "";
+		case 4: return "bobtoolz_treeplanter.bmp";
+		case 5: return "bobtoolz_trainpathplot.bmp";
+		case 6: return "bobtoolz_dropent.bmp";
+		case 7: return "";
+		case 8: return "bobtoolz_merge.bmp";
+		case 9: return "bobtoolz_split.bmp";
+		case 10: return "bobtoolz_splitrow.bmp";
+		case 11: return "bobtoolz_splitcol.bmp";
+        case 12: return "";
+		case 13: return "bobtoolz_turnedge.bmp";
     }
     return NULL;
   }
   virtual EType getType() const
   {
     switch( mIndex ) {
-      case 3: return eToggleButton;
+		case 3: return eSpace;
+      case 4: return eToggleButton;
+		case 7: return eSpace;
+		case 12: return eSpace;
       default: return eButton;
     }    
   }
@@ -162,12 +162,14 @@ public:
       case 0: return "Cleanup";
       case 1: return "Polygons";
       case 2: return "Caulk";
-      case 3: return "Tree Planter";
-      case 4: return "Plot Splines";
-      case 5: return "Drop Entity";
-      case 6: return "Merge Patches";
-      case 7: return "Split Patches";
-      case 8: return "Flip Terrain";
+      case 4: return "Tree Planter";
+      case 5: return "Plot Splines";
+      case 6: return "Drop Entity";
+      case 8: return "Merge 2 Patches";
+      case 9: return "Split Patch";
+      case 10: return "Split Patch Rows";
+      case 11: return "Split Patch Columns";
+      case 13: return "Flip Terrain";
     }
     return NULL;
   }
@@ -177,12 +179,14 @@ public:
       case 0: return "Brush Cleanup";
       case 1: return "Polygons";
       case 2: return "Caulk selection";
-      case 3: return "Tree Planter";
-      case 4: return "Plot Splines";
-      case 5: return "Drop Entity";
-      case 6: return "Merge Patches";
-      case 7: return "Split Patches";
-      case 8: return "Flip Terrain";
+      case 4: return "Tree Planter";
+      case 5: return "Plot Splines";
+      case 6: return "Drop Entity";
+      case 8: return "Merge 2 Patches";
+      case 9: return "Split Patch";
+	  case 10: return "Split Patch Rows";
+	  case 11: return "Split Patch Columns";
+      case 13: return "Flip Terrain (Turn Edge)";
     }
     return NULL;
   }
@@ -195,12 +199,14 @@ public:
       case 0: DoFixBrushes(); break;
       case 1: DoPolygonsTB(); break;
       case 2: DoCaulkSelection(); break;
-      case 3: DoTreePlanter(); break;
-      case 4: DoTrainPathPlot(); break;
-      case 5: DoDropEnts(); break;
-      case 6: DoMergePatches(); break;
-      case 7: DoSplitPatch(); break;
-      case 8: DoFlipTerrain(); break;
+      case 4: DoTreePlanter(); break;
+      case 5: DoTrainPathPlot(); break;
+      case 6: DoDropEnts(); break;
+      case 8: DoMergePatches(); break;
+      case 9: DoSplitPatch(); break;
+	  case 10: DoSplitPatchRows(); break;
+	  case 11: DoSplitPatchCols(); break;
+      case 13: DoFlipTerrain(); break;
     }
   }
 
@@ -259,7 +265,7 @@ class BobToolzPluginModule : public TypeSystemRef
   _QERPluginTable m_plugin;
 public:
   typedef _QERPluginTable Type;
-  STRING_CONSTANT(Name, "bobtoolz");
+  STRING_CONSTANT(Name, "bobToolz");
 
   BobToolzPluginModule()
   {
@@ -291,7 +297,7 @@ class BobToolzToolbarDependencies :
 {
 public:
   BobToolzToolbarDependencies() :
-    ModuleRef<_QERPluginTable>("bobtoolz")
+    ModuleRef<_QERPluginTable>("bobToolz")
   {
   }
 };
@@ -301,7 +307,7 @@ class BobToolzToolbarModule : public TypeSystemRef
   _QERPlugToolbarTable m_table;
 public:
   typedef _QERPlugToolbarTable Type;
-  STRING_CONSTANT(Name, "bobtoolz");
+  STRING_CONSTANT(Name, "bobToolz");
 
   BobToolzToolbarModule()
   {

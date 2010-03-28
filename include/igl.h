@@ -2318,8 +2318,14 @@ struct OpenGLBinding
   void (QGL_DLLEXPORT *m_glTexGenfv)(GLenum coord, GLenum pname, const GLfloat *params);
   void (QGL_DLLEXPORT *m_glTexGeni)(GLenum coord, GLenum pname, GLint param);
   void (QGL_DLLEXPORT *m_glTexGeniv)(GLenum coord, GLenum pname, const GLint *params);
+#if defined(MACVERSION) && MACVERSION > 15
+	//Snow Leopard 16, Leopard 15, Tiger 14, Panther 13, ... 
+  void (QGL_DLLEXPORT *m_glTexImage1D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+  void (QGL_DLLEXPORT *m_glTexImage2D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+#else
   void (QGL_DLLEXPORT *m_glTexImage1D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+  void (QGL_DLLEXPORT *m_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);	
+#endif
   void (QGL_DLLEXPORT *m_glTexParameterf)(GLenum target, GLenum pname, GLfloat param);
   void (QGL_DLLEXPORT *m_glTexParameterfv)(GLenum target, GLenum pname, const GLfloat *params);
   void (QGL_DLLEXPORT *m_glTexParameteri)(GLenum target, GLenum pname, GLint param);

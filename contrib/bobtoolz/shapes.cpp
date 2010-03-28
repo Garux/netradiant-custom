@@ -576,32 +576,43 @@ void BuildDoorsX2(vec3_t min, vec3_t max,
 
 void MakeBevel(vec3_t vMin, vec3_t vMax)
 {
-  NodeSmartReference patch(GlobalPatchCreator().createPatch());
-  PatchControlMatrix matrix = GlobalPatchCreator().Patch_getControlPoints(patch);
-
-  GlobalPatchCreator().Patch_setShader(patch, "textures/common/caulk");
-  GlobalPatchCreator().Patch_resize(patch, 3, 3);
-	
+	NodeSmartReference patch(GlobalPatchCreator().createPatch());
+    GlobalPatchCreator().Patch_resize(patch, 3, 3);
+	GlobalPatchCreator().Patch_setShader(patch, "textures/common/caulk");
+	PatchControlMatrix matrix = GlobalPatchCreator().Patch_getControlPoints(patch);
 	vec3_t x_3, y_3, z_3;
 	x_3[0] = vMin[0];	x_3[1] = vMin[0];				x_3[2] = vMax[0];
 	y_3[0] = vMin[1];	y_3[1] = vMax[1];				y_3[2] = vMax[1];
 	z_3[0] = vMin[2];	z_3[1] = (vMax[2] + vMin[2])/2;	z_3[2] = vMax[2];
-
-/*	x_3[0] = 0;		x_3[1] = 0;		x_3[2] = 64;
-	y_3[0] = 0;		y_3[1] = 64;	y_3[2] = 64;
-	z_3[0] = 0;		z_3[1] = 32;	z_3[2] = 64;*/
-
+	/*
+	 x_3[0] = 0;		x_3[1] = 0;		x_3[2] = 64;
+	 y_3[0] = 0;		y_3[1] = 64;	y_3[2] = 64;
+	 z_3[0] = 0;		z_3[1] = 32;	z_3[2] = 64;*/
 	for(int i = 0; i < 3; i++)
 	{
 		for(int j = 0; j < 3; j++)
 		{
-			matrix(i, j).m_vertex[0] = x_3[i];
-			matrix(i, j).m_vertex[1] = y_3[i];
-			matrix(i, j).m_vertex[2] = z_3[j];
+			PatchControl& p = matrix(i, j);
+			p.m_vertex[0] = x_3[i];
+			p.m_vertex[1] = y_3[i];
+			p.m_vertex[2] = z_3[j];
 		}
 	}
-
-  Node_getTraversable(GlobalRadiant().getMapWorldEntity())->insert(patch);
+	//does invert the matrix, else the patch face is on wrong side.
+	for(int i = 0 ; i < 3 ; i++ ) 
+	{
+		for(int j = 0; j < 1; j++)
+		{
+			PatchControl& p = matrix(i,2- j);
+			PatchControl& q = matrix(i, j);
+			std::swap(p.m_vertex, q.m_vertex);
+			//std::swap(p.m_texcoord, q.m_texcoord);
+		}
+	}
+	GlobalPatchCreator().Patch_controlPointsChanged(patch);
+	//TODO - the patch has textures weird, patchmanip.h has all function it needs.. lots of duplicate code.. 
+	//NaturalTexture(patch);
+	Node_getTraversable(GlobalRadiant().getMapWorldEntity())->insert(patch);
 }
 
 void BuildCornerStairs(vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTexture, const char* riserTex)
@@ -609,7 +620,7 @@ void BuildCornerStairs(vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTex
 	vec3_t* topPoints = new vec3_t[nSteps+1];
 	vec3_t* botPoints = new vec3_t[nSteps+1];
 
-	bool bFacesUse[6] = {true, true, false, true, false, false};
+	//bool bFacesUse[6] = {true, true, false, true, false, false};
 
 	vec3_t centre;
 	VectorCopy(vMin, centre);
@@ -644,8 +655,25 @@ void BuildCornerStairs(vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTex
 
 	for(i = 0; i < nSteps; i++)
 	{
-    scene::Node& brush = Build_Get_BoundingCube_Selective(vBot, vTop, "textures/common/caulk", bFacesUse);
-
+		NodeSmartReference brush(GlobalBrushCreator().createBrush());
+		vec3_t v1, v2, v3, v5, v6, v7;
+		VectorCopy(vBot, v1);
+		VectorCopy(vBot, v2);
+		VectorCopy(vBot, v3);
+		VectorCopy(vTop, v5);
+		VectorCopy(vTop, v6);
+		VectorCopy(vTop, v7);
+		
+		v2[0] = vTop[0];
+		v3[1] = vTop[1];
+		
+		v6[0] = vBot[0];
+		v7[1] = vBot[1];
+		
+		AddFaceWithTexture(brush, v1, v2, v3, "textures/common/caulk", false);
+		AddFaceWithTexture(brush, v1, v3, v6, "textures/common/caulk", false);
+		AddFaceWithTexture(brush, v5, v6, v3, "textures/common/caulk", false);
+		
 		for(int j = 0; j < 3; j++)
 			tp[j][2] = vTop[2];
 
