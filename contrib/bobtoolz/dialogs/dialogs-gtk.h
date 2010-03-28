@@ -85,6 +85,11 @@ struct PathPlotterRS{
 	bool bShowExtra;
 };
 
+struct MakeChainRS{
+	char linkName[256];
+	int linkNum;
+};
+
 typedef struct _GtkWidget GtkWidget;
 
 struct TwinWidget{
@@ -101,7 +106,7 @@ EMessageBoxReturn DoDoorsBox(DoorRS* rs);
 EMessageBoxReturn DoPathPlotterBox(PathPlotterRS* rs);
 EMessageBoxReturn DoCTFColourChangeBox();
 EMessageBoxReturn DoTrainThingBox (TrainThingRS* rs);
-
+EMessageBoxReturn DoMakeChainBox(MakeChainRS* rs);
 //GtkWidget* GetProgressWindow(char* title, GtkProgressBar* feedback);
 
 #endif

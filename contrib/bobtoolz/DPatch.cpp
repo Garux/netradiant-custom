@@ -308,28 +308,27 @@ DPatch* DPatch::MergePatches(patch_merge_t merge_info, DPatch *p1, DPatch *p2)
 			merge_info.pos2 += 3;
 	}
 	//
-	/* The Patch will never be reaching max, previous comparissions make sure,
-	   for 2 patches with 3x3 size. Results always in a patch of 3x5. (31 is max currently)
-	int newHeight = p1->height + p2->height - 1; anyway = 5
+
+	int newHeight = p1->height + p2->height - 1; 
 	if(newHeight > MAX_PATCH_HEIGHT)
-		return NULL;
-	int newWidth = p1->width + p2->width - 1;
+		return false;
+/*	int newWidth = p1->width + p2->width - 1;
 	if(newWidth > MAX_PATCH_WIDTH)
 		return NULL;
-	*/
+*/	
 	DPatch* newPatch = new DPatch();
-
-	newPatch->height	= 3;
-	newPatch->width		= 5;
+	//switched..
+	newPatch->height	= p1->width;
+	newPatch->width		= newHeight;
 	newPatch->SetTexture(p1->texture);
 
-	for(int y = 0; y < 3; y++)
-		for(int x = 0; x < 3; x++)
+	for(int y = 0; y < p1->height; y++)
+		for(int x = 0; x < p1->width; x++)
 			newPatch->points[x][y] = p1->points[x][y];
 	
-	for(int y = 1; y < 3; y++)
-		for(int x = 0; x < 3; x++)
-			newPatch->points[x][y+2] = p2->points[x][y];
+	for(int y = 1; y < p2->height; y++)
+		for(int x = 0; x < p2->width; x++)
+			newPatch->points[x][(y + p1->height - 1)] = p2->points[x][y];
 	
 //	newPatch->Invert();
 	return newPatch;

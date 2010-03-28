@@ -776,7 +776,15 @@ void Patch::InsertPoints(EMatrixMajor mt, bool bFirst)
   std::size_t pos = 0;
   {
     PatchControl* p1 = m_ctrl.data();
-    for(std::size_t w = 0; w != width; ++w, p1 += col_stride)
+	/*
+	  if(GlobalSelectionSystem().countSelected() != 0) 
+	  {  
+		  scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+		  PatchInstance* patch = Instance_getPatch(instance);
+		  patch->m_selectable.isSelected();
+	  }
+	*/
+	for(std::size_t w = 0; w != width; ++w, p1 += col_stride)
     {
       {
         PatchControl* p2 = p1;
@@ -831,7 +839,15 @@ void Patch::InsertPoints(EMatrixMajor mt, bool bFirst)
     ERROR_MESSAGE("neither row-major nor column-major");
     return;
   }
-
+    if(bFirst)
+    {
+		pos = height - 1;
+    }
+    else
+    {
+		pos = 2;
+    }
+	
   if(pos >= height)
   {
     if(bFirst)
@@ -978,7 +994,14 @@ void Patch::RemovePoints(EMatrixMajor mt, bool bFirst)
     ERROR_MESSAGE("neither row-major nor column-major");
     return;
   }
-
+    if(bFirst)
+    {
+		pos=height-3;
+    }
+    else
+    {
+		pos=2;
+    }
   if(pos >= height)
   {
     if(bFirst)

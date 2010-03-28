@@ -212,6 +212,7 @@ void DBobView::Begin(const char* trigger, const char *target, float multiplier, 
 		globalErrorStream() << "Initialization Failure in DBobView::Begin";
 		delete this;
 	}
+	globalOutputStream() << "Initialization of Path Plotter succeeded.";
 }
 
 bool DBobView::UpdatePath()
@@ -243,35 +244,38 @@ void DBobView_setEntity(Entity& entity, float multiplier, int points, float varG
 			DEPair* target_ep = trigger.FindEPairByKey("target");
 			if(target_ep)
 			{
-        const scene::Path* entTarget = FindEntityFromTargetname(target_ep->value);
+				const scene::Path* entTarget = FindEntityFromTargetname(target_ep->value);
 				if(entTarget)
 				{
 					if(g_PathView)
 						delete g_PathView;
 					g_PathView = new DBobView;
 
-          Entity* target = Node_getEntity(entTarget->top());
-          if(target != 0)
-          {
-            if(!bNoUpdate)
-            {
-              g_PathView->trigger = &entity;
-              entity.attach(*g_PathView);
-              g_PathView->target = target;
-              target->attach(*g_PathView);
-            }
+					Entity* target = Node_getEntity(entTarget->top());
+					if(target != 0)
+					{
+						if(!bNoUpdate)
+						{
+							g_PathView->trigger = &entity;
+							entity.attach(*g_PathView);
+							g_PathView->target = target;
+							target->attach(*g_PathView);
+						}
 					  g_PathView->Begin(trigger_ep->value, target_ep->value, multiplier, points, varGravity, bNoUpdate, bShowExtra);
-          }
+					}
+					else
+						globalErrorStream() << "bobToolz PathPlotter: trigger_push ARGH\n";
 				}
 				else
-					DoMessageBox("trigger_push target could not be found.", "Error", eMB_OK);
+					globalErrorStream() << "bobToolz PathPlotter: trigger_push target could not be found..\n";
 			}
 			else
-				DoMessageBox("trigger_push has no target.", "Error", eMB_OK);
+				globalErrorStream() << "bobToolz PathPlotter: trigger_push has no target..\n";
 		}
 		else
-			DoMessageBox("You must select a 'trigger_push' entity.", "Error", eMB_OK);
+			globalErrorStream() << "bobToolz PathPlotter: You must select a 'trigger_push' entity..\n";
 	}	
 	else
-		DoMessageBox("Entity must have a targetname", "Error", eMB_OK);
+		globalErrorStream() << "bobToolz PathPlotter: Entity must have a targetname.\n";
+	return;
 }

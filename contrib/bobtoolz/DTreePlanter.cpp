@@ -217,34 +217,32 @@ void DTreePlanter::DropEntsToGround( void ) {
   Scene_forEachEntity(TreePlanterDropEntityIfSelected(*this));
 }
 
-void DTreePlanter::MakeChain( void ) {
+void DTreePlanter::MakeChain( int linkNum, const char* linkName ) {
 	char buffer[256];
 	int i;
-
-	for(i = 0; i < m_linkNum; i++) {
+	for(i = 0; i < linkNum; i++) {
 		DEntity e("info_train_spline_main");
 
-		sprintf( buffer, "%s_pt%i", m_linkName, i );
+		sprintf( buffer, "%s_pt%i", linkName, i );
 		e.AddEPair( "targetname", buffer );
 
 		sprintf( buffer, "0 %i 0", i * 64 );
 		e.AddEPair( "origin", buffer );
 
 		if(i != m_linkNum-1) {
-			sprintf( buffer, "%s_pt%i", m_linkName, i+1 );
+			sprintf( buffer, "%s_pt%i", linkName, i+1 );
 			e.AddEPair( "target", buffer );
 
-			sprintf( buffer, "%s_ctl%i", m_linkName, i );
+			sprintf( buffer, "%s_ctl%i", linkName, i );
 			e.AddEPair( "control", buffer );
 		}
-
 		e.BuildInRadiant( false );
 	}
 
-	for(i = 0; i < m_linkNum-1; i++) {
+	for(i = 0; i < linkNum-1; i++) {
 		DEntity e("info_train_spline_control");
 
-		sprintf( buffer, "%s_ctl%i", m_linkName, i );
+		sprintf( buffer, "%s_ctl%i", linkName, i );
 		e.AddEPair( "targetname", buffer );
 
 		sprintf( buffer, "0 %i 0", (i * 64) + 32);

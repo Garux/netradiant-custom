@@ -192,7 +192,8 @@ ifeq ($(OS),Darwin)
 	A = a
 	DLL = dylib
 	MWINDOWS =
-
+	MACVERSION ?= 16
+	CPPFLAGS_COMMON += -DMACVERSION="$(MACVERSION)"
 	# workaround for weird prints
 	ECHO_NOLF = /bin/echo -n
 
@@ -375,6 +376,7 @@ endif
 
 %.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
+
 
 $(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_ZLIB)
 $(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
@@ -969,6 +971,8 @@ install-data: binaries
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
 	$(CP_R) setup/data/tools/* $(INSTALLDIR)/
+	$(MKDIR) $(INSTALLDIR)/docs
+	$(CP_R) docs/* $(INSTALLDIR)/docs/
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
 
 .PHONY: install-dll

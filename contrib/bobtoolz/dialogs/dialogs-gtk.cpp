@@ -370,6 +370,7 @@ EMessageBoxReturn DoIntersectBox (IntersectRS* rs)
  
 	// ---- vbox ----
 
+	
 		radio1 = gtk_radio_button_new_with_label(NULL, "Use Whole Map");
 		gtk_box_pack_start (GTK_BOX (vbox), radio1, FALSE, FALSE, 2);
 		gtk_widget_show (radio1);
@@ -377,7 +378,7 @@ EMessageBoxReturn DoIntersectBox (IntersectRS* rs)
 		radio2 = gtk_radio_button_new_with_label(((GtkRadioButton*)radio1)->group, "Use Selected Brushes");
 		gtk_box_pack_start (GTK_BOX (vbox), radio2, FALSE, FALSE, 2);
 		gtk_widget_show (radio2);
-
+	
 		w = gtk_hseparator_new ();
 		gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 2);
 		gtk_widget_show (w);
@@ -1900,5 +1901,118 @@ EMessageBoxReturn DoTrainThingBox (TrainThingRS* rs)
 	gtk_grab_remove (window);
 	gtk_widget_destroy (window);
 
+	return ret;
+}
+// ailmanki
+// add a simple input for the MakeChain thing..
+EMessageBoxReturn DoMakeChainBox(MakeChainRS* rs)
+{
+	GtkWidget	*window, *w, *vbox, *hbox;
+	GtkWidget	*textlinkNum, *textlinkName;
+	EMessageBoxReturn ret;
+	int loop = 1;
+	
+	char	*text = "Please set a value in the boxes below and press 'OK' to make a chain";
+	
+	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	
+	gtk_signal_connect (GTK_OBJECT (window), "delete_event", GTK_SIGNAL_FUNC (dialog_delete_callback), NULL);
+	gtk_signal_connect (GTK_OBJECT (window), "destroy", GTK_SIGNAL_FUNC (gtk_widget_destroy), NULL);
+	
+	gtk_window_set_title( GTK_WINDOW( window ), "Make Chain" );
+	
+	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	
+	g_object_set_data (G_OBJECT (window), "loop", &loop);
+	g_object_set_data (G_OBJECT (window), "ret", &ret);
+	
+	gtk_widget_realize (window);
+	
+	// new vbox 
+	vbox = gtk_vbox_new( FALSE, 10 );
+	gtk_container_add( GTK_CONTAINER( window ), vbox );
+	gtk_widget_show( vbox );
+	
+	hbox = gtk_hbox_new( FALSE, 10 );
+	gtk_container_add( GTK_CONTAINER( vbox ), hbox );
+	gtk_widget_show( hbox );
+	
+	// dunno if you want this text or not ...
+	w = gtk_label_new( text );
+	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
+	gtk_widget_show( w );
+	
+	w = gtk_hseparator_new();
+	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
+	gtk_widget_show( w );
+	
+	// ------------------------- // 
+	
+	// new hbox
+	hbox = gtk_hbox_new( FALSE, 10 );
+	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	textlinkNum = gtk_entry_new_with_max_length( 256 ); 
+	gtk_box_pack_start( GTK_BOX( hbox ), textlinkNum, FALSE, FALSE, 1 );
+	gtk_widget_show( textlinkNum );
+	
+	w = gtk_label_new( "Number of elements in chain" );
+	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
+	gtk_widget_show( w );
+	
+	// -------------------------- //
+	
+	hbox = gtk_hbox_new( FALSE, 10 );
+	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
+	gtk_widget_show( hbox );
+	
+	textlinkName = gtk_entry_new_with_max_length( 256 );
+	gtk_box_pack_start( GTK_BOX( hbox ), textlinkName, FALSE, FALSE, 0 );
+	gtk_widget_show( textlinkName );
+	
+	w = gtk_label_new( "Basename for chain's targetnames." );
+	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
+	gtk_widget_show( w );
+	
+	
+	w = gtk_button_new_with_label( "OK" );
+	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0);
+	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_grab_default( w );
+	gtk_widget_show( w );
+	
+	w = gtk_button_new_with_label( "Cancel" );
+	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
+	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	gtk_widget_show( w );
+	
+	ret = eIDCANCEL;
+
+	gtk_window_set_position(GTK_WINDOW(window),GTK_WIN_POS_CENTER);
+	gtk_widget_show (window);
+	gtk_grab_add (window);
+	
+	bool dialogError = TRUE;
+	while (dialogError)
+	{
+		loop = 1;
+		while (loop)
+			gtk_main_iteration ();
+		
+		dialogError = FALSE;
+		
+		if(ret == eIDOK)
+		{
+			strcpy(rs->linkName, gtk_entry_get_text((GtkEntry*)textlinkName));
+			if(!ValidateTextInt(gtk_entry_get_text((GtkEntry*)textlinkNum), "Elements", &rs->linkNum))
+				dialogError = TRUE;
+		}
+	}
+	
+	gtk_grab_remove (window);
+	gtk_widget_destroy (window);
+	
 	return ret;
 }

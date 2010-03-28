@@ -992,9 +992,9 @@ void OpenUpdateURL()
 // open the Q3Rad manual
 void OpenHelpURL()
 {
-  // at least on win32, AppPath + "Q3Rad_Manual/index.htm"
+  // at least on win32, AppPath + "docs/index.html"
   StringOutputStream help(256);
-  help << AppPath_get() << "Q3Rad_Manual/index.htm";
+  help << AppPath_get() << "docs/index.html";
   OpenURL(help.c_str());
 }
 

@@ -181,7 +181,7 @@ public:
 
 	bool FindDropPoint(vec3_t in, vec3_t out);
 	void DropEntsToGround( void );
-	void MakeChain( void );
+	void MakeChain( int linkNum, const char* linkName );
 	void SelectChain( void );
 
 private:
