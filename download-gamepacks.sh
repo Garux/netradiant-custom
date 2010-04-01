@@ -33,7 +33,9 @@ pack()
 				;;
 			gitdir)
 				rm -rf "games/$pack"
+				cd games
 				git archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
+				cd ..
 				;;
 		esac
 		return
