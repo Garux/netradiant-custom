@@ -401,6 +401,10 @@ void CreateEntityLights( void )
 		else
 			light->color[ 0 ] = light->color[ 1 ] = light->color[ 2 ] = 1.0f;
 
+		light->extraDist = FloatForKey( e, "_extradist" );
+		if(light->extraDist == 0.0f)
+			light->extraDist = extraDist;
+		
 		intensity = intensity * pointScale;
 		light->photons = intensity;
 
@@ -821,6 +825,12 @@ int LightContributionToSample( trace_t *trace )
 			else if( angle < 0.0f &&
 				(trace->twoSided || (light->flags & LIGHT_TWOSIDED)) )
 				angle = -angle;
+
+			/* clamp the distance to prevent super hot spots */
+			dist = sqrt(dist * dist + light->extraDist * light->extraDist);
+			if( dist < 16.0f )
+				dist = 16.0f;
+
 			add = light->photons / (dist * dist) * angle;
 		}
 		else
@@ -859,11 +869,12 @@ int LightContributionToSample( trace_t *trace )
 		dist = SetupTrace( trace );
 		if( dist >= light->envelope )
 			return 0;
-		
+
 		/* clamp the distance to prevent super hot spots */
+		dist = sqrt(dist * dist + light->extraDist * light->extraDist);
 		if( dist < 16.0f )
 			dist = 16.0f;
-		
+
 		/* angle attenuation */
 		if( light->flags & LIGHT_ATTEN_ANGLE )
 		{
@@ -907,7 +918,7 @@ int LightContributionToSample( trace_t *trace )
 				add = 0.0f;
 		}
 		else
-			add = light->photons / (dist * dist) * angle;
+			add = (light->photons / (dist * dist)) * angle;
 		
 		/* handle spotlights */
 		if( light->type == EMIT_SPOT )
@@ -1156,9 +1167,10 @@ int LightContributionToPoint( trace_t *trace )
 	if( light->type == EMIT_AREA && faster )
 	{
 		/* clamp the distance to prevent super hot spots */
+		dist = sqrt(dist * dist + light->extraDist * light->extraDist);
 		if( dist < 16.0f )
 			dist = 16.0f;
-		
+
 		/* attenuate */
 		add = light->photons / (dist * dist);
 	}
@@ -1202,6 +1214,7 @@ int LightContributionToPoint( trace_t *trace )
 	else if( light->type == EMIT_POINT || light->type == EMIT_SPOT )
 	{
 		/* clamp the distance to prevent super hot spots */
+		dist = sqrt(dist * dist + light->extraDist * light->extraDist);
 		if( dist < 16.0f )
 			dist = 16.0f;
 		
@@ -2226,6 +2239,15 @@ int LightMain( int argc, char **argv )
 			/* -game should already be set */
 			wolfLight = qfalse;
 			Sys_Printf( "Enabling Quake 3 lighting model (nonlinear default)\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-extradist" ) )
+		{
+			extraDist = atof( argv[ i + 1 ] );
+			if( extraDist < 0 )
+				extraDist = 0;
+			i++;
+			Sys_Printf( "Default extra radius set to %f units\n", extraDist );
 		}
 		
 		else if( !strcmp( argv[ i ], "-sunonly" ) )

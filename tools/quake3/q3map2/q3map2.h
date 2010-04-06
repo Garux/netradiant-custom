@@ -1304,6 +1304,7 @@ typedef struct light_s
 	float				radiusByDist;	/* for spotlights */
 	float				fade;			/* ydnar: from wolf, for linear lights */
 	float				angleScale;		/* ydnar: stolen from vlight for K */
+	float				extraDist;		/* "extra dimension" distance of the light, to kill hot spots */
 
 	float				add;			/* ydnar: used for area lights */
 	float				envelope;		/* ydnar: units until falloff < tolerance */
@@ -2141,6 +2142,7 @@ light global variables
 
 /* commandline arguments */
 Q_EXTERN qboolean			wolfLight Q_ASSIGN( qfalse );
+Q_EXTERN float				extraDist Q_ASSIGN( 0.0f );
 Q_EXTERN qboolean			loMem Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			noStyles Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			keepLights Q_ASSIGN( qfalse );
