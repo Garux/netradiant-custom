@@ -6,6 +6,15 @@
 
 set -e
 
+extra_urls()
+{
+	if [ -f "$1/extra-urls.txt" ]; then
+		while IFS="	" read -r FILE URL; do
+			wget -O "$1/$FILE" "$URL"
+		done < "$1/extra-urls.txt"
+	fi
+}
+
 pack()
 {
 	pack=$1; shift
@@ -37,7 +46,13 @@ pack()
 				git archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
 				cd ..
 				;;
+			git)
+				cd "games/$pack"
+				git pull
+				cd ../..
+				;;
 		esac
+		extra_urls "games/$pack"
 		return
 	fi
 
@@ -102,12 +117,17 @@ pack()
 			rm -rf zipdownload
 			;;
 		gitdir)
-			rm -rf "games/$pack"
 			cd games
 			git archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
 			cd ..
 			;;
+		git)
+			cd games
+			git clone "$source" "$pack"
+			cd ..
+			;;
 	esac
+	extra_urls "games/$pack"
 }
 
 mkdir -p games
@@ -121,3 +141,4 @@ pack QuakePack       proprietary zip1   http://ingar.satgnu.net/files/gtkradiant
 pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
 pack UFOAIPack       proprietary svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/UFOAIPack/branches/1.5/
 pack WarsowPack      GPL         svn    http://opensvn.csie.org/warsowgamepack/netradiant/games/WarsowPack/
+pack XonoticPack     GPL         git    git://git.xonotic.org/xonotic/netradiant-xonoticpack.git
