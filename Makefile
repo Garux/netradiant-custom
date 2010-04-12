@@ -77,7 +77,8 @@ LIBS_DL            ?= -ldl # nothing on Win32
 CPPFLAGS_ZLIB      ?=
 LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
-DOWNLOAD_GAMEPACKS ?= yes # set to no to disable gamepack, set to all to even download undistributable gamepacks
+DOWNLOAD_GAMEPACKS ?= yes
+# set to no to disable gamepack, set to all to even download undistributable gamepacks
 DEPENDENCIES_CHECK ?= quiet
 # or: off, verbose
 
