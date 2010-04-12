@@ -44,9 +44,11 @@ TR                 ?= tr
 FIND               ?= find
 DIFF               ?= diff
 SED                ?= sed
-
-# optional:
 GIT                ?= git
+SVN                ?= svn
+WGET               ?= wget
+MV                 ?= mv
+UNZIP              ?= unzip
 
 STDOUT_TO_DEVNULL  ?= >/dev/null
 STDERR_TO_DEVNULL  ?= 2>/dev/null
@@ -75,6 +77,7 @@ LIBS_DL            ?= -ldl # nothing on Win32
 CPPFLAGS_ZLIB      ?=
 LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
+DOWNLOAD_GAMEPACKS ?= yes # set to no to disable gamepack, set to all to even download undistributable gamepacks
 DEPENDENCIES_CHECK ?= quiet
 # or: off, verbose
 
@@ -268,6 +271,7 @@ dependencies-check:
 	checkbinary coreutils "$(CP_R)"; \
 	checkbinary coreutils "$(RM)"; \
 	checkbinary coreutils "$(RM_R)"; \
+	checkbinary coreutils "$(MV)"; \
 	checkbinary coreutils "$(ECHO) test $(TEE_STDERR)"; \
 	checkbinary sed "$(SED)"; \
 	checkbinary findutils "$(FIND)"; \
@@ -277,6 +281,10 @@ dependencies-check:
 	checkbinary binutils "$(RANLIB)"; \
 	checkbinary binutils "$(AR)"; \
 	checkbinary pkg-config "$(PKGCONFIG)"; \
+	checkbinary unzip "$(UNZIP)"; \
+	checkbinary git-core "$(GIT)"; \
+	checkbinary subversion "$(SVN)"; \
+	checkbinary wget "$(WGET)"; \
 	[ "$(OS)" = "Win32" ] && checkbinary mingw32 "$(WINDRES)"; \
 	[ -n "$(LDD)" ] && checkbinary libc6 "$(LDD)"; \
 	[ -n "$(OTOOL)" ] && checkbinary xcode "$(OTOOL)"; \
@@ -958,16 +966,7 @@ install-data: binaries
 	$(MKDIR) $(INSTALLDIR)/games
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
 	[ "$(OS)" != "Darwin" ] || $(CP_R) setup/data/osx/NetRadiant.app/* $(INSTALLDIR_BASE)/NetRadiant.app/
-	set -ex; \
-	for GAME in games/*; do \
-		if [ "$$GAME" = "games/*" ]; then \
-			$(ECHO) "Game packs not found, please run"; \
-			$(ECHO) "  ./download-gamepacks.sh"; \
-			$(ECHO) "and then try again!"; \
-		else \
-			CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepack.sh "$$GAME" "$(INSTALLDIR)"; \
-		fi; \
-	done
+	DOWNLOAD_GAMEPACKS="$(DOWNLOAD_GAMEPACKS)" GIT="$(GIT)" SVN="$(SVN)" WGET="$(WGET)" RM_R="$(RM_R)" MV="$(MV)" UNZIP="$(UNZIP)" ECHO="$(ECHO)" SH="$(SH)" CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepacks.sh "$(INSTALLDIR)"
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
 	$(CP_R) setup/data/tools/* $(INSTALLDIR)/

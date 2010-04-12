@@ -4,13 +4,22 @@
 #   sh download-gamepack.sh
 #   LICENSEFILTER=GPL BATCH=1 sh download-gamepack.sh
 
+: ${GIT:=git}
+: ${SVN:=svn}
+: ${WGET:=wget}
+: ${ECHO:=echo}
+: ${MKDIR:=mkdir}
+: ${RM_R:=rm -r}
+: ${MV:=mv}
+: ${UNZIP:=unzip}
+
 set -e
 
 extra_urls()
 {
 	if [ -f "$1/extra-urls.txt" ]; then
 		while IFS="	" read -r FILE URL; do
-			wget -O "$1/$FILE" "$URL"
+			$WGET -O "$1/$FILE" "$URL"
 		done < "$1/extra-urls.txt"
 	fi
 }
@@ -23,32 +32,32 @@ pack()
 	source=$1; shift
 
 	if [ -d "games/$pack" ]; then
-		echo "Updating $pack..."
+		$ECHO "Updating $pack..."
 		case "$sourcetype" in
 			svn)
-				svn update "games/$pack" "$@"
+				$SVN update "games/$pack" "$@"
 				;;
 			zip1)
-				rm -rf zipdownload
-				mkdir zipdownload
+				$RM_R zipdownload
+				$MKDIR zipdownload
 				cd zipdownload
-				wget "$source" "$@"
-				unzip *
+				$WGET "$source" "$@"
+				$UNZIP *
 				cd ..
-				rm -rf "games/$pack"
-				mkdir "games/$pack"
-				mv zipdownload/*/* "games/$pack/"
-				rm -rf zipdownload
+				$RM_R "games/$pack"
+				$MKDIR "games/$pack"
+				$MV zipdownload/*/* "games/$pack/"
+				$RM_R zipdownload
 				;;
 			gitdir)
-				rm -rf "games/$pack"
+				$RM_R "games/$pack"
 				cd games
-				git archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
+				$GIT archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
 				cd ..
 				;;
 			git)
 				cd "games/$pack"
-				git pull
+				$GIT pull
 				cd ../..
 				;;
 		esac
@@ -56,18 +65,18 @@ pack()
 		return
 	fi
 
-	echo
-	echo "Available pack: $pack"
-	echo "  License: $license"
-	echo "  Download via $sourcetype from $source"
-	echo
+	$ECHO
+	$ECHO "Available pack: $pack"
+	$ECHO "  License: $license"
+	$ECHO "  Download via $sourcetype from $source"
+	$ECHO
 	case " $PACKFILTER " in
 		"  ")
 			;;
 		*" $pack "*)
 			;;
 		*)
-			echo "Pack $pack rejected because it is not in PACKFILTER."
+			$ECHO "Pack $pack rejected because it is not in PACKFILTER."
 			return
 			;;
 	esac
@@ -77,14 +86,14 @@ pack()
 		*" $license "*)
 			;;
 		*)
-			echo "Pack $pack rejected because its license is not in LICENSEFILTER."
+			$ECHO "Pack $pack rejected because its license is not in LICENSEFILTER."
 			return
 			;;
 	esac
 	case "$BATCH" in
 		'')
 			while :; do
-				echo "Download this pack? (y/n)"
+				$ECHO "Download this pack? (y/n)"
 				read -r P
 				case "$P" in
 					y*)
@@ -100,30 +109,30 @@ pack()
 			;;
 	esac
 	
-	echo "Downloading $pack..."
+	$ECHO "Downloading $pack..."
 	case "$sourcetype" in
 		svn)
-			svn checkout "$source" "games/$pack" "$@"
+			$SVN checkout "$source" "games/$pack" "$@"
 			;;
 		zip1)
-			rm -rf zipdownload
-			mkdir zipdownload
+			$RM_R zipdownload
+			$MKDIR zipdownload
 			cd zipdownload
-			wget "$source" "$@"
-			unzip *
+			$WGET "$source" "$@"
+			$UNZIP *
 			cd ..
-			mkdir "games/$pack"
-			mv zipdownload/*/* "games/$pack/"
-			rm -rf zipdownload
+			$MKDIR "games/$pack"
+			$MV zipdownload/*/* "games/$pack/"
+			$RM_R zipdownload
 			;;
 		gitdir)
 			cd games
-			git archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
+			$GIT archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
 			cd ..
 			;;
 		git)
 			cd games
-			git clone "$source" "$pack"
+			$GIT clone "$source" "$pack"
 			cd ..
 			;;
 	esac
