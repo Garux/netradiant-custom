@@ -1780,10 +1780,6 @@ void LightWorld( void )
 	if( dirty )
 	{
 		Sys_Printf( "--- DirtyRawLightmap ---\n" );
-
-
-
-
 		RunThreadsOnIndividual( numRawLightmaps, qtrue, DirtyRawLightmap );
 	}
 	
