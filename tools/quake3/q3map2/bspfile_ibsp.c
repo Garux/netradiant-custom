@@ -483,7 +483,7 @@ void LoadIBSPFile( const char *filename )
 	
 	numBSPPlanes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_PLANES, (void **) &bspPlanes, sizeof( bspPlane_t ), &allocatedBSPPlanes );
 	
-	numBSPLeafs = CopyLump( (bspHeader_t*) header, LUMP_LEAFS, bspLeafs, sizeof( bspLeaf_t ) );
+	numBSPLeafs = CopyLump( (bspHeader_t*) header, LUMP_LEAFS, bspLeafs, sizeof( bspLeaf_t ) ); // TODO fix overflow
 	
 	numBSPNodes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_NODES, (void **) &bspNodes, sizeof( bspNode_t ), &allocatedBSPNodes );
 	
@@ -499,13 +499,13 @@ void LoadIBSPFile( const char *filename )
 	
 	CopyDrawSurfacesLump( header );
 	
-	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) );
+	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) ); // TODO fix overflow
 	
 	numBSPDrawIndexes = CopyLump( (bspHeader_t*) header, LUMP_DRAWINDEXES, bspDrawIndexes, sizeof( bspDrawIndexes[ 0 ] ) );
 	
-	numBSPVisBytes = CopyLump( (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, 1 );
+	numBSPVisBytes = CopyLump( (bspHeader_t*) header, LUMP_VISIBILITY, bspVisBytes, 1 ); // TODO fix overflow
 	
-	numBSPLightBytes = GetLumpElements( (bspHeader_t*) header, LUMP_LIGHTMAPS, 1 );
+	numBSPLightBytes = GetLumpElements( (bspHeader_t*) header, LUMP_LIGHTMAPS, 1 ); // TODO change to CopyLump_Allocate
 		bspLightBytes = safe_malloc( numBSPLightBytes );
 		CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes, 1 );
 	
