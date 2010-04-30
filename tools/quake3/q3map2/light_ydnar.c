@@ -2006,11 +2006,12 @@ void IlluminateRawLightmap( int rawLightmapNum )
 					VectorCopy( ambientColor, luxel );
 					if( deluxemap )
 					{
-						brightness = ambientColor[ 0 ] * 0.3f + ambientColor[ 1 ] * 0.59f + ambientColor[ 2 ] * 0.11f;
-						brightness *= (1.0 / 255.0);
+						brightness = RGBTOGRAY( ambientColor ) * ( 1.0f/255.0f );
+
 						// use AT LEAST this amount of contribution from ambient for the deluxemap, fixes points that receive ZERO light
 						if(brightness < 0.00390625f)
 							brightness = 0.00390625f;
+
 						VectorScale( normal, brightness, deluxel );
 					}
 					luxel[ 3 ] = 1.0f;
@@ -2094,22 +2095,13 @@ void IlluminateRawLightmap( int rawLightmapNum )
 						LightContributionToSample( &trace );
 						VectorCopy( trace.color, lightLuxel );
 
+						/* add the contribution to the deluxemap */
+						if( deluxemap )
+							VectorAdd( deluxel, trace.directionContribution, deluxel );
+
 						/* add to count */
 						if( trace.color[ 0 ] || trace.color[ 1 ] || trace.color[ 2 ] )
 							totalLighted++;
-					}
-					
-					/* add to light direction map (fixme: use luxel normal as starting point for deluxel?) */
-					if( deluxemap )
-					{
-						if(DotProduct(normal, trace.direction) > 0) // do not take light from the back side
-						{
-							/* color to grayscale (photoshop rgb weighting) */
-							brightness = trace.colorNoShadow[ 0 ] * 0.3f + trace.colorNoShadow[ 1 ] * 0.59f + trace.colorNoShadow[ 2 ] * 0.11f;
-							brightness *= (1.0 / 255.0);
-							VectorScale( trace.direction, brightness, trace.direction );
-							VectorAdd( deluxel, trace.direction, deluxel );
-						}
 					}
 				}
 			}
@@ -2442,6 +2434,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				if( *cluster < 0 ||
 					(lm->splotchFix && (luxel[ 0 ] <= ambientColor[ 0 ] || luxel[ 1 ] <= ambientColor[ 1 ] || luxel[ 2 ] <= ambientColor[ 2 ])) )
 					filterColor = qtrue;
+
 				if( deluxemap && lightmapNum == 0 && (*cluster < 0 || filter) )
 					filterDir = qtrue;
 				
@@ -4194,8 +4187,7 @@ void FloodlightIlluminateLightmap( rawLightmap_t *lm )
 					vec3_t				lightvector;
 
 					normal = SUPER_NORMAL( x, y );
-					brightness = floodlight[ 0 ] * 0.3f + floodlight[ 1 ] * 0.59f + floodlight[ 2 ] * 0.11f;
-					brightness *= ( 1.0f / 255.0f ) * floodlight[3];
+					brightness = RGBTOGRAY( floodlight ) * ( 1.0f/255.0f ) * floodlight[3];
 
 					// use AT LEAST this amount of contribution from ambient for the deluxemap, fixes points that receive ZERO light
 					if(brightness < 0.00390625f)

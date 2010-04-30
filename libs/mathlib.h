@@ -77,6 +77,8 @@ extern const vec3_t g_vec3_axis_z;
 #define FLOAT_SNAP(f,snap) ( (float)( floor( (f) / (snap) + 0.5 ) * (snap) ) )
 #define FLOAT_TO_INTEGER(f) ( (float)( floor( (f) + 0.5 ) ) )
 
+#define RGBTOGRAY(x) ( (x)[0] * 0.2989f + (x)[1] * 0.5870f + (x)[2] * 0.1140f )
+
 #define Q_rint(in) ((vec_t)floor(in+0.5))
 
 qboolean VectorCompare (const vec3_t v1, const vec3_t v2);

@@ -1921,7 +1921,7 @@ for a given surface lightmap, find output lightmap pages and positions for it
 #define LIGHTMAP_RESERVE_COUNT 1
 static void FindOutLightmaps( rawLightmap_t *lm )
 {
-	int					i, j, k, lightmapNum, xMax, yMax, x, y, sx, sy, ox, oy, offset, temp;
+	int					i, j, k, lightmapNum, xMax, yMax, x, y, sx, sy, ox, oy, offset;
 	outLightmap_t		*olm;
 	surfaceInfo_t		*info;
 	float				*luxel, *deluxel;
@@ -2193,21 +2193,12 @@ static void FindOutLightmaps( rawLightmap_t *lm )
 				if( deluxemap )
 				{
 					/* normalize average light direction */
-					if( VectorNormalize( deluxel, direction ) )
-					{
-						/* encode [-1,1] in [0,255] */
-						pixel = olm->bspDirBytes + (((oy * olm->customWidth) + ox) * 3);
-						for( i = 0; i < 3; i++ )
-						{
-							temp = (direction[ i ] + 1.0f) * 127.5f;
-							if( temp < 0 )
-								pixel[ i ] = 0;
-							else if( temp > 255 )
-								pixel[ i ] = 255;
-							else
-								pixel[ i ] = temp;
-						}
-					}
+					pixel = olm->bspDirBytes + (((oy * olm->customWidth) + ox) * 3);
+					VectorScale( deluxel, 1000.0f, direction );
+					VectorNormalize( direction, direction );
+					VectorScale( direction, 127.5f, direction );
+					for( i = 0; i < 3; i++ )
+						pixel[ i ] = (byte)( 127.5f + direction[ i ] );
 				}
 			}
 		}
