@@ -29,8 +29,8 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 
 
 /* marker */
-#ifndef GAME_NEXUIZ_H
-#define GAME_NEXUIZ_H
+#ifndef GAME_XONOTIC_H
+#define GAME_XONOTIC_H
 
 
 
@@ -53,7 +53,7 @@ game_t struct
 	"xonotic", /* -game x */
 	"data", /* default base game data dir */
 	".xonotic", /* unix home sub-dir */
-	"nexuiz", /* magic path word */
+	"xonotic", /* magic path word */
 	"scripts", /* shader directory */
 	1048575, /* max lightmapped surface verts */
 	1048575, /* max surface verts */
