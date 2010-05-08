@@ -35,29 +35,29 @@ pack()
 		$ECHO "Updating $pack..."
 		case "$sourcetype" in
 			svn)
-				$SVN update "games/$pack" "$@"
+				$SVN update "games/$pack" "$@" || true
 				;;
 			zip1)
 				$RM_R zipdownload
 				$MKDIR zipdownload
 				cd zipdownload
-				$WGET "$source" "$@"
+				$WGET "$source" "$@" || true
 				$UNZIP *
 				cd ..
 				$RM_R "games/$pack"
 				$MKDIR "games/$pack"
-				$MV zipdownload/*/* "games/$pack/"
+				$MV zipdownload/*/* "games/$pack/" || true
 				$RM_R zipdownload
 				;;
 			gitdir)
 				$RM_R "games/$pack"
 				cd games
-				$GIT archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
+				$GIT archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf - || true
 				cd ..
 				;;
 			git)
 				cd "games/$pack"
-				$GIT pull
+				$GIT pull || true
 				cd ../..
 				;;
 		esac
@@ -112,31 +112,38 @@ pack()
 	$ECHO "Downloading $pack..."
 	case "$sourcetype" in
 		svn)
-			$SVN checkout "$source" "games/$pack" "$@"
+			$SVN checkout "$source" "games/$pack" "$@" || true
 			;;
 		zip1)
 			$RM_R zipdownload
 			$MKDIR zipdownload
 			cd zipdownload
-			$WGET "$source" "$@"
-			$UNZIP *
+			$WGET "$source" "$@" || true
+			$UNZIP * || true
 			cd ..
 			$MKDIR "games/$pack"
-			$MV zipdownload/*/* "games/$pack/"
+			$MV zipdownload/*/* "games/$pack/" || true
 			$RM_R zipdownload
 			;;
 		gitdir)
 			cd games
-			$GIT archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf -
+			$GIT archive --remote="$source" --prefix="$pack/" "$2":"$1" | tar xvf - || true
 			cd ..
 			;;
 		git)
 			cd games
-			$GIT clone "$source" "$pack"
+			$GIT clone "$source" "$pack" || true
 			cd ..
 			;;
 	esac
 	extra_urls "games/$pack"
+	good=false
+	for D in "games/$pack"/*.game; do
+		if [ -d "$D" ]; then
+			good=true
+		fi
+	done
+	$good || rm -rf "$D"
 }
 
 mkdir -p games
