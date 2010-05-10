@@ -156,5 +156,5 @@ pack Quake2WorldPack GPL         svn    svn://jdolan.dyndns.org/quake2world/trun
 pack QuakePack       proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/QuakePack.zip
 pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
 pack UFOAIPack       proprietary svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/UFOAIPack/branches/1.5/
-pack WarsowPack      GPL         svn    http://opensvn.csie.org/warsowgamepack/netradiant/games/WarsowPack/
+pack WarsowPack      GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
 pack XonoticPack     GPL         git    git://git.xonotic.org/xonotic/netradiant-xonoticpack.git
