@@ -1351,6 +1351,7 @@ typedef struct
 	/* input and output */
 	vec3_t				color;			/* starts out at full color, may be reduced if transparent surfaces are crossed */
 	vec3_t				colorNoShadow;	/* result color with no shadow casting */
+	vec3_t				directionContribution; /* result contribution to the deluxe map */
 
 	/* output */
 	vec3_t				hit;

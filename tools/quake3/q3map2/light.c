@@ -749,7 +749,9 @@ int LightContributionToSample( trace_t *trace )
 	float			angle;
 	float			add;
 	float			dist;
-	
+	float			addDeluxe = 0.0f, addDeluxeBounceScale = 0.25f;
+	qboolean		angledDeluxe = qfalse;
+	float			colorBrightness;
 	
 	/* get light */
 	light = trace->light;
@@ -757,6 +759,9 @@ int LightContributionToSample( trace_t *trace )
 	/* clear color */
 	VectorClear( trace->color );
 	VectorClear( trace->colorNoShadow );
+	VectorClear( trace->directionContribution );
+
+	colorBrightness = RGBTOGRAY( light->color ) * ( 1.0f/255.0f );
 	
 	/* ydnar: early out */
 	if( !(light->flags & LIGHT_SURFACES) || light->envelope <= 0.0f )
@@ -796,7 +801,7 @@ int LightContributionToSample( trace_t *trace )
 		}
 		
 		/* nudge the point so that it is clearly forward of the light */
-		/* so that surfaces meeting a light emiter don't get black edges */
+		/* so that surfaces meeting a light emitter don't get black edges */
 		if( d > -8.0f && d < 8.0f )
 			VectorMA( trace->origin, (8.0f - d), light->normal, pushedOrigin );				
 		else
@@ -832,6 +837,14 @@ int LightContributionToSample( trace_t *trace )
 				dist = 16.0f;
 
 			add = light->photons / (dist * dist) * angle;
+
+			if( deluxemap )
+			{
+				if( angledDeluxe )
+					addDeluxe = light->photons / (dist * dist) * angle;
+				else
+					addDeluxe = light->photons / (dist * dist);
+			}
 		}
 		else
 		{
@@ -858,6 +871,9 @@ int LightContributionToSample( trace_t *trace )
 			
 			/* ydnar: moved to here */
 			add = factor * light->add;
+
+			if( deluxemap )
+				addDeluxe = add;
 		}
 	}
 	
@@ -916,9 +932,35 @@ int LightContributionToSample( trace_t *trace )
 			add = angle * light->photons * linearScale - (dist * light->fade);
 			if( add < 0.0f )
 				add = 0.0f;
+
+			if( deluxemap )
+			{
+				if( angledDeluxe )
+					addDeluxe = angle * light->photons * linearScale - (dist * light->fade);
+				else
+					addDeluxe = light->photons * linearScale - (dist * light->fade);
+
+				if( addDeluxe < 0.0f )
+					addDeluxe = 0.0f;
+			}
 		}
 		else
+		{
 			add = (light->photons / (dist * dist)) * angle;
+			if( add < 0.0f )
+				add = 0.0f;
+
+			if( deluxemap )
+			{
+				if( angledDeluxe )
+					addDeluxe = (light->photons / (dist * dist)) * angle;
+				else
+					addDeluxe = (light->photons / (dist * dist));
+			}
+
+			if( addDeluxe < 0.0f )
+				addDeluxe = 0.0f;
+		}
 		
 		/* handle spotlights */
 		if( light->type == EMIT_SPOT )
@@ -941,7 +983,16 @@ int LightContributionToSample( trace_t *trace )
 			
 			/* attenuate */
 			if( sampleRadius > (radiusAtDist - 32.0f) )
+			{
 				add *= ((radiusAtDist - sampleRadius) / 32.0f);
+				if( add < 0.0f )
+					add = 0.0f;
+
+				addDeluxe *= ((radiusAtDist - sampleRadius) / 32.0f);
+
+				if( addDeluxe < 0.0f )
+					addDeluxe = 0.0f;
+			}
 		}
 	}
 	
@@ -982,11 +1033,34 @@ int LightContributionToSample( trace_t *trace )
 		
 		/* attenuate */
 		add = light->photons * angle;
+
+		if( deluxemap )
+		{
+			if( angledDeluxe )
+				addDeluxe = light->photons * angle;
+			else
+				addDeluxe = light->photons;
+
+			if( addDeluxe < 0.0f )
+				addDeluxe = 0.0f;
+		}
+
 		if( add <= 0.0f )
 			return 0;
 
 		/* VorteX: set noShadow color */
 		VectorScale(light->color, add, trace->colorNoShadow);
+
+		addDeluxe *= colorBrightness;
+
+		if( bouncing )
+		{
+			addDeluxe *= addDeluxeBounceScale;
+			if( addDeluxe < 0.00390625f )
+				addDeluxe = 0.00390625f;
+		}
+
+		VectorScale( trace->direction, addDeluxe, trace->directionContribution );
 		
 		/* setup trace */
 		trace->testAll = qtrue;
@@ -1000,6 +1074,8 @@ int LightContributionToSample( trace_t *trace )
 			if( !(trace->compileFlags & C_SKY) || trace->opaque )
 			{
 				VectorClear( trace->color );
+				VectorClear( trace->directionContribution );
+
 				return -1;
 			}
 		}
@@ -1014,6 +1090,29 @@ int LightContributionToSample( trace_t *trace )
 	/* ydnar: changed to a variable number */
 	if( add <= 0.0f || (add <= light->falloffTolerance && (light->flags & LIGHT_FAST_ACTUAL)) )
 		return 0;
+
+	addDeluxe *= colorBrightness;
+
+	/* hack land: scale down the radiosity contribution to light directionality.
+	Deluxemaps fusion many light directions into one. In a rtl process all lights
+	would contribute individually to the bump map, so several light sources together
+	would make it more directional (example: a yellow and red lights received from
+	opposing sides would light one side in red and the other in blue, adding
+	the effect of 2 directions applied. In the deluxemapping case, this 2 lights would
+	neutralize each other making it look like having no direction.
+	Same thing happens with radiosity. In deluxemapping case the radiosity contribution
+	is modifying the direction applied from directional lights, making it go closer and closer
+	to the surface normal the bigger is the amount of radiosity received.
+	So, for preserving the directional lights contributions, we scale down the radiosity
+	contribution. It's a hack, but there's a reason behind it */
+	if( bouncing )
+	{
+		addDeluxe *= addDeluxeBounceScale;
+		if( addDeluxe < 0.00390625f )
+			addDeluxe = 0.00390625f;
+	}
+
+	VectorScale( trace->direction, addDeluxe, trace->directionContribution );
 	
 	/* setup trace */
 	trace->testAll = qfalse;
@@ -1024,6 +1123,8 @@ int LightContributionToSample( trace_t *trace )
 	if( trace->passSolid || trace->opaque )
 	{
 		VectorClear( trace->color );
+		VectorClear( trace->directionContribution );
+
 		return -1;
 	}
 	
@@ -1780,10 +1881,6 @@ void LightWorld( void )
 	if( dirty )
 	{
 		Sys_Printf( "--- DirtyRawLightmap ---\n" );
-
-
-
-
 		RunThreadsOnIndividual( numRawLightmaps, qtrue, DirtyRawLightmap );
 	}
 	
