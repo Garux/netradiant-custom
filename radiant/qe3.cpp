@@ -346,7 +346,7 @@ void RunBSP(const char* name)
 void Sys_SetTitle(const char *text, bool modified)
 {
   StringOutputStream title;
-  title << ConvertLocaleToUTF8(text);
+  title << text;
 
   if(modified)
   {

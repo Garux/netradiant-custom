@@ -216,7 +216,7 @@ std::size_t Sys_Print(int level, const char* buf, std::size_t length)
         if(!globalCharacterSet().isUTF8())
         {
           BufferedTextOutputStream<GtkTextBufferOutputStream> buffered(textBuffer);
-          buffered << ConvertLocaleToUTF8(StringRange(buf, buf + length));
+          buffered << StringRange(buf, buf + length);
         }
         else
         {

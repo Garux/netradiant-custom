@@ -216,7 +216,7 @@ public:
   void apply()
   {
     StringOutputStream value(64);
-    value << ConvertUTF8ToLocale(gtk_entry_get_text(m_entry));
+    value << gtk_entry_get_text(m_entry);
     Scene_EntitySetKeyValue_Selected_Undoable(m_key.c_str(), value.c_str());
   }
   typedef MemberCaller<StringAttribute, &StringAttribute::apply> ApplyCaller;
@@ -224,7 +224,7 @@ public:
   void update()
   {
     StringOutputStream value(64);
-    value << ConvertLocaleToUTF8(SelectedEntity_getValueForKey(m_key.c_str()));
+    value << SelectedEntity_getValueForKey(m_key.c_str());
     gtk_entry_set_text(m_entry, value.c_str());
   }
   typedef MemberCaller<StringAttribute, &StringAttribute::update> UpdateCaller;
@@ -264,14 +264,14 @@ public:
   void apply()
   {
     StringOutputStream value(64);
-    value << ConvertUTF8ToLocale(gtk_entry_get_text(GTK_ENTRY(m_entry.m_entry.m_entry)));
+    value << gtk_entry_get_text(GTK_ENTRY(m_entry.m_entry.m_entry));
     Scene_EntitySetKeyValue_Selected_Undoable(m_key.c_str(), value.c_str());
   }
   typedef MemberCaller<ModelAttribute, &ModelAttribute::apply> ApplyCaller;
   void update()
   {
     StringOutputStream value(64);
-    value << ConvertLocaleToUTF8(SelectedEntity_getValueForKey(m_key.c_str()));
+    value << SelectedEntity_getValueForKey(m_key.c_str());
     gtk_entry_set_text(GTK_ENTRY(m_entry.m_entry.m_entry), value.c_str());
   }
   typedef MemberCaller<ModelAttribute, &ModelAttribute::update> UpdateCaller;
@@ -338,14 +338,14 @@ public:
   void apply()
   {
     StringOutputStream value(64);
-    value << ConvertUTF8ToLocale(gtk_entry_get_text(GTK_ENTRY(m_entry.m_entry.m_entry)));
+    value << gtk_entry_get_text(GTK_ENTRY(m_entry.m_entry.m_entry));
     Scene_EntitySetKeyValue_Selected_Undoable(m_key.c_str(), value.c_str());
   }
   typedef MemberCaller<SoundAttribute, &SoundAttribute::apply> ApplyCaller;
   void update()
   {
     StringOutputStream value(64);
-    value << ConvertLocaleToUTF8(SelectedEntity_getValueForKey(m_key.c_str()));
+    value << SelectedEntity_getValueForKey(m_key.c_str());
     gtk_entry_set_text(GTK_ENTRY(m_entry.m_entry.m_entry), value.c_str());
   }
   typedef MemberCaller<SoundAttribute, &SoundAttribute::update> UpdateCaller;
@@ -1170,9 +1170,9 @@ void EntityInspector_updateKeyValues()
     GtkTreeIter iter;
     gtk_list_store_append(store, &iter);
     StringOutputStream key(64);
-    key << ConvertLocaleToUTF8((*i).first.c_str());
+    key << (*i).first.c_str();
     StringOutputStream value(64);
-    value << ConvertLocaleToUTF8((*i).second.c_str());
+    value << (*i).second.c_str();
     gtk_list_store_set(store, &iter, 0, key.c_str(), 1, value.c_str(), -1);
   }
 
@@ -1243,9 +1243,9 @@ void EntityInspector_applyKeyValue()
 {
   // Get current selection text
   StringOutputStream key(64);
-  key << ConvertUTF8ToLocale(gtk_entry_get_text(g_entityKeyEntry));
+  key << gtk_entry_get_text(g_entityKeyEntry);
   StringOutputStream value(64);
-  value << ConvertUTF8ToLocale(gtk_entry_get_text(g_entityValueEntry));
+  value << gtk_entry_get_text(g_entityValueEntry);
 
 
   // TTimo: if you change the classname to worldspawn you won't merge back in the structural brushes but create a parasite entity
@@ -1280,7 +1280,7 @@ void EntityInspector_clearKeyValue()
 {
   // Get current selection text
   StringOutputStream key(64);
-  key << ConvertUTF8ToLocale(gtk_entry_get_text(g_entityKeyEntry));
+  key << gtk_entry_get_text(g_entityKeyEntry);
 
   if(strcmp(key.c_str(), "classname") != 0)
   {

@@ -176,7 +176,7 @@ int DoLoadPortalFileDialog ()
   }
 
   StringOutputStream value(256);
-  value << ConvertLocaleToUTF8(portals.fn);
+  value << portals.fn;
   gtk_entry_set_text (GTK_ENTRY (entry), value.c_str());
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check2d), portals.show_2d);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check3d), portals.show_3d);

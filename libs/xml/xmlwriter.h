@@ -113,7 +113,7 @@ class XMLStreamWriter : public XMLImporter, public XMLAttrVisitor
 
   void write_cdata(const char* buffer, std::size_t length)
   {
-    m_ostream << ConvertLocaleToUTF8(StringRange(buffer, buffer + length));
+    m_ostream << StringRange(buffer, buffer + length);
   }
   void write_string(const char* string)
   {

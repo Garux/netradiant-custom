@@ -138,7 +138,7 @@ class XMLSAXImporter
   static void characters(void *user_data, const xmlChar *ch, int len)
   {
     reinterpret_cast<XMLSAXImporter*>(user_data)->m_importer
-      << ConvertUTF8ToLocale(StringRange(reinterpret_cast<const char*>(ch), reinterpret_cast<const char*>(ch + len)));
+      << StringRange(reinterpret_cast<const char*>(ch), reinterpret_cast<const char*>(ch + len));
   }
 
   static void warning(void *user_data, const char *msg, ...)
