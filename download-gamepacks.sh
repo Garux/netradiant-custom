@@ -9,7 +9,7 @@
 : ${WGET:=wget}
 : ${ECHO:=echo}
 : ${MKDIR:=mkdir}
-: ${RM_R:=rm -r}
+: ${RM_R:=rm -f -r}
 : ${MV:=mv}
 : ${UNZIP:=unzip}
 
