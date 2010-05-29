@@ -98,8 +98,8 @@ public:
   /// \brief Detach an \p observer previously-attached by calling \c attach.
   virtual void detach(ModuleObserver& observer) = 0;
 
-  virtual Archive* getArchive(const char* archiveName) = 0;
-  virtual void forEachArchive(const ArchiveNameCallback& callback) = 0;
+  virtual Archive* getArchive(const char* archiveName, bool pakonly=true) = 0;
+  virtual void forEachArchive(const ArchiveNameCallback& callback, bool pakonly=true, bool reverse=false) = 0;
 };
 
 #include "modulesystem.h"

@@ -1768,9 +1768,9 @@ void IfFound_dumpUnreferencedShader(bool& bFound, const char* filename)
     if(!bFound)
     {
       bFound = true;
-      globalOutputStream() << "Following shader files are not referenced in shaderlist.txt:\n";
+      globalOutputStream() << "Following shader files are not referenced in any shaderlist.txt:\n";
     }
-    globalOutputStream() << filename << "\n";
+    globalOutputStream() << "\t" << filename << "\n";
   }
 }
 typedef ReferenceCaller1<bool, const char*, IfFound_dumpUnreferencedShader> IfFoundDumpUnreferencedShaderCaller;
@@ -1840,6 +1840,30 @@ void FreeShaderList()
   }
 }
 
+void ShaderList_addFromArchive(const char *archivename)
+{
+  const char *shaderpath = GlobalRadiant().getGameDescriptionKeyValue("shaderpath");
+  if (string_empty(shaderpath))
+    return;
+
+  StringOutputStream shaderlist(256);
+  shaderlist << DirectoryCleaned(shaderpath) << "shaderlist.txt";
+
+  Archive *archive = GlobalFileSystem().getArchive(archivename, false);
+  if (archive)
+  {
+    ArchiveTextFile *file = archive->openTextFile(shaderlist.c_str());
+    if (file)
+    {
+      globalOutputStream() << "Found shaderlist.txt in " << archivename << "\n";
+      BuildShaderList(file->getInputStream());
+      file->release();
+    }
+  }
+}
+
+typedef FreeCaller1<const char *, ShaderList_addFromArchive> AddShaderListFromArchiveCaller;
+
 #include "stream/filestream.h"
 
 bool shaderlist_findOrInstall(const char* enginePath, const char* toolsPath, const char* shaderPath, const char* gamename)
@@ -1898,22 +1922,8 @@ void Shaders_Load()
         shaderlist_findOrInstall(enginePath, toolsPath, path.c_str(), gamename);
       }
 
-      StringOutputStream absShaderList(256);
-      absShaderList << enginePath << gamename << '/' << path.c_str() << "shaderlist.txt";
-
-      {
-        globalOutputStream() << "Parsing shader files from " << absShaderList.c_str() << "\n";
-        TextFileInputStream shaderlistFile(absShaderList.c_str());
-        if(shaderlistFile.failed())
-        {
-          globalErrorStream() << "Couldn't find '" << absShaderList.c_str() << "'\n";
-        }
-        else
-        {
-          BuildShaderList(shaderlistFile);
-          DumpUnreferencedShaders();
-        }
-      }
+      GlobalFileSystem().forEachArchive(AddShaderListFromArchiveCaller(), false, true);
+      DumpUnreferencedShaders();
     }
     else
     {

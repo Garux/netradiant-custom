@@ -661,29 +661,33 @@ public:
     g_observers.detach(observer);
   }
 
-  Archive* getArchive(const char* archiveName)
+  Archive* getArchive(const char* archiveName, bool pakonly)
   {
     for(archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i)
     {
-      if((*i).is_pakfile)
-      {
-        if(path_equal((*i).name.c_str(), archiveName))
-        {
-          return (*i).archive;
-        }
-      }
+      if(pakonly && !(*i).is_pakfile)
+        continue;
+
+      if(path_equal((*i).name.c_str(), archiveName))
+        return (*i).archive;
     }
     return 0;
   }
-  void forEachArchive(const ArchiveNameCallback& callback)
+  void forEachArchive(const ArchiveNameCallback& callback, bool pakonly, bool reverse)
   {
+    if (reverse)
+      g_archives.reverse();
+
     for(archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i)
     {
-      if((*i).is_pakfile)
-      {
-        callback((*i).name.c_str());
-      }
+      if(pakonly && !(*i).is_pakfile)
+        continue;
+
+      callback((*i).name.c_str());
     }
+
+    if (reverse)
+      g_archives.reverse();
   }
 };
 
