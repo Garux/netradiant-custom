@@ -1546,7 +1546,8 @@ void DirtyRawLightmap( int rawLightmapNum )
 	rawLightmap_t		*lm;
 	surfaceInfo_t		*info;
 	trace_t				trace;
-	
+	qboolean			noDirty;
+
 	
 	/* bail if this number exceeds the number of raw lightmaps */
 	if( rawLightmapNum >= numRawLightmaps )
@@ -1578,6 +1579,20 @@ void DirtyRawLightmap( int rawLightmapNum )
 			break;
 		}
 	}
+
+	noDirty = qfalse;
+	for( i = 0; i < trace.numSurfaces; i++ )
+	{
+		/* get surface */
+		info = &surfaceInfos[ trace.surfaces[ i ] ];
+
+		/* check twosidedness */
+		if( info->si->noDirty )
+		{
+			noDirty = qtrue;
+			break;
+		}
+	}
 	
 	/* gather dirt */
 	for( y = 0; y < lm->sh; y++ )
@@ -1596,6 +1611,13 @@ void DirtyRawLightmap( int rawLightmapNum )
 			/* only look at mapped luxels */
 			if( *cluster < 0 )
 				continue;
+
+			/* don't apply dirty on this surface */
+			if( noDirty )
+			{
+				*dirt = 1.0f;
+				continue;
+			}
 			
 			/* copy to trace */
 			trace.cluster = *cluster;
