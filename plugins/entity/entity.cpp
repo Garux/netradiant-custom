@@ -50,8 +50,7 @@ EGameType g_gameType;
 
 inline scene::Node& entity_for_eclass(EntityClass* eclass)
 {
-  if(classname_equal(eclass->name(), "misc_model")
-  || classname_equal(eclass->name(), "misc_gamemodel")
+  if((string_compare_nocase_n(eclass->name(), "misc_", 5) == 0 && string_equal_nocase(eclass->name() + string_length(eclass->name()) - 5, "model")) // misc_*model (also misc_model) // TODO make classname_* wrapper functions for this
   || classname_equal(eclass->name(), "model_static"))
   {
     return New_MiscModel(eclass);
