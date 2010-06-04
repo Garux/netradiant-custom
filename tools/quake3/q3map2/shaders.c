@@ -1523,6 +1523,12 @@ static void ParseShaderFile( const char *filename )
 					GetTokenAppend( shaderText, qfalse );
 					si->floodlightDirectionScale = atof( token ); 
 				}
+
+				/* jal: q3map_nodirty : skip dirty */
+				else if( !Q_stricmp( token, "q3map_nodirty" ) )
+				{
+					si->noDirty = qtrue;
+				}
 				
 				/* q3map_lightmapSampleSize <value> */
 				else if( !Q_stricmp( token, "q3map_lightmapSampleSize" ) )
@@ -1668,7 +1674,7 @@ static void ParseShaderFile( const char *filename )
 					si->offset = atof( token );
 				}
 				
-				/* ydnar: q3map_textureSize <width> <height> (substitute for q3map_lightimage derivation for terrain) */
+				/* ydnar: q3map_fur <numlayers> <offset> <fade> */
 				else if( !Q_stricmp( token, "q3map_fur" ) )
 				{
 					GetTokenAppend( shaderText, qfalse );

@@ -749,7 +749,8 @@ typedef struct shaderInfo_s
 	qb_t				noFog;							/* ydnar: supress fogging */
 	qb_t				clipModel;						/* ydnar: solid model hack */
 	qb_t				noVertexLight;					/* ydnar: leave vertex color alone */
-	
+	qb_t				noDirty;						/* jal: do not apply the dirty pass to this surface */
+
 	byte				styleMarker;					/* ydnar: light styles hack */
 	
 	float				vertexScale;					/* vertex light scale */
