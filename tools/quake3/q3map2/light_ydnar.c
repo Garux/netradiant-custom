@@ -2359,7 +2359,8 @@ void IlluminateRawLightmap( int rawLightmapNum )
 	FreeTraceLights( &trace );
 	
 	/* floodlight pass */
-	FloodlightIlluminateLightmap(lm);
+	if( floodlighty )
+		FloodlightIlluminateLightmap(lm);
 
 	if (debugnormals)
 	{
