@@ -2359,7 +2359,8 @@ void IlluminateRawLightmap( int rawLightmapNum )
 	FreeTraceLights( &trace );
 	
 	/* floodlight pass */
-	FloodlightIlluminateLightmap(lm);
+	if( floodlighty )
+		FloodlightIlluminateLightmap(lm);
 
 	if (debugnormals)
 	{
@@ -2584,6 +2585,8 @@ void IlluminateVertexes( int num )
 	rawLightmap_t		*lm;
 	bspDrawVert_t		*verts;
 	trace_t				trace;
+	float				floodLightAmount;
+	vec3_t				floodColor;
 	
 	
 	/* get surface, info, and raw lightmap */
@@ -2661,10 +2664,19 @@ void IlluminateVertexes( int num )
 					VectorCopy( verts[ i ].normal, trace.normal );
 					
 					/* r7 dirt */
-					if( dirty )
+					if( dirty && !bouncing )
 						dirt = DirtForSample( &trace );
 					else
 						dirt = 1.0f;
+
+					/* jal: floodlight */
+					floodLightAmount = 0.0f;
+					VectorClear( floodColor );
+					if( floodlighty && !bouncing )
+					{
+						floodLightAmount = floodlightIntensity * FloodLightForSample( &trace, floodlightDistance, floodlight_lowquality );
+						VectorScale( floodlightRGB, floodLightAmount, floodColor );
+					}
 
 					/* trace */
 					LightingAtSample( &trace, ds->vertexStyles, colors );
@@ -2674,6 +2686,9 @@ void IlluminateVertexes( int num )
 					{
 						/* r7 dirt */
 						VectorScale( colors[ lightmapNum ], dirt, colors[ lightmapNum ] );
+
+						/* jal: floodlight */
+						VectorAdd( colors[ lightmapNum ], floodColor, colors[ lightmapNum ] ); 
 						
 						/* store */
 						radVertLuxel = RAD_VERTEX_LUXEL( lightmapNum, ds->firstVert + i );
@@ -2720,6 +2735,9 @@ void IlluminateVertexes( int num )
 								{
 									/* r7 dirt */
 									VectorScale( colors[ lightmapNum ], dirt, colors[ lightmapNum ] );
+
+									/* jal: floodlight */
+									VectorAdd( colors[ lightmapNum ], floodColor, colors[ lightmapNum ] ); 
 									
 									/* store */
 									radVertLuxel = RAD_VERTEX_LUXEL( lightmapNum, ds->firstVert + i );
