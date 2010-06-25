@@ -79,8 +79,14 @@ LIBS_ZLIB          ?= -lz
 DEPEND_ON_MAKEFILE ?= yes
 DOWNLOAD_GAMEPACKS ?= yes
 # set to no to disable gamepack, set to all to even download undistributable gamepacks
+
+# Support CHECK_DEPENDENCIES with DOWNLOAD_GAMEPACKS semantics
+ifneq ($(CHECK_DEPENDENCIES),)
+DEPENDENCIES_CHECK = $(patsubst yes,quiet,$(patsubst no,off,$(CHECK_DEPENDENCIES)))
+else
 DEPENDENCIES_CHECK ?= quiet
 # or: off, verbose
+endif
 
 # these are used on Win32 only
 GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix $(STDERR_TO_DEVNULL))
