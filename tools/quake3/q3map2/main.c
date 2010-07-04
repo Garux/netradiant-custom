@@ -1204,7 +1204,7 @@ int ScaleBSPMain( int argc, char **argv )
 	{
 		if(!strcmp(argv[i], "-tex"))
 		{
-			texscale = true;
+			texscale = qtrue;
 		}
 		else if(!strcmp(argv[i], "-spawn_ref"))
 		{
