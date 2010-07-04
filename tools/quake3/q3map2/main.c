@@ -1,4 +1,4 @@
-/* -------------------------------------------------------------------------------
+/* -------------------------------------------------------------------------------;
 
 Copyright (C) 1999-2007 id Software, Inc. and contributors.
 For a list of contributors, see the accompanying CONTRIBUTORS file.
@@ -1199,15 +1199,8 @@ int ScaleBSPMain( int argc, char **argv )
 		return 0;
 	}
 	
-	/* get scale */
-	scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
-	if(argc >= 4)
-		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
-	if(argc >= 5)
-		scale[0] = atof( argv[ argc - 4 ] );
-
 	texscale = false;
-	for(i = 1; i < argc-1; ++i)
+	for(i = 1; i < argc-2; ++i)
 	{
 		if(!strcmp(argv[i], "-tex"))
 		{
@@ -1218,8 +1211,18 @@ int ScaleBSPMain( int argc, char **argv )
 			spawn_ref = atof(argv[i+1]);
 			++i;
 		}
+		else
+			break;
 	}
 	
+	/* get scale */
+	// if(argc-2 >= i) // always true
+		scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
+	if(argc-3 >= i)
+		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
+	if(argc-4 >= i)
+		scale[0] = atof( argv[ argc - 4 ] );
+
 	uniform = ((scale[0] == scale[1]) && (scale[1] == scale[2]));
 
 	if( scale[0] == 0.0f || scale[1] == 0.0f || scale[2] == 0.0f )
