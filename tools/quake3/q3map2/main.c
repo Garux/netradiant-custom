@@ -1189,12 +1189,13 @@ int ScaleBSPMain( int argc, char **argv )
 	int uniform, axis;
 	qboolean texscale;
 	float *old_xyzst = NULL;
+	float spawn_ref = 0;
 	
 	
 	/* arg checking */
 	if( argc < 3 )
 	{
-		Sys_Printf( "Usage: q3map [-v] -scale [-tex] <value> <mapname>\n" );
+		Sys_Printf( "Usage: q3map [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
 		return 0;
 	}
 	
@@ -1205,13 +1206,25 @@ int ScaleBSPMain( int argc, char **argv )
 	if(argc >= 5)
 		scale[0] = atof( argv[ argc - 4 ] );
 
-	texscale = !strcmp(argv[1], "-tex");
+	texscale = false;
+	for(i = 1; i < argc-1; ++i)
+	{
+		if(!strcmp(argv[i], "-tex"))
+		{
+			texscale = true;
+		}
+		else if(!strcmp(argv[i], "-spawn_ref"))
+		{
+			spawn_ref = atof(argv[i+1]);
+			++i;
+		}
+	}
 	
 	uniform = ((scale[0] == scale[1]) && (scale[1] == scale[2]));
 
 	if( scale[0] == 0.0f || scale[1] == 0.0f || scale[2] == 0.0f )
 	{
-		Sys_Printf( "Usage: q3map [-v] -scale [-tex] <value> <mapname>\n" );
+		Sys_Printf( "Usage: q3map [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
 		Sys_Printf( "Non-zero scale value required.\n" );
 		return 0;
 	}
@@ -1237,9 +1250,13 @@ int ScaleBSPMain( int argc, char **argv )
 		GetVectorForKey( &entities[ i ], "origin", vec );
 		if( (vec[ 0 ] || vec[ 1 ] || vec[ 2 ]) )
 		{
+			if(!strncmp(ValueForKey(&entities[i], "classname"), "info_player_", 12))
+				vec[2] += spawn_ref;
 			vec[0] *= scale[0];
 			vec[1] *= scale[1];
 			vec[2] *= scale[2];
+			if(!strncmp(ValueForKey(&entities[i], "classname"), "info_player_", 12))
+				vec[2] -= spawn_ref;
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 			SetKeyValue( &entities[ i ], "origin", str );
 		}
