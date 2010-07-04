@@ -1199,7 +1199,7 @@ int ScaleBSPMain( int argc, char **argv )
 		return 0;
 	}
 	
-	texscale = false;
+	texscale = qfalse;
 	for(i = 1; i < argc-2; ++i)
 	{
 		if(!strcmp(argv[i], "-tex"))
