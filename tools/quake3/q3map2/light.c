@@ -1421,6 +1421,7 @@ typedef struct
 {
 	vec3_t		dir;
 	vec3_t		color;
+	vec3_t		ambient;
 	int			style;
 }
 contribution_t;
@@ -1514,6 +1515,7 @@ void TraceGrid( int num )
 		/* add a contribution */
 		VectorCopy( trace.color, contributions[ numCon ].color );
 		VectorCopy( trace.direction, contributions[ numCon ].dir );
+		VectorClear( contributions[ numCon ].ambient );
 		contributions[ numCon ].style = trace.light->style;
 		numCon++;
 		
@@ -1533,50 +1535,55 @@ void TraceGrid( int num )
 	
 	/////// Floodlighting for point //////////////////
 	//do our floodlight ambient occlusion loop, and add a single contribution based on the brightest dir
-	if (floodlighty)
+	if( floodlighty )
 	{
-		int q;
-		float addSize,f;
-		vec3_t col,dir;
-		col[0]=col[1]=col[2]=floodlightIntensity;
-		dir[0]=dir[1]=0;
-		dir[2]=1;
+		int k;
+		float addSize, f;
+		vec3_t dir = { 0, 0, 1 };
+		float ambientFrac = 0.25f;
 
 		trace.testOcclusion = qtrue;
 		trace.forceSunlight = qfalse;
 		trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
 		trace.testAll = qtrue;
 
-		for (q=0;q<2;q++)
+		for( k = 0; k < 2; k++ )
 		{
-			if (q==0) //upper hemisphere
+			if( k == 0 ) // upper hemisphere
 			{
-				trace.normal[0]=0;
-				trace.normal[1]=0;
-				trace.normal[2]=1;
+				trace.normal[0] = 0;
+				trace.normal[1] = 0;
+				trace.normal[2] = 1;
 			}
 			else //lower hemisphere
 			{
-				trace.normal[0]=0;
-				trace.normal[1]=0;
-				trace.normal[2]=-1;
+				trace.normal[0] = 0;
+				trace.normal[1] = 0;
+				trace.normal[2] = -1;
 			}
 
-			f = FloodLightForSample(&trace, floodlightDistance, floodlight_lowquality);
+			f = FloodLightForSample( &trace, floodlightDistance, floodlight_lowquality );
 
-			contributions[ numCon ].color[0]=col[0]*f;
-			contributions[ numCon ].color[1]=col[1]*f;
-			contributions[ numCon ].color[2]=col[2]*f;
+			/* add a fraction as pure ambient, half as top-down direction */
+			contributions[ numCon ].color[0]= floodlightRGB[0] * floodlightIntensity * f * ( 1.0f - ambientFrac );
+			contributions[ numCon ].color[1]= floodlightRGB[1] * floodlightIntensity * f * ( 1.0f - ambientFrac );
+			contributions[ numCon ].color[2]= floodlightRGB[2] * floodlightIntensity * f * ( 1.0f - ambientFrac );
 
-			contributions[ numCon ].dir[0]=dir[0];
-			contributions[ numCon ].dir[1]=dir[1];
-			contributions[ numCon ].dir[2]=dir[2];
+			contributions[ numCon ].ambient[0]= floodlightRGB[0] * floodlightIntensity * f * ambientFrac;
+			contributions[ numCon ].ambient[1]= floodlightRGB[1] * floodlightIntensity * f * ambientFrac;
+			contributions[ numCon ].ambient[2]= floodlightRGB[2] * floodlightIntensity * f * ambientFrac;
+
+			contributions[ numCon ].dir[0] = dir[0];
+			contributions[ numCon ].dir[1] = dir[1];
+			contributions[ numCon ].dir[2] = dir[2];
 
 			contributions[ numCon ].style = 0;
-			numCon++;
+
 			/* push average direction around */
-			addSize = VectorLength( col );
+			addSize = VectorLength( contributions[ numCon ].color );
 			VectorMA( gp->dir, addSize, dir, gp->dir );
+
+			numCon++;
 		}
 	}
 	/////////////////////
@@ -1631,6 +1638,8 @@ void TraceGrid( int num )
 		/* (Hobbes: always setting it to .25 is hardly any better) */
 		d = 0.25f * (1.0f - d);
 		VectorMA( gp->ambient[ j ], d, contributions[ i ].color, gp->ambient[ j ] );
+
+		VectorAdd( gp->ambient[ j ], contributions[ i ].ambient, gp->ambient[ j ] );
 
 /*
  * div0:
