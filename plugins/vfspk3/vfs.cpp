@@ -62,7 +62,7 @@ ArchiveModules& FileSystemQ3API_getArchiveModules();
 #include "moduleobservers.h"
 
 
-#define VFS_MAXDIRS 8
+#define VFS_MAXDIRS 64
 
 #if defined(WIN32)
 #define PATH_MAX 260
@@ -297,7 +297,7 @@ typedef std::set<CopiedString, PakLess> Archives;
 // reads all pak files from a dir
 void InitDirectory(const char* directory, ArchiveModules& archiveModules)
 {
-  if (g_numDirs == (VFS_MAXDIRS-1))
+  if (g_numDirs == VFS_MAXDIRS)
     return;
 
   strncpy(g_strDirs[g_numDirs], directory, PATH_MAX);
@@ -356,7 +356,7 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
 
 	if(ext && !string_compare_nocase_upper(ext, ".pk3dir"))
 	{
-	  if (g_numDirs == (VFS_MAXDIRS-1))
+	  if (g_numDirs == VFS_MAXDIRS)
 	    continue;
 	  snprintf(g_strDirs[g_numDirs], PATH_MAX, "%s%s/", path, name);
 	  g_strDirs[g_numDirs][PATH_MAX] = '\0';

@@ -169,7 +169,7 @@ void vfsInitDirectory (const char *path)
   char *dirlist;
   GDir *dir;
   
-  if (g_numDirs == (VFS_MAXDIRS-1))
+  if (g_numDirs == VFS_MAXDIRS)
     return;
   
   Sys_Printf ("VFS Init: %s\n", path);
@@ -198,7 +198,7 @@ void vfsInitDirectory (const char *path)
 
 	  if(ext && !Q_stricmp(ext, ".pk3dir"))
 	  {
-	    if (g_numDirs == (VFS_MAXDIRS-1))
+	    if (g_numDirs == VFS_MAXDIRS)
 	      continue;
 	    snprintf(g_strDirs[g_numDirs], PATH_MAX, "%s/%s", path, name);
 	    g_strDirs[g_numDirs][PATH_MAX] = '\0';
