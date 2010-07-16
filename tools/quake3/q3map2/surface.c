@@ -2037,14 +2037,25 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 	{
 		/* 'fatten' the winding by the shader mins/maxs (parsed from vertexDeform move) */
 		/* note this winding is completely invalid (concave, nonplanar, etc) */
-		fat = AllocWinding( w->numpoints * 3 );
-		fat->numpoints = w->numpoints * 3;
+		fat = AllocWinding( w->numpoints * 3 + 3 );
+		fat->numpoints = w->numpoints * 3 + 3;
 		for( i = 0; i < w->numpoints; i++ )
 		{
 			VectorCopy( w->p[ i ], fat->p[ i ] );
-			VectorAdd( w->p[ i ], si->mins, fat->p[ i * 2 ] );
-			VectorAdd( w->p[ i ], si->maxs, fat->p[ i * 3 ] );
+			VectorAdd( w->p[ i ], si->mins, fat->p[ i + (w->numpoints+1) ] );
+			VectorAdd( w->p[ i ], si->maxs, fat->p[ i + (w->numpoints+1) * 2 ] );
 		}
+		VectorCopy( w->p[ 0 ], fat->p[ i ] );
+		VectorAdd( w->p[ 0 ], si->mins, fat->p[ i + w->numpoints ] );
+		VectorAdd( w->p[ 0 ], si->maxs, fat->p[ i + w->numpoints * 2 ] );
+
+		/*
+		 * note: this winding is STILL not suitable for ClipWindingEpsilon, and
+		 * also does not really fulfill the intention as it only contains
+		 * origin, +mins, +maxs, but thanks to the "closing" points I just
+		 * added to the three sub-windings, the fattening at least doesn't make
+		 * it worse
+		 */
 		
 		FreeWinding( w );
 		w = fat;
