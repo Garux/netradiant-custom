@@ -234,10 +234,6 @@ public:
     {
       ConnectEntities connector(e1, e2, index);
       const char* value = e2->getKeyValue("targetname");
-      if(string_empty(value))
-      {
-        value = e1->getKeyValue(connector.keyname());
-      }
       if(!string_empty(value))
       {
         connector.connect(value);
