@@ -11,8 +11,8 @@
 // this is very evil, but right now there is no better way
 #include "../../radiant/brush.h"
 
-#define MAX_MATERIAL_NAME (64+9-1)
-// MAX_QPATH plus "textures/" prefix, allow trailing NUL to fit
+// for limNames
+#define MAX_MATERIAL_NAME 20
 
 /*
 	Abstract baseclass for modelexporters
