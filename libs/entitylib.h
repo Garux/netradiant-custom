@@ -104,18 +104,17 @@ inline void aabb_testselect(const AABB& aabb, SelectionTest& test, SelectionInte
 
 inline void aabb_draw_wire(const Vector3 points[8])
 {
-  typedef std::size_t index_t;
-  index_t indices[24] = {
+  unsigned int indices[24] = {
     0, 1, 1, 2, 2, 3, 3, 0,
     4, 5, 5, 6, 6, 7, 7, 4,
     0, 4, 1, 5, 2, 6, 3, 7,
   };
 #if 1
   glVertexPointer(3, GL_FLOAT, 0, points);
-  glDrawElements(GL_LINES, sizeof(indices)/sizeof(index_t), GL_UNSIGNED_INT, indices);
+  glDrawElements(GL_LINES, sizeof(indices)/sizeof(indices[0]), GL_UNSIGNED_INT, indices);
 #else
   glBegin(GL_LINES);
-  for(std::size_t i = 0; i < sizeof(indices)/sizeof(index_t); ++i)
+  for(std::size_t i = 0; i < sizeof(indices)/sizeof(indices[0]); ++i)
   {
     glVertex3fv(points[indices[i]]);
   }
