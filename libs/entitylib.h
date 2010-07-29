@@ -104,10 +104,11 @@ inline void aabb_testselect(const AABB& aabb, SelectionTest& test, SelectionInte
 
 inline void aabb_draw_wire(const Vector3 points[8])
 {
-  unsigned int indices[24] = {
+  unsigned int indices[32] = {
     0, 1, 1, 2, 2, 3, 3, 0,
     4, 5, 5, 6, 6, 7, 7, 4,
     0, 4, 1, 5, 2, 6, 3, 7,
+    0, 6, 1, 7, 2, 4, 3, 5 // X cross
   };
 #if 1
   glVertexPointer(3, GL_FLOAT, 0, points);
