@@ -255,13 +255,13 @@ void light_vertices(const AABB& aabb_light, Vector3 points[6])
   Vector3 min(vector3_subtracted(aabb_light.origin, aabb_light.extents));
   Vector3 mid(aabb_light.origin);
 
-  // top, bottom, tleft, tright, bright, bleft
+  // top, bottom, middle-up, middle-right, middle-down, middle-left
   points[0] = Vector3(mid[0], mid[1], max[2]);
   points[1] = Vector3(mid[0], mid[1], min[2]);
-  points[2] = Vector3(min[0], max[1], mid[2]);
-  points[3] = Vector3(max[0], max[1], mid[2]);
-  points[4] = Vector3(max[0], min[1], mid[2]);
-  points[5] = Vector3(min[0], min[1], mid[2]);
+  points[2] = Vector3(mid[0], max[1], mid[2]);
+  points[3] = Vector3(max[0], mid[1], mid[2]);
+  points[4] = Vector3(mid[0], min[1], mid[2]);
+  points[5] = Vector3(min[0], mid[1], mid[2]);
 }
 
 void light_draw(const AABB& aabb_light, RenderStateFlags state)
