@@ -11,6 +11,9 @@
 // this is very evil, but right now there is no better way
 #include "../../radiant/brush.h"
 
+// for limNames
+#define MAX_MATERIAL_NAME 20
+
 /*
 	Abstract baseclass for modelexporters
 	the class collects all the data which then gets
@@ -279,9 +282,9 @@ bool ExportDataAsWavefront::WriteToFile(const std::string& path, collapsemode mo
 
 				if(mat != lastMat)
 				{
-					if(limNames && mat.size() > 20)
+					if(limNames && mat.size() > MAX_MATERIAL_NAME)
 					{
-						out << "\nusemtl " << mat.substr(mat.size() - 20, mat.size()).c_str();
+						out << "\nusemtl " << mat.substr(mat.size() - MAX_MATERIAL_NAME, mat.size()).c_str();
 					} else {
 						out << "\nusemtl " << mat.c_str();
 					}
@@ -308,9 +311,9 @@ bool ExportDataAsWavefront::WriteToFile(const std::string& path, collapsemode mo
 		outMtl << "# Material Count: " << (const Unsigned)materials.size() << "\n\n";
 		for(std::set<std::string>::const_iterator it(materials.begin()); it != materials.end(); ++it)
 		{
-			if(limNames && it->size() > 20)
+			if(limNames && it->size() > MAX_MATERIAL_NAME)
 			{
-				outMtl << "newmtl " << it->substr(it->size() - 20, it->size()).c_str() << "\n";
+				outMtl << "newmtl " << it->substr(it->size() - MAX_MATERIAL_NAME, it->size()).c_str() << "\n";
 			} else {
 				outMtl << "newmtl " << it->c_str() << "\n";
 			}
