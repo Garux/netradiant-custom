@@ -552,15 +552,15 @@ const char* FindFile(const char* relative)
 
 const char* FindPath(const char* absolute)
 {
+  const char *best = "";
   for(archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i)
   {
-    if(path_equal_n(absolute, (*i).name.c_str(), string_length((*i).name.c_str())))
-    {
-      return (*i).name.c_str();
-    }
+	if(string_length((*i).name.c_str()) > string_length(best))
+      if(path_equal_n(absolute, (*i).name.c_str(), string_length((*i).name.c_str())))
+        best = (*i).name.c_str();
   }
 
-  return "";
+  return best;
 }
 
 
