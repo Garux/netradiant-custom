@@ -315,12 +315,17 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
 
   for(j = 0; j < g_numForbiddenDirs; ++j)
   {
+    printf("match against %s?\n", g_strForbiddenDirs[j]);
     if(!string_compare_nocase_upper(directory, g_strForbiddenDirs[j])
     || (string_length(directory) > string_length(g_strForbiddenDirs[j]) && directory[string_length(directory) - string_length(g_strForbiddenDirs[j]) - 1] == '/' && !string_compare_nocase_upper(directory + string_length(directory) - string_length(g_strForbiddenDirs[j]), g_strForbiddenDirs[j])))
       break;
+    printf("not matched\n");
   }
   if(j < g_numForbiddenDirs)
+  {
+    printf("Directory %s matched by forbidden dirs, removed\n", directory);
     return;
+  }
 
   if (g_numDirs == VFS_MAXDIRS)
     return;

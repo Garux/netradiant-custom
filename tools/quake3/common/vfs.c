@@ -41,19 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Leonardo Zide (leo@lokigames.com)
 //
 
-#include <stdio.h>
-
-#if defined (__linux__) || defined (__APPLE__)
-#include <dirent.h>
-#include <unistd.h>
-#else
-#include <wtypes.h>
-#include <io.h>
-#define R_OK 04
-#define S_ISDIR(mode) (mode & _S_IFDIR)
-#define PATH_MAX 260
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -78,8 +65,10 @@ typedef struct
 
 static GSList*  g_unzFiles;
 static GSList*  g_pakFiles;
-static char     g_strDirs[VFS_MAXDIRS][PATH_MAX];
+static char     g_strDirs[VFS_MAXDIRS][PATH_MAX+1];
 static int      g_numDirs;
+char     g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX+1];
+int      g_numForbiddenDirs = 0;
 static gboolean g_bUsePak = TRUE;
 
 // =============================================================================
@@ -168,13 +157,24 @@ void vfsInitDirectory (const char *path)
   char filename[PATH_MAX];
   char *dirlist;
   GDir *dir;
+  int j;
+
+  for(j = 0; j < g_numForbiddenDirs; ++j)
+  {
+    if(!Q_stricmp(path, g_strForbiddenDirs[j])
+    || (strlen(path) > strlen(g_strForbiddenDirs[j]) && path[strlen(path) - strlen(g_strForbiddenDirs[j]) - 1] == '/' && !Q_stricmp(path + strlen(path) - strlen(g_strForbiddenDirs[j]), g_strForbiddenDirs[j])))
+      break;
+  }
+  if(j < g_numForbiddenDirs)
+    return;
   
   if (g_numDirs == VFS_MAXDIRS)
     return;
   
   Sys_Printf ("VFS Init: %s\n", path);
   
-  strcpy (g_strDirs[g_numDirs], path);
+  strncpy (g_strDirs[g_numDirs], path, PATH_MAX);
+  g_strDirs[g_numDirs][PATH_MAX] = 0;
   vfsFixDOSName (g_strDirs[g_numDirs]);
   vfsAddSlash (g_strDirs[g_numDirs]);
   g_numDirs++;
@@ -190,6 +190,12 @@ void vfsInitDirectory (const char *path)
         const char* name = g_dir_read_name(dir);
         if(name == NULL)
           break;
+
+        for(j = 0; j < g_numForbiddenDirs; ++j)
+          if(!Q_stricmp(name, g_strForbiddenDirs[j]))
+            break;
+        if(j < g_numForbiddenDirs)
+          continue;
 
         dirlist = g_strdup(name);
 
