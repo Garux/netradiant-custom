@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // to get PATH_MAX
 #include <stdio.h>
 #if defined (__linux__) || defined (__APPLE__)
+#include <limits.h>
 #include <dirent.h>
 #include <unistd.h>
 #else
