@@ -91,6 +91,8 @@ typedef std::list<archive_entry_t> archives_t;
 static archives_t g_archives;
 static char    g_strDirs[VFS_MAXDIRS][PATH_MAX+1];
 static int     g_numDirs;
+static char    g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX+1];
+static int     g_numForbiddenDirs = 0;
 static bool    g_bUsePak = true;
 
 ModuleObservers g_observers;
@@ -297,6 +299,29 @@ typedef std::set<CopiedString, PakLess> Archives;
 // reads all pak files from a dir
 void InitDirectory(const char* directory, ArchiveModules& archiveModules)
 {
+  int j;
+
+  g_numForbiddenDirs = 0;
+  StringTokeniser st(GlobalRadiant().getGameDescriptionKeyValue("forbidden_paths"), " ");
+  for(j = 0; j < VFS_MAXDIRS; ++j)
+  {
+    const char *t = st.getToken();
+    if(string_empty(t))
+      break;
+    strncpy(g_strForbiddenDirs[g_numForbiddenDirs], t, PATH_MAX);
+    g_strForbiddenDirs[g_numForbiddenDirs][PATH_MAX] = '\0';
+    ++g_numForbiddenDirs;
+  }
+
+  for(j = 0; j < g_numForbiddenDirs; ++j)
+  {
+    if(!string_compare_nocase_upper(directory, g_strForbiddenDirs[j])
+    || (string_length(directory) > string_length(g_strForbiddenDirs[j]) && directory[string_length(directory) - string_length(g_strForbiddenDirs[j]) - 1] == '/' && !string_compare_nocase_upper(directory + string_length(directory) - string_length(g_strForbiddenDirs[j]), g_strForbiddenDirs[j])))
+      break;
+  }
+  if(j < g_numForbiddenDirs)
+    return;
+
   if (g_numDirs == VFS_MAXDIRS)
     return;
 
@@ -351,6 +376,12 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
         const char* name = g_dir_read_name(dir);
         if(name == 0)
           break;
+
+	for(j = 0; j < g_numForbiddenDirs; ++j)
+	  if(!string_compare_nocase_upper(name, g_strForbiddenDirs[j]))
+	    break;
+	if(j < g_numForbiddenDirs)
+	  continue;
 
         const char *ext = strrchr (name, '.');
 
@@ -427,6 +458,7 @@ void Shutdown()
   g_archives.clear();
 
   g_numDirs = 0;
+  g_numForbiddenDirs = 0;
 }
 
 #define VFS_SEARCH_PAK 0x1
