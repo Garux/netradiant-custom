@@ -34,7 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // to get PATH_MAX
 #include <stdio.h>
 #if defined (__linux__) || defined (__APPLE__)
-#include <glib.h>
 #include <dirent.h>
 #include <unistd.h>
 #else
@@ -44,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define S_ISDIR(mode) (mode & _S_IFDIR)
 #define PATH_MAX 260
 #endif
+#include <glib.h>
 
 #define VFS_MAXDIRS 64
 
