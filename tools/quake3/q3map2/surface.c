@@ -3448,6 +3448,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 	vec3_t				origin, mins, maxs;
 	int					refs;
 	int					numSurfs, numRefs, numSkyboxSurfaces;
+	qboolean	sb;
 	
 	
 	/* note it */
@@ -3466,15 +3467,18 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 		
 		/* get shader */
 		si = ds->shaderInfo;
-		
+
 		/* ydnar: skybox surfaces are special */
 		if( ds->skybox )
 		{
 			refs = AddReferenceToTree_r( ds, tree->headnode, qtrue );
 			ds->skybox = qfalse;
+			sb = qtrue;
 		}
 		else
 		{
+			sb = qfalse;
+
 			/* refs initially zero */
 			refs = 0;
 			
@@ -3594,6 +3598,11 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 				refs = 0;
 				break;
 		}
+
+		/* maybe surface got marked as skybox again */
+		/* if we keep that flag, it will get scaled up AGAIN */
+		if(sb)
+			ds->skybox = qfalse;
 		
 		/* tot up the references */
 		if( refs > 0 )
