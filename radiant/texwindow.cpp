@@ -713,6 +713,8 @@ bool texture_name_ignore(const char* name)
 	  endswith(strTemp.c_str(), "_gloss") ||
 	  endswith(strTemp.c_str(), "_pants") ||
 	  endswith(strTemp.c_str(), "_shirt") ||
+	  endswith(strTemp.c_str(), "_reflect") ||
+	  endswith(strTemp.c_str(), "_alpha") ||
 	  0;
 }
 
