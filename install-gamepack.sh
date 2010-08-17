@@ -18,6 +18,6 @@ fi
 for GAMEFILE in "$pack/games"/*.game; do
 	$CP "$GAMEFILE" "$dest/games/"
 done
-for GAMEDIR in "$pack"/*.game/; do
+for GAMEDIR in "$pack"/*.game; do
 	$CP_R "$GAMEDIR" "$dest/"
 done
