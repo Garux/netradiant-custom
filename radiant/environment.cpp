@@ -88,10 +88,13 @@ bool gamedetect_check_game(char *gamefile, const char *checkfile1, const char *c
 	if(!file_exists(buf))
 		return false;
 
-	strcpy(buf + bufpos + 1, checkfile2);
-	globalOutputStream() << "Checking for a game file in " << buf << "\n";
-	if(!file_exists(buf))
-		return false;
+	if(checkfile2)
+	{
+		strcpy(buf + bufpos + 1, checkfile2);
+		globalOutputStream() << "Checking for a game file in " << buf << "\n";
+		if(!file_exists(buf))
+			return false;
+	}
 
 	buf[bufpos + 1] = 0;
 	gamedetect_found_game(gamefile, buf);
