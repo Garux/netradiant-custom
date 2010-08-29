@@ -193,17 +193,14 @@ ifeq ($(OS),Darwin)
 	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
-	CPPFLAGS_COMMON += -I/sw/include -I/usr/X11R6/include
-	LDFLAGS_COMMON += -L/sw/lib  -L/usr/X11R6/lib
-	#LDFLAGS_COMMON += -L/sw/lib -L/usr/lib -L/usr/X11R6/lib
+	CPPFLAGS_COMMON += -I/opt/local/include -I/sw/include -I/usr/X11R6/include
+	LDFLAGS_COMMON += -L/opt/local/lib -L/sw/lib -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
 	EXE ?= ppc
-	MACLIBDIR ?= /sw/lib
+	MACLIBDIR ?= /opt/local/lib
 	A = a
 	DLL = dylib
 	MWINDOWS =
-	MACVERSION ?= 16
-	CPPFLAGS_COMMON += -DMACVERSION="$(MACVERSION)"
 	# workaround for weird prints
 	ECHO_NOLF = /bin/echo -n
 
