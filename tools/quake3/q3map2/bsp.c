@@ -901,6 +901,11 @@ int BSPMain( int argc, char **argv )
 			Sys_Printf( "Deep BSP tree generation enabled\n" );
 			deepBSP = qtrue;
 		}
+		else if( !strcmp( argv[ i ], "-maxarea" ) )
+		{
+			Sys_Printf( "Max Area face surface generation enabled\n" );
+			maxAreaFaceSurface = qtrue;
+		}
 		else if( !strcmp( argv[ i ], "-bsp" ) )
 			Sys_Printf( "-bsp argument unnecessary\n" );
 		else

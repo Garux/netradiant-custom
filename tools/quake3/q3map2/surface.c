@@ -2850,7 +2850,10 @@ emits a bsp planar winding (brush face) drawsurface
 static void EmitFaceSurface(mapDrawSurface_t *ds )
 {
 	/* strip/fan finding was moved elsewhere */
-	StripFaceSurface( ds );
+	if(maxAreaFaceSurface)
+		MaxAreaFaceSurface( ds );
+	else
+		StripFaceSurface( ds );
 	EmitTriangleSurface(ds);
 }
 
@@ -3641,6 +3644,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 	Sys_FPrintf( SYS_VRB, "%9d (%d) emitted drawsurfs\n", numSurfs, numBSPDrawSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d stripped face surfaces\n", numStripSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d fanned face surfaces\n", numFanSurfaces );
+	Sys_FPrintf( SYS_VRB, "%9d maxarea'd face surfaces\n", numMaxAreaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d surface models generated\n", numSurfaceModels );
 	Sys_FPrintf( SYS_VRB, "%9d skybox surfaces generated\n", numSkyboxSurfaces );
 	for( i = 0; i < NUM_SURFACE_TYPES; i++ )

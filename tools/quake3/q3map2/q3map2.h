@@ -1985,6 +1985,7 @@ Q_EXTERN qboolean			renameModelShaders Q_ASSIGN( qfalse );	/* ydnar */
 Q_EXTERN qboolean			skyFixHack Q_ASSIGN( qfalse );			/* ydnar */
 Q_EXTERN qboolean			bspAlternateSplitWeights Q_ASSIGN( qfalse );			/* 27 */
 Q_EXTERN qboolean			deepBSP Q_ASSIGN( qfalse );			/* div0 */
+Q_EXTERN qboolean			maxAreaFaceSurface Q_ASSIGN( qfalse );			/* divVerent */
 
 Q_EXTERN int				patchSubdivisions Q_ASSIGN( 8 );		/* ydnar: -patchmeta subdivisions */
 
@@ -2054,6 +2055,7 @@ Q_EXTERN int				numMapDrawSurfs;
 Q_EXTERN int				numSurfacesByType[ NUM_SURFACE_TYPES ];
 Q_EXTERN int				numClearedSurfaces;
 Q_EXTERN int				numStripSurfaces;
+Q_EXTERN int				numMaxAreaSurfaces;
 Q_EXTERN int				numFanSurfaces;
 Q_EXTERN int				numMergedSurfaces;
 Q_EXTERN int				numMergedVerts;

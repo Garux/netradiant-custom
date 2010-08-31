@@ -84,7 +84,7 @@ static int FindMetaVertex( bspDrawVert_t *src )
 {
 	int			i;
 	bspDrawVert_t	*v, *temp;
-	
+
 	
 	/* try to find an existing drawvert */
 	for( i = firstSearchMetaVert, v = &metaVerts[ i ]; i < numMetaVerts; i++, v++ )
@@ -413,6 +413,113 @@ void TriangulatePatchSurface( entity_t *e , mapDrawSurface_t *ds )
 	ClassifySurfaces( 1, ds );
 }
 
+#define TINY_AREA 1.0f
+int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
+{
+	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
+	int i, j, k;
+	double A, bestA = -1;
+	vec3_t ab, ac, cross;
+	bspDrawVert_t *buf;
+
+	if(cnt < 3)
+		return 0;
+
+	/* find the triangle with highest area */
+	for(r = 0; r+2 < cnt; ++r)
+	for(s = r+1; s+1 < cnt; ++s)
+	for(t = s+1; t < cnt; ++t)
+	{
+		VectorSubtract(vert[s].xyz, vert[r].xyz, ab);
+		VectorSubtract(vert[t].xyz, vert[r].xyz, ac);
+		CrossProduct(ab, ac, cross);
+		A = VectorLength(cross);
+		if(A > bestA)
+		{
+			bestA = A;
+			bestR = r;
+			bestS = s;
+			bestT = t;
+		}
+	}
+
+	if(bestA < TINY_AREA)
+		/* the biggest triangle is degenerate - then every other is too, and the other algorithms wouldn't generate anything useful either */
+		return 0;
+
+	i = 0;
+	indexes[i++] = bestR;
+	indexes[i++] = bestS;
+	indexes[i++] = bestT;
+		/* uses 3 */
+
+	/* identify the other fragments */
+
+	/* full polygon without triangle (bestR,bestS,bestT) = three new polygons:
+	 * 1. bestR..bestS
+	 * 2. bestS..bestT
+	 * 3. bestT..bestR
+	 */
+
+	j = i + MaxAreaIndexes(vert + bestR, bestS - bestR + 1, indexes + i);
+	for(; i < j; ++i)
+		indexes[i] += bestR;
+		/* uses 3*(bestS-bestR+1)-6 */
+	j = i + MaxAreaIndexes(vert + bestS, bestT - bestS + 1, indexes + i);
+	for(; i < j; ++i)
+		indexes[i] += bestS;
+		/* uses 3*(bestT-bestS+1)-6 */
+
+	/* can'bestT recurse this one directly... therefore, buffering */
+	if(cnt + bestR - bestT + 1 >= 3)
+	{
+		buf = safe_malloc(sizeof(*vert) * (cnt + bestR - bestT + 1));
+		memcpy(buf, vert + bestT, sizeof(*vert) * (cnt - bestT));
+		memcpy(buf + (cnt - bestT), vert, sizeof(*vert) * (bestR + 1));
+		j = i + MaxAreaIndexes(buf, cnt + bestR - bestT + 1, indexes + i);
+		for(; i < j; ++i)
+			indexes[i] = (indexes[i] + bestT) % cnt;
+			/* uses 3*(cnt+bestR-bestT+1)-6 */
+		free(buf);
+	}
+
+	/* together 3 + 3*(cnt+3) - 18 = 3*cnt-6 q.e.d. */
+
+	return i;
+}
+
+/*
+MaxAreaFaceSurface() - divVerent
+creates a triangle list using max area indexes
+*/
+
+void MaxAreaFaceSurface(mapDrawSurface_t *ds)
+{
+	/* try to early out  */
+	if( !ds->numVerts || (ds->type != SURFACE_FACE && ds->type != SURFACE_DECAL) )
+		return;
+
+	/* is this a simple triangle? */
+	if( ds->numVerts == 3 )
+	{
+		ds->numIndexes = 3;
+		ds->indexes = safe_malloc( ds->numIndexes * sizeof( int ) );
+		VectorSet( ds->indexes, 0, 1, 2 );
+		numMaxAreaSurfaces++;
+		return;
+	}
+
+	/* do it! */
+	ds->numIndexes = 3 * ds->numVerts - 6;
+	ds->indexes = safe_malloc( ds->numIndexes * sizeof( int ) );
+	ds->numIndexes = MaxAreaIndexes(ds->verts, ds->numVerts, ds->indexes);
+
+	/* add to count */
+	numMaxAreaSurfaces++;
+
+	/* classify it */
+	ClassifySurfaces( 1, ds );
+}
 
 
 /*
@@ -629,6 +736,7 @@ void EmitMetaStats()
 	Sys_Printf( "%9d total meta surfaces\n", numMetaSurfaces );
 	Sys_Printf( "%9d stripped surfaces\n", numStripSurfaces );
 	Sys_Printf( "%9d fanned surfaces\n", numFanSurfaces );
+	Sys_Printf( "%9d maxarea'd surfaces\n", numMaxAreaSurfaces );
 	Sys_Printf( "%9d patch meta surfaces\n", numPatchMetaSurfaces );
 	Sys_Printf( "%9d meta verts\n", numMetaVerts );
 	Sys_Printf( "%9d meta triangles\n", numMetaTriangles );
@@ -681,7 +789,10 @@ void MakeEntityMetaTriangles( entity_t *e )
 		{
 			case SURFACE_FACE:
 			case SURFACE_DECAL:
-				StripFaceSurface( ds );
+				if(maxAreaFaceSurface)
+					MaxAreaFaceSurface( ds );
+				else
+					StripFaceSurface( ds );
 				SurfaceToMetaTriangles( ds );
 				break;
 			
@@ -710,6 +821,7 @@ void MakeEntityMetaTriangles( entity_t *e )
 	Sys_FPrintf( SYS_VRB, "%9d total meta surfaces\n", numMetaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d stripped surfaces\n", numStripSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d fanned surfaces\n", numFanSurfaces );
+	Sys_FPrintf( SYS_VRB, "%9d maxarea'd surfaces\n", numMaxAreaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d patch meta surfaces\n", numPatchMetaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d meta verts\n", numMetaVerts );
 	Sys_FPrintf( SYS_VRB, "%9d meta triangles\n", numMetaTriangles );
