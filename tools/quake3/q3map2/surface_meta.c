@@ -417,9 +417,9 @@ void TriangulatePatchSurface( entity_t *e , mapDrawSurface_t *ds )
 int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
 {
 	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
-	int i, j, k;
-	double A, bestA = -1;
-	vec3_t ab, ac, cross;
+	int i, j;
+	double A, bestA = -1, V, bestV = -1;
+	vec3_t ab, ac, bc, cross;
 	bspDrawVert_t *buf;
 
 	if(cnt < 3)
@@ -432,11 +432,18 @@ int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
 	{
 		VectorSubtract(vert[s].xyz, vert[r].xyz, ab);
 		VectorSubtract(vert[t].xyz, vert[r].xyz, ac);
+		VectorSubtract(vert[t].xyz, vert[s].xyz, bc);
 		CrossProduct(ab, ac, cross);
 		A = VectorLength(cross);
-		if(A > bestA)
+
+		V = A - (VectorLength(ab) - VectorLength(ac) - VectorLength(bc)) * 0.2;
+		/* value = A - circumference * 0.2, i.e. we back out by 0.2 units from each side, to prevent too acute triangles */
+		/* this kind of simulates "number of 0.2x0.2 fragments in the triangle not touched by an edge" */
+
+		if(bestA < 0 || V > bestV)
 		{
 			bestA = A;
+			bestV = V;
 			bestR = r;
 			bestS = s;
 			bestT = t;
