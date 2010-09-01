@@ -414,10 +414,11 @@ void TriangulatePatchSurface( entity_t *e , mapDrawSurface_t *ds )
 }
 
 #define TINY_AREA 1.0f
+#define MAXAREA_MAXTRIES 8
 int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
 {
 	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
-	int i, j;
+	int i, j, try;
 	double A, bestA = -1, V, bestV = -1;
 	vec3_t ab, ac, bc, cross;
 	bspDrawVert_t *buf;
@@ -488,49 +489,102 @@ int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
 		printf("value was REALLY bad\n");
 	*/
 
-	if(bestA < TINY_AREA)
-		/* the biggest triangle is degenerate - then every other is too, and the other algorithms wouldn't generate anything useful either */
-		return 0;
-
-	i = 0;
-	indexes[i++] = bestR;
-	indexes[i++] = bestS;
-	indexes[i++] = bestT;
-		/* uses 3 */
-
-	/* identify the other fragments */
-
-	/* full polygon without triangle (bestR,bestS,bestT) = three new polygons:
-	 * 1. bestR..bestS
-	 * 2. bestS..bestT
-	 * 3. bestT..bestR
-	 */
-
-	j = i + MaxAreaIndexes(vert + bestR, bestS - bestR + 1, indexes + i);
-	for(; i < j; ++i)
-		indexes[i] += bestR;
-		/* uses 3*(bestS-bestR+1)-6 */
-	j = i + MaxAreaIndexes(vert + bestS, bestT - bestS + 1, indexes + i);
-	for(; i < j; ++i)
-		indexes[i] += bestS;
-		/* uses 3*(bestT-bestS+1)-6 */
-
-	/* can'bestT recurse this one directly... therefore, buffering */
-	if(cnt + bestR - bestT + 1 >= 3)
+	for(try = 0; try < MAXAREA_MAXTRIES; ++try)
 	{
-		buf = safe_malloc(sizeof(*vert) * (cnt + bestR - bestT + 1));
-		memcpy(buf, vert + bestT, sizeof(*vert) * (cnt - bestT));
-		memcpy(buf + (cnt - bestT), vert, sizeof(*vert) * (bestR + 1));
-		j = i + MaxAreaIndexes(buf, cnt + bestR - bestT + 1, indexes + i);
+		if(try)
+		{
+			bestR = rand() % cnt;
+			bestS = rand() % cnt;
+			bestT = rand() % cnt;
+			if(bestR == bestS || bestR == bestT || bestS == bestT)
+				continue;
+			// bubblesort inline
+			// abc acb bac bca cab cba
+			if(bestR > bestS)
+			{
+				j = bestR;
+				bestR = bestS;
+				bestS = j;
+			}
+			// abc acb abc bca acb bca
+			if(bestS > bestT)
+			{
+				j = bestS;
+				bestS = bestT;
+				bestT = j;
+			}
+			// abc abc abc bac abc bac
+			if(bestR > bestS)
+			{
+				j = bestR;
+				bestR = bestS;
+				bestS = j;
+			}
+			// abc abc abc abc abc abc
+
+			VectorSubtract(vert[bestS].xyz, vert[bestR].xyz, ab);
+			VectorSubtract(vert[bestT].xyz, vert[bestR].xyz, ac);
+			CrossProduct(ab, ac, cross);
+			bestA = VectorLength(cross);
+		}
+
+		if(bestA < TINY_AREA)
+			/* the biggest triangle is degenerate - then every other is too, and the other algorithms wouldn't generate anything useful either */
+			continue;
+
+		i = 0;
+		indexes[i++] = bestR;
+		indexes[i++] = bestS;
+		indexes[i++] = bestT;
+			/* uses 3 */
+
+		/* identify the other fragments */
+
+		/* full polygon without triangle (bestR,bestS,bestT) = three new polygons:
+		 * 1. bestR..bestS
+		 * 2. bestS..bestT
+		 * 3. bestT..bestR
+		 */
+
+		j = MaxAreaIndexes(vert + bestR, bestS - bestR + 1, indexes + i);
+		if(j < 0)
+			continue;
+		j += i;
 		for(; i < j; ++i)
-			indexes[i] = (indexes[i] + bestT) % cnt;
-			/* uses 3*(cnt+bestR-bestT+1)-6 */
-		free(buf);
+			indexes[i] += bestR;
+			/* uses 3*(bestS-bestR+1)-6 */
+		j = MaxAreaIndexes(vert + bestS, bestT - bestS + 1, indexes + i);
+		if(j < 0)
+			continue;
+		j += i;
+		for(; i < j; ++i)
+			indexes[i] += bestS;
+			/* uses 3*(bestT-bestS+1)-6 */
+
+		/* can'bestT recurse this one directly... therefore, buffering */
+		if(cnt + bestR - bestT + 1 >= 3)
+		{
+			buf = safe_malloc(sizeof(*vert) * (cnt + bestR - bestT + 1));
+			memcpy(buf, vert + bestT, sizeof(*vert) * (cnt - bestT));
+			memcpy(buf + (cnt - bestT), vert, sizeof(*vert) * (bestR + 1));
+			j = MaxAreaIndexes(buf, cnt + bestR - bestT + 1, indexes + i);
+			if(j < 0)
+			{
+				free(buf);
+				continue;
+			}
+			j += i;
+			for(; i < j; ++i)
+				indexes[i] = (indexes[i] + bestT) % cnt;
+				/* uses 3*(cnt+bestR-bestT+1)-6 */
+			free(buf);
+		}
+
+		/* together 3 + 3*(cnt+3) - 18 = 3*cnt-6 q.e.d. */
+		return i;
 	}
 
-	/* together 3 + 3*(cnt+3) - 18 = 3*cnt-6 q.e.d. */
-
-	return i;
+	return -1;
 }
 
 /*
@@ -540,6 +594,7 @@ creates a triangle list using max area indexes
 
 void MaxAreaFaceSurface(mapDrawSurface_t *ds)
 {
+	int n;
 	/* try to early out  */
 	if( !ds->numVerts || (ds->type != SURFACE_FACE && ds->type != SURFACE_DECAL) )
 		return;
@@ -557,7 +612,16 @@ void MaxAreaFaceSurface(mapDrawSurface_t *ds)
 	/* do it! */
 	ds->numIndexes = 3 * ds->numVerts - 6;
 	ds->indexes = safe_malloc( ds->numIndexes * sizeof( int ) );
-	ds->numIndexes = MaxAreaIndexes(ds->verts, ds->numVerts, ds->indexes);
+	n = MaxAreaIndexes(ds->verts, ds->numVerts, ds->indexes);
+	if(n < 0)
+	{
+		/* whatever we do, it's degenerate */
+		free(ds->indexes);
+		ds->numIndexes = 0;
+		StripFaceSurface(ds);
+		return;
+	}
+	ds->numIndexes = n;
 
 	/* add to count */
 	numMaxAreaSurfaces++;
