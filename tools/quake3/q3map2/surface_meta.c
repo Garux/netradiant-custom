@@ -421,9 +421,42 @@ int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
 	double A, bestA = -1, V, bestV = -1;
 	vec3_t ab, ac, bc, cross;
 	bspDrawVert_t *buf;
+	double shiftWidth;
 
 	if(cnt < 3)
 		return 0;
+
+	/* calculate total area */
+	A = 0;
+	for(i = 1; i+1 < cnt; ++i)
+	{
+		VectorSubtract(vert[i].xyz, vert[0].xyz, ab);
+		VectorSubtract(vert[i+1].xyz, vert[0].xyz, ac);
+		CrossProduct(ab, ac, cross);
+		A += VectorLength(cross);
+	}
+	V = 0;
+	for(i = 0; i < cnt; ++i)
+	{
+		VectorSubtract(vert[(i+1)%cnt].xyz, vert[i].xyz, ab);
+		V += VectorLength(ab);
+	}
+
+	/* calculate shift width from the area sensibly, assuming the polygon
+	 * fits about 25% of the screen in both dimensions
+	 * we assume 1280x1024
+	 * 1 pixel is then about sqrt(A) / (0.25 * screenwidth)
+	 * 8 pixels are then about sqrt(A) /  (0.25 * 1280) * 8
+	 * 8 pixels are then about sqrt(A) * 0.025
+	 * */
+	shiftWidth = sqrt(A) * 0.0125;
+	/*     3->1 6->2 12->3 ... */
+	if(A - ceil(log(cnt/1.5) / log(2)) * V * shiftWidth * 2 < 0)
+	{
+		/* printf("Small triangle detected (area %f, circumference %f), adjusting shiftWidth from %f to ", A, V, shiftWidth); */
+		shiftWidth = A / (ceil(log(cnt/1.5) / log(2)) * V * 2);
+		/* printf("%f\n", shiftWidth); */
+	}
 
 	/* find the triangle with highest area */
 	for(r = 0; r+2 < cnt; ++r)
@@ -436,9 +469,9 @@ int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
 		CrossProduct(ab, ac, cross);
 		A = VectorLength(cross);
 
-		V = A - (VectorLength(ab) - VectorLength(ac) - VectorLength(bc)) * 0.2;
-		/* value = A - circumference * 0.2, i.e. we back out by 0.2 units from each side, to prevent too acute triangles */
-		/* this kind of simulates "number of 0.2x0.2 fragments in the triangle not touched by an edge" */
+		V = A - (VectorLength(ab) - VectorLength(ac) - VectorLength(bc)) * shiftWidth;
+		/* value = A - circumference * shiftWidth, i.e. we back out by shiftWidth units from each side, to prevent too acute triangles */
+		/* this kind of simulates "number of shiftWidth*shiftWidth fragments in the triangle not touched by an edge" */
 
 		if(bestA < 0 || V > bestV)
 		{
