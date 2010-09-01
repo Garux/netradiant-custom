@@ -483,6 +483,11 @@ int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
 		}
 	}
 
+	/*
+	if(bestV < 0)
+		printf("value was REALLY bad\n");
+	*/
+
 	if(bestA < TINY_AREA)
 		/* the biggest triangle is degenerate - then every other is too, and the other algorithms wouldn't generate anything useful either */
 		return 0;
