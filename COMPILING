@@ -1,3 +1,4 @@
+
 developer documentation for GtkRadiant 1.5.0-div0
 =================================================
 
@@ -45,13 +46,15 @@ OSX(using X-windows)
 ====================
 
 environment:
-- OS X 10.5
-- Xcode developer tools installed
+- OS X 10.5 or 10.6
+- Xcode developer tools installed (OSX DVD)
 - X11 (from the OS X DVD)
-- fink installed
-- the following fink packages installed:
-  gtkglext1 pkgconfig glib2-dev libxml2 gtk+2-dev pango1-xft2-dev atk-dev atk1 gettext-dev
-- Subversion must be installed and available in PATH to download the game packs
+- MacPorts or fink installed
+- the following packages installed:
+  Macports:
+    gtkglext pkgconfig glib2-devel libxml2 gtk2 pango atk gettext wget
+  Fink:
+    gtkglext1 pkgconfig glib2-dev libxml2 gtk+2 gtk+2-dev pango1-xft2-ft219-dev atk1 gettext-dev wget
 
 build:
 run 'make'
