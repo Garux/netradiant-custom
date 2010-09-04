@@ -347,12 +347,18 @@ public:
   bool pre(const scene::Path& path, scene::Instance& instance) const
   {
     ++m_depth;
+
+    // ignore worldspawn
+    NodeSmartReference me(path.top().get());
+    if(me == Map_FindOrInsertWorldspawn(g_map))
+	    return false;
+
     if(m_depth == 2) // entity depth
     {
       // traverse and select children if any one is selected
 	  if(instance.childSelected())
 	  	Instance_setSelected(instance, true);
-      return Node_getEntity(path.top())->isContainer() && instance.childSelected();
+      return Node_getEntity(path.top())->isContainer() && instance.isSelected();
     }
     else if(m_depth == 3) // primitive depth
     {

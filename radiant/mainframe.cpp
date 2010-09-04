@@ -1196,6 +1196,11 @@ public:
     if(path.size() == 1)
       return true;
 
+    // ignore worldspawn, but keep checking children
+    NodeSmartReference me(path.top().get());
+    if(me == Map_FindOrInsertWorldspawn(g_map))
+           return true;
+
     if(!path.top().get().isRoot())
     {
       Selectable* selectable = Instance_getSelectable(instance);
@@ -1212,6 +1217,11 @@ public:
   {
     if(path.size() == 1)
       return;
+
+    // ignore worldspawn, but keep checking children
+    NodeSmartReference me(path.top().get());
+    if(me == Map_FindOrInsertWorldspawn(g_map))
+           return;
 
     if(!path.top().get().isRoot())
     {
