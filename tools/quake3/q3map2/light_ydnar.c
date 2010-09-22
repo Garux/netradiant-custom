@@ -1884,6 +1884,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 	qboolean			filterColor, filterDir;
 	float				brightness;
 	float				*origin, *normal, *dirt, *luxel, *luxel2, *deluxel, *deluxel2;
+	unsigned char			*flag;
 	float				*lightLuxels, *lightLuxel, samples, filterRadius, weight;
 	vec3_t				color, averageColor, averageDir, total, temp, temp2;
 	float				tests[ 4 ][ 2 ] = { { 0.0f, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } };
@@ -2078,6 +2079,27 @@ void IlluminateRawLightmap( int rawLightmapNum )
 			memset( lightLuxels, 0, llSize );
 			totalLighted = 0;
 			
+			/* determine filter radius */
+			filterRadius = lm->filterRadius > trace.light->filterRadius
+				? lm->filterRadius
+				: trace.light->filterRadius;
+			if( filterRadius < 0.0f )
+				filterRadius = 0.0f;
+			
+			/* set luxel filter radius */
+			luxelFilterRadius = superSample * filterRadius / lm->sampleSize;
+			if( luxelFilterRadius == 0 && (filterRadius > 0.0f || filter) )
+				luxelFilterRadius = 1;
+
+			/* allocate sampling flags storage */
+			if(lightSamples > 1 && luxelFilterRadius == 0)
+			{
+				size = lm->sw * lm->sh * SUPER_LUXEL_SIZE * sizeof( unsigned char );
+				if(lm->superFlags == NULL)
+					lm->superFlags = safe_malloc( size );
+				memset( (void *) lm->superFlags, 0, size );
+			}
+
 			/* initial pass, one sample per luxel */
 			for( y = 0; y < lm->sh; y++ )
 			{
@@ -2093,6 +2115,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 					deluxel = SUPER_DELUXEL( x, y );
 					origin = SUPER_ORIGIN( x, y );
 					normal = SUPER_NORMAL( x, y );
+					flag = SUPER_FLAG( x, y );
 
 #if 0
 					////////// 27's temp hack for testing edge clipping ////
@@ -2121,8 +2144,14 @@ void IlluminateRawLightmap( int rawLightmapNum )
 						if( deluxemap )
 							VectorAdd( deluxel, trace.directionContribution, deluxel );
 
+						/* check for evilness */
+						if(trace.forceSubsampling && lightSamples > 1 && luxelFilterRadius == 0)
+						{
+							totalLighted++;
+							*flag |= FLAG_FORCE_SUBSAMPLING; /* force */
+						}
 						/* add to count */
-						if( trace.color[ 0 ] || trace.color[ 1 ] || trace.color[ 2 ] )
+						else if( trace.color[ 0 ] || trace.color[ 1 ] || trace.color[ 2 ] )
 							totalLighted++;
 					}
 				}
@@ -2131,18 +2160,6 @@ void IlluminateRawLightmap( int rawLightmapNum )
 			/* don't even bother with everything else if nothing was lit */
 			if( totalLighted == 0 )
 				continue;
-			
-			/* determine filter radius */
-			filterRadius = lm->filterRadius > trace.light->filterRadius
-				? lm->filterRadius
-				: trace.light->filterRadius;
-			if( filterRadius < 0.0f )
-				filterRadius = 0.0f;
-			
-			/* set luxel filter radius */
-			luxelFilterRadius = superSample * filterRadius / lm->sampleSize;
-			if( luxelFilterRadius == 0 && (filterRadius > 0.0f || filter) )
-				luxelFilterRadius = 1;
 			
 			/* secondary pass, adaptive supersampling (fixme: use a contrast function to determine if subsampling is necessary) */
 			/* 2003-09-27: changed it so filtering disamples supersampling, as it would waste time */
@@ -2172,6 +2189,14 @@ void IlluminateRawLightmap( int rawLightmapNum )
 							mapped++;
 							
 							/* get luxel */
+							flag = SUPER_FLAG( sx, sy );
+							if(*flag & FLAG_FORCE_SUBSAMPLING)
+							{
+								/* force a lighted/mapped discrepancy so we subsample */
+								++lighted;
+								++mapped;
+								++mapped;
+							}
 							lightLuxel = LIGHT_LUXEL( sx, sy );
 							VectorAdd( total, lightLuxel, total );
 							if( (lightLuxel[ 0 ] + lightLuxel[ 1 ] + lightLuxel[ 2 ]) > 0.0f )
@@ -2195,6 +2220,9 @@ void IlluminateRawLightmap( int rawLightmapNum )
 								cluster = SUPER_CLUSTER( sx, sy );
 								if( *cluster < 0 )
 									continue;
+								flag = SUPER_FLAG( sx, sy );
+								if(*flag & FLAG_ALREADY_SUBSAMPLED) // already subsampled
+									continue;
 								lightLuxel = LIGHT_LUXEL( sx, sy );
 								origin = SUPER_ORIGIN( sx, sy );
 								
@@ -2204,6 +2232,8 @@ void IlluminateRawLightmap( int rawLightmapNum )
 								
 								/* subsample it */
 								SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel );
+
+								*flag |= FLAG_ALREADY_SUBSAMPLED;
 								
 								/* debug code to colorize subsampled areas to yellow */
 								//%	luxel = SUPER_LUXEL( lightmapNum, sx, sy );
@@ -2245,7 +2275,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				lm->superLuxels[ lightmapNum ] = safe_malloc( size );
 				memset( lm->superLuxels[ lightmapNum ], 0, size );
 			}
-			
+
 			/* set style */
 			if( lightmapNum > 0 )
 			{

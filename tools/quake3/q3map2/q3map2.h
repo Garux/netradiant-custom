@@ -268,6 +268,9 @@ constants
 #define BSP_LUXEL_SIZE			3
 #define RAD_LUXEL_SIZE			3
 #define SUPER_LUXEL_SIZE		4
+#define SUPER_FLAG_SIZE			4
+#define FLAG_FORCE_SUBSAMPLING 1
+#define FLAG_ALREADY_SUBSAMPLED 2
 #define SUPER_ORIGIN_SIZE		3
 #define SUPER_NORMAL_SIZE		4
 #define SUPER_DELUXEL_SIZE		3
@@ -279,6 +282,7 @@ constants
 #define BSP_LUXEL( s, x, y )	(lm->bspLuxels[ s ] + ((((y) * lm->w) + (x)) * BSP_LUXEL_SIZE))
 #define RAD_LUXEL( s, x, y )	(lm->radLuxels[ s ] + ((((y) * lm->w) + (x)) * RAD_LUXEL_SIZE))
 #define SUPER_LUXEL( s, x, y )	(lm->superLuxels[ s ] + ((((y) * lm->sw) + (x)) * SUPER_LUXEL_SIZE))
+#define SUPER_FLAG( x, y )	(lm->superFlags + ((((y) * lm->sw) + (x)) * SUPER_FLAG_SIZE))
 #define SUPER_DELUXEL( x, y )	(lm->superDeluxels + ((((y) * lm->sw) + (x)) * SUPER_DELUXEL_SIZE))
 #define BSP_DELUXEL( x, y )		(lm->bspDeluxels + ((((y) * lm->w) + (x)) * BSP_DELUXEL_SIZE))
 #define SUPER_CLUSTER( x, y )	(lm->superClusters + (((y) * lm->sw) + (x)))
@@ -1359,6 +1363,7 @@ typedef struct
 	int					compileFlags;	/* for determining surface compile flags traced through */
 	qboolean			passSolid;
 	qboolean			opaque;
+	qboolean			forceSubsampling; /* needs subsampling (alphashadow) */
 	
 	/* working data */
 	int					numTestNodes;
@@ -1450,6 +1455,7 @@ typedef struct rawLightmap_s
 	float					*bspLuxels[ MAX_LIGHTMAPS ];
 	float					*radLuxels[ MAX_LIGHTMAPS ];
 	float					*superLuxels[ MAX_LIGHTMAPS ];
+	unsigned char				*superFlags;
 	float					*superOrigins;
 	float					*superNormals;
 	int						*superClusters;

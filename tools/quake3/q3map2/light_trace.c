@@ -1511,6 +1511,9 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 		trace->opaque = qtrue;
 		return qtrue;
 	}
+
+	/* force subsampling because the lighting is texture dependent */
+	trace->forceSubsampling = qtrue;
 	
 	/* try to avoid double shadows near triangle seams */
 	if( u < -ASLF_EPSILON || u > (1.0f + ASLF_EPSILON) ||
@@ -1778,6 +1781,7 @@ sets up certain trace values
 
 float SetupTrace( trace_t *trace )
 {
+	trace->forceSubsampling = qfalse;
 	VectorSubtract( trace->end, trace->origin, trace->displacement );
 	trace->distance = VectorNormalize( trace->displacement, trace->direction );
 	VectorCopy( trace->origin, trace->hit );
