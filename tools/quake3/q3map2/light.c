@@ -758,6 +758,7 @@ int LightContributionToSample( trace_t *trace )
 	light = trace->light;
 	
 	/* clear color */
+	trace->forceSubsampling = qfalse; /* to make sure */
 	VectorClear( trace->color );
 	VectorClear( trace->colorNoShadow );
 	VectorClear( trace->directionContribution );

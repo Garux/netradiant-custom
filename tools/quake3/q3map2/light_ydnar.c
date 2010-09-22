@@ -1817,6 +1817,13 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, vec3_t sampl
 		/* sample light */
 
 		LightContributionToSample( trace );
+		if(trace.forceSubsampling)
+		{
+			/* alphashadow: we subsample as deep as we can */
+			++lighted;
+			++mapped;
+			++mapped;
+		}
 		
 		/* add to totals (fixme: make contrast function) */
 		VectorCopy( trace->color, luxel[ b ] );

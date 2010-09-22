@@ -1781,7 +1781,6 @@ sets up certain trace values
 
 float SetupTrace( trace_t *trace )
 {
-	trace->forceSubsampling = qfalse;
 	VectorSubtract( trace->end, trace->origin, trace->displacement );
 	trace->distance = VectorNormalize( trace->displacement, trace->direction );
 	VectorCopy( trace->origin, trace->hit );
