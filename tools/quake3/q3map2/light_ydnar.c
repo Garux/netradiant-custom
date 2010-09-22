@@ -1834,7 +1834,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, vec3_t sampl
 		{
 			if( cluster[ b ] < 0 )
 				continue;
-			SubsampleRawLuxel_r( lm, trace, origin[ b ], x, y, (bias / 3.0f), luxel[ b ] );
+			SubsampleRawLuxel_r( lm, trace, origin[ b ], x, y, (bias * 0.5f), luxel[ b ] );
 		}
 	}
 	
@@ -2203,7 +2203,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 								//%		continue;
 								
 								/* subsample it */
-								SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 1.0f/3.0f, lightLuxel );
+								SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f, lightLuxel );
 								/* will do: first -1/3 .. +1/3, then subsample these corners the same way -> -1/9 .. +1/9 around them, etc. -> 1/3 + 1/9 + 1/27 + ... = 0.5 */
 								
 								/* debug code to colorize subsampled areas to yellow */
