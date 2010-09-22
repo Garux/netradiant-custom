@@ -1553,6 +1553,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 	/* check filter for opaque */
 	if( trace->color[ 0 ] <= 0.001f && trace->color[ 1 ] <= 0.001f && trace->color[ 2 ] <= 0.001f )
 	{
+		VectorClear( trace->color );
 		VectorMA( trace->origin, depth, trace->direction, trace->hit );
 		trace->opaque = qtrue;
 		return qtrue;
