@@ -750,8 +750,9 @@ int LightContributionToSample( trace_t *trace )
 	float			add;
 	float			dist;
 	float			addDeluxe = 0.0f, addDeluxeBounceScale = 0.25f;
-	qboolean		angledDeluxe = qfalse;
+	qboolean		angledDeluxe = qtrue;
 	float			colorBrightness;
+	qboolean		doAddDeluxe = qtrue;
 	
 	/* get light */
 	light = trace->light;
@@ -821,7 +822,12 @@ int LightContributionToSample( trace_t *trace )
 			
 			/* twosided lighting */
 			if( trace->twoSided )
-				angle = fabs( angle );
+			{
+				angle = -angle;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
 			
 			/* attenuate */
 			angle *= -DotProduct( light->normal, trace->direction );
@@ -864,6 +870,9 @@ int LightContributionToSample( trace_t *trace )
 					dist = SetupTrace( trace );
 					if( dist >= light->envelope )
 						return 0;
+
+					/* no deluxemap contribution from "other side" light */
+					doAddDeluxe = qfalse;
 				}
 				else
 					return 0;
@@ -898,8 +907,13 @@ int LightContributionToSample( trace_t *trace )
 			float dot = DotProduct( trace->normal, trace->direction ); 
 
 			/* twosided lighting */
-			if( trace->twoSided )
-				dot = fabs( dot );
+			if( trace->twoSided && dot < 0 )
+			{
+				dot = -dot;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
 
 			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
 			if( lightAngleHL )
@@ -1010,8 +1024,13 @@ int LightContributionToSample( trace_t *trace )
 			float dot = DotProduct( trace->normal, trace->direction ); 
 
 			/* twosided lighting */
-			if( trace->twoSided )
-				dot = fabs( dot );
+			if( trace->twoSided && dot < 0 )
+			{
+				dot = -dot;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
 
 			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
 			if( lightAngleHL )
@@ -1108,11 +1127,16 @@ int LightContributionToSample( trace_t *trace )
 	if( bouncing )
 	{
 		addDeluxe *= addDeluxeBounceScale;
+		/* better NOT increase it beyond the original value
 		if( addDeluxe < 0.00390625f )
 			addDeluxe = 0.00390625f;
+		*/
 	}
 
-	VectorScale( trace->direction, addDeluxe, trace->directionContribution );
+	if(doAddDeluxe)
+	{
+		VectorScale( trace->direction, addDeluxe, trace->directionContribution );
+	}
 	
 	/* setup trace */
 	trace->testAll = qfalse;
