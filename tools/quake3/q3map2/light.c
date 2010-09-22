@@ -758,7 +758,7 @@ int LightContributionToSample( trace_t *trace )
 	light = trace->light;
 	
 	/* clear color */
-	trace->forceSubsampling = qfalse; /* to make sure */
+	trace->forceSubsampling = 0.0f; /* to make sure */
 	VectorClear( trace->color );
 	VectorClear( trace->colorNoShadow );
 	VectorClear( trace->directionContribution );
@@ -1091,6 +1091,7 @@ int LightContributionToSample( trace_t *trace )
 		{
 			/* trace */
 			TraceLine( trace );
+			trace->forceSubsampling *= add;
 			if( !(trace->compileFlags & C_SKY) || trace->opaque )
 			{
 				VectorClear( trace->color );
@@ -1145,6 +1146,7 @@ int LightContributionToSample( trace_t *trace )
 	
 	/* raytrace */
 	TraceLine( trace );
+	trace->forceSubsampling *= add;
 	if( trace->passSolid || trace->opaque )
 	{
 		VectorClear( trace->color );

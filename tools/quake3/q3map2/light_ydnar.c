@@ -1817,7 +1817,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, vec3_t sampl
 		/* sample light */
 
 		LightContributionToSample( trace );
-		if(trace->forceSubsampling)
+		if(trace->forceSubsampling > 1.0f)
 		{
 			/* alphashadow: we subsample as deep as we can */
 			++lighted;
@@ -2152,7 +2152,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 							VectorAdd( deluxel, trace.directionContribution, deluxel );
 
 						/* check for evilness */
-						if(trace.forceSubsampling && lightSamples > 1 && luxelFilterRadius == 0)
+						if(trace.forceSubsampling > 1.0f && lightSamples > 1 && luxelFilterRadius == 0)
 						{
 							totalLighted++;
 							*flag |= FLAG_FORCE_SUBSAMPLING; /* force */

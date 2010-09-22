@@ -1513,7 +1513,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 	}
 
 	/* force subsampling because the lighting is texture dependent */
-	trace->forceSubsampling = qtrue;
+	trace->forceSubsampling = 1.0;
 	
 	/* try to avoid double shadows near triangle seams */
 	if( u < -ASLF_EPSILON || u > (1.0f + ASLF_EPSILON) ||

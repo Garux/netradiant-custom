@@ -1363,7 +1363,7 @@ typedef struct
 	int					compileFlags;	/* for determining surface compile flags traced through */
 	qboolean			passSolid;
 	qboolean			opaque;
-	qboolean			forceSubsampling; /* needs subsampling (alphashadow) */
+	vec_t			forceSubsampling; /* needs subsampling (alphashadow), value = max color contribution possible from it */
 	
 	/* working data */
 	int					numTestNodes;
