@@ -2216,6 +2216,18 @@ int LightMain( int argc, char **argv )
 			i++;
 		}
 		
+		else if( !strcmp( argv[ i ], "-samplessearchboxsize" ) )
+		{
+			lightSamplesSearchBoxSize = atoi( argv[ i + 1 ] );
+			if( lightSamplesSearchBoxSize <= 0 )
+				lightSamplesSearchBoxSize = 1;
+			if( lightSamplesSearchBoxSize > 4 )
+				lightSamplesSearchBoxSize = 4; /* more makes no sense */
+			else if( lightSamplesSearchBoxSize != 1 )
+				Sys_Printf( "Adaptive supersampling uses %f times the normal search box size\n", lightSamplesSearchBoxSize );
+			i++;
+		}
+
 		else if( !strcmp( argv[ i ], "-filter" ) )
 		{
 			filter = qtrue;

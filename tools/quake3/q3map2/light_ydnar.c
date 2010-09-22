@@ -2203,8 +2203,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 								//%		continue;
 								
 								/* subsample it */
-								SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f, lightLuxel );
-								/* will do: first -1/3 .. +1/3, then subsample these corners the same way -> -1/9 .. +1/9 around them, etc. -> 1/3 + 1/9 + 1/27 + ... = 0.5 */
+								SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel );
 								
 								/* debug code to colorize subsampled areas to yellow */
 								//%	luxel = SUPER_LUXEL( lightmapNum, sx, sy );
