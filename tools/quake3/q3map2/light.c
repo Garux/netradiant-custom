@@ -822,7 +822,7 @@ int LightContributionToSample( trace_t *trace )
 			angle = DotProduct( trace->normal, trace->direction );
 			
 			/* twosided lighting */
-			if( trace->twoSided )
+			if( trace->twoSided && angle < 0 )
 			{
 				angle = -angle;
 
@@ -836,7 +836,12 @@ int LightContributionToSample( trace_t *trace )
 				return 0;
 			else if( angle < 0.0f &&
 				(trace->twoSided || (light->flags & LIGHT_TWOSIDED)) )
+			{
 				angle = -angle;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
 
 			/* clamp the distance to prevent super hot spots */
 			dist = sqrt(dist * dist + light->extraDist * light->extraDist);
@@ -877,6 +882,13 @@ int LightContributionToSample( trace_t *trace )
 				}
 				else
 					return 0;
+			}
+
+			/* also don't deluxe if the direction is on the wrong side */
+			if(DotProduct(trace->normal, trace->direction) < 0)
+			{
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
 			}
 			
 			/* ydnar: moved to here */
