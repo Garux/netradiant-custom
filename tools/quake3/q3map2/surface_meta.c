@@ -1090,10 +1090,6 @@ void FixMetaTJunctions( void )
 			/* get vert */
 			VectorCopy( metaVerts[ j ].xyz, pt );
 
-			/* debug code: darken verts */
-			if( i == 0 )
-				VectorSet( metaVerts[ j ].color[ 0 ], 8, 8, 8 );
-			
 			/* determine if point lies in the triangle's plane */
 			dist = DotProduct( pt, plane ) - plane[ 3 ];
 			if( fabs( dist ) > TJ_PLANE_EPSILON )
@@ -1134,13 +1130,6 @@ void FixMetaTJunctions( void )
 				amount = dist / edges[ k ].length;
 				#endif
 				
-				/* debug code: brighten this point */
-				//%	metaVerts[ j ].color[ 0 ][ 0 ] += 5;
-				//%	metaVerts[ j ].color[ 0 ][ 1 ] += 4;
-				VectorSet( metaVerts[ tri->indexes[ k ] ].color[ 0 ], 255, 204, 0 );
-				VectorSet( metaVerts[ tri->indexes[ (k + 1) % 3 ] ].color[ 0 ], 255, 204, 0 );
-				
-
 				/* the edge opposite the zero-weighted vertex was hit, so use that as an amount */
 				a = &metaVerts[ tri->indexes[ k % 3 ] ];
 				b = &metaVerts[ tri->indexes[ (k + 1) % 3 ] ];
