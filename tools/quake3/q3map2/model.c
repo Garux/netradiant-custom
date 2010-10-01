@@ -242,13 +242,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	skinfilename[sizeof(skinfilename)-1] = 0;
 	skinfilehandle = fopen(skinfilename, "r");
 	skinfilesize = vfsLoadFile(skinfilename, (void**) &skinfilecontent, 0);
-	if(skinfilesize < 0)
+	if(skinfilesize < 0 && skin != 0)
 	{
 		/* fallback to skin 0 if invalid */
 		snprintf(skinfilename, sizeof(skinfilename), "%s_0.skin", name);
 		skinfilename[sizeof(skinfilename)-1] = 0;
 		skinfilesize = vfsLoadFile(skinfilename, (void**) &skinfilecontent, 0);
-		if(skinfilesize < 0)
+		if(skinfilesize >= 0)
 			Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
 	}
 	sf = NULL;
@@ -280,16 +280,15 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			sf = safe_malloc( sizeof( *sf ) );
 			sf->next = sf2;
 
-			sprintf(format, "replace %%%ds %%%ds%%n", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
-			pos = 0;
-			if(sscanf(skinfileptr, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
+			sprintf(format, "replace %%%ds %%%ds", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
+			if(sscanf(skinfileptr, format, sf->name, sf->to) == 2)
 				continue;
-			sprintf(format, "%%%ds,%%%ds%%n", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
-			pos = 0;
-			if(sscanf(skinfileptr, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
+			sprintf(format, " %%%d[^, 	] ,%%%ds", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
+			if((pos = sscanf(skinfileptr, format, sf->name, sf->to)) == 2)
 				continue;
 
 			/* invalid input line -> discard sf struct */
+			Sys_Printf( "Discarding skin directive in %s: %s\n", skinfilename, skinfileptr );
 			free(sf);
 			sf = sf2;
 		}
