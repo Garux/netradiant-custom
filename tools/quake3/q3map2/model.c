@@ -206,7 +206,7 @@ InsertModel() - ydnar
 adds a picomodel into the bsp
 */
 
-void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle )
+void InsertModel( char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle )
 {
 	int					i, j, k, s, numSurfaces;
 	m4x4_t				identity, nTransform;
@@ -222,14 +222,64 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 	byte				*color;
 	picoIndex_t			*indexes;
 	remap_t				*rm, *glob;
+	skinfile_t			*sf, *sf2;
 	double				normalEpsilon_save;
 	double				distanceEpsilon_save;
+	char				skinfilename[ MAX_QPATH ];
+	FILE				*skinfilehandle;
 	
 	
 	/* get model */
 	model = LoadModel( name, frame );
 	if( model == NULL )
 		return;
+
+	/* load skin file */
+	snprintf(skinfilename, sizeof(skinfilename), "%s_%d.skin", name, skin);
+	skinfilename[sizeof(skinfilename)-1] = 0;
+	skinfilehandle = fopen(skinfilename, "r");
+	if(!skinfilehandle)
+	{
+		/* fallback to skin 0 if invalid */
+		snprintf(skinfilename, sizeof(skinfilename), "%s_0.skin", name);
+		skinfilename[sizeof(skinfilename)-1] = 0;
+		skinfilehandle = fopen(skinfilename, "r");
+		if(skinfilehandle)
+			Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
+	}
+	sf = NULL;
+	if(skinfilehandle)
+	{
+		Sys_Printf( "Using skin %d of %s\n", skin, name );
+		int pos;
+		for(;;)
+		{
+			// for fscanf
+			char format[64];
+			char buf[1024];
+
+			if(!fgets(buf, sizeof(buf), skinfilehandle))
+				break;
+
+			/* create new item */
+			sf2 = sf;
+			sf = safe_malloc( sizeof( *sf ) );
+			sf->next = sf2;
+
+			sprintf(format, "replace %%%ds %%%ds%%n", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
+			pos = 0;
+			if(sscanf(buf, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
+				continue;
+			sprintf(format, "%%%ds,%%%ds%%n", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
+			pos = 0;
+			if(sscanf(buf, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
+				continue;
+
+			/* invalid input line -> discard sf struct */
+			free(sf);
+			sf = sf2;
+		}
+	}
 	
 	/* handle null matrix */
 	if( transform == NULL )
@@ -283,7 +333,27 @@ void InsertModel( char *name, int frame, m4x4_t transform, remap_t *remap, shade
 			picoShaderName = "";
 		else
 			picoShaderName = PicoGetShaderName( shader );
-		
+
+		/* handle .skin file */
+		if(sf)
+		{
+			picoShaderName = NULL;
+			for(sf2 = sf; sf2 != NULL; sf2 = sf2->next)
+			{
+				if( !Q_stricmp( surface->name, sf2->name ) )
+				{
+					Sys_FPrintf( SYS_VRB, "Skin file: mapping %s to %s\n", surface->name, sf2->to );
+					picoShaderName = sf2->to;
+					break;
+				}
+			}
+			if(!picoShaderName)
+			{
+				Sys_FPrintf( SYS_VRB, "Skin file: not mapping %s\n", surface->name );
+				continue;
+			}
+		}
+
 		/* handle shader remapping */
 		glob = NULL;
 		for( rm = remap; rm != NULL; rm = rm->next )
@@ -603,7 +673,7 @@ adds misc_model surfaces to the bsp
 
 void AddTriangleModels( entity_t *e )
 {
-	int				num, frame, castShadows, recvShadows, spawnFlags;
+	int				num, frame, skin, castShadows, recvShadows, spawnFlags;
 	entity_t		*e2;
 	const char		*targetName;
 	const char		*target, *model, *value;
@@ -806,21 +876,23 @@ void AddTriangleModels( entity_t *e )
 		if ( strcmp( "", ValueForKey( e2, "_shadeangle" ) ) )
 			shadeAngle = FloatForKey( e2, "_shadeangle" );
 		/* vortex' aliases */
-		else if ( strcmp( "", ValueForKey( mapEnt, "_smoothnormals" ) ) )
-			shadeAngle = FloatForKey( mapEnt, "_smoothnormals" );
-		else if ( strcmp( "", ValueForKey( mapEnt, "_sn" ) ) )
-			shadeAngle = FloatForKey( mapEnt, "_sn" );
-		else if ( strcmp( "", ValueForKey( mapEnt, "_smooth" ) ) )
-			shadeAngle = FloatForKey( mapEnt, "_smooth" );
+		else if ( strcmp( "", ValueForKey( e2, "_smoothnormals" ) ) )
+			shadeAngle = FloatForKey( e2, "_smoothnormals" );
+		else if ( strcmp( "", ValueForKey( e2, "_sn" ) ) )
+			shadeAngle = FloatForKey( e2, "_sn" );
+		else if ( strcmp( "", ValueForKey( e2, "_smooth" ) ) )
+			shadeAngle = FloatForKey( e2, "_smooth" );
 
 		if( shadeAngle < 0.0f )
 			shadeAngle = 0.0f;
 
 		if( shadeAngle > 0.0f )
 			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
-		
+
+		skin = IntForKey(e2, "skin");
+
 		/* insert the model */
-		InsertModel( (char*) model, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle );
+		InsertModel( (char*) model, skin, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle );
 		
 		/* free shader remappings */
 		while( remap != NULL )
