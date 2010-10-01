@@ -90,7 +90,7 @@ FindModel() - ydnar
 finds an existing picoModel and returns a pointer to the picoModel_t struct or NULL if not found
 */
 
-picoModel_t *FindModel( char *name, int frame )
+picoModel_t *FindModel( const char *name, int frame )
 {
 	int			i;
 	
@@ -123,7 +123,7 @@ LoadModel() - ydnar
 loads a picoModel and returns a pointer to the picoModel_t struct or NULL if not found
 */
 
-picoModel_t *LoadModel( char *name, int frame )
+picoModel_t *LoadModel( const char *name, int frame )
 {
 	int				i;
 	picoModel_t		*model, **pm;
@@ -169,7 +169,7 @@ picoModel_t *LoadModel( char *name, int frame )
 			return NULL;
 		
 		/* set data */
-		PicoSetModelName( *pm, name );
+		PicoSetModelName( *pm, (char*) name );
 		PicoSetModelFrameNum( *pm, frame );
 	}
 	
@@ -206,7 +206,7 @@ InsertModel() - ydnar
 adds a picomodel into the bsp
 */
 
-void InsertModel( char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle )
+void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle )
 {
 	int					i, j, k, s, numSurfaces;
 	m4x4_t				identity, nTransform;
@@ -226,6 +226,9 @@ void InsertModel( char *name, int skin, int frame, m4x4_t transform, remap_t *re
 	double				normalEpsilon_save;
 	double				distanceEpsilon_save;
 	char				skinfilename[ MAX_QPATH ];
+	char				*skinfilecontent;
+	int					skinfilesize;
+	char				*skinfileptr, *skinfilenextptr;
 	FILE				*skinfilehandle;
 	
 	
@@ -238,28 +241,39 @@ void InsertModel( char *name, int skin, int frame, m4x4_t transform, remap_t *re
 	snprintf(skinfilename, sizeof(skinfilename), "%s_%d.skin", name, skin);
 	skinfilename[sizeof(skinfilename)-1] = 0;
 	skinfilehandle = fopen(skinfilename, "r");
-	if(!skinfilehandle)
+	skinfilesize = vfsLoadFile(skinfilename, (void**) &skinfilecontent, 0);
+	if(skinfilesize < 0)
 	{
 		/* fallback to skin 0 if invalid */
 		snprintf(skinfilename, sizeof(skinfilename), "%s_0.skin", name);
 		skinfilename[sizeof(skinfilename)-1] = 0;
-		skinfilehandle = fopen(skinfilename, "r");
-		if(skinfilehandle)
+		skinfilesize = vfsLoadFile(skinfilename, (void**) &skinfilecontent, 0);
+		if(skinfilesize < 0)
 			Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
 	}
 	sf = NULL;
-	if(skinfilehandle)
+	if(skinfilesize)
 	{
 		Sys_Printf( "Using skin %d of %s\n", skin, name );
 		int pos;
-		for(;;)
+		for(skinfileptr = skinfilecontent; *skinfileptr; skinfileptr = skinfilenextptr)
 		{
 			// for fscanf
 			char format[64];
-			char buf[1024];
 
-			if(!fgets(buf, sizeof(buf), skinfilehandle))
-				break;
+			skinfilenextptr = strchr(skinfileptr, '\r');
+			if(skinfilenextptr)
+			{
+				*skinfilenextptr++ = 0;
+			}
+			else
+			{
+				skinfilenextptr = strchr(skinfileptr, '\n');
+				if(skinfilenextptr)
+					*skinfilenextptr++ = 0;
+				else
+					skinfilenextptr = skinfileptr + strlen(skinfileptr);
+			}
 
 			/* create new item */
 			sf2 = sf;
@@ -268,17 +282,18 @@ void InsertModel( char *name, int skin, int frame, m4x4_t transform, remap_t *re
 
 			sprintf(format, "replace %%%ds %%%ds%%n", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
 			pos = 0;
-			if(sscanf(buf, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
+			if(sscanf(skinfileptr, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
 				continue;
 			sprintf(format, "%%%ds,%%%ds%%n", (int)sizeof(sf->name)-1, (int)sizeof(sf->to)-1);
 			pos = 0;
-			if(sscanf(buf, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
+			if(sscanf(skinfileptr, format, &sf->name, &sf->to, &pos) > 0 && pos > 0)
 				continue;
 
 			/* invalid input line -> discard sf struct */
 			free(sf);
 			sf = sf2;
 		}
+		free(skinfilecontent);
 	}
 	
 	/* handle null matrix */
@@ -892,7 +907,7 @@ void AddTriangleModels( entity_t *e )
 		skin = IntForKey(e2, "skin");
 
 		/* insert the model */
-		InsertModel( (char*) model, skin, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle );
+		InsertModel( model, skin, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle );
 		
 		/* free shader remappings */
 		while( remap != NULL )

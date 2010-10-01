@@ -1657,9 +1657,9 @@ tree_t						*FaceBSP( face_t *list );
 /* model.c */
 void						PicoPrintFunc( int level, const char *str );
 void						PicoLoadFileFunc( char *name, byte **buffer, int *bufSize );
-picoModel_t					*FindModel( char *name, int frame );
-picoModel_t					*LoadModel( char *name, int frame );
-void						InsertModel( char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle );
+picoModel_t					*FindModel( const char *name, int frame );
+picoModel_t					*LoadModel( const char *name, int frame );
+void						InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle );
 void						AddTriangleModels( entity_t *e );
 
 
