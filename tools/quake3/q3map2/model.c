@@ -252,7 +252,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
 	}
 	sf = NULL;
-	if(skinfilesize)
+	if(skinfilesize >= 0)
 	{
 		Sys_Printf( "Using skin %d of %s\n", skin, name );
 		int pos;
