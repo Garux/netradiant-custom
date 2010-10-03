@@ -2197,6 +2197,7 @@ Q_EXTERN qboolean			shade Q_ASSIGN( qfalse );
 Q_EXTERN float				shadeAngleDegrees Q_ASSIGN( 0.0f );
 Q_EXTERN int				superSample Q_ASSIGN( 0 );
 Q_EXTERN int				lightSamples Q_ASSIGN( 1 );
+Q_EXTERN qboolean			lightRandomSamples Q_ASSIGN( qfalse );
 Q_EXTERN int				lightSamplesSearchBoxSize Q_ASSIGN( 1 );
 Q_EXTERN qboolean			filter Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			dark Q_ASSIGN( qfalse );

@@ -1871,6 +1871,45 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, vec3_t sampl
 		lightLuxel[ 3 ] += 1.0f;
 	}
 }
+static void RandomSubsampleRawLuxel( rawLightmap_t *lm, trace_t *trace, vec3_t sampleOrigin, int x, int y, float bias, float *lightLuxel )
+{
+	int			b, samples, mapped;
+	int			cluster;
+	vec3_t		origin, normal;
+	vec3_t		total;
+	
+	VectorClear( total );
+	mapped = 0;
+	for(b = 0; b < lightSamples; ++b)
+	{
+		/* set origin */
+		VectorCopy( sampleOrigin, origin );
+		
+		/* calculate position */
+		if( !SubmapRawLuxel( lm, x, y, (bias * (2 * Random() - 1)), (bias * (2 * Random() - 1)), &cluster, origin, normal ) )
+		{
+			cluster = -1;
+			continue;
+		}
+		mapped++;
+
+		trace->cluster = cluster;
+		VectorCopy( origin, trace->origin );
+		VectorCopy( normal, trace->normal );
+
+		LightContributionToSample( trace );
+		VectorAdd( total, trace->color, total );
+	}
+
+	/* add to luxel */
+	if( mapped > 0 )
+	{
+		/* average */
+		lightLuxel[ 0 ] = total[ 0 ] / mapped;
+		lightLuxel[ 1 ] = total[ 1 ] / mapped;
+		lightLuxel[ 2 ] = total[ 2 ] / mapped;
+	}
+}
 
 
 
@@ -2099,7 +2138,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				luxelFilterRadius = 1;
 
 			/* allocate sampling flags storage */
-			if(lightSamples > 1 && luxelFilterRadius == 0)
+			if((lightSamples > 1 || lightRandomSamples) && luxelFilterRadius == 0)
 			{
 				size = lm->sw * lm->sh * SUPER_LUXEL_SIZE * sizeof( unsigned char );
 				if(lm->superFlags == NULL)
@@ -2152,7 +2191,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 							VectorAdd( deluxel, trace.directionContribution, deluxel );
 
 						/* check for evilness */
-						if(trace.forceSubsampling > 1.0f && lightSamples > 1 && luxelFilterRadius == 0)
+						if(trace.forceSubsampling > 1.0f && (lightSamples > 1 || lightRandomSamples) && luxelFilterRadius == 0)
 						{
 							totalLighted++;
 							*flag |= FLAG_FORCE_SUBSAMPLING; /* force */
@@ -2170,7 +2209,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 			
 			/* secondary pass, adaptive supersampling (fixme: use a contrast function to determine if subsampling is necessary) */
 			/* 2003-09-27: changed it so filtering disamples supersampling, as it would waste time */
-			if( lightSamples > 1 && luxelFilterRadius == 0 )
+			if( (lightSamples > 1 || lightRandomSamples) && luxelFilterRadius == 0 )
 			{
 				/* walk luxels */
 				for( y = 0; y < (lm->sh - 1); y++ )
@@ -2238,7 +2277,10 @@ void IlluminateRawLightmap( int rawLightmapNum )
 								//%		continue;
 								
 								/* subsample it */
-								SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel );
+								if(lightRandomSamples)
+									RandomSubsampleRawLuxel( lm, &trace, origin, sx, sy, 0.5f, lightLuxel );
+								else
+									SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel );
 
 								*flag |= FLAG_ALREADY_SUBSAMPLED;
 								

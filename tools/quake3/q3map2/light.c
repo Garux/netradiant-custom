@@ -2245,6 +2245,12 @@ int LightMain( int argc, char **argv )
 			i++;
 		}
 		
+		else if( !strcmp( argv[ i ], "-randomsamples" ) )
+		{
+			lightRandomSamples = qtrue;
+			Sys_Printf( "Random sampling enabled\n", lightRandomSamples );
+		}
+		
 		else if( !strcmp( argv[ i ], "-samples" ) )
 		{
 			lightSamples = atoi( argv[ i + 1 ] );
