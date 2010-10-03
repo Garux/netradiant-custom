@@ -1889,12 +1889,27 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, vec3_t sampl
 		}
 	}
 }
+
+/* A mostly Gaussian-like bounded random distribution (sigma is expected standard deviation) */
+static void GaussLikeRandom(float sigma, float *x, float *y)
+{
+	float r;
+	r = Random() * 2 * Q_PI;
+	*x = sigma * 2.73861278752581783822 * cos(r);
+	*y = sigma * 2.73861278752581783822 * sin(r);
+	r = Random();
+	r = 1 - sqrt(r);
+	r = 1 - sqrt(r);
+	*x *= r;
+	*y *= r;
+}
 static void RandomSubsampleRawLuxel( rawLightmap_t *lm, trace_t *trace, vec3_t sampleOrigin, int x, int y, float bias, float *lightLuxel, float *lightDeluxel )
 {
 	int			b, mapped;
 	int			cluster;
 	vec3_t		origin, normal;
 	vec3_t		total, totaldirection;
+	float		dx, dy;
 	
 	VectorClear( total );
 	mapped = 0;
@@ -1902,9 +1917,14 @@ static void RandomSubsampleRawLuxel( rawLightmap_t *lm, trace_t *trace, vec3_t s
 	{
 		/* set origin */
 		VectorCopy( sampleOrigin, origin );
-		
+		GaussLikeRandom(bias, &dx, &dy);
+		if(dx > 1) dx = 1;
+		if(dy > 1) dy = 1;
+		if(dx < -1) dx = -1;
+		if(dy < -1) dy = -1;
+
 		/* calculate position */
-		if( !SubmapRawLuxel( lm, x, y, (bias * (2 * Random() - 1)), (bias * (2 * Random() - 1)), &cluster, origin, normal ) )
+		if( !SubmapRawLuxel( lm, x, y, dx, dy, &cluster, origin, normal ) )
 		{
 			cluster = -1;
 			continue;
