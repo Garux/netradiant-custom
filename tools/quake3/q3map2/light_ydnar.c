@@ -1912,6 +1912,7 @@ static void RandomSubsampleRawLuxel( rawLightmap_t *lm, trace_t *trace, vec3_t s
 	float		dx, dy;
 	
 	VectorClear( total );
+	VectorClear( totaldirection );
 	mapped = 0;
 	for(b = 0; b < lightSamples; ++b)
 	{
