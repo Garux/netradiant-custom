@@ -1207,7 +1207,7 @@ DrawSurfaceForFlare() - ydnar
 creates a flare draw surface
 */
 
-mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal, vec3_t color, char *flareShader, int lightStyle )
+mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal, vec3_t color, const char *flareShader, int lightStyle )
 {
 	mapDrawSurface_t	*ds;
 	

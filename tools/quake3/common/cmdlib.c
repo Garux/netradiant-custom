@@ -193,7 +193,7 @@ void SetQdirFromPath( const char *path )
       }
 			strncpy (qdir, path, c+len+count-path);
 			Sys_Printf ("qdir: %s\n", qdir);
-			for ( i = 0; i < strlen( qdir ); i++ )
+			for ( i = 0; i < (int) strlen( qdir ); i++ )
 			{
 				if ( qdir[i] == '\\' ) 
 					qdir[i] = '/';
@@ -206,7 +206,7 @@ void SetQdirFromPath( const char *path )
 				{
 					strncpy (gamedir, path, c+1-path);
 
-					for ( i = 0; i < strlen( gamedir ); i++ )
+					for ( i = 0; i < (int) strlen( gamedir ); i++ )
 					{
 						if ( gamedir[i] == '\\' ) 
 							gamedir[i] = '/';
@@ -250,7 +250,7 @@ char *ExpandArg (const char *path)
 char *ExpandPath (const char *path)
 {
 	static char full[1024];
-	if (!qdir)
+	if (!*qdir)
 		Error ("ExpandPath called without qdir set");
 	if (path[0] == '/' || path[0] == '\\' || path[1] == ':') {
 		strcpy( full, path );
@@ -263,7 +263,7 @@ char *ExpandPath (const char *path)
 char *ExpandGamePath (const char *path)
 {
 	static char full[1024];
-	if (!qdir)
+	if (!*qdir)
 		Error ("ExpandGamePath called without qdir set");
 	if (path[0] == '/' || path[0] == '\\' || path[1] == ':') {
 		strcpy( full, path );

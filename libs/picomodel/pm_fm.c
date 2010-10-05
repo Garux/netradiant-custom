@@ -66,10 +66,11 @@ typedef struct index_DUP_LUT_s
 static int _fm_canload( PM_PARAMS_CANLOAD )
 {
 	fm_t		fm;
-	unsigned char	*bb;
+	unsigned char	*bb, *bb0;
 	int		fm_file_pos;
 
-	bb = (unsigned char *) buffer;
+	bb0 = bb = (picoByte_t*) _pico_alloc(bufSize);
+	memcpy(bb, buffer, bufSize);
 
 	// Header
 	fm.fm_header_hdr = (fm_chunk_header_t *) bb;
@@ -82,6 +83,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Header Ident incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_IDENT;
 	}
 
@@ -91,6 +93,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Header Version incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_VERSION;
 	}
 
@@ -105,6 +108,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Skin Ident incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_IDENT;
 	}
 
@@ -114,6 +118,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Skin Version incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_VERSION;
 	}
 
@@ -128,6 +133,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM ST Ident incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_IDENT;
 	}
 
@@ -137,6 +143,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM ST Version incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_VERSION;
 	}
 
@@ -151,6 +158,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Tri Ident incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_IDENT;
 	}
 
@@ -160,6 +168,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Tri Version incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_VERSION;
 	}
 
@@ -174,6 +183,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Frame Ident incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_IDENT;
 	}
 
@@ -183,6 +193,7 @@ static int _fm_canload( PM_PARAMS_CANLOAD )
 #ifdef FM_DBG
 		_pico_printf( PICO_WARNING, "FM Frame Version incorrect\n");
 #endif
+		_pico_free(bb0);
 		return PICO_PMV_ERROR_VERSION;
 	}
 
@@ -211,7 +222,7 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	fm_xyz_st_t		*triangle;
 	fm_frame_t		*frame;
 
-	picoByte_t      *bb;
+	picoByte_t      *bb, *bb0;
 	picoModel_t	*picoModel;
 	picoSurface_t	*picoSurface;
 	picoShader_t	*picoShader;
@@ -220,7 +231,8 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	picoColor_t	color;
 	
 
-	bb = (picoByte_t*) buffer;
+	bb0 = bb = (picoByte_t*) _pico_alloc(bufSize);
+	memcpy(bb, buffer, bufSize);
 
 	// Header Header
 	fm.fm_header_hdr = (fm_chunk_header_t *) bb;
@@ -228,12 +240,14 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	if( (strcmp(fm.fm_header_hdr->ident, FM_HEADERCHUNKNAME))  )
 	{
 		_pico_printf( PICO_WARNING, "FM Header Ident incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
 	if( _pico_little_long( fm.fm_header_hdr->version ) != FM_HEADERCHUNKVER )
 	{
 		_pico_printf( PICO_WARNING, "FM Header Version incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -243,12 +257,14 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	if( (strcmp(fm.fm_skin_hdr->ident, FM_SKINCHUNKNAME)) )
 	{
 		_pico_printf( PICO_WARNING, "FM Skin Ident incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
 	if( _pico_little_long( fm.fm_skin_hdr->version ) != FM_SKINCHUNKVER )
 	{
 		_pico_printf( PICO_WARNING, "FM Skin Version incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -258,12 +274,14 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	if( (strcmp(fm.fm_st_hdr->ident, FM_STCOORDCHUNKNAME)) )
 	{
 		_pico_printf( PICO_WARNING, "FM ST Ident incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
 	if( _pico_little_long( fm.fm_st_hdr->version ) != FM_STCOORDCHUNKVER )
 	{
 		_pico_printf( PICO_WARNING, "FM ST Version incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -273,12 +291,14 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	if( (strcmp(fm.fm_tri_hdr->ident, FM_TRISCHUNKNAME)) )
 	{
 		_pico_printf( PICO_WARNING, "FM Tri Ident incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
 	if( _pico_little_long( fm.fm_tri_hdr->version ) != FM_TRISCHUNKVER )
 	{
 		_pico_printf( PICO_WARNING, "FM Tri Version incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -288,12 +308,14 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	if( (strcmp(fm.fm_frame_hdr->ident, FM_FRAMESCHUNKNAME)) )
 	{
 		_pico_printf( PICO_WARNING, "FM Frame Ident incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
 	if( _pico_little_long( fm.fm_frame_hdr->version ) != FM_FRAMESCHUNKVER )
 	{
 		_pico_printf( PICO_WARNING, "FM Frame Version incorrect\n");
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -325,12 +347,14 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	if( fm_head->numFrames < 1 )
 	{
 		_pico_printf( PICO_ERROR, "%s has 0 frames!", fileName );
+		_pico_free(bb0);
 		return NULL;
 	}
 	
 	if( frameNum < 0 || frameNum >= fm_head->numFrames )
 	{
 		_pico_printf( PICO_ERROR, "Invalid or out-of-range FM frame specified" );
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -371,7 +395,7 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 		texCoord->t = _pico_little_short( texCoord[i].t );
 	}
 	// set Skin Name
-	strncpy(skinname, (unsigned char *) fm.fm_skin, FM_SKINPATHSIZE );
+	strncpy(skinname, (const char *) fm.fm_skin, FM_SKINPATHSIZE );
 
 #ifdef FM_VERBOSE_DBG
 	// Print out md2 values
@@ -387,6 +411,7 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	if( picoModel == NULL )
 	{
 		_pico_printf( PICO_ERROR, "Unable to allocate a new model" );
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -402,6 +427,7 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	{
 		_pico_printf( PICO_ERROR, "Unable to allocate a new model surface" );
 		PicoFreeModel( picoModel );
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -413,6 +439,7 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	{
 		_pico_printf( PICO_ERROR, "Unable to allocate a new model shader" );
 		PicoFreeModel( picoModel );
+		_pico_free(bb0);
 		return NULL;
 	}
 
@@ -644,6 +671,7 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	_pico_free(p_index_LUT_DUPS);
 
 	/* return the new pico model */
+	_pico_free(bb0);
 	return picoModel;
 
 }

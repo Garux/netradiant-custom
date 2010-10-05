@@ -221,11 +221,8 @@ static int _ase_canload( PM_PARAMS_CANLOAD )
 	if( bufSize < 80 )
 		return PICO_PMV_ERROR_SIZE;
 	
-	/* keep the friggin compiler happy */
-	*fileName = *fileName;
-	
 	/* create pico parser */
-	p = _pico_new_parser( (picoByte_t*) buffer, bufSize );
+	p = _pico_new_parser( (const picoByte_t*) buffer, bufSize );
 	if( p == NULL )
 		return PICO_PMV_ERROR_MEMORY;
 	
@@ -552,7 +549,7 @@ static picoModel_t *_ase_load( PM_PARAMS_LOAD )
 		return NULL; \
 	}
 	/* create a new pico parser */
-	p = _pico_new_parser( (picoByte_t *)buffer,bufSize );
+	p = _pico_new_parser( (const picoByte_t *)buffer,bufSize );
 	if (p == NULL) return NULL;
 
 	/* create a new pico model */
@@ -868,7 +865,7 @@ static picoModel_t *_ase_load( PM_PARAMS_LOAD )
 		else if( !_pico_stricmp( p->token, "*material" ) )
 		{
 			aseSubMaterial_t*	subMaterial = NULL;
-			picoShader_t		*shader;
+			picoShader_t		*shader = NULL;
 			int					level = 1, index;
 			char				materialName[ 1024 ];
 			float				transValue = 0.0f, shineValue = 1.0f;

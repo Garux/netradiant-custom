@@ -1116,6 +1116,8 @@ int LightContributionToSample( trace_t *trace )
 		/* return to sender */
 		return 1;
 	}
+	else
+		Error("Light of undefined type!");
 
 	/* VorteX: set noShadow color */
 	VectorScale(light->color, add, trace->colorNoShadow);
@@ -1830,7 +1832,7 @@ void LightWorld( void )
 	vec3_t		color;
 	float		f;
 	int			b, bt;
-	qboolean	minVertex, minGrid, ps;
+	qboolean	minVertex, minGrid;
 	const char	*value;
 	
 

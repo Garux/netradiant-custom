@@ -417,21 +417,18 @@ by one structure only.
 
 static int _mdc_canload( PM_PARAMS_CANLOAD )
 {
-	mdc_t	*mdc;
+	const mdc_t	*mdc;
 	
-
-	/* to keep the compiler happy */
-	*fileName = *fileName;
 	
 	/* sanity check */
-	if( bufSize < ( sizeof( *mdc ) * 2) )
+	if( (size_t) bufSize < ( sizeof( *mdc ) * 2) )
 		return PICO_PMV_ERROR_SIZE;
 	
 	/* set as mdc */
-	mdc	= (mdc_t*) buffer;
+	mdc	= (const mdc_t*) buffer;
 	
 	/* check mdc magic */
-	if( *((int*) mdc->magic) != *((int*) MDC_MAGIC) ) 
+	if( *((const int*) mdc->magic) != *((const int*) MDC_MAGIC) ) 
 		return PICO_PMV_ERROR_IDENT;
 	
 	/* check mdc version */
@@ -452,7 +449,7 @@ loads a Return to Castle Wolfenstein mdc model file.
 static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 {
 	int					i, j;
-	picoByte_t			*bb;
+	picoByte_t			*bb, *bb0;
 	mdc_t				*mdc;
 	mdcSurface_t		*surface;
 	mdcShader_t			*shader;
@@ -460,8 +457,8 @@ static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 	mdcFrame_t			*frame;
 	mdcTriangle_t		*triangle;
 	mdcVertex_t			*vertex;
-	mdcXyzCompressed_t	*vertexComp;
-	short				*mdcShort, *mdcCompVert;
+	mdcXyzCompressed_t	*vertexComp = NULL;
+	short				*mdcShort, *mdcCompVert = NULL;
 	double				lat, lng;
 	
 	picoModel_t			*picoModel;
@@ -478,13 +475,15 @@ static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 
 
 	/* set as mdc */
-	bb = (picoByte_t*) buffer;
-	mdc	= (mdc_t*) buffer;
+	bb0 = bb = (picoByte_t*) _pico_alloc(bufSize);
+	memcpy(bb, buffer, bufSize);
+	mdc	= (mdc_t*) bb;
 	
 	/* check ident and version */
 	if( *((int*) mdc->magic) != *((int*) MDC_MAGIC) || _pico_little_long( mdc->version ) != MDC_VERSION )
 	{
 		/* not an mdc file (todo: set error) */
+		_pico_free(bb0);
 		return NULL;
 	}
 	
@@ -504,12 +503,14 @@ static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 	if( mdc->numFrames < 1 )
 	{
 		_pico_printf( PICO_ERROR, "MDC with 0 frames" );
+		_pico_free(bb0);
 		return NULL;
 	}
 	
 	if( frameNum < 0 || frameNum >= mdc->numFrames )
 	{
 		_pico_printf( PICO_ERROR, "Invalid or out-of-range MDC frame specified" );
+		_pico_free(bb0);
 		return NULL;
 	}
 	
@@ -608,6 +609,7 @@ static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 	if( picoModel == NULL )
 	{
 		_pico_printf( PICO_ERROR, "Unable to allocate a new model" );
+		_pico_free(bb0);
 		return NULL;
 	}
 	
@@ -629,6 +631,7 @@ static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 		{
 			_pico_printf( PICO_ERROR, "Unable to allocate a new model surface" );
 			PicoFreeModel( picoModel ); /* sea */
+			_pico_free(bb0);
 			return NULL;
 		}
 		
@@ -644,6 +647,7 @@ static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 		{
 			_pico_printf( PICO_ERROR, "Unable to allocate a new model shader" );
 			PicoFreeModel( picoModel );
+			_pico_free(bb0);
 			return NULL;
 		}
 		
@@ -728,6 +732,7 @@ static picoModel_t *_mdc_load( PM_PARAMS_LOAD )
 	}
 	
 	/* return the new pico model */
+	_pico_free(bb0);
 	return picoModel;
 }
 

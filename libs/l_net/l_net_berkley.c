@@ -41,8 +41,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <netdb.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <stdio.h>
 #define SOCKET_ERROR -1
 #define INVALID_SOCKET -1
 
@@ -112,7 +116,7 @@ ERROR_STRUCT errlist[] = {
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-char *WINS_ErrorMessage(int error)
+const char *WINS_ErrorMessage(int error)
 {
     int search = 0;
 
@@ -121,7 +125,7 @@ char *WINS_ErrorMessage(int error)
 	 for (search = 0; errlist[search].errstr; search++)
 	 {
 		if (error == errlist[search].errnum)
-				return (char *)errlist[search].errstr;
+				return errlist[search].errstr;
 	 } //end for
 
     return "Unknown error";
@@ -139,7 +143,6 @@ int WINS_Init(void)
 	char	buff[MAXHOSTNAMELEN];
 	struct sockaddr_s addr;
 	char	*p;
-	int		r;
 /* 
  linux doesn't have anything to initialize for the net
  "Windows .. built for the internet .. the internet .. built with unix" 
@@ -365,7 +368,7 @@ int WINS_Listen(int socket)
 //===========================================================================
 int WINS_Accept(int socket, struct sockaddr_s *addr)
 {
-	int addrlen = sizeof (struct sockaddr_s);
+	socklen_t addrlen = sizeof (struct sockaddr_s);
 	int newsocket;
 	qboolean _true = 1;
 
@@ -496,7 +499,7 @@ int WINS_CheckNewConnections(void)
 //===========================================================================
 int WINS_Read(int socket, byte *buf, int len, struct sockaddr_s *addr)
 {
-	int addrlen = sizeof (struct sockaddr_s);
+	socklen_t addrlen = sizeof (struct sockaddr_s);
 	int ret;
 
 	if (addr)
@@ -583,6 +586,7 @@ int WINS_Broadcast (int socket, byte *buf, int len)
 int WINS_Write(int socket, byte *buf, int len, struct sockaddr_s *addr)
 {
 	int ret, written;
+	ret = 0;
 
 	if (addr)
 	{
@@ -670,7 +674,7 @@ int WINS_StringToAddr(char *string, struct sockaddr_s *addr)
 //===========================================================================
 int WINS_GetSocketAddr(int socket, struct sockaddr_s *addr)
 {
-	int addrlen = sizeof(struct sockaddr_s);
+	socklen_t addrlen = sizeof(struct sockaddr_s);
 	unsigned int a;
 
 	memset(addr, 0, sizeof(struct sockaddr_s));

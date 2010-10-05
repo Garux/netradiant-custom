@@ -136,19 +136,13 @@ ERROR_STRUCT errlist[] = {
     {-1,                 NULL}
 };
 
-#ifdef _DEBUG
-void WinPrint(char *str, ...);
-#else
-void WinPrint(char *str, ...);
-#endif
-
 //===========================================================================
 //
 // Parameter:				-
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-char *WINS_ErrorMessage(int error)
+const char *WINS_ErrorMessage(int error)
 {
     int search = 0;
 

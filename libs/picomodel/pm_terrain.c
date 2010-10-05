@@ -302,11 +302,8 @@ static int _terrain_canload( PM_PARAMS_CANLOAD )
 	picoParser_t	*p;
 	
 	
-	/* keep the friggin compiler happy */
-	*fileName = *fileName;
-	
 	/* create pico parser */
-	p = _pico_new_parser( (picoByte_t*) buffer, bufSize );
+	p = _pico_new_parser( (const picoByte_t*) buffer, bufSize );
 	if( p == NULL )
 		return PICO_PMV_ERROR_MEMORY;
 	
@@ -355,11 +352,8 @@ static picoModel_t *_terrain_load( PM_PARAMS_LOAD )
 	picoColor_t		color;
 	
 	
-	/* keep the friggin compiler happy */
-	*fileName = *fileName;
-	
 	/* create pico parser */
-	p = _pico_new_parser( (picoByte_t*) buffer, bufSize );
+	p = _pico_new_parser( (const picoByte_t*) buffer, bufSize );
 	if( p == NULL )
 		return NULL;
 	

@@ -73,12 +73,14 @@ typedef struct socket_s
 	struct socket_s *prev, *next;	//prev and next socket in a list
 } socket_t;
 
+void WinPrint(const char *format, ...);
+
 //compare addresses
 int Net_AddressCompare(address_t *addr1, address_t *addr2);
 //gives the address of a socket
 void Net_SocketToAddress(socket_t *sock, address_t *address);
 //converts a string to an address
-void Net_StringToAddress(char *string, address_t *address);
+void Net_StringToAddress(const char *string, address_t *address);
 //set the address ip port
 void Net_SetAddressPort(address_t *address, int port);
 //send a message to the given socket
@@ -118,7 +120,7 @@ float NMSG_ReadFloat(netmessage_t *msg);
 char *NMSG_ReadString(netmessage_t *msg);
 
 //++timo FIXME: the WINS_ things are not necessary, they can be made portable arther easily
-char *WINS_ErrorMessage(int error);
+const char *WINS_ErrorMessage(int error);
 
 #ifdef __cplusplus
 }

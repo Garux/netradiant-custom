@@ -340,12 +340,12 @@ void ProcessWorldModel( void )
 		Sys_FPrintf( SYS_NOXML, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
 		polyline = LeakFile( tree );
-		leaknode = xmlNewNode( NULL, "message" );
-		xmlNodeSetContent( leaknode, "MAP LEAKED\n" );
+		leaknode = xmlNewNode( NULL, (xmlChar*)"message" );
+		xmlNodeSetContent( leaknode, (xmlChar*)"MAP LEAKED\n" );
 		xmlAddChild( leaknode, polyline );
 		level[0] = (int) '0' + SYS_ERR;
 		level[1] = 0;
-		xmlSetProp( leaknode, "level", (char*) &level );
+		xmlSetProp( leaknode, (xmlChar*)"level", (xmlChar*) &level );
 		xml_SendNode( leaknode );
 		if( leaktest )
 		{
@@ -458,7 +458,7 @@ void ProcessWorldModel( void )
 					VectorSet( normal, 0, 0, -1 );
 				
 				/* create the flare surface (note shader defaults automatically) */
-				DrawSurfaceForFlare( mapEntityNum, origin, normal, color, (char*) flareShader, lightStyle );
+				DrawSurfaceForFlare( mapEntityNum, origin, normal, color, flareShader, lightStyle );
 			}
 		}
 	}

@@ -291,8 +291,8 @@ static int CompareLightSurface( const void *a, const void *b )
 	
 	
 	/* get shaders */
-	asi = surfaceInfos[ *((int*) a) ].si;
-	bsi = surfaceInfos[ *((int*) b) ].si;
+	asi = surfaceInfos[ *((const int*) a) ].si;
+	bsi = surfaceInfos[ *((const int*) b) ].si;
 	
 	/* dummy check */
 	if( asi == NULL )
@@ -861,8 +861,8 @@ static int CompareSurfaceInfo( const void *a, const void *b )
 	
 
 	/* get surface info */
-	aInfo = &surfaceInfos[ *((int*) a) ];
-	bInfo = &surfaceInfos[ *((int*) b) ];
+	aInfo = &surfaceInfos[ *((const int*) a) ];
+	bInfo = &surfaceInfos[ *((const int*) b) ];
 	
 	/* model first */
 	if( aInfo->modelindex < bInfo->modelindex )
@@ -2220,8 +2220,8 @@ static int CompareRawLightmap( const void *a, const void *b )
 	
 	
 	/* get lightmaps */
-	alm = &rawLightmaps[ *((int*) a) ];
-	blm = &rawLightmaps[ *((int*) b) ];
+	alm = &rawLightmaps[ *((const int*) a) ];
+	blm = &rawLightmaps[ *((const int*) b) ];
 	
 	/* get min number of surfaces */
 	min = (alm->numLightSurfaces < blm->numLightSurfaces ? alm->numLightSurfaces : blm->numLightSurfaces);
@@ -2281,8 +2281,8 @@ void StoreSurfaceLightmaps( void )
 	char				dirname[ 1024 ], filename[ 1024 ];
 	shaderInfo_t		*csi;
 	char				lightmapName[ 128 ];
-	char				*rgbGenValues[ 256 ];
-	char				*alphaGenValues[ 256 ];
+	const char				*rgbGenValues[ 256 ];
+	const char				*alphaGenValues[ 256 ];
 	
 	
 	/* note it */
@@ -3170,7 +3170,7 @@ void StoreSurfaceLightmaps( void )
 				if( rgbGenValues[ style ] == NULL )
 				{
 					sprintf( key, "_style%drgbgen", style );
-					rgbGenValues[ style ] = (char*) ValueForKey( &entities[ 0 ], key );
+					rgbGenValues[ style ] = ValueForKey( &entities[ 0 ], key );
 					if( rgbGenValues[ style ][ 0 ] == '\0' )
 						rgbGenValues[ style ] = "wave noise 0.5 1 0 5.37";
 				}
@@ -3184,7 +3184,7 @@ void StoreSurfaceLightmaps( void )
 				if( alphaGenValues[ style ] == NULL )
 				{
 					sprintf( key, "_style%dalphagen", style );
-					alphaGenValues[ style ] = (char*) ValueForKey( &entities[ 0 ], key );
+					alphaGenValues[ style ] = ValueForKey( &entities[ 0 ], key );
 				}
 				if( alphaGenValues[ style ][ 0 ] != '\0' )
 					sprintf( alphaGen, "\t\talphaGen %s // style %d\n", alphaGenValues[ style ], style );

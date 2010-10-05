@@ -79,7 +79,7 @@ static int _lwo_canload( PM_PARAMS_CANLOAD )
 	int ret;
 
 	/* create a new pico memorystream */
-	s = _pico_new_memstream( (picoByte_t *)buffer, bufSize );
+	s = _pico_new_memstream( (const picoByte_t *)buffer, bufSize );
 	if (s == NULL)
 	{
 		return PICO_PMV_ERROR_MEMORY;
@@ -139,7 +139,7 @@ static picoModel_t *_lwo_load( PM_PARAMS_LOAD )
 	}
 
 	/* create a new pico memorystream */
-	s = _pico_new_memstream( (picoByte_t *)buffer, bufSize );
+	s = _pico_new_memstream( (const picoByte_t *)buffer, bufSize );
 	if (s == NULL)
 	{
 		return NULL;

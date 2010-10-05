@@ -1626,20 +1626,21 @@ void m4_submat( m4x4_t mr, m3x3_t mb, int i, int j )
   {
     if ( ti < i )
       idst = ti;
+    else if ( ti > i )
+      idst = ti-1;
     else
-      if ( ti > i )
-        idst = ti-1;
+      continue;
       
       for ( tj = 0; tj < 4; tj++ )
       {
         if ( tj < j )
           jdst = tj;
+        else if ( tj > j )
+          jdst = tj-1;
         else
-          if ( tj > j )
-            jdst = tj-1;
+          continue;
           
-          if ( ti != i && tj != j )
-            mb[idst*3 + jdst] = mr[ti*4 + tj ];
+        mb[idst*3 + jdst] = mr[ti*4 + tj ];
       }
   }
 }

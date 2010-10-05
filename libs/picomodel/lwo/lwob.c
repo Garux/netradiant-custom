@@ -70,7 +70,7 @@ static int add_clip( char *s, lwClip **clist, int *nclips )
    clip->saturation.val = 1.0f;
    clip->gamma.val = 1.0f;
 
-   if ( p = strstr( s, "(sequence)" )) {
+   if ((p = strstr( s, "(sequence)" ))) {
       p[ -1 ] = 0;
       clip->type = ID_ISEQ;
       clip->source.seq.prefix = s;
@@ -81,7 +81,7 @@ static int add_clip( char *s, lwClip **clist, int *nclips )
       clip->source.still.name = s;
    }
 
-   *nclips++;
+   (*nclips)++;
    clip->index = *nclips;
 
    lwListAdd( (void *) clist, clip );
@@ -188,8 +188,8 @@ Read an lwSurface from an LWOB file.
 lwSurface *lwGetSurface5( picoMemStream_t *fp, int cksize, lwObject *obj )
 {
    lwSurface *surf;
-   lwTexture *tex;
-   lwPlugin *shdr;
+   lwTexture *tex = NULL;
+   lwPlugin *shdr = NULL;
    char *s;
    float v[ 3 ];
    unsigned int id, flags;
@@ -352,11 +352,14 @@ lwSurface *lwGetSurface5( picoMemStream_t *fp, int cksize, lwObject *obj )
             break;
 
          case ID_TFLG:
+            if(!tex) goto Fail;
             flags = getU2( fp );
 
+            i = -1;
             if ( flags & 1 ) i = 0;
             if ( flags & 2 ) i = 1;
             if ( flags & 4 ) i = 2;
+            if(i < 0) goto Fail;
             tex->axis = i;
             if ( tex->type == ID_IMAP )
                tex->param.imap.axis = i;
@@ -373,21 +376,25 @@ lwSurface *lwGetSurface5( picoMemStream_t *fp, int cksize, lwObject *obj )
             break;
 
          case ID_TSIZ:
+            if(!tex) goto Fail;
             for ( i = 0; i < 3; i++ )
                tex->tmap.size.val[ i ] = getF4( fp );
             break;
 
          case ID_TCTR:
+            if(!tex) goto Fail;
             for ( i = 0; i < 3; i++ )
                tex->tmap.center.val[ i ] = getF4( fp );
             break;
 
          case ID_TFAL:
+            if(!tex) goto Fail;
             for ( i = 0; i < 3; i++ )
                tex->tmap.falloff.val[ i ] = getF4( fp );
             break;
 
          case ID_TVEL:
+            if(!tex) goto Fail;
             for ( i = 0; i < 3; i++ )
                v[ i ] = getF4( fp );
             tex->tmap.center.eindex = add_tvel( tex->tmap.center.val, v,
@@ -395,44 +402,53 @@ lwSurface *lwGetSurface5( picoMemStream_t *fp, int cksize, lwObject *obj )
             break;
 
          case ID_TCLR:
+            if(!tex) goto Fail;
             if ( tex->type == ID_PROC )
                for ( i = 0; i < 3; i++ )
                   tex->param.proc.value[ i ] = getU1( fp ) / 255.0f;
             break;
 
          case ID_TVAL:
+            if(!tex) goto Fail;
             tex->param.proc.value[ 0 ] = getI2( fp ) / 256.0f;
             break;
 
          case ID_TAMP:
+            if(!tex) goto Fail;
             if ( tex->type == ID_IMAP )
                tex->param.imap.amplitude.val = getF4( fp );
             break;
 
          case ID_TIMG:
+            if(!tex) goto Fail;
             s = getS0( fp );
             tex->param.imap.cindex = add_clip( s, &obj->clip, &obj->nclips );
             break;
 
          case ID_TAAS:
+            if(!tex) goto Fail;
             tex->param.imap.aa_strength = getF4( fp );
             tex->param.imap.aas_flags = 1;
             break;
 
          case ID_TREF:
+            if(!tex) goto Fail;
             tex->tmap.ref_object = getbytes( fp, sz );
             break;
 
          case ID_TOPC:
+            if(!tex) goto Fail;
             tex->opacity.val = getF4( fp );
             break;
 
          case ID_TFP0:
+            if(!tex) goto Fail;
             if ( tex->type == ID_IMAP )
                tex->param.imap.wrapw.val = getF4( fp );
             break;
 
          case ID_TFP1:
+            if(!tex) goto Fail;
             if ( tex->type == ID_IMAP )
                tex->param.imap.wraph.val = getF4( fp );
             break;
@@ -446,6 +462,7 @@ lwSurface *lwGetSurface5( picoMemStream_t *fp, int cksize, lwObject *obj )
             break;
 
          case ID_SDAT:
+            if(!shdr) goto Fail;
             shdr->data = getbytes( fp, sz );
             break;
 
@@ -583,7 +600,7 @@ to diagnose the cause.
 If you don't need this information, failID and failpos can be NULL.
 ====================================================================== */
 
-lwObject *lwGetObject5( char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
+lwObject *lwGetObject5( const char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
 {
    lwObject *object;
    lwLayer *layer;
@@ -665,7 +682,7 @@ lwObject *lwGetObject5( char *filename, picoMemStream_t *fp, unsigned int *failI
 
       /* end of the file? */
 
-      if ( formsize <= _pico_memstream_tell( fp ) - 8 ) break;
+      if ( formsize <= (unsigned int) (_pico_memstream_tell( fp ) - 8) ) break;
 
       /* get the next chunk header */
 
@@ -693,7 +710,7 @@ Fail:
    return NULL;
 }
 
-int lwValidateObject5( char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
+int lwValidateObject5( const char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
 {
    unsigned int id, formsize, type;
 

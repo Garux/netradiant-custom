@@ -1154,13 +1154,16 @@ void MapRawLightmap( int rawLightmapNum )
 						if( MapQuad( lm, info, dv ) )
 							continue;
 						
-						/* get drawverts and map first triangle */
-						MapTriangle( lm, info, dv, mapNonAxial );
-						
-						/* get drawverts and map second triangle */
-						dv[ 1 ] = &verts[ pw[ r + 2 ] ];
-						dv[ 2 ] = &verts[ pw[ r + 3 ] ];
-						MapTriangle( lm, info, dv, mapNonAxial );
+						for( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
+						{
+							/* get drawverts and map first triangle */
+							MapTriangle( lm, info, dv, mapNonAxial );
+							
+							/* get drawverts and map second triangle */
+							dv[ 1 ] = &verts[ pw[ r + 2 ] ];
+							dv[ 2 ] = &verts[ pw[ r + 3 ] ];
+							MapTriangle( lm, info, dv, mapNonAxial );
+						}
 					}
 				}
 				
@@ -1714,7 +1717,9 @@ static qboolean SubmapRawLuxel( rawLightmap_t *lm, int x, int y, float bx, float
 		//%	normal2 = SUPER_NORMAL( x, y );
 	}
 	else
-		Sys_Printf( "WARNING: Spurious lightmap S vector\n" );
+	{
+		Error( "Spurious lightmap S vector\n" );
+	}
 	
 	VectorSubtract( origin2, origin, originVecs[ 0 ] );
 	//%	VectorSubtract( normal2, normal, normalVecs[ 0 ] );
@@ -1974,8 +1979,9 @@ illuminates the luxels
 
 void IlluminateRawLightmap( int rawLightmapNum )
 {
-	int					i, t, x, y, sx, sy, size, llSize, ldSize, luxelFilterRadius, lightmapNum;
+	int					i, t, x, y, sx, sy, size, luxelFilterRadius, lightmapNum;
 	int					*cluster, *cluster2, mapped, lighted, totalLighted;
+	size_t					llSize, ldSize;
 	rawLightmap_t		*lm;
 	surfaceInfo_t		*info;
 	qboolean			filterColor, filterDir;
@@ -2870,16 +2876,16 @@ void IlluminateVertexes( int num )
 					radVertLuxel[ 2 ] <= ambientColor[ 2 ] )
 				{
 					/* nudge the sample point around a bit */
-					for( x = 0; x < 4; x++ )
+					for( x = 0; x < 5; x++ )
 					{
 						/* two's complement 0, 1, -1, 2, -2, etc */
 						x1 = ((x >> 1) ^ (x & 1 ? -1 : 0)) + (x & 1);
 						
-						for( y = 0; y < 4; y++ )
+						for( y = 0; y < 5; y++ )
 						{
 							y1 = ((y >> 1) ^ (y & 1 ? -1 : 0)) + (y & 1);
 							
-							for( z = 0; z < 4; z++ )
+							for( z = 0; z < 5; z++ )
 							{
 								z1 = ((z >> 1) ^ (z & 1 ? -1 : 0)) + (z & 1);
 								
@@ -2892,6 +2898,21 @@ void IlluminateVertexes( int num )
 								trace.cluster = ClusterForPointExtFilter( origin, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
 								if( trace.cluster < 0 )
 									continue;
+
+								/* r7 dirt */
+								if( dirty && !bouncing )
+									dirt = DirtForSample( &trace );
+								else
+									dirt = 1.0f;
+
+								/* jal: floodlight */
+								floodLightAmount = 0.0f;
+								VectorClear( floodColor );
+								if( floodlighty && !bouncing )
+								{
+									floodLightAmount = floodlightIntensity * FloodLightForSample( &trace, floodlightDistance, floodlight_lowquality );
+									VectorScale( floodlightRGB, floodLightAmount, floodColor );
+								}
 															
 								/* trace */
 								LightingAtSample( &trace, ds->vertexStyles, colors );
@@ -3503,7 +3524,7 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 	int			i, x, y, z, x1, y1, z1;
 	light_t		*light, *light2, **owner;
 	bspLeaf_t	*leaf;
-	vec3_t		origin, dir, mins, maxs, nullVector = { 0, 0, 0 };
+	vec3_t		origin, dir, mins, maxs;
 	float		radius, intensity;
 	light_t		*buckets[ 256 ];
 	
@@ -3616,6 +3637,7 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 					/* check for fast mode */
 					if( !(light->flags & LIGHT_FAST) && !(light->flags & LIGHT_FAST_TEMP) )
 						light->envelope = MAX_WORLD_COORD * 8.0f;
+					intensity = light->photons; /* hopefully not used */
 				}
 				else
 				{

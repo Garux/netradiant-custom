@@ -44,7 +44,7 @@ Read an ENVL chunk from an LWO2 file.
 lwEnvelope *lwGetEnvelope( picoMemStream_t *fp, int cksize )
 {
    lwEnvelope *env;
-   lwKey *key;
+   lwKey *key = NULL;
    lwPlugin *plug;
    unsigned int id;
    unsigned short sz;

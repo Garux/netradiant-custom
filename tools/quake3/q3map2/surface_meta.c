@@ -771,6 +771,7 @@ void StripFaceSurface( mapDrawSurface_t *ds )
 			Error( "MAX_INDEXES exceeded for surface (%d > %d) (%d verts)", numIndexes, MAX_INDEXES, ds->numVerts );
 		
 		/* try all possible orderings of the points looking for a non-degenerate strip order */
+		ni = 0;
 		for( r = 0; r < ds->numVerts; r++ )
 		{
 			/* set rotation */
@@ -937,50 +938,6 @@ void MakeEntityMetaTriangles( entity_t *e )
 	
 	/* tidy things up */
 	TidyEntitySurfaces( e );
-}
-
-
-
-/*
-PointTriangleIntersect()
-assuming that all points lie in plane, determine if pt
-is inside the triangle abc
-code originally (c) 2001 softSurfer (www.softsurfer.com)
-*/
-
-#define MIN_OUTSIDE_EPSILON		-0.01f
-#define MAX_OUTSIDE_EPSILON		1.01f
-
-static qboolean PointTriangleIntersect( vec3_t pt, vec4_t plane, vec3_t a, vec3_t b, vec3_t c, vec3_t bary )
-{
-	vec3_t	u, v, w;
-	float	uu, uv, vv, wu, wv, d;
-	
-	
-	/* make vectors */
-	VectorSubtract( b, a, u );
-	VectorSubtract( c, a, v );
-	VectorSubtract( pt, a, w );
-	
-	/* more setup */
-	uu = DotProduct( u, u );
-	uv = DotProduct( u, v );
-	vv = DotProduct( v, v );
-	wu = DotProduct( w, u );
-	wv = DotProduct( w, v );
-	d = uv * uv - uu * vv;
-	
-	/* calculate barycentric coordinates */
-	bary[ 1 ] = (uv * wv - vv * wu) / d;
-	if( bary[ 1 ] < MIN_OUTSIDE_EPSILON || bary[ 1 ] > MAX_OUTSIDE_EPSILON )
-		return qfalse;
-	bary[ 2 ] = (uv * wv - uu * wv) / d;
-	if( bary[ 2 ] < MIN_OUTSIDE_EPSILON || bary[ 2 ] > MAX_OUTSIDE_EPSILON )
-		return qfalse;
-	bary[ 0 ] = 1.0f - (bary[ 1 ] + bary[ 2 ]);
-	
-	/* point is in triangle */
-	return qtrue;
 }
 
 
@@ -1444,7 +1401,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 {
 	int					i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
 	float				lmMax;
-	vec3_t				mins, maxs, p;
+	vec3_t				mins, maxs;
 	qboolean			inTexRange, es, et;
 	mapDrawSurface_t	old;
 	
@@ -1807,37 +1764,37 @@ static int CompareMetaTriangles( const void *a, const void *b )
 	
 	
 	/* shader first */
-	if( ((metaTriangle_t*) a)->si < ((metaTriangle_t*) b)->si )
+	if( ((const metaTriangle_t*) a)->si < ((const metaTriangle_t*) b)->si )
 		return 1;
-	else if( ((metaTriangle_t*) a)->si > ((metaTriangle_t*) b)->si )
+	else if( ((const metaTriangle_t*) a)->si > ((const metaTriangle_t*) b)->si )
 		return -1;
 	
 	/* then fog */
-	else if( ((metaTriangle_t*) a)->fogNum < ((metaTriangle_t*) b)->fogNum )
+	else if( ((const metaTriangle_t*) a)->fogNum < ((const metaTriangle_t*) b)->fogNum )
 		return 1;
-	else if( ((metaTriangle_t*) a)->fogNum > ((metaTriangle_t*) b)->fogNum )
+	else if( ((const metaTriangle_t*) a)->fogNum > ((const metaTriangle_t*) b)->fogNum )
 		return -1;
 	
 	/* then plane */
 	#if 0
-		else if( npDegrees == 0.0f && ((metaTriangle_t*) a)->si->nonplanar == qfalse &&
-			((metaTriangle_t*) a)->planeNum >= 0 && ((metaTriangle_t*) a)->planeNum >= 0 )
+		else if( npDegrees == 0.0f && ((const metaTriangle_t*) a)->si->nonplanar == qfalse &&
+			((const metaTriangle_t*) a)->planeNum >= 0 && ((const metaTriangle_t*) a)->planeNum >= 0 )
 		{
-			if( ((metaTriangle_t*) a)->plane[ 3 ] < ((metaTriangle_t*) b)->plane[ 3 ] )
+			if( ((const metaTriangle_t*) a)->plane[ 3 ] < ((const metaTriangle_t*) b)->plane[ 3 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 3 ] > ((metaTriangle_t*) b)->plane[ 3 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 3 ] > ((const metaTriangle_t*) b)->plane[ 3 ] )
 				return -1;
-			else if( ((metaTriangle_t*) a)->plane[ 0 ] < ((metaTriangle_t*) b)->plane[ 0 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 0 ] < ((const metaTriangle_t*) b)->plane[ 0 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 0 ] > ((metaTriangle_t*) b)->plane[ 0 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 0 ] > ((const metaTriangle_t*) b)->plane[ 0 ] )
 				return -1;
-			else if( ((metaTriangle_t*) a)->plane[ 1 ] < ((metaTriangle_t*) b)->plane[ 1 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 1 ] < ((const metaTriangle_t*) b)->plane[ 1 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 1 ] > ((metaTriangle_t*) b)->plane[ 1 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 1 ] > ((const metaTriangle_t*) b)->plane[ 1 ] )
 				return -1;
-			else if( ((metaTriangle_t*) a)->plane[ 2 ] < ((metaTriangle_t*) b)->plane[ 2 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 2 ] < ((const metaTriangle_t*) b)->plane[ 2 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 2 ] > ((metaTriangle_t*) b)->plane[ 2 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 2 ] > ((const metaTriangle_t*) b)->plane[ 2 ] )
 				return -1;
 		}
 	#endif
@@ -1849,8 +1806,8 @@ static int CompareMetaTriangles( const void *a, const void *b )
 	VectorSet( bMins, 999999, 999999, 999999 );
 	for( i = 0; i < 3; i++ )
 	{
-		av = ((metaTriangle_t*) a)->indexes[ i ];
-		bv = ((metaTriangle_t*) b)->indexes[ i ];
+		av = ((const metaTriangle_t*) a)->indexes[ i ];
+		bv = ((const metaTriangle_t*) b)->indexes[ i ];
 		for( j = 0; j < 3; j++ )
 		{
 			if( metaVerts[ av ].xyz[ j ] < aMins[ j ] )

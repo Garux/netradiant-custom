@@ -78,9 +78,9 @@ PicoLoadFileFunc()
 callback for picomodel.lib
 */
 
-void PicoLoadFileFunc( char *name, byte **buffer, int *bufSize )
+void PicoLoadFileFunc( const char *name, byte **buffer, int *bufSize )
 {
-	*bufSize = vfsLoadFile( (const char*) name, (void**) buffer, 0 );
+	*bufSize = vfsLoadFile( name, (void**) buffer, 0 );
 }
 
 
@@ -158,7 +158,7 @@ picoModel_t *LoadModel( const char *name, int frame )
 		Error( "MAX_MODELS (%d) exceeded, there are too many model files referenced by the map.", MAX_MODELS );
 	
 	/* attempt to parse model */
-	*pm = PicoLoadModel( (char*) name, frame );
+	*pm = PicoLoadModel( name, frame );
 	
 	/* if loading failed, make a bogus model to silence the rest of the warnings */
 	if( *pm == NULL )
@@ -169,7 +169,7 @@ picoModel_t *LoadModel( const char *name, int frame )
 			return NULL;
 		
 		/* set data */
-		PicoSetModelName( *pm, (char*) name );
+		PicoSetModelName( *pm, name );
 		PicoSetModelFrameNum( *pm, frame );
 	}
 	

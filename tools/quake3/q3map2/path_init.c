@@ -109,6 +109,7 @@ void LokiInitPaths( char *argv0 )
 		strcpy( installPath, "../" );
 	#else
 		char		temp[ MAX_OS_PATH ];
+		char		last0[ 2 ];
 		char		*home;
 		char		*path;
 		char		*last;
@@ -122,7 +123,7 @@ void LokiInitPaths( char *argv0 )
 		
 		/* do some path divining */
 		strcpy( temp, argv0 );
-		if( strrchr( temp, '/' ) )
+		if( strrchr( argv0, '/' ) )
 			argv0 = strrchr( argv0, '/' ) + 1;
 		else
 		{
@@ -130,6 +131,7 @@ void LokiInitPaths( char *argv0 )
 			path = getenv( "PATH" );
 			
 			/* minor setup */
+			last = last0;
 			last[ 0 ] = path[ 0 ];
 			last[ 1 ] = '\0';
 			found = qfalse;

@@ -99,7 +99,11 @@ void ExpandWildcards( int *argc, char ***argv );
 
 double I_FloatTime( void );
 
-void	Error( const char *error, ... );
+void	Error( const char *error, ... )
+#ifdef __GNUC__
+__attribute__((noreturn))
+#endif
+;
 int		CheckParm( const char *check );
 
 FILE	*SafeOpenWrite( const char *filename );

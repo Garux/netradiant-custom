@@ -76,13 +76,13 @@ can be used to diagnose the cause.
 If you don't need this information, failID and failpos can be NULL.
 ====================================================================== */
 
-lwObject *lwGetObject( char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
+lwObject *lwGetObject( const char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
 {
    lwObject *object;
    lwLayer *layer;
    lwNode *node;
-   unsigned int id, formsize, type, cksize;
-   int i, rlen;
+   unsigned int id, formsize, type;
+   int i, rlen, cksize;
 
    /* open the file */
 
@@ -233,7 +233,7 @@ lwObject *lwGetObject( char *filename, picoMemStream_t *fp, unsigned int *failID
 
       /* end of the file? */
 
-      if ( formsize <= _pico_memstream_tell( fp ) - 8 ) break;
+      if ( formsize <= (unsigned int) (_pico_memstream_tell( fp ) - 8) ) break;
 
       /* get the next chunk header */
 
@@ -270,7 +270,7 @@ Fail:
    return NULL;
 }
 
-int lwValidateObject( char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
+int lwValidateObject( const char *filename, picoMemStream_t *fp, unsigned int *failID, int *failpos )
 {
    unsigned int id, formsize, type;
 

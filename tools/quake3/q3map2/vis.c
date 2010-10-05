@@ -102,9 +102,9 @@ the earlier information.
 */
 int PComp (const void *a, const void *b)
 {
-	if ( (*(vportal_t **)a)->nummightsee == (*(vportal_t **)b)->nummightsee)
+	if ( (*(const vportal_t *const *)a)->nummightsee == (*(const vportal_t *const *)b)->nummightsee)
 		return 0;
-	if ( (*(vportal_t **)a)->nummightsee < (*(vportal_t **)b)->nummightsee)
+	if ( (*(const vportal_t *const *)a)->nummightsee < (*(const vportal_t *const *)b)->nummightsee)
 		return -1;
 	return 1;
 }
@@ -932,8 +932,8 @@ void LoadPortals (char *name)
 			Error ("LoadPortals: reading portal %i", i);
 		if (numpoints > MAX_POINTS_ON_WINDING)
 			Error ("LoadPortals: portal %i has too many points", i);
-		if ( (unsigned)leafnums[0] > portalclusters
-		|| (unsigned)leafnums[1] > portalclusters)
+		if (leafnums[0] > portalclusters
+		|| leafnums[1] > portalclusters)
 			Error ("LoadPortals: reading portal %i", i);
 		if (fscanf (f, "%i ", &hint) != 1)
 			Error ("LoadPortals: reading hint state");

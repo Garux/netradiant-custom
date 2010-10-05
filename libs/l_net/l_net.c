@@ -43,7 +43,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define qfalse	0
 
 #ifdef _DEBUG
-void WinPrint(char *str, ...)
+void WinPrint(const char *str, ...)
 {
 	va_list argptr;
   char text[4096];
@@ -55,7 +55,7 @@ void WinPrint(char *str, ...)
   printf(text);
 }
 #else
-void WinPrint(char *str, ...)
+void WinPrint(const char *str, ...)
 {
 }
 #endif
@@ -323,7 +323,7 @@ void Net_Disconnect(socket_t *sock)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void Net_StringToAddress(char *string, address_t *address)
+void Net_StringToAddress(const char *string, address_t *address)
 {
 	strcpy(address->ip, string);
 } //end of the function Net_StringToAddress
@@ -620,7 +620,7 @@ char *NMSG_ReadString(netmessage_t *msg)
 		if (c == 0) break;
 		string[l] = c;
 		l++;
-	} while (l < sizeof(string)-1);
+	} while ((size_t) l < sizeof(string)-1);
 	string[l] = 0;
 	return string;
 } //end of the function NMSG_ReadString

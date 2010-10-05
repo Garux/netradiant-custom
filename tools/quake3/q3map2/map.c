@@ -837,7 +837,7 @@ static void ParseRawBrush( qboolean onlyLights )
 	int				planenum;
 	shaderInfo_t	*si;
 	vec_t			shift[ 2 ];
-	vec_t			rotate;
+	vec_t			rotate = 0;
 	vec_t			scale[ 2 ];
 	char			name[ MAX_QPATH ];
 	char			shader[ MAX_QPATH ];
@@ -1693,7 +1693,7 @@ void LoadMapFile( char *filename, qboolean onlyLights )
 {		
 	FILE		*file;
 	brush_t		*b;
-	int			oldNumEntities, numMapBrushes;
+	int			oldNumEntities = 0, numMapBrushes;
 	
 	
 	/* note it */
