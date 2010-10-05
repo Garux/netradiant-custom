@@ -297,9 +297,16 @@ int vfsLoadFile (const char *filename, void **bufferptr, int index)
     
     *bufferptr = safe_malloc (len+1);
     if (*bufferptr == NULL)
-      return -1;
+	{
+		fclose(f);
+		return -1;
+	}
     
-    fread (*bufferptr, 1, len, f);
+    if(fread (*bufferptr, 1, len, f) != len)
+	{
+		fclose(f);
+		return -1;
+	}
     fclose (f);
     
     // we need to end the buffer with a 0

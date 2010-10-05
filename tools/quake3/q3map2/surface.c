@@ -291,7 +291,7 @@ deletes all empty or bad surfaces from the surface list
 void TidyEntitySurfaces( entity_t *e )
 {
 	int					i, j, deleted;
-	mapDrawSurface_t	*out, *in;
+	mapDrawSurface_t	*out, *in = NULL;
 	
 	
 	/* note it */

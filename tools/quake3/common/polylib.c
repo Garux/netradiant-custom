@@ -282,11 +282,11 @@ CopyWinding
 */
 winding_t	*CopyWinding (winding_t *w)
 {
-	int			size;
+	size_t			size;
 	winding_t	*c;
 
 	c = AllocWinding (w->numpoints);
-	size = (int)((winding_t *)0)->p[w->numpoints];
+	size = (size_t)((winding_t *)NULL)->p[w->numpoints];
 	memcpy (c, w, size);
 	return c;
 }
