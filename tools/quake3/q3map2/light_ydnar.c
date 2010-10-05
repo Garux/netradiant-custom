@@ -1157,6 +1157,8 @@ void MapRawLightmap( int rawLightmapNum )
 						for( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
 						{
 							/* get drawverts and map first triangle */
+							dv[ 1 ] = &verts[ pw[ r + 1 ] ];
+							dv[ 2 ] = &verts[ pw[ r + 2 ] ];
 							MapTriangle( lm, info, dv, mapNonAxial );
 							
 							/* get drawverts and map second triangle */
