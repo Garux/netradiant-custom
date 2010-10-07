@@ -178,22 +178,22 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushP
 					origin[0] + 8 * S(i,0,0), origin[1] + 8 * S(i,0,1), origin[2] + 8 * S(i,0,2),
 					origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
 					origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
-					1/16.0, 0.0, FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
-					0.0, 1/16.0, FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
+					1.0f/16.0f, 0.0f, FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
+					0.0f, 1.0f/16.0f, FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
 					"common/origin",
 					0
 				   );
 		}
 		else
 		{
-			fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %.8f %.8f %.8f %.8f %.8f %s %d 0 0\n",
+			fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
 					origin[0] + 8 * S(i,0,0), origin[1] + 8 * S(i,0,1), origin[2] + 8 * S(i,0,2),
 					origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
 					origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
+					"common/origin",
 					FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
 					FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
-					0.0, 0.25, 0.25,
-					"common/origin",
+					0.0f, 0.25f, 0.25f,
 					0
 				   );
 		}
@@ -252,8 +252,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 		if( side->shaderNum < 0 || side->shaderNum >= numBSPShaders )
 			continue;
 		shader = &bspShaders[ side->shaderNum ];
-		if( !Q_stricmp( shader->shader, "default" ) || !Q_stricmp( shader->shader, "noshader" ) )
-			continue;
+		//if( !Q_stricmp( shader->shader, "default" ) || !Q_stricmp( shader->shader, "noshader" ) )
+		//	continue;
 		
 		/* get plane */
 		plane = &bspPlanes[ side->planeNum ];
@@ -467,28 +467,63 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 					//	nt =  cosv * vecs[1][tv];
 					//	vecsrotscaled[1][sv] = ns / scale[1];
 					//	vecsrotscaled[1][tv] = nt / scale[1];
-				scale[0] = sqrt(sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1]);
-				scale[1] = sqrt(sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1]);
-				rotate = atan2(sts[0][1] - sts[1][0], sts[0][0] + sts[1][1]) * (180.0f / Q_PI);
+				scale[0] = 1.0/sqrt(sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1]);
+				scale[1] = 1.0/sqrt(sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1]);
+				rotate = atan2(sts[0][1] * vecs[0][sv] - sts[1][0] * vecs[1][tv], sts[0][0] * vecs[0][sv] + sts[1][1] * vecs[1][tv]) * (180.0f / Q_PI);
 				shift[0] = sts[0][2];
 				shift[1] = sts[1][2];
 
 				/* print brush side */
 				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
-				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %.8f %.8f %.8f %.8f %.8f %s %d 0 0\n",
+				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
 						pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
 						pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
 						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						shift[0], shift[1], rotate, scale[0], scale[1],
 						texture,
+						shift[0], shift[1], rotate, scale[0], scale[1],
 						// DEBUG: valid ? 0 : C_DETAIL
 						0
 					   );
 			}
 		}
 		else
+		{
+			vec3_t	vecs[ 2 ];
 			if(strncmp(buildSide->shaderInfo->shader, "textures/common/", 16))
+			if(strcmp(buildSide->shaderInfo->shader, "noshader"))
+			if(strcmp(buildSide->shaderInfo->shader, "default"))
 				fprintf(stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader);
+
+			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
+			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );
+			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
+			VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
+			if(brushPrimitives)
+			{
+				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
+						pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+						pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+						1.0f/16.0f, 0.0f, 0.0f,
+						0.0f, 1.0f/16.0f, 0.0f,
+						texture,
+						// DEBUG: valid ? 0 : C_DETAIL
+						0
+					   );
+			}
+			else
+			{
+				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
+						pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+						pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+						texture,
+						0.0f, 0.0f, 0.0f, 0.25f, 0.25f,
+						// DEBUG: valid ? 0 : C_DETAIL
+						0
+					   );
+			}
+		}
 	}
 	
 	/* end brush */
