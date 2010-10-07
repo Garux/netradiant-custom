@@ -1463,6 +1463,8 @@ int ConvertBSPMain( int argc, char **argv )
 			i++;
 			if( !Q_stricmp( argv[ i ], "ase" ) )
 				convertFunc = ConvertBSPToASE;
+			else if( !Q_stricmp( argv[ i ], "map_bp" ) )
+				convertFunc = ConvertBSPToMap_BP;
 			else if( !Q_stricmp( argv[ i ], "map" ) )
 				convertFunc = ConvertBSPToMap;
 			else

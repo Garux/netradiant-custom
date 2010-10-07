@@ -1524,6 +1524,7 @@ int							BSPMain( int argc, char **argv );
 
 /* convert_map.c */
 int							ConvertBSPToMap( char *bspName );
+int							ConvertBSPToMap_BP( char *bspName );
 
 
 /* convert_ase.c */

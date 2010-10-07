@@ -185,7 +185,7 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin )
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin )
+static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qboolean brushPrimitives )
 {
 	int				i, j;
 	bspBrushSide_t	*side;
@@ -202,8 +202,11 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin )
 	/* start brush */
 	fprintf( f, "\t// brush %d\n", num );
 	fprintf( f, "\t{\n" );
-	fprintf( f, "\tbrushDef\n" );
-	fprintf( f, "\t{\n" );
+	if(brushPrimitives)
+	{
+		fprintf( f, "\tbrushDef\n" );
+		fprintf( f, "\t{\n" );
+	}
 	
 	/* clear out build brush */
 	for( i = 0; i < buildBrush->numsides; i++ )
@@ -273,69 +276,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin )
 		GetBestSurfaceTriangleMatchForBrushside(buildSide, vert);
 		valid = 0;
 
-		if(vert[0] && vert[1] && vert[2])
-		{
-			int i;
-			vec3_t texX, texY;
-			vec3_t xy1I, xy1J, xy1K;
-			vec2_t stI, stJ, stK;
-			vec_t D, D0, D1, D2;
-
-			ComputeAxisBase(buildPlane->normal, texX, texY);
-
-			VectorSet(xy1I, DotProduct(vert[0]->xyz, texX), DotProduct(vert[0]->xyz, texY), 1);
-			VectorSet(xy1J, DotProduct(vert[1]->xyz, texX), DotProduct(vert[1]->xyz, texY), 1);
-			VectorSet(xy1K, DotProduct(vert[2]->xyz, texX), DotProduct(vert[2]->xyz, texY), 1);
-			stI[0] = vert[0]->st[0]; stI[1] = vert[0]->st[1];
-			stJ[0] = vert[1]->st[0]; stJ[1] = vert[1]->st[1];
-			stK[0] = vert[2]->st[0]; stK[1] = vert[2]->st[1];
-
-			//   - solve linear equations:
-			//     - (x, y) := xyz . (texX, texY)
-			//     - st[i] = texMat[i][0]*x + texMat[i][1]*y + texMat[i][2]
-			//       (for three vertices)
-			D = Det3x3(
-				xy1I[0], xy1I[1], 1,
-				xy1J[0], xy1J[1], 1,
-				xy1K[0], xy1K[1], 1
-			);
-			if(D != 0)
-			{
-				for(i = 0; i < 2; ++i)
-				{
-					D0 = Det3x3(
-						stI[i], xy1I[1], 1,
-						stJ[i], xy1J[1], 1,
-						stK[i], xy1K[1], 1
-					);
-					D1 = Det3x3(
-						xy1I[0], stI[i], 1,
-						xy1J[0], stJ[i], 1,
-						xy1K[0], stK[i], 1
-					);
-					D2 = Det3x3(
-						xy1I[0], xy1I[1], stI[i],
-						xy1J[0], xy1J[1], stJ[i],
-						xy1K[0], xy1K[1], stK[i]
-					);
-					VectorSet(buildSide->texMat[i], D0 / D, D1 / D, D2 / D);
-					valid = 1;
-				}
-			}
-			else
-				fprintf(stderr, "degenerate triangle found when solving texMat equations for\n(%f %f %f) (%f %f %f) (%f %f %f)\n( %f %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n",
-					buildPlane->normal[0], buildPlane->normal[1], buildPlane->normal[2],
-					vert[0]->normal[0], vert[0]->normal[1], vert[0]->normal[2],
-					texX[0], texX[1], texX[2], texY[0], texY[1], texY[2],
-					vert[0]->xyz[0], vert[0]->xyz[1], vert[0]->xyz[2], xy1I[0], xy1I[1],
-					vert[1]->xyz[0], vert[1]->xyz[1], vert[1]->xyz[2], xy1J[0], xy1J[1],
-					vert[2]->xyz[0], vert[2]->xyz[1], vert[2]->xyz[2], xy1K[0], xy1K[1]
-					);
-		}
-		else
-			if(strncmp(buildSide->shaderInfo->shader, "textures/common/", 16))
-				fprintf(stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader);
-		
 		/* get texture name */
 		if( !Q_strncasecmp( buildSide->shaderInfo->shader, "textures/", 9 ) )
 			texture = buildSide->shaderInfo->shader + 9;
@@ -350,24 +290,184 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin )
 			//%	pts[ j ][ 1 ] = SNAP_INT_TO_FLOAT * floor( pts[ j ][ 1 ] * SNAP_FLOAT_TO_INT + 0.5f );
 			//%	pts[ j ][ 2 ] = SNAP_INT_TO_FLOAT * floor( pts[ j ][ 2 ] * SNAP_FLOAT_TO_INT + 0.5f );
 		}
-		
-		/* print brush side */
-		/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
-		fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
-			pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-			pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-			pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-			buildSide->texMat[0][0], buildSide->texMat[0][1], buildSide->texMat[0][2],
-			buildSide->texMat[1][0], buildSide->texMat[1][1], buildSide->texMat[1][2],
-			texture,
-			// DEBUG: valid ? 0 : C_DETAIL
-			0
-			);
-		// TODO write brush primitives format here
+
+		if(vert[0] && vert[1] && vert[2])
+		{
+			if(brushPrimites)
+			{
+				int i;
+				vec3_t texX, texY;
+				vec2_t xyI, xyJ, xyK;
+				vec2_t stI, stJ, stK;
+				vec_t D, D0, D1, D2;
+
+				ComputeAxisBase(buildPlane->normal, texX, texY);
+
+				Vector2Set(xyI, DotProduct(vert[0]->xyz, texX), DotProduct(vert[0]->xyz, texY));
+				Vector2Set(xyJ, DotProduct(vert[1]->xyz, texX), DotProduct(vert[1]->xyz, texY));
+				Vector2Set(xyK, DotProduct(vert[2]->xyz, texX), DotProduct(vert[2]->xyz, texY));
+				stI[0] = vert[0]->st[0]; stI[1] = vert[0]->st[1];
+				stJ[0] = vert[1]->st[0]; stJ[1] = vert[1]->st[1];
+				stK[0] = vert[2]->st[0]; stK[1] = vert[2]->st[1];
+
+				//   - solve linear equations:
+				//     - (x, y) := xyz . (texX, texY)
+				//     - st[i] = texMat[i][0]*x + texMat[i][1]*y + texMat[i][2]
+				//       (for three vertices)
+				D = Det3x3(
+					xyI[0], xyI[1], 1,
+					xyJ[0], xyJ[1], 1,
+					xyK[0], xyK[1], 1
+				);
+				if(D != 0)
+				{
+					for(i = 0; i < 2; ++i)
+					{
+						D0 = Det3x3(
+							stI[i], xyI[1], 1,
+							stJ[i], xyJ[1], 1,
+							stK[i], xyK[1], 1
+						);
+						D1 = Det3x3(
+							xyI[0], stI[i], 1,
+							xyJ[0], stJ[i], 1,
+							xyK[0], stK[i], 1
+						);
+						D2 = Det3x3(
+							xyI[0], xyI[1], stI[i],
+							xyJ[0], xyJ[1], stJ[i],
+							xyK[0], xyK[1], stK[i]
+						);
+						VectorSet(buildSide->texMat[i], D0 / D, D1 / D, D2 / D);
+					}
+					valid = 1;
+				}
+				else
+					fprintf(stderr, "degenerate triangle found when solving texMat equations for\n(%f %f %f) (%f %f %f) (%f %f %f)\n( %f %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n",
+						buildPlane->normal[0], buildPlane->normal[1], buildPlane->normal[2],
+						vert[0]->normal[0], vert[0]->normal[1], vert[0]->normal[2],
+						texX[0], texX[1], texX[2], texY[0], texY[1], texY[2],
+						vert[0]->xyz[0], vert[0]->xyz[1], vert[0]->xyz[2], xyI[0], xyI[1],
+						vert[1]->xyz[0], vert[1]->xyz[1], vert[1]->xyz[2], xyJ[0], xyJ[1],
+						vert[2]->xyz[0], vert[2]->xyz[1], vert[2]->xyz[2], xyK[0], xyK[1]
+						);
+
+				/* print brush side */
+				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
+				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
+						pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+						pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+						buildSide->texMat[0][0], buildSide->texMat[0][1], buildSide->texMat[0][2],
+						buildSide->texMat[1][0], buildSide->texMat[1][1], buildSide->texMat[1][2],
+						texture,
+						// DEBUG: valid ? 0 : C_DETAIL
+						0
+					   );
+			}
+			else
+			{
+				// invert QuakeTextureVecs
+				vec3_t vecs[2];
+				int sv, tv;
+				vec2_t stI, stJ, stK;
+				vec3_t xyzI, xyzJ, xyzK;
+				vec3_t rrs[3];
+				vec3_t sts[2];
+				vec2_t shift, scale;
+				vec_t rotate;
+
+				TextureAxisFromPlane(buildPlane, vecs[0], vecs[1]);
+				if (vecs[0][0])
+					sv = 0;
+				else if (vecs[0][1])
+					sv = 1;
+				else
+					sv = 2;
+				if (vecs[1][0])
+					tv = 0;
+				else if (vecs[1][1])
+					tv = 1;
+				else
+					tv = 2;
+
+				stI[0] = vert[0]->st[0] * si->shaderWidth; stI[1] = vert[0]->st[1] * si->shaderHeight;
+				stJ[0] = vert[1]->st[0] * si->shaderWidth; stJ[1] = vert[1]->st[1] * si->shaderHeight;
+				stK[0] = vert[2]->st[0] * si->shaderWidth; stK[1] = vert[2]->st[1] * si->shaderHeight;
+
+				D = Det3x3(
+					vert[0]->xyz[sv], vert[0]->xyz[tv], 1,
+					vert[1]->xyz[sv], vert[1]->xyz[tv], 1,
+					vert[2]->xyz[sv], vert[2]->xyz[tv], 1
+				);
+				if(D != 0)
+				{
+					for(i = 0; i < 2; ++i)
+					{
+						D0 = Det3x3(
+							stI[i], vert[0]->xyz[tv], 1,
+							stJ[i], vert[1]->xyz[tv], 1,
+							stK[i], vert[2]->xyz[tv], 1
+						);
+						D1 = Det3x3(
+							vert[0]->xyz[sv], stI[i], 1,
+							vert[1]->xyz[sv], stJ[i], 1,
+							vert[2]->xyz[sv], stK[i], 1
+						);
+						D2 = Det3x3(
+							vert[0]->xyz[sv], vert[0]->xyz[tv], stI[i],
+							vert[1]->xyz[sv], vert[1]->xyz[tv], stJ[i],
+							vert[2]->xyz[sv], vert[2]->xyz[tv], stK[i]
+						);
+						VectorSet(sts[i], D0 / D, D1 / D, D2 / D);
+					}
+					valid = 1;
+				}
+				else
+					fprintf(stderr, "degenerate triangle found when solving texDef equations\n"); // FIXME add stuff here
+
+				// now we must solve:
+					//	// now we must invert:
+					//	ang = rotate / 180 * Q_PI;
+					//	sinv = sin(ang);
+					//	cosv = cos(ang);
+					//	ns = cosv * vecs[0][sv];
+					//	nt = sinv * vecs[0][sv];
+					//	vecsrotscaled[0][sv] = ns / scale[0];
+					//	vecsrotscaled[0][tv] = nt / scale[0];
+					//	ns = -sinv * vecs[1][tv];
+					//	nt =  cosv * vecs[1][tv];
+					//	vecsrotscaled[1][sv] = ns / scale[1];
+					//	vecsrotscaled[1][tv] = nt / scale[1];
+				scale[0] = sqrt(sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1]);
+				scale[1] = sqrt(sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1]);
+				rotate = atan2(sts[0][1] - sts[1][0], sts[0][0] + sts[1][1]);
+				shift[0] = sts[0][2];
+				shift[1] = sts[1][2];
+
+				/* print brush side */
+				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
+				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %.8f %.8f %.8f %.8f %.8f %s %d 0 0\n",
+						pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+						pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+						shift[0], shift[1], rotate, scale[0], scale[1],
+						texture,
+						// DEBUG: valid ? 0 : C_DETAIL
+						0
+					   );
+			}
+		}
+		else
+			if(strncmp(buildSide->shaderInfo->shader, "textures/common/", 16))
+				fprintf(stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader);
 	}
 	
 	/* end brush */
-	fprintf( f, "\t}\n" );
+	if(brushPrimitives)
+	{
+		fprintf( f, "\t}\n" );
+	}
 	fprintf( f, "\t}\n\n" );
 }
 
@@ -508,7 +608,7 @@ ConvertModel()
 exports a bsp model to a map file
 */
 
-static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origin )
+static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origin, qboolean brushPrimitives )
 {
 	int					i, num;
 	bspBrush_t			*brush;
@@ -539,7 +639,7 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
 	{
 		num = i + model->firstBSPBrush;
 		brush = &bspBrushes[ num ];
-		ConvertBrush( f, num, brush, origin );
+		ConvertBrush( f, num, brush, origin, brushPrimitives );
 	}
 	
 	/* free the build brush */
@@ -596,7 +696,7 @@ ConvertBSPToMap()
 exports an quake map file from the bsp
 */
 
-int ConvertBSPToMap( char *bspName )
+int ConvertBSPToMap_Ext( char *bspName, qboolean brushPrimitives )
 {
 	int				i, modelNum;
 	FILE			*f;
@@ -667,7 +767,7 @@ int ConvertBSPToMap( char *bspName )
 				GetVectorForKey( e, "origin", origin );
 			
 			/* convert model */
-			ConvertModel( f, model, modelNum, origin );
+			ConvertModel( f, model, modelNum, origin, brushPrimitives );
 		}
 		
 		/* end entity */
@@ -679,4 +779,14 @@ int ConvertBSPToMap( char *bspName )
 	
 	/* return to sender */
 	return 0;
+}
+
+int ConvertBSPToMap( char *bspName )
+{
+	return ConvertBSPToMap(bspName, qfalse);
+}
+
+int ConvertBSPToMap_BP( char *bspName )
+{
+	return ConvertBSPToMap(bspName, qtrue);
 }
