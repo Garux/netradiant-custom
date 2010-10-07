@@ -293,7 +293,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 
 		if(vert[0] && vert[1] && vert[2])
 		{
-			if(brushPrimites)
+			if(brushPrimitives)
 			{
 				int i;
 				vec3_t texX, texY;
@@ -303,9 +303,12 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 
 				ComputeAxisBase(buildPlane->normal, texX, texY);
 
-				Vector2Set(xyI, DotProduct(vert[0]->xyz, texX), DotProduct(vert[0]->xyz, texY));
-				Vector2Set(xyJ, DotProduct(vert[1]->xyz, texX), DotProduct(vert[1]->xyz, texY));
-				Vector2Set(xyK, DotProduct(vert[2]->xyz, texX), DotProduct(vert[2]->xyz, texY));
+				xyI[0] = DotProduct(vert[0]->xyz, texX);
+				xyI[1] = DotProduct(vert[0]->xyz, texY);
+				xyJ[0] = DotProduct(vert[1]->xyz, texX);
+				xyJ[1] = DotProduct(vert[1]->xyz, texY);
+				xyK[0] = DotProduct(vert[2]->xyz, texX);
+				xyK[1] = DotProduct(vert[2]->xyz, texY);
 				stI[0] = vert[0]->st[0]; stI[1] = vert[0]->st[1];
 				stJ[0] = vert[1]->st[0]; stJ[1] = vert[1]->st[1];
 				stK[0] = vert[2]->st[0]; stK[1] = vert[2]->st[1];
@@ -371,11 +374,10 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 				vec3_t vecs[2];
 				int sv, tv;
 				vec2_t stI, stJ, stK;
-				vec3_t xyzI, xyzJ, xyzK;
-				vec3_t rrs[3];
 				vec3_t sts[2];
 				vec2_t shift, scale;
 				vec_t rotate;
+				vec_t D, D0, D1, D2;
 
 				TextureAxisFromPlane(buildPlane, vecs[0], vecs[1]);
 				if (vecs[0][0])
@@ -391,9 +393,9 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 				else
 					tv = 2;
 
-				stI[0] = vert[0]->st[0] * si->shaderWidth; stI[1] = vert[0]->st[1] * si->shaderHeight;
-				stJ[0] = vert[1]->st[0] * si->shaderWidth; stJ[1] = vert[1]->st[1] * si->shaderHeight;
-				stK[0] = vert[2]->st[0] * si->shaderWidth; stK[1] = vert[2]->st[1] * si->shaderHeight;
+				stI[0] = vert[0]->st[0] * buildSide->shaderInfo->shaderWidth; stI[1] = vert[0]->st[1] * buildSide->shaderInfo->shaderHeight;
+				stJ[0] = vert[1]->st[0] * buildSide->shaderInfo->shaderWidth; stJ[1] = vert[1]->st[1] * buildSide->shaderInfo->shaderHeight;
+				stK[0] = vert[2]->st[0] * buildSide->shaderInfo->shaderWidth; stK[1] = vert[2]->st[1] * buildSide->shaderInfo->shaderHeight;
 
 				D = Det3x3(
 					vert[0]->xyz[sv], vert[0]->xyz[tv], 1,
@@ -783,10 +785,10 @@ int ConvertBSPToMap_Ext( char *bspName, qboolean brushPrimitives )
 
 int ConvertBSPToMap( char *bspName )
 {
-	return ConvertBSPToMap(bspName, qfalse);
+	return ConvertBSPToMap_Ext(bspName, qfalse);
 }
 
 int ConvertBSPToMap_BP( char *bspName )
 {
-	return ConvertBSPToMap(bspName, qtrue);
+	return ConvertBSPToMap_Ext(bspName, qtrue);
 }

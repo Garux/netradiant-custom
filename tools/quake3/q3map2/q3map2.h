@@ -1735,6 +1735,8 @@ void						LoadSurfaceExtraFile( const char *path );
 void						ProcessDecals( void );
 void						MakeEntityDecals( entity_t *e );
 
+/* map.c */
+void						TextureAxisFromPlane( plane_t *pln, vec3_t xv, vec3_t yv );
 
 /* brush_primit.c */
 void						ComputeAxisBase( vec3_t normal, vec3_t texX, vec3_t texY);
