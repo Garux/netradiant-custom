@@ -145,7 +145,7 @@ exwinding:
 	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide->shaderInfo->shader, matches, best);
 }
 
-static void ConvertOriginBrush( FILE *f, int num, vec3_t origin )
+static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushPrimitives )
 {
 	char pattern[6][5][3] = {
 		{ "+++", "+-+", "-++", " - ", "-  " },
@@ -162,26 +162,48 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin )
 	/* start brush */
 	fprintf( f, "\t// brush %d\n", num );
 	fprintf( f, "\t{\n" );
-	fprintf( f, "\tbrushDef\n" );
-	fprintf( f, "\t{\n" );
+	if(brushPrimitives)
+	{
+		fprintf( f, "\tbrushDef\n" );
+		fprintf( f, "\t{\n" );
+	}
 	/* print brush side */
 	/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
 
 	for(i = 0; i < 6; ++i)
-		fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
-				origin[0] + 8 * S(i,0,0), origin[1] + 8 * S(i,0,1), origin[2] + 8 * S(i,0,2),
-				origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
-				origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
-				1/16.0, 0.0, FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
-				0.0, 1/16.0, FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
-				"common/origin",
-				0
-			   );
+	{
+		if(brushPrimitives)
+		{
+			fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
+					origin[0] + 8 * S(i,0,0), origin[1] + 8 * S(i,0,1), origin[2] + 8 * S(i,0,2),
+					origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
+					origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
+					1/16.0, 0.0, FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
+					0.0, 1/16.0, FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
+					"common/origin",
+					0
+				   );
+		}
+		else
+		{
+			fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %.8f %.8f %.8f %.8f %.8f %s %d 0 0\n",
+					origin[0] + 8 * S(i,0,0), origin[1] + 8 * S(i,0,1), origin[2] + 8 * S(i,0,2),
+					origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
+					origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
+					FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
+					FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
+					0.0, 0.25, 0.25,
+					"common/origin",
+					0
+				   );
+		}
+	}
 #undef FRAC
 #undef S
 	
 	/* end brush */
-	fprintf( f, "\t}\n" );
+	if(brushPrimitives)
+		fprintf( f, "\t}\n" );
 	fprintf( f, "\t}\n\n" );
 }
 
@@ -248,7 +270,10 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 	
 	/* make brush windings */
 	if( !CreateBrushWindings( buildBrush ) )
+	{
+		Sys_Printf( "CreateBrushWindings failed\n" );
 		return;
+	}
 	
 	/* iterate through build brush sides */
 	for( i = 0; i < buildBrush->numsides; i++ )
@@ -371,6 +396,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 			else
 			{
 				// invert QuakeTextureVecs
+				int i;
 				vec3_t vecs[2];
 				int sv, tv;
 				vec2_t stI, stJ, stK;
@@ -443,7 +469,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 					//	vecsrotscaled[1][tv] = nt / scale[1];
 				scale[0] = sqrt(sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1]);
 				scale[1] = sqrt(sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1]);
-				rotate = atan2(sts[0][1] - sts[1][0], sts[0][0] + sts[1][1]);
+				rotate = atan2(sts[0][1] - sts[1][0], sts[0][0] + sts[1][1]) * (180.0f / Q_PI);
 				shift[0] = sts[0][2];
 				shift[1] = sts[1][2];
 
@@ -634,7 +660,7 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
 	buildBrush->original = buildBrush;
 
 	if(origin[0] != 0 || origin[1] != 0 || origin[2] != 0)
-		ConvertOriginBrush(f, -1, origin);
+		ConvertOriginBrush(f, -1, origin, brushPrimitives);
 	
 	/* go through each brush in the model */
 	for( i = 0; i < model->numBSPBrushes; i++ )
