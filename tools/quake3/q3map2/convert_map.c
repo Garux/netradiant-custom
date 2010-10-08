@@ -148,13 +148,15 @@ exwinding:
 #define FRAC(x) ((x) - floor(x))
 static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushPrimitives )
 {
-	char pattern[6][5][3] = {
-		{ "+++", "+-+", "-++", " - ", "-  " },
-		{ "+++", "-++", "++-", "+  ", "  +" },
-		{ "+++", "++-", "+-+", " - ", "  +" },
-		{ "---", "+--", "-+-", " - ", "+  " },
-		{ "---", "--+", "+--", "-  ", "  +" },
-		{ "---", "-+-", "--+", " + ", "  +" }
+	int originSize = 256;
+
+	char pattern[6][7][3] = {
+		{ "+++", "+-+", "-++", "-  ", " + ", " - ", "-  " },
+		{ "+++", "-++", "++-", "-  ", "  +", "+  ", "  +" },
+		{ "+++", "++-", "+-+", " - ", "  +", " - ", "  +" },
+		{ "---", "+--", "-+-", "-  ", " + ", " - ", "+  " },
+		{ "---", "--+", "+--", "-  ", "  +", "-  ", "  +" },
+		{ "---", "-+-", "--+", " - ", "  +", " + ", "  +" }
 	};
 	int i;
 #define S(a,b,c) (pattern[a][b][c] == '+' ? +1 : pattern[a][b][c] == '-' ? -1 : 0)
@@ -178,8 +180,8 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushP
 					origin[0] + 8 * S(i,0,0), origin[1] + 8 * S(i,0,1), origin[2] + 8 * S(i,0,2),
 					origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
 					origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
-					1.0f/16.0f, 0.0f, FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
-					0.0f, 1.0f/16.0f, FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
+					1.0f/16.0f, 0.0f, FRAC((S(i,5,0) * origin[0] + S(i,5,1) * origin[1] + S(i,5,2) * origin[2]) / 16.0 + 0.5),
+					0.0f, 1.0f/16.0f, FRAC((S(i,6,0) * origin[0] + S(i,6,1) * origin[1] + S(i,6,2) * origin[2]) / 16.0 + 0.5),
 					"common/origin",
 					0
 				   );
@@ -191,9 +193,9 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushP
 					origin[0] + 8 * S(i,1,0), origin[1] + 8 * S(i,1,1), origin[2] + 8 * S(i,1,2),
 					origin[0] + 8 * S(i,2,0), origin[1] + 8 * S(i,2,1), origin[2] + 8 * S(i,2,2),
 					"common/origin",
-					FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5),
-					FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5),
-					0.0f, 0.25f, 0.25f,
+					FRAC((S(i,3,0) * origin[0] + S(i,3,1) * origin[1] + S(i,3,2) * origin[2]) / 16.0 + 0.5) * originSize,
+					FRAC((S(i,4,0) * origin[0] + S(i,4,1) * origin[1] + S(i,4,2) * origin[2]) / 16.0 + 0.5) * originSize,
+					0.0f, 16.0 / originSize, 16.0 / originSize,
 					0
 				   );
 		}
