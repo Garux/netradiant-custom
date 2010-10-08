@@ -145,6 +145,7 @@ exwinding:
 	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide->shaderInfo->shader, matches, best);
 }
 
+#define FRAC(x) ((x) - floor(x))
 static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushPrimitives )
 {
 	char pattern[6][5][3] = {
@@ -157,7 +158,6 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushP
 	};
 	int i;
 #define S(a,b,c) (pattern[a][b][c] == '+' ? +1 : pattern[a][b][c] == '-' ? -1 : 0)
-#define FRAC(x) ((x) - floor(x))
 
 	/* start brush */
 	fprintf( f, "\t// brush %d\n", num );
@@ -198,7 +198,6 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushP
 				   );
 		}
 	}
-#undef FRAC
 #undef S
 	
 	/* end brush */
@@ -386,8 +385,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 						pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
 						pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
 						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-						buildSide->texMat[0][0], buildSide->texMat[0][1], buildSide->texMat[0][2],
-						buildSide->texMat[1][0], buildSide->texMat[1][1], buildSide->texMat[1][2],
+						buildSide->texMat[0][0], buildSide->texMat[0][1], FRAC(buildSide->texMat[0][2]),
+						buildSide->texMat[1][0], buildSide->texMat[1][1], FRAC(buildSide->texMat[1][2]),
 						texture,
 						// DEBUG: valid ? 0 : C_DETAIL
 						0
@@ -470,8 +469,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 				scale[0] = 1.0/sqrt(sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1]);
 				scale[1] = 1.0/sqrt(sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1]);
 				rotate = atan2(sts[0][1] * vecs[0][sv] - sts[1][0] * vecs[1][tv], sts[0][0] * vecs[0][sv] + sts[1][1] * vecs[1][tv]) * (180.0f / Q_PI);
-				shift[0] = sts[0][2];
-				shift[1] = sts[1][2];
+				shift[0] = buildSide->shaderInfo->shaderWidth * FRAC(sts[0][2] / buildSide->shaderInfo->shaderWidth);
+				shift[1] = buildSide->shaderInfo->shaderHeight * FRAC(sts[1][2] / buildSide->shaderInfo->shaderHeight);
 
 				/* print brush side */
 				/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
@@ -533,6 +532,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 	}
 	fprintf( f, "\t}\n\n" );
 }
+#undef FRAC
 
 #if 0
 	/* iterate through the brush sides (ignore the first 6 bevel planes) */
