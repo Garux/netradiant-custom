@@ -87,7 +87,7 @@ void GetBestSurfaceTriangleMatchForBrushside(side_t *buildSide, bspDrawVert_t *b
 			vert[0] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 0]];
 			vert[1] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 1]];
 			vert[2] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 2]];
-			if(s->surfaceType == MST_PLANAR)
+			if(s->surfaceType == MST_PLANAR && VectorCompare(vert[0]->normal, vert[1]->normal) && VectorCompare(vert[1]->normal, vert[2]->normal))
 			{
 				VectorSubtract(vert[0]->normal, buildPlane->normal, normdiff); if(VectorLength(normdiff) >= normalEpsilon) continue;
 				VectorSubtract(vert[1]->normal, buildPlane->normal, normdiff); if(VectorLength(normdiff) >= normalEpsilon) continue;
