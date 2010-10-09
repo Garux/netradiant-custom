@@ -1580,7 +1580,7 @@ void 						LoadMapFile( char *filename, qboolean onlyLights, qboolean noCollapse
 int							FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points );
 int							PlaneTypeForNormal( vec3_t normal );
 void						AddBrushBevels( void );
-brush_t						*FinishBrush( void );
+brush_t						*FinishBrush(qboolean noCollapseGroups);
 
 
 /* portals.c */

@@ -620,7 +620,7 @@ static void MergeOrigin(entity_t *ent, vec3_t origin)
 	SetKeyValue(ent, "origin", string);
 }
 
-brush_t *FinishBrush( void )
+brush_t *FinishBrush( qboolean noCollapseGroups )
 {
 	brush_t		*b;
 	
@@ -665,7 +665,8 @@ brush_t *FinishBrush( void )
 	}
 	
 	/* add bevel planes */
-	AddBrushBevels();
+	if(!noCollapseGroups)
+		AddBrushBevels();
 	
 	/* keep it */
 	b = CopyBrush( buildBrush );
@@ -1034,7 +1035,7 @@ ParseBrush()
 parses a brush out of a map file and sets it up
 */
 
-static void ParseBrush( qboolean onlyLights )
+static void ParseBrush( qboolean onlyLights, qboolean noCollapseGroups )
 {
 	brush_t	*b;
 	
@@ -1081,7 +1082,7 @@ static void ParseBrush( qboolean onlyLights )
 	}
 	
 	/* finish the brush */
-	b = FinishBrush();
+	b = FinishBrush(noCollapseGroups);
 }
 
 
@@ -1497,7 +1498,7 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 				g_bBrushPrimit = BPRIMIT_NEWBRUSHES;
 				
 				/* parse brush primitive */
-				ParseBrush( onlyLights );
+				ParseBrush( onlyLights, noCollapseGroups );
 			}
 			else
 			{
@@ -1507,7 +1508,7 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 				
 				/* parse old brush format */
 				UnGetToken();
-				ParseBrush( onlyLights );
+				ParseBrush( onlyLights, noCollapseGroups );
 			}
 			entitySourceBrushes++;
 		}

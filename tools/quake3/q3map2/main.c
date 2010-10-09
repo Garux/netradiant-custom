@@ -1430,23 +1430,71 @@ int ScaleBSPMain( int argc, char **argv )
 }
 
 
+/*
+PseudoCompileBSP()
+a stripped down ProcessModels
+*/
 void PseudoCompileBSP()
 {
-	// a stripped down ProcessModels
+	int models;
+	char modelValue[10];
+	entity_t *entity;
+	tree_t *tree;
+	node_t *node;
+	brush_t *brush;
+	side_t *side;
+	int i;
+
+        SetDrawSurfacesBuffer();
+	mapDrawSurfs = safe_malloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
+	memset( mapDrawSurfs, 0, sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
+	numMapDrawSurfs = 0;
+
 	BeginBSPFile();
+	models = 1;
 	for( mapEntityNum = 0; mapEntityNum < numEntities; mapEntityNum++ )
 	{
 		/* get entity */
 		entity = &entities[ mapEntityNum ];
 		if( entity->brushes == NULL && entity->patches == NULL )
 			continue;
+
+		if(mapEntityNum != 0)
+		{
+			sprintf( modelValue, "*%d", models++);
+			SetKeyValue(entity, "model", modelValue);
+		}
 		
 		/* process the model */
 		Sys_FPrintf( SYS_VRB, "############### model %i ###############\n", numBSPModels );
 		BeginModel();
-		entity>firstDrawSurf = 0;
-		EmitBrushes(entity->brushes, &entity>firstBrush, &entity>numBrushes );
-		EndModel(entity, NULL);
+
+		entity->firstDrawSurf = numMapDrawSurfs;
+
+		node = AllocNode();
+		node->planenum = PLANENUM_LEAF;
+		tree = AllocTree();
+		tree->headnode = node;
+
+		/* a minimized ClipSidesIntoTree */
+		for( brush = entity->brushes; brush; brush = brush->next )
+		{
+			/* walk the brush sides */
+			for( i = 0; i < brush->numsides; i++ )
+			{
+				/* get side */
+				side = &brush->sides[ i ];
+				if( side->winding == NULL )
+					continue;
+				/* save this winding as a visible surface */
+				DrawSurfaceForSide(entity, brush, side, side->winding);
+			}
+		}
+
+		FilterDrawsurfsIntoTree(entity, tree);
+
+		EmitBrushes(entity->brushes, &entity->firstBrush, &entity->numBrushes );
+		EndModel(entity, node);
 	}
 }
 
@@ -1530,8 +1578,7 @@ int ConvertBSPMain( int argc, char **argv )
 		StripExtension(source);
 		DefaultExtension(source, ".map");
 		Sys_Printf("Loading %s\n", source);
-		LoadMapFile(name, qfalse, qtrue);
-		ParseEntities();
+		LoadMapFile(source, qfalse, qtrue);
 		PseudoCompileBSP();
 	}
 	else
