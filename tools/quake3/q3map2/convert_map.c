@@ -493,7 +493,10 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 			if(strncmp(buildSide->shaderInfo->shader, "textures/common/", 16))
 			if(strcmp(buildSide->shaderInfo->shader, "noshader"))
 			if(strcmp(buildSide->shaderInfo->shader, "default"))
+			{
 				fprintf(stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader);
+				texture = "common/WTF";
+			}
 
 			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
 			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );

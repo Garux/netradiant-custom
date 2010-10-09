@@ -1508,14 +1508,14 @@ int ConvertBSPMain( int argc, char **argv )
 	int		i;
 	int		(*convertFunc)( char * );
 	game_t	*convertGame;
-	qboolean	map_allowed;
 	char		ext[1024];
+	qboolean	map_allowed;
 	
 	
 	/* set default */
 	convertFunc = ConvertBSPToASE;
 	convertGame = NULL;
-	map_allowed = qfalse;
+	map_allowed = qtrue;
 	
 	/* arg checking */
 	if( argc < 1 )
@@ -1534,6 +1534,7 @@ int ConvertBSPMain( int argc, char **argv )
 			if( !Q_stricmp( argv[ i ], "ase" ) )
 			{
 				convertFunc = ConvertBSPToASE;
+				map_allowed = qtrue;
 			}
 			else if( !Q_stricmp( argv[ i ], "map_bp" ) )
 			{
@@ -1548,6 +1549,7 @@ int ConvertBSPMain( int argc, char **argv )
 			else
 			{
 				convertGame = GetGame( argv[ i ] );
+				map_allowed = qfalse;
 				if( convertGame == NULL )
 					Sys_Printf( "Unknown conversion format \"%s\". Defaulting to ASE.\n", argv[ i ] );
 			}
