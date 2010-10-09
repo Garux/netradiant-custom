@@ -1496,6 +1496,7 @@ void PseudoCompileBSP()
 		EmitBrushes(entity->brushes, &entity->firstBrush, &entity->numBrushes );
 		EndModel(entity, node);
 	}
+	EndBSPFile();
 }
 
 /*
