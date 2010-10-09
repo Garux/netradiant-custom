@@ -1615,7 +1615,7 @@ void						SetLightStyles( void );
 int							EmitShader( const char *shader, int *contentFlags, int *surfaceFlags );
 
 void						BeginBSPFile( void );
-void						EndBSPFile( void );
+void						EndBSPFile( qboolean do_write );
 void						EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes );
 void						EmitFogs( void );
 

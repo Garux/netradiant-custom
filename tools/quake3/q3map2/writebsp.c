@@ -399,7 +399,7 @@ EndBSPFile()
 finishes a new bsp and writes to disk
 */
 
-void EndBSPFile( void )
+void EndBSPFile(qboolean do_write)
 {
 	char	path[ 1024 ];
 	
@@ -411,13 +411,16 @@ void EndBSPFile( void )
 	numBSPEntities = numEntities;
 	UnparseEntities();
 	
-	/* write the surface extra file */
-	WriteSurfaceExtraFile( source );
-	
-	/* write the bsp */
-	sprintf( path, "%s.bsp", source );
-	Sys_Printf( "Writing %s\n", path );
-	WriteBSPFile( path );
+	if(do_write)
+	{
+		/* write the surface extra file */
+		WriteSurfaceExtraFile( source );
+
+		/* write the bsp */
+		sprintf( path, "%s.bsp", source );
+		Sys_Printf( "Writing %s\n", path );
+		WriteBSPFile( path );
+	}
 }
 
 

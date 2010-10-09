@@ -1511,7 +1511,7 @@ void PseudoCompileBSP(qboolean need_tree)
 		EmitBrushes(entity->brushes, &entity->firstBrush, &entity->numBrushes );
 		EndModel(entity, node);
 	}
-	EndBSPFile();
+	EndBSPFile(qfalse);
 }
 
 /*

@@ -978,7 +978,7 @@ int BSPMain( int argc, char **argv )
 	ProcessAdvertisements();
 
 	/* finish and write bsp */
-	EndBSPFile();
+	EndBSPFile(qtrue);
 	
 	/* remove temp map source file if appropriate */
 	if( strlen( tempSource ) > 0)
