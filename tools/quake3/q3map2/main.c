@@ -1434,11 +1434,12 @@ int ScaleBSPMain( int argc, char **argv )
 PseudoCompileBSP()
 a stripped down ProcessModels
 */
-void PseudoCompileBSP()
+void PseudoCompileBSP(qboolean need_tree)
 {
 	int models;
 	char modelValue[10];
 	entity_t *entity;
+	face_t *faces;
 	tree_t *tree;
 	node_t *node;
 	brush_t *brush;
@@ -1471,10 +1472,19 @@ void PseudoCompileBSP()
 
 		entity->firstDrawSurf = numMapDrawSurfs;
 
-		node = AllocNode();
-		node->planenum = PLANENUM_LEAF;
-		tree = AllocTree();
-		tree->headnode = node;
+		if(mapEntityNum == 0 && need_tree)
+		{
+			faces = MakeStructuralBSPFaceList(entities[0].brushes);
+			tree = FaceBSP(faces);
+			node = tree->headnode;
+		}
+		else
+		{
+			node = AllocNode();
+			node->planenum = PLANENUM_LEAF;
+			tree = AllocTree();
+			tree->headnode = node;
+		}
 
 		/* a minimized ClipSidesIntoTree */
 		for( brush = entity->brushes; brush; brush = brush->next )
@@ -1486,12 +1496,17 @@ void PseudoCompileBSP()
 				side = &brush->sides[ i ];
 				if( side->winding == NULL )
 					continue;
+				/* shader? */
+				if( side->shaderInfo == NULL )
+					continue;
 				/* save this winding as a visible surface */
 				DrawSurfaceForSide(entity, brush, side, side->winding);
 			}
 		}
 
 		FilterDrawsurfsIntoTree(entity, tree);
+		FilterStructuralBrushesIntoTree(entity, tree);
+		FilterDetailBrushesIntoTree(entity, tree);
 
 		EmitBrushes(entity->brushes, &entity->firstBrush, &entity->numBrushes );
 		EndModel(entity, node);
@@ -1550,7 +1565,7 @@ int ConvertBSPMain( int argc, char **argv )
 			else
 			{
 				convertGame = GetGame( argv[ i ] );
-				map_allowed = qfalse;
+				map_allowed = qtrue;
 				if( convertGame == NULL )
 					Sys_Printf( "Unknown conversion format \"%s\". Defaulting to ASE.\n", argv[ i ] );
 			}
@@ -1581,8 +1596,8 @@ int ConvertBSPMain( int argc, char **argv )
 		StripExtension(source);
 		DefaultExtension(source, ".map");
 		Sys_Printf("Loading %s\n", source);
-		LoadMapFile(source, qfalse, qtrue);
-		PseudoCompileBSP();
+		LoadMapFile(source, qfalse, convertGame == NULL);
+		PseudoCompileBSP(convertGame != NULL);
 	}
 	else
 	{
