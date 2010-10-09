@@ -639,7 +639,7 @@ void OnlyEnts( void )
 	numEntities = 0;
 
 	LoadShaderInfo();
-	LoadMapFile( name, qfalse );
+	LoadMapFile( name, qfalse, qfalse );
 	SetModelNumbers();
 	SetLightStyles();
 
@@ -955,9 +955,9 @@ int BSPMain( int argc, char **argv )
 	
 	/* load original file from temp spot in case it was renamed by the editor on the way in */
 	if( strlen( tempSource ) > 0 )
-		LoadMapFile( tempSource, qfalse );
+		LoadMapFile( tempSource, qfalse, qfalse );
 	else
-		LoadMapFile( name, qfalse );
+		LoadMapFile( name, qfalse, qfalse );
 	
 	/* div0: inject command line parameters */
 	InjectCommandLine(argv, 1, argc - 1);

@@ -1430,6 +1430,25 @@ int ScaleBSPMain( int argc, char **argv )
 }
 
 
+void PseudoCompileBSP()
+{
+	// a stripped down ProcessModels
+	BeginBSPFile();
+	for( mapEntityNum = 0; mapEntityNum < numEntities; mapEntityNum++ )
+	{
+		/* get entity */
+		entity = &entities[ mapEntityNum ];
+		if( entity->brushes == NULL && entity->patches == NULL )
+			continue;
+		
+		/* process the model */
+		Sys_FPrintf( SYS_VRB, "############### model %i ###############\n", numBSPModels );
+		BeginModel();
+		entity>firstDrawSurf = 0;
+		EmitBrushes(entity->brushes, &entity>firstBrush, &entity>numBrushes );
+		EndModel(entity, NULL);
+	}
+}
 
 /*
 ConvertBSPMain()
@@ -1441,11 +1460,14 @@ int ConvertBSPMain( int argc, char **argv )
 	int		i;
 	int		(*convertFunc)( char * );
 	game_t	*convertGame;
+	qboolean	map_allowed;
+	char		ext[1024];
 	
 	
 	/* set default */
 	convertFunc = ConvertBSPToASE;
 	convertGame = NULL;
+	map_allowed = qfalse;
 	
 	/* arg checking */
 	if( argc < 1 )
@@ -1462,11 +1484,19 @@ int ConvertBSPMain( int argc, char **argv )
  		{
 			i++;
 			if( !Q_stricmp( argv[ i ], "ase" ) )
+			{
 				convertFunc = ConvertBSPToASE;
+			}
 			else if( !Q_stricmp( argv[ i ], "map_bp" ) )
+			{
 				convertFunc = ConvertBSPToMap_BP;
+				map_allowed = qtrue;
+			}
 			else if( !Q_stricmp( argv[ i ], "map" ) )
+			{
 				convertFunc = ConvertBSPToMap;
+				map_allowed = qtrue;
+			}
 			else
 			{
 				convertGame = GetGame( argv[ i ] );
@@ -1489,23 +1519,29 @@ int ConvertBSPMain( int argc, char **argv )
 		else if( !strcmp( argv[ i ],  "-shadersasbitmap" ) )
 			shadersAsBitmap = qtrue;
 	}
-	
-	/* clean up map name */
-	strcpy( source, ExpandArg( argv[ i ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
-	
+
 	LoadShaderInfo();
 	
-	Sys_Printf( "Loading %s\n", source );
-	
-	/* ydnar: load surface file */
-	//%	LoadSurfaceExtraFile( source );
-	
-	LoadBSPFile( source );
-	
-	/* parse bsp entities */
-	ParseEntities();
+	/* clean up map name */
+	strcpy(source, ExpandArg(argv[i]));
+	ExtractFileExtension(source, ext);
+	if(!Q_stricmp(ext, "map") && map_allowed)
+	{
+		StripExtension(source);
+		DefaultExtension(source, ".map");
+		Sys_Printf("Loading %s\n", source);
+		LoadMapFile(name, qfalse, qtrue);
+		ParseEntities();
+		PseudoCompileBSP();
+	}
+	else
+	{
+		StripExtension(source);
+		DefaultExtension(source, ".bsp");
+		Sys_Printf("Loading %s\n", source);
+		LoadBSPFile(source);
+		ParseEntities();
+	}
 	
 	/* bsp format convert? */
 	if( convertGame != NULL )

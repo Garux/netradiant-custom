@@ -630,7 +630,8 @@ void EndModel( entity_t *e, node_t *headnode )
 	
 	/* emit the bsp */
 	mod = &bspModels[ numBSPModels ];
-	EmitDrawNode_r( headnode );
+	if(headnode)
+		EmitDrawNode_r( headnode );
 	
 	/* set surfaces and brushes */
 	mod->numBSPSurfaces = numBSPDrawSurfaces - mod->firstBSPSurface;

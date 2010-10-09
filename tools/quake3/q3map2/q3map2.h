@@ -1576,7 +1576,7 @@ void						MakeNormalVectors( vec3_t forward, vec3_t right, vec3_t up );
 
 
 /* map.c */
-void 						LoadMapFile( char *filename, qboolean onlyLights );
+void 						LoadMapFile( char *filename, qboolean onlyLights, qboolean noCollapseGroups );
 int							FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points );
 int							PlaneTypeForNormal( vec3_t normal );
 void						AddBrushBevels( void );

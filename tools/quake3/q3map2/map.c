@@ -1418,7 +1418,7 @@ ParseMapEntity()
 parses a single entity out of a map file
 */
 
-static qboolean ParseMapEntity( qboolean onlyLights )
+static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 {
 	epair_t			*ep;
 	const char		*classname, *value;
@@ -1664,14 +1664,14 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		AdjustBrushesForOrigin( mapEnt );
 
 	/* group_info entities are just for editor grouping (fixme: leak!) */
-	if( !Q_stricmp( "group_info", classname ) )
+	if( !noCollapseGroups && !Q_stricmp( "group_info", classname ) )
 	{
 		numEntities--;
 		return qtrue;
 	}
 	
 	/* group entities are just for editor convenience, toss all brushes into worldspawn */
-	if( funcGroup )
+	if( !noCollapseGroups && funcGroup )
 	{
 		MoveBrushesToWorld( mapEnt );
 		numEntities--;
@@ -1689,7 +1689,7 @@ LoadMapFile()
 loads a map file into a list of entities
 */
 
-void LoadMapFile( char *filename, qboolean onlyLights )
+void LoadMapFile( char *filename, qboolean onlyLights, qboolean noCollapseGroups )
 {		
 	FILE		*file;
 	brush_t		*b;
@@ -1722,7 +1722,7 @@ void LoadMapFile( char *filename, qboolean onlyLights )
 	buildBrush = AllocBrush( MAX_BUILD_SIDES );
 	
 	/* parse the map file */
-	while( ParseMapEntity( onlyLights ) );
+	while( ParseMapEntity( onlyLights, noCollapseGroups ) );
 	
 	/* light loading */
 	if( onlyLights )

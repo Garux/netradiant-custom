@@ -2800,7 +2800,7 @@ int LightMain( int argc, char **argv )
 	/* load map file */
 	value = ValueForKey( &entities[ 0 ], "_keepLights" );
 	if( value[ 0 ] != '1' )
-		LoadMapFile( mapSource, qtrue );
+		LoadMapFile( mapSource, qtrue, qfalse );
 	
 	/* set the entity/model origins and init yDrawVerts */
 	SetEntityOrigins();
