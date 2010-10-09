@@ -1550,7 +1550,7 @@ int ConvertBSPMain( int argc, char **argv )
 			if( !Q_stricmp( argv[ i ], "ase" ) )
 			{
 				convertFunc = ConvertBSPToASE;
-				map_allowed = qtrue;
+				map_allowed = qfalse;
 			}
 			else if( !Q_stricmp( argv[ i ], "map_bp" ) )
 			{
@@ -1565,7 +1565,7 @@ int ConvertBSPMain( int argc, char **argv )
 			else
 			{
 				convertGame = GetGame( argv[ i ] );
-				map_allowed = qtrue;
+				map_allowed = qfalse;
 				if( convertGame == NULL )
 					Sys_Printf( "Unknown conversion format \"%s\". Defaulting to ASE.\n", argv[ i ] );
 			}
@@ -1591,8 +1591,10 @@ int ConvertBSPMain( int argc, char **argv )
 	/* clean up map name */
 	strcpy(source, ExpandArg(argv[i]));
 	ExtractFileExtension(source, ext);
-	if(!Q_stricmp(ext, "map") && map_allowed)
+	if(!Q_stricmp(ext, "map"))
 	{
+		if(!map_allowed)
+			Sys_Printf("WARNING: the requested conversion should not be done from .map files. Compile a .bsp first.\n");
 		StripExtension(source);
 		DefaultExtension(source, ".map");
 		Sys_Printf("Loading %s\n", source);
