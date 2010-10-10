@@ -90,6 +90,16 @@ void Brush_registerPreferencesPage()
   PreferencesDialog_addSettingsPage(FreeCaller1<PreferenceGroup&, Brush_constructPage>());
 }
 
+void Brush_unlatchPreferences()
+{
+	if(g_showAlternativeTextureProjectionOption)
+	{
+		g_useAlternativeTextureProjection.useLatched();
+		globalErrorStream() << "Unlatched g_useAlternativeTextureProjection (" << g_useAlternativeTextureProjection.m_value << ")\n";
+		Brush::destroyStatic();
+		Brush::constructStatic(g_useAlternativeTextureProjection.m_value ? eBrushTypeQuake3BP : eBrushTypeQuake3);
+	}
+}
 
 void Brush_Construct(EBrushType type)
 {

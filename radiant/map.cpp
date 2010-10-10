@@ -83,6 +83,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "mru.h"
 #include "commands.h"
 #include "autosave.h"
+#include "brushmodule.h"
 
 class NameObserver
 {
@@ -463,6 +464,7 @@ void Map_Free()
   FlushReferences();
 
   g_currentMap = 0;
+  Brush_unlatchPreferences();
 }
 
 class EntityFindByClassname : public scene::Graph::Walker
