@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 /// GTK+ file-chooser dialogs.
 
 typedef struct _GtkWidget GtkWidget;
-const char* file_dialog(GtkWidget *parent, bool open, const char* title, const char* path = 0, const char* pattern = 0);
+const char* file_dialog(GtkWidget *parent, bool open, const char* title, const char* path = 0, const char* pattern = 0, bool want_load = false, bool want_import = false, bool want_save = false);
 
 
 /// \brief Prompts the user to browse for a directory.

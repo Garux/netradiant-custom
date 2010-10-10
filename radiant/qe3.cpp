@@ -333,7 +333,7 @@ void RunBSP(const char* name)
 #endif
       globalOutputStream() << "Writing the compile script to '" << batpath << "'\n";
       globalOutputStream() << "The build output will be saved in '" << junkpath << "'\n";
-      Q_Exec(batpath, NULL, NULL, true);
+      Q_Exec(batpath, NULL, NULL, true, false);
     }
   }
 

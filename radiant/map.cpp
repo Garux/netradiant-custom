@@ -85,6 +85,7 @@ MapModules& ReferenceAPI_getMapModules();
 #include "commands.h"
 #include "autosave.h"
 #include "brushmodule.h"
+#include "brush.h"
 
 class NameObserver
 {
@@ -1637,28 +1638,80 @@ bool Map_ImportFile(const char* filename)
   ScopeDisableScreenUpdates disableScreenUpdates("Processing...", "Loading Map");
 
   bool success = false;
+
+  if(extension_equal(path_get_extension(filename), "bsp"))
+    goto tryDecompile;
+
   {
     Resource* resource = GlobalReferenceCache().capture(filename);
     resource->refresh(); // avoid loading old version if map has changed on disk since last import
-    if(resource->load())
+    if(!resource->load())
     {
-      NodeSmartReference clone(NewMapRoot(""));
-
-      {
-        //ScopeTimer timer("clone subgraph");
-        Node_getTraversable(*resource->getNode())->traverse(CloneAll(clone));
-      }
-
-      Map_gatherNamespaced(clone);
-      Map_mergeClonedNames();
-      MergeMap(clone);
-      success = true;
+      GlobalReferenceCache().release(filename);
+      goto tryDecompile;
     }
+    NodeSmartReference clone(NewMapRoot(""));
+    Node_getTraversable(*resource->getNode())->traverse(CloneAll(clone));
+    Map_gatherNamespaced(clone);
+    Map_mergeClonedNames();
+    MergeMap(clone);
+    success = true;
     GlobalReferenceCache().release(filename);
   }
 
-	SceneChangeNotify();
+  SceneChangeNotify();
 
+  return success;
+
+tryDecompile:
+
+  const char *type = GlobalRadiant().getRequiredGameDescriptionKeyValue("q3map2_type");
+  int n = string_length(path_get_extension(filename));
+  if(n && (extension_equal(path_get_extension(filename), "bsp") || extension_equal(path_get_extension(filename), "map")))
+  {
+    StringBuffer output;
+    output.push_string(AppPath_get());
+    output.push_string("q3map2.");
+    output.push_string(RADIANT_EXECUTABLE);
+    output.push_string(" -v -game ");
+    output.push_string((type && *type) ? type : "quake3");
+    output.push_string(" -fs_basepath \"");
+    output.push_string(EnginePath_get());
+    output.push_string("\" -fs_game ");
+    output.push_string(gamename_get());
+    output.push_string(" -convert -format ");
+    output.push_string(Brush::m_type == eBrushTypeQuake3BP ? "map_bp" : "map");
+    output.push_string(" \"");
+    output.push_string(filename);
+    output.push_string("\"");
+
+    // run
+    Q_Exec(NULL, output.c_str(), NULL, false, true);
+
+    // rebuild filename as "filenamewithoutext_converted.map"
+    output.clear();
+    output.push_range(filename, filename + string_length(filename) - (n + 1));
+    output.push_string("_converted.map");
+    filename = output.c_str();
+
+    // open
+    Resource* resource = GlobalReferenceCache().capture(filename);
+    resource->refresh(); // avoid loading old version if map has changed on disk since last import
+    if(!resource->load())
+    {
+      GlobalReferenceCache().release(filename);
+      goto tryDecompile;
+    }
+    NodeSmartReference clone(NewMapRoot(""));
+    Node_getTraversable(*resource->getNode())->traverse(CloneAll(clone));
+    Map_gatherNamespaced(clone);
+    Map_mergeClonedNames();
+    MergeMap(clone);
+    success = true;
+    GlobalReferenceCache().release(filename);
+  }
+  
+  SceneChangeNotify();
   return success;
 }
 
@@ -1897,12 +1950,17 @@ const char* getMapsPath()
 
 const char* map_open(const char* title)
 {
-  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), TRUE, title, getMapsPath(), MapFormat::Name());
+  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), TRUE, title, getMapsPath(), MapFormat::Name(), true, false, false);
+}
+
+const char* map_import(const char* title)
+{
+  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), TRUE, title, getMapsPath(), MapFormat::Name(), false, true, false);
 }
 
 const char* map_save(const char* title)
 {
-  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), FALSE, title, getMapsPath(), MapFormat::Name());
+  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), FALSE, title, getMapsPath(), MapFormat::Name(), false, false, true);
 }
 
 void OpenMap()
@@ -1923,7 +1981,7 @@ void OpenMap()
 
 void ImportMap()
 {
-  const char* filename = map_open("Import Map");
+  const char* filename = map_import("Import Map");
 
   if(filename != 0)
   {

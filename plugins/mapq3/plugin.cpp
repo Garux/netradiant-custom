@@ -264,8 +264,9 @@ public:
 
   MapQ3API()
   {
-    GlobalFiletypesModule::getTable().addType(Type::Name(), Name(), filetype_t("quake3 maps", "*.map"));
-    GlobalFiletypesModule::getTable().addType(Type::Name(), Name(), filetype_t("quake3 region", "*.reg"));
+    GlobalFiletypesModule::getTable().addType(Type::Name(), Name(), filetype_t("quake3 maps", "*.map", true, true, true));
+    GlobalFiletypesModule::getTable().addType(Type::Name(), Name(), filetype_t("quake3 region", "*.reg", true, true, true));
+    GlobalFiletypesModule::getTable().addType(Type::Name(), Name(), filetype_t("quake3 compiled maps", "*.bsp", false, true, false));
   }
   MapFormat* getTable()
   {

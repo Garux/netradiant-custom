@@ -36,16 +36,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if defined (POSIX)
 
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-bool Q_Exec(const char *cmd, char *cmdline, const char *, bool)
+bool Q_Exec(const char *cmd, char *cmdline, const char *, bool, bool waitfor)
 {
   char fullcmd[2048];
   char *pCmd;
+  pid_t pid;
 #ifdef _DEBUG
   printf("Q_Exec damnit\n");
 #endif
-  switch (fork())
+  switch ((pid = fork()))
   {
+  default:
+    if(waitfor)
+      waitpid(pid, NULL, 0);
+    break;
   case -1:
     return true;
     break;
@@ -84,7 +91,7 @@ bool Q_Exec(const char *cmd, char *cmdline, const char *, bool)
 #include <windows.h>
 
 // NOTE TTimo windows is VERY nitpicky about the syntax in CreateProcess
-bool Q_Exec(const char *cmd, char *cmdline, const char *execdir, bool bCreateConsole)
+bool Q_Exec(const char *cmd, char *cmdline, const char *execdir, bool bCreateConsole, bool waitfor)
 {
   PROCESS_INFORMATION ProcessInformation;
   STARTUPINFO startupinfo = {0};
@@ -121,7 +128,11 @@ bool Q_Exec(const char *cmd, char *cmdline, const char *execdir, bool bCreateCon
                     &startupinfo,
                     &ProcessInformation
                     ))
+  {
+    if(waitfor)
+      WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
     return true;
+  }
   return false;
 }
 

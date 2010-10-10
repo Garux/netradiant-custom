@@ -22,7 +22,7 @@ void OnExportClicked(GtkButton* button, gpointer user_data)
 {
 	GtkWidget* window = lookup_widget(GTK_WIDGET(button), "w_plugplug2");
 	ASSERT_NOTNULL(window);
-	const char* cpath = GlobalRadiant().m_pfnFileDialog(window, false, "Save as Obj", 0, 0);
+	const char* cpath = GlobalRadiant().m_pfnFileDialog(window, false, "Save as Obj", 0, 0, false, false, true);
 	if(!cpath)
 		return;
 

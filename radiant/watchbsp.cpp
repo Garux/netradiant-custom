@@ -577,7 +577,7 @@ void CWatchBSP::DoEBeginStep()
     globalOutputStream() << "=== running build command ===\n"
       << static_cast<const char*>(g_ptr_array_index( m_pCmd, m_iCurrentStep )) << "\n";
     
-    if (!Q_Exec(NULL, (char *)g_ptr_array_index( m_pCmd, m_iCurrentStep ), NULL, true ))
+    if (!Q_Exec(NULL, (char *)g_ptr_array_index( m_pCmd, m_iCurrentStep ), NULL, true, false ))
     {
       StringOutputStream msg(256);
       msg << "Failed to execute the following command: ";
@@ -815,7 +815,7 @@ void CWatchBSP::RoutineProcessing()
             globalOutputStream() << cmd.c_str() << " " << cmdline.c_str() << "\n";
 
             // execute now
-            if (!Q_Exec(cmd.c_str(), (char *)cmdline.c_str(), EnginePath_get(), false))
+            if (!Q_Exec(cmd.c_str(), (char *)cmdline.c_str(), EnginePath_get(), false, false))
             {
               StringOutputStream msg;
               msg << "Failed to execute the following command: " << cmd.c_str() << cmdline.c_str();

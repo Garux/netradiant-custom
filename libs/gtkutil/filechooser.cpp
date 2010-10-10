@@ -137,7 +137,7 @@ public:
 
 static char g_file_dialog_file[1024];
 
-const char* file_dialog_show(GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern)
+const char* file_dialog_show(GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save)
 {
   filetype_t type;
 
@@ -147,7 +147,7 @@ const char* file_dialog_show(GtkWidget* parent, bool open, const char* title, co
   }
 
   FileTypeList typelist;
-  GlobalFiletypes().getTypeList(pattern, &typelist);
+  GlobalFiletypes().getTypeList(pattern, &typelist, want_load, want_import, want_save);
 
   GTKMasks masks(typelist);
 
@@ -288,11 +288,11 @@ char* dir_dialog(GtkWidget* parent, const char* title, const char* path)
   return filename;
 }
 
-const char* file_dialog(GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern)
+const char* file_dialog(GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save)
 {
   for(;;)
   {
-    const char* file = file_dialog_show(parent, open, title, path, pattern);
+    const char* file = file_dialog_show(parent, open, title, path, pattern, want_load, want_import, want_save);
 
     if(open
       || file == 0

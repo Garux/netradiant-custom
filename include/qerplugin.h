@@ -71,7 +71,7 @@ typedef EMessageBoxReturn (* PFN_QERAPP_MESSAGEBOX) (GtkWidget *parent, const ch
 // - 'title' is the dialog title (can be null)
 // - 'path' is used to set the initial directory (can be null)
 // - 'pattern': the first pattern is for the win32 mode, then comes the Gtk pattern list, see Radiant source for samples
-typedef const char* (* PFN_QERAPP_FILEDIALOG) (GtkWidget *parent, bool open, const char* title, const char* path/* = 0*/, const char* pattern/* = 0*/);
+typedef const char* (* PFN_QERAPP_FILEDIALOG) (GtkWidget *parent, bool open, const char* title, const char* path/* = 0*/, const char* pattern/* = 0*/, bool want_load/* = false*/, bool want_import/* = false*/, bool want_save/* = false*/);
 
 // returns a gchar* string that must be g_free'd by the user
 typedef char* (* PFN_QERAPP_DIRDIALOG) (GtkWidget *parent, const char* title/* = "Choose Directory"*/, const char* path/* = 0*/);

@@ -1089,7 +1089,7 @@ void DoTextEditor (const char* filename, int cursorpos)
     
     globalOutputStream() << "Launching: " << strEditCommand.c_str() << "\n";
     // note: linux does not return false if the command failed so it will assume success
-    if (Q_Exec(0, const_cast<char*>(strEditCommand.c_str()), 0, true) == false)
+    if (Q_Exec(0, const_cast<char*>(strEditCommand.c_str()), 0, true, false) == false)
     {
       globalOutputStream() << "Failed to execute " << strEditCommand.c_str() << ", using default\n";
     }

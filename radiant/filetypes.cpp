@@ -35,7 +35,7 @@ class RadiantFileTypeRegistry : public IFileTypeRegistry
   struct filetype_copy_t
   {
     filetype_copy_t(const char* moduleName, const filetype_t other)
-      : m_moduleName(moduleName), m_name(other.name), m_pattern(other.pattern)
+      : m_moduleName(moduleName), m_name(other.name), m_pattern(other.pattern), m_can_load(other.can_load), m_can_import(other.can_import), m_can_save(other.can_save)
     {
     }
     const char* getModuleName() const
@@ -44,8 +44,11 @@ class RadiantFileTypeRegistry : public IFileTypeRegistry
     }
     filetype_t getType() const
     {
-      return filetype_t(m_name.c_str(), m_pattern.c_str());
+      return filetype_t(m_name.c_str(), m_pattern.c_str(), m_can_load, m_can_save, m_can_import);
     }
+    bool m_can_load;
+    bool m_can_import;
+    bool m_can_save;
   private:
     CopiedString m_moduleName;
     CopiedString m_name;
@@ -62,11 +65,14 @@ public:
   {
     m_typelists[moduleType].push_back(filetype_copy_t(moduleName, type));
   }
-  void getTypeList(const char* moduleType, IFileTypeList* typelist)
+  void getTypeList(const char* moduleType, IFileTypeList* typelist, bool want_load, bool want_import, bool want_save)
   {
     filetype_list_t& list_ref = m_typelists[moduleType];
     for(filetype_list_t::iterator i = list_ref.begin(); i != list_ref.end(); ++i)
     {
+      if(want_load && !(*i).m_can_load) return;
+      if(want_import && !(*i).m_can_import) return;
+      if(want_save && !(*i).m_can_save) return;
       typelist->addType((*i).getModuleName(), (*i).getType());
     }
   }
