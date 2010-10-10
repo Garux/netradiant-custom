@@ -1032,29 +1032,28 @@ void Map_LoadFile (const char *filename)
   globalOutputStream() << "Loading map from " << filename << "\n";
   ScopeDisableScreenUpdates disableScreenUpdates("Processing...", "Loading Map");
 
-  g_map.m_name = filename;
-  Map_UpdateTitle(g_map);
-
   {
     ScopeTimer timer("map load");
 
-    g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
+    const MapFormat* format = NULL;
+    const char* moduleName = findModuleName(&GlobalFiletypes(), MapFormat::Name(), path_get_extension(filename));
+    if(string_not_empty(moduleName))
+      format = ReferenceAPI_getMapModules().findModule(moduleName);
 
-    const MapFormat* format = ReferenceAPI_getMapModules().findModule("mapq3");
-    format->wrongFormat = false;
-    g_map.m_resource->attach(g_map);
-    if(format->wrongFormat)
+    for(int i = 0; i < Brush_toggleFormatCount(); ++i)
     {
-      // try toggling BrushPrimitives
-      for(i = 1; i < Brush_toggleFormatCount(); ++i)
-      {
+      if(i)
 	Map_Free();
-	Brush_toggleFormat(i);
-	g_map.m_name = filename;
-	Map_UpdateTitle(g_map);
-	g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
-	g_map.m_resource->attach(g_map);
-      }
+      Brush_toggleFormat(i);
+      g_map.m_name = filename;
+      Map_UpdateTitle(g_map);
+      g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
+      if(format)
+	format->wrongFormat = false;
+      g_map.m_resource->attach(g_map);
+      if(format)
+	if(!format->wrongFormat)
+	  break;
     }
 
     Node_getTraversable(GlobalSceneGraph().root())->traverse(entity_updateworldspawn());
