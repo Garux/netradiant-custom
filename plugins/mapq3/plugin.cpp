@@ -257,6 +257,7 @@ public:
 
 class MapQ3API : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
+  mutable bool detectedFormat;
 public:
   typedef MapFormat Type;
   STRING_CONSTANT(Name, "mapq3");
@@ -284,16 +285,30 @@ public:
       {
         if(string_equal(primitive, "brushDef"))
         {
+	  detectedFormat = true;
           return GlobalBrushModule::getTable().createBrush();
         }
+	else if(!detectedFormat && string_equal(primitive, "("))
+	{
+	  detectedFormat = true;
+	  Tokeniser_unexpectedError(tokeniser, primitive, "#quake3-switch-to-texdef");
+	  return g_nullNode;
+	}
       }
       else
       {
         if(string_equal(primitive, "("))
         {
+	  detectedFormat = true;
           tokeniser.ungetToken(); // (
           return GlobalBrushModule::getTable().createBrush();
         }
+	else if(!detectedFormat && string_equal(primitive, "("))
+	{
+	  detectedFormat = true;
+	  Tokeniser_unexpectedError(tokeniser, primitive, "#quake3-switch-to-brush-primitives");
+	  return g_nullNode;
+	}
       }
     }
 
@@ -303,6 +318,7 @@ public:
 
   void readGraph(scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable) const
   {
+    detectedFormat = false;
     Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser(inputStream);
     Map_Read(root, tokeniser, entityTable, *this);
     tokeniser.release();
