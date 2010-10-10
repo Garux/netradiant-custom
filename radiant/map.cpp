@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "debugging/debugging.h"
 
 #include "imap.h"
+MapModules& ReferenceAPI_getMapModules();
 #include "iselection.h"
 #include "iundo.h"
 #include "ibrush.h"
@@ -1038,7 +1039,20 @@ void Map_LoadFile (const char *filename)
     ScopeTimer timer("map load");
 
     g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
+
+    const MapFormat* format = ReferenceAPI_getMapModules().findModule("mapq3");
+    format->wrongFormat = false;
     g_map.m_resource->attach(g_map);
+    if(format->wrongFormat)
+    {
+      // try toggling BrushPrimitives
+      Map_Free();
+      Brush_toggleProjection();
+      g_map.m_name = filename;
+      Map_UpdateTitle(g_map);
+      g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
+      g_map.m_resource->attach(g_map);
+    }
 
     Node_getTraversable(GlobalSceneGraph().root())->traverse(entity_updateworldspawn());
   }

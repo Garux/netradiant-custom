@@ -101,6 +101,17 @@ void Brush_unlatchPreferences()
 	}
 }
 
+void Brush_toggleProjection()
+{
+	if(g_showAlternativeTextureProjectionOption)
+	{
+		g_useAlternativeTextureProjection.m_value = !g_useAlternativeTextureProjection.m_value;
+		globalErrorStream() << "Toggled g_useAlternativeTextureProjection (" << g_useAlternativeTextureProjection.m_value << ")\n";
+		Brush::destroyStatic();
+		Brush::constructStatic(g_useAlternativeTextureProjection.m_value ? eBrushTypeQuake3BP : eBrushTypeQuake3);
+	}
+}
+
 void Brush_Construct(EBrushType type)
 {
   if(type == eBrushTypeQuake3)
