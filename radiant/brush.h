@@ -1203,6 +1203,9 @@ public:
     ASSERT_MESSAGE(projectionaxis_for_normal(normal) == projectionaxis_for_normal(plane3().normal()), "bleh");
 #endif
     m_observer->planeChanged();
+
+    if(g_brush_texturelock_enabled)
+      Brush_textureChanged();
   }
 
   void assign_planepts(const PlanePoints planepts)
