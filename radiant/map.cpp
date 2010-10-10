@@ -1046,12 +1046,15 @@ void Map_LoadFile (const char *filename)
     if(format->wrongFormat)
     {
       // try toggling BrushPrimitives
-      Map_Free();
-      Brush_toggleProjection();
-      g_map.m_name = filename;
-      Map_UpdateTitle(g_map);
-      g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
-      g_map.m_resource->attach(g_map);
+      for(i = 1; i < Brush_toggleProjectionCount(); ++i)
+      {
+	Map_Free();
+	Brush_toggleProjection(i);
+	g_map.m_name = filename;
+	Map_UpdateTitle(g_map);
+	g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
+	g_map.m_resource->attach(g_map);
+      }
     }
 
     Node_getTraversable(GlobalSceneGraph().root())->traverse(entity_updateworldspawn());

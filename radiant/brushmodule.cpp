@@ -92,24 +92,24 @@ void Brush_registerPreferencesPage()
 
 void Brush_unlatchPreferences()
 {
+	Brush_toggleProjection(0);
+}
+
+void Brush_toggleProjection(int i)
+{
 	if(g_showAlternativeTextureProjectionOption)
 	{
-		g_useAlternativeTextureProjection.useLatched();
-		globalErrorStream() << "Unlatched g_useAlternativeTextureProjection (" << g_useAlternativeTextureProjection.m_value << ")\n";
+		g_useAlternativeTextureProjection.m_value = g_useAlternativeTextureProjection.m_latched ^ i;
 		Brush::destroyStatic();
 		Brush::constructStatic(g_useAlternativeTextureProjection.m_value ? eBrushTypeQuake3BP : eBrushTypeQuake3);
 	}
 }
 
-void Brush_toggleProjection()
+int Brush_toggleProjectionCount()
 {
 	if(g_showAlternativeTextureProjectionOption)
-	{
-		g_useAlternativeTextureProjection.m_value = !g_useAlternativeTextureProjection.m_value;
-		globalErrorStream() << "Toggled g_useAlternativeTextureProjection (" << g_useAlternativeTextureProjection.m_value << ")\n";
-		Brush::destroyStatic();
-		Brush::constructStatic(g_useAlternativeTextureProjection.m_value ? eBrushTypeQuake3BP : eBrushTypeQuake3);
-	}
+		return 2;
+	return 1;
 }
 
 void Brush_Construct(EBrushType type)
