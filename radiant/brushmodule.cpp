@@ -92,10 +92,10 @@ void Brush_registerPreferencesPage()
 
 void Brush_unlatchPreferences()
 {
-	Brush_toggleProjection(0);
+	Brush_toggleFormat(0);
 }
 
-void Brush_toggleProjection(int i)
+void Brush_toggleFormat(int i)
 {
 	if(g_showAlternativeTextureProjectionOption)
 	{
@@ -105,7 +105,7 @@ void Brush_toggleProjection(int i)
 	}
 }
 
-int Brush_toggleProjectionCount()
+int Brush_toggleFormatCount()
 {
 	if(g_showAlternativeTextureProjectionOption)
 		return 2;

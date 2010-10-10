@@ -1046,10 +1046,10 @@ void Map_LoadFile (const char *filename)
     if(format->wrongFormat)
     {
       // try toggling BrushPrimitives
-      for(i = 1; i < Brush_toggleProjectionCount(); ++i)
+      for(i = 1; i < Brush_toggleFormatCount(); ++i)
       {
 	Map_Free();
-	Brush_toggleProjection(i);
+	Brush_toggleFormat(i);
 	g_map.m_name = filename;
 	Map_UpdateTitle(g_map);
 	g_map.m_resource = GlobalReferenceCache().capture(g_map.m_name.c_str());
