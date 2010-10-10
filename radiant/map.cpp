@@ -1897,12 +1897,17 @@ const char* getMapsPath()
 
 const char* map_open(const char* title)
 {
-  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), TRUE, title, getMapsPath(), MapFormat::Name());
+  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), TRUE, title, getMapsPath(), MapFormat::Name(), true, false, false);
+}
+
+const char* map_import(const char* title)
+{
+  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), TRUE, title, getMapsPath(), MapFormat::Name(), false, true, false);
 }
 
 const char* map_save(const char* title)
 {
-  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), FALSE, title, getMapsPath(), MapFormat::Name());
+  return file_dialog(GTK_WIDGET(MainFrame_getWindow()), FALSE, title, getMapsPath(), MapFormat::Name(), false, false, true);
 }
 
 void OpenMap()
@@ -1923,7 +1928,7 @@ void OpenMap()
 
 void ImportMap()
 {
-  const char* filename = map_open("Import Map");
+  const char* filename = map_import("Import Map");
 
   if(filename != 0)
   {
