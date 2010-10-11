@@ -1193,9 +1193,7 @@ public:
   void transform(const Matrix4& matrix, bool mirror)
   {
     if(g_brush_texturelock_enabled)
-    {
       Texdef_transformLocked(m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix);
-    }
 
     m_planeTransformed.transform(matrix, mirror);
 
