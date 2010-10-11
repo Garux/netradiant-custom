@@ -1551,6 +1551,9 @@ void CamWnd::Cam_Draw()
   glGetIntegerv (GL_VIEWPORT, viewprt);
 #endif
 
+  // initialize OpenGL state for glClear to work
+  GlobalShaderCache().render(RENDER_DEFAULT, m_Camera.modelview, m_Camera.projection, m_view.getViewer());
+
   // enable depth buffer writes
   glDepthMask(GL_TRUE);
 
