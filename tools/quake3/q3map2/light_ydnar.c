@@ -4162,7 +4162,7 @@ float FloodLightForSample( trace_t *trace , float floodLightDistance, qboolean f
 	  		TraceLine( trace );
 			contribution=1;
 
-			if (trace->compileFlags & C_SKY )
+			if ( trace->compileFlags & C_SKY || trace->compileFlags & C_TRANSLUCENT )
 			{
 				contribution=1.0f;
 			}
