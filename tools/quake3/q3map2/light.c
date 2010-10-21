@@ -2050,6 +2050,7 @@ int LightMain( int argc, char **argv )
 	char		mapSource[ 1024 ];
 	const char	*value;
 	int lightmapMergeSize = 0;
+	qboolean	lightSamplesInsist = qfalse;
 	
 	
 	/* note it */
@@ -2255,6 +2256,8 @@ int LightMain( int argc, char **argv )
 		
 		else if( !strcmp( argv[ i ], "-samples" ) )
 		{
+			if(*argv[i+1] == '+')
+				lightSamplesInsist = qtrue;
 			lightSamples = atoi( argv[ i + 1 ] );
 			if( lightSamples < 1 )
 				lightSamples = 1;
@@ -2755,6 +2758,29 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "WARNING: Unknown argument \"%s\"\n", argv[ i ] );
 		}
 
+	}
+
+	/* fix up samples count */
+	if(lightRandomSamples)
+	{
+		if(!lightSamplesInsist)
+		{
+			/* approximately match -samples in quality */
+			switch(lightSamples)
+			{
+				/* somewhat okay */
+				case 1:
+				case 2: lightSamples = 16; break;
+
+				/* good */
+				case 3: lightSamples = 64; break;
+
+				/* perfect */
+				case 4: lightSamples = 256; break;
+
+				default: break;
+			}
+		}
 	}
 
 	/* fix up lightmap search power */
