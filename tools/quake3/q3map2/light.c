@@ -2770,13 +2770,22 @@ int LightMain( int argc, char **argv )
 			{
 				/* somewhat okay */
 				case 1:
-				case 2: lightSamples = 16; break;
+				case 2:
+					lightSamples = 16;
+					Sys_Printf( "Adaptive supersampling preset enabled with %d random sample(s) per lightmap texel\n", lightSamples );
+					break;
 
 				/* good */
-				case 3: lightSamples = 64; break;
+				case 3:
+					lightSamples = 64;
+					Sys_Printf( "Adaptive supersampling preset enabled with %d random sample(s) per lightmap texel\n", lightSamples );
+					break;
 
 				/* perfect */
-				case 4: lightSamples = 256; break;
+				case 4:
+					lightSamples = 256;
+					Sys_Printf( "Adaptive supersampling preset enabled with %d random sample(s) per lightmap texel\n", lightSamples );
+					break;
 
 				default: break;
 			}
