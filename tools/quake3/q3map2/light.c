@@ -2258,6 +2258,8 @@ int LightMain( int argc, char **argv )
 		{
 			if(*argv[i+1] == '+')
 				lightSamplesInsist = qtrue;
+			else
+				lightSamplesInsist = qfalse;
 			lightSamples = atoi( argv[ i + 1 ] );
 			if( lightSamples < 1 )
 				lightSamples = 1;
