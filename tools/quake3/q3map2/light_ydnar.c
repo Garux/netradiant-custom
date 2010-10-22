@@ -2347,7 +2347,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 								
 								/* subsample it */
 								if(lightRandomSamples)
-									RandomSubsampleRawLuxel( lm, &trace, origin, sx, sy, 0.5f, lightLuxel, deluxemap ? lightDeluxel : NULL );
+									RandomSubsampleRawLuxel( lm, &trace, origin, sx, sy, 0.5f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : NULL );
 								else
 									SubsampleRawLuxel_r( lm, &trace, origin, sx, sy, 0.25f * lightSamplesSearchBoxSize, lightLuxel, deluxemap ? lightDeluxel : NULL );
 
