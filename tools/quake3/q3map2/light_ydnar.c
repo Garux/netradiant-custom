@@ -4013,7 +4013,7 @@ void SetupFloodLight( void )
 	int		i, j;
 	float	angle, elevation, angleStep, elevationStep;
 	const char	*value;
-	double v1,v2,v3,v4,v5;
+	double v1,v2,v3,v4,v5,v6;
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SetupFloodLight ---\n" );
