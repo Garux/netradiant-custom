@@ -1476,7 +1476,7 @@ float DirtForSample( trace_t *trace )
 			
 			/* trace */
 			TraceLine( trace );
-			if( trace->opaque )
+			if( trace->opaque && !(trace->compileFlags & C_SKY) )
 			{
 				VectorSubtract( trace->hit, trace->origin, displacement );
 				gatherDirt += 1.0f - ooDepth * VectorLength( displacement );
@@ -1567,8 +1567,8 @@ void DirtyRawLightmap( int rawLightmapNum )
 	trace.recvShadows = lm->recvShadows;
 	trace.numSurfaces = lm->numLightSurfaces;
 	trace.surfaces = &lightSurfaces[ lm->firstLightSurface ];
-	trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
-	trace.testAll = qtrue;
+	trace.inhibitRadius = 0.0f;
+	trace.testAll = qfalse;
 	
 	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
 	trace.twoSided = qfalse;
