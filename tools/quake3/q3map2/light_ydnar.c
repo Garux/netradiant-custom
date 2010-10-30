@@ -1926,10 +1926,6 @@ static void RandomSubsampleRawLuxel( rawLightmap_t *lm, trace_t *trace, vec3_t s
 		/* set origin */
 		VectorCopy( sampleOrigin, origin );
 		GaussLikeRandom(bias, &dx, &dy);
-		if(dx > 1) dx = 1;
-		if(dy > 1) dy = 1;
-		if(dx < -1) dx = -1;
-		if(dy < -1) dy = -1;
 
 		/* calculate position */
 		if( !SubmapRawLuxel( lm, x, y, dx, dy, &cluster, origin, normal ) )
