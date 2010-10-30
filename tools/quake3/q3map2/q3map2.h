@@ -2229,6 +2229,7 @@ Q_EXTERN qboolean					floodlight_lowquality Q_ASSIGN( qfalse );
 Q_EXTERN vec3_t						floodlightRGB;
 Q_EXTERN float						floodlightIntensity Q_ASSIGN( 512.0f );
 Q_EXTERN float						floodlightDistance Q_ASSIGN( 1024.0f );
+Q_EXTERN float						floodlightDirectionScale Q_ASSIGN( 1.0f );
 
 Q_EXTERN qboolean			dump Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debug Q_ASSIGN( qfalse );

@@ -4047,8 +4047,9 @@ void SetupFloodLight( void )
 		v1=v2=v3=0;
 		v4=floodlightDistance;
 		v5=floodlightIntensity;
+		v6=floodlightDirectionScale;
 
-		sscanf( value, "%lf %lf %lf %lf %lf", &v1, &v2, &v3, &v4, &v5);
+		sscanf( value, "%lf %lf %lf %lf %lf %lf", &v1, &v2, &v3, &v4, &v5);
 
 		floodlightRGB[0]=v1;
 		floodlightRGB[1]=v2;
@@ -4061,9 +4062,11 @@ void SetupFloodLight( void )
 
 		if (v4<1) v4=1024;
 		if (v5<1) v5=128;
+		if (v6<0) v6=1;
 
 		floodlightDistance=v4;
 		floodlightIntensity=v5;
+		floodlightDirectionScale=v6;
 
 		floodlighty = qtrue;
 		Sys_Printf( "FloodLighting enabled via worldspawn _floodlight key.\n" );
@@ -4342,7 +4345,7 @@ void FloodLightRawLightmap( int rawLightmapNum )
 
 	/* global pass */
 	if (floodlighty && floodlightIntensity)
-		FloodLightRawLightmapPass(lm, floodlightRGB, floodlightIntensity, floodlightDistance, floodlight_lowquality, 1.0f);
+		FloodLightRawLightmapPass(lm, floodlightRGB, floodlightIntensity, floodlightDistance, floodlight_lowquality, floodlightDirectionScale);
 
 	/* custom pass */
 	if (lm->floodlightIntensity)
