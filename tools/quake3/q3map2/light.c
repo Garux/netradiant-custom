@@ -2754,6 +2754,11 @@ int LightMain( int argc, char **argv )
 		{
 			lightmapExtraVisClusterNudge = qtrue;
 		}
+		else if( !strcmp( argv[ i ], "-fill" ) )
+		{
+			lightmapFill = qtrue;
+			Sys_Printf( "Filling lightmap colors from surrounding pixels to improve JPEG compression\n" );
+		}
 		/* unhandled args */
 		else
 		{

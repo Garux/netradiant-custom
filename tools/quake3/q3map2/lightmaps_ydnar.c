@@ -2255,7 +2255,112 @@ static int CompareRawLightmap( const void *a, const void *b )
 	return 0;
 }
 
+void FillOutLightmap(outLightmap_t *olm)
+{
+	int x, y;
+	int ofs;
+	vec3_t dir_sum, light_sum;
+	int cnt, filled;
+	byte *lightBitsNew = NULL;
+	byte *lightBytesNew = NULL;
+	byte *dirBytesNew = NULL;
 
+	lightBitsNew = safe_malloc((olm->customWidth * olm->customHeight + 8) / 8);
+	lightBytesNew = safe_malloc(olm->customWidth * olm->customHeight * 3);
+	if(deluxemap)
+		dirBytesNew = safe_malloc(olm->customWidth * olm->customHeight * 3);
+
+	/*
+	memset(olm->lightBits, 0, (olm->customWidth * olm->customHeight + 8) / 8);
+		olm->lightBits[0] |= 1;
+		olm->lightBits[(10 * olm->customWidth + 30) >> 3] |= 1 << ((10 * olm->customWidth + 30) & 7);
+	memset(olm->bspLightBytes, 0, olm->customWidth * olm->customHeight * 3);
+		olm->bspLightBytes[0] = 255;
+		olm->bspLightBytes[(10 * olm->customWidth + 30) * 3 + 2] = 255;
+	*/
+
+	memcpy(lightBitsNew, olm->lightBits, (olm->customWidth * olm->customHeight + 8) / 8);
+	memcpy(lightBytesNew, olm->bspLightBytes, olm->customWidth * olm->customHeight * 3);
+	if(deluxemap)
+		memcpy(dirBytesNew, olm->bspDirBytes, olm->customWidth * olm->customHeight * 3);
+
+	for(;;)
+	{
+		filled = 0;
+		for(y = 0; y < olm->customHeight; ++y)
+		{
+			for(x = 0; x < olm->customWidth; ++x)
+			{
+				ofs = y * olm->customWidth + x;
+				if(olm->lightBits[ofs >> 3] & (1 << (ofs & 7))) /* already filled */
+					continue;
+				cnt = 0;
+				VectorClear(dir_sum);
+				VectorClear(light_sum);
+
+				/* try all four neighbors */
+				ofs = ((y + olm->customHeight - 1) % olm->customHeight) * olm->customWidth + x;
+				if(olm->lightBits[ofs >> 3] & (1 << (ofs & 7))) /* already filled */
+				{
+					++cnt;
+					VectorAdd(light_sum, olm->bspLightBytes + ofs * 3, light_sum);
+					if(deluxemap)
+						VectorAdd(dir_sum, olm->bspDirBytes + ofs * 3, dir_sum);
+				}
+
+				ofs = ((y + 1) % olm->customHeight) * olm->customWidth + x;
+				if(olm->lightBits[ofs >> 3] & (1 << (ofs & 7))) /* already filled */
+				{
+					++cnt;
+					VectorAdd(light_sum, olm->bspLightBytes + ofs * 3, light_sum);
+					if(deluxemap)
+						VectorAdd(dir_sum, olm->bspDirBytes + ofs * 3, dir_sum);
+				}
+
+				ofs = y * olm->customWidth + (x + olm->customWidth - 1) % olm->customWidth;
+				if(olm->lightBits[ofs >> 3] & (1 << (ofs & 7))) /* already filled */
+				{
+					++cnt;
+					VectorAdd(light_sum, olm->bspLightBytes + ofs * 3, light_sum);
+					if(deluxemap)
+						VectorAdd(dir_sum, olm->bspDirBytes + ofs * 3, dir_sum);
+				}
+
+				ofs = y * olm->customWidth + (x + 1) % olm->customWidth;
+				if(olm->lightBits[ofs >> 3] & (1 << (ofs & 7))) /* already filled */
+				{
+					++cnt;
+					VectorAdd(light_sum, olm->bspLightBytes + ofs * 3, light_sum);
+					if(deluxemap)
+						VectorAdd(dir_sum, olm->bspDirBytes + ofs * 3, dir_sum);
+				}
+
+				if(cnt)
+				{
+					++filled;
+					ofs = y * olm->customWidth + x;
+					lightBitsNew[ofs >> 3] |= (1 << (ofs & 7));
+					VectorScale(light_sum, 1.0/cnt, lightBytesNew + ofs * 3);
+					if(deluxemap)
+						VectorScale(dir_sum, 1.0/cnt, dirBytesNew + ofs * 3);
+				}
+			}
+		}
+
+		if(!filled)
+			break;
+
+		memcpy(olm->lightBits, lightBitsNew, (olm->customWidth * olm->customHeight + 8) / 8);
+		memcpy(olm->bspLightBytes, lightBytesNew, olm->customWidth * olm->customHeight * 3);
+		if(deluxemap)
+			memcpy(olm->bspDirBytes, dirBytesNew, olm->customWidth * olm->customHeight * 3);
+	}
+
+	free(lightBitsNew);
+	free(lightBytesNew);
+	if(deluxemap)
+		free(dirBytesNew);
+}
 
 /*
 StoreSurfaceLightmaps()
@@ -2937,6 +3042,10 @@ void StoreSurfaceLightmaps( void )
 	{
 		/* get output lightmap */
 		olm = &outLightmaps[ i ];
+
+		/* fill output lightmap */
+		if(lightmapFill)
+			FillOutLightmap(olm);
 		
 		/* is this a valid bsp lightmap? */
 		if( olm->lightmapNum >= 0 && !externalLightmaps )

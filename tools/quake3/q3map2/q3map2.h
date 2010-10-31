@@ -2022,6 +2022,7 @@ Q_EXTERN qboolean			debugInset Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			debugPortals Q_ASSIGN( qfalse );
 Q_EXTERN qboolean           lightmapTriangleCheck Q_ASSIGN(qfalse);
 Q_EXTERN qboolean           lightmapExtraVisClusterNudge Q_ASSIGN(qfalse);
+Q_EXTERN qboolean           lightmapFill Q_ASSIGN(qfalse);
 Q_EXTERN double				normalEpsilon Q_ASSIGN( 0.00001 );
 Q_EXTERN double				distanceEpsilon Q_ASSIGN( 0.01 );
 
