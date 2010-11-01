@@ -1189,8 +1189,11 @@ void SelectFaceMode()
 class CloneSelected : public scene::Graph::Walker
 {
   bool doMakeUnique;
+  NodeSmartReference worldspawn;
 public:
-  CloneSelected(bool d): doMakeUnique(d) { }
+  CloneSelected(bool d): doMakeUnique(d), worldspawn(Map_FindOrInsertWorldspawn(g_map))
+  {
+  }
   bool pre(const scene::Path& path, scene::Instance& instance) const
   {
     if(path.size() == 1)
@@ -1198,7 +1201,7 @@ public:
 
     // ignore worldspawn, but keep checking children
     NodeSmartReference me(path.top().get());
-    if(me == Map_FindOrInsertWorldspawn(g_map))
+    if(me == worldspawn)
            return true;
 
     if(!path.top().get().isRoot())
@@ -1220,7 +1223,7 @@ public:
 
     // ignore worldspawn, but keep checking children
     NodeSmartReference me(path.top().get());
-    if(me == Map_FindOrInsertWorldspawn(g_map))
+    if(me == worldspawn)
            return;
 
     if(!path.top().get().isRoot())

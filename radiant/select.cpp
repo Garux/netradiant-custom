@@ -340,8 +340,9 @@ void Select_Invert()
 class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 {
   mutable std::size_t m_depth;
+  NodeSmartReference worldspawn;
 public:
-  ExpandSelectionToEntitiesWalker() : m_depth(0)
+  ExpandSelectionToEntitiesWalker() : m_depth(0), worldspawn(Map_FindOrInsertWorldspawn(g_map))
   {
   }
   bool pre(const scene::Path& path, scene::Instance& instance) const
@@ -350,7 +351,7 @@ public:
 
     // ignore worldspawn
     NodeSmartReference me(path.top().get());
-    if(me == Map_FindOrInsertWorldspawn(g_map))
+    if(me == worldspawn)
 	    return false;
 
     if(m_depth == 2) // entity depth

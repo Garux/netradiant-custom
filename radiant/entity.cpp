@@ -184,11 +184,11 @@ public:
 
 class EntityGroupSelected : public scene::Graph::Walker
 {
-	NodeSmartReference group;
+	NodeSmartReference group, worldspawn;
 	//typedef std::pair<NodeSmartReference, NodeSmartReference> DeletionPair;
 	//Stack<DeletionPair> deleteme;
 	public:
-	EntityGroupSelected(const scene::Path &p): group(p.top().get())
+	EntityGroupSelected(const scene::Path &p): group(p.top().get()), worldspawn(Map_FindOrInsertWorldspawn(g_map))
 	{
 	}
 	bool pre(const scene::Path& path, scene::Instance& instance) const
@@ -206,7 +206,7 @@ class EntityGroupSelected : public scene::Graph::Walker
 				NodeSmartReference child(path.top().get());
 				NodeSmartReference parent(path.parent().get());
 
-				if(path.size() >= 3 && parent != Map_FindOrInsertWorldspawn(g_map))
+				if(path.size() >= 3 && parent != worldspawn)
 				{
 					NodeSmartReference parentparent(path[path.size() - 3].get());
 
