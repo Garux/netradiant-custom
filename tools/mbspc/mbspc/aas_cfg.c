@@ -29,9 +29,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../botlib/l_struct.h"
 #include "../botlib/l_libvar.h"
 
+#include <stddef.h>
+
 //structure field offsets
-#define BBOX_OFS(x) (int)&(((aas_bbox_t *)0)->x)
-#define CFG_OFS(x) (int)&(((cfg_t *)0)->x)
+#define BBOX_OFS(x) offsetof(aas_bbox_t, x)
+#define CFG_OFS(x) offsetof(cfg_t, x)
 
 //bounding box definition
 fielddef_t bbox_fields[] =
