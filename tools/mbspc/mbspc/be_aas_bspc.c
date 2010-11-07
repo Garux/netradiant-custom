@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../botlib/be_aas_cluster.h"
 #include "../botlib/be_aas_reach.h"
 #include "../qcommon/cm_public.h"
+#include "be_aas_bspc.h"
 
 #include <stdarg.h>
 
