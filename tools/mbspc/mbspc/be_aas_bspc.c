@@ -38,6 +38,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../botlib/be_aas_reach.h"
 #include "../qcommon/cm_public.h"
 
+#include <stdarg.h>
+
 //#define BSPC
 
 extern botlib_import_t botimport;
@@ -162,8 +164,8 @@ void BotImport_Print(int type, char *fmt, ...)
 	char buf[1024];
 
 	va_start(argptr, fmt);
-	vsprintf(buf, fmt, argptr);
-	printf(buf);
+	vsnprintf(buf, sizeof(buf), fmt, argptr);
+	fputs(buf, stdout);
 	if (buf[0] != '\r') Log_Write(buf);
 	va_end(argptr);
 } //end of the function BotImport_Print
@@ -209,8 +211,8 @@ void Com_DPrintf(char *fmt, ...)
 	char buf[1024];
 
 	va_start(argptr, fmt);
-	vsprintf(buf, fmt, argptr);
-	printf(buf);
+	vsnprintf(buf, sizeof(buf), fmt, argptr);
+	fputs(buf, stdout);
 	if (buf[0] != '\r') Log_Write(buf);
 	va_end(argptr);
 } //end of the function Com_DPrintf
