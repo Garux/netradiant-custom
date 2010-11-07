@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "aas_store.h"
 #include "aas_cfg.h"
 
+#include <stddef.h>
 #include <assert.h>
 
 /*
@@ -422,9 +423,9 @@ node_t *AllocNode (void)
 bspbrush_t *AllocBrush (int numsides)
 {
 	bspbrush_t	*bb;
-	int			c;
+	size_t		c;
 
-	c = (int)&(((bspbrush_t *)0)->sides[numsides]);
+	c = offsetof(bspbrush_t, sides[numsides]);
 	bb = GetMemory(c);
 	memset (bb, 0, c);
 	if (numthreads == 1)
@@ -484,10 +485,10 @@ void FreeBrushList (bspbrush_t *brushes)
 bspbrush_t *CopyBrush (bspbrush_t *brush)
 {
 	bspbrush_t *newbrush;
-	int			size;
+	size_t		size;
 	int			i;
 	
-	size = (int)&(((bspbrush_t *)0)->sides[brush->numsides]);
+	size = offsetof(bspbrush_t, sides[brush->numsides]);
 
 	newbrush = AllocBrush (brush->numsides);
 	memcpy (newbrush, brush, size);
