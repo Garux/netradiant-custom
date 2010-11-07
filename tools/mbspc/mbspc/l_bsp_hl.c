@@ -335,7 +335,7 @@ Byte swaps all data in a bsp file.
 */
 void HL_SwapBSPFile (qboolean todisk)
 {
-	int i, j, c;
+	int i, j, k, c;
 	hl_dmodel_t *d;
 	hl_dmiptexlump_t *mtl;
 
@@ -385,8 +385,13 @@ void HL_SwapBSPFile (qboolean todisk)
 //	
 	for (i=0 ; i<hl_numtexinfo ; i++)
 	{
-		for (j=0 ; j<8 ; j++)
-			hl_texinfo[i].vecs[0][j] = LittleFloat (hl_texinfo[i].vecs[0][j]);
+		for (j=0 ; j<2 ; j++)
+		{
+			for (k=0; k<4; k++)
+			{
+				hl_texinfo[i].vecs[j][k] = LittleFloat (hl_texinfo[i].vecs[j][k]);
+			}
+		}
 		hl_texinfo[i].miptex = LittleLong (hl_texinfo[i].miptex);
 		hl_texinfo[i].flags = LittleLong (hl_texinfo[i].flags);
 	}
