@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "l_log.h"
 #include "../mbspc/l_mem.h"
+#include "l_cmd.h"
 
 #define qtrue	true
 #define qfalse	false
@@ -644,14 +645,14 @@ int PS_ReadNumber(script_t *script, token_t *token)
 	{
 		c = *script->script_p;
 		//check for a LONG number
-		if ( (c == 'l' || c == 'L') // bk001204 - brackets 
+		if ( (c == 'l' || c == 'L') // bk001204 - brackets
 		     && !(token->subtype & TT_LONG))
 		{
 			script->script_p++;
 			token->subtype |= TT_LONG;
 		} //end if
 		//check for an UNSIGNED number
-		else if ( (c == 'u' || c == 'U') // bk001204 - brackets 
+		else if ( (c == 'u' || c == 'U') // bk001204 - brackets
 			  && !(token->subtype & (TT_UNSIGNED | TT_FLOAT)))
 		{
 			script->script_p++;
@@ -1361,5 +1362,5 @@ void FreeScript(script_t *script)
 //============================================================================
 void PS_SetBaseFolder(char *path)
 {
-	sprintf(basefolder, path);
+	Q_strncpyz(basefolder, path, sizeof(basefolder));
 } //end of the function PS_SetBaseFolder
