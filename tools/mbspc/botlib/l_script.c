@@ -1057,7 +1057,7 @@ void StripDoubleQuotes(char *string)
 {
 	if (*string == '\"')
 	{
-		strcpy(string, string+1);
+		memmove(string, string+1, strlen(string));
 	} //end if
 	if (string[strlen(string)-1] == '\"')
 	{
