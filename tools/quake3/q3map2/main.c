@@ -1525,13 +1525,14 @@ int ConvertBSPMain( int argc, char **argv )
 	int		(*convertFunc)( char * );
 	game_t	*convertGame;
 	char		ext[1024];
-	qboolean	map_allowed;
+	qboolean	map_allowed, force_bsp;
 	
 	
 	/* set default */
 	convertFunc = ConvertBSPToASE;
 	convertGame = NULL;
 	map_allowed = qtrue;
+	force_bsp = qfalse;
 	
 	/* arg checking */
 	if( argc < 1 )
@@ -1584,6 +1585,8 @@ int ConvertBSPMain( int argc, char **argv )
  		}
 		else if( !strcmp( argv[ i ],  "-shadersasbitmap" ) )
 			shadersAsBitmap = qtrue;
+		else if( !strcmp( argv[ i ],  "-forcereadbsp" ) )
+			force_bsp = qtrue;
 	}
 
 	LoadShaderInfo();
@@ -1591,7 +1594,7 @@ int ConvertBSPMain( int argc, char **argv )
 	/* clean up map name */
 	strcpy(source, ExpandArg(argv[i]));
 	ExtractFileExtension(source, ext);
-	if(!Q_stricmp(ext, "map"))
+	if(!Q_stricmp(ext, "map") && !force_bsp)
 	{
 		if(!map_allowed)
 			Sys_Printf("WARNING: the requested conversion should not be done from .map files. Compile a .bsp first.\n");
