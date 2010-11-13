@@ -1472,6 +1472,9 @@ void PseudoCompileBSP(qboolean need_tree)
 
 		entity->firstDrawSurf = numMapDrawSurfs;
 
+		ClearMetaTriangles();
+		PatchMapDrawSurfs(entity);
+
 		if(mapEntityNum == 0 && need_tree)
 		{
 			faces = MakeStructuralBSPFaceList(entities[0].brushes);
@@ -1504,7 +1507,16 @@ void PseudoCompileBSP(qboolean need_tree)
 			}
 		}
 
+		if(meta)
+		{
+			ClassifyEntitySurfaces(entity);
+			MakeEntityDecals(entity);
+			MakeEntityMetaTriangles(entity);
+			SmoothMetaTriangles();
+			MergeMetaTriangles();
+		}
 		FilterDrawsurfsIntoTree(entity, tree);
+
 		FilterStructuralBrushesIntoTree(entity, tree);
 		FilterDetailBrushesIntoTree(entity, tree);
 
@@ -1587,6 +1599,13 @@ int ConvertBSPMain( int argc, char **argv )
 			shadersAsBitmap = qtrue;
 		else if( !strcmp( argv[ i ],  "-forcereadbsp" ) )
 			force_bsp = qtrue;
+		else if( !strcmp( argv[ i ],  "-meta" ) )
+			meta = qtrue;
+		else if( !strcmp( argv[ i ],  "-patchmeta" ) )
+		{
+			meta = qtrue;
+			patchMeta = qtrue;
+		}
 	}
 
 	LoadShaderInfo();
