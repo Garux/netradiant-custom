@@ -318,8 +318,8 @@ DPatch* DPatch::MergePatches(patch_merge_t merge_info, DPatch *p1, DPatch *p2)
 */	
 	DPatch* newPatch = new DPatch();
 	//switched..
-	newPatch->height	= p1->width;
-	newPatch->width		= newHeight;
+	newPatch->height	= newHeight;
+	newPatch->width		= p1->width;
 	newPatch->SetTexture(p1->texture);
 
 	for(int y = 0; y < p1->height; y++)
