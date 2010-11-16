@@ -50,8 +50,9 @@ WGET               ?= wget
 MV                 ?= mv
 UNZIP              ?= unzip
 
-STDOUT_TO_DEVNULL  ?= >/dev/null
-STDERR_TO_DEVNULL  ?= 2>/dev/null
+FD_TO_DEVNULL      ?= >/dev/null
+STDOUT_TO_DEVNULL  ?= 1$(FD_TO_DEVNULL)
+STDERR_TO_DEVNULL  ?= 2$(FD_TO_DEVNULL)
 STDERR_TO_STDOUT   ?= 2>&1
 TO_DEVNULL         ?= $(STDOUT_TO_DEVNULL) $(STDERR_TO_STDOUT)
 
@@ -250,12 +251,12 @@ dependencies-check:
 else
 dependencies-check:
 	@$(ECHO)
-	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
+	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; exec 3>&2; else exec 3$(FD_TO_DEVNULL); fi; \
 	failed=0; \
 	checkbinary() \
 	{ \
 		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
-		$$2 --help $(TO_DEVNULL); \
+		$$2 --help >&3 $(STDERR_TO_STDOUT); \
 		if [ $$? != 127 ]; then \
 			$(ECHO) "found."; \
 		else \
@@ -294,14 +295,14 @@ dependencies-check:
 	[ -n "$(OTOOL)" ] && checkbinary xcode "$(OTOOL)"; \
 	[ "$$failed" = "0" ] && $(ECHO) All required tools have been found!
 	@$(ECHO)
-	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; fi; \
+	@if [ x"$(DEPENDENCIES_CHECK)" = x"verbose" ]; then set -x; exec 3>&2; else exec 3$(FD_TO_DEVNULL); fi; \
 	failed=0; \
 	checkheader() \
 	{ \
 		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
 		if \
-			$(CXX) conftest.cpp $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $$4 -DCONFTEST_HEADER="<$$2>" -DCONFTEST_SYMBOL="$$3" $(TARGET_ARCH) $(LDFLAGS) -c -o conftest.o $(TO_DEVNULL) && \
-			$(CXX) conftest.o $(LDFLAGS) $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest $(TO_DEVNULL); \
+			$(CXX) conftest.cpp $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $$4 -DCONFTEST_HEADER="<$$2>" -DCONFTEST_SYMBOL="$$3" $(TARGET_ARCH) $(LDFLAGS) -c -o conftest.o >&3 $(STDERR_TO_STDOUT) && \
+			$(CXX) conftest.o $(LDFLAGS) $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest >&3 $(STDERR_TO_STDOUT); \
 		then \
 			$(RM) conftest conftest.o conftest.d; \
 			$(ECHO) "found."; \
