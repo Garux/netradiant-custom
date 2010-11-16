@@ -2012,8 +2012,10 @@ struct OpenGLBinding
   /// \brief Renders \p character at the current raster-position of the current context.
   void drawChar(char character) const
   {
-    m_glListBase(m_font);
-    m_glCallLists(1, GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>(&character));
+    char s[2];
+    s[0] = character;
+    s[1] = 0;
+    drawString(s);
   }
 
 
