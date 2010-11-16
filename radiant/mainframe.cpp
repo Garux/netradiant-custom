@@ -3345,9 +3345,6 @@ void GlobalGL_sharedContextCreated()
 #endif
 
   GlobalOpenGL().m_font = g_font;
-  GlobalOpenGL().m_fontHeight = g_font->getPixelHeight();
-  GlobalOpenGL().m_fontAscent = g_font->getPixelAscent();
-  GlobalOpenGL().m_fontDescent = g_font->getPixelDescent();
 }
 
 void GlobalGL_sharedContextDestroyed()

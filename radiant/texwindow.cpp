@@ -370,7 +370,7 @@ const char* TextureBrowser_getComonShadersDir()
 
 inline int TextureBrowser_fontHeight(TextureBrowser& textureBrowser)
 {
-  return GlobalOpenGL().m_fontHeight;
+  return GlobalOpenGL().m_font->getPixelHeight();
 }
 
 const char* TextureBrowser_GetSelectedShader(TextureBrowser& textureBrowser)
