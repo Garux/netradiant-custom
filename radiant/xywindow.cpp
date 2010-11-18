@@ -2522,10 +2522,10 @@ void XYWnd::XY_Draw()
         }
       }
       glBegin (GL_LINE_LOOP);
-      glVertex2i (0, 0);
-      glVertex2i (m_nWidth-1, 0);
-      glVertex2i (m_nWidth-1, m_nHeight-1);
-      glVertex2i (0, m_nHeight-1);
+      glVertex2f (0.5, 0.5);
+      glVertex2f (m_nWidth-0.5, 1);
+      glVertex2f (m_nWidth-0.5, m_nHeight-0.5);
+      glVertex2f (0.5, m_nHeight-0.5);
       glEnd();
     }
   }
