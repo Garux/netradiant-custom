@@ -1976,6 +1976,7 @@ typedef unsigned int GLhandleARB;
 
 #endif
 
+#include "gtkutil/glfont.h"
 
 /// \brief A module which wraps a runtime-binding of the standard OpenGL functions.
 /// Provides convenience functions for querying availabiliy of extensions, rendering text and error-checking.
@@ -1997,7 +1998,7 @@ struct OpenGLBinding
   /// \brief Asserts that there no OpenGL errors have occurred since the last call to glGetError.
   void (*assertNoErrors)(const char *file, int line);
 
-  GLuint m_font;
+  GLFont *m_font; // MUST be set!
   int m_fontHeight;
   int m_fontAscent;
   int m_fontDescent;
@@ -2005,8 +2006,7 @@ struct OpenGLBinding
   /// \brief Renders \p string at the current raster-position of the current context.
   void drawString(const char* string) const
   {
-    m_glListBase(m_font);
-    m_glCallLists(GLsizei(strlen(string)), GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>(string));
+    m_font->printString(string);
   }
 
   /// \brief Renders \p character at the current raster-position of the current context.

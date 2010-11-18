@@ -3316,13 +3316,10 @@ void GridStatus_onTextureLockEnabledChanged()
   }
 }
 
-namespace
-{
-  GLFont g_font(0, 0, 0, 0);
-}
-
 void GlobalGL_sharedContextCreated()
 {
+  GLFont *g_font = NULL;
+
   // report OpenGL information
   globalOutputStream() << "GL_VENDOR: " << reinterpret_cast<const char*>(glGetString (GL_VENDOR)) << "\n";
   globalOutputStream() << "GL_RENDERER: " << reinterpret_cast<const char*>(glGetString (GL_RENDERER)) << "\n";
@@ -3347,10 +3344,10 @@ void GlobalGL_sharedContextCreated()
   g_font = glfont_create(fontname);
 #endif
 
-  GlobalOpenGL().m_font = g_font.getDisplayList();
-  GlobalOpenGL().m_fontHeight = g_font.getPixelHeight();
-  GlobalOpenGL().m_fontAscent = g_font.getPixelAscent();
-  GlobalOpenGL().m_fontDescent = g_font.getPixelDescent();
+  GlobalOpenGL().m_font = g_font;
+  GlobalOpenGL().m_fontHeight = g_font->getPixelHeight();
+  GlobalOpenGL().m_fontAscent = g_font->getPixelAscent();
+  GlobalOpenGL().m_fontDescent = g_font->getPixelDescent();
 }
 
 void GlobalGL_sharedContextDestroyed()

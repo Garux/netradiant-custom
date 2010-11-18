@@ -20,10 +20,45 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #include "glfont.h"
+#include "igl.h"
+
+// generic string printing with call lists
+class GLFontCallList: public GLFont
+{
+	GLuint m_displayList;
+	int m_pixelHeight;
+	int m_pixelAscent;
+	int m_pixelDescent;
+	public:
+	GLFontCallList(GLuint displayList, int asc, int desc, int pixelHeight) : m_displayList(displayList), m_pixelHeight(pixelHeight), m_pixelAscent(asc), m_pixelDescent(desc)
+	{
+	}
+	virtual ~GLFontCallList()
+	{
+		glDeleteLists(m_displayList, 256);
+	}
+	void printString(const char *s)
+	{
+		GlobalOpenGL().m_glListBase(m_displayList);
+		GlobalOpenGL().m_glCallLists(GLsizei(strlen(s)), GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>(s));
+	}
+	virtual int getPixelAscent() const
+	{
+		return m_pixelAscent;
+	}
+	virtual int getPixelDescent() const
+	{
+		return m_pixelDescent;
+	}
+	virtual int getPixelHeight() const
+	{
+		return m_pixelHeight;
+	}
+};
+
 #ifdef _WIN32
 	#include <windows.h>
 #endif
-#include <GL/gl.h>
 #include "debugging/debugging.h"
 
 // LordHavoc: this is code for direct Xlib bitmap character fetching, as an
@@ -38,7 +73,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <gdk/gdkx.h>
 #include <GL/glx.h>
 
-GLFont glfont_create(const char* font_string)
+GLFont *glfont_create(const char* font_string)
 {
   GLuint font_list_base;
   XFontStruct *fontInfo;
@@ -91,20 +126,14 @@ GLFont glfont_create(const char* font_string)
 
 /*    *height = fontInfo->ascent + fontInfo->descent;
     *width = fontInfo->max_bounds.width;  */
-  return GLFont(font_list_base, fontInfo->ascent + fontInfo->descent);
-}
-
-void glfont_release(GLFont& font)
-{
-  glDeleteLists(font.getDisplayList(), 256);
-  font = GLFont(0, 0);
+  return new GLFontCallList(font_list_base, fontInfo->ascent, fontInfo->descent, fontInfo->ascent + fontInfo->descent);
 }
 
 #else
 
 #include <gtk/gtkglwidget.h>
 
-GLFont glfont_create(const char* font_string)
+GLFont *glfont_create(const char* font_string)
 {
   GLuint font_list_base = glGenLists (256);
   gint font_height = 0, font_ascent = 0, font_descent = 0;
@@ -148,25 +177,16 @@ GLFont glfont_create(const char* font_string)
   if(font_height > 256)
 	  font_height = 16;
 
-  return GLFont(font_list_base, font_ascent, font_descent, font_height);
-}
-
-void glfont_release(GLFont& font)
-{
-  glDeleteLists(font.getDisplayList(), 256);
-  font = GLFont(0, 0, 0, 0);
+  return new GLFontCallList(font_list_base, font_ascent, font_descent, font_height);
 }
 #endif
-
-
 
 // new font code ripped from ZeroRadiant (not in use yet)
 
 #include <pango/pangoft2.h>
 #include <pango/pango-utils.h>
-#include "igl.h"
 
-class GLFontInternal
+class GLFontInternal: public GLFont
 {
 	const char *font_string;
 	int font_height;
@@ -185,10 +205,13 @@ class GLFontInternal
 		int font_ascent_pango_units;
 		int font_descent_pango_units;
 
-		//ft2_context = pango_ft2_get_context(72, 72);
+#if !PANGO_VERSION_CHECK(1,22,0)
+		ft2_context = pango_ft2_get_context(72, 72);
+#else
 		fontmap = pango_ft2_font_map_new();
 		pango_ft2_font_map_set_resolution(PANGO_FT2_FONT_MAP(fontmap), 72, 72);
 		ft2_context = pango_font_map_create_context(fontmap);
+#endif
 
 		font_desc = pango_font_description_from_string(font_string);
 		//pango_font_description_set_size(font_desc, 10 * PANGO_SCALE);
@@ -215,7 +238,7 @@ class GLFontInternal
 		y_offset_bitmap_render_pango_units = (font_ascent * PANGO_SCALE) - font_ascent_pango_units;
 	}
 
-	~GLFontInternal()
+	virtual ~GLFontInternal()
 	{
 		g_object_unref(G_OBJECT(ft2_context));
 		g_object_unref(G_OBJECT(fontmap));
@@ -231,7 +254,7 @@ class GLFontInternal
 	// just a hair outside of the viewport (meaning the current raster position is invalid),
 	// then no text will be rendered.  The solution to this is a very hacky one.  You can search
 	// Google for "glDrawPixels clipping".
-	void printString(const char *s)
+	virtual void printString(const char *s)
 	{
 		// The idea for this code initially came from the font-pangoft2.c example that comes with GtkGLExt.
 
@@ -301,5 +324,18 @@ class GLFontInternal
 		}
 
 		g_object_unref(G_OBJECT(layout));
+	}
+
+	virtual int getPixelAscent() const
+	{
+		return font_ascent;
+	}
+	virtual int getPixelDescent() const
+	{
+		return font_descent;
+	}
+	virtual int getPixelHeight() const
+	{
+		return font_height;
 	}
 };
