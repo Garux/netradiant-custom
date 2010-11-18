@@ -163,6 +163,7 @@ void glfont_release(GLFont& font)
 // new font code ripped from ZeroRadiant (not in use yet)
 
 #include <pango/pangoft2.h>
+#include <pango/pango-utils.h>
 #include "igl.h"
 
 class GLFontInternal
@@ -173,9 +174,10 @@ class GLFontInternal
 	int font_descent;
 	int y_offset_bitmap_render_pango_units;
 	PangoContext *ft2_context;
+	PangoFontMap *fontmap;
 
 	public:
-	GLFontInternal(const char *_font_string): font_string(font_string)
+	GLFontInternal(const char *_font_string): font_string(_font_string)
 	{
 		PangoFontDescription *font_desc;
 		PangoLayout *layout;
@@ -183,12 +185,16 @@ class GLFontInternal
 		int font_ascent_pango_units;
 		int font_descent_pango_units;
 
-		// This call is deprecated so we'll have to fix it sometime.
-		ft2_context = pango_ft2_get_context(72, 72);
+		//ft2_context = pango_ft2_get_context(72, 72);
+		fontmap = pango_ft2_font_map_new();
+		pango_ft2_font_map_set_resolution(PANGO_FT2_FONT_MAP(fontmap), 72, 72);
+		ft2_context = pango_font_map_create_context(fontmap);
 
 		font_desc = pango_font_description_from_string(font_string);
+		//pango_font_description_set_size(font_desc, 10 * PANGO_SCALE);
 		pango_context_set_font_description(ft2_context, font_desc);
 		pango_font_description_free(font_desc);
+		// TODO fallback to fixed 8, courier new 8
 
 		layout = pango_layout_new(ft2_context);
 #if !PANGO_VERSION_CHECK(1,22,0)
@@ -212,6 +218,7 @@ class GLFontInternal
 	~GLFontInternal()
 	{
 		g_object_unref(G_OBJECT(ft2_context));
+		g_object_unref(G_OBJECT(fontmap));
 	}
 
 	// Renders the input text at the current location with the current color.
