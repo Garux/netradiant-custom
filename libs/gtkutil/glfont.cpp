@@ -129,7 +129,7 @@ GLFont *glfont_create(const char* font_string)
   return new GLFontCallList(font_list_base, fontInfo->ascent, fontInfo->descent, fontInfo->ascent + fontInfo->descent);
 }
 
-#else
+#elif 0
 
 #include <gtk/gtkglwidget.h>
 
@@ -181,7 +181,7 @@ GLFont *glfont_create(const char* font_string)
 }
 #endif
 
-// new font code ripped from ZeroRadiant (not in use yet)
+// new font code ripped from ZeroRadiant
 
 #include <pango/pangoft2.h>
 #include <pango/pango-utils.h>
@@ -339,3 +339,8 @@ class GLFontInternal: public GLFont
 		return font_height;
 	}
 };
+
+GLFont *glfont_create(const char* font_string)
+{
+	return new GLFontInternal(font_string);
+}
