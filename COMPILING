@@ -1,23 +1,22 @@
 
-developer documentation for GtkRadiant 1.5.0-div0
-=================================================
+developer documentation for NetRadiant
+======================================
 
 (NOTE: outdated stuff has been ROT13ed)
 
 getting the source
 ==================
 
-The latest source is available from the Subversion repository.
-  https://zerowing.idsoftware.com/svn/radiant/GtkRadiant/trunk/
+The latest source is available from the git repository.
+  git://git.icculus.org/divverent/netradiant.git
 
-The subversion client can be obtained from the Subversion site.
-  http://subversion.tigris.org
+The git client can be obtained from the Subversion site.
+  http://git-scm.org
 
-To get a copy of the source using the commandline Subversion client:
+To get a copy of the source using the commandline git client:
   Change the current directory to the desired location for the source.
-  svn checkout http://svn.icculus.org/netradiant/trunk/ NetRadiant
-  cd NetRadiant
-  sh download-gamepacks.sh
+  git clone git://git.icculus.org/divverent/netradiant.git
+  cd netradiant
 
 
 
@@ -40,7 +39,7 @@ build:
 run 'make'
 
 run:
-Execute './GtkRadiant/install/radiant.x86' (or './GtkRadiant/install/radiant.ppc' on osx)
+Execute 'install/radiant.x86'
 
 OSX(using X-windows)
 ====================
