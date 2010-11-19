@@ -251,7 +251,7 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 			/* ydnar: test supplied points against this plane */
 			for( j = 0; j < numPoints; j++ )
 			{
-				d = DotProduct( points[ j ], normal ) - dist;
+				d = DotProduct( points[ j ], p->normal ) - p->dist;
 				if( fabs( d ) > distanceEpsilon )
 					break;
 			}
