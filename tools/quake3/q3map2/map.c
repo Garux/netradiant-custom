@@ -284,7 +284,22 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 	SnapPlane( normal, &dist, centerofweight );
 	for( i = 0, p = mapplanes; i < nummapplanes; i++, p++ )
 	{
-		if( PlaneEqual( p, normal, dist ) )
+		if( !PlaneEqual( p, normal, dist ) )
+			continue;
+
+		/* ydnar: uncomment the following line for old-style plane finding */
+		//%	return i;
+			
+		/* ydnar: test supplied points against this plane */
+		for( j = 0; j < numPoints; j++ )
+		{
+			d = DotProduct( points[ j ], p->normal ) - p->dist;
+			if( fabs( d ) > distanceEpsilon )
+				break;
+		}
+		
+		/* found a matching plane */
+		if( j >= numPoints )
 			return i;
 	}
 	
