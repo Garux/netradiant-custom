@@ -1542,10 +1542,13 @@ void add_brush_filter(BrushFilter& filter, int mask, bool invert = false);
 
 
 /// \brief Returns true if 'self' takes priority when building brush b-rep.
-inline bool plane3_inside(const Plane3& self, const Plane3& other)
+inline bool plane3_inside(const Plane3& self, const Plane3& other, bool selfIsLater)
 {
   if(vector3_equal_epsilon(self.normal(), other.normal(), 0.001))
   {
+    // same plane? prefer the one with smaller index
+    if(self.dist() == other.dist())
+      return selfIsLater;
     return self.dist() < other.dist();
   }
   return true;
@@ -2420,7 +2423,7 @@ private:
     // duplicate plane
     for(std::size_t i = 0; i < m_faces.size(); ++i)
     {
-      if(index != i && !plane3_inside(m_faces[index]->plane3(), m_faces[i]->plane3()))
+      if(index != i && !plane3_inside(m_faces[index]->plane3(), m_faces[i]->plane3(), index < i))
       {
         return false;
       }
