@@ -1058,6 +1058,7 @@ public:
     m_creators.insert(Creators::value_type("model", &StatelessAttributeCreator<ModelAttribute>::create));
     m_creators.insert(Creators::value_type("sound", &StatelessAttributeCreator<SoundAttribute>::create));
     m_creators.insert(Creators::value_type("vector3", &StatelessAttributeCreator<Vector3Attribute>::create));
+    m_creators.insert(Creators::value_type("real3", &StatelessAttributeCreator<Vector3Attribute>::create));
   }
   EntityAttribute* create(const char* type, const char* name)
   {
