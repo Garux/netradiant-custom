@@ -1849,10 +1849,8 @@ void XYWnd::XY_DrawGrid(void) {
 	// draw coordinate text if needed
 	if ( g_xywindow_globals_private.show_coordinates) {
 		glColor4fv(vector4_to_array(Vector4(g_xywindow_globals.color_gridtext, 1.0f)));
-		// why does this not work on windows:
-		//   float offx = m_vOrigin[nDim2] + h - (1 + GlobalOpenGL().m_fontAscent) / m_fScale;
-		float offx = m_vOrigin[nDim2] + h - 13                                / m_fScale;
-		float offy = m_vOrigin[nDim1] - w +  1                                / m_fScale;
+		float offx = m_vOrigin[nDim2] + h - (4 + GlobalOpenGL().m_font->getPixelAscent()) / m_fScale;
+		float offy = m_vOrigin[nDim1] - w +  4                                            / m_fScale;
 		for (x = xb - fmod(xb, stepx); x <= xe ; x += stepx) {
 			glRasterPos2f (x, offx);
 			sprintf (text, "%g", x);
@@ -2522,10 +2520,10 @@ void XYWnd::XY_Draw()
         }
       }
       glBegin (GL_LINE_LOOP);
-      glVertex2i (0, 0);
-      glVertex2i (m_nWidth-1, 0);
-      glVertex2i (m_nWidth-1, m_nHeight-1);
-      glVertex2i (0, m_nHeight-1);
+      glVertex2f (0.5, 0.5);
+      glVertex2f (m_nWidth-0.5, 1);
+      glVertex2f (m_nWidth-0.5, m_nHeight-0.5);
+      glVertex2f (0.5, m_nHeight-0.5);
       glEnd();
     }
   }
