@@ -48,7 +48,7 @@ GIT                ?= git
 SVN                ?= svn
 WGET               ?= wget
 MV                 ?= mv
-UNZIP              ?= unzip
+UNZIPPER           ?= unzip
 
 FD_TO_DEVNULL      ?= >/dev/null
 STDOUT_TO_DEVNULL  ?= 1$(FD_TO_DEVNULL)
@@ -289,7 +289,7 @@ dependencies-check:
 	checkbinary binutils "$(RANLIB)"; \
 	checkbinary binutils "$(AR)"; \
 	checkbinary pkg-config "$(PKGCONFIG)"; \
-	checkbinary unzip "$(UNZIP)"; \
+	checkbinary unzip "$(UNZIPPER)"; \
 	checkbinary git-core "$(GIT)"; \
 	checkbinary subversion "$(SVN)"; \
 	checkbinary wget "$(WGET)"; \
@@ -975,7 +975,7 @@ install-data: binaries
 	$(MKDIR) $(INSTALLDIR)/games
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
 	[ "$(OS)" != "Darwin" ] || $(CP_R) setup/data/osx/NetRadiant.app/* $(INSTALLDIR_BASE)/NetRadiant.app/
-	DOWNLOAD_GAMEPACKS="$(DOWNLOAD_GAMEPACKS)" GIT="$(GIT)" SVN="$(SVN)" WGET="$(WGET)" RM_R="$(RM_R)" MV="$(MV)" UNZIP="$(UNZIP)" ECHO="$(ECHO)" SH="$(SH)" CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepacks.sh "$(INSTALLDIR)"
+	DOWNLOAD_GAMEPACKS="$(DOWNLOAD_GAMEPACKS)" GIT="$(GIT)" SVN="$(SVN)" WGET="$(WGET)" RM_R="$(RM_R)" MV="$(MV)" UNZIPPER="$(UNZIPPER)" ECHO="$(ECHO)" SH="$(SH)" CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepacks.sh "$(INSTALLDIR)"
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
 	$(CP_R) setup/data/tools/* $(INSTALLDIR)/

@@ -11,7 +11,7 @@
 : ${MKDIR:=mkdir}
 : ${RM_R:=rm -f -r}
 : ${MV:=mv}
-: ${UNZIP:=unzip}
+: ${UNZIPPER:=unzip}
 
 set -e
 
@@ -42,7 +42,7 @@ pack()
 				$MKDIR zipdownload
 				cd zipdownload
 				$WGET "$source" "$@" || true
-				$UNZIP * || true
+				$UNZIPPER *.zip || true
 				cd ..
 				$RM_R "games/$pack"
 				$MKDIR "games/$pack"
@@ -119,7 +119,7 @@ pack()
 			$MKDIR zipdownload
 			cd zipdownload
 			$WGET "$source" "$@" || true
-			$UNZIP * || true
+			$UNZIPPER *.zip || true
 			cd ..
 			$MKDIR "games/$pack"
 			$MV zipdownload/*/* "games/$pack/" || true
