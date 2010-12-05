@@ -42,7 +42,7 @@ pack()
 				$MKDIR zipdownload
 				cd zipdownload
 				$WGET "$source" "$@" || true
-				$UNZIP *
+				$UNZIP * || true
 				cd ..
 				$RM_R "games/$pack"
 				$MKDIR "games/$pack"
