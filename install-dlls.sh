@@ -10,12 +10,12 @@ set -ex
 : ${INSTALLDIR:=.}
 
 for DLL in \
+	freetype6.dll \
 	intl.dll \
 	libatk-1.0-0.dll \
 	libcairo-2.dll \
 	libexpat-1.dll \
 	libfontconfig-1.dll \
-	libfreetype6.dll \
 	libgdkglext-win32-1.0-0.dll \
 	libgdk_pixbuf-2.0-0.dll \
 	libgdk-win32-2.0-0.dll \
