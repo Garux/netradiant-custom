@@ -152,7 +152,7 @@ pack NexuizPack      GPL         gitdir git://git.icculus.org/divverent/nexuiz.g
 pack OpenArenaPack   unknown     zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/OpenArenaPack.zip
 pack Q3Pack          proprietary svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Pack/trunk/ -r29
 pack Quake2Pack      proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/Quake2Pack.zip
-pack Quake2WorldPack GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
+#pack Quake2WorldPack GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
 pack QuakePack       proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/QuakePack.zip
 pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
 pack UFOAIPack       proprietary svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/UFOAIPack/branches/1.5/
