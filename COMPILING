@@ -74,7 +74,9 @@ environment:
 - Prepackaged Radiant dependencies (Gtk and other stuff):
   http://www.icculus.org/netradiant/files/radiant-deps-mingw32.zip
   Preferably extract this one to c:\mingw\radiant-deps-mingw32
+  OUTDATED!
 - Subversion must be installed and available in PATH to download the game packs
+- msysGit must be installed and available in PATH to download the game packs
 
 build:
 - Start the MSYS shell (to be found in c:\msys\1.0\msys.bat)
