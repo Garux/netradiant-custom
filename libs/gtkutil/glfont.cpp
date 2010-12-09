@@ -220,6 +220,12 @@ class GLFontInternal: public GLFont
 		// TODO fallback to fixed 8, courier new 8
 
 		layout = pango_layout_new(ft2_context);
+
+#ifdef FONT_SIZE_WORKAROUND
+		pango_layout_set_width(layout, -1); // -1 no wrapping.  All text on one line.
+		pango_layout_set_text(layout, "The quick brown fox jumped over the lazy sleeping dog's back then sat on a tack.", -1); // -1 null-terminated string.
+#endif
+
 #if !PANGO_VERSION_CHECK(1,22,0)
 		PangoLayoutIter *iter;  
 		iter = pango_layout_get_iter(layout);
