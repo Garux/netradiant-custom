@@ -179,7 +179,7 @@ GLFont *glfont_create(const char* font_string)
 
   return new GLFontCallList(font_list_base, font_ascent, font_descent, font_height);
 }
-#endif
+#else
 
 // new font code ripped from ZeroRadiant
 
@@ -344,3 +344,5 @@ GLFont *glfont_create(const char* font_string)
 {
 	return new GLFontInternal(font_string);
 }
+
+#endif
