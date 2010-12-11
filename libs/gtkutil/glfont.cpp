@@ -206,10 +206,10 @@ class GLFontInternal: public GLFont
 		int font_descent_pango_units;
 
 #if !PANGO_VERSION_CHECK(1,22,0)
-		ft2_context = pango_ft2_get_context(96, 96);
+		ft2_context = pango_ft2_get_context(72, 72);
 #else
 		fontmap = pango_ft2_font_map_new();
-		//pango_ft2_font_map_set_resolution(PANGO_FT2_FONT_MAP(fontmap), 96, 96);
+		pango_ft2_font_map_set_resolution(PANGO_FT2_FONT_MAP(fontmap), 72, 72);
 		ft2_context = pango_font_map_create_context(fontmap);
 #endif
 
