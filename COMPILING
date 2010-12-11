@@ -72,7 +72,9 @@ environment:
 - Prepackaged Radiant dependencies (Gtk and other stuff):
   http://www.icculus.org/netradiant/files/netradiant-dependencies-mingw32-20101211-7z.exe
   Extract this one to
-  c:\mingw\msys\1.0\home\username (keep the "netradiant-dependencies-mingw32" folder name of the contents)
+  c:\mingw\msys\1.0\home\username
+  (if you do this with 7zip, keep the "netradiant-dependencies-mingw32" folder
+  name of the contents)
 - now download the source from the MSYS shell, if you don't already have it:
   ~/netradiant-dependencies-mingw32/util/bin/git clone git://git.icculus.org/divverent/netradiant.git
 
