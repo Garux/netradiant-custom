@@ -2,7 +2,7 @@
 MINGW_EXEC_PREFIX ?=
 
 # where the dependencies package is extracted
-RADIANT_DEPENDENCIES_PREFIX = $(HOME)/radiant-deps-mingw32/
+RADIANT_DEPENDENCIES_PREFIX = $(HOME)/netradiant-dependencies-mingw32/
 
 # run the prefix fixing tool
 IGNORETHIS := $(shell cd $(RADIANT_DEPENDENCIES_PREFIX) && ./fixprefix.sh)

@@ -65,26 +65,18 @@ Win32 (2000, XP, Vista or Windows 7)
 ==================
 
 environment:
-- MinGW
-  http://www.mingw.org/wiki/HOWTO_Install_the_MinGW_GCC_Compiler_Suite (the installer link)
-  Install this to c:\mingw, and select the components C compiler, C++ compiler, Make
-- MSYS
-  http://www.mingw.org/wiki/msys (you need the installer MSYS-versionnumber.exe)
-  Install this to c:\msys\1.0
+- MinGW (http://www.mingw.org/wiki/Getting_Started)
+  Install this to c:\mingw, and select the components C compiler, C++ compiler
+  and MSYS Basic System
 - Prepackaged Radiant dependencies (Gtk and other stuff):
-  http://www.icculus.org/netradiant/files/radiant-deps-mingw32.zip
-  Preferably extract this one to c:\mingw\radiant-deps-mingw32
-  OUTDATED!
-- Subversion must be installed and available in PATH to download the game packs
-- msysGit must be installed and available in PATH to download the game packs
+  http://www.icculus.org/netradiant/files/radiant-deps-mingw32.zip OUTDATED!
+  Preferably extract this one to
+  c:\mingw\msys\1.0\home\username\netradiant-dependencies-mingw32
 
 build:
-- Start the MSYS shell (to be found in c:\msys\1.0\msys.bat)
+- Start the MSYS shell
 - Switch to the directory with NetRadiant source
-- cp mingw-Makefile.conf Makefile.conf
-- (edit mingw-Makefile.conf in case you installed anything to other locations
-  than the recommended ones)
-- make
+- make MAKEFILE_CONF=mingw-Makefile.conf
 
 run:
 - in the "install" directory, double click netradiant.exe
