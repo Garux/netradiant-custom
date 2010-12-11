@@ -68,10 +68,13 @@ environment:
 - MinGW (http://www.mingw.org/wiki/Getting_Started)
   Install this to c:\mingw, and select the components C compiler, C++ compiler
   and MSYS Basic System
+- Start the MSYS shell once, then exit it
 - Prepackaged Radiant dependencies (Gtk and other stuff):
   http://ompldr.org/vNmlwcA/netradiant-dependencies-mingw32.7z
   Extract this one to
-  c:\mingw\msys\1.0\home\username\netradiant-dependencies-mingw32
+  c:\mingw\msys\1.0\home\username (keep the "netradiant-dependencies-mingw32" folder name of the contents)
+- now download the source from the MSYS shell, if you don't already have it:
+  ~/netradiant-dependencies-mingw32/util/bin/git clone git://git.icculus.org/divverent/netradiant.git
 
 build:
 - Start the MSYS shell
