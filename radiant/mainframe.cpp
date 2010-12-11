@@ -3335,9 +3335,8 @@ void GlobalGL_sharedContextCreated()
 
 #ifdef WIN32
   /* win32 is dodgy here, just use courier new then */
-  g_font = glfont_create("courier new 8");
+  g_font = glfont_create("arial 9");
 #else
-  /* use default font here (Sans 10 is gtk default) */
   GtkSettings *settings = gtk_settings_get_default();
   gchar *fontname;
   g_object_get(settings, "gtk-font-name", &fontname, NULL);
