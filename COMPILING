@@ -83,3 +83,5 @@ build:
 
 run:
 - in the "install" directory, double click netradiant.exe
+- if you get a DLL not found error, copy the DLL from either c:\mingw\bin or
+  from c:\mingw\msys\1.0\bin to the "install" directory
