@@ -69,8 +69,8 @@ environment:
   Install this to c:\mingw, and select the components C compiler, C++ compiler
   and MSYS Basic System
 - Prepackaged Radiant dependencies (Gtk and other stuff):
-  http://www.icculus.org/netradiant/files/radiant-deps-mingw32.zip OUTDATED!
-  Preferably extract this one to
+  http://ompldr.org/vNmlwcA/netradiant-dependencies-mingw32.7z
+  Extract this one to
   c:\mingw\msys\1.0\home\username\netradiant-dependencies-mingw32
 
 build:
