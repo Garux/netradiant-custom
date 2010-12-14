@@ -178,7 +178,12 @@ void bsp_init()
   build_set_variable("MonitorAddress", (g_WatchBSP_Enabled) ? "127.0.0.1:39000" : "");
   build_set_variable("GameName", gamename_get());
 
-  build_set_variable("MapFile", Map_Name(g_map));
+  const char* mapname = Map_Name(g_map);
+  StringOutputStream name(256);
+  name << StringRange(mapname, path_get_filename_base_end(mapname)) << ".bsp";
+
+  build_set_variable("MapFile", mapname);
+  build_set_variable("BspFile", name.c_str());
 }
 
 void bsp_shutdown()
