@@ -304,11 +304,20 @@ dependencies-check:
 	{ \
 		$(ECHO_NOLF) "Checking for $$2 ($$1)... "; \
 		if \
-			$(CXX) conftest.cpp $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $$4 -DCONFTEST_HEADER="<$$2>" -DCONFTEST_SYMBOL="$$3" $(TARGET_ARCH) $(LDFLAGS) -c -o conftest.o >&3 $(STDERR_TO_STDOUT) && \
-			$(CXX) conftest.o $(LDFLAGS) $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest >&3 $(STDERR_TO_STDOUT); \
+			$(CXX) conftest.cpp $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS) $(CPPFLAGS_COMMON) $$4 -DCONFTEST_HEADER="<$$2>" -DCONFTEST_SYMBOL="$$3" $(TARGET_ARCH) $(LDFLAGS) -c -o conftest.o >&3 $(STDERR_TO_STDOUT); \
 		then \
-			$(RM) conftest conftest.o conftest.d; \
-			$(ECHO) "found."; \
+			if \
+				$(CXX) conftest.o $(LDFLAGS) $(LDFLAGS_COMMON) $$5 $(LIBS_COMMON) $(LIBS) -o conftest >&3 $(STDERR_TO_STDOUT); \
+			then \
+				$(RM) conftest conftest.o conftest.d; \
+				$(ECHO) "found and links."; \
+			else \
+				$(RM) conftest.o conftest.d; \
+				$(ECHO) "found but does not link, please install it or set PKG_CONFIG_PATH right!"; \
+				$(ECHO) "To see the failed commands, set DEPENDENCIES_CHECK=verbose"; \
+				$(ECHO) "To proceed anyway, set DEPENDENCIES_CHECK=off"; \
+				failed=1; \
+			fi; \
 		else \
 			$(RM) conftest conftest.o conftest.d; \
 			$(ECHO) "not found, please install it or set PKG_CONFIG_PATH right!"; \
