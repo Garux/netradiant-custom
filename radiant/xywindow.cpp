@@ -775,6 +775,16 @@ gboolean xywnd_button_release(GtkWidget* widget, GdkEventButton* event, XYWnd* x
   return FALSE;
 }
 
+gboolean xywnd_focus_in(GtkWidget* widget, GdkEventFocus* event, XYWnd* xywnd)
+{
+	if(event->type == GDK_FOCUS_CHANGE)
+	{
+		if(event->in)
+			g_pParentWnd->SetActiveXY(xywnd);
+	}
+	return FALSE;
+}
+
 void xywnd_motion(gdouble x, gdouble y, guint state, void* data)
 {
   if(reinterpret_cast<XYWnd*>(data)->chaseMouseMotion(static_cast<int>(x), static_cast<int>(y)))
@@ -884,6 +894,7 @@ XYWnd::XYWnd() :
 
   g_signal_connect(G_OBJECT(m_gl_widget), "button_press_event", G_CALLBACK(xywnd_button_press), this);
   g_signal_connect(G_OBJECT(m_gl_widget), "button_release_event", G_CALLBACK(xywnd_button_release), this);
+  g_signal_connect(G_OBJECT(m_gl_widget), "focus_in_event", G_CALLBACK(xywnd_focus_in), this);
   g_signal_connect(G_OBJECT(m_gl_widget), "motion_notify_event", G_CALLBACK(DeferredMotion::gtk_motion), &m_deferred_motion);
 
   g_signal_connect(G_OBJECT(m_gl_widget), "scroll_event", G_CALLBACK(xywnd_wheel_scroll), this);
@@ -2578,9 +2589,12 @@ void XY_Split_Focus()
 {
   Vector3 position;
   GetFocusPosition(position);
-  g_pParentWnd->GetXYWnd()->PositionView(position);
-  g_pParentWnd->GetXZWnd()->PositionView(position);
-  g_pParentWnd->GetYZWnd()->PositionView(position);
+  if(g_pParentWnd->GetXYWnd())
+	  g_pParentWnd->GetXYWnd()->PositionView(position);
+  if(g_pParentWnd->GetXZWnd())
+	  g_pParentWnd->GetXZWnd()->PositionView(position);
+  if(g_pParentWnd->GetYZWnd())
+	  g_pParentWnd->GetYZWnd()->PositionView(position);
 }
 
 void XY_Focus()
