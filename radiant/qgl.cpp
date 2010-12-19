@@ -49,31 +49,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <wtypes.h>
 
-int   ( WINAPI * qwglChoosePixelFormat )(HDC, CONST PIXELFORMATDESCRIPTOR *);
-int   ( WINAPI * qwglDescribePixelFormat) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
-int   ( WINAPI * qwglGetPixelFormat)(HDC);
-BOOL  ( WINAPI * qwglSetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR *);
-BOOL  ( WINAPI * qwglSwapBuffers)(HDC);
-
-BOOL  ( WINAPI * qwglCopyContext)(HGLRC, HGLRC, UINT);
-HGLRC ( WINAPI * qwglCreateContext)(HDC);
-HGLRC ( WINAPI * qwglCreateLayerContext)(HDC, int);
-BOOL  ( WINAPI * qwglDeleteContext)(HGLRC);
-HGLRC ( WINAPI * qwglGetCurrentContext)(VOID);
-HDC   ( WINAPI * qwglGetCurrentDC)(VOID);
 PROC  ( WINAPI * qwglGetProcAddress)(LPCSTR);
-BOOL  ( WINAPI * qwglMakeCurrent)(HDC, HGLRC);
-BOOL  ( WINAPI * qwglShareLists)(HGLRC, HGLRC);
-BOOL  ( WINAPI * qwglUseFontBitmaps)(HDC, DWORD, DWORD, DWORD);
-
-BOOL  ( WINAPI * qwglUseFontOutlines)(HDC, DWORD, DWORD, DWORD, FLOAT,
-				      FLOAT, int, LPGLYPHMETRICSFLOAT);
-
-BOOL ( WINAPI * qwglDescribeLayerPlane)(HDC, int, int, UINT, LPLAYERPLANEDESCRIPTOR);
-int  ( WINAPI * qwglSetLayerPaletteEntries)(HDC, int, int, int, CONST COLORREF *);
-int  ( WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int, COLORREF *);
-BOOL ( WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
-BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
 #elif defined (XWINDOWS)
 
@@ -81,23 +57,7 @@ BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 #include <dlfcn.h>
 #include <gdk/gdkx.h>
 
-XVisualInfo* (*qglXChooseVisual)(Display *dpy, int screen, int *attribList);
-GLXContext   (*qglXCreateContext)(Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct);
-void         (*qglXDestroyContext)(Display *dpy, GLXContext ctx);
-Bool         (*qglXMakeCurrent)(Display *dpy, GLXDrawable drawable, GLXContext ctx);
-void         (*qglXCopyContext)(Display *dpy, GLXContext src, GLXContext dst, GLuint mask);
-void         (*qglXSwapBuffers)( Display *dpy, GLXDrawable drawable );
-GLXPixmap    (*qglXCreateGLXPixmap)( Display *dpy, XVisualInfo *visual, Pixmap pixmap );
-void         (*qglXDestroyGLXPixmap)( Display *dpy, GLXPixmap pixmap );
 Bool         (*qglXQueryExtension)( Display *dpy, int *errorb, int *event );
-Bool         (*qglXQueryVersion)( Display *dpy, int *maj, int *min );
-Bool         (*qglXIsDirect)( Display *dpy, GLXContext ctx );
-int          (*qglXGetConfig)( Display *dpy, XVisualInfo *visual, int attrib, int *value );
-GLXContext   (*qglXGetCurrentContext)( void );
-GLXDrawable  (*qglXGetCurrentDrawable)( void );
-void         (*qglXWaitGL)( void );
-void         (*qglXWaitX)( void );
-void         (*qglXUseXFont)( Font font, int first, int count, int list );
 void*        (*qglXGetProcAddressARB) (const GLubyte *procName);
 typedef void* (*glXGetProcAddressARBProc) (const GLubyte *procName);
 
@@ -111,46 +71,9 @@ void QGL_Shutdown(OpenGLBinding& table)
   globalOutputStream() << "Shutting down OpenGL module...";
 
 #if defined(WIN32)
-  qwglCopyContext              = 0;
-  qwglCreateContext            = 0;
-  qwglCreateLayerContext       = 0;
-  qwglDeleteContext            = 0;
-  qwglDescribeLayerPlane       = 0;
-  qwglGetCurrentContext        = 0;
-  qwglGetCurrentDC             = 0;
-  qwglGetLayerPaletteEntries   = 0;
   qwglGetProcAddress           = 0;
-  qwglMakeCurrent              = 0;
-  qwglRealizeLayerPalette      = 0;
-  qwglSetLayerPaletteEntries   = 0;
-  qwglShareLists               = 0;
-  qwglSwapLayerBuffers         = 0;
-  qwglUseFontBitmaps           = 0;
-  qwglUseFontOutlines          = 0;
-
-  qwglChoosePixelFormat        = 0;
-  qwglDescribePixelFormat      = 0;
-  qwglGetPixelFormat           = 0;
-  qwglSetPixelFormat           = 0;
-  qwglSwapBuffers              = 0;
 #elif defined(XWINDOWS)
-  qglXChooseVisual             = 0;
-  qglXCreateContext            = 0;
-  qglXDestroyContext           = 0;
-  qglXMakeCurrent              = 0;
-  qglXCopyContext              = 0;
-  qglXSwapBuffers              = 0;
-  qglXCreateGLXPixmap          = 0;
-  qglXDestroyGLXPixmap         = 0;
-  qglXQueryExtension           = 0;
-  qglXQueryVersion             = 0;
-  qglXIsDirect                 = 0;
-  qglXGetConfig                = 0;
-  qglXGetCurrentContext        = 0;
-  qglXGetCurrentDrawable       = 0;
-  qglXWaitGL                   = 0;
-  qglXWaitX                    = 0;
-  qglXUseXFont                 = 0;
+  qglXQueryExtension           = glXQueryExtension;
   qglXGetProcAddressARB        = 0;
 #else
 #error "unsupported platform"
@@ -615,48 +538,8 @@ int QGL_Init(OpenGLBinding& table)
   QGL_clear(table);
 
 #if defined(WIN32)
-  qwglCopyContext              = wglCopyContext;
-  qwglCreateContext            = wglCreateContext;
-  qwglCreateLayerContext       = wglCreateLayerContext;
-  qwglDeleteContext            = wglDeleteContext;
-  qwglDescribeLayerPlane       = wglDescribeLayerPlane;
-  qwglGetCurrentContext        = wglGetCurrentContext;
-  qwglGetCurrentDC             = wglGetCurrentDC;
-  qwglGetLayerPaletteEntries   = wglGetLayerPaletteEntries;
   qwglGetProcAddress           = wglGetProcAddress;
-  qwglMakeCurrent              = wglMakeCurrent;
-  qwglRealizeLayerPalette      = wglRealizeLayerPalette;
-  qwglSetLayerPaletteEntries   = wglSetLayerPaletteEntries;
-  qwglShareLists               = wglShareLists;
-  qwglSwapLayerBuffers         = wglSwapLayerBuffers;
-  qwglUseFontBitmaps           = wglUseFontBitmapsA;
-  qwglUseFontOutlines          = wglUseFontOutlinesA;
-
-  qwglChoosePixelFormat        = ChoosePixelFormat;
-  qwglDescribePixelFormat      = DescribePixelFormat;
-  qwglGetPixelFormat           = GetPixelFormat;
-  qwglSetPixelFormat           = SetPixelFormat;
-  qwglSwapBuffers              = SwapBuffers;
 #elif defined(XWINDOWS)
-  qglXChooseVisual             = glXChooseVisual;
-  qglXCreateContext            = glXCreateContext;
-  qglXDestroyContext           = glXDestroyContext;
-  qglXMakeCurrent              = glXMakeCurrent;
-  //qglXCopyContext              = glXCopyContext;
-  qglXSwapBuffers              = glXSwapBuffers;
-  qglXCreateGLXPixmap          = glXCreateGLXPixmap;
-  qglXDestroyGLXPixmap         = glXDestroyGLXPixmap;
-  qglXQueryExtension           = glXQueryExtension;
-  qglXQueryVersion             = glXQueryVersion;
-  qglXIsDirect                 = glXIsDirect;
-  qglXGetConfig                = glXGetConfig;
-  qglXGetCurrentContext        = glXGetCurrentContext;
-  qglXGetCurrentDrawable       = glXGetCurrentDrawable;
-  qglXWaitGL                   = glXWaitGL;
-  qglXWaitX                    = glXWaitX;
-  qglXUseXFont                 = glXUseXFont;
-//  qglXGetProcAddressARB        = glXGetProcAddressARB; // Utah-GLX fix
-
   qglXGetProcAddressARB = (glXGetProcAddressARBProc)dlsym(RTLD_DEFAULT, "glXGetProcAddressARB"); 
   if ((qglXQueryExtension == 0) || (qglXQueryExtension(GDK_DISPLAY(),0,0) != True))
     return 0;
