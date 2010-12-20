@@ -1010,22 +1010,16 @@ endif
 # release building... NOT for general users
 # these may use tools not in the list that is checked by the build system
 release-src: BUILD_DATE := $(shell date +%Y%m%d)
-release-src: MAKEFILE_CONF := cross-Makefile.conf
 release-src: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
-release-src: RADIANT_ABOUTMSG := Official release build
-release-src: BUILD := release
 release-src:
 	$(GIT) archive --format=tar --prefix=$(INSTALLDIR)/ HEAD | bzip2 > $(INSTALLDIR).tar.bz2
 
 release-win32: BUILD_DATE := $(shell date +%Y%m%d)
-release-win32: MAKEFILE_CONF := cross-Makefile.conf
 release-win32: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
-release-win32: RADIANT_ABOUTMSG := Official release build
-release-win32: BUILD := release
 release-win32:
-	$(MAKE) all
+	$(MAKE) all INSTALLDIR=$(INSTALLDIR) MAKEFILE_CONF=cross-Makefile.conf RADIANT_ABOUTMSG="Official release build" BUILD=release
 	7za a -sfx../../../../../../../../../../$(HOME)/7z.sfx $(INSTALLDIR)-win32-7z.exe $(INSTALLDIR)/
-	$(MAKE) clean
+	$(MAKE) clean INSTALLDIR=$(INSTALLDIR) MAKEFILE_CONF=cross-Makefile.conf RADIANT_ABOUTMSG="Official release build" BUILD=release
 
 release-all:
 	$(GIT) clean -xdf
