@@ -1012,13 +1012,13 @@ endif
 release-src: BUILD_DATE := $(shell date +%Y%m%d)
 release-src: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
 release-src:
-	$(GIT) archive --format=tar --prefix=$(INSTALLDIR)/ HEAD | bzip2 > $(INSTALLDIR).tar.bz2
+	$(GIT) archive --format=tar --prefix=$(INSTALLDIR)/ HEAD | bzip2 > ../$(INSTALLDIR).tar.bz2
 
 release-win32: BUILD_DATE := $(shell date +%Y%m%d)
 release-win32: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
 release-win32:
 	$(MAKE) all INSTALLDIR=$(INSTALLDIR) MAKEFILE_CONF=cross-Makefile.conf RADIANT_ABOUTMSG="Official release build" BUILD=release
-	7za a -sfx../../../../../../../../../../$(HOME)/7z.sfx $(INSTALLDIR)-win32-7z.exe $(INSTALLDIR)/
+	7za a -sfx../../../../../../../../../../$(HOME)/7z.sfx ../$(INSTALLDIR)-win32-7z.exe $(INSTALLDIR)/
 	$(MAKE) clean INSTALLDIR=$(INSTALLDIR) MAKEFILE_CONF=cross-Makefile.conf RADIANT_ABOUTMSG="Official release build" BUILD=release
 
 release-all:
