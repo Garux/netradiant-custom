@@ -1006,16 +1006,16 @@ install-dll: binaries
 endif
 endif
 
-release-src: BUILD_DATE := `date +%Y%m%d`
+release-src: BUILD_DATE := $(shell date +%Y%m%d)
 release-src: MAKEFILE_CONF := cross-Makefile.conf
 release-src: INSTALLDIR := netradiant-$(RADIANT_VERSION)-$(BUILD_DATE)
 release-src:
 	git archive --format=tar HEAD | bzip2 > $(INSTALLDIR).tar.bz2
 
-release-win32: BUILD_DATE := `date +%Y%m%d`
+release-win32: BUILD_DATE := $(shell date +%Y%m%d)
 release-win32: MAKEFILE_CONF := cross-Makefile.conf
 release-win32: INSTALLDIR := netradiant-$(RADIANT_VERSION)-$(BUILD_DATE)
-release-win32: install
+release-win32: all
 	7za a -sfx../../../../../../../../../../$(HOME)/7z.sfx $(INSTALLDIR)-win32-7z.exe $(INSTALLDIR)/
 
 release-all:
