@@ -224,7 +224,8 @@ endif
 endif
 
 # VERSION!
-RADIANT_VERSION = 1.5.0n
+RADIANT_VERSION_NUMBER = 1.5.0
+RADIANT_VERSION = $(RADIANT_VERSION_NUMBER)n
 RADIANT_MAJOR_VERSION = 5
 RADIANT_MINOR_VERSION = 0
 Q3MAP_VERSION = 2.5.17n
@@ -1008,13 +1009,13 @@ endif
 
 release-src: BUILD_DATE := $(shell date +%Y%m%d)
 release-src: MAKEFILE_CONF := cross-Makefile.conf
-release-src: INSTALLDIR := netradiant-$(RADIANT_VERSION)-$(BUILD_DATE)
+release-src: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
 release-src:
 	git archive --format=tar HEAD | bzip2 > $(INSTALLDIR).tar.bz2
 
 release-win32: BUILD_DATE := $(shell date +%Y%m%d)
 release-win32: MAKEFILE_CONF := cross-Makefile.conf
-release-win32: INSTALLDIR := netradiant-$(RADIANT_VERSION)-$(BUILD_DATE)
+release-win32: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
 release-win32: all
 	7za a -sfx../../../../../../../../../../$(HOME)/7z.sfx $(INSTALLDIR)-win32-7z.exe $(INSTALLDIR)/
 
