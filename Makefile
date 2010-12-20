@@ -1018,4 +1018,10 @@ release-win32: INSTALLDIR := netradiant-$(RADIANT_VERSION)-$(BUILD_DATE)
 release-win32: install
 	7za a -sfx../../../../../../../../../../$(HOME)/7z.sfx $(INSTALLDIR)-win32-7z.exe $(INSTALLDIR)/
 
+release-all:
+	$(MAKE) release-src
+	$(MAKE) clean
+	$(MAKE) release-win32
+	$(MAKE) clean
+
 -include $(shell find . -name \*.d)
