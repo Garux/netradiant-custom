@@ -1007,22 +1007,24 @@ install-dll: binaries
 endif
 endif
 
+# release building... NOT for general users
+# these may use tools not in the list that is checked by the build system
 release-src: BUILD_DATE := $(shell date +%Y%m%d)
 release-src: MAKEFILE_CONF := cross-Makefile.conf
 release-src: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
 release-src:
-	git archive --format=tar HEAD | bzip2 > $(INSTALLDIR).tar.bz2
+	$(GIT) archive --format=tar HEAD | bzip2 > $(INSTALLDIR).tar.bz2
 
 release-win32: BUILD_DATE := $(shell date +%Y%m%d)
 release-win32: MAKEFILE_CONF := cross-Makefile.conf
 release-win32: INSTALLDIR := netradiant-$(RADIANT_VERSION_NUMBER)-$(BUILD_DATE)
 release-win32: all
 	7za a -sfx../../../../../../../../../../$(HOME)/7z.sfx $(INSTALLDIR)-win32-7z.exe $(INSTALLDIR)/
+	$(MAKE) clean
 
 release-all:
+	$(GIT) clean -xdf
 	$(MAKE) release-src
-	$(MAKE) clean
 	$(MAKE) release-win32
-	$(MAKE) clean
 
 -include $(shell find . -name \*.d)
