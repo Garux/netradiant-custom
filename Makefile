@@ -1027,4 +1027,5 @@ release-all:
 	$(MAKE) release-src
 	$(MAKE) release-win32
 
+# load dependency files
 -include $(shell find . -name \*.d)
