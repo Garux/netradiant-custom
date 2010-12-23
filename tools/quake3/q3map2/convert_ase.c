@@ -322,13 +322,15 @@ int ConvertBSPToASE( char *bspName )
 	entity_t		*e;
 	vec3_t			origin;
 	const char		*key;
-	char			name[ 1024 ], base[ 1024 ];
+	char			name[ 1024 ], base[ 1024 ], dirname[ 1024 ];
 	
 	
 	/* note it */
 	Sys_Printf( "--- Convert BSP to ASE ---\n" );
 
 	/* create the ase filename from the bsp name */
+	strcpy( dirname, bspName );
+	StripExtension( dirname );
 	strcpy( name, bspName );
 	StripExtension( name );
 	strcat( name, ".ase" );
@@ -366,7 +368,7 @@ int ConvertBSPToASE( char *bspName )
 		{
 			char buf[1024];
 			FILE *tmp;
-			snprintf(buf, sizeof(buf), "%s/lm_%04d.tga", base, lightmapCount);
+			snprintf(buf, sizeof(buf), "%s/lm_%04d.tga", dirname, lightmapCount);
 			buf[sizeof(buf) - 1] = 0;
 			tmp = fopen(buf, "rb");
 			if(!tmp)
