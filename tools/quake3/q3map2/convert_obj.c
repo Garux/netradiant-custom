@@ -217,7 +217,6 @@ int ConvertBSPToOBJ( char *bspName )
 	Sys_Printf( "writing %s\n", mtlname );
 	
 	ExtractFileBase( bspName, base );
-	strcat( base, ".bsp" );
 	
 	/* open it */
 	f = fopen( name, "wb" );
