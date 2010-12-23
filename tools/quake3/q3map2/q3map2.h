@@ -1530,6 +1530,9 @@ int							ConvertBSPToMap_BP( char *bspName );
 /* convert_ase.c */
 int							ConvertBSPToASE( char *bspName );
 
+/* convert_obj.c */
+int							ConvertBSPToOBJ( char *bspName );
+
 
 /* brush.c */
 sideRef_t					*AllocSideRef( side_t *side, sideRef_t *next );
