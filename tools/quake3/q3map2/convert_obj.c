@@ -40,10 +40,10 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 
 /*
 ConvertSurface()
-converts a bsp drawsurface to an ase chunk
+converts a bsp drawsurface to an obj chunk
 */
 
-static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, vec3_t origin )
+static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, vec3_t origin )
 {
 	int				i, v, face, a, b, c;
 	bspDrawVert_t	*dv;
@@ -173,7 +173,7 @@ ConvertModel()
 exports a bsp model to an ase chunk
 */
 
-static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origin )
+static void ConvertModelToOBJ( FILE *f, bspModel_t *model, int modelNum, vec3_t origin )
 {
 	int					i, s;
 	bspDrawSurface_t	*ds;
@@ -184,7 +184,7 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
 	{
 		s = i + model->firstBSPSurface;
 		ds = &bspDrawSurfaces[ s ];
-		ConvertSurface( f, model, modelNum, ds, s, origin );
+		ConvertSurfaceToOBJ( f, model, modelNum, ds, s, origin );
 	}
 }
 
@@ -234,7 +234,7 @@ exports a bsp shader to an ase chunk
 	}
 */
 
-static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum )
+static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum )
 {
 	shaderInfo_t	*si;
 	char			*c, filename[ 1024 ];
@@ -288,10 +288,10 @@ ConvertBSPToASE()
 exports an 3d studio ase file from the bsp
 */
 
-int ConvertBSPToASE( char *bspName )
+int ConvertBSPToOBJ( char *bspName )
 {
 	int				i, modelNum;
-	FILE			*f;
+	FILE			*f, *fmtl;
 	bspShader_t		*shader;
 	bspModel_t		*model;
 	entity_t		*e;
@@ -301,13 +301,17 @@ int ConvertBSPToASE( char *bspName )
 	
 	
 	/* note it */
-	Sys_Printf( "--- Convert BSP to ASE ---\n" );
+	Sys_Printf( "--- Convert BSP to OBJ ---\n" );
 
 	/* create the ase filename from the bsp name */
 	strcpy( name, bspName );
 	StripExtension( name );
-	strcat( name, ".ase" );
+	strcat( name, ".obj" );
 	Sys_Printf( "writing %s\n", name );
+	strcpy( mtlname, bspName );
+	StripExtension( mtlname );
+	strcat( mtlname, ".mtl" );
+	Sys_Printf( "writing %s\n", mtlname );
 	
 	ExtractFileBase( bspName, base );
 	strcat( base, ".bsp" );
@@ -316,6 +320,9 @@ int ConvertBSPToASE( char *bspName )
 	f = fopen( name, "wb" );
 	if( f == NULL )
 		Error( "Open failed on %s\n", name );
+	fmtl = fopen( mtlname, "wb" );
+	if( fmtl == NULL )
+		Error( "Open failed on %s\n", mtlname );
 	
 	/* print header */
 	fprintf( f, "*3DSMAX_ASCIIEXPORT\t200\r\n" );
@@ -336,7 +343,7 @@ int ConvertBSPToASE( char *bspName )
 	for( i = 0; i < numBSPShaders; i++ )
 	{
 		shader = &bspShaders[ i ];
-		ConvertShader( f, shader, i );
+		ConvertShaderToMTL( fmtl, shader, i );
 	}
 	fprintf( f, "}\r\n" );
 	
@@ -364,11 +371,12 @@ int ConvertBSPToASE( char *bspName )
 			GetVectorForKey( e, "origin", origin );
 		
 		/* convert model */
-		ConvertModel( f, model, modelNum, origin );
+		ConvertModelToOBJ( f, model, modelNum, origin );
 	}
 	
 	/* close the file and return */
 	fclose( f );
+	fclose( fmtl );
 	
 	/* return to sender */
 	return 0;
