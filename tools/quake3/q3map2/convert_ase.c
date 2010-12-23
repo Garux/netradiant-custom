@@ -165,10 +165,10 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 	fprintf( f, "\t*PROP_RECVSHADOW\t1\r\n" );
 	if(lightmapsAsTexcoord)
 	{
-		if(ds->lightmapNum >= 0 && ds->lightmapNum < numLightmapsASE)
-			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->lightmapNum );
+		if(ds->lightmapNum[0] >= 0 && ds->lightmapNum[0] < numLightmapsASE)
+			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->lightmapNum[0] );
 		else
-			Sys_Printf( "WARNING: lightmap %d out of range, not exporting\n", ds->lightmapNum );
+			Sys_Printf( "WARNING: lightmap %d out of range, not exporting\n", ds->lightmapNum[0] );
 	}
 	else
 		fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->shaderNum );
@@ -291,9 +291,6 @@ static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum )
 }
 static void ConvertLightmap( FILE *f, const char *base, int lightmapNum )
 {
-	shaderInfo_t	*si;
-	char			*c, filename[ 1024 ];
-	
 	/* print shader info */
 	fprintf( f, "\t*MATERIAL\t%d\t{\r\n", lightmapNum );
 	fprintf( f, "\t\t*MATERIAL_NAME\t\"lm_%04d\"\r\n", lightmapNum );
