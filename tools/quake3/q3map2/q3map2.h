@@ -2275,6 +2275,7 @@ Q_EXTERN float				linearScale Q_ASSIGN( 1.0f / 8000.0f );
 
 // for .ase conversion
 Q_EXTERN qboolean			shadersAsBitmap Q_ASSIGN( qfalse );
+Q_EXTERN qboolean			lightmapsAsTexcoord Q_ASSIGN( qfalse );
 
 Q_EXTERN light_t			*lights;
 Q_EXTERN int				numPointLights;

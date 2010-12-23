@@ -162,7 +162,7 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 	fprintf( f, "\t*PROP_MOTIONBLUR\t0\r\n" );
 	fprintf( f, "\t*PROP_CASTSHADOW\t1\r\n" );
 	fprintf( f, "\t*PROP_RECVSHADOW\t1\r\n" );
-	fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->shaderNum );
+	fprintf( f, "\t*MATERIAL_REF\t%d\r\n", lightmapsAsTexcoord ? ds->lightmapNum : ds->shaderNum );
 	fprintf( f, "}\r\n" );
 }
 
@@ -280,6 +280,31 @@ static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum )
 	
 	fprintf( f, "\t}\r\n" );
 }
+static void ConvertLightmap( FILE *f, const char *base, int lightmapNum )
+{
+	shaderInfo_t	*si;
+	char			*c, filename[ 1024 ];
+	
+	/* print shader info */
+	fprintf( f, "\t*MATERIAL\t%d\t{\r\n", lightmapNum );
+	fprintf( f, "\t\t*MATERIAL_NAME\t\"lm_%04d\"\r\n", lightmapNum );
+	fprintf( f, "\t\t*MATERIAL_CLASS\t\"Standard\"\r\n" );
+	fprintf( f, "\t\t*MATERIAL_DIFFUSE\t1\t1\t1\r\n");
+	fprintf( f, "\t\t*MATERIAL_SHADING Phong\r\n" );
+	
+	/* print map info */
+	fprintf( f, "\t\t*MAP_DIFFUSE\t{\r\n" );
+	fprintf( f, "\t\t\t*MAP_NAME\t\"lm_%04d\"\r\n", lightmapNum );
+	fprintf( f, "\t\t\t*MAP_CLASS\t\"Bitmap\"\r\n");
+	fprintf( f, "\t\t\t*MAP_SUBNO\t1\r\n" );
+	fprintf( f, "\t\t\t*MAP_AMOUNT\t1.0\r\n" );
+	fprintf( f, "\t\t\t*MAP_TYPE\tScreen\r\n" );
+	fprintf( f, "\t\t\t*BITMAP\t\"%s\\lm_%04d.tga\"\r\n", base, lightmapNum );
+	fprintf( f, "\t\t\t*BITMAP_FILTER\tPyramidal\r\n" );
+	fprintf( f, "\t\t}\r\n" );
+	
+	fprintf( f, "\t}\r\n" );
+}
 
 
 
@@ -332,11 +357,34 @@ int ConvertBSPToASE( char *bspName )
 	
 	/* print materials */
 	fprintf( f, "*MATERIAL_LIST\t{\r\n" );
-	fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", numBSPShaders );
-	for( i = 0; i < numBSPShaders; i++ )
+	if(lightmapsAsTexcoord)
 	{
-		shader = &bspShaders[ i ];
-		ConvertShader( f, shader, i );
+		int lightmapCount;
+		for( lightmapCount = 0; lightmapCount < numBSPLightmaps; lightmapCount++ )
+			;
+		for( ; ; lightmapCount++ )
+		{
+			char buf[1024];
+			FILE *tmp;
+			snprintf(buf, sizeof(buf), "%s/lm_%04d.tga", base, lightmapCount);
+			buf[sizeof(buf) - 1] = 0;
+			tmp = fopen(buf, "rb");
+			if(!tmp)
+				break;
+			fclose(tmp);
+		}
+		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", lightmapCount );
+		for( i = 0; i < lightmapCount; i++ )
+			ConvertLightmap( f, base, i );
+	}
+	else
+	{
+		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", numBSPShaders );
+		for( i = 0; i < numBSPShaders; i++ )
+		{
+			shader = &bspShaders[ i ];
+			ConvertShader( f, shader, i );
+		}
 	}
 	fprintf( f, "}\r\n" );
 	
