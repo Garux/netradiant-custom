@@ -43,6 +43,7 @@ ConvertSurface()
 converts a bsp drawsurface to an ase chunk
 */
 
+int numLightmapsASE = 0;
 static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, vec3_t origin )
 {
 	int				i, v, face, a, b, c;
@@ -162,7 +163,15 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 	fprintf( f, "\t*PROP_MOTIONBLUR\t0\r\n" );
 	fprintf( f, "\t*PROP_CASTSHADOW\t1\r\n" );
 	fprintf( f, "\t*PROP_RECVSHADOW\t1\r\n" );
-	fprintf( f, "\t*MATERIAL_REF\t%d\r\n", lightmapsAsTexcoord ? ds->lightmapNum : ds->shaderNum );
+	if(lightmapsAsTexcoord)
+	{
+		if(ds->lightmapNum >= 0 && ds->lightmapNum < numLightmapsASE)
+			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->lightmapNum );
+		else
+			Sys_Printf( "WARNING: lightmap %d out of range, not exporting\n", ds->lightmapNum );
+	}
+	else
+		fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->shaderNum );
 	fprintf( f, "}\r\n" );
 }
 
@@ -293,15 +302,18 @@ static void ConvertLightmap( FILE *f, const char *base, int lightmapNum )
 	fprintf( f, "\t\t*MATERIAL_SHADING Phong\r\n" );
 	
 	/* print map info */
-	fprintf( f, "\t\t*MAP_DIFFUSE\t{\r\n" );
-	fprintf( f, "\t\t\t*MAP_NAME\t\"lm_%04d\"\r\n", lightmapNum );
-	fprintf( f, "\t\t\t*MAP_CLASS\t\"Bitmap\"\r\n");
-	fprintf( f, "\t\t\t*MAP_SUBNO\t1\r\n" );
-	fprintf( f, "\t\t\t*MAP_AMOUNT\t1.0\r\n" );
-	fprintf( f, "\t\t\t*MAP_TYPE\tScreen\r\n" );
-	fprintf( f, "\t\t\t*BITMAP\t\"%s\\lm_%04d.tga\"\r\n", base, lightmapNum );
-	fprintf( f, "\t\t\t*BITMAP_FILTER\tPyramidal\r\n" );
-	fprintf( f, "\t\t}\r\n" );
+	if(lightmapNum >= 0)
+	{
+		fprintf( f, "\t\t*MAP_DIFFUSE\t{\r\n" );
+		fprintf( f, "\t\t\t*MAP_NAME\t\"lm_%04d\"\r\n", lightmapNum );
+		fprintf( f, "\t\t\t*MAP_CLASS\t\"Bitmap\"\r\n");
+		fprintf( f, "\t\t\t*MAP_SUBNO\t1\r\n" );
+		fprintf( f, "\t\t\t*MAP_AMOUNT\t1.0\r\n" );
+		fprintf( f, "\t\t\t*MAP_TYPE\tScreen\r\n" );
+		fprintf( f, "\t\t\t*BITMAP\t\"%s\\lm_%04d.tga\"\r\n", base, lightmapNum );
+		fprintf( f, "\t\t\t*BITMAP_FILTER\tPyramidal\r\n" );
+		fprintf( f, "\t\t}\r\n" );
+	}
 	
 	fprintf( f, "\t}\r\n" );
 }
@@ -377,6 +389,7 @@ int ConvertBSPToASE( char *bspName )
 		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", lightmapCount );
 		for( i = 0; i < lightmapCount; i++ )
 			ConvertLightmap( f, base, i );
+		numLightmapsASE = lightmapCount;
 	}
 	else
 	{

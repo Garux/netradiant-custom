@@ -43,6 +43,10 @@ ConvertSurface()
 converts a bsp drawsurface to an obj chunk
 */
 
+int firstLightmap = 0;
+int lastLightmap = -1;
+static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum );
+
 int objVertexCount = 0;
 int objLastShaderNum = -1;
 static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, vec3_t origin )
@@ -72,6 +76,16 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
 		{
 			fprintf(f, "usemtl lm_%04d\r\n", ds->lightmapNum[0]);
 			objLastShaderNum = ds->lightmapNum[0];
+		}
+		if(ds->lightmapNum[0] < firstLightmap)
+		{
+			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] );
+			firstLightmap = ds->lightmapNum[0];
+		}
+		if(ds->lightmapNum[0] > lastLightmap)
+		{
+			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] );
+			lastLightmap = ds->lightmapNum[0];
 		}
 	}
 	else
@@ -179,7 +193,8 @@ static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum )
 {
 	/* print shader info */
 	fprintf( f, "newmtl lm_%04d\r\n", lightmapNum );
-	fprintf( f, "map_Kd %s\\lm_%04d.tga\r\n", base, lightmapNum );
+	if(lightmapNum >= 0)
+		fprintf( f, "map_Kd %s\\lm_%04d.tga\r\n", base, lightmapNum );
 }
 
 
@@ -248,8 +263,7 @@ int ConvertBSPToOBJ( char *bspName )
 				break;
 			fclose(tmp);
 		}
-		for( i = 0; i < lightmapCount; i++ )
-			ConvertLightmapToMTL( fmtl, base, i );
+		lastLightmap = lightmapCount - 1;
 	}
 	else
 	{
@@ -287,6 +301,12 @@ int ConvertBSPToOBJ( char *bspName )
 		ConvertModelToOBJ( f, model, modelNum, origin );
 	}
 	
+	if(lightmapsAsTexcoord)
+	{
+		for( i = firstLightmap; i <= lastLightmap; i++ )
+			ConvertLightmapToMTL( fmtl, base, i );
+	}
+
 	/* close the file and return */
 	fclose( f );
 	fclose( fmtl );
