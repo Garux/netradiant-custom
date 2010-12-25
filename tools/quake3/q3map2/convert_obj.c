@@ -74,18 +74,18 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
 	{
 		if(objLastShaderNum != ds->lightmapNum[0])
 		{
-			fprintf(f, "usemtl lm_%04d\r\n", ds->lightmapNum[0]);
-			objLastShaderNum = ds->lightmapNum[0];
+			fprintf(f, "usemtl lm_%04d\r\n", ds->lightmapNum[0] + deluxemap);
+			objLastShaderNum = ds->lightmapNum[0] + deluxemap;
 		}
-		if(ds->lightmapNum[0] < firstLightmap)
+		if(ds->lightmapNum[0] + deluxemap < firstLightmap)
 		{
-			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] );
-			firstLightmap = ds->lightmapNum[0];
+			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] + deluxemap );
+			firstLightmap = ds->lightmapNum[0] + deluxemap;
 		}
 		if(ds->lightmapNum[0] > lastLightmap)
 		{
-			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] );
-			lastLightmap = ds->lightmapNum[0];
+			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] + deluxemap );
+			lastLightmap = ds->lightmapNum[0] + deluxemap;
 		}
 	}
 	else

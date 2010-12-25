@@ -1604,6 +1604,11 @@ int ConvertBSPMain( int argc, char **argv )
 			shadersAsBitmap = qtrue;
 		else if( !strcmp( argv[ i ],  "-lightmapsastexcoord" ) )
 			lightmapsAsTexcoord = qtrue;
+		else if( !strcmp( argv[ i ],  "-deluxemapsastexcoord" ) )
+		{
+			lightmapsAsTexcoord = qtrue;
+			deluxemap = qtrue;
+		}
 		else if( !strcmp( argv[ i ],  "-forcereadbsp" ) )
 			force_bsp = qtrue;
 		else if( !strcmp( argv[ i ],  "-meta" ) )
