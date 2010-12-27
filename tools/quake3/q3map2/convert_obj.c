@@ -176,9 +176,12 @@ static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum )
 		strcpy( filename, si->shaderImage->filename );
 	else
 		sprintf( filename, "%s.tga", si->shader );
+
+	/* blender hates this, so let's not do it
 	for( c = filename; *c != '\0'; c++ )
 		if( *c == '/' )
 			*c = '\\';
+	*/
 	
 	/* print shader info */
 	fprintf( f, "newmtl %s\r\n", shader->shader );
@@ -186,7 +189,10 @@ static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum )
 	if(shadersAsBitmap)
 		fprintf( f, "map_Kd %s\r\n", shader->shader );
 	else
+	/* blender hates this, so let's not do it
 		fprintf( f, "map_Kd ..\\%s\r\n", filename );
+	*/
+		fprintf( f, "map_Kd ../%s\r\n", filename );
 }
 
 static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum )
@@ -194,7 +200,10 @@ static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum )
 	/* print shader info */
 	fprintf( f, "newmtl lm_%04d\r\n", lightmapNum );
 	if(lightmapNum >= 0)
+	/* blender hates this, so let's not do it
 		fprintf( f, "map_Kd %s\\lm_%04d.tga\r\n", base, lightmapNum );
+	*/
+		fprintf( f, "map_Kd %s/lm_%04d.tga\r\n", base, lightmapNum );
 }
 
 
