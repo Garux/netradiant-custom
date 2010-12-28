@@ -1537,14 +1537,15 @@ int ConvertBSPMain( int argc, char **argv )
 	int		(*convertFunc)( char * );
 	game_t	*convertGame;
 	char		ext[1024];
-	qboolean	map_allowed, force_bsp;
+	qboolean	map_allowed, force_bsp, force_map;
 	
 	
 	/* set default */
 	convertFunc = ConvertBSPToASE;
 	convertGame = NULL;
-	map_allowed = qtrue;
+	map_allowed = qfalse;
 	force_bsp = qfalse;
+	force_map = qfalse;
 	
 	/* arg checking */
 	if( argc < 1 )
@@ -1609,8 +1610,10 @@ int ConvertBSPMain( int argc, char **argv )
 			lightmapsAsTexcoord = qtrue;
 			deluxemap = qtrue;
 		}
-		else if( !strcmp( argv[ i ],  "-forcereadbsp" ) )
+		else if( !strcmp( argv[ i ],  "-readbsp" ) )
 			force_bsp = qtrue;
+		else if( !strcmp( argv[ i ],  "-readmap" ) )
+			force_map = qtrue;
 		else if( !strcmp( argv[ i ],  "-meta" ) )
 			meta = qtrue;
 		else if( !strcmp( argv[ i ],  "-patchmeta" ) )
@@ -1625,7 +1628,11 @@ int ConvertBSPMain( int argc, char **argv )
 	/* clean up map name */
 	strcpy(source, ExpandArg(argv[i]));
 	ExtractFileExtension(source, ext);
-	if(!Q_stricmp(ext, "map") && !force_bsp)
+
+	if(!map_allowed && !force_map)
+		force_bsp = qtrue;
+
+	if(force_map || (!force_bsp && !Q_stricmp(ext, "map") && map_allowed))
 	{
 		if(!map_allowed)
 			Sys_Printf("WARNING: the requested conversion should not be done from .map files. Compile a .bsp first.\n");
