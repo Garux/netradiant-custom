@@ -2184,8 +2184,8 @@ int LightMain( int argc, char **argv )
 		else if( !strcmp( argv[ i ], "-griddirectionality" ) )
 		{
 			f = atof( argv[ i + 1 ] );
-			if(f < 0) f = 0;
-			if(f > gridAmbientDirectionality) f = gridAmbientDirectionality;
+			if(f < gridAmbientDirectionality) f = gridAmbientDirectionality;
+			if(f > 1) f = 1;
 			Sys_Printf( "Grid directionality is %f\n", f );
 			gridDirectionality *= f;
 			i++;
@@ -2195,7 +2195,7 @@ int LightMain( int argc, char **argv )
 		{
 			f = atof( argv[ i + 1 ] );
 			if(f > gridDirectionality) f = gridDirectionality;
-			if(f > 1) f = 1;
+			if(f < 0) f = 0;
 			Sys_Printf( "Grid ambient directionality is %f\n", f );
 			gridAmbientDirectionality *= f;
 			i++;
