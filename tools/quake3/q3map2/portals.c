@@ -725,7 +725,11 @@ qboolean FloodEntities( tree_t *tree )
 		r = PlaceOccupant( headnode, origin, e, skybox );
 		if( r )
 			inside = qtrue;
-		if( (!r || tree->outside_node.occupied) && !tripped )
+		if( !r )
+		{
+			Sys_Printf( "Entity %i, Brush %i: Entity in solid\n", e->mapEntityNum, 0);
+		}
+		else if( tree->outside_node.occupied && !tripped )
 		{
 			xml_Select( "Entity leaked", e->mapEntityNum, 0, qfalse );
 			tripped = qtrue;
