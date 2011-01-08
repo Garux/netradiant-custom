@@ -229,7 +229,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	char				*skinfilecontent;
 	int					skinfilesize;
 	char				*skinfileptr, *skinfilenextptr;
-	FILE				*skinfilehandle;
 	
 	
 	/* get model */
@@ -240,7 +239,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	/* load skin file */
 	snprintf(skinfilename, sizeof(skinfilename), "%s_%d.skin", name, skin);
 	skinfilename[sizeof(skinfilename)-1] = 0;
-	skinfilehandle = fopen(skinfilename, "r");
 	skinfilesize = vfsLoadFile(skinfilename, (void**) &skinfilecontent, 0);
 	if(skinfilesize < 0 && skin != 0)
 	{
