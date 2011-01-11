@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // mathlib.h
 #include <math.h>
+#include <float.h>
 
 #ifdef __cplusplus
 
@@ -39,6 +40,12 @@ typedef float vec_t;
 typedef vec_t vec3_t[3];
 typedef vec_t vec5_t[5];
 typedef vec_t vec4_t[4];
+
+// Smallest positive value for vec_t such that 1.0 + VEC_SMALLEST_EPSILON_AROUND_ONE != 1.0.
+// In the case of 32 bit floats (which is almost certainly the case), it's 0.00000011921.
+// Don't forget that your epsilons should depend on the possible range of values,
+// because for example adding VEC_SMALLEST_EPSILON_AROUND_ONE to 1024.0 will have no effect.
+#define VEC_SMALLEST_EPSILON_AROUND_ONE FLT_EPSILON
 
 #define	SIDE_FRONT		0
 #define	SIDE_ON			2
@@ -82,6 +89,9 @@ extern const vec3_t g_vec3_axis_z;
 #define Q_rint(in) ((vec_t)floor(in+0.5))
 
 qboolean VectorCompare (const vec3_t v1, const vec3_t v2);
+
+qboolean VectorIsOnAxis(vec3_t v);
+qboolean VectorIsOnAxialPlane(vec3_t v);
 
 vec_t VectorLength(const vec3_t v);
 
@@ -418,6 +428,50 @@ vec_t ray_intersect_plane(const ray_t* ray, const vec3_t normal, vec_t dist);
 
 int plane_intersect_planes(const vec4_t plane1, const vec4_t plane2, const vec4_t plane3, vec3_t intersection);
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Below is double-precision math stuff.  This was initially needed by the new
+// "base winding" code in q3map2 brush processing in order to fix the famous
+// "disappearing triangles" issue.  These definitions can be used wherever extra
+// precision is needed.
+////////////////////////////////////////////////////////////////////////////////
+
+typedef double vec_accu_t;
+typedef vec_accu_t vec3_accu_t[3];
+
+// Smallest positive value for vec_accu_t such that 1.0 + VEC_ACCU_SMALLEST_EPSILON_AROUND_ONE != 1.0.
+// In the case of 64 bit doubles (which is almost certainly the case), it's 0.00000000000000022204.
+// Don't forget that your epsilons should depend on the possible range of values,
+// because for example adding VEC_ACCU_SMALLEST_EPSILON_AROUND_ONE to 1024.0 will have no effect.
+#define VEC_ACCU_SMALLEST_EPSILON_AROUND_ONE DBL_EPSILON
+
+vec_accu_t VectorLengthAccu(const vec3_accu_t v);
+
+// I have a feeling it may be safer to break these #define functions out into actual functions
+// in order to avoid accidental loss of precision.  For example, say you call
+// VectorScaleAccu(vec3_t, vec_t, vec3_accu_t).  The scale would take place in 32 bit land
+// and the result would be cast to 64 bit, which would cause total loss of precision when
+// scaling by a large factor.
+//#define DotProductAccu(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
+//#define VectorSubtractAccu(a, b, c) ((c)[0] = (a)[0] - (b)[0], (c)[1] = (a)[1] - (b)[1], (c)[2] = (a)[2] - (b)[2])
+//#define VectorAddAccu(a, b, c) ((c)[0] = (a)[0] + (b)[0], (c)[1] = (a)[1] + (b)[1], (c)[2] = (a)[2] + (b)[2])
+//#define VectorCopyAccu(a, b) ((b)[0] = (a)[0], (b)[1] = (a)[1], (b)[2] = (a)[2])
+//#define VectorScaleAccu(a, b, c) ((c)[0] = (b) * (a)[0], (c)[1] = (b) * (a)[1], (c)[2] = (b) * (a)[2])
+//#define CrossProductAccu(a, b, c) ((c)[0] = (a)[1] * (b)[2] - (a)[2] * (b)[1], (c)[1] = (a)[2] * (b)[0] - (a)[0] * (b)[2], (c)[2] = (a)[0] * (b)[1] - (a)[1] * (b)[0])
+//#define Q_rintAccu(in) ((vec_accu_t) floor(in + 0.5))
+
+vec_accu_t DotProductAccu(const vec3_accu_t a, const vec3_accu_t b);
+void VectorSubtractAccu(const vec3_accu_t a, const vec3_accu_t b, vec3_accu_t out);
+void VectorAddAccu(const vec3_accu_t a, const vec3_accu_t b, vec3_accu_t out);
+void VectorCopyAccu(const vec3_accu_t in, vec3_accu_t out);
+void VectorScaleAccu(const vec3_accu_t in, vec_accu_t scaleFactor, vec3_accu_t out);
+void CrossProductAccu(const vec3_accu_t a, const vec3_accu_t b, vec3_accu_t out);
+vec_accu_t Q_rintAccu(vec_accu_t val);
+
+void VectorCopyAccuToRegular(const vec3_accu_t in, vec3_t out);
+void VectorCopyRegularToAccu(const vec3_t in, vec3_accu_t out);
+vec_accu_t VectorNormalizeAccu(const vec3_accu_t in, vec3_accu_t out);
 
 #ifdef __cplusplus
 }
