@@ -159,7 +159,7 @@ Returns qtrue if and only if the normal was adjusted.
 
 qboolean SnapNormal( vec3_t normal )
 {
-#if EXPERIMENTAL_SNAP_NORMAL_FIX
+#if Q3MAP2_EXPERIMENTAL_SNAP_NORMAL_FIX
 	int		i;
 	qboolean	adjusted = qfalse;
 
@@ -340,7 +340,7 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 	vec3_t normal;
 
 	VectorCopy(innormal, normal);
-#if EXPERIMENTAL_SNAP_PLANE_FIX
+#if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
 	SnapPlaneImproved(normal, &dist, numPoints, (const vec3_t *) points);
 #else
 	SnapPlane( normal, &dist );
@@ -395,7 +395,7 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 	vec3_t normal;
 	
 	VectorCopy(innormal, normal);
-#if EXPERIMENTAL_SNAP_PLANE_FIX
+#if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
 	SnapPlaneImproved(normal, &dist, numPoints, (const vec3_t *) points);
 #else
  	SnapPlane( normal, &dist );
@@ -438,7 +438,7 @@ takes 3 points and finds the plane they lie in
 
 int MapPlaneFromPoints( vec3_t *p )
 {
-#if EXPERIMENTAL_HIGH_PRECISION_MATH_Q3MAP2_FIXES
+#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 	vec3_accu_t	paccu[3];
 	vec3_accu_t	t1, t2, normalAccu;
 	vec3_t		normal;

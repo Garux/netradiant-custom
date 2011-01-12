@@ -321,6 +321,50 @@ void SnapWeldVectorAccu(vec3_accu_t a, vec3_accu_t b, vec3_accu_t out)
 	}
 }
 
+/*
+==================
+SnapWeldVectorAccu
+
+Welds two vectors into a third, taking into account nearest-to-integer
+instead of averaging.
+==================
+*/
+void SnapWeldVectorAccu(vec3_accu_t a, vec3_accu_t b, vec3_accu_t out)
+{
+	// I'm just preserving what I think was the intended logic of the original
+	// SnapWeldVector().  I'm not actually sure where this function should even
+	// be used.  I'd like to know which kinds of problems this function addresses.
+
+	// TODO: I thought we're snapping all coordinates to nearest 1/8 unit?
+	// So what is natural about snapping to the nearest integer?  Maybe we should
+	// be snapping to the nearest 1/8 unit instead?
+
+	int		i;
+	vec_accu_t	ai, bi, ad, bd;
+	
+	if (a == NULL || b == NULL || out == NULL)
+		Error("SnapWeldVectorAccu: NULL argument");
+	
+	for (i = 0; i < 3; i++)
+	{
+		ai = Q_rintAccu(a[i]);
+		bi = Q_rintAccu(b[i]);
+		ad = fabs(ai - a[i]);
+		bd = fabs(bi - b[i]);
+	
+		if (ad < bd)
+		{
+			if (ad < SNAP_EPSILON)	out[i] = ai;
+			else			out[i] = a[i];
+		}
+		else
+		{
+			if (bd < SNAP_EPSILON)	out[i] = bi;
+			else			out[i] = b[i];
+		}
+	}
+}
+
 
 
 /*
@@ -458,7 +502,7 @@ returns false if the brush doesn't enclose a valid volume
 qboolean CreateBrushWindings( brush_t *brush )
 {
 	int			i, j;
-#if EXPERIMENTAL_HIGH_PRECISION_MATH_Q3MAP2_FIXES
+#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 	winding_accu_t	*w;
 #else
 	winding_t	*w;
@@ -475,7 +519,7 @@ qboolean CreateBrushWindings( brush_t *brush )
 		plane = &mapplanes[ side->planenum ];
 		
 		/* make huge winding */
-#if EXPERIMENTAL_HIGH_PRECISION_MATH_Q3MAP2_FIXES
+#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 		w = BaseWindingForPlaneAccu(plane->normal, plane->dist);
 #else
 		w = BaseWindingForPlane( plane->normal, plane->dist );
@@ -491,14 +535,14 @@ qboolean CreateBrushWindings( brush_t *brush )
 			if( brush->sides[ j ].bevel )
 				continue;
 			plane = &mapplanes[ brush->sides[ j ].planenum ^ 1 ];
-#if EXPERIMENTAL_HIGH_PRECISION_MATH_Q3MAP2_FIXES
+#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 			ChopWindingInPlaceAccu(&w, plane->normal, plane->dist, 0);
 #else
 			ChopWindingInPlace( &w, plane->normal, plane->dist, 0 ); // CLIP_EPSILON );
 #endif
 			
 			/* ydnar: fix broken windings that would generate trifans */
-#if EXPERIMENTAL_HIGH_PRECISION_MATH_Q3MAP2_FIXES
+#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 			// I think it's better to FixWindingAccu() once after we chop with all planes
 			// so that error isn't multiplied.  There is nothing natural about welding
 			// the points unless they are the final endpoints.  ChopWindingInPlaceAccu()
@@ -509,7 +553,7 @@ qboolean CreateBrushWindings( brush_t *brush )
 		}
 		
 		/* set side winding */
-#if EXPERIMENTAL_HIGH_PRECISION_MATH_Q3MAP2_FIXES
+#if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
 		if (w != NULL)
 		{
 			FixWindingAccu(w);
