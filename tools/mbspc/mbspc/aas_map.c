@@ -557,8 +557,11 @@ int AAS_ValidEntity(entity_t *mapent)
 	} //end else if
 	else if (!strcmp("func_static", ValueForKey(mapent, "classname")))
 	{
-		//FIXME: easy/medium/hard/deathmatch specific?
-		return true;
+		//include func_static in AAS calculations unless spawnflags & 1
+		if (!(atoi(ValueForKey(mapent, "spawnflags")) & 1))
+		{
+			return true;
+		}
 	} //end else if
 	else if (!strcmp("func_door", ValueForKey(mapent, "classname")))
 	{
