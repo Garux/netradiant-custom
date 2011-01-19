@@ -528,19 +528,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 					
 					/* copy xyz */
 					VectorCopy( dv->xyz, points[ j ] );
-					VectorCopy( dv->xyz, backs[ j ] );
-					
-					/* find nearest axial to normal and push back points opposite */
-					/* note: this doesn't work as well as simply using the plane of the triangle, below */
-					for( k = 0; k < 3; k++ )
-					{
-						if( fabs( dv->normal[ k ] ) >= fabs( dv->normal[ (k + 1) % 3 ] ) &&
-							fabs( dv->normal[ k ] ) >= fabs( dv->normal[ (k + 2) % 3 ] ) )
-						{
-							backs[ j ][ k ] += dv->normal[ k ] < 0.0f ? 64.0f : -64.0f;
-							break;
-						}
-					}
 				}
 
 				VectorCopy( points[0], points[3] ); // for cyclic usage
