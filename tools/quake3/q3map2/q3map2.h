@@ -1956,6 +1956,8 @@ Q_EXTERN game_t				games[]
 								,
 								#include "game_qfusion.h"	/* qfusion game */
 								,
+								#include "game_reaction.h" /* must be after game_quake3.h */
+								,
 								#include "game_darkplaces.h"	/* vortex: darkplaces q1 engine */
 								,
 								#include "game_dq.h"	/* vortex: deluxe quake game ( darkplaces q1 engine) */
