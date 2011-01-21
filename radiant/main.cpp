@@ -567,9 +567,9 @@ int main (int argc, char* argv[])
   lib = LoadLibrary("dwmapi.dll");
   if(lib != 0)
   {
-	  void (WINAPI *DwmEnableComposition) (bool bEnable) = (void (WINAPI *) (bool bEnable)) GetProcAddress(lib, "DwmEnableComposition");
-	  if(DwmEnableComposition)
-		  DwmEnableComposition(FALSE);
+	  void (WINAPI *qDwmEnableComposition) (bool bEnable) = (void (WINAPI *) (bool bEnable)) GetProcAddress(lib, "DwmEnableComposition");
+	  if(qDwmEnableComposition)
+		  qDwmEnableComposition(FALSE);
 	  FreeLibrary(lib);
   }
 #endif
