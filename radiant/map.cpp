@@ -1643,6 +1643,13 @@ bool Map_ImportFile(const char* filename)
     goto tryDecompile;
 
   {
+    const MapFormat* format = NULL;
+    const char* moduleName = findModuleName(&GlobalFiletypes(), MapFormat::Name(), path_get_extension(filename));
+    if(string_not_empty(moduleName))
+      format = ReferenceAPI_getMapModules().findModule(moduleName);
+
+    if(format)
+      format->wrongFormat = false;
     Resource* resource = GlobalReferenceCache().capture(filename);
     resource->refresh(); // avoid loading old version if map has changed on disk since last import
     if(!resource->load())
@@ -1650,6 +1657,12 @@ bool Map_ImportFile(const char* filename)
       GlobalReferenceCache().release(filename);
       goto tryDecompile;
     }
+    if(format)
+      if(format->wrongFormat)
+      {
+        GlobalReferenceCache().release(filename);
+        goto tryDecompile;
+      }
     NodeSmartReference clone(NewMapRoot(""));
     Node_getTraversable(*resource->getNode())->traverse(CloneAll(clone));
     Map_gatherNamespaced(clone);
