@@ -189,11 +189,10 @@ std::size_t Sys_Print(int level, const char* buf, std::size_t length)
 
       const GdkColor yellow = { 0, 0xb0ff, 0xb0ff, 0x0000 };
       const GdkColor red = { 0, 0xffff, 0x0000, 0x0000 };
-      const GdkColor black = { 0, 0x0000, 0x0000, 0x0000 };
 
       static GtkTextTag* error_tag = gtk_text_buffer_create_tag (buffer, "red_foreground", "foreground-gdk", &red, 0);
       static GtkTextTag* warning_tag = gtk_text_buffer_create_tag (buffer, "yellow_foreground", "foreground-gdk", &yellow, 0);
-      static GtkTextTag* standard_tag = gtk_text_buffer_create_tag (buffer, "black_foreground", "foreground-gdk", &black, 0);
+      static GtkTextTag* standard_tag = gtk_text_buffer_create_tag (buffer, "black_foreground", 0);
       GtkTextTag* tag;
       switch (level)
       {
