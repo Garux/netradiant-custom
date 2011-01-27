@@ -344,13 +344,13 @@ endif
 .PHONY: binaries
 binaries: \
 	binaries-tools \
-	binaries-radiant-all \
+	binaries-radiant \
 
 .PHONY: binaries-radiant-all
-binaries-radiant-all: \
+binaries-radiant: \
 	binaries-radiant-modules \
 	binaries-radiant-plugins \
-	binaries-radiant \
+	binaries-radiant-core \
 
 .PHONY: binaries-radiant-modules
 binaries-radiant-modules: \
@@ -379,7 +379,7 @@ binaries-radiant-plugins: \
 	$(INSTALLDIR)/plugins/ufoaiplug.$(DLL) \
 
 .PHONY: binaries-radiant
-binaries-radiant: \
+binaries-radiant-core: \
 	$(INSTALLDIR)/radiant.$(EXE) \
 
 .PHONY: binaries-tools
@@ -391,7 +391,7 @@ binaries-tools: \
 binaries-tools-quake2: \
 	binaries-q2map \
 	binaries-qdata3 \
-	binaries-heretic2 \
+	binaries-h2data \
 
 .PHONY: binaries-q2map
 binaries-q2map: \
@@ -401,8 +401,8 @@ binaries-q2map: \
 binaries-qdata3: \
 	$(INSTALLDIR)/qdata3.$(EXE) \
 
-.PHONY: binaries-heretic2
-binaries-heretic2: \
+.PHONY: binaries-h2data
+binaries-h2data: \
 	$(INSTALLDIR)/heretic2/h2data.$(EXE)
 
 .PHONY: binaries-tools-quake3
