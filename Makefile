@@ -343,7 +343,17 @@ endif
 
 .PHONY: binaries
 binaries: \
-	$(INSTALLDIR)/heretic2/h2data.$(EXE) \
+	binaries-tools \
+	binaries-radiant-all \
+
+.PHONY: binaries-radiant-all
+binaries-radiant-all: \
+	binaries-radiant-modules \
+	binaries-radiant-plugins \
+	binaries-radiant \
+
+.PHONY: binaries-radiant-modules
+binaries-radiant-modules: \
 	$(INSTALLDIR)/modules/archivepak.$(DLL) \
 	$(INSTALLDIR)/modules/archivewad.$(DLL) \
 	$(INSTALLDIR)/modules/archivezip.$(DLL) \
@@ -358,17 +368,56 @@ binaries: \
 	$(INSTALLDIR)/modules/model.$(DLL) \
 	$(INSTALLDIR)/modules/shaders.$(DLL) \
 	$(INSTALLDIR)/modules/vfspk3.$(DLL) \
+
+.PHONY: binaries-radiant-plugins
+binaries-radiant-plugins: \
 	$(INSTALLDIR)/plugins/bobtoolz.$(DLL) \
 	$(INSTALLDIR)/plugins/brushexport.$(DLL) \
 	$(INSTALLDIR)/plugins/prtview.$(DLL) \
 	$(INSTALLDIR)/plugins/shaderplug.$(DLL) \
 	$(INSTALLDIR)/plugins/sunplug.$(DLL) \
 	$(INSTALLDIR)/plugins/ufoaiplug.$(DLL) \
-	$(INSTALLDIR)/q2map.$(EXE) \
-	$(INSTALLDIR)/q3data.$(EXE) \
-	$(INSTALLDIR)/q3map2.$(EXE) \
-	$(INSTALLDIR)/qdata3.$(EXE) \
+
+.PHONY: binaries-radiant
+binaries-radiant: \
 	$(INSTALLDIR)/radiant.$(EXE) \
+
+.PHONY: binaries-tools
+binaries-tools: \
+	binaries-tools-quake2 \
+	binaries-tools-quake3 \
+
+.PHONY: binaries-tools-quake2
+binaries-tools-quake2: \
+	binaries-q2map \
+	binaries-qdata3 \
+	binaries-heretic2 \
+
+.PHONY: binaries-q2map
+binaries-q2map: \
+	$(INSTALLDIR)/q2map.$(EXE) \
+
+.PHONY: binaries-qdata3
+binaries-qdata3: \
+	$(INSTALLDIR)/qdata3.$(EXE) \
+
+.PHONY: binaries-heretic2
+binaries-heretic2: \
+	$(INSTALLDIR)/heretic2/h2data.$(EXE)
+
+.PHONY: binaries-tools-quake3
+binaries-tools-quake3: \
+	binaries-q3data \
+	binaries-q3map2 \
+
+.PHONY: binaries-q3data
+binaries-q3data: \
+	$(INSTALLDIR)/q3data.$(EXE) \
+
+.PHONY: binaries-q3map2
+binaries-q3map2: \
+	$(INSTALLDIR)/q3map2.$(EXE) \
+
 
 .PHONY: clean
 clean:
