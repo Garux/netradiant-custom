@@ -166,7 +166,7 @@ game_t struct
 	MINIMAP_MODE_GRAY,  /* minimap mode */
 	"%s.tga",           /* minimap name format */
 	"IBSP",				/* bsp file prefix */
-	46,					/* bsp file version */
+	47,					/* bsp file version */
 	qfalse,				/* cod-style lump len/ofs order */
 	LoadIBSPFile,		/* bsp load function */
 	WriteIBSPFile,		/* bsp write function */
