@@ -283,4 +283,6 @@ void XYWindowDestroyed_disconnect(SignalHandlerId id);
 MouseEventHandlerId XYWindowMouseDown_connect(const MouseEventHandler& handler);
 void XYWindowMouseDown_disconnect(MouseEventHandlerId id);
 
+extern GtkWidget* g_page_entity;
+
 #endif

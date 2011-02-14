@@ -47,6 +47,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "mainframe.h"
 #include "grid.h"
 #include "map.h"
+#include "entityinspector.h"
 
 
 
@@ -658,13 +659,13 @@ void FindReplaceTextures(const char* pFind, const char* pReplace, bool bSelected
   }
 }
 
-typedef std::vector<const char*> Classnames;
+typedef std::vector<const char*> PropertyValues;
 
-bool classnames_match_entity(const Classnames& classnames, Entity* entity)
+bool propertyvalues_contain(const PropertyValues& propertyvalues, const char *str)
 {
-  for(Classnames::const_iterator i = classnames.begin(); i != classnames.end(); ++i)
+  for(PropertyValues::const_iterator i = propertyvalues.begin(); i != propertyvalues.end(); ++i)
   {
-    if(string_equal(entity->getKeyValue("classname"), *i))
+    if(string_equal(str, *i))
     {
       return true;
     }
@@ -672,19 +673,20 @@ bool classnames_match_entity(const Classnames& classnames, Entity* entity)
   return false;
 }
 
-class EntityFindByClassnameWalker : public scene::Graph::Walker
+class EntityFindByPropertyValueWalker : public scene::Graph::Walker
 {
-  const Classnames& m_classnames;
+  const PropertyValues& m_propertyvalues;
+  const char *m_prop;
 public:
-  EntityFindByClassnameWalker(const Classnames& classnames)
-    : m_classnames(classnames)
+  EntityFindByPropertyValueWalker(const char *prop, const PropertyValues& propertyvalues)
+    : m_propertyvalues(propertyvalues), m_prop(prop)
   {
   }
   bool pre(const scene::Path& path, scene::Instance& instance) const
   {
     Entity* entity = Node_getEntity(path.top());
     if(entity != 0
-      && classnames_match_entity(m_classnames, entity))
+      && propertyvalues_contain(m_propertyvalues, entity->getKeyValue(m_prop)))
     {
       Instance_getSelectable(instance)->setSelected(true);
     }
@@ -692,17 +694,18 @@ public:
   }
 };
 
-void Scene_EntitySelectByClassnames(scene::Graph& graph, const Classnames& classnames)
+void Scene_EntitySelectByPropertyValues(scene::Graph& graph, const char *prop, const PropertyValues& propertyvalues)
 {
-  graph.traverse(EntityFindByClassnameWalker(classnames));
+  graph.traverse(EntityFindByPropertyValueWalker(prop, propertyvalues));
 }
 
-class EntityGetSelectedClassnamesWalker : public scene::Graph::Walker
+class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
 {
-  Classnames& m_classnames;
+  PropertyValues& m_propertyvalues;
+  const char *m_prop;
 public:
-  EntityGetSelectedClassnamesWalker(Classnames& classnames)
-    : m_classnames(classnames)
+  EntityGetSelectedPropertyValuesWalker(const char *prop, PropertyValues& propertyvalues)
+    : m_propertyvalues(propertyvalues), m_prop(prop)
   {
   }
   bool pre(const scene::Path& path, scene::Instance& instance) const
@@ -714,16 +717,17 @@ public:
       Entity* entity = Node_getEntity(path.top());
       if(entity != 0)
       {
-        m_classnames.push_back(entity->getKeyValue("classname"));
+	if(!propertyvalues_contain(m_propertyvalues, entity->getKeyValue(m_prop)))
+          m_propertyvalues.push_back(entity->getKeyValue(m_prop));
       }
     }
     return true;
   }
 };
 
-void Scene_EntityGetClassnames(scene::Graph& graph, Classnames& classnames)
+void Scene_EntityGetPropertyValues(scene::Graph& graph, const char *prop, PropertyValues& propertyvalues)
 {
-  graph.traverse(EntityGetSelectedClassnamesWalker(classnames));
+  graph.traverse(EntityGetSelectedPropertyValuesWalker(prop, propertyvalues));
 }
 
 void Select_AllOfType()
@@ -738,12 +742,15 @@ void Select_AllOfType()
   }
   else
   {
-    Classnames classnames;
-    Scene_EntityGetClassnames(GlobalSceneGraph(), classnames);
+    PropertyValues propertyvalues;
+    const char *prop = EntityInspector_getCurrentKey();
+    if(!prop || !*prop)
+      prop = "classname";
+    Scene_EntityGetPropertyValues(GlobalSceneGraph(), prop, propertyvalues);
     GlobalSelectionSystem().setSelectedAll(false);
-    if(!classnames.empty())
+    if(!propertyvalues.empty())
     {
-      Scene_EntitySelectByClassnames(GlobalSceneGraph(), classnames);
+      Scene_EntitySelectByPropertyValues(GlobalSceneGraph(), prop, propertyvalues);
     }
     else
     {
