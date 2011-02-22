@@ -1861,7 +1861,10 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, vec3_t sampl
 	//%	VectorClear( color );
 	//%	samples = 0;
 	VectorCopy( lightLuxel, color );
-	VectorCopy( lightDeluxel, direction );
+	if(lightDeluxel)
+	{
+		VectorCopy( lightDeluxel, direction );
+	}
 	samples = 1;
 	for( b = 0; b < 4; b++ )
 	{
