@@ -44,5 +44,7 @@ GtkWidget* GroupDialog_addPage(const char* tabLabel, GtkWidget* widget, const St
 
 void GroupDialog_showPage(GtkWidget* page);
 void GroupDialog_updatePageTitle(GtkWidget* page);
+bool GroupDialog_isShown();
+GtkWidget* GroupDialog_getPage();
 
 #endif

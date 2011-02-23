@@ -76,6 +76,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "entity.h"
 #include "mainframe.h"
 #include "textureentry.h"
+#include "groupdialog.h"
 
 GtkEntry* numeric_entry_new()
 {
@@ -1760,3 +1761,11 @@ void EntityInspector_destroy()
   GlobalEntityClassManager().detach(g_EntityInspector);
 }
 
+const char *EntityInspector_getCurrentKey()
+{
+	if(!GroupDialog_isShown())
+		return 0;
+	if(GroupDialog_getPage() != g_page_entity)
+		return 0;
+	return gtk_entry_get_text(g_entityKeyEntry);
+}
