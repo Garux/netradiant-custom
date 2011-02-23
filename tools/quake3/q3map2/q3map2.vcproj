@@ -316,6 +316,10 @@
 				RelativePath=".\convert_map.c"
 				>
 			</File>
+			<File
+				RelativePath=".\convert_obj.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="rc"
