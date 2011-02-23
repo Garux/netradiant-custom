@@ -118,6 +118,10 @@ void Brush_Construct(EBrushType type)
   {
     g_showAlternativeTextureProjectionOption = true;
 
+    const char *value = g_pGameDescription->getKeyValue("brush_primit");
+    if(!string_empty(value))
+      g_useAlternativeTextureProjection.m_latched = atoi(value);
+
     GlobalPreferenceSystem().registerPreference(
       "AlternativeTextureProjection",
       BoolImportStringCaller(g_useAlternativeTextureProjection.m_latched),
