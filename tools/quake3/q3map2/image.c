@@ -419,12 +419,6 @@ image_t *ImageLoad( const char *filename )
 				StripExtension( name );
 				strcat( name, ".dds" );
 				size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
-				if(size <= 0)
-				{
-					memmove(name + 4, name, strlen(name) + 1);
-					memcpy(name, "dds/", 4);
-					size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
-				}
 				if( size > 0 )
 				{
 					LoadDDSBuffer( buffer, size, &image->pixels, &image->width, &image->height );
