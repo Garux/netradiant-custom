@@ -150,7 +150,7 @@ mkdir -p games
 pack DarkPlacesPack  GPL         svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/DarkPlacesPack/branches/1.5/
 pack NexuizPack      GPL         gitdir git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
 pack OpenArenaPack   unknown     zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/OpenArenaPack.zip
-pack OsirionPack     proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/OsirionPack.zip
+pack OsirionPack     GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/OsirionPack.zip
 pack Q3Pack          proprietary svn    https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Pack/trunk/ -r29
 pack Quake2Pack      proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/Quake2Pack.zip
 pack Quake2WorldPack GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
