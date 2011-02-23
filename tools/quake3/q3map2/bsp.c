@@ -44,7 +44,6 @@ functions
 
 ------------------------------------------------------------------------------- */
 
-
 /*
 ProcessAdvertisements()
 copies advertisement info into the BSP structures
@@ -268,7 +267,6 @@ void ProcessWorldModel( void )
 	char		level[ 2 ], shader[ 1024 ];
 	const char	*value;
 	
-	
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
 	value = ValueForKey( &entities[ 0 ], "_blocksize" );
 	if( value[ 0 ] == '\0' )
@@ -342,12 +340,12 @@ void ProcessWorldModel( void )
 		Sys_FPrintf( SYS_NOXML, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
 		polyline = LeakFile( tree );
-		leaknode = xmlNewNode( NULL, "message" );
-		xmlNodeSetContent( leaknode, "MAP LEAKED\n" );
+		leaknode = xmlNewNode( NULL, (xmlChar*)"message" );
+		xmlNodeSetContent( leaknode, (xmlChar*)"MAP LEAKED\n" );
 		xmlAddChild( leaknode, polyline );
 		level[0] = (int) '0' + SYS_ERR;
 		level[1] = 0;
-		xmlSetProp( leaknode, "level", (char*) &level );
+		xmlSetProp( leaknode, (xmlChar*)"level", (xmlChar*) &level );
 		xml_SendNode( leaknode );
 		if( leaktest )
 		{
@@ -460,7 +458,7 @@ void ProcessWorldModel( void )
 					VectorSet( normal, 0, 0, -1 );
 				
 				/* create the flare surface (note shader defaults automatically) */
-				DrawSurfaceForFlare( mapEntityNum, origin, normal, color, (char*) flareShader, lightStyle );
+				DrawSurfaceForFlare( mapEntityNum, origin, normal, color, flareShader, lightStyle );
 			}
 		}
 	}
@@ -605,6 +603,9 @@ void ProcessModels( void )
 	
 	/* write fogs */
 	EmitFogs();
+
+	/* vortex: emit meta stats */
+	EmitMetaStats();
 }
 
 
@@ -618,18 +619,34 @@ void OnlyEnts( void )
 {
 	char out[ 1024 ];
 
+	char save_cmdline[1024], save_version[1024];
+	const char *p;
 	
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
 	
 	sprintf( out, "%s.bsp", source );
 	LoadBSPFile( out );
+
+	ParseEntities();
+	p = ValueForKey(&entities[0], "_q3map2_cmdline");
+	strncpy(save_cmdline, p, sizeof(save_cmdline));
+	save_cmdline[sizeof(save_cmdline)-1] = 0;
+	p = ValueForKey(&entities[0], "_q3map2_version");
+	strncpy(save_version, p, sizeof(save_version));
+	save_version[sizeof(save_version)-1] = 0;
+
 	numEntities = 0;
 
 	LoadShaderInfo();
-	LoadMapFile( name, qfalse );
+	LoadMapFile( name, qfalse, qfalse );
 	SetModelNumbers();
 	SetLightStyles();
+
+	if(*save_cmdline)
+		SetKeyValue(&entities[0], "_q3map2_cmdline", save_cmdline);
+	if(*save_version)
+		SetKeyValue(&entities[0], "_q3map2_version", save_version);
 	
 	numBSPEntities = numEntities;
 	UnparseEntities();
@@ -660,6 +677,7 @@ int BSPMain( int argc, char **argv )
 	numMapDrawSurfs = 0;
 	
 	tempSource[ 0 ] = '\0';
+	globalCelShader[0] = 0;
 	
 	/* set standard game flags */
 	maxSurfaceVerts = game->maxSurfaceVerts;
@@ -736,6 +754,14 @@ int BSPMain( int argc, char **argv )
  			i++;
 			Sys_Printf( "Lightmap sample size set to %dx%d units\n", sampleSize, sampleSize );
  		}
+		else if( !strcmp( argv[ i ], "-minsamplesize" ) )
+		{
+			minSampleSize = atoi( argv[ i + 1 ] );
+			if( minSampleSize < 1 )
+				minSampleSize = 1;
+			i++;
+			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
+		}
 		else if( !strcmp( argv[ i ],  "-custinfoparms") )
 		{
 			Sys_Printf( "Custom info parms enabled\n" );
@@ -816,6 +842,15 @@ int BSPMain( int argc, char **argv )
 			Sys_Printf( "Flatshading enabled\n" );
 			flat = qtrue;
 		}
+		else if( !strcmp( argv[ i ], "-celshader" ) )
+		{
+			++i;
+			if(argv[i][0])
+				sprintf( globalCelShader, "textures/%s", argv[ i ] );
+			else
+				*globalCelShader = 0;
+			Sys_Printf( "Global cel shader set to \"%s\"\n", globalCelShader );
+		}
 		else if( !strcmp( argv[ i ], "-meta" ) )
 		{
 			Sys_Printf( "Creating meta surfaces from brush faces\n" );
@@ -856,10 +891,27 @@ int BSPMain( int argc, char **argv )
 			Sys_Printf( "Debug portal surfaces enabled\n" );
 			debugPortals = qtrue;
 		}
+		else if( !strcmp( argv[ i ], "-altsplit" ) )
+		{
+			Sys_Printf( "Alternate BSP splitting (by 27) enabled\n" );
+			bspAlternateSplitWeights = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-deep" ) )
+		{
+			Sys_Printf( "Deep BSP tree generation enabled\n" );
+			deepBSP = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-maxarea" ) )
+		{
+			Sys_Printf( "Max Area face surface generation enabled\n" );
+			maxAreaFaceSurface = qtrue;
+		}
 		else if( !strcmp( argv[ i ], "-bsp" ) )
 			Sys_Printf( "-bsp argument unnecessary\n" );
 		else
+		{
 			Sys_Printf( "WARNING: Unknown option \"%s\"\n", argv[ i ] );
+		}
 	}
 	
 	/* fixme: print more useful usage here */
@@ -903,9 +955,12 @@ int BSPMain( int argc, char **argv )
 	
 	/* load original file from temp spot in case it was renamed by the editor on the way in */
 	if( strlen( tempSource ) > 0 )
-		LoadMapFile( tempSource, qfalse );
+		LoadMapFile( tempSource, qfalse, qfalse );
 	else
-		LoadMapFile( name, qfalse );
+		LoadMapFile( name, qfalse, qfalse );
+	
+	/* div0: inject command line parameters */
+	InjectCommandLine(argv, 1, argc - 1);
 	
 	/* ydnar: decal setup */
 	ProcessDecals();
@@ -923,7 +978,7 @@ int BSPMain( int argc, char **argv )
 	ProcessAdvertisements();
 
 	/* finish and write bsp */
-	EndBSPFile();
+	EndBSPFile(qtrue);
 	
 	/* remove temp map source file if appropriate */
 	if( strlen( tempSource ) > 0)

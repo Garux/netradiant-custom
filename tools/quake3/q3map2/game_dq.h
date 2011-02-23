@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------------
 
-Copyright (C) 1999-2007 id Software, Inc. and contributors.
+Copyright (C) 1999-2006 Id Software, Inc. and contributors.
 For a list of contributors, see the accompanying CONTRIBUTORS file.
 
 This file is part of GtkRadiant.
@@ -29,20 +29,10 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 
 
 /* marker */
-#ifndef GAME_QUAKELIVE_H
-#define GAME_QUAKELIVE_H
+#ifndef GAME_DQ_H
+#define GAME_DQ_H
 
-
-
-/* -------------------------------------------------------------------------------
-
-no content and surface flags here
-they are the same as Quake 3's
-(this file must be included AFTER game_quake3.h)
-
-------------------------------------------------------------------------------- */
-
-
+/* content and surface flags get form quake3 */
 
 /* -------------------------------------------------------------------------------
 
@@ -51,10 +41,10 @@ game_t struct
 ------------------------------------------------------------------------------- */
 
 {
-	"quakelive",		/* -game x */
-	"baseq3",			/* default base game data dir (FIXME what does quake live really use?) */
-	".q3a",				/* unix home sub-dir (FIXME what does quake live really use?) */
-	"quake",			/* magic path word (FIXME where does quake live install to?) */
+	"dq",				/* -game x */
+	"basedq",			/* default base game data dir */
+	".dq",				/* unix home sub-dir */
+	"dq",				/* magic path word */
 	"scripts",			/* shader directory */
 	64,					/* max lightmapped surface verts */
 	999,				/* max surface verts */
@@ -63,18 +53,18 @@ game_t struct
 	"flareshader",		/* default flare shader */
 	qfalse,				/* wolf lighting model? */
 	128,				/* lightmap width/height */
-	1.0f,				/* lightmap gamma */
-	1.0f,				/* lightmap exposure */
+	1.2f,				/* lightmap gamma */
+	200.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
-	1.0f,				/* lightgrid scale */
-	1.0f,				/* lightgrid ambient scale */
+	0.3f,				/* lightgrid scale */
+	0.6f,				/* lightgrid ambient scale */
 	qfalse,				/* light angle attenuation uses half-lambert curve */
-	qfalse,				/* disable shader lightstyles hack */
-	qfalse,				/* keep light entities on bsp */
-	8,					/* default patchMeta subdivisions tolerance */
-	qfalse,				/* patch casting enabled */
-	qfalse,				/* compile deluxemaps */
-	0,					/* deluxemaps default mode */
+	qtrue,				/* disable shader lightstyles hack */
+	qtrue,				/* keep light entities on bsp */
+	4,					/* default patchMeta subdivisions tolerance */
+	qtrue,				/* patch casting enabled */
+	qtrue,				/* compile deluxemaps */
+	1,					/* deluxemaps default mode */
 	512,                /* minimap size */
 	1.0f,               /* minimap sharpener */
 	0.0f,               /* minimap border */
@@ -82,7 +72,7 @@ game_t struct
 	MINIMAP_MODE_GRAY,  /* minimap mode */
 	"%s.tga",           /* minimap name format */
 	"IBSP",				/* bsp file prefix */
-	47,					/* bsp file version */
+	46,					/* bsp file version */
 	qfalse,				/* cod-style lump len/ofs order */
 	LoadIBSPFile,		/* bsp load function */
 	WriteIBSPFile,		/* bsp write function */
@@ -146,6 +136,7 @@ game_t struct
 		{ "nosteps",		0,							0,							Q_SURF_NOSTEPS,				0,							0,							0 },
 		{ "nodlight",		0,							0,							Q_SURF_NODLIGHT,			0,							0,							0 },
 		{ "dust",			0,							0,							Q_SURF_DUST,				0,							0,							0 },
+		
 		
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }

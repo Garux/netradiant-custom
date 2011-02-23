@@ -668,9 +668,15 @@ qboolean FloodEntities( tree_t *tree )
 		
 		/* get origin */
 		GetVectorForKey( e, "origin", origin );
+
+		/* as a special case, allow origin-less entities */
 		if( VectorCompare( origin, vec3_origin ) ) 
 			continue;
 		
+		/* also allow bmodel entities outside, as they could be on a moving path that will go into the map */
+		if( e->brushes != NULL || e->patches != NULL )
+			continue;
+
 		/* handle skybox entities */
 		value = ValueForKey( e, "classname" );
 		if( !Q_stricmp( value, "_skybox" ) )
@@ -719,7 +725,11 @@ qboolean FloodEntities( tree_t *tree )
 		r = PlaceOccupant( headnode, origin, e, skybox );
 		if( r )
 			inside = qtrue;
-		if( (!r || tree->outside_node.occupied) && !tripped )
+		if( !r )
+		{
+			Sys_Printf( "Entity %i, Brush %i: Entity in solid\n", e->mapEntityNum, 0);
+		}
+		else if( tree->outside_node.occupied && !tripped )
 		{
 			xml_Select( "Entity leaked", e->mapEntityNum, 0, qfalse );
 			tripped = qtrue;

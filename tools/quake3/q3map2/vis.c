@@ -102,9 +102,9 @@ the earlier information.
 */
 int PComp (const void *a, const void *b)
 {
-	if ( (*(vportal_t **)a)->nummightsee == (*(vportal_t **)b)->nummightsee)
+	if ( (*(const vportal_t *const *)a)->nummightsee == (*(const vportal_t *const *)b)->nummightsee)
 		return 0;
-	if ( (*(vportal_t **)a)->nummightsee < (*(vportal_t **)b)->nummightsee)
+	if ( (*(const vportal_t *const *)a)->nummightsee < (*(const vportal_t *const *)b)->nummightsee)
 		return -1;
 	return 1;
 }
@@ -167,6 +167,7 @@ ClusterMerge
 Merges the portal visibility for a leaf
 ===============
 */
+static int clustersizehistogram[MAX_MAP_LEAFS] = {0};
 void ClusterMerge (int leafnum)
 {
 	leaf_t		*leaf;
@@ -212,9 +213,8 @@ void ClusterMerge (int leafnum)
 
 	numvis++;		// count the leaf itself
 
-	totalvis += numvis;
-
-	Sys_FPrintf (SYS_VRB,"cluster %4i : %4i visible\n", leafnum, numvis);
+	//Sys_FPrintf (SYS_VRB,"cluster %4i : %4i visible\n", leafnum, numvis);
+	++clustersizehistogram[numvis];
 
 	memcpy (bspVisBytes + VIS_HEADER_SIZE + leafnum*leafbytes, uncompressed, leafbytes);
 }
@@ -310,8 +310,9 @@ CalcVis
 */
 void CalcVis (void)
 {
-	int			i;
+	int			i, minvis, maxvis;
 	const char	*value;
+	double mu, sigma, totalvis, totalvis2;
 	
 	
 	/* ydnar: rr2do2's farplane code */
@@ -357,9 +358,34 @@ void CalcVis (void)
 	Sys_Printf("creating leaf vis...\n");
 	for (i=0 ; i<portalclusters ; i++)
 		ClusterMerge (i);
+	
+	totalvis = 0;
+	totalvis2 = 0;
+	minvis = -1;
+	maxvis = -1;
+	for(i = 0; i < MAX_MAP_LEAFS; ++i)
+		if(clustersizehistogram[i])
+		{
+			if(debugCluster)
+				Sys_FPrintf(SYS_VRB, "%4i clusters have exactly %4i visible clusters\n", clustersizehistogram[i], i);
+			/* cast is to prevent integer overflow */
+			totalvis  += ((double) i)                * ((double) clustersizehistogram[i]);
+			totalvis2 += ((double) i) * ((double) i) * ((double) clustersizehistogram[i]);
 
-  Sys_Printf( "Total visible clusters: %i\n", totalvis );
-  Sys_Printf( "Average clusters visible: %i\n", totalvis / portalclusters );
+			if(minvis < 0)
+				minvis = i;
+			maxvis = i;
+		}
+	
+	mu = totalvis / portalclusters;
+	sigma = sqrt(totalvis2 / portalclusters - mu * mu);
+	
+  Sys_Printf( "Total clusters: %i\n", portalclusters );
+  Sys_Printf( "Total visible clusters: %.0f\n", totalvis );
+  Sys_Printf( "Average clusters visible: %.2f (%.3f%%/total)\n", mu, mu / portalclusters * 100.0);
+  Sys_Printf( "  Standard deviation: %.2f (%.3f%%/total, %.3f%%/avg)\n", sigma, sigma / portalclusters * 100.0, sigma / mu * 100.0);
+  Sys_Printf( "  Minimum: %i (%.3f%%/total, %.3f%%/avg)\n", minvis, minvis / (double) portalclusters * 100.0, minvis / mu * 100.0);
+  Sys_Printf( "  Maximum: %i (%.3f%%/total, %.3f%%/avg)\n", maxvis, maxvis / (double) portalclusters * 100.0, maxvis / mu * 100.0);
 }
 
 /*
@@ -871,6 +897,9 @@ void LoadPortals (char *name)
 	Sys_Printf ("%6i portalclusters\n", portalclusters);
 	Sys_Printf ("%6i numportals\n", numportals);
 	Sys_Printf ("%6i numfaces\n", numfaces);
+
+	if(numportals > MAX_PORTALS)
+		Error("MAX_PORTALS");
 	
 	// these counts should take advantage of 64 bit systems automatically
 	leafbytes = ((portalclusters+63)&~63)>>3;
@@ -903,8 +932,8 @@ void LoadPortals (char *name)
 			Error ("LoadPortals: reading portal %i", i);
 		if (numpoints > MAX_POINTS_ON_WINDING)
 			Error ("LoadPortals: portal %i has too many points", i);
-		if ( (unsigned)leafnums[0] > portalclusters
-		|| (unsigned)leafnums[1] > portalclusters)
+		if (leafnums[0] > portalclusters
+		|| leafnums[1] > portalclusters)
 			Error ("LoadPortals: reading portal %i", i);
 		if (fscanf (f, "%i ", &hint) != 1)
 			Error ("LoadPortals: reading hint state");
@@ -925,7 +954,10 @@ void LoadPortals (char *name)
 			for (k=0 ; k<3 ; k++)
 				w->points[j][k] = v[k];
 		}
-		fscanf (f, "\n");
+		if(fscanf (f, "\n") != 0)
+		{
+			// silence gcc warning
+		}
 		
 		// calc plane
 		PlaneFromWinding (w, &plane);
@@ -996,7 +1028,10 @@ void LoadPortals (char *name)
 			for (k=0 ; k<3 ; k++)
 				w->points[j][k] = v[k];
 		}
-		fscanf (f, "\n");
+		if(fscanf (f, "\n") != 0)
+		{
+			// silence gcc warning
+		}
 		
 		// calc plane
 		PlaneFromWinding (w, &plane);
@@ -1046,6 +1081,9 @@ int VisMain (int argc, char **argv)
 		} else if (!strcmp(argv[i], "-merge")) {
 			Sys_Printf ("merge = true\n");
 			mergevis = qtrue;
+		} else if (!strcmp(argv[i], "-mergeportals")) {
+			Sys_Printf ("mergeportals = true\n");
+			mergevisportals = qtrue;
 		} else if (!strcmp(argv[i], "-nopassage")) {
 			Sys_Printf ("nopassage = true\n");
 			noPassageVis = qtrue;
@@ -1058,6 +1096,9 @@ int VisMain (int argc, char **argv)
 		} else if (!strcmp (argv[i],"-saveprt")) {
 			Sys_Printf ("saveprt = true\n");
 			saveprt = qtrue;
+		} else if( !strcmp( argv[ i ], "-v" ) ) {
+			debugCluster = qtrue;
+			Sys_Printf( "Extra verbous mode enabled\n" );
 		} else if (!strcmp (argv[i],"-tmpin")) {
 			strcpy (inbase, "/tmp");
 		} else if (!strcmp (argv[i],"-tmpout")) {
@@ -1074,7 +1115,9 @@ int VisMain (int argc, char **argv)
 		}
 		
 		else
+		{
 			Sys_Printf( "WARNING: Unknown option \"%s\"\n", argv[ i ] );
+		}
 	}
 
 	if( i != argc - 1 )
@@ -1105,11 +1148,15 @@ int VisMain (int argc, char **argv)
 	/* ydnar: for getting far plane */
 	ParseEntities();
 	
+	/* inject command line parameters */
+	InjectCommandLine(argv, 0, argc - 1);
+	UnparseEntities();
+	
 	if( mergevis )
-	{
 		MergeLeaves();
+
+	if( mergevis || mergevisportals )
 		MergeLeafPortals();
-	}
 	
 	CountActivePortals();
 	/* WritePortals( "maps/hints.prs" );*/

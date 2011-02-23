@@ -229,23 +229,23 @@ void LoadRBSPFile( const char *filename )
 		Error( "%s is version %d, not %d", filename, header->version, game->bspVersion );
 	
 	/* load/convert lumps */
-	numBSPShaders = CopyLump( (bspHeader_t*) header, LUMP_SHADERS, bspShaders, sizeof( bspShader_t ) );
+	numBSPShaders = CopyLump_Allocate( (bspHeader_t*) header, LUMP_SHADERS, (void **) &bspShaders, sizeof( bspShader_t ), &allocatedBSPShaders );
 	
-	numBSPModels = CopyLump( (bspHeader_t*) header, LUMP_MODELS, bspModels, sizeof( bspModel_t ) );
+	numBSPModels = CopyLump_Allocate( (bspHeader_t*) header, LUMP_MODELS, (void **) &bspModels, sizeof( bspModel_t ), &allocatedBSPModels );
 	
-	numBSPPlanes = CopyLump( (bspHeader_t*) header, LUMP_PLANES, bspPlanes, sizeof( bspPlane_t ) );
+	numBSPPlanes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_PLANES, (void **) &bspPlanes, sizeof( bspPlane_t ), &allocatedBSPPlanes );
 	
 	numBSPLeafs = CopyLump( (bspHeader_t*) header, LUMP_LEAFS, bspLeafs, sizeof( bspLeaf_t ) );
 	
-	numBSPNodes = CopyLump( (bspHeader_t*) header, LUMP_NODES, bspNodes, sizeof( bspNode_t ) );
+	numBSPNodes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_NODES, (void **) &bspNodes, sizeof( bspNode_t ), &allocatedBSPNodes );
 	
-	numBSPLeafSurfaces = CopyLump( (bspHeader_t*) header, LUMP_LEAFSURFACES, bspLeafSurfaces, sizeof( bspLeafSurfaces[ 0 ] ) );
+	numBSPLeafSurfaces = CopyLump_Allocate( (bspHeader_t*) header, LUMP_LEAFSURFACES, (void **) &bspLeafSurfaces, sizeof( bspLeafSurfaces[ 0 ] ), &allocatedBSPLeafSurfaces );
 	
-	numBSPLeafBrushes = CopyLump( (bspHeader_t*) header, LUMP_LEAFBRUSHES, bspLeafBrushes, sizeof( bspLeafBrushes[ 0 ] ) );
+	numBSPLeafBrushes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_LEAFBRUSHES, (void **) &bspLeafBrushes, sizeof( bspLeafBrushes[ 0 ] ), &allocatedBSPLeafBrushes );
 	
-	numBSPBrushes = CopyLump( (bspHeader_t*) header, LUMP_BRUSHES, bspBrushes, sizeof( bspBrush_t ) );
+	numBSPBrushes = CopyLump_Allocate( (bspHeader_t*) header, LUMP_BRUSHES, (void **) &bspBrushes, sizeof( bspBrush_t ), &allocatedBSPLeafBrushes );
 	
-	numBSPBrushSides = CopyLump( (bspHeader_t*) header, LUMP_BRUSHSIDES, bspBrushSides, sizeof( bspBrushSide_t ) );
+	numBSPBrushSides = CopyLump_Allocate( (bspHeader_t*) header, LUMP_BRUSHSIDES, (void **) &bspBrushSides, sizeof( bspBrushSide_t ), &allocatedBSPBrushSides );
 	
 	numBSPDrawVerts = GetLumpElements( (bspHeader_t*) header, LUMP_DRAWVERTS, sizeof( bspDrawVerts[ 0 ] ) );
 		SetDrawVerts( numBSPDrawVerts );
@@ -265,7 +265,7 @@ void LoadRBSPFile( const char *filename )
 		bspLightBytes = safe_malloc( numBSPLightBytes );
 		CopyLump( (bspHeader_t*) header, LUMP_LIGHTMAPS, bspLightBytes, 1 );
 	
-	bspEntDataSize = CopyLump( (bspHeader_t*) header, LUMP_ENTITIES, bspEntData, 1);
+	bspEntDataSize = CopyLump_Allocate( (bspHeader_t*) header, LUMP_ENTITIES, (void **) &bspEntData, 1, &allocatedBSPEntData);
 	
 	CopyLightGridLumps( header );
 	

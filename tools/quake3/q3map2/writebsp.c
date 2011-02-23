@@ -66,13 +66,15 @@ int	EmitShader( const char *shader, int *contentFlags, int *surfaceFlags )
 		if( !Q_stricmp( shader, bspShaders[ i ].shader ) )
 			return i;
 	}
+
+	// i == numBSPShaders
 	
 	/* get shaderinfo */
 	si = ShaderInfoForShader( shader );
 	
 	/* emit a new shader */
-	if( i == MAX_MAP_SHADERS )
-		Error( "MAX_MAP_SHADERS" );
+	AUTOEXPAND_BY_REALLOC_BSP(Shaders, 1024);
+
 	numBSPShaders++;
 	strcpy( bspShaders[ i ].shader, shader );
 	bspShaders[ i ].surfaceFlags = si->surfaceFlags;
@@ -114,6 +116,7 @@ void EmitPlanes( void )
 	mp = mapplanes;
 	for( i = 0; i < nummapplanes; i++, mp++ )
 	{
+		AUTOEXPAND_BY_REALLOC_BSP(Planes, 1024);
 		bp = &bspPlanes[ numBSPPlanes ];
 		VectorCopy( mp->normal, bp->normal );
 		bp->dist = mp->dist;
@@ -165,8 +168,7 @@ void EmitLeaf( node_t *node )
 		//%	if( b->guard != 0xDEADBEEF )
 		//%		Sys_Printf( "Brush %6d: 0x%08X Guard: 0x%08X Next: 0x%08X Original: 0x%08X Sides: %d\n", b->brushNum, b, b, b->next, b->original, b->numsides );
 		
-		if( numBSPLeafBrushes >= MAX_MAP_LEAFBRUSHES )
-			Error( "MAX_MAP_LEAFBRUSHES" );
+		AUTOEXPAND_BY_REALLOC_BSP(LeafBrushes, 1024);
 		bspLeafBrushes[ numBSPLeafBrushes ] = b->original->outputNum;
 		numBSPLeafBrushes++;
 	}
@@ -181,8 +183,7 @@ void EmitLeaf( node_t *node )
 	leaf_p->firstBSPLeafSurface = numBSPLeafSurfaces;
 	for ( dsr = node->drawSurfReferences; dsr; dsr = dsr->nextRef )
 	{
-		if( numBSPLeafSurfaces >= MAX_MAP_LEAFFACES )
-			Error( "MAX_MAP_LEAFFACES" );
+		AUTOEXPAND_BY_REALLOC_BSP(LeafSurfaces, 1024);
 		bspLeafSurfaces[ numBSPLeafSurfaces ] = dsr->outputNum;
 		numBSPLeafSurfaces++;			
 	}
@@ -199,7 +200,7 @@ recursively emit the bsp nodes
 int EmitDrawNode_r( node_t *node )
 {
 	bspNode_t	*n;
-	int			i;
+	int			i, n0;
 	
 	
 	/* check for leafnode */
@@ -210,9 +211,9 @@ int EmitDrawNode_r( node_t *node )
 	}
 	
 	/* emit a node */
-	if( numBSPNodes == MAX_MAP_NODES )
-		Error( "MAX_MAP_NODES" );
-	n = &bspNodes[ numBSPNodes ];
+	AUTOEXPAND_BY_REALLOC_BSP(Nodes, 1024);
+	n0 = numBSPNodes;
+	n = &bspNodes[ n0 ];
 	numBSPNodes++;
 	
 	VectorCopy (node->mins, n->mins);
@@ -236,6 +237,8 @@ int EmitDrawNode_r( node_t *node )
 		{
 			n->children[i] = numBSPNodes;	
 			EmitDrawNode_r (node->children[i]);
+			// n may have become invalid here, so...
+			n = &bspNodes[ n0 ];
 		}
 	}
 
@@ -277,18 +280,19 @@ sets style keys for entity lights
 void SetLightStyles( void )
 {
 	int			i, j, style, numStyles;
-	qboolean	keepLights;
 	const char	*t;
 	entity_t	*e;
 	epair_t		*ep, *next;
 	char		value[ 10 ];
 	char		lightTargets[ MAX_SWITCHED_LIGHTS ][ 64 ];
 	int			lightStyles[ MAX_SWITCHED_LIGHTS ];
-	
-	
+
 	/* ydnar: determine if we keep lights in the bsp */
-	t = ValueForKey( &entities[ 0 ], "_keepLights" );
-	keepLights = (t[ 0 ] == '1') ? qtrue : qfalse;
+	if (KeyExists(&entities[ 0 ], "_keepLights") == qtrue)
+	{
+		t = ValueForKey( &entities[ 0 ], "_keepLights" );
+		keepLights = (t[ 0 ] == '1') ? qtrue : qfalse;
+	}
 	
 	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
 	numStyles = 0;
@@ -395,7 +399,7 @@ EndBSPFile()
 finishes a new bsp and writes to disk
 */
 
-void EndBSPFile( void )
+void EndBSPFile(qboolean do_write)
 {
 	char	path[ 1024 ];
 	
@@ -407,13 +411,16 @@ void EndBSPFile( void )
 	numBSPEntities = numEntities;
 	UnparseEntities();
 	
-	/* write the surface extra file */
-	WriteSurfaceExtraFile( source );
-	
-	/* write the bsp */
-	sprintf( path, "%s.bsp", source );
-	Sys_Printf( "Writing %s\n", path );
-	WriteBSPFile( path );
+	if(do_write)
+	{
+		/* write the surface extra file */
+		WriteSurfaceExtraFile( source );
+
+		/* write the bsp */
+		sprintf( path, "%s.bsp", source );
+		Sys_Printf( "Writing %s\n", path );
+		WriteBSPFile( path );
+	}
 }
 
 
@@ -441,8 +448,7 @@ void EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes )
 	for( b = brushes; b != NULL; b = b->next )
 	{
 		/* check limits */
-		if( numBSPBrushes == MAX_MAP_BRUSHES )
-			Error( "MAX_MAP_BRUSHES (%d)", numBSPBrushes );
+		AUTOEXPAND_BY_REALLOC_BSP(Brushes, 1024);
 		
 		/* get bsp brush */
 		b->outputNum = numBSPBrushes;
@@ -462,8 +468,7 @@ void EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes )
 			b->sides[ j ].outputNum = -1;
 			
 			/* check count */
-			if( numBSPBrushSides == MAX_MAP_BRUSHSIDES )
-				Error( "MAX_MAP_BRUSHSIDES ");
+			AUTOEXPAND_BY_REALLOC_BSP(BrushSides, 1024);
 			
 			/* emit side */
 			b->sides[ j ].outputNum = numBSPBrushSides;
@@ -553,8 +558,7 @@ void BeginModel( void )
 	
 	
 	/* test limits */
-	if( numBSPModels == MAX_MAP_MODELS )
-		Error( "MAX_MAP_MODELS" );
+	AUTOEXPAND_BY_REALLOC_BSP(Models, 256);
 	
 	/* get model and entity */
 	mod = &bspModels[ numBSPModels ];

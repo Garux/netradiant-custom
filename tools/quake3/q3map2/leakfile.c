@@ -81,15 +81,15 @@ xmlNodePtr LeakFile (tree_t *tree)
 	if (!linefile)
 		Error ("Couldn't open %s\n", filename);
 
-  xml_node = xmlNewNode (NULL, "polyline");
+  xml_node = xmlNewNode (NULL, (xmlChar*)"polyline");
 
 	count = 0;
 	node = &tree->outside_node;
 	while (node->occupied > 1)
 	{
 		int			next;
-		portal_t	*p, *nextportal;
-		node_t		*nextnode;
+		portal_t	*p, *nextportal = NULL;
+		node_t		*nextnode = NULL;
 		int			s;
 
 		// find the best portal exit

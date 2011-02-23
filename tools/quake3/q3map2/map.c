@@ -44,7 +44,7 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 #define	USE_HASHING
 #define	PLANE_HASHES	8192
 
-plane_t					*planehash[ PLANE_HASHES ];
+int						planehash[ PLANE_HASHES ];
 
 int						c_boxbevels;
 int						c_edgebevels;
@@ -97,7 +97,7 @@ void AddPlaneToHash( plane_t *p )
 	hash = (PLANE_HASHES - 1) & (int) fabs( p->dist );
 
 	p->hash_chain = planehash[hash];
-	planehash[hash] = p;
+	planehash[hash] = p - mapplanes + 1;
 }
 
 /*
@@ -116,8 +116,7 @@ int CreateNewFloatPlane (vec3_t normal, vec_t dist)
 	}
 
 	// create a new plane
-	if (nummapplanes+2 > MAX_MAP_PLANES)
-		Error ("MAX_MAP_PLANES");
+	AUTOEXPAND_BY_REALLOC(mapplanes, nummapplanes+1, allocatedmapplanes, 1024);
 
 	p = &mapplanes[nummapplanes];
 	VectorCopy (normal, p->normal);
@@ -248,7 +247,7 @@ SnapPlane()
 snaps a plane to normal/distance epsilons
 */
 
-void SnapPlane( vec3_t normal, vec_t *dist )
+void SnapPlane( vec3_t normal, vec_t *dist, vec3_t center )
 {
 // SnapPlane disabled by LordHavoc because it often messes up collision
 // brushes made from triangles of embedded models, and it has little effect
@@ -322,22 +321,25 @@ void SnapPlaneImproved(vec3_t normal, vec_t *dist, int numPoints, const vec3_t *
 }
 
 
+
 /*
 FindFloatPlane()
 ydnar: changed to allow a number of test points to be supplied that
 must be within an epsilon distance of the plane
 */
 
-int FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points )
+int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points ) // NOTE: this has a side effect on the normal. Good or bad?
 
 #ifdef USE_HASHING
 
 {
 	int		i, j, hash, h;
+	int pidx;
 	plane_t	*p;
 	vec_t	d;
-	
-	
+	vec3_t normal;
+
+	VectorCopy(innormal, normal);
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
 	SnapPlaneImproved(normal, &dist, numPoints, (const vec3_t *) points);
 #else
@@ -350,8 +352,10 @@ int FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points )
 	for( i = -1; i <= 1; i++ )
 	{
 		h = (hash + i) & (PLANE_HASHES - 1);
-		for( p = planehash[ h ]; p != NULL; p = p->hash_chain )
+		for( pidx = planehash[ h ] - 1; pidx != -1; pidx = mapplanes[pidx].hash_chain - 1 )
 		{
+			p = &mapplanes[pidx];
+
 			/* do standard plane compare */
 			if( !PlaneEqual( p, normal, dist ) )
 				continue;
@@ -367,7 +371,7 @@ int FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points )
 				// very small when world coordinates extend to 2^16.  Making the
 				// dot product here in 64 bit land will not really help the situation
 				// because the error will already be carried in dist.
-				d = DotProduct( points[ j ], normal ) - dist;
+				d = DotProduct( points[ j ], p->normal ) - p->dist;
 				d = fabs(d);
 				if (d != 0.0 && d >= distanceEpsilon)
 					break; // Point is too far from plane.
@@ -388,15 +392,32 @@ int FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points )
 {
 	int		i;
 	plane_t	*p;
+	vec3_t normal;
 	
+	VectorCopy(innormal, normal);
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
 	SnapPlaneImproved(normal, &dist, numPoints, (const vec3_t *) points);
 #else
-	SnapPlane( normal, &dist );
+ 	SnapPlane( normal, &dist );
 #endif
 	for( i = 0, p = mapplanes; i < nummapplanes; i++, p++ )
 	{
-		if( PlaneEqual( p, normal, dist ) )
+		if( !PlaneEqual( p, normal, dist ) )
+			continue;
+
+		/* ydnar: uncomment the following line for old-style plane finding */
+		//%	return i;
+			
+		/* ydnar: test supplied points against this plane */
+		for( j = 0; j < numPoints; j++ )
+		{
+			d = DotProduct( points[ j ], p->normal ) - p->dist;
+			if( fabs( d ) > distanceEpsilon )
+				break;
+		}
+		
+		/* found a matching plane */
+		if( j >= numPoints )
 			return i;
 		// TODO: Note that the non-USE_HASHING code does not compute epsilons
 		// for the provided points.  It should do that.  I think this code
@@ -487,6 +508,9 @@ void SetBrushContents( brush_t *b )
 			continue;
 		if( s->contentFlags != contentFlags || s->compileFlags != compileFlags )
 			mixed = qtrue;
+
+		contentFlags |= s->contentFlags;
+		compileFlags |= s->compileFlags;
 	}
 	
 	/* ydnar: getting rid of this stupid warning */
@@ -739,7 +763,23 @@ produces a final brush based on the buildBrush->sides array
 and links it to the current entity
 */
 
-brush_t *FinishBrush( void )
+static void MergeOrigin(entity_t *ent, vec3_t origin)
+{
+	vec3_t adjustment;
+	char string[128];
+
+	/* we have not parsed the brush completely yet... */
+	GetVectorForKey( ent, "origin", ent->origin );
+
+	VectorMA(origin, -1, ent->originbrush_origin, adjustment);
+	VectorAdd(adjustment, ent->origin, ent->origin);
+	VectorCopy(origin, ent->originbrush_origin);
+
+	sprintf(string, "%f %f %f", ent->origin[0], ent->origin[1], ent->origin[2]);
+	SetKeyValue(ent, "origin", string);
+}
+
+brush_t *FinishBrush( qboolean noCollapseGroups )
 {
 	brush_t		*b;
 	
@@ -752,8 +792,10 @@ brush_t *FinishBrush( void )
 	   after the entire entity is parsed, the planenums and texinfos will be adjusted for the origin brush */
 	if( buildBrush->compileFlags & C_ORIGIN )
 	{
-		char	string[ 32 ];
 		vec3_t	origin;
+
+		Sys_Printf( "Entity %i, Brush %i: origin brush detected\n", 
+				mapEnt->mapEntityNum, entitySourceBrushes );
 
 		if( numEntities == 1 )
 		{
@@ -765,10 +807,7 @@ brush_t *FinishBrush( void )
 		VectorAdd (buildBrush->mins, buildBrush->maxs, origin);
 		VectorScale (origin, 0.5, origin);
 
-		sprintf( string, "%i %i %i", (int) origin[ 0 ], (int) origin[ 1 ], (int) origin[ 2 ] );
-		SetKeyValue( &entities[ numEntities - 1 ], "origin", string);
-
-		VectorCopy( origin, entities[ numEntities - 1 ].origin);
+		MergeOrigin(&entities[ numEntities - 1 ], origin);
 
 		/* don't keep this brush */
 		return NULL;
@@ -785,7 +824,8 @@ brush_t *FinishBrush( void )
 	}
 	
 	/* add bevel planes */
-	AddBrushBevels();
+	if(!noCollapseGroups)
+		AddBrushBevels();
 	
 	/* keep it */
 	b = CopyBrush( buildBrush );
@@ -957,7 +997,7 @@ static void ParseRawBrush( qboolean onlyLights )
 	int				planenum;
 	shaderInfo_t	*si;
 	vec_t			shift[ 2 ];
-	vec_t			rotate;
+	vec_t			rotate = 0;
 	vec_t			scale[ 2 ];
 	char			name[ MAX_QPATH ];
 	char			shader[ MAX_QPATH ];
@@ -1154,7 +1194,7 @@ ParseBrush()
 parses a brush out of a map file and sets it up
 */
 
-static void ParseBrush( qboolean onlyLights )
+static void ParseBrush( qboolean onlyLights, qboolean noCollapseGroups )
 {
 	brush_t	*b;
 	
@@ -1201,7 +1241,7 @@ static void ParseBrush( qboolean onlyLights )
 	}
 	
 	/* finish the brush */
-	b = FinishBrush();
+	b = FinishBrush(noCollapseGroups);
 }
 
 
@@ -1213,11 +1253,16 @@ adds them to the world's brush list
 (used by func_group)
 */
 
+void AdjustBrushesForOrigin( entity_t *ent );
 void MoveBrushesToWorld( entity_t *ent )
 {
 	brush_t		*b, *next;
 	parseMesh_t	*pm;
 
+	/* we need to undo the common/origin adjustment, and instead shift them by the entity key origin */
+	VectorScale(ent->origin, -1, ent->originbrush_origin);
+	AdjustBrushesForOrigin(ent);
+	VectorClear(ent->originbrush_origin);
 	
 	/* move brushes */
 	for( b = ent->brushes; b != NULL; b = next )
@@ -1280,7 +1325,6 @@ void AdjustBrushesForOrigin( entity_t *ent )
 	brush_t		*b;
 	parseMesh_t	*p;
 	
-	
 	/* walk brush list */
 	for( b = ent->brushes; b != NULL; b = b->next )
 	{
@@ -1291,7 +1335,7 @@ void AdjustBrushesForOrigin( entity_t *ent )
 			s = &b->sides[ i ];
 			
 			/* offset side plane */
-			newdist = mapplanes[ s->planenum ].dist - DotProduct( mapplanes[ s->planenum ].normal, ent->origin );
+			newdist = mapplanes[ s->planenum ].dist - DotProduct( mapplanes[ s->planenum ].normal, ent->originbrush_origin );
 			
 			/* find a new plane */
 			s->planenum = FindFloatPlane( mapplanes[ s->planenum ].normal, newdist, 0, NULL );
@@ -1305,7 +1349,7 @@ void AdjustBrushesForOrigin( entity_t *ent )
 	for( p = ent->patches; p != NULL; p = p->next )
 	{
 		for( i = 0; i < (p->mesh.width * p->mesh.height); i++ )
-			VectorSubtract( p->mesh.verts[ i ].xyz, ent->origin, p->mesh.verts[ i ].xyz );
+			VectorSubtract( p->mesh.verts[ i ].xyz, ent->originbrush_origin, p->mesh.verts[ i ].xyz );
 	}
 }
 
@@ -1534,11 +1578,12 @@ ParseMapEntity()
 parses a single entity out of a map file
 */
 
-static qboolean ParseMapEntity( qboolean onlyLights )
+static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 {
 	epair_t			*ep;
 	const char		*classname, *value;
-	float			lightmapScale;
+	float			lightmapScale, shadeAngle;
+	int				lightmapSampleSize;
 	char			shader[ MAX_QPATH ];
 	shaderInfo_t	*celShader = NULL;
 	brush_t			*brush;
@@ -1612,7 +1657,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 				g_bBrushPrimit = BPRIMIT_NEWBRUSHES;
 				
 				/* parse brush primitive */
-				ParseBrush( onlyLights );
+				ParseBrush( onlyLights, noCollapseGroups );
 			}
 			else
 			{
@@ -1622,7 +1667,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 				
 				/* parse old brush format */
 				UnGetToken();
-				ParseBrush( onlyLights );
+				ParseBrush( onlyLights, noCollapseGroups );
 			}
 			entitySourceBrushes++;
 		}
@@ -1675,19 +1720,24 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	/* get explicit shadow flags */
 	GetEntityShadowFlags( mapEnt, NULL, &castShadows, &recvShadows );
 	
+	/* vortex: added _ls key (short name of lightmapscale) */
 	/* ydnar: get lightmap scaling value for this entity */
+	lightmapScale = 0.0f;
 	if( strcmp( "", ValueForKey( mapEnt, "lightmapscale" ) ) ||
-		strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) )
+		strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) || 
+		strcmp( "", ValueForKey( mapEnt, "_ls" ) ) )
 	{
 		/* get lightmap scale from entity */
 		lightmapScale = FloatForKey( mapEnt, "lightmapscale" );
 		if( lightmapScale <= 0.0f )
 			lightmapScale = FloatForKey( mapEnt, "_lightmapscale" );
+		if( lightmapScale <= 0.0f )
+			lightmapScale = FloatForKey( mapEnt, "_ls" );
+		if( lightmapScale < 0.0f )
+			lightmapScale = 0.0f;
 		if( lightmapScale > 0.0f )
 			Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt->mapEntityNum, classname, lightmapScale );
 	}
-	else
-		lightmapScale = 0.0f;
 	
 	/* ydnar: get cel shader :) for this entity */
 	value = ValueForKey( mapEnt, "_celshader" );
@@ -1695,12 +1745,50 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		value = ValueForKey( &entities[ 0 ], "_celshader" );
 	if( value[ 0 ] != '\0' )
 	{
-		sprintf( shader, "textures/%s", value );
-		celShader = ShaderInfoForShader( shader );
-		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader );
+		if(strcmp(value, "none"))
+		{
+			sprintf( shader, "textures/%s", value );
+			celShader = ShaderInfoForShader( shader );
+			Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader );
+		}
+		else
+		{
+			celShader = NULL;
+		}
 	}
 	else
-		celShader = NULL;
+		celShader = (*globalCelShader ? ShaderInfoForShader(globalCelShader) : NULL);
+
+	/* jal : entity based _shadeangle */
+	shadeAngle = 0.0f;
+	if ( strcmp( "", ValueForKey( mapEnt, "_shadeangle" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_shadeangle" );
+	/* vortex' aliases */
+	else if ( strcmp( "", ValueForKey( mapEnt, "_smoothnormals" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_smoothnormals" );
+	else if ( strcmp( "", ValueForKey( mapEnt, "_sn" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_sn" );
+	else if ( strcmp( "", ValueForKey( mapEnt, "_smooth" ) ) )
+		shadeAngle = FloatForKey( mapEnt, "_smooth" );
+	
+	if( shadeAngle < 0.0f )
+		shadeAngle = 0.0f;
+
+	if( shadeAngle > 0.0f )
+		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt->mapEntityNum, classname, shadeAngle );
+	
+	/* jal : entity based _samplesize */
+	lightmapSampleSize = 0;
+	if ( strcmp( "", ValueForKey( mapEnt, "_lightmapsamplesize" ) ) )
+		lightmapSampleSize = IntForKey( mapEnt, "_lightmapsamplesize" );
+	else if ( strcmp( "", ValueForKey( mapEnt, "_samplesize" ) ) )
+		lightmapSampleSize = IntForKey( mapEnt, "_samplesize" );
+	
+	if( lightmapSampleSize < 0 )
+		lightmapSampleSize = 0;
+
+	if( lightmapSampleSize > 0 )
+		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", mapEnt->mapEntityNum, classname, lightmapSampleSize );
 	
 	/* attach stuff to everything in the entity */
 	for( brush = mapEnt->brushes; brush != NULL; brush = brush->next )
@@ -1708,8 +1796,10 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		brush->entityNum = mapEnt->mapEntityNum;
 		brush->castShadows = castShadows;
 		brush->recvShadows = recvShadows;
+		brush->lightmapSampleSize = lightmapSampleSize;
 		brush->lightmapScale = lightmapScale;
 		brush->celShader = celShader;
+		brush->shadeAngleDegrees = shadeAngle;
 	}
 	
 	for( patch = mapEnt->patches; patch != NULL; patch = patch->next )
@@ -1717,6 +1807,7 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 		patch->entityNum = mapEnt->mapEntityNum;
 		patch->castShadows = castShadows;
 		patch->recvShadows = recvShadows;
+		patch->lightmapSampleSize = lightmapSampleSize;
 		patch->lightmapScale = lightmapScale;
 		patch->celShader = celShader;
 	}
@@ -1729,18 +1820,18 @@ static qboolean ParseMapEntity( qboolean onlyLights )
 	
 	/* get entity origin and adjust brushes */
 	GetVectorForKey( mapEnt, "origin", mapEnt->origin );
-	if( mapEnt->origin[ 0 ] || mapEnt->origin[ 1 ] || mapEnt->origin[ 2 ] )
+	if( mapEnt->originbrush_origin[ 0 ] || mapEnt->originbrush_origin[ 1 ] || mapEnt->originbrush_origin[ 2 ] )
 		AdjustBrushesForOrigin( mapEnt );
 
 	/* group_info entities are just for editor grouping (fixme: leak!) */
-	if( !Q_stricmp( "group_info", classname ) )
+	if( !noCollapseGroups && !Q_stricmp( "group_info", classname ) )
 	{
 		numEntities--;
 		return qtrue;
 	}
 	
 	/* group entities are just for editor convenience, toss all brushes into worldspawn */
-	if( funcGroup )
+	if( !noCollapseGroups && funcGroup )
 	{
 		MoveBrushesToWorld( mapEnt );
 		numEntities--;
@@ -1758,11 +1849,11 @@ LoadMapFile()
 loads a map file into a list of entities
 */
 
-void LoadMapFile( char *filename, qboolean onlyLights )
+void LoadMapFile( char *filename, qboolean onlyLights, qboolean noCollapseGroups )
 {		
 	FILE		*file;
 	brush_t		*b;
-	int			oldNumEntities, numMapBrushes;
+	int			oldNumEntities = 0, numMapBrushes;
 	
 	
 	/* note it */
@@ -1791,7 +1882,7 @@ void LoadMapFile( char *filename, qboolean onlyLights )
 	buildBrush = AllocBrush( MAX_BUILD_SIDES );
 	
 	/* parse the map file */
-	while( ParseMapEntity( onlyLights ) );
+	while( ParseMapEntity( onlyLights, noCollapseGroups ) );
 	
 	/* light loading */
 	if( onlyLights )

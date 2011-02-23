@@ -56,7 +56,7 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 #define GROW_TRACE_NODES		16384		//%	16384
 #define GROW_NODE_ITEMS			16			//%	256
 
-#define MAX_TW_VERTS			12
+#define MAX_TW_VERTS			24 // vortex: increased from 12 to 24 for ability co compile some insane maps with large curve count
 
 #define	TRACE_ON_EPSILON		0.1f
 
@@ -73,7 +73,7 @@ traceVert_t;
 typedef struct traceInfo_s
 {
 	shaderInfo_t				*si;
-	int							surfaceNum, castShadows;
+	int							surfaceNum, castShadows, skipGrid;
 }
 traceInfo_t;
 
@@ -144,7 +144,8 @@ static int AddTraceInfo( traceInfo_t *ti )
 	{
 		if( traceInfos[ num ].si == ti->si &&
 			traceInfos[ num ].surfaceNum == ti->surfaceNum &&
-			traceInfos[ num ].castShadows == ti->castShadows )
+			traceInfos[ num ].castShadows == ti->castShadows &&
+			traceInfos[ num ].skipGrid == ti->skipGrid )
 			return num;
 	}
 	
@@ -201,6 +202,9 @@ static int AllocTraceNode( void )
 	memset( &traceNodes[ numTraceNodes ], 0, sizeof( traceNode_t ) );
 	traceNodes[ numTraceNodes ].type = TRACE_LEAF;
 	ClearBounds( traceNodes[ numTraceNodes ].mins, traceNodes[ numTraceNodes ].maxs );
+
+	/* Sys_Printf("alloc node %d\n", numTraceNodes); */
+
 	numTraceNodes++;
 	
 	/* return the count */
@@ -362,7 +366,7 @@ recursively create the initial trace node structure from the bsp tree
 
 static int SetupTraceNodes_r( int bspNodeNum )
 {
-	int				i, nodeNum, bspLeafNum;
+	int				i, nodeNum, bspLeafNum, newNode;
 	bspPlane_t		*plane;
 	bspNode_t 		*bspNode;
 	
@@ -388,15 +392,26 @@ static int SetupTraceNodes_r( int bspNodeNum )
 			bspLeafNum = -bspNode->children[ i ] - 1;
 			
 			/* new code */
-			traceNodes[ nodeNum ].children[ i ] = AllocTraceNode();
+			newNode = AllocTraceNode();
+			traceNodes[ nodeNum ].children[ i ] = newNode;
+			/* have to do this separately, as gcc first executes LHS, then RHS, and if a realloc took place, this fails */
+
 			if( bspLeafs[ bspLeafNum ].cluster == -1 )
 				traceNodes[ traceNodes[ nodeNum ].children[ i ] ].type = TRACE_LEAF_SOLID;
 		}
 		
 		/* normal node */
 		else
-			traceNodes[ nodeNum ].children[ i ] = SetupTraceNodes_r( bspNode->children[ i ] );
+		{
+			newNode = SetupTraceNodes_r( bspNode->children[ i ] );
+			traceNodes[ nodeNum ].children[ i ] = newNode;
+		}
+
+		if(traceNodes[ nodeNum ].children[ i ] == 0)
+			Error( "Invalid tracenode allocated" );
 	}
+
+	/* Sys_Printf("node %d children: %d %d\n", nodeNum, traceNodes[ nodeNum ].children[0], traceNodes[ nodeNum ].children[1]); */
 	
 	/* return node number */
 	return nodeNum;
@@ -506,52 +521,16 @@ void ClipTraceWinding( traceWinding_t *tw, vec4_t plane, traceWinding_t *front, 
 					mid.xyz[ k ] = -plane[ 3 ];
 				else
 					mid.xyz[ k ] = a->xyz[ k ] + frac * (b->xyz[ k ] - a->xyz[ k ]);
-				
-				/* set texture coordinates */
-				if( k > 1 )
-					continue;
-				mid.st[ 0 ] = a->st[ 0 ] + frac * (b->st[ 0 ] - a->st[ 0 ]);
-				mid.st[ 1 ] = a->st[ 1 ] + frac * (b->st[ 1 ] - a->st[ 1 ]);
 			}
+			/* set texture coordinates */
+			mid.st[ 0 ] = a->st[ 0 ] + frac * (b->st[ 0 ] - a->st[ 0 ]);
+			mid.st[ 1 ] = a->st[ 1 ] + frac * (b->st[ 1 ] - a->st[ 1 ]);
 			
 			/* copy midpoint to front and back polygons */
 			front->v[ front->numVerts++ ] = mid;
 			back->v[ back->numVerts++ ] = mid;
 		}
 	}
-}
-
-
-
-/*
-FilterPointToTraceNodes_r() - ydnar
-debugging tool
-*/
-
-static int FilterPointToTraceNodes_r( vec3_t pt, int nodeNum )
-{
-	float			dot;
-	traceNode_t		*node;
-	
-	
-	if( nodeNum < 0 || nodeNum >= numTraceNodes )
-		return -1;
-	
-	node = &traceNodes[ nodeNum ];
-	
-	if( node->type >= 0 )
-	{
-		dot = DotProduct( pt, node->plane ) - node->plane[ 3 ];
-		if( dot > -0.001f )
-			FilterPointToTraceNodes_r( pt, node->children[ 0 ] );
-		if( dot < 0.001f )
-			FilterPointToTraceNodes_r( pt, node->children[ 1 ] );
-		return -1;
-	}
-	
-	Sys_Printf( "%d ", nodeNum );
-	
-	return nodeNum;
 }
 
 
@@ -960,6 +939,7 @@ static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform )
 		ti.si = info->si;
 		ti.castShadows = info->castShadows;
 		ti.surfaceNum = model->firstBSPBrush + i;
+		ti.skipGrid = (ds->surfaceType == MST_PATCH);
 		
 		/* choose which node (normal or skybox) */
 		if( info->parentSurfaceNum >= 0 )
@@ -1129,6 +1109,7 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, m4x4_t t
 		/* setup trace info */
 		ti.castShadows = castShadows;
 		ti.surfaceNum = -1;
+		ti.skipGrid = qtrue; // also ignore picomodels when skipping patches
 		
 		/* setup trace winding */
 		memset( &tw, 0, sizeof( tw ) );
@@ -1240,7 +1221,7 @@ static void PopulateTraceNodes( void )
 			/* external model */
 			default:
 				frame = IntForKey( e, "_frame" );
-				model = LoadModel( (char*) value, frame );
+				model = LoadModel( value, frame );
 				if( model == NULL )
 					continue;
 				PopulateWithPicoModel( castShadows, model, transform );
@@ -1268,7 +1249,7 @@ static void PopulateTraceNodes( void )
 			/* external model */
 			default:
 				frame = IntForKey( e, "_frame2" );
-				model = LoadModel( (char*) value, frame );
+				model = LoadModel( value, frame );
 				if( model == NULL )
 					continue;
 				PopulateWithPicoModel( castShadows, model, transform );
@@ -1412,7 +1393,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 		if( ti->castShadows != 1 )
 			return qfalse;
 	}
-	
+
 	/* receive shadows from same group and worldspawn group */
 	else if( trace->recvShadows > 1 )
 	{
@@ -1425,6 +1406,13 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 	else
 	{
 		if( abs( ti->castShadows ) != abs( trace->recvShadows ) )
+			return qfalse;
+	}
+	
+	/* skip patches when doing the grid (FIXME this is an ugly hack) */
+	if( inGrid )
+	{
+		if (ti->skipGrid)
 			return qfalse;
 	}
 	
@@ -1487,6 +1475,9 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 		trace->opaque = qtrue;
 		return qtrue;
 	}
+
+	/* force subsampling because the lighting is texture dependent */
+	trace->forceSubsampling = 1.0;
 	
 	/* try to avoid double shadows near triangle seams */
 	if( u < -ASLF_EPSILON || u > (1.0f + ASLF_EPSILON) ||
@@ -1529,6 +1520,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 	/* check filter for opaque */
 	if( trace->color[ 0 ] <= 0.001f && trace->color[ 1 ] <= 0.001f && trace->color[ 2 ] <= 0.001f )
 	{
+		VectorClear( trace->color );
 		VectorMA( trace->origin, depth, trace->direction, trace->hit );
 		trace->opaque = qtrue;
 		return qtrue;

@@ -63,7 +63,23 @@ game_t struct
 	qfalse,				/* wolf lighting model? */
 	128,				/* lightmap width/height */
 	1.0f,				/* lightmap gamma */
+	1.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
+	1.0f,				/* lightgrid scale */
+	1.0f,				/* lightgrid ambient scale */
+	qfalse,				/* light angle attenuation uses half-lambert curve */
+	qtrue,				/* disable shader lightstyles hack */
+	qtrue,				/* keep light entities on bsp */
+	8,					/* default patchMeta subdivisions tolerance */
+	qfalse,				/* patch casting enabled */
+	qfalse,				/* compile deluxemaps */
+	0,					/* deluxemaps default mode */
+	512,                /* minimap size */
+	1.0f,               /* minimap sharpener */
+	1.0f/66.0f,         /* minimap border */
+	qtrue,              /* minimap keep aspect */
+	MINIMAP_MODE_GRAY,  /* minimap mode */
+	"../gfx/%s_mini.tga", /* minimap name format */
 	"IBSP",				/* bsp file prefix */
 	46,					/* bsp file version */
 	qfalse,				/* cod-style lump len/ofs order */
@@ -129,6 +145,7 @@ game_t struct
 		{ "nosteps",		0,							0,							Q_SURF_NOSTEPS,				0,							0,							0 },
 		{ "nodlight",		0,							0,							Q_SURF_NODLIGHT,			0,							0,							0 },
 		{ "dust",			0,							0,							Q_SURF_DUST,				0,							0,							0 },
+		
 		
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }

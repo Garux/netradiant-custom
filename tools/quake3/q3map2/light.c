@@ -313,7 +313,15 @@ void CreateEntityLights( void )
 			flags |= LIGHT_GRID;
 			flags &= ~LIGHT_SURFACES;
 		}
-		
+
+		/* vortex: unnormalized? */
+		if (spawnflags & 32)
+			flags |= LIGHT_UNNORMALIZED;
+
+		/* vortex: distance atten? */
+		if (spawnflags & 64)
+			flags |= LIGHT_ATTEN_DISTANCE;
+
 		/* store the flags */
 		light->flags = flags;
 		
@@ -385,14 +393,21 @@ void CreateEntityLights( void )
 		if( _color && _color[ 0 ] )
 		{
 			sscanf( _color, "%f %f %f", &light->color[ 0 ], &light->color[ 1 ], &light->color[ 2 ] );
-			ColorNormalize( light->color, light->color );
+			if (!(light->flags & LIGHT_UNNORMALIZED))
+			{
+				ColorNormalize( light->color, light->color );
+			}
 		}
 		else
 			light->color[ 0 ] = light->color[ 1 ] = light->color[ 2 ] = 1.0f;
+
+		light->extraDist = FloatForKey( e, "_extradist" );
+		if(light->extraDist == 0.0f)
+			light->extraDist = extraDist;
 		
 		intensity = intensity * pointScale;
 		light->photons = intensity;
-		
+
 		light->type = EMIT_POINT;
 		
 		/* set falloff threshold */
@@ -734,13 +749,21 @@ int LightContributionToSample( trace_t *trace )
 	float			angle;
 	float			add;
 	float			dist;
-	
+	float			addDeluxe = 0.0f, addDeluxeBounceScale = 0.25f;
+	qboolean		angledDeluxe = qtrue;
+	float			colorBrightness;
+	qboolean		doAddDeluxe = qtrue;
 	
 	/* get light */
 	light = trace->light;
 	
 	/* clear color */
+	trace->forceSubsampling = 0.0f; /* to make sure */
 	VectorClear( trace->color );
+	VectorClear( trace->colorNoShadow );
+	VectorClear( trace->directionContribution );
+
+	colorBrightness = RGBTOGRAY( light->color ) * ( 1.0f/255.0f );
 	
 	/* ydnar: early out */
 	if( !(light->flags & LIGHT_SURFACES) || light->envelope <= 0.0f )
@@ -766,7 +789,6 @@ int LightContributionToSample( trace_t *trace )
 		float		d;
 		vec3_t		pushedOrigin;
 		
-		
 		/* project sample point into light plane */
 		d = DotProduct( trace->origin, light->normal ) - light->dist;
 		if( d < 3.0f )
@@ -781,7 +803,7 @@ int LightContributionToSample( trace_t *trace )
 		}
 		
 		/* nudge the point so that it is clearly forward of the light */
-		/* so that surfaces meeting a light emiter don't get black edges */
+		/* so that surfaces meeting a light emitter don't get black edges */
 		if( d > -8.0f && d < 8.0f )
 			VectorMA( trace->origin, (8.0f - d), light->normal, pushedOrigin );				
 		else
@@ -800,8 +822,13 @@ int LightContributionToSample( trace_t *trace )
 			angle = DotProduct( trace->normal, trace->direction );
 			
 			/* twosided lighting */
-			if( trace->twoSided )
-				angle = fabs( angle );
+			if( trace->twoSided && angle < 0 )
+			{
+				angle = -angle;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
 			
 			/* attenuate */
 			angle *= -DotProduct( light->normal, trace->direction );
@@ -809,8 +836,27 @@ int LightContributionToSample( trace_t *trace )
 				return 0;
 			else if( angle < 0.0f &&
 				(trace->twoSided || (light->flags & LIGHT_TWOSIDED)) )
+			{
 				angle = -angle;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
+
+			/* clamp the distance to prevent super hot spots */
+			dist = sqrt(dist * dist + light->extraDist * light->extraDist);
+			if( dist < 16.0f )
+				dist = 16.0f;
+
 			add = light->photons / (dist * dist) * angle;
+
+			if( deluxemap )
+			{
+				if( angledDeluxe )
+					addDeluxe = light->photons / (dist * dist) * angle;
+				else
+					addDeluxe = light->photons / (dist * dist);
+			}
 		}
 		else
 		{
@@ -830,13 +876,26 @@ int LightContributionToSample( trace_t *trace )
 					dist = SetupTrace( trace );
 					if( dist >= light->envelope )
 						return 0;
+
+					/* no deluxemap contribution from "other side" light */
+					doAddDeluxe = qfalse;
 				}
 				else
 					return 0;
 			}
+
+			/* also don't deluxe if the direction is on the wrong side */
+			if(DotProduct(trace->normal, trace->direction) < 0)
+			{
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
 			
 			/* ydnar: moved to here */
 			add = factor * light->add;
+
+			if( deluxemap )
+				addDeluxe = add;
 		}
 	}
 	
@@ -848,13 +907,45 @@ int LightContributionToSample( trace_t *trace )
 		dist = SetupTrace( trace );
 		if( dist >= light->envelope )
 			return 0;
-		
+
 		/* clamp the distance to prevent super hot spots */
+		dist = sqrt(dist * dist + light->extraDist * light->extraDist);
 		if( dist < 16.0f )
 			dist = 16.0f;
-		
+
 		/* angle attenuation */
-		angle = (light->flags & LIGHT_ATTEN_ANGLE) ? DotProduct( trace->normal, trace->direction ) : 1.0f;
+		if( light->flags & LIGHT_ATTEN_ANGLE )
+		{
+			/* standard Lambert attenuation */
+			float dot = DotProduct( trace->normal, trace->direction ); 
+
+			/* twosided lighting */
+			if( trace->twoSided && dot < 0 )
+			{
+				dot = -dot;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
+
+			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
+			if( lightAngleHL )
+			{
+				if( dot > 0.001f ) // skip coplanar
+				{
+					if( dot > 1.0f ) dot = 1.0f;
+					dot = ( dot * 0.5f ) + 0.5f;
+					dot *= dot;
+				}
+				else
+					dot = 0;
+			}
+
+			angle = dot;
+		}
+		else
+			angle = 1.0f;
+
 		if( light->angleScale != 0.0f )
 		{
 			angle /= light->angleScale;
@@ -862,27 +953,48 @@ int LightContributionToSample( trace_t *trace )
 				angle = 1.0f;
 		}
 		
-		/* twosided lighting */
-		if( trace->twoSided )
-			angle = fabs( angle );
-		
 		/* attenuate */
 		if( light->flags & LIGHT_ATTEN_LINEAR )
 		{
 			add = angle * light->photons * linearScale - (dist * light->fade);
 			if( add < 0.0f )
 				add = 0.0f;
+
+			if( deluxemap )
+			{
+				if( angledDeluxe )
+					addDeluxe = angle * light->photons * linearScale - (dist * light->fade);
+				else
+					addDeluxe = light->photons * linearScale - (dist * light->fade);
+
+				if( addDeluxe < 0.0f )
+					addDeluxe = 0.0f;
+			}
 		}
 		else
-			add = light->photons / (dist * dist) * angle;
+		{
+			add = (light->photons / (dist * dist)) * angle;
+			if( add < 0.0f )
+				add = 0.0f;
+
+			if( deluxemap )
+			{
+				if( angledDeluxe )
+					addDeluxe = (light->photons / (dist * dist)) * angle;
+				else
+					addDeluxe = (light->photons / (dist * dist));
+			}
+
+			if( addDeluxe < 0.0f )
+				addDeluxe = 0.0f;
+		}
 		
 		/* handle spotlights */
 		if( light->type == EMIT_SPOT )
 		{
 			float	distByNormal, radiusAtDist, sampleRadius;
 			vec3_t	pointAtDist, distToSample;
-			
-			
+	
 			/* do cone calculation */
 			distByNormal = -DotProduct( trace->displacement, light->normal );
 			if( distByNormal < 0.0f )
@@ -898,7 +1010,16 @@ int LightContributionToSample( trace_t *trace )
 			
 			/* attenuate */
 			if( sampleRadius > (radiusAtDist - 32.0f) )
+			{
 				add *= ((radiusAtDist - sampleRadius) / 32.0f);
+				if( add < 0.0f )
+					add = 0.0f;
+
+				addDeluxe *= ((radiusAtDist - sampleRadius) / 32.0f);
+
+				if( addDeluxe < 0.0f )
+					addDeluxe = 0.0f;
+			}
 		}
 	}
 	
@@ -908,20 +1029,70 @@ int LightContributionToSample( trace_t *trace )
 		/* get origin and direction */
 		VectorAdd( trace->origin, light->origin, trace->end );
 		dist = SetupTrace( trace );
-		
+
 		/* angle attenuation */
-		angle = (light->flags & LIGHT_ATTEN_ANGLE)
-			? DotProduct( trace->normal, trace->direction )
-			: 1.0f;
-		
-		/* twosided lighting */
-		if( trace->twoSided )
-			angle = fabs( angle );
+		if( light->flags & LIGHT_ATTEN_ANGLE )
+		{
+			/* standard Lambert attenuation */
+			float dot = DotProduct( trace->normal, trace->direction ); 
+
+			/* twosided lighting */
+			if( trace->twoSided && dot < 0 )
+			{
+				dot = -dot;
+
+				/* no deluxemap contribution from "other side" light */
+				doAddDeluxe = qfalse;
+			}
+
+			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
+			if( lightAngleHL )
+			{
+				if( dot > 0.001f ) // skip coplanar
+				{
+					if( dot > 1.0f ) dot = 1.0f;
+					dot = ( dot * 0.5f ) + 0.5f;
+					dot *= dot;
+				}
+				else
+					dot = 0;
+			}
+			
+			angle = dot;
+		}
+		else
+			angle = 1.0f;
 		
 		/* attenuate */
 		add = light->photons * angle;
+
+		if( deluxemap )
+		{
+			if( angledDeluxe )
+				addDeluxe = light->photons * angle;
+			else
+				addDeluxe = light->photons;
+
+			if( addDeluxe < 0.0f )
+				addDeluxe = 0.0f;
+		}
+
 		if( add <= 0.0f )
 			return 0;
+
+		/* VorteX: set noShadow color */
+		VectorScale(light->color, add, trace->colorNoShadow);
+
+		addDeluxe *= colorBrightness;
+
+		if( bouncing )
+		{
+			addDeluxe *= addDeluxeBounceScale;
+			if( addDeluxe < 0.00390625f )
+				addDeluxe = 0.00390625f;
+		}
+
+		VectorScale( trace->direction, addDeluxe, trace->directionContribution );
 		
 		/* setup trace */
 		trace->testAll = qtrue;
@@ -932,9 +1103,12 @@ int LightContributionToSample( trace_t *trace )
 		{
 			/* trace */
 			TraceLine( trace );
+			trace->forceSubsampling *= add;
 			if( !(trace->compileFlags & C_SKY) || trace->opaque )
 			{
 				VectorClear( trace->color );
+				VectorClear( trace->directionContribution );
+
 				return -1;
 			}
 		}
@@ -942,10 +1116,43 @@ int LightContributionToSample( trace_t *trace )
 		/* return to sender */
 		return 1;
 	}
+	else
+		Error("Light of undefined type!");
+
+	/* VorteX: set noShadow color */
+	VectorScale(light->color, add, trace->colorNoShadow);
 	
 	/* ydnar: changed to a variable number */
 	if( add <= 0.0f || (add <= light->falloffTolerance && (light->flags & LIGHT_FAST_ACTUAL)) )
 		return 0;
+
+	addDeluxe *= colorBrightness;
+
+	/* hack land: scale down the radiosity contribution to light directionality.
+	Deluxemaps fusion many light directions into one. In a rtl process all lights
+	would contribute individually to the bump map, so several light sources together
+	would make it more directional (example: a yellow and red lights received from
+	opposing sides would light one side in red and the other in blue, adding
+	the effect of 2 directions applied. In the deluxemapping case, this 2 lights would
+	neutralize each other making it look like having no direction.
+	Same thing happens with radiosity. In deluxemapping case the radiosity contribution
+	is modifying the direction applied from directional lights, making it go closer and closer
+	to the surface normal the bigger is the amount of radiosity received.
+	So, for preserving the directional lights contributions, we scale down the radiosity
+	contribution. It's a hack, but there's a reason behind it */
+	if( bouncing )
+	{
+		addDeluxe *= addDeluxeBounceScale;
+		/* better NOT increase it beyond the original value
+		if( addDeluxe < 0.00390625f )
+			addDeluxe = 0.00390625f;
+		*/
+	}
+
+	if(doAddDeluxe)
+	{
+		VectorScale( trace->direction, addDeluxe, trace->directionContribution );
+	}
 	
 	/* setup trace */
 	trace->testAll = qfalse;
@@ -953,9 +1160,12 @@ int LightContributionToSample( trace_t *trace )
 	
 	/* raytrace */
 	TraceLine( trace );
+	trace->forceSubsampling *= add;
 	if( trace->passSolid || trace->opaque )
 	{
 		VectorClear( trace->color );
+		VectorClear( trace->directionContribution );
+
 		return -1;
 	}
 	
@@ -1099,9 +1309,10 @@ int LightContributionToPoint( trace_t *trace )
 	if( light->type == EMIT_AREA && faster )
 	{
 		/* clamp the distance to prevent super hot spots */
+		dist = sqrt(dist * dist + light->extraDist * light->extraDist);
 		if( dist < 16.0f )
 			dist = 16.0f;
-		
+
 		/* attenuate */
 		add = light->photons / (dist * dist);
 	}
@@ -1145,6 +1356,7 @@ int LightContributionToPoint( trace_t *trace )
 	else if( light->type == EMIT_POINT || light->type == EMIT_SPOT )
 	{
 		/* clamp the distance to prevent super hot spots */
+		dist = sqrt(dist * dist + light->extraDist * light->extraDist);
 		if( dist < 16.0f )
 			dist = 16.0f;
 		
@@ -1244,26 +1456,26 @@ grid samples are for quickly determining the lighting
 of dynamically placed entities in the world
 */
 
-#define	MAX_CONTRIBUTIONS	1024
+#define	MAX_CONTRIBUTIONS	32768
 
 typedef struct
 {
 	vec3_t		dir;
 	vec3_t		color;
+	vec3_t		ambient;
 	int			style;
 }
 contribution_t;
 
 void TraceGrid( int num )
 {
-	int						i, j, x, y, z, mod, step, numCon, numStyles;
-	float					d;
-	vec3_t					baseOrigin, cheapColor, color;
+	int						i, j, x, y, z, mod, numCon, numStyles;
+	float					d, step;
+	vec3_t					baseOrigin, cheapColor, color, thisdir;
 	rawGridPoint_t			*gp;
 	bspGridPoint_t			*bgp;
 	contribution_t			contributions[ MAX_CONTRIBUTIONS ];
 	trace_t					trace;
-	
 	
 	/* get grid points */
 	gp = &rawGridPoints[ num ];
@@ -1295,38 +1507,21 @@ void TraceGrid( int num )
 	{
 		/* try to nudge the origin around to find a valid point */
 		VectorCopy( trace.origin, baseOrigin );
-		for( step = 9; step <= 18; step += 9 )
+		for( step = 0; (step += 0.005) <= 1.0; )
 		{
-			for( i = 0; i < 8; i++ )
-			{
-				VectorCopy( baseOrigin, trace.origin );
-				if( i & 1 )
-					trace.origin[ 0 ] += step;
-				else
-					trace.origin[ 0 ] -= step;
+			VectorCopy( baseOrigin, trace.origin );
+			trace.origin[ 0 ] += step * (Random() - 0.5) * gridSize[0];
+			trace.origin[ 1 ] += step * (Random() - 0.5) * gridSize[1];
+			trace.origin[ 2 ] += step * (Random() - 0.5) * gridSize[2];
 				
-				if( i & 2 )
-					trace.origin[ 1 ] += step;
-				else
-					trace.origin[ 1 ] -= step;
-				
-				if( i & 4 )
-					trace.origin[ 2 ] += step;
-				else
-					trace.origin[ 2 ] -= step;
-				
-				/* ydnar: changed to find cluster num */
-				trace.cluster = ClusterForPointExt( trace.origin, VERTEX_EPSILON );
-				if( trace.cluster >= 0 )
-					break;
-			}
-			
-			if( i != 8 )
+			/* ydnar: changed to find cluster num */
+			trace.cluster = ClusterForPointExt( trace.origin, VERTEX_EPSILON );
+			if( trace.cluster >= 0 )
 				break;
 		}
 		
 		/* can't find a valid point at all */
-		if( step > 18 )
+		if( step > 1.0 )
 			return;
 	}
 	
@@ -1361,6 +1556,7 @@ void TraceGrid( int num )
 		/* add a contribution */
 		VectorCopy( trace.color, contributions[ numCon ].color );
 		VectorCopy( trace.direction, contributions[ numCon ].dir );
+		VectorClear( contributions[ numCon ].ambient );
 		contributions[ numCon ].style = trace.light->style;
 		numCon++;
 		
@@ -1378,16 +1574,74 @@ void TraceGrid( int num )
 			break;
 	}
 	
+	/////// Floodlighting for point //////////////////
+	//do our floodlight ambient occlusion loop, and add a single contribution based on the brightest dir
+	if( floodlighty )
+	{
+		int k;
+		float addSize, f;
+		vec3_t dir = { 0, 0, 1 };
+		float ambientFrac = 0.25f;
+
+		trace.testOcclusion = qtrue;
+		trace.forceSunlight = qfalse;
+		trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
+		trace.testAll = qtrue;
+
+		for( k = 0; k < 2; k++ )
+		{
+			if( k == 0 ) // upper hemisphere
+			{
+				trace.normal[0] = 0;
+				trace.normal[1] = 0;
+				trace.normal[2] = 1;
+			}
+			else //lower hemisphere
+			{
+				trace.normal[0] = 0;
+				trace.normal[1] = 0;
+				trace.normal[2] = -1;
+			}
+
+			f = FloodLightForSample( &trace, floodlightDistance, floodlight_lowquality );
+
+			/* add a fraction as pure ambient, half as top-down direction */
+			contributions[ numCon ].color[0]= floodlightRGB[0] * floodlightIntensity * f * ( 1.0f - ambientFrac );
+			contributions[ numCon ].color[1]= floodlightRGB[1] * floodlightIntensity * f * ( 1.0f - ambientFrac );
+			contributions[ numCon ].color[2]= floodlightRGB[2] * floodlightIntensity * f * ( 1.0f - ambientFrac );
+
+			contributions[ numCon ].ambient[0]= floodlightRGB[0] * floodlightIntensity * f * ambientFrac;
+			contributions[ numCon ].ambient[1]= floodlightRGB[1] * floodlightIntensity * f * ambientFrac;
+			contributions[ numCon ].ambient[2]= floodlightRGB[2] * floodlightIntensity * f * ambientFrac;
+
+			contributions[ numCon ].dir[0] = dir[0];
+			contributions[ numCon ].dir[1] = dir[1];
+			contributions[ numCon ].dir[2] = dir[2];
+
+			contributions[ numCon ].style = 0;
+
+			/* push average direction around */
+			addSize = VectorLength( contributions[ numCon ].color );
+			VectorMA( gp->dir, addSize, dir, gp->dir );
+
+			numCon++;
+		}
+	}
+	/////////////////////
+
 	/* normalize to get primary light direction */
-	VectorNormalize( gp->dir, gp->dir );
+	VectorNormalize( gp->dir, thisdir );
 	
 	/* now that we have identified the primary light direction,
 	   go back and separate all the light into directed and ambient */
+
 	numStyles = 1;
 	for( i = 0; i < numCon; i++ )
 	{
 		/* get relative directed strength */
-		d = DotProduct( contributions[ i ].dir, gp->dir );
+		d = DotProduct( contributions[ i ].dir, thisdir );
+		/* we map 1 to gridDirectionality, and 0 to gridAmbientDirectionality */
+		d = gridAmbientDirectionality + d * (gridDirectionality - gridAmbientDirectionality);
 		if( d < 0.0f )
 			d = 0.0f;
 		
@@ -1420,25 +1674,47 @@ void TraceGrid( int num )
 		
 		/* ambient light will be at 1/4 the value of directed light */
 		/* (ydnar: nuke this in favor of more dramatic lighting?) */
+		/* (PM: how about actually making it work? d=1 when it got here for single lights/sun :P */
+//		d = 0.25f;
+		/* (Hobbes: always setting it to .25 is hardly any better) */
 		d = 0.25f * (1.0f - d);
 		VectorMA( gp->ambient[ j ], d, contributions[ i ].color, gp->ambient[ j ] );
+
+		VectorAdd( gp->ambient[ j ], contributions[ i ].ambient, gp->ambient[ j ] );
+
+/*
+ * div0:
+ * the total light average = ambient value + 0.25 * sum of all directional values
+ * we can also get the total light average as 0.25 * the sum of all contributions
+ *
+ * 0.25 * sum(contribution_i) == ambient + 0.25 * sum(d_i contribution_i)
+ *
+ * THIS YIELDS:
+ * ambient == 0.25 * sum((1 - d_i) contribution_i)
+ *
+ * So, 0.25f * (1.0f - d) IS RIGHT. If you want to tune it, tune d BEFORE.
+ */
 	}
 	
 	
 	/* store off sample */
 	for( i = 0; i < MAX_LIGHTMAPS; i++ )
 	{
+#if 0
 		/* do some fudging to keep the ambient from being too low (2003-07-05: 0.25 -> 0.125) */
 		if( !bouncing )
 			VectorMA( gp->ambient[ i ], 0.125f, gp->directed[ i ], gp->ambient[ i ] );
+#endif
 		
 		/* set minimum light and copy off to bytes */
 		VectorCopy( gp->ambient[ i ], color );
 		for( j = 0; j < 3; j++ )
 			if( color[ j ] < minGridLight[ j ] )
 				color[ j ] = minGridLight[ j ];
-		ColorToBytes( color, bgp->ambient[ i ], 1.0f );
-		ColorToBytes( gp->directed[ i ], bgp->directed[ i ], 1.0f );
+
+		/* vortex: apply gridscale and gridambientscale here */
+		ColorToBytes( color, bgp->ambient[ i ], gridScale*gridAmbientScale );
+		ColorToBytes( gp->directed[ i ], bgp->directed[ i ], gridScale );
 	}
 	
 	/* debug code */
@@ -1451,8 +1727,7 @@ void TraceGrid( int num )
 	#endif
 	
 	/* store direction */
-	if( !bouncing )
-		NormalToLatLong( gp->dir, bgp->latLong );
+	NormalToLatLong( thisdir, bgp->latLong );
 }
 
 
@@ -1631,7 +1906,9 @@ void LightWorld( void )
 		SetupEnvelopes( qtrue, fastgrid );
 		
 		Sys_Printf( "--- TraceGrid ---\n" );
+		inGrid = qtrue;
 		RunThreadsOnIndividual( numRawGridPoints, qtrue, TraceGrid );
+		inGrid = qfalse;
 		Sys_Printf( "%d x %d x %d = %d grid\n",
 			gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], numBSPGridPoints );
 		
@@ -1654,13 +1931,11 @@ void LightWorld( void )
 	if( dirty )
 	{
 		Sys_Printf( "--- DirtyRawLightmap ---\n" );
-
-
-
-
 		RunThreadsOnIndividual( numRawLightmaps, qtrue, DirtyRawLightmap );
 	}
 	
+	/* floodlight pass */
+	FloodlightRawLightmaps();
 
 	/* ydnar: set up light envelopes */
 	SetupEnvelopes( qfalse, fast );
@@ -1694,6 +1969,7 @@ void LightWorld( void )
 	{
 		/* store off the bsp between bounces */
 		StoreSurfaceLightmaps();
+		UnparseEntities();
 		Sys_Printf( "Writing %s\n", source );
 		WriteBSPFile( source );
 		
@@ -1703,6 +1979,7 @@ void LightWorld( void )
 		/* flag bouncing */
 		bouncing = qtrue;
 		VectorClear( ambientColor );
+		floodlighty = qfalse;
 		
 		/* generate diffuse lights */
 		RadFreeLights();
@@ -1723,7 +2000,9 @@ void LightWorld( void )
 			gridBoundsCulled = 0;
 			
 			Sys_Printf( "--- BounceGrid ---\n" );
+			inGrid = qtrue;
 			RunThreadsOnIndividual( numRawGridPoints, qtrue, TraceGrid );
+			inGrid = qfalse;
 			Sys_FPrintf( SYS_VRB, "%9d grid points envelope culled\n", gridEnvelopeCulled );
 			Sys_FPrintf( SYS_VRB, "%9d grid points bounds culled\n", gridBoundsCulled );
 		}
@@ -1770,16 +2049,74 @@ int LightMain( int argc, char **argv )
 	float		f;
 	char		mapSource[ 1024 ];
 	const char	*value;
+	int lightmapMergeSize = 0;
+	qboolean	lightSamplesInsist = qfalse;
 	
 	
 	/* note it */
 	Sys_Printf( "--- Light ---\n" );
-	
+	Sys_Printf( "--- ProcessGameSpecific ---\n" );
+
 	/* set standard game flags */
 	wolfLight = game->wolfLight;
+	if (wolfLight == qtrue)
+		Sys_Printf( " lightning model: wolf\n" );
+	else
+		Sys_Printf( " lightning model: quake3\n" );
+
 	lmCustomSize = game->lightmapSize;
+	Sys_Printf( " lightmap size: %d x %d pixels\n", lmCustomSize, lmCustomSize );
+
 	lightmapGamma = game->lightmapGamma;
+	Sys_Printf( " lightning gamma: %f\n", lightmapGamma );
+
 	lightmapCompensate = game->lightmapCompensate;
+	Sys_Printf( " lightning compensation: %f\n", lightmapCompensate );
+
+	lightmapExposure = game->lightmapExposure;
+	Sys_Printf( " lightning exposure: %f\n", lightmapExposure );
+
+	gridScale = game->gridScale;
+	Sys_Printf( " lightgrid scale: %f\n", gridScale );
+
+	gridAmbientScale = game->gridAmbientScale;
+	Sys_Printf( " lightgrid ambient scale: %f\n", gridAmbientScale );
+
+	lightAngleHL = game->lightAngleHL;
+	if( lightAngleHL )
+		Sys_Printf( " half lambert light angle attenuation enabled \n" );
+
+	noStyles = game->noStyles;
+	if (noStyles == qtrue)
+		Sys_Printf( " shader lightstyles hack: disabled\n" );
+	else
+		Sys_Printf( " shader lightstyles hack: enabled\n" );
+
+	keepLights = game->keepLights;
+	if (keepLights == qtrue)
+		Sys_Printf( " keep lights: enabled\n" );
+	else
+		Sys_Printf( " keep lights: disabled\n" );
+
+	patchShadows = game->patchShadows;
+	if (patchShadows == qtrue)
+		Sys_Printf( " patch shadows: enabled\n" );
+	else
+		Sys_Printf( " patch shadows: disabled\n" );
+
+	deluxemap = game->deluxeMap;
+	deluxemode = game->deluxeMode;
+ 	if (deluxemap == qtrue)
+	{
+		if (deluxemode)
+			Sys_Printf( " deluxemapping: enabled with tangentspace deluxemaps\n" );
+		else
+			Sys_Printf( " deluxemapping: enabled with modelspace deluxemaps\n" );
+	}
+	else
+		Sys_Printf( " deluxemapping: disabled\n" );
+
+	Sys_Printf( "--- ProcessCommandLine ---\n" );
 	
 	/* process commandline arguments */
 	for( i = 1; i < (argc - 1); i++ )
@@ -1827,6 +2164,42 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "All light scaled by %f\n", f );
 			i++;
 		}
+
+		else if( !strcmp( argv[ i ], "-gridscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			Sys_Printf( "Grid lightning scaled by %f\n", f );
+			gridScale *= f;
+			i++;
+		}
+
+		else if( !strcmp( argv[ i ], "-gridambientscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			Sys_Printf( "Grid ambient lightning scaled by %f\n", f );
+			gridAmbientScale *= f;
+			i++;
+		}
+
+		else if( !strcmp( argv[ i ], "-griddirectionality" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			if(f > 1) f = 1;
+			if(f < gridAmbientDirectionality) gridAmbientDirectionality = f;
+			Sys_Printf( "Grid directionality is %f\n", f );
+			gridDirectionality = f;
+			i++;
+		}
+
+		else if( !strcmp( argv[ i ], "-gridambientdirectionality" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			if(f < -1) f = -1;
+			if(f > gridDirectionality) gridDirectionality = f;
+			Sys_Printf( "Grid ambient directionality is %f\n", f );
+			gridAmbientDirectionality = f;
+			i++;
+		}
 		
 		else if( !strcmp( argv[ i ], "-gamma" ) )
 		{
@@ -1836,6 +2209,14 @@ int LightMain( int argc, char **argv )
 			i++;
 		}
 		
+		else if( !strcmp( argv[ i ], "-exposure" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			lightmapExposure = f;
+			Sys_Printf( "Lighting exposure set to %f\n", lightmapExposure );
+			i++;
+		}
+
 		else if( !strcmp( argv[ i ], "-compensate" ) )
 		{
 			f = atof( argv[ i + 1 ] );
@@ -1867,8 +2248,18 @@ int LightMain( int argc, char **argv )
 			i++;
 		}
 		
+		else if( !strcmp( argv[ i ], "-randomsamples" ) )
+		{
+			lightRandomSamples = qtrue;
+			Sys_Printf( "Random sampling enabled\n", lightRandomSamples );
+		}
+		
 		else if( !strcmp( argv[ i ], "-samples" ) )
 		{
+			if(*argv[i+1] == '+')
+				lightSamplesInsist = qtrue;
+			else
+				lightSamplesInsist = qfalse;
 			lightSamples = atoi( argv[ i + 1 ] );
 			if( lightSamples < 1 )
 				lightSamples = 1;
@@ -1877,6 +2268,18 @@ int LightMain( int argc, char **argv )
 			i++;
 		}
 		
+		else if( !strcmp( argv[ i ], "-samplessearchboxsize" ) )
+		{
+			lightSamplesSearchBoxSize = atoi( argv[ i + 1 ] );
+			if( lightSamplesSearchBoxSize <= 0 )
+				lightSamplesSearchBoxSize = 1;
+			if( lightSamplesSearchBoxSize > 4 )
+				lightSamplesSearchBoxSize = 4; /* more makes no sense */
+			else if( lightSamplesSearchBoxSize != 1 )
+				Sys_Printf( "Adaptive supersampling uses %f times the normal search box size\n", lightSamplesSearchBoxSize );
+			i++;
+		}
+
 		else if( !strcmp( argv[ i ], "-filter" ) )
 		{
 			filter = qtrue;
@@ -1889,12 +2292,6 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "Dark lightmap seams enabled\n" );
 		}
 		
-
-
-
-
-
-
 		else if( !strcmp( argv[ i ], "-shadeangle" ) )
 		{
 			shadeAngleDegrees = atof( argv[ i + 1 ] );
@@ -1927,13 +2324,28 @@ int LightMain( int argc, char **argv )
 				Sys_Printf( "Approximating lightmaps within a byte tolerance of %d\n", approximateTolerance );
 			i++;
 		}
-		
 		else if( !strcmp( argv[ i ], "-deluxe" ) || !strcmp( argv[ i ], "-deluxemap" ) )
 		{
 			deluxemap = qtrue;
 			Sys_Printf( "Generating deluxemaps for average light direction\n" );
 		}
-		
+		else if( !strcmp( argv[ i ], "-deluxemode" ))
+		{
+			deluxemode = atoi( argv[ i + 1 ] );
+			if (deluxemode == 0 || deluxemode > 1 || deluxemode < 0)
+			{
+				Sys_Printf( "Generating modelspace deluxemaps\n" );
+				deluxemode = 0;
+			}
+			else 
+				Sys_Printf( "Generating tangentspace deluxemaps\n" );
+			i++;
+		}
+		else if( !strcmp( argv[ i ], "-nodeluxe" ) || !strcmp( argv[ i ], "-nodeluxemap" ) )
+		{
+			deluxemap = qfalse;
+			Sys_Printf( "Disabling generating of deluxemaps for average light direction\n" );
+		}
 		else if( !strcmp( argv[ i ], "-external" ) )
 		{
 			externalLightmaps = qtrue;
@@ -1961,6 +2373,23 @@ int LightMain( int argc, char **argv )
 			}
 		}
 		
+		else if( !strcmp( argv[ i ], "-rawlightmapsizelimit" ) )
+		{
+			lmLimitSize = atoi( argv[ i + 1 ] );
+			
+			i++;
+			Sys_Printf( "Raw lightmap size limit set to %d x %d pixels\n", lmLimitSize, lmLimitSize );
+		}
+		
+		else if( !strcmp( argv[ i ], "-lightmapdir" ) )
+		{
+			lmCustomDir = argv[i + 1];
+			i++;
+			Sys_Printf( "Lightmap directory set to %s\n", lmCustomDir );
+			externalLightmaps = qtrue;
+			Sys_Printf( "Storing all lightmaps externally\n" );
+		}
+		
 		/* ydnar: add this to suppress warnings */
 		else if( !strcmp( argv[ i ],  "-custinfoparms") )
 		{
@@ -1981,6 +2410,15 @@ int LightMain( int argc, char **argv )
 			wolfLight = qfalse;
 			Sys_Printf( "Enabling Quake 3 lighting model (nonlinear default)\n" );
 		}
+
+		else if( !strcmp( argv[ i ], "-extradist" ) )
+		{
+			extraDist = atof( argv[ i + 1 ] );
+			if( extraDist < 0 )
+				extraDist = 0;
+			i++;
+			Sys_Printf( "Default extra radius set to %f units\n", extraDist );
+		}
 		
 		else if( !strcmp( argv[ i ], "-sunonly" ) )
 		{
@@ -1998,6 +2436,26 @@ int LightMain( int argc, char **argv )
 		{
 			noCollapse = qtrue;
 			Sys_Printf( "Identical lightmap collapsing disabled\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-nolightmapsearch" ) )
+		{
+			lightmapSearchBlockSize = 1;
+			Sys_Printf( "No lightmap searching - all lightmaps will be sequential\n" );
+		}
+		
+		else if( !strcmp( argv[ i ], "-lightmapsearchpower" ) )
+		{
+			lightmapMergeSize = (game->lightmapSize << atoi(argv[i+1]));
+			++i;
+			Sys_Printf( "Restricted lightmap searching enabled - optimize for lightmap merge power %d (size %d)\n", atoi(argv[i]), lightmapMergeSize );
+		}
+		
+		else if( !strcmp( argv[ i ], "-lightmapsearchblocksize" ) )
+		{
+			lightmapSearchBlockSize = atoi(argv[i+1]);
+			++i;
+			Sys_Printf( "Restricted lightmap searching enabled - block size set to %d\n", lightmapSearchBlockSize );
 		}
 		
 		else if( !strcmp( argv[ i ], "-shade" ) )
@@ -2151,6 +2609,20 @@ int LightMain( int argc, char **argv )
 			i++;
 			Sys_Printf( "Default lightmap sample size set to %dx%d units\n", sampleSize, sampleSize );
 		}
+		else if( !strcmp( argv[ i ], "-minsamplesize" ) )
+		{
+			minSampleSize = atoi( argv[ i + 1 ] );
+			if( minSampleSize < 1 )
+				minSampleSize = 1;
+			i++;
+			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
+		}
+		else if( !strcmp( argv[ i ],  "-samplescale" ) )
+ 		{
+			sampleScale = atoi( argv[ i + 1 ] );
+ 			i++;
+			Sys_Printf( "Lightmaps sample scale set to %d\n", sampleScale);
+ 		}
 		else if( !strcmp( argv[ i ], "-novertex" ) )
 		{
 			noVertexLighting = qtrue;
@@ -2181,15 +2653,51 @@ int LightMain( int argc, char **argv )
 			loMem = qtrue;
 			Sys_Printf( "Enabling low-memory (potentially slower) lighting mode\n" );
 		}
+		else if( !strcmp( argv[ i ], "-lightanglehl" ) )
+		{
+			if( ( atoi( argv[ i + 1 ] ) != 0 ) != lightAngleHL )
+			{
+				lightAngleHL = ( atoi( argv[ i + 1 ] ) != 0 );
+				if( lightAngleHL )
+					Sys_Printf( "Enabling half lambert light angle attenuation\n" );
+				else
+					Sys_Printf( "Disabling half lambert light angle attenuation\n" );
+			}
+		}
 		else if( !strcmp( argv[ i ], "-nostyle" ) || !strcmp( argv[ i ], "-nostyles" ) )
 		{
 			noStyles = qtrue;
 			Sys_Printf( "Disabling lightstyles\n" );
 		}
+		else if( !strcmp( argv[ i ], "-style" ) || !strcmp( argv[ i ], "-styles" ) )
+		{
+			noStyles = qfalse;
+			Sys_Printf( "Enabling lightstyles\n" );
+		}
+		else if( !strcmp( argv[ i ], "-keeplights" ))
+		{
+			keepLights = qtrue;
+			Sys_Printf( "Leaving light entities on map after compile\n" );
+		}
 		else if( !strcmp( argv[ i ], "-cpma" ) )
 		{
 			cpmaHack = qtrue;
 			Sys_Printf( "Enabling Challenge Pro Mode Asstacular Vertex Lighting Mode (tm)\n" );
+		}
+		else if( !strcmp( argv[ i ], "-floodlight" ) )
+		{
+			floodlighty = qtrue;
+			Sys_Printf( "FloodLighting enabled\n" );
+		}
+		else if( !strcmp( argv[ i ], "-debugnormals" ) )
+		{
+			debugnormals = qtrue;
+			Sys_Printf( "DebugNormals enabled\n" );
+		}
+		else if( !strcmp( argv[ i ], "-lowquality" ) )
+		{
+			floodlight_lowquality = qtrue;
+			Sys_Printf( "Low Quality FloodLighting enabled\n" );
 		}
 		
 		/* r7: dirtmapping */
@@ -2212,6 +2720,7 @@ int LightMain( int argc, char **argv )
 				Sys_Printf( "Enabling randomized dirtmapping\n" );
 			else
 				Sys_Printf( "Enabling ordered dir mapping\n" );
+			i++;
 		}
 		else if( !strcmp( argv[ i ], "-dirtdepth" ) )
 		{
@@ -2219,6 +2728,7 @@ int LightMain( int argc, char **argv )
 			if( dirtDepth <= 0.0f )
 				dirtDepth = 128.0f;
 			Sys_Printf( "Dirtmapping depth set to %.1f\n", dirtDepth );
+			i++;
 		}
 		else if( !strcmp( argv[ i ], "-dirtscale" ) )
 		{
@@ -2226,6 +2736,7 @@ int LightMain( int argc, char **argv )
 			if( dirtScale <= 0.0f )
 				dirtScale = 1.0f;
 			Sys_Printf( "Dirtmapping scale set to %.1f\n", dirtScale );
+			i++;
 		}
 		else if( !strcmp( argv[ i ], "-dirtgain" ) )
 		{
@@ -2233,12 +2744,69 @@ int LightMain( int argc, char **argv )
 			if( dirtGain <= 0.0f )
 				dirtGain = 1.0f;
 			Sys_Printf( "Dirtmapping gain set to %.1f\n", dirtGain );
+			i++;
 		}
-		
+		else if( !strcmp( argv[ i ], "-trianglecheck" ) )
+		{
+			lightmapTriangleCheck = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-extravisnudge" ) )
+		{
+			lightmapExtraVisClusterNudge = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-fill" ) )
+		{
+			lightmapFill = qtrue;
+			Sys_Printf( "Filling lightmap colors from surrounding pixels to improve JPEG compression\n" );
+		}
 		/* unhandled args */
 		else
+		{
 			Sys_Printf( "WARNING: Unknown argument \"%s\"\n", argv[ i ] );
+		}
 
+	}
+
+	/* fix up samples count */
+	if(lightRandomSamples)
+	{
+		if(!lightSamplesInsist)
+		{
+			/* approximately match -samples in quality */
+			switch(lightSamples)
+			{
+				/* somewhat okay */
+				case 1:
+				case 2:
+					lightSamples = 16;
+					Sys_Printf( "Adaptive supersampling preset enabled with %d random sample(s) per lightmap texel\n", lightSamples );
+					break;
+
+				/* good */
+				case 3:
+					lightSamples = 64;
+					Sys_Printf( "Adaptive supersampling preset enabled with %d random sample(s) per lightmap texel\n", lightSamples );
+					break;
+
+				/* perfect */
+				case 4:
+					lightSamples = 256;
+					Sys_Printf( "Adaptive supersampling preset enabled with %d random sample(s) per lightmap texel\n", lightSamples );
+					break;
+
+				default: break;
+			}
+		}
+	}
+
+	/* fix up lightmap search power */
+	if(lightmapMergeSize)
+	{
+		lightmapSearchBlockSize = (lightmapMergeSize / lmCustomSize) * (lightmapMergeSize / lmCustomSize);
+		if(lightmapSearchBlockSize < 1)
+			lightmapSearchBlockSize = 1;
+
+		Sys_Printf( "Restricted lightmap searching enabled - block size adjusted to %d\n", lightmapSearchBlockSize );
 	}
 	
 	/* clean up map name */
@@ -2267,11 +2835,14 @@ int LightMain( int argc, char **argv )
 	
 	/* parse bsp entities */
 	ParseEntities();
+
+	/* inject command line parameters */
+	InjectCommandLine(argv, 0, argc - 1);
 	
 	/* load map file */
 	value = ValueForKey( &entities[ 0 ], "_keepLights" );
 	if( value[ 0 ] != '1' )
-		LoadMapFile( mapSource, qtrue );
+		LoadMapFile( mapSource, qtrue, qfalse );
 	
 	/* set the entity/model origins and init yDrawVerts */
 	SetEntityOrigins();
@@ -2279,6 +2850,7 @@ int LightMain( int argc, char **argv )
 	/* ydnar: set up optimization */
 	SetupBrushes();
 	SetupDirt();
+	SetupFloodLight();
 	SetupSurfaceLightmaps();
 	
 	/* initialize the surface facet tracing */

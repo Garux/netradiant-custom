@@ -181,6 +181,7 @@ mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si )
 	/* do some fixups for celshading */
 	ds->planar = qfalse;
 	ds->planeNum = -1;
+	ds->celShader = NULL; /* don't cel shade cels :P */
 	
 	/* return the surface */
 	return ds;
@@ -290,7 +291,7 @@ deletes all empty or bad surfaces from the surface list
 void TidyEntitySurfaces( entity_t *e )
 {
 	int					i, j, deleted;
-	mapDrawSurface_t	*out, *in;
+	mapDrawSurface_t	*out, *in = NULL;
 	
 	
 	/* note it */
@@ -630,19 +631,26 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds )
 			//% 	Sys_Printf( "Failed to map axis %d onto patch\n", bestAxis );
 		}
 		
-		/* get lightmap sample size */
-		if( ds->sampleSize <= 0 )
+		/* calculate lightmap sample size */
+		if( ds->shaderInfo->lightmapSampleSize > 0 ) /* shader value overrides every other */
+			ds->sampleSize = ds->shaderInfo->lightmapSampleSize;
+		else if( ds->sampleSize <= 0 ) /* may contain the entity asigned value */
+			ds->sampleSize = sampleSize; /* otherwise use global default */
+
+		if( ds->lightmapScale > 0.0f ) /* apply surface lightmap scaling factor */
 		{
- 			ds->sampleSize = sampleSize;
- 			if( ds->shaderInfo->lightmapSampleSize )
- 				ds->sampleSize = ds->shaderInfo->lightmapSampleSize;
-			if( ds->lightmapScale > 0 )
-				ds->sampleSize *= ds->lightmapScale;
-			if( ds->sampleSize <= 0 )
-				ds->sampleSize = 1;
-			else if( ds->sampleSize > 16384 )	/* powers of 2 are preferred */
-				ds->sampleSize = 16384;
+			ds->sampleSize = ds->lightmapScale * (float)ds->sampleSize;
+			ds->lightmapScale = 0; /* applied */
 		}
+
+		if( ds->sampleSize < minSampleSize )
+			ds->sampleSize = minSampleSize;
+
+		if( ds->sampleSize < 1 )
+			ds->sampleSize = 1;
+
+		if( ds->sampleSize > 16384 ) /* powers of 2 are preferred */
+			ds->sampleSize = 16384;
 	}
 }
 
@@ -911,6 +919,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	ds->mapBrush = b;
 	ds->sideRef = AllocSideRef( s, NULL );
 	ds->fogNum = -1;
+	ds->sampleSize = b->lightmapSampleSize;
 	ds->lightmapScale = b->lightmapScale;
 	ds->numVerts = w->numpoints;
 	ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
@@ -986,6 +995,10 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	
 	/* set cel shader */
 	ds->celShader = b->celShader;
+
+	/* set shade angle */
+	if( b->shadeAngleDegrees > 0.0f )
+		ds->shadeAngleDegrees = b->shadeAngleDegrees;
 	
 	/* ydnar: gs mods: moved st biasing elsewhere */
 	return ds;
@@ -1094,6 +1107,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 	
 	ds->shaderInfo = si;
 	ds->mapMesh = p;
+	ds->sampleSize = p->lightmapSampleSize;
 	ds->lightmapScale = p->lightmapScale;	/* ydnar */
 	ds->patchWidth = mesh->width;
 	ds->patchHeight = mesh->height;
@@ -1193,7 +1207,7 @@ DrawSurfaceForFlare() - ydnar
 creates a flare draw surface
 */
 
-mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal, vec3_t color, char *flareShader, int lightStyle )
+mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal, vec3_t color, const char *flareShader, int lightStyle )
 {
 	mapDrawSurface_t	*ds;
 	
@@ -1951,6 +1965,51 @@ int FilterPointIntoTree_r( vec3_t point, mapDrawSurface_t *ds, node_t *node )
 	return AddReferenceToLeaf( ds, node );
 }
 
+/*
+FilterPointConvexHullIntoTree_r() - ydnar
+filters the convex hull of multiple points from a surface into the tree
+*/
+
+int FilterPointConvexHullIntoTree_r( vec3_t **points, int npoints, mapDrawSurface_t *ds, node_t *node )
+{
+	float			d, dmin, dmax;
+	plane_t			*plane;
+	int				refs = 0;
+	int				i;
+
+	if(!points)
+		return 0;
+	
+	/* is this a decision node? */
+	if( node->planenum != PLANENUM_LEAF )
+	{
+		/* classify the point in relation to the plane */
+		plane = &mapplanes[ node->planenum ];
+
+		dmin = dmax = DotProduct( *(points[0]), plane->normal ) - plane->dist;
+		for(i = 1; i < npoints; ++i)
+		{
+			d = DotProduct( *(points[i]), plane->normal ) - plane->dist;
+			if(d > dmax)
+				dmax = d;
+			if(d < dmin)
+				dmin = d;
+		}
+		
+		/* filter by this plane */
+		refs = 0;
+		if( dmax >= -ON_EPSILON )
+			refs += FilterPointConvexHullIntoTree_r( points, npoints, ds, node->children[ 0 ] );
+		if( dmin <= ON_EPSILON )
+			refs += FilterPointConvexHullIntoTree_r( points, npoints, ds, node->children[ 1 ] );
+		
+		/* return */
+		return refs;
+	}
+	
+	/* add a reference */
+	return AddReferenceToLeaf( ds, node );
+}
 
 
 /*
@@ -1978,14 +2037,25 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 	{
 		/* 'fatten' the winding by the shader mins/maxs (parsed from vertexDeform move) */
 		/* note this winding is completely invalid (concave, nonplanar, etc) */
-		fat = AllocWinding( w->numpoints * 3 );
-		fat->numpoints = w->numpoints * 3;
+		fat = AllocWinding( w->numpoints * 3 + 3 );
+		fat->numpoints = w->numpoints * 3 + 3;
 		for( i = 0; i < w->numpoints; i++ )
 		{
 			VectorCopy( w->p[ i ], fat->p[ i ] );
-			VectorAdd( w->p[ i ], si->mins, fat->p[ i * 2 ] );
-			VectorAdd( w->p[ i ], si->maxs, fat->p[ i * 3 ] );
+			VectorAdd( w->p[ i ], si->mins, fat->p[ i + (w->numpoints+1) ] );
+			VectorAdd( w->p[ i ], si->maxs, fat->p[ i + (w->numpoints+1) * 2 ] );
 		}
+		VectorCopy( w->p[ 0 ], fat->p[ i ] );
+		VectorAdd( w->p[ 0 ], si->mins, fat->p[ i + w->numpoints ] );
+		VectorAdd( w->p[ 0 ], si->maxs, fat->p[ i + w->numpoints * 2 ] );
+
+		/*
+		 * note: this winding is STILL not suitable for ClipWindingEpsilon, and
+		 * also does not really fulfill the intention as it only contains
+		 * origin, +mins, +maxs, but thanks to the "closing" points I just
+		 * added to the three sub-windings, the fattening at least doesn't make
+		 * it worse
+		 */
 		
 		FreeWinding( w );
 		w = fat;
@@ -2077,48 +2147,24 @@ subdivides a patch into an approximate curve and filters it into the tree
 
 static int FilterPatchIntoTree( mapDrawSurface_t *ds, tree_t *tree )
 {
-	int					i, x, y, refs;
-	mesh_t				src, *mesh;
-	winding_t			*w;
+	int					x, y, refs;
 	
-	
-	/* subdivide the surface */
-	src.width = ds->patchWidth;
-	src.height = ds->patchHeight;
-	src.verts = ds->verts;
-	mesh = SubdivideMesh( src, FILTER_SUBDIVISION, 32 );
-	
-	
-	/* filter each quad into the tree (fixme: use new patch x-triangulation code?) */
-	refs = 0;
-	for( y = 0; y < (mesh->height - 1); y++ )
-	{
-		for( x = 0; x < (mesh->width - 1); x++ )
+	for(y = 0; y + 2 < ds->patchHeight; y += 2)
+		for(x = 0; x + 2 < ds->patchWidth; x += 2)
 		{
-			/* triangle 1 */
-			w = AllocWinding( 3 );
-			w->numpoints = 3;
-			VectorCopy( mesh->verts[ y * mesh->width + x ].xyz, w->p[ 0 ] );
-			VectorCopy( mesh->verts[ y * mesh->width + x + 1 ].xyz, w->p[ 1 ] );
-			VectorCopy( mesh->verts[ (y + 1) * mesh->width + x ].xyz, w->p[ 2 ] );
-			refs += FilterWindingIntoTree_r( w, ds, tree->headnode );
-			
-			/* triangle 2 */
-			w = AllocWinding( 3 );
-			w->numpoints = 3;
-			VectorCopy( mesh->verts[ y * mesh->width + x + 1 ].xyz, w->p[ 0 ] );
-			VectorCopy( mesh->verts[ (y + 1 ) * mesh->width + x + 1 ].xyz, w->p[ 1 ] );
-			VectorCopy( mesh->verts[ (y + 1 ) * mesh->width + x ].xyz, w->p[ 2 ] );
-			refs += FilterWindingIntoTree_r( w, ds, tree->headnode );
+			vec3_t *points[9];
+			points[0] = &ds->verts[(y+0) * ds->patchWidth + (x+0)].xyz;
+			points[1] = &ds->verts[(y+0) * ds->patchWidth + (x+1)].xyz;
+			points[2] = &ds->verts[(y+0) * ds->patchWidth + (x+2)].xyz;
+			points[3] = &ds->verts[(y+1) * ds->patchWidth + (x+0)].xyz;
+			points[4] = &ds->verts[(y+1) * ds->patchWidth + (x+1)].xyz;
+			points[5] = &ds->verts[(y+1) * ds->patchWidth + (x+2)].xyz;
+			points[6] = &ds->verts[(y+2) * ds->patchWidth + (x+0)].xyz;
+			points[7] = &ds->verts[(y+2) * ds->patchWidth + (x+1)].xyz;
+			points[8] = &ds->verts[(y+2) * ds->patchWidth + (x+2)].xyz;
+			refs += FilterPointConvexHullIntoTree_r(points, 9, ds, tree->headnode);
 		}
-	}
-	
-	/* use point filtering as well */
-	for( i = 0; i < (mesh->width * mesh->height); i++ )
-		refs += FilterPointIntoTree_r( mesh->verts[ i ].xyz, ds, tree->headnode );
-	
-	/* free the subdivided mesh and return */
-	FreeMesh( mesh );
+
 	return refs;
 }
 
@@ -2248,8 +2294,6 @@ void EmitDrawVerts( mapDrawSurface_t *ds, bspDrawSurface_t *out )
 	for( i = 0; i < ds->numVerts; i++ )
 	{
 		/* allocate a new vert */
-		if( numBSPDrawVerts == MAX_MAP_DRAW_VERTS )
-			Error( "MAX_MAP_DRAW_VERTS" );
 		IncDrawVerts();
 		dv = &bspDrawVerts[ numBSPDrawVerts - 1 ];
 		
@@ -2445,25 +2489,27 @@ void EmitFlareSurface( mapDrawSurface_t *ds )
 	numSurfacesByType[ ds->type ]++;
 }
 
-
-
 /*
 EmitPatchSurface()
 emits a bsp patch drawsurface
 */
 
-void EmitPatchSurface( mapDrawSurface_t *ds )
+void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds )
 {
 	int					i, j;
 	bspDrawSurface_t	*out;
 	int					surfaceFlags, contentFlags;
-	
+	int					forcePatchMeta;
+
+	/* vortex: _patchMeta support */
+	forcePatchMeta = IntForKey(e, "_patchMeta" );
+	if (!forcePatchMeta)
+		forcePatchMeta = IntForKey(e, "patchMeta" );
 	
 	/* invert the surface if necessary */
 	if( ds->backSide || ds->shaderInfo->invert )
 	{
 		bspDrawVert_t	*dv1, *dv2, temp;
-		
 
 		/* walk the verts, flip the normal */
 		for( i = 0; i < ds->numVerts; i++ )
@@ -2485,7 +2531,7 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 		/* invert facing */
 		VectorScale( ds->lightmapVecs[ 2 ], -1.0f, ds->lightmapVecs[ 2 ] );
 	}
-	
+
 	/* allocate a new surface */
 	if( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS )
 		Error( "MAX_MAP_DRAW_SURFS" );
@@ -2493,12 +2539,12 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 	ds->outputNum = numBSPDrawSurfaces;
 	numBSPDrawSurfaces++;
 	memset( out, 0, sizeof( *out ) );
-	
+
 	/* set it up */
 	out->surfaceType = MST_PATCH;
 	if( debugSurfaces )
 		out->shaderNum = EmitShader( "debugsurfaces", NULL, NULL );
-	else if( patchMeta )
+	else if( patchMeta || forcePatchMeta )
 	{
 		/* patch meta requires that we have nodraw patches for collision */
 		surfaceFlags = ds->shaderInfo->surfaceFlags;
@@ -2547,8 +2593,6 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 	/* add to count */
 	numSurfacesByType[ ds->type ]++;
 }
-
-
 
 /*
 OptimizeTriangleSurface() - ydnar
@@ -2673,12 +2717,11 @@ EmitTriangleSurface()
 creates a bsp drawsurface from arbitrary triangle surfaces
 */
 
-static void EmitTriangleSurface( mapDrawSurface_t *ds )
+void EmitTriangleSurface( mapDrawSurface_t *ds )
 {
 	int						i, temp;
 	bspDrawSurface_t		*out;
-	
-	
+
 	/* invert the surface if necessary */
 	if( ds->backSide || ds->shaderInfo->invert )
 	{
@@ -2689,15 +2732,15 @@ static void EmitTriangleSurface( mapDrawSurface_t *ds )
 			ds->indexes[ i ] = ds->indexes[ i + 1 ];
 			ds->indexes[ i + 1 ] = temp;
 		}
-		
+			
 		/* walk the verts, flip the normal */
 		for( i = 0; i < ds->numVerts; i++ )
 			VectorScale( ds->verts[ i ].normal, -1.0f, ds->verts[ i ].normal );
-		
+			
 		/* invert facing */
 		VectorScale( ds->lightmapVecs[ 2 ], -1.0f, ds->lightmapVecs[ 2 ] );
 	}
-	
+		
 	/* allocate a new surface */
 	if( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS )
 		Error( "MAX_MAP_DRAW_SURFS" );
@@ -2804,13 +2847,15 @@ EmitFaceSurface()
 emits a bsp planar winding (brush face) drawsurface
 */
 
-static void EmitFaceSurface( mapDrawSurface_t *ds )
+static void EmitFaceSurface(mapDrawSurface_t *ds )
 {
 	/* strip/fan finding was moved elsewhere */
-	StripFaceSurface( ds );
-	EmitTriangleSurface( ds );
+	if(maxAreaFaceSurface)
+		MaxAreaFaceSurface( ds );
+	else
+		StripFaceSurface( ds );
+	EmitTriangleSurface(ds);
 }
-
 
 
 /*
@@ -3128,7 +3173,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			}
 			
 			/* insert the model */
-			InsertModel( (char *) model->model, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale );
+			InsertModel( (char *) model->model, 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0 );
 			
 			/* return to sender */
 			return 1;
@@ -3406,6 +3451,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 	vec3_t				origin, mins, maxs;
 	int					refs;
 	int					numSurfs, numRefs, numSkyboxSurfaces;
+	qboolean	sb;
 	
 	
 	/* note it */
@@ -3424,15 +3470,18 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 		
 		/* get shader */
 		si = ds->shaderInfo;
-		
+
 		/* ydnar: skybox surfaces are special */
 		if( ds->skybox )
 		{
 			refs = AddReferenceToTree_r( ds, tree->headnode, qtrue );
 			ds->skybox = qfalse;
+			sb = qtrue;
 		}
 		else
 		{
+			sb = qfalse;
+
 			/* refs initially zero */
 			refs = 0;
 			
@@ -3502,7 +3551,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 				if( refs == 0 )
 					refs = FilterPatchIntoTree( ds, tree );
 				if( refs > 0 )
-					EmitPatchSurface( ds );
+					EmitPatchSurface( e, ds );
 				break;
 			
 			/* handle triangle surfaces */
@@ -3552,6 +3601,11 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 				refs = 0;
 				break;
 		}
+
+		/* maybe surface got marked as skybox again */
+		/* if we keep that flag, it will get scaled up AGAIN */
+		if(sb)
+			ds->skybox = qfalse;
 		
 		/* tot up the references */
 		if( refs > 0 )
@@ -3590,6 +3644,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 	Sys_FPrintf( SYS_VRB, "%9d (%d) emitted drawsurfs\n", numSurfs, numBSPDrawSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d stripped face surfaces\n", numStripSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d fanned face surfaces\n", numFanSurfaces );
+	Sys_FPrintf( SYS_VRB, "%9d maxarea'd face surfaces\n", numMaxAreaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d surface models generated\n", numSurfaceModels );
 	Sys_FPrintf( SYS_VRB, "%9d skybox surfaces generated\n", numSkyboxSurfaces );
 	for( i = 0; i < NUM_SURFACE_TYPES; i++ )

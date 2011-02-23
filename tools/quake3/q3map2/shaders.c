@@ -98,8 +98,20 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts )
 					VectorSet( mult, c, c, c );
 					break;
 				
+				case CM_COLOR_DOT_PRODUCT_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c = (c - cm2->data[3]) / (cm2->data[4] - cm2->data[3]);
+					VectorSet( mult, c, c, c );
+					break;
+				
 				case CM_ALPHA_DOT_PRODUCT:
 					mult[ 3 ] = DotProduct( dv->normal, cm2->data );
+					break;
+				
+				case CM_ALPHA_DOT_PRODUCT_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c = (c - cm2->data[3]) / (cm2->data[4] - cm2->data[3]);
+					mult[ 3 ] = c;
 					break;
 				
 				case CM_COLOR_DOT_PRODUCT_2:
@@ -108,9 +120,23 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts )
 					VectorSet( mult, c, c, c );
 					break;
 				
+				case CM_COLOR_DOT_PRODUCT_2_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c *= c;
+					c = (c - cm2->data[3]) / (cm2->data[4] - cm2->data[3]);
+					VectorSet( mult, c, c, c );
+					break;
+				
 				case CM_ALPHA_DOT_PRODUCT_2:
 					mult[ 3 ] = DotProduct( dv->normal, cm2->data );
 					mult[ 3 ] *= mult[ 3 ];
+					break;
+				
+				case CM_ALPHA_DOT_PRODUCT_2_SCALE:
+					c = DotProduct( dv->normal, cm2->data );
+					c *= c;
+					c = (c - cm2->data[3]) / (cm2->data[4] - cm2->data[3]);
+					mult[ 3 ] = c;
 					break;
 				
 				default:
@@ -408,7 +434,6 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, char *find, char *replace )
 	char			shader[ MAX_QPATH ];
 	char			*s;
 	int				loc;
-	md5_state_t		mh;
 	byte			digest[ 16 ];
 	char			*srcShaderText, temp[ 8192 ], shaderText[ 8192 ];	/* ydnar: fixme (make this bigger?) */
 	
@@ -529,10 +554,8 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, char *find, char *replace )
 		strcat( shaderText, &srcShaderText[ loc + strlen( find ) ] );
 	}
 	
-	/* make md5 hash of the shader text */
-	md5_init( &mh );
-	md5_append( &mh, shaderText, strlen( shaderText ) );
-	md5_finish( &mh, digest );
+	/* make md4 hash of the shader text */
+	Com_BlockFullChecksum(shaderText, strlen(shaderText), digest);
 	
 	/* mangle hash into a shader name */
 	sprintf( shader, "%s/%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", mapName,
@@ -568,7 +591,6 @@ adds a vertexremapshader key/value pair to worldspawn
 
 void EmitVertexRemapShader( char *from, char *to )
 {
-	md5_state_t		mh;
 	byte			digest[ 16 ];
 	char			key[ 64 ], value[ 256 ];
 	
@@ -581,10 +603,8 @@ void EmitVertexRemapShader( char *from, char *to )
 	/* build value */
 	sprintf( value, "%s;%s", from, to );
 	
-	/* make md5 hash */
-	md5_init( &mh );
-	md5_append( &mh, value, strlen( value ) );
-	md5_finish( &mh, digest );
+	/* make md4 hash */
+	Com_BlockFullChecksum(value, strlen(value), digest);
 
 	/* make key (this is annoying, as vertexremapshader is precisely 17 characters,
 	   which is one too long, so we leave off the last byte of the md5 digest) */
@@ -790,8 +810,14 @@ static void LoadShaderImages( shaderInfo_t *si )
 	}
 	
 	if( VectorLength( si->color ) <= 0.0f )
+	{
 		ColorNormalize( color, si->color );
-	VectorScale( color, (1.0f / count), si->averageColor );
+		VectorScale( color, (1.0f / count), si->averageColor );
+	}
+	else
+	{
+		VectorCopy( si->color, si->averageColor );
+	}
 }
 
 
@@ -801,13 +827,15 @@ ShaderInfoForShader()
 finds a shaderinfo for a named shader
 */
 
+#define MAX_SHADER_DEPRECATION_DEPTH 16
+
 shaderInfo_t *ShaderInfoForShader( const char *shaderName )
 {
 	int				i;
+	int				deprecationDepth;
 	shaderInfo_t	*si;
 	char			shader[ MAX_QPATH ];
-	
-	
+
 	/* dummy check */
 	if( shaderName == NULL || shaderName[ 0 ] == '\0' )
 	{
@@ -820,11 +848,27 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName )
 	StripExtension( shader );
 	
 	/* search for it */
+	deprecationDepth = 0;
 	for( i = 0; i < numShaderInfo; i++ )
 	{
 		si = &shaderInfo[ i ];
 		if( !Q_stricmp( shader, si->shader ) )
 		{
+			/* check if shader is deprecated */
+			if (deprecationDepth < MAX_SHADER_DEPRECATION_DEPTH && si->deprecateShader && si->deprecateShader[ 0 ] )
+			{
+				/* override name */
+				strcpy( shader, si->deprecateShader );
+				StripExtension( shader );
+				/* increase deprecation depth */
+				deprecationDepth++;
+				if (deprecationDepth == MAX_SHADER_DEPRECATION_DEPTH)
+					Sys_Printf("WARNING: Max deprecation depth of %i is reached on shader '%s'\n", MAX_SHADER_DEPRECATION_DEPTH, shader);
+				/* search again from beginning */
+				i = -1;
+				continue;
+			}
+
 			/* load image if necessary */
 			if( si->finished == qfalse )
 			{
@@ -1337,7 +1381,6 @@ static void ParseShaderFile( const char *filename )
 				{
 					surfaceModel_t	*model;
 					
-					
 					/* allocate new model and attach it */
 					model = safe_malloc( sizeof( *model ) );
 					memset( model, 0, sizeof( *model ) );
@@ -1462,6 +1505,30 @@ static void ParseShaderFile( const char *filename )
 					GetTokenAppend( shaderText, qfalse );
 					si->backsplashDistance = atof( token );
 				}
+
+				/* q3map_floodLight <r> <g> <b> <diste> <intensity> <light_direction_power> */
+				else if( !Q_stricmp( token, "q3map_floodLight" ) )
+				{
+					/* get color */
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightRGB[ 0 ] = atof( token );
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightRGB[ 1 ] = atof( token );
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightRGB[ 2 ] = atof( token );
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightDistance = atof( token ); 
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightIntensity = atof( token ); 
+					GetTokenAppend( shaderText, qfalse );
+					si->floodlightDirectionScale = atof( token ); 
+				}
+
+				/* jal: q3map_nodirty : skip dirty */
+				else if( !Q_stricmp( token, "q3map_nodirty" ) )
+				{
+					si->noDirty = qtrue;
+				}
 				
 				/* q3map_lightmapSampleSize <value> */
 				else if( !Q_stricmp( token, "q3map_lightmapSampleSize" ) )
@@ -1470,7 +1537,7 @@ static void ParseShaderFile( const char *filename )
 					si->lightmapSampleSize = atoi( token );
 				}
 				
-				/* q3map_lightmapSampleSffset <value> */
+				/* q3map_lightmapSampleOffset <value> */
 				else if( !Q_stricmp( token, "q3map_lightmapSampleOffset" ) )
 				{
 					GetTokenAppend( shaderText, qfalse );
@@ -1587,6 +1654,18 @@ static void ParseShaderFile( const char *filename )
 						strcpy( si->remapShader, token );
 					}
 				}
+
+				/* q3map_deprecateShader <shader> */
+				else if( !Q_stricmp( token, "q3map_deprecateShader" ) )
+				{
+					GetTokenAppend( shaderText, qfalse );
+					if( token[ 0 ] != '\0' )
+					{
+
+						si->deprecateShader = safe_malloc( strlen( token ) + 1 );
+						strcpy( si->deprecateShader, token );
+					}
+				}
 				
 				/* ydnar: q3map_offset <value> */
 				else if( !Q_stricmp( token, "q3map_offset" ) )
@@ -1595,7 +1674,7 @@ static void ParseShaderFile( const char *filename )
 					si->offset = atof( token );
 				}
 				
-				/* ydnar: q3map_textureSize <width> <height> (substitute for q3map_lightimage derivation for terrain) */
+				/* ydnar: q3map_fur <numlayers> <offset> <fade> */
 				else if( !Q_stricmp( token, "q3map_fur" ) )
 				{
 					GetTokenAppend( shaderText, qfalse );
@@ -1746,11 +1825,25 @@ static void ParseShaderFile( const char *filename )
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 					}
 					
+					/* dotProductScale ( X Y Z MIN MAX ) */
+					else if( !Q_stricmp( token, "dotProductScale" ) )
+					{
+						cm->type = CM_COLOR_DOT_PRODUCT_SCALE + alpha;
+						Parse1DMatrixAppend( shaderText, 5, cm->data );
+					}
+					
 					/* dotProduct2 ( X Y Z ) */
 					else if( !Q_stricmp( token, "dotProduct2" ) )
 					{
 						cm->type = CM_COLOR_DOT_PRODUCT_2 + alpha;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
+					}
+					
+					/* dotProduct2scale ( X Y Z MIN MAX ) */
+					else if( !Q_stricmp( token, "dotProduct2scale" ) )
+					{
+						cm->type = CM_COLOR_DOT_PRODUCT_2_SCALE + alpha;
+						Parse1DMatrixAppend( shaderText, 5, cm->data );
 					}
 					
 					/* volume */
@@ -1893,12 +1986,14 @@ static void ParseShaderFile( const char *filename )
 					si->styleMarker = 2;
 				
 				/* ydnar: default to searching for q3map_<surfaceparm> */
-				else
+#if 0
+ 				else
 				{
-					//%	Sys_FPrintf( SYS_VRB, "Attempting to match %s with a known surfaceparm\n", token );
+					Sys_FPrintf( SYS_VRB, "Attempting to match %s with a known surfaceparm\n", token );
 					if( ApplySurfaceParm( &token[ 6 ], &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) == qfalse )
-						;//%	Sys_Printf( "WARNING: Unknown q3map_* directive \"%s\"\n", token );
+						Sys_Printf( "WARNING: Unknown q3map_* directive \"%s\"\n", token );
 				}
+#endif
 			}
 			
 			

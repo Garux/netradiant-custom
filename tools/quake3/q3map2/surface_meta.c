@@ -84,7 +84,7 @@ static int FindMetaVertex( bspDrawVert_t *src )
 {
 	int			i;
 	bspDrawVert_t	*v, *temp;
-	
+
 	
 	/* try to find an existing drawvert */
 	for( i = firstSearchMetaVert, v = &metaVerts[ i ]; i < numMetaVerts; i++, v++ )
@@ -288,6 +288,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds )
 			src.recvShadows = ds->recvShadows;
 			src.fogNum = ds->fogNum;
 			src.sampleSize = ds->sampleSize;
+			src.shadeAngleDegrees = ds->shadeAngleDegrees;
 			VectorCopy( ds->lightmapAxis, src.lightmapAxis );
 			
 			/* copy drawverts */
@@ -312,23 +313,41 @@ TriangulatePatchSurface()
 creates triangles from a patch
 */
 
-void TriangulatePatchSurface( mapDrawSurface_t *ds )
+void TriangulatePatchSurface( entity_t *e , mapDrawSurface_t *ds )
 {
 	int					iterations, x, y, pw[ 5 ], r;
 	mapDrawSurface_t	*dsNew;
 	mesh_t				src, *subdivided, *mesh;
-	
-	
+	int					forcePatchMeta;
+	int					patchQuality;
+	int					patchSubdivision;
+
+	/* vortex: _patchMeta, _patchQuality, _patchSubdivide support */
+	forcePatchMeta = IntForKey(e, "_patchMeta" );
+	if (!forcePatchMeta)
+		forcePatchMeta = IntForKey(e, "patchMeta" );
+	patchQuality = IntForKey(e, "_patchQuality" );
+	if (!patchQuality)
+		patchQuality = IntForKey(e, "patchQuality" );
+	if (!patchQuality)
+		patchQuality = 1.0;
+	patchSubdivision = IntForKey(e, "_patchSubdivide" );
+	if (!patchSubdivision)
+		patchSubdivision = IntForKey(e, "patchSubdivide" );
+
 	/* try to early out */
-	if( ds->numVerts == 0 || ds->type != SURFACE_PATCH || patchMeta == qfalse )
+	if(ds->numVerts == 0 || ds->type != SURFACE_PATCH || ( patchMeta == qfalse && !forcePatchMeta) )
 		return;
-	
 	/* make a mesh from the drawsurf */ 
 	src.width = ds->patchWidth;
 	src.height = ds->patchHeight;
 	src.verts = ds->verts;
 	//%	subdivided = SubdivideMesh( src, 8, 999 );
-	iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions );
+	if (patchSubdivision)
+		iterations = IterationsForCurve( ds->longestCurve, patchSubdivision );
+	else
+		iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions / patchQuality );
+
 	subdivided = SubdivideMesh2( src, iterations );	//%	ds->maxIterations
 	
 	/* fit it to the curve and remove colinear verts on rows/columns */
@@ -394,6 +413,222 @@ void TriangulatePatchSurface( mapDrawSurface_t *ds )
 	ClassifySurfaces( 1, ds );
 }
 
+#define TINY_AREA 1.0f
+#define MAXAREA_MAXTRIES 8
+int MaxAreaIndexes(bspDrawVert_t *vert, int cnt, int *indexes)
+{
+	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
+	int i, j, try;
+	double A, bestA = -1, V, bestV = -1;
+	vec3_t ab, ac, bc, cross;
+	bspDrawVert_t *buf;
+	double shiftWidth;
+
+	if(cnt < 3)
+		return 0;
+
+	/* calculate total area */
+	A = 0;
+	for(i = 1; i+1 < cnt; ++i)
+	{
+		VectorSubtract(vert[i].xyz, vert[0].xyz, ab);
+		VectorSubtract(vert[i+1].xyz, vert[0].xyz, ac);
+		CrossProduct(ab, ac, cross);
+		A += VectorLength(cross);
+	}
+	V = 0;
+	for(i = 0; i < cnt; ++i)
+	{
+		VectorSubtract(vert[(i+1)%cnt].xyz, vert[i].xyz, ab);
+		V += VectorLength(ab);
+	}
+
+	/* calculate shift width from the area sensibly, assuming the polygon
+	 * fits about 25% of the screen in both dimensions
+	 * we assume 1280x1024
+	 * 1 pixel is then about sqrt(A) / (0.25 * screenwidth)
+	 * 8 pixels are then about sqrt(A) /  (0.25 * 1280) * 8
+	 * 8 pixels are then about sqrt(A) * 0.025
+	 * */
+	shiftWidth = sqrt(A) * 0.0125;
+	/*     3->1 6->2 12->3 ... */
+	if(A - ceil(log(cnt/1.5) / log(2)) * V * shiftWidth * 2 < 0)
+	{
+		/* printf("Small triangle detected (area %f, circumference %f), adjusting shiftWidth from %f to ", A, V, shiftWidth); */
+		shiftWidth = A / (ceil(log(cnt/1.5) / log(2)) * V * 2);
+		/* printf("%f\n", shiftWidth); */
+	}
+
+	/* find the triangle with highest area */
+	for(r = 0; r+2 < cnt; ++r)
+	for(s = r+1; s+1 < cnt; ++s)
+	for(t = s+1; t < cnt; ++t)
+	{
+		VectorSubtract(vert[s].xyz, vert[r].xyz, ab);
+		VectorSubtract(vert[t].xyz, vert[r].xyz, ac);
+		VectorSubtract(vert[t].xyz, vert[s].xyz, bc);
+		CrossProduct(ab, ac, cross);
+		A = VectorLength(cross);
+
+		V = A - (VectorLength(ab) - VectorLength(ac) - VectorLength(bc)) * shiftWidth;
+		/* value = A - circumference * shiftWidth, i.e. we back out by shiftWidth units from each side, to prevent too acute triangles */
+		/* this kind of simulates "number of shiftWidth*shiftWidth fragments in the triangle not touched by an edge" */
+
+		if(bestA < 0 || V > bestV)
+		{
+			bestA = A;
+			bestV = V;
+			bestR = r;
+			bestS = s;
+			bestT = t;
+		}
+	}
+
+	/*
+	if(bestV < 0)
+		printf("value was REALLY bad\n");
+	*/
+
+	for(try = 0; try < MAXAREA_MAXTRIES; ++try)
+	{
+		if(try)
+		{
+			bestR = rand() % cnt;
+			bestS = rand() % cnt;
+			bestT = rand() % cnt;
+			if(bestR == bestS || bestR == bestT || bestS == bestT)
+				continue;
+			// bubblesort inline
+			// abc acb bac bca cab cba
+			if(bestR > bestS)
+			{
+				j = bestR;
+				bestR = bestS;
+				bestS = j;
+			}
+			// abc acb abc bca acb bca
+			if(bestS > bestT)
+			{
+				j = bestS;
+				bestS = bestT;
+				bestT = j;
+			}
+			// abc abc abc bac abc bac
+			if(bestR > bestS)
+			{
+				j = bestR;
+				bestR = bestS;
+				bestS = j;
+			}
+			// abc abc abc abc abc abc
+
+			VectorSubtract(vert[bestS].xyz, vert[bestR].xyz, ab);
+			VectorSubtract(vert[bestT].xyz, vert[bestR].xyz, ac);
+			CrossProduct(ab, ac, cross);
+			bestA = VectorLength(cross);
+		}
+
+		if(bestA < TINY_AREA)
+			/* the biggest triangle is degenerate - then every other is too, and the other algorithms wouldn't generate anything useful either */
+			continue;
+
+		i = 0;
+		indexes[i++] = bestR;
+		indexes[i++] = bestS;
+		indexes[i++] = bestT;
+			/* uses 3 */
+
+		/* identify the other fragments */
+
+		/* full polygon without triangle (bestR,bestS,bestT) = three new polygons:
+		 * 1. bestR..bestS
+		 * 2. bestS..bestT
+		 * 3. bestT..bestR
+		 */
+
+		j = MaxAreaIndexes(vert + bestR, bestS - bestR + 1, indexes + i);
+		if(j < 0)
+			continue;
+		j += i;
+		for(; i < j; ++i)
+			indexes[i] += bestR;
+			/* uses 3*(bestS-bestR+1)-6 */
+		j = MaxAreaIndexes(vert + bestS, bestT - bestS + 1, indexes + i);
+		if(j < 0)
+			continue;
+		j += i;
+		for(; i < j; ++i)
+			indexes[i] += bestS;
+			/* uses 3*(bestT-bestS+1)-6 */
+
+		/* can'bestT recurse this one directly... therefore, buffering */
+		if(cnt + bestR - bestT + 1 >= 3)
+		{
+			buf = safe_malloc(sizeof(*vert) * (cnt + bestR - bestT + 1));
+			memcpy(buf, vert + bestT, sizeof(*vert) * (cnt - bestT));
+			memcpy(buf + (cnt - bestT), vert, sizeof(*vert) * (bestR + 1));
+			j = MaxAreaIndexes(buf, cnt + bestR - bestT + 1, indexes + i);
+			if(j < 0)
+			{
+				free(buf);
+				continue;
+			}
+			j += i;
+			for(; i < j; ++i)
+				indexes[i] = (indexes[i] + bestT) % cnt;
+				/* uses 3*(cnt+bestR-bestT+1)-6 */
+			free(buf);
+		}
+
+		/* together 3 + 3*(cnt+3) - 18 = 3*cnt-6 q.e.d. */
+		return i;
+	}
+
+	return -1;
+}
+
+/*
+MaxAreaFaceSurface() - divVerent
+creates a triangle list using max area indexes
+*/
+
+void MaxAreaFaceSurface(mapDrawSurface_t *ds)
+{
+	int n;
+	/* try to early out  */
+	if( !ds->numVerts || (ds->type != SURFACE_FACE && ds->type != SURFACE_DECAL) )
+		return;
+
+	/* is this a simple triangle? */
+	if( ds->numVerts == 3 )
+	{
+		ds->numIndexes = 3;
+		ds->indexes = safe_malloc( ds->numIndexes * sizeof( int ) );
+		VectorSet( ds->indexes, 0, 1, 2 );
+		numMaxAreaSurfaces++;
+		return;
+	}
+
+	/* do it! */
+	ds->numIndexes = 3 * ds->numVerts - 6;
+	ds->indexes = safe_malloc( ds->numIndexes * sizeof( int ) );
+	n = MaxAreaIndexes(ds->verts, ds->numVerts, ds->indexes);
+	if(n < 0)
+	{
+		/* whatever we do, it's degenerate */
+		free(ds->indexes);
+		ds->numIndexes = 0;
+		StripFaceSurface(ds);
+		return;
+	}
+	ds->numIndexes = n;
+
+	/* add to count */
+	numMaxAreaSurfaces++;
+
+	/* classify it */
+	ClassifySurfaces( 1, ds );
+}
 
 
 /*
@@ -536,6 +771,7 @@ void StripFaceSurface( mapDrawSurface_t *ds )
 			Error( "MAX_INDEXES exceeded for surface (%d > %d) (%d verts)", numIndexes, MAX_INDEXES, ds->numVerts );
 		
 		/* try all possible orderings of the points looking for a non-degenerate strip order */
+		ni = 0;
 		for( r = 0; r < ds->numVerts; r++ )
 		{
 			/* set rotation */
@@ -597,8 +833,24 @@ void StripFaceSurface( mapDrawSurface_t *ds )
 	/* classify it */
 	ClassifySurfaces( 1, ds );
 }
+ 
+ 
+/*
+EmitMetaStatictics
+vortex: prints meta statistics in general output
+*/
 
-
+void EmitMetaStats()
+{
+	Sys_Printf( "--- EmitMetaStats ---\n" );
+	Sys_Printf( "%9d total meta surfaces\n", numMetaSurfaces );
+	Sys_Printf( "%9d stripped surfaces\n", numStripSurfaces );
+	Sys_Printf( "%9d fanned surfaces\n", numFanSurfaces );
+	Sys_Printf( "%9d maxarea'd surfaces\n", numMaxAreaSurfaces );
+	Sys_Printf( "%9d patch meta surfaces\n", numPatchMetaSurfaces );
+	Sys_Printf( "%9d meta verts\n", numMetaVerts );
+	Sys_Printf( "%9d meta triangles\n", numMetaTriangles );
+}
 
 /*
 MakeEntityMetaTriangles()
@@ -647,17 +899,20 @@ void MakeEntityMetaTriangles( entity_t *e )
 		{
 			case SURFACE_FACE:
 			case SURFACE_DECAL:
-				StripFaceSurface( ds );
+				if(maxAreaFaceSurface)
+					MaxAreaFaceSurface( ds );
+				else
+					StripFaceSurface( ds );
 				SurfaceToMetaTriangles( ds );
 				break;
 			
 			case SURFACE_PATCH:
-				TriangulatePatchSurface( ds );
+				TriangulatePatchSurface(e, ds );
 				break;
 			
 			case SURFACE_TRIANGLES:
 				break;
-			
+		
 			case SURFACE_FORCED_META:
 			case SURFACE_META:
 				SurfaceToMetaTriangles( ds );
@@ -676,56 +931,13 @@ void MakeEntityMetaTriangles( entity_t *e )
 	Sys_FPrintf( SYS_VRB, "%9d total meta surfaces\n", numMetaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d stripped surfaces\n", numStripSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d fanned surfaces\n", numFanSurfaces );
+	Sys_FPrintf( SYS_VRB, "%9d maxarea'd surfaces\n", numMaxAreaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d patch meta surfaces\n", numPatchMetaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d meta verts\n", numMetaVerts );
 	Sys_FPrintf( SYS_VRB, "%9d meta triangles\n", numMetaTriangles );
 	
 	/* tidy things up */
 	TidyEntitySurfaces( e );
-}
-
-
-
-/*
-PointTriangleIntersect()
-assuming that all points lie in plane, determine if pt
-is inside the triangle abc
-code originally (c) 2001 softSurfer (www.softsurfer.com)
-*/
-
-#define MIN_OUTSIDE_EPSILON		-0.01f
-#define MAX_OUTSIDE_EPSILON		1.01f
-
-static qboolean PointTriangleIntersect( vec3_t pt, vec4_t plane, vec3_t a, vec3_t b, vec3_t c, vec3_t bary )
-{
-	vec3_t	u, v, w;
-	float	uu, uv, vv, wu, wv, d;
-	
-	
-	/* make vectors */
-	VectorSubtract( b, a, u );
-	VectorSubtract( c, a, v );
-	VectorSubtract( pt, a, w );
-	
-	/* more setup */
-	uu = DotProduct( u, u );
-	uv = DotProduct( u, v );
-	vv = DotProduct( v, v );
-	wu = DotProduct( w, u );
-	wv = DotProduct( w, v );
-	d = uv * uv - uu * vv;
-	
-	/* calculate barycentric coordinates */
-	bary[ 1 ] = (uv * wv - vv * wu) / d;
-	if( bary[ 1 ] < MIN_OUTSIDE_EPSILON || bary[ 1 ] > MAX_OUTSIDE_EPSILON )
-		return qfalse;
-	bary[ 2 ] = (uv * wv - uu * wv) / d;
-	if( bary[ 2 ] < MIN_OUTSIDE_EPSILON || bary[ 2 ] > MAX_OUTSIDE_EPSILON )
-		return qfalse;
-	bary[ 0 ] = 1.0f - (bary[ 1 ] + bary[ 2 ]);
-	
-	/* point is in triangle */
-	return qtrue;
 }
 
 
@@ -835,10 +1047,6 @@ void FixMetaTJunctions( void )
 			/* get vert */
 			VectorCopy( metaVerts[ j ].xyz, pt );
 
-			/* debug code: darken verts */
-			if( i == 0 )
-				VectorSet( metaVerts[ j ].color[ 0 ], 8, 8, 8 );
-			
 			/* determine if point lies in the triangle's plane */
 			dist = DotProduct( pt, plane ) - plane[ 3 ];
 			if( fabs( dist ) > TJ_PLANE_EPSILON )
@@ -879,13 +1087,6 @@ void FixMetaTJunctions( void )
 				amount = dist / edges[ k ].length;
 				#endif
 				
-				/* debug code: brighten this point */
-				//%	metaVerts[ j ].color[ 0 ][ 0 ] += 5;
-				//%	metaVerts[ j ].color[ 0 ][ 1 ] += 4;
-				VectorSet( metaVerts[ tri->indexes[ k ] ].color[ 0 ], 255, 204, 0 );
-				VectorSet( metaVerts[ tri->indexes[ (k + 1) % 3 ] ].color[ 0 ], 255, 204, 0 );
-				
-
 				/* the edge opposite the zero-weighted vertex was hit, so use that as an amount */
 				a = &metaVerts[ tri->indexes[ k % 3 ] ];
 				b = &metaVerts[ tri->indexes[ (k + 1) % 3 ] ];
@@ -973,7 +1174,6 @@ void SmoothMetaTriangles( void )
 	int				indexes[ MAX_SAMPLES ];
 	vec3_t			votes[ MAX_SAMPLES ];
 	
-	
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SmoothMetaTriangles ---\n" );
 	
@@ -994,11 +1194,18 @@ void SmoothMetaTriangles( void )
 	   and set per-vertex smoothing angle */
 	for( i = 0, tri = &metaTriangles[ i ]; i < numMetaTriangles; i++, tri++ )
 	{
-		/* get shader for shade angle */
+		shadeAngle = defaultShadeAngle;
+
+		/* get shade angle from shader */
 		if( tri->si->shadeAngleDegrees > 0.0f )
 			shadeAngle = DEG2RAD( tri->si->shadeAngleDegrees );
-		else
+		/* get shade angle from entity */
+		else if( tri->shadeAngleDegrees > 0.0f )
+			shadeAngle = DEG2RAD( tri->shadeAngleDegrees );
+		
+		if( shadeAngle <= 0.0f ) 
 			shadeAngle = defaultShadeAngle;
+
 		if( shadeAngle > maxShadeAngle )
 			maxShadeAngle = shadeAngle;
 		
@@ -1186,8 +1393,9 @@ returns the score of the triangle added
 #define ST_SCORE2			(2 * (ST_SCORE))
 
 #define ADEQUATE_SCORE		((AXIS_MIN) + 1 * (VERT_SCORE))
-#define GOOD_SCORE			((AXIS_MIN) + 2 * (VERT_SCORE) + 4 * (ST_SCORE))
-#define PERFECT_SCORE		((AXIS_MIN) + + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE))
+#define GOOD_SCORE			((AXIS_MIN) + 2 * (VERT_SCORE)                   + 4 * (ST_SCORE))
+#define PERFECT_SCORE		((AXIS_MIN) + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE))
+//#define MAX_BBOX_DISTANCE   16
 
 static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, qboolean testAdd )
 {
@@ -1224,6 +1432,32 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 		if( tri->planeNum >= 0 && tri->planeNum != ds->planeNum )
 			return 0;
 	}
+
+#if MAX_BBOX_DISTANCE > 0
+	VectorCopy( ds->mins, mins );
+	VectorCopy( ds->maxs, maxs );
+	mins[0] -= MAX_BBOX_DISTANCE;
+	mins[1] -= MAX_BBOX_DISTANCE;
+	mins[2] -= MAX_BBOX_DISTANCE;
+	maxs[0] += MAX_BBOX_DISTANCE;
+	maxs[1] += MAX_BBOX_DISTANCE;
+	maxs[2] += MAX_BBOX_DISTANCE;
+#define CHECK_1D(mins, v, maxs) ((mins) <= (v) && (v) <= (maxs))
+#define CHECK_3D(mins, v, maxs) (CHECK_1D((mins)[0], (v)[0], (maxs)[0]) && CHECK_1D((mins)[1], (v)[1], (maxs)[1]) && CHECK_1D((mins)[2], (v)[2], (maxs)[2]))
+	VectorCopy(metaVerts[ tri->indexes[ 0 ] ].xyz, p);
+	if(!CHECK_3D(mins, p, maxs))
+	{
+		VectorCopy(metaVerts[ tri->indexes[ 1 ] ].xyz, p);
+		if(!CHECK_3D(mins, p, maxs))
+		{
+			VectorCopy(metaVerts[ tri->indexes[ 2 ] ].xyz, p);
+			if(!CHECK_3D(mins, p, maxs))
+				return 0;
+		}
+	}
+#undef CHECK_3D
+#undef CHECK_1D
+#endif
 	
 	/* set initial score */
 	score = tri->surfaceNum == ds->surfaceNum ? SURFACE_SCORE : 0;
@@ -1422,6 +1656,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		ds->planeNum = seed->planeNum;
 		ds->fogNum = seed->fogNum;
 		ds->sampleSize = seed->sampleSize;
+		ds->shadeAngleDegrees = seed->shadeAngleDegrees;
 		ds->verts = verts;
 		ds->indexes = indexes;
 		VectorCopy( seed->lightmapAxis, ds->lightmapAxis );
@@ -1529,37 +1764,37 @@ static int CompareMetaTriangles( const void *a, const void *b )
 	
 	
 	/* shader first */
-	if( ((metaTriangle_t*) a)->si < ((metaTriangle_t*) b)->si )
+	if( ((const metaTriangle_t*) a)->si < ((const metaTriangle_t*) b)->si )
 		return 1;
-	else if( ((metaTriangle_t*) a)->si > ((metaTriangle_t*) b)->si )
+	else if( ((const metaTriangle_t*) a)->si > ((const metaTriangle_t*) b)->si )
 		return -1;
 	
 	/* then fog */
-	else if( ((metaTriangle_t*) a)->fogNum < ((metaTriangle_t*) b)->fogNum )
+	else if( ((const metaTriangle_t*) a)->fogNum < ((const metaTriangle_t*) b)->fogNum )
 		return 1;
-	else if( ((metaTriangle_t*) a)->fogNum > ((metaTriangle_t*) b)->fogNum )
+	else if( ((const metaTriangle_t*) a)->fogNum > ((const metaTriangle_t*) b)->fogNum )
 		return -1;
 	
 	/* then plane */
 	#if 0
-		else if( npDegrees == 0.0f && ((metaTriangle_t*) a)->si->nonplanar == qfalse &&
-			((metaTriangle_t*) a)->planeNum >= 0 && ((metaTriangle_t*) a)->planeNum >= 0 )
+		else if( npDegrees == 0.0f && ((const metaTriangle_t*) a)->si->nonplanar == qfalse &&
+			((const metaTriangle_t*) a)->planeNum >= 0 && ((const metaTriangle_t*) a)->planeNum >= 0 )
 		{
-			if( ((metaTriangle_t*) a)->plane[ 3 ] < ((metaTriangle_t*) b)->plane[ 3 ] )
+			if( ((const metaTriangle_t*) a)->plane[ 3 ] < ((const metaTriangle_t*) b)->plane[ 3 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 3 ] > ((metaTriangle_t*) b)->plane[ 3 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 3 ] > ((const metaTriangle_t*) b)->plane[ 3 ] )
 				return -1;
-			else if( ((metaTriangle_t*) a)->plane[ 0 ] < ((metaTriangle_t*) b)->plane[ 0 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 0 ] < ((const metaTriangle_t*) b)->plane[ 0 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 0 ] > ((metaTriangle_t*) b)->plane[ 0 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 0 ] > ((const metaTriangle_t*) b)->plane[ 0 ] )
 				return -1;
-			else if( ((metaTriangle_t*) a)->plane[ 1 ] < ((metaTriangle_t*) b)->plane[ 1 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 1 ] < ((const metaTriangle_t*) b)->plane[ 1 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 1 ] > ((metaTriangle_t*) b)->plane[ 1 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 1 ] > ((const metaTriangle_t*) b)->plane[ 1 ] )
 				return -1;
-			else if( ((metaTriangle_t*) a)->plane[ 2 ] < ((metaTriangle_t*) b)->plane[ 2 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 2 ] < ((const metaTriangle_t*) b)->plane[ 2 ] )
 				return 1;
-			else if( ((metaTriangle_t*) a)->plane[ 2 ] > ((metaTriangle_t*) b)->plane[ 2 ] )
+			else if( ((const metaTriangle_t*) a)->plane[ 2 ] > ((const metaTriangle_t*) b)->plane[ 2 ] )
 				return -1;
 		}
 	#endif
@@ -1571,8 +1806,8 @@ static int CompareMetaTriangles( const void *a, const void *b )
 	VectorSet( bMins, 999999, 999999, 999999 );
 	for( i = 0; i < 3; i++ )
 	{
-		av = ((metaTriangle_t*) a)->indexes[ i ];
-		bv = ((metaTriangle_t*) b)->indexes[ i ];
+		av = ((const metaTriangle_t*) a)->indexes[ i ];
+		bv = ((const metaTriangle_t*) b)->indexes[ i ];
 		for( j = 0; j < 3; j++ )
 		{
 			if( metaVerts[ av ].xyz[ j ] < aMins[ j ] )
