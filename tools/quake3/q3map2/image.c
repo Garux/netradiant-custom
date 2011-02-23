@@ -346,6 +346,7 @@ image_t *ImageLoad( const char *filename )
 	char		name[ 1024 ];
 	int			size;
 	byte		*buffer = NULL;
+	qboolean	alphaHack = qfalse;
 
 	
 	/* init */
@@ -410,6 +411,7 @@ image_t *ImageLoad( const char *filename )
 			{
 				if( LoadJPGBuff( buffer, size, &image->pixels, &image->width, &image->height ) == -1 && image->pixels != NULL )
 					Sys_Printf( "WARNING: LoadJPGBuff: %s\n", (unsigned char*) image->pixels );
+				alphaHack = qtrue;
 			}
 			else
 			{
@@ -460,6 +462,28 @@ image_t *ImageLoad( const char *filename )
 	/* set count */
 	image->refCount = 1;
 	numImages++;
+
+	if(alphaHack)
+	{
+		StripExtension( name );
+		strcat( name, "_alpha.jpg" );
+		size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
+		if( size > 0 )
+		{
+			unsigned char *pixels;
+			int width, height;
+			if( LoadJPGBuff( buffer, size, &pixels, &width, &height ) == -1 && pixels != NULL )
+				Sys_Printf( "WARNING: LoadJPGBuff: %s\n", (unsigned char*) image->pixels );
+			if(pixels && width == image->width && height == image->height)
+			{
+				int i;
+				for(i = 0; i < width*height; ++i)
+					image->pixels[4*i+3] = pixels[4*i+2]; // copy alpha from blue channel
+			}
+			free(pixels);
+			free(buffer);
+		}
+	}
 	
 	/* return the image */
 	return image;
