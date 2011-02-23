@@ -59,13 +59,21 @@ int	GetThreadWork (void)
 		return -1;
 	}
 
-	f = 10*dispatch / workcount;
-	if (f != oldf)
+	f = 40*dispatch / workcount;
+	if(f < oldf)
 	{
+		Sys_Printf("warning: progress went backwards (should never happen)\n");
 		oldf = f;
+	}
+	while(f > oldf)
+	{
+		++oldf;
 		if (pacifier)
 		{
-			Sys_Printf ("%i...", f);
+			if(oldf % 4 == 0)
+				Sys_Printf("%i", f / 4);
+			else
+				Sys_Printf (".");
 			fflush( stdout );	/* ydnar */
 		}
 	}
@@ -415,7 +423,7 @@ void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
 =======================================================================
 */
 
-#ifdef __linux__
+#if defined(__linux__) || (defined(__APPLE__) && !MAC_STATIC_HACK)
 #define USED
 
 int numthreads = 4;
@@ -517,11 +525,12 @@ RunThreadsOn
 void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
 {
   pthread_mutexattr_t         mattrib;
+  pthread_attr_t              attr;
   pthread_t work_threads[MAX_THREADS];
+  size_t stacksize;
   
   int	  start, end;
-  int   i=0;
-  void *exit_value;
+  int   i=0, status=0;
   
   start     = I_FloatTime ();
   pacifier  = showpacifier;
@@ -529,6 +538,14 @@ void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
   dispatch  = 0;
   oldf      = -1;
   workcount = workcnt;
+  
+  pthread_attr_init(&attr);
+  if(pthread_attr_setstacksize(&attr, 8388608) != 0)
+  {
+	  stacksize = 0;
+	  pthread_attr_getstacksize(&attr, &stacksize);
+	  Sys_Printf("Could not set a per-thread stack size of 8 MB, using only %.2f MB\n", stacksize / 1048576.0);
+  }
   
   if(numthreads == 1)
     func(0);
@@ -541,23 +558,19 @@ void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
 
     if(pthread_mutexattr_init(&mattrib) != 0)
       Error("pthread_mutexattr_init failed");
-#if __GLIBC_MINOR__ == 1
-    if (pthread_mutexattr_settype(&mattrib, PTHREAD_MUTEX_FAST_NP) != 0)
-#else
-    if (pthread_mutexattr_settype(&mattrib, PTHREAD_MUTEX_ADAPTIVE_NP) != 0)
-#endif
+    if (pthread_mutexattr_settype(&mattrib, PTHREAD_MUTEX_ERRORCHECK) != 0)
       Error ("pthread_mutexattr_settype failed");
     recursive_mutex_init(mattrib);
 
     for (i=0 ; i<numthreads ; i++)
     {
       /* Default pthread attributes: joinable & non-realtime scheduling */
-      if(pthread_create(&work_threads[i], NULL, (void*)func, (void*)i) != 0)
+      if(pthread_create(&work_threads[i], &attr, (void*)func, (void*)(size_t)i) != 0)
         Error("pthread_create failed");
     }
     for (i=0 ; i<numthreads ; i++)
     {
-      if(pthread_join(work_threads[i], &exit_value) != 0)
+      if(pthread_join(work_threads[i], (void **)&status) != 0)
         Error("pthread_join failed");
     }
     pthread_mutexattr_destroy(&mattrib);
@@ -603,6 +616,7 @@ RunThreadsOn
 */
 void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
 {
+	int		i;
 	int		start, end;
 
 	dispatch = 0;
