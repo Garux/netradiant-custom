@@ -51,6 +51,7 @@ GLOBAL int LoadJPGBuff(unsigned char *fbuffer, int bufsize, unsigned char **pic,
   unsigned char *out, *bbuf;
   int nSize;
   int jmpret;
+  int i;
 
   // Rad additions: initialize the longjmp buffer
   jmpret = setjmp( rad_loadfailed );
@@ -98,18 +99,12 @@ GLOBAL int LoadJPGBuff(unsigned char *fbuffer, int bufsize, unsigned char **pic,
    * with the stdio data source.
    */
   
-  /* ydnar: radiant only handles RGB, non-progressive format jpegs */
-  if( cinfo.output_components != 4 )
+  if( cinfo.output_components != 1 && cinfo.output_components != 3 && cinfo.output_components != 4 )
   {
-    *pic = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>("Non-RGB JPEG encountered (unsupported)"));
+    *pic = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>("Non-Y/RGB/RGBA JPEG encountered (unsupported)"));
     return -1;
   }
-  if( cinfo.progressive_mode )
-  {
-    *pic = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>("Progressive JPEG encountered (unsupported)"));
-    return -1;
-  }
-  
+
   /* We may need to do some setup of our own at this point before reading
    * the data.  After jpeg_start_decompress() we have the correct scaled
    * output image dimensions available, as well as the output colormap
@@ -119,7 +114,7 @@ GLOBAL int LoadJPGBuff(unsigned char *fbuffer, int bufsize, unsigned char **pic,
   
   /* JSAMPLEs per row in output buffer */
   row_stride = cinfo.output_width * cinfo.output_components;
-  nSize = cinfo.output_width*cinfo.output_height*cinfo.output_components;
+  nSize = cinfo.output_width*cinfo.output_height*4;
   
   out = reinterpret_cast<unsigned char*>( malloc( nSize+ 1 ) );
   memset( out, 255, nSize + 1 );
@@ -142,20 +137,39 @@ GLOBAL int LoadJPGBuff(unsigned char *fbuffer, int bufsize, unsigned char **pic,
      */
 	bbuf = out + row_stride * cinfo.output_scanline;
   	buffer = &bbuf;
-    (void) jpeg_read_scanlines( &cinfo, buffer, 1 );
-  }
+	(void) jpeg_read_scanlines( &cinfo, buffer, 1 );
 
-  // clear all the alphas to 255
-  {
-    int i, j;
-    unsigned char *buf;
-
-    buf = *pic;
-
-    j = cinfo.output_width * cinfo.output_height * 4;
-    for ( i = 3 ; i < j ; i+=4 ) {
-      buf[i] = 255;
-    }
+	// we convert downwards to not overwrite values we want to read later
+	switch(cinfo.output_components)
+	{
+		case 4:
+			// clear all the alphas to 255
+			for(i = cinfo.output_width; i-- > 0; )
+			{
+				bbuf[i*4+3] = 255;
+			}
+			break;
+		case 3:
+			// expand 3 to 4
+			for(i = cinfo.output_width; i-- > 0; )
+			{
+				bbuf[i*4+3] = 255;
+				bbuf[i*4+2] = bbuf[i*3+2];
+				bbuf[i*4+1] = bbuf[i*3+1];
+				bbuf[i*4+0] = bbuf[i*3+0];
+			}
+			break;
+		case 1:
+			// expand 1 to 4
+			for(i = cinfo.output_width; i-- > 0; )
+			{
+				bbuf[i*4+3] = 255;
+				bbuf[i*4+2] = bbuf[i];
+				bbuf[i*4+1] = bbuf[i];
+				bbuf[i*4+0] = bbuf[i];
+			}
+			break;
+	}
   }
 
   /* Step 7: Finish decompression */
