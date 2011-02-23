@@ -80,6 +80,8 @@ qboolean VectorCompare (vec3_t v1, vec3_t v2);
 #define CrossProduct(a,b,c) ((c)[0]=(a)[1]*(b)[2]-(a)[2]*(b)[1],(c)[1]=(a)[2]*(b)[0]-(a)[0]*(b)[2],(c)[2]=(a)[0]*(b)[1]-(a)[1]*(b)[0])
 #define VectorClear(x) ((x)[0]=(x)[1]=(x)[2]=0)
 
+#define RGBTOGRAY(x) ( (float)((x)[0]) * 0.2989f + (float)((x)[1]) * 0.5870f + (float)((x)[2]) * 0.1140f )
+
 #define Q_rint(in) ((vec_t)floor(in+0.5))
 
 qboolean VectorIsOnAxis(vec3_t v);

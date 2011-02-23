@@ -33,6 +33,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define VFS_MAXDIRS 64
 
+#if defined (__linux__) || defined (__APPLE__)
+#include <dirent.h>
+#include <unistd.h>
+#else
+#include <wtypes.h>
+#include <io.h>
+#define R_OK 04
+#define S_ISDIR(mode) (mode & _S_IFDIR)
+#define PATH_MAX 260
+#endif
+
 void vfsInitDirectory (const char *path);
 void vfsShutdown ();
 int vfsGetFileCount (const char *filename);

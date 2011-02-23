@@ -35,9 +35,10 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 
 
 /* version */
-#ifndef Q3MAP_VERSION
-#error no Q3MAP_VERSION defined
-#endif
+#define Q3MAP_VERSION "2.5.17"
+//#ifndef Q3MAP_VERSION
+//#error no Q3MAP_VERSION defined
+//#endif
 #define Q3MAP_MOTD		"Your map saw the pretty lights from q3map2's BFG"
 
 
@@ -83,7 +84,6 @@ dependencies
 #include "vfs.h"
 #include "png.h"
 #include "md4.h"
-#include "radiant_jpeglib.h"
 #include <stdlib.h>
 
 
