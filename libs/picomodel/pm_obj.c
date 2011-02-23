@@ -87,7 +87,7 @@ static int _obj_canload( PM_PARAMS_CANLOAD )
 	/* appearing at the beginning of wavefront objects */
 
 	/* alllocate a new pico parser */
-	p = _pico_new_parser( (picoByte_t *)buffer,bufSize );
+	p = _pico_new_parser( (const picoByte_t *)buffer,bufSize );
 	if (p == NULL)
 		return PICO_PMV_ERROR_MEMORY;
 
@@ -215,10 +215,9 @@ static void FreeObjVertexData( TObjVertexData *vertexData )
 	}
 }
 
-#if 0
 static int _obj_mtl_load( picoModel_t *model )
 {
-	//picoShader_t *curShader = NULL;
+	picoShader_t *curShader = NULL;
 	picoParser_t *p;
 	picoByte_t   *mtlBuffer;
 	int			  mtlBufSize;
@@ -241,7 +240,7 @@ static int _obj_mtl_load( picoModel_t *model )
 		return 0; \
 	}
 	/* alloc copy of model file name */
-	fileName = _pico_clone_alloc( model->fileName,-1 );
+	fileName = _pico_clone_alloc( model->fileName );
 	if (fileName == NULL)
 		return 0;
 
@@ -308,6 +307,7 @@ static int _obj_mtl_load( picoModel_t *model )
 		else if (!_pico_stricmp(p->token,"map_kd"))
 		{
 			char *mapName;
+			picoShader_t *shader;
 
 			/* pointer to current shader must be valid */
 			if (curShader == NULL)
@@ -322,6 +322,10 @@ static int _obj_mtl_load( picoModel_t *model )
 				_pico_printf( PICO_ERROR,"Missing material map name in MTL, line %d.",p->curLine);
 				_obj_mtl_error_return;
 			}
+			/* create a new pico shader */
+			shader = PicoNewShader( model );
+			if (shader == NULL)
+				_obj_mtl_error_return;
 			/* set shader map name */
 			PicoSetShaderMapName( shader,mapName );
 		}
@@ -478,7 +482,6 @@ static int _obj_mtl_load( picoModel_t *model )
 	/* return with success */
 	return 1;
 }
-#endif
 
 /* _obj_load:
  *  loads a wavefront obj model file.
@@ -497,8 +500,33 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 	int				curVertex	= 0;
 	int				curFace		= 0;
 
+	int autoGroupNumber = 0;
+	char autoGroupNameBuf[64];
+
+#define AUTO_GROUPNAME(namebuf) \
+	sprintf(namebuf, "__autogroup_%d", autoGroupNumber++)
+#define NEW_SURFACE(name) \
+{ \
+	picoSurface_t *newSurface; \
+	/* allocate a pico surface */ \
+	newSurface = PicoNewSurface( model ); \
+	if (newSurface == NULL) \
+	_obj_error_return("Error allocating surface"); \
+	/* reset face index for surface */ \
+	curFace = 0; \
+	/* if we can, assign the previous shader to this surface */ \
+	if(curSurface) \
+		PicoSetSurfaceShader(newSurface, curSurface->shader); \
+	/* set ptr to current surface */ \
+	curSurface = newSurface; \
+	/* we use triangle meshes */ \
+	PicoSetSurfaceType( newSurface,PICO_TRIANGLES ); \
+	/* set surface name */ \
+	PicoSetSurfaceName( newSurface,name ); \
+}
+
 	/* helper */
-	#define _obj_error_return(m) \
+#define _obj_error_return(m) \
 	{ \
 		_pico_printf( PICO_ERROR,"%s in OBJ, line %d.",m,p->curLine); \
 		_pico_free_parser( p ); \
@@ -507,7 +535,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 		return NULL; \
 	}
 	/* alllocate a new pico parser */
-	p = _pico_new_parser( (picoByte_t *)buffer,bufSize );
+	p = _pico_new_parser( (const picoByte_t *)buffer,bufSize );
 	if (p == NULL) return NULL;
 
 	/* create a new pico model */
@@ -523,7 +551,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 	PicoSetModelFileName( model,fileName );
 
 	/* try loading the materials; we don't handle the result */
-#if 0
+#if 1
 	_obj_mtl_load( model );
 #endif
 
@@ -613,7 +641,6 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 		/* new group (for us this means a new surface) */
 		else if (!_pico_stricmp(p->token,"g"))
 		{
-			picoSurface_t *newSurface;
 			char *groupName;
 
 			/* get first group name (ignore 2nd,3rd,etc.) */
@@ -629,22 +656,15 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 				_obj_error_return("Invalid or missing group name");
 #endif
 			}
-			/* allocate a pico surface */
-			newSurface = PicoNewSurface( model );
-			if (newSurface == NULL)
-				_obj_error_return("Error allocating surface");
 
-			/* reset face index for surface */
-			curFace = 0;
-
-			/* set ptr to current surface */
-			curSurface = newSurface;
-
-			/* we use triangle meshes */
-			PicoSetSurfaceType( newSurface,PICO_TRIANGLES );
-
-			/* set surface name */
-			PicoSetSurfaceName( newSurface,groupName );
+			if(curFace == 0)
+			{
+				PicoSetSurfaceName( curSurface,groupName );
+			}
+			else
+			{
+				NEW_SURFACE(groupName);
+			}
 
 #ifdef DEBUG_PM_OBJ_EX
 			printf("Group: '%s'\n",groupName);
@@ -668,9 +688,16 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 			int ivt[ 4 ], has_vt = 0;
 			int ivn[ 4 ], has_vn = 0;
 			int have_quad = 0;
-			int slashcount;
-			int doubleslash;
+			int slashcount = 0;
+			int doubleslash = 0;
 			int i;
+
+			if(curSurface == NULL)
+			{
+				_pico_printf( PICO_ERROR,"No group defined for faces, so creating an autoSurface in OBJ, line %d.",p->curLine);
+				AUTO_GROUPNAME(autoGroupNameBuf);
+				NEW_SURFACE(autoGroupNameBuf);
+			}
 
 			/* group defs *must* come before faces */
 			if (curSurface == NULL)
@@ -830,6 +857,48 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 				}
 				/* increase vertex count */
 				curVertex += max;
+			}
+		}
+		else if (!_pico_stricmp(p->token,"usemtl"))
+		{
+			picoShader_t *shader;
+			char *name;
+
+			/* get material name */
+			name = _pico_parse( p,0 );
+
+			if(curFace != 0 || curSurface == NULL)
+			{
+				_pico_printf( PICO_ERROR,"No group defined for usemtl, so creating an autoSurface in OBJ, line %d.",p->curLine);
+				AUTO_GROUPNAME(autoGroupNameBuf);
+				NEW_SURFACE(autoGroupNameBuf);
+			}
+
+			/* validate material name */
+			if (name == NULL || !strlen(name))
+			{
+				_pico_printf( PICO_ERROR,"Missing material name in OBJ, line %d.",p->curLine);
+			}
+			else
+			{
+				shader = PicoFindShader( model, name, 1 );
+				if (shader == NULL)
+				{
+					_pico_printf( PICO_ERROR,"Undefined material name in OBJ, line %d. Making a default shader.",p->curLine);
+
+					/* create a new pico shader */
+					shader = PicoNewShader( model );
+					if (shader != NULL)
+					{
+						PicoSetShaderName( shader,name );
+						PicoSetShaderMapName( shader,name );
+						PicoSetSurfaceShader( curSurface, shader );
+					}
+				}
+				else
+				{
+					PicoSetSurfaceShader( curSurface, shader );
+				}
 			}
 		}
 		/* skip unparsed rest of line and continue */
