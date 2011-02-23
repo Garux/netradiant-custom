@@ -2820,7 +2820,7 @@ void StoreSurfaceLightmaps( void )
 
 						/* fix tangents to world matrix */
 						if (myNormal[0] > 0 || myNormal[1] < 0 || myNormal[2] < 0)
-							VectorNegate(myTangent, myTangent);
+							VectorNegative(myTangent, myTangent);
 
 						/* build tangentspace vectors */
 						bspDeluxel[0] = DotProduct(dirSample, myTangent);
