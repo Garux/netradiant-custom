@@ -806,8 +806,7 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName )
 	int				i;
 	shaderInfo_t	*si;
 	char			shader[ MAX_QPATH ];
-	
-	
+
 	/* dummy check */
 	if( shaderName == NULL || shaderName[ 0 ] == '\0' )
 	{
@@ -1336,7 +1335,6 @@ static void ParseShaderFile( const char *filename )
 				else if( !Q_stricmp( token, "q3map_surfacemodel" ) )
 				{
 					surfaceModel_t	*model;
-					
 					
 					/* allocate new model and attach it */
 					model = safe_malloc( sizeof( *model ) );

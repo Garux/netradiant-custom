@@ -84,7 +84,7 @@ static int FindMetaVertex( bspDrawVert_t *src )
 {
 	int			i;
 	bspDrawVert_t	*v, *temp;
-	
+
 	
 	/* try to find an existing drawvert */
 	for( i = firstSearchMetaVert, v = &metaVerts[ i ]; i < numMetaVerts; i++, v++ )
@@ -657,7 +657,7 @@ void MakeEntityMetaTriangles( entity_t *e )
 			
 			case SURFACE_TRIANGLES:
 				break;
-			
+		
 			case SURFACE_FORCED_META:
 			case SURFACE_META:
 				SurfaceToMetaTriangles( ds );
@@ -973,7 +973,6 @@ void SmoothMetaTriangles( void )
 	int				indexes[ MAX_SAMPLES ];
 	vec3_t			votes[ MAX_SAMPLES ];
 	
-	
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SmoothMetaTriangles ---\n" );
 	
@@ -999,6 +998,7 @@ void SmoothMetaTriangles( void )
 			shadeAngle = DEG2RAD( tri->si->shadeAngleDegrees );
 		else
 			shadeAngle = defaultShadeAngle;
+
 		if( shadeAngle > maxShadeAngle )
 			maxShadeAngle = shadeAngle;
 		

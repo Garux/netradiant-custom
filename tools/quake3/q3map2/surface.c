@@ -2445,8 +2445,6 @@ void EmitFlareSurface( mapDrawSurface_t *ds )
 	numSurfacesByType[ ds->type ]++;
 }
 
-
-
 /*
 EmitPatchSurface()
 emits a bsp patch drawsurface
@@ -2463,7 +2461,6 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 	if( ds->backSide || ds->shaderInfo->invert )
 	{
 		bspDrawVert_t	*dv1, *dv2, temp;
-		
 
 		/* walk the verts, flip the normal */
 		for( i = 0; i < ds->numVerts; i++ )
@@ -2485,7 +2482,7 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 		/* invert facing */
 		VectorScale( ds->lightmapVecs[ 2 ], -1.0f, ds->lightmapVecs[ 2 ] );
 	}
-	
+
 	/* allocate a new surface */
 	if( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS )
 		Error( "MAX_MAP_DRAW_SURFS" );
@@ -2493,7 +2490,7 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 	ds->outputNum = numBSPDrawSurfaces;
 	numBSPDrawSurfaces++;
 	memset( out, 0, sizeof( *out ) );
-	
+
 	/* set it up */
 	out->surfaceType = MST_PATCH;
 	if( debugSurfaces )
@@ -2547,8 +2544,6 @@ void EmitPatchSurface( mapDrawSurface_t *ds )
 	/* add to count */
 	numSurfacesByType[ ds->type ]++;
 }
-
-
 
 /*
 OptimizeTriangleSurface() - ydnar
@@ -2677,8 +2672,7 @@ static void EmitTriangleSurface( mapDrawSurface_t *ds )
 {
 	int						i, temp;
 	bspDrawSurface_t		*out;
-	
-	
+
 	/* invert the surface if necessary */
 	if( ds->backSide || ds->shaderInfo->invert )
 	{
@@ -2689,15 +2683,15 @@ static void EmitTriangleSurface( mapDrawSurface_t *ds )
 			ds->indexes[ i ] = ds->indexes[ i + 1 ];
 			ds->indexes[ i + 1 ] = temp;
 		}
-		
+			
 		/* walk the verts, flip the normal */
 		for( i = 0; i < ds->numVerts; i++ )
 			VectorScale( ds->verts[ i ].normal, -1.0f, ds->verts[ i ].normal );
-		
+			
 		/* invert facing */
 		VectorScale( ds->lightmapVecs[ 2 ], -1.0f, ds->lightmapVecs[ 2 ] );
 	}
-	
+		
 	/* allocate a new surface */
 	if( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS )
 		Error( "MAX_MAP_DRAW_SURFS" );
@@ -2810,7 +2804,6 @@ static void EmitFaceSurface( mapDrawSurface_t *ds )
 	StripFaceSurface( ds );
 	EmitTriangleSurface( ds );
 }
-
 
 
 /*
@@ -3424,7 +3417,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 		
 		/* get shader */
 		si = ds->shaderInfo;
-		
+
 		/* ydnar: skybox surfaces are special */
 		if( ds->skybox )
 		{

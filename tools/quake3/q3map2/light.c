@@ -392,7 +392,7 @@ void CreateEntityLights( void )
 		
 		intensity = intensity * pointScale;
 		light->photons = intensity;
-		
+
 		light->type = EMIT_POINT;
 		
 		/* set falloff threshold */
@@ -766,7 +766,6 @@ int LightContributionToSample( trace_t *trace )
 		float		d;
 		vec3_t		pushedOrigin;
 		
-		
 		/* project sample point into light plane */
 		d = DotProduct( trace->origin, light->normal ) - light->dist;
 		if( d < 3.0f )
@@ -881,8 +880,7 @@ int LightContributionToSample( trace_t *trace )
 		{
 			float	distByNormal, radiusAtDist, sampleRadius;
 			vec3_t	pointAtDist, distToSample;
-			
-			
+	
 			/* do cone calculation */
 			distByNormal = -DotProduct( trace->displacement, light->normal );
 			if( distByNormal < 0.0f )
@@ -1101,7 +1099,7 @@ int LightContributionToPoint( trace_t *trace )
 		/* clamp the distance to prevent super hot spots */
 		if( dist < 16.0f )
 			dist = 16.0f;
-		
+
 		/* attenuate */
 		add = light->photons / (dist * dist);
 	}
@@ -1263,7 +1261,6 @@ void TraceGrid( int num )
 	bspGridPoint_t			*bgp;
 	contribution_t			contributions[ MAX_CONTRIBUTIONS ];
 	trace_t					trace;
-	
 	
 	/* get grid points */
 	gp = &rawGridPoints[ num ];
@@ -1654,10 +1651,6 @@ void LightWorld( void )
 	if( dirty )
 	{
 		Sys_Printf( "--- DirtyRawLightmap ---\n" );
-
-
-
-
 		RunThreadsOnIndividual( numRawLightmaps, qtrue, DirtyRawLightmap );
 	}
 	
@@ -1889,12 +1882,6 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "Dark lightmap seams enabled\n" );
 		}
 		
-
-
-
-
-
-
 		else if( !strcmp( argv[ i ], "-shadeangle" ) )
 		{
 			shadeAngleDegrees = atof( argv[ i + 1 ] );

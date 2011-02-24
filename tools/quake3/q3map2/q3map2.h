@@ -1028,7 +1028,7 @@ typedef struct mapDrawSurface_s
 	int					maxIterations;
 	int					patchWidth, patchHeight;
 	vec3_t				bounds[ 2 ];
-	
+
 	/* ydnar/sd: for foliage */
 	int					numFoliageInstances;
 	
@@ -1435,8 +1435,6 @@ typedef struct surfaceInfo_s
 	int					firstSurfaceCluster, numSurfaceClusters;
 }
 surfaceInfo_t;
-
-
 
 /* -------------------------------------------------------------------------------
 

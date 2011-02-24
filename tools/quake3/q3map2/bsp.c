@@ -44,7 +44,6 @@ functions
 
 ------------------------------------------------------------------------------- */
 
-
 /*
 ProcessAdvertisements()
 copies advertisement info into the BSP structures
@@ -267,7 +266,6 @@ void ProcessWorldModel( void )
 	xmlNodePtr	polyline, leaknode;
 	char		level[ 2 ], shader[ 1024 ];
 	const char	*value;
-	
 	
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
 	value = ValueForKey( &entities[ 0 ], "_blocksize" );

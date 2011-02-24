@@ -1,4 +1,4 @@
-/* -------------------------------------------------------------------------------
+/* -------------------------------------------------------------------------------;
 
 Copyright (C) 1999-2007 id Software, Inc. and contributors.
 For a list of contributors, see the accompanying CONTRIBUTORS file.
@@ -35,6 +35,8 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 
 /* dependencies */
 #include "q3map2.h"
+
+
 
 /*
 Random()
@@ -588,7 +590,7 @@ int main( int argc, char **argv )
 	
 	/* set exit call */
 	atexit( ExitQ3Map );
-	
+
 	/* read general options first */
 	for( i = 1; i < argc; i++ )
 	{
@@ -635,7 +637,7 @@ int main( int argc, char **argv )
 			argv[ i ] = NULL;
 		}
 	}
-	
+
 	/* init model library */
 	PicoInit();
 	PicoSetMallocFunc( safe_malloc );

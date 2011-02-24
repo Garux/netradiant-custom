@@ -130,6 +130,7 @@ game_t struct
 		{ "nodlight",		0,							0,							Q_SURF_NODLIGHT,			0,							0,							0 },
 		{ "dust",			0,							0,							Q_SURF_DUST,				0,							0,							0 },
 		
+		
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
 	}

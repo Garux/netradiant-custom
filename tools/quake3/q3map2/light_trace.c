@@ -1412,7 +1412,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 		if( ti->castShadows != 1 )
 			return qfalse;
 	}
-	
+
 	/* receive shadows from same group and worldspawn group */
 	else if( trace->recvShadows > 1 )
 	{

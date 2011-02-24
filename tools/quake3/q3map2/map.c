@@ -1280,7 +1280,6 @@ void AdjustBrushesForOrigin( entity_t *ent )
 	brush_t		*b;
 	parseMesh_t	*p;
 	
-	
 	/* walk brush list */
 	for( b = ent->brushes; b != NULL; b = b->next )
 	{

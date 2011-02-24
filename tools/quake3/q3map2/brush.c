@@ -321,8 +321,6 @@ void SnapWeldVectorAccu(vec3_accu_t a, vec3_accu_t b, vec3_accu_t out)
 	}
 }
 
-
-
 /*
 FixWinding() - ydnar
 removes degenerate edges from a winding

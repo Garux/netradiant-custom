@@ -2109,7 +2109,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				lm->superLuxels[ lightmapNum ] = safe_malloc( size );
 				memset( lm->superLuxels[ lightmapNum ], 0, size );
 			}
-			
+
 			/* set style */
 			if( lightmapNum > 0 )
 			{
@@ -2288,6 +2288,7 @@ void IlluminateRawLightmap( int rawLightmapNum )
 				if( *cluster < 0 ||
 					(lm->splotchFix && (luxel[ 0 ] <= ambientColor[ 0 ] || luxel[ 1 ] <= ambientColor[ 1 ] || luxel[ 2 ] <= ambientColor[ 2 ])) )
 					filterColor = qtrue;
+
 				if( deluxemap && lightmapNum == 0 && (*cluster < 0 || filter) )
 					filterDir = qtrue;
 				

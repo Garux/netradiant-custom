@@ -604,6 +604,7 @@ void UnparseEntities( void )
 	buf = bspEntData;
 	end = buf;
 	*end = 0;
+
 	
 	/* run through entity list */
 	for( i = 0; i < numBSPEntities && i < numEntities; i++ )
@@ -820,7 +821,6 @@ note: does not set them to defaults if the keys are not found!
 void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows )
 {
 	const char	*value;
-	
 	
 	/* get cast shadows */
 	if( castShadows != NULL )

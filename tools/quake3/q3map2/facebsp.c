@@ -225,6 +225,7 @@ void BuildFaceTree_r( node_t *node, face_t *list )
 	plane = &mapplanes[ splitPlaneNum ];
 	childLists[0] = NULL;
 	childLists[1] = NULL;
+
 	for( split = list; split; split = next )
 	{
 		/* set next */
