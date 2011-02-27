@@ -397,12 +397,16 @@ public:
           for(brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i)
           {
             ++m_after;
-            NodeSmartReference node((new BrushNode())->node());
             (*i)->removeEmptyFaces();
-            ASSERT_MESSAGE(!(*i)->empty(), "brush left with no faces after subtract");
-            Node_getBrush(node)->copy(*(*i));
-            delete (*i);
-            Node_getTraversable(path.parent())->insert(node);
+            if(!(*i)->empty())
+            {
+              NodeSmartReference node((new BrushNode())->node());
+              Node_getBrush(node)->copy(*(*i));
+              delete (*i);
+              Node_getTraversable(path.parent())->insert(node);
+            }
+            else
+              delete (*i);
           }
           Path_deleteTop(path);
         }
