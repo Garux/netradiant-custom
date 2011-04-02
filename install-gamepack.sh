@@ -16,8 +16,12 @@ if [ -d "$pack/tools" ]; then
 	pack="$pack/tools"
 fi
 for GAMEFILE in "$pack/games"/*.game; do
-	$CP "$GAMEFILE" "$dest/games/"
+	if [ x"$GAMEFILE" != x"$pack/games/*.game" ]; then
+		$CP "$GAMEFILE" "$dest/games/"
+	fi
 done
 for GAMEDIR in "$pack"/*.game; do
-	$CP_R "$GAMEDIR" "$dest/"
+	if [ x"$GAMEDIR" != x"$pack/*.game" ]; then
+		$CP_R "$GAMEDIR" "$dest/"
+	fi
 done
