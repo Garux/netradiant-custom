@@ -694,7 +694,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 
 			if(curSurface == NULL)
 			{
-				_pico_printf( PICO_ERROR,"No group defined for faces, so creating an autoSurface in OBJ, line %d.",p->curLine);
+				_pico_printf( PICO_WARNING,"No group defined for faces, so creating an autoSurface in OBJ, line %d.",p->curLine);
 				AUTO_GROUPNAME(autoGroupNameBuf);
 				NEW_SURFACE(autoGroupNameBuf);
 			}
@@ -869,7 +869,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 
 			if(curFace != 0 || curSurface == NULL)
 			{
-				_pico_printf( PICO_ERROR,"No group defined for usemtl, so creating an autoSurface in OBJ, line %d.",p->curLine);
+				_pico_printf( PICO_WARNING,"No group defined for usemtl, so creating an autoSurface in OBJ, line %d.",p->curLine);
 				AUTO_GROUPNAME(autoGroupNameBuf);
 				NEW_SURFACE(autoGroupNameBuf);
 			}
