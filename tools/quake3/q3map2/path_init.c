@@ -62,6 +62,9 @@ PathLokiGetHomeDir()
 gets the user's home dir (for ~/.q3a)
 */
 
+#ifdef WIN32
+#include <shlobj.h>
+#endif
 char *LokiGetHomeDir( void )
 {
 	#ifndef Q_UNIX
