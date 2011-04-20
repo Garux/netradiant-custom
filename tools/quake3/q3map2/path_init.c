@@ -75,7 +75,7 @@ char *LokiGetHomeDir( void )
 			TCHAR mydocsdir[MAX_PATH + 1];
 			if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
 			{
-				snprintf(buf, "%s/My Games", mydocsdir);
+				snprintf(buf, sizeof(buf), "%s/My Games", mydocsdir);
 				return buf;
 			}
 			return NULL;
@@ -119,6 +119,8 @@ initializes some paths on linux/os x
 void LokiInitPaths( char *argv0 )
 {
 	#ifndef Q_UNIX
+		char		*home;
+
 		/* this is kinda crap, but hey */
 		strcpy( installPath, "../" );
 
