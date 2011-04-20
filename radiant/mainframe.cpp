@@ -184,6 +184,9 @@ void VFS_Destroy()
 
 // Home Paths
 
+#ifdef WIN32
+#include <shlobj.h>
+#endif
 void HomePaths_Realise()
 {
 #if defined(POSIX)
