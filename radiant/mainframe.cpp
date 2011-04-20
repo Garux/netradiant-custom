@@ -200,6 +200,7 @@ void HomePaths_Realise()
   }
   else
 #elif defined(WIN32)
+  const char* prefix = g_pGameDescription->getKeyValue("prefix");
   if(!string_empty(prefix))
   {
     StringOutputStream path(256);
