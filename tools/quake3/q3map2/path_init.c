@@ -65,7 +65,18 @@ gets the user's home dir (for ~/.q3a)
 char *LokiGetHomeDir( void )
 {
 	#ifndef Q_UNIX
-		return NULL;
+		#ifndef WIN32
+			return NULL;
+		#else
+			static char buf[MAX_OS_PATH];
+			TCHAR mydocsdir[MAX_PATH + 1];
+			if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
+			{
+				snprintf(buf, "%s/My Games", mydocsdir);
+				return buf;
+			}
+			return NULL;
+		#endif
 	#else
 		char			*home;
 		uid_t			id;
@@ -107,6 +118,14 @@ void LokiInitPaths( char *argv0 )
 	#ifndef Q_UNIX
 		/* this is kinda crap, but hey */
 		strcpy( installPath, "../" );
+
+		/* get home dir */
+		home = LokiGetHomeDir();
+		if( home == NULL )
+			home = ".";
+		
+		/* set home path */
+		homePath = home;
 	#else
 		char		temp[ MAX_OS_PATH ];
 		char		last0[ 2 ];
@@ -272,28 +291,39 @@ adds a base path to the beginning of the list, prefixed by ~/
 
 void AddHomeBasePath( char *path )
 {
-	#ifdef Q_UNIX
-		int		i;
-		char	temp[ MAX_OS_PATH ];
-		
-		
-		/* dummy check */
-		if( path == NULL || path[ 0 ] == '\0' )
-			return;
+	int		i;
+	char	temp[ MAX_OS_PATH ];
+	
+	if(!homePath)
+		return;
+	
+	/* dummy check */
+	if( path == NULL || path[ 0 ] == '\0' )
+		return;
 
-		/* make a hole */
-		for( i = (MAX_BASE_PATHS - 2); i >= 0; i-- )
-			basePaths[ i + 1 ] = basePaths[ i ];
-		
-		/* concatenate home dir and path */
-		sprintf( temp, "%s/%s", homePath, path );
-		
-		/* add it to the list */
-		basePaths[ 0 ] = safe_malloc( strlen( temp ) + 1 );
-		strcpy( basePaths[ 0 ], temp );
-		CleanPath( basePaths[ 0 ] );
-		numBasePaths++;
-	#endif
+	/* concatenate home dir and path */
+	sprintf( temp, "%s/%s", homePath, path );
+	
+#ifdef WIN32
+	{
+		/* on Win32, we ONLY add it if the directory already exists */
+		GDir *dir;
+		dir = g_dir_open (temp, 0, NULL);
+		if(!dir)
+			return;
+		g_dir_close(dir);
+	}
+#endif
+
+	/* make a hole */
+	for( i = (MAX_BASE_PATHS - 2); i >= 0; i-- )
+		basePaths[ i + 1 ] = basePaths[ i ];
+	
+	/* add it to the list */
+	basePaths[ 0 ] = safe_malloc( strlen( temp ) + 1 );
+	strcpy( basePaths[ 0 ], temp );
+	CleanPath( basePaths[ 0 ] );
+	numBasePaths++;
 }
 
 

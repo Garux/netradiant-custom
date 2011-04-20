@@ -196,6 +196,26 @@ void HomePaths_Realise()
     Q_mkdir(g_qeglobals.m_userEnginePath.c_str());
   }
   else
+#elif defined(WIN32)
+  if(!string_empty(prefix))
+  {
+    StringOutputStream path(256);
+    TCHAR mydocsdir[MAX_PATH + 1];
+    if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
+    {
+      path << DirectoryCleaned(mydocsdir) << "My Games/" << prefix << "/";
+      // win32: only add it if it already exists
+      if(file_is_directory(path.c_str()))
+        g_qeglobals.m_userEnginePath = path.c_str();
+      else
+        g_qeglobals.m_userEnginePath = EnginePath_get();
+    }
+    else
+    {
+      g_qeglobals.m_userEnginePath = EnginePath_get();
+    }
+  }
+  else
 #endif
   {
     g_qeglobals.m_userEnginePath = EnginePath_get();

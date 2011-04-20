@@ -78,22 +78,19 @@ void QE_InitVFS()
 
   const char* gamename = gamename_get();
   const char* basegame = basegame_get();
-#if defined(POSIX)
   const char* userRoot = g_qeglobals.m_userEnginePath.c_str();
-#endif
   const char* globalRoot = EnginePath_get();
 
   // if we have a mod dir
   if(!string_equal(gamename, basegame))
   {
-#if defined(POSIX)
     // ~/.<gameprefix>/<fs_game>
+    if(userRoot)
     {
       StringOutputStream userGamePath(256);
       userGamePath << userRoot << gamename << '/';
       GlobalFileSystem().initDirectory(userGamePath.c_str());
     }
-#endif
 
     // <fs_basepath>/<fs_game>
     {
@@ -103,14 +100,13 @@ void QE_InitVFS()
     }
   }
 
-#if defined(POSIX)
   // ~/.<gameprefix>/<fs_main>
+  if(userRoot)
   {
     StringOutputStream userBasePath(256);
     userBasePath << userRoot << basegame << '/';
     GlobalFileSystem().initDirectory(userBasePath.c_str());
   }
-#endif
 
   // <fs_basepath>/<fs_main>
   {
