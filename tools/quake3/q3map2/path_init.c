@@ -43,6 +43,7 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 #define MAX_GAME_PATHS	10
 
 char					*homePath;
+qboolean				homePathUsesDot;
 char					installPath[ MAX_OS_PATH ];
 
 int						numBasePaths;
@@ -65,8 +66,9 @@ gets the user's home dir (for ~/.q3a)
 #ifdef WIN32
 #include <shlobj.h>
 #endif
-char *LokiGetHomeDir( void )
+char *LokiGetHomeDir( qboolean *usedot )
 {
+	*usedot = qtrue;
 	#ifndef Q_UNIX
 		#ifndef WIN32
 			return NULL;
@@ -76,6 +78,7 @@ char *LokiGetHomeDir( void )
 			if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
 			{
 				snprintf(buf, sizeof(buf), "%s/My Games", mydocsdir);
+				*usedot = qfalse;
 				return buf;
 			}
 			return NULL;
@@ -103,6 +106,18 @@ char *LokiGetHomeDir( void )
 			}
 			endpwent();
 		}
+
+		#ifdef __APPLE__
+		{
+			static char foo[MAX_OSPATH];
+			snprintf(foo, sizeof(foo), "%s/Library/Application Support", home);
+			if(access(foo, X_OK) == 0)
+			{
+				*usedot = qfalse;
+				home = foo;
+			}
+		}
+		#endif
 		
 		/* return it */
 		return home;
@@ -125,10 +140,10 @@ void LokiInitPaths( char *argv0 )
 		strcpy( installPath, "../" );
 
 		/* get home dir */
-		home = LokiGetHomeDir();
+		home = LokiGetHomeDir(&homePathUsesDot);
 		if( home == NULL )
 			home = ".";
-		
+
 		/* set home path */
 		homePath = home;
 	#else
@@ -141,7 +156,7 @@ void LokiInitPaths( char *argv0 )
 		
 		
 		/* get home dir */
-		home = LokiGetHomeDir();
+		home = LokiGetHomeDir(&homePathUsesDot);
 		if( home == NULL )
 			home = ".";
 		
@@ -307,7 +322,7 @@ void AddHomeBasePath( char *path )
 		return;
 
 	/* concatenate home dir and path */
-	sprintf( temp, "%s/%s", homePath, path );
+	sprintf( temp, "%s/%s", homePath, homePathUsesDot ? path : (path+1) );
 	
 #ifdef WIN32
 	{
