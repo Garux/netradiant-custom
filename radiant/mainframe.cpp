@@ -186,6 +186,11 @@ void VFS_Destroy()
 
 #ifdef WIN32
 #include <shlobj.h>
+const GUID qFOLDERID_SavedGames = {0x4C5C32FF, 0xBB9D, 0x43b0, {0xB5, 0xB4, 0x2D, 0x72, 0xE5, 0x4E, 0xAA, 0xA4}};
+#define qREFKNOWNFOLDERID GUID
+#define qKF_FLAG_CREATE 0x8000
+#define qKF_FLAG_NO_ALIAS 0x1000
+static HRESULT (WINAPI *qSHGetKnownFolderPath) (qREFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
 #endif
 void HomePaths_Realise()
 {
@@ -220,19 +225,43 @@ void HomePaths_Realise()
   {
     StringOutputStream path(256);
     TCHAR mydocsdir[MAX_PATH + 1];
-    if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
-    {
-      path << DirectoryCleaned(mydocsdir) << "My Games/" << (prefix+1) << "/";
-      // win32: only add it if it already exists
-      if(file_is_directory(path.c_str()))
-        g_qeglobals.m_userEnginePath = path.c_str();
-      else
-        g_qeglobals.m_userEnginePath = EnginePath_get();
-    }
+    wchar_t *mydocsdirw;
+    HMODULE shfolder = LoadLibrary("shfolder.dll");
+    if(shfolder)
+      qSHGetKnownFolderPath = GetProcAddress("SHGetFolderPathA");
     else
+      qSHGetKnownFolderPath = NULL;
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+    do
     {
+      if(qSHGetKnownFolderPath && qSHGetKnownFolderPath(qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &mydocsdirw) == S_OK)
+      {
+        memset(mydocsdir, 0, sizeof(mydocsdir));
+        wctombs(mydocsdir, mydocsdirw, sizeof(mydocsdir)-1);
+        CoTaskMemFree(mydocsdirw);
+        path << DirectoryCleaned(mydocsdir) << (prefix+1) << "/";
+        if(file_is_directory(path.c_str()))
+        {
+          g_qeglobals.m_userEnginePath = path.c_str();
+          break;
+        }
+      }
+      if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
+      {
+        path << DirectoryCleaned(mydocsdir) << "My Games/" << (prefix+1) << "/";
+        // win32: only add it if it already exists
+        if(file_is_directory(path.c_str()))
+        {
+          g_qeglobals.m_userEnginePath = path.c_str();
+          break;
+        }
+      }
       g_qeglobals.m_userEnginePath = EnginePath_get();
     }
+    while(0);
+    CoUninitialize();
+    if(shfolder)
+      FreeLibrary(shfolder);
   }
   else
 #endif
