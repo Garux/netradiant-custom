@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define AFX_DPATCH_H__26C6B083_CE5B_420B_836B_1DDA733C04CE__INCLUDED_
 
 #include <list>
+#include <stdlib.h>
 
 typedef struct
 {	
