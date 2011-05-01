@@ -194,60 +194,53 @@ static HRESULT (WINAPI *qSHGetKnownFolderPath) (qREFKNOWNFOLDERID rfid, DWORD dw
 #endif
 void HomePaths_Realise()
 {
+  do
+  {
+    const char* prefix = g_pGameDescription->getKeyValue("prefix");
+    if(!string_empty(prefix))
+    {
+      StringOutputStream path(256);
+
 #if defined(__APPLE__)
-  const char* prefix = g_pGameDescription->getKeyValue("prefix");
-  if(!string_empty(prefix))
-  {
-    StringOutputStream path(256);
-    path << DirectoryCleaned(g_get_home_dir()) << "Library/Application Support" << (prefix+1) << "/";
-    if(!file_is_directory(path.c_str()))
-    {
       path.clear();
-      path << DirectoryCleaned(g_get_home_dir()) << prefix << "/";
-    }
-    g_qeglobals.m_userEnginePath = path.c_str();
-    Q_mkdir(g_qeglobals.m_userEnginePath.c_str());
-  }
-  else
-#elif defined(POSIX)
-  const char* prefix = g_pGameDescription->getKeyValue("prefix");
-  if(!string_empty(prefix))
-  {
-    StringOutputStream path(256);
-    path << DirectoryCleaned(g_get_home_dir()) << prefix << "/";
-    g_qeglobals.m_userEnginePath = path.c_str();
-    Q_mkdir(g_qeglobals.m_userEnginePath.c_str());
-  }
-  else
-#elif defined(WIN32)
-  const char* prefix = g_pGameDescription->getKeyValue("prefix");
-  if(!string_empty(prefix))
-  {
-    StringOutputStream path(256);
-    TCHAR mydocsdir[MAX_PATH + 1];
-    wchar_t *mydocsdirw;
-    HMODULE shfolder = LoadLibrary("shfolder.dll");
-    if(shfolder)
-      qSHGetKnownFolderPath = GetProcAddress("SHGetFolderPathA");
-    else
-      qSHGetKnownFolderPath = NULL;
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    do
-    {
+      path << DirectoryCleaned(g_get_home_dir()) << "Library/Application Support" << (prefix+1) << "/";
+      if(file_is_directory(path.c_str()))
+      {
+        g_qeglobals.m_userEnginePath = path.c_str();
+        break;
+      }
+#endif
+
+#if defined(WIN32)
+      TCHAR mydocsdir[MAX_PATH + 1];
+      wchar_t *mydocsdirw;
+      HMODULE shfolder = LoadLibrary("shfolder.dll");
+      if(shfolder)
+        qSHGetKnownFolderPath = GetProcAddress("SHGetFolderPathA");
+      else
+        qSHGetKnownFolderPath = NULL;
+      CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
       if(qSHGetKnownFolderPath && qSHGetKnownFolderPath(qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &mydocsdirw) == S_OK)
       {
         memset(mydocsdir, 0, sizeof(mydocsdir));
         wctombs(mydocsdir, mydocsdirw, sizeof(mydocsdir)-1);
         CoTaskMemFree(mydocsdirw);
+        path.clear();
         path << DirectoryCleaned(mydocsdir) << (prefix+1) << "/";
         if(file_is_directory(path.c_str()))
         {
           g_qeglobals.m_userEnginePath = path.c_str();
+          CoUninitialize();
+          FreeLibrary(shfolder);
           break;
         }
       }
+      CoUninitialize();
+      if(shfolder)
+        FreeLibrary(shfolder);
       if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
       {
+        path.clear();
         path << DirectoryCleaned(mydocsdir) << "My Games/" << (prefix+1) << "/";
         // win32: only add it if it already exists
         if(file_is_directory(path.c_str()))
@@ -256,18 +249,21 @@ void HomePaths_Realise()
           break;
         }
       }
-      g_qeglobals.m_userEnginePath = EnginePath_get();
-    }
-    while(0);
-    CoUninitialize();
-    if(shfolder)
-      FreeLibrary(shfolder);
-  }
-  else
 #endif
-  {
+
+#if defined(POSIX)
+      path.clear();
+      path << DirectoryCleaned(g_get_home_dir()) << prefix << "/";
+      g_qeglobals.m_userEnginePath = path.c_str();
+      break;
+#endif
+    }
+
     g_qeglobals.m_userEnginePath = EnginePath_get();
   }
+  while(0);
+
+  Q_mkdir(g_qeglobals.m_userEnginePath.c_str());
 
   {
     StringOutputStream path(256);
