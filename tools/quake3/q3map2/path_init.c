@@ -450,10 +450,6 @@ void InitPaths( int *argc, char **argv )
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			argv[ i - 1 ] = NULL;
 			homePath = argv[i];
-			/* do we want to do this:
-			if(!homeBasePath)
-				homeBasePath = "."; // if only -fs_home is set, this shall be the FULL path!
-			*/
 			argv[ i ] = NULL;
 		}
 		
@@ -464,6 +460,17 @@ void InitPaths( int *argc, char **argv )
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			argv[ i - 1 ] = NULL;
 			homeBasePath = argv[i];
+			argv[ i ] = NULL;
+		}
+
+		/* -fs_homepath - sets both of them */
+		else if( strcmp( argv[ i ], "-fs_homepath" ) == 0 )
+		{
+			if( ++i >= *argc )
+				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
+			argv[ i - 1 ] = NULL;
+			homePath = argv[i];
+			homeBasePath = ".";
 			argv[ i ] = NULL;
 		}
 	}
