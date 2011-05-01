@@ -43,7 +43,6 @@ several games based on the Quake III Arena engine, in the form of "Q3Map2."
 #define MAX_GAME_PATHS	10
 
 char					*homePath;
-qboolean				homePathUsesDot;
 char					installPath[ MAX_OS_PATH ];
 
 int						numBasePaths;
@@ -63,30 +62,16 @@ PathLokiGetHomeDir()
 gets the user's home dir (for ~/.q3a)
 */
 
-#ifdef WIN32
-#include <shlobj.h>
-#endif
 char *LokiGetHomeDir( qboolean *usedot )
 {
 	*usedot = qtrue;
 	#ifndef Q_UNIX
-		#ifndef WIN32
-			return NULL;
-		#else
-			static char buf[MAX_OS_PATH];
-			TCHAR mydocsdir[MAX_PATH + 1];
-			if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir))
-			{
-				snprintf(buf, sizeof(buf), "%s/My Games", mydocsdir);
-				*usedot = qfalse;
-				return buf;
-			}
-			return NULL;
-		#endif
+		return NULL;
 	#else
 		char			*home;
 		uid_t			id;
 		struct passwd	*pwd;
+		static char homeBuf[MAX_OS_PATH];
 		
 		
 		/* get the home environment variable */
@@ -107,20 +92,10 @@ char *LokiGetHomeDir( qboolean *usedot )
 			endpwent();
 		}
 
-		#ifdef __APPLE__
-		{
-			static char foo[MAX_OSPATH];
-			snprintf(foo, sizeof(foo), "%s/Library/Application Support", home);
-			if(access(foo, X_OK) == 0)
-			{
-				*usedot = qfalse;
-				home = foo;
-			}
-		}
-		#endif
+		snprintf(homeBuf, sizeof(homeBuf), "%s/.", home);
 		
 		/* return it */
-		return home;
+		return homeBuf;
 	#endif
 }
 
@@ -133,19 +108,22 @@ initializes some paths on linux/os x
 
 void LokiInitPaths( char *argv0 )
 {
-	#ifndef Q_UNIX
-		char		*home;
-
-		/* this is kinda crap, but hey */
-		strcpy( installPath, "../" );
-
+	if(!homePath)
+	{
 		/* get home dir */
-		home = LokiGetHomeDir(&homePathUsesDot);
+		home = LokiGetHomeDir();
 		if( home == NULL )
 			home = ".";
 
 		/* set home path */
 		homePath = home;
+	}
+
+	#ifndef Q_UNIX
+		char		*home;
+
+		/* this is kinda crap, but hey */
+		strcpy( installPath, "../" );
 	#else
 		char		temp[ MAX_OS_PATH ];
 		char		last0[ 2 ];
@@ -154,11 +132,6 @@ void LokiInitPaths( char *argv0 )
 		char		*last;
 		qboolean	found;
 		
-		
-		/* get home dir */
-		home = LokiGetHomeDir(&homePathUsesDot);
-		if( home == NULL )
-			home = ".";
 		
 		/* do some path divining */
 		strcpy( temp, argv0 );
@@ -216,9 +189,6 @@ void LokiInitPaths( char *argv0 )
 			*(strrchr( installPath, '/' )) = '\0';
 			*(strrchr( installPath, '/' ) + 1) = '\0';
 		}
-		
-		/* set home path */
-		homePath = home;
 	#endif
 }
 
@@ -313,6 +283,7 @@ void AddHomeBasePath( char *path )
 {
 	int		i;
 	char	temp[ MAX_OS_PATH ];
+	int l, homePathLen;
 	
 	if(!homePath)
 		return;
@@ -321,20 +292,31 @@ void AddHomeBasePath( char *path )
 	if( path == NULL || path[ 0 ] == '\0' )
 		return;
 
-	/* concatenate home dir and path */
-	sprintf( temp, "%s/%s", homePath, homePathUsesDot ? path : (path+1) );
-	
-#ifdef WIN32
+	/* strip leading dot, if homePath does not end in /. */
+	homePathLen = strlen(homePath);
+	if(!strcmp(path, ".")
 	{
-		/* on Win32, we ONLY add it if the directory already exists */
-		GDir *dir;
-		dir = g_dir_open (temp, 0, NULL);
-		if(!dir)
-			return;
-		g_dir_close(dir);
+		/* -fs_homebase . means that -fs_home is to be used as is */
+		strcpy(temp, homePath);
 	}
-#endif
+	else if(homePathLen >= 2 && !strcmp(homePath + homePathLen - 2, "/."))
+	{
+		/* remove trailing /. of homePath */
+		homePathLen -= 2;
 
+		/* concatenate home dir and path */
+		sprintf( temp, "%.*s/%s", homePathLen, homePath, path );
+	}
+	else
+	{
+		/* remove leading . of path */
+		if(path[0] == '.')
+			++path;
+
+		/* concatenate home dir and path */
+		sprintf( temp, "%s/%s", homePath, path );
+	}
+	
 	/* make a hole */
 	for( i = (MAX_BASE_PATHS - 2); i >= 0; i-- )
 		basePaths[ i + 1 ] = basePaths[ i ];
@@ -461,7 +443,21 @@ void InitPaths( int *argc, char **argv )
 			argv[ i ] = NULL;
 		}
 		
-		/* -fs_nohomebase */
+		/* -fs_home */
+		else if( strcmp( argv[ i ], "-fs_home" ) == 0 )
+		{
+			if( ++i >= *argc )
+				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
+			argv[ i - 1 ] = NULL;
+			homePath = argv[i];
+			/* do we want to do this:
+			if(!homeBasePath)
+				homeBasePath = "."; // if only -fs_home is set, this shall be the FULL path!
+			*/
+			argv[ i ] = NULL;
+		}
+		
+		/* -fs_homebase */
 		else if( strcmp( argv[ i ], "-fs_homebase" ) == 0 )
 		{
 			if( ++i >= *argc )
