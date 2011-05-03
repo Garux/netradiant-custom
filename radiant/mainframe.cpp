@@ -216,11 +216,11 @@ void HomePaths_Realise()
       wchar_t *mydocsdirw;
       HMODULE shfolder = LoadLibrary("shfolder.dll");
       if(shfolder)
-        qSHGetKnownFolderPath = GetProcAddress("SHGetFolderPathA");
+        qSHGetKnownFolderPath = GetProcAddress("SHGetKnownFolderPath");
       else
         qSHGetKnownFolderPath = NULL;
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-      if(qSHGetKnownFolderPath && qSHGetKnownFolderPath(qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &mydocsdirw) == S_OK)
+      if(qSHGetKnownFolderPath && qSHGetKnownFolderPath(&qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &mydocsdirw) == S_OK)
       {
         memset(mydocsdir, 0, sizeof(mydocsdir));
         wctombs(mydocsdir, mydocsdirw, sizeof(mydocsdir)-1);
