@@ -109,7 +109,7 @@ char *LokiGetHomeDir( qboolean *usedot )
 
 		#ifdef __APPLE__
 		{
-			static char foo[MAX_OSPATH];
+			static char foo[MAX_OS_PATH];
 			snprintf(foo, sizeof(foo), "%s/Library/Application Support", home);
 			if(access(foo, X_OK) == 0)
 			{
