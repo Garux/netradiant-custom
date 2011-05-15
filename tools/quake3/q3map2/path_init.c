@@ -110,6 +110,8 @@ void LokiInitPaths( char *argv0 )
 {
 	if(!homePath)
 	{
+		char		*home;
+
 		/* get home dir */
 		home = LokiGetHomeDir();
 		if( home == NULL )
@@ -120,14 +122,11 @@ void LokiInitPaths( char *argv0 )
 	}
 
 	#ifndef Q_UNIX
-		char		*home;
-
 		/* this is kinda crap, but hey */
 		strcpy( installPath, "../" );
 	#else
 		char		temp[ MAX_OS_PATH ];
 		char		last0[ 2 ];
-		char		*home;
 		char		*path;
 		char		*last;
 		qboolean	found;
