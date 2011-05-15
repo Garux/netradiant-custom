@@ -62,9 +62,8 @@ PathLokiGetHomeDir()
 gets the user's home dir (for ~/.q3a)
 */
 
-char *LokiGetHomeDir( qboolean *usedot )
+char *LokiGetHomeDir(void)
 {
-	*usedot = qtrue;
 	#ifndef Q_UNIX
 		return NULL;
 	#else
@@ -108,10 +107,10 @@ initializes some paths on linux/os x
 
 void LokiInitPaths( char *argv0 )
 {
+	char		*home;
+
 	if(!homePath)
 	{
-		char		*home;
-
 		/* get home dir */
 		home = LokiGetHomeDir();
 		if( home == NULL )
@@ -120,6 +119,8 @@ void LokiInitPaths( char *argv0 )
 		/* set home path */
 		homePath = home;
 	}
+	else
+		home = homePath;
 
 	#ifndef Q_UNIX
 		/* this is kinda crap, but hey */
@@ -282,7 +283,7 @@ void AddHomeBasePath( char *path )
 {
 	int		i;
 	char	temp[ MAX_OS_PATH ];
-	int l, homePathLen;
+	int homePathLen;
 	
 	if(!homePath)
 		return;
@@ -293,7 +294,7 @@ void AddHomeBasePath( char *path )
 
 	/* strip leading dot, if homePath does not end in /. */
 	homePathLen = strlen(homePath);
-	if(!strcmp(path, ".")
+	if(!strcmp(path, "."))
 	{
 		/* -fs_homebase . means that -fs_home is to be used as is */
 		strcpy(temp, homePath);
