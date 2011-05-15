@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define INCLUDED_MEMORY_ALLOCATOR_H
 
 #include <memory>
+#include <stddef.h>
 
 #if 0
 

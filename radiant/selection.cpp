@@ -3872,7 +3872,9 @@ const ModifierFlags c_modifier_toggle_face = c_modifier_toggle | c_modifier_face
 const ModifierFlags c_modifier_replace_face = c_modifier_replace | c_modifier_face;
 
 const ButtonIdentifier c_button_texture = c_buttonMiddle;
-const ModifierFlags c_modifier_apply_texture = c_modifierControl | c_modifierShift;
+const ModifierFlags c_modifier_apply_texture1 = c_modifierControl | c_modifierShift;
+const ModifierFlags c_modifier_apply_texture2 = c_modifierControl;
+const ModifierFlags c_modifier_apply_texture3 =                     c_modifierShift;
 const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 
 class Selector_
@@ -4094,7 +4096,7 @@ public:
       ConstructSelectionTest(scissored, SelectionBoxForPoint(&devicePosition[0], &m_selector.m_epsilon[0]));
       SelectionVolume volume(scissored);
 
-      if(modifiers == c_modifier_apply_texture)
+      if(modifiers == c_modifier_apply_texture1 || modifiers == c_modifier_apply_texture2 || modifiers == c_modifier_apply_texture3)
       {
         Scene_applyClosestTexture(volume);
       }
