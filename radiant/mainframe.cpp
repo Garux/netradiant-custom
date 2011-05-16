@@ -216,7 +216,7 @@ void HomePaths_Realise()
       wchar_t *mydocsdirw;
       HMODULE shfolder = LoadLibrary("shfolder.dll");
       if(shfolder)
-        qSHGetKnownFolderPath = GetProcAddress("SHGetKnownFolderPath");
+        qSHGetKnownFolderPath = GetProcAddress(shfolder, "SHGetKnownFolderPath");
       else
         qSHGetKnownFolderPath = NULL;
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
