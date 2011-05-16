@@ -179,7 +179,7 @@ ifeq ($(OS),Win32)
 	CPPFLAGS_COMMON += -DWIN32 -D_WIN32 -D_inline=inline
 	CFLAGS_COMMON += -mms-bitfields
 	LDFLAGS_DLL = --dll -Wl,--add-stdcall-alias
-	LIBS_COMMON = -lws2_32 -luser32 -lgdi32
+	LIBS_COMMON = -lws2_32 -luser32 -lgdi32 -lole32
 	EXE ?= exe
 	A = a
 	DLL = dll
