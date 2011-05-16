@@ -190,7 +190,8 @@ const GUID qFOLDERID_SavedGames = {0x4C5C32FF, 0xBB9D, 0x43b0, {0xB5, 0xB4, 0x2D
 #define qREFKNOWNFOLDERID GUID
 #define qKF_FLAG_CREATE 0x8000
 #define qKF_FLAG_NO_ALIAS 0x1000
-static HRESULT (WINAPI *qSHGetKnownFolderPath) (qREFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
+typedef HRESULT (WINAPI qSHGetKnownFolderPath_t) (qREFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
+static qSHGetKnownFolderPath_t *qSHGetKnownFolderPath;
 #endif
 void HomePaths_Realise()
 {
@@ -216,14 +217,14 @@ void HomePaths_Realise()
       wchar_t *mydocsdirw;
       HMODULE shfolder = LoadLibrary("shfolder.dll");
       if(shfolder)
-        qSHGetKnownFolderPath = GetProcAddress(shfolder, "SHGetKnownFolderPath");
+        qSHGetKnownFolderPath = (qSHGetKnownFolderPath_t *) GetProcAddress(shfolder, "SHGetKnownFolderPath");
       else
         qSHGetKnownFolderPath = NULL;
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-      if(qSHGetKnownFolderPath && qSHGetKnownFolderPath(&qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &mydocsdirw) == S_OK)
+      if(qSHGetKnownFolderPath && qSHGetKnownFolderPath(qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &mydocsdirw) == S_OK)
       {
         memset(mydocsdir, 0, sizeof(mydocsdir));
-        wctombs(mydocsdir, mydocsdirw, sizeof(mydocsdir)-1);
+        wcstombs(mydocsdir, mydocsdirw, sizeof(mydocsdir)-1);
         CoTaskMemFree(mydocsdirw);
         path.clear();
         path << DirectoryCleaned(mydocsdir) << (prefix+1) << "/";
