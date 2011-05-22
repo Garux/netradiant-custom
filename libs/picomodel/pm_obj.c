@@ -884,7 +884,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD )
 				shader = PicoFindShader( model, name, 1 );
 				if (shader == NULL)
 				{
-					_pico_printf( PICO_ERROR,"Undefined material name in OBJ, line %d. Making a default shader.",p->curLine);
+					_pico_printf( PICO_WARNING,"Undefined material name in OBJ, line %d. Making a default shader.",p->curLine);
 
 					/* create a new pico shader */
 					shader = PicoNewShader( model );
