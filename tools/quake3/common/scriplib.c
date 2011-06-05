@@ -296,12 +296,11 @@ Returns qtrue if there is another token on the line
 ==============
 */
 qboolean TokenAvailable (void) {
-	int		oldLine, oldScriptLine;
+	int		oldLine;
 	qboolean	r;
 	
 	/* save */
 	oldLine = scriptline;
-	oldScriptLine = script->line;
 	
 	/* test */
 	r = GetToken( qtrue );

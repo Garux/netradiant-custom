@@ -329,7 +329,6 @@ static int _md2_canload( PM_PARAMS_CANLOAD )
 static picoModel_t *_md2_load( PM_PARAMS_LOAD )
 {
 	int				i, j, dups, dup_index;
-	short			tot_numVerts;
 	index_LUT_t		*p_index_LUT, *p_index_LUT2, *p_index_LUT3;
 	index_DUP_LUT_t	*p_index_LUT_DUPS;
 	md2Triangle_t	*p_md2Triangle;
@@ -491,7 +490,6 @@ static picoModel_t *_md2_load( PM_PARAMS_LOAD )
 	}
 
 	// Fill in Look Up Table, and allocate/fill Linked List from vert array as needed for dup STs per Vert.
-	tot_numVerts = md2->numXYZ;
 	dups = 0;
 	for(i=0; i<md2->numTris; i++)
 	{

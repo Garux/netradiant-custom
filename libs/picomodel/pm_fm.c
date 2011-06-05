@@ -208,7 +208,6 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 {
 	int				i, j, dups, dup_index;
 	int				fm_file_pos;
-	short			tot_numVerts;
 	index_LUT_t		*p_index_LUT, *p_index_LUT2, *p_index_LUT3;
 	index_DUP_LUT_t	*p_index_LUT_DUPS;
 
@@ -458,7 +457,6 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD )
 	}
 
 	// Fill in Look Up Table, and allocate/fill Linked List from vert array as needed for dup STs per Vert.
-	tot_numVerts = fm_head->numXYZ;
 	dups = 0;
 	triangle = tri_verts;
 
