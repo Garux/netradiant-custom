@@ -687,7 +687,7 @@ void FinishShader( shaderInfo_t *si )
 {
 	int		x, y;
 	float	st[ 2 ], o[ 2 ], dist, bestDist;
-	vec4_t	color, bestColor, delta;
+	vec4_t	color, delta;
 	
 
 	/* don't double-dip */
@@ -727,8 +727,6 @@ void FinishShader( shaderInfo_t *si )
 			dist = delta[ 0 ] * delta[ 0 ] + delta[ 1 ] * delta[ 1 ] + delta[ 2 ] * delta[ 2 ] + delta[ 3 ] * delta[ 3 ];
 			if( dist < bestDist )
 			{
-				VectorCopy( color, bestColor );
-				bestColor[ 3 ] = color[ 3 ];
 				si->stFlat[ 0 ] = st[ 0 ];
 				si->stFlat[ 1 ] = st[ 1 ];
 			}

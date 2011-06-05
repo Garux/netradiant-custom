@@ -1402,7 +1402,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	int					i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
 	float				lmMax;
 	vec3_t				mins, maxs;
-	qboolean			inTexRange, es, et;
+	qboolean			inTexRange;
 	mapDrawSurface_t	old;
 	
 	
@@ -1517,9 +1517,6 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	oldTexRange[ 0 ] = ds->texRange[ 0 ];
 	oldTexRange[ 1 ] = ds->texRange[ 1 ];
 	inTexRange = CalcSurfaceTextureRange( ds );
-	
-	es = (ds->texRange[ 0 ] > oldTexRange[ 0 ]) ? qtrue : qfalse;
-	et = (ds->texRange[ 1 ] > oldTexRange[ 1 ]) ? qtrue : qfalse;
 	
 	if( inTexRange == qfalse && ds->numIndexes > 0 )
 	{
