@@ -208,7 +208,7 @@ adds a picomodel into the bsp
 
 void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle )
 {
-	int					i, j, k, s, numSurfaces;
+	int					i, j, s, numSurfaces;
 	m4x4_t				identity, nTransform;
 	picoModel_t			*model;
 	picoShader_t		*shader;

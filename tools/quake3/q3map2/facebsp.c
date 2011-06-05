@@ -244,7 +244,9 @@ void BuildFaceTree_r( node_t *node, face_t *list )
 	winding_t	*frontWinding, *backWinding;
 	int			i;
 	int			splitPlaneNum, compileFlags;
+#if 0
 	qboolean isstruct = qfalse;
+#endif
 	
 	
 	/* count faces left */
@@ -282,8 +284,10 @@ void BuildFaceTree_r( node_t *node, face_t *list )
 			continue;
 		}
 
+#if 0
 		if(!(split->compileFlags & C_DETAIL))
 			isstruct = 1;
+#endif
 		
 		/* determine which side the face falls on */
 		side = WindingOnPlaneSide( split->w, plane->normal, plane->dist );

@@ -490,7 +490,7 @@ void SetBrushContents( brush_t *b )
 	int			contentFlags, compileFlags;
 	side_t		*s;
 	int			i;
-	qboolean	mixed;
+	//%	qboolean	mixed;
 	
 	
 	/* get initial compile flags from first side */
@@ -498,7 +498,7 @@ void SetBrushContents( brush_t *b )
 	contentFlags = s->contentFlags;
 	compileFlags = s->compileFlags;
 	b->contentShader = s->shaderInfo;
-	mixed = qfalse;
+	//%	mixed = qfalse;
 	
 	/* get the content/compile flags for every side in the brush */
 	for( i = 1; i < b->numsides; i++, s++ )
@@ -506,8 +506,8 @@ void SetBrushContents( brush_t *b )
 		s = &b->sides[ i ];
 		if( s->shaderInfo == NULL )
 			continue;
-		if( s->contentFlags != contentFlags || s->compileFlags != compileFlags )
-			mixed = qtrue;
+		//%	if( s->contentFlags != contentFlags || s->compileFlags != compileFlags )
+		//%		mixed = qtrue;
 
 		contentFlags |= s->contentFlags;
 		compileFlags |= s->compileFlags;
@@ -1196,9 +1196,6 @@ parses a brush out of a map file and sets it up
 
 static void ParseBrush( qboolean onlyLights, qboolean noCollapseGroups )
 {
-	brush_t	*b;
-	
-	
 	/* parse the brush out of the map */
 	ParseRawBrush( onlyLights );
 	
@@ -1241,7 +1238,7 @@ static void ParseBrush( qboolean onlyLights, qboolean noCollapseGroups )
 	}
 	
 	/* finish the brush */
-	b = FinishBrush(noCollapseGroups);
+	FinishBrush(noCollapseGroups);
 }
 
 

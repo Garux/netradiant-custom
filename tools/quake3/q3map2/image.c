@@ -127,7 +127,7 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 	png_struct	*png;
 	png_info	*info, *end;
 	pngBuffer_t	pb;
-	int			bitDepth, colorType, channels;
+	int			bitDepth, colorType;
 	png_uint_32	w, h, i;
 	byte		**rowPointers;
 	
@@ -195,9 +195,6 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 	/* read image header chunk */
 	png_get_IHDR( png, info,
 		&w, &h, &bitDepth, &colorType, NULL, NULL, NULL );
-	
-	/* read number of channels */
-	channels = png_get_channels( png, info );
 	
 	/* the following will probably bork on certain types of png images, but hey... */
 

@@ -148,17 +148,12 @@ static void CreateSkyLights( vec3_t color, float value, int iterations, float fi
 	int			angleSteps, elevationSteps;
 	float		angle, elevation;
 	float		angleStep, elevationStep;
-	float		step, start;
 	sun_t		sun;
 	
 	
 	/* dummy check */
 	if( value <= 0.0f || iterations < 2 )
 		return;
-	
-	/* calculate some stuff */
-	step = 2.0f / (iterations - 1);
-	start = -1.0f;
 	
 	/* basic sun setup */
 	VectorCopy( color, sun.color );
