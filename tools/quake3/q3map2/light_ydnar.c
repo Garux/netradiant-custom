@@ -4052,7 +4052,7 @@ void SetupFloodLight( void )
 		v5=floodlightIntensity;
 		v6=floodlightDirectionScale;
 
-		sscanf( value, "%lf %lf %lf %lf %lf %lf", &v1, &v2, &v3, &v4, &v5);
+		sscanf( value, "%lf %lf %lf %lf %lf %lf", &v1, &v2, &v3, &v4, &v5, &v6);
 
 		floodlightRGB[0]=v1;
 		floodlightRGB[1]=v2;
