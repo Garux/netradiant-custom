@@ -3204,7 +3204,7 @@ determines if two clusters are visible to each other using the PVS
 
 qboolean ClusterVisible( int a, int b )
 {
-	int			portalClusters, leafBytes;
+	int			leafBytes;
 	byte		*pvs;
 	
 	
@@ -3221,7 +3221,7 @@ qboolean ClusterVisible( int a, int b )
 		return qtrue;
 	
 	/* get pvs data */
-	portalClusters = ((int *) bspVisBytes)[ 0 ];
+	/* portalClusters = ((int *) bspVisBytes)[ 0 ]; */
 	leafBytes = ((int*) bspVisBytes)[ 1 ];
 	pvs = bspVisBytes + VIS_HEADER_SIZE + (a * leafBytes);
 	
