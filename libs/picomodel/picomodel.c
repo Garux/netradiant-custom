@@ -912,7 +912,7 @@ void PicoSetSurfaceType( picoSurface_t *surface, picoSurfaceType_t type )
 
 
 
-void PicoSetSurfaceName( picoSurface_t *surface, char *name )
+void PicoSetSurfaceName( picoSurface_t *surface, const char *name )
 {
 	if( surface == NULL || name == NULL )
 		return;

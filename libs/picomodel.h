@@ -258,7 +258,7 @@ void 						PicoSetShaderShininess( picoShader_t *shader, float value );
 
 void						PicoSetSurfaceData( picoSurface_t *surface, void *data );
 void						PicoSetSurfaceType( picoSurface_t *surface, picoSurfaceType_t type );
-void						PicoSetSurfaceName( picoSurface_t *surface, char *name );
+void						PicoSetSurfaceName( picoSurface_t *surface, const char *name );
 void						PicoSetSurfaceShader( picoSurface_t *surface, picoShader_t *shader );
 void						PicoSetSurfaceXYZ( picoSurface_t *surface, int num, picoVec3_t xyz );
 void						PicoSetSurfaceNormal( picoSurface_t *surface, int num, picoVec3_t normal );
@@ -341,7 +341,7 @@ void						PicoFixSurfaceNormals( picoSurface_t *surface );
 int							PicoRemapModel( picoModel_t *model, char *remapFile );
 
 
-void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** normals, int numSTs, picoVec2_t **st, int numColors, picoColor_t **colors, picoShader_t* shader, picoIndex_t* smoothingGroup);
+void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** normals, int numSTs, picoVec2_t **st, int numColors, picoColor_t **colors, picoShader_t* shader, const char *name, picoIndex_t* smoothingGroup);
 
 /* end marker */
 #ifdef __cplusplus
