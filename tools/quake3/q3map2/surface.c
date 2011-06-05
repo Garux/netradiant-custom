@@ -3108,7 +3108,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			/* roll the dice (model's odds scaled by vertex alpha) */
 			odds = model->odds * (tri[ 0 ]->color[ 0 ][ 3 ] + tri[ 0 ]->color[ 0 ][ 3 ] + tri[ 0 ]->color[ 0 ][ 3 ]) / 765.0f;
 			r = Random();
-			if( r > model->odds )
+			if( r > odds )
 				return 0;
 			
 			/* calculate scale */
