@@ -2214,7 +2214,7 @@ Chooses an appropriate surface based on the shader, or adds a new surface if nec
 
 void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** normals, 
 							int numSTs, picoVec2_t **st, int numColors, picoColor_t **colors,
-							picoShader_t* shader, picoIndex_t* smoothingGroup )
+							picoShader_t* shader, const char *name, picoIndex_t* smoothingGroup )
 {
 	int i,j;
 	int vertDataIndex;
@@ -2224,6 +2224,7 @@ void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** 
 	for ( i = 0 ; i < model->numSurfaces ; i++ )
 	{
 		workSurface = model->surface[i];
+		if ( !name || !strcmp(workSurface->name, name) )
 		if ( workSurface->shader == shader )
 		{			
 			break;
@@ -2243,7 +2244,7 @@ void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** 
 
 		/* do surface setup */
 		PicoSetSurfaceType( workSurface, PICO_TRIANGLES );
-		PicoSetSurfaceName( workSurface, shader->name );
+		PicoSetSurfaceName( workSurface, name ? name : shader->name );
 		PicoSetSurfaceShader( workSurface, shader );
 	}
 

@@ -452,7 +452,7 @@ static void _ase_submit_triangles_unshared ( picoModel_t* model , aseMaterial_t*
 
 #endif
 
-static void _ase_submit_triangles( picoModel_t* model , aseMaterial_t* materials , aseVertex_t* vertices, aseTexCoord_t* texcoords, aseColor_t* colors, aseFace_t* faces, int numFaces )
+static void _ase_submit_triangles( picoModel_t* model , aseMaterial_t* materials , aseVertex_t* vertices, aseTexCoord_t* texcoords, aseColor_t* colors, aseFace_t* faces, int numFaces, const char *name )
 {
 	aseFacesIter_t i = faces, end = faces + numFaces;
 	for(; i != end; ++i)
@@ -492,7 +492,7 @@ static void _ase_submit_triangles( picoModel_t* model , aseMaterial_t* materials
 			}
 
 			/* submit the triangle to the model */
-			PicoAddTriangleToModel ( model , xyz , normal , 1 , st , 1 , color , subMtl->shader, smooth );
+			PicoAddTriangleToModel ( model , xyz , normal , 1 , st , 1 , color , subMtl->shader, name, smooth );
 		}
 	}
 }
@@ -599,7 +599,7 @@ static picoModel_t *_ase_load( PM_PARAMS_LOAD )
 		else if (!_pico_stricmp(p->token,"*mesh"))
 		{
 			/* finish existing surface */
-			_ase_submit_triangles(model, materials, vertices, texcoords, colors, faces, numFaces);
+			_ase_submit_triangles(model, materials, vertices, texcoords, colors, faces, numFaces, lastNodeName);
 			_pico_free(faces);
 			_pico_free(vertices);
 			_pico_free(texcoords);
@@ -1152,7 +1152,7 @@ static picoModel_t *_ase_load( PM_PARAMS_LOAD )
 	}
 	
 	/* ydnar: finish existing surface */
-	_ase_submit_triangles(model, materials, vertices, texcoords, colors, faces, numFaces);
+	_ase_submit_triangles(model, materials, vertices, texcoords, colors, faces, numFaces, lastNodeName);
 	_pico_free(faces);
 	_pico_free(vertices);
 	_pico_free(texcoords);
