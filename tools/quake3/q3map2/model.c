@@ -747,7 +747,11 @@ void AddTriangleModels( entity_t *e )
 		}
 		
 		/* get model frame */
-		frame = IntForKey( e2, "_frame" );
+		frame = 0;
+		if(strcmp("", ValueForKey( e2, "_frame")))
+			frame = IntForKey(e2, "_frame");
+		else if(strcmp("", ValueForKey( e2, "frame")))
+			frame = IntForKey(e2, "frame");
 		
 		/* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
 		if( e == entities )
@@ -888,7 +892,11 @@ void AddTriangleModels( entity_t *e )
 		if( shadeAngle > 0.0f )
 			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
 
-		skin = IntForKey(e2, "skin");
+		skin = 0;
+		if(strcmp("", ValueForKey( e2, "_skin")))
+			skin = IntForKey(e2, "_skin");
+		else if(strcmp("", ValueForKey( e2, "skin")))
+			skin = IntForKey(e2, "skin");
 
 		/* insert the model */
 		InsertModel( model, skin, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle );
