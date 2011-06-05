@@ -215,11 +215,9 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 	side_t			*buildSide;
 	bspShader_t		*shader;
 	char			*texture;
-	bspPlane_t		*plane;
 	plane_t         *buildPlane;
 	vec3_t			pts[ 3 ];
 	bspDrawVert_t	*vert[3];
-	int valid;
 	
 	
 	/* start brush */
@@ -255,9 +253,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 		shader = &bspShaders[ side->shaderNum ];
 		//if( !Q_stricmp( shader->shader, "default" ) || !Q_stricmp( shader->shader, "noshader" ) )
 		//	continue;
-		
-		/* get plane */
-		plane = &bspPlanes[ side->planeNum ];
 		
 		/* add build side */
 		buildSide = &buildBrush->sides[ buildBrush->numsides ];
@@ -300,7 +295,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 		//   - (triangles)
 		//   - find the triangle that has most in common with our side
 		GetBestSurfaceTriangleMatchForBrushside(buildSide, vert);
-		valid = 0;
 
 		/* get texture name */
 		if( !Q_strncasecmp( buildSide->shaderInfo->shader, "textures/", 9 ) )
@@ -369,7 +363,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 						);
 						VectorSet(buildSide->texMat[i], D0 / D, D1 / D, D2 / D);
 					}
-					valid = 1;
 				}
 				else
 					fprintf(stderr, "degenerate triangle found when solving texMat equations for\n(%f %f %f) (%f %f %f) (%f %f %f)\n( %f %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n",
@@ -390,7 +383,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 						buildSide->texMat[0][0], buildSide->texMat[0][1], FRAC(buildSide->texMat[0][2]),
 						buildSide->texMat[1][0], buildSide->texMat[1][1], FRAC(buildSide->texMat[1][2]),
 						texture,
-						// DEBUG: valid ? 0 : C_DETAIL
 						0
 					   );
 			}
@@ -450,7 +442,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 						);
 						VectorSet(sts[i], D0 / D, D1 / D, D2 / D);
 					}
-					valid = 1;
 				}
 				else
 					fprintf(stderr, "degenerate triangle found when solving texDef equations\n"); // FIXME add stuff here
@@ -482,7 +473,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
 						texture,
 						shift[0], shift[1], rotate, scale[0], scale[1],
-						// DEBUG: valid ? 0 : C_DETAIL
 						0
 					   );
 			}
@@ -511,7 +501,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 						1.0f/16.0f, 0.0f, 0.0f,
 						0.0f, 1.0f/16.0f, 0.0f,
 						texture,
-						// DEBUG: valid ? 0 : C_DETAIL
 						0
 					   );
 			}
@@ -523,7 +512,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 						pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
 						texture,
 						0.0f, 0.0f, 0.0f, 0.25f, 0.25f,
-						// DEBUG: valid ? 0 : C_DETAIL
 						0
 					   );
 			}

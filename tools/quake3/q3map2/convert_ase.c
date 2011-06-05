@@ -165,7 +165,7 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 	fprintf( f, "\t*PROP_RECVSHADOW\t1\r\n" );
 	if(lightmapsAsTexcoord)
 	{
-		if(ds->lightmapNum[0] >= 0 && ds->lightmapNum[0] + deluxemap < numLightmapsASE)
+		if(ds->lightmapNum[0] >= 0 && ds->lightmapNum[0] + (int)deluxemap < numLightmapsASE)
 			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->lightmapNum[0] + deluxemap );
 		else
 			Sys_Printf( "WARNING: lightmap %d out of range, not exporting\n", ds->lightmapNum[0] + deluxemap );

@@ -1788,7 +1788,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, vec3_t sampl
 	vec3_t		deluxel[ 3 ];
 	vec3_t		origin[ 4 ], normal[ 4 ];
 	float		biasDirs[ 4 ][ 2 ] = { { -1.0f, -1.0f }, { 1.0f, -1.0f }, { -1.0f, 1.0f }, { 1.0f, 1.0f } };
-	vec3_t		color, direction, total;
+	vec3_t		color, direction = { 0, 0, 0 }, total;
 	
 	
 	/* limit check */

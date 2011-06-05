@@ -593,10 +593,10 @@ based on AllocateLightmapForSurface()
 qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
 {
 	bspDrawSurface_t	*ds, *ds2;
-	surfaceInfo_t		*info, *info2;
+	surfaceInfo_t		*info;
 	int					num2, n, i, axisNum;
 	float				s, t, d, len, sampleSize;
-	vec3_t				mins, maxs, origin, faxis, size, exactSize, delta, normalized, vecs[ 2 ];
+	vec3_t				mins, maxs, origin, faxis, size, delta, normalized, vecs[ 2 ];
 	vec4_t				plane;
 	bspDrawVert_t		*verts;
 	
@@ -672,7 +672,6 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
 	/* round to the lightmap resolution */
 	for( i = 0; i < 3; i++ )
 	{
-		exactSize[ i ] = lm->maxs[ i ] - lm->mins[ i ];
  		mins[ i ] = sampleSize * floor( lm->mins[ i ] / sampleSize );
  		maxs[ i ] = sampleSize * ceil( lm->maxs[ i ] / sampleSize );
  		size[ i ] = (maxs[ i ] - mins[ i ]) / sampleSize + 1.0f;
@@ -763,7 +762,6 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
 		/* get surface */
 		num2 = lightSurfaces[ lm->firstLightSurface + n ];
 		ds2 = &bspDrawSurfaces[ num2 ];
-		info2 = &surfaceInfos[ num2 ];
 		verts = &yDrawVerts[ ds2->firstVert ];
 		
 		/* set the lightmap texture coordinates in yDrawVerts in [0, superSample * lm->customWidth] space */
@@ -786,7 +784,6 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm )
 	/* get first drawsurface */
 	num2 = lightSurfaces[ lm->firstLightSurface ];
 	ds2 = &bspDrawSurfaces[ num2 ];
-	info2 = &surfaceInfos[ num2 ];
 	verts = &yDrawVerts[ ds2->firstVert ];
 	
 	/* calculate lightmap origin */
@@ -940,7 +937,7 @@ void SetupSurfaceLightmaps( void )
 	int					i, j, k, s,num, num2;
 	bspModel_t			*model;
 	bspLeaf_t			*leaf;
-	bspDrawSurface_t	*ds, *ds2;
+	bspDrawSurface_t	*ds;
 	surfaceInfo_t		*info, *info2;
 	rawLightmap_t		*lm;
 	qboolean			added;
@@ -1154,7 +1151,6 @@ void SetupSurfaceLightmaps( void )
 			{
 				/* get info and attempt early out */
 				num2 = sortSurfaces[ j ];
-				ds2 = &bspDrawSurfaces[ num2 ];
 				info2 = &surfaceInfos[ num2 ];
 				if( info2->hasLightmap == qfalse || info2->lm != NULL )
 					continue;
@@ -1215,7 +1211,7 @@ void StitchSurfaceLightmaps( void )
 					numStitched, numCandidates, numLuxels, f, fOld, start;
 	rawLightmap_t	*lm, *a, *b, *c[ MAX_STITCH_CANDIDATES ];
 	float			*luxel, *luxel2, *origin, *origin2, *normal, *normal2, 
-					sampleSize, average[ 3 ], totalColor, ootc, *luxels[ MAX_STITCH_LUXELS ];
+					sampleSize, average[ 3 ], totalColor, ootc;
 	
 	
 	/* disabled for now */
@@ -1330,7 +1326,6 @@ void StitchSurfaceLightmaps( void )
 							
 							/* add luxel */
 							//%	VectorSet( luxel2, 255, 0, 255 );
-							luxels[ numLuxels++ ] = luxel2;
 							VectorAdd( average, luxel2, average );
 							totalColor += luxel2[ 3 ];
 						}
@@ -1921,7 +1916,7 @@ for a given surface lightmap, find output lightmap pages and positions for it
 #define LIGHTMAP_RESERVE_COUNT 1
 static void FindOutLightmaps( rawLightmap_t *lm )
 {
-	int					i, j, k, lightmapNum, xMax, yMax, x, y, sx, sy, ox, oy, offset;
+	int					i, j, k, lightmapNum, xMax, yMax, x = -1, y = -1, sx, sy, ox, oy, offset;
 	outLightmap_t		*olm;
 	surfaceInfo_t		*info;
 	float				*luxel, *deluxel;

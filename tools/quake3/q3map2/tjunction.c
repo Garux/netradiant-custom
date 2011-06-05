@@ -330,23 +330,18 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 	int			i, j, k;
 	edgeLine_t	*e;
 	edgePoint_t	*p;
-	int			originalVerts;
 	int			counts[MAX_SURFACE_VERTS];
 	int			originals[MAX_SURFACE_VERTS];
-	int			firstVert[MAX_SURFACE_VERTS];
 	bspDrawVert_t	verts[MAX_SURFACE_VERTS], *v1, *v2;
 	int			numVerts;
 	float		start, end, frac, c;
 	vec3_t		delta;
 	
 	
-	originalVerts = ds->numVerts;
-	
 	numVerts = 0;
 	for ( i = 0 ; i < ds->numVerts ; i++ )
 	{
 		counts[i] = 0;
-		firstVert[i] = numVerts;
 
 		// copy first vert
 		if ( numVerts == MAX_SURFACE_VERTS ) {

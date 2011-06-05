@@ -626,14 +626,12 @@ void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, shaderIn
 {
 	int					i, j, k, v;
 	bspDrawSurface_t	*ds;
-	surfaceInfo_t		*info;
 	float				*radVertexLuxel;
 	radWinding_t		rw;
 	
 	
 	/* get surface */
 	ds = &bspDrawSurfaces[ num ];
-	info = &surfaceInfos[ num ];
 	
 	/* each triangle is a potential emitter */
 	rw.numVerts = 3;

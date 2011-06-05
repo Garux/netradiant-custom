@@ -51,7 +51,7 @@ int objVertexCount = 0;
 int objLastShaderNum = -1;
 static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, vec3_t origin )
 {
-	int				i, v, face, a, b, c;
+	int				i, v, a, b, c;
 	bspDrawVert_t	*dv;
 	
 	/* ignore patches for now */
@@ -77,7 +77,7 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
 			fprintf(f, "usemtl lm_%04d\r\n", ds->lightmapNum[0] + deluxemap);
 			objLastShaderNum = ds->lightmapNum[0] + deluxemap;
 		}
-		if(ds->lightmapNum[0] + deluxemap < firstLightmap)
+		if(ds->lightmapNum[0] + (int)deluxemap < firstLightmap)
 		{
 			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] + deluxemap );
 			firstLightmap = ds->lightmapNum[0] + deluxemap;
@@ -114,7 +114,6 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
 	/* export faces */
 	for( i = 0; i < ds->numIndexes; i += 3 )
 	{
-		face = (i / 3);
 		a = bspDrawIndexes[ i + ds->firstIndex ];
 		c = bspDrawIndexes[ i + ds->firstIndex + 1 ];
 		b = bspDrawIndexes[ i + ds->firstIndex + 2 ];
@@ -160,7 +159,7 @@ exports a bsp shader to an ase chunk
 static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum )
 {
 	shaderInfo_t	*si;
-	char			*c, filename[ 1024 ];
+	char			filename[ 1024 ];
 	
 	
 	/* get shader */
