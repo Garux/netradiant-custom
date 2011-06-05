@@ -266,8 +266,10 @@ void ParsePatch( qboolean onlyLights )
 	GetToken(qtrue);
 	if (g_bBrushPrimit!=BPRIMIT_OLDBRUSHES && strcmp(token,"}"))
 	{
-		// NOTE: we leak that!
 		ep = ParseEPair();
+		free(ep->key);
+		free(ep->value);
+		free(ep);
 	}
 	else
 		UnGetToken();
