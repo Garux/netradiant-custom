@@ -333,12 +333,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		if( PicoGetSurfaceType( surface ) != PICO_TRIANGLES )
 			continue;
 		
-		/* allocate a surface (ydnar: gs mods) */
-		ds = AllocDrawSurface( SURFACE_TRIANGLES );
-		ds->entityNum = eNum;
-		ds->castShadows = castShadows;
-		ds->recvShadows = recvShadows;
-		
 		/* get shader name */
         shader = PicoGetSurfaceShader( surface );
 		if( shader == NULL )
@@ -401,6 +395,12 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		else
 			si = ShaderInfoForShader( picoShaderName );
 		
+		/* allocate a surface (ydnar: gs mods) */
+		ds = AllocDrawSurface( SURFACE_TRIANGLES );
+		ds->entityNum = eNum;
+		ds->castShadows = castShadows;
+		ds->recvShadows = recvShadows;
+
 		/* set shader */
 		ds->shaderInfo = si;
 
