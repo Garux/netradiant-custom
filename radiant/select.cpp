@@ -290,13 +290,16 @@ void Select_Delete (void)
 class InvertSelectionWalker : public scene::Graph::Walker
 {
   SelectionSystem::EMode m_mode;
-  mutable Selectable* m_selectable;
 public:
   InvertSelectionWalker(SelectionSystem::EMode mode)
-    : m_mode(mode), m_selectable(0)
+    : m_mode(mode)
   {
   }
   bool pre(const scene::Path& path, scene::Instance& instance) const
+  {
+    return true;
+  }
+  void post(const scene::Path& path, scene::Instance& instance) const
   {
     Selectable* selectable = Instance_getSelectable(instance);
     if(selectable)
@@ -305,25 +308,16 @@ public:
       {
       case SelectionSystem::eEntity:
         if(Node_isEntity(path.top()) != 0)
-        {
-          m_selectable = path.top().get().visible() ? selectable : 0;
-        }
+          if(path.top().get().visible())
+            selectable->setSelected(!selectable->isSelected());
         break;
       case SelectionSystem::ePrimitive:
-        m_selectable = path.top().get().visible() ? selectable : 0;
+        if(path.top().get().visible())
+          selectable->setSelected(!selectable->isSelected());
         break;
       case SelectionSystem::eComponent:
         break;
       }
-    }
-    return true;
-  }
-  void post(const scene::Path& path, scene::Instance& instance) const
-  {
-    if(m_selectable != 0)
-    {
-      m_selectable->setSelected(!m_selectable->isSelected());
-      m_selectable = 0;
     }
   }
 };
