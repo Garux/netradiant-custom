@@ -604,6 +604,7 @@ $(INSTALLDIR)/q3data.$(EXE): \
 	tools/quake3/q3data/q3data.o \
 	tools/quake3/q3data/stripper.o \
 	tools/quake3/q3data/video.o \
+	libfilematch.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	$(if $(findstring $(OS),Win32),icons/q3data.o,) \
