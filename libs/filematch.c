@@ -1,10 +1,11 @@
-#include "matchpattern.h"
+#include <string.h>
+#include "filematch.h"
 
 // LordHavoc: some portable directory listing code I wrote for lmp2pcx, now used in darkplaces to load id1/*.pak and such...
 
 int matchpattern(const char *in, const char *pattern, int caseinsensitive)
 {
-	return matchpattern_with_separator(in, pattern, caseinsensitive, "/\\:", false);
+	return matchpattern_with_separator(in, pattern, caseinsensitive, "/\\:", 0);
 }
 
 // wildcard_least_one: if true * matches 1 or more characters
