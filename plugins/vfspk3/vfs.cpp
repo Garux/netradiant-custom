@@ -316,10 +316,17 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
 
   for(j = 0; j < g_numForbiddenDirs; ++j)
   {
-    const char *p = strrchr(directory, '/');
-    p = (p ? (p+1) : directory);
+    char* dbuf = g_strdup(directory);
+    if(*dbuf && dbuf[strlen(dbuf)-1] == '/')
+      dbuf[strlen(dbuf)-1] = 0;
+    const char *p = strrchr(dbuf, '/');
+    p = (p ? (p+1) : dbuf);
     if(matchpattern(p, g_strForbiddenDirs[j], TRUE))
+    {
+      g_free(dbuf);
       break;
+    }
+    g_free(dbuf);
   }
   if(j < g_numForbiddenDirs)
   {
@@ -382,9 +389,13 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
         if(name == 0)
           break;
 
-	for(j = 0; j < g_numForbiddenDirs; ++j)
-	  if(!string_compare_nocase_upper(name, g_strForbiddenDirs[j]))
-	    break;
+        for(j = 0; j < g_numForbiddenDirs; ++j)
+        {
+          const char *p = strrchr(name, '/');
+          p = (p ? (p+1) : name);
+          if(matchpattern(p, g_strForbiddenDirs[j], TRUE))
+            break;
+        }
 	if(j < g_numForbiddenDirs)
 	  continue;
 

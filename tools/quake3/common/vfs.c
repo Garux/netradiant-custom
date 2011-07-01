@@ -161,10 +161,17 @@ void vfsInitDirectory (const char *path)
 
   for(j = 0; j < g_numForbiddenDirs; ++j)
   {
-    const char *p = strrchr(path, '/');
-    p = (p ? (p+1) : path);
+    char* dbuf = g_strdup(path);
+    if(*dbuf && dbuf[strlen(dbuf)-1] == '/')
+      dbuf[strlen(dbuf)-1] = 0;
+    const char *p = strrchr(dbuf, '/');
+    p = (p ? (p+1) : dbuf);
     if(matchpattern(p, g_strForbiddenDirs[j], TRUE))
+    {
+      g_free(dbuf);
       break;
+    }
+    g_free(dbuf);
   }
   if(j < g_numForbiddenDirs)
     return;
@@ -193,8 +200,12 @@ void vfsInitDirectory (const char *path)
           break;
 
         for(j = 0; j < g_numForbiddenDirs; ++j)
-          if(!Q_stricmp(name, g_strForbiddenDirs[j]))
+        {
+          const char *p = strrchr(name, '/');
+          p = (p ? (p+1) : name);
+          if(matchpattern(p, g_strForbiddenDirs[j], TRUE))
             break;
+        }
         if(j < g_numForbiddenDirs)
           continue;
 
