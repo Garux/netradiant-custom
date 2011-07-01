@@ -506,6 +506,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/vis.o \
 	tools/quake3/q3map2/writebsp.o \
 	libddslib.$(A) \
+	libfilematch.$(A) \
 	libjpeg6.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
@@ -693,12 +694,17 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/xmlstuff.o \
 	radiant/xywindow.o \
 	libcmdlib.$(A) \
+	libfilematch.$(A) \
 	libgtkutil.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	libprofile.$(A) \
 	libxmllib.$(A) \
 	$(if $(findstring $(OS),Win32),icons/radiant.o,) \
+
+libfilematch.$(A): CPPFLAGS_EXTRA := -Ilibs
+libfilematch.$(A): \
+	libs/filematch.o \
 
 libcmdlib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libcmdlib.$(A): \

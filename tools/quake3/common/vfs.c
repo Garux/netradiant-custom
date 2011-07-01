@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 
 #include "cmdlib.h"
+#include "filematch.h"
 #include "mathlib.h"
 #include "inout.h"
 #include "vfs.h"
@@ -160,8 +161,9 @@ void vfsInitDirectory (const char *path)
 
   for(j = 0; j < g_numForbiddenDirs; ++j)
   {
-    if(!Q_stricmp(path, g_strForbiddenDirs[j])
-    || (strlen(path) > strlen(g_strForbiddenDirs[j]) && path[strlen(path) - strlen(g_strForbiddenDirs[j]) - 1] == '/' && !Q_stricmp(path + strlen(path) - strlen(g_strForbiddenDirs[j]), g_strForbiddenDirs[j])))
+    const char *p = strrchr(path, '/');
+    p = (p ? (p+1) : path);
+    if(matchpattern(p, g_strForbiddenDirs[j], TRUE))
       break;
   }
   if(j < g_numForbiddenDirs)

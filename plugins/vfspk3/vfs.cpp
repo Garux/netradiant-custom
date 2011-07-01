@@ -315,8 +315,9 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
 
   for(j = 0; j < g_numForbiddenDirs; ++j)
   {
-    if(!string_compare_nocase_upper(directory, g_strForbiddenDirs[j])
-    || (string_length(directory) > string_length(g_strForbiddenDirs[j]) && directory[string_length(directory) - string_length(g_strForbiddenDirs[j]) - 1] == '/' && !string_compare_nocase_upper(directory + string_length(directory) - string_length(g_strForbiddenDirs[j]), g_strForbiddenDirs[j])))
+    const char *p = strrchr(directory, '/');
+    p = (p ? (p+1) : path);
+    if(matchpattern(p, g_strForbiddenDirs[j], TRUE))
       break;
   }
   if(j < g_numForbiddenDirs)
