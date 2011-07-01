@@ -60,6 +60,7 @@ ArchiveModules& FileSystemQ3API_getArchiveModules();
 #include "stream/stringstream.h"
 #include "os/path.h"
 #include "moduleobservers.h"
+#include "filematch.h"
 
 
 #define VFS_MAXDIRS 64
@@ -316,7 +317,7 @@ void InitDirectory(const char* directory, ArchiveModules& archiveModules)
   for(j = 0; j < g_numForbiddenDirs; ++j)
   {
     const char *p = strrchr(directory, '/');
-    p = (p ? (p+1) : path);
+    p = (p ? (p+1) : directory);
     if(matchpattern(p, g_strForbiddenDirs[j], TRUE))
       break;
   }

@@ -695,7 +695,6 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/xmlstuff.o \
 	radiant/xywindow.o \
 	libcmdlib.$(A) \
-	libfilematch.$(A) \
 	libgtkutil.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
@@ -863,6 +862,7 @@ $(INSTALLDIR)/modules/vfspk3.$(DLL): \
 	plugins/vfspk3/archive.o \
 	plugins/vfspk3/vfs.o \
 	plugins/vfspk3/vfspk3.o \
+	libfilematch.$(A) \
 
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
 $(INSTALLDIR)/plugins/bobtoolz.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
