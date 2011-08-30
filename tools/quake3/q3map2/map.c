@@ -1587,6 +1587,7 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 	parseMesh_t		*patch;
 	qboolean		funcGroup;
 	int				castShadows, recvShadows;
+	vec3_t			colormod;
 	
 	
 	/* eof check */
@@ -1735,6 +1736,12 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 		if( lightmapScale > 0.0f )
 			Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt->mapEntityNum, classname, lightmapScale );
 	}
+
+	VectorClear(colormod);
+	if( strcmp( "", ValueForKey( mapEnt, "_color" ) ) )
+	{
+		GetVectorForKey( mapEnt, "_color", colormod );
+	}
 	
 	/* ydnar: get cel shader :) for this entity */
 	value = ValueForKey( mapEnt, "_celshader" );
@@ -1797,6 +1804,7 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 		brush->lightmapScale = lightmapScale;
 		brush->celShader = celShader;
 		brush->shadeAngleDegrees = shadeAngle;
+		brush->colormod = colormod;
 	}
 	
 	for( patch = mapEnt->patches; patch != NULL; patch = patch->next )
@@ -1807,6 +1815,7 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 		patch->lightmapSampleSize = lightmapSampleSize;
 		patch->lightmapScale = lightmapScale;
 		patch->celShader = celShader;
+		patch->colormod = colormod;
 	}
 	
 	/* ydnar: gs mods: set entity bounds */

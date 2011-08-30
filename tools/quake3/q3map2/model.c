@@ -206,7 +206,7 @@ InsertModel() - ydnar
 adds a picomodel into the bsp
 */
 
-void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle )
+void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, vec3_t colormod )
 {
 	int					i, j, s, numSurfaces;
 	m4x4_t				identity, nTransform;
@@ -419,6 +419,9 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		/* set lightmap scale */
 		if( lightmapScale > 0.0f )
 			ds->lightmapScale = lightmapScale;
+
+		/* set color mod */
+		ds->colormod = colormod;
 
 		/* set shading angle */
 		if( shadeAngle > 0.0f )
@@ -899,7 +902,7 @@ void AddTriangleModels( entity_t *e )
 			skin = IntForKey(e2, "skin");
 
 		/* insert the model */
-		InsertModel( model, skin, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle );
+		InsertModel( model, skin, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, colormod );
 		
 		/* free shader remappings */
 		while( remap != NULL )

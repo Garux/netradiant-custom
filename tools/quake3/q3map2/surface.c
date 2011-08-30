@@ -921,6 +921,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	ds->fogNum = -1;
 	ds->sampleSize = b->lightmapSampleSize;
 	ds->lightmapScale = b->lightmapScale;
+	ds->colormod = b->colormod;
 	ds->numVerts = w->numpoints;
 	ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
 	memset( ds->verts, 0, ds->numVerts * sizeof( *ds->verts ) );
@@ -1109,6 +1110,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 	ds->mapMesh = p;
 	ds->sampleSize = p->lightmapSampleSize;
 	ds->lightmapScale = p->lightmapScale;	/* ydnar */
+	ds->colormod = p->colormod;
 	ds->patchWidth = mesh->width;
 	ds->patchHeight = mesh->height;
 	ds->numVerts = ds->patchWidth * ds->patchHeight;
@@ -3173,7 +3175,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			}
 			
 			/* insert the model */
-			InsertModel( (char *) model->model, 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0 );
+			InsertModel( (char *) model->model, 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, ds->colormod );
 			
 			/* return to sender */
 			return 1;
