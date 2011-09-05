@@ -140,7 +140,7 @@ namespace
 		else
 		{
 			if(s)
-				s[0] = 0;
+				s[1] = 0;
 			else
 				n[0] = 0;
 		}
@@ -174,9 +174,9 @@ namespace
 		}
 		else
 		{
-			StringOutputStream o(64);
-			o << cat << "/";
-			cs = o.c_str();
+			globalErrorStream() << "category name " << cat << " doesn't end with slash?\n";
+			cs = "";
+			string_release(n, l);
 		}
 		return cs;
 	}
@@ -229,7 +229,11 @@ void TextureGroups_addDirectory(TextureGroups& groups, const char* directory)
 		Radiant_getImageModules().foreachModule(FindTexturesByTypeVisitor(groups, dirstring.c_str()));
 	}
 	else
-		groups.insert(directory);
+	{
+		StringOutputStream dirstring(64);
+		dirstring << directory << "/";
+		groups.insert(dirstring.c_str());
+	}
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addDirectory> TextureGroupsAddDirectoryCaller;
 
@@ -1625,7 +1629,7 @@ void TextureGroups_constructTreeModel(TextureGroups groups, GtkTreeStore* store)
       && string_equal_start((*next).c_str(), dirRoot))
     {
 		gtk_tree_store_append(store, &iter, NULL);
-		gtk_tree_store_set (store, &iter, 0, CopiedString(StringRange(dirName, firstUnderscore)).c_str(), -1);
+		gtk_tree_store_set (store, &iter, 0, CopiedString(StringRange(dirName, firstUnderscore+1)).c_str(), -1);
 
 	    // keep going...
 	    while (i != groups.end() && string_equal_start((*i).c_str(), dirRoot))
@@ -1707,10 +1711,6 @@ void TreeView_onRowActivated(GtkTreeView* treeview, GtkTreePath* path, GtkTreeVi
 	g_free(buffer);
 
 	g_TextureBrowser.m_searchedTags = false;
-
-    if(!TextureBrowser_showWads())
-	    if(!cutAtDash)
-		    strcat(dirName, "/");
 
     ScopeDisableScreenUpdates disableScreenUpdates(dirName, "Loading Textures");
     TextureBrowser_ShowDirectory(GlobalTextureBrowser (), dirName);
