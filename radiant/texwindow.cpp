@@ -117,7 +117,6 @@ void TextureGroups_addWad(TextureGroups& groups, const char* archive)
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addWad> TextureGroupsAddWadCaller;
 
-
 #define cutAtDash 1
 
 namespace
@@ -146,6 +145,7 @@ namespace
 		}
 		CopiedString cs(n);
 		string_release(n, l);
+		globalErrorStream() << "texture " << tex << " is in " << cs.c_str() << "\n";
 		return cs;
 	}
 	CopiedString Texture_getCategoryDirectory(const char *cat)
@@ -160,6 +160,7 @@ namespace
 		if(cat[l-1] == '/')
 		{
 			string_release(n, l);
+			globalErrorStream() << "category " << cat << " is in " << cat << " (identity case)\n";
 			return cat;
 		}
 		CopiedString cs;
@@ -178,6 +179,7 @@ namespace
 			cs = "";
 			string_release(n, l);
 		}
+		globalErrorStream() << "category " << cat << " is in " << cs.c_str() << "\n";
 		return cs;
 	}
 };
@@ -632,10 +634,8 @@ bool Texture_IsShown(IShader* shader, bool show_shaders, bool hideUnused)
 	  return true;
 	}
   } else {
-    if(!shader_equal_prefix(shader_get_textureName(shader->getName()), g_TextureBrowser_currentDirectory.c_str()))
-    {
-	  return false;
-	}
+	  if(!string_equal(g_TextureBrowser_currentDirectory.c_str(), Texture_getCategoryByName(shader_get_textureName(shader->getName())).c_str()))
+		  return false;
   }
 
   return true;
@@ -859,18 +859,16 @@ public:
   }
   void operator()(const char* name) const
   {
-    if(shader_equal_prefix(name, "textures/")
-      && shader_equal_prefix(name + string_length("textures/"), m_directory))
-    {
-	    if(!string_equal(m_directory, Texture_getCategoryByName(name + string_length("textures/")).c_str()))
-		    return;
+	  if(!shader_equal_prefix(name, "textures/"))
+		  return;
+	  if(!string_equal(m_directory, Texture_getCategoryByName(name + string_length("textures/")).c_str()))
+		  return;
 
-      ++m_count;
-      // request the shader, this will load the texture if needed
-      // this Shader_ForName call is a kind of hack
-      IShader *pFoo = QERApp_Shader_ForName(name);
-      pFoo->DecRef();
-    }
+	  ++m_count;
+	  // request the shader, this will load the texture if needed
+	  // this Shader_ForName call is a kind of hack
+	  IShader *pFoo = QERApp_Shader_ForName(name);
+	  pFoo->DecRef();
   }
 };
 
@@ -1629,7 +1627,7 @@ void TextureGroups_constructTreeModel(TextureGroups groups, GtkTreeStore* store)
       && string_equal_start((*next).c_str(), dirRoot))
     {
 		gtk_tree_store_append(store, &iter, NULL);
-		gtk_tree_store_set (store, &iter, 0, CopiedString(StringRange(dirName, firstUnderscore+1)).c_str(), -1);
+		gtk_tree_store_set (store, &iter, 0, CopiedString(StringRange(dirName, firstUnderscore)).c_str(), -1);
 
 	    // keep going...
 	    while (i != groups.end() && string_equal_start((*i).c_str(), dirRoot))
