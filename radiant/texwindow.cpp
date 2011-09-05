@@ -117,14 +117,14 @@ void TextureGroups_addWad(TextureGroups& groups, const char* archive)
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addWad> TextureGroupsAddWadCaller;
 
+
 #define cutAtDash 1
 
-void TextureGroups_addShader(TextureGroups& groups, const char* shaderName)
+namespace
 {
-	const char* texture = path_make_relative(shaderName, "textures/");
-	if(texture != shaderName)
+	CopiedString Texture_getCategoryByName(const char *tex)
 	{
-		char *n = string_clone(texture);
+		char *n = string_clone(tex);
 		int l = string_length(n);
 		char *s = strrchr(n, '/');
 		char *p = strchr(s ? (s+1) : n, '-');
@@ -144,9 +144,53 @@ void TextureGroups_addShader(TextureGroups& groups, const char* shaderName)
 			else
 				n[0] = 0;
 		}
-		if(!string_empty(n))
-			groups.insert(CopiedString(n));
+		CopiedString cs(n);
 		string_release(n, l);
+		return cs;
+	}
+	CopiedString Texture_getCategoryDirectory(const char *cat)
+	{
+		char *n = string_clone(cat);
+		int l = string_length(n);
+		if(l == 0)
+		{
+			string_release(n, l);
+			return "";
+		}
+		if(cat[l-1] == '/')
+		{
+			string_release(n, l);
+			return cat;
+		}
+		CopiedString cs;
+		if(cutAtDash)
+		{
+			char *p = strrchr(n, '/');
+			if(p)
+				cs = StringRange(n, p+1);
+			else
+				cs = "";
+			string_release(n, l);
+		}
+		else
+		{
+			StringOutputStream o(64);
+			o << cat << "/";
+			cs = o.c_str();
+		}
+		return cs;
+	}
+};
+
+
+void TextureGroups_addShader(TextureGroups& groups, const char* shaderName)
+{
+	const char* texture = path_make_relative(shaderName, "textures/");
+	if(texture != shaderName)
+	{
+		CopiedString n = Texture_getCategoryByName(texture);
+		if(!string_empty(n.c_str()))
+			groups.insert(n);
 	}
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addShader> TextureGroupsAddShaderCaller;
@@ -157,7 +201,12 @@ class FindTexturesByTypeVisitor : public ImageModules::Visitor
 {
   TextureGroups& m_groups;
   const char* m_dirstring;
-  void visitFile(const char *name) const;
+  void visitFile(const char *name) const
+  {
+	  StringOutputStream dirstring(64);
+	  dirstring << m_dirstring << name;
+	  TextureGroups_addShader(m_groups, dirstring.c_str());
+  }
   typedef ConstMemberCaller1<FindTexturesByTypeVisitor, const char *, &FindTexturesByTypeVisitor::visitFile> VisitFileMemberCaller;
 public:
   FindTexturesByTypeVisitor(TextureGroups& groups, const char* dirstring)
@@ -169,12 +218,6 @@ public:
     GlobalFileSystem().forEachFile(m_dirstring, minor, VisitFileMemberCaller(*this));
   }
 };
-void FindTexturesByTypeVisitor::visitFile(const char *name) const
-{
-	StringOutputStream dirstring(64);
-	dirstring << m_dirstring << name;
-	TextureGroups_addShader(m_groups, dirstring.c_str());
-}
 
 void TextureGroups_addDirectory(TextureGroups& groups, const char* directory)
 {
@@ -815,9 +858,8 @@ public:
     if(shader_equal_prefix(name, "textures/")
       && shader_equal_prefix(name + string_length("textures/"), m_directory))
     {
-	    if(cutAtDash && (!string_length(m_directory) || m_directory[string_length(m_directory)-1] == '/'))
-		    if(strchr(name + string_length("textures/") + string_length(m_directory), '-'))
-			    return;
+	    if(!string_equal(m_directory, Texture_getCategoryByName(name + string_length("textures/")).c_str()))
+		    return;
 
       ++m_count;
       // request the shader, this will load the texture if needed
@@ -889,12 +931,8 @@ void TextureBrowser_ShowDirectory(TextureBrowser& textureBrowser, const char* di
     if(g_pGameDescription->mGameType != "doom3")
     {
 	    // load remaining texture files
-	    char *p = strrchr(const_cast<char *>(directory), '/');
-	    StringRange dir = StringRange(directory, (cutAtDash && p && p[1] != 0) ? (p+1) : directory+string_length(directory));
-
 	    StringOutputStream dirstring(64);
-	    dirstring << "textures/" << dir;
-
+	    dirstring << "textures/" << Texture_getCategoryDirectory(directory).c_str();
 	    Radiant_getImageModules().foreachModule(LoadTexturesByTypeVisitor(dirstring.c_str()));
     }
   }
