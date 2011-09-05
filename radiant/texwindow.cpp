@@ -117,23 +117,76 @@ void TextureGroups_addWad(TextureGroups& groups, const char* archive)
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addWad> TextureGroupsAddWadCaller;
 
+#define cutAtDash 1
+
 void TextureGroups_addShader(TextureGroups& groups, const char* shaderName)
 {
-  const char* texture = path_make_relative(shaderName, "textures/");
-  if(texture != shaderName)
-  {
-    const char* last = path_remove_directory(texture);
-    if(!string_empty(last))
-    {
-      groups.insert(CopiedString(StringRange(texture, --last)));
-    }
-  }
+	const char* texture = path_make_relative(shaderName, "textures/");
+	if(texture != shaderName)
+	{
+		char *n = string_clone(texture);
+		int l = string_length(n);
+		char *s = strrchr(n, '/');
+		char *p = strchr(s ? (s+1) : n, '-');
+		if(cutAtDash)
+		{
+			if(s ? (p >= s) : (p != NULL))
+				p[1] = 0;
+			else if(s)
+				s[1] = 0;
+			else
+				n[0] = 0;
+		}
+		else
+		{
+			if(s)
+				s[0] = 0;
+			else
+				n[0] = 0;
+		}
+		if(!string_empty(n))
+			groups.insert(CopiedString(n));
+		string_release(n, l);
+	}
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addShader> TextureGroupsAddShaderCaller;
 
+
+
+class FindTexturesByTypeVisitor : public ImageModules::Visitor
+{
+  TextureGroups& m_groups;
+  const char* m_dirstring;
+  void visitFile(const char *name) const;
+  typedef ConstMemberCaller1<FindTexturesByTypeVisitor, const char *, &FindTexturesByTypeVisitor::visitFile> VisitFileMemberCaller;
+public:
+  FindTexturesByTypeVisitor(TextureGroups& groups, const char* dirstring)
+    : m_groups(groups), m_dirstring(dirstring)
+  {
+  }
+  void visit(const char* minor, const _QERPlugImageTable& table) const
+  {
+    GlobalFileSystem().forEachFile(m_dirstring, minor, VisitFileMemberCaller(*this));
+  }
+};
+void FindTexturesByTypeVisitor::visitFile(const char *name) const
+{
+	StringOutputStream dirstring(64);
+	dirstring << m_dirstring << name;
+	TextureGroups_addShader(m_groups, dirstring.c_str());
+}
+
 void TextureGroups_addDirectory(TextureGroups& groups, const char* directory)
 {
-  groups.insert(directory);
+	if(cutAtDash)
+	{
+		// enumerate all files, find dashes
+		StringOutputStream dirstring(64);
+		dirstring << "textures/" << directory << "/";
+		Radiant_getImageModules().foreachModule(FindTexturesByTypeVisitor(groups, dirstring.c_str()));
+	}
+	else
+		groups.insert(directory);
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addDirectory> TextureGroupsAddDirectoryCaller;
 
@@ -762,6 +815,10 @@ public:
     if(shader_equal_prefix(name, "textures/")
       && shader_equal_prefix(name + string_length("textures/"), m_directory))
     {
+	    if(cutAtDash && (!string_length(m_directory) || m_directory[string_length(m_directory)-1] == '/'))
+		    if(strchr(name + string_length("textures/") + string_length(m_directory), '-'))
+			    return;
+
       ++m_count;
       // request the shader, this will load the texture if needed
       // this Shader_ForName call is a kind of hack
@@ -786,6 +843,10 @@ void TextureDirectory_loadTexture(const char* directory, const char* texture)
     globalOutputStream() << "Skipping invalid texture name: [" << name.c_str() << "]\n";
     return;
   }
+
+  if(cutAtDash && (!string_length(directory) || directory[string_length(directory)-1] == '/'))
+	  if(strchr(texture, '-'))
+		  return;
 
   // if a texture is already in use to represent a shader, ignore it
   IShader* shader = QERApp_Shader_ForName(name.c_str());
@@ -827,12 +888,14 @@ void TextureBrowser_ShowDirectory(TextureBrowser& textureBrowser, const char* di
 
     if(g_pGameDescription->mGameType != "doom3")
     {
-      // load remaining texture files
+	    // load remaining texture files
+	    char *p = strrchr(const_cast<char *>(directory), '/');
+	    StringRange dir = StringRange(directory, (cutAtDash && p && p[1] != 0) ? (p+1) : directory+string_length(directory));
 
-      StringOutputStream dirstring(64);
-      dirstring << "textures/" << directory;
+	    StringOutputStream dirstring(64);
+	    dirstring << "textures/" << dir;
 
-      Radiant_getImageModules().foreachModule(LoadTexturesByTypeVisitor(dirstring.c_str()));
+	    Radiant_getImageModules().foreachModule(LoadTexturesByTypeVisitor(dirstring.c_str()));
     }
   }
 
@@ -1510,6 +1573,9 @@ void TextureGroups_constructTreeModel(TextureGroups groups, GtkTreeStore* store)
   {
     const char* dirName = (*i).c_str();
     const char* firstUnderscore = strchr(dirName, '_');
+    const char* firstDash = strchr(dirName, '/');
+    if(firstDash && (!firstUnderscore || firstDash < firstUnderscore))
+	    firstUnderscore = firstDash;
     StringRange dirRoot (dirName, (firstUnderscore == 0) ? dirName : firstUnderscore + 1);
 
     TextureGroups::const_iterator next = i;
@@ -1603,7 +1669,8 @@ void TreeView_onRowActivated(GtkTreeView* treeview, GtkTreePath* path, GtkTreeVi
 	g_TextureBrowser.m_searchedTags = false;
 
     if(!TextureBrowser_showWads())
-      strcat(dirName, "/");
+	    if(!cutAtDash)
+		    strcat(dirName, "/");
 
     ScopeDisableScreenUpdates disableScreenUpdates(dirName, "Loading Textures");
     TextureBrowser_ShowDirectory(GlobalTextureBrowser (), dirName);
