@@ -870,10 +870,11 @@ public:
   }
 };
 
-void TextureDirectory_loadTexture(const char* directory, const char* texture)
+void TextureDirectory_loadTexture(const char* category, const char* texture)
 {
+	CopiedString directory = Texture_getCategoryDirectory(category);
   StringOutputStream name(256);
-  name << directory << StringRange(texture, path_get_filename_base_end(texture));
+  name << "textures/" << directory.c_str() << StringRange(texture, path_get_filename_base_end(texture));
 
   if(texture_name_ignore(name.c_str()))
   {
@@ -886,9 +887,10 @@ void TextureDirectory_loadTexture(const char* directory, const char* texture)
     return;
   }
 
-  if(cutAtDash && (!string_length(directory) || directory[string_length(directory)-1] == '/'))
-	  if(strchr(texture, '-'))
-		  return;
+  if(!shader_equal_prefix(name.c_str(), "textures/")) // can't happen
+	  return;
+  if(!string_equal(category, Texture_getCategoryByName(name.c_str() + string_length("textures/")).c_str()))
+	  return;
 
   // if a texture is already in use to represent a shader, ignore it
   IShader* shader = QERApp_Shader_ForName(name.c_str());
@@ -898,15 +900,17 @@ typedef ConstPointerCaller1<char, const char*, TextureDirectory_loadTexture> Tex
 
 class LoadTexturesByTypeVisitor : public ImageModules::Visitor
 {
-  const char* m_dirstring;
+  const char* m_catstring;
 public:
-  LoadTexturesByTypeVisitor(const char* dirstring)
-    : m_dirstring(dirstring)
+  LoadTexturesByTypeVisitor(const char* catstring)
+    : m_catstring(catstring)
   {
   }
   void visit(const char* minor, const _QERPlugImageTable& table) const
   {
-    GlobalFileSystem().forEachFile(m_dirstring, minor, TextureDirectoryLoadTextureCaller(m_dirstring));
+	  StringOutputStream dirstring(64);
+	  dirstring << "textures/" << Texture_getCategoryDirectory(m_catstring).c_str();
+	  GlobalFileSystem().forEachFile(dirstring.c_str(), minor, TextureDirectoryLoadTextureCaller(m_catstring));
   }
 };
 
@@ -931,9 +935,7 @@ void TextureBrowser_ShowDirectory(TextureBrowser& textureBrowser, const char* di
     if(g_pGameDescription->mGameType != "doom3")
     {
 	    // load remaining texture files
-	    StringOutputStream dirstring(64);
-	    dirstring << "textures/" << Texture_getCategoryDirectory(directory).c_str();
-	    Radiant_getImageModules().foreachModule(LoadTexturesByTypeVisitor(dirstring.c_str()));
+	    Radiant_getImageModules().foreachModule(LoadTexturesByTypeVisitor(directory));
     }
   }
 
