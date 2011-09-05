@@ -139,7 +139,7 @@ namespace
 		else
 		{
 			if(s)
-				s[1] = 0;
+				s[0] = 0;
 			else
 				n[0] = 0;
 		}
@@ -149,6 +149,13 @@ namespace
 	}
 	CopiedString Texture_getCategoryDirectory(const char *cat)
 	{
+		if(!softGroups())
+		{
+			StringOutputStream o(64);
+			if(string_length(cat))
+				o << cat << "/";
+			return o.c_str();
+		}
 		char *n = string_clone(cat);
 		int l = string_length(n);
 		if(l == 0)
@@ -156,27 +163,13 @@ namespace
 			string_release(n, l);
 			return "";
 		}
-		if(cat[l-1] == '/')
-		{
-			string_release(n, l);
-			return cat;
-		}
 		CopiedString cs;
-		if(softGroups())
-		{
-			char *p = strrchr(n, '/');
-			if(p)
-				cs = StringRange(n, p+1);
-			else
-				cs = "";
-			string_release(n, l);
-		}
+		char *p = strrchr(n, '/');
+		if(p)
+			cs = StringRange(n, p+1);
 		else
-		{
-			globalErrorStream() << "category name " << cat << " doesn't end with slash?\n";
 			cs = "";
-			string_release(n, l);
-		}
+		string_release(n, l);
 		return cs;
 	}
 	bool Texture_matchCategory(const char *matchcat, const char *texcat)
@@ -195,6 +188,7 @@ namespace
 void TextureGroups_addShader(TextureGroups& groups, const char* shaderName)
 {
 	const char* texture = path_make_relative(shaderName, "textures/");
+	globalErrorStream() << texture << "\n";
 	if(texture != shaderName)
 	{
 		CopiedString n = Texture_getCategoryByName(texture);
@@ -239,9 +233,7 @@ void TextureGroups_addDirectory(TextureGroups& groups, const char* directory)
 	}
 	else
 	{
-		StringOutputStream dirstring(64);
-		dirstring << directory << "/";
-		groups.insert(dirstring.c_str());
+		groups.insert(directory);
 	}
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addDirectory> TextureGroupsAddDirectoryCaller;
