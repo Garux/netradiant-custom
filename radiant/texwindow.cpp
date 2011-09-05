@@ -179,6 +179,16 @@ namespace
 		}
 		return cs;
 	}
+	bool Texture_matchCategory(const char *matchcat, const char *texcat)
+	{
+		int l = string_length(matchcat);
+		if(softGroups())
+		{
+			if(l > 0 && matchcat[l-1] == '*')
+				return string_equal_n(texcat, matchcat, l-1);
+		}
+		return string_equal(texcat, matchcat);
+	}
 };
 
 
@@ -645,7 +655,7 @@ bool Texture_IsShown(IShader* shader, bool show_shaders, bool hideUnused)
 	  return true;
 	}
   } else {
-	  if(!string_equal(g_TextureBrowser_currentDirectory.c_str(), Texture_getCategoryByName(shader_get_textureName(shader->getName())).c_str()))
+	  if(!Texture_matchCategory(g_TextureBrowser_currentDirectory.c_str(), Texture_getCategoryByName(shader_get_textureName(shader->getName())).c_str()))
 		  return false;
   }
 
@@ -872,7 +882,7 @@ public:
   {
 	  if(!shader_equal_prefix(name, "textures/"))
 		  return;
-	  if(!string_equal(m_directory, Texture_getCategoryByName(name + string_length("textures/")).c_str()))
+	  if(!Texture_matchCategory(m_directory, Texture_getCategoryByName(name + string_length("textures/")).c_str()))
 		  return;
 
 	  ++m_count;
@@ -902,7 +912,7 @@ void TextureDirectory_loadTexture(const char* category, const char* texture)
 
   if(!shader_equal_prefix(name.c_str(), "textures/")) // can't happen
 	  return;
-  if(!string_equal(category, Texture_getCategoryByName(name.c_str() + string_length("textures/")).c_str()))
+  if(!Texture_matchCategory(category, Texture_getCategoryByName(name.c_str() + string_length("textures/")).c_str()))
 	  return;
 
   // if a texture is already in use to represent a shader, ignore it
@@ -1632,9 +1642,9 @@ void TextureGroups_constructTreeModel(TextureGroups groups, GtkTreeStore* store)
   {
     const char* dirName = (*i).c_str();
     const char* firstUnderscore = strchr(dirName, '_');
-    const char* firstDash = strchr(dirName, '/');
-    if(firstDash && (!firstUnderscore || firstDash < firstUnderscore))
-	    firstUnderscore = firstDash;
+    const char* firstSlash = strchr(dirName, '/');
+    if(firstSlash && (!firstUnderscore || firstSlash < firstUnderscore))
+	    firstUnderscore = firstSlash;
     StringRange dirRoot (dirName, (firstUnderscore == 0) ? dirName : firstUnderscore + 1);
 
     TextureGroups::const_iterator next = i;
@@ -1644,7 +1654,11 @@ void TextureGroups_constructTreeModel(TextureGroups groups, GtkTreeStore* store)
       && string_equal_start((*next).c_str(), dirRoot))
     {
 		gtk_tree_store_append(store, &iter, NULL);
-		gtk_tree_store_set (store, &iter, 0, CopiedString(StringRange(dirName, firstUnderscore)).c_str(), -1);
+		StringOutputStream ost(64);
+		ost << CopiedString(StringRange(dirName, firstUnderscore)).c_str();
+		if(*firstUnderscore == '/')
+			ost << "/*";
+		gtk_tree_store_set (store, &iter, 0, ost.c_str(), -1);
 
 	    // keep going...
 	    while (i != groups.end() && string_equal_start((*i).c_str(), dirRoot))
@@ -2834,6 +2848,7 @@ void TextureBrowser_Construct()
   );
   GlobalPreferenceSystem().registerPreference("ShowShaders", BoolImportStringCaller(GlobalTextureBrowser().m_showShaders), BoolExportStringCaller(GlobalTextureBrowser().m_showShaders));
   GlobalPreferenceSystem().registerPreference("ShowShaderlistOnly", BoolImportStringCaller(g_TextureBrowser_shaderlistOnly), BoolExportStringCaller(g_TextureBrowser_shaderlistOnly));
+  GlobalPreferenceSystem().registerPreference("SoftGroups", BoolImportStringCaller(GlobalTextureBrowser().m_softGroups), BoolExportStringCaller(GlobalTextureBrowser().m_softGroups));
   GlobalPreferenceSystem().registerPreference("FixedSize", BoolImportStringCaller(g_TextureBrowser_fixedSize), BoolExportStringCaller(g_TextureBrowser_fixedSize));
   GlobalPreferenceSystem().registerPreference("FilterNotex", BoolImportStringCaller(g_TextureBrowser_filterNotex), BoolExportStringCaller(g_TextureBrowser_filterNotex));
   GlobalPreferenceSystem().registerPreference("LoadShaders", IntImportStringCaller(reinterpret_cast<int&>(GlobalTextureBrowser().m_startupShaders)), IntExportStringCaller(reinterpret_cast<int&>(GlobalTextureBrowser().m_startupShaders)));
