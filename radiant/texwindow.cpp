@@ -117,17 +117,17 @@ void TextureGroups_addWad(TextureGroups& groups, const char* archive)
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addWad> TextureGroupsAddWadCaller;
 
-#define cutAtDash 1
-
 namespace
 {
+	bool softGroups();
+
 	CopiedString Texture_getCategoryByName(const char *tex)
 	{
 		char *n = string_clone(tex);
 		int l = string_length(n);
 		char *s = strrchr(n, '/');
 		char *p = strchr(s ? (s+1) : n, '-');
-		if(cutAtDash)
+		if(softGroups())
 		{
 			if(s ? (p >= s) : (p != NULL))
 				p[1] = 0;
@@ -145,7 +145,6 @@ namespace
 		}
 		CopiedString cs(n);
 		string_release(n, l);
-		globalErrorStream() << "texture " << tex << " is in " << cs.c_str() << "\n";
 		return cs;
 	}
 	CopiedString Texture_getCategoryDirectory(const char *cat)
@@ -160,11 +159,10 @@ namespace
 		if(cat[l-1] == '/')
 		{
 			string_release(n, l);
-			globalErrorStream() << "category " << cat << " is in " << cat << " (identity case)\n";
 			return cat;
 		}
 		CopiedString cs;
-		if(cutAtDash)
+		if(softGroups())
 		{
 			char *p = strrchr(n, '/');
 			if(p)
@@ -179,7 +177,6 @@ namespace
 			cs = "";
 			string_release(n, l);
 		}
-		globalErrorStream() << "category " << cat << " is in " << cs.c_str() << "\n";
 		return cs;
 	}
 };
@@ -223,7 +220,7 @@ public:
 
 void TextureGroups_addDirectory(TextureGroups& groups, const char* directory)
 {
-	if(cutAtDash)
+	if(softGroups())
 	{
 		// enumerate all files, find dashes
 		StringOutputStream dirstring(64);
@@ -311,6 +308,9 @@ typedef FreeCaller1<const BoolImportCallback&, TextureBrowser_hideUnusedExport> 
 void TextureBrowser_showShadersExport(const BoolImportCallback& importer);
 typedef FreeCaller1<const BoolImportCallback&, TextureBrowser_showShadersExport> TextureBrowserShowShadersExport;
 
+void TextureBrowser_softGroupsExport(const BoolImportCallback& importer);
+typedef FreeCaller1<const BoolImportCallback&, TextureBrowser_softGroupsExport> TextureBrowserSoftGroupsExport;
+
 void TextureBrowser_showShaderlistOnly(const BoolImportCallback& importer);
 typedef FreeCaller1<const BoolImportCallback&, TextureBrowser_showShaderlistOnly> TextureBrowserShowShaderlistOnlyExport;
 
@@ -353,6 +353,7 @@ public:
   ToggleItem m_hideunused_item;
   ToggleItem m_showshaders_item;
   ToggleItem m_showshaderlistonly_item;
+  ToggleItem m_softgroups_item;
   ToggleItem m_fixedsize_item;
   ToggleItem m_filternotex_item;
 
@@ -371,6 +372,7 @@ public:
   std::size_t m_textureScale;
   // make the texture increments match the grid changes
   bool m_showShaders;
+  bool m_softGroups;
   bool m_showTextureScrollbar;
   StartupShaders m_startupShaders;
   // if true, the texture window will only display in-use shaders
@@ -424,6 +426,7 @@ public:
     m_hideunused_item(TextureBrowserHideUnusedExport()),
 	m_showshaders_item(TextureBrowserShowShadersExport()),
 	m_showshaderlistonly_item(TextureBrowserShowShaderlistOnlyExport()),
+	m_softgroups_item(TextureBrowserSoftGroupsExport()),
     m_fixedsize_item(TextureBrowserFixedSizeExport()),
     m_filternotex_item(TextureBrowserFilterNotexExport()),
     m_heightChanged(true),
@@ -443,6 +446,14 @@ public:
   {
   }
 };
+namespace
+{
+	bool softGroups()
+	{
+		return GlobalTextureBrowser().m_softGroups;
+	}
+};
+
 
 void(*TextureBrowser_textureSelected)(const char* shader);
 
@@ -986,6 +997,12 @@ void TextureBrowser_showShadersExport(const BoolImportCallback& importer)
   importer(GlobalTextureBrowser().m_showShaders);
 }
 typedef FreeCaller1<const BoolImportCallback&, TextureBrowser_showShadersExport> TextureBrowserShowShadersExport;
+
+void TextureBrowser_softGroupsExport(const BoolImportCallback& importer)
+{
+  importer(GlobalTextureBrowser().m_softGroups);
+}
+typedef FreeCaller1<const BoolImportCallback&, TextureBrowser_softGroupsExport> TextureBrowserSoftGroupsExport;
 
 void TextureBrowser_showShaderlistOnly(const BoolImportCallback& importer)
 {
@@ -1829,6 +1846,8 @@ GtkMenuItem* TextureBrowser_constructViewMenu(GtkMenu* menu)
     create_menu_item_with_mnemonic(menu, "Show Untagged", "ShowUntagged");
   }
 
+  create_check_menu_item_with_mnemonic(menu, "Use soft groups", "ToggleSoftGroups");
+
   create_check_menu_item_with_mnemonic(menu, "Fixed Size", "FixedSize");
 
   if(string_empty(g_pGameDescription->getKeyValue("show_wads")))
@@ -2613,6 +2632,16 @@ void TextureBrowser_ToggleShowShaders()
   TextureBrowser_queueDraw(g_TextureBrowser);
 }
 
+void TextureBrowser_constructTreeStore();
+void TextureBrowser_ToggleSoftGroups() 
+{
+  g_TextureBrowser.m_softGroups ^= 1;
+  g_TextureBrowser.m_softgroups_item.update();
+  TextureBrowser_constructTreeStore();
+  GlobalShaderSystem().refresh();
+  UpdateAllWindows();
+}
+
 void TextureBrowser_ToggleShowShaderListOnly() 
 {
   g_TextureBrowser_shaderlistOnly ^= 1;
@@ -2791,6 +2820,7 @@ void TextureBrowser_Construct()
   GlobalCommands_insert("ToggleTextures", FreeCaller<TextureBrowser_toggleShow>(), Accelerator('T'));
   GlobalToggles_insert("ToggleShowShaders", FreeCaller<TextureBrowser_ToggleShowShaders>(), ToggleItem::AddCallbackCaller(g_TextureBrowser.m_showshaders_item));
   GlobalToggles_insert("ToggleShowShaderlistOnly", FreeCaller<TextureBrowser_ToggleShowShaderListOnly>(), ToggleItem::AddCallbackCaller(g_TextureBrowser.m_showshaderlistonly_item));
+  GlobalToggles_insert("ToggleSoftGroups",  FreeCaller<TextureBrowser_ToggleSoftGroups>(), ToggleItem::AddCallbackCaller(g_TextureBrowser.m_softgroups_item));
   GlobalToggles_insert("FixedSize", FreeCaller<TextureBrowser_FixedSize>(), ToggleItem::AddCallbackCaller(g_TextureBrowser.m_fixedsize_item));
   GlobalToggles_insert("FilterNotex", FreeCaller<TextureBrowser_FilterNotex>(), ToggleItem::AddCallbackCaller(g_TextureBrowser.m_filternotex_item));
 
@@ -2826,3 +2856,4 @@ void TextureBrowser_Destroy()
 
   Textures_setModeChangedNotify(Callback());
 }
+
