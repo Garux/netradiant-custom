@@ -1399,6 +1399,9 @@ returns the score of the triangle added
 
 static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, qboolean testAdd )
 {
+#if MAX_BBOX_DISTANCE > 0
+	vec3_t				p;
+#endif
 	int					i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
 	float				lmMax;
 	vec3_t				mins, maxs;
@@ -1433,30 +1436,35 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 			return 0;
 	}
 
+	
+
 #if MAX_BBOX_DISTANCE > 0
-	VectorCopy( ds->mins, mins );
-	VectorCopy( ds->maxs, maxs );
-	mins[0] -= MAX_BBOX_DISTANCE;
-	mins[1] -= MAX_BBOX_DISTANCE;
-	mins[2] -= MAX_BBOX_DISTANCE;
-	maxs[0] += MAX_BBOX_DISTANCE;
-	maxs[1] += MAX_BBOX_DISTANCE;
-	maxs[2] += MAX_BBOX_DISTANCE;
+	if(ds->numIndexes > 0)
+	{
+		VectorCopy( ds->mins, mins );
+		VectorCopy( ds->maxs, maxs );
+		mins[0] -= MAX_BBOX_DISTANCE;
+		mins[1] -= MAX_BBOX_DISTANCE;
+		mins[2] -= MAX_BBOX_DISTANCE;
+		maxs[0] += MAX_BBOX_DISTANCE;
+		maxs[1] += MAX_BBOX_DISTANCE;
+		maxs[2] += MAX_BBOX_DISTANCE;
 #define CHECK_1D(mins, v, maxs) ((mins) <= (v) && (v) <= (maxs))
 #define CHECK_3D(mins, v, maxs) (CHECK_1D((mins)[0], (v)[0], (maxs)[0]) && CHECK_1D((mins)[1], (v)[1], (maxs)[1]) && CHECK_1D((mins)[2], (v)[2], (maxs)[2]))
-	VectorCopy(metaVerts[ tri->indexes[ 0 ] ].xyz, p);
-	if(!CHECK_3D(mins, p, maxs))
-	{
-		VectorCopy(metaVerts[ tri->indexes[ 1 ] ].xyz, p);
+		VectorCopy(metaVerts[ tri->indexes[ 0 ] ].xyz, p);
 		if(!CHECK_3D(mins, p, maxs))
 		{
-			VectorCopy(metaVerts[ tri->indexes[ 2 ] ].xyz, p);
+			VectorCopy(metaVerts[ tri->indexes[ 1 ] ].xyz, p);
 			if(!CHECK_3D(mins, p, maxs))
-				return 0;
+			{
+				VectorCopy(metaVerts[ tri->indexes[ 2 ] ].xyz, p);
+				if(!CHECK_3D(mins, p, maxs))
+					return 0;
+			}
 		}
-	}
 #undef CHECK_3D
 #undef CHECK_1D
+	}
 #endif
 	
 	/* set initial score */
