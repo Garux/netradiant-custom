@@ -810,7 +810,7 @@ int BSPMain( int argc, char **argv )
 		{
 			npDegrees = atof( argv[ i + 1 ] );
 			if( npDegrees < 0.0f )
-				shadeAngleDegrees = 0.0f;
+				npDegrees = 0.0f;
 			else if( npDegrees > 0.0f )
 				Sys_Printf( "Forcing nonplanar surfaces with a breaking angle of %f degrees\n", npDegrees );
 			i++;
@@ -863,7 +863,7 @@ int BSPMain( int argc, char **argv )
 				metaAdequateScore = -1;
  			i++;
 			if( metaAdequateScore >= 0 )
-				Sys_Printf( "Setting ADEQUATE meta score to %d (see surface_meta.c)\n", metaGoodScore );
+				Sys_Printf( "Setting ADEQUATE meta score to %d (see surface_meta.c)\n", metaAdequateScore );
 		}
 		else if( !strcmp( argv[ i ], "-metagoodscore" ) )
 		{
