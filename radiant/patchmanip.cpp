@@ -517,13 +517,13 @@ void Patch_Cone()
   Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eCone, GlobalXYWnd_getCurrentViewType());
 }
 
-void DoNewPatchDlg();
+void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int maxrows, int maxcols);
 
 void Patch_Plane()
 {
   UndoableCommand undo("patchCreatePlane");
 
-  DoNewPatchDlg();
+  DoNewPatchDlg(ePlane, 3, 3, 0, 0);
 }
 
 void Patch_InsertInsertColumn()
@@ -894,7 +894,7 @@ void Patch_constructMenu(GtkMenu* menu)
 #include "gtkutil/dialog.h"
 #include "gtkutil/widget.h"
 
-void DoNewPatchDlg()
+void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int maxrows, int maxcols)
 {
   ModalDialog dialog;
   GtkComboBox* width;
@@ -930,21 +930,22 @@ void DoNewPatchDlg()
 
       {
         GtkComboBox* combo = GTK_COMBO_BOX(gtk_combo_box_new_text());
-        gtk_combo_box_append_text(combo, "3");
-        gtk_combo_box_append_text(combo, "5");
-        gtk_combo_box_append_text(combo, "7");
-        gtk_combo_box_append_text(combo, "9");
-        gtk_combo_box_append_text(combo, "11");
-        gtk_combo_box_append_text(combo, "13");
-        gtk_combo_box_append_text(combo, "15");
-        gtk_combo_box_append_text(combo, "17");
-        gtk_combo_box_append_text(combo, "19");
-        gtk_combo_box_append_text(combo, "21");
-        gtk_combo_box_append_text(combo, "23");
-        gtk_combo_box_append_text(combo, "25");
-        gtk_combo_box_append_text(combo, "27");
-        gtk_combo_box_append_text(combo, "29");
-        gtk_combo_box_append_text(combo, "31"); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#define D_ITEM(x) if(x >= mincols && (!maxcols || x <= maxcols)) gtk_combo_box_append_text(combo, #x)
+	D_ITEM(3);
+        D_ITEM(5);
+        D_ITEM(7);
+        D_ITEM(9);
+        D_ITEM(11);
+        D_ITEM(13);
+        D_ITEM(15);
+        D_ITEM(17);
+        D_ITEM(19);
+        D_ITEM(21);
+        D_ITEM(23);
+        D_ITEM(25);
+        D_ITEM(27);
+        D_ITEM(29);
+        D_ITEM(31); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 0, 1,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -954,21 +955,22 @@ void DoNewPatchDlg()
       }
       {
         GtkComboBox* combo = GTK_COMBO_BOX(gtk_combo_box_new_text());
-        gtk_combo_box_append_text(combo, "3");
-        gtk_combo_box_append_text(combo, "5");
-        gtk_combo_box_append_text(combo, "7");
-        gtk_combo_box_append_text(combo, "9");
-        gtk_combo_box_append_text(combo, "11");
-        gtk_combo_box_append_text(combo, "13");
-        gtk_combo_box_append_text(combo, "15");
-        gtk_combo_box_append_text(combo, "17");
-        gtk_combo_box_append_text(combo, "19");
-        gtk_combo_box_append_text(combo, "21");
-        gtk_combo_box_append_text(combo, "23");
-        gtk_combo_box_append_text(combo, "25");
-        gtk_combo_box_append_text(combo, "27");
-        gtk_combo_box_append_text(combo, "29");
-        gtk_combo_box_append_text(combo, "31"); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#define D_ITEM(x) if(x >= minrows && (!maxrows || x <= maxrows)) gtk_combo_box_append_text(combo, #x)
+	D_ITEM(3);
+        D_ITEM(5);
+        D_ITEM(7);
+        D_ITEM(9);
+        D_ITEM(11);
+        D_ITEM(13);
+        D_ITEM(15);
+        D_ITEM(17);
+        D_ITEM(19);
+        D_ITEM(21);
+        D_ITEM(23);
+        D_ITEM(25);
+        D_ITEM(27);
+        D_ITEM(29);
+        D_ITEM(31); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 1, 2,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -1002,10 +1004,10 @@ void DoNewPatchDlg()
 
   if(modal_dialog_show(window, dialog) == eIDOK)
   {
-    int w = gtk_combo_box_get_active(width) * 2 + 3;
-    int h = gtk_combo_box_get_active(height) * 2 + 3;
+    int w = gtk_combo_box_get_active(width) * 2 + mincols;
+    int h = gtk_combo_box_get_active(height) * 2 + minrows;
 
-    Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), ePlane, GlobalXYWnd_getCurrentViewType(), w, h);
+    Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), prefab, GlobalXYWnd_getCurrentViewType(), w, h);
   }
 
   gtk_widget_destroy(GTK_WIDGET(window));
