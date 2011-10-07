@@ -1400,6 +1400,33 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
       return;
     }
   }
+  else if (eType == eXactCylinder)
+  {
+	int n = 6; // n = number of segments
+	setDims(2 * n + 1, 3);
+
+	// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
+	// vPos[1] = aabb.origin;
+	// vPos[2] = vector3_added(aabb.origin, aabb.extents);
+
+	int i, j;
+	float f = 1 / cos(M_PI / n);
+	for(i = 0; i < 2*n+1; ++i)
+	{
+		float angle  = (M_PI * i) / n;
+		float x = vPos[1][0] + cos(angle) * (vPos[2][0] - vPos[1][0]) * ((i&1) ? f : 1.0f);
+		float y = vPos[1][1] + sin(angle) * (vPos[2][1] - vPos[1][1]) * ((i&1) ? f : 1.0f);
+		for(j = 0; j < 3; ++j)
+		{
+			float z = vPos[j][2];
+			PatchControl *v;
+			v = &m_ctrl.data()[j*(2*n+1)+i];
+			v->m_vertex[0] = x;
+			v->m_vertex[1] = y;
+			v->m_vertex[2] = z;
+		}
+	}
+  }
   else if  (eType == eBevel)
   {
     unsigned char *pIndex;

@@ -432,6 +432,13 @@ AABB PatchCreator_getBounds()
   return AABB(Vector3(0, 0, 0), Vector3(64, 64, 64));
 }
 
+void Patch_XactCylinder()
+{
+  UndoableCommand undo("patchCreateXactCylinder");
+
+  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactCylinder, GlobalXYWnd_getCurrentViewType());
+}
+
 void Patch_Cylinder()
 {
   UndoableCommand undo("patchCreateCylinder");
@@ -743,6 +750,7 @@ void Patch_registerCommands()
   GlobalCommands_insert("DecPatchRow", FreeCaller<Patch_DeleteLastRow>(), Accelerator(GDK_KP_Subtract, (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("NaturalizePatch", FreeCaller<Patch_NaturalTexture>(), Accelerator('N', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("PatchCylinder", FreeCaller<Patch_Cylinder>());
+  GlobalCommands_insert("PatchXactCylinder", FreeCaller<Patch_XactCylinder>());
   GlobalCommands_insert("PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>());
   GlobalCommands_insert("PatchVeryDenseCylinder", FreeCaller<Patch_VeryDenseCylinder>());
   GlobalCommands_insert("PatchSquareCylinder", FreeCaller<Patch_SquareCylinder>());
@@ -788,6 +796,7 @@ void Patch_constructMenu(GtkMenu* menu)
     create_menu_item_with_mnemonic(menu_in_menu, "Dense Cylinder", "PatchDenseCylinder");
     create_menu_item_with_mnemonic(menu_in_menu, "Very Dense Cylinder", "PatchVeryDenseCylinder");
     create_menu_item_with_mnemonic(menu_in_menu, "Square Cylinder", "PatchSquareCylinder");
+    create_menu_item_with_mnemonic(menu_in_menu, "Exact Cylinder", "PatchXactCylinder");
   }
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "End cap", "PatchEndCap");
