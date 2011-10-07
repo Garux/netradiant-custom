@@ -432,11 +432,27 @@ AABB PatchCreator_getBounds()
   return AABB(Vector3(0, 0, 0), Vector3(64, 64, 64));
 }
 
+void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int defrows, int defcols, int maxrows, int maxcols);
+
 void Patch_XactCylinder()
 {
   UndoableCommand undo("patchCreateXactCylinder");
 
-  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactCylinder, GlobalXYWnd_getCurrentViewType());
+  DoNewPatchDlg(eXactCylinder, 3, 7, 3, 13, 0, 0);
+}
+
+void Patch_XactSphere()
+{
+  UndoableCommand undo("patchCreateXactSphere");
+
+  DoNewPatchDlg(eXactSphere, 5, 7, 7, 13, 0, 0);
+}
+
+void Patch_XactCone()
+{
+  UndoableCommand undo("patchCreateXactCone");
+
+  DoNewPatchDlg(eXactCone, 3, 7, 3, 13, 0, 0);
 }
 
 void Patch_Cylinder()
@@ -503,13 +519,11 @@ void Patch_Cone()
   Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eCone, GlobalXYWnd_getCurrentViewType());
 }
 
-void DoNewPatchDlg();
-
 void Patch_Plane()
 {
   UndoableCommand undo("patchCreatePlane");
 
-  DoNewPatchDlg();
+  DoNewPatchDlg(ePlane, 3, 3, 3, 3, 0, 0);
 }
 
 void Patch_InsertInsertColumn()
@@ -750,10 +764,12 @@ void Patch_registerCommands()
   GlobalCommands_insert("DecPatchRow", FreeCaller<Patch_DeleteLastRow>(), Accelerator(GDK_KP_Subtract, (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("NaturalizePatch", FreeCaller<Patch_NaturalTexture>(), Accelerator('N', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("PatchCylinder", FreeCaller<Patch_Cylinder>());
-  GlobalCommands_insert("PatchXactCylinder", FreeCaller<Patch_XactCylinder>());
   GlobalCommands_insert("PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>());
   GlobalCommands_insert("PatchVeryDenseCylinder", FreeCaller<Patch_VeryDenseCylinder>());
   GlobalCommands_insert("PatchSquareCylinder", FreeCaller<Patch_SquareCylinder>());
+  GlobalCommands_insert("PatchXactCylinder", FreeCaller<Patch_XactCylinder>());
+  GlobalCommands_insert("PatchXactSphere", FreeCaller<Patch_XactSphere>());
+  GlobalCommands_insert("PatchXactCone", FreeCaller<Patch_XactCone>());
   GlobalCommands_insert("PatchEndCap", FreeCaller<Patch_Endcap>());
   GlobalCommands_insert("PatchBevel", FreeCaller<Patch_Bevel>());
   GlobalCommands_insert("PatchSquareBevel", FreeCaller<Patch_SquareBevel>());
@@ -796,7 +812,7 @@ void Patch_constructMenu(GtkMenu* menu)
     create_menu_item_with_mnemonic(menu_in_menu, "Dense Cylinder", "PatchDenseCylinder");
     create_menu_item_with_mnemonic(menu_in_menu, "Very Dense Cylinder", "PatchVeryDenseCylinder");
     create_menu_item_with_mnemonic(menu_in_menu, "Square Cylinder", "PatchSquareCylinder");
-    create_menu_item_with_mnemonic(menu_in_menu, "Exact Cylinder", "PatchXactCylinder");
+    create_menu_item_with_mnemonic(menu_in_menu, "Exact Cylinder...", "PatchXactCylinder");
   }
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "End cap", "PatchEndCap");
@@ -810,7 +826,10 @@ void Patch_constructMenu(GtkMenu* menu)
   }
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Cone", "PatchCone");
+  create_menu_item_with_mnemonic(menu, "Exact Cone...", "PatchXactCone");
+  menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Sphere", "PatchSphere");
+  create_menu_item_with_mnemonic(menu, "Exact Sphere...", "PatchXactSphere");
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Simple Patch Mesh...", "SimplePatchMesh");
   menu_separator (menu);
@@ -875,7 +894,7 @@ void Patch_constructMenu(GtkMenu* menu)
 #include "gtkutil/dialog.h"
 #include "gtkutil/widget.h"
 
-void DoNewPatchDlg()
+void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int defrows, int defcols, int maxrows, int maxcols)
 {
   ModalDialog dialog;
   GtkComboBox* width;
@@ -911,21 +930,23 @@ void DoNewPatchDlg()
 
       {
         GtkComboBox* combo = GTK_COMBO_BOX(gtk_combo_box_new_text());
-        gtk_combo_box_append_text(combo, "3");
-        gtk_combo_box_append_text(combo, "5");
-        gtk_combo_box_append_text(combo, "7");
-        gtk_combo_box_append_text(combo, "9");
-        gtk_combo_box_append_text(combo, "11");
-        gtk_combo_box_append_text(combo, "13");
-        gtk_combo_box_append_text(combo, "15");
-        gtk_combo_box_append_text(combo, "17");
-        gtk_combo_box_append_text(combo, "19");
-        gtk_combo_box_append_text(combo, "21");
-        gtk_combo_box_append_text(combo, "23");
-        gtk_combo_box_append_text(combo, "25");
-        gtk_combo_box_append_text(combo, "27");
-        gtk_combo_box_append_text(combo, "29");
-        gtk_combo_box_append_text(combo, "31"); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#define D_ITEM(x) if(x >= mincols && (!maxcols || x <= maxcols)) gtk_combo_box_append_text(combo, #x)
+	D_ITEM(3);
+        D_ITEM(5);
+        D_ITEM(7);
+        D_ITEM(9);
+        D_ITEM(11);
+        D_ITEM(13);
+        D_ITEM(15);
+        D_ITEM(17);
+        D_ITEM(19);
+        D_ITEM(21);
+        D_ITEM(23);
+        D_ITEM(25);
+        D_ITEM(27);
+        D_ITEM(29);
+        D_ITEM(31); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#undef D_ITEM
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 0, 1,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -935,21 +956,23 @@ void DoNewPatchDlg()
       }
       {
         GtkComboBox* combo = GTK_COMBO_BOX(gtk_combo_box_new_text());
-        gtk_combo_box_append_text(combo, "3");
-        gtk_combo_box_append_text(combo, "5");
-        gtk_combo_box_append_text(combo, "7");
-        gtk_combo_box_append_text(combo, "9");
-        gtk_combo_box_append_text(combo, "11");
-        gtk_combo_box_append_text(combo, "13");
-        gtk_combo_box_append_text(combo, "15");
-        gtk_combo_box_append_text(combo, "17");
-        gtk_combo_box_append_text(combo, "19");
-        gtk_combo_box_append_text(combo, "21");
-        gtk_combo_box_append_text(combo, "23");
-        gtk_combo_box_append_text(combo, "25");
-        gtk_combo_box_append_text(combo, "27");
-        gtk_combo_box_append_text(combo, "29");
-        gtk_combo_box_append_text(combo, "31"); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#define D_ITEM(x) if(x >= minrows && (!maxrows || x <= maxrows)) gtk_combo_box_append_text(combo, #x)
+	D_ITEM(3);
+        D_ITEM(5);
+        D_ITEM(7);
+        D_ITEM(9);
+        D_ITEM(11);
+        D_ITEM(13);
+        D_ITEM(15);
+        D_ITEM(17);
+        D_ITEM(19);
+        D_ITEM(21);
+        D_ITEM(23);
+        D_ITEM(25);
+        D_ITEM(27);
+        D_ITEM(29);
+        D_ITEM(31); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#undef D_ITEM
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 1, 2,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -978,15 +1001,15 @@ void DoNewPatchDlg()
   }
 
   // Initialize dialog
-  gtk_combo_box_set_active(width, 0);
-  gtk_combo_box_set_active(height, 0);
+  gtk_combo_box_set_active(width, (defcols - mincols) / 2);
+  gtk_combo_box_set_active(height, (defrows - minrows) / 2);
 
   if(modal_dialog_show(window, dialog) == eIDOK)
   {
-    int w = gtk_combo_box_get_active(width) * 2 + 3;
-    int h = gtk_combo_box_get_active(height) * 2 + 3;
+    int w = gtk_combo_box_get_active(width) * 2 + mincols;
+    int h = gtk_combo_box_get_active(height) * 2 + minrows;
 
-    Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), ePlane, GlobalXYWnd_getCurrentViewType(), w, h);
+    Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), prefab, GlobalXYWnd_getCurrentViewType(), w, h);
   }
 
   gtk_widget_destroy(GTK_WIDGET(window));
