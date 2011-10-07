@@ -439,6 +439,20 @@ void Patch_XactCylinder()
   Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactCylinder, GlobalXYWnd_getCurrentViewType());
 }
 
+void Patch_XactSphere()
+{
+  UndoableCommand undo("patchCreateXactSphere");
+
+  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactSphere, GlobalXYWnd_getCurrentViewType());
+}
+
+void Patch_XactCone()
+{
+  UndoableCommand undo("patchCreateXactCone");
+
+  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactCone, GlobalXYWnd_getCurrentViewType());
+}
+
 void Patch_Cylinder()
 {
   UndoableCommand undo("patchCreateCylinder");
@@ -750,10 +764,12 @@ void Patch_registerCommands()
   GlobalCommands_insert("DecPatchRow", FreeCaller<Patch_DeleteLastRow>(), Accelerator(GDK_KP_Subtract, (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("NaturalizePatch", FreeCaller<Patch_NaturalTexture>(), Accelerator('N', (GdkModifierType)GDK_CONTROL_MASK));
   GlobalCommands_insert("PatchCylinder", FreeCaller<Patch_Cylinder>());
-  GlobalCommands_insert("PatchXactCylinder", FreeCaller<Patch_XactCylinder>());
   GlobalCommands_insert("PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>());
   GlobalCommands_insert("PatchVeryDenseCylinder", FreeCaller<Patch_VeryDenseCylinder>());
   GlobalCommands_insert("PatchSquareCylinder", FreeCaller<Patch_SquareCylinder>());
+  GlobalCommands_insert("PatchXactCylinder", FreeCaller<Patch_XactCylinder>());
+  GlobalCommands_insert("PatchXactSphere", FreeCaller<Patch_XactSphere>());
+  GlobalCommands_insert("PatchXactCone", FreeCaller<Patch_XactCone>());
   GlobalCommands_insert("PatchEndCap", FreeCaller<Patch_Endcap>());
   GlobalCommands_insert("PatchBevel", FreeCaller<Patch_Bevel>());
   GlobalCommands_insert("PatchSquareBevel", FreeCaller<Patch_SquareBevel>());
@@ -796,7 +812,7 @@ void Patch_constructMenu(GtkMenu* menu)
     create_menu_item_with_mnemonic(menu_in_menu, "Dense Cylinder", "PatchDenseCylinder");
     create_menu_item_with_mnemonic(menu_in_menu, "Very Dense Cylinder", "PatchVeryDenseCylinder");
     create_menu_item_with_mnemonic(menu_in_menu, "Square Cylinder", "PatchSquareCylinder");
-    create_menu_item_with_mnemonic(menu_in_menu, "Exact Cylinder", "PatchXactCylinder");
+    create_menu_item_with_mnemonic(menu_in_menu, "Exact Cylinder...", "PatchXactCylinder");
   }
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "End cap", "PatchEndCap");
@@ -810,7 +826,10 @@ void Patch_constructMenu(GtkMenu* menu)
   }
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Cone", "PatchCone");
+  create_menu_item_with_mnemonic(menu, "Exact Cone...", "PatchXactCone");
+  menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Sphere", "PatchSphere");
+  create_menu_item_with_mnemonic(menu, "Exact Sphere...", "PatchXactSphere");
   menu_separator (menu);
   create_menu_item_with_mnemonic(menu, "Simple Patch Mesh...", "SimplePatchMesh");
   menu_separator (menu);
