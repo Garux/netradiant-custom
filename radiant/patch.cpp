@@ -1402,8 +1402,8 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
   }
   else if (eType == eXactCylinder)
   {
-	int n = 6; // n = number of segments
-	setDims(2 * n + 1, 3);
+	int n = (width - 1) / 2; // n = number of segments
+	setDims(width, height);
 
 	// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
 	// vPos[1] = aabb.origin;
@@ -1411,16 +1411,16 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
 
 	int i, j;
 	float f = 1 / cos(M_PI / n);
-	for(i = 0; i < 2*n+1; ++i)
+	for(i = 0; i < width; ++i)
 	{
-		float angle = (M_PI * i) / n;
+		float angle = (M_PI * i) / n; // 0 to 2pi
 		float x = vPos[1][0] + (vPos[2][0] - vPos[1][0]) * cos(angle) * ((i&1) ? f : 1.0f);
 		float y = vPos[1][1] + (vPos[2][1] - vPos[1][1]) * sin(angle) * ((i&1) ? f : 1.0f);
-		for(j = 0; j < 3; ++j)
+		for(j = 0; j < height; ++j)
 		{
-			float z = vPos[j][2];
+			float z = vPos[0][2] + (vPos[2][2] - vPos[0][2]) * (j / (float)(height - 1));
 			PatchControl *v;
-			v = &m_ctrl.data()[j*(2*n+1)+i];
+			v = &m_ctrl.data()[j*width+i];
 			v->m_vertex[0] = x;
 			v->m_vertex[1] = y;
 			v->m_vertex[2] = z;
@@ -1429,8 +1429,8 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
   }
   else if (eType == eXactCone)
   {
-	int n = 6; // n = number of segments
-	setDims(2 * n + 1, 3);
+	int n = (width - 1) / 2; // n = number of segments
+	setDims(width, height);
 
 	// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
 	// vPos[1] = aabb.origin;
@@ -1438,16 +1438,16 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
 
 	int i, j;
 	float f = 1 / cos(M_PI / n);
-	for(i = 0; i < 2*n+1; ++i)
+	for(i = 0; i < width; ++i)
 	{
 		float angle = (M_PI * i) / n;
-		for(j = 0; j < 3; ++j)
+		for(j = 0; j < height; ++j)
 		{
-			float x = vPos[1][0] + ((2-j)/2.0f) * (vPos[2][0] - vPos[1][0]) * cos(angle) * ((i&1) ? f : 1.0f);
-			float y = vPos[1][1] + ((2-j)/2.0f) * (vPos[2][1] - vPos[1][1]) * sin(angle) * ((i&1) ? f : 1.0f);
-			float z = vPos[j][2];
+			float x = vPos[1][0] + (1.0f - (j / (float)(height - 1))) * (vPos[2][0] - vPos[1][0]) * cos(angle) * ((i&1) ? f : 1.0f);
+			float y = vPos[1][1] + (1.0f - (j / (float)(height - 1))) * (vPos[2][1] - vPos[1][1]) * sin(angle) * ((i&1) ? f : 1.0f);
+			float z = vPos[0][2] + (vPos[2][2] - vPos[0][2]) * (j / (float)(height - 1));
 			PatchControl *v;
-			v = &m_ctrl.data()[j*(2*n+1)+i];
+			v = &m_ctrl.data()[j*width+i];
 			v->m_vertex[0] = x;
 			v->m_vertex[1] = y;
 			v->m_vertex[2] = z;
@@ -1456,9 +1456,9 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
   }
   else if (eType == eXactSphere)
   {
-	int n = 6; // n = number of segments
-	int m = 3; // m = number of segments
-	setDims(2 * n + 1, 2 * m + 1);
+	int n = (width - 1) / 2; // n = number of segments (yaw)
+	int m = (height - 1) / 2; // m = number of segments (pitch)
+	setDims(width, height);
 
 	// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
 	// vPos[1] = aabb.origin;
@@ -1467,17 +1467,17 @@ void Patch::ConstructPrefab(const AABB& aabb, EPatchPrefab eType, int axis, std:
 	int i, j;
 	float f = 1 / cos(M_PI / n);
 	float g = 1 / cos(M_PI / (2*m));
-	for(i = 0; i < 2*n+1; ++i)
+	for(i = 0; i < width; ++i)
 	{
 		float angle = (M_PI * i) / n;
-		for(j = 0; j < 2*m+1; ++j)
+		for(j = 0; j < height; ++j)
 		{
 			float angle2 = (M_PI * j) / (2*m);
 			float x = vPos[1][0] + (vPos[2][0] - vPos[1][0]) *  sin(angle2) * ((j&1) ? g : 1.0f) * cos(angle) * ((i&1) ? f : 1.0f);
 			float y = vPos[1][1] + (vPos[2][1] - vPos[1][1]) *  sin(angle2) * ((j&1) ? g : 1.0f) * sin(angle) * ((i&1) ? f : 1.0f);
 			float z = vPos[1][2] + (vPos[2][2] - vPos[1][2]) * -cos(angle2) * ((j&1) ? g : 1.0f);
 			PatchControl *v;
-			v = &m_ctrl.data()[j*(2*n+1)+i];
+			v = &m_ctrl.data()[j*width+i];
 			v->m_vertex[0] = x;
 			v->m_vertex[1] = y;
 			v->m_vertex[2] = z;

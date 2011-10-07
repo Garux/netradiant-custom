@@ -432,25 +432,27 @@ AABB PatchCreator_getBounds()
   return AABB(Vector3(0, 0, 0), Vector3(64, 64, 64));
 }
 
+void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int defrows, int defcols, int maxrows, int maxcols);
+
 void Patch_XactCylinder()
 {
   UndoableCommand undo("patchCreateXactCylinder");
 
-  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactCylinder, GlobalXYWnd_getCurrentViewType());
+  DoNewPatchDlg(eXactCylinder, 3, 7, 3, 13, 0, 0);
 }
 
 void Patch_XactSphere()
 {
   UndoableCommand undo("patchCreateXactSphere");
 
-  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactSphere, GlobalXYWnd_getCurrentViewType());
+  DoNewPatchDlg(eXactSphere, 5, 7, 7, 13, 0, 0);
 }
 
 void Patch_XactCone()
 {
   UndoableCommand undo("patchCreateXactCone");
 
-  Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eXactCone, GlobalXYWnd_getCurrentViewType());
+  DoNewPatchDlg(eXactCone, 3, 7, 3, 13, 0, 0);
 }
 
 void Patch_Cylinder()
@@ -517,13 +519,11 @@ void Patch_Cone()
   Scene_PatchConstructPrefab(GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()), eCone, GlobalXYWnd_getCurrentViewType());
 }
 
-void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int maxrows, int maxcols);
-
 void Patch_Plane()
 {
   UndoableCommand undo("patchCreatePlane");
 
-  DoNewPatchDlg(ePlane, 3, 3, 0, 0);
+  DoNewPatchDlg(ePlane, 3, 3, 3, 3, 0, 0);
 }
 
 void Patch_InsertInsertColumn()
@@ -894,7 +894,7 @@ void Patch_constructMenu(GtkMenu* menu)
 #include "gtkutil/dialog.h"
 #include "gtkutil/widget.h"
 
-void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int maxrows, int maxcols)
+void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int defrows, int defcols, int maxrows, int maxcols)
 {
   ModalDialog dialog;
   GtkComboBox* width;
@@ -946,6 +946,7 @@ void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int maxrows, i
         D_ITEM(27);
         D_ITEM(29);
         D_ITEM(31); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#undef D_ITEM
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 0, 1,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -971,6 +972,7 @@ void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int maxrows, i
         D_ITEM(27);
         D_ITEM(29);
         D_ITEM(31); // MAX_PATCH_SIZE is 32, so we should be able to do 31...
+#undef D_ITEM
         gtk_widget_show(GTK_WIDGET(combo));
         gtk_table_attach(table, GTK_WIDGET(combo), 1, 2, 1, 2,
                           (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
@@ -999,8 +1001,8 @@ void DoNewPatchDlg(EPatchPrefab prefab, int minrows, int mincols, int maxrows, i
   }
 
   // Initialize dialog
-  gtk_combo_box_set_active(width, 0);
-  gtk_combo_box_set_active(height, 0);
+  gtk_combo_box_set_active(width, (defcols - mincols) / 2);
+  gtk_combo_box_set_active(height, (defrows - minrows) / 2);
 
   if(modal_dialog_show(window, dialog) == eIDOK)
   {
