@@ -810,7 +810,7 @@ int BSPMain( int argc, char **argv )
 		{
 			npDegrees = atof( argv[ i + 1 ] );
 			if( npDegrees < 0.0f )
-				shadeAngleDegrees = 0.0f;
+				npDegrees = 0.0f;
 			else if( npDegrees > 0.0f )
 				Sys_Printf( "Forcing nonplanar surfaces with a breaking angle of %f degrees\n", npDegrees );
 			i++;
@@ -855,6 +855,33 @@ int BSPMain( int argc, char **argv )
 		{
 			Sys_Printf( "Creating meta surfaces from brush faces\n" );
 			meta = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-metaadequatescore" ) )
+		{
+			metaAdequateScore = atoi( argv[ i + 1 ]);
+			if( metaAdequateScore < 0 )
+				metaAdequateScore = -1;
+ 			i++;
+			if( metaAdequateScore >= 0 )
+				Sys_Printf( "Setting ADEQUATE meta score to %d (see surface_meta.c)\n", metaAdequateScore );
+		}
+		else if( !strcmp( argv[ i ], "-metagoodscore" ) )
+		{
+			metaGoodScore = atoi( argv[ i + 1 ]);
+			if( metaGoodScore < 0 )
+				metaGoodScore = -1;
+ 			i++;
+			if( metaGoodScore >= 0 )
+				Sys_Printf( "Setting GOOD meta score to %d (see surface_meta.c)\n", metaGoodScore );
+		}
+		else if( !strcmp( argv[ i ], "-metamaxbboxdistance" ) )
+		{
+			metaMaxBBoxDistance = atof( argv[ i + 1 ]);
+			if( metaMaxBBoxDistance < 0 )
+				metaMaxBBoxDistance = -1;
+ 			i++;
+			if( metaMaxBBoxDistance >= 0 )
+				Sys_Printf( "Setting meta maximum bounding box distance to %f\n", metaMaxBBoxDistance );
 		}
 		else if( !strcmp( argv[ i ], "-patchmeta" ) )
 		{

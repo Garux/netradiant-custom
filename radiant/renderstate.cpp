@@ -1827,7 +1827,7 @@ void OpenGLState_apply(const OpenGLState& self, OpenGLState& current, unsigned i
   {
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
-    //qglEnable(GL_RESCALE_NORMAL);
+    glEnable(GL_RESCALE_NORMAL);
     glEnableClientState(GL_NORMAL_ARRAY);
     GlobalOpenGL_debugAssertNoErrors();
     g_normalArray_enabled = true;
@@ -1836,7 +1836,7 @@ void OpenGLState_apply(const OpenGLState& self, OpenGLState& current, unsigned i
   {
     glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
-    //qglDisable(GL_RESCALE_NORMAL);
+    glDisable(GL_RESCALE_NORMAL);
     glDisableClientState(GL_NORMAL_ARRAY);
     GlobalOpenGL_debugAssertNoErrors();
     g_normalArray_enabled = false;
