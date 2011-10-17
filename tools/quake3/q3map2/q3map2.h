@@ -317,9 +317,6 @@ abstracted bsp file
 #define MAX_LIGHTMAP_SHADERS	256
 
 /* ok to increase these at the expense of more memory */
-#define	MAX_MAP_ENTITIES		0x8000		//%	0x800	/* ydnar */
-#define	MAX_MAP_ENTSTRING		0x400000	//%	0x40000	/* ydnar */
-
 #define	MAX_MAP_AREAS			0x100		/* MAX_MAP_AREA_BYTES in q_shared must match! */
 #define	MAX_MAP_FOGS			30			//& 0x100	/* RBSP (32 - world fog - goggles) */
 #define	MAX_MAP_LEAFS			0x20000
@@ -2449,7 +2446,8 @@ abstracted bsp globals
 
 Q_EXTERN int				numEntities Q_ASSIGN( 0 );
 Q_EXTERN int				numBSPEntities Q_ASSIGN( 0 );
-Q_EXTERN entity_t			entities[ MAX_MAP_ENTITIES ];
+Q_EXTERN int				allocatedEntities Q_ASSIGN( 0 );
+Q_EXTERN entity_t*			entities Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPModels Q_ASSIGN( 0 );
 Q_EXTERN int				allocatedBSPModels Q_ASSIGN( 0 );

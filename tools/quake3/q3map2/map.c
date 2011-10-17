@@ -1603,8 +1603,7 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 	}
 	
 	/* range check */
-	if( numEntities >= MAX_MAP_ENTITIES )
-		Error( "numEntities == MAX_MAP_ENTITIES" );
+	AUTOEXPAND_BY_REALLOC(entities, numEntities, allocatedEntities, 32);
 	
 	/* setup */
 	entitySourceBrushes = 0;

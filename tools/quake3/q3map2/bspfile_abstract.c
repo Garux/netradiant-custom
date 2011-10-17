@@ -545,8 +545,7 @@ qboolean ParseEntity( void )
 		return qfalse;
 	if( strcmp( token, "{" ) )
 		Error( "ParseEntity: { not found" );
-	if( numEntities == MAX_MAP_ENTITIES )
-		Error( "numEntities == MAX_MAP_ENTITIES" );
+	AUTOEXPAND_BY_REALLOC(entities, numEntities, allocatedEntities, 32);
 	
 	/* create new entity */
 	mapEnt = &entities[ numEntities ];
