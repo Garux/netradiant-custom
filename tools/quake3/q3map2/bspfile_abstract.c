@@ -550,7 +550,8 @@ qboolean ParseEntity( void )
 	/* create new entity */
 	mapEnt = &entities[ numEntities ];
 	numEntities++;
-	
+	memset( mapEnt, 0, sizeof( *mapEnt ) );
+
 	/* parse */
 	while( 1 )
 	{
