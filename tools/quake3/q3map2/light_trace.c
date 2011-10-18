@@ -1498,6 +1498,10 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace )
 	t = t - floor( t );
 	is = s * si->lightImage->width;
 	it = t * si->lightImage->height;
+	if(is < 0) is = 0;
+	if(is > si->lightImage->width - 1) is = si->lightImage->width - 1;
+	if(it < 0) it = 0;
+	if(it > si->lightImage->height - 1) it = si->lightImage->height - 1;
 	
 	/* get pixel */
 	pixel = si->lightImage->pixels + 4 * (it * si->lightImage->width + is);
