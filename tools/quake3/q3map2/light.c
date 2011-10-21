@@ -2065,6 +2065,12 @@ int LightMain( int argc, char **argv )
 	lightmapGamma = game->lightmapGamma;
 	Sys_Printf( " lightning gamma: %f\n", lightmapGamma );
 
+	lightmapsRGB = game->lightmapsRGB;
+	if(lightmapsRGB)
+		Sys_Printf( " lightmap colorspace: sRGB\n" );
+	else
+		Sys_Printf( " lightmap colorspace: linear\n" );
+
 	lightmapCompensate = game->lightmapCompensate;
 	Sys_Printf( " lightning compensation: %f\n", lightmapCompensate );
 
@@ -2201,6 +2207,13 @@ int LightMain( int argc, char **argv )
 			f = atof( argv[ i + 1 ] );
 			lightmapGamma = f;
 			Sys_Printf( "Lighting gamma set to %f\n", lightmapGamma );
+			i++;
+		}
+		
+		else if( !strcmp( argv[ i ], "-sRGB" ) )
+		{
+			lightmapsRGB = qtrue;
+			Sys_Printf( "Lighting is in sRGB\n" );
 			i++;
 		}
 		

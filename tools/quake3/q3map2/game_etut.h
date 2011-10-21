@@ -147,7 +147,8 @@ game_t struct
 	"flareshader",		/* default flare shader */
 	qfalse,				/* wolf lighting model? */
 	128,				/* lightmap width/height */
-	2.2f,				/* lightmap gamma */
+	1.0f,				/* lightmap gamma */
+	qtrue,				/* lightmap sRGB */
 	1.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
 	1.0f,				/* lightgrid scale */

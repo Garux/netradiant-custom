@@ -565,6 +565,7 @@ typedef struct game_s
 	qboolean			wolfLight;						/* when true, lights work like wolf q3map  */
 	int					lightmapSize;					/* bsp lightmap width/height */
 	float				lightmapGamma;					/* default lightmap gamma */
+	qboolean			lightmapsRGB;					/* default lightmap sRGB mode */
 	float				lightmapExposure;				/* default lightmap exposure */
 	float				lightmapCompensate;				/* default lightmap compensate value */
 	float				gridScale;						/* vortex: default lightgrid scale (affects both directional and ambient spectres) */
@@ -2295,6 +2296,7 @@ Q_EXTERN qboolean			inGrid Q_ASSIGN(0);
 
 /* ydnar: lightmap gamma/compensation */
 Q_EXTERN float				lightmapGamma Q_ASSIGN( 1.0f );
+Q_EXTERN float				lightmapsRGB Q_ASSIGN( qfalse );
 Q_EXTERN float				lightmapExposure Q_ASSIGN( 1.0f );
 Q_EXTERN float				lightmapCompensate Q_ASSIGN( 1.0f );
 
