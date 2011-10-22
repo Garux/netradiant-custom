@@ -2214,9 +2214,14 @@ int LightMain( int argc, char **argv )
 		{
 			lightmapsRGB = qtrue;
 			Sys_Printf( "Lighting is in sRGB\n" );
-			i++;
 		}
-		
+
+		else if( !strcmp( argv[ i ], "-nosRGB" ) )
+		{
+			lightmapsRGB = qfalse;
+			Sys_Printf( "Lighting is linear\n" );
+		}
+
 		else if( !strcmp( argv[ i ], "-exposure" ) )
 		{
 			f = atof( argv[ i + 1 ] );
