@@ -400,7 +400,6 @@ void CreateEntityLights( void )
 		if(light->extraDist == 0.0f)
 			light->extraDist = extraDist;
 		
-		intensity = intensity * pointScale;
 		light->photons = intensity;
 
 		light->type = EMIT_POINT;
@@ -424,6 +423,7 @@ void CreateEntityLights( void )
 			{
 				Sys_Printf( "WARNING: light at (%i %i %i) has missing target\n",
 					(int) light->origin[ 0 ], (int) light->origin[ 1 ], (int) light->origin[ 2 ] );
+				intensity = intensity * pointScale;
 			}
 			else
 			{
@@ -461,7 +461,7 @@ void CreateEntityLights( void )
 					/* make a sun */
 					VectorScale( light->normal, -1.0f, sun.direction );
 					VectorCopy( light->color, sun.color );
-					sun.photons = (intensity / pointScale);
+					sun.photons = intensity;
 					sun.deviance = deviance / 180.0f * Q_PI;
 					sun.numSamples = numSamples;
 					sun.style = noStyles ? LS_NORMAL : light->style;
@@ -477,8 +477,14 @@ void CreateEntityLights( void )
 					/* skip the rest of this love story */
 					continue;
 				}
+				else
+				{
+					intensity = intensity * spotScale;
+				}
 			}
 		}
+		else
+			intensity = intensity * pointScale;
 		
 		/* jitter the light */
 		for( j = 1; j < numSamples; j++ )
@@ -2127,7 +2133,24 @@ int LightMain( int argc, char **argv )
 		{
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
+			spotScale *= f;
 			Sys_Printf( "Point (entity) light scaled by %f to %f\n", f, pointScale );
+			i++;
+		}
+		
+		if( !strcmp( argv[ i ], "-pointonly" ) || !strcmp( argv[ i ], "-pointonlyscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			pointScale *= f;
+			Sys_Printf( "Point (entity) light scaled by %f to %f\n", f, pointScale );
+			i++;
+		}
+		
+		if( !strcmp( argv[ i ], "-spot" ) || !strcmp( argv[ i ], "-spotscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			spotScale *= f;
+			Sys_Printf( "Point (entity) light scaled by %f to %f\n", f, spotScale );
 			i++;
 		}
 		
@@ -2159,6 +2182,7 @@ int LightMain( int argc, char **argv )
 		{
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
+			spotScale *= f;
 			areaScale *= f;
 			skyScale *= f;
 			bounceScale *= f;

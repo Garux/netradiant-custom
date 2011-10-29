@@ -2280,6 +2280,7 @@ Q_EXTERN float				maxMapDistance Q_ASSIGN( 0 );
 
 /* for run time tweaking of light sources */
 Q_EXTERN float				pointScale Q_ASSIGN( 7500.0f );
+Q_EXTERN float				spotScale Q_ASSIGN( 7500.0f );
 Q_EXTERN float				areaScale Q_ASSIGN( 0.25f );
 Q_EXTERN float				skyScale Q_ASSIGN( 1.0f );
 Q_EXTERN float				bounceScale Q_ASSIGN( 0.25f );
