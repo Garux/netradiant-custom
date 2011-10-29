@@ -423,7 +423,7 @@ void CreateEntityLights( void )
 			{
 				Sys_Printf( "WARNING: light at (%i %i %i) has missing target\n",
 					(int) light->origin[ 0 ], (int) light->origin[ 1 ], (int) light->origin[ 2 ] );
-				intensity = intensity * pointScale;
+				light->photons *= pointScale;
 			}
 			else
 			{
@@ -479,12 +479,12 @@ void CreateEntityLights( void )
 				}
 				else
 				{
-					intensity = intensity * spotScale;
+					light->photons *= spotScale;
 				}
 			}
 		}
 		else
-			intensity = intensity * pointScale;
+			light->photons *= pointScale;
 		
 		/* jitter the light */
 		for( j = 1; j < numSamples; j++ )
@@ -2134,23 +2134,24 @@ int LightMain( int argc, char **argv )
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
 			spotScale *= f;
-			Sys_Printf( "Point (entity) light scaled by %f to %f\n", f, pointScale );
+			Sys_Printf( "Spherical point (entity) light scaled by %f to %f\n", f, pointScale );
+			Sys_Printf( "Spot point (entity) light scaled by %f to %f\n", f, spotScale );
 			i++;
 		}
 		
-		if( !strcmp( argv[ i ], "-pointonly" ) || !strcmp( argv[ i ], "-pointonlyscale" ) )
+		else if( !strcmp( argv[ i ], "-spherical" ) || !strcmp( argv[ i ], "-sphericalscale" ) )
 		{
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
-			Sys_Printf( "Point (entity) light scaled by %f to %f\n", f, pointScale );
+			Sys_Printf( "Spherical point (entity) light scaled by %f to %f\n", f, pointScale );
 			i++;
 		}
 		
-		if( !strcmp( argv[ i ], "-spot" ) || !strcmp( argv[ i ], "-spotscale" ) )
+		else if( !strcmp( argv[ i ], "-spot" ) || !strcmp( argv[ i ], "-spotscale" ) )
 		{
 			f = atof( argv[ i + 1 ] );
 			spotScale *= f;
-			Sys_Printf( "Point (entity) light scaled by %f to %f\n", f, spotScale );
+			Sys_Printf( "Spot point (entity) light scaled by %f to %f\n", f, spotScale );
 			i++;
 		}
 		
