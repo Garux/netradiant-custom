@@ -683,6 +683,7 @@ int BSPMain( int argc, char **argv )
 	maxSurfaceVerts = game->maxSurfaceVerts;
 	maxSurfaceIndexes = game->maxSurfaceIndexes;
 	emitFlares = game->emitFlares;
+	texturesRGB = game->texturesRGB;
 	
 	/* process arguments */
 	for( i = 1; i < (argc - 1); i++ )
@@ -917,6 +918,16 @@ int BSPMain( int argc, char **argv )
 		{
 			Sys_Printf( "Debug portal surfaces enabled\n" );
 			debugPortals = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-sRGBtex" ) )
+		{
+			texturesRGB = qtrue;
+			Sys_Printf( "Textures are in sRGB\n" );
+		}
+		else if( !strcmp( argv[ i ], "-nosRGBtex" ) )
+		{
+			texturesRGB = qfalse;
+			Sys_Printf( "Textures are linear\n" );
 		}
 		else if( !strcmp( argv[ i ], "-altsplit" ) )
 		{

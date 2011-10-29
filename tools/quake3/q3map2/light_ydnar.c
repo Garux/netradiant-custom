@@ -44,7 +44,6 @@ ColorToBytes()
 ydnar: moved to here 2001-02-04
 */
 
-#define Image_sRGBFloatFromLinear(c) (((c) < 0.8014848f) ? (c) * 0.05046875f : 1.055f * (float)pow((c)*(1.0f/256.0f), 1.0f/2.4f) - 0.055f)
 void ColorToBytes( const float *color, byte *colorBytes, float scale )
 {
 	int		i;
@@ -125,9 +124,9 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 	/* sRGB lightmaps */
 	if(lightmapsRGB)
 	{
-		sample[0] = floor(Image_sRGBFloatFromLinear(sample[0]) * 255.0 + 0.5);
-		sample[1] = floor(Image_sRGBFloatFromLinear(sample[1]) * 255.0 + 0.5);
-		sample[2] = floor(Image_sRGBFloatFromLinear(sample[2]) * 255.0 + 0.5);
+		sample[0] = floor(Image_sRGBFloatFromLinearFloat(sample[0] * (1.0 / 255.0)) * 255.0 + 0.5);
+		sample[1] = floor(Image_sRGBFloatFromLinearFloat(sample[1] * (1.0 / 255.0)) * 255.0 + 0.5);
+		sample[2] = floor(Image_sRGBFloatFromLinearFloat(sample[2] * (1.0 / 255.0)) * 255.0 + 0.5);
 	}
 	
 	/* store it off */

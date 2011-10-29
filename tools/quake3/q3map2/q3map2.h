@@ -566,6 +566,7 @@ typedef struct game_s
 	int					lightmapSize;					/* bsp lightmap width/height */
 	float				lightmapGamma;					/* default lightmap gamma */
 	qboolean			lightmapsRGB;					/* default lightmap sRGB mode */
+	qboolean			texturesRGB;					/* default texture sRGB mode */
 	float				lightmapExposure;				/* default lightmap exposure */
 	float				lightmapCompensate;				/* default lightmap compensate value */
 	float				gridScale;						/* vortex: default lightgrid scale (affects both directional and ambient spectres) */
@@ -2298,6 +2299,7 @@ Q_EXTERN qboolean			inGrid Q_ASSIGN(0);
 /* ydnar: lightmap gamma/compensation */
 Q_EXTERN float				lightmapGamma Q_ASSIGN( 1.0f );
 Q_EXTERN float				lightmapsRGB Q_ASSIGN( qfalse );
+Q_EXTERN float				texturesRGB Q_ASSIGN( qfalse );
 Q_EXTERN float				lightmapExposure Q_ASSIGN( 1.0f );
 Q_EXTERN float				lightmapCompensate Q_ASSIGN( 1.0f );
 
@@ -2539,6 +2541,9 @@ Q_EXTERN bspAdvertisement_t	bspAds[ MAX_MAP_ADVERTISEMENTS ];
 	while(0)
 
 #define AUTOEXPAND_BY_REALLOC_BSP(suffix, def) AUTOEXPAND_BY_REALLOC(bsp##suffix, numBSP##suffix, allocatedBSP##suffix, def)
+
+#define Image_LinearFloatFromsRGBFloat(c) (((c) <= 0.04045f) ? (c) * (1.0f / 12.92f) : (float)pow(((c) + 0.055f)*(1.0f/1.055f), 2.4f))
+#define Image_sRGBFloatFromLinearFloat(c) (((c) < 0.0031308f) ? (c) * 12.92f : 1.055f * (float)pow((c), 1.0f/2.4f) - 0.055f)
 
 /* end marker */
 #endif
