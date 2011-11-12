@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "mainframe.h"
 #include "preferences.h"
 
-LatchedBool g_useAlternativeTextureProjection(false, "Use alternative texture-projection");
+LatchedBool g_useAlternativeTextureProjection(false, "Use alternative texture-projection (\"brush primitives\")");
 bool g_showAlternativeTextureProjectionOption = false;
 bool g_brush_always_caulk;
 
@@ -69,7 +69,7 @@ void Brush_constructPreferences(PreferencesPage& page)
   if(g_showAlternativeTextureProjectionOption)
   {
     page.appendCheckBox(
-      "", "Use alternative texture-projection",
+      "", "Use alternative texture-projection (\"brush primitives\")",
       LatchedBoolImportCaller(g_useAlternativeTextureProjection),
       BoolExportCaller(g_useAlternativeTextureProjection.m_latched)
     );
