@@ -340,6 +340,11 @@ void BuildFaceTree_r( node_t *node, face_t *list )
 			node->children[1]->maxs[i] = plane->dist;
 			break;
 		}
+		if ( plane->normal[i] == -1 ) {
+			node->children[0]->maxs[i] = -plane->dist;
+			node->children[1]->mins[i] = -plane->dist;
+			break;
+		}
 	}
 
 #if 0
