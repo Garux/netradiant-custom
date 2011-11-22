@@ -536,7 +536,7 @@ winding_t	*ReverseWinding (winding_t *w)
 ClipWindingEpsilon
 =============
 */
-void	ClipWindingEpsilon (winding_t *in, vec3_t normal, vec_t dist, 
+void	ClipWindingEpsilonStrict (winding_t *in, vec3_t normal, vec_t dist, 
 				vec_t epsilon, winding_t **front, winding_t **back)
 {
 	vec_t	dists[MAX_POINTS_ON_WINDING+4];
@@ -573,6 +573,10 @@ void	ClipWindingEpsilon (winding_t *in, vec3_t normal, vec_t dist,
 	
 	*front = *back = NULL;
 
+	if (!counts[0] && !counts[1])
+	{
+		return;
+	}
 	if (!counts[0])
 	{
 		*back = CopyWinding (in);
@@ -641,6 +645,15 @@ void	ClipWindingEpsilon (winding_t *in, vec3_t normal, vec_t dist,
 		Error ("ClipWinding: points exceeded estimate");
 	if (f->numpoints > MAX_POINTS_ON_WINDING || b->numpoints > MAX_POINTS_ON_WINDING)
 		Error ("ClipWinding: MAX_POINTS_ON_WINDING");
+}
+
+void	ClipWindingEpsilon (winding_t *in, vec3_t normal, vec_t dist, 
+				vec_t epsilon, winding_t **front, winding_t **back)
+{
+	ClipWindingEpsilonStrict(in, normal, dist, epsilon, front, back);
+	/* apparently most code expects that in the winding-on-plane case, the back winding is the original winding */
+	if(!*front && !*back)
+		*back = CopyWinding(in);
 }
 
 

@@ -2035,6 +2035,13 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 		si->mins[ 1 ] != 0.0f || si->maxs[ 1 ] != 0.0f ||
 		si->mins[ 2 ] != 0.0f || si->maxs[ 2 ] != 0.0f) )
 	{
+		static qboolean warned = qfalse;
+		if(!warned)
+		{
+			Sys_Printf( "WARNING: this map uses the deformVertexes move hack\n" );
+			warned = qtrue;
+		}
+
 		/* 'fatten' the winding by the shader mins/maxs (parsed from vertexDeform move) */
 		/* note this winding is completely invalid (concave, nonplanar, etc) */
 		fat = AllocWinding( w->numpoints * 3 + 3 );
@@ -2077,7 +2084,9 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 			VectorCopy( p2->normal, plane2 );
 			plane2[ 3 ] = p2->dist;
 			
-			#if 1
+			#if 0
+				/* div0: this is the plague (inaccurate) */
+
 				/* invert surface plane */
 				VectorSubtract( vec3_origin, plane2, reverse );
 				reverse[ 3 ] = -plane2[ 3 ];
@@ -2088,6 +2097,8 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 				if( DotProduct( plane1, reverse ) > 0.999f && fabs( plane1[ 3 ] - reverse[ 3 ] ) < 0.001f )
 					return FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
 			#else
+				/* div0: this is the cholera (doesn't hit enough) */
+
 				/* the drawsurf might have an associated plane, if so, force a filter here */
 				if( ds->planeNum == node->planenum )
 					return FilterWindingIntoTree_r( w, ds, node->children[ 0 ] );
@@ -2097,10 +2108,17 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 		}
 		
 		/* clip the winding by this plane */
-		ClipWindingEpsilon( w, plane1, plane1[ 3 ], ON_EPSILON, &front, &back );
+		ClipWindingEpsilonStrict( w, plane1, plane1[ 3 ], ON_EPSILON, &front, &back );
 		
 		/* filter by this plane */
 		refs = 0;
+		if( front == NULL && back == NULL )
+		{
+			/* same plane, this is an ugly hack */
+			/* but better too many than too few refs */
+			refs += FilterWindingIntoTree_r( CopyWinding(w), ds, node->children[ 0 ] );
+			refs += FilterWindingIntoTree_r( CopyWinding(w), ds, node->children[ 1 ] );
+		}
 		if( front != NULL )
 			refs += FilterWindingIntoTree_r( front, ds, node->children[ 0 ] );
 		if( back != NULL )
