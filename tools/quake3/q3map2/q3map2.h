@@ -1236,6 +1236,7 @@ typedef struct
 {
 	int					num;
 	qboolean			hint;			/* true if this portal was created from a hint splitter */
+	qboolean			sky;			/* true if this portal belongs to a sky leaf */
 	qboolean			removed;
 	visPlane_t			plane;			/* normal pointing into neighbor */
 	int					leaf;			/* neighbor */

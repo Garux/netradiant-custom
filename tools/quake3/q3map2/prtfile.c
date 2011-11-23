@@ -102,7 +102,7 @@ WritePortalFile_r
 */
 void WritePortalFile_r (node_t *node)
 {
-	int			i, s;	
+	int			i, s, flags;
 	portal_t	*p;
 	winding_t	*w;
 	vec3_t		normal;
@@ -144,12 +144,18 @@ void WritePortalFile_r (node_t *node)
 			}
 			else
 				fprintf (pf,"%i %i %i ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster);
+
+			flags = 0;
 			
 			/* ydnar: added this change to make antiportals work */
 			if( p->compileFlags & C_HINT )
-				fprintf( pf, "1 " );
-			else
-				fprintf( pf, "0 " );
+				flags |= 1;
+
+			/* divVerent: I want farplanedist to not kill skybox. So... */
+			if( p->compileFlags & C_SKY )
+				flags |= 2;
+
+			fprintf( pf, "%d ", flags );
 			
 			/* write the winding */
 			for (i=0 ; i<w->numpoints ; i++)
