@@ -594,7 +594,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	for( i = 0; i < dp->numPlanes; i++ )
 	{
 		/* chop winding by the plane */
-		ClipWindingEpsilon( w, dp->planes[ i ], dp->planes[ i ][ 3 ], 0.0625f, &front, &back );
+		ClipWindingEpsilonStrict( w, dp->planes[ i ], dp->planes[ i ][ 3 ], 0.0625f, &front, &back ); /* strict, if identical plane we don't want to keep it */
 		FreeWinding( w );
 		
 		/* lose the front fragment */

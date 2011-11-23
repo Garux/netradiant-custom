@@ -1356,7 +1356,7 @@ static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, winding_
 		if( (subCeil - subFloor) > subdivisions )
 		{
 			/* clip the winding */
-			ClipWindingEpsilon( w, planeNormal, d, epsilon, &frontWinding, &backWinding );
+			ClipWindingEpsilon( w, planeNormal, d, epsilon, &frontWinding, &backWinding ); /* not strict; we assume we always keep a winding */
 
 			/* the clip may not produce two polygons if it was epsilon close */
 			if( frontWinding == NULL )
@@ -1498,8 +1498,14 @@ void ClipSideIntoTree_r( winding_t *w, side_t *side, node_t *node )
 		}
 
 		plane = &mapplanes[ node->planenum ];
-		ClipWindingEpsilon ( w, plane->normal, plane->dist,
-				ON_EPSILON, &front, &back );
+		ClipWindingEpsilonStrict ( w, plane->normal, plane->dist,
+				ON_EPSILON, &front, &back ); /* strict, we handle the "winding disappeared" case */
+		if(!front && !back)
+		{
+			/* in doubt, register it in both nodes */
+			front = CopyWinding(w);
+			back = CopyWinding(w);
+		}
 		FreeWinding( w );
 
 		ClipSideIntoTree_r( front, side, node->children[0] );
@@ -2108,7 +2114,7 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 		}
 		
 		/* clip the winding by this plane */
-		ClipWindingEpsilonStrict( w, plane1, plane1[ 3 ], ON_EPSILON, &front, &back );
+		ClipWindingEpsilonStrict( w, plane1, plane1[ 3 ], ON_EPSILON, &front, &back ); /* strict; we handle the "winding disappeared" case */
 		
 		/* filter by this plane */
 		refs = 0;

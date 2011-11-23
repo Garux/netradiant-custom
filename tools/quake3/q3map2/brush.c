@@ -1027,8 +1027,8 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 		w = s->winding;
 		if (!w)
 			continue;
-		ClipWindingEpsilon (w, plane->normal, plane->dist,
-			0 /*PLANESIDE_EPSILON*/, &cw[0], &cw[1]);
+		ClipWindingEpsilonStrict (w, plane->normal, plane->dist,
+			0 /*PLANESIDE_EPSILON*/, &cw[0], &cw[1]); /* strict, in parallel case we get the face back because it also is the midwinding */
 		for (j=0 ; j<2 ; j++)
 		{
 			if (!cw[j])
