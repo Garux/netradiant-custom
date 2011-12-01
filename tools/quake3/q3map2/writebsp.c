@@ -287,6 +287,10 @@ void SetLightStyles( void )
 	char		lightTargets[ MAX_SWITCHED_LIGHTS ][ 64 ];
 	int			lightStyles[ MAX_SWITCHED_LIGHTS ];
 
+	/* -keeplights option: force lights to be kept and ignore what the map file says */
+	if (keepLights)
+		SetKeyValue(&entities[0], "_keepLights", "1");
+
 	/* ydnar: determine if we keep lights in the bsp */
 	if (KeyExists(&entities[ 0 ], "_keepLights") == qtrue)
 	{

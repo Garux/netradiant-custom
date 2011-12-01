@@ -702,6 +702,11 @@ int BSPMain( int argc, char **argv )
 			Sys_Printf( "Disabling water\n" );
 			nowater = qtrue;
 		}
+		else if( !strcmp( argv[ i ], "-keeplights" ))
+		{
+			keepLights = qtrue;
+			Sys_Printf( "Leaving light entities on map after compile\n" );
+		}
 		else if( !strcmp( argv[ i ],  "-nodetail" ) )
 		{
 			Sys_Printf( "Ignoring detail brushes\n") ;

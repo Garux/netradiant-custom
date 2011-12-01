@@ -2105,12 +2105,6 @@ int LightMain( int argc, char **argv )
 	else
 		Sys_Printf( " shader lightstyles hack: enabled\n" );
 
-	keepLights = game->keepLights;
-	if (keepLights == qtrue)
-		Sys_Printf( " keep lights: enabled\n" );
-	else
-		Sys_Printf( " keep lights: disabled\n" );
-
 	patchShadows = game->patchShadows;
 	if (patchShadows == qtrue)
 		Sys_Printf( " patch shadows: enabled\n" );
@@ -2729,11 +2723,6 @@ int LightMain( int argc, char **argv )
 		{
 			noStyles = qfalse;
 			Sys_Printf( "Enabling lightstyles\n" );
-		}
-		else if( !strcmp( argv[ i ], "-keeplights" ))
-		{
-			keepLights = qtrue;
-			Sys_Printf( "Leaving light entities on map after compile\n" );
 		}
 		else if( !strcmp( argv[ i ], "-cpma" ) )
 		{
