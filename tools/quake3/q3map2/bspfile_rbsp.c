@@ -146,7 +146,7 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t *header )
 			out = &gridPoints[ j ];
 			
 			/* compare styles */
-			if( *((unsigned int*) in->styles) != *((unsigned int*) out->styles) )
+			if( memcmp(in->styles, out->styles, MAX_LIGHTMAPS) )
 				continue;
 			
 			/* compare direction */
