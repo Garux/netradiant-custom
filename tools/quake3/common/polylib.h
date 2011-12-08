@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 typedef struct
 {
 	int		numpoints;
-	vec3_t	p[4];		// variable sized
+	vec3_t	p[1];		// variable sized
 } winding_t;
 
 #define	MAX_POINTS_ON_WINDING	512
@@ -67,7 +67,7 @@ void pw(winding_t *w);
 typedef struct
 {
 	int		numpoints;
-	vec3_accu_t	p[4]; // variable sized
+	vec3_accu_t	p[1]; // variable sized
 } winding_accu_t;
 
 winding_accu_t	*BaseWindingForPlaneAccu(vec3_t normal, vec_t dist);
