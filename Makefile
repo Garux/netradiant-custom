@@ -243,6 +243,7 @@ CPPFLAGS += -DRADIANT_VERSION="\"$(RADIANT_VERSION)\"" -DRADIANT_MAJOR_VERSION="
 
 .PHONY: all
 all: \
+	dependencies-check \
 	binaries \
 	install-data \
 	install-dll \
@@ -446,10 +447,10 @@ ifeq ($(OS),Win32)
 	$(WINDRES) $< $@
 endif
 
-%.o: %.cpp dependencies-check $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
+%.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),) | dependencies-check
 	$(CXX) $< $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
-%.o: %.c dependencies-check $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
+%.o: %.c dependencies-check $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),) | dependencies-check
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
 

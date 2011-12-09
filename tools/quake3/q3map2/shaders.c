@@ -827,6 +827,13 @@ finds a shaderinfo for a named shader
 
 #define MAX_SHADER_DEPRECATION_DEPTH 16
 
+shaderInfo_t *ShaderInfoForShaderNull( const char *shaderName )
+{
+	if(!strcmp(shaderName, "noshader"))
+		return NULL;
+	return ShaderInfoForShader(shaderName);
+}
+
 shaderInfo_t *ShaderInfoForShader( const char *shaderName )
 {
 	int				i;
