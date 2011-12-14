@@ -456,6 +456,13 @@ void ProcessWorldModel( void )
 				else
 					//%	VectorClear( normal );
 					VectorSet( normal, 0, 0, -1 );
+
+				if(colorsRGB)
+				{
+					color[0] = Image_LinearFloatFromsRGBFloat(color[0]);
+					color[1] = Image_LinearFloatFromsRGBFloat(color[1]);
+					color[2] = Image_LinearFloatFromsRGBFloat(color[2]);
+				}
 				
 				/* create the flare surface (note shader defaults automatically) */
 				DrawSurfaceForFlare( mapEntityNum, origin, normal, color, flareShader, lightStyle );
