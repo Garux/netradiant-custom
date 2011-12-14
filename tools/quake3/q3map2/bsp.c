@@ -684,6 +684,7 @@ int BSPMain( int argc, char **argv )
 	maxSurfaceIndexes = game->maxSurfaceIndexes;
 	emitFlares = game->emitFlares;
 	texturesRGB = game->texturesRGB;
+	colorsRGB = game->colorsRGB;
 	
 	/* process arguments */
 	for( i = 1; i < (argc - 1); i++ )
@@ -933,6 +934,16 @@ int BSPMain( int argc, char **argv )
 		{
 			texturesRGB = qfalse;
 			Sys_Printf( "Textures are linear\n" );
+		}
+		else if( !strcmp( argv[ i ], "-sRGBcolor" ) )
+		{
+			colorsRGB = qtrue;
+			Sys_Printf( "Colors are in sRGB\n" );
+		}
+		else if( !strcmp( argv[ i ], "-nosRGBcolor" ) )
+		{
+			colorsRGB = qfalse;
+			Sys_Printf( "Colors are linear\n" );
 		}
 		else if( !strcmp( argv[ i ], "-altsplit" ) )
 		{

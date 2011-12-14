@@ -150,6 +150,7 @@ game_t struct
 	1.0f,				/* lightmap gamma */
 	qtrue,				/* lightmap sRGB */
 	qfalse,				/* texture sRGB (yes, this is incorrect, but we better match ET:UT) */
+	qfalse,				/* color sRGB */
 	1.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
 	1.0f,				/* lightgrid scale */

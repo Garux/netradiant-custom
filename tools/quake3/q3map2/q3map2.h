@@ -567,6 +567,7 @@ typedef struct game_s
 	float				lightmapGamma;					/* default lightmap gamma */
 	qboolean			lightmapsRGB;					/* default lightmap sRGB mode */
 	qboolean			texturesRGB;					/* default texture sRGB mode */
+	qboolean			colorsRGB;					/* default color sRGB mode */
 	float				lightmapExposure;				/* default lightmap exposure */
 	float				lightmapCompensate;				/* default lightmap compensate value */
 	float				gridScale;						/* vortex: default lightgrid scale (affects both directional and ambient spectres) */
@@ -2302,6 +2303,7 @@ Q_EXTERN qboolean			inGrid Q_ASSIGN(0);
 Q_EXTERN float				lightmapGamma Q_ASSIGN( 1.0f );
 Q_EXTERN float				lightmapsRGB Q_ASSIGN( qfalse );
 Q_EXTERN float				texturesRGB Q_ASSIGN( qfalse );
+Q_EXTERN float				colorsRGB Q_ASSIGN( qfalse );
 Q_EXTERN float				lightmapExposure Q_ASSIGN( 1.0f );
 Q_EXTERN float				lightmapCompensate Q_ASSIGN( 1.0f );
 

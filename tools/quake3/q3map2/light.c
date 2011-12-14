@@ -2083,6 +2083,12 @@ int LightMain( int argc, char **argv )
 	else
 		Sys_Printf( " texture colorspace: linear\n" );
 
+	colorsRGB = game->colorsRGB;
+	if(colorsRGB)
+		Sys_Printf( " _color colorspace: sRGB\n" );
+	else
+		Sys_Printf( " _color colorspace: linear\n" );
+
 	lightmapCompensate = game->lightmapCompensate;
 	Sys_Printf( " lightning compensation: %f\n", lightmapCompensate );
 
@@ -2257,6 +2263,18 @@ int LightMain( int argc, char **argv )
 		{
 			texturesRGB = qfalse;
 			Sys_Printf( "Textures are linear\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-sRGBcolor" ) )
+		{
+			colorsRGB = qtrue;
+			Sys_Printf( "Colors are in sRGB\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-nosRGBcolor" ) )
+		{
+			colorsRGB = qfalse;
+			Sys_Printf( "Colors are linear\n" );
 		}
 
 		else if( !strcmp( argv[ i ], "-exposure" ) )
