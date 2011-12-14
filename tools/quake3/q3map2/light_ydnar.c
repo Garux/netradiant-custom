@@ -4075,7 +4075,7 @@ void SetupFloodLight( void )
 
 		if (VectorLength(floodlightRGB)==0)
 		{
-			VectorSet(floodlightRGB,240,240,255);
+			VectorSet(floodlightRGB,0.94,0.94,1.0);
 		}
 
 		if (v4<1) v4=1024;
@@ -4091,9 +4091,13 @@ void SetupFloodLight( void )
 	}
 	else
 	{
-		VectorSet(floodlightRGB,240,240,255);
-		//floodlighty = qtrue;
-		//Sys_Printf( "FloodLighting enabled via worldspawn _floodlight key.\n" );
+		VectorSet(floodlightRGB,0.94,0.94,1.0);
+	}
+	if(colorsRGB)
+	{
+		floodlightRGB[0] = Image_LinearFloatFromsRGBFloat(floodlightRGB[0]);
+		floodlightRGB[1] = Image_LinearFloatFromsRGBFloat(floodlightRGB[1]);
+		floodlightRGB[2] = Image_LinearFloatFromsRGBFloat(floodlightRGB[2]);
 	}
 	VectorNormalize(floodlightRGB,floodlightRGB);
 }
