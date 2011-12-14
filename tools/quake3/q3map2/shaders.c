@@ -1300,6 +1300,13 @@ static void ParseShaderFile( const char *filename )
 				sun->color[ 1 ] = atof( token );
 				GetTokenAppend( shaderText, qfalse );
 				sun->color[ 2 ] = atof( token );
+
+				if(colorsRGB)
+				{
+					sun->color[0] = Image_LinearFloatFromsRGBFloat(sun->color[0]);
+					sun->color[1] = Image_LinearFloatFromsRGBFloat(sun->color[1]);
+					sun->color[2] = Image_LinearFloatFromsRGBFloat(sun->color[2]);
+				}
 				
 				/* normalize it */
 				VectorNormalize( sun->color, sun->color );
@@ -1492,6 +1499,12 @@ static void ParseShaderFile( const char *filename )
 					si->color[ 1 ] = atof( token );
 					GetTokenAppend( shaderText, qfalse );
 					si->color[ 2 ] = atof( token );
+					if(colorsRGB)
+					{
+						si->color[0] = Image_LinearFloatFromsRGBFloat(si->color[0]);
+						si->color[1] = Image_LinearFloatFromsRGBFloat(si->color[1]);
+						si->color[2] = Image_LinearFloatFromsRGBFloat(si->color[2]);
+					}
 					ColorNormalize( si->color, si->color );
 				}
 				
@@ -1527,6 +1540,13 @@ static void ParseShaderFile( const char *filename )
 					si->floodlightIntensity = atof( token ); 
 					GetTokenAppend( shaderText, qfalse );
 					si->floodlightDirectionScale = atof( token ); 
+					if(colorsRGB)
+					{
+						si->floodlightRGB[0] = Image_LinearFloatFromsRGBFloat(si->floodlightRGB[0]);
+						si->floodlightRGB[1] = Image_LinearFloatFromsRGBFloat(si->floodlightRGB[1]);
+						si->floodlightRGB[2] = Image_LinearFloatFromsRGBFloat(si->floodlightRGB[2]);
+					}
+					VectorNormalize(si->floodlightRGB);
 				}
 
 				/* jal: q3map_nodirty : skip dirty */
@@ -1806,6 +1826,12 @@ static void ParseShaderFile( const char *filename )
 					{
 						cm->type = CM_COLOR_SET;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
+						if(colorsRGB)
+						{
+							cm->data[0] = Image_LinearFloatFromsRGBFloat(cm->data[0]);
+							cm->data[1] = Image_LinearFloatFromsRGBFloat(cm->data[1]);
+							cm->data[2] = Image_LinearFloatFromsRGBFloat(cm->data[2]);
+						}
 					}
 					
 					/* alpha scale A */
