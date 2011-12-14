@@ -388,6 +388,12 @@ void CreateEntityLights( void )
 		if( _color && _color[ 0 ] )
 		{
 			sscanf( _color, "%f %f %f", &light->color[ 0 ], &light->color[ 1 ], &light->color[ 2 ] );
+			if (colorsRGB)
+			{
+				light->color[0] = Image_LinearFloatFromsRGBFloat(light->color[0]);
+				light->color[1] = Image_LinearFloatFromsRGBFloat(light->color[1]);
+				light->color[2] = Image_LinearFloatFromsRGBFloat(light->color[2]);
+			}
 			if (!(light->flags & LIGHT_UNNORMALIZED))
 			{
 				ColorNormalize( light->color, light->color );
@@ -1850,6 +1856,12 @@ void LightWorld( void )
 	
 	/* find the optional minimum lighting values */
 	GetVectorForKey( &entities[ 0 ], "_color", color );
+	if (colorsRGB)
+	{
+		color[0] = Image_LinearFloatFromsRGBFloat(color[0]);
+		color[1] = Image_LinearFloatFromsRGBFloat(color[1]);
+		color[2] = Image_LinearFloatFromsRGBFloat(color[2]);
+	}
 	if( VectorLength( color ) == 0.0f )
 		VectorSet( color, 1.0, 1.0, 1.0 );
 	
