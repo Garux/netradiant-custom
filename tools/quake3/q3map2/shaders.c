@@ -1309,7 +1309,7 @@ static void ParseShaderFile( const char *filename )
 				}
 				
 				/* normalize it */
-				VectorNormalize( sun->color, sun->color );
+				ColorNormalize( sun->color, sun->color );
 				
 				/* scale color by brightness */
 				GetTokenAppend( shaderText, qfalse );
@@ -1546,7 +1546,7 @@ static void ParseShaderFile( const char *filename )
 						si->floodlightRGB[1] = Image_LinearFloatFromsRGBFloat(si->floodlightRGB[1]);
 						si->floodlightRGB[2] = Image_LinearFloatFromsRGBFloat(si->floodlightRGB[2]);
 					}
-					VectorNormalize(si->floodlightRGB, si->floodlightRGB);
+					ColorNormalize(si->floodlightRGB, si->floodlightRGB);
 				}
 
 				/* jal: q3map_nodirty : skip dirty */
