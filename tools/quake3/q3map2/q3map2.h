@@ -142,7 +142,7 @@ constants
 #define DEF_RADIOSITY_BOUNCE	1.0f	/* ydnar: default to 100% re-emitted light */
 
 #define	MAX_SHADER_INFO			8192
-#define MAX_CUST_SURFACEPARMS	64
+#define MAX_CUST_SURFACEPARMS	256
 
 #define	SHADER_MAX_VERTEXES		1000
 #define	SHADER_MAX_INDEXES		(6 * SHADER_MAX_VERTEXES)
