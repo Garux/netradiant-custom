@@ -4099,7 +4099,7 @@ void SetupFloodLight( void )
 		floodlightRGB[1] = Image_LinearFloatFromsRGBFloat(floodlightRGB[1]);
 		floodlightRGB[2] = Image_LinearFloatFromsRGBFloat(floodlightRGB[2]);
 	}
-	VectorNormalize(floodlightRGB,floodlightRGB);
+	ColorNormalize(floodlightRGB,floodlightRGB);
 }
 
 /*
