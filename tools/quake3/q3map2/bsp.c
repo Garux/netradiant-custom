@@ -952,6 +952,13 @@ int BSPMain( int argc, char **argv )
 			colorsRGB = qfalse;
 			Sys_Printf( "Colors are linear\n" );
 		}
+		else if( !strcmp( argv[ i ], "-nosRGB" ) )
+		{
+			texturesRGB = qfalse;
+			Sys_Printf( "Textures are linear\n" );
+			colorsRGB = qfalse;
+			Sys_Printf( "Colors are linear\n" );
+		}
 		else if( !strcmp( argv[ i ], "-altsplit" ) )
 		{
 			Sys_Printf( "Alternate BSP splitting (by 27) enabled\n" );
