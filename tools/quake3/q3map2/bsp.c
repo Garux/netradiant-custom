@@ -626,7 +626,7 @@ void OnlyEnts( void )
 {
 	char out[ 1024 ];
 
-	char save_cmdline[1024], save_version[1024];
+	char save_cmdline[1024], save_version[1024], save_gridsize[1024];
 	const char *p;
 	
 	/* note it */
@@ -642,6 +642,9 @@ void OnlyEnts( void )
 	p = ValueForKey(&entities[0], "_q3map2_version");
 	strncpy(save_version, p, sizeof(save_version));
 	save_version[sizeof(save_version)-1] = 0;
+	p = ValueForKey(&entities[0], "gridsize");
+	strncpy(save_gridsize, p, sizeof(save_gridsize));
+	save_gridsize[sizeof(save_gridsize)-1] = 0;
 
 	numEntities = 0;
 
@@ -654,6 +657,8 @@ void OnlyEnts( void )
 		SetKeyValue(&entities[0], "_q3map2_cmdline", save_cmdline);
 	if(*save_version)
 		SetKeyValue(&entities[0], "_q3map2_version", save_version);
+	if(*save_gridsize)
+		SetKeyValue(&entities[0], "gridsize", save_gridsize);
 	
 	numBSPEntities = numEntities;
 	UnparseEntities();
