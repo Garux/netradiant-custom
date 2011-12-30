@@ -1625,11 +1625,11 @@ int ConvertBSPMain( int argc, char **argv )
  			i++;
 			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
  		}
-		else if( !strcmp( argv[ i ],  "-shadersasbitmap" ) )
+		else if( !strcmp( argv[ i ],  "-shaderasbitmap" ) || !strcmp( argv[ i ],  "-shadersasbitmap" ) )
 			shadersAsBitmap = qtrue;
-		else if( !strcmp( argv[ i ],  "-lightmapsastexcoord" ) )
+		else if( !strcmp( argv[ i ],  "-lightmapastexcoord" ) || !strcmp( argv[ i ],  "-lightmapsastexcoord" ) )
 			lightmapsAsTexcoord = qtrue;
-		else if( !strcmp( argv[ i ],  "-deluxemapsastexcoord" ) )
+		else if( !strcmp( argv[ i ],  "-deluxemapastexcoord" ) || !strcmp( argv[ i ],  "-deluxemapsastexcoord" ) )
 		{
 			lightmapsAsTexcoord = qtrue;
 			deluxemap = qtrue;
