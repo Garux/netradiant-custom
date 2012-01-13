@@ -33,6 +33,8 @@ for DLL in \
 	libpng14-14.dll \
 	libxml2-2.dll \
 	zlib1.dll \
+	libgcc_s_sjlj-1.dll \
+	libstdc++-6.dll \
 ; do
 	$CP "`$WHICHDLL $DLL`" $INSTALLDIR/
 done
