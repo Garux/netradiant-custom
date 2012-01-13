@@ -337,6 +337,19 @@ public:
 };
 
 typedef std::pair<CopiedString, Build> BuildPair;
+#define SEPARATOR_STRING "-"
+static bool is_separator(const BuildPair &p)
+{
+      if(!string_equal(p.first.c_str(), SEPARATOR_STRING))
+	      return false;
+      for(Build::const_iterator j = p.second.begin(); j != p.second.end(); ++j)
+      {
+	      if(!string_equal((*j).c_str(), ""))
+		      return false;
+      }
+      return true;
+}
+
 
 class BuildPairEqual
 {
@@ -414,6 +427,11 @@ public:
       m_project.push_back(Project::value_type(element.attribute("name"), Build()));
       m_build = new BuildXMLConstructor(m_project.back().second);
       return *m_build;
+    }
+    else if(string_equal(element.name(), "separator"))
+    {
+      m_project.push_back(Project::value_type(SEPARATOR_STRING, Build()));
+      return *this;
     }
     else
     {
@@ -664,13 +682,23 @@ public:
     }
     for(Project::iterator i = m_project.begin(); i != m_project.end(); ++i)
     {
-      StaticElement buildElement("build");
-      buildElement.insertAttribute("name", (*i).first.c_str());
-      importer.pushElement(buildElement);
-      BuildXMLExporter buildExporter((*i).second);
-      buildExporter.exportXML(importer);
-      importer.popElement(buildElement.name());
-      importer << "\n";
+      if(is_separator(*i))
+      {
+        StaticElement buildElement("separator");
+        importer.pushElement(buildElement);
+        importer.popElement(buildElement.name());
+        importer << "\n";
+      }
+      else
+      {
+        StaticElement buildElement("build");
+        buildElement.insertAttribute("name", (*i).first.c_str());
+        importer.pushElement(buildElement);
+        BuildXMLExporter buildExporter((*i).second);
+        buildExporter.exportXML(importer);
+        importer.popElement(buildElement.name());
+        importer << "\n";
+      }
     }
     importer.popElement(projectElement.name());
   }
@@ -756,15 +784,11 @@ gboolean project_cell_edited(GtkCellRendererText* cell, gchar* path_string, gcha
     if(string_empty(new_text))
     {
       project.erase(i);
-      Build_refreshMenu(g_bsp_menu);
-
       gtk_list_store_remove(projectList->m_store, &iter);
     }
     else
     {
       (*i).first = new_text;
-      Build_refreshMenu(g_bsp_menu);
-
       gtk_list_store_set(projectList->m_store, &iter, 0, new_text, -1);
     }
   }
@@ -772,7 +796,6 @@ gboolean project_cell_edited(GtkCellRendererText* cell, gchar* path_string, gcha
   {
     projectList->m_changed = true;
     project.push_back(Project::value_type(new_text, Build()));
-    Build_refreshMenu(g_bsp_menu);
 
     gtk_list_store_set(projectList->m_store, &iter, 0, new_text, -1);
     GtkTreeIter lastIter;
@@ -780,6 +803,8 @@ gboolean project_cell_edited(GtkCellRendererText* cell, gchar* path_string, gcha
   }
 
   gtk_tree_path_free(path);
+
+  Build_refreshMenu(g_bsp_menu);
 
   return FALSE;
 }
@@ -891,6 +916,8 @@ gboolean commands_cell_edited(GtkCellRendererText* cell, gchar* path_string, gch
   }
 
   gtk_tree_path_free(path);
+
+  Build_refreshMenu(g_bsp_menu);
 
   return FALSE;
 }
@@ -1097,7 +1124,14 @@ void Build_constructMenu(GtkMenu* menu)
   for(Project::iterator i = g_build_project.begin(); i != g_build_project.end(); ++i)
   {
     g_BuildMenuItems.push_back(BuildMenuItem((*i).first.c_str(), 0));
-    g_BuildMenuItems.back().m_item = create_menu_item_with_mnemonic(menu, (*i).first.c_str(), BuildMenuItem::RunCaller(g_BuildMenuItems.back()));
+    if(is_separator(*i))
+    {
+      g_BuildMenuItems.back().m_item = menu_separator(menu);
+    }
+    else
+    {
+      g_BuildMenuItems.back().m_item = create_menu_item_with_mnemonic(menu, (*i).first.c_str(), BuildMenuItem::RunCaller(g_BuildMenuItems.back()));
+    }
   }
 }
 
