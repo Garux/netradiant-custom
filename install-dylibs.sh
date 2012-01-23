@@ -24,29 +24,20 @@ finkgetdeps()
 finkgetdeps "$INSTALLDIR/radiant.$EXE"
 echo Warning: this only works if only ONE version of gtk-2.0 and pango is installed
 
-LAST=
-for LIB in "$MACLIBDIR"/gtk-2.0/*/loaders/libpixbufloader-bmp.so "$MACLIBDIR"/gdk-pixbuf-2.0/*/loaders/libpixbufloader-bmp.so; do
-	[ -f "$LIB" ] || continue
-	LAST=$LIB
-done
-cp -L "$LAST" "$INSTALLDIR"
-finkgetdeps "$LAST"
+getlib()
+{
+	LAST=
+	for LIB in "$@"; do
+		[ -f "$LIB" ] || continue
+		LAST=$LIB
+	done
+	cp -L "$LAST" "$INSTALLDIR"
+	finkgetdeps "$LAST"
+}
 
-LAST=
-for LIB in "$MACLIBDIR"/pango/*/modules/pango-basic-fc.so; do
-	[ -f "$LIB" ] || continue
-	LAST=$LIB
-done
-cp -L "$LAST" "$INSTALLDIR"
-finkgetdeps "$LAST"
-
-LAST=
-for LIB in "$MACLIBDIR"/pango/*/modules/pango-basic-x.so; do
-	[ -f "$LIB" ] || continue
-	LAST=$LIB
-done
-cp -L "$LAST" "$INSTALLDIR"
-finkgetdeps "$LAST"
+getlib "$MACLIBDIR"/gtk-2.0/*/loaders/libpixbufloader-bmp.so "$MACLIBDIR"/gdk-pixbuf-2.0/*/loaders/libpixbufloader-bmp.so
+getlib "$MACLIBDIR"/pango/*/modules/pango-basic-fc.so
+getlib "$MACLIBDIR"/pango/*/modules/pango-basic-x.so
 
 cp -L "$MACLIBDIR"/../etc/fonts/fonts.conf "$INSTALLDIR"
 cp -L "$MACLIBDIR"/../etc/fonts/fonts.dtd "$INSTALLDIR"
