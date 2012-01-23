@@ -197,11 +197,11 @@ ifeq ($(OS),Darwin)
 	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
-	CPPFLAGS_COMMON += -I/opt/local/include -I/sw/include -I/usr/X11R6/include
-	LDFLAGS_COMMON += -L/opt/local/lib -L/sw/lib -L/usr/X11R6/lib
+	MACLIBDIR ?= /opt/local/lib
+	CPPFLAGS_COMMON += -I$(MACLIBDIR)/../include -I/usr/X11R6/include
+	LDFLAGS_COMMON += -L$(MACLIBDIR) -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
 	EXE ?= ppc
-	MACLIBDIR ?= /opt/local/lib
 	A = a
 	DLL = dylib
 	MWINDOWS =
