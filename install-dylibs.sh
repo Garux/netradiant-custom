@@ -39,10 +39,10 @@ getlib "$MACLIBDIR"/gtk-2.0/*/loaders/libpixbufloader-bmp.so "$MACLIBDIR"/gdk-pi
 getlib "$MACLIBDIR"/pango/*/modules/pango-basic-fc.so
 getlib "$MACLIBDIR"/pango/*/modules/pango-basic-x.so
 
-cp -L "$MACLIBDIR"/../etc/fonts/fonts.conf "$INSTALLDIR"
-cp -L "$MACLIBDIR"/../etc/fonts/fonts.dtd "$INSTALLDIR"
-cp -L "$MACLIBDIR"/../etc/gtk-2.0/gdk-pixbuf.loaders "$INSTALLDIR"
-cp -L "$MACLIBDIR"/../etc/pango/pangorc "$INSTALLDIR"
+#cp -L "$MACLIBDIR"/../etc/fonts/fonts.conf "$INSTALLDIR"
+#cp -L "$MACLIBDIR"/../etc/fonts/fonts.dtd "$INSTALLDIR"
+#cp -L "$MACLIBDIR"/../etc/gtk-2.0/gdk-pixbuf.loaders "$INSTALLDIR"
+#cp -L "$MACLIBDIR"/../etc/pango/pangorc "$INSTALLDIR"
 
 $CAT > "$INSTALLDIR/../netradiant.sh" <<EOF
 #!/bin/sh
