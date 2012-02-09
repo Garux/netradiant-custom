@@ -3632,23 +3632,29 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 				/* handle area lights */
 				if( exactPointToPolygon && light->type == EMIT_AREA && light->w != NULL )
 				{
-					/* ugly hack to calculate extent for area lights, but only done once */
-					VectorScale( light->normal, -1.0f, dir );
-					for( radius = 100.0f; radius < 130000.0f && light->envelope == 0; radius += 10.0f )
+					light->envelope = MAX_WORLD_COORD * 8.0f;
+
+					/* check for fast mode */
+					if( (light->flags & LIGHT_FAST) || (light->flags & LIGHT_FAST_TEMP) )
 					{
-						float	factor;
-						
-						VectorMA( light->origin, radius, light->normal, origin );
-						factor = PointToPolygonFormFactor( origin, dir, light->w );
-						if( factor < 0.0f )
-							factor *= -1.0f;
-						if( (factor * light->add) <= light->falloffTolerance )
-							light->envelope = radius;
+						/* ugly hack to calculate extent for area lights, but only done once */
+						VectorScale( light->normal, -1.0f, dir );
+						for( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
+						{
+							float	factor;
+							
+							VectorMA( light->origin, radius, light->normal, origin );
+							factor = PointToPolygonFormFactor( origin, dir, light->w );
+							if( factor < 0.0f )
+								factor *= -1.0f;
+							if( (factor * light->add) <= light->falloffTolerance )
+							{
+								light->envelope = radius;
+								break;
+							}
+						}
 					}
 					
-					/* check for fast mode */
-					if( !(light->flags & LIGHT_FAST) && !(light->flags & LIGHT_FAST_TEMP) )
-						light->envelope = MAX_WORLD_COORD * 8.0f;
 					intensity = light->photons; /* hopefully not used */
 				}
 				else
@@ -3660,35 +3666,45 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 				/* other calcs */
 				if( light->envelope <= 0.0f )
 				{
-					/* FIXME shouldn't we assume falloffTolerance == 0 when -fast is not used? */
-
 					/* solve distance for non-distance lights */
 					if( !(light->flags & LIGHT_ATTEN_DISTANCE) )
 						light->envelope = MAX_WORLD_COORD * 8.0f;
-					
-					/* solve distance for linear lights */
-					else if( (light->flags & LIGHT_ATTEN_LINEAR ) )
-						//% light->envelope = ((intensity / light->falloffTolerance) * linearScale - 1 + radius) / light->fade;
-						light->envelope = ((intensity * linearScale) - light->falloffTolerance) / light->fade;
-
-						/*
-						add = angle * light->photons * linearScale - (dist * light->fade);
-						T = (light->photons * linearScale) - (dist * light->fade);
-						T + (dist * light->fade) = (light->photons * linearScale);
-						dist * light->fade = (light->photons * linearScale) - T;
-						dist = ((light->photons * linearScale) - T) / light->fade;
-						*/
-					
-					/* solve for inverse square falloff */
-					else
-						light->envelope = sqrt( intensity / light->falloffTolerance ) + radius;
 						
-						/*
-						add = light->photons / (dist * dist);
-						T = light->photons / (dist * dist);
-						T * (dist * dist) = light->photons;
-						dist = sqrt( light->photons / T );
-						*/
+					else if( (light->flags & LIGHT_FAST) || (light->flags & LIGHT_FAST_TEMP) )
+					{
+						/* solve distance for linear lights */
+						if( (light->flags & LIGHT_ATTEN_LINEAR ) )
+							light->envelope = ((intensity * linearScale) - light->falloffTolerance) / light->fade;
+
+							/*
+							add = angle * light->photons * linearScale - (dist * light->fade);
+							T = (light->photons * linearScale) - (dist * light->fade);
+							T + (dist * light->fade) = (light->photons * linearScale);
+							dist * light->fade = (light->photons * linearScale) - T;
+							dist = ((light->photons * linearScale) - T) / light->fade;
+							*/
+						
+						/* solve for inverse square falloff */
+						else
+							light->envelope = sqrt( intensity / light->falloffTolerance ) + radius;
+							
+							/*
+							add = light->photons / (dist * dist);
+							T = light->photons / (dist * dist);
+							T * (dist * dist) = light->photons;
+							dist = sqrt( light->photons / T );
+							*/
+					}
+					else
+					{
+						/* solve distance for linear lights */
+						if( (light->flags & LIGHT_ATTEN_LINEAR ) )
+							light->envelope = (intensity * linearScale) / light->fade;
+						
+						/* can't cull these */
+						else
+							light->envelope = MAX_WORLD_COORD * 8.0f;
+					}
 				}
 				
 				/* chop radius against pvs */
