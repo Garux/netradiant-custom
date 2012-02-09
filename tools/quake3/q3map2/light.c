@@ -2852,6 +2852,10 @@ int LightMain( int argc, char **argv )
 
 	}
 
+	/* fix up falloff tolerance for sRGB */
+	if(lightmapsRGB)
+		falloffTolerance = Image_LinearFloatFromsRGBFloat(falloffTolerance * (1.0 / 255.0)) * 255.0;
+
 	/* fix up samples count */
 	if(lightRandomSamples)
 	{
