@@ -3660,6 +3660,8 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 				/* other calcs */
 				if( light->envelope <= 0.0f )
 				{
+					/* FIXME shouldn't we assume falloffTolerance == 0 when -fast is not used? */
+
 					/* solve distance for non-distance lights */
 					if( !(light->flags & LIGHT_ATTEN_DISTANCE) )
 						light->envelope = MAX_WORLD_COORD * 8.0f;
