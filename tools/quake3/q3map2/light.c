@@ -2567,12 +2567,18 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "The -smooth argument is deprecated, use \"-samples 2\" instead\n" );
 		}
 		
+		else if( !strcmp( argv[ i ], "-nofastpoint" ) )
+		{
+			fastpoint = qfalse;
+			Sys_Printf( "Automatic fast mode for point lights disabled\n" );
+		}
+		
 		else if( !strcmp( argv[ i ], "-fast" ) )
 		{
 			fast = qtrue;
 			fastgrid = qtrue;
 			fastbounce = qtrue;
-			Sys_Printf( "Fast mode enabled\n" );
+			Sys_Printf( "Fast mode enabled for all area lights\n" );
 		}
 		
 		else if( !strcmp( argv[ i ], "-faster" ) )

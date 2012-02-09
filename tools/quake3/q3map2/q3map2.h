@@ -2226,6 +2226,7 @@ Q_EXTERN qboolean			debugDeluxemap Q_ASSIGN( qfalse );
 Q_EXTERN int				deluxemode Q_ASSIGN( 0 );	/* deluxemap format (0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization) */
 
 Q_EXTERN qboolean			fast Q_ASSIGN( qfalse );
+Q_EXTERN qboolean			fastpoint Q_ASSIGN( qtrue );
 Q_EXTERN qboolean			faster Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			fastgrid Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			fastbounce Q_ASSIGN( qfalse );
