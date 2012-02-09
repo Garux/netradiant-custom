@@ -74,7 +74,7 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 		sample[ i ] = pow( sample[ i ] / 255.0f, gamma ) * 255.0f;
 	}
 
-	if (lightmapExposure == 1)
+	if (lightmapExposure == 0)
 	{
 		/* clamp with color normalization */
 		max = sample[ 0 ];
@@ -87,10 +87,6 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 	}
 	else
 	{
-		if (lightmapExposure==0)
-		{
-			lightmapExposure=1.0f;
-		}
 		inv=1.f/lightmapExposure;
 		//Exposure
 

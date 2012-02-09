@@ -115,7 +115,7 @@ game_t struct
 	qfalse,				/* lightmap sRGB */
 	qfalse,				/* texture sRGB */
 	qfalse,				/* color sRGB */
-	1.0f,				/* lightmap exposure */
+	0.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
 	1.0f,				/* lightgrid scale */
 	1.0f,				/* lightgrid ambient scale */
