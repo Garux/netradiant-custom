@@ -80,11 +80,11 @@ void DPatch::BuildInRadiant(scene::Node* entity)
   GlobalPatchCreator().Patch_setShader(patch, texture);
   GlobalPatchCreator().Patch_resize(patch, height, width);
   PatchControlMatrix matrix = GlobalPatchCreator().Patch_getControlPoints(patch);
-	for(int x = 0; x < height; x++)
+	for(int x = 0; x < width; x++)
   {
-		for(int y = 0; y < width; y++)
+		for(int y = 0; y < height; y++)
     {
-      PatchControl& p = matrix(y, x);
+      PatchControl& p = matrix(x, y);
       p.m_vertex[0] = points[x][y].xyz[0];
       p.m_vertex[1] = points[x][y].xyz[1];
       p.m_vertex[2] = points[x][y].xyz[2];
@@ -148,11 +148,11 @@ void DPatch::LoadFromPatch(scene::Instance& patch)
   width = static_cast<int>(matrix.x());
 	height = static_cast<int>(matrix.y());
 
-  for(int x = 0; x < height; x++)
+  for(int x = 0; x < width; x++)
   {
-		for(int y = 0; y < width; y++)
+		for(int y = 0; y < height; y++)
     {
-      PatchControl& p = matrix(y, x);
+      PatchControl& p = matrix(x, y);
       points[x][y].xyz[0] = p.m_vertex[0];
       points[x][y].xyz[1] = p.m_vertex[1];
       points[x][y].xyz[2] = p.m_vertex[2];
@@ -307,17 +307,13 @@ DPatch* DPatch::MergePatches(patch_merge_t merge_info, DPatch *p1, DPatch *p2)
 		if(merge_info.pos2 < 0)
 			merge_info.pos2 += 3;
 	}
-	//
 
 	int newHeight = p1->height + p2->height - 1; 
 	if(newHeight > MAX_PATCH_HEIGHT)
 		return false;
-/*	int newWidth = p1->width + p2->width - 1;
-	if(newWidth > MAX_PATCH_WIDTH)
-		return NULL;
-*/	
+
 	DPatch* newPatch = new DPatch();
-	//switched..
+
 	newPatch->height	= newHeight;
 	newPatch->width		= p1->width;
 	newPatch->SetTexture(p1->texture);
@@ -346,6 +342,45 @@ void DPatch::Invert()
 		}
 	}
 }
+/*
+//Was used for debugging, obsolete function
+DPatch* DPatch::TransposePatch(DPatch *p1)
+{
+	globalOutputStream() << "Source patch ";
+    p1->DebugPrint();
+    p1->Transpose();
+    globalOutputStream() << "Transposed";
+    p1->DebugPrint();
+  
+    DPatch* newPatch = new DPatch();
+	newPatch->height	= p1->height;
+	newPatch->width		= p1->width;
+	newPatch->SetTexture(p1->texture);
+    
+	for(int x = 0; x < p1->height; x++)
+	{
+		for(int y = 0; y < p1->width; y++)
+		{
+            newPatch->points[x][y] = p1->points[x][y];
+        }
+    }
+	return newPatch;
+}
+
+//Function to figure out what is actually going wrong.
+void DPatch::DebugPrint()
+{
+    globalOutputStream() << "width: " << width << "\theight: " << height << "\n";
+    for(int x = 0; x < height; x++)
+	{
+		for(int y = 0; y < width; y++)
+		{
+            globalOutputStream() << "\t(" << points[x][y].xyz[0] << " " << points[x][y].xyz[1] << " " << points[x][y].xyz[2] << ")\t";
+        }
+        globalOutputStream() << "\n";
+    }
+}
+ */
 
 void DPatch::Transpose()
 {
@@ -397,7 +432,7 @@ void DPatch::Transpose()
 	Invert();
 }
 
-std::list<DPatch> DPatch::SplitRows()
+std::list<DPatch> DPatch::SplitCols()
 {
 	std::list<DPatch> patchList;
 	int i;
@@ -410,39 +445,25 @@ std::list<DPatch> DPatch::SplitRows()
 			DPatch p;
 
 			p.width = width;
-			p.height = 3;
+			p.height = MIN_PATCH_HEIGHT;
 			p.SetTexture(texture);
-			for(x = 0; x < 3; x++)
+			for(x = 0; x < p.width; x++)
 			{
-				for(y = 0; y < p.width; y++)
+				for(y = 0; y < MIN_PATCH_HEIGHT; y++)
 				{
-					p.points[x][y] = points[(i*2)+x][y];
+					p.points[x][y] = points[x][(i*2)+y];
 				}
 			}			
 			patchList.push_back(p);
 		}
 	} else {
-		//This returns exactly what comes in.. I don't know better :/
-		//If nothing is returned, the Patch in Radiant is just deleted - I suppose for evil follow up erros.
-		DPatch p;
-		
-		p.height = height;
-		p.width = width;
-		p.SetTexture(texture);
-		
-		for(x = 0; x < p.height; x++)
-		{
-			for(y = 0; y < p.width; y++)
-			{
-				p.points[x][y] = points[x][y];
+        //globalErrorStream() << "bobToolz SplitPatchRows: Patch has not enough rows for splitting.\n";
+		patchList.push_back(*this);
 			}
-		}
-		patchList.push_back(p);
-	}
 	return patchList;
 }
 
-std::list<DPatch> DPatch::SplitCols()
+std::list<DPatch> DPatch::SplitRows()
 {
 	std::list<DPatch> patchList;
 	int i;
@@ -454,38 +475,23 @@ std::list<DPatch> DPatch::SplitCols()
 		{
 			DPatch p;
 			
-			p.width = 3;
+			p.width = MIN_PATCH_WIDTH;
 			p.height = height;
 			p.SetTexture(texture);
 			
-			for(x = 0; x < p.height; x++)
+			for(x = 0; x < MIN_PATCH_WIDTH; x++)
 			{
-				for(y = 0; y < 3; y++)
+				for(y = 0; y < p.height; y++)
 				{
-					p.points[x][y] = points[x][(i*2)+y];
+					p.points[x][y] = points[(i*2)+x][y];
 				}
 			}
 			patchList.push_back(p);
 		}
 	} else 
 	{
-		//This returns exactly what comes in.. I don't know better :/
-		//If nothing is returned, the Patch in Radiant is just deleted - I suppose for evil follow up erros.
-		DPatch p;
-		
-		p.height = height;
-		p.width = width;
-		p.SetTexture(texture);
-		
-		for(x = 0; x < p.height; x++)
-		{
-			for(y = 0; y < p.width; y++)
-			{
-				p.points[x][y] = points[x][y];
+		patchList.push_back(*this);
 			}
-		}
-		patchList.push_back(p);
-	}
 	return patchList;
 }
 
@@ -497,77 +503,26 @@ std::list<DPatch> DPatch::Split()
 	
 	if(width >= 5)
 	{
-		for(i = 0; i < (width-1)/2; i++)
+		std::list<DPatch> patchColList = SplitCols();
+        for(std::list<DPatch>::iterator patchesCol = patchColList.begin(); patchesCol != patchColList.end(); patchesCol++)
 		{
-			DPatch p;
-			
-			p.width = 3;
-			p.height = height;
-			p.SetTexture(texture);
-			
-			for(x = 0; x < p.height; x++)
+		   std::list<DPatch> patchRowList = (*patchesCol).SplitRows();
+	       for(std::list<DPatch>::iterator patchesRow = patchRowList.begin(); patchesRow != patchRowList.end(); patchesRow++)
 			{
-				for(y = 0; y < 3; y++)
-				{
-					p.points[x][y] = points[x][(i*2)+y];
+              patchList.push_front(*patchesRow);
 				}
 			}
-			patchList.push_back(p);
-		}
-		std::list<DPatch> patchList2;
-		for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++)
-		{
-			std::list<DPatch> patchList3 = (*patches).SplitRows();
-			for(std::list<DPatch>::iterator patches2 = patchList3.begin(); patches2 != patchList3.end(); patches2++)
-				patchList2.push_front(*patches2);
-		}
-		return patchList2;
-		
 	} else 	if(height >= 5) 
 	{
-		for(i = 0; i < (height-1)/2; i++)
+		std::list<DPatch> patchRowList = SplitRows();
+        for(std::list<DPatch>::iterator patchesRow = patchRowList.begin(); patchesRow != patchRowList.end(); patchesRow++)
 		{
-			DPatch p;
-			
-			p.width = width;
-			p.height = 3;
-			p.SetTexture(texture);
-			for(x = 0; x < 3; x++)
-			{
-				for(y = 0; y < p.width; y++)
-				{
-					p.points[x][y] = points[(i*2)+x][y];
+           patchList.push_front(*patchesRow);
 				}
-			}			
-			patchList.push_back(p);
-		}		
-		std::list<DPatch> patchList2;
-		for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++)
-		{
-			std::list<DPatch> patchList3 = (*patches).SplitCols();
-			for(std::list<DPatch>::iterator patches2 = patchList3.begin(); patches2 != patchList3.end(); patches2++)
-				patchList2.push_front(*patches2);
-		}
-		return patchList2;
-		
 	} else 
 	{
-		//This returns exactly what comes in.. I don't know better :/
-		//If nothing is returned, the Patch in Radiant is just deleted - I suppose for evil follow up erros.
-		DPatch p;
-		
-		p.height = height;
-		p.width = width;
-		p.SetTexture(texture);
-		
-		for(x = 0; x < p.height; x++)
-		{
-			for(y = 0; y < p.width; y++)
-			{
-				p.points[x][y] = points[x][y];
+        //globalErrorStream() << "bobToolz SplitPatchRows: Patch has not enough rows for splitting.\n";
+		patchList.push_back(*this);
 			}
-		}
-		patchList.push_back(p);		
-	}
 	return patchList;
 }
