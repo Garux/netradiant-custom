@@ -2435,8 +2435,7 @@ void EmitDrawIndexes( mapDrawSurface_t *ds, bspDrawSurface_t *out )
 		/* copy new unique indexes */
 		for( i = 0; i < ds->numIndexes; i++ )
 		{
-			if( numBSPDrawIndexes == MAX_MAP_DRAW_INDEXES )
-				Error( "MAX_MAP_DRAW_INDEXES" );
+			AUTOEXPAND_BY_REALLOC_BSP(DrawIndexes, 1024);
 			bspDrawIndexes[ numBSPDrawIndexes ] = ds->indexes[ i ];
 
 			/* validate the index */

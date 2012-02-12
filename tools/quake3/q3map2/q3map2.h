@@ -327,7 +327,6 @@ abstracted bsp file
 #define	MAX_MAP_VISIBILITY		(VIS_HEADER_SIZE + MAX_MAP_VISCLUSTERS * (((MAX_MAP_VISCLUSTERS + 63) & ~63) >> 3))
 
 #define	MAX_MAP_DRAW_SURFS		0x20000
-#define	MAX_MAP_DRAW_INDEXES	0x80000
 
 #define MAX_MAP_ADVERTISEMENTS	30
 
@@ -2511,10 +2510,11 @@ Q_EXTERN int				numBSPVisBytes Q_ASSIGN( 0 );
 Q_EXTERN byte				bspVisBytes[ MAX_MAP_VISIBILITY ];
 
 Q_EXTERN int				numBSPDrawVerts Q_ASSIGN( 0 );
-Q_EXTERN bspDrawVert_t		*bspDrawVerts Q_ASSIGN( NULL );
+Q_EXTERN bspDrawVert_t			*bspDrawVerts Q_ASSIGN( NULL );
 
 Q_EXTERN int				numBSPDrawIndexes Q_ASSIGN( 0 );
-Q_EXTERN int				bspDrawIndexes[ MAX_MAP_DRAW_INDEXES ];
+Q_EXTERN int				allocatedBSPDrawIndexes Q_ASSIGN( 0 );
+Q_EXTERN int				*bspDrawIndexes Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPDrawSurfaces Q_ASSIGN( 0 );
 Q_EXTERN bspDrawSurface_t	*bspDrawSurfaces Q_ASSIGN( NULL );
