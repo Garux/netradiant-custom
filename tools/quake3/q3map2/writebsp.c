@@ -388,6 +388,7 @@ void BeginBSPFile( void )
 	
 	/* ydnar: gs mods: set the first 6 drawindexes to 0 1 2 2 1 3 for triangles and quads */
 	numBSPDrawIndexes = 6;
+	AUTOEXPAND_BY_REALLOC_BSP(DrawIndexes, 1024);
 	bspDrawIndexes[ 0 ] = 0;
 	bspDrawIndexes[ 1 ] = 1;
 	bspDrawIndexes[ 2 ] = 2;
