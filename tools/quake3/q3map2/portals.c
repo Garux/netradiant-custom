@@ -665,10 +665,11 @@ int FloodEntities( tree_t *tree )
 {
 	int			i, s;
 	vec3_t		origin, offset, scale, angles;
-	qboolean	r, inside, tripped, skybox;
+	qboolean	r, inside, skybox;
 	node_t		*headnode;
-	entity_t	*e;
+	entity_t	*e, *tripped;
 	const char	*value;
+	int		tripcount;
 	
 	
 	headnode = tree->headnode;
@@ -746,12 +747,18 @@ int FloodEntities( tree_t *tree )
 		{
 			Sys_Printf( "Entity %i, Brush %i: Entity in solid\n", e->mapEntityNum, 0);
 		}
-		else if( tree->outside_node.occupied && !tripped )
+		else if( tree->outside_node.occupied )
 		{
-			xml_Select( "Entity leaked", e->mapEntityNum, 0, qfalse );
-			tripped = qtrue;
+			if(!tripped || tree->outside_node.occupied < tripcount)
+			{
+				tripped = e;
+				tripcount = tree->outside_node.occupied;
+			}
 		}
 	}
+
+	if(tripped)
+		xml_Select( "Entity leaked", e->mapEntityNum, 0, qfalse );
 	
 	Sys_FPrintf( SYS_VRB, "%9d flooded leafs\n", c_floodedleafs );
 	
