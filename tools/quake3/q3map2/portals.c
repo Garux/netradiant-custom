@@ -585,9 +585,26 @@ void FloodPortals_r( node_t *node, int dist, qboolean skybox )
 	
 	if( skybox )
 		node->skybox = skybox;
-	
-	if( node->occupied || node->opaque )
+
+	if( node->opaque)
 		return;
+
+	if( node->occupied )
+	{
+		if( node->occupied > dist )
+		{
+			/* reduce distance! */
+			/* for better leak line */
+			/* note: node->occupied will also be true for all further nodes, then */
+			node->occupied = dist;
+			for( p = node->portals; p; p = p->next[ s ] )
+			{
+				s = (p->nodes[ 1 ] == node);
+				FloodPortals_r( p->nodes[ !s ], dist + 1, skybox );
+			}
+		}
+		return;
+	}
 	
 	c_floodedleafs++;
 	node->occupied = dist;
