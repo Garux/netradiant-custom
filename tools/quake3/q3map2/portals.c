@@ -644,7 +644,7 @@ Marks all nodes that can be reached by entites
 =============
 */
 
-qboolean FloodEntities( tree_t *tree )
+int FloodEntities( tree_t *tree )
 {
 	int			i, s;
 	vec3_t		origin, offset, scale, angles;
@@ -739,11 +739,17 @@ qboolean FloodEntities( tree_t *tree )
 	Sys_FPrintf( SYS_VRB, "%9d flooded leafs\n", c_floodedleafs );
 	
 	if( !inside )
+	{
 		Sys_FPrintf( SYS_VRB, "no entities in open -- no filling\n" );
-	else if( tree->outside_node.occupied )
-		Sys_FPrintf( SYS_VRB, "entity reached from outside -- no filling\n" );
+		return FLOODENTITIES_EMPTY;
+	}
+	if( tree->outside_node.occupied )
+	{
+		Sys_FPrintf( SYS_VRB, "entity reached from outside -- leak detected\n" );
+		return FLOODENTITIES_LEAKED;
+	}
 	
-	return (qboolean) (inside && !tree->outside_node.occupied);
+	return FLOODENTITIES_GOOD;
 }
 
 /*

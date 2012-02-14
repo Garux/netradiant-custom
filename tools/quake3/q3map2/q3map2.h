@@ -1599,7 +1599,10 @@ void						SplitNodePortals( node_t *node );
 
 qboolean					PortalPassable( portal_t *p );
 
-qboolean					FloodEntities( tree_t *tree );
+#define FLOODENTITIES_LEAKED 1
+#define FLOODENTITIES_GOOD 0
+#define FLOODENTITIES_EMPTY -1
+int						FloodEntities( tree_t *tree );
 void						FillOutside( node_t *headnode);
 void						FloodAreas( tree_t *tree);
 face_t						*VisibleFaces( entity_t *e, tree_t *tree );

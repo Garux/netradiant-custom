@@ -266,6 +266,7 @@ void ProcessWorldModel( void )
 	xmlNodePtr	polyline, leaknode;
 	char		level[ 2 ], shader[ 1024 ];
 	const char	*value;
+	int		leakStatus;
 	
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
 	value = ValueForKey( &entities[ 0 ], "_blocksize" );
@@ -314,28 +315,19 @@ void ProcessWorldModel( void )
 	FilterStructuralBrushesIntoTree( e, tree );
 	
 	/* see if the bsp is completely enclosed */
-	if( FloodEntities( tree ) || ignoreLeaks )
-	{
-		/* rebuild a better bsp tree using only the sides that are visible from the inside */
-		FillOutside( tree->headnode );
+	leakStatus = FloodEntities(tree);
+	if (ignoreLeaks)
+		if(leakStatus == FLOODENTITIES_LEAKED)
+			leakStatus = FLOODENTITIES_GOOD;
 
-		/* chop the sides to the convex hull of their visible fragments, giving us the smallest polygons */
-		ClipSidesIntoTree( e, tree );
-		
-		/* build a visible face tree */
-		faces = MakeVisibleBSPFaceList( entities[ 0 ].brushes );
-		FreeTree( tree );
-		tree = FaceBSP( faces );
-		MakeTreePortals( tree );
-		FilterStructuralBrushesIntoTree( e, tree );
+	if ( leakStatus == FLOODENTITIES_GOOD )
+	{
 		leaked = qfalse;
-		
-		/* ydnar: flood again for skybox */
-		if( skyboxPresent )
-			FloodEntities( tree );
 	}
 	else
 	{
+		leaked = qtrue;
+
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
 		Sys_FPrintf( SYS_NOXML, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
@@ -352,10 +344,26 @@ void ProcessWorldModel( void )
 			Sys_Printf ("--- MAP LEAKED, ABORTING LEAKTEST ---\n");
 			exit( 0 );
 		}
-		leaked = qtrue;
-		
+	}
+
+	if(leakStatus != FLOODENTITIES_EMPTY) /* if no entities exist, this would accidentally the whole map, and that IS bad */
+	{
+		/* rebuild a better bsp tree using only the sides that are visible from the inside */
+		FillOutside( tree->headnode );
+
 		/* chop the sides to the convex hull of their visible fragments, giving us the smallest polygons */
 		ClipSidesIntoTree( e, tree );
+		
+		/* build a visible face tree (same thing as the initial bsp tree but after reducing the faces) */
+		faces = MakeVisibleBSPFaceList( entities[ 0 ].brushes );
+		FreeTree( tree );
+		tree = FaceBSP( faces );
+		MakeTreePortals( tree );
+		FilterStructuralBrushesIntoTree( e, tree );
+	
+		/* ydnar: flood again for skybox */
+		if( skyboxPresent )
+			FloodEntities( tree );
 	}
 	
 	/* save out information for visibility processing */
