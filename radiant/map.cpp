@@ -1690,7 +1690,7 @@ tryDecompile:
     output.push_string((type && *type) ? type : "quake3");
     output.push_string(" -fs_basepath \"");
     output.push_string(EnginePath_get());
-    output.push_string(" -fs_homepath \"");
+    output.push_string("\" -fs_homepath \"");
     output.push_string(g_qeglobals.m_userEnginePath.c_str());
     output.push_string("\" -fs_game ");
     output.push_string(gamename_get());
