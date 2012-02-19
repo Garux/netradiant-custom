@@ -1696,7 +1696,9 @@ tryDecompile:
     output.push_string(gamename_get());
     output.push_string(" -convert -format ");
     output.push_string(Brush::m_type == eBrushTypeQuake3BP ? "map_bp" : "map");
-    output.push_string(" -readmap \"");
+    if(extension_equal(path_get_extension(filename), "map"))
+      output.push_string(" -readmap ");
+    output.push_string(" \"");
     output.push_string(filename);
     output.push_string("\"");
 
