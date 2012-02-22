@@ -1581,102 +1581,134 @@ qboolean TraceWinding( traceWinding_t *tw, trace_t *trace )
 /*
 TraceLine_r()
 returns qtrue if something is hit and tracing can stop
+
+SmileTheory: made half-iterative
 */
 
-static qboolean TraceLine_r( int nodeNum, vec3_t origin, vec3_t end, trace_t *trace )
+#define TRACELINE_R_HALF_ITERATIVE 1
+
+#if TRACELINE_R_HALF_ITERATIVE
+static qboolean TraceLine_r( int nodeNum, const vec3_t start, const vec3_t end, trace_t *trace )
+#else
+static qboolean TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, trace_t *trace )
+#endif
 {
 	traceNode_t		*node;
 	int				side;
 	float			front, back, frac;
-	vec3_t			mid;
+	vec3_t			origin, mid;
 	qboolean		r;
+	
+#if TRACELINE_R_HALF_ITERATIVE
+	VectorCopy( start, origin );
 
-	
-	/* bogus node number means solid, end tracing unless testing all */
-	if( nodeNum < 0 )
+	while( 1 )
+#endif
 	{
-		VectorCopy( origin, trace->hit );
-		trace->passSolid = qtrue;
-		return qtrue;
-	}
-	
-	/* get node */
-	node = &traceNodes[ nodeNum ];
-	
-	/* solid? */
-	if( node->type == TRACE_LEAF_SOLID )
-	{
-		VectorCopy( origin, trace->hit );
-		trace->passSolid = qtrue;
-		return qtrue;
-	}
-	
-	/* leafnode? */
-	if( node->type < 0 )
-	{
-		/* note leaf and return */	
-		if( node->numItems > 0 && trace->numTestNodes < MAX_TRACE_TEST_NODES )
-			trace->testNodes[ trace->numTestNodes++ ] = nodeNum;
-		return qfalse;
-	}
-	
-	/* ydnar 2003-09-07: don't test branches of the bsp with nothing in them when testall is enabled */
-	if( trace->testAll && node->numItems == 0 )
-		return qfalse;
-	
-	/* classify beginning and end points */
-	switch( node->type )
-	{
-		case PLANE_X:
-			front = origin[ 0 ] - node->plane[ 3 ];
-			back = end[ 0 ] - node->plane[ 3 ];
-			break;
+		/* bogus node number means solid, end tracing unless testing all */
+		if( nodeNum < 0 )
+		{
+			VectorCopy( origin, trace->hit );
+			trace->passSolid = qtrue;
+			return qtrue;
+		}
 		
-		case PLANE_Y:
-			front = origin[ 1 ] - node->plane[ 3 ];
-			back = end[ 1 ] - node->plane[ 3 ];
-			break;
+		/* get node */
+		node = &traceNodes[ nodeNum ];
 		
-		case PLANE_Z:
-			front = origin[ 2 ] - node->plane[ 3 ];
-			back = end[ 2 ] - node->plane[ 3 ];
-			break;
+		/* solid? */
+		if( node->type == TRACE_LEAF_SOLID )
+		{
+			VectorCopy( origin, trace->hit );
+			trace->passSolid = qtrue;
+			return qtrue;
+		}
 		
-		default:
-			front = DotProduct( origin, node->plane ) - node->plane[ 3 ];
-			back = DotProduct( end, node->plane ) - node->plane[ 3 ];
-			break;
+		/* leafnode? */
+		if( node->type < 0 )
+		{
+			/* note leaf and return */	
+			if( node->numItems > 0 && trace->numTestNodes < MAX_TRACE_TEST_NODES )
+				trace->testNodes[ trace->numTestNodes++ ] = nodeNum;
+			return qfalse;
+		}
+		
+		/* ydnar 2003-09-07: don't test branches of the bsp with nothing in them when testall is enabled */
+		if( trace->testAll && node->numItems == 0 )
+			return qfalse;
+		
+		/* classify beginning and end points */
+		switch( node->type )
+		{
+			case PLANE_X:
+				front = origin[ 0 ] - node->plane[ 3 ];
+				back = end[ 0 ] - node->plane[ 3 ];
+				break;
+			
+			case PLANE_Y:
+				front = origin[ 1 ] - node->plane[ 3 ];
+				back = end[ 1 ] - node->plane[ 3 ];
+				break;
+			
+			case PLANE_Z:
+				front = origin[ 2 ] - node->plane[ 3 ];
+				back = end[ 2 ] - node->plane[ 3 ];
+				break;
+			
+			default:
+				front = DotProduct( origin, node->plane ) - node->plane[ 3 ];
+				back = DotProduct( end, node->plane ) - node->plane[ 3 ];
+				break;
+		}
+		
+		/* entirely in front side? */
+		if( front >= -TRACE_ON_EPSILON && back >= -TRACE_ON_EPSILON )
+		{
+#if TRACELINE_R_HALF_ITERATIVE
+			nodeNum = node->children[ 0 ];
+			continue;
+#else
+			return TraceLine_r( node->children[ 0 ], origin, end, trace );
+#endif
+		}
+		
+		/* entirely on back side? */
+		if( front < TRACE_ON_EPSILON && back < TRACE_ON_EPSILON )
+		{
+#if TRACELINE_R_HALF_ITERATIVE
+			nodeNum = node->children[ 1 ];
+			continue;
+#else
+			return TraceLine_r( node->children[ 1 ], origin, end, trace );
+#endif
+		}
+		
+		/* select side */
+		side = front < 0;
+		
+		/* calculate intercept point */
+		frac = front / (front - back);
+		mid[ 0 ] = origin[ 0 ] + (end[ 0 ] - origin[ 0 ]) * frac;
+		mid[ 1 ] = origin[ 1 ] + (end[ 1 ] - origin[ 1 ]) * frac;
+		mid[ 2 ] = origin[ 2 ] + (end[ 2 ] - origin[ 2 ]) * frac;
+		
+		/* fixme: check inhibit radius, then solid nodes and ignore */
+		
+		/* set trace hit here */
+		//%	VectorCopy( mid, trace->hit );
+		
+		/* trace first side */
+		if( TraceLine_r( node->children[ side ], origin, mid, trace ) )
+			return qtrue;
+		
+		/* trace other side */
+#if TRACELINE_R_HALF_ITERATIVE
+		nodeNum = node->children[ !side ];
+		VectorCopy( mid, origin );
+#else
+		return TraceLine_r( node->children[ !side ], mid, end, trace );
+#endif
 	}
-	
-	/* entirely in front side? */
-	if( front >= -TRACE_ON_EPSILON && back >= -TRACE_ON_EPSILON )
-		return TraceLine_r( node->children[ 0 ], origin, end, trace );
-	
-	/* entirely on back side? */
-	if( front < TRACE_ON_EPSILON && back < TRACE_ON_EPSILON )
-		return TraceLine_r( node->children[ 1 ], origin, end, trace );
-	
-	/* select side */
-	side = front < 0;
-	
-	/* calculate intercept point */
-	frac = front / (front - back);
-	mid[ 0 ] = origin[ 0 ] + (end[ 0 ] - origin[ 0 ]) * frac;
-	mid[ 1 ] = origin[ 1 ] + (end[ 1 ] - origin[ 1 ]) * frac;
-	mid[ 2 ] = origin[ 2 ] + (end[ 2 ] - origin[ 2 ]) * frac;
-	
-	/* fixme: check inhibit radius, then solid nodes and ignore */
-	
-	/* set trace hit here */
-	//%	VectorCopy( mid, trace->hit );
-	
-	/* trace first side */
-	r = TraceLine_r( node->children[ side ], origin, mid, trace );
-	if( r )
-		return r;
-	
-	/* trace other side */
-	return TraceLine_r( node->children[ !side ], mid, end, trace );
 }
 
 
@@ -1754,7 +1786,7 @@ sets up certain trace values
 float SetupTrace( trace_t *trace )
 {
 	VectorSubtract( trace->end, trace->origin, trace->displacement );
-	trace->distance = VectorNormalize( trace->displacement, trace->direction );
+	trace->distance = VectorFastNormalize( trace->displacement, trace->direction );
 	VectorCopy( trace->origin, trace->hit );
 	return trace->distance;
 }
