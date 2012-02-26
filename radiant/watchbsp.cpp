@@ -641,7 +641,7 @@ inline void GlobalGameDescription_string_write_mapparameter(StringOutputStream& 
     {
       string << "+set fs_game " << fs_game << " ";
     }
-    if(g_pGameDescription->mGameType == "wolf"
+    if(g_pGameDescription->mGameType == "wolf")
       //|| g_pGameDescription->mGameType == "et")
     {
       if (string_equal(gamemode_get(), "mp"))
