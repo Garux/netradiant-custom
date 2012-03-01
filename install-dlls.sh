@@ -26,6 +26,7 @@ for DLL in \
 	libgthread-2.0-0.dll \
 	libgtkglext-win32-1.0-0.dll \
 	libgtk-win32-2.0-0.dll \
+	libjpeg-8.dll \
 	libpango-1.0-0.dll \
 	libpangocairo-1.0-0.dll \
 	libpangoft2-1.0-0.dll \
