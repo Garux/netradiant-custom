@@ -65,6 +65,9 @@ LIBS_XML           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) li
 CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --cflags $(STDERR_TO_DEVNULL))
 LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-l $(STDERR_TO_DEVNULL))
+CPPFLAGS_JPEG      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libjpeg --cflags $(STDERR_TO_DEVNULL))
+LIBS_JPEG          ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libjpeg --libs-only-L $(STDERR_TO_DEVNULL)) \
+                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libjpeg --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_GTK       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --cflags $(STDERR_TO_DEVNULL))
 LIBS_GTK           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-l $(STDERR_TO_DEVNULL))
@@ -454,12 +457,13 @@ endif
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
 
-$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_ZLIB)
-$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB)
+$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
 	tools/quake3/common/inout.o \
+	tools/quake3/common/jpeg.o \
 	tools/quake3/common/md4.o \
 	tools/quake3/common/mutex.o \
 	tools/quake3/common/polylib.o \
@@ -507,7 +511,6 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/writebsp.o \
 	libddslib.$(A) \
 	libfilematch.$(A) \
-	libjpeg6.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	libpicomodel.$(A) \
@@ -525,31 +528,6 @@ libl_net.$(A): CPPFLAGS_EXTRA := -Ilibs
 libl_net.$(A): \
 	libs/l_net/l_net.o \
 	$(if $(findstring $(OS),Win32),libs/l_net/l_net_wins.o,libs/l_net/l_net_berkley.o) \
-
-libjpeg6.$(A): CPPFLAGS_EXTRA := -Ilibs/jpeg6 -Ilibs
-libjpeg6.$(A): \
-	libs/jpeg6/jcomapi.o \
-	libs/jpeg6/jdapimin.o \
-	libs/jpeg6/jdapistd.o \
-	libs/jpeg6/jdatasrc.o \
-	libs/jpeg6/jdcoefct.o \
-	libs/jpeg6/jdcolor.o \
-	libs/jpeg6/jddctmgr.o \
-	libs/jpeg6/jdhuff.o \
-	libs/jpeg6/jdinput.o \
-	libs/jpeg6/jdmainct.o \
-	libs/jpeg6/jdmarker.o \
-	libs/jpeg6/jdmaster.o \
-	libs/jpeg6/jdpostct.o \
-	libs/jpeg6/jdsample.o \
-	libs/jpeg6/jdtrans.o \
-	libs/jpeg6/jerror.o \
-	libs/jpeg6/jfdctflt.o \
-	libs/jpeg6/jidctflt.o \
-	libs/jpeg6/jmemmgr.o \
-	libs/jpeg6/jmemnobs.o \
-	libs/jpeg6/jpgload.o \
-	libs/jpeg6/jutils.o \
 
 libpicomodel.$(A): CPPFLAGS_EXTRA := -Ilibs
 libpicomodel.$(A): \
@@ -792,7 +770,8 @@ $(INSTALLDIR)/modules/entity.$(DLL): \
 	plugins/entity/skincache.o \
 	plugins/entity/targetable.o \
 
-$(INSTALLDIR)/modules/image.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/image.$(DLL): LIBS_EXTRA := $(LIBS_JPEG)
+$(INSTALLDIR)/modules/image.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_JPEG) -Ilibs -Iinclude
 $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/bmp.o \
 	plugins/image/dds.o \
@@ -801,7 +780,6 @@ $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/pcx.o \
 	plugins/image/tga.o \
 	libddslib.$(A) \
-	libjpeg6.$(A) \
 
 $(INSTALLDIR)/modules/imageq2.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
 $(INSTALLDIR)/modules/imageq2.$(DLL): \
