@@ -188,7 +188,7 @@ bool portable_app_setup()
 #include <pwd.h>
 #include <unistd.h> 
 
-#include <glib/gutils.h>
+#include <glib.h>
 
 const char* LINK_NAME =
 #if defined (__linux__)
