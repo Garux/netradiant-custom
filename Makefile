@@ -65,9 +65,6 @@ LIBS_XML           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) li
 CPPFLAGS_PNG       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --cflags $(STDERR_TO_DEVNULL))
 LIBS_PNG           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libpng --libs-only-l $(STDERR_TO_DEVNULL))
-CPPFLAGS_JPEG      ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libjpeg --cflags $(STDERR_TO_DEVNULL))
-LIBS_JPEG          ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libjpeg --libs-only-L $(STDERR_TO_DEVNULL)) \
-                      $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) libjpeg --libs-only-l $(STDERR_TO_DEVNULL))
 CPPFLAGS_GTK       ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --cflags $(STDERR_TO_DEVNULL))
 LIBS_GTK           ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-L $(STDERR_TO_DEVNULL)) \
                       $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --libs-only-l $(STDERR_TO_DEVNULL))
@@ -83,6 +80,8 @@ CPPFLAGS_DL        ?=
 LIBS_DL            ?= -ldl # nothing on Win32
 CPPFLAGS_ZLIB      ?=
 LIBS_ZLIB          ?= -lz
+CPPFLAGS_JPEG      ?=
+LIBS_JPEG          ?= -ljpeg
 DEPEND_ON_MAKEFILE ?= yes
 DOWNLOAD_GAMEPACKS ?= yes
 # set to no to disable gamepack, set to all to even download undistributable gamepacks
@@ -331,6 +330,7 @@ dependencies-check:
 		fi; \
 	}; \
 	$(ECHO) checking that the dependencies exist; \
+	checkheader libjpeg8-dev jpeglib.h jpeg_set_defaults "$(CPPFLAGS_JPEG)" "$(LIBS_JPEG)"; \
 	checkheader libglib2.0-dev glib/gutils.h g_path_is_absolute "$(CPPFLAGS_GLIB)" "$(LIBS_GLIB)"; \
 	checkheader libxml2-dev libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
 	checkheader libpng12-dev png.h png_create_read_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
