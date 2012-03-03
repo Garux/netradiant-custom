@@ -2027,7 +2027,7 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 {
 	int				i, refs = 0;
 	plane_t			*p1, *p2;
-	vec4_t			plane1, plane2, reverse;
+	vec4_t			plane1, plane2;
 	winding_t		*fat, *front, *back;
 	shaderInfo_t	*si;
 	
@@ -2092,6 +2092,7 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 			
 			#if 0
 				/* div0: this is the plague (inaccurate) */
+				vec4_t reverse;
 
 				/* invert surface plane */
 				VectorSubtract( vec3_origin, plane2, reverse );
@@ -3531,7 +3532,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 				AddSurfaceFlare( ds, e->origin );
 			
 			/* ydnar: don't emit nodraw surfaces (like nodraw fog) */
-			if( si != NULL && (si->compileFlags & C_NODRAW) && ds->type != SURFACE_PATCH )
+			if( (si->compileFlags & C_NODRAW) && ds->type != SURFACE_PATCH )
 				continue;
 			
 			/* ydnar: bias the surface textures */
