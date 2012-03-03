@@ -434,8 +434,8 @@ void ThreadSetDefault (void)
 {
 	if (numthreads == -1)	// not set manually
 	{
-#ifdef _SC_NPROCESSORS_CONF
-		long cpus = sysconf(_SC_NPROCESSORS_CONF);
+#ifdef _SC_NPROCESSORS_ONLN
+		long cpus = sysconf(_SC_NPROCESSORS_ONLN);
 		if (cpus > 0)
 			numthreads = cpus;
 		else
