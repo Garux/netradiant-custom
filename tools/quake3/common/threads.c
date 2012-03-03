@@ -426,17 +426,26 @@ void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
 #if defined(__linux__) || (defined(__APPLE__) && !MAC_STATIC_HACK)
 #define USED
 
-int numthreads = 4;
+#include <unistd.h>
+
+int numthreads = -1;
 
 void ThreadSetDefault (void)
 {
 	if (numthreads == -1)	// not set manually
 	{
-    /* default to one thread, only multi-thread when specifically told to */
-		numthreads = 1;
+#ifdef _SC_NPROCESSORS_CONF
+		long cpus = sysconf(_SC_NPROCESSORS_CONF);
+		if (cpus > 0)
+			numthreads = cpus;
+		else
+#endif
+			/* can't detect, so default to four threads */
+			numthreads = 4;
 	}
-  if(numthreads > 1)
-    Sys_Printf("threads: %d\n", numthreads);
+
+	if(numthreads > 1)
+		Sys_Printf("threads: %d\n", numthreads);
 }
 
 #include <pthread.h>
