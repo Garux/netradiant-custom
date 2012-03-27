@@ -1574,7 +1574,7 @@ int ConvertBSPMain( int argc, char **argv )
 	/* arg checking */
 	if( argc < 1 )
 	{
-		Sys_Printf( "Usage: q3map -convert -format <ase|obj|map_bp|map> [-shadesasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] <mapname>\n" );
+		Sys_Printf( "Usage: q3map -convert [-format <ase|obj|map_bp|map>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
 		return 0;
 	}
 	
