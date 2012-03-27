@@ -1,25 +1,25 @@
 /*
-Copyright (C) 2001-2006, William Joseph.
-All Rights Reserved.
+   Copyright (C) 2001-2006, William Joseph.
+   All Rights Reserved.
 
-This file is part of GtkRadiant.
+   This file is part of GtkRadiant.
 
-GtkRadiant is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   GtkRadiant is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-GtkRadiant is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GtkRadiant is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GtkRadiant; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+   You should have received a copy of the GNU General Public License
+   along with GtkRadiant; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-#if !defined(INCLUDED_GENERIC_STATIC_H)
+#if !defined( INCLUDED_GENERIC_STATIC_H )
 #define INCLUDED_GENERIC_STATIC_H
 
 /// \file
@@ -42,12 +42,11 @@ class Null
 template<typename Type, typename Context = Null>
 class Static
 {
-  static Type m_instance;
+static Type m_instance;
 public:
-  static Type& instance()
-  {
-    return m_instance;
-  }
+static Type& instance(){
+	return m_instance;
+}
 };
 
 template<typename Type, typename Context>
@@ -66,20 +65,18 @@ Type Static<Type, Context>::m_instance;
 template<typename Type, typename Context = Null>
 class LazyStatic
 {
-  static Type* m_instance; // this will be initialised to 0 by the CRT, according to the c++ standard
+static Type* m_instance;   // this will be initialised to 0 by the CRT, according to the c++ standard
 public:
-  static Type& instance()
-  {
-    if(m_instance == 0)
-    {
-      m_instance = new Type; // allocate using 'new' to get the correct alignment
-    }
-    return *m_instance;
-  }
+static Type& instance(){
+	if ( m_instance == 0 ) {
+		m_instance = new Type; // allocate using 'new' to get the correct alignment
+	}
+	return *m_instance;
+}
 };
 
 template<typename Type, typename Context>
-Type* LazyStatic<Type, Context>::m_instance;
+Type * LazyStatic<Type, Context>::m_instance;
 
 
 /// \brief A singleton which keeps a count of the number of times it is referenced.
@@ -92,33 +89,28 @@ Type* LazyStatic<Type, Context>::m_instance;
 template<typename Type, typename Context = Null>
 class CountedStatic
 {
-  static std::size_t m_refcount; // this will be initialised to 0 by the CRT, according to the c++ standard
-  static Type* m_instance;
+static std::size_t m_refcount;   // this will be initialised to 0 by the CRT, according to the c++ standard
+static Type* m_instance;
 public:
-  static Type& instance()
-  {
-    return *m_instance;
-  }
-  static void capture()
-  {
-    if(++m_refcount == 1)
-    {
-      m_instance = new Type; // allocate using 'new' to get the correct alignment
-    }
-  }
-  static void release()
-  {
-    if(--m_refcount == 0)
-    {
-      delete m_instance;
-    }
-  }
+static Type& instance(){
+	return *m_instance;
+}
+static void capture(){
+	if ( ++m_refcount == 1 ) {
+		m_instance = new Type; // allocate using 'new' to get the correct alignment
+	}
+}
+static void release(){
+	if ( --m_refcount == 0 ) {
+		delete m_instance;
+	}
+}
 };
 
 template<typename Type, typename Context>
 std::size_t CountedStatic<Type, Context>::m_refcount; // this will be initialised to 0 by the CRT, according to the c++ standard
 template<typename Type, typename Context>
-Type* CountedStatic<Type, Context>::m_instance;
+Type * CountedStatic<Type, Context>::m_instance;
 
 /// \brief A reference to a CountedStatic.
 /// Guarantees that CountedStatic<Type> will be constructed for the lifetime of this object.
@@ -133,18 +125,15 @@ template<typename Type, typename Context = Null>
 class SmartStatic
 {
 public:
-  SmartStatic()
-  {
-    CountedStatic<Type, Context>::capture();
-  }
-  ~SmartStatic()
-  {
-    CountedStatic<Type, Context>::release();
-  }
-  Type& instance()
-  {
-    return CountedStatic<Type, Context>::instance();
-  }
+SmartStatic(){
+	CountedStatic<Type, Context>::capture();
+}
+~SmartStatic(){
+	CountedStatic<Type, Context>::release();
+}
+Type& instance(){
+	return CountedStatic<Type, Context>::instance();
+}
 };
 
 

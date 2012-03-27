@@ -1,27 +1,27 @@
 /*
-Copyright (C) 1999-2006 Id Software, Inc. and contributors.
-For a list of contributors, see the accompanying CONTRIBUTORS file.
+   Copyright (C) 1999-2006 Id Software, Inc. and contributors.
+   For a list of contributors, see the accompanying CONTRIBUTORS file.
 
-This file is part of GtkRadiant.
+   This file is part of GtkRadiant.
 
-GtkRadiant is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   GtkRadiant is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-GtkRadiant is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GtkRadiant is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GtkRadiant; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+   You should have received a copy of the GNU General Public License
+   along with GtkRadiant; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 //
 // start of shared cmdlib stuff
-// 
+//
 
 #ifndef __CMDLIB__
 #define __CMDLIB__
@@ -43,7 +43,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //   if the spawn was fine
 //   TODO TTimo add functionality to track the process until it dies
 
-bool Q_Exec(const char *cmd, char *cmdline, const char *execdir, bool bCreateConsole, bool waitfor);
+bool Q_Exec( const char *cmd, char *cmdline, const char *execdir, bool bCreateConsole, bool waitfor );
 
 // some easy portability crap
 
@@ -73,29 +73,26 @@ bool Q_Exec(const char *cmd, char *cmdline, const char *execdir, bool bCreateCon
 #define access_others_rwx 0007
 
 
-#define access_rwxrwxr_x (access_owner_rwx | access_group_rwx | access_others_r_x)
-#define access_rwxrwxrwx (access_owner_rwx | access_group_rwx | access_others_rwx)
+#define access_rwxrwxr_x ( access_owner_rwx | access_group_rwx | access_others_r_x )
+#define access_rwxrwxrwx ( access_owner_rwx | access_group_rwx | access_others_rwx )
 
 // Q_mkdir
 // returns true if succeeded in creating directory
 #ifdef WIN32
 #include <direct.h>
-inline bool Q_mkdir(const char* name)
-{
-  return _mkdir(name) != -1; 
+inline bool Q_mkdir( const char* name ){
+	return _mkdir( name ) != -1;
 }
 #else
 #include <sys/stat.h>
-inline bool Q_mkdir(const char* name)
-{
-  return mkdir(name, access_rwxrwxr_x) != -1; 
+inline bool Q_mkdir( const char* name ){
+	return mkdir( name, access_rwxrwxr_x ) != -1;
 }
 #endif
 
 
-inline double Sys_DoubleTime(void)
-{
-  return clock()/ 1000.0;
+inline double Sys_DoubleTime( void ){
+	return clock() / 1000.0;
 }
 
 
