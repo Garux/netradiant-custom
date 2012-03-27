@@ -56,7 +56,7 @@
 #ifdef PATH_MAX
 #define MAX_OS_PATH     PATH_MAX
 #else
-#define MAX_OS_PATH     1024
+#define MAX_OS_PATH     4096
 #endif
 #define MEM_BLOCKSIZE 4096
 
