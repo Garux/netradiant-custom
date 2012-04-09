@@ -48,7 +48,7 @@
 #include "qerplugin.h"
 #include "irender.h"
 
-#include <glib/gslist.h>
+#include <glib.h>
 
 #include "debugging/debugging.h"
 #include "string/pooledstring.h"

@@ -45,9 +45,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <glib/gslist.h>
-#include <glib/gdir.h>
-#include <glib/gstrfuncs.h>
+#include <glib.h>
 
 #include "qerplugin.h"
 #include "idatastream.h"

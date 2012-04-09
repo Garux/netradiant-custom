@@ -23,7 +23,7 @@
 #pragma warning(disable : 4786)
 #endif
 
-#include <glib/glist.h>
+#include <glib.h>
 
 #include "misc.h"
 

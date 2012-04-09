@@ -25,7 +25,7 @@
 /// \file
 /// \brief OS directory-listing object.
 
-#include <glib/gdir.h>
+#include <glib.h>
 
 typedef GDir Directory;
 

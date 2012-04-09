@@ -76,8 +76,7 @@ void message_print( message_info_t* self, const char* characters, std::size_t le
 }
 
 
-#include <glib/gtimer.h>
-#include <glib/garray.h>
+#include <glib.h>
 #include "xmlstuff.h"
 
 class CWatchBSP

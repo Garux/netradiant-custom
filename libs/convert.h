@@ -27,8 +27,7 @@
 
 #include "debugging/debugging.h"
 #include <algorithm>
-#include <glib/gunicode.h>
-#include <glib/gconvert.h>
+#include <glib.h>
 
 #include "character.h"
 

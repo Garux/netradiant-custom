@@ -22,7 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_IDLEDRAW_H )
 #define INCLUDED_GTKUTIL_IDLEDRAW_H
 
-#include <glib/gmain.h>
+#include <glib.h>
 
 #include "generic/callback.h"
 

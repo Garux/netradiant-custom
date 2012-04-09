@@ -22,7 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_CURSOR_H )
 #define INCLUDED_GTKUTIL_CURSOR_H
 
-#include <glib/gmain.h>
+#include <glib.h>
 #include <gdk/gdkevents.h>
 #include <gtk/gtkwidget.h>
 #include <gtk/gtkwindow.h>
