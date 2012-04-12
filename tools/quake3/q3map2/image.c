@@ -167,9 +167,9 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 	}
 
 	/* set read callback */
-	pb->buffer = buffer;
-	pb->size = size;
-	pb->offset = 0;
+	pb.buffer = buffer;
+	pb.size = size;
+	pb.offset = 0;
 	png_set_read_fn( png, &pb, PNGReadData );
 	//png->io_ptr = &pb; /* hack! */
 
