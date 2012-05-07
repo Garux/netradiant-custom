@@ -98,8 +98,7 @@ typedef struct pngBuffer_s
 {
 	byte    *buffer;
 	png_size_t size, offset;
-}
-pngBuffer_t;
+} pngBuffer_t;
 
 void PNGReadData( png_struct *png, png_byte *buffer, png_size_t size ){
 	pngBuffer_t     *pb = (pngBuffer_t*) png_get_io_ptr( png );
