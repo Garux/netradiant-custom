@@ -1,29 +1,29 @@
 /* -------------------------------------------------------------------------------
 
-Copyright (C) 1999-2007 id Software, Inc. and contributors.
-For a list of contributors, see the accompanying CONTRIBUTORS file.
+   Copyright (C) 1999-2007 id Software, Inc. and contributors.
+   For a list of contributors, see the accompanying CONTRIBUTORS file.
 
-This file is part of GtkRadiant.
+   This file is part of GtkRadiant.
 
-GtkRadiant is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   GtkRadiant is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-GtkRadiant is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GtkRadiant is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GtkRadiant; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+   You should have received a copy of the GNU General Public License
+   along with GtkRadiant; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-----------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------
 
-Foliage code for Wolfenstein: Enemy Territory by ydnar@splashdamage.com
+   Foliage code for Wolfenstein: Enemy Territory by ydnar@splashdamage.com
 
-------------------------------------------------------------------------------- */
+   ------------------------------------------------------------------------------- */
 
 
 
@@ -45,20 +45,20 @@ static foliageInstance_t		foliageInstances[ MAX_FOLIAGE_INSTANCES ];
 
 
 /*
-SubdivideFoliageTriangle_r()
-recursively subdivides a triangle until the triangle is smaller than
-the desired density, then pseudo-randomly sets a point
-*/
+   SubdivideFoliageTriangle_r()
+   recursively subdivides a triangle until the triangle is smaller than
+   the desired density, then pseudo-randomly sets a point
+ */
 
-static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage, bspDrawVert_t **tri )
-{
+static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage, bspDrawVert_t **tri ){
 	bspDrawVert_t	mid, *tri2[ 3 ];
 	int				max;
 	
 	
 	/* limit test */
-	if( numFoliageInstances >= MAX_FOLIAGE_INSTANCES )
+	if ( numFoliageInstances >= MAX_FOLIAGE_INSTANCES ) {
 		return;
+	}
 	
 	/* plane test */
 	{
@@ -66,12 +66,14 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage
 		
 		
 		/* make a plane */
-		if( !PlaneFromPoints( plane, tri[ 0 ]->xyz, tri[ 1 ]->xyz, tri[ 2 ]->xyz ) )
+		if ( !PlaneFromPoints( plane, tri[ 0 ]->xyz, tri[ 1 ]->xyz, tri[ 2 ]->xyz ) ) {
 			return;
+		}
 		
 		/* if normal is too far off vertical, then don't place an instance */
-		if( plane[ 2 ] < 0.5f )
+		if ( plane[ 2 ] < 0.5f ) {
 			return;
+	}
 	}
 	
 	/* subdivide calc */
@@ -89,21 +91,20 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage
 		maxDist = 0.0f;
 		VectorClear( fi->xyz );
 		VectorClear( fi->normal );
-		for( i = 0; i < 3; i++ )
+		for ( i = 0; i < 3; i++ )
 		{
 			/* get verts */
 			a = tri[ i ]->xyz;
-			b = tri[ (i + 1) % 3 ]->xyz;
+			b = tri[ ( i + 1 ) % 3 ]->xyz;
 			
 			/* get dists */
 			dx = a[ 0 ] - b[ 0 ];
 			dy = a[ 1 ] - b[ 1 ];
 			dz = a[ 2 ] - b[ 2 ];
-			dist = (dx * dx) + (dy * dy) + (dz * dz);
+			dist = ( dx * dx ) + ( dy * dy ) + ( dz * dz );
 			
 			/* longer? */
-			if( dist > maxDist )
-			{
+			if ( dist > maxDist ) {
 				maxDist = dist;
 				max = i;
 			}
@@ -114,33 +115,37 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage
 		}
 		
 		/* is the triangle small enough? */
-		if( maxDist <= (foliage->density * foliage->density) )
-		{
+		if ( maxDist <= ( foliage->density * foliage->density ) ) {
 			float	alpha, odds, r;
 			
 			
 			/* get average alpha */
-			if( foliage->inverseAlpha == 2 )
+			if ( foliage->inverseAlpha == 2 ) {
 				alpha = 1.0f;
+			}
 			else
 			{
-				alpha = ((float) tri[ 0 ]->color[ 0 ][ 3 ] + (float) tri[ 1 ]->color[ 0 ][ 3 ] + (float) tri[ 2 ]->color[ 0 ][ 3 ]) / 765.0f;
-				if( foliage->inverseAlpha == 1 )
+				alpha = ( (float) tri[ 0 ]->color[ 0 ][ 3 ] + (float) tri[ 1 ]->color[ 0 ][ 3 ] + (float) tri[ 2 ]->color[ 0 ][ 3 ] ) / 765.0f;
+				if ( foliage->inverseAlpha == 1 ) {
 					alpha = 1.0f - alpha;
-				if( alpha < 0.75f )
+				}
+				if ( alpha < 0.75f ) {
 					return;
+			}
 			}
 			
 			/* roll the dice */
 			odds = foliage->odds * alpha;
 			r = Random();
-			if( r > odds )
+			if ( r > odds ) {
 				return;
+			}
 			
 			/* scale centroid */
 			VectorScale( fi->xyz, 0.33333333f, fi->xyz );
-			if( VectorNormalize( fi->normal, fi->normal ) == 0.0f )
+			if ( VectorNormalize( fi->normal, fi->normal ) == 0.0f ) {
 				return;
+			}
 			
 			/* add to count and return */
 			numFoliageInstances++;
@@ -149,7 +154,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage
 	}
 	
 	/* split the longest edge and map it */
-	LerpDrawVert( tri[ max ], tri[ (max + 1) % 3 ], &mid );
+	LerpDrawVert( tri[ max ], tri[ ( max + 1 ) % 3 ], &mid );
 	
 	/* recurse to first triangle */
 	VectorCopy( tri, tri2 );
@@ -158,19 +163,18 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage
 	
 	/* recurse to second triangle */
 	VectorCopy( tri, tri2 );
-	tri2[ (max + 1) % 3 ] = &mid;
+	tri2[ ( max + 1 ) % 3 ] = &mid;
 	SubdivideFoliageTriangle_r( ds, foliage, tri2 );
 }
 
 
 
 /*
-GenFoliage()
-generates a foliage file for a bsp
-*/
+   GenFoliage()
+   generates a foliage file for a bsp
+ */
 
-void Foliage( mapDrawSurface_t *src )
-{
+void Foliage( mapDrawSurface_t *src ){
 	int					i, j, k, x, y, pw[ 5 ], r, oldNumMapDrawSurfs;
 	mapDrawSurface_t	*ds;
 	shaderInfo_t		*si;
@@ -183,17 +187,18 @@ void Foliage( mapDrawSurface_t *src )
 	
 	/* get shader */
 	si = src->shaderInfo;
-	if( si == NULL || si->foliage == NULL )
+	if ( si == NULL || si->foliage == NULL ) {
 		return;
+	}
 	
 	/* do every foliage */
-	for( foliage = si->foliage; foliage != NULL; foliage = foliage->next )
+	for ( foliage = si->foliage; foliage != NULL; foliage = foliage->next )
 	{
 		/* zero out */
 		numFoliageInstances = 0;
 		
 		/* map the surface onto the lightmap origin/cluster/normal buffers */
-		switch( src->type )
+		switch ( src->type )
 		{
 			case SURFACE_META:
 			case SURFACE_FORCED_META:
@@ -202,7 +207,7 @@ void Foliage( mapDrawSurface_t *src )
 				verts = src->verts;
 				
 				/* map the triangles */
-				for( i = 0; i < src->numIndexes; i += 3 )
+			for ( i = 0; i < src->numIndexes; i += 3 )
 				{
 					dv[ 0 ] = &verts[ src->indexes[ i ] ];
 					dv[ 1 ] = &verts[ src->indexes[ i + 1 ] ];
@@ -227,19 +232,19 @@ void Foliage( mapDrawSurface_t *src )
 				verts = mesh->verts;
 				
 				/* map the mesh quads */
-				for( y = 0; y < (mesh->height - 1); y++ )
+			for ( y = 0; y < ( mesh->height - 1 ); y++ )
 				{
-					for( x = 0; x < (mesh->width - 1); x++ )
+				for ( x = 0; x < ( mesh->width - 1 ); x++ )
 					{
 						/* set indexes */
-						pw[ 0 ] = x + (y * mesh->width);
-						pw[ 1 ] = x + ((y + 1) * mesh->width);
-						pw[ 2 ] = x + 1 + ((y + 1) * mesh->width);
-						pw[ 3 ] = x + 1 + (y * mesh->width);
-						pw[ 4 ] = x + (y * mesh->width);	/* same as pw[ 0 ] */
+					pw[ 0 ] = x + ( y * mesh->width );
+					pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
+					pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
+					pw[ 3 ] = x + 1 + ( y * mesh->width );
+					pw[ 4 ] = x + ( y * mesh->width );      /* same as pw[ 0 ] */
 						
 						/* set radix */
-						r = (x + y) & 1;
+					r = ( x + y ) & 1;
 						
 						/* get drawverts and map first triangle */
 						dv[ 0 ] = &verts[ pw[ r + 0 ] ];
@@ -264,8 +269,9 @@ void Foliage( mapDrawSurface_t *src )
 		}
 		
 		/* any origins? */
-		if( numFoliageInstances < 1 )
+		if ( numFoliageInstances < 1 ) {
 			continue;
+		}
 		
 		/* remember surface count */
 		oldNumMapDrawSurfs = numMapDrawSurfs;
@@ -278,7 +284,7 @@ void Foliage( mapDrawSurface_t *src )
 		InsertModel( foliage->model, 0, 0, transform, NULL, NULL, src->entityNum, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, src->colormod );
 		
 		/* walk each new surface */
-		for( i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )
+		for ( i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )
 		{
 			/* get surface */
 			ds = &mapDrawSurfs[ i ];
@@ -295,14 +301,14 @@ void Foliage( mapDrawSurface_t *src )
 			ds->fogNum = src->fogNum;
 			
 			/* add a drawvert for every instance */
-			verts = safe_malloc( (ds->numVerts + ds->numFoliageInstances) * sizeof( *verts ) );
-			memset( verts, 0, (ds->numVerts + ds->numFoliageInstances) * sizeof( *verts ) );
+			verts = safe_malloc( ( ds->numVerts + ds->numFoliageInstances ) * sizeof( *verts ) );
+			memset( verts, 0, ( ds->numVerts + ds->numFoliageInstances ) * sizeof( *verts ) );
 			memcpy( verts, ds->verts, ds->numVerts * sizeof( *verts ) );
 			free( ds->verts );
 			ds->verts = verts;
 			
 			/* copy the verts */
-			for( j = 0; j < ds->numFoliageInstances; j++ )
+			for ( j = 0; j < ds->numFoliageInstances; j++ )
 			{
 				/* get vert (foliage instance) */
 				fi = &ds->verts[ ds->numVerts + j ];
@@ -312,7 +318,7 @@ void Foliage( mapDrawSurface_t *src )
 				VectorCopy( foliageInstances[ j ].normal, fi->normal );
 
 				/* ydnar: set color */
-				for( k = 0; k < MAX_LIGHTMAPS; k++ )
+				for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 				{
 					fi->color[ k ][ 0 ] = 255;
 					fi->color[ k ][ 1 ] = 255;

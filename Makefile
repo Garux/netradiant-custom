@@ -80,6 +80,8 @@ CPPFLAGS_DL        ?=
 LIBS_DL            ?= -ldl # nothing on Win32
 CPPFLAGS_ZLIB      ?=
 LIBS_ZLIB          ?= -lz
+CPPFLAGS_JPEG      ?=
+LIBS_JPEG          ?= -ljpeg
 DEPEND_ON_MAKEFILE ?= yes
 DOWNLOAD_GAMEPACKS ?= yes
 # set to no to disable gamepack, set to all to even download undistributable gamepacks
@@ -178,7 +180,7 @@ else
 ifeq ($(OS),Win32)
 	CPPFLAGS_COMMON += -DWIN32 -D_WIN32 -D_inline=inline
 	CFLAGS_COMMON += -mms-bitfields
-	LDFLAGS_DLL = --dll -Wl,--add-stdcall-alias
+	LDFLAGS_DLL = -Wl,--add-stdcall-alias
 	LIBS_COMMON = -lws2_32 -luser32 -lgdi32 -lole32
 	EXE ?= exe
 	A = a
@@ -197,11 +199,11 @@ ifeq ($(OS),Darwin)
 	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	CXXFLAGS_COMMON += -fno-exceptions -fno-rtti
-	CPPFLAGS_COMMON += -I/opt/local/include -I/sw/include -I/usr/X11R6/include
-	LDFLAGS_COMMON += -L/opt/local/lib -L/sw/lib -L/usr/X11R6/lib
+	MACLIBDIR ?= /opt/local/lib
+	CPPFLAGS_COMMON += -I$(MACLIBDIR)/../include -I/usr/X11R6/include
+	LDFLAGS_COMMON += -L$(MACLIBDIR) -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
 	EXE ?= ppc
-	MACLIBDIR ?= /opt/local/lib
 	A = a
 	DLL = dylib
 	MWINDOWS =
@@ -328,7 +330,8 @@ dependencies-check:
 		fi; \
 	}; \
 	$(ECHO) checking that the dependencies exist; \
-	checkheader libglib2.0-dev glib/gutils.h g_path_is_absolute "$(CPPFLAGS_GLIB)" "$(LIBS_GLIB)"; \
+	checkheader libjpeg8-dev jpeglib.h jpeg_set_defaults "$(CPPFLAGS_JPEG)" "$(LIBS_JPEG)"; \
+	checkheader libglib2.0-dev glib.h g_path_is_absolute "$(CPPFLAGS_GLIB)" "$(LIBS_GLIB)"; \
 	checkheader libxml2-dev libxml/xpath.h xmlXPathInit "$(CPPFLAGS_XML)" "$(LIBS_XML)"; \
 	checkheader libpng12-dev png.h png_create_read_struct "$(CPPFLAGS_PNG)" "$(LIBS_PNG)"; \
 	checkheader "mesa-common-dev (or another OpenGL library)" GL/gl.h glClear "$(CPPFLAGS_GL)" "$(LIBS_GL)"; \
@@ -447,19 +450,20 @@ ifeq ($(OS),Win32)
 	$(WINDRES) $< $@
 endif
 
-%.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
+%.o: %.cpp $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),) | dependencies-check
 	$(CXX) $< $(CFLAGS) $(CXXFLAGS) $(CFLAGS_COMMON) $(CXXFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
-%.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),)
+%.o: %.c $(if $(findstring $(DEPEND_ON_MAKEFILE),yes),$(wildcard Makefile*),) | dependencies-check
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
 
-$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_ZLIB)
-$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) -Itools/quake3/common -Ilibs -Iinclude
+$(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB)
+$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
 	tools/quake3/common/inout.o \
+	tools/quake3/common/jpeg.o \
 	tools/quake3/common/md4.o \
 	tools/quake3/common/mutex.o \
 	tools/quake3/common/polylib.o \
@@ -507,7 +511,6 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/writebsp.o \
 	libddslib.$(A) \
 	libfilematch.$(A) \
-	libjpeg6.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	libpicomodel.$(A) \
@@ -525,31 +528,6 @@ libl_net.$(A): CPPFLAGS_EXTRA := -Ilibs
 libl_net.$(A): \
 	libs/l_net/l_net.o \
 	$(if $(findstring $(OS),Win32),libs/l_net/l_net_wins.o,libs/l_net/l_net_berkley.o) \
-
-libjpeg6.$(A): CPPFLAGS_EXTRA := -Ilibs/jpeg6 -Ilibs
-libjpeg6.$(A): \
-	libs/jpeg6/jcomapi.o \
-	libs/jpeg6/jdapimin.o \
-	libs/jpeg6/jdapistd.o \
-	libs/jpeg6/jdatasrc.o \
-	libs/jpeg6/jdcoefct.o \
-	libs/jpeg6/jdcolor.o \
-	libs/jpeg6/jddctmgr.o \
-	libs/jpeg6/jdhuff.o \
-	libs/jpeg6/jdinput.o \
-	libs/jpeg6/jdmainct.o \
-	libs/jpeg6/jdmarker.o \
-	libs/jpeg6/jdmaster.o \
-	libs/jpeg6/jdpostct.o \
-	libs/jpeg6/jdsample.o \
-	libs/jpeg6/jdtrans.o \
-	libs/jpeg6/jerror.o \
-	libs/jpeg6/jfdctflt.o \
-	libs/jpeg6/jidctflt.o \
-	libs/jpeg6/jmemmgr.o \
-	libs/jpeg6/jmemnobs.o \
-	libs/jpeg6/jpgload.o \
-	libs/jpeg6/jutils.o \
 
 libpicomodel.$(A): CPPFLAGS_EXTRA := -Ilibs
 libpicomodel.$(A): \
@@ -792,7 +770,8 @@ $(INSTALLDIR)/modules/entity.$(DLL): \
 	plugins/entity/skincache.o \
 	plugins/entity/targetable.o \
 
-$(INSTALLDIR)/modules/image.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
+$(INSTALLDIR)/modules/image.$(DLL): LIBS_EXTRA := $(LIBS_JPEG)
+$(INSTALLDIR)/modules/image.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_JPEG) -Ilibs -Iinclude
 $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/bmp.o \
 	plugins/image/dds.o \
@@ -801,7 +780,6 @@ $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/pcx.o \
 	plugins/image/tga.o \
 	libddslib.$(A) \
-	libjpeg6.$(A) \
 
 $(INSTALLDIR)/modules/imageq2.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
 $(INSTALLDIR)/modules/imageq2.$(DLL): \
