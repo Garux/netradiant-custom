@@ -75,7 +75,7 @@ typedef struct minimap_s
 	float *sample_offsets;
 	float sharpen_boxmult;
 	float sharpen_centermult;
-	float boost;
+	float boost, brightness, contrast;
 	float *data1f;
 	float *sharpendata1f;
 	vec3_t mins, size;
@@ -303,6 +303,17 @@ static void MiniMapContrastBoost(int y)
 	}
 }
 
+static void MiniMapBrightnessContrast(int y)
+{
+	int x;
+	float *q = &minimap.data1f[y * minimap.width];
+	for(x = 0; x < minimap.width; ++x)
+	{
+		*q = *q * minimap.contrast + minimap.brightness;
+		++q;
+	}
+}
+
 void MiniMapMakeMinsMaxs(vec3_t mins_in, vec3_t maxs_in, float border, qboolean keepaspect)
 {
 	vec3_t mins, maxs, extend;
@@ -350,67 +361,10 @@ determines solid non-sky brushes in the world
 
 void MiniMapSetupBrushes( void )
 {
-	int				i, b, compileFlags;
-	bspBrush_t		*brush;
-	bspShader_t		*shader;
-	shaderInfo_t	*si;
-	
-	
-	/* note it */
-	Sys_FPrintf( SYS_VRB, "--- MiniMapSetupBrushes ---\n" );
-	
-	/* allocate */
-	if( opaqueBrushes == NULL )
-		opaqueBrushes = safe_malloc( numBSPBrushes / 8 + 1 );
-	
-	/* clear */
-	memset( opaqueBrushes, 0, numBSPBrushes / 8 + 1 );
-	numOpaqueBrushes = 0;
-	
-	/* walk the list of worldspawn brushes */
-	for( i = 0; i < minimap.model->numBSPBrushes; i++ )
-	{
-		/* get brush */
-		b = minimap.model->firstBSPBrush + i;
-		brush = &bspBrushes[ b ];
-		
-#if 0
-		/* check all sides */
-		compileFlags = 0;
-		for( j = 0; j < brush->numSides; j++ )
-		{
-			/* do bsp shader calculations */
-			side = &bspBrushSides[ brush->firstSide + j ];
-			shader = &bspShaders[ side->shaderNum ];
-			
-			/* get shader info */
-			si = ShaderInfoForShader( shader->shader );
-			if( si == NULL )
-				continue;
-			
-			/* or together compile flags */
-			compileFlags |= si->compileFlags;
-		}
-#else
-		shader = &bspShaders[ brush->shaderNum ];
-		si = ShaderInfoForShader( shader->shader );
-		if( si == NULL )
-			compileFlags = 0;
-		else
-			compileFlags = si->compileFlags;
-#endif
-		
-		/* determine if this brush is solid */
-		if( (compileFlags & (C_SOLID | C_SKY)) == C_SOLID )
-		{
-			opaqueBrushes[ b >> 3 ] |= (1 << (b & 7));
-			numOpaqueBrushes++;
-			maxOpaqueBrush = i;
-		}
-	}
-	
-	/* emit some statistics */
-	Sys_FPrintf( SYS_VRB, "%9d solid brushes\n", numOpaqueBrushes );
+	SetupBrushesFlags(C_SOLID | C_SKY, C_SOLID, 0, 0);
+		// at least one must be solid
+		// none may be sky
+		// not all may be nodraw
 }
 
 qboolean MiniMapEvaluateSampleOffsets(int *bestj, int *bestk, float *bestval)
@@ -540,6 +494,7 @@ int MiniMapBSPMain( int argc, char **argv )
 	char basename[1024];
 	char path[1024];
 	char relativeMinimapFilename[1024];
+	qboolean autolevel;
 	float minimapSharpen;
 	float border;
 	byte *data4b, *p;
@@ -577,9 +532,12 @@ int MiniMapBSPMain( int argc, char **argv )
 	keepaspect = game->miniMapKeepAspect;
 	mode = game->miniMapMode;
 
+	autolevel = qfalse;
 	minimap.samples = 1;
 	minimap.sample_offsets = NULL;
 	minimap.boost = 1.0;
+	minimap.brightness = 0.0;
+	minimap.contrast = 1.0;
 
 	/* process arguments */
 	for( i = 1; i < (argc - 1); i++ )
@@ -663,11 +621,33 @@ int MiniMapBSPMain( int argc, char **argv )
 			mode = MINIMAP_MODE_WHITE;
 			Sys_Printf( "Writing as white alpha image\n" );
  		}
-		else if( !strcmp( argv[ i ],  "-boost" ) )
+		else if( !strcmp( argv[ i ],  "-boost" ) && i < (argc - 2) )
  		{
 			minimap.boost = atof(argv[i + 1]);
 			i++;
 			Sys_Printf( "Contrast boost set to %f\n", minimap.boost );
+ 		}
+		else if( !strcmp( argv[ i ],  "-brightness" ) && i < (argc - 2) )
+ 		{
+			minimap.brightness = atof(argv[i + 1]);
+			i++;
+			Sys_Printf( "Brightness set to %f\n", minimap.brightness );
+ 		}
+		else if( !strcmp( argv[ i ],  "-contrast" ) && i < (argc - 2) )
+ 		{
+			minimap.contrast = atof(argv[i + 1]);
+			i++;
+			Sys_Printf( "Contrast set to %f\n", minimap.contrast );
+ 		}
+		else if( !strcmp( argv[ i ],  "-autolevel" ) )
+ 		{
+			autolevel = qtrue;
+			Sys_Printf( "Auto level enabled\n", border );
+ 		}
+		else if( !strcmp( argv[ i ],  "-noautolevel" ) )
+ 		{
+			autolevel = qfalse;
+			Sys_Printf( "Auto level disabled\n", border );
  		}
 	}
 
@@ -720,6 +700,50 @@ int MiniMapBSPMain( int argc, char **argv )
 	{
 		Sys_Printf( "\n--- MiniMapContrastBoost (%d) ---\n", minimap.height );
 		RunThreadsOnIndividual(minimap.height, qtrue, MiniMapContrastBoost);
+	}
+
+	if(autolevel)
+	{
+		Sys_Printf( "\n--- MiniMapAutoLevel (%d) ---\n", minimap.height );
+		float mi = 1, ma = 0;
+		float s, o;
+
+		// TODO threads!
+		q = minimap.data1f;
+		for(y = 0; y < minimap.height; ++y)
+			for(x = 0; x < minimap.width; ++x)
+			{
+				float v = *q++;
+				if(v < mi)
+					mi = v;
+				if(v > ma)
+					ma = v;
+			}
+		if(ma > mi)
+		{
+			s = 1 / (ma - mi);
+			o = mi / (ma - mi);
+
+			// equations:
+			//   brightness + contrast * v
+			// after autolevel:
+			//   brightness + contrast * (v * s - o)
+			// =
+			//   (brightness - contrast * o) + (contrast * s) * v
+			minimap.brightness = minimap.brightness - minimap.contrast * o;
+			minimap.contrast *= s;
+
+			Sys_Printf( "Auto level: Brightness changed to %f\n", minimap.brightness );
+			Sys_Printf( "Auto level: Contrast changed to %f\n", minimap.contrast );
+		}
+		else
+			Sys_Printf( "Auto level: failed because all pixels are the same value\n" );
+	}
+
+	if(minimap.brightness != 0 || minimap.contrast != 1)
+	{
+		Sys_Printf( "\n--- MiniMapBrightnessContrast (%d) ---\n", minimap.height );
+		RunThreadsOnIndividual(minimap.height, qtrue, MiniMapBrightnessContrast);
 	}
 
 	if(minimap.sharpendata1f)
@@ -1550,7 +1574,7 @@ int ConvertBSPMain( int argc, char **argv )
 	/* arg checking */
 	if( argc < 1 )
 	{
-		Sys_Printf( "Usage: q3map -convert -format <ase|obj|map_bp|map> [-shadesasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] <mapname>\n" );
+		Sys_Printf( "Usage: q3map -convert [-format <ase|obj|map_bp|map>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
 		return 0;
 	}
 	
@@ -1601,11 +1625,11 @@ int ConvertBSPMain( int argc, char **argv )
  			i++;
 			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
  		}
-		else if( !strcmp( argv[ i ],  "-shadersasbitmap" ) )
+		else if( !strcmp( argv[ i ],  "-shaderasbitmap" ) || !strcmp( argv[ i ],  "-shadersasbitmap" ) )
 			shadersAsBitmap = qtrue;
-		else if( !strcmp( argv[ i ],  "-lightmapsastexcoord" ) )
+		else if( !strcmp( argv[ i ],  "-lightmapastexcoord" ) || !strcmp( argv[ i ],  "-lightmapsastexcoord" ) )
 			lightmapsAsTexcoord = qtrue;
-		else if( !strcmp( argv[ i ],  "-deluxemapsastexcoord" ) )
+		else if( !strcmp( argv[ i ],  "-deluxemapastexcoord" ) || !strcmp( argv[ i ],  "-deluxemapsastexcoord" ) )
 		{
 			lightmapsAsTexcoord = qtrue;
 			deluxemap = qtrue;

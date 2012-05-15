@@ -74,7 +74,7 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 		sample[ i ] = pow( sample[ i ] / 255.0f, gamma ) * 255.0f;
 	}
 
-	if (lightmapExposure == 1)
+	if (lightmapExposure == 0)
 	{
 		/* clamp with color normalization */
 		max = sample[ 0 ];
@@ -87,10 +87,6 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 	}
 	else
 	{
-		if (lightmapExposure==0)
-		{
-			lightmapExposure=1.0f;
-		}
 		inv=1.f/lightmapExposure;
 		//Exposure
 
@@ -120,6 +116,14 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale )
 	
 	/* compensate for ingame overbrighting/bitshifting */
 	VectorScale( sample, (1.0f / lightmapCompensate), sample );
+
+	/* sRGB lightmaps */
+	if(lightmapsRGB)
+	{
+		sample[0] = floor(Image_sRGBFloatFromLinearFloat(sample[0] * (1.0 / 255.0)) * 255.0 + 0.5);
+		sample[1] = floor(Image_sRGBFloatFromLinearFloat(sample[1] * (1.0 / 255.0)) * 255.0 + 0.5);
+		sample[2] = floor(Image_sRGBFloatFromLinearFloat(sample[2] * (1.0 / 255.0)) * 255.0 + 0.5);
+	}
 	
 	/* store it off */
 	colorBytes[ 0 ] = sample[ 0 ];
@@ -3136,9 +3140,10 @@ SetupBrushes()
 determines opaque brushes in the world and find sky shaders for sunlight calculations
 */
 
-void SetupBrushes( void )
+void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 {
-	int				i, j, b, compileFlags;
+	int				i, j, b;
+	unsigned int			compileFlags, allCompileFlags;
 	qboolean		inside;
 	bspBrush_t		*brush;
 	bspBrushSide_t	*side;
@@ -3167,23 +3172,25 @@ void SetupBrushes( void )
 		/* check all sides */
 		inside = qtrue;
 		compileFlags = 0;
+		allCompileFlags = ~(0u);
 		for( j = 0; j < brush->numSides && inside; j++ )
 		{
 			/* do bsp shader calculations */
 			side = &bspBrushSides[ brush->firstSide + j ];
 			shader = &bspShaders[ side->shaderNum ];
-			
+
 			/* get shader info */
-			si = ShaderInfoForShader( shader->shader );
+			si = ShaderInfoForShaderNull( shader->shader );
 			if( si == NULL )
 				continue;
 			
 			/* or together compile flags */
 			compileFlags |= si->compileFlags;
+			allCompileFlags &= si->compileFlags;
 		}
-		
+
 		/* determine if this brush is opaque to light */
-		if( !(compileFlags & C_TRANSLUCENT) )
+		if( (compileFlags & mask_any) == test_any && (allCompileFlags & mask_all) == test_all )
 		{
 			opaqueBrushes[ b >> 3 ] |= (1 << (b & 7));
 			numOpaqueBrushes++;
@@ -3193,6 +3200,10 @@ void SetupBrushes( void )
 	
 	/* emit some statistics */
 	Sys_FPrintf( SYS_VRB, "%9d opaque brushes\n", numOpaqueBrushes );
+}
+void SetupBrushes( void )
+{
+	SetupBrushesFlags(C_TRANSLUCENT, 0, 0, 0);
 }
 
 
@@ -3612,6 +3623,8 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 					light->flags |= LIGHT_FAST_TEMP;
 				else
 					light->flags &= ~LIGHT_FAST_TEMP;
+				if( fastpoint && (light->flags != EMIT_AREA) )
+					light->flags |= LIGHT_FAST_TEMP;
 				if( light->si && light->si->noFast )
 					light->flags &= ~(LIGHT_FAST | LIGHT_FAST_TEMP);
 				
@@ -3621,23 +3634,29 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 				/* handle area lights */
 				if( exactPointToPolygon && light->type == EMIT_AREA && light->w != NULL )
 				{
-					/* ugly hack to calculate extent for area lights, but only done once */
-					VectorScale( light->normal, -1.0f, dir );
-					for( radius = 100.0f; radius < 130000.0f && light->envelope == 0; radius += 10.0f )
+					light->envelope = MAX_WORLD_COORD * 8.0f;
+
+					/* check for fast mode */
+					if( (light->flags & LIGHT_FAST) || (light->flags & LIGHT_FAST_TEMP) )
 					{
-						float	factor;
-						
-						VectorMA( light->origin, radius, light->normal, origin );
-						factor = PointToPolygonFormFactor( origin, dir, light->w );
-						if( factor < 0.0f )
-							factor *= -1.0f;
-						if( (factor * light->add) <= light->falloffTolerance )
-							light->envelope = radius;
+						/* ugly hack to calculate extent for area lights, but only done once */
+						VectorScale( light->normal, -1.0f, dir );
+						for( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
+						{
+							float	factor;
+							
+							VectorMA( light->origin, radius, light->normal, origin );
+							factor = PointToPolygonFormFactor( origin, dir, light->w );
+							if( factor < 0.0f )
+								factor *= -1.0f;
+							if( (factor * light->add) <= light->falloffTolerance )
+							{
+								light->envelope = radius;
+								break;
+							}
+						}
 					}
 					
-					/* check for fast mode */
-					if( !(light->flags & LIGHT_FAST) && !(light->flags & LIGHT_FAST_TEMP) )
-						light->envelope = MAX_WORLD_COORD * 8.0f;
 					intensity = light->photons; /* hopefully not used */
 				}
 				else
@@ -3652,30 +3671,42 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag )
 					/* solve distance for non-distance lights */
 					if( !(light->flags & LIGHT_ATTEN_DISTANCE) )
 						light->envelope = MAX_WORLD_COORD * 8.0f;
-					
-					/* solve distance for linear lights */
-					else if( (light->flags & LIGHT_ATTEN_LINEAR ) )
-						//% light->envelope = ((intensity / light->falloffTolerance) * linearScale - 1 + radius) / light->fade;
-						light->envelope = ((intensity * linearScale) - light->falloffTolerance) / light->fade;
-
-						/*
-						add = angle * light->photons * linearScale - (dist * light->fade);
-						T = (light->photons * linearScale) - (dist * light->fade);
-						T + (dist * light->fade) = (light->photons * linearScale);
-						dist * light->fade = (light->photons * linearScale) - T;
-						dist = ((light->photons * linearScale) - T) / light->fade;
-						*/
-					
-					/* solve for inverse square falloff */
-					else
-						light->envelope = sqrt( intensity / light->falloffTolerance ) + radius;
 						
-						/*
-						add = light->photons / (dist * dist);
-						T = light->photons / (dist * dist);
-						T * (dist * dist) = light->photons;
-						dist = sqrt( light->photons / T );
-						*/
+					else if( (light->flags & LIGHT_FAST) || (light->flags & LIGHT_FAST_TEMP) )
+					{
+						/* solve distance for linear lights */
+						if( (light->flags & LIGHT_ATTEN_LINEAR ) )
+							light->envelope = ((intensity * linearScale) - light->falloffTolerance) / light->fade;
+
+							/*
+							add = angle * light->photons * linearScale - (dist * light->fade);
+							T = (light->photons * linearScale) - (dist * light->fade);
+							T + (dist * light->fade) = (light->photons * linearScale);
+							dist * light->fade = (light->photons * linearScale) - T;
+							dist = ((light->photons * linearScale) - T) / light->fade;
+							*/
+						
+						/* solve for inverse square falloff */
+						else
+							light->envelope = sqrt( intensity / light->falloffTolerance ) + radius;
+							
+							/*
+							add = light->photons / (dist * dist);
+							T = light->photons / (dist * dist);
+							T * (dist * dist) = light->photons;
+							dist = sqrt( light->photons / T );
+							*/
+					}
+					else
+					{
+						/* solve distance for linear lights */
+						if( (light->flags & LIGHT_ATTEN_LINEAR ) )
+							light->envelope = (intensity * linearScale) / light->fade;
+						
+						/* can't cull these */
+						else
+							light->envelope = MAX_WORLD_COORD * 8.0f;
+					}
 				}
 				
 				/* chop radius against pvs */
@@ -4060,7 +4091,7 @@ void SetupFloodLight( void )
 
 		if (VectorLength(floodlightRGB)==0)
 		{
-			VectorSet(floodlightRGB,240,240,255);
+			VectorSet(floodlightRGB,0.94,0.94,1.0);
 		}
 
 		if (v4<1) v4=1024;
@@ -4076,11 +4107,15 @@ void SetupFloodLight( void )
 	}
 	else
 	{
-		VectorSet(floodlightRGB,240,240,255);
-		//floodlighty = qtrue;
-		//Sys_Printf( "FloodLighting enabled via worldspawn _floodlight key.\n" );
+		VectorSet(floodlightRGB,0.94,0.94,1.0);
 	}
-	VectorNormalize(floodlightRGB,floodlightRGB);
+	if(colorsRGB)
+	{
+		floodlightRGB[0] = Image_LinearFloatFromsRGBFloat(floodlightRGB[0]);
+		floodlightRGB[1] = Image_LinearFloatFromsRGBFloat(floodlightRGB[1]);
+		floodlightRGB[2] = Image_LinearFloatFromsRGBFloat(floodlightRGB[2]);
+	}
+	ColorNormalize(floodlightRGB,floodlightRGB);
 }
 
 /*

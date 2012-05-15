@@ -59,6 +59,8 @@ public:
 	std::list<DPatch> SplitCols();
 	std::list<DPatch> Split();
 	void Transpose();
+	//DPatch* TransposePatch(DPatch* p1);
+	//void DebugPrint();
 	void Invert();
 	DPatch* MergePatches(patch_merge_t merge_info, DPatch* p1, DPatch* p2);
 	patch_merge_t IsMergable(DPatch* other);

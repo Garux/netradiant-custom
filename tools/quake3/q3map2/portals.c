@@ -410,7 +410,7 @@ void SplitNodePortals (node_t *node)
 // cut the portal into two portals, one on each side of the cut plane
 //
 		ClipWindingEpsilon (p->winding, plane->normal, plane->dist,
-			SPLIT_WINDING_EPSILON, &frontwinding, &backwinding);
+			SPLIT_WINDING_EPSILON, &frontwinding, &backwinding); /* not strict, we want to always keep one of them even if coplanar */
 
 		if (frontwinding && WindingIsTiny(frontwinding))
 		{
@@ -585,9 +585,26 @@ void FloodPortals_r( node_t *node, int dist, qboolean skybox )
 	
 	if( skybox )
 		node->skybox = skybox;
-	
-	if( node->occupied || node->opaque )
+
+	if( node->opaque)
 		return;
+
+	if( node->occupied )
+	{
+		if( node->occupied > dist )
+		{
+			/* reduce distance! */
+			/* for better leak line */
+			/* note: node->occupied will also be true for all further nodes, then */
+			node->occupied = dist;
+			for( p = node->portals; p; p = p->next[ s ] )
+			{
+				s = (p->nodes[ 1 ] == node);
+				FloodPortals_r( p->nodes[ !s ], dist + 1, skybox );
+			}
+		}
+		return;
+	}
 	
 	c_floodedleafs++;
 	node->occupied = dist;
@@ -644,14 +661,15 @@ Marks all nodes that can be reached by entites
 =============
 */
 
-qboolean FloodEntities( tree_t *tree )
+int FloodEntities( tree_t *tree )
 {
 	int			i, s;
 	vec3_t		origin, offset, scale, angles;
-	qboolean	r, inside, tripped, skybox;
+	qboolean	r, inside, skybox;
 	node_t		*headnode;
-	entity_t	*e;
+	entity_t	*e, *tripped;
 	const char	*value;
+	int		tripcount;
 	
 	
 	headnode = tree->headnode;
@@ -729,21 +747,33 @@ qboolean FloodEntities( tree_t *tree )
 		{
 			Sys_Printf( "Entity %i, Brush %i: Entity in solid\n", e->mapEntityNum, 0);
 		}
-		else if( tree->outside_node.occupied && !tripped )
+		else if( tree->outside_node.occupied )
 		{
-			xml_Select( "Entity leaked", e->mapEntityNum, 0, qfalse );
-			tripped = qtrue;
+			if(!tripped || tree->outside_node.occupied < tripcount)
+			{
+				tripped = e;
+				tripcount = tree->outside_node.occupied;
+			}
 		}
 	}
+
+	if(tripped)
+		xml_Select( "Entity leaked", e->mapEntityNum, 0, qfalse );
 	
 	Sys_FPrintf( SYS_VRB, "%9d flooded leafs\n", c_floodedleafs );
 	
 	if( !inside )
+	{
 		Sys_FPrintf( SYS_VRB, "no entities in open -- no filling\n" );
-	else if( tree->outside_node.occupied )
-		Sys_FPrintf( SYS_VRB, "entity reached from outside -- no filling\n" );
+		return FLOODENTITIES_EMPTY;
+	}
+	if( tree->outside_node.occupied )
+	{
+		Sys_FPrintf( SYS_VRB, "entity reached from outside -- leak detected\n" );
+		return FLOODENTITIES_LEAKED;
+	}
 	
-	return (qboolean) (inside && !tree->outside_node.occupied);
+	return FLOODENTITIES_GOOD;
 }
 
 /*

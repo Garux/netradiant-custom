@@ -305,7 +305,7 @@ public:
           tokeniser.ungetToken(); // (
           return GlobalBrushModule::getTable().createBrush();
         }
-	else if(!detectedFormat && string_equal(primitive, "("))
+	else if(!detectedFormat && string_equal(primitive, "brushDef"))
 	{
 	  detectedFormat = true;
 	  wrongFormat = true;

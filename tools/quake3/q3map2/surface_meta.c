@@ -1388,17 +1388,20 @@ returns the score of the triangle added
 #define AXIS_SCORE			100000
 #define AXIS_MIN			100000
 #define VERT_SCORE			10000
-#define SURFACE_SCORE		1000
+#define SURFACE_SCORE			1000
 #define ST_SCORE			50
 #define ST_SCORE2			(2 * (ST_SCORE))
 
-#define ADEQUATE_SCORE		((AXIS_MIN) + 1 * (VERT_SCORE))
-#define GOOD_SCORE			((AXIS_MIN) + 2 * (VERT_SCORE)                   + 4 * (ST_SCORE))
-#define PERFECT_SCORE		((AXIS_MIN) + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE))
-//#define MAX_BBOX_DISTANCE   16
+#define DEFAULT_ADEQUATE_SCORE		((AXIS_MIN) + 1 * (VERT_SCORE))
+#define DEFAULT_GOOD_SCORE		((AXIS_MIN) + 2 * (VERT_SCORE)                   + 4 * (ST_SCORE))
+#define         PERFECT_SCORE		((AXIS_MIN) + 3 * (VERT_SCORE) + (SURFACE_SCORE) + 4 * (ST_SCORE))
+
+#define ADEQUATE_SCORE 			(metaAdequateScore >= 0 ? metaAdequateScore : DEFAULT_ADEQUATE_SCORE)
+#define GOOD_SCORE 			(metaGoodScore     >= 0 ? metaGoodScore     : DEFAULT_GOOD_SCORE)
 
 static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, qboolean testAdd )
 {
+	vec3_t				p;
 	int					i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
 	float				lmMax;
 	vec3_t				mins, maxs;
@@ -1433,31 +1436,37 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 			return 0;
 	}
 
-#if MAX_BBOX_DISTANCE > 0
-	VectorCopy( ds->mins, mins );
-	VectorCopy( ds->maxs, maxs );
-	mins[0] -= MAX_BBOX_DISTANCE;
-	mins[1] -= MAX_BBOX_DISTANCE;
-	mins[2] -= MAX_BBOX_DISTANCE;
-	maxs[0] += MAX_BBOX_DISTANCE;
-	maxs[1] += MAX_BBOX_DISTANCE;
-	maxs[2] += MAX_BBOX_DISTANCE;
+	
+
+	if(metaMaxBBoxDistance >= 0)
+	{
+		if(ds->numIndexes > 0)
+		{
+			VectorCopy( ds->mins, mins );
+			VectorCopy( ds->maxs, maxs );
+			mins[0] -= metaMaxBBoxDistance;
+			mins[1] -= metaMaxBBoxDistance;
+			mins[2] -= metaMaxBBoxDistance;
+			maxs[0] += metaMaxBBoxDistance;
+			maxs[1] += metaMaxBBoxDistance;
+			maxs[2] += metaMaxBBoxDistance;
 #define CHECK_1D(mins, v, maxs) ((mins) <= (v) && (v) <= (maxs))
 #define CHECK_3D(mins, v, maxs) (CHECK_1D((mins)[0], (v)[0], (maxs)[0]) && CHECK_1D((mins)[1], (v)[1], (maxs)[1]) && CHECK_1D((mins)[2], (v)[2], (maxs)[2]))
-	VectorCopy(metaVerts[ tri->indexes[ 0 ] ].xyz, p);
-	if(!CHECK_3D(mins, p, maxs))
-	{
-		VectorCopy(metaVerts[ tri->indexes[ 1 ] ].xyz, p);
-		if(!CHECK_3D(mins, p, maxs))
-		{
-			VectorCopy(metaVerts[ tri->indexes[ 2 ] ].xyz, p);
+			VectorCopy(metaVerts[ tri->indexes[ 0 ] ].xyz, p);
 			if(!CHECK_3D(mins, p, maxs))
-				return 0;
-		}
-	}
+			{
+				VectorCopy(metaVerts[ tri->indexes[ 1 ] ].xyz, p);
+				if(!CHECK_3D(mins, p, maxs))
+				{
+					VectorCopy(metaVerts[ tri->indexes[ 2 ] ].xyz, p);
+					if(!CHECK_3D(mins, p, maxs))
+						return 0;
+				}
+			}
 #undef CHECK_3D
 #undef CHECK_1D
-#endif
+		}
+	}
 	
 	/* set initial score */
 	score = tri->surfaceNum == ds->surfaceNum ? SURFACE_SCORE : 0;

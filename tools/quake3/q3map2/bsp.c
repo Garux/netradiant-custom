@@ -266,6 +266,7 @@ void ProcessWorldModel( void )
 	xmlNodePtr	polyline, leaknode;
 	char		level[ 2 ], shader[ 1024 ];
 	const char	*value;
+	int		leakStatus;
 	
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
 	value = ValueForKey( &entities[ 0 ], "_blocksize" );
@@ -314,28 +315,19 @@ void ProcessWorldModel( void )
 	FilterStructuralBrushesIntoTree( e, tree );
 	
 	/* see if the bsp is completely enclosed */
-	if( FloodEntities( tree ) || ignoreLeaks )
-	{
-		/* rebuild a better bsp tree using only the sides that are visible from the inside */
-		FillOutside( tree->headnode );
+	leakStatus = FloodEntities(tree);
+	if (ignoreLeaks)
+		if(leakStatus == FLOODENTITIES_LEAKED)
+			leakStatus = FLOODENTITIES_GOOD;
 
-		/* chop the sides to the convex hull of their visible fragments, giving us the smallest polygons */
-		ClipSidesIntoTree( e, tree );
-		
-		/* build a visible face tree */
-		faces = MakeVisibleBSPFaceList( entities[ 0 ].brushes );
-		FreeTree( tree );
-		tree = FaceBSP( faces );
-		MakeTreePortals( tree );
-		FilterStructuralBrushesIntoTree( e, tree );
+	if ( leakStatus == FLOODENTITIES_GOOD )
+	{
 		leaked = qfalse;
-		
-		/* ydnar: flood again for skybox */
-		if( skyboxPresent )
-			FloodEntities( tree );
 	}
 	else
 	{
+		leaked = qtrue;
+
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
 		Sys_FPrintf( SYS_NOXML, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
@@ -352,10 +344,26 @@ void ProcessWorldModel( void )
 			Sys_Printf ("--- MAP LEAKED, ABORTING LEAKTEST ---\n");
 			exit( 0 );
 		}
-		leaked = qtrue;
-		
+	}
+
+	if(leakStatus != FLOODENTITIES_EMPTY) /* if no entities exist, this would accidentally the whole map, and that IS bad */
+	{
+		/* rebuild a better bsp tree using only the sides that are visible from the inside */
+		FillOutside( tree->headnode );
+
 		/* chop the sides to the convex hull of their visible fragments, giving us the smallest polygons */
 		ClipSidesIntoTree( e, tree );
+		
+		/* build a visible face tree (same thing as the initial bsp tree but after reducing the faces) */
+		faces = MakeVisibleBSPFaceList( entities[ 0 ].brushes );
+		FreeTree( tree );
+		tree = FaceBSP( faces );
+		MakeTreePortals( tree );
+		FilterStructuralBrushesIntoTree( e, tree );
+	
+		/* ydnar: flood again for skybox */
+		if( skyboxPresent )
+			FloodEntities( tree );
 	}
 	
 	/* save out information for visibility processing */
@@ -456,6 +464,13 @@ void ProcessWorldModel( void )
 				else
 					//%	VectorClear( normal );
 					VectorSet( normal, 0, 0, -1 );
+
+				if(colorsRGB)
+				{
+					color[0] = Image_LinearFloatFromsRGBFloat(color[0]);
+					color[1] = Image_LinearFloatFromsRGBFloat(color[1]);
+					color[2] = Image_LinearFloatFromsRGBFloat(color[2]);
+				}
 				
 				/* create the flare surface (note shader defaults automatically) */
 				DrawSurfaceForFlare( mapEntityNum, origin, normal, color, flareShader, lightStyle );
@@ -619,7 +634,7 @@ void OnlyEnts( void )
 {
 	char out[ 1024 ];
 
-	char save_cmdline[1024], save_version[1024];
+	char save_cmdline[1024], save_version[1024], save_gridsize[1024];
 	const char *p;
 	
 	/* note it */
@@ -635,6 +650,9 @@ void OnlyEnts( void )
 	p = ValueForKey(&entities[0], "_q3map2_version");
 	strncpy(save_version, p, sizeof(save_version));
 	save_version[sizeof(save_version)-1] = 0;
+	p = ValueForKey(&entities[0], "gridsize");
+	strncpy(save_gridsize, p, sizeof(save_gridsize));
+	save_gridsize[sizeof(save_gridsize)-1] = 0;
 
 	numEntities = 0;
 
@@ -647,6 +665,8 @@ void OnlyEnts( void )
 		SetKeyValue(&entities[0], "_q3map2_cmdline", save_cmdline);
 	if(*save_version)
 		SetKeyValue(&entities[0], "_q3map2_version", save_version);
+	if(*save_gridsize)
+		SetKeyValue(&entities[0], "gridsize", save_gridsize);
 	
 	numBSPEntities = numEntities;
 	UnparseEntities();
@@ -683,6 +703,8 @@ int BSPMain( int argc, char **argv )
 	maxSurfaceVerts = game->maxSurfaceVerts;
 	maxSurfaceIndexes = game->maxSurfaceIndexes;
 	emitFlares = game->emitFlares;
+	texturesRGB = game->texturesRGB;
+	colorsRGB = game->colorsRGB;
 	
 	/* process arguments */
 	for( i = 1; i < (argc - 1); i++ )
@@ -700,6 +722,11 @@ int BSPMain( int argc, char **argv )
 		{
 			Sys_Printf( "Disabling water\n" );
 			nowater = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-keeplights" ))
+		{
+			keepLights = qtrue;
+			Sys_Printf( "Leaving light entities on map after compile\n" );
 		}
 		else if( !strcmp( argv[ i ],  "-nodetail" ) )
 		{
@@ -810,7 +837,7 @@ int BSPMain( int argc, char **argv )
 		{
 			npDegrees = atof( argv[ i + 1 ] );
 			if( npDegrees < 0.0f )
-				shadeAngleDegrees = 0.0f;
+				npDegrees = 0.0f;
 			else if( npDegrees > 0.0f )
 				Sys_Printf( "Forcing nonplanar surfaces with a breaking angle of %f degrees\n", npDegrees );
 			i++;
@@ -856,6 +883,33 @@ int BSPMain( int argc, char **argv )
 			Sys_Printf( "Creating meta surfaces from brush faces\n" );
 			meta = qtrue;
 		}
+		else if( !strcmp( argv[ i ], "-metaadequatescore" ) )
+		{
+			metaAdequateScore = atoi( argv[ i + 1 ]);
+			if( metaAdequateScore < 0 )
+				metaAdequateScore = -1;
+ 			i++;
+			if( metaAdequateScore >= 0 )
+				Sys_Printf( "Setting ADEQUATE meta score to %d (see surface_meta.c)\n", metaAdequateScore );
+		}
+		else if( !strcmp( argv[ i ], "-metagoodscore" ) )
+		{
+			metaGoodScore = atoi( argv[ i + 1 ]);
+			if( metaGoodScore < 0 )
+				metaGoodScore = -1;
+ 			i++;
+			if( metaGoodScore >= 0 )
+				Sys_Printf( "Setting GOOD meta score to %d (see surface_meta.c)\n", metaGoodScore );
+		}
+		else if( !strcmp( argv[ i ], "-metamaxbboxdistance" ) )
+		{
+			metaMaxBBoxDistance = atof( argv[ i + 1 ]);
+			if( metaMaxBBoxDistance < 0 )
+				metaMaxBBoxDistance = -1;
+ 			i++;
+			if( metaMaxBBoxDistance >= 0 )
+				Sys_Printf( "Setting meta maximum bounding box distance to %f\n", metaMaxBBoxDistance );
+		}
 		else if( !strcmp( argv[ i ], "-patchmeta" ) )
 		{
 			Sys_Printf( "Creating meta surfaces from patches\n" );
@@ -890,6 +944,33 @@ int BSPMain( int argc, char **argv )
 		{
 			Sys_Printf( "Debug portal surfaces enabled\n" );
 			debugPortals = qtrue;
+		}
+		else if( !strcmp( argv[ i ], "-sRGBtex" ) )
+		{
+			texturesRGB = qtrue;
+			Sys_Printf( "Textures are in sRGB\n" );
+		}
+		else if( !strcmp( argv[ i ], "-nosRGBtex" ) )
+		{
+			texturesRGB = qfalse;
+			Sys_Printf( "Textures are linear\n" );
+		}
+		else if( !strcmp( argv[ i ], "-sRGBcolor" ) )
+		{
+			colorsRGB = qtrue;
+			Sys_Printf( "Colors are in sRGB\n" );
+		}
+		else if( !strcmp( argv[ i ], "-nosRGBcolor" ) )
+		{
+			colorsRGB = qfalse;
+			Sys_Printf( "Colors are linear\n" );
+		}
+		else if( !strcmp( argv[ i ], "-nosRGB" ) )
+		{
+			texturesRGB = qfalse;
+			Sys_Printf( "Textures are linear\n" );
+			colorsRGB = qfalse;
+			Sys_Printf( "Colors are linear\n" );
 		}
 		else if( !strcmp( argv[ i ], "-altsplit" ) )
 		{

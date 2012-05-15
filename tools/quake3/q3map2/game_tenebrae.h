@@ -112,7 +112,10 @@ game_t struct
 	qfalse,				/* wolf lighting model? */
 	512,				/* lightmap width/height */
 	2.0f,				/* lightmap gamma */
-	1.0f,				/* lightmap exposure */
+	qfalse,				/* lightmap sRGB */
+	qfalse,				/* texture sRGB */
+	qfalse,				/* color sRGB */
+	0.0f,				/* lightmap exposure */
 	1.0f,				/* lightmap compensate */
 	1.0f,				/* lightgrid scale */
 	1.0f,				/* lightgrid ambient scale */

@@ -1356,7 +1356,7 @@ static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, winding_
 		if( (subCeil - subFloor) > subdivisions )
 		{
 			/* clip the winding */
-			ClipWindingEpsilon( w, planeNormal, d, epsilon, &frontWinding, &backWinding );
+			ClipWindingEpsilon( w, planeNormal, d, epsilon, &frontWinding, &backWinding ); /* not strict; we assume we always keep a winding */
 
 			/* the clip may not produce two polygons if it was epsilon close */
 			if( frontWinding == NULL )
@@ -1498,8 +1498,14 @@ void ClipSideIntoTree_r( winding_t *w, side_t *side, node_t *node )
 		}
 
 		plane = &mapplanes[ node->planenum ];
-		ClipWindingEpsilon ( w, plane->normal, plane->dist,
-				ON_EPSILON, &front, &back );
+		ClipWindingEpsilonStrict ( w, plane->normal, plane->dist,
+				ON_EPSILON, &front, &back ); /* strict, we handle the "winding disappeared" case */
+		if(!front && !back)
+		{
+			/* in doubt, register it in both nodes */
+			front = CopyWinding(w);
+			back = CopyWinding(w);
+		}
 		FreeWinding( w );
 
 		ClipSideIntoTree_r( front, side, node->children[0] );
@@ -2021,7 +2027,7 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 {
 	int				i, refs = 0;
 	plane_t			*p1, *p2;
-	vec4_t			plane1, plane2, reverse;
+	vec4_t			plane1, plane2;
 	winding_t		*fat, *front, *back;
 	shaderInfo_t	*si;
 	
@@ -2035,6 +2041,13 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 		si->mins[ 1 ] != 0.0f || si->maxs[ 1 ] != 0.0f ||
 		si->mins[ 2 ] != 0.0f || si->maxs[ 2 ] != 0.0f) )
 	{
+		static qboolean warned = qfalse;
+		if(!warned)
+		{
+			Sys_Printf( "WARNING: this map uses the deformVertexes move hack\n" );
+			warned = qtrue;
+		}
+
 		/* 'fatten' the winding by the shader mins/maxs (parsed from vertexDeform move) */
 		/* note this winding is completely invalid (concave, nonplanar, etc) */
 		fat = AllocWinding( w->numpoints * 3 + 3 );
@@ -2077,7 +2090,10 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 			VectorCopy( p2->normal, plane2 );
 			plane2[ 3 ] = p2->dist;
 			
-			#if 1
+			#if 0
+				/* div0: this is the plague (inaccurate) */
+				vec4_t reverse;
+
 				/* invert surface plane */
 				VectorSubtract( vec3_origin, plane2, reverse );
 				reverse[ 3 ] = -plane2[ 3 ];
@@ -2088,6 +2104,8 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 				if( DotProduct( plane1, reverse ) > 0.999f && fabs( plane1[ 3 ] - reverse[ 3 ] ) < 0.001f )
 					return FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
 			#else
+				/* div0: this is the cholera (doesn't hit enough) */
+
 				/* the drawsurf might have an associated plane, if so, force a filter here */
 				if( ds->planeNum == node->planenum )
 					return FilterWindingIntoTree_r( w, ds, node->children[ 0 ] );
@@ -2097,10 +2115,17 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node )
 		}
 		
 		/* clip the winding by this plane */
-		ClipWindingEpsilon( w, plane1, plane1[ 3 ], ON_EPSILON, &front, &back );
+		ClipWindingEpsilonStrict( w, plane1, plane1[ 3 ], ON_EPSILON, &front, &back ); /* strict; we handle the "winding disappeared" case */
 		
 		/* filter by this plane */
 		refs = 0;
+		if( front == NULL && back == NULL )
+		{
+			/* same plane, this is an ugly hack */
+			/* but better too many than too few refs */
+			refs += FilterWindingIntoTree_r( CopyWinding(w), ds, node->children[ 0 ] );
+			refs += FilterWindingIntoTree_r( CopyWinding(w), ds, node->children[ 1 ] );
+		}
 		if( front != NULL )
 			refs += FilterWindingIntoTree_r( front, ds, node->children[ 0 ] );
 		if( back != NULL )
@@ -2411,8 +2436,7 @@ void EmitDrawIndexes( mapDrawSurface_t *ds, bspDrawSurface_t *out )
 		/* copy new unique indexes */
 		for( i = 0; i < ds->numIndexes; i++ )
 		{
-			if( numBSPDrawIndexes == MAX_MAP_DRAW_INDEXES )
-				Error( "MAX_MAP_DRAW_INDEXES" );
+			AUTOEXPAND_BY_REALLOC_BSP(DrawIndexes, 1024);
 			bspDrawIndexes[ numBSPDrawIndexes ] = ds->indexes[ i ];
 
 			/* validate the index */
@@ -3508,7 +3532,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree )
 				AddSurfaceFlare( ds, e->origin );
 			
 			/* ydnar: don't emit nodraw surfaces (like nodraw fog) */
-			if( si != NULL && (si->compileFlags & C_NODRAW) && ds->type != SURFACE_PATCH )
+			if( (si->compileFlags & C_NODRAW) && ds->type != SURFACE_PATCH )
 				continue;
 			
 			/* ydnar: bias the surface textures */

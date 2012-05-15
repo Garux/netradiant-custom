@@ -83,7 +83,6 @@ dependencies
 #include "vfs.h"
 #include "png.h"
 #include "md4.h"
-#include "radiant_jpeglib.h"
 #include <stdlib.h>
 
 
@@ -142,7 +141,7 @@ constants
 #define DEF_RADIOSITY_BOUNCE	1.0f	/* ydnar: default to 100% re-emitted light */
 
 #define	MAX_SHADER_INFO			8192
-#define MAX_CUST_SURFACEPARMS	64
+#define MAX_CUST_SURFACEPARMS	256
 
 #define	SHADER_MAX_VERTEXES		1000
 #define	SHADER_MAX_INDEXES		(6 * SHADER_MAX_VERTEXES)
@@ -317,9 +316,6 @@ abstracted bsp file
 #define MAX_LIGHTMAP_SHADERS	256
 
 /* ok to increase these at the expense of more memory */
-#define	MAX_MAP_ENTITIES		0x1000		//%	0x800	/* ydnar */
-#define	MAX_MAP_ENTSTRING		0x80000		//%	0x40000	/* ydnar */
-
 #define	MAX_MAP_AREAS			0x100		/* MAX_MAP_AREA_BYTES in q_shared must match! */
 #define	MAX_MAP_FOGS			30			//& 0x100	/* RBSP (32 - world fog - goggles) */
 #define	MAX_MAP_LEAFS			0x20000
@@ -330,7 +326,6 @@ abstracted bsp file
 #define	MAX_MAP_VISIBILITY		(VIS_HEADER_SIZE + MAX_MAP_VISCLUSTERS * (((MAX_MAP_VISCLUSTERS + 63) & ~63) >> 3))
 
 #define	MAX_MAP_DRAW_SURFS		0x20000
-#define	MAX_MAP_DRAW_INDEXES	0x80000
 
 #define MAX_MAP_ADVERTISEMENTS	30
 
@@ -568,6 +563,9 @@ typedef struct game_s
 	qboolean			wolfLight;						/* when true, lights work like wolf q3map  */
 	int					lightmapSize;					/* bsp lightmap width/height */
 	float				lightmapGamma;					/* default lightmap gamma */
+	qboolean			lightmapsRGB;					/* default lightmap sRGB mode */
+	qboolean			texturesRGB;					/* default texture sRGB mode */
+	qboolean			colorsRGB;					/* default color sRGB mode */
 	float				lightmapExposure;				/* default lightmap exposure */
 	float				lightmapCompensate;				/* default lightmap compensate value */
 	float				gridScale;						/* vortex: default lightgrid scale (affects both directional and ambient spectres) */
@@ -1599,7 +1597,10 @@ void						SplitNodePortals( node_t *node );
 
 qboolean					PortalPassable( portal_t *p );
 
-qboolean					FloodEntities( tree_t *tree );
+#define FLOODENTITIES_LEAKED 1
+#define FLOODENTITIES_GOOD 0
+#define FLOODENTITIES_EMPTY -1
+int						FloodEntities( tree_t *tree );
 void						FillOutside( node_t *headnode);
 void						FloodAreas( tree_t *tree);
 face_t						*VisibleFaces( entity_t *e, tree_t *tree );
@@ -1808,6 +1809,7 @@ void						FloodLightRawLightmap( int num );
 void						IlluminateRawLightmap( int num );
 void						IlluminateVertexes( int num );
 
+void						SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all );
 void						SetupBrushes( void );
 void						SetupClusters( void );
 qboolean					ClusterVisible( int a, int b );
@@ -1858,6 +1860,7 @@ void						EmitVertexRemapShader( char *from, char *to );
 
 void						LoadShaderInfo( void );
 shaderInfo_t				*ShaderInfoForShader( const char *shader );
+shaderInfo_t				*ShaderInfoForShaderNull( const char *shader );
 
 
 /* bspfile_abstract.c */
@@ -2034,6 +2037,9 @@ Q_EXTERN qboolean			debugPortals Q_ASSIGN( qfalse );
 Q_EXTERN qboolean           lightmapTriangleCheck Q_ASSIGN(qfalse);
 Q_EXTERN qboolean           lightmapExtraVisClusterNudge Q_ASSIGN(qfalse);
 Q_EXTERN qboolean           lightmapFill Q_ASSIGN(qfalse);
+Q_EXTERN int				metaAdequateScore Q_ASSIGN( -1 );
+Q_EXTERN int				metaGoodScore Q_ASSIGN( -1 );
+Q_EXTERN float				metaMaxBBoxDistance Q_ASSIGN( -1 );
 
 #if Q3MAP2_EXPERIMENTAL_SNAP_NORMAL_FIX
 // Increasing the normalEpsilon to compensate for new logic in SnapNormal(), where
@@ -2221,6 +2227,7 @@ Q_EXTERN qboolean			debugDeluxemap Q_ASSIGN( qfalse );
 Q_EXTERN int				deluxemode Q_ASSIGN( 0 );	/* deluxemap format (0 - modelspace, 1 - tangentspace with renormalization, 2 - tangentspace without renormalization) */
 
 Q_EXTERN qboolean			fast Q_ASSIGN( qfalse );
+Q_EXTERN qboolean			fastpoint Q_ASSIGN( qtrue );
 Q_EXTERN qboolean			faster Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			fastgrid Q_ASSIGN( qfalse );
 Q_EXTERN qboolean			fastbounce Q_ASSIGN( qfalse );
@@ -2279,6 +2286,7 @@ Q_EXTERN float				maxMapDistance Q_ASSIGN( 0 );
 
 /* for run time tweaking of light sources */
 Q_EXTERN float				pointScale Q_ASSIGN( 7500.0f );
+Q_EXTERN float				spotScale Q_ASSIGN( 7500.0f );
 Q_EXTERN float				areaScale Q_ASSIGN( 0.25f );
 Q_EXTERN float				skyScale Q_ASSIGN( 1.0f );
 Q_EXTERN float				bounceScale Q_ASSIGN( 0.25f );
@@ -2295,7 +2303,10 @@ Q_EXTERN qboolean			inGrid Q_ASSIGN(0);
 
 /* ydnar: lightmap gamma/compensation */
 Q_EXTERN float				lightmapGamma Q_ASSIGN( 1.0f );
-Q_EXTERN float				lightmapExposure Q_ASSIGN( 1.0f );
+Q_EXTERN float				lightmapsRGB Q_ASSIGN( qfalse );
+Q_EXTERN float				texturesRGB Q_ASSIGN( qfalse );
+Q_EXTERN float				colorsRGB Q_ASSIGN( qfalse );
+Q_EXTERN float				lightmapExposure Q_ASSIGN( 0.0f );
 Q_EXTERN float				lightmapCompensate Q_ASSIGN( 1.0f );
 
 /* ydnar: for runtime tweaking of falloff tolerance */
@@ -2446,7 +2457,8 @@ abstracted bsp globals
 
 Q_EXTERN int				numEntities Q_ASSIGN( 0 );
 Q_EXTERN int				numBSPEntities Q_ASSIGN( 0 );
-Q_EXTERN entity_t			entities[ MAX_MAP_ENTITIES ];
+Q_EXTERN int				allocatedEntities Q_ASSIGN( 0 );
+Q_EXTERN entity_t*			entities Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPModels Q_ASSIGN( 0 );
 Q_EXTERN int				allocatedBSPModels Q_ASSIGN( 0 );
@@ -2500,10 +2512,11 @@ Q_EXTERN int				numBSPVisBytes Q_ASSIGN( 0 );
 Q_EXTERN byte				bspVisBytes[ MAX_MAP_VISIBILITY ];
 
 Q_EXTERN int				numBSPDrawVerts Q_ASSIGN( 0 );
-Q_EXTERN bspDrawVert_t		*bspDrawVerts Q_ASSIGN( NULL );
+Q_EXTERN bspDrawVert_t			*bspDrawVerts Q_ASSIGN( NULL );
 
 Q_EXTERN int				numBSPDrawIndexes Q_ASSIGN( 0 );
-Q_EXTERN int				bspDrawIndexes[ MAX_MAP_DRAW_INDEXES ];
+Q_EXTERN int				allocatedBSPDrawIndexes Q_ASSIGN( 0 );
+Q_EXTERN int				*bspDrawIndexes Q_ASSIGN(NULL);
 
 Q_EXTERN int				numBSPDrawSurfaces Q_ASSIGN( 0 );
 Q_EXTERN bspDrawSurface_t	*bspDrawSurfaces Q_ASSIGN( NULL );
@@ -2535,6 +2548,9 @@ Q_EXTERN bspAdvertisement_t	bspAds[ MAX_MAP_ADVERTISEMENTS ];
 	while(0)
 
 #define AUTOEXPAND_BY_REALLOC_BSP(suffix, def) AUTOEXPAND_BY_REALLOC(bsp##suffix, numBSP##suffix, allocatedBSP##suffix, def)
+
+#define Image_LinearFloatFromsRGBFloat(c) (((c) <= 0.04045f) ? (c) * (1.0f / 12.92f) : (float)pow(((c) + 0.055f)*(1.0f/1.055f), 2.4f))
+#define Image_sRGBFloatFromLinearFloat(c) (((c) < 0.0031308f) ? (c) * 12.92f : 1.055f * (float)pow((c), 1.0f/2.4f) - 0.055f)
 
 /* end marker */
 #endif

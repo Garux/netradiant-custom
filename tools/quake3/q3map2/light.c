@@ -388,6 +388,12 @@ void CreateEntityLights( void )
 		if( _color && _color[ 0 ] )
 		{
 			sscanf( _color, "%f %f %f", &light->color[ 0 ], &light->color[ 1 ], &light->color[ 2 ] );
+			if (colorsRGB)
+			{
+				light->color[0] = Image_LinearFloatFromsRGBFloat(light->color[0]);
+				light->color[1] = Image_LinearFloatFromsRGBFloat(light->color[1]);
+				light->color[2] = Image_LinearFloatFromsRGBFloat(light->color[2]);
+			}
 			if (!(light->flags & LIGHT_UNNORMALIZED))
 			{
 				ColorNormalize( light->color, light->color );
@@ -400,7 +406,6 @@ void CreateEntityLights( void )
 		if(light->extraDist == 0.0f)
 			light->extraDist = extraDist;
 		
-		intensity = intensity * pointScale;
 		light->photons = intensity;
 
 		light->type = EMIT_POINT;
@@ -424,6 +429,7 @@ void CreateEntityLights( void )
 			{
 				Sys_Printf( "WARNING: light at (%i %i %i) has missing target\n",
 					(int) light->origin[ 0 ], (int) light->origin[ 1 ], (int) light->origin[ 2 ] );
+				light->photons *= pointScale;
 			}
 			else
 			{
@@ -461,7 +467,7 @@ void CreateEntityLights( void )
 					/* make a sun */
 					VectorScale( light->normal, -1.0f, sun.direction );
 					VectorCopy( light->color, sun.color );
-					sun.photons = (intensity / pointScale);
+					sun.photons = intensity;
 					sun.deviance = deviance / 180.0f * Q_PI;
 					sun.numSamples = numSamples;
 					sun.style = noStyles ? LS_NORMAL : light->style;
@@ -477,8 +483,14 @@ void CreateEntityLights( void )
 					/* skip the rest of this love story */
 					continue;
 				}
+				else
+				{
+					light->photons *= spotScale;
+				}
 			}
 		}
+		else
+			light->photons *= pointScale;
 		
 		/* jitter the light */
 		for( j = 1; j < numSamples; j++ )
@@ -1844,6 +1856,12 @@ void LightWorld( void )
 	
 	/* find the optional minimum lighting values */
 	GetVectorForKey( &entities[ 0 ], "_color", color );
+	if (colorsRGB)
+	{
+		color[0] = Image_LinearFloatFromsRGBFloat(color[0]);
+		color[1] = Image_LinearFloatFromsRGBFloat(color[1]);
+		color[2] = Image_LinearFloatFromsRGBFloat(color[2]);
+	}
 	if( VectorLength( color ) == 0.0f )
 		VectorSet( color, 1.0, 1.0, 1.0 );
 	
@@ -2065,6 +2083,24 @@ int LightMain( int argc, char **argv )
 	lightmapGamma = game->lightmapGamma;
 	Sys_Printf( " lightning gamma: %f\n", lightmapGamma );
 
+	lightmapsRGB = game->lightmapsRGB;
+	if(lightmapsRGB)
+		Sys_Printf( " lightmap colorspace: sRGB\n" );
+	else
+		Sys_Printf( " lightmap colorspace: linear\n" );
+
+	texturesRGB = game->texturesRGB;
+	if(texturesRGB)
+		Sys_Printf( " texture colorspace: sRGB\n" );
+	else
+		Sys_Printf( " texture colorspace: linear\n" );
+
+	colorsRGB = game->colorsRGB;
+	if(colorsRGB)
+		Sys_Printf( " _color colorspace: sRGB\n" );
+	else
+		Sys_Printf( " _color colorspace: linear\n" );
+
 	lightmapCompensate = game->lightmapCompensate;
 	Sys_Printf( " lightning compensation: %f\n", lightmapCompensate );
 
@@ -2086,12 +2122,6 @@ int LightMain( int argc, char **argv )
 		Sys_Printf( " shader lightstyles hack: disabled\n" );
 	else
 		Sys_Printf( " shader lightstyles hack: enabled\n" );
-
-	keepLights = game->keepLights;
-	if (keepLights == qtrue)
-		Sys_Printf( " keep lights: enabled\n" );
-	else
-		Sys_Printf( " keep lights: disabled\n" );
 
 	patchShadows = game->patchShadows;
 	if (patchShadows == qtrue)
@@ -2121,7 +2151,25 @@ int LightMain( int argc, char **argv )
 		{
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
-			Sys_Printf( "Point (entity) light scaled by %f to %f\n", f, pointScale );
+			spotScale *= f;
+			Sys_Printf( "Spherical point (entity) light scaled by %f to %f\n", f, pointScale );
+			Sys_Printf( "Spot point (entity) light scaled by %f to %f\n", f, spotScale );
+			i++;
+		}
+		
+		else if( !strcmp( argv[ i ], "-spherical" ) || !strcmp( argv[ i ], "-sphericalscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			pointScale *= f;
+			Sys_Printf( "Spherical point (entity) light scaled by %f to %f\n", f, pointScale );
+			i++;
+		}
+		
+		else if( !strcmp( argv[ i ], "-spot" ) || !strcmp( argv[ i ], "-spotscale" ) )
+		{
+			f = atof( argv[ i + 1 ] );
+			spotScale *= f;
+			Sys_Printf( "Spot point (entity) light scaled by %f to %f\n", f, spotScale );
 			i++;
 		}
 		
@@ -2153,6 +2201,7 @@ int LightMain( int argc, char **argv )
 		{
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
+			spotScale *= f;
 			areaScale *= f;
 			skyScale *= f;
 			bounceScale *= f;
@@ -2204,6 +2253,52 @@ int LightMain( int argc, char **argv )
 			i++;
 		}
 		
+		else if( !strcmp( argv[ i ], "-sRGBlight" ) )
+		{
+			lightmapsRGB = qtrue;
+			Sys_Printf( "Lighting is in sRGB\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-nosRGBlight" ) )
+		{
+			lightmapsRGB = qfalse;
+			Sys_Printf( "Lighting is linear\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-sRGBtex" ) )
+		{
+			texturesRGB = qtrue;
+			Sys_Printf( "Textures are in sRGB\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-nosRGBtex" ) )
+		{
+			texturesRGB = qfalse;
+			Sys_Printf( "Textures are linear\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-sRGBcolor" ) )
+		{
+			colorsRGB = qtrue;
+			Sys_Printf( "Colors are in sRGB\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-nosRGBcolor" ) )
+		{
+			colorsRGB = qfalse;
+			Sys_Printf( "Colors are linear\n" );
+		}
+
+		else if( !strcmp( argv[ i ], "-nosRGB" ) )
+		{
+			lightmapsRGB = qtrue;
+			Sys_Printf( "Lighting is linear\n" );
+			texturesRGB = qtrue;
+			Sys_Printf( "Textures are linear\n" );
+			colorsRGB = qtrue;
+			Sys_Printf( "Colors are linear\n" );
+		}
+
 		else if( !strcmp( argv[ i ], "-exposure" ) )
 		{
 			f = atof( argv[ i + 1 ] );
@@ -2472,12 +2567,18 @@ int LightMain( int argc, char **argv )
 			Sys_Printf( "The -smooth argument is deprecated, use \"-samples 2\" instead\n" );
 		}
 		
+		else if( !strcmp( argv[ i ], "-nofastpoint" ) )
+		{
+			fastpoint = qfalse;
+			Sys_Printf( "Automatic fast mode for point lights disabled\n" );
+		}
+		
 		else if( !strcmp( argv[ i ], "-fast" ) )
 		{
 			fast = qtrue;
 			fastgrid = qtrue;
 			fastbounce = qtrue;
-			Sys_Printf( "Fast mode enabled\n" );
+			Sys_Printf( "Fast mode enabled for all area lights\n" );
 		}
 		
 		else if( !strcmp( argv[ i ], "-faster" ) )
@@ -2669,11 +2770,6 @@ int LightMain( int argc, char **argv )
 			noStyles = qfalse;
 			Sys_Printf( "Enabling lightstyles\n" );
 		}
-		else if( !strcmp( argv[ i ], "-keeplights" ))
-		{
-			keepLights = qtrue;
-			Sys_Printf( "Leaving light entities on map after compile\n" );
-		}
 		else if( !strcmp( argv[ i ], "-cpma" ) )
 		{
 			cpmaHack = qtrue;
@@ -2761,6 +2857,10 @@ int LightMain( int argc, char **argv )
 		}
 
 	}
+
+	/* fix up falloff tolerance for sRGB */
+	if(lightmapsRGB)
+		falloffTolerance = Image_LinearFloatFromsRGBFloat(falloffTolerance * (1.0 / 255.0)) * 255.0;
 
 	/* fix up samples count */
 	if(lightRandomSamples)

@@ -180,8 +180,12 @@ public:
 
 bool ExportDataAsWavefront::WriteToFile(const std::string& path, collapsemode mode) const
 {
-	std::string objFile = path.substr(0, path.length() -4) + ".obj";
-	std::string mtlFile = path.substr(0, path.length() -4) + ".mtl";
+	std::string objFile = path;
+
+	if(path.compare(path.length() - 4, 4, ".obj") != 0)
+		objFile += ".obj";
+
+	std::string mtlFile = objFile.substr(0, objFile.length() -4) + ".mtl";
 
 	std::set<std::string> materials;
 

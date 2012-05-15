@@ -102,6 +102,9 @@ enum EPatchPrefab
   eSqCylinder,
   eCone,
   eSphere,
+  eXactCylinder,
+  eXactSphere,
+  eXactCone,
 };
 
 enum EMatrixMajor

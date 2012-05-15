@@ -233,6 +233,14 @@ qboolean RadSampleImage( byte *pixels, int width, int height, float st[ 2 ], flo
 	pixels += (y * width * 4) + (x * 4);
 	VectorCopy( pixels, color );
 	color[ 3 ] = pixels[ 3 ];
+
+	if(texturesRGB)
+	{
+		color[0] = Image_LinearFloatFromsRGBFloat(color[0] * (1.0 / 255.0)) * 255.0;
+		color[1] = Image_LinearFloatFromsRGBFloat(color[1] * (1.0 / 255.0)) * 255.0;
+		color[2] = Image_LinearFloatFromsRGBFloat(color[2] * (1.0 / 255.0)) * 255.0;
+	}
+
 	return qtrue;
 }
 

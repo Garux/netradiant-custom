@@ -87,7 +87,7 @@ Image* LoadPNGBuff (unsigned char* fbuffer)
   }
 
   // configure the read function
-  png_set_read_fn(png_ptr, (voidp)&p_fbuffer, (png_rw_ptr)&user_read_data);
+  png_set_read_fn(png_ptr, (png_voidp)&p_fbuffer, (png_rw_ptr)&user_read_data);
 
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr,

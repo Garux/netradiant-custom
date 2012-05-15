@@ -408,7 +408,7 @@ qboolean ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b )
 			continue;
 		
 		/* general case */
-		ClipWindingEpsilon( w, plane->normal, plane->dist, ON_EPSILON, &front, &back );
+		ClipWindingEpsilonStrict( w, plane->normal, plane->dist, ON_EPSILON, &front, &back ); /* strict; if plane is "almost identical" to face, both ways to continue can be wrong, so we better not fog it */
 		FreeWinding( w );
 		
 		if( back == NULL )
@@ -783,7 +783,7 @@ void CreateMapFogs( void )
 		
 		/* set up fog */
 		fog = &mapFogs[ numMapFogs++ ];
-		fog->si = ShaderInfoForShader( globalFog );
+		fog->si = ShaderInfoForShaderNull( globalFog );
 		if( fog->si == NULL )
 			Error( "Invalid shader \"%s\" referenced trying to add global fog", globalFog );
 		fog->brush = NULL;
