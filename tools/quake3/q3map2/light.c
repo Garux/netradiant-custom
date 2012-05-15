@@ -720,7 +720,7 @@ float PointToPolygonFormFactor( const vec3_t point, const vec3_t normal, const w
 	for ( i = 0; i < w->numpoints; i++ )
 	{
 		VectorSubtract( w->p[ i ], point, dirs[ i ] );
-		VectorNormalize( dirs[ i ], dirs[ i ] );
+		VectorFastNormalize( dirs[ i ], dirs[ i ] );
 	}
 
 	/* duplicate first vertex to avoid mod operation */
@@ -746,7 +746,7 @@ float PointToPolygonFormFactor( const vec3_t point, const vec3_t normal, const w
 		angle = acos( dot );
 
 		CrossProduct( dirs[ i ], dirs[ j ], triVector );
-		if ( VectorNormalize( triVector, triNormal ) < 0.0001f ) {
+		if ( VectorFastNormalize( triVector, triNormal ) < 0.0001f ) {
 			continue;
 		}
 

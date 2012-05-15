@@ -153,9 +153,7 @@ void _VectorCopy( vec3_t in, vec3_t out ){
 	out[2] = in[2];
 }
 
-vec_t VectorNormalize( const vec3_t in, vec3_t out ) {
-
-#if MATHLIB_VECTOR_NORMALIZE_PRECISION_FIX
+vec_t VectorAccurateNormalize( const vec3_t in, vec3_t out ) {
 
 	// The sqrt() function takes double as an input and returns double as an
 	// output according the the man pages on Debian and on FreeBSD.  Therefore,
@@ -179,26 +177,30 @@ vec_t VectorNormalize( const vec3_t in, vec3_t out ) {
 	out[2] = (vec_t) ( z / length );
 
 	return (vec_t) length;
+}
 
-#else
+vec_t VectorFastNormalize( const vec3_t in, vec3_t out ) {
 
-	vec_t length, ilength;
+	// SmileTheory: This is ioquake3's VectorNormalize2
+	//              for when accuracy matters less than speed
+	float length, ilength;
 
-	length = (vec_t)sqrt( in[0] * in[0] + in[1] * in[1] + in[2] * in[2] );
-	if ( length == 0 ) {
+	length = in[0] * in[0] + in[1] * in[1] + in[2] * in[2];
+
+	if ( length ) {
+		/* writing it this way allows gcc to recognize that rsqrt can be used */
+		ilength = 1 / (float)sqrt( length );
+		/* sqrt(length) = length * (1 / sqrt(length)) */
+		length *= ilength;
+		out[0] = in[0] * ilength;
+		out[1] = in[1] * ilength;
+		out[2] = in[2] * ilength;
+	}
+	else {
 		VectorClear( out );
-		return 0;
 	}
 
-	ilength = 1.0f / length;
-	out[0] = in[0] * ilength;
-	out[1] = in[1] * ilength;
-	out[2] = in[2] * ilength;
-
 	return length;
-
-#endif
-
 }
 
 vec_t ColorNormalize( const vec3_t in, vec3_t out ) {

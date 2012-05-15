@@ -101,7 +101,13 @@ void _CrossProduct( vec3_t v1, vec3_t v2, vec3_t cross );
 // I need this define in order to test some of the regression tests from time to time.
 // This define affect the precision of VectorNormalize() function only.
 #define MATHLIB_VECTOR_NORMALIZE_PRECISION_FIX 1
-vec_t VectorNormalize( const vec3_t in, vec3_t out );
+vec_t VectorAccurateNormalize( const vec3_t in, vec3_t out );
+vec_t VectorFastNormalize( const vec3_t in, vec3_t out );
+#if MATHLIB_VECTOR_NORMALIZE_PRECISION_FIX
+#define VectorNormalize VectorAccurateNormalize
+#else
+#define VectorNormalize VectorFastNormalize
+#endif
 vec_t ColorNormalize( const vec3_t in, vec3_t out );
 void VectorInverse( vec3_t v );
 void VectorPolar( vec3_t v, float radius, float theta, float phi );
