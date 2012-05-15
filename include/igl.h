@@ -1,32 +1,32 @@
 /*
-Copyright (C) 2001-2006, William Joseph.
-All Rights Reserved.
+   Copyright (C) 2001-2006, William Joseph.
+   All Rights Reserved.
 
-This file is part of GtkRadiant.
+   This file is part of GtkRadiant.
 
-GtkRadiant is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   GtkRadiant is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-GtkRadiant is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GtkRadiant is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GtkRadiant; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+   You should have received a copy of the GNU General Public License
+   along with GtkRadiant; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-#if !defined(INCLUDED_IGL_H)
+#if !defined( INCLUDED_IGL_H )
 #define INCLUDED_IGL_H
 
 #include <cstddef>
 #include <string.h>
 #include "generic/constant.h"
 
-#if defined(WIN32)
+#if defined( WIN32 )
 #define QGL_DLLEXPORT __stdcall
 #else
 #define QGL_DLLEXPORT
@@ -48,7 +48,7 @@ typedef double GLdouble;
 typedef double GLclampd;
 typedef void GLvoid;
 
-#if !defined(GL_VERSION_1_1)
+#if !defined( GL_VERSION_1_1 )
 #define GL_VERSION_1_1 1
 
 #define GL_ZERO 0
@@ -918,7 +918,7 @@ typedef void GLvoid;
 #endif
 
 
-#if !defined(GL_EXT_vertex_array)
+#if !defined( GL_EXT_vertex_array )
 #define GL_EXT_vertex_array 1
 
 #define GL_VERTEX_ARRAY_EXT 0x8074
@@ -958,7 +958,7 @@ typedef void GLvoid;
 #endif
 
 
-#if !defined(GL_EXT_bgra)
+#if !defined( GL_EXT_bgra )
 #define GL_EXT_bgra 1
 
 #define GL_BGR_EXT 0x80E0
@@ -967,7 +967,7 @@ typedef void GLvoid;
 #endif
 
 
-#if !defined(GL_EXT_paletted_texture)
+#if !defined( GL_EXT_paletted_texture )
 #define GL_EXT_paletted_texture 1
 
 #define GL_COLOR_TABLE_FORMAT_EXT 0x80D8
@@ -991,7 +991,7 @@ typedef void GLvoid;
 
 #endif
 
-#if !defined(GL_ARB_multitexture)
+#if !defined( GL_ARB_multitexture )
 #define GL_ARB_multitexture 1
 
 #define GL_TEXTURE0_ARB 0x84C0
@@ -1069,7 +1069,7 @@ typedef void GLvoid;
 
 
 // EXT_texture_compression_s3tc
-#if !defined(GL_EXT_texture_compression_s3tc)
+#if !defined( GL_EXT_texture_compression_s3tc )
 #define GL_EXT_texture_compression_s3tc 1
 
 #define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0x83F0
@@ -1081,7 +1081,7 @@ typedef void GLvoid;
 
 
 // ARB_texture_compression
-#if !defined(GL_ARB_texture_compression)
+#if !defined( GL_ARB_texture_compression )
 #define GL_ARB_texture_compression 1
 
 #define GL_COMPRESSED_ALPHA_ARB 0x84E9
@@ -1109,7 +1109,7 @@ typedef void GLvoid;
 
 // GL 1.2
 
-#if !defined(GL_VERSION_1_2)
+#if !defined( GL_VERSION_1_2 )
 
 #define GL_SMOOTH_POINT_SIZE_RANGE 0x0B12
 #define GL_SMOOTH_POINT_SIZE_GRANULARITY 0x0B13
@@ -1163,7 +1163,7 @@ typedef void GLvoid;
 
 // GL 1.3
 
-#if !defined(GL_VERSION_1_3)
+#if !defined( GL_VERSION_1_3 )
 #define GL_VERSION_1_3 1
 
 #define GL_MULTISAMPLE 0x809D
@@ -1314,7 +1314,7 @@ typedef void GLvoid;
 
 
 // GL 1.4
-#if !defined(GL_VERSION_1_4)
+#if !defined( GL_VERSION_1_4 )
 #define GL_VERSION_1_4 1
 
 #define GL_BLEND_DST_RGB 0x80C8
@@ -1409,7 +1409,7 @@ typedef void GLvoid;
 
 
 // GL 1.5
-#if !defined(GL_VERSION_1_5)
+#if !defined( GL_VERSION_1_5 )
 #define GL_VERSION_1_5 1
 
 #define GL_FOG_COORD GL_FOG_COORDINATE
@@ -1490,7 +1490,7 @@ typedef std::ptrdiff_t GLintptr;
 
 
 // GL_ARB_vertex_program
-#if !defined(GL_ARB_vertex_program)
+#if !defined( GL_ARB_vertex_program )
 #define GL_ARB_vertex_program
 
 #define GL_VERTEX_PROGRAM_ARB 0x8620
@@ -1640,7 +1640,7 @@ typedef std::ptrdiff_t GLintptr;
 
 
 // GL_ARB_fragment_program
-#if !defined(GL_ARB_fragment_program)
+#if !defined( GL_ARB_fragment_program )
 #define GL_ARB_fragment_program 1
 
 #define GL_FRAGMENT_PROGRAM_ARB 0x8804
@@ -1663,7 +1663,7 @@ typedef std::ptrdiff_t GLintptr;
 
 
 // GL_ARB_shader_objects
-#if !defined(GL_ARB_shader_objects)
+#if !defined( GL_ARB_shader_objects )
 #define GL_ARB_shader_objects 1
 
 #define GL_PROGRAM_OBJECT_ARB 0x8B40
@@ -1747,7 +1747,7 @@ typedef unsigned int GLhandleARB;
 #endif
 
 // GL_ARB_vertex_shader
-#if !defined(GL_ARB_vertex_shader)
+#if !defined( GL_ARB_vertex_shader )
 #define GL_ARB_vertex_shader 1
 
 #define GL_VERTEX_SHADER_ARB 0x8B31
@@ -1813,7 +1813,7 @@ typedef unsigned int GLhandleARB;
 
 
 // GL_ARB_fragment_shader
-#if !defined(GL_ARB_fragment_shader)
+#if !defined( GL_ARB_fragment_shader )
 #define GL_ARB_fragment_shader 1
 
 #define GL_FRAGMENT_SHADER_ARB 0x8B30
@@ -1824,7 +1824,7 @@ typedef unsigned int GLhandleARB;
 
 
 // GL_ARB_shading_language_100
-#if !defined(GL_ARB_shading_language_100)
+#if !defined( GL_ARB_shading_language_100 )
 #define GL_ARB_shading_language_100 1
 
 #define GL_SHADING_LANGUAGE_VERSION_ARB 0x8B8C
@@ -1833,7 +1833,7 @@ typedef unsigned int GLhandleARB;
 
 
 // GL_NV_vertex_program2
-#if !defined(GL_NV_vertex_program)
+#if !defined( GL_NV_vertex_program )
 #define GL_NV_vertex_program 1
 
 #define GL_VERTEX_PROGRAM_NV 0x8620
@@ -1959,7 +1959,7 @@ typedef unsigned int GLhandleARB;
 
 
 // GL_NV_fragment_program
-#if !defined(GL_NV_fragment_program)
+#if !defined( GL_NV_fragment_program )
 
 #define GL_NV_fragment_program 1
 
@@ -1982,831 +1982,813 @@ typedef unsigned int GLhandleARB;
 /// Provides convenience functions for querying availabiliy of extensions, rendering text and error-checking.
 struct OpenGLBinding
 {
-  INTEGER_CONSTANT(Version, 2);
-  STRING_CONSTANT(Name, "qgl");
+	INTEGER_CONSTANT( Version, 2 );
+	STRING_CONSTANT( Name, "qgl" );
 
-  /// \brief OpenGL version, extracted from the GL_VERSION string.
-  int major_version, minor_version;
+	/// \brief OpenGL version, extracted from the GL_VERSION string.
+	int major_version, minor_version;
 
-  /// \brief Is true if the global shared OpenGL context is valid.
-  bool contextValid;
+	/// \brief Is true if the global shared OpenGL context is valid.
+	bool contextValid;
 
-  OpenGLBinding() : contextValid(false)
-  {
-  }
+	OpenGLBinding() : contextValid( false ){
+	}
 
-  /// \brief Asserts that there no OpenGL errors have occurred since the last call to glGetError.
-  void (*assertNoErrors)(const char *file, int line);
+	/// \brief Asserts that there no OpenGL errors have occurred since the last call to glGetError.
+	void ( *assertNoErrors )( const char *file, int line );
 
-  GLFont *m_font; // MUST be set!
+	GLFont *m_font; // MUST be set!
 
-  /// \brief Renders \p string at the current raster-position of the current context.
-  void drawString(const char* string) const
-  {
-    m_font->printString(string);
-  }
+	/// \brief Renders \p string at the current raster-position of the current context.
+	void drawString( const char* string ) const {
+		m_font->printString( string );
+	}
 
-  /// \brief Renders \p character at the current raster-position of the current context.
-  void drawChar(char character) const
-  {
-    char s[2];
-    s[0] = character;
-    s[1] = 0;
-    drawString(s);
-  }
+	/// \brief Renders \p character at the current raster-position of the current context.
+	void drawChar( char character ) const {
+		char s[2];
+		s[0] = character;
+		s[1] = 0;
+		drawString( s );
+	}
 
 
-  // GL 1.1
-  void (QGL_DLLEXPORT *m_glAccum)(GLenum op, GLfloat value);
-  void (QGL_DLLEXPORT *m_glAlphaFunc)(GLenum func, GLclampf ref);
-  GLboolean (QGL_DLLEXPORT *m_glAreTexturesResident)(GLsizei n, const GLuint *textures, GLboolean *residences);
-  void (QGL_DLLEXPORT *m_glArrayElement)(GLint i);
-  void (QGL_DLLEXPORT *m_glBegin)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glBindTexture)(GLenum target, GLuint texture);
-  void (QGL_DLLEXPORT *m_glBitmap)(GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte *bitmap);
-  void (QGL_DLLEXPORT *m_glBlendFunc)(GLenum sfactor, GLenum dfactor);
-  void (QGL_DLLEXPORT *m_glCallList)(GLuint list);
-  void (QGL_DLLEXPORT *m_glCallLists)(GLsizei n, GLenum type, const GLvoid *lists);
-  void (QGL_DLLEXPORT *m_glClear)(GLbitfield mask);
-  void (QGL_DLLEXPORT *m_glClearAccum)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-  void (QGL_DLLEXPORT *m_glClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-  void (QGL_DLLEXPORT *m_glClearDepth)(GLclampd depth);
-  void (QGL_DLLEXPORT *m_glClearIndex)(GLfloat c);
-  void (QGL_DLLEXPORT *m_glClearStencil)(GLint s);
-  void (QGL_DLLEXPORT *m_glClipPlane)(GLenum plane, const GLdouble *equation);
-  void (QGL_DLLEXPORT *m_glColor3b)(GLbyte red, GLbyte green, GLbyte blue);
-  void (QGL_DLLEXPORT *m_glColor3bv)(const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glColor3d)(GLdouble red, GLdouble green, GLdouble blue);
-  void (QGL_DLLEXPORT *m_glColor3dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glColor3f)(GLfloat red, GLfloat green, GLfloat blue);
-  void (QGL_DLLEXPORT *m_glColor3fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glColor3i)(GLint red, GLint green, GLint blue);
-  void (QGL_DLLEXPORT *m_glColor3iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glColor3s)(GLshort red, GLshort green, GLshort blue);
-  void (QGL_DLLEXPORT *m_glColor3sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glColor3ub)(GLubyte red, GLubyte green, GLubyte blue);
-  void (QGL_DLLEXPORT *m_glColor3ubv)(const GLubyte *v);
-  void (QGL_DLLEXPORT *m_glColor3ui)(GLuint red, GLuint green, GLuint blue);
-  void (QGL_DLLEXPORT *m_glColor3uiv)(const GLuint *v);
-  void (QGL_DLLEXPORT *m_glColor3us)(GLushort red, GLushort green, GLushort blue);
-  void (QGL_DLLEXPORT *m_glColor3usv)(const GLushort *v);
-  void (QGL_DLLEXPORT *m_glColor4b)(GLbyte red, GLbyte green, GLbyte blue, GLbyte alpha);
-  void (QGL_DLLEXPORT *m_glColor4bv)(const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glColor4d)(GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha);
-  void (QGL_DLLEXPORT *m_glColor4dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glColor4f)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-  void (QGL_DLLEXPORT *m_glColor4fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glColor4i)(GLint red, GLint green, GLint blue, GLint alpha);
-  void (QGL_DLLEXPORT *m_glColor4iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glColor4s)(GLshort red, GLshort green, GLshort blue, GLshort alpha);
-  void (QGL_DLLEXPORT *m_glColor4sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glColor4ub)(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha);
-  void (QGL_DLLEXPORT *m_glColor4ubv)(const GLubyte *v);
-  void (QGL_DLLEXPORT *m_glColor4ui)(GLuint red, GLuint green, GLuint blue, GLuint alpha);
-  void (QGL_DLLEXPORT *m_glColor4uiv)(const GLuint *v);
-  void (QGL_DLLEXPORT *m_glColor4us)(GLushort red, GLushort green, GLushort blue, GLushort alpha);
-  void (QGL_DLLEXPORT *m_glColor4usv)(const GLushort *v);
-  void (QGL_DLLEXPORT *m_glColorMask)(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
-  void (QGL_DLLEXPORT *m_glColorMaterial)(GLenum face, GLenum mode);
-  void (QGL_DLLEXPORT *m_glColorPointer)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glCopyPixels)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum type);
-  void (QGL_DLLEXPORT *m_glCopyTexImage1D)(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border);
-  void (QGL_DLLEXPORT *m_glCopyTexImage2D)(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
-  void (QGL_DLLEXPORT *m_glCopyTexSubImage1D)(GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width);
-  void (QGL_DLLEXPORT *m_glCopyTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
-  void (QGL_DLLEXPORT *m_glCullFace)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glDeleteLists)(GLuint list, GLsizei range);
-  void (QGL_DLLEXPORT *m_glDeleteTextures)(GLsizei n, const GLuint *textures);
-  void (QGL_DLLEXPORT *m_glDepthFunc)(GLenum func);
-  void (QGL_DLLEXPORT *m_glDepthMask)(GLboolean flag);
-  void (QGL_DLLEXPORT *m_glDepthRange)(GLclampd zNear, GLclampd zFar);
-  void (QGL_DLLEXPORT *m_glDisable)(GLenum cap);
-  void (QGL_DLLEXPORT *m_glDisableClientState)(GLenum array);
-  void (QGL_DLLEXPORT *m_glDrawArrays)(GLenum mode, GLint first, GLsizei count);
-  void (QGL_DLLEXPORT *m_glDrawBuffer)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const GLvoid *indices);
-  void (QGL_DLLEXPORT *m_glDrawPixels)(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glEdgeFlag)(GLboolean flag);
-  void (QGL_DLLEXPORT *m_glEdgeFlagPointer)(GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glEdgeFlagv)(const GLboolean *flag);
-  void (QGL_DLLEXPORT *m_glEnable)(GLenum cap);
-  void (QGL_DLLEXPORT *m_glEnableClientState)(GLenum array);
-  void (QGL_DLLEXPORT *m_glEnd)(void);
-  void (QGL_DLLEXPORT *m_glEndList)(void);
-  void (QGL_DLLEXPORT *m_glEvalCoord1d)(GLdouble u);
-  void (QGL_DLLEXPORT *m_glEvalCoord1dv)(const GLdouble *u);
-  void (QGL_DLLEXPORT *m_glEvalCoord1f)(GLfloat u);
-  void (QGL_DLLEXPORT *m_glEvalCoord1fv)(const GLfloat *u);
-  void (QGL_DLLEXPORT *m_glEvalCoord2d)(GLdouble u, GLdouble v);
-  void (QGL_DLLEXPORT *m_glEvalCoord2dv)(const GLdouble *u);
-  void (QGL_DLLEXPORT *m_glEvalCoord2f)(GLfloat u, GLfloat v);
-  void (QGL_DLLEXPORT *m_glEvalCoord2fv)(const GLfloat *u);
-  void (QGL_DLLEXPORT *m_glEvalMesh1)(GLenum mode, GLint i1, GLint i2);
-  void (QGL_DLLEXPORT *m_glEvalMesh2)(GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2);
-  void (QGL_DLLEXPORT *m_glEvalPoint1)(GLint i);
-  void (QGL_DLLEXPORT *m_glEvalPoint2)(GLint i, GLint j);
-  void (QGL_DLLEXPORT *m_glFeedbackBuffer)(GLsizei size, GLenum type, GLfloat *buffer);
-  void (QGL_DLLEXPORT *m_glFinish)(void);
-  void (QGL_DLLEXPORT *m_glFlush)(void);
-  void (QGL_DLLEXPORT *m_glFogf)(GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glFogfv)(GLenum pname, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glFogi)(GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glFogiv)(GLenum pname, const GLint *params);
-  void (QGL_DLLEXPORT *m_glFrontFace)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glFrustum)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
-  GLuint (QGL_DLLEXPORT *m_glGenLists)(GLsizei range);
-  void (QGL_DLLEXPORT *m_glGenTextures)(GLsizei n, GLuint *textures);
-  void (QGL_DLLEXPORT *m_glGetBooleanv)(GLenum pname, GLboolean *params);
-  void (QGL_DLLEXPORT *m_glGetClipPlane)(GLenum plane, GLdouble *equation);
-  void (QGL_DLLEXPORT *m_glGetDoublev)(GLenum pname, GLdouble *params);
-  GLenum (QGL_DLLEXPORT *m_glGetError)(void);
-  void (QGL_DLLEXPORT *m_glGetFloatv)(GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetIntegerv)(GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetLightfv)(GLenum light, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetLightiv)(GLenum light, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetMapdv)(GLenum target, GLenum query, GLdouble *v);
-  void (QGL_DLLEXPORT *m_glGetMapfv)(GLenum target, GLenum query, GLfloat *v);
-  void (QGL_DLLEXPORT *m_glGetMapiv)(GLenum target, GLenum query, GLint *v);
-  void (QGL_DLLEXPORT *m_glGetMaterialfv)(GLenum face, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetMaterialiv)(GLenum face, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetPixelMapfv)(GLenum map, GLfloat *values);
-  void (QGL_DLLEXPORT *m_glGetPixelMapuiv)(GLenum map, GLuint *values);
-  void (QGL_DLLEXPORT *m_glGetPixelMapusv)(GLenum map, GLushort *values);
-  void (QGL_DLLEXPORT *m_glGetPointerv)(GLenum pname, GLvoid* *params);
-  void (QGL_DLLEXPORT *m_glGetPolygonStipple)(GLubyte *mask);
-  const GLubyte * (QGL_DLLEXPORT *m_glGetString)(GLenum name);
-  void (QGL_DLLEXPORT *m_glGetTexEnvfv)(GLenum target, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetTexEnviv)(GLenum target, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetTexGendv)(GLenum coord, GLenum pname, GLdouble *params);
-  void (QGL_DLLEXPORT *m_glGetTexGenfv)(GLenum coord, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetTexGeniv)(GLenum coord, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetTexImage)(GLenum target, GLint level, GLenum format, GLenum type, GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glGetTexLevelParameterfv)(GLenum target, GLint level, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetTexLevelParameteriv)(GLenum target, GLint level, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetTexParameterfv)(GLenum target, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetTexParameteriv)(GLenum target, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glHint)(GLenum target, GLenum mode);
-  void (QGL_DLLEXPORT *m_glIndexMask)(GLuint mask);
-  void (QGL_DLLEXPORT *m_glIndexPointer)(GLenum type, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glIndexd)(GLdouble c);
-  void (QGL_DLLEXPORT *m_glIndexdv)(const GLdouble *c);
-  void (QGL_DLLEXPORT *m_glIndexf)(GLfloat c);
-  void (QGL_DLLEXPORT *m_glIndexfv)(const GLfloat *c);
-  void (QGL_DLLEXPORT *m_glIndexi)(GLint c);
-  void (QGL_DLLEXPORT *m_glIndexiv)(const GLint *c);
-  void (QGL_DLLEXPORT *m_glIndexs)(GLshort c);
-  void (QGL_DLLEXPORT *m_glIndexsv)(const GLshort *c);
-  void (QGL_DLLEXPORT *m_glIndexub)(GLubyte c);
-  void (QGL_DLLEXPORT *m_glIndexubv)(const GLubyte *c);
-  void (QGL_DLLEXPORT *m_glInitNames)(void);
-  void (QGL_DLLEXPORT *m_glInterleavedArrays)(GLenum format, GLsizei stride, const GLvoid *pointer);
-  GLboolean (QGL_DLLEXPORT *m_glIsEnabled)(GLenum cap);
-  GLboolean (QGL_DLLEXPORT *m_glIsList)(GLuint list);
-  GLboolean (QGL_DLLEXPORT *m_glIsTexture)(GLuint texture);
-  void (QGL_DLLEXPORT *m_glLightModelf)(GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glLightModelfv)(GLenum pname, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glLightModeli)(GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glLightModeliv)(GLenum pname, const GLint *params);
-  void (QGL_DLLEXPORT *m_glLightf)(GLenum light, GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glLightfv)(GLenum light, GLenum pname, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glLighti)(GLenum light, GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glLightiv)(GLenum light, GLenum pname, const GLint *params);
-  void (QGL_DLLEXPORT *m_glLineStipple)(GLint factor, GLushort pattern);
-  void (QGL_DLLEXPORT *m_glLineWidth)(GLfloat width);
-  void (QGL_DLLEXPORT *m_glListBase)(GLuint base);
-  void (QGL_DLLEXPORT *m_glLoadIdentity)(void);
-  void (QGL_DLLEXPORT *m_glLoadMatrixd)(const GLdouble *m);
-  void (QGL_DLLEXPORT *m_glLoadMatrixf)(const GLfloat *m);
-  void (QGL_DLLEXPORT *m_glLoadName)(GLuint name);
-  void (QGL_DLLEXPORT *m_glLogicOp)(GLenum opcode);
-  void (QGL_DLLEXPORT *m_glMap1d)(GLenum target, GLdouble u1, GLdouble u2, GLint stride, GLint order, const GLdouble *points);
-  void (QGL_DLLEXPORT *m_glMap1f)(GLenum target, GLfloat u1, GLfloat u2, GLint stride, GLint order, const GLfloat *points);
-  void (QGL_DLLEXPORT *m_glMap2d)(GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, const GLdouble *points);
-  void (QGL_DLLEXPORT *m_glMap2f)(GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, const GLfloat *points);
-  void (QGL_DLLEXPORT *m_glMapGrid1d)(GLint un, GLdouble u1, GLdouble u2);
-  void (QGL_DLLEXPORT *m_glMapGrid1f)(GLint un, GLfloat u1, GLfloat u2);
-  void (QGL_DLLEXPORT *m_glMapGrid2d)(GLint un, GLdouble u1, GLdouble u2, GLint vn, GLdouble v1, GLdouble v2);
-  void (QGL_DLLEXPORT *m_glMapGrid2f)(GLint un, GLfloat u1, GLfloat u2, GLint vn, GLfloat v1, GLfloat v2);
-  void (QGL_DLLEXPORT *m_glMaterialf)(GLenum face, GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glMaterialfv)(GLenum face, GLenum pname, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glMateriali)(GLenum face, GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glMaterialiv)(GLenum face, GLenum pname, const GLint *params);
-  void (QGL_DLLEXPORT *m_glMatrixMode)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glMultMatrixd)(const GLdouble *m);
-  void (QGL_DLLEXPORT *m_glMultMatrixf)(const GLfloat *m);
-  void (QGL_DLLEXPORT *m_glNewList)(GLuint list, GLenum mode);
-  void (QGL_DLLEXPORT *m_glNormal3b)(GLbyte nx, GLbyte ny, GLbyte nz);
-  void (QGL_DLLEXPORT *m_glNormal3bv)(const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glNormal3d)(GLdouble nx, GLdouble ny, GLdouble nz);
-  void (QGL_DLLEXPORT *m_glNormal3dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glNormal3f)(GLfloat nx, GLfloat ny, GLfloat nz);
-  void (QGL_DLLEXPORT *m_glNormal3fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glNormal3i)(GLint nx, GLint ny, GLint nz);
-  void (QGL_DLLEXPORT *m_glNormal3iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glNormal3s)(GLshort nx, GLshort ny, GLshort nz);
-  void (QGL_DLLEXPORT *m_glNormal3sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glNormalPointer)(GLenum type, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glOrtho)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
-  void (QGL_DLLEXPORT *m_glPassThrough)(GLfloat token);
-  void (QGL_DLLEXPORT *m_glPixelMapfv)(GLenum map, GLsizei mapsize, const GLfloat *values);
-  void (QGL_DLLEXPORT *m_glPixelMapuiv)(GLenum map, GLsizei mapsize, const GLuint *values);
-  void (QGL_DLLEXPORT *m_glPixelMapusv)(GLenum map, GLsizei mapsize, const GLushort *values);
-  void (QGL_DLLEXPORT *m_glPixelStoref)(GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glPixelStorei)(GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glPixelTransferf)(GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glPixelTransferi)(GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glPixelZoom)(GLfloat xfactor, GLfloat yfactor);
-  void (QGL_DLLEXPORT *m_glPointSize)(GLfloat size);
-  void (QGL_DLLEXPORT *m_glPolygonMode)(GLenum face, GLenum mode);
-  void (QGL_DLLEXPORT *m_glPolygonOffset)(GLfloat factor, GLfloat units);
-  void (QGL_DLLEXPORT *m_glPolygonStipple)(const GLubyte *mask);
-  void (QGL_DLLEXPORT *m_glPopAttrib)(void);
-  void (QGL_DLLEXPORT *m_glPopClientAttrib)(void);
-  void (QGL_DLLEXPORT *m_glPopMatrix)(void);
-  void (QGL_DLLEXPORT *m_glPopName)(void);
-  void (QGL_DLLEXPORT *m_glPrioritizeTextures)(GLsizei n, const GLuint *textures, const GLclampf *priorities);
-  void (QGL_DLLEXPORT *m_glPushAttrib)(GLbitfield mask);
-  void (QGL_DLLEXPORT *m_glPushClientAttrib)(GLbitfield mask);
-  void (QGL_DLLEXPORT *m_glPushMatrix)(void);
-  void (QGL_DLLEXPORT *m_glPushName)(GLuint name);
-  void (QGL_DLLEXPORT *m_glRasterPos2d)(GLdouble x, GLdouble y);
-  void (QGL_DLLEXPORT *m_glRasterPos2dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glRasterPos2f)(GLfloat x, GLfloat y);
-  void (QGL_DLLEXPORT *m_glRasterPos2fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glRasterPos2i)(GLint x, GLint y);
-  void (QGL_DLLEXPORT *m_glRasterPos2iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glRasterPos2s)(GLshort x, GLshort y);
-  void (QGL_DLLEXPORT *m_glRasterPos2sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glRasterPos3d)(GLdouble x, GLdouble y, GLdouble z);
-  void (QGL_DLLEXPORT *m_glRasterPos3dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glRasterPos3f)(GLfloat x, GLfloat y, GLfloat z);
-  void (QGL_DLLEXPORT *m_glRasterPos3fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glRasterPos3i)(GLint x, GLint y, GLint z);
-  void (QGL_DLLEXPORT *m_glRasterPos3iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glRasterPos3s)(GLshort x, GLshort y, GLshort z);
-  void (QGL_DLLEXPORT *m_glRasterPos3sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glRasterPos4d)(GLdouble x, GLdouble y, GLdouble z, GLdouble w);
-  void (QGL_DLLEXPORT *m_glRasterPos4dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glRasterPos4f)(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-  void (QGL_DLLEXPORT *m_glRasterPos4fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glRasterPos4i)(GLint x, GLint y, GLint z, GLint w);
-  void (QGL_DLLEXPORT *m_glRasterPos4iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glRasterPos4s)(GLshort x, GLshort y, GLshort z, GLshort w);
-  void (QGL_DLLEXPORT *m_glRasterPos4sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glReadBuffer)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glReadPixels)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glRectd)(GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2);
-  void (QGL_DLLEXPORT *m_glRectdv)(const GLdouble *v1, const GLdouble *v2);
-  void (QGL_DLLEXPORT *m_glRectf)(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
-  void (QGL_DLLEXPORT *m_glRectfv)(const GLfloat *v1, const GLfloat *v2);
-  void (QGL_DLLEXPORT *m_glRecti)(GLint x1, GLint y1, GLint x2, GLint y2);
-  void (QGL_DLLEXPORT *m_glRectiv)(const GLint *v1, const GLint *v2);
-  void (QGL_DLLEXPORT *m_glRects)(GLshort x1, GLshort y1, GLshort x2, GLshort y2);
-  void (QGL_DLLEXPORT *m_glRectsv)(const GLshort *v1, const GLshort *v2);
-  GLint (QGL_DLLEXPORT *m_glRenderMode)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glRotated)(GLdouble anm_gle, GLdouble x, GLdouble y, GLdouble z);
-  void (QGL_DLLEXPORT *m_glRotatef)(GLfloat anm_gle, GLfloat x, GLfloat y, GLfloat z);
-  void (QGL_DLLEXPORT *m_glScaled)(GLdouble x, GLdouble y, GLdouble z);
-  void (QGL_DLLEXPORT *m_glScalef)(GLfloat x, GLfloat y, GLfloat z);
-  void (QGL_DLLEXPORT *m_glScissor)(GLint x, GLint y, GLsizei width, GLsizei height);
-  void (QGL_DLLEXPORT *m_glSelectBuffer)(GLsizei size, GLuint *buffer);
-  void (QGL_DLLEXPORT *m_glShadeModel)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glStencilFunc)(GLenum func, GLint ref, GLuint mask);
-  void (QGL_DLLEXPORT *m_glStencilMask)(GLuint mask);
-  void (QGL_DLLEXPORT *m_glStencilOp)(GLenum fail, GLenum zfail, GLenum zpass);
-  void (QGL_DLLEXPORT *m_glTexCoord1d)(GLdouble s);
-  void (QGL_DLLEXPORT *m_glTexCoord1dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glTexCoord1f)(GLfloat s);
-  void (QGL_DLLEXPORT *m_glTexCoord1fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glTexCoord1i)(GLint s);
-  void (QGL_DLLEXPORT *m_glTexCoord1iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glTexCoord1s)(GLshort s);
-  void (QGL_DLLEXPORT *m_glTexCoord1sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glTexCoord2d)(GLdouble s, GLdouble t);
-  void (QGL_DLLEXPORT *m_glTexCoord2dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glTexCoord2f)(GLfloat s, GLfloat t);
-  void (QGL_DLLEXPORT *m_glTexCoord2fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glTexCoord2i)(GLint s, GLint t);
-  void (QGL_DLLEXPORT *m_glTexCoord2iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glTexCoord2s)(GLshort s, GLshort t);
-  void (QGL_DLLEXPORT *m_glTexCoord2sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glTexCoord3d)(GLdouble s, GLdouble t, GLdouble r);
-  void (QGL_DLLEXPORT *m_glTexCoord3dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glTexCoord3f)(GLfloat s, GLfloat t, GLfloat r);
-  void (QGL_DLLEXPORT *m_glTexCoord3fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glTexCoord3i)(GLint s, GLint t, GLint r);
-  void (QGL_DLLEXPORT *m_glTexCoord3iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glTexCoord3s)(GLshort s, GLshort t, GLshort r);
-  void (QGL_DLLEXPORT *m_glTexCoord3sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glTexCoord4d)(GLdouble s, GLdouble t, GLdouble r, GLdouble q);
-  void (QGL_DLLEXPORT *m_glTexCoord4dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glTexCoord4f)(GLfloat s, GLfloat t, GLfloat r, GLfloat q);
-  void (QGL_DLLEXPORT *m_glTexCoord4fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glTexCoord4i)(GLint s, GLint t, GLint r, GLint q);
-  void (QGL_DLLEXPORT *m_glTexCoord4iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glTexCoord4s)(GLshort s, GLshort t, GLshort r, GLshort q);
-  void (QGL_DLLEXPORT *m_glTexCoord4sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glTexCoordPointer)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glTexEnvf)(GLenum target, GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glTexEnvfv)(GLenum target, GLenum pname, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glTexEnvi)(GLenum target, GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glTexEnviv)(GLenum target, GLenum pname, const GLint *params);
-  void (QGL_DLLEXPORT *m_glTexGend)(GLenum coord, GLenum pname, GLdouble param);
-  void (QGL_DLLEXPORT *m_glTexGendv)(GLenum coord, GLenum pname, const GLdouble *params);
-  void (QGL_DLLEXPORT *m_glTexGenf)(GLenum coord, GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glTexGenfv)(GLenum coord, GLenum pname, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glTexGeni)(GLenum coord, GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glTexGeniv)(GLenum coord, GLenum pname, const GLint *params);
-#if defined(MACVERSION) && MACVERSION > 15
-	//Snow Leopard 16, Leopard 15, Tiger 14, Panther 13, ... 
-  void (QGL_DLLEXPORT *m_glTexImage1D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glTexImage2D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+	// GL 1.1
+	void ( QGL_DLLEXPORT *m_glAccum )( GLenum op, GLfloat value );
+	void ( QGL_DLLEXPORT *m_glAlphaFunc )( GLenum func, GLclampf ref );
+	GLboolean ( QGL_DLLEXPORT *m_glAreTexturesResident )( GLsizei n, const GLuint *textures, GLboolean *residences );
+	void ( QGL_DLLEXPORT *m_glArrayElement )( GLint i );
+	void ( QGL_DLLEXPORT *m_glBegin )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glBindTexture )( GLenum target, GLuint texture );
+	void ( QGL_DLLEXPORT *m_glBitmap )( GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte *bitmap );
+	void ( QGL_DLLEXPORT *m_glBlendFunc )( GLenum sfactor, GLenum dfactor );
+	void ( QGL_DLLEXPORT *m_glCallList )( GLuint list );
+	void ( QGL_DLLEXPORT *m_glCallLists )( GLsizei n, GLenum type, const GLvoid *lists );
+	void ( QGL_DLLEXPORT *m_glClear )( GLbitfield mask );
+	void ( QGL_DLLEXPORT *m_glClearAccum )( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha );
+	void ( QGL_DLLEXPORT *m_glClearColor )( GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha );
+	void ( QGL_DLLEXPORT *m_glClearDepth )( GLclampd depth );
+	void ( QGL_DLLEXPORT *m_glClearIndex )( GLfloat c );
+	void ( QGL_DLLEXPORT *m_glClearStencil )( GLint s );
+	void ( QGL_DLLEXPORT *m_glClipPlane )( GLenum plane, const GLdouble *equation );
+	void ( QGL_DLLEXPORT *m_glColor3b )( GLbyte red, GLbyte green, GLbyte blue );
+	void ( QGL_DLLEXPORT *m_glColor3bv )( const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glColor3d )( GLdouble red, GLdouble green, GLdouble blue );
+	void ( QGL_DLLEXPORT *m_glColor3dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glColor3f )( GLfloat red, GLfloat green, GLfloat blue );
+	void ( QGL_DLLEXPORT *m_glColor3fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glColor3i )( GLint red, GLint green, GLint blue );
+	void ( QGL_DLLEXPORT *m_glColor3iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glColor3s )( GLshort red, GLshort green, GLshort blue );
+	void ( QGL_DLLEXPORT *m_glColor3sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glColor3ub )( GLubyte red, GLubyte green, GLubyte blue );
+	void ( QGL_DLLEXPORT *m_glColor3ubv )( const GLubyte *v );
+	void ( QGL_DLLEXPORT *m_glColor3ui )( GLuint red, GLuint green, GLuint blue );
+	void ( QGL_DLLEXPORT *m_glColor3uiv )( const GLuint *v );
+	void ( QGL_DLLEXPORT *m_glColor3us )( GLushort red, GLushort green, GLushort blue );
+	void ( QGL_DLLEXPORT *m_glColor3usv )( const GLushort *v );
+	void ( QGL_DLLEXPORT *m_glColor4b )( GLbyte red, GLbyte green, GLbyte blue, GLbyte alpha );
+	void ( QGL_DLLEXPORT *m_glColor4bv )( const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glColor4d )( GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha );
+	void ( QGL_DLLEXPORT *m_glColor4dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glColor4f )( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha );
+	void ( QGL_DLLEXPORT *m_glColor4fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glColor4i )( GLint red, GLint green, GLint blue, GLint alpha );
+	void ( QGL_DLLEXPORT *m_glColor4iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glColor4s )( GLshort red, GLshort green, GLshort blue, GLshort alpha );
+	void ( QGL_DLLEXPORT *m_glColor4sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glColor4ub )( GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha );
+	void ( QGL_DLLEXPORT *m_glColor4ubv )( const GLubyte *v );
+	void ( QGL_DLLEXPORT *m_glColor4ui )( GLuint red, GLuint green, GLuint blue, GLuint alpha );
+	void ( QGL_DLLEXPORT *m_glColor4uiv )( const GLuint *v );
+	void ( QGL_DLLEXPORT *m_glColor4us )( GLushort red, GLushort green, GLushort blue, GLushort alpha );
+	void ( QGL_DLLEXPORT *m_glColor4usv )( const GLushort *v );
+	void ( QGL_DLLEXPORT *m_glColorMask )( GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha );
+	void ( QGL_DLLEXPORT *m_glColorMaterial )( GLenum face, GLenum mode );
+	void ( QGL_DLLEXPORT *m_glColorPointer )( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glCopyPixels )( GLint x, GLint y, GLsizei width, GLsizei height, GLenum type );
+	void ( QGL_DLLEXPORT *m_glCopyTexImage1D )( GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border );
+	void ( QGL_DLLEXPORT *m_glCopyTexImage2D )( GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border );
+	void ( QGL_DLLEXPORT *m_glCopyTexSubImage1D )( GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width );
+	void ( QGL_DLLEXPORT *m_glCopyTexSubImage2D )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height );
+	void ( QGL_DLLEXPORT *m_glCullFace )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glDeleteLists )( GLuint list, GLsizei range );
+	void ( QGL_DLLEXPORT *m_glDeleteTextures )( GLsizei n, const GLuint *textures );
+	void ( QGL_DLLEXPORT *m_glDepthFunc )( GLenum func );
+	void ( QGL_DLLEXPORT *m_glDepthMask )( GLboolean flag );
+	void ( QGL_DLLEXPORT *m_glDepthRange )( GLclampd zNear, GLclampd zFar );
+	void ( QGL_DLLEXPORT *m_glDisable )( GLenum cap );
+	void ( QGL_DLLEXPORT *m_glDisableClientState )( GLenum array );
+	void ( QGL_DLLEXPORT *m_glDrawArrays )( GLenum mode, GLint first, GLsizei count );
+	void ( QGL_DLLEXPORT *m_glDrawBuffer )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glDrawElements )( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices );
+	void ( QGL_DLLEXPORT *m_glDrawPixels )( GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glEdgeFlag )( GLboolean flag );
+	void ( QGL_DLLEXPORT *m_glEdgeFlagPointer )( GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glEdgeFlagv )( const GLboolean *flag );
+	void ( QGL_DLLEXPORT *m_glEnable )( GLenum cap );
+	void ( QGL_DLLEXPORT *m_glEnableClientState )( GLenum array );
+	void ( QGL_DLLEXPORT *m_glEnd )( void );
+	void ( QGL_DLLEXPORT *m_glEndList )( void );
+	void ( QGL_DLLEXPORT *m_glEvalCoord1d )( GLdouble u );
+	void ( QGL_DLLEXPORT *m_glEvalCoord1dv )( const GLdouble *u );
+	void ( QGL_DLLEXPORT *m_glEvalCoord1f )( GLfloat u );
+	void ( QGL_DLLEXPORT *m_glEvalCoord1fv )( const GLfloat *u );
+	void ( QGL_DLLEXPORT *m_glEvalCoord2d )( GLdouble u, GLdouble v );
+	void ( QGL_DLLEXPORT *m_glEvalCoord2dv )( const GLdouble *u );
+	void ( QGL_DLLEXPORT *m_glEvalCoord2f )( GLfloat u, GLfloat v );
+	void ( QGL_DLLEXPORT *m_glEvalCoord2fv )( const GLfloat *u );
+	void ( QGL_DLLEXPORT *m_glEvalMesh1 )( GLenum mode, GLint i1, GLint i2 );
+	void ( QGL_DLLEXPORT *m_glEvalMesh2 )( GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2 );
+	void ( QGL_DLLEXPORT *m_glEvalPoint1 )( GLint i );
+	void ( QGL_DLLEXPORT *m_glEvalPoint2 )( GLint i, GLint j );
+	void ( QGL_DLLEXPORT *m_glFeedbackBuffer )( GLsizei size, GLenum type, GLfloat *buffer );
+	void ( QGL_DLLEXPORT *m_glFinish )( void );
+	void ( QGL_DLLEXPORT *m_glFlush )( void );
+	void ( QGL_DLLEXPORT *m_glFogf )( GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glFogfv )( GLenum pname, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glFogi )( GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glFogiv )( GLenum pname, const GLint *params );
+	void ( QGL_DLLEXPORT *m_glFrontFace )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glFrustum )( GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar );
+	GLuint ( QGL_DLLEXPORT *m_glGenLists )( GLsizei range );
+	void ( QGL_DLLEXPORT *m_glGenTextures )( GLsizei n, GLuint *textures );
+	void ( QGL_DLLEXPORT *m_glGetBooleanv )( GLenum pname, GLboolean *params );
+	void ( QGL_DLLEXPORT *m_glGetClipPlane )( GLenum plane, GLdouble *equation );
+	void ( QGL_DLLEXPORT *m_glGetDoublev )( GLenum pname, GLdouble *params );
+	GLenum ( QGL_DLLEXPORT *m_glGetError )( void );
+	void ( QGL_DLLEXPORT *m_glGetFloatv )( GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetIntegerv )( GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetLightfv )( GLenum light, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetLightiv )( GLenum light, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetMapdv )( GLenum target, GLenum query, GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glGetMapfv )( GLenum target, GLenum query, GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glGetMapiv )( GLenum target, GLenum query, GLint *v );
+	void ( QGL_DLLEXPORT *m_glGetMaterialfv )( GLenum face, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetMaterialiv )( GLenum face, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetPixelMapfv )( GLenum map, GLfloat *values );
+	void ( QGL_DLLEXPORT *m_glGetPixelMapuiv )( GLenum map, GLuint *values );
+	void ( QGL_DLLEXPORT *m_glGetPixelMapusv )( GLenum map, GLushort *values );
+	void ( QGL_DLLEXPORT *m_glGetPointerv )( GLenum pname, GLvoid* *params );
+	void ( QGL_DLLEXPORT *m_glGetPolygonStipple )( GLubyte *mask );
+	const GLubyte * ( QGL_DLLEXPORT * m_glGetString )(GLenum name);
+	void ( QGL_DLLEXPORT *m_glGetTexEnvfv )( GLenum target, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetTexEnviv )( GLenum target, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetTexGendv )( GLenum coord, GLenum pname, GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glGetTexGenfv )( GLenum coord, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetTexGeniv )( GLenum coord, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetTexImage )( GLenum target, GLint level, GLenum format, GLenum type, GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glGetTexLevelParameterfv )( GLenum target, GLint level, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetTexLevelParameteriv )( GLenum target, GLint level, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetTexParameterfv )( GLenum target, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetTexParameteriv )( GLenum target, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glHint )( GLenum target, GLenum mode );
+	void ( QGL_DLLEXPORT *m_glIndexMask )( GLuint mask );
+	void ( QGL_DLLEXPORT *m_glIndexPointer )( GLenum type, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glIndexd )( GLdouble c );
+	void ( QGL_DLLEXPORT *m_glIndexdv )( const GLdouble *c );
+	void ( QGL_DLLEXPORT *m_glIndexf )( GLfloat c );
+	void ( QGL_DLLEXPORT *m_glIndexfv )( const GLfloat *c );
+	void ( QGL_DLLEXPORT *m_glIndexi )( GLint c );
+	void ( QGL_DLLEXPORT *m_glIndexiv )( const GLint *c );
+	void ( QGL_DLLEXPORT *m_glIndexs )( GLshort c );
+	void ( QGL_DLLEXPORT *m_glIndexsv )( const GLshort *c );
+	void ( QGL_DLLEXPORT *m_glIndexub )( GLubyte c );
+	void ( QGL_DLLEXPORT *m_glIndexubv )( const GLubyte *c );
+	void ( QGL_DLLEXPORT *m_glInitNames )( void );
+	void ( QGL_DLLEXPORT *m_glInterleavedArrays )( GLenum format, GLsizei stride, const GLvoid *pointer );
+	GLboolean ( QGL_DLLEXPORT *m_glIsEnabled )( GLenum cap );
+	GLboolean ( QGL_DLLEXPORT *m_glIsList )( GLuint list );
+	GLboolean ( QGL_DLLEXPORT *m_glIsTexture )( GLuint texture );
+	void ( QGL_DLLEXPORT *m_glLightModelf )( GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glLightModelfv )( GLenum pname, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glLightModeli )( GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glLightModeliv )( GLenum pname, const GLint *params );
+	void ( QGL_DLLEXPORT *m_glLightf )( GLenum light, GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glLightfv )( GLenum light, GLenum pname, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glLighti )( GLenum light, GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glLightiv )( GLenum light, GLenum pname, const GLint *params );
+	void ( QGL_DLLEXPORT *m_glLineStipple )( GLint factor, GLushort pattern );
+	void ( QGL_DLLEXPORT *m_glLineWidth )( GLfloat width );
+	void ( QGL_DLLEXPORT *m_glListBase )( GLuint base );
+	void ( QGL_DLLEXPORT *m_glLoadIdentity )( void );
+	void ( QGL_DLLEXPORT *m_glLoadMatrixd )( const GLdouble *m );
+	void ( QGL_DLLEXPORT *m_glLoadMatrixf )( const GLfloat *m );
+	void ( QGL_DLLEXPORT *m_glLoadName )( GLuint name );
+	void ( QGL_DLLEXPORT *m_glLogicOp )( GLenum opcode );
+	void ( QGL_DLLEXPORT *m_glMap1d )( GLenum target, GLdouble u1, GLdouble u2, GLint stride, GLint order, const GLdouble *points );
+	void ( QGL_DLLEXPORT *m_glMap1f )( GLenum target, GLfloat u1, GLfloat u2, GLint stride, GLint order, const GLfloat *points );
+	void ( QGL_DLLEXPORT *m_glMap2d )( GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, const GLdouble *points );
+	void ( QGL_DLLEXPORT *m_glMap2f )( GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, const GLfloat *points );
+	void ( QGL_DLLEXPORT *m_glMapGrid1d )( GLint un, GLdouble u1, GLdouble u2 );
+	void ( QGL_DLLEXPORT *m_glMapGrid1f )( GLint un, GLfloat u1, GLfloat u2 );
+	void ( QGL_DLLEXPORT *m_glMapGrid2d )( GLint un, GLdouble u1, GLdouble u2, GLint vn, GLdouble v1, GLdouble v2 );
+	void ( QGL_DLLEXPORT *m_glMapGrid2f )( GLint un, GLfloat u1, GLfloat u2, GLint vn, GLfloat v1, GLfloat v2 );
+	void ( QGL_DLLEXPORT *m_glMaterialf )( GLenum face, GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glMaterialfv )( GLenum face, GLenum pname, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glMateriali )( GLenum face, GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glMaterialiv )( GLenum face, GLenum pname, const GLint *params );
+	void ( QGL_DLLEXPORT *m_glMatrixMode )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glMultMatrixd )( const GLdouble *m );
+	void ( QGL_DLLEXPORT *m_glMultMatrixf )( const GLfloat *m );
+	void ( QGL_DLLEXPORT *m_glNewList )( GLuint list, GLenum mode );
+	void ( QGL_DLLEXPORT *m_glNormal3b )( GLbyte nx, GLbyte ny, GLbyte nz );
+	void ( QGL_DLLEXPORT *m_glNormal3bv )( const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glNormal3d )( GLdouble nx, GLdouble ny, GLdouble nz );
+	void ( QGL_DLLEXPORT *m_glNormal3dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glNormal3f )( GLfloat nx, GLfloat ny, GLfloat nz );
+	void ( QGL_DLLEXPORT *m_glNormal3fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glNormal3i )( GLint nx, GLint ny, GLint nz );
+	void ( QGL_DLLEXPORT *m_glNormal3iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glNormal3s )( GLshort nx, GLshort ny, GLshort nz );
+	void ( QGL_DLLEXPORT *m_glNormal3sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glNormalPointer )( GLenum type, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glOrtho )( GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar );
+	void ( QGL_DLLEXPORT *m_glPassThrough )( GLfloat token );
+	void ( QGL_DLLEXPORT *m_glPixelMapfv )( GLenum map, GLsizei mapsize, const GLfloat *values );
+	void ( QGL_DLLEXPORT *m_glPixelMapuiv )( GLenum map, GLsizei mapsize, const GLuint *values );
+	void ( QGL_DLLEXPORT *m_glPixelMapusv )( GLenum map, GLsizei mapsize, const GLushort *values );
+	void ( QGL_DLLEXPORT *m_glPixelStoref )( GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glPixelStorei )( GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glPixelTransferf )( GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glPixelTransferi )( GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glPixelZoom )( GLfloat xfactor, GLfloat yfactor );
+	void ( QGL_DLLEXPORT *m_glPointSize )( GLfloat size );
+	void ( QGL_DLLEXPORT *m_glPolygonMode )( GLenum face, GLenum mode );
+	void ( QGL_DLLEXPORT *m_glPolygonOffset )( GLfloat factor, GLfloat units );
+	void ( QGL_DLLEXPORT *m_glPolygonStipple )( const GLubyte *mask );
+	void ( QGL_DLLEXPORT *m_glPopAttrib )( void );
+	void ( QGL_DLLEXPORT *m_glPopClientAttrib )( void );
+	void ( QGL_DLLEXPORT *m_glPopMatrix )( void );
+	void ( QGL_DLLEXPORT *m_glPopName )( void );
+	void ( QGL_DLLEXPORT *m_glPrioritizeTextures )( GLsizei n, const GLuint *textures, const GLclampf *priorities );
+	void ( QGL_DLLEXPORT *m_glPushAttrib )( GLbitfield mask );
+	void ( QGL_DLLEXPORT *m_glPushClientAttrib )( GLbitfield mask );
+	void ( QGL_DLLEXPORT *m_glPushMatrix )( void );
+	void ( QGL_DLLEXPORT *m_glPushName )( GLuint name );
+	void ( QGL_DLLEXPORT *m_glRasterPos2d )( GLdouble x, GLdouble y );
+	void ( QGL_DLLEXPORT *m_glRasterPos2dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos2f )( GLfloat x, GLfloat y );
+	void ( QGL_DLLEXPORT *m_glRasterPos2fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos2i )( GLint x, GLint y );
+	void ( QGL_DLLEXPORT *m_glRasterPos2iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos2s )( GLshort x, GLshort y );
+	void ( QGL_DLLEXPORT *m_glRasterPos2sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos3d )( GLdouble x, GLdouble y, GLdouble z );
+	void ( QGL_DLLEXPORT *m_glRasterPos3dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos3f )( GLfloat x, GLfloat y, GLfloat z );
+	void ( QGL_DLLEXPORT *m_glRasterPos3fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos3i )( GLint x, GLint y, GLint z );
+	void ( QGL_DLLEXPORT *m_glRasterPos3iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos3s )( GLshort x, GLshort y, GLshort z );
+	void ( QGL_DLLEXPORT *m_glRasterPos3sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos4d )( GLdouble x, GLdouble y, GLdouble z, GLdouble w );
+	void ( QGL_DLLEXPORT *m_glRasterPos4dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos4f )( GLfloat x, GLfloat y, GLfloat z, GLfloat w );
+	void ( QGL_DLLEXPORT *m_glRasterPos4fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos4i )( GLint x, GLint y, GLint z, GLint w );
+	void ( QGL_DLLEXPORT *m_glRasterPos4iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glRasterPos4s )( GLshort x, GLshort y, GLshort z, GLshort w );
+	void ( QGL_DLLEXPORT *m_glRasterPos4sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glReadBuffer )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glReadPixels )( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glRectd )( GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2 );
+	void ( QGL_DLLEXPORT *m_glRectdv )( const GLdouble *v1, const GLdouble *v2 );
+	void ( QGL_DLLEXPORT *m_glRectf )( GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2 );
+	void ( QGL_DLLEXPORT *m_glRectfv )( const GLfloat *v1, const GLfloat *v2 );
+	void ( QGL_DLLEXPORT *m_glRecti )( GLint x1, GLint y1, GLint x2, GLint y2 );
+	void ( QGL_DLLEXPORT *m_glRectiv )( const GLint *v1, const GLint *v2 );
+	void ( QGL_DLLEXPORT *m_glRects )( GLshort x1, GLshort y1, GLshort x2, GLshort y2 );
+	void ( QGL_DLLEXPORT *m_glRectsv )( const GLshort *v1, const GLshort *v2 );
+	GLint ( QGL_DLLEXPORT *m_glRenderMode )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glRotated )( GLdouble anm_gle, GLdouble x, GLdouble y, GLdouble z );
+	void ( QGL_DLLEXPORT *m_glRotatef )( GLfloat anm_gle, GLfloat x, GLfloat y, GLfloat z );
+	void ( QGL_DLLEXPORT *m_glScaled )( GLdouble x, GLdouble y, GLdouble z );
+	void ( QGL_DLLEXPORT *m_glScalef )( GLfloat x, GLfloat y, GLfloat z );
+	void ( QGL_DLLEXPORT *m_glScissor )( GLint x, GLint y, GLsizei width, GLsizei height );
+	void ( QGL_DLLEXPORT *m_glSelectBuffer )( GLsizei size, GLuint *buffer );
+	void ( QGL_DLLEXPORT *m_glShadeModel )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glStencilFunc )( GLenum func, GLint ref, GLuint mask );
+	void ( QGL_DLLEXPORT *m_glStencilMask )( GLuint mask );
+	void ( QGL_DLLEXPORT *m_glStencilOp )( GLenum fail, GLenum zfail, GLenum zpass );
+	void ( QGL_DLLEXPORT *m_glTexCoord1d )( GLdouble s );
+	void ( QGL_DLLEXPORT *m_glTexCoord1dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord1f )( GLfloat s );
+	void ( QGL_DLLEXPORT *m_glTexCoord1fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord1i )( GLint s );
+	void ( QGL_DLLEXPORT *m_glTexCoord1iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord1s )( GLshort s );
+	void ( QGL_DLLEXPORT *m_glTexCoord1sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord2d )( GLdouble s, GLdouble t );
+	void ( QGL_DLLEXPORT *m_glTexCoord2dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord2f )( GLfloat s, GLfloat t );
+	void ( QGL_DLLEXPORT *m_glTexCoord2fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord2i )( GLint s, GLint t );
+	void ( QGL_DLLEXPORT *m_glTexCoord2iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord2s )( GLshort s, GLshort t );
+	void ( QGL_DLLEXPORT *m_glTexCoord2sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord3d )( GLdouble s, GLdouble t, GLdouble r );
+	void ( QGL_DLLEXPORT *m_glTexCoord3dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord3f )( GLfloat s, GLfloat t, GLfloat r );
+	void ( QGL_DLLEXPORT *m_glTexCoord3fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord3i )( GLint s, GLint t, GLint r );
+	void ( QGL_DLLEXPORT *m_glTexCoord3iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord3s )( GLshort s, GLshort t, GLshort r );
+	void ( QGL_DLLEXPORT *m_glTexCoord3sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord4d )( GLdouble s, GLdouble t, GLdouble r, GLdouble q );
+	void ( QGL_DLLEXPORT *m_glTexCoord4dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord4f )( GLfloat s, GLfloat t, GLfloat r, GLfloat q );
+	void ( QGL_DLLEXPORT *m_glTexCoord4fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord4i )( GLint s, GLint t, GLint r, GLint q );
+	void ( QGL_DLLEXPORT *m_glTexCoord4iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glTexCoord4s )( GLshort s, GLshort t, GLshort r, GLshort q );
+	void ( QGL_DLLEXPORT *m_glTexCoord4sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glTexCoordPointer )( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glTexEnvf )( GLenum target, GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glTexEnvfv )( GLenum target, GLenum pname, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glTexEnvi )( GLenum target, GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glTexEnviv )( GLenum target, GLenum pname, const GLint *params );
+	void ( QGL_DLLEXPORT *m_glTexGend )( GLenum coord, GLenum pname, GLdouble param );
+	void ( QGL_DLLEXPORT *m_glTexGendv )( GLenum coord, GLenum pname, const GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glTexGenf )( GLenum coord, GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glTexGenfv )( GLenum coord, GLenum pname, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glTexGeni )( GLenum coord, GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glTexGeniv )( GLenum coord, GLenum pname, const GLint *params );
+#if defined( MACVERSION ) && MACVERSION > 15
+	//Snow Leopard 16, Leopard 15, Tiger 14, Panther 13, ...
+	void ( QGL_DLLEXPORT *m_glTexImage1D )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glTexImage2D )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels );
 #else
-  void (QGL_DLLEXPORT *m_glTexImage1D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);	
+	void ( QGL_DLLEXPORT *m_glTexImage1D )( GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glTexImage2D )( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels );
 #endif
-  void (QGL_DLLEXPORT *m_glTexParameterf)(GLenum target, GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glTexParameterfv)(GLenum target, GLenum pname, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glTexParameteri)(GLenum target, GLenum pname, GLint param);
-  void (QGL_DLLEXPORT *m_glTexParameteriv)(GLenum target, GLenum pname, const GLint *params);
-  void (QGL_DLLEXPORT *m_glTexSubImage1D)(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glTranslated)(GLdouble x, GLdouble y, GLdouble z);
-  void (QGL_DLLEXPORT *m_glTranslatef)(GLfloat x, GLfloat y, GLfloat z);
-  void (QGL_DLLEXPORT *m_glVertex2d)(GLdouble x, GLdouble y);
-  void (QGL_DLLEXPORT *m_glVertex2dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertex2f)(GLfloat x, GLfloat y);
-  void (QGL_DLLEXPORT *m_glVertex2fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertex2i)(GLint x, GLint y);
-  void (QGL_DLLEXPORT *m_glVertex2iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glVertex2s)(GLshort x, GLshort y);
-  void (QGL_DLLEXPORT *m_glVertex2sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertex3d)(GLdouble x, GLdouble y, GLdouble z);
-  void (QGL_DLLEXPORT *m_glVertex3dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertex3f)(GLfloat x, GLfloat y, GLfloat z);
-  void (QGL_DLLEXPORT *m_glVertex3fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertex3i)(GLint x, GLint y, GLint z);
-  void (QGL_DLLEXPORT *m_glVertex3iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glVertex3s)(GLshort x, GLshort y, GLshort z);
-  void (QGL_DLLEXPORT *m_glVertex3sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertex4d)(GLdouble x, GLdouble y, GLdouble z, GLdouble w);
-  void (QGL_DLLEXPORT *m_glVertex4dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertex4f)(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-  void (QGL_DLLEXPORT *m_glVertex4fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertex4i)(GLint x, GLint y, GLint z, GLint w);
-  void (QGL_DLLEXPORT *m_glVertex4iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glVertex4s)(GLshort x, GLshort y, GLshort z, GLshort w);
-  void (QGL_DLLEXPORT *m_glVertex4sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexPointer)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
+	void ( QGL_DLLEXPORT *m_glTexParameterf )( GLenum target, GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glTexParameterfv )( GLenum target, GLenum pname, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glTexParameteri )( GLenum target, GLenum pname, GLint param );
+	void ( QGL_DLLEXPORT *m_glTexParameteriv )( GLenum target, GLenum pname, const GLint *params );
+	void ( QGL_DLLEXPORT *m_glTexSubImage1D )( GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glTexSubImage2D )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glTranslated )( GLdouble x, GLdouble y, GLdouble z );
+	void ( QGL_DLLEXPORT *m_glTranslatef )( GLfloat x, GLfloat y, GLfloat z );
+	void ( QGL_DLLEXPORT *m_glVertex2d )( GLdouble x, GLdouble y );
+	void ( QGL_DLLEXPORT *m_glVertex2dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertex2f )( GLfloat x, GLfloat y );
+	void ( QGL_DLLEXPORT *m_glVertex2fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertex2i )( GLint x, GLint y );
+	void ( QGL_DLLEXPORT *m_glVertex2iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glVertex2s )( GLshort x, GLshort y );
+	void ( QGL_DLLEXPORT *m_glVertex2sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertex3d )( GLdouble x, GLdouble y, GLdouble z );
+	void ( QGL_DLLEXPORT *m_glVertex3dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertex3f )( GLfloat x, GLfloat y, GLfloat z );
+	void ( QGL_DLLEXPORT *m_glVertex3fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertex3i )( GLint x, GLint y, GLint z );
+	void ( QGL_DLLEXPORT *m_glVertex3iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glVertex3s )( GLshort x, GLshort y, GLshort z );
+	void ( QGL_DLLEXPORT *m_glVertex3sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertex4d )( GLdouble x, GLdouble y, GLdouble z, GLdouble w );
+	void ( QGL_DLLEXPORT *m_glVertex4dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertex4f )( GLfloat x, GLfloat y, GLfloat z, GLfloat w );
+	void ( QGL_DLLEXPORT *m_glVertex4fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertex4i )( GLint x, GLint y, GLint z, GLint w );
+	void ( QGL_DLLEXPORT *m_glVertex4iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glVertex4s )( GLshort x, GLshort y, GLshort z, GLshort w );
+	void ( QGL_DLLEXPORT *m_glVertex4sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexPointer )( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glViewport )( GLint x, GLint y, GLsizei width, GLsizei height );
 
-  // GL_ARB_multitexture
-  bool support_ARB_multitexture;
-  bool ARB_multitexture()
-  {
-    return support_ARB_multitexture;
-  }
-  void (QGL_DLLEXPORT *m_glActiveTextureARB)(GLenum texture);
-  void (QGL_DLLEXPORT *m_glClientActiveTextureARB)(GLenum texture);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1dARB)(GLenum target, GLdouble s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1dvARB)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1fARB)(GLenum target, GLfloat s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1fvARB)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1iARB)(GLenum target, GLint s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1ivARB)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1sARB)(GLenum target, GLshort s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1svARB)(GLenum target, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2dARB)(GLenum target, GLdouble s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2dvARB)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2fARB)(GLenum target, GLfloat s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2fvARB)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2iARB)(GLenum target, GLint s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2ivARB)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2sARB)(GLenum target, GLshort s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2svARB)(GLenum target, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3dARB)(GLenum target, GLdouble s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3dvARB)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3fARB)(GLenum target, GLfloat s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3fvARB)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3iARB)(GLenum target, GLint s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3ivARB)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3sARB)(GLenum target, GLshort s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3svARB)(GLenum target, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4dARB)(GLenum target, GLdouble s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4dvARB)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4fARB)(GLenum target, GLfloat s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4fvARB)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4iARB)(GLenum target, GLint s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4ivARB)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4sARB)(GLenum target, GLshort s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4svARB)(GLenum target, const GLshort *v);
+	// GL_ARB_multitexture
+	bool support_ARB_multitexture;
+	bool ARB_multitexture(){
+		return support_ARB_multitexture;
+	}
+	void ( QGL_DLLEXPORT *m_glActiveTextureARB )( GLenum texture );
+	void ( QGL_DLLEXPORT *m_glClientActiveTextureARB )( GLenum texture );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1dARB )( GLenum target, GLdouble s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1dvARB )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1fARB )( GLenum target, GLfloat s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1fvARB )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1iARB )( GLenum target, GLint s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1ivARB )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1sARB )( GLenum target, GLshort s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1svARB )( GLenum target, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2dARB )( GLenum target, GLdouble s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2dvARB )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2fARB )( GLenum target, GLfloat s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2fvARB )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2iARB )( GLenum target, GLint s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2ivARB )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2sARB )( GLenum target, GLshort s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2svARB )( GLenum target, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3dARB )( GLenum target, GLdouble s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3dvARB )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3fARB )( GLenum target, GLfloat s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3fvARB )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3iARB )( GLenum target, GLint s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3ivARB )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3sARB )( GLenum target, GLshort s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3svARB )( GLenum target, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4dARB )( GLenum target, GLdouble s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4dvARB )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4fARB )( GLenum target, GLfloat s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4fvARB )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4iARB )( GLenum target, GLint s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4ivARB )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4sARB )( GLenum target, GLshort s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4svARB )( GLenum target, const GLshort *v );
 
-  // ARB_texture_compression
-  bool support_ARB_texture_compression;
-  bool ARB_texture_compression()
-  {
-    return support_ARB_texture_compression;
-  }
-  void (QGL_DLLEXPORT *m_glCompressedTexImage3DARB)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data);
-  void (QGL_DLLEXPORT *m_glCompressedTexImage2DARB)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
-  void (QGL_DLLEXPORT *m_glCompressedTexImage1DARB)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data);
-  void (QGL_DLLEXPORT *m_glCompressedTexSubImage3DARB)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data);
-  void (QGL_DLLEXPORT *m_glCompressedTexSubImage2DARB)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data);
-  void (QGL_DLLEXPORT *m_glCompressedTexSubImage1DARB)(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid* data);
-  void (QGL_DLLEXPORT *m_glGetCompressedTexImageARB)(GLenum target, GLint lod, GLvoid* img);
+	// ARB_texture_compression
+	bool support_ARB_texture_compression;
+	bool ARB_texture_compression(){
+		return support_ARB_texture_compression;
+	}
+	void ( QGL_DLLEXPORT *m_glCompressedTexImage3DARB )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexImage2DARB )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexImage1DARB )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexSubImage3DARB )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexSubImage2DARB )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexSubImage1DARB )( GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glGetCompressedTexImageARB )( GLenum target, GLint lod, GLvoid* img );
 
-  // EXT_texture_compression_s3tc
-  bool support_EXT_texture_compression_s3tc;
-  bool EXT_texture_compression_s3tc()
-  {
-    return support_EXT_texture_compression_s3tc;
-  }
+	// EXT_texture_compression_s3tc
+	bool support_EXT_texture_compression_s3tc;
+	bool EXT_texture_compression_s3tc(){
+		return support_EXT_texture_compression_s3tc;
+	}
 
-  // GL 1.2
-  bool support_GL_1_2;
-  bool GL_1_2()
-  {
-    return support_GL_1_2;
-  }
-  void (QGL_DLLEXPORT *m_glCopyTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
-  void (QGL_DLLEXPORT *m_glDrawRangeElements)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
-  void (QGL_DLLEXPORT *m_glTexImage3D)(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-  void (QGL_DLLEXPORT *m_glTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid *pixels);
+	// GL 1.2
+	bool support_GL_1_2;
+	bool GL_1_2(){
+		return support_GL_1_2;
+	}
+	void ( QGL_DLLEXPORT *m_glCopyTexSubImage3D )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height );
+	void ( QGL_DLLEXPORT *m_glDrawRangeElements )( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices );
+	void ( QGL_DLLEXPORT *m_glTexImage3D )( GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels );
+	void ( QGL_DLLEXPORT *m_glTexSubImage3D )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid *pixels );
 
-  // GL 1.3
-  bool support_GL_1_3;
-  bool GL_1_3()
-  {
-    return support_GL_1_3;
-  }
-  void (QGL_DLLEXPORT *m_glActiveTexture)(GLenum texture);
-  void (QGL_DLLEXPORT *m_glClientActiveTexture)(GLenum texture);
-  void (QGL_DLLEXPORT *m_glCompressedTexImage1D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid *data);
-  void (QGL_DLLEXPORT *m_glCompressedTexImage2D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data);
-  void (QGL_DLLEXPORT *m_glCompressedTexImage3D)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid *data);
-  void (QGL_DLLEXPORT *m_glCompressedTexSubImage1D)(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid *data);
-  void (QGL_DLLEXPORT *m_glCompressedTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data);
-  void (QGL_DLLEXPORT *m_glCompressedTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid *data);
-  void (QGL_DLLEXPORT *m_glGetCompressedTexImage)(GLenum target, GLint lod, GLvoid *img);
-  void (QGL_DLLEXPORT *m_glLoadTransposeMatrixd)(const GLdouble m[16]);
-  void (QGL_DLLEXPORT *m_glLoadTransposeMatrixf)(const GLfloat m[16]);
-  void (QGL_DLLEXPORT *m_glMultTransposeMatrixd)(const GLdouble m[16]);
-  void (QGL_DLLEXPORT *m_glMultTransposeMatrixf)(const GLfloat m[16]);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1d)(GLenum target, GLdouble s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1dv)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1f)(GLenum target, GLfloat s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1fv)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1i)(GLenum target, GLint s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1iv)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1s)(GLenum target, GLshort s);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord1sv)(GLenum target, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2d)(GLenum target, GLdouble s, GLdouble t);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2dv)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2f)(GLenum target, GLfloat s, GLfloat t);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2fv)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2i)(GLenum target, GLint s, GLint t);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2iv)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2s)(GLenum target, GLshort s, GLshort t);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord2sv)(GLenum target, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3d)(GLenum target, GLdouble s, GLdouble t, GLdouble r);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3dv)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3f)(GLenum target, GLfloat s, GLfloat t, GLfloat r);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3fv)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3i)(GLenum target, GLint s, GLint t, GLint r);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3iv)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3s)(GLenum target, GLshort s, GLshort t, GLshort r);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord3sv)(GLenum target, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4d)(GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4dv)(GLenum target, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4f)(GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4fv)(GLenum target, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4i)(GLenum target, GLint s, GLint t, GLint r, GLint q);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4iv)(GLenum target, const GLint *v);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4s)(GLenum target, GLshort s, GLshort t, GLshort r, GLshort q);
-  void (QGL_DLLEXPORT *m_glMultiTexCoord4sv)(GLenum target, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glSampleCoverage)(GLclampf value, GLboolean invert);
+	// GL 1.3
+	bool support_GL_1_3;
+	bool GL_1_3(){
+		return support_GL_1_3;
+	}
+	void ( QGL_DLLEXPORT *m_glActiveTexture )( GLenum texture );
+	void ( QGL_DLLEXPORT *m_glClientActiveTexture )( GLenum texture );
+	void ( QGL_DLLEXPORT *m_glCompressedTexImage1D )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid *data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexImage2D )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexImage3D )( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid *data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexSubImage1D )( GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid *data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexSubImage2D )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data );
+	void ( QGL_DLLEXPORT *m_glCompressedTexSubImage3D )( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid *data );
+	void ( QGL_DLLEXPORT *m_glGetCompressedTexImage )( GLenum target, GLint lod, GLvoid *img );
+	void ( QGL_DLLEXPORT *m_glLoadTransposeMatrixd )( const GLdouble m[16] );
+	void ( QGL_DLLEXPORT *m_glLoadTransposeMatrixf )( const GLfloat m[16] );
+	void ( QGL_DLLEXPORT *m_glMultTransposeMatrixd )( const GLdouble m[16] );
+	void ( QGL_DLLEXPORT *m_glMultTransposeMatrixf )( const GLfloat m[16] );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1d )( GLenum target, GLdouble s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1dv )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1f )( GLenum target, GLfloat s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1fv )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1i )( GLenum target, GLint s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1iv )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1s )( GLenum target, GLshort s );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord1sv )( GLenum target, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2d )( GLenum target, GLdouble s, GLdouble t );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2dv )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2f )( GLenum target, GLfloat s, GLfloat t );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2fv )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2i )( GLenum target, GLint s, GLint t );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2iv )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2s )( GLenum target, GLshort s, GLshort t );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord2sv )( GLenum target, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3d )( GLenum target, GLdouble s, GLdouble t, GLdouble r );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3dv )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3f )( GLenum target, GLfloat s, GLfloat t, GLfloat r );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3fv )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3i )( GLenum target, GLint s, GLint t, GLint r );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3iv )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3s )( GLenum target, GLshort s, GLshort t, GLshort r );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord3sv )( GLenum target, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4d )( GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4dv )( GLenum target, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4f )( GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4fv )( GLenum target, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4i )( GLenum target, GLint s, GLint t, GLint r, GLint q );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4iv )( GLenum target, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4s )( GLenum target, GLshort s, GLshort t, GLshort r, GLshort q );
+	void ( QGL_DLLEXPORT *m_glMultiTexCoord4sv )( GLenum target, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glSampleCoverage )( GLclampf value, GLboolean invert );
 
-  // GL 1.4
-  bool support_GL_1_4;
-  bool GL_1_4()
-  {
-    return support_GL_1_4;
-  }
-  void (QGL_DLLEXPORT *m_glBlendColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-  void (QGL_DLLEXPORT *m_glBlendEquation)(GLenum mode);
-  void (QGL_DLLEXPORT *m_glBlendFuncSeparate)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
-  void (QGL_DLLEXPORT *m_glFogCoordPointer)(GLenum type, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glFogCoordd)(GLdouble coord);
-  void (QGL_DLLEXPORT *m_glFogCoorddv)(const GLdouble *coord);
-  void (QGL_DLLEXPORT *m_glFogCoordf)(GLfloat coord);
-  void (QGL_DLLEXPORT *m_glFogCoordfv)(const GLfloat *coord);
-  void (QGL_DLLEXPORT *m_glMultiDrawArrays)(GLenum mode, GLint *first, GLsizei *count, GLsizei primcount);
-  void (QGL_DLLEXPORT *m_glMultiDrawElements)(GLenum mode, GLsizei *count, GLenum type, const GLvoid **indices, GLsizei primcount);
-  void (QGL_DLLEXPORT *m_glPointParameterf)(GLenum pname, GLfloat param);
-  void (QGL_DLLEXPORT *m_glPointParameterfv)(GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3b)(GLbyte red, GLbyte green, GLbyte blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3bv)(const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3d)(GLdouble red, GLdouble green, GLdouble blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3dv)(const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3f)(GLfloat red, GLfloat green, GLfloat blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3fv)(const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3i)(GLint red, GLint green, GLint blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3iv)(const GLint *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3s)(GLshort red, GLshort green, GLshort blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3sv)(const GLshort *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3ub)(GLubyte red, GLubyte green, GLubyte blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3ubv)(const GLubyte *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3ui)(GLuint red, GLuint green, GLuint blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3uiv)(const GLuint *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3us)(GLushort red, GLushort green, GLushort blue);
-  void (QGL_DLLEXPORT *m_glSecondaryColor3usv)(const GLushort *v);
-  void (QGL_DLLEXPORT *m_glSecondaryColorPointer)(GLint size, GLenum type, GLsizei stride, GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glWindowPos2d)(GLdouble x, GLdouble y);
-  void (QGL_DLLEXPORT *m_glWindowPos2dv)(const GLdouble *p);
-  void (QGL_DLLEXPORT *m_glWindowPos2f)(GLfloat x, GLfloat y);
-  void (QGL_DLLEXPORT *m_glWindowPos2fv)(const GLfloat *p);
-  void (QGL_DLLEXPORT *m_glWindowPos2i)(GLint x, GLint y);
-  void (QGL_DLLEXPORT *m_glWindowPos2iv)(const GLint *p);
-  void (QGL_DLLEXPORT *m_glWindowPos2s)(GLshort x, GLshort y);
-  void (QGL_DLLEXPORT *m_glWindowPos2sv)(const GLshort *p);
-  void (QGL_DLLEXPORT *m_glWindowPos3d)(GLdouble x, GLdouble y, GLdouble z);
-  void (QGL_DLLEXPORT *m_glWindowPos3dv)(const GLdouble *p);
-  void (QGL_DLLEXPORT *m_glWindowPos3f)(GLfloat x, GLfloat y, GLfloat z);
-  void (QGL_DLLEXPORT *m_glWindowPos3fv)(const GLfloat *p);
-  void (QGL_DLLEXPORT *m_glWindowPos3i)(GLint x, GLint y, GLint z);
-  void (QGL_DLLEXPORT *m_glWindowPos3iv)(const GLint *p);
-  void (QGL_DLLEXPORT *m_glWindowPos3s)(GLshort x, GLshort y, GLshort z);
-  void (QGL_DLLEXPORT *m_glWindowPos3sv)(const GLshort *p);
+	// GL 1.4
+	bool support_GL_1_4;
+	bool GL_1_4(){
+		return support_GL_1_4;
+	}
+	void ( QGL_DLLEXPORT *m_glBlendColor )( GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha );
+	void ( QGL_DLLEXPORT *m_glBlendEquation )( GLenum mode );
+	void ( QGL_DLLEXPORT *m_glBlendFuncSeparate )( GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha );
+	void ( QGL_DLLEXPORT *m_glFogCoordPointer )( GLenum type, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glFogCoordd )( GLdouble coord );
+	void ( QGL_DLLEXPORT *m_glFogCoorddv )( const GLdouble *coord );
+	void ( QGL_DLLEXPORT *m_glFogCoordf )( GLfloat coord );
+	void ( QGL_DLLEXPORT *m_glFogCoordfv )( const GLfloat *coord );
+	void ( QGL_DLLEXPORT *m_glMultiDrawArrays )( GLenum mode, GLint *first, GLsizei *count, GLsizei primcount );
+	void ( QGL_DLLEXPORT *m_glMultiDrawElements )( GLenum mode, GLsizei *count, GLenum type, const GLvoid **indices, GLsizei primcount );
+	void ( QGL_DLLEXPORT *m_glPointParameterf )( GLenum pname, GLfloat param );
+	void ( QGL_DLLEXPORT *m_glPointParameterfv )( GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3b )( GLbyte red, GLbyte green, GLbyte blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3bv )( const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3d )( GLdouble red, GLdouble green, GLdouble blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3dv )( const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3f )( GLfloat red, GLfloat green, GLfloat blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3fv )( const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3i )( GLint red, GLint green, GLint blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3iv )( const GLint *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3s )( GLshort red, GLshort green, GLshort blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3sv )( const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3ub )( GLubyte red, GLubyte green, GLubyte blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3ubv )( const GLubyte *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3ui )( GLuint red, GLuint green, GLuint blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3uiv )( const GLuint *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3us )( GLushort red, GLushort green, GLushort blue );
+	void ( QGL_DLLEXPORT *m_glSecondaryColor3usv )( const GLushort *v );
+	void ( QGL_DLLEXPORT *m_glSecondaryColorPointer )( GLint size, GLenum type, GLsizei stride, GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glWindowPos2d )( GLdouble x, GLdouble y );
+	void ( QGL_DLLEXPORT *m_glWindowPos2dv )( const GLdouble *p );
+	void ( QGL_DLLEXPORT *m_glWindowPos2f )( GLfloat x, GLfloat y );
+	void ( QGL_DLLEXPORT *m_glWindowPos2fv )( const GLfloat *p );
+	void ( QGL_DLLEXPORT *m_glWindowPos2i )( GLint x, GLint y );
+	void ( QGL_DLLEXPORT *m_glWindowPos2iv )( const GLint *p );
+	void ( QGL_DLLEXPORT *m_glWindowPos2s )( GLshort x, GLshort y );
+	void ( QGL_DLLEXPORT *m_glWindowPos2sv )( const GLshort *p );
+	void ( QGL_DLLEXPORT *m_glWindowPos3d )( GLdouble x, GLdouble y, GLdouble z );
+	void ( QGL_DLLEXPORT *m_glWindowPos3dv )( const GLdouble *p );
+	void ( QGL_DLLEXPORT *m_glWindowPos3f )( GLfloat x, GLfloat y, GLfloat z );
+	void ( QGL_DLLEXPORT *m_glWindowPos3fv )( const GLfloat *p );
+	void ( QGL_DLLEXPORT *m_glWindowPos3i )( GLint x, GLint y, GLint z );
+	void ( QGL_DLLEXPORT *m_glWindowPos3iv )( const GLint *p );
+	void ( QGL_DLLEXPORT *m_glWindowPos3s )( GLshort x, GLshort y, GLshort z );
+	void ( QGL_DLLEXPORT *m_glWindowPos3sv )( const GLshort *p );
 
-  // GL 1.5
-  bool support_GL_1_5;
-  bool GL_1_5()
-  {
-    return support_GL_1_5;
-  }
-  void (QGL_DLLEXPORT *m_glBeginQuery)(GLenum target, GLuint id);
-  void (QGL_DLLEXPORT *m_glBindBuffer)(GLenum target, GLuint buffer);
-  void (QGL_DLLEXPORT *m_glBufferData)(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
-  void (QGL_DLLEXPORT *m_glBufferSubData)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
-  void (QGL_DLLEXPORT *m_glDeleteBuffers)(GLsizei n, const GLuint* buffers);
-  void (QGL_DLLEXPORT *m_glDeleteQueries)(GLsizei n, const GLuint* ids);
-  void (QGL_DLLEXPORT *m_glEndQuery)(GLenum target);
-  void (QGL_DLLEXPORT *m_glGenBuffers)(GLsizei n, GLuint* buffers);
-  void (QGL_DLLEXPORT *m_glGenQueries)(GLsizei n, GLuint* ids);
-  void (QGL_DLLEXPORT *m_glGetBufferParameteriv)(GLenum target, GLenum pname, GLint* params);
-  void (QGL_DLLEXPORT *m_glGetBufferPointerv)(GLenum target, GLenum pname, GLvoid** params);
-  void (QGL_DLLEXPORT *m_glGetBufferSubData)(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid* data);
-  void (QGL_DLLEXPORT *m_glGetQueryObjectiv)(GLuint id, GLenum pname, GLint* params);
-  void (QGL_DLLEXPORT *m_glGetQueryObjectuiv)(GLuint id, GLenum pname, GLuint* params);
-  void (QGL_DLLEXPORT *m_glGetQueryiv)(GLenum target, GLenum pname, GLint params);
-  GLboolean (QGL_DLLEXPORT *m_glIsBuffer)(GLuint buffer);
-  GLboolean (QGL_DLLEXPORT *m_glIsQuery)(GLuint id);
-  GLvoid* (QGL_DLLEXPORT *m_glMapBuffer)(GLenum target, GLenum access);
-  GLboolean (QGL_DLLEXPORT *m_glUnmapBuffer)(GLenum target);
+	// GL 1.5
+	bool support_GL_1_5;
+	bool GL_1_5(){
+		return support_GL_1_5;
+	}
+	void ( QGL_DLLEXPORT *m_glBeginQuery )( GLenum target, GLuint id );
+	void ( QGL_DLLEXPORT *m_glBindBuffer )( GLenum target, GLuint buffer );
+	void ( QGL_DLLEXPORT *m_glBufferData )( GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage );
+	void ( QGL_DLLEXPORT *m_glBufferSubData )( GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glDeleteBuffers )( GLsizei n, const GLuint* buffers );
+	void ( QGL_DLLEXPORT *m_glDeleteQueries )( GLsizei n, const GLuint* ids );
+	void ( QGL_DLLEXPORT *m_glEndQuery )( GLenum target );
+	void ( QGL_DLLEXPORT *m_glGenBuffers )( GLsizei n, GLuint* buffers );
+	void ( QGL_DLLEXPORT *m_glGenQueries )( GLsizei n, GLuint* ids );
+	void ( QGL_DLLEXPORT *m_glGetBufferParameteriv )( GLenum target, GLenum pname, GLint* params );
+	void ( QGL_DLLEXPORT *m_glGetBufferPointerv )( GLenum target, GLenum pname, GLvoid** params );
+	void ( QGL_DLLEXPORT *m_glGetBufferSubData )( GLenum target, GLintptr offset, GLsizeiptr size, GLvoid* data );
+	void ( QGL_DLLEXPORT *m_glGetQueryObjectiv )( GLuint id, GLenum pname, GLint* params );
+	void ( QGL_DLLEXPORT *m_glGetQueryObjectuiv )( GLuint id, GLenum pname, GLuint* params );
+	void ( QGL_DLLEXPORT *m_glGetQueryiv )( GLenum target, GLenum pname, GLint params );
+	GLboolean ( QGL_DLLEXPORT *m_glIsBuffer )( GLuint buffer );
+	GLboolean ( QGL_DLLEXPORT *m_glIsQuery )( GLuint id );
+	GLvoid* ( QGL_DLLEXPORT * m_glMapBuffer )( GLenum target, GLenum access );
+	GLboolean ( QGL_DLLEXPORT *m_glUnmapBuffer )( GLenum target );
 
-  // GL_ARB_vertex_program
-  bool support_ARB_vertex_program;
-  bool ARB_vertex_program()
-  {
-    return support_ARB_vertex_program;
-  }
-  void (QGL_DLLEXPORT *m_glVertexAttrib1sARB)(GLuint index, GLshort x);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1fARB)(GLuint index, GLfloat x);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1dARB)(GLuint index, GLdouble x);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2sARB)(GLuint index, GLshort x, GLshort y);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2fARB)(GLuint index, GLfloat x, GLfloat y);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2dARB)(GLuint index, GLdouble x, GLdouble y);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3sARB)(GLuint index, GLshort x, GLshort y, GLshort z);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3fARB)(GLuint index, GLfloat x, GLfloat y, GLfloat z);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3dARB)(GLuint index, GLdouble x, GLdouble y, GLdouble z);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4sARB)(GLuint index, GLshort x, GLshort y, GLshort z, GLshort w);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4fARB)(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4dARB)(GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NubARB)(GLuint index, GLubyte x, GLubyte y, GLubyte z, GLubyte w);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4bvARB)(GLuint index, const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4ivARB)(GLuint index, const GLint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4ubvARB)(GLuint index, const GLubyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4usvARB)(GLuint index, const GLushort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4uivARB)(GLuint index, const GLuint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NbvARB)(GLuint index, const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NsvARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NivARB)(GLuint index, const GLint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NubvARB)(GLuint index, const GLubyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NusvARB)(GLuint index, const GLushort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NuivARB)(GLuint index, const GLuint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttribPointerARB)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glEnableVertexAttribArrayARB)(GLuint index);
-  void (QGL_DLLEXPORT *m_glDisableVertexAttribArrayARB)(GLuint index);
-  void (QGL_DLLEXPORT *m_glProgramStringARB)(GLenum target, GLenum format, GLsizei len, const GLvoid *string); 
-  void (QGL_DLLEXPORT *m_glBindProgramARB)(GLenum target, GLuint program);
-  void (QGL_DLLEXPORT *m_glDeleteProgramsARB)(GLsizei n, const GLuint *programs);
-  void (QGL_DLLEXPORT *m_glGenProgramsARB)(GLsizei n, GLuint *programs);
-  void (QGL_DLLEXPORT *m_glProgramEnvParameter4dARB)(GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
-  void (QGL_DLLEXPORT *m_glProgramEnvParameter4dvARB)(GLenum target, GLuint index, const GLdouble *params);
-  void (QGL_DLLEXPORT *m_glProgramEnvParameter4fARB)(GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-  void (QGL_DLLEXPORT *m_glProgramEnvParameter4fvARB)(GLenum target, GLuint index, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glProgramLocalParameter4dARB)(GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
-  void (QGL_DLLEXPORT *m_glProgramLocalParameter4dvARB)(GLenum target, GLuint index, const GLdouble *params);
-  void (QGL_DLLEXPORT *m_glProgramLocalParameter4fARB)(GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-  void (QGL_DLLEXPORT *m_glProgramLocalParameter4fvARB)(GLenum target, GLuint index, const GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetProgramEnvParameterdvARB)(GLenum target, GLuint index, GLdouble *params);
-  void (QGL_DLLEXPORT *m_glGetProgramEnvParameterfvARB)(GLenum target, GLuint index, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetProgramLocalParameterdvARB)(GLenum target, GLuint index, GLdouble *params);
-  void (QGL_DLLEXPORT *m_glGetProgramLocalParameterfvARB)(GLenum target, GLuint index, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetProgramivARB)(GLenum target, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetProgramStringARB)(GLenum target, GLenum pname, GLvoid *string);
-  void (QGL_DLLEXPORT *m_glGetVertexAttribdvARB)(GLuint index, GLenum pname, GLdouble *params);
-  void (QGL_DLLEXPORT *m_glGetVertexAttribfvARB)(GLuint index, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetVertexAttribivARB)(GLuint index, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetVertexAttribPointervARB)(GLuint index, GLenum pname, GLvoid **pointer);
-  GLboolean (QGL_DLLEXPORT *m_glIsProgramARB)(GLuint program);
+	// GL_ARB_vertex_program
+	bool support_ARB_vertex_program;
+	bool ARB_vertex_program(){
+		return support_ARB_vertex_program;
+	}
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1sARB )( GLuint index, GLshort x );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1fARB )( GLuint index, GLfloat x );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1dARB )( GLuint index, GLdouble x );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2sARB )( GLuint index, GLshort x, GLshort y );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2fARB )( GLuint index, GLfloat x, GLfloat y );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2dARB )( GLuint index, GLdouble x, GLdouble y );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3sARB )( GLuint index, GLshort x, GLshort y, GLshort z );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3fARB )( GLuint index, GLfloat x, GLfloat y, GLfloat z );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3dARB )( GLuint index, GLdouble x, GLdouble y, GLdouble z );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4sARB )( GLuint index, GLshort x, GLshort y, GLshort z, GLshort w );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4fARB )( GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4dARB )( GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NubARB )( GLuint index, GLubyte x, GLubyte y, GLubyte z, GLubyte w );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4bvARB )( GLuint index, const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4ivARB )( GLuint index, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4ubvARB )( GLuint index, const GLubyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4usvARB )( GLuint index, const GLushort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4uivARB )( GLuint index, const GLuint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NbvARB )( GLuint index, const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NsvARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NivARB )( GLuint index, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NubvARB )( GLuint index, const GLubyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NusvARB )( GLuint index, const GLushort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NuivARB )( GLuint index, const GLuint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttribPointerARB )( GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glEnableVertexAttribArrayARB )( GLuint index );
+	void ( QGL_DLLEXPORT *m_glDisableVertexAttribArrayARB )( GLuint index );
+	void ( QGL_DLLEXPORT *m_glProgramStringARB )( GLenum target, GLenum format, GLsizei len, const GLvoid *string );
+	void ( QGL_DLLEXPORT *m_glBindProgramARB )( GLenum target, GLuint program );
+	void ( QGL_DLLEXPORT *m_glDeleteProgramsARB )( GLsizei n, const GLuint *programs );
+	void ( QGL_DLLEXPORT *m_glGenProgramsARB )( GLsizei n, GLuint *programs );
+	void ( QGL_DLLEXPORT *m_glProgramEnvParameter4dARB )( GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w );
+	void ( QGL_DLLEXPORT *m_glProgramEnvParameter4dvARB )( GLenum target, GLuint index, const GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glProgramEnvParameter4fARB )( GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w );
+	void ( QGL_DLLEXPORT *m_glProgramEnvParameter4fvARB )( GLenum target, GLuint index, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glProgramLocalParameter4dARB )( GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w );
+	void ( QGL_DLLEXPORT *m_glProgramLocalParameter4dvARB )( GLenum target, GLuint index, const GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glProgramLocalParameter4fARB )( GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w );
+	void ( QGL_DLLEXPORT *m_glProgramLocalParameter4fvARB )( GLenum target, GLuint index, const GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetProgramEnvParameterdvARB )( GLenum target, GLuint index, GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glGetProgramEnvParameterfvARB )( GLenum target, GLuint index, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetProgramLocalParameterdvARB )( GLenum target, GLuint index, GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glGetProgramLocalParameterfvARB )( GLenum target, GLuint index, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetProgramivARB )( GLenum target, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetProgramStringARB )( GLenum target, GLenum pname, GLvoid *string );
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribdvARB )( GLuint index, GLenum pname, GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribfvARB )( GLuint index, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribivARB )( GLuint index, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribPointervARB )( GLuint index, GLenum pname, GLvoid **pointer );
+	GLboolean ( QGL_DLLEXPORT *m_glIsProgramARB )( GLuint program );
 
-  // GL_ARB_fragment_program
-  bool support_ARB_fragment_program;
-  bool ARB_fragment_program()
-  {
-    return support_ARB_fragment_program;
-  }
+	// GL_ARB_fragment_program
+	bool support_ARB_fragment_program;
+	bool ARB_fragment_program(){
+		return support_ARB_fragment_program;
+	}
 
-  // GL_ARB_shader_objects
-  bool support_ARB_shader_objects;
-  bool ARB_shader_objects()
-  {
-    return support_ARB_shader_objects;
-  }
-  void (QGL_DLLEXPORT *m_glDeleteObjectARB)(GLhandleARB obj);
-  GLhandleARB (QGL_DLLEXPORT *m_glGetHandleARB)(GLenum pname);
-  void (QGL_DLLEXPORT *m_glDetachObjectARB)(GLhandleARB containerObj, GLhandleARB attachedObj);
-  GLhandleARB (QGL_DLLEXPORT *m_glCreateShaderObjectARB)(GLenum shaderType);
-  void (QGL_DLLEXPORT *m_glShaderSourceARB)(GLhandleARB shaderObj, GLsizei count, const GLcharARB **string, const GLint *length);
-  void (QGL_DLLEXPORT *m_glCompileShaderARB)(GLhandleARB shaderObj);
-  GLhandleARB (QGL_DLLEXPORT *m_glCreateProgramObjectARB)(void);
-  void (QGL_DLLEXPORT *m_glAttachObjectARB)(GLhandleARB containerObj, GLhandleARB obj);
-  void (QGL_DLLEXPORT *m_glLinkProgramARB)(GLhandleARB programObj);
-  void (QGL_DLLEXPORT *m_glUseProgramObjectARB)(GLhandleARB programObj);
-  void (QGL_DLLEXPORT *m_glValidateProgramARB)(GLhandleARB programObj);
-  void (QGL_DLLEXPORT *m_glUniform1fARB)(GLint location, GLfloat v0);
-  void (QGL_DLLEXPORT *m_glUniform2fARB)(GLint location, GLfloat v0, GLfloat v1);
-  void (QGL_DLLEXPORT *m_glUniform3fARB)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
-  void (QGL_DLLEXPORT *m_glUniform4fARB)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-  void (QGL_DLLEXPORT *m_glUniform1iARB)(GLint location, GLint v0);
-  void (QGL_DLLEXPORT *m_glUniform2iARB)(GLint location, GLint v0, GLint v1);
-  void (QGL_DLLEXPORT *m_glUniform3iARB)(GLint location, GLint v0, GLint v1, GLint v2);
-  void (QGL_DLLEXPORT *m_glUniform4iARB)(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
-  void (QGL_DLLEXPORT *m_glUniform1fvARB)(GLint location, GLsizei count, const GLfloat *value);
-  void (QGL_DLLEXPORT *m_glUniform2fvARB)(GLint location, GLsizei count, const GLfloat *value);
-  void (QGL_DLLEXPORT *m_glUniform3fvARB)(GLint location, GLsizei count, const GLfloat *value);
-  void (QGL_DLLEXPORT *m_glUniform4fvARB)(GLint location, GLsizei count, const GLfloat *value);
-  void (QGL_DLLEXPORT *m_glUniform1ivARB)(GLint location, GLsizei count, const GLint *value);
-  void (QGL_DLLEXPORT *m_glUniform2ivARB)(GLint location, GLsizei count, const GLint *value);
-  void (QGL_DLLEXPORT *m_glUniform3ivARB)(GLint location, GLsizei count, const GLint *value);
-  void (QGL_DLLEXPORT *m_glUniform4ivARB)(GLint location, GLsizei count, const GLint *value);
-  void (QGL_DLLEXPORT *m_glUniformMatrix2fvARB)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
-  void (QGL_DLLEXPORT *m_glUniformMatrix3fvARB)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
-  void (QGL_DLLEXPORT *m_glUniformMatrix4fvARB)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
-  void (QGL_DLLEXPORT *m_glGetObjectParameterfvARB)(GLhandleARB obj, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetObjectParameterivARB)(GLhandleARB obj, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetInfoLogARB)(GLhandleARB obj, GLsizei maxLength, GLsizei *length, GLcharARB *infoLog);
-  void (QGL_DLLEXPORT *m_glGetAttachedObjectsARB)(GLhandleARB containerObj, GLsizei maxCount, GLsizei *count, GLhandleARB *obj);
-  GLint (QGL_DLLEXPORT *m_glGetUniformLocationARB)(GLhandleARB programObj, const GLcharARB *name);
-  void (QGL_DLLEXPORT *m_glGetActiveUniformARB)(GLhandleARB programObj, GLuint index, GLsizei maxLength, GLsizei *length, GLint *size, GLenum *type, GLcharARB *name);
-  void (QGL_DLLEXPORT *m_glGetUniformfvARB)(GLhandleARB programObj, GLint location, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetUniformivARB)(GLhandleARB programObj, GLint location, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetShaderSourceARB)(GLhandleARB obj, GLsizei maxLength, GLsizei *length, GLcharARB *source);
+	// GL_ARB_shader_objects
+	bool support_ARB_shader_objects;
+	bool ARB_shader_objects(){
+		return support_ARB_shader_objects;
+	}
+	void ( QGL_DLLEXPORT *m_glDeleteObjectARB )( GLhandleARB obj );
+	GLhandleARB ( QGL_DLLEXPORT *m_glGetHandleARB )( GLenum pname );
+	void ( QGL_DLLEXPORT *m_glDetachObjectARB )( GLhandleARB containerObj, GLhandleARB attachedObj );
+	GLhandleARB ( QGL_DLLEXPORT *m_glCreateShaderObjectARB )( GLenum shaderType );
+	void ( QGL_DLLEXPORT *m_glShaderSourceARB )( GLhandleARB shaderObj, GLsizei count, const GLcharARB **string, const GLint *length );
+	void ( QGL_DLLEXPORT *m_glCompileShaderARB )( GLhandleARB shaderObj );
+	GLhandleARB ( QGL_DLLEXPORT *m_glCreateProgramObjectARB )( void );
+	void ( QGL_DLLEXPORT *m_glAttachObjectARB )( GLhandleARB containerObj, GLhandleARB obj );
+	void ( QGL_DLLEXPORT *m_glLinkProgramARB )( GLhandleARB programObj );
+	void ( QGL_DLLEXPORT *m_glUseProgramObjectARB )( GLhandleARB programObj );
+	void ( QGL_DLLEXPORT *m_glValidateProgramARB )( GLhandleARB programObj );
+	void ( QGL_DLLEXPORT *m_glUniform1fARB )( GLint location, GLfloat v0 );
+	void ( QGL_DLLEXPORT *m_glUniform2fARB )( GLint location, GLfloat v0, GLfloat v1 );
+	void ( QGL_DLLEXPORT *m_glUniform3fARB )( GLint location, GLfloat v0, GLfloat v1, GLfloat v2 );
+	void ( QGL_DLLEXPORT *m_glUniform4fARB )( GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3 );
+	void ( QGL_DLLEXPORT *m_glUniform1iARB )( GLint location, GLint v0 );
+	void ( QGL_DLLEXPORT *m_glUniform2iARB )( GLint location, GLint v0, GLint v1 );
+	void ( QGL_DLLEXPORT *m_glUniform3iARB )( GLint location, GLint v0, GLint v1, GLint v2 );
+	void ( QGL_DLLEXPORT *m_glUniform4iARB )( GLint location, GLint v0, GLint v1, GLint v2, GLint v3 );
+	void ( QGL_DLLEXPORT *m_glUniform1fvARB )( GLint location, GLsizei count, const GLfloat *value );
+	void ( QGL_DLLEXPORT *m_glUniform2fvARB )( GLint location, GLsizei count, const GLfloat *value );
+	void ( QGL_DLLEXPORT *m_glUniform3fvARB )( GLint location, GLsizei count, const GLfloat *value );
+	void ( QGL_DLLEXPORT *m_glUniform4fvARB )( GLint location, GLsizei count, const GLfloat *value );
+	void ( QGL_DLLEXPORT *m_glUniform1ivARB )( GLint location, GLsizei count, const GLint *value );
+	void ( QGL_DLLEXPORT *m_glUniform2ivARB )( GLint location, GLsizei count, const GLint *value );
+	void ( QGL_DLLEXPORT *m_glUniform3ivARB )( GLint location, GLsizei count, const GLint *value );
+	void ( QGL_DLLEXPORT *m_glUniform4ivARB )( GLint location, GLsizei count, const GLint *value );
+	void ( QGL_DLLEXPORT *m_glUniformMatrix2fvARB )( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value );
+	void ( QGL_DLLEXPORT *m_glUniformMatrix3fvARB )( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value );
+	void ( QGL_DLLEXPORT *m_glUniformMatrix4fvARB )( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value );
+	void ( QGL_DLLEXPORT *m_glGetObjectParameterfvARB )( GLhandleARB obj, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetObjectParameterivARB )( GLhandleARB obj, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetInfoLogARB )( GLhandleARB obj, GLsizei maxLength, GLsizei *length, GLcharARB *infoLog );
+	void ( QGL_DLLEXPORT *m_glGetAttachedObjectsARB )( GLhandleARB containerObj, GLsizei maxCount, GLsizei *count, GLhandleARB *obj );
+	GLint ( QGL_DLLEXPORT *m_glGetUniformLocationARB )( GLhandleARB programObj, const GLcharARB *name );
+	void ( QGL_DLLEXPORT *m_glGetActiveUniformARB )( GLhandleARB programObj, GLuint index, GLsizei maxLength, GLsizei *length, GLint *size, GLenum *type, GLcharARB *name );
+	void ( QGL_DLLEXPORT *m_glGetUniformfvARB )( GLhandleARB programObj, GLint location, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetUniformivARB )( GLhandleARB programObj, GLint location, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetShaderSourceARB )( GLhandleARB obj, GLsizei maxLength, GLsizei *length, GLcharARB *source );
 
-  // GL_ARB_vertex_shader
-  bool support_ARB_vertex_shader;
-  bool ARB_vertex_shader()
-  {
-    return support_ARB_vertex_shader;
-  }
+	// GL_ARB_vertex_shader
+	bool support_ARB_vertex_shader;
+	bool ARB_vertex_shader(){
+		return support_ARB_vertex_shader;
+	}
 #if 0
-  void (QGL_DLLEXPORT *m_glVertexAttrib1fARB)(GLuint index, GLfloat v0);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1sARB)(GLuint index, GLshort v0);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1dARB)(GLuint index, GLdouble v0);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2fARB)(GLuint index, GLfloat v0, GLfloat v1);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2sARB)(GLuint index, GLshort v0, GLshort v1);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2dARB)(GLuint index, GLdouble v0, GLdouble v1);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3fARB)(GLuint index, GLfloat v0, GLfloat v1, GLfloat v2);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3sARB)(GLuint index, GLshort v0, GLshort v1, GLshort v2);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3dARB)(GLuint index, GLdouble v0, GLdouble v1, GLdouble v2);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4fARB)(GLuint index, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4sARB)(GLuint index, GLshort v0, GLshort v1, GLshort v2, GLshort v3);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4dARB)(GLuint index, GLdouble v0, GLdouble v1, GLdouble v2, GLdouble v3);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NubARB)(GLuint index, GLubyte x, GLubyte y, GLubyte z, GLubyte w);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib1dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib2dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib3dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4fvARB)(GLuint index, const GLfloat *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4svARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4dvARB)(GLuint index, const GLdouble *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4ivARB)(GLuint index, const GLint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4bvARB)(GLuint index, const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4ubvARB)(GLuint index, const GLubyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4usvARB)(GLuint index, const GLushort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4uivARB)(GLuint index, const GLuint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NbvARB)(GLuint index, const GLbyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NsvARB)(GLuint index, const GLshort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NivARB)(GLuint index, const GLint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NubvARB)(GLuint index, const GLubyte *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NusvARB)(GLuint index, const GLushort *v);
-  void (QGL_DLLEXPORT *m_glVertexAttrib4NuivARB)(GLuint index, const GLuint *v);
-  void (QGL_DLLEXPORT *m_glVertexAttribPointerARB)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
-  void (QGL_DLLEXPORT *m_glEnableVertexAttribArrayARB)(GLuint index);
-  void (QGL_DLLEXPORT *m_glDisableVertexAttribArrayARB)(GLuint index);
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1fARB )( GLuint index, GLfloat v0 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1sARB )( GLuint index, GLshort v0 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1dARB )( GLuint index, GLdouble v0 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2fARB )( GLuint index, GLfloat v0, GLfloat v1 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2sARB )( GLuint index, GLshort v0, GLshort v1 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2dARB )( GLuint index, GLdouble v0, GLdouble v1 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3fARB )( GLuint index, GLfloat v0, GLfloat v1, GLfloat v2 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3sARB )( GLuint index, GLshort v0, GLshort v1, GLshort v2 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3dARB )( GLuint index, GLdouble v0, GLdouble v1, GLdouble v2 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4fARB )( GLuint index, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4sARB )( GLuint index, GLshort v0, GLshort v1, GLshort v2, GLshort v3 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4dARB )( GLuint index, GLdouble v0, GLdouble v1, GLdouble v2, GLdouble v3 );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NubARB )( GLuint index, GLubyte x, GLubyte y, GLubyte z, GLubyte w );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib1dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib2dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib3dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4fvARB )( GLuint index, const GLfloat *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4svARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4dvARB )( GLuint index, const GLdouble *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4ivARB )( GLuint index, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4bvARB )( GLuint index, const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4ubvARB )( GLuint index, const GLubyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4usvARB )( GLuint index, const GLushort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4uivARB )( GLuint index, const GLuint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NbvARB )( GLuint index, const GLbyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NsvARB )( GLuint index, const GLshort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NivARB )( GLuint index, const GLint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NubvARB )( GLuint index, const GLubyte *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NusvARB )( GLuint index, const GLushort *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttrib4NuivARB )( GLuint index, const GLuint *v );
+	void ( QGL_DLLEXPORT *m_glVertexAttribPointerARB )( GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer );
+	void ( QGL_DLLEXPORT *m_glEnableVertexAttribArrayARB )( GLuint index );
+	void ( QGL_DLLEXPORT *m_glDisableVertexAttribArrayARB )( GLuint index );
 #endif
-  void (QGL_DLLEXPORT *m_glBindAttribLocationARB)(GLhandleARB programObj, GLuint index, const GLcharARB *name);
-  void (QGL_DLLEXPORT *m_glGetActiveAttribARB)(GLhandleARB programObj, GLuint index, GLsizei maxLength, GLsizei *length, GLint *size, GLenum *type, GLcharARB *name);
-  GLint (QGL_DLLEXPORT *m_glGetAttribLocationARB)(GLhandleARB programObj, const GLcharARB *name);
+	void ( QGL_DLLEXPORT *m_glBindAttribLocationARB )( GLhandleARB programObj, GLuint index, const GLcharARB *name );
+	void ( QGL_DLLEXPORT *m_glGetActiveAttribARB )( GLhandleARB programObj, GLuint index, GLsizei maxLength, GLsizei *length, GLint *size, GLenum *type, GLcharARB *name );
+	GLint ( QGL_DLLEXPORT *m_glGetAttribLocationARB )( GLhandleARB programObj, const GLcharARB *name );
 #if 0
-  void (QGL_DLLEXPORT *m_glGetVertexAttribdvARB)(GLuint index, GLenum pname, GLdouble *params);
-  void (QGL_DLLEXPORT *m_glGetVertexAttribfvARB)(GLuint index, GLenum pname, GLfloat *params);
-  void (QGL_DLLEXPORT *m_glGetVertexAttribivARB)(GLuint index, GLenum pname, GLint *params);
-  void (QGL_DLLEXPORT *m_glGetVertexAttribPointervARB)(GLuint index, GLenum pname, GLvoid **pointer);
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribdvARB )( GLuint index, GLenum pname, GLdouble *params );
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribfvARB )( GLuint index, GLenum pname, GLfloat *params );
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribivARB )( GLuint index, GLenum pname, GLint *params );
+	void ( QGL_DLLEXPORT *m_glGetVertexAttribPointervARB )( GLuint index, GLenum pname, GLvoid **pointer );
 #endif
 
-  // ARB_fragment_shader
-  bool support_ARB_fragment_shader;
-  bool ARB_fragment_shader()
-  {
-    return support_ARB_fragment_shader;
-  }
+	// ARB_fragment_shader
+	bool support_ARB_fragment_shader;
+	bool ARB_fragment_shader(){
+		return support_ARB_fragment_shader;
+	}
 
-  // ARB_shading_language_100
-  bool support_ARB_shading_language_100;
-  bool ARB_shading_language_100()
-  {
-    return support_ARB_shading_language_100;
-  }
+	// ARB_shading_language_100
+	bool support_ARB_shading_language_100;
+	bool ARB_shading_language_100(){
+		return support_ARB_shading_language_100;
+	}
 
-  // GL_NV_vertex_program2
-  bool support_NV_vertex_program2;
-  bool NV_vertex_program2()
-  {
-    return support_NV_vertex_program2;
-  }
-  GLboolean (QGL_DLLEXPORT* m_glAreProgramsResidentNV)(GLsizei, const GLuint *, GLboolean *);
-  void (QGL_DLLEXPORT* m_glBindProgramNV)(GLenum, GLuint);
-  void (QGL_DLLEXPORT* m_glDeleteProgramsNV)(GLsizei, const GLuint *);
-  void (QGL_DLLEXPORT* m_glExecuteProgramNV)(GLenum, GLuint, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glGenProgramsNV)(GLsizei, GLuint *);
-  void (QGL_DLLEXPORT* m_glGetProgramParameterdvNV)(GLenum, GLuint, GLenum, GLdouble *);
-  void (QGL_DLLEXPORT* m_glGetProgramParameterfvNV)(GLenum, GLuint, GLenum, GLfloat *);
-  void (QGL_DLLEXPORT* m_glGetProgramivNV)(GLuint, GLenum, GLint *);
-  void (QGL_DLLEXPORT* m_glGetProgramStringNV)(GLuint, GLenum, GLubyte *);
-  void (QGL_DLLEXPORT* m_glGetTrackMatrixivNV)(GLenum, GLuint, GLenum, GLint *);
-  void (QGL_DLLEXPORT* m_glGetVertexAttribdvNV)(GLuint, GLenum, GLdouble *);
-  void (QGL_DLLEXPORT* m_glGetVertexAttribfvNV)(GLuint, GLenum, GLfloat *);
-  void (QGL_DLLEXPORT* m_glGetVertexAttribivNV)(GLuint, GLenum, GLint *);
-  void (QGL_DLLEXPORT* m_glGetVertexAttribPointervNV)(GLuint, GLenum, GLvoid* *);
-  GLboolean (QGL_DLLEXPORT* m_glIsProgramNV)(GLuint);
-  void (QGL_DLLEXPORT* m_glLoadProgramNV)(GLenum, GLuint, GLsizei, const GLubyte *);
-  void (QGL_DLLEXPORT* m_glProgramParameter4fNV)(GLenum, GLuint, GLfloat, GLfloat, GLfloat, GLfloat);
-  void (QGL_DLLEXPORT* m_glProgramParameter4fvNV)(GLenum, GLuint, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glProgramParameters4fvNV)(GLenum, GLuint, GLuint, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glRequestResidentProgramsNV)(GLsizei, const GLuint *);
-  void (QGL_DLLEXPORT* m_glTrackMatrixNV)(GLenum, GLuint, GLenum, GLenum);
-  void (QGL_DLLEXPORT* m_glVertexAttribPointerNV)(GLuint, GLint, GLenum, GLsizei, const GLvoid *);
-  void (QGL_DLLEXPORT* m_glVertexAttrib1fNV)(GLuint, GLfloat);
-  void (QGL_DLLEXPORT* m_glVertexAttrib1fvNV)(GLuint, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glVertexAttrib2fNV)(GLuint, GLfloat, GLfloat);
-  void (QGL_DLLEXPORT* m_glVertexAttrib2fvNV)(GLuint, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glVertexAttrib3fNV)(GLuint, GLfloat, GLfloat, GLfloat);
-  void (QGL_DLLEXPORT* m_glVertexAttrib3fvNV)(GLuint, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glVertexAttrib4fNV)(GLuint, GLfloat, GLfloat, GLfloat, GLfloat);
-  void (QGL_DLLEXPORT* m_glVertexAttrib4fvNV)(GLuint, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glVertexAttribs1fvNV)(GLuint, GLsizei, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glVertexAttribs2fvNV)(GLuint, GLsizei, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glVertexAttribs3fvNV)(GLuint, GLsizei, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glVertexAttribs4fvNV)(GLuint, GLsizei, const GLfloat *);
+	// GL_NV_vertex_program2
+	bool support_NV_vertex_program2;
+	bool NV_vertex_program2(){
+		return support_NV_vertex_program2;
+	}
+	GLboolean ( QGL_DLLEXPORT* m_glAreProgramsResidentNV )( GLsizei, const GLuint *, GLboolean * );
+	void ( QGL_DLLEXPORT* m_glBindProgramNV )( GLenum, GLuint );
+	void ( QGL_DLLEXPORT* m_glDeleteProgramsNV )( GLsizei, const GLuint * );
+	void ( QGL_DLLEXPORT* m_glExecuteProgramNV )( GLenum, GLuint, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glGenProgramsNV )( GLsizei, GLuint * );
+	void ( QGL_DLLEXPORT* m_glGetProgramParameterdvNV )( GLenum, GLuint, GLenum, GLdouble * );
+	void ( QGL_DLLEXPORT* m_glGetProgramParameterfvNV )( GLenum, GLuint, GLenum, GLfloat * );
+	void ( QGL_DLLEXPORT* m_glGetProgramivNV )( GLuint, GLenum, GLint * );
+	void ( QGL_DLLEXPORT* m_glGetProgramStringNV )( GLuint, GLenum, GLubyte * );
+	void ( QGL_DLLEXPORT* m_glGetTrackMatrixivNV )( GLenum, GLuint, GLenum, GLint * );
+	void ( QGL_DLLEXPORT* m_glGetVertexAttribdvNV )( GLuint, GLenum, GLdouble * );
+	void ( QGL_DLLEXPORT* m_glGetVertexAttribfvNV )( GLuint, GLenum, GLfloat * );
+	void ( QGL_DLLEXPORT* m_glGetVertexAttribivNV )( GLuint, GLenum, GLint * );
+	void ( QGL_DLLEXPORT* m_glGetVertexAttribPointervNV )( GLuint, GLenum, GLvoid* * );
+	GLboolean ( QGL_DLLEXPORT* m_glIsProgramNV )( GLuint );
+	void ( QGL_DLLEXPORT* m_glLoadProgramNV )( GLenum, GLuint, GLsizei, const GLubyte * );
+	void ( QGL_DLLEXPORT* m_glProgramParameter4fNV )( GLenum, GLuint, GLfloat, GLfloat, GLfloat, GLfloat );
+	void ( QGL_DLLEXPORT* m_glProgramParameter4fvNV )( GLenum, GLuint, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glProgramParameters4fvNV )( GLenum, GLuint, GLuint, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glRequestResidentProgramsNV )( GLsizei, const GLuint * );
+	void ( QGL_DLLEXPORT* m_glTrackMatrixNV )( GLenum, GLuint, GLenum, GLenum );
+	void ( QGL_DLLEXPORT* m_glVertexAttribPointerNV )( GLuint, GLint, GLenum, GLsizei, const GLvoid * );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib1fNV )( GLuint, GLfloat );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib1fvNV )( GLuint, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib2fNV )( GLuint, GLfloat, GLfloat );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib2fvNV )( GLuint, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib3fNV )( GLuint, GLfloat, GLfloat, GLfloat );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib3fvNV )( GLuint, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib4fNV )( GLuint, GLfloat, GLfloat, GLfloat, GLfloat );
+	void ( QGL_DLLEXPORT* m_glVertexAttrib4fvNV )( GLuint, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glVertexAttribs1fvNV )( GLuint, GLsizei, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glVertexAttribs2fvNV )( GLuint, GLsizei, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glVertexAttribs3fvNV )( GLuint, GLsizei, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glVertexAttribs4fvNV )( GLuint, GLsizei, const GLfloat * );
 
-  // GL_NV_fragment_program
-  bool support_NV_fragment_program;
-  bool NV_fragment_program()
-  {
-    return support_NV_fragment_program;
-  }
-  void (QGL_DLLEXPORT* m_glProgramNamedParameter4fNV)(GLuint, GLsizei, const GLubyte *, GLfloat, GLfloat, GLfloat, GLfloat);
-  void (QGL_DLLEXPORT* m_glProgramNamedParameter4fvNV)(GLuint, GLsizei, const GLubyte *, const GLfloat *);
-  void (QGL_DLLEXPORT* m_glGetProgramNamedParameterfvNV)(GLuint, GLsizei, const GLubyte *, GLfloat *);
+	// GL_NV_fragment_program
+	bool support_NV_fragment_program;
+	bool NV_fragment_program(){
+		return support_NV_fragment_program;
+	}
+	void ( QGL_DLLEXPORT* m_glProgramNamedParameter4fNV )( GLuint, GLsizei, const GLubyte *, GLfloat, GLfloat, GLfloat, GLfloat );
+	void ( QGL_DLLEXPORT* m_glProgramNamedParameter4fvNV )( GLuint, GLsizei, const GLubyte *, const GLfloat * );
+	void ( QGL_DLLEXPORT* m_glGetProgramNamedParameterfvNV )( GLuint, GLsizei, const GLubyte *, GLfloat * );
 };
 
 #include "modulesystem.h"
@@ -2819,13 +2801,12 @@ template<typename Type>
 class GlobalModuleRef;
 typedef GlobalModuleRef<OpenGLBinding> GlobalOpenGLModuleRef;
 
-inline OpenGLBinding& GlobalOpenGL()
-{
-  return GlobalOpenGLModule::getTable();
+inline OpenGLBinding& GlobalOpenGL(){
+	return GlobalOpenGLModule::getTable();
 }
 
-#if defined(_DEBUG)
-#define GlobalOpenGL_debugAssertNoErrors() GlobalOpenGL().assertNoErrors(__FILE__, __LINE__)
+#if defined( _DEBUG )
+#define GlobalOpenGL_debugAssertNoErrors() GlobalOpenGL().assertNoErrors( __FILE__, __LINE__ )
 #else
 #define GlobalOpenGL_debugAssertNoErrors()
 #endif

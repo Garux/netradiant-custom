@@ -1,23 +1,23 @@
 /*
-Copyright (C) 2001-2006, William Joseph.
-All Rights Reserved.
+   Copyright (C) 2001-2006, William Joseph.
+   All Rights Reserved.
 
-This file is part of GtkRadiant.
+   This file is part of GtkRadiant.
 
-GtkRadiant is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   GtkRadiant is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-GtkRadiant is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GtkRadiant is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GtkRadiant; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+   You should have received a copy of the GNU General Public License
+   along with GtkRadiant; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include "image.h"
 
@@ -39,19 +39,17 @@ class ImageDependencies : public GlobalFileSystemModuleRef
 
 class ImageTGAAPI
 {
-  _QERPlugImageTable m_imagetga;
+_QERPlugImageTable m_imagetga;
 public:
-  typedef _QERPlugImageTable Type;
-  STRING_CONSTANT(Name, "tga");
+typedef _QERPlugImageTable Type;
+STRING_CONSTANT( Name, "tga" );
 
-  ImageTGAAPI()
-  {
-    m_imagetga.loadImage = LoadTGA;
-  }
-  _QERPlugImageTable* getTable()
-  {
-    return &m_imagetga;
-  }
+ImageTGAAPI(){
+	m_imagetga.loadImage = LoadTGA;
+}
+_QERPlugImageTable* getTable(){
+	return &m_imagetga;
+}
 };
 
 typedef SingletonModule<ImageTGAAPI> ImageTGAModule;
@@ -61,19 +59,17 @@ ImageTGAModule g_ImageTGAModule;
 
 class ImageJPGAPI
 {
-  _QERPlugImageTable m_imagejpg;
+_QERPlugImageTable m_imagejpg;
 public:
-  typedef _QERPlugImageTable Type;
-  STRING_CONSTANT(Name, "jpg");
+typedef _QERPlugImageTable Type;
+STRING_CONSTANT( Name, "jpg" );
 
-  ImageJPGAPI()
-  {
-    m_imagejpg.loadImage = LoadJPG;
-  }
-  _QERPlugImageTable* getTable()
-  {
-    return &m_imagejpg;
-  }
+ImageJPGAPI(){
+	m_imagejpg.loadImage = LoadJPG;
+}
+_QERPlugImageTable* getTable(){
+	return &m_imagejpg;
+}
 };
 
 typedef SingletonModule<ImageJPGAPI, ImageDependencies> ImageJPGModule;
@@ -83,19 +79,17 @@ ImageJPGModule g_ImageJPGModule;
 
 class ImageBMPAPI
 {
-  _QERPlugImageTable m_imagebmp;
+_QERPlugImageTable m_imagebmp;
 public:
-  typedef _QERPlugImageTable Type;
-  STRING_CONSTANT(Name, "bmp");
+typedef _QERPlugImageTable Type;
+STRING_CONSTANT( Name, "bmp" );
 
-  ImageBMPAPI()
-  {
-    m_imagebmp.loadImage = LoadBMP;
-  }
-  _QERPlugImageTable* getTable()
-  {
-    return &m_imagebmp;
-  }
+ImageBMPAPI(){
+	m_imagebmp.loadImage = LoadBMP;
+}
+_QERPlugImageTable* getTable(){
+	return &m_imagebmp;
+}
 };
 
 typedef SingletonModule<ImageBMPAPI, ImageDependencies> ImageBMPModule;
@@ -105,19 +99,17 @@ ImageBMPModule g_ImageBMPModule;
 
 class ImagePCXAPI
 {
-  _QERPlugImageTable m_imagepcx;
+_QERPlugImageTable m_imagepcx;
 public:
-  typedef _QERPlugImageTable Type;
-  STRING_CONSTANT(Name, "pcx");
+typedef _QERPlugImageTable Type;
+STRING_CONSTANT( Name, "pcx" );
 
-  ImagePCXAPI()
-  {
-    m_imagepcx.loadImage = LoadPCX32;
-  }
-  _QERPlugImageTable* getTable()
-  {
-    return &m_imagepcx;
-  }
+ImagePCXAPI(){
+	m_imagepcx.loadImage = LoadPCX32;
+}
+_QERPlugImageTable* getTable(){
+	return &m_imagepcx;
+}
 };
 
 typedef SingletonModule<ImagePCXAPI, ImageDependencies> ImagePCXModule;
@@ -127,19 +119,17 @@ ImagePCXModule g_ImagePCXModule;
 
 class ImageDDSAPI
 {
-  _QERPlugImageTable m_imagedds;
+_QERPlugImageTable m_imagedds;
 public:
-  typedef _QERPlugImageTable Type;
-  STRING_CONSTANT(Name, "dds");
+typedef _QERPlugImageTable Type;
+STRING_CONSTANT( Name, "dds" );
 
-  ImageDDSAPI()
-  {
-    m_imagedds.loadImage = LoadDDS;
-  }
-  _QERPlugImageTable* getTable()
-  {
-    return &m_imagedds;
-  }
+ImageDDSAPI(){
+	m_imagedds.loadImage = LoadDDS;
+}
+_QERPlugImageTable* getTable(){
+	return &m_imagedds;
+}
 };
 
 typedef SingletonModule<ImageDDSAPI, ImageDependencies> ImageDDSModule;
@@ -147,13 +137,12 @@ typedef SingletonModule<ImageDDSAPI, ImageDependencies> ImageDDSModule;
 ImageDDSModule g_ImageDDSModule;
 
 
-extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules(ModuleServer& server)
-{
-  initialiseModule(server);
+extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server ){
+	initialiseModule( server );
 
-  g_ImageTGAModule.selfRegister();
-  g_ImageJPGModule.selfRegister();
-  g_ImageBMPModule.selfRegister();
-  g_ImagePCXModule.selfRegister();
-  g_ImageDDSModule.selfRegister();
+	g_ImageTGAModule.selfRegister();
+	g_ImageJPGModule.selfRegister();
+	g_ImageBMPModule.selfRegister();
+	g_ImagePCXModule.selfRegister();
+	g_ImageDDSModule.selfRegister();
 }

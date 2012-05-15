@@ -4,4 +4,4 @@
 
 class DWinding;
 
-std::list<DWinding*> *BuildTrace(char* filename, vec3_t v_origin);
+std::list<DWinding*> *BuildTrace( char* filename, vec3_t v_origin );

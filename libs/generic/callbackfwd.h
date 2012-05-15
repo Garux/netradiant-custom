@@ -1,5 +1,5 @@
 
-#if !defined(INCLUDED_CALLBACKFWD_H)
+#if !defined( INCLUDED_CALLBACKFWD_H )
 #define INCLUDED_CALLBACKFWD_H
 
 template<typename Return>
