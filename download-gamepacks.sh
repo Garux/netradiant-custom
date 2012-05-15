@@ -154,9 +154,9 @@ pack OsirionPack     GPL         zip1   http://ingar.satgnu.net/files/gtkradiant
 pack Q3Pack          proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
 pack Quake2Pack      proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/Quake2Pack.zip
 pack Quake2WorldPack GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
-pack QuakePack       proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/QuakePack.zip
+pack QuakePack       GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/QuakePack.zip
 pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
 pack UFOAIPack       proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
 #pack WarsowPack     GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
 pack WarsowPack      GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/WarsowPack.zip
-pack XonoticPack     GPL         git    git://git.xonotic.org/xonotic/netradiant-xonoticpack.git
+pack XonoticPack     GPL         git    http://git.xonotic.org/xonotic/netradiant-xonoticpack.git

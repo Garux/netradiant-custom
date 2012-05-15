@@ -1,21 +1,21 @@
 /*
-BobToolz plugin for GtkRadiant
-Copyright (C) 2001 Gordon Biggans
+   BobToolz plugin for GtkRadiant
+   Copyright (C) 2001 Gordon Biggans
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include "funchandlers.h"
 
@@ -57,32 +57,33 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "scenelib.h"
 
 // for autocaulk
-std::list<Str> exclusionList;		// whole brush exclusion
-std::list<Str> exclusionList_Face;	// single face exclusion
+std::list<Str> exclusionList;       // whole brush exclusion
+std::list<Str> exclusionList_Face;  // single face exclusion
 
-bool el1Loaded =		false;
-bool el2Loaded =		false;
-bool clrLst1Loaded =	false;
-bool clrLst2Loaded =	false;
+bool el1Loaded =        false;
+bool el2Loaded =        false;
+bool clrLst1Loaded =    false;
+bool clrLst2Loaded =    false;
 
-DBobView*		g_PathView =		NULL;
-DVisDrawer*		g_VisView =			NULL;
-DTrainDrawer*	g_TrainView =		NULL;
-DTreePlanter*	g_TreePlanter =		NULL;
+DBobView*       g_PathView =        NULL;
+DVisDrawer*     g_VisView =         NULL;
+DTrainDrawer*   g_TrainView =       NULL;
+DTreePlanter*   g_TreePlanter =     NULL;
 // -------------
 
 //========================//
 //    Helper Functions    //
 //========================//
 
-void LoadLists()
-{
+void LoadLists(){
 	char buffer[256];
 
-	if(!el1Loaded)
-		el1Loaded = LoadExclusionList(GetFilename(buffer, "bt/bt-el1.txt"), &exclusionList);
-	if(!el2Loaded)
-		el2Loaded = LoadExclusionList(GetFilename(buffer, "bt/bt-el2.txt"), &exclusionList_Face);
+	if ( !el1Loaded ) {
+		el1Loaded = LoadExclusionList( GetFilename( buffer, "bt/bt-el1.txt" ), &exclusionList );
+	}
+	if ( !el2Loaded ) {
+		el2Loaded = LoadExclusionList( GetFilename( buffer, "bt/bt-el2.txt" ), &exclusionList_Face );
+	}
 }
 
 
@@ -90,100 +91,99 @@ void LoadLists()
 //     Main Functions     //
 //========================//
 
-void DoIntersect()
-{
-  UndoableCommand undo("bobToolz.intersect");
+void DoIntersect(){
+	UndoableCommand undo( "bobToolz.intersect" );
 	IntersectRS rs;
 
-	if(DoIntersectBox(&rs) == eIDCANCEL)
+	if ( DoIntersectBox( &rs ) == eIDCANCEL ) {
 		return;
+	}
 
-	if(rs.nBrushOptions == BRUSH_OPT_SELECTED)
-	{
-		if( GlobalSelectionSystem().countSelected() < 2 )
-		{
+	if ( rs.nBrushOptions == BRUSH_OPT_SELECTED ) {
+		if ( GlobalSelectionSystem().countSelected() < 2 ) {
 			//DoMessageBox("Invalid number of brushes selected, choose at least 2", "Error", eMB_OK);
 			globalErrorStream() << "bobToolz Intersect: Invalid number of brushes selected, choose at least 2.\n";
-			return; 
+			return;
 		}
 	}
 
 	DEntity world;
-	switch(rs.nBrushOptions)
+	switch ( rs.nBrushOptions )
 	{
 	case BRUSH_OPT_SELECTED:
-		{
-			
-			world.LoadFromEntity(GlobalRadiant().getMapWorldEntity(), false);
-			world.LoadSelectedBrushes();
-			break;
-		}
-	case BRUSH_OPT_WHOLE_MAP:
-		{
-			world.LoadFromEntity(GlobalRadiant().getMapWorldEntity(), false);
-			break;
-		}
+	{
+
+		world.LoadFromEntity( GlobalRadiant().getMapWorldEntity(), false );
+		world.LoadSelectedBrushes();
+		break;
 	}
-	world.RemoveNonCheckBrushes(&exclusionList, rs.bUseDetail);
+	case BRUSH_OPT_WHOLE_MAP:
+	{
+		world.LoadFromEntity( GlobalRadiant().getMapWorldEntity(), false );
+		break;
+	}
+	}
+	world.RemoveNonCheckBrushes( &exclusionList, rs.bUseDetail );
 
 	bool* pbSelectList;
-	if(rs.bDuplicateOnly)
+	if ( rs.bDuplicateOnly ) {
 		pbSelectList = world.BuildDuplicateList();
-	else
+	}
+	else{
 		pbSelectList = world.BuildIntersectList();
+	}
 
-	world.SelectBrushes(pbSelectList);
+	world.SelectBrushes( pbSelectList );
 	int brushCount = GlobalSelectionSystem().countSelected();
 	globalOutputStream() << "bobToolz Intersect: " << brushCount << " intersecting brushes found.\n";
 	delete[] pbSelectList;
 }
 
-void DoPolygonsTB()
-{
-  DoPolygons();
+void DoPolygonsTB(){
+	DoPolygons();
 }
 
-void DoPolygons()
-{
-  UndoableCommand undo("bobToolz.polygons");
+void DoPolygons(){
+	UndoableCommand undo( "bobToolz.polygons" );
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of brushes selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz Polygons: Invalid number of brushes selected, choose 1 only.\n";
-		return; 
+		return;
 	}
 
 	PolygonRS rs;
 	scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
-	if( !Node_isBrush(instance.path().top()) ) {
+	if ( !Node_isBrush( instance.path().top() ) ) {
 		//DoMessageBox("No brush selected, select ONLY one brush", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz Polygons: No brush selected, select ONLY one brush.\n";
-		return; 
+		return;
 	}
 	// ask user for type, size, etc....
-	if(DoPolygonBox(&rs) == eIDOK)
-	{
+	if ( DoPolygonBox( &rs ) == eIDOK ) {
 		DShape poly;
 
-    vec3_t vMin, vMax;
+		vec3_t vMin, vMax;
 
-    {
+		{
 
-      VectorSubtract(instance.worldAABB().origin, instance.worldAABB().extents, vMin);
-      VectorAdd(instance.worldAABB().origin, instance.worldAABB().extents, vMax);
+			VectorSubtract( instance.worldAABB().origin, instance.worldAABB().extents, vMin );
+			VectorAdd( instance.worldAABB().origin, instance.worldAABB().extents, vMax );
 
-      Path_deleteTop(instance.path());
-    }
+			Path_deleteTop( instance.path() );
+		}
 
-		if(rs.bInverse)
-			poly.BuildInversePrism(vMin, vMax, rs.nSides, rs.bAlignTop);
+		if ( rs.bInverse ) {
+			poly.BuildInversePrism( vMin, vMax, rs.nSides, rs.bAlignTop );
+		}
 		else
 		{
-			if(rs.bUseBorder)
-				poly.BuildBorderedPrism(vMin, vMax, rs.nSides, rs.nBorderWidth, rs.bAlignTop);
-			else
-				poly.BuildRegularPrism(vMin, vMax, rs.nSides, rs.bAlignTop);
+			if ( rs.bUseBorder ) {
+				poly.BuildBorderedPrism( vMin, vMax, rs.nSides, rs.nBorderWidth, rs.bAlignTop );
+			}
+			else{
+				poly.BuildRegularPrism( vMin, vMax, rs.nSides, rs.bAlignTop );
+			}
 
 		}
 
@@ -191,105 +191,98 @@ void DoPolygons()
 	}
 }
 
-void DoFixBrushes()
-{
-  UndoableCommand undo("bobToolz.fixBrushes");
+void DoFixBrushes(){
+	UndoableCommand undo( "bobToolz.fixBrushes" );
 	DMap world;
 	world.LoadAll();
 
 	int count = world.FixBrushes();
-	
+
 	globalOutputStream() << "bobToolz FixBrushes: " << count << " invalid/duplicate planes removed.\n";
 }
 
-void DoResetTextures()
-{
-  UndoableCommand undo("bobToolz.resetTextures");
+void DoResetTextures(){
+	UndoableCommand undo( "bobToolz.resetTextures" );
 	static ResetTextureRS rs;
 
-  const char* texName;
-	if(1/*g_SelectedFaceTable.m_pfnGetSelectedFaceCount() != 1*/)
-  {
-    texName = NULL;
-  }
-  else
-  {
-    texName = GetCurrentTexture();
-	  strcpy(rs.textureName, GetCurrentTexture());
-  }
+	const char* texName;
+	if ( 1 /*g_SelectedFaceTable.m_pfnGetSelectedFaceCount() != 1*/ ) {
+		texName = NULL;
+	}
+	else
+	{
+		texName = GetCurrentTexture();
+		strcpy( rs.textureName, GetCurrentTexture() );
+	}
 
-  EMessageBoxReturn ret;
-	if((ret = DoResetTextureBox(&rs)) == eIDCANCEL)
-		return;  
+	EMessageBoxReturn ret;
+	if ( ( ret = DoResetTextureBox( &rs ) ) == eIDCANCEL ) {
+		return;
+	}
 
-  if(rs.bResetTextureName)
-    texName = rs.textureName;
+	if ( rs.bResetTextureName ) {
+		texName = rs.textureName;
+	}
 
-  if(ret == eIDOK)
-  {
-	  DEntity world;
-	  world.LoadSelectedBrushes();
-	  world.ResetTextures(texName,              rs.fScale,      rs.fShift,      rs.rotation, rs.newTextureName, 
-                        rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation, true);
-  }
-  else
-  {
-	  DMap world;
-    world.LoadAll(true);
-    world.ResetTextures(texName,              rs.fScale,      rs.fShift,      rs.rotation, rs.newTextureName, 
-                        rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation);
-  }
+	if ( ret == eIDOK ) {
+		DEntity world;
+		world.LoadSelectedBrushes();
+		world.ResetTextures( texName,              rs.fScale,      rs.fShift,      rs.rotation, rs.newTextureName,
+							 rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation, true );
+	}
+	else
+	{
+		DMap world;
+		world.LoadAll( true );
+		world.ResetTextures( texName,              rs.fScale,      rs.fShift,      rs.rotation, rs.newTextureName,
+							 rs.bResetTextureName, rs.bResetScale, rs.bResetShift, rs.bResetRotation );
+	}
 }
 
-void DoBuildStairs()
-{
-  UndoableCommand undo("bobToolz.buildStairs");
+void DoBuildStairs(){
+	UndoableCommand undo( "bobToolz.buildStairs" );
 	BuildStairsRS rs;
 
-	strcpy(rs.mainTexture, GetCurrentTexture());
+	strcpy( rs.mainTexture, GetCurrentTexture() );
 
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of brushes selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz BuildStairs: Invalid number of brushes selected, choose 1 only.\n";
-		return; 
+		return;
 	}
 
 	// ask user for type, size, etc....
-	if(DoBuildStairsBox(&rs) == eIDOK)
-	{
-    vec3_t vMin, vMax;
+	if ( DoBuildStairsBox( &rs ) == eIDOK ) {
+		vec3_t vMin, vMax;
 
-    {
-      scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
-      VectorSubtract(instance.worldAABB().origin, instance.worldAABB().extents, vMin);
-      VectorAdd(instance.worldAABB().origin, instance.worldAABB().extents, vMax);
-    }
+		{
+			scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+			VectorSubtract( instance.worldAABB().origin, instance.worldAABB().extents, vMin );
+			VectorAdd( instance.worldAABB().origin, instance.worldAABB().extents, vMax );
+		}
 
 		// calc brush size
 		vec3_t size;
-		VectorSubtract(vMax, vMin, size);
+		VectorSubtract( vMax, vMin, size );
 
-		if(((int)size[2] % rs.stairHeight) != 0)
-		{
+		if ( ( (int)size[2] % rs.stairHeight ) != 0 ) {
 			// stairs must fit evenly into brush
 			//DoMessageBox("Invalid stair height\nHeight of block must be divisable by stair height", "Error", eMB_OK);
 			globalErrorStream() << "bobToolz BuildStairs: Invalid stair height. Height of block must be divisable by stair height.\n";
 		}
 		else
 		{
-      {
-        scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
-        Path_deleteTop(instance.path());
-      }
-						
+			{
+				scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+				Path_deleteTop( instance.path() );
+			}
+
 			// Get Step Count
 			int numSteps = (int)size[2] / rs.stairHeight;
-			
-			if(rs.style == STYLE_CORNER)
-			{
-				BuildCornerStairs(vMin, vMax, numSteps, rs.mainTexture, rs.riserTexture);
+
+			if ( rs.style == STYLE_CORNER ) {
+				BuildCornerStairs( vMin, vMax, numSteps, rs.mainTexture, rs.riserTexture );
 			}
 			else
 			{
@@ -297,136 +290,135 @@ void DoBuildStairs()
 				// Get Step Dimensions
 				float stairHeight = (float)rs.stairHeight;
 				float stairWidth;
-				if((rs.direction == MOVE_EAST) || (rs.direction == MOVE_WEST))
-					stairWidth = (size[0])/numSteps;
-				else
-					stairWidth = (size[1])/numSteps;
+				if ( ( rs.direction == MOVE_EAST ) || ( rs.direction == MOVE_WEST ) ) {
+					stairWidth = ( size[0] ) / numSteps;
+				}
+				else{
+					stairWidth = ( size[1] ) / numSteps;
+				}
 
 
 				// Build Base For Stair (bob's style)
-				if(rs.style == STYLE_BOB)
-					Build_Wedge(rs.direction, vMin, vMax, true);
+				if ( rs.style == STYLE_BOB ) {
+					Build_Wedge( rs.direction, vMin, vMax, true );
+				}
 
 
 				// Set First Step Starting Position
 				vMax[2] = vMin[2] + stairHeight;
-				SetInitialStairPos(rs.direction, vMin, vMax, stairWidth);
+				SetInitialStairPos( rs.direction, vMin, vMax, stairWidth );
 
 
 				// Build The Steps
-				for(int i = 0; i < numSteps; i++)
+				for ( int i = 0; i < numSteps; i++ )
 				{
-					if(rs.style == STYLE_BOB)
-						Build_StairStep_Wedge(rs.direction, vMin, vMax, rs.mainTexture, rs.riserTexture, rs.bUseDetail);
-					else if(rs.style == STYLE_ORIGINAL)
-						Build_StairStep(vMin, vMax, rs.mainTexture, rs.riserTexture, rs.direction);
+					if ( rs.style == STYLE_BOB ) {
+						Build_StairStep_Wedge( rs.direction, vMin, vMax, rs.mainTexture, rs.riserTexture, rs.bUseDetail );
+					}
+					else if ( rs.style == STYLE_ORIGINAL ) {
+						Build_StairStep( vMin, vMax, rs.mainTexture, rs.riserTexture, rs.direction );
+					}
 
 					// get step into next position
-					MoveBlock(rs.direction, vMin, vMax, stairWidth);
+					MoveBlock( rs.direction, vMin, vMax, stairWidth );
 					vMax[2] += stairHeight;
-					if(rs.style == STYLE_BOB)
-						vMin[2] += stairHeight;	// wedge bottom must be raised
+					if ( rs.style == STYLE_BOB ) {
+						vMin[2] += stairHeight; // wedge bottom must be raised
+					}
 				}
 			}
 		}
 	}
 }
 
-void DoBuildDoors()
-{
-  UndoableCommand undo("bobToolz.buildDoors");
+void DoBuildDoors(){
+	UndoableCommand undo( "bobToolz.buildDoors" );
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of brushes selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz BuildDoors: Invalid number of brushes selected, choose 1 only.\n";
-		return; 
+		return;
 	}
 
-  DoorRS rs;
-	strcpy(rs.mainTexture, GetCurrentTexture());
+	DoorRS rs;
+	strcpy( rs.mainTexture, GetCurrentTexture() );
 
-	if(DoDoorsBox(&rs) == eIDOK)
-	{
-    vec3_t vMin, vMax;
+	if ( DoDoorsBox( &rs ) == eIDOK ) {
+		vec3_t vMin, vMax;
 
-    {
-      scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
-      VectorSubtract(instance.worldAABB().origin, instance.worldAABB().extents, vMin);
-      VectorAdd(instance.worldAABB().origin, instance.worldAABB().extents, vMax);
-      Path_deleteTop(instance.path());
-    }
+		{
+			scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+			VectorSubtract( instance.worldAABB().origin, instance.worldAABB().extents, vMin );
+			VectorAdd( instance.worldAABB().origin, instance.worldAABB().extents, vMax );
+			Path_deleteTop( instance.path() );
+		}
 
-		BuildDoorsX2(vMin, vMax, 
-			rs.bScaleMainH, rs.bScaleMainV,
-			rs.bScaleTrimH, rs.bScaleTrimV,
-			rs.mainTexture, rs.trimTexture,
-			rs.nOrientation);	// shapes.cpp
+		BuildDoorsX2( vMin, vMax,
+					  rs.bScaleMainH, rs.bScaleMainV,
+					  rs.bScaleTrimH, rs.bScaleTrimV,
+					  rs.mainTexture, rs.trimTexture,
+					  rs.nOrientation ); // shapes.cpp
 	}
 }
 
-void DoPathPlotter()
-{
-  UndoableCommand undo("bobToolz.pathPlotter");
+void DoPathPlotter(){
+	UndoableCommand undo( "bobToolz.pathPlotter" );
 	PathPlotterRS rs;
-	EMessageBoxReturn ret = DoPathPlotterBox(&rs);
-	if(ret == eIDCANCEL)
+	EMessageBoxReturn ret = DoPathPlotterBox( &rs );
+	if ( ret == eIDCANCEL ) {
 		return;
-	if(ret == eIDNO)
-	{
-		if(g_PathView)
+	}
+	if ( ret == eIDNO ) {
+		if ( g_PathView ) {
 			delete g_PathView;
+		}
 		return;
 	}
 
 	// ensure we have something selected
 	/*
-	 if( GlobalSelectionSystem().countSelected() != 1 )
-	{
-		//DoMessageBox("Invalid number of brushes selected, choose 1 only", "Error", eMB_OK);
-		globalOutputStream() << "bobToolz PathPlotter: Invalid number of entities selected, choose 1 trigger_push entity only.\n";
-		return; 
-	}
+	   if( GlobalSelectionSystem().countSelected() != 1 )
+	   {
+	    //DoMessageBox("Invalid number of brushes selected, choose 1 only", "Error", eMB_OK);
+	    globalOutputStream() << "bobToolz PathPlotter: Invalid number of entities selected, choose 1 trigger_push entity only.\n";
+	    return;
+	   }
 	 */
-  Entity* entity = Node_getEntity(GlobalSelectionSystem().ultimateSelected().path().top());
-  if(entity != 0)
-  {
-    DBobView_setEntity(*entity, rs.fMultiplier, rs.nPoints, rs.fGravity, rs.bNoUpdate, rs.bShowExtra);
-  } 
-  else globalErrorStream() << "bobToolz PathPlotter: No trigger_push entitity selected, select 1 only (Use list to select it).\n";
+	Entity* entity = Node_getEntity( GlobalSelectionSystem().ultimateSelected().path().top() );
+	if ( entity != 0 ) {
+		DBobView_setEntity( *entity, rs.fMultiplier, rs.nPoints, rs.fGravity, rs.bNoUpdate, rs.bShowExtra );
+	}
+	else{ globalErrorStream() << "bobToolz PathPlotter: No trigger_push entitity selected, select 1 only (Use list to select it).\n"; }
 	return;
 }
 
-void DoPitBuilder()
-{
-	UndoableCommand undo("bobToolz.pitBuilder");
+void DoPitBuilder(){
+	UndoableCommand undo( "bobToolz.pitBuilder" );
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of brushes selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz PitBuilder: Invalid number of brushes selected, choose 1 only.\n";
-		return; 
+		return;
 	}
 
 	vec3_t vMin, vMax;
 
 	scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
 	//seems it does this also with a patch with valid dimensions.. but probably better to enforce a brush.
-	if( !Node_isBrush(instance.path().top()) ) {
+	if ( !Node_isBrush( instance.path().top() ) ) {
 		//DoMessageBox("No brush selected, select ONLY one brush", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz PitBuilder: No brush selected, select ONLY 1 brush.\n";
-		return; 
+		return;
 	}
-	
-	VectorSubtract(instance.worldAABB().origin, instance.worldAABB().extents, vMin);
-	VectorAdd(instance.worldAABB().origin, instance.worldAABB().extents, vMax);
+
+	VectorSubtract( instance.worldAABB().origin, instance.worldAABB().extents, vMin );
+	VectorAdd( instance.worldAABB().origin, instance.worldAABB().extents, vMax );
 
 	DShape pit;
 
-	if(pit.BuildPit(vMin, vMax))
-	{
+	if ( pit.BuildPit( vMin, vMax ) ) {
 		pit.Commit();
-		Path_deleteTop(instance.path());
+		Path_deleteTop( instance.path() );
 	}
 	else
 	{
@@ -435,65 +427,61 @@ void DoPitBuilder()
 	}
 }
 
-void DoMergePatches()
-{
-	UndoableCommand undo("bobToolz.mergePatches");
+void DoMergePatches(){
+	UndoableCommand undo( "bobToolz.mergePatches" );
 	patch_merge_t merge_info;
 	DPatch mrgPatches[2];
 	int i;
 
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 2 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 2 ) {
 		globalErrorStream() << "bobToolz MergePatches: Invalid number of patches selected, choose 2 only.\n";
 		//DoMessageBox("Invalid number of patches selected, choose 2 only", "Error", eMB_OK);
-		return; 
+		return;
 	}
 
 	scene::Instance* patches[2];
 	patches[0] = &GlobalSelectionSystem().ultimateSelected();
 	patches[1] = &GlobalSelectionSystem().penultimateSelected();
 
-	for (i = 0; i < 2; i++)
+	for ( i = 0; i < 2; i++ )
 	{
-		if (!Node_isPatch(patches[i]->path().top()))
-		{
+		if ( !Node_isPatch( patches[i]->path().top() ) ) {
 			//DoMessageBox("No patches selected, select ONLY patches", "Error", eMB_OK);
 			globalErrorStream() << "bobToolz MergePatches: Invalid number of patches selected, choose ONLY 2 patches.\n";
-			return; 
+			return;
 		}
 
-		mrgPatches[i].LoadFromPatch(*patches[i]);
+		mrgPatches[i].LoadFromPatch( *patches[i] );
 	}
 
-  /*  mrgPatches[0].Transpose();
-      mrgPatches[0].RemoveFromRadiant();
-      mrgPatches[0].BuildInRadiant();*/
+	/*  mrgPatches[0].Transpose();
+	    mrgPatches[0].RemoveFromRadiant();
+	    mrgPatches[0].BuildInRadiant();*/
 
-	merge_info = mrgPatches[0].IsMergable(&mrgPatches[1]);
+	merge_info = mrgPatches[0].IsMergable( &mrgPatches[1] );
 
-	if (merge_info.mergable)
-	{
+	if ( merge_info.mergable ) {
 		globalOutputStream() << merge_info.pos1 << " " <<  merge_info.pos2;
 		//Message removed, No tools give feedback on success.
 		//globalOutputStream() << "bobToolz MergePatches: Patches Mergable.\n";
-		DPatch* newPatch = mrgPatches[0].MergePatches(merge_info, &mrgPatches[0], &mrgPatches[1]);
+		DPatch* newPatch = mrgPatches[0].MergePatches( merge_info, &mrgPatches[0], &mrgPatches[1] );
 
-    /*                mrgPatches[0].RemoveFromRadiant();
-    mrgPatches[0].BuildInRadiant();
-    
-      mrgPatches[1].RemoveFromRadiant();
-      mrgPatches[1].BuildInRadiant();
-      
-        
-    delete newPatch;*/
+		/*                mrgPatches[0].RemoveFromRadiant();
+		   mrgPatches[0].BuildInRadiant();
 
-		if (!newPatch)
+		   mrgPatches[1].RemoveFromRadiant();
+		   mrgPatches[1].BuildInRadiant();
+
+
+		   delete newPatch;*/
+
+		if ( !newPatch ) {
+		}
+		else
 		{
-		} else
-		{
-			Path_deleteTop(patches[0]->path());
-			Path_deleteTop(patches[1]->path());
+			Path_deleteTop( patches[0]->path() );
+			Path_deleteTop( patches[1]->path() );
 
 			newPatch->BuildInRadiant();
 			delete newPatch;
@@ -502,167 +490,158 @@ void DoMergePatches()
 	else
 	{
 		globalErrorStream() << "bobToolz.mergePatch: The selected patches are not mergable.\n";
-		
+
 	}
 }
 
 void DoSplitPatch() {
-  UndoableCommand undo("bobToolz.splitPatch");
+	UndoableCommand undo( "bobToolz.splitPatch" );
 
 	DPatch patch;
 
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of patches selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz SplitPatch: Invalid number of patches selected, choose only 1 patch.\n";
-		return; 
+		return;
 	}
 
-  scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
+	scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
 
-	if( !Node_isPatch(instance.path().top()) ) {
+	if ( !Node_isPatch( instance.path().top() ) ) {
 		//DoMessageBox("No patch selected, select ONLY one patch", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz SplitPatch: No patch selected, select ONLY 1 patch.\n";
-		return; 
+		return;
 	}
 
-	patch.LoadFromPatch(instance);
+	patch.LoadFromPatch( instance );
 
 	std::list<DPatch> patchList = patch.Split();
-	for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++) {
-		(*patches).BuildInRadiant();
+	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
+		( *patches ).BuildInRadiant();
 	}
 
-	Path_deleteTop(instance.path());
+	Path_deleteTop( instance.path() );
 }
 
 void DoSplitPatchCols() {
-	UndoableCommand undo("bobToolz.splitPatchCols");
-	
+	UndoableCommand undo( "bobToolz.splitPatchCols" );
+
 	DPatch patch;
-	
+
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of patches selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz SplitPatchCols: Invalid number of patches selected, choose 1 only.\n";
-		return; 
+		return;
 	}
-	
+
 	scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
-	
-	if( !Node_isPatch(instance.path().top()) ) {
+
+	if ( !Node_isPatch( instance.path().top() ) ) {
 		//DoMessageBox("No patch selected, select ONLY one patch", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz SplitPatchCols: No patch selected, select ONLY 1 patch.\n";
-		return; 
+		return;
 	}
-	
-	patch.LoadFromPatch(instance);
-	
+
+	patch.LoadFromPatch( instance );
+
 	std::list<DPatch> patchList = patch.SplitCols();
-	for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++) {
-		(*patches).BuildInRadiant();
+	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
+		( *patches ).BuildInRadiant();
 	}
-	
-	Path_deleteTop(instance.path());
+
+	Path_deleteTop( instance.path() );
 }
 
 void DoSplitPatchRows() {
-	UndoableCommand undo("bobToolz.splitPatchRows");
-	
+	UndoableCommand undo( "bobToolz.splitPatchRows" );
+
 	DPatch patch;
-	
+
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of patches selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz SplitPatchRows: Invalid number of patches selected, choose 1 only.\n";
-		return; 
+		return;
 	}
-	
+
 	scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
-	
-	if( !Node_isPatch(instance.path().top()) ) {
+
+	if ( !Node_isPatch( instance.path().top() ) ) {
 		//DoMessageBox("No patch selected, select ONLY one patch", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz SplitPatchRows: No patch selected, select ONLY 1 patch.\n";
-		return; 
+		return;
 	}
-	
-	patch.LoadFromPatch(instance);
-	
+
+	patch.LoadFromPatch( instance );
+
 	std::list<DPatch> patchList = patch.SplitRows();
-	for(std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++) {
-		(*patches).BuildInRadiant();
+	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
+		( *patches ).BuildInRadiant();
 	}
-	
-	Path_deleteTop(instance.path());
+
+	Path_deleteTop( instance.path() );
 }
 
-void DoVisAnalyse()
-{
+void DoVisAnalyse(){
 	char filename[1024];
 
-	if( GlobalSelectionSystem().countSelected() == 0 )
-	{
+	if ( GlobalSelectionSystem().countSelected() == 0 ) {
 		globalErrorStream() << "bobToolz VisAnalyse: Invalid number of objects selected, choose 1 only.\n";
-		if(g_VisView) 
-		{
+		if ( g_VisView ) {
 			delete g_VisView;
 			return;
 		}
 	}
 
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 1 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 1 ) {
 		//DoMessageBox("Invalid number of objects selected, choose 1 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz VisAnalyse: Invalid number of objects selected, choose 1 only.\n";
-		return; 
+		return;
 	}
-	
+
 	scene::Instance& brush = GlobalSelectionSystem().ultimateSelected();
 	//ensure we have a brush selected
-	if( !Node_isBrush(brush.path().top()) ) {
+	if ( !Node_isBrush( brush.path().top() ) ) {
 		//DoMessageBox("No brush selected, select ONLY one brush", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz VisAnalyse: No brush selected, select ONLY 1 brush.\n";
-		return; 
+		return;
 	}
 	DBrush orgBrush;
-	orgBrush.LoadFromBrush(brush, false);
+	orgBrush.LoadFromBrush( brush, false );
 
 	orgBrush.BuildBounds();
 	vec3_t origin;
-	origin[0] = (orgBrush.bbox_max[0] + orgBrush.bbox_min[0])/2.f;
-	origin[1] = (orgBrush.bbox_max[1] + orgBrush.bbox_min[1])/2.f;
-	origin[2] = (orgBrush.bbox_max[2] + orgBrush.bbox_min[2])/2.f;
+	origin[0] = ( orgBrush.bbox_max[0] + orgBrush.bbox_min[0] ) / 2.f;
+	origin[1] = ( orgBrush.bbox_max[1] + orgBrush.bbox_min[1] ) / 2.f;
+	origin[2] = ( orgBrush.bbox_max[2] + orgBrush.bbox_min[2] ) / 2.f;
 
 
-  const char* rad_filename = GlobalRadiant().getMapName();
-	if(!rad_filename)
-	{
+	const char* rad_filename = GlobalRadiant().getMapName();
+	if ( !rad_filename ) {
 		//DoMessageBox("An ERROR occurred while trying\n to get the map filename", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz VisAnalyse: An ERROR occurred while trying to get the map filename.\n";
 		return;
 	}
 
-	strcpy(filename, rad_filename);
-		
-	char* ext = strrchr(filename, '.')+1;
-	strcpy(ext, "bsp");// rename the extension
+	strcpy( filename, rad_filename );
 
-	std::list<DWinding*> *pointList = BuildTrace(filename, origin);
+	char* ext = strrchr( filename, '.' ) + 1;
+	strcpy( ext, "bsp" ); // rename the extension
 
-	if(!g_VisView)
-	{
+	std::list<DWinding*> *pointList = BuildTrace( filename, origin );
+
+	if ( !g_VisView ) {
 		g_VisView = new DVisDrawer;
 	}
-	
-	g_VisView->SetList(pointList);
+
+	g_VisView->SetList( pointList );
 }
 
 void DoTrainPathPlot() {
-	if(g_TrainView) {
+	if ( g_TrainView ) {
 		delete g_TrainView;
 		g_TrainView = NULL;
 	}
@@ -671,9 +650,9 @@ void DoTrainPathPlot() {
 }
 
 void DoCaulkSelection() {
-  UndoableCommand undo("bobToolz.caulkSelection");
+	UndoableCommand undo( "bobToolz.caulkSelection" );
 	DEntity world;
-	
+
 	float fScale[2] = { 0.5f, 0.5f };
 	float fShift[2] = { 0.0f, 0.0f };
 
@@ -686,8 +665,8 @@ void DoCaulkSelection() {
 }
 
 void DoTreePlanter() {
-  UndoableCommand undo("bobToolz.treePlanter");
-	if(g_TreePlanter) {
+	UndoableCommand undo( "bobToolz.treePlanter" );
+	if ( g_TreePlanter ) {
 		delete g_TreePlanter;
 		g_TreePlanter = NULL;
 		return;
@@ -697,23 +676,22 @@ void DoTreePlanter() {
 }
 
 void DoDropEnts() {
-  UndoableCommand undo("bobToolz.dropEntities");
-	if(g_TreePlanter) {
+	UndoableCommand undo( "bobToolz.dropEntities" );
+	if ( g_TreePlanter ) {
 		g_TreePlanter->DropEntsToGround();
 	}
 }
 
 void DoMakeChain() {
 	MakeChainRS rs;
-	if(DoMakeChainBox(&rs) == eIDOK)
-	{
+	if ( DoMakeChainBox( &rs ) == eIDOK ) {
 		if ( rs.linkNum > 1001 ) {
 			globalErrorStream() << "bobToolz MakeChain: " << rs.linkNum << " to many Elemets, limited to 1000.\n";
 			return;
 		}
-		UndoableCommand undo("bobToolz.makeChain");
+		UndoableCommand undo( "bobToolz.makeChain" );
 		DTreePlanter pl;
-		pl.MakeChain(rs.linkNum,rs.linkName);
+		pl.MakeChain( rs.linkNum,rs.linkName );
 	}
 }
 
@@ -722,36 +700,35 @@ typedef DPoint* pntTripple[3];
 bool bFacesNoTop[6] = {true, true, true, true, true, false};
 
 void DoFlipTerrain() {
-  UndoableCommand undo("bobToolz.flipTerrain");
+	UndoableCommand undo( "bobToolz.flipTerrain" );
 	vec3_t vUp = { 0.f, 0.f, 1.f };
-  int i;
+	int i;
 
 	// ensure we have something selected
-	if( GlobalSelectionSystem().countSelected() != 2 )
-	{
+	if ( GlobalSelectionSystem().countSelected() != 2 ) {
 		//DoMessageBox("Invalid number of objects selected, choose 2 only", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz FlipTerrain: Invalid number of objects selected, choose 2 only.\n";
-		return; 
+		return;
 	}
 
-  scene::Instance* brushes[2];
+	scene::Instance* brushes[2];
 	brushes[0] = &GlobalSelectionSystem().ultimateSelected();
 	brushes[1] = &GlobalSelectionSystem().penultimateSelected();
 	//ensure we have only Brushes selected.
-	for (i = 0; i < 2; i++)
+	for ( i = 0; i < 2; i++ )
 	{
-		if( !Node_isBrush(brushes[i]->path().top()) ) {
+		if ( !Node_isBrush( brushes[i]->path().top() ) ) {
 			//DoMessageBox("No brushes selected, select ONLY brushes", "Error", eMB_OK);
 			globalErrorStream() << "bobToolz FlipTerrain: No brushes selected, select ONLY 2 brushes.\n";
-			return; 
+			return;
 		}
 	}
 	DBrush Brushes[2];
 	DPlane* Planes[2];
 	pntTripple Points[2];
-	for( i = 0; i < 2; i++ ) {
+	for ( i = 0; i < 2; i++ ) {
 		Brushes[i].LoadFromBrush( *brushes[i], false );
-		if(!(Planes[i] = Brushes[i].FindPlaneWithClosestNormal( vUp )) || Brushes[i].FindPointsForPlane( Planes[i], Points[i], 3 ) != 3) {
+		if ( !( Planes[i] = Brushes[i].FindPlaneWithClosestNormal( vUp ) ) || Brushes[i].FindPointsForPlane( Planes[i], Points[i], 3 ) != 3 ) {
 			//DoMessageBox("Error", "Error", eMB_OK);
 			globalErrorStream() << "bobToolz FlipTerrain: ERROR (FindPlaneWithClosestNormal/FindPointsForPlane).\n";
 			return;
@@ -766,39 +743,39 @@ void DoFlipTerrain() {
 
 	int dontmatch[2] = { -1, -1 };
 	bool found = false;
-	for( i = 0; i < 3; i++ ) {
-		for( int j = 0; j < 3 && !found; j++ ) {
-			if(VectorCompare( (Points[0])[i]->_pnt, (Points[1])[j]->_pnt )) {
+	for ( i = 0; i < 3; i++ ) {
+		for ( int j = 0; j < 3 && !found; j++ ) {
+			if ( VectorCompare( ( Points[0] )[i]->_pnt, ( Points[1] )[j]->_pnt ) ) {
 				found = true;
 				break;
 			}
 		}
-		if(!found) {
+		if ( !found ) {
 			dontmatch[0] = i;
 			break;
 		}
 		found = false;
 	}
-	if(dontmatch[0] == -1) {
+	if ( dontmatch[0] == -1 ) {
 		//DoMessageBox("Error", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz FlipTerrain: ERROR (dontmatch[0]).\n";
 		return;
 	}
 
-	for( i = 0; i < 3; i++ ) {
-		for( int j = 0; j < 3 && !found; j++ ) {
-			if(VectorCompare( (Points[1])[i]->_pnt, (Points[0])[j]->_pnt )) {
+	for ( i = 0; i < 3; i++ ) {
+		for ( int j = 0; j < 3 && !found; j++ ) {
+			if ( VectorCompare( ( Points[1] )[i]->_pnt, ( Points[0] )[j]->_pnt ) ) {
 				found = true;
 				break;
 			}
 		}
-		if(!found) {
+		if ( !found ) {
 			dontmatch[1] = i;
 			break;
 		}
 		found = false;
 	}
-	if(dontmatch[1] == -1) {
+	if ( dontmatch[1] == -1 ) {
 		//DoMessageBox("Error", "Error", eMB_OK);
 		globalErrorStream() << "bobToolz FlipTerrain: ERROR (dontmatch[1]).\n";
 		return;
@@ -808,82 +785,87 @@ void DoFlipTerrain() {
 	vec3_t plnpnts2[3];
 	vec3_t plnpntsshr[3];
 
-	VectorCopy( (Points[0])[dontmatch[0]]->_pnt, plnpnts1[0] );
-	for( i = 0; i < 3; i++ ) {
-		if( dontmatch[0] != i ) {
-			VectorCopy( (Points[0])[i]->_pnt, plnpnts1[1] );
+	VectorCopy( ( Points[0] )[dontmatch[0]]->_pnt, plnpnts1[0] );
+	for ( i = 0; i < 3; i++ ) {
+		if ( dontmatch[0] != i ) {
+			VectorCopy( ( Points[0] )[i]->_pnt, plnpnts1[1] );
 			break;
 		}
 	}
-	VectorCopy( (Points[1])[dontmatch[1]]->_pnt, plnpnts1[2] );
+	VectorCopy( ( Points[1] )[dontmatch[1]]->_pnt, plnpnts1[2] );
 
-	VectorCopy( (Points[1])[dontmatch[1]]->_pnt, plnpnts2[0] );
-	for( i = 0; i < 3; i++ ) {
-		if( dontmatch[1] != i && !VectorCompare( (Points[1])[i]->_pnt, plnpnts1[1] )) {
-			VectorCopy( (Points[1])[i]->_pnt, plnpnts2[1] );
+	VectorCopy( ( Points[1] )[dontmatch[1]]->_pnt, plnpnts2[0] );
+	for ( i = 0; i < 3; i++ ) {
+		if ( dontmatch[1] != i && !VectorCompare( ( Points[1] )[i]->_pnt, plnpnts1[1] ) ) {
+			VectorCopy( ( Points[1] )[i]->_pnt, plnpnts2[1] );
 			break;
 		}
 	}
-	VectorCopy( (Points[0])[dontmatch[0]]->_pnt, plnpnts2[2] );
+	VectorCopy( ( Points[0] )[dontmatch[0]]->_pnt, plnpnts2[2] );
 
-	VectorCopy( (Points[0])[dontmatch[0]]->_pnt, plnpntsshr[0] );
-	VectorCopy( (Points[1])[dontmatch[1]]->_pnt, plnpntsshr[1] );
-	if( (Points[1])[dontmatch[1]]->_pnt[2] < (Points[0])[dontmatch[0]]->_pnt[2] ) {
-		VectorCopy( (Points[1])[dontmatch[1]]->_pnt, plnpntsshr[2] );
-	} else {
-		VectorCopy( (Points[0])[dontmatch[0]]->_pnt, plnpntsshr[2] );
+	VectorCopy( ( Points[0] )[dontmatch[0]]->_pnt, plnpntsshr[0] );
+	VectorCopy( ( Points[1] )[dontmatch[1]]->_pnt, plnpntsshr[1] );
+	if ( ( Points[1] )[dontmatch[1]]->_pnt[2] < ( Points[0] )[dontmatch[0]]->_pnt[2] ) {
+		VectorCopy( ( Points[1] )[dontmatch[1]]->_pnt, plnpntsshr[2] );
+	}
+	else {
+		VectorCopy( ( Points[0] )[dontmatch[0]]->_pnt, plnpntsshr[2] );
 	}
 	plnpntsshr[2][2] -= 16;
 
-	for( i = 0; i < 3; i++ ) {
-		if( mins2[i] < mins1[i] ) {
+	for ( i = 0; i < 3; i++ ) {
+		if ( mins2[i] < mins1[i] ) {
 			mins1[i] = mins2[i];
 		}
-		if( maxs2[i] > maxs1[i] ) {
+		if ( maxs2[i] > maxs1[i] ) {
 			maxs1[i] = maxs2[i];
 		}
 	}
 
 	DBrush* newBrushes[2];
-	newBrushes[0] = DShape::GetBoundingCube_Ext( mins1, maxs1, "textures/common/caulk", bFacesAll, true);
-	newBrushes[1] = DShape::GetBoundingCube_Ext( mins1, maxs1, "textures/common/caulk", bFacesAll, true);
+	newBrushes[0] = DShape::GetBoundingCube_Ext( mins1, maxs1, "textures/common/caulk", bFacesAll, true );
+	newBrushes[1] = DShape::GetBoundingCube_Ext( mins1, maxs1, "textures/common/caulk", bFacesAll, true );
 
 	vec3_t normal;
 	MakeNormal( plnpnts1[0], plnpnts1[1], plnpnts1[2], normal );
-	if( normal[2] >= 0 ) {
+	if ( normal[2] >= 0 ) {
 		newBrushes[0]->AddFace( plnpnts1[0], plnpnts1[1], plnpnts1[2], "textures/common/terrain", true );
-	} else {
+	}
+	else {
 		newBrushes[0]->AddFace( plnpnts1[2], plnpnts1[1], plnpnts1[0], "textures/common/terrain", true );
 	}
 
 	MakeNormal( plnpnts2[0], plnpnts2[1], plnpnts2[2], normal );
-	if( normal[2] >= 0 ) {
+	if ( normal[2] >= 0 ) {
 		newBrushes[1]->AddFace( plnpnts2[0], plnpnts2[1], plnpnts2[2], "textures/common/terrain", true );
-	} else {
+	}
+	else {
 		newBrushes[1]->AddFace( plnpnts2[2], plnpnts2[1], plnpnts2[0], "textures/common/terrain", true );
 	}
 
 	vec3_t vec;
-	MakeNormal( plnpntsshr[0], plnpntsshr[1], plnpntsshr[2], normal );	
-	
+	MakeNormal( plnpntsshr[0], plnpntsshr[1], plnpntsshr[2], normal );
+
 	VectorSubtract( plnpnts1[2], plnpnts1[1], vec );
-	if( DotProduct( vec, normal ) >= 0 ) {
+	if ( DotProduct( vec, normal ) >= 0 ) {
 		newBrushes[0]->AddFace( plnpntsshr[0], plnpntsshr[1], plnpntsshr[2], "textures/common/caulk", true );
-	} else {
+	}
+	else {
 		newBrushes[0]->AddFace( plnpntsshr[2], plnpntsshr[1], plnpntsshr[0], "textures/common/caulk", true );
 	}
 
 	VectorSubtract( plnpnts2[2], plnpnts2[1], vec );
-	if( DotProduct( vec, normal ) >= 0 ) {
+	if ( DotProduct( vec, normal ) >= 0 ) {
 		newBrushes[1]->AddFace( plnpntsshr[0], plnpntsshr[1], plnpntsshr[2], "textures/common/caulk", true );
-	} else {
+	}
+	else {
 		newBrushes[1]->AddFace( plnpntsshr[2], plnpntsshr[1], plnpntsshr[0], "textures/common/caulk", true );
 	}
 
-	for( i = 0; i < 2; i++ ) {
+	for ( i = 0; i < 2; i++ ) {
 		newBrushes[i]->RemoveRedundantPlanes();
 		newBrushes[i]->BuildInRadiant( false, NULL, brushes[i]->path().parent().get_pointer() );
-		Path_deleteTop(brushes[i]->path());
+		Path_deleteTop( brushes[i]->path() );
 		delete newBrushes[i];
 	}
 
