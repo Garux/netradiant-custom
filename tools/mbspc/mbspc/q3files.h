@@ -205,6 +205,13 @@ typedef struct {
 
 #define Q3_BSP_VERSION			46
 
+// quick fix for creating aas files for ql bsp's.
+// (later this will probably need to be seperated, if we plan to add further support for ql)
+#define QL_BSP_IDENT	(('P'<<24)+('S'<<16)+('B'<<8)+'I')
+		// little-endian "IBSP"
+
+#define QL_BSP_VERSION			47
+// ***********************************************************
 
 // there shouldn't be any problem with increasing these values at the
 // expense of more memory allocation in the utilities

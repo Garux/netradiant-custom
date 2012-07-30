@@ -603,11 +603,11 @@ void	Q3_LoadBSPFile(struct quakefile_s *qf)
 	// swap the header
 	Q3_SwapBlock( (int *)header, sizeof(*header) );
 
-	if ( header->ident != Q3_BSP_IDENT ) {
+	if ( header->ident != Q3_BSP_IDENT && header->ident != QL_BSP_IDENT ) {
 		Error( "%s is not a IBSP file", qf->filename );
 	}
-	if ( header->version != Q3_BSP_VERSION ) {
-		Error( "%s is version %i, not %i", qf->filename, header->version, Q3_BSP_VERSION );
+	if ( header->version != Q3_BSP_VERSION && header->version != QL_BSP_VERSION ) {
+		Error( "%s is version %i, not (%i or %i)", qf->filename, header->version, Q3_BSP_VERSION, QL_BSP_VERSION );
 	}
 
 	q3_numShaders = Q3_CopyLump( header, Q3_LUMP_SHADERS, (void *) &q3_dshaders, sizeof(q3_dshader_t) );
