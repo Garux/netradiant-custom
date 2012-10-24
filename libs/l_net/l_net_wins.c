@@ -196,7 +196,10 @@ int WINS_Init( void ){
 	// determine my name & address
 	gethostname( buff, MAXHOSTNAMELEN );
 	local = gethostbyname( buff );
-	myAddr = *(int *)local->h_addr_list[0];
+	if(local && local->h_addr_list && local->h_addr_list[0])
+		myAddr = *(int *)local->h_addr_list[0];
+	else
+		myAddr = inet_ntoa("127.0.0.1");
 
 	// if the quake hostname isn't set, set it to the machine name
 //	if (Q_strcmp(hostname.string, "UNNAMED") == 0)
