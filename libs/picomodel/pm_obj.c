@@ -676,7 +676,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 #endif
 			}
 
-			if ( curFace == 0 ) {
+			if ( curFace == 0 && curSurface != NULL ) {
 				PicoSetSurfaceName( curSurface,groupName );
 			}
 			else
