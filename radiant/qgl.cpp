@@ -169,11 +169,11 @@ QGLFunctionPointer QGL_getExtensionFunc( const char* symbol ){
 	}
 	else
 	{
-		return (QGLFunctionPointer)qglXGetProcAddressARB( reinterpret_cast<const GLubyte*>( symbol ) );
+		return (QGLFunctionPointer) qglXGetProcAddressARB( reinterpret_cast<const GLubyte*>( symbol ) );
 	}
 #elif defined( WIN32 )
 	ASSERT_NOTNULL( qwglGetProcAddress );
-	return qwglGetProcAddress( symbol );
+	return (QGLFunctionPointer) qwglGetProcAddress( symbol );
 #else
 #error "unsupported platform"
 #endif
