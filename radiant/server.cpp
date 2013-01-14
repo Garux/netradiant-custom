@@ -131,7 +131,7 @@ bool failed(){
 	return m_library == 0;
 }
 FunctionPointer findSymbol( const char* symbol ){
-	FunctionPointer address = GetProcAddress( m_library, symbol );
+	FunctionPointer address = (FunctionPointer) GetProcAddress( m_library, symbol );
 	if ( address == 0 ) {
 		globalErrorStream() << "GetProcAddress failed: '" << symbol << "'\n";
 		globalErrorStream() << "GetLastError: " << FormatGetLastError();
