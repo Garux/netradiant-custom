@@ -97,6 +97,7 @@ endif
 # these are used on Win32 only
 GTKDIR             ?= $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONFIG) gtk+-2.0 --variable=prefix $(STDERR_TO_DEVNULL))
 WHICHDLL           ?= which
+DLLINSTALL         ?= install-dlls.sh
 
 # alias mingw32 OSes
 ifeq ($(OS),MINGW32_NT-6.0)
@@ -1031,7 +1032,7 @@ install-data: binaries
 .PHONY: install-dll
 ifeq ($(OS),Win32)
 install-dll: binaries
-	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dlls.sh
+	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" $(SH) $(DLLINSTALL) 
 else
 ifeq ($(OS),Darwin)
 install-dll: binaries
