@@ -55,30 +55,6 @@ void default_cursor( GtkWidget* widget ){
 }
 
 
-#if defined( WIN32 )
-
-// FIXME do we really need this? gdk_display_warp_pointer should not be depending on X11, so...
-
-#include <gdk/gdkwin32.h>
-
-void Sys_GetCursorPos( GtkWindow* window, int *x, int *y ){
-	POINT pos;
-	GetCursorPos( &pos );
-	ScreenToClient( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( window )->window ), &pos );
-	*x = pos.x;
-	*y = pos.y;
-}
-
-void Sys_SetCursorPos( GtkWindow* window, int x, int y ){
-	POINT pos;
-	pos.x = x;
-	pos.y = y;
-	ClientToScreen( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( window )->window ), &pos );
-	SetCursorPos( pos.x, pos.y );
-}
-
-#else
-
 void Sys_GetCursorPos( GtkWindow* window, int *x, int *y ){
 	gdk_display_get_pointer( gdk_display_get_default(), 0, x, y, 0 );
 }
@@ -86,5 +62,3 @@ void Sys_GetCursorPos( GtkWindow* window, int *x, int *y ){
 void Sys_SetCursorPos( GtkWindow* window, int x, int y ){
 	gdk_display_warp_pointer( gdk_display_get_default(), 0, x, y );
 }
-
-#endif
