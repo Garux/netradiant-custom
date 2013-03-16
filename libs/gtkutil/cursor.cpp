@@ -60,5 +60,7 @@ void Sys_GetCursorPos( GtkWindow* window, int *x, int *y ){
 }
 
 void Sys_SetCursorPos( GtkWindow* window, int x, int y ){
-	gdk_display_warp_pointer( gdk_display_get_default(), 0, x, y );
+	GdkScreen *screen;
+	gdk_display_get_pointer( gdk_display_get_default(), &screen, 0, 0, 0 );
+	gdk_display_warp_pointer( gdk_display_get_default(), screen, x, y );
 }
