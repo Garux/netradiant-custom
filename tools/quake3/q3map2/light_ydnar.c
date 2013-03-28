@@ -1492,6 +1492,7 @@ float DirtForSample( trace_t *trace ){
 			/* set endpoint */
 			VectorMA( trace->origin, dirtDepth, direction, trace->end );
 			SetupTrace( trace );
+			VectorSet(trace->color, 1.0f, 1.0f, 1.0f);
 
 			/* trace */
 			TraceLine( trace );
@@ -1514,6 +1515,7 @@ float DirtForSample( trace_t *trace ){
 			/* set endpoint */
 			VectorMA( trace->origin, dirtDepth, direction, trace->end );
 			SetupTrace( trace );
+			VectorSet(trace->color, 1.0f, 1.0f, 1.0f);
 
 			/* trace */
 			TraceLine( trace );
@@ -1527,6 +1529,7 @@ float DirtForSample( trace_t *trace ){
 	/* direct ray */
 	VectorMA( trace->origin, dirtDepth, normal, trace->end );
 	SetupTrace( trace );
+	VectorSet(trace->color, 1.0f, 1.0f, 1.0f);
 
 	/* trace */
 	TraceLine( trace );
@@ -4248,6 +4251,7 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, qboolean fl
 			//VectorMA( trace->origin, 1, direction, trace->origin );
 
 			SetupTrace( trace );
+			VectorSet(trace->color, 1.0f, 1.0f, 1.0f);
 			/* trace */
 			TraceLine( trace );
 			contribution = 1;
