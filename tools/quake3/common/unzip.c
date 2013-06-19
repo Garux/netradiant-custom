@@ -1644,11 +1644,12 @@ static int unzlocal_GetCurrentFileInfoInternal (unzFile file,
 
 
 	/* we check the magic */
-	if (err==UNZ_OK)
+	if (err==UNZ_OK) {
 		if (unzlocal_getLong(s->file,&uMagic) != UNZ_OK)
 			err=UNZ_ERRNO;
 		else if (uMagic!=0x02014b50)
 			err=UNZ_BADZIPFILE;
+	}
 
 	if (unzlocal_getShort(s->file,&file_info.version) != UNZ_OK)
 		err=UNZ_ERRNO;
@@ -1724,11 +1725,12 @@ static int unzlocal_GetCurrentFileInfoInternal (unzFile file,
 		else
 			uSizeRead = extraFieldBufferSize;
 
-		if (lSeek!=0)
+		if (lSeek!=0) {
 			if (fseek(s->file,lSeek,SEEK_CUR)==0)
 				lSeek=0;
 			else
 				err=UNZ_ERRNO;
+		}
 		if ((file_info.size_file_extra>0) && (extraFieldBufferSize>0))
 			if (fread(extraField,(uInt)uSizeRead,1,s->file)!=1)
 				err=UNZ_ERRNO;
@@ -1749,11 +1751,12 @@ static int unzlocal_GetCurrentFileInfoInternal (unzFile file,
 		else
 			uSizeRead = commentBufferSize;
 
-		if (lSeek!=0)
+		if (lSeek!=0) {
 			if (fseek(s->file,lSeek,SEEK_CUR)==0)
 				lSeek=0;
 			else
 				err=UNZ_ERRNO;
+		}
 		if ((file_info.size_file_comment>0) && (commentBufferSize>0))
 			if (fread(szComment,(uInt)uSizeRead,1,s->file)!=1)
 				err=UNZ_ERRNO;
@@ -1915,11 +1918,12 @@ static int unzlocal_CheckCurrentFileCoherencyHeader (unz_s* s, uInt* piSizeVar,
 		return UNZ_ERRNO;
 
 
-	if (err==UNZ_OK)
+	if (err==UNZ_OK) {
 		if (unzlocal_getLong(s->file,&uMagic) != UNZ_OK)
 			err=UNZ_ERRNO;
 		else if (uMagic!=0x04034b50)
 			err=UNZ_BADZIPFILE;
+	}
 
 	if (unzlocal_getShort(s->file,&uData) != UNZ_OK)
 		err=UNZ_ERRNO;
@@ -3417,7 +3421,7 @@ static int huft_build(uInt *b, uInt n, uInt s, const uInt *d, const uInt *e, inf
 
         /* compute minimum size table less than or equal to l bits */
         z = g - w;
-        z = z > (uInt)l ? l : z;        /* table size upper limit */
+        z = z > (uInt)l ? (uInt)l : z;        /* table size upper limit */
         if ((f = 1 << (j = k - w)) > a + 1)     /* try a k-w bit table */
         {                       /* too few codes for k-w bit table */
           f -= a + 1;           /* deduct codes from patterns left */
