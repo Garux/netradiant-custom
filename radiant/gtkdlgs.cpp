@@ -590,6 +590,10 @@ void DoAbout(){
 // =============================================================================
 // TextureLayout dialog
 
+// remembers last used texture scale values
+static float last_used_texture_layout_scale_x = 4.0;
+static float last_used_texture_layout_scale_y = 4.0;
+
 EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 	ModalDialog dialog;
 	ModalDialogButton ok_button( dialog, eIDOK );
@@ -644,8 +648,6 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-					gtk_widget_grab_focus( GTK_WIDGET( entry ) );
-
 					x = entry;
 				}
 				{
@@ -675,16 +677,26 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 			}
 		}
 	}
+	
+	// Initialize with last used values
+	char buf[16];
+	
+	sprintf( buf, "%f", last_used_texture_layout_scale_x );
+	gtk_entry_set_text( x, buf );
+	
+	sprintf( buf, "%f", last_used_texture_layout_scale_y );
+	gtk_entry_set_text( y, buf );
 
-	// Initialize
-	gtk_entry_set_text( x, "4.0" );
-	gtk_entry_set_text( y, "4.0" );
-
+	// Set focus
+	gtk_widget_grab_focus( GTK_WIDGET( x ) );
 
 	EMessageBoxReturn ret = modal_dialog_show( window, dialog );
 	if ( ret == eIDOK ) {
 		*fx = static_cast<float>( atof( gtk_entry_get_text( x ) ) );
 		*fy = static_cast<float>( atof( gtk_entry_get_text( y ) ) );
+		
+		last_used_texture_layout_scale_x = *fx;
+		last_used_texture_layout_scale_y = *fy;
 	}
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );
