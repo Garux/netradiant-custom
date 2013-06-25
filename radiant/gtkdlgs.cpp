@@ -590,7 +590,7 @@ void DoAbout(){
 // =============================================================================
 // TextureLayout dialog
 
-// remembers last used texture scale values
+// Last used texture scale values
 static float last_used_texture_layout_scale_x = 4.0;
 static float last_used_texture_layout_scale_y = 4.0;
 
@@ -687,14 +687,15 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 	sprintf( buf, "%f", last_used_texture_layout_scale_y );
 	gtk_entry_set_text( y, buf );
 
-	// Set focus
+	// Set focus after intializing the values
 	gtk_widget_grab_focus( GTK_WIDGET( x ) );
 
 	EMessageBoxReturn ret = modal_dialog_show( window, dialog );
 	if ( ret == eIDOK ) {
 		*fx = static_cast<float>( atof( gtk_entry_get_text( x ) ) );
 		*fy = static_cast<float>( atof( gtk_entry_get_text( y ) ) );
-		
+	
+		// Remember last used values
 		last_used_texture_layout_scale_x = *fx;
 		last_used_texture_layout_scale_y = *fy;
 	}
