@@ -45,7 +45,7 @@ GdkPixbuf* pixbuf_new_from_file_with_mask( const char* filename ){
 	}
 	else
 	{
-		GdkPixbuf* rgba = gdk_pixbuf_add_alpha( rgb, TRUE, 255, 0, 255 );
+		GdkPixbuf* rgba = gdk_pixbuf_add_alpha( rgb, FALSE, 255, 0, 255 );
 		gdk_pixbuf_unref( rgb );
 		return rgba;
 	}
