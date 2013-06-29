@@ -549,15 +549,18 @@ int main( int argc, char* argv[] ){
 	streams_init();
 
 #ifdef WIN32
+	/*
 	HMODULE lib;
 	lib = LoadLibrary( "dwmapi.dll" );
 	if ( lib != 0 ) {
 		void ( WINAPI *qDwmEnableComposition )( bool bEnable ) = ( void (WINAPI *) ( bool bEnable ) )GetProcAddress( lib, "DwmEnableComposition" );
 		if ( qDwmEnableComposition ) {
+			// disable Aero
 			qDwmEnableComposition( FALSE );
 		}
 		FreeLibrary( lib );
 	}
+	*/
 #endif
 
 	gtk_disable_setlocale();
