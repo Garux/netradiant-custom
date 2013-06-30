@@ -701,7 +701,7 @@ void Patch_registerCommands(){
 }
 
 void Patch_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "Put caps on the current patch (SHIFT + C)", "curve_cap.png", "CapCurrentCurve" );
+	toolbar_append_button( toolbar, "Put caps on the current patch (SHIFT + C)", "cap_curve.png", "CapCurrentCurve" );
 }
 
 void Patch_constructMenu( GtkMenu* menu ){
