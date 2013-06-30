@@ -175,7 +175,7 @@ ifeq ($(OS),Linux)
 	CFLAGS_COMMON += -fPIC
 	LDFLAGS_DLL = -fPIC -ldl
 	LIBS_COMMON = -lpthread
-	EXE ?= x86
+	EXE ?= $(shell uname -m)
 	A = a
 	DLL = so
 	MWINDOWS =
