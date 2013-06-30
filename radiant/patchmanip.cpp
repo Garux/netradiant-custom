@@ -701,7 +701,7 @@ void Patch_registerCommands(){
 }
 
 void Patch_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "Put caps on the current patch (SHIFT + C)", "curve_cap.bmp", "CapCurrentCurve" );
+	toolbar_append_button( toolbar, "Put caps on the current patch (SHIFT + C)", "cap_curve.png", "CapCurrentCurve" );
 }
 
 void Patch_constructMenu( GtkMenu* menu ){
@@ -957,35 +957,35 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 				gtk_table_set_col_spacings( table, 5 );
 
 				{
-					GtkImage* image = new_local_image( "cap_bevel.bmp" );
+					GtkImage* image = new_local_image( "cap_bevel.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkImage* image = new_local_image( "cap_endcap.bmp" );
+					GtkImage* image = new_local_image( "cap_endcap.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 1, 2,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkImage* image = new_local_image( "cap_ibevel.bmp" );
+					GtkImage* image = new_local_image( "cap_ibevel.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 2, 3,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkImage* image = new_local_image( "cap_iendcap.bmp" );
+					GtkImage* image = new_local_image( "cap_iendcap.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 3, 4,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkImage* image = new_local_image( "cap_cylinder.bmp" );
+					GtkImage* image = new_local_image( "cap_cylinder.png" );
 					gtk_widget_show( GTK_WIDGET( image ) );
 					gtk_table_attach( table, GTK_WIDGET( image ), 0, 1, 4, 5,
 									  (GtkAttachOptions) ( GTK_FILL ),
