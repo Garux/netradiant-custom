@@ -1,0 +1,20 @@
+# Makefile.conf
+# Build configuration for netradiant on win64
+
+RADIANT_ABOUTMSG=netradiant-20130630-1.5.0ing
+
+# FIXME release build fails on win64
+BUILD=debug
+
+OS=Win32
+LIBS_GL=-lopengl32
+CC=gcc
+WINDRES=windres
+PKGCONFIG=pkg-config.sh
+CFLAGS=-I/local64/include -mms-bitfields -mthreads -fno-strict-aliasing
+CXXFLAGS=-I/local64/include -I/local64/include/libxml2
+LDFLAGS=-L/local64/lib
+
+# do not fetch gamepacks
+DOWNLOAD_GAMEPACKS=no
+
