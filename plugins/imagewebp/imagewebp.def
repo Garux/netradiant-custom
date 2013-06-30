@@ -1,0 +1,7 @@
+; imagewebp.def : Declares the module parameters for the DLL.
+
+LIBRARY      "IMAGEWEBP"
+
+EXPORTS
+    ; Explicit exports can go here
+	Radiant_RegisterModules @1
