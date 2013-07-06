@@ -402,7 +402,8 @@ image_t *ImageLoad( const char *filename ){
 			size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
 			if ( size > 0 ) {
 				if ( LoadJPGBuff( buffer, size, &image->pixels, &image->width, &image->height ) == -1 && image->pixels != NULL ) {
-					Sys_Printf( "WARNING: LoadJPGBuff: %s\n", (unsigned char*) image->pixels );
+					// On error, LoadJPGBuff might store a pointer to the error message in image->pixels
+					Sys_Printf( "WARNING: LoadJPGBuff %s %s\n", name, (unsigned char*) image->pixels );
 				}
 				alphaHack = qtrue;
 			}
@@ -460,15 +461,19 @@ image_t *ImageLoad( const char *filename ){
 		if ( size > 0 ) {
 			unsigned char *pixels;
 			int width, height;
-			if ( LoadJPGBuff( buffer, size, &pixels, &width, &height ) == -1 && pixels != NULL ) {
-				Sys_Printf( "WARNING: LoadJPGBuff: %s\n", (unsigned char*) image->pixels );
+			if ( LoadJPGBuff( buffer, size, &pixels, &width, &height ) == -1 ) {
+				if (pixels) {
+					// On error, LoadJPGBuff might store a pointer to the error message in pixels
+					Sys_Printf( "WARNING: LoadJPGBuff %s %s\n", name, (unsigned char*) pixels );
+				}				
+			} else {
+				if ( width == image->width && height == image->height ) {
+					int i;
+					for ( i = 0; i < width * height; ++i )
+						image->pixels[4 * i + 3] = pixels[4 * i + 2];  // copy alpha from blue channel
+				}
+				free( pixels );
 			}
-			if ( pixels && width == image->width && height == image->height ) {
-				int i;
-				for ( i = 0; i < width * height; ++i )
-					image->pixels[4 * i + 3] = pixels[4 * i + 2];  // copy alpha from blue channel
-			}
-			free( pixels );
 			free( buffer );
 		}
 	}
