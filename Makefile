@@ -37,6 +37,8 @@ CAT                ?= cat
 MKDIR              ?= mkdir -p
 CP                 ?= cp
 CP_R               ?= $(CP) -r
+LN                 ?= ln
+LN_SNF             ?= $(LN) -snf
 RM                 ?= rm
 RM_R               ?= $(RM) -r
 TEE_STDERR         ?= | tee /dev/stderr
@@ -170,12 +172,15 @@ endif
 
 INSTALLDIR_BASE := $(INSTALLDIR)
 
+MAKE_EXE_SYMLINK = false
+
 ifeq ($(OS),Linux)
 	CPPFLAGS_COMMON += -DPOSIX -DXWINDOWS
 	CFLAGS_COMMON += -fPIC
 	LDFLAGS_DLL = -fPIC -ldl
 	LIBS_COMMON = -lpthread
-	EXE ?= x86
+	EXE ?= $(shell uname -m)
+	MAKE_EXE_SYMLINK = true
 	A = a
 	DLL = so
 	MWINDOWS =
@@ -207,7 +212,8 @@ ifeq ($(OS),Darwin)
 	CPPFLAGS_COMMON += -I$(MACLIBDIR)/../include -I/usr/X11R6/include
 	LDFLAGS_COMMON += -L$(MACLIBDIR) -L/usr/X11R6/lib
 	LDFLAGS_DLL += -dynamiclib -ldl
-	EXE ?= ppc
+	EXE ?= $(shell uname -m)
+	MAKE_EXE_SYMLINK = true
 	A = a
 	DLL = dylib
 	MWINDOWS =
@@ -438,6 +444,7 @@ clean:
 	file=$@; $(MKDIR) $${file%/*}
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ $(STDERR_TO_STDOUT) $(STDOUT_TO_DEVNULL) $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
+	if $(MAKE_EXE_SYMLINK); then o=$@; $(LN_SNF) $${o##*/} $*; fi
 
 %.$(A):
 	$(AR) rc $@ $^
