@@ -391,6 +391,7 @@ binaries-radiant-plugins: \
 .PHONY: binaries-radiant
 binaries-radiant-core: \
 	$(INSTALLDIR)/radiant.$(EXE) \
+	$(INSTALLDIR)/radiant \
 
 .PHONY: binaries-tools
 binaries-tools: \
@@ -406,14 +407,17 @@ binaries-tools-quake2: \
 .PHONY: binaries-q2map
 binaries-q2map: \
 	$(INSTALLDIR)/q2map.$(EXE) \
+	$(INSTALLDIR)/q2map \
 
 .PHONY: binaries-qdata3
 binaries-qdata3: \
 	$(INSTALLDIR)/qdata3.$(EXE) \
+	$(INSTALLDIR)/qdata3 \
 
 .PHONY: binaries-h2data
 binaries-h2data: \
-	$(INSTALLDIR)/heretic2/h2data.$(EXE)
+	$(INSTALLDIR)/heretic2/h2data.$(EXE) \
+	$(INSTALLDIR)/heretic2/h2data \
 
 .PHONY: binaries-tools-quake3
 binaries-tools-quake3: \
@@ -423,10 +427,12 @@ binaries-tools-quake3: \
 .PHONY: binaries-q3data
 binaries-q3data: \
 	$(INSTALLDIR)/q3data.$(EXE) \
+	$(INSTALLDIR)/q3data \
 
 .PHONY: binaries-q3map2
 binaries-q3map2: \
 	$(INSTALLDIR)/q3map2.$(EXE) \
+	$(INSTALLDIR)/q3map2 \
 
 
 .PHONY: clean
@@ -439,7 +445,9 @@ clean:
 	file=$@; $(MKDIR) $${file%/*}
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ $(STDERR_TO_STDOUT) $(STDOUT_TO_DEVNULL) $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
-	if $(MAKE_EXE_SYMLINK); then o=$@; $(LN_SNF) $${o##*/} $*; fi
+
+%: %.$(EXE)
+	if $(MAKE_EXE_SYMLINK); then o=$<; $(LN_SNF) $${o##*/} $@; else true; fi
 
 %.$(A):
 	$(AR) rc $@ $^
