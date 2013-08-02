@@ -446,7 +446,7 @@ clean:
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ $(STDERR_TO_STDOUT) $(STDOUT_TO_DEVNULL) $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
 
-%: %.$(EXE)
+$(INSTALLDIR)/%: $(INSTALLDIR)/%.$(EXE)
 	if $(MAKE_EXE_SYMLINK); then o=$<; $(LN_SNF) $${o##*/} $@; else true; fi
 
 %.$(A):
