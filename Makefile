@@ -155,13 +155,23 @@ ifeq ($(BUILD),release)
 ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O3
 	# only add -O3 if no -O flag is in $(CFLAGS)
-	# to allow overriding the optimizations
 endif
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -s
 else
 
+ifeq ($(BUILD),native)
+ifeq ($(findstring $(CFLAGS),-O),)
+	CFLAGS_COMMON += -O3
+	# only add -O3 if no -O flag is in $(CFLAGS)
+endif
+	CFLAGS_COMMON += -march=native -mcpu=native
+	CPPFLAGS_COMMON +=
+	LDFLAGS_COMMON += -s
+else
+
 $(error Unsupported build type: $(BUILD))
+endif
 endif
 endif
 endif
