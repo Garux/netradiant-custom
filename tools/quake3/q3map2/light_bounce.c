@@ -551,6 +551,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 	/* bouncing light? */
 	if ( !bouncing ) {
+		Sys_Printf( "BUG: RadSubdivideDiffuseLight !bouncing shouldn't happen\n" );
+
 		/* handle first-pass lights in normal q3a style */
 		value = si->value;
 		light->photons = value * area * areaScale;
@@ -615,6 +617,9 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		VectorMA( light->origin, 1.0f, light->normal, light->origin );
 		light->dist = DotProduct( light->origin, normal );
 	}
+
+	if (light->photons < 0 || light->add < 0 || light->color[0] < 0 || light->color[1] < 0 || light->color[2] < 0)
+		Sys_Printf( "BUG: RadSubdivideDiffuseLight created a darkbulb\n" );
 
 	/* emit light from both sides? */
 	if ( si->compileFlags & C_FOG || si->twoSided ) {
