@@ -56,11 +56,12 @@ settings
 	phys_maxwalkvelocity		320
 	phys_maxcrouchvelocity		100
 	phys_maxswimvelocity		150
-	phys_maxacceleration		2200
-	phys_airaccelerate			0
-	phys_maxstep				18
+	phys_walkaccelerate		10
+	phys_airaccelerate			1
+	phys_swimaccelerate			4
+	phys_maxstep				19
 	phys_maxsteepness			0.7
-	phys_maxwaterjump			19
+	phys_maxwaterjump			18
 	phys_maxbarrier				33
 	phys_jumpvel				270
 	phys_falldelta5				40
@@ -80,5 +81,6 @@ settings
 	rs_startelevator			50
 	rs_falldamage5				300
 	rs_falldamage10				500
+	rs_maxfallheight		0
 	rs_maxjumpfallheight		450
 } //end settings
