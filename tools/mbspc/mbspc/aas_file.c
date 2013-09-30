@@ -299,55 +299,55 @@ qboolean AAS_LoadAASFile(char *filename, int fpoffset, int fplength)
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_BBOXES].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_BBOXES].filelen);
 	aasworld.bboxes = (aas_bbox_t *) AAS_LoadAASLump(fp, offset, length, aasworld.bboxes);
-	if (!aasworld.bboxes) return false;
+	if (length && !aasworld.bboxes) return false;
 	aasworld.numbboxes = length / sizeof(aas_bbox_t);
 	//vertexes
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_VERTEXES].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_VERTEXES].filelen);
 	aasworld.vertexes = (aas_vertex_t *) AAS_LoadAASLump(fp, offset, length, aasworld.vertexes);
-	if (!aasworld.vertexes) return false;
+	if (length & !aasworld.vertexes) return false;
 	aasworld.numvertexes = length / sizeof(aas_vertex_t);
 	//planes
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_PLANES].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_PLANES].filelen);
 	aasworld.planes = (aas_plane_t *) AAS_LoadAASLump(fp, offset, length, aasworld.planes);
-	if (!aasworld.planes) return false;
+	if (length && !aasworld.planes) return false;
 	aasworld.numplanes = length / sizeof(aas_plane_t);
 	//edges
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_EDGES].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_EDGES].filelen);
 	aasworld.edges = (aas_edge_t *) AAS_LoadAASLump(fp, offset, length, aasworld.edges);
-	if (!aasworld.edges) return false;
+	if (length && !aasworld.edges) return false;
 	aasworld.numedges = length / sizeof(aas_edge_t);
 	//edgeindex
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_EDGEINDEX].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_EDGEINDEX].filelen);
 	aasworld.edgeindex = (aas_edgeindex_t *) AAS_LoadAASLump(fp, offset, length, aasworld.edgeindex);
-	if (!aasworld.edgeindex) return false;
+	if (length && !aasworld.edgeindex) return false;
 	aasworld.edgeindexsize = length / sizeof(aas_edgeindex_t);
 	//faces
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_FACES].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_FACES].filelen);
 	aasworld.faces = (aas_face_t *) AAS_LoadAASLump(fp, offset, length, aasworld.faces);
-	if (!aasworld.faces) return false;
+	if (length && !aasworld.faces) return false;
 	aasworld.numfaces = length / sizeof(aas_face_t);
 	//faceindex
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_FACEINDEX].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_FACEINDEX].filelen);
 	aasworld.faceindex = (aas_faceindex_t *) AAS_LoadAASLump(fp, offset, length, aasworld.faceindex);
-	if (!aasworld.faceindex) return false;
+	if (length && !aasworld.faceindex) return false;
 	aasworld.faceindexsize = length / sizeof(int);
 	//convex areas
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_AREAS].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_AREAS].filelen);
 	aasworld.areas = (aas_area_t *) AAS_LoadAASLump(fp, offset, length, aasworld.areas);
-	if (!aasworld.areas) return false;
+	if (length && !aasworld.areas) return false;
 	aasworld.numareas = length / sizeof(aas_area_t);
 	//area settings
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_AREASETTINGS].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_AREASETTINGS].filelen);
 	aasworld.areasettings = (aas_areasettings_t *) AAS_LoadAASLump(fp, offset, length, aasworld.areasettings);
-	if (!aasworld.areasettings) return false;
+	if (length && !aasworld.areasettings) return false;
 	aasworld.numareasettings = length / sizeof(aas_areasettings_t);
 	//reachability list
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_REACHABILITY].fileofs);
@@ -359,7 +359,7 @@ qboolean AAS_LoadAASFile(char *filename, int fpoffset, int fplength)
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_NODES].fileofs);
 	length = LittleLong(header.lumps[AASLUMP_NODES].filelen);
 	aasworld.nodes = (aas_node_t *) AAS_LoadAASLump(fp, offset, length, aasworld.nodes);
-	if (!aasworld.nodes) return false;
+	if (length && !aasworld.nodes) return false;
 	aasworld.numnodes = length / sizeof(aas_node_t);
 	//cluster portals
 	offset = fpoffset + LittleLong(header.lumps[AASLUMP_PORTALS].fileofs);
