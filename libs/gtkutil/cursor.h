@@ -114,7 +114,7 @@ void motion_delta( int x, int y, unsigned int state ){
 class FreezePointer
 {
 unsigned int handle_motion;
-int recorded_x, recorded_y;
+int recorded_x, recorded_y, last_x, last_y;
 typedef void ( *MotionDeltaFunction )( int x, int y, unsigned int state, void* data );
 MotionDeltaFunction m_function;
 void* m_data;
@@ -124,11 +124,19 @@ FreezePointer() : handle_motion( 0 ), m_function( 0 ), m_data( 0 ){
 static gboolean motion_delta( GtkWidget *widget, GdkEventMotion *event, FreezePointer* self ){
 	int current_x, current_y;
 	Sys_GetCursorPos( GTK_WINDOW( widget ), &current_x, &current_y );
-	int dx = current_x - self->recorded_x;
-	int dy = current_y - self->recorded_y;
+	int dx = current_x - self->last_x;
+	int dy = current_y - self->last_y;
+	int ddx = current_x - self->recorded_x;
+	int ddy = current_y - self->recorded_y;
+	self->last_x = current_x;
+	self->last_y = current_y;
 	if ( dx != 0 || dy != 0 ) {
 		//globalOutputStream() << "motion x: " << dx << ", y: " << dy << "\n";
-		Sys_SetCursorPos( GTK_WINDOW( widget ), self->recorded_x, self->recorded_y );
+		if (ddx < -32 || ddx > 32 || ddy < -32 || ddy > 32) {
+			Sys_SetCursorPos( GTK_WINDOW( widget ), self->recorded_x, self->recorded_y );
+			self->last_x = self->recorded_x;
+			self->last_y = self->recorded_y;
+		}
 		self->m_function( dx, dy, event->state, self->m_data );
 	}
 	return FALSE;
@@ -155,6 +163,9 @@ void freeze_pointer( GtkWindow* window, MotionDeltaFunction function, void* data
 	Sys_GetCursorPos( window, &recorded_x, &recorded_y );
 
 	Sys_SetCursorPos( window, recorded_x, recorded_y );
+
+	last_x = recorded_x;
+	last_y = recorded_y;
 
 	m_function = function;
 	m_data = data;
