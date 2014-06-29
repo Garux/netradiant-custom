@@ -146,22 +146,33 @@ glwindow_globals_t g_glwindow_globals;
 
 
 // VFS
+
+bool g_vfsInitialized = false;
+
+void VFS_Init(){
+	if ( g_vfsInitialized ) return;
+	QE_InitVFS();
+	GlobalFileSystem().initialise();
+	g_vfsInitialized = true;
+}
+void VFS_Shutdown(){
+	if ( !g_vfsInitialized ) return;
+	GlobalFileSystem().shutdown();
+	g_vfsInitialized = false;
+}
+void VFS_Restart(){
+	VFS_Shutdown();
+	VFS_Init();
+}
+
 class VFSModuleObserver : public ModuleObserver
 {
-std::size_t m_unrealised;
 public:
-VFSModuleObserver() : m_unrealised( 1 ){
-}
 void realise(){
-	if ( --m_unrealised == 0 ) {
-		QE_InitVFS();
-		GlobalFileSystem().initialise();
-	}
+	VFS_Init();
 }
 void unrealise(){
-	if ( ++m_unrealised == 1 ) {
-		GlobalFileSystem().shutdown();
-	}
+	VFS_Shutdown();
 }
 };
 
@@ -512,6 +523,7 @@ void gamemode_set( const char* gamemode ){
 		g_gameModeObservers.realise();
 	}
 }
+
 
 #include "os/dir.h"
 

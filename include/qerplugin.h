@@ -124,6 +124,7 @@ struct _QERFuncTable_1
 	const char* ( *getSettingsPath )( );
 	const char* ( *getMapsPath )( );
 
+	const char* ( *getGameFile )( );
 	const char* ( *getGameName )( );
 	const char* ( *getGameMode )( );
 
@@ -133,15 +134,6 @@ struct _QERFuncTable_1
 
 	const char* ( *getGameDescriptionKeyValue )(const char* key);
 	const char* ( *getRequiredGameDescriptionKeyValue )(const char* key);
-
-	void ( *attachGameToolsPathObserver )( ModuleObserver& observer );
-	void ( *detachGameToolsPathObserver )( ModuleObserver& observer );
-	void ( *attachEnginePathObserver )( ModuleObserver& observer );
-	void ( *detachEnginePathObserver )( ModuleObserver& observer );
-	void ( *attachGameNameObserver )( ModuleObserver& observer );
-	void ( *detachGameNameObserver )( ModuleObserver& observer );
-	void ( *attachGameModeObserver )( ModuleObserver& observer );
-	void ( *detachGameModeObserver )( ModuleObserver& observer );
 
 	SignalHandlerId ( *XYWindowDestroyed_connect )( const SignalHandler& handler );
 	void ( *XYWindowDestroyed_disconnect )( SignalHandlerId id );

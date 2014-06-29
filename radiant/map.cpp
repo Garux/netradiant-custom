@@ -38,6 +38,7 @@ MapModules& ReferenceAPI_getMapModules();
 #include "ifilesystem.h"
 #include "namespace.h"
 #include "moduleobserver.h"
+#include "moduleobservers.h"
 
 #include <set>
 
@@ -404,6 +405,31 @@ float g_MinWorldCoord = -64 * 1024;
 void AddRegionBrushes( void );
 void RemoveRegionBrushes( void );
 
+/* Map open/close observers */
+
+ModuleObservers g_mapPathObservers;
+
+class UnvanquishedMapFileObserver : public ModuleObserver
+{
+void realise() {
+	if ( strncmp( GlobalRadiant().getGameFile(), "unvanquished", 12 ) == 0 ) {
+		// Restart VFS to apply new pak filtering based on mapname
+		VFS_Restart();
+	}
+}
+void unrealise() { }
+};
+
+UnvanquishedMapFileObserver g_unvanquishedMapFileObserver;
+
+void BindMapFileObservers(){
+	g_mapPathObservers.attach( g_unvanquishedMapFileObserver );
+}
+
+void UnBindMapFileObservers(){
+	g_mapPathObservers.detach( g_unvanquishedMapFileObserver );
+}
+
 
 /*
    ================
@@ -422,6 +448,7 @@ void Map_Free(){
 
 	g_currentMap = 0;
 	Brush_unlatchPreferences();
+	g_mapPathObservers.unrealise();
 }
 
 class EntityFindByClassname : public scene::Graph::Walker
@@ -946,6 +973,7 @@ void Map_LoadFile( const char *filename ){
 			}
 			Brush_toggleFormat( i );
 			g_map.m_name = filename;
+			g_mapPathObservers.realise();
 			Map_UpdateTitle( g_map );
 			g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
 			if ( format ) {
@@ -1177,10 +1205,12 @@ void Map_RenameAbsolute( const char* absolute ){
 
 	g_map.m_resource->detach( g_map );
 	GlobalReferenceCache().release( g_map.m_name.c_str() );
+	g_mapPathObservers.unrealise();
 
 	g_map.m_resource = resource;
 
 	g_map.m_name = absolute;
+	g_mapPathObservers.realise();
 	Map_UpdateTitle( g_map );
 
 	g_map.m_resource->attach( g_map );
@@ -1218,6 +1248,7 @@ void Map_New(){
 	//globalOutputStream() << "Map_New\n";
 
 	g_map.m_name = "unnamed.map";
+	g_mapPathObservers.realise();
 	Map_UpdateTitle( g_map );
 
 	{

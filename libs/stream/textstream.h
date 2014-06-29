@@ -26,6 +26,7 @@
 /// \brief Text-output-formatting.
 
 #include "itextstream.h"
+#include "string/string.h"
 
 #include <cctype>
 #include <cstddef>
@@ -33,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
+#include <string>
 
 #include "generic/arrayrange.h"
 
@@ -395,6 +397,48 @@ std::size_t write( const char* buffer, std::size_t length ){
 	return length;
 }
 };
+
+
+/// \brief A wrapper for a TextInputStream used for reading one text line at a time.
+template<typename TextInputStreamType, int SIZE = 1024>
+class TextLinesInputStream
+{
+TextInputStreamType& m_inputStream;
+char m_buffer[SIZE + 1];
+char* m_cur;
+char* m_end;
+
+int fillBuffer(){
+	m_end = m_buffer + m_inputStream.read( m_buffer, SIZE );
+	m_cur = m_buffer;
+	m_buffer[SIZE] = '\0';
+	*m_end = '\0';
+	return m_end - m_cur;
+}
+public:
+
+TextLinesInputStream( TextInputStreamType& inputStream ) : m_inputStream( inputStream ), m_cur( m_buffer ), m_end( m_buffer ){
+	m_buffer[0] = '\0';
+}
+
+CopiedString readLine(){
+	std::string s;
+	char* m_fin;
+
+	while ( (m_fin = strchr( m_cur, '\n' )) == 0 )
+	{
+		s.append( m_cur, m_end - m_cur );
+		if ( fillBuffer() <= 0 ) break;
+	}
+	if ( m_fin != 0 ) {
+		s.append( m_cur, m_fin - m_cur + 1 );
+		m_cur = m_fin + 1;
+	}
+
+	return CopiedString( s.c_str() );
+}
+};
+
 
 /// \brief A wrapper for a TextOutputStream, optimised for writing a few characters at a time.
 template<typename TextOutputStreamType, int SIZE = 1024>
