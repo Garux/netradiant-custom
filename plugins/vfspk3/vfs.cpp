@@ -826,15 +826,31 @@ void initialise(){
 		const char* pakname;
 		g_loaded_unv_paks.clear();
 
-		pakname = GetLatestVersionOfUnvPak( "tex-common" );
-		if ( pakname ) LoadPakWithDeps( pakname );
-
 		pakname = GetLatestVersionOfUnvPak( "radiant" );
 		if ( pakname ) LoadPakWithDeps( pakname );
 
-		pakname = GetCurrentMapPakName();
-		if ( pakname && !string_empty( pakname ) ) {
-			LoadPakWithDeps( pakname );
+		// prevent VFS double start, for MapName="" and MapName="unnamed.map"
+		if ( string_length( GlobalRadiant().getMapName() ) ){
+			// map's tex-* paks have precedence over any other tex-* paks
+			char* mappakname = GetCurrentMapPakName();
+			if ( mappakname ) {
+				LoadPakWithDeps( mappakname );
+				string_release( mappakname, string_length( mappakname ) );
+			}
+
+			for ( PakfilePaths::iterator i = g_pakfile_paths.begin(); i != g_pakfile_paths.end(); ++i ) {
+				if ( strncmp( i->first.c_str(), "tex-", 4 ) != 0 ) continue;
+				// firstly load latest version of pak
+				const char *paknamever = i->first.c_str();
+				const char *c = strchr( paknamever, '_' );
+				char *paknameonly;
+				if ( c ) paknameonly = string_clone_range( StringRange( paknamever, c ) );
+				pakname = GetLatestVersionOfUnvPak( paknameonly );
+				LoadPakWithDeps( pakname );
+				if ( c ) string_release( paknameonly, string_length( paknameonly ) );
+				// then load this specific version
+				LoadPakWithDeps( paknamever );
+			}
 		}
 
 		g_pakfile_paths.clear();
