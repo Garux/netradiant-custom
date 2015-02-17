@@ -141,6 +141,13 @@ inline bool string_equal_prefix( const char* string, const char* prefix ){
 	return string_equal_n( string, prefix, string_length( prefix ) );
 }
 
+/// \brief Returns true if the ending of \p string is equal to \p suffix.
+/// O(n)
+inline bool string_equal_suffix( const char* string, const char* suffix){
+	const char *s = string + string_length( string ) - string_length( suffix );
+	return string_equal_n( s , suffix, string_length( suffix ) );
+}
+
 /// \brief Copies \p other into \p string and returns \p string.
 /// Assumes that the space allocated for \p string is at least string_length(other) + 1.
 /// O(n)
