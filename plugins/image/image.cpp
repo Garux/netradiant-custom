@@ -29,6 +29,7 @@
 #include "bmp.h"
 #include "pcx.h"
 #include "dds.h"
+#include "ktx.h"
 
 
 #include "modulesystem/singletonmodule.h"
@@ -137,6 +138,26 @@ typedef SingletonModule<ImageDDSAPI, ImageDependencies> ImageDDSModule;
 ImageDDSModule g_ImageDDSModule;
 
 
+class ImageKTXAPI
+{
+_QERPlugImageTable m_imagektx;
+public:
+typedef _QERPlugImageTable Type;
+STRING_CONSTANT( Name, "ktx" );
+
+ImageKTXAPI(){
+	m_imagektx.loadImage = LoadKTX;
+}
+_QERPlugImageTable* getTable(){
+	return &m_imagektx;
+}
+};
+
+typedef SingletonModule<ImageKTXAPI, ImageDependencies> ImageKTXModule;
+
+ImageKTXModule g_ImageKTXModule;
+
+
 extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server ){
 	initialiseModule( server );
 
@@ -145,4 +166,5 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 	g_ImageBMPModule.selfRegister();
 	g_ImagePCXModule.selfRegister();
 	g_ImageDDSModule.selfRegister();
+	g_ImageKTXModule.selfRegister();
 }
