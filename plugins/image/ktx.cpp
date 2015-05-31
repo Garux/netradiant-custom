@@ -49,8 +49,6 @@ class KTX_Decoder
 public:
 	virtual void Decode( PointerInputStream& istream, byte* out ) = 0;
 	virtual unsigned int GetPixelSize() = 0;
-protected:
-	bool m_bigEndian;
 };
 
 class KTX_Decoder_A8 : public KTX_Decoder
