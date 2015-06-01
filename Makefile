@@ -536,6 +536,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/vis.o \
 	tools/quake3/q3map2/writebsp.o \
 	libddslib.$(A) \
+	libetclib.$(A) \
 	libfilematch.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
@@ -585,6 +586,10 @@ libddslib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
 
+libetclib.$(A): CPPFLAGS_EXTRA := -Ilibs
+libetclib.$(A): \
+	libs/etclib.o \
+
 $(INSTALLDIR)/q3data.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_ZLIB)
 $(INSTALLDIR)/q3data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_ZLIB) -Itools/quake3/common -Ilibs -Iinclude
 $(INSTALLDIR)/q3data.$(EXE): \
@@ -609,6 +614,7 @@ $(INSTALLDIR)/q3data.$(EXE): \
 	tools/quake3/q3data/stripper.o \
 	tools/quake3/q3data/video.o \
 	libfilematch.$(A) \
+	libetclib.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	$(if $(findstring $(OS),Win32),icons/q3data.o,) \
@@ -803,9 +809,11 @@ $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/dds.o \
 	plugins/image/image.o \
 	plugins/image/jpeg.o \
+	plugins/image/ktx.o \
 	plugins/image/pcx.o \
 	plugins/image/tga.o \
 	libddslib.$(A) \
+	libetclib.$(A) \
 
 $(INSTALLDIR)/modules/imageq2.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
 $(INSTALLDIR)/modules/imageq2.$(DLL): \
