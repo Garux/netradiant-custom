@@ -83,9 +83,23 @@ inline int16_t istream_read_int16_le( InputStreamType& istream ){
 }
 
 template<typename InputStreamType>
+inline int16_t istream_read_int16_be( InputStreamType& istream ){
+	int16_t value;
+	istream_read_big_endian( istream, value );
+	return value;
+}
+
+template<typename InputStreamType>
 inline uint16_t istream_read_uint16_le( InputStreamType& istream ){
 	uint16_t value;
 	istream_read_little_endian( istream, value );
+	return value;
+}
+
+template<typename InputStreamType>
+inline uint16_t istream_read_uint16_be( InputStreamType& istream ){
+	uint16_t value;
+	istream_read_big_endian( istream, value );
 	return value;
 }
 
@@ -97,6 +111,13 @@ inline int32_t istream_read_int32_le( InputStreamType& istream ){
 }
 
 template<typename InputStreamType>
+inline int32_t istream_read_int32_be( InputStreamType& istream ){
+	int32_t value;
+	istream_read_big_endian( istream, value );
+	return value;
+}
+
+template<typename InputStreamType>
 inline uint32_t istream_read_uint32_le( InputStreamType& istream ){
 	uint32_t value;
 	istream_read_little_endian( istream, value );
@@ -104,9 +125,23 @@ inline uint32_t istream_read_uint32_le( InputStreamType& istream ){
 }
 
 template<typename InputStreamType>
+inline uint32_t istream_read_uint32_be( InputStreamType& istream ){
+	uint32_t value;
+	istream_read_big_endian( istream, value );
+	return value;
+}
+
+template<typename InputStreamType>
 inline float istream_read_float32_le( InputStreamType& istream ){
 	float value;
 	istream_read_little_endian( istream, value );
+	return value;
+}
+
+template<typename InputStreamType>
+inline float istream_read_float32_be( InputStreamType& istream ){
+	float value;
+	istream_read_big_endian( istream, value );
 	return value;
 }
 

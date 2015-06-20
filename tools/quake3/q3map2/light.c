@@ -2343,12 +2343,21 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Colors are linear\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nosRGB" ) ) {
+		else if ( !strcmp( argv[ i ], "-sRGB" ) ) {
 			lightmapsRGB = qtrue;
-			Sys_Printf( "Lighting is linear\n" );
+			Sys_Printf( "Lighting is in sRGB\n" );
 			texturesRGB = qtrue;
-			Sys_Printf( "Textures are linear\n" );
+			Sys_Printf( "Textures are in sRGB\n" );
 			colorsRGB = qtrue;
+			Sys_Printf( "Colors are in sRGB\n" );
+		}
+
+		else if ( !strcmp( argv[ i ], "-nosRGB" ) ) {
+			lightmapsRGB = qfalse;
+			Sys_Printf( "Lighting is linear\n" );
+			texturesRGB = qfalse;
+			Sys_Printf( "Textures are linear\n" );
+			colorsRGB = qfalse;
 			Sys_Printf( "Colors are linear\n" );
 		}
 

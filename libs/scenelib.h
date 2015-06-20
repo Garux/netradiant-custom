@@ -166,6 +166,8 @@ class Symbiot
 {
 public:
 virtual void release() = 0;
+virtual ~Symbiot(){
+}
 };
 
 private:
@@ -223,7 +225,17 @@ bool visible(){
 bool excluded(){
 	return ( m_state & eExcluded ) != 0;
 }
+bool operator<( const scene::Node& other ){
+	return this < &other;
+}
+bool operator==( const scene::Node& other ){
+	return this == &other;
+}
+bool operator!=( const scene::Node& other ){
+	return this != &other;
+}
 };
+
 
 class NullNode : public Node::Symbiot
 {
@@ -274,16 +286,6 @@ inline void Node_traverseSubgraph( scene::Node& node, const scene::Traversable::
 
 inline TransformNode* Node_getTransformNode( scene::Node& node ){
 	return NodeTypeCast<TransformNode>::cast( node );
-}
-
-inline bool operator<( scene::Node& node, scene::Node& other ){
-	return &node < &other;
-}
-inline bool operator==( scene::Node& node, scene::Node& other ){
-	return &node == &other;
-}
-inline bool operator!=( scene::Node& node, scene::Node& other ){
-	return !::operator==( node, other );
 }
 
 
