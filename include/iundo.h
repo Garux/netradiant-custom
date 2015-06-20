@@ -33,6 +33,8 @@ class UndoMemento
 {
 public:
 virtual void release() = 0;
+virtual ~UndoMemento() {
+}
 };
 
 class Undoable
@@ -40,12 +42,16 @@ class Undoable
 public:
 virtual UndoMemento* exportState() const = 0;
 virtual void importState( const UndoMemento* state ) = 0;
+virtual ~Undoable() {
+}
 };
 
 class UndoObserver
 {
 public:
 virtual void save( Undoable* undoable ) = 0;
+virtual ~UndoObserver() {
+}
 };
 
 class UndoTracker
@@ -55,6 +61,8 @@ virtual void clear() = 0;
 virtual void begin() = 0;
 virtual void undo() = 0;
 virtual void redo() = 0;
+virtual ~UndoTracker() {
+}
 };
 
 class UndoSystem
@@ -75,6 +83,9 @@ virtual void clear() = 0;
 
 virtual void trackerAttach( UndoTracker& tracker ) = 0;
 virtual void trackerDetach( UndoTracker& tracker ) = 0;
+
+virtual ~UndoSystem() {
+}
 };
 
 #include "modulesystem.h"

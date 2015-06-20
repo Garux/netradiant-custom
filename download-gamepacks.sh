@@ -158,5 +158,6 @@ pack QuakePack       GPL         zip1   http://ingar.satgnu.net/files/gtkradiant
 pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
 pack UFOAIPack       proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
 #pack WarsowPack     GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
-pack WarsowPack      GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/WarsowPack.zip
+#pack WarsowPack     GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/WarsowPack.zip
+pack WarsowPack      GPL         git    https://github.com/Warsow/NetRadiantPack.git
 pack XonoticPack     GPL         git    http://git.xonotic.org/xonotic/netradiant-xonoticpack.git

@@ -23,6 +23,7 @@
 
 #include "inout.h"
 #include "cmdlib.h"
+#include "etclib.h"
 #include "imagelib.h"
 #include "vfs.h"
 
@@ -1229,6 +1230,305 @@ void Load32BitImage( const char *name, unsigned **pixels,  int *width, int *heig
 			pixels32[i * 4 + 1] = palette[ v * 3 + 1 ];
 			pixels32[i * 4 + 2] = palette[ v * 3 + 2 ];
 			pixels32[i * 4 + 3] = 0xff;
+		}
+	}
+}
+
+
+/*
+   ============================================================================
+
+   KHRONOS TEXTURE
+
+   ============================================================================
+ */
+
+
+#define KTX_UINT32_LE( buf ) ( ( unsigned int )( (buf)[0] | ( (buf)[1] << 8 ) | ( (buf)[2] << 16 ) | ( (buf)[3] << 24 ) ) )
+#define KTX_UINT32_BE( buf ) ( ( unsigned int )( (buf)[3] | ( (buf)[2] << 8 ) | ( (buf)[1] << 16 ) | ( (buf)[0] << 24 ) ) )
+
+#define KTX_TYPE_UNSIGNED_BYTE				0x1401
+#define KTX_TYPE_UNSIGNED_SHORT_4_4_4_4		0x8033
+#define KTX_TYPE_UNSIGNED_SHORT_5_5_5_1		0x8034
+#define KTX_TYPE_UNSIGNED_SHORT_5_6_5		0x8363
+
+#define KTX_FORMAT_ALPHA					0x1906
+#define KTX_FORMAT_RGB						0x1907
+#define KTX_FORMAT_RGBA						0x1908
+#define KTX_FORMAT_LUMINANCE				0x1909
+#define KTX_FORMAT_LUMINANCE_ALPHA			0x190A
+#define KTX_FORMAT_BGR						0x80E0
+#define KTX_FORMAT_BGRA						0x80E1
+
+#define KTX_FORMAT_ETC1_RGB8				0x8D64
+
+static void KTX_DecodeA8( const byte *in, qboolean bigEndian, byte *out ){
+	out[0] = out[1] = out[2] = 0;
+	out[3] = in[0];
+}
+
+static void KTX_DecodeRGB8( const byte *in, qboolean bigEndian, byte *out ){
+	out[0] = in[0];
+	out[1] = in[1];
+	out[2] = in[2];
+	out[3] = 255;
+}
+
+static void KTX_DecodeRGBA8( const byte *in, qboolean bigEndian, byte *out ){
+	out[0] = in[0];
+	out[1] = in[1];
+	out[2] = in[2];
+	out[3] = in[3];
+}
+
+static void KTX_DecodeL8( const byte *in, qboolean bigEndian, byte *out ){
+	out[0] = out[1] = out[2] = in[0];
+	out[3] = 255;
+}
+
+static void KTX_DecodeLA8( const byte *in, qboolean bigEndian, byte *out ){
+	out[0] = out[1] = out[2] = in[0];
+	out[3] = in[1];
+}
+
+static void KTX_DecodeBGR8( const byte *in, qboolean bigEndian, byte *out ){
+	out[0] = in[2];
+	out[1] = in[1];
+	out[2] = in[0];
+	out[3] = 255;
+}
+
+static void KTX_DecodeBGRA8( const byte *in, qboolean bigEndian, byte *out ){
+	out[0] = in[2];
+	out[1] = in[1];
+	out[2] = in[0];
+	out[3] = in[3];
+}
+
+static void KTX_DecodeRGBA4( const byte *in, qboolean bigEndian, byte *out ){
+	unsigned short rgba;
+	int r, g, b, a;
+
+	if ( bigEndian ) {
+		rgba = ( in[0] << 8 ) | in[1];
+	}
+	else {
+		rgba = ( in[1] << 8 ) | in[0];
+	}
+
+	r = ( rgba >> 12 ) & 0xf;
+	g = ( rgba >> 8 ) & 0xf;
+	b = ( rgba >> 4 ) & 0xf;
+	a = rgba & 0xf;
+	out[0] = ( r << 4 ) | r;
+	out[1] = ( g << 4 ) | g;
+	out[2] = ( b << 4 ) | b;
+	out[3] = ( a << 4 ) | a;
+}
+
+static void KTX_DecodeRGBA5( const byte *in, qboolean bigEndian, byte *out ){
+	unsigned short rgba;
+	int r, g, b;
+
+	if ( bigEndian ) {
+		rgba = ( in[0] << 8 ) | in[1];
+	}
+	else {
+		rgba = ( in[1] << 8 ) | in[0];
+	}
+
+	r = ( rgba >> 11 ) & 0x1f;
+	g = ( rgba >> 6 ) & 0x1f;
+	b = ( rgba >> 1 ) & 0x1f;
+	out[0] = ( r << 3 ) | ( r >> 2 );
+	out[1] = ( g << 3 ) | ( g >> 2 );
+	out[2] = ( b << 3 ) | ( b >> 2 );
+	out[3] = ( rgba & 1 ) * 255;
+}
+
+static void KTX_DecodeRGB5( const byte *in, qboolean bigEndian, byte *out ){
+	unsigned short rgba;
+	int r, g, b;
+
+	if ( bigEndian ) {
+		rgba = ( in[0] << 8 ) | in[1];
+	}
+	else {
+		rgba = ( in[1] << 8 ) | in[0];
+	}
+
+	r = ( rgba >> 11 ) & 0x1f;
+	g = ( rgba >> 5 ) & 0x3f;
+	b = rgba & 0x1f;
+	out[0] = ( r << 3 ) | ( r >> 2 );
+	out[1] = ( g << 2 ) | ( g >> 4 );
+	out[2] = ( b << 3 ) | ( b >> 2 );
+	out[3] = 255;
+}
+
+typedef struct
+{
+	unsigned int type;
+	unsigned int format;
+	unsigned int pixelSize;
+	void ( *decode )( const byte *in, qboolean bigEndian, byte *out );
+} KTX_UncompressedFormat_t;
+
+static const KTX_UncompressedFormat_t KTX_UncompressedFormats[] =
+{
+	{ KTX_TYPE_UNSIGNED_BYTE, KTX_FORMAT_ALPHA, 1, KTX_DecodeA8 },
+	{ KTX_TYPE_UNSIGNED_BYTE, KTX_FORMAT_RGB, 3, KTX_DecodeRGB8 },
+	{ KTX_TYPE_UNSIGNED_BYTE, KTX_FORMAT_RGBA, 4, KTX_DecodeRGBA8 },
+	{ KTX_TYPE_UNSIGNED_BYTE, KTX_FORMAT_LUMINANCE, 1, KTX_DecodeL8 },
+	{ KTX_TYPE_UNSIGNED_BYTE, KTX_FORMAT_LUMINANCE_ALPHA, 2, KTX_DecodeLA8 },
+	{ KTX_TYPE_UNSIGNED_BYTE, KTX_FORMAT_BGR, 3, KTX_DecodeBGR8 },
+	{ KTX_TYPE_UNSIGNED_BYTE, KTX_FORMAT_BGRA, 4, KTX_DecodeBGRA8 },
+	{ KTX_TYPE_UNSIGNED_SHORT_4_4_4_4, KTX_FORMAT_RGBA, 2, KTX_DecodeRGBA4 },
+	{ KTX_TYPE_UNSIGNED_SHORT_5_5_5_1, KTX_FORMAT_RGBA, 2, KTX_DecodeRGBA5 },
+	{ KTX_TYPE_UNSIGNED_SHORT_5_6_5, KTX_FORMAT_RGB, 2, KTX_DecodeRGB5 },
+	{ 0, 0, 0, NULL }
+};
+
+static qboolean KTX_DecodeETC1( const byte* in, size_t inSize, unsigned int width, unsigned int height, byte* out ){
+	unsigned int y, stride = width * 4;
+	byte rgba[64];
+
+	if ( inSize < ( ( ( ( width + 3 ) & ~3 ) * ( ( height + 3 ) & ~3 ) ) >> 1 ) ) {
+		return qfalse;
+	}
+
+	for ( y = 0; y < height; y += 4, out += stride * 4 )
+	{
+		byte *p;
+		unsigned int x, blockrows;
+
+		blockrows = height - y;
+		if ( blockrows > 4 ) {
+			blockrows = 4;
+		}
+
+		p = out;
+		for ( x = 0; x < width; x += 4, p += 16 )
+		{
+			unsigned int blockrowsize, blockrow;
+
+			ETC_DecodeETC1Block( in, rgba, qtrue );
+			in += 8;
+
+			blockrowsize = width - x;
+			if ( blockrowsize > 4 ) {
+				blockrowsize = 4;
+			}
+			blockrowsize *= 4;
+			for ( blockrow = 0; blockrow < blockrows; blockrow++ )
+			{
+				memcpy( p + blockrow * stride, rgba + blockrow * 16, blockrowsize );
+			}
+		}
+	}
+
+	return qtrue;
+}
+
+#define KTX_HEADER_UINT32( buf ) ( bigEndian ? KTX_UINT32_BE( buf ) : KTX_UINT32_LE( buf ) )
+
+void LoadKTXBufferFirstImage( const byte *buffer, size_t bufSize, byte **pic, int *picWidth, int *picHeight ){
+	unsigned int type, format, width, height, imageOffset;
+	byte *pixels;
+
+	if ( bufSize < 64 ) {
+		Error( "LoadKTX: Image doesn't have a header" );
+	}
+
+	if ( memcmp( buffer, "\xABKTX 11\xBB\r\n\x1A\n", 12 ) ) {
+		Error( "LoadKTX: Image has the wrong identifier" );
+	}
+
+	qboolean bigEndian = ( buffer[4] == 4 );
+
+	type = KTX_HEADER_UINT32( buffer + 16 );
+	if ( type ) {
+		format = KTX_HEADER_UINT32( buffer + 32 );
+	}
+	else {
+		format = KTX_HEADER_UINT32( buffer + 28 );
+	}
+
+	width = KTX_HEADER_UINT32( buffer + 36 );
+	height = KTX_HEADER_UINT32( buffer + 40 );
+	if ( !width ) {
+		Error( "LoadKTX: Image has zero width" );
+	}
+	if ( !height ) {
+		height = 1;
+	}
+	if ( picWidth ) {
+		*picWidth = width;
+	}
+	if ( picHeight ) {
+		*picHeight = height;
+	}
+
+	imageOffset = 64 + KTX_HEADER_UINT32( buffer + 60 ) + 4;
+	if ( bufSize < imageOffset ) {
+		Error( "LoadKTX: No image in the file" );
+	}
+	buffer += imageOffset;
+	bufSize -= imageOffset;
+
+	pixels = safe_malloc( width * height * 4 );
+	*pic = pixels;
+
+	if ( type ) {
+		const KTX_UncompressedFormat_t *ktxFormat = KTX_UncompressedFormats;
+		unsigned int pixelSize;
+		unsigned int inRowLength, inPadding;
+		unsigned int y;
+
+		while ( ktxFormat->type )
+		{
+			if ( ktxFormat->type == type && ktxFormat->format == format ) {
+				break;
+			}
+			ktxFormat++;
+		}
+		if ( !ktxFormat->type ) {
+			Error( "LoadKTX: Image has an unsupported pixel type 0x%X or format 0x%X", type, format );
+		}
+
+		pixelSize = ktxFormat->pixelSize;
+		inRowLength = width * pixelSize;
+		inPadding = ( ( inRowLength + 3 ) & ~3 ) - inRowLength;
+
+		if ( bufSize < height * ( inRowLength + inPadding ) ) {
+			Error( "LoadKTX: Image is truncated" );
+		}
+
+		for ( y = 0; y < height; y++ )
+		{
+			unsigned int x;
+			for ( x = 0; x < width; x++, buffer += pixelSize, pixels += 4 )
+			{
+				ktxFormat->decode( buffer, bigEndian, pixels );
+			}
+			buffer += inPadding;
+		}
+	}
+	else {
+		qboolean decoded = qfalse;
+
+		switch ( format )
+		{
+		case KTX_FORMAT_ETC1_RGB8:
+			decoded = KTX_DecodeETC1( buffer, bufSize, width, height, pixels );
+			break;
+		default:
+			Error( "LoadKTX: Image has an unsupported compressed format format 0x%X", format );
+			break;
+		}
+
+		if ( !decoded ) {
+			Error( "LoadKTX: Image is truncated" );
 		}
 	}
 }

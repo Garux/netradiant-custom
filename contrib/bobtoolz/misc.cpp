@@ -31,7 +31,7 @@
 
 #include "funchandlers.h"
 
-#ifdef __linux__
+#if defined ( POSIX )
 #include <sys/types.h>
 #include <unistd.h>
 #endif

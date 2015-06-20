@@ -158,13 +158,23 @@ ifeq ($(BUILD),release)
 ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O3
 	# only add -O3 if no -O flag is in $(CFLAGS)
-	# to allow overriding the optimizations
 endif
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -s
 else
 
+ifeq ($(BUILD),native)
+ifeq ($(findstring $(CFLAGS),-O),)
+	CFLAGS_COMMON += -O3
+	# only add -O3 if no -O flag is in $(CFLAGS)
+endif
+	CFLAGS_COMMON += -march=native -mcpu=native
+	CPPFLAGS_COMMON +=
+	LDFLAGS_COMMON += -s
+else
+
 $(error Unsupported build type: $(BUILD))
+endif
 endif
 endif
 endif
@@ -395,6 +405,7 @@ binaries-radiant-plugins: \
 .PHONY: binaries-radiant
 binaries-radiant-core: \
 	$(INSTALLDIR)/radiant.$(EXE) \
+	$(INSTALLDIR)/radiant \
 
 .PHONY: binaries-tools
 binaries-tools: \
@@ -410,14 +421,17 @@ binaries-tools-quake2: \
 .PHONY: binaries-q2map
 binaries-q2map: \
 	$(INSTALLDIR)/q2map.$(EXE) \
+	$(INSTALLDIR)/q2map \
 
 .PHONY: binaries-qdata3
 binaries-qdata3: \
 	$(INSTALLDIR)/qdata3.$(EXE) \
+	$(INSTALLDIR)/qdata3 \
 
 .PHONY: binaries-h2data
 binaries-h2data: \
-	$(INSTALLDIR)/heretic2/h2data.$(EXE)
+	$(INSTALLDIR)/heretic2/h2data.$(EXE) \
+	$(INSTALLDIR)/heretic2/h2data \
 
 .PHONY: binaries-tools-quake3
 binaries-tools-quake3: \
@@ -427,10 +441,12 @@ binaries-tools-quake3: \
 .PHONY: binaries-q3data
 binaries-q3data: \
 	$(INSTALLDIR)/q3data.$(EXE) \
+	$(INSTALLDIR)/q3data \
 
 .PHONY: binaries-q3map2
 binaries-q3map2: \
 	$(INSTALLDIR)/q3map2.$(EXE) \
+	$(INSTALLDIR)/q3map2 \
 
 
 .PHONY: clean
@@ -443,7 +459,9 @@ clean:
 	file=$@; $(MKDIR) $${file%/*}
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) $(LIBS_EXTRA) $(LIBS_COMMON) $(LIBS) -o $@
 	[ -z "$(LDD)" ] || [ -z "`$(LDD) -r $@ $(STDERR_TO_STDOUT) $(STDOUT_TO_DEVNULL) $(TEE_STDERR)`" ] || { $(RM) $@; exit 1; }
-	if $(MAKE_EXE_SYMLINK); then o=$@; $(LN_SNF) $${o##*/} $*; fi
+
+$(INSTALLDIR)/%: $(INSTALLDIR)/%.$(EXE)
+	if $(MAKE_EXE_SYMLINK); then o=$<; $(LN_SNF) $${o##*/} $@; else true; fi
 
 %.$(A):
 	$(AR) rc $@ $^
@@ -522,6 +540,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/vis.o \
 	tools/quake3/q3map2/writebsp.o \
 	libddslib.$(A) \
+	libetclib.$(A) \
 	libfilematch.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
@@ -571,6 +590,10 @@ libddslib.$(A): CPPFLAGS_EXTRA := -Ilibs
 libddslib.$(A): \
 	libs/ddslib/ddslib.o \
 
+libetclib.$(A): CPPFLAGS_EXTRA := -Ilibs
+libetclib.$(A): \
+	libs/etclib.o \
+
 $(INSTALLDIR)/q3data.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_ZLIB)
 $(INSTALLDIR)/q3data.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_ZLIB) -Itools/quake3/common -Ilibs -Iinclude
 $(INSTALLDIR)/q3data.$(EXE): \
@@ -595,6 +618,7 @@ $(INSTALLDIR)/q3data.$(EXE): \
 	tools/quake3/q3data/stripper.o \
 	tools/quake3/q3data/video.o \
 	libfilematch.$(A) \
+	libetclib.$(A) \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	$(if $(findstring $(OS),Win32),icons/q3data.o,) \
@@ -789,9 +813,11 @@ $(INSTALLDIR)/modules/image.$(DLL): \
 	plugins/image/dds.o \
 	plugins/image/image.o \
 	plugins/image/jpeg.o \
+	plugins/image/ktx.o \
 	plugins/image/pcx.o \
 	plugins/image/tga.o \
 	libddslib.$(A) \
+	libetclib.$(A) \
 
 $(INSTALLDIR)/modules/imageq2.$(DLL): CPPFLAGS_EXTRA := -Ilibs -Iinclude
 $(INSTALLDIR)/modules/imageq2.$(DLL): \
