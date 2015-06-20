@@ -1,7 +1,7 @@
 # Makefile.conf
 # Build configuration for netradiant on linux
 
-RADIANT_ABOUTMSG=netradiant-20130630-1.5.0ing
+RADIANT_ABOUTMSG=netradiant-20150620-1.5.0ing
 BUILD=release
 
 # do not fetch gamepacks

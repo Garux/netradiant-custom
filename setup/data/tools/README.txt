@@ -57,8 +57,11 @@ GAMEPACKS
 	Quake 3 support files can be downloaded from
 	https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Pack/trunk/install/
 
-	Quake2World gamepack for GtkRadiant 1.5
-	http://quake2world.net
+	Quetoo gamepack for GtkRadiant 1.5
+	http://quetoo.org
+
+	Neverball 1.6 gamepack for GtkRadiant 1.5/NetRadiant
+	http://neverball.org
 	(included with source)
 
 	Nexuiz gamepack for NetRadiant
@@ -82,18 +85,25 @@ GAMEPACKS
 	http://ufoai.sourceforge.net/
 	(included with source)
 
+	Unvanquished gamepack for NetRadiant
+	https://github.com/Unvanquished/mapeditor-support.git
+
 	Warsow gamepack for NetRadiant
-	https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
+	https://github.com/Warsow/NetRadiantPack.git
 
 	Xonotic gamepack for NetRadiant
-	git://git.xonotic.org/xonotic/netradiant-xonoticpack.git
-	
+	http://git.xonotic.org/xonotic/netradiant-xonoticpack.git
+
 MANUAL
 
 	GtkRadiant Editor Manual
 	https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Rad_Manual/trunk
 
 CHANGES
+
+	2015-06-20
+		updated to the latest NetRadiant git revision
+		updated gamepacks
 
 	2013-06-30 
 		updated to the latest NetRadiant git revision
