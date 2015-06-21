@@ -449,7 +449,7 @@ image_t *ImageLoad( const char *filename ){
 						LoadDDSBuffer( buffer, size, &image->pixels, &image->width, &image->height );
 
 						/* debug code */
-						#if 1
+						#if 0
 						{
 							ddsPF_t pf;
 							DDSGetInfo( (ddsBuffer_t*) buffer, NULL, NULL, &pf );
@@ -462,15 +462,15 @@ image_t *ImageLoad( const char *filename ){
 						}
 						#endif
 					}
-				}
-				else
-				{
-					/* attempt to load ktx */
-					StripExtension( name );
-					strcat( name, ".ktx" );
-					size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
-					if ( size > 0 ) {
-						LoadKTXBufferFirstImage( buffer, size, &image->pixels, &image->width, &image->height );
+					else
+					{
+						/* attempt to load ktx */
+						StripExtension( name );
+						strcat( name, ".ktx" );
+						size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
+						if ( size > 0 ) {
+							LoadKTXBufferFirstImage( buffer, size, &image->pixels, &image->width, &image->height );
+						}
 					}
 				}
 			}
