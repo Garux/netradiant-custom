@@ -1,7 +1,8 @@
 # Makefile.conf
 # Build configuration for netradiant on win64
 
-RADIANT_ABOUTMSG=netradiant-20150620-1.5.0ing
+# Include platform-independent configuration settings
+-include Makefile.conf.common
 
 # FIXME release build fails on win64
 BUILD=debug
@@ -14,7 +15,3 @@ PKGCONFIG=pkg-config.sh
 CFLAGS=-I/local64/include -mms-bitfields -mthreads -fno-strict-aliasing
 CXXFLAGS=-I/local64/include -I/local64/include/libxml2
 LDFLAGS=-L/local64/lib
-
-# do not fetch gamepacks
-DOWNLOAD_GAMEPACKS=no
-

@@ -1,8 +1,9 @@
 # Makefile.conf
 # Build configuration for netradiant on win32
 
-RADIANT_ABOUTMSG=netradiant-20150620-1.5.0ing
-BUILD=release
+# Include platform-independent configuration settings
+-include Makefile.conf.common
+
 EXE=exe
 
 OS=Win32
@@ -13,7 +14,3 @@ PKGCONFIG=pkg-config.sh
 CFLAGS=-I/local32/include -mms-bitfields -mthreads -fno-strict-aliasing
 CXXFLAGS=-I/local32/include -I/local32/include/libxml2
 LDFLAGS=-L/local32/lib
-
-# do not fetch gamepacks
-DOWNLOAD_GAMEPACKS=no
-

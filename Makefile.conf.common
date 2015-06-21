@@ -1,0 +1,8 @@
+# Makefile.common
+# Platform-independent configuration settings
+
+RADIANT_ABOUTMSG=netradiant-20150621-1.5.0ing
+BUILD=release
+
+# do not fetch gamepacks
+DOWNLOAD_GAMEPACKS=no

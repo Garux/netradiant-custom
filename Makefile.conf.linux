@@ -1,8 +1,5 @@
 # Makefile.conf
 # Build configuration for netradiant on linux
 
-RADIANT_ABOUTMSG=netradiant-20150620-1.5.0ing
-BUILD=release
-
-# do not fetch gamepacks
-DOWNLOAD_GAMEPACKS=no
+# Include platform-independent configuration settings
+-include Makefile.conf.common

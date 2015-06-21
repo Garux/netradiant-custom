@@ -26,8 +26,8 @@ WEBSITES
 	http://www.icculus.org/netradiant
 
 SOURCE
-
-	git://git.xonotic.org/xonotic/netradiant.git
+    
+        https://gitlab.com/xonotic/netradiant
 	
 	http://ingar.satgnu.net/gtkradiant/files/gamepacks
 
@@ -57,8 +57,8 @@ GAMEPACKS
 	Quake 3 support files can be downloaded from
 	https://zerowing.idsoftware.com/svn/radiant.gamepacks/Q3Pack/trunk/install/
 
-	Quetoo gamepack for GtkRadiant 1.5
-	http://quetoo.org
+	Quetoo gamepack for GtkRadiant 1.5/NetRadiant
+	svn://svn.icculus.org/gtkradiant-gamepacks/Q2WPack/branches/1.5/
 
 	Neverball 1.6 gamepack for GtkRadiant 1.5/NetRadiant
 	http://neverball.org
@@ -101,9 +101,9 @@ MANUAL
 
 CHANGES
 
-	2015-06-20
+	2015-06-21
 		updated to the latest NetRadiant git revision
-		updated gamepacks
+		updated gamepacks		
 
 	2013-06-30 
 		updated to the latest NetRadiant git revision
