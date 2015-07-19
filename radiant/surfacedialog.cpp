@@ -442,23 +442,19 @@ void SurfaceInspector_FitTexture(){
 }
 
 static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
-	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
+	Patch_CapTexture();
 }
 
 static void OnBtnPatchnatural( GtkWidget *widget, gpointer data ){
-	Scene_PatchNaturalTexture_Selected( GlobalSceneGraph() );
+	Patch_NaturalTexture();
 }
 
 static void OnBtnPatchreset( GtkWidget *widget, gpointer data ){
-	float fx, fy;
-
-	if ( DoTextureLayout( &fx, &fy ) == eIDOK ) {
-		Scene_PatchTileTexture_Selected( GlobalSceneGraph(), fx, fy );
-	}
+	Patch_ResetTexture();
 }
 
 static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
-	Scene_PatchTileTexture_Selected( GlobalSceneGraph(), 1, 1 );
+	Patch_FitTexture();
 }
 
 static void OnBtnAxial( GtkWidget *widget, gpointer data ){
