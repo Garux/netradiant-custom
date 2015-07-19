@@ -57,6 +57,7 @@ void Patch_ResetTexture();
 void Patch_FitTexture();
 void Patch_FlipTextureX();
 void Patch_FlipTextureY();
+void Patch_AutoCapTexture();
 
 class PatchCreator;
 extern PatchCreator* g_patchCreator;

@@ -196,6 +196,34 @@ void Scene_PatchCapTexture_Selected( scene::Graph& graph ){
 	SceneChangeNotify();
 }
 
+
+void PatchAutoCapTexture( Patch& patch ) {
+
+	AABB box = patch.localAABB();
+	float x = box.extents.x();
+	float y = box.extents.y();
+	float z = box.extents.z();
+
+	int cap_direction = -1;
+	if ( x < y  && x < z )
+		cap_direction = 0;
+	else if ( y < x  && y < z )
+		cap_direction = 1;
+	else if ( z < x  && z < x )
+		cap_direction = 2;
+
+	if ( cap_direction >= 0 )
+		patch.ProjectTexture(cap_direction);
+	else
+		patch.NaturalTexture();
+}
+
+void Patch_AutoCapTexture(){
+	UndoableCommand command( "patchAutoCapTexture" );
+	Scene_forEachVisibleSelectedPatch( &PatchAutoCapTexture );
+	SceneChangeNotify();
+}
+
 class PatchFlipTexture
 {
 int m_axis;

@@ -455,6 +455,10 @@ void Scene_PatchTranslateTexture_Selected( scene::Graph& graph, float s, float t
 	Scene_forEachVisibleSelectedPatch( PatchTranslateTexture( s, t ) );
 }
 
+static void OnBtnPatchAutoCap( GtkWidget *widget, gpointer data ){
+	Patch_AutoCapTexture();
+}
+
 static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 	texdef_t td;
 
@@ -998,6 +1002,13 @@ GtkWindow* PatchInspector::BuildDialog(){
 					GtkHBox* hbox2 = GTK_HBOX( gtk_hbox_new( TRUE, 5 ) );
 					gtk_widget_show( GTK_WIDGET( hbox2 ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( hbox2 ), TRUE, FALSE, 0 );
+					{
+						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Auto Cap" ) );
+						gtk_widget_show( GTK_WIDGET( button ) );
+						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchAutoCap ), 0 );
+						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "CAP" ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
