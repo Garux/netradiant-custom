@@ -836,7 +836,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Horizontal Shift Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
 							gtk_table_attach( table, GTK_WIDGET( label ), 2, 4, 0, 1,
-											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
@@ -844,7 +844,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Vertical Shift Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
 							gtk_table_attach( table, GTK_WIDGET( label ), 2, 4, 1, 2,
-											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
@@ -852,7 +852,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Horizontal Stretch Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
 							gtk_table_attach( table, GTK_WIDGET( label ), 2, 3, 2, 3,
-											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
@@ -869,7 +869,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Vertical Stretch Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
 							gtk_table_attach( table, GTK_WIDGET( label ), 2, 3, 3, 4,
-											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
@@ -886,7 +886,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Rotate Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
 							gtk_table_attach( table, GTK_WIDGET( label ), 2, 4, 4, 5,
-											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
