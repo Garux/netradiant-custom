@@ -326,7 +326,7 @@ TextureBrowser() :
 	m_rmbSelected( false ),
 	m_searchedTags( false ),
 	m_tags( false ),
-	m_uniformTextureSize( 128 ){
+	m_uniformTextureSize( 96 ){
 }
 };
 
@@ -1204,6 +1204,12 @@ void TextureBrowser_queueDraw( TextureBrowser& textureBrowser ){
 
 void TextureBrowser_setScale( TextureBrowser& textureBrowser, std::size_t scale ){
 	textureBrowser.m_textureScale = scale;
+
+	TextureBrowser_queueDraw( textureBrowser );
+}
+
+void TextureBrowser_setUniformSize( TextureBrowser& textureBrowser, std::size_t scale ){
+	textureBrowser.m_uniformTextureSize = scale;
 
 	TextureBrowser_queueDraw( textureBrowser );
 }
@@ -2496,6 +2502,14 @@ void TextureScaleExport( TextureBrowser& textureBrowser, const IntImportCallback
 }
 typedef ReferenceCaller1<TextureBrowser, const IntImportCallback&, TextureScaleExport> TextureScaleExportCaller;
 
+
+void UniformTextureSizeImport( TextureBrowser& textureBrowser, int value ){
+
+	if ( value > 16 )
+		TextureBrowser_setUniformSize( textureBrowser, value );
+}
+typedef ReferenceCaller1<TextureBrowser, int, UniformTextureSizeImport> UniformTextureSizeImportCaller;
+
 void TextureBrowser_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox(
 		"", "Texture scrollbar",
@@ -2511,6 +2525,12 @@ void TextureBrowser_constructPreferences( PreferencesPage& page ){
 			IntExportCallback( TextureScaleExportCaller( GlobalTextureBrowser() ) )
 			);
 	}
+	page.appendSpinner(
+		"Texture Thumbnail Size",
+		GlobalTextureBrowser().m_uniformTextureSize,
+		GlobalTextureBrowser().m_uniformTextureSize,
+		16, 8192
+	);
 	page.appendEntry( "Mousewheel Increment", GlobalTextureBrowser().m_mouseWheelScrollIncrement );
 	{
 		const char* startup_shaders[] = { "None", TextureBrowser_getComonShadersName() };
@@ -2557,6 +2577,9 @@ void TextureBrowser_Construct(){
 												 makeSizeStringImportCallback( TextureBrowserSetScaleCaller( g_TextureBrowser ) ),
 												 SizeExportStringCaller( g_TextureBrowser.m_textureScale )
 												 );
+	GlobalPreferenceSystem().registerPreference( "UniformTextureSize",
+												 makeIntStringImportCallback(UniformTextureSizeImportCaller(g_TextureBrowser)),
+												 IntExportStringCaller(g_TextureBrowser.m_uniformTextureSize) );
 	GlobalPreferenceSystem().registerPreference( "TextureScrollbar",
 												 makeBoolStringImportCallback( TextureBrowserImportShowScrollbarCaller( g_TextureBrowser ) ),
 												 BoolExportStringCaller( GlobalTextureBrowser().m_showTextureScrollbar )
