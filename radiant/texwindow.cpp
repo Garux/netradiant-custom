@@ -1624,7 +1624,9 @@ GtkMenuItem* TextureBrowser_constructViewMenu( GtkMenu* menu ){
 		create_menu_item_with_mnemonic( menu, "Show Untagged", "ShowUntagged" );
 	}
 
+	menu_separator( menu );
 	create_check_menu_item_with_mnemonic( menu, "Fixed Size", "FixedSize" );
+	create_check_menu_item_with_mnemonic( menu, "Transparency", "EnableAlpha" );
 
 	if ( string_empty( g_pGameDescription->getKeyValue( "show_wads" ) ) ) {
 		menu_separator( menu );
@@ -1632,8 +1634,6 @@ GtkMenuItem* TextureBrowser_constructViewMenu( GtkMenu* menu ){
 		gtk_widget_set_sensitive( g_TextureBrowser.m_shader_info_item, FALSE );
 	}
 
-	menu_separator( menu );
-	create_check_menu_item_with_mnemonic( menu, "Show Transparency", "EnableAlpha" );
 
 	return textures_menu_item;
 }
