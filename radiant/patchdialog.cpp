@@ -376,29 +376,19 @@ void Scene_PatchTileTexture_Selected( scene::Graph& graph, float s, float t ){
 }
 
 static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
-	UndoableCommand command( "patchCapTexture" );
-
-	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
+	Patch_CapTexture();
 }
 
 static void OnBtnPatchfit( GtkWidget *widget, gpointer data ){
-	UndoableCommand command( "patchFitTexture" );
-
-	Scene_PatchTileTexture_Selected( GlobalSceneGraph(), 1, 1 );
+	Patch_FitTexture();
 }
 
 static void OnBtnPatchnatural( GtkWidget *widget, gpointer data ){
-	UndoableCommand command( "patchNaturalTexture" );
-
-	Scene_PatchNaturalTexture_Selected( GlobalSceneGraph() );
+	Patch_NaturalTexture();
 }
 
 static void OnBtnPatchreset( GtkWidget *widget, gpointer data ){
-	float fx, fy;
-	if ( DoTextureLayout( &fx, &fy ) == eIDOK ) {
-		UndoableCommand command( "patchTileTexture" );
-		Scene_PatchTileTexture_Selected( GlobalSceneGraph(), fx, fy );
-	}
+	Patch_ResetTexture();
 }
 
 struct PatchRotateTexture
