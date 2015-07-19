@@ -804,16 +804,6 @@ void Patch_constructMenu( GtkMenu* menu ){
 		create_menu_item_with_mnemonic( menu_in_menu, "Set", "MakeOverlayPatch" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Clear", "ClearPatchOverlays" );
 	}
-	menu_separator( menu );
-	{
-			GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Texture" );
-			if ( g_Layout_enableDetachableMenus.m_value ) {
-					menu_tearoff( menu_in_menu );
-			}
-			create_menu_item_with_mnemonic( menu_in_menu, "Flip Horizontally", "InvertCurveTextureX" );
-			create_menu_item_with_mnemonic( menu_in_menu, "Flip Vertically", "InvertCurveTextureY" );
-			create_menu_item_with_mnemonic( menu_in_menu, "Naturalize", "NaturalizePatch" );
-	}
 }
 
 
