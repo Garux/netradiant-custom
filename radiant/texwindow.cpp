@@ -132,9 +132,9 @@ typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addDirectory>
 namespace
 {
 bool g_TextureBrowser_shaderlistOnly = false;
-bool g_TextureBrowser_fixedSize = false;
+bool g_TextureBrowser_fixedSize = true;
 bool g_TextureBrowser_filterNotex = false;
-bool g_TextureBrowser_enableAlpha = false;
+bool g_TextureBrowser_enableAlpha = true;
 }
 
 class DeferredAdjustment
