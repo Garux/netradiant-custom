@@ -484,7 +484,7 @@ endif
 
 
 $(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB)
-$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -Itools/quake3/common -Ilibs -Iinclude
+$(INSTALLDIR)/q3map2.$(EXE): CPPFLAGS_EXTRA := $(CPPFLAGS_XML) $(CPPFLAGS_GLIB) $(CPPFLAGS_PNG) $(CPPFLAGS_JPEG) -lm -Itools/quake3/common -Ilibs -Iinclude
 $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/cmdlib.o \
 	tools/quake3/common/imagelib.o \
@@ -497,6 +497,29 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/threads.o \
 	tools/quake3/common/unzip.o \
 	tools/quake3/common/vfs.o \
+	tools/quake3/libs/detour/DetourAlloc.o \
+	tools/quake3/libs/detour/DetourNavMeshQuery.o \
+	tools/quake3/libs/detour/DetourDebugDraw.o \
+	tools/quake3/libs/detour/DetourNode.o \
+	tools/quake3/libs/detour/DetourPathCorridor.o \
+	tools/quake3/libs/detour/DetourNavMeshBuilder.o \
+	tools/quake3/libs/detour/DebugDraw.o \
+	tools/quake3/libs/detour/DetourCommon.o \
+	tools/quake3/libs/detour/DetourNavMesh.o \
+	tools/quake3/libs/detour/DetourTileCacheBuilder.o \
+	tools/quake3/libs/detour/DetourTileCache.o \
+	tools/quake3/libs/recast/ChunkyTriMesh.o \
+	tools/quake3/libs/fastlz/fastlz.o \
+	tools/quake3/libs/recast/RecastMesh.o \
+	tools/quake3/libs/recast/RecastRegion.o \
+	tools/quake3/libs/recast/RecastRasterization.o \
+	tools/quake3/libs/recast/RecastMeshDetail.o \
+	tools/quake3/libs/recast/RecastLayers.o \
+	tools/quake3/libs/recast/RecastContour.o \
+	tools/quake3/libs/recast/RecastAlloc.o \
+	tools/quake3/libs/recast/RecastFilter.o \
+	tools/quake3/libs/recast/RecastArea.o \
+	tools/quake3/libs/recast/Recast.o \
 	tools/quake3/q3map2/brush.o \
 	tools/quake3/q3map2/brush_primit.o \
 	tools/quake3/q3map2/bspfile_abstract.o \
@@ -520,6 +543,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/map.o \
 	tools/quake3/q3map2/mesh.o \
 	tools/quake3/q3map2/model.o \
+	tools/quake3/q3map2/nav.o \
 	tools/quake3/q3map2/patch.o \
 	tools/quake3/q3map2/path_init.o \
 	tools/quake3/q3map2/portals.o \

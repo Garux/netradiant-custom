@@ -47,9 +47,18 @@ void Broadcast_Shutdown();
 #define SYS_ERR 3 // error
 #define SYS_NOXML 4 // don't send that down the XML stream
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 extern qboolean verbose;
 void Sys_Printf( const char *text, ... );
 void Sys_FPrintf( int flag, const char *text, ... );
+
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef _DEBUG
 #define DBG_XML 1

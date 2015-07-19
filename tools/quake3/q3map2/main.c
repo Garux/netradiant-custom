@@ -36,7 +36,20 @@
 /* dependencies */
 #include "q3map2.h"
 
-
+char *surfaceTypes[ NUM_SURFACE_TYPES ] =
+{
+	"SURFACE_BAD",
+	"SURFACE_FACE",
+	"SURFACE_PATCH",
+	"SURFACE_TRIANGLES",
+	"SURFACE_FLARE",
+	"SURFACE_FOLIAGE",
+	"SURFACE_FORCED_META",
+	"SURFACE_META",
+	"SURFACE_FOGHULL",
+	"SURFACE_DECAL",
+	"SURFACE_SHADER"
+};
 
 /*
    Random()
@@ -1867,6 +1880,11 @@ int main( int argc, char **argv ){
 	/* div0: minimap */
 	else if ( !strcmp( argv[ 1 ], "-minimap" ) ) {
 		r = MiniMapBSPMain( argc - 1, argv + 1 );
+	}
+
+	/* Navigation Mesh generation */
+	else if(!strcmp(argv[1], "-nav")) {
+		r = NavMain(argc - 1, argv + 1);
 	}
 
 	/* ydnar: otherwise create a bsp */
