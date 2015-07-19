@@ -67,6 +67,32 @@ void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const cha
 	}
 }
 
+void PatchAutoCapTexture( Patch& patch ) {
+
+	AABB box = patch.localAABB();
+	float x = box.extents.x();
+	float y = box.extents.y();
+	float z = box.extents.z();
+
+	int cap_direction = -1;
+	if ( x < y  && x < z )
+		cap_direction = 0;
+	else if ( y < x  && y < z )
+		cap_direction = 1;
+	else if ( z < x  && z < x )
+		cap_direction = 2;
+
+	if ( cap_direction >= 0 )
+		patch.ProjectTexture(cap_direction);
+	else
+		patch.NaturalTexture();
+}
+
+void Patch_AutoCapTexture(){
+	UndoableCommand command( "patchAutoCapTexture" );
+	Scene_forEachVisibleSelectedPatch( &PatchAutoCapTexture );
+	SceneChangeNotify();
+}
 
 void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, const char* shader ){
 	if ( ( type == eCapEndCap || type == eCapIEndCap )
@@ -89,8 +115,10 @@ void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, co
 		NodeSmartReference cap( g_patchCreator->createPatch() );
 		Node_getTraversable( instance.path().parent() )->insert( cap );
 
-		patch.MakeCap( Node_getPatch( cap ), type, ROW, true );
-		Node_getPatch( cap )->SetShader( shader );
+		Patch* cap_patch = Node_getPatch( cap );
+		patch.MakeCap( cap_patch, type, ROW, true );
+		cap_patch->SetShader( shader );
+		PatchAutoCapTexture(*cap_patch);
 
 		scene::Path path( instance.path() );
 		path.pop();
@@ -102,8 +130,10 @@ void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, co
 		NodeSmartReference cap( g_patchCreator->createPatch() );
 		Node_getTraversable( instance.path().parent() )->insert( cap );
 
-		patch.MakeCap( Node_getPatch( cap ), type, ROW, false );
-		Node_getPatch( cap )->SetShader( shader );
+		Patch* cap_patch = Node_getPatch( cap );
+		patch.MakeCap( cap_patch, type, ROW, false );
+		cap_patch->SetShader( shader );
+		PatchAutoCapTexture(*cap_patch);
 
 		scene::Path path( instance.path() );
 		path.pop();
@@ -193,34 +223,6 @@ void operator()( Patch& patch ) const {
 void Scene_PatchCapTexture_Selected( scene::Graph& graph ){
 	Scene_forEachVisibleSelectedPatch( PatchCapTexture() );
 	Patch::m_CycleCapIndex = ( Patch::m_CycleCapIndex == 0 ) ? 1 : ( Patch::m_CycleCapIndex == 1 ) ? 2 : 0;
-	SceneChangeNotify();
-}
-
-
-void PatchAutoCapTexture( Patch& patch ) {
-
-	AABB box = patch.localAABB();
-	float x = box.extents.x();
-	float y = box.extents.y();
-	float z = box.extents.z();
-
-	int cap_direction = -1;
-	if ( x < y  && x < z )
-		cap_direction = 0;
-	else if ( y < x  && y < z )
-		cap_direction = 1;
-	else if ( z < x  && z < x )
-		cap_direction = 2;
-
-	if ( cap_direction >= 0 )
-		patch.ProjectTexture(cap_direction);
-	else
-		patch.NaturalTexture();
-}
-
-void Patch_AutoCapTexture(){
-	UndoableCommand command( "patchAutoCapTexture" );
-	Scene_forEachVisibleSelectedPatch( &PatchAutoCapTexture );
 	SceneChangeNotify();
 }
 
