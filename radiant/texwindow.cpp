@@ -2310,6 +2310,23 @@ void RefreshShaders(){
 	ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Shaders" );
 	GlobalShaderSystem().refresh();
 	UpdateAllWindows();
+	GtkTreeSelection* selection = gtk_tree_view_get_selection((GtkTreeView*)GlobalTextureBrowser().m_treeViewTree);
+	GtkTreeModel* model = NULL;
+	GtkTreeIter iter;
+	if ( gtk_tree_selection_get_selected (selection, &model, &iter) )
+	{
+		gchar dirName[1024];
+
+		gchar* buffer;
+		gtk_tree_model_get( model, &iter, 0, &buffer, -1 );
+		strcpy( dirName, buffer );
+		g_free( buffer );
+		if ( !TextureBrowser_showWads() ) {
+			strcat( dirName, "/" );
+		}
+		TextureBrowser_ShowDirectory( GlobalTextureBrowser(), dirName );
+		TextureBrowser_queueDraw( GlobalTextureBrowser() );
+	}
 }
 
 void TextureBrowser_ToggleShowShaders(){
