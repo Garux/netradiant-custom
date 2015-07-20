@@ -1523,10 +1523,6 @@ vec_t                       Random( void );
 char                        *Q_strncpyz( char *dst, const char *src, size_t len );
 char                        *Q_strcat( char *dst, size_t dlen, const char *src );
 char                        *Q_strncat( char *dst, size_t dlen, const char *src, size_t slen );
-int                         BSPInfo( int count, char **fileNames );
-int                         ScaleBSPMain( int argc, char **argv );
-int                         ShiftBSPMain( int argc, char **argv );
-int                         ConvertMain( int argc, char **argv );
 
 /* help.c */
 void                        HelpMain(const char* arg);
@@ -1542,6 +1538,13 @@ int                         BSPMain( int argc, char **argv );
 
 /* minimap.c */
 int                         MiniMapBSPMain( int argc, char **argv );
+
+/* convert_bsp.c */
+int                         AnalyzeBSP( int argc, char **argv );
+int                         BSPInfo( int count, char **fileNames );
+int                         ScaleBSPMain( int argc, char **argv );
+int                         ShiftBSPMain( int argc, char **argv );
+int                         ConvertBSPMain( int argc, char **argv );
 
 /* convert_map.c */
 int                         ConvertBSPToMap( char *bspName );
