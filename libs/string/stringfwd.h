@@ -22,14 +22,17 @@
 #if !defined( INCLUDED_STRING_STRINGFWD_H )
 #define INCLUDED_STRING_STRINGFWD_H
 
+#include <string>
+
 // forward-declaration of CopiedString
 
 template<typename Type>
 class DefaultAllocator;
-template<typename Allocator>
+/*template<typename Allocator>
 class CopiedBuffer;
 template<typename Buffer>
 class String;
-typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
+typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;*/
+typedef std::string CopiedString;
 
 #endif

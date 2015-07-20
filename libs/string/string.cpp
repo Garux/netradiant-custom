@@ -21,7 +21,8 @@
 
 #include "string.h"
 
+/// \note Never called...
 void TestString(){
 	CopiedString bleh( "bleh" );
-	SmartString blah( "blah" );
+	//SmartString blah( "blah" );
 }

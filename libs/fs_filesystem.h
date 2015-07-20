@@ -55,7 +55,7 @@ Path( const char* path )
 	: m_path( path ), m_depth( path_get_depth( c_str() ) ){
 }
 Path( StringRange range )
-	: m_path( range ), m_depth( path_get_depth( c_str() ) ){
+	: m_path( range.first, range.last ), m_depth( path_get_depth( c_str() ) ){
 }
 bool operator<( const Path& other ) const {
 	return string_less_nocase( c_str(), other.c_str() );

@@ -288,6 +288,7 @@ const char* getToken(){
 }
 };
 
+#if 0
 /// \brief A non-mutable c-style string.
 ///
 /// \param Buffer The string storage implementation. Must be DefaultConstructible, CopyConstructible and Assignable. Must implement:
@@ -423,7 +424,6 @@ void swap( CopiedBuffer& other ){
 /// \brief A non-mutable string which uses copy-by-value for assignment.
 typedef String< CopiedBuffer< DefaultAllocator<char> > > CopiedString;
 
-
 /// \brief A non-mutable string buffer which uses reference-counting to avoid unnecessary allocations.
 template<typename Allocator>
 class SmartBuffer : private Allocator
@@ -491,6 +491,9 @@ void swap( SmartBuffer& other ){
 
 /// \brief A non-mutable string which uses copy-by-reference for assignment of SmartString.
 typedef String< SmartBuffer< DefaultAllocator<char> > > SmartString;
+#endif
+
+typedef std::string CopiedString;
 
 class StringEqualNoCase
 {
