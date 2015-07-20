@@ -215,13 +215,13 @@ bool Patch::isValid() const {
 		return false;
 	}
 
-	for ( const_iterator i = m_ctrl.begin(); i != m_ctrl.end(); ++i )
+	for ( const auto& i : m_ctrl )
 	{
-		if ( !float_valid( ( *i ).m_vertex.x() )
-			 || !float_valid( ( *i ).m_vertex.y() )
-			 || !float_valid( ( *i ).m_vertex.z() )
-			 || !float_valid( ( *i ).m_texcoord.x() )
-			 || !float_valid( ( *i ).m_texcoord.y() ) ) {
+		if ( !float_valid( i.m_vertex.x() )
+			 || !float_valid( i.m_vertex.y() )
+			 || !float_valid( i.m_vertex.z() )
+			 || !float_valid( i.m_texcoord.x() )
+			 || !float_valid( i.m_texcoord.y() ) ) {
 			globalErrorStream() << "patch has invalid control points\n";
 			return false;
 		}

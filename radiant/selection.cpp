@@ -684,7 +684,7 @@ struct FlatShadedVertex
 };
 
 
-typedef FlatShadedVertex* FlatShadedVertexIterator;
+typedef Array<FlatShadedVertex>::iterator FlatShadedVertexIterator;
 void Triangles_BestPoint( const Matrix4& local2view, clipcull_t cull, FlatShadedVertexIterator first, FlatShadedVertexIterator last, SelectionIntersection& best ){
 	for ( FlatShadedVertexIterator x( first ), y( first + 1 ), z( first + 2 ); x != last; x += 3, y += 3, z += 3 )
 	{

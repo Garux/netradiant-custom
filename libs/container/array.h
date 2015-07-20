@@ -22,6 +22,14 @@
 #if !defined( INCLUDED_CONTAINER_ARRAY_H )
 #define INCLUDED_CONTAINER_ARRAY_H
 
+#include <vector>
+/// \todo remove the custom allocator
+#include "memory/allocator.h"
+template<typename Element, typename Allocator = DefaultAllocator<Element> >
+using Array = std::vector<Element, Allocator>;
+/// \todo replace Array<char> with std::string
+
+#if 0
 #include <cstddef>
 #include <algorithm>
 
@@ -166,5 +174,6 @@ inline void swap( Array<Element, Allocator>& self, Array<Element, Allocator>& ot
 	self.swap( other );
 }
 }
+#endif
 
 #endif
