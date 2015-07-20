@@ -1084,10 +1084,10 @@ void EntityClassMenu_addItem( GtkMenu* menu, const char* name ){
 
 class EntityClassMenuInserter : public EntityClassVisitor
 {
-typedef std::pair<GtkMenu*, CopiedString> MenuPair;
+typedef std::pair<GtkMenu*, std::string> MenuPair;
 typedef std::vector<MenuPair> MenuStack;
 MenuStack m_stack;
-CopiedString m_previous;
+std::string m_previous;
 public:
 EntityClassMenuInserter( GtkMenu* menu ){
 	m_stack.reserve( 2 );
@@ -1105,7 +1105,7 @@ void visit( EntityClass* e ){
 	}
 	m_previous = e->name();
 }
-void pushMenu( const CopiedString& name ){
+void pushMenu( const std::string& name ){
 	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name.c_str() ) );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	container_add_widget( GTK_CONTAINER( m_stack.back().first ), GTK_WIDGET( item ) );
@@ -1133,7 +1133,7 @@ void addItem( const char* name, const char* next ){
 			if ( m_stack.size() == 2 ) {
 				popMenu();
 			}
-			pushMenu( CopiedString( StringRange( name, underscore ) ) );
+			pushMenu( std::string( StringRange( name, underscore ) ) );
 		}
 		else if ( m_stack.size() == 2 ) {
 			popMenu();

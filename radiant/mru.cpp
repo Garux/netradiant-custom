@@ -38,7 +38,7 @@
 namespace {
 GtkMenuItem *MRU_items[MRU_MAX];
 std::size_t MRU_used;
-typedef CopiedString MRU_filename_t;
+typedef std::string MRU_filename_t;
 MRU_filename_t MRU_filenames[MRU_MAX];
 typedef const char* MRU_key_t;
 MRU_key_t MRU_keys[MRU_MAX] = { "File0", "File1", "File2", "File3" };

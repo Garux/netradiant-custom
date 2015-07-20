@@ -34,7 +34,7 @@
 #include "gtkmisc.h"
 
 typedef std::pair<Accelerator, int> ShortcutValue; // accelerator, isRegistered
-typedef std::map<CopiedString, ShortcutValue> Shortcuts;
+typedef std::map<std::string, ShortcutValue> Shortcuts;
 
 void Shortcuts_foreach( Shortcuts& shortcuts, CommandVisitor& visitor ){
 	for ( Shortcuts::iterator i = shortcuts.begin(); i != shortcuts.end(); ++i )
@@ -69,7 +69,7 @@ void GlobalShortcuts_reportUnregistered(){
 	}
 }
 
-typedef std::map<CopiedString, Command> Commands;
+typedef std::map<std::string, Command> Commands;
 
 Commands g_commands;
 
@@ -84,7 +84,7 @@ const Command& GlobalCommands_find( const char* command ){
 	return ( *i ).second;
 }
 
-typedef std::map<CopiedString, Toggle> Toggles;
+typedef std::map<std::string, Toggle> Toggles;
 
 
 Toggles g_toggles;
@@ -99,7 +99,7 @@ const Toggle& GlobalToggles_find( const char* name ){
 	return ( *i ).second;
 }
 
-typedef std::map<CopiedString, KeyEvent> KeyEvents;
+typedef std::map<std::string, KeyEvent> KeyEvents;
 
 
 KeyEvents g_keyEvents;

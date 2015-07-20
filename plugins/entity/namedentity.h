@@ -52,7 +52,7 @@ class NamedEntity : public Nameable
 {
 EntityKeyValues& m_entity;
 NameCallbackSet m_changed;
-CopiedString m_name;
+std::string m_name;
 public:
 NamedEntity( EntityKeyValues& entity ) : m_entity( entity ){
 }

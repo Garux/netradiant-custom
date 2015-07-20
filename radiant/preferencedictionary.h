@@ -47,10 +47,10 @@ void exportString( const StringImportCallback& importer ){
 }
 };
 
-typedef std::map<CopiedString, PreferenceEntry> PreferenceEntries;
+typedef std::map<std::string, PreferenceEntry> PreferenceEntries;
 PreferenceEntries m_preferences;
 
-typedef std::map<CopiedString, CopiedString> PreferenceCache;
+typedef std::map<std::string, std::string> PreferenceCache;
 PreferenceCache m_cache;
 
 public:
@@ -185,7 +185,7 @@ struct xml_state_t
 	}
 
 	ETag m_tag;
-	CopiedString m_name;
+	std::string m_name;
 	StringOutputStream m_ostream;
 };
 

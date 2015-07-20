@@ -99,14 +99,14 @@ bool string_equal_start( const char* string, StringRange start ){
 	return string_equal_n( string, start.first, start.last - start.first );
 }
 
-typedef std::set<CopiedString> TextureGroups;
+typedef std::set<std::string> TextureGroups;
 
 void TextureGroups_addWad( TextureGroups& groups, const char* archive ){
 	if ( extension_equal( path_get_extension( archive ), "wad" ) ) {
 #if 1
 		groups.insert( archive );
 #else
-		CopiedString archiveBaseName( path_get_filename_start( archive ), path_get_filename_base_end( archive ) );
+		std::string archiveBaseName( path_get_filename_start( archive ), path_get_filename_base_end( archive ) );
 		groups.insert( archiveBaseName );
 #endif
 	}
@@ -118,7 +118,7 @@ void TextureGroups_addShader( TextureGroups& groups, const char* shaderName ){
 	if ( texture != shaderName ) {
 		const char* last = path_remove_directory( texture );
 		if ( !string_empty( last ) ) {
-			groups.insert( CopiedString( StringRange( texture, --last ) ) );
+			groups.insert( std::string( StringRange( texture, --last ) ) );
 		}
 	}
 }
@@ -214,7 +214,7 @@ int width, height;
 int originy;
 int m_nTotalHeight;
 
-CopiedString shader;
+std::string shader;
 
 GtkWindow* m_parent;
 GtkWidget* m_gl_widget;
@@ -232,10 +232,10 @@ GtkWidget* m_tag_notebook;
 GtkWidget* m_search_button;
 GtkWidget* m_shader_info_item;
 
-std::set<CopiedString> m_all_tags;
+std::set<std::string> m_all_tags;
 GtkListStore* m_all_tags_list;
-std::vector<CopiedString> m_copied_tags;
-std::set<CopiedString> m_found_shaders;
+std::vector<std::string> m_copied_tags;
+std::set<std::string> m_found_shaders;
 
 ToggleItem m_hideunused_item;
 ToggleItem m_showshaders_item;
@@ -382,7 +382,7 @@ void TextureBrowser_SetSelectedShader( TextureBrowser& textureBrowser, const cha
 
 	// disable the menu item "shader info" if no shader was selected
 	IShader* ishader = QERApp_Shader_ForName( shader );
-	CopiedString filename = ishader->getShaderFileName();
+	std::string filename = ishader->getShaderFileName();
 
 	if ( filename.empty() ) {
 		if ( textureBrowser.m_shader_info_item != NULL ) {
@@ -397,7 +397,7 @@ void TextureBrowser_SetSelectedShader( TextureBrowser& textureBrowser, const cha
 }
 
 
-CopiedString g_TextureBrowser_currentDirectory;
+std::string g_TextureBrowser_currentDirectory;
 
 /*
    ============================================================================
@@ -451,7 +451,7 @@ void Texture_NextPos( TextureBrowser& textureBrowser, TextureLayout& layout, qte
 }
 
 bool TextureSearch_IsShown( const char* name ){
-	std::set<CopiedString>::iterator iter;
+	std::set<std::string>::iterator iter;
 
 	iter = GlobalTextureBrowser().m_found_shaders.find( name );
 
@@ -463,8 +463,8 @@ bool TextureSearch_IsShown( const char* name ){
 	}
 }
 
-CopiedString g_notex;
-CopiedString g_shadernotex;
+std::string g_notex;
+std::string g_shadernotex;
 
 // if texture_showinuse jump over non in-use textures
 bool Texture_IsShown( IShader* shader, bool show_shaders, bool hideUnused ){
@@ -474,7 +474,7 @@ bool Texture_IsShown( IShader* shader, bool show_shaders, bool hideUnused ){
 	}
 
 	if ( g_TextureBrowser_currentDirectory == "Untagged" ) {
-		std::set<CopiedString>::iterator iter;
+		std::set<std::string>::iterator iter;
 
 		iter = GlobalTextureBrowser().m_found_shaders.find( shader->getName() );
 
@@ -677,7 +677,7 @@ class LoadShaderVisitor : public Archive::Visitor
 {
 public:
 void visit( const char* name ){
-	IShader* shader = QERApp_Shader_ForName( CopiedString( StringRange( name, path_get_filename_base_end( name ) ) ).c_str() );
+	IShader* shader = QERApp_Shader_ForName( std::string( StringRange( name, path_get_filename_base_end( name ) ) ).c_str() );
 	shader->DecRef();
 }
 };
@@ -1242,7 +1242,7 @@ void BuildStoreAssignedTags( GtkListStore* store, const char* shader, TextureBro
 
 	gtk_list_store_clear( store );
 
-	std::vector<CopiedString> assigned_tags;
+	std::vector<std::string> assigned_tags;
 	TagBuilder.GetShaderTags( shader, assigned_tags );
 
 	for ( size_t i = 0; i < assigned_tags.size(); i++ )
@@ -1254,11 +1254,11 @@ void BuildStoreAssignedTags( GtkListStore* store, const char* shader, TextureBro
 
 void BuildStoreAvailableTags(   GtkListStore* storeAvailable,
 								GtkListStore* storeAssigned,
-								const std::set<CopiedString>& allTags,
+								const std::set<std::string>& allTags,
 								TextureBrowser* textureBrowser ){
 	GtkTreeIter iterAssigned;
 	GtkTreeIter iterAvailable;
-	std::set<CopiedString>::const_iterator iterAll;
+	std::set<std::string>::const_iterator iterAll;
 	gchar* tag_assigned;
 
 	gtk_list_store_clear( storeAvailable );
@@ -1441,7 +1441,7 @@ void TextureGroups_constructTreeModel( TextureGroups groups, GtkTreeStore* store
 			 && next != groups.end()
 			 && string_equal_start( ( *next ).c_str(), dirRoot ) ) {
 			gtk_tree_store_append( store, &iter, NULL );
-			gtk_tree_store_set( store, &iter, 0, CopiedString( StringRange( dirName, firstUnderscore ) ).c_str(), -1 );
+			gtk_tree_store_set( store, &iter, 0, std::string( StringRange( dirName, firstUnderscore ) ).c_str(), -1 );
 
 			// keep going...
 			while ( i != groups.end() && string_equal_start( ( *i ).c_str(), dirRoot ) )
@@ -1483,7 +1483,7 @@ void TextureBrowser_constructTreeStore(){
 	TextureGroups groups = TextureGroups_constructTreeView();
 	GtkTreeStore* store = gtk_tree_store_new( 1, G_TYPE_STRING );
 	TextureGroups_constructTreeModel( groups, store );
-	std::set<CopiedString>::iterator iter;
+	std::set<std::string>::iterator iter;
 
 	GtkTreeModel* model = GTK_TREE_MODEL( store );
 
@@ -1705,7 +1705,7 @@ void TextureBrowser_assignTags(){
 					if ( !TagBuilder.CheckShaderTag( g_TextureBrowser.shader.c_str() ) ) {
 						// create a custom shader/texture entry
 						IShader* ishader = QERApp_Shader_ForName( g_TextureBrowser.shader.c_str() );
-						CopiedString filename = ishader->getShaderFileName();
+						std::string filename = ishader->getShaderFileName();
 
 						if ( filename.empty() ) {
 							// it's a texture
@@ -1774,7 +1774,7 @@ void TextureBrowser_buildTagList(){
 	GtkTreeIter treeIter;
 	gtk_list_store_clear( g_TextureBrowser.m_all_tags_list );
 
-	std::set<CopiedString>::iterator iter;
+	std::set<std::string>::iterator iter;
 
 	for ( iter = g_TextureBrowser.m_all_tags.begin(); iter != g_TextureBrowser.m_all_tags.end(); ++iter )
 	{
@@ -1831,7 +1831,7 @@ void TextureBrowser_searchTags(){
 			globalOutputStream() << "Found " << (unsigned int)shaders_found << " textures and shaders with " << tags_searched << "\n";
 			ScopeDisableScreenUpdates disableScreenUpdates( "Searching...", "Loading Textures" );
 
-			std::set<CopiedString>::iterator iter;
+			std::set<std::string>::iterator iter;
 
 			for ( iter = g_TextureBrowser.m_found_shaders.begin(); iter != g_TextureBrowser.m_found_shaders.end(); iter++ )
 			{
@@ -1889,7 +1889,7 @@ void TextureBrowser_constructSearchButton(){
 
 void TextureBrowser_checkTagFile(){
 	const char SHADERTAG_FILE[] = "shadertags.xml";
-	CopiedString default_filename, rc_filename;
+	std::string default_filename, rc_filename;
 	StringOutputStream stream( 256 );
 
 	stream << LocalRcPath_get();
@@ -2204,7 +2204,7 @@ void TextureBrowser_shaderInfo(){
 }
 
 void TextureBrowser_addTag(){
-	CopiedString tag;
+	std::string tag;
 
 	EMessageBoxReturn result = DoShaderTagDlg( &tag, "Add shader tag" );
 
@@ -2237,7 +2237,7 @@ void TextureBrowser_renameTag(){
 	gtk_tree_selection_selected_foreach( selection, GtkTreeSelectionForeachFunc( TextureBrowser_selectionHelper ), &selected );
 
 	if ( g_slist_length( selected ) == 1 ) { // we only rename a single tag
-		CopiedString newTag;
+		std::string newTag;
 		EMessageBoxReturn result = DoShaderTagDlg( &newTag, "Rename shader tag" );
 
 		if ( result == eIDOK && !newTag.empty() ) {
@@ -2259,7 +2259,7 @@ void TextureBrowser_renameTag(){
 
 			TagBuilder.RenameShaderTag( oldTag, newTag.c_str() );
 
-			g_TextureBrowser.m_all_tags.erase( (CopiedString)oldTag );
+			g_TextureBrowser.m_all_tags.erase( (std::string)oldTag );
 			g_TextureBrowser.m_all_tags.insert( newTag );
 
 			BuildStoreAssignedTags( g_TextureBrowser.m_assigned_store, g_TextureBrowser.shader.c_str(), &g_TextureBrowser );
@@ -2301,7 +2301,7 @@ void TextureBrowser_deleteTag(){
 			}
 
 			TagBuilder.DeleteTag( tagSelected );
-			g_TextureBrowser.m_all_tags.erase( (CopiedString)tagSelected );
+			g_TextureBrowser.m_all_tags.erase( (std::string)tagSelected );
 
 			BuildStoreAssignedTags( g_TextureBrowser.m_assigned_store, g_TextureBrowser.shader.c_str(), &g_TextureBrowser );
 			BuildStoreAvailableTags( g_TextureBrowser.m_available_store, g_TextureBrowser.m_assigned_store, g_TextureBrowser.m_all_tags, &g_TextureBrowser );
@@ -2319,10 +2319,10 @@ void TextureBrowser_copyTag(){
 
 void TextureBrowser_pasteTag(){
 	IShader* ishader = QERApp_Shader_ForName( g_TextureBrowser.shader.c_str() );
-	CopiedString shader = g_TextureBrowser.shader.c_str();
+	std::string shader = g_TextureBrowser.shader.c_str();
 
 	if ( !TagBuilder.CheckShaderTag( shader.c_str() ) ) {
-		CopiedString shaderFile = ishader->getShaderFileName();
+		std::string shaderFile = ishader->getShaderFileName();
 		if ( shaderFile.empty() ) {
 			// it's a texture
 			TagBuilder.AddShaderNode( shader.c_str(), CUSTOM, TEXTURE );
@@ -2405,7 +2405,7 @@ void TextureBrowser_showUntagged(){
 	if ( result == eIDYES ) {
 		g_TextureBrowser.m_found_shaders.clear();
 		TagBuilder.GetUntagged( g_TextureBrowser.m_found_shaders );
-		std::set<CopiedString>::iterator iter;
+		std::set<std::string>::iterator iter;
 
 		ScopeDisableScreenUpdates disableScreenUpdates( "Searching untagged textures...", "Loading Textures" );
 

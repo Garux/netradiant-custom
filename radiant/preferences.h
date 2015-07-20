@@ -91,7 +91,7 @@ GtkWidget* appendEntry( const char* name, float& data ){
 GtkWidget* appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
 	return m_dialog.addPathEntry( m_vbox, name, browse_directory, importCallback, exportCallback );
 }
-GtkWidget* appendPathEntry( const char* name, CopiedString& data, bool directory ){
+GtkWidget* appendPathEntry( const char* name, std::string& data, bool directory ){
 	return m_dialog.addPathEntry( m_vbox, name, data, directory );
 }
 GtkWidget* appendSpinner( const char* name, int& data, double value, double lower, double upper ){
@@ -165,14 +165,14 @@ typedef MemberCaller1<LatchedInt, int, &LatchedInt::import> LatchedIntImportCall
  */
 class CGameDescription
 {
-typedef std::map<CopiedString, CopiedString> GameDescription;
+typedef std::map<std::string, std::string> GameDescription;
 
 public:
-CopiedString mGameFile;   ///< the .game file that describes this game
+std::string mGameFile;   ///< the .game file that describes this game
 GameDescription m_gameDescription;
 
-CopiedString mGameToolsPath;   ///< the explicit path to the game-dependent modules
-CopiedString mGameType;   ///< the type of the engine
+std::string mGameToolsPath;   ///< the explicit path to the game-dependent modules
+std::string mGameType;   ///< the type of the engine
 
 const char* getKeyValue( const char* key ) const {
 	GameDescription::const_iterator i = m_gameDescription.find( key );
@@ -190,7 +190,7 @@ const char* getRequiredKeyValue( const char* key ) const {
 	return "";
 }
 
-CGameDescription( xmlDocPtr pDoc, const CopiedString &GameFile );
+CGameDescription( xmlDocPtr pDoc, const std::string &GameFile );
 
 void Dump();
 };
@@ -226,7 +226,7 @@ public:
    what game has been selected
    this is the name of the .game file
  */
-CopiedString m_sGameFile;
+std::string m_sGameFile;
 /*!
    prompt which game to load on startup
  */

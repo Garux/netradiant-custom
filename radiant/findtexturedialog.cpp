@@ -77,8 +77,8 @@ void destroyWindow(){
 
 
 bool m_bSelectedOnly;
-CopiedString m_strFind;
-CopiedString m_strReplace;
+std::string m_strFind;
+std::string m_strReplace;
 };
 
 FindTextureDialog g_FindTextureDialog;

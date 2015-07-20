@@ -45,7 +45,7 @@ EntityClasses g_EntityClassFGD_classes;
 typedef std::map<const char*, EntityClass*, RawStringLess> BaseClasses;
 BaseClasses g_EntityClassFGD_bases;
 EntityClass   *g_EntityClassFGD_bad = 0;
-typedef std::map<CopiedString, ListAttributeType> ListAttributeTypes;
+typedef std::map<std::string, ListAttributeType> ListAttributeTypes;
 ListAttributeTypes g_listTypesFGD;
 }
 
@@ -93,7 +93,7 @@ inline bool EntityClassFGD_parseToken( Tokeniser& tokeniser, const char* token )
 
 #define PARSE_ERROR "error parsing entity class definition"
 
-void EntityClassFGD_parseSplitString( Tokeniser& tokeniser, CopiedString& string ){
+void EntityClassFGD_parseSplitString( Tokeniser& tokeniser, std::string& string ){
 	StringOutputStream buffer( 256 );
 	for (;; )
 	{
@@ -249,7 +249,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 
 	for (;; )
 	{
-		CopiedString key = tokeniser.getToken();
+		std::string key = tokeniser.getToken();
 		if ( string_equal( key.c_str(), "]" ) ) {
 			tokeniser.nextLine();
 			break;
@@ -265,7 +265,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 				ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
 				const char* descriptionSeparator = tokeniser.getToken();
 				if ( string_equal( descriptionSeparator, ":" ) ) {
-					CopiedString description;
+					std::string description;
 					EntityClassFGD_parseSplitString( tokeniser, description );
 				}
 				else
@@ -278,7 +278,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 
 		ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
-		CopiedString type = tokeniser.getToken();
+		std::string type = tokeniser.getToken();
 		ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
 
 		if ( string_equal_nocase( type.c_str(), "flags" ) ) {
@@ -375,7 +375,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 				}
 				else
 				{
-					CopiedString tmp( value );
+					std::string tmp( value );
 					ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ":" ), PARSE_ERROR );
 					const char* name = tokeniser.getToken();
 					listType.push_back( name, tmp.c_str() );

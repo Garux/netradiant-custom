@@ -65,7 +65,7 @@ inline VertexPointer vertexpointer_arbitrarymeshvertex( const ArbitraryMeshVerte
 	return VertexPointer( VertexPointer::pointer( &array->vertex ), sizeof( ArbitraryMeshVertex ) );
 }
 
-inline void parseTextureName( CopiedString& name, const char* token ){
+inline void parseTextureName( std::string& name, const char* token ){
 	StringOutputStream cleaned( 256 );
 	cleaned << PathCleaned( token );
 	name = StringRange( cleaned.c_str(), path_get_filename_base_end( cleaned.c_str() ) ); // remove extension
@@ -81,7 +81,7 @@ typedef IndexBuffer indices_t;
 private:
 
 AABB m_aabb_local;
-CopiedString m_shader;
+std::string m_shader;
 Shader* m_state;
 
 vertices_t m_vertices;
@@ -324,7 +324,7 @@ SurfaceLightLists m_surfaceLightLists;
 class Remap
 {
 public:
-CopiedString first;
+std::string first;
 Shader* second;
 Remap() : second( 0 ){
 }

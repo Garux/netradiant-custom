@@ -59,9 +59,9 @@ struct filetype_copy_t
 	filetype_copy_t( const filetype_pair_t& other )
 		: m_moduleName( other.m_moduleName ), m_name( other.m_type.name ), m_pattern( other.m_type.pattern ){
 	}
-	CopiedString m_moduleName;
-	CopiedString m_name;
-	CopiedString m_pattern;
+	std::string m_moduleName;
+	std::string m_name;
+	std::string m_pattern;
 };
 
 typedef std::list<filetype_copy_t> Types;
@@ -90,8 +90,8 @@ class GTKMasks
 {
 const FileTypeList& m_types;
 public:
-std::vector<CopiedString> m_filters;
-std::vector<CopiedString> m_masks;
+std::vector<std::string> m_filters;
+std::vector<std::string> m_masks;
 
 GTKMasks( const FileTypeList& types ) : m_types( types ){
 	m_masks.reserve( m_types.size() );
@@ -113,7 +113,7 @@ GTKMasks( const FileTypeList& types ) : m_types( types ){
 }
 
 filetype_pair_t GetTypeForGTKMask( const char *mask ) const {
-	std::vector<CopiedString>::const_iterator j = m_masks.begin();
+	std::vector<std::string>::const_iterator j = m_masks.begin();
 	for ( FileTypeList::const_iterator i = m_types.begin(); i != m_types.end(); ++i, ++j )
 	{
 		if ( string_equal( ( *j ).c_str(), mask ) ) {

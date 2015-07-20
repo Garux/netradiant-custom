@@ -29,7 +29,7 @@ namespace ExampleHashTable
 {
 void testStuff(){
 	// HashTable example
-	typedef HashTable<CopiedString, int, HashString> MyHashTable;
+	typedef HashTable<std::string, int, HashString> MyHashTable;
 	MyHashTable hashtable;
 	hashtable["bleh"] = 5;
 	hashtable.insert( "blah", 17 );

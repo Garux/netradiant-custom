@@ -46,7 +46,7 @@ typedef std::map<const char*, EntityClass*, RawStringLessNoCase> EntityClasses;
 EntityClasses g_entityClasses;
 EntityClass   *eclass_bad = 0;
 //char eclass_directory[1024];
-typedef std::map<CopiedString, ListAttributeType> ListAttributeTypes;
+typedef std::map<std::string, ListAttributeType> ListAttributeTypes;
 ListAttributeTypes g_listTypes;
 }
 
@@ -168,12 +168,12 @@ void operator()( const char* name ) const {
 
 struct PathLess
 {
-	bool operator()( const CopiedString& path, const CopiedString& other ) const {
+	bool operator()( const std::string& path, const std::string& other ) const {
 		return path_less( path.c_str(), other.c_str() );
 	}
 };
 
-typedef std::map<CopiedString, const char*, PathLess> Paths;
+typedef std::map<std::string, const char*, PathLess> Paths;
 
 class PathsInsert
 {

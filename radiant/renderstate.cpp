@@ -1014,7 +1014,7 @@ void detach( ModuleObserver& observer ){
 	}
 	m_observers.detach( observer );
 }
-void realise( const CopiedString& name ){
+void realise( const std::string& name ){
 	construct( name.c_str() );
 
 	if ( m_used != 0 && m_shader != 0 ) {
@@ -1147,7 +1147,7 @@ public:
 explicit CreateOpenGLShader( OpenGLShaderCache* cache = 0 )
 	: m_cache( cache ){
 }
-OpenGLShader* construct( const CopiedString& name ){
+OpenGLShader* construct( const std::string& name ){
 	OpenGLShader* shader = new OpenGLShader;
 	if ( m_cache->realised() ) {
 		shader->realise( name );
@@ -1162,7 +1162,7 @@ void destroy( OpenGLShader* shader ){
 }
 };
 
-typedef HashedCache<CopiedString, OpenGLShader, HashString, std::equal_to<CopiedString>, CreateOpenGLShader> Shaders;
+typedef HashedCache<std::string, OpenGLShader, HashString, std::equal_to<std::string>, CreateOpenGLShader> Shaders;
 Shaders m_shaders;
 std::size_t m_unrealised;
 
@@ -2010,7 +2010,7 @@ void OpenGLStateBucket::render( OpenGLState& current, unsigned int globalstate, 
 
 class OpenGLStateMap : public OpenGLStateLibrary
 {
-typedef std::map<CopiedString, OpenGLState> States;
+typedef std::map<std::string, OpenGLState> States;
 States m_states;
 public:
 ~OpenGLStateMap(){

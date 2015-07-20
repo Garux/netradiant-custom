@@ -139,7 +139,7 @@ typedef ImportExport<bool, bool, BoolImport, BoolExport> BoolImportExport;
 typedef ImportExport<int, int, IntImport, IntExport> IntImportExport;
 typedef ImportExport<std::size_t, std::size_t, SizeImport, SizeExport> SizeImportExport;
 typedef ImportExport<float, float, FloatImport, FloatExport> FloatImportExport;
-typedef ImportExport<CopiedString, const char*, StringImport, StringExport> StringImportExport;
+typedef ImportExport<std::string, const char*, StringImport, StringExport> StringImportExport;
 
 
 
@@ -401,7 +401,7 @@ void Dialog::AddDialogData( GtkToggleButton& widget, bool& data ){
 void Dialog::AddDialogData( GtkRadioButton& widget, int& data ){
 	AddData<IntRadioImportExport, IntImportExport>( m_data ).apply( widget, data );
 }
-void Dialog::AddDialogData( GtkEntry& widget, CopiedString& data ){
+void Dialog::AddDialogData( GtkEntry& widget, std::string& data ){
 	AddData<TextEntryImportExport, StringImportExport>( m_data ).apply( widget, data );
 }
 void Dialog::AddDialogData( GtkEntry& widget, int& data ){
@@ -627,7 +627,7 @@ GtkWidget* Dialog::addPathEntry( GtkWidget* vbox, const char* name, bool browse_
 	return GTK_WIDGET( row );
 }
 
-GtkWidget* Dialog::addPathEntry( GtkWidget* vbox, const char* name, CopiedString& data, bool browse_directory ){
+GtkWidget* Dialog::addPathEntry( GtkWidget* vbox, const char* name, std::string& data, bool browse_directory ){
 	return addPathEntry( vbox, name, browse_directory, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
 }
 

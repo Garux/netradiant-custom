@@ -21,7 +21,7 @@
 
 #include "targetable.h"
 
-typedef std::map<CopiedString, targetables_t> targetnames_t;
+typedef std::map<std::string, targetables_t> targetnames_t;
 
 const char* g_targetable_nameKey = "targetname";
 

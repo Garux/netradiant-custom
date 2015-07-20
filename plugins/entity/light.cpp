@@ -660,7 +660,7 @@ inline void default_extents( Vector3& extents ){
 
 class ShaderRef
 {
-CopiedString m_name;
+std::string m_name;
 Shader* m_shader;
 void capture(){
 	m_shader = GlobalShaderCache().capture( m_name.c_str() );

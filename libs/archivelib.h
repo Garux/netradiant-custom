@@ -96,7 +96,7 @@ std::size_t read( char* buffer, std::size_t length ){
 /// \brief An ArchiveFile which is stored uncompressed as part of a larger archive file.
 class StoredArchiveFile : public ArchiveFile
 {
-CopiedString m_name;
+std::string m_name;
 FileInputStream m_filestream;
 SubFileInputStream m_substream;
 FileInputStream::size_type m_size;
@@ -129,7 +129,7 @@ InputStream& getInputStream(){
 /// \brief An ArchiveTextFile which is stored uncompressed as part of a larger archive file.
 class StoredArchiveTextFile : public ArchiveTextFile
 {
-CopiedString m_name;
+std::string m_name;
 FileInputStream m_filestream;
 SubFileInputStream m_substream;
 BinaryToTextInputStream<SubFileInputStream> m_textStream;
@@ -159,7 +159,7 @@ TextInputStream& getInputStream(){
 /// \brief An ArchiveFile which is stored as a single file on disk.
 class DirectoryArchiveFile : public ArchiveFile
 {
-CopiedString m_name;
+std::string m_name;
 FileInputStream m_istream;
 FileInputStream::size_type m_size;
 public:
@@ -198,7 +198,7 @@ InputStream& getInputStream(){
 /// \brief An ArchiveTextFile which is stored as a single file on disk.
 class DirectoryArchiveTextFile : public ArchiveTextFile
 {
-CopiedString m_name;
+std::string m_name;
 TextFileInputStream m_inputStream;
 public:
 

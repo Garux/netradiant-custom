@@ -524,7 +524,7 @@ void VMF_parseBlock( Tokeniser& tokeniser, const VMFBlock& block ){
 			tokeniser.ungetToken();
 			break;
 		}
-		CopiedString tmp( key );
+		std::string tmp( key );
 		tokeniser.nextLine();
 		const char* value = tokeniser.getToken();
 		tokeniser.nextLine();

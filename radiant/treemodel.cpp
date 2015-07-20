@@ -737,7 +737,7 @@ void graph_tree_model_row_changed( GraphTreeNode& node );
 
 class GraphTreeNode
 {
-typedef std::map<std::pair<CopiedString, scene::Node*>, GraphTreeNode*> ChildNodes;
+typedef std::map<std::pair<std::string, scene::Node*>, GraphTreeNode*> ChildNodes;
 ChildNodes m_childnodes;
 public:
 Reference<scene::Instance> m_instance;

@@ -64,7 +64,7 @@ unsigned int m_stream_size;
 typedef GenericFileSystem<PakRecord> PakFileSystem;
 PakFileSystem m_filesystem;
 FileInputStream m_pakfile;
-CopiedString m_name;
+std::string m_name;
 
 public:
 

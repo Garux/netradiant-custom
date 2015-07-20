@@ -42,7 +42,7 @@
 
 class DirectoryArchive : public Archive
 {
-CopiedString m_root;
+std::string m_root;
 public:
 DirectoryArchive( const char* root ) : m_root( root ){
 }

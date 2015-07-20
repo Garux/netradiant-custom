@@ -78,7 +78,7 @@ Archive* OpenArchive( const char* name );
 
 struct archive_entry_t
 {
-	CopiedString name;
+	std::string name;
 	Archive* archive;
 	bool is_pakfile;
 };
@@ -269,12 +269,12 @@ static int string_compare_nocase_upper( const char* a, const char* b ){
 class PakLess
 {
 public:
-bool operator()( const CopiedString& self, const CopiedString& other ) const {
+bool operator()( const std::string& self, const std::string& other ) const {
 	return string_compare_nocase_upper( self.c_str(), other.c_str() ) > 0;
 }
 };
 
-typedef std::set<CopiedString, PakLess> Archives;
+typedef std::set<std::string, PakLess> Archives;
 
 // =============================================================================
 // Global functions

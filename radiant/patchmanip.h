@@ -22,7 +22,7 @@
 #if !defined ( INCLUDED_PATCHMANIP_H )
 #define INCLUDED_PATCHMANIP_H
 
-#include "string/stringfwd.h"
+#include <string>
 
 void Patch_registerCommands();
 typedef struct _GtkToolbar GtkToolbar;
@@ -36,7 +36,7 @@ class Graph;
 }
 
 void Scene_PatchSetShader_Selected( scene::Graph& graph, const char* name );
-void Scene_PatchGetShader_Selected( scene::Graph& graph, CopiedString& name );
+void Scene_PatchGetShader_Selected( scene::Graph& graph, std::string& name );
 void Scene_PatchSelectByShader( scene::Graph& graph, const char* name );
 void Scene_PatchFindReplaceShader( scene::Graph& graph, const char* find, const char* replace );
 void Scene_PatchFindReplaceShader_Selected( scene::Graph& graph, const char* find, const char* replace );

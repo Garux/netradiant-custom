@@ -250,7 +250,7 @@ bool attributeSupported( const char* name ){
 		   || string_equal( name, "integer2" );
 }
 
-typedef std::map<CopiedString, ListAttributeType> ListAttributeTypes;
+typedef std::map<std::string, ListAttributeType> ListAttributeTypes;
 
 bool listAttributeSupported( ListAttributeTypes& listTypes, const char* name ){
 	return listTypes.find( name ) != listTypes.end();

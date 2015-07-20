@@ -48,7 +48,7 @@ class GenericFileSystem
 {
 class Path
 {
-CopiedString m_path;
+std::string m_path;
 unsigned int m_depth;
 public:
 Path( const char* path )

@@ -34,7 +34,7 @@
 
 class DeflatedArchiveFile : public ArchiveFile
 {
-CopiedString m_name;
+std::string m_name;
 FileInputStream m_istream;
 SubFileInputStream m_substream;
 DeflatedInputStream m_zipstream;
@@ -63,7 +63,7 @@ InputStream& getInputStream(){
 
 class DeflatedArchiveTextFile : public ArchiveTextFile
 {
-CopiedString m_name;
+std::string m_name;
 FileInputStream m_istream;
 SubFileInputStream m_substream;
 DeflatedInputStream m_zipstream;
@@ -112,7 +112,7 @@ ECompressionMode m_mode;
 
 typedef GenericFileSystem<ZipRecord> ZipFileSystem;
 ZipFileSystem m_filesystem;
-CopiedString m_name;
+std::string m_name;
 FileInputStream m_istream;
 
 bool read_record(){

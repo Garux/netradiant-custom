@@ -341,7 +341,7 @@ void Scene_PatchSetShader_Selected( scene::Graph& graph, const char* name ){
 	SceneChangeNotify();
 }
 
-void Scene_PatchGetShader_Selected( scene::Graph& graph, CopiedString& name ){
+void Scene_PatchGetShader_Selected( scene::Graph& graph, std::string& name ){
 	Patch* patch = Scene_GetUltimateSelectedVisiblePatch();
 	if ( patch != 0 ) {
 		name = patch->GetShader();

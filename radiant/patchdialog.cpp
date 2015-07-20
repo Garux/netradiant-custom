@@ -222,7 +222,7 @@ WindowPositionTracker m_position_tracker;
 
 Patch *m_Patch;
 
-CopiedString m_strName;
+std::string m_strName;
 float m_fS;
 float m_fT;
 float m_fX;

@@ -58,9 +58,9 @@ enum EWadVersion
 	eWAD3,
 };
 
-typedef std::map<CopiedString, wad_record_t, StringLessNoCase> files_t;
+typedef std::map<std::string, wad_record_t, StringLessNoCase> files_t;
 files_t m_files;
-CopiedString m_name;
+std::string m_name;
 FileInputStream m_wadfile;
 
 EWadVersion wad_version( const char* identification ){

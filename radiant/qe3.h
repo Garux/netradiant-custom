@@ -48,11 +48,11 @@ typedef struct
 	   win32: engine full path.
 	   unix: user home full path + engine dir.
 	 */
-	CopiedString m_userEnginePath;
+	std::string m_userEnginePath;
 	/*!
 	   cache for m_userEnginePath + mod subdirectory.
 	 */
-	CopiedString m_userGamePath;
+	std::string m_userGamePath;
 
 } QEGlobals_t;
 

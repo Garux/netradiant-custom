@@ -31,7 +31,7 @@
 
 namespace
 {
-CopiedString g_bitmapsPath;
+std::string g_bitmapsPath;
 }
 
 void BitmapsPath_set( const char* path ){

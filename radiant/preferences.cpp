@@ -113,7 +113,7 @@ inline const char* xmlAttr_getValue( xmlAttrPtr attr ){
 	return reinterpret_cast<const char*>( attr->children->content );
 }
 
-CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile ){
+CGameDescription::CGameDescription( xmlDocPtr pDoc, const std::string& gameFile ){
 	// read the user-friendly game name
 	xmlNodePtr pNode = pDoc->children;
 

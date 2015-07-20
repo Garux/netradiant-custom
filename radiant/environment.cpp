@@ -157,8 +157,8 @@ void gamedetect(){
 
 namespace
 {
-CopiedString home_path;
-CopiedString app_path;
+std::string home_path;
+std::string app_path;
 }
 
 const char* environment_get_home_path(){

@@ -58,7 +58,7 @@ KeyIsNameFunc m_keyIsName;
 NameKeys( const NameKeys& other );
 NameKeys& operator=( const NameKeys& other );
 
-typedef std::map<CopiedString, EntityKeyValue*> KeyValues;
+typedef std::map<std::string, EntityKeyValue*> KeyValues;
 KeyValues m_keyValues;
 
 void insertName( const char* key, EntityKeyValue& value ){

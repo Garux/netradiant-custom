@@ -361,7 +361,7 @@ bool XmlTagBuilder::AddShaderTag( const char* shader, const char* content, NodeT
 }
 
 //int XmlTagBuilder::RenameShaderTag(const char* oldtag, const char* newtag)
-int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
+int XmlTagBuilder::RenameShaderTag( const char* oldtag, std::string newtag ){
 	/* Replaces tag node contents
 
 	   char* oldtag - the <tag></tag> node content that sould be changed
@@ -457,9 +457,9 @@ bool XmlTagBuilder::DeleteTag( const char* tag ){
 	strcat( expression, tag );
 	strcat( expression, "']" );
 
-	std::set<CopiedString> dellist;
+	std::set<std::string> dellist;
 	TagSearch( expression, dellist );
-	std::set<CopiedString>::iterator iter;
+	std::set<std::string>::iterator iter;
 
 	for ( iter = dellist.begin(); iter != dellist.end(); iter++ )
 	{
@@ -470,7 +470,7 @@ bool XmlTagBuilder::DeleteTag( const char* tag ){
 	return true;
 }
 
-void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>& tags ){
+void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<std::string>& tags ){
 	/* Gets the tags from a shader
 
 	   char* shader - the name of the shader
@@ -500,13 +500,13 @@ void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
-			tags.push_back( (CopiedString)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
+			tags.push_back( (std::string)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
 		}
 	}
 	xmlXPathFreeObject( xpathPtr );
 }
 
-void XmlTagBuilder::GetUntagged( std::set<CopiedString>& shaders ){
+void XmlTagBuilder::GetUntagged( std::set<std::string>& shaders ){
 	/* Gets all textures and shaders listed in the xml file that don't have any tag
 
 	   returns a set containing the shaders (with path)
@@ -536,7 +536,7 @@ void XmlTagBuilder::GetUntagged( std::set<CopiedString>& shaders ){
 	xmlXPathFreeObject( xpathPtr );
 }
 
-void XmlTagBuilder::GetAllTags( std::set<CopiedString>& tags ){
+void XmlTagBuilder::GetAllTags( std::set<std::string>& tags ){
 	/* Gets a list of all tags that are used (assigned to any shader)
 
 	   returns a set containing all used tags
@@ -556,14 +556,14 @@ void XmlTagBuilder::GetAllTags( std::set<CopiedString>& tags ){
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
-			tags.insert( (CopiedString)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
+			tags.insert( (std::string)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
 		}
 	}
 
 	xmlXPathFreeObject( xpathPtr );
 }
 
-void XmlTagBuilder::TagSearch( const char* expression, std::set<CopiedString>& paths ){
+void XmlTagBuilder::TagSearch( const char* expression, std::set<std::string>& paths ){
 	/* Searches shaders by tags
 
 	   char* expression - the XPath expression to search
@@ -587,7 +587,7 @@ void XmlTagBuilder::TagSearch( const char* expression, std::set<CopiedString>& p
 		{
 			ptr = nodePtr->nodeTab[i];
 			xmlattrib = xmlGetProp( ptr, (const xmlChar*)"path" );
-			paths.insert( (CopiedString)(char*)xmlattrib );
+			paths.insert( (std::string)(char*)xmlattrib );
 		}
 	}
 	xmlXPathFreeObject( xpathPtr );

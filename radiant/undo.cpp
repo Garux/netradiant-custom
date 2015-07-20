@@ -110,7 +110,7 @@ void release(){
 struct Operation
 {
 	Snapshot m_snapshot;
-	CopiedString m_command;
+	std::string m_command;
 
 	Operation( const char* command )
 		: m_command( command ){

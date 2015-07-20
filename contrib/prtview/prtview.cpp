@@ -43,7 +43,7 @@
 #define Q3R_CMD_SHOW_2D "Toggle portals (2D)"
 #define Q3R_CMD_OPTIONS "Configure Portal Viewer"
 
-CopiedString INIfn;
+std::string INIfn;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPrtViewApp construction

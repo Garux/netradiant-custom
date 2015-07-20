@@ -321,7 +321,7 @@ class TestHashtable
 {
 public:
 TestHashtable(){
-	HashTable<CopiedString, CopiedString, HashStringNoCase, StringEqualNoCase> strings;
+	HashTable<std::string, std::string, HashStringNoCase, StringEqualNoCase> strings;
 	strings["Monkey"] = "bleh";
 	strings["MonkeY"] = "blah";
 }
@@ -331,7 +331,7 @@ const TestHashtable g_testhashtable;
 
 #endif
 
-typedef std::pair<LoadImageCallback, CopiedString> TextureKey;
+typedef std::pair<LoadImageCallback, std::string> TextureKey;
 
 void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
 	texture.texture_number = 0;

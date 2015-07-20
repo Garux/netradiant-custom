@@ -314,7 +314,7 @@ struct RawStringHash
 struct HashString
 {
 	typedef hash_t hash_type;
-	hash_type operator()( const CopiedString& string ) const {
+	hash_type operator()( const std::string& string ) const {
 		return string_hash( string.c_str() );
 	}
 };
@@ -322,7 +322,7 @@ struct HashString
 struct HashStringNoCase
 {
 	typedef hash_t hash_type;
-	hash_type operator()( const CopiedString& string ) const {
+	hash_type operator()( const std::string& string ) const {
 		return string_hash_nocase( string.c_str() );
 	}
 };

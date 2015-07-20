@@ -305,7 +305,7 @@ void HomePaths_Destroy(){
 
 // Engine Path
 
-CopiedString g_strEnginePath;
+std::string g_strEnginePath;
 ModuleObservers g_enginePathObservers;
 std::size_t g_enginepath_unrealised = 1;
 
@@ -367,7 +367,7 @@ void setEnginePath( const char* path ){
 
 // App Path
 
-CopiedString g_strAppPath;                 ///< holds the full path of the executable
+std::string g_strAppPath;                 ///< holds the full path of the executable
 
 const char* AppPath_get(){
 	return g_strAppPath.c_str();
@@ -375,7 +375,7 @@ const char* AppPath_get(){
 
 /// the path to the local rc-dir
 const char* LocalRcPath_get( void ){
-	static CopiedString rc_path;
+	static std::string rc_path;
 	if ( rc_path.empty() ) {
 		StringOutputStream stream( 256 );
 		stream << GlobalRadiant().getSettingsPath() << g_pGameDescription->mGameFile.c_str() << "/";
@@ -386,7 +386,7 @@ const char* LocalRcPath_get( void ){
 
 /// directory for temp files
 /// NOTE: on *nix this is were we check for .pid
-CopiedString g_strSettingsPath;
+std::string g_strSettingsPath;
 const char* SettingsPath_get(){
 	return g_strSettingsPath.c_str();
 }
@@ -401,16 +401,16 @@ const char* SettingsPath_get(){
    [GameToolsPath]/modules
    and also q3map, bspc
  */
-CopiedString g_strGameToolsPath;           ///< this is set by g_GamesDialog
+std::string g_strGameToolsPath;           ///< this is set by g_GamesDialog
 
 const char* GameToolsPath_get(){
 	return g_strGameToolsPath.c_str();
 }
 
-void EnginePathImport( CopiedString& self, const char* value ){
+void EnginePathImport( std::string& self, const char* value ){
 	setEnginePath( value );
 }
-typedef ReferenceCaller1<CopiedString, const char*, EnginePathImport> EnginePathImportCaller;
+typedef ReferenceCaller1<std::string, const char*, EnginePathImport> EnginePathImportCaller;
 
 void Paths_constructPreferences( PreferencesPage& page ){
 	page.appendPathEntry( "Engine Path", true,
@@ -457,8 +457,8 @@ void EnginePath_verify(){
 
 namespace
 {
-CopiedString g_gamename;
-CopiedString g_gamemode;
+std::string g_gamename;
+std::string g_gamemode;
 ModuleObservers g_gameNameObservers;
 ModuleObservers g_gameModeObservers;
 }
@@ -1678,7 +1678,7 @@ bool MainFrame_isActiveApp(){
 	return false;
 }
 
-typedef std::list<CopiedString> StringStack;
+typedef std::list<std::string> StringStack;
 StringStack g_wait_stack;
 WaitDialog g_wait;
 
@@ -3059,7 +3059,7 @@ void MainFrame::UpdateStatusText(){
 	m_idleRedrawStatusText.queueDraw();
 }
 
-void MainFrame::SetStatusText( CopiedString& status_text, const char* pText ){
+void MainFrame::SetStatusText( std::string& status_text, const char* pText ){
 	status_text = pText;
 	UpdateStatusText();
 }

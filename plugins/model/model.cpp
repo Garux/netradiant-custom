@@ -69,7 +69,7 @@ class PicoSurface :
 	public OpenGLRenderable
 {
 AABB m_aabb_local;
-CopiedString m_shader;
+std::string m_shader;
 Shader* m_state;
 
 Array<ArbitraryMeshVertex> m_vertices;
@@ -310,7 +310,7 @@ void constructNull(){
 };
 
 
-typedef std::pair<CopiedString, int> PicoModelKey;
+typedef std::pair<std::string, int> PicoModelKey;
 
 
 class PicoModel :
@@ -446,7 +446,7 @@ SurfaceLightLists m_surfaceLightLists;
 class Remap
 {
 public:
-CopiedString first;
+std::string first;
 Shader* second;
 Remap() : second( 0 ){
 }
@@ -808,18 +808,18 @@ void parse_namestr( const char *name ){
 		if ( !hasName && ( *ptr == ':' || *ptr == '\0' ) ) {
 			// model name
 			hasName = true;
-			m_name = CopiedString( s, ptr );
+			m_name = std::string( s, ptr );
 			s = ptr + 1;
 		}
 		else if ( *ptr == '?' || *ptr == '\0' ) {
 			// model frame
 			hasFrame = true;
-			m_frame = atoi( CopiedString( s, ptr ).c_str() );
+			m_frame = atoi( std::string( s, ptr ).c_str() );
 			s = ptr + 1;
 		}
 		else if ( *ptr == '&' || *ptr == '\0' ) {
 			// a remap
-			add_remap( CopiedString( s, ptr ).c_str() );
+			add_remap( std::string( s, ptr ).c_str() );
 			s = ptr + 1;
 		}
 
@@ -857,13 +857,13 @@ inline const char* shader_for_remap( const char* remap ){
 	return "";
 }
 
-CopiedString m_name;
+std::string m_name;
 int m_frame;
 PicoModel* m_model;
 
 typedef std::vector<remap_t*> remaps_t;
 remaps_t m_remaps;
-typedef std::vector<CopiedString> shaders_t;
+typedef std::vector<std::string> shaders_t;
 shaders_t m_shaders;
 typedef std::vector<Shader*> states_t;
 states_t m_states;

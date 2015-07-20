@@ -392,7 +392,7 @@ void release(){
 }
 
 std::size_t m_width, m_height;
-CopiedString m_shader;
+std::string m_shader;
 PatchControlArray m_ctrl;
 bool m_patchDef3;
 std::size_t m_subdivisions_x;
@@ -414,7 +414,7 @@ scene::Node* m_node;
 
 AABB m_aabb_local;   // local bbox
 
-CopiedString m_shader;
+std::string m_shader;
 Shader* m_state;
 
 std::size_t m_width;

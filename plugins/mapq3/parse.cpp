@@ -38,7 +38,7 @@ inline MapImporter* Node_getMapImporter( scene::Node& node ){
 }
 
 
-typedef std::list< std::pair<CopiedString, CopiedString> > KeyValues;
+typedef std::list< std::pair<std::string, std::string> > KeyValues;
 
 NodeSmartReference g_nullNode( NewNullNode() );
 
@@ -99,7 +99,7 @@ NodeSmartReference Entity_parseTokens( Tokeniser& tokeniser, EntityCreator& enti
 		}
 		else // epair
 		{
-			CopiedString key( token );
+			std::string key( token );
 			token = tokeniser.getToken();
 			if ( token == 0 ) {
 				Tokeniser_unexpectedError( tokeniser, token, "#epair-value" );
