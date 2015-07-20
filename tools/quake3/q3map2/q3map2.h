@@ -1519,6 +1519,8 @@ int                         BSPInfo( int count, char **fileNames );
 int                         ScaleBSPMain( int argc, char **argv );
 int                         ConvertMain( int argc, char **argv );
 
+/* help.c */
+void                        HelpMain(const char* arg);
 
 /* path_init.c */
 game_t                      *GetGame( char *arg );
@@ -1539,7 +1541,6 @@ int                         ConvertBSPMain( int argc, char **argv );
 /* convert_map.c */
 int                         ConvertBSPToMap( char *bspName );
 int                         ConvertBSPToMap_BP( char *bspName );
-
 
 /* convert_ase.c */
 int                         ConvertBSPToASE( char *bspName );

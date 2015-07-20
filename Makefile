@@ -508,6 +508,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/decals.o \
 	tools/quake3/q3map2/facebsp.o \
 	tools/quake3/q3map2/fog.o \
+	tools/quake3/q3map2/help.o \
 	tools/quake3/q3map2/image.o \
 	tools/quake3/q3map2/leakfile.o \
 	tools/quake3/q3map2/light_bounce.o \
