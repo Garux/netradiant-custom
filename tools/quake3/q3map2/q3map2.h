@@ -1532,6 +1532,10 @@ int                         BSPMain( int argc, char **argv );
 /* minimap.c */
 int							MiniMapBSPMain( int argc, char **argv );
 
+/* convert_bsp.c */
+int                         ScaleBSPMain( int argc, char **argv );
+int                         ConvertBSPMain( int argc, char **argv );
+
 /* convert_map.c */
 int                         ConvertBSPToMap( char *bspName );
 int                         ConvertBSPToMap_BP( char *bspName );
