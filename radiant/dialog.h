@@ -85,8 +85,10 @@ inline void StringExport( CopiedString& self, const StringImportCallback& import
 typedef ReferenceCaller1<CopiedString, const StringImportCallback&, StringExport> StringExportCaller;
 
 
-struct DLG_DATA
+class DLG_DATA
 {
+public:
+	virtual ~DLG_DATA(){}
 	virtual void release() = 0;
 	virtual void importData() const = 0;
 	virtual void exportData() const = 0;

@@ -187,7 +187,7 @@ XMLStreamParser( TextInputStream& istream )
 	: m_istream( istream ){
 }
 virtual void exportXML( XMLImporter& importer ){
-	bool wellFormed = false;
+	//bool wellFormed = false;
 
 	char chars[BUFSIZE];
 	std::size_t res = m_istream.read( chars, 4 );
@@ -203,7 +203,7 @@ virtual void exportXML( XMLImporter& importer ){
 		}
 		xmlParseChunk( ctxt, chars, 0, 1 );
 
-		wellFormed = ( ctxt->wellFormed == 1 );
+		//wellFormed = ( ctxt->wellFormed == 1 );
 
 		xmlFreeParserCtxt( ctxt );
 	}

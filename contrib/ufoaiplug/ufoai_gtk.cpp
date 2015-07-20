@@ -43,23 +43,23 @@ UFOAIGtk( void* gtk_window ) : m_gtk_window( ( GtkWindow* )gtk_window ){
  * This is useful for popping up 'are you sure you want to quit?'
  * type dialogs.
  */
-static gboolean delete_event( GtkWidget *widget, GdkEvent *event, gpointer data ){
+/*static gboolean delete_event( GtkWidget *widget, GdkEvent *event, gpointer data ){
 	return FALSE;
-}
+}*/
 
 /**
  * @brief destroy widget if destroy signal is passed to widget
  */
-static void destroy( GtkWidget *widget, gpointer data ){
+/*static void destroy( GtkWidget *widget, gpointer data ){
 	gtk_widget_destroy( widget );
-}
+}*/
 
 /**
  * @brief function for close button to destroy the toplevel widget
  */
-static void close_window( GtkWidget *widget, gpointer data ){
+/*static void close_window( GtkWidget *widget, gpointer data ){
 	gtk_widget_destroy( gtk_widget_get_toplevel( widget ) );
-}
+}*/
 
 /* =============================== */
 

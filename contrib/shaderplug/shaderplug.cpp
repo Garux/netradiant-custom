@@ -118,7 +118,7 @@ void LoadTextureFile( const char* filename ){
 
 typedef FreeCaller1<const char*, LoadTextureFile> LoadTextureFileCaller;
 
-void GetTextures( char* extension ){
+void GetTextures( const char* extension ){
 	GlobalFileSystem().forEachFile( "textures/", extension, LoadTextureFileCaller(), 0 );
 }
 

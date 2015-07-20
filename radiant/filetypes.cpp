@@ -35,7 +35,8 @@ class RadiantFileTypeRegistry : public IFileTypeRegistry
 struct filetype_copy_t
 {
 	filetype_copy_t( const char* moduleName, const filetype_t other )
-		: m_moduleName( moduleName ), m_name( other.name ), m_pattern( other.pattern ), m_can_load( other.can_load ), m_can_import( other.can_import ), m_can_save( other.can_save ){
+		: m_can_load( other.can_load ), m_can_import( other.can_import ), m_can_save( other.can_save ),
+		m_moduleName( moduleName ), m_name( other.name ), m_pattern( other.pattern ) {
 	}
 	const char* getModuleName() const {
 		return m_moduleName.c_str();

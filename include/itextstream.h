@@ -32,6 +32,7 @@
 class TextInputStream
 {
 public:
+virtual ~TextInputStream(){}
 /// \brief Attempts to read the next \p length characters from the stream to \p buffer.
 /// Returns the number of characters actually stored in \p buffer.
 virtual std::size_t read( char* buffer, std::size_t length ) = 0;
@@ -41,6 +42,7 @@ virtual std::size_t read( char* buffer, std::size_t length ) = 0;
 class TextOutputStream
 {
 public:
+virtual ~TextOutputStream(){}
 /// \brief Attempts to write \p length characters to the stream from \p buffer.
 /// Returns the number of characters actually read from \p buffer.
 virtual std::size_t write( const char* buffer, std::size_t length ) = 0;

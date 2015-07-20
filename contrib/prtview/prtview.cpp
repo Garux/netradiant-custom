@@ -162,7 +162,7 @@ void SaveConfig(){
 
 #define CONFIG_SECTION "Configuration"
 
-int INIGetInt( char *key, int def ){
+int INIGetInt( const char *key, int def ){
 	char value[1024];
 
 	if ( read_var( INIfn.c_str(), CONFIG_SECTION, key, value ) ) {
@@ -173,7 +173,7 @@ int INIGetInt( char *key, int def ){
 	}
 }
 
-void INISetInt( char *key, int val, char *comment /* = NULL */ ){
+void INISetInt( const char* key, int val, const char* comment /* = NULL */ ){
 	char s[1000];
 
 	if ( comment ) {

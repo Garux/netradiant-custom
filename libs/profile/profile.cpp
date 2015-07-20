@@ -252,7 +252,7 @@ bool profile_load_buffer( const char * rc_path, const char *name, void *buffer, 
 		fclose( f );
 	}
 
-	return true;
+	return ret;
 }
 
 int profile_load_int( const char *filename, const char *section, const char *key, int default_value ){

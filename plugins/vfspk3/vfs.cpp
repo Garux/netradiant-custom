@@ -473,8 +473,8 @@ int GetFileCount( const char *filename, int flag ){
 
 	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
 	{
-		if ( ( *i ).is_pakfile && ( flag & VFS_SEARCH_PAK ) != 0
-			 || !( *i ).is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0 ) {
+		if ( (( *i ).is_pakfile && ( flag & VFS_SEARCH_PAK ) != 0)
+			 || (!( *i ).is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0) ) {
 			if ( ( *i ).archive->containsFile( fixed ) ) {
 				++count;
 			}

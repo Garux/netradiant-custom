@@ -302,7 +302,7 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch *p1, DPatch *p2 )
 
 	int newHeight = p1->height + p2->height - 1;
 	if ( newHeight > MAX_PATCH_HEIGHT ) {
-		return false;
+		return NULL;
 	}
 
 	DPatch* newPatch = new DPatch();
@@ -483,8 +483,6 @@ std::list<DPatch> DPatch::SplitRows(){
 
 std::list<DPatch> DPatch::Split(){
 	std::list<DPatch> patchList;
-	int i;
-	int x, y;
 
 	if ( width >= 5 ) {
 		std::list<DPatch> patchColList = SplitCols();

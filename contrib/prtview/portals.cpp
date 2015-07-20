@@ -37,10 +37,10 @@ CPortalsRender render;
 
 int compare( const void *arg1, const void *arg2 ){
 
-	if ( portals.portal[*( (int *)arg1 )].dist > portals.portal[*( (int *)arg2 )].dist ) {
+	if ( portals.portal[*( (const int *)arg1 )].dist > portals.portal[*( (const int *)arg2 )].dist ) {
 		return -1;
 	}
-	else if ( portals.portal[*( (int *)arg1 )].dist < portals.portal[*( (int *)arg2 )].dist ) {
+	else if ( portals.portal[*( (const int *)arg1 )].dist < portals.portal[*( (const int *)arg2 )].dist ) {
 		return 1;
 	}
 
@@ -61,7 +61,7 @@ bool CBspPortal::Build( char *def ){
 	char *c = def;
 	unsigned int n;
 	int dummy1, dummy2;
-	int res_cnt, i;
+	int res_cnt = 0, i;
 
 	if ( portals.hint_flags ) {
 		res_cnt = sscanf( def, "%u %d %d %d", &point_count, &dummy1, &dummy2, (int *)&hint );
@@ -603,7 +603,7 @@ void CPortalsDrawSolid::render( RenderStateFlags state ) const {
 }
 
 void CPortalsDrawSolidOutline::render( RenderStateFlags state ) const {
-	for ( int n = 0; n < portals.portal_count; n++ )
+	for ( unsigned int n = 0; n < portals.portal_count; n++ )
 	{
 		if ( portals.lines == 2 && !portals.portal[n].hint ) {
 			continue;
@@ -632,7 +632,7 @@ void CPortalsDrawSolidOutline::render( RenderStateFlags state ) const {
 
 		glBegin( GL_LINE_LOOP );
 
-		for ( int p = 0; p < portals.portal[n].point_count; p++ )
+		for ( unsigned int p = 0; p < portals.portal[n].point_count; p++ )
 			glVertex3fv( portals.portal[n].inner_point[p].p );
 
 		glEnd();

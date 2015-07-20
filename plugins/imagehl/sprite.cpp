@@ -102,7 +102,7 @@ typedef struct {
 
 Image* LoadIDSPBuff( byte *buffer ){
 	byte *buf_p;
-	int columns, rows, numPixels;
+	int columns, rows;
 	byte *pixbuf;
 
 	int row, column;
@@ -159,7 +159,7 @@ Image* LoadIDSPBuff( byte *buffer ){
 	// palette = buffer+mipdatasize+2;
 	// buf_p = buffer+lpMip->offsets[0];
 
-	numPixels = columns * rows;
+	//int numPixels = columns * rows;
 
 	RGBAImage* image = new RGBAImage( columns, rows );
 

@@ -55,6 +55,7 @@ const char* build_get_variable( const char* name ){
 class Evaluatable
 {
 public:
+virtual ~Evaluatable(){}
 virtual void evaluate( StringBuffer& output ) = 0;
 virtual void exportXML( XMLImporter& importer ) = 0;
 };

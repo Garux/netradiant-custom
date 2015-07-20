@@ -413,6 +413,7 @@ inline unsigned int buttons_for_button_and_modifiers( ButtonIdentifier button, M
 	case ButtonEnumeration::LEFT: buttons |= RAD_LBUTTON; break;
 	case ButtonEnumeration::MIDDLE: buttons |= RAD_MBUTTON; break;
 	case ButtonEnumeration::RIGHT: buttons |= RAD_RBUTTON; break;
+	default: break;
 	}
 
 	if ( bitfield_enabled( flags, c_modifierControl ) ) {
@@ -1449,7 +1450,7 @@ void XYWnd::XY_LoadBackgroundImage( const char *name ){
 	globalOutputStream() << "Loaded background texture " << relative << "\n";
 	g_pParentWnd->ActiveXY()->m_backgroundActivated = true;
 
-	int m_ix, m_iy;
+	int m_ix = 0, m_iy = 0;
 	switch ( g_pParentWnd->ActiveXY()->m_viewType )
 	{
 	case XY:
@@ -2064,7 +2065,7 @@ void SetState( Shader* state, EStyle style ){
 		m_state_stack.back().m_state = state;
 	}
 }
-const EStyle getStyle() const {
+EStyle getStyle() const {
 	return eWireframeOnly;
 }
 void PushState(){

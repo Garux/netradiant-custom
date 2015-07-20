@@ -110,7 +110,7 @@ void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& 
 	if ( !Tokeniser_getSize( tokeniser, version ) ) {
 		return;
 	}
-	if ( version != MapVersion() ) {
+	if ( version != std::size_t(MapVersion()) ) {
 		globalErrorStream() << "Doom 3 map version " << MapVersion() << " supported, version is " << Unsigned( version ) << "\n";
 		return;
 	}
@@ -181,7 +181,7 @@ void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& 
 	if ( !Tokeniser_getSize( tokeniser, version ) ) {
 		return;
 	}
-	if ( version != MapVersion() ) {
+	if ( version != std::size_t(MapVersion()) ) {
 		globalErrorStream() << "Quake 4 map version " << MapVersion() << " supported, version is " << Unsigned( version ) << "\n";
 		return;
 	}
