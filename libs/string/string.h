@@ -70,12 +70,6 @@ inline bool string_less( const char* string, const char* other ){
 	return string_compare( string, other ) < 0;
 }
 
-/// \brief Returns true if \p string is lexicographically greater than \p other.
-/// O(n)
-inline bool string_greater( const char* string, const char* other ){
-	return string_compare( string, other ) > 0;
-}
-
 /// \brief Returns <0 if \p string is lexicographically less than \p other after converting both to lower-case.
 /// Returns >0 if \p string is lexicographically greater than \p other after converting both to lower-case.
 /// Returns 0 if \p string is lexicographically equal to \p other after converting both to lower-case.
@@ -122,13 +116,6 @@ inline bool string_less_nocase( const char* string, const char* other ){
 	return string_compare_nocase( string, other ) < 0;
 }
 
-/// \brief Returns true if \p string is lexicographically greater than \p other.
-/// Treats all ascii characters as lower-case during comparisons.
-/// O(n)
-inline bool string_greater_nocase( const char* string, const char* other ){
-	return string_compare_nocase( string, other ) > 0;
-}
-
 /// \brief Returns the number of non-null characters in \p string.
 /// O(n)
 inline std::size_t string_length( const char* string ){
@@ -170,15 +157,6 @@ inline char* string_clone( const char* other, Allocator& allocator ){
 	return copied;
 }
 
-/// \brief Returns a newly-allocated string which is a clone of [\p first, \p last), using \p allocator.
-/// The returned buffer must be released with \c string_release using a matching \p allocator.
-template<typename Allocator>
-inline char* string_clone_range( StringRange range, Allocator& allocator ){
-	std::size_t length = range.last - range.first;
-	char* copied = strncpy( string_new( length, allocator ), range.first, length );
-	copied[length] = '\0';
-	return copied;
-}
 
 /// \brief Allocates a string buffer large enough to hold \p length characters.
 /// The returned buffer must be released with \c string_release.
@@ -198,45 +176,6 @@ inline void string_release( char* string, std::size_t length ){
 inline char* string_clone( const char* other ){
 	DefaultAllocator<char> allocator;
 	return string_clone( other, allocator );
-}
-
-/// \brief Returns a newly-allocated string which is a clone of [\p first, \p last).
-/// The returned buffer must be released with \c string_release.
-inline char* string_clone_range( StringRange range ){
-	DefaultAllocator<char> allocator;
-	return string_clone_range( range, allocator );
-}
-
-typedef char* char_pointer;
-/// \brief Swaps the values of \p string and \p other.
-inline void string_swap( char_pointer& string, char_pointer& other ){
-	std::swap( string, other );
-}
-
-typedef const char* char_const_pointer;
-/// \brief Swaps the values of \p string and \p other.
-inline void string_swap( char_const_pointer& string, char_const_pointer& other ){
-	std::swap( string, other );
-}
-
-/// \brief Converts each character of \p string to lower-case and returns \p string.
-/// O(n)
-inline char* string_to_lowercase( char* string ){
-	for ( char* p = string; *p != '\0'; ++p )
-	{
-		*p = (char)std::tolower( *p );
-	}
-	return string;
-}
-
-/// \brief Converts each character of \p string to upper-case and returns \p string.
-/// O(n)
-inline char* string_to_uppercase( char* string ){
-	for ( char* p = string; *p != '\0'; ++p )
-	{
-		*p = (char)std::toupper( *p );
-	}
-	return string;
 }
 
 /// \brief A re-entrant string tokeniser similar to strchr.
@@ -288,20 +227,18 @@ const char* getToken(){
 }
 };
 
-class StringEqualNoCase
-{
-public:
-bool operator()( const std::string& key, const std::string& other ) const {
-	return string_equal_nocase( key.c_str(), other.c_str() );
-}
-};
-
 struct StringLessNoCase
 {
 	bool operator()( const std::string& x, const std::string& y ) const {
 		return string_less_nocase( x.c_str(), y.c_str() );
 	}
+
+	bool operator()( const char* x, const char* y ) const {
+		return string_less_nocase( x, y );
+	}
 };
+
+typedef StringLessNoCase RawStringLessNoCase;
 
 struct RawStringEqual
 {
@@ -316,12 +253,4 @@ struct RawStringLess
 		return string_less( x, y );
 	}
 };
-
-struct RawStringLessNoCase
-{
-	bool operator()( const char* x, const char* y ) const {
-		return string_less_nocase( x, y );
-	}
-};
-
 #endif
