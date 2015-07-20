@@ -516,6 +516,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/light_ydnar.o \
 	tools/quake3/q3map2/main.o \
 	tools/quake3/q3map2/map.o \
+	tools/quake3/q3map2/minimap.o \
 	tools/quake3/q3map2/mesh.o \
 	tools/quake3/q3map2/model.o \
 	tools/quake3/q3map2/patch.o \
