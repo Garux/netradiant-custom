@@ -505,8 +505,8 @@ void realise(){
 
 		for ( qtextures_t::iterator i = m_qtextures.begin(); i != m_qtextures.end(); ++i )
 		{
-			if ( !( *i ).value.empty() ) {
-				qtexture_realise( *( *i ).value, ( *i ).key );
+			if ( !( *i ).second.empty() ) {
+				qtexture_realise( *( *i ).second, ( *i ).first );
 			}
 		}
 		if ( m_observer != 0 ) {
@@ -521,8 +521,8 @@ void unrealise(){
 		}
 		for ( qtextures_t::iterator i = m_qtextures.begin(); i != m_qtextures.end(); ++i )
 		{
-			if ( !( *i ).value.empty() ) {
-				qtexture_unrealise( *( *i ).value );
+			if ( !( *i ).second.empty() ) {
+				qtexture_unrealise( *( *i ).second );
 			}
 		}
 	}
@@ -560,7 +560,7 @@ void Textures_ModeChanged(){
 
 		for ( TexturesMap::iterator i = g_texturesmap->begin(); i != g_texturesmap->end(); ++i )
 		{
-			glBindTexture( GL_TEXTURE_2D, ( *i ).value->texture_number );
+			glBindTexture( GL_TEXTURE_2D, ( *i ).second->texture_number );
 			SetTexParameters( g_texture_mode );
 		}
 

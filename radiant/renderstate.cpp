@@ -1183,7 +1183,7 @@ OpenGLShaderCache()
 ~OpenGLShaderCache(){
 	for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 	{
-		globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).key.c_str() ) << "\n";
+		globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).first.c_str() ) << "\n";
 	}
 }
 Shader* capture( const char* name ){
@@ -1327,8 +1327,8 @@ void realise(){
 
 		for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 		{
-			if ( !( *i ).value.empty() ) {
-				( *i ).value->realise( i->key );
+			if ( !( *i ).second.empty() ) {
+				( *i ).second->realise( i->first );
 			}
 		}
 	}
@@ -1337,8 +1337,8 @@ void unrealise(){
 	if ( ++m_unrealised == 1 ) {
 		for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 		{
-			if ( !( *i ).value.empty() ) {
-				( *i ).value->unrealise();
+			if ( !( *i ).second.empty() ) {
+				( *i ).second->unrealise();
 			}
 		}
 		if ( GlobalOpenGL().contextValid && lightingSupported() && lightingEnabled() ) {

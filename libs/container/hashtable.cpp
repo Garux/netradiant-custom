@@ -44,7 +44,7 @@ void testStuff(){
 
 	for ( MyHashTable::iterator i = hashtable.begin(); i != hashtable.end(); ++i )
 	{
-		if ( ( *i ).key != "bleh" ) {
+		if ( ( *i ).first != "bleh" ) {
 			++hashtable["count"]; // insertion does not invalidate iterators
 		}
 	}

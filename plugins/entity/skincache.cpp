@@ -276,14 +276,14 @@ void realise(){
 	m_realised = true;
 	for ( Cache::iterator i = m_cache.begin(); i != m_cache.end(); ++i )
 	{
-		( *i ).value->realise( ( *i ).key.c_str() );
+		( *i ).second->realise( ( *i ).first.c_str() );
 	}
 }
 void unrealise(){
 	m_realised = false;
 	for ( Cache::iterator i = m_cache.begin(); i != m_cache.end(); ++i )
 	{
-		( *i ).value->unrealise();
+		( *i ).second->unrealise();
 	}
 	g_skins.unrealise();
 }

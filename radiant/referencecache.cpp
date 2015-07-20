@@ -258,9 +258,9 @@ ModelCache::iterator ModelCache_find( const char* path, const char* name ){
 
 ModelCache::iterator ModelCache_insert( const char* path, const char* name, scene::Node& node ){
 	if ( g_modelCache_enabled ) {
-		return g_modelCache.insert( ModelKey( path, name ), NodeSmartReference( node ) );
+		return g_modelCache.emplace( ModelKey( path, name ), NodeSmartReference( node ) ).first;
 	}
-	return g_modelCache.insert( ModelKey( "", "" ), g_nullModel );
+	return g_modelCache.emplace( ModelKey( "", "" ), g_nullModel ).first;
 }
 
 void ModelCache_flush( const char* path, const char* name ){
@@ -374,7 +374,7 @@ struct ModelResource : public Resource
 					);
 			}
 
-			setModel( ( *i ).value );
+			setModel( ( *i ).second );
 		}
 		else
 		{
@@ -424,7 +424,7 @@ struct ModelResource : public Resource
 	void setNode( scene::Node* node ){
 		ModelCache::iterator i = ModelCache_find( m_path.c_str(), m_name.c_str() );
 		if ( i != g_modelCache.end() ) {
-			( *i ).value = NodeSmartReference( *node );
+			( *i ).second = NodeSmartReference( *node );
 		}
 		setModel( NodeSmartReference( *node ) );
 
@@ -584,8 +584,8 @@ void realise(){
 			for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
 			{
 				ModelReferences::value_type& value = *( *i );
-				if ( value.value.count() != 1 ) {
-					value.value.get()->realise();
+				if ( value.second.count() != 1 ) {
+					value.second.get()->realise();
 				}
 			}
 		}
@@ -600,8 +600,8 @@ void unrealise(){
 			for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
 			{
 				ModelReferences::value_type& value = *( *i );
-				if ( value.value.count() != 1 ) {
-					value.value.get()->unrealise();
+				if ( value.second.count() != 1 ) {
+					value.second.get()->unrealise();
 				}
 			}
 		}
@@ -613,7 +613,7 @@ void refresh(){
 	ModelReferencesSnapshot snapshot( m_references );
 	for ( ModelReferencesSnapshot::iterator i = snapshot.begin(); i != snapshot.end(); ++i )
 	{
-		ModelResource* resource = ( *( *i ) ).value.get();
+		ModelResource* resource = ( *( *i ) ).second.get();
 		if ( !resource->isMap() ) {
 			resource->refresh();
 		}
@@ -638,7 +638,7 @@ void SaveReferences(){
 	ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Saving Map" );
 	for ( HashtableReferenceCache::iterator i = g_referenceCache.begin(); i != g_referenceCache.end(); ++i )
 	{
-		( *i ).value->save();
+		( *i ).second->save();
 	}
 	MapChanged();
 }
@@ -646,7 +646,7 @@ void SaveReferences(){
 bool References_Saved(){
 	for ( HashtableReferenceCache::iterator i = g_referenceCache.begin(); i != g_referenceCache.end(); ++i )
 	{
-		scene::Node* node = ( *i ).value->getNode();
+		scene::Node* node = ( *i ).second->getNode();
 		if ( node != 0 ) {
 			MapFile* map = Node_getMapFile( *node );
 			if ( map != 0 && !map->saved() ) {

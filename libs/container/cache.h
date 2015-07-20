@@ -127,11 +127,11 @@ iterator find( const Key& key ){
 }
 
 void capture( iterator i ){
-	( *i ).value.increment();
+	( *i ).second.increment();
 }
 void release( iterator i ){
-	if ( ( *i ).value.decrement() == 0 ) {
-		CreationPolicy::destroy( ( *i ).value.get() );
+	if ( ( *i ).second.decrement() == 0 ) {
+		CreationPolicy::destroy( ( *i ).second.get() );
 		m_map.erase( i );
 	}
 }
@@ -145,11 +145,11 @@ Element& capture( const Key& key ){
 	}
 	return elem;
 #else
-	iterator i = m_map.insert( key, Element() );
-	if ( ( *i ).value.increment() == 1 ) {
-		( *i ).value.set( CreationPolicy::construct( ( *i ).key ) );
+	iterator i = m_map.emplace( key, Element() ).first;
+	if ( ( *i ).second.increment() == 1 ) {
+		( *i ).second.set( CreationPolicy::construct( ( *i ).first ) );
 	}
-	return ( *i ).value;
+	return ( *i ).second;
 #endif
 }
 #else
@@ -157,9 +157,9 @@ value_type& capture( const Key& key ){
 	iterator i = m_map.find( key );
 	if ( i == m_map.end() ) {
 		i = m_map.insert( key, Element() );
-		( *i ).value.set( CreationPolicy::construct( ( *i ).key ) );
+		( *i ).second.set( CreationPolicy::construct( ( *i ).first ) );
 	}
-	( *i ).value.increment();
+	( *i ).second.increment();
 	return ( *i );
 }
 #endif
