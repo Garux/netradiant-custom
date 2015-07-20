@@ -1626,12 +1626,12 @@ void                        MakeTreePortals( tree_t *tree );
 
 
 /* leakfile.c */
-xmlNodePtr                  LeakFile( tree_t *tree );
+xmlNodePtr                  LeakFile( tree_t *tree, const char *lineFilePath );
 
 
 /* prtfile.c */
 void                        NumberClusters( tree_t *tree );
-void                        WritePortalFile( tree_t *tree );
+void                        WritePortalFile( tree_t *tree, const char *portalFilePath );
 
 
 /* writebsp.c */
@@ -1641,7 +1641,7 @@ void                        SetLightStyles( void );
 int                         EmitShader( const char *shader, int *contentFlags, int *surfaceFlags );
 
 void                        BeginBSPFile( void );
-void                        EndBSPFile( qboolean do_write );
+void                        EndBSPFile( qboolean do_write, const char *BSPFilePath, const char *surfaceFilePath );
 void                        EmitBrushes( brush_t *brushes, int *firstBrush, int *numBrushes );
 void                        EmitFogs( void );
 
@@ -1753,8 +1753,8 @@ int                         GetSurfaceExtraMinSampleSize( int num );
 float                       GetSurfaceExtraLongestCurve( int num );
 void                        GetSurfaceExtraLightmapAxis( int num, vec3_t lightmapAxis );
 
-void                        WriteSurfaceExtraFile( const char *path );
-void                        LoadSurfaceExtraFile( const char *path );
+void                        WriteSurfaceExtraFile( const char *surfaceFilePath );
+void                        LoadSurfaceExtraFile( const char *surfaceFilePath );
 
 
 /* decals.c */

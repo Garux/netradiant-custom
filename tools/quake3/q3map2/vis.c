@@ -812,16 +812,16 @@ int CountActivePortals( void ){
  */
 void WriteFloat( FILE *f, vec_t v );
 
-void WritePortals( char *filename ){
+void WritePortals( char *portalpathfile ){
 	int i, j, num;
 	FILE *pf;
 	vportal_t *p;
 	fixedWinding_t *w;
 
 	// write the file
-	pf = fopen( filename, "w" );
+	pf = fopen( portalpathfile, "w" );
 	if ( !pf ) {
-		Error( "Error opening %s", filename );
+		Error( "Error opening %s", portalpathfile );
 	}
 
 	num = 0;
@@ -1099,8 +1099,9 @@ void LoadPortals( char *name ){
    ===========
  */
 int VisMain( int argc, char **argv ){
-	char portalfile[1024];
 	int i;
+	char portalFilePath[ 1024 ];
+	portalFilePath[0] = 0;
 
 
 	/* note it */
@@ -1148,12 +1149,17 @@ int VisMain( int argc, char **argv ){
 			strcpy( outbase, "/tmp" );
 		}
 
-
 		/* ydnar: -hint to merge all but hint portals */
 		else if ( !strcmp( argv[ i ], "-hint" ) ) {
 			Sys_Printf( "hint = true\n" );
 			hint = qtrue;
 			mergevis = qtrue;
+		}
+		else if ( !strcmp( argv[ i ], "-prtfile" ) )
+		{
+			strcpy( portalFilePath, argv[i + 1] );
+			i++;
+			Sys_Printf( "Use %s as portal file\n", portalFilePath );
 		}
 
 		else
@@ -1163,7 +1169,7 @@ int VisMain( int argc, char **argv ){
 	}
 
 	if ( i != argc - 1 ) {
-		Error( "usage: vis [-threads #] [-level 0-4] [-fast] [-v] bspfile" );
+		Error( "usage: vis [-threads #] [-level 0-4] [-fast] [-v] BSPFilePath" );
 	}
 
 
@@ -1175,11 +1181,13 @@ int VisMain( int argc, char **argv ){
 	LoadBSPFile( source );
 
 	/* load the portal file */
-	sprintf( portalfile, "%s%s", inbase, ExpandArg( argv[ i ] ) );
-	StripExtension( portalfile );
-	strcat( portalfile, ".prt" );
-	Sys_Printf( "Loading %s\n", portalfile );
-	LoadPortals( portalfile );
+	if (!portalFilePath[0]) {
+		sprintf( portalFilePath, "%s%s", inbase, ExpandArg( argv[ i ] ) );
+		StripExtension( portalFilePath );
+		strcat( portalFilePath, ".prt" );
+		Sys_Printf( "Loading %s\n", portalFilePath );
+		LoadPortals( portalFilePath );
+	}
 
 	/* ydnar: exit if no portals, hence no vis */
 	if ( numportals == 0 ) {
@@ -1211,7 +1219,7 @@ int VisMain( int argc, char **argv ){
 
 	/* delete the prt file */
 	if ( !saveprt ) {
-		remove( portalfile );
+		remove( portalFilePath );
 	}
 
 	/* write the bsp file */
