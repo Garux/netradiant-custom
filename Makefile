@@ -501,6 +501,9 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/bspfile_ibsp.o \
 	tools/quake3/q3map2/bspfile_rbsp.o \
 	tools/quake3/q3map2/bsp.o \
+	tools/quake3/q3map2/bsp_analyze.o \
+	tools/quake3/q3map2/bsp_scale.o \
+	tools/quake3/q3map2/bsp_info.o \
 	tools/quake3/q3map2/convert_ase.o \
 	tools/quake3/q3map2/convert_bsp.o \
 	tools/quake3/q3map2/convert_obj.o \
