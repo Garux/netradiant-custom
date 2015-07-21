@@ -538,7 +538,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 	size_t stacksize;
 
 	int start, end;
-	int i = 0, status = 0;
+	int i = 0;
 
 	start     = I_FloatTime();
 	pacifier  = showpacifier;
@@ -582,7 +582,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 		}
 		for ( i = 0 ; i < numthreads ; i++ )
 		{
-			if ( pthread_join( work_threads[i], (void **)&status ) != 0 ) {
+			if ( pthread_join( work_threads[i], NULL ) != 0 ) {
 				Error( "pthread_join failed" );
 			}
 		}
