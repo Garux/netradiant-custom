@@ -27,7 +27,6 @@
 #include "memory/allocator.h"
 template<typename Element, typename Allocator = DefaultAllocator<Element> >
 using Array = std::vector<Element, Allocator>;
-/// \todo replace Array<char> with std::string
 
 #if 0
 #include <cstddef>

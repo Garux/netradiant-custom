@@ -148,20 +148,20 @@ bool read_record(){
 	istream_read_int32_le( m_istream );
 	unsigned int position = istream_read_int32_le( m_istream );
 
-	Array<char> filename( namelength + 1 );
-	m_istream.read( reinterpret_cast<FileInputStream::byte_type*>( filename.data() ), namelength );
-	filename[namelength] = '\0';
+	std::string filename( namelength, ' ' );
+	if ( namelength > 0 )
+		m_istream.read( reinterpret_cast<FileInputStream::byte_type*>( &filename[0] ), namelength );
 
 	m_istream.seek( extras + comment, FileInputStream::cur );
 
-	if ( path_is_directory( filename.data() ) ) {
-		m_filesystem[filename.data()] = 0;
+	if ( path_is_directory( filename.c_str() ) ) {
+		m_filesystem[filename.c_str()] = 0;
 	}
 	else
 	{
-		ZipFileSystem::entry_type& file = m_filesystem[filename.data()];
+		ZipFileSystem::entry_type& file = m_filesystem[filename.c_str()];
 		if ( !file.is_directory() ) {
-			globalOutputStream() << "Warning: zip archive " << makeQuoted( m_name.c_str() ) << " contains duplicated file: " << makeQuoted( filename.data() ) << "\n";
+			globalOutputStream() << "Warning: zip archive " << makeQuoted( m_name.c_str() ) << " contains duplicated file: " << makeQuoted( filename.c_str() ) << "\n";
 		}
 		else
 		{

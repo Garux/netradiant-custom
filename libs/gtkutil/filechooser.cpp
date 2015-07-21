@@ -170,22 +170,12 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 	if ( path != 0 && !string_empty( path ) ) {
 		ASSERT_MESSAGE( path_is_absolute( path ), "file_dialog_show: path not absolute: " << makeQuoted( path ) );
 
-		Array<char> new_path( strlen( path ) + 1 );
+		std::string new_path(path);
+		std::replace(new_path.begin(), new_path.end(), '/', G_DIR_SEPARATOR);
+		if ( !new_path.empty() && new_path.back() == G_DIR_SEPARATOR )
+			new_path.pop_back();
 
-		// copy path, replacing dir separators as appropriate
-		Array<char>::iterator w = new_path.begin();
-		for ( const char* r = path; *r != '\0'; ++r )
-		{
-			*w++ = ( *r == '/' ) ? G_DIR_SEPARATOR : *r;
-		}
-		// remove separator from end of path if required
-		if ( *( w - 1 ) == G_DIR_SEPARATOR ) {
-			--w;
-		}
-		// terminate string
-		*w = '\0';
-
-		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER( dialog ), new_path.data() );
+		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER( dialog ), new_path.c_str() );
 	}
 
 	// we should add all important paths as shortcut folder...

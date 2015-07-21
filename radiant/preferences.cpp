@@ -215,15 +215,12 @@ bool Preferences_Save( PreferenceDictionary& preferences, const char* filename )
 }
 
 bool Preferences_Save_Safe( PreferenceDictionary& preferences, const char* filename ){
-	Array<char> tmpName( filename, filename + strlen( filename ) + 1 + 3 );
-	*( tmpName.end() - 4 ) = 'T';
-	*( tmpName.end() - 3 ) = 'M';
-	*( tmpName.end() - 2 ) = 'P';
-	*( tmpName.end() - 1 ) = '\0';
+	std::string tmpName( filename );
+	tmpName += "TMP";
 
-	return Preferences_Save( preferences, tmpName.data() )
+	return Preferences_Save( preferences, tmpName.c_str() )
 		   && ( !file_exists( filename ) || file_remove( filename ) )
-		   && file_move( tmpName.data(), filename );
+		   && file_move( tmpName.c_str(), filename );
 }
 
 

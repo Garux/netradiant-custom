@@ -23,6 +23,7 @@
 #define INCLUDED_IDATASTREAM_H
 
 #include <cstddef>
+#include <iostream>
 
 class StreamBase
 {
@@ -55,12 +56,10 @@ public:
 typedef int offset_type;
 typedef std::size_t position_type;
 
-enum seekdir
-{
-	beg,
-	cur,
-	end,
-};
+using seekdir = std::ios_base::seekdir;
+static const auto cur = std::ios_base::cur;
+static const auto beg = std::ios_base::beg;
+static const auto end = std::ios_base::end;
 
 /// \brief Sets the current \p position of the stream relative to the start.
 virtual position_type seek( position_type position ) = 0;

@@ -129,8 +129,10 @@ void printShaderLog( GLhandleARB object ){
 	GLint log_length = 0;
 	glGetObjectParameterivARB( object, GL_OBJECT_INFO_LOG_LENGTH_ARB, &log_length );
 
-	Array<char> log( log_length );
-	glGetInfoLogARB( object, log_length, &log_length, log.data() );
+
+	std::string log( log_length, ' ' );
+	if ( !log.empty() )
+		glGetInfoLogARB( object, log_length, &log_length, &log[0] );
 
 	globalErrorStream() << StringRange( log.data(), log.data() + log_length ) << "\n";
 }
