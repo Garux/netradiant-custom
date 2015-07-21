@@ -127,6 +127,7 @@ void HelpBsp()
 	};
 	HelpOptions("BSP Stage", 0, 80, bsp, sizeof(bsp)/sizeof(struct HelpOption));
 }
+
 void HelpVis()
 {
 	struct HelpOption vis[] = {
@@ -143,6 +144,7 @@ void HelpVis()
 	};
 	HelpOptions("VIS Stage", 0, 80, vis, sizeof(vis)/sizeof(struct HelpOption));
 }
+
 void HelpLight()
 {
 	struct HelpOption light[] = {
@@ -233,15 +235,16 @@ void HelpLight()
 	HelpOptions("Light Stage", 0, 80, light, sizeof(light)/sizeof(struct HelpOption));
 }
 
-void HelpAnalize()
+void HelpAnalyze()
 {
-	struct HelpOption analize[] = {
+	struct HelpOption analyze[] = {
 		{"-analyze <filename.bsp>", "Switch that enters this mode"},
 		{"-lumpswap", "Swap byte order in the lumps"},
 	};
 
-	HelpOptions("Analyzing BSP-like file structure", 0, 80, analize, sizeof(analize)/sizeof(struct HelpOption));
+	HelpOptions("Analyzing BSP-like file structure", 0, 80, analyze, sizeof(analyze)/sizeof(struct HelpOption));
 }
+
 void HelpScale()
 {
 	struct HelpOption scale[] = {
@@ -252,6 +255,7 @@ void HelpScale()
 	};
 	HelpOptions("Scaling", 0, 80, scale, sizeof(scale)/sizeof(struct HelpOption));
 }
+
 void HelpConvert()
 {
 	struct HelpOption convert[] = {
@@ -352,7 +356,7 @@ void HelpMain(const char* arg)
 		{"-bsp", "BSP Stage"},
 		{"-vis", "VIS Stage"},
 		{"-light", "Light Stage"},
-		{"-analize", "Analyzing BSP-like file structure"},
+		{"-analyze", "Analyzing BSP-like file structure"},
 		{"-scale", "Scaling"},
 		{"-convert", "Converting & Decompiling"},
 		{"-export", "Exporting lightmaps"},
@@ -365,7 +369,7 @@ void HelpMain(const char* arg)
 		HelpBsp,
 		HelpVis,
 		HelpLight,
-		HelpAnalize,
+		HelpAnalyze,
 		HelpScale,
 		HelpConvert,
 		HelpExport,
