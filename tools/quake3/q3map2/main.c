@@ -93,82 +93,6 @@ static void ExitQ3Map( void ){
 }
 
 /*
-   MD4BlockChecksum()
-   calculates an md4 checksum for a block of data
- */
-
-static int MD4BlockChecksum( void *buffer, int length ){
-	return Com_BlockChecksum( buffer, length );
-}
-
-/*
-   FixAAS()
-   resets an aas checksum to match the given BSP
- */
-
-int FixAAS( int argc, char **argv ){
-	int length, checksum;
-	void        *buffer;
-	FILE        *file;
-	char aas[ 1024 ], **ext;
-	char        *exts[] =
-	{
-		".aas",
-		"_b0.aas",
-		"_b1.aas",
-		NULL
-	};
-
-
-	/* arg checking */
-	if ( argc < 2 ) {
-		Sys_Printf( "Usage: q3map -fixaas [-v] <mapname>\n" );
-		return 0;
-	}
-
-	/* do some path mangling */
-	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
-
-	/* note it */
-	Sys_Printf( "--- FixAAS ---\n" );
-
-	/* load the bsp */
-	Sys_Printf( "Loading %s\n", source );
-	length = LoadFile( source, &buffer );
-
-	/* create bsp checksum */
-	Sys_Printf( "Creating checksum...\n" );
-	checksum = LittleLong( MD4BlockChecksum( buffer, length ) );
-
-	/* write checksum to aas */
-	ext = exts;
-	while ( *ext )
-	{
-		/* mangle name */
-		strcpy( aas, source );
-		StripExtension( aas );
-		strcat( aas, *ext );
-		Sys_Printf( "Trying %s\n", aas );
-		ext++;
-
-		/* fix it */
-		file = fopen( aas, "r+b" );
-		if ( !file ) {
-			continue;
-		}
-		if ( fwrite( &checksum, 4, 1, file ) != 1 ) {
-			Error( "Error writing checksum to %s", aas );
-		}
-		fclose( file );
-	}
-
-	/* return to sender */
-	return 0;
-}
-
-/*
    main()
    q3map mojo...
  */
@@ -283,7 +207,7 @@ int main( int argc, char **argv ){
 
 	/* fixaas */
 	if ( !strcmp( argv[ 1 ], "-fixaas" ) ) {
-		r = FixAAS( argc - 1, argv + 1 );
+		r = FixAASMain( argc - 1, argv + 1 );
 	}
 
 	/* analyze */

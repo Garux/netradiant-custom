@@ -1523,6 +1523,8 @@ void                        HelpMain(const char* arg);
 game_t                      *GetGame( char *arg );
 void                        InitPaths( int *argc, char **argv );
 
+/* fixaas.c */
+int                         FixAASMain( int argc, char **argv );
 
 /* bsp.c */
 int                         BSPMain( int argc, char **argv );
@@ -1551,7 +1553,6 @@ int                         ConvertBSPToASE( char *bspName );
 
 /* convert_obj.c */
 int                         ConvertBSPToOBJ( char *bspName );
-
 
 /* brush.c */
 sideRef_t                   *AllocSideRef( side_t *side, sideRef_t *next );
