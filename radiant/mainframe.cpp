@@ -1127,13 +1127,10 @@ void SelectFaceMode(){
 
 class CloneSelected : public scene::Graph::Walker
 {
-	bool doMakeUnique;
 	NodeSmartReference worldspawn;
 
 public:
-	CloneSelected( bool d )
-	: doMakeUnique( d ),
-	worldspawn( Map_FindOrInsertWorldspawn( g_map ) )
+	CloneSelected() : worldspawn( Map_FindOrInsertWorldspawn( g_map ) )
 	{}
 
 	bool pre( const scene::Path& path, scene::Instance& instance ) const override
@@ -1168,20 +1165,14 @@ public:
 			if ( selectable && selectable->isSelected() )
 			{
 				NodeSmartReference clone( Node_Clone( path.top() ) );
-				if ( doMakeUnique )
-				{
-					Map_gatherNamespaced( clone );
-				}
 				Node_getTraversable( path.parent().get() )->insert( clone );
 			}
 		}
 	}
 };
 
-void Scene_Clone_Selected( scene::Graph& graph, bool doMakeUnique ){
-	graph.traverse( CloneSelected( doMakeUnique ) );
-
-	Map_mergeClonedNames();
+void Scene_Clone_Selected( scene::Graph& graph ){
+	graph.traverse( CloneSelected() );
 }
 
 enum ENudgeDirection
@@ -1245,18 +1236,7 @@ void Selection_Clone(){
 	if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
 		UndoableCommand undo( "cloneSelected" );
 
-		Scene_Clone_Selected( GlobalSceneGraph(), false );
-
-		//NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-		//NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-	}
-}
-
-void Selection_Clone_MakeUnique(){
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
-		UndoableCommand undo( "cloneSelectedMakeUnique" );
-
-		Scene_Clone_Selected( GlobalSceneGraph(), true );
+		Scene_Clone_Selected( GlobalSceneGraph() );
 
 		//NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
 		//NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
@@ -1852,7 +1832,6 @@ GtkMenuItem* create_edit_menu(){
 	create_menu_item_with_mnemonic( menu, "P_aste To Camera", "PasteToCamera" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "_Duplicate", "CloneSelection" );
-	create_menu_item_with_mnemonic( menu, "Duplicate, make uni_que", "CloneSelectionAndMakeUnique" );
 	create_menu_item_with_mnemonic( menu, "D_elete", "DeleteSelection" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Pa_rent", "ParentSelection" );
@@ -3200,7 +3179,6 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "Paste", FreeCaller<Paste>(), Accelerator( 'V', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PasteToCamera", FreeCaller<PasteToCamera>(), Accelerator( 'V', (GdkModifierType)GDK_MOD1_MASK ) );
 	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), Accelerator( GDK_space ) );
-	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
 	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
 	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
