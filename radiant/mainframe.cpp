@@ -1127,55 +1127,55 @@ void SelectFaceMode(){
 
 class CloneSelected : public scene::Graph::Walker
 {
-bool doMakeUnique;
-NodeSmartReference worldspawn;
+	bool doMakeUnique;
+	NodeSmartReference worldspawn;
+
 public:
-CloneSelected( bool d ) : doMakeUnique( d ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.size() == 1 ) {
-		return true;
-	}
+	CloneSelected( bool d )
+	: doMakeUnique( d ),
+	worldspawn( Map_FindOrInsertWorldspawn( g_map ) )
+	{}
 
-	// ignore worldspawn, but keep checking children
-	NodeSmartReference me( path.top().get() );
-	if ( me == worldspawn ) {
-		return true;
-	}
-
-	if ( !path.top().get().isRoot() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0
-			 && selectable->isSelected() ) {
-			return false;
+	bool pre( const scene::Path& path, scene::Instance& instance ) const override
+	{
+		if ( path.size() == 1 ) {
+			return true;
 		}
-	}
 
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.size() == 1 ) {
-		return;
-	}
+		// ignore worldspawn, but keep checking children
+		NodeSmartReference me( path.top().get() );
+		if ( me == worldspawn ) {
+			return true;
+		}
 
-	// ignore worldspawn, but keep checking children
-	NodeSmartReference me( path.top().get() );
-	if ( me == worldspawn ) {
-		return;
+		return true;
 	}
+	void post( const scene::Path& path, scene::Instance& instance ) const override
+	{
+		if ( path.size() == 1 ) {
+			return;
+		}
 
-	if ( !path.top().get().isRoot() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0
-			 && selectable->isSelected() ) {
-			NodeSmartReference clone( Node_Clone( path.top() ) );
-			if ( doMakeUnique ) {
-				Map_gatherNamespaced( clone );
+		// ignore worldspawn, but keep checking children
+		NodeSmartReference me( path.top().get() );
+		if ( me == worldspawn ) {
+			return;
+		}
+
+		if ( !path.top().get().isRoot() && !node_is_group(path.top().get()) )
+		{
+			Selectable* selectable = Instance_getSelectable( instance );
+			if ( selectable && selectable->isSelected() )
+			{
+				NodeSmartReference clone( Node_Clone( path.top() ) );
+				if ( doMakeUnique )
+				{
+					Map_gatherNamespaced( clone );
+				}
+				Node_getTraversable( path.parent().get() )->insert( clone );
 			}
-			Node_getTraversable( path.parent().get() )->insert( clone );
 		}
 	}
-}
 };
 
 void Scene_Clone_Selected( scene::Graph& graph, bool doMakeUnique ){

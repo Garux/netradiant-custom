@@ -76,11 +76,11 @@ STRING_CONSTANT( Name, "scenegraph" );
 class Walker
 {
 public:
-virtual ~Walker(){}
-/// \brief Called before traversing the first child-instance of 'instance'. If the return value is false, the children of the current instance are not traversed.
-virtual bool pre( const Path& path, Instance& instance ) const = 0;
-/// \brief Called after traversing the last child-instance of 'instance'.
-virtual void post( const Path& path, Instance& instance ) const {
+	virtual ~Walker(){}
+	/// \brief Called before traversing the first child-instance of 'instance'. If the return value is false, the children of the current instance are not traversed.
+	virtual bool pre( const Path& path, Instance& instance ) const = 0;
+	/// \brief Called after traversing the last child-instance of 'instance'.
+	virtual void post( const Path& path, Instance& instance ) const {
 }
 };
 
