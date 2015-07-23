@@ -1765,15 +1765,15 @@ void Scene_parentSelected(){
 	if ( GlobalSelectionSystem().countSelected() > 1 ) {
 		class ParentSelectedBrushesToEntityWalker : public SelectionSystem::Visitor
 		{
-		const scene::Path& m_parent;
-public:
-		ParentSelectedBrushesToEntityWalker( const scene::Path& parent ) : m_parent( parent ){
-		}
-		void visit( scene::Instance& instance ) const {
-			if ( &m_parent != &instance.path() ) {
-				Path_parent( m_parent, instance.path() );
+			const scene::Path& m_parent;
+		public:
+			ParentSelectedBrushesToEntityWalker( const scene::Path& parent ) : m_parent( parent ){
 			}
-		}
+			void visit( scene::Instance& instance ) const {
+				if ( &m_parent != &instance.path() ) {
+					Path_parent( m_parent, instance.path() );
+				}
+			}
 		};
 
 		ParentSelectedBrushesToEntityWalker visitor( GlobalSelectionSystem().ultimateSelected().path() );

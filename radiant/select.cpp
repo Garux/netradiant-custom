@@ -60,36 +60,24 @@ select_workzone_t g_select_workzone;
  */
 class CollectSelectedBrushesBounds : public SelectionSystem::Visitor
 {
-AABB* m_bounds;     // array of AABBs
-Unsigned m_max;     // max AABB-elements in array
-Unsigned& m_count;  // count of valid AABBs stored in array
+	std::vector<AABB>& m_bounds;     // array of AABBs
 
 public:
-CollectSelectedBrushesBounds( AABB* bounds, Unsigned max, Unsigned& count )
-	: m_bounds( bounds ),
-	m_max( max ),
-	m_count( count ){
-	m_count = 0;
-}
-
-void visit( scene::Instance& instance ) const {
-	ASSERT_MESSAGE( m_count <= m_max, "Invalid m_count in CollectSelectedBrushesBounds" );
-
-	// stop if the array is already full
-	if ( m_count == m_max ) {
-		return;
+	CollectSelectedBrushesBounds( std::vector<AABB>& bounds )
+		: m_bounds( bounds )
+	{
+		m_bounds.clear();
 	}
 
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( ( selectable != 0 )
-		 && instance.isSelected() ) {
-		// brushes only
-		if ( Instance_getBrush( instance ) != 0 ) {
-			m_bounds[m_count] = instance.worldAABB();
-			++m_count;
+	void visit( scene::Instance& instance ) const {
+		Selectable* selectable = Instance_getSelectable( instance );
+		if ( selectable && instance.isSelected() ) {
+			// brushes only
+			if ( Instance_getBrush( instance ) ) {
+				m_bounds.push_back(instance.worldAABB());
+			}
 		}
 	}
-}
 };
 
 /**
@@ -99,76 +87,66 @@ void visit( scene::Instance& instance ) const {
 template<class TSelectionPolicy>
 class SelectByBounds : public scene::Graph::Walker
 {
-AABB* m_aabbs;             // selection aabbs
-Unsigned m_count;          // number of aabbs in m_aabbs
-TSelectionPolicy policy;   // type that contains a custom intersection method aabb<->aabb
+	std::vector<AABB> m_aabbs; // selection aabbs
+	TSelectionPolicy policy;   // type that contains a custom intersection method aabb<->aabb
 
 public:
-SelectByBounds( AABB* aabbs, Unsigned count )
-	: m_aabbs( aabbs ),
-	m_count( count ){
-}
+	SelectByBounds( const std::vector<AABB>& aabbs )
+		: m_aabbs( aabbs )
+	{}
 
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		Selectable* selectable = Instance_getSelectable( instance );
 
-	// ignore worldspawn
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity ) {
-		if ( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ) {
+		// ignore worldspawn
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity && string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ) {
 			return true;
 		}
-	}
 
-	if ( ( path.size() > 1 ) &&
-		 ( !path.top().get().isRoot() ) &&
-		 ( selectable != 0 )
-		 ) {
-		for ( Unsigned i = 0; i < m_count; ++i )
+		if ( ( path.size() > 1 ) && ( !path.top().get().isRoot() ) && selectable )
 		{
-			if ( policy.Evaluate( m_aabbs[i], instance ) ) {
-				selectable->setSelected( true );
+			for ( const AABB& aabb : m_aabbs )
+			{
+				if ( policy.Evaluate( aabb, instance ) ) {
+					selectable->setSelected( true );
+				}
 			}
 		}
+
+		return true;
 	}
 
-	return true;
-}
+	/**
+	  Performs selection operation on the global scenegraph.
+	  If delete_bounds_src is true, then the objects which were
+	  used as source for the selection aabbs will be deleted.
+	*/
+	static void DoSelection( bool delete_bounds_src = true ){
+		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
+			// we may not need all AABBs since not all selected objects have to be brushes
+			const Unsigned max = (Unsigned)GlobalSelectionSystem().countSelected();
+			std::vector<AABB> aabbs(max);
+			CollectSelectedBrushesBounds collector( aabbs );
+			GlobalSelectionSystem().foreachSelected( collector );
 
-/**
-   Performs selection operation on the global scenegraph.
-   If delete_bounds_src is true, then the objects which were
-   used as source for the selection aabbs will be deleted.
- */
-static void DoSelection( bool delete_bounds_src = true ){
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
-		// we may not need all AABBs since not all selected objects have to be brushes
-		const Unsigned max = (Unsigned)GlobalSelectionSystem().countSelected();
-		AABB* aabbs = new AABB[max];
+			// nothing usable in selection
+			if ( aabbs.empty() ) {
+				return;
+			}
 
-		Unsigned count;
-		CollectSelectedBrushesBounds collector( aabbs, max, count );
-		GlobalSelectionSystem().foreachSelected( collector );
+			// delete selected objects
+			if ( delete_bounds_src ) { // see deleteSelection
+				UndoableCommand undo( "deleteSelected" );
+				Select_Delete();
+			}
 
-		// nothing usable in selection
-		if ( !count ) {
-			delete[] aabbs;
-			return;
+			// select objects with bounds
+			GlobalSceneGraph().traverse( SelectByBounds<TSelectionPolicy>( aabbs ) );
+
+			SceneChangeNotify();
 		}
-
-		// delete selected objects
-		if ( delete_bounds_src ) { // see deleteSelection
-			UndoableCommand undo( "deleteSelected" );
-			Select_Delete();
-		}
-
-		// select objects with bounds
-		GlobalSceneGraph().traverse( SelectByBounds<TSelectionPolicy>( aabbs, count ) );
-
-		SceneChangeNotify();
-		delete[] aabbs;
 	}
-}
 };
 
 /**
@@ -311,36 +289,38 @@ void Select_Invert(){
 
 class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 {
-mutable std::size_t m_depth;
-NodeSmartReference worldspawn;
+	mutable std::size_t m_depth;
+	NodeSmartReference worldspawn;
 public:
-ExpandSelectionToEntitiesWalker() : m_depth( 0 ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	++m_depth;
-
-	// ignore worldspawn
-	NodeSmartReference me( path.top().get() );
-	if ( me == worldspawn ) {
-		return false;
+	ExpandSelectionToEntitiesWalker()
+		: m_depth( 0 ),
+		worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
 	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		++m_depth;
 
-	if ( m_depth == 2 ) { // entity depth
-		// traverse and select children if any one is selected
-		if ( instance.childSelected() ) {
-			Instance_setSelected( instance, true );
+		// ignore worldspawn
+		NodeSmartReference me( path.top().get() );
+		if ( me == worldspawn ) {
+			return false;
 		}
-		return Node_getEntity( path.top() )->isContainer() && instance.isSelected();
+
+		if ( m_depth == 2 ) { // entity depth
+			// traverse and select children if any one is selected
+			if ( instance.childSelected() ) {
+				Instance_setSelected( instance, true );
+			}
+			return Node_getEntity( path.top() )->isContainer() && instance.isSelected();
+		}
+		else if ( m_depth == 3 ) { // primitive depth
+			Instance_setSelected( instance, true );
+			return false;
+		}
+		return true;
 	}
-	else if ( m_depth == 3 ) { // primitive depth
-		Instance_setSelected( instance, true );
-		return false;
+	void post( const scene::Path& path, scene::Instance& instance ) const {
+		--m_depth;
 	}
-	return true;
-}
-void post( const scene::Path& path, scene::Instance& instance ) const {
-	--m_depth;
-}
 };
 
 void Scene_ExpandSelectionToEntities(){

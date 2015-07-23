@@ -2804,11 +2804,12 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			{
 				SelectableSortedSet::iterator best = selector.begin();
 				// toggle selection of the object with least depth
-				if ( ( *best ).second->isSelected() ) {
-					( *best ).second->setSelected( false );
+				if ( best->second->isSelected() ) {
+					best->second->setSelected( false );
 				}
 				else{
-					( *best ).second->setSelected( true );
+					best->second->setSelected( true );
+					/// \todo Might be cool to select the whole entity if all the children are selected
 				}
 			}
 			break;
