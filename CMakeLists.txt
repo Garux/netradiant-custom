@@ -1,0 +1,1389 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+project(NetRadiant C CXX)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
+set(BKGRND2DLIST
+    contrib/bkgrnd2d/bkgrnd2d.cpp
+    contrib/bkgrnd2d/bkgrnd2d.h
+    contrib/bkgrnd2d/dialog.cpp
+    contrib/bkgrnd2d/dialog.h
+    contrib/bkgrnd2d/plugin.cpp
+    contrib/bkgrnd2d/plugin.h
+)
+
+set(BOBTOOLZLIST
+    contrib/bobtoolz/dialogs/AboutDialog.cpp
+    contrib/bobtoolz/dialogs/AboutDialog.h
+    contrib/bobtoolz/dialogs/AutoCaulkDialog.cpp
+    contrib/bobtoolz/dialogs/AutoCaulkDialog.h
+    contrib/bobtoolz/dialogs/AutoCaulkStartDialog.cpp
+    contrib/bobtoolz/dialogs/AutoCaulkStartDialog.h
+    contrib/bobtoolz/dialogs/BrushCheckDialog.h
+    contrib/bobtoolz/dialogs/DoorDialog.cpp
+    contrib/bobtoolz/dialogs/DoorDialog.h
+    contrib/bobtoolz/dialogs/IntersectDialog.cpp
+    contrib/bobtoolz/dialogs/IntersectDialog.h
+    contrib/bobtoolz/dialogs/IntersectInfoDialog.cpp
+    contrib/bobtoolz/dialogs/IntersectInfoDialog.h
+    contrib/bobtoolz/dialogs/PolygonDialog.cpp
+    contrib/bobtoolz/dialogs/PolygonDialog.h
+    contrib/bobtoolz/dialogs/StairDialog.cpp
+    contrib/bobtoolz/dialogs/StairDialog.h
+    contrib/bobtoolz/dialogs/TextureResetDialog.cpp
+    contrib/bobtoolz/dialogs/TextureResetDialog.h
+    contrib/bobtoolz/dialogs/brushcheckdialog.cpp
+    contrib/bobtoolz/dialogs/dialogs-gtk.cpp
+    contrib/bobtoolz/dialogs/dialogs-gtk.h
+    contrib/bobtoolz/dialogs/pathplotterdialog.cpp
+    contrib/bobtoolz/dialogs/pathplotterdialog.h
+    contrib/bobtoolz/CPortals.h
+    contrib/bobtoolz/DBobView.cpp
+    contrib/bobtoolz/DBobView.h
+    contrib/bobtoolz/DBrush.cpp
+    contrib/bobtoolz/DBrush.h
+    contrib/bobtoolz/DEPair.cpp
+    contrib/bobtoolz/DEPair.h
+    contrib/bobtoolz/DEntity.cpp
+    contrib/bobtoolz/DEntity.h
+    contrib/bobtoolz/DMap.cpp
+    contrib/bobtoolz/DMap.h
+    contrib/bobtoolz/DPatch.cpp
+    contrib/bobtoolz/DPatch.h
+    contrib/bobtoolz/DPlane.cpp
+    contrib/bobtoolz/DPlane.h
+    contrib/bobtoolz/DPoint.cpp
+    contrib/bobtoolz/DPoint.h
+    contrib/bobtoolz/DShape.cpp
+    contrib/bobtoolz/DShape.h
+    contrib/bobtoolz/DTrainDrawer.cpp
+    contrib/bobtoolz/DTrainDrawer.h
+    contrib/bobtoolz/DTreePlanter.cpp
+    contrib/bobtoolz/DTreePlanter.h
+    contrib/bobtoolz/DVisDrawer.cpp
+    contrib/bobtoolz/DVisDrawer.h
+    contrib/bobtoolz/DWinding.cpp
+    contrib/bobtoolz/DWinding.h
+    contrib/bobtoolz/ScriptParser.cpp
+    contrib/bobtoolz/ScriptParser.h
+    contrib/bobtoolz/StdAfx.cpp
+    contrib/bobtoolz/StdAfx.h
+    contrib/bobtoolz/bobToolz-GTK.cpp
+    contrib/bobtoolz/bobToolz.h
+    contrib/bobtoolz/bsploader.cpp
+    contrib/bobtoolz/bsploader.h
+    contrib/bobtoolz/cportals.cpp
+    contrib/bobtoolz/ctfToolz-GTK.cpp
+    contrib/bobtoolz/ctfresource_gtk.h
+    contrib/bobtoolz/funchandlers-GTK.cpp
+    contrib/bobtoolz/funchandlers-ctf-GTK.cpp
+    contrib/bobtoolz/funchandlers.cpp
+    contrib/bobtoolz/funchandlers.h
+    contrib/bobtoolz/lists.cpp
+    contrib/bobtoolz/lists.h
+    contrib/bobtoolz/misc.cpp
+    contrib/bobtoolz/misc.h
+    contrib/bobtoolz/resource-gtk.h
+    contrib/bobtoolz/resource.h
+    contrib/bobtoolz/shapes.cpp
+    contrib/bobtoolz/shapes.h
+    contrib/bobtoolz/visfind.cpp
+    contrib/bobtoolz/visfind.h
+)
+
+set(BRUSHEXPORTLIST
+    contrib/brushexport/callbacks.cpp
+    contrib/brushexport/callbacks.h
+    contrib/brushexport/export.cpp
+    contrib/brushexport/export.h
+    contrib/brushexport/interface.cpp
+    contrib/brushexport/plugin.cpp
+    contrib/brushexport/plugin.h
+    contrib/brushexport/support.cpp
+    contrib/brushexport/support.h
+)
+
+set(CAMERALIST
+    contrib/camera/camera.cpp
+    contrib/camera/camera.h
+    contrib/camera/dialogs.cpp
+    contrib/camera/dialogs.h
+    contrib/camera/dialogs_common.cpp
+    contrib/camera/funchandlers.cpp
+    contrib/camera/funchandlers.h
+    contrib/camera/listener.cpp
+    contrib/camera/listener.h
+    contrib/camera/misc.cpp
+    contrib/camera/misc.h
+    contrib/camera/renderer.cpp
+    contrib/camera/renderer.h
+)
+
+set(GTKGENSURFLIST
+    contrib/gtkgensurf/bitmap.cpp
+    contrib/gtkgensurf/dec.cpp
+    contrib/gtkgensurf/face.cpp
+    contrib/gtkgensurf/font.cpp
+    contrib/gtkgensurf/gendlgs.cpp
+    contrib/gtkgensurf/gendlgs.h
+    contrib/gtkgensurf/genmap.cpp
+    contrib/gtkgensurf/gensurf.cpp
+    contrib/gtkgensurf/gensurf.h
+    contrib/gtkgensurf/heretic.cpp
+    contrib/gtkgensurf/plugin.cpp
+    contrib/gtkgensurf/triangle.c
+    contrib/gtkgensurf/triangle.h
+    contrib/gtkgensurf/view.cpp
+)
+
+set(HYDRATOOLZLIST
+    contrib/hydratoolz/plugin.cpp
+    contrib/hydratoolz/plugin.h
+)
+
+set(PRTVIEWLIST
+    contrib/prtview/AboutDialog.cpp
+    contrib/prtview/AboutDialog.h
+    contrib/prtview/ConfigDialog.cpp
+    contrib/prtview/ConfigDialog.h
+    contrib/prtview/LoadPortalFileDialog.cpp
+    contrib/prtview/LoadPortalFileDialog.h
+    contrib/prtview/portals.cpp
+    contrib/prtview/portals.h
+    contrib/prtview/prtview.cpp
+    contrib/prtview/prtview.h
+)
+
+set(SHADERPLUGLIST
+    contrib/shaderplug/shaderplug.cpp
+    contrib/shaderplug/shaderplug.h
+)
+
+set(SUNPLUGLIST
+    contrib/sunplug/sunplug.cpp
+    contrib/sunplug/sunplug.h
+)
+
+set(UFOAIPLUGLIST
+    contrib/ufoaiplug/ufoai.cpp
+    contrib/ufoaiplug/ufoai.h
+    contrib/ufoaiplug/ufoai_filters.cpp
+    contrib/ufoaiplug/ufoai_filters.h
+    contrib/ufoaiplug/ufoai_gtk.cpp
+    contrib/ufoaiplug/ufoai_gtk.h
+    contrib/ufoaiplug/ufoai_level.cpp
+    contrib/ufoaiplug/ufoai_level.h
+)
+
+set(INCLUDELIST
+    include/aboutmsg.h
+    include/cullable.cpp
+    include/cullable.h
+    include/editable.cpp
+    include/editable.h
+    include/iarchive.cpp
+    include/iarchive.h
+    include/ibrush.cpp
+    include/ibrush.h
+    include/icamera.cpp
+    include/icamera.h
+    include/idatastream.cpp
+    include/idatastream.h
+    include/ieclass.cpp
+    include/ieclass.h
+    include/ientity.cpp
+    include/ientity.h
+    include/ifilesystem.cpp
+    include/ifilesystem.h
+    include/ifiletypes.cpp
+    include/ifiletypes.h
+    include/ifilter.cpp
+    include/ifilter.h
+    include/igl.cpp
+    include/igl.h
+    include/iglrender.cpp
+    include/iglrender.h
+    include/igtkgl.cpp
+    include/igtkgl.h
+    include/iimage.cpp
+    include/iimage.h
+    include/imap.cpp
+    include/imap.h
+    include/imodel.cpp
+    include/imodel.h
+    include/ipatch.cpp
+    include/ipatch.h
+    include/iplugin.cpp
+    include/iplugin.h
+    include/ireference.cpp
+    include/ireference.h
+    include/irender.cpp
+    include/irender.h
+    include/iscenegraph.cpp
+    include/iscenegraph.h
+    include/iscriplib.cpp
+    include/iscriplib.h
+    include/iselection.cpp
+    include/iselection.h
+    include/ishaders.cpp
+    include/ishaders.h
+    include/itexdef.cpp
+    include/itexdef.h
+    include/itextstream.cpp
+    include/itextstream.h
+    include/itextures.cpp
+    include/itextures.h
+    include/itoolbar.cpp
+    include/itoolbar.h
+    include/iundo.cpp
+    include/iundo.h
+    include/mapfile.cpp
+    include/mapfile.h
+    include/modelskin.cpp
+    include/modelskin.h
+    include/moduleobserver.cpp
+    include/moduleobserver.h
+    include/modulesystem.cpp
+    include/modulesystem.h
+    include/nameable.cpp
+    include/nameable.h
+    include/namespace.cpp
+    include/namespace.h
+    include/preferencesystem.cpp
+    include/preferencesystem.h
+    include/qerplugin.cpp
+    include/qerplugin.h
+    include/renderable.cpp
+    include/renderable.h
+    include/selectable.cpp
+    include/selectable.h
+    include/stream_version.h
+    include/version.h
+    include/warnings.h
+    include/windowobserver.cpp
+    include/windowobserver.h
+)
+include_directories(include)
+
+add_library(cmdlib
+    libs/cmdlib/cmdlib.cpp
+)
+
+add_library(container
+    libs/container/array.cpp
+    libs/container/array.h
+    libs/container/cache.cpp
+    libs/container/cache.h
+    libs/container/container.cpp
+    libs/container/container.h
+    libs/container/hashfunc.cpp
+    libs/container/hashfunc.h
+    libs/container/hashtable.cpp
+    libs/container/hashtable.h
+    libs/container/stack.cpp
+    libs/container/stack.h
+)
+
+add_library(ddslib
+    libs/ddslib/ddslib.c
+)
+
+add_library(debugging
+    libs/debugging/debugging.cpp
+    libs/debugging/debugging.h
+)
+
+add_library(generic
+    libs/generic/arrayrange.cpp
+    libs/generic/arrayrange.h
+    libs/generic/bitfield.cpp
+    libs/generic/bitfield.h
+    libs/generic/callback.cpp
+    libs/generic/callback.h
+    libs/generic/callbackfwd.cpp
+    libs/generic/callbackfwd.h
+    libs/generic/constant.cpp
+    libs/generic/constant.h
+    libs/generic/enumeration.cpp
+    libs/generic/enumeration.h
+    libs/generic/functional.cpp
+    libs/generic/functional.h
+    libs/generic/object.cpp
+    libs/generic/object.h
+    libs/generic/reference.cpp
+    libs/generic/reference.h
+    libs/generic/referencecounted.cpp
+    libs/generic/referencecounted.h
+    libs/generic/static.cpp
+    libs/generic/static.h
+    libs/generic/vector.cpp
+    libs/generic/vector.h
+)
+
+add_library(gtkutil
+    libs/gtkutil/accelerator.cpp
+    libs/gtkutil/accelerator.h
+    libs/gtkutil/button.cpp
+    libs/gtkutil/button.h
+    libs/gtkutil/clipboard.cpp
+    libs/gtkutil/clipboard.h
+    libs/gtkutil/closure.cpp
+    libs/gtkutil/closure.h
+    libs/gtkutil/container.cpp
+    libs/gtkutil/container.h
+    libs/gtkutil/cursor.cpp
+    libs/gtkutil/cursor.h
+    libs/gtkutil/dialog.cpp
+    libs/gtkutil/dialog.h
+    libs/gtkutil/entry.cpp
+    libs/gtkutil/entry.h
+    libs/gtkutil/filechooser.cpp
+    libs/gtkutil/filechooser.h
+    libs/gtkutil/frame.cpp
+    libs/gtkutil/frame.h
+    libs/gtkutil/glfont.cpp
+    libs/gtkutil/glfont.h
+    libs/gtkutil/glwidget.cpp
+    libs/gtkutil/glwidget.h
+    libs/gtkutil/idledraw.cpp
+    libs/gtkutil/idledraw.h
+    libs/gtkutil/image.cpp
+    libs/gtkutil/image.h
+    libs/gtkutil/menu.cpp
+    libs/gtkutil/menu.h
+    libs/gtkutil/messagebox.cpp
+    libs/gtkutil/messagebox.h
+    libs/gtkutil/nonmodal.cpp
+    libs/gtkutil/nonmodal.h
+    libs/gtkutil/paned.cpp
+    libs/gtkutil/paned.h
+    libs/gtkutil/pointer.cpp
+    libs/gtkutil/pointer.h
+    libs/gtkutil/toolbar.cpp
+    libs/gtkutil/toolbar.h
+    libs/gtkutil/widget.cpp
+    libs/gtkutil/widget.h
+    libs/gtkutil/window.cpp
+    libs/gtkutil/window.h
+    libs/gtkutil/xorrectangle.cpp
+    libs/gtkutil/xorrectangle.h
+)
+
+add_library(l_net
+    libs/l_net/l_net.c
+    libs/l_net/l_net.h
+    libs/l_net/l_net_berkley.c
+#    libs/l_net/l_net_wins.c
+    libs/l_net/l_net_wins.h
+)
+
+#add_library(math
+#    libs/math/aabb.cpp
+#    libs/math/aabb.h
+#    libs/math/curve.cpp
+#    libs/math/curve.h
+#    libs/math/expression.cpp
+#    libs/math/expression.h
+#    libs/math/frustum.cpp
+#    libs/math/frustum.h
+#    libs/math/line.cpp
+#    libs/math/line.h
+#    libs/math/matrix.cpp
+#    libs/math/matrix.h
+#    libs/math/pi.cpp
+#    libs/math/pi.h
+#    libs/math/plane.cpp
+#    libs/math/plane.h
+#    libs/math/quaternion.cpp
+#    libs/math/quaternion.h
+#    libs/math/vector.cpp
+#    libs/math/vector.h
+#)
+
+add_library(mathlib
+    libs/mathlib/bbox.c
+    libs/mathlib/line.c
+    libs/mathlib/m4x4.c
+    libs/mathlib/mathlib.c
+    libs/mathlib/ray.c
+)
+
+add_library(md5lib
+    libs/md5lib/md5lib.c
+)
+
+add_library(memory
+    libs/memory/allocator.cpp
+    libs/memory/allocator.h
+)
+add_library(modulesystem
+    libs/modulesystem/moduleregistry.cpp
+    libs/modulesystem/moduleregistry.h
+    libs/modulesystem/modulesmap.cpp
+    libs/modulesystem/modulesmap.h
+    libs/modulesystem/singletonmodule.cpp
+    libs/modulesystem/singletonmodule.h
+)
+
+add_library(os
+    libs/os/dir.cpp
+    libs/os/dir.h
+    libs/os/file.cpp
+    libs/os/file.h
+    libs/os/path.cpp
+    libs/os/path.h
+)
+
+add_library(picomodel
+    libs/picomodel/lwo/clip.c
+    libs/picomodel/lwo/envelope.c
+    libs/picomodel/lwo/list.c
+    libs/picomodel/lwo/lwio.c
+    libs/picomodel/lwo/lwo2.c
+    libs/picomodel/lwo/lwo2.h
+    libs/picomodel/lwo/lwob.c
+    libs/picomodel/lwo/pntspols.c
+    libs/picomodel/lwo/surface.c
+    libs/picomodel/lwo/vecmath.c
+    libs/picomodel/lwo/vmap.c
+    libs/picomodel/picointernal.c
+    libs/picomodel/picointernal.h
+    libs/picomodel/picomodel.c
+    libs/picomodel/picomodules.c
+    libs/picomodel/pm_3ds.c
+    libs/picomodel/pm_ase.c
+    libs/picomodel/pm_fm.c
+    libs/picomodel/pm_fm.h
+    libs/picomodel/pm_lwo.c
+    libs/picomodel/pm_md2.c
+    libs/picomodel/pm_md3.c
+    libs/picomodel/pm_mdc.c
+    libs/picomodel/pm_ms3d.c
+    libs/picomodel/pm_obj.c
+    libs/picomodel/pm_terrain.c
+)
+
+add_library(profile
+    libs/profile/file.cpp
+    libs/profile/file.h
+    libs/profile/profile.cpp
+    libs/profile/profile.h
+)
+
+add_library(script
+    libs/script/scripttokeniser.cpp
+    libs/script/scripttokeniser.h
+    libs/script/scripttokenwriter.cpp
+    libs/script/scripttokenwriter.h
+)
+
+add_library(signal
+    libs/signal/isignal.cpp
+    libs/signal/isignal.h
+    libs/signal/signal.cpp
+    libs/signal/signal.h
+    libs/signal/signalfwd.cpp
+    libs/signal/signalfwd.h
+)
+
+add_library(splines
+    libs/splines/math_angles.cpp
+    libs/splines/math_angles.h
+    libs/splines/math_matrix.cpp
+    libs/splines/math_matrix.h
+    libs/splines/math_quaternion.cpp
+    libs/splines/math_quaternion.h
+    libs/splines/math_vector.cpp
+    libs/splines/math_vector.h
+    libs/splines/q_parse.cpp
+    libs/splines/q_shared.cpp
+    libs/splines/q_shared.h
+    libs/splines/splines.cpp
+    libs/splines/splines.h
+    libs/splines/util_list.h
+    libs/splines/util_str.cpp
+    libs/splines/util_str.h
+)
+
+add_library(stream
+    libs/stream/filestream.cpp
+    libs/stream/filestream.h
+    libs/stream/memstream.cpp
+    libs/stream/memstream.h
+    libs/stream/stringstream.cpp
+    libs/stream/stringstream.h
+    libs/stream/textfilestream.cpp
+    libs/stream/textfilestream.h
+    libs/stream/textstream.cpp
+    libs/stream/textstream.h
+)
+
+add_library(string
+    libs/string/pooledstring.cpp
+    libs/string/pooledstring.h
+    libs/string/string.cpp
+    libs/string/string.h
+    libs/string/stringfwd.cpp
+    libs/string/stringfwd.h
+)
+
+add_library(xml
+    libs/xml/ixml.cpp
+    libs/xml/ixml.h
+    libs/xml/xmlelement.cpp
+    libs/xml/xmlelement.h
+    libs/xml/xmlparser.cpp
+    libs/xml/xmlparser.h
+    libs/xml/xmltextags.cpp
+    libs/xml/xmltextags.h
+    libs/xml/xmlwriter.cpp
+    libs/xml/xmlwriter.h
+)
+
+add_library(libs
+    libs/archivelib.cpp
+    libs/archivelib.h
+    libs/bytebool.cpp
+    libs/bytebool.h
+    libs/bytestreamutils.cpp
+    libs/character.cpp
+    libs/character.h
+    libs/cmdlib.h
+    libs/convert.cpp
+    libs/convert.h
+    libs/ddslib.h
+    libs/dragplanes.cpp
+    libs/dragplanes.h
+    libs/eclasslib.cpp
+    libs/eclasslib.h
+    libs/entitylib.cpp
+    libs/entitylib.h
+    libs/entityxml.cpp
+    libs/entityxml.h
+    libs/filematch.c
+    libs/filematch.h
+    libs/fs_filesystem.cpp
+    libs/fs_filesystem.h
+    libs/fs_path.cpp
+    libs/fs_path.h
+    libs/imagelib.cpp
+    libs/imagelib.h
+    libs/instancelib.cpp
+    libs/instancelib.h
+    libs/maplib.cpp
+    libs/maplib.h
+    libs/mathlib.h
+    libs/md5lib.h
+    libs/moduleobservers.cpp
+    libs/moduleobservers.h
+    libs/picomodel.h
+    libs/pivot.cpp
+    libs/pivot.h
+    libs/render.cpp
+    libs/render.h
+    libs/scenelib.cpp
+    libs/scenelib.h
+    libs/selectionlib.cpp
+    libs/selectionlib.h
+    libs/shaderlib.cpp
+    libs/shaderlib.h
+    libs/str.cpp
+    libs/str.h
+    libs/stringio.cpp
+    libs/stringio.h
+    libs/texturelib.cpp
+    libs/texturelib.h
+    libs/transformlib.cpp
+    libs/transformlib.h
+    libs/traverselib.cpp
+    libs/traverselib.h
+    libs/typesystem.cpp
+    libs/typesystem.h
+    libs/undolib.cpp
+    libs/undolib.h
+    libs/uniquenames.cpp
+    libs/uniquenames.h
+    libs/versionlib.cpp
+    libs/versionlib.h
+    libs/bytestreamutils.h
+    libs/etclib.c
+    libs/etclib.h
+)
+
+include_directories(libs)
+
+set(ARCHIVEPAKLIST
+    plugins/archivepak/archive.cpp
+    plugins/archivepak/archive.h
+    plugins/archivepak/pak.cpp
+    plugins/archivepak/pak.h
+    plugins/archivepak/plugin.cpp
+    plugins/archivepak/plugin.h
+)
+
+set(ARCHIVEWADLIST
+    plugins/archivewad/archive.cpp
+    plugins/archivewad/archive.h
+    plugins/archivewad/plugin.cpp
+    plugins/archivewad/plugin.h
+    plugins/archivewad/wad.cpp
+    plugins/archivewad/wad.h
+)
+
+set(ARCHIVEZIPLIST
+    plugins/archivezip/archive.cpp
+    plugins/archivezip/archive.h
+    plugins/archivezip/pkzip.cpp
+    plugins/archivezip/pkzip.h
+    plugins/archivezip/plugin.cpp
+    plugins/archivezip/plugin.h
+    plugins/archivezip/zlibstream.cpp
+    plugins/archivezip/zlibstream.h
+)
+
+set(ENTITYLIST
+    plugins/entity/angle.cpp
+    plugins/entity/angle.h
+    plugins/entity/angles.cpp
+    plugins/entity/angles.h
+    plugins/entity/colour.cpp
+    plugins/entity/colour.h
+    plugins/entity/curve.cpp
+    plugins/entity/curve.h
+    plugins/entity/doom3group.cpp
+    plugins/entity/doom3group.h
+    plugins/entity/eclassmodel.cpp
+    plugins/entity/eclassmodel.h
+    plugins/entity/entity.cpp
+    plugins/entity/entity.h
+    plugins/entity/filters.cpp
+    plugins/entity/filters.h
+    plugins/entity/generic.cpp
+    plugins/entity/generic.h
+    plugins/entity/group.cpp
+    plugins/entity/group.h
+    plugins/entity/keyobservers.cpp
+    plugins/entity/keyobservers.h
+    plugins/entity/light.cpp
+    plugins/entity/light.h
+    plugins/entity/miscmodel.cpp
+    plugins/entity/miscmodel.h
+    plugins/entity/model.cpp
+    plugins/entity/model.h
+    plugins/entity/modelskinkey.cpp
+    plugins/entity/modelskinkey.h
+    plugins/entity/namedentity.cpp
+    plugins/entity/namedentity.h
+    plugins/entity/namekeys.cpp
+    plugins/entity/namekeys.h
+    plugins/entity/origin.cpp
+    plugins/entity/origin.h
+    plugins/entity/plugin.cpp
+    plugins/entity/plugin.h
+    plugins/entity/rotation.cpp
+    plugins/entity/rotation.h
+    plugins/entity/scale.cpp
+    plugins/entity/scale.h
+    plugins/entity/skincache.cpp
+    plugins/entity/skincache.h
+    plugins/entity/targetable.cpp
+    plugins/entity/targetable.h
+)
+
+set(IMAGELIST
+    plugins/image/bmp.cpp
+    plugins/image/bmp.h
+    plugins/image/dds.cpp
+    plugins/image/dds.h
+    plugins/image/image.h
+    plugins/image/jpeg.cpp
+    plugins/image/jpeg.h
+    plugins/image/pcx.cpp
+    plugins/image/pcx.h
+    plugins/image/tga.cpp
+    plugins/image/tga.h
+    plugins/image/image.cpp
+    plugins/image/ktx.cpp
+    plugins/image/ktx.h
+)
+
+set(IMAGEHLLIST
+    plugins/imagehl/hlw.cpp
+    plugins/imagehl/hlw.h
+    plugins/imagehl/imagehl.cpp
+    plugins/imagehl/imagehl.h
+    plugins/imagehl/mip.cpp
+    plugins/imagehl/mip.h
+    plugins/imagehl/sprite.cpp
+    plugins/imagehl/sprite.h
+)
+
+set(IMAGEPNGLIST
+    plugins/imagepng/plugin.cpp
+    plugins/imagepng/plugin.h
+)
+
+set(IMAGEQ2LIST
+    plugins/imageq2/imageq2.cpp
+    plugins/imageq2/imageq2.h
+    plugins/imageq2/wal.cpp
+    plugins/imageq2/wal.h
+    plugins/imageq2/wal32.cpp
+    plugins/imageq2/wal32.h
+)
+
+set(MAPQ3LIST
+    plugins/mapq3/parse.cpp
+    plugins/mapq3/parse.h
+    plugins/mapq3/plugin.cpp
+    plugins/mapq3/plugin.h
+    plugins/mapq3/write.cpp
+    plugins/mapq3/write.h
+)
+
+set(MAPXMLLIST
+    plugins/mapxml/plugin.cpp
+    plugins/mapxml/plugin.h
+    plugins/mapxml/xmlparse.cpp
+    plugins/mapxml/xmlparse.h
+    plugins/mapxml/xmlwrite.cpp
+    plugins/mapxml/xmlwrite.h
+)
+
+set(MD3MODELLIST
+    plugins/md3model/ident.h
+    plugins/md3model/md2.cpp
+    plugins/md3model/md2.h
+    plugins/md3model/md3.cpp
+    plugins/md3model/md3.h
+    plugins/md3model/md3normals.cpp
+    plugins/md3model/md3normals.h
+    plugins/md3model/md5.cpp
+    plugins/md3model/md5.h
+    plugins/md3model/mdc.cpp
+    plugins/md3model/mdc.h
+    plugins/md3model/mdl.cpp
+    plugins/md3model/mdl.h
+    plugins/md3model/mdlformat.cpp
+    plugins/md3model/mdlformat.h
+    plugins/md3model/mdlimage.cpp
+    plugins/md3model/mdlimage.h
+    plugins/md3model/mdlnormals.cpp
+    plugins/md3model/mdlnormals.h
+    plugins/md3model/model.cpp
+    plugins/md3model/model.h
+    plugins/md3model/plugin.cpp
+    plugins/md3model/plugin.h
+)
+
+set(MODELLIST
+    plugins/model/model.cpp
+    plugins/model/model.h
+    plugins/model/plugin.cpp
+    plugins/model/plugin.h
+)
+
+set(SAMPLELIST
+    plugins/sample/sample.cpp
+    plugins/sample/sample.h
+)
+
+set(SHADERSLIST
+    plugins/shaders/plugin.cpp
+    plugins/shaders/plugin.h
+    plugins/shaders/shaders.cpp
+    plugins/shaders/shaders.h
+)
+
+set(SPRITEMODELLIST
+    plugins/spritemodel/plugin.cpp
+    plugins/spritemodel/plugin.h
+    plugins/spritemodel/spritemodel.cpp
+    plugins/spritemodel/spritemodel.h
+)
+
+set(TEXTOOLLIST
+    plugins/textool/2DView.cpp
+    plugins/textool/2DView.h
+    plugins/textool/ControlPointsManager.cpp
+    plugins/textool/ControlPointsManager.h
+    plugins/textool/StdAfx.cpp
+    plugins/textool/StdAfx.h
+    plugins/textool/TexTool.cpp
+    plugins/textool/resource.h
+)
+
+set(VFSPK3LIST
+    plugins/vfspk3/archive.cpp
+    plugins/vfspk3/archive.h
+    plugins/vfspk3/vfs.cpp
+    plugins/vfspk3/vfs.h
+    plugins/vfspk3/vfspk3.cpp
+    plugins/vfspk3/vfspk3.h
+)
+
+set(RADIANTLIST
+    radiant/autosave.cpp
+    radiant/autosave.h
+    radiant/brush.cpp
+    radiant/brush.h
+    radiant/brush_primit.cpp
+    radiant/brush_primit.h
+    radiant/brushmanip.cpp
+    radiant/brushmanip.h
+    radiant/brushmodule.cpp
+    radiant/brushmodule.h
+    radiant/brushnode.cpp
+    radiant/brushnode.h
+    radiant/brushtokens.cpp
+    radiant/brushtokens.h
+    radiant/brushxml.cpp
+    radiant/brushxml.h
+    radiant/build.cpp
+    radiant/build.h
+    radiant/camwindow.cpp
+    radiant/camwindow.h
+    radiant/clippertool.cpp
+    radiant/clippertool.h
+    radiant/commands.cpp
+    radiant/commands.h
+    radiant/console.cpp
+    radiant/console.h
+    radiant/csg.cpp
+    radiant/csg.h
+    radiant/dialog.cpp
+    radiant/dialog.h
+    radiant/eclass.cpp
+    radiant/eclass.h
+    radiant/eclass_def.cpp
+    radiant/eclass_def.h
+    radiant/eclass_doom3.cpp
+    radiant/eclass_doom3.h
+    radiant/eclass_fgd.cpp
+    radiant/eclass_fgd.h
+    radiant/eclass_xml.cpp
+    radiant/eclass_xml.h
+    radiant/entity.cpp
+    radiant/entity.h
+    radiant/entityinspector.cpp
+    radiant/entityinspector.h
+    radiant/entitylist.cpp
+    radiant/entitylist.h
+    radiant/environment.cpp
+    radiant/environment.h
+    radiant/error.cpp
+    radiant/error.h
+    radiant/feedback.cpp
+    radiant/feedback.h
+    radiant/filetypes.cpp
+    radiant/filetypes.h
+    radiant/filters.cpp
+    radiant/filters.h
+    radiant/findtexturedialog.cpp
+    radiant/findtexturedialog.h
+    radiant/glwidget.cpp
+    radiant/glwidget.h
+    radiant/grid.cpp
+    radiant/grid.h
+    radiant/groupdialog.cpp
+    radiant/groupdialog.h
+    radiant/gtkdlgs.cpp
+    radiant/gtkdlgs.h
+    radiant/gtkmisc.cpp
+    radiant/gtkmisc.h
+    radiant/help.cpp
+    radiant/help.h
+    radiant/image.cpp
+    radiant/image.h
+    radiant/main.cpp
+    radiant/main.h
+    radiant/mainframe.cpp
+    radiant/mainframe.h
+    radiant/map.cpp
+    radiant/map.h
+    radiant/mru.cpp
+    radiant/mru.h
+    radiant/multimon.cpp
+    radiant/multimon.h
+    radiant/nullmodel.cpp
+    radiant/nullmodel.h
+    radiant/parse.cpp
+    radiant/parse.h
+    radiant/patch.cpp
+    radiant/patch.h
+    radiant/patchdialog.cpp
+    radiant/patchdialog.h
+    radiant/patchmanip.cpp
+    radiant/patchmanip.h
+    radiant/patchmodule.cpp
+    radiant/patchmodule.h
+    radiant/plugin.cpp
+    radiant/plugin.h
+    radiant/pluginapi.cpp
+    radiant/pluginapi.h
+    radiant/pluginmanager.cpp
+    radiant/pluginmanager.h
+    radiant/pluginmenu.cpp
+    radiant/pluginmenu.h
+    radiant/plugintoolbar.cpp
+    radiant/plugintoolbar.h
+    radiant/points.cpp
+    radiant/points.h
+    radiant/preferencedictionary.cpp
+    radiant/preferencedictionary.h
+    radiant/preferences.cpp
+    radiant/preferences.h
+    radiant/qe3.cpp
+    radiant/qe3.h
+    radiant/qgl.cpp
+    radiant/qgl.h
+    radiant/referencecache.cpp
+    radiant/referencecache.h
+    radiant/renderer.cpp
+    radiant/renderer.h
+    radiant/renderstate.cpp
+    radiant/renderstate.h
+    radiant/resource.h
+    radiant/scenegraph.cpp
+    radiant/scenegraph.h
+    radiant/select.cpp
+    radiant/select.h
+    radiant/selection.cpp
+    radiant/selection.h
+    radiant/server.cpp
+    radiant/server.h
+    radiant/shaders.cpp
+    radiant/shaders.h
+    radiant/sockets.cpp
+    radiant/sockets.h
+    radiant/stacktrace.cpp
+    radiant/stacktrace.h
+    radiant/surfacedialog.cpp
+    radiant/surfacedialog.h
+    radiant/texmanip.cpp
+    radiant/texmanip.h
+    radiant/textureentry.cpp
+    radiant/textureentry.h
+    radiant/textures.cpp
+    radiant/textures.h
+    radiant/texwindow.cpp
+    radiant/texwindow.h
+    radiant/timer.cpp
+    radiant/timer.h
+    radiant/treemodel.cpp
+    radiant/treemodel.h
+    radiant/undo.cpp
+    radiant/undo.h
+    radiant/url.cpp
+    radiant/url.h
+    radiant/view.cpp
+    radiant/view.h
+    radiant/watchbsp.cpp
+    radiant/watchbsp.h
+    radiant/winding.cpp
+    radiant/winding.h
+    radiant/windowobservers.cpp
+    radiant/windowobservers.h
+    radiant/xmlstuff.cpp
+    radiant/xmlstuff.h
+    radiant/xywindow.cpp
+    radiant/xywindow.h
+)
+
+set(QUAKE2LIST
+    tools/quake2/common/bspfile.c
+    tools/quake2/common/bspfile.h
+    tools/quake2/common/cmdlib.c
+    tools/quake2/common/cmdlib.h
+    tools/quake2/common/inout.c
+    tools/quake2/common/inout.h
+    tools/quake2/common/l3dslib.c
+    tools/quake2/common/l3dslib.h
+    tools/quake2/common/lbmlib.c
+    tools/quake2/common/lbmlib.h
+    tools/quake2/common/mathlib.c
+    tools/quake2/common/mathlib.h
+    tools/quake2/common/md4.c
+    tools/quake2/common/md4.h
+    tools/quake2/common/path_init.c
+    tools/quake2/common/polylib.c
+    tools/quake2/common/polylib.h
+    tools/quake2/common/q2_threads.h
+    tools/quake2/common/qfiles.h
+    tools/quake2/common/scriplib.c
+    tools/quake2/common/scriplib.h
+    tools/quake2/common/threads.c
+    tools/quake2/common/trilib.c
+    tools/quake2/common/trilib.h
+    tools/quake2/extra/bsp/bspinfo3/bspinfo3.c
+    tools/quake2/extra/bsp/qbsp3/brushbsp.c
+    tools/quake2/extra/bsp/qbsp3/csg.c
+    tools/quake2/extra/bsp/qbsp3/faces.c
+    tools/quake2/extra/bsp/qbsp3/gldraw.c
+    tools/quake2/extra/bsp/qbsp3/glfile.c
+    tools/quake2/extra/bsp/qbsp3/leakfile.c
+    tools/quake2/extra/bsp/qbsp3/map.c
+    tools/quake2/extra/bsp/qbsp3/nodraw.c
+    tools/quake2/extra/bsp/qbsp3/portals.c
+    tools/quake2/extra/bsp/qbsp3/prtfile.c
+    tools/quake2/extra/bsp/qbsp3/qbsp.h
+    tools/quake2/extra/bsp/qbsp3/qbsp3.c
+    tools/quake2/extra/bsp/qbsp3/textures.c
+    tools/quake2/extra/bsp/qbsp3/tree.c
+    tools/quake2/extra/bsp/qbsp3/writebsp.c
+    tools/quake2/extra/bsp/qrad3/lightmap.c
+    tools/quake2/extra/bsp/qrad3/patches.c
+    tools/quake2/extra/bsp/qrad3/qrad.h
+    tools/quake2/extra/bsp/qrad3/qrad3.c
+    tools/quake2/extra/bsp/qrad3/trace.c
+    tools/quake2/extra/bsp/qvis3/flow.c
+    tools/quake2/extra/bsp/qvis3/qvis3.c
+    tools/quake2/extra/bsp/qvis3/vis.h
+    tools/quake2/extra/common/bspfile.c
+    tools/quake2/extra/common/bspfile.h
+    tools/quake2/extra/common/cmdlib.c
+    tools/quake2/extra/common/cmdlib.h
+    tools/quake2/extra/common/l3dslib.c
+    tools/quake2/extra/common/l3dslib.h
+    tools/quake2/extra/common/lbmlib.c
+    tools/quake2/extra/common/lbmlib.h
+    tools/quake2/extra/common/mathlib.c
+    tools/quake2/extra/common/mathlib.h
+    tools/quake2/extra/common/mdfour.c
+    tools/quake2/extra/common/mdfour.h
+    tools/quake2/extra/common/polylib.c
+    tools/quake2/extra/common/polylib.h
+    tools/quake2/extra/common/qfiles.h
+    tools/quake2/extra/common/scriplib.c
+    tools/quake2/extra/common/scriplib.h
+    tools/quake2/extra/common/threads.c
+    tools/quake2/extra/common/threads.h
+    tools/quake2/extra/common/trilib.c
+    tools/quake2/extra/common/trilib.h
+    tools/quake2/extra/qdata/anorms.h
+    tools/quake2/extra/qdata/images.c
+    tools/quake2/extra/qdata/models.c
+    tools/quake2/extra/qdata/qdata.c
+    tools/quake2/extra/qdata/qdata.h
+    tools/quake2/extra/qdata/sprites.c
+    tools/quake2/extra/qdata/tables.c
+    tools/quake2/extra/qdata/video.c
+    tools/quake2/extra/qe4/brush.c
+    tools/quake2/extra/qe4/brush.h
+    tools/quake2/extra/qe4/bspfile.h
+    tools/quake2/extra/qe4/camera.c
+    tools/quake2/extra/qe4/camera.h
+    tools/quake2/extra/qe4/cmdlib.c
+    tools/quake2/extra/qe4/cmdlib.h
+    tools/quake2/extra/qe4/csg.c
+    tools/quake2/extra/qe4/drag.c
+    tools/quake2/extra/qe4/eclass.c
+    tools/quake2/extra/qe4/entity.c
+    tools/quake2/extra/qe4/entity.h
+    tools/quake2/extra/qe4/entityw.h
+    tools/quake2/extra/qe4/glingr.h
+    tools/quake2/extra/qe4/lbmlib.c
+    tools/quake2/extra/qe4/lbmlib.h
+    tools/quake2/extra/qe4/map.c
+    tools/quake2/extra/qe4/map.h
+    tools/quake2/extra/qe4/mathlib.c
+    tools/quake2/extra/qe4/mathlib.h
+    tools/quake2/extra/qe4/mru.c
+    tools/quake2/extra/qe4/mru.h
+    tools/quake2/extra/qe4/parse.c
+    tools/quake2/extra/qe4/parse.h
+    tools/quake2/extra/qe4/points.c
+    tools/quake2/extra/qe4/qe3.c
+    tools/quake2/extra/qe4/qe3.h
+    tools/quake2/extra/qe4/qedefs.h
+    tools/quake2/extra/qe4/qfiles.h
+    tools/quake2/extra/qe4/resource.h
+    tools/quake2/extra/qe4/select.c
+    tools/quake2/extra/qe4/select.h
+    tools/quake2/extra/qe4/textures.c
+    tools/quake2/extra/qe4/textures.h
+    tools/quake2/extra/qe4/vertsel.c
+    tools/quake2/extra/qe4/view.h
+    tools/quake2/extra/qe4/win_cam.c
+    tools/quake2/extra/qe4/win_dlg.c
+    tools/quake2/extra/qe4/win_ent.c
+    tools/quake2/extra/qe4/win_main.c
+    tools/quake2/extra/qe4/win_qe3.c
+    tools/quake2/extra/qe4/win_xy.c
+    tools/quake2/extra/qe4/win_z.c
+    tools/quake2/extra/qe4/xy.c
+    tools/quake2/extra/qe4/xy.h
+    tools/quake2/extra/qe4/z.c
+    tools/quake2/extra/qe4/z.h
+    tools/quake2/extra/texpaint/resource.h
+    tools/quake2/extra/texpaint/texpaint.c
+    tools/quake2/extra/texpaint/texpaint.h
+    tools/quake2/extra/texpaint/win_cam.c
+    tools/quake2/extra/texpaint/win_main.c
+    tools/quake2/extra/texpaint/win_pal.c
+    tools/quake2/extra/texpaint/win_skin.c
+    tools/quake2/q2map/brushbsp.c
+    tools/quake2/q2map/csg.c
+    tools/quake2/q2map/faces.c
+    tools/quake2/q2map/flow.c
+    tools/quake2/q2map/gldraw.c
+    tools/quake2/q2map/glfile.c
+    tools/quake2/q2map/leakfile.c
+    tools/quake2/q2map/lightmap.c
+    tools/quake2/q2map/main.c
+    tools/quake2/q2map/map.c
+    tools/quake2/q2map/nodraw.c
+    tools/quake2/q2map/patches.c
+    tools/quake2/q2map/portals.c
+    tools/quake2/q2map/prtfile.c
+    tools/quake2/q2map/q2map.h
+    tools/quake2/q2map/qbsp.c
+    tools/quake2/q2map/qbsp.h
+    tools/quake2/q2map/qrad.c
+    tools/quake2/q2map/qrad.h
+    tools/quake2/q2map/qvis.c
+    tools/quake2/q2map/qvis.h
+    tools/quake2/q2map/textures.c
+    tools/quake2/q2map/trace.c
+    tools/quake2/q2map/tree.c
+    tools/quake2/q2map/writebsp.c
+    tools/quake2/qdata/anorms.h
+    tools/quake2/qdata/images.c
+    tools/quake2/qdata/models.c
+    tools/quake2/qdata/qdata.c
+    tools/quake2/qdata/qdata.h
+    tools/quake2/qdata/sprites.c
+    tools/quake2/qdata/tables.c
+    tools/quake2/qdata/video.c
+    tools/quake2/qdata_heretic2/common/bspfile.c
+    tools/quake2/qdata_heretic2/common/bspfile.h
+    tools/quake2/qdata_heretic2/common/cmdlib.c
+    tools/quake2/qdata_heretic2/common/cmdlib.h
+    tools/quake2/qdata_heretic2/common/her2_threads.h
+    tools/quake2/qdata_heretic2/common/inout.c
+    tools/quake2/qdata_heretic2/common/inout.h
+    tools/quake2/qdata_heretic2/common/l3dslib.c
+    tools/quake2/qdata_heretic2/common/l3dslib.h
+    tools/quake2/qdata_heretic2/common/lbmlib.c
+    tools/quake2/qdata_heretic2/common/lbmlib.h
+    tools/quake2/qdata_heretic2/common/mathlib.c
+    tools/quake2/qdata_heretic2/common/mathlib.h
+    tools/quake2/qdata_heretic2/common/md4.c
+    tools/quake2/qdata_heretic2/common/md4.h
+    tools/quake2/qdata_heretic2/common/path_init.c
+    tools/quake2/qdata_heretic2/common/polylib.c
+    tools/quake2/qdata_heretic2/common/polylib.h
+    tools/quake2/qdata_heretic2/common/qfiles.c
+    tools/quake2/qdata_heretic2/common/qfiles.h
+    tools/quake2/qdata_heretic2/common/scriplib.c
+    tools/quake2/qdata_heretic2/common/scriplib.h
+    tools/quake2/qdata_heretic2/common/threads.c
+    tools/quake2/qdata_heretic2/common/token.c
+    tools/quake2/qdata_heretic2/common/token.h
+    tools/quake2/qdata_heretic2/common/trilib.c
+    tools/quake2/qdata_heretic2/common/trilib.h
+    tools/quake2/qdata_heretic2/qcommon/angles.h
+    tools/quake2/qdata_heretic2/qcommon/arrayedlist.h
+    tools/quake2/qdata_heretic2/qcommon/flex.h
+    tools/quake2/qdata_heretic2/qcommon/fmodel.h
+    tools/quake2/qdata_heretic2/qcommon/h2common.h
+    tools/quake2/qdata_heretic2/qcommon/placement.h
+    tools/quake2/qdata_heretic2/qcommon/q_typedef.h
+    tools/quake2/qdata_heretic2/qcommon/qfiles.h
+    tools/quake2/qdata_heretic2/qcommon/reference.c
+    tools/quake2/qdata_heretic2/qcommon/reference.h
+    tools/quake2/qdata_heretic2/qcommon/resourcemanager.c
+    tools/quake2/qdata_heretic2/qcommon/resourcemanager.h
+    tools/quake2/qdata_heretic2/qcommon/skeletons.c
+    tools/quake2/qdata_heretic2/qcommon/skeletons.h
+    tools/quake2/qdata_heretic2/adpcm.h
+    tools/quake2/qdata_heretic2/animcomp.c
+    tools/quake2/qdata_heretic2/animcomp.h
+    tools/quake2/qdata_heretic2/anorms.h
+    tools/quake2/qdata_heretic2/book.c
+    tools/quake2/qdata_heretic2/fmodels.c
+    tools/quake2/qdata_heretic2/images.c
+    tools/quake2/qdata_heretic2/jointed.c
+    tools/quake2/qdata_heretic2/jointed.h
+    tools/quake2/qdata_heretic2/joints.h
+    tools/quake2/qdata_heretic2/models.c
+    tools/quake2/qdata_heretic2/pics.c
+    tools/quake2/qdata_heretic2/qd_fmodel.h
+    tools/quake2/qdata_heretic2/qd_skeletons.c
+    tools/quake2/qdata_heretic2/qd_skeletons.h
+    tools/quake2/qdata_heretic2/qdata.c
+    tools/quake2/qdata_heretic2/qdata.h
+    tools/quake2/qdata_heretic2/resource.h
+    tools/quake2/qdata_heretic2/sprites.c
+    tools/quake2/qdata_heretic2/svdcmp.c
+    tools/quake2/qdata_heretic2/tables.c
+    tools/quake2/qdata_heretic2/tmix.c
+    tools/quake2/qdata_heretic2/video.c
+)
+
+set(QUAKE3LIST
+    tools/quake3/common/aselib.c
+    tools/quake3/common/aselib.h
+    tools/quake3/common/bspfile.c
+    tools/quake3/common/bspfile.h
+    tools/quake3/common/cmdlib.c
+    tools/quake3/common/cmdlib.h
+    tools/quake3/common/inout.c
+    tools/quake3/common/jpeg.c
+    tools/quake3/common/l3dslib.c
+    tools/quake3/common/l3dslib.h
+    tools/quake3/common/md4.c
+    tools/quake3/common/md4.h
+    tools/quake3/common/mutex.c
+    tools/quake3/common/mutex.h
+    tools/quake3/common/polylib.c
+    tools/quake3/common/polylib.h
+    tools/quake3/common/polyset.h
+    tools/quake3/common/qfiles.h
+    tools/quake3/common/qthreads.h
+    tools/quake3/common/scriplib.c
+    tools/quake3/common/scriplib.h
+    tools/quake3/common/surfaceflags.h
+    tools/quake3/common/threads.c
+    tools/quake3/common/trilib.c
+    tools/quake3/common/trilib.h
+    tools/quake3/common/unzip.c
+    tools/quake3/common/unzip.h
+    tools/quake3/common/vfs.c
+    tools/quake3/common/vfs.h
+    tools/quake3/common/imagelib.c
+    tools/quake3/common/imagelib.h
+    tools/quake3/common/inout.h
+    tools/quake3/q3data/3dslib.c
+    tools/quake3/q3data/3dslib.h
+    tools/quake3/q3data/compress.c
+    tools/quake3/q3data/images.c
+    tools/quake3/q3data/md3lib.c
+    tools/quake3/q3data/md3lib.h
+    tools/quake3/q3data/models.c
+    tools/quake3/q3data/oldstuff.c
+    tools/quake3/q3data/p3dlib.c
+    tools/quake3/q3data/p3dlib.h
+    tools/quake3/q3data/polyset.c
+    tools/quake3/q3data/q3data.c
+    tools/quake3/q3data/q3data.h
+    tools/quake3/q3data/stripper.c
+    tools/quake3/q3data/video.c
+    tools/quake3/q3map2/brush.c
+    tools/quake3/q3map2/brush_primit.c
+    tools/quake3/q3map2/bsp.c
+    tools/quake3/q3map2/bspfile_abstract.c
+    tools/quake3/q3map2/bspfile_ibsp.c
+    tools/quake3/q3map2/bspfile_rbsp.c
+    tools/quake3/q3map2/convert_ase.c
+    tools/quake3/q3map2/convert_map.c
+    tools/quake3/q3map2/convert_obj.c
+    tools/quake3/q3map2/decals.c
+    tools/quake3/q3map2/facebsp.c
+    tools/quake3/q3map2/fog.c
+    tools/quake3/q3map2/game__null.h
+    tools/quake3/q3map2/game_darkplaces.h
+    tools/quake3/q3map2/game_dq.h
+    tools/quake3/q3map2/game_ef.h
+    tools/quake3/q3map2/game_etut.h
+    tools/quake3/q3map2/game_ja.h
+    tools/quake3/q3map2/game_jk2.h
+    tools/quake3/q3map2/game_nexuiz.h
+    tools/quake3/q3map2/game_prophecy.h
+    tools/quake3/q3map2/game_qfusion.h
+    tools/quake3/q3map2/game_quake3.h
+    tools/quake3/q3map2/game_quakelive.h
+    tools/quake3/q3map2/game_reaction.h
+    tools/quake3/q3map2/game_sof2.h
+    tools/quake3/q3map2/game_t.h
+    tools/quake3/q3map2/game_tenebrae.h
+    tools/quake3/q3map2/game_tremulous.h
+    tools/quake3/q3map2/game_wolf.h
+    tools/quake3/q3map2/game_wolfet.h
+    tools/quake3/q3map2/game_xonotic.h
+    tools/quake3/q3map2/leakfile.c
+    tools/quake3/q3map2/light.c
+    tools/quake3/q3map2/light_bounce.c
+    tools/quake3/q3map2/light_shadows.c
+    tools/quake3/q3map2/light_trace.c
+    tools/quake3/q3map2/light_ydnar.c
+    tools/quake3/q3map2/lightmaps.c
+    tools/quake3/q3map2/lightmaps_ydnar.c
+    tools/quake3/q3map2/map.c
+    tools/quake3/q3map2/mesh.c
+    tools/quake3/q3map2/model.c
+    tools/quake3/q3map2/patch.c
+    tools/quake3/q3map2/path_init.c
+    tools/quake3/q3map2/portals.c
+    tools/quake3/q3map2/prtfile.c
+    tools/quake3/q3map2/shaders.c
+    tools/quake3/q3map2/surface.c
+    tools/quake3/q3map2/surface_extra.c
+    tools/quake3/q3map2/surface_foliage.c
+    tools/quake3/q3map2/surface_fur.c
+    tools/quake3/q3map2/surface_meta.c
+    tools/quake3/q3map2/tjunction.c
+    tools/quake3/q3map2/tree.c
+    tools/quake3/q3map2/vis.c
+    tools/quake3/q3map2/visflow.c
+    tools/quake3/q3map2/writebsp.c
+    tools/quake3/q3map2/image.c
+    tools/quake3/q3map2/main.c
+    tools/quake3/q3map2/nav.cpp
+    tools/quake3/q3map2/navgen.h
+    tools/quake3/q3map2/q3map2.h
+)
+
+find_package(LibXml2 REQUIRED)
+include_directories(${LIBXML2_INCLUDE_DIR})
+
+find_package(GTK2 REQUIRED)
+include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR})
+
+find_package(GtkGLExt REQUIRED)
+include_directories(${GTKGL_INCLUDE_DIRS})
+
+find_package(OpenGL REQUIRED)
+
+add_definitions(
+    -D_DEBUG=1
+    -DPOSIX=1
+    -DXWINDOWS=1
+    -DRADIANT_VERSION="1.5.0n"
+    -DRADIANT_MAJOR_VERSION="5"
+    -DRADIANT_MINOR_VERSION="0"
+    -DRADIANT_ABOUTMSG="Custom build"
+    -DRADIANT_EXECUTABLE="x86_64"
+)
+
+add_executable(radiant WIN32 radiant/radiant.rc ${RADIANTLIST})
+target_link_libraries(radiant
+    ${CMAKE_DL_LIBS}
+    ${LIBXML2_LIBRARIES}
+    ${GTK2_LIBRARIES}
+    ${OPENGL_gl_LIBRARY}
+    cmdlib
+    container
+    ddslib
+    debugging
+    gtkutil
+    ${GTKGL_LIBRARIES}
+    l_net
+#    math
+    mathlib
+    md5lib
+    memory
+    modulesystem
+    os
+    picomodel
+    profile
+    script
+    signal
+    splines
+    stream
+    string
+    xml
+)

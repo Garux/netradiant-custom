@@ -37,14 +37,7 @@ struct multimon_globals_t
 
 extern multimon_globals_t g_multimon_globals;
 
-#if defined( WIN32 )
 void MultiMon_Construct();
 void MultiMon_Destroy();
-#else
-inline void MultiMon_Construct(){
-}
-inline void MultiMon_Destroy(){
-}
-#endif
 
 #endif
