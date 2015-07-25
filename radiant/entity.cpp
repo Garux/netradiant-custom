@@ -117,7 +117,6 @@ void Scene_EntitySetClassname_Selected( const char* classname ){
 	GlobalSceneGraph().traverse( EntitySetClassnameSelected( classname ) );
 }
 
-
 void Entity_ungroupSelected(){
 	if ( GlobalSelectionSystem().countSelected() < 1 ) {
 		return;
@@ -144,6 +143,14 @@ void Entity_ungroupSelected(){
 	}
 }
 
+void Entity_ungroupSelectedPrimitives(){
+	if ( GlobalSelectionSystem().countSelected() < 1 ) {
+		return;
+	}
+
+	UndoableCommand undo( "ungroupSelectedPrimitives" );
+	Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), *Map_FindWorldspawn( g_map ));
+}
 
 class EntityFindSelected : public scene::Graph::Walker
 {
@@ -570,6 +577,7 @@ void Entity_registerPreferencesPage(){
 void Entity_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "_Regroup", "GroupSelection" );
 	create_menu_item_with_mnemonic( menu, "_Ungroup", "UngroupSelection" );
+	create_menu_item_with_mnemonic( menu, "Re_move from Entity", "UngroupSelectedPrimitives" );
 	create_menu_item_with_mnemonic( menu, "_Connect", "ConnectSelection" );
 	create_menu_item_with_mnemonic( menu, "_KillConnect", "KillConnectSelection" );
 	create_menu_item_with_mnemonic( menu, "_Select Color...", "EntityColor" );
@@ -588,6 +596,8 @@ void Entity_Construct(){
 	GlobalCommands_insert( "KillConnectSelection", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)( GDK_SHIFT_MASK ) ) );
 	GlobalCommands_insert( "GroupSelection", FreeCaller<Entity_groupSelected>() );
 	GlobalCommands_insert( "UngroupSelection", FreeCaller<Entity_ungroupSelected>() );
+	GlobalCommands_insert( "UngroupSelectedPrimitives", FreeCaller<Entity_ungroupSelectedPrimitives>() );
+
 
 	GlobalPreferenceSystem().registerPreference( "SI_Colors5", Vector3ImportStringCaller( g_entity_globals.color_entity ), Vector3ExportStringCaller( g_entity_globals.color_entity ) );
 	GlobalPreferenceSystem().registerPreference( "LastLightIntensity", IntImportStringCaller( g_iLastLightIntensity ), IntExportStringCaller( g_iLastLightIntensity ) );
