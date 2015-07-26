@@ -18,6 +18,36 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
+find_package(LibXml2 REQUIRED)
+include_directories(${LIBXML2_INCLUDE_DIR})
+
+find_package(GTK2 REQUIRED)
+include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR} ${GTK2_GLIB_INCLUDE_DIR})
+
+find_package(GtkGLExt REQUIRED)
+include_directories(${GTKGL_INCLUDE_DIRS})
+
+find_package(OpenGL REQUIRED)
+
+add_definitions(
+    -D_DEBUG=1
+    -DRADIANT_VERSION="1.5.0n"
+    -DRADIANT_MAJOR_VERSION="5"
+    -DRADIANT_MINOR_VERSION="0"
+    -DRADIANT_ABOUTMSG="Custom build"
+    -DRADIANT_EXECUTABLE="x86_64"
+)
+if(NOT WIN32)
+    add_definitions(
+        -DPOSIX=1
+        -DXWINDOWS=1
+    )
+else()
+    add_definitions(
+        -D_WIN32
+    )
+endif()
+
 set(BKGRND2DLIST
     contrib/bkgrnd2d/bkgrnd2d.cpp
     contrib/bkgrnd2d/bkgrnd2d.h
@@ -383,14 +413,21 @@ add_library(gtkutil
     libs/gtkutil/xorrectangle.cpp
     libs/gtkutil/xorrectangle.h
 )
+target_link_libraries(gtkutil ${GTK2_PANGOFT2_LIBRARY})
 
-add_library(l_net
+set(L_NETLIST
     libs/l_net/l_net.c
     libs/l_net/l_net.h
-    libs/l_net/l_net_berkley.c
-#    libs/l_net/l_net_wins.c
-    libs/l_net/l_net_wins.h
 )
+if(WIN32)
+    set(L_NETLIST ${L_NETLIST} libs/l_net/l_net_wins.c libs/l_net/l_net_wins.h)
+else()
+    set(L_NETLIST ${L_NETLIST} libs/l_net/l_net_berkley.c)
+endif()
+add_library(l_net ${L_NETLIST})
+if(WIN32)
+    target_link_libraries(l_net ws2_32)
+endif()
 
 #add_library(math
 #    libs/math/aabb.cpp
@@ -551,6 +588,7 @@ add_library(xml
     libs/xml/xmlwriter.cpp
     libs/xml/xmlwriter.h
 )
+target_link_libraries(xml ${LIBXML2_LIBRARIES})
 
 add_library(libs
     libs/archivelib.cpp
@@ -1344,28 +1382,6 @@ set(QUAKE3LIST
     tools/quake3/q3map2/nav.cpp
     tools/quake3/q3map2/navgen.h
     tools/quake3/q3map2/q3map2.h
-)
-
-find_package(LibXml2 REQUIRED)
-include_directories(${LIBXML2_INCLUDE_DIR})
-
-find_package(GTK2 REQUIRED)
-include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR})
-
-find_package(GtkGLExt REQUIRED)
-include_directories(${GTKGL_INCLUDE_DIRS})
-
-find_package(OpenGL REQUIRED)
-
-add_definitions(
-    -D_DEBUG=1
-    -DPOSIX=1
-    -DXWINDOWS=1
-    -DRADIANT_VERSION="1.5.0n"
-    -DRADIANT_MAJOR_VERSION="5"
-    -DRADIANT_MINOR_VERSION="0"
-    -DRADIANT_ABOUTMSG="Custom build"
-    -DRADIANT_EXECUTABLE="x86_64"
 )
 
 add_executable(radiant WIN32 radiant/radiant.rc ${RADIANTLIST})
