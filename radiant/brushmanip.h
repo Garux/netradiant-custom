@@ -23,7 +23,7 @@
 #define INCLUDED_BRUSHWRAPPER_H
 
 #include <cstddef>
-#include "string/stringfwd.h"
+#include <string>
 #include "generic/callbackfwd.h"
 
 enum EBrushPrefab
@@ -61,8 +61,8 @@ void Scene_BrushRotateTexdef_Selected( scene::Graph& graph, float angle );
 void Scene_BrushRotateTexdef_Component_Selected( scene::Graph& graph, float angle );
 void Scene_BrushSetShader_Selected( scene::Graph& graph, const char* name );
 void Scene_BrushSetShader_Component_Selected( scene::Graph& graph, const char* name );
-void Scene_BrushGetShader_Selected( scene::Graph& graph, CopiedString& shader );
-void Scene_BrushGetShader_Component_Selected( scene::Graph& graph, CopiedString& shader );
+void Scene_BrushGetShader_Selected( scene::Graph& graph, std::string& shader );
+void Scene_BrushGetShader_Component_Selected( scene::Graph& graph, std::string& shader );
 void Scene_BrushFindReplaceShader( scene::Graph& graph, const char* find, const char* replace );
 void Scene_BrushFindReplaceShader_Selected( scene::Graph& graph, const char* find, const char* replace );
 void Scene_BrushFindReplaceShader_Component_Selected( scene::Graph& graph, const char* find, const char* replace );

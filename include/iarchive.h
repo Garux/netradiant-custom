@@ -31,6 +31,7 @@ class InputStream;
 class ArchiveFile
 {
 public:
+virtual ~ArchiveFile(){}
 /// \brief Destroys the file object.
 virtual void release() = 0;
 /// \brief Returns the size of the file data in bytes.
@@ -50,6 +51,7 @@ class TextInputStream;
 class ArchiveTextFile
 {
 public:
+virtual ~ArchiveTextFile(){}
 /// \brief Destroys the file object.
 virtual void release() = 0;
 /// \brief Returns the stream associated with this file.
@@ -79,6 +81,7 @@ public:
 class Visitor
 {
 public:
+virtual ~Visitor(){}
 virtual void visit( const char* name ) = 0;
 };
 
@@ -91,6 +94,7 @@ enum EMode
 	eFilesAndDirectories = 0x03,
 };
 
+virtual ~Archive(){}
 /// \brief Destroys the archive object.
 /// Any unreleased file object associated with the archive remains valid. */
 virtual void release() = 0;

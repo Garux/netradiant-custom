@@ -52,13 +52,13 @@ enum TextureType
 class XmlTagBuilder
 {
 private:
-CopiedString m_savefilename;
+std::string m_savefilename;
 xmlDocPtr doc;
 xmlXPathContextPtr context;
 xmlNodeSetPtr nodePtr;
 
 xmlXPathObjectPtr XpathEval( const char* queryString ){
-	xmlChar* expression = (xmlChar*)queryString;
+	const xmlChar* expression = (const xmlChar*)queryString;
 	xmlXPathObjectPtr result = xmlXPathEvalExpression( expression, context );
 	return result;
 };
@@ -93,12 +93,12 @@ bool CheckShaderTag( const char* shader );
 bool CheckShaderTag( const char* shader, const char* content );
 bool AddShaderTag( const char* shader, const char* content, NodeTagType nodeTagType );
 bool DeleteTag( const char* tag );
-int RenameShaderTag( const char* oldtag, CopiedString newtag );
+int RenameShaderTag( const char* oldtag, std::string newtag );
 bool DeleteShaderTag( const char* shader, const char* tag );
-void GetShaderTags( const char* shader, std::vector<CopiedString>& tags );
-void GetUntagged( std::set<CopiedString>& shaders );
-void GetAllTags( std::set<CopiedString>& tags );
-void TagSearch( const char* expression, std::set<CopiedString>& paths );
+void GetShaderTags( const char* shader, std::vector<std::string>& tags );
+void GetUntagged( std::set<std::string>& shaders );
+void GetAllTags( std::set<std::string>& tags );
+void TagSearch( const char* expression, std::set<std::string>& paths );
 };
 
 #endif

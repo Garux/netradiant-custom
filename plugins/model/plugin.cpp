@@ -133,7 +133,7 @@ ModelLoader* getTable(){
 
 class PicoModelAPIConstructor
 {
-CopiedString m_extension;
+std::string m_extension;
 const picoModule_t* m_module;
 public:
 PicoModelAPIConstructor( const char* extension, const picoModule_t* module ) :

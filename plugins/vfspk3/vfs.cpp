@@ -78,7 +78,7 @@ Archive* OpenArchive( const char* name );
 
 struct archive_entry_t
 {
-	CopiedString name;
+	std::string name;
 	Archive* archive;
 	bool is_pakfile;
 };
@@ -269,12 +269,12 @@ static int string_compare_nocase_upper( const char* a, const char* b ){
 class PakLess
 {
 public:
-bool operator()( const CopiedString& self, const CopiedString& other ) const {
+bool operator()( const std::string& self, const std::string& other ) const {
 	return string_compare_nocase_upper( self.c_str(), other.c_str() ) > 0;
 }
 };
 
-typedef std::set<CopiedString, PakLess> Archives;
+typedef std::set<std::string, PakLess> Archives;
 
 // =============================================================================
 // Global functions
@@ -473,8 +473,8 @@ int GetFileCount( const char *filename, int flag ){
 
 	for ( archives_t::iterator i = g_archives.begin(); i != g_archives.end(); ++i )
 	{
-		if ( ( *i ).is_pakfile && ( flag & VFS_SEARCH_PAK ) != 0
-			 || !( *i ).is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0 ) {
+		if ( (( *i ).is_pakfile && ( flag & VFS_SEARCH_PAK ) != 0)
+			 || (!( *i ).is_pakfile && ( flag & VFS_SEARCH_DIR ) != 0) ) {
 			if ( ( *i ).archive->containsFile( fixed ) ) {
 				++count;
 			}

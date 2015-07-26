@@ -319,17 +319,15 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 }
 
 void Cam_MouseControl( camera_t& camera, int x, int y ){
-	int xl, xh;
-	int yl, yh;
 	float xf, yf;
 
 	xf = (float)( x - camera.width / 2 ) / ( camera.width / 2 );
 	yf = (float)( y - camera.height / 2 ) / ( camera.height / 2 );
 
-	xl = camera.width / 3;
-	xh = xl * 2;
-	yl = camera.height / 3;
-	yh = yl * 2;
+	//int xl = camera.width / 3;
+	//int xh = xl * 2;
+	//int yl = camera.height / 3;
+	//int yh = yl * 2;
 
 	xf *= 1.0f - fabsf( yf );
 	if ( xf < 0 ) {
@@ -1353,7 +1351,7 @@ void SetState( Shader* state, EStyle style ){
 		m_state_stack.back().m_state = state;
 	}
 }
-const EStyle getStyle() const {
+EStyle getStyle() const {
 	return eFullMaterials;
 }
 void PushState(){

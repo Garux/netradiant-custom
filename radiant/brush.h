@@ -366,7 +366,7 @@ public:
 class SavedState
 {
 public:
-CopiedString m_shader;
+std::string m_shader;
 ContentsFlagsValue m_flags;
 
 SavedState( const FaceShader& faceShader ){
@@ -380,7 +380,7 @@ void exportState( FaceShader& faceShader ) const {
 }
 };
 
-CopiedString m_shader;
+std::string m_shader;
 Shader* m_state;
 ContentsFlagsValue m_flags;
 FaceShaderObserverPair m_observers;

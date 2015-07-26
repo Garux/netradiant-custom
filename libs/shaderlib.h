@@ -45,7 +45,7 @@ inline bool shader_equal_prefix( const char* string, const char* prefix ){
 class shader_less_t
 {
 public:
-bool operator()( const CopiedString& shader, const CopiedString& other ) const {
+bool operator()( const std::string& shader, const std::string& other ) const {
 	return shader_less( shader.c_str(), other.c_str() );
 }
 };

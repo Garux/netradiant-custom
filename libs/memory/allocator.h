@@ -93,6 +93,15 @@ inline bool operator==( const DefaultAllocator<Type>&, const OtherAllocator& ){
 	return false;
 }
 
+template<typename Type, typename Other>
+inline bool operator!=( const DefaultAllocator<Type>&, const DefaultAllocator<Other>& ){
+	return false;
+}
+template<typename Type, typename OtherAllocator>
+inline bool operator!=( const DefaultAllocator<Type>&, const OtherAllocator& ){
+	return true;
+}
+
 #endif
 
 

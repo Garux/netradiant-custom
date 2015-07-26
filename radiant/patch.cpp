@@ -215,13 +215,13 @@ bool Patch::isValid() const {
 		return false;
 	}
 
-	for ( const_iterator i = m_ctrl.begin(); i != m_ctrl.end(); ++i )
+	for ( const auto& i : m_ctrl )
 	{
-		if ( !float_valid( ( *i ).m_vertex.x() )
-			 || !float_valid( ( *i ).m_vertex.y() )
-			 || !float_valid( ( *i ).m_vertex.z() )
-			 || !float_valid( ( *i ).m_texcoord.x() )
-			 || !float_valid( ( *i ).m_texcoord.y() ) ) {
+		if ( !float_valid( i.m_vertex.x() )
+			 || !float_valid( i.m_vertex.y() )
+			 || !float_valid( i.m_vertex.z() )
+			 || !float_valid( i.m_texcoord.x() )
+			 || !float_valid( i.m_texcoord.y() ) ) {
 			globalErrorStream() << "patch has invalid control points\n";
 			return false;
 		}
@@ -1357,14 +1357,13 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		// vPos[1] = aabb.origin;
 		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
-		int i, j;
 		float f = 1 / cos( M_PI / n );
-		for ( i = 0; i < width; ++i )
+		for ( std::size_t i = 0; i < width; ++i )
 		{
 			float angle = ( M_PI * i ) / n; // 0 to 2pi
 			float x = vPos[1][0] + ( vPos[2][0] - vPos[1][0] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
 			float y = vPos[1][1] + ( vPos[2][1] - vPos[1][1] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
-			for ( j = 0; j < height; ++j )
+			for ( std::size_t j = 0; j < height; ++j )
 			{
 				float z = vPos[0][2] + ( vPos[2][2] - vPos[0][2] ) * ( j / (float)( height - 1 ) );
 				PatchControl *v;
@@ -1383,12 +1382,11 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		// vPos[1] = aabb.origin;
 		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
-		int i, j;
 		float f = 1 / cos( M_PI / n );
-		for ( i = 0; i < width; ++i )
+		for ( std::size_t i = 0; i < width; ++i )
 		{
 			float angle = ( M_PI * i ) / n;
-			for ( j = 0; j < height; ++j )
+			for ( std::size_t j = 0; j < height; ++j )
 			{
 				float x = vPos[1][0] + ( 1.0f - ( j / (float)( height - 1 ) ) ) * ( vPos[2][0] - vPos[1][0] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
 				float y = vPos[1][1] + ( 1.0f - ( j / (float)( height - 1 ) ) ) * ( vPos[2][1] - vPos[1][1] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
@@ -1410,13 +1408,12 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		// vPos[1] = aabb.origin;
 		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
-		int i, j;
 		float f = 1 / cos( M_PI / n );
 		float g = 1 / cos( M_PI / ( 2 * m ) );
-		for ( i = 0; i < width; ++i )
+		for ( std::size_t i = 0; i < width; ++i )
 		{
 			float angle = ( M_PI * i ) / n;
-			for ( j = 0; j < height; ++j )
+			for ( std::size_t j = 0; j < height; ++j )
 			{
 				float angle2 = ( M_PI * j ) / ( 2 * m );
 				float x = vPos[1][0] + ( vPos[2][0] - vPos[1][0] ) *  sin( angle2 ) * ( ( j & 1 ) ? g : 1.0f ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );

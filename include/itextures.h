@@ -52,6 +52,7 @@ inline bool operator<( const LoadImageCallback& self, const LoadImageCallback& o
 class TexturesCacheObserver
 {
 public:
+virtual ~TexturesCacheObserver(){}
 virtual void unrealise() = 0;
 virtual void realise() = 0;
 };
@@ -61,6 +62,7 @@ class TexturesCache
 public:
 INTEGER_CONSTANT( Version, 1 );
 STRING_CONSTANT( Name, "textures" );
+virtual ~TexturesCache(){}
 virtual LoadImageCallback defaultLoader() const = 0;
 virtual Image* loadImage( const char* name ) = 0;
 virtual qtexture_t* capture( const char* name ) = 0;

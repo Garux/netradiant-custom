@@ -49,16 +49,16 @@ bool XmlTagBuilder::CreateXmlDocument(){
 	xmlTextWriterStartDocument( writer, NULL, "UTF-8", NULL );
 
 	// create the root node with stock and custom elements
-	xmlTextWriterStartElement( writer, (xmlChar*)"root" );
-	xmlTextWriterWriteString( writer, (xmlChar*)"\n  " );
-	xmlTextWriterStartElement( writer, (xmlChar*)"stock" );
-	xmlTextWriterWriteString( writer, (xmlChar*)"\n  " );
+	xmlTextWriterStartElement( writer, (const xmlChar*)"root" );
+	xmlTextWriterWriteString( writer, (const xmlChar*)"\n  " );
+	xmlTextWriterStartElement( writer, (const xmlChar*)"stock" );
+	xmlTextWriterWriteString( writer, (const xmlChar*)"\n  " );
 	xmlTextWriterEndElement( writer );
-	xmlTextWriterWriteString( writer, (xmlChar*)"\n  " );
-	xmlTextWriterStartElement( writer, (xmlChar*)"custom" );
-	xmlTextWriterWriteString( writer, (xmlChar*)"\n  " );
+	xmlTextWriterWriteString( writer, (const xmlChar*)"\n  " );
+	xmlTextWriterStartElement( writer, (const xmlChar*)"custom" );
+	xmlTextWriterWriteString( writer, (const xmlChar*)"\n  " );
 	xmlTextWriterEndElement( writer );
-	xmlTextWriterWriteString( writer, (xmlChar*)"\n" );
+	xmlTextWriterWriteString( writer, (const xmlChar*)"\n" );
 	xmlTextWriterEndElement( writer );
 
 	// end of the xml document
@@ -151,26 +151,28 @@ bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, 
 		switch ( nodeShaderType )
 		{
 		case SHADER:
-			newnode = xmlNewNode( NULL, (xmlChar*)"shader" );
+			newnode = xmlNewNode( NULL, (const xmlChar*)"shader" );
 			break;
 		case TEXTURE:
-			newnode = xmlNewNode( NULL, (xmlChar*)"texture" );
+			newnode = xmlNewNode( NULL, (const xmlChar*)"texture" );
+		default:
+			return false;
 		};
 
 		newnode = xmlDocCopyNode( newnode, doc, 1 );
-		xmlSetProp( newnode, (xmlChar*)"path", (xmlChar*)shader );
-		xmlNodeSetContent( newnode, (xmlChar*)"\n    " );
+		xmlSetProp( newnode, (const xmlChar*)"path", (const xmlChar*)shader );
+		xmlNodeSetContent( newnode, (const xmlChar*)"\n    " );
 
 		if ( nodePtr->nodeTab[0]->children->next == NULL ) { // there are no shaders yet
 			// add spaces
-			newtext = xmlNewText( (xmlChar*)"  " );
+			newtext = xmlNewText( (const xmlChar*)"  " );
 			xmlAddChild( nodeParent->children, newtext );
 
 			// add the new node
 			xmlAddNextSibling( nodeParent->children, newnode );
 
 			// append a new line
-			newtext = xmlNewText( (xmlChar*)"\n  " );
+			newtext = xmlNewText( (const xmlChar*)"\n  " );
 			xmlAddNextSibling( nodeParent->children->next, newtext );
 		}
 		else {
@@ -178,7 +180,7 @@ bool XmlTagBuilder::AddShaderNode( const char* shader, TextureType textureType, 
 			xmlAddNextSibling( nodeParent->children, newnode );
 
 			// append a new line and spaces
-			newtext = xmlNewText( (xmlChar*)"\n    " );
+			newtext = xmlNewText( (const xmlChar*)"\n    " );
 			xmlAddNextSibling( nodeParent->children->next, newtext );
 		}
 
@@ -327,26 +329,26 @@ bool XmlTagBuilder::AddShaderTag( const char* shader, const char* content, NodeT
 	}
 
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) { // node was found
-		xmlNodePtr newnode = xmlNewNode( NULL, (xmlChar*)"tag" );
+		xmlNodePtr newnode = xmlNewNode( NULL, (const xmlChar*)"tag" );
 		xmlNodePtr nodeParent = nodePtr->nodeTab[0];
 		newnode = xmlDocCopyNode( newnode, doc, 1 );
-		xmlNodeSetContent( newnode, (xmlChar*)content );
+		xmlNodeSetContent( newnode, (const xmlChar*)content );
 
 		if ( nodePtr->nodeTab[0]->children->next == NULL ) { // shader node has NO children
 			// add spaces
-			xmlNodePtr newtext = xmlNewText( (xmlChar*)"  " );
+			xmlNodePtr newtext = xmlNewText( (const xmlChar*)"  " );
 			xmlAddChild( nodeParent->children, newtext );
 
 			// add new node
 			xmlAddNextSibling( nodeParent->children, newnode );
 
 			// append a new line + spaces
-			newtext = xmlNewText( (xmlChar*)"\n    " );
+			newtext = xmlNewText( (const xmlChar*)"\n    " );
 			xmlAddNextSibling( nodeParent->children->next, newtext );
 		}
 		else { // shader node has children already - the new node will be the first sibling
 			xmlAddNextSibling( nodeParent->children, newnode );
-			xmlNodePtr newtext = xmlNewText( (xmlChar*)"\n      " );
+			xmlNodePtr newtext = xmlNewText( (const xmlChar*)"\n      " );
 			xmlAddNextSibling( nodeParent->children->next, newtext );
 		}
 		xmlXPathFreeObject( xpathPtr );
@@ -359,7 +361,7 @@ bool XmlTagBuilder::AddShaderTag( const char* shader, const char* content, NodeT
 }
 
 //int XmlTagBuilder::RenameShaderTag(const char* oldtag, const char* newtag)
-int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
+int XmlTagBuilder::RenameShaderTag( const char* oldtag, std::string newtag ){
 	/* Replaces tag node contents
 
 	   char* oldtag - the <tag></tag> node content that sould be changed
@@ -376,7 +378,7 @@ int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
 	strcat( expression, oldtag );
 	strcat( expression, "']/*" );
 
-	xmlXPathObjectPtr result = xmlXPathEvalExpression( (xmlChar*)expression, context );
+	xmlXPathObjectPtr result = xmlXPathEvalExpression( (const xmlChar*)expression, context );
 	if ( !result ) {
 		return 0;
 	}
@@ -388,7 +390,7 @@ int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
 		char* content = (char*)xmlNodeGetContent( ptrContent );
 
 		if ( strcmp( content, oldtag ) == 0 ) { // found a node with old content?
-			xmlNodeSetContent( ptrContent, (xmlChar*)newtag.c_str() );
+			xmlNodeSetContent( ptrContent, (const xmlChar*)newtag.c_str() );
 			num++;
 		}
 	}
@@ -422,7 +424,7 @@ bool XmlTagBuilder::DeleteShaderTag( const char* shader, const char* tag ){
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
 			xmlNodePtr ptrContent = nodePtr->nodeTab[i];
-			char* content = (char*)(xmlChar*)xmlNodeGetContent( ptrContent );
+			const char* content = (const char*)xmlNodeGetContent( ptrContent );
 
 			if ( strcmp( content, tag ) == 0 ) { // find the node
 				xmlNodePtr ptrWhitespace = nodePtr->nodeTab[i]->prev;
@@ -455,9 +457,9 @@ bool XmlTagBuilder::DeleteTag( const char* tag ){
 	strcat( expression, tag );
 	strcat( expression, "']" );
 
-	std::set<CopiedString> dellist;
+	std::set<std::string> dellist;
 	TagSearch( expression, dellist );
-	std::set<CopiedString>::iterator iter;
+	std::set<std::string>::iterator iter;
 
 	for ( iter = dellist.begin(); iter != dellist.end(); iter++ )
 	{
@@ -468,7 +470,7 @@ bool XmlTagBuilder::DeleteTag( const char* tag ){
 	return true;
 }
 
-void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>& tags ){
+void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<std::string>& tags ){
 	/* Gets the tags from a shader
 
 	   char* shader - the name of the shader
@@ -476,7 +478,7 @@ void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>
 	   returns a vector containing the tags
 	 */
 
-	char* expression;
+	const char* expression;
 
 	if ( shader == NULL ) { // get all tags from all shaders
 		expression = "/root/*/*/tag";
@@ -498,19 +500,19 @@ void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
-			tags.push_back( (CopiedString)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
+			tags.push_back( (std::string)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
 		}
 	}
 	xmlXPathFreeObject( xpathPtr );
 }
 
-void XmlTagBuilder::GetUntagged( std::set<CopiedString>& shaders ){
+void XmlTagBuilder::GetUntagged( std::set<std::string>& shaders ){
 	/* Gets all textures and shaders listed in the xml file that don't have any tag
 
 	   returns a set containing the shaders (with path)
 	 */
 
-	char* expression = "/root/*/*[not(child::tag)]";
+	const char* expression = "/root/*/*[not(child::tag)]";
 
 	xmlXPathObjectPtr xpathPtr = XpathEval( expression );
 	xmlNodeSetPtr nodePtr;
@@ -527,20 +529,20 @@ void XmlTagBuilder::GetUntagged( std::set<CopiedString>& shaders ){
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
 			ptr = nodePtr->nodeTab[i];
-			shaders.insert( (char*)xmlGetProp( ptr, (xmlChar*)"path" ) );
+			shaders.insert( (char*)xmlGetProp( ptr, (const xmlChar*)"path" ) );
 		}
 	}
 
 	xmlXPathFreeObject( xpathPtr );
 }
 
-void XmlTagBuilder::GetAllTags( std::set<CopiedString>& tags ){
+void XmlTagBuilder::GetAllTags( std::set<std::string>& tags ){
 	/* Gets a list of all tags that are used (assigned to any shader)
 
 	   returns a set containing all used tags
 	 */
 
-	char* expression = "/root/*/*/tag";
+	const char* expression = "/root/*/*/tag";
 
 	xmlXPathObjectPtr xpathPtr = XpathEval( expression );
 	xmlNodeSetPtr nodePtr;
@@ -554,14 +556,14 @@ void XmlTagBuilder::GetAllTags( std::set<CopiedString>& tags ){
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
-			tags.insert( (CopiedString)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
+			tags.insert( (std::string)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
 		}
 	}
 
 	xmlXPathFreeObject( xpathPtr );
 }
 
-void XmlTagBuilder::TagSearch( const char* expression, std::set<CopiedString>& paths ){
+void XmlTagBuilder::TagSearch( const char* expression, std::set<std::string>& paths ){
 	/* Searches shaders by tags
 
 	   char* expression - the XPath expression to search
@@ -584,8 +586,8 @@ void XmlTagBuilder::TagSearch( const char* expression, std::set<CopiedString>& p
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
 			ptr = nodePtr->nodeTab[i];
-			xmlattrib = xmlGetProp( ptr, (xmlChar*)"path" );
-			paths.insert( (CopiedString)(char*)xmlattrib );
+			xmlattrib = xmlGetProp( ptr, (const xmlChar*)"path" );
+			paths.insert( (std::string)(char*)xmlattrib );
 		}
 	}
 	xmlXPathFreeObject( xpathPtr );

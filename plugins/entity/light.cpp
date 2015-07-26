@@ -649,7 +649,7 @@ void render( RenderStateFlags state ) const {
 	points[6] = vector4_projected( matrix4_transformed_vector4( unproject, Vector4( points[6], 1 ) ) );
 	points[7] = vector4_projected( matrix4_transformed_vector4( unproject, Vector4( points[7], 1 ) ) );
 	Vector4 test1 = matrix4_transformed_vector4( unproject, Vector4( 0.5f, 0.5f, 0.5f, 1 ) );
-	Vector3 test2 = vector4_projected( test1 );
+	/*Vector3 test2 =*/ vector4_projected( test1 );
 	aabb_draw_wire( points );
 }
 };
@@ -660,7 +660,7 @@ inline void default_extents( Vector3& extents ){
 
 class ShaderRef
 {
-CopiedString m_name;
+std::string m_name;
 Shader* m_shader;
 void capture(){
 	m_shader = GlobalShaderCache().capture( m_name.c_str() );

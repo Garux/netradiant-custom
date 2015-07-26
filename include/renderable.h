@@ -48,7 +48,7 @@ enum EStyle
 virtual void PushState() = 0;
 virtual void PopState() = 0;
 virtual void SetState( Shader* state, EStyle mode ) = 0;
-virtual const EStyle getStyle() const = 0;
+virtual EStyle getStyle() const = 0;
 virtual void Highlight( EHighlightMode mode, bool bEnable = true ) = 0;
 virtual void setLights( const LightList& lights ){
 }

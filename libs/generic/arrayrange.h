@@ -21,6 +21,7 @@
 
 #if !defined( INCLUDED_GENERIC_ARRAYRANGE_H )
 #define INCLUDED_GENERIC_ARRAYRANGE_H
+#include <string>
 
 /// \file
 /// \brief Macros for automatically converting a compile-time-sized array to a range.
@@ -34,6 +35,11 @@ struct ArrayRange
 	}
 	Iterator first;
 	Iterator last;
+
+	operator std::basic_string<typename std::remove_cv<Element>::type>() const
+	{
+		return std::basic_string<typename std::remove_cv<Element>::type>(first, last);
+	}
 };
 
 template<typename Element>

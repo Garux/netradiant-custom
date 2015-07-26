@@ -297,9 +297,9 @@ typedef UnsortedSet<KeyObserver> KeyObservers;
 
 std::size_t m_refcount;
 KeyObservers m_observers;
-CopiedString m_string;
+std::string m_string;
 const char* m_empty;
-ObservedUndoableObject<CopiedString> m_undo;
+ObservedUndoableObject<std::string> m_undo;
 static EntityCreator::KeyValueChangedFunc m_entityKeyValueChanged;
 public:
 
@@ -361,12 +361,12 @@ void notify(){
 	}
 }
 
-void importState( const CopiedString& string ){
+void importState( const std::string& string ){
 	m_string = string;
 
 	notify();
 }
-typedef MemberCaller1<KeyValue, const CopiedString&, &KeyValue::importState> UndoImportCaller;
+typedef MemberCaller1<KeyValue, const std::string&, &KeyValue::importState> UndoImportCaller;
 };
 
 /// \brief An unsorted list of key/value pairs.
@@ -614,7 +614,7 @@ public:
 /// \brief The resource is released when the ResourceReference is destroyed.
 class ResourceReference
 {
-	CopiedString m_name;
+	std::string m_name;
 	Resource* m_resource;
 public:
 	ResourceReference( const char* name )

@@ -106,8 +106,8 @@ mutable AABB m_curveBounds;
 Callback m_transformChanged;
 Callback m_evaluateTransform;
 
-CopiedString m_name;
-CopiedString m_modelKey;
+std::string m_name;
+std::string m_modelKey;
 bool m_isModel;
 
 scene::Traversable* m_traversable;

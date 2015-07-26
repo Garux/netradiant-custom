@@ -30,7 +30,7 @@
 #include "entitylib.h"
 #include "traverselib.h"
 
-inline void parseTextureName( CopiedString& name, const char* token ){
+inline void parseTextureName( std::string& name, const char* token ){
 	StringOutputStream cleaned( 256 );
 	cleaned << PathCleaned( token );
 	name = StringRange( cleaned.c_str(), path_get_filename_base_end( cleaned.c_str() ) ); // remove extension
@@ -38,7 +38,7 @@ inline void parseTextureName( CopiedString& name, const char* token ){
 
 class ModelSkinKey : public ModuleObserver
 {
-CopiedString m_name;
+std::string m_name;
 ModelSkin* m_skin;
 Callback m_skinChangedCallback;
 

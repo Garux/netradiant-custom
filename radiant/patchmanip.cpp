@@ -67,6 +67,32 @@ void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const cha
 	}
 }
 
+void PatchAutoCapTexture( Patch& patch ) {
+
+	AABB box = patch.localAABB();
+	float x = box.extents.x();
+	float y = box.extents.y();
+	float z = box.extents.z();
+
+	int cap_direction = -1;
+	if ( x < y  && x < z )
+		cap_direction = 0;
+	else if ( y < x  && y < z )
+		cap_direction = 1;
+	else if ( z < x  && z < x )
+		cap_direction = 2;
+
+	if ( cap_direction >= 0 )
+		patch.ProjectTexture(cap_direction);
+	else
+		patch.NaturalTexture();
+}
+
+void Patch_AutoCapTexture(){
+	UndoableCommand command( "patchAutoCapTexture" );
+	Scene_forEachVisibleSelectedPatch( &PatchAutoCapTexture );
+	SceneChangeNotify();
+}
 
 void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, const char* shader ){
 	if ( ( type == eCapEndCap || type == eCapIEndCap )
@@ -89,8 +115,10 @@ void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, co
 		NodeSmartReference cap( g_patchCreator->createPatch() );
 		Node_getTraversable( instance.path().parent() )->insert( cap );
 
-		patch.MakeCap( Node_getPatch( cap ), type, ROW, true );
-		Node_getPatch( cap )->SetShader( shader );
+		Patch* cap_patch = Node_getPatch( cap );
+		patch.MakeCap( cap_patch, type, ROW, true );
+		cap_patch->SetShader( shader );
+		PatchAutoCapTexture(*cap_patch);
 
 		scene::Path path( instance.path() );
 		path.pop();
@@ -102,8 +130,10 @@ void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, co
 		NodeSmartReference cap( g_patchCreator->createPatch() );
 		Node_getTraversable( instance.path().parent() )->insert( cap );
 
-		patch.MakeCap( Node_getPatch( cap ), type, ROW, false );
-		Node_getPatch( cap )->SetShader( shader );
+		Patch* cap_patch = Node_getPatch( cap );
+		patch.MakeCap( cap_patch, type, ROW, false );
+		cap_patch->SetShader( shader );
+		PatchAutoCapTexture(*cap_patch);
 
 		scene::Path path( instance.path() );
 		path.pop();
@@ -311,7 +341,7 @@ void Scene_PatchSetShader_Selected( scene::Graph& graph, const char* name ){
 	SceneChangeNotify();
 }
 
-void Scene_PatchGetShader_Selected( scene::Graph& graph, CopiedString& name ){
+void Scene_PatchGetShader_Selected( scene::Graph& graph, std::string& name ){
 	Patch* patch = Scene_GetUltimateSelectedVisiblePatch();
 	if ( patch != 0 ) {
 		name = patch->GetShader();
@@ -585,8 +615,25 @@ void Patch_NaturalTexture(){
 	Scene_PatchNaturalTexture_Selected( GlobalSceneGraph() );
 }
 
+void Patch_CapTexture(){
+	UndoableCommand command( "patchCapTexture" );
 
+	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
+}
 
+void Patch_ResetTexture(){
+	float fx, fy;
+	if ( DoTextureLayout( &fx, &fy ) == eIDOK ) {
+		UndoableCommand command( "patchTileTexture" );
+		Scene_PatchTileTexture_Selected( GlobalSceneGraph(), fx, fy );
+	}
+}
+
+void Patch_FitTexture(){
+	UndoableCommand command( "patchFitTexture" );
+
+	Scene_PatchTileTexture_Selected( GlobalSceneGraph(), 1, 1 );
+}
 
 #include "ifilter.h"
 
@@ -661,10 +708,6 @@ void PatchPreferences_construct(){
 void Patch_registerCommands(){
 	GlobalCommands_insert( "InvertCurveTextureX", FreeCaller<Patch_FlipTextureX>(), Accelerator( 'I', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "InvertCurveTextureY", FreeCaller<Patch_FlipTextureY>(), Accelerator( 'I', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "IncPatchColumn", FreeCaller<Patch_InsertInsertColumn>(), Accelerator( GDK_KP_Add, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "IncPatchRow", FreeCaller<Patch_InsertInsertRow>(), Accelerator( GDK_KP_Add, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "DecPatchColumn", FreeCaller<Patch_DeleteLastColumn>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "DecPatchRow", FreeCaller<Patch_DeleteLastRow>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "NaturalizePatch", FreeCaller<Patch_NaturalTexture>(), Accelerator( 'N', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchCylinder", FreeCaller<Patch_Cylinder>() );
 	GlobalCommands_insert( "PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>() );
@@ -680,13 +723,13 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "PatchCone", FreeCaller<Patch_Cone>() );
 	GlobalCommands_insert( "PatchSphere", FreeCaller<Patch_Sphere>() );
 	GlobalCommands_insert( "SimplePatchMesh", FreeCaller<Patch_Plane>(), Accelerator( 'P', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "PatchInsertInsertColumn", FreeCaller<Patch_InsertInsertColumn>() );
+	GlobalCommands_insert( "PatchInsertInsertColumn", FreeCaller<Patch_InsertInsertColumn>(), Accelerator( GDK_KP_Add, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "PatchInsertAddColumn", FreeCaller<Patch_InsertAddColumn>() );
-	GlobalCommands_insert( "PatchInsertInsertRow", FreeCaller<Patch_InsertInsertRow>() );
+	GlobalCommands_insert( "PatchInsertInsertRow", FreeCaller<Patch_InsertInsertRow>(), Accelerator( GDK_KP_Add, (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchInsertAddRow", FreeCaller<Patch_InsertAddRow>() );
 	GlobalCommands_insert( "PatchDeleteFirstColumn", FreeCaller<Patch_DeleteFirstColumn>() );
-	GlobalCommands_insert( "PatchDeleteLastColumn", FreeCaller<Patch_DeleteLastColumn>() );
-	GlobalCommands_insert( "PatchDeleteFirstRow", FreeCaller<Patch_DeleteFirstRow>() );
+	GlobalCommands_insert( "PatchDeleteLastColumn", FreeCaller<Patch_DeleteLastColumn>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalCommands_insert( "PatchDeleteFirstRow", FreeCaller<Patch_DeleteFirstRow>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchDeleteLastRow", FreeCaller<Patch_DeleteLastRow>() );
 	GlobalCommands_insert( "InvertCurve", FreeCaller<Patch_Invert>(), Accelerator( 'I', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "RedisperseRows", FreeCaller<Patch_RedisperseRows>(), Accelerator( 'E', (GdkModifierType)GDK_CONTROL_MASK ) );

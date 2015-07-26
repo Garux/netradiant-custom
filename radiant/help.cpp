@@ -41,13 +41,13 @@
  */
 namespace
 {
-std::list<CopiedString> mHelpURLs;
+std::list<std::string> mHelpURLs;
 }
 
 /*!
    needed for hooking in Gtk+
  */
-void HandleHelpCommand( CopiedString& str ){
+void HandleHelpCommand( std::string& str ){
 	OpenURL( str.c_str() );
 }
 
@@ -71,7 +71,7 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 				{
 					if ( !strcmp( (const char*)pNode->name, "item" ) ) {
 						// process the URL
-						CopiedString url;
+						std::string url;
 
 						xmlChar* prop = xmlGetProp( pNode, reinterpret_cast<const xmlChar*>( "url" ) );
 						ASSERT_NOTNULL( prop );
@@ -93,7 +93,7 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 
 						prop = xmlGetProp( pNode, reinterpret_cast<const xmlChar*>( "name" ) );
 						ASSERT_NOTNULL( prop );
-						create_menu_item_with_mnemonic( menu_in_menu, reinterpret_cast<const char*>( prop ), ReferenceCaller<CopiedString, HandleHelpCommand>( mHelpURLs.back() ) );
+						create_menu_item_with_mnemonic( menu_in_menu, reinterpret_cast<const char*>( prop ), ReferenceCaller<std::string, HandleHelpCommand>( mHelpURLs.back() ) );
 						xmlFree( prop );
 					}
 					pNode = pNode->next;

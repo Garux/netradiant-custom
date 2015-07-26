@@ -87,7 +87,7 @@ GtkEntry* numeric_entry_new(){
 
 namespace
 {
-typedef std::map<CopiedString, CopiedString> KeyValues;
+typedef std::map<std::string, std::string> KeyValues;
 KeyValues g_selectedKeyValues;
 KeyValues g_selectedDefaultKeyValues;
 }
@@ -118,6 +118,7 @@ void Scene_EntitySetKeyValue_Selected_Undoable( const char* key, const char* val
 class EntityAttribute
 {
 public:
+virtual ~EntityAttribute(){}
 virtual GtkWidget* getWidget() const = 0;
 virtual void update() = 0;
 virtual void release() = 0;
@@ -125,7 +126,7 @@ virtual void release() = 0;
 
 class BooleanAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 GtkCheckButton* m_check;
 
 static gboolean toggled( GtkWidget *widget, BooleanAttribute* self ){
@@ -173,7 +174,7 @@ typedef MemberCaller<BooleanAttribute, &BooleanAttribute::update> UpdateCaller;
 
 class StringAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 GtkEntry* m_entry;
 NonModalEntry m_nonModal;
 public:
@@ -224,7 +225,7 @@ ShaderAttribute( const char* key ) : StringAttribute( key ){
 
 class ModelAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 BrowsedPathEntry m_entry;
 NonModalEntry m_nonModal;
 public:
@@ -287,7 +288,7 @@ const char* browse_sound( GtkWidget* parent ){
 
 class SoundAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 BrowsedPathEntry m_entry;
 NonModalEntry m_nonModal;
 public:
@@ -332,7 +333,7 @@ inline double angle_normalised( double angle ){
 
 class AngleAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 GtkEntry* m_entry;
 NonModalEntry m_nonModal;
 public:
@@ -380,7 +381,7 @@ const String buttons[] = { "up", "down", "z-axis" };
 
 class DirectionAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 GtkEntry* m_entry;
 NonModalEntry m_nonModal;
 RadioHBox m_radio;
@@ -478,7 +479,7 @@ typedef BasicVector3<double> DoubleVector3;
 
 class AnglesAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 AnglesEntry m_angles;
 NonModalEntry m_nonModal;
 GtkBox* m_hbox;
@@ -565,7 +566,7 @@ Vector3Entry() : m_x( 0 ), m_y( 0 ), m_z( 0 ){
 
 class Vector3Attribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 Vector3Entry m_vector3;
 NonModalEntry m_nonModal;
 GtkBox* m_hbox;
@@ -665,7 +666,7 @@ void setActive( GtkComboBox* combo, int value ){
 
 class ListAttribute : public EntityAttribute
 {
-CopiedString m_key;
+std::string m_key;
 GtkComboBox* m_combo;
 NonModalComboBox m_nonModal;
 const ListAttributeType& m_type;
@@ -766,7 +767,7 @@ GetKeyValueVisitor( KeyValues& keyvalues )
 }
 
 void visit( const char* key, const char* value ){
-	m_keyvalues.insert( KeyValues::value_type( CopiedString( key ), CopiedString( value ) ) );
+	m_keyvalues.insert( KeyValues::value_type( std::string( key ), std::string( value ) ) );
 }
 
 };
@@ -808,7 +809,7 @@ public:
 }
 
 const char* keyvalues_valueforkey( KeyValues& keyvalues, const char* key ){
-	KeyValues::iterator i = keyvalues.find( CopiedString( key ) );
+	KeyValues::iterator i = keyvalues.find( std::string( key ) );
 	if ( i != keyvalues.end() ) {
 		return ( *i ).second.c_str();
 	}
@@ -1051,8 +1052,8 @@ void EntityInspector_updateKeyValues(){
 
 	// save current key/val pair around filling epair box
 	// row_select wipes it and sets to first in list
-	CopiedString strKey( gtk_entry_get_text( g_entityKeyEntry ) );
-	CopiedString strVal( gtk_entry_get_text( g_entityValueEntry ) );
+	std::string strKey( gtk_entry_get_text( g_entityKeyEntry ) );
+	std::string strVal( gtk_entry_get_text( g_entityValueEntry ) );
 
 	gtk_list_store_clear( store );
 	// Walk through list and add pairs

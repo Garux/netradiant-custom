@@ -29,7 +29,7 @@
 
 #include "mainframe.h"
 
-typedef std::map<CopiedString, CopiedString> Variables;
+typedef std::map<std::string, std::string> Variables;
 Variables g_build_variables;
 
 void build_clear_variables(){
@@ -55,13 +55,14 @@ const char* build_get_variable( const char* name ){
 class Evaluatable
 {
 public:
+virtual ~Evaluatable(){}
 virtual void evaluate( StringBuffer& output ) = 0;
 virtual void exportXML( XMLImporter& importer ) = 0;
 };
 
 class VariableString : public Evaluatable
 {
-CopiedString m_string;
+std::string m_string;
 public:
 VariableString() : m_string(){
 }
@@ -292,7 +293,7 @@ void popElement( const char* name ){
 }
 };
 
-typedef std::pair<CopiedString, Build> BuildPair;
+typedef std::pair<std::string, Build> BuildPair;
 #define SEPARATOR_STRING "-"
 static bool is_separator( const BuildPair &p ){
 	if ( !string_equal( p.first.c_str(), SEPARATOR_STRING ) ) {
@@ -349,7 +350,7 @@ Build::iterator Build_find( Build& build, std::size_t index ){
 	return i;
 }
 
-typedef std::map<CopiedString, Tool> Tools;
+typedef std::map<std::string, Tool> Tools;
 
 class ProjectXMLConstructor : public XMLElementParser
 {
@@ -409,7 +410,7 @@ void popElement( const char* name ){
 
 class RootXMLConstructor : public XMLElementParser
 {
-CopiedString m_elementName;
+std::string m_elementName;
 XMLElementParser& m_parser;
 SkipAllParser m_skip;
 Version m_version;
@@ -949,7 +950,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 
 namespace
 {
-CopiedString g_buildMenu;
+std::string g_buildMenu;
 }
 
 void LoadBuildMenu();

@@ -113,7 +113,7 @@ inline const char* xmlAttr_getValue( xmlAttrPtr attr ){
 	return reinterpret_cast<const char*>( attr->children->content );
 }
 
-CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile ){
+CGameDescription::CGameDescription( xmlDocPtr pDoc, const std::string& gameFile ){
 	// read the user-friendly game name
 	xmlNodePtr pNode = pDoc->children;
 
@@ -215,15 +215,12 @@ bool Preferences_Save( PreferenceDictionary& preferences, const char* filename )
 }
 
 bool Preferences_Save_Safe( PreferenceDictionary& preferences, const char* filename ){
-	Array<char> tmpName( filename, filename + strlen( filename ) + 1 + 3 );
-	*( tmpName.end() - 4 ) = 'T';
-	*( tmpName.end() - 3 ) = 'M';
-	*( tmpName.end() - 2 ) = 'P';
-	*( tmpName.end() - 1 ) = '\0';
+	std::string tmpName( filename );
+	tmpName += "TMP";
 
-	return Preferences_Save( preferences, tmpName.data() )
+	return Preferences_Save( preferences, tmpName.c_str() )
 		   && ( !file_exists( filename ) || file_remove( filename ) )
-		   && file_move( tmpName.data(), filename );
+		   && file_move( tmpName.c_str(), filename );
 }
 
 

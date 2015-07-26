@@ -20,10 +20,10 @@ inline void StringPool_analyse( StringPool& pool ){
 	std::size_t pooled = 0;
 	for ( StringPool::iterator i = pool.begin(); i != pool.end(); ++i )
 	{
-		std::size_t size =  string_length( ( *i ).key ) + 1;
-		total += size * ( *i ).value;
+		std::size_t size =  string_length( ( *i ).first ) + 1;
+		total += size * ( *i ).second;
 		pooled += size + 20;
-		ordered.insert( Ordered::value_type( ( *i ).value, ( *i ).key ) );
+		ordered.insert( Ordered::value_type( ( *i ).second, ( *i ).first ) );
 	}
 	globalOutputStream() << "total: " << Unsigned( total ) << " pooled:" << Unsigned( pooled ) << "\n";
 	for ( Ordered::iterator i = ordered.begin(); i != ordered.end(); ++i )
@@ -41,19 +41,19 @@ class PooledString
 {
 StringPool::iterator m_i;
 static StringPool::iterator increment( StringPool::iterator i ){
-	++( *i ).value;
+	++( *i ).second;
 	return i;
 }
 static StringPool::iterator insert( const char* string ){
 	StringPool::iterator i = PoolContext::instance().find( const_cast<char*>( string ) );
 	if ( i == PoolContext::instance().end() ) {
-		return PoolContext::instance().insert( string_clone( string ), 1 );
+		return PoolContext::instance().emplace( string_clone( string ), 1 ).first;
 	}
 	return increment( i );
 }
 static void erase( StringPool::iterator i ){
-	if ( --( *i ).value == 0 ) {
-		char* string = ( *i ).key;
+	if ( --( *i ).second == 0 ) {
+		char* string = ( *i ).first;
 		PoolContext::instance().erase( i );
 		string_release( string, string_length( string ) );
 	}
@@ -85,7 +85,7 @@ bool operator==( const PooledString& other ) const {
 	return m_i == other.m_i;
 }
 const char* c_str() const {
-	return ( *m_i ).key;
+	return ( *m_i ).first;
 }
 };
 

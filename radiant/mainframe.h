@@ -62,11 +62,11 @@ MainFrame();
 
 GtkWindow* m_window;
 
-CopiedString m_command_status;
-CopiedString m_position_status;
-CopiedString m_brushcount_status;
-CopiedString m_texture_status;
-CopiedString m_grid_status;
+std::string m_command_status;
+std::string m_position_status;
+std::string m_brushcount_status;
+std::string m_texture_status;
+std::string m_grid_status;
 private:
 
 void Create();
@@ -101,7 +101,7 @@ bool IsSleeping(){
 }
 void OnSleep();
 
-void SetStatusText( CopiedString& status_text, const char* pText );
+void SetStatusText( std::string& status_text, const char* pText );
 void UpdateStatusText();
 void RedrawStatusText();
 typedef MemberCaller<MainFrame, &MainFrame::RedrawStatusText> RedrawStatusTextCaller;
@@ -202,15 +202,15 @@ void Radiant_detachEnginePathObserver( ModuleObserver& observer );
 void Radiant_attachGameToolsPathObserver( ModuleObserver& observer );
 void Radiant_detachGameToolsPathObserver( ModuleObserver& observer );
 
-extern CopiedString g_strEnginePath;
+extern std::string g_strEnginePath;
 void EnginePath_verify();
 const char* EnginePath_get();
 const char* QERApp_GetGamePath();
 
-extern CopiedString g_strAppPath;
+extern std::string g_strAppPath;
 const char* AppPath_get();
 
-extern CopiedString g_strSettingsPath;
+extern std::string g_strSettingsPath;
 const char* SettingsPath_get();
 
 const char* LocalRcPath_get( void );
@@ -218,7 +218,7 @@ const char* LocalRcPath_get( void );
 const char* const g_pluginsDir = "plugins/"; ///< name of plugins directory, always sub-directory of toolspath
 const char* const g_modulesDir = "modules/"; ///< name of modules directory, always sub-directory of toolspath
 
-extern CopiedString g_strGameToolsPath;
+extern std::string g_strGameToolsPath;
 const char* GameToolsPath_get();
 
 void Radiant_Initialise();

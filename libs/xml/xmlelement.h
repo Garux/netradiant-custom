@@ -65,7 +65,7 @@ attrs_t m_attrs;
 ///\brief All string pointers passed to an instance of this class are copied.
 class DynamicElement : public XMLElement
 {
-typedef std::map<CopiedString, CopiedString> attrs_t;
+typedef std::map<std::string, std::string> attrs_t;
 public:
 DynamicElement( const char* name )
 	: m_name( name ){
@@ -92,7 +92,7 @@ void forEachAttribute( XMLAttrVisitor& visitor ) const {
 	}
 }
 private:
-CopiedString m_name;
+std::string m_name;
 attrs_t m_attrs;
 };
 

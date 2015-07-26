@@ -923,7 +923,7 @@ EMessageBoxReturn DoLightIntensityDlg( int *intensity ){
 // =============================================================================
 // Add new shader tag dialog
 
-EMessageBoxReturn DoShaderTagDlg( CopiedString* tag, char* title ){
+EMessageBoxReturn DoShaderTagDlg( std::string* tag, const char* title ){
 	ModalDialog dialog;
 	GtkEntry* textentry;
 	ModalDialogButton ok_button( dialog, eIDOK );
@@ -984,7 +984,7 @@ EMessageBoxReturn DoShaderTagDlg( CopiedString* tag, char* title ){
 	return ret;
 }
 
-EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, char* title ){
+EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, const char* title ){
 	ModalDialog dialog;
 	ModalDialogButton ok_button( dialog, eIDOK );
 
@@ -1047,7 +1047,7 @@ bool g_TextEditor_useWin32Editor = true;
 #else
 // custom shader editor
 bool g_TextEditor_useCustomEditor = false;
-CopiedString g_TextEditor_editorCommand( "" );
+std::string g_TextEditor_editorCommand( "" );
 #endif
 
 void DoTextEditor( const char* filename, int cursorpos ){

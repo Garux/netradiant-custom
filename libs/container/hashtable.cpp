@@ -29,7 +29,7 @@ namespace ExampleHashTable
 {
 void testStuff(){
 	// HashTable example
-	typedef HashTable<CopiedString, int, HashString> MyHashTable;
+	typedef HashTable<std::string, int, HashString> MyHashTable;
 	MyHashTable hashtable;
 	hashtable["bleh"] = 5;
 	hashtable.insert( "blah", 17 );
@@ -44,7 +44,7 @@ void testStuff(){
 
 	for ( MyHashTable::iterator i = hashtable.begin(); i != hashtable.end(); ++i )
 	{
-		if ( ( *i ).key != "bleh" ) {
+		if ( ( *i ).first != "bleh" ) {
 			++hashtable["count"]; // insertion does not invalidate iterators
 		}
 	}

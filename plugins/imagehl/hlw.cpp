@@ -91,7 +91,7 @@ typedef struct
 Image* LoadHLWBuff( byte* buffer ){
 	byte *buf_p;
 	unsigned long mipdatasize;
-	int columns, rows, numPixels;
+	int columns, rows;
 	byte *pixbuf;
 	int row, column;
 	byte *palette;
@@ -108,7 +108,7 @@ Image* LoadHLWBuff( byte* buffer ){
 
 	columns = lpMip->width;
 	rows = lpMip->height;
-	numPixels = columns * rows;
+	//int numPixels = columns * rows;
 
 	RGBAImage* image = new RGBAImage( columns, rows );
 

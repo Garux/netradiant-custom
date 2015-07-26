@@ -84,7 +84,7 @@ inline void printParseError( const char* message ){
 	globalErrorStream() << message;
 }
 
-#define PARSE_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; } else
+#define PARSE_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; }
 
 bool EntityClassDoom3_parseToken( Tokeniser& tokeniser ){
 	const char* token = tokeniser.getToken();
@@ -105,7 +105,7 @@ bool EntityClassDoom3_parseString( Tokeniser& tokeniser, const char*& s ){
 	return true;
 }
 
-bool EntityClassDoom3_parseString( Tokeniser& tokeniser, CopiedString& s ){
+bool EntityClassDoom3_parseString( Tokeniser& tokeniser, std::string& s ){
 	const char* token = tokeniser.getToken();
 	PARSE_RETURN_FALSE_IF_FAIL( token != 0 );
 	s = token;
@@ -152,16 +152,16 @@ class Model
 {
 public:
 bool m_resolved;
-CopiedString m_mesh;
-CopiedString m_skin;
-CopiedString m_parent;
-typedef std::map<CopiedString, CopiedString> Anims;
+std::string m_mesh;
+std::string m_skin;
+std::string m_parent;
+typedef std::map<std::string, std::string> Anims;
 Anims m_anims;
 Model() : m_resolved( false ){
 }
 };
 
-typedef std::map<CopiedString, Model> Models;
+typedef std::map<std::string, Model> Models;
 
 Models g_models;
 
@@ -241,7 +241,7 @@ bool EntityClassDoom3_parseModel( Tokeniser& tokeniser ){
 			}
 		}
 		else if ( string_equal( parameter, "anim" ) ) {
-			CopiedString animName;
+			std::string animName;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, animName ) );
 			const char* animFile;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, animFile ) );
@@ -319,7 +319,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 
 	StringOutputStream usage( 256 );
 	StringOutputStream description( 256 );
-	CopiedString* currentDescription = 0;
+	std::string* currentDescription = 0;
 	StringOutputStream* currentString = 0;
 
 	for (;; )
@@ -328,7 +328,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 		PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, key ) );
 
 		const char* last = string_findFirstSpaceOrTab( key );
-		CopiedString first( StringRange( key, last ) );
+		std::string first( StringRange( key, last ) );
 
 		if ( !string_empty( last ) ) {
 			last = string_findFirstNonSpaceOrTab( last );
@@ -501,7 +501,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 		// end ignore prey entity keys
 		else
 		{
-			CopiedString tmp( key );
+			std::string tmp( key );
 			ASSERT_MESSAGE( !string_equal_n( key, "editor_", 7 ), "unsupported editor key: " << makeQuoted( key ) );
 			EntityClassAttribute& attribute = EntityClass_insertAttribute( entityClass, key ).second;
 			attribute.m_type = "string";
@@ -598,7 +598,7 @@ bool EntityClassDoom3_parse( TextInputStream& inputStream, const char* filename 
 		if ( blockType == 0 ) {
 			return true;
 		}
-		CopiedString tmp( blockType );
+		std::string tmp( blockType );
 		if ( !EntityClassDoom3_parseBlock( tokeniser, tmp.c_str() ) ) {
 			globalErrorStream() << GlobalFileSystem().findFile( filename ) << filename << ":" << (unsigned int)tokeniser.getLine() << ": " << tmp.c_str() << " parse failed, skipping rest of file\n";
 			return false;

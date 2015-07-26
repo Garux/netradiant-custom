@@ -809,10 +809,10 @@ void Scene_BrushGetFlags_Component_Selected( scene::Graph& graph, ContentsFlagsV
 
 class FaceGetShader
 {
-CopiedString& m_shader;
+std::string& m_shader;
 mutable bool m_done;
 public:
-FaceGetShader( CopiedString& shader )
+FaceGetShader( std::string& shader )
 	: m_shader( shader ), m_done( false ){
 }
 void operator()( Face& face ) const {
@@ -823,7 +823,7 @@ void operator()( Face& face ) const {
 }
 };
 
-void Scene_BrushGetShader_Selected( scene::Graph& graph, CopiedString& shader ){
+void Scene_BrushGetShader_Selected( scene::Graph& graph, std::string& shader ){
 #if 1
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		BrushInstance* brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() );
@@ -836,7 +836,7 @@ void Scene_BrushGetShader_Selected( scene::Graph& graph, CopiedString& shader ){
 #endif
 }
 
-void Scene_BrushGetShader_Component_Selected( scene::Graph& graph, CopiedString& shader ){
+void Scene_BrushGetShader_Component_Selected( scene::Graph& graph, std::string& shader ){
 #if 1
 	if ( !g_SelectedFaceInstances.empty() ) {
 		FaceInstance& faceInstance = g_SelectedFaceInstances.last();

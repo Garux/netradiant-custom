@@ -38,7 +38,7 @@ typedef Vector3 Colour3;
 
 class ListAttributeType
 {
-typedef std::pair<CopiedString, CopiedString> ListItem;
+typedef std::pair<std::string, std::string> ListItem;
 typedef std::vector<ListItem> ListItems;
 ListItems m_items;
 public:
@@ -72,19 +72,19 @@ void push_back( const char* name, const char* value ){
 class EntityClassAttribute
 {
 public:
-CopiedString m_type;
-CopiedString m_name;
-CopiedString m_value;
-CopiedString m_description;
+std::string m_type;
+std::string m_name;
+std::string m_value;
+std::string m_description;
 EntityClassAttribute(){
 }
 EntityClassAttribute( const char* type, const char* name, const char* value = "", const char* description = "" ) : m_type( type ), m_name( name ), m_value( value ), m_description( description ){
 }
 };
 
-typedef std::pair<CopiedString, EntityClassAttribute> EntityClassAttributePair;
+typedef std::pair<std::string, EntityClassAttribute> EntityClassAttributePair;
 typedef std::list<EntityClassAttributePair> EntityClassAttributes;
-typedef std::list<CopiedString> StringList;
+typedef std::list<std::string> StringList;
 
 inline const char* EntityClassAttributePair_getName( const EntityClassAttributePair& attributePair ){
 	if ( !string_empty( attributePair.second.m_name.c_str() ) ) {
@@ -103,7 +103,7 @@ inline const char* EntityClassAttributePair_getDescription( const EntityClassAtt
 class EntityClass
 {
 public:
-CopiedString m_name;
+std::string m_name;
 StringList m_parent;
 bool fixedsize;
 bool unknown;               // wasn't found in source
@@ -115,11 +115,11 @@ Shader* m_state_fill;
 Shader* m_state_wire;
 Shader* m_state_blend;
 
-CopiedString m_comments;
+std::string m_comments;
 char flagnames[MAX_FLAGS][32];
 
-CopiedString m_modelpath;
-CopiedString m_skin;
+std::string m_modelpath;
+std::string m_skin;
 
 void ( *free )( EntityClass* );
 

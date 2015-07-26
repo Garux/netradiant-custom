@@ -129,10 +129,12 @@ void printShaderLog( GLhandleARB object ){
 	GLint log_length = 0;
 	glGetObjectParameterivARB( object, GL_OBJECT_INFO_LOG_LENGTH_ARB, &log_length );
 
-	Array<char> log( log_length );
-	glGetInfoLogARB( object, log_length, &log_length, log.data() );
 
-	globalErrorStream() << StringRange( log.begin(), log.begin() + log_length ) << "\n";
+	std::string log( log_length, ' ' );
+	if ( !log.empty() )
+		glGetInfoLogARB( object, log_length, &log_length, &log[0] );
+
+	globalErrorStream() << StringRange( log.data(), log.data() + log_length ) << "\n";
 }
 
 void createShader( GLhandleARB program, const char* filename, GLenum type ){
@@ -1014,7 +1016,7 @@ void detach( ModuleObserver& observer ){
 	}
 	m_observers.detach( observer );
 }
-void realise( const CopiedString& name ){
+void realise( const std::string& name ){
 	construct( name.c_str() );
 
 	if ( m_used != 0 && m_shader != 0 ) {
@@ -1147,7 +1149,7 @@ public:
 explicit CreateOpenGLShader( OpenGLShaderCache* cache = 0 )
 	: m_cache( cache ){
 }
-OpenGLShader* construct( const CopiedString& name ){
+OpenGLShader* construct( const std::string& name ){
 	OpenGLShader* shader = new OpenGLShader;
 	if ( m_cache->realised() ) {
 		shader->realise( name );
@@ -1162,7 +1164,7 @@ void destroy( OpenGLShader* shader ){
 }
 };
 
-typedef HashedCache<CopiedString, OpenGLShader, HashString, std::equal_to<CopiedString>, CreateOpenGLShader> Shaders;
+typedef HashedCache<std::string, OpenGLShader, HashString, std::equal_to<std::string>, CreateOpenGLShader> Shaders;
 Shaders m_shaders;
 std::size_t m_unrealised;
 
@@ -1183,7 +1185,7 @@ OpenGLShaderCache()
 ~OpenGLShaderCache(){
 	for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 	{
-		globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).key.c_str() ) << "\n";
+		globalOutputStream() << "leaked shader: " << makeQuoted( ( *i ).first.c_str() ) << "\n";
 	}
 }
 Shader* capture( const char* name ){
@@ -1327,8 +1329,8 @@ void realise(){
 
 		for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 		{
-			if ( !( *i ).value.empty() ) {
-				( *i ).value->realise( i->key );
+			if ( !( *i ).second.empty() ) {
+				( *i ).second->realise( i->first );
 			}
 		}
 	}
@@ -1337,8 +1339,8 @@ void unrealise(){
 	if ( ++m_unrealised == 1 ) {
 		for ( Shaders::iterator i = m_shaders.begin(); i != m_shaders.end(); ++i )
 		{
-			if ( !( *i ).value.empty() ) {
-				( *i ).value->unrealise();
+			if ( !( *i ).second.empty() ) {
+				( *i ).second->unrealise();
 			}
 		}
 		if ( GlobalOpenGL().contextValid && lightingSupported() && lightingEnabled() ) {
@@ -2010,7 +2012,7 @@ void OpenGLStateBucket::render( OpenGLState& current, unsigned int globalstate, 
 
 class OpenGLStateMap : public OpenGLStateLibrary
 {
-typedef std::map<CopiedString, OpenGLState> States;
+typedef std::map<std::string, OpenGLState> States;
 States m_states;
 public:
 ~OpenGLStateMap(){

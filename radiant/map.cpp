@@ -90,7 +90,7 @@ MapModules& ReferenceAPI_getMapModules();
 class NameObserver
 {
 UniqueNames& m_names;
-CopiedString m_name;
+std::string m_name;
 
 void construct(){
 	if ( !empty() ) {
@@ -161,7 +161,7 @@ void makeUnique( const char* name, const NameCallback& setName ) const {
 
 void mergeNames( const BasicNamespace& other ) const {
 	typedef std::list<NameCallback> SetNameCallbacks;
-	typedef std::map<CopiedString, SetNameCallbacks> NameGroups;
+	typedef std::map<std::string, SetNameCallbacks> NameGroups;
 	NameGroups groups;
 
 	UniqueNames uniqueNames( other.m_uniqueNames );
@@ -284,7 +284,7 @@ void Map_SetWorldspawn( Map& map, scene::Node* node );
 class Map : public ModuleObserver
 {
 public:
-CopiedString m_name;
+std::string m_name;
 Resource* m_resource;
 bool m_valid;
 
@@ -734,7 +734,7 @@ scene::Node& Node_Clone( scene::Node& node ){
 }
 
 
-typedef std::map<CopiedString, std::size_t> EntityBreakdown;
+typedef std::map<std::string, std::size_t> EntityBreakdown;
 
 class EntityBreakdownWalker : public scene::Graph::Walker
 {
@@ -1768,7 +1768,7 @@ void NewMap(){
 	}
 }
 
-CopiedString g_mapsPath;
+std::string g_mapsPath;
 
 const char* getMapsPath(){
 	return g_mapsPath.c_str();
@@ -2142,7 +2142,7 @@ MapModuleObserver g_MapModuleObserver;
 
 #include "preferencesystem.h"
 
-CopiedString g_strLastMap;
+std::string g_strLastMap;
 bool g_bLoadLastMap = false;
 
 void Map_Construct(){

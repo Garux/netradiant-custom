@@ -97,7 +97,7 @@ bool operator!=( const Postfix& other ) const {
 
 #endif
 
-typedef std::pair<CopiedString, Postfix> name_t;
+typedef std::pair<std::string, Postfix> name_t;
 
 inline void name_write( char* buffer, name_t name ){
 	strcpy( buffer, name.first.c_str() );
@@ -114,7 +114,7 @@ inline name_t name_read( const char* name ){
 		end = p;
 	}
 
-	return name_t( CopiedString( StringRange( name, end ) ), Postfix( end ) );
+	return name_t( std::string( StringRange( name, end ) ), Postfix( end ) );
 }
 
 
@@ -180,7 +180,7 @@ bool empty() const {
 
 class UniqueNames
 {
-typedef std::map<CopiedString, PostFixes> names_t;
+typedef std::map<std::string, PostFixes> names_t;
 names_t m_names;
 public:
 name_t make_unique( const name_t& name ) const {

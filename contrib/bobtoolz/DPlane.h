@@ -64,7 +64,7 @@ virtual ~DPlane();
 
 bool m_bChkOk;
 _QERFaceData texInfo;
-CopiedString m_shader;
+std::string m_shader;
 vec3_t points[3];           // djbob:do we really need these any more?
 vec3_t normal;
 float _d;

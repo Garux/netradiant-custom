@@ -155,7 +155,7 @@ const char* Get_COM_Token(){
 
 const char *debugname;
 
-void setSpecialLoad( EntityClass *e, const char* pWhat, CopiedString& p ){
+void setSpecialLoad( EntityClass *e, const char* pWhat, std::string& p ){
 	// Hydra: removed some amazingly bad cstring usage, whoever wrote that
 	// needs to be taken out and shot.
 

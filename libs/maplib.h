@@ -36,7 +36,7 @@
 
 class NameableString : public Nameable
 {
-CopiedString m_name;
+std::string m_name;
 public:
 NameableString( const char* name )
 	: m_name( name ){

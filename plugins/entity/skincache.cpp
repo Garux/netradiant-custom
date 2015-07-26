@@ -37,7 +37,7 @@
 #include "modulesystem/singletonmodule.h"
 #include "stringio.h"
 
-void parseShaderName( CopiedString& name, const char* token ){
+void parseShaderName( std::string& name, const char* token ){
 	StringOutputStream cleaned( 256 );
 	cleaned << PathCleaned( token );
 	name = cleaned.c_str();
@@ -45,7 +45,7 @@ void parseShaderName( CopiedString& name, const char* token ){
 
 class Doom3ModelSkin
 {
-typedef std::map<CopiedString, CopiedString> Remaps;
+typedef std::map<std::string, std::string> Remaps;
 Remaps m_remaps;
 public:
 bool parseTokens( Tokeniser& tokeniser ){
@@ -67,7 +67,7 @@ bool parseTokens( Tokeniser& tokeniser ){
 		}
 		else
 		{
-			CopiedString from, to;
+			std::string from, to;
 			parseShaderName( from, token );
 
 			tokeniser.nextLine(); // hack to handle badly formed skins
@@ -99,7 +99,7 @@ void forEachRemap( const SkinRemapCallback& callback ) const {
 class GlobalSkins
 {
 public:
-typedef std::map<CopiedString, Doom3ModelSkin> SkinMap;
+typedef std::map<std::string, Doom3ModelSkin> SkinMap;
 SkinMap m_skins;
 Doom3ModelSkin g_nullSkin;
 
@@ -130,7 +130,7 @@ bool parseTokens( Tokeniser& tokeniser ){
 			Tokeniser_unexpectedError( tokeniser, token, "#string" );
 			return false;
 		}
-		CopiedString name;
+		std::string name;
 		parseShaderName( name, other );
 		Doom3ModelSkin& skin = m_skins[name];
 		RETURN_FALSE_IF_FAIL( skin.parseTokens( tokeniser ) );
@@ -228,7 +228,7 @@ public:
 explicit CreateDoom3ModelSkin( Doom3ModelSkinCache& cache )
 	: m_cache( cache ){
 }
-Doom3ModelSkinCacheElement* construct( const CopiedString& name ){
+Doom3ModelSkinCacheElement* construct( const std::string& name ){
 	Doom3ModelSkinCacheElement* skin = new Doom3ModelSkinCacheElement;
 	if ( m_cache.realised() ) {
 		skin->realise( name.c_str() );
@@ -243,7 +243,7 @@ void destroy( Doom3ModelSkinCacheElement* skin ){
 }
 };
 
-typedef HashedCache<CopiedString, Doom3ModelSkinCacheElement, HashString, std::equal_to<CopiedString>, CreateDoom3ModelSkin> Cache;
+typedef HashedCache<std::string, Doom3ModelSkinCacheElement, HashString, std::equal_to<std::string>, CreateDoom3ModelSkin> Cache;
 Cache m_cache;
 bool m_realised;
 
@@ -276,14 +276,14 @@ void realise(){
 	m_realised = true;
 	for ( Cache::iterator i = m_cache.begin(); i != m_cache.end(); ++i )
 	{
-		( *i ).value->realise( ( *i ).key.c_str() );
+		( *i ).second->realise( ( *i ).first.c_str() );
 	}
 }
 void unrealise(){
 	m_realised = false;
 	for ( Cache::iterator i = m_cache.begin(); i != m_cache.end(); ++i )
 	{
-		( *i ).value->unrealise();
+		( *i ).second->unrealise();
 	}
 	g_skins.unrealise();
 }

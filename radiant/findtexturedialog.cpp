@@ -77,8 +77,8 @@ void destroyWindow(){
 
 
 bool m_bSelectedOnly;
-CopiedString m_strFind;
-CopiedString m_strReplace;
+std::string m_strFind;
+std::string m_strReplace;
 };
 
 FindTextureDialog g_FindTextureDialog;
@@ -100,7 +100,7 @@ static void OnApply( GtkWidget* widget, gpointer data ){
 	FindTextureDialog_apply();
 }
 
-static void OnFind( GtkWidget* widget, gpointer data ){
+/*static void OnFind( GtkWidget* widget, gpointer data ){
 	g_FindTextureDialog.exportData();
 	FindTextureDialog_apply();
 }
@@ -109,7 +109,7 @@ static void OnOK( GtkWidget* widget, gpointer data ){
 	g_FindTextureDialog.exportData();
 	FindTextureDialog_apply();
 	g_FindTextureDialog.HideDlg();
-}
+}*/
 
 static void OnClose( GtkWidget* widget, gpointer data ){
 	g_FindTextureDialog.HideDlg();

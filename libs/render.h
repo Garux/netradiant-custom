@@ -171,7 +171,7 @@ RenderIndex m_prev0;
 RenderIndex m_prev1;
 RenderIndex m_prev2;
 
-const RenderIndex find_or_insert( const Vertex& vertex ){
+RenderIndex find_or_insert( const Vertex& vertex ){
 	RenderIndex index = 0;
 
 	while ( 1 )

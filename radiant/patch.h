@@ -392,7 +392,7 @@ void release(){
 }
 
 std::size_t m_width, m_height;
-CopiedString m_shader;
+std::string m_shader;
 PatchControlArray m_ctrl;
 bool m_patchDef3;
 std::size_t m_subdivisions_x;
@@ -414,7 +414,7 @@ scene::Node* m_node;
 
 AABB m_aabb_local;   // local bbox
 
-CopiedString m_shader;
+std::string m_shader;
 Shader* m_state;
 
 std::size_t m_width;
@@ -861,20 +861,20 @@ int getShaderFlags() const {
 	return 0;
 }
 
-typedef PatchControl* iterator;
-typedef const PatchControl* const_iterator;
+typedef PatchControlArray::iterator iterator;
+typedef PatchControlArray::const_iterator const_iterator;
 
 iterator begin(){
-	return m_ctrl.data();
+	return m_ctrl.begin();
 }
 const_iterator begin() const {
-	return m_ctrl.data();
+	return m_ctrl.begin();
 }
 iterator end(){
-	return m_ctrl.data() + m_ctrl.size();
+	return m_ctrl.end();
 }
 const_iterator end() const {
-	return m_ctrl.data() + m_ctrl.size();
+	return m_ctrl.end();
 }
 
 PatchControlArray& getControlPoints(){
@@ -1557,7 +1557,7 @@ bool selectedVertices(){
 
 void transformComponents( const Matrix4& matrix ){
 	if ( selectedVertices() ) {
-		PatchControlIter ctrl = m_patch.getControlPointsTransformed().begin();
+		PatchControlIter ctrl = m_patch.getControlPointsTransformed().data();
 		for ( PatchControlInstances::iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i, ++ctrl )
 		{
 			if ( ( *i ).m_selectable.isSelected() ) {

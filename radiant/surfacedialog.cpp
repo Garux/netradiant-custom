@@ -258,7 +258,7 @@ void SurfaceInspector_queueDraw(){
 
 namespace
 {
-CopiedString g_selectedShader;
+std::string g_selectedShader;
 TextureProjection g_selectedTexdef;
 ContentsFlagsValue g_selectedFlags;
 size_t g_selectedShaderSize[2];
@@ -312,7 +312,7 @@ void SurfaceInspector_SetCurrent_FromSelected(){
 			g_selectedTexdef.m_brushprimit_texdef.coords[0][2] = float_mod( g_selectedTexdef.m_brushprimit_texdef.coords[0][2], (float)g_selectedShaderSize[0] );
 			g_selectedTexdef.m_brushprimit_texdef.coords[1][2] = float_mod( g_selectedTexdef.m_brushprimit_texdef.coords[1][2], (float)g_selectedShaderSize[1] );
 
-			CopiedString name;
+			std::string name;
 			Scene_BrushGetShader_Component_Selected( GlobalSceneGraph(), name );
 			if ( string_not_empty( name.c_str() ) ) {
 				SurfaceInspector_SetSelectedShader( name.c_str() );
@@ -328,7 +328,7 @@ void SurfaceInspector_SetCurrent_FromSelected(){
 			Scene_BrushGetTexdef_Selected( GlobalSceneGraph(), projection );
 			SurfaceInspector_SetSelectedTexdef( projection );
 
-			CopiedString name;
+			std::string name;
 			Scene_BrushGetShader_Selected( GlobalSceneGraph(), name );
 			if ( string_empty( name.c_str() ) ) {
 				Scene_PatchGetShader_Selected( GlobalSceneGraph(), name );
@@ -442,23 +442,19 @@ void SurfaceInspector_FitTexture(){
 }
 
 static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
-	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
+	Patch_CapTexture();
 }
 
 static void OnBtnPatchnatural( GtkWidget *widget, gpointer data ){
-	Scene_PatchNaturalTexture_Selected( GlobalSceneGraph() );
+	Patch_NaturalTexture();
 }
 
 static void OnBtnPatchreset( GtkWidget *widget, gpointer data ){
-	float fx, fy;
-
-	if ( DoTextureLayout( &fx, &fy ) == eIDOK ) {
-		Scene_PatchTileTexture_Selected( GlobalSceneGraph(), fx, fy );
-	}
+	Patch_ResetTexture();
 }
 
 static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
-	Scene_PatchTileTexture_Selected( GlobalSceneGraph(), 1, 1 );
+	Patch_FitTexture();
 }
 
 static void OnBtnAxial( GtkWidget *widget, gpointer data ){
@@ -1258,12 +1254,12 @@ void SurfaceInspector::ApplyFlags(){
 }
 
 
-void Face_getTexture( Face& face, CopiedString& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
+void Face_getTexture( Face& face, std::string& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
 	shader = face.GetShader();
 	face.GetTexdef( projection );
 	flags = face.getShader().m_flags;
 }
-typedef Function4<Face&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Face_getTexture> FaceGetTexture;
+typedef Function4<Face&, std::string&, TextureProjection&, ContentsFlagsValue&, void, Face_getTexture> FaceGetTexture;
 
 void Face_setTexture( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
 	face.SetShader( shader );
@@ -1273,12 +1269,12 @@ void Face_setTexture( Face& face, const char* shader, const TextureProjection& p
 typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture> FaceSetTexture;
 
 
-void Patch_getTexture( Patch& patch, CopiedString& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
+void Patch_getTexture( Patch& patch, std::string& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
 	shader = patch.GetShader();
 	projection = TextureProjection( texdef_t(), brushprimit_texdef_t(), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) );
 	flags = ContentsFlagsValue( 0, 0, 0, false );
 }
-typedef Function4<Patch&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Patch_getTexture> PatchGetTexture;
+typedef Function4<Patch&, std::string&, TextureProjection&, ContentsFlagsValue&, void, Patch_getTexture> PatchGetTexture;
 
 void Patch_setTexture( Patch& patch, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
 	patch.SetShader( shader );
@@ -1286,7 +1282,7 @@ void Patch_setTexture( Patch& patch, const char* shader, const TextureProjection
 typedef Function4<Patch&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Patch_setTexture> PatchSetTexture;
 
 
-typedef Callback3<CopiedString&, TextureProjection&, ContentsFlagsValue&> GetTextureCallback;
+typedef Callback3<std::string&, TextureProjection&, ContentsFlagsValue&> GetTextureCallback;
 typedef Callback3<const char*, const TextureProjection&, const ContentsFlagsValue&> SetTextureCallback;
 
 struct Texturable
@@ -1378,7 +1374,7 @@ Texturable Scene_getClosestTexturable( scene::Graph& graph, SelectionTest& test 
 	return texturable;
 }
 
-bool Scene_getClosestTexture( scene::Graph& graph, SelectionTest& test, CopiedString& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
+bool Scene_getClosestTexture( scene::Graph& graph, SelectionTest& test, std::string& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
 	Texturable texturable = Scene_getClosestTexturable( graph, test );
 	if ( texturable.getTexture != GetTextureCallback() ) {
 		texturable.getTexture( shader, projection, flags );
@@ -1419,7 +1415,7 @@ void TextureBrowser_SetSelectedShader( TextureBrowser& textureBrowser, const cha
 const char* TextureBrowser_GetSelectedShader( TextureBrowser& textureBrowser );
 
 void Scene_copyClosestTexture( SelectionTest& test ){
-	CopiedString shader;
+	std::string shader;
 	if ( Scene_getClosestTexture( GlobalSceneGraph(), test, shader, g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags ) ) {
 		TextureBrowser_SetSelectedShader( g_TextureBrowser, shader.c_str() );
 	}

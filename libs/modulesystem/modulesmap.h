@@ -30,7 +30,7 @@
 template<typename Type>
 class ModulesMap : public Modules<Type>
 {
-typedef std::map<CopiedString, Module*> modules_t;
+typedef std::map<std::string, Module*> modules_t;
 modules_t m_modules;
 public:
 ~ModulesMap(){

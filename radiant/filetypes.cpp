@@ -35,7 +35,8 @@ class RadiantFileTypeRegistry : public IFileTypeRegistry
 struct filetype_copy_t
 {
 	filetype_copy_t( const char* moduleName, const filetype_t other )
-		: m_moduleName( moduleName ), m_name( other.name ), m_pattern( other.pattern ), m_can_load( other.can_load ), m_can_import( other.can_import ), m_can_save( other.can_save ){
+		: m_can_load( other.can_load ), m_can_import( other.can_import ), m_can_save( other.can_save ),
+		m_moduleName( moduleName ), m_name( other.name ), m_pattern( other.pattern ) {
 	}
 	const char* getModuleName() const {
 		return m_moduleName.c_str();
@@ -47,12 +48,12 @@ struct filetype_copy_t
 	bool m_can_import;
 	bool m_can_save;
 private:
-	CopiedString m_moduleName;
-	CopiedString m_name;
-	CopiedString m_pattern;
+	std::string m_moduleName;
+	std::string m_name;
+	std::string m_pattern;
 };
 typedef std::vector<filetype_copy_t> filetype_list_t;
-std::map<CopiedString, filetype_list_t> m_typelists;
+std::map<std::string, filetype_list_t> m_typelists;
 public:
 RadiantFileTypeRegistry(){
 	addType( "*", "*", filetype_t( "All Files", "*.*" ) );

@@ -65,7 +65,7 @@ virtual void onChanged() = 0;
 };
 
 private:
-CopiedString m_string;
+std::string m_string;
 Observer& m_observer;
 public:
 StringPreference( Observer& observer )

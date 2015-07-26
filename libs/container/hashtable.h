@@ -22,12 +22,17 @@
 #if !defined( INCLUDED_CONTAINER_HASHTABLE_H )
 #define INCLUDED_CONTAINER_HASHTABLE_H
 
+#include <unordered_map>
+
+template<typename Key, typename Value, typename Hasher, typename KeyEqual = std::equal_to<Key> >
+	using HashTable = std::unordered_map<Key, Value, Hasher, KeyEqual>;
+
+#if 0
 #include <cstddef>
 #include <algorithm>
 #include <functional>
 #include <memory>
 #include "debugging/debugging.h"
-
 
 namespace HashTableDetail
 {
@@ -240,7 +245,7 @@ BucketNode* bucket_find( Bucket bucket, hash_type hash, const Key& key ){
 			return 0;
 		}
 
-		if ( nodeHash == hash && KeyEqual::operator()( ( *i ).key, key ) ) {
+		if ( nodeHash == hash && KeyEqual::operator()( ( *i ).first, key ) ) {
 			return i.node();
 		}
 	}
@@ -407,5 +412,7 @@ void clear(){
 	tmp.swap( *this );
 }
 };
+
+#endif
 
 #endif

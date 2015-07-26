@@ -113,15 +113,15 @@ CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fn
 CPPFLAGS_COMMON =
 LDFLAGS_COMMON =
 LIBS_COMMON =
-CXXFLAGS_COMMON = -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
+CXXFLAGS_COMMON = -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti -std=c++11
 
 ifeq ($(BUILD),debug)
 ifeq ($(findstring $(CFLAGS),-g),)
 	CFLAGS_COMMON += -g
 	# only add -g if no -g flag is in $(CFLAGS)
 endif
-ifeq ($(findstring $(CFLAGS),-O),)
-	CFLAGS_COMMON += -O
+ifeq ($(findstring $(CFLAGS),-O0),)
+	CFLAGS_COMMON += -O0
 	# only add -O if no -O flag is in $(CFLAGS)
 endif
 	CPPFLAGS_COMMON +=
@@ -142,8 +142,8 @@ ifeq ($(findstring $(CFLAGS),-g),)
 	CFLAGS_COMMON += -g
 	# only add -g if no -g flag is in $(CFLAGS)
 endif
-ifeq ($(findstring $(CFLAGS),-O),)
-	CFLAGS_COMMON += -O
+ifeq ($(findstring $(CFLAGS),-O0),)
+	CFLAGS_COMMON += -O0
 	# only add -O if no -O flag is in $(CFLAGS)
 endif
 	CFLAGS_COMMON += -pg

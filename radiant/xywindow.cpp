@@ -413,6 +413,7 @@ inline unsigned int buttons_for_button_and_modifiers( ButtonIdentifier button, M
 	case ButtonEnumeration::LEFT: buttons |= RAD_LBUTTON; break;
 	case ButtonEnumeration::MIDDLE: buttons |= RAD_MBUTTON; break;
 	case ButtonEnumeration::RIGHT: buttons |= RAD_RBUTTON; break;
+	default: break;
 	}
 
 	if ( bitfield_enabled( flags, c_modifierControl ) ) {
@@ -1083,10 +1084,10 @@ void EntityClassMenu_addItem( GtkMenu* menu, const char* name ){
 
 class EntityClassMenuInserter : public EntityClassVisitor
 {
-typedef std::pair<GtkMenu*, CopiedString> MenuPair;
+typedef std::pair<GtkMenu*, std::string> MenuPair;
 typedef std::vector<MenuPair> MenuStack;
 MenuStack m_stack;
-CopiedString m_previous;
+std::string m_previous;
 public:
 EntityClassMenuInserter( GtkMenu* menu ){
 	m_stack.reserve( 2 );
@@ -1104,7 +1105,7 @@ void visit( EntityClass* e ){
 	}
 	m_previous = e->name();
 }
-void pushMenu( const CopiedString& name ){
+void pushMenu( const std::string& name ){
 	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name.c_str() ) );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	container_add_widget( GTK_CONTAINER( m_stack.back().first ), GTK_WIDGET( item ) );
@@ -1132,7 +1133,7 @@ void addItem( const char* name, const char* next ){
 			if ( m_stack.size() == 2 ) {
 				popMenu();
 			}
-			pushMenu( CopiedString( StringRange( name, underscore ) ) );
+			pushMenu( std::string( StringRange( name, underscore ) ) );
 		}
 		else if ( m_stack.size() == 2 ) {
 			popMenu();
@@ -1449,7 +1450,7 @@ void XYWnd::XY_LoadBackgroundImage( const char *name ){
 	globalOutputStream() << "Loaded background texture " << relative << "\n";
 	g_pParentWnd->ActiveXY()->m_backgroundActivated = true;
 
-	int m_ix, m_iy;
+	int m_ix = 0, m_iy = 0;
 	switch ( g_pParentWnd->ActiveXY()->m_viewType )
 	{
 	case XY:
@@ -2064,7 +2065,7 @@ void SetState( Shader* state, EStyle style ){
 		m_state_stack.back().m_state = state;
 	}
 }
-const EStyle getStyle() const {
+EStyle getStyle() const {
 	return eWireframeOnly;
 }
 void PushState(){

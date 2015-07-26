@@ -43,10 +43,10 @@
 /* plugin manager --------------------------------------- */
 class CPluginSlot : public IPlugIn
 {
-CopiedString m_menu_name;
+std::string m_menu_name;
 const _QERPluginTable *mpTable;
-std::list<CopiedString> m_CommandStrings;
-std::list<CopiedString> m_CommandTitleStrings;
+std::list<std::string> m_CommandStrings;
+std::list<std::string> m_CommandTitleStrings;
 std::list<std::size_t> m_CommandIDs;
 
 public:
@@ -109,14 +109,14 @@ std::size_t CPluginSlot::getCommandCount(){
 }
 
 const char* CPluginSlot::getCommand( std::size_t n ){
-	std::list<CopiedString>::iterator i = m_CommandStrings.begin();
+	std::list<std::string>::iterator i = m_CommandStrings.begin();
 	while ( n-- != 0 )
 		++i;
 	return ( *i ).c_str();
 }
 
 const char* CPluginSlot::getCommandTitle( std::size_t n ){
-	std::list<CopiedString>::iterator i = m_CommandTitleStrings.begin();
+	std::list<std::string>::iterator i = m_CommandTitleStrings.begin();
 	while ( n-- != 0 )
 		++i;
 	return ( *i ).c_str();
