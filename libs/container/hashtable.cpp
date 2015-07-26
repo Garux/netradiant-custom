@@ -32,11 +32,11 @@ void testStuff(){
 	typedef HashTable<std::string, int, HashString> MyHashTable;
 	MyHashTable hashtable;
 	hashtable["bleh"] = 5;
-	hashtable.insert( "blah", 17 );
+	hashtable.insert({"blah", 17});
 	hashtable["foo"] = 99;
-	hashtable.insert( "bar", 23 );
+	hashtable.insert({"bar", 23});
 
-	int bleh = ( *hashtable.find( "bleh" ) ).value; // 5
+	int bleh = ( *hashtable.find( "bleh" ) ).second; // 5
 	int blah = hashtable["blah"]; // 17
 	hashtable.erase( "foo" );
 	MyHashTable::iterator barIter = hashtable.find( "bar" );

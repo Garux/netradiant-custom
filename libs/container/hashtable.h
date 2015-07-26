@@ -23,6 +23,7 @@
 #define INCLUDED_CONTAINER_HASHTABLE_H
 
 #include <unordered_map>
+#include "debugging/debugging.h"
 
 template<typename Key, typename Value, typename Hasher, typename KeyEqual = std::equal_to<Key> >
 	using HashTable = std::unordered_map<Key, Value, Hasher, KeyEqual>;
