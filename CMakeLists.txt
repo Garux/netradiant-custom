@@ -1,6 +1,34 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(NetRadiant C CXX)
+
+#CMake 3.0+ would allow this in project()
+set(NetRadiant_VERSION_MAJOR 1)
+set(NetRadiant_VERSION_MINOR 5)
+set(NetRadiant_VERSION_PATCH 0)
+set(NetRadiant_VERSION ${NetRadiant_VERSION_MAJOR}.${NetRadiant_VERSION_MINOR}.${NetRadiant_VERSION_PATCH})
+
+set(Q3MAP_VERSION = 2.5.17n)
+
+set(RADIANT_VERSION_STRING "${NetRadiant_VERSION}n${GIT_VERSION}")
+execute_process(COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE GIT_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(GIT_VERSION)
+    set(RADIANT_VERSION_STRING "${RADIANT_VERSION_STRING}-git-${GIT_VERSION}")
+    set(Q3MAP_VERSION "${Q3MAP_VERSION}-git-${GIT_VERSION}")
+endif()
+
+if(WIN32)
+    set(RADIANT_EXECUTABLE "exe")
+else()
+    execute_process(COMMAND uname -m
+        OUTPUT_VARIABLE RADIANT_EXECUTABLE OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+set(RADIANT_ABOUTMSG "Custom build" CACHE STRING "About message")
+
+message(STATUS "Building ${PROJECT_NAME} ${RADIANT_VERSION_STRING} ${RADIANT_ABOUTMSG}")
+
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # For some reason the above flags don't really work...
@@ -18,6 +46,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
+
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 
@@ -31,11 +60,11 @@ find_package(OpenGL REQUIRED)
 
 add_definitions(
     -D_DEBUG=1
-    -DRADIANT_VERSION="1.5.0n"
-    -DRADIANT_MAJOR_VERSION="5"
-    -DRADIANT_MINOR_VERSION="0"
-    -DRADIANT_ABOUTMSG="Custom build"
-    -DRADIANT_EXECUTABLE="x86_64"
+    -DRADIANT_VERSION="${RADIANT_VERSION_STRING}"
+    -DRADIANT_MAJOR_VERSION="${NetRadiant_VERSION_MINOR}"
+    -DRADIANT_MINOR_VERSION="${NetRadiant_VERSION_PATCH}"
+    -DRADIANT_ABOUTMSG="${RADIANT_ABOUTMSG}"
+    -DRADIANT_EXECUTABLE="${RADIANT_EXECUTABLE}"
 )
 if(NOT WIN32)
     add_definitions(
