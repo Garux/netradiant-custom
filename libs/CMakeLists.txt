@@ -1,0 +1,93 @@
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_subdirectory(cmdlib)
+add_subdirectory(container)
+add_subdirectory(ddslib)
+add_subdirectory(debugging)
+add_subdirectory(generic)
+add_subdirectory(gtkutil)
+add_subdirectory(l_net)
+#add_subdirectory(math)
+add_subdirectory(mathlib)
+add_subdirectory(md5lib)
+add_subdirectory(memory)
+add_subdirectory(modulesystem)
+add_subdirectory(os)
+add_subdirectory(picomodel)
+add_subdirectory(profile)
+add_subdirectory(script)
+add_subdirectory(signal)
+add_subdirectory(splines)
+add_subdirectory(stream)
+add_subdirectory(string)
+add_subdirectory(xml)
+
+add_library(libs
+    archivelib.cpp
+    archivelib.h
+    bytebool.cpp
+    bytebool.h
+    bytestreamutils.cpp
+    character.cpp
+    character.h
+    cmdlib.h
+    convert.cpp
+    convert.h
+    ddslib.h
+    dragplanes.cpp
+    dragplanes.h
+    eclasslib.cpp
+    eclasslib.h
+    entitylib.cpp
+    entitylib.h
+    entityxml.cpp
+    entityxml.h
+    filematch.c
+    filematch.h
+    fs_filesystem.cpp
+    fs_filesystem.h
+    fs_path.cpp
+    fs_path.h
+    imagelib.cpp
+    imagelib.h
+    instancelib.cpp
+    instancelib.h
+    maplib.cpp
+    maplib.h
+    mathlib.h
+    md5lib.h
+    moduleobservers.cpp
+    moduleobservers.h
+    picomodel.h
+    pivot.cpp
+    pivot.h
+    render.cpp
+    render.h
+    scenelib.cpp
+    scenelib.h
+    selectionlib.cpp
+    selectionlib.h
+    shaderlib.cpp
+    shaderlib.h
+    str.cpp
+    str.h
+    stringio.cpp
+    stringio.h
+    texturelib.cpp
+    texturelib.h
+    transformlib.cpp
+    transformlib.h
+    traverselib.cpp
+    traverselib.h
+    typesystem.cpp
+    typesystem.h
+    undolib.cpp
+    undolib.h
+    uniquenames.cpp
+    uniquenames.h
+    versionlib.cpp
+    versionlib.h
+    bytestreamutils.h
+    etclib.c
+    etclib.h
+)

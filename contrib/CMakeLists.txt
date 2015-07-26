@@ -1,0 +1,173 @@
+# Todo split further and actually compile the plugins
+
+set(BKGRND2DLIST
+    contrib/bkgrnd2d/bkgrnd2d.cpp
+    contrib/bkgrnd2d/bkgrnd2d.h
+    contrib/bkgrnd2d/dialog.cpp
+    contrib/bkgrnd2d/dialog.h
+    contrib/bkgrnd2d/plugin.cpp
+    contrib/bkgrnd2d/plugin.h
+)
+
+set(BOBTOOLZLIST
+    contrib/bobtoolz/dialogs/AboutDialog.cpp
+    contrib/bobtoolz/dialogs/AboutDialog.h
+    contrib/bobtoolz/dialogs/AutoCaulkDialog.cpp
+    contrib/bobtoolz/dialogs/AutoCaulkDialog.h
+    contrib/bobtoolz/dialogs/AutoCaulkStartDialog.cpp
+    contrib/bobtoolz/dialogs/AutoCaulkStartDialog.h
+    contrib/bobtoolz/dialogs/BrushCheckDialog.h
+    contrib/bobtoolz/dialogs/DoorDialog.cpp
+    contrib/bobtoolz/dialogs/DoorDialog.h
+    contrib/bobtoolz/dialogs/IntersectDialog.cpp
+    contrib/bobtoolz/dialogs/IntersectDialog.h
+    contrib/bobtoolz/dialogs/IntersectInfoDialog.cpp
+    contrib/bobtoolz/dialogs/IntersectInfoDialog.h
+    contrib/bobtoolz/dialogs/PolygonDialog.cpp
+    contrib/bobtoolz/dialogs/PolygonDialog.h
+    contrib/bobtoolz/dialogs/StairDialog.cpp
+    contrib/bobtoolz/dialogs/StairDialog.h
+    contrib/bobtoolz/dialogs/TextureResetDialog.cpp
+    contrib/bobtoolz/dialogs/TextureResetDialog.h
+    contrib/bobtoolz/dialogs/brushcheckdialog.cpp
+    contrib/bobtoolz/dialogs/dialogs-gtk.cpp
+    contrib/bobtoolz/dialogs/dialogs-gtk.h
+    contrib/bobtoolz/dialogs/pathplotterdialog.cpp
+    contrib/bobtoolz/dialogs/pathplotterdialog.h
+    contrib/bobtoolz/CPortals.h
+    contrib/bobtoolz/DBobView.cpp
+    contrib/bobtoolz/DBobView.h
+    contrib/bobtoolz/DBrush.cpp
+    contrib/bobtoolz/DBrush.h
+    contrib/bobtoolz/DEPair.cpp
+    contrib/bobtoolz/DEPair.h
+    contrib/bobtoolz/DEntity.cpp
+    contrib/bobtoolz/DEntity.h
+    contrib/bobtoolz/DMap.cpp
+    contrib/bobtoolz/DMap.h
+    contrib/bobtoolz/DPatch.cpp
+    contrib/bobtoolz/DPatch.h
+    contrib/bobtoolz/DPlane.cpp
+    contrib/bobtoolz/DPlane.h
+    contrib/bobtoolz/DPoint.cpp
+    contrib/bobtoolz/DPoint.h
+    contrib/bobtoolz/DShape.cpp
+    contrib/bobtoolz/DShape.h
+    contrib/bobtoolz/DTrainDrawer.cpp
+    contrib/bobtoolz/DTrainDrawer.h
+    contrib/bobtoolz/DTreePlanter.cpp
+    contrib/bobtoolz/DTreePlanter.h
+    contrib/bobtoolz/DVisDrawer.cpp
+    contrib/bobtoolz/DVisDrawer.h
+    contrib/bobtoolz/DWinding.cpp
+    contrib/bobtoolz/DWinding.h
+    contrib/bobtoolz/ScriptParser.cpp
+    contrib/bobtoolz/ScriptParser.h
+    contrib/bobtoolz/StdAfx.cpp
+    contrib/bobtoolz/StdAfx.h
+    contrib/bobtoolz/bobToolz-GTK.cpp
+    contrib/bobtoolz/bobToolz.h
+    contrib/bobtoolz/bsploader.cpp
+    contrib/bobtoolz/bsploader.h
+    contrib/bobtoolz/cportals.cpp
+    contrib/bobtoolz/ctfToolz-GTK.cpp
+    contrib/bobtoolz/ctfresource_gtk.h
+    contrib/bobtoolz/funchandlers-GTK.cpp
+    contrib/bobtoolz/funchandlers-ctf-GTK.cpp
+    contrib/bobtoolz/funchandlers.cpp
+    contrib/bobtoolz/funchandlers.h
+    contrib/bobtoolz/lists.cpp
+    contrib/bobtoolz/lists.h
+    contrib/bobtoolz/misc.cpp
+    contrib/bobtoolz/misc.h
+    contrib/bobtoolz/resource-gtk.h
+    contrib/bobtoolz/resource.h
+    contrib/bobtoolz/shapes.cpp
+    contrib/bobtoolz/shapes.h
+    contrib/bobtoolz/visfind.cpp
+    contrib/bobtoolz/visfind.h
+)
+
+set(BRUSHEXPORTLIST
+    contrib/brushexport/callbacks.cpp
+    contrib/brushexport/callbacks.h
+    contrib/brushexport/export.cpp
+    contrib/brushexport/export.h
+    contrib/brushexport/interface.cpp
+    contrib/brushexport/plugin.cpp
+    contrib/brushexport/plugin.h
+    contrib/brushexport/support.cpp
+    contrib/brushexport/support.h
+)
+
+set(CAMERALIST
+    contrib/camera/camera.cpp
+    contrib/camera/camera.h
+    contrib/camera/dialogs.cpp
+    contrib/camera/dialogs.h
+    contrib/camera/dialogs_common.cpp
+    contrib/camera/funchandlers.cpp
+    contrib/camera/funchandlers.h
+    contrib/camera/listener.cpp
+    contrib/camera/listener.h
+    contrib/camera/misc.cpp
+    contrib/camera/misc.h
+    contrib/camera/renderer.cpp
+    contrib/camera/renderer.h
+)
+
+set(GTKGENSURFLIST
+    contrib/gtkgensurf/bitmap.cpp
+    contrib/gtkgensurf/dec.cpp
+    contrib/gtkgensurf/face.cpp
+    contrib/gtkgensurf/font.cpp
+    contrib/gtkgensurf/gendlgs.cpp
+    contrib/gtkgensurf/gendlgs.h
+    contrib/gtkgensurf/genmap.cpp
+    contrib/gtkgensurf/gensurf.cpp
+    contrib/gtkgensurf/gensurf.h
+    contrib/gtkgensurf/heretic.cpp
+    contrib/gtkgensurf/plugin.cpp
+    contrib/gtkgensurf/triangle.c
+    contrib/gtkgensurf/triangle.h
+    contrib/gtkgensurf/view.cpp
+)
+
+set(HYDRATOOLZLIST
+    contrib/hydratoolz/plugin.cpp
+    contrib/hydratoolz/plugin.h
+)
+
+set(PRTVIEWLIST
+    contrib/prtview/AboutDialog.cpp
+    contrib/prtview/AboutDialog.h
+    contrib/prtview/ConfigDialog.cpp
+    contrib/prtview/ConfigDialog.h
+    contrib/prtview/LoadPortalFileDialog.cpp
+    contrib/prtview/LoadPortalFileDialog.h
+    contrib/prtview/portals.cpp
+    contrib/prtview/portals.h
+    contrib/prtview/prtview.cpp
+    contrib/prtview/prtview.h
+)
+
+set(SHADERPLUGLIST
+    contrib/shaderplug/shaderplug.cpp
+    contrib/shaderplug/shaderplug.h
+)
+
+set(SUNPLUGLIST
+    contrib/sunplug/sunplug.cpp
+    contrib/sunplug/sunplug.h
+)
+
+set(UFOAIPLUGLIST
+    contrib/ufoaiplug/ufoai.cpp
+    contrib/ufoaiplug/ufoai.h
+    contrib/ufoaiplug/ufoai_filters.cpp
+    contrib/ufoaiplug/ufoai_filters.h
+    contrib/ufoaiplug/ufoai_gtk.cpp
+    contrib/ufoaiplug/ufoai_gtk.h
+    contrib/ufoaiplug/ufoai_level.cpp
+    contrib/ufoaiplug/ufoai_level.h
+)

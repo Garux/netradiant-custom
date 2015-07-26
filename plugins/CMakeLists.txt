@@ -1,0 +1,211 @@
+# Todo split further and actually compile the plugins
+
+set(ARCHIVEPAKLIST
+    plugins/archivepak/archive.cpp
+    plugins/archivepak/archive.h
+    plugins/archivepak/pak.cpp
+    plugins/archivepak/pak.h
+    plugins/archivepak/plugin.cpp
+    plugins/archivepak/plugin.h
+)
+
+set(ARCHIVEWADLIST
+    plugins/archivewad/archive.cpp
+    plugins/archivewad/archive.h
+    plugins/archivewad/plugin.cpp
+    plugins/archivewad/plugin.h
+    plugins/archivewad/wad.cpp
+    plugins/archivewad/wad.h
+)
+
+set(ARCHIVEZIPLIST
+    plugins/archivezip/archive.cpp
+    plugins/archivezip/archive.h
+    plugins/archivezip/pkzip.cpp
+    plugins/archivezip/pkzip.h
+    plugins/archivezip/plugin.cpp
+    plugins/archivezip/plugin.h
+    plugins/archivezip/zlibstream.cpp
+    plugins/archivezip/zlibstream.h
+)
+
+set(ENTITYLIST
+    plugins/entity/angle.cpp
+    plugins/entity/angle.h
+    plugins/entity/angles.cpp
+    plugins/entity/angles.h
+    plugins/entity/colour.cpp
+    plugins/entity/colour.h
+    plugins/entity/curve.cpp
+    plugins/entity/curve.h
+    plugins/entity/doom3group.cpp
+    plugins/entity/doom3group.h
+    plugins/entity/eclassmodel.cpp
+    plugins/entity/eclassmodel.h
+    plugins/entity/entity.cpp
+    plugins/entity/entity.h
+    plugins/entity/filters.cpp
+    plugins/entity/filters.h
+    plugins/entity/generic.cpp
+    plugins/entity/generic.h
+    plugins/entity/group.cpp
+    plugins/entity/group.h
+    plugins/entity/keyobservers.cpp
+    plugins/entity/keyobservers.h
+    plugins/entity/light.cpp
+    plugins/entity/light.h
+    plugins/entity/miscmodel.cpp
+    plugins/entity/miscmodel.h
+    plugins/entity/model.cpp
+    plugins/entity/model.h
+    plugins/entity/modelskinkey.cpp
+    plugins/entity/modelskinkey.h
+    plugins/entity/namedentity.cpp
+    plugins/entity/namedentity.h
+    plugins/entity/namekeys.cpp
+    plugins/entity/namekeys.h
+    plugins/entity/origin.cpp
+    plugins/entity/origin.h
+    plugins/entity/plugin.cpp
+    plugins/entity/plugin.h
+    plugins/entity/rotation.cpp
+    plugins/entity/rotation.h
+    plugins/entity/scale.cpp
+    plugins/entity/scale.h
+    plugins/entity/skincache.cpp
+    plugins/entity/skincache.h
+    plugins/entity/targetable.cpp
+    plugins/entity/targetable.h
+)
+
+set(IMAGELIST
+    plugins/image/bmp.cpp
+    plugins/image/bmp.h
+    plugins/image/dds.cpp
+    plugins/image/dds.h
+    plugins/image/image.h
+    plugins/image/jpeg.cpp
+    plugins/image/jpeg.h
+    plugins/image/pcx.cpp
+    plugins/image/pcx.h
+    plugins/image/tga.cpp
+    plugins/image/tga.h
+    plugins/image/image.cpp
+    plugins/image/ktx.cpp
+    plugins/image/ktx.h
+)
+
+set(IMAGEHLLIST
+    plugins/imagehl/hlw.cpp
+    plugins/imagehl/hlw.h
+    plugins/imagehl/imagehl.cpp
+    plugins/imagehl/imagehl.h
+    plugins/imagehl/mip.cpp
+    plugins/imagehl/mip.h
+    plugins/imagehl/sprite.cpp
+    plugins/imagehl/sprite.h
+)
+
+set(IMAGEPNGLIST
+    plugins/imagepng/plugin.cpp
+    plugins/imagepng/plugin.h
+)
+
+set(IMAGEQ2LIST
+    plugins/imageq2/imageq2.cpp
+    plugins/imageq2/imageq2.h
+    plugins/imageq2/wal.cpp
+    plugins/imageq2/wal.h
+    plugins/imageq2/wal32.cpp
+    plugins/imageq2/wal32.h
+)
+
+set(MAPQ3LIST
+    plugins/mapq3/parse.cpp
+    plugins/mapq3/parse.h
+    plugins/mapq3/plugin.cpp
+    plugins/mapq3/plugin.h
+    plugins/mapq3/write.cpp
+    plugins/mapq3/write.h
+)
+
+set(MAPXMLLIST
+    plugins/mapxml/plugin.cpp
+    plugins/mapxml/plugin.h
+    plugins/mapxml/xmlparse.cpp
+    plugins/mapxml/xmlparse.h
+    plugins/mapxml/xmlwrite.cpp
+    plugins/mapxml/xmlwrite.h
+)
+
+set(MD3MODELLIST
+    plugins/md3model/ident.h
+    plugins/md3model/md2.cpp
+    plugins/md3model/md2.h
+    plugins/md3model/md3.cpp
+    plugins/md3model/md3.h
+    plugins/md3model/md3normals.cpp
+    plugins/md3model/md3normals.h
+    plugins/md3model/md5.cpp
+    plugins/md3model/md5.h
+    plugins/md3model/mdc.cpp
+    plugins/md3model/mdc.h
+    plugins/md3model/mdl.cpp
+    plugins/md3model/mdl.h
+    plugins/md3model/mdlformat.cpp
+    plugins/md3model/mdlformat.h
+    plugins/md3model/mdlimage.cpp
+    plugins/md3model/mdlimage.h
+    plugins/md3model/mdlnormals.cpp
+    plugins/md3model/mdlnormals.h
+    plugins/md3model/model.cpp
+    plugins/md3model/model.h
+    plugins/md3model/plugin.cpp
+    plugins/md3model/plugin.h
+)
+
+set(MODELLIST
+    plugins/model/model.cpp
+    plugins/model/model.h
+    plugins/model/plugin.cpp
+    plugins/model/plugin.h
+)
+
+set(SAMPLELIST
+    plugins/sample/sample.cpp
+    plugins/sample/sample.h
+)
+
+set(SHADERSLIST
+    plugins/shaders/plugin.cpp
+    plugins/shaders/plugin.h
+    plugins/shaders/shaders.cpp
+    plugins/shaders/shaders.h
+)
+
+set(SPRITEMODELLIST
+    plugins/spritemodel/plugin.cpp
+    plugins/spritemodel/plugin.h
+    plugins/spritemodel/spritemodel.cpp
+    plugins/spritemodel/spritemodel.h
+)
+
+set(TEXTOOLLIST
+    plugins/textool/2DView.cpp
+    plugins/textool/2DView.h
+    plugins/textool/ControlPointsManager.cpp
+    plugins/textool/ControlPointsManager.h
+    plugins/textool/StdAfx.cpp
+    plugins/textool/StdAfx.h
+    plugins/textool/TexTool.cpp
+    plugins/textool/resource.h
+)
+
+set(VFSPK3LIST
+    plugins/vfspk3/archive.cpp
+    plugins/vfspk3/archive.h
+    plugins/vfspk3/vfs.cpp
+    plugins/vfspk3/vfs.h
+    plugins/vfspk3/vfspk3.cpp
+    plugins/vfspk3/vfspk3.h
+)
