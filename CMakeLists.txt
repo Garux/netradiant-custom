@@ -46,6 +46,13 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
+# Enable Debug by default, can be changed with -D CMAKE_BUILD_TYPE=Release
+if(CMAKE_BUILD_TYPE STREQUAL "")
+    set(CMAKE_BUILD_TYPE Debug)
+    add_definitions(-D_DEBUG=1)
+else()
+endif()
+
 
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
@@ -59,7 +66,6 @@ include_directories(${GTKGL_INCLUDE_DIRS})
 find_package(OpenGL REQUIRED)
 
 add_definitions(
-    -D_DEBUG=1
     -DRADIANT_VERSION="${RADIANT_VERSION_STRING}"
     -DRADIANT_MAJOR_VERSION="${NetRadiant_VERSION_MINOR}"
     -DRADIANT_MINOR_VERSION="${NetRadiant_VERSION_PATCH}"
