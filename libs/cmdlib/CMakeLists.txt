@@ -1,4 +1,4 @@
 
-add_library(cmdlib
+add_library(cmdlib SHARED
     cmdlib.cpp
 )

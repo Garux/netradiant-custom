@@ -371,5 +371,5 @@ target_link_libraries(radiant
     splines
     stream
     string
-    xml
+    xmllib
 )
