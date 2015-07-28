@@ -1,4 +1,10 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories("${CMAKE_SOURCE_DIR}/include")
+
+find_package(GTK2 REQUIRED)
+include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR} ${GTK2_GLIB_INCLUDE_DIR})
+find_package(GtkGLExt REQUIRED)
+include_directories(${GTKGL_INCLUDE_DIRS})
 
 add_subdirectory(cmdlib)
 add_subdirectory(container)

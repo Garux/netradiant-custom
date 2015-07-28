@@ -53,15 +53,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
 else()
 endif()
 
-find_package(LibXml2 REQUIRED)
-include_directories(${LIBXML2_INCLUDE_DIR})
-
-find_package(GTK2 REQUIRED)
-include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR} ${GTK2_GLIB_INCLUDE_DIR})
-
-find_package(GtkGLExt REQUIRED)
-include_directories(${GTKGL_INCLUDE_DIRS})
-
 find_package(OpenGL REQUIRED)
 
 add_definitions(
@@ -170,10 +161,8 @@ set(INCLUDELIST
     include/windowobserver.cpp
     include/windowobserver.h
 )
-include_directories(include)
 
 add_subdirectory(libs)
-include_directories(libs)
 
 macro(radiant_plugin name)
 	message(STATUS "Found Plugin ${name}")
@@ -183,202 +172,9 @@ endmacro()
 add_subdirectory(contrib)
 add_subdirectory(plugins)
 
-set(RADIANTLIST
-    radiant/autosave.cpp
-    radiant/autosave.h
-    radiant/brush.cpp
-    radiant/brush.h
-    radiant/brush_primit.cpp
-    radiant/brush_primit.h
-    radiant/brushmanip.cpp
-    radiant/brushmanip.h
-    radiant/brushmodule.cpp
-    radiant/brushmodule.h
-    radiant/brushnode.cpp
-    radiant/brushnode.h
-    radiant/brushtokens.cpp
-    radiant/brushtokens.h
-    radiant/brushxml.cpp
-    radiant/brushxml.h
-    radiant/build.cpp
-    radiant/build.h
-    radiant/camwindow.cpp
-    radiant/camwindow.h
-    radiant/clippertool.cpp
-    radiant/clippertool.h
-    radiant/commands.cpp
-    radiant/commands.h
-    radiant/console.cpp
-    radiant/console.h
-    radiant/csg.cpp
-    radiant/csg.h
-    radiant/dialog.cpp
-    radiant/dialog.h
-    radiant/eclass.cpp
-    radiant/eclass.h
-    radiant/eclass_def.cpp
-    radiant/eclass_def.h
-    radiant/eclass_doom3.cpp
-    radiant/eclass_doom3.h
-    radiant/eclass_fgd.cpp
-    radiant/eclass_fgd.h
-    radiant/eclass_xml.cpp
-    radiant/eclass_xml.h
-    radiant/entity.cpp
-    radiant/entity.h
-    radiant/entityinspector.cpp
-    radiant/entityinspector.h
-    radiant/entitylist.cpp
-    radiant/entitylist.h
-    radiant/environment.cpp
-    radiant/environment.h
-    radiant/error.cpp
-    radiant/error.h
-    radiant/feedback.cpp
-    radiant/feedback.h
-    radiant/filetypes.cpp
-    radiant/filetypes.h
-    radiant/filters.cpp
-    radiant/filters.h
-    radiant/findtexturedialog.cpp
-    radiant/findtexturedialog.h
-    radiant/glwidget.cpp
-    radiant/glwidget.h
-    radiant/grid.cpp
-    radiant/grid.h
-    radiant/groupdialog.cpp
-    radiant/groupdialog.h
-    radiant/gtkdlgs.cpp
-    radiant/gtkdlgs.h
-    radiant/gtkmisc.cpp
-    radiant/gtkmisc.h
-    radiant/help.cpp
-    radiant/help.h
-    radiant/image.cpp
-    radiant/image.h
-    radiant/main.cpp
-    radiant/main.h
-    radiant/mainframe.cpp
-    radiant/mainframe.h
-    radiant/map.cpp
-    radiant/map.h
-    radiant/mru.cpp
-    radiant/mru.h
-    radiant/multimon.cpp
-    radiant/multimon.h
-    radiant/nullmodel.cpp
-    radiant/nullmodel.h
-    radiant/parse.cpp
-    radiant/parse.h
-    radiant/patch.cpp
-    radiant/patch.h
-    radiant/patchdialog.cpp
-    radiant/patchdialog.h
-    radiant/patchmanip.cpp
-    radiant/patchmanip.h
-    radiant/patchmodule.cpp
-    radiant/patchmodule.h
-    radiant/plugin.cpp
-    radiant/plugin.h
-    radiant/pluginapi.cpp
-    radiant/pluginapi.h
-    radiant/pluginmanager.cpp
-    radiant/pluginmanager.h
-    radiant/pluginmenu.cpp
-    radiant/pluginmenu.h
-    radiant/plugintoolbar.cpp
-    radiant/plugintoolbar.h
-    radiant/points.cpp
-    radiant/points.h
-    radiant/preferencedictionary.cpp
-    radiant/preferencedictionary.h
-    radiant/preferences.cpp
-    radiant/preferences.h
-    radiant/qe3.cpp
-    radiant/qe3.h
-    radiant/qgl.cpp
-    radiant/qgl.h
-    radiant/referencecache.cpp
-    radiant/referencecache.h
-    radiant/renderer.cpp
-    radiant/renderer.h
-    radiant/renderstate.cpp
-    radiant/renderstate.h
-    radiant/resource.h
-    radiant/scenegraph.cpp
-    radiant/scenegraph.h
-    radiant/select.cpp
-    radiant/select.h
-    radiant/selection.cpp
-    radiant/selection.h
-    radiant/server.cpp
-    radiant/server.h
-    radiant/shaders.cpp
-    radiant/shaders.h
-    radiant/sockets.cpp
-    radiant/sockets.h
-    radiant/stacktrace.cpp
-    radiant/stacktrace.h
-    radiant/surfacedialog.cpp
-    radiant/surfacedialog.h
-    radiant/texmanip.cpp
-    radiant/texmanip.h
-    radiant/textureentry.cpp
-    radiant/textureentry.h
-    radiant/textures.cpp
-    radiant/textures.h
-    radiant/texwindow.cpp
-    radiant/texwindow.h
-    radiant/timer.cpp
-    radiant/timer.h
-    radiant/treemodel.cpp
-    radiant/treemodel.h
-    radiant/undo.cpp
-    radiant/undo.h
-    radiant/url.cpp
-    radiant/url.h
-    radiant/view.cpp
-    radiant/view.h
-    radiant/watchbsp.cpp
-    radiant/watchbsp.h
-    radiant/winding.cpp
-    radiant/winding.h
-    radiant/windowobservers.cpp
-    radiant/windowobservers.h
-    radiant/xmlstuff.cpp
-    radiant/xmlstuff.h
-    radiant/xywindow.cpp
-    radiant/xywindow.h
-)
+add_subdirectory(radiant build)
 
-add_executable(radiant WIN32 radiant/radiant.rc ${RADIANTLIST})
-target_link_libraries(radiant
-    ${CMAKE_DL_LIBS}
-    ${LIBXML2_LIBRARIES}
-    ${GTK2_LIBRARIES}
-    ${OPENGL_gl_LIBRARY}
-    cmdlib
-    container
-    ddslib
-    debugging
-    gtkutil
-    ${GTKGL_LIBRARIES}
-    l_net
-#    math
-    mathlib
-    md5lib
-    memory
-    modulesystem
-    os
-    picomodel
-    profile
-    script
-    signal
-    splines
-    stream
-    string
-    xmllib
-)
+add_subdirectory(tools)
 
 if(NOT (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR))
     # Copy data files from sources to the build directory
