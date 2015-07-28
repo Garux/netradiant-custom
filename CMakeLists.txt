@@ -390,9 +390,15 @@ if(NOT (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR))
 endif()
 
 option(DOWNLOAD_GAMEPACKS "Download game packs" ON)
+add_custom_target(game_packs
+    COMMAND ${CMAKE_COMMAND} -E make_directory games
+    COMMAND DOWNLOAD_GAMEPACKS=yes SOURCE_DIR="${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/install-gamepacks.sh" "${CMAKE_BINARY_DIR}"
+    COMMENT "Downloading game packs"
+)
+add_custom_command(OUTPUT games
+	COMMAND make game_packs
+	DEPENDS download-gamepacks.sh install-gamepacks.sh install-gamepack.sh
+)
 if(DOWNLOAD_GAMEPACKS)
-    add_custom_target(game_packs ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory games
-        COMMAND DOWNLOAD_GAMEPACKS=yes SOURCE_DIR="${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/install-gamepacks.sh" "${CMAKE_BINARY_DIR}"
-    )
+    add_custom_target(game_packs_all ALL DEPENDS games)
 endif()
