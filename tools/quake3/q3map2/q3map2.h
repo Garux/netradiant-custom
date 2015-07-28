@@ -35,6 +35,7 @@
 
 
 /* version */
+/** \todo Generate a header for Q3MAP_VERSION from cmake  */
 #ifndef Q3MAP_VERSION
 #error no Q3MAP_VERSION defined
 #endif

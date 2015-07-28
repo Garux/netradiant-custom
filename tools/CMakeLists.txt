@@ -1,5 +1,9 @@
 # Todo split further and actually compile the tools
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+add_subdirectory(quake3)
+
 set(QUAKE2LIST
     tools/quake2/common/bspfile.c
     tools/quake2/common/bspfile.h
@@ -229,117 +233,4 @@ set(QUAKE2LIST
     tools/quake2/qdata_heretic2/tables.c
     tools/quake2/qdata_heretic2/tmix.c
     tools/quake2/qdata_heretic2/video.c
-)
-
-set(QUAKE3LIST
-    tools/quake3/common/aselib.c
-    tools/quake3/common/aselib.h
-    tools/quake3/common/bspfile.c
-    tools/quake3/common/bspfile.h
-    tools/quake3/common/cmdlib.c
-    tools/quake3/common/cmdlib.h
-    tools/quake3/common/inout.c
-    tools/quake3/common/jpeg.c
-    tools/quake3/common/l3dslib.c
-    tools/quake3/common/l3dslib.h
-    tools/quake3/common/md4.c
-    tools/quake3/common/md4.h
-    tools/quake3/common/mutex.c
-    tools/quake3/common/mutex.h
-    tools/quake3/common/polylib.c
-    tools/quake3/common/polylib.h
-    tools/quake3/common/polyset.h
-    tools/quake3/common/qfiles.h
-    tools/quake3/common/qthreads.h
-    tools/quake3/common/scriplib.c
-    tools/quake3/common/scriplib.h
-    tools/quake3/common/surfaceflags.h
-    tools/quake3/common/threads.c
-    tools/quake3/common/trilib.c
-    tools/quake3/common/trilib.h
-    tools/quake3/common/unzip.c
-    tools/quake3/common/unzip.h
-    tools/quake3/common/vfs.c
-    tools/quake3/common/vfs.h
-    tools/quake3/common/imagelib.c
-    tools/quake3/common/imagelib.h
-    tools/quake3/common/inout.h
-    tools/quake3/q3data/3dslib.c
-    tools/quake3/q3data/3dslib.h
-    tools/quake3/q3data/compress.c
-    tools/quake3/q3data/images.c
-    tools/quake3/q3data/md3lib.c
-    tools/quake3/q3data/md3lib.h
-    tools/quake3/q3data/models.c
-    tools/quake3/q3data/oldstuff.c
-    tools/quake3/q3data/p3dlib.c
-    tools/quake3/q3data/p3dlib.h
-    tools/quake3/q3data/polyset.c
-    tools/quake3/q3data/q3data.c
-    tools/quake3/q3data/q3data.h
-    tools/quake3/q3data/stripper.c
-    tools/quake3/q3data/video.c
-    tools/quake3/q3map2/brush.c
-    tools/quake3/q3map2/brush_primit.c
-    tools/quake3/q3map2/bsp.c
-    tools/quake3/q3map2/bspfile_abstract.c
-    tools/quake3/q3map2/bspfile_ibsp.c
-    tools/quake3/q3map2/bspfile_rbsp.c
-    tools/quake3/q3map2/convert_ase.c
-    tools/quake3/q3map2/convert_map.c
-    tools/quake3/q3map2/convert_obj.c
-    tools/quake3/q3map2/decals.c
-    tools/quake3/q3map2/facebsp.c
-    tools/quake3/q3map2/fog.c
-    tools/quake3/q3map2/game__null.h
-    tools/quake3/q3map2/game_darkplaces.h
-    tools/quake3/q3map2/game_dq.h
-    tools/quake3/q3map2/game_ef.h
-    tools/quake3/q3map2/game_etut.h
-    tools/quake3/q3map2/game_ja.h
-    tools/quake3/q3map2/game_jk2.h
-    tools/quake3/q3map2/game_nexuiz.h
-    tools/quake3/q3map2/game_prophecy.h
-    tools/quake3/q3map2/game_qfusion.h
-    tools/quake3/q3map2/game_quake3.h
-    tools/quake3/q3map2/game_quakelive.h
-    tools/quake3/q3map2/game_reaction.h
-    tools/quake3/q3map2/game_sof2.h
-    tools/quake3/q3map2/game_t.h
-    tools/quake3/q3map2/game_tenebrae.h
-    tools/quake3/q3map2/game_tremulous.h
-    tools/quake3/q3map2/game_wolf.h
-    tools/quake3/q3map2/game_wolfet.h
-    tools/quake3/q3map2/game_xonotic.h
-    tools/quake3/q3map2/leakfile.c
-    tools/quake3/q3map2/light.c
-    tools/quake3/q3map2/light_bounce.c
-    tools/quake3/q3map2/light_shadows.c
-    tools/quake3/q3map2/light_trace.c
-    tools/quake3/q3map2/light_ydnar.c
-    tools/quake3/q3map2/lightmaps.c
-    tools/quake3/q3map2/lightmaps_ydnar.c
-    tools/quake3/q3map2/map.c
-    tools/quake3/q3map2/mesh.c
-    tools/quake3/q3map2/model.c
-    tools/quake3/q3map2/patch.c
-    tools/quake3/q3map2/path_init.c
-    tools/quake3/q3map2/portals.c
-    tools/quake3/q3map2/prtfile.c
-    tools/quake3/q3map2/shaders.c
-    tools/quake3/q3map2/surface.c
-    tools/quake3/q3map2/surface_extra.c
-    tools/quake3/q3map2/surface_foliage.c
-    tools/quake3/q3map2/surface_fur.c
-    tools/quake3/q3map2/surface_meta.c
-    tools/quake3/q3map2/tjunction.c
-    tools/quake3/q3map2/tree.c
-    tools/quake3/q3map2/vis.c
-    tools/quake3/q3map2/visflow.c
-    tools/quake3/q3map2/writebsp.c
-    tools/quake3/q3map2/image.c
-    tools/quake3/q3map2/main.c
-    tools/quake3/q3map2/nav.cpp
-    tools/quake3/q3map2/navgen.h
-    tools/quake3/q3map2/q3map2.h
 )
