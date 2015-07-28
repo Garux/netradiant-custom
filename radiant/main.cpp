@@ -208,11 +208,15 @@ void error_redirect( const gchar *domain, GLogLevelFlags log_level, const gchar 
 	// spam it...
 	globalErrorStream() << buf << "\n";
 
+	bool worth_showing = strcmp(domain,"Gdk") != 0;
+
 	// FIXME why are warnings is_fatal?
 #ifndef _DEBUG
-	if ( is_fatal )
+	worth_showing = worth_showing && is_fatal;
 #endif
-	ERROR_MESSAGE( "GTK+ error: " << buf );
+
+	if ( worth_showing )
+		ERROR_MESSAGE( "GTK+ error: " << buf );
 }
 
 #if defined ( _DEBUG ) && defined ( WIN32 ) && defined ( _MSC_VER )
