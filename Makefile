@@ -662,7 +662,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/mainframe.o \
 	radiant/main.o \
 	radiant/map.o \
-	$(if $(findstring $(OS),Win32),radiant/multimon.o,) \
+	radiant/multimon.o \
 	radiant/mru.o \
 	radiant/nullmodel.o \
 	radiant/parse.o \

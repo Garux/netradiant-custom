@@ -4,15 +4,16 @@
 : ${SH:=sh}
 : ${CP:=cp}
 : ${CP_R:=cp -r}
+: ${SOURCE_DIR:=.}
 
 dest=$1
 
 case "$DOWNLOAD_GAMEPACKS" in
 	yes)
-		LICENSEFILTER=GPL BATCH=1 $SH download-gamepacks.sh
+		LICENSEFILTER=GPL BATCH=1 $SH "$SOURCE_DIR/download-gamepacks.sh"
 		;;
 	all)
-		BATCH=1 $SH download-gamepacks.sh
+		BATCH=1 $SH "$SOURCE_DIR/download-gamepacks.sh"
 		;;
 	*)
 		;;
@@ -22,9 +23,9 @@ set -e
 for GAME in games/*; do
 	if [ "$GAME" = "games/*" ]; then
 		$ECHO "Game packs not found, please run"
-		$ECHO "  ./download-gamepacks.sh"
+		$ECHO "  $SOURCE_DIR/download-gamepacks.sh"
 		$ECHO "and then try again!"
 	else
-		$SH install-gamepack.sh "$GAME" "$dest"
+		$SH "$SOURCE_DIR/install-gamepack.sh" "$GAME" "$dest"
 	fi
 done

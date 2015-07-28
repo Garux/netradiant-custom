@@ -383,3 +383,10 @@ if(NOT (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR))
     file(COPY ${DATA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/docs")
 endif()
 
+option(DOWNLOAD_GAMEPACKS "Download game packs" ON)
+if(DOWNLOAD_GAMEPACKS)
+    add_custom_target(game_packs ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory games
+        COMMAND DOWNLOAD_GAMEPACKS=yes SOURCE_DIR="${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/install-gamepacks.sh" "${CMAKE_BINARY_DIR}"
+    )
+endif()
