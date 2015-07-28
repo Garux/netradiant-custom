@@ -1,5 +1,5 @@
 
-add_library(picomodel
+add_library(picomodel SHARED
     lwo/clip.c
     lwo/envelope.c
     lwo/list.c

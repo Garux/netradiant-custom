@@ -1,5 +1,5 @@
 
-add_library(signal
+add_library(signal SHARED
     isignal.cpp
     isignal.h
     signal.cpp

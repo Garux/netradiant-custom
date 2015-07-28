@@ -1,5 +1,5 @@
 
-add_library(splines
+add_library(splines SHARED
     math_angles.cpp
     math_angles.h
     math_matrix.cpp

@@ -1,4 +1,4 @@
 
-add_library(ddslib
+add_library(ddslib SHARED
     ddslib.c
 )

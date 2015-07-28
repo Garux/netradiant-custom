@@ -174,6 +174,12 @@ include_directories(include)
 
 add_subdirectory(libs)
 include_directories(libs)
+
+macro(radiant_plugin name)
+	message(STATUS "Found Plugin ${name}")
+	add_library(${name} MODULE ${ARGN})
+endmacro()
+
 add_subdirectory(contrib)
 add_subdirectory(plugins)
 

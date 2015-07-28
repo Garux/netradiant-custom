@@ -1,9 +1,3 @@
-# Todo split further and actually compile the plugins
-
-macro(radiant_plugin name)
-	message(STATUS "Found Plugin ${name}")
-	add_library(${name} MODULE ${ARGN})
-endmacro()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
 

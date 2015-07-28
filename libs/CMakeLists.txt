@@ -22,6 +22,16 @@ add_subdirectory(stream)
 add_subdirectory(string)
 add_subdirectory(xml)
 
+add_library(etclib SHARED
+    etclib.c
+    etclib.h
+)
+
+add_library(filematch SHARED
+    filematch.c
+    filematch.h
+)
+
 add_library(libs
     archivelib.cpp
     archivelib.h

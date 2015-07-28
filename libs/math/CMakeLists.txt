@@ -1,5 +1,5 @@
 
-add_library(math
+add_library(math SHARED
    aabb.cpp
    aabb.h
    curve.cpp

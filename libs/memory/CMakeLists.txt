@@ -1,5 +1,5 @@
 
-add_library(memory
+add_library(memory SHARED
     allocator.cpp
     allocator.h
 )

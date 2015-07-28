@@ -152,6 +152,12 @@ typedef int ( *FunctionPointer )();
 
 DynamicLibrary( const char* filename ){
 	m_library = dlopen( filename, RTLD_NOW );
+	if ( !m_library )
+	{
+		globalErrorStream() << "LoadLibrary failed: '" << filename << "'\n";
+		if ( const char* error = dlerror() )
+			globalErrorStream() << "GetLastError: " << error;
+	}
 }
 ~DynamicLibrary(){
 	if ( !failed() ) {
