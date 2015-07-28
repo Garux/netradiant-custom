@@ -373,3 +373,13 @@ target_link_libraries(radiant
     string
     xmllib
 )
+
+if(NOT (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR))
+    # Copy data files from sources to the build directory
+    message(STATUS "Copying data files")
+    file(GLOB DATA_FILES "${CMAKE_SOURCE_DIR}/setup/data/tools/*")
+    file(COPY ${DATA_FILES} DESTINATION "${CMAKE_BINARY_DIR}")
+    file(GLOB DATA_FILES "${CMAKE_SOURCE_DIR}/docs/*")
+    file(COPY ${DATA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/docs")
+endif()
+

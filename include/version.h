@@ -1,4 +1,5 @@
 // Makefile appends preprocessor flags instead now
+/// \todo Generate this file from cmake
 #ifndef RADIANT_VERSION
 #error no RADIANT_VERSION defined
 #endif
