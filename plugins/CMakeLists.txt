@@ -1,3 +1,11 @@
+include_directories("${CMAKE_SOURCE_DIR}/libs")
+include_directories("${CMAKE_SOURCE_DIR}/include")
+
+find_package(GTK2 REQUIRED)
+include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR} ${GTK2_GLIB_INCLUDE_DIR})
+
+find_package(LibXml2 REQUIRED)
+include_directories(${LIBXML2_INCLUDE_DIR})
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules")
 
