@@ -171,6 +171,9 @@ target_link_libraries(q3data
     mathlib
 )
 
+add_custom_target(quake3)
+add_dependencies(quake3 q3map2 q3data)
+
 if (UNIX)
     target_link_libraries(q3map2 pthread m)
     target_link_libraries(q3data m)
