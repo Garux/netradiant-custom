@@ -46,10 +46,11 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 # Enable Debug by default, can be changed with -D CMAKE_BUILD_TYPE=Release
-if(CMAKE_BUILD_TYPE STREQUAL "")
+if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
+endif()
+if(CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-D_DEBUG=1)
-else()
 endif()
 
 find_package(OpenGL REQUIRED)
