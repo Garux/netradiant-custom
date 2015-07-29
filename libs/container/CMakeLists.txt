@@ -1,4 +1,4 @@
-add_library(container SHARED
+add_library(container
     array.cpp
     array.h
     cache.cpp

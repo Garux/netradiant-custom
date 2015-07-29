@@ -1,5 +1,4 @@
-
-add_library(script SHARED
+add_library(script
     scripttokeniser.cpp
     scripttokeniser.h
     scripttokenwriter.cpp

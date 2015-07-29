@@ -1,8 +1,7 @@
-
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 
-add_library(xmllib SHARED
+add_library(xmllib
     ixml.cpp
     ixml.h
     xmlelement.cpp

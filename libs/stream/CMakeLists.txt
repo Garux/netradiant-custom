@@ -1,5 +1,4 @@
-
-add_library(stream SHARED
+add_library(stream
     filestream.cpp
     filestream.h
     memstream.cpp

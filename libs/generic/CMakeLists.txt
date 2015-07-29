@@ -1,5 +1,4 @@
-
-add_library(generic SHARED
+add_library(generic
     arrayrange.cpp
     arrayrange.h
     bitfield.cpp

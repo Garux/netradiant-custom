@@ -1,5 +1,4 @@
-
-add_library(os SHARED
+add_library(os
     dir.cpp
     dir.h
     file.cpp

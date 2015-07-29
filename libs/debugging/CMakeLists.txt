@@ -1,5 +1,4 @@
-
-add_library(debugging SHARED
+add_library(debugging
     debugging.cpp
     debugging.h
 )

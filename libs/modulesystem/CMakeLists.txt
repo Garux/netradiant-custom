@@ -1,5 +1,4 @@
-
-add_library(modulesystem SHARED
+add_library(modulesystem
     moduleregistry.cpp
     moduleregistry.h
     modulesmap.cpp

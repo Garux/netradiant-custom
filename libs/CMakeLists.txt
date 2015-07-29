@@ -1,3 +1,5 @@
+set(CMAKE_POSITION_INDEPENDENT_CODE 1)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
@@ -28,12 +30,12 @@ add_subdirectory(stream)
 add_subdirectory(string)
 add_subdirectory(xml)
 
-add_library(etclib SHARED
+add_library(etclib
     etclib.c
     etclib.h
 )
 
-add_library(filematch SHARED
+add_library(filematch
     filematch.c
     filematch.h
 )

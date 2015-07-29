@@ -1,4 +1,3 @@
-
-add_library(md5lib SHARED
+add_library(md5lib
     md5lib.c
 )

@@ -1,5 +1,4 @@
-
-add_library(gtkutil SHARED
+add_library(gtkutil
     accelerator.cpp
     accelerator.h
     button.cpp

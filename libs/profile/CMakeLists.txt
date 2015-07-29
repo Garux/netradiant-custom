@@ -1,5 +1,4 @@
-
-add_library(profile SHARED
+add_library(profile
     file.cpp
     file.h
     profile.cpp
