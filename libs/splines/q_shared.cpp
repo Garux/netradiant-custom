@@ -30,14 +30,10 @@
    ============================================================================
  */
 
-// malloc / free all in one place for debugging
-extern "C" void *Com_Allocate( int bytes );
-extern "C" void Com_Dealloc( void *ptr );
-
 void Com_InitGrowList( growList_t *list, int maxElements ) {
 	list->maxElements = maxElements;
 	list->currentElements = 0;
-	list->elements = (void **)Com_Allocate( list->maxElements * sizeof( void * ) );
+	list->elements = (void **)malloc( list->maxElements * sizeof( void * ) );
 }
 
 int Com_AddToGrowList( growList_t *list, void *data ) {
@@ -65,7 +61,7 @@ int Com_AddToGrowList( growList_t *list, void *data ) {
 
 	Com_DPrintf( "Resizing growlist to %i maxElements\n", list->maxElements );
 
-	list->elements = (void **)Com_Allocate( list->maxElements * sizeof( void * ) );
+	list->elements = (void **)malloc( list->maxElements * sizeof( void * ) );
 
 	if ( !list->elements ) {
 		Com_Error( ERR_DROP, "Growlist alloc failed" );
@@ -73,7 +69,7 @@ int Com_AddToGrowList( growList_t *list, void *data ) {
 
 	memcpy( list->elements, old, list->currentElements * sizeof( void * ) );
 
-	Com_Dealloc( old );
+	free( old );
 
 	return Com_AddToGrowList( list, data );
 }
