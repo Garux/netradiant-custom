@@ -9,6 +9,13 @@ include_directories(${LIBXML2_INCLUDE_DIR})
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules")
 
+add_custom_target(modules)
+macro(radiant_plugin name)
+    message(STATUS "Found Module ${name}")
+    add_library(${name} MODULE ${ARGN})
+    add_dependencies(modules ${name})
+endmacro()
+
 add_subdirectory(archivepak)
 add_subdirectory(archivewad)
 add_subdirectory(archivezip)

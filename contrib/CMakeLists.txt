@@ -9,6 +9,13 @@ include_directories(${LIBXML2_INCLUDE_DIR})
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
 
+add_custom_target(plugins)
+macro(radiant_plugin name)
+    message(STATUS "Found Plugin ${name}")
+    add_library(${name} MODULE ${ARGN})
+    add_dependencies(plugins ${name})
+endmacro()
+
 # add_subdirectory(bkgrnd2d)
 add_subdirectory(bobtoolz)
 add_subdirectory(brushexport)
