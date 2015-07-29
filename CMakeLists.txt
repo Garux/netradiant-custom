@@ -7,8 +7,7 @@ set(NetRadiant_VERSION_MAJOR 1)
 set(NetRadiant_VERSION_MINOR 5)
 set(NetRadiant_VERSION_PATCH 0)
 set(NetRadiant_VERSION ${NetRadiant_VERSION_MAJOR}.${NetRadiant_VERSION_MINOR}.${NetRadiant_VERSION_PATCH})
-
-set(Q3MAP_VERSION = 2.5.17n)
+set(Q3MAP_VERSION 2.5.17n)
 
 set(RADIANT_VERSION_STRING "${NetRadiant_VERSION}n${GIT_VERSION}")
 execute_process(COMMAND git rev-parse --short HEAD

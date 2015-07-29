@@ -1,5 +1,3 @@
-
-set(Q3MAP_VERSION 2.5.17n)
 add_definitions(-DQ3MAP_VERSION="${Q3MAP_VERSION}")
 
 include_directories(common)
