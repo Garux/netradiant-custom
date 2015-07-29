@@ -13,9 +13,14 @@ set(Q3MAP_STREAM_VERSION 1)
 set(RADIANT_VERSION_STRING "${NetRadiant_VERSION}n${GIT_VERSION}")
 execute_process(COMMAND git rev-parse --short HEAD
     OUTPUT_VARIABLE GIT_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 if(GIT_VERSION)
     set(RADIANT_VERSION_STRING "${RADIANT_VERSION_STRING}-git-${GIT_VERSION}")
     set(Q3MAP_VERSION "${Q3MAP_VERSION}-git-${GIT_VERSION}")
+    add_custom_target(version_git ALL
+        COMMAND [ "`git rev-parse --short HEAD`" != "${GIT_VERSION}" ] && ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
+        VERBATIM
+    )
 endif()
 
 if(WIN32)
