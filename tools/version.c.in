@@ -1,0 +1,15 @@
+const char* radiant_version()
+{
+	return "@RADIANT_VERSION_STRING@";
+}
+
+const char* q3map2_version()
+{
+	return "@Q3MAP_VERSION@";
+}
+
+
+const char* q3map_stream_version()
+{
+	return "@Q3MAP_STREAM_VERSION@";
+}

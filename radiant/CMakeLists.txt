@@ -179,6 +179,7 @@ set(RADIANTLIST
     xmlstuff.h
     xywindow.cpp
     xywindow.h
+    "${CMAKE_BINARY_DIR}/version.cpp"
 )
 
 add_executable(radiant WIN32 radiant.rc ${RADIANTLIST})

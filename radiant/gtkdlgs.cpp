@@ -473,16 +473,16 @@ void DoAbout(){
 			}
 
 			{
-				GtkLabel* label = GTK_LABEL( gtk_label_new( "NetRadiant " RADIANT_VERSION "\n"
-															__DATE__ "\n\n"
-															RADIANT_ABOUTMSG "\n\n"
-																			 "By alientrap.org\n\n"
-																			 "This program is free software\n"
-																			 "licensed under the GNU GPL.\n\n"
-																			 "NetRadiant is unsupported, however\n"
-																			 "you may report your problems at\n"
-																			 "http://www.icculus.org/netradiant/"
-															) );
+				std::string label_text = "NetRadiant " + radiant::version() + "\n"
+										__DATE__ "\n\n"
+										+ radiant::about_msg() + "\n\n"
+										"This program is free software\n"
+										"licensed under the GNU GPL.\n\n"
+										"NetRadiant is unsupported, however\n"
+										"you may report your problems at\n"
+										"https://gitlab.com/xonotic/netradiant/issues";
+
+				GtkLabel* label = GTK_LABEL( gtk_label_new( label_text.c_str() ) );
 
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( label ), FALSE, FALSE, 0 );

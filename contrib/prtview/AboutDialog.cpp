@@ -66,12 +66,12 @@ void DoAboutDlg(){
 	gtk_container_add( GTK_CONTAINER( dlg ), hbox );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 10 );
 
-	label = gtk_label_new( "Version 1.000\n\n"
+	std::string label_text = "Version 1.000\n\n"
 						   "Gtk port by Leonardo Zide\nleo@lokigames.com\n\n"
 						   "Written by Geoffrey DeWan\ngdewan@prairienet.org\n\n"
-						   "Built against NetRadiant " RADIANT_VERSION "\n"
-						   __DATE__
-						   );
+						   "Built against NetRadiant " +radiant::version()+ "\n"
+						   __DATE__;
+	label = gtk_label_new( label_text.c_str() );
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX( hbox ), label, TRUE, TRUE, 0 );
 	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT );

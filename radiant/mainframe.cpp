@@ -950,7 +950,7 @@ void OpenUpdateURL(){
 #else
 	URL << "&OS_dlup=3";
 #endif
-	URL << "&Version_dlup=" RADIANT_VERSION;
+	URL << "&Version_dlup=" << radiant::version();
 	g_GamesDialog.AddPacksURL( URL );
 	OpenURL( URL.c_str() );
 }

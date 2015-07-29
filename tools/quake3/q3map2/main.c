@@ -2081,7 +2081,7 @@ int main( int argc, char **argv ){
 	start = I_FloatTime();
 
 	/* this was changed to emit version number over the network */
-	printf( Q3MAP_VERSION "\n" );
+	printf( "%s\n", q3map2_version() );
 
 	/* set exit call */
 	atexit( ExitQ3Map );
@@ -2160,8 +2160,8 @@ int main( int argc, char **argv ){
 	   and we put the GtkRadiant version to make it easy to track with what version of Radiant it was built with */
 
 	Sys_Printf( "Q3Map         - v1.0r (c) 1999 Id Software Inc.\n" );
-	Sys_Printf( "Q3Map (ydnar) - v" Q3MAP_VERSION "\n" );
-	Sys_Printf( "NetRadiant    - v" RADIANT_VERSION " " __DATE__ " " __TIME__ "\n" );
+	Sys_Printf( "Q3Map (ydnar) - v%s\n", q3map2_version() );
+	Sys_Printf( "NetRadiant    - v%s " __DATE__ " " __TIME__ "\n", radiant_version() );
 	Sys_Printf( "%s\n", Q3MAP_MOTD );
 
 	/* ydnar: new path initialization */

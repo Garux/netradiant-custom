@@ -211,6 +211,13 @@ inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const
 	return ostream;
 }
 
+/// \brief Writes a \p string to \p ostream.
+template<typename TextOutputStreamType>
+inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const std::string& string ){
+	ostream.write( string.data(), string.size() );
+	return ostream;
+}
+
 class HexChar
 {
 public:

@@ -8,6 +8,7 @@ set(NetRadiant_VERSION_MINOR 5)
 set(NetRadiant_VERSION_PATCH 0)
 set(NetRadiant_VERSION ${NetRadiant_VERSION_MAJOR}.${NetRadiant_VERSION_MINOR}.${NetRadiant_VERSION_PATCH})
 set(Q3MAP_VERSION 2.5.17n)
+set(Q3MAP_STREAM_VERSION 1)
 
 set(RADIANT_VERSION_STRING "${NetRadiant_VERSION}n${GIT_VERSION}")
 execute_process(COMMAND git rev-parse --short HEAD
@@ -55,13 +56,8 @@ endif()
 
 find_package(OpenGL REQUIRED)
 
-add_definitions(
-    -DRADIANT_VERSION="${RADIANT_VERSION_STRING}"
-    -DRADIANT_MAJOR_VERSION="${NetRadiant_VERSION_MINOR}"
-    -DRADIANT_MINOR_VERSION="${NetRadiant_VERSION_PATCH}"
-    -DRADIANT_ABOUTMSG="${RADIANT_ABOUTMSG}"
-    -DRADIANT_EXECUTABLE="${RADIANT_EXECUTABLE}"
-)
+add_definitions(-DRADIANT_EXECUTABLE="${RADIANT_EXECUTABLE}")
+
 if(NOT WIN32)
     add_definitions(
         -DPOSIX=1
@@ -73,6 +69,7 @@ else()
     )
 endif()
 
+configure_file("${CMAKE_SOURCE_DIR}/include/version.cpp.in" "${CMAKE_BINARY_DIR}/version.cpp")
 set(INCLUDELIST
     include/aboutmsg.h
     include/cullable.cpp

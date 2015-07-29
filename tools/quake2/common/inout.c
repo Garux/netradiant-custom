@@ -239,7 +239,7 @@ void Broadcast_Setup( const char *dest ){
 	brdcst_socket = Net_Connect( &address, 0 );
 	if ( brdcst_socket ) {
 		// send in a header
-		sprintf( sMsg, "<?xml version=\"1.0\"?><q3map_feedback version=\"" Q3MAP_STREAM_VERSION "\">" );
+		sprintf( sMsg, "<?xml version=\"1.0\"?><q3map_feedback version=\"%s\">", q3map_stream_version() );
 		NMSG_Clear( &msg );
 		NMSG_WriteString( &msg, sMsg );
 		Net_Send( brdcst_socket, &msg );

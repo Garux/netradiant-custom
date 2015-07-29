@@ -1,8 +1,5 @@
-add_definitions(-DQ3MAP_VERSION="${Q3MAP_VERSION}")
-
 include_directories(common)
 include_directories("${CMAKE_SOURCE_DIR}/libs")
-include_directories("${CMAKE_SOURCE_DIR}/include")
 
 find_package(GLIB REQUIRED)
 include_directories(${GLIB_INCLUDE_DIRS})
@@ -105,6 +102,7 @@ add_executable(q3map2
     q3map2/vis.c
     q3map2/visflow.c
     q3map2/writebsp.c
+    "${CMAKE_BINARY_DIR}/version.c"
 )
 
 target_link_libraries(q3map2
@@ -157,6 +155,7 @@ add_executable(q3data
     q3data/q3data.h
     q3data/stripper.c
     q3data/video.c
+    "${CMAKE_BINARY_DIR}/version.c"
 )
 
 target_link_libraries(q3data

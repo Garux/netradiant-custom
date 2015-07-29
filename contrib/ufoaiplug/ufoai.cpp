@@ -78,8 +78,12 @@ const char* getCommandTitleList(){
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	char *message = NULL;
 	if ( string_equal( command, "About" ) ) {
+		std::string version_string = "UFO:AI Plugin (http://ufoai.sf.net)\nBuild: " __DATE__
+			"\nRadiant version: " +radiant::version()+
+			"\nPlugin version: " PLUGIN_VERSION
+			"\nAuthor: Martin Gerhardy (tlh2000/mattn)\n";
 		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
-										 "UFO:AI Plugin (http://ufoai.sf.net)\nBuild: " __DATE__ "\nRadiant version: " RADIANT_VERSION "\nPlugin version: " PLUGIN_VERSION "\nAuthor: Martin Gerhardy (tlh2000/mattn)\n", "About",
+										 version_string.c_str(), "About",
 										 eMB_OK, eMB_ICONDEFAULT );
 	}
 	else if ( string_equal( command, "Level 1" ) ) {

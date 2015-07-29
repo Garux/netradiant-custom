@@ -335,7 +335,7 @@ void paths_init(){
 
 	{
 		StringOutputStream path( 256 );
-		path << home << "1." << RADIANT_MAJOR_VERSION "." << RADIANT_MINOR_VERSION << '/';
+		path << home << "1." << radiant::version_major() << "." << radiant::version_minor() << '/';
 		g_strSettingsPath = path.c_str();
 	}
 
@@ -375,7 +375,14 @@ bool check_version_file( const char* filename, const char* version ){
 }
 
 bool check_version(){
-	// a safe check to avoid people running broken installations
+	// a safe check to avoid people running broken code
+	// (otherwise, they run it, don't crash it, wait 20 years and blame us for not maintaining this hard enough)
+	// make something idiot proof and someone will make better idiots, this may be overkill
+	// let's leave it disabled in any case
+	/// \todo actually remove this and check if the functions called from here
+	/// are used elsewhere; if not, remove them.
+	return true;
+/*	// a safe check to avoid people running broken installations
 	// (otherwise, they run it, crash it, and blame us for not forcing them hard enough to pay attention while installing)
 	// make something idiot proof and someone will make better idiots, this may be overkill
 	// let's leave it disabled in debug mode in any case
@@ -399,15 +406,17 @@ bool check_version(){
 
 	if ( !bVerIsGood ) {
 		StringOutputStream msg( 256 );
-		msg << "This editor binary (" RADIANT_VERSION ") doesn't match what the latest setup has configured in this directory\n"
-													  "Make sure you run the right/latest editor binary you installed\n"
+		msg << "This editor binary ("
+			<< radiant::version()
+			<< ") doesn't match what the latest setup has configured in this directory\n"
+				"Make sure you run the right/latest editor binary you installed\n"
 			<< AppPath_get();
 		gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONDEFAULT );
 	}
 	return bVerIsGood;
 #else
 	return true;
-#endif
+#endif*/
 }
 
 void create_global_pid(){

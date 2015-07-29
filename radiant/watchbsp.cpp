@@ -269,11 +269,13 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 					abortStream( data );
 					return;
 				}
-				else if ( strcmp( reinterpret_cast<const char*>( attrs[1] ), Q3MAP_STREAM_VERSION ) != 0 ) {
+				else if ( q3map::stream_version() !=  reinterpret_cast<const char*>( attrs[1] ) ) {
 					message_flush( data );
-					globalErrorStream() <<
-					"This version of Radiant reads version " Q3MAP_STREAM_VERSION " debug streams, I got an incoming connection with version " << reinterpret_cast<const char*>( attrs[1] ) << "\n"
-																																															   "Please make sure your versions of Radiant and q3map are matching.\n";
+					globalErrorStream() << "This version of Radiant reads version "
+						<< q3map::stream_version()
+						<< " debug streams, I got an incoming connection with version "
+						<< reinterpret_cast<const char*>( attrs[1] )
+						<< "\nPlease make sure your versions of Radiant and q3map are matching.\n";
 					abortStream( data );
 					return;
 				}

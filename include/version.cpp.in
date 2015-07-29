@@ -1,0 +1,34 @@
+#include "@CMAKE_SOURCE_DIR@/include/version.h"
+namespace radiant {
+
+std::string version()
+{
+	return "@RADIANT_VERSION_STRING@";
+}
+
+int version_major()
+{
+	return @NetRadiant_VERSION_MINOR@;
+}
+
+int version_minor()
+{
+	return @NetRadiant_VERSION_PATCH@;
+}
+
+std::string about_msg()
+{
+	return "@RADIANT_ABOUTMSG@";
+}
+
+
+} // namespace radiant
+
+namespace q3map {
+
+std::string stream_version()
+{
+	return "@Q3MAP_STREAM_VERSION@";
+}
+
+} // namespace q3map

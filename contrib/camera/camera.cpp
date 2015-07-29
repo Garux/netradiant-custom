@@ -170,7 +170,7 @@ class CameraSynapseClient : public CSynapseClient
 public:
 // CSynapseClient API
 bool RequestAPI( APIDescriptor_t *pAPI );
-const char* GetInfo();
+const char* GetInfo() override;
 
 CameraSynapseClient() { }
 virtual ~CameraSynapseClient() { }

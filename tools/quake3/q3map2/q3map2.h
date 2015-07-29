@@ -35,11 +35,7 @@
 
 
 /* version */
-/** \todo Generate a header for Q3MAP_VERSION from cmake  */
-#ifndef Q3MAP_VERSION
-#error no Q3MAP_VERSION defined
-#endif
-#define Q3MAP_MOTD      "Your map saw the pretty lights from q3map2's BFG"
+#include "version.h"
 
 
 
@@ -67,7 +63,6 @@
 
 
 /* general */
-#include "version.h"            /* ttimo: might want to guard that if built outside of the GtkRadiant tree */
 
 #include "cmdlib.h"
 #include "mathlib.h"

@@ -54,6 +54,7 @@ add_executable(q2map EXCLUDE_FROM_ALL
    q2map/trace.c
    q2map/tree.c
    q2map/writebsp.c
+	"${CMAKE_BINARY_DIR}/version.c"
 )
 target_link_libraries(q2map
     ${LIBXML2_LIBRARIES}
@@ -91,6 +92,7 @@ add_executable(qdata3 EXCLUDE_FROM_ALL
    qdata/sprites.c
    qdata/tables.c
    qdata/video.c
+	"${CMAKE_BINARY_DIR}/version.c"
 )
 
 target_link_libraries(qdata3
@@ -164,6 +166,7 @@ add_executable(h2data EXCLUDE_FROM_ALL
    qdata_heretic2/tables.c
    qdata_heretic2/tmix.c
    qdata_heretic2/video.c
+	"${CMAKE_BINARY_DIR}/version.c"
 )
 target_include_directories(h2data BEFORE
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/qdata_heretic2/common"
