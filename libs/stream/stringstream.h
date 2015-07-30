@@ -30,6 +30,7 @@
 /// \brief A wrapper around a STL vector of char.
 /// Maintains a null-terminated array of char.
 /// Provides a limited STL-style interface to push and pop characters at the end of the string.
+/// \todo That vector<char> must become a std::string, and not NUL terminated. Maybe the whole class can be replaced by std::string
 class StringBuffer
 {
 std::vector<char> m_string;

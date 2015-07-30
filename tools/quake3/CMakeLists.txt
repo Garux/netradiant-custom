@@ -16,7 +16,7 @@ include_directories(${LIBXML2_INCLUDE_DIR})
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
-add_executable(q3map2
+radiant_tool(q3map2
     common/cmdlib.c
     common/cmdlib.h
     common/imagelib.c
@@ -119,7 +119,7 @@ target_link_libraries(q3map2
     picomodel
 )
 
-add_executable(q3data
+radiant_tool(q3data
     common/aselib.c
     common/aselib.h
     common/bspfile.c

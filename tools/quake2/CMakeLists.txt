@@ -6,7 +6,7 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 
-add_executable(q2map EXCLUDE_FROM_ALL
+radiant_tool(q2map EXCLUDE_FROM_ALL
    common/bspfile.c
    common/bspfile.h
    common/cmdlib.c
@@ -61,7 +61,7 @@ target_link_libraries(q2map
     l_net
 )
 
-add_executable(qdata3 EXCLUDE_FROM_ALL
+radiant_tool(qdata3 EXCLUDE_FROM_ALL
    common/bspfile.c
    common/bspfile.h
    common/cmdlib.c
@@ -101,7 +101,7 @@ target_link_libraries(qdata3
 )
 
 # Why is the /common stuff duplicated for qdata_heretic2?
-add_executable(h2data EXCLUDE_FROM_ALL
+radiant_tool(h2data EXCLUDE_FROM_ALL
    qdata_heretic2/common/bspfile.c
    qdata_heretic2/common/bspfile.h
    qdata_heretic2/common/cmdlib.c
