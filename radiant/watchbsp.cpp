@@ -82,81 +82,81 @@ void message_print( message_info_t* self, const char* characters, std::size_t le
 class CWatchBSP
 {
 private:
-// a flag we have set to true when using an external BSP plugin
-// the resulting code with that is a bit dirty, cleaner solution would be to seperate the succession of commands from the listening loop
-// (in two seperate classes probably)
-bool m_bBSPPlugin;
+	// a flag we have set to true when using an external BSP plugin
+	// the resulting code with that is a bit dirty, cleaner solution would be to seperate the succession of commands from the listening loop
+	// (in two seperate classes probably)
+	bool m_bBSPPlugin;
 
-// EIdle: we are not listening
-//   DoMonitoringLoop will change state to EBeginStep
-// EBeginStep: the socket is up for listening, we are expecting incoming connection
-//   incoming connection will change state to EWatching
-// EWatching: we have a connection, monitor it
-//   connection closed will see if we start a new step (EBeginStep) or launch Quake3 and end (EIdle)
-enum EWatchBSPState { EIdle, EBeginStep, EWatching } m_eState;
-socket_t *m_pListenSocket;
-socket_t *m_pInSocket;
-netmessage_t msg;
-GPtrArray *m_pCmd;
-// used to timeout EBeginStep
-GTimer    *m_pTimer;
-std::size_t m_iCurrentStep;
-// name of the map so we can run the engine
-char    *m_sBSPName;
-// buffer we use in push mode to receive data directly from the network
-xmlParserInputBufferPtr m_xmlInputBuffer;
-xmlParserInputPtr m_xmlInput;
-xmlParserCtxtPtr m_xmlParserCtxt;
-// call this to switch the set listening mode
-bool SetupListening();
-// start a new EBeginStep
-void DoEBeginStep();
-// the xml and sax parser state
-char m_xmlBuf[MAX_NETMESSAGE];
-bool m_bNeedCtxtInit;
-message_info_t m_message_info;
+	// EIdle: we are not listening
+	//   DoMonitoringLoop will change state to EBeginStep
+	// EBeginStep: the socket is up for listening, we are expecting incoming connection
+	//   incoming connection will change state to EWatching
+	// EWatching: we have a connection, monitor it
+	//   connection closed will see if we start a new step (EBeginStep) or launch Quake3 and end (EIdle)
+	enum EWatchBSPState { EIdle, EBeginStep, EWatching } m_eState;
+	socket_t *m_pListenSocket;
+	socket_t *m_pInSocket;
+	netmessage_t msg;
+	GPtrArray *m_pCmd;
+	// used to timeout EBeginStep
+	GTimer    *m_pTimer;
+	std::size_t m_iCurrentStep;
+	// name of the map so we can run the engine
+	char    *m_sBSPName;
+	// buffer we use in push mode to receive data directly from the network
+	xmlParserInputBufferPtr m_xmlInputBuffer;
+	xmlParserInputPtr m_xmlInput;
+	xmlParserCtxtPtr m_xmlParserCtxt;
+	// call this to switch the set listening mode
+	bool SetupListening();
+	// start a new EBeginStep
+	void DoEBeginStep();
+	// the xml and sax parser state
+	char m_xmlBuf[MAX_NETMESSAGE];
+	bool m_bNeedCtxtInit;
+	message_info_t m_message_info;
 
 public:
-CWatchBSP(){
-	m_pCmd = 0;
-	m_bBSPPlugin = false;
-	m_pListenSocket = NULL;
-	m_pInSocket = NULL;
-	m_eState = EIdle;
-	m_pTimer = g_timer_new();
-	m_sBSPName = NULL;
-	m_xmlInputBuffer = NULL;
-	m_bNeedCtxtInit = true;
-}
-virtual ~CWatchBSP(){
-	EndMonitoringLoop();
-	Net_Shutdown();
-
-	g_timer_destroy( m_pTimer );
-}
-
-bool HasBSPPlugin() const
-{ return m_bBSPPlugin; }
-
-// called regularly to keep listening
-void RoutineProcessing();
-// start a monitoring loop with the following steps
-void DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName );
-void EndMonitoringLoop(){
-	Reset();
-	if ( m_sBSPName ) {
-		string_release( m_sBSPName, string_length( m_sBSPName ) );
-		m_sBSPName = 0;
-	}
-	if ( m_pCmd ) {
-		g_ptr_array_free( m_pCmd, TRUE );
+	CWatchBSP(){
 		m_pCmd = 0;
+		m_bBSPPlugin = false;
+		m_pListenSocket = NULL;
+		m_pInSocket = NULL;
+		m_eState = EIdle;
+		m_pTimer = g_timer_new();
+		m_sBSPName = NULL;
+		m_xmlInputBuffer = NULL;
+		m_bNeedCtxtInit = true;
 	}
-}
-// close everything - may be called from the outside to abort the process
-void Reset();
-// start a listening loop for an external process, possibly a BSP plugin
-void ExternalListen();
+	virtual ~CWatchBSP(){
+		EndMonitoringLoop();
+		Net_Shutdown();
+
+		g_timer_destroy( m_pTimer );
+	}
+
+	bool HasBSPPlugin() const
+	{ return m_bBSPPlugin; }
+
+	// called regularly to keep listening
+	void RoutineProcessing();
+	// start a monitoring loop with the following steps
+	void DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName );
+	void EndMonitoringLoop(){
+		Reset();
+		if ( m_sBSPName ) {
+			string_release( m_sBSPName, string_length( m_sBSPName ) );
+			m_sBSPName = 0;
+		}
+		if ( m_pCmd ) {
+			g_ptr_array_free( m_pCmd, TRUE );
+			m_pCmd = 0;
+		}
+	}
+	// close everything - may be called from the outside to abort the process
+	void Reset();
+	// start a listening loop for an external process, possibly a BSP plugin
+	void ExternalListen();
 };
 
 CWatchBSP* g_pWatchBSP;
@@ -210,6 +210,7 @@ void BuildMonitor_Construct(){
 
 void BuildMonitor_Destroy(){
 	delete g_pWatchBSP;
+	g_pWatchBSP = nullptr;
 }
 
 CWatchBSP *GetWatchBSP(){
@@ -361,29 +362,30 @@ static void saxEndElement( message_info_t *data, const xmlChar *name ){
 
 class MessageOutputStream : public TextOutputStream
 {
-message_info_t* m_data;
+	message_info_t* m_data;
 public:
-MessageOutputStream( message_info_t* data ) : m_data( data ){
-}
-std::size_t write( const char* buffer, std::size_t length ){
-	if ( m_data->pGeometry != 0 ) {
-		m_data->pGeometry->saxCharacters( m_data, reinterpret_cast<const xmlChar*>( buffer ), int(length) );
-	}
-	else
-	{
-		if ( m_data->ignore_depth == 0 ) {
-			// output the message using the level
-			message_print( m_data, buffer, length );
-			// if this message has error level flag, we mark the depth to stop the compilation when we get out
-			// we don't set the msg level if we don't stop on leak
-			if ( m_data->msg_level == 3 ) {
-				m_data->stop_depth = m_data->recurse - 1;
-			}
-		}
+	MessageOutputStream( message_info_t* data ) : m_data( data ){
 	}
 
-	return length;
-}
+	std::size_t write( const char* buffer, std::size_t length ){
+		if ( m_data->pGeometry != 0 ) {
+			m_data->pGeometry->saxCharacters( m_data, reinterpret_cast<const xmlChar*>( buffer ), int(length) );
+		}
+		else
+		{
+			if ( m_data->ignore_depth == 0 ) {
+				// output the message using the level
+				message_print( m_data, buffer, length );
+				// if this message has error level flag, we mark the depth to stop the compilation when we get out
+				// we don't set the msg level if we don't stop on leak
+				if ( m_data->msg_level == 3 ) {
+					m_data->stop_depth = m_data->recurse - 1;
+				}
+			}
+		}
+
+		return length;
+	}
 };
 
 template<typename T>
@@ -491,6 +493,7 @@ void CWatchBSP::Reset(){
 	m_eState = EIdle;
 	if ( s_routine_id ) {
 		gtk_timeout_remove( s_routine_id );
+		s_routine_id = 0;
 	}
 }
 
@@ -562,15 +565,15 @@ void CWatchBSP::DoEBeginStep(){
 class RunEngineConfiguration
 {
 public:
-const char* executable;
-const char* mp_executable;
-bool do_sp_mp;
+	const char* executable;
+	const char* mp_executable;
+	bool do_sp_mp;
 
-RunEngineConfiguration() :
-	executable( g_pGameDescription->getRequiredKeyValue( ENGINE_ATTRIBUTE ) ),
-	mp_executable( g_pGameDescription->getKeyValue( MP_ENGINE_ATTRIBUTE ) ){
-	do_sp_mp = !string_empty( mp_executable );
-}
+	RunEngineConfiguration() :
+		executable( g_pGameDescription->getRequiredKeyValue( ENGINE_ATTRIBUTE ) ),
+		mp_executable( g_pGameDescription->getKeyValue( MP_ENGINE_ATTRIBUTE ) ){
+		do_sp_mp = !string_empty( mp_executable );
+	}
 };
 
 inline void GlobalGameDescription_string_write_mapparameter( StringOutputStream& string, const char* mapname ){
