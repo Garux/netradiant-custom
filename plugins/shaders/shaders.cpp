@@ -207,7 +207,7 @@ Image* loadHeightmap( void* environment, const char* name ){
 Image* loadSpecial( void* environment, const char* name ){
 	if ( *name == '_' ) { // special image
 		StringOutputStream bitmapName( 256 );
-		bitmapName << GlobalRadiant().getAppPath() << "bitmaps/" << name + 1 << ".bmp";
+		bitmapName << GlobalRadiant().getAppPath() << "bitmaps/" << name + 1 << ".png";
 		Image* image = loadBitmap( environment, bitmapName.c_str() );
 		if ( image != 0 ) {
 			return image;
@@ -951,7 +951,7 @@ void realise(){
 
 		{
 			StringOutputStream name( 256 );
-			name << GlobalRadiant().getAppPath() << "bitmaps/" << ( IsDefault() ? "notex.bmp" : "shadernotex.bmp" );
+			name << GlobalRadiant().getAppPath() << "bitmaps/" << ( IsDefault() ? "notex.png" : "shadernotex.png" );
 			m_pTexture = GlobalTexturesCache().capture( LoadImageCallback( 0, loadBitmap ), name.c_str() );
 		}
 	}

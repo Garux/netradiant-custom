@@ -1927,11 +1927,11 @@ void TextureBrowser_checkTagFile(){
 
 void TextureBrowser_SetNotex(){
 	StringOutputStream name( 256 );
-	name << GlobalRadiant().getAppPath() << "bitmaps/notex.bmp";
+	name << GlobalRadiant().getAppPath() << "bitmaps/notex.png";
 	g_notex = name.c_str();
 
 	name = NULL;
-	name << GlobalRadiant().getAppPath() << "bitmaps/shadernotex.bmp";
+	name << GlobalRadiant().getAppPath() << "bitmaps/shadernotex.png";
 	g_shadernotex = name.c_str();
 }
 
