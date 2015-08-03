@@ -900,7 +900,7 @@ static gboolean rotatedlg_cancel( GtkWidget *widget, RotateDialog* rotateDialog 
 
 static gboolean rotatedlg_ok( GtkWidget *widget, RotateDialog* rotateDialog ){
 	rotatedlg_apply( widget, rotateDialog );
-	rotatedlg_cancel( widget, rotateDialog );
+	gtk_widget_hide( GTK_WIDGET( rotateDialog->window ) );
 	return TRUE;
 }
 
@@ -1052,7 +1052,7 @@ static gboolean scaledlg_cancel( GtkWidget *widget, ScaleDialog* scaleDialog ){
 
 static gboolean scaledlg_ok( GtkWidget *widget, ScaleDialog* scaleDialog ){
 	scaledlg_apply( widget, scaleDialog );
-	scaledlg_cancel( widget, scaleDialog );
+	gtk_widget_hide( GTK_WIDGET( scaleDialog->window ) );
 	return TRUE;
 }
 

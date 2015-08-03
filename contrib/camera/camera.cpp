@@ -132,7 +132,7 @@ class CameraInspectorButton : public IToolbarButton
 {
 public:
 virtual const char* getImage() const {
-	return "camera_insp.bmp";
+	return "camera_insp.jpg";
 }
 virtual const char* getText() const {
 	return "Inspector";
