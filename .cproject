@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.toolchain.llvm.clang.macosx.base.835953277">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.llvm.clang.macosx.base.835953277" moduleId="org.eclipse.cdt.core.settings" name="Default">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="cdt.managedbuild.toolchain.llvm.clang.macosx.base.835953277" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="cdt.managedbuild.toolchain.llvm.clang.macosx.base.835953277.2072262777" name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.llvm.clang.macosx.base.1440061656" name="LLVM with Clang (MacOSX)" superClass="cdt.managedbuild.toolchain.llvm.clang.macosx.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.llvm.macosx.platform.base.220063451" isAbstract="true" name="Debug Platform" osList="macosx" superClass="cdt.managedbuild.target.llvm.macosx.platform.base"/>
+							<builder buildPath="${workspace_loc:/NetRadiant}/Default" id="cdt.managedbuild.target.llvm.builder.base.1826435543" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="CDT Internal Builder" superClass="cdt.managedbuild.target.llvm.builder.base"/>
+							<tool id="cdt.managedbuild.tool.llvm.assembler.base.1540137577" name="LLVM assembler" superClass="cdt.managedbuild.tool.llvm.assembler.base"/>
+							<tool id="cdt.managedbuild.tool.llvm.archiver.base.726448752" name="LLVM archiver" superClass="cdt.managedbuild.tool.llvm.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.llvm.c.compiler.base.423406515" name="LLVM Clang" superClass="cdt.managedbuild.tool.llvm.c.compiler.base">
+								<option id="llvm.c_cpp.compiler.option.include.paths.1177478676" name="Include paths (-I)" superClass="llvm.c_cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/opt/local/include"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/glib-2.0"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/gtk-2.0"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.llvm.c.compiler.input.1702833029" superClass="cdt.managedbuild.tool.llvm.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.llvm.cpp.compiler.base.1130692273" name="LLVM Clang++" superClass="cdt.managedbuild.tool.llvm.cpp.compiler.base">
+								<option id="llvm.c_cpp.compiler.option.include.paths.1703680230" name="Include paths (-I)" superClass="llvm.c_cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/opt/local/include"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/gtk-2.0"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/glib-2.0"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NetRadiant/plugins}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NetRadiant/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NetRadiant/radiant}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.llvm.cpp.compiler.input.1553525897" superClass="cdt.managedbuild.tool.llvm.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.llvm.c.linker.base.391098519" name="LLVM Clang C linker" superClass="cdt.managedbuild.tool.llvm.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.llvm.cpp.linker.base.2079349783" name="LLVM Clang C++ linker" superClass="cdt.managedbuild.tool.llvm.cpp.linker.base">
+								<inputType id="cdt.managedbuild.tool.llvm.c.linker.input.1496404439" superClass="cdt.managedbuild.tool.llvm.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="NetRadiant.null.969150560" name="NetRadiant"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/NetRadiant"/>
+		</configuration>
+	</storageModule>
+</cproject>

@@ -50,6 +50,16 @@ bool operator()( const CopiedString& shader, const CopiedString& other ) const {
 }
 };
 
+static inline bool shader_is_diffuse( const char *shader ){
+	return !string_equal_suffix( shader, "_bump" )
+		   && !string_equal_suffix( shader, "_glow" )
+		   && !string_equal_suffix( shader, "_h" )
+		   && !string_equal_suffix( shader, "_local" )
+		   && !string_equal_suffix( shader, "_luma" )
+		   && !string_equal_suffix( shader, "_nm" )
+		   && !string_equal_suffix( shader, "_s" );
+}
+
 inline bool shader_valid( const char* shader ){
 	return string_is_ascii( shader )
 		   && strchr( shader, ' ' ) == 0
@@ -57,7 +67,8 @@ inline bool shader_valid( const char* shader ){
 		   && strchr( shader, '\r' ) == 0
 		   && strchr( shader, '\t' ) == 0
 		   && strchr( shader, '\v' ) == 0
-		   && strchr( shader, '\\' ) == 0;
+		   && strchr( shader, '\\' ) == 0
+		   && shader_is_diffuse( shader );
 }
 
 inline const char* GlobalTexturePrefix_get(){
