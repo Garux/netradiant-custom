@@ -41,6 +41,7 @@
 /* path support */
 #define MAX_BASE_PATHS  10
 #define MAX_GAME_PATHS  10
+#define MAX_PAK_PATHS  200
 
 char                    *homePath;
 char installPath[ MAX_OS_PATH ];
@@ -49,6 +50,8 @@ int numBasePaths;
 char                    *basePaths[ MAX_BASE_PATHS ];
 int numGamePaths;
 char                    *gamePaths[ MAX_GAME_PATHS ];
+int numPakPaths;
+char                    *pakPaths[ MAX_PAK_PATHS ];
 char                    *homeBasePath = NULL;
 
 
@@ -350,6 +353,24 @@ void AddGamePath( char *path ){
 }
 
 
+/*
+   AddPakPath()
+   adds a pak path to the list
+ */
+
+void AddPakPath( char *path ){
+	/* dummy check */
+	if ( path == NULL || path[ 0 ] == '\0' || numPakPaths >= MAX_PAK_PATHS ) {
+		return;
+	}
+
+	/* add it to the list */
+	pakPaths[ numPakPaths ] = safe_malloc( strlen( path ) + 1 );
+	strcpy( pakPaths[ numPakPaths ], path );
+	CleanPath( pakPaths[ numPakPaths ] );
+	numPakPaths++;
+}
+
 
 
 /*
@@ -459,6 +480,17 @@ void InitPaths( int *argc, char **argv ){
 			homeBasePath = ".";
 			argv[ i ] = NULL;
 		}
+
+		/* -fs_pakpath */
+		else if ( strcmp( argv[ i ], "-fs_pakpath" ) == 0 ) {
+			if ( ++i >= *argc ) {
+				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
+			}
+			argv[ i - 1 ] = NULL;
+			AddPakPath( argv[ i ] );
+			argv[ i ] = NULL;
+		}
+
 	}
 
 	/* remove processed arguments */
@@ -540,6 +572,18 @@ void InitPaths( int *argc, char **argv ){
 			sprintf( temp, "%s/%s/", basePaths[ i ], gamePaths[ j ] );
 			vfsInitDirectory( temp );
 		}
+	}
+
+	/* initialize vfs paths */
+	if ( numPakPaths > MAX_PAK_PATHS ) {
+		numPakPaths = MAX_PAK_PATHS;
+	}
+
+	/* walk the list of pak paths */
+	for ( i = 0; i < numPakPaths; i++ )
+	{
+		/* initialize this pak path */
+		vfsInitDirectory( pakPaths[ i ] );
 	}
 
 	/* done */
