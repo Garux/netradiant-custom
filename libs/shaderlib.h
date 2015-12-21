@@ -53,7 +53,7 @@ bool operator()( const CopiedString& shader, const CopiedString& other ) const {
 static inline bool shader_is_diffuse( const char *shader ){
 	return
 		/* Quetoo */
-		&& !string_equal_suffix( shader, "_h" )
+		!string_equal_suffix( shader, "_h" )
 		&& !string_equal_suffix( shader, "_local" )
 		&& !string_equal_suffix( shader, "_nm" )
 		&& !string_equal_suffix( shader, "_s" )
