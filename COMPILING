@@ -48,15 +48,21 @@ environment:
 - OS X 10.5 or 10.6
 - Xcode developer tools installed (OSX DVD)
 - X11 (from the OS X DVD)
-- MacPorts or fink installed
+- MacPorts or fink or homebrew installed
 - the following packages installed:
   Macports:
     gtkglext pkgconfig glib2-devel libxml2 gtk2 pango atk gettext wget
   Fink:
     gtkglext1 pkgconfig glib2-dev libxml2 gtk+2 gtk+2-dev pango1-xft2-ft219-dev atk1 gettext-dev wget
+  homebrew:
+    gtk+ gtkglext
 
 build:
 run 'make'
+
+homebrew build:
+run 'export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig
+make'
 
 run:
 Switch into the install folder, and run NetRadiant.app

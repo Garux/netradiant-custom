@@ -136,8 +136,8 @@ void gamedetect(){
 #endif
 			{ return; }
 
-			// try to detect Q2World installs
-			if ( gamedetect_check_game( "q2w.game", "default/quake2world.version", NULL, buf, p - buf ) ) {
+			// try to detect Quetoo installs
+			if ( gamedetect_check_game( "quetoo.game", "default/icons/quetoo.png", NULL, buf, p - buf ) ) {
 				return;
 			}
 
