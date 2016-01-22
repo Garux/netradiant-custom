@@ -20,6 +20,7 @@
 #include "dialogs-gtk.h"
 #include "../funchandlers.h"
 
+#include <cstdlib>
 #include "str.h"
 #include <list>
 #include <gtk/gtk.h>

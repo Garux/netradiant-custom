@@ -25,6 +25,7 @@
 
 #include "string/string.h"
 #include <list>
+#include <cstdlib>
 
 class Level;
 

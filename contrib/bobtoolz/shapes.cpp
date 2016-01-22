@@ -45,6 +45,8 @@
 #include "scenelib.h"
 #include "texturelib.h"
 
+#include <cstdlib>
+
 //#include "dialogs-gtk.h"
 
 /************************
@@ -58,10 +60,10 @@
        / |   / |
       /  |  /  |
     4 ----- 6  |
- |  2|_|___|8
- |  /  |   /
- | /   |  /       ----> WEST, definitely
- ||/    | /
+     |  2|_|___|8
+     |  /  |   /
+     | /   |  /       ----> WEST, definitely
+     |/    | /
     1|_____|/3
 
  */

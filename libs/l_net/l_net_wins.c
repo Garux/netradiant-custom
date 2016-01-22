@@ -31,7 +31,7 @@
 
 #include <windows.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string.h>
 #include "l_net.h"
 #include "l_net_wins.h"

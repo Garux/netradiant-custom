@@ -19,6 +19,7 @@
  */
 
 #include "sunplug.h"
+#include <cstdlib>
 
 #include "debugging/debugging.h"
 

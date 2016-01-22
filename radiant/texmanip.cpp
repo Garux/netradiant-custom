@@ -31,7 +31,7 @@
 
 #include "texmanip.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "stream/textstream.h"
 
 static byte *row1 = NULL, *row2 = NULL;

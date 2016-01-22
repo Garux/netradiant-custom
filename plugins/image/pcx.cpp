@@ -25,7 +25,7 @@
 
 typedef unsigned char byte;
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "imagelib.h"
 #include "bytestreamutils.h"

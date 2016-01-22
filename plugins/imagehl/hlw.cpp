@@ -29,7 +29,7 @@
 
 #include "hlw.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string.h>
 #include <stdio.h>
 

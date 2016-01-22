@@ -22,7 +22,7 @@
 //need to rewrite this
 
 #include "util_str.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>

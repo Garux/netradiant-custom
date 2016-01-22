@@ -23,7 +23,7 @@
 #define INCLUDED_ECLASSLIB_H
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <list>
 #include <map>
 #include <vector>

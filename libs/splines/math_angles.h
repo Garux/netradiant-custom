@@ -22,7 +22,7 @@
 #ifndef __MATH_ANGLES_H__
 #define __MATH_ANGLES_H__
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <assert.h>
 
 #include "math_vector.h"

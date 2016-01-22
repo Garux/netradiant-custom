@@ -23,7 +23,7 @@
 #define INCLUDED_GTKUTIL_ENTRY_H
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <gtk/gtkentry.h>
 
 inline void entry_set_string( GtkEntry* entry, const char* string ){

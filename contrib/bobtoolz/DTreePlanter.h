@@ -20,6 +20,7 @@
 #ifndef __DTREE_H__
 #define __DTREE_H__
 
+#include <cstdlib>
 #include "qerplugin.h"
 #include "signal/isignal.h"
 #include "string/string.h"

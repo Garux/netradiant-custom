@@ -210,3 +210,6 @@ target_link_libraries(radiant
     string
     xmllib
 )
+if(NOT WIN32)
+    target_link_libraries(radiant ${X11_LIBRARIES})
+endif()

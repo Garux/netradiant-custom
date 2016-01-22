@@ -42,7 +42,7 @@
 
 #include "file.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "str.h"
 

@@ -26,7 +26,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #if !defined( WIN32 )
 

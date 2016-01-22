@@ -21,7 +21,7 @@
 
 #include "dds.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "ifilesystem.h"
 #include "iarchive.h"

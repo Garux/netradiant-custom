@@ -24,7 +24,7 @@
 //
 
 #include "h2common.h"
-#include <stdlib.h>     // needed here for size_t
+#include <cstdlib>     // needed here for size_t
 
 typedef struct ResourceManager_s
 {

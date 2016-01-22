@@ -24,7 +24,7 @@
 #define REAL double
 #endif /* not SINGLE */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <stdio.h>
 #include <math.h>
 #include "gensurf.h"

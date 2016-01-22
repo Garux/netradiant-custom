@@ -20,7 +20,7 @@
 
 #include "prtview.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "profile/profile.h"
 

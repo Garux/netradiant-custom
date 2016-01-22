@@ -18,7 +18,7 @@
  */
 
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <stdio.h>
 #include "gensurf.h"
 

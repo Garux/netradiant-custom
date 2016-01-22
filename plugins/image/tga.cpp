@@ -27,7 +27,7 @@
 
 typedef unsigned char byte;
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "generic/bitfield.h"
 #include "imagelib.h"

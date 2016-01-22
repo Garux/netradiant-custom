@@ -62,7 +62,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <time.h>
 #include <ctype.h>
 #ifdef WIN32                // mac doesn't have malloc.h
@@ -227,11 +227,6 @@ typedef enum {
 
 #define MAX_QINT            0x7fffffff
 #define MIN_QINT            ( -MAX_QINT - 1 )
-
-#ifndef max
-#define max( x, y ) ( ( ( x ) > ( y ) ) ? ( x ) : ( y ) )
-#define min( x, y ) ( ( ( x ) < ( y ) ) ? ( x ) : ( y ) )
-#endif
 
 #ifndef sign
 #define sign( f )   ( ( f > 0 ) ? 1 : ( ( f < 0 ) ? -1 : 0 ) )

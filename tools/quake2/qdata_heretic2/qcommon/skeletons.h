@@ -19,7 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdlib.h> // for size_t
+#include <cstdlib> // for size_t
 #include "arrayedlist.h"
 
 #define JN_YAW_CHANGED      0x00000001

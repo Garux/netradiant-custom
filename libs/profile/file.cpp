@@ -38,7 +38,7 @@
 #include "file.h"
 
 #include <memory.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string.h>
 #include <stdarg.h>
 

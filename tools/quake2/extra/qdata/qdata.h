@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // qdata.h
 
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>

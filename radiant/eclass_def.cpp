@@ -66,7 +66,7 @@ StaticRegisterModule staticRegisterEclassDef( StaticEclassDefModule::instance() 
 
 #include "string/string.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 
 char com_token[1024];

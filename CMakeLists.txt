@@ -68,6 +68,8 @@ if(NOT WIN32)
         -DPOSIX=1
         -DXWINDOWS=1
     )
+    find_package(X11 REQUIRED)
+    include_directories(${X11_INCLUDE_DIR})
 else()
     add_definitions(
         -D_WIN32

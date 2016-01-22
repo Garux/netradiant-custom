@@ -25,7 +25,7 @@
 #include "debugging/debugging.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string.h>
 
 #if defined( _WIN32 )
@@ -55,7 +55,6 @@ PROC ( WINAPI * qwglGetProcAddress )( LPCSTR );
 
 #include <GL/glx.h>
 #include <dlfcn.h>
-#include <gdk/gdkx.h>
 
 Bool ( *qglXQueryExtension )( Display *dpy, int *errorb, int *event );
 void*        ( *qglXGetProcAddressARB )( const GLubyte * procName );
@@ -537,7 +536,7 @@ int QGL_Init( OpenGLBinding& table ){
 	qwglGetProcAddress           = wglGetProcAddress;
 #elif defined( XWINDOWS )
 	qglXGetProcAddressARB = (glXGetProcAddressARBProc)dlsym( RTLD_DEFAULT, "glXGetProcAddressARB" );
-	if ( ( qglXQueryExtension == 0 ) || ( qglXQueryExtension( GDK_DISPLAY(),0,0 ) != True ) ) {
+	if ( ( qglXQueryExtension == 0 ) || ( qglXQueryExtension(XOpenDisplay(nullptr), 0, 0) != True ) ) {
 		return 0;
 	}
 #else

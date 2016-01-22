@@ -37,7 +37,7 @@
 #include "jpeg.h"
 
 #include <setjmp.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <stdio.h>
 #include <string.h>
 

@@ -28,7 +28,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "mathlib.h"
 #include "DMap.h"
 class DBrush;

@@ -22,7 +22,7 @@
 #if !defined ( INCLUDED_STRINGIO_H )
 #define INCLUDED_STRINGIO_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cctype>
 
 #include "generic/vector.h"

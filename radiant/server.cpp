@@ -22,10 +22,9 @@
 #include "server.h"
 
 #include "debugging/debugging.h"
-#include "warnings.h"
 
-#include <vector>
 #include <map>
+#include <vector>
 #include "os/path.h"
 
 #include "modulesystem.h"
@@ -151,7 +150,12 @@ public:
 typedef int ( *FunctionPointer )();
 
 DynamicLibrary( const char* filename ){
-	m_library = dlopen( filename, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND );
+	m_library = dlopen(filename, RTLD_LOCAL
+								 | RTLD_NOW
+								 #ifndef __APPLE__
+								 | RTLD_DEEPBIND
+                                 #endif
+	);
 	if ( !m_library )
 	{
 		globalErrorStream() << "LoadLibrary failed: '" << filename << "'\n";

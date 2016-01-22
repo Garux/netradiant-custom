@@ -36,7 +36,7 @@
 
 #include "light.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "cullable.h"
 #include "renderable.h"

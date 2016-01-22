@@ -35,7 +35,7 @@
 	#include <windows.h>
 #endif
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "cmdlib.h"
 #include "mathlib.h"

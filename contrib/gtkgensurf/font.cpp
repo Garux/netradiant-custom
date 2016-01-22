@@ -26,7 +26,7 @@
 // Leonardo Zide (leo@lokigames.com)
 //
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "gensurf.h"
 
 static const unsigned char data[2048] = {

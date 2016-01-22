@@ -22,6 +22,7 @@
 #if !defined( INCLUDED_UNIQUENAMES_H )
 #define INCLUDED_UNIQUENAMES_H
 
+#include <cstdlib>
 #include "debugging/debugging.h"
 #include <map>
 #include "string/string.h"

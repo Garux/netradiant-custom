@@ -19,7 +19,7 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include "gensurf.h"
 
 #undef ISOMETRIC

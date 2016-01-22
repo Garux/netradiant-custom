@@ -8,6 +8,7 @@
 #include "bsploader.h"
 
 #include <list>
+#include <cstdlib>
 
 typedef struct {
 	int portalclusters;
@@ -209,7 +210,7 @@ std::list<DWinding*> *CreateTrace( dleaf_t *leaf, int c, vis_header *header, byt
 		}
 	}
 
-	delete repeatlist;
+	delete[] repeatlist;
 
 	return pointlist;
 }

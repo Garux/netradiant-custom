@@ -25,7 +25,7 @@
 #include "iarchive.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 
 #include "stream/filestream.h"

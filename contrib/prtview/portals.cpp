@@ -19,7 +19,7 @@
 
 #include "portals.h"
 #include <string.h>
-#include <stdlib.h>
+#include <cstdlib>
 #ifndef __APPLE__
 #include <search.h>
 #endif

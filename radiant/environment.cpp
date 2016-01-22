@@ -181,7 +181,7 @@ bool portable_app_setup(){
 
 #if defined( POSIX )
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <pwd.h>
 #include <unistd.h>
 

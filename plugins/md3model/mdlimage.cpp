@@ -22,7 +22,7 @@
 #include "mdlimage.h"
 
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "ifilesystem.h"
 #include "bytestreamutils.h"

@@ -25,7 +25,7 @@
 #define AFX_DPATCH_H__26C6B083_CE5B_420B_836B_1DDA733C04CE__INCLUDED_
 
 #include <list>
-#include <stdlib.h>
+#include <cstdlib>
 
 typedef struct
 {
