@@ -200,6 +200,8 @@ void HomePaths_Realise(){
 				g_qeglobals.m_userEnginePath = path.c_str();
 				break;
 			}
+			path.clear();
+			path << DirectoryCleaned( g_get_home_dir() ) << prefix << "/";
 #endif
 
 #if defined( WIN32 )
@@ -2271,55 +2273,55 @@ void register_shortcuts(){
 }
 
 void File_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "Open an existing map (CTRL + O)", "file_open.bmp", "OpenMap" );
-	toolbar_append_button( toolbar, "Save the active map (CTRL + S)", "file_save.bmp", "SaveMap" );
+	toolbar_append_button( toolbar, "Open an existing map (CTRL + O)", "file_open.png", "OpenMap" );
+	toolbar_append_button( toolbar, "Save the active map (CTRL + S)", "file_save.png", "SaveMap" );
 }
 
 void UndoRedo_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "Undo (CTRL + Z)", "undo.bmp", "Undo" );
-	toolbar_append_button( toolbar, "Redo (CTRL + Y)", "redo.bmp", "Redo" );
+	toolbar_append_button( toolbar, "Undo (CTRL + Z)", "undo.png", "Undo" );
+	toolbar_append_button( toolbar, "Redo (CTRL + Y)", "redo.png", "Redo" );
 }
 
 void RotateFlip_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "x-axis Flip", "brush_flipx.bmp", "MirrorSelectionX" );
-	toolbar_append_button( toolbar, "x-axis Rotate", "brush_rotatex.bmp", "RotateSelectionX" );
-	toolbar_append_button( toolbar, "y-axis Flip", "brush_flipy.bmp", "MirrorSelectionY" );
-	toolbar_append_button( toolbar, "y-axis Rotate", "brush_rotatey.bmp", "RotateSelectionY" );
-	toolbar_append_button( toolbar, "z-axis Flip", "brush_flipz.bmp", "MirrorSelectionZ" );
-	toolbar_append_button( toolbar, "z-axis Rotate", "brush_rotatez.bmp", "RotateSelectionZ" );
+	toolbar_append_button( toolbar, "x-axis Flip", "brush_flipx.png", "MirrorSelectionX" );
+	toolbar_append_button( toolbar, "x-axis Rotate", "brush_rotatex.png", "RotateSelectionX" );
+	toolbar_append_button( toolbar, "y-axis Flip", "brush_flipy.png", "MirrorSelectionY" );
+	toolbar_append_button( toolbar, "y-axis Rotate", "brush_rotatey.png", "RotateSelectionY" );
+	toolbar_append_button( toolbar, "z-axis Flip", "brush_flipz.png", "MirrorSelectionZ" );
+	toolbar_append_button( toolbar, "z-axis Rotate", "brush_rotatez.png", "RotateSelectionZ" );
 }
 
 void Select_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "Select touching", "selection_selecttouching.bmp", "SelectTouching" );
-	toolbar_append_button( toolbar, "Select inside", "selection_selectinside.bmp", "SelectInside" );
+	toolbar_append_button( toolbar, "Select touching", "selection_selecttouching.png", "SelectTouching" );
+	toolbar_append_button( toolbar, "Select inside", "selection_selectinside.png", "SelectInside" );
 }
 
 void CSG_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "CSG Subtract (SHIFT + U)", "selection_csgsubtract.bmp", "CSGSubtract" );
-	toolbar_append_button( toolbar, "CSG Merge (CTRL + U)", "selection_csgmerge.bmp", "CSGMerge" );
-	toolbar_append_button( toolbar, "Hollow", "selection_makehollow.bmp", "CSGHollow" );
+	toolbar_append_button( toolbar, "CSG Subtract (SHIFT + U)", "selection_csgsubtract.png", "CSGSubtract" );
+	toolbar_append_button( toolbar, "CSG Merge (CTRL + U)", "selection_csgmerge.png", "CSGMerge" );
+	toolbar_append_button( toolbar, "Hollow", "selection_makehollow.png", "CSGHollow" );
 }
 
 void ComponentModes_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_toggle_button( toolbar, "Select Vertices (V)", "modify_vertices.bmp", "DragVertices" );
-	toolbar_append_toggle_button( toolbar, "Select Edges (E)", "modify_edges.bmp", "DragEdges" );
-	toolbar_append_toggle_button( toolbar, "Select Faces (F)", "modify_faces.bmp", "DragFaces" );
+	toolbar_append_toggle_button( toolbar, "Select Vertices (V)", "modify_vertices.png", "DragVertices" );
+	toolbar_append_toggle_button( toolbar, "Select Edges (E)", "modify_edges.png", "DragEdges" );
+	toolbar_append_toggle_button( toolbar, "Select Faces (F)", "modify_faces.png", "DragFaces" );
 }
 
 void Clipper_constructToolbar( GtkToolbar* toolbar ){
 
-	toolbar_append_toggle_button( toolbar, "Clipper (X)", "view_clipper.bmp", "ToggleClipper" );
+	toolbar_append_toggle_button( toolbar, "Clipper (X)", "view_clipper.png", "ToggleClipper" );
 }
 
 void XYWnd_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "Change views", "view_change.bmp", "NextView" );
+	toolbar_append_button( toolbar, "Change views", "view_change.png", "NextView" );
 }
 
 void Manipulators_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_toggle_button( toolbar, "Translate (W)", "select_mousetranslate.bmp", "MouseTranslate" );
-	toolbar_append_toggle_button( toolbar, "Rotate (R)", "select_mouserotate.bmp", "MouseRotate" );
-	toolbar_append_toggle_button( toolbar, "Scale", "select_mousescale.bmp", "MouseScale" );
-	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.bmp", "MouseDrag" );
+	toolbar_append_toggle_button( toolbar, "Translate (W)", "select_mousetranslate.png", "MouseTranslate" );
+	toolbar_append_toggle_button( toolbar, "Rotate (R)", "select_mouserotate.png", "MouseRotate" );
+	toolbar_append_toggle_button( toolbar, "Scale", "select_mousescale.png", "MouseScale" );
+	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.png", "MouseDrag" );
 
 	Clipper_constructToolbar( toolbar );
 }
@@ -2375,18 +2377,18 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 
 	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
 
-	toolbar_append_toggle_button( toolbar, "Texture Lock (SHIFT +T)", "texture_lock.bmp", "TogTexLock" );
+	toolbar_append_toggle_button( toolbar, "Texture Lock (SHIFT +T)", "texture_lock.png", "TogTexLock" );
 
 	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
 
-	/*GtkButton* g_view_entities_button =*/ toolbar_append_button( toolbar, "Entities (N)", "entities.bmp", "ToggleEntityInspector" );
-	GtkButton* g_view_console_button = toolbar_append_button( toolbar, "Console (O)", "console.bmp", "ToggleConsole" );
-	GtkButton* g_view_textures_button = toolbar_append_button( toolbar, "Texture Browser (T)", "texture_browser.bmp", "ToggleTextures" );
+	/*GtkButton* g_view_entities_button =*/ toolbar_append_button( toolbar, "Entities (N)", "entities.png", "ToggleEntityInspector" );
+	GtkButton* g_view_console_button = toolbar_append_button( toolbar, "Console (O)", "console.png", "ToggleConsole" );
+	GtkButton* g_view_textures_button = toolbar_append_button( toolbar, "Texture Browser (T)", "texture_browser.png", "ToggleTextures" );
 	// TODO: call light inspector
-	//GtkButton* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.bmp", "ToggleLightInspector");
+	//GtkButton* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector");
 
 	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
-	/*GtkButton* g_refresh_models_button =*/ toolbar_append_button( toolbar, "Refresh Models", "refresh_models.bmp", "RefreshReferences" );
+	/*GtkButton* g_refresh_models_button =*/ toolbar_append_button( toolbar, "Refresh Models", "refresh_models.png", "RefreshReferences" );
 
 
 	// disable the console and texture button in the regular layouts
@@ -2678,7 +2680,7 @@ GtkWindow* create_splash(){
 	gtk_window_set_position( window, GTK_WIN_POS_CENTER );
 	gtk_container_set_border_width( GTK_CONTAINER( window ), 0 );
 
-	GtkImage* image = new_local_image( "splash.bmp" );
+	GtkImage* image = new_local_image( "splash.png" );
 	gtk_widget_show( GTK_WIDGET( image ) );
 	gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( image ) );
 
@@ -2722,7 +2724,7 @@ void MainFrame::Create(){
 
 #if !defined( WIN32 )
 	{
-		GdkPixbuf* pixbuf = pixbuf_new_from_file_with_mask( "bitmaps/icon.bmp" );
+		GdkPixbuf* pixbuf = pixbuf_new_from_file_with_mask( "bitmaps/icon.png" );
 		if ( pixbuf != 0 ) {
 			gtk_window_set_icon( window, pixbuf );
 			gdk_pixbuf_unref( pixbuf );
@@ -3138,7 +3140,7 @@ void GlobalGL_sharedContextDestroyed(){
 
 void Layout_constructPreferences( PreferencesPage& page ){
 	{
-		const char* layouts[] = { "window1.bmp", "window2.bmp", "window3.bmp", "window4.bmp" };
+		const char* layouts[] = { "window1.png", "window2.png", "window3.png", "window4.png" };
 		page.appendRadioIcons(
 			"Window Layout",
 			STRING_ARRAY_RANGE( layouts ),
@@ -3324,10 +3326,10 @@ void MainFrame_Construct(){
 		const char* ENGINEPATH_ATTRIBUTE =
 #if defined( WIN32 )
 			"enginepath_win32"
-#elif defined( __linux__ ) || defined ( __FreeBSD__ )
-			"enginepath_linux"
 #elif defined( __APPLE__ )
 			"enginepath_macos"
+#elif defined( __linux__ ) || defined ( __FreeBSD__ )
+			"enginepath_linux"
 #else
 #error "unknown platform"
 #endif

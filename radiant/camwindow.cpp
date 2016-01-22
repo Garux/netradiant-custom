@@ -1662,7 +1662,7 @@ void Camera_ToggleFarClip(){
 
 
 void CamWnd_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_toggle_button( toolbar, "Cubic clip the camera view (\\)", "view_cubicclipping.bmp", "ToggleCubicClip" );
+	toolbar_append_toggle_button( toolbar, "Cubic clip the camera view (\\)", "view_cubicclipping.png", "ToggleCubicClip" );
 }
 
 void CamWnd_registerShortcuts(){

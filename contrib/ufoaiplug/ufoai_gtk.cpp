@@ -88,18 +88,18 @@ public:
 virtual const char* getImage() const {
 	switch ( mIndex )
 	{
-	case 0: return "ufoai_level1.bmp";
-	case 1: return "ufoai_level2.bmp";
-	case 2: return "ufoai_level3.bmp";
-	case 3: return "ufoai_level4.bmp";
-	case 4: return "ufoai_level5.bmp";
-	case 5: return "ufoai_level6.bmp";
-	case 6: return "ufoai_level7.bmp";
-	case 7: return "ufoai_level8.bmp";
-	case 8: return "ufoai_stepon.bmp";
-	case 9: return "ufoai_actorclip.bmp";
-	case 10: return "ufoai_weaponclip.bmp";
-	case 11: return "ufoai_nodraw.bmp";
+	case 0: return "ufoai_level1.png";
+	case 1: return "ufoai_level2.png";
+	case 2: return "ufoai_level3.png";
+	case 3: return "ufoai_level4.png";
+	case 4: return "ufoai_level5.png";
+	case 5: return "ufoai_level6.png";
+	case 6: return "ufoai_level7.png";
+	case 7: return "ufoai_level8.png";
+	case 8: return "ufoai_stepon.png";
+	case 9: return "ufoai_actorclip.png";
+	case 10: return "ufoai_weaponclip.png";
+	case 11: return "ufoai_nodraw.png";
 	}
 	return NULL;
 }
