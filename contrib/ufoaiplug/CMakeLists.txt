@@ -9,3 +9,5 @@ radiant_plugin(ufoaiplug
     ufoai_level.cpp
     ufoai_level.h
 )
+
+target_link_libraries(ufoaiplug ${GTK2_LIBRARIES})

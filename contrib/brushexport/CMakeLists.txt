@@ -10,3 +10,5 @@ radiant_plugin(brushexport
     support.cpp
     support.h
 )
+
+target_link_libraries(brushexport ${GTK2_LIBRARIES})

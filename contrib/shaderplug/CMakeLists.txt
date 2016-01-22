@@ -4,4 +4,4 @@ radiant_plugin(shaderplug
     shaderplug.h
 )
 
-target_link_libraries(shaderplug xmllib)
+target_link_libraries(shaderplug xmllib ${GTK2_LIBRARIES})

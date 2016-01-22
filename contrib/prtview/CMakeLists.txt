@@ -12,4 +12,4 @@ radiant_plugin(prtview
     prtview.h
 )
 
-target_link_libraries(prtview profile)
+target_link_libraries(prtview profile ${GTK2_LIBRARIES})

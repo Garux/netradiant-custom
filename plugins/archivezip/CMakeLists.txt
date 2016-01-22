@@ -9,3 +9,8 @@ radiant_plugin(archivezip
     zlibstream.cpp
     zlibstream.h
 )
+
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
+
+target_link_libraries(archivezip ${ZLIB_LIBRARIES})

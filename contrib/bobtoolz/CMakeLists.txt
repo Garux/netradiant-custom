@@ -77,4 +77,4 @@ radiant_plugin(bobtoolz
     visfind.h
 )
 
-target_link_libraries(bobtoolz cmdlib mathlib profile)
+target_link_libraries(bobtoolz cmdlib mathlib profile ${GLIB_LIBRARIES} ${GTK2_LIBRARIES})
