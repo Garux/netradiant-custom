@@ -194,6 +194,7 @@ void HelpLight()
 		{"-extravisnudge", "Broken feature to nudge the luxel origin to a better vis cluster"},
 		{"-extrawide", "Deprecated alias for `-super 2 -filter`"},
 		{"-extra", "Deprecated alias for `-super 2`"},
+		{"-fastallocate", "Use `-fastallocate` to trade lightmap size against allocation time (useful with hi res lightmaps on large maps: reduce allocation time from days to minutes for only some extra bytes)"},
 		{"-fastbounce", "Use `-fast` style lighting for radiosity"},
 		{"-faster", "Use a faster falloff curve for lighting; also implies `-fast`"},
 		{"-fastgrid", "Use `-fast` style lighting for the light grid"},

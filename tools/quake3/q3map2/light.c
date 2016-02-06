@@ -1890,7 +1890,7 @@ void SetupGrid( void ){
    does what it says...
  */
 
-void LightWorld( const char *BSPFilePath ){
+void LightWorld( const char *BSPFilePath, qboolean fastAllocate ){
 	vec3_t color;
 	float f;
 	int b, bt;
@@ -2033,7 +2033,7 @@ void LightWorld( const char *BSPFilePath ){
 	while ( bounce > 0 )
 	{
 		/* store off the bsp between bounces */
-		StoreSurfaceLightmaps();
+		StoreSurfaceLightmaps( fastAllocate );
 		UnparseEntities();
 		Sys_Printf( "Writing %s\n", BSPFilePath );
 		WriteBSPFile( BSPFilePath );
@@ -2116,6 +2116,7 @@ int LightMain( int argc, char **argv ){
 	const char  *value;
 	int lightmapMergeSize = 0;
 	qboolean lightSamplesInsist = qfalse;
+	qboolean fastAllocate = qfalse;
 
 
 	/* note it */
@@ -2636,6 +2637,11 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Faster mode enabled\n" );
 		}
 
+		else if ( !strcmp( argv[ i ], "-fastallocate" ) ) {
+			fastAllocate = qtrue;
+			Sys_Printf( "Fast allocation mode enabled\n" );
+		}
+
 		else if ( !strcmp( argv[ i ], "-fastgrid" ) ) {
 			fastgrid = qtrue;
 			Sys_Printf( "Fast grid lighting enabled\n" );
@@ -2984,10 +2990,10 @@ int LightMain( int argc, char **argv ){
 	SetupTraceNodes();
 
 	/* light the world */
-	LightWorld( BSPFilePath );
+	LightWorld( BSPFilePath, fastAllocate );
 
 	/* ydnar: store off lightmaps */
-	StoreSurfaceLightmaps();
+	StoreSurfaceLightmaps( fastAllocate );
 
 	/* write out the bsp */
 	UnparseEntities();
