@@ -103,6 +103,9 @@ namespace ui {
     Label::Label(const char *label) : Label(GTK_LABEL(gtk_label_new(label)))
     { }
 
+    Menu::Menu() : Menu(GTK_MENU(gtk_menu_new()))
+    { }
+
     MenuItem::MenuItem(const char *label, bool mnemonic) : MenuItem(GTK_MENU_ITEM((mnemonic ? gtk_menu_item_new_with_mnemonic : gtk_menu_item_new_with_label)(label)))
     { }
 

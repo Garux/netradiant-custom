@@ -60,7 +60,7 @@ GtkMenuItem* new_sub_menu_item_with_mnemonic( const char* mnemonic ){
 	GtkMenuItem* item = ui::MenuItem( mnemonic, true );
 	gtk_widget_show( GTK_WIDGET( item ) );
 
-	GtkWidget* sub_menu = gtk_menu_new();
+	GtkWidget* sub_menu = ui::Menu();
 	gtk_menu_item_set_submenu( item, sub_menu );
 
 	return item;

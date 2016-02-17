@@ -114,7 +114,7 @@ bool C2DView::OnRButtonUp( int x, int y ){
 		if ( m_bPopup ) {
 			GtkWidget *menu, *item;
 
-			menu = gtk_menu_new();
+			menu = ui::Menu();
 
 			item = ui::MenuItem( "Validate (RETURN)" );
 			gtk_signal_connect( GTK_OBJECT( item ), "activate", GTK_SIGNAL_FUNC( Textool_Validate ), NULL );

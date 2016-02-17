@@ -10,6 +10,7 @@ using ui_checkbutton = struct _GtkCheckButton;
 using ui_evkey = struct _GdkEventKey;
 using ui_hbox = struct _GtkHBox;
 using ui_label = struct _GtkLabel;
+using ui_menu = struct _GtkMenu;
 using ui_menuitem = struct _GtkMenuItem;
 using ui_modal = struct ModalDialog;
 using ui_scrolledwindow = struct _GtkScrolledWindow;
@@ -126,6 +127,10 @@ namespace ui {
 
     WRAP(Label, Widget, ui_label,
          Label(const char *label);
+    );
+
+    WRAP(Menu, Widget, ui_menu,
+         Menu();
     );
 
     WRAP(MenuItem, Widget, ui_menuitem,

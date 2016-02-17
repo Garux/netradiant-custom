@@ -337,7 +337,7 @@ void DoConfigDialog(){
 	gtk_widget_show( zlist );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), zlist, TRUE, FALSE, 0 );
 
-	menu = gtk_menu_new();
+	menu = ui::Menu();
 	gtk_widget_show( menu );
 	gtk_option_menu_set_menu( GTK_OPTION_MENU( zlist ), menu );
 
