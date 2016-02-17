@@ -1949,7 +1949,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 
 	g_TextureBrowser.m_parent = toplevel;
 
-	ui::Widget table = ui::Widget(gtk_table_new( 3, 3, FALSE ));
+	ui::Widget table = ui::Table( 3, 3, FALSE );
 	ui::Widget frame_table;
 	ui::Widget vbox = ui::VBox( FALSE, 0 );
 	gtk_table_attach( GTK_TABLE( table ), vbox, 0, 1, 1, 3, GTK_FILL, GTK_FILL, 0, 0 );
@@ -2056,7 +2056,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			gtk_box_pack_end( GTK_BOX( vbox ), g_TextureBrowser.m_search_button, FALSE, FALSE, 0 );
 		}
 		{ // Tag frame
-			frame_table = ui::Widget(gtk_table_new( 3, 3, FALSE ));
+			frame_table = ui::Table( 3, 3, FALSE );
 
 			g_TextureBrowser.m_tag_frame = ui::Widget(gtk_frame_new( "Tag assignment" ));
 			gtk_frame_set_label_align( GTK_FRAME( g_TextureBrowser.m_tag_frame ), 0.5, 0.5 );

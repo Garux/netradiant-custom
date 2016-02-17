@@ -559,7 +559,7 @@ void Dialog::addRadio( ui::Widget vbox, const char* name, int& data, StringArray
 }
 
 void Dialog::addRadioIcons( ui::Widget vbox, const char* name, StringArrayRange icons, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	ui::Widget table = ui::Widget(gtk_table_new( 2, static_cast<guint>( icons.last - icons.first ), FALSE ));
+	ui::Widget table = ui::Table( 2, icons.last - icons.first, FALSE );
 	gtk_widget_show( table );
 
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );

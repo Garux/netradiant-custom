@@ -1352,7 +1352,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 3, TRUE );
+	table = ui::Table( 2, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1400,7 +1400,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 3, TRUE );
+	table = ui::Table( 2, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1456,7 +1456,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 3, TRUE );
+	table = ui::Table( 2, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1512,7 +1512,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 1, 3, TRUE );
+	table = ui::Table( 1, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1678,7 +1678,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 3, TRUE );
+	table = ui::Table( 2, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1721,7 +1721,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 3, TRUE );
+	table = ui::Table( 2, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1763,7 +1763,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 3, TRUE );
+	table = ui::Table( 2, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1806,7 +1806,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 3, TRUE );
+	table = ui::Table( 2, 3, TRUE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );

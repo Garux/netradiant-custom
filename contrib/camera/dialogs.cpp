@@ -1010,7 +1010,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	// the table
 	// -------------------------- //
 
-	table = gtk_table_new( 3, 2, FALSE );
+	table = ui::Table( 3, 2, FALSE );
 	gtk_widget_show( table );
 	gtk_container_add( GTK_CONTAINER( window ), table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );

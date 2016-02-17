@@ -285,7 +285,7 @@ void DoConfigDialog(){
 	gtk_box_pack_start( GTK_BOX( hbox ), lw3label, FALSE, TRUE, 0 );
 	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScroll3d ), lw3label );
 
-	table = gtk_table_new( 2, 4, FALSE );
+	table = ui::Table( 2, 4, FALSE );
 	gtk_widget_show( table );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), table, TRUE, TRUE, 0 );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -359,7 +359,7 @@ void DoConfigDialog(){
 						GTK_SIGNAL_FUNC( OnSelchangeZbuffer ), GINT_TO_POINTER( 2 ) );
 	gtk_menu_append( GTK_MENU( menu ), item );
 
-	table = gtk_table_new( 2, 2, FALSE );
+	table = ui::Table( 2, 2, FALSE );
 	gtk_widget_show( table );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), table, TRUE, TRUE, 0 );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );

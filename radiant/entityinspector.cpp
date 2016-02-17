@@ -1395,7 +1395,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 
 				{
 					// Spawnflags (4 colums wide max, or window gets too wide.)
-					GtkTable* table = GTK_TABLE( gtk_table_new( 4, 4, FALSE ) );
+					GtkTable* table = ui::Table( 4, 4, FALSE );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( table ), FALSE, TRUE, 0 );
 					gtk_widget_show( GTK_WIDGET( table ) );
 
@@ -1454,7 +1454,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 
 				{
 					// key/value entry
-					GtkTable* table = GTK_TABLE( gtk_table_new( 2, 2, FALSE ) );
+					GtkTable* table = ui::Table( 2, 2, FALSE );
 					gtk_widget_show( GTK_WIDGET( table ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( table ), FALSE, TRUE, 0 );
 					gtk_table_set_row_spacings( table, 3 );

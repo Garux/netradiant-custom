@@ -152,7 +152,7 @@ ui::Window FindTextureDialog::BuildDialog(){
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
 
-	table = ui::Widget(gtk_table_new( 2, 2, FALSE ));
+	table = ui::Table( 2, 2, FALSE );
 	gtk_widget_show( table );
 	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );

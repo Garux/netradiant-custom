@@ -378,7 +378,7 @@ void MapCoordinator(){
 
 		gtk_box_pack_start( GTK_BOX( vbox ), gtk_hseparator_new(), FALSE, FALSE, 2 ); // insert separator into vbox
 
-		table = gtk_table_new( 4, 3, TRUE ); // create table
+		table = ui::Table( 4, 3, TRUE ); // create table
 		gtk_table_set_row_spacings( GTK_TABLE( table ), 8 ); // set row spacings
 		gtk_table_set_col_spacings( GTK_TABLE( table ), 8 ); // set column spacings
 		gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, FALSE, 2 ); // insert table into vbox

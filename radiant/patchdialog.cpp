@@ -596,7 +596,7 @@ ui::Window PatchInspector::BuildDialog(){
 						gtk_widget_show( GTK_WIDGET( vbox3 ) );
 						gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
 						{
-							GtkTable* table = GTK_TABLE( gtk_table_new( 2, 2, FALSE ) );
+							GtkTable* table = ui::Table( 2, 2, FALSE );
 							gtk_widget_show( GTK_WIDGET( table ) );
 							gtk_box_pack_start( GTK_BOX( vbox3 ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 							gtk_table_set_row_spacings( table, 5 );
@@ -641,7 +641,7 @@ ui::Window PatchInspector::BuildDialog(){
 								m_pColCombo = combo;
 							}
 						}
-						GtkTable* table = GTK_TABLE( gtk_table_new( 5, 2, FALSE ) );
+						GtkTable* table = ui::Table( 5, 2, FALSE );
 						gtk_widget_show( GTK_WIDGET( table ) );
 						gtk_box_pack_start( GTK_BOX( vbox3 ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 						gtk_table_set_row_spacings( table, 5 );
@@ -743,7 +743,7 @@ ui::Window PatchInspector::BuildDialog(){
 						gtk_widget_show( GTK_WIDGET( vbox3 ) );
 						gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
 						{
-							GtkTable* table = GTK_TABLE( gtk_table_new( 3, 2, FALSE ) );
+							GtkTable* table = ui::Table( 3, 2, FALSE );
 							gtk_widget_show( GTK_WIDGET( table ) );
 							gtk_box_pack_start( GTK_BOX( vbox3 ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 							gtk_table_set_row_spacings( table, 5 );
@@ -827,7 +827,7 @@ ui::Window PatchInspector::BuildDialog(){
 						g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( OnDialogKey ), 0 );
 					}
 					{
-						GtkTable* table = GTK_TABLE( gtk_table_new( 5, 4, FALSE ) );
+						GtkTable* table = ui::Table( 5, 4, FALSE );
 						gtk_widget_show( GTK_WIDGET( table ) );
 						gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 						gtk_table_set_row_spacings( table, 5 );

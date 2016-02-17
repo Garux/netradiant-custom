@@ -57,7 +57,7 @@ GtkFrame* create_dialog_frame( const char* label, GtkShadowType shadow ){
 }
 
 GtkTable* create_dialog_table( unsigned int rows, unsigned int columns, unsigned int row_spacing, unsigned int col_spacing, int border ){
-	GtkTable* table = GTK_TABLE( gtk_table_new( rows, columns, FALSE ) );
+	GtkTable* table = ui::Table( rows, columns, FALSE );
 	gtk_widget_show( GTK_WIDGET( table ) );
 	gtk_table_set_row_spacings( table, row_spacing );
 	gtk_table_set_col_spacings( table, col_spacing );
@@ -254,7 +254,7 @@ GtkLabel* DialogLabel_new( const char* name ){
 }
 
 GtkTable* DialogRow_new( const char* name, GtkWidget* widget ){
-	GtkTable* table = GTK_TABLE( gtk_table_new( 1, 3, TRUE ) );
+	GtkTable* table = ui::Table( 1, 3, TRUE );
 	gtk_widget_show( GTK_WIDGET( table ) );
 
 	gtk_table_set_col_spacings( table, 4 );

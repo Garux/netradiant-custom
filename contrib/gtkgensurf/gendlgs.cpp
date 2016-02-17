@@ -1374,7 +1374,7 @@ GtkWidget* create_main_dialog(){
 	gtk_notebook_set_tab_pos( GTK_NOTEBOOK( notebook ), GTK_POS_TOP );
 	g_object_set_data( G_OBJECT( dlg ), "notebook", notebook );
 
-	table = gtk_table_new( 2, 2, FALSE );
+	table = ui::Table( 2, 2, FALSE );
 	gtk_widget_show( table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -1447,7 +1447,7 @@ GtkWidget* create_main_dialog(){
 		g_signal_connect( G_OBJECT( radio ), "toggled", G_CALLBACK( general_plane ), GINT_TO_POINTER( i ) );
 	}
 
-	table2 = gtk_table_new( 4, 2, FALSE );
+	table2 = ui::Table( 4, 2, FALSE );
 	gtk_widget_show( table2 );
 	gtk_table_set_row_spacings( GTK_TABLE( table2 ), 5 );
 	gtk_table_set_col_spacings( GTK_TABLE( table2 ), 5 );
@@ -1540,7 +1540,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), frame, TRUE, TRUE, 0 );
 
-	table = gtk_table_new( 3, 4, FALSE );
+	table = ui::Table( 3, 4, FALSE );
 	gtk_widget_show( table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
@@ -1627,7 +1627,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), frame, TRUE, TRUE, 0 );
 
-	table = gtk_table_new( 2, 2, FALSE );
+	table = ui::Table( 2, 2, FALSE );
 	gtk_widget_show( table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
@@ -1711,7 +1711,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 3, 4, FALSE );
+	table = ui::Table( 3, 4, FALSE );
 	gtk_widget_show( table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 	gtk_container_add( GTK_CONTAINER( frame ), table );
@@ -1799,7 +1799,7 @@ GtkWidget* create_main_dialog(){
 	gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "bmp_note", label );
 
-	table = gtk_table_new( 2, 2, FALSE );
+	table = ui::Table( 2, 2, FALSE );
 	gtk_widget_show( table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 	gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, TRUE, 0 );
@@ -1841,7 +1841,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "bmp_reload", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( bitmap_reload ), NULL );
 
-	table = gtk_table_new( 2, 2, TRUE );
+	table = ui::Table( 2, 2, TRUE );
 	gtk_widget_show( table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 	gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, TRUE, 0 );
@@ -1909,7 +1909,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, TRUE, 0 );
 
-	table = gtk_table_new( 3, 3, FALSE );
+	table = ui::Table( 3, 3, FALSE );
 	gtk_widget_show( table );
 	gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 	gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, TRUE, 0 );
@@ -1996,7 +1996,7 @@ GtkWidget* create_main_dialog(){
 	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox, label );
 
 	// ^Fishman - Modified to add more labels and textboxes.
-	table = gtk_table_new( 5, 2, FALSE );
+	table = ui::Table( 5, 2, FALSE );
 	gtk_widget_show( table );
 	gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, TRUE, 0 );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -2063,7 +2063,7 @@ GtkWidget* create_main_dialog(){
 	gtk_box_pack_start( GTK_BOX( hbox2 ), spin, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "tex_slant", spin );
 
-	table = gtk_table_new( 2, 4, TRUE );
+	table = ui::Table( 2, 4, TRUE );
 	gtk_widget_show( table );
 	gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, TRUE, 0 );
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );

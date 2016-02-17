@@ -626,7 +626,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 
 
 		{
-			ui::Widget table = ui::Widget(gtk_table_new( 6, 4, FALSE ));
+			ui::Widget table = ui::Table( 6, 4, FALSE );
 			gtk_widget_show( table );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( table ), FALSE, FALSE, 0 );
 			gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -828,7 +828,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 			gtk_widget_show( frame );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 			{
-				ui::Widget table = ui::Widget(gtk_table_new( 4, 4, FALSE ));
+				ui::Widget table = ui::Table( 4, 4, FALSE );
 				gtk_widget_show( table );
 				gtk_container_add( GTK_CONTAINER( frame ), table );
 				gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -953,7 +953,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_widget_show( GTK_WIDGET( vbox3 ) );
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
 					{
-						GtkTable* table = GTK_TABLE( gtk_table_new( 8, 4, FALSE ) );
+						GtkTable* table = ui::Table( 8, 4, FALSE );
 						gtk_widget_show( GTK_WIDGET( table ) );
 						gtk_box_pack_start( GTK_BOX( vbox3 ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 						gtk_table_set_row_spacings( table, 0 );
@@ -989,7 +989,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
 					{
 
-						GtkTable* table = GTK_TABLE( gtk_table_new( 8, 4, FALSE ) );
+						GtkTable* table = ui::Table( 8, 4, FALSE );
 						gtk_widget_show( GTK_WIDGET( table ) );
 						gtk_box_pack_start( GTK_BOX( vbox3 ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 						gtk_table_set_row_spacings( table, 0 );

@@ -118,6 +118,9 @@ namespace ui {
     ScrolledWindow::ScrolledWindow() : ScrolledWindow(GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr)))
     { }
 
+    Table::Table(std::size_t rows, std::size_t columns, bool homogenous) : Table(GTK_TABLE(gtk_table_new(rows, columns, homogenous)))
+    { }
+
     TreeView::TreeView(TreeModel model) : TreeView(GTK_TREE_VIEW(gtk_tree_view_new_with_model(model)))
     { }
 

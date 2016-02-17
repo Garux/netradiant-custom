@@ -993,7 +993,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 			gtk_container_add( GTK_CONTAINER( hbox ), GTK_WIDGET( radio_vbox ) );
 
 			{
-				GtkTable* table = GTK_TABLE( gtk_table_new( 5, 2, FALSE ) );
+				GtkTable* table = ui::Table( 5, 2, FALSE );
 				gtk_widget_show( GTK_WIDGET( table ) );
 				gtk_box_pack_start( GTK_BOX( radio_vbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 				gtk_table_set_row_spacings( table, 5 );

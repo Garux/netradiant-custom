@@ -2390,7 +2390,7 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 }
 
 ui::Widget create_main_statusbar( ui::Widget pStatusLabel[c_count_status] ){
-	GtkTable* table = GTK_TABLE( gtk_table_new( 1, c_count_status, FALSE ) );
+	GtkTable* table = ui::Table( 1, c_count_status, FALSE );
 	gtk_widget_show( GTK_WIDGET( table ) );
 
 	{
