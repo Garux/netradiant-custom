@@ -21,52 +21,48 @@
 
 #include "toolbar.h"
 
-#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 #include "generic/callback.h"
 
 #include "accelerator.h"
 #include "button.h"
-#include "closure.h"
-#include "pointer.h"
+#include "image.h"
 
 
-void toolbar_append( GtkToolbar* toolbar, GtkButton* button, const char* description ){
-	gtk_widget_show( GTK_WIDGET( button ) );
-	gtk_button_set_relief( button, GTK_RELIEF_NONE );
-	gtk_widget_set_can_focus(GTK_WIDGET( button ), false);
-	gtk_widget_set_can_default(GTK_WIDGET( button ), false);
-	gtk_toolbar_append_element( toolbar, GTK_TOOLBAR_CHILD_WIDGET, GTK_WIDGET( button ), "", description, "", 0, 0, 0 );
+void toolbar_append( GtkToolbar* toolbar, GtkToolItem* button, const char* description ){
+	gtk_widget_show_all(GTK_WIDGET(button));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(button), description);
+	gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(button));
 }
 
-GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback ){
-	GtkButton* button = ui::Button();
-	button_set_icon( button, icon );
-	button_connect_callback( button, callback );
-	toolbar_append( toolbar, button, description );
+GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback ){
+	auto button = GTK_TOOL_BUTTON(gtk_tool_button_new(GTK_WIDGET(new_local_image(icon)), nullptr));
+	button_connect_callback(button, callback);
+	toolbar_append(toolbar, GTK_TOOL_ITEM(button), description);
 	return button;
 }
 
-GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback ){
-	GtkToggleButton* button = GTK_TOGGLE_BUTTON( gtk_toggle_button_new() );
-	button_set_icon( GTK_BUTTON( button ), icon );
-	toggle_button_connect_callback( button, callback );
-	toolbar_append( toolbar, GTK_BUTTON( button ), description );
+GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback ){
+	auto button = GTK_TOGGLE_TOOL_BUTTON(gtk_toggle_tool_button_new());
+	toggle_button_connect_callback(button, callback);
+	gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(button), GTK_WIDGET(new_local_image(icon)));
+	gtk_tool_button_set_label(GTK_TOOL_BUTTON(button), description);
+	toolbar_append(toolbar, GTK_TOOL_ITEM(button), description);
 	return button;
 }
 
-GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Command& command ){
+GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Command& command ){
 	return toolbar_append_button( toolbar, description, icon, command.m_callback );
 }
 
-void toggle_button_set_active_callback( GtkToggleButton& button, bool active ){
+void toggle_button_set_active_callback( GtkToggleToolButton& button, bool active ){
 	toggle_button_set_active_no_signal( &button, active );
 }
-typedef ReferenceCaller1<GtkToggleButton, bool, toggle_button_set_active_callback> ToggleButtonSetActiveCaller;
+using ToggleButtonSetActiveCaller = ReferenceCaller1<GtkToggleToolButton, bool, toggle_button_set_active_callback>;
 
-GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Toggle& toggle ){
-	GtkToggleButton* button = toolbar_append_toggle_button( toolbar, description, icon, toggle.m_command.m_callback );
+GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Toggle& toggle ){
+	auto button = toolbar_append_toggle_button( toolbar, description, icon, toggle.m_command.m_callback );
 	toggle.m_exportCallback( ToggleButtonSetActiveCaller( *button ) );
 	return button;
 }

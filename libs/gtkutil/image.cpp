@@ -69,10 +69,7 @@ GtkImage* image_new_missing(){
 
 GtkImage* new_image( const char* filename ){
 	{
-		GtkImage* image = image_new_from_file_with_mask( filename );
-		if ( image != 0 ) {
-			return image;
-		}
+		if ( auto image = image_new_from_file_with_mask( filename ) ) return image;
 	}
 
 	return image_new_missing();

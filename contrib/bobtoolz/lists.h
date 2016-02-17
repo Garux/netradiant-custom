@@ -18,8 +18,9 @@
  */
 
 #include <list>
+#include <gtk/gtk.h>
 #include "str.h"
 typedef struct _GList GList;
 
 bool LoadExclusionList( char* filename, std::list<Str>* exclusionList );
-bool LoadGList( char* filename, GList** loadlist );
+bool LoadGList( char* filename, GtkListStore* loadlist );

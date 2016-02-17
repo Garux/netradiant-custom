@@ -60,23 +60,23 @@ void Update_TextureReseter(){
 	gboolean check;
 
 	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbTexChange ) );
-	gtk_entry_set_editable( GTK_ENTRY( dlgTexReset.editTexNew ), check );
-	gtk_entry_set_editable( GTK_ENTRY( dlgTexReset.editTexOld ), check );
+	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editTexNew ), check );
+	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editTexOld ), check );
 
 	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbScaleHor ) );
-	gtk_entry_set_editable( GTK_ENTRY( dlgTexReset.editScaleHor ), check );
+	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editScaleHor ), check );
 
 	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbScaleVert ) );
-	gtk_entry_set_editable( GTK_ENTRY( dlgTexReset.editScaleVert ), check );
+	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editScaleVert ), check );
 
 	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbShiftHor ) );
-	gtk_entry_set_editable( GTK_ENTRY( dlgTexReset.editShiftHor ), check );
+	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editShiftHor ), check );
 
 	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbShiftVert ) );
-	gtk_entry_set_editable( GTK_ENTRY( dlgTexReset.editShiftVert ), check );
+	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editShiftVert ), check );
 
 	check = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( dlgTexReset.cbRotation ) );
-	gtk_entry_set_editable( GTK_ENTRY( dlgTexReset.editRotation ), check );
+	gtk_editable_set_editable( GTK_EDITABLE( dlgTexReset.editRotation ), check );
 }
 
 static void dialog_button_callback( GtkWidget *widget, gpointer data ){
@@ -106,9 +106,8 @@ static void dialog_button_callback_settex( GtkWidget *widget, gpointer data ){
 	TwinWidget* tw = (TwinWidget*)data;
 
 	GtkEntry* entry = GTK_ENTRY( tw->one );
-	GtkCombo* combo = GTK_COMBO( tw->two );
-
-	const gchar* tex = gtk_entry_get_text( GTK_ENTRY( combo->entry ) );
+	auto* combo = tw->two;
+	const gchar* tex = gtk_combo_box_get_active_text(GTK_COMBO_BOX(combo));
 	gtk_entry_set_text( entry, tex );
 }
 
@@ -215,10 +214,10 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	int loop = 1;
 
 	window = ui::Window( ui::window_type::TOP );
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event",
-						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy",
-						GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event",
+						G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy",
+						G_CALLBACK( gtk_widget_destroy ), NULL );
 	gtk_window_set_title( GTK_WINDOW( window ), lpCaption );
 	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
@@ -245,8 +244,8 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	if ( type == eMB_OK ) {
 		w = ui::Button( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 		gtk_widget_set_can_default(w, true);
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
@@ -255,38 +254,38 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	else if ( type ==  eMB_OKCANCEL ) {
 		w = ui::Button( "Ok" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 		gtk_widget_set_can_default( w, true );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
 		w = ui::Button( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 		gtk_widget_show( w );
 		ret = eIDCANCEL;
 	}
 	else if ( type == eMB_YESNOCANCEL ) {
 		w = ui::Button( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 		gtk_widget_set_can_default( w, true );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
 		w = ui::Button( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
 		gtk_widget_show( w );
 
 		w = ui::Button( "Cancel" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 		gtk_widget_show( w );
 		ret = eIDCANCEL;
 	}
@@ -294,16 +293,16 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	{
 		w = ui::Button( "Yes" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 		gtk_widget_set_can_default( w, true );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
 		w = ui::Button( "No" );
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
-							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
+		g_signal_connect( GTK_OBJECT( w ), "clicked",
+							G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
 		gtk_widget_show( w );
 		ret = eIDNO;
 	}
@@ -329,8 +328,8 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Intersect" );
 	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
@@ -377,7 +376,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 
 	w = ui::Button( "Ok" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
@@ -385,7 +384,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 	ret = eIDCANCEL;
 
@@ -427,8 +426,8 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Polygon Builder" );
 	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
@@ -531,7 +530,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	w = ui::Button( "Ok" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
@@ -539,7 +538,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 	ret = eIDCANCEL;
 
@@ -601,8 +600,8 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Stair Builder" );
 
@@ -672,19 +671,19 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), radioNorth, FALSE, FALSE, 3 );
 	gtk_widget_show( radioNorth );
 
-	radioDirection = gtk_radio_button_group( GTK_RADIO_BUTTON( radioNorth ) );
+	radioDirection = gtk_radio_button_get_group( GTK_RADIO_BUTTON( radioNorth ) );
 
 	radioSouth = gtk_radio_button_new_with_label( radioDirection, "South" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioSouth, FALSE, FALSE, 2 );
 	gtk_widget_show( radioSouth );
 
-	radioDirection = gtk_radio_button_group( GTK_RADIO_BUTTON( radioSouth ) );
+	radioDirection = gtk_radio_button_get_group( GTK_RADIO_BUTTON( radioSouth ) );
 
 	radioEast = gtk_radio_button_new_with_label( radioDirection, "East" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioEast, FALSE, FALSE, 1 );
 	gtk_widget_show( radioEast );
 
-	radioDirection = gtk_radio_button_group( GTK_RADIO_BUTTON( radioEast ) );
+	radioDirection = gtk_radio_button_get_group( GTK_RADIO_BUTTON( radioEast ) );
 
 	radioWest = gtk_radio_button_new_with_label( radioDirection, "West" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioWest, FALSE, FALSE, 0 );
@@ -710,13 +709,13 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), radioOldStyle, FALSE, FALSE, 0 );
 	gtk_widget_show( radioOldStyle );
 
-	radioStyle = gtk_radio_button_group( GTK_RADIO_BUTTON( radioOldStyle ) );
+	radioStyle = gtk_radio_button_get_group( GTK_RADIO_BUTTON( radioOldStyle ) );
 
 	radioBobStyle = gtk_radio_button_new_with_label( radioStyle, "Bob's Style" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioBobStyle, FALSE, FALSE, 0 );
 	gtk_widget_show( radioBobStyle );
 
-	radioStyle = gtk_radio_button_group( GTK_RADIO_BUTTON( radioBobStyle ) );
+	radioStyle = gtk_radio_button_get_group( GTK_RADIO_BUTTON( radioBobStyle ) );
 
 	radioCornerStyle = gtk_radio_button_new_with_label( radioStyle, "Corner Style" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioCornerStyle, FALSE, FALSE, 0 );
@@ -773,14 +772,14 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	w = ui::Button( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 
 	ret = eIDCANCEL;
@@ -857,8 +856,8 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Door Builder" );
 
@@ -870,10 +869,10 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_widget_realize( window );
 
 	char buffer[256];
-	GList       *listMainTextures = NULL;
-	GList       *listTrimTextures = NULL;
-	LoadGList( GetFilename( buffer, "plugins/bt/door-tex.txt" ), &listMainTextures );
-	LoadGList( GetFilename( buffer, "plugins/bt/door-tex-trim.txt" ), &listTrimTextures );
+	GtkListStore *listMainTextures = gtk_list_store_new( 1, G_TYPE_STRING );
+	GtkListStore *listTrimTextures = gtk_list_store_new( 1, G_TYPE_STRING );
+	LoadGList( GetFilename( buffer, "plugins/bt/door-tex.txt" ), listMainTextures );
+	LoadGList( GetFilename( buffer, "plugins/bt/door-tex-trim.txt" ), listTrimTextures );
 
 	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
@@ -949,17 +948,16 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// djbob: lists added
 
-	comboMain = gtk_combo_new();
+	comboMain = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(listMainTextures));
+	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(comboMain), 0);
 	gtk_box_pack_start( GTK_BOX( hbox ), comboMain, FALSE, FALSE, 0 );
-	gtk_combo_set_popdown_strings( GTK_COMBO( comboMain ), listMainTextures );
-	gtk_combo_set_use_arrows( GTK_COMBO( comboMain ), 1 );
 	gtk_widget_show( comboMain );
 
 	tw1.one = textFrontBackTex;
-	tw1.two = comboMain;
+	tw1.two = GTK_COMBO_BOX(comboMain);
 
 	buttonSetMain = ui::Button( "Set As Main Texture" );
-	gtk_signal_connect( GTK_OBJECT( buttonSetMain ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback_settex ), &tw1 );
+	g_signal_connect( GTK_OBJECT( buttonSetMain ), "clicked", G_CALLBACK( dialog_button_callback_settex ), &tw1 );
 	gtk_box_pack_start( GTK_BOX( hbox ), buttonSetMain, FALSE, FALSE, 0 );
 	gtk_widget_show( buttonSetMain );
 
@@ -969,17 +967,16 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	comboTrim = gtk_combo_new();
+	comboTrim = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(listTrimTextures));
+	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(comboMain), 0);
 	gtk_box_pack_start( GTK_BOX( hbox ), comboTrim, FALSE, FALSE, 0 );
-	gtk_combo_set_popdown_strings( GTK_COMBO( comboTrim ), listTrimTextures );
-	gtk_combo_set_use_arrows( GTK_COMBO( comboMain ), 1 );
 	gtk_widget_show( comboTrim );
 
 	tw2.one = textTrimTex;
-	tw2.two = comboTrim;
+	tw2.two = GTK_COMBO_BOX(comboTrim);
 
 	buttonSetTrim = ui::Button( "Set As Trim Texture" );
-	gtk_signal_connect( GTK_OBJECT( buttonSetTrim ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback_settex ), &tw2 );
+	g_signal_connect( GTK_OBJECT( buttonSetTrim ), "clicked", G_CALLBACK( dialog_button_callback_settex ), &tw2 );
 	gtk_box_pack_start( GTK_BOX( hbox ), buttonSetTrim, FALSE, FALSE, 0 );
 	gtk_widget_show( buttonSetTrim );
 
@@ -998,7 +995,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), radioNS, FALSE, FALSE, 0 );
 	gtk_widget_show( radioNS );
 
-	radioOrientation = gtk_radio_button_group( GTK_RADIO_BUTTON( radioNS ) );
+	radioOrientation = gtk_radio_button_get_group( GTK_RADIO_BUTTON( radioNS ) );
 
 	radioEW = gtk_radio_button_new_with_label( radioOrientation, "East - West" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioEW, FALSE, FALSE, 0 );
@@ -1018,14 +1015,14 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	w = ui::Button( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 	ret = eIDCANCEL;
 
@@ -1072,8 +1069,8 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Texture Reset" );
 	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
@@ -1179,7 +1176,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	w = ui::Button( "Enable" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 	gtk_widget_show( w );
 
 	gtk_widget_set_can_default( w, true );
@@ -1187,12 +1184,12 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	w = ui::Button( "Disable" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
 	gtk_widget_show( w );
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 
 	ret = eIDCANCEL;
@@ -1243,8 +1240,8 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "CTF Colour Changer" );
 	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
@@ -1270,7 +1267,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 
 	w = ui::Button( "Red->Blue" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
@@ -1278,12 +1275,12 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 
 	w = ui::Button( "Blue->Red" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 	gtk_widget_show( w );
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 	ret = eIDCANCEL;
 
@@ -1314,8 +1311,8 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Texture Reset" );
 	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
@@ -1361,7 +1358,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	// ---- frame ----
 
 	dlgTexReset.cbTexChange = ui::CheckButton( "Enabled" );
-	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbTexChange ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
+	g_signal_connect( GTK_OBJECT( dlgTexReset.cbTexChange ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbTexChange );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbTexChange, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1409,7 +1406,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	// ---- frame ----
 
 	dlgTexReset.cbScaleHor = ui::CheckButton( "Enabled" );
-	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbScaleHor ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
+	g_signal_connect( GTK_OBJECT( dlgTexReset.cbScaleHor ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbScaleHor );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleHor, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1430,7 +1427,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 
 	dlgTexReset.cbScaleVert = ui::CheckButton( "Enabled" );
-	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbScaleVert ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
+	g_signal_connect( GTK_OBJECT( dlgTexReset.cbScaleVert ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbScaleVert );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleVert, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1465,7 +1462,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	// ---- frame ----
 
 	dlgTexReset.cbShiftHor = ui::CheckButton( "Enabled" );
-	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbShiftHor ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
+	g_signal_connect( GTK_OBJECT( dlgTexReset.cbShiftHor ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbShiftHor );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftHor, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1486,7 +1483,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 
 	dlgTexReset.cbShiftVert = ui::CheckButton( "Enabled" );
-	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbShiftVert ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
+	g_signal_connect( GTK_OBJECT( dlgTexReset.cbShiftVert ), "toggled", G_CALLBACK( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbShiftVert );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftVert, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1549,7 +1546,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	w = ui::Button( "Use Selected Brushes" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
@@ -1557,12 +1554,12 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	w = ui::Button( "Use All Brushes" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 	gtk_widget_show( w );
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 	ret = eIDCANCEL;
 
@@ -1650,8 +1647,8 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Train Thing" );
 	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
@@ -1836,7 +1833,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	w = ui::Button( "Ok" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
@@ -1844,7 +1841,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 	ret = eIDCANCEL;
 
@@ -1913,8 +1910,8 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 
 	window = ui::Window( ui::window_type::TOP );
 
-	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Make Chain" );
 
@@ -1975,14 +1972,14 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 
 	w = ui::Button( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
 	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
-	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
+	g_signal_connect( GTK_OBJECT( w ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
 
 	ret = eIDCANCEL;

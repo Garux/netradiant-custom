@@ -187,7 +187,7 @@ GtkWidget* g_shared = 0;
 gint glwidget_context_created( GtkWidget* widget, gpointer data ){
 	if ( ++g_context_count == 1 ) {
 		g_shared = widget;
-		gtk_widget_ref( g_shared );
+		g_object_ref( g_shared );
 
 		glwidget_make_current( g_shared );
 		GlobalOpenGL().contextValid = true;
@@ -203,7 +203,7 @@ gint glwidget_context_destroyed( GtkWidget* widget, gpointer data ){
 
 		GLWidget_sharedContextDestroyed();
 
-		gtk_widget_unref( g_shared );
+		g_object_unref( g_shared );
 		g_shared = 0;
 	}
 	return FALSE;

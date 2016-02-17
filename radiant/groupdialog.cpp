@@ -80,7 +80,7 @@ void GroupDialog_updatePageTitle( ui::Window window, std::size_t pageIndex ){
 	}
 }
 
-static gboolean switch_page( GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data ){
+static gboolean switch_page( GtkNotebook *notebook, gpointer page, guint page_num, gpointer data ){
 	GroupDialog_updatePageTitle( ui::Window(GTK_WINDOW( data )), page_num );
 	g_current_page = page_num;
 

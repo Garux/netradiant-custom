@@ -153,7 +153,7 @@ inline void path_copy_clean( char* destination, const char* source ){
 
 struct GameCombo
 {
-	GtkComboBox* game_select;
+	ui::ComboBoxText game_select;
 	GtkEntry* fsgame_entry;
 };
 
@@ -240,11 +240,11 @@ ui::Window ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 				{
 					dialog.game_combo.game_select = ui::ComboBoxText();
 
-					gtk_combo_box_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().basegame );
+					gtk_combo_box_text_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().basegame );
 					if ( globalGameComboConfiguration().known[0] != '\0' ) {
-						gtk_combo_box_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().known );
+						gtk_combo_box_text_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().known );
 					}
-					gtk_combo_box_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().custom );
+					gtk_combo_box_text_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().custom );
 
 					gtk_widget_show( GTK_WIDGET( dialog.game_combo.game_select ) );
 					gtk_table_attach( table2, GTK_WIDGET( dialog.game_combo.game_select ), 1, 2, 0, 1,
@@ -280,9 +280,9 @@ ui::Window ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 
-					GtkComboBox* combo = ui::ComboBoxText();
-					gtk_combo_box_append_text( combo, globalMappingMode().sp_mapping_mode );
-					gtk_combo_box_append_text( combo, globalMappingMode().mp_mapping_mode );
+					auto combo = ui::ComboBoxText();
+					gtk_combo_box_text_append_text( combo, globalMappingMode().sp_mapping_mode );
+					gtk_combo_box_text_append_text( combo, globalMappingMode().mp_mapping_mode );
 
 					gtk_widget_show( GTK_WIDGET( combo ) );
 					gtk_table_attach( table2, GTK_WIDGET( combo ), 1, 2, 3, 4,
@@ -766,14 +766,14 @@ static void CreateGtkTextEditor(){
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
 					  G_CALLBACK( editor_close ), dlg );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 
 	button = ui::Button( "Save" );
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
 					  G_CALLBACK( editor_save ), dlg );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 
 	text_editor = dlg;
 	text_widget = text;

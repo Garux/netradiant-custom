@@ -1854,7 +1854,7 @@ void TextureBrowser_toggleSearchButton(){
 		gtk_widget_show_all( g_TextureBrowser.m_search_button );
 	}
 	else {
-		gtk_widget_hide_all( g_TextureBrowser.m_search_button );
+		gtk_widget_hide( g_TextureBrowser.m_search_button );
 	}
 }
 
@@ -1872,12 +1872,10 @@ void TextureBrowser_constructTagNotebook(){
 }
 
 void TextureBrowser_constructSearchButton(){
-	GtkTooltips* tooltips = gtk_tooltips_new();
-
 	ui::Widget image = ui::Widget(gtk_image_new_from_stock( GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR ));
 	g_TextureBrowser.m_search_button = ui::Button();
 	g_signal_connect( G_OBJECT( g_TextureBrowser.m_search_button ), "clicked", G_CALLBACK( TextureBrowser_searchTags ), NULL );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), g_TextureBrowser.m_search_button, "Search with selected tags", "Search with selected tags" );
+	gtk_widget_set_tooltip_text(g_TextureBrowser.m_search_button, "Search with selected tags");
 	gtk_container_add( GTK_CONTAINER( g_TextureBrowser.m_search_button ), image );
 }
 
@@ -1955,12 +1953,12 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 		ui::Widget menu_view = ui::Menu();
 		auto view_item = TextureBrowser_constructViewMenu( GTK_MENU( menu_view ) );
 		gtk_menu_item_set_submenu( GTK_MENU_ITEM( view_item ), menu_view );
-		gtk_menu_bar_append( GTK_MENU_BAR( menu_bar ), view_item );
+		gtk_menu_shell_append( GTK_MENU_SHELL( menu_bar ), view_item );
 
 		ui::Widget menu_tools = ui::Menu();
 		auto tools_item = TextureBrowser_constructToolsMenu( GTK_MENU( menu_tools ) );
 		gtk_menu_item_set_submenu( GTK_MENU_ITEM( tools_item ), menu_tools );
-		gtk_menu_bar_append( GTK_MENU_BAR( menu_bar ), tools_item );
+		gtk_menu_shell_append( GTK_MENU_SHELL( menu_bar ), tools_item );
 
 		gtk_table_attach( GTK_TABLE( table ), menu_bar, 0, 3, 0, 1, GTK_FILL, GTK_SHRINK, 0, 0 );
 		gtk_widget_show( menu_bar );
@@ -1992,7 +1990,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 	}
 	{ // gl_widget
 		g_TextureBrowser.m_gl_widget = ui::Widget(glwidget_new( FALSE ));
-		gtk_widget_ref( g_TextureBrowser.m_gl_widget );
+		g_object_ref( g_TextureBrowser.m_gl_widget );
 
 		gtk_widget_set_events( g_TextureBrowser.m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
 		gtk_widget_set_can_focus( g_TextureBrowser.m_gl_widget, true );
@@ -2023,7 +2021,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			ui::Widget menu_tags = ui::Menu();
 			auto tags_item = TextureBrowser_constructTagsMenu( GTK_MENU( menu_tags ) );
 			gtk_menu_item_set_submenu( GTK_MENU_ITEM( tags_item ), menu_tags );
-			gtk_menu_bar_append( GTK_MENU_BAR( menu_bar ), tags_item );
+			gtk_menu_shell_append( GTK_MENU_SHELL( menu_bar ), tags_item );
 		}
 		{ // Tag TreeView
 			g_TextureBrowser.m_scr_win_tags = ui::ScrolledWindow();
@@ -2168,7 +2166,7 @@ void TextureBrowser_destroyWindow(){
 	g_signal_handler_disconnect( G_OBJECT( g_TextureBrowser.m_gl_widget ), g_TextureBrowser.m_sizeHandler );
 	g_signal_handler_disconnect( G_OBJECT( g_TextureBrowser.m_gl_widget ), g_TextureBrowser.m_exposeHandler );
 
-	gtk_widget_unref( g_TextureBrowser.m_gl_widget );
+	g_object_unref( g_TextureBrowser.m_gl_widget );
 }
 
 const Vector3& TextureBrowser_getBackgroundColour( TextureBrowser& textureBrowser ){

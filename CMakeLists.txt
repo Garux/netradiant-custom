@@ -63,7 +63,12 @@ find_package(OpenGL REQUIRED)
 
 add_definitions(-DRADIANT_EXECUTABLE="${RADIANT_EXECUTABLE}")
 
-add_definitions(-DGTK_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE)
+add_definitions(
+        -DGTK_DISABLE_SINGLE_INCLUDES
+        -DGSEAL_ENABLE
+        #-DGDK_DISABLE_DEPRECATED
+        #-DGTK_DISABLE_DEPRECATED
+)
 
 if(NOT WIN32)
     add_definitions(

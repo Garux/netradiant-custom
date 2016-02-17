@@ -227,8 +227,8 @@ float m_fZ;
    float	m_fVShift; */
 int m_nCol;
 int m_nRow;
-GtkComboBox *m_pRowCombo;
-GtkComboBox *m_pColCombo;
+ui::ComboBoxText m_pRowCombo{nullptr};
+ui::ComboBoxText m_pColCombo{nullptr};
 std::size_t m_countRows;
 std::size_t m_countCols;
 
@@ -608,28 +608,28 @@ ui::Window PatchInspector::BuildDialog(){
 												  (GtkAttachOptions)( 0 ), 0, 0 );
 							}
 							{
-								GtkComboBox* combo = ui::ComboBoxText();
+								auto combo = ui::ComboBoxText();
 								g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( OnSelchangeComboColRow ), this );
-								AddDialogData( *combo, m_nRow );
+								AddDialogData( *GTK_COMBO_BOX(combo), m_nRow );
 
 								gtk_widget_show( GTK_WIDGET( combo ) );
 								gtk_table_attach( table, GTK_WIDGET( combo ), 0, 1, 1, 2,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
 												  (GtkAttachOptions)( 0 ), 0, 0 );
-								gtk_widget_set_usize( GTK_WIDGET( combo ), 60, -1 );
+								gtk_widget_set_size_request( GTK_WIDGET( combo ), 60, -1 );
 								m_pRowCombo = combo;
 							}
 
 							{
-								GtkComboBox* combo = ui::ComboBoxText();
+								auto combo = ui::ComboBoxText();
 								g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( OnSelchangeComboColRow ), this );
-								AddDialogData( *combo, m_nCol );
+								AddDialogData( *GTK_COMBO_BOX(combo), m_nCol );
 
 								gtk_widget_show( GTK_WIDGET( combo ) );
 								gtk_table_attach( table, GTK_WIDGET( combo ), 1, 2, 1, 2,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
 												  (GtkAttachOptions)( 0 ), 0, 0 );
-								gtk_widget_set_usize( GTK_WIDGET( combo ), 60, -1 );
+								gtk_widget_set_size_request( GTK_WIDGET( combo ), 60, -1 );
 								m_pColCombo = combo;
 							}
 						}
@@ -811,7 +811,7 @@ ui::Window PatchInspector::BuildDialog(){
 					}
 					{
 						GtkEntry* entry = ui::Entry();
-						//  gtk_entry_set_editable (GTK_ENTRY (entry), false);
+						//  gtk_editable_set_editable (GTK_ENTRY (entry), false);
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 						AddDialogData( *entry, m_strName );
@@ -855,7 +855,7 @@ ui::Window PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFlipX ), 0 );
-							gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+							gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 						}
 						{
 							GtkLabel* label = GTK_LABEL( ui::Label( "Vertical Stretch Step" ) );
@@ -872,7 +872,7 @@ ui::Window PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFlipY ), 0 );
-							gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+							gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 						}
 						{
 							GtkLabel* label = GTK_LABEL( ui::Label( "Rotate Step" ) );
@@ -888,7 +888,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 0, 1,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							g_object_set_data( G_OBJECT( window ), "hshift_entry", entry );
 							// we fill in this data, if no patch is selected the widgets are unmodified when the inspector is raised
 							// so we need to have at least one initialisation somewhere
@@ -903,7 +903,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 10, -1 );
 							gtk_widget_set_can_focus( spin, false );
 						}
 						{
@@ -912,7 +912,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 1, 2,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.shift[1] );
 
 							auto adj = ui::Adjustment( 0, -8192, 8192, 1, 1, 0 );
@@ -924,7 +924,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 10, -1 );
 							gtk_widget_set_can_focus( spin, false );
 						}
 						{
@@ -933,7 +933,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 2, 3,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.scale[0] );
 
 							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
@@ -945,7 +945,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 10, -1 );
 							gtk_widget_set_can_focus( spin, false );
 						}
 						{
@@ -954,7 +954,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 3, 4,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.scale[1] );
 
 							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
@@ -966,7 +966,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 3, 4,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 10, -1 );
 							gtk_widget_set_can_focus( spin, false );
 						}
 						{
@@ -975,7 +975,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 4, 5,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.rotate );
 
 							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 ); // NOTE: Arnout - this really should be 360 but can't change it anymore as it could break existing maps
@@ -987,7 +987,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 4, 5,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 10, -1 );
 							gtk_widget_set_can_focus( spin, false );
 						}
 					}
@@ -999,35 +999,35 @@ ui::Window PatchInspector::BuildDialog(){
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchAutoCap ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = ui::Button( "CAP" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchdetails ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = ui::Button( "Set..." );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchreset ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = ui::Button( "Natural" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchnatural ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = ui::Button( "Fit" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchfit ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 				}
 			}
@@ -1074,7 +1074,7 @@ void PatchInspector::GetPatchInfo(){
 
 			for ( std::size_t i = 0; i < m_countRows; ++i )
 			{
-				gtk_combo_box_remove_text( m_pRowCombo, gint( m_countRows - i - 1 ) );
+				gtk_combo_box_text_remove( m_pRowCombo, gint( m_countRows - i - 1 ) );
 			}
 
 			m_countRows = m_Patch->getHeight();
@@ -1082,7 +1082,7 @@ void PatchInspector::GetPatchInfo(){
 			{
 				char buffer[16];
 				sprintf( buffer, "%u", Unsigned( i ) );
-				gtk_combo_box_append_text( m_pRowCombo, buffer );
+				gtk_combo_box_text_append_text( m_pRowCombo, buffer );
 			}
 
 			gtk_combo_box_set_active( m_pRowCombo, 0 );
@@ -1093,7 +1093,7 @@ void PatchInspector::GetPatchInfo(){
 
 			for ( std::size_t i = 0; i < m_countCols; ++i )
 			{
-				gtk_combo_box_remove_text( m_pColCombo, gint( m_countCols - i - 1 ) );
+				gtk_combo_box_text_remove( m_pColCombo, gint( m_countCols - i - 1 ) );
 			}
 
 			m_countCols = m_Patch->getWidth();
@@ -1101,7 +1101,7 @@ void PatchInspector::GetPatchInfo(){
 			{
 				char buffer[16];
 				sprintf( buffer, "%u", Unsigned( i ) );
-				gtk_combo_box_append_text( m_pColCombo, buffer );
+				gtk_combo_box_text_append_text( m_pColCombo, buffer );
 			}
 
 			gtk_combo_box_set_active( m_pColCombo, 0 );

@@ -20,6 +20,7 @@
 #if !defined( INCLUDED_DIALOGS_GTK_H )
 #define INCLUDED_DIALOGS_GTK_H
 
+#include <gtk/gtk.h>
 #include "qerplugin.h"
 
 struct BuildStairsRS {
@@ -94,7 +95,7 @@ typedef struct _GtkWidget GtkWidget;
 
 struct TwinWidget {
 	GtkWidget* one;
-	GtkWidget* two;
+	GtkComboBox* two;
 };
 
 EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMessageBoxType type );

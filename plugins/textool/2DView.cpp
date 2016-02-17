@@ -117,22 +117,22 @@ bool C2DView::OnRButtonUp( int x, int y ){
 			menu = ui::Menu();
 
 			item = ui::MenuItem( "Validate (RETURN)" );
-			gtk_signal_connect( GTK_OBJECT( item ), "activate", GTK_SIGNAL_FUNC( Textool_Validate ), NULL );
+			g_signal_connect( GTK_OBJECT( item ), "activate", G_CALLBACK( Textool_Validate ), NULL );
 			gtk_widget_show( item );
 			gtk_menu_append( GTK_MENU( menu ), item );
 
 			item = ui::MenuItem( "Zoom in (INSERT)" );
-			gtk_signal_connect( GTK_OBJECT( item ), "activate", GTK_SIGNAL_FUNC( view_ZoomIn ), this );
+			g_signal_connect( GTK_OBJECT( item ), "activate", G_CALLBACK( view_ZoomIn ), this );
 			gtk_widget_show( item );
 			gtk_menu_append( GTK_MENU( menu ), item );
 
 			item = ui::MenuItem( "Zoom out (DELETE)" );
-			gtk_signal_connect( GTK_OBJECT( item ), "activate", GTK_SIGNAL_FUNC( view_ZoomOut ), this );
+			g_signal_connect( GTK_OBJECT( item ), "activate", G_CALLBACK( view_ZoomOut ), this );
 			gtk_widget_show( item );
 			gtk_menu_append( GTK_MENU( menu ), item );
 
 			item = ui::MenuItem( "Cancel (ESC)" );
-			gtk_signal_connect( GTK_OBJECT( item ), "activate", GTK_SIGNAL_FUNC( Textool_Cancel ), NULL );
+			g_signal_connect( GTK_OBJECT( item ), "activate", G_CALLBACK( Textool_Cancel ), NULL );
 			gtk_widget_show( item );
 			gtk_menu_append( GTK_MENU( menu ), item );
 

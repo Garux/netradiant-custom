@@ -493,7 +493,7 @@ void CWatchBSP::Reset(){
 	}
 	m_eState = EIdle;
 	if ( s_routine_id ) {
-		gtk_timeout_remove( s_routine_id );
+		g_source_remove( s_routine_id );
 		s_routine_id = 0;
 	}
 }
@@ -546,7 +546,7 @@ void CWatchBSP::DoEBeginStep(){
 		}
 	}
 	m_eState = EBeginStep;
-	s_routine_id = gtk_timeout_add( 25, watchbsp_routine, this );
+	s_routine_id = g_timeout_add( 25, watchbsp_routine, this );
 }
 
 

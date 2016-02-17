@@ -828,7 +828,7 @@ XYWnd::XYWnd() :
 	m_window_observer->setRectangleDrawCallback( ReferenceCaller1<XYWnd, rect_t, xy_update_xor_rectangle>( *this ) );
 	m_window_observer->setView( m_view );
 
-	gtk_widget_ref( m_gl_widget );
+	g_object_ref( m_gl_widget );
 
 	gtk_widget_set_events( m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
 	gtk_widget_set_can_focus( m_gl_widget, true );
@@ -867,7 +867,7 @@ XYWnd::~XYWnd(){
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_sizeHandler );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_exposeHandler );
 
-	gtk_widget_unref( m_gl_widget );
+	g_object_unref( m_gl_widget );
 
 	m_window_observer->release();
 }

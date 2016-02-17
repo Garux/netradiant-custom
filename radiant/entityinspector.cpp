@@ -668,7 +668,7 @@ ListAttribute( const char* key, const ListAttributeType& type ) :
 
 	for ( ListAttributeType::const_iterator i = type.begin(); i != type.end(); ++i )
 	{
-		gtk_combo_box_append_text( GTK_COMBO_BOX( combo ), ( *i ).first.c_str() );
+		gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( combo ), ( *i ).first.c_str() );
 	}
 
 	gtk_widget_show( GTK_WIDGET( combo ) );
@@ -865,7 +865,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 			ui::Widget widget = ui::Widget(GTK_WIDGET( g_entitySpawnflagsCheck[i] ));
 			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child(GTK_BIN(widget)) ), " " );
 			gtk_widget_hide( widget );
-			gtk_widget_ref( widget );
+			g_object_ref( widget );
 			gtk_container_remove( GTK_CONTAINER( g_spawnflagsTable ), widget );
 		}
 	}
@@ -884,7 +884,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 			gtk_table_attach( g_spawnflagsTable, widget, i % 4, i % 4 + 1, i / 4, i / 4 + 1,
 							  (GtkAttachOptions)( GTK_FILL ),
 							  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
-			gtk_widget_unref( widget );
+			g_object_unref( widget );
 
 			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child(GTK_BIN(widget)) ), str.c_str() );
 		}
@@ -1389,7 +1389,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 					for ( int i = 0; i < MAX_FLAGS; i++ )
 					{
 						GtkCheckButton* check = ui::CheckButton( "" );
-						gtk_widget_ref( GTK_WIDGET( check ) );
+						g_object_ref( GTK_WIDGET( check ) );
 						g_object_set_data( G_OBJECT( check ), "handler", gint_to_pointer( g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( SpawnflagCheck_toggled ), 0 ) ) );
 						g_entitySpawnflagsCheck[i] = check;
 					}

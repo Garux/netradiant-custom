@@ -119,8 +119,8 @@ namespace ui {
     CellRendererText::CellRendererText() : CellRendererText(GTK_CELL_RENDERER_TEXT(gtk_cell_renderer_text_new()))
     { }
 
-    ComboBox ComboBoxText()
-    { return ComboBox(GTK_COMBO_BOX(gtk_combo_box_new_text())); }
+    ComboBoxText::ComboBoxText() : ComboBoxText(GTK_COMBO_BOX_TEXT(gtk_combo_box_text_new()))
+    { }
 
     CheckButton::CheckButton(const char *label) : CheckButton(GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label)))
     { }
@@ -128,8 +128,10 @@ namespace ui {
     Entry::Entry() : Entry(GTK_ENTRY(gtk_entry_new()))
     { }
 
-    Entry::Entry(std::size_t max_length) : Entry(GTK_ENTRY(gtk_entry_new_with_max_length(max_length)))
-    { }
+    Entry::Entry(std::size_t max_length) : Entry()
+    {
+        gtk_entry_set_max_length(*this, static_cast<gint>(max_length));
+    }
 
     Frame::Frame(const char *label) : Frame(GTK_FRAME(gtk_frame_new(label)))
     { }

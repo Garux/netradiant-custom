@@ -24,6 +24,7 @@
 #endif
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 #include "misc.h"
 
@@ -54,7 +55,7 @@ bool LoadExclusionList( char* filename, std::list<Str>* exclusionList ){
 	return FALSE;
 }
 
-bool LoadGList( char* filename, GList** loadlist ){
+bool LoadGList( char* filename, GtkListStore* loadlist ){
 	FILE* eFile = fopen( filename, "r" );
 	if ( eFile ) {
 		char buffer[256];
@@ -67,7 +68,9 @@ bool LoadGList( char* filename, GList** loadlist ){
 			if ( strlen( buffer ) > 0 ) {
 				char* buffer2 = new char[strlen( buffer ) + 1];
 				strcpy( buffer2, buffer );
-				*loadlist = g_list_append( *loadlist, buffer2 );
+				GtkTreeIter iter;
+				gtk_list_store_append(loadlist, &iter);
+				gtk_list_store_set(loadlist, &iter, 0, buffer2, -1);
 			}
 			else{
 				cnt++;

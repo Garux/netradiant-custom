@@ -86,11 +86,11 @@ GtkMenuItem* create_menu_item_with_mnemonic( GtkMenu* menu, const char *mnemonic
 	return create_menu_item_with_mnemonic( menu, mnemonic, command );
 }
 
-GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
+GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
 	return toolbar_append_button( toolbar, description, icon, GlobalCommands_find( commandName ) );
 }
 
-GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
+GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
 	return toolbar_append_toggle_button( toolbar, description, icon, GlobalToggles_find( commandName ) );
 }
 
@@ -99,15 +99,11 @@ GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* 
 
 bool color_dialog( ui::Widget parent, Vector3& color, const char* title ){
 	ui::Widget dlg;
-	double clr[3];
+	GdkColor clr = { 0, guint16(color[0] * 65535), guint16(color[1] * 65535), guint16(color[2] * 65535) };
 	ModalDialog dialog;
 
-	clr[0] = color[0];
-	clr[1] = color[1];
-	clr[2] = color[2];
-
 	dlg = ui::Widget(gtk_color_selection_dialog_new( title ));
-	gtk_color_selection_set_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG( dlg )) ), clr );
+	gtk_color_selection_set_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG( dlg )) ), &clr );
 	g_signal_connect( G_OBJECT( dlg ), "delete_event", G_CALLBACK( dialog_delete_callback ), &dialog );
 	GtkWidget *ok_button, *cancel_button;
 	g_object_get(dlg, "ok-button", &ok_button, "cancel-button", &cancel_button, nullptr);
@@ -120,15 +116,10 @@ bool color_dialog( ui::Widget parent, Vector3& color, const char* title ){
 
 	bool ok = modal_dialog_show( GTK_WINDOW( dlg ), dialog ) == eIDOK;
 	if ( ok ) {
-		GdkColor gdkcolor;
-		gtk_color_selection_get_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG( dlg )) ), &gdkcolor );
-		clr[0] = gdkcolor.red / 65535.0;
-		clr[1] = gdkcolor.green / 65535.0;
-		clr[2] = gdkcolor.blue / 65535.0;
-
-		color[0] = (float)clr[0];
-		color[1] = (float)clr[1];
-		color[2] = (float)clr[2];
+		gtk_color_selection_get_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG( dlg )) ), &clr );
+		color[0] = clr.red / 65535.0f;
+		color[1] = clr.green / 65535.0f;
+		color[2] = clr.blue / 65535.0f;
 	}
 
 	gtk_widget_destroy( dlg );

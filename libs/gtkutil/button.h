@@ -22,6 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_BUTTON_H )
 #define INCLUDED_GTKUTIL_BUTTON_H
 
+#include <gtk/gtk.h>
 #include "generic/callbackfwd.h"
 
 typedef struct _GtkButton GtkButton;
@@ -32,10 +33,13 @@ typedef gint gboolean;
 typedef unsigned int guint;
 
 void button_connect_callback( GtkButton* button, const Callback& callback );
+void button_connect_callback( GtkToolButton* button, const Callback& callback );
 guint toggle_button_connect_callback( GtkToggleButton* button, const Callback& callback );
+guint toggle_button_connect_callback( GtkToggleToolButton* button, const Callback& callback );
 
 void button_set_icon( GtkButton* button, const char* icon );
 void toggle_button_set_active_no_signal( GtkToggleButton* item, gboolean active );
+void toggle_button_set_active_no_signal( GtkToggleToolButton* item, gboolean active );
 
 void radio_button_set_active( GtkRadioButton* radio, int index );
 void radio_button_set_active_no_signal( GtkRadioButton* radio, int index );

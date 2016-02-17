@@ -60,9 +60,9 @@ typedef struct _GtkToggleButton GtkToggleButton;
 typedef struct _GtkToolbar GtkToolbar;
 
 // this DOES NOT set up the shortcut using command_connect_accelerator
-GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName );
+GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName );
 // this DOES NOT set up the shortcut using command_connect_accelerator
-GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName );
+GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName );
 
 
 template<typename Element> class BasicVector3;

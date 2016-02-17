@@ -193,7 +193,7 @@ void FloatSpinnerImport( GtkSpinButton& widget, float value ){
 	gtk_spin_button_set_value( &widget, value );
 }
 void FloatSpinnerExport( GtkSpinButton& widget, const FloatImportCallback& importCallback ){
-	importCallback( float(gtk_spin_button_get_value_as_float( &widget ) ) );
+	importCallback( float(gtk_spin_button_get_value( &widget ) ) );
 }
 typedef ImportExport<GtkSpinButton, float, FloatSpinnerImport, FloatSpinnerExport> FloatSpinnerImportExport;
 
@@ -474,7 +474,7 @@ void Dialog::addCombo( ui::Widget vbox, const char* name, StringArrayRange value
 
 		for ( StringArrayRange::Iterator i = values.first; i != values.last; ++i )
 		{
-			gtk_combo_box_append_text( GTK_COMBO_BOX( combo ), *i );
+			gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( combo ), *i );
 		}
 
 		AddIntComboData( *GTK_COMBO_BOX( combo ), importViewer, exportViewer );

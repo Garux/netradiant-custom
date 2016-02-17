@@ -1588,13 +1588,13 @@ guint s_qe_every_second_id = 0;
 
 void EverySecondTimer_enable(){
 	if ( s_qe_every_second_id == 0 ) {
-		s_qe_every_second_id = gtk_timeout_add( 1000, qe_every_second, 0 );
+		s_qe_every_second_id = g_timeout_add( 1000, qe_every_second, 0 );
 	}
 }
 
 void EverySecondTimer_disable(){
 	if ( s_qe_every_second_id != 0 ) {
-		gtk_timeout_remove( s_qe_every_second_id );
+		g_source_remove( s_qe_every_second_id );
 		s_qe_every_second_id = 0;
 	}
 }
@@ -2311,66 +2311,72 @@ void Manipulators_constructToolbar( GtkToolbar* toolbar ){
 
 GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	GtkToolbar* toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
-	gtk_toolbar_set_orientation( toolbar, GTK_ORIENTATION_HORIZONTAL );
+	gtk_orientable_set_orientation( GTK_ORIENTABLE(toolbar), GTK_ORIENTATION_HORIZONTAL );
 	gtk_toolbar_set_style( toolbar, GTK_TOOLBAR_ICONS );
 
 	gtk_widget_show( GTK_WIDGET( toolbar ) );
 
+	auto space = [&]() {
+		auto btn = gtk_separator_tool_item_new();
+		gtk_widget_show(GTK_WIDGET(btn));
+		gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(btn));
+	};
+
 	File_constructToolbar( toolbar );
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	UndoRedo_constructToolbar( toolbar );
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	RotateFlip_constructToolbar( toolbar );
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	Select_constructToolbar( toolbar );
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	CSG_constructToolbar( toolbar );
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	ComponentModes_constructToolbar( toolbar );
 
 	if ( style == MainFrame::eRegular || style == MainFrame::eRegularLeft || style == MainFrame::eFloating ) {
-		gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+		space();
 
 		XYWnd_constructToolbar( toolbar );
 	}
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	CamWnd_constructToolbar( toolbar );
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	Manipulators_constructToolbar( toolbar );
 
 	if ( g_Layout_enablePatchToolbar.m_value ) {
-		gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+		space();
 
 		Patch_constructToolbar( toolbar );
 	}
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	toolbar_append_toggle_button( toolbar, "Texture Lock (SHIFT +T)", "texture_lock.png", "TogTexLock" );
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 
 	/*GtkButton* g_view_entities_button =*/ toolbar_append_button( toolbar, "Entities (N)", "entities.png", "ToggleEntityInspector" );
-	GtkButton* g_view_console_button = toolbar_append_button( toolbar, "Console (O)", "console.png", "ToggleConsole" );
-	GtkButton* g_view_textures_button = toolbar_append_button( toolbar, "Texture Browser (T)", "texture_browser.png", "ToggleTextures" );
+	auto g_view_console_button = toolbar_append_button( toolbar, "Console (O)", "console.png", "ToggleConsole" );
+	auto g_view_textures_button = toolbar_append_button( toolbar, "Texture Browser (T)", "texture_browser.png", "ToggleTextures" );
 	// TODO: call light inspector
 	//GtkButton* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector");
 
-	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+	space();
 	/*GtkButton* g_refresh_models_button =*/ toolbar_append_button( toolbar, "Refresh Models", "refresh_models.png", "RefreshReferences" );
 
 

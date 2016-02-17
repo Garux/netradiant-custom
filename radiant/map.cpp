@@ -785,7 +785,7 @@ void DoMapInfo(){
 					gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 0, 1,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_entry_set_editable( entry, FALSE );
+					gtk_editable_set_editable( GTK_EDITABLE(entry), FALSE );
 
 					brushes_entry = entry;
 				}
@@ -795,7 +795,7 @@ void DoMapInfo(){
 					gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_entry_set_editable( entry, FALSE );
+					gtk_editable_set_editable( GTK_EDITABLE(entry), FALSE );
 
 					entities_entry = entry;
 				}

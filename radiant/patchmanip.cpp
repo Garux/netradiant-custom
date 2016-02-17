@@ -876,8 +876,8 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 			}
 
 			{
-				GtkComboBox* combo = ui::ComboBoxText();
-#define D_ITEM( x ) if ( x >= mincols && ( !maxcols || x <= maxcols ) ) gtk_combo_box_append_text( combo, # x )
+				auto combo = ui::ComboBoxText();
+#define D_ITEM( x ) if ( x >= mincols && ( !maxcols || x <= maxcols ) ) gtk_combo_box_text_append_text( combo, # x )
 				D_ITEM( 3 );
 				D_ITEM( 5 );
 				D_ITEM( 7 );
@@ -902,8 +902,8 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 				width = combo;
 			}
 			{
-				GtkComboBox* combo = ui::ComboBoxText();
-#define D_ITEM( x ) if ( x >= minrows && ( !maxrows || x <= maxrows ) ) gtk_combo_box_append_text( combo, # x )
+				auto combo = ui::ComboBoxText();
+#define D_ITEM( x ) if ( x >= minrows && ( !maxrows || x <= maxrows ) ) gtk_combo_box_text_append_text( combo, # x )
 				D_ITEM( 3 );
 				D_ITEM( 5 );
 				D_ITEM( 7 );
@@ -1038,7 +1038,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					gtk_table_attach( table, button, 1, 2, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
+					group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( button ) );
 
 					bevel = button;
 				}
@@ -1048,7 +1048,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					gtk_table_attach( table, button, 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
+					group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( button ) );
 
 					endcap = button;
 				}
@@ -1058,7 +1058,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					gtk_table_attach( table, button, 1, 2, 2, 3,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
+					group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( button ) );
 
 					ibevel = button;
 				}
@@ -1068,7 +1068,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					gtk_table_attach( table, button, 1, 2, 3, 4,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
+					group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( button ) );
 
 					iendcap = button;
 				}
@@ -1078,7 +1078,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					gtk_table_attach( table, button, 1, 2, 4, 5,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
+					group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( button ) );
 
 					cylinder = button;
 				}

@@ -33,7 +33,6 @@ enum EType
 	eSpace,
 	eButton,
 	eToggleButton,
-	eRadioButton,
 };
 
 virtual const char* getImage() const = 0;
