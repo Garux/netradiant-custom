@@ -772,7 +772,7 @@ static void CreateGtkTextEditor(){
 	g_object_set_data( G_OBJECT( dlg ), "text", (gpointer) text );
 	gtk_text_view_set_editable( GTK_TEXT_VIEW( text ), TRUE );
 
-	hbox = ui::Widget(gtk_hbox_new( FALSE, 5 ));
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, TRUE, 0 );
 

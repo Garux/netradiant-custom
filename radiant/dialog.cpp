@@ -505,7 +505,7 @@ void Dialog::addCombo( ui::Widget vbox, const char* name, int& data, StringArray
 void Dialog::addSlider( ui::Widget vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
 #if 0
 	if ( draw_value == FALSE ) {
-		ui::Widget hbox2 = gtk_hbox_new( FALSE, 0 );
+		ui::Widget hbox2 = ui::HBox( FALSE, 0 );
 		gtk_widget_show( hbox2 );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox2 ), FALSE, FALSE, 0 );
 		{

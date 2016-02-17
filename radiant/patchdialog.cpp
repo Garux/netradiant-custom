@@ -578,7 +578,7 @@ ui::Window PatchInspector::BuildDialog(){
 		gtk_widget_show( GTK_WIDGET( vbox ) );
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( vbox ) );
 		{
-			GtkHBox* hbox = GTK_HBOX( gtk_hbox_new( FALSE, 5 ) );
+			GtkHBox* hbox = ui::HBox( FALSE, 5 );
 			gtk_widget_show( GTK_WIDGET( hbox ) );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), TRUE, TRUE, 0 );
 			{
@@ -999,7 +999,7 @@ ui::Window PatchInspector::BuildDialog(){
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 					}
-					GtkHBox* hbox2 = GTK_HBOX( gtk_hbox_new( TRUE, 5 ) );
+					GtkHBox* hbox2 = ui::HBox( TRUE, 5 );
 					gtk_widget_show( GTK_WIDGET( hbox2 ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( hbox2 ), TRUE, FALSE, 0 );
 					{

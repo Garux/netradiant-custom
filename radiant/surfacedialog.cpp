@@ -605,7 +605,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 		gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
 		{
-			ui::Widget hbox2 = ui::Widget(gtk_hbox_new( FALSE, 5 ));
+			ui::Widget hbox2 = ui::HBox( FALSE, 5 );
 			gtk_widget_show( hbox2 );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox2 ), FALSE, FALSE, 0 );
 
@@ -1063,7 +1063,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				g_signal_connect( G_OBJECT( TexTool::g_textoolWin ), "motion_notify_event", G_CALLBACK( TexTool::motion ), NULL );
 			}
 			{
-				ui::Widget hbox = gtk_hbox_new( FALSE, 5 );
+				ui::Widget hbox = ui::HBox( FALSE, 5 );
 				gtk_widget_show( hbox );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, FALSE, 0 );
 				// Checkboxes go here... (Flip X/Y)

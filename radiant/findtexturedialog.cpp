@@ -143,7 +143,7 @@ ui::Window FindTextureDialog::BuildDialog(){
 
 	ui::Window dlg = ui::Window(create_floating_window( "Find / Replace Texture(s)", m_parent ));
 
-	hbox = ui::Widget(gtk_hbox_new( FALSE, 5 ));
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_container_add( GTK_CONTAINER( dlg ), GTK_WIDGET( hbox ) );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 5 );

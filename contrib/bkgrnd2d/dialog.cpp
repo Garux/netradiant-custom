@@ -202,7 +202,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_box_pack_start( GTK_BOX( m_pWidget ),frame, FALSE, FALSE, 2 );
 
 // hbox for first row
-	hbox = gtk_hbox_new( FALSE,5 );
+	hbox = ui::HBox( FALSE,5 );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ),4 );
 	gtk_container_add( GTK_CONTAINER( frame ), hbox );
 
@@ -237,7 +237,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	frame = gtk_frame_new( "Rendering" );
 	gtk_box_pack_start( GTK_BOX( m_pWidget ),frame, FALSE, FALSE, 2 );
 
-	hbox = gtk_hbox_new( FALSE,5 );
+	hbox = ui::HBox( FALSE,5 );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ),4 );
 	gtk_container_add( GTK_CONTAINER( frame ), hbox );
 
@@ -261,7 +261,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	m_pPosLabel = gtk_frame_get_label_widget( GTK_FRAME( frame ) );
 	gtk_box_pack_start( GTK_BOX( m_pWidget ), frame, FALSE, FALSE, 2 );
 
-	hbox = gtk_hbox_new( FALSE,5 );
+	hbox = ui::HBox( FALSE,5 );
 	gtk_container_add( GTK_CONTAINER( frame ), hbox );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ),4 );
 

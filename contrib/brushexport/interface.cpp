@@ -53,7 +53,7 @@ create_w_plugplug2( void ){
 	gtk_container_add( GTK_CONTAINER( w_plugplug2 ), vbox1 );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox1 ), 5 );
 
-	hbox2 = gtk_hbox_new( TRUE, 5 );
+	hbox2 = ui::HBox( TRUE, 5 );
 	gtk_widget_set_name( hbox2, "hbox2" );
 	gtk_widget_show( hbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox1 ), hbox2, FALSE, FALSE, 0 );
@@ -135,7 +135,7 @@ create_w_plugplug2( void ){
 	gtk_widget_show( ed_materialname );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), ed_materialname, FALSE, FALSE, 0 );
 
-	hbox1 = gtk_hbox_new( TRUE, 0 );
+	hbox1 = ui::HBox( TRUE, 0 );
 	gtk_widget_set_name( hbox1, "hbox1" );
 	gtk_widget_show( hbox1 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox1, FALSE, FALSE, 0 );

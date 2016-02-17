@@ -108,7 +108,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
 	gtk_widget_show( w );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 

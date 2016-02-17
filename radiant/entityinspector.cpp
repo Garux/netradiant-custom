@@ -401,7 +401,7 @@ DirectionAttribute( const char* key ) :
 
 	m_nonModalRadio.connect( m_radio.m_radio );
 
-	m_hbox = GTK_HBOX( gtk_hbox_new( FALSE, 4 ) );
+	m_hbox = ui::HBox( FALSE, 4 );
 	gtk_widget_show( GTK_WIDGET( m_hbox ) );
 
 	gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_radio.m_hbox ), TRUE, TRUE, 0 );
@@ -483,12 +483,14 @@ class AnglesAttribute : public EntityAttribute
 std::string m_key;
 AnglesEntry m_angles;
 NonModalEntry m_nonModal;
-GtkBox* m_hbox;
+ui::HBox m_hbox;
 public:
 AnglesAttribute( const char* key ) :
 	m_key( key ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	m_hbox = GTK_BOX( gtk_hbox_new( TRUE, 4 ) );
+	m_nonModal( ApplyCaller( *this ),
+				UpdateCaller( *this ) ),
+	m_hbox(ui::HBox( TRUE, 4 ))
+{
 	gtk_widget_show( GTK_WIDGET( m_hbox ) );
 	{
 		GtkEntry* entry = numeric_entry_new();
@@ -575,7 +577,7 @@ public:
 Vector3Attribute( const char* key ) :
 	m_key( key ),
 	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	m_hbox = GTK_BOX( gtk_hbox_new( TRUE, 4 ) );
+	m_hbox = ui::HBox( TRUE, 4 );
 	gtk_widget_show( GTK_WIDGET( m_hbox ) );
 	{
 		GtkEntry* entry = numeric_entry_new();
@@ -1500,7 +1502,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 				}
 
 				{
-					GtkBox* hbox = GTK_BOX( gtk_hbox_new( TRUE, 4 ) );
+					GtkBox* hbox = ui::HBox( TRUE, 4 );
 					gtk_widget_show( GTK_WIDGET( hbox ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( hbox ), FALSE, TRUE, 0 );
 

@@ -1361,7 +1361,7 @@ GtkWidget* create_main_dialog(){
 	//  g_signal_connect (G_OBJECT (dlg), "destroy", G_CALLBACK (gtk_widget_destroy), NULL);
 	gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( g_pRadiantWnd ) );
 
-	hbox = gtk_hbox_new( FALSE, 5 );
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_container_add( GTK_CONTAINER( dlg ), hbox );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 5 );
@@ -1532,7 +1532,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( label );
 	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), vbox, label );
 
-	hbox2 = gtk_hbox_new( FALSE, 5 );
+	hbox2 = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox2, FALSE, TRUE, 0 );
 
@@ -1689,7 +1689,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "sp", spin );
 	// ^Fishman - End of Snap to grid code.
 
-	hbox2 = gtk_hbox_new( FALSE, 5 );
+	hbox2 = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox2, FALSE, TRUE, 10 );
 
@@ -1821,7 +1821,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "bmp_file", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( bitmap_file_entryfocusout ), NULL );
 
-	hbox2 = gtk_hbox_new( TRUE, 5 );
+	hbox2 = ui::HBox( TRUE, 5 );
 	gtk_widget_show( hbox2 );
 	gtk_table_attach( GTK_TABLE( table ), hbox2, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( 0 ),
@@ -1866,7 +1866,7 @@ GtkWidget* create_main_dialog(){
 	gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_RIGHT );
 
-	hbox2 = gtk_hbox_new( FALSE, 5 );
+	hbox2 = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox2 );
 	gtk_table_attach( GTK_TABLE( table ), hbox2, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1879,7 +1879,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "bmp_black", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &gbmp.black_value );
 
-	hbox2 = gtk_hbox_new( FALSE, 5 );
+	hbox2 = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox2 );
 	gtk_table_attach( GTK_TABLE( table ), hbox2, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -2049,7 +2049,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_set_usize( entry, 60, -2 );
 	g_object_set_data( G_OBJECT( dlg ), "texture3", entry );
 
-	hbox2 = gtk_hbox_new( FALSE, 5 );
+	hbox2 = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox2, FALSE, TRUE, 0 );
 

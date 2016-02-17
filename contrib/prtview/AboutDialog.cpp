@@ -62,7 +62,7 @@ void DoAboutDlg(){
 	g_object_set_data( G_OBJECT( dlg ), "loop", &loop );
 	g_object_set_data( G_OBJECT( dlg ), "ret", &ret );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_widget_show( hbox );
 	gtk_container_add( GTK_CONTAINER( dlg ), hbox );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 10 );

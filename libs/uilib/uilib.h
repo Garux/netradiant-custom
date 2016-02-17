@@ -4,9 +4,11 @@
 #include <string>
 
 using ui_alignment = struct _GtkAlignment;
+using ui_box = struct _GtkBox;
 using ui_button = struct _GtkButton;
 using ui_checkbutton = struct _GtkCheckButton;
 using ui_evkey = struct _GdkEventKey;
+using ui_hbox = struct _GtkHBox;
 using ui_label = struct _GtkLabel;
 using ui_menuitem = struct _GtkMenuItem;
 using ui_modal = struct ModalDialog;
@@ -78,6 +80,7 @@ namespace ui {
 
     class Widget : public Base, public Convertible<Widget, ui_widget> {
     public:
+        using native = ui_widget;
         explicit Widget(ui_widget *h = nullptr) : Base((void *) h)
         { }
 
@@ -93,51 +96,58 @@ namespace ui {
 
     extern Widget root;
 
-#define WRAP(name, impl, methods) \
-    class name : public Widget, public Convertible<name, impl> { \
+#define WRAP(name, super, impl, methods) \
+    class name : public super, public Convertible<name, impl> { \
         public: \
-            explicit name(impl *h) : Widget(reinterpret_cast<ui_widget *>(h)) {} \
+            using native = impl; \
+            explicit name(impl *h) : super(reinterpret_cast<super::native *>(h)) {} \
         methods \
     }; \
-    static_assert(sizeof(name) == sizeof(Widget), "object slicing")
+    static_assert(sizeof(name) == sizeof(super), "object slicing")
 
-    WRAP(Alignment, ui_alignment,
+    WRAP(Alignment, Widget, ui_alignment,
          Alignment(float xalign, float yalign, float xscale, float yscale);
     );
 
-    WRAP(Button, ui_button,
+    WRAP(Box, Widget, ui_box,);
+
+    WRAP(Button, Widget, ui_button,
          Button(const char *label);
     );
 
-    WRAP(CheckButton, ui_checkbutton,
+    WRAP(CheckButton, Widget, ui_checkbutton,
          CheckButton(const char *label);
     );
 
-    WRAP(Label, ui_label,
+    WRAP(HBox, Box, ui_hbox,
+         HBox(bool homogenous, int spacing);
+    );
+
+    WRAP(Label, Widget, ui_label,
          Label(const char *label);
     );
 
-    WRAP(MenuItem, ui_menuitem,
+    WRAP(MenuItem, Widget, ui_menuitem,
          MenuItem(const char *label, bool mnemonic = false);
     );
 
-    WRAP(ScrolledWindow, ui_scrolledwindow,
+    WRAP(ScrolledWindow, Widget, ui_scrolledwindow,
          ScrolledWindow();
     );
 
-    WRAP(SpinButton, ui_widget,);
+    WRAP(SpinButton, Widget, ui_widget,);
 
-    WRAP(TreeModel, ui_treemodel,);
+    WRAP(TreeModel, Widget, ui_treemodel,);
 
-    WRAP(TreeView, ui_treeview,
+    WRAP(TreeView, Widget, ui_treeview,
          TreeView(TreeModel model);
     );
 
-    WRAP(VBox, ui_vbox,
+    WRAP(VBox, Box, ui_vbox,
          VBox(bool homogenous, int spacing);
     );
 
-    WRAP(Window, ui_window,
+    WRAP(Window, Widget, ui_window,
          Window() : Window(nullptr) {};
 
          Window create_dialog_window(const char *title, void func(), void *data, int default_w = -1,

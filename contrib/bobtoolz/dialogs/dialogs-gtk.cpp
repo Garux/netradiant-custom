@@ -238,7 +238,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
 	gtk_widget_show( w );
 
-	hbox = ui::Widget(gtk_hbox_new( FALSE, 10 ));
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -370,7 +370,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), check2, FALSE, FALSE, 0 );
 	gtk_widget_show( check2 );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -447,7 +447,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- vbox ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -460,7 +460,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- vbox2 ----
 
-	hbox2 = gtk_hbox_new( FALSE, 10 );
+	hbox2 = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox2, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox2 );
 
@@ -478,7 +478,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- /hbox2 ----
 
-	hbox2 = gtk_hbox_new( FALSE, 10 );
+	hbox2 = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox2, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox2 );
 
@@ -524,7 +524,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- /hbox ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -619,7 +619,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( vbox ), hbox );
 	gtk_widget_show( hbox );
 
@@ -635,7 +635,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	// ------------------------- // indenting == good way of keeping track of lines :)
 
 	// new hbox
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -649,7 +649,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	// ------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -659,7 +659,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	// -------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -693,7 +693,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	// --------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -703,7 +703,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	// --------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -736,7 +736,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	// --------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -751,7 +751,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	// -------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -768,7 +768,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -882,7 +882,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// -------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -897,7 +897,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// ------------------------ //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -911,7 +911,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// ----------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -929,7 +929,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// ---------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -944,7 +944,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// --------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -966,7 +966,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// ------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -986,7 +986,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// ------------------ //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -1013,7 +1013,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// ----------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -1092,7 +1092,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	// ---- vbox ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -1110,7 +1110,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	// ---- /hbox ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -1133,7 +1133,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -1174,7 +1174,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	// ----------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -1263,7 +1263,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 
 	// ---- vbox ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, TRUE, TRUE, 0 );
 	gtk_widget_show( hbox );
 
@@ -1332,7 +1332,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- vbox ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -1542,7 +1542,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- /frame ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -1668,7 +1668,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	// ---- vbox ----
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -1829,7 +1829,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_widget_show( numPoints );
 
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
@@ -1931,7 +1931,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( vbox ), hbox );
 	gtk_widget_show( hbox );
 
@@ -1947,7 +1947,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	// ------------------------- //
 
 	// new hbox
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
@@ -1961,7 +1961,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 
 	// -------------------------- //
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::HBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 

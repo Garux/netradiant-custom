@@ -270,7 +270,7 @@ void DoConfigDialog(){
 	gtk_container_add( GTK_CONTAINER( frame ), vbox2 );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox2 ), 5 );
 
-	hbox = gtk_hbox_new( FALSE, 5 );
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, TRUE, 0 );
 
@@ -397,7 +397,7 @@ void DoConfigDialog(){
 	gtk_misc_set_alignment( GTK_MISC( cliplabel ), 0.0, 0.0 );
 	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScrollClip ), cliplabel );
 
-	hbox = gtk_hbox_new( TRUE, 5 );
+	hbox = ui::HBox( TRUE, 5 );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
@@ -420,7 +420,7 @@ void DoConfigDialog(){
 	gtk_container_add( GTK_CONTAINER( frame ), vbox2 );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox2 ), 5 );
 
-	hbox = gtk_hbox_new( FALSE, 5 );
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
@@ -435,7 +435,7 @@ void DoConfigDialog(){
 	gtk_box_pack_start( GTK_BOX( hbox ), lw2label, FALSE, TRUE, 0 );
 	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScroll2d ), lw2label );
 
-	hbox = gtk_hbox_new( FALSE, 5 );
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
@@ -450,7 +450,7 @@ void DoConfigDialog(){
 	gtk_box_pack_start( GTK_BOX( hbox ), aa2check, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( aa2check ), "toggled", GTK_SIGNAL_FUNC( OnAntiAlias2d ), NULL );
 
-	hbox = gtk_hbox_new( FALSE, 5 );
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
@@ -459,7 +459,7 @@ void DoConfigDialog(){
 	gtk_box_pack_start( GTK_BOX( hbox ), show2check, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( show2check ), "toggled", GTK_SIGNAL_FUNC( OnConfig2d ), NULL );
 
-	hbox = gtk_hbox_new( FALSE, 5 );
+	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 
