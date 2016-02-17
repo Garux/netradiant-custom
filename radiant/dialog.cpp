@@ -92,7 +92,7 @@ GtkSpinButton* DialogSpinner_new( double value, double lower, double upper, int 
 	{
 		++digits;
 	}
-	GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( ui::Adjustment( value, lower, upper, step, 10, 0 ), step, digits ) );
+	GtkSpinButton* spin = ui::SpinButton( ui::Adjustment( value, lower, upper, step, 10, 0 ), step, digits );
 	gtk_widget_show( GTK_WIDGET( spin ) );
 	gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
 	return spin;
@@ -635,7 +635,7 @@ ui::SpinButton Dialog::addSpinner( ui::Widget vbox, const char* name, double val
 	DialogSpinnerRow row( DialogSpinnerRow_new( name, value, lower, upper, 1 ) );
 	AddIntSpinnerData( *row.m_spin, importViewer, exportViewer );
 	DialogVBox_packRow( GTK_VBOX( vbox ), row.m_row );
-	return ui::SpinButton(row.m_row);
+	return ui::SpinButton(row.m_spin);
 }
 
 ui::SpinButton Dialog::addSpinner( ui::Widget vbox, const char* name, int& data, double value, double lower, double upper ){
@@ -646,5 +646,5 @@ ui::SpinButton Dialog::addSpinner( ui::Widget vbox, const char* name, double val
 	DialogSpinnerRow row( DialogSpinnerRow_new( name, value, lower, upper, 10 ) );
 	AddFloatSpinnerData( *row.m_spin, importViewer, exportViewer );
 	DialogVBox_packRow( GTK_VBOX( vbox ), row.m_row );
-	return ui::SpinButton(row.m_row);
+	return ui::SpinButton(row.m_spin);
 }

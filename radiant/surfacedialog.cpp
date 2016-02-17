@@ -640,7 +640,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 2 ) );
+				GtkSpinButton* spin = ui::SpinButton( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 2 );
 				m_hshiftIncrement.m_spin = spin;
 				m_hshiftSpinner.connect( spin );
 				gtk_widget_show( GTK_WIDGET( spin ) );
@@ -676,7 +676,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 2 ) );
+				GtkSpinButton* spin = ui::SpinButton( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 2 );
 				m_vshiftIncrement.m_spin = spin;
 				m_vshiftSpinner.connect( spin );
 				gtk_widget_show( GTK_WIDGET( spin ) );
@@ -712,7 +712,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 5 ) );
+				GtkSpinButton* spin = ui::SpinButton( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 5 );
 				m_hscaleIncrement.m_spin = spin;
 				m_hscaleSpinner.connect( spin );
 				gtk_widget_show( GTK_WIDGET( spin ) );
@@ -748,7 +748,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 5 ) );
+				GtkSpinButton* spin = ui::SpinButton( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 5 );
 				m_vscaleIncrement.m_spin = spin;
 				m_vscaleSpinner.connect( spin );
 				gtk_widget_show( GTK_WIDGET( spin ) );
@@ -784,7 +784,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 2 ) );
+				GtkSpinButton* spin = ui::SpinButton( ui::Adjustment( 0, -8192, 8192, 2, 8, 0 ), 0, 2 );
 				m_rotateIncrement.m_spin = spin;
 				m_rotateSpinner.connect( spin );
 				gtk_widget_show( GTK_WIDGET( spin ) );
@@ -923,7 +923,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					ui::Widget spin = ui::Widget(gtk_spin_button_new( ui::Adjustment( 1, 0, 1 << 16, 1, 10, 0 ), 0, 6 ));
+					ui::Widget spin = ui::SpinButton( ui::Adjustment( 1, 0, 1 << 16, 1, 10, 0 ), 0, 6 );
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 2, 3, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -932,7 +932,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					AddDialogData( *GTK_SPIN_BUTTON( spin ), m_fitHorizontal );
 				}
 				{
-					ui::Widget spin = ui::Widget(gtk_spin_button_new( ui::Adjustment( 1, 0, 1 << 16, 1, 10, 0 ), 0, 6 ));
+					ui::Widget spin = ui::SpinButton( ui::Adjustment( 1, 0, 1 << 16, 1, 10, 0 ), 0, 6 );
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 3, 4, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),

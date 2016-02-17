@@ -128,6 +128,9 @@ namespace ui {
     ScrolledWindow::ScrolledWindow() : ScrolledWindow(GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr)))
     { }
 
+    SpinButton::SpinButton(Adjustment adjustment, double climb_rate, std::size_t digits) : SpinButton(GTK_SPIN_BUTTON(gtk_spin_button_new(adjustment, climb_rate, digits)))
+    { }
+
     Table::Table(std::size_t rows, std::size_t columns, bool homogenous) : Table(GTK_TABLE(gtk_table_new(rows, columns, homogenous)))
     { }
 

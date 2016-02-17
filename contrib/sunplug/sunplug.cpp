@@ -316,7 +316,6 @@ void GetOptimalCoordinates( AABB *levelBoundingBox ){
 // MapCoordinator dialog window
 void MapCoordinator(){
 	GtkWidget *window, *vbox, *table, *label, *spinnerMinX, *spinnerMinY, *spinnerMaxX, *spinnerMaxY, *button;
-	GtkAdjustment *spinner_adj_MinX, *spinner_adj_MinY, *spinner_adj_MaxX, *spinner_adj_MaxY;
 	Entity *theWorldspawn = NULL;
 	const char *buffer;
 	char line[20];
@@ -367,10 +366,10 @@ void MapCoordinator(){
 		globalOutputStream() << "SunPlug: adviced mapcoordsmins=" << minX << " " << maxY << "\n"; // console info about mapcoordsmins
 		globalOutputStream() << "SunPlug: adviced mapcoordsmaxs=" << maxX << " " << minY << "\n"; // console info about mapcoordsmaxs
 
-		spinner_adj_MinX = ui::Adjustment( map_minX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum x value
-		spinner_adj_MinY = ui::Adjustment( map_minY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum y value
-		spinner_adj_MaxX = ui::Adjustment( map_maxX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum x value
-		spinner_adj_MaxY = ui::Adjustment( map_maxY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum y value
+		auto spinner_adj_MinX = ui::Adjustment( map_minX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum x value
+		auto spinner_adj_MinY = ui::Adjustment( map_minY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of minimum y value
+		auto spinner_adj_MaxX = ui::Adjustment( map_maxX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum x value
+		auto spinner_adj_MaxY = ui::Adjustment( map_maxY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum y value
 
 		button = ui::Button( "Get optimal mapcoords" ); // create button with text
 		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( input_optimal ), NULL ); // connect button with callback function
@@ -395,20 +394,20 @@ void MapCoordinator(){
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 1, 2 ); // insert label into table
 
-		spinnerMinX = gtk_spin_button_new( spinner_adj_MinX, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMinX = ui::SpinButton( spinner_adj_MinX, 1.0, 0 ); // create textbox wiht value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMinX, 1, 2, 1, 2 ); // insert spinbox into table
 
-		spinnerMinY = gtk_spin_button_new( spinner_adj_MinY, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMinY = ui::SpinButton( spinner_adj_MinY, 1.0, 0 ); // create textbox wiht value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMinY, 2, 3, 1, 2 ); // insert spinbox into table
 
 		label = ui::Label( "mapcoordsmaxs" ); // create label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 2, 3 ); // insert label into table
 
-		spinnerMaxX = gtk_spin_button_new( spinner_adj_MaxX, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMaxX = ui::SpinButton( spinner_adj_MaxX, 1.0, 0 ); // create textbox wiht value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMaxX, 1, 2, 2, 3 ); // insert spinbox into table
 
-		spinnerMaxY = gtk_spin_button_new( spinner_adj_MaxY, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMaxY = ui::SpinButton( spinner_adj_MaxY, 1.0, 0 ); // create textbox wiht value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMaxY, 2, 3, 2, 3 ); // insert spinbox into table
 
 		// put the references to the spinboxes and the worldspawn into the global exchange

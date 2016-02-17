@@ -395,14 +395,14 @@ void CreateViewWindow(){
 
 	adj = ui::Adjustment( 30, -90, 90, 1, 10, 0 );
 	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( preview_spin ), &elevation );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_box_pack_start( GTK_BOX( hbox ), spin, FALSE, TRUE, 0 );
 	g_signal_connect( G_OBJECT( spin ), "focus_out_event", G_CALLBACK( doublevariable_spinfocusout ), &elevation );
 
 	adj = ui::Adjustment( 30, 0, 359, 1, 10, 0 );
 	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( preview_spin ), &azimuth );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_spin_button_set_wrap( GTK_SPIN_BUTTON( spin ), TRUE );
 	gtk_box_pack_end( GTK_BOX( hbox ), spin, FALSE, TRUE, 0 );

@@ -19,6 +19,7 @@ using ui_menuitem = struct _GtkMenuItem;
 using ui_modal = struct ModalDialog;
 using ui_object = struct _GtkObject;
 using ui_scrolledwindow = struct _GtkScrolledWindow;
+using ui_spinbutton = struct _GtkSpinButton;
 using ui_table = struct _GtkTable;
 using ui_treemodel = struct _GtkTreeModel;
 using ui_treeview = struct _GtkTreeView;
@@ -170,11 +171,13 @@ namespace ui {
          ScrolledWindow();
     );
 
+    WRAP(SpinButton, Widget, ui_spinbutton,
+         SpinButton(Adjustment adjustment, double climb_rate, std::size_t digits);
+    );
+
     WRAP(Table, Widget, ui_table,
          Table(std::size_t rows, std::size_t columns, bool homogenous);
     );
-
-    WRAP(SpinButton, Widget, ui_widget,);
 
     WRAP(TreeModel, Widget, ui_treemodel,);
 

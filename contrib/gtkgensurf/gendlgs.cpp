@@ -1516,7 +1516,7 @@ GtkWidget* create_main_dialog(){
 
 	adj = ui::Adjustment( 1, 1, 32767, 1, 10, 0 );
 	g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( general_random ), NULL );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_table_attach( GTK_TABLE( table2 ), spin, 1, 2, 3, 4,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1650,7 +1650,7 @@ GtkWidget* create_main_dialog(){
 
 	adj = ui::Adjustment( 8, 1, MAX_ROWS, 1, 10, 0 );
 	g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( extents_nhnv_spin ), &NH );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_table_attach( GTK_TABLE( table ), spin, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1660,7 +1660,7 @@ GtkWidget* create_main_dialog(){
 
 	adj = ui::Adjustment( 8, 1, MAX_ROWS, 1, 10, 0 );
 	g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( extents_nhnv_spin ), &NV );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_table_attach( GTK_TABLE( table ), spin, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1682,7 +1682,7 @@ GtkWidget* create_main_dialog(){
 
 	adj = ui::Adjustment( 8, 0, 256, 1, 10, 0 );
 	g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( extents_snaptogrid_spin ), &SP );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_box_pack_start( GTK_BOX( vbox ), spin, FALSE, TRUE, 0 );
 	gtk_widget_set_usize( spin, 60, -2 );
@@ -1942,7 +1942,7 @@ GtkWidget* create_main_dialog(){
 
 	adj = ui::Adjustment( 0, -65536, 65536, 1, 16, 0 );
 	g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( fix_value_changed ), NULL );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_table_attach( GTK_TABLE( table ), spin, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
@@ -2058,7 +2058,7 @@ GtkWidget* create_main_dialog(){
 	gtk_box_pack_start( GTK_BOX( hbox2 ), label, FALSE, TRUE, 0 );
 
 	adj = ui::Adjustment( 60, 0, 90, 1, 10, 0 );
-	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
+	spin = ui::SpinButton( adj, 1, 0 );
 	gtk_widget_show( spin );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), spin, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "tex_slant", spin );

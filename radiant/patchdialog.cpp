@@ -902,11 +902,11 @@ ui::Window PatchInspector::BuildDialog(){
 							// so we need to have at least one initialisation somewhere
 							entry_set_float( entry, g_pi_globals.shift[0] );
 
-							GtkAdjustment* adj = ui::Adjustment( 0, -8192, 8192, 1, 1, 0 );
+							auto adj = ui::Adjustment( 0, -8192, 8192, 1, 1, 0 );
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "hshift_adj", adj );
 
-							GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 0 ) );
+							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
 											  (GtkAttachOptions)( 0 ),
@@ -923,11 +923,11 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
 							entry_set_float( entry, g_pi_globals.shift[1] );
 
-							GtkAdjustment* adj = ui::Adjustment( 0, -8192, 8192, 1, 1, 0 );
+							auto adj = ui::Adjustment( 0, -8192, 8192, 1, 1, 0 );
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "vshift_adj", adj );
 
-							GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 0 ) );
+							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
 											  (GtkAttachOptions)( 0 ),
@@ -944,11 +944,11 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
 							entry_set_float( entry, g_pi_globals.scale[0] );
 
-							GtkAdjustment* adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
+							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "hscale_adj", adj );
 
-							GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 0 ) );
+							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
 											  (GtkAttachOptions)( 0 ),
@@ -965,11 +965,11 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
 							entry_set_float( entry, g_pi_globals.scale[1] );
 
-							GtkAdjustment* adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
+							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "vscale_adj", adj );
 
-							GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 0 ) );
+							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 3, 4,
 											  (GtkAttachOptions)( 0 ),
@@ -986,11 +986,11 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
 							entry_set_float( entry, g_pi_globals.rotate );
 
-							GtkAdjustment* adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 ); // NOTE: Arnout - this really should be 360 but can't change it anymore as it could break existing maps
+							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 ); // NOTE: Arnout - this really should be 360 but can't change it anymore as it could break existing maps
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "rotate_adj", adj );
 
-							GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 0 ) );
+							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 4, 5,
 											  (GtkAttachOptions)( 0 ),
