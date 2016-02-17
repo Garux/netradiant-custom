@@ -3,6 +3,7 @@
 
 #include <string>
 
+using ui_adjustment = struct _GtkAdjustment;
 using ui_alignment = struct _GtkAlignment;
 using ui_box = struct _GtkBox;
 using ui_button = struct _GtkButton;
@@ -16,6 +17,7 @@ using ui_label = struct _GtkLabel;
 using ui_menu = struct _GtkMenu;
 using ui_menuitem = struct _GtkMenuItem;
 using ui_modal = struct ModalDialog;
+using ui_object = struct _GtkObject;
 using ui_scrolledwindow = struct _GtkScrolledWindow;
 using ui_table = struct _GtkTable;
 using ui_treemodel = struct _GtkTreeModel;
@@ -54,21 +56,26 @@ namespace ui {
         NO,
     };
 
-    template<class Self, class T>
-    class Convertible {
-    public:
-        T *handle() const
-        { return (T *) static_cast<const Self *>(this)->_handle; }
+    template<class Self, class T, bool implicit = true>
+    struct Convertible;
 
+    template<class Self, class T>
+    struct Convertible<Self, T, true> {
         operator T *() const
-        { return handle(); }
+        { return reinterpret_cast<T *>(static_cast<const Self *>(this)->_handle); }
     };
 
-    class Base {
+    template<class Self, class T>
+    struct Convertible<Self, T, false> {
+        explicit operator T *() const
+        { return reinterpret_cast<T *>(static_cast<const Self *>(this)->_handle); }
+    };
+
+    class Object : public Convertible<Object, ui_object, false> {
     public:
         void *_handle;
 
-        Base(void *h) : _handle(h)
+        Object(void *h) : _handle(h)
         { }
 
         explicit operator bool() const
@@ -81,12 +88,12 @@ namespace ui {
         { return _handle; }
     };
 
-    static_assert(sizeof(Base) == sizeof(ui_widget *), "object slicing");
+    static_assert(sizeof(Object) == sizeof(ui_widget *), "object slicing");
 
-    class Widget : public Base, public Convertible<Widget, ui_widget> {
+    class Widget : public Object, public Convertible<Widget, ui_widget> {
     public:
         using native = ui_widget;
-        explicit Widget(ui_widget *h = nullptr) : Base((void *) h)
+        explicit Widget(ui_widget *h = nullptr) : Object((void *) h)
         { }
 
         alert_response alert(std::string text, std::string title = "NetRadiant",
@@ -97,7 +104,7 @@ namespace ui {
                                 bool want_save = false);
     };
 
-    static_assert(sizeof(Widget) == sizeof(Base), "object slicing");
+    static_assert(sizeof(Widget) == sizeof(Object), "object slicing");
 
     extern Widget root;
 
@@ -109,6 +116,13 @@ namespace ui {
         methods \
     }; \
     static_assert(sizeof(name) == sizeof(super), "object slicing")
+
+    WRAP(Adjustment, Widget, ui_adjustment,
+         Adjustment(double value,
+                    double lower, double upper,
+                    double step_increment, double page_increment,
+                    double page_size);
+    );
 
     WRAP(Alignment, Widget, ui_alignment,
          Alignment(float xalign, float yalign, float xscale, float yscale);

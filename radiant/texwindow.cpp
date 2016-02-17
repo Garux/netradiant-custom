@@ -1987,7 +1987,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 		gtk_widget_show( GTK_WIDGET( g_TextureBrowser.m_treeViewTree ) );
 	}
 	{ // gl_widget scrollbar
-		ui::Widget w = ui::Widget(gtk_vscrollbar_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,0,1,1,0 ) ) ));
+		ui::Widget w = ui::Widget(gtk_vscrollbar_new( ui::Adjustment( 0,0,0,1,1,0 ) ));
 		gtk_table_attach( GTK_TABLE( table ), w, 2, 3, 1, 2, GTK_SHRINK, GTK_FILL, 0, 0 );
 		gtk_widget_show( w );
 		g_TextureBrowser.m_texture_scroll = w;
@@ -2361,7 +2361,7 @@ void RefreshShaders(){
 	ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Shaders" );
 	GlobalShaderSystem().refresh();
 	UpdateAllWindows();
-	GtkTreeSelection* selection = gtk_tree_view_get_selection((GtkTreeView*) GlobalTextureBrowser().m_treeViewTree.handle());
+	GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(GlobalTextureBrowser().m_treeViewTree));
 	GtkTreeModel* model = NULL;
 	GtkTreeIter iter;
 	if ( gtk_tree_selection_get_selected (selection, &model, &iter) )

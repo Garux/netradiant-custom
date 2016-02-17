@@ -84,6 +84,13 @@ namespace ui {
         return g_signal_connect(G_OBJECT(*this), "key-press-event", (GCallback) +func, &pass);
     }
 
+    Adjustment::Adjustment(double value,
+                           double lower, double upper,
+                           double step_increment, double page_increment,
+                           double page_size)
+            : Adjustment(GTK_ADJUSTMENT(gtk_adjustment_new(value, lower, upper, step_increment, page_increment, page_size)))
+    { }
+
     Alignment::Alignment(float xalign, float yalign, float xscale, float yscale)
             : Alignment(GTK_ALIGNMENT(gtk_alignment_new(xalign, yalign, xscale, yscale)))
     { }

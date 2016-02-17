@@ -1606,7 +1606,7 @@ void EverySecondTimer_disable(){
 }
 
 gint window_realize_remove_decoration( ui::Widget widget, gpointer data ){
-	gdk_window_set_decorations( widget.handle()->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
+	gdk_window_set_decorations( GTK_WIDGET(widget)->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
 	return FALSE;
 }
 

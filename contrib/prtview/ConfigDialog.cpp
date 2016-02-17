@@ -245,7 +245,6 @@ void DoConfigDialog(){
 	GtkWidget *transslider, *translabel, *clipslider, *cliplabel;
 	GtkWidget *show2check, *show3check, *portalcheck;
 	int loop = 1, ret = IDCANCEL;
-	GtkObject *adj;
 
 	dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	gtk_window_set_title( GTK_WINDOW( dlg ), "Portal Viewer Configuration" );
@@ -274,7 +273,7 @@ void DoConfigDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, TRUE, 0 );
 
-	adj = gtk_adjustment_new( portals.width_3d, 2, 40, 1, 1, 0 );
+	auto adj = ui::Adjustment( portals.width_3d, 2, 40, 1, 1, 0 );
 	lw3slider = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
 	gtk_widget_show( lw3slider );
 	gtk_box_pack_start( GTK_BOX( hbox ), lw3slider, TRUE, TRUE, 0 );
@@ -283,7 +282,7 @@ void DoConfigDialog(){
 	lw3label = ui::Label( "" );
 	gtk_widget_show( lw3label );
 	gtk_box_pack_start( GTK_BOX( hbox ), lw3label, FALSE, TRUE, 0 );
-	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScroll3d ), lw3label );
+	gtk_signal_connect( GTK_OBJECT(adj), "value_changed", GTK_SIGNAL_FUNC( OnScroll3d ), lw3label );
 
 	table = ui::Table( 2, 4, FALSE );
 	gtk_widget_show( table );
@@ -365,7 +364,7 @@ void DoConfigDialog(){
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
 	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
 
-	adj = gtk_adjustment_new( portals.trans_3d, 0, 100, 1, 1, 0 );
+	adj = ui::Adjustment( portals.trans_3d, 0, 100, 1, 1, 0 );
 	transslider = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
 	gtk_widget_show( transslider );
 	gtk_table_attach( GTK_TABLE( table ), transslider, 0, 1, 0, 1,
@@ -379,9 +378,9 @@ void DoConfigDialog(){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_misc_set_alignment( GTK_MISC( translabel ), 0.0, 0.0 );
-	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScrollTrans ), translabel );
+	gtk_signal_connect( GTK_OBJECT(adj), "value_changed", GTK_SIGNAL_FUNC( OnScrollTrans ), translabel );
 
-	adj = gtk_adjustment_new( portals.clip_range, 1, 128, 1, 1, 0 );
+	adj = ui::Adjustment( portals.clip_range, 1, 128, 1, 1, 0 );
 	clipslider = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
 	gtk_widget_show( clipslider );
 	gtk_table_attach( GTK_TABLE( table ), clipslider, 0, 1, 1, 2,
@@ -395,7 +394,7 @@ void DoConfigDialog(){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_misc_set_alignment( GTK_MISC( cliplabel ), 0.0, 0.0 );
-	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScrollClip ), cliplabel );
+	gtk_signal_connect( GTK_OBJECT(adj), "value_changed", GTK_SIGNAL_FUNC( OnScrollClip ), cliplabel );
 
 	hbox = ui::HBox( TRUE, 5 );
 	gtk_widget_show( hbox );
@@ -424,7 +423,7 @@ void DoConfigDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
-	adj = gtk_adjustment_new( portals.width_2d, 2, 40, 1, 1, 0 );
+	adj = ui::Adjustment( portals.width_2d, 2, 40, 1, 1, 0 );
 	lw2slider = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
 	gtk_widget_show( lw2slider );
 	gtk_box_pack_start( GTK_BOX( hbox ), lw2slider, TRUE, TRUE, 0 );
@@ -433,7 +432,7 @@ void DoConfigDialog(){
 	lw2label = ui::Label( "" );
 	gtk_widget_show( lw2label );
 	gtk_box_pack_start( GTK_BOX( hbox ), lw2label, FALSE, TRUE, 0 );
-	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScroll2d ), lw2label );
+	gtk_signal_connect( GTK_OBJECT(adj), "value_changed", GTK_SIGNAL_FUNC( OnScroll2d ), lw2label );
 
 	hbox = ui::HBox( FALSE, 5 );
 	gtk_widget_show( hbox );

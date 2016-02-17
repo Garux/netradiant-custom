@@ -849,7 +849,7 @@ void selection_motion( gdouble x, gdouble y, guint state, void* data ){
 }
 
 inline WindowVector windowvector_for_widget_centre( ui::Widget widget ){
-	return WindowVector( static_cast<float>( widget.handle()->allocation.width / 2 ), static_cast<float>( widget.handle()->allocation.height / 2 ) );
+	return WindowVector( static_cast<float>( GTK_WIDGET(widget)->allocation.width / 2 ), static_cast<float>(GTK_WIDGET(widget)->allocation.height / 2 ) );
 }
 
 gboolean selection_button_press_freemove( ui::Widget widget, GdkEventButton* event, WindowObserver* observer ){

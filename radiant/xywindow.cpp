@@ -946,12 +946,12 @@ void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
 	if ( ClipMode() && GlobalClipPoints_Find( mousePosition, (VIEWTYPE)m_viewType, m_fScale ) != 0 ) {
 		GdkCursor *cursor;
 		cursor = gdk_cursor_new( GDK_CROSSHAIR );
-		gdk_window_set_cursor( m_gl_widget.handle()->window, cursor );
+		gdk_window_set_cursor( GTK_WIDGET(m_gl_widget)->window, cursor );
 		gdk_cursor_unref( cursor );
 	}
 	else
 	{
-		gdk_window_set_cursor( m_gl_widget.handle()->window, 0 );
+		gdk_window_set_cursor( GTK_WIDGET(m_gl_widget)->window, 0 );
 	}
 }
 

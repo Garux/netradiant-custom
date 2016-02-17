@@ -92,7 +92,7 @@ GtkSpinButton* DialogSpinner_new( double value, double lower, double upper, int 
 	{
 		++digits;
 	}
-	GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( value, lower, upper, step, 10, 0 ) ), step, digits ) );
+	GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( ui::Adjustment( value, lower, upper, step, 10, 0 ), step, digits ) );
 	gtk_widget_show( GTK_WIDGET( spin ) );
 	gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
 	return spin;
@@ -522,8 +522,8 @@ void Dialog::addSlider( ui::Widget vbox, const char* name, int& data, gboolean d
 #endif
 
 	// adjustment
-	GtkObject* adj = gtk_adjustment_new( value, lower, upper, step_increment, page_increment, 0 );
-	AddIntAdjustmentData( *GTK_ADJUSTMENT( adj ), IntImportCaller( data ), IntExportCaller( data ) );
+	auto adj = ui::Adjustment( value, lower, upper, step_increment, page_increment, 0 );
+	AddIntAdjustmentData( *GTK_ADJUSTMENT(adj), IntImportCaller( data ), IntExportCaller( data ) );
 
 	// scale
 	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 1.0, 0.0 );
