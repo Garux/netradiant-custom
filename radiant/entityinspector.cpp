@@ -1313,14 +1313,14 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 	g_signal_connect( G_OBJECT( vbox ), "destroy", G_CALLBACK( EntityInspector_destroyWindow ), 0 );
 
 	{
-		ui::Widget split1 = ui::Widget(gtk_vpaned_new());
+		ui::Widget split1 = ui::VPaned();
 		gtk_box_pack_start( GTK_BOX( vbox ), split1, TRUE, TRUE, 0 );
 		gtk_widget_show( split1 );
 
 		g_entity_split1 = split1;
 
 		{
-			ui::Widget split2 = ui::Widget(gtk_vpaned_new());
+			ui::Widget split2 = ui::VPaned();
 			gtk_paned_add1( GTK_PANED( split1 ), split2 );
 			gtk_widget_show( split2 );
 
@@ -1384,7 +1384,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 		}
 
 		{
-			ui::Widget split2 = ui::Widget(gtk_vpaned_new());
+			ui::Widget split2 = ui::VPaned();
 			gtk_paned_add2( GTK_PANED( split1 ), split2 );
 			gtk_widget_show( split2 );
 

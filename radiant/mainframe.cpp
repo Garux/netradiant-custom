@@ -2788,7 +2788,7 @@ void MainFrame::Create(){
 
 	if ( CurrentStyle() == eRegular || CurrentStyle() == eRegularLeft ) {
 		{
-			ui::Widget vsplit = ui::Widget(gtk_vpaned_new());
+			ui::Widget vsplit = ui::VPaned();
 			m_vSplit = vsplit;
 			gtk_box_pack_start( GTK_BOX( vbox ), vsplit, TRUE, TRUE, 0 );
 			gtk_widget_show( vsplit );
@@ -2798,7 +2798,7 @@ void MainFrame::Create(){
 			gtk_paned_pack2( GTK_PANED( vsplit ), console_window, FALSE, TRUE );
 
 			{
-				ui::Widget hsplit = ui::Widget(gtk_hpaned_new());
+				ui::Widget hsplit = ui::HPaned();
 				gtk_widget_show( hsplit );
 				m_hSplit = hsplit;
 				gtk_paned_add1( GTK_PANED( vsplit ), hsplit );
@@ -2809,7 +2809,7 @@ void MainFrame::Create(){
 				ui::Widget xy_window = ui::Widget(GTK_WIDGET( create_framed_widget( m_pXYWnd->GetWidget() ) ));
 
 				{
-					ui::Widget vsplit2 = ui::Widget(gtk_vpaned_new());
+					ui::Widget vsplit2 = ui::VPaned();
 					gtk_widget_show( vsplit2 );
 					m_vSplit2 = vsplit2;
 

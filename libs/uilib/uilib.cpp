@@ -136,6 +136,12 @@ namespace ui {
             GTK_MENU_ITEM((mnemonic ? gtk_menu_item_new_with_mnemonic : gtk_menu_item_new_with_label)(label)))
     { }
 
+    HPaned::HPaned() : HPaned(GTK_HPANED(gtk_hpaned_new()))
+    { }
+
+    VPaned::VPaned() : VPaned(GTK_VPANED(gtk_vpaned_new()))
+    { }
+
     ScrolledWindow::ScrolledWindow() : ScrolledWindow(GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr)))
     { }
 

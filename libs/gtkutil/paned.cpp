@@ -23,6 +23,7 @@
 
 #include <gtk/gtkhpaned.h>
 #include <gtk/gtkvpaned.h>
+#include <uilib/uilib.h>
 
 #include "frame.h"
 
@@ -62,14 +63,14 @@ PanedState g_vpaned1 = { 0.5f, -1, };
 PanedState g_vpaned2 = { 0.5f, -1, };
 
 GtkHPaned* create_split_views( GtkWidget* topleft, GtkWidget* topright, GtkWidget* botleft, GtkWidget* botright ){
-	GtkHPaned* hsplit = GTK_HPANED( gtk_hpaned_new() );
+	GtkHPaned* hsplit = ui::HPaned();
 	gtk_widget_show( GTK_WIDGET( hsplit ) );
 
 	g_signal_connect( G_OBJECT( hsplit ), "size_allocate", G_CALLBACK( hpaned_allocate ), &g_hpaned );
 	g_signal_connect( G_OBJECT( hsplit ), "notify::position", G_CALLBACK( paned_position ), &g_hpaned );
 
 	{
-		GtkVPaned* vsplit = GTK_VPANED( gtk_vpaned_new() );
+		GtkVPaned* vsplit = ui::VPaned();
 		gtk_paned_add1( GTK_PANED( hsplit ), GTK_WIDGET( vsplit ) );
 		gtk_widget_show( GTK_WIDGET( vsplit ) );
 
@@ -80,7 +81,7 @@ GtkHPaned* create_split_views( GtkWidget* topleft, GtkWidget* topright, GtkWidge
 		gtk_paned_add2( GTK_PANED( vsplit ), GTK_WIDGET( create_framed_widget( topright ) ) );
 	}
 	{
-		GtkVPaned* vsplit = GTK_VPANED( gtk_vpaned_new() );
+		GtkVPaned* vsplit = ui::VPaned();
 		gtk_paned_add2( GTK_PANED( hsplit ), GTK_WIDGET( vsplit ) );
 		gtk_widget_show( GTK_WIDGET( vsplit ) );
 

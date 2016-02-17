@@ -16,11 +16,13 @@ using ui_entry = struct _GtkEntry;
 using ui_evkey = struct _GdkEventKey;
 using ui_frame = struct _GtkFrame;
 using ui_hbox = struct _GtkHBox;
+using ui_hpaned = struct _GtkHPaned;
 using ui_label = struct _GtkLabel;
 using ui_menu = struct _GtkMenu;
 using ui_menuitem = struct _GtkMenuItem;
 using ui_modal = struct ModalDialog;
 using ui_object = struct _GtkObject;
+using ui_paned = struct _GtkPaned;
 using ui_scrolledwindow = struct _GtkScrolledWindow;
 using ui_spinbutton = struct _GtkSpinButton;
 using ui_table = struct _GtkTable;
@@ -30,6 +32,7 @@ using ui_treeview = struct _GtkTreeView;
 using ui_treeviewcolumn = struct _GtkTreeViewColumn;
 using ui_typeinst = struct _GTypeInstance;
 using ui_vbox = struct _GtkVBox;
+using ui_vpaned = struct _GtkVPaned;
 using ui_widget = struct _GtkWidget;
 using ui_window = struct _GtkWindow;
 
@@ -184,6 +187,16 @@ namespace ui {
     WRAP(MenuItem, Widget, ui_menuitem,
          MenuItem(const char *label, bool mnemonic = false);
     );
+
+    WRAP(Paned, Widget, ui_paned,);
+
+        WRAP(HPaned, Paned, ui_hpaned,
+             HPaned();
+        );
+
+        WRAP(VPaned, Paned, ui_vpaned,
+             VPaned();
+        );
 
     WRAP(ScrolledWindow, Widget, ui_scrolledwindow,
          ScrolledWindow();
