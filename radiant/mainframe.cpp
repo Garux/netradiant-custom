@@ -2733,7 +2733,7 @@ void MainFrame::Create(){
 
 	GetPlugInMgr().Init( window );
 
-	ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 0 ));
+	ui::Widget vbox = ui::VBox( FALSE, 0 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 

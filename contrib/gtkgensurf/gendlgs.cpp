@@ -1390,7 +1390,7 @@ GtkWidget* create_main_dialog(){
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
 
-	vbox = gtk_vbox_new( TRUE, 5 );
+	vbox = ui::VBox( TRUE, 5 );
 	gtk_widget_show( vbox );
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
@@ -1411,7 +1411,7 @@ GtkWidget* create_main_dialog(){
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
 
-	vbox = gtk_vbox_new( TRUE, 5 );
+	vbox = ui::VBox( TRUE, 5 );
 	gtk_widget_show( vbox );
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
@@ -1432,7 +1432,7 @@ GtkWidget* create_main_dialog(){
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
 
-	vbox = gtk_vbox_new( TRUE, 5 );
+	vbox = ui::VBox( TRUE, 5 );
 	gtk_widget_show( vbox );
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
@@ -1524,7 +1524,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_set_usize( spin, 60, -2 );
 	g_object_set_data( G_OBJECT( dlg ), "random", spin );
 
-	vbox = gtk_vbox_new( FALSE, 5 );
+	vbox = ui::VBox( FALSE, 5 );
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
@@ -1786,7 +1786,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "linearborder", check );
 	g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( extents_linearborder ), NULL );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
@@ -1892,7 +1892,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "bmp_white", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &gbmp.white_value );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
@@ -1987,7 +1987,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "fix_freeall", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( fix_freeall ), NULL );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
@@ -2134,7 +2134,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "terrain_ent", check );
 	g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( texture_terrainent ), NULL );
 
-	vbox = gtk_vbox_new( FALSE, 5 );
+	vbox = ui::VBox( FALSE, 5 );
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), vbox, FALSE, TRUE, 0 );
 

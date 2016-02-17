@@ -95,7 +95,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	gtk_object_set_data( GTK_OBJECT( window ), "ret", &ret );
 	gtk_widget_realize( window );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 

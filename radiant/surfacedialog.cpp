@@ -599,7 +599,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 
 	{
 		// replaced by only the vbox:
-		ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 5 ));
+		ui::Widget vbox = ui::VBox( FALSE, 5 );
 		gtk_widget_show( vbox );
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( vbox ) );
 		gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
@@ -948,7 +948,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
-					GtkVBox* vbox3 = GTK_VBOX( gtk_vbox_new( FALSE, 4 ) );
+					GtkVBox* vbox3 = ui::VBox( FALSE, 4 );
 					//gtk_container_set_border_width(GTK_CONTAINER(vbox3), 4);
 					gtk_widget_show( GTK_WIDGET( vbox3 ) );
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
@@ -983,7 +983,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
-					GtkVBox* vbox3 = GTK_VBOX( gtk_vbox_new( FALSE, 4 ) );
+					GtkVBox* vbox3 = ui::VBox( FALSE, 4 );
 					//gtk_container_set_border_width(GTK_CONTAINER(vbox3), 4);
 					gtk_widget_show( GTK_WIDGET( vbox3 ) );
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
@@ -1022,7 +1022,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
-					GtkVBox* vbox3 = GTK_VBOX( gtk_vbox_new( FALSE, 4 ) );
+					GtkVBox* vbox3 = ui::VBox( FALSE, 4 );
 					gtk_container_set_border_width( GTK_CONTAINER( vbox3 ), 4 );
 					gtk_widget_show( GTK_WIDGET( vbox3 ) );
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );

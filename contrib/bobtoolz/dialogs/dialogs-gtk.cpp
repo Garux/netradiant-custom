@@ -225,7 +225,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
 	gtk_widget_realize( window );
 
-	vbox = ui::Widget(gtk_vbox_new( FALSE, 10 ));
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -343,7 +343,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 
 
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -441,7 +441,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -454,7 +454,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	// ---- hbox ----
 
 
-	vbox2 = gtk_vbox_new( FALSE, 10 );
+	vbox2 = ui::VBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( hbox ), vbox2, FALSE, FALSE, 2 );
 	gtk_widget_show( vbox2 );
 
@@ -500,7 +500,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 
 
-	vbox2 = gtk_vbox_new( FALSE, 10 );
+	vbox2 = ui::VBox( FALSE, 10 );
 	gtk_box_pack_start( GTK_BOX( hbox ), vbox2, FALSE, FALSE, 2 );
 	gtk_widget_show( vbox2 );
 
@@ -615,7 +615,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_widget_realize( window );
 
 	// new vbox
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -876,7 +876,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	LoadGList( GetFilename( buffer, "plugins/bt/door-tex.txt" ), &listMainTextures );
 	LoadGList( GetFilename( buffer, "plugins/bt/door-tex-trim.txt" ), &listTrimTextures );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -1086,7 +1086,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -1257,7 +1257,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 
 
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -1326,7 +1326,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	gtk_widget_realize( window );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -1662,7 +1662,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	gtk_widget_realize( window );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -1927,7 +1927,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	gtk_widget_realize( window );
 
 	// new vbox
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::VBox( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 

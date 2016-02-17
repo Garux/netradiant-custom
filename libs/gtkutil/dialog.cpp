@@ -36,7 +36,7 @@
 #include "window.h"
 
 GtkVBox* create_dialog_vbox( int spacing, int border ){
-	GtkVBox* vbox = GTK_VBOX( gtk_vbox_new( FALSE, spacing ) );
+	GtkVBox* vbox = ui::VBox( FALSE, spacing );
 	gtk_widget_show( GTK_WIDGET( vbox ) );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), border );
 	return vbox;

@@ -1304,7 +1304,7 @@ void EntityInspector_destroyWindow( ui::Widget widget, gpointer data ){
 }
 
 ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
-	ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 2 ));
+	ui::Widget vbox = ui::VBox( FALSE, 2 );
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 2 );
 
@@ -1387,7 +1387,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 			gtk_widget_show( split2 );
 
 			{
-				ui::Widget vbox2 = ui::Widget(gtk_vbox_new( FALSE, 2 ));
+				ui::Widget vbox2 = ui::VBox( FALSE, 2 );
 				gtk_widget_show( vbox2 );
 				gtk_paned_pack1( GTK_PANED( split2 ), vbox2, FALSE, FALSE );
 
@@ -1528,7 +1528,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 				gtk_widget_show( viewport );
 				gtk_viewport_set_shadow_type( GTK_VIEWPORT( viewport ), GTK_SHADOW_NONE );
 
-				g_attributeBox = GTK_VBOX( gtk_vbox_new( FALSE, 2 ) );
+				g_attributeBox = ui::VBox( FALSE, 2 );
 				gtk_widget_show( GTK_WIDGET( g_attributeBox ) );
 
 				gtk_container_add( GTK_CONTAINER( viewport ), GTK_WIDGET( g_attributeBox ) );

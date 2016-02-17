@@ -1951,7 +1951,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 
 	ui::Widget table = ui::Widget(gtk_table_new( 3, 3, FALSE ));
 	ui::Widget frame_table;
-	ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 0 ));
+	ui::Widget vbox = ui::VBox( FALSE, 0 );
 	gtk_table_attach( GTK_TABLE( table ), vbox, 0, 1, 1, 3, GTK_FILL, GTK_FILL, 0, 0 );
 	gtk_widget_show( vbox );
 

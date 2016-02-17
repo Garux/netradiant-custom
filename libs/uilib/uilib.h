@@ -12,6 +12,7 @@ using ui_modal = struct ModalDialog;
 using ui_treemodel = struct _GtkTreeModel;
 using ui_treeview = struct _GtkTreeView;
 using ui_typeinst = struct _GTypeInstance;
+using ui_vbox = struct _GtkVBox;
 using ui_widget = struct _GtkWidget;
 using ui_window = struct _GtkWindow;
 
@@ -133,6 +134,10 @@ namespace ui {
 
     WRAP(TreeView, ui_treeview,
          TreeView(TreeModel model);
+    );
+
+    WRAP(VBox, ui_vbox,
+         VBox(bool homogenous, int spacing);
     );
 
 #undef WRAP

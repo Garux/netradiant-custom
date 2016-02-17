@@ -77,7 +77,7 @@ void DoAboutDlg(){
 	gtk_box_pack_start( GTK_BOX( hbox ), label, TRUE, TRUE, 0 );
 	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT );
 
-	vbox = gtk_vbox_new( FALSE, 0 );
+	vbox = ui::VBox( FALSE, 0 );
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), vbox, FALSE, FALSE, 0 );
 

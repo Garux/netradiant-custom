@@ -755,7 +755,7 @@ static void CreateGtkTextEditor(){
 					  G_CALLBACK( editor_delete ), 0 );
 	gtk_window_set_default_size( GTK_WINDOW( dlg ), 600, 300 );
 
-	vbox = ui::Widget(gtk_vbox_new( FALSE, 5 ));
+	vbox = ui::VBox( FALSE, 5 );
 	gtk_widget_show( vbox );
 	gtk_container_add( GTK_CONTAINER( dlg ), GTK_WIDGET( vbox ) );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );

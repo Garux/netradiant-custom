@@ -573,7 +573,7 @@ ui::Window PatchInspector::BuildDialog(){
 
 
 	{
-		GtkVBox* vbox = GTK_VBOX( gtk_vbox_new( FALSE, 5 ) );
+		GtkVBox* vbox = ui::VBox( FALSE, 5 );
 		gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 		gtk_widget_show( GTK_WIDGET( vbox ) );
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( vbox ) );
@@ -582,7 +582,7 @@ ui::Window PatchInspector::BuildDialog(){
 			gtk_widget_show( GTK_WIDGET( hbox ) );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), TRUE, TRUE, 0 );
 			{
-				GtkVBox* vbox2 = GTK_VBOX( gtk_vbox_new( FALSE, 0 ) );
+				GtkVBox* vbox2 = ui::VBox( FALSE, 0 );
 				gtk_container_set_border_width( GTK_CONTAINER( vbox2 ), 0 );
 				gtk_widget_show( GTK_WIDGET( vbox2 ) );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox2 ), TRUE, TRUE, 0 );
@@ -591,7 +591,7 @@ ui::Window PatchInspector::BuildDialog(){
 					gtk_widget_show( GTK_WIDGET( frame ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 					{
-						GtkVBox* vbox3 = GTK_VBOX( gtk_vbox_new( FALSE, 5 ) );
+						GtkVBox* vbox3 = ui::VBox( FALSE, 5 );
 						gtk_container_set_border_width( GTK_CONTAINER( vbox3 ), 5 );
 						gtk_widget_show( GTK_WIDGET( vbox3 ) );
 						gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
@@ -738,7 +738,7 @@ ui::Window PatchInspector::BuildDialog(){
 					gtk_widget_show( GTK_WIDGET( frame ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 					{
-						GtkVBox* vbox3 = GTK_VBOX( gtk_vbox_new( FALSE, 5 ) );
+						GtkVBox* vbox3 = ui::VBox( FALSE, 5 );
 						gtk_container_set_border_width( GTK_CONTAINER( vbox3 ), 5 );
 						gtk_widget_show( GTK_WIDGET( vbox3 ) );
 						gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
@@ -806,7 +806,7 @@ ui::Window PatchInspector::BuildDialog(){
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
-					GtkVBox* vbox2 = GTK_VBOX( gtk_vbox_new( FALSE, 5 ) );
+					GtkVBox* vbox2 = ui::VBox( FALSE, 5 );
 					gtk_widget_show( GTK_WIDGET( vbox2 ) );
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox2 ) );
 					gtk_container_set_border_width( GTK_CONTAINER( vbox2 ), 5 );

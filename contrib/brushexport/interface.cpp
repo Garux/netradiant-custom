@@ -47,7 +47,7 @@ create_w_plugplug2( void ){
 	gtk_window_set_position( GTK_WINDOW( w_plugplug2 ), GTK_WIN_POS_CENTER );
 	gtk_window_set_destroy_with_parent( GTK_WINDOW( w_plugplug2 ), TRUE );
 
-	vbox1 = gtk_vbox_new( FALSE, 0 );
+	vbox1 = ui::VBox( FALSE, 0 );
 	gtk_widget_set_name( vbox1, "vbox1" );
 	gtk_widget_show( vbox1 );
 	gtk_container_add( GTK_CONTAINER( w_plugplug2 ), vbox1 );
@@ -59,7 +59,7 @@ create_w_plugplug2( void ){
 	gtk_box_pack_start( GTK_BOX( vbox1 ), hbox2, FALSE, FALSE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox2 ), 5 );
 
-	vbox4 = gtk_vbox_new( TRUE, 0 );
+	vbox4 = ui::VBox( TRUE, 0 );
 	gtk_widget_set_name( vbox4, "vbox4" );
 	gtk_widget_show( vbox4 );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox4, TRUE, FALSE, 0 );
@@ -88,7 +88,7 @@ create_w_plugplug2( void ){
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_nocollapse ), r_collapse_group );
 	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_nocollapse ) );
 
-	vbox3 = gtk_vbox_new( FALSE, 0 );
+	vbox3 = ui::VBox( FALSE, 0 );
 	gtk_widget_set_name( vbox3, "vbox3" );
 	gtk_widget_show( vbox3 );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox3, FALSE, FALSE, 0 );
@@ -105,7 +105,7 @@ create_w_plugplug2( void ){
 	gtk_box_pack_start( GTK_BOX( vbox3 ), b_close, TRUE, FALSE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( b_close ), 5 );
 
-	vbox2 = gtk_vbox_new( FALSE, 5 );
+	vbox2 = ui::VBox( FALSE, 5 );
 	gtk_widget_set_name( vbox2, "vbox2" );
 	gtk_widget_show( vbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox1 ), vbox2, TRUE, TRUE, 0 );

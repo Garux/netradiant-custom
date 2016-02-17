@@ -666,7 +666,7 @@ ui::Widget PreferencePages_addPage( ui::Widget notebook, const char* name ){
 	gtk_container_set_border_width( GTK_CONTAINER( pageframe ), 4 );
 	gtk_widget_show( pageframe );
 
-	ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 4 ));
+	ui::Widget vbox = ui::VBox( FALSE, 4 );
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 4 );
 	gtk_container_add( GTK_CONTAINER( pageframe ), vbox );
@@ -704,7 +704,7 @@ ui::Window PrefsDlg::BuildDialog(){
 	ui::Window dialog = ui::Window(create_floating_window( "NetRadiant Preferences", m_parent ));
 
 	{
-		ui::Widget mainvbox = ui::Widget(gtk_vbox_new( FALSE, 5 ));
+		ui::Widget mainvbox = ui::VBox( FALSE, 5 );
 		gtk_container_add( GTK_CONTAINER( dialog ), mainvbox );
 		gtk_container_set_border_width( GTK_CONTAINER( mainvbox ), 5 );
 		gtk_widget_show( mainvbox );

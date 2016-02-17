@@ -148,7 +148,7 @@ ui::Window FindTextureDialog::BuildDialog(){
 	gtk_container_add( GTK_CONTAINER( dlg ), GTK_WIDGET( hbox ) );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 5 );
 
-	vbox = ui::Widget(gtk_vbox_new( FALSE, 5 ));
+	vbox = ui::VBox( FALSE, 5 );
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
 
@@ -197,7 +197,7 @@ ui::Window FindTextureDialog::BuildDialog(){
 	gtk_box_pack_start( GTK_BOX( vbox ), check, TRUE, TRUE, 0 );
 	AddDialogData( *GTK_TOGGLE_BUTTON( check ), m_bSelectedOnly );
 
-	vbox = ui::Widget(gtk_vbox_new( FALSE, 5 ));
+	vbox = ui::VBox( FALSE, 5 );
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), FALSE, FALSE, 0 );
 
