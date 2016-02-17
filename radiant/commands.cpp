@@ -474,7 +474,7 @@ public:
 		GtkButton* clearbutton = create_dialog_button( "Clear", (GCallback) accelerator_clear_button_clicked, &dialog );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( clearbutton ), FALSE, FALSE, 0 );
 
-		ui::Widget spacer = ui::Widget(gtk_image_new());
+		ui::Widget spacer = ui::Image();
 		gtk_widget_show( spacer );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( spacer ), TRUE, TRUE, 0 );
 

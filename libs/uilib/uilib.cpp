@@ -137,6 +137,9 @@ namespace ui {
     HBox::HBox(bool homogenous, int spacing) : HBox(GTK_HBOX(gtk_hbox_new(homogenous, spacing)))
     { }
 
+    Image::Image() : Image(GTK_IMAGE(gtk_image_new()))
+    { }
+
     Label::Label(const char *label) : Label(GTK_LABEL(gtk_label_new(label)))
     { }
 

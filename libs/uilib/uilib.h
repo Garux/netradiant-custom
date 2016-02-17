@@ -17,6 +17,7 @@ using ui_evkey = struct _GdkEventKey;
 using ui_frame = struct _GtkFrame;
 using ui_hbox = struct _GtkHBox;
 using ui_hpaned = struct _GtkHPaned;
+using ui_image = struct _GtkImage;
 using ui_label = struct _GtkLabel;
 using ui_menu = struct _GtkMenu;
 using ui_menuitem = struct _GtkMenuItem;
@@ -179,6 +180,10 @@ namespace ui {
 
     WRAP(HBox, Box, ui_hbox,
          HBox(bool homogenous, int spacing);
+    );
+
+    WRAP(Image, Widget, ui_image,
+         Image();
     );
 
     WRAP(Label, Widget, ui_label,
