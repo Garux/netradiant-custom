@@ -73,15 +73,19 @@ namespace ui {
 
     std::uint64_t Window::on_key_press(bool (*f)(Widget widget, ui_evkey *event, void *extra), void *extra)
     {
-        auto pass = std::make_tuple(f, extra);
-        auto func = [](ui_widget *widget, GdkEventKey *event, void *pass_) -> bool {
-            using pass_t = decltype(pass);
-            auto &args = *(pass_t *) pass_;
-            auto func = std::get<0>(args);
-            auto pass = std::get<1>(args);
-            return func(Widget(widget), event, pass);
+        using f_t = decltype(f);
+        struct user_data {
+            f_t f;
+            void *extra;
+        } *pass = new user_data{f, extra};
+        auto dtor = [](user_data *data, GClosure *) {
+            delete data;
         };
-        return g_signal_connect(G_OBJECT(*this), "key-press-event", (GCallback) +func, &pass);
+        auto func = [](ui_widget *widget, GdkEventKey *event, user_data *args) -> bool {
+            return args->f(Widget(widget), event, args->extra);
+        };
+        auto clos = g_cclosure_new(G_CALLBACK(+func), pass, reinterpret_cast<GClosureNotify>(+dtor));
+        return g_signal_connect_closure(G_OBJECT(*this), "key-press-event", clos, false);
     }
 
     AccelGroup::AccelGroup() : AccelGroup(GTK_ACCEL_GROUP(gtk_accel_group_new()))
