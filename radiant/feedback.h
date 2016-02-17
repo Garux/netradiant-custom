@@ -171,13 +171,13 @@ void draw2D( VIEWTYPE viewType ){
 	}
 }
 void destroyWindow(){
-	if ( GetWidget() != 0 ) {
+	if ( GetWidget() ) {
 		Destroy();
 	}
 }
 //  void HideDlg();
 protected:
-GtkWindow* BuildDialog();
+ui::Window BuildDialog();
 };
 
 extern CDbgDlg g_DbgDlg;

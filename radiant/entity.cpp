@@ -45,6 +45,8 @@
 #include "qe3.h"
 #include "commands.h"
 
+#include "uilib/uilib.h"
+
 struct entity_globals_t
 {
 	Vector3 color_entity;
@@ -287,7 +289,7 @@ int g_iLastLightIntensity;
 void Entity_createFromSelection( const char* name, const Vector3& origin ){
 #if 0
 	if ( string_equal_nocase( name, "worldspawn" ) ) {
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Can't create an entity with worldspawn.", "info" );
+		ui::alert( GTK_WIDGET( MainFrame_getWindow() ), "Can't create an entity with worldspawn.", "info" );
 		return;
 	}
 #endif
@@ -381,7 +383,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	}
 
 	if ( isModel ) {
-		const char* model = misc_model_dialog( GTK_WIDGET( MainFrame_getWindow() ) );
+		const char* model = misc_model_dialog(MainFrame_getWindow());
 		if ( model != 0 ) {
 			Node_getEntity( node )->setKeyValue( "model", model );
 		}
@@ -501,7 +503,7 @@ void Entity_setColour(){
 				normalize = false;
 			}
 
-			if ( color_dialog( GTK_WIDGET( MainFrame_getWindow() ), g_entity_globals.color_entity ) ) {
+			if ( color_dialog( MainFrame_getWindow(), g_entity_globals.color_entity ) ) {
 				if ( normalize ) {
 					NormalizeColor( g_entity_globals.color_entity );
 				}
@@ -517,7 +519,7 @@ void Entity_setColour(){
 	}
 }
 
-const char* misc_model_dialog( GtkWidget* parent ){
+const char* misc_model_dialog( ui::Widget parent ){
 	StringOutputStream buffer( 1024 );
 
 	buffer << g_qeglobals.m_userGamePath.c_str() << "models/";
@@ -528,7 +530,7 @@ const char* misc_model_dialog( GtkWidget* parent ){
 		buffer << g_qeglobals.m_userGamePath.c_str() << "/";
 	}
 
-	const char *filename = file_dialog( parent, TRUE, "Choose Model", buffer.c_str(), ModelLoader::Name() );
+	const char *filename = parent.file_dialog( TRUE, "Choose Model", buffer.c_str(), ModelLoader::Name() );
 	if ( filename != 0 ) {
 		// use VFS to get the correct relative path
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );

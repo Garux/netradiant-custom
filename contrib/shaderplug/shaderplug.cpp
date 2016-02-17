@@ -57,7 +57,7 @@ ShaderPlugPluginDependencies() :
 
 namespace Shaderplug
 {
-GtkWindow* g_window;
+ui::Window g_window;
 
 std::vector<const char*> archives;
 std::set<std::string> shaders;
@@ -67,7 +67,7 @@ XmlTagBuilder TagBuilder;
 void CreateTagFile();
 
 const char* init( void* hApp, void* pMainWidget ){
-	g_window = GTK_WINDOW( pMainWidget );
+	g_window = ui::Window(GTK_WINDOW( pMainWidget ));
 	return "";
 }
 const char* getName(){
@@ -81,7 +81,7 @@ const char* getCommandTitleList(){
 }
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	if ( string_equal( command, "About" ) ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ), "Shaderplug (1.0)\n\n"
+		GlobalRadiant().m_pfnMessageBox( g_window, "Shaderplug (1.0)\n\n"
 																 "by Shaderman (shaderman@gmx.net)",
 										 "About",
 										 eMB_OK,
@@ -181,23 +181,23 @@ void CreateTagFile(){
 		strcat( message, "\nPlease restart Radiant now.\n" );
 
 		if ( file_exists( tagFile ) ) {
-			EMessageBoxReturn result = GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
+			EMessageBoxReturn result = GlobalRadiant().m_pfnMessageBox( g_window ,
 																		"WARNING! A tag file already exists! Overwrite it?", "Overwrite tag file?",
 																		eMB_NOYES,
 																		eMB_ICONWARNING );
 
 			if ( result == eIDYES ) {
 				TagBuilder.SaveXmlDoc( tagFile );
-				GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ), message, "INFO", eMB_OK, eMB_ICONASTERISK );
+				GlobalRadiant().m_pfnMessageBox( g_window, message, "INFO", eMB_OK, eMB_ICONASTERISK );
 			}
 		}
 		else {
 			TagBuilder.SaveXmlDoc( tagFile );
-			GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ), message, "INFO", eMB_OK, eMB_ICONASTERISK );
+			GlobalRadiant().m_pfnMessageBox( g_window, message, "INFO", eMB_OK, eMB_ICONASTERISK );
 		}
 	}
 	else {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_window ),
+		GlobalRadiant().m_pfnMessageBox( g_window,
 										 "No shaders or textures found. No XML tag file created!\n"
 										 "",
 										 "ERROR",

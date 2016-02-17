@@ -50,11 +50,11 @@ bool IsWindowOpen( void );
 
 namespace BrushExport
 {
-GtkWindow* g_mainwnd;
+ui::Window g_mainwnd;
 
 const char* init( void* hApp, void* pMainWidget ){
-	g_mainwnd = (GtkWindow*)pMainWidget;
-	ASSERT_NOTNULL( g_mainwnd );
+	g_mainwnd = ui::Window(GTK_WINDOW(pMainWidget));
+	ASSERT_TRUE( g_mainwnd );
 	return "";
 }
 const char* getName(){
@@ -69,7 +69,7 @@ const char* getCommandTitleList(){
 
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
 	if ( string_equal( command, "About" ) ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ), "Brushexport plugin v 2.0 by namespace (www.codecreator.net)\n"
+		GlobalRadiant().m_pfnMessageBox( g_mainwnd, "Brushexport plugin v 2.0 by namespace (www.codecreator.net)\n"
 																  "Enjoy!\n\nSend feedback to spam@codecreator.net", "About me...",
 										 eMB_OK,
 										 eMB_ICONDEFAULT );

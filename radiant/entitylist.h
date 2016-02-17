@@ -19,14 +19,15 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <uilib/uilib.h>
+
 #if !defined( INCLUDED_ENTITYLIST_H )
 #define INCLUDED_ENTITYLIST_H
 
 void EntityList_Construct();
 void EntityList_Destroy();
 
-typedef struct _GtkWindow GtkWindow;
-void EntityList_constructWindow( GtkWindow* main_window );
+void EntityList_constructWindow( ui::Window main_window );
 void EntityList_destroyWindow();
 void EntityList_toggleShown();
 

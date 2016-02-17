@@ -22,18 +22,16 @@
 #if !defined( INCLUDED_TEXWINDOW_H )
 #define INCLUDED_TEXWINDOW_H
 
+#include <uilib/uilib.h>
 #include "math/vector.h"
 #include "generic/callbackfwd.h"
 #include "signal/signalfwd.h"
 #include "xml/xmltextags.h"
 
-typedef struct _GtkWidget GtkWidget;
-
 class TextureBrowser;
 TextureBrowser& GlobalTextureBrowser();
 
-typedef struct _GtkWindow GtkWindow;
-GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel );
+ui::Widget TextureBrowser_constructWindow( ui::Window toplevel );
 void TextureBrowser_destroyWindow();
 
 
@@ -49,7 +47,7 @@ typedef Callback1<const char*> StringImportCallback;
 template<typename FirstArgument, void( *func ) (FirstArgument)>
 class FreeCaller1;
 
-extern GtkWidget* g_page_textures;
+extern ui::Widget g_page_textures;
 void TextureBrowser_exportTitle( const StringImportCallback& importer );
 typedef FreeCaller1<const StringImportCallback&, TextureBrowser_exportTitle> TextureBrowserExportTitleCaller;
 

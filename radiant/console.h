@@ -23,6 +23,7 @@
 #define INCLUDED_CONSOLE_H
 
 #include <cstddef>
+#include <uilib/uilib.h>
 
 #define SYS_VRB 0 ///< verbose support (on/off)
 #define SYS_STD 1 ///< standard print level - this is the default
@@ -35,9 +36,7 @@ class TextOutputStream;
 TextOutputStream& getSysPrintOutputStream();
 TextOutputStream& getSysPrintErrorStream();
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-GtkWidget* Console_constructWindow( GtkWindow* toplevel );
+ui::Widget Console_constructWindow( ui::Window toplevel );
 
 // will open/close the log file based on the parameter
 void Sys_LogFile( bool enable );

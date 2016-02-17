@@ -716,7 +716,7 @@ gboolean project_cell_edited( GtkCellRendererText* cell, gchar* path_string, gch
 	return FALSE;
 }
 
-gboolean project_key_press( GtkWidget* widget, GdkEventKey* event, ProjectList* projectList ){
+gboolean project_key_press( ui::Widget widget, GdkEventKey* event, ProjectList* projectList ){
 	Project& project = projectList->m_project;
 
 	if ( event->keyval == GDK_Delete ) {
@@ -818,7 +818,7 @@ gboolean commands_cell_edited( GtkCellRendererText* cell, gchar* path_string, gc
 	return FALSE;
 }
 
-gboolean commands_key_press( GtkWidget* widget, GdkEventKey* event, GtkListStore* store ){
+gboolean commands_key_press( ui::Widget widget, GdkEventKey* event, GtkListStore* store ){
 	if ( g_current_build == 0 ) {
 		return FALSE;
 	}
@@ -845,10 +845,10 @@ gboolean commands_key_press( GtkWidget* widget, GdkEventKey* event, GtkListStore
 }
 
 
-GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectList ){
-	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Build Menu", G_CALLBACK( dialog_delete_callback ), &modal, -1, 400 );
+ui::Window BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectList ){
+	ui::Window window = MainFrame_getWindow().create_dialog_window("Build Menu", G_CALLBACK(dialog_delete_callback ), &modal, -1, 400 );
 
-	GtkWidget* buildView = 0;
+	ui::Widget buildView;
 
 	{
 		GtkTable* table1 = create_dialog_table( 2, 2, 4, 4, 4 );
@@ -879,7 +879,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 				{
 					GtkListStore* store = gtk_list_store_new( 1, G_TYPE_STRING );
 
-					GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
+					ui::Widget view = ui::Widget(gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ));
 					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 					GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
@@ -916,7 +916,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 				{
 					GtkListStore* store = gtk_list_store_new( 1, G_TYPE_STRING );
 
-					GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
+					ui::Widget view = ui::Widget(gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ));
 					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 					GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
@@ -960,7 +960,7 @@ void DoBuildMenu(){
 
 	ProjectList projectList( g_build_project );
 
-	GtkWindow* window = BuildMenuDialog_construct( modal, projectList );
+	ui::Window window = BuildMenuDialog_construct( modal, projectList );
 
 	if ( modal_dialog_show( window, modal ) == eIDCANCEL ) {
 		build_commands_clear();

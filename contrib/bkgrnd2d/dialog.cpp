@@ -183,15 +183,15 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	switch ( m_vt )
 	{
 	case XY:
-		m_pTabLabel = gtk_label_new( "X/Y" );
+		m_pTabLabel = ui::Label( "X/Y" );
 		m_pImage = &backgroundXY;
 		break;
 	case XZ:
-		m_pTabLabel = gtk_label_new( "X/Z" );
+		m_pTabLabel = ui::Label( "X/Z" );
 		m_pImage = &backgroundXZ;
 		break;
 	case YZ:
-		m_pTabLabel = gtk_label_new( "Y/Z" );
+		m_pTabLabel = ui::Label( "Y/Z" );
 		m_pImage = &backgroundYZ;
 		break;
 	}
@@ -207,7 +207,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_container_add( GTK_CONTAINER( frame ), hbox );
 
 // label to display filename
-	m_pFileLabel  = gtk_label_new( NO_FILE_MSG );
+	m_pFileLabel  = ui::Label( NO_FILE_MSG );
 	gtk_label_set_selectable( GTK_LABEL( m_pFileLabel ),TRUE );
 //TODO set min size ? done with spaces right now
 	gtk_box_pack_start( GTK_BOX( hbox ),m_pFileLabel, TRUE, TRUE, 5 );
@@ -241,7 +241,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ),4 );
 	gtk_container_add( GTK_CONTAINER( frame ), hbox );
 
-	w = gtk_label_new( "Vertex alpha:" );
+	w = ui::Label( "Vertex alpha:" );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, FALSE, FALSE, 5 );
 	gtk_widget_show( w );
 

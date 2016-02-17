@@ -89,18 +89,18 @@ namespace TexTool
 {
 
 //Shamus: Textool function prototypes
-gboolean size_allocate( GtkWidget *, GtkAllocation *, gpointer );
-gboolean expose( GtkWidget *, GdkEventExpose *, gpointer );
-gboolean button_press( GtkWidget *, GdkEventButton *, gpointer );
-gboolean button_release( GtkWidget *, GdkEventButton *, gpointer );
-gboolean motion( GtkWidget *, GdkEventMotion *, gpointer );
+gboolean size_allocate( ui::Widget, GtkAllocation *, gpointer );
+gboolean expose( ui::Widget, GdkEventExpose *, gpointer );
+gboolean button_press( ui::Widget, GdkEventButton *, gpointer );
+gboolean button_release( ui::Widget, GdkEventButton *, gpointer );
+gboolean motion( ui::Widget, GdkEventMotion *, gpointer );
 void flipX( GtkToggleButton *, gpointer );
 void flipY( GtkToggleButton *, gpointer );
 
 //End Textool function prototypes
 
 //Shamus: Textool globals
-GtkWidget * g_textoolWin;
+ui::Widget g_textoolWin;
 //End Textool globals
 
 void queueDraw(){
@@ -145,7 +145,7 @@ void SurfaceInspector_GridChange();
 
 class SurfaceInspector : public Dialog
 {
-GtkWindow* BuildDialog();
+ui::Window BuildDialog();
 
 NonModalEntry m_textureEntry;
 NonModalSpinner m_hshiftSpinner;
@@ -208,7 +208,7 @@ SurfaceInspector() :
 	m_positionTracker.setPosition( c_default_window_pos );
 }
 
-void constructWindow( GtkWindow* main_window ){
+void constructWindow( ui::Window main_window ){
 	m_parent = main_window;
 	Create();
 	AddGridChangeCallback( FreeCaller<SurfaceInspector_GridChange>() );
@@ -217,7 +217,7 @@ void destroyWindow(){
 	Destroy();
 }
 bool visible() const {
-	return GTK_WIDGET_VISIBLE( const_cast<GtkWindow*>( GetWidget() ) );
+	return GTK_WIDGET_VISIBLE( GetWidget() );
 }
 void queueDraw(){
 	if ( visible() ) {
@@ -245,7 +245,7 @@ inline SurfaceInspector& getSurfaceInspector(){
 }
 }
 
-void SurfaceInspector_constructWindow( GtkWindow* main_window ){
+void SurfaceInspector_constructWindow( ui::Window main_window ){
 	getSurfaceInspector().constructWindow( main_window );
 }
 void SurfaceInspector_destroyWindow(){
@@ -400,7 +400,7 @@ void SurfaceInspector_GridChange(){
 // we move the textures in pixels, not world units. (i.e. increment values are in pixel)
 // depending on the texture scale it doesn't take the same amount of pixels to move of GetGridSize()
 // increment * scale = gridsize
-static void OnBtnMatchGrid( GtkWidget *widget, gpointer data ){
+static void OnBtnMatchGrid( ui::Widget widget, gpointer data ){
 	float hscale, vscale;
 	hscale = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
 	vscale = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
@@ -417,7 +417,7 @@ static void OnBtnMatchGrid( GtkWidget *widget, gpointer data ){
 // or update it because something new has been selected
 // Shamus: It does get called when the SI is hidden, but not when you select something new. ;-)
 void DoSurface( void ){
-	if ( getSurfaceInspector().GetWidget() == 0 ) {
+	if ( !getSurfaceInspector().GetWidget() ) {
 		getSurfaceInspector().Create();
 
 	}
@@ -441,23 +441,23 @@ void SurfaceInspector_FitTexture(){
 	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
 }
 
-static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
+static void OnBtnPatchdetails( ui::Widget widget, gpointer data ){
 	Patch_CapTexture();
 }
 
-static void OnBtnPatchnatural( GtkWidget *widget, gpointer data ){
+static void OnBtnPatchnatural( ui::Widget widget, gpointer data ){
 	Patch_NaturalTexture();
 }
 
-static void OnBtnPatchreset( GtkWidget *widget, gpointer data ){
+static void OnBtnPatchreset( ui::Widget widget, gpointer data ){
 	Patch_ResetTexture();
 }
 
-static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
+static void OnBtnPatchFit( ui::Widget widget, gpointer data ){
 	Patch_FitTexture();
 }
 
-static void OnBtnAxial( GtkWidget *widget, gpointer data ){
+static void OnBtnAxial( ui::Widget widget, gpointer data ){
 //globalOutputStream() << "--> [OnBtnAxial]...\n";
 	UndoableCommand undo( "textureDefault" );
 	TextureProjection projection;
@@ -486,7 +486,7 @@ static void OnBtnAxial( GtkWidget *widget, gpointer data ){
 	Select_SetTexdef( projection );
 }
 
-static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
+static void OnBtnFaceFit( ui::Widget widget, gpointer data ){
 	getSurfaceInspector().exportData();
 	SurfaceInspector_FitTexture();
 }
@@ -587,8 +587,8 @@ guint togglebutton_connect_toggled( GtkToggleButton* button, const Callback& cal
 	return g_signal_connect_swapped( G_OBJECT( button ), "toggled", G_CALLBACK( callback.getThunk() ), callback.getEnvironment() );
 }
 
-GtkWindow* SurfaceInspector::BuildDialog(){
-	GtkWindow* window = create_floating_window( "Surface Inspector", m_parent );
+ui::Window SurfaceInspector::BuildDialog(){
+	ui::Window window = ui::Window(create_floating_window( "Surface Inspector", m_parent ));
 
 	m_positionTracker.connect( window );
 
@@ -599,18 +599,18 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 
 	{
 		// replaced by only the vbox:
-		GtkWidget* vbox = gtk_vbox_new( FALSE, 5 );
+		ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 5 ));
 		gtk_widget_show( vbox );
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( vbox ) );
 		gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
 		{
-			GtkWidget* hbox2 = gtk_hbox_new( FALSE, 5 );
+			ui::Widget hbox2 = ui::Widget(gtk_hbox_new( FALSE, 5 ));
 			gtk_widget_show( hbox2 );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox2 ), FALSE, FALSE, 0 );
 
 			{
-				GtkWidget* label = gtk_label_new( "Texture" );
+				ui::Widget label = ui::Label( "Texture" );
 				gtk_widget_show( label );
 				gtk_box_pack_start( GTK_BOX( hbox2 ), label, FALSE, TRUE, 0 );
 			}
@@ -626,13 +626,13 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 
 
 		{
-			GtkWidget* table = gtk_table_new( 6, 4, FALSE );
+			ui::Widget table = ui::Widget(gtk_table_new( 6, 4, FALSE ));
 			gtk_widget_show( table );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( table ), FALSE, FALSE, 0 );
 			gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
 			gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
 			{
-				GtkWidget* label = gtk_label_new( "Horizontal shift" );
+				ui::Widget label = ui::Label( "Horizontal shift" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
@@ -650,7 +650,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				gtk_widget_set_usize( GTK_WIDGET( spin ), 60, -2 );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Step" );
+				ui::Widget label = ui::Label( "Step" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 0, 1,
@@ -668,7 +668,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				m_hshiftEntry.connect( entry );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Vertical shift" );
+				ui::Widget label = ui::Label( "Vertical shift" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
@@ -686,7 +686,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				gtk_widget_set_usize( GTK_WIDGET( spin ), 60, -2 );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Step" );
+				ui::Widget label = ui::Label( "Step" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 1, 2,
@@ -704,7 +704,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				m_vshiftEntry.connect( entry );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Horizontal stretch" );
+				ui::Widget label = ui::Label( "Horizontal stretch" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 2, 3,
@@ -722,7 +722,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				gtk_widget_set_usize( GTK_WIDGET( spin ), 60, -2 );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Step" );
+				ui::Widget label = ui::Label( "Step" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 2, 3,
@@ -740,7 +740,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				m_hscaleEntry.connect( entry );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Vertical stretch" );
+				ui::Widget label = ui::Label( "Vertical stretch" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 3, 4,
@@ -758,7 +758,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				gtk_widget_set_usize( GTK_WIDGET( spin ), 60, -2 );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Step" );
+				ui::Widget label = ui::Label( "Step" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 3, 4,
@@ -776,7 +776,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				m_vscaleEntry.connect( entry );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Rotate" );
+				ui::Widget label = ui::Label( "Rotate" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 4, 5,
@@ -795,7 +795,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				gtk_spin_button_set_wrap( spin, TRUE );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Step" );
+				ui::Widget label = ui::Label( "Step" );
 				gtk_widget_show( label );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0 );
 				gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 4, 5,
@@ -814,7 +814,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 			}
 			{
 				// match grid button
-				GtkWidget* button = gtk_button_new_with_label( "Match Grid" );
+				ui::Widget button = ui::Widget(gtk_button_new_with_label( "Match Grid" ));
 				gtk_widget_show( button );
 				gtk_table_attach( GTK_TABLE( table ), button, 2, 4, 5, 6,
 								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -824,46 +824,46 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 		}
 
 		{
-			GtkWidget* frame = gtk_frame_new( "Texturing" );
+			ui::Widget frame = ui::Widget(gtk_frame_new( "Texturing" ));
 			gtk_widget_show( frame );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 			{
-				GtkWidget* table = gtk_table_new( 4, 4, FALSE );
+				ui::Widget table = ui::Widget(gtk_table_new( 4, 4, FALSE ));
 				gtk_widget_show( table );
 				gtk_container_add( GTK_CONTAINER( frame ), table );
 				gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
 				gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
 				gtk_container_set_border_width( GTK_CONTAINER( table ), 5 );
 				{
-					GtkWidget* label = gtk_label_new( "Brush" );
+					ui::Widget label = ui::Label( "Brush" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Patch" );
+					ui::Widget label = ui::Label( "Patch" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 2, 3,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Width" );
+					ui::Widget label = ui::Label( "Width" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Height" );
+					ui::Widget label = ui::Label( "Height" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "Axial" );
+					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Axial" ));
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -873,7 +873,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "Fit" );
+					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Fit" ));
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -883,7 +883,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "CAP" );
+					ui::Widget button = ui::Widget(gtk_button_new_with_label( "CAP" ));
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -893,7 +893,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "Set..." );
+					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Set..." ));
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 1, 2, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -903,7 +903,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "Natural" );
+					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Natural" ));
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -913,7 +913,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "Fit" );
+					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Fit" ));
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 3, 4, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -923,7 +923,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 6 );
+					ui::Widget spin = ui::Widget(gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 6 ));
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 2, 3, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -932,7 +932,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					AddDialogData( *GTK_SPIN_BUTTON( spin ), m_fitHorizontal );
 				}
 				{
-					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 6 );
+					ui::Widget spin = ui::Widget(gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 6 ));
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 3, 4, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1041,7 +1041,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 #if TEXTOOL_ENABLED
 		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
 // Shamus: Textool goodies...
-			GtkWidget * frame = gtk_frame_new( "Textool" );
+			ui::Widget frame = gtk_frame_new( "Textool" );
 			gtk_widget_show( frame );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 			{
@@ -1063,12 +1063,12 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				g_signal_connect( G_OBJECT( TexTool::g_textoolWin ), "motion_notify_event", G_CALLBACK( TexTool::motion ), NULL );
 			}
 			{
-				GtkWidget * hbox = gtk_hbox_new( FALSE, 5 );
+				ui::Widget hbox = gtk_hbox_new( FALSE, 5 );
 				gtk_widget_show( hbox );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, FALSE, 0 );
 				// Checkboxes go here... (Flip X/Y)
-				GtkWidget * flipX = gtk_check_button_new_with_label( "Flip X axis" );
-				GtkWidget * flipY = gtk_check_button_new_with_label( "Flip Y axis" );
+				ui::Widget flipX = gtk_check_button_new_with_label( "Flip X axis" );
+				ui::Widget flipY = gtk_check_button_new_with_label( "Flip Y axis" );
 				gtk_widget_show( flipX );
 				gtk_widget_show( flipY );
 				gtk_box_pack_start( GTK_BOX( hbox ), flipX, FALSE, FALSE, 0 );
@@ -1877,14 +1877,14 @@ void focus(){
 //	<< extents.maxX << ", " << extents.minY << ", " << extents.maxY << "\n";
 }
 
-gboolean size_allocate( GtkWidget * win, GtkAllocation * a, gpointer ){
+gboolean size_allocate( ui::Widget win, GtkAllocation * a, gpointer ){
 	windowSize.x() = a->width;
 	windowSize.y() = a->height;
 	queueDraw();
 	return false;
 }
 
-gboolean expose( GtkWidget * win, GdkEventExpose * e, gpointer ){
+gboolean expose( ui::Widget win, GdkEventExpose * e, gpointer ){
 //	globalOutputStream() << "--> Textool Window was exposed!\n";
 //	globalOutputStream() << "    (window width/height: " << cc << "/" << e->area.height << ")\n";
 
@@ -1983,7 +1983,7 @@ Vector2 trans;
 Vector2 trans2;
 Vector2 dragPoint;  // Defined in terms of window space (+x/-y)
 Vector2 oldTrans;
-gboolean button_press( GtkWidget * win, GdkEventButton * e, gpointer ){
+gboolean button_press( ui::Widget win, GdkEventButton * e, gpointer ){
 //	globalOutputStream() << "--> Textool button press...\n";
 
 	if ( e->button == 1 ) {
@@ -2045,7 +2045,7 @@ gboolean button_press( GtkWidget * win, GdkEventButton * e, gpointer ){
 	return false;
 }
 
-gboolean button_release( GtkWidget * win, GdkEventButton * e, gpointer ){
+gboolean button_release( ui::Widget win, GdkEventButton * e, gpointer ){
 //	globalOutputStream() << "--> Textool button release...\n";
 
 	if ( e->button == 1 ) {
@@ -2107,7 +2107,7 @@ gboolean button_release( GtkWidget * win, GdkEventButton * e, gpointer ){
    c[1] = ((float)(y))/((float)(m_rect.bottom-m_rect.top))*(m_Maxs[1]-m_Mins[1])+m_Mins[1];
    }
  */
-gboolean motion( GtkWidget * win, GdkEventMotion * e, gpointer ){
+gboolean motion( ui::Widget win, GdkEventMotion * e, gpointer ){
 //	globalOutputStream() << "--> Textool motion...\n";
 
 	if ( lButtonDown ) {

@@ -19,6 +19,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <uilib/uilib.h>
+
 #if !defined( INCLUDED_SURFACEDIALOG_H )
 #define INCLUDED_SURFACEDIALOG_H
 
@@ -26,9 +28,7 @@
 void SurfaceInspector_Construct();
 void SurfaceInspector_Destroy();
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-void SurfaceInspector_constructWindow( GtkWindow* widget );
+void SurfaceInspector_constructWindow( ui::Window widget );
 void SurfaceInspector_destroyWindow();
 
 bool SelectedFaces_empty();

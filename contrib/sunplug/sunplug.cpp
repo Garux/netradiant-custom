@@ -268,7 +268,7 @@ void about_plugin_window(){
 	vbox = gtk_vbox_new( FALSE, 10 ); // create a box to arrange new objects vertically
 	gtk_container_add( GTK_CONTAINER( window ), vbox ); // add the box to the window
 
-	label = gtk_label_new( "SunPlug v1.0 for NetRadiant 1.5\nby Topsun" ); // create a label
+	label = ui::Label( "SunPlug v1.0 for NetRadiant 1.5\nby Topsun" ); // create a label
 	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // text align left
 	gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 2 ); // insert the label in the box
 
@@ -383,15 +383,15 @@ void MapCoordinator(){
 		gtk_table_set_col_spacings( GTK_TABLE( table ), 8 ); // set column spacings
 		gtk_box_pack_start( GTK_BOX( vbox ), table, FALSE, FALSE, 2 ); // insert table into vbox
 
-		label = gtk_label_new( "x" ); // create label
+		label = ui::Label( "x" ); // create label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 1, 2, 0, 1 ); // insert label into table
 
-		label = gtk_label_new( "y" ); // create label
+		label = ui::Label( "y" ); // create label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 2, 3, 0, 1 ); // insert label into table
 
-		label = gtk_label_new( "mapcoordsmins" ); // create label
+		label = ui::Label( "mapcoordsmins" ); // create label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 1, 2 ); // insert label into table
 
@@ -401,7 +401,7 @@ void MapCoordinator(){
 		spinnerMinY = gtk_spin_button_new( spinner_adj_MinY, 1.0, 0 ); // create textbox wiht value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMinY, 2, 3, 1, 2 ); // insert spinbox into table
 
-		label = gtk_label_new( "mapcoordsmaxs" ); // create label
+		label = ui::Label( "mapcoordsmaxs" ); // create label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 2, 3 ); // insert label into table
 
@@ -429,7 +429,7 @@ void MapCoordinator(){
 	else {
 		globalOutputStream() << "SunPlug: no worldspawn found!\n"; // output error to console
 
-		label = gtk_label_new( "ERROR: No worldspawn was found in the map!\nIn order to use this tool the map must have at least one brush in the worldspawn. " ); // create a label
+		label = ui::Label( "ERROR: No worldspawn was found in the map!\nIn order to use this tool the map must have at least one brush in the worldspawn. " ); // create a label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // text align left
 		gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 2 ); // insert the label in the box
 

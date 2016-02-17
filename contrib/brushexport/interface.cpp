@@ -111,7 +111,7 @@ create_w_plugplug2( void ){
 	gtk_box_pack_start( GTK_BOX( vbox1 ), vbox2, TRUE, TRUE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox2 ), 2 );
 
-	label1 = gtk_label_new( "Ignored materials:" );
+	label1 = ui::Label( "Ignored materials:" );
 	gtk_widget_set_name( label1, "label1" );
 	gtk_widget_show( label1 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), label1, FALSE, FALSE, 0 );
@@ -206,7 +206,7 @@ GtkWidget* g_brushexp_window = 0;
 
 // spawn plugin window (and make sure it got destroyed first or never created)
 void CreateWindow( void ){
-	ASSERT_NOTNULL( !g_brushexp_window );
+	ASSERT_TRUE( !g_brushexp_window );
 
 	GtkWidget* wnd = create_w_plugplug2();
 

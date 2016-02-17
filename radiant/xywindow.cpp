@@ -41,6 +41,7 @@
 
 #include <gtk/gtklabel.h>
 #include <gtk/gtkmenuitem.h>
+#include <uilib/uilib.h>
 
 #include "generic/callback.h"
 #include "string/string.h"
@@ -549,7 +550,7 @@ void WXY_Print(){
 	unsigned char* img;
 	const char* filename;
 
-	filename = file_dialog( GTK_WIDGET( MainFrame_getWindow() ), FALSE, "Save Image", 0, FILTER_BMP );
+	filename = ui::file_dialog( GTK_WIDGET( MainFrame_getWindow() ), FALSE, "Save Image", 0, FILTER_BMP );
 	if ( !filename ) {
 		return;
 	}
@@ -711,7 +712,7 @@ void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
 	}
 }
 
-gboolean xywnd_button_press( GtkWidget* widget, GdkEventButton* event, XYWnd* xywnd ){
+gboolean xywnd_button_press( ui::Widget widget, GdkEventButton* event, XYWnd* xywnd ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		g_pParentWnd->SetActiveXY( xywnd );
 
@@ -722,7 +723,7 @@ gboolean xywnd_button_press( GtkWidget* widget, GdkEventButton* event, XYWnd* xy
 	return FALSE;
 }
 
-gboolean xywnd_button_release( GtkWidget* widget, GdkEventButton* event, XYWnd* xywnd ){
+gboolean xywnd_button_release( ui::Widget widget, GdkEventButton* event, XYWnd* xywnd ){
 	if ( event->type == GDK_BUTTON_RELEASE ) {
 		xywnd->XY_MouseUp( static_cast<int>( event->x ), static_cast<int>( event->y ), buttons_for_event_button( event ) );
 
@@ -731,7 +732,7 @@ gboolean xywnd_button_release( GtkWidget* widget, GdkEventButton* event, XYWnd* 
 	return FALSE;
 }
 
-gboolean xywnd_focus_in( GtkWidget* widget, GdkEventFocus* event, XYWnd* xywnd ){
+gboolean xywnd_focus_in( ui::Widget widget, GdkEventFocus* event, XYWnd* xywnd ){
 	if ( event->type == GDK_FOCUS_CHANGE ) {
 		if ( event->in ) {
 			g_pParentWnd->SetActiveXY( xywnd );
@@ -747,7 +748,7 @@ void xywnd_motion( gdouble x, gdouble y, guint state, void* data ){
 	reinterpret_cast<XYWnd*>( data )->XY_MouseMoved( static_cast<int>( x ), static_cast<int>( y ), buttons_for_state( state ) );
 }
 
-gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xywnd ){
+gboolean xywnd_wheel_scroll( ui::Widget widget, GdkEventScroll* event, XYWnd* xywnd ){
 	if ( event->direction == GDK_SCROLL_UP ) {
 		XYWnd_ZoomIn( xywnd );
 	}
@@ -757,7 +758,7 @@ gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xy
 	return FALSE;
 }
 
-gboolean xywnd_size_allocate( GtkWidget* widget, GtkAllocation* allocation, XYWnd* xywnd ){
+gboolean xywnd_size_allocate( ui::Widget widget, GtkAllocation* allocation, XYWnd* xywnd ){
 	xywnd->m_nWidth = allocation->width;
 	xywnd->m_nHeight = allocation->height;
 	xywnd->updateProjection();
@@ -765,7 +766,7 @@ gboolean xywnd_size_allocate( GtkWidget* widget, GtkAllocation* allocation, XYWn
 	return FALSE;
 }
 
-gboolean xywnd_expose( GtkWidget* widget, GdkEventExpose* event, XYWnd* xywnd ){
+gboolean xywnd_expose( ui::Widget widget, GdkEventExpose* event, XYWnd* xywnd ){
 	if ( glwidget_make_current( xywnd->GetWidget() ) != FALSE ) {
 		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 			GlobalOpenGL_debugAssertNoErrors();
@@ -945,12 +946,12 @@ void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
 	if ( ClipMode() && GlobalClipPoints_Find( mousePosition, (VIEWTYPE)m_viewType, m_fScale ) != 0 ) {
 		GdkCursor *cursor;
 		cursor = gdk_cursor_new( GDK_CROSSHAIR );
-		gdk_window_set_cursor( m_gl_widget->window, cursor );
+		gdk_window_set_cursor( m_gl_widget.handle()->window, cursor );
 		gdk_cursor_unref( cursor );
 	}
 	else
 	{
-		gdk_window_set_cursor( m_gl_widget->window, 0 );
+		gdk_window_set_cursor( m_gl_widget.handle()->window, 0 );
 	}
 }
 
@@ -1059,7 +1060,7 @@ void XYWnd::NewBrushDrag( int x, int y ){
 								"textures/common/caulk" : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
 }
 
-void entitycreate_activated( GtkWidget* item ){
+void entitycreate_activated( ui::Widget item ){
 	scene::Node* world_node = Map_FindWorldspawn( g_map );
 	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
 
@@ -1067,7 +1068,7 @@ void entitycreate_activated( GtkWidget* item ){
 		g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );
 	}
 	else {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!"
+		GlobalRadiant().m_pfnMessageBox( MainFrame_getWindow(), "There's already a worldspawn in your map!"
 																			  "",
 										 "Info",
 										 eMB_OK,
@@ -1173,7 +1174,7 @@ void XYWnd_moveDelta( int x, int y, unsigned int state, void* data ){
 	reinterpret_cast<XYWnd*>( data )->Scroll( -x, y );
 }
 
-gboolean XYWnd_Move_focusOut( GtkWidget* widget, GdkEventFocus* event, XYWnd* xywnd ){
+gboolean XYWnd_Move_focusOut( ui::Widget widget, GdkEventFocus* event, XYWnd* xywnd ){
 	xywnd->Move_End();
 	return FALSE;
 }
@@ -1183,13 +1184,13 @@ void XYWnd::Move_Begin(){
 		Move_End();
 	}
 	m_move_started = true;
-	g_xywnd_freezePointer.freeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), XYWnd_moveDelta, this );
+	g_xywnd_freezePointer.freeze_pointer( m_parent  ? m_parent : MainFrame_getWindow(), XYWnd_moveDelta, this );
 	m_move_focusOut = g_signal_connect( G_OBJECT( m_gl_widget ), "focus_out_event", G_CALLBACK( XYWnd_Move_focusOut ), this );
 }
 
 void XYWnd::Move_End(){
 	m_move_started = false;
-	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow() );
+	g_xywnd_freezePointer.unfreeze_pointer( m_parent ? m_parent : MainFrame_getWindow() );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_move_focusOut );
 }
 
@@ -1218,7 +1219,7 @@ void XYWnd_zoomDelta( int x, int y, unsigned int state, void* data ){
 	}
 }
 
-gboolean XYWnd_Zoom_focusOut( GtkWidget* widget, GdkEventFocus* event, XYWnd* xywnd ){
+gboolean XYWnd_Zoom_focusOut( ui::Widget widget, GdkEventFocus* event, XYWnd* xywnd ){
 	xywnd->Zoom_End();
 	return FALSE;
 }
@@ -1229,13 +1230,13 @@ void XYWnd::Zoom_Begin(){
 	}
 	m_zoom_started = true;
 	g_dragZoom = 0;
-	g_xywnd_freezePointer.freeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), XYWnd_zoomDelta, this );
+	g_xywnd_freezePointer.freeze_pointer( m_parent ? m_parent : MainFrame_getWindow(), XYWnd_zoomDelta, this );
 	m_zoom_focusOut = g_signal_connect( G_OBJECT( m_gl_widget ), "focus_out_event", G_CALLBACK( XYWnd_Zoom_focusOut ), this );
 }
 
 void XYWnd::Zoom_End(){
 	m_zoom_started = false;
-	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow() );
+	g_xywnd_freezePointer.unfreeze_pointer( m_parent ? m_parent : MainFrame_getWindow() );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_zoom_focusOut );
 }
 
@@ -1256,7 +1257,7 @@ void XYWnd::SetViewType( VIEWTYPE viewType ){
 	m_viewType = viewType;
 	updateModelview();
 
-	if ( m_parent != 0 ) {
+	if ( m_parent ) {
 		gtk_window_set_title( m_parent, ViewType_getTitle( m_viewType ) );
 	}
 }
@@ -1486,12 +1487,12 @@ void XYWnd::XY_DisableBackground( void ){
 void WXY_BackgroundSelect( void ){
 	bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
 	if ( !brushesSelected ) {
-		gtk_MessageBox( 0, "You have to select some brushes to get the bounding box for.\n",
-						"No selection", eMB_OK, eMB_ICONERROR );
+		ui::root.alert( "You have to select some brushes to get the bounding box for.\n",
+						"No selection", ui::alert_type::OK, ui::alert_icon::ERROR );
 		return;
 	}
 
-	const char *filename = file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, "Background Image", NULL, NULL );
+	const char *filename = MainFrame_getWindow().file_dialog( TRUE, "Background Image", NULL, NULL );
 	g_pParentWnd->ActiveXY()->XY_DisableBackground();
 	if ( filename ) {
 		g_pParentWnd->ActiveXY()->XY_LoadBackgroundImage( filename );
@@ -2538,19 +2539,19 @@ void ToggleShowGrid(){
 
 ToggleShown g_xy_top_shown( true );
 
-void XY_Top_Shown_Construct( GtkWindow* parent ){
+void XY_Top_Shown_Construct( ui::Window parent ){
 	g_xy_top_shown.connect( GTK_WIDGET( parent ) );
 }
 
 ToggleShown g_yz_side_shown( false );
 
-void YZ_Side_Shown_Construct( GtkWindow* parent ){
+void YZ_Side_Shown_Construct( ui::Window parent ){
 	g_yz_side_shown.connect( GTK_WIDGET( parent ) );
 }
 
 ToggleShown g_xz_front_shown( false );
 
-void XZ_Front_Shown_Construct( GtkWindow* parent ){
+void XZ_Front_Shown_Construct( ui::Window parent ){
 	g_xz_front_shown.connect( GTK_WIDGET( parent ) );
 }
 

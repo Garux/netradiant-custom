@@ -1,8 +1,9 @@
 #include <gtk/gtk.h>
+#include <uilib/uilib.h>
 
 #include "support.h"
 
-GtkWidget*
+ui::Widget
 lookup_widget( GtkWidget       *widget,
 			   const gchar     *widget_name ){
 	GtkWidget *parent, *found_widget;
@@ -29,5 +30,5 @@ lookup_widget( GtkWidget       *widget,
 	if ( !found_widget ) {
 		g_warning( "Widget not found: %s", widget_name );
 	}
-	return found_widget;
+	return ui::Widget(found_widget);
 }

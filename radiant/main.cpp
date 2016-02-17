@@ -69,6 +69,7 @@
 
 #include "iundo.h"
 
+#include "uilib/uilib.h"
 #include <gtk/gtkmain.h>
 
 #include "cmdlib.h"
@@ -309,12 +310,12 @@ bool handleMessage(){
 		ScopedLock lock( m_lock );
 #if defined _DEBUG
 		m_buffer << "Break into the debugger?\n";
-		bool handled = gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_YESNO, eMB_ICONERROR ) == eIDNO;
+		bool handled = ui::alert( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_YESNO, eMB_ICONERROR ) == eIDNO;
 		m_buffer.clear();
 		return handled;
 #else
 		m_buffer << "Please report this error to the developers\n";
-		gtk_MessageBox( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_OK, eMB_ICONERROR );
+		ui::root.alert( m_buffer.c_str(), "Radiant - Runtime Error", ui::alert_type::OK, ui::alert_icon::ERROR );
 		m_buffer.clear();
 #endif
 	}
@@ -411,7 +412,7 @@ bool check_version(){
 			<< ") doesn't match what the latest setup has configured in this directory\n"
 				"Make sure you run the right/latest editor binary you installed\n"
 			<< AppPath_get();
-		gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONDEFAULT );
+		ui::alert( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONDEFAULT );
 	}
 	return bVerIsGood;
 #else
@@ -439,7 +440,7 @@ void create_global_pid(){
 		if ( remove( g_pidFile.c_str() ) == -1 ) {
 			StringOutputStream msg( 256 );
 			msg << "WARNING: Could not delete " << g_pidFile.c_str();
-			gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONERROR );
+			ui::root.alert( msg.c_str(), "Radiant", ui::alert_type::OK, ui::alert_icon::ERROR );
 		}
 
 		// in debug, never prompt to clean registry, turn console logging auto after a failed start
@@ -449,14 +450,14 @@ void create_global_pid(){
 			   "The failure may be related to current global preferences.\n"
 			   "Do you want to reset global preferences to defaults?";
 
-		if ( gtk_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES ) {
+		if ( ui::root.alert( msg.c_str(), "Radiant - Startup Failure", ui::alert_type::YESNO, ui::alert_icon::QUESTION ) == ui::alert_response::YES ) {
 			g_GamesDialog.Reset();
 		}
 
 		msg.clear();
 		msg << "Logging console output to " << SettingsPath_get() << "radiant.log\nRefer to the log if Radiant fails to start again.";
 
-		gtk_MessageBox( 0, msg.c_str(), "Radiant - Console Log", eMB_OK );
+		ui::root.alert( msg.c_str(), "Radiant - Console Log", ui::alert_type::OK );
 #endif
 
 		// set without saving, the class is not in a coherent state yet
@@ -480,7 +481,7 @@ void remove_global_pid(){
 	if ( remove( g_pidFile.c_str() ) == -1 ) {
 		StringOutputStream msg( 256 );
 		msg << "WARNING: Could not delete " << g_pidFile.c_str();
-		gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONERROR );
+		ui::root.alert( msg.c_str(), "Radiant", ui::alert_type::OK, ui::alert_icon::ERROR );
 	}
 }
 
@@ -498,7 +499,7 @@ void create_local_pid(){
 		if ( remove( g_pidGameFile.c_str() ) == -1 ) {
 			StringOutputStream msg;
 			msg << "WARNING: Could not delete " << g_pidGameFile.c_str();
-			gtk_MessageBox( 0, msg.c_str(), "Radiant", eMB_OK, eMB_ICONERROR );
+			ui::root.alert( msg.c_str(), "Radiant", ui::alert_type::OK, ui::alert_icon::ERROR );
 		}
 
 		// in debug, never prompt to clean registry, turn console logging auto after a failed start
@@ -508,14 +509,14 @@ void create_local_pid(){
 			   "The failure may be caused by current preferences.\n"
 			   "Do you want to reset all preferences to defaults?";
 
-		if ( gtk_MessageBox( 0, msg.c_str(), "Radiant - Startup Failure", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES ) {
+		if ( ui::root.alert( msg.c_str(), "Radiant - Startup Failure", ui::alert_type::YESNO, ui::alert_icon::QUESTION ) == ui::alert_response::YES ) {
 			Preferences_Reset();
 		}
 
 		msg.clear();
 		msg << "Logging console output to " << SettingsPath_get() << "radiant.log\nRefer to the log if Radiant fails to start again.";
 
-		gtk_MessageBox( 0, msg.c_str(), "Radiant - Console Log", eMB_OK );
+		ui::root.alert( msg.c_str(), "Radiant - Console Log", ui::alert_type::OK );
 #endif
 
 		// force console logging on! (will go in prefs too)
@@ -573,8 +574,7 @@ int main( int argc, char* argv[] ){
 	}
 #endif
 
-	gtk_disable_setlocale();
-	gtk_init( &argc, &argv );
+	ui::init(argc, argv);
 
 	// redirect Gtk warnings to the console
 	g_log_set_handler( "Gdk", (GLogLevelFlags)( G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING |
@@ -650,7 +650,7 @@ int main( int argc, char* argv[] ){
 
 	remove_local_pid();
 
-	gtk_main();
+	ui::main();
 
 	// avoid saving prefs when the app is minimized
 	if ( g_pParentWnd->IsSleeping() ) {

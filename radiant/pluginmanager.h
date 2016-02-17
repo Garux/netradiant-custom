@@ -23,8 +23,8 @@
 #define INCLUDED_PLUGINMANAGER_H
 
 #include <cstddef>
+#include <uilib/uilib.h>
 
-typedef struct _GtkWidget GtkWidget;
 
 /*!
    \class IPlugin
@@ -55,7 +55,7 @@ class CPlugInManager
 {
 public:
 void Dispatch( std::size_t n, const char *p );
-void Init( GtkWidget* main_window );
+void Init( ui::Widget main_window );
 void constructMenu( PluginsVisitor& menu );
 void Shutdown();
 };

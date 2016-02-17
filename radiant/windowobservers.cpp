@@ -50,7 +50,7 @@ inline void WindowObservers_OnModifierUp( WindowObservers& observers, ModifierFl
 
 #include <gdk/gdkkeysyms.h>
 
-gboolean selection_modifier_key_press( GtkWidget* widget, GdkEventKey* event, WindowObservers& observers ){
+gboolean selection_modifier_key_press( ui::Widget widget, GdkEventKey* event, WindowObservers& observers ){
 	switch ( event->keyval )
 	{
 	case GDK_Alt_L:
@@ -72,7 +72,7 @@ gboolean selection_modifier_key_press( GtkWidget* widget, GdkEventKey* event, Wi
 	return FALSE;
 }
 
-gboolean selection_modifier_key_release( GtkWidget* widget, GdkEventKey* event, WindowObservers& observers ){
+gboolean selection_modifier_key_release( ui::Widget widget, GdkEventKey* event, WindowObservers& observers ){
 	switch ( event->keyval )
 	{
 	case GDK_Alt_L:
@@ -109,21 +109,21 @@ void WindowObservers_UpdateModifiers( WindowObservers& observers, ModifierFlags 
 	WindowObservers_UpdateModifier( observers, modifiers, c_modifierControl );
 }
 
-gboolean modifiers_button_press( GtkWidget* widget, GdkEventButton* event, WindowObservers* observers ){
+gboolean modifiers_button_press( ui::Widget widget, GdkEventButton* event, WindowObservers* observers ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		WindowObservers_UpdateModifiers( *observers, modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
 
-gboolean modifiers_button_release( GtkWidget* widget, GdkEventButton* event, WindowObservers* observers ){
+gboolean modifiers_button_release( ui::Widget widget, GdkEventButton* event, WindowObservers* observers ){
 	if ( event->type == GDK_BUTTON_RELEASE ) {
 		WindowObservers_UpdateModifiers( *observers, modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
 
-gboolean modifiers_motion( GtkWidget *widget, GdkEventMotion *event, WindowObservers* observers ){
+gboolean modifiers_motion( ui::Widget widget, GdkEventMotion *event, WindowObservers* observers ){
 	WindowObservers_UpdateModifiers( *observers, modifiers_for_state( event->state ) );
 	return FALSE;
 }
@@ -139,12 +139,12 @@ void GlobalWindowObservers_add( WindowObserver* observer ){
 	g_window_observers.push_back( observer );
 }
 
-void GlobalWindowObservers_connectTopLevel( GtkWindow* window ){
+void GlobalWindowObservers_connectTopLevel( ui::Window window ){
 	g_signal_connect( G_OBJECT( window ), "key_press_event", G_CALLBACK( selection_modifier_key_press ), &g_window_observers );
 	g_signal_connect( G_OBJECT( window ), "key_release_event", G_CALLBACK( selection_modifier_key_release ), &g_window_observers );
 }
 
-void GlobalWindowObservers_connectWidget( GtkWidget* widget ){
+void GlobalWindowObservers_connectWidget( ui::Widget widget ){
 	g_signal_connect( G_OBJECT( widget ), "button_press_event", G_CALLBACK( modifiers_button_press ), &g_window_observers );
 	g_signal_connect( G_OBJECT( widget ), "button_release_event", G_CALLBACK( modifiers_button_release ), &g_window_observers );
 	g_signal_connect( G_OBJECT( widget ), "motion_notify_event", G_CALLBACK( modifiers_motion ), &g_window_observers );

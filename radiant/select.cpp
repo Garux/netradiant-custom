@@ -870,10 +870,10 @@ struct RotateDialog
 	GtkSpinButton* x;
 	GtkSpinButton* y;
 	GtkSpinButton* z;
-	GtkWindow *window;
+	ui::Window window;
 };
 
-static gboolean rotatedlg_apply( GtkWidget *widget, RotateDialog* rotateDialog ){
+static gboolean rotatedlg_apply( ui::Widget widget, RotateDialog* rotateDialog ){
 	Vector3 eulerXYZ;
 
 	eulerXYZ[0] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->x ) );
@@ -888,7 +888,7 @@ static gboolean rotatedlg_apply( GtkWidget *widget, RotateDialog* rotateDialog )
 	return TRUE;
 }
 
-static gboolean rotatedlg_cancel( GtkWidget *widget, RotateDialog* rotateDialog ){
+static gboolean rotatedlg_cancel( ui::Widget widget, RotateDialog* rotateDialog ){
 	gtk_widget_hide( GTK_WIDGET( rotateDialog->window ) );
 
 	gtk_spin_button_set_value( rotateDialog->x, 0.0f ); // reset to 0 on close
@@ -898,21 +898,21 @@ static gboolean rotatedlg_cancel( GtkWidget *widget, RotateDialog* rotateDialog 
 	return TRUE;
 }
 
-static gboolean rotatedlg_ok( GtkWidget *widget, RotateDialog* rotateDialog ){
+static gboolean rotatedlg_ok( ui::Widget widget, RotateDialog* rotateDialog ){
 	rotatedlg_apply( widget, rotateDialog );
 	gtk_widget_hide( GTK_WIDGET( rotateDialog->window ) );
 	return TRUE;
 }
 
-static gboolean rotatedlg_delete( GtkWidget *widget, GdkEventAny *event, RotateDialog* rotateDialog ){
+static gboolean rotatedlg_delete( ui::Widget widget, GdkEventAny *event, RotateDialog* rotateDialog ){
 	rotatedlg_cancel( widget, rotateDialog );
 	return TRUE;
 }
 
 RotateDialog g_rotate_dialog;
 void DoRotateDlg(){
-	if ( g_rotate_dialog.window == NULL ) {
-		g_rotate_dialog.window = create_dialog_window( MainFrame_getWindow(), "Arbitrary rotation", G_CALLBACK( rotatedlg_delete ), &g_rotate_dialog );
+	if ( !g_rotate_dialog.window ) {
+		g_rotate_dialog.window = MainFrame_getWindow().create_dialog_window("Arbitrary rotation", G_CALLBACK(rotatedlg_delete ), &g_rotate_dialog );
 
 		GtkAccelGroup* accel = gtk_accel_group_new();
 		gtk_window_add_accel_group( g_rotate_dialog.window, accel );
@@ -924,21 +924,21 @@ void DoRotateDlg(){
 				GtkTable* table = create_dialog_table( 3, 2, 4, 4 );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 				{
-					GtkWidget* label = gtk_label_new( "  X  " );
+					ui::Widget label = ui::Label( "  X  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 0, 1,
 									  (GtkAttachOptions) ( 0 ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "  Y  " );
+					ui::Widget label = ui::Label( "  Y  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 1, 2,
 									  (GtkAttachOptions) ( 0 ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "  Z  " );
+					ui::Widget label = ui::Label( "  Z  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 2, 3,
 									  (GtkAttachOptions) ( 0 ),
@@ -1018,13 +1018,13 @@ void DoRotateDlg(){
 
 struct ScaleDialog
 {
-	GtkWidget* x;
-	GtkWidget* y;
-	GtkWidget* z;
-	GtkWindow *window;
+	ui::Widget x;
+	ui::Widget y;
+	ui::Widget z;
+	ui::Window window;
 };
 
-static gboolean scaledlg_apply( GtkWidget *widget, ScaleDialog* scaleDialog ){
+static gboolean scaledlg_apply( ui::Widget widget, ScaleDialog* scaleDialog ){
 	float sx, sy, sz;
 
 	sx = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( scaleDialog->x ) ) ) );
@@ -1040,7 +1040,7 @@ static gboolean scaledlg_apply( GtkWidget *widget, ScaleDialog* scaleDialog ){
 	return TRUE;
 }
 
-static gboolean scaledlg_cancel( GtkWidget *widget, ScaleDialog* scaleDialog ){
+static gboolean scaledlg_cancel( ui::Widget widget, ScaleDialog* scaleDialog ){
 	gtk_widget_hide( GTK_WIDGET( scaleDialog->window ) );
 
 	gtk_entry_set_text( GTK_ENTRY( scaleDialog->x ), "1.0" );
@@ -1050,13 +1050,13 @@ static gboolean scaledlg_cancel( GtkWidget *widget, ScaleDialog* scaleDialog ){
 	return TRUE;
 }
 
-static gboolean scaledlg_ok( GtkWidget *widget, ScaleDialog* scaleDialog ){
+static gboolean scaledlg_ok( ui::Widget widget, ScaleDialog* scaleDialog ){
 	scaledlg_apply( widget, scaleDialog );
 	gtk_widget_hide( GTK_WIDGET( scaleDialog->window ) );
 	return TRUE;
 }
 
-static gboolean scaledlg_delete( GtkWidget *widget, GdkEventAny *event, ScaleDialog* scaleDialog ){
+static gboolean scaledlg_delete( ui::Widget widget, GdkEventAny *event, ScaleDialog* scaleDialog ){
 	scaledlg_cancel( widget, scaleDialog );
 	return TRUE;
 }
@@ -1064,8 +1064,8 @@ static gboolean scaledlg_delete( GtkWidget *widget, GdkEventAny *event, ScaleDia
 ScaleDialog g_scale_dialog;
 
 void DoScaleDlg(){
-	if ( g_scale_dialog.window == NULL ) {
-		g_scale_dialog.window = create_dialog_window( MainFrame_getWindow(), "Arbitrary scale", G_CALLBACK( scaledlg_delete ), &g_scale_dialog );
+	if ( !g_scale_dialog.window ) {
+		g_scale_dialog.window = MainFrame_getWindow().create_dialog_window("Arbitrary scale", G_CALLBACK(scaledlg_delete ), &g_scale_dialog );
 
 		GtkAccelGroup* accel = gtk_accel_group_new();
 		gtk_window_add_accel_group( g_scale_dialog.window, accel );
@@ -1077,28 +1077,28 @@ void DoScaleDlg(){
 				GtkTable* table = create_dialog_table( 3, 2, 4, 4 );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 				{
-					GtkWidget* label = gtk_label_new( "  X  " );
+					ui::Widget label = ui::Label( "  X  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 0, 1,
 									  (GtkAttachOptions) ( 0 ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "  Y  " );
+					ui::Widget label = ui::Label( "  Y  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 1, 2,
 									  (GtkAttachOptions) ( 0 ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "  Z  " );
+					ui::Widget label = ui::Label( "  Z  " );
 					gtk_widget_show( label );
 					gtk_table_attach( table, label, 0, 1, 2, 3,
 									  (GtkAttachOptions) ( 0 ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* entry = gtk_entry_new();
+					ui::Widget entry = ui::Widget(gtk_entry_new());
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 0, 1,
@@ -1108,7 +1108,7 @@ void DoScaleDlg(){
 					g_scale_dialog.x = entry;
 				}
 				{
-					GtkWidget* entry = gtk_entry_new();
+					ui::Widget entry = ui::Widget(gtk_entry_new());
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 1, 2,
@@ -1118,7 +1118,7 @@ void DoScaleDlg(){
 					g_scale_dialog.y = entry;
 				}
 				{
-					GtkWidget* entry = gtk_entry_new();
+					ui::Widget entry = ui::Widget(gtk_entry_new());
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 2, 3,

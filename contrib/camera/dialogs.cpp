@@ -384,7 +384,7 @@ static gint ci_rename( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Name:" );
+	w = ui::Label( "Name:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -503,7 +503,7 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Name:" );
+	w = ui::Label( "Name:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -878,7 +878,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Parameters:" );
+	w = ui::Label( "Parameters:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -1032,7 +1032,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "File:" );
+	w = ui::Label( "File:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -1046,7 +1046,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Name:" );
+	w = ui::Label( "Name:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -1054,11 +1054,11 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( hbox ), g_pCamName, FALSE, FALSE, 0 );
 	gtk_widget_show( g_pCamName );
 
-	w = gtk_label_new( "Type: " );
+	w = ui::Label( "Type: " );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	w = gtk_label_new( "" );
+	w = ui::Label( "" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 	g_pCamType = GTK_LABEL( w );
@@ -1087,7 +1087,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Edit:" );
+	w = ui::Label( "Edit:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -1126,11 +1126,11 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( g_pEditModeAddRadioButton ), TRUE );
 	}
 
-	w = gtk_label_new( "Type: " );
+	w = ui::Label( "Type: " );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	w = gtk_label_new( "" );
+	w = ui::Label( "" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 	g_pPathType = GTK_LABEL( w );
@@ -1181,7 +1181,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Length (seconds):" );
+	w = ui::Label( "Length (seconds):" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -1195,20 +1195,20 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Current Time: " );
+	w = ui::Label( "Current Time: " );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	w = gtk_label_new( "0.00" );
+	w = ui::Label( "0.00" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 	g_pCurrentTime = GTK_LABEL( w );
 
-	w = gtk_label_new( " of " );
+	w = ui::Label( " of " );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	w = gtk_label_new( "0.00" );
+	w = ui::Label( "0.00" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 	g_pTotalTime = GTK_LABEL( w );
@@ -1242,7 +1242,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Events:" );
+	w = ui::Label( "Events:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 

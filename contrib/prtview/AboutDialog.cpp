@@ -20,6 +20,7 @@
 #include "AboutDialog.h"
 #include <gtk/gtk.h>
 #include <gtkutil/pointer.h>
+#include <uilib/uilib.h>
 #include "version.h"
 #include "gtkutil/pointer.h"
 
@@ -71,7 +72,7 @@ void DoAboutDlg(){
 						   "Written by Geoffrey DeWan\ngdewan@prairienet.org\n\n"
 						   "Built against NetRadiant " +radiant::version()+ "\n"
 						   __DATE__;
-	label = gtk_label_new( label_text.c_str() );
+	label = ui::Label( label_text.c_str() );
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX( hbox ), label, TRUE, TRUE, 0 );
 	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT );

@@ -388,7 +388,7 @@ void CreateViewWindow(){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, TRUE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox ), 3 );
 
-	label = gtk_label_new( "Elevation" );
+	label = ui::Label( "Elevation" );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 	gtk_box_pack_start( GTK_BOX( hbox ), label, FALSE, TRUE, 0 );
@@ -407,7 +407,7 @@ void CreateViewWindow(){
 	gtk_spin_button_set_wrap( GTK_SPIN_BUTTON( spin ), TRUE );
 	gtk_box_pack_end( GTK_BOX( hbox ), spin, FALSE, TRUE, 0 );
 
-	label = gtk_label_new( "Azimuth" );
+	label = ui::Label( "Azimuth" );
 	gtk_widget_show( label );
 	gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 	gtk_box_pack_end( GTK_BOX( hbox ), label, FALSE, TRUE, 0 );

@@ -19,14 +19,15 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <uilib/uilib.h>
+
 #if !defined( INCLUDED_FINDTEXTUREDIALOG_H )
 #define INCLUDED_FINDTEXTUREDIALOG_H
 
 void FindTextureDialog_Construct();
 void FindTextureDialog_Destroy();
 
-typedef struct _GtkWindow GtkWindow;
-void FindTextureDialog_constructWindow( GtkWindow* main_window );
+void FindTextureDialog_constructWindow( ui::Window main_window );
 void FindTextureDialog_destroyWindow();
 bool FindTextureDialog_isOpen();
 void FindTextureDialog_selectTexture( const char* name );

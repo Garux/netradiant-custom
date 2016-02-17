@@ -7,6 +7,7 @@
 #endif
 
 #include <gtk/gtk.h>
+#include <uilib/uilib.h>
 
 /*
  * Public Functions.
@@ -18,5 +19,5 @@
  * or alternatively any widget in the component, and the name of the widget
  * you want returned.
  */
-GtkWidget*  lookup_widget( GtkWidget       *widget,
+ui::Widget lookup_widget( GtkWidget       *widget,
 						   const gchar     *widget_name );

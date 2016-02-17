@@ -59,14 +59,14 @@ const char* messagebox_stock_icon( EMessageBoxIcon type ){
 	}
 }
 
-EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const char* title, EMessageBoxType type, EMessageBoxIcon icon ){
+EMessageBoxReturn gtk_MessageBox( ui::Widget parent, const char* text, const char* title, EMessageBoxType type, EMessageBoxIcon icon ){
 	ModalDialog dialog;
 	ModalDialogButton ok_button( dialog, eIDOK );
 	ModalDialogButton cancel_button( dialog, eIDCANCEL );
 	ModalDialogButton yes_button( dialog, eIDYES );
 	ModalDialogButton no_button( dialog, eIDNO );
 
-	GtkWindow* parentWindow = parent != 0 ? GTK_WINDOW( parent ) : 0;
+	GtkWindow* parentWindow = parent ? GTK_WINDOW( parent ) : nullptr;
 
 	GtkWindow* window = create_fixedsize_modal_dialog_window( parentWindow, title, dialog, 400, 100 );
 
@@ -94,7 +94,7 @@ EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const cha
 	gtk_widget_show( GTK_WIDGET( image ) );
 	gtk_box_pack_start( GTK_BOX( iconBox ), GTK_WIDGET( image ), FALSE, FALSE, 0 );
 
-	GtkLabel* label = GTK_LABEL( gtk_label_new( text ) );
+	GtkLabel* label = GTK_LABEL( ui::Label( text ) );
 	gtk_widget_show( GTK_WIDGET( label ) );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 	gtk_label_set_justify( label, GTK_JUSTIFY_LEFT );

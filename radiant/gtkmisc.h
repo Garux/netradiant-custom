@@ -32,6 +32,7 @@
 #define INCLUDED_GTKMISC_H
 
 #include <gtk/gtkmain.h>
+#include <uilib/uilib.h>
 
 inline void process_gui(){
 	while ( gtk_events_pending() )
@@ -66,10 +67,10 @@ GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* 
 
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
-bool color_dialog( GtkWidget *parent, Vector3& color, const char* title = "Choose Color" );
+bool color_dialog( ui::Widget parent, Vector3& color, const char* title = "Choose Color" );
 
 typedef struct _GtkEntry GtkEntry;
-void button_clicked_entry_browse_file( GtkWidget* widget, GtkEntry* entry );
-void button_clicked_entry_browse_directory( GtkWidget* widget, GtkEntry* entry );
+void button_clicked_entry_browse_file( ui::Widget widget, GtkEntry* entry );
+void button_clicked_entry_browse_directory( ui::Widget widget, GtkEntry* entry );
 
 #endif

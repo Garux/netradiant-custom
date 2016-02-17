@@ -52,11 +52,11 @@
 class GroupDlg
 {
 public:
-GtkWidget* m_pNotebook;
-GtkWindow* m_window;
+ui::Widget m_pNotebook;
+ui::Window m_window;
 
 GroupDlg();
-void Create( GtkWindow* parent );
+void Create( ui::Window parent );
 
 void Show(){
 	// workaround for strange gtk behaviour - modifying the contents of a window while it is not visible causes the window position to change without sending a configure_event
@@ -78,14 +78,14 @@ std::size_t g_current_page;
 std::vector<StringExportCallback> g_pages;
 }
 
-void GroupDialog_updatePageTitle( GtkWindow* window, std::size_t pageIndex ){
+void GroupDialog_updatePageTitle( ui::Window window, std::size_t pageIndex ){
 	if ( pageIndex < g_pages.size() ) {
 		g_pages[pageIndex]( PointerCaller1<GtkWindow, const char*, gtk_window_set_title>( window ) );
 	}
 }
 
 static gboolean switch_page( GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data ){
-	GroupDialog_updatePageTitle( GTK_WINDOW( data ), page_num );
+	GroupDialog_updatePageTitle( ui::Window(GTK_WINDOW( data )), page_num );
 	g_current_page = page_num;
 
 	return FALSE;
@@ -95,10 +95,10 @@ GroupDlg::GroupDlg() : m_window( 0 ){
 	m_position_tracker.setPosition( c_default_window_pos );
 }
 
-void GroupDlg::Create( GtkWindow* parent ){
-	ASSERT_MESSAGE( m_window == 0, "dialog already created" );
+void GroupDlg::Create( ui::Window parent ){
+	ASSERT_MESSAGE( !m_window, "dialog already created" );
 
-	GtkWindow* window = create_persistent_floating_window( "Entities", parent );
+	ui::Window window = ui::Window(create_persistent_floating_window( "Entities", parent ));
 
 	global_accel_connect_window( window );
 
@@ -116,21 +116,21 @@ void GroupDlg::Create( GtkWindow* parent ){
 	m_position_tracker.connect( window );
 
 	{
-		GtkWidget* notebook = gtk_notebook_new();
+		ui::Widget notebook = ui::Widget(gtk_notebook_new());
 		gtk_widget_show( notebook );
 		gtk_container_add( GTK_CONTAINER( window ), notebook );
 		gtk_notebook_set_tab_pos( GTK_NOTEBOOK( notebook ), GTK_POS_BOTTOM );
 		m_pNotebook = notebook;
 
-		g_signal_connect( G_OBJECT( notebook ), "switch_page", G_CALLBACK( switch_page ), window );
+		g_signal_connect( notebook, "switch_page", G_CALLBACK( switch_page ), window );
 	}
 }
 
 
-GtkWidget* GroupDialog_addPage( const char* tabLabel, GtkWidget* widget, const StringExportCallback& title ){
-	GtkWidget* w = gtk_label_new( tabLabel );
+ui::Widget GroupDialog_addPage( const char* tabLabel, ui::Widget widget, const StringExportCallback& title ){
+	ui::Widget w = ui::Label( tabLabel );
 	gtk_widget_show( w );
-	GtkWidget* page = gtk_notebook_get_nth_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), gtk_notebook_insert_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), widget, w, -1 ) );
+	ui::Widget page = ui::Widget(gtk_notebook_get_nth_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), gtk_notebook_insert_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), widget, w, -1 ) ));
 	g_pages.push_back( title );
 
 	return page;
@@ -147,33 +147,33 @@ void GroupDialog_ToggleShow(){
 	GroupDialog_setShown( !GroupDialog_isShown() );
 }
 
-void GroupDialog_constructWindow( GtkWindow* main_window ){
+void GroupDialog_constructWindow( ui::Window main_window ){
 	g_GroupDlg.Create( main_window );
 }
 void GroupDialog_destroyWindow(){
-	ASSERT_NOTNULL( g_GroupDlg.m_window );
+	ASSERT_TRUE( g_GroupDlg.m_window );
 	destroy_floating_window( g_GroupDlg.m_window );
-	g_GroupDlg.m_window = 0;
+	g_GroupDlg.m_window = ui::Window();
 }
 
 
-GtkWindow* GroupDialog_getWindow(){
-	return g_GroupDlg.m_window;
+ui::Window GroupDialog_getWindow(){
+	return ui::Window(g_GroupDlg.m_window);
 }
 void GroupDialog_show(){
 	g_GroupDlg.Show();
 }
 
-GtkWidget* GroupDialog_getPage(){
-	return gtk_notebook_get_nth_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), gint( g_current_page ) );
+ui::Widget GroupDialog_getPage(){
+	return ui::Widget(gtk_notebook_get_nth_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), gint( g_current_page ) ));
 }
 
-void GroupDialog_setPage( GtkWidget* page ){
+void GroupDialog_setPage( ui::Widget page ){
 	g_current_page = gtk_notebook_page_num( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), page );
 	gtk_notebook_set_current_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), gint( g_current_page ) );
 }
 
-void GroupDialog_showPage( GtkWidget* page ){
+void GroupDialog_showPage( ui::Widget page ){
 	if ( GroupDialog_getPage() == page ) {
 		GroupDialog_ToggleShow();
 	}
@@ -189,7 +189,7 @@ void GroupDialog_cycle(){
 	gtk_notebook_set_current_page( GTK_NOTEBOOK( g_GroupDlg.m_pNotebook ), gint( g_current_page ) );
 }
 
-void GroupDialog_updatePageTitle( GtkWidget* page ){
+void GroupDialog_updatePageTitle( ui::Widget page ){
 	if ( GroupDialog_getPage() == page ) {
 		GroupDialog_updatePageTitle( g_GroupDlg.m_window, g_current_page );
 	}

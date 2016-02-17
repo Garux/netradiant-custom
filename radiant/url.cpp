@@ -34,6 +34,8 @@ bool open_url( const char* url ){
 
 #if defined( __linux__ ) || defined( __FreeBSD__ )
 #include <cstdlib>
+#include <uilib/uilib.h>
+
 bool open_url( const char* url ){
 	// \todo FIXME: the way we open URLs on *nix should be improved. A script is good (see how I do on RTCW)
 	char command[2 * PATH_MAX];
@@ -56,6 +58,6 @@ void OpenURL( const char *url ){
 	// let's put a little comment
 	globalOutputStream() << "OpenURL: " << url << "\n";
 	if ( !open_url( url ) ) {
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Failed to launch browser!" );
+		MainFrame_getWindow().alert( "Failed to launch browser!" );
 	}
 }

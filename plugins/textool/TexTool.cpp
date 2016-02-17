@@ -69,7 +69,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
-	w = gtk_label_new( lpText );
+	w = ui::Label( lpText );
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );

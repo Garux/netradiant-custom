@@ -34,19 +34,19 @@
 #include <list>
 #include <map>
 
-void Widget_connectToggleDependency( GtkWidget* self, GtkWidget* toggleButton );
+void Widget_connectToggleDependency( ui::Widget self, ui::Widget toggleButton );
 
 class PreferencesPage
 {
 Dialog& m_dialog;
-GtkWidget* m_vbox;
+ui::Widget m_vbox;
 public:
-PreferencesPage( Dialog& dialog, GtkWidget* vbox ) : m_dialog( dialog ), m_vbox( vbox ){
+PreferencesPage( Dialog& dialog, ui::Widget vbox ) : m_dialog( dialog ), m_vbox( vbox ){
 }
-GtkWidget* appendCheckBox( const char* name, const char* flag, bool& data ){
+ui::CheckButton appendCheckBox( const char* name, const char* flag, bool& data ){
 	return m_dialog.addCheckBox( m_vbox, name, flag, data );
 }
-GtkWidget* appendCheckBox( const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback ){
+ui::CheckButton appendCheckBox( const char* name, const char* flag, const BoolImportCallback& importCallback, const BoolExportCallback& exportCallback ){
 	return m_dialog.addCheckBox( m_vbox, name, flag, importCallback, exportCallback );
 }
 void appendCombo( const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
@@ -70,37 +70,37 @@ void appendRadioIcons( const char* name, StringArrayRange icons, const IntImport
 void appendRadioIcons( const char* name, int& data, StringArrayRange icons ){
 	m_dialog.addRadioIcons( m_vbox, name, data, icons );
 }
-GtkWidget* appendEntry( const char* name, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+ui::Widget appendEntry( const char* name, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
 	return m_dialog.addIntEntry( m_vbox, name, importCallback, exportCallback );
 }
-GtkWidget* appendEntry( const char* name, int& data ){
+ui::Widget appendEntry( const char* name, int& data ){
 	return m_dialog.addEntry( m_vbox, name, data );
 }
-GtkWidget* appendEntry( const char* name, const SizeImportCallback& importCallback, const SizeExportCallback& exportCallback ){
+ui::Widget appendEntry( const char* name, const SizeImportCallback& importCallback, const SizeExportCallback& exportCallback ){
 	return m_dialog.addSizeEntry( m_vbox, name, importCallback, exportCallback );
 }
-GtkWidget* appendEntry( const char* name, std::size_t& data ){
+ui::Widget appendEntry( const char* name, std::size_t& data ){
 	return m_dialog.addEntry( m_vbox, name, data );
 }
-GtkWidget* appendEntry( const char* name, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
+ui::Widget appendEntry( const char* name, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
 	return m_dialog.addFloatEntry( m_vbox, name, importCallback, exportCallback );
 }
-GtkWidget* appendEntry( const char* name, float& data ){
+ui::Widget appendEntry( const char* name, float& data ){
 	return m_dialog.addEntry( m_vbox, name, data );
 }
-GtkWidget* appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
+ui::Widget appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
 	return m_dialog.addPathEntry( m_vbox, name, browse_directory, importCallback, exportCallback );
 }
-GtkWidget* appendPathEntry( const char* name, std::string& data, bool directory ){
+ui::Widget appendPathEntry( const char* name, std::string& data, bool directory ){
 	return m_dialog.addPathEntry( m_vbox, name, data, directory );
 }
-GtkWidget* appendSpinner( const char* name, int& data, double value, double lower, double upper ){
+ui::SpinButton appendSpinner( const char* name, int& data, double value, double lower, double upper ){
 	return m_dialog.addSpinner( m_vbox, name, data, value, lower, upper );
 }
-GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
+ui::SpinButton appendSpinner( const char* name, double value, double lower, double upper, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
 	return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
 }
-GtkWidget* appendSpinner( const char* name, double value, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
+ui::SpinButton appendSpinner( const char* name, double value, double lower, double upper, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback ){
 	return m_dialog.addSpinner( m_vbox, name, value, lower, upper, importCallback, exportCallback );
 }
 };
@@ -197,7 +197,6 @@ void Dump();
 
 extern CGameDescription *g_pGameDescription;
 
-typedef struct _GtkWidget GtkWidget;
 class PrefsDlg;
 
 class PreferencesPage;
@@ -272,7 +271,7 @@ void DoGameDialog();
    Dialog API
    this is only called when the dialog is built at startup for main engine select
  */
-GtkWindow* BuildDialog();
+ui::Window BuildDialog();
 
 void GameFileImport( int value );
 void GameFileExport( const IntImportCallback& importCallback ) const;
@@ -331,7 +330,7 @@ std::list<CGameDescription *> mGames;
 
 public:
 
-GtkWidget *m_notebook;
+ui::Widget m_notebook;
 
 virtual ~PrefsDlg(){
 	g_string_free( m_rc_path, true );
@@ -364,12 +363,12 @@ GString *m_inipath;
 void Init();
 
 /*! Utility function for swapping notebook pages for tree list selections */
-void showPrefPage( GtkWidget* prefpage );
+void showPrefPage( ui::Widget prefpage );
 
 protected:
 
 /*! Dialog API */
-GtkWindow* BuildDialog();
+ui::Window BuildDialog();
 void PostModal( EMessageBoxReturn code );
 };
 
@@ -384,8 +383,7 @@ struct preferences_globals_t
 };
 extern preferences_globals_t g_preferences_globals;
 
-typedef struct _GtkWindow GtkWindow;
-void PreferencesDialog_constructWindow( GtkWindow* main_window );
+void PreferencesDialog_constructWindow( ui::Window main_window );
 void PreferencesDialog_destroyWindow();
 
 void PreferencesDialog_showDialog();

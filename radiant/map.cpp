@@ -50,6 +50,7 @@ MapModules& ReferenceAPI_getMapModules();
 #include <gtk/gtktreeview.h>
 #include <gtk/gtkliststore.h>
 #include <gtk/gtkcellrenderertext.h>
+#include "uilib/uilib.h"
 
 #include "scenelib.h"
 #include "transformlib.h"
@@ -769,7 +770,7 @@ void DoMapInfo(){
 	GtkEntry* entities_entry;
 	GtkListStore* EntityBreakdownWalker;
 
-	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Map Info", G_CALLBACK( dialog_delete_callback ), &dialog );
+	ui::Window window = MainFrame_getWindow().create_dialog_window("Map Info", G_CALLBACK(dialog_delete_callback ), &dialog );
 
 	window_set_position( window, g_posMapInfoWnd );
 
@@ -806,7 +807,7 @@ void DoMapInfo(){
 					entities_entry = entry;
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Total Brushes" );
+					ui::Widget label = ui::Label( "Total Brushes" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL ),
@@ -814,7 +815,7 @@ void DoMapInfo(){
 					gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Total Entities" );
+					ui::Widget label = ui::Label( "Total Entities" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
 									  (GtkAttachOptions) ( GTK_FILL ),
@@ -833,7 +834,7 @@ void DoMapInfo(){
 			}
 		}
 		{
-			GtkWidget* label = gtk_label_new( "Entity breakdown" );
+			ui::Widget label = ui::Label( "Entity breakdown" );
 			gtk_widget_show( label );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( label ), FALSE, TRUE, 0 );
 			gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
@@ -845,7 +846,7 @@ void DoMapInfo(){
 			{
 				GtkListStore* store = gtk_list_store_new( 2, G_TYPE_STRING, G_TYPE_STRING );
 
-				GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
+				ui::Widget view = ui::Widget(gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ));
 				gtk_tree_view_set_headers_clickable( GTK_TREE_VIEW( view ), TRUE );
 
 				{
@@ -1775,15 +1776,15 @@ const char* getMapsPath(){
 }
 
 const char* map_open( const char* title ){
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, title, getMapsPath(), MapFormat::Name(), true, false, false );
+	return MainFrame_getWindow().file_dialog( TRUE, title, getMapsPath(), MapFormat::Name(), true, false, false );
 }
 
 const char* map_import( const char* title ){
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, title, getMapsPath(), MapFormat::Name(), false, true, false );
+	return MainFrame_getWindow().file_dialog( TRUE, title, getMapsPath(), MapFormat::Name(), false, true, false );
 }
 
 const char* map_save( const char* title ){
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), FALSE, title, getMapsPath(), MapFormat::Name(), false, false, true );
+	return MainFrame_getWindow().file_dialog( FALSE, title, getMapsPath(), MapFormat::Name(), false, false, true );
 }
 
 void OpenMap(){
@@ -2004,7 +2005,7 @@ void DoFind(){
 	GtkEntry* entity;
 	GtkEntry* brush;
 
-	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Find Brush", G_CALLBACK( dialog_delete_callback ), &dialog );
+	ui::Window window = MainFrame_getWindow().create_dialog_window("Find Brush", G_CALLBACK(dialog_delete_callback ), &dialog );
 
 	GtkAccelGroup* accel = gtk_accel_group_new();
 	gtk_window_add_accel_group( window, accel );
@@ -2016,14 +2017,14 @@ void DoFind(){
 			GtkTable* table = create_dialog_table( 2, 2, 4, 4 );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 			{
-				GtkWidget* label = gtk_label_new( "Entity number" );
+				ui::Widget label = ui::Label( "Entity number" );
 				gtk_widget_show( label );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
 								  (GtkAttachOptions) ( 0 ),
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkWidget* label = gtk_label_new( "Brush number" );
+				ui::Widget label = ui::Label( "Brush number" );
 				gtk_widget_show( label );
 				gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
 								  (GtkAttachOptions) ( 0 ),

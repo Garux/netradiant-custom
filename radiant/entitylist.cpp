@@ -27,6 +27,7 @@
 #include <gtk/gtktreeview.h>
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkcellrenderertext.h>
+#include <uilib/uilib.h>
 
 #include "string/string.h"
 #include "scenelib.h"
@@ -62,7 +63,7 @@ EDirty m_dirty;
 IdleDraw m_idleDraw;
 WindowPositionTracker m_positionTracker;
 
-GtkWindow* m_window;
+ui::Window m_window;
 GtkTreeView* m_tree_view;
 GraphTreeModel* m_tree_model;
 bool m_selection_disabled;
@@ -75,7 +76,7 @@ EntityList() :
 }
 
 bool visible() const {
-	return GTK_WIDGET_VISIBLE( GTK_WIDGET( m_window ) );
+	return GTK_WIDGET_VISIBLE( m_window );
 }
 };
 
@@ -282,10 +283,10 @@ void DetachEntityTreeModel(){
 	gtk_tree_view_set_model( getEntityList().m_tree_view, 0 );
 }
 
-void EntityList_constructWindow( GtkWindow* main_window ){
-	ASSERT_MESSAGE( getEntityList().m_window == 0, "error" );
+void EntityList_constructWindow( ui::Window main_window ){
+	ASSERT_TRUE( !getEntityList().m_window );
 
-	GtkWindow* window = create_persistent_floating_window( "Entity List", main_window );
+	ui::Window window = ui::Window(create_persistent_floating_window( "Entity List", main_window ));
 
 	gtk_window_add_accel_group( window, global_accel );
 
@@ -299,7 +300,7 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( scr ) );
 
 		{
-			GtkWidget* view = gtk_tree_view_new();
+			ui::Widget view = ui::Widget(gtk_tree_view_new());
 			gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 			GtkCellRenderer* renderer = gtk_cell_renderer_text_new();

@@ -23,6 +23,7 @@
 #define INCLUDED_XORRECTANGLE_H
 
 #include <gtk/gtkwidget.h>
+#include <uilib/uilib.h>
 #include "math/vector.h"
 
 class rectangle_t
@@ -92,7 +93,7 @@ void draw() const {
 }
 
 public:
-XORRectangle( GtkWidget* widget ) : m_widget( widget ), m_gc( 0 ){
+XORRectangle( ui::Widget widget ) : m_widget( widget ), m_gc( 0 ){
 }
 ~XORRectangle(){
 	if ( initialised() ) {

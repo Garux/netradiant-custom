@@ -22,12 +22,10 @@
 #include "commands.h"
 
 #include "debugging/debugging.h"
-#include "warnings.h"
 
 #include <map>
 #include "string/string.h"
 #include "versionlib.h"
-#include "gtkutil/accelerator.h"
 #include "gtkutil/messagebox.h"
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkbutton.h>
@@ -150,13 +148,9 @@ void connect_accelerator( const char *name ){
 }
 
 
-#include <cctype>
-
 #include <gtk/gtkbox.h>
-#include <gtk/gtkliststore.h>
-#include <gtk/gtktreemodel.h>
-#include <gtk/gtktreeview.h>
 #include <gtk/gtkcellrenderertext.h>
+#include <uilib/uilib.h>
 
 #include "gtkutil/dialog.h"
 #include "mainframe.h"
@@ -239,7 +233,7 @@ void accelerator_edit_button_clicked( GtkButton *btn, gpointer dialogptr ){
 	dialog.m_waiting_for_key = true;
 }
 
-gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gpointer dialogptr ){
+bool accelerator_window_key_press( ui::Widget widget, GdkEventKey *event, gpointer dialogptr ){
 	command_list_dialog_t &dialog = *(command_list_dialog_t *) dialogptr;
 
 	if ( !dialog.m_waiting_for_key ) {
@@ -293,11 +287,11 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	{
 	const char *commandName;
 	const Accelerator &newAccel;
-	GtkWidget *widget;
+	ui::Widget widget;
 	GtkTreeModel *model;
 public:
 	bool allow;
-	VerifyAcceleratorNotTaken( const char *name, const Accelerator &accelerator, GtkWidget *w, GtkTreeModel *m ) : commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
+	VerifyAcceleratorNotTaken( const char *name, const Accelerator &accelerator, ui::Widget w, GtkTreeModel *m ) : commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
 	}
 	void visit( const char* name, Accelerator& accelerator ){
 		if ( !strcmp( name, commandName ) ) {
@@ -313,8 +307,8 @@ public:
 			StringOutputStream msg;
 			msg << "The command " << name << " is already assigned to the key " << accelerator << ".\n\n"
 				<< "Do you want to unassign " << name << " first?";
-			EMessageBoxReturn r = gtk_MessageBox( widget, msg.c_str(), "Key already used", eMB_YESNOCANCEL );
-			if ( r == eIDYES ) {
+			auto r = widget.alert( msg.c_str(), "Key already used", ui::alert_type::YESNOCANCEL );
+			if ( r == ui::alert_response::YES ) {
 				// clear the ACTUAL accelerator too!
 				disconnect_accelerator( name );
 				// delete the modifier
@@ -338,7 +332,7 @@ public:
 					}
 				}
 			}
-			else if ( r == eIDCANCEL ) {
+			else if ( r == ui::alert_response::CANCEL ) {
 				// aborted
 				allow = false;
 			}
@@ -394,8 +388,10 @@ public:
 void DoCommandListDlg(){
 	command_list_dialog_t dialog;
 
-	GtkWindow* window = create_modal_dialog_window( MainFrame_getWindow(), "Mapped Commands", dialog, -1, 400 );
-	g_signal_connect( G_OBJECT( window ), "key-press-event", (GCallback) accelerator_window_key_press, &dialog );
+	ui::Window window = MainFrame_getWindow().create_modal_dialog_window("Mapped Commands", dialog, -1, 400);
+	window.on_key_press([](ui::Widget widget, GdkEventKey *event, gpointer dialogptr) {
+		return accelerator_window_key_press(widget, event, dialogptr);
+	}, &dialog);
 
 	GtkAccelGroup* accel = gtk_accel_group_new();
 	gtk_window_add_accel_group( window, accel );
@@ -410,7 +406,7 @@ void DoCommandListDlg(){
 		{
 			GtkListStore* store = gtk_list_store_new( 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_INT );
 
-			GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
+			ui::Widget view = ui::Widget(gtk_tree_view_new_with_model(GTK_TREE_MODEL(store)));
 			dialog.m_list = GTK_TREE_VIEW( view );
 
 			gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), false ); // annoying
@@ -478,7 +474,7 @@ public:
 		GtkButton* clearbutton = create_dialog_button( "Clear", (GCallback) accelerator_clear_button_clicked, &dialog );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( clearbutton ), FALSE, FALSE, 0 );
 
-		GtkWidget *spacer = gtk_image_new();
+		ui::Widget spacer = ui::Widget(gtk_image_new());
 		gtk_widget_show( spacer );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( spacer ), TRUE, TRUE, 0 );
 

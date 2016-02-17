@@ -667,8 +667,8 @@ static Shader* m_state_select2;
 FreezePointer m_freezePointer;
 
 public:
-GtkWidget* m_gl_widget;
-GtkWindow* m_parent;
+ui::Widget m_gl_widget;
+ui::Window m_parent;
 
 SelectionSystemWindowObserver* m_window_observer;
 XORRectangle m_XORRectangle;
@@ -754,17 +754,17 @@ void GlobalCamera_setCamWnd( CamWnd& camwnd ){
 }
 
 
-GtkWidget* CamWnd_getWidget( CamWnd& camwnd ){
+ui::Widget CamWnd_getWidget( CamWnd& camwnd ){
 	return camwnd.m_gl_widget;
 }
 
-GtkWindow* CamWnd_getParent( CamWnd& camwnd ){
+ui::Window CamWnd_getParent( CamWnd& camwnd ){
 	return camwnd.m_parent;
 }
 
 ToggleShown g_camera_shown( true );
 
-void CamWnd_setParent( CamWnd& camwnd, GtkWindow* parent ){
+void CamWnd_setParent( CamWnd& camwnd, ui::Window parent ){
 	camwnd.m_parent = parent;
 	g_camera_shown.connect( GTK_WIDGET( camwnd.m_parent ) );
 }
@@ -797,7 +797,7 @@ void Camera_setAngles( CamWnd& camwnd, const Vector3& angles ){
 // =============================================================================
 // CamWnd class
 
-gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
+gboolean enable_freelook_button_press( ui::Widget widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
 		camwnd->EnableFreeMove();
 		return TRUE;
@@ -805,7 +805,7 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 	return FALSE;
 }
 
-gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
+gboolean disable_freelook_button_press( ui::Widget widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
 		camwnd->DisableFreeMove();
 		return TRUE;
@@ -814,7 +814,7 @@ gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event
 }
 
 #if 0
-gboolean mousecontrol_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
+gboolean mousecontrol_button_press( ui::Widget widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
 		Cam_MouseControl( camwnd->getCamera(), event->x, widget->allocation.height - 1 - event->y );
 	}
@@ -829,14 +829,14 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 }
 
 
-gboolean selection_button_press( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
+gboolean selection_button_press( ui::Widget widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		observer->onMouseDown( WindowVector_forDouble( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
 
-gboolean selection_button_release( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
+gboolean selection_button_release( ui::Widget widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_RELEASE ) {
 		observer->onMouseUp( WindowVector_forDouble( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
@@ -848,30 +848,30 @@ void selection_motion( gdouble x, gdouble y, guint state, void* data ){
 	reinterpret_cast<WindowObserver*>( data )->onMouseMotion( WindowVector_forDouble( x, y ), modifiers_for_state( state ) );
 }
 
-inline WindowVector windowvector_for_widget_centre( GtkWidget* widget ){
-	return WindowVector( static_cast<float>( widget->allocation.width / 2 ), static_cast<float>( widget->allocation.height / 2 ) );
+inline WindowVector windowvector_for_widget_centre( ui::Widget widget ){
+	return WindowVector( static_cast<float>( widget.handle()->allocation.width / 2 ), static_cast<float>( widget.handle()->allocation.height / 2 ) );
 }
 
-gboolean selection_button_press_freemove( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
+gboolean selection_button_press_freemove( ui::Widget widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		observer->onMouseDown( windowvector_for_widget_centre( widget ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
 
-gboolean selection_button_release_freemove( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
+gboolean selection_button_release_freemove( ui::Widget widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_RELEASE ) {
 		observer->onMouseUp( windowvector_for_widget_centre( widget ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
 
-gboolean selection_motion_freemove( GtkWidget *widget, GdkEventMotion *event, WindowObserver* observer ){
+gboolean selection_motion_freemove( ui::Widget widget, GdkEventMotion *event, WindowObserver* observer ){
 	observer->onMouseMotion( windowvector_for_widget_centre( widget ), modifiers_for_state( event->state ) );
 	return FALSE;
 }
 
-gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* camwnd ){
+gboolean wheelmove_scroll( ui::Widget widget, GdkEventScroll* event, CamWnd* camwnd ){
 	if ( event->direction == GDK_SCROLL_UP ) {
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
 		Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( camwnd->getCamera().forward, static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
@@ -884,7 +884,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 	return FALSE;
 }
 
-gboolean camera_size_allocate( GtkWidget* widget, GtkAllocation* allocation, CamWnd* camwnd ){
+gboolean camera_size_allocate( ui::Widget widget, GtkAllocation* allocation, CamWnd* camwnd ){
 	camwnd->getCamera().width = allocation->width;
 	camwnd->getCamera().height = allocation->height;
 	Camera_updateProjection( camwnd->getCamera() );
@@ -893,7 +893,7 @@ gboolean camera_size_allocate( GtkWidget* widget, GtkAllocation* allocation, Cam
 	return FALSE;
 }
 
-gboolean camera_expose( GtkWidget* widget, GdkEventExpose* event, gpointer data ){
+gboolean camera_expose( ui::Widget widget, GdkEventExpose* event, gpointer data ){
 	reinterpret_cast<CamWnd*>( data )->draw();
 	return FALSE;
 }
@@ -1140,7 +1140,7 @@ CamWnd::CamWnd() :
 	m_view( true ),
 	m_Camera( &m_view, CamWndQueueDraw( *this ) ),
 	m_cameraview( m_Camera, &m_view, ReferenceCaller<CamWnd, CamWnd_Update>( *this ) ),
-	m_gl_widget( glwidget_new( TRUE ) ),
+	m_gl_widget( ui::Widget(glwidget_new( TRUE )) ),
 	m_window_observer( NewWindowObserver() ),
 	m_XORRectangle( m_gl_widget ),
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
@@ -1276,7 +1276,7 @@ void CamWnd::Cam_PositionDrag(){
 
 // NOTE TTimo if there's an OS-level focus out of the application
 //   then we can release the camera cursor grab
-static gboolean camwindow_freemove_focusout( GtkWidget* widget, GdkEventFocus* event, gpointer data ){
+static gboolean camwindow_freemove_focusout( ui::Widget widget, GdkEventFocus* event, gpointer data ){
 	reinterpret_cast<CamWnd*>( data )->DisableFreeMove();
 	return FALSE;
 }

@@ -74,8 +74,8 @@ void Interface_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Default Text Editor", g_TextEditor_useWin32Editor );
 #else
 	{
-		GtkWidget* use_custom = page.appendCheckBox( "Text Editor", "Custom", g_TextEditor_useCustomEditor );
-		GtkWidget* custom_editor = page.appendPathEntry( "Text Editor Command", g_TextEditor_editorCommand, true );
+		ui::CheckButton use_custom = page.appendCheckBox( "Text Editor", "Custom", g_TextEditor_useCustomEditor );
+		ui::Widget custom_editor = page.appendPathEntry( "Text Editor Command", g_TextEditor_editorCommand, true );
 		Widget_connectToggleDependency( custom_editor, use_custom );
 	}
 #endif
@@ -104,6 +104,7 @@ void Mouse_registerPreferencesPage(){
  */
 
 #include <map>
+#include <uilib/uilib.h>
 
 inline const char* xmlAttr_getName( xmlAttrPtr attr ){
 	return reinterpret_cast<const char*>( attr->name );
@@ -327,19 +328,19 @@ void CGameDialog::CreateGlobalFrame( PreferencesPage& page ){
 	page.appendCheckBox( "Startup", "Show Global Preferences", m_bGamePrompt );
 }
 
-GtkWindow* CGameDialog::BuildDialog(){
+ui::Window CGameDialog::BuildDialog(){
 	GtkFrame* frame = create_dialog_frame( "Game settings", GTK_SHADOW_ETCHED_IN );
 
 	GtkVBox* vbox2 = create_dialog_vbox( 0, 4 );
 	gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox2 ) );
 
 	{
-		PreferencesPage preferencesPage( *this, GTK_WIDGET( vbox2 ) );
+		PreferencesPage preferencesPage( *this, ui::Widget(GTK_WIDGET( vbox2 )) );
 		Global_constructPreferences( preferencesPage );
 		CreateGlobalFrame( preferencesPage );
 	}
 
-	return create_simple_modal_dialog_window( "Global Preferences", m_modal, GTK_WIDGET( frame ) );
+	return ui::Window(create_simple_modal_dialog_window( "Global Preferences", m_modal, GTK_WIDGET( frame ) ));
 }
 
 class LoadGameFile
@@ -468,7 +469,7 @@ CGameDialog::~CGameDialog(){
 		delete ( *iGame );
 		*iGame = 0;
 	}
-	if ( GetWidget() != 0 ) {
+	if ( GetWidget() ) {
 		Destroy();
 	}
 }
@@ -497,11 +498,11 @@ CGameDialog g_GamesDialog;
 // =============================================================================
 // Widget callbacks for PrefsDlg
 
-static void OnButtonClean( GtkWidget *widget, gpointer data ){
+static void OnButtonClean( ui::Widget widget, gpointer data ){
 	// make sure this is what the user wants
-	if ( gtk_MessageBox( GTK_WIDGET( g_Preferences.GetWidget() ), "This will close Radiant and clean the corresponding registry entries.\n"
+	if ( ui::Widget(GTK_WIDGET( g_Preferences.GetWidget() )).alert( "This will close Radiant and clean the corresponding registry entries.\n"
 																  "Next time you start Radiant it will be good as new. Do you wish to continue?",
-						 "Reset Registry", eMB_YESNO, eMB_ICONASTERISK ) == eIDYES ) {
+						 "Reset Registry", ui::alert_type::YESNO, ui::alert_icon::ASTERISK ) == ui::alert_response::YES ) {
 		PrefsDlg *dlg = (PrefsDlg*)data;
 		dlg->EndModal( eIDCANCEL );
 
@@ -547,14 +548,14 @@ void PrefsDlg::Init(){
 	g_string_append( m_inipath, PREFS_LOCAL_FILENAME );
 }
 
-void notebook_set_page( GtkWidget* notebook, GtkWidget* page ){
+void notebook_set_page( ui::Widget notebook, ui::Widget page ){
 	int pagenum = gtk_notebook_page_num( GTK_NOTEBOOK( notebook ), page );
 	if ( gtk_notebook_get_current_page( GTK_NOTEBOOK( notebook ) ) != pagenum ) {
 		gtk_notebook_set_current_page( GTK_NOTEBOOK( notebook ), pagenum );
 	}
 }
 
-void PrefsDlg::showPrefPage( GtkWidget* prefpage ){
+void PrefsDlg::showPrefPage( ui::Widget prefpage ){
 	notebook_set_page( m_notebook, prefpage );
 	return;
 }
@@ -565,7 +566,7 @@ static void treeSelection( GtkTreeSelection* selection, gpointer data ){
 	GtkTreeModel* model;
 	GtkTreeIter selected;
 	if ( gtk_tree_selection_get_selected( selection, &model, &selected ) ) {
-		GtkWidget* prefpage;
+		ui::Widget prefpage;
 		gtk_tree_model_get( model, &selected, 1, (gpointer*)&prefpage, -1 );
 		dlg->showPrefPage( prefpage );
 	}
@@ -625,47 +626,47 @@ void PreferencesDialog_addSettingsPage( const PreferenceGroupCallback& callback 
 	PreferenceGroupCallbacks_pushBack( g_settingsCallbacks, callback );
 }
 
-void Widget_updateDependency( GtkWidget* self, GtkWidget* toggleButton ){
+void Widget_updateDependency( ui::Widget self, ui::Widget toggleButton ){
 	gtk_widget_set_sensitive( self, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggleButton ) ) && GTK_WIDGET_IS_SENSITIVE( toggleButton ) );
 }
 
-void ToggleButton_toggled_Widget_updateDependency( GtkWidget *toggleButton, GtkWidget* self ){
+void ToggleButton_toggled_Widget_updateDependency( ui::Widget toggleButton, ui::Widget self ){
 	Widget_updateDependency( self, toggleButton );
 }
 
-void ToggleButton_state_changed_Widget_updateDependency( GtkWidget* toggleButton, GtkStateType state, GtkWidget* self ){
+void ToggleButton_state_changed_Widget_updateDependency( ui::Widget toggleButton, GtkStateType state, ui::Widget self ){
 	if ( state == GTK_STATE_INSENSITIVE ) {
 		Widget_updateDependency( self, toggleButton );
 	}
 }
 
-void Widget_connectToggleDependency( GtkWidget* self, GtkWidget* toggleButton ){
+void Widget_connectToggleDependency( ui::Widget self, ui::Widget toggleButton ){
 	g_signal_connect( G_OBJECT( toggleButton ), "state_changed", G_CALLBACK( ToggleButton_state_changed_Widget_updateDependency ), self );
 	g_signal_connect( G_OBJECT( toggleButton ), "toggled", G_CALLBACK( ToggleButton_toggled_Widget_updateDependency ), self );
 	Widget_updateDependency( self, toggleButton );
 }
 
 
-inline GtkWidget* getVBox( GtkWidget* page ){
-	return gtk_bin_get_child( GTK_BIN( page ) );
+inline ui::Widget getVBox( ui::Widget page ){
+	return ui::Widget(gtk_bin_get_child( GTK_BIN( page ) ));
 }
 
-GtkTreeIter PreferenceTree_appendPage( GtkTreeStore* store, GtkTreeIter* parent, const char* name, GtkWidget* page ){
+GtkTreeIter PreferenceTree_appendPage( GtkTreeStore* store, GtkTreeIter* parent, const char* name, ui::Widget page ){
 	GtkTreeIter group;
 	gtk_tree_store_append( store, &group, parent );
 	gtk_tree_store_set( store, &group, 0, name, 1, page, -1 );
 	return group;
 }
 
-GtkWidget* PreferencePages_addPage( GtkWidget* notebook, const char* name ){
-	GtkWidget* preflabel = gtk_label_new( name );
+ui::Widget PreferencePages_addPage( ui::Widget notebook, const char* name ){
+	ui::Widget preflabel = ui::Label( name );
 	gtk_widget_show( preflabel );
 
-	GtkWidget* pageframe = gtk_frame_new( name );
+	ui::Widget pageframe = ui::Widget(gtk_frame_new( name ));
 	gtk_container_set_border_width( GTK_CONTAINER( pageframe ), 4 );
 	gtk_widget_show( pageframe );
 
-	GtkWidget* vbox = gtk_vbox_new( FALSE, 4 );
+	ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 4 ));
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 4 );
 	gtk_container_add( GTK_CONTAINER( pageframe ), vbox );
@@ -679,37 +680,37 @@ GtkWidget* PreferencePages_addPage( GtkWidget* notebook, const char* name ){
 class PreferenceTreeGroup : public PreferenceGroup
 {
 Dialog& m_dialog;
-GtkWidget* m_notebook;
+ui::Widget m_notebook;
 GtkTreeStore* m_store;
 GtkTreeIter m_group;
 public:
-PreferenceTreeGroup( Dialog& dialog, GtkWidget* notebook, GtkTreeStore* store, GtkTreeIter group ) :
+PreferenceTreeGroup( Dialog& dialog, ui::Widget notebook, GtkTreeStore* store, GtkTreeIter group ) :
 	m_dialog( dialog ),
 	m_notebook( notebook ),
 	m_store( store ),
 	m_group( group ){
 }
 PreferencesPage createPage( const char* treeName, const char* frameName ){
-	GtkWidget* page = PreferencePages_addPage( m_notebook, frameName );
+	ui::Widget page = PreferencePages_addPage( m_notebook, frameName );
 	PreferenceTree_appendPage( m_store, &m_group, treeName, page );
 	return PreferencesPage( m_dialog, getVBox( page ) );
 }
 };
 
-GtkWindow* PrefsDlg::BuildDialog(){
+ui::Window PrefsDlg::BuildDialog(){
 	PreferencesDialog_addInterfacePreferences( FreeCaller1<PreferencesPage&, Interface_constructPreferences>() );
 	Mouse_registerPreferencesPage();
 
-	GtkWindow* dialog = create_floating_window( "NetRadiant Preferences", m_parent );
+	ui::Window dialog = ui::Window(create_floating_window( "NetRadiant Preferences", m_parent ));
 
 	{
-		GtkWidget* mainvbox = gtk_vbox_new( FALSE, 5 );
+		ui::Widget mainvbox = ui::Widget(gtk_vbox_new( FALSE, 5 ));
 		gtk_container_add( GTK_CONTAINER( dialog ), mainvbox );
 		gtk_container_set_border_width( GTK_CONTAINER( mainvbox ), 5 );
 		gtk_widget_show( mainvbox );
 
 		{
-			GtkWidget* hbox = gtk_hbox_new( FALSE, 5 );
+			ui::Widget hbox = ui::Widget(gtk_hbox_new( FALSE, 5 ));
 			gtk_widget_show( hbox );
 			gtk_box_pack_end( GTK_BOX( mainvbox ), hbox, FALSE, TRUE, 0 );
 
@@ -728,19 +729,19 @@ GtkWindow* PrefsDlg::BuildDialog(){
 		}
 
 		{
-			GtkWidget* hbox = gtk_hbox_new( FALSE, 5 );
+			ui::Widget hbox = ui::Widget(gtk_hbox_new( FALSE, 5 ));
 			gtk_box_pack_start( GTK_BOX( mainvbox ), hbox, TRUE, TRUE, 0 );
 			gtk_widget_show( hbox );
 
 			{
-				GtkWidget* sc_win = gtk_scrolled_window_new( 0, 0 );
+				ui::Widget sc_win = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
 				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( sc_win ), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
 				gtk_box_pack_start( GTK_BOX( hbox ), sc_win, FALSE, FALSE, 0 );
 				gtk_widget_show( sc_win );
 				gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( sc_win ), GTK_SHADOW_IN );
 
 				// prefs pages notebook
-				m_notebook = gtk_notebook_new();
+				m_notebook = ui::Widget(gtk_notebook_new());
 				// hide the notebook tabs since its not supposed to look like a notebook
 				gtk_notebook_set_show_tabs( GTK_NOTEBOOK( m_notebook ), FALSE );
 				gtk_box_pack_start( GTK_BOX( hbox ), m_notebook, TRUE, TRUE, 0 );
@@ -750,7 +751,7 @@ GtkWindow* PrefsDlg::BuildDialog(){
 				{
 					GtkTreeStore* store = gtk_tree_store_new( 2, G_TYPE_STRING, G_TYPE_POINTER );
 
-					GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
+					ui::Widget view = ui::Widget(gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ));
 					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 					{
@@ -777,14 +778,14 @@ GtkWindow* PrefsDlg::BuildDialog(){
 						PreferencePages_addPage( m_notebook, "Front Page" );
 
 						{
-							GtkWidget* global = PreferencePages_addPage( m_notebook, "Global Preferences" );
+							ui::Widget global = PreferencePages_addPage( m_notebook, "Global Preferences" );
 							{
 								PreferencesPage preferencesPage( *this, getVBox( global ) );
 								Global_constructPreferences( preferencesPage );
 							}
 							GtkTreeIter group = PreferenceTree_appendPage( store, 0, "Global", global );
 							{
-								GtkWidget* game = PreferencePages_addPage( m_notebook, "Game" );
+								ui::Widget game = PreferencePages_addPage( m_notebook, "Game" );
 								PreferencesPage preferencesPage( *this, getVBox( game ) );
 								g_GamesDialog.CreateGlobalFrame( preferencesPage );
 
@@ -793,7 +794,7 @@ GtkWindow* PrefsDlg::BuildDialog(){
 						}
 
 						{
-							GtkWidget* interfacePage = PreferencePages_addPage( m_notebook, "Interface Preferences" );
+							ui::Widget interfacePage = PreferencePages_addPage( m_notebook, "Interface Preferences" );
 							{
 								PreferencesPage preferencesPage( *this, getVBox( interfacePage ) );
 								PreferencesPageCallbacks_constructPage( g_interfacePreferences, preferencesPage );
@@ -806,7 +807,7 @@ GtkWindow* PrefsDlg::BuildDialog(){
 						}
 
 						{
-							GtkWidget* display = PreferencePages_addPage( m_notebook, "Display Preferences" );
+							ui::Widget display = PreferencePages_addPage( m_notebook, "Display Preferences" );
 							{
 								PreferencesPage preferencesPage( *this, getVBox( display ) );
 								PreferencesPageCallbacks_constructPage( g_displayPreferences, preferencesPage );
@@ -818,7 +819,7 @@ GtkWindow* PrefsDlg::BuildDialog(){
 						}
 
 						{
-							GtkWidget* settings = PreferencePages_addPage( m_notebook, "General Settings" );
+							ui::Widget settings = PreferencePages_addPage( m_notebook, "General Settings" );
 							{
 								PreferencesPage preferencesPage( *this, getVBox( settings ) );
 								PreferencesPageCallbacks_constructPage( g_settingsPreferences, preferencesPage );
@@ -849,7 +850,7 @@ preferences_globals_t g_preferences_globals;
 PrefsDlg g_Preferences;               // global prefs instance
 
 
-void PreferencesDialog_constructWindow( GtkWindow* main_window ){
+void PreferencesDialog_constructWindow( ui::Window main_window ){
 	g_Preferences.m_parent = main_window;
 	g_Preferences.Create();
 }
@@ -937,7 +938,7 @@ void PreferencesDialog_showDialog(){
 			{
 				message << ( *i ) << '\n';
 			}
-			gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), message.c_str() );
+			MainFrame_getWindow().alert( message.c_str() );
 			g_restart_required.clear();
 		}
 	}

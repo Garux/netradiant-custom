@@ -19,15 +19,15 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <uilib/uilib.h>
+
 #if !defined( INCLUDED_PATCHDIALOG_H )
 #define INCLUDED_PATCHDIALOG_H
 
 void PatchInspector_Construct();
 void PatchInspector_Destroy();
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-void PatchInspector_constructWindow( GtkWindow* main_window );
+void PatchInspector_constructWindow( ui::Window main_window );
 void PatchInspector_destroyWindow();
 
 namespace scene

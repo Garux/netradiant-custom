@@ -77,6 +77,7 @@ void message_print( message_info_t* self, const char* characters, std::size_t le
 
 
 #include <glib.h>
+#include <uilib/uilib.h>
 #include "xmlstuff.h"
 
 class CWatchBSP
@@ -176,10 +177,10 @@ int g_WatchBSP_Timeout = 10;
 
 
 void Build_constructPreferences( PreferencesPage& page ){
-	GtkWidget* monitorbsp = page.appendCheckBox( "", "Enable Build Process Monitoring", g_WatchBSP_Enabled );
-	GtkWidget* leakstop = page.appendCheckBox( "", "Stop Compilation on Leak", g_WatchBSP_LeakStop );
-	GtkWidget* runengine = page.appendCheckBox( "", "Run Engine After Compile", g_WatchBSP_RunQuake );
-	GtkWidget* sleep = page.appendCheckBox ( "", "Sleep When Running the Engine", g_WatchBSP_DoSleep );
+	ui::CheckButton monitorbsp = page.appendCheckBox( "", "Enable Build Process Monitoring", g_WatchBSP_Enabled );
+	ui::CheckButton leakstop = page.appendCheckBox( "", "Stop Compilation on Leak", g_WatchBSP_LeakStop );
+	ui::CheckButton runengine = page.appendCheckBox( "", "Run Engine After Compile", g_WatchBSP_RunQuake );
+	ui::CheckButton sleep = page.appendCheckBox ( "", "Sleep When Running the Engine", g_WatchBSP_DoSleep );
 	Widget_connectToggleDependency( leakstop, monitorbsp );
 	Widget_connectToggleDependency( runengine, monitorbsp );
 	Widget_connectToggleDependency( sleep, runengine );
@@ -519,7 +520,7 @@ void CWatchBSP::DoEBeginStep(){
 	if ( SetupListening() == false ) {
 		const char* msg = "Failed to get a listening socket on port 39000.\nTry running with Build monitoring disabled if you can't fix this.\n";
 		globalOutputStream() << msg;
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), msg, "Build monitoring", eMB_OK, eMB_ICONERROR );
+		MainFrame_getWindow().alert( msg, "Build monitoring", ui::alert_type::OK, ui::alert_icon::ERROR );
 		return;
 	}
 	// set the timer for timeouts and step cancellation
@@ -536,7 +537,7 @@ void CWatchBSP::DoEBeginStep(){
 			msg << reinterpret_cast<const char*>( g_ptr_array_index( m_pCmd, m_iCurrentStep ) );
 			msg << "\nCheck that the file exists and that you don't run out of system resources.\n";
 			globalOutputStream() << msg.c_str();
-			gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), msg.c_str(), "Build monitoring", eMB_OK, eMB_ICONERROR );
+			MainFrame_getWindow().alert( msg.c_str(), "Build monitoring", ui::alert_type::OK, ui::alert_icon::ERROR );
 			return;
 		}
 		// re-initialise the debug window
@@ -616,7 +617,7 @@ void CWatchBSP::RoutineProcessing(){
 	case EBeginStep:
 		// timeout: if we don't get an incoming connection fast enough, go back to idle
 		if ( g_timer_elapsed( m_pTimer, NULL ) > g_WatchBSP_Timeout ) {
-			gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "The connection timed out, assuming the build process failed\nMake sure you are using a networked version of Q3Map?\nOtherwise you need to disable BSP Monitoring in prefs.", "BSP process monitoring", eMB_OK );
+			MainFrame_getWindow().alert(  "The connection timed out, assuming the build process failed\nMake sure you are using a networked version of Q3Map?\nOtherwise you need to disable BSP Monitoring in prefs.", "BSP process monitoring", ui::alert_type::OK );
 			EndMonitoringLoop();
 #if 0
 			if ( m_bBSPPlugin ) {
@@ -749,7 +750,7 @@ void CWatchBSP::RoutineProcessing(){
 							StringOutputStream msg;
 							msg << "Failed to execute the following command: " << cmd.c_str() << cmdline.c_str();
 							globalOutputStream() << msg.c_str();
-							gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  msg.c_str(), "Build monitoring", eMB_OK, eMB_ICONERROR );
+							MainFrame_getWindow().alert( msg.c_str(), "Build monitoring", ui::alert_type::OK, ui::alert_icon::ERROR );
 						}
 					}
 					EndMonitoringLoop();
@@ -777,8 +778,8 @@ void CWatchBSP::DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName ){
 	if ( m_eState != EIdle ) {
 		globalOutputStream() << "WatchBSP got a monitoring request while not idling...\n";
 		// prompt the user, should we cancel the current process and go ahead?
-		if ( gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "I am already monitoring a Build process.\nDo you want me to override and start a new compilation?",
-							 "Build process monitoring", eMB_YESNO ) == eIDYES ) {
+		if ( MainFrame_getWindow().alert( "I am already monitoring a Build process.\nDo you want me to override and start a new compilation?",
+							 "Build process monitoring", ui::alert_type::YESNO ) == ui::alert_response::YES ) {
 			// disconnect and set EIdle state
 			Reset();
 		}

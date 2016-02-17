@@ -18,7 +18,7 @@ void OnDestroy( GtkWidget* w, gpointer data ){
 }
 
 void OnExportClicked( GtkButton* button, gpointer user_data ){
-	GtkWidget* window = lookup_widget( GTK_WIDGET( button ), "w_plugplug2" );
+	ui::Widget window = lookup_widget( GTK_WIDGET( button ), "w_plugplug2" );
 	ASSERT_NOTNULL( window );
 	const char* cpath = GlobalRadiant().m_pfnFileDialog( window, false, "Save as Obj", 0, 0, false, false, true );
 	if ( !cpath ) {
@@ -68,7 +68,7 @@ void OnExportClicked( GtkButton* button, gpointer user_data ){
 		{
 			radio = lookup_widget( GTK_WIDGET( button ), "r_nocollapse" );
 			ASSERT_NOTNULL( radio );
-			ASSERT_NOTNULL( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio ) ) );
+			ASSERT_TRUE( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio ) ) );
 			mode = COLLAPSE_NONE;
 		}
 	}

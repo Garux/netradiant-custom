@@ -19,6 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <uilib/uilib.h>
 #include "autosave.h"
 
 #include "os/file.h"
@@ -91,7 +92,7 @@ void Map_Snapshot(){
 	{
 		StringOutputStream strMsg( 256 );
 		strMsg << "Snapshot save failed.. unabled to create directory\n" << snapshotsDir.c_str();
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), strMsg.c_str() );
+		MainFrame_getWindow().alert( strMsg.c_str() );
 	}
 }
 /*
@@ -174,8 +175,8 @@ void QE_CheckAutoSave( void ){
 }
 
 void Autosave_constructPreferences( PreferencesPage& page ){
-	GtkWidget* autosave_enabled = page.appendCheckBox( "Autosave", "Enable Autosave", g_AutoSave_Enabled );
-	GtkWidget* autosave_frequency = page.appendSpinner( "Autosave Frequency (minutes)", m_AutoSave_Frequency, 1, 1, 60 );
+	ui::CheckButton autosave_enabled = page.appendCheckBox( "Autosave", "Enable Autosave", g_AutoSave_Enabled );
+	ui::SpinButton autosave_frequency = page.appendSpinner( "Autosave Frequency (minutes)", m_AutoSave_Frequency, 1, 1, 60 );
 	Widget_connectToggleDependency( autosave_frequency, autosave_enabled );
 	page.appendCheckBox( "", "Save Snapshots", g_SnapShots_Enabled );
 }

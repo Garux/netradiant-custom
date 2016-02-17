@@ -40,7 +40,6 @@ namespace scene
 {
 class Node;
 }
-typedef struct _GtkWindow GtkWindow;
 typedef struct _GtkMenu GtkMenu;
 
 
@@ -65,21 +64,21 @@ inline const char* ViewType_getTitle( VIEWTYPE viewtype ){
 
 class XYWnd
 {
-GtkWidget* m_gl_widget;
+ui::Widget m_gl_widget;
 guint m_sizeHandler;
 guint m_exposeHandler;
 
 DeferredDraw m_deferredDraw;
 DeferredMotion m_deferred_motion;
 public:
-GtkWindow* m_parent;
+ui::Window m_parent;
 XYWnd();
 ~XYWnd();
 
 void queueDraw(){
 	m_deferredDraw.draw();
 }
-GtkWidget* GetWidget(){
+ui::Widget GetWidget(){
 	return m_gl_widget;
 }
 
@@ -281,10 +280,9 @@ extern xywindow_globals_t g_xywindow_globals;
 
 VIEWTYPE GlobalXYWnd_getCurrentViewType();
 
-typedef struct _GtkWindow GtkWindow;
-void XY_Top_Shown_Construct( GtkWindow* parent );
-void YZ_Side_Shown_Construct( GtkWindow* parent );
-void XZ_Front_Shown_Construct( GtkWindow* parent );
+void XY_Top_Shown_Construct( ui::Window parent );
+void YZ_Side_Shown_Construct( ui::Window parent );
+void XZ_Front_Shown_Construct( ui::Window parent );
 
 void XYWindow_Construct();
 void XYWindow_Destroy();

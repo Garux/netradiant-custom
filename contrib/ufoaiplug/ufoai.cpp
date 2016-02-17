@@ -59,10 +59,10 @@ UFOAIPluginDependencies( void ) :
 
 namespace UFOAI
 {
-GtkWindow* g_mainwnd;
+	ui::Window g_mainwnd;
 
 const char* init( void* hApp, void* pMainWidget ){
-	g_mainwnd = GTK_WINDOW( pMainWidget );
+	g_mainwnd = ui::Window(GTK_WINDOW( pMainWidget ));
 	return "Initializing GTKRadiant UFOAI plugin";
 }
 const char* getName(){
@@ -82,7 +82,7 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 			"\nRadiant version: " +radiant::version()+
 			"\nPlugin version: " PLUGIN_VERSION
 			"\nAuthor: Martin Gerhardy (tlh2000/mattn)\n";
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
+		GlobalRadiant().m_pfnMessageBox( g_mainwnd,
 										 version_string.c_str(), "About",
 										 eMB_OK, eMB_ICONDEFAULT );
 	}
@@ -133,7 +133,7 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 	}
 
 	if ( message != NULL ) {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
+		GlobalRadiant().m_pfnMessageBox( g_mainwnd,
 										 message, "Note",
 										 eMB_OK, eMB_ICONDEFAULT );
 	}

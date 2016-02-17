@@ -22,6 +22,8 @@
 #if !defined( INCLUDED_ENTITY_H )
 #define INCLUDED_ENTITY_H
 
+#include <uilib/uilib.h>
+
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
 void Entity_createFromSelection( const char* name, const Vector3& origin );
@@ -30,8 +32,7 @@ void Scene_EntitySetKeyValue_Selected( const char* key, const char* value );
 void Scene_EntitySetClassname_Selected( const char* classname );
 
 
-typedef struct _GtkWidget GtkWidget;
-const char* misc_model_dialog( GtkWidget* parent );
+const char* misc_model_dialog( ui::Widget parent );
 
 typedef struct _GtkMenu GtkMenu;
 void Entity_constructMenu( GtkMenu* menu );

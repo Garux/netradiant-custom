@@ -36,26 +36,26 @@
 
 int m_nNextPlugInID = 0;
 
-void plugin_activated( GtkWidget* widget, gpointer data ){
+void plugin_activated( ui::Widget widget, gpointer data ){
 	const char* str = (const char*)g_object_get_data( G_OBJECT( widget ),"command" );
 	GetPlugInMgr().Dispatch( gpointer_to_int( data ), str );
 }
 
 #include <stack>
-typedef std::stack<GtkWidget*> WidgetStack;
+typedef std::stack<ui::Widget> WidgetStack;
 
 void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
-	GtkWidget *menu, *item, *parent, *subMenu;
+	ui::Widget menu, item, parent, subMenu;
 	const char *menuText, *menuCommand;
 	WidgetStack menuStack;
 
-	parent = gtk_menu_item_new_with_label( pPlugIn->getMenuName() );
+	parent = ui::Widget(gtk_menu_item_new_with_label( pPlugIn->getMenuName() ));
 	gtk_widget_show( parent );
 	gtk_container_add( GTK_CONTAINER( plugin_menu ), parent );
 
 	std::size_t nCount = pPlugIn->getCommandCount();
 	if ( nCount > 0 ) {
-		menu = gtk_menu_new();
+		menu = ui::Widget(gtk_menu_new());
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( GTK_MENU( menu ) );
 		}
@@ -66,7 +66,7 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 
 			if ( menuText != 0 && strlen( menuText ) > 0 ) {
 				if ( !strcmp( menuText, "-" ) ) {
-					item = gtk_menu_item_new();
+					item = ui::Widget(gtk_menu_item_new());
 					gtk_widget_set_sensitive( item, FALSE );
 				}
 				else if ( !strcmp( menuText, ">" ) ) {
@@ -77,11 +77,11 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 						continue;
 					}
 
-					item = gtk_menu_item_new_with_label( menuText );
+					item = ui::Widget(gtk_menu_item_new_with_label( menuText ));
 					gtk_widget_show( item );
 					gtk_container_add( GTK_CONTAINER( menu ), item );
 
-					subMenu = gtk_menu_new();
+					subMenu = ui::Widget(gtk_menu_new());
 					gtk_menu_item_set_submenu( GTK_MENU_ITEM( item ), subMenu );
 					menuStack.push( menu );
 					menu = subMenu;
@@ -100,7 +100,7 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 				}
 				else
 				{
-					item = gtk_menu_item_new_with_label( menuText );
+					item = ui::Widget(gtk_menu_item_new_with_label( menuText ));
 					g_object_set_data( G_OBJECT( item ),"command", const_cast<gpointer>( static_cast<const void*>( menuCommand ) ) );
 					g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( plugin_activated ), gint_to_pointer( m_nNextPlugInID ) );
 				}

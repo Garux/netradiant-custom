@@ -19,12 +19,12 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <uilib/uilib.h>
+
 #if !defined( INCLUDED_ENTITYINSPECTOR_H )
 #define INCLUDED_ENTITYINSPECTOR_H
 
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-GtkWidget* EntityInspector_constructWindow( GtkWindow* parent );
+ui::Widget EntityInspector_constructWindow( ui::Window parent );
 void EntityInspector_construct();
 void EntityInspector_destroy();
 const char *EntityInspector_getCurrentKey();

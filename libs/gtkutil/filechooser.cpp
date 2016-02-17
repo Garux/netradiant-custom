@@ -30,6 +30,7 @@
 #include <gtk/gtkfilechooser.h>
 #include <gtk/gtkfilechooserdialog.h>
 #include <gtk/gtkstock.h>
+#include <uilib/uilib.h>
 
 #include "string/string.h"
 #include "stream/stringstream.h"
@@ -233,7 +234,7 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 	return g_file_dialog_file;
 }
 
-char* dir_dialog( GtkWidget* parent, const char* title, const char* path ){
+char* dir_dialog( ui::Widget parent, const char* title, const char* path ){
 	GtkWidget* dialog = gtk_file_chooser_dialog_new( title,
 													 GTK_WINDOW( parent ),
 													 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -258,15 +259,15 @@ char* dir_dialog( GtkWidget* parent, const char* title, const char* path ){
 	return filename;
 }
 
-const char* file_dialog( GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save ){
+const char* file_dialog( ui::Widget parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save ){
 	for (;; )
 	{
 		const char* file = file_dialog_show( parent, open, title, path, pattern, want_load, want_import, want_save );
 
 		if ( open
-			 || file == 0
+			 || file == nullptr
 			 || !file_exists( file )
-			 || gtk_MessageBox( parent, "The file specified already exists.\nDo you want to replace it?", title, eMB_NOYES, eMB_ICONQUESTION ) == eIDYES ) {
+			 || parent.alert("The file specified already exists.\nDo you want to replace it?", title, ui::alert_type::NOYES, ui::alert_icon::QUESTION ) == ui::alert_response::YES ) {
 			return file;
 		}
 	}

@@ -22,28 +22,26 @@
 #if !defined( INCLUDED_GROUPDIALOG_H )
 #define INCLUDED_GROUPDIALOG_H
 
+#include <uilib/uilib.h>
 #include "generic/callback.h"
-
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
 
 void GroupDialog_Construct();
 void GroupDialog_Destroy();
 
-void GroupDialog_constructWindow( GtkWindow* main_window );
+void GroupDialog_constructWindow( ui::Window main_window );
 void GroupDialog_destroyWindow();
-GtkWindow* GroupDialog_getWindow();
+ui::Window GroupDialog_getWindow();
 void GroupDialog_show();
 
 inline void RawStringExport( const char* string, const StringImportCallback& importer ){
 	importer( string );
 }
 typedef ConstPointerCaller1<char, const StringImportCallback&, RawStringExport> RawStringExportCaller;
-GtkWidget* GroupDialog_addPage( const char* tabLabel, GtkWidget* widget, const StringExportCallback& title );
+ui::Widget GroupDialog_addPage( const char* tabLabel, ui::Widget widget, const StringExportCallback& title );
 
-void GroupDialog_showPage( GtkWidget* page );
-void GroupDialog_updatePageTitle( GtkWidget* page );
+void GroupDialog_showPage( ui::Widget page );
+void GroupDialog_updatePageTitle( ui::Widget page );
 bool GroupDialog_isShown();
-GtkWidget* GroupDialog_getPage();
+ui::Widget GroupDialog_getPage();
 
 #endif

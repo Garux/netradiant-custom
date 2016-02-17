@@ -279,7 +279,7 @@ void CDbgDlg::Push( ISAXHandler *pHandler ){
 	// push in the list
 	g_ptr_array_add( m_pFeedbackElements, (void *)pHandler );
 
-	if ( GetWidget() == 0 ) {
+	if ( !GetWidget() ) {
 		Create();
 	}
 
@@ -295,10 +295,10 @@ void CDbgDlg::Push( ISAXHandler *pHandler ){
 	ShowDlg();
 }
 
-GtkWindow* CDbgDlg::BuildDialog(){
-	GtkWindow* window = create_floating_window( "Q3Map debug window", MainFrame_getWindow() );
+ui::Window CDbgDlg::BuildDialog(){
+	ui::Window window = MainFrame_getWindow().create_floating_window("Q3Map debug window" );
 
-	GtkWidget* scr = gtk_scrolled_window_new( NULL, NULL );
+	ui::Widget scr = ui::Widget(gtk_scrolled_window_new( NULL, NULL ));
 	gtk_widget_show( scr );
 	gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( scr ) );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
@@ -307,7 +307,7 @@ GtkWindow* CDbgDlg::BuildDialog(){
 	{
 		GtkListStore* store = gtk_list_store_new( 1, G_TYPE_STRING );
 
-		GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
+		ui::Widget view = ui::Widget(gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ));
 		gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 		{

@@ -22,6 +22,7 @@
 #if !defined( INCLUDED_MAINFRAME_H )
 #define INCLUDED_MAINFRAME_H
 
+#include <uilib/uilib.h>
 #include "gtkutil/window.h"
 #include "gtkutil/idledraw.h"
 #include "gtkutil/widget.h"
@@ -35,9 +36,6 @@ class IToolbarButton;
 class XYWnd;
 class CamWnd;
 class ZWnd;
-
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
 
 const int c_command_status = 0;
 const int c_position_status = 1;
@@ -60,7 +58,7 @@ enum EViewStyle
 MainFrame();
 ~MainFrame();
 
-GtkWindow* m_window;
+ui::Window m_window;
 
 std::string m_command_status;
 std::string m_position_status;
@@ -73,9 +71,9 @@ void Create();
 void SaveWindowInfo();
 void Shutdown();
 
-GtkWidget* m_vSplit;
-GtkWidget* m_hSplit;
-GtkWidget* m_vSplit2;
+ui::Widget m_vSplit;
+ui::Widget m_hSplit;
+ui::Widget m_vSplit2;
 
 XYWnd* m_pXYWnd;
 XYWnd* m_pYZWnd;
@@ -86,7 +84,7 @@ XYWnd* m_pActiveXY;
 
 bool m_bSleeping;
 
-GtkWidget *m_pStatusLabel[c_count_status];
+ui::Widget m_pStatusLabel[c_count_status];
 
 
 EViewStyle m_nCurrentStyle;
@@ -142,7 +140,7 @@ bool FloatingGroupDialog(){
 
 extern MainFrame* g_pParentWnd;
 
-GtkWindow* MainFrame_getWindow();
+ui::Window MainFrame_getWindow();
 
 enum EMouseButtonMode
 {
@@ -271,6 +269,6 @@ void XYWindowDestroyed_disconnect( SignalHandlerId id );
 MouseEventHandlerId XYWindowMouseDown_connect( const MouseEventHandler& handler );
 void XYWindowMouseDown_disconnect( MouseEventHandlerId id );
 
-extern GtkWidget* g_page_entity;
+extern ui::Widget g_page_entity;
 
 #endif

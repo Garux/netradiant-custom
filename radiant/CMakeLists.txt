@@ -208,6 +208,7 @@ target_link_libraries(radiant
     splines
     stream
     string
+    uilib
     xmllib
 )
 if(NOT WIN32)

@@ -53,7 +53,7 @@ public:
 /*!
    build directly from a SYN_PROVIDE interface
  */
-CPluginSlot( GtkWidget* main_window, const char* name, const _QERPluginTable& table );
+CPluginSlot( ui::Widget main_window, const char* name, const _QERPluginTable& table );
 /*!
    dispatching a command by name to the plugin
  */
@@ -69,7 +69,7 @@ bool ownsCommandID( std::size_t n );
 
 };
 
-CPluginSlot::CPluginSlot( GtkWidget* main_window, const char* name, const _QERPluginTable& table ){
+CPluginSlot::CPluginSlot( ui::Widget main_window, const char* name, const _QERPluginTable& table ){
 	mpTable = &table;
 	m_menu_name = name;
 
@@ -149,7 +149,7 @@ std::list<CPluginSlot *> mSlots;
 public:
 virtual ~CPluginSlots();
 
-void AddPluginSlot( GtkWidget* main_window, const char* name, const _QERPluginTable& table ){
+void AddPluginSlot( ui::Widget main_window, const char* name, const _QERPluginTable& table ){
 	mSlots.push_back( new CPluginSlot( main_window, name, table ) );
 }
 
@@ -190,13 +190,13 @@ bool CPluginSlots::Dispatch( std::size_t n, const char* p ){
 CPluginSlots g_plugin_slots;
 
 
-void FillPluginSlots( CPluginSlots& slots, GtkWidget* main_window ){
+void FillPluginSlots( CPluginSlots& slots, ui::Widget main_window ){
 	class AddPluginVisitor : public PluginModules::Visitor
 	{
 	CPluginSlots& m_slots;
-	GtkWidget* m_main_window;
+	ui::Widget m_main_window;
 public:
-	AddPluginVisitor( CPluginSlots& slots, GtkWidget* main_window )
+	AddPluginVisitor( CPluginSlots& slots, ui::Widget main_window )
 		: m_slots( slots ), m_main_window( main_window ){
 	}
 	void visit( const char* name, const _QERPluginTable& table ) const {
@@ -220,7 +220,7 @@ void CPlugInManager::Dispatch( std::size_t n, const char * p ){
 	g_plugin_slots.Dispatch( n, p );
 }
 
-void CPlugInManager::Init( GtkWidget* main_window ){
+void CPlugInManager::Init( ui::Widget main_window ){
 	FillPluginSlots( g_plugin_slots, main_window );
 }
 

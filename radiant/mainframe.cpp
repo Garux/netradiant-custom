@@ -27,13 +27,10 @@
 
 #include "mainframe.h"
 
-#include "debugging/debugging.h"
 #include "version.h"
 
 #include "ifilesystem.h"
 #include "iundo.h"
-#include "ifilter.h"
-#include "itoolbar.h"
 #include "editable.h"
 #include "ientity.h"
 #include "ishaders.h"
@@ -50,13 +47,9 @@
 #include <gtk/gtkhpaned.h>
 #include <gtk/gtkvpaned.h>
 #include <gtk/gtktoolbar.h>
-#include <gtk/gtkmenubar.h>
-#include <gtk/gtkimage.h>
-#include <gtk/gtktable.h>
 
 
 #include "cmdlib.h"
-#include "scenelib.h"
 #include "stream/stringstream.h"
 #include "signal/isignal.h"
 #include "os/path.h"
@@ -65,14 +58,11 @@
 #include "moduleobservers.h"
 
 #include "gtkutil/clipboard.h"
-#include "gtkutil/container.h"
 #include "gtkutil/frame.h"
-#include "gtkutil/glfont.h"
 #include "gtkutil/glwidget.h"
 #include "gtkutil/image.h"
 #include "gtkutil/menu.h"
 #include "gtkutil/paned.h"
-#include "gtkutil/widget.h"
 
 #include "autosave.h"
 #include "build.h"
@@ -101,7 +91,6 @@
 #include "pluginmanager.h"
 #include "pluginmenu.h"
 #include "plugintoolbar.h"
-#include "points.h"
 #include "preferences.h"
 #include "qe3.h"
 #include "qgl.h"
@@ -432,18 +421,18 @@ void Paths_registerPreferencesPage(){
 class PathsDialog : public Dialog
 {
 public:
-GtkWindow* BuildDialog(){
+ui::Window BuildDialog(){
 	GtkFrame* frame = create_dialog_frame( "Path settings", GTK_SHADOW_ETCHED_IN );
 
 	GtkVBox* vbox2 = create_dialog_vbox( 0, 4 );
 	gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox2 ) );
 
 	{
-		PreferencesPage preferencesPage( *this, GTK_WIDGET( vbox2 ) );
+		PreferencesPage preferencesPage( *this, ui::Widget(GTK_WIDGET( vbox2 )) );
 		Paths_constructPreferences( preferencesPage );
 	}
 
-	return create_simple_modal_dialog_window( "Engine Path Not Found", m_modal, GTK_WIDGET( frame ) );
+	return ui::Window(create_simple_modal_dialog_window( "Engine Path Not Found", m_modal, GTK_WIDGET( frame ) ));
 }
 };
 
@@ -805,7 +794,7 @@ ChooseColour( const GetColourCallback& get, const SetColourCallback& set )
 void operator()(){
 	Vector3 colour;
 	m_get( colour );
-	color_dialog( GTK_WIDGET( MainFrame_getWindow() ), colour );
+	color_dialog( MainFrame_getWindow(), colour );
 	m_set( colour );
 }
 };
@@ -970,13 +959,13 @@ void OpenBugReportURL(){
 }
 
 
-GtkWidget* g_page_console;
+ui::Widget g_page_console;
 
 void Console_ToggleShow(){
 	GroupDialog_showPage( g_page_console );
 }
 
-GtkWidget* g_page_entity;
+ui::Widget g_page_entity;
 
 void EntityInspector_ToggleShow(){
 	GroupDialog_showPage( g_page_entity );
@@ -1616,22 +1605,22 @@ void EverySecondTimer_disable(){
 	}
 }
 
-gint window_realize_remove_decoration( GtkWidget* widget, gpointer data ){
-	gdk_window_set_decorations( widget->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
+gint window_realize_remove_decoration( ui::Widget widget, gpointer data ){
+	gdk_window_set_decorations( widget.handle()->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
 	return FALSE;
 }
 
 class WaitDialog
 {
 public:
-GtkWindow* m_window;
+ui::Window m_window;
 GtkLabel* m_label;
 };
 
 WaitDialog create_wait_dialog( const char* title, const char* text ){
 	WaitDialog dialog;
 
-	dialog.m_window = create_floating_window( title, MainFrame_getWindow() );
+	dialog.m_window = MainFrame_getWindow().create_floating_window(title);
 	gtk_window_set_resizable( dialog.m_window, FALSE );
 	gtk_container_set_border_width( GTK_CONTAINER( dialog.m_window ), 0 );
 	gtk_window_set_position( dialog.m_window, GTK_WIN_POS_CENTER_ON_PARENT );
@@ -1639,7 +1628,7 @@ WaitDialog create_wait_dialog( const char* title, const char* text ){
 	g_signal_connect( G_OBJECT( dialog.m_window ), "realize", G_CALLBACK( window_realize_remove_decoration ), 0 );
 
 	{
-		dialog.m_label = GTK_LABEL( gtk_label_new( text ) );
+		dialog.m_label = GTK_LABEL( ui::Label( text ) );
 		gtk_misc_set_alignment( GTK_MISC( dialog.m_label ), 0.0, 0.5 );
 		gtk_label_set_justify( dialog.m_label, GTK_JUSTIFY_LEFT );
 		gtk_widget_show( GTK_WIDGET( dialog.m_label ) );
@@ -1727,7 +1716,7 @@ void ScreenUpdates_Enable(){
 
 		gtk_grab_remove( GTK_WIDGET( g_wait.m_window ) );
 		destroy_floating_window( g_wait.m_window );
-		g_wait.m_window = 0;
+		g_wait.m_window = ui::Window();
 
 		//gtk_window_present(MainFrame_getWindow());
 	}
@@ -1891,10 +1880,10 @@ void fill_view_xz_front_menu( GtkMenu* menu ){
 }
 
 
-GtkWidget* g_toggle_z_item = 0;
-GtkWidget* g_toggle_console_item = 0;
-GtkWidget* g_toggle_entity_item = 0;
-GtkWidget* g_toggle_entitylist_item = 0;
+ui::Widget g_toggle_z_item;
+ui::Widget g_toggle_console_item;
+ui::Widget g_toggle_entity_item;
+ui::Widget g_toggle_entitylist_item;
 
 GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 	// View menu
@@ -2400,17 +2389,17 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	return toolbar;
 }
 
-GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_count_status] ){
+ui::Widget create_main_statusbar( ui::Widget pStatusLabel[c_count_status] ){
 	GtkTable* table = GTK_TABLE( gtk_table_new( 1, c_count_status, FALSE ) );
 	gtk_widget_show( GTK_WIDGET( table ) );
 
 	{
-		GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
+		GtkLabel* label = GTK_LABEL( ui::Label( "Label" ) );
 		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 		gtk_misc_set_padding( GTK_MISC( label ), 4, 2 );
 		gtk_widget_show( GTK_WIDGET( label ) );
 		gtk_table_attach_defaults( table, GTK_WIDGET( label ), 0, 1, 0, 1 );
-		pStatusLabel[c_command_status] = GTK_WIDGET( label );
+		pStatusLabel[c_command_status] = ui::Widget(GTK_WIDGET( label ));
 	}
 
 	for ( int i = 1; i < c_count_status; ++i )
@@ -2420,16 +2409,16 @@ GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_count_status] ){
 		gtk_table_attach_defaults( table, GTK_WIDGET( frame ), i, i + 1, 0, 1 );
 		gtk_frame_set_shadow_type( frame, GTK_SHADOW_IN );
 
-		GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
+		GtkLabel* label = GTK_LABEL( ui::Label( "Label" ) );
 		gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_END );
 		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 		gtk_misc_set_padding( GTK_MISC( label ), 4, 2 );
 		gtk_widget_show( GTK_WIDGET( label ) );
 		gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( label ) );
-		pStatusLabel[i] = GTK_WIDGET( label );
+		pStatusLabel[i] = ui::Widget(GTK_WIDGET( label ));
 	}
 
-	return GTK_WIDGET( table );
+	return ui::Widget(GTK_WIDGET( table ));
 }
 
 #if 0
@@ -2441,15 +2430,15 @@ class WindowFocusPrinter
 {
 const char* m_name;
 
-static gboolean frame_event( GtkWidget *widget, GdkEvent* event, WindowFocusPrinter* self ){
+static gboolean frame_event( ui::Widget widget, GdkEvent* event, WindowFocusPrinter* self ){
 	globalOutputStream() << self->m_name << " frame_event\n";
 	return FALSE;
 }
-static gboolean keys_changed( GtkWidget *widget, WindowFocusPrinter* self ){
+static gboolean keys_changed( ui::Widget widget, WindowFocusPrinter* self ){
 	globalOutputStream() << self->m_name << " keys_changed\n";
 	return FALSE;
 }
-static gboolean notify( GtkWindow* window, gpointer dummy, WindowFocusPrinter* self ){
+static gboolean notify( ui::Window window, gpointer dummy, WindowFocusPrinter* self ){
 	if ( gtk_window_is_active( window ) ) {
 		globalOutputStream() << self->m_name << " takes toplevel focus\n";
 	}
@@ -2462,7 +2451,7 @@ static gboolean notify( GtkWindow* window, gpointer dummy, WindowFocusPrinter* s
 public:
 WindowFocusPrinter( const char* name ) : m_name( name ){
 }
-void connect( GtkWindow* toplevel_window ){
+void connect( ui::Window toplevel_window ){
 	g_signal_connect( G_OBJECT( toplevel_window ), "notify::has_toplevel_focus", G_CALLBACK( notify ), this );
 	g_signal_connect( G_OBJECT( toplevel_window ), "notify::is_active", G_CALLBACK( notify ), this );
 	g_signal_connect( G_OBJECT( toplevel_window ), "keys_changed", G_CALLBACK( keys_changed ), this );
@@ -2476,15 +2465,15 @@ WindowFocusPrinter g_mainframeFocusPrinter( "mainframe" );
 
 class MainWindowActive
 {
-static gboolean notify( GtkWindow* window, gpointer dummy, MainWindowActive* self ){
-	if ( g_wait.m_window != 0 && gtk_window_is_active( window ) && !GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+static gboolean notify( ui::Window window, gpointer dummy, MainWindowActive* self ){
+	if ( g_wait.m_window && gtk_window_is_active( window ) && !GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
 		gtk_widget_show( GTK_WIDGET( g_wait.m_window ) );
 	}
 
 	return FALSE;
 }
 public:
-void connect( GtkWindow* toplevel_window ){
+void connect( ui::Window toplevel_window ){
 	g_signal_connect( G_OBJECT( toplevel_window ), "notify::is-active", G_CALLBACK( notify ), this );
 }
 };
@@ -2510,16 +2499,14 @@ void XYWindowMouseDown_disconnect( MouseEventHandlerId id ){
 // =============================================================================
 // MainFrame class
 
-MainFrame* g_pParentWnd = 0;
+MainFrame* g_pParentWnd = nullptr;
 
-GtkWindow* MainFrame_getWindow(){
-	if ( g_pParentWnd == 0 ) {
-		return 0;
-	}
-	return g_pParentWnd->m_window;
+ui::Window MainFrame_getWindow()
+{
+	return g_pParentWnd ? g_pParentWnd->m_window : ui::Window();
 }
 
-std::vector<GtkWidget*> g_floating_windows;
+std::vector<ui::Widget> g_floating_windows;
 
 MainFrame::MainFrame() : m_window( 0 ), m_idleRedrawStatusText( RedrawStatusTextCaller( *this ) ){
 	m_pXYWnd = 0;
@@ -2531,7 +2518,7 @@ MainFrame::MainFrame() : m_window( 0 ), m_idleRedrawStatusText( RedrawStatusText
 
 	for ( int n = 0; n < c_count_status; n++ )
 	{
-		m_pStatusLabel[n] = 0;
+		m_pStatusLabel[n] = ui::root;
 	}
 
 	m_bSleeping = false;
@@ -2546,7 +2533,7 @@ MainFrame::~MainFrame(){
 
 	Shutdown();
 
-	for ( std::vector<GtkWidget*>::iterator i = g_floating_windows.begin(); i != g_floating_windows.end(); ++i )
+	for ( std::vector<ui::Widget>::iterator i = g_floating_windows.begin(); i != g_floating_windows.end(); ++i )
 	{
 		gtk_widget_destroy( *i );
 	}
@@ -2671,8 +2658,8 @@ void MainFrame::OnSleep(){
 }
 
 
-GtkWindow* create_splash(){
-	GtkWindow* window = GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) );
+ui::Window create_splash(){
+	ui::Window window = ui::Window(GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) ));
 	gtk_window_set_decorated( window, FALSE );
 	gtk_window_set_resizable( window, FALSE );
 	gtk_window_set_modal( window, TRUE );
@@ -2690,7 +2677,7 @@ GtkWindow* create_splash(){
 	return window;
 }
 
-static GtkWindow *splash_screen = 0;
+static ui::Window splash_screen;
 
 void show_splash(){
 	splash_screen = create_splash();
@@ -2707,7 +2694,7 @@ WindowPositionTracker g_posXYWnd;
 WindowPositionTracker g_posXZWnd;
 WindowPositionTracker g_posYZWnd;
 
-static gint mainframe_delete( GtkWidget *widget, GdkEvent *event, gpointer data ){
+static gint mainframe_delete( ui::Widget widget, GdkEvent *event, gpointer data ){
 	if ( ConfirmModified( "Exit Radiant" ) ) {
 		gtk_main_quit();
 	}
@@ -2716,7 +2703,7 @@ static gint mainframe_delete( GtkWidget *widget, GdkEvent *event, gpointer data 
 }
 
 void MainFrame::Create(){
-	GtkWindow* window = GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) );
+	ui::Window window = ui::Window(GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) ));
 
 	GlobalWindowObservers_connectTopLevel( window );
 
@@ -2744,9 +2731,9 @@ void MainFrame::Create(){
 
 	g_MainWindowActive.connect( window );
 
-	GetPlugInMgr().Init( GTK_WIDGET( window ) );
+	GetPlugInMgr().Init( window );
 
-	GtkWidget* vbox = gtk_vbox_new( FALSE, 0 );
+	ui::Widget vbox = ui::Widget(gtk_vbox_new( FALSE, 0 ));
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
@@ -2768,7 +2755,7 @@ void MainFrame::Create(){
 	}
 	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( plugin_toolbar ), FALSE, FALSE, 0 );
 
-	GtkWidget* main_statusbar = create_main_statusbar( m_pStatusLabel );
+	ui::Widget main_statusbar = create_main_statusbar( m_pStatusLabel );
 	gtk_box_pack_end( GTK_BOX( vbox ), main_statusbar, FALSE, TRUE, 2 );
 
 	GroupDialog_constructWindow( window );
@@ -2801,17 +2788,17 @@ void MainFrame::Create(){
 
 	if ( CurrentStyle() == eRegular || CurrentStyle() == eRegularLeft ) {
 		{
-			GtkWidget* vsplit = gtk_vpaned_new();
+			ui::Widget vsplit = ui::Widget(gtk_vpaned_new());
 			m_vSplit = vsplit;
 			gtk_box_pack_start( GTK_BOX( vbox ), vsplit, TRUE, TRUE, 0 );
 			gtk_widget_show( vsplit );
 
 			// console
-			GtkWidget* console_window = Console_constructWindow( window );
+			ui::Widget console_window = Console_constructWindow( window );
 			gtk_paned_pack2( GTK_PANED( vsplit ), console_window, FALSE, TRUE );
 
 			{
-				GtkWidget* hsplit = gtk_hpaned_new();
+				ui::Widget hsplit = ui::Widget(gtk_hpaned_new());
 				gtk_widget_show( hsplit );
 				m_hSplit = hsplit;
 				gtk_paned_add1( GTK_PANED( vsplit ), hsplit );
@@ -2819,10 +2806,10 @@ void MainFrame::Create(){
 				// xy
 				m_pXYWnd = new XYWnd();
 				m_pXYWnd->SetViewType( XY );
-				GtkWidget* xy_window = GTK_WIDGET( create_framed_widget( m_pXYWnd->GetWidget() ) );
+				ui::Widget xy_window = ui::Widget(GTK_WIDGET( create_framed_widget( m_pXYWnd->GetWidget() ) ));
 
 				{
-					GtkWidget* vsplit2 = gtk_vpaned_new();
+					ui::Widget vsplit2 = ui::Widget(gtk_vpaned_new());
 					gtk_widget_show( vsplit2 );
 					m_vSplit2 = vsplit2;
 
@@ -2867,7 +2854,7 @@ void MainFrame::Create(){
 	}
 	else if ( CurrentStyle() == eFloating ) {
 		{
-			GtkWindow* window = create_persistent_floating_window( "Camera", m_window );
+			ui::Window window = ui::Window(create_persistent_floating_window( "Camera", m_window ));
 			global_accel_connect_window( window );
 			g_posCamWnd.connect( window );
 
@@ -2882,11 +2869,11 @@ void MainFrame::Create(){
 			}
 			CamWnd_setParent( *m_pCamWnd, window );
 
-			g_floating_windows.push_back( GTK_WIDGET( window ) );
+			g_floating_windows.push_back( window );
 		}
 
 		{
-			GtkWindow* window = create_persistent_floating_window( ViewType_getTitle( XY ), m_window );
+			ui::Window window = ui::Window(create_persistent_floating_window( ViewType_getTitle( XY ), m_window ));
 			global_accel_connect_window( window );
 			g_posXYWnd.connect( window );
 
@@ -2901,11 +2888,11 @@ void MainFrame::Create(){
 			}
 			XY_Top_Shown_Construct( window );
 
-			g_floating_windows.push_back( GTK_WIDGET( window ) );
+			g_floating_windows.push_back( window );
 		}
 
 		{
-			GtkWindow* window = create_persistent_floating_window( ViewType_getTitle( XZ ), m_window );
+			ui::Window window = ui::Window(create_persistent_floating_window( ViewType_getTitle( XZ ), m_window ));
 			global_accel_connect_window( window );
 			g_posXZWnd.connect( window );
 
@@ -2920,11 +2907,11 @@ void MainFrame::Create(){
 
 			XZ_Front_Shown_Construct( window );
 
-			g_floating_windows.push_back( GTK_WIDGET( window ) );
+			g_floating_windows.push_back( window );
 		}
 
 		{
-			GtkWindow* window = create_persistent_floating_window( ViewType_getTitle( YZ ), m_window );
+			ui::Window window = ui::Window(create_persistent_floating_window( ViewType_getTitle( YZ ), m_window ));
 			global_accel_connect_window( window );
 			g_posYZWnd.connect( window );
 
@@ -2939,12 +2926,12 @@ void MainFrame::Create(){
 
 			YZ_Side_Shown_Construct( window );
 
-			g_floating_windows.push_back( GTK_WIDGET( window ) );
+			g_floating_windows.push_back( window );
 		}
 
 		{
 			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
-			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
+			g_page_textures = GroupDialog_addPage( "Textures", ui::Widget(GTK_WIDGET( frame )), TextureBrowserExportTitleCaller() );
 		}
 
 		GroupDialog_show();
@@ -2955,29 +2942,29 @@ void MainFrame::Create(){
 		GlobalCamera_setCamWnd( *m_pCamWnd );
 		CamWnd_setParent( *m_pCamWnd, window );
 
-		GtkWidget* camera = CamWnd_getWidget( *m_pCamWnd );
+		ui::Widget camera = CamWnd_getWidget( *m_pCamWnd );
 
 		m_pYZWnd = new XYWnd();
 		m_pYZWnd->SetViewType( YZ );
 
-		GtkWidget* yz = m_pYZWnd->GetWidget();
+		ui::Widget yz = m_pYZWnd->GetWidget();
 
 		m_pXYWnd = new XYWnd();
 		m_pXYWnd->SetViewType( XY );
 
-		GtkWidget* xy = m_pXYWnd->GetWidget();
+		ui::Widget xy = m_pXYWnd->GetWidget();
 
 		m_pXZWnd = new XYWnd();
 		m_pXZWnd->SetViewType( XZ );
 
-		GtkWidget* xz = m_pXZWnd->GetWidget();
+		ui::Widget xz = m_pXZWnd->GetWidget();
 
 		GtkHPaned* split = create_split_views( camera, yz, xy, xz );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( split ), TRUE, TRUE, 0 );
 
 		{
 			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( window ) );
-			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
+			g_page_textures = GroupDialog_addPage( "Textures", ui::Widget(GTK_WIDGET( frame )), TextureBrowserExportTitleCaller() );
 		}
 	}
 

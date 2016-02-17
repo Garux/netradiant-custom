@@ -42,6 +42,7 @@
 #include <map>
 
 #include <gtk/gtktearoffmenuitem.h>
+#include <uilib/uilib.h>
 
 #include "stream/textfilestream.h"
 #include "cmdlib.h"
@@ -140,11 +141,11 @@ bool ConfirmModified( const char* title ){
 		return true;
 	}
 
-	EMessageBoxReturn result = gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "The current map has changed since it was last saved.\nDo you want to save the current map before continuing?", title, eMB_YESNOCANCEL, eMB_ICONQUESTION );
-	if ( result == eIDCANCEL ) {
+	auto result = MainFrame_getWindow().alert( "The current map has changed since it was last saved.\nDo you want to save the current map before continuing?", title, ui::alert_type::YESNOCANCEL, ui::alert_icon::QUESTION );
+	if ( result == ui::alert_response::CANCEL ) {
 		return false;
 	}
-	if ( result == eIDYES ) {
+	if ( result == ui::alert_response::YES ) {
 		if ( Map_Unnamed( g_map ) ) {
 			return Map_SaveAs();
 		}
@@ -324,7 +325,7 @@ void Sys_SetTitle( const char *text, bool modified ){
 		title << " *";
 	}
 
-	gtk_window_set_title( MainFrame_getWindow(), title.c_str() );
+	gtk_window_set_title(MainFrame_getWindow(), title.c_str() );
 }
 
 bool g_bWaitCursor = false;

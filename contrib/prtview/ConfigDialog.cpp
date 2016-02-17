@@ -20,6 +20,7 @@
 #include "ConfigDialog.h"
 #include <stdio.h>
 #include <gtk/gtk.h>
+#include <uilib/uilib.h>
 #include "gtkutil/pointer.h"
 
 #include "iscenegraph.h"
@@ -279,7 +280,7 @@ void DoConfigDialog(){
 	gtk_box_pack_start( GTK_BOX( hbox ), lw3slider, TRUE, TRUE, 0 );
 	gtk_scale_set_draw_value( GTK_SCALE( lw3slider ), FALSE );
 
-	lw3label = gtk_label_new( "" );
+	lw3label = ui::Label( "" );
 	gtk_widget_show( lw3label );
 	gtk_box_pack_start( GTK_BOX( hbox ), lw3label, FALSE, TRUE, 0 );
 	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScroll3d ), lw3label );
@@ -372,7 +373,7 @@ void DoConfigDialog(){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_scale_set_draw_value( GTK_SCALE( transslider ), FALSE );
 
-	translabel = gtk_label_new( "" );
+	translabel = ui::Label( "" );
 	gtk_widget_show( translabel );
 	gtk_table_attach( GTK_TABLE( table ), translabel, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -388,7 +389,7 @@ void DoConfigDialog(){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_scale_set_draw_value( GTK_SCALE( clipslider ), FALSE );
 
-	cliplabel = gtk_label_new( "" );
+	cliplabel = ui::Label( "" );
 	gtk_widget_show( cliplabel );
 	gtk_table_attach( GTK_TABLE( table ), cliplabel, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -429,7 +430,7 @@ void DoConfigDialog(){
 	gtk_box_pack_start( GTK_BOX( hbox ), lw2slider, TRUE, TRUE, 0 );
 	gtk_scale_set_draw_value( GTK_SCALE( lw2slider ), FALSE );
 
-	lw2label = gtk_label_new( "" );
+	lw2label = ui::Label( "" );
 	gtk_widget_show( lw2label );
 	gtk_box_pack_start( GTK_BOX( hbox ), lw2label, FALSE, TRUE, 0 );
 	gtk_signal_connect( adj, "value_changed", GTK_SIGNAL_FUNC( OnScroll2d ), lw2label );

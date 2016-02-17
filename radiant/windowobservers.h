@@ -25,15 +25,14 @@
 #include "windowobserver.h"
 
 #include <gdk/gdktypes.h>
+#include <uilib/uilib.h>
 
 #include "math/vector.h"
 
 class WindowObserver;
 void GlobalWindowObservers_add( WindowObserver* observer );
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
-void GlobalWindowObservers_connectWidget( GtkWidget* widget );
-void GlobalWindowObservers_connectTopLevel( GtkWindow* window );
+void GlobalWindowObservers_connectWidget( ui::Widget widget );
+void GlobalWindowObservers_connectTopLevel( ui::Window window );
 
 inline ButtonIdentifier button_for_button( unsigned int button ){
 	switch ( button )

@@ -85,7 +85,7 @@ void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, co
 	gtk_toolbar_append_element( toolbar, gtktoolbarchildtype_for_toolbarbuttontype( type ), 0, text, tooltip, "", GTK_WIDGET( new_plugin_image( icon ) ), handler, data );
 }
 
-void ActivateToolbarButton( GtkWidget *widget, gpointer data ){
+void ActivateToolbarButton( ui::Widget widget, gpointer data ){
 	const_cast<const IToolbarButton*>( reinterpret_cast<IToolbarButton*>( data ) )->activate();
 }
 

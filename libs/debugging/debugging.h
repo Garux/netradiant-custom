@@ -116,7 +116,8 @@ inline DebugMessageHandler& globalDebugMessageHandler(){
 		globalDebugMessageHandler().getOutputStream() << FILE_LINE "\nruntime error: " << message << "\n"; \
 		if ( !globalDebugMessageHandler().handleMessage() ) { DEBUGGER_BREAKPOINT(); }} while ( 0 )
 
-#define ASSERT_NOTNULL( ptr ) ASSERT_MESSAGE( ptr != 0, "pointer \"" # ptr "\" is null" )
+#define ASSERT_NOTNULL( ptr ) ASSERT_MESSAGE( ptr != nullptr, "pointer \"" # ptr "\" is null" )
+#define ASSERT_TRUE( flag ) ASSERT_MESSAGE( !!(flag) == true, "condition \"" # flag "\" is false" )
 
 #else
 

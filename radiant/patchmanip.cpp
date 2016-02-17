@@ -851,7 +851,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 	GtkComboBox* width;
 	GtkComboBox* height;
 
-	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Patch density", G_CALLBACK( dialog_delete_callback ), &dialog );
+	ui::Window window = MainFrame_getWindow().create_dialog_window("Patch density", G_CALLBACK(dialog_delete_callback ), &dialog );
 
 	GtkAccelGroup* accel = gtk_accel_group_new();
 	gtk_window_add_accel_group( window, accel );
@@ -863,7 +863,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 			GtkTable* table = create_dialog_table( 2, 2, 4, 4 );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 			{
-				GtkLabel* label = GTK_LABEL( gtk_label_new( "Width:" ) );
+				GtkLabel* label = GTK_LABEL( ui::Label( "Width:" ) );
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 0, 1,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -871,7 +871,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 			}
 			{
-				GtkLabel* label = GTK_LABEL( gtk_label_new( "Height:" ) );
+				GtkLabel* label = GTK_LABEL( ui::Label( "Height:" ) );
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 1, 2,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -972,13 +972,13 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 	ModalDialog dialog;
 	ModalDialogButton ok_button( dialog, eIDOK );
 	ModalDialogButton cancel_button( dialog, eIDCANCEL );
-	GtkWidget* bevel;
-	GtkWidget* ibevel;
-	GtkWidget* endcap;
-	GtkWidget* iendcap;
-	GtkWidget* cylinder;
+	ui::Widget bevel;
+	ui::Widget ibevel;
+	ui::Widget endcap;
+	ui::Widget iendcap;
+	ui::Widget cylinder;
 
-	GtkWindow* window = create_modal_dialog_window( MainFrame_getWindow(), "Cap", dialog );
+	ui::Window window = MainFrame_getWindow().create_modal_dialog_window( "Cap", dialog );
 
 	GtkAccelGroup *accel_group = gtk_accel_group_new();
 	gtk_window_add_accel_group( window, accel_group );
@@ -1037,7 +1037,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 
 				GSList* group = 0;
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Bevel" );
+					ui::Widget button = ui::Widget(gtk_radio_button_new_with_label( group, "Bevel" ));
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
@@ -1047,7 +1047,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					bevel = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Endcap" );
+					ui::Widget button = ui::Widget(gtk_radio_button_new_with_label( group, "Endcap" ));
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
@@ -1057,7 +1057,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					endcap = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Inverted Bevel" );
+					ui::Widget button = ui::Widget(gtk_radio_button_new_with_label( group, "Inverted Bevel" ));
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 2, 3,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
@@ -1067,7 +1067,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					ibevel = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Inverted Endcap" );
+					ui::Widget button = ui::Widget(gtk_radio_button_new_with_label( group, "Inverted Endcap" ));
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 3, 4,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
@@ -1077,7 +1077,7 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 					iendcap = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Cylinder" );
+					ui::Widget button = ui::Widget(gtk_radio_button_new_with_label( group, "Cylinder" ));
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 4, 5,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),

@@ -210,11 +210,11 @@ bool ValidateTextInt( const char* pData, const char* error_title, int* value ){
  */
 
 EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMessageBoxType type ){
-	GtkWidget *window, *w, *vbox, *hbox;
+	ui::Widget window, w, vbox, hbox;
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Widget(gtk_window_new( GTK_WINDOW_TOPLEVEL ));
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy",
@@ -225,25 +225,25 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
 	gtk_widget_realize( window );
 
-	vbox = gtk_vbox_new( FALSE, 10 );
+	vbox = ui::Widget(gtk_vbox_new( FALSE, 10 ));
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
 
-	w = gtk_label_new( lpText );
+	w = ui::Label( lpText );
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
 
-	w = gtk_hseparator_new();
+	w = ui::Widget(gtk_hseparator_new());
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
 	gtk_widget_show( w );
 
-	hbox = gtk_hbox_new( FALSE, 10 );
+	hbox = ui::Widget(gtk_hbox_new( FALSE, 10 ));
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 2 );
 	gtk_widget_show( hbox );
 
 	if ( type == eMB_OK ) {
-		w = gtk_button_new_with_label( "Ok" );
+		w = ui::Widget(gtk_button_new_with_label( "Ok" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
@@ -253,7 +253,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		ret = eIDOK;
 	}
 	else if ( type ==  eMB_OKCANCEL ) {
-		w = gtk_button_new_with_label( "Ok" );
+		w = ui::Widget(gtk_button_new_with_label( "Ok" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
@@ -261,7 +261,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
-		w = gtk_button_new_with_label( "Cancel" );
+		w = ui::Widget(gtk_button_new_with_label( "Cancel" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
@@ -269,7 +269,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		ret = eIDCANCEL;
 	}
 	else if ( type == eMB_YESNOCANCEL ) {
-		w = gtk_button_new_with_label( "Yes" );
+		w = ui::Widget(gtk_button_new_with_label( "Yes" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
@@ -277,13 +277,13 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
-		w = gtk_button_new_with_label( "No" );
+		w = ui::Widget(gtk_button_new_with_label( "No" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
 		gtk_widget_show( w );
 
-		w = gtk_button_new_with_label( "Cancel" );
+		w = ui::Widget(gtk_button_new_with_label( "Cancel" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
@@ -292,7 +292,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	}
 	else /* if (mode == MB_YESNO) */
 	{
-		w = gtk_button_new_with_label( "Yes" );
+		w = ui::Widget(gtk_button_new_with_label( "Yes" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
@@ -300,7 +300,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
-		w = gtk_button_new_with_label( "No" );
+		w = ui::Widget(gtk_button_new_with_label( "No" ));
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDNO ) );
@@ -471,7 +471,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox2 ), text1, FALSE, FALSE, 2 );
 	gtk_widget_show( text1 );
 
-	w = gtk_label_new( "Number Of Sides" );
+	w = ui::Label( "Number Of Sides" );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
@@ -489,7 +489,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox2 ), text2, FALSE, FALSE, 2 );
 	gtk_widget_show( text2 );
 
-	w = gtk_label_new( "Border Width" );
+	w = ui::Label( "Border Width" );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
@@ -624,7 +624,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_widget_show( hbox );
 
 	// dunno if you want this text or not ...
-	w = gtk_label_new( text );
+	w = ui::Label( text );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 ); // not entirely sure on all the parameters / what they do ...
 	gtk_widget_show( w );
 
@@ -643,7 +643,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), textStairHeight, FALSE, FALSE, 1 );
 	gtk_widget_show( textStairHeight );
 
-	w = gtk_label_new( "Stair Height" );
+	w = ui::Label( "Stair Height" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
 	gtk_widget_show( w );
 
@@ -653,7 +653,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Direction:" );
+	w = ui::Label( "Direction:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 5 );
 	gtk_widget_show( w );
 
@@ -697,7 +697,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Style:" );
+	w = ui::Label( "Style:" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 5 );
 	gtk_widget_show( w );
 
@@ -745,7 +745,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), textMainTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textMainTex );
 
-	w = gtk_label_new( "Main Texture" );
+	w = ui::Label( "Main Texture" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
 	gtk_widget_show( w );
 
@@ -759,7 +759,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), textRiserTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textRiserTex );
 
-	w = gtk_label_new( "Riser Texture" );
+	w = ui::Label( "Riser Texture" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
 	gtk_widget_show( w );
 
@@ -891,7 +891,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), textFrontBackTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textFrontBackTex );
 
-	w = gtk_label_new( "Door Front/Back Texture" );
+	w = ui::Label( "Door Front/Back Texture" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -905,7 +905,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), textTrimTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textTrimTex );
 
-	w = gtk_label_new( "Door Trim Texture" );
+	w = ui::Label( "Door Trim Texture" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -990,7 +990,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_label_new( "Orientation" );
+	w = ui::Label( "Orientation" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -1103,7 +1103,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), text1, FALSE, FALSE, 2 );
 	gtk_widget_show( text1 );
 
-	w = gtk_label_new( "Number Of Points" );
+	w = ui::Label( "Number Of Points" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
@@ -1121,14 +1121,14 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), text2, FALSE, FALSE, 2 );
 	gtk_widget_show( text2 );
 
-	w = gtk_label_new( "Multipler" );
+	w = ui::Label( "Multipler" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
 
 	// ---- /hbox ----
 
-	w = gtk_label_new( "Path Distance = dist(start -> apex) * multiplier" );
+	w = ui::Label( "Path Distance = dist(start -> apex) * multiplier" );
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
@@ -1144,7 +1144,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), text3, FALSE, FALSE, 2 );
 	gtk_widget_show( text3 );
 
-	w = gtk_label_new( "Gravity" );
+	w = ui::Label( "Gravity" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
@@ -1341,7 +1341,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	texSelected = "Currently Selected Texture:   ";
 	texSelected += GetCurrentTexture();
 
-	w = gtk_label_new( texSelected );
+	w = ui::Label( texSelected );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 2 );
 	gtk_label_set_justify( GTK_LABEL( w ), GTK_JUSTIFY_LEFT );
 	gtk_widget_show( w );
@@ -1368,7 +1368,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-	w = gtk_label_new( "Old Name: " );
+	w = ui::Label( "Old Name: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1381,7 +1381,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( dlgTexReset.editTexOld );
 
-	w = gtk_label_new( "New Name: " );
+	w = ui::Label( "New Name: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1416,7 +1416,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-	w = gtk_label_new( "New Horizontal Scale: " );
+	w = ui::Label( "New Horizontal Scale: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1437,7 +1437,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-	w = gtk_label_new( "New Vertical Scale: " );
+	w = ui::Label( "New Vertical Scale: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1472,7 +1472,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-	w = gtk_label_new( "New Horizontal Shift: " );
+	w = ui::Label( "New Horizontal Shift: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1493,7 +1493,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-	w = gtk_label_new( "New Vertical Shift: " );
+	w = ui::Label( "New Vertical Shift: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1527,7 +1527,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-	w = gtk_label_new( "New Rotation Value: " );
+	w = ui::Label( "New Rotation Value: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1687,7 +1687,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	// ---- frame ----
 
-	w = gtk_label_new( "X: " );
+	w = ui::Label( "X: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1702,7 +1702,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 
 
-	w = gtk_label_new( "Y: " );
+	w = ui::Label( "Y: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1730,7 +1730,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	// ---- frame ----
 
-	w = gtk_label_new( "Start: " );
+	w = ui::Label( "Start: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1745,7 +1745,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 
 
-	w = gtk_label_new( "End: " );
+	w = ui::Label( "End: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1772,7 +1772,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	// ---- frame ----
 
-	w = gtk_label_new( "Start: " );
+	w = ui::Label( "Start: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1787,7 +1787,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 
 
-	w = gtk_label_new( "End: " );
+	w = ui::Label( "End: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1815,7 +1815,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	// ---- frame ----
 
-	w = gtk_label_new( "Number: " );
+	w = ui::Label( "Number: " );
 	gtk_table_attach( GTK_TABLE( table ), w, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
@@ -1936,7 +1936,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	gtk_widget_show( hbox );
 
 	// dunno if you want this text or not ...
-	w = gtk_label_new( text );
+	w = ui::Label( text );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
@@ -1955,7 +1955,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), textlinkNum, FALSE, FALSE, 1 );
 	gtk_widget_show( textlinkNum );
 
-	w = gtk_label_new( "Number of elements in chain" );
+	w = ui::Label( "Number of elements in chain" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
 	gtk_widget_show( w );
 
@@ -1969,7 +1969,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), textlinkName, FALSE, FALSE, 0 );
 	gtk_widget_show( textlinkName );
 
-	w = gtk_label_new( "Basename for chain's targetnames." );
+	w = ui::Label( "Basename for chain's targetnames." );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 1 );
 	gtk_widget_show( w );
 
