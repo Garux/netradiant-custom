@@ -1346,7 +1346,7 @@ void create_tooltips(){
 GtkWidget* create_main_dialog(){
 	GtkWidget *dlg, *vbox, *hbox, *hbox2, *button, *notebook, *frame, *table, *table2;
 	GtkWidget *check, *spin, *radio, *label, *entry, *scale;
-	GtkObject *adj;
+	ui::Adjustment adj;
 	GSList *group;
 	int i;
 	const char *games[] = { "Quake 2", "Half-Life", "SiN", "Heretic 2", "Kingpin", "Genesis3D", "Quake 3 Arena" };
@@ -1700,7 +1700,7 @@ GtkWidget* create_main_dialog(){
 	adj = ui::Adjustment( 0, 0, 110, 1, 10, 0 );
 	g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( extents_decimate ), NULL );
 	g_object_set_data( G_OBJECT( dlg ), "decimate_adj", adj );
-	scale = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
+	scale = ui::HScale( adj );
 	gtk_widget_show( scale );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), scale, TRUE, TRUE, 0 );
 	gtk_scale_set_value_pos( GTK_SCALE( scale ), GTK_POS_RIGHT );

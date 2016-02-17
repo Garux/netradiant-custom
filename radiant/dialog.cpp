@@ -529,7 +529,7 @@ void Dialog::addSlider( ui::Widget vbox, const char* name, int& data, gboolean d
 	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 1.0, 0.0 );
 	gtk_widget_show( alignment );
 
-	ui::Widget scale = ui::Widget(gtk_hscale_new( GTK_ADJUSTMENT( adj ) ));
+	ui::Widget scale = ui::HScale( adj );
 	gtk_scale_set_value_pos( GTK_SCALE( scale ), GTK_POS_LEFT );
 	gtk_widget_show( scale );
 	gtk_container_add( GTK_CONTAINER( alignment ), scale );

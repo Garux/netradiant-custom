@@ -245,7 +245,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_box_pack_start( GTK_BOX( hbox ),w, FALSE, FALSE, 5 );
 	gtk_widget_show( w );
 
-	w = gtk_hscale_new_with_range( 0.0,1.0,0.01 );
+	w = ui::HScale( 0.0, 1.0, 0.01 );
 	gtk_range_set_value( GTK_RANGE( w ),0.5 );
 	gtk_scale_set_value_pos( GTK_SCALE( w ),GTK_POS_LEFT );
 	g_signal_connect( G_OBJECT( w ), "value-changed",

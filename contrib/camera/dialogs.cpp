@@ -1221,7 +1221,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 
 	g_pTimeLine = ui::Adjustment( 0, 0, 30000, 100, 250, 0 );
 	gtk_signal_connect( GTK_OBJECT( g_pTimeLine ), "value_changed", GTK_SIGNAL_FUNC( ci_timeline_changed ), NULL );
-	w = gtk_hscale_new( g_pTimeLine );
+	w = ui::HScale( g_pTimeLine );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_widget_show( w );
 	gtk_scale_set_draw_value( GTK_SCALE( w ), FALSE );

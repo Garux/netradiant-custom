@@ -137,6 +137,12 @@ namespace ui {
     HBox::HBox(bool homogenous, int spacing) : HBox(GTK_HBOX(gtk_hbox_new(homogenous, spacing)))
     { }
 
+    HScale::HScale(Adjustment adjustment) : HScale(GTK_HSCALE(gtk_hscale_new(adjustment)))
+    { }
+
+    HScale::HScale(double min, double max, double step) : HScale(GTK_HSCALE(gtk_hscale_new_with_range(min, max, step)))
+    { }
+
     Image::Image() : Image(GTK_IMAGE(gtk_image_new()))
     { }
 
