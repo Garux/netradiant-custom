@@ -75,7 +75,7 @@ GtkEntry* m_entry;
 };
 
 DialogEntryRow DialogEntryRow_new( const char* name ){
-	ui::Widget alignment = ui::Widget(gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 ));
+	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 0.0, 0.0 );
 	gtk_widget_show( alignment );
 
 	GtkEntry* entry = DialogEntry_new();
@@ -108,7 +108,7 @@ GtkSpinButton* m_spin;
 };
 
 DialogSpinnerRow DialogSpinnerRow_new( const char* name, double value, double lower, double upper, int fraction ){
-	ui::Widget alignment = ui::Widget(gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 ));
+	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 0.0, 0.0 );
 	gtk_widget_show( alignment );
 
 	GtkSpinButton* spin = DialogSpinner_new( value, lower, upper, fraction );
@@ -478,7 +478,7 @@ ui::CheckButton Dialog::addCheckBox( ui::Widget vbox, const char* name, const ch
 }
 
 void Dialog::addCombo( ui::Widget vbox, const char* name, StringArrayRange values, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	ui::Widget alignment = ui::Widget(gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 ));
+	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 0.0, 0.0 );
 	gtk_widget_show( alignment );
 	{
 		ui::Widget combo = ui::Widget(gtk_combo_box_new_text());
@@ -526,7 +526,7 @@ void Dialog::addSlider( ui::Widget vbox, const char* name, int& data, gboolean d
 	AddIntAdjustmentData( *GTK_ADJUSTMENT( adj ), IntImportCaller( data ), IntExportCaller( data ) );
 
 	// scale
-	ui::Widget alignment = ui::Widget(gtk_alignment_new( 0.0, 0.5, 1.0, 0.0 ));
+	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 1.0, 0.0 );
 	gtk_widget_show( alignment );
 
 	ui::Widget scale = ui::Widget(gtk_hscale_new( GTK_ADJUSTMENT( adj ) ));
@@ -542,7 +542,7 @@ void Dialog::addSlider( ui::Widget vbox, const char* name, int& data, gboolean d
 }
 
 void Dialog::addRadio( ui::Widget vbox, const char* name, StringArrayRange names, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
-	ui::Widget alignment = ui::Widget(gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 ));
+	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 0.0, 0.0 );
 	gtk_widget_show( alignment );
 	{
 		RadioHBox radioBox = RadioHBox_new( names );

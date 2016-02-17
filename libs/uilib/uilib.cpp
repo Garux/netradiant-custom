@@ -84,6 +84,10 @@ namespace ui {
         return g_signal_connect(G_OBJECT(*this), "key-press-event", (GCallback) +func, &pass);
     }
 
+    Alignment::Alignment(float xalign, float yalign, float xscale, float yscale)
+            : Alignment(GTK_ALIGNMENT(gtk_alignment_new(xalign, yalign, xscale, yscale)))
+    { }
+
     Button::Button(const char *label) : Button(GTK_BUTTON(gtk_button_new_with_label(label)))
     { }
 

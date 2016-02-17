@@ -36,7 +36,7 @@
 #include "widget.h"
 
 GtkWidget* create_padding( int width, int height ){
-	GtkWidget* widget = gtk_alignment_new( 0.0, 0.0, 0.0, 0.0 );
+	ui::Alignment widget = ui::Alignment( 0.0, 0.0, 0.0, 0.0 );
 	gtk_widget_show( widget );
 	gtk_widget_set_size_request( widget, width, height );
 	return widget;
@@ -105,7 +105,7 @@ EMessageBoxReturn gtk_MessageBox( ui::Widget parent, const char* text, const cha
 	GtkVBox* vboxDummy = create_dialog_vbox( 0, 0 );
 	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( vboxDummy ), FALSE, FALSE, 0 );
 
-	GtkAlignment* alignment = GTK_ALIGNMENT( gtk_alignment_new( 0.5, 0.0, 0.0, 0.0 ) );
+	GtkAlignment* alignment = ui::Alignment( 0.5, 0.0, 0.0, 0.0 );
 	gtk_widget_show( GTK_WIDGET( alignment ) );
 	gtk_box_pack_start( GTK_BOX( vboxDummy ), GTK_WIDGET( alignment ), FALSE, FALSE, 0 );
 

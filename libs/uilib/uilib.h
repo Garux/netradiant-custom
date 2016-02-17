@@ -3,16 +3,15 @@
 
 #include <string>
 
+using ui_alignment = struct _GtkAlignment;
+using ui_button = struct _GtkButton;
+using ui_evkey = struct _GdkEventKey;
+using ui_label = struct _GtkLabel;
+using ui_menuitem = struct _GtkMenuItem;
+using ui_modal = struct ModalDialog;
 using ui_typeinst = struct _GTypeInstance;
 using ui_widget = struct _GtkWidget;
 using ui_window = struct _GtkWindow;
-using ui_button = struct _GtkButton;
-using ui_menuitem = struct _GtkMenuItem;
-using ui_label = struct _GtkLabel;
-
-using ui_evkey = struct _GdkEventKey;
-
-using ui_modal = struct ModalDialog;
 
 namespace ui {
 
@@ -122,6 +121,10 @@ namespace ui {
 
     WIDGET(Label, ui_label,
            Label(const char *label);
+    );
+
+    WIDGET(Alignment, ui_alignment,
+           Alignment(float xalign, float yalign, float xscale, float yscale);
     );
 
 }

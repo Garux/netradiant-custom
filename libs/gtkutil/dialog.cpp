@@ -174,7 +174,7 @@ GtkWindow* create_simple_modal_dialog_window( const char* title, ModalDialog& di
 
 	gtk_container_add( GTK_CONTAINER( vbox1 ), contents );
 
-	GtkAlignment* alignment = GTK_ALIGNMENT( gtk_alignment_new( 0.5, 0.0, 0.0, 0.0 ) );
+	ui::Alignment alignment = ui::Alignment( 0.5, 0.0, 0.0, 0.0 );
 	gtk_widget_show( GTK_WIDGET( alignment ) );
 	gtk_box_pack_start( GTK_BOX( vbox1 ), GTK_WIDGET( alignment ), FALSE, FALSE, 0 );
 
