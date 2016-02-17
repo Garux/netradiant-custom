@@ -108,7 +108,7 @@ int DoLoadPortalFileDialog(){
 	GtkWidget *dlg, *vbox, *hbox, *button, *entry, *check2d, *check3d;
 	int loop = 1, ret = IDCANCEL;
 
-	dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	dlg = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( dlg ), "Load .prt" );
 	gtk_signal_connect( GTK_OBJECT( dlg ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );

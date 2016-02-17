@@ -2659,7 +2659,7 @@ void MainFrame::OnSleep(){
 
 
 ui::Window create_splash(){
-	ui::Window window = ui::Window(GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) ));
+	ui::Window window = ui::Window( ui::window_type::TOP );
 	gtk_window_set_decorated( window, FALSE );
 	gtk_window_set_resizable( window, FALSE );
 	gtk_window_set_modal( window, TRUE );
@@ -2703,7 +2703,7 @@ static gint mainframe_delete( ui::Widget widget, GdkEvent *event, gpointer data 
 }
 
 void MainFrame::Create(){
-	ui::Window window = ui::Window(GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) ));
+	ui::Window window = ui::Window( ui::window_type::TOP );
 
 	GlobalWindowObservers_connectTopLevel( window );
 

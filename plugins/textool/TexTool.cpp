@@ -54,7 +54,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	GtkWidget *window, *w, *vbox, *hbox;
 	int mode = ( uType & MB_TYPEMASK ), ret, loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy",

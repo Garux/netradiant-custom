@@ -371,7 +371,7 @@ void CreateViewWindow(){
 	azimuth   = PI / 6.;
 #endif
 
-	g_pWndPreview = dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	g_pWndPreview = dlg = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( dlg ), "GtkGenSurf Preview" );
 	gtk_signal_connect( GTK_OBJECT( dlg ), "delete_event", GTK_SIGNAL_FUNC( preview_close ), NULL );
 	gtk_signal_connect( GTK_OBJECT( dlg ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );

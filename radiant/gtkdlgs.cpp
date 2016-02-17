@@ -749,7 +749,7 @@ static void CreateGtkTextEditor(){
 	ui::Widget dlg;
 	ui::Widget vbox, hbox, button, scr, text;
 
-	dlg = ui::Widget(gtk_window_new( GTK_WINDOW_TOPLEVEL ));
+	dlg = ui::Window( ui::window_type::TOP );
 
 	g_signal_connect( G_OBJECT( dlg ), "delete_event",
 					  G_CALLBACK( editor_delete ), 0 );

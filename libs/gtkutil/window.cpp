@@ -83,7 +83,7 @@ guint connect_floating_window_destroy_present( GtkWindow* floating, GtkWindow* m
 }
 
 GtkWindow* create_floating_window( const char* title, GtkWindow* parent ){
-	GtkWindow* window = GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) );
+	GtkWindow* window = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( window, title );
 
 	if ( parent != 0 ) {

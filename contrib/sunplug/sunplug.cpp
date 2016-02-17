@@ -256,7 +256,7 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 void about_plugin_window(){
 	GtkWidget *window, *vbox, *label, *button;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL ); // create a window
+	window = ui::Window( ui::window_type::TOP ); // create a window
 	gtk_window_set_transient_for( GTK_WINDOW( window ), SunPlug::main_window ); // make the window to stay in front of the main window
 	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( delete_event ), NULL ); // connect the delete event
 	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( destroy ), NULL ); // connect the destroy event for the window
@@ -321,7 +321,7 @@ void MapCoordinator(){
 	char line[20];
 
 	// in any case we need a window to show the user what to do
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL ); // create the window
+	window = ui::Window( ui::window_type::TOP ); // create the window
 	gtk_window_set_transient_for( GTK_WINDOW( window ), SunPlug::main_window ); // make the window to stay in front of the main window
 	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( delete_event ), NULL ); // connect the delete event for the window
 	g_signal_connect( G_OBJECT( window ), "destroy", G_CALLBACK( destroy ), NULL ); // connect the destroy event for the window

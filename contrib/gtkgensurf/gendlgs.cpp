@@ -1355,7 +1355,7 @@ GtkWidget* create_main_dialog(){
 	const char *orientations[] = { "Ground surface", "Ceiling", "Wall facing 0", "Wall facing 90",
 								   "Wall facing 180","Wall facing 270" };
 
-	g_pWnd = dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	g_pWnd = dlg = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( dlg ), gszCaption );
 	g_signal_connect( G_OBJECT( dlg ), "delete_event", G_CALLBACK( main_close ), NULL );
 	//  g_signal_connect (G_OBJECT (dlg), "destroy", G_CALLBACK (gtk_widget_destroy), NULL);

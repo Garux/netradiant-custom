@@ -65,6 +65,11 @@ namespace ui {
         NO,
     };
 
+    enum class window_type {
+        TOP,
+        POPUP
+    };
+
     template<class Self, class T, bool implicit = true>
     struct Convertible;
 
@@ -236,6 +241,7 @@ namespace ui {
 
     WRAP(Window, Widget, ui_window,
          Window() : Window(nullptr) {};
+         Window(window_type type);
 
          Window create_dialog_window(const char *title, void func(), void *data, int default_w = -1,
                                      int default_h = -1);

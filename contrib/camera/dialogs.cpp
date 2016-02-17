@@ -69,7 +69,7 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 //	char buf[128];
 
 	// create the window
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( window ), "New Camera" );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -362,7 +362,7 @@ static gint ci_rename( GtkWidget *widget, gpointer data ){
 	}
 
 	// create the window
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( window ), "Rename Path" );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -481,7 +481,7 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	}
 
 	// create the window
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( window ), "Add Target" );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -829,7 +829,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	}
 
 	// create the window
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( window ), "Add Event" );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -995,7 +995,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	GtkWidget *window, *w, *vbox, *hbox, *table, *frame;
 
 	// create the window
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 	gtk_window_set_title( GTK_WINDOW( window ), "Camera Inspector" );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( ci_close ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "expose_event", GTK_SIGNAL_FUNC( ci_expose ), NULL );

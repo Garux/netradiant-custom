@@ -56,6 +56,13 @@ namespace ui {
         return ::file_dialog(*this, open, title, path, pattern, want_load, want_import, want_save);
     }
 
+    Window::Window(window_type type)
+            : Window(GTK_WINDOW(gtk_window_new(
+            type == window_type::TOP ? GTK_WINDOW_TOPLEVEL :
+            type == window_type::POPUP ? GTK_WINDOW_POPUP :
+            GTK_WINDOW_TOPLEVEL)))
+    { };
+
     Window Window::create_dialog_window(const char *title, void func(), void *data, int default_w, int default_h)
     {
         return Window(::create_dialog_window(*this, title, func, data, default_w, default_h));

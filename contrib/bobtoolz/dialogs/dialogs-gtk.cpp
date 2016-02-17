@@ -214,7 +214,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = ui::Widget(gtk_window_new( GTK_WINDOW_TOPLEVEL ));
+	window = ui::Window( ui::window_type::TOP );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy",
@@ -328,7 +328,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -426,7 +426,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -600,7 +600,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	const gchar    *text = "Please set a value in the boxes below and press 'OK' to build the stairs";
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -856,7 +856,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -1071,7 +1071,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -1242,7 +1242,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -1313,7 +1313,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -1649,7 +1649,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	EMessageBoxReturn ret;
 	int loop = 1;
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -1912,7 +1912,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 
 	const gchar    *text = "Please set a value in the boxes below and press 'OK' to make a chain";
 
-	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	window = ui::Window( ui::window_type::TOP );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );

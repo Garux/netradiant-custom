@@ -41,7 +41,7 @@ create_w_plugplug2( void ){
 
 	tooltips = gtk_tooltips_new();
 
-	w_plugplug2 = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	w_plugplug2 = ui::Window( ui::window_type::TOP );
 	gtk_widget_set_name( w_plugplug2, "w_plugplug2" );
 	gtk_window_set_title( GTK_WINDOW( w_plugplug2 ), "BrushExport-Plugin 3.0 by namespace" );
 	gtk_window_set_position( GTK_WINDOW( w_plugplug2 ), GTK_WIN_POS_CENTER );
