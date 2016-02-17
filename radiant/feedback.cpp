@@ -298,7 +298,7 @@ void CDbgDlg::Push( ISAXHandler *pHandler ){
 ui::Window CDbgDlg::BuildDialog(){
 	ui::Window window = MainFrame_getWindow().create_floating_window("Q3Map debug window" );
 
-	ui::Widget scr = ui::Widget(gtk_scrolled_window_new( NULL, NULL ));
+	ui::Widget scr = ui::ScrolledWindow();
 	gtk_widget_show( scr );
 	gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( scr ) );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );

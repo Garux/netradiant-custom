@@ -1973,7 +1973,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 		gtk_widget_show( menu_bar );
 	}
 	{ // Texture TreeView
-		g_TextureBrowser.m_scr_win_tree = ui::Widget(gtk_scrolled_window_new( NULL, NULL ));
+		g_TextureBrowser.m_scr_win_tree = ui::ScrolledWindow();
 		gtk_container_set_border_width( GTK_CONTAINER( g_TextureBrowser.m_scr_win_tree ), 0 );
 
 		// vertical only scrolling for treeview
@@ -2033,7 +2033,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			gtk_menu_bar_append( GTK_MENU_BAR( menu_bar ), tags_item );
 		}
 		{ // Tag TreeView
-			g_TextureBrowser.m_scr_win_tags = ui::Widget(gtk_scrolled_window_new( NULL, NULL ));
+			g_TextureBrowser.m_scr_win_tags = ui::ScrolledWindow();
 			gtk_container_set_border_width( GTK_CONTAINER( g_TextureBrowser.m_scr_win_tags ), 0 );
 
 			// vertical only scrolling for treeview
@@ -2069,7 +2069,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			gtk_container_add( GTK_CONTAINER( g_TextureBrowser.m_tag_frame ), frame_table );
 		}
 		{ // assigned tag list
-			ui::Widget scrolled_win = ui::Widget(gtk_scrolled_window_new( NULL, NULL ));
+			ui::Widget scrolled_win = ui::ScrolledWindow();
 			gtk_container_set_border_width( GTK_CONTAINER( scrolled_win ), 0 );
 			gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolled_win ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
 
@@ -2098,7 +2098,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			gtk_table_attach( GTK_TABLE( frame_table ), scrolled_win, 0, 1, 1, 3, GTK_FILL, GTK_FILL, 0, 0 );
 		}
 		{ // available tag list
-			ui::Widget scrolled_win = ui::Widget(gtk_scrolled_window_new( NULL, NULL ));
+			ui::Widget scrolled_win = ui::ScrolledWindow();
 			gtk_container_set_border_width( GTK_CONTAINER( scrolled_win ), 0 );
 			gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolled_win ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
 

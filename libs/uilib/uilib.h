@@ -10,6 +10,7 @@ using ui_evkey = struct _GdkEventKey;
 using ui_label = struct _GtkLabel;
 using ui_menuitem = struct _GtkMenuItem;
 using ui_modal = struct ModalDialog;
+using ui_scrolledwindow = struct _GtkScrolledWindow;
 using ui_treemodel = struct _GtkTreeModel;
 using ui_treeview = struct _GtkTreeView;
 using ui_typeinst = struct _GTypeInstance;
@@ -95,7 +96,7 @@ namespace ui {
 #define WRAP(name, impl, methods) \
     class name : public Widget, public Convertible<name, impl> { \
         public: \
-            explicit name(impl *h = nullptr) : Widget(reinterpret_cast<ui_widget *>(h)) {} \
+            explicit name(impl *h) : Widget(reinterpret_cast<ui_widget *>(h)) {} \
         methods \
     }; \
     static_assert(sizeof(name) == sizeof(Widget), "object slicing")
@@ -118,6 +119,10 @@ namespace ui {
 
     WRAP(MenuItem, ui_menuitem,);
 
+    WRAP(ScrolledWindow, ui_scrolledwindow,
+         ScrolledWindow();
+    );
+
     WRAP(SpinButton, ui_widget,);
 
     WRAP(TreeModel, ui_treemodel,);
@@ -131,6 +136,8 @@ namespace ui {
     );
 
     WRAP(Window, ui_window,
+         Window() : Window(nullptr) {};
+
          Window create_dialog_window(const char *title, void func(), void *data, int default_w = -1,
                                      int default_h = -1);
 

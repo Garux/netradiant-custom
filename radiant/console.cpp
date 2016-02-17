@@ -110,7 +110,7 @@ gboolean destroy_set_null( ui::Window widget, ui::Widget* p ){
 WidgetFocusPrinter g_consoleWidgetFocusPrinter( "console" );
 
 ui::Widget Console_constructWindow( ui::Window toplevel ){
-	ui::Widget scr = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
+	ui::Widget scr = ui::ScrolledWindow();
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
 	gtk_widget_show( scr );

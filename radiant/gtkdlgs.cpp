@@ -760,7 +760,7 @@ static void CreateGtkTextEditor(){
 	gtk_container_add( GTK_CONTAINER( dlg ), GTK_WIDGET( vbox ) );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
-	scr = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
+	scr = ui::ScrolledWindow();
 	gtk_widget_show( scr );
 	gtk_box_pack_start( GTK_BOX( vbox ), scr, TRUE, TRUE, 0 );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );

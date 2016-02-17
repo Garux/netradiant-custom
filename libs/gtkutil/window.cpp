@@ -22,6 +22,7 @@
 #include "window.h"
 
 #include <gtk/gtkscrolledwindow.h>
+#include <uilib/uilib.h>
 
 #include "pointer.h"
 #include "accelerator.h"
@@ -137,7 +138,7 @@ void window_remove_minmax( GtkWindow* window ){
 
 
 GtkScrolledWindow* create_scrolled_window( GtkPolicyType hscrollbar_policy, GtkPolicyType vscrollbar_policy, int border ){
-	GtkScrolledWindow* scr = GTK_SCROLLED_WINDOW( gtk_scrolled_window_new( 0, 0 ) );
+	GtkScrolledWindow* scr = ui::ScrolledWindow();
 	gtk_widget_show( GTK_WIDGET( scr ) );
 	gtk_scrolled_window_set_policy( scr, hscrollbar_policy, vscrollbar_policy );
 	gtk_scrolled_window_set_shadow_type( scr, GTK_SHADOW_IN );

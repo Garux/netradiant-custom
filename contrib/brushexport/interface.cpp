@@ -116,7 +116,7 @@ create_w_plugplug2( void ){
 	gtk_widget_show( label1 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), label1, FALSE, FALSE, 0 );
 
-	scrolledwindow1 = gtk_scrolled_window_new( NULL, NULL );
+	scrolledwindow1 = ui::ScrolledWindow();
 	gtk_widget_set_name( scrolledwindow1, "scrolledwindow1" );
 	gtk_widget_show( scrolledwindow1 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), scrolledwindow1, TRUE, TRUE, 0 );

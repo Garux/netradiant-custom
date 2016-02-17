@@ -94,6 +94,9 @@ namespace ui {
     CheckButton::CheckButton(const char *label) : CheckButton(GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label)))
     { }
 
+    ScrolledWindow::ScrolledWindow() : ScrolledWindow(GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr)))
+    { }
+
     Label::Label(const char *label) : Label(GTK_LABEL(gtk_label_new(label)))
     { }
 

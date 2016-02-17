@@ -1326,7 +1326,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 
 			{
 				// class list
-				ui::Widget scr = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
+				ui::Widget scr = ui::ScrolledWindow();
 				gtk_widget_show( scr );
 				gtk_paned_add1( GTK_PANED( split2 ), scr );
 				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
@@ -1363,7 +1363,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 			}
 
 			{
-				ui::Widget scr = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
+				ui::Widget scr = ui::ScrolledWindow();
 				gtk_widget_show( scr );
 				gtk_paned_add2( GTK_PANED( split2 ), scr );
 				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
@@ -1410,7 +1410,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 
 				{
 					// key/value list
-					ui::Widget scr = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
+					ui::Widget scr = ui::ScrolledWindow();
 					gtk_widget_show( scr );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), scr, TRUE, TRUE, 0 );
 					gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
@@ -1520,7 +1520,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 			}
 
 			{
-				ui::Widget scr = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
+				ui::Widget scr = ui::ScrolledWindow();
 				gtk_widget_show( scr );
 				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
 

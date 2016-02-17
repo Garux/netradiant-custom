@@ -734,7 +734,7 @@ ui::Window PrefsDlg::BuildDialog(){
 			gtk_widget_show( hbox );
 
 			{
-				ui::Widget sc_win = ui::Widget(gtk_scrolled_window_new( 0, 0 ));
+				ui::Widget sc_win = ui::ScrolledWindow();
 				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( sc_win ), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
 				gtk_box_pack_start( GTK_BOX( hbox ), sc_win, FALSE, FALSE, 0 );
 				gtk_widget_show( sc_win );
