@@ -679,7 +679,7 @@ ListAttribute( const char* key, const ListAttributeType& type ) :
 	m_combo( 0 ),
 	m_nonModal( ApplyCaller( *this ) ),
 	m_type( type ){
-	GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+	GtkComboBox* combo = ui::ComboBoxText();
 
 	for ( ListAttributeType::const_iterator i = type.begin(); i != type.end(); ++i )
 	{

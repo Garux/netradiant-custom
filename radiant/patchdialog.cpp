@@ -616,7 +616,7 @@ ui::Window PatchInspector::BuildDialog(){
 												  (GtkAttachOptions)( 0 ), 0, 0 );
 							}
 							{
-								GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+								GtkComboBox* combo = ui::ComboBoxText();
 								g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( OnSelchangeComboColRow ), this );
 								AddDialogData( *combo, m_nRow );
 
@@ -629,7 +629,7 @@ ui::Window PatchInspector::BuildDialog(){
 							}
 
 							{
-								GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+								GtkComboBox* combo = ui::ComboBoxText();
 								g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( OnSelchangeComboColRow ), this );
 								AddDialogData( *combo, m_nCol );
 

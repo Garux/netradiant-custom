@@ -107,6 +107,9 @@ namespace ui {
     CellRendererText::CellRendererText() : CellRendererText(GTK_CELL_RENDERER_TEXT(gtk_cell_renderer_text_new()))
     { }
 
+    ComboBoxText::ComboBoxText() : ComboBoxText(GTK_COMBO_BOX(gtk_combo_box_new_text()))
+    { }
+
     CheckButton::CheckButton(const char *label) : CheckButton(GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label)))
     { }
 

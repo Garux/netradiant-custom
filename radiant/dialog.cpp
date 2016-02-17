@@ -481,7 +481,7 @@ void Dialog::addCombo( ui::Widget vbox, const char* name, StringArrayRange value
 	ui::Widget alignment = ui::Alignment( 0.0, 0.5, 0.0, 0.0 );
 	gtk_widget_show( alignment );
 	{
-		ui::Widget combo = ui::Widget(gtk_combo_box_new_text());
+		ui::Widget combo = ui::ComboBoxText();
 
 		for ( StringArrayRange::Iterator i = values.first; i != values.last; ++i )
 		{

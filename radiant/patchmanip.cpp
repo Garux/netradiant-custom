@@ -880,7 +880,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 			}
 
 			{
-				GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+				GtkComboBox* combo = ui::ComboBoxText();
 #define D_ITEM( x ) if ( x >= mincols && ( !maxcols || x <= maxcols ) ) gtk_combo_box_append_text( combo, # x )
 				D_ITEM( 3 );
 				D_ITEM( 5 );
@@ -906,7 +906,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 				width = combo;
 			}
 			{
-				GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+				GtkComboBox* combo = ui::ComboBoxText();
 #define D_ITEM( x ) if ( x >= minrows && ( !maxrows || x <= maxrows ) ) gtk_combo_box_append_text( combo, # x )
 				D_ITEM( 3 );
 				D_ITEM( 5 );

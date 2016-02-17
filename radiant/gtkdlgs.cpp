@@ -253,7 +253,7 @@ ui::Window ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 					gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 				}
 				{
-					dialog.game_combo.game_select = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+					dialog.game_combo.game_select = ui::ComboBoxText();
 
 					gtk_combo_box_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().basegame );
 					if ( globalGameComboConfiguration().known[0] != '\0' ) {
@@ -295,7 +295,7 @@ ui::Window ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 
-					GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+					GtkComboBox* combo = ui::ComboBoxText();
 					gtk_combo_box_append_text( combo, globalMappingMode().sp_mapping_mode );
 					gtk_combo_box_append_text( combo, globalMappingMode().mp_mapping_mode );
 
