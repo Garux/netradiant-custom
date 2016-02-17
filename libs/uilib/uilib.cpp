@@ -163,6 +163,9 @@ namespace ui {
     TreePath::TreePath(const char *path) : TreePath(gtk_tree_path_new_from_string(path))
     { }
 
+    TreeView::TreeView() : TreeView(GTK_TREE_VIEW(gtk_tree_view_new()))
+    { }
+
     TreeView::TreeView(TreeModel model) : TreeView(GTK_TREE_VIEW(gtk_tree_view_new_with_model(model)))
     { }
 

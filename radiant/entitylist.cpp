@@ -300,7 +300,7 @@ void EntityList_constructWindow( ui::Window main_window ){
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( scr ) );
 
 		{
-			ui::Widget view = ui::Widget(gtk_tree_view_new());
+			ui::Widget view = ui::TreeView();
 			gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 			auto renderer = ui::CellRendererText();

@@ -1529,7 +1529,7 @@ void TreeView_onRowActivated( GtkTreeView* treeview, GtkTreePath* path, GtkTreeV
 }
 
 void TextureBrowser_createTreeViewTree(){
-	g_TextureBrowser.m_treeViewTree = ui::Widget(GTK_WIDGET( gtk_tree_view_new() ));
+	g_TextureBrowser.m_treeViewTree = ui::TreeView();
 	gtk_tree_view_set_enable_search( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), FALSE );
 
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), FALSE );
@@ -1585,7 +1585,7 @@ gboolean TreeViewTags_onButtonPressed( ui::Widget treeview, GdkEventButton *even
 }
 
 void TextureBrowser_createTreeViewTags(){
-	g_TextureBrowser.m_treeViewTags = ui::Widget(GTK_WIDGET( gtk_tree_view_new() ));
+	g_TextureBrowser.m_treeViewTags = ui::TreeView();
 	gtk_tree_view_set_enable_search( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), FALSE );
 
 	g_signal_connect( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), "button-press-event", (GCallback)TreeViewTags_onButtonPressed, NULL );

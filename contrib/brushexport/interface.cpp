@@ -123,7 +123,7 @@ create_w_plugplug2( void ){
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow1 ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scrolledwindow1 ), GTK_SHADOW_IN );
 
-	t_materialist = gtk_tree_view_new();
+	t_materialist = ui::TreeView();
 	gtk_widget_set_name( t_materialist, "t_materialist" );
 	gtk_widget_show( t_materialist );
 	gtk_container_add( GTK_CONTAINER( scrolledwindow1 ), t_materialist );

@@ -218,6 +218,7 @@ namespace ui {
     );
 
     WRAP(TreeView, Widget, ui_treeview,
+         TreeView();
          TreeView(TreeModel model);
     );
 

@@ -1337,7 +1337,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 				{
 					GtkListStore* store = gtk_list_store_new( 2, G_TYPE_STRING, G_TYPE_POINTER );
 
-					GtkTreeView* view = GTK_TREE_VIEW( gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ) );
+					GtkTreeView* view = ui::TreeView( ui::TreeModel( GTK_TREE_MODEL( store ) ));
 					gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), FALSE );
 					gtk_tree_view_set_headers_visible( view, FALSE );
 					g_signal_connect( G_OBJECT( view ), "button_press_event", G_CALLBACK( EntityClassList_button_press ), 0 );
