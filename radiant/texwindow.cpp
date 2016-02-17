@@ -1536,7 +1536,7 @@ void TextureBrowser_createTreeViewTree(){
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), FALSE );
 	g_signal_connect( g_TextureBrowser.m_treeViewTree, "row-activated", (GCallback) TreeView_onRowActivated, NULL );
 
-	renderer = gtk_cell_renderer_text_new();
+	renderer = ui::CellRendererText();
 	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), -1, "", renderer, "text", 0, NULL );
 
 	TextureBrowser_constructTreeStore();
@@ -1594,7 +1594,7 @@ void TextureBrowser_createTreeViewTags(){
 
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), FALSE );
 
-	renderer = gtk_cell_renderer_text_new();
+	renderer = ui::CellRendererText();
 	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), -1, "", renderer, "text", 0, NULL );
 
 	TextureBrowser_constructTreeStoreTags();
@@ -2078,7 +2078,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			GtkTreeSortable* sortable = GTK_TREE_SORTABLE( g_TextureBrowser.m_assigned_store );
 			gtk_tree_sortable_set_sort_column_id( sortable, TAG_COLUMN, GTK_SORT_ASCENDING );
 
-			GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+			GtkCellRenderer* renderer = ui::CellRendererText();
 
 			g_TextureBrowser.m_assigned_tree = ui::TreeView(ui::TreeModel( GTK_TREE_MODEL( g_TextureBrowser.m_assigned_store ) ));
 			g_object_unref( G_OBJECT( g_TextureBrowser.m_assigned_store ) );
@@ -2106,7 +2106,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			GtkTreeSortable* sortable = GTK_TREE_SORTABLE( g_TextureBrowser.m_available_store );
 			gtk_tree_sortable_set_sort_column_id( sortable, TAG_COLUMN, GTK_SORT_ASCENDING );
 
-			GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+			GtkCellRenderer* renderer = ui::CellRendererText();
 
 			g_TextureBrowser.m_available_tree = ui::TreeView(ui::TreeModel( GTK_TREE_MODEL( g_TextureBrowser.m_available_store ) ));
 			g_object_unref( G_OBJECT( g_TextureBrowser.m_available_store ) );

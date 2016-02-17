@@ -303,7 +303,7 @@ void EntityList_constructWindow( ui::Window main_window ){
 			ui::Widget view = ui::Widget(gtk_tree_view_new());
 			gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
-			GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+			GtkCellRenderer* renderer = ui::CellRendererText();
 			GtkTreeViewColumn* column = gtk_tree_view_column_new();
 			gtk_tree_view_column_pack_start( column, renderer, TRUE );
 			gtk_tree_view_column_set_cell_data_func( column, renderer, entitylist_treeviewcolumn_celldatafunc, 0, 0 );

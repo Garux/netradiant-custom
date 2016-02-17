@@ -7,6 +7,8 @@ using ui_alignment = struct _GtkAlignment;
 using ui_box = struct _GtkBox;
 using ui_button = struct _GtkButton;
 using ui_checkbutton = struct _GtkCheckButton;
+using ui_cellrenderer = struct _GtkCellRenderer;
+using ui_cellrenderertext = struct _GtkCellRendererText;
 using ui_entry = struct _GtkEntry;
 using ui_evkey = struct _GdkEventKey;
 using ui_hbox = struct _GtkHBox;
@@ -117,6 +119,12 @@ namespace ui {
     WRAP(Button, Widget, ui_button,
          Button();
          Button(const char *label);
+    );
+
+    WRAP(CellRenderer, Widget, ui_cellrenderer,);
+
+    WRAP(CellRendererText, CellRenderer, ui_cellrenderertext,
+         CellRendererText();
     );
 
     WRAP(CheckButton, Widget, ui_checkbutton,

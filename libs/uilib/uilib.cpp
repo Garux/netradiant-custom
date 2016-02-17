@@ -94,6 +94,9 @@ namespace ui {
     Button::Button(const char *label) : Button(GTK_BUTTON(gtk_button_new_with_label(label)))
     { }
 
+    CellRendererText::CellRendererText() : CellRendererText(GTK_CELL_RENDERER_TEXT(gtk_cell_renderer_text_new()))
+    { }
+
     CheckButton::CheckButton(const char *label) : CheckButton(GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label)))
     { }
 

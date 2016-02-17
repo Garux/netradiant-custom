@@ -1344,7 +1344,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 					g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( EntityClassList_keypress ), 0 );
 
 					{
-						GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+						GtkCellRenderer* renderer = ui::CellRendererText();
 						GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "Key", renderer, "text", 0, 0 );
 						gtk_tree_view_append_column( view, column );
 					}
@@ -1426,13 +1426,13 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 						gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 						{
-							GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+							GtkCellRenderer* renderer = ui::CellRendererText();
 							GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, 0 );
 							gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 						}
 
 						{
-							GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+							GtkCellRenderer* renderer = ui::CellRendererText();
 							GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 1, 0 );
 							gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 						}

@@ -882,7 +882,7 @@ ui::Window BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 					ui::Widget view = ui::TreeView( ui::TreeModel(GTK_TREE_MODEL( store ) ));
 					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
-					GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+					GtkCellRenderer* renderer = ui::CellRendererText();
 					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
 					g_signal_connect( renderer, "edited", G_CALLBACK( project_cell_edited ), &projectList );
 
@@ -919,7 +919,7 @@ ui::Window BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 					ui::Widget view = ui::TreeView(ui::TreeModel( GTK_TREE_MODEL( store ) ));
 					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
-					GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+					GtkCellRenderer* renderer = ui::CellRendererText();
 					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
 					g_signal_connect( renderer, "edited", G_CALLBACK( commands_cell_edited ), store );
 

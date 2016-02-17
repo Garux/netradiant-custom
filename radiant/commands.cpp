@@ -412,13 +412,13 @@ void DoCommandListDlg(){
 			gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), false ); // annoying
 
 			{
-				GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+				GtkCellRenderer* renderer = ui::CellRendererText();
 				GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "Command", renderer, "text", 0, "weight-set", 2, "weight", 3, NULL );
 				gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 			}
 
 			{
-				GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+				GtkCellRenderer* renderer = ui::CellRendererText();
 				GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "Key", renderer, "text", 1, "weight-set", 2, "weight", 3, NULL );
 				gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 			}
