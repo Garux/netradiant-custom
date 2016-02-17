@@ -100,6 +100,9 @@ namespace ui {
     Label::Label(const char *label) : Label(GTK_LABEL(gtk_label_new(label)))
     { }
 
+    MenuItem::MenuItem(const char *label, bool mnemonic) : MenuItem(GTK_MENU_ITEM((mnemonic ? gtk_menu_item_new_with_mnemonic : gtk_menu_item_new_with_label)(label)))
+    { }
+
     TreeView::TreeView(TreeModel model) : TreeView(GTK_TREE_VIEW(gtk_tree_view_new_with_model(model)))
     { }
 

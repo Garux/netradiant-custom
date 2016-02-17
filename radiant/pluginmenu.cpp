@@ -49,7 +49,7 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 	const char *menuText, *menuCommand;
 	WidgetStack menuStack;
 
-	parent = ui::Widget(gtk_menu_item_new_with_label( pPlugIn->getMenuName() ));
+	parent = ui::MenuItem( pPlugIn->getMenuName() );
 	gtk_widget_show( parent );
 	gtk_container_add( GTK_CONTAINER( plugin_menu ), parent );
 
@@ -77,7 +77,7 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 						continue;
 					}
 
-					item = ui::Widget(gtk_menu_item_new_with_label( menuText ));
+					item = ui::MenuItem( menuText );
 					gtk_widget_show( item );
 					gtk_container_add( GTK_CONTAINER( menu ), item );
 
@@ -100,7 +100,7 @@ void PlugInMenu_Add( GtkMenu* plugin_menu, IPlugIn* pPlugIn ){
 				}
 				else
 				{
-					item = ui::Widget(gtk_menu_item_new_with_label( menuText ));
+					item = ui::MenuItem( menuText );
 					g_object_set_data( G_OBJECT( item ),"command", const_cast<gpointer>( static_cast<const void*>( menuCommand ) ) );
 					g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( plugin_activated ), gint_to_pointer( m_nNextPlugInID ) );
 				}

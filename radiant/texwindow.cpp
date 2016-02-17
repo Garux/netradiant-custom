@@ -1549,15 +1549,15 @@ void TextureBrowser_deleteTag();
 void TextureBrowser_createContextMenu( ui::Widget treeview, GdkEventButton *event ){
 	ui::Widget menu = ui::Widget(gtk_menu_new());
 
-	ui::Widget menuitem = ui::Widget(gtk_menu_item_new_with_label( "Add tag" ));
+	ui::Widget menuitem = ui::MenuItem( "Add tag" );
 	g_signal_connect( menuitem, "activate", (GCallback)TextureBrowser_addTag, treeview );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu ), menuitem );
 
-	menuitem = ui::Widget(gtk_menu_item_new_with_label( "Rename tag" ));
+	menuitem = ui::MenuItem( "Rename tag" );
 	g_signal_connect( menuitem, "activate", (GCallback)TextureBrowser_renameTag, treeview );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu ), menuitem );
 
-	menuitem = ui::Widget(gtk_menu_item_new_with_label( "Delete tag" ));
+	menuitem = ui::MenuItem( "Delete tag" );
 	g_signal_connect( menuitem, "activate", (GCallback)TextureBrowser_deleteTag, treeview );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu ), menuitem );
 

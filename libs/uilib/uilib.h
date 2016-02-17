@@ -117,7 +117,9 @@ namespace ui {
          Label(const char *label);
     );
 
-    WRAP(MenuItem, ui_menuitem,);
+    WRAP(MenuItem, ui_menuitem,
+         MenuItem(const char *label, bool mnemonic = false);
+    );
 
     WRAP(ScrolledWindow, ui_scrolledwindow,
          ScrolledWindow();

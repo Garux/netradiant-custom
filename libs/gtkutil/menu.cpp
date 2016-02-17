@@ -27,6 +27,7 @@
 #include <gtk/gtkradiomenuitem.h>
 #include <gtk/gtktearoffmenuitem.h>
 #include <gtk/gtkaccellabel.h>
+#include <uilib/uilib.h>
 
 #include "generic/callback.h"
 
@@ -56,7 +57,7 @@ GtkTearoffMenuItem* menu_tearoff( GtkMenu* menu ){
 }
 
 GtkMenuItem* new_sub_menu_item_with_mnemonic( const char* mnemonic ){
-	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_mnemonic( mnemonic ) );
+	GtkMenuItem* item = ui::MenuItem( mnemonic, true );
 	gtk_widget_show( GTK_WIDGET( item ) );
 
 	GtkWidget* sub_menu = gtk_menu_new();
@@ -102,7 +103,7 @@ guint check_menu_item_connect_callback( GtkCheckMenuItem* item, const Callback& 
 }
 
 GtkMenuItem* new_menu_item_with_mnemonic( const char *mnemonic, const Callback& callback ){
-	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_mnemonic( mnemonic ) );
+	GtkMenuItem* item = ui::MenuItem( mnemonic, true );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	menu_item_connect_callback( item, callback );
 	return item;

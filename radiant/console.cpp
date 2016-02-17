@@ -96,7 +96,7 @@ void console_clear(){
 void console_populate_popup( GtkTextView* textview, GtkMenu* menu, gpointer user_data ){
 	menu_separator( menu );
 
-	ui::Widget item(gtk_menu_item_new_with_label( "Clear" ));
+	ui::Widget item(ui::MenuItem( "Clear" ));
 	g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( console_clear ), 0 );
 	gtk_widget_show( item );
 	container_add_widget( GTK_CONTAINER( menu ), item );

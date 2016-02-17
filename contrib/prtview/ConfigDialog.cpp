@@ -341,19 +341,19 @@ void DoConfigDialog(){
 	gtk_widget_show( menu );
 	gtk_option_menu_set_menu( GTK_OPTION_MENU( zlist ), menu );
 
-	item = gtk_menu_item_new_with_label( "Z-Buffer Test and Write (recommended for solid or no polygons)" );
+	item = ui::MenuItem( "Z-Buffer Test and Write (recommended for solid or no polygons)" );
 	gtk_widget_show( item );
 	gtk_signal_connect( GTK_OBJECT( item ), "activate",
 						GTK_SIGNAL_FUNC( OnSelchangeZbuffer ), GINT_TO_POINTER( 0 ) );
 	gtk_menu_append( GTK_MENU( menu ), item );
 
-	item = gtk_menu_item_new_with_label( "Z-Buffer Test Only (recommended for transparent polygons)" );
+	item = ui::MenuItem( "Z-Buffer Test Only (recommended for transparent polygons)" );
 	gtk_widget_show( item );
 	gtk_signal_connect( GTK_OBJECT( item ), "activate",
 						GTK_SIGNAL_FUNC( OnSelchangeZbuffer ), GINT_TO_POINTER( 1 ) );
 	gtk_menu_append( GTK_MENU( menu ), item );
 
-	item = gtk_menu_item_new_with_label( "Z-Buffer Off" );
+	item = ui::MenuItem( "Z-Buffer Off" );
 	gtk_widget_show( item );
 	gtk_signal_connect( GTK_OBJECT( item ), "activate",
 						GTK_SIGNAL_FUNC( OnSelchangeZbuffer ), GINT_TO_POINTER( 2 ) );

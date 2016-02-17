@@ -1077,7 +1077,7 @@ void entitycreate_activated( ui::Widget item ){
 }
 
 void EntityClassMenu_addItem( GtkMenu* menu, const char* name ){
-	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name ) );
+	GtkMenuItem* item = ui::MenuItem( name );
 	g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( entitycreate_activated ), item );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	menu_add_item( menu, item );
@@ -1107,7 +1107,7 @@ void visit( EntityClass* e ){
 	m_previous = e->name();
 }
 void pushMenu( const std::string& name ){
-	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name.c_str() ) );
+	GtkMenuItem* item = ui::MenuItem( name.c_str() );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	container_add_widget( GTK_CONTAINER( m_stack.back().first ), GTK_WIDGET( item ) );
 
