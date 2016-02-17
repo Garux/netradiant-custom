@@ -9,6 +9,8 @@ using ui_evkey = struct _GdkEventKey;
 using ui_label = struct _GtkLabel;
 using ui_menuitem = struct _GtkMenuItem;
 using ui_modal = struct ModalDialog;
+using ui_treemodel = struct _GtkTreeModel;
+using ui_treeview = struct _GtkTreeView;
 using ui_typeinst = struct _GTypeInstance;
 using ui_widget = struct _GtkWidget;
 using ui_window = struct _GtkWindow;
@@ -88,7 +90,7 @@ namespace ui {
 
     extern Widget root;
 
-#define WIDGET(name, impl, methods) \
+#define WRAP(name, impl, methods) \
     class name : public Widget, public Convertible<name, impl> { \
         public: \
             explicit name(impl *h = nullptr) : Widget(reinterpret_cast<ui_widget *>(h)) {} \
@@ -96,7 +98,7 @@ namespace ui {
     }; \
     static_assert(sizeof(name) == sizeof(Widget), "object slicing")
 
-    WIDGET(Window, ui_window,
+    WRAP(Window, ui_window,
            Window create_dialog_window(const char *title, void func(), void *data, int default_w = -1,
                                        int default_h = -1);
 
@@ -109,23 +111,31 @@ namespace ui {
                                               void *extra = nullptr);
     );
 
-    WIDGET(Button, ui_button,
+    WRAP(Button, ui_button,
            Button(const char *label);
     );
 
-    WIDGET(CheckButton, ui_widget,);
+    WRAP(CheckButton, ui_widget,);
 
-    WIDGET(SpinButton, ui_widget,);
+    WRAP(SpinButton, ui_widget,);
 
-    WIDGET(MenuItem, ui_menuitem,);
+    WRAP(MenuItem, ui_menuitem,);
 
-    WIDGET(Label, ui_label,
+    WRAP(Label, ui_label,
            Label(const char *label);
     );
 
-    WIDGET(Alignment, ui_alignment,
+    WRAP(Alignment, ui_alignment,
            Alignment(float xalign, float yalign, float xscale, float yscale);
     );
+
+    WRAP(TreeModel, ui_treemodel, );
+
+    WRAP(TreeView, ui_treeview,
+         TreeView(TreeModel model);
+    );
+
+#undef WRAP
 
 }
 

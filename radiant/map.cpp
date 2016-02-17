@@ -846,7 +846,7 @@ void DoMapInfo(){
 			{
 				GtkListStore* store = gtk_list_store_new( 2, G_TYPE_STRING, G_TYPE_STRING );
 
-				ui::Widget view = ui::Widget(gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ));
+				ui::Widget view = ui::TreeView(ui::TreeModel( GTK_TREE_MODEL( store ) ));
 				gtk_tree_view_set_headers_clickable( GTK_TREE_VIEW( view ), TRUE );
 
 				{

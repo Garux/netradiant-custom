@@ -94,4 +94,7 @@ namespace ui {
     Label::Label(const char *label) : Label(GTK_LABEL(gtk_label_new(label)))
     { }
 
+    TreeView::TreeView(TreeModel model) : TreeView(GTK_TREE_VIEW(gtk_tree_view_new_with_model(model)))
+    { }
+
 }

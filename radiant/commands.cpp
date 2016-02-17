@@ -406,7 +406,7 @@ void DoCommandListDlg(){
 		{
 			GtkListStore* store = gtk_list_store_new( 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_INT );
 
-			ui::Widget view = ui::Widget(gtk_tree_view_new_with_model(GTK_TREE_MODEL(store)));
+			ui::Widget view = ui::TreeView(ui::TreeModel(GTK_TREE_MODEL(store)));
 			dialog.m_list = GTK_TREE_VIEW( view );
 
 			gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), false ); // annoying
