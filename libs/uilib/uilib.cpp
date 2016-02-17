@@ -84,6 +84,9 @@ namespace ui {
         return g_signal_connect(G_OBJECT(*this), "key-press-event", (GCallback) +func, &pass);
     }
 
+    AccelGroup::AccelGroup() : AccelGroup(GTK_ACCEL_GROUP(gtk_accel_group_new()))
+    { }
+
     Adjustment::Adjustment(double value,
                            double lower, double upper,
                            double step_increment, double page_increment,

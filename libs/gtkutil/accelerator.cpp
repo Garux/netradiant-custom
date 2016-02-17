@@ -327,6 +327,7 @@ PressedButtons g_pressedButtons;
 
 
 #include <set>
+#include <uilib/uilib.h>
 
 struct PressedKeys
 {
@@ -484,7 +485,7 @@ void accel_group_remove_accelerator( GtkAccelGroup* group, Accelerator accelerat
 GtkAccelGroup* global_accel = 0;
 
 void global_accel_init(){
-	global_accel = gtk_accel_group_new();
+	global_accel = ui::AccelGroup();
 }
 
 void global_accel_destroy(){

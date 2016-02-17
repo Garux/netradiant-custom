@@ -3,6 +3,7 @@
 
 #include <string>
 
+using ui_accelgroup = struct _GtkAccelGroup;
 using ui_adjustment = struct _GtkAdjustment;
 using ui_alignment = struct _GtkAlignment;
 using ui_box = struct _GtkBox;
@@ -74,6 +75,7 @@ namespace ui {
 
     class Object : public Convertible<Object, ui_object, false> {
     public:
+        using native = ui_object;
         void *_handle;
 
         Object(void *h) : _handle(h)
@@ -118,6 +120,10 @@ namespace ui {
     }; \
     static_assert(sizeof(name) == sizeof(super), "object slicing")
 
+    WRAP(AccelGroup, Object, ui_accelgroup,
+         AccelGroup();
+    );
+
     WRAP(Adjustment, Widget, ui_adjustment,
          Adjustment(double value,
                     double lower, double upper,
@@ -136,7 +142,7 @@ namespace ui {
          Button(const char *label);
     );
 
-    WRAP(CellRenderer, Widget, ui_cellrenderer,);
+    WRAP(CellRenderer, Object, ui_cellrenderer,);
 
     WRAP(CellRendererText, CellRenderer, ui_cellrenderertext,
          CellRendererText();

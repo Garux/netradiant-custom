@@ -914,7 +914,7 @@ void DoRotateDlg(){
 	if ( !g_rotate_dialog.window ) {
 		g_rotate_dialog.window = MainFrame_getWindow().create_dialog_window("Arbitrary rotation", G_CALLBACK(rotatedlg_delete ), &g_rotate_dialog );
 
-		GtkAccelGroup* accel = gtk_accel_group_new();
+		GtkAccelGroup* accel = ui::AccelGroup();
 		gtk_window_add_accel_group( g_rotate_dialog.window, accel );
 
 		{
@@ -1067,7 +1067,7 @@ void DoScaleDlg(){
 	if ( !g_scale_dialog.window ) {
 		g_scale_dialog.window = MainFrame_getWindow().create_dialog_window("Arbitrary scale", G_CALLBACK(scaledlg_delete ), &g_scale_dialog );
 
-		GtkAccelGroup* accel = gtk_accel_group_new();
+		GtkAccelGroup* accel = ui::AccelGroup();
 		gtk_window_add_accel_group( g_scale_dialog.window, accel );
 
 		{

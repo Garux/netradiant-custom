@@ -2007,7 +2007,7 @@ void DoFind(){
 
 	ui::Window window = MainFrame_getWindow().create_dialog_window("Find Brush", G_CALLBACK(dialog_delete_callback ), &dialog );
 
-	GtkAccelGroup* accel = gtk_accel_group_new();
+	GtkAccelGroup* accel = ui::AccelGroup();
 	gtk_window_add_accel_group( window, accel );
 
 	{

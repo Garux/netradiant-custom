@@ -386,7 +386,7 @@ void DoSides( int type, int axis ){
 
 	ui::Window window = MainFrame_getWindow().create_dialog_window("Arbitrary sides", G_CALLBACK(dialog_delete_callback ), &dialog );
 
-	GtkAccelGroup* accel = gtk_accel_group_new();
+	GtkAccelGroup* accel = ui::AccelGroup();
 	gtk_window_add_accel_group( window, accel );
 
 	{
@@ -604,7 +604,7 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 
 	ui::Window window = MainFrame_getWindow().create_modal_dialog_window("Patch texture layout", dialog );
 
-	GtkAccelGroup* accel = gtk_accel_group_new();
+	GtkAccelGroup* accel = ui::AccelGroup();
 	gtk_window_add_accel_group( window, accel );
 
 	{
@@ -865,7 +865,7 @@ EMessageBoxReturn DoLightIntensityDlg( int *intensity ){
 
 	ui::Window window = MainFrame_getWindow().create_modal_dialog_window("Light intensity", dialog, -1, -1 );
 
-	GtkAccelGroup *accel_group = gtk_accel_group_new();
+	GtkAccelGroup *accel_group = ui::AccelGroup();
 	gtk_window_add_accel_group( window, accel_group );
 
 	{
@@ -932,7 +932,7 @@ EMessageBoxReturn DoShaderTagDlg( std::string* tag, const char* title ){
 
 	ui::Window window = MainFrame_getWindow().create_modal_dialog_window(title, dialog, -1, -1 );
 
-	GtkAccelGroup *accel_group = gtk_accel_group_new();
+	GtkAccelGroup *accel_group = ui::AccelGroup();
 	gtk_window_add_accel_group( window, accel_group );
 
 	{
@@ -991,7 +991,7 @@ EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, const
 
 	ui::Window window = MainFrame_getWindow().create_modal_dialog_window(title, dialog, -1, -1 );
 
-	GtkAccelGroup *accel_group = gtk_accel_group_new();
+	GtkAccelGroup *accel_group = ui::AccelGroup();
 	gtk_window_add_accel_group( window, accel_group );
 
 	{

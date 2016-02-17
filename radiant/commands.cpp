@@ -393,7 +393,7 @@ void DoCommandListDlg(){
 		return accelerator_window_key_press(widget, event, dialogptr);
 	}, &dialog);
 
-	GtkAccelGroup* accel = gtk_accel_group_new();
+	GtkAccelGroup* accel = ui::AccelGroup();
 	gtk_window_add_accel_group( window, accel );
 
 	GtkHBox* hbox = create_dialog_hbox( 4, 4 );
