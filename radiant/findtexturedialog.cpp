@@ -172,7 +172,7 @@ ui::Window FindTextureDialog::BuildDialog(){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 
-	entry = ui::Widget(gtk_entry_new());
+	entry = ui::Entry();
 	gtk_widget_show( entry );
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -182,7 +182,7 @@ ui::Window FindTextureDialog::BuildDialog(){
 	AddDialogData( *GTK_ENTRY( entry ), m_strFind );
 	GlobalTextureEntryCompletion::instance().connect( GTK_ENTRY( entry ) );
 
-	entry = ui::Widget(gtk_entry_new());
+	entry = ui::Entry();
 	gtk_widget_show( entry );
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),

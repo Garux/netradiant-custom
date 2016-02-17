@@ -7,6 +7,7 @@ using ui_alignment = struct _GtkAlignment;
 using ui_box = struct _GtkBox;
 using ui_button = struct _GtkButton;
 using ui_checkbutton = struct _GtkCheckButton;
+using ui_entry = struct _GtkEntry;
 using ui_evkey = struct _GdkEventKey;
 using ui_hbox = struct _GtkHBox;
 using ui_label = struct _GtkLabel;
@@ -119,6 +120,11 @@ namespace ui {
 
     WRAP(CheckButton, Widget, ui_checkbutton,
          CheckButton(const char *label);
+    );
+
+    WRAP(Entry, Widget, ui_entry,
+         Entry();
+         Entry(std::size_t max_length);
     );
 
     WRAP(HBox, Box, ui_hbox,

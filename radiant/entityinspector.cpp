@@ -80,7 +80,7 @@
 #include "groupdialog.h"
 
 GtkEntry* numeric_entry_new(){
-	GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+	GtkEntry* entry = ui::Entry();
 	gtk_widget_show( GTK_WIDGET( entry ) );
 	gtk_widget_set_size_request( GTK_WIDGET( entry ), 64, -1 );
 	return entry;
@@ -183,7 +183,7 @@ StringAttribute( const char* key ) :
 	m_key( key ),
 	m_entry( 0 ),
 	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+	GtkEntry* entry = ui::Entry();
 	gtk_widget_show( GTK_WIDGET( entry ) );
 	gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 
@@ -1461,7 +1461,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 					gtk_table_set_col_spacings( table, 5 );
 
 					{
-						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+						GtkEntry* entry = ui::Entry();
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 0, 1,
 										  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -1472,7 +1472,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 					}
 
 					{
-						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+						GtkEntry* entry = ui::Entry();
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
 										  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),

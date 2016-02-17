@@ -278,7 +278,7 @@ ui::Window ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 					gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 				}
 				{
-					GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+					GtkEntry* entry = ui::Entry();
 					gtk_widget_show( GTK_WIDGET( entry ) );
 					gtk_table_attach( table2, GTK_WIDGET( entry ), 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -398,7 +398,7 @@ void DoSides( int type, int axis ){
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( label ), FALSE, FALSE, 0 );
 		}
 		{
-			GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+			GtkEntry* entry = ui::Entry();
 			gtk_widget_show( GTK_WIDGET( entry ) );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( entry ), FALSE, FALSE, 0 );
 			sides_entry = entry;
@@ -643,7 +643,7 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 					gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 				}
 				{
-					GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+					GtkEntry* entry = ui::Entry();
 					gtk_widget_show( GTK_WIDGET( entry ) );
 					gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 0, 1,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -652,7 +652,7 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 					x = entry;
 				}
 				{
-					GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+					GtkEntry* entry = ui::Entry();
 					gtk_widget_show( GTK_WIDGET( entry ) );
 					gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -880,7 +880,7 @@ EMessageBoxReturn DoLightIntensityDlg( int *intensity ){
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( label ), FALSE, FALSE, 0 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 
@@ -948,7 +948,7 @@ EMessageBoxReturn DoShaderTagDlg( std::string* tag, const char* title ){
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( label ), FALSE, FALSE, 0 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 

@@ -130,7 +130,7 @@ create_w_plugplug2( void ){
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( t_materialist ), FALSE );
 	gtk_tree_view_set_enable_search( GTK_TREE_VIEW( t_materialist ), FALSE );
 
-	ed_materialname = gtk_entry_new();
+	ed_materialname = ui::Entry();
 	gtk_widget_set_name( ed_materialname, "ed_materialname" );
 	gtk_widget_show( ed_materialname );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), ed_materialname, FALSE, FALSE, 0 );

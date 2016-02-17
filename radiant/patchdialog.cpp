@@ -682,7 +682,7 @@ ui::Window PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 0, 1,
 											  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -692,7 +692,7 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( OnDialogKey ), 0 );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
 											  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -702,7 +702,7 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( OnDialogKey ), 0 );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 2, 3,
 											  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -712,7 +712,7 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( OnDialogKey ), 0 );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 3, 4,
 											  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -722,7 +722,7 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( OnDialogKey ), 0 );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 4, 5,
 											  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -773,7 +773,7 @@ ui::Window PatchInspector::BuildDialog(){
 												  (GtkAttachOptions)( 0 ), 0, 0 );
 							}
 							{
-								GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+								GtkEntry* entry = ui::Entry();
 								gtk_widget_show( GTK_WIDGET( entry ) );
 								gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -789,7 +789,7 @@ ui::Window PatchInspector::BuildDialog(){
 												  (GtkAttachOptions)( 0 ), 0, 0 );
 							}
 							{
-								GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+								GtkEntry* entry = ui::Entry();
 								gtk_widget_show( GTK_WIDGET( entry ) );
 								gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 2, 3,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -818,7 +818,7 @@ ui::Window PatchInspector::BuildDialog(){
 						gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 					}
 					{
-						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+						GtkEntry* entry = ui::Entry();
 						//  gtk_entry_set_editable (GTK_ENTRY (entry), false);
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
@@ -891,7 +891,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 0, 1,
 											  (GtkAttachOptions)( GTK_FILL ),
@@ -915,7 +915,7 @@ ui::Window PatchInspector::BuildDialog(){
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 1, 2,
 											  (GtkAttachOptions)( GTK_FILL ),
@@ -936,7 +936,7 @@ ui::Window PatchInspector::BuildDialog(){
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 2, 3,
 											  (GtkAttachOptions)( GTK_FILL ),
@@ -957,7 +957,7 @@ ui::Window PatchInspector::BuildDialog(){
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 3, 4,
 											  (GtkAttachOptions)( GTK_FILL ),
@@ -978,7 +978,7 @@ ui::Window PatchInspector::BuildDialog(){
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
-							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+							GtkEntry* entry = ui::Entry();
 							gtk_widget_show( GTK_WIDGET( entry ) );
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 4, 5,
 											  (GtkAttachOptions)( GTK_FILL ),

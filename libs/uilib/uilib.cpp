@@ -97,6 +97,12 @@ namespace ui {
     CheckButton::CheckButton(const char *label) : CheckButton(GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label)))
     { }
 
+    Entry::Entry() : Entry(GTK_ENTRY(gtk_entry_new()))
+    { }
+
+    Entry::Entry(std::size_t max_length) : Entry(GTK_ENTRY(gtk_entry_new_with_max_length(max_length)))
+    { }
+
     HBox::HBox(bool homogenous, int spacing) : HBox(GTK_HBOX(gtk_hbox_new(homogenous, spacing)))
     { }
 

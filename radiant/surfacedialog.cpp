@@ -615,7 +615,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				gtk_box_pack_start( GTK_BOX( hbox2 ), label, FALSE, TRUE, 0 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_box_pack_start( GTK_BOX( hbox2 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 				m_texture = entry;
@@ -658,7 +658,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( entry ), 3, 4, 0, 1,
 								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -694,7 +694,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( entry ), 3, 4, 1, 2,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -730,7 +730,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 2, 3 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( entry ), 3, 4, 2, 3,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -766,7 +766,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( entry ), 3, 4, 3, 4,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -803,7 +803,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 			}
 			{
-				GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+				GtkEntry* entry = ui::Entry();
 				gtk_widget_show( GTK_WIDGET( entry ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( entry ), 3, 4, 4, 5,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -1028,7 +1028,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( vbox3 ) );
 
 					{
-						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+						GtkEntry* entry = ui::Entry();
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_box_pack_start( GTK_BOX( vbox3 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 						m_valueEntryWidget = entry;

@@ -388,7 +388,7 @@ static gint ci_rename( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	name = gtk_entry_new();
+	name = ui::Entry();
 	gtk_box_pack_start( GTK_BOX( hbox ), name, FALSE, FALSE, 0 );
 	gtk_widget_show( name );
 
@@ -507,7 +507,7 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	name = gtk_entry_new();
+	name = ui::Entry();
 	gtk_box_pack_start( GTK_BOX( hbox ), name, TRUE, TRUE, 0 );
 	gtk_widget_show( name );
 
@@ -882,7 +882,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	parameters = gtk_entry_new();
+	parameters = ui::Entry();
 	gtk_box_pack_start( GTK_BOX( hbox ), parameters, TRUE, TRUE, 0 );
 	gtk_widget_show( parameters );
 
@@ -1050,7 +1050,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	g_pCamName = gtk_entry_new();
+	g_pCamName = ui::Entry();
 	gtk_box_pack_start( GTK_BOX( hbox ), g_pCamName, FALSE, FALSE, 0 );
 	gtk_widget_show( g_pCamName );
 
@@ -1185,7 +1185,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	g_pSecondsEntry = gtk_entry_new();
+	g_pSecondsEntry = ui::Entry();
 	gtk_box_pack_start( GTK_BOX( hbox ), g_pSecondsEntry, FALSE, FALSE, 0 );
 	gtk_widget_show( g_pSecondsEntry );
 

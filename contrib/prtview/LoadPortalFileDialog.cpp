@@ -122,7 +122,7 @@ int DoLoadPortalFileDialog(){
 	gtk_container_add( GTK_CONTAINER( dlg ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
-	entry = gtk_entry_new();
+	entry = ui::Entry();
 	gtk_widget_show( entry );
 	gtk_entry_set_editable( GTK_ENTRY( entry ), FALSE );
 	gtk_box_pack_start( GTK_BOX( vbox ), entry, FALSE, FALSE, 0 );

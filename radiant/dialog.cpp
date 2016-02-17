@@ -59,7 +59,7 @@
 
 
 GtkEntry* DialogEntry_new(){
-	GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+	GtkEntry* entry = ui::Entry();
 	gtk_widget_show( GTK_WIDGET( entry ) );
 	gtk_widget_set_size_request( GTK_WIDGET( entry ), 64, -1 );
 	return entry;

@@ -1098,7 +1098,7 @@ void DoScaleDlg(){
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					ui::Widget entry = ui::Widget(gtk_entry_new());
+					ui::Widget entry = ui::Entry();
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 0, 1,
@@ -1108,7 +1108,7 @@ void DoScaleDlg(){
 					g_scale_dialog.x = entry;
 				}
 				{
-					ui::Widget entry = ui::Widget(gtk_entry_new());
+					ui::Widget entry = ui::Entry();
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 1, 2,
@@ -1118,7 +1118,7 @@ void DoScaleDlg(){
 					g_scale_dialog.y = entry;
 				}
 				{
-					ui::Widget entry = ui::Widget(gtk_entry_new());
+					ui::Widget entry = ui::Entry();
 					gtk_entry_set_text( GTK_ENTRY( entry ), "1.0" );
 					gtk_widget_show( entry );
 					gtk_table_attach( table, entry, 1, 2, 2, 3,

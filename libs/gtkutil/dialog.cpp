@@ -212,7 +212,7 @@ PathEntry PathEntry_new(){
 	GtkHBox* hbox = ui::HBox( FALSE, 0 );
 	gtk_widget_show( GTK_WIDGET( hbox ) );
 
-	GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+	GtkEntry* entry = ui::Entry();
 	gtk_entry_set_has_frame( entry, FALSE );
 	gtk_widget_show( GTK_WIDGET( entry ) );
 	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
