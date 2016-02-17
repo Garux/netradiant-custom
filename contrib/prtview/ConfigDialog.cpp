@@ -291,14 +291,14 @@ void DoConfigDialog(){
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
 	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
 
-	button = gtk_button_new_with_label( "Color" );
+	button = ui::Button( "Color" );
 	gtk_widget_show( button );
 	gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_signal_connect( GTK_OBJECT( button ), "clicked", GTK_SIGNAL_FUNC( OnColor3d ), NULL );
 
-	button = gtk_button_new_with_label( "Depth Color" );
+	button = ui::Button( "Depth Color" );
 	gtk_widget_show( button );
 	gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -439,7 +439,7 @@ void DoConfigDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
-	button = gtk_button_new_with_label( "Color" );
+	button = ui::Button( "Color" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( button ), "clicked", GTK_SIGNAL_FUNC( OnColor2d ), NULL );
@@ -463,7 +463,7 @@ void DoConfigDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 
-	button = gtk_button_new_with_label( "OK" );
+	button = ui::Button( "OK" );
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( button ), "clicked",

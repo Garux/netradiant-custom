@@ -66,7 +66,7 @@ GtkTable* create_dialog_table( unsigned int rows, unsigned int columns, unsigned
 }
 
 GtkButton* create_dialog_button( const char* label, GCallback func, gpointer data ){
-	GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( label ) );
+	GtkButton* button = ui::Button( label );
 	gtk_widget_set_size_request( GTK_WIDGET( button ), 64, -1 );
 	gtk_widget_show( GTK_WIDGET( button ) );
 	g_signal_connect( G_OBJECT( button ), "clicked", func, data );
@@ -218,7 +218,7 @@ PathEntry PathEntry_new(){
 	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 
 	// browse button
-	GtkButton* button = GTK_BUTTON( gtk_button_new() );
+	GtkButton* button = ui::Button();
 	button_set_icon( button, "ellipsis.bmp" );
 	gtk_widget_show( GTK_WIDGET( button ) );
 	gtk_box_pack_end( GTK_BOX( hbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );

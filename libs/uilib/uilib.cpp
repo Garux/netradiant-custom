@@ -88,6 +88,9 @@ namespace ui {
             : Alignment(GTK_ALIGNMENT(gtk_alignment_new(xalign, yalign, xscale, yscale)))
     { }
 
+    Button::Button() : Button(GTK_BUTTON(gtk_button_new()))
+    { }
+
     Button::Button(const char *label) : Button(GTK_BUTTON(gtk_button_new_with_label(label)))
     { }
 

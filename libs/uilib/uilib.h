@@ -112,6 +112,7 @@ namespace ui {
     WRAP(Box, Widget, ui_box,);
 
     WRAP(Button, Widget, ui_button,
+         Button();
          Button(const char *label);
     );
 

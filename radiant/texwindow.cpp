@@ -1882,7 +1882,7 @@ void TextureBrowser_constructSearchButton(){
 	GtkTooltips* tooltips = gtk_tooltips_new();
 
 	ui::Widget image = ui::Widget(gtk_image_new_from_stock( GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR ));
-	g_TextureBrowser.m_search_button = ui::Widget(gtk_button_new());
+	g_TextureBrowser.m_search_button = ui::Button();
 	g_signal_connect( G_OBJECT( g_TextureBrowser.m_search_button ), "clicked", G_CALLBACK( TextureBrowser_searchTags ), NULL );
 	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), g_TextureBrowser.m_search_button, "Search with selected tags", "Search with selected tags" );
 	gtk_container_add( GTK_CONTAINER( g_TextureBrowser.m_search_button ), image );
@@ -2126,8 +2126,8 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			gtk_table_attach( GTK_TABLE( frame_table ), scrolled_win, 2, 3, 1, 3, GTK_FILL, GTK_FILL, 0, 0 );
 		}
 		{ // tag arrow buttons
-			ui::Widget m_btn_left = ui::Widget(gtk_button_new());
-			ui::Widget m_btn_right = ui::Widget(gtk_button_new());
+			ui::Widget m_btn_left = ui::Button();
+			ui::Widget m_btn_right = ui::Button();
 			ui::Widget m_arrow_left = ui::Widget(gtk_arrow_new( GTK_ARROW_LEFT, GTK_SHADOW_OUT ));
 			ui::Widget m_arrow_right = ui::Widget(gtk_arrow_new( GTK_ARROW_RIGHT, GTK_SHADOW_OUT ));
 			gtk_container_add( GTK_CONTAINER( m_btn_left ), m_arrow_left );

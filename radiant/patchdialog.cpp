@@ -857,7 +857,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
 						{
-							GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Flip" ) );
+							GtkButton* button = ui::Button( "Flip" );
 							gtk_widget_show( GTK_WIDGET( button ) );
 							gtk_table_attach( table, GTK_WIDGET( button ), 3, 4, 2, 3,
 											  (GtkAttachOptions)( GTK_FILL ),
@@ -874,7 +874,7 @@ ui::Window PatchInspector::BuildDialog(){
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
 						{
-							GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Flip" ) );
+							GtkButton* button = ui::Button( "Flip" );
 							gtk_widget_show( GTK_WIDGET( button ) );
 							gtk_table_attach( table, GTK_WIDGET( button ), 3, 4, 3, 4,
 											  (GtkAttachOptions)( GTK_FILL ),
@@ -1003,35 +1003,35 @@ ui::Window PatchInspector::BuildDialog(){
 					gtk_widget_show( GTK_WIDGET( hbox2 ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( hbox2 ), TRUE, FALSE, 0 );
 					{
-						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Auto Cap" ) );
+						GtkButton* button = ui::Button( "Auto Cap" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchAutoCap ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
-						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "CAP" ) );
+						GtkButton* button = ui::Button( "CAP" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchdetails ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
-						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Set..." ) );
+						GtkButton* button = ui::Button( "Set..." );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchreset ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
-						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Natural" ) );
+						GtkButton* button = ui::Button( "Natural" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchnatural ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
-						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Fit" ) );
+						GtkButton* button = ui::Button( "Fit" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchfit ), 0 );

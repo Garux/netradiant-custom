@@ -272,7 +272,7 @@ void about_plugin_window(){
 	gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // text align left
 	gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 2 ); // insert the label in the box
 
-	button = gtk_button_new_with_label( "OK" ); // create a button with text
+	button = ui::Button( "OK" ); // create a button with text
 	g_signal_connect_swapped( G_OBJECT( button ), "clicked", G_CALLBACK( gtk_widget_destroy ), window ); // connect the click event to close the window
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 2 ); // insert the button in the box
 
@@ -372,7 +372,7 @@ void MapCoordinator(){
 		spinner_adj_MaxX = (GtkAdjustment *)gtk_adjustment_new( map_maxX, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum x value
 		spinner_adj_MaxY = (GtkAdjustment *)gtk_adjustment_new( map_maxY, -65536.0, 65536.0, 1.0, 5.0, 0 ); // create adjustment for value and range of maximum y value
 
-		button = gtk_button_new_with_label( "Get optimal mapcoords" ); // create button with text
+		button = ui::Button( "Get optimal mapcoords" ); // create button with text
 		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( input_optimal ), NULL ); // connect button with callback function
 		gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 2 ); // insert button into vbox
 
@@ -418,11 +418,11 @@ void MapCoordinator(){
 		msp.spinner4 = GTK_SPIN_BUTTON( spinnerMaxY );
 		msp.worldspawn = theWorldspawn;
 
-		button = gtk_button_new_with_label( "Set" ); // create button with text
+		button = ui::Button( "Set" ); // create button with text
 		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( set_coordinates ), NULL ); // connect button with callback function
 		gtk_table_attach_defaults( GTK_TABLE( table ), button, 1, 2, 3, 4 ); // insert button into table
 
-		button = gtk_button_new_with_label( "Cancel" ); // create button with text
+		button = ui::Button( "Cancel" ); // create button with text
 		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( close_window ), NULL ); // connect button with callback function
 		gtk_table_attach_defaults( GTK_TABLE( table ), button, 2, 3, 3, 4 ); // insert button into table
 	}
@@ -433,7 +433,7 @@ void MapCoordinator(){
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // text align left
 		gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 2 ); // insert the label in the box
 
-		button = gtk_button_new_with_label( "OK" ); // create a button with text
+		button = ui::Button( "OK" ); // create a button with text
 		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( close_window ), NULL ); // connect the click event to close the window
 		gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 2 ); // insert the button in the box
 	}

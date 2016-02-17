@@ -1507,13 +1507,13 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( hbox ), FALSE, TRUE, 0 );
 
 					{
-						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Clear All" ) );
+						GtkButton* button = ui::Button( "Clear All" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_clearAllKeyValues ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), TRUE, TRUE, 0 );
 					}
 					{
-						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Delete Key" ) );
+						GtkButton* button = ui::Button( "Delete Key" );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_clearKeyValue ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), TRUE, TRUE, 0 );

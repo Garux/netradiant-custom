@@ -81,7 +81,7 @@ void DoAboutDlg(){
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), vbox, FALSE, FALSE, 0 );
 
-	button = gtk_button_new_with_label( "OK" );
+	button = ui::Button( "OK" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( button ), "clicked",

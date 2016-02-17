@@ -129,7 +129,7 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_button_new_with_label( "Ok" );
+	w = ui::Button( "Ok" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
@@ -137,7 +137,7 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
 	gtk_widget_grab_default( w );
 
-	w = gtk_button_new_with_label( "Cancel" );
+	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
@@ -411,7 +411,7 @@ static gint ci_rename( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_button_new_with_label( "Ok" );
+	w = ui::Button( "Ok" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
@@ -419,7 +419,7 @@ static gint ci_rename( GtkWidget *widget, gpointer data ){
 	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
 	gtk_widget_grab_default( w );
 
-	w = gtk_button_new_with_label( "Cancel" );
+	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
@@ -558,7 +558,7 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_button_new_with_label( "Ok" );
+	w = ui::Button( "Ok" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
@@ -566,7 +566,7 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
 	gtk_widget_grab_default( w );
 
-	w = gtk_button_new_with_label( "Cancel" );
+	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
@@ -898,7 +898,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_button_new_with_label( "Ok" );
+	w = ui::Button( "Ok" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
@@ -906,7 +906,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
 	gtk_widget_grab_default( w );
 
-	w = gtk_button_new_with_label( "Cancel" );
+	w = ui::Button( "Cancel" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDCANCEL ) );
 	gtk_widget_show( w );
@@ -1141,12 +1141,12 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	w = gtk_button_new_with_label( "Rename..." );
+	w = ui::Button( "Rename..." );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( ci_rename ), NULL );
 	gtk_widget_show( w );
 
-	w = gtk_button_new_with_label( "Add Target..." );
+	w = ui::Button( "Add Target..." );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, FALSE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( ci_add_target ), NULL );
 	gtk_widget_show( w );
@@ -1272,12 +1272,12 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( hbox ), vbox, FALSE, FALSE, 0 );
 	gtk_widget_show( vbox );
 
-	w = gtk_button_new_with_label( "Add..." );
+	w = ui::Button( "Add..." );
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( ci_add ), NULL );
 	gtk_widget_show( w );
 
-	w = gtk_button_new_with_label( "Del" );
+	w = ui::Button( "Del" );
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( ci_del ), NULL );
 	gtk_widget_show( w );

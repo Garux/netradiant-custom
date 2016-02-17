@@ -23,6 +23,7 @@
 
 #include <gtk/gtktoolbar.h>
 #include <gtk/gtktogglebutton.h>
+#include <uilib/uilib.h>
 
 #include "generic/callback.h"
 
@@ -41,7 +42,7 @@ void toolbar_append( GtkToolbar* toolbar, GtkButton* button, const char* descrip
 }
 
 GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback ){
-	GtkButton* button = GTK_BUTTON( gtk_button_new() );
+	GtkButton* button = ui::Button();
 	button_set_icon( button, icon );
 	button_connect_callback( button, callback );
 	toolbar_append( toolbar, button, description );

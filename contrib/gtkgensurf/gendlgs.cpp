@@ -1827,14 +1827,14 @@ GtkWidget* create_main_dialog(){
 					  (GtkAttachOptions) ( 0 ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
 
-	button = gtk_button_new_with_label( "Browse..." );
+	button = ui::Button( "Browse..." );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), button, FALSE, FALSE, 0 );
 	gtk_widget_set_usize( button, 60, -2 );
 	g_object_set_data( G_OBJECT( dlg ), "bmp_file_browse", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( bitmap_browse ), NULL );
 
-	button = gtk_button_new_with_label( "Reload" );
+	button = ui::Button( "Reload" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), button, FALSE, FALSE, 0 );
 	gtk_widget_set_usize( button, 60, -2 );
@@ -1969,7 +1969,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "fix_rate", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( fix_rate_entryfocusout ), NULL );
 
-	button = gtk_button_new_with_label( "Free" );
+	button = ui::Button( "Free" );
 	gtk_widget_show( button );
 	gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
@@ -1978,7 +1978,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "fix_free", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( fix_free ), NULL );
 
-	button = gtk_button_new_with_label( "Free All" );
+	button = ui::Button( "Free All" );
 	gtk_widget_show( button );
 	gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
@@ -2138,7 +2138,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), vbox, FALSE, TRUE, 0 );
 
-	button = gtk_button_new_with_label( "OK" );
+	button = ui::Button( "OK" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, TRUE, 0 );
 	gtk_widget_set_usize( button, 60, -2 );
@@ -2149,25 +2149,25 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, TRUE, 0 );
 
-	button = gtk_button_new_with_label( "Open..." );
+	button = ui::Button( "Open..." );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "open", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( main_open ), NULL );
 
-	button = gtk_button_new_with_label( "Save as..." );
+	button = ui::Button( "Save as..." );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "save", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( main_save ), NULL );
 
-	button = gtk_button_new_with_label( "Defaults" );
+	button = ui::Button( "Defaults" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "defaults", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( main_defaults ), NULL );
 
-	button = gtk_button_new_with_label( "About..." );
+	button = ui::Button( "About..." );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, TRUE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( main_about ), NULL );
