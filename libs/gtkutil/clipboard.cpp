@@ -111,11 +111,11 @@ static void clipboard_clear( GtkClipboard *clipboard, gpointer data ){
 }
 
 static void clipboard_received( GtkClipboard *clipboard, GtkSelectionData *data, gpointer user_data ){
-	if ( data->length < 0 ) {
+	if ( gtk_selection_data_get_length(data) < 0 ) {
 		globalErrorStream() << "Error retrieving selection\n";
 	}
-	else if ( strcmp( gdk_atom_name( data->type ), clipboard_targets[0].target ) == 0 ) {
-		BufferInputStream istream( reinterpret_cast<const char*>( data->data ), data->length );
+	else if ( strcmp( gdk_atom_name( gtk_selection_data_get_data_type(data) ), clipboard_targets[0].target ) == 0 ) {
+		BufferInputStream istream( reinterpret_cast<const char*>( gtk_selection_data_get_data(data) ), gtk_selection_data_get_length(data) );
 		( *reinterpret_cast<ClipboardPasteFunc*>( user_data ) )( istream );
 	}
 }

@@ -333,14 +333,14 @@ bool g_bWaitCursor = false;
 void Sys_BeginWait( void ){
 	ScreenUpdates_Disable( "Processing...", "Please Wait" );
 	GdkCursor *cursor = gdk_cursor_new( GDK_WATCH );
-	gdk_window_set_cursor( GTK_WIDGET( MainFrame_getWindow() )->window, cursor );
+	gdk_window_set_cursor( gtk_widget_get_window(MainFrame_getWindow()), cursor );
 	gdk_cursor_unref( cursor );
 	g_bWaitCursor = true;
 }
 
 void Sys_EndWait( void ){
 	ScreenUpdates_Enable();
-	gdk_window_set_cursor( GTK_WIDGET( MainFrame_getWindow() )->window, 0 );
+	gdk_window_set_cursor(gtk_widget_get_window(MainFrame_getWindow()), 0 );
 	g_bWaitCursor = false;
 }
 

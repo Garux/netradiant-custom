@@ -707,7 +707,7 @@ bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 Shader* XYWnd::m_state_selected = 0;
 
 void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
-	if ( GTK_WIDGET_VISIBLE( self.GetWidget() ) ) {
+	if ( gtk_widget_get_visible( self.GetWidget() ) ) {
 		self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.Width(), self.Height() ) );
 	}
 }
@@ -831,7 +831,7 @@ XYWnd::XYWnd() :
 	gtk_widget_ref( m_gl_widget );
 
 	gtk_widget_set_events( m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
-	GTK_WIDGET_SET_FLAGS( m_gl_widget, GTK_CAN_FOCUS );
+	gtk_widget_set_can_focus( m_gl_widget, true );
 
 	m_sizeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "size_allocate", G_CALLBACK( xywnd_size_allocate ), this );
 	m_exposeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "expose_event", G_CALLBACK( xywnd_expose ), this );
@@ -946,12 +946,12 @@ void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
 	if ( ClipMode() && GlobalClipPoints_Find( mousePosition, (VIEWTYPE)m_viewType, m_fScale ) != 0 ) {
 		GdkCursor *cursor;
 		cursor = gdk_cursor_new( GDK_CROSSHAIR );
-		gdk_window_set_cursor( GTK_WIDGET(m_gl_widget)->window, cursor );
+		gdk_window_set_cursor( gtk_widget_get_window(m_gl_widget), cursor );
 		gdk_cursor_unref( cursor );
 	}
 	else
 	{
-		gdk_window_set_cursor( GTK_WIDGET(m_gl_widget)->window, 0 );
+		gdk_window_set_cursor( gtk_widget_get_window(m_gl_widget), 0 );
 	}
 }
 
@@ -1062,7 +1062,7 @@ void XYWnd::NewBrushDrag( int x, int y ){
 
 void entitycreate_activated( ui::Widget item ){
 	scene::Node* world_node = Map_FindWorldspawn( g_map );
-	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
+	const char* entity_name = gtk_label_get_text( GTK_LABEL( gtk_bin_get_child(GTK_BIN( item )) ) );
 
 	if ( !( world_node && string_equal( entity_name, "worldspawn" ) ) ) {
 		g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );

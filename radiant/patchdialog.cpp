@@ -257,7 +257,7 @@ PatchInspector() :
 }
 
 bool visible(){
-	return GTK_WIDGET_VISIBLE( GetWidget() );
+	return gtk_widget_get_visible( GetWidget() );
 }
 
 //  void UpdateInfo();
@@ -458,14 +458,14 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 	td.scale[0] = td.scale[1] = 0;
 	td.shift[0] = td.shift[1] = 0;
 
-	if ( adj->value == 0 ) {
+	if ( gtk_adjustment_get_value(adj) == 0 ) {
 		return;
 	}
 
 	if ( adj == g_object_get_data( G_OBJECT( g_PatchInspector.GetWidget() ), "hshift_adj" ) ) {
 		g_pi_globals.shift[0] = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( data ) ) ) );
 
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value(adj) > 0 ) {
 			td.shift[0] = g_pi_globals.shift[0];
 		}
 		else{
@@ -475,7 +475,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 	else if ( adj == g_object_get_data( G_OBJECT( g_PatchInspector.GetWidget() ), "vshift_adj" ) ) {
 		g_pi_globals.shift[1] = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( data ) ) ) );
 
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value(adj) > 0 ) {
 			td.shift[1] = g_pi_globals.shift[1];
 		}
 		else{
@@ -487,7 +487,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 		if ( g_pi_globals.scale[0] == 0.0f ) {
 			return;
 		}
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value(adj) > 0 ) {
 			td.scale[0] = g_pi_globals.scale[0];
 		}
 		else{
@@ -499,7 +499,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 		if ( g_pi_globals.scale[1] == 0.0f ) {
 			return;
 		}
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value(adj) > 0 ) {
 			td.scale[1] = g_pi_globals.scale[1];
 		}
 		else{
@@ -509,7 +509,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 	else if ( adj == g_object_get_data( G_OBJECT( g_PatchInspector.GetWidget() ), "rotate_adj" ) ) {
 		g_pi_globals.rotate = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( data ) ) ) );
 
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value(adj) > 0 ) {
 			td.rotate = g_pi_globals.rotate;
 		}
 		else{
@@ -517,7 +517,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 		}
 	}
 
-	adj->value = 0;
+	gtk_adjustment_set_value(adj, 0);
 
 	// will scale shift rotate the patch accordingly
 
@@ -898,13 +898,13 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "hshift_adj", adj );
 
-							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
+							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( spin, false );
 						}
 						{
 							GtkEntry* entry = ui::Entry();
@@ -919,13 +919,13 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "vshift_adj", adj );
 
-							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
+							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( spin, false );
 						}
 						{
 							GtkEntry* entry = ui::Entry();
@@ -940,13 +940,13 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "hscale_adj", adj );
 
-							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
+							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( spin, false );
 						}
 						{
 							GtkEntry* entry = ui::Entry();
@@ -961,13 +961,13 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "vscale_adj", adj );
 
-							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
+							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 3, 4,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( spin, false );
 						}
 						{
 							GtkEntry* entry = ui::Entry();
@@ -982,13 +982,13 @@ ui::Window PatchInspector::BuildDialog(){
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
 							g_object_set_data( G_OBJECT( window ), "rotate_adj", adj );
 
-							GtkSpinButton* spin = ui::SpinButton( adj, 1, 0 );
+							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 4, 5,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( spin, false );
 						}
 					}
 					GtkHBox* hbox2 = ui::HBox( TRUE, 5 );

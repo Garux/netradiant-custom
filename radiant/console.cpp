@@ -212,7 +212,7 @@ std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 			if ( contains_newline ) {
 				gtk_text_view_scroll_mark_onscreen( GTK_TEXT_VIEW( g_console ), end );
 
-				if ( !ScreenUpdates_Enabled() && GTK_WIDGET_REALIZED( g_console ) ) {
+				if ( !ScreenUpdates_Enabled() && gtk_widget_get_realized( g_console ) ) {
 					ScreenUpdates_process();
 				}
 			}

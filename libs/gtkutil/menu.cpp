@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include <gtk/gtk.h>
 #include <uilib/uilib.h>
+#include <debugging/debugging.h>
 
 #include "generic/callback.h"
 
@@ -223,38 +224,11 @@ void accelerator_name( const Accelerator& accelerator, GString* gstring ){
 	}
 }
 
-void menu_item_set_accelerator( GtkMenuItem* item, Accelerator accelerator ){
-	GtkAccelLabel* accel_label = GTK_ACCEL_LABEL( gtk_bin_get_child( GTK_BIN( item ) ) );
-
-	g_free( accel_label->accel_string );
-	accel_label->accel_string = 0;
-
-	GString* gstring = g_string_new( accel_label->accel_string );
-	g_string_append( gstring, "   " );
-
-	accelerator_name( accelerator, gstring );
-
-	g_free( accel_label->accel_string );
-	accel_label->accel_string = gstring->str;
-	g_string_free( gstring, FALSE );
-
-	if ( !accel_label->accel_string ) {
-		accel_label->accel_string = g_strdup( "" );
-	}
-
-	gtk_widget_queue_resize( GTK_WIDGET( accel_label ) );
-}
-
 void menu_item_add_accelerator( GtkMenuItem* item, Accelerator accelerator ){
 	if ( accelerator.key != 0 ) {
 		GClosure* closure = global_accel_group_find( accelerator );
-		if ( closure != 0 ) {
-			menu_item_set_accelerator( item, closure );
-		}
-		else
-		{
-			menu_item_set_accelerator( item, accelerator );
-		}
+		ASSERT_NOTNULL(closure);
+		menu_item_set_accelerator( item, closure );
 	}
 }
 

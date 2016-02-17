@@ -39,7 +39,7 @@ inline void widget_set_visible( GtkWidget* widget, bool shown ){
 }
 
 inline bool widget_is_visible( GtkWidget* widget ){
-	return GTK_WIDGET_VISIBLE( widget ) != FALSE;
+	return gtk_widget_get_visible( widget ) != FALSE;
 }
 
 inline void widget_toggle_visible( GtkWidget* widget ){
@@ -81,7 +81,7 @@ static gboolean notify_visible( GtkWidget* widget, gpointer dummy, ToggleShown* 
 	return FALSE;
 }
 static gboolean destroy( GtkWidget* widget, ToggleShown* self ){
-	self->m_shownDeferred = GTK_WIDGET_VISIBLE( self->m_widget ) != FALSE;
+	self->m_shownDeferred = gtk_widget_get_visible( self->m_widget ) != FALSE;
 	self->m_widget = 0;
 	return FALSE;
 }
@@ -101,7 +101,7 @@ bool active() const {
 	}
 	else
 	{
-		return GTK_WIDGET_VISIBLE( m_widget ) != FALSE;
+		return gtk_widget_get_visible( m_widget ) != FALSE;
 	}
 }
 void exportActive( const BoolImportCallback& importCallback ){
@@ -138,7 +138,7 @@ typedef ReferenceCaller<GtkWidget, widget_queue_draw> WidgetQueueDrawCaller;
 
 
 inline void widget_make_default( GtkWidget* widget ){
-	GTK_WIDGET_SET_FLAGS( widget, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( widget, true );
 	gtk_widget_grab_default( widget );
 }
 

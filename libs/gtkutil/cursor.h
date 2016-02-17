@@ -155,7 +155,7 @@ void freeze_pointer( GtkWindow* window, MotionDeltaFunction function, void* data
 
 	GdkCursor* cursor = create_blank_cursor();
 	//GdkGrabStatus status =
-	gdk_pointer_grab( GTK_WIDGET( window )->window, TRUE, mask, 0, cursor, GDK_CURRENT_TIME );
+	gdk_pointer_grab( gtk_widget_get_window(GTK_WIDGET(window)), TRUE, mask, 0, cursor, GDK_CURRENT_TIME );
 	gdk_cursor_unref( cursor );
 
 	Sys_GetCursorPos( window, &recorded_x, &recorded_y );

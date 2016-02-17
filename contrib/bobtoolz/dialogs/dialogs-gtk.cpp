@@ -247,7 +247,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default(w, true);
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 		ret = eIDOK;
@@ -257,7 +257,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, true );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -273,7 +273,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, true );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -296,7 +296,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, true );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -323,7 +323,6 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 
 EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	GtkWidget *window, *w, *vbox, *hbox;
-	GtkWidget *radio1, *radio2;
 	GtkWidget *check1, *check2;
 	EMessageBoxReturn ret;
 	int loop = 1;
@@ -350,11 +349,11 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	// ---- vbox ----
 
 
-	radio1 = gtk_radio_button_new_with_label( NULL, "Use Whole Map" );
+	auto radio1 = gtk_radio_button_new_with_label( NULL, "Use Whole Map" );
 	gtk_box_pack_start( GTK_BOX( vbox ), radio1, FALSE, FALSE, 2 );
 	gtk_widget_show( radio1 );
 
-	radio2 = gtk_radio_button_new_with_label( ( (GtkRadioButton*)radio1 )->group, "Use Selected Brushes" );
+	auto radio2 = gtk_radio_button_new_with_label( gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio1)), "Use Selected Brushes" );
 	gtk_box_pack_start( GTK_BOX( vbox ), radio2, FALSE, FALSE, 2 );
 	gtk_widget_show( radio2 );
 
@@ -380,7 +379,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -534,7 +533,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -775,7 +774,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	w = ui::Button( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1020,7 +1019,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	w = ui::Button( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1183,7 +1182,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 	gtk_widget_show( w );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 
 	w = ui::Button( "Disable" );
@@ -1273,7 +1272,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1552,7 +1551,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1839,7 +1838,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1977,7 +1976,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	w = ui::Button( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, true );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 

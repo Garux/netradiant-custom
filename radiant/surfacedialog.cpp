@@ -106,7 +106,7 @@ void queueDraw(){
 
 inline void spin_button_set_step( GtkSpinButton* spin, gfloat step ){
 #if 1
-	gtk_spin_button_get_adjustment( spin )->step_increment = step;
+    gtk_adjustment_set_step_increment(gtk_spin_button_get_adjustment( spin ), step);
 #else
 	GValue gvalue = GValue_default();
 	g_value_init( &gvalue, G_TYPE_DOUBLE );
@@ -210,7 +210,7 @@ void destroyWindow(){
 	Destroy();
 }
 bool visible() const {
-	return GTK_WIDGET_VISIBLE( GetWidget() );
+	return gtk_widget_get_visible( GetWidget() );
 }
 void queueDraw(){
 	if ( visible() ) {
@@ -1043,7 +1043,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				// --> Dunno, but this stuff may be necessary... (Looks like it!)
 				gtk_widget_ref( TexTool::g_textoolWin );
 				gtk_widget_set_events( TexTool::g_textoolWin, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK );
-				GTK_WIDGET_SET_FLAGS( TexTool::g_textoolWin, GTK_CAN_FOCUS );
+				gtk_widget_set_can_focus( TexTool::g_textoolWin, true );
 				// <-- end stuff...
 				gtk_widget_show( TexTool::g_textoolWin );
 				gtk_widget_set_usize( TexTool::g_textoolWin, -1, 240 ); //Yeah!
@@ -1104,7 +1104,7 @@ void spin_button_set_value_no_signal( GtkSpinButton* spin, gdouble value ){
 
 void spin_button_set_step_increment( GtkSpinButton* spin, gdouble value ){
 	GtkAdjustment* adjust = gtk_spin_button_get_adjustment( spin );
-	adjust->step_increment = value;
+	gtk_adjustment_set_step_increment(adjust, value);
 }
 
 void SurfaceInspector::Update(){

@@ -1600,7 +1600,7 @@ void EverySecondTimer_disable(){
 }
 
 gint window_realize_remove_decoration( ui::Widget widget, gpointer data ){
-	gdk_window_set_decorations( GTK_WIDGET(widget)->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
+	gdk_window_set_decorations( gtk_widget_get_window(widget), (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
 	return FALSE;
 }
 
@@ -1672,7 +1672,7 @@ bool ScreenUpdates_Enabled(){
 }
 
 void ScreenUpdates_process(){
-	if ( redrawRequired() && GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	if ( redrawRequired() && gtk_widget_get_visible( g_wait.m_window ) ) {
 		process_gui();
 	}
 }
@@ -1694,7 +1694,7 @@ void ScreenUpdates_Disable( const char* message, const char* title ){
 			ScreenUpdates_process();
 		}
 	}
-	else if ( GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	else if ( gtk_widget_get_visible( g_wait.m_window ) ) {
 		gtk_label_set_text( g_wait.m_label, message );
 		ScreenUpdates_process();
 	}
@@ -1714,7 +1714,7 @@ void ScreenUpdates_Enable(){
 
 		//gtk_window_present(MainFrame_getWindow());
 	}
-	else if ( GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	else if ( gtk_widget_get_visible( g_wait.m_window ) ) {
 		gtk_label_set_text( g_wait.m_label, g_wait_stack.back().c_str() );
 		ScreenUpdates_process();
 	}
@@ -2460,7 +2460,7 @@ WindowFocusPrinter g_mainframeFocusPrinter( "mainframe" );
 class MainWindowActive
 {
 static gboolean notify( ui::Window window, gpointer dummy, MainWindowActive* self ){
-	if ( g_wait.m_window && gtk_window_is_active( window ) && !GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	if ( g_wait.m_window && gtk_window_is_active( window ) && !gtk_widget_get_visible( g_wait.m_window ) ) {
 		gtk_widget_show( GTK_WIDGET( g_wait.m_window ) );
 	}
 
@@ -2999,7 +2999,7 @@ void MainFrame::SaveWindowInfo(){
 
 	g_layout_globals.m_position = m_position_tracker.getPosition();
 
-	g_layout_globals.nState = gdk_window_get_state( GTK_WIDGET( m_window )->window );
+	g_layout_globals.nState = gdk_window_get_state( gtk_widget_get_window(GTK_WIDGET( m_window )) );
 }
 
 void MainFrame::Shutdown(){

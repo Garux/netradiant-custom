@@ -58,7 +58,7 @@ static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* 
 }
 
 static gboolean focus_out( GtkEntry* entry, GdkEventFocus *event, NonModalEntry* self ){
-	if ( self->m_editing && GTK_WIDGET_VISIBLE( entry ) ) {
+	if ( self->m_editing && gtk_widget_get_visible( GTK_WIDGET(entry) ) ) {
 		self->m_apply();
 	}
 	self->m_editing = false;

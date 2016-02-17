@@ -221,7 +221,7 @@ void FindTextureDialog::updateTextures( const char* name ){
 }
 
 bool FindTextureDialog::isOpen(){
-	return GTK_WIDGET_VISIBLE( g_FindTextureDialog.GetWidget() ) == TRUE;
+	return gtk_widget_get_visible( g_FindTextureDialog.GetWidget() ) == TRUE;
 }
 
 void FindTextureDialog::setFindStr( const char* name ){

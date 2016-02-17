@@ -107,10 +107,12 @@ bool color_dialog( ui::Widget parent, Vector3& color, const char* title ){
 	clr[2] = color[2];
 
 	dlg = ui::Widget(gtk_color_selection_dialog_new( title ));
-	gtk_color_selection_set_color( GTK_COLOR_SELECTION( GTK_COLOR_SELECTION_DIALOG( dlg )->colorsel ), clr );
+	gtk_color_selection_set_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG( dlg )) ), clr );
 	g_signal_connect( G_OBJECT( dlg ), "delete_event", G_CALLBACK( dialog_delete_callback ), &dialog );
-	g_signal_connect( G_OBJECT( GTK_COLOR_SELECTION_DIALOG( dlg )->ok_button ), "clicked", G_CALLBACK( dialog_button_ok ), &dialog );
-	g_signal_connect( G_OBJECT( GTK_COLOR_SELECTION_DIALOG( dlg )->cancel_button ), "clicked", G_CALLBACK( dialog_button_cancel ), &dialog );
+	GtkWidget *ok_button, *cancel_button;
+	g_object_get(dlg, "ok-button", &ok_button, "cancel-button", &cancel_button, nullptr);
+	g_signal_connect( ok_button, "clicked", G_CALLBACK( dialog_button_ok ), &dialog );
+	g_signal_connect( cancel_button, "clicked", G_CALLBACK( dialog_button_cancel ), &dialog );
 
 	if ( parent ) {
 		gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( parent ) );
@@ -119,7 +121,7 @@ bool color_dialog( ui::Widget parent, Vector3& color, const char* title ){
 	bool ok = modal_dialog_show( GTK_WINDOW( dlg ), dialog ) == eIDOK;
 	if ( ok ) {
 		GdkColor gdkcolor;
-		gtk_color_selection_get_current_color( GTK_COLOR_SELECTION( GTK_COLOR_SELECTION_DIALOG( dlg )->colorsel ), &gdkcolor );
+		gtk_color_selection_get_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG( dlg )) ), &gdkcolor );
 		clr[0] = gdkcolor.red / 65535.0;
 		clr[1] = gdkcolor.green / 65535.0;
 		clr[2] = gdkcolor.blue / 65535.0;

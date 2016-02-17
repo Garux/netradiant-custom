@@ -824,7 +824,7 @@ gboolean mousecontrol_button_press( ui::Widget widget, GdkEventButton* event, Ca
 #endif
 
 void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
-	if ( GTK_WIDGET_VISIBLE( self.m_gl_widget ) ) {
+	if ( gtk_widget_get_visible( self.m_gl_widget ) ) {
 		self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.getCamera().width, self.getCamera().height ) );
 	}
 }
@@ -850,7 +850,9 @@ void selection_motion( gdouble x, gdouble y, guint state, void* data ){
 }
 
 inline WindowVector windowvector_for_widget_centre( ui::Widget widget ){
-	return WindowVector( static_cast<float>( GTK_WIDGET(widget)->allocation.width / 2 ), static_cast<float>(GTK_WIDGET(widget)->allocation.height / 2 ) );
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(widget, &allocation);
+	return WindowVector( static_cast<float>( allocation.width / 2 ), static_cast<float>(allocation.height / 2 ) );
 }
 
 gboolean selection_button_press_freemove( ui::Widget widget, GdkEventButton* event, WindowObserver* observer ){
@@ -1162,7 +1164,7 @@ CamWnd::CamWnd() :
 	gtk_widget_ref( m_gl_widget );
 
 	gtk_widget_set_events( m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
-	GTK_WIDGET_SET_FLAGS( m_gl_widget, GTK_CAN_FOCUS );
+	gtk_widget_set_can_focus( m_gl_widget, true );
 
 	m_sizeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "size_allocate", G_CALLBACK( camera_size_allocate ), this );
 	m_exposeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "expose_event", G_CALLBACK( camera_expose ), this );

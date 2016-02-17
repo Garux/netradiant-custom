@@ -63,14 +63,18 @@ static int DoColor( PackedColour *c ){
 	clr[2] = ( (double)GetBValue( *c ) ) / 255.0;
 
 	dlg = gtk_color_selection_dialog_new( "Choose Color" );
-	gtk_color_selection_set_color( GTK_COLOR_SELECTION( GTK_COLOR_SELECTION_DIALOG( dlg )->colorsel ), clr );
+	gtk_color_selection_set_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(dlg)) ), clr );
 	gtk_signal_connect( GTK_OBJECT( dlg ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( dlg ), "destroy",
 						GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
-	gtk_signal_connect( GTK_OBJECT( GTK_COLOR_SELECTION_DIALOG( dlg )->ok_button ), "clicked",
+
+	GtkWidget *ok_button, *cancel_button;
+	g_object_get(dlg, "ok-button", &ok_button, "cancel-button", &cancel_button, nullptr);
+
+	gtk_signal_connect( GTK_OBJECT(ok_button), "clicked",
 						GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
-	gtk_signal_connect( GTK_OBJECT( GTK_COLOR_SELECTION_DIALOG( dlg )->cancel_button ), "clicked",
+	gtk_signal_connect( GTK_OBJECT(cancel_button), "clicked",
 						GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
 	g_object_set_data( G_OBJECT( dlg ), "loop", &loop );
 	g_object_set_data( G_OBJECT( dlg ), "ret", &ret );
@@ -81,7 +85,7 @@ static int DoColor( PackedColour *c ){
 	while ( loop )
 		gtk_main_iteration();
 
-	gtk_color_selection_get_color( GTK_COLOR_SELECTION( GTK_COLOR_SELECTION_DIALOG( dlg )->colorsel ), clr );
+	gtk_color_selection_get_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(dlg)) ), clr );
 
 	gtk_grab_remove( dlg );
 	gtk_widget_destroy( dlg );
@@ -126,7 +130,7 @@ static void SetClipText( GtkWidget* label ){
 }
 
 static void OnScroll2d( GtkAdjustment *adj, gpointer data ){
-	portals.width_2d = static_cast<float>( adj->value );
+	portals.width_2d = static_cast<float>( gtk_adjustment_get_value(adj) );
 	Set2DText( GTK_WIDGET( data ) );
 
 	Portals_shadersChanged();
@@ -134,21 +138,21 @@ static void OnScroll2d( GtkAdjustment *adj, gpointer data ){
 }
 
 static void OnScroll3d( GtkAdjustment *adj, gpointer data ){
-	portals.width_3d = static_cast<float>( adj->value );
+	portals.width_3d = static_cast<float>( gtk_adjustment_get_value(adj) );
 	Set3DText( GTK_WIDGET( data ) );
 
 	SceneChangeNotify();
 }
 
 static void OnScrollTrans( GtkAdjustment *adj, gpointer data ){
-	portals.trans_3d = static_cast<float>( adj->value );
+	portals.trans_3d = static_cast<float>( gtk_adjustment_get_value(adj) );
 	Set3DTransText( GTK_WIDGET( data ) );
 
 	SceneChangeNotify();
 }
 
 static void OnScrollClip( GtkAdjustment *adj, gpointer data ){
-	portals.clip_range = static_cast<float>( adj->value );
+	portals.clip_range = static_cast<float>( gtk_adjustment_get_value(adj) );
 	SetClipText( GTK_WIDGET( data ) );
 
 	SceneChangeNotify();

@@ -35,8 +35,8 @@
 void toolbar_append( GtkToolbar* toolbar, GtkButton* button, const char* description ){
 	gtk_widget_show( GTK_WIDGET( button ) );
 	gtk_button_set_relief( button, GTK_RELIEF_NONE );
-	GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
-	GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_DEFAULT );
+	gtk_widget_set_can_focus(GTK_WIDGET( button ), false);
+	gtk_widget_set_can_default(GTK_WIDGET( button ), false);
 	gtk_toolbar_append_element( toolbar, GTK_TOOLBAR_CHILD_WIDGET, GTK_WIDGET( button ), "", description, "", 0, 0, 0 );
 }
 

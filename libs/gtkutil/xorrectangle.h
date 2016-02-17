@@ -72,12 +72,12 @@ bool initialised() const {
 }
 void lazy_init(){
 	if ( !initialised() ) {
-		m_gc = gdk_gc_new( m_widget->window );
+		m_gc = gdk_gc_new( gtk_widget_get_window(m_widget) );
 
 		GdkColor color = { 0, 0xffff, 0xffff, 0xffff, };
-		GdkColormap* colormap = gdk_window_get_colormap( m_widget->window );
+		GdkColormap* colormap = gdk_window_get_colormap( gtk_widget_get_window(m_widget) );
 		gdk_colormap_alloc_color( colormap, &color, FALSE, TRUE );
-		gdk_gc_copy( m_gc, m_widget->style->white_gc );
+		gdk_gc_copy( m_gc, gtk_widget_get_style(m_widget)->white_gc );
 		gdk_gc_set_foreground( m_gc, &color );
 		gdk_gc_set_background( m_gc, &color );
 
@@ -89,7 +89,9 @@ void draw() const {
 	const int y = float_to_integer( m_rectangle.y );
 	const int w = float_to_integer( m_rectangle.w );
 	const int h = float_to_integer( m_rectangle.h );
-	gdk_draw_rectangle( m_widget->window, m_gc, FALSE, x, -( h ) - ( y - m_widget->allocation.height ), w, h );
+	GtkAllocation allocation;
+	gtk_widget_get_allocation(m_widget, &allocation);
+	gdk_draw_rectangle( gtk_widget_get_window(m_widget), m_gc, FALSE, x, -( h ) - ( y - allocation.height ), w, h );
 }
 
 public:
@@ -101,7 +103,7 @@ XORRectangle( ui::Widget widget ) : m_widget( widget ), m_gc( 0 ){
 	}
 }
 void set( rectangle_t rectangle ){
-	if ( GTK_WIDGET_REALIZED( m_widget ) ) {
+	if ( gtk_widget_get_realized( m_widget ) ) {
 		lazy_init();
 		draw();
 		m_rectangle = rectangle;
