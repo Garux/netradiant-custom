@@ -24,6 +24,7 @@ using ui_scrolledwindow = struct _GtkScrolledWindow;
 using ui_spinbutton = struct _GtkSpinButton;
 using ui_table = struct _GtkTable;
 using ui_treemodel = struct _GtkTreeModel;
+using ui_treepath = struct _GtkTreePath;
 using ui_treeview = struct _GtkTreeView;
 using ui_typeinst = struct _GTypeInstance;
 using ui_vbox = struct _GtkVBox;
@@ -191,6 +192,11 @@ namespace ui {
     );
 
     WRAP(TreeModel, Widget, ui_treemodel,);
+
+    WRAP(TreePath, Object, ui_treepath,
+         TreePath();
+         TreePath(const char *path);
+    );
 
     WRAP(TreeView, Widget, ui_treeview,
          TreeView(TreeModel model);

@@ -680,7 +680,7 @@ ProjectList( Project& project ) : m_project( project ), m_changed( false ){
 gboolean project_cell_edited( GtkCellRendererText* cell, gchar* path_string, gchar* new_text, ProjectList* projectList ){
 	Project& project = projectList->m_project;
 
-	GtkTreePath* path = gtk_tree_path_new_from_string( path_string );
+	GtkTreePath* path = ui::TreePath( path_string );
 
 	ASSERT_MESSAGE( gtk_tree_path_get_depth( path ) == 1, "invalid path length" );
 
@@ -787,7 +787,7 @@ gboolean commands_cell_edited( GtkCellRendererText* cell, gchar* path_string, gc
 	}
 	Build& build = *g_current_build;
 
-	GtkTreePath* path = gtk_tree_path_new_from_string( path_string );
+	GtkTreePath* path = ui::TreePath( path_string );
 
 	ASSERT_MESSAGE( gtk_tree_path_get_depth( path ) == 1, "invalid path length" );
 

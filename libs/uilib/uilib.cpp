@@ -140,6 +140,12 @@ namespace ui {
     Table::Table(std::size_t rows, std::size_t columns, bool homogenous) : Table(GTK_TABLE(gtk_table_new(rows, columns, homogenous)))
     { }
 
+    TreePath::TreePath() : TreePath(gtk_tree_path_new())
+    { }
+
+    TreePath::TreePath(const char *path) : TreePath(gtk_tree_path_new_from_string(path))
+    { }
+
     TreeView::TreeView(TreeModel model) : TreeView(GTK_TREE_VIEW(gtk_tree_view_new_with_model(model)))
     { }
 

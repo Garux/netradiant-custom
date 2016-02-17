@@ -27,6 +27,7 @@
 #include <gtk/gtktreemodel.h>
 #include <gtk/gtktreednd.h>
 #include <gtk/gtkmain.h>
+#include <uilib/uilib.h>
 
 #include "iscenegraph.h"
 #include "nameable.h"
@@ -280,7 +281,7 @@ static GtkTreePath* graph_tree_model_get_path( GtkTreeModel* tree_model, GtkTree
 	graph_type& graph = *GRAPH_TREE_MODEL( tree_model )->graph;
 	graph_type::iterator i = graph_iterator_read_tree_iter( iter );
 
-	GtkTreePath* path = gtk_tree_path_new();
+	GtkTreePath* path = ui::TreePath();
 
 	for ( std::size_t depth = ( *i ).first.get().size(); depth != 0; --depth )
 	{
@@ -874,7 +875,7 @@ static GtkTreePath* graph_tree_model_get_path( GtkTreeModel* tree_model, GtkTree
 	ASSERT_MESSAGE( tree_model != 0, "RUNTIME ERROR" );
 	GraphTreeNode* graph = GRAPH_TREE_MODEL( tree_model )->m_graph;
 
-	GtkTreePath* path = gtk_tree_path_new();
+	GtkTreePath* path = ui::TreePath();
 
 	for ( GraphTreeNode* node = ( *graph_iterator_read_tree_iter( iter ) ).second; node != graph; node = node->m_parent )
 	{
@@ -1358,7 +1359,7 @@ TestGraphTreeModel(){
 
 	{
 		GtkTreeIter iter;
-		GtkTreePath* path = gtk_tree_path_new_from_string( "0" );
+		GtkTreePath* path = ui::TreePath( "0" );
 		gtk_tree_model_get_iter( model, &iter, path );
 		gtk_tree_path_free( path );
 
@@ -1368,7 +1369,7 @@ TestGraphTreeModel(){
 
 	{
 		GtkTreeIter iter;
-		GtkTreePath* path = gtk_tree_path_new_from_string( "1" );
+		GtkTreePath* path = ui::TreePath( "1" );
 		gtk_tree_model_get_iter( model, &iter, path );
 		gtk_tree_path_free( path );
 
