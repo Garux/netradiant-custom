@@ -1348,7 +1348,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- /hbox ----
 
-	frame = gtk_frame_new( "Reset Texture Names" );
+	frame = ui::Frame( "Reset Texture Names" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
@@ -1396,7 +1396,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- /frame ----
 
-	frame = gtk_frame_new( "Reset Scales" );
+	frame = ui::Frame( "Reset Scales" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
@@ -1452,7 +1452,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- /frame ----
 
-	frame = gtk_frame_new( "Reset Shift" );
+	frame = ui::Frame( "Reset Shift" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
@@ -1508,7 +1508,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- /frame ----
 
-	frame = gtk_frame_new( "Reset Rotation" );
+	frame = ui::Frame( "Reset Rotation" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
@@ -1674,7 +1674,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 	// ---- /hbox ----
 
-	frame = gtk_frame_new( "Radii" );
+	frame = ui::Frame( "Radii" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
@@ -1717,7 +1717,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 
 
-	frame = gtk_frame_new( "Angles" );
+	frame = ui::Frame( "Angles" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
@@ -1759,7 +1759,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_widget_show( angleEnd );
 
 
-	frame = gtk_frame_new( "Height" );
+	frame = ui::Frame( "Height" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 
@@ -1802,7 +1802,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 
 
 
-	frame = gtk_frame_new( "Points" );
+	frame = ui::Frame( "Points" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 

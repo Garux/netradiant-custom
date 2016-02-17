@@ -2058,7 +2058,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 		{ // Tag frame
 			frame_table = ui::Table( 3, 3, FALSE );
 
-			g_TextureBrowser.m_tag_frame = ui::Widget(gtk_frame_new( "Tag assignment" ));
+			g_TextureBrowser.m_tag_frame = ui::Frame( "Tag assignment" );
 			gtk_frame_set_label_align( GTK_FRAME( g_TextureBrowser.m_tag_frame ), 0.5, 0.5 );
 			gtk_frame_set_shadow_type( GTK_FRAME( g_TextureBrowser.m_tag_frame ), GTK_SHADOW_NONE );
 

@@ -50,7 +50,7 @@ GtkHBox* create_dialog_hbox( int spacing, int border ){
 }
 
 GtkFrame* create_dialog_frame( const char* label, GtkShadowType shadow ){
-	GtkFrame* frame = GTK_FRAME( gtk_frame_new( label ) );
+	GtkFrame* frame = ui::Frame( label );
 	gtk_widget_show( GTK_WIDGET( frame ) );
 	gtk_frame_set_shadow_type( frame, shadow );
 	return frame;
@@ -204,7 +204,7 @@ RadioHBox RadioHBox_new( StringArrayRange names ){
 
 
 PathEntry PathEntry_new(){
-	GtkFrame* frame = GTK_FRAME( gtk_frame_new( NULL ) );
+	GtkFrame* frame = ui::Frame();
 	gtk_widget_show( GTK_WIDGET( frame ) );
 	gtk_frame_set_shadow_type( frame, GTK_SHADOW_IN );
 

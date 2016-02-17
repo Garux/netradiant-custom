@@ -824,7 +824,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 		}
 
 		{
-			ui::Widget frame = ui::Widget(gtk_frame_new( "Texturing" ));
+			ui::Widget frame = ui::Frame( "Texturing" );
 			gtk_widget_show( frame );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 			{
@@ -944,7 +944,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 		}
 		if ( !string_empty( g_pGameDescription->getKeyValue( "si_flags" ) ) ) {
 			{
-				GtkFrame* frame = GTK_FRAME( gtk_frame_new( "Surface Flags" ) );
+				GtkFrame* frame = ui::Frame( "Surface Flags" );
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
@@ -979,7 +979,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				}
 			}
 			{
-				GtkFrame* frame = GTK_FRAME( gtk_frame_new( "Content Flags" ) );
+				GtkFrame* frame = ui::Frame( "Content Flags" );
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
@@ -1018,7 +1018,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 				}
 			}
 			{
-				GtkFrame* frame = GTK_FRAME( gtk_frame_new( "Value" ) );
+				GtkFrame* frame = ui::Frame( "Value" );
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{
@@ -1041,7 +1041,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 #if TEXTOOL_ENABLED
 		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
 // Shamus: Textool goodies...
-			ui::Widget frame = gtk_frame_new( "Textool" );
+			ui::Widget frame = ui::Frame( "Textool" );
 			gtk_widget_show( frame );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 			{

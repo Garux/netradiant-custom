@@ -662,7 +662,7 @@ ui::Widget PreferencePages_addPage( ui::Widget notebook, const char* name ){
 	ui::Widget preflabel = ui::Label( name );
 	gtk_widget_show( preflabel );
 
-	ui::Widget pageframe = ui::Widget(gtk_frame_new( name ));
+	ui::Widget pageframe = ui::Frame( name );
 	gtk_container_set_border_width( GTK_CONTAINER( pageframe ), 4 );
 	gtk_widget_show( pageframe );
 

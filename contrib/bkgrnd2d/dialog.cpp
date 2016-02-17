@@ -198,7 +198,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 // A vbox to hold everything
 	m_pWidget = ui::VBox( FALSE,0 );
 // Frame for file row
-	frame = gtk_frame_new( "File" );
+	frame = ui::Frame( "File" );
 	gtk_box_pack_start( GTK_BOX( m_pWidget ),frame, FALSE, FALSE, 2 );
 
 // hbox for first row
@@ -234,7 +234,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_widget_show( frame );
 
 // second row (rendering options)
-	frame = gtk_frame_new( "Rendering" );
+	frame = ui::Frame( "Rendering" );
 	gtk_box_pack_start( GTK_BOX( m_pWidget ),frame, FALSE, FALSE, 2 );
 
 	hbox = ui::HBox( FALSE,5 );
@@ -257,7 +257,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_widget_show( hbox );
 	gtk_widget_show( frame );
 // Third row (size and position)
-	frame = gtk_frame_new( "Size/Position (undefined)" );
+	frame = ui::Frame( "Size/Position (undefined)" );
 	m_pPosLabel = gtk_frame_get_label_widget( GTK_FRAME( frame ) );
 	gtk_box_pack_start( GTK_BOX( m_pWidget ), frame, FALSE, FALSE, 2 );
 

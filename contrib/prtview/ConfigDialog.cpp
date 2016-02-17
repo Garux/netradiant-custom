@@ -260,7 +260,7 @@ void DoConfigDialog(){
 	gtk_container_add( GTK_CONTAINER( dlg ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
-	frame = gtk_frame_new( "3D View" );
+	frame = ui::Frame( "3D View" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, TRUE, TRUE, 0 );
 
@@ -410,7 +410,7 @@ void DoConfigDialog(){
 	gtk_box_pack_start( GTK_BOX( hbox ), portalcheck, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( portalcheck ), "toggled", GTK_SIGNAL_FUNC( OnClip ), NULL );
 
-	frame = gtk_frame_new( "2D View" );
+	frame = ui::Frame( "2D View" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, TRUE, TRUE, 0 );
 

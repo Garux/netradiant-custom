@@ -13,6 +13,7 @@ using ui_cellrenderer = struct _GtkCellRenderer;
 using ui_cellrenderertext = struct _GtkCellRendererText;
 using ui_entry = struct _GtkEntry;
 using ui_evkey = struct _GdkEventKey;
+using ui_frame = struct _GtkFrame;
 using ui_hbox = struct _GtkHBox;
 using ui_label = struct _GtkLabel;
 using ui_menu = struct _GtkMenu;
@@ -155,6 +156,10 @@ namespace ui {
     WRAP(Entry, Widget, ui_entry,
          Entry();
          Entry(std::size_t max_length);
+    );
+
+    WRAP(Frame, Widget, ui_frame,
+         Frame(const char *label = nullptr);
     );
 
     WRAP(HBox, Box, ui_hbox,

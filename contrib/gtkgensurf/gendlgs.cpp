@@ -1384,7 +1384,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( label );
 	gtk_notebook_append_page( GTK_NOTEBOOK( notebook ), table, label );
 
-	frame = gtk_frame_new( "Game" );
+	frame = ui::Frame( "Game" );
 	gtk_widget_show( frame );
 	gtk_table_attach( GTK_TABLE( table ), frame, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1405,7 +1405,7 @@ GtkWidget* create_main_dialog(){
 		g_signal_connect( G_OBJECT( radio ), "toggled", G_CALLBACK( general_game ), GINT_TO_POINTER( i ) );
 	}
 
-	frame = gtk_frame_new( "Waveform" );
+	frame = ui::Frame( "Waveform" );
 	gtk_widget_show( frame );
 	gtk_table_attach( GTK_TABLE( table ), frame, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1426,7 +1426,7 @@ GtkWidget* create_main_dialog(){
 		g_signal_connect( G_OBJECT( radio ), "toggled", G_CALLBACK( general_wave ), GINT_TO_POINTER( i ) );
 	}
 
-	frame = gtk_frame_new( "Orientation" );
+	frame = ui::Frame( "Orientation" );
 	gtk_widget_show( frame );
 	gtk_table_attach( GTK_TABLE( table ), frame, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1536,7 +1536,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_show( hbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox2, FALSE, TRUE, 0 );
 
-	frame = gtk_frame_new( "Extents" );
+	frame = ui::Frame( "Extents" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), frame, TRUE, TRUE, 0 );
 
@@ -1623,7 +1623,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "vmax", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Vur );
 
-	frame = gtk_frame_new( "Divisions" );
+	frame = ui::Frame( "Divisions" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), frame, TRUE, TRUE, 0 );
 
@@ -1707,7 +1707,7 @@ GtkWidget* create_main_dialog(){
 	gtk_scale_set_digits( GTK_SCALE( scale ), 0 );
 	g_object_set_data( G_OBJECT( dlg ), "decimate", scale );
 
-	frame = gtk_frame_new( "Corner values" );
+	frame = ui::Frame( "Corner values" );
 	gtk_widget_show( frame );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, TRUE, 0 );
 

@@ -91,7 +91,7 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	frame = gtk_frame_new( "Type" );
+	frame = ui::Frame( "Type" );
 	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
 	gtk_widget_show( frame );
 
@@ -520,7 +520,7 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	frame = gtk_frame_new( "Type" );
+	frame = ui::Frame( "Type" );
 	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
 	gtk_widget_show( frame );
 
@@ -851,7 +851,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	frame = gtk_frame_new( "Type" );
+	frame = ui::Frame( "Type" );
 	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
 	gtk_widget_show( frame );
 
@@ -1070,7 +1070,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 
 	// -------------------------- //
 
-	frame = gtk_frame_new( "Path and Target editing" );
+	frame = ui::Frame( "Path and Target editing" );
 	gtk_widget_show( frame );
 	gtk_table_attach( GTK_TABLE( table ), frame, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1164,7 +1164,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 
 	// -------------------------- //
 
-	frame = gtk_frame_new( "Time" );
+	frame = ui::Frame( "Time" );
 	gtk_widget_show( frame );
 	gtk_table_attach( GTK_TABLE( table ), frame, 0, 1, 2, 3,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),

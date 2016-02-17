@@ -587,7 +587,7 @@ ui::Window PatchInspector::BuildDialog(){
 				gtk_widget_show( GTK_WIDGET( vbox2 ) );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox2 ), TRUE, TRUE, 0 );
 				{
-					GtkFrame* frame = GTK_FRAME( gtk_frame_new( "Details" ) );
+					GtkFrame* frame = ui::Frame( "Details" );
 					gtk_widget_show( GTK_WIDGET( frame ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 					{
@@ -734,7 +734,7 @@ ui::Window PatchInspector::BuildDialog(){
 					}
 				}
 				if ( g_pGameDescription->mGameType == "doom3" ) {
-					GtkFrame* frame = GTK_FRAME( gtk_frame_new( "Tesselation" ) );
+					GtkFrame* frame = ui::Frame( "Tesselation" );
 					gtk_widget_show( GTK_WIDGET( frame ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 					{
@@ -802,7 +802,7 @@ ui::Window PatchInspector::BuildDialog(){
 				}
 			}
 			{
-				GtkFrame* frame = GTK_FRAME( gtk_frame_new( "Texturing" ) );
+				GtkFrame* frame = ui::Frame( "Texturing" );
 				gtk_widget_show( GTK_WIDGET( frame ) );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( frame ), TRUE, TRUE, 0 );
 				{

@@ -22,9 +22,10 @@
 #include "frame.h"
 
 #include <gtk/gtkframe.h>
+#include <uilib/uilib.h>
 
 GtkFrame* create_framed_widget( GtkWidget* widget ){
-	GtkFrame* frame = GTK_FRAME( gtk_frame_new( 0 ) );
+	GtkFrame* frame = ui::Frame();
 	gtk_widget_show( GTK_WIDGET( frame ) );
 	gtk_frame_set_shadow_type( frame, GTK_SHADOW_IN );
 	gtk_container_add( GTK_CONTAINER( frame ), widget );

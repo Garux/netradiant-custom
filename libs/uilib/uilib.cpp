@@ -116,6 +116,9 @@ namespace ui {
     Entry::Entry(std::size_t max_length) : Entry(GTK_ENTRY(gtk_entry_new_with_max_length(max_length)))
     { }
 
+    Frame::Frame(const char *label) : Frame(GTK_FRAME(gtk_frame_new(label)))
+    { }
+
     HBox::HBox(bool homogenous, int spacing) : HBox(GTK_HBOX(gtk_hbox_new(homogenous, spacing)))
     { }
 

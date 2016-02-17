@@ -414,7 +414,7 @@ void CreateViewWindow(){
 	g_signal_connect( G_OBJECT( spin ), "focus_out_event", G_CALLBACK( doublevariable_spinfocusout ), &azimuth );
 #endif
 
-	frame = gtk_frame_new( NULL );
+	frame = ui::Frame( nullptr );
 	gtk_widget_show( frame );
 	gtk_frame_set_shadow_type( GTK_FRAME( frame ), GTK_SHADOW_IN );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, TRUE, TRUE, 0 );

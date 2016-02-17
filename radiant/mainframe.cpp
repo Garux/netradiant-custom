@@ -2404,7 +2404,7 @@ ui::Widget create_main_statusbar( ui::Widget pStatusLabel[c_count_status] ){
 
 	for ( int i = 1; i < c_count_status; ++i )
 	{
-		GtkFrame* frame = GTK_FRAME( gtk_frame_new( 0 ) );
+		GtkFrame* frame = ui::Frame();
 		gtk_widget_show( GTK_WIDGET( frame ) );
 		gtk_table_attach_defaults( table, GTK_WIDGET( frame ), i, i + 1, 0, 1 );
 		gtk_frame_set_shadow_type( frame, GTK_SHADOW_IN );
