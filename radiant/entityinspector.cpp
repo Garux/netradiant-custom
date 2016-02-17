@@ -1372,7 +1372,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 				gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
 
 				{
-					GtkTextView* text = GTK_TEXT_VIEW( gtk_text_view_new() );
+					GtkTextView* text = ui::TextView();
 					gtk_widget_set_size_request( GTK_WIDGET( text ), 0, -1 ); // allow shrinking
 					gtk_text_view_set_wrap_mode( text, GTK_WRAP_WORD );
 					gtk_text_view_set_editable( text, FALSE );

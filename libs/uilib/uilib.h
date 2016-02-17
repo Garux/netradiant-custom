@@ -27,6 +27,7 @@ using ui_paned = struct _GtkPaned;
 using ui_scrolledwindow = struct _GtkScrolledWindow;
 using ui_spinbutton = struct _GtkSpinButton;
 using ui_table = struct _GtkTable;
+using ui_textview = struct _GtkTextView;
 using ui_treemodel = struct _GtkTreeModel;
 using ui_treepath = struct _GtkTreePath;
 using ui_treeview = struct _GtkTreeView;
@@ -218,6 +219,10 @@ namespace ui {
 
     WRAP(Table, Widget, ui_table,
          Table(std::size_t rows, std::size_t columns, bool homogenous);
+    );
+
+    WRAP(TextView, Widget, ui_textview,
+         TextView();
     );
 
     WRAP(TreeModel, Widget, ui_treemodel,);

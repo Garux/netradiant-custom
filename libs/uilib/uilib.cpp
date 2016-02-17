@@ -167,6 +167,9 @@ namespace ui {
             GTK_TABLE(gtk_table_new(rows, columns, homogenous)))
     { }
 
+    TextView::TextView() : TextView(GTK_TEXT_VIEW(gtk_text_view_new()))
+    { }
+
     TreePath::TreePath() : TreePath(gtk_tree_path_new())
     { }
 

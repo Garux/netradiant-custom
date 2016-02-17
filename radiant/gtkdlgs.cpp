@@ -570,7 +570,7 @@ void DoAbout(){
 					GtkScrolledWindow* sc_extensions = create_scrolled_window( GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS, 4 );
 					gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( sc_extensions ) );
 					{
-						ui::Widget text_extensions = ui::Widget(gtk_text_view_new());
+						ui::Widget text_extensions = ui::TextView();
 						gtk_text_view_set_editable( GTK_TEXT_VIEW( text_extensions ), FALSE );
 						gtk_container_add( GTK_CONTAINER( sc_extensions ), text_extensions );
 						GtkTextBuffer* buffer = gtk_text_view_get_buffer( GTK_TEXT_VIEW( text_extensions ) );
@@ -766,7 +766,7 @@ static void CreateGtkTextEditor(){
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
 
-	text = ui::Widget(gtk_text_view_new());
+	text = ui::TextView();
 	gtk_container_add( GTK_CONTAINER( scr ), text );
 	gtk_widget_show( text );
 	g_object_set_data( G_OBJECT( dlg ), "text", (gpointer) text );
