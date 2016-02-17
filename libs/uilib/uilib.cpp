@@ -91,7 +91,8 @@ namespace ui {
                            double lower, double upper,
                            double step_increment, double page_increment,
                            double page_size)
-            : Adjustment(GTK_ADJUSTMENT(gtk_adjustment_new(value, lower, upper, step_increment, page_increment, page_size)))
+            : Adjustment(
+            GTK_ADJUSTMENT(gtk_adjustment_new(value, lower, upper, step_increment, page_increment, page_size)))
     { }
 
     Alignment::Alignment(float xalign, float yalign, float xscale, float yscale)
@@ -107,8 +108,8 @@ namespace ui {
     CellRendererText::CellRendererText() : CellRendererText(GTK_CELL_RENDERER_TEXT(gtk_cell_renderer_text_new()))
     { }
 
-    ComboBoxText::ComboBoxText() : ComboBoxText(GTK_COMBO_BOX(gtk_combo_box_new_text()))
-    { }
+    ComboBox ComboBoxText()
+    { return ComboBox(GTK_COMBO_BOX(gtk_combo_box_new_text())); }
 
     CheckButton::CheckButton(const char *label) : CheckButton(GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label)))
     { }
@@ -131,16 +132,19 @@ namespace ui {
     Menu::Menu() : Menu(GTK_MENU(gtk_menu_new()))
     { }
 
-    MenuItem::MenuItem(const char *label, bool mnemonic) : MenuItem(GTK_MENU_ITEM((mnemonic ? gtk_menu_item_new_with_mnemonic : gtk_menu_item_new_with_label)(label)))
+    MenuItem::MenuItem(const char *label, bool mnemonic) : MenuItem(
+            GTK_MENU_ITEM((mnemonic ? gtk_menu_item_new_with_mnemonic : gtk_menu_item_new_with_label)(label)))
     { }
 
     ScrolledWindow::ScrolledWindow() : ScrolledWindow(GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr)))
     { }
 
-    SpinButton::SpinButton(Adjustment adjustment, double climb_rate, std::size_t digits) : SpinButton(GTK_SPIN_BUTTON(gtk_spin_button_new(adjustment, climb_rate, digits)))
+    SpinButton::SpinButton(Adjustment adjustment, double climb_rate, std::size_t digits) : SpinButton(
+            GTK_SPIN_BUTTON(gtk_spin_button_new(adjustment, climb_rate, digits)))
     { }
 
-    Table::Table(std::size_t rows, std::size_t columns, bool homogenous) : Table(GTK_TABLE(gtk_table_new(rows, columns, homogenous)))
+    Table::Table(std::size_t rows, std::size_t columns, bool homogenous) : Table(
+            GTK_TABLE(gtk_table_new(rows, columns, homogenous)))
     { }
 
     TreePath::TreePath() : TreePath(gtk_tree_path_new())
@@ -151,6 +155,15 @@ namespace ui {
 
     TreeView::TreeView(TreeModel model) : TreeView(GTK_TREE_VIEW(gtk_tree_view_new_with_model(model)))
     { }
+
+    TreeViewColumn::TreeViewColumn(const char *title, CellRenderer renderer,
+                                   std::initializer_list<TreeViewColumnAttribute> attributes)
+            : TreeViewColumn(gtk_tree_view_column_new_with_attributes(title, renderer, nullptr))
+    {
+        for (auto &it : attributes) {
+            gtk_tree_view_column_add_attribute(*this, renderer, it.attribute, it.column);
+        }
+    };
 
     VBox::VBox(bool homogenous, int spacing) : VBox(GTK_VBOX(gtk_vbox_new(homogenous, spacing)))
     { }

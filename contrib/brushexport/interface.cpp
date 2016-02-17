@@ -214,7 +214,7 @@ void CreateWindow( void ){
 	GtkTreeViewColumn* col = gtk_tree_view_column_new();
 	gtk_tree_view_column_set_title( col, "materials" );
 	gtk_tree_view_append_column( GTK_TREE_VIEW( lookup_widget( wnd, "t_materialist" ) ), col );
-	GtkCellRenderer* renderer = ui::CellRendererText();
+	auto renderer = ui::CellRendererText();
 	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( lookup_widget( wnd, "t_materialist" ) ), -1, "", renderer, "text", 0, NULL );
 
 	// list store

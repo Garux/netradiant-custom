@@ -679,7 +679,7 @@ ListAttribute( const char* key, const ListAttributeType& type ) :
 	m_combo( 0 ),
 	m_nonModal( ApplyCaller( *this ) ),
 	m_type( type ){
-	GtkComboBox* combo = ui::ComboBoxText();
+	auto combo = ui::ComboBoxText();
 
 	for ( ListAttributeType::const_iterator i = type.begin(); i != type.end(); ++i )
 	{
@@ -1344,8 +1344,8 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 					g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( EntityClassList_keypress ), 0 );
 
 					{
-						GtkCellRenderer* renderer = ui::CellRendererText();
-						GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "Key", renderer, "text", 0, 0 );
+						auto renderer = ui::CellRendererText();
+						GtkTreeViewColumn* column = ui::TreeViewColumn( "Key", renderer, {{"text", 0}} );
 						gtk_tree_view_append_column( view, column );
 					}
 
@@ -1426,14 +1426,14 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 						gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 						{
-							GtkCellRenderer* renderer = ui::CellRendererText();
-							GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, 0 );
+							auto renderer = ui::CellRendererText();
+							GtkTreeViewColumn* column = ui::TreeViewColumn( "", renderer, {{"text", 0}} );
 							gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 						}
 
 						{
-							GtkCellRenderer* renderer = ui::CellRendererText();
-							GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 1, 0 );
+							auto renderer = ui::CellRendererText();
+							GtkTreeViewColumn* column = ui::TreeViewColumn( "", renderer, {{"text", 1}} );
 							gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 						}
 

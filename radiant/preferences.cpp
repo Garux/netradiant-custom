@@ -755,8 +755,8 @@ ui::Window PrefsDlg::BuildDialog(){
 					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 					{
-						GtkCellRenderer* renderer = ui::CellRendererText();
-						GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "Preferences", renderer, "text", 0, NULL );
+						auto renderer = ui::CellRendererText();
+						GtkTreeViewColumn* column = ui::TreeViewColumn( "Preferences", renderer, {{"text", 0}} );
 						gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 					}
 

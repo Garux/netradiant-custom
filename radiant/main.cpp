@@ -310,7 +310,7 @@ bool handleMessage(){
 		ScopedLock lock( m_lock );
 #if defined _DEBUG
 		m_buffer << "Break into the debugger?\n";
-		bool handled = ui::alert( 0, m_buffer.c_str(), "Radiant - Runtime Error", eMB_YESNO, eMB_ICONERROR ) == eIDNO;
+		bool handled = ui::root.alert( m_buffer.c_str(), "Radiant - Runtime Error", ui::alert_type::YESNO, ui::alert_icon::ERROR ) == ui::alert_response::NO;
 		m_buffer.clear();
 		return handled;
 #else

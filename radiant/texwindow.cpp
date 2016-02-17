@@ -1529,14 +1529,13 @@ void TreeView_onRowActivated( GtkTreeView* treeview, GtkTreePath* path, GtkTreeV
 }
 
 void TextureBrowser_createTreeViewTree(){
-	GtkCellRenderer* renderer;
 	g_TextureBrowser.m_treeViewTree = ui::Widget(GTK_WIDGET( gtk_tree_view_new() ));
 	gtk_tree_view_set_enable_search( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), FALSE );
 
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), FALSE );
 	g_signal_connect( g_TextureBrowser.m_treeViewTree, "row-activated", (GCallback) TreeView_onRowActivated, NULL );
 
-	renderer = ui::CellRendererText();
+	auto renderer = ui::CellRendererText();
 	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), -1, "", renderer, "text", 0, NULL );
 
 	TextureBrowser_constructTreeStore();
@@ -1586,7 +1585,6 @@ gboolean TreeViewTags_onButtonPressed( ui::Widget treeview, GdkEventButton *even
 }
 
 void TextureBrowser_createTreeViewTags(){
-	GtkCellRenderer* renderer;
 	g_TextureBrowser.m_treeViewTags = ui::Widget(GTK_WIDGET( gtk_tree_view_new() ));
 	gtk_tree_view_set_enable_search( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), FALSE );
 
@@ -1594,7 +1592,7 @@ void TextureBrowser_createTreeViewTags(){
 
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), FALSE );
 
-	renderer = ui::CellRendererText();
+	auto renderer = ui::CellRendererText();
 	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), -1, "", renderer, "text", 0, NULL );
 
 	TextureBrowser_constructTreeStoreTags();
@@ -2078,7 +2076,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			GtkTreeSortable* sortable = GTK_TREE_SORTABLE( g_TextureBrowser.m_assigned_store );
 			gtk_tree_sortable_set_sort_column_id( sortable, TAG_COLUMN, GTK_SORT_ASCENDING );
 
-			GtkCellRenderer* renderer = ui::CellRendererText();
+			auto renderer = ui::CellRendererText();
 
 			g_TextureBrowser.m_assigned_tree = ui::TreeView(ui::TreeModel( GTK_TREE_MODEL( g_TextureBrowser.m_assigned_store ) ));
 			g_object_unref( G_OBJECT( g_TextureBrowser.m_assigned_store ) );
@@ -2088,7 +2086,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( g_TextureBrowser.m_assigned_tree ) );
 			gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
 
-			GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", TAG_COLUMN, NULL );
+			GtkTreeViewColumn* column = ui::TreeViewColumn( "", renderer, {{"text", TAG_COLUMN}} );
 			gtk_tree_view_append_column( GTK_TREE_VIEW( g_TextureBrowser.m_assigned_tree ), column );
 			gtk_widget_show( g_TextureBrowser.m_assigned_tree );
 
@@ -2106,7 +2104,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			GtkTreeSortable* sortable = GTK_TREE_SORTABLE( g_TextureBrowser.m_available_store );
 			gtk_tree_sortable_set_sort_column_id( sortable, TAG_COLUMN, GTK_SORT_ASCENDING );
 
-			GtkCellRenderer* renderer = ui::CellRendererText();
+			auto renderer = ui::CellRendererText();
 
 			g_TextureBrowser.m_available_tree = ui::TreeView(ui::TreeModel( GTK_TREE_MODEL( g_TextureBrowser.m_available_store ) ));
 			g_object_unref( G_OBJECT( g_TextureBrowser.m_available_store ) );
@@ -2116,7 +2114,7 @@ ui::Widget TextureBrowser_constructWindow( ui::Window toplevel ){
 			GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( g_TextureBrowser.m_available_tree ) );
 			gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
 
-			GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", TAG_COLUMN, NULL );
+			GtkTreeViewColumn* column = ui::TreeViewColumn( "", renderer, {{"text", TAG_COLUMN}} );
 			gtk_tree_view_append_column( GTK_TREE_VIEW( g_TextureBrowser.m_available_tree ), column );
 			gtk_widget_show( g_TextureBrowser.m_available_tree );
 
