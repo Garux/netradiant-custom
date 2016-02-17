@@ -830,10 +830,7 @@ void Selection_destroy(){
 
 
 #include "gtkdlgs.h"
-#include <gtk/gtkbox.h>
-#include <gtk/gtkspinbutton.h>
-#include <gtk/gtktable.h>
-#include <gtk/gtklabel.h>
+#include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
 

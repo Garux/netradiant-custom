@@ -23,9 +23,7 @@
 #define INCLUDED_GTKUTIL_CURSOR_H
 
 #include <glib.h>
-#include <gdk/gdkevents.h>
-#include <gtk/gtkwidget.h>
-#include <gtk/gtkwindow.h>
+#include <gtk/gtk.h>
 
 #include "debugging/debugging.h"
 

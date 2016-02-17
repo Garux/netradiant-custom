@@ -22,11 +22,7 @@
 #include "menu.h"
 
 #include <ctype.h>
-#include <gtk/gtkmenu.h>
-#include <gtk/gtkmenubar.h>
-#include <gtk/gtkradiomenuitem.h>
-#include <gtk/gtktearoffmenuitem.h>
-#include <gtk/gtkaccellabel.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 #include "generic/callback.h"

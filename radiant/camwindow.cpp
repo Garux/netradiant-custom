@@ -25,6 +25,7 @@
 // Leonardo Zide (leo@lokigames.com)
 //
 
+#include <gdk/gdkkeysyms.h>
 #include "camwindow.h"
 
 #include "debugging/debugging.h"
@@ -911,27 +912,27 @@ void KeyEvent_disconnect( const char* name ){
 }
 
 void CamWnd_registerCommands( CamWnd& camwnd ){
-	GlobalKeyEvents_insert( "CameraForward", Accelerator( GDK_Up ),
+	GlobalKeyEvents_insert( "CameraForward", Accelerator( GDK_KEY_Up ),
 							ReferenceCaller<camera_t, Camera_MoveForward_KeyDown>( camwnd.getCamera() ),
 							ReferenceCaller<camera_t, Camera_MoveForward_KeyUp>( camwnd.getCamera() )
 							);
-	GlobalKeyEvents_insert( "CameraBack", Accelerator( GDK_Down ),
+	GlobalKeyEvents_insert( "CameraBack", Accelerator( GDK_KEY_Down ),
 							ReferenceCaller<camera_t, Camera_MoveBack_KeyDown>( camwnd.getCamera() ),
 							ReferenceCaller<camera_t, Camera_MoveBack_KeyUp>( camwnd.getCamera() )
 							);
-	GlobalKeyEvents_insert( "CameraLeft", Accelerator( GDK_Left ),
+	GlobalKeyEvents_insert( "CameraLeft", Accelerator( GDK_KEY_Left ),
 							ReferenceCaller<camera_t, Camera_RotateLeft_KeyDown>( camwnd.getCamera() ),
 							ReferenceCaller<camera_t, Camera_RotateLeft_KeyUp>( camwnd.getCamera() )
 							);
-	GlobalKeyEvents_insert( "CameraRight", Accelerator( GDK_Right ),
+	GlobalKeyEvents_insert( "CameraRight", Accelerator( GDK_KEY_Right ),
 							ReferenceCaller<camera_t, Camera_RotateRight_KeyDown>( camwnd.getCamera() ),
 							ReferenceCaller<camera_t, Camera_RotateRight_KeyUp>( camwnd.getCamera() )
 							);
-	GlobalKeyEvents_insert( "CameraStrafeRight", Accelerator( GDK_period ),
+	GlobalKeyEvents_insert( "CameraStrafeRight", Accelerator( GDK_KEY_period ),
 							ReferenceCaller<camera_t, Camera_MoveRight_KeyDown>( camwnd.getCamera() ),
 							ReferenceCaller<camera_t, Camera_MoveRight_KeyUp>( camwnd.getCamera() )
 							);
-	GlobalKeyEvents_insert( "CameraStrafeLeft", Accelerator( GDK_comma ),
+	GlobalKeyEvents_insert( "CameraStrafeLeft", Accelerator( GDK_KEY_comma ),
 							ReferenceCaller<camera_t, Camera_MoveLeft_KeyDown>( camwnd.getCamera() ),
 							ReferenceCaller<camera_t, Camera_MoveLeft_KeyUp>( camwnd.getCamera() )
 							);

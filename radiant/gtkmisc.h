@@ -31,7 +31,7 @@
 #if !defined( INCLUDED_GTKMISC_H )
 #define INCLUDED_GTKMISC_H
 
-#include <gtk/gtkmain.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 inline void process_gui(){

@@ -22,7 +22,7 @@
 #if !defined ( INCLUDED_XORRECTANGLE_H )
 #define INCLUDED_XORRECTANGLE_H
 
-#include <gtk/gtkwidget.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 #include "math/vector.h"
 

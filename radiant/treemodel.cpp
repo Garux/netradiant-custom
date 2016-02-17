@@ -24,9 +24,7 @@
 #include "debugging/debugging.h"
 
 #include <map>
-#include <gtk/gtktreemodel.h>
-#include <gtk/gtktreednd.h>
-#include <gtk/gtkmain.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 #include "iscenegraph.h"

@@ -23,10 +23,7 @@
 
 #include "iselection.h"
 
-#include <gtk/gtktreemodel.h>
-#include <gtk/gtktreeview.h>
-#include <gtk/gtktreeselection.h>
-#include <gtk/gtkcellrenderertext.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 #include "string/string.h"

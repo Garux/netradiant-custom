@@ -40,13 +40,7 @@
 #include <ctime>
 
 #include <gdk/gdkkeysyms.h>
-#include <gtk/gtkhbox.h>
-#include <gtk/gtkvbox.h>
-#include <gtk/gtkframe.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtkhpaned.h>
-#include <gtk/gtkvpaned.h>
-#include <gtk/gtktoolbar.h>
+#include <gtk/gtk.h>
 
 
 #include "cmdlib.h"

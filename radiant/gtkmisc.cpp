@@ -34,8 +34,7 @@
 
 #include "gtkmisc.h"
 
-#include <gtk/gtkcolorseldialog.h>
-#include <gtk/gtkentry.h>
+#include <gtk/gtk.h>
 #include "uilib/uilib.h"
 
 #include "math/vector.h"

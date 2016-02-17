@@ -22,9 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_ACCELERATOR_H )
 #define INCLUDED_GTKUTIL_ACCELERATOR_H
 
-#include <gdk/gdktypes.h>
-#include <gdk/gdkkeysyms.h>
-#include <gdk/gdkkeys.h>
+#include <gdk/gdk.h>
 
 #include "generic/callback.h"
 

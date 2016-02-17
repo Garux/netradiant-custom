@@ -27,8 +27,7 @@
 #include "string/string.h"
 #include "versionlib.h"
 #include "gtkutil/messagebox.h"
-#include <gtk/gtktreeselection.h>
-#include <gtk/gtkbutton.h>
+#include <gtk/gtk.h>
 #include "gtkmisc.h"
 
 typedef std::pair<Accelerator, int> ShortcutValue; // accelerator, isRegistered
@@ -148,9 +147,8 @@ void connect_accelerator( const char *name ){
 }
 
 
-#include <gtk/gtkbox.h>
-#include <gtk/gtkcellrenderertext.h>
 #include <uilib/uilib.h>
+#include <gdk/gdkkeysyms.h>
 
 #include "gtkutil/dialog.h"
 #include "mainframe.h"
@@ -247,20 +245,20 @@ bool accelerator_window_key_press( ui::Widget widget, GdkEventKey *event, gpoint
 #else
 	switch ( event->keyval )
 	{
-	case GDK_Shift_L:
-	case GDK_Shift_R:
-	case GDK_Control_L:
-	case GDK_Control_R:
-	case GDK_Caps_Lock:
-	case GDK_Shift_Lock:
-	case GDK_Meta_L:
-	case GDK_Meta_R:
-	case GDK_Alt_L:
-	case GDK_Alt_R:
-	case GDK_Super_L:
-	case GDK_Super_R:
-	case GDK_Hyper_L:
-	case GDK_Hyper_R:
+	case GDK_KEY_Shift_L:
+	case GDK_KEY_Shift_R:
+	case GDK_KEY_Control_L:
+	case GDK_KEY_Control_R:
+	case GDK_KEY_Caps_Lock:
+	case GDK_KEY_Shift_Lock:
+	case GDK_KEY_Meta_L:
+	case GDK_KEY_Meta_R:
+	case GDK_KEY_Alt_L:
+	case GDK_KEY_Alt_R:
+	case GDK_KEY_Super_L:
+	case GDK_KEY_Super_R:
+	case GDK_KEY_Hyper_L:
+	case GDK_KEY_Hyper_R:
 		return false;
 	}
 #endif

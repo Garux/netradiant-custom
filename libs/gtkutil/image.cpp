@@ -21,8 +21,7 @@
 
 #include "image.h"
 
-#include <gtk/gtkimage.h>
-#include <gtk/gtkstock.h>
+#include <gtk/gtk.h>
 
 #include "string/string.h"
 #include "stream/stringstream.h"

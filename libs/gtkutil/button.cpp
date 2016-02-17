@@ -21,7 +21,7 @@
 
 #include "button.h"
 
-#include <gtk/gtkradiobutton.h>
+#include <gtk/gtk.h>
 
 #include "stream/textstream.h"
 #include "stream/stringstream.h"

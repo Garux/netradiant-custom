@@ -63,6 +63,8 @@ find_package(OpenGL REQUIRED)
 
 add_definitions(-DRADIANT_EXECUTABLE="${RADIANT_EXECUTABLE}")
 
+add_definitions(-DGTK_DISABLE_SINGLE_INCLUDES)
+
 if(NOT WIN32)
     add_definitions(
         -DPOSIX=1

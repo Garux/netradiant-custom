@@ -25,7 +25,7 @@
 #include "generic/callback.h"
 #include "generic/arrayrange.h"
 #include "qerplugin.h"
-#include <gtk/gtkenums.h>
+#include <gtk/gtk.h>
 
 typedef int gint;
 typedef gint gboolean;

@@ -21,8 +21,7 @@
 
 #include "toolbar.h"
 
-#include <gtk/gtktoolbar.h>
-#include <gtk/gtktogglebutton.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 #include "generic/callback.h"

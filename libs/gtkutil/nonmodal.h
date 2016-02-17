@@ -22,9 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_NONMODAL_H )
 #define INCLUDED_GTKUTIL_NONMODAL_H
 
-#include <gtk/gtkwindow.h>
-#include <gtk/gtkspinbutton.h>
-#include <gtk/gtkradiobutton.h>
+#include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "generic/callback.h"
@@ -36,7 +34,7 @@ typedef struct _GtkEntry GtkEntry;
 
 
 inline gboolean escape_clear_focus_widget( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	if ( event->keyval == GDK_Escape ) {
+	if ( event->keyval == GDK_KEY_Escape ) {
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), NULL );
 		return TRUE;
 	}

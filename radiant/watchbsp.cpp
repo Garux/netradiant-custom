@@ -36,7 +36,7 @@
 #include "watchbsp.h"
 
 #include <algorithm>
-#include <gtk/gtkmain.h>
+#include <gtk/gtk.h>
 
 #include "cmdlib.h"
 #include "convert.h"

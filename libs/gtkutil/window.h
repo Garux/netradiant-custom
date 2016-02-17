@@ -22,7 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_WINDOW_H )
 #define INCLUDED_GTKUTIL_WINDOW_H
 
-#include <gtk/gtkwindow.h>
+#include <gtk/gtk.h>
 
 #include "debugging/debugging.h"
 #include "generic/callback.h"

@@ -21,7 +21,7 @@
 
 #include "window.h"
 
-#include <gtk/gtkscrolledwindow.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 #include "pointer.h"

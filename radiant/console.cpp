@@ -22,10 +22,7 @@
 #include "console.h"
 
 #include <time.h>
-#include <gtk/gtktextbuffer.h>
-#include <gtk/gtktextview.h>
-#include <gtk/gtkmenuitem.h>
-#include <gtk/gtkscrolledwindow.h>
+#include <gtk/gtk.h>
 #include <uilib/uilib.h>
 
 #include "gtkutil/accelerator.h"

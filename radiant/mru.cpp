@@ -23,7 +23,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <gtk/gtklabel.h>
+#include <gtk/gtk.h>
 
 #include "os/file.h"
 #include "generic/callback.h"

@@ -31,17 +31,7 @@
 
 #include "ishaders.h"
 
-#include <gtk/gtkhbox.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtkvbox.h>
-#include <gtk/gtkframe.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtktable.h>
-#include <gtk/gtkbutton.h>
-#include <gtk/gtktogglebutton.h>
-#include <gtk/gtkcheckbutton.h>
-#include <gtk/gtkmenuitem.h>
-#include <gtk/gtkarrow.h>
+#include <gtk/gtk.h>
 
 #include "gtkutil/window.h"
 #include "stream/stringstream.h"
