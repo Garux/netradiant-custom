@@ -6,6 +6,7 @@
 using ui_typeinst = struct _GTypeInstance;
 using ui_widget = struct _GtkWidget;
 using ui_window = struct _GtkWindow;
+using ui_button = struct _GtkButton;
 using ui_menuitem = struct _GtkMenuItem;
 using ui_label = struct _GtkLabel;
 
@@ -107,6 +108,10 @@ namespace ui {
 
                    std::uint64_t on_key_press(bool (*f)(Widget widget, ui_evkey *event, void *extra),
                                               void *extra = nullptr);
+    );
+
+    WIDGET(Button, ui_button,
+           Button(const char *label);
     );
 
     WIDGET(CheckButton, ui_widget,);

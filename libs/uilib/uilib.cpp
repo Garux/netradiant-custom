@@ -84,6 +84,9 @@ namespace ui {
         return g_signal_connect(G_OBJECT(*this), "key-press-event", (GCallback) +func, &pass);
     }
 
+    Button::Button(const char *label) : Button(GTK_BUTTON(gtk_button_new_with_label(label)))
+    { }
+
     Label::Label(const char *label) : Label(GTK_LABEL(gtk_label_new(label)))
     { }
 

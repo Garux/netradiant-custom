@@ -201,14 +201,14 @@ ui::Window FindTextureDialog::BuildDialog(){
 	gtk_widget_show( vbox );
 	gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), FALSE, FALSE, 0 );
 
-	button = ui::Widget(gtk_button_new_with_label( "Apply" ));
+	button = ui::Button( "Apply" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
 					  G_CALLBACK( OnApply ), 0 );
 	gtk_widget_set_usize( button, 60, -2 );
 
-	button = ui::Widget(gtk_button_new_with_label( "Close" ));
+	button = ui::Button( "Close" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",

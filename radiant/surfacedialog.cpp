@@ -814,7 +814,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 			}
 			{
 				// match grid button
-				ui::Widget button = ui::Widget(gtk_button_new_with_label( "Match Grid" ));
+				ui::Widget button = ui::Button( "Match Grid" );
 				gtk_widget_show( button );
 				gtk_table_attach( GTK_TABLE( table ), button, 2, 4, 5, 6,
 								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -863,7 +863,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Axial" ));
+					ui::Widget button = ui::Button( "Axial" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -873,7 +873,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Fit" ));
+					ui::Widget button = ui::Button( "Fit" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -883,7 +883,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					ui::Widget button = ui::Widget(gtk_button_new_with_label( "CAP" ));
+					ui::Widget button = ui::Button( "CAP" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -893,7 +893,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Set..." ));
+					ui::Widget button = ui::Button( "Set..." );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 1, 2, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -903,7 +903,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Natural" ));
+					ui::Widget button = ui::Button( "Natural" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -913,7 +913,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					ui::Widget button = ui::Widget(gtk_button_new_with_label( "Fit" ));
+					ui::Widget button = ui::Button( "Fit" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 3, 4, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),

@@ -776,14 +776,14 @@ static void CreateGtkTextEditor(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, TRUE, 0 );
 
-	button = ui::Widget(gtk_button_new_with_label( "Close" ));
+	button = ui::Button( "Close" );
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
 					  G_CALLBACK( editor_close ), dlg );
 	gtk_widget_set_usize( button, 60, -2 );
 
-	button = ui::Widget(gtk_button_new_with_label( "Save" ));
+	button = ui::Button( "Save" );
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
