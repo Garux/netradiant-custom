@@ -5,6 +5,7 @@
 
 using ui_alignment = struct _GtkAlignment;
 using ui_button = struct _GtkButton;
+using ui_checkbutton = struct _GtkCheckButton;
 using ui_evkey = struct _GdkEventKey;
 using ui_label = struct _GtkLabel;
 using ui_menuitem = struct _GtkMenuItem;
@@ -99,38 +100,27 @@ namespace ui {
     }; \
     static_assert(sizeof(name) == sizeof(Widget), "object slicing")
 
-    WRAP(Window, ui_window,
-           Window create_dialog_window(const char *title, void func(), void *data, int default_w = -1,
-                                       int default_h = -1);
-
-                   Window create_modal_dialog_window(const char *title, ui_modal &dialog, int default_w = -1,
-                                                     int default_h = -1);
-
-                   Window create_floating_window(const char *title);
-
-                   std::uint64_t on_key_press(bool (*f)(Widget widget, ui_evkey *event, void *extra),
-                                              void *extra = nullptr);
+    WRAP(Alignment, ui_alignment,
+         Alignment(float xalign, float yalign, float xscale, float yscale);
     );
 
     WRAP(Button, ui_button,
-           Button(const char *label);
+         Button(const char *label);
     );
 
-    WRAP(CheckButton, ui_widget,);
+    WRAP(CheckButton, ui_checkbutton,
+         CheckButton(const char *label);
+    );
 
-    WRAP(SpinButton, ui_widget,);
+    WRAP(Label, ui_label,
+         Label(const char *label);
+    );
 
     WRAP(MenuItem, ui_menuitem,);
 
-    WRAP(Label, ui_label,
-           Label(const char *label);
-    );
+    WRAP(SpinButton, ui_widget,);
 
-    WRAP(Alignment, ui_alignment,
-           Alignment(float xalign, float yalign, float xscale, float yscale);
-    );
-
-    WRAP(TreeModel, ui_treemodel, );
+    WRAP(TreeModel, ui_treemodel,);
 
     WRAP(TreeView, ui_treeview,
          TreeView(TreeModel model);
@@ -138,6 +128,19 @@ namespace ui {
 
     WRAP(VBox, ui_vbox,
          VBox(bool homogenous, int spacing);
+    );
+
+    WRAP(Window, ui_window,
+         Window create_dialog_window(const char *title, void func(), void *data, int default_w = -1,
+                                     int default_h = -1);
+
+         Window create_modal_dialog_window(const char *title, ui_modal &dialog, int default_w = -1,
+                                           int default_h = -1);
+
+         Window create_floating_window(const char *title);
+
+         std::uint64_t on_key_press(bool (*f)(Widget widget, ui_evkey *event, void *extra),
+                                    void *extra = nullptr);
     );
 
 #undef WRAP

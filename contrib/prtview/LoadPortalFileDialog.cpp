@@ -131,11 +131,11 @@ int DoLoadPortalFileDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 
-	check3d = gtk_check_button_new_with_label( "Show 3D" );
+	check3d = ui::CheckButton( "Show 3D" );
 	gtk_widget_show( check3d );
 	gtk_box_pack_start( GTK_BOX( hbox ), check3d, FALSE, FALSE, 0 );
 
-	check2d = gtk_check_button_new_with_label( "Show 2D" );
+	check2d = ui::CheckButton( "Show 2D" );
 	gtk_widget_show( check2d );
 	gtk_box_pack_start( GTK_BOX( hbox ), check2d, FALSE, FALSE, 0 );
 

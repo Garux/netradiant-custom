@@ -1232,7 +1232,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	g_pTrackCamera = gtk_check_button_new_with_label( "Track Camera" );
+	g_pTrackCamera = ui::CheckButton( "Track Camera" );
 	gtk_box_pack_start( GTK_BOX( hbox ), g_pTrackCamera, FALSE, FALSE, 0 );
 	gtk_widget_show( g_pTrackCamera );
 

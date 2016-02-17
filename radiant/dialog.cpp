@@ -465,12 +465,12 @@ EMessageBoxReturn Dialog::DoModal(){
 
 
 ui::CheckButton Dialog::addCheckBox( ui::Widget vbox, const char* name, const char* flag, const BoolImportCallback& importViewer, const BoolExportCallback& exportViewer ){
-	ui::Widget check = ui::Widget(gtk_check_button_new_with_label( flag ));
+	auto check = ui::CheckButton( flag );
 	gtk_widget_show( check );
 	AddBoolToggleData( *GTK_TOGGLE_BUTTON( check ), importViewer, exportViewer );
 
 	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( DialogRow_new( name, check ) ) );
-	return ui::CheckButton(check);
+	return check;
 }
 
 ui::CheckButton Dialog::addCheckBox( ui::Widget vbox, const char* name, const char* flag, bool& data ){

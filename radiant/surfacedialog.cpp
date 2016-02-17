@@ -965,7 +965,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 						{
 							for ( int r = 0; r != 8; ++r )
 							{
-								GtkCheckButton* check = GTK_CHECK_BUTTON( gtk_check_button_new_with_label( getSurfaceFlagName( c * 8 + r ) ) );
+								GtkCheckButton* check = ui::CheckButton( getSurfaceFlagName( c * 8 + r ) );
 								gtk_widget_show( GTK_WIDGET( check ) );
 								gtk_table_attach( table, GTK_WIDGET( check ), c, c + 1, r, r + 1,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -1001,7 +1001,7 @@ ui::Window SurfaceInspector::BuildDialog(){
 						{
 							for ( int r = 0; r != 8; ++r )
 							{
-								GtkCheckButton* check = GTK_CHECK_BUTTON( gtk_check_button_new_with_label( getContentFlagName( c * 8 + r ) ) );
+								GtkCheckButton* check = ui::CheckButton( getContentFlagName( c * 8 + r ) );
 								gtk_widget_show( GTK_WIDGET( check ) );
 								gtk_table_attach( table, GTK_WIDGET( check ), c, c + 1, r, r + 1,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
@@ -1067,8 +1067,8 @@ ui::Window SurfaceInspector::BuildDialog(){
 				gtk_widget_show( hbox );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, FALSE, 0 );
 				// Checkboxes go here... (Flip X/Y)
-				ui::Widget flipX = gtk_check_button_new_with_label( "Flip X axis" );
-				ui::Widget flipY = gtk_check_button_new_with_label( "Flip Y axis" );
+				ui::Widget flipX = ui::CheckButton( "Flip X axis" );
+				ui::Widget flipY = ui::CheckButton( "Flip Y axis" );
 				gtk_widget_show( flipX );
 				gtk_widget_show( flipY );
 				gtk_box_pack_start( GTK_BOX( hbox ), flipX, FALSE, FALSE, 0 );

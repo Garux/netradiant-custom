@@ -305,28 +305,28 @@ void DoConfigDialog(){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_signal_connect( GTK_OBJECT( button ), "clicked", GTK_SIGNAL_FUNC( OnColorFog ), NULL );
 
-	aa3check = gtk_check_button_new_with_label( "Anti-Alias (May not work on some video cards)" );
+	aa3check = ui::CheckButton( "Anti-Alias (May not work on some video cards)" );
 	gtk_widget_show( aa3check );
 	gtk_table_attach( GTK_TABLE( table ), aa3check, 1, 4, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_signal_connect( GTK_OBJECT( aa3check ), "toggled", GTK_SIGNAL_FUNC( OnAntiAlias3d ), NULL );
 
-	depthcheck = gtk_check_button_new_with_label( "Depth Cue" );
+	depthcheck = ui::CheckButton( "Depth Cue" );
 	gtk_widget_show( depthcheck );
 	gtk_table_attach( GTK_TABLE( table ), depthcheck, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_signal_connect( GTK_OBJECT( depthcheck ), "toggled", GTK_SIGNAL_FUNC( OnFog ), NULL );
 
-	linescheck = gtk_check_button_new_with_label( "Lines" );
+	linescheck = ui::CheckButton( "Lines" );
 	gtk_widget_show( linescheck );
 	gtk_table_attach( GTK_TABLE( table ), linescheck, 2, 3, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_signal_connect( GTK_OBJECT( linescheck ), "toggled", GTK_SIGNAL_FUNC( OnLines ), NULL );
 
-	polyscheck = gtk_check_button_new_with_label( "Polygons" );
+	polyscheck = ui::CheckButton( "Polygons" );
 	gtk_widget_show( polyscheck );
 	gtk_table_attach( GTK_TABLE( table ), polyscheck, 3, 4, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -401,12 +401,12 @@ void DoConfigDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
-	show3check = gtk_check_button_new_with_label( "Show" );
+	show3check = ui::CheckButton( "Show" );
 	gtk_widget_show( show3check );
 	gtk_box_pack_start( GTK_BOX( hbox ), show3check, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( show3check ), "toggled", GTK_SIGNAL_FUNC( OnConfig3d ), NULL );
 
-	portalcheck = gtk_check_button_new_with_label( "Portal cubic clipper" );
+	portalcheck = ui::CheckButton( "Portal cubic clipper" );
 	gtk_widget_show( portalcheck );
 	gtk_box_pack_start( GTK_BOX( hbox ), portalcheck, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( portalcheck ), "toggled", GTK_SIGNAL_FUNC( OnClip ), NULL );
@@ -445,7 +445,7 @@ void DoConfigDialog(){
 	gtk_signal_connect( GTK_OBJECT( button ), "clicked", GTK_SIGNAL_FUNC( OnColor2d ), NULL );
 	gtk_widget_set_usize( button, 60, -2 );
 
-	aa2check = gtk_check_button_new_with_label( "Anti-Alias (May not work on some video cards)" );
+	aa2check = ui::CheckButton( "Anti-Alias (May not work on some video cards)" );
 	gtk_widget_show( aa2check );
 	gtk_box_pack_start( GTK_BOX( hbox ), aa2check, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( aa2check ), "toggled", GTK_SIGNAL_FUNC( OnAntiAlias2d ), NULL );
@@ -454,7 +454,7 @@ void DoConfigDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, FALSE, 0 );
 
-	show2check = gtk_check_button_new_with_label( "Show" );
+	show2check = ui::CheckButton( "Show" );
 	gtk_widget_show( show2check );
 	gtk_box_pack_start( GTK_BOX( hbox ), show2check, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( show2check ), "toggled", GTK_SIGNAL_FUNC( OnConfig2d ), NULL );

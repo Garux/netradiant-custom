@@ -192,7 +192,7 @@ ui::Window FindTextureDialog::BuildDialog(){
 	AddDialogData( *GTK_ENTRY( entry ), m_strReplace );
 	GlobalTextureEntryCompletion::instance().connect( GTK_ENTRY( entry ) );
 
-	check = ui::Widget(gtk_check_button_new_with_label( "Within selected brushes only" ));
+	check = ui::CheckButton( "Within selected brushes only" );
 	gtk_widget_show( check );
 	gtk_box_pack_start( GTK_BOX( vbox ), check, TRUE, TRUE, 0 );
 	AddDialogData( *GTK_TOGGLE_BUTTON( check ), m_bSelectedOnly );

@@ -1668,7 +1668,7 @@ GtkWidget* create_main_dialog(){
 	gtk_widget_set_usize( spin, 60, -2 );
 	g_object_set_data( G_OBJECT( dlg ), "nv", spin );
 
-	check = gtk_check_button_new_with_label( "Use Bezier patches" );
+	check = ui::CheckButton( "Use Bezier patches" );
 	gtk_widget_show( check );
 	gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "use_patches", check );
@@ -1778,7 +1778,7 @@ GtkWidget* create_main_dialog(){
 	g_object_set_data( G_OBJECT( dlg ), "z10", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Z10 );
 
-	check = gtk_check_button_new_with_label( "Linear borders" );
+	check = ui::CheckButton( "Linear borders" );
 	gtk_widget_show( check );
 	gtk_table_attach( GTK_TABLE( table ), check, 0, 4, 2, 3,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -2115,20 +2115,20 @@ GtkWidget* create_main_dialog(){
 
 
 
-	check = gtk_check_button_new_with_label( "Use detail brushes" );
+	check = ui::CheckButton( "Use detail brushes" );
 	gtk_widget_show( check );
 	gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "detail", check );
 	g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( texture_detail ), NULL );
 
-	check = gtk_check_button_new_with_label( "Detail hint brushes" );
+	check = ui::CheckButton( "Detail hint brushes" );
 	gtk_widget_show( check );
 	gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "hint", check );
 	g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( texture_hint ), NULL );
 
 	// ^Fishman - Add terrain key to func_group.
-	check = gtk_check_button_new_with_label( "Add terrain key" );
+	check = ui::CheckButton( "Add terrain key" );
 	gtk_widget_show( check );
 	gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "terrain_ent", check );
@@ -2172,14 +2172,14 @@ GtkWidget* create_main_dialog(){
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, TRUE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( main_about ), NULL );
 
-	check = gtk_check_button_new_with_label( "Preview" );
+	check = ui::CheckButton( "Preview" );
 	gtk_widget_show( check );
 	gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, TRUE, 0 );
 	g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( main_preview ), NULL );
 	g_object_set_data( G_OBJECT( dlg ), "main_preview", check );
 
 	// ^Fishman - Antializing for the preview window.
-	check = gtk_check_button_new_with_label( "Antialised lines" );
+	check = ui::CheckButton( "Antialised lines" );
 	gtk_widget_show( check );
 	gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, TRUE, 0 );
 	g_object_set_data( G_OBJECT( dlg ), "main_antialiasing", check );

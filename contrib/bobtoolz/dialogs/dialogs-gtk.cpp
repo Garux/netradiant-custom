@@ -362,11 +362,11 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 2 );
 	gtk_widget_show( w );
 
-	check1 = gtk_check_button_new_with_label( "Include Detail Brushes" );
+	check1 = ui::CheckButton( "Include Detail Brushes" );
 	gtk_box_pack_start( GTK_BOX( vbox ), check1, FALSE, FALSE, 0 );
 	gtk_widget_show( check1 );
 
-	check2 = gtk_check_button_new_with_label( "Select Duplicate Brushes Only" );
+	check2 = ui::CheckButton( "Select Duplicate Brushes Only" );
 	gtk_box_pack_start( GTK_BOX( vbox ), check2, FALSE, FALSE, 0 );
 	gtk_widget_show( check2 );
 
@@ -506,17 +506,17 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- vbox2 ----
 
-	check1 = gtk_check_button_new_with_label( "Use Border" );
+	check1 = ui::CheckButton( "Use Border" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), check1, FALSE, FALSE, 0 );
 	gtk_widget_show( check1 );
 
 
-	check2 = gtk_check_button_new_with_label( "Inverse Polygon" );
+	check2 = ui::CheckButton( "Inverse Polygon" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), check2, FALSE, FALSE, 0 );
 	gtk_widget_show( check2 );
 
 
-	check3 = gtk_check_button_new_with_label( "Align Top Edge" );
+	check3 = ui::CheckButton( "Align Top Edge" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), check3, FALSE, FALSE, 0 );
 	gtk_widget_show( check3 );
 
@@ -730,7 +730,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	// djbob: think we need some button callback functions or smuffin
 	// FIXME: actually get around to doing what i suggested!!!!
 
-	checkUseDetail = gtk_check_button_new_with_label( "Use Detail Brushes" );
+	checkUseDetail = ui::CheckButton( "Use Detail Brushes" );
 	gtk_box_pack_start( GTK_BOX( hbox ), checkUseDetail, FALSE, FALSE, 0 );
 	gtk_widget_show( checkUseDetail );
 
@@ -917,12 +917,12 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// sp: horizontally ????
 	// djbob: yes mars, u can spell :]
-	checkScaleMainH = gtk_check_button_new_with_label( "Scale Main Texture Horizontally" );
+	checkScaleMainH = ui::CheckButton( "Scale Main Texture Horizontally" );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( checkScaleMainH ), TRUE );
 	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleMainH, FALSE, FALSE, 0 );
 	gtk_widget_show( checkScaleMainH );
 
-	checkScaleTrimH = gtk_check_button_new_with_label( "Scale Trim Texture Horizontally" );
+	checkScaleTrimH = ui::CheckButton( "Scale Trim Texture Horizontally" );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( checkScaleTrimH ), TRUE );
 	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleTrimH, FALSE, FALSE, 0 );
 	gtk_widget_show( checkScaleTrimH );
@@ -933,12 +933,12 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	checkScaleMainV = gtk_check_button_new_with_label( "Scale Main Texture Vertically" );
+	checkScaleMainV = ui::CheckButton( "Scale Main Texture Vertically" );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( checkScaleMainV ), TRUE );
 	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleMainV, FALSE, FALSE, 0 );
 	gtk_widget_show( checkScaleMainV );
 
-	checkScaleTrimV = gtk_check_button_new_with_label( "Scale Trim Texture Vertically" );
+	checkScaleTrimV = ui::CheckButton( "Scale Trim Texture Vertically" );
 	gtk_box_pack_start( GTK_BOX( hbox ), checkScaleTrimV, FALSE, FALSE, 0 );
 	gtk_widget_show( checkScaleTrimV );
 
@@ -1155,11 +1155,11 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
 	gtk_widget_show( w );
 
-	check1 = gtk_check_button_new_with_label( "No Dynamic Update" );
+	check1 = ui::CheckButton( "No Dynamic Update" );
 	gtk_box_pack_start( GTK_BOX( vbox ), check1, FALSE, FALSE, 0 );
 	gtk_widget_show( check1 );
 
-	check2 = gtk_check_button_new_with_label( "Show Bounding Lines" );
+	check2 = ui::CheckButton( "Show Bounding Lines" );
 	gtk_box_pack_start( GTK_BOX( vbox ), check2, FALSE, FALSE, 0 );
 	gtk_widget_show( check2 );
 
@@ -1361,7 +1361,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- frame ----
 
-	dlgTexReset.cbTexChange = gtk_check_button_new_with_label( "Enabled" );
+	dlgTexReset.cbTexChange = ui::CheckButton( "Enabled" );
 	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbTexChange ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbTexChange );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbTexChange, 0, 1, 0, 1,
@@ -1409,7 +1409,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- frame ----
 
-	dlgTexReset.cbScaleHor = gtk_check_button_new_with_label( "Enabled" );
+	dlgTexReset.cbScaleHor = ui::CheckButton( "Enabled" );
 	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbScaleHor ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbScaleHor );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleHor, 0, 1, 0, 1,
@@ -1430,7 +1430,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_widget_show( dlgTexReset.editScaleHor );
 
 
-	dlgTexReset.cbScaleVert = gtk_check_button_new_with_label( "Enabled" );
+	dlgTexReset.cbScaleVert = ui::CheckButton( "Enabled" );
 	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbScaleVert ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbScaleVert );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbScaleVert, 0, 1, 1, 2,
@@ -1465,7 +1465,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- frame ----
 
-	dlgTexReset.cbShiftHor = gtk_check_button_new_with_label( "Enabled" );
+	dlgTexReset.cbShiftHor = ui::CheckButton( "Enabled" );
 	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbShiftHor ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbShiftHor );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftHor, 0, 1, 0, 1,
@@ -1486,7 +1486,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_widget_show( dlgTexReset.editShiftHor );
 
 
-	dlgTexReset.cbShiftVert = gtk_check_button_new_with_label( "Enabled" );
+	dlgTexReset.cbShiftVert = ui::CheckButton( "Enabled" );
 	gtk_signal_connect( GTK_OBJECT( dlgTexReset.cbShiftVert ), "toggled", GTK_SIGNAL_FUNC( dialog_button_callback_texreset_update ), NULL );
 	gtk_widget_show( dlgTexReset.cbShiftVert );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbShiftVert, 0, 1, 1, 2,
@@ -1521,7 +1521,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- frame ----
 
-	dlgTexReset.cbRotation = gtk_check_button_new_with_label( "Enabled" );
+	dlgTexReset.cbRotation = ui::CheckButton( "Enabled" );
 	gtk_widget_show( dlgTexReset.cbRotation );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.cbRotation, 0, 1, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),

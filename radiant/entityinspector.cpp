@@ -1401,7 +1401,7 @@ ui::Widget EntityInspector_constructWindow( ui::Window toplevel ){
 
 					for ( int i = 0; i < MAX_FLAGS; i++ )
 					{
-						GtkCheckButton* check = GTK_CHECK_BUTTON( gtk_check_button_new_with_label( "" ) );
+						GtkCheckButton* check = ui::CheckButton( "" );
 						gtk_widget_ref( GTK_WIDGET( check ) );
 						g_object_set_data( G_OBJECT( check ), "handler", gint_to_pointer( g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( SpawnflagCheck_toggled ), 0 ) ) );
 						g_entitySpawnflagsCheck[i] = check;
