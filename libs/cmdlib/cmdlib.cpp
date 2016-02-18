@@ -23,7 +23,7 @@
 // start of shared cmdlib stuff
 //
 
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 
 #include <string.h>
 #include <stdio.h>

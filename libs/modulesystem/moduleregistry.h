@@ -31,23 +31,23 @@ public:
 virtual void selfRegister() = 0;
 };
 
-class ModuleRegistryList
-{
-typedef std::list<ModuleRegisterable*> RegisterableModules;
-RegisterableModules m_modules;
+class ModuleRegistryList {
+	std::list<ModuleRegisterable *> m_modules;
 public:
-void addModule( ModuleRegisterable& module ){
-	m_modules.push_back( &module );
-}
-void registerModules() const {
-	for ( RegisterableModules::const_iterator i = m_modules.begin(); i != m_modules.end(); ++i )
+	void addModule(ModuleRegisterable &module)
 	{
-		( *i )->selfRegister();
+		m_modules.push_back(&module);
 	}
-}
+
+	void registerModules() const
+	{
+		for (auto it : m_modules) {
+			it->selfRegister();
+		}
+	}
 };
 
-typedef SmartStatic<ModuleRegistryList> StaticModuleRegistryList;
+using StaticModuleRegistryList = SmartStatic<ModuleRegistryList>;
 
 
 class StaticRegisterModule : public StaticModuleRegistryList

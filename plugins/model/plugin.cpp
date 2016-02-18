@@ -19,10 +19,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "plugin.h"
-
 #include <stdio.h>
-#include "picomodel.h"
+#include "picomodel/picomodel.h"
 typedef unsigned char byte;
 #include <cstdlib>
 #include <algorithm>

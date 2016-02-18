@@ -58,7 +58,7 @@ ArchiveModules& FileSystemQ3API_getArchiveModules();
 #include "stream/stringstream.h"
 #include "os/path.h"
 #include "moduleobservers.h"
-#include "filematch.h"
+#include "filematch/filematch.h"
 
 
 #define VFS_MAXDIRS 64

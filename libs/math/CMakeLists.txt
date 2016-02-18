@@ -1,22 +1,13 @@
 add_library(math
-   aabb.cpp
-   aabb.h
-   curve.cpp
-   curve.h
-   expression.cpp
-   expression.h
-   frustum.cpp
-   frustum.h
-   line.cpp
-   line.h
-   matrix.cpp
-   matrix.h
-   pi.cpp
-   pi.h
-   plane.cpp
-   plane.h
-   quaternion.cpp
-   quaternion.h
-   vector.cpp
-   vector.h
-)
+        aabb.h
+        curve.h
+#        expression.cpp expression.h
+        frustum.h
+        line.h
+        matrix.h
+        pi.h
+        plane.h
+        quaternion.h
+        vector.h
+        )
+set_target_properties(math PROPERTIES LINKER_LANGUAGE CXX)

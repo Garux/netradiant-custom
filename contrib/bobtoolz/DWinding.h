@@ -28,7 +28,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 class DPlane;
 

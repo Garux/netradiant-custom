@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include "../common/cmdlib.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "../common/qfiles.h"
 
 void MD3_Dump( const char *filename );

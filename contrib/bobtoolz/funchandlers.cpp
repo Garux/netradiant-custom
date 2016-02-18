@@ -17,20 +17,18 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "StdAfx.h"
-
 #include "funchandlers.h"
 
-#include "IntersectDialog.h"
-#include "PolygonDialog.h"
-#include "StairDialog.h"
-#include "DoorDialog.h"
-#include "IntersectInfoDialog.h"
-#include "BrushCheckDialog.h"
-#include "AutoCaulkDialog.h"
-#include "AutoCaulkStartDialog.h"
-#include "TextureResetDialog.h"
-#include "pathplotterdialog.h"
+#include "dialogs/IntersectDialog.h"
+#include "dialogs/PolygonDialog.h"
+#include "dialogs/StairDialog.h"
+#include "dialogs/DoorDialog.h"
+#include "dialogs/IntersectInfoDialog.h"
+#include "dialogs/BrushCheckDialog.h"
+#include "dialogs/AutoCaulkDialog.h"
+#include "dialogs/AutoCaulkStartDialog.h"
+#include "dialogs/TextureResetDialog.h"
+#include "dialogs/pathplotterdialog.h"
 
 #include "DEntity.h"
 #include "shapes.h"

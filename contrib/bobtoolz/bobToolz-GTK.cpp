@@ -21,7 +21,7 @@
 
 #include "str.h"
 #include "qerplugin.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "string/string.h"
 #include "itoolbar.h"
 
@@ -32,7 +32,7 @@
 #include "DTreePlanter.h"
 
 #include "dialogs/dialogs-gtk.h"
-#include "../../libs/cmdlib.h"
+#include "cmdlib/cmdlib.h"
 
 void BobToolz_construct(){
 }

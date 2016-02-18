@@ -24,7 +24,7 @@
 #include "qertypes.h"
 #include <stdio.h>
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "iscenegraph.h"
 #define USE_QERTABLE_DEFINE
 #include "qerplugin.h"

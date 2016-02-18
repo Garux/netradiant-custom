@@ -30,7 +30,7 @@
 
 #include "../common/cmdlib.h"
 #include "scriplib.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "polyset.h"
 #include "trilib.h"
 #include "imagelib.h"

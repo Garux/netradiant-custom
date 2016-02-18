@@ -1,3 +1,3 @@
 add_library(ddslib
-    ddslib.c
-)
+        ddslib.c ddslib.h
+        )

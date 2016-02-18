@@ -23,7 +23,7 @@
 
 #include "inout.h"
 #include "cmdlib.h"
-#include "etclib.h"
+#include "etclib/etclib.h"
 #include "imagelib.h"
 #include "vfs.h"
 

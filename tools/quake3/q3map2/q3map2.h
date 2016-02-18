@@ -65,11 +65,11 @@
 /* general */
 
 #include "cmdlib.h"
-#include "mathlib.h"
-#include "md5lib.h"
-#include "ddslib.h"
+#include "mathlib/mathlib.h"
+#include "md5lib/md5lib.h"
+#include "ddslib/ddslib.h"
 
-#include "picomodel.h"
+#include "picomodel/picomodel.h"
 
 #include "scriplib.h"
 #include "polylib.h"

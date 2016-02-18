@@ -87,7 +87,7 @@ extern "C" void Sys_Printf( char *text, ... );
 #include "synapse.h"
 #include "iplugin.h"
 #include "qerplugin.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "igl.h"
 #include "iselectedface.h"
 #include "isurfaceplugin.h"

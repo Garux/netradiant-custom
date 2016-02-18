@@ -173,10 +173,12 @@ bool initialised() const {
 }
 
 void initialise( const char* name ){
-	m_module = globalModuleServer().findModule( typename Type::Name(), typename Type::Version(), name );
-	if ( m_module == 0 ) {
+	const char *type = typename Type::Name();
+	int version = typename Type::Version();
+	m_module = globalModuleServer().findModule( type, version, name );
+	if ( !m_module ) {
 		globalModuleServer().setError( true );
-		globalErrorStream() << "SingletonModuleRef::initialise: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " name=" << makeQuoted( name ) << " - not found\n";
+		globalErrorStream() << "SingletonModuleRef::initialise: type=" << makeQuoted( type ) << " version=" << makeQuoted( version ) << " name=" << makeQuoted( name ) << " - not found\n";
 	}
 }
 

@@ -25,7 +25,7 @@
 #include "../common/cmdlib.h"
 #endif
 #ifndef __MATHLIB__
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #endif
 
 #define MAXTOKEN    1024

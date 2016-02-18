@@ -1,14 +1,10 @@
-
 radiant_plugin(brushexport
-    callbacks.cpp
-    callbacks.h
-    export.cpp
-    export.h
-    interface.cpp
-    plugin.cpp
-    plugin.h
-    support.cpp
-    support.h
-)
+        callbacks.cpp callbacks.h
+        export.cpp export.h
+        interface.cpp
+        plugin.cpp plugin.h
+        support.cpp support.h
+        )
 
-target_link_libraries(brushexport ${GTK2_LIBRARIES})
+find_package(GTK2 REQUIRED)
+target_include_directories(brushexport PRIVATE ${GTK2_INCLUDE_DIRS})

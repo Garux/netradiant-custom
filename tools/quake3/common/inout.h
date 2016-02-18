@@ -24,7 +24,7 @@
 
 // inout is the only stuff relying on xml, include the headers there
 #include "libxml/tree.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 // some useful xml routines
 xmlNodePtr xml_NodeForVec( vec3_t v );

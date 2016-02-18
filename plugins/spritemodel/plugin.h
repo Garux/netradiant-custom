@@ -29,7 +29,7 @@
 #ifndef _PLUGIN_H_
 #define _PLUGIN_H_
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include <string.h>
 #include "qertypes.h"
 #include <stdio.h>

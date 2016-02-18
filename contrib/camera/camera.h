@@ -29,7 +29,7 @@
 
 typedef unsigned char byte;
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include <string.h>
 #include "qertypes.h"
 #include <stdio.h>

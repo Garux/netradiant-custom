@@ -1,6 +1,6 @@
 
 #include <list>
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 class DWinding;
 

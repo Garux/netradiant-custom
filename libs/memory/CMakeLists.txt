@@ -1,4 +1,3 @@
 add_library(memory
-    allocator.cpp
-    allocator.h
-)
+        allocator.cpp allocator.h
+        )

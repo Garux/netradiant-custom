@@ -30,7 +30,7 @@
 
 #include <stdio.h>
 #include <list>
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "str.h"
 
 class DPlane;

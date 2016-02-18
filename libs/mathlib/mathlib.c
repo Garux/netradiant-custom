@@ -20,7 +20,7 @@
  */
 
 // mathlib.c -- math primitives
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 // we use memcpy and memset
 #include <memory.h>
 

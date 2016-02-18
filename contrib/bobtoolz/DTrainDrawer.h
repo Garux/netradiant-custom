@@ -30,7 +30,7 @@
 #endif // _MSC_VER > 1000
 
 #include <list>
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 #include "irender.h"
 #include "renderable.h"

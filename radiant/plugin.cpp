@@ -298,7 +298,8 @@ Radiant* g_Radiant;
 
 bool Radiant_Construct( ModuleServer& server ){
 	GlobalModuleServer::instance().set( server );
-	StaticModuleRegistryList().instance().registerModules();
+	auto modules = StaticModuleRegistryList().instance();
+	modules.registerModules();
 
 	g_RadiantDependencies = new RadiantDependencies();
 

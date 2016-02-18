@@ -24,7 +24,7 @@
 
 #include "os/file.h"
 #include "os/path.h"
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "stream/stringstream.h"
 #include "gtkutil/messagebox.h"
 #include "scenelib.h"

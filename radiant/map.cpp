@@ -52,7 +52,7 @@ MapModules& ReferenceAPI_getMapModules();
 #include "traverselib.h"
 #include "maplib.h"
 #include "eclasslib.h"
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "stream/textfilestream.h"
 #include "os/path.h"
 #include "uniquenames.h"

@@ -24,7 +24,6 @@
 #include "debugging/debugging.h"
 
 #include <map>
-#include <vector>
 #include "os/path.h"
 
 #include "modulesystem.h"
@@ -70,11 +69,11 @@ void registerModule( const char* type, int version, const char* name, Module& mo
 }
 
 Module* findModule( const char* type, int version, const char* name ) const {
-	Modules_::const_iterator i = m_modules.find( ModuleKey( ModuleType( type, version ), name ) );
+	auto i = m_modules.find( ModuleKey( ModuleType( type, version ), name ) );
 	if ( i != m_modules.end() ) {
-		return ( *i ).second;
+		return i->second;
 	}
-	return 0;
+	return nullptr;
 }
 
 void foreachModule( const char* type, int version, const Visitor& visitor ){
@@ -143,73 +142,82 @@ FunctionPointer findSymbol( const char* symbol ){
 
 #include <dlfcn.h>
 
-class DynamicLibrary
-{
-void* m_library;
+class DynamicLibrary {
+	void *m_library;
 public:
-typedef int ( *FunctionPointer )();
+	using FunctionPointer = int (*)();
 
-DynamicLibrary( const char* filename ){
-	m_library = dlopen(filename, RTLD_LOCAL
-								 | RTLD_NOW
-								 #ifndef __APPLE__
-								 | RTLD_DEEPBIND
-                                 #endif
-	);
-	if ( !m_library )
+	DynamicLibrary(const char *filename)
 	{
-		globalErrorStream() << "LoadLibrary failed: '" << filename << "'\n";
-		if ( const char* error = dlerror() )
+		m_library = dlopen(filename, RTLD_LOCAL
+									 | RTLD_NOW
+									 #ifndef __APPLE__
+									 | RTLD_DEEPBIND
+#endif
+		);
+		auto error = dlerror();
+		if (!m_library || error) {
+			globalErrorStream() << "LoadLibrary failed: '" << filename << "'\n";
 			globalErrorStream() << "GetLastError: " << error;
-	}
-}
-~DynamicLibrary(){
-	if ( !failed() ) {
-		dlclose( m_library );
-	}
-}
-bool failed(){
-	return m_library == 0;
-}
-FunctionPointer findSymbol( const char* symbol ){
-	FunctionPointer p = (FunctionPointer)dlsym( m_library, symbol );
-	if ( p == 0 ) {
-		const char* error = reinterpret_cast<const char*>( dlerror() );
-		if ( error != 0 ) {
-			globalErrorStream() << error;
 		}
 	}
-	return p;
-}
+
+	~DynamicLibrary()
+	{
+		if (!failed()) {
+			dlclose(m_library);
+		}
+	}
+
+	bool failed()
+	{
+		return m_library == nullptr;
+	}
+
+	FunctionPointer findSymbol(const char *symbol)
+	{
+		if (auto p = reinterpret_cast<FunctionPointer>(dlsym(m_library, symbol))) {
+			return p;
+		}
+		if (auto error = reinterpret_cast<const char *>(dlerror())) {
+			globalErrorStream() << error;
+		}
+		return nullptr;
+	}
 };
 
 #else
 #error "unsupported platform"
 #endif
 
-class DynamicLibraryModule
-{
-typedef void ( RADIANT_DLLIMPORT * RegisterModulesFunc )( ModuleServer& server );
-DynamicLibrary m_library;
-RegisterModulesFunc m_registerModule;
+class DynamicLibraryModule {
+	typedef void ( RADIANT_DLLIMPORT *RegisterModulesFunc )(ModuleServer &server);
+
+	DynamicLibrary m_library;
+	RegisterModulesFunc m_registerModule;
 public:
-DynamicLibraryModule( const char* filename )
-	: m_library( filename ), m_registerModule( 0 ){
-	if ( !m_library.failed() ) {
-		m_registerModule = reinterpret_cast<RegisterModulesFunc>( m_library.findSymbol( "Radiant_RegisterModules" ) );
+	DynamicLibraryModule(const char *filename)
+			: m_library(filename), m_registerModule(nullptr)
+	{
+		if (!m_library.failed()) {
+			m_registerModule = reinterpret_cast<RegisterModulesFunc>( m_library.findSymbol("Radiant_RegisterModules"));
 #if 0
-		if ( !m_registerModule ) {
-			m_registerModule = reinterpret_cast<RegisterModulesFunc>( m_library.findSymbol( "Radiant_RegisterModules@4" ) );
-		}
+            if ( !m_registerModule ) {
+                m_registerModule = reinterpret_cast<RegisterModulesFunc>( m_library.findSymbol( "Radiant_RegisterModules@4" ) );
+            }
 #endif
+		}
 	}
-}
-bool failed(){
-	return m_registerModule == 0;
-}
-void registerModules( ModuleServer& server ){
-	m_registerModule( server );
-}
+
+	bool failed()
+	{
+		return m_registerModule == nullptr;
+	}
+
+	void registerModules(ModuleServer &server)
+	{
+		m_registerModule(server);
+	}
 };
 
 

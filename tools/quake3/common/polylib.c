@@ -21,7 +21,7 @@
 
 
 #include "cmdlib.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "inout.h"
 #include "polylib.h"
 #include "qfiles.h"

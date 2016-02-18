@@ -37,8 +37,6 @@
 #include "archivelib.h"
 #include "fs_path.h"
 
-#include "vfspk3.h"
-
 
 class DirectoryArchive : public Archive
 {

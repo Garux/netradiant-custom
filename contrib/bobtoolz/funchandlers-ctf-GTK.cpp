@@ -17,8 +17,6 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "StdAfx.h"
-
 #include "dialogs/dialogs-gtk.h"
 
 #include "DEntity.h"
@@ -29,8 +27,8 @@
 #include "funchandlers.h"
 
 // for ctf texture changer
-list<Str> clrList_Blue;
-list<Str> clrList_Red;
+std::list<Str> clrList_Blue;
+std::list<Str> clrList_Red;
 
 BOOL clrLst1Loaded = FALSE;
 BOOL clrLst2Loaded = FALSE;

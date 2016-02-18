@@ -27,7 +27,7 @@
 
 #include "DEntity.h"
 #include "ScriptParser.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "misc.h"
 
 #define MAX_QPATH 64

@@ -1,9 +1,6 @@
-
 radiant_plugin(model
-    model.cpp
-    model.h
-    plugin.cpp
-    plugin.h
-)
+        model.cpp model.h
+        plugin.cpp
+        )
 
 target_link_libraries(model picomodel)

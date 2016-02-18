@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "bytestreamutils.h"
-#include "etclib.h"
+#include "etclib/etclib.h"
 #include "ifilesystem.h"
 #include "imagelib.h"
 

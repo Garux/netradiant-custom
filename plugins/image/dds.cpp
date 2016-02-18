@@ -27,7 +27,7 @@
 #include "iarchive.h"
 #include "idatastream.h"
 
-#include "ddslib.h"
+#include "ddslib/ddslib.h"
 #include "imagelib.h"
 
 Image* LoadDDSBuff( const byte* buffer ){

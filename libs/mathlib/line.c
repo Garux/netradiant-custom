@@ -19,7 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 void line_construct_for_vec3( line_t *line, const vec3_t start, const vec3_t end ){
 	VectorMid( start, end, line->origin );

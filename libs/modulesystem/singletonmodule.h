@@ -86,9 +86,13 @@ explicit SingletonModule( const APIConstructor& constructor )
 	ASSERT_MESSAGE( m_refcount == 0, "module still referenced at shutdown" );
 }
 
-void selfRegister(){
-	globalModuleServer().registerModule( typename Type::Name(), typename Type::Version(), APIConstructor::getName(), *this );
-}
+	void selfRegister()
+	{
+		const char *type = typename Type::Name();
+		int version = typename Type::Version();
+		const char *name = APIConstructor::getName();
+		globalModuleServer().registerModule(type, version, name, *this);
+	}
 
 Dependencies& getDependencies(){
 	return *m_dependencies;

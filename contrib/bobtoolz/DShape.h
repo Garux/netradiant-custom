@@ -29,7 +29,7 @@
 #endif // _MSC_VER > 1000
 
 #include <cstdlib>
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "DMap.h"
 class DBrush;
 class DEntity;

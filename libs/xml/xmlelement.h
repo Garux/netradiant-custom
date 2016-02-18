@@ -22,7 +22,7 @@
 #if !defined( INCLUDED_XML_XMLELEMENT_H )
 #define INCLUDED_XML_XMLELEMENT_H
 
-#include "xml/ixml.h"
+#include "ixml.h"
 #include "string/string.h"
 
 #include <map>

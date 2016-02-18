@@ -1,13 +1,9 @@
-
 radiant_plugin(ufoaiplug
-    ufoai.cpp
-    ufoai.h
-    ufoai_filters.cpp
-    ufoai_filters.h
-    ufoai_gtk.cpp
-    ufoai_gtk.h
-    ufoai_level.cpp
-    ufoai_level.h
-)
+        ufoai.cpp ufoai.h
+        ufoai_filters.cpp ufoai_filters.h
+        ufoai_gtk.cpp ufoai_gtk.h
+        ufoai_level.cpp ufoai_level.h
+        )
 
-target_link_libraries(ufoaiplug ${GTK2_LIBRARIES})
+find_package(GTK2 REQUIRED)
+target_include_directories(ufoaiplug PRIVATE ${GTK2_INCLUDE_DIRS})

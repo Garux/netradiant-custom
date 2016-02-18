@@ -1,4 +1,3 @@
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 find_package(LibXml2 REQUIRED)
@@ -6,6 +5,8 @@ include_directories(${LIBXML2_INCLUDE_DIR})
 
 find_package(GTK2 REQUIRED)
 include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR} ${GTK2_GLIB_INCLUDE_DIR})
+
+find_package(OpenGL REQUIRED)
 
 find_package(GtkGLExt REQUIRED)
 include_directories(${GTKGL_INCLUDE_DIRS})
@@ -186,16 +187,20 @@ add_executable(radiant WIN32 radiant.rc ${RADIANTLIST})
 target_link_libraries(radiant
     ${CMAKE_DL_LIBS}
     ${LIBXML2_LIBRARIES}
-    ${GTK2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
+    ${GTK2_LIBRARIES}
+    ${GTKGL_LIBRARIES}
+    includes
     cmdlib
     container
     ddslib
     debugging
+    etclib
+    filematch
+    generic
     gtkutil
-    ${GTKGL_LIBRARIES}
     l_net
-#    math
+    math
     mathlib
     md5lib
     memory
@@ -211,6 +216,3 @@ target_link_libraries(radiant
     uilib
     xmllib
 )
-if(NOT WIN32)
-    target_link_libraries(radiant ${X11_LIBRARIES})
-endif()

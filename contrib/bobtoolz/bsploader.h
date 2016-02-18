@@ -1,5 +1,5 @@
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 #define LUMP_ENTITIES       0
 #define LUMP_SHADERS        1

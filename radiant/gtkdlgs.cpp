@@ -66,7 +66,7 @@
 #include "mainframe.h"
 #include "preferences.h"
 #include "url.h"
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 
 
 

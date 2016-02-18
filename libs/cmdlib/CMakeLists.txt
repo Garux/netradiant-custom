@@ -1,3 +1,3 @@
 add_library(cmdlib
-    cmdlib.cpp
-)
+        cmdlib.cpp cmdlib.h
+        )

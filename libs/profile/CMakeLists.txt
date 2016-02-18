@@ -1,6 +1,4 @@
 add_library(profile
-    file.cpp
-    file.h
-    profile.cpp
-    profile.h
-)
+        file.cpp file.h
+        profile.cpp profile.h
+        )

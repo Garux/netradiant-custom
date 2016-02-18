@@ -21,7 +21,7 @@
 
 
 #include "../common/cmdlib.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "polyset.h"
 
 void        ASE_Load( const char *filename, qboolean verbose, qboolean meshanims );

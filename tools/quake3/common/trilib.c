@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include "cmdlib.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "polyset.h"
 #include "trilib.h"
 

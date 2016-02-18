@@ -27,7 +27,7 @@
 #include <list>
 #include "ibrush.h"
 #include "string/string.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 class Brush;
 class DPoint;

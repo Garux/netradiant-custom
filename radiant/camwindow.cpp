@@ -42,7 +42,7 @@
 #include "container/array.h"
 #include "scenelib.h"
 #include "render.h"
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "math/frustum.h"
 
 #include "gtkutil/widget.h"

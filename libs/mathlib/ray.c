@@ -19,7 +19,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include <float.h>
 
 vec3_t identity = { 0,0,0 };

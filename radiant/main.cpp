@@ -72,7 +72,7 @@
 #include "uilib/uilib.h"
 #include <gtk/gtk.h>
 
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "os/file.h"
 #include "os/path.h"
 #include "stream/stringstream.h"

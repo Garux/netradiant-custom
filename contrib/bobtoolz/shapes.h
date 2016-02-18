@@ -31,7 +31,7 @@ namespace scene
 class Node;
 }
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 // generic (detail added 12/01/01, for AC+)
 void AddFaceWithTexture( scene::Node& brush, vec3_t va, vec3_t vb, vec3_t vc, const char* texture, bool detail );

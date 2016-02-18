@@ -46,8 +46,8 @@
 #include <sys/stat.h>
 
 #include "cmdlib.h"
-#include "filematch.h"
-#include "mathlib.h"
+#include "filematch/filematch.h"
+#include "mathlib/mathlib.h"
 #include "inout.h"
 #include "vfs.h"
 #include "unzip.h"

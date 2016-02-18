@@ -1,4 +1,3 @@
 add_library(debugging
-    debugging.cpp
-    debugging.h
-)
+        debugging.cpp debugging.h
+        )

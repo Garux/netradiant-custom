@@ -27,7 +27,7 @@
 //
 
 #include "cmdlib.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include "polylib.h"
 #include "inout.h"
 #include <sys/types.h>

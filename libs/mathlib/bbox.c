@@ -21,7 +21,7 @@
 
 #include <float.h>
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 const aabb_t g_aabb_null = {
 	{ 0, 0, 0, },

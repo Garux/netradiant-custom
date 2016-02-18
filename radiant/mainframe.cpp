@@ -43,7 +43,7 @@
 #include <gtk/gtk.h>
 
 
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "stream/stringstream.h"
 #include "signal/isignal.h"
 #include "os/path.h"

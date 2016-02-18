@@ -45,7 +45,7 @@
 #include <uilib/uilib.h>
 
 #include "stream/textfilestream.h"
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "stream/stringstream.h"
 #include "os/path.h"
 #include "scenelib.h"

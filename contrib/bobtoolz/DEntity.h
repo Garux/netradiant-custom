@@ -30,7 +30,7 @@
 
 #include <list>
 #include "str.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 class DEPair;
 class DBrush;

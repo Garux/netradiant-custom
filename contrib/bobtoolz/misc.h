@@ -20,7 +20,7 @@
 #if !defined( INCLUDED_MISC_H )
 #define INCLUDED_MISC_H
 
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 #include <list>
 #include "str.h"
 #include "iscenegraph.h"

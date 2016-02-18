@@ -34,7 +34,7 @@
 #include "stream/stringstream.h"
 #include "moduleobservers.h"
 
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 
 #include "preferences.h"
 #include "mainframe.h"

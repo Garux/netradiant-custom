@@ -27,7 +27,7 @@
 #include "ientity.h"
 #include "irender.h"
 #include "renderable.h"
-#include "mathlib.h"
+#include "mathlib/mathlib.h"
 
 class DListener;
 class Shader;

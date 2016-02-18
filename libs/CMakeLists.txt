@@ -3,19 +3,16 @@ set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
-find_package(GTK2 REQUIRED)
-include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR} ${GTK2_GLIB_INCLUDE_DIR})
-find_package(GtkGLExt REQUIRED)
-include_directories(${GTKGL_INCLUDE_DIRS})
-
 add_subdirectory(cmdlib)
 add_subdirectory(container)
 add_subdirectory(ddslib)
 add_subdirectory(debugging)
+add_subdirectory(etclib)
+add_subdirectory(filematch)
 add_subdirectory(generic)
 add_subdirectory(gtkutil)
 add_subdirectory(l_net)
-#add_subdirectory(math)
+add_subdirectory(math)
 add_subdirectory(mathlib)
 add_subdirectory(md5lib)
 add_subdirectory(memory)
@@ -31,82 +28,39 @@ add_subdirectory(string)
 add_subdirectory(uilib)
 add_subdirectory(xml)
 
-add_library(etclib
-    etclib.c
-    etclib.h
-)
-
-add_library(filematch
-    filematch.c
-    filematch.h
-)
-
 add_library(libs
-    archivelib.cpp
-    archivelib.h
-    bytebool.cpp
-    bytebool.h
-    bytestreamutils.cpp
-    character.cpp
-    character.h
-    cmdlib.h
-    convert.cpp
-    convert.h
-    ddslib.h
-    dragplanes.cpp
-    dragplanes.h
-    eclasslib.cpp
-    eclasslib.h
-    entitylib.cpp
-    entitylib.h
-    entityxml.cpp
-    entityxml.h
-    filematch.c
-    filematch.h
-    fs_filesystem.cpp
-    fs_filesystem.h
-    fs_path.cpp
-    fs_path.h
-    imagelib.cpp
-    imagelib.h
-    instancelib.cpp
-    instancelib.h
-    maplib.cpp
-    maplib.h
-    mathlib.h
-    md5lib.h
-    moduleobservers.cpp
-    moduleobservers.h
-    picomodel.h
-    pivot.cpp
-    pivot.h
-    render.cpp
-    render.h
-    scenelib.cpp
-    scenelib.h
-    selectionlib.cpp
-    selectionlib.h
-    shaderlib.cpp
-    shaderlib.h
-    str.cpp
-    str.h
-    stringio.cpp
-    stringio.h
-    texturelib.cpp
-    texturelib.h
-    transformlib.cpp
-    transformlib.h
-    traverselib.cpp
-    traverselib.h
-    typesystem.cpp
-    typesystem.h
-    undolib.cpp
-    undolib.h
-    uniquenames.cpp
-    uniquenames.h
-    versionlib.cpp
-    versionlib.h
-    bytestreamutils.h
-    etclib.c
-    etclib.h
-)
+        archivelib.h
+        bytebool.h
+        bytestreamutils.h
+        character.h
+        convert.h
+        dragplanes.h
+        eclasslib.h
+        entitylib.h
+        entityxml.h
+        fs_filesystem.h
+        fs_path.h
+        imagelib.h
+        instancelib.h
+        maplib.h
+        moduleobservers.h
+        picomodel/picomodel.h
+        pivot.h
+        render.h
+        scenelib.h
+        selectionlib.h
+        shaderlib.h
+        str.h
+        stringio.h
+        texturelib.h
+        transformlib.h
+        traverselib.h
+        typesystem.h
+        undolib.h
+        uniquenames.h
+        versionlib.h
+        )
+set_target_properties(libs PROPERTIES LINKER_LANGUAGE CXX)
+
+find_package(GLIB REQUIRED)
+target_include_directories(libs PRIVATE ${GLIB_INCLUDE_DIRS})

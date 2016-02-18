@@ -78,7 +78,7 @@ void GlobalCommands_insert( const char* name, const Callback& callback, const Ac
 const Command& GlobalCommands_find( const char* command ){
 	Commands::iterator i = g_commands.find( command );
 	ASSERT_MESSAGE( i != g_commands.end(), "failed to lookup command " << makeQuoted( command ) );
-	return ( *i ).second;
+	return i->second;
 }
 
 typedef std::map<std::string, Toggle> Toggles;

@@ -1,6 +1,6 @@
 radiant_plugin(sunplug
-    sunplug.cpp
-    sunplug.h
-)
+        sunplug.cpp sunplug.h
+        )
 
-target_link_libraries(sunplug ${GTK2_LIBRARIES})
+find_package(GTK2 REQUIRED)
+target_include_directories(sunplug PRIVATE ${GTK2_INCLUDE_DIRS})

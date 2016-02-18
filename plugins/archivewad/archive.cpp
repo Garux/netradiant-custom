@@ -22,7 +22,7 @@
 #include "archive.h"
 
 #include "idatastream.h"
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "bytestreamutils.h"
 #include <algorithm>
 #include "stream/filestream.h"
@@ -30,8 +30,6 @@
 #include "iarchive.h"
 
 #include "archivelib.h"
-
-#include "plugin.h"
 
 #include <map>
 #include "string/string.h"

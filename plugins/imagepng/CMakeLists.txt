@@ -1,9 +1,6 @@
 radiant_plugin(imagepng
-    plugin.cpp
-    plugin.h
-)
+        plugin.cpp
+        )
 
 find_package(PNG REQUIRED)
-include_directories(${PNG_INCLUDE_DIR})
-
-target_link_libraries(imagepng ${PNG_LIBRARIES})
+target_include_directories(imagepng PRIVATE ${PNG_INCLUDE_DIR})

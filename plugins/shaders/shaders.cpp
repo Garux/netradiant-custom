@@ -64,7 +64,7 @@
 #include "stringio.h"
 #include "shaderlib.h"
 #include "texturelib.h"
-#include "cmdlib.h"
+#include "cmdlib/cmdlib.h"
 #include "moduleobservers.h"
 #include "archivelib.h"
 #include "imagelib.h"
