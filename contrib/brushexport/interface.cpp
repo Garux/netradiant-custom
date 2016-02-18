@@ -37,9 +37,6 @@ create_w_plugplug2( void ){
 	GtkWidget *t_exportmaterials;
 	GtkWidget *t_limitmatnames;
 	GtkWidget *t_objects;
-	GtkTooltips *tooltips;
-
-	tooltips = gtk_tooltips_new();
 
 	w_plugplug2 = ui::Window( ui::window_type::TOP );
 	gtk_widget_set_name( w_plugplug2, "w_plugplug2" );
@@ -66,7 +63,7 @@ create_w_plugplug2( void ){
 
 	r_collapse = gtk_radio_button_new_with_mnemonic( NULL, "Collapse mesh" );
 	gtk_widget_set_name( r_collapse, "r_collapse" );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_collapse, "Collapse all brushes into a single group", "Collapse all brushes into a single group" );
+	gtk_widget_set_tooltip_text(r_collapse, "Collapse all brushes into a single group");
 	gtk_widget_show( r_collapse );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapse, FALSE, FALSE, 0 );
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_collapse ), r_collapse_group );
@@ -74,7 +71,7 @@ create_w_plugplug2( void ){
 
 	r_collapsebymaterial = gtk_radio_button_new_with_mnemonic( NULL, "Collapse by material" );
 	gtk_widget_set_name( r_collapsebymaterial, "r_collapsebymaterial" );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_collapsebymaterial, "Collapse into groups by material", "Collapse into groups by material" );
+	gtk_widget_set_tooltip_text(r_collapsebymaterial, "Collapse into groups by material");
 	gtk_widget_show( r_collapsebymaterial );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapsebymaterial, FALSE, FALSE, 0 );
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_collapsebymaterial ), r_collapse_group );
@@ -82,7 +79,7 @@ create_w_plugplug2( void ){
 
 	r_nocollapse = gtk_radio_button_new_with_mnemonic( NULL, "Don't collapse" );
 	gtk_widget_set_name( r_nocollapse, "r_nocollapse" );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_nocollapse, "Every brush is stored in its own group", "Every brush is stored in its own group" );
+	gtk_widget_set_tooltip_text(r_nocollapse, "Every brush is stored in its own group");
 	gtk_widget_show( r_nocollapse );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_nocollapse, FALSE, FALSE, 0 );
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_nocollapse ), r_collapse_group );

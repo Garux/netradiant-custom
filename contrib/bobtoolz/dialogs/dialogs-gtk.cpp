@@ -20,10 +20,7 @@
 #include "dialogs-gtk.h"
 #include "../funchandlers.h"
 
-#include <cstdlib>
 #include "str.h"
-#include <list>
-#include <gtk/gtk.h>
 #include "gtkutil/pointer.h"
 
 #include "../lists.h"
@@ -107,7 +104,7 @@ static void dialog_button_callback_settex( GtkWidget *widget, gpointer data ){
 
 	GtkEntry* entry = GTK_ENTRY( tw->one );
 	auto* combo = tw->two;
-	const gchar* tex = gtk_combo_box_get_active_text(GTK_COMBO_BOX(combo));
+	const gchar *tex = gtk_entry_get_text(GTK_ENTRY (gtk_bin_get_child(GTK_BIN(combo))));
 	gtk_entry_set_text( entry, tex );
 }
 
@@ -219,7 +216,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	g_signal_connect( GTK_OBJECT( window ), "destroy",
 						G_CALLBACK( gtk_widget_destroy ), NULL );
 	gtk_window_set_title( GTK_WINDOW( window ), lpCaption );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
 	gtk_widget_realize( window );
@@ -332,7 +329,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Intersect" );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
@@ -430,7 +427,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Polygon Builder" );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
@@ -605,7 +602,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Stair Builder" );
 
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
@@ -861,7 +858,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Door Builder" );
 
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
@@ -1073,7 +1070,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Texture Reset" );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
@@ -1244,7 +1241,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "CTF Colour Changer" );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
@@ -1315,7 +1312,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Texture Reset" );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
@@ -1651,10 +1648,10 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	g_signal_connect( GTK_OBJECT( window ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Train Thing" );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
-	gtk_object_set_data( GTK_OBJECT( window ), "loop", &loop );
-	gtk_object_set_data( GTK_OBJECT( window ), "ret", &ret );
+	g_object_set_data( G_OBJECT( window ), "loop", &loop );
+	g_object_set_data( G_OBJECT( window ), "ret", &ret );
 
 	gtk_widget_realize( window );
 
@@ -1915,7 +1912,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 
 	gtk_window_set_title( GTK_WINDOW( window ), "Make Chain" );
 
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );

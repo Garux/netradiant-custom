@@ -55,47 +55,22 @@ static gint dialog_delete_callback( GtkWidget *widget, GdkEvent* event, gpointer
 	return TRUE;
 }
 
-static void file_sel_callback( GtkWidget *widget, gpointer data ){
-	GtkWidget *parent;
-	int *loop;
-	char **filename;
-
-	parent = gtk_widget_get_toplevel( widget );
-	loop = (int*)g_object_get_data( G_OBJECT( parent ), "loop" );
-	filename = (char**)g_object_get_data( G_OBJECT( parent ), "filename" );
-
-	*loop = 0;
-	if ( gpointer_to_int( data ) == IDOK ) {
-		*filename = g_strdup( gtk_file_selection_get_filename( GTK_FILE_SELECTION( parent ) ) );
-	}
-}
-
 static void change_clicked( GtkWidget *widget, gpointer data ){
 	GtkWidget* file_sel;
 	char* filename = NULL;
-	int loop = 1;
 
-	file_sel = gtk_file_selection_new( "Locate portal (.prt) file" );
-	g_signal_connect( GTK_OBJECT( GTK_FILE_SELECTION( file_sel )->ok_button ), "clicked",
-						G_CALLBACK( file_sel_callback ), GINT_TO_POINTER( IDOK ) );
-	g_signal_connect( GTK_OBJECT( GTK_FILE_SELECTION( file_sel )->cancel_button ), "clicked",
-						G_CALLBACK( file_sel_callback ), GINT_TO_POINTER( IDCANCEL ) );
-	g_signal_connect( GTK_OBJECT( file_sel ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
-	gtk_file_selection_hide_fileop_buttons( GTK_FILE_SELECTION( file_sel ) );
+	file_sel = gtk_file_chooser_dialog_new ( "Locate portal (.prt) file", nullptr, GTK_FILE_CHOOSER_ACTION_OPEN,
+											 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+											 GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+											 nullptr);
 
-	g_object_set_data( G_OBJECT( file_sel ), "loop", &loop );
-	g_object_set_data( G_OBJECT( file_sel ), "filename", &filename );
-	gtk_file_selection_set_filename( GTK_FILE_SELECTION( file_sel ), portals.fn );
+	gtk_file_chooser_set_filename( GTK_FILE_CHOOSER(file_sel), portals.fn );
 
-	gtk_grab_add( file_sel );
-	gtk_widget_show( file_sel );
-
-	while ( loop )
-		gtk_main_iteration();
-
-	gtk_grab_remove( file_sel );
-	gtk_widget_destroy( file_sel );
+	if (gtk_dialog_run (GTK_DIALOG (file_sel)) == GTK_RESPONSE_ACCEPT)
+	{
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_sel));
+	}
+	gtk_widget_destroy (file_sel);
 
 	if ( filename != NULL ) {
 		strcpy( portals.fn, filename );
