@@ -877,7 +877,7 @@ ui::Window BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 
 					auto renderer = ui::CellRendererText();
 					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
-					g_signal_connect( renderer, "edited", G_CALLBACK( project_cell_edited ), &projectList );
+					g_signal_connect( G_OBJECT(renderer), "edited", G_CALLBACK( project_cell_edited ), &projectList );
 
 					GtkTreeViewColumn* column = ui::TreeViewColumn( "", renderer, {{"text", 0}} );
 					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
@@ -914,7 +914,7 @@ ui::Window BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 
 					auto renderer = ui::CellRendererText();
 					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
-					g_signal_connect( renderer, "edited", G_CALLBACK( commands_cell_edited ), store );
+					g_signal_connect( G_OBJECT(renderer), "edited", G_CALLBACK( commands_cell_edited ), store );
 
 					GtkTreeViewColumn* column = ui::TreeViewColumn( "", renderer, {{"text", 0}} );
 					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );

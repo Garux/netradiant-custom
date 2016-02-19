@@ -33,7 +33,7 @@ See also https://gitlab.com/xonotic/netradiant/ for a source browser, issues and
 
 This project uses the usual CMake workflow:
 
-    mkdir build && cd build && cmake .. && make
+    mkdir build && cd build && cmake .. && cmake --build .
 
 ## linux
 
@@ -44,13 +44,12 @@ cmake --build . -- -j$(nproc)
 
 ## msys2
 
-`base-devel`
+`pacman -S --needed base-devel`
 
 ### 32 bit:
 
 ```
-pacman -S mingw-w64-i686-{toolchain,cmake}
-pacman -S mingw-w64-i686-{gtk2,gtkglext}
+pacman -S --needed mingw-w64-i686-{toolchain,cmake,gtk2,gtkglext}
 mkdir build && cd build
 cmake -G "MSYS Makefiles" .. -DGTK2_GLIBCONFIG_INCLUDE_DIR=/mingw32/lib/glib-2.0/include -DGTK2_GDKCONFIG_INCLUDE_DIR=/mingw32/lib/gtk-2.0/include
 cmake --build . -- -j$(nproc)
@@ -59,8 +58,7 @@ cmake --build . -- -j$(nproc)
 ### 64 bit:
 
 ```
-pacman -S mingw-w64-x86_64-{toolchain,cmake}
-pacman -S mingw-w64-x86_64-{gtk2,gtkglext}
+pacman -S mingw-w64-x86_64-{toolchain,cmake,gtk2,gtkglext}
 mkdir build && cd build
 cmake -G "MSYS Makefiles" .. -DGTK2_GLIBCONFIG_INCLUDE_DIR=/mingw64/lib/glib-2.0/include -DGTK2_GDKCONFIG_INCLUDE_DIR=/mingw64/lib/gtk-2.0/include
 cmake --build . -- -j$(nproc)
@@ -77,13 +75,13 @@ options:
 
 targets:
  * `radiant`    Compiles the radiant core binary
- * `plugins`    Compiles all plugins (each plugin has its own target as well)
  * `modules`    Compiles all modules (each module has its own target as well)
+ * `plugins`    Compiles all plugins (each plugin has its own target as well)
  * `game_packs` Downloads the game pack data
  * `quake3`     Compiles all the Quake3 tools
-   - `q3map2`    Quake3 map compiler
+   - `q3map2`     Quake3 map compiler
    - `q3data`
  * `quake2`     Compiles all the Quake2 tools (Note: needs to be compiled explicitly)
-   - `q2map`     Quake2 map compiler
+   - `q2map`      Quake2 map compiler
    - `q2data`
    - `h2data`

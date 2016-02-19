@@ -71,7 +71,9 @@ void QGL_Shutdown( OpenGLBinding& table ){
 #if defined( WIN32 )
 	qwglGetProcAddress           = 0;
 #elif defined( XWINDOWS )
+	#ifndef __APPLE__
 	qglXQueryExtension           = glXQueryExtension;
+    #endif
 	qglXGetProcAddressARB        = 0;
 #else
 #error "unsupported platform"

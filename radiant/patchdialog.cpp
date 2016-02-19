@@ -895,8 +895,8 @@ ui::Window PatchInspector::BuildDialog(){
 							entry_set_float( entry, g_pi_globals.shift[0] );
 
 							auto adj = ui::Adjustment( 0, -8192, 8192, 1, 1, 0 );
-							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
-							g_object_set_data( G_OBJECT( window ), "hshift_adj", adj );
+							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), (gpointer) entry );
+							g_object_set_data( G_OBJECT( window ), "hshift_adj", (gpointer) adj );
 
 							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
@@ -917,7 +917,7 @@ ui::Window PatchInspector::BuildDialog(){
 
 							auto adj = ui::Adjustment( 0, -8192, 8192, 1, 1, 0 );
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
-							g_object_set_data( G_OBJECT( window ), "vshift_adj", adj );
+							g_object_set_data( G_OBJECT( window ), "vshift_adj", (gpointer) adj );
 
 							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
@@ -938,7 +938,7 @@ ui::Window PatchInspector::BuildDialog(){
 
 							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
-							g_object_set_data( G_OBJECT( window ), "hscale_adj", adj );
+							g_object_set_data( G_OBJECT( window ), "hscale_adj", (gpointer) adj );
 
 							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
@@ -959,7 +959,7 @@ ui::Window PatchInspector::BuildDialog(){
 
 							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 );
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
-							g_object_set_data( G_OBJECT( window ), "vscale_adj", adj );
+							g_object_set_data( G_OBJECT( window ), "vscale_adj", (gpointer) adj );
 
 							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );
@@ -980,7 +980,7 @@ ui::Window PatchInspector::BuildDialog(){
 
 							auto adj = ui::Adjustment( 0, -1000, 1000, 1, 1, 0 ); // NOTE: Arnout - this really should be 360 but can't change it anymore as it could break existing maps
 							g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( OnSpinChanged ), entry );
-							g_object_set_data( G_OBJECT( window ), "rotate_adj", adj );
+							g_object_set_data( G_OBJECT( window ), "rotate_adj", (gpointer) adj );
 
 							auto spin = ui::SpinButton( adj, 1, 0 );
 							gtk_widget_show( GTK_WIDGET( spin ) );

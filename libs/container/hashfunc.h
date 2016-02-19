@@ -182,7 +182,7 @@ inline ub4 hash(
 	const UB1Traits& ub1traits,
 	const UB4x1Traits& ub4x1traits
 	){
-	register ub4 a,b,c,len;
+	ub4 a,b,c,len;
 
 	/* Set up the internal state */
 	len = length;
@@ -240,7 +240,7 @@ inline ub4 hash2(
 	ub4 initval, /* the previous hash, or an arbitrary value */
 	const UB4Traits& ub4traits
 	){
-	register ub4 a,b,c,len;
+	ub4 a,b,c,len;
 
 	/* Set up the internal state */
 	len = length;

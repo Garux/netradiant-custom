@@ -45,7 +45,7 @@ GdkPixbuf* pixbuf_new_from_file_with_mask( const char* filename ){
 	else
 	{
 		GdkPixbuf* rgba = gdk_pixbuf_add_alpha( rgb, FALSE, 255, 0, 255 );
-		gdk_pixbuf_unref( rgb );
+		g_object_unref( rgb );
 		return rgba;
 	}
 }
@@ -58,7 +58,7 @@ GtkImage* image_new_from_file_with_mask( const char* filename ){
 	else
 	{
 		GtkImage* image = GTK_IMAGE( gtk_image_new_from_pixbuf( rgba ) );
-		gdk_pixbuf_unref( rgba );
+		g_object_unref( rgba );
 		return image;
 	}
 }

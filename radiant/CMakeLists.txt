@@ -189,6 +189,7 @@ target_link_libraries(radiant
     ${LIBXML2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${GTK2_LIBRARIES}
+    ${GTK2_PANGO_LIBRARY}
     ${GTKGL_LIBRARIES}
     includes
     cmdlib
@@ -216,3 +217,6 @@ target_link_libraries(radiant
     uilib
     xmllib
 )
+if (X11_LIBRARIES)
+    target_link_libraries(radiant ${X11_LIBRARIES})
+endif ()

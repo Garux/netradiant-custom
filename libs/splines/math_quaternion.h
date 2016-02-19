@@ -157,7 +157,7 @@ inline int operator==( quat_t a, quat_t b ) {
 }
 
 inline int operator!=( quat_t a, quat_t b ) {
-	return ( ( a.x != b.x ) || ( a.y != b.y ) || ( a.z != b.z ) && ( a.w != b.w ) );
+	return ( ( a.x != b.x ) || ( a.y != b.y ) || (( a.z != b.z ) && ( a.w != b.w )) );
 }
 
 inline float quat_t::Length( void ) {

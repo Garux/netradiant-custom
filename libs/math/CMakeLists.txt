@@ -1,4 +1,5 @@
 add_library(math
+        _.cpp
         aabb.h
         curve.h
 #        expression.cpp expression.h
@@ -10,4 +11,3 @@ add_library(math
         quaternion.h
         vector.h
         )
-set_target_properties(math PROPERTIES LINKER_LANGUAGE CXX)

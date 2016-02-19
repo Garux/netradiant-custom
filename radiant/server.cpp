@@ -24,6 +24,7 @@
 #include "debugging/debugging.h"
 
 #include <map>
+#include <vector>
 #include "os/path.h"
 
 #include "modulesystem.h"

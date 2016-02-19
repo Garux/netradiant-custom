@@ -29,6 +29,7 @@ add_subdirectory(uilib)
 add_subdirectory(xml)
 
 add_library(libs
+        _.cpp
         archivelib.h
         bytebool.h
         bytestreamutils.h
@@ -44,7 +45,6 @@ add_library(libs
         instancelib.h
         maplib.h
         moduleobservers.h
-        picomodel/picomodel.h
         pivot.h
         render.h
         scenelib.h
@@ -60,7 +60,6 @@ add_library(libs
         uniquenames.h
         versionlib.h
         )
-set_target_properties(libs PROPERTIES LINKER_LANGUAGE CXX)
 
 find_package(GLIB REQUIRED)
 target_include_directories(libs PRIVATE ${GLIB_INCLUDE_DIRS})

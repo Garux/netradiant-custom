@@ -1,5 +1,5 @@
 add_library(script
+        _.cpp
         scripttokeniser.h
         scripttokenwriter.h
         )
-set_target_properties(script PROPERTIES LINKER_LANGUAGE CXX)

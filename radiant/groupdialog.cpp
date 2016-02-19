@@ -118,7 +118,7 @@ void GroupDlg::Create( ui::Window parent ){
 		gtk_notebook_set_tab_pos( GTK_NOTEBOOK( notebook ), GTK_POS_BOTTOM );
 		m_pNotebook = notebook;
 
-		g_signal_connect( notebook, "switch_page", G_CALLBACK( switch_page ), window );
+		g_signal_connect( G_OBJECT(notebook), "switch_page", G_CALLBACK( switch_page ), (gpointer) window );
 	}
 }
 
