@@ -6,5 +6,5 @@ radiant_plugin(brushexport
         support.cpp support.h
         )
 
-find_package(GTK2 REQUIRED)
-target_include_directories(brushexport PRIVATE ${GTK2_INCLUDE_DIRS})
+target_include_directories(brushexport PRIVATE uilib)
+target_link_libraries(brushexport PRIVATE uilib)

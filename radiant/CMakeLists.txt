@@ -1,15 +1,6 @@
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-find_package(LibXml2 REQUIRED)
-include_directories(${LIBXML2_INCLUDE_DIR})
-
-find_package(GTK2 REQUIRED)
-include_directories(${GTK2_INCLUDE_DIRS} ${GTK2_GDK_INCLUDE_DIR} ${GTK2_GLIB_INCLUDE_DIR})
-
 find_package(OpenGL REQUIRED)
-
-find_package(GtkGLExt REQUIRED)
-include_directories(${GTKGL_INCLUDE_DIRS})
 
 include_directories("${CMAKE_SOURCE_DIR}/libs")
 include_directories("${CMAKE_SOURCE_DIR}/include")
@@ -180,7 +171,6 @@ set(RADIANTLIST
     xmlstuff.h
     xywindow.cpp
     xywindow.h
-    "${CMAKE_BINARY_DIR}/version.cpp"
 )
 
 add_executable(radiant WIN32 radiant.rc ${RADIANTLIST})
@@ -188,9 +178,8 @@ target_link_libraries(radiant
     ${CMAKE_DL_LIBS}
     ${LIBXML2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
-    ${GTK2_LIBRARIES}
-    ${GTK2_PANGO_LIBRARY}
     ${GTKGL_LIBRARIES}
+    version
     includes
     cmdlib
     container
@@ -199,7 +188,6 @@ target_link_libraries(radiant
     etclib
     filematch
     generic
-    gtkutil
     l_net
     math
     mathlib

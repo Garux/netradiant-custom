@@ -2,5 +2,5 @@ radiant_plugin(sunplug
         sunplug.cpp sunplug.h
         )
 
-find_package(GTK2 REQUIRED)
-target_include_directories(sunplug PRIVATE ${GTK2_INCLUDE_DIRS})
+target_include_directories(sunplug PRIVATE uilib)
+target_link_libraries(sunplug PRIVATE uilib)

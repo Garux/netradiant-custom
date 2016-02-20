@@ -8,7 +8,8 @@ add_library(xmllib
 
 find_package(GLIB REQUIRED)
 target_include_directories(xmllib PUBLIC ${GLIB_INCLUDE_DIRS})
+target_link_libraries(xmllib PUBLIC ${GLIB_LIBRARIES})
 
 find_package(LibXml2 REQUIRED)
 target_include_directories(xmllib PUBLIC ${LIBXML2_INCLUDE_DIR})
-target_link_libraries(xmllib ${LIBXML2_LIBRARIES})
+target_link_libraries(xmllib PUBLIC ${LIBXML2_LIBRARIES})

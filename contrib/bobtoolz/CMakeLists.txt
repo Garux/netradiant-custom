@@ -41,7 +41,8 @@ radiant_plugin(bobtoolz
         visfind.cpp visfind.h
         )
 
-find_package(GTK2 REQUIRED)
-target_include_directories(bobtoolz PRIVATE ${GTK2_INCLUDE_DIRS})
+target_include_directories(bobtoolz PRIVATE uilib)
+target_link_libraries(bobtoolz PRIVATE uilib)
 
-target_link_libraries(bobtoolz mathlib)
+target_include_directories(bobtoolz PRIVATE mathlib)
+target_link_libraries(bobtoolz PRIVATE mathlib)

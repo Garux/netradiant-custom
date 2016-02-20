@@ -6,5 +6,11 @@ radiant_plugin(prtview
         prtview.cpp prtview.h
         )
 
-find_package(GTK2 REQUIRED)
-target_include_directories(prtview PRIVATE ${GTK2_INCLUDE_DIRS})
+target_include_directories(prtview PRIVATE version)
+target_link_libraries(prtview PRIVATE version)
+
+target_include_directories(prtview PRIVATE uilib)
+target_link_libraries(prtview PRIVATE uilib)
+
+target_include_directories(prtview PRIVATE profile)
+target_link_libraries(prtview PRIVATE profile)

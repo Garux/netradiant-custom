@@ -63,3 +63,4 @@ add_library(libs
 
 find_package(GLIB REQUIRED)
 target_include_directories(libs PRIVATE ${GLIB_INCLUDE_DIRS})
+target_link_libraries(libs PRIVATE ${GLIB_LIBRARIES})

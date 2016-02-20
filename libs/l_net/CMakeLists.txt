@@ -10,5 +10,5 @@ endif ()
 add_library(l_net ${L_NETLIST})
 
 if (WIN32)
-    target_link_libraries(l_net ws2_32)
+    target_link_libraries(l_net PRIVATE ws2_32)
 endif ()

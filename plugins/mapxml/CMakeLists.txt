@@ -4,4 +4,5 @@ radiant_plugin(mapxml
         xmlwrite.cpp xmlwrite.h
         )
 
-target_link_libraries(mapxml xmllib)
+target_include_directories(mapxml PRIVATE xmllib)
+target_link_libraries(mapxml PRIVATE xmllib)

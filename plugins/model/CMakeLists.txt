@@ -3,4 +3,5 @@ radiant_plugin(model
         plugin.cpp
         )
 
-target_link_libraries(model picomodel)
+target_include_directories(model PRIVATE picomodel)
+target_link_libraries(model PRIVATE picomodel)

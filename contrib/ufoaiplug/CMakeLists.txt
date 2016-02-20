@@ -5,5 +5,8 @@ radiant_plugin(ufoaiplug
         ufoai_level.cpp ufoai_level.h
         )
 
-find_package(GTK2 REQUIRED)
-target_include_directories(ufoaiplug PRIVATE ${GTK2_INCLUDE_DIRS})
+target_include_directories(ufoaiplug PRIVATE version)
+target_link_libraries(ufoaiplug PRIVATE version)
+
+target_include_directories(ufoaiplug PRIVATE uilib)
+target_link_libraries(ufoaiplug PRIVATE uilib)

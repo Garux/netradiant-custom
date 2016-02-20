@@ -2,8 +2,8 @@ radiant_plugin(shaderplug
         shaderplug.cpp shaderplug.h
         )
 
-find_package(LibXml2 REQUIRED)
-target_include_directories(shaderplug PRIVATE ${LIBXML2_INCLUDE_DIR})
+target_include_directories(shaderplug PRIVATE xmllib)
+target_link_libraries(shaderplug PRIVATE xmllib)
 
-find_package(GTK2 REQUIRED)
-target_include_directories(shaderplug PRIVATE ${GTK2_INCLUDE_DIRS})
+target_include_directories(shaderplug PRIVATE uilib)
+target_link_libraries(shaderplug PRIVATE uilib)

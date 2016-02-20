@@ -34,6 +34,9 @@ endif ()
 
 configure_file("${CMAKE_SOURCE_DIR}/include/version.cpp.in" "${CMAKE_BINARY_DIR}/version.cpp")
 
+add_library(version "${CMAKE_BINARY_DIR}/version.cpp")
+set_property(TARGET version PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+
 set(RADIANT_ABOUTMSG "Custom build" CACHE STRING "About message")
 message(STATUS "Building ${PROJECT_NAME} ${RADIANT_VERSION_STRING} ${RADIANT_ABOUTMSG}")
 
