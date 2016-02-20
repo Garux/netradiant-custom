@@ -520,7 +520,7 @@ void CWatchBSP::DoEBeginStep(){
 	if ( SetupListening() == false ) {
 		const char* msg = "Failed to get a listening socket on port 39000.\nTry running with Build monitoring disabled if you can't fix this.\n";
 		globalOutputStream() << msg;
-		MainFrame_getWindow().alert( msg, "Build monitoring", ui::alert_type::OK, ui::alert_icon::ERROR );
+		MainFrame_getWindow().alert( msg, "Build monitoring", ui::alert_type::OK, ui::alert_icon::Error );
 		return;
 	}
 	// set the timer for timeouts and step cancellation
@@ -537,7 +537,7 @@ void CWatchBSP::DoEBeginStep(){
 			msg << reinterpret_cast<const char*>( g_ptr_array_index( m_pCmd, m_iCurrentStep ) );
 			msg << "\nCheck that the file exists and that you don't run out of system resources.\n";
 			globalOutputStream() << msg.c_str();
-			MainFrame_getWindow().alert( msg.c_str(), "Build monitoring", ui::alert_type::OK, ui::alert_icon::ERROR );
+			MainFrame_getWindow().alert( msg.c_str(), "Build monitoring", ui::alert_type::OK, ui::alert_icon::Error );
 			return;
 		}
 		// re-initialise the debug window
@@ -750,7 +750,7 @@ void CWatchBSP::RoutineProcessing(){
 							StringOutputStream msg;
 							msg << "Failed to execute the following command: " << cmd.c_str() << cmdline.c_str();
 							globalOutputStream() << msg.c_str();
-							MainFrame_getWindow().alert( msg.c_str(), "Build monitoring", ui::alert_type::OK, ui::alert_icon::ERROR );
+							MainFrame_getWindow().alert( msg.c_str(), "Build monitoring", ui::alert_type::OK, ui::alert_icon::Error );
 						}
 					}
 					EndMonitoringLoop();

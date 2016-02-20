@@ -30,6 +30,8 @@
 /// The surface is recursively tesselated until the angle between each triangle
 /// edge is smaller than a specified tolerance.
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include "nameable.h"
 #include "ifilter.h"

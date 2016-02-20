@@ -263,7 +263,7 @@ const char* file_dialog( ui::Widget parent, bool open, const char* title, const 
 		if ( open
 			 || file == nullptr
 			 || !file_exists( file )
-			 || parent.alert("The file specified already exists.\nDo you want to replace it?", title, ui::alert_type::NOYES, ui::alert_icon::QUESTION ) == ui::alert_response::YES ) {
+			 || parent.alert("The file specified already exists.\nDo you want to replace it?", title, ui::alert_type::NOYES, ui::alert_icon::Question ) == ui::alert_response::YES ) {
 			return file;
 		}
 	}

@@ -1488,7 +1488,7 @@ void WXY_BackgroundSelect( void ){
 	bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
 	if ( !brushesSelected ) {
 		ui::root.alert( "You have to select some brushes to get the bounding box for.\n",
-						"No selection", ui::alert_type::OK, ui::alert_icon::ERROR );
+						"No selection", ui::alert_type::OK, ui::alert_icon::Error );
 		return;
 	}
 

@@ -2271,7 +2271,7 @@ void TextureBrowser_deleteTag(){
 	gtk_tree_selection_selected_foreach( selection, GtkTreeSelectionForeachFunc( TextureBrowser_selectionHelper ), &selected );
 
 	if ( g_slist_length( selected ) == 1 ) { // we only delete a single tag
-		auto result = ui::Widget(GTK_WIDGET( g_TextureBrowser.m_parent )).alert( "Are you sure you want to delete the selected tag?", "Delete Tag", ui::alert_type::YESNO, ui::alert_icon::QUESTION );
+		auto result = ui::Widget(GTK_WIDGET( g_TextureBrowser.m_parent )).alert( "Are you sure you want to delete the selected tag?", "Delete Tag", ui::alert_type::YESNO, ui::alert_icon::Question );
 
 		if ( result == ui::alert_response::YES ) {
 			GtkTreeIter iterSelected;
@@ -2392,7 +2392,7 @@ void TextureBrowser_showAll(){
 }
 
 void TextureBrowser_showUntagged(){
-	auto result = ui::Widget(GTK_WIDGET( g_TextureBrowser.m_parent )).alert( "WARNING! This function might need a lot of memory and time. Are you sure you want to use it?", "Show Untagged", ui::alert_type::YESNO, ui::alert_icon::WARNING );
+	auto result = ui::Widget(GTK_WIDGET( g_TextureBrowser.m_parent )).alert( "WARNING! This function might need a lot of memory and time. Are you sure you want to use it?", "Show Untagged", ui::alert_type::YESNO, ui::alert_icon::Warning );
 
 	if ( result == ui::alert_response::YES ) {
 		g_TextureBrowser.m_found_shaders.clear();

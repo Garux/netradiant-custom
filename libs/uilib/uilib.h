@@ -55,11 +55,11 @@ namespace ui {
     };
 
     enum class alert_icon {
-        DEFAULT,
-        ERROR,
-        WARNING,
-        QUESTION,
-        ASTERISK,
+        Default,
+        Error,
+        Warning,
+        Question,
+        Asterisk,
     };
 
     enum class alert_response {
@@ -116,7 +116,7 @@ namespace ui {
         { }
 
         alert_response alert(std::string text, std::string title = "NetRadiant",
-                             alert_type type = alert_type::OK, alert_icon icon = alert_icon::DEFAULT);
+                             alert_type type = alert_type::OK, alert_icon icon = alert_icon::Default);
 
         const char *file_dialog(bool open, const char *title, const char *path = nullptr,
                                 const char *pattern = nullptr, bool want_load = false, bool want_import = false,

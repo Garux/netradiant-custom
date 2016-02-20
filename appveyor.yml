@@ -1,0 +1,28 @@
+platform: x64
+
+shallow_clone: true
+
+install:
+  - set "PATH=C:\msys64\usr\bin;%PATH%"
+  - bash -lc "pacman --noconfirm --needed -Sy bash pacman pacman-mirrors msys2-runtime msys2-runtime-devel"
+  - ps: >-
+      bash -lc @"
+        exec 0</dev/null 2>&1
+        pacman --noconfirm -Su
+        pacman --noconfirm --needed -S base-devel mingw-w64-x86_64-{toolchain,clang,cmake,gtk2,gtkglext}
+      "@
+
+build_script:
+  - set HOME=.
+  - set MSYSTEM=MINGW64
+  - ps: >-
+      bash -lc @"
+        set -e
+        exec 0</dev/null 2>&1
+        # export CC=clang
+        # export CXX=clang++
+        mkdir build && cd build
+        cmake --version
+        cmake -G 'MSYS Makefiles' .. -DGTK2_GLIBCONFIG_INCLUDE_DIR=/mingw64/lib/glib-2.0/include -DGTK2_GDKCONFIG_INCLUDE_DIR=/mingw64/lib/gtk-2.0/include
+        cmake --build . --target radiant
+      "@

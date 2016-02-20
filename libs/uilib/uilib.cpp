@@ -34,11 +34,11 @@ namespace ui {
                                   type == alert_type::YESNOCANCEL ? eMB_YESNOCANCEL :
                                   type == alert_type::NOYES ? eMB_NOYES :
                                   eMB_OK,
-                                  icon == alert_icon::DEFAULT ? eMB_ICONDEFAULT :
-                                  icon == alert_icon::ERROR ? eMB_ICONERROR :
-                                  icon == alert_icon::WARNING ? eMB_ICONWARNING :
-                                  icon == alert_icon::QUESTION ? eMB_ICONQUESTION :
-                                  icon == alert_icon::ASTERISK ? eMB_ICONASTERISK :
+                                  icon == alert_icon::Default ? eMB_ICONDEFAULT :
+                                  icon == alert_icon::Error ? eMB_ICONERROR :
+                                  icon == alert_icon::Warning ? eMB_ICONWARNING :
+                                  icon == alert_icon::Question ? eMB_ICONQUESTION :
+                                  icon == alert_icon::Asterisk ? eMB_ICONASTERISK :
                                   eMB_ICONDEFAULT
         );
         return

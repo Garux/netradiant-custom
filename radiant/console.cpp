@@ -70,7 +70,7 @@ void Sys_LogFile( bool enable ){
 		}
 		else{
 			ui::root.alert( "Failed to create log file, check write permissions in Radiant directory.\n",
-							"Console logging", ui::alert_type::OK, ui::alert_icon::ERROR );
+							"Console logging", ui::alert_type::OK, ui::alert_icon::Error );
 		}
 	}
 	else if ( !enable && g_hLogFile != 0 ) {

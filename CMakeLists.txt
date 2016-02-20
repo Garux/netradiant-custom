@@ -82,7 +82,8 @@ if (NOT WIN32)
     include_directories(${X11_INCLUDE_DIR})
 else ()
     add_definitions(
-            -D_WIN32
+            -DWIN32=1
+            -D_WIN32=1
     )
 endif ()
 

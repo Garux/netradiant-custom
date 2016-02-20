@@ -699,7 +699,7 @@ static ui::Widget text_editor;
 static ui::Widget text_widget; // slave, text widget from the gtk editor
 
 static gint editor_delete( ui::Widget widget, gpointer data ){
-	if ( widget.alert( "Close the shader editor ?", "Radiant", ui::alert_type::YESNO, ui::alert_icon::QUESTION ) == ui::alert_response::NO ) {
+	if ( widget.alert( "Close the shader editor ?", "Radiant", ui::alert_type::YESNO, ui::alert_icon::Question ) == ui::alert_response::NO ) {
 		return TRUE;
 	}
 
@@ -723,7 +723,7 @@ static void editor_save( ui::Widget widget, gpointer data ){
 }
 
 static void editor_close( ui::Widget widget, gpointer data ){
-	if ( text_editor.alert( "Close the shader editor ?", "Radiant", ui::alert_type::YESNO, ui::alert_icon::QUESTION ) == ui::alert_response::NO ) {
+	if ( text_editor.alert( "Close the shader editor ?", "Radiant", ui::alert_type::YESNO, ui::alert_icon::Question ) == ui::alert_response::NO ) {
 		return;
 	}
 
@@ -1040,7 +1040,7 @@ void DoTextEditor( const char* filename, int cursorpos ){
 #ifdef WIN32
 	if ( g_TextEditor_useWin32Editor ) {
 		globalOutputStream() << "opening file '" << filename << "' (line " << cursorpos << " info ignored)\n";
-		ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), "open", filename, 0, 0, SW_SHOW );
+		ShellExecute( (HWND)GDK_WINDOW_HWND( gtk_widget_get_window( MainFrame_getWindow() ) ), "open", filename, 0, 0, SW_SHOW );
 		return;
 	}
 #else
