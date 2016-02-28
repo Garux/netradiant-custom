@@ -5,6 +5,10 @@ find_package(OpenGL REQUIRED)
 include_directories("${CMAKE_SOURCE_DIR}/libs")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
+string(SUBSTRING ${CMAKE_SHARED_MODULE_SUFFIX} 1 -1 _clibext)
+add_definitions(-DCMAKE_SHARED_MODULE_SUFFIX="${_clibext}")
+unset(_clibext)
+
 set(RADIANTLIST
     autosave.cpp
     autosave.h

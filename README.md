@@ -64,6 +64,14 @@ cmake -G "MSYS Makefiles" .. -DGTK2_GLIBCONFIG_INCLUDE_DIR=/mingw64/lib/glib-2.0
 cmake --build . -- -j$(nproc)
 ```
 
+## OS X:
+
+```
+brew install gtkglext
+brew install Caskroom/cask/xquartz
+brew link --force gettext
+```
+
 More Compilation Details
 ------------------------
 

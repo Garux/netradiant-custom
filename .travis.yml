@@ -30,4 +30,4 @@ before_script:
 script:
   - mkdir build && cd build
   - cmake ..
-  - cmake --build . --target radiant -- -j4
+  - cmake --build . -- -j4

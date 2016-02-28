@@ -6,7 +6,7 @@ macro(radiant_tool name)
     add_executable(${name} ${ARGN})
     if(NOT (CMAKE_EXECUTABLE_SUFFIX STREQUAL RADIANT_EXECUTABLE))
         add_custom_command(TARGET ${name} POST_BUILD
-            COMMAND ln -f -s -T "$<TARGET_FILE_NAME:${name}>" "${CMAKE_BINARY_DIR}/${name}.${RADIANT_EXECUTABLE}"
+            COMMAND ln -f -s "$<TARGET_FILE_NAME:${name}>" "${CMAKE_BINARY_DIR}/${name}.${RADIANT_EXECUTABLE}"
             VERBATIM
         )
     endif()

@@ -514,15 +514,7 @@ void operator()( const char* name ) const {
 }
 };
 
-const char* const c_library_extension =
-#if defined( WIN32 )
-	"dll"
-#elif defined ( __APPLE__ )
-	"dylib"
-#elif defined( __linux__ ) || defined ( __FreeBSD__ )
-	"so"
-#endif
-;
+const char* const c_library_extension = CMAKE_SHARED_MODULE_SUFFIX;
 
 void Radiant_loadModules( const char* path ){
 	Directory_forEach( path, MatchFileExtension<CLoadModule>( c_library_extension, CLoadModule( path ) ) );

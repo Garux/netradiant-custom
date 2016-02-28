@@ -18,6 +18,9 @@
  */
 
 #include "dialogs-gtk.h"
+
+#include <cstdlib>
+
 #include "../funchandlers.h"
 
 #include "str.h"
