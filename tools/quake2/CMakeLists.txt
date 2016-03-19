@@ -1,7 +1,7 @@
 
 include_directories(common)
-include_directories("${CMAKE_SOURCE_DIR}/libs")
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/libs")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
@@ -54,7 +54,7 @@ radiant_tool(q2map EXCLUDE_FROM_ALL
    q2map/trace.c
    q2map/tree.c
    q2map/writebsp.c
-	"${CMAKE_BINARY_DIR}/version.c"
+	"${PROJECT_BINARY_DIR}/version.c"
 )
 target_link_libraries(q2map
     ${LIBXML2_LIBRARIES}
@@ -92,7 +92,7 @@ radiant_tool(qdata3 EXCLUDE_FROM_ALL
    qdata/sprites.c
    qdata/tables.c
    qdata/video.c
-	"${CMAKE_BINARY_DIR}/version.c"
+	"${PROJECT_BINARY_DIR}/version.c"
 )
 
 target_link_libraries(qdata3
@@ -166,7 +166,7 @@ radiant_tool(h2data EXCLUDE_FROM_ALL
    qdata_heretic2/tables.c
    qdata_heretic2/tmix.c
    qdata_heretic2/video.c
-	"${CMAKE_BINARY_DIR}/version.c"
+	"${PROJECT_BINARY_DIR}/version.c"
 )
 target_include_directories(h2data BEFORE
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/qdata_heretic2/common"

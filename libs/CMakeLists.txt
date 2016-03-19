@@ -1,7 +1,7 @@
 set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(cmdlib)
 add_subdirectory(container)

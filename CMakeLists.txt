@@ -32,9 +32,9 @@ if (GIT_VERSION)
     set(Q3MAP_VERSION "${Q3MAP_VERSION}-git-${GIT_VERSION}")
 endif ()
 
-configure_file("${CMAKE_SOURCE_DIR}/include/version.cpp.in" "${CMAKE_BINARY_DIR}/version.cpp")
+configure_file("${PROJECT_SOURCE_DIR}/include/version.cpp.in" "${PROJECT_BINARY_DIR}/version.cpp")
 
-add_library(version "${CMAKE_BINARY_DIR}/version.cpp")
+add_library(version "${PROJECT_BINARY_DIR}/version.cpp")
 set_property(TARGET version PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 set(RADIANT_ABOUTMSG "Custom build" CACHE STRING "About message")
@@ -183,13 +183,13 @@ set_target_properties(radiant PROPERTIES
 
 add_subdirectory(tools)
 
-if (NOT (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR))
+if (NOT (PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR))
     # Copy data files from sources to the build directory
     message(STATUS "Copying data files")
-    file(GLOB DATA_FILES "${CMAKE_SOURCE_DIR}/setup/data/tools/*")
-    file(COPY ${DATA_FILES} DESTINATION "${CMAKE_BINARY_DIR}")
-    file(GLOB DATA_FILES "${CMAKE_SOURCE_DIR}/docs/*")
-    file(COPY ${DATA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/docs")
+    file(GLOB DATA_FILES "${PROJECT_SOURCE_DIR}/setup/data/tools/*")
+    file(COPY ${DATA_FILES} DESTINATION "${PROJECT_BINARY_DIR}")
+    file(GLOB DATA_FILES "${PROJECT_SOURCE_DIR}/docs/*")
+    file(COPY ${DATA_FILES} DESTINATION "${PROJECT_BINARY_DIR}/docs")
 endif ()
 
 #-----------------------------------------------------------------------
@@ -199,7 +199,7 @@ endif ()
 option(DOWNLOAD_GAMEPACKS "Download game packs" ON)
 add_custom_target(game_packs
         COMMAND ${CMAKE_COMMAND} -E make_directory games
-        COMMAND DOWNLOAD_GAMEPACKS=yes SOURCE_DIR="${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/install-gamepacks.sh" "${CMAKE_BINARY_DIR}"
+        COMMAND DOWNLOAD_GAMEPACKS=yes SOURCE_DIR="${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/install-gamepacks.sh" "${PROJECT_BINARY_DIR}"
         COMMENT "Downloading game packs"
         )
 add_custom_command(OUTPUT games

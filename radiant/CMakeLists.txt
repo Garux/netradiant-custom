@@ -1,9 +1,9 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
 find_package(OpenGL REQUIRED)
 
-include_directories("${CMAKE_SOURCE_DIR}/libs")
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/libs")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 string(SUBSTRING ${CMAKE_SHARED_MODULE_SUFFIX} 1 -1 _clibext)
 add_definitions(-DCMAKE_SHARED_MODULE_SUFFIX="${_clibext}")

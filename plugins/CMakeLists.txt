@@ -1,7 +1,7 @@
-include_directories("${CMAKE_SOURCE_DIR}/libs")
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/libs")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/modules")
 
 add_custom_target(modules)
 macro(radiant_plugin name)
