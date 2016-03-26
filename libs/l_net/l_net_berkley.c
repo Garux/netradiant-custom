@@ -37,6 +37,8 @@
 #include "l_net_wins.h"
 
 #include <sys/types.h>
+typedef unsigned short u_short;
+typedef unsigned long u_long;
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>

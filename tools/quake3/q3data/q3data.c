@@ -336,6 +336,7 @@ void PackDirectory_r( char *dir ){
 #include <sys/types.h>
 #ifndef WIN32
 #include <sys/dir.h>
+#include <sys/stat.h>
 #else
 #include <sys/dirent.h>
 #endif
@@ -372,7 +373,7 @@ void PackDirectory_r( char *dir ){
 		if ( stat( dirstring, &st ) == -1 ) {
 			Error( "fstating %s", pf->name );
 		}
-		if ( st.st_mode & S_IFDIR ) { // directory
+		if ( S_ISDIR(st.st_mode) ) { // directory
 			PackDirectory_r( fullname );
 			continue;
 		}

@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
+
+option(SKIP_RADIANT "don't build the gui, useful for map compile servers" OFF)
 
 project(NetRadiant C CXX)
 
@@ -150,19 +152,25 @@ add_library(includes ${INCLUDELIST})
 # Plugins
 #-----------------------------------------------------------------------
 
-add_subdirectory(contrib)
+if (NOT SKIP_RADIANT)
+    add_subdirectory(contrib)
+endif ()
 
 #-----------------------------------------------------------------------
 # Modules
 #-----------------------------------------------------------------------
 
-add_subdirectory(plugins)
+if (NOT SKIP_RADIANT)
+    add_subdirectory(plugins)
+endif ()
 
 #-----------------------------------------------------------------------
 # Radiant
 #-----------------------------------------------------------------------
 
-add_subdirectory(radiant build)
+if (NOT SKIP_RADIANT)
+    add_subdirectory(radiant build)
+endif ()
 
 if (CMAKE_EXECUTABLE_SUFFIX)
     set(RADIANT_EXECUTABLE ${CMAKE_EXECUTABLE_SUFFIX})
@@ -173,9 +181,12 @@ else ()
             OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 endif ()
-set_target_properties(radiant PROPERTIES
-        COMPILE_DEFINITIONS RADIANT_EXECUTABLE="${RADIANT_EXECUTABLE}"
-        )
+
+if (NOT SKIP_RADIANT)
+    set_target_properties(radiant PROPERTIES
+            COMPILE_DEFINITIONS RADIANT_EXECUTABLE="${RADIANT_EXECUTABLE}"
+            )
+endif ()
 
 #-----------------------------------------------------------------------
 # Tools
