@@ -501,12 +501,18 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/bspfile_ibsp.o \
 	tools/quake3/q3map2/bspfile_rbsp.o \
 	tools/quake3/q3map2/bsp.o \
+	tools/quake3/q3map2/bsp_analyze.o \
+	tools/quake3/q3map2/bsp_scale.o \
+	tools/quake3/q3map2/bsp_info.o \
 	tools/quake3/q3map2/convert_ase.o \
+	tools/quake3/q3map2/convert_bsp.o \
 	tools/quake3/q3map2/convert_obj.o \
 	tools/quake3/q3map2/convert_map.o \
 	tools/quake3/q3map2/decals.o \
 	tools/quake3/q3map2/facebsp.o \
+	tools/quake3/q3map2/fixaas.o \
 	tools/quake3/q3map2/fog.o \
+	tools/quake3/q3map2/help.o \
 	tools/quake3/q3map2/image.o \
 	tools/quake3/q3map2/leakfile.o \
 	tools/quake3/q3map2/light_bounce.o \
@@ -516,6 +522,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/q3map2/light_ydnar.o \
 	tools/quake3/q3map2/main.o \
 	tools/quake3/q3map2/map.o \
+	tools/quake3/q3map2/minimap.o \
 	tools/quake3/q3map2/mesh.o \
 	tools/quake3/q3map2/model.o \
 	tools/quake3/q3map2/patch.o \
