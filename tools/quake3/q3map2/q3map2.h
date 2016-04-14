@@ -1848,7 +1848,7 @@ int                         ImportLightmapsMain( int argc, char **argv );
 
 void                        SetupSurfaceLightmaps( void );
 void                        StitchSurfaceLightmaps( void );
-void                        StoreSurfaceLightmaps( void );
+void                        StoreSurfaceLightmaps( qboolean fastAllocate );
 
 
 /* image.c */

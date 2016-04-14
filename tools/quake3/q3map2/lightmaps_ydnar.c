@@ -1976,7 +1976,7 @@ static void SetupOutLightmap( rawLightmap_t *lm, outLightmap_t *olm ){
  */
 
 #define LIGHTMAP_RESERVE_COUNT 1
-static void FindOutLightmaps( rawLightmap_t *lm ){
+static void FindOutLightmaps( rawLightmap_t *lm, qboolean fastAllocate ){
 	int i, j, k, lightmapNum, xMax, yMax, x = -1, y = -1, sx, sy, ox, oy, offset;
 	outLightmap_t       *olm;
 	surfaceInfo_t       *info;
@@ -1984,6 +1984,7 @@ static void FindOutLightmaps( rawLightmap_t *lm ){
 	vec3_t color, direction;
 	byte                *pixel;
 	qboolean ok;
+	int xIncrement, yIncrement;
 
 
 	/* set default lightmap number (-3 = LIGHTMAP_BY_VERTEX) */
@@ -2094,6 +2095,13 @@ static void FindOutLightmaps( rawLightmap_t *lm ){
 					continue;
 				}
 
+				/* if fast allocation, skip lightmap files that are more than 90% complete */
+				if ( fastAllocate == qtrue ) {
+					if (olm->freeLuxels < (olm->customWidth * olm->customHeight) / 10) {
+						continue;
+					}
+				}
+
 				/* don't store non-custom raw lightmaps on custom bsp lightmaps */
 				if ( olm->customWidth != lm->customWidth ||
 					 olm->customHeight != lm->customHeight ) {
@@ -2111,10 +2119,20 @@ static void FindOutLightmaps( rawLightmap_t *lm ){
 					yMax = ( olm->customHeight - lm->h ) + 1;
 				}
 
+				/* if fast allocation, do not test allocation on every pixels, especially for large lightmaps */
+				if ( fastAllocate == qtrue ) {
+					xIncrement = MAX(1, lm->w / 15);
+					yIncrement = MAX(1, lm->h / 15);
+				}
+				else {
+					xIncrement = 1;
+					yIncrement = 1;
+				}
+
 				/* walk the origin around the lightmap */
-				for ( y = 0; y < yMax; y++ )
+				for ( y = 0; y < yMax; y += yIncrement )
 				{
-					for ( x = 0; x < xMax; x++ )
+					for ( x = 0; x < xMax; x += xIncrement )
 					{
 						/* find a fine tract of lauhnd */
 						ok = TestOutLightmapStamp( lm, lightmapNum, olm, x, y );
@@ -2292,6 +2310,12 @@ static int CompareRawLightmap( const void *a, const void *b ){
 	/* get min number of surfaces */
 	min = ( alm->numLightSurfaces < blm->numLightSurfaces ? alm->numLightSurfaces : blm->numLightSurfaces );
 
+	/* compare size, allocate bigger first */
+	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
+	if ( diff != 0 ) {
+		return diff;
+	}
+
 	/* iterate */
 	for ( i = 0; i < min; i++ )
 	{
@@ -2311,12 +2335,6 @@ static int CompareRawLightmap( const void *a, const void *b ){
 	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
 		diff += blm->styles[ i ] - alm->styles[ i ];
 	if ( diff ) {
-		return diff;
-	}
-
-	/* compare size */
-	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
-	if ( diff != 0 ) {
 		return diff;
 	}
 
@@ -2441,7 +2459,7 @@ void FillOutLightmap( outLightmap_t *olm ){
    stores the surface lightmaps into the bsp as byte rgb triplets
  */
 
-void StoreSurfaceLightmaps( void ){
+void StoreSurfaceLightmaps( qboolean fastAllocate ){
 	int i, j, k, x, y, lx, ly, sx, sy, *cluster, mappedSamples;
 	int style, size, lightmapNum, lightmapNum2;
 	float               *normal, *luxel, *bspLuxel, *bspLuxel2, *radLuxel, samples, occludedSamples;
@@ -3059,7 +3077,7 @@ void StoreSurfaceLightmaps( void ){
 	for ( i = 0; i < numRawLightmaps; i++ )
 	{
 		lm = &rawLightmaps[ sortLightmaps[ i ] ];
-		FindOutLightmaps( lm );
+		FindOutLightmaps( lm, fastAllocate );
 	}
 
 	/* set output numbers in twinned lightmaps */
