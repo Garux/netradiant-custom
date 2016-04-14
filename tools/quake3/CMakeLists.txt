@@ -44,6 +44,7 @@ set(q3map2_games
         q3map2/game_sof2.h
         q3map2/game_tenebrae.h
         q3map2/game_tremulous.h
+        q3map2/game_unvanquished.h
         q3map2/game_wolf.h
         q3map2/game_wolfet.h
         q3map2/game_xonotic.h
