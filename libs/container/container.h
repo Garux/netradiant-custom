@@ -22,6 +22,7 @@
 #if !defined( INCLUDED_CONTAINER_CONTAINER_H )
 #define INCLUDED_CONTAINER_CONTAINER_H
 
+#include <algorithm>
 #include <list>
 #include <set>
 

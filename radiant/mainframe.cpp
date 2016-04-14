@@ -532,7 +532,9 @@ void operator()( const char* name ) const {
 };
 
 const char* const c_library_extension =
-#if defined( WIN32 )
+#if defined( CMAKE_SHARED_MODULE_SUFFIX )
+    CMAKE_SHARED_MODULE_SUFFIX
+#elif defined( WIN32 )
 	"dll"
 #elif defined ( __APPLE__ )
 	"dylib"

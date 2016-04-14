@@ -1,0 +1,25 @@
+radiant_plugin(entity
+        angle.cpp angle.h
+        angles.cpp angles.h
+        colour.cpp colour.h
+        curve.cpp curve.h
+        doom3group.cpp doom3group.h
+        eclassmodel.cpp eclassmodel.h
+        entity.cpp entity.h
+        filters.cpp filters.h
+        generic.cpp generic.h
+        group.cpp group.h
+        keyobservers.cpp keyobservers.h
+        light.cpp light.h
+        miscmodel.cpp miscmodel.h
+        model.cpp model.h
+        modelskinkey.cpp modelskinkey.h
+        namedentity.cpp namedentity.h
+        namekeys.cpp namekeys.h
+        origin.cpp origin.h
+        plugin.cpp plugin.h
+        rotation.cpp rotation.h
+        scale.cpp scale.h
+        skincache.cpp skincache.h
+        targetable.cpp targetable.h
+        )

@@ -1,5 +1,6 @@
 *.[oda]
+.idea/
 .settings
-games
-install
-games
+build/
+games/
+install/

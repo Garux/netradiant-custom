@@ -1,0 +1,5 @@
+include(FindPkgConfig OPTIONAL)
+if (PKG_CONFIG_FOUND)
+    include(FindPkgConfig)
+    pkg_check_modules(GLIB glib-2.0)
+endif ()

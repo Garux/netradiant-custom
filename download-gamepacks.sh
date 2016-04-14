@@ -149,15 +149,15 @@ pack()
 mkdir -p games
 pack DarkPlacesPack  GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/DarkPlacesPack/branches/1.5/
 pack NexuizPack      GPL         gitdir git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
-pack OpenArenaPack   unknown     zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/OpenArenaPack.zip
-pack OsirionPack     GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/OsirionPack.zip
+pack OpenArenaPack   unknown     zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/OpenArenaPack.zip
+pack OsirionPack     GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/OsirionPack.zip
 pack Q3Pack          proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
-pack Quake2Pack      proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/Quake2Pack.zip
-pack QuakePack       GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/Quake1Pack.zip
+pack Quake2Pack      proprietary zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/Quake2Pack.zip
+pack QuakePack       GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/Quake1Pack.zip
 pack QuetooPack      GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
-pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/TremulousPack.zip
+pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/TremulousPack.zip
 pack UFOAIPack       proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
 #pack WarsowPack     GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
-#pack WarsowPack     GPL         zip1   http://ingar.satgnu.net/files/gtkradiant/gamepacks/WarsowPack.zip
+#pack WarsowPack     GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/WarsowPack.zip
 pack WarsowPack      GPL         git    https://github.com/Warsow/NetRadiantPack.git
-pack XonoticPack     GPL         git    http://git.xonotic.org/xonotic/netradiant-xonoticpack.git
+pack XonoticPack     GPL         git    https://gitlab.com/xonotic/netradiant-xonoticpack.git

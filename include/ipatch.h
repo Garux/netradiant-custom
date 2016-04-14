@@ -22,6 +22,7 @@
 #if !defined( INCLUDED_IPATCH_H )
 #define INCLUDED_IPATCH_H
 
+#include "debugging/debugging.h"
 #include "generic/constant.h"
 #include "generic/vector.h"
 

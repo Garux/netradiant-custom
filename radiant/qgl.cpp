@@ -33,7 +33,11 @@
 #define APIENTRY __stdcall
 #endif
 
+#if defined( __APPLE__ ) && !defined( XWINDOWS )
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 #if defined( _WIN32 )
 #undef WINGDIAPI
@@ -61,6 +65,10 @@ Bool ( *qglXQueryExtension )( Display *dpy, int *errorb, int *event );
 void*        ( *qglXGetProcAddressARB )( const GLubyte * procName );
 typedef void* ( *glXGetProcAddressARBProc )( const GLubyte *procName );
 
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include <stdlib.h>
+#include <string.h>
 #else
 #error "unsupported platform"
 #endif
@@ -74,6 +82,7 @@ void QGL_Shutdown( OpenGLBinding& table ){
 #elif defined( XWINDOWS )
 	qglXQueryExtension           = glXQueryExtension;
 	qglXGetProcAddressARB        = 0;
+#elif defined(__APPLE__)
 #else
 #error "unsupported platform"
 #endif
@@ -171,6 +180,15 @@ QGLFunctionPointer QGL_getExtensionFunc( const char* symbol ){
 	{
 		return (QGLFunctionPointer) qglXGetProcAddressARB( reinterpret_cast<const GLubyte*>( symbol ) );
 	}
+#elif defined(__APPLE__)
+	// Prepend a '_' for the Unix C symbol mangling convention
+	char *symbolName = (char *) malloc(strlen(symbol) + 2);
+	strcpy(symbolName + 1, symbol);
+	symbolName[0] = '_';
+	NSSymbol nssymbol = NULL;
+	if (NSIsSymbolNameDefined(symbolName)) nssymbol = NSLookupAndBindSymbol(symbolName);
+	free(symbolName);
+    return nssymbol ? reinterpret_cast<QGLFunctionPointer>(NSAddressOfSymbol(nssymbol)) : reinterpret_cast<QGLFunctionPointer>(glInvalidFunction);
 #elif defined( WIN32 )
 	ASSERT_NOTNULL( qwglGetProcAddress );
 	return (QGLFunctionPointer) qwglGetProcAddress( symbol );
@@ -540,6 +558,7 @@ int QGL_Init( OpenGLBinding& table ){
 	if ( ( qglXQueryExtension == 0 ) || ( qglXQueryExtension( GDK_DISPLAY(),0,0 ) != True ) ) {
 		return 0;
 	}
+#elif defined (__APPLE__)
 #else
 #error "unsupported platform"
 #endif
