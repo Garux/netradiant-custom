@@ -1016,10 +1016,10 @@ side_t *SelectSplitSide (bspbrush_t *brushes, node_t *node)
 				pnum = side->planenum;
 				pnum &= ~1;	// allways use positive facing plane
 
-				CheckPlaneAgainstParents (pnum, node);
-
 				if (!CheckPlaneAgainstVolume (pnum, node))
 					continue;	// would produce a tiny volume
+
+				CheckPlaneAgainstParents (pnum, node);
 
 				front = 0;
 				back = 0;
