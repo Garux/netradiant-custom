@@ -80,6 +80,7 @@ radiant_tool(q3map2
         q3map2/convert_map.c
         q3map2/convert_obj.c
         q3map2/decals.c
+        q3map2/exportents.c
         q3map2/facebsp.c
         q3map2/fixaas.c
         q3map2/fog.c
