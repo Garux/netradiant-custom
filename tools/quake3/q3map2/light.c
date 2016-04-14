@@ -1890,7 +1890,7 @@ void SetupGrid( void ){
    does what it says...
  */
 
-void LightWorld( void ){
+void LightWorld( const char *BSPFilePath ){
 	vec3_t color;
 	float f;
 	int b, bt;
@@ -2035,8 +2035,8 @@ void LightWorld( void ){
 		/* store off the bsp between bounces */
 		StoreSurfaceLightmaps();
 		UnparseEntities();
-		Sys_Printf( "Writing %s\n", source );
-		WriteBSPFile( source );
+		Sys_Printf( "Writing %s\n", BSPFilePath );
+		WriteBSPFile( BSPFilePath );
 
 		/* note it */
 		Sys_Printf( "\n--- Radiosity (bounce %d of %d) ---\n", b, bt );
@@ -2109,7 +2109,10 @@ void LightWorld( void ){
 int LightMain( int argc, char **argv ){
 	int i;
 	float f;
-	char mapSource[ 1024 ];
+	char BSPFilePath[ 1024 ];
+	char surfaceFilePath[ 1024 ];
+	BSPFilePath[0] = 0;
+	surfaceFilePath[0] = 0;
 	const char  *value;
 	int lightmapMergeSize = 0;
 	qboolean lightSamplesInsist = qfalse;
@@ -2859,6 +2862,18 @@ int LightMain( int argc, char **argv ){
 			lightmapFill = qtrue;
 			Sys_Printf( "Filling lightmap colors from surrounding pixels to improve JPEG compression\n" );
 		}
+		else if ( !strcmp( argv[ i ], "-bspfile" ) )
+		{
+			strcpy( BSPFilePath, argv[i + 1] );
+			i++;
+			Sys_Printf( "Use %s as bsp file\n", BSPFilePath );
+		}
+		else if ( !strcmp( argv[ i ], "-srffile" ) )
+		{
+			strcpy( surfaceFilePath, argv[i + 1] );
+			i++;
+			Sys_Printf( "Use %s as surface file\n", surfaceFilePath );
+		}
 		/* unhandled args */
 		else
 		{
@@ -2912,29 +2927,37 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( "Restricted lightmap searching enabled - block size adjusted to %d\n", lightmapSearchBlockSize );
 	}
 
-	/* clean up map name */
 	strcpy( source, ExpandArg( argv[ i ] ) );
 	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
-	strcpy( mapSource, ExpandArg( argv[ i ] ) );
-	StripExtension( mapSource );
-	DefaultExtension( mapSource, ".map" );
+	DefaultExtension( source, ".map" );
+
+	if (!BSPFilePath[0]) {
+		strcpy( BSPFilePath, ExpandArg( argv[ i ] ) );
+		StripExtension( BSPFilePath );
+		DefaultExtension( BSPFilePath, ".bsp" );
+	}
+
+	if (!surfaceFilePath[0]) {
+		strcpy( surfaceFilePath, ExpandArg( argv[ i ] ) );
+		StripExtension( surfaceFilePath );
+		DefaultExtension( surfaceFilePath, ".srf" );
+	}
 
 	/* ydnar: set default sample size */
 	SetDefaultSampleSize( sampleSize );
 
 	/* ydnar: handle shaders */
-	BeginMapShaderFile( source );
+	BeginMapShaderFile( BSPFilePath );
 	LoadShaderInfo();
 
 	/* note loading */
 	Sys_Printf( "Loading %s\n", source );
 
 	/* ydnar: load surface file */
-	LoadSurfaceExtraFile( source );
+	LoadSurfaceExtraFile( surfaceFilePath );
 
 	/* load bsp file */
-	LoadBSPFile( source );
+	LoadBSPFile( BSPFilePath );
 
 	/* parse bsp entities */
 	ParseEntities();
@@ -2945,7 +2968,7 @@ int LightMain( int argc, char **argv ){
 	/* load map file */
 	value = ValueForKey( &entities[ 0 ], "_keepLights" );
 	if ( value[ 0 ] != '1' ) {
-		LoadMapFile( mapSource, qtrue, qfalse );
+		LoadMapFile( source, qtrue, qfalse );
 	}
 
 	/* set the entity/model origins and init yDrawVerts */
@@ -2961,15 +2984,15 @@ int LightMain( int argc, char **argv ){
 	SetupTraceNodes();
 
 	/* light the world */
-	LightWorld();
+	LightWorld( BSPFilePath );
 
 	/* ydnar: store off lightmaps */
 	StoreSurfaceLightmaps();
 
 	/* write out the bsp */
 	UnparseEntities();
-	Sys_Printf( "Writing %s\n", source );
-	WriteBSPFile( source );
+	Sys_Printf( "Writing %s\n", BSPFilePath );
+	WriteBSPFile( BSPFilePath );
 
 	/* ydnar: export lightmaps */
 	if ( exportLightmaps && !externalLightmaps ) {

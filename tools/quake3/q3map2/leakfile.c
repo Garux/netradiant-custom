@@ -43,7 +43,7 @@
 
    LEAK FILE GENERATION
 
-   Save out name.line for qe3 to read
+   Save out name.lin for qe3 to read
    ==============================================================================
  */
 
@@ -59,10 +59,9 @@
    TTimo: builds a polyline xml node
    =============
  */
-xmlNodePtr LeakFile( tree_t *tree ){
+xmlNodePtr LeakFile( tree_t *tree, const char *filename ){
 	vec3_t mid;
 	FILE    *linefile;
-	char filename[1024];
 	node_t  *node;
 	int count;
 	xmlNodePtr xml_node, point;
@@ -76,7 +75,6 @@ xmlNodePtr LeakFile( tree_t *tree ){
 	//
 	// write the points to the file
 	//
-	sprintf( filename, "%s.lin", source );
 	linefile = fopen( filename, "w" );
 	if ( !linefile ) {
 		Error( "Couldn't open %s\n", filename );

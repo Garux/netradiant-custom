@@ -37,7 +37,7 @@
    PseudoCompileBSP()
    a stripped down ProcessModels
  */
-void PseudoCompileBSP( qboolean need_tree ){
+void PseudoCompileBSP( qboolean need_tree, const char *BSPFilePath, const char *surfaceFilePath ){
 	int models;
 	char modelValue[10];
 	entity_t *entity;
@@ -125,7 +125,7 @@ void PseudoCompileBSP( qboolean need_tree ){
 		EmitBrushes( entity->brushes, &entity->firstBrush, &entity->numBrushes );
 		EndModel( entity, node );
 	}
-	EndBSPFile( qfalse );
+	EndBSPFile( qfalse, BSPFilePath, surfaceFilePath );
 }
 
 /*
@@ -138,6 +138,8 @@ int ConvertBSPMain( int argc, char **argv ){
 	int ( *convertFunc )( char * );
 	game_t  *convertGame;
 	char ext[1024];
+	char BSPFilePath [ 1024 ];
+	char surfaceFilePath [ 1024 ];
 	qboolean map_allowed, force_bsp, force_map;
 
 
@@ -238,7 +240,9 @@ int ConvertBSPMain( int argc, char **argv ){
 		DefaultExtension( source, ".map" );
 		Sys_Printf( "Loading %s\n", source );
 		LoadMapFile( source, qfalse, convertGame == NULL );
-		PseudoCompileBSP( convertGame != NULL );
+		sprintf( BSPFilePath, "%s.bsp", source );
+		sprintf( surfaceFilePath, "%s.srf", source );
+		PseudoCompileBSP( convertGame != NULL, BSPFilePath, surfaceFilePath );
 	}
 	else
 	{

@@ -265,7 +265,7 @@ static void FixBrushSides( entity_t *e ){
    creates a full bsp + surfaces for the worldspawn entity
  */
 
-void ProcessWorldModel( void ){
+void ProcessWorldModel( const char *portalFilePath, const char *lineFilePath ){
 	int i, s;
 	entity_t    *e;
 	tree_t      *tree;
@@ -343,7 +343,7 @@ void ProcessWorldModel( void ){
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
 		Sys_FPrintf( SYS_NOXML, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
-		polyline = LeakFile( tree );
+		polyline = LeakFile( tree, lineFilePath );
 		leaknode = xmlNewNode( NULL, (xmlChar*)"message" );
 		xmlNodeSetContent( leaknode, (xmlChar*)"MAP LEAKED\n" );
 		xmlAddChild( leaknode, polyline );
@@ -380,7 +380,7 @@ void ProcessWorldModel( void ){
 	/* save out information for visibility processing */
 	NumberClusters( tree );
 	if ( !leaked ) {
-		WritePortalFile( tree );
+		WritePortalFile( tree, portalFilePath );
 	}
 
 	/* flood from entities */
@@ -592,7 +592,7 @@ void ProcessSubModel( void ){
    process world + other models into the bsp
  */
 
-void ProcessModels( void ){
+void ProcessModels( const char *portalFilePath, const char *lineFilePath ){
 	qboolean oldVerbose;
 	entity_t    *entity;
 
@@ -618,7 +618,7 @@ void ProcessModels( void ){
 		/* process the model */
 		Sys_FPrintf( SYS_VRB, "############### model %i ###############\n", numBSPModels );
 		if ( mapEntityNum == 0 ) {
-			ProcessWorldModel();
+			ProcessWorldModel(portalFilePath, lineFilePath);
 		}
 		else{
 			ProcessSubModel();
@@ -645,17 +645,14 @@ void ProcessModels( void ){
    this is probably broken unless teamed with a radiant version that preserves entity order
  */
 
-void OnlyEnts( void ){
-	char out[ 1024 ];
-
+void OnlyEnts( const char *BSPFilePath ){
 	char save_cmdline[1024], save_version[1024], save_gridsize[1024];
 	const char *p;
 
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
 
-	sprintf( out, "%s.bsp", source );
-	LoadBSPFile( out );
+	LoadBSPFile( BSPFilePath );
 
 	ParseEntities();
 	p = ValueForKey( &entities[0], "_q3map2_cmdline" );
@@ -688,7 +685,7 @@ void OnlyEnts( void ){
 	numBSPEntities = numEntities;
 	UnparseEntities();
 
-	WriteBSPFile( out );
+	WriteBSPFile( BSPFilePath );
 }
 
 
@@ -702,6 +699,14 @@ int BSPMain( int argc, char **argv ){
 	int i;
 	char path[ 1024 ], tempSource[ 1024 ];
 	qboolean onlyents = qfalse;
+	char BSPFilePath [ 1024 ];
+	char lineFilePath [ 1024 ];
+	char portalFilePath [ 1024 ];
+	char surfaceFilePath [ 1024 ];
+	BSPFilePath[0] = 0;
+	lineFilePath[0] = 0;
+	portalFilePath[0] = 0;
+	surfaceFilePath[0] = 0;
 
 
 	/* note it */
@@ -978,6 +983,30 @@ int BSPMain( int argc, char **argv ){
 			Sys_Printf( "Max Area face surface generation enabled\n" );
 			maxAreaFaceSurface = qtrue;
 		}
+		else if ( !strcmp( argv[ i ], "-bspfile" ) )
+		{
+			strcpy( BSPFilePath, argv[i + 1] );
+			i++;
+			Sys_Printf( "Use %s as bsp file\n", BSPFilePath );
+		}
+		else if ( !strcmp( argv[ i ], "-linfile" ) )
+		{
+			strcpy( lineFilePath, argv[i + 1] );
+			i++;
+			Sys_Printf( "Use %s as line file\n", lineFilePath );
+		}
+		else if ( !strcmp( argv[ i ], "-prtfile" ) )
+		{
+			strcpy( portalFilePath, argv[i + 1] );
+			i++;
+			Sys_Printf( "Use %s as portal file\n", portalFilePath );
+		}
+		else if ( !strcmp( argv[ i ], "-srffile" ) )
+		{
+			strcpy( surfaceFilePath, argv[i + 1] );
+			i++;
+			Sys_Printf( "Use %s as surface file\n", surfaceFilePath );
+		}
 		else if ( !strcmp( argv[ i ], "-bsp" ) ) {
 			Sys_Printf( "-bsp argument unnecessary\n" );
 		}
@@ -999,13 +1028,23 @@ int BSPMain( int argc, char **argv ){
 	/* ydnar: set default sample size */
 	SetDefaultSampleSize( sampleSize );
 
+	if (!BSPFilePath[0]) {
+		sprintf( BSPFilePath, "%s.bsp", source );
+	}
+	if (!lineFilePath[0]) {
+		sprintf( lineFilePath, "%s.lin", source );
+	}
+	if (!portalFilePath[0]) {
+		sprintf( portalFilePath, "%s.prt", source );
+	}
+	if (!surfaceFilePath[0]) {
+		sprintf( surfaceFilePath, "%s.srf", source );
+	}
+
 	/* delete portal, line and surface files */
-	sprintf( path, "%s.prt", source );
-	remove( path );
-	sprintf( path, "%s.lin", source );
-	remove( path );
-	//%	sprintf( path, "%s.srf", source );	/* ydnar */
-	//%	remove( path );
+	remove( portalFilePath );
+	remove( lineFilePath );
+	//%	remove( surfaceFilePath )	/* ydnar */
 
 	/* expand mapname */
 	strcpy( name, ExpandArg( argv[ i ] ) );
@@ -1018,7 +1057,7 @@ int BSPMain( int argc, char **argv ){
 
 	/* if onlyents, just grab the entites and resave */
 	if ( onlyents ) {
-		OnlyEnts();
+		OnlyEnts( BSPFilePath );
 		return 0;
 	}
 
@@ -1043,7 +1082,7 @@ int BSPMain( int argc, char **argv ){
 	SetCloneModelNumbers();
 
 	/* process world and submodels */
-	ProcessModels();
+	ProcessModels( portalFilePath, lineFilePath );
 
 	/* set light styles from targetted light entities */
 	SetLightStyles();
@@ -1052,7 +1091,7 @@ int BSPMain( int argc, char **argv ){
 	ProcessAdvertisements();
 
 	/* finish and write bsp */
-	EndBSPFile( qtrue );
+	EndBSPFile( qtrue, BSPFilePath, surfaceFilePath );
 
 	/* remove temp map source file if appropriate */
 	if ( strlen( tempSource ) > 0 ) {

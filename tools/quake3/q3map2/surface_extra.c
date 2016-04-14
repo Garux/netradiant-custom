@@ -211,15 +211,14 @@ void GetSurfaceExtraLightmapAxis( int num, vec3_t lightmapAxis ){
    writes out a surface info file (<map>.srf)
  */
 
-void WriteSurfaceExtraFile( const char *path ){
-	char srfPath[ 1024 ];
+void WriteSurfaceExtraFile( const char *surfaceFilePath ){
 	FILE            *sf;
 	surfaceExtra_t  *se;
 	int i;
 
 
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' ) {
+	if ( surfaceFilePath == NULL || surfaceFilePath[ 0 ] == '\0' ) {
 		return;
 	}
 
@@ -227,13 +226,10 @@ void WriteSurfaceExtraFile( const char *path ){
 	Sys_Printf( "--- WriteSurfaceExtraFile ---\n" );
 
 	/* open the file */
-	strcpy( srfPath, path );
-	StripExtension( srfPath );
-	strcat( srfPath, ".srf" );
-	Sys_Printf( "Writing %s\n", srfPath );
-	sf = fopen( srfPath, "w" );
+	Sys_Printf( "Writing %s\n", surfaceFilePath );
+	sf = fopen( surfaceFilePath, "w" );
 	if ( sf == NULL ) {
-		Error( "Error opening %s for writing", srfPath );
+		Error( "Error opening %s for writing", surfaceFilePath );
 	}
 
 	/* lap through the extras list */
@@ -321,26 +317,22 @@ void WriteSurfaceExtraFile( const char *path ){
    reads a surface info file (<map>.srf)
  */
 
-void LoadSurfaceExtraFile( const char *path ){
-	char srfPath[ 1024 ];
+void LoadSurfaceExtraFile( const char *surfaceFilePath ){
 	surfaceExtra_t  *se;
 	int surfaceNum, size;
 	byte            *buffer;
 
 
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' ) {
+	if ( surfaceFilePath == NULL || surfaceFilePath[ 0 ] == '\0' ) {
 		return;
 	}
 
 	/* load the file */
-	strcpy( srfPath, path );
-	StripExtension( srfPath );
-	strcat( srfPath, ".srf" );
-	Sys_Printf( "Loading %s\n", srfPath );
-	size = LoadFile( srfPath, (void**) &buffer );
+	Sys_Printf( "Loading %s\n", surfaceFilePath );
+	size = LoadFile( surfaceFilePath, (void**) &buffer );
 	if ( size <= 0 ) {
-		Sys_Printf( "WARNING: Unable to find surface file %s, using defaults.\n", srfPath );
+		Sys_Printf( "WARNING: Unable to find surface file %s, using defaults.\n", surfaceFilePath );
 		return;
 	}
 
@@ -365,7 +357,7 @@ void LoadSurfaceExtraFile( const char *path ){
 		{
 			surfaceNum = atoi( token );
 			if ( surfaceNum < 0 || surfaceNum > MAX_MAP_DRAW_SURFS ) {
-				Error( "ReadSurfaceExtraFile(): %s, line %d: bogus surface num %d", srfPath, scriptline, surfaceNum );
+				Error( "ReadSurfaceExtraFile(): %s, line %d: bogus surface num %d", surfaceFilePath, scriptline, surfaceNum );
 			}
 			while ( surfaceNum >= numSurfaceExtras )
 				se = AllocSurfaceExtra();
@@ -374,7 +366,7 @@ void LoadSurfaceExtraFile( const char *path ){
 
 		/* handle { } section */
 		if ( !GetToken( qtrue ) || strcmp( token, "{" ) ) {
-			Error( "ReadSurfaceExtraFile(): %s, line %d: { not found", srfPath, scriptline );
+			Error( "ReadSurfaceExtraFile(): %s, line %d: { not found", surfaceFilePath, scriptline );
 		}
 		while ( 1 )
 		{

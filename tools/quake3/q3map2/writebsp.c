@@ -402,9 +402,7 @@ void BeginBSPFile( void ){
    finishes a new bsp and writes to disk
  */
 
-void EndBSPFile( qboolean do_write ){
-	char path[ 1024 ];
-
+void EndBSPFile( qboolean do_write, const char *BSPFilePath, const char *surfaceFilePath ){
 
 	Sys_FPrintf( SYS_VRB, "--- EndBSPFile ---\n" );
 
@@ -415,12 +413,11 @@ void EndBSPFile( qboolean do_write ){
 
 	if ( do_write ) {
 		/* write the surface extra file */
-		WriteSurfaceExtraFile( source );
+		WriteSurfaceExtraFile( surfaceFilePath );
 
 		/* write the bsp */
-		sprintf( path, "%s.bsp", source );
-		Sys_Printf( "Writing %s\n", path );
-		WriteBSPFile( path );
+		Sys_Printf( "Writing %s\n", BSPFilePath );
+		WriteBSPFile( BSPFilePath );
 	}
 }
 

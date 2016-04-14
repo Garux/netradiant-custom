@@ -371,17 +371,15 @@ void NumberClusters( tree_t *tree ) {
    WritePortalFile
    ================
  */
-void WritePortalFile( tree_t *tree ){
-	char filename[1024];
+void WritePortalFile( tree_t *tree, const char *portalFilePath ){
 
 	Sys_FPrintf( SYS_VRB,"--- WritePortalFile ---\n" );
 
 	// write the file
-	sprintf( filename, "%s.prt", source );
-	Sys_Printf( "writing %s\n", filename );
-	pf = fopen( filename, "w" );
+	Sys_Printf( "writing %s\n", portalFilePath );
+	pf = fopen( portalFilePath, "w" );
 	if ( !pf ) {
-		Error( "Error opening %s", filename );
+		Error( "Error opening %s", portalFilePath );
 	}
 
 	fprintf( pf, "%s\n", PORTALFILE );
