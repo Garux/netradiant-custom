@@ -1740,9 +1740,8 @@ static qboolean SubmapRawLuxel( rawLightmap_t *lm, int x, int y, float bx, float
 		origin2 = SUPER_ORIGIN( x, y );
 		//%	normal2 = SUPER_NORMAL( x, y );
 	}
-	else
-	{
-		Error( "Spurious lightmap S vector\n" );
+	else{
+		Sys_FPrintf( SYS_WRN, "WARNING: Spurious lightmap S vector\n" );
 	}
 
 	VectorSubtract( origin2, origin, originVecs[ 0 ] );
@@ -1766,7 +1765,7 @@ static qboolean SubmapRawLuxel( rawLightmap_t *lm, int x, int y, float bx, float
 		//%	normal2 = SUPER_NORMAL( x, y );
 	}
 	else{
-		Sys_Printf( "WARNING: Spurious lightmap T vector\n" );
+		Sys_FPrintf( SYS_WRN, "WARNING: Spurious lightmap T vector\n" );
 	}
 
 	VectorSubtract( origin2, origin, originVecs[ 1 ] );
@@ -2196,7 +2195,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 			/* max of MAX_LIGHTMAPS (4) styles allowed to hit a surface/lightmap */
 			if ( lightmapNum >= MAX_LIGHTMAPS ) {
-				Sys_Printf( "WARNING: Hit per-surface style limit (%d)\n", MAX_LIGHTMAPS );
+				Sys_FPrintf( SYS_WRN, "WARNING: Hit per-surface style limit (%d)\n", MAX_LIGHTMAPS );
 				continue;
 			}
 
