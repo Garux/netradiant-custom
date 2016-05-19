@@ -151,7 +151,7 @@ public:
 typedef int ( *FunctionPointer )();
 
 DynamicLibrary( const char* filename ){
-	m_library = dlopen( filename, RTLD_NOW );
+	m_library = dlopen( filename, RTLD_NOW | (RTLD_DEEPBIND + 0) );
 }
 ~DynamicLibrary(){
 	if ( !failed() ) {
