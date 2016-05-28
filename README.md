@@ -33,7 +33,7 @@ See also https://gitlab.com/xonotic/netradiant/ for a source browser, issues and
 
 This project uses the usual CMake workflow:
 
-`cmake -H. -Bbuild && cmake --build build -- -j$(nproc)``
+`cmake -H. -Bbuild && cmake --build build -- -j$(nproc)`
 
 ## linux
 
