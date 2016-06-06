@@ -61,6 +61,14 @@ void Create( GtkWindow* parent );
 void Show(){
 	// workaround for strange gtk behaviour - modifying the contents of a window while it is not visible causes the window position to change without sending a configure_event
 	m_position_tracker.sync( m_window );
+	/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+	GtkWidget* glwidget = GTK_WIDGET( g_object_get_data( G_OBJECT( m_window ), "glwidget" ) );
+	if ( glwidget ){
+		//if ( widget_is_visible( glwidget ) )
+			//globalOutputStream() << "glwidget have been already visible :0\n"; /* is not hidden aswell, according to this */
+		gtk_widget_hide( glwidget );
+		gtk_widget_show( glwidget );
+	}
 	gtk_widget_show( GTK_WIDGET( m_window ) );
 }
 void Hide(){

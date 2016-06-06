@@ -29,12 +29,18 @@
 inline void CHECK_RESTORE( GtkWidget* w ){
 	if ( gpointer_to_int( g_object_get_data( G_OBJECT( w ), "was_mapped" ) ) != 0 ) {
 		gtk_widget_show( w );
+		/* workaround for gtk 2.24 issue: not displayed glwidget after min/restore */
+		GtkWidget* glwidget = GTK_WIDGET( g_object_get_data( G_OBJECT( w ), "glwidget" ) );
+		if ( glwidget ){
+			gtk_widget_hide( glwidget );
+			gtk_widget_show( glwidget );
+		}
 	}
 }
 
 inline void CHECK_MINIMIZE( GtkWidget* w ){
 	g_object_set_data( G_OBJECT( w ), "was_mapped", gint_to_pointer( GTK_WIDGET_VISIBLE( w ) ) );
-	gtk_widget_hide( w );
+	//gtk_widget_hide( w ); //fix for gtk 2.24 + the whole scheme isn't needed with gtk 2.16, 2.24; they do it all alone
 }
 
 static gboolean main_window_iconified( GtkWidget* widget, GdkEventWindowState* event, gpointer data ){

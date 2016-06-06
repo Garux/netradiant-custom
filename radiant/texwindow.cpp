@@ -2608,3 +2608,7 @@ void TextureBrowser_Destroy(){
 
 	Textures_setModeChangedNotify( Callback() );
 }
+
+GtkWidget* TextureBrowser_getGLWidget(){
+	return GlobalTextureBrowser().m_gl_widget;
+}
