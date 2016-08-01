@@ -151,7 +151,7 @@ void HL_AllocMaxBSP(void)
 	//edges
 	hl_numedges = 0;
 	hl_dedges = (hl_dedge_t *) GetMemory(HL_MAX_MAP_EDGES * sizeof(hl_dedge_t));
-	hl_allocatedbspmem += HL_MAX_MAP_EDGES, sizeof(hl_dedge_t);
+	hl_allocatedbspmem += HL_MAX_MAP_EDGES * sizeof(hl_dedge_t);
 	//mark surfaces
 	hl_nummarksurfaces = 0;
 	hl_dmarksurfaces = (unsigned short *) GetMemory(HL_MAX_MAP_MARKSURFACES * sizeof(unsigned short));
