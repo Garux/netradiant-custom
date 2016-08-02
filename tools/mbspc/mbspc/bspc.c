@@ -222,7 +222,7 @@ void Win_Map2Bsp(char *bspfilename)
 	sprintf(path, "%s.lin", source);
 	remove(path);
 
-	strcpy(name, ExpandArg(bspfilename));	
+	strcpy(name, ExpandArg(bspfilename));
 	DefaultExtension(name, ".map");	// might be .reg
 
 	Q2_AllocMaxBSP();
@@ -507,8 +507,8 @@ quakefile_t *GetArgumentFiles(int argc, char *argv[], int *i, char *ext)
 int main (int argc, char **argv)
 {
 	int i, comp = 0;
-	char outputpath[MAX_PATH] = "";
-	char filename[MAX_PATH] = "unknown";
+	static char outputpath[MAX_PATH] = "";
+	static char filename[MAX_PATH] = "unknown";
 	quakefile_t *qfiles = NULL, *qf;
 	double start_time;
 	char *ent_str;
