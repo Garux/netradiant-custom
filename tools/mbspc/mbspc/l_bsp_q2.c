@@ -642,7 +642,7 @@ Byte swaps all data in a bsp file.
 */
 void Q2_SwapBSPFile (qboolean todisk)
 {
-	int				i, j;
+	int				i, j, k;
 	dmodel_t		*d;
 
 	
@@ -688,8 +688,13 @@ void Q2_SwapBSPFile (qboolean todisk)
 //	
 	for (i=0 ; i<numtexinfo ; i++)
 	{
-		for (j=0 ; j<8 ; j++)
-			texinfo[i].vecs[0][j] = LittleFloat (texinfo[i].vecs[0][j]);
+		for (j=0 ; j<2 ; j++)
+		{
+			for (k=0; k<4; k++)
+			{
+				texinfo[i].vecs[j][k] = LittleFloat (texinfo[i].vecs[j][k]);
+			}
+		}
 		texinfo[i].flags = LittleLong (texinfo[i].flags);
 		texinfo[i].value = LittleLong (texinfo[i].value);
 		texinfo[i].nexttexinfo = LittleLong (texinfo[i].nexttexinfo);

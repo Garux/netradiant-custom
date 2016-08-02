@@ -542,7 +542,7 @@ Byte swaps all data in a bsp file.
 */
 void Sin_SwapBSPFile (qboolean todisk)
 {
-	int				i, j;
+	int				i, j, k;
 	sin_dmodel_t		*d;
 
 	
@@ -588,8 +588,13 @@ void Sin_SwapBSPFile (qboolean todisk)
 //	
 	for (i = 0; i < sin_numtexinfo; i++)
 	{
-		for (j=0 ; j<8 ; j++)
-			sin_texinfo[i].vecs[0][j] = LittleFloat (sin_texinfo[i].vecs[0][j]);
+		for (j=0 ; j<2 ; j++)
+		{
+			for (k=0; k<4; k++)
+			{
+				sin_texinfo[i].vecs[j][k] = LittleFloat (sin_texinfo[i].vecs[j][k]);
+			}
+		}
 #ifdef SIN
       sin_texinfo[i].trans_mag = LittleFloat( sin_texinfo[i].trans_mag );     
       sin_texinfo[i].trans_angle = LittleLong( sin_texinfo[i].trans_angle );     
