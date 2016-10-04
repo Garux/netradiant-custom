@@ -2,7 +2,7 @@
 
 # Usage:
 #   sh download-gamepack.sh
-#   LICENSEFILTER=GPL BATCH=1 sh download-gamepack.sh
+#   LICENSEFILTER=GPL,BSD BATCH=1 sh download-gamepack.sh
 
 : ${GIT:=git}
 : ${SVN:=svn}
@@ -83,11 +83,12 @@ pack()
 	case " $LICENSEFILTER " in
 		"  ")
 			;;
-		*" $license "*)
-			;;
 		*)
-			$ECHO "Pack $pack rejected because its license is not in LICENSEFILTER."
-			return
+			if ! echo "$LICENSEFILTER" | tr ',' '\n' | grep -F -q -x "$license"
+			then
+				$ECHO "Pack $pack rejected because its license is not in LICENSEFILTER."
+				return
+			fi
 			;;
 	esac
 	case "$BATCH" in
@@ -147,17 +148,18 @@ pack()
 }
 
 mkdir -p games
-pack DarkPlacesPack  GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/DarkPlacesPack/branches/1.5/
-pack NexuizPack      GPL         gitdir git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
-pack OpenArenaPack   unknown     zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/OpenArenaPack.zip
-pack OsirionPack     GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/OsirionPack.zip
-pack Q3Pack          proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
-pack Quake2Pack      proprietary zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/Quake2Pack.zip
-pack QuakePack       GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/Quake1Pack.zip
-pack QuetooPack      GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
-pack TremulousPack   proprietary zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/TremulousPack.zip
-pack UFOAIPack       proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
-#pack WarsowPack     GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
-#pack WarsowPack     GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/WarsowPack.zip
-pack WarsowPack      GPL         git    https://github.com/Warsow/NetRadiantPack.git
-pack XonoticPack     GPL         git    https://gitlab.com/xonotic/netradiant-xonoticpack.git
+pack DarkPlacesPack    GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/DarkPlacesPack/branches/1.5/
+pack NexuizPack        GPL         gitdir git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
+pack OpenArenaPack     unknown     zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/OpenArenaPack.zip
+pack OsirionPack       GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/OsirionPack.zip
+pack Q3Pack            proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
+pack Quake2Pack        proprietary zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/Quake2Pack.zip
+pack QuakePack         GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/Quake1Pack.zip
+pack QuetooPack        GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
+pack TremulousPack     proprietary zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/TremulousPack.zip
+pack UFOAIPack         proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
+#pack WarsowPack       GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
+#pack WarsowPack       GPL         zip1   http://ingar.satgnu.net/files/netradiant/gamepacks/WarsowPack.zip
+pack WarsowPack        GPL         git    https://github.com/Warsow/NetRadiantPack.git
+pack XonoticPack       GPL         git    https://gitlab.com/xonotic/netradiant-xonoticpack.git
+pack UnvanquishedPack  BSD         svn    https://github.com/Unvanquished/unvanquished-mapeditor-support.git/trunk/build/netradiant
