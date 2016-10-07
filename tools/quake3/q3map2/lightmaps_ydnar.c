@@ -2310,12 +2310,6 @@ static int CompareRawLightmap( const void *a, const void *b ){
 	/* get min number of surfaces */
 	min = ( alm->numLightSurfaces < blm->numLightSurfaces ? alm->numLightSurfaces : blm->numLightSurfaces );
 
-	/* compare size, allocate bigger first */
-	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
-	if ( diff != 0 ) {
-		return diff;
-	}
-
 	/* iterate */
 	for ( i = 0; i < min; i++ )
 	{
@@ -2335,6 +2329,12 @@ static int CompareRawLightmap( const void *a, const void *b ){
 	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
 		diff += blm->styles[ i ] - alm->styles[ i ];
 	if ( diff ) {
+		return diff;
+	}
+
+	/* compare size */
+	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
+	if ( diff != 0 ) {
 		return diff;
 	}
 
