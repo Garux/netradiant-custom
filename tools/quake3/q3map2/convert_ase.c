@@ -169,7 +169,7 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->lightmapNum[0] + deluxemap );
 		}
 		else{
-			Sys_Printf( "WARNING: lightmap %d out of range, not exporting\n", ds->lightmapNum[0] + deluxemap );
+			Sys_FPrintf( SYS_WRN, "WARNING: lightmap %d out of range, not exporting\n", ds->lightmapNum[0] + deluxemap );
 		}
 	}
 	else{

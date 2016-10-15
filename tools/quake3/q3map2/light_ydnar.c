@@ -3794,7 +3794,7 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag ){
 					for ( i = 0; i < 3; i++ )
 					{
 						if ( mins[ i ] > light->origin[ i ] || maxs[ i ] < light->origin[ i ] ) {
-							//% Sys_Printf( "WARNING: Light PVS bounds (%.0f, %.0f, %.0f) -> (%.0f, %.0f, %.0f)\ndo not encompass light %d (%f, %f, %f)\n",
+							//% Sys_FPrintf( SYS_WRN, "WARNING: Light PVS bounds (%.0f, %.0f, %.0f) -> (%.0f, %.0f, %.0f)\ndo not encompass light %d (%f, %f, %f)\n",
 							//%     mins[ 0 ], mins[ 1 ], mins[ 2 ],
 							//%     maxs[ 0 ], maxs[ 1 ], maxs[ 2 ],
 							//%     numLights, light->origin[ 0 ], light->origin[ 1 ], light->origin[ 2 ] );

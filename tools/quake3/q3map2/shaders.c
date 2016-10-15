@@ -861,7 +861,7 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 				/* increase deprecation depth */
 				deprecationDepth++;
 				if ( deprecationDepth == MAX_SHADER_DEPRECATION_DEPTH ) {
-					Sys_Printf( "WARNING: Max deprecation depth of %i is reached on shader '%s'\n", MAX_SHADER_DEPRECATION_DEPTH, shader );
+					Sys_FPrintf( SYS_WRN, "WARNING: Max deprecation depth of %i is reached on shader '%s'\n", MAX_SHADER_DEPRECATION_DEPTH, shader );
 				}
 				/* search again from beginning */
 				i = -1;

@@ -474,7 +474,7 @@ image_t *ImageLoad( const char *filename ){
 			if ( LoadJPGBuff( buffer, size, &pixels, &width, &height ) == -1 ) {
 				if (pixels) {
 					// On error, LoadJPGBuff might store a pointer to the error message in pixels
-					Sys_Printf( "WARNING: LoadJPGBuff %s %s\n", name, (unsigned char*) pixels );
+					Sys_FPrintf( SYS_WRN, "WARNING: LoadJPGBuff %s %s\n", name, (unsigned char*) pixels );
 				}				
 			} else {
 				if ( width == image->width && height == image->height ) {

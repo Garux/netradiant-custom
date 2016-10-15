@@ -2124,7 +2124,7 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 		   si->mins[ 2 ] != 0.0f || si->maxs[ 2 ] != 0.0f ) ) {
 		static qboolean warned = qfalse;
 		if ( !warned ) {
-			Sys_Printf( "WARNING: this map uses the deformVertexes move hack\n" );
+			Sys_FPrintf( SYS_WRN, "WARNING: this map uses the deformVertexes move hack\n" );
 			warned = qtrue;
 		}
 
