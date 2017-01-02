@@ -2097,7 +2097,7 @@ Q_EXTERN int blockSize[ 3 ]                                 /* should be the sam
 #ifndef MAIN_C
 ;
 #else
-	= { 1024, 1024, 1024 };
+	= { 512, 512, 512 };
 #endif
 
 Q_EXTERN char name[ 1024 ];
