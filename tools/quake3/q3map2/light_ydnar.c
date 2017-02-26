@@ -3709,7 +3709,7 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag ){
 				else{
 					light->flags &= ~LIGHT_FAST_TEMP;
 				}
-				if ( fastpoint && ( light->flags != EMIT_AREA ) ) {
+				if ( fastpoint && ( light->type != EMIT_AREA ) ) {
 					light->flags |= LIGHT_FAST_TEMP;
 				}
 				if ( light->si && light->si->noFast ) {
