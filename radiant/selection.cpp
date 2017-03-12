@@ -156,7 +156,7 @@ inline float angle_between( const Vector3& a, const Vector3& b ){
 }
 
 
-#if defined( _DEBUG )
+#if 0
 class test_quat
 {
 public:
@@ -463,7 +463,7 @@ void add_one(){
 }
 };
 
-#if defined( _DEBUG )
+#if 0
 #define DEBUG_SELECTION
 #endif
 

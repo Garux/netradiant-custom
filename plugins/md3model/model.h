@@ -180,7 +180,7 @@ void render( RenderStateFlags state ) const {
 	glEnd();
 #endif
 
-#if defined( _DEBUG )
+#if 0
 	glBegin( GL_LINES );
 
 	for ( VertexBuffer<ArbitraryMeshVertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
