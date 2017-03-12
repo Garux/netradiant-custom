@@ -245,12 +245,6 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	if ( !dialog.m_waiting_for_key ) {
 		return false;
 	}
-
-#if 0
-	if ( event->is_modifier ) {
-		return false;
-	}
-#else
 	switch ( event->keyval )
 	{
 	case GDK_Shift_L:
@@ -269,7 +263,6 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	case GDK_Hyper_R:
 		return false;
 	}
-#endif
 
 	dialog.m_waiting_for_key = false;
 

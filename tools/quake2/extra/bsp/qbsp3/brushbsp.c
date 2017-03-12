@@ -590,18 +590,6 @@ int	TestBrushToPlanenum (bspbrush_t *brush, int planenum,
 		|| (d_back < 0.0 && d_back > -1.0) )
 		(*epsilonbrush)++;
 
-#if 0
-	if (*numsplits == 0)
-	{	//	didn't really need to be split
-		if (front)
-			s = PSIDE_FRONT;
-		else if (back)
-			s = PSIDE_BACK;
-		else
-			s = 0;
-	}
-#endif
-
 	return s;
 }
 
@@ -618,11 +606,6 @@ existance by the vertex snapping.
 #define	EDGE_LENGTH	0.2
 qboolean WindingIsTiny (winding_t *w)
 {
-#if 0
-	if (WindingArea (w) < 1)
-		return true;
-	return false;
-#else
 	int		i, j;
 	vec_t	len;
 	vec3_t	delta;
@@ -641,7 +624,6 @@ qboolean WindingIsTiny (winding_t *w)
 		}
 	}
 	return true;
-#endif
 }
 
 /*
@@ -1022,20 +1004,9 @@ void SplitBrush (bspbrush_t *brush, int planenum,
 		{
 			if (!cw[j])
 				continue;
-#if 0
-			if (WindingIsTiny (cw[j]))
-			{
-				FreeWinding (cw[j]);
-				continue;
-			}
-#endif
 			cs = &b[j]->sides[b[j]->numsides];
 			b[j]->numsides++;
 			*cs = *s;
-//			cs->planenum = s->planenum;
-//			cs->texinfo = s->texinfo;
-//			cs->visible = s->visible;
-//			cs->original = s->original;
 			cs->winding = cw[j];
 			cs->tested = false;
 		}
@@ -1312,19 +1283,6 @@ tree_t *BrushBSP (bspbrush_t *brushlist, vec3_t mins, vec3_t maxs)
 	qprintf ("%5i visible nodes\n", c_nodes/2 - c_nonvis);
 	qprintf ("%5i nonvis nodes\n", c_nonvis);
 	qprintf ("%5i leafs\n", (c_nodes+1)/2);
-#if 0
-{	// debug code
-static node_t	*tnode;
-vec3_t	p;
-
-p[0] = -1469;
-p[1] = -118;
-p[2] = 119;
-tnode = PointInLeaf (tree->headnode, p);
-printf ("contents: %i\n", tnode->contents);
-p[0] = 0;
-}
-#endif
 	return tree;
 }
 

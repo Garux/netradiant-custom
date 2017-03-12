@@ -655,10 +655,6 @@ void PortalFlow( int portalnum ){
 	vportal_t       *p;
 	int c_might, c_can;
 
-#ifdef MREDEBUG
-	Sys_Printf( "\r%6d", portalnum );
-#endif
-
 	p = sorted_portals[portalnum];
 
 	if ( p->removed ) {
@@ -778,11 +774,6 @@ void PassageFlow( int portalnum ){
 	threaddata_t data;
 	int i;
 	vportal_t       *p;
-//	int				c_might, c_can;
-
-#ifdef MREDEBUG
-	Sys_Printf( "\r%6d", portalnum );
-#endif
 
 	p = sorted_portals[portalnum];
 
@@ -792,8 +783,6 @@ void PassageFlow( int portalnum ){
 	}
 
 	p->status = stat_working;
-
-//	c_might = CountBits (p->portalflood, numportals*2);
 
 	memset( &data, 0, sizeof( data ) );
 	data.base = p;
@@ -808,13 +797,6 @@ void PassageFlow( int portalnum ){
 	RecursivePassageFlow( p, &data, &data.pstack_head );
 
 	p->status = stat_done;
-
-	/*
-	   c_can = CountBits (p->portalvis, numportals*2);
-
-	   Sys_FPrintf (SYS_VRB,"portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
-	    (int)(p - portals),	c_might, c_can, data.c_chains);
-	 */
 }
 
 /*
@@ -1042,11 +1024,7 @@ void PassagePortalFlow( int portalnum ){
 	threaddata_t data;
 	int i;
 	vportal_t       *p;
-//	int				c_might, c_can;
 
-#ifdef MREDEBUG
-	Sys_Printf( "\r%6d", portalnum );
-#endif
 
 	p = sorted_portals[portalnum];
 
@@ -1056,8 +1034,6 @@ void PassagePortalFlow( int portalnum ){
 	}
 
 	p->status = stat_working;
-
-//	c_might = CountBits (p->portalflood, numportals*2);
 
 	memset( &data, 0, sizeof( data ) );
 	data.base = p;
@@ -1343,10 +1319,6 @@ void CreatePassages( int portalnum ){
 	fixedWinding_t  *w;
 	fixedWinding_t in, out, *res;
 
-
-#ifdef MREDEBUG
-	Sys_Printf( "\r%6d", portalnum );
-#endif
 
 	portal = sorted_portals[portalnum];
 

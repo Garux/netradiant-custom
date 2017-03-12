@@ -575,9 +575,6 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 					origin[0] -= sideplane[0] * ( e + 1 );
 					origin[1] -= sideplane[1] * ( e + 1 );
 					origin[2] -= sideplane[2] * ( e + 1 );
-#ifdef DEBUG_27_1
-					VectorClear( origin );
-#endif
 				}
 			}
 		}

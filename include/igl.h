@@ -1758,56 +1758,9 @@ typedef unsigned int GLhandleARB;
 #define GL_OBJECT_ACTIVE_ATTRIBUTES_ARB 0x8B89
 #define GL_OBJECT_ACTIVE_ATTRIBUTE_MAX_LENGTH_ARB 0x8B8A
 
-#if 0
-#define glVertexAttrib1fARB GlobalOpenGL().m_glVertexAttrib1fARB
-#define glVertexAttrib1sARB GlobalOpenGL().m_glVertexAttrib1sARB
-#define glVertexAttrib1dARB GlobalOpenGL().m_glVertexAttrib1dARB
-#define glVertexAttrib2fARB GlobalOpenGL().m_glVertexAttrib2fARB
-#define glVertexAttrib2sARB GlobalOpenGL().m_glVertexAttrib2sARB
-#define glVertexAttrib2dARB GlobalOpenGL().m_glVertexAttrib2dARB
-#define glVertexAttrib3fARB GlobalOpenGL().m_glVertexAttrib3fARB
-#define glVertexAttrib3sARB GlobalOpenGL().m_glVertexAttrib3sARB
-#define glVertexAttrib3dARB GlobalOpenGL().m_glVertexAttrib3dARB
-#define glVertexAttrib4fARB GlobalOpenGL().m_glVertexAttrib4fARB
-#define glVertexAttrib4sARB GlobalOpenGL().m_glVertexAttrib4sARB
-#define glVertexAttrib4dARB GlobalOpenGL().m_glVertexAttrib4dARB
-#define glVertexAttrib4NubARB GlobalOpenGL().m_glVertexAttrib4NubARB
-#define glVertexAttrib1fvARB GlobalOpenGL().m_glVertexAttrib1fvARB
-#define glVertexAttrib1svARB GlobalOpenGL().m_glVertexAttrib1svARB
-#define glVertexAttrib1dvARB GlobalOpenGL().m_glVertexAttrib1dvARB
-#define glVertexAttrib2fvARB GlobalOpenGL().m_glVertexAttrib2fvARB
-#define glVertexAttrib2svARB GlobalOpenGL().m_glVertexAttrib2svARB
-#define glVertexAttrib2dvARB GlobalOpenGL().m_glVertexAttrib2dvARB
-#define glVertexAttrib3fvARB GlobalOpenGL().m_glVertexAttrib3fvARB
-#define glVertexAttrib3svARB GlobalOpenGL().m_glVertexAttrib3svARB
-#define glVertexAttrib3dvARB GlobalOpenGL().m_glVertexAttrib3dvARB
-#define glVertexAttrib4fvARB GlobalOpenGL().m_glVertexAttrib4fvARB
-#define glVertexAttrib4svARB GlobalOpenGL().m_glVertexAttrib4svARB
-#define glVertexAttrib4dvARB GlobalOpenGL().m_glVertexAttrib4dvARB
-#define glVertexAttrib4ivARB GlobalOpenGL().m_glVertexAttrib4ivARB
-#define glVertexAttrib4bvARB GlobalOpenGL().m_glVertexAttrib4bvARB
-#define glVertexAttrib4ubvARB GlobalOpenGL().m_glVertexAttrib4ubvARB
-#define glVertexAttrib4usvARB GlobalOpenGL().m_glVertexAttrib4usvARB
-#define glVertexAttrib4uivARB GlobalOpenGL().m_glVertexAttrib4uivARB
-#define glVertexAttrib4NbvARB GlobalOpenGL().m_glVertexAttrib4NbvARB
-#define glVertexAttrib4NsvARB GlobalOpenGL().m_glVertexAttrib4NsvARB
-#define glVertexAttrib4NivARB GlobalOpenGL().m_glVertexAttrib4NivARB
-#define glVertexAttrib4NubvARB GlobalOpenGL().m_glVertexAttrib4NubvARB
-#define glVertexAttrib4NusvARB GlobalOpenGL().m_glVertexAttrib4NusvARB
-#define glVertexAttrib4NuivARB GlobalOpenGL().m_glVertexAttrib4NuivARB
-#define glVertexAttribPointerARB GlobalOpenGL().m_glVertexAttribPointerARB
-#define glEnableVertexAttribArrayARB GlobalOpenGL().m_glEnableVertexAttribArrayARB
-#define glDisableVertexAttribArrayARB GlobalOpenGL().m_glDisableVertexAttribArrayARB
-#endif
 #define glBindAttribLocationARB GlobalOpenGL().m_glBindAttribLocationARB
 #define glGetActiveAttribARB GlobalOpenGL().m_glGetActiveAttribARB
 #define glGetAttribLocationARB GlobalOpenGL().m_glGetAttribLocationARB
-#if 0
-#define glGetVertexAttribdvARB GlobalOpenGL().m_glGetVertexAttribdvARB
-#define glGetVertexAttribfvARB GlobalOpenGL().m_glGetVertexAttribfvARB
-#define glGetVertexAttribivARB GlobalOpenGL().m_glGetVertexAttribivARB
-#define glGetVertexAttribPointervARB GlobalOpenGL().m_glGetVertexAttribPointervARB
-#endif
 #endif
 
 
@@ -2678,56 +2631,10 @@ struct OpenGLBinding
 	bool ARB_vertex_shader(){
 		return support_ARB_vertex_shader;
 	}
-#if 0
-	void ( QGL_DLLEXPORT *m_glVertexAttrib1fARB )( GLuint index, GLfloat v0 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib1sARB )( GLuint index, GLshort v0 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib1dARB )( GLuint index, GLdouble v0 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib2fARB )( GLuint index, GLfloat v0, GLfloat v1 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib2sARB )( GLuint index, GLshort v0, GLshort v1 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib2dARB )( GLuint index, GLdouble v0, GLdouble v1 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib3fARB )( GLuint index, GLfloat v0, GLfloat v1, GLfloat v2 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib3sARB )( GLuint index, GLshort v0, GLshort v1, GLshort v2 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib3dARB )( GLuint index, GLdouble v0, GLdouble v1, GLdouble v2 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4fARB )( GLuint index, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4sARB )( GLuint index, GLshort v0, GLshort v1, GLshort v2, GLshort v3 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4dARB )( GLuint index, GLdouble v0, GLdouble v1, GLdouble v2, GLdouble v3 );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4NubARB )( GLuint index, GLubyte x, GLubyte y, GLubyte z, GLubyte w );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib1fvARB )( GLuint index, const GLfloat *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib1svARB )( GLuint index, const GLshort *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib1dvARB )( GLuint index, const GLdouble *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib2fvARB )( GLuint index, const GLfloat *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib2svARB )( GLuint index, const GLshort *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib2dvARB )( GLuint index, const GLdouble *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib3fvARB )( GLuint index, const GLfloat *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib3svARB )( GLuint index, const GLshort *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib3dvARB )( GLuint index, const GLdouble *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4fvARB )( GLuint index, const GLfloat *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4svARB )( GLuint index, const GLshort *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4dvARB )( GLuint index, const GLdouble *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4ivARB )( GLuint index, const GLint *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4bvARB )( GLuint index, const GLbyte *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4ubvARB )( GLuint index, const GLubyte *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4usvARB )( GLuint index, const GLushort *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4uivARB )( GLuint index, const GLuint *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4NbvARB )( GLuint index, const GLbyte *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4NsvARB )( GLuint index, const GLshort *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4NivARB )( GLuint index, const GLint *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4NubvARB )( GLuint index, const GLubyte *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4NusvARB )( GLuint index, const GLushort *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttrib4NuivARB )( GLuint index, const GLuint *v );
-	void ( QGL_DLLEXPORT *m_glVertexAttribPointerARB )( GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer );
-	void ( QGL_DLLEXPORT *m_glEnableVertexAttribArrayARB )( GLuint index );
-	void ( QGL_DLLEXPORT *m_glDisableVertexAttribArrayARB )( GLuint index );
-#endif
 	void ( QGL_DLLEXPORT *m_glBindAttribLocationARB )( GLhandleARB programObj, GLuint index, const GLcharARB *name );
 	void ( QGL_DLLEXPORT *m_glGetActiveAttribARB )( GLhandleARB programObj, GLuint index, GLsizei maxLength, GLsizei *length, GLint *size, GLenum *type, GLcharARB *name );
 	GLint ( QGL_DLLEXPORT *m_glGetAttribLocationARB )( GLhandleARB programObj, const GLcharARB *name );
-#if 0
-	void ( QGL_DLLEXPORT *m_glGetVertexAttribdvARB )( GLuint index, GLenum pname, GLdouble *params );
-	void ( QGL_DLLEXPORT *m_glGetVertexAttribfvARB )( GLuint index, GLenum pname, GLfloat *params );
-	void ( QGL_DLLEXPORT *m_glGetVertexAttribivARB )( GLuint index, GLenum pname, GLint *params );
-	void ( QGL_DLLEXPORT *m_glGetVertexAttribPointervARB )( GLuint index, GLenum pname, GLvoid **pointer );
-#endif
+
 
 	// ARB_fragment_shader
 	bool support_ARB_fragment_shader;

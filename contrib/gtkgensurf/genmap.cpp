@@ -249,31 +249,6 @@ int MapPatches(){
 			}
 
 			scene::Node* patch = MakePatch();
-#if 0
-			b->pPatch->setDims( NH_patch, NV_patch );
-			for ( i = 0; i < NH_patch; i++ )
-			{
-				switch ( Plane )
-				{
-				case PLANE_XY1:
-				case PLANE_XZ0:
-				case PLANE_YZ1:
-					ii = i0 + NH_patch - 1 - i;
-					break;
-				default:
-					ii = i0 + i;
-				}
-				for ( j = 0; j < NV_patch; j++ )
-				{
-					b->pPatch->ctrlAt( COL,i,j )[0] = (float)xyz[ii][j0 + j].pp[0];
-					b->pPatch->ctrlAt( COL,i,j )[1] = (float)xyz[ii][j0 + j].pp[1];
-					b->pPatch->ctrlAt( COL,i,j )[2] = (float)xyz[ii][j0 + j].pp[2];
-					b->pPatch->ctrlAt( COL,i,j )[3] = (float)i;
-					b->pPatch->ctrlAt( COL,i,j )[4] = (float)j;
-				}
-			}
-			b->pPatch->UpdateCachedData();
-#endif
 			BrushNum++;
 			j0 += NV_patch - 1;
 		}
@@ -1082,15 +1057,7 @@ void GenerateMap(){
 	if ( !ValidSurface() ) {
 		return;
 	}
-	/*
-	   ghCursorCurrent = LoadCursor(NULL,IDC_WAIT);
-	   SetCursor(ghCursorCurrent);
-	 */
-#if 0
-	if ( SingleBrushSelected ) {
-		g_FuncTable.m_pfnDeleteSelection();
-	}
-#endif
+
 
 	GenerateXYZ();
 	ntri = NH * NV * 2;
@@ -1101,10 +1068,6 @@ void GenerateMap(){
 
 	if ( Decimate > 0 && ( Game != QUAKE3 || UsePatches == 0 ) ) {
 		MapOut( gNumNodes,gNumTris,gNode,gTri );
-		/*
-		   ghCursorCurrent = ghCursorDefault;
-		   SetCursor(ghCursorCurrent);
-		 */
 		return;
 	}
 
@@ -2024,9 +1987,6 @@ void XYZtoV( XYZ *xyz, vec3 *v ){
 //=============================================================
 scene::Node* MakePatch( void ){
 	scene::Node* patch = Patch_AllocNode();
-#if 0
-	patch->m_patch->SetShader( Texture[Game][0] );
-#endif
 	Node_getTraversable( h_worldspawn )->insert( patch );
 	return patch;
 }
@@ -2034,41 +1994,6 @@ scene::Node* MakePatch( void ){
 //=============================================================
 void MakeBrush( BRUSH *brush ){
 	NodePtr node( Brush_AllocNode() );
-
-#if 0
-	for ( int i = 0; i < brush->NumFaces; i++ )
-	{
-		_QERFaceData QERFaceData;
-		if ( !strncmp( brush->face[i].texture, "textures/", 9 ) ) {
-			strcpy( QERFaceData.m_TextureName,brush->face[i].texture );
-		}
-		else
-		{
-			strcpy( QERFaceData.m_TextureName,"textures/" );
-			strcpy( QERFaceData.m_TextureName + 9,brush->face[i].texture );
-		}
-		QERFaceData.m_nContents = brush->face[i].Contents;
-		QERFaceData.m_nFlags    = brush->face[i].Surface;
-		QERFaceData.m_nValue    = brush->face[i].Value;
-		QERFaceData.m_fShift[0] = brush->face[i].Shift[0];
-		QERFaceData.m_fShift[1] = brush->face[i].Shift[1];
-		QERFaceData.m_fRotate   = brush->face[i].Rotate;
-		QERFaceData.m_fScale[0] = brush->face[i].Scale[0];
-		QERFaceData.m_fScale[1] = brush->face[i].Scale[1];
-		QERFaceData.m_v1[0]     = brush->face[i].v[0][0];
-		QERFaceData.m_v1[1]     = brush->face[i].v[0][1];
-		QERFaceData.m_v1[2]     = brush->face[i].v[0][2];
-		QERFaceData.m_v2[0]     = brush->face[i].v[1][0];
-		QERFaceData.m_v2[1]     = brush->face[i].v[1][1];
-		QERFaceData.m_v2[2]     = brush->face[i].v[1][2];
-		QERFaceData.m_v3[0]     = brush->face[i].v[2][0];
-		QERFaceData.m_v3[1]     = brush->face[i].v[2][1];
-		QERFaceData.m_v3[2]     = brush->face[i].v[2][2];
-		QERFaceData.m_bBPrimit  = false;
-		( g_FuncTable.m_pfnAddFaceData )( vp,&QERFaceData );
-	}
-#endif
-
 	Node_getTraversable( h_func_group )->insert( node );
 }
 //=============================================================

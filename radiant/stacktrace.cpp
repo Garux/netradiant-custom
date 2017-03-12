@@ -107,58 +107,6 @@ struct EnumerateSymbolsContext
 };
 
 void write_symbol( PSYMBOL_INFO pSym, STACKFRAME64& sf, TextOutputStream& outputStream, std::size_t& count ){
-#if 0
-	if ( pSym->Flags & SYMFLAG_PARAMETER ) {
-
-		DWORD basicType;
-		if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, pSym->TypeIndex,
-							 TI_GET_BASETYPE, &basicType ) ) {
-			int bleh = 0;
-		}
-		else
-		{
-			DWORD typeId;
-			if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, pSym->TypeIndex,
-								 TI_GET_TYPEID, &typeId ) ) {
-				if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, pSym->TypeIndex,
-									 TI_GET_BASETYPE, &basicType ) ) {
-					int bleh = 0;
-				}
-				else
-				{
-					const char* FormatGetLastError();
-					const char* error = FormatGetLastError();
-					int bleh = 0;
-
-					WCHAR* name;
-					if ( SymGetTypeInfo( GetCurrentProcess(), pSym->ModBase, typeId,
-										 TI_GET_SYMNAME, &name ) ) {
-						outputStream << name << " ";
-						LocalFree( name );
-						int bleh = 0;
-					}
-					else
-					{
-						const char* FormatGetLastError();
-						const char* error = FormatGetLastError();
-						int bleh = 0;
-					}
-				}
-			}
-			else
-			{
-				const char* FormatGetLastError();
-				const char* error = FormatGetLastError();
-				int bleh = 0;
-			}
-		}
-		if ( count != 0 ) {
-			outputStream << ", ";
-		}
-		outputStream << pSym->Name;
-		++count;
-	}
-#endif
 }
 
 BOOL CALLBACK

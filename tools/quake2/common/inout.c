@@ -106,33 +106,6 @@ void xml_SendNode( xmlNodePtr node ){
 			pos += size;
 		}
 
-#if 0
-		// NOTE: the NMSG_WriteString is limited to MAX_NETMESSAGE
-		// we will need to split into chunks
-		// (we could also go lower level, in the end it's using send and receiv which are not size limited)
-		//++timo FIXME: MAX_NETMESSAGE is not exactly the max size we can stick in the message
-		//  there's some tweaking to do in l_net for that .. so let's give us a margin for now
-
-		//++timo we need to handle the case of a buffer too big to fit in a single message
-		// try without checks for now
-		if ( xml_buf->use > MAX_NETMESSAGE - 10 ) {
-			// if we send that we are probably gonna break the stream at the other end..
-			// and Error will call right there
-			//Error( "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use);
-			Sys_FPrintf( SYS_NOXML, "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use );
-			xml_buf->content[xml_buf->use] = '\0'; //++timo this corrupts the buffer but we don't care it's for printing
-			Sys_FPrintf( SYS_NOXML, xml_buf->content );
-
-		}
-
-		size = xml_buf->use;
-		memcpy( xmlbuf, xml_buf->content, size );
-		xmlbuf[size] = '\0';
-		NMSG_Clear( &msg );
-		NMSG_WriteString( &msg, xmlbuf );
-		Net_Send( brdcst_socket, &msg );
-#endif
-
 		xmlBufferFree( xml_buf );
 	}
 }

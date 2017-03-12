@@ -285,12 +285,7 @@ AABB Doom3Light_getBounds( const AABB& workzone ){
 int g_iLastLightIntensity;
 
 void Entity_createFromSelection( const char* name, const Vector3& origin ){
-#if 0
-	if ( string_equal_nocase( name, "worldspawn" ) ) {
-		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Can't create an entity with worldspawn.", "info" );
-		return;
-	}
-#endif
+
 
 	EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( name, true );
 
@@ -387,45 +382,6 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 		}
 	}
 }
-
-#if 0
-bool DoNormalisedColor( Vector3& color ){
-	if ( !color_dialog( GTK_WIDGET( MainFrame_getWindow() ), color ) ) {
-		return false;
-	}
-	/*
-	** scale colors so that at least one component is at 1.0F
-	*/
-
-	float largest = 0.0F;
-
-	if ( color[0] > largest ) {
-		largest = color[0];
-	}
-	if ( color[1] > largest ) {
-		largest = color[1];
-	}
-	if ( color[2] > largest ) {
-		largest = color[2];
-	}
-
-	if ( largest == 0.0F ) {
-		color[0] = 1.0F;
-		color[1] = 1.0F;
-		color[2] = 1.0F;
-	}
-	else
-	{
-		float scaler = 1.0F / largest;
-
-		color[0] *= scaler;
-		color[1] *= scaler;
-		color[2] *= scaler;
-	}
-
-	return true;
-}
-#endif
 
 void NormalizeColor( Vector3& color ){
 	// scale colors so that at least one component is at 1.0F

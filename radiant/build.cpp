@@ -462,19 +462,6 @@ void build_error_undefined_tool( const char* build, const char* tool ){
 }
 
 void project_verify( Project& project, Tools& tools ){
-#if 0
-	for ( Project::iterator i = project.begin(); i != project.end(); ++i )
-	{
-		Build& build = ( *i ).second;
-		for ( Build::iterator j = build.begin(); j != build.end(); ++j )
-		{
-			Tools::iterator k = tools.find( ( *j ).first );
-			if ( k == g_build_tools.end() ) {
-				build_error_undefined_tool( ( *i ).first.c_str(), ( *j ).first.c_str() );
-			}
-		}
-	}
-#endif
 }
 
 void build_run( const char* name, CommandListener& listener ){

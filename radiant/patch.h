@@ -280,46 +280,33 @@ PatchTesselation& m_tess;
 public:
 RenderablePatchSolid( PatchTesselation& tess ) : m_tess( tess ){
 }
-void RenderNormals() const;
 void render( RenderStateFlags state ) const {
-#if 0
-	if ( ( state & RENDER_FILL ) == 0 ) {
-		RenderablePatchWireframe( m_tess ).render( state );
-	}
-	else
-#endif
-	{
-		if ( ( state & RENDER_BUMP ) != 0 ) {
-			if ( GlobalShaderCache().useShaderLanguage() ) {
-				glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->normal );
-				glVertexAttribPointerARB( c_attr_TexCoord0, 2, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->texcoord );
-				glVertexAttribPointerARB( c_attr_Tangent, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->tangent );
-				glVertexAttribPointerARB( c_attr_Binormal, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->bitangent );
-			}
-			else
-			{
-				glVertexAttribPointerARB( 11, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->normal );
-				glVertexAttribPointerARB( 8, 2, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->texcoord );
-				glVertexAttribPointerARB( 9, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->tangent );
-				glVertexAttribPointerARB( 10, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->bitangent );
-			}
+	if ( ( state & RENDER_BUMP ) != 0 ) {
+		if ( GlobalShaderCache().useShaderLanguage() ) {
+			glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->normal );
+			glVertexAttribPointerARB( c_attr_TexCoord0, 2, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->texcoord );
+			glVertexAttribPointerARB( c_attr_Tangent, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->tangent );
+			glVertexAttribPointerARB( c_attr_Binormal, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->bitangent );
 		}
 		else
 		{
-			glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->normal );
-			glTexCoordPointer( 2, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->texcoord );
-		}
-		glVertexPointer( 3, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->vertex );
-		const RenderIndex* strip_indices = m_tess.m_indices.data();
-		for ( std::size_t i = 0; i < m_tess.m_numStrips; i++, strip_indices += m_tess.m_lenStrips )
-		{
-			glDrawElements( GL_QUAD_STRIP, GLsizei( m_tess.m_lenStrips ), RenderIndexTypeID, strip_indices );
+			glVertexAttribPointerARB( 11, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->normal );
+			glVertexAttribPointerARB( 8, 2, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->texcoord );
+			glVertexAttribPointerARB( 9, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->tangent );
+			glVertexAttribPointerARB( 10, 3, GL_FLOAT, 0, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->bitangent );
 		}
 	}
-
-#if defined( _DEBUG )
-	RenderNormals();
-#endif
+	else
+	{
+		glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->normal );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->texcoord );
+	}
+	glVertexPointer( 3, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_tess.m_vertices.data()->vertex );
+	const RenderIndex* strip_indices = m_tess.m_indices.data();
+	for ( std::size_t i = 0; i < m_tess.m_numStrips; i++, strip_indices += m_tess.m_lenStrips )
+	{
+		glDrawElements( GL_QUAD_STRIP, GLsizei( m_tess.m_lenStrips ), RenderIndexTypeID, strip_indices );
+	}
 }
 };
 
@@ -716,7 +703,6 @@ void snapto( float snap ){
 
 
 void RenderDebug( RenderStateFlags state ) const;
-void RenderNormals( RenderStateFlags state ) const;
 
 void pushElement( const XMLElement& element ){
 	switch ( m_xml_state.back().state() )
@@ -1431,28 +1417,6 @@ void update_selected() const {
 		}
 	}
 }
-
-#if 0
-void render( Renderer& renderer, const VolumeTest& volume ) const {
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent
-		 && m_selectable.isSelected() ) {
-		renderer.Highlight( Renderer::eFace, false );
-
-		m_patch.render( renderer, volume, localToWorld() );
-
-		if ( GlobalSelectionSystem().ComponentMode() == SelectionSystem::eVertex ) {
-			renderer.Highlight( Renderer::ePrimitive, false );
-
-			m_patch.render_component( renderer, volume, localToWorld() );
-
-			renderComponentsSelected( renderer, volume );
-		}
-	}
-	else{
-		m_patch.render( renderer, volume, localToWorld() );
-	}
-}
-#endif
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
 	m_patch.evaluateTransform();

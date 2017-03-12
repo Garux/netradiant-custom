@@ -262,21 +262,6 @@ void Brush::buildBRep(){
 				globalErrorStream() << "Final B-Rep: inconsistent vertex count\n";
 			}
 
-#if BRUSH_CONNECTIVITY_DEBUG
-			if ( ( uniqueVertices.size() + faces_size ) - uniqueEdges.size() != 2 ) {
-				for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
-				{
-					std::size_t faceIndex = std::distance( m_faces.begin(), i );
-
-					if ( !( *i )->contributes() ) {
-						globalOutputStream() << "face: " << Unsigned( faceIndex ) << " does not contribute\n";
-					}
-
-					Winding_printConnectivity( ( *i )->getWinding() );
-				}
-			}
-#endif
-
 			// edge-index list for wireframe rendering
 			{
 				m_edge_indices.resize( uniqueEdgeIndices.size() );

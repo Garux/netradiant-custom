@@ -48,14 +48,6 @@ void QERApp_SetCamera( const Vector3& origin, const Vector3& angles ){
 }
 
 void QERApp_GetCamWindowExtents( int *x, int *y, int *width, int *height ){
-#if 0
-	CamWnd* camwnd = g_pParentWnd->GetCamWnd();
-
-	gtk_window_get_position( GTK_WINDOW( camwnd->m_window ), x, y );
-
-	*width = camwnd->Camera()->width;
-	*height = camwnd->Camera()->height;
-#endif
 }
 
 #include "icamera.h"

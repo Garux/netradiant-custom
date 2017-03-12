@@ -222,13 +222,7 @@ void ClusterMerge( int leafnum ){
    ==================
  */
 void CalcPortalVis( void ){
-#ifdef MREDEBUG
-	Sys_Printf( "%6d portals out of %d", 0, numportals * 2 );
-	//get rid of the counter
-	RunThreadsOnIndividual( numportals * 2, qfalse, PortalFlow );
-#else
 	RunThreadsOnIndividual( numportals * 2, qtrue, PortalFlow );
-#endif
 
 }
 
@@ -240,20 +234,11 @@ void CalcPortalVis( void ){
 void CalcPassageVis( void ){
 	PassageMemory();
 
-#ifdef MREDEBUG
-	_printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, CreatePassages );
-	_printf( "\n" );
-	_printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, PassageFlow );
-	_printf( "\n" );
-#else
 	Sys_Printf( "\n--- CreatePassages (%d) ---\n", numportals * 2 );
 	RunThreadsOnIndividual( numportals * 2, qtrue, CreatePassages );
 
 	Sys_Printf( "\n--- PassageFlow (%d) ---\n", numportals * 2 );
 	RunThreadsOnIndividual( numportals * 2, qtrue, PassageFlow );
-#endif
 }
 
 /*
@@ -264,20 +249,11 @@ void CalcPassageVis( void ){
 void CalcPassagePortalVis( void ){
 	PassageMemory();
 
-#ifdef MREDEBUG
-	Sys_Printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, CreatePassages );
-	Sys_Printf( "\n" );
-	Sys_Printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, PassagePortalFlow );
-	Sys_Printf( "\n" );
-#else
 	Sys_Printf( "\n--- CreatePassages (%d) ---\n", numportals * 2 );
 	RunThreadsOnIndividual( numportals * 2, qtrue, CreatePassages );
 
 	Sys_Printf( "\n--- PassagePortalFlow (%d) ---\n", numportals * 2 );
 	RunThreadsOnIndividual( numportals * 2, qtrue, PassagePortalFlow );
-#endif
 }
 
 /*

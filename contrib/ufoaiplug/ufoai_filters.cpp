@@ -100,22 +100,21 @@ ForEachFace( Brush& brush )
 }
 
 void visit( Face& face ) const {
-#if _DEBUG
 	if ( m_surfaceFlagsVis < 0 ) {
 		m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
 	}
+#if _DEBUG
 	else if ( m_surfaceFlagsVis >= 0 && m_surfaceFlagsVis != face.getShader().m_flags.m_surfaceFlags ) {
 		globalOutputStream() << "Faces with different surfaceflags at brush\n";
 	}
+#endif
 	if ( m_contentFlagsVis < 0 ) {
 		m_contentFlagsVis = face.getShader().m_flags.m_contentFlags;
 	}
+#if _DEBUG
 	else if ( m_contentFlagsVis >= 0 && m_contentFlagsVis != face.getShader().m_flags.m_contentFlags ) {
 		globalOutputStream() << "Faces with different contentflags at brush\n";
 	}
-#else
-	m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
-	m_contentFlagsVis = face.getShader().m_flags.m_contentFlags;
 #endif
 }
 };

@@ -187,11 +187,6 @@ DynamicLibraryModule( const char* filename )
 	: m_library( filename ), m_registerModule( 0 ){
 	if ( !m_library.failed() ) {
 		m_registerModule = reinterpret_cast<RegisterModulesFunc>( m_library.findSymbol( "Radiant_RegisterModules" ) );
-#if 0
-		if ( !m_registerModule ) {
-			m_registerModule = reinterpret_cast<RegisterModulesFunc>( m_library.findSymbol( "Radiant_RegisterModules@4" ) );
-		}
-#endif
 	}
 }
 bool failed(){

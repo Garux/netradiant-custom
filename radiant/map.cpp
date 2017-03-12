@@ -1120,11 +1120,7 @@ void post( scene::Node& node ) const {
 void Map_Traverse_Selected( scene::Node& root, const scene::Traversable::Walker& walker ){
 	scene::Traversable* traversable = Node_getTraversable( root );
 	if ( traversable != 0 ) {
-#if 0
-		traversable->traverse( ExcludeWalker( walker, SelectionExcluder() ) );
-#else
 		traversable->traverse( IncludeSelectedWalker( walker ) );
-#endif
 	}
 }
 
@@ -1171,7 +1167,6 @@ void Map_RenameAbsolute( const char* absolute ){
 	resource->setNode( clone.get_pointer() );
 
 	{
-		//ScopeTimer timer("clone subgraph");
 		Node_getTraversable( GlobalSceneGraph().root() )->traverse( CloneAll( clone ) );
 	}
 

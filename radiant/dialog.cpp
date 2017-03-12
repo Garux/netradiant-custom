@@ -503,23 +503,6 @@ void Dialog::addCombo( GtkWidget* vbox, const char* name, int& data, StringArray
 }
 
 void Dialog::addSlider( GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
-#if 0
-	if ( draw_value == FALSE ) {
-		GtkWidget* hbox2 = gtk_hbox_new( FALSE, 0 );
-		gtk_widget_show( hbox2 );
-		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox2 ), FALSE, FALSE, 0 );
-		{
-			GtkWidget* label = gtk_label_new( low );
-			gtk_widget_show( label );
-			gtk_box_pack_start( GTK_BOX( hbox2 ), label, FALSE, FALSE, 0 );
-		}
-		{
-			GtkWidget* label = gtk_label_new( high );
-			gtk_widget_show( label );
-			gtk_box_pack_end( GTK_BOX( hbox2 ), label, FALSE, FALSE, 0 );
-		}
-	}
-#endif
 
 	// adjustment
 	GtkObject* adj = gtk_adjustment_new( value, lower, upper, step_increment, page_increment, 0 );

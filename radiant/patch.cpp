@@ -278,30 +278,6 @@ void Patch::UpdateCachedData(){
 		}
 	}
 
-#if 0
-	{
-		Array<RenderIndex>::iterator first = m_tess.m_indices.begin();
-		for ( std::size_t s = 0; s < m_tess.m_numStrips; s++ )
-		{
-			Array<RenderIndex>::iterator last = first + m_tess.m_lenStrips;
-
-			for ( Array<RenderIndex>::iterator i( first ); i + 2 != last; i += 2 )
-			{
-				ArbitraryMeshTriangle_sumTangents( m_tess.m_vertices[*( i + 0 )], m_tess.m_vertices[*( i + 1 )], m_tess.m_vertices[*( i + 2 )] );
-				ArbitraryMeshTriangle_sumTangents( m_tess.m_vertices[*( i + 2 )], m_tess.m_vertices[*( i + 1 )], m_tess.m_vertices[*( i + 3 )] );
-			}
-
-			first = last;
-		}
-
-		for ( Array<ArbitraryMeshVertex>::iterator i = m_tess.m_vertices.begin(); i != m_tess.m_vertices.end(); ++i )
-		{
-			vector3_normalise( reinterpret_cast<Vector3&>( ( *i ).tangent ) );
-			vector3_normalise( reinterpret_cast<Vector3&>( ( *i ).bitangent ) );
-		}
-	}
-#endif
-
 	SceneChangeNotify();
 }
 
@@ -1503,49 +1479,6 @@ void Patch::RenderDebug( RenderStateFlags state ) const {
 		}
 		glEnd();
 	}
-}
-
-void RenderablePatchSolid::RenderNormals() const {
-	const std::size_t width = m_tess.m_numStrips + 1;
-	const std::size_t height = m_tess.m_lenStrips >> 1;
-	glBegin( GL_LINES );
-	for ( std::size_t i = 0; i < width; i++ )
-	{
-		for ( std::size_t j = 0; j < height; j++ )
-		{
-			{
-				Vector3 vNormal(
-					vector3_added(
-						vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
-						vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->normal ), 8 )
-						)
-					);
-				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
-				glVertex3fv( &vNormal[0] );
-			}
-			{
-				Vector3 vNormal(
-					vector3_added(
-						vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
-						vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->tangent ), 8 )
-						)
-					);
-				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
-				glVertex3fv( &vNormal[0] );
-			}
-			{
-				Vector3 vNormal(
-					vector3_added(
-						vertex3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ),
-						vector3_scaled( normal3f_to_vector3( ( m_tess.m_vertices.data() + ( j * width + i ) )->bitangent ), 8 )
-						)
-					);
-				glVertex3fv( vertex3f_to_array( ( m_tess.m_vertices.data() + ( j * width + i ) )->vertex ) );
-				glVertex3fv( &vNormal[0] );
-			}
-		}
-	}
-	glEnd();
 }
 
 #define DEGEN_0a  0x01

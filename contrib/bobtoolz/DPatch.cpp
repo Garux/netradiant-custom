@@ -92,47 +92,6 @@ void DPatch::BuildInRadiant( scene::Node* entity ){
 	QER_entity = entity;
 	QER_brush = patch.get_pointer();
 
-
-#if 0
-	int nIndex = g_FuncTable.m_pfnCreatePatchHandle();
-	//$ FIXME: m_pfnGetPatchHandle
-	patchMesh_t* pm = g_FuncTable.m_pfnGetPatchData( nIndex );
-
-	b->patchBrush = true;
-	b->pPatch = Patch_Alloc();
-	b->pPatch->setDims( width,height );
-
-	for ( int x = 0; x < width; x++ )
-		for ( int y = 0; y < height; y++ )
-			CopyDrawVert( &points[x][y], &pm->ctrl[x][y] );
-
-/*	if(entity)
-    {
-   //		strcpy(pm->d_texture->name, texture);
-
-        brush_t* brush = (brush_t*)g_FuncTable.m_pfnCreateBrushHandle();
-        brush->patchBrush = true;
-        brush->pPatch = pm;
-
-        pm->pSymbiot = brush;
-        pm->bSelected = false;
-        pm->bOverlay = false;	// bleh, f*cks up, just have to wait for a proper function
-        pm->bDirty = true;		// or get my own patch out....
-        pm->nListID = -1;
-
-        g_FuncTable.m_pfnCommitBrushHandleToEntity(brush, entity);
-    }
-    else*/                                                                                                                                                                                                                                                                                                                                                                                                                                                                // patch to entity just plain dont work atm
-
-	if ( entity ) {
-		g_FuncTable.m_pfnCommitPatchHandleToEntity( nIndex, pm, texture, entity );
-	}
-	else{
-		g_FuncTable.m_pfnCommitPatchHandleToMap( nIndex, pm, texture );
-	}
-
-	QER_brush = pm->pSymbiot;
-#endif
 }
 
 void DPatch::LoadFromPatch( scene::Instance& patch ){
@@ -158,25 +117,6 @@ void DPatch::LoadFromPatch( scene::Instance& patch ){
 	}
 	SetTexture( GlobalPatchCreator().Patch_getShader( patch.path().top() ) );
 
-#if 0
-	SetTexture( brush->pPatch->GetShader() );
-
-	width = brush->pPatch->getWidth();
-	height = brush->pPatch->getHeight();
-
-	for ( int x = 0; x < height; x++ )
-	{
-		for ( int y = 0; y < width; y++ )
-		{
-			float *p = brush->pPatch->ctrlAt( ROW,x,y );
-			p[0] = points[x][y].xyz[0];
-			p[1] = points[x][y].xyz[1];
-			p[2] = points[x][y].xyz[2];
-			p[3] = points[x][y].st[0];
-			p[4] = points[x][y].st[1];
-		}
-	}
-#endif
 }
 
 bool DPatch::ResetTextures( const char *oldTextureName, const char *newTextureName ){

@@ -146,7 +146,6 @@ void updateAABB(){
 }
 
 void render( RenderStateFlags state ) const {
-#if 1
 	if ( ( state & RENDER_BUMP ) != 0 ) {
 		if ( GlobalShaderCache().useShaderLanguage() ) {
 			glNormalPointer( GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->normal );
@@ -169,28 +168,6 @@ void render( RenderStateFlags state ) const {
 	}
 	glVertexPointer( 3, GL_FLOAT, sizeof( ArbitraryMeshVertex ), &m_vertices.data()->vertex );
 	glDrawElements( GL_TRIANGLES, GLsizei( m_indices.size() ), RenderIndexTypeID, m_indices.data() );
-#else
-	glBegin( GL_TRIANGLES );
-	for ( unsigned int i = 0; i < m_indices.size(); ++i )
-	{
-		glTexCoord2fv( &m_vertices[m_indices[i]].texcoord.s );
-		glNormal3fv( &m_vertices[m_indices[i]].normal.x );
-		glVertex3fv( &m_vertices[m_indices[i]].vertex.x );
-	}
-	glEnd();
-#endif
-
-#if defined( _DEBUG )
-	glBegin( GL_LINES );
-
-	for ( VertexBuffer<ArbitraryMeshVertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
-	{
-		Vector3 normal = vector3_added( vertex3f_to_vector3( ( *i ).vertex ), vector3_scaled( normal3f_to_vector3( ( *i ).normal ), 8 ) );
-		glVertex3fv( vertex3f_to_array( ( *i ).vertex ) );
-		glVertex3fv( vector3_to_array( normal ) );
-	}
-	glEnd();
-#endif
 }
 
 VolumeIntersectionValue intersectVolume( const VolumeTest& test, const Matrix4& localToWorld ) const {

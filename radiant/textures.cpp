@@ -264,73 +264,6 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	}
 }
 
-#if 0
-/*
-   ==============
-   Texture_InitPalette
-   ==============
- */
-void Texture_InitPalette( byte *pal ){
-	int r,g,b;
-	int i;
-	int inf;
-	byte gammatable[256];
-	float gamma;
-
-	gamma = g_texture_globals.fGamma;
-
-	if ( gamma == 1.0 ) {
-		for ( i = 0 ; i < 256 ; i++ )
-			gammatable[i] = i;
-	}
-	else
-	{
-		for ( i = 0 ; i < 256 ; i++ )
-		{
-			inf = (int)( 255 * pow( ( i + 0.5 ) / 255.5, gamma ) + 0.5 );
-			if ( inf < 0 ) {
-				inf = 0;
-			}
-			if ( inf > 255 ) {
-				inf = 255;
-			}
-			gammatable[i] = inf;
-		}
-	}
-
-	for ( i = 0 ; i < 256 ; i++ )
-	{
-		r = gammatable[pal[0]];
-		g = gammatable[pal[1]];
-		b = gammatable[pal[2]];
-		pal += 3;
-
-		//v = (r<<24) + (g<<16) + (b<<8) + 255;
-		//v = BigLong (v);
-
-		//tex_palette[i] = v;
-		tex_palette[i * 3 + 0] = r;
-		tex_palette[i * 3 + 1] = g;
-		tex_palette[i * 3 + 2] = b;
-	}
-}
-#endif
-
-#if 0
-class TestHashtable
-{
-public:
-TestHashtable(){
-	HashTable<CopiedString, CopiedString, HashStringNoCase, StringEqualNoCase> strings;
-	strings["Monkey"] = "bleh";
-	strings["MonkeY"] = "blah";
-}
-};
-
-const TestHashtable g_testhashtable;
-
-#endif
-
 typedef std::pair<LoadImageCallback, CopiedString> TextureKey;
 
 void qtexture_realise( qtexture_t& texture, const TextureKey& key ){
@@ -376,8 +309,6 @@ hash_t operator()( const TextureKey& key ) const {
 	return hash_combine( string_hash_nocase( key.second.c_str() ), pod_hash( key.first ) );
 }
 };
-
-#define DEBUG_TEXTURES 0
 
 class TexturesMap : public TexturesCache
 {
@@ -430,15 +361,9 @@ qtexture_t* capture( const char* name ){
 	return capture( defaultLoader(), name );
 }
 qtexture_t* capture( const LoadImageCallback& loader, const char* name ){
-#if DEBUG_TEXTURES
-	globalOutputStream() << "textures capture: " << makeQuoted( name ) << '\n';
-#endif
 	return m_qtextures.capture( TextureKey( loader, name ) ).get();
 }
 void release( qtexture_t* texture ){
-#if DEBUG_TEXTURES
-	globalOutputStream() << "textures release: " << makeQuoted( texture->name ) << '\n';
-#endif
 	m_qtextures.release( TextureKey( texture->load, texture->name ) );
 }
 void attach( TexturesCacheObserver& observer ){

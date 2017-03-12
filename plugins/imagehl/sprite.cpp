@@ -163,20 +163,6 @@ Image* LoadIDSPBuff( byte *buffer ){
 
 	RGBAImage* image = new RGBAImage( columns, rows );
 
-#ifdef DEBUG
-	frametype = spriteframetype_t( pframetype->type );
-	if ( frametype == SPR_SINGLE ) {
-		globalOutputStream() << "Single Frame\n";
-	}
-	else if ( frametype == SPR_GROUP ) {
-		globalOutputStream() << "Group of Frames\n";
-	}
-	else
-	{
-		globalOutputStream() << "Bleh!\n"; // <-- we always get this, wtf!
-	}
-#endif
-
 	palette = (byte *)( pframetype + 1 );
 	spriteframe = (dspriteframe_t *)( palette + ( 256 * 3 ) + 4 ); // what are those 4 extra bytes ? what's missing ?
 	buf_p = (byte *)( spriteframe + 1 );

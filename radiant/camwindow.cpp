@@ -656,10 +656,6 @@ class CamWnd
 View m_view;
 camera_t m_Camera;
 RadiantCameraView m_cameraview;
-#if 0
-int m_PositionDragCursorX;
-int m_PositionDragCursorY;
-#endif
 
 guint m_freemove_handle_focusout;
 
@@ -692,11 +688,9 @@ CamWnd();
 
 bool m_drawing;
 void queue_draw(){
-	//ASSERT_MESSAGE(!m_drawing, "CamWnd::queue_draw(): called while draw is already in progress");
 	if ( m_drawing ) {
 		return;
 	}
-	//globalOutputStream() << "queue... ";
 	m_deferredDraw.draw();
 }
 void draw();
@@ -814,15 +808,6 @@ gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event
 	}
 	return FALSE;
 }
-
-#if 0
-gboolean mousecontrol_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
-		Cam_MouseControl( camwnd->getCamera(), event->x, widget->allocation.height - 1 - event->y );
-	}
-	return FALSE;
-}
-#endif
 
 void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 	if ( GTK_WIDGET_VISIBLE( self.m_gl_widget ) ) {
@@ -1243,39 +1228,6 @@ void CamWnd::Cam_ChangeFloor( bool up ){
 }
 
 
-#if 0
-
-// button_press
-Sys_GetCursorPos( &m_PositionDragCursorX, &m_PositionDragCursorY );
-
-// motion
-if ( ( m_bFreeMove && ( buttons == ( RAD_CONTROL | RAD_SHIFT ) ) )
-	 || ( !m_bFreeMove && ( buttons == ( RAD_RBUTTON | RAD_CONTROL ) ) ) ) {
-	Cam_PositionDrag();
-	CamWnd_Update( camwnd );
-	CameraMovedNotify();
-	return;
-}
-
-void CamWnd::Cam_PositionDrag(){
-	int x, y;
-
-	Sys_GetCursorPos( GTK_WINDOW( m_gl_widget ), &x, &y );
-	if ( x != m_PositionDragCursorX || y != m_PositionDragCursorY ) {
-		x -= m_PositionDragCursorX;
-		vector3_add( m_Camera.origin, vector3_scaled( m_Camera.vright, x ) );
-		y -= m_PositionDragCursorY;
-		m_Camera.origin[2] -= y;
-		Camera_updateModelview();
-		CamWnd_Update( camwnd );
-		CameraMovedNotify();
-
-		Sys_SetCursorPos( GTK_WINDOW( m_parent ), m_PositionDragCursorX, m_PositionDragCursorY );
-	}
-}
-#endif
-
-
 // NOTE TTimo if there's an OS-level focus out of the application
 //   then we can release the camera cursor grab
 static gboolean camwindow_freemove_focusout( GtkWidget* widget, GdkEventFocus* event, gpointer data ){
@@ -1409,10 +1361,6 @@ ToggleItem g_show_stats( g_show_stats_callback );
 
 void CamWnd::Cam_Draw(){
 	glViewport( 0, 0, m_Camera.width, m_Camera.height );
-#if 0
-	GLint viewprt[4];
-	glGetIntegerv( GL_VIEWPORT, viewprt );
-#endif
 
 	// enable depth buffer writes
 	glDepthMask( GL_TRUE );

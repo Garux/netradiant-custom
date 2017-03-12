@@ -198,72 +198,10 @@ void transformChanged(){
 typedef MemberCaller<Group, &Group::transformChanged> TransformChangedCaller;
 };
 
-#if 0
-class TransformableSetTranslation
-{
-Translation m_value;
-public:
-TransformableSetTranslation( const Translation& value ) : m_value( value ){
-}
-void operator()( Transformable& transformable ) const {
-	transformable.setTranslation( m_value );
-}
-};
-
-class TransformableSetRotation
-{
-Rotation m_value;
-public:
-TransformableSetRotation( const Rotation& value ) : m_value( value ){
-}
-void operator()( Transformable& transformable ) const {
-	transformable.setRotation( m_value );
-}
-};
-
-class TransformableSetScale
-{
-Scale m_value;
-public:
-TransformableSetScale( const Scale& value ) : m_value( value ){
-}
-void operator()( Transformable& transformable ) const {
-	transformable.setScale( m_value );
-}
-};
-
-class TransformableSetType
-{
-TransformModifierType m_value;
-public:
-TransformableSetType( const TransformModifierType& value ) : m_value( value ){
-}
-void operator()( Transformable& transformable ) const {
-	transformable.setType( m_value );
-}
-};
-
-class TransformableFreezeTransform
-{
-TransformModifierType m_value;
-public:
-void operator()( Transformable& transformable ) const {
-	transformable.freezeTransform();
-}
-};
-
-template<typename Functor>
-inline void Scene_forEachChildTransformable( const Functor& functor, const scene::Path& path ){
-	GlobalSceneGraph().traverse_subgraph( ChildInstanceWalker< InstanceApply<Transformable, Functor> >( functor ), path );
-}
-#endif
 
 class GroupInstance :
 	public TargetableInstance,
 	public TransformModifier,
-#if 0
-	public Transformable,
-#endif
 	public Renderable
 {
 class TypeCasts
@@ -273,9 +211,6 @@ public:
 TypeCasts(){
 	m_casts = TargetableInstance::StaticTypeCasts::instance().get();
 	InstanceStaticCast<GroupInstance, Renderable>::install( m_casts );
-#if 0
-	InstanceStaticCast<GroupInstance, Transformable>::install( m_casts );
-#endif
 }
 InstanceTypeCastTable& get(){
 	return m_casts;
@@ -306,26 +241,6 @@ void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
 
 STRING_CONSTANT( Name, "GroupInstance" );
 
-#if 0
-void setType( TransformModifierType type ){
-	Scene_forEachChildTransformable( TransformableSetType( type ), Instance::path() );
-}
-void setTranslation( const Translation& value ){
-	Scene_forEachChildTransformable( TransformableSetTranslation( value ), Instance::path() );
-}
-void setRotation( const Rotation& value ){
-	Scene_forEachChildTransformable( TransformableSetRotation( value ), Instance::path() );
-}
-void setScale( const Scale& value ){
-	Scene_forEachChildTransformable( TransformableSetScale( value ), Instance::path() );
-}
-void freezeTransform(){
-	Scene_forEachChildTransformable( TransformableFreezeTransform(), Instance::path() );
-}
-
-void evaluateTransform(){
-}
-#endif
 
 void evaluateTransform(){
 	if ( getType() == TRANSFORM_PRIMITIVE ) {

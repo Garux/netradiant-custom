@@ -342,19 +342,6 @@ void setEnginePath( const char* path ){
 	StringOutputStream buffer( 256 );
 	buffer << DirectoryCleaned( path );
 	if ( !path_equal( buffer.c_str(), g_strEnginePath.c_str() ) ) {
-#if 0
-		while ( !ConfirmModified( "Paths Changed" ) )
-		{
-			if ( Map_Unnamed( g_map ) ) {
-				Map_SaveAs();
-			}
-			else
-			{
-				Map_Save();
-			}
-		}
-		Map_RegionOff();
-#endif
 
 		ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Changing Engine Path" );
 
@@ -1057,11 +1044,6 @@ void ComponentMode_SelectionChanged( const Selectable& selectable ){
 }
 
 void SelectEdgeMode(){
-#if 0
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
-		GlobalSelectionSystem().Select( false );
-	}
-#endif
 
 	if ( EdgeMode() ) {
 		SelectionSystem_DefaultMode();
@@ -1081,11 +1063,6 @@ void SelectEdgeMode(){
 }
 
 void SelectVertexMode(){
-#if 0
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
-		GlobalSelectionSystem().Select( false );
-	}
-#endif
 
 	if ( VertexMode() ) {
 		SelectionSystem_DefaultMode();
@@ -1105,11 +1082,6 @@ void SelectVertexMode(){
 }
 
 void SelectFaceMode(){
-#if 0
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
-		GlobalSelectionSystem().Select( false );
-	}
-#endif
 
 	if ( FaceMode() ) {
 		SelectionSystem_DefaultMode();
@@ -1811,12 +1783,6 @@ GtkMenuItem* create_file_menu(){
 	create_menu_item_with_mnemonic( menu, "_New Map", "NewMap" );
 	menu_separator( menu );
 
-#if 0
-	//++timo temporary experimental stuff for sleep mode..
-	create_menu_item_with_mnemonic( menu, "_Sleep", "Sleep" );
-	menu_separator( menu );
-	// end experimental
-#endif
 
 	create_menu_item_with_mnemonic( menu, "_Open...", "OpenMap" );
 
@@ -2108,15 +2074,11 @@ GtkMenuItem* create_misc_menu(){
 		menu_tearoff( menu );
 	}
 
-#if 0
-	create_menu_item_with_mnemonic( menu, "_Benchmark", FreeCaller<GlobalCamera_Benchmark>() );
-#endif
 	gtk_container_add( GTK_CONTAINER( menu ), GTK_WIDGET( create_colours_menu() ) );
 
 	create_menu_item_with_mnemonic( menu, "Find brush...", "FindBrush" );
 	create_menu_item_with_mnemonic( menu, "Map Info...", "MapInfo" );
 	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=394
-//  create_menu_item_with_mnemonic(menu, "_Print XY View", FreeCaller<WXY_Print>());
 	create_menu_item_with_mnemonic( menu, "_Background select", FreeCaller<WXY_BackgroundSelect>() );
 	return misc_menu_item;
 }
@@ -2434,48 +2396,6 @@ GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_count_status] ){
 	return GTK_WIDGET( table );
 }
 
-#if 0
-
-
-WidgetFocusPrinter g_mainframeWidgetFocusPrinter( "mainframe" );
-
-class WindowFocusPrinter
-{
-const char* m_name;
-
-static gboolean frame_event( GtkWidget *widget, GdkEvent* event, WindowFocusPrinter* self ){
-	globalOutputStream() << self->m_name << " frame_event\n";
-	return FALSE;
-}
-static gboolean keys_changed( GtkWidget *widget, WindowFocusPrinter* self ){
-	globalOutputStream() << self->m_name << " keys_changed\n";
-	return FALSE;
-}
-static gboolean notify( GtkWindow* window, gpointer dummy, WindowFocusPrinter* self ){
-	if ( gtk_window_is_active( window ) ) {
-		globalOutputStream() << self->m_name << " takes toplevel focus\n";
-	}
-	else
-	{
-		globalOutputStream() << self->m_name << " loses toplevel focus\n";
-	}
-	return FALSE;
-}
-public:
-WindowFocusPrinter( const char* name ) : m_name( name ){
-}
-void connect( GtkWindow* toplevel_window ){
-	g_signal_connect( G_OBJECT( toplevel_window ), "notify::has_toplevel_focus", G_CALLBACK( notify ), this );
-	g_signal_connect( G_OBJECT( toplevel_window ), "notify::is_active", G_CALLBACK( notify ), this );
-	g_signal_connect( G_OBJECT( toplevel_window ), "keys_changed", G_CALLBACK( keys_changed ), this );
-	g_signal_connect( G_OBJECT( toplevel_window ), "frame_event", G_CALLBACK( frame_event ), this );
-}
-};
-
-WindowFocusPrinter g_mainframeFocusPrinter( "mainframe" );
-
-#endif
-
 class MainWindowActive
 {
 static gboolean notify( GtkWindow* window, gpointer dummy, MainWindowActive* self ){
@@ -2569,107 +2489,8 @@ void MainFrame::SetActiveXY( XYWnd* p ){
 
 }
 
-void MainFrame::ReleaseContexts(){
-#if 0
-	if ( m_pXYWnd ) {
-		m_pXYWnd->DestroyContext();
-	}
-	if ( m_pYZWnd ) {
-		m_pYZWnd->DestroyContext();
-	}
-	if ( m_pXZWnd ) {
-		m_pXZWnd->DestroyContext();
-	}
-	if ( m_pCamWnd ) {
-		m_pCamWnd->DestroyContext();
-	}
-	if ( m_pTexWnd ) {
-		m_pTexWnd->DestroyContext();
-	}
-	if ( m_pZWnd ) {
-		m_pZWnd->DestroyContext();
-	}
-#endif
-}
-
-void MainFrame::CreateContexts(){
-#if 0
-	if ( m_pCamWnd ) {
-		m_pCamWnd->CreateContext();
-	}
-	if ( m_pXYWnd ) {
-		m_pXYWnd->CreateContext();
-	}
-	if ( m_pYZWnd ) {
-		m_pYZWnd->CreateContext();
-	}
-	if ( m_pXZWnd ) {
-		m_pXZWnd->CreateContext();
-	}
-	if ( m_pTexWnd ) {
-		m_pTexWnd->CreateContext();
-	}
-	if ( m_pZWnd ) {
-		m_pZWnd->CreateContext();
-	}
-#endif
-}
-
-#ifdef _DEBUG
-//#define DBG_SLEEP
-#endif
 
 void MainFrame::OnSleep(){
-#if 0
-	m_bSleeping ^= 1;
-	if ( m_bSleeping ) {
-		// useful when trying to debug crashes in the sleep code
-		globalOutputStream() << "Going into sleep mode..\n";
-
-		globalOutputStream() << "Dispatching sleep msg...";
-		DispatchRadiantMsg( RADIANT_SLEEP );
-		globalOutputStream() << "Done.\n";
-
-		gtk_window_iconify( m_window );
-		GlobalSelectionSystem().setSelectedAll( false );
-
-		GlobalShaderCache().unrealise();
-		Shaders_Free();
-		GlobalOpenGL_debugAssertNoErrors();
-		ScreenUpdates_Disable();
-
-		// release contexts
-		globalOutputStream() << "Releasing contexts...";
-		ReleaseContexts();
-		globalOutputStream() << "Done.\n";
-	}
-	else
-	{
-		globalOutputStream() << "Waking up\n";
-
-		gtk_window_deiconify( m_window );
-
-		// create contexts
-		globalOutputStream() << "Creating contexts...";
-		CreateContexts();
-		globalOutputStream() << "Done.\n";
-
-		globalOutputStream() << "Making current on camera...";
-		m_pCamWnd->MakeCurrent();
-		globalOutputStream() << "Done.\n";
-
-		globalOutputStream() << "Reloading shaders...";
-		Shaders_Load();
-		GlobalShaderCache().realise();
-		globalOutputStream() << "Done.\n";
-
-		ScreenUpdates_Enable();
-
-		globalOutputStream() << "Dispatching wake msg...";
-		DispatchRadiantMsg( RADIANT_WAKEUP );
-		globalOutputStream() << "Done\n";
-	}
-#endif
 }
 
 
@@ -2738,11 +2559,6 @@ void MainFrame::Create(){
 	g_signal_connect( G_OBJECT( window ), "delete_event", G_CALLBACK( mainframe_delete ), this );
 
 	m_position_tracker.connect( window );
-
-#if 0
-	g_mainframeWidgetFocusPrinter.connect( window );
-	g_mainframeFocusPrinter.connect( window );
-#endif
 
 	g_MainWindowActive.connect( window );
 

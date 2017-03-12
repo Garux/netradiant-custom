@@ -472,25 +472,6 @@ Shader* g_state_clipped;
 RenderableClippedPrimitive g_render_clipped;
 #endif
 
-
-#if 0
-// dist_Point_to_Line(): get the distance of a point to a line.
-//    Input:  a Point P and a Line L (in any dimension)
-//    Return: the shortest distance from P to L
-float
-dist_Point_to_Line( Point P, Line L ){
-	Vector v = L.P1 - L.P0;
-	Vector w = P - L.P0;
-
-	double c1 = dot( w,v );
-	double c2 = dot( v,v );
-	double b = c1 / c2;
-
-	Point Pb = L.P0 + b * v;
-	return d( P, Pb );
-}
-#endif
-
 class Segment3D
 {
 typedef Vector3 point_type;
@@ -770,19 +751,8 @@ inline void draw_semicircle( const std::size_t segments, const float radius, Poi
 		PointVertex* k = i + ( segments << 1 );
 		PointVertex* l = j + ( segments << 1 );
 
-#if 0
-		PointVertex* m = i + ( segments << 2 );
-		PointVertex* n = j + ( segments << 2 );
-		PointVertex* o = k + ( segments << 2 );
-		PointVertex* p = l + ( segments << 2 );
-#endif
-
 		remap_policy::set( i->vertex, x,-y, 0 );
 		remap_policy::set( k->vertex,-y,-x, 0 );
-#if 0
-		remap_policy::set( m->vertex,-x, y, 0 );
-		remap_policy::set( o->vertex, y, x, 0 );
-#endif
 
 		++count;
 
@@ -794,10 +764,6 @@ inline void draw_semicircle( const std::size_t segments, const float radius, Poi
 
 		remap_policy::set( j->vertex, y,-x, 0 );
 		remap_policy::set( l->vertex,-x,-y, 0 );
-#if 0
-		remap_policy::set( n->vertex,-y, x, 0 );
-		remap_policy::set( p->vertex, x, y, 0 );
-#endif
 	}
 }
 
@@ -3288,27 +3254,6 @@ void Scene_BoundsSelected( scene::Graph& graph, AABB& bounds ){
 void Scene_BoundsSelectedComponent( scene::Graph& graph, AABB& bounds ){
 	graph.traverse( bounds_selected_component( bounds ) );
 }
-
-#if 0
-inline void pivot_for_node( Matrix4& pivot, scene::Node& node, scene::Instance& instance ){
-	ComponentEditable* componentEditable = Instance_getComponentEditable( instance );
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent
-		 && componentEditable != 0 ) {
-		pivot = matrix4_translation_for_vec3( componentEditable->getSelectedComponentsBounds().origin );
-	}
-	else
-	{
-		Bounded* bounded = Instance_getBounded( instance );
-		if ( bounded != 0 ) {
-			pivot = matrix4_translation_for_vec3( bounded->localAABB().origin );
-		}
-		else
-		{
-			pivot = g_matrix4_identity;
-		}
-	}
-}
-#endif
 
 void RadiantSelectionSystem::ConstructPivot() const {
 	if ( !m_pivotChanged || m_pivot_moving ) {

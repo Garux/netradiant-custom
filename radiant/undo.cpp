@@ -484,25 +484,3 @@ void mutate( unsigned int data ){
 	m_state.test_data = data;
 }
 };
-
-#if 0
-
-class TestUndo
-{
-public:
-TestUndo(){
-	undoable_test test;
-	GlobalUndoSystem().begin( "bleh" );
-	test.mutate( 3 );
-	GlobalUndoSystem().begin( "blah" );
-	test.mutate( 4 );
-	GlobalUndoSystem().undo();
-	GlobalUndoSystem().undo();
-	GlobalUndoSystem().redo();
-	GlobalUndoSystem().redo();
-}
-};
-
-TestUndo g_TestUndo;
-
-#endif

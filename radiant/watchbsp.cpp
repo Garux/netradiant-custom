@@ -227,11 +227,6 @@ void BuildMonitor_Run( GPtrArray* commands, const char* mapName ){
 static void abortStream( message_info_t *data ){
 	GetWatchBSP()->EndMonitoringLoop();
 	// tell there has been an error
-#if 0
-	if ( GetWatchBSP()->HasBSPPlugin() ) {
-		g_BSPFrontendTable.m_pfnEndListen( 2 );
-	}
-#endif
 	// yeah this doesn't look good.. but it's needed so that everything will be ignored until the stream goes out
 	data->ignore_depth = -1;
 	data->recurse++;
@@ -240,17 +235,6 @@ static void abortStream( message_info_t *data ){
 #include "stream_version.h"
 
 static void saxStartElement( message_info_t *data, const xmlChar *name, const xmlChar **attrs ){
-#if 0
-	globalOutputStream() << "<" << name;
-	if ( attrs != 0 ) {
-		for ( const xmlChar** p = attrs; *p != 0; p += 2 )
-		{
-			globalOutputStream() << " " << p[0] << "=" << makeQuoted( p[1] );
-		}
-	}
-	globalOutputStream() << ">\n";
-#endif
-
 	if ( data->ignore_depth == 0 ) {
 		if ( data->pGeometry != 0 ) {
 			// we have a handler
@@ -323,10 +307,6 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 }
 
 static void saxEndElement( message_info_t *data, const xmlChar *name ){
-#if 0
-	globalOutputStream() << "<" << name << "/>\n";
-#endif
-
 	data->recurse--;
 	// we are out of an ignored chunk
 	if ( data->recurse == data->ignore_depth ) {
@@ -348,11 +328,6 @@ static void saxEndElement( message_info_t *data, const xmlChar *name ){
 #endif
 		GetWatchBSP()->EndMonitoringLoop();
 		// tell there has been an error
-#if 0
-		if ( GetWatchBSP()->HasBSPPlugin() ) {
-			g_BSPFrontendTable.m_pfnEndListen( 2 );
-		}
-#endif
 		return;
 	}
 }
@@ -613,12 +588,6 @@ void CWatchBSP::RoutineProcessing(){
 		if ( g_timer_elapsed( m_pTimer, NULL ) > g_WatchBSP_Timeout ) {
 			gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "The connection timed out, assuming the build process failed\nMake sure you are using a networked version of Q3Map?\nOtherwise you need to disable BSP Monitoring in prefs.", "BSP process monitoring", eMB_OK );
 			EndMonitoringLoop();
-#if 0
-			if ( m_bBSPPlugin ) {
-				// status == 1 : didn't get the connection
-				g_BSPFrontendTable.m_pfnEndListen( 1 );
-			}
-#endif
 			return;
 		}
 #ifdef _DEBUG
@@ -687,14 +656,6 @@ void CWatchBSP::RoutineProcessing(){
 				Net_Disconnect( m_pInSocket );
 				m_pInSocket = NULL;
 				globalOutputStream() << "Connection closed.\n";
-#if 0
-				if ( m_bBSPPlugin ) {
-					EndMonitoringLoop();
-					// let the BSP plugin know that the job is done
-					g_BSPFrontendTable.m_pfnEndListen( 0 );
-					return;
-				}
-#endif
 				// move to next step or finish
 				m_iCurrentStep++;
 				if ( m_iCurrentStep < m_pCmd->len ) {
@@ -704,13 +665,6 @@ void CWatchBSP::RoutineProcessing(){
 				{
 					// launch the engine .. OMG
 					if ( g_WatchBSP_RunQuake ) {
-#if 0
-						// do we enter sleep mode before?
-						if ( g_WatchBSP_DoSleep ) {
-							globalOutputStream() << "Going into sleep mode..\n";
-							g_pParentWnd->OnSleep();
-						}
-#endif
 						globalOutputStream() << "Running engine...\n";
 						StringOutputStream cmd( 256 );
 						// build the command line

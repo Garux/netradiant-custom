@@ -118,20 +118,6 @@ void CSpriteModel::Draw( int state, int rflags ) const {
 
 	// draw the sprite
 
-#if 0
-	// using x/y axis, it appears FLAT without the proper transform and rotation.
-
-	g_QglTable.m_pfn_qglBegin( GL_QUADS );
-	g_QglTable.m_pfn_qglTexCoord2f( 0,0 );
-	g_QglTable.m_pfn_qglVertex3f( 0 - w,0 - h, 0 );
-	g_QglTable.m_pfn_qglTexCoord2f( 1,0 );
-	g_QglTable.m_pfn_qglVertex3f( w,0 - h, 0 );
-	g_QglTable.m_pfn_qglTexCoord2f( 1,1 );
-	g_QglTable.m_pfn_qglVertex3f( w, h, 0 );
-	g_QglTable.m_pfn_qglTexCoord2f( 0,1 );
-	g_QglTable.m_pfn_qglVertex3f( 0 - w, h, 0 );
-	g_QglTable.m_pfn_qglEnd();
-#else
 
 	// so draw it using y/z instead.
 	g_QglTable.m_pfn_qglBegin( GL_QUADS );
@@ -144,29 +130,7 @@ void CSpriteModel::Draw( int state, int rflags ) const {
 	g_QglTable.m_pfn_qglTexCoord2f( 0.0f, 0.0f );
 	g_QglTable.m_pfn_qglVertex3f( 0.0f, static_cast<float>( w ), 0.0f - static_cast<float>( h ) );
 	g_QglTable.m_pfn_qglEnd();
-#endif
 
 	g_QglTable.m_pfn_qglBindTexture( GL_TEXTURE_2D, 0 );
 	g_QglTable.m_pfn_qglPopAttrib();
 }
-
-/*
-   bool CSpriteModel::TestRay(const ray_t *ray, vec_t *dist) const
-   {
-   vec_t depth_start = *dist;
-   vec_t depth_local = *dist;
-
-   if (aabb_test_ray(&m_BBox, ray) == 0)
-    return false;
-
-   for(int i=0; i<m_nSurfaces; i++)
-   {
-    if(m_children[i].TestRay(ray, &depth_local))
-    {
-      if (depth_local < *dist) *dist = depth_local;
-    }
-   }
-
-   return *dist < depth_start;
-   }
- */

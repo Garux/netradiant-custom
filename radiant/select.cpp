@@ -838,17 +838,6 @@ void Selection_destroy(){
 
 
 inline Quaternion quaternion_for_euler_xyz_degrees( const Vector3& eulerXYZ ){
-#if 0
-	return quaternion_for_matrix4_rotation( matrix4_rotation_for_euler_xyz_degrees( eulerXYZ ) );
-#elif 0
-	return quaternion_multiplied_by_quaternion(
-			   quaternion_multiplied_by_quaternion(
-				   quaternion_for_z( degrees_to_radians( eulerXYZ[2] ) ),
-				   quaternion_for_y( degrees_to_radians( eulerXYZ[1] ) )
-				   ),
-			   quaternion_for_x( degrees_to_radians( eulerXYZ[0] ) )
-			   );
-#elif 1
 	double cx = cos( degrees_to_radians( eulerXYZ[0] * 0.5 ) );
 	double sx = sin( degrees_to_radians( eulerXYZ[0] * 0.5 ) );
 	double cy = cos( degrees_to_radians( eulerXYZ[1] * 0.5 ) );
@@ -862,7 +851,6 @@ inline Quaternion quaternion_for_euler_xyz_degrees( const Vector3& eulerXYZ ){
 			   sz * cy * cx - cz * sy * sx,
 			   cz * cy * cx + sz * sy * sx
 			   );
-#endif
 }
 
 struct RotateDialog

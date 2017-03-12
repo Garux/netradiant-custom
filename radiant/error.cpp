@@ -107,23 +107,6 @@ void Error( const char *error, ... ){
 	}
 #endif
 
-
-#if 0
-	// we need to have a current context to call glError()
-	if ( g_glwindow_globals.d_glBase != 0 ) {
-		// glGetError .. can record several errors, clears after calling
-		//++timo TODO: be able to deal with several errors if necessary, for now I'm just warning about pending error messages
-		// NOTE: forget that, most boards don't seem to follow the OpenGL standard
-		GLenum iGLError = glGetError();
-		if ( iGLError != GL_NO_ERROR ) {
-			// use our own gluErrorString
-			strcat( text, "gluErrorString: " );
-			strcat( text, (char*)gluErrorString( iGLError ) );
-			strcat( text, "\n" );
-		}
-	}
-#endif
-
 	strcat( text, "An unrecoverable error has occured.\n" );
 
 	ERROR_MESSAGE( text );

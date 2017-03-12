@@ -62,15 +62,11 @@ const_iterator end() const {
 }
 
 value_type& operator[]( std::size_t index ){
-#if defined( _DEBUG )
 	ASSERT_MESSAGE( index < size(), "array index out of bounds" );
-#endif
 	return m_data[index];
 }
 const value_type& operator[]( std::size_t index ) const {
-#if defined( _DEBUG )
 	ASSERT_MESSAGE( index < size(), "array index out of bounds" );
-#endif
 	return m_data[index];
 }
 value_type* data(){
@@ -86,55 +82,6 @@ bool empty() const {
 	return m_size == 0;
 }
 };
-
-#if 0
-template<typename Element>
-class MatrixIterator
-{
-Element* m_position;
-
-void increment(){
-	++m_position;
-}
-
-public:
-typedef std::bidirectional_iterator_tag iterator_category;
-typedef std::ptrdiff_t difference_type;
-typedef difference_type distance_type;
-typedef KeyValue<Key, Value> value_type;
-typedef value_type* pointer;
-typedef value_type& reference;
-
-MatrixIterator( Element* position ) : m_position( position ){
-}
-
-Element* position(){
-	return m_position;
-}
-
-bool operator==( const MatrixIterator& other ) const {
-	return m_position == other.m_position;
-}
-bool operator!=( const MatrixIterator& other ) const {
-	return !operator==( other );
-}
-MatrixIterator& operator++(){
-	increment();
-	return *this;
-}
-MatrixIterator operator++( int ){
-	MatrixIterator tmp = *this;
-	increment();
-	return tmp;
-}
-value_type& operator*() const {
-	return m_position->m_value;
-}
-value_type* operator->() const {
-	return &( operator*() );
-}
-};
-#endif
 
 template<typename Element>
 class Matrix
@@ -167,27 +114,19 @@ const_iterator end() const {
 }
 
 value_type& operator[]( std::size_t index ){
-#if defined( _DEBUG )
 	ASSERT_MESSAGE( index < size(), "array index out of bounds" );
-#endif
 	return m_data[index];
 }
 const value_type& operator[]( std::size_t index ) const {
-#if defined( _DEBUG )
 	ASSERT_MESSAGE( index < size(), "array index out of bounds" );
-#endif
 	return m_data[index];
 }
 value_type& operator()( std::size_t x, std::size_t y ){
-#if defined( _DEBUG )
 	ASSERT_MESSAGE( x < m_x && y < m_y, "array index out of bounds" );
-#endif
 	return m_data[x * m_y + y];
 }
 const value_type& operator()( std::size_t x, std::size_t y ) const {
-#if defined( _DEBUG )
 	ASSERT_MESSAGE( x < m_x && y < m_y, "array index out of bounds" );
-#endif
 	return m_data[x * m_y + y];
 }
 value_type* data(){

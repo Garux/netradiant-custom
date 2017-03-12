@@ -591,11 +591,6 @@ bool ShaderTemplate::parseDoom3( Tokeniser& tokeniser ){
 			else if ( string_equal_nocase( token, "zeroclamp" ) ) {
 				currentLayer.m_clampToBorder = true;
 			}
-#if 0
-			else if ( string_equal_nocase( token, "alphaTest" ) ) {
-				Tokeniser_getFloat( tokeniser, currentLayer.m_alphaTest );
-			}
-#endif
 		}
 		else if ( depth == 1 ) {
 			if ( string_equal_nocase( token, "qer_editorimage" ) ) {

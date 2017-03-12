@@ -183,12 +183,6 @@ brushsplit_t Winding_ClassifyPlane( const Winding& winding, const Plane3& plane 
 	return split;
 }
 
-
-#define DEBUG_EPSILON ON_EPSILON
-const double DEBUG_EPSILON_SQUARED = DEBUG_EPSILON * DEBUG_EPSILON;
-
-#define WINDING_DEBUG 0
-
 /// \brief Clip \p winding which lies on \p plane by \p clipPlane, resulting in \p clipped.
 /// If \p winding is completely in front of the plane, \p clipped will be identical to \p winding.
 /// If \p winding is completely in back of the plane, \p clipped will be empty.

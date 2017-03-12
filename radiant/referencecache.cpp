@@ -626,14 +626,6 @@ namespace
 HashtableReferenceCache g_referenceCache;
 }
 
-#if 0
-class ResourceVisitor
-{
-public:
-virtual void visit( const char* name, const char* path, const
-					};
-#endif
-
 void SaveReferences(){
 	ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Saving Map" );
 	for ( HashtableReferenceCache::iterator i = g_referenceCache.begin(); i != g_referenceCache.end(); ++i )

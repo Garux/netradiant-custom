@@ -129,9 +129,6 @@ CamWnd* GetCamWnd(){
 	return m_pCamWnd;
 }
 
-void ReleaseContexts();
-void CreateContexts();
-
 EViewStyle CurrentStyle(){
 	return m_nCurrentStyle;
 };

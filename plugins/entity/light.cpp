@@ -1301,52 +1301,6 @@ const Matrix4& projection() const {
 	matrix4_translate_by_vec3( m_doom3Projection, Vector3( 0.5f, 0.5f, 0 ) );
 	matrix4_scale_by_vec3( m_doom3Projection, Vector3( 0.5f, 0.5f, 1 ) );
 
-#if 0
-	Vector3 right = vector3_cross( m_lightUp, vector3_normalised( m_lightTarget ) );
-	Vector3 up = vector3_cross( vector3_normalised( m_lightTarget ), m_lightRight );
-	Vector3 target = m_lightTarget;
-	Matrix4 test(
-		-right.x(), -right.y(), -right.z(), 0,
-		-up.x(), -up.y(), -up.z(), 0,
-		-target.x(), -target.y(), -target.z(), 0,
-		0, 0, 0, 1
-		);
-	Matrix4 frustum = matrix4_frustum( -0.01, 0.01, -0.01, 0.01, 0.01, 1.0 );
-	test = matrix4_full_inverse( test );
-	matrix4_premultiply_by_matrix4( test, frustum );
-	matrix4_multiply_by_matrix4( m_doom3Projection, test );
-#elif 0
-	const float nearFar = 1 / 49.5f;
-	Vector3 right = vector3_cross( m_lightUp, vector3_normalised( m_lightTarget + m_lightRight ) );
-	Vector3 up = vector3_cross( vector3_normalised( m_lightTarget + m_lightUp ), m_lightRight );
-	Vector3 target = vector3_negated( m_lightTarget * ( 1 + nearFar ) );
-	float scale = -1 / vector3_length( m_lightTarget );
-	Matrix4 test(
-		-inverse( right.x() ), -inverse( up.x() ), -inverse( target.x() ), 0,
-		-inverse( right.y() ), -inverse( up.y() ), -inverse( target.y() ), 0,
-		-inverse( right.z() ), -inverse( up.z() ), -inverse( target.z() ), scale,
-		0, 0, -nearFar, 0
-		);
-	matrix4_multiply_by_matrix4( m_doom3Projection, test );
-#elif 0
-	Vector3 leftA( m_lightTarget - m_lightRight );
-	Vector3 leftB( m_lightRight + m_lightUp );
-	Plane3 left( vector3_normalised( vector3_cross( leftA, leftB ) ) * ( 1.0 / 128 ), 0 );
-	Vector3 rightA( m_lightTarget + m_lightRight );
-	Vector3 rightB( vector3_cross( rightA, m_lightTarget ) );
-	Plane3 right( vector3_normalised( vector3_cross( rightA, rightB ) ) * ( 1.0 / 128 ), 0 );
-	Vector3 bottomA( m_lightTarget - m_lightUp );
-	Vector3 bottomB( vector3_cross( bottomA, m_lightTarget ) );
-	Plane3 bottom( vector3_normalised( vector3_cross( bottomA, bottomB ) ) * ( 1.0 / 128 ), 0 );
-	Vector3 topA( m_lightTarget + m_lightUp );
-	Vector3 topB( vector3_cross( topA, m_lightTarget ) );
-	Plane3 top( vector3_normalised( vector3_cross( topA, topB ) ) * ( 1.0 / 128 ), 0 );
-	Plane3 front( vector3_normalised( m_lightTarget ) * ( 1.0 / 128 ), 1 );
-	Plane3 back( vector3_normalised( vector3_negated( m_lightTarget ) ) * ( 1.0 / 128 ), 0 );
-	Matrix4 test( matrix4_from_planes( plane3_flipped( left ), plane3_flipped( right ), plane3_flipped( bottom ), plane3_flipped( top ), plane3_flipped( front ), plane3_flipped( back ) ) );
-	matrix4_multiply_by_matrix4( m_doom3Projection, test );
-#else
-
 	Plane3 lightProject[4];
 
 	Vector3 start = m_useLightStart && m_useLightEnd ? m_lightStart : vector3_normalised( m_lightTarget );
@@ -1418,8 +1372,7 @@ const Matrix4& projection() const {
 	m_doom3Frustum.top = plane3_normalised( m_doom3Frustum.top );
 	m_doom3Frustum.back = plane3_normalised( m_doom3Frustum.back );
 	m_doom3Frustum.front = plane3_normalised( m_doom3Frustum.front );
-#endif
-	//matrix4_scale_by_vec3(m_doom3Projection, Vector3(1.0 / 128, 1.0 / 128, 1.0 / 128));
+
 	return m_doom3Projection;
 }
 
@@ -1701,9 +1654,6 @@ void Light_Construct( LightType lightType ){
 	g_lightType = lightType;
 	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 		LightShader::m_defaultShader = "lights/defaultPointLight";
-#if 0
-		LightShader::m_defaultShader = "lights/defaultProjectedLight";
-#endif
 	}
 	RenderLightRadiiFill::m_state = GlobalShaderCache().capture( "$Q3MAP2_LIGHT_SPHERE" );
 	RenderLightCenter::m_state = GlobalShaderCache().capture( "$BIGPOINT" );

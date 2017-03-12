@@ -215,16 +215,6 @@ void error_redirect( const gchar *domain, GLogLevelFlags log_level, const gchar 
 	ERROR_MESSAGE( "GTK+ error: " << buf );
 }
 
-#if defined ( _DEBUG ) && defined ( WIN32 ) && defined ( _MSC_VER )
-#include "crtdbg.h"
-#endif
-
-void crt_init(){
-#if defined ( _DEBUG ) && defined ( WIN32 ) && defined ( _MSC_VER )
-	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-#endif
-}
-
 class Lock
 {
 bool m_locked;
@@ -377,9 +367,6 @@ bool check_version(){
 	// let's leave it disabled in debug mode in any case
 	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=431
 #ifndef _DEBUG
-#define CHECK_VERSION
-#endif
-#ifdef CHECK_VERSION
 	// locate and open RADIANT_MAJOR and RADIANT_MINOR
 	bool bVerIsGood = true;
 	{
@@ -544,8 +531,6 @@ void user_shortcuts_save(){
 }
 
 int main( int argc, char* argv[] ){
-	crt_init();
-
 	streams_init();
 
 #ifdef WIN32

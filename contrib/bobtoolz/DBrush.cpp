@@ -68,9 +68,6 @@ DBrush::~DBrush(){
 //////////////////////////////////////////////////////////////////////
 
 DPlane* DBrush::AddFace( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFaceData* texData ){
-#ifdef _DEBUG
-//	Sys_Printf("(%f %f %f) (%f %f %f) (%f %f %f)\n", va[0], va[1], va[2], vb[0], vb[1], vb[2], vc[0], vc[1], vc[2]);
-#endif
 	bBoundsBuilt = false;
 	DPlane* newFace = new DPlane( va, vb, vc, texData );
 	faceList.push_back( newFace );
@@ -116,10 +113,6 @@ int DBrush::BuildPoints(){
 			}
 		}
 	}
-
-#ifdef _DEBUG
-//	Sys_Printf("%i points on brush\n", pointList.size());
-#endif
 
 	return static_cast<int>( pointList.size() );
 }
