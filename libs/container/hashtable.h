@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include "debugging/debugging.h"
 
 
