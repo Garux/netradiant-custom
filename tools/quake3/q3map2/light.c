@@ -2054,7 +2054,7 @@ void LightWorld( const char *BSPFilePath, qboolean fastAllocate ){
 		SetupEnvelopes( qfalse, fastbounce );
 		if ( numLights == 0 ) {
 			Sys_Printf( "No diffuse light to calculate, ending radiosity.\n" );
-			break;
+			return;
 		}
 
 		/* add to lightgrid */
@@ -2097,6 +2097,8 @@ void LightWorld( const char *BSPFilePath, qboolean fastAllocate ){
 		bounce--;
 		b++;
 	}
+	/* ydnar: store off lightmaps */
+	StoreSurfaceLightmaps( fastAllocate );
 }
 
 
@@ -2991,9 +2993,6 @@ int LightMain( int argc, char **argv ){
 
 	/* light the world */
 	LightWorld( BSPFilePath, fastAllocate );
-
-	/* ydnar: store off lightmaps */
-	StoreSurfaceLightmaps( fastAllocate );
 
 	/* write out the bsp */
 	UnparseEntities();
