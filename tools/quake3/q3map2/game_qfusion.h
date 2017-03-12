@@ -103,21 +103,21 @@
 
 {
 	"qfusion",          /* -game x */
-	"baseq3",           /* default base game data dir */
-	".q3a",             /* unix home sub-dir */
-	"quake",            /* magic path word */
+	"base",             /* default base game data dir */
+	".qfusion",         /* unix home sub-dir */
+	"qfusion",          /* magic path word */
 	"scripts",          /* shader directory */
-	2048,               /* max lightmapped surface verts */
-	2048,               /* max surface verts */
-	12288,              /* max surface indexes */
-	qtrue,              /* flares */
+	65535,              /* max lightmapped surface verts */
+	65535,              /* max surface verts */
+	393210,             /* max surface indexes */
+	qfalse,             /* flares */
 	"flareshader",      /* default flare shader */
 	qfalse,             /* wolf lighting model? */
 	512,                /* lightmap width/height */
 	1.0f,               /* lightmap gamma */
-	qfalse,             /* lightmap sRGB */
-	qfalse,             /* texture sRGB */
-	qfalse,             /* color sRGB */
+	qtrue,              /* lightmap sRGB */
+	qtrue,              /* texture sRGB */
+	qtrue,              /* color sRGB */
 	0.0f,               /* lightmap exposure */
 	1.0f,               /* lightmap compensate */
 	1.0f,               /* lightgrid scale */
@@ -125,15 +125,15 @@
 	qtrue,              /* light angle attenuation uses half-lambert curve */
 	qtrue,              /* disable shader lightstyles hack */
 	qtrue,              /* keep light entities on bsp */
-	8,                  /* default patchMeta subdivisions tolerance */
+	4,                  /* default patchMeta subdivisions tolerance */
 	qtrue,              /* patch casting enabled */
 	qtrue,              /* compile deluxemaps */
 	0,                  /* deluxemaps default mode */
-	256,                /* minimap size */
+	512,                /* minimap size */
 	1.0f,               /* minimap sharpener */
-	0.0f,               /* minimap border */
+	1.0f / 66.0f,       /* minimap border */
 	qtrue,              /* minimap keep aspect */
-	MINIMAP_MODE_WHITE, /* minimap mode */
+	MINIMAP_MODE_GRAY,  /* minimap mode */
 	"../minimaps/%s.tga", /* minimap name format */
 	"FBSP",             /* bsp file prefix */
 	1,                  /* bsp file version */

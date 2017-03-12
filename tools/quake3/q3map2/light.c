@@ -1910,13 +1910,13 @@ void LightWorld( const char *BSPFilePath, qboolean fastAllocate ){
 
 	/* find the optional minimum lighting values */
 	GetVectorForKey( &entities[ 0 ], "_color", color );
+	if ( VectorLength( color ) == 0.0f ) {
+		VectorSet( color, 1.0, 1.0, 1.0 );
+	}
 	if ( colorsRGB ) {
 		color[0] = Image_LinearFloatFromsRGBFloat( color[0] );
 		color[1] = Image_LinearFloatFromsRGBFloat( color[1] );
 		color[2] = Image_LinearFloatFromsRGBFloat( color[2] );
-	}
-	if ( VectorLength( color ) == 0.0f ) {
-		VectorSet( color, 1.0, 1.0, 1.0 );
 	}
 
 	/* ambient */
