@@ -1182,6 +1182,8 @@ void project( XYZ *v ){
 	// NOTE: if perspective transformation is desired,
 	// set "persp" to the range from the surface,
 	// then:
+	// v->projected_h = -v->projected_h * persp/(v->projected_z-persp);
+	// v->projected_v = -v->projected_v * persp/(v->projected_z-persp);
 }
 /*=======================================================================*/
 void evaluate(){

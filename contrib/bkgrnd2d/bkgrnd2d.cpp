@@ -118,9 +118,6 @@ void CBackgroundImage::Render(){
 	g_QglTable.m_pfn_qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 
 	g_QglTable.m_pfn_qglPolygonMode( GL_FRONT,GL_FILL );
-	// TODO, just so we can tell if we end up going the wrong way
-
-	// TODO any other state we should not assume ?
 
 	g_QglTable.m_pfn_qglBindTexture( GL_TEXTURE_2D, m_tex->texture_number );
 	g_QglTable.m_pfn_qglBegin( GL_QUADS );

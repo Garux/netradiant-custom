@@ -9,11 +9,13 @@
 
 #include <list>
 
+
 typedef struct {
 	int portalclusters;
 	int leafbytes;           //leafbytes = ((portalclusters+63)&~63)>>3;
 } vis_header;
 
+// added because int shift = 32; i = 0xFFFFFFFF >> shift;
 // then i = 0xFFFFFFFF, when it should = 0
 const unsigned long bitmasks[33] =
 {

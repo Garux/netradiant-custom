@@ -443,25 +443,12 @@ void DoMergePatches(){
 		mrgPatches[i].LoadFromPatch( *patches[i] );
 	}
 
-	/*  mrgPatches[0].Transpose();
-	    mrgPatches[0].RemoveFromRadiant();
-	    mrgPatches[0].BuildInRadiant();*/
-
 	merge_info = mrgPatches[0].IsMergable( &mrgPatches[1] );
 
 	if ( merge_info.mergable ) {
 		globalOutputStream() << merge_info.pos1 << " " <<  merge_info.pos2;
-		//Message removed, No tools give feedback on success.
+
 		DPatch* newPatch = mrgPatches[0].MergePatches( merge_info, &mrgPatches[0], &mrgPatches[1] );
-
-		/*                mrgPatches[0].RemoveFromRadiant();
-		   mrgPatches[0].BuildInRadiant();
-
-		   mrgPatches[1].RemoveFromRadiant();
-		   mrgPatches[1].BuildInRadiant();
-
-
-		   delete newPatch;*/
 
 		if ( !newPatch ) {
 		}

@@ -110,8 +110,6 @@ void SwapBlock( int *block, int sizeOfBlock ) {
 void SwapBSPFile( void ) {
 	int i;
 
-	// models
-
 	// planes
 	SwapBlock( (int *)dplanes, numplanes * sizeof( dplanes[0] ) );
 
@@ -150,8 +148,6 @@ void SwapBSPFile( void ) {
 		drawVerts[i].normal[1] = LittleFloat( drawVerts[i].normal[1] );
 		drawVerts[i].normal[2] = LittleFloat( drawVerts[i].normal[2] );
 	}
-
-	// drawindexes
 
 	// drawsurfs
 	SwapBlock( (int *)drawSurfaces, numDrawSurfaces * sizeof( drawSurfaces[0] ) );

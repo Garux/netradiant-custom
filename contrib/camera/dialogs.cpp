@@ -658,8 +658,6 @@ void RefreshCamListCombo( void ){
 
 	// select our current entry in the list
 	if ( GetCurrentCam() ) {
-		// stop editing on the current cam
-
 		GList *li = GTK_LIST( GTK_COMBO( g_pCamListCombo )->list )->children;
 		combo_cam = firstCam;
 		while ( li && combo_cam ) {
@@ -988,6 +986,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_signal_connect( GTK_OBJECT( window ), "expose_event", GTK_SIGNAL_FUNC( ci_expose ), NULL );
 	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
 
+    // don't use show, as you don't want to have it displayed on startup ;-)
 	gtk_widget_realize( window );
 
 	// fill the window

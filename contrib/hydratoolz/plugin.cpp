@@ -332,6 +332,7 @@ void UpdateWadKeyPair( void ){
 			strcpy( wads,pEpair->value );
 			ConvertDOSToUnixName( wads,wads );
 
+			// ok, we got the list of ; delimited wads, now split it into a GSList that contains
 			// just the wad names themselves.
 
 			p1 = wads;
@@ -404,6 +405,7 @@ void UpdateWadKeyPair( void ){
 	g_FuncTable.m_pfnReleaseSelectedBrushHandles();
 
 	// Now we have a complete list of wadnames (without paths) so we just have to turn this
+	// back to a ; delimited list.
 
 	wads[0] = 0;
 	while ( wadlist )

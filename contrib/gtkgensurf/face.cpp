@@ -277,9 +277,6 @@ void ChopWindingInPlace( MY_WINDING **inout, vec3 normal, vec dist, vec epsilon 
 		f->numpoints++;
 	}
 
-//	if (f->numpoints > maxpts)
-//	if (f->numpoints > MAX_POINTS_ON_WINDING)
-
 	FreeWinding( in );
 	*inout = f;
 }
