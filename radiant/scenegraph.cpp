@@ -96,7 +96,6 @@ scene::Node& root(){
 	return m_rootpath.top();
 }
 void insert_root( scene::Node& root ){
-	//globalOutputStream() << "insert_root\n";
 
 	ASSERT_MESSAGE( m_rootpath.empty(), "scenegraph root already exists" );
 
@@ -107,7 +106,6 @@ void insert_root( scene::Node& root ){
 	m_rootpath.push( makeReference( root ) );
 }
 void erase_root(){
-	//globalOutputStream() << "erase_root\n";
 
 	ASSERT_MESSAGE( !m_rootpath.empty(), "scenegraph root does not exist" );
 

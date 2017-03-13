@@ -495,7 +495,6 @@ void TestStringClass
 	delete t;                           // t == ?
 
 	a = c;                              // a.len == 4, a.data == "test\0"
-//   a = "";
 	a = NULL;                           // a.len == 0, a.data == "\0"					ASSERT!
 	a = c + d;                          // a.len == 8, a.data == "testtest\0"
 	a = c + "wow";                      // a.len == 7, a.data == "testwow\0"

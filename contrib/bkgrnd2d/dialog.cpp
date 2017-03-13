@@ -55,7 +55,6 @@ void Append( GtkWidget *notebook );
 void Browse();
 void Reload();
 void SetPosLabel();
-//  ~BackgroundDialogPage();
 };
 
 
@@ -102,8 +101,6 @@ void CBackgroundDialogPage::Browse(){
 
 	//TODO GetMapName saves the map. eeep!
 	//also with no map, returns unnamed.map, otherwise returns full path
-//	Syn_Printf(MSG_PREFIX "GetMapName() %s\n",
-//				g_FuncTable.m_pfnGetMapName());
 
 	ct = g_FuncTable.m_pfnReadProjectKey( "basepath" );
 	// TODO shouldn't need this stuff
@@ -225,7 +222,6 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( reload_callback ),
 					  ( gpointer ) this );
 	// TODO disable until we have file
-	// gtk_widget_set_sensitive(w,FALSE);
 	gtk_tooltips_set_tip( pTooltips, w, "Reload current file", NULL );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, FALSE, FALSE, 5 );
 	gtk_widget_show( w );
@@ -324,7 +320,6 @@ void InitBackgroundDialog(){
 						GTK_SIGNAL_FUNC( close_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( pDialogWnd ), "response",
 						GTK_SIGNAL_FUNC( response_callback ), NULL );
-//  gtk_signal_connect( GTK_OBJECT (pDialogWnd), "expose_event", GTK_SIGNAL_FUNC( ci_expose ), NULL );
 
 	pTooltips = gtk_tooltips_new();
 

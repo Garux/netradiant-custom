@@ -908,8 +908,6 @@ void DrawPreview( Rect rc ){
 				y = Vll + dv / 2;
 			}
 		}
-//		x = (Hll+Hur)/2.;
-//		y = (Vll+Vur)/2.;
 		v[0].p[0] = x + PlayerBox[Game].x[0];
 		v[0].p[1] = y + PlayerBox[Game].y[0];
 		v[0].p[2] = PlayerStartZ( x,y ) + PlayerBox[Game].z[0] + 8; // add 8 cuz I'm a pessimist
@@ -1177,8 +1175,6 @@ void project( XYZ *v ){
 	y  = ct[2] * ya + st[2] * za;
 
 	// horizontal and vertical projections:
-//	v->pp[0] = D*x/z;
-//	v->pp[1] = D*y/z;
 	v->pp[0] = -y;
 	v->pp[1] =  x;
 	v->pp[2] =  z;
@@ -1186,8 +1182,6 @@ void project( XYZ *v ){
 	// NOTE: if perspective transformation is desired,
 	// set "persp" to the range from the surface,
 	// then:
-	// v->projected_h = -v->projected_h * persp/(v->projected_z-persp);
-	// v->projected_v = -v->projected_v * persp/(v->projected_z-persp);
 }
 /*=======================================================================*/
 void evaluate(){

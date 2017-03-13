@@ -63,8 +63,6 @@ EntityClass* EntityClassFGD_insertUniqueBase( EntityClass* entityClass ){
 	std::pair<BaseClasses::iterator, bool> result = g_EntityClassFGD_bases.insert( BaseClasses::value_type( entityClass->name(), entityClass ) );
 	if ( !result.second ) {
 		globalErrorStream() << "duplicate base class: " << makeQuoted( entityClass->name() ) << "\n";
-		//eclass_capture_state(entityClass);
-		//entityClass->free(entityClass);
 	}
 	return ( *result.first ).second;
 }

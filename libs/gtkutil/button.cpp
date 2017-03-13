@@ -59,12 +59,7 @@ void button_set_icon( GtkButton* button, const char* icon ){
 }
 
 void toggle_button_set_active_no_signal( GtkToggleButton* button, gboolean active ){
-	//globalOutputStream() << "set active: " << active << "\n";
 	guint handler_id = gpointer_to_int( g_object_get_data( G_OBJECT( button ), "handler" ) );
-	//guint signal_id = g_signal_lookup("toggled", G_OBJECT_TYPE (button));
-	//globalOutputStream() << "signal_id: " << signal_id << "\n";
-	//guint found = g_signal_handler_find(G_OBJECT(button), G_SIGNAL_MATCH_ID, signal_id, 0, 0, 0, 0);
-	//globalOutputStream() << " handler found: " << found << "\n";
 	g_signal_handler_block( G_OBJECT( button ), handler_id );
 	gtk_toggle_button_set_active( button, active );
 	g_signal_handler_unblock( G_OBJECT( button ), handler_id );
@@ -86,9 +81,7 @@ GtkToggleButton* radio_button_get_nth( GtkRadioButton* radio, int index ){
 }
 
 void radio_button_set_active( GtkRadioButton* radio, int index ){
-	//radio_button_print_state(radio);
 	gtk_toggle_button_set_active( radio_button_get_nth( radio, index ), TRUE );
-	//radio_button_print_state(radio);
 }
 
 void radio_button_set_active_no_signal( GtkRadioButton* radio, int index ){
@@ -108,7 +101,6 @@ void radio_button_set_active_no_signal( GtkRadioButton* radio, int index ){
 }
 
 int radio_button_get_active( GtkRadioButton* radio ){
-	//radio_button_print_state(radio);
 	GSList *group = gtk_radio_button_group( radio );
 	int index = g_slist_length( group ) - 1;
 	for (; group != 0; group = g_slist_next( group ) )

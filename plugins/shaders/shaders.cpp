@@ -1667,7 +1667,6 @@ void Shaders_Load(){
 		}
 	}
 
-	//StringPool_analyse(ShaderPool::instance());
 }
 
 void Shaders_Free(){

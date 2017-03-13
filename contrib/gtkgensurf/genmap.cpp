@@ -971,30 +971,18 @@ void MapBrushes(){
 							v[0].p[2] += HINT_OFFSET;
 							v[1].p[2] += HINT_OFFSET;
 							v[2].p[2] += HINT_OFFSET;
-//              v[3].p[2] = backface;
-//              v[4].p[2] = backface;
-//              v[5].p[2] = backface;
 							break;
 						case PLANE_XY1:
 							v[0].p[2] -= HINT_OFFSET;
 							v[1].p[2] -= HINT_OFFSET;
 							v[2].p[2] -= HINT_OFFSET;
-//              v[3].p[2] = backface;
-//              v[4].p[2] = backface;
-//              v[5].p[2] = backface;
 							break;
 						case PLANE_XZ0:
-//              v[0].p[1] = backface;
-//              v[1].p[1] = backface;
-//              v[2].p[1] = backface;
 							v[3].p[1] += HINT_OFFSET;
 							v[4].p[1] += HINT_OFFSET;
 							v[5].p[1] += HINT_OFFSET;
 							break;
 						case PLANE_XZ1:
-//              v[0].p[1] = backface;
-//              v[1].p[1] = backface;
-//              v[2].p[1] = backface;
 							v[3].p[1] -= HINT_OFFSET;
 							v[4].p[1] -= HINT_OFFSET;
 							v[5].p[1] -= HINT_OFFSET;
@@ -1003,17 +991,11 @@ void MapBrushes(){
 							v[0].p[0] += HINT_OFFSET;
 							v[1].p[0] += HINT_OFFSET;
 							v[2].p[0] += HINT_OFFSET;
-//              v[3].p[0] = backface;
-//              v[4].p[0] = backface;
-//              v[5].p[0] = backface;
 							break;
 						case PLANE_YZ1:
 							v[0].p[0] -= HINT_OFFSET;
 							v[1].p[0] -= HINT_OFFSET;
 							v[2].p[0] -= HINT_OFFSET;
-//              v[3].p[0] = backface;
-//              v[4].p[0] = backface;
-//              v[5].p[0] = backface;
 							break;
 						}
 						brush.Number   = N;
@@ -1120,8 +1102,6 @@ void GenerateXYZ(){
 	int i0, i1, j0, j1;
 	int ii, jj;
 
-//  FILE *f;
-//  char CSV[64];
 
 	if ( !ValidSurface() ) {
 		return;

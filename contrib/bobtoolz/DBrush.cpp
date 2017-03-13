@@ -108,7 +108,6 @@ int DBrush::BuildPoints(){
 
 					// otherwise point is removed due to another plane..
 
-					// Sys_Printf("(%f, %f, %f)\n", pnt[0], pnt[1], pnt[2]);
 				}
 			}
 		}

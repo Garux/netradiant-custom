@@ -111,13 +111,6 @@ void SwapBSPFile( void ) {
 	int i;
 
 	// models
-//	SwapBlock( (int *)dmodels, nummodels * sizeof( dmodels[0] ) );
-
-	// shaders (don't swap the name)
-//	for ( i = 0 ; i < numShaders ; i++ ) {
-//		dshaders[i].contentFlags = LittleLong( dshaders[i].contentFlags );
-//		dshaders[i].surfaceFlags = LittleLong( dshaders[i].surfaceFlags );
-//	}
 
 	// planes
 	SwapBlock( (int *)dplanes, numplanes * sizeof( dplanes[0] ) );
@@ -159,16 +152,9 @@ void SwapBSPFile( void ) {
 	}
 
 	// drawindexes
-//	SwapBlock( (int *)drawIndexes, numDrawIndexes * sizeof( drawIndexes[0] ) );
 
 	// drawsurfs
 	SwapBlock( (int *)drawSurfaces, numDrawSurfaces * sizeof( drawSurfaces[0] ) );
-
-	// fogs
-//	for ( i = 0 ; i < numFogs ; i++ ) {
-//		dfogs[i].brushNum = LittleLong( dfogs[i].brushNum );
-//		dfogs[i].visibleSide = LittleLong( dfogs[i].visibleSide );
-//	}
 }
 
 /*

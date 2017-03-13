@@ -123,7 +123,6 @@ bool EntityClassDoom3_parseUnknown( Tokeniser& tokeniser ){
 	//const char* name =
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 
-	//globalOutputStream() << "parsing unknown block " << makeQuoted(name) << "\n";
 
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser, "{" ) );
 	tokeniser.nextLine();
@@ -370,7 +369,6 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 			}
 		}
 		else if ( string_equal( key, "editor_ragdoll" ) ) {
-			//bool ragdoll = atoi(tokeniser.getToken()) != 0;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser ) );
 		}
 		else if ( string_equal( key, "editor_mins" ) ) {

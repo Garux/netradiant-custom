@@ -121,11 +121,9 @@ GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
 		gtk_widget_show( text );
 		g_console = text;
 
-		//globalExtendedASCIICharacterSet().print();
 
 		widget_connect_escape_clear_focus_widget( g_console );
 
-		//g_consoleWidgetFocusPrinter.connect(g_console);
 
 		g_signal_connect( G_OBJECT( g_console ), "populate-popup", G_CALLBACK( console_populate_popup ), 0 );
 		g_signal_connect( G_OBJECT( g_console ), "destroy", G_CALLBACK( destroy_set_null ), &g_console );

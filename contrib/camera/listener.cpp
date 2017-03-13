@@ -175,7 +175,6 @@ bool CListener::OnLButtonDown( unsigned int nFlags, double x, double y ){
 
 	return true;
 
-	//return false;
 }
 
 bool CListener::OnLButtonUp( unsigned int nFlags, double x, double y ){

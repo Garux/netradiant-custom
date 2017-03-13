@@ -127,11 +127,6 @@ GtkWindow* create_fixedsize_modal_dialog_window( GtkWindow* parent, const char* 
 
 	window_remove_minmax( window );
 
-	//gtk_widget_set_size_request(GTK_WIDGET(window), width, height);
-	//gtk_window_set_default_size(window, width, height);
-	//gtk_window_resize(window, width, height);
-	//GdkGeometry geometry = { width, height, -1, -1, width, height, -1, -1, -1, -1, GDK_GRAVITY_STATIC, };
-	//gtk_window_set_geometry_hints(window, GTK_WIDGET(window), &geometry, (GdkWindowHints)(GDK_HINT_POS|GDK_HINT_MIN_SIZE|GDK_HINT_BASE_SIZE));
 
 	return window;
 }

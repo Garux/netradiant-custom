@@ -170,8 +170,6 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 class EntityGroupSelected : public scene::Graph::Walker
 {
 NodeSmartReference group, worldspawn;
-//typedef std::pair<NodeSmartReference, NodeSmartReference> DeletionPair;
-//Stack<DeletionPair> deleteme;
 public:
 EntityGroupSelected( const scene::Path &p ) : group( p.top().get() ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
 }
@@ -193,7 +191,6 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 				Node_getTraversable( group )->insert( child );
 
 				if ( Node_getTraversable( parent )->empty() ) {
-					//deleteme.push(DeletionPair(parentparent, parent));
 					Node_getTraversable( parentparent )->erase( parent );
 				}
 			}

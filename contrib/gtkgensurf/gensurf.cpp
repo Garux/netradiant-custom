@@ -88,13 +88,7 @@ bounding_box PlayerBox[NUMGAMES] = { {{-16., 16.}, {-16., 16.}, {-24., 32.}},   
 									 {{-16., 16.}, {-16., 16.}, {-24., 32.}},    // KingPin (guess)
 									 {{-30., 30.}, {-30., 30.}, {-10.,160.}},    // Genesis3D (no idea)
 									 {{-16., 16.}, {-16., 16.}, {-24., 32.}}};   // Quake3 (not sure)
-//char      gszOutputDir[NUMGAMES][NAME_MAX];
-//char      gszTextureDir[NUMGAMES][NAME_MAX];
 char Texture[NUMGAMES][3][64];
-//char      pakfile[NUMGAMES][NAME_MAX];
-//char      lastpakfile[NUMGAMES][NAME_MAX];
-//int       UsePak[NUMGAMES];
-//char      GameDir[NUMGAMES][NAME_MAX];
 
 char GameName[NUMGAMES][16] = {"Quake2", "Half-Life", "SiN", "Heretic2", "Kingpin", "Genesis3D", "Quake3" };
 
@@ -241,8 +235,6 @@ void ReadIniFile( const char *file ){
 	NV = g_FuncTable.m_pfnProfileLoadInt( file, OPTS_SECTION,"NV",8 );
 	NV = max( 1,min( NV,MAX_ROWS ) );
 
-//	Decimate   = GetPrivateProfileInt(OPTS_SECTION,"Decimate",0,file);
-//	Decimate = max(0,min(Decimate,100));
 
 	AddHints          = g_FuncTable.m_pfnProfileLoadInt( file, OPTS_SECTION,"AddHints",0 );
 	ArghRad2          = g_FuncTable.m_pfnProfileLoadInt( file, OPTS_SECTION,"ArghRad2",0 );
@@ -272,15 +264,9 @@ void ReadIniFile( const char *file ){
 
 	for ( i = 0; i < NUMGAMES; i++ )
 	{
-		//    strcpy (gszOutputDir[i], g_FuncTable.m_pfnProfileLoadString (file, GameName[i],"OutputDir",""));
 		strcpy( Texture[i][0], g_FuncTable.m_pfnProfileLoadString( file, GameName[i], "Texture", "" ) );
 		strcpy( Texture[i][1], g_FuncTable.m_pfnProfileLoadString( file, GameName[i], "Texture2", "" ) );
 		strcpy( Texture[i][2], g_FuncTable.m_pfnProfileLoadString( file, GameName[i], "Texture3", "" ) );
-		//    strcpy (gszTextureDir[i], g_FuncTable.m_pfnProfileLoadString (file, GameName[i],"TextureDir",""));
-		//    UsePak[i] = GetPrivateProfileInt(GameName[i],"UsePak",0);
-		//    strcpy (pakfile[i], g_FuncTable.m_pfnProfileLoadString (file, GameName[i],"PakFile",""));
-		//    strcpy (lastpakfile[i], g_FuncTable.m_pfnProfileLoadString (file, GameName[i],"LastPakFile",""));
-		//    strcpy (GameDir[i], g_FuncTable.m_pfnProfileLoadString (file, GameName[i],"GameDir","\0"));
 	}
 	/*
 	   if(!strlen(gszTextureDir[QUAKE2]))
@@ -405,7 +391,6 @@ void WriteIniFile( const char *file ){
 	g_FuncTable.m_pfnProfileSaveString( file, "Bitmap", "DefaultPath", gbmp.defpath );
 	g_FuncTable.m_pfnProfileSaveString( file, "Bitmap", "BlackValue", va( "%g",gbmp.black_value ) );
 	g_FuncTable.m_pfnProfileSaveString( file, "Bitmap", "WhiteValue", va( "%g",gbmp.white_value ) );
-//g_FuncTable.m_pfnProfileSaveString (file, "Formula", "Formula", ExcelFunc );
 }
 
 void UpdatePreview( bool DataChange ){

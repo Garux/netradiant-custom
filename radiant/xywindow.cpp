@@ -547,7 +547,6 @@ void XYWnd::ChaseMouse(){
 	float multiplier = g_chasemouse_timer.elapsed_msec() / 10.0f;
 	Scroll( float_to_integer( multiplier * m_chasemouse_delta_x ), float_to_integer( multiplier * -m_chasemouse_delta_y ) );
 
-	//globalOutputStream() << "chasemouse: multiplier=" << multiplier << " x=" << m_chasemouse_delta_x << " y=" << m_chasemouse_delta_y << '\n';
 
 	XY_MouseMoved( m_chasemouse_current_x, m_chasemouse_current_y, getButtonState() );
 	g_chasemouse_timer.start();
@@ -584,11 +583,9 @@ bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 		}
 
 		if ( m_chasemouse_delta_y != 0 || m_chasemouse_delta_x != 0 ) {
-			//globalOutputStream() << "chasemouse motion: x=" << pointx << " y=" << pointy << "... ";
 			m_chasemouse_current_x = pointx;
 			m_chasemouse_current_y = pointy;
 			if ( m_chasemouse_handler == 0 ) {
-				//globalOutputStream() << "chasemouse timer start... ";
 				g_chasemouse_timer.start();
 				m_chasemouse_handler = g_idle_add( xywnd_chasemouse, this );
 			}
@@ -597,7 +594,6 @@ bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 		else
 		{
 			if ( m_chasemouse_handler != 0 ) {
-				//globalOutputStream() << "chasemouse cancel\n";
 				g_source_remove( m_chasemouse_handler );
 				m_chasemouse_handler = 0;
 			}
@@ -606,7 +602,6 @@ bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 	else
 	{
 		if ( m_chasemouse_handler != 0 ) {
-			//globalOutputStream() << "chasemouse cancel\n";
 			g_source_remove( m_chasemouse_handler );
 			m_chasemouse_handler = 0;
 		}
@@ -966,7 +961,6 @@ void XYWnd::NewBrushDrag( int x, int y ){
 	}
 
 	// d1223m
-	//Scene_BrushResize_Selected(GlobalSceneGraph(), aabb_for_minmax(mins, maxs), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()));
 	Scene_BrushResize_Selected( GlobalSceneGraph(), aabb_for_minmax( mins, maxs ),
 								g_brush_always_caulk ?
 								"textures/common/caulk" : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );

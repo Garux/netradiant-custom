@@ -148,7 +148,6 @@ gint grab_int_value( GtkSpinButton *a_spinner, gpointer user_data ) {
 
 // write the values of the Spinner-Boxes to the worldspawn
 static void set_coordinates( GtkWidget *widget, gpointer data ){
-	//Str str_min, str_max;
 	char buffer[10], str_min[20], str_max[20];
 
 	itoa( gtk_spin_button_get_value_as_int( msp.spinner1 ), str_min, 10 );

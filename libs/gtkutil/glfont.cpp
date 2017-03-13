@@ -203,7 +203,6 @@ GLFontInternal( const char *_font_string ) : font_string( _font_string ){
 #endif
 
 	font_desc = pango_font_description_from_string( font_string );
-	//pango_font_description_set_size(font_desc, 10 * PANGO_SCALE);
 	pango_context_set_font_description( ft2_context, font_desc );
 	pango_font_description_free( font_desc );
 	// TODO fallback to fixed 8, courier new 8

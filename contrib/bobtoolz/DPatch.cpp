@@ -259,7 +259,6 @@ DPatch* DPatch::MergePatches( patch_merge_t merge_info, DPatch *p1, DPatch *p2 )
 		for ( int x = 0; x < p2->width; x++ )
 			newPatch->points[x][( y + p1->height - 1 )] = p2->points[x][y];
 
-//	newPatch->Invert();
 	return newPatch;
 }
 
@@ -384,7 +383,6 @@ std::list<DPatch> DPatch::SplitCols(){
 		}
 	}
 	else {
-		//globalErrorStream() << "bobToolz SplitPatchRows: Patch has not enough rows for splitting.\n";
 		patchList.push_back( *this );
 	}
 	return patchList;
@@ -446,7 +444,6 @@ std::list<DPatch> DPatch::Split(){
 	}
 	else
 	{
-		//globalErrorStream() << "bobToolz SplitPatchRows: Patch has not enough rows for splitting.\n";
 		patchList.push_back( *this );
 	}
 	return patchList;

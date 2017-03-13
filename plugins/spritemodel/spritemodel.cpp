@@ -42,8 +42,6 @@ void LoadSpriteModel( entity_interfaces_t *interfaces, const char *name ){
 	model->Construct( pShader );
 	interfaces->pRender = (IRender*)model;
 	interfaces->pRender->IncRef();
-	//interfaces->pSelect = (ISelect*)model;
-	//interfaces->pSelect->IncRef();
 	interfaces->pSelect = NULL;
 	interfaces->pEdit = NULL;
 	model->DecRef();
@@ -69,13 +67,10 @@ void CSpriteModel::Construct( IShader *pShader ){
 
 CSpriteModel::CSpriteModel(){
 	refCount = 1;
-	//m_nSurfaces = 0;
-	//m_children = NULL;
 	m_pShader = NULL;
 }
 
 CSpriteModel::~CSpriteModel(){
-	// if(m_children) delete[] m_children;
 	if ( m_pShader ) {
 		m_pShader->DecRef();
 	}
@@ -103,11 +98,8 @@ void CSpriteModel::Draw( int state, int rflags ) const {
 	// setup opengl stuff
 
 	g_QglTable.m_pfn_qglPushAttrib( GL_ALL_ATTRIB_BITS ); // GL_ENABLE_BIT
-	//g_QglTable.m_pfn_qglColor3f (1,1,1);   //testing
-	//g_QglTable.m_pfn_qglColor4f (1,1,1,1); //testing
 	g_QglTable.m_pfn_qglBindTexture( GL_TEXTURE_2D, q->texture_number );
 
-	//g_QglTable.m_pfn_qglEnable (GL_TEXTURE_2D); // FIXME: ? this forces textures, even in wireframe mode, bad... ?
 
 	g_QglTable.m_pfn_qglAlphaFunc( GL_LESS, 1 );
 	g_QglTable.m_pfn_qglEnable( GL_ALPHA_TEST );

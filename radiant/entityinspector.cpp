@@ -1576,7 +1576,6 @@ EntityInspector() : m_unrealised( 1 ){
 void realise(){
 	if ( --m_unrealised == 0 ) {
 		if ( g_entityInspector_windowConstructed ) {
-			//globalOutputStream() << "Entity Inspector: realise\n";
 			EntityClassList_fill();
 		}
 	}
@@ -1584,7 +1583,6 @@ void realise(){
 void unrealise(){
 	if ( ++m_unrealised == 1 ) {
 		if ( g_entityInspector_windowConstructed ) {
-			//globalOutputStream() << "Entity Inspector: unrealise\n";
 			EntityClassList_clear();
 		}
 	}

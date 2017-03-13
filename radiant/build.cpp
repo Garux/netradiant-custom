@@ -438,7 +438,6 @@ XMLElementParser& pushElement( const XMLElement& element ){
 	}
 	else
 	{
-		//ERROR_MESSAGE("parse error: invalid element \"" << element.name() << "\"");
 		return *this;
 	}
 }

@@ -250,9 +250,7 @@ void MD2Surface_read( Model& model, const byte* buffer, ArchiveFile& file ){
 			}
 			path[i] = '\0';
 		}
-//	globalErrorStream() << "modified skinname: " << path << " (path) and " << skinnameRelative << " (texture)" << "\n";
 		snprintf( skinname, MD2_MAX_SKINNAME, "%s%s", path, &skinnameRelative[1] );
-//	globalErrorStream() << skinname << "\n";
 	}
 	else
 	{

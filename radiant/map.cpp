@@ -94,13 +94,11 @@ CopiedString m_name;
 
 void construct(){
 	if ( !empty() ) {
-		//globalOutputStream() << "construct " << makeQuoted(c_str()) << "\n";
 		m_names.insert( name_read( c_str() ) );
 	}
 }
 void destroy(){
 	if ( !empty() ) {
-		//globalOutputStream() << "destroy " << makeQuoted(c_str()) << "\n";
 		m_names.erase( name_read( c_str() ) );
 	}
 }
@@ -143,12 +141,10 @@ void attach( const NameCallback& setName, const NameCallbackCallback& attachObse
 	std::pair<Names::iterator, bool> result = m_names.insert( Names::value_type( setName, m_uniqueNames ) );
 	ASSERT_MESSAGE( result.second, "cannot attach name" );
 	attachObserver( NameObserver::NameChangedCaller( ( *result.first ).second ) );
-	//globalOutputStream() << "attach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
 }
 void detach( const NameCallback& setName, const NameCallbackCallback& detachObserver ){
 	Names::iterator i = m_names.find( setName );
 	ASSERT_MESSAGE( i != m_names.end(), "cannot detach name" );
-	//globalOutputStream() << "detach: " << reinterpret_cast<const unsigned int&>(setName) << "\n";
 	detachObserver( NameObserver::NameChangedCaller( ( *i ).second ) );
 	m_names.erase( i );
 }
@@ -179,7 +175,6 @@ void mergeNames( const BasicNamespace& other ) const {
 		char buffer[1024];
 		name_write( buffer, uniqueName );
 
-		//globalOutputStream() << "renaming " << makeQuoted((*i).first.c_str()) << " to " << makeQuoted(buffer) << "\n";
 
 		SetNameCallbacks& setNameCallbacks = ( *i ).second;
 
@@ -968,7 +963,6 @@ void Map_LoadFile( const char *filename ){
 	globalOutputStream() << Unsigned( g_brushCount.get() ) << " primitive\n";
 	globalOutputStream() << Unsigned( g_entityCount.get() ) << " entities\n";
 
-	//GlobalEntityCreator().printStatistics();
 
 	//
 	// move the view to a start position
@@ -1210,14 +1204,12 @@ bool Map_Save(){
    ===========
  */
 void Map_New(){
-	//globalOutputStream() << "Map_New\n";
 
 	g_map.m_name = "unnamed.map";
 	Map_UpdateTitle( g_map );
 
 	{
 		g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
-//    ASSERT_MESSAGE(g_map.m_resource->getNode() == 0, "bleh");
 		g_map.m_resource->attach( g_map );
 
 		SceneChangeNotify();

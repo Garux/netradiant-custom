@@ -163,7 +163,6 @@ bool DBobView::CalculateTrajectory( vec3_t start, vec3_t apex, float multiplier,
 	VectorScale( dist, 1 / flight_time, speed );
 	speed[2] = speed_z;
 
-//	Sys_Printf("Speed: (%.4f %.4f %.4f)\n", speed[0], speed[1], speed[2]);
 
 	vec3_t* pPath = new vec3_t[points];
 
@@ -174,13 +173,6 @@ bool DBobView::CalculateTrajectory( vec3_t start, vec3_t apex, float multiplier,
 
 		VectorScale( speed, ltime, pPath[i] );
 		VectorAdd( pPath[i], start, pPath[i] );
-
-		// could do this all with vectors
-		// vGrav = {0, 0, -800.0f}
-		// VectorScale(vGrav, 0.5f*ltime*ltime, vAdd);
-		// VectorScale(speed, ltime, pPath[i]);
-		// _VectorAdd(pPath[i], start, pPath[i])
-		// _VectorAdd(pPath[i], vAdd, pPath[i])
 
 		pPath[i][2] = start[2] + ( speed_z * ltime ) + ( varGravity * 0.5f * ltime * ltime );
 	}

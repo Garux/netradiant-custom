@@ -353,7 +353,6 @@ void Cam_MouseControl( camera_t& camera, int x, int y ){
 }
 
 void Camera_mouseMove( camera_t& camera, int x, int y ){
-	//globalOutputStream() << "mousemove... ";
 	Camera_FreeMove( camera, -x, -y );
 	camera.m_update();
 	CameraMovedNotify();
@@ -422,7 +421,6 @@ void Cam_KeyControl( camera_t& camera, float dtime ){
 void Camera_keyMove( camera_t& camera ){
 	camera.m_mouseMove.flush();
 
-	//globalOutputStream() << "keymove... ";
 	float time_seconds = camera.m_keycontrol_timer.elapsed_msec() / static_cast<float>( msec_per_sec );
 	camera.m_keycontrol_timer.start();
 	if ( time_seconds > 0.05f ) {
@@ -831,7 +829,6 @@ gboolean selection_button_release( GtkWidget* widget, GdkEventButton* event, Win
 }
 
 void selection_motion( gdouble x, gdouble y, guint state, void* data ){
-	//globalOutputStream() << "motion... ";
 	reinterpret_cast<WindowObserver*>( data )->onMouseMotion( WindowVector_forDouble( x, y ), modifiers_for_state( state ) );
 }
 
@@ -1236,7 +1233,6 @@ static gboolean camwindow_freemove_focusout( GtkWidget* widget, GdkEventFocus* e
 }
 
 void CamWnd::EnableFreeMove(){
-	//globalOutputStream() << "EnableFreeMove\n";
 
 	ASSERT_MESSAGE( !m_bFreeMove, "EnableFreeMove: free-move was already enabled" );
 	m_bFreeMove = true;
@@ -1253,7 +1249,6 @@ void CamWnd::EnableFreeMove(){
 }
 
 void CamWnd::DisableFreeMove(){
-	//globalOutputStream() << "DisableFreeMove\n";
 
 	ASSERT_MESSAGE( m_bFreeMove, "DisableFreeMove: free-move was not enabled" );
 	m_bFreeMove = false;
@@ -1394,8 +1389,6 @@ void CamWnd::Cam_Draw(){
 		ambient[3] = 1.0f;
 		diffuse[0] = diffuse[1] = diffuse[2] = 0.4f;
 		diffuse[3] = 1.0f;
-		//material[0] = material[1] = material[2] = 0.8f;
-		//material[3] = 1.0f;
 
 		inverse_cam_dir[0] = m_Camera.vpn[0];
 		inverse_cam_dir[1] = m_Camera.vpn[1];
@@ -1515,13 +1508,11 @@ void CamWnd::Cam_Draw(){
 void CamWnd::draw(){
 	m_drawing = true;
 
-	//globalOutputStream() << "draw...\n";
 	if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
 		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 			GlobalOpenGL_debugAssertNoErrors();
 			Cam_Draw();
 			GlobalOpenGL_debugAssertNoErrors();
-			//qglFinish();
 
 			m_XORRectangle.set( rectangle_t() );
 		}

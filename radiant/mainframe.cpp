@@ -1223,8 +1223,6 @@ void Selection_Clone(){
 
 		Scene_Clone_Selected( GlobalSceneGraph(), false );
 
-		//NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-		//NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
 	}
 }
 
@@ -1234,8 +1232,6 @@ void Selection_Clone_MakeUnique(){
 
 		Scene_Clone_Selected( GlobalSceneGraph(), true );
 
-		//NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-		//NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
 	}
 }
 
@@ -1640,16 +1636,12 @@ bool redrawRequired(){
 }
 
 bool MainFrame_isActiveApp(){
-	//globalOutputStream() << "listing\n";
 	GList* list = gtk_window_list_toplevels();
 	for ( GList* i = list; i != 0; i = g_list_next( i ) )
 	{
-		//globalOutputStream() << "toplevel.. ";
 		if ( gtk_window_is_active( GTK_WINDOW( i->data ) ) ) {
-			//globalOutputStream() << "is active\n";
 			return true;
 		}
-		//globalOutputStream() << "not active\n";
 	}
 	return false;
 }
@@ -1697,13 +1689,11 @@ void ScreenUpdates_Enable(){
 	g_wait_stack.pop_back();
 	if ( g_wait_stack.empty() ) {
 		EverySecondTimer_enable();
-		//gtk_widget_set_sensitive(GTK_WIDGET(MainFrame_getWindow()), TRUE);
 
 		gtk_grab_remove( GTK_WIDGET( g_wait.m_window ) );
 		destroy_floating_window( g_wait.m_window );
 		g_wait.m_window = 0;
 
-		//gtk_window_present(MainFrame_getWindow());
 	}
 	else if ( GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
 		gtk_label_set_text( g_wait.m_label, g_wait_stack.back().c_str() );
@@ -2176,7 +2166,6 @@ void Patch_registerShortcuts(){
 	command_connect_accelerator( "PatchDeleteLastColumn" );
 	command_connect_accelerator( "PatchDeleteLastRow" );
 	command_connect_accelerator( "NaturalizePatch" );
-	//command_connect_accelerator("CapCurrentCurve");
 }
 
 void Manipulators_registerShortcuts(){
@@ -2203,10 +2192,6 @@ void TexdefNudge_registerShortcuts(){
 void SelectNudge_registerShortcuts(){
 	command_connect_accelerator( "MoveSelectionDOWN" );
 	command_connect_accelerator( "MoveSelectionUP" );
-	//command_connect_accelerator("SelectNudgeLeft");
-	//command_connect_accelerator("SelectNudgeRight");
-	//command_connect_accelerator("SelectNudgeUp");
-	//command_connect_accelerator("SelectNudgeDown");
 }
 
 void SnapToGrid_registerShortcuts(){
@@ -2349,7 +2334,6 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	GtkButton* g_view_console_button = toolbar_append_button( toolbar, "Console (O)", "console.png", "ToggleConsole" );
 	GtkButton* g_view_textures_button = toolbar_append_button( toolbar, "Texture Browser (T)", "texture_browser.png", "ToggleTextures" );
 	// TODO: call light inspector
-	//GtkButton* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector");
 
 	gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
 	GtkButton* g_refresh_models_button = toolbar_append_button( toolbar, "Refresh Models", "refresh_models.png", "RefreshReferences" );
@@ -2816,7 +2800,6 @@ void MainFrame::Create(){
 
 	EverySecondTimer_enable();
 
-	//GlobalShortcuts_reportUnregistered();
 }
 
 void MainFrame::SaveWindowInfo(){

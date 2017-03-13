@@ -941,7 +941,6 @@ EMessageBoxReturn DoShaderTagDlg( CopiedString* tag, char* title ){
 			GtkVBox* vbox = create_dialog_vbox( 4 );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
 			{
-				//GtkLabel* label = GTK_LABEL(gtk_label_new("Enter one ore more tags separated by spaces"));
 				GtkLabel* label = GTK_LABEL( gtk_label_new( "ESC to cancel, ENTER to validate" ) );
 				gtk_widget_show( GTK_WIDGET( label ) );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( label ), FALSE, FALSE, 0 );

@@ -248,7 +248,6 @@ void CPortals::Load(){
 		return;
 	}
 
-//	node = new CBspNode[node_count];
 	portal = new CBspPortal[portal_count];
 	portal_sort = new int[portal_count];
 

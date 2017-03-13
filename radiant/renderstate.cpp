@@ -1285,8 +1285,6 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 	}
 
 	if ( delta & state & RENDER_FILL ) {
-		//qglPolygonMode (GL_BACK, GL_LINE);
-		//qglPolygonMode (GL_FRONT, GL_FILL);
 		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		GlobalOpenGL_debugAssertNoErrors();
 	}
@@ -1546,7 +1544,6 @@ void Renderables_flush( OpenGLStateBucket::Renderables& renderables, OpenGLState
 	glPushMatrix();
 	for ( OpenGLStateBucket::Renderables::const_iterator i = renderables.begin(); i != renderables.end(); ++i )
 	{
-		//qglLoadMatrixf(i->m_transform);
 		if ( !transform || ( transform != ( *i ).m_transform && !matrix4_affine_equal( *transform, *( *i ).m_transform ) ) ) {
 			count_transform();
 			transform = ( *i ).m_transform;

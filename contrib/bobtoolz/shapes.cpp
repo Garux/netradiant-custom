@@ -592,7 +592,6 @@ void BuildDoorsX2( vec3_t min, vec3_t max,
 	Node_getTraversable( GlobalSceneGraph().root() )->insert( pEDoor1 );
 	Node_getTraversable( GlobalSceneGraph().root() )->insert( pEDoor2 );
 
-//	ResetCurrentTexture();
 }
 
 //-----------------------------------------------------------------------------------
@@ -629,12 +628,10 @@ void MakeBevel( vec3_t vMin, vec3_t vMax ){
 			PatchControl& p = matrix( i,2 - j );
 			PatchControl& q = matrix( i, j );
 			std::swap( p.m_vertex, q.m_vertex );
-			//std::swap(p.m_texcoord, q.m_texcoord);
 		}
 	}
 	GlobalPatchCreator().Patch_controlPointsChanged( patch );
 	//TODO - the patch has textures weird, patchmanip.h has all function it needs.. lots of duplicate code..
-	//NaturalTexture(patch);
 	Node_getTraversable( GlobalRadiant().getMapWorldEntity() )->insert( patch );
 }
 
@@ -642,7 +639,6 @@ void BuildCornerStairs( vec3_t vMin, vec3_t vMax, int nSteps, const char* mainTe
 	vec3_t* topPoints = new vec3_t[nSteps + 1];
 	vec3_t* botPoints = new vec3_t[nSteps + 1];
 
-	//bool bFacesUse[6] = {true, true, false, true, false, false};
 
 	vec3_t centre;
 	VectorCopy( vMin, centre );

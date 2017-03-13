@@ -156,8 +156,6 @@ Image* LoadIDSPBuff( byte *buffer ){
 		globalErrorStream() << "WARNING: IDSP file has multiple frames, only the first frame will be used.\n";
 	}
 
-	// palette = buffer+mipdatasize+2;
-	// buf_p = buffer+lpMip->offsets[0];
 
 	numPixels = columns * rows;
 

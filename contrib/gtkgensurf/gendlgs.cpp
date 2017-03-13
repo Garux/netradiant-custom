@@ -502,8 +502,6 @@ static void SetDlgValues( int tab ){
 }
 
 static void ReadDlgValues( int tab ){
-	//  char Text[256];
-	//  int i;
 
 	switch ( tab )
 	{
@@ -1265,7 +1263,6 @@ GtkWidget* create_main_dialog(){
 	g_pWnd = dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	gtk_window_set_title( GTK_WINDOW( dlg ), gszCaption );
 	g_signal_connect( G_OBJECT( dlg ), "delete_event", G_CALLBACK( main_close ), NULL );
-	//  g_signal_connect (G_OBJECT (dlg), "destroy", G_CALLBACK (gtk_widget_destroy), NULL);
 	gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( g_pRadiantWnd ) );
 
 	hbox = gtk_hbox_new( FALSE, 5 );

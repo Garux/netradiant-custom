@@ -268,7 +268,6 @@ GSList *AddToWadList( GSList *wadlist, const char *shadername, const char *wad )
 			return wadlist;
 		}
 		ExtractFilePath( shadername,tmpstr );
-		// Sys_Printf("checking: %s\n",shadername);
 
 		int l = strlen( tmpstr ) - 1;
 
@@ -333,7 +332,6 @@ void UpdateWadKeyPair( void ){
 			strcpy( wads,pEpair->value );
 			ConvertDOSToUnixName( wads,wads );
 
-			// ok, we got the list of ; delimited wads, now split it into a GSList that contains
 			// just the wad names themselves.
 
 			p1 = wads;
@@ -406,7 +404,6 @@ void UpdateWadKeyPair( void ){
 	g_FuncTable.m_pfnReleaseSelectedBrushHandles();
 
 	// Now we have a complete list of wadnames (without paths) so we just have to turn this
-	// back to a ; delimited list.
 
 	wads[0] = 0;
 	while ( wadlist )
@@ -438,8 +435,6 @@ void UpdateWadKeyPair( void ){
 
 	// store the wad list back in the worldspawn.
 	if ( wads[0] ) {
-		//free(pEpair->value);
-		//pEpair->value = strdup(wads);
 		SetKeyValue( pEntity, "wad", wads );
 	}
 

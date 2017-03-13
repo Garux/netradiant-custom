@@ -230,7 +230,6 @@ void accelerator_edit_button_clicked( GtkButton *btn, gpointer dialogptr ){
 	dialog.m_model = model;
 
 	// 2. disallow changing the row
-	//gtk_widget_set_sensitive(GTK_WIDGET(dialog.m_list), false);
 
 	// 3. highlight the row
 	gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 2, true, -1 );

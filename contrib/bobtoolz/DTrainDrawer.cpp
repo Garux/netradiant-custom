@@ -241,7 +241,6 @@ void DTrainDrawer::BuildPaths() {
 		if ( !pTarget ) {
 			globalOutputStream() << "couldn't find target " << pSP->strTarget;
 			return;
-//			continue;
 		}
 
 		pSP->pTarget = pTarget;

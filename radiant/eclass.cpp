@@ -252,7 +252,6 @@ EntityClassQuake3() : m_unrealised( 4 ){
 }
 void realise(){
 	if ( --m_unrealised == 0 ) {
-		//globalOutputStream() << "Entity Classes: realise\n";
 		EntityClassQuake3_Construct();
 		m_observers.realise();
 	}
@@ -260,7 +259,6 @@ void realise(){
 void unrealise(){
 	if ( ++m_unrealised == 1 ) {
 		m_observers.unrealise();
-		//globalOutputStream() << "Entity Classes: unrealise\n";
 		Eclass_Clear();
 	}
 }

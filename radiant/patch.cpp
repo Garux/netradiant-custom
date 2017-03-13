@@ -387,9 +387,7 @@ void Patch::Smooth( EMatrixMajor mt ){
 	{
 		p1 = m_ctrl.data() + ( h * row_stride );
 		p2 = p1 + ( 2 * width ) * col_stride;
-		//globalErrorStream() << "compare " << p1->m_vertex << " and " << p2->m_vertex << "\n";
 		if ( vector3_length_squared( vector3_subtracted( p1->m_vertex, p2->m_vertex ) ) > 1.0 ) {
-			//globalErrorStream() << "too far\n";
 			wrap = false;
 			break;
 		}
@@ -1329,9 +1327,6 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		int n = ( width - 1 ) / 2; // n = number of segments
 		setDims( width, height );
 
-		// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
-		// vPos[1] = aabb.origin;
-		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
 		int i, j;
 		float f = 1 / cos( M_PI / n );
@@ -1355,9 +1350,6 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		int n = ( width - 1 ) / 2; // n = number of segments
 		setDims( width, height );
 
-		// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
-		// vPos[1] = aabb.origin;
-		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
 		int i, j;
 		float f = 1 / cos( M_PI / n );
@@ -1382,9 +1374,6 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		int m = ( height - 1 ) / 2; // m = number of segments (pitch)
 		setDims( width, height );
 
-		// vPos[0] = vector3_subtracted(aabb.origin, aabb.extents);
-		// vPos[1] = aabb.origin;
-		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
 		int i, j;
 		float f = 1 / cos( M_PI / n );
@@ -2004,8 +1993,6 @@ void Patch::TesselateSubMatrix( const BezierCurveTree *BX, const BezierCurveTree
 	}
 
 
-	//if((nFlagsX & DEGEN_0a) && (nFlagsX & DEGEN_1a) && (nFlagsX & DEGEN_2a)) { newFlagsX |= DEGEN_0a; newFlagsX |= DEGEN_1a; newFlagsX |= DEGEN_2a; }
-	//if((nFlagsX & DEGEN_0b) && (nFlagsX & DEGEN_1b) && (nFlagsX & DEGEN_2b)) { newFlagsX |= DEGEN_0b; newFlagsX |= DEGEN_1b; newFlagsX |= DEGEN_2b; }
 
 	newFlagsX |= ( nFlagsX & SPLIT );
 	newFlagsX |= ( nFlagsX & AVERAGE );
@@ -2443,8 +2430,6 @@ void Patch::BuildVertexArray(){
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2] = RenderIndex( j * m_tess.m_nArrayWidth + i );
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( j + 1 ) * m_tess.m_nArrayWidth + i );
 				// reverse because radiant uses CULL_FRONT
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2+1] = RenderIndex(j*m_tess.m_nArrayWidth+i);
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2] = RenderIndex((j+1)*m_tess.m_nArrayWidth+i);
 			}
 		}
 	}
@@ -2460,8 +2445,6 @@ void Patch::BuildVertexArray(){
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j );
 				m_tess.m_indices[( j * m_tess.m_lenStrips ) + i * 2 + 1] = RenderIndex( ( ( m_tess.m_nArrayHeight - 1 ) - i ) * m_tess.m_nArrayWidth + j + 1 );
 				// reverse because radiant uses CULL_FRONT
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2+1] = RenderIndex(((m_tess.m_nArrayHeight-1)-i)*m_tess.m_nArrayWidth+j);
-				//m_tess.m_indices[(j*m_tess.m_lenStrips)+i*2] = RenderIndex(((m_tess.m_nArrayHeight-1)-i)*m_tess.m_nArrayWidth+j+1);
 
 			}
 		}

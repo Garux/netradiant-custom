@@ -110,9 +110,7 @@ bool sphere_intersect_ray( const Vector3& origin, float radius, const Ray& ray, 
 
 void ray_intersect_ray( const Ray& ray, const Ray& other, Vector3& intersection ){
 	intersection = vector3_subtracted( ray.origin, other.origin );
-	//float a = 1;//vector3_dot(ray.direction, ray.direction);        // always >= 0
 	double dot = vector3_dot( ray.direction, other.direction );
-	//float c = 1;//vector3_dot(other.direction, other.direction);        // always >= 0
 	double d = vector3_dot( ray.direction, intersection );
 	double e = vector3_dot( other.direction, intersection );
 	double D = 1 - dot * dot; //a*c - dot*dot;       // always >= 0
@@ -2853,7 +2851,6 @@ void SelectArea( const View& view, const float device_point[2], const float devi
 
 void translate( const Vector3& translation ){
 	if ( !nothingSelected() ) {
-		//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
 
 		m_translation = translation;
 
@@ -2876,7 +2873,6 @@ void outputTranslation( TextOutputStream& ostream ){
 }
 void rotate( const Quaternion& rotation ){
 	if ( !nothingSelected() ) {
-		//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
 
 		m_rotation = rotation;
 

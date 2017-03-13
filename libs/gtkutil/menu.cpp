@@ -50,7 +50,6 @@ GtkMenuItem* menu_separator( GtkMenu* menu ){
 GtkTearoffMenuItem* menu_tearoff( GtkMenu* menu ){
 	GtkTearoffMenuItem* menu_item = GTK_TEAROFF_MENU_ITEM( gtk_tearoff_menu_item_new() );
 	container_add_widget( GTK_CONTAINER( menu ), GTK_WIDGET( menu_item ) );
-// gtk_widget_set_sensitive(GTK_WIDGET(menu_item), FALSE); -- controls whether menu is detachable
 	gtk_widget_show( GTK_WIDGET( menu_item ) );
 	return menu_item;
 }

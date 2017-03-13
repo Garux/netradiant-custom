@@ -140,7 +140,6 @@ void QE_CheckAutoSave( void ){
 		if ( g_AutoSave_Enabled ) {
 			const char* strMsg = g_SnapShots_Enabled ? "Autosaving snapshot..." : "Autosaving...";
 			globalOutputStream() << strMsg << "\n";
-			//Sys_Status(strMsg);
 
 			// only snapshot if not working on a default map
 			if ( g_SnapShots_Enabled && !Map_Unnamed( g_map ) ) {
@@ -168,7 +167,6 @@ void QE_CheckAutoSave( void ){
 		else
 		{
 			globalOutputStream() << "Autosave skipped...\n";
-			//Sys_Status ("Autosave skipped...");
 		}
 	}
 }

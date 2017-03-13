@@ -1181,13 +1181,11 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 			glEnable( GL_TEXTURE_2D );
 		}
 
-		//int totalHeight = abs(y) + last_height + TextureBrowser_fontHeight(textureBrowser) + 4;
 	}
 
 
 	// reset the current texture
 	glBindTexture( GL_TEXTURE_2D, 0 );
-	//qglFinish();
 }
 
 void TextureBrowser_queueDraw( TextureBrowser& textureBrowser ){
@@ -1351,7 +1349,6 @@ gboolean TextureBrowser_scroll( GtkWidget* widget, GdkEventScroll* event, Textur
 }
 
 void TextureBrowser_scrollChanged( void* data, gdouble value ){
-	//globalOutputStream() << "vertical scroll\n";
 	TextureBrowser_setOriginY( *reinterpret_cast<TextureBrowser*>( data ), -(int)value );
 }
 
@@ -2158,7 +2155,6 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 	}
 
 	// TODO do we need this?
-	//gtk_container_set_focus_chain(GTK_CONTAINER(hbox_table), NULL);
 
 	return table;
 }

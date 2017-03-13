@@ -189,7 +189,6 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 	}
 
 	// we should add all important paths as shortcut folder...
-	// gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), "/tmp/", NULL);
 
 
 	for ( std::size_t i = 0; i < masks.m_filters.size(); ++i )

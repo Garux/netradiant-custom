@@ -28,7 +28,6 @@
 #define SIDE_BACK       1
 #define SIDE_CROSS      -2
 
-//vec3 vec3_origin = {0,0,0};
 
 void PlaneFromPoints( float *p0, float *p1, float *p2, PLANE *plane ){
 	vec3 t1, t2;
@@ -176,7 +175,6 @@ MY_WINDING *BaseWindingForPlane( vec3 normal, vec dist ){
 
 void FreeWinding( MY_WINDING *w ){
 	if ( *(unsigned *)w == 0xdeaddead ) {
-//		Error ("FreeWinding: freed a freed winding");
 		return;
 	}
 	*(unsigned *)w = 0xdeaddead;
@@ -280,9 +278,7 @@ void ChopWindingInPlace( MY_WINDING **inout, vec3 normal, vec dist, vec epsilon 
 	}
 
 //	if (f->numpoints > maxpts)
-//		Error ("ClipWinding: points exceeded estimate");
 //	if (f->numpoints > MAX_POINTS_ON_WINDING)
-//		Error ("ClipWinding: MAX_POINTS_ON_WINDING");
 
 	FreeWinding( in );
 	*inout = f;

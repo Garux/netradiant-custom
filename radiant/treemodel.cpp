@@ -122,7 +122,6 @@ static GtkTreeModelFlags graph_tree_model_get_flags( GtkTreeModel* tree_model ){
 
 static gint graph_tree_model_get_n_columns( GtkTreeModel* tree_model ){
 	ASSERT_MESSAGE( tree_model != 0, "RUNTIME ERROR" );
-	//GraphTreeModel* graph_tree_model = (GraphTreeModel*) tree_model;
 
 	return 2;
 }
@@ -145,7 +144,6 @@ inline void graph_iterator_write_tree_iter( GraphTreeNode::iterator i, GtkTreeIt
 
 static GType graph_tree_model_get_column_type( GtkTreeModel *tree_model, gint index ){
 	ASSERT_MESSAGE( tree_model != 0, "RUNTIME ERROR" );
-	//GraphTreeModel *graph_tree_model = (GraphTreeModel *) tree_model;
 
 	return G_TYPE_POINTER;
 }

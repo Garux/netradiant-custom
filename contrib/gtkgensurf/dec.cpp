@@ -217,8 +217,6 @@ void MakeDecimatedMap( int *NumNodes, int *NumTris, NODE **pNode, TRI **pTri ){
 	}
 	free( TriTable );
 	// One last time (because we're pessimistic), check border triangles
-//	CheckBorders(&NumNodesUsed,NumNodes[0],Node,NumTris,pTri);
-//	Tri = *pTri;
 
 	// Check that all fixed points are exact. If not, add them to the mix.
 	// First check to see if we have any fixed points that aren't already used.

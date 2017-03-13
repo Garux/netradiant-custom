@@ -172,7 +172,6 @@ typedef int ( QGL_DLLEXPORT * QGLFunctionPointer )();
 
 QGLFunctionPointer QGL_getExtensionFunc( const char* symbol ){
 #if defined( XWINDOWS )
-	//ASSERT_NOTNULL(qglXGetProcAddressARB);
 	if ( qglXGetProcAddressARB == 0 ) {
 		return reinterpret_cast<QGLFunctionPointer>( glInvalidFunction );
 	}

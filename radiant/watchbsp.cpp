@@ -555,7 +555,6 @@ inline void GlobalGameDescription_string_write_mapparameter( StringOutputStream&
 	{
 		string << "+set sv_pure 0 ";
 		// TTimo: a check for vm_* but that's all fine
-		//cmdline = "+set sv_pure 0 +set vm_ui 0 +set vm_cgame 0 +set vm_game 0 ";
 		const char* fs_game = gamename_get();
 		if ( !string_equal( fs_game, basegame_get() ) ) {
 			string << "+set fs_game " << fs_game << " ";
@@ -631,7 +630,6 @@ void CWatchBSP::RoutineProcessing(){
 			// see if there's anything in input
 			ret = Net_Receive( m_pInSocket, &msg );
 			if ( ret > 0 ) {
-				//        unsigned int size = msg.size; //++timo just a check
 				strcpy( m_xmlBuf, NMSG_ReadString( &msg ) );
 				if ( m_bNeedCtxtInit ) {
 					m_xmlParserCtxt = NULL;

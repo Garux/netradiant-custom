@@ -147,20 +147,16 @@ void glBox( idVec3 &color, idVec3 &point, float size ) {
 }
 
 void splineTest() {
-	//g_splineList->load("p:/doom/base/maps/test_base1.camera");
 }
 
 void splineDraw() {
-	//g_splineList->addToRenderer();
 }
 
 
-//extern void D_DebugLine( const idVec3 &color, const idVec3 &start, const idVec3 &end );
 
 void debugLine( idVec3 &color, float x, float y, float z, float x2, float y2, float z2 ) {
 	idVec3 from( x, y, z );
 	idVec3 to( x2, y2, z2 );
-	//D_DebugLine(color, from, to);
 }
 
 void idSplineList::addToRenderer() {
@@ -223,7 +219,6 @@ void idSplineList::addToRenderer() {
 }
 
 void idSplineList::buildSpline() {
-	//int start = Sys_Milliseconds();
 	clearSpline();
 	for ( int i = 3; i < controlPoints.Num(); i++ ) {
 		for ( float tension = 0.0f; tension < 1.001f; tension += granularity ) {
@@ -239,7 +234,6 @@ void idSplineList::buildSpline() {
 		}
 	}
 	dirty = false;
-	//Com_Printf("Spline build took %f seconds\n", (float)(Sys_Milliseconds() - start) / 1000);
 }
 
 
@@ -290,7 +284,6 @@ void idSplineList::draw( bool editMode ) {
 		glEnd();
 	}
 	if ( count > 0 ) {
-		//assert(activeSegment >=0 && activeSegment < count);
 		if ( activeSegment >= 0 && activeSegment < count ) {
 			glBox( activeColor, *splinePoints[activeSegment], 6 );
 			glBox( yellow, *splinePoints[activeSegment], 8 );
@@ -342,7 +335,6 @@ void idSplineList::initPosition( long bt, long totalTime ) {
 	double distSoFar = 0.0;
 	idVec3 temp;
 	int count = splinePoints.Num();
-	//for(int i = 2; i < count - 1; i++) {
 	for ( int i = 1; i < count; i++ ) {
 		temp = *splinePoints[i - 1];
 		temp -= *splinePoints[i];
@@ -399,7 +391,6 @@ const idVec3 *idSplineList::getPosition( long t ) {
 		return &zero;
 	}
 
-//	Com_Printf("Time: %d\n", t);
 	assert( splineTime.Num() == splinePoints.Num() );
 
 	while ( activeSegment < count ) {
@@ -428,7 +419,6 @@ const idVec3 *idSplineList::getPosition( long t ) {
 
 void idSplineList::parse( const char *( *text )  ) {
 	const char *token;
-	//Com_MatchToken( text, "{" );
 	do {
 		token = Com_Parse( text );
 
@@ -469,16 +459,12 @@ void idSplineList::parse( const char *( *text )  ) {
 		addPoint( point.x, point.y, point.z );
 	} while ( 1 );
 
-	//Com_UngetToken();
-	//Com_MatchToken( text, "}" );
 	dirty = true;
 }
 
 void idSplineList::write( fileHandle_t file, const char *p ) {
 	idStr s = va( "\t\t%s {\n", p );
 	FS_Write( s.c_str(), s.length(), file );
-	//s = va("\t\tname %s\n", name.c_str());
-	//FS_Write(s.c_str(), s.length(), file);
 	s = va( "\t\t\tgranularity %f\n", granularity );
 	FS_Write( s.c_str(), s.length(), file );
 	int count = controlPoints.Num();
@@ -542,14 +528,9 @@ bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, f
 			if ( events[i]->getType() == idCameraEvent::EVENT_TARGET ) {
 				setActiveTargetByName( events[i]->getParam() );
 				getActiveTarget()->start( startTime + events[i]->getTime() );
-				//Com_Printf("Triggered event switch to target: %s\n",events[i]->getParam());
 			}
 			else if ( events[i]->getType() == idCameraEvent::EVENT_TRIGGER ) {
-				//idEntity *ent = NULL;
-				//ent = level.FindTarget( ent, events[i]->getParam());
 				//if (ent) {
-				//	ent->signal( SIG_TRIGGER );
-				//	ent->ProcessEvent( &EV_Activate, world );
 				//}
 			}
 			else if ( events[i]->getType() == idCameraEvent::EVENT_FOV ) {
@@ -560,7 +541,6 @@ bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, f
 				float len = ( param2 ) ? atof( param2 ) : 0;
 				float newfov = ( param1 ) ? atof( param1 ) : 90;
 				fov.reset( fov.getFOV( time ), newfov, time, len );
-				//*fv = fov = atof(events[i]->getParam());
 			}
 			else if ( events[i]->getType() == idCameraEvent::EVENT_FADEIN ) {
 				float time = atof( events[i]->getParam() );
@@ -629,11 +609,6 @@ bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, f
 }
 
 bool idCameraDef::waitEvent( int index ) {
-	//for (int i = 0; i < events.Num(); i++) {
-	//	if (events[i]->getSegment() == index && events[i]->getType() == idCameraEvent::EVENT_WAIT) {
-	//		return true;
-	//	}
-	//}
 	return false;
 }
 
@@ -715,7 +690,6 @@ void idCameraDef::buildCamera() {
 			break;
 		}
 		case idCameraEvent::EVENT_TARGETWAIT: {
-			//targetWaits.Append(i);
 			break;
 		}
 		case idCameraEvent::EVENT_SPEED: {
@@ -784,9 +758,6 @@ void idCameraDef::startCamera( long t ) {
 	cameraPosition->start( t );
 	buildCamera();
 	fov.reset( 90, 90, t, 0 );
-	//for (int i = 0; i < targetPositions.Num(); i++) {
-	//	targetPositions[i]->
-	//}
 	startTime = t;
 	cameraRunning = true;
 }
@@ -919,7 +890,6 @@ int idCameraDef::sortEvents( const void *p1, const void *p2 ) {
 
 void idCameraDef::addEvent( idCameraEvent *event ) {
 	events.Append( event );
-	//events.Sort(&sortEvents);
 
 }
 void idCameraDef::addEvent( idCameraEvent::eventType t, const char *param, long time ) {
@@ -1043,9 +1013,6 @@ const idVec3 *idInterpolatedPosition::getPosition( long t ) {
 	else if ( percent < 0.0 ) {
 		percent = 0.0;
 	}
-
-	// the following line does a straigt calc on percentage of time
-	// float percent = (float)(startTime + time - t) / time;
 
 	idVec3 v1 = startPos;
 	idVec3 v2 = endPos;

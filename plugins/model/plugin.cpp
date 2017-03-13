@@ -57,7 +57,6 @@ void PicoPrintFunc( int level, const char *str ){
 		break;
 
 	case PICO_VERBOSE:
-		//globalOutputStream() << "PICO_VERBOSE: " << str << "\n";
 		break;
 
 	case PICO_WARNING:

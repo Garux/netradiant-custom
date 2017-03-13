@@ -52,7 +52,6 @@
         Global Vars
    ==========================*/
 
-//HANDLE bsp_process;
 char g_CurrentTexture[256] = "";
 
 //=============================================================
@@ -189,7 +188,6 @@ bool Q_Exec( const char *pCmd, bool bCreateConsole ){
 	{
 	case -1:
 		return false;
-//      Error ("CreateProcess failed");
 		break;
 	case 0:
 #ifdef _DEBUG
@@ -198,7 +196,6 @@ bool Q_Exec( const char *pCmd, bool bCreateConsole ){
 #endif
 		// NOTE: we could use that to detect when a step finishes. But then it
 		// would not work for remote compiling stuff.
-//      execlp (pCmd, pCmd, NULL);
 		system( pCmd );
 		printf( "system() returned" );
 		_exit( 0 );

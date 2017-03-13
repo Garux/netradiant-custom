@@ -99,7 +99,6 @@ NodeSmartReference MapResource_load( const MapFormat& format, const char* path, 
 }
 
 bool MapResource_saveFile( const MapFormat& format, scene::Node& root, GraphTraversalFunc traverse, const char* filename ){
-	//ASSERT_MESSAGE(path_is_absolute(filename), "MapResource_saveFile: path is not absolute: " << makeQuoted(filename));
 	globalOutputStream() << "Open file " << filename << " for write...";
 	TextFileOutputStream file( filename );
 	if ( !file.failed() ) {
@@ -266,7 +265,6 @@ ModelCache::iterator ModelCache_insert( const char* path, const char* name, scen
 void ModelCache_flush( const char* path, const char* name ){
 	ModelCache::iterator i = g_modelCache.find( ModelKey( path, name ) );
 	if ( i != g_modelCache.end() ) {
-		//ASSERT_MESSAGE((*i).value.getCount() == 0, "resource flushed while still in use: " << (*i).key.first.c_str() << (*i).key.second.c_str());
 		g_modelCache.erase( i );
 	}
 }
@@ -419,7 +417,6 @@ struct ModelResource : public Resource
 		{
 			return m_model.get_pointer();
 		}
-		//return 0;
 	}
 	void setNode( scene::Node* node ){
 		ModelCache::iterator i = ModelCache_find( m_path.c_str(), m_name.c_str() );
@@ -451,7 +448,6 @@ struct ModelResource : public Resource
 			m_path = rootPath( m_originalName.c_str() );
 			m_name = path_make_relative( m_originalName.c_str(), m_path.c_str() );
 
-			//globalOutputStream() << "ModelResource::realise: " << m_path.c_str() << m_name.c_str() << "\n";
 
 			m_observers.realise();
 		}
@@ -460,7 +456,6 @@ struct ModelResource : public Resource
 		if ( ++m_unrealised == 1 ) {
 			m_observers.unrealise();
 
-			//globalOutputStream() << "ModelResource::unrealise: " << m_path.c_str() << m_name.c_str() << "\n";
 			clearModel();
 		}
 	}
@@ -559,12 +554,10 @@ void clear(){
 }
 
 Resource* capture( const char* path ){
-	//globalOutputStream() << "capture: \"" << path << "\"\n";
 	return m_references.capture( CopiedString( path ) ).get();
 }
 void release( const char* path ){
 	m_references.release( CopiedString( path ) );
-	//globalOutputStream() << "release: \"" << path << "\"\n";
 }
 
 void setEntityCreator( EntityCreator& entityCreator ){

@@ -53,7 +53,6 @@ void TestNewDelete(){
 	{
 		NamedAllocator<int> allocator( "test" );
 		int* p = NamedNew<int>::type( allocator ).scalar();
-		//new int();
 		NamedDelete<int>::type( allocator ).scalar( p );
 	}
 

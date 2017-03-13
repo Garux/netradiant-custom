@@ -66,7 +66,6 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 	EMessageBoxReturn ret;
 	int loop = 1;
 	GSList *targetTypeRadio = NULL;
-//	char buf[128];
 
 	// create the window
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
@@ -646,16 +645,7 @@ void RefreshCamListCombo( void ){
 	CCamera *combo_cam = firstCam;
 	if ( combo_cam ) {
 		while ( combo_cam ) {
-			//combo_list = g_list_append( combo_list, (void *)combo_cam->GetCam()->getName() );
-			//if( combo_cam->HasBeenSaved() ) {
 			combo_list = g_list_append( combo_list, (void *)combo_cam->GetFileName() );
-			/*} else {
-			    char buf[128];
-			    sprintf( buf, "Unsaved Camera %i", combo_cam->GetCamNum() );
-			    combo_list = g_list_append( combo_list, (void *)buf );
-
-			    //combo_list = g_list_append( combo_list, (void *)combo_cam->GetCam()->getName() );	// FIXME: this requires camera.dll to create unique names for new cams
-			   }*/
 			combo_cam = combo_cam->GetNext();
 		}
 	}
@@ -669,7 +659,6 @@ void RefreshCamListCombo( void ){
 	// select our current entry in the list
 	if ( GetCurrentCam() ) {
 		// stop editing on the current cam
-		//GetCurrentCam()->GetCam()->stopEdit();	// FIXME: this crashed on creating new cameras, why is it here?
 
 		GList *li = GTK_LIST( GTK_COMBO( g_pCamListCombo )->list )->children;
 		combo_cam = firstCam;
@@ -822,7 +811,6 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	EMessageBoxReturn ret;
 	int i, loop = 1;
 	GSList *eventTypeRadio = NULL;
-//	char buf[128];
 
 	if ( !GetCurrentCam() ) {
 		return TRUE;
@@ -931,7 +919,6 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 
 			if ( !camEventFlags[i][0] || ( str && str[0] ) ) {
 				int type = 0;
-//				GList *li;
 
 				for ( type = 1; type < EVENT_COUNT; type++ ) {
 					if ( gtk_toggle_button_get_active( (GtkToggleButton*)eventWidget[type] ) ) {
@@ -999,10 +986,8 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_window_set_title( GTK_WINDOW( window ), "Camera Inspector" );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( ci_close ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "expose_event", GTK_SIGNAL_FUNC( ci_expose ), NULL );
-	//  gtk_signal_connect( GTK_OBJECT (window), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
 	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
 
-	// don't use show, as you don't want to have it displayed on startup ;-)
 	gtk_widget_realize( window );
 
 	// fill the window
@@ -1260,7 +1245,6 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 
 	g_pEventsList = gtk_clist_new( 3 );
 	gtk_container_add( GTK_CONTAINER( w ), g_pEventsList );
-	//gtk_signal_connect( GTK_OBJECT(g_pEventsList), "select_row", GTK_SIGNAL_FUNC (proplist_select_row), NULL);
 	gtk_clist_set_selection_mode( GTK_CLIST( g_pEventsList ), GTK_SELECTION_BROWSE );
 	gtk_clist_column_titles_hide( GTK_CLIST( g_pEventsList ) );
 	gtk_clist_set_column_auto_resize( GTK_CLIST( g_pEventsList ), 0, TRUE );

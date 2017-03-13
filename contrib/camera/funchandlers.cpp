@@ -121,7 +121,6 @@ void DoLoadCamera(){
 					FreeCam( cam );
 					sprintf( error, "Camera file \'%s\' is already loaded", fullpathtofile );
 					g_FuncTable.m_pfnMessageBox( (GtkWidget *)g_pRadiantWnd, error, "Load error", eMB_OK );
-					//g_free( filename );
 					return;
 				}
 				checkCam = checkCam->GetNext();
@@ -141,7 +140,6 @@ void DoLoadCamera(){
 				g_FuncTable.m_pfnMessageBox( (GtkWidget *)g_pRadiantWnd, error, "Load error", eMB_OK );
 			}
 
-			//g_free( filename );
 		}
 		else {
 			g_FuncTable.m_pfnMessageBox( (GtkWidget *)g_pRadiantWnd, "No free camera slots available", "Load error", eMB_OK );

@@ -1350,7 +1350,6 @@ public:
 TypeCasts(){
 	m_casts = TargetableInstance::StaticTypeCasts::instance().get();
 	InstanceContainedCast<LightInstance, Bounded>::install( m_casts );
-	//InstanceContainedCast<LightInstance, Cullable>::install(m_casts);
 	InstanceStaticCast<LightInstance, Renderable>::install( m_casts );
 	InstanceStaticCast<LightInstance, SelectionTestable>::install( m_casts );
 	InstanceStaticCast<LightInstance, Transformable>::install( m_casts );
@@ -1440,7 +1439,6 @@ void evaluateTransform(){
 	}
 	else
 	{
-		//globalOutputStream() << getTranslation() << "\n";
 
 		m_dragPlanes.m_bounds = m_contained.aabb();
 		m_contained.setLightRadius( m_dragPlanes.evaluateResize( getTranslation(), rotation() ) );

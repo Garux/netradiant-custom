@@ -220,7 +220,6 @@ void texfont_init(){
 	g_GLTable.m_pfn_qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	g_GLTable.m_pfn_qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	g_GLTable.m_pfn_qglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-	//  g_GLTable.m_pfn_qglPixelStorei (GL_UNPACK_ALIGNMENT, 1);
 
 	unsigned char *buf = (unsigned char*)malloc( 128 * 128 );
 	memset( buf, 255, 128 * 128 );
@@ -244,7 +243,6 @@ void texfont_write( const char *text, int l, int t ){
 	g_GLTable.m_pfn_qglColor3f( 0, 1, 0 );
 	g_GLTable.m_pfn_qglBindTexture( GL_TEXTURE_2D, texture );
 	g_GLTable.m_pfn_qglEnable( GL_TEXTURE_2D );
-	//  g_GLTable.m_pfn_qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	g_GLTable.m_pfn_qglAlphaFunc( GL_GREATER, 0.0625 );
 	g_GLTable.m_pfn_qglEnable( GL_ALPHA_TEST );
 

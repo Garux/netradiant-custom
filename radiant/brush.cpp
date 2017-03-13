@@ -76,7 +76,6 @@ bool operator==( const ProximalVertex& other ) const {
 			return true;
 		}
 		v = v->m_next;
-		//ASSERT_MESSAGE(DEBUG_LOOP < c_brush_maxFaces, "infinite loop");
 		if ( !( DEBUG_LOOP < c_brush_maxFaces ) ) {
 			break;
 		}

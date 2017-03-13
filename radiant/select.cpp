@@ -533,7 +533,6 @@ void Select_ShiftTexture( float x, float y ){
 		Scene_BrushShiftTexdef_Selected( GlobalSceneGraph(), x, y );
 		Scene_PatchTranslateTexture_Selected( GlobalSceneGraph(), x, y );
 	}
-	//globalOutputStream() << "shift selected face textures: s=" << x << " t=" << y << '\n';
 	Scene_BrushShiftTexdef_Component_Selected( GlobalSceneGraph(), x, y );
 }
 

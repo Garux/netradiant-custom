@@ -264,8 +264,6 @@ bool visible(){
 	return GTK_WIDGET_VISIBLE( GetWidget() );
 }
 
-//  void UpdateInfo();
-//  void SetPatchInfo();
 void GetPatchInfo();
 void UpdateSpinners( bool bUp, int nID );
 // read the current patch on map and initialize m_fX m_fY accordingly
@@ -815,7 +813,6 @@ GtkWindow* PatchInspector::BuildDialog(){
 					}
 					{
 						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-						//  gtk_entry_set_editable (GTK_ENTRY (entry), false);
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 						AddDialogData( *entry, m_strName );
@@ -1116,7 +1113,6 @@ void PatchInspector::GetPatchInfo(){
 	}
 	else
 	{
-		//globalOutputStream() << "WARNING: no patch\n";
 	}
 	// fill in our internal structs
 	m_nRow = 0; m_nCol = 0;
