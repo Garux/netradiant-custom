@@ -474,8 +474,9 @@ static void LoadPakWithDeps( const char* pakname ){
 				const char* p_pakname;
 				CopiedString name_final = CopiedString( StringRange( p_name, p_name_end ) );
 				p_pakname = GetLatestVersionOfUnvPak( name_final.c_str() );
-				if ( !p_pakname ) continue;
-				LoadPakWithDeps( p_pakname );
+				if ( p_pakname != NULL ) {
+					LoadPakWithDeps( p_pakname );
+				}
 			} else {
 				int len = ( p_name_end - p_name ) + ( p_version_end - p_version ) + 1;
 				char* p_pakname = string_new( len );
@@ -827,13 +828,15 @@ void initialise(){
 		g_loaded_unv_paks.clear();
 
 		pakname = GetLatestVersionOfUnvPak( "radiant" );
-		if ( pakname ) LoadPakWithDeps( pakname );
+		if (pakname != NULL) {
+			LoadPakWithDeps( pakname );
+		}
 
 		// prevent VFS double start, for MapName="" and MapName="unnamed.map"
 		if ( string_length( GlobalRadiant().getMapName() ) ){
 			// map's tex-* paks have precedence over any other tex-* paks
 			char* mappakname = GetCurrentMapPakName();
-			if ( mappakname ) {
+			if ( mappakname != NULL ) {
 				LoadPakWithDeps( mappakname );
 				string_release( mappakname, string_length( mappakname ) );
 			}
@@ -846,7 +849,9 @@ void initialise(){
 				char *paknameonly;
 				if ( c ) paknameonly = string_clone_range( StringRange( paknamever, c ) );
 				pakname = GetLatestVersionOfUnvPak( paknameonly );
-				LoadPakWithDeps( pakname );
+				if (pakname != NULL) {
+					LoadPakWithDeps( pakname );
+				}
 				if ( c ) string_release( paknameonly, string_length( paknameonly ) );
 				// then load this specific version
 				LoadPakWithDeps( paknamever );
