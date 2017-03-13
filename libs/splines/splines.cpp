@@ -155,8 +155,6 @@ void splineDraw() {
 
 
 void debugLine( idVec3 &color, float x, float y, float z, float x2, float y2, float z2 ) {
-	idVec3 from( x, y, z );
-	idVec3 to( x2, y2, z2 );
 }
 
 void idSplineList::addToRenderer() {
@@ -478,39 +476,6 @@ void idSplineList::write( fileHandle_t file, const char *p ) {
 
 
 void idCameraDef::getActiveSegmentInfo( int segment, idVec3 &origin, idVec3 &direction, float *fov ) {
-#if 0
-	if ( !cameraSpline.validTime() ) {
-		buildCamera();
-	}
-	double d = (double)segment / numSegments();
-	getCameraInfo( d * totalTime * 1000, origin, direction, fov );
-#endif
-/*
-    if (!cameraSpline.validTime()) {
-        buildCamera();
-    }
-    origin = *cameraSpline.getSegmentPoint(segment);
-
-
-    idVec3 temp;
-
-    int numTargets = getTargetSpline()->controlPoints.Num();
-    int count = cameraSpline.splineTime.Num();
-    if (numTargets == 0) {
-        // follow the path
-        if (cameraSpline.getActiveSegment() < count - 1) {
-            temp = *cameraSpline.splinePoints[cameraSpline.getActiveSegment()+1];
-        }
-    } else if (numTargets == 1) {
-        temp = *getTargetSpline()->controlPoints[0];
-    } else {
-        temp = *getTargetSpline()->getSegmentPoint(segment);
-    }
-
-    temp -= origin;
-    temp.Normalize();
-    direction = temp;
- */
 }
 
 bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, float *fv ) {
@@ -530,8 +495,6 @@ bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, f
 				getActiveTarget()->start( startTime + events[i]->getTime() );
 			}
 			else if ( events[i]->getType() == idCameraEvent::EVENT_TRIGGER ) {
-				//if (ent) {
-				//}
 			}
 			else if ( events[i]->getType() == idCameraEvent::EVENT_FOV ) {
 				memset( buff, 0, sizeof( buff ) );
@@ -581,21 +544,7 @@ bool idCameraDef::getCameraInfo( long time, idVec3 &origin, idVec3 &direction, f
 	idVec3 temp = origin;
 
 	int numTargets = targetPositions.Num();
-	if ( numTargets == 0 ) {
-/*
-        // follow the path
-        if (cameraSpline.getActiveSegment() < count - 1) {
-            temp = *cameraSpline.splinePoints[cameraSpline.getActiveSegment()+1];
-            if (temp == origin) {
-                int index = cameraSpline.getActiveSegment() + 2;
-                while (temp == origin && index < count - 1) {
-                    temp = *cameraSpline.splinePoints[index++];
-                }
-            }
-        }
- */
-	}
-	else {
+	if ( numTargets != 0 ) {
 		if ( getActiveTarget()->numPoints() > 0 ) {
 			temp = *getActiveTarget()->getPosition( time );
 		}

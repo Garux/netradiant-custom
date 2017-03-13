@@ -32,6 +32,7 @@ public:
 int value;
 
 void printValue() const {
+	// print this->value here;
 }
 
 void setValue(){
@@ -67,6 +68,7 @@ namespace ExampleReferenceCaller
 {
 // ReferenceCaller example
 void Int_printValue( const int& value ){
+	// print value here;
 }
 
 void Int_setValue( int& value ){
