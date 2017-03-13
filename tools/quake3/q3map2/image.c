@@ -417,7 +417,6 @@ image_t *ImageLoad( const char *filename ){
 					LoadDDSBuffer( buffer, size, &image->pixels, &image->width, &image->height );
 
 					/* debug code */
-					#if 1
 					{
 						ddsPF_t pf;
 						DDSGetInfo( (ddsBuffer_t*) buffer, NULL, NULL, &pf );
@@ -428,7 +427,6 @@ image_t *ImageLoad( const char *filename ){
 							WriteTGA( "C:\\games\\quake3\\baseq3\\textures\\rad\\dds_converted.tga", image->pixels, image->width, image->height );
 						}
 					}
-					#endif
 				}
 				else
 				{

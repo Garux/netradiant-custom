@@ -181,12 +181,6 @@ void Cam_MouseControl (float dtime)
 	yl = camera.height/3;
 	yh = yl*2;
 
-#if 0
-	// strafe
-	if (buttony < yl && (buttonx < xl || buttonx > xh))
-		VectorMA (camera.origin, xf*dtime*MOVE_SPEED, camera.right, camera.origin);
-	else
-#endif
 	{
 		xf *= 1.0 - fabs(yf);
 		if (xf < 0)
@@ -453,20 +447,6 @@ void Cam_Draw (void)
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc (GL_LEQUAL);
 
-#if 0
-
-		{
-	   GLfloat fogColor[4] = {0.0, 1.0, 0.0, 0.25};
-
-		glFogi (GL_FOG_MODE, GL_LINEAR);
-		glHint (GL_FOG_HINT, GL_NICEST);  /*  per pixel   */
-		glFogf (GL_FOG_START, -8192);
-		glFogf (GL_FOG_END, 65536);
-	   glFogfv (GL_FOG_COLOR, fogColor);
-
-		}
-
-#endif
 		break;
 
 	case cd_blend:

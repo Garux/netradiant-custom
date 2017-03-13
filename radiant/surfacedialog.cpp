@@ -77,49 +77,8 @@
 #include "grid.h"
 #include "textureentry.h"
 
-//NOTE: Proper functioning of Textool currently requires that the "#if 1" lines in
-//      brush_primit.h be changed to "#if 0". add/removeScale screws this up ATM. :-)
-//      Plus, Radiant seems to work just fine without that stuff. ;-)
-
-#define TEXTOOL_ENABLED 0
-
-#if TEXTOOL_ENABLED
-
-namespace TexTool
-{
-
-//Shamus: Textool function prototypes
-gboolean size_allocate( GtkWidget *, GtkAllocation *, gpointer );
-gboolean expose( GtkWidget *, GdkEventExpose *, gpointer );
-gboolean button_press( GtkWidget *, GdkEventButton *, gpointer );
-gboolean button_release( GtkWidget *, GdkEventButton *, gpointer );
-gboolean motion( GtkWidget *, GdkEventMotion *, gpointer );
-void flipX( GtkToggleButton *, gpointer );
-void flipY( GtkToggleButton *, gpointer );
-
-//End Textool function prototypes
-
-//Shamus: Textool globals
-GtkWidget * g_textoolWin;
-//End Textool globals
-
-void queueDraw(){
-	gtk_widget_queue_draw( g_textoolWin );
-}
-
-}
-
-#endif
-
 inline void spin_button_set_step( GtkSpinButton* spin, gfloat step ){
-#if 1
 	gtk_spin_button_get_adjustment( spin )->step_increment = step;
-#else
-	GValue gvalue = GValue_default();
-	g_value_init( &gvalue, G_TYPE_DOUBLE );
-	g_value_set_double( &gvalue, step );
-	g_object_set( G_OBJECT( gtk_spin_button_get_adjustment( spin ) ), "step-increment", &gvalue, NULL );
-#endif
 }
 
 class Increment

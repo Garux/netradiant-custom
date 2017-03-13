@@ -175,25 +175,7 @@ picoModel_t *LoadModel( const char *name, int frame ){
 		PicoSetModelName( *pm, name );
 		PicoSetModelFrameNum( *pm, frame );
 	}
-
-	/* debug code */
-	#if 0
-	{
-		int numSurfaces, numVertexes;
-		picoSurface_t   *ps;
-
-
-		Sys_Printf( "Model %s\n", name );
-		numSurfaces = PicoGetModelNumSurfaces( *pm );
-		for ( i = 0; i < numSurfaces; i++ )
-		{
-			ps = PicoGetModelSurface( *pm, i );
-			numVertexes = PicoGetSurfaceNumVertexes( ps );
-			Sys_Printf( "Surface %d has %d vertexes\n", i, numVertexes );
-		}
-	}
-	#endif
-
+	
 	/* set count */
 	if ( *pm != NULL ) {
 		numPicoModels++;

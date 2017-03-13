@@ -542,59 +542,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 }
 #undef FRAC
 
-#if 0
-/* iterate through the brush sides (ignore the first 6 bevel planes) */
-for ( i = 0; i < brush->numSides; i++ )
-{
-	/* get side */
-	side = &bspBrushSides[ brush->firstSide + i ];
-
-	/* get shader */
-	if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
-		continue;
-	}
-	shader = &bspShaders[ side->shaderNum ];
-	if ( !Q_stricmp( shader->shader, "default" ) || !Q_stricmp( shader->shader, "noshader" ) ) {
-		continue;
-	}
-
-	/* get texture name */
-	if ( !Q_strncasecmp( shader->shader, "textures/", 9 ) ) {
-		texture = shader->shader + 9;
-	}
-	else{
-		texture = shader->shader;
-	}
-
-	/* get plane */
-	plane = &bspPlanes[ side->planeNum ];
-
-	/* make plane points */
-	{
-		vec3_t vecs[ 2 ];
-
-
-		MakeNormalVectors( plane->normal, vecs[ 0 ], vecs[ 1 ] );
-		VectorMA( vec3_origin, plane->dist, plane->normal, pts[ 0 ] );
-		VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
-		VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
-	}
-
-	/* offset by origin */
-	for ( j = 0; j < 3; j++ )
-		VectorAdd( pts[ j ], origin, pts[ j ] );
-
-	/* print brush side */
-	/* ( 640 24 -224 ) ( 448 24 -224 ) ( 448 -232 -224 ) common/caulk 0 48 0 0.500000 0.500000 0 0 0 */
-	fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s 0 0 0 0.5 0.5 0 0 0\n",
-			 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
-			 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
-			 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
-			 texture );
-}
-#endif
-
-
 
 /*
    ConvertPatch()

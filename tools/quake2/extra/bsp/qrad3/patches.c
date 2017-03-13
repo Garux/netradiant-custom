@@ -106,11 +106,6 @@ void CalcTextureReflectivity (void)
 			scale *= 2;
 			VectorScale (texture_reflectivity[i], scale, texture_reflectivity[i]);
 		}
-#if 0
-texture_reflectivity[i][0] = 0.5;
-texture_reflectivity[i][1] = 0.5;
-texture_reflectivity[i][2] = 0.5;
-#endif
 	}
 }
 

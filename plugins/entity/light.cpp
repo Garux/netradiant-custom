@@ -358,55 +358,10 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 			1, 4, 3,
 			1, 3, 2
 		};
-#if 1
 		glVertexPointer( 3, GL_FLOAT, 0, points );
 		glDrawElements( GL_TRIANGLES, sizeof( indices ) / sizeof( index_t ), RenderIndexTypeID, indices );
-#else
-		glBegin( GL_TRIANGLES );
-		for ( unsigned int i = 0; i < sizeof( indices ) / sizeof( index_t ); ++i )
-		{
-			glVertex3fv( points[indices[i]] );
-		}
-		glEnd();
-#endif
 	}
 
-
-	// NOTE: prolly not relevant until some time..
-	// check for DOOM lights
-#if 0
-	if ( strlen( ValueForKey( e, "light_right" ) ) > 0 ) {
-		vec3_t vRight, vUp, vTarget, vTemp;
-		GetVectorForKey( e, "light_right", vRight );
-		GetVectorForKey( e, "light_up", vUp );
-		GetVectorForKey( e, "light_target", vTarget );
-
-		glColor3f( 0, 1, 0 );
-		glBegin( GL_LINE_LOOP );
-		VectorAdd( vTarget, e->origin, vTemp );
-		VectorAdd( vTemp, vRight, vTemp );
-		VectorAdd( vTemp, vUp, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
-		VectorAdd( vTarget, e->origin, vTemp );
-		VectorAdd( vTemp, vUp, vTemp );
-		VectorSubtract( vTemp, vRight, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
-		VectorAdd( vTarget, e->origin, vTemp );
-		VectorAdd( vTemp, vRight, vTemp );
-		VectorSubtract( vTemp, vUp, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
-		VectorAdd( vTarget, e->origin, vTemp );
-		VectorSubtract( vTemp, vUp, vTemp );
-		VectorSubtract( vTemp, vRight, vTemp );
-		glVertex3fv( e->origin );
-		glVertex3fv( vTemp );
-		glEnd();
-
-	}
-#endif
 }
 
 // These variables are tweakable on the q3map2 console, setting to q3map2
@@ -602,9 +557,7 @@ void render( RenderStateFlags state ) const {
 		aabb_draw_wire( m_points );
 	}
 
-  #if 1    //disable if you dont want lines going from the center of the light bbox to the corners
 	light_draw_box_lines( m_origin, m_points );
-  #endif
 }
 };
 

@@ -103,12 +103,7 @@ typedef std::set<CopiedString> TextureGroups;
 
 void TextureGroups_addWad( TextureGroups& groups, const char* archive ){
 	if ( extension_equal( path_get_extension( archive ), "wad" ) ) {
-#if 1
 		groups.insert( archive );
-#else
-		CopiedString archiveBaseName( path_get_filename_start( archive ), path_get_filename_base_end( archive ) );
-		groups.insert( archiveBaseName );
-#endif
 	}
 }
 typedef ReferenceCaller1<TextureGroups, const char*, TextureGroups_addWad> TextureGroupsAddWadCaller;

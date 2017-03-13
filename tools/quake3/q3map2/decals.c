@@ -114,7 +114,6 @@ static qboolean MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspD
 	VectorMA( c->xyz, -d, projection, pc );
 
 	/* two methods */
-	#if 1
 	{
 		/* old code */
 
@@ -123,19 +122,6 @@ static qboolean MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspD
 		if ( fabs( bb ) < 0.00000001 ) {
 			return qfalse;
 		}
-
-		/* calculate texture origin */
-		#if 0
-		s = 0.0;
-		t = 0.0;
-		bary[ 0 ] = ( ( b->st[ 0 ] - s ) * ( c->st[ 1 ] - t ) - ( c->st[ 0 ] - s ) * ( b->st[ 1 ] - t ) ) / bb;
-		bary[ 1 ] = ( ( c->st[ 0 ] - s ) * ( a->st[ 1 ] - t ) - ( a->st[ 0 ] - s ) * ( c->st[ 1 ] - t ) ) / bb;
-		bary[ 2 ] = ( ( a->st[ 0 ] - s ) * ( b->st[ 1 ] - t ) - ( b->st[ 0 ] - s ) * ( a->st[ 1 ] - t ) ) / bb;
-
-		origin[ 0 ] = bary[ 0 ] * pa[ 0 ] + bary[ 1 ] * pb[ 0 ] + bary[ 2 ] * pc[ 0 ];
-		origin[ 1 ] = bary[ 0 ] * pa[ 1 ] + bary[ 1 ] * pb[ 1 ] + bary[ 2 ] * pc[ 1 ];
-		origin[ 2 ] = bary[ 0 ] * pa[ 2 ] + bary[ 1 ] * pb[ 2 ] + bary[ 2 ] * pc[ 2 ];
-		#endif
 
 		/* calculate s vector */
 		s = a->st[ 0 ] + 1.0;
@@ -181,61 +167,8 @@ static qboolean MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspD
 		dp->texMat[ 0 ][ 3 ] = a->st[ 0 ] - DotProduct( a->xyz, dp->texMat[ 0 ] );
 		dp->texMat[ 1 ][ 3 ] = a->st[ 1 ] - DotProduct( a->xyz, dp->texMat[ 1 ] );
 	}
-	#else
-	{
-		int k;
-		dvec3_t origin, deltas[ 3 ];
-		double texDeltas[ 3 ][ 2 ];
-		double delta, texDelta;
-
-
-		/* new code */
-
-		/* calculate deltas */
-		VectorSubtract( pa, pb, deltas[ 0 ] );
-		VectorSubtract( pa, pc, deltas[ 1 ] );
-		VectorSubtract( pb, pc, deltas[ 2 ] );
-		Vector2Subtract( a->st, b->st, texDeltas[ 0 ] );
-		Vector2Subtract( a->st, c->st, texDeltas[ 1 ] );
-		Vector2Subtract( b->st, c->st, texDeltas[ 2 ] );
-
-		/* walk st */
-		for ( i = 0; i < 2; i++ )
-		{
-			/* walk xyz */
-			for ( j = 0; j < 3; j++ )
-			{
-				/* clear deltas */
-				delta = 0.0;
-				texDelta = 0.0;
-
-				/* walk deltas */
-				for ( k = 0; k < 3; k++ )
-				{
-					if ( fabs( deltas[ k ][ j ] ) > delta &&
-						 fabs( texDeltas[ k ][ i ] ) > texDelta  ) {
-						delta = deltas[ k ][ j ];
-						texDelta = texDeltas[ k ][ i ];
-					}
-				}
-
-				/* set texture matrix component */
-				if ( fabs( delta ) > 0.0 ) {
-					dp->texMat[ i ][ j ] = texDelta / delta;
-				}
-				else{
-					dp->texMat[ i ][ j ] = 0.0;
-				}
-			}
-
-			/* set translation component */
-			dp->texMat[ i ][ 3 ] = a->st[ i ] - DotProduct( pa, dp->texMat[ i ] );
-		}
-	}
-	#endif
 
 	/* debug code */
-	#if 1
 	Sys_Printf( "Mat: [ %f %f %f %f ] [ %f %f %f %f ] Theta: %f (%f)\n",
 				dp->texMat[ 0 ][ 0 ], dp->texMat[ 0 ][ 1 ], dp->texMat[ 0 ][ 2 ], dp->texMat[ 0 ][ 3 ],
 				dp->texMat[ 1 ][ 0 ], dp->texMat[ 1 ][ 1 ], dp->texMat[ 1 ][ 2 ], dp->texMat[ 1 ][ 3 ],
@@ -246,7 +179,6 @@ static qboolean MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspD
 				a->xyz[ 0 ], a->xyz[ 1 ], a->xyz[ 2 ],
 				a->st[ 0 ], a->st[ 1 ],
 				DotProduct( a->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ], DotProduct( a->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ] );
-	#endif
 
 	/* test texture matrix */
 	s = DotProduct( a->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ];
@@ -528,11 +460,6 @@ void ProcessDecals( void ){
 			/* remove patch from entity (fixme: leak!) */
 			e->patches = p->next;
 
-			/* push patch to worldspawn (enable this to debug projectors) */
-			#if 0
-			p->next = entities[ 0 ].patches;
-			entities[ 0 ].patches = p;
-			#endif
 		}
 	}
 

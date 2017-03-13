@@ -332,15 +332,6 @@ void FindEdgeVerts (vec3_t v1, vec3_t v2)
 	int		x, y;
 	int		vnum;
 
-#if 0
-{
-	int		i;
-	num_edge_verts = numvertexes-1;
-	for (i=0 ; i<numvertexes-1 ; i++)
-		edge_verts[i] = i+1;
-}
-#endif
-
 	x1 = (4096 + (int)(v1[0]+0.5)) >> 7;
 	y1 = (4096 + (int)(v1[1]+0.5)) >> 7;
 	x2 = (4096 + (int)(v2[0]+0.5)) >> 7;
@@ -358,20 +349,6 @@ void FindEdgeVerts (vec3_t v1, vec3_t v2)
 		y1 = y2;
 		y2 = t;
 	}
-#if 0
-	x1--;
-	x2++;
-	y1--;
-	y2++;
-	if (x1 < 0)
-		x1 = 0;
-	if (x2 >= HASH_SIZE)
-		x2 = HASH_SIZE;
-	if (y1 < 0)
-		y1 = 0;
-	if (y2 >= HASH_SIZE)
-		y2 = HASH_SIZE;
-#endif
 	num_edge_verts = 0;
 	for (x=x1 ; x <= x2 ; x++)
 	{
@@ -647,13 +624,6 @@ int GetEdge2 (int v1, int v2,  face_t *f)
 				edgefaces[i][1] = f;
 				return -i;
 			}
-	#if 0
-			if (v1 == edge->v[0] && v2 == edge->v[1])
-			{
-				printf ("WARNING: multiple forward edge\n");
-				return i;
-			}
-	#endif
 		}
 	}
 
@@ -910,10 +880,6 @@ void SubdivideFace (node_t *node, face_t *f)
 				if (v > maxs)
 					maxs = v;
 			}
-#if 0
-			if (maxs - mins <= 0)
-				Error ("zero extents");
-#endif
 			if (axis == 2)
 			{	// allow double high walls
 				if (maxs - mins <= subdivide_size/* *2 */)

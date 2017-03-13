@@ -223,12 +223,6 @@ entity_t	*Entity_Parse (qboolean onlypairs)
 		if (ent->brushes.onext != &ent->brushes)
 		{
 			printf ("Warning: Fixed size entity with brushes\n");
-#if 0
-			while (ent->brushes.onext != &ent->brushes)
-			{	// FIXME: this will free the entity and crash!
-				Brush_Free (b);
-			}
-#endif
 ent->brushes.next = ent->brushes.prev = &ent->brushes;
 		}
 		// create a custom brush

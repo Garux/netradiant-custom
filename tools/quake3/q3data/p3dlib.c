@@ -261,10 +261,6 @@ int P3DProcess(){
 							strcpy( p3d.polysetNames[p3d.numPairs], s_token );
 						}
 
-						// strip off trailing unused color information
-//						if ( strrchr( p3d.polysetNames[p3d.numPairs], '_' ) != 0 )
-//							*strrchr( p3d.polysetNames[p3d.numPairs], '_' ) = 0;
-
 						p3d.numPairs++;
 					}
 					else
@@ -281,54 +277,4 @@ int P3DProcess(){
 	return 1;
 }
 
-#if 0
-void SkinFromP3D( const char *file ){
-	char filename[1024];
-	char *psetName, *associatedShader;
 
-	/*
-	** a P3D file contains a list of polysets, each with a list of associated
-	** texture names that constitute it's
-	**
-	** Thus:
-	**
-	** P3D file -> skin
-	** polyset  -> polyset
-	**   texture -> texture.SHADER becomes polyset's shader
-	*/
-	sprintf( filename, "%s/%s", g_cddir, file );
-
-	if ( !P3DLoad( filename ) ) {
-		Error( "unable to load '%s'", filename );
-	}
-
-	while ( P3DGetNextPair( &psetName, &associatedShader ) )
-	{
-		int i;
-
-		// find the polyset in the object that this particular pset/shader pair
-		// corresponds to and append the shader to it
-		for ( i = 0; i < g_data.model.numSurfaces; i++ )
-		{
-			if ( !_strcmpi( g_data.surfData[i].header.name, psetName ) ) {
-				char *p;
-
-				if ( strstr( associatedShader, gamedir + 1 ) ) {
-					p = strstr( associatedShader, gamedir + 1 ) + strlen( gamedir ) - 1;
-				}
-				else
-				{
-					p = associatedShader;
-				}
-
-				strcpy( g_data.surfData[i].shaders[g_data.surfData[i].header.numShaders].name, p );
-
-				g_data.surfData[i].header.numShaders++;
-			}
-		}
-
-	}
-
-	P3DClose();
-}
-#endif

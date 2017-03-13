@@ -502,22 +502,9 @@ void BeginBSPFile( void ){
 void EndBSPFile( void ){
 	char path[1024];
 
-#if 0
-	int len;
-	byte    *buf;
-#endif
-
 	EmitBrushes();
 	EmitPlanes();
 	UnparseEntities();
-
-	// load the pop
-#if 0
-	sprintf( path, "%s/pics/pop.lmp", gamedir );
-	len = LoadFile( path, &buf );
-	memcpy( dpop, buf, sizeof( dpop ) );
-	free( buf );
-#endif
 
 	// write the map
 	sprintf( path, "%s.bsp", source );

@@ -74,23 +74,11 @@ void Draw_ClearWindow (void)
 	gluLookAt (mx, my, draw_maxs[2] + g/2, mx , my, draw_maxs[2], 0, 1, 0);
 
 	glColor3f (0,0,0);
-//	glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	glDisable (GL_DEPTH_TEST);
 	glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-#if 0
-	glColor4f (1,0,0,0.5);
-	glBegin (GL_POLYGON);
-
-	glVertex3f (0, 500, 0);
-	glVertex3f (0, 900, 0);
-	glVertex3f (0, 900, 100);
-	glVertex3f (0, 500, 100);
-
-	glEnd ();
-#endif
 
 	glFlush ();
 

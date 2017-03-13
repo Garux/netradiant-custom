@@ -883,7 +883,6 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 	Texdef_normalise( projection, (float)width, (float)height );
 }
 
-#if 1
 void Q3_to_matrix( const texdef_t& texdef, float width, float height, const Vector3& normal, Matrix4& matrix ){
 	Normal_GetTransform( normal, matrix );
 
@@ -912,4 +911,3 @@ void Q3_to_BP( const texdef_t& texdef, float width, float height, const Vector3&
 	Q3_to_matrix( texdef, width, height, normal, matrix );
 	BP_from_matrix( bp_texdef, normal, matrix );
 }
-#endif

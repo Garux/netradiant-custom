@@ -203,15 +203,6 @@ qboolean _TestLine( vec3_t start, vec3_t stop ){
 	while ( 1 )
 	{
 		if ( node == CONTENTS_SOLID ) {
-#if 0
-			float d1, d2, d3;
-
-			d1 = backx - frontx;
-			d2 = backy - fronty;
-			d3 = backz - frontz;
-
-			if ( d1 * d1 + d2 * d2 + d3 * d3 > 1 )
-#endif
 			return false;       // DONE!
 		}
 

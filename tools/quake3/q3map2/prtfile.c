@@ -278,19 +278,11 @@ void WriteFaceFile_r( node_t *node ){
    ================
  */
 void NumberLeafs_r( node_t *node, int c ){
-#if 0
-	portal_t    *p;
-#endif
 	if ( node->planenum != PLANENUM_LEAF ) {
 		// decision node
 		node->cluster = -99;
 
 		if ( node->has_structural_children ) {
-#if 0
-			if ( c >= 0 ) {
-				Sys_FPrintf( SYS_ERR,"THIS CANNOT HAPPEN\n" );
-			}
-#endif
 			NumberLeafs_r( node->children[0], c );
 			NumberLeafs_r( node->children[1], c );
 		}
@@ -318,29 +310,6 @@ void NumberLeafs_r( node_t *node, int c ){
 	}
 
 	node->cluster = c;
-
-#if 0
-	// count the portals
-	for ( p = node->portals ; p ; )
-	{
-		if ( p->nodes[0] == node ) {      // only write out from first leaf
-			if ( PortalPassable( p ) ) {
-				num_visportals++;
-			}
-			else{
-				num_solidfaces++;
-			}
-			p = p->next[0];
-		}
-		else
-		{
-			if ( !PortalPassable( p ) ) {
-				num_solidfaces++;
-			}
-			p = p->next[1];
-		}
-	}
-#endif
 }
 
 

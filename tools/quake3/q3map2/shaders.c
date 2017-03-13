@@ -1975,17 +1975,6 @@ static void ParseShaderFile( const char *filename ){
 				else if ( !Q_stricmp( token, "q3map_styleMarker2" ) ) {  /* uses depthFunc equal */
 					si->styleMarker = 2;
 				}
-
-				/* ydnar: default to searching for q3map_<surfaceparm> */
-#if 0
-				else
-				{
-					Sys_FPrintf( SYS_VRB, "Attempting to match %s with a known surfaceparm\n", token );
-					if ( ApplySurfaceParm( &token[ 6 ], &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) == qfalse ) {
-						Sys_Printf( "WARNING: Unknown q3map_* directive \"%s\"\n", token );
-					}
-				}
-#endif
 			}
 
 

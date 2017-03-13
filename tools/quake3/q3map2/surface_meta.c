@@ -1090,14 +1090,6 @@ void FixMetaTJunctions( void ){
 					continue;
 				}
 
-				#if 0
-				dist = DotProduct( pt, edges[ k ].edge ) - edges[ k ].edge[ 3 ];
-				if ( dist <= -0.0f || dist >= edges[ k ].length ) {
-					continue;
-				}
-				amount = dist / edges[ k ].length;
-				#endif
-
 				/* the edge opposite the zero-weighted vertex was hit, so use that as an amount */
 				a = &metaVerts[ tri->indexes[ k % 3 ] ];
 				b = &metaVerts[ tri->indexes[ ( k + 1 ) % 3 ] ];
@@ -1450,14 +1442,6 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	if ( ds->shaderInfo != tri->si || ds->fogNum != tri->fogNum || ds->sampleSize != tri->sampleSize ) {
 		return 0;
 	}
-	#if 0
-	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
-	     //% VectorCompare( ds->lightmapAxis, tri->lightmapAxis ) == qfalse )
-		 DotProduct( ds->lightmapAxis, tri->plane ) < 0.25f ) {
-		return 0;
-	}
-	#endif
-
 	/* planar surfaces will only merge with triangles in the same plane */
 	if ( npDegrees == 0.0f && ds->shaderInfo->nonplanar == qfalse && ds->planeNum >= 0 ) {
 		if ( VectorCompare( mapplanes[ ds->planeNum ].normal, tri->plane ) == qfalse || mapplanes[ ds->planeNum ].dist != tri->plane[ 3 ] ) {
@@ -1816,37 +1800,6 @@ static int CompareMetaTriangles( const void *a, const void *b ){
 	else if ( ( (const metaTriangle_t*) a )->fogNum > ( (const metaTriangle_t*) b )->fogNum ) {
 		return -1;
 	}
-
-	/* then plane */
-	#if 0
-	else if ( npDegrees == 0.0f && ( (const metaTriangle_t*) a )->si->nonplanar == qfalse &&
-			  ( (const metaTriangle_t*) a )->planeNum >= 0 && ( (const metaTriangle_t*) a )->planeNum >= 0 ) {
-		if ( ( (const metaTriangle_t*) a )->plane[ 3 ] < ( (const metaTriangle_t*) b )->plane[ 3 ] ) {
-			return 1;
-		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 3 ] > ( (const metaTriangle_t*) b )->plane[ 3 ] ) {
-			return -1;
-		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 0 ] < ( (const metaTriangle_t*) b )->plane[ 0 ] ) {
-			return 1;
-		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 0 ] > ( (const metaTriangle_t*) b )->plane[ 0 ] ) {
-			return -1;
-		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 1 ] < ( (const metaTriangle_t*) b )->plane[ 1 ] ) {
-			return 1;
-		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 1 ] > ( (const metaTriangle_t*) b )->plane[ 1 ] ) {
-			return -1;
-		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 2 ] < ( (const metaTriangle_t*) b )->plane[ 2 ] ) {
-			return 1;
-		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 2 ] > ( (const metaTriangle_t*) b )->plane[ 2 ] ) {
-			return -1;
-		}
-	}
-	#endif
 
 	/* then position in world */
 

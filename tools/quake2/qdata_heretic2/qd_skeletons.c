@@ -85,84 +85,7 @@ static void LoadHRCClustered( char *fileName, int **clusterList, int *num_verts,
 //      mesh_node_t *nodesList;
 	int num_mesh_nodes = 0, triangleCount = 0;
 
-#if 0
-	int i;
-	int j, numVerts;
-	char stripped[SKELETAL_NAME_MAX];
-
-	for ( i = 1; i < numJointsInSkeleton[skelType] + 1; ++i )
-	{
-		num_verts[i] = 0;
-	}
-
-	TK_OpenSource( fileName );
-	TK_FetchRequire( TK_HRCH );
-	TK_FetchRequire( TK_COLON );
-	TK_FetchRequire( TK_SOFTIMAGE );
-
-	TK_Beyond( TK_CLUSTERS );
-
-	while ( TK_Search( TK_CLUSTER_NAME ) != TK_EOF )
-	{
-		TK_Require( TK_STRING );
-
-		StripTrailingDigits( tk_String, stripped );
-
-		for ( i = 0; i < numJointsInSkeleton[skelType]; ++i )
-		{
-			if ( stricmp( stripped, skeletonJointNames[skeletonNameOffsets[skelType] + i] ) == 0 ) {
-				i = -i + numJointsInSkeleton[skelType] - 1;
-
-				TK_BeyondRequire( TK_NUM_CLUSTER_VERTICES, TK_INTNUMBER );
-
-				numVerts = tk_IntNumber;
-
-				if ( !num_verts[i + 1] ) { // first set of verts for cluster
-					clusterList[i] = SafeMalloc( numVerts * sizeof( int ), "LoadHRCClustered" );
-					assert( clusterList[i] );
-				}
-				else                // any later sets of verts need to copy current
-				{
-					int *temp;
-
-					temp = SafeMalloc( ( num_verts[i + 1] + numVerts ) * sizeof( int ), "LoadHRCClustered" );
-					assert( temp );
-
-					memcpy( temp + numVerts, clusterList[i], num_verts[i + 1] * sizeof( int ) );
-
-					free( clusterList[i] );
-
-					clusterList[i] = temp;
-				}
-
-				// currently this function is only called by LoadModelClusters.
-				// Apparently the matching free has disappeared,
-				// should probably be free at the end of FMCmd_Base
-
-				TK_Beyond( TK_LBRACE );
-
-				for ( j = 0; j < numVerts; ++j )
-				{
-					TK_Require( TK_INTNUMBER );
-					clusterList[i][j] = tk_IntNumber;
-					TK_Fetch();
-				}
-
-				num_verts[i + 1] += numVerts;
-
-				break;
-			}
-		}
-	}
-
-	num_verts[0] = numJointsInSkeleton[skelType];
-#endif
-
-#if 1   // get the index number localized to the root
-//	for( i = 1; i < numJointsInSkeleton[skelType] + 1; ++i)
-//	{
-//		g_skelModel.num_verts[i] = 0;
-//	}
+// get the index number localized to the root
 
 	TK_OpenSource( fileName );
 	TK_FetchRequire( TK_HRCH );
@@ -186,7 +109,6 @@ static void LoadHRCClustered( char *fileName, int **clusterList, int *num_verts,
 	free( triList );
 
 	num_verts[0] = numJointsInSkeleton[skelType];
-#endif
 }
 
 void ReadHRCClusterList( mesh_node_t *meshNode, int baseIndex ){
@@ -473,70 +395,6 @@ static void LoadHRCJointList( char *fileName, QD_SkeletalJoint_t *jointList, int
 
 	stackSize = currentStack;
 
-#if 0
-	// rotate the direction and up vectors to correspond to the rotation
-	for ( i = 0; i < numJointsInSkeleton[skelType]; ++i )
-	{
-		rx = jointList[i].rotation[0] * ANGLE_TO_RAD;
-		ry = jointList[i].rotation[1] * ANGLE_TO_RAD;
-		rz = jointList[i].rotation[2] * ANGLE_TO_RAD;
-
-		cx = cos( rx );
-		sx = sin( rx );
-
-		cy = cos( ry );
-		sy = sin( ry );
-
-		cz = cos( rz );
-		sz = sin( rz );
-
-		// y-axis rotation for direction
-		x2 = jointList[i].placement.direction[0] * cy + jointList[i].placement.direction[2] * sy;
-		z2 = -jointList[i].placement.direction[0] * sy + jointList[i].placement.direction[2] * cy;
-		jointList[i].placement.direction[0] = x2;
-		jointList[i].placement.direction[2] = z2;
-
-		// y-axis rotation for up
-		x2 = jointList[i].placement.up[0] * cy + jointList[i].placement.up[2] * sy;
-		z2 = -jointList[i].placement.up[0] * sy + jointList[i].placement.up[2] * cy;
-		jointList[i].placement.up[0] = x2;
-		jointList[i].placement.up[2] = z2;
-
-		// z-axis rotation for direction
-		x2 = jointList[i].placement.direction[0] * cz - jointList[i].placement.direction[1] * sz;
-		y2 = jointList[i].placement.direction[0] * sz + jointList[i].placement.direction[1] * cz;
-		jointList[i].placement.direction[0] = x2;
-		jointList[i].placement.direction[1] = y2;
-
-		// z-axis rotation for up
-		x2 = jointList[i].placement.up[0] * cz - jointList[i].placement.up[1] * sz;
-		y2 = jointList[i].placement.up[0] * sz + jointList[i].placement.up[1] * cz;
-		jointList[i].placement.up[0] = x2;
-		jointList[i].placement.up[1] = y2;
-
-		// x-axis rotation for direction vector
-		y2 = jointList[i].placement.direction[1] * cx - jointList[i].placement.direction[2] * sx;
-		z2 = jointList[i].placement.direction[1] * sx + jointList[i].placement.direction[2] * cx;
-		jointList[i].placement.direction[1] = y2;
-		jointList[i].placement.direction[2] = z2;
-
-		// x-axis rotation for up vector
-		y2 = jointList[i].placement.up[1] * cx - jointList[i].placement.up[2] * sx;
-		z2 = jointList[i].placement.up[1] * sx + jointList[i].placement.up[2] * cx;
-		jointList[i].placement.up[1] = y2;
-		jointList[i].placement.up[2] = z2;
-
-		// translate direction to a point in the model
-		jointList[i].placement.direction[0] += jointList[i].placement.origin[0];
-		jointList[i].placement.direction[1] += jointList[i].placement.origin[1];
-		jointList[i].placement.direction[2] += jointList[i].placement.origin[2];
-
-		// translate up to a point in the model
-		jointList[i].placement.up[0] += jointList[i].placement.origin[0];
-		jointList[i].placement.up[1] += jointList[i].placement.origin[1];
-		jointList[i].placement.up[2] += jointList[i].placement.origin[2];
-	}
-#endif
 
 	for ( i = stackSize - 1; i >= 0; --i )
 	{
@@ -553,7 +411,6 @@ static void LoadHRCJointList( char *fileName, QD_SkeletalJoint_t *jointList, int
 		cz = cos( rz );
 		sz = sin( rz );
 
-#if 1
 		for ( j = i; j < stackSize; ++j )
 		{
 			if ( curCorrespondingJoint[j] != -1 ) {
@@ -629,83 +486,6 @@ static void LoadHRCJointList( char *fileName, QD_SkeletalJoint_t *jointList, int
 				placement->up[2] += curTranslation[i][2];
 			}
 		}
-#else
-		// This screwed up and needs to be sorted out!!!
-		// The stack info needs to be written too instead of the jointList for j > numJoints for Skeleton
-		for ( j = i - 1; j < stackSize - 1; ++j )
-		{
-			// y-axis rotation for origin
-			x2 = jointList[j].placement.origin[0] * cy + jointList[j].placement.origin[2] * sy;
-			z2 = -jointList[j].placement.origin[0] * sy + jointList[j].placement.origin[2] * cy;
-			jointList[j].placement.origin[0] = x2;
-			jointList[j].placement.origin[2] = z2;
-
-			// y-axis rotation for direction
-			x2 = jointList[j].placement.direction[0] * cy + jointList[j].placement.direction[2] * sy;
-			z2 = -jointList[j].placement.direction[0] * sy + jointList[j].placement.direction[2] * cy;
-			jointList[j].placement.direction[0] = x2;
-			jointList[j].placement.direction[2] = z2;
-
-			// y-axis rotation for up
-			x2 = jointList[j].placement.up[0] * cy + jointList[j].placement.up[2] * sy;
-			z2 = -jointList[j].placement.up[0] * sy + jointList[j].placement.up[2] * cy;
-			jointList[j].placement.up[0] = x2;
-			jointList[j].placement.up[2] = z2;
-
-			// z-axis rotation for origin
-			x2 = jointList[j].placement.origin[0] * cz - jointList[j].placement.origin[1] * sz;
-			y2 = jointList[j].placement.origin[0] * sz + jointList[j].placement.origin[1] * cz;
-			jointList[j].placement.origin[0] = x2;
-			jointList[j].placement.origin[1] = y2;
-
-			// z-axis rotation for direction
-			x2 = jointList[j].placement.direction[0] * cz - jointList[j].placement.direction[1] * sz;
-			y2 = jointList[j].placement.direction[0] * sz + jointList[j].placement.direction[1] * cz;
-			jointList[j].placement.direction[0] = x2;
-			jointList[j].placement.direction[1] = y2;
-
-			// z-axis rotation for up
-			x2 = jointList[j].placement.up[0] * cz - jointList[j].placement.up[1] * sz;
-			y2 = jointList[j].placement.up[0] * sz + jointList[j].placement.up[1] * cz;
-			jointList[j].placement.up[0] = x2;
-			jointList[j].placement.up[1] = y2;
-
-			// x-axis rotation for origin
-			y2 = jointList[j].placement.origin[1] * cx - jointList[j].placement.origin[2] * sx;
-			z2 = jointList[j].placement.origin[1] * sx + jointList[j].placement.origin[2] * cx;
-			jointList[j].placement.origin[1] = y2;
-			jointList[j].placement.origin[2] = z2;
-
-			// x-axis rotation for direction vector
-			y2 = jointList[j].placement.direction[1] * cx - jointList[j].placement.direction[2] * sx;
-			z2 = jointList[j].placement.direction[1] * sx + jointList[j].placement.direction[2] * cx;
-			jointList[j].placement.direction[1] = y2;
-			jointList[j].placement.direction[2] = z2;
-
-			// x-axis rotation for up vector
-			y2 = jointList[j].placement.up[1] * cx - jointList[j].placement.up[2] * sx;
-			z2 = jointList[j].placement.up[1] * sx + jointList[j].placement.up[2] * cx;
-			jointList[j].placement.up[1] = y2;
-			jointList[j].placement.up[2] = z2;
-
-			if ( curCorrespondingJoint[j + 1] != -1 ) {
-				// translate origin
-				jointList[j].placement.origin[0] += curTranslation[i - 1][0];
-				jointList[j].placement.origin[1] += curTranslation[i - 1][1];
-				jointList[j].placement.origin[2] += curTranslation[i - 1][2];
-
-				// translate back to local coord
-				jointList[j].placement.direction[0] += curTranslation[i - 1][0];
-				jointList[j].placement.direction[1] += curTranslation[i - 1][1];
-				jointList[j].placement.direction[2] += curTranslation[i - 1][2];
-
-				// translate back to local coord
-				jointList[j].placement.up[0] += curTranslation[i - 1][0];
-				jointList[j].placement.up[1] += curTranslation[i - 1][1];
-				jointList[j].placement.up[2] += curTranslation[i - 1][2];
-			}
-		}
-#endif
 	}
 }
 

@@ -678,7 +678,6 @@ cblock_t LZSS( cblock_t in ){
 	for ( i = 0 ; i < in.count ; )
 	{
 		val = in.data[i];
-#if 1
 // chained search
 		bestlength = 0;
 		beststart = 0;
@@ -703,36 +702,6 @@ cblock_t LZSS( cblock_t in ){
 			start = lzss_next[start];
 		}
 
-#else
-// slow simple search
-		// search for a match
-		max = FRONT_WINDOW;
-		if ( i + max > in.count ) {
-			max = in.count - i;
-		}
-
-		start = i - BACK_WINDOW;
-		if ( start < 0 ) {
-			start = 0;
-		}
-		bestlength = 0;
-		beststart = 0;
-		for ( ; start < i ; start++ )
-		{
-			if ( in.data[start] != val ) {
-				continue;
-			}
-			// count match length
-			for ( j = 0 ; j < max ; j++ )
-				if ( in.data[start + j] != in.data[i + j] ) {
-					break;
-				}
-			if ( j > bestlength ) {
-				bestlength = j;
-				beststart = start;
-			}
-		}
-#endif
 		beststart = BACK_WINDOW - ( i - beststart );
 
 		if ( bestlength < 3 ) { // output a single char
@@ -899,7 +868,6 @@ void Huffman1_Count( cblock_t in ){
 		order0counts[v]++;
 		hnodes1[prev][v].count++;
 		prev = v;
-#if 1
 		for ( rept = 1 ; i + rept < in.count && rept < MAX_REPT ; rept++ )
 			if ( in.data[i + rept] != v ) {
 				break;
@@ -908,7 +876,6 @@ void Huffman1_Count( cblock_t in ){
 			hnodes1[prev][255 + rept].count++;
 			i += rept - 1;
 		}
-#endif
 	}
 }
 
@@ -960,18 +927,6 @@ void Huffman1_Build( FILE *f ){
 
 		BuildTree1( i );
 	}
-
-#if 0
-	// count up the total bits
-	total = 0;
-	for ( i = 0 ; i < 256 ; i++ )
-		for ( j = 0 ; j < 256 ; j++ )
-			total += charbitscount1[i][j] * hnodes1[i][j].count;
-
-	total = ( total + 7 ) / 8;
-	printf( "%i bytes huffman1 compressed\n", total );
-#endif
-
 	fwrite( scaled, 1, sizeof( scaled ), f );
 }
 
@@ -1023,7 +978,6 @@ cblock_t Huffman1( cblock_t in ){
 		}
 
 		prev = v;
-#if 1
 		// check for repeat encodes
 		for ( rept = 1 ; i + rept < in.count && rept < MAX_REPT ; rept++ )
 			if ( in.data[i + rept] != v ) {
@@ -1045,7 +999,6 @@ cblock_t Huffman1( cblock_t in ){
 			}
 			i += rept - 1;
 		}
-#endif
 	}
 
 	out_p += ( outbits + 7 ) >> 3;
@@ -1096,14 +1049,6 @@ cblock_t LoadFrame( char *base, int frame, int digits, byte **palette ){
 	Load256Image( name, &in.data, palette, &width, &height );
 	in.count = width * height;
 // FIXME: map 0 and 255!
-
-#if 0
-	// rle compress
-	rle = RLE( in );
-	free( in.data );
-
-	return rle;
-#endif
 
 	return in;
 }

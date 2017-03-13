@@ -58,15 +58,7 @@ extern _QERBrushTable __BRUSHTABLENAME;
 #define PLUGIN
 #define Q3RADIANT
 
-//#if defined(__linux__) || defined(__APPLE__)
-#if 1
 #include <algorithm>
-#else
-template <class T>
-inline T min( T x, T y ) { return ( x < y ) ? x : y; }
-template <class T>
-inline T max( T x, T y ) { return ( x > y ) ? x : y; }
-#endif
 
 typedef struct { long x, y; } Point;
 typedef struct { long left, top, right, bottom; } Rect;
@@ -76,7 +68,6 @@ typedef struct { long left, top, right, bottom; } Rect;
 typedef void* LPVOID;
 typedef char* LPSTR;
 
-//#endif
 inline bool PtInRect( Rect *rc, Point pt ){
 	if ( pt.x < rc->left ) {
 		return false;
@@ -107,14 +98,7 @@ inline bool PtInRect( Rect *rc, Point pt ){
 #define DegreesToRadians( a ) ( a / 57.2957795 )
 
 #define BOGUS_RANGE 65536
-/*
-   #define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
-   #define VectorAdd(a,b,c) {c[0]=a[0]+b[0];c[1]=a[1]+b[1];c[2]=a[2]+b[2];}
-   #define VectorClear(x) {x[0] = x[1] = x[2] = 0;}
-   #define VectorCopy(a,b) {b[0]=a[0];b[1]=a[1];b[2]=a[2];}
-   #define VectorScale(a,b,c) {c[0]=b*a[0];c[1]=b*a[1];c[2]=b*a[2];}
-   #define VectorSubtract(a,b,c) {c[0]=a[0]-b[0];c[1]=a[1]-b[1];c[2]=a[2]-b[2];}
- */
+
 #define XYZVectorSubtract( a,b,c ) {c[0] = (float)a[0] - (float)b[0]; c[1] = (float)a[1] - (float)b[1]; c[2] = (float)a[2] - (float)b[2]; }
 #define side( u1,v1,u2,v2,u3,v3 ) ( v3 - v1 ) * ( u2 - u1 ) - ( u3 - u1 ) * ( v2 - v1 )
 

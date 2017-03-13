@@ -602,14 +602,6 @@ static float BTCCompressBlock( float inBlock[4][4][3], unsigned long out[2] ){
 	float bestError = 10000000000;
 	unsigned int bestEndPoints[2][2];
 
-#if 0
-	//
-	// find the "ideal" end points for the color vector
-	//
-	BTCFindEndpoints( inBlock, endPoints );
-	error = BTCQuantizeBlock( inBlock, endPoints, btcQuantizedBlock );
-	memcpy( bestEndPoints, endPoints, sizeof( bestEndPoints ) );
-#else
 	for ( blockY = 0; blockY < 4; blockY++ )
 	{
 		for ( blockX = 0; blockX < 4; blockX++ )
@@ -641,7 +633,6 @@ static float BTCCompressBlock( float inBlock[4][4][3], unsigned long out[2] ){
 	}
 
 	error = BTCQuantizeBlock( inBlock, bestEndPoints, btcQuantizedBlock, -1.0f );
-#endif
 
 	//
 	// encode the results
@@ -869,19 +860,10 @@ cblock_t LoadFrame( char *base, int frame, int digits, byte **palette ){
 	if ( palette ) {
 		*palette = 0;
 	}
-//	Load256Image (name, &in.data, palette, &width, &height);
 	in.count = width * height;
 	in.width = width;
 	in.height = height;
 // FIXME: map 0 and 255!
-
-#if 0
-	// rle compress
-	rle = RLE( in );
-	free( in.data );
-
-	return rle;
-#endif
 
 	return in;
 }

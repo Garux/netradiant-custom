@@ -38,17 +38,14 @@ struct brushprimit_texdef_t
 		coords[1][2] = 0.f;
 	}
 	void removeScale( std::size_t width, std::size_t height ){
-#if 1
 		coords[0][0] *= width;
 		coords[0][1] *= width;
 		coords[0][2] *= width;
 		coords[1][0] *= height;
 		coords[1][1] *= height;
 		coords[1][2] *= height;
-#endif
 	}
 	void addScale( std::size_t width, std::size_t height ){
-#if 1
 		ASSERT_MESSAGE( width > 0, "shader-width is 0" );
 		ASSERT_MESSAGE( height > 0, "shader-height is 0" );
 		coords[0][0] /= width;
@@ -57,7 +54,6 @@ struct brushprimit_texdef_t
 		coords[1][0] /= height;
 		coords[1][1] /= height;
 		coords[1][2] /= height;
-#endif
 	}
 	float coords[2][3];
 };

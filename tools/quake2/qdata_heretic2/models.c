@@ -156,7 +156,6 @@ void H_printf( char *fmt, ... ){
 	va_end( argptr );
 }
 
-#if 1
 /*
    ============
    WriteModelFile
@@ -392,126 +391,6 @@ void WriteJointedModelFile( FILE *modelouthandle ){
 		}
 	}
 }
-#else
-/*
-   ============
-   WriteModelFile
-   ============
- */
-static void WriteModelFile( FILE *modelouthandle ){
-	int i;
-	dmdl_t modeltemp;
-	int j, k;
-	frame_t         *in;
-	daliasframe_t   *out;
-	byte buffer[MAX_VERTS * 4 + 128];
-	float v;
-	int c_on, c_off;
-
-	model.ident = IDALIASHEADER;
-	model.version = ALIAS_VERSION;
-	model.framesize = (int)&( (daliasframe_t *)0 )->verts[model.num_xyz];
-	model.num_glcmds = numcommands;
-	model.ofs_skins = sizeof( dmdl_t );
-	model.ofs_st = model.ofs_skins + model.num_skins * MAX_SKINNAME;
-	model.ofs_tris = model.ofs_st + model.num_st * sizeof( dstvert_t );
-	model.ofs_frames = model.ofs_tris + model.num_tris * sizeof( dtriangle_t );
-	model.ofs_glcmds = model.ofs_frames + model.num_frames * model.framesize;
-	model.ofs_end = model.ofs_glcmds + model.num_glcmds * 4;
-
-	//
-	// write out the model header
-	//
-	for ( i = 0 ; i < sizeof( dmdl_t ) / 4 ; i++ )
-		( (int *)&modeltemp )[i] = LittleLong( ( (int *)&model )[i] );
-
-	SafeWrite( modelouthandle, &modeltemp, sizeof( modeltemp ) );
-
-	//
-	// write out the skin names
-	//
-	SafeWrite( modelouthandle, g_skins, model.num_skins * MAX_SKINNAME );
-
-	//
-	// write out the texture coordinates
-	//
-	c_on = c_off = 0;
-	for ( i = 0 ; i < model.num_st ; i++ )
-	{
-		base_st[i].s = LittleShort( base_st[i].s );
-		base_st[i].t = LittleShort( base_st[i].t );
-	}
-
-	SafeWrite( modelouthandle, base_st, model.num_st * sizeof( base_st[0] ) );
-
-	//
-	// write out the triangles
-	//
-	for ( i = 0 ; i < model.num_tris ; i++ )
-	{
-		int j;
-		dtriangle_t tri;
-
-		for ( j = 0 ; j < 3 ; j++ )
-		{
-			tri.index_xyz[j] = LittleShort( triangles[i].index_xyz[j] );
-			tri.index_st[j] = LittleShort( triangles[i].index_st[j] );
-		}
-
-		SafeWrite( modelouthandle, &tri, sizeof( tri ) );
-	}
-
-	//
-	// write out the frames
-	//
-	for ( i = 0 ; i < model.num_frames ; i++ )
-	{
-		in = &g_frames[i];
-		out = (daliasframe_t *)buffer;
-
-		strcpy( out->name, in->name );
-		for ( j = 0 ; j < 3 ; j++ )
-		{
-			out->scale[j] = ( in->maxs[j] - in->mins[j] ) / 255;
-			out->translate[j] = in->mins[j];
-		}
-
-		for ( j = 0 ; j < model.num_xyz ; j++ )
-		{
-			// all of these are byte values, so no need to deal with endianness
-			out->verts[j].lightnormalindex = in->v[j].lightnormalindex;
-
-			for ( k = 0 ; k < 3 ; k++ )
-			{
-				// scale to byte values & min/max check
-				v = Q_rint( ( in->v[j].v[k] - out->translate[k] ) / out->scale[k] );
-
-				// clamp, so rounding doesn't wrap from 255.6 to 0
-				if ( v > 255.0 ) {
-					v = 255.0;
-				}
-				if ( v < 0 ) {
-					v = 0;
-				}
-				out->verts[j].v[k] = v;
-			}
-		}
-
-		for ( j = 0 ; j < 3 ; j++ )
-		{
-			out->scale[j] = LittleFloat( out->scale[j] );
-			out->translate[j] = LittleFloat( out->translate[j] );
-		}
-
-		SafeWrite( modelouthandle, out, model.framesize );
-	}
-
-	//
-	// write out glcmds
-	//
-	SafeWrite( modelouthandle, commands, numcommands * 4 );
-}
-#endif
 
 /*
    ===============
@@ -560,12 +439,10 @@ void FinishModel( void ){
 	CreatePath( name );
 	modelouthandle = SafeOpenWrite( name );
 
-#if 1
 	if ( jointed != NOT_JOINTED ) {
 		WriteJointedModelFile( modelouthandle );
 	}
 	else
-#endif
 	WriteModelFile( modelouthandle );
 
 	printf( "%3dx%3d skin\n", model.skinwidth, model.skinheight );
@@ -886,106 +763,6 @@ static void BuildGlCmds( void ){
    ===============================================================
  */
 
-/*
-   ============
-   BuildST
-
-   Builds the triangle_st array for the base frame and
-   model.skinwidth / model.skinheight
-
-   FIXME: allow this to be loaded from a file for
-   arbitrary mappings
-   ============
- */
-#if 0
-static void OldBuildST( triangle_t *ptri, int numtri ){
-	int i, j;
-	int width, height, iwidth, iheight, swidth;
-	float basex, basey;
-	float s_scale, t_scale;
-	float scale;
-	vec3_t mins, maxs;
-	float       *pbasevert;
-	vec3_t vtemp1, vtemp2, normal;
-
-	//
-	// find bounds of all the verts on the base frame
-	//
-	ClearBounds( mins, maxs );
-
-	for ( i = 0 ; i < numtri ; i++ )
-		for ( j = 0 ; j < 3 ; j++ )
-			AddPointToBounds( ptri[i].verts[j], mins, maxs );
-
-	for ( i = 0 ; i < 3 ; i++ )
-	{
-		mins[i] = floor( mins[i] );
-		maxs[i] = ceil( maxs[i] );
-	}
-
-	width = maxs[0] - mins[0];
-	height = maxs[2] - mins[2];
-
-	if ( !g_fixedwidth ) { // old style
-		scale = 8;
-		if ( width * scale >= 150 ) {
-			scale = 150.0 / width;
-		}
-		if ( height * scale >= 190 ) {
-			scale = 190.0 / height;
-		}
-
-		s_scale = t_scale = scale;
-
-		iwidth = ceil( width * s_scale );
-		iheight = ceil( height * t_scale );
-
-		iwidth += 4;
-		iheight += 4;
-	}
-	else
-	{   // new style
-		iwidth = g_fixedwidth / 2;
-		iheight = g_fixedheight;
-
-		s_scale = (float)( iwidth - 4 ) / width;
-		t_scale = (float)( iheight - 4 ) / height;
-	}
-
-//
-// determine which side of each triangle to map the texture to
-//
-	for ( i = 0 ; i < numtri ; i++ )
-	{
-		VectorSubtract( ptri[i].verts[0], ptri[i].verts[1], vtemp1 );
-		VectorSubtract( ptri[i].verts[2], ptri[i].verts[1], vtemp2 );
-		CrossProduct( vtemp1, vtemp2, normal );
-
-		if ( normal[1] > 0 ) {
-			basex = iwidth + 2;
-		}
-		else
-		{
-			basex = 2;
-		}
-		basey = 2;
-
-		for ( j = 0 ; j < 3 ; j++ )
-		{
-			pbasevert = ptri[i].verts[j];
-
-			triangle_st[i][j][0] = Q_rint( ( pbasevert[0] - mins[0] ) * s_scale + basex );
-			triangle_st[i][j][1] = Q_rint( ( maxs[2] - pbasevert[2] ) * t_scale + basey );
-		}
-	}
-
-// make the width a multiple of 4; some hardware requires this, and it ensures
-// dword alignment for each scan
-	swidth = iwidth * 2;
-	model.skinwidth = ( swidth + 3 ) & ~3;
-	model.skinheight = iheight;
-}
-#endif
 
 //==========================================================================
 //
@@ -1187,10 +964,6 @@ void Cmd_Base( void ){
 	vec3_t base_xyz[MAX_VERTS];
 	triangle_t  *ptri;
 	int i, j, k;
-#if 1
-#else
-	int time1;
-#endif
 	char file1[1024];
 	char file2[1024];
 
@@ -1201,26 +974,12 @@ void Cmd_Base( void ){
 	}
 
 	printf( "---------------------\n" );
-#if 1
 	sprintf( file1, "%s/%s", cdpartial, token );
 	printf( "%s  ", file1 );
 
 	ExpandPathAndArchive( file1 );
 
 	sprintf( file1, "%s/%s", cddir, token );
-#else
-	sprintf( file1, "%s/%s.%s", cdarchive, token, trifileext );
-	printf( "%s\n", file1 );
-
-	ExpandPathAndArchive( file1 );
-
-	sprintf( file1, "%s/%s.%s", cddir, token, trifileext );
-
-	time1 = FileTime( file1 );
-	if ( time1 == -1 ) {
-		Error( "%s doesn't exist", file1 );
-	}
-#endif
 //
 // load the base triangles
 //
@@ -1622,26 +1381,9 @@ void Cmd_Skin( void ){
 		return;
 	}
 
-#if 1
 	sprintf( name, "%s/%s.pcx", cddir, token );
 	sprintf( savename, "%s/!%s.pcx", g_outputDir, token );
 	sprintf( g_skins[model.num_skins], "%s/!%s.pcx", cdpartial, token );
-#else
-	sprintf( name, "%s/%s.lbm", cdarchive, token );
-	strcpy( name, ExpandPathAndArchive( name ) );
-//	sprintf (name, "%s/%s.lbm", cddir, token);
-
-	if ( ScriptTokenAvailable() ) {
-		GetScriptToken( false );
-		sprintf( g_skins[model.num_skins], "%s.pcx", token );
-		sprintf( savename, "%s%s.pcx", g_outputDir, g_skins[model.num_skins] );
-	}
-	else
-	{
-		sprintf( savename, "%s/%s.pcx", g_outputDir, token );
-		sprintf( g_skins[model.num_skins], "%s/%s.pcx", cdpartial, token );
-	}
-#endif
 
 	model.num_skins++;
 

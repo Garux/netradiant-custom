@@ -2674,7 +2674,6 @@ void Cmd_FMSkin( void ){
 		}
 		else
 		{
-	#if 1
 			miptex_t    *qtex;
 			qtex = CreateMip( cropped, fmheader.skinwidth, fmheader.skinheight, palette, &size, true );
 
@@ -2685,15 +2684,6 @@ void Cmd_FMSkin( void ){
 			CreatePath( savename );
 			SaveFile( savename, (byte *)qtex, size );
 			free( qtex );
-	#else
-			strcat( g_skins[fmheader.num_skins - 1],".pcx" );
-			strcat( savename,".pcx" );
-
-			// save off the new image
-			printf( "saving %s\n", savename );
-			CreatePath( savename );
-			WritePCXfile( savename, cropped, fmheader.skinwidth, fmheader.skinheight, palette );
-	#endif
 		}
 	}
 	else

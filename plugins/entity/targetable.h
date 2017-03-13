@@ -342,17 +342,10 @@ void erase( const char* key, EntityKeyValue& value ){
 }
 
 const Vector3& world_position() const {
-#if 1
 	const AABB& bounds = Instance::worldAABB();
 	if ( aabb_valid( bounds ) ) {
 		return bounds.origin;
 	}
-#else
-	const AABB& childBounds = Instance::childBounds();
-	if ( aabb_valid( childBounds ) ) {
-		return childBounds.origin;
-	}
-#endif
 	return vector4_to_vector3( localToWorld().t() );
 }
 

@@ -1445,14 +1445,6 @@ void Cmd_ASEConvert( qboolean grabAnims ){
 			GetToken( qfalse );
 			g_data.lowerSkipFrameStart = atoi( token );
 
-#if 0
-			if ( !TokenAvailable() ) {
-				Error( "missing skip end parameter for -playerparms" );
-			}
-			GetToken( qfalse );
-			g_data.lowerSkipFrameEnd = atoi( token );
-#endif
-
 			if ( !TokenAvailable() ) {
 				Error( "missing upper parameter for -playerparms" );
 			}
@@ -1461,13 +1453,6 @@ void Cmd_ASEConvert( qboolean grabAnims ){
 
 			g_data.lowerSkipFrameEnd = g_data.maxUpperFrames - 1;
 
-#if 0
-			if ( !TokenAvailable() ) {
-				Error( "missing head parameter for -playerparms" );
-			}
-			GetToken( qfalse );
-			g_data.maxHeadFrames = atoi( token );
-#endif
 			g_data.maxHeadFrames = 1;
 
 			if ( type != TYPE_ITEM ) {

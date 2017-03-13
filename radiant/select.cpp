@@ -477,7 +477,6 @@ inline void matrix4_pivoted_rotate_by_axis90( Matrix4& matrix, axis_t axis, sign
 }
 
 inline Quaternion quaternion_for_axis90( axis_t axis, sign_t sign ){
-#if 1
 	switch ( axis )
 	{
 	case eAxisX:
@@ -505,9 +504,6 @@ inline Quaternion quaternion_for_axis90( axis_t axis, sign_t sign ){
 			return Quaternion( 0, 0, -c_half_sqrt2f, -c_half_sqrt2f );
 		}
 	}
-#else
-	quaternion_for_matrix4_rotation( matrix4_rotation_for_axis90( (axis_t)axis, ( deg > 0 ) ? eSignPositive : eSignNegative ) );
-#endif
 }
 
 void Select_RotateAxis( int axis, float deg ){

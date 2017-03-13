@@ -289,7 +289,6 @@ void svbksb( double** u, double* w, double** v,int m, int n, double* b, double* 
 #undef PYTHAG
 
 
-#if 1
 void DOsvd( float *a,float *res,float *comp,float *values,int nframes,int framesize,int compressedsize ){
 	int usedfs;
 	int *remap;
@@ -376,71 +375,6 @@ void DOsvd( float *a,float *res,float *comp,float *values,int nframes,int frames
 	freeMatrix( da,framesize );
 	free( remap );
 }
-
-#else
-
-void DOsvd( float *a,float *res,float *comp,float *values,int nframes,int framesize,int compressedsize ){
-	int *remap;
-	int i,j;
-	int nrows;
-	nrows = nframes;
-	if ( nrows < framesize ) {
-		nrows = framesize;
-	}
-	double **da = allocMatrix( nrows,framesize );
-	double **v = allocMatrix( framesize,framesize );
-	double *w = allocVect( framesize );
-	float mx;
-	int bestat;
-
-	for ( j = 0; j < framesize; j++ )
-	{
-		for ( i = 0; i < nframes; i++ )
-			da[j + 1][i + 1] = a[i * framesize + j];
-		for (; i < nrows; i++ )
-			da[j + 1][i + 1] = 0.0;
-	}
-
-	svdcmp( da,nrows,framesize,w,v );
-
-	remap = new int[framesize];
-
-
-	for ( i = 0; i < framesize; i++ )
-		remap[i] = -1;
-	for ( j = 0; j < compressedsize; j++ )
-	{
-		mx = -1.0f;
-		for ( i = 0; i < framesize; i++ )
-		{
-			if ( remap[i] < 0 && fabs( w[i + 1] ) > mx ) {
-				mx = fabs( w[i + 1] );
-				bestat = i;
-			}
-		}
-		assert( mx > -.5f );
-		remap[bestat] = j;
-	}
-	// josh **DO NOT** put your dof>nframes mod here
-	for ( i = 0; i < framesize; i++ )
-	{
-		if ( remap[i] < 0 ) {
-			w[i + 1] = 0.0;
-		}
-		else
-		{
-			values[remap[i]] = w[i + 1];
-			for ( j = 0; j < framesize; j++ )
-				res[remap[i] * framesize + j] = v[j + 1][i + 1];
-		}
-	}
-	freeVect( w );
-	freeMatrix( v,framesize );
-	freeMatrix( da,nrows );
-	delete[] remap;
-}
-
-#endif
 
 void DOsvdPlane( float *pnts,int npnts,float *n,float *base ){
 	int i,j;

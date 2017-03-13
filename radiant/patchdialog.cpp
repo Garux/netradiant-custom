@@ -133,16 +133,12 @@ void operator()( Patch& patch ){
 };
 
 void Scene_PatchGetFixedSubdivisions( PatchFixedSubdivisions& subdivisions ){
-#if 1
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		Patch* patch = Node_getPatch( GlobalSelectionSystem().ultimateSelected().path().top() );
 		if ( patch != 0 ) {
 			Patch_getFixedSubdivisions( *patch, subdivisions );
 		}
 	}
-#else
-	Scene_forEachVisibleSelectedPatch( PatchGetFixedSubdivisions( subdivisions ) );
-#endif
 }
 
 class PatchSetFixedSubdivisions

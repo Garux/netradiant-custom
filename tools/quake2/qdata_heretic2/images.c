@@ -27,9 +27,7 @@
 
 #include <GL/gl.h>
 
-#if 1
 extern char     *g_outputDir;
-#endif // _QDATA
 
 char mip_prefix[1024];              // directory to dump the textures in
 
@@ -41,42 +39,6 @@ unsigned total_y = 0;
 unsigned total_textures = 0;
 
 #define MAX_IMAGE_SIZE 512
-
-#if 0
-/*
-   ==============
-   RemapZero
-
-   Replaces all 0 bytes in an image with the closest palette entry.
-   This is because NT won't let us change index 0, so any palette
-   animation leaves those pixels untouched.
-   ==============
- */
-void RemapZero( byte *pixels, byte *palette, int width, int height ){
-	int i, c;
-	int alt_zero;
-	int value, best;
-
-	alt_zero = 0;
-	best = 9999999;
-	for ( i = 1 ; i < 255 ; i++ )
-	{
-		value = palette[i * 3 + 0] + palette[i * 3 + 1] + palette[i * 3 + 2];
-		if ( value < best ) {
-			best = value;
-			alt_zero = i;
-		}
-	}
-
-	c = width * height;
-	for ( i = 0 ; i < c ; i++ )
-		if ( pixels[i] == 0 ) {
-			pixels[i] = alt_zero;
-		}
-}
-
-#endif
-
 
 // ********************************************************************
 // **  Mip Map Pre-Processing Routines

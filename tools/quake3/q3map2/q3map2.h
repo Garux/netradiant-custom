@@ -99,14 +99,12 @@
 	#define MAC_STATIC
 #endif
 
-#if 1
-	#ifdef WIN32
-		#define Q_stricmp           stricmp
-		#define Q_strncasecmp       strnicmp
-	#else
-		#define Q_stricmp           strcasecmp
-		#define Q_strncasecmp       strncasecmp
-	#endif
+#ifdef WIN32
+	#define Q_stricmp           stricmp
+	#define Q_strncasecmp       strnicmp
+#else
+	#define Q_stricmp           strcasecmp
+	#define Q_strncasecmp       strncasecmp
 #endif
 
 /* macro version */

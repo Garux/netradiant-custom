@@ -55,12 +55,6 @@ void SplitBrush2 (bspbrush_t *brush, int planenum,
 	bspbrush_t **front, bspbrush_t **back)
 {
 	SplitBrush (brush, planenum, front, back);
-#if 0
-	if (*front && (*front)->sides[(*front)->numsides-1].texinfo == -1)
-		(*front)->sides[(*front)->numsides-1].texinfo = (*front)->sides[0].texinfo;	// not -1
-	if (*back && (*back)->sides[(*back)->numsides-1].texinfo == -1)
-		(*back)->sides[(*back)->numsides-1].texinfo = (*back)->sides[0].texinfo;	// not -1
-#endif
 }
 
 /*
@@ -289,10 +283,6 @@ bspbrush_t *MakeBspBrushList (int startbrush, int endbrush,
 		for (j=0 ; j<numsides ; j++)
 			if (mb->original_sides[j].visible && mb->original_sides[j].winding)
 				vis++;
-#if 0
-		if (!vis)
-			continue;	// no faces at all
-#endif
 		// if the brush is outside the clip area, skip it
 		for (j=0 ; j<3 ; j++)
 			if (mb->mins[j] >= clipmaxs[j]
@@ -462,10 +452,6 @@ bspbrush_t *ChopBrushes (bspbrush_t *head)
 	qprintf ("---- ChopBrushes ----\n");
 	qprintf ("original brushes: %i\n", CountBrushList (head));
 
-#if 0
-	if (startbrush == 0)
-		WriteBrushList ("before.gl", head, false);
-#endif
 	keep = NULL;
 
 newlist:
@@ -555,12 +541,6 @@ newlist:
 	}
 
 	qprintf ("output brushes: %i\n", CountBrushList (keep));
-#if 0
-	{
-		WriteBrushList ("after.gl", keep, false);
-		WriteBrushMap ("after.map", keep);
-	}
-#endif
 	return keep;
 }
 
@@ -580,13 +560,6 @@ bspbrush_t *InitialBrushList (bspbrush_t *list)
 	out = NULL;
 	for (b=list ; b ; b=b->next)
 	{
-#if 0
-		for (i=0 ; i<b->numsides ; i++)
-			if (b->sides[i].visible)
-				break;
-		if (i == b->numsides)
-			continue;
-#endif
 		newb = CopyBrush (b);
 		newb->next = out;
 		out = newb;
@@ -596,7 +569,6 @@ bspbrush_t *InitialBrushList (bspbrush_t *list)
 		for (i=0 ; i<b->numsides ; i++)
 		{
 			newb->sides[i].original = &b->sides[i];
-//			newb->sides[i].visible = true;
 			b->sides[i].visible = false;
 		}
 	}

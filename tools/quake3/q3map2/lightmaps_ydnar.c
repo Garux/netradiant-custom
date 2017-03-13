@@ -357,7 +357,6 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 		is = 1.0f / superSample;
 
 		/* scale the vectors and shift the origin */
-		#if 1
 		/* new code that works for arbitrary supersampling values */
 		VectorMA( lm->origin, -0.5, lm->vecs[ 0 ], lm->origin );
 		VectorMA( lm->origin, -0.5, lm->vecs[ 1 ], lm->origin );
@@ -365,13 +364,6 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 		VectorScale( lm->vecs[ 1 ], is, lm->vecs[ 1 ] );
 		VectorMA( lm->origin, is, lm->vecs[ 0 ], lm->origin );
 		VectorMA( lm->origin, is, lm->vecs[ 1 ], lm->origin );
-		#else
-		/* old code that only worked with a value of 2 */
-		VectorScale( lm->vecs[ 0 ], is, lm->vecs[ 0 ] );
-		VectorScale( lm->vecs[ 1 ], is, lm->vecs[ 1 ] );
-		VectorMA( lm->origin, -is, lm->vecs[ 0 ], lm->origin );
-		VectorMA( lm->origin, -is, lm->vecs[ 1 ], lm->origin );
-		#endif
 	}
 
 	/* allocate bsp lightmap storage */
@@ -1732,22 +1724,6 @@ static qboolean ApproximateLightmap( rawLightmap_t *lm ){
 	if ( approximateTolerance <= 0 ) {
 		return qfalse;
 	}
-
-	/* test for jmonroe */
-	#if 0
-	/* don't approx lightmaps with styled twins */
-	if ( lm->numStyledTwins > 0 ) {
-		return qfalse;
-	}
-
-	/* don't approx lightmaps with styles */
-	for ( i = 1; i < MAX_LIGHTMAPS; i++ )
-	{
-		if ( lm->styles[ i ] != LS_NONE ) {
-			return qfalse;
-		}
-	}
-	#endif
 
 	/* assume reduced until shadow detail is found */
 	approximated = qtrue;

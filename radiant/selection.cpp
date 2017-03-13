@@ -3388,19 +3388,11 @@ typedef Callback1<DeviceVector> MouseEventCallback;
 Single<MouseEventCallback> g_mouseMovedCallback;
 Single<MouseEventCallback> g_mouseUpCallback;
 
-#if 1
 const ButtonIdentifier c_button_select = c_buttonLeft;
 const ModifierFlags c_modifier_manipulator = c_modifierNone;
 const ModifierFlags c_modifier_toggle = c_modifierShift;
 const ModifierFlags c_modifier_replace = c_modifierShift | c_modifierAlt;
 const ModifierFlags c_modifier_face = c_modifierControl;
-#else
-const ButtonIdentifier c_button_select = c_buttonLeft;
-const ModifierFlags c_modifier_manipulator = c_modifierNone;
-const ModifierFlags c_modifier_toggle = c_modifierControl;
-const ModifierFlags c_modifier_replace = c_modifierNone;
-const ModifierFlags c_modifier_face = c_modifierShift;
-#endif
 const ModifierFlags c_modifier_toggle_face = c_modifier_toggle | c_modifier_face;
 const ModifierFlags c_modifier_replace_face = c_modifier_replace | c_modifier_face;
 

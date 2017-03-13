@@ -197,18 +197,6 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 	*splitPlaneNum = bestSplit->planenum;
 	*compileFlags = bestSplit->compileFlags;
 
-#if 0
-	if ( bestSplit->compileFlags & C_DETAIL ) {
-		for ( split = list; split; split = split->next )
-			if ( !( split->compileFlags & C_DETAIL ) ) {
-				Sys_FPrintf( SYS_ERR, "DON'T DO SUCH SPLITS (1)\n" );
-			}
-	}
-	if ( ( node->compileFlags & C_DETAIL ) && !( bestSplit->compileFlags & C_DETAIL ) ) {
-		Sys_FPrintf( SYS_ERR, "DON'T DO SUCH SPLITS (2)\n" );
-	}
-#endif
-
 	if ( *splitPlaneNum > -1 ) {
 		mapplanes[ *splitPlaneNum ].counter++;
 	}
@@ -248,10 +236,6 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 	winding_t   *frontWinding, *backWinding;
 	int i;
 	int splitPlaneNum, compileFlags;
-#if 0
-	qboolean isstruct = qfalse;
-#endif
-
 
 	/* count faces left */
 	i = CountFaceList( list );
@@ -285,13 +269,6 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 			FreeBspFace( split );
 			continue;
 		}
-
-#if 0
-		if ( !( split->compileFlags & C_DETAIL ) ) {
-			isstruct = 1;
-		}
-#endif
-
 		/* determine which side the face falls on */
 		side = WindingOnPlaneSide( split->w, plane->normal, plane->dist );
 
@@ -351,25 +328,10 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 		}
 	}
 
-#if 0
-	if ( ( node->compileFlags & C_DETAIL ) && isstruct ) {
-		Sys_FPrintf( SYS_ERR, "I am detail, my child is structural, this is a wtf1\n", node->has_structural_children );
-	}
-#endif
-
 	for ( i = 0 ; i < 2 ; i++ ) {
 		BuildFaceTree_r( node->children[i], childLists[i] );
 		node->has_structural_children |= node->children[i]->has_structural_children;
 	}
-
-#if 0
-	if ( ( node->compileFlags & C_DETAIL ) && !( node->children[0]->compileFlags & C_DETAIL ) && node->children[0]->planenum != PLANENUM_LEAF ) {
-		Sys_FPrintf( SYS_ERR, "I am detail, my child is structural\n", node->has_structural_children );
-	}
-	if ( ( node->compileFlags & C_DETAIL ) && isstruct ) {
-		Sys_FPrintf( SYS_ERR, "I am detail, my child is structural, this is a wtf2\n", node->has_structural_children );
-	}
-#endif
 }
 
 

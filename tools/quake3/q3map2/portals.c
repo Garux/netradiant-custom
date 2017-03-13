@@ -345,16 +345,6 @@ void MakeNodePortal( node_t *node ){
 		return;
 	}
 
-
-	/* ydnar: adding this here to fix degenerate windings */
-	#if 0
-	if ( FixWinding( w ) == qfalse ) {
-		c_badportals++;
-		FreeWinding( w );
-		return;
-	}
-	#endif
-
 	if ( WindingIsTiny( w ) ) {
 		c_tinyportals++;
 		FreeWinding( w );

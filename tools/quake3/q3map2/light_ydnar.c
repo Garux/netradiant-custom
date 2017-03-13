@@ -711,14 +711,6 @@ static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 	bspDrawVert_t mid, *dv2[ 3 ];
 	int max;
 
-
-	/* map the vertexes */
-	#if 0
-	MapSingleLuxel( lm, info, dv[ 0 ], plane, 1, stv, ttv );
-	MapSingleLuxel( lm, info, dv[ 1 ], plane, 1, stv, ttv );
-	MapSingleLuxel( lm, info, dv[ 2 ], plane, 1, stv, ttv );
-	#endif
-
 	/* subdivide calc */
 	{
 		int i;
@@ -1091,52 +1083,6 @@ void MapRawLightmap( int rawLightmapNum ){
 			/* get verts */
 			verts = mesh->verts;
 
-			/* debug code */
-				#if 0
-			if ( lm->plane ) {
-				Sys_Printf( "Planar patch: [%1.3f %1.3f %1.3f] [%1.3f %1.3f %1.3f] [%1.3f %1.3f %1.3f]\n",
-							lm->plane[ 0 ], lm->plane[ 1 ], lm->plane[ 2 ],
-							lm->vecs[ 0 ][ 0 ], lm->vecs[ 0 ][ 1 ], lm->vecs[ 0 ][ 2 ],
-							lm->vecs[ 1 ][ 0 ], lm->vecs[ 1 ][ 1 ], lm->vecs[ 1 ][ 2 ] );
-			}
-				#endif
-
-			/* map the mesh quads */
-				#if 0
-
-			for ( mapNonAxial = 0; mapNonAxial < 2; mapNonAxial++ )
-			{
-				for ( y = 0; y < ( mesh->height - 1 ); y++ )
-				{
-					for ( x = 0; x < ( mesh->width - 1 ); x++ )
-					{
-						/* set indexes */
-						pw[ 0 ] = x + ( y * mesh->width );
-						pw[ 1 ] = x + ( ( y + 1 ) * mesh->width );
-						pw[ 2 ] = x + 1 + ( ( y + 1 ) * mesh->width );
-						pw[ 3 ] = x + 1 + ( y * mesh->width );
-						pw[ 4 ] = x + ( y * mesh->width );      /* same as pw[ 0 ] */
-
-						/* set radix */
-						r = ( x + y ) & 1;
-
-						/* get drawverts and map first triangle */
-						dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-						dv[ 1 ] = &verts[ pw[ r + 1 ] ];
-						dv[ 2 ] = &verts[ pw[ r + 2 ] ];
-						MapTriangle( lm, info, dv, mapNonAxial );
-
-						/* get drawverts and map second triangle */
-						dv[ 0 ] = &verts[ pw[ r + 0 ] ];
-						dv[ 1 ] = &verts[ pw[ r + 2 ] ];
-						dv[ 2 ] = &verts[ pw[ r + 3 ] ];
-						MapTriangle( lm, info, dv, mapNonAxial );
-					}
-				}
-			}
-
-				#else
-
 			for ( y = 0; y < ( mesh->height - 1 ); y++ )
 			{
 				for ( x = 0; x < ( mesh->width - 1 ); x++ )
@@ -1174,8 +1120,6 @@ void MapRawLightmap( int rawLightmapNum ){
 					}
 				}
 			}
-
-				#endif
 
 			/* free the mesh */
 			FreeMesh( mesh );
@@ -1326,57 +1270,6 @@ void MapRawLightmap( int rawLightmapNum ){
 			luxel[ 3 ] = 1.0f;
 		}
 	}
-
-	/* debug code */
-	#if 0
-	Sys_Printf( "\n" );
-	for ( y = 0; y < lm->sh; y++ )
-	{
-		for ( x = 0; x < lm->sw; x++ )
-		{
-			vec3_t mins, maxs;
-
-
-			cluster = SUPER_CLUSTER( x, y );
-			origin = SUPER_ORIGIN( x, y );
-			normal = SUPER_NORMAL( x, y );
-			luxel = SUPER_LUXEL( x, y );
-
-			if ( *cluster < 0 ) {
-				continue;
-			}
-
-			/* check if within the bounding boxes of all surfaces referenced */
-			ClearBounds( mins, maxs );
-			for ( n = 0; n < lm->numLightSurfaces; n++ )
-			{
-				int TOL;
-				info = &surfaceInfos[ lightSurfaces[ lm->firstLightSurface + n ] ];
-				TOL = info->sampleSize + 2;
-				AddPointToBounds( info->mins, mins, maxs );
-				AddPointToBounds( info->maxs, mins, maxs );
-				if ( origin[ 0 ] > ( info->mins[ 0 ] - TOL ) && origin[ 0 ] < ( info->maxs[ 0 ] + TOL ) &&
-					 origin[ 1 ] > ( info->mins[ 1 ] - TOL ) && origin[ 1 ] < ( info->maxs[ 1 ] + TOL ) &&
-					 origin[ 2 ] > ( info->mins[ 2 ] - TOL ) && origin[ 2 ] < ( info->maxs[ 2 ] + TOL ) ) {
-					break;
-				}
-			}
-
-			/* inside? */
-			if ( n < lm->numLightSurfaces ) {
-				continue;
-			}
-
-			/* report bogus origin */
-			Sys_Printf( "%6d [%2d,%2d] (%4d): XYZ(%+4.1f %+4.1f %+4.1f) LO(%+4.1f %+4.1f %+4.1f) HI(%+4.1f %+4.1f %+4.1f) <%3.0f>\n",
-						rawLightmapNum, x, y, *cluster,
-						origin[ 0 ], origin[ 1 ], origin[ 2 ],
-						mins[ 0 ], mins[ 1 ], mins[ 2 ],
-						maxs[ 0 ], maxs[ 1 ], maxs[ 2 ],
-						luxel[ 3 ] );
-		}
-	}
-	#endif
 }
 
 
@@ -2245,15 +2138,6 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 					normal = SUPER_NORMAL( x, y );
 					flag = SUPER_FLAG( x, y );
 
-#if 0
-					////////// 27's temp hack for testing edge clipping ////
-					if ( origin[0] == 0 && origin[1] == 0 && origin[2] == 0 ) {
-						lightLuxel[ 1 ] = 255;
-						lightLuxel[ 3 ] = 1.0f;
-						totalLighted++;
-					}
-					else
-#endif
 					{
 						/* set contribution count */
 						lightLuxel[ 3 ] = 1.0f;
@@ -2734,44 +2618,6 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 		}
 	}
 
-
-#if 0
-	// audit pass
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-	{
-		/* early out */
-		if ( lm->superLuxels[ lightmapNum ] == NULL ) {
-			continue;
-		}
-		for ( y = 0; y < lm->sh; y++ )
-			for ( x = 0; x < lm->sw; x++ )
-			{
-				/* get cluster */
-				cluster = SUPER_CLUSTER( x, y );
-				luxel = SUPER_LUXEL( lightmapNum, x, y );
-				deluxel = SUPER_DELUXEL( x, y );
-				if ( !luxel || !deluxel || !cluster ) {
-					Sys_FPrintf( SYS_VRB, "WARNING: I got NULL'd.\n" );
-					continue;
-				}
-				else if ( *cluster < 0 ) {
-					// unmapped pixel
-					// should have neither deluxemap nor lightmap
-					if ( deluxel[3] ) {
-						Sys_FPrintf( SYS_VRB, "WARNING: I have written deluxe to an unmapped luxel. Sorry.\n" );
-					}
-				}
-				else
-				{
-					// mapped pixel
-					// should have both deluxemap and lightmap
-					if ( deluxel[3] ) {
-						Sys_FPrintf( SYS_VRB, "WARNING: I forgot to write deluxe to a mapped luxel. Sorry.\n" );
-					}
-				}
-			}
-	}
-#endif
 }
 
 
@@ -3997,21 +3843,6 @@ void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int nu
 				lightsEnvelopeCulled++;
 				continue;
 			}
-
-			/* check bounding box against light's pvs envelope (note: this code never eliminated any lights, so disabling it) */
-			#if 0
-			skip = qfalse;
-			for ( i = 0; i < 3; i++ )
-			{
-				if ( mins[ i ] > light->maxs[ i ] || maxs[ i ] < light->mins[ i ] ) {
-					skip = qtrue;
-				}
-			}
-			if ( skip ) {
-				lightsBoundsCulled++;
-				continue;
-			}
-			#endif
 		}
 
 		/* planar surfaces (except twosided surfaces) have a couple more checks */
@@ -4376,61 +4207,6 @@ void FloodLightRawLightmapPass( rawLightmap_t *lm, vec3_t lmFloodLightRGB, float
 
 	/* testing no filtering */
 	return;
-
-#if 0
-
-	/* filter "dirt" */
-	for ( y = 0; y < lm->sh; y++ )
-	{
-		for ( x = 0; x < lm->sw; x++ )
-		{
-			/* get luxel */
-			cluster = SUPER_CLUSTER( x, y );
-			floodlight = SUPER_FLOODLIGHT( x, y );
-
-			/* filter dirt by adjacency to unmapped luxels */
-			average = *floodlight;
-			samples = 1.0f;
-			for ( sy = ( y - 1 ); sy <= ( y + 1 ); sy++ )
-			{
-				if ( sy < 0 || sy >= lm->sh ) {
-					continue;
-				}
-
-				for ( sx = ( x - 1 ); sx <= ( x + 1 ); sx++ )
-				{
-					if ( sx < 0 || sx >= lm->sw || ( sx == x && sy == y ) ) {
-						continue;
-					}
-
-					/* get neighboring luxel */
-					cluster = SUPER_CLUSTER( sx, sy );
-					floodlight2 = SUPER_FLOODLIGHT( sx, sy );
-					if ( *cluster < 0 || *floodlight2 <= 0.0f ) {
-						continue;
-					}
-
-					/* add it */
-					average += *floodlight2;
-					samples += 1.0f;
-				}
-
-				/* bail */
-				if ( samples <= 0.0f ) {
-					break;
-				}
-			}
-
-			/* bail */
-			if ( samples <= 0.0f ) {
-				continue;
-			}
-
-			/* scale dirt */
-			*floodlight = average / samples;
-		}
-	}
-#endif
 }
 
 void FloodLightRawLightmap( int rawLightmapNum ){

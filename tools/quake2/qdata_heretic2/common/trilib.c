@@ -31,9 +31,7 @@
 #include "token.h"
 #include "l3dslib.h"
 #include "fmodel.h"
-#if 1
 #include "qd_skeletons.h"
-#endif
 
 // on disk representation of a face
 #define FLOAT_START 99999.0
@@ -424,28 +422,12 @@ void HandleHRCModel( triangle_t **triList, int *triangleCount, mesh_node_t **nod
 				tList[i + start_tri].verts[2 - j][0] = vList[tk_IntNumber].v[0];
 				tList[i + start_tri].verts[2 - j][1] = vList[tk_IntNumber].v[1];
 				tList[i + start_tri].verts[2 - j][2] = vList[tk_IntNumber].v[2];
-#if 1
-				tList[i + start_tri].indicies[2 - j] = tk_IntNumber + vertIndexBase;
-#endif
 				TK_BeyondRequire( TK_UVTEXTURE, TK_FLOATNUMBER );
 				tList[i + start_tri].uv[2 - j][0] = tk_FloatNumber;
 				TK_Fetch();
 				TK_Require( TK_FLOATNUMBER );
 				tList[i + start_tri].uv[2 - j][1] = tk_FloatNumber;
 			}
-
-			/*		printf("Face %i:\n  v0: %f, %f, %f\n  v1: %f, %f, %f\n"
-			            "  v2: %f, %f, %f\n", i,
-			            tList[i].verts[0][0],
-			            tList[i].verts[0][1],
-			            tList[i].verts[0][2],
-			            tList[i].verts[1][0],
-			            tList[i].verts[1][1],
-			            tList[i].verts[1][2],
-			            tList[i].verts[2][0],
-			            tList[i].verts[2][1],
-			            tList[i].verts[2][2]);
-			 */
 		}
 
 		TK_Beyond( TK_RBRACE );
@@ -462,7 +444,6 @@ void HandleHRCModel( triangle_t **triList, int *triangleCount, mesh_node_t **nod
 
 		// See if there are any other models belonging to this node
 
-#if 1
 		TK_Fetch();
 
 		nextToken = tk_Token;
@@ -490,7 +471,6 @@ void HandleHRCModel( triangle_t **triList, int *triangleCount, mesh_node_t **nod
 				meshNode->clustered = false;
 			}
 		}
-#endif
 
 		nextToken = tk_Token;
 		if ( nextToken == TK_SPLINE ) {
@@ -903,7 +883,6 @@ static void LoadHTR( char *fileName, triangle_t **triList, int *triangleCount, m
 			tList[i].verts[2 - j][2] = vList[vertexNum].v[2];
 		}
 		TK_FetchRequire( TK_RPAREN );
-#if 1
 		if ( Version2 ) {
 			TK_FetchRequire( TK_FLOATNUMBER );
 			tList[i].uv[2][0] = fmod( 1000 + tk_FloatNumber,1 );
@@ -922,19 +901,6 @@ static void LoadHTR( char *fileName, triangle_t **triList, int *triangleCount, m
 		else{
 			tList[i].HasUV = 0;
 		}
-#endif
-/*		printf("Face %i:\n  v0: %f, %f, %f\n  v1: %f, %f, %f\n"
-            "  v2: %f, %f, %f\n", i,
-            tList[i].verts[0][0],
-            tList[i].verts[0][1],
-            tList[i].verts[0][2],
-            tList[i].verts[1][0],
-            tList[i].verts[1][1],
-            tList[i].verts[1][2],
-            tList[i].verts[2][0],
-            tList[i].verts[2][1],
-            tList[i].verts[2][2]);
- */
 	}
 
 	free( vList );

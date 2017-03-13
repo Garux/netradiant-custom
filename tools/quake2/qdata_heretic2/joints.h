@@ -41,13 +41,11 @@ typedef struct Placement_s
 	vec3_t up;
 } Placement_t;
 
-#if 1
 typedef struct QDataJoint_s
 {
 	Placement_t placement;
 	vec3_t rotation;
 } QDataJoint_t;
-#endif
 
 typedef struct ArrayedListNode_s
 {

@@ -123,7 +123,6 @@ Image& convertHeightmapToNormalmap( Image& heightmap, float scale ){
 	byte* in = heightmap.getRGBAPixels();
 	byte* out = normalmap.getRGBAPixels();
 
-#if 1
 	// no filtering
 	const int kernelSize = 2;
 	KernelElement kernel_du[kernelSize] = {
@@ -134,26 +133,6 @@ Image& convertHeightmapToNormalmap( Image& heightmap, float scale ){
 		{ 0, 1, 0.5f },
 		{ 0,-1,-0.5f }
 	};
-#else
-	// 3x3 Prewitt
-	const int kernelSize = 6;
-	KernelElement kernel_du[kernelSize] = {
-		{-1, 1,-1.0f },
-		{-1, 0,-1.0f },
-		{-1,-1,-1.0f },
-		{ 1, 1, 1.0f },
-		{ 1, 0, 1.0f },
-		{ 1,-1, 1.0f }
-	};
-	KernelElement kernel_dv[kernelSize] = {
-		{-1, 1, 1.0f },
-		{ 0, 1, 1.0f },
-		{ 1, 1, 1.0f },
-		{-1,-1,-1.0f },
-		{ 0,-1,-1.0f },
-		{ 1,-1,-1.0f }
-	};
-#endif
 
 	int x, y = 0;
 	while ( y < h )

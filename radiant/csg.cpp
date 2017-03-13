@@ -240,7 +240,6 @@ typedef Function3<const Face&, const Plane3&, bool, bool, Face_testPlane> FaceTe
 /// \li flipped && brush is FRONT or ON
 bool Brush_testPlane( const Brush& brush, const Plane3& plane, bool flipped ){
 	brush.evaluateBRep();
-#if 1
 	for ( Brush::const_iterator i( brush.begin() ); i != brush.end(); ++i )
 	{
 		if ( Face_testPlane( *( *i ), plane, flipped ) ) {
@@ -248,9 +247,6 @@ bool Brush_testPlane( const Brush& brush, const Plane3& plane, bool flipped ){
 		}
 	}
 	return true;
-#else
-	return Brush_findIf( brush, bindArguments( FaceTestPlane(), makeReference( plane ), flipped ) ) == 0;
-#endif
 }
 
 brushsplit_t Brush_classifyPlane( const Brush& brush, const Plane3& plane ){

@@ -30,11 +30,9 @@
 typedef struct
 {
 	vec3_t verts[3];
-#if 1
 	int indicies[3];
 	float uv[3][2];
 	qboolean HasUV;
-#endif
 } triangle_t;
 
 #define NUM_CLUSTERS 8

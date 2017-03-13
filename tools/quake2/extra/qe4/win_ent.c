@@ -264,21 +264,6 @@ void GetEntityControls(HWND ghwndEntity)
 		Error ("CreateWindow failed");
 
 	g_qeglobals.d_hwndTexture = CreateTextureWindow ();
-
-#if 0
-	for (i=0 ; i<12 ; i++)
-	{
-		hwndEnt[EntCheck1 + i] = CreateWindow ("button", NULL,
-		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE,
-		5, 100, 180, 99,
-		entwindow,
-		(void *)IDC_E_STATUS,
-		main_instance,
-		NULL);
-		if (!hwndEnt[EntCheck1 + i])
-			Error ("CreateWindow failed");
-	}
-#endif
 }
 
 

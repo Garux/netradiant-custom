@@ -51,11 +51,7 @@ public:
 	}
 	else
 	{
-#if 1
 		return MillisecondTime();
-#else
-		return time_from_ticks( timeGetTime(), 1000 );
-#endif
 	}
 }
 

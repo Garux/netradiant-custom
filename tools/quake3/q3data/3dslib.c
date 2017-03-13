@@ -644,14 +644,6 @@ void _3DS_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets,
 	}
 
 	// compute normal data
-#if 0
-	for ( i = 0; i < numPolysets; i++ )
-	{
-		// unique vertices based solely on vertex position
-		ComputeNormals( &_3ds.editChunk.pNamedObjects[i].pTriObjects[0],
-						pPSET[i].triangles );
-	}
-#endif
 
 	free( _3ds.editChunk.pMaterials );
 	free( _3ds.editChunk.pNamedObjects );

@@ -717,36 +717,6 @@ byte GetShaderIndexForPoint( indexMap_t *im, vec3_t eMins, vec3_t eMaxs, vec3_t 
 		return 0;
 	}
 
-	/* this code is really broken */
-	#if 0
-	/* legacy precision fudges for terrain */
-	for ( i = 0; i < 3; i++ )
-	{
-		mins[ i ] = floor( eMins[ i ] + 0.1 );
-		maxs[ i ] = floor( eMaxs[ i ] + 0.1 );
-		size[ i ] = maxs[ i ] - mins[ i ];
-	}
-
-	/* find st (fixme: support more than just z-axis projection) */
-	s = floor( point[ 0 ] + 0.1f - mins[ 0 ] ) / size[ 0 ];
-	t = floor( maxs[ 1 ] - point[ 1 ] + 0.1f ) / size[ 1 ];
-	if ( s < 0.0f ) {
-		s = 0.0f;
-	}
-	else if ( s > 1.0f ) {
-		s = 1.0f;
-	}
-	if ( t < 0.0f ) {
-		t = 0.0f;
-	}
-	else if ( t > 1.0f ) {
-		t = 1.0f;
-	}
-
-	/* make xy */
-	x = ( im->w - 1 ) * s;
-	y = ( im->h - 1 ) * t;
-	#else
 	/* get size */
 	for ( i = 0; i < 3; i++ )
 	{
@@ -774,7 +744,6 @@ byte GetShaderIndexForPoint( indexMap_t *im, vec3_t eMins, vec3_t eMaxs, vec3_t 
 	else if ( y > ( im->h - 1 ) ) {
 		y = ( im->h - 1 );
 	}
-	#endif
 
 	/* return index */
 	return im->pixels[ y * im->w + x ];
@@ -2167,23 +2136,6 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 			p2 = &mapplanes[ ds->planeNum ];
 			VectorCopy( p2->normal, plane2 );
 			plane2[ 3 ] = p2->dist;
-
-			#if 0
-			/* div0: this is the plague (inaccurate) */
-			vec4_t reverse;
-
-			/* invert surface plane */
-			VectorSubtract( vec3_origin, plane2, reverse );
-			reverse[ 3 ] = -plane2[ 3 ];
-
-			/* compare planes */
-			if ( DotProduct( plane1, plane2 ) > 0.999f && fabs( plane1[ 3 ] - plane2[ 3 ] ) < 0.001f ) {
-				return FilterWindingIntoTree_r( w, ds, node->children[ 0 ] );
-			}
-			if ( DotProduct( plane1, reverse ) > 0.999f && fabs( plane1[ 3 ] - reverse[ 3 ] ) < 0.001f ) {
-				return FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
-			}
-			#else
 			/* div0: this is the cholera (doesn't hit enough) */
 
 			/* the drawsurf might have an associated plane, if so, force a filter here */
@@ -2193,7 +2145,6 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 			if ( ds->planeNum == ( node->planenum ^ 1 ) ) {
 				return FilterWindingIntoTree_r( w, ds, node->children[ 1 ] );
 			}
-			#endif
 		}
 
 		/* clip the winding by this plane */

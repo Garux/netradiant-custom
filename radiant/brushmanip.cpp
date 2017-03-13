@@ -731,15 +731,10 @@ void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& proj
 }
 
 void Scene_BrushGetTexdef_Component_Selected( scene::Graph& graph, TextureProjection& projection ){
-#if 1
 	if ( !g_SelectedFaceInstances.empty() ) {
 		FaceInstance& faceInstance = g_SelectedFaceInstances.last();
 		faceInstance.getFace().GetTexdef( projection );
 	}
-#else
-	FaceGetTexdef visitor( projection );
-	Scene_ForEachSelectedBrushFace( graph, visitor );
-#endif
 }
 
 void Scene_BrushGetShaderSize_Component_Selected( scene::Graph& graph, size_t& width, size_t& height ){
@@ -769,27 +764,19 @@ void operator()( Face& face ) const {
 
 
 void Scene_BrushGetFlags_Selected( scene::Graph& graph, ContentsFlagsValue& flags ){
-#if 1
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		BrushInstance* brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() );
 		if ( brush != 0 ) {
 			Brush_forEachFace( *brush, FaceGetFlags( flags ) );
 		}
 	}
-#else
-	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceGetFlags( flags ) );
-#endif
 }
 
 void Scene_BrushGetFlags_Component_Selected( scene::Graph& graph, ContentsFlagsValue& flags ){
-#if 1
 	if ( !g_SelectedFaceInstances.empty() ) {
 		FaceInstance& faceInstance = g_SelectedFaceInstances.last();
 		faceInstance.getFace().GetFlags( flags );
 	}
-#else
-	Scene_ForEachSelectedBrushFace( graph, FaceGetFlags( flags ) );
-#endif
 }
 
 
@@ -810,28 +797,19 @@ void operator()( Face& face ) const {
 };
 
 void Scene_BrushGetShader_Selected( scene::Graph& graph, CopiedString& shader ){
-#if 1
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		BrushInstance* brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() );
 		if ( brush != 0 ) {
 			Brush_forEachFace( *brush, FaceGetShader( shader ) );
 		}
 	}
-#else
-	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceGetShader( shader ) );
-#endif
 }
 
 void Scene_BrushGetShader_Component_Selected( scene::Graph& graph, CopiedString& shader ){
-#if 1
 	if ( !g_SelectedFaceInstances.empty() ) {
 		FaceInstance& faceInstance = g_SelectedFaceInstances.last();
 		shader = faceInstance.getFace().GetShader();
 	}
-#else
-	FaceGetShader visitor( shader );
-	Scene_ForEachSelectedBrushFace( graph, visitor );
-#endif
 }
 
 

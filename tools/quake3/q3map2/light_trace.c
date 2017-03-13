@@ -1345,39 +1345,6 @@ void SetupTraceNodes( void ){
 	numTraceWindings = 0;
 	maxTraceWindings = 0;
 	deadWinding = -1;
-
-	/* debug code: write out trace triangles to an alias obj file */
-	#if 0
-	{
-		int i, j;
-		FILE            *file;
-		char filename[ 1024 ];
-		traceWinding_t  *tw;
-
-
-		/* open the file */
-		strcpy( filename, source );
-		StripExtension( filename );
-		strcat( filename, ".lin" );
-		Sys_Printf( "Opening light trace file %s...\n", filename );
-		file = fopen( filename, "w" );
-		if ( file == NULL ) {
-			Error( "Error opening %s for writing", filename );
-		}
-
-		/* walk node list */
-		for ( i = 0; i < numTraceWindings; i++ )
-		{
-			tw = &traceWindings[ i ];
-			for ( j = 0; j < tw->numVerts + 1; j++ )
-				fprintf( file, "%f %f %f\n",
-						 tw->v[ j % tw->numVerts ].xyz[ 0 ], tw->v[ j % tw->numVerts ].xyz[ 1 ], tw->v[ j % tw->numVerts ].xyz[ 2 ] );
-		}
-
-		/* close it */
-		fclose( file );
-	}
-	#endif
 }
 
 

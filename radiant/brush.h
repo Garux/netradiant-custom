@@ -1258,19 +1258,9 @@ class RenderableWireframe : public OpenGLRenderable
 {
 public:
 void render( RenderStateFlags state ) const {
-#if 1
 	glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices->colour );
 	glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices->vertex );
 	glDrawElements( GL_LINES, GLsizei( m_size << 1 ), RenderIndexTypeID, m_faceVertex.data() );
-#else
-	glBegin( GL_LINES );
-	for ( std::size_t i = 0; i < m_size; ++i )
-	{
-		glVertex3fv( &m_vertices[m_faceVertex[i].first].vertex.x );
-		glVertex3fv( &m_vertices[m_faceVertex[i].second].vertex.x );
-	}
-	glEnd();
-#endif
 }
 
 Array<EdgeRenderIndices> m_faceVertex;

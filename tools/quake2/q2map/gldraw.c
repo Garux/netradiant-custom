@@ -77,18 +77,6 @@ void Draw_ClearWindow( void ){
 	glEnable( GL_BLEND );
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-#if 0
-	glColor4f( 1,0,0,0.5 );
-	glBegin( GL_POLYGON );
-
-	glVertex3f( 0, 500, 0 );
-	glVertex3f( 0, 900, 0 );
-	glVertex3f( 0, 900, 100 );
-	glVertex3f( 0, 500, 100 );
-
-	glEnd();
-#endif
-
 	glFlush();
 
 }

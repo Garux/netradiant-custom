@@ -262,16 +262,6 @@ void OrderMesh( int input[][3], int output[][3], int numTris ){
 
 	memset( s_used, 0, sizeof( s_used ) );
 
-#if 0
-	FILE *fp = fopen( "strip.txt", "wt" );
-
-	for ( i = 0; i < numTris; i++ )
-	{
-		fprintf( fp, "%4d: %3d %3d %3d\n", i, input[i][0], input[i][1], input[i][2] );
-	}
-	fclose( fp );
-#endif
-
 	// while there are still triangles that are not part of a strip
 	while ( sumStrippedTriangles < numTris )
 	{

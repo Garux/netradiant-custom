@@ -89,14 +89,6 @@ H2COMMON_API void ResMngr_Con( ResourceManager_t *resource, size_t init_resSize,
 H2COMMON_API void ResMngr_Des( ResourceManager_t *resource ){
 	ResMngr_Block_t *toDelete;
 
-#if 0
-	if ( resource->numResourcesAllocated ) {
-		char mess[100];
-		sprintf( mess,"Potential memory leak %d bytes unfreed\n",resource->resSize * resource->numResourcesAllocated );
-		OutputDebugString( mess );
-	}
-#endif
-
 	while ( resource->blockList )
 	{
 		toDelete = resource->blockList;

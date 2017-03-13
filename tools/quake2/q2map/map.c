@@ -100,7 +100,6 @@ int PlaneTypeForNormal( vec3_t normal ){
 #define NORMAL_EPSILON  0.00001
 #define DIST_EPSILON    0.01
 qboolean    PlaneEqual( plane_t *p, vec3_t normal, vec_t dist ){
-#if 1
 	if (
 		fabs( p->normal[0] - normal[0] ) < NORMAL_EPSILON
 		&& fabs( p->normal[1] - normal[1] ) < NORMAL_EPSILON
@@ -108,14 +107,6 @@ qboolean    PlaneEqual( plane_t *p, vec3_t normal, vec_t dist ){
 		&& fabs( p->dist - dist ) < DIST_EPSILON ) {
 		return true;
 	}
-#else
-	if ( p->normal[0] == normal[0]
-		 && p->normal[1] == normal[1]
-		 && p->normal[2] == normal[2]
-		 && p->dist == dist ) {
-		return true;
-	}
-#endif
 	return false;
 }
 
@@ -795,11 +786,6 @@ void MoveBrushesToWorld( entity_t *mapent ){
 
 	temp = malloc( newbrushes * sizeof( mapbrush_t ) );
 	memcpy( temp, mapbrushes + mapent->firstbrush, newbrushes * sizeof( mapbrush_t ) );
-
-#if 0       // let them keep their original brush numbers
-	for ( i = 0 ; i < newbrushes ; i++ )
-		temp[i].entitynum = 0;
-#endif
 
 	// make space to move the brushes (overlapped copy)
 	memmove( mapbrushes + worldbrushes + newbrushes,

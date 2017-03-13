@@ -581,24 +581,10 @@ void AddBrushBevels( void ){
 			// see if the plane is allready present
 			for ( i = 0, s = buildBrush->sides; i < buildBrush->numsides; i++, s++ )
 			{
-				/* ydnar: testing disabling of mre code */
-				#if 0
-				if ( dir > 0 ) {
-					if ( mapplanes[s->planenum].normal[axis] >= 0.9999f ) {
-						break;
-					}
-				}
-				else {
-					if ( mapplanes[s->planenum].normal[axis] <= -0.9999f ) {
-						break;
-					}
-				}
-				#else
 				if ( ( dir > 0 && mapplanes[ s->planenum ].normal[ axis ] == 1.0f ) ||
 					 ( dir < 0 && mapplanes[ s->planenum ].normal[ axis ] == -1.0f ) ) {
 					break;
 				}
-				#endif
 			}
 
 			if ( i == buildBrush->numsides ) {

@@ -301,7 +301,6 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			// find out which side of the generated seperating plane has the
 			// source portal
 			//
-#if 1
 			fliptest = qfalse;
 			for ( k = 0 ; k < source->numpoints ; k++ )
 			{
@@ -323,9 +322,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			if ( k == source->numpoints ) {
 				continue;       // planar with source portal
 			}
-#else
-			fliptest = flipclip;
-#endif
+
 			//
 			// flip the normal if the source portal is backwards
 			//
@@ -333,7 +330,6 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 				VectorSubtract( vec3_origin, plane.normal, plane.normal );
 				plane.dist = -plane.dist;
 			}
-#if 1
 			//
 			// if all of the pass portal points are now on the positive side,
 			// this is the seperating plane
@@ -362,18 +358,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			if ( !counts[0] ) {
 				continue;   // planar with seperating plane
 			}
-#else
-			k = ( j + 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
-			if ( d < -ON_EPSILON ) {
-				continue;
-			}
-			k = ( j + pass->numpoints - 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
-			if ( d < -ON_EPSILON ) {
-				continue;
-			}
-#endif
+
 			//
 			// flip the normal if we want the back side
 			//
@@ -510,15 +495,12 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		VectorSubtract( vec3_origin, p->plane.normal, backplane.normal );
 		backplane.dist = -p->plane.dist;
 
-//		c_portalcheck++;
-
 		stack.portal = p;
 		stack.next = NULL;
 		stack.freewindings[0] = 1;
 		stack.freewindings[1] = 1;
 		stack.freewindings[2] = 1;
 
-#if 1
 		{
 			float d;
 
@@ -538,15 +520,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 				}
 			}
 		}
-#else
-		stack.pass = VisChopWinding( p->winding, &stack, &thread->pstack_head.portalplane );
-		if ( !stack.pass ) {
-			continue;
-		}
-#endif
 
-
-#if 1
 		{
 			float d;
 
@@ -571,12 +545,6 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 				}
 			}
 		}
-#else
-		stack.source = VisChopWinding( prevstack->source, &stack, &backplane );
-		if ( !stack.source ) {
-			continue;
-		}
-#endif
 
 		if ( !prevstack->pass ) { // the second leaf can only be blocked if coplanar
 
@@ -883,15 +851,12 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		VectorSubtract( vec3_origin, p->plane.normal, backplane.normal );
 		backplane.dist = -p->plane.dist;
 
-//		c_portalcheck++;
-
 		stack.portal = p;
 		stack.next = NULL;
 		stack.freewindings[0] = 1;
 		stack.freewindings[1] = 1;
 		stack.freewindings[2] = 1;
 
-#if 1
 		{
 			float d;
 
@@ -911,15 +876,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 				}
 			}
 		}
-#else
-		stack.pass = VisChopWinding( p->winding, &stack, &thread->pstack_head.portalplane );
-		if ( !stack.pass ) {
-			continue;
-		}
-#endif
 
-
-#if 1
 		{
 			float d;
 
@@ -944,12 +901,6 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 				}
 			}
 		}
-#else
-		stack.source = VisChopWinding( prevstack->source, &stack, &backplane );
-		if ( !stack.source ) {
-			continue;
-		}
-#endif
 
 		if ( !prevstack->pass ) { // the second leaf can only be blocked if coplanar
 
@@ -1208,7 +1159,6 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, qboolean flipcl
 			// find out which side of the generated seperating plane has the
 			// source portal
 			//
-#if 1
 			fliptest = qfalse;
 			for ( k = 0 ; k < source->numpoints ; k++ )
 			{
@@ -1230,9 +1180,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, qboolean flipcl
 			if ( k == source->numpoints ) {
 				continue;       // planar with source portal
 			}
-#else
-			fliptest = flipclip;
-#endif
+
 			//
 			// flip the normal if the source portal is backwards
 			//
@@ -1240,7 +1188,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, qboolean flipcl
 				VectorSubtract( vec3_origin, plane.normal, plane.normal );
 				plane.dist = -plane.dist;
 			}
-#if 1
+
 			//
 			// if all of the pass portal points are now on the positive side,
 			// this is the seperating plane
@@ -1269,18 +1217,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, qboolean flipcl
 			if ( !counts[0] ) {
 				continue;   // planar with seperating plane
 			}
-#else
-			k = ( j + 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
-			if ( d < -ON_EPSILON ) {
-				continue;
-			}
-			k = ( j + pass->numpoints - 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
-			if ( d < -ON_EPSILON ) {
-				continue;
-			}
-#endif
+
 			//
 			// flip the normal if we want the back side
 			//

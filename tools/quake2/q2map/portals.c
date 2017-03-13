@@ -776,12 +776,6 @@ void FloodAreas_r( node_t *node ){
 
 	for ( p = node->portals ; p ; p = p->next[s] )
 	{
-		s = ( p->nodes[1] == node );
-#if 0
-		if ( p->nodes[!s]->occupied ) {
-			continue;
-		}
-#endif
 		if ( !Portal_EntityFlood( p, s ) ) {
 			continue;
 		}

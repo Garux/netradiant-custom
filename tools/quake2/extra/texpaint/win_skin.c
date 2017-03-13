@@ -780,16 +780,7 @@ void ResampleSkin (void)
 	glDisable (GL_DEPTH_TEST);
 	glDisable (GL_CULL_FACE);
 	BindTextureEXT (GL_TEXTURE_2D, TEXTURE_INDEX);
-#if 0
-	glDisable(GL_TEXTURE_2D);
-	glBegin (GL_LINE_LOOP);
-	glVertex3f (1,1,10);
-	glVertex3f (skin_width-1,0,10);
-	glVertex3f (skin_width-1,skin_height-1,10);
-	glVertex3f (1,skin_height-1,10);
-	glEnd ();
-	glEnable(GL_TEXTURE_2D);
-#endif
+
 	glBegin (GL_TRIANGLES);
 	for (i=0 ; i<numfaces ; i++)
 	{

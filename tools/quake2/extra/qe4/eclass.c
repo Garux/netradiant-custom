@@ -130,13 +130,6 @@ eclass_t *Eclass_InitFromText (char *text)
 	len = t-text;
 	e->comments = qmalloc (len+1);
 	memcpy (e->comments, text, len);
-#if 0
-	for (i=0 ; i<len ; i++)
-		if (text[i] == '\n')
-			e->comments[i] = '\r';
-		else
-			e->comments[i] = text[i];
-#endif
 	e->comments[len] = 0;
 
 	return e;

@@ -1759,13 +1759,6 @@ void TraceGrid( int num ){
 	/* store off sample */
 	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
 	{
-#if 0
-		/* do some fudging to keep the ambient from being too low (2003-07-05: 0.25 -> 0.125) */
-		if ( !bouncing ) {
-			VectorMA( gp->ambient[ i ], 0.125f, gp->directed[ i ], gp->ambient[ i ] );
-		}
-#endif
-
 		/* set minimum light and copy off to bytes */
 		VectorCopy( gp->ambient[ i ], color );
 		for ( j = 0; j < 3; j++ )
@@ -1777,15 +1770,6 @@ void TraceGrid( int num ){
 		ColorToBytes( color, bgp->ambient[ i ], gridScale * gridAmbientScale );
 		ColorToBytes( gp->directed[ i ], bgp->directed[ i ], gridScale );
 	}
-
-	/* debug code */
-	#if 0
-	//%	Sys_FPrintf( SYS_VRB, "%10d %10d %10d ", &gp->ambient[ 0 ][ 0 ], &gp->ambient[ 0 ][ 1 ], &gp->ambient[ 0 ][ 2 ] );
-	Sys_FPrintf( SYS_VRB, "%9d Amb: (%03.1f %03.1f %03.1f) Dir: (%03.1f %03.1f %03.1f)\n",
-				 num,
-				 gp->ambient[ 0 ][ 0 ], gp->ambient[ 0 ][ 1 ], gp->ambient[ 0 ][ 2 ],
-				 gp->directed[ 0 ][ 0 ], gp->directed[ 0 ][ 1 ], gp->directed[ 0 ][ 2 ] );
-	#endif
 
 	/* store direction */
 	NormalToLatLong( thisdir, bgp->latLong );
