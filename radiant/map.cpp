@@ -35,6 +35,7 @@ MapModules& ReferenceAPI_getMapModules();
 #include "irender.h"
 #include "ientity.h"
 #include "editable.h"
+#include "iarchive.h"
 #include "ifilesystem.h"
 #include "namespace.h"
 #include "moduleobserver.h"
@@ -409,25 +410,24 @@ void RemoveRegionBrushes( void );
 
 ModuleObservers g_mapPathObservers;
 
-class UnvanquishedMapFileObserver : public ModuleObserver
+class MapFileObserver : public ModuleObserver
 {
 void realise() {
-	if ( strncmp( GlobalRadiant().getGameFile(), "unvanquished", 12 ) == 0 ) {
 		// Restart VFS to apply new pak filtering based on mapname
+		// needed for daemon dpk vfs
 		VFS_Restart();
-	}
 }
 void unrealise() { }
 };
 
-UnvanquishedMapFileObserver g_unvanquishedMapFileObserver;
+MapFileObserver g_mapFileObserver;
 
 void BindMapFileObservers(){
-	g_mapPathObservers.attach( g_unvanquishedMapFileObserver );
+	g_mapPathObservers.attach( g_mapFileObserver );
 }
 
 void UnBindMapFileObservers(){
-	g_mapPathObservers.detach( g_unvanquishedMapFileObserver );
+	g_mapPathObservers.detach( g_mapFileObserver );
 }
 
 
