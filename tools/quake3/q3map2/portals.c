@@ -664,7 +664,7 @@ qboolean PlaceOccupant( node_t *headnode, vec3_t origin, entity_t *occupant, qbo
 int FloodEntities( tree_t *tree ){
 	int i, s;
 	vec3_t origin, offset, scale, angles;
-	qboolean r, inside, skybox;
+	qboolean r, inside, skybox, found;
 	node_t      *headnode;
 	entity_t    *e, *tripped;
 	const char  *value;
@@ -684,10 +684,10 @@ int FloodEntities( tree_t *tree ){
 		e = &entities[ i ];
 
 		/* get origin */
-		GetVectorForKey( e, "origin", origin );
+		found = GetVectorForKey( e, "origin", origin );
 
 		/* as a special case, allow origin-less entities */
-		if ( VectorCompare( origin, vec3_origin ) ) {
+		if ( !found ) {
 			continue;
 		}
 
