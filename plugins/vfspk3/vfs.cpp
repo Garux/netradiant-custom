@@ -862,27 +862,11 @@ void initialise(){
 
 		// prevent VFS double start, for MapName="" and MapName="unnamed.map"
 		if ( string_length( GlobalRadiant().getMapName() ) ){
-			// map's tex-* paks have precedence over any other tex-* paks
+			// load map's paks from DEPS
 			char* mappakname = GetCurrentMapDpkPakName();
 			if ( mappakname != NULL ) {
 				LoadDpkPakWithDeps( mappakname );
 				string_release( mappakname, string_length( mappakname ) );
-			}
-
-			for ( PakfilePaths::iterator i = g_pakfile_paths.begin(); i != g_pakfile_paths.end(); ++i ) {
-				if ( strncmp( i->first.c_str(), "tex-", 4 ) != 0 ) continue;
-				// firstly load latest version of pak
-				const char *paknamever = i->first.c_str();
-				const char *c = strchr( paknamever, '_' );
-				char *paknameonly;
-				if ( c ) paknameonly = string_clone_range( StringRange( paknamever, c ) );
-				pakname = GetLatestDpkPakVersion( paknameonly );
-				if (pakname != NULL) {
-					LoadDpkPakWithDeps( pakname );
-				}
-				if ( c ) string_release( paknameonly, string_length( paknameonly ) );
-				// then load this specific version
-				LoadDpkPakWithDeps( paknamever );
 			}
 		}
 
