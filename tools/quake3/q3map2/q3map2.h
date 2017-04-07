@@ -1913,7 +1913,7 @@ qboolean                    KeyExists( const entity_t *ent, const char *key ); /
 const char                  *ValueForKey( const entity_t *ent, const char *key );
 int                         IntForKey( const entity_t *ent, const char *key );
 vec_t                       FloatForKey( const entity_t *ent, const char *key );
-void                        GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec );
+qboolean                    GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec );
 entity_t                    *FindTargetEntity( const char *target );
 void                        GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows );
 void InjectCommandLine( char **argv, int beginArgs, int endArgs );

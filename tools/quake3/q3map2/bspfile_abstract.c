@@ -831,7 +831,7 @@ vec_t FloatForKey( const entity_t *ent, const char *key ){
    gets a 3-element vector value for an entity key
  */
 
-void GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
+qboolean GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
 	const char  *k;
 	double v1, v2, v3;
 
@@ -845,6 +845,9 @@ void GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
 	vec[ 0 ] = v1;
 	vec[ 1 ] = v2;
 	vec[ 2 ] = v3;
+
+	/* true if the key is found, false otherwise */
+	return strlen( k );
 }
 
 
