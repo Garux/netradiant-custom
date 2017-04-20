@@ -84,7 +84,7 @@ game_t struct
 	8,                      /* default patchMeta subdivisions tolerance */
 	qfalse,                 /* patch casting enabled */
 	qfalse,                 /* compile deluxemaps */
-	1,                      /* deluxemaps default mode */
+	0,                      /* deluxemaps default mode */
 	512,                    /* minimap size */
 	1.0f,                   /* minimap sharpener */
 	0.0f,                   /* minimap border */
