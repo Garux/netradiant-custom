@@ -234,7 +234,7 @@ int ConvertBSPMain( int argc, char **argv ){
 
 	if ( force_map || ( !force_bsp && !Q_stricmp( ext, "map" ) && map_allowed ) ) {
 		if ( !map_allowed ) {
-			Sys_Printf( "WARNING: the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
+			Sys_FPrintf( SYS_WRN, "WARNING: the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
 		}
 		StripExtension( source );
 		DefaultExtension( source, ".map" );
