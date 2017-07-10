@@ -245,8 +245,7 @@ void gamemode_set( const char* gamemode );
 void Radiant_attachGameModeObserver( ModuleObserver& observer );
 void Radiant_detachGameModeObserver( ModuleObserver& observer );
 
-
-
+void VFS_Restart();
 void VFS_Construct();
 void VFS_Destroy();
 

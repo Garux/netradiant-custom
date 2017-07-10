@@ -113,6 +113,10 @@ const char* TextureBrowser_getSelectedShader(){
 	return TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
 }
 
+const char* getGameFile(){
+	return g_GamesDialog.m_sGameFile.c_str();
+}
+
 class RadiantCoreAPI
 {
 _QERFuncTable_1 m_radiantcore;
@@ -128,6 +132,7 @@ RadiantCoreAPI(){
 	m_radiantcore.getSettingsPath = &SettingsPath_get;
 	m_radiantcore.getMapsPath = &getMapsPath;
 
+	m_radiantcore.getGameFile = &getGameFile;
 	m_radiantcore.getGameName = &gamename_get;
 	m_radiantcore.getGameMode = &gamemode_get;
 
@@ -137,15 +142,6 @@ RadiantCoreAPI(){
 
 	m_radiantcore.getGameDescriptionKeyValue = &GameDescription_getKeyValue;
 	m_radiantcore.getRequiredGameDescriptionKeyValue = &GameDescription_getRequiredKeyValue;
-
-	m_radiantcore.attachGameToolsPathObserver = Radiant_attachGameToolsPathObserver;
-	m_radiantcore.detachGameToolsPathObserver = Radiant_detachGameToolsPathObserver;
-	m_radiantcore.attachEnginePathObserver = Radiant_attachEnginePathObserver;
-	m_radiantcore.detachEnginePathObserver = Radiant_detachEnginePathObserver;
-	m_radiantcore.attachGameNameObserver = Radiant_attachGameNameObserver;
-	m_radiantcore.detachGameNameObserver = Radiant_detachGameNameObserver;
-	m_radiantcore.attachGameModeObserver = Radiant_attachGameModeObserver;
-	m_radiantcore.detachGameModeObserver = Radiant_detachGameModeObserver;
 
 	m_radiantcore.XYWindowDestroyed_connect = XYWindowDestroyed_connect;
 	m_radiantcore.XYWindowDestroyed_disconnect = XYWindowDestroyed_disconnect;
@@ -254,10 +250,12 @@ Radiant(){
 	MapRoot_construct();
 
 	EnginePath_verify();
+	BindMapFileObservers();
 	EnginePath_Realise();
 }
 ~Radiant(){
 	EnginePath_Unrealise();
+	UnBindMapFileObservers();
 
 	MapRoot_destroy();
 	NullModel_destroy();

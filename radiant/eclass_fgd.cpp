@@ -28,6 +28,7 @@
 #include "ifilesystem.h"
 #include "iscriplib.h"
 #include "qerplugin.h"
+#include "mainframe.h"
 
 #include "string/string.h"
 #include "eclasslib.h"
@@ -699,12 +700,12 @@ EntityClassFGDAPI(){
 	m_eclassmanager.realise = &EntityClassFGD_realise;
 	m_eclassmanager.unrealise = &EntityClassFGD_unrealise;
 
-	GlobalRadiant().attachGameToolsPathObserver( g_EntityClassFGD );
-	GlobalRadiant().attachGameNameObserver( g_EntityClassFGD );
+	Radiant_attachGameToolsPathObserver( g_EntityClassFGD );
+	Radiant_attachGameNameObserver( g_EntityClassFGD );
 }
 ~EntityClassFGDAPI(){
-	GlobalRadiant().detachGameNameObserver( g_EntityClassFGD );
-	GlobalRadiant().detachGameToolsPathObserver( g_EntityClassFGD );
+	Radiant_detachGameNameObserver( g_EntityClassFGD );
+	Radiant_detachGameToolsPathObserver( g_EntityClassFGD );
 
 	EntityClassFGD_destroy();
 }

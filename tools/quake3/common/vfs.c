@@ -218,7 +218,7 @@ void vfsInitDirectory( const char *path ){
 				{
 					char *ext = strrchr( dirlist, '.' );
 
-					if ( ext && !Q_stricmp( ext, ".pk3dir" ) ) {
+					if ( ext && ( !Q_stricmp( ext, ".pk3dir" ) || !Q_stricmp( ext, ".dpkdir" ) ) ) {
 						if ( g_numDirs == VFS_MAXDIRS ) {
 							continue;
 						}
@@ -229,7 +229,7 @@ void vfsInitDirectory( const char *path ){
 						++g_numDirs;
 					}
 
-					if ( ( ext == NULL ) || ( Q_stricmp( ext, ".pk3" ) != 0 ) ) {
+					if ( ( ext == NULL ) || ( Q_stricmp( ext, ".pk3" ) != 0 || !Q_stricmp( ext, ".dpk" ) != 0 ) ) {
 						continue;
 					}
 				}

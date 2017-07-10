@@ -587,12 +587,15 @@ void TextureBrowser_addActiveShadersChangedCallback( const SignalHandler& handle
 	g_activeShadersChangedCallbacks.connectLast( handler );
 }
 
+void TextureBrowser_constructTreeStore();
+
 class ShadersObserver : public ModuleObserver
 {
 Signal0 m_realiseCallbacks;
 public:
 void realise(){
 	m_realiseCallbacks();
+	TextureBrowser_constructTreeStore();
 }
 void unrealise(){
 }

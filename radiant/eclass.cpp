@@ -336,14 +336,14 @@ EclassManagerAPI(){
 	m_eclassmanager.realise = &EntityClass_realise;
 	m_eclassmanager.unrealise = &EntityClass_unrealise;
 
-	GlobalRadiant().attachGameToolsPathObserver( g_EntityClassQuake3 );
-	GlobalRadiant().attachGameModeObserver( g_EntityClassQuake3 );
-	GlobalRadiant().attachGameNameObserver( g_EntityClassQuake3 );
+	Radiant_attachGameToolsPathObserver( g_EntityClassQuake3 );
+	Radiant_attachGameModeObserver( g_EntityClassQuake3 );
+	Radiant_attachGameNameObserver( g_EntityClassQuake3 );
 }
 ~EclassManagerAPI(){
-	GlobalRadiant().detachGameNameObserver( g_EntityClassQuake3 );
-	GlobalRadiant().detachGameModeObserver( g_EntityClassQuake3 );
-	GlobalRadiant().detachGameToolsPathObserver( g_EntityClassQuake3 );
+	Radiant_detachGameNameObserver( g_EntityClassQuake3 );
+	Radiant_detachGameModeObserver( g_EntityClassQuake3 );
+	Radiant_detachGameToolsPathObserver( g_EntityClassQuake3 );
 
 	EntityClassQuake3_destroy();
 }
