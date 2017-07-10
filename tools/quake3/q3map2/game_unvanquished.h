@@ -84,12 +84,12 @@ game_t struct
 	8,                      /* default patchMeta subdivisions tolerance */
 	qfalse,                 /* patch casting enabled */
 	qfalse,                 /* compile deluxemaps */
-	1,                      /* deluxemaps default mode */
+	0,                      /* deluxemaps default mode */
 	512,                    /* minimap size */
 	1.0f,                   /* minimap sharpener */
 	0.0f,                   /* minimap border */
 	qtrue,                  /* minimap keep aspect */
-	MINIMAP_MODE_BLACK,     /* minimap mode */
+	MINIMAP_MODE_WHITE,     /* minimap mode */
 	"../minimaps/%s.tga",   /* minimap name format */
 	"IBSP",                 /* bsp file prefix */
 	46,                     /* bsp file version */
