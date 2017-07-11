@@ -3787,6 +3787,7 @@ const SelectionIntersection& bestIntersection() const {
 
 class BestSelector : public Selector
 {
+protected:
 SelectionIntersection m_intersection;
 Selectable* m_selectable;
 SelectionIntersection m_bestIntersection;
@@ -3823,20 +3824,9 @@ const SelectionIntersection& bestIntersection() const {
 }
 };
 
-class DeepBestSelector : public Selector
+class DeepBestSelector : public BestSelector // copy of class BestSelector with 2.f depthEpsilon
 {
-SelectionIntersection m_intersection;
-Selectable* m_selectable;
-SelectionIntersection m_bestIntersection;
-std::list<Selectable*> m_bestSelectable;
 public:
-DeepBestSelector() : m_bestIntersection( SelectionIntersection() ), m_bestSelectable( 0 ){
-}
-
-void pushSelectable( Selectable& selectable ){
-	m_intersection = SelectionIntersection();
-	m_selectable = &selectable;
-}
 void popSelectable(){
 	if ( m_intersection.equalEpsilon( m_bestIntersection, 0.25f, 2.f ) ) {
 		m_bestSelectable.push_back( m_selectable );
@@ -3848,13 +3838,6 @@ void popSelectable(){
 		m_bestIntersection = m_intersection;
 	}
 	m_intersection = SelectionIntersection();
-}
-void addIntersection( const SelectionIntersection& intersection ){
-	assign_if_closer( m_intersection, intersection );
-}
-
-std::list<Selectable*>& best(){
-	return m_bestSelectable;
 }
 };
 
