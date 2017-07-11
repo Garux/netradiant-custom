@@ -250,8 +250,6 @@ CGameDialog() :
 }
 virtual ~CGameDialog();
 
-void AddPacksURL( StringOutputStream &s );
-
 /*!
    intialize the game dialog, called at CPrefsDlg::Init
    will scan for games, load prefs, and do game selection dialog if needed
