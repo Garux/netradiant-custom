@@ -210,7 +210,7 @@ void ClusterMerge( int leafnum ){
 
 	numvis++;       // count the leaf itself
 
-	//Sys_FPrintf (SYS_VRB,"cluster %4i : %4i visible\n", leafnum, numvis);
+	//Sys_FPrintf( SYS_VRB,"cluster %4i : %4i visible\n", leafnum, numvis );
 	++clustersizehistogram[numvis];
 
 	memcpy( bspVisBytes + VIS_HEADER_SIZE + leafnum * leafbytes, uncompressed, leafbytes );
@@ -1162,9 +1162,8 @@ int VisMain( int argc, char **argv ){
 			Sys_Printf( "Use %s as portal file\n", portalFilePath );
 		}
 
-		else
-		{
-			Sys_Printf( "WARNING: Unknown option \"%s\"\n", argv[ i ] );
+		else{
+			Sys_FPrintf( SYS_WRN, "WARNING: Unknown option \"%s\"\n", argv[ i ] );
 		}
 	}
 

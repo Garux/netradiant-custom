@@ -84,6 +84,7 @@ struct archive_entry_t
 };
 
 #include <list>
+#include <map>
 
 typedef std::list<archive_entry_t> archives_t;
 
@@ -125,14 +126,13 @@ static void FixDOSName( char *src ){
 	}
 }
 
-
-
 const _QERArchiveTable* GetArchiveTable( ArchiveModules& archiveModules, const char* ext ){
 	StringOutputStream tmp( 16 );
 	tmp << LowerCase( ext );
 	return archiveModules.findModule( tmp.c_str() );
 }
-static void InitPakFile( ArchiveModules& archiveModules, const char *filename ){
+
+static Archive* InitPakFile( ArchiveModules& archiveModules, const char *filename ){
 	const _QERArchiveTable* table = GetArchiveTable( archiveModules, path_get_extension( filename ) );
 
 	if ( table != 0 ) {
@@ -143,7 +143,11 @@ static void InitPakFile( ArchiveModules& archiveModules, const char *filename ){
 		entry.is_pakfile = true;
 		g_archives.push_back( entry );
 		globalOutputStream() << "  pak file: " << filename << "\n";
+
+		return entry.archive;
 	}
+
+	return 0;
 }
 
 inline void pathlist_prepend_unique( GSList*& pathlist, char* path ){
@@ -276,6 +280,220 @@ bool operator()( const CopiedString& self, const CopiedString& other ) const {
 
 typedef std::set<CopiedString, PakLess> Archives;
 
+Archive* AddPk3Dir( const char* fullpath ){
+	if ( g_numDirs == VFS_MAXDIRS ) return 0;
+
+	strncpy( g_strDirs[g_numDirs], fullpath, PATH_MAX );
+	g_strDirs[g_numDirs][PATH_MAX] = '\0';
+	g_numDirs++;
+
+	{
+		archive_entry_t entry;
+		entry.name = fullpath;
+		entry.archive = OpenArchive( fullpath );
+		entry.is_pakfile = false;
+		g_archives.push_back( entry );
+
+		return entry.archive;
+	}
+}
+
+// for Daemon DPK vfs
+
+Archive* AddDpkDir( const char* fullpath ){
+	return AddPk3Dir( fullpath );
+}
+
+struct pakfile_path_t
+{
+	CopiedString fullpath;  // full pak dir or pk3dir name
+	bool is_pakfile;  // defines is it .pk3dir or .pk3 file
+};
+
+typedef std::pair<CopiedString, pakfile_path_t> PakfilePathsKV;
+typedef std::map<CopiedString, pakfile_path_t> PakfilePaths;  // key must have no extension, only name
+
+static PakfilePaths g_pakfile_paths;
+
+void AddDpkPak( const char* name, const char* fullpath, bool is_pakfile ){
+	pakfile_path_t pakfile_path;
+	pakfile_path.fullpath = fullpath;
+	pakfile_path.is_pakfile = is_pakfile;
+	g_pakfile_paths.insert( PakfilePathsKV( name, pakfile_path ) );
+}
+
+// Comparaison function for version numbers
+// Implementation is based on dpkg's version comparison code (verrevcmp() and order())
+// http://anonscm.debian.org/gitweb/?p=dpkg/dpkg.git;a=blob;f=lib/dpkg/version.c;hb=74946af470550a3295e00cf57eca1747215b9311
+static int char_weight(char c){
+	if (std::isdigit(c))
+		return 0;
+	else if (std::isalpha(c))
+		return c;
+	else if (c == '~')
+		return -1;
+	else if (c)
+		return c + 256;
+	else
+		return 0;
+}
+
+static int VersionCmp(const char* a, const char* b){
+	while (*a || *b) {
+		int firstDiff = 0;
+
+		while ((*a && !std::isdigit(*a)) || (*b && !std::isdigit(*b))) {
+			int ac = char_weight(*a);
+			int bc = char_weight(*b);
+
+			if (ac != bc)
+				return ac - bc;
+
+			a++;
+			b++;
+		}
+
+		while (*a == '0')
+			a++;
+		while (*b == '0')
+			b++;
+
+		while (std::isdigit(*a) && std::isdigit(*b)) {
+			if (firstDiff == 0)
+				firstDiff = *a - *b;
+			a++;
+			b++;
+		}
+
+		if (std::isdigit(*a))
+			return 1;
+		if (std::isdigit(*b))
+			return -1;
+		if (firstDiff)
+			return firstDiff;
+	}
+
+	return false;
+}
+
+// takes name without ext, returns without ext
+static const char* GetLatestDpkPakVersion( const char* name ){
+	const char* maxversion = 0;
+	const char* result = 0;
+	const char* pakname;
+	const char* pakversion;
+	int namelen = string_length( name );
+
+	for ( PakfilePaths::iterator i = g_pakfile_paths.begin(); i != g_pakfile_paths.end(); ++i )
+	{
+		pakname = i->first.c_str();
+		if ( strncmp( pakname, name, namelen ) != 0 || pakname[namelen] != '_' ) continue;
+		pakversion = pakname + (namelen + 1);
+		if ( maxversion == 0 || VersionCmp( pakversion, maxversion ) > 0 ){
+			maxversion = pakversion;
+			result = pakname;
+		}
+	}
+	return result;
+}
+
+// release string after using
+static char* GetCurrentMapDpkPakName(){
+	char* mapdir;
+	char* mapname;
+	int mapnamelen;
+	char* result = 0;
+
+	mapname = string_clone( GlobalRadiant().getMapName() );
+	mapnamelen = string_length( mapname );
+
+	mapdir = strrchr( mapname, '/' );
+	if ( mapdir ) {
+		mapdir -= 12;
+		if ( strncmp( mapdir, ".dpkdir/maps/", 13 ) == 0 ) {
+			*mapdir = '\0';
+			mapdir = strrchr( mapname, '/' );
+			if ( mapdir ) mapdir++;
+			else mapdir = mapname;
+			result = string_clone( mapdir );
+		}
+	}
+
+	string_release( mapname, mapnamelen );
+	return result;
+
+}
+
+// prevent loading duplicates or circular references
+static Archives g_loaded_dpk_paks;
+
+// actual pak adding on initialise, deferred from InitDirectory
+// Daemon DPK filesystem doesn't need load all paks it finds
+static void LoadDpkPakWithDeps( const char* pakname ){
+	const char* und = strrchr( pakname, '_' );
+	if ( !und ) pakname = GetLatestDpkPakVersion( pakname );
+	if ( !pakname || g_loaded_dpk_paks.find( pakname ) != g_loaded_dpk_paks.end() ) return;
+
+	PakfilePaths::iterator i = g_pakfile_paths.find( pakname );
+	if ( i == g_pakfile_paths.end() ) return;
+
+	Archive* arc;
+	if ( i->second.is_pakfile ){
+		arc = InitPakFile( FileSystemQ3API_getArchiveModules(), i->second.fullpath.c_str() );
+	} else {
+		arc = AddDpkDir( i->second.fullpath.c_str() );
+	}
+	g_loaded_dpk_paks.insert( pakname );
+
+	ArchiveTextFile* depsFile = arc->openTextFile( "DEPS" );
+	if ( !depsFile ) return;
+
+	{
+		TextLinesInputStream<TextInputStream> istream = depsFile->getInputStream();
+
+		CopiedString line;
+		const char* c;
+		const char* p_name;
+		const char* p_name_end;
+		const char* p_version;
+		const char* p_version_end;
+		while ( line = istream.readLine(), string_length( line.c_str() ) ) {
+			c = line.c_str();
+			while ( std::isspace( *c ) && *c != '\0' ) ++c;
+			p_name = c;
+			while ( !std::isspace( *c ) && *c != '\0' ) ++c;
+			p_name_end = c;
+			while ( std::isspace( *c ) && *c != '\0' ) ++c;
+			p_version = c;
+			while ( !std::isspace( *c ) && *c != '\0' ) ++c;
+			p_version_end = c;
+
+			if ( p_name_end - p_name == 0 ) continue;
+			if ( p_version_end - p_version == 0 ) {
+				const char* p_pakname;
+				CopiedString name_final = CopiedString( StringRange( p_name, p_name_end ) );
+				p_pakname = GetLatestDpkPakVersion( name_final.c_str() );
+				if ( p_pakname != NULL ) {
+					LoadDpkPakWithDeps( p_pakname );
+				}
+			} else {
+				int len = ( p_name_end - p_name ) + ( p_version_end - p_version ) + 1;
+				char* p_pakname = string_new( len );
+				strncpy( p_pakname, p_name, p_name_end - p_name );
+				p_pakname[ p_name_end - p_name ] = '\0';
+				strcat( p_pakname, "_" );
+				strncat( p_pakname, p_version, p_version_end - p_version );
+				LoadDpkPakWithDeps( p_pakname );
+				string_release( p_pakname, len );
+			}
+		}
+	}
+
+	depsFile->release();
+}
+
+// end for Daemon DPK vfs
+
 // =============================================================================
 // Global functions
 
@@ -337,15 +555,23 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 	}
 
 	if ( g_bUsePak ) {
+
 		GDir* dir = g_dir_open( path, 0, 0 );
 
 		if ( dir != 0 ) {
 			globalOutputStream() << "vfs directory: " << path << "\n";
 
+			Archives archives;
+			Archives archivesOverride;
 			const char* ignore_prefix = "";
 			const char* override_prefix = "";
+			bool is_pk3_vfs, is_pk4_vfs, is_dpk_vfs;
 
-			{
+			is_pk3_vfs = GetArchiveTable( archiveModules, "pk3" );
+			is_pk4_vfs = GetArchiveTable( archiveModules, "pk4" );
+			is_dpk_vfs = GetArchiveTable( archiveModules, "dpk" );
+
+			if ( !is_dpk_vfs ) {
 				// See if we are in "sp" or "mp" mapping mode
 				const char* gamemode = gamemode_get();
 
@@ -359,8 +585,6 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 				}
 			}
 
-			Archives archives;
-			Archives archivesOverride;
 			for (;; )
 			{
 				const char* name = g_dir_read_name( dir );
@@ -381,27 +605,31 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 				}
 
 				const char *ext = strrchr( name, '.' );
+				char tmppath[PATH_MAX];
 
-				if ( ext && !string_compare_nocase_upper( ext, ".pk3dir" ) ) {
-					if ( g_numDirs == VFS_MAXDIRS ) {
-						continue;
-					}
-					snprintf( g_strDirs[g_numDirs], PATH_MAX, "%s%s/", path, name );
-					g_strDirs[g_numDirs][PATH_MAX] = '\0';
-					FixDOSName( g_strDirs[g_numDirs] );
-					AddSlash( g_strDirs[g_numDirs] );
-					g_numDirs++;
-
-					{
-						archive_entry_t entry;
-						entry.name = g_strDirs[g_numDirs - 1];
-						entry.archive = OpenArchive( g_strDirs[g_numDirs - 1] );
-						entry.is_pakfile = false;
-						g_archives.push_back( entry );
+				if ( is_dpk_vfs ) {
+					if ( !!ext && !string_compare_nocase_upper( ext, ".dpkdir" ) ) {
+						snprintf( tmppath, PATH_MAX, "%s%s/", path, name );
+						tmppath[PATH_MAX] = '\0';
+						FixDOSName( tmppath );
+						AddSlash( tmppath );
+						AddDpkPak( CopiedString( StringRange( name, ext ) ).c_str(), tmppath, false );
 					}
 				}
 
-				if ( ( ext == 0 ) || *( ++ext ) == '\0' || GetArchiveTable( archiveModules, ext ) == 0 ) {
+				if ( is_pk3_vfs || is_pk4_vfs ) {
+					if ( !!ext && ( !string_compare_nocase_upper( ext, ".pk3dir" )
+						|| !string_compare_nocase_upper( ext, ".pk4dir" ) ) ) {
+						snprintf( tmppath, PATH_MAX, "%s%s/", path, name );
+						tmppath[PATH_MAX] = '\0';
+						FixDOSName( tmppath );
+						AddSlash( tmppath );
+						AddPk3Dir( tmppath );
+					}
+				}
+
+				// GetArchiveTable() needs "pk3" if ext is ".pk3"
+				if ( ( ext == 0 ) || *( ext + 1 ) == '\0' || GetArchiveTable( archiveModules, ext + 1 ) == 0 ) {
 					continue;
 				}
 
@@ -410,7 +638,14 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 					continue;
 				}
 				if ( !string_empty( override_prefix ) && strncmp( name, override_prefix, strlen( override_prefix ) ) == 0 ) {
-					archivesOverride.insert( name );
+					if ( !string_compare_nocase_upper( ext, ".dpk" ) ) {
+						if ( is_dpk_vfs ) {
+							archives.insert( name );
+						}
+					}
+					else {
+						archivesOverride.insert( name );
+					}
 					continue;
 				}
 
@@ -420,19 +655,42 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 			g_dir_close( dir );
 
 			// add the entries to the vfs
-			for ( Archives::iterator i = archivesOverride.begin(); i != archivesOverride.end(); ++i )
-			{
-				char filename[PATH_MAX];
-				strcpy( filename, path );
-				strcat( filename, ( *i ).c_str() );
-				InitPakFile( archiveModules, filename );
+			char* fullpath;
+			if ( is_dpk_vfs ) {
+				for ( Archives::iterator i = archives.begin(); i != archives.end(); ++i ) {
+					const char* name = i->c_str();
+					const char* ext = strrchr( name, '.' );
+					if ( !string_compare_nocase_upper( ext, "dpk" ) ) {
+						CopiedString name_final = CopiedString( StringRange( name, ext ) );
+						fullpath = string_new_concat( path, name );
+						AddDpkPak( name_final.c_str(), fullpath, true );
+						string_release( fullpath, string_length( fullpath ) );
+					}
+				}
 			}
-			for ( Archives::iterator i = archives.begin(); i != archives.end(); ++i )
-			{
-				char filename[PATH_MAX];
-				strcpy( filename, path );
-				strcat( filename, ( *i ).c_str() );
-				InitPakFile( archiveModules, filename );
+			if ( is_pk3_vfs || is_pk4_vfs ) {
+				for ( Archives::iterator i = archivesOverride.begin(); i != archivesOverride.end(); ++i )
+				{
+					const char* name = i->c_str();
+					const char* ext = strrchr( name, '.' );
+					if ( !string_compare_nocase_upper( ext, "pk3" )
+						|| !string_compare_nocase_upper( ext, "pk4" ) ) {
+						fullpath = string_new_concat( path, i->c_str() );
+						InitPakFile( archiveModules, fullpath );
+						string_release( fullpath, string_length( fullpath ) );
+					}
+				}
+				for ( Archives::iterator i = archives.begin(); i != archives.end(); ++i )
+				{
+					const char* name = i->c_str();
+					const char* ext = strrchr( name, '.' );
+					if ( !string_compare_nocase_upper( ext, "pk3" )
+						|| !string_compare_nocase_upper( ext, "pk4" ) ) {
+						fullpath = string_new_concat( path, i->c_str() );
+						InitPakFile( archiveModules, fullpath );
+						string_release( fullpath, string_length( fullpath ) );
+					}
+				}
 			}
 		}
 		else
@@ -454,6 +712,9 @@ void Shutdown(){
 
 	g_numDirs = 0;
 	g_numForbiddenDirs = 0;
+
+	g_pakfile_paths.clear();
+	g_loaded_dpk_paks.clear();
 }
 
 #define VFS_SEARCH_PAK 0x1
@@ -587,6 +848,32 @@ void initDirectory( const char *path ){
 	InitDirectory( path, FileSystemQ3API_getArchiveModules() );
 }
 void initialise(){
+	ArchiveModules& archiveModules = FileSystemQ3API_getArchiveModules();
+	bool is_dpk_vfs = GetArchiveTable( archiveModules, "dpk" );
+
+	if ( is_dpk_vfs ) {
+		const char* pakname;
+		g_loaded_dpk_paks.clear();
+
+		pakname = GetLatestDpkPakVersion( "tex-common" );
+		if (pakname != NULL) {
+			LoadDpkPakWithDeps( pakname );
+		}
+
+		// prevent VFS double start, for MapName="" and MapName="unnamed.map"
+		if ( string_length( GlobalRadiant().getMapName() ) ){
+			// load map's paks from DEPS
+			char* mappakname = GetCurrentMapDpkPakName();
+			if ( mappakname != NULL ) {
+				LoadDpkPakWithDeps( mappakname );
+				string_release( mappakname, string_length( mappakname ) );
+			}
+		}
+
+		g_pakfile_paths.clear();
+		g_loaded_dpk_paks.clear();
+	}
+
 	globalOutputStream() << "filesystem initialised\n";
 	g_observers.realise();
 }
@@ -692,14 +979,15 @@ void forEachArchive( const ArchiveNameCallback& callback, bool pakonly, bool rev
 }
 };
 
+
 Quake3FileSystem g_Quake3FileSystem;
+
+VirtualFileSystem& GetFileSystem(){
+	return g_Quake3FileSystem;
+}
 
 void FileSystem_Init(){
 }
 
 void FileSystem_Shutdown(){
-}
-
-VirtualFileSystem& GetFileSystem(){
-	return g_Quake3FileSystem;
 }

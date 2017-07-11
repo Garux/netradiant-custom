@@ -104,7 +104,7 @@ void SetDrawSurfacesBuffer(){
 
 	bspDrawSurfaces = safe_malloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
 
-	memset( bspDrawSurfaces, 0, MAX_MAP_DRAW_SURFS * sizeof( bspDrawVert_t ) );
+	memset( bspDrawSurfaces, 0, MAX_MAP_DRAW_SURFS * sizeof( bspDrawSurface_t ) );
 }
 
 void SetDrawSurfaces( int n ){
@@ -117,7 +117,7 @@ void SetDrawSurfaces( int n ){
 
 	bspDrawSurfaces = safe_malloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
 
-	memset( bspDrawSurfaces, 0, n * sizeof( bspDrawVert_t ) );
+	memset( bspDrawSurfaces, 0, n * sizeof( bspDrawSurface_t ) );
 }
 
 void BSPFilesCleanup(){
@@ -268,7 +268,7 @@ int GetLumpElements( bspHeader_t *header, int lump, int size ){
 	/* check for odd size */
 	if ( header->lumps[ lump ].length % size ) {
 		if ( force ) {
-			Sys_Printf( "WARNING: GetLumpElements: odd lump size (%d) in lump %d\n", header->lumps[ lump ].length, lump );
+			Sys_FPrintf( SYS_WRN, "WARNING: GetLumpElements: odd lump size (%d) in lump %d\n", header->lumps[ lump ].length, lump );
 			return 0;
 		}
 		else{
@@ -312,7 +312,7 @@ int CopyLump( bspHeader_t *header, int lump, void *dest, int size ){
 	}
 	if ( length % size ) {
 		if ( force ) {
-			Sys_Printf( "WARNING: CopyLump: odd lump size (%d) in lump %d\n", length, lump );
+			Sys_FPrintf( SYS_WRN, "WARNING: CopyLump: odd lump size (%d) in lump %d\n", length, lump );
 			return 0;
 		}
 		else{
@@ -831,7 +831,7 @@ vec_t FloatForKey( const entity_t *ent, const char *key ){
    gets a 3-element vector value for an entity key
  */
 
-void GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
+qboolean GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
 	const char  *k;
 	double v1, v2, v3;
 
@@ -845,6 +845,9 @@ void GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
 	vec[ 0 ] = v1;
 	vec[ 1 ] = v2;
 	vec[ 2 ] = v3;
+
+	/* true if the key is found, false otherwise */
+	return strlen( k );
 }
 
 

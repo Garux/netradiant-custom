@@ -69,9 +69,30 @@ typedef SingletonModule<ArchivePK4API> ArchivePK4Module;
 ArchivePK4Module g_ArchivePK4Module;
 
 
+class ArchiveDPKAPI
+{
+_QERArchiveTable m_archivedpk;
+public:
+typedef _QERArchiveTable Type;
+STRING_CONSTANT( Name, "dpk" );
+
+ArchiveDPKAPI(){
+	m_archivedpk.m_pfnOpenArchive = &OpenArchive;
+}
+_QERArchiveTable* getTable(){
+	return &m_archivedpk;
+}
+};
+
+typedef SingletonModule<ArchiveDPKAPI> ArchiveDPKModule;
+
+ArchiveDPKModule g_ArchiveDPKModule;
+
+
 extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server ){
 	initialiseModule( server );
 
 	g_ArchiveZipModule.selfRegister();
 	g_ArchivePK4Module.selfRegister();
+	g_ArchiveDPKModule.selfRegister();
 }

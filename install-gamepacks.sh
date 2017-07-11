@@ -10,7 +10,7 @@ dest=$1
 
 case "$DOWNLOAD_GAMEPACKS" in
 	yes)
-		LICENSEFILTER=GPL BATCH=1 $SH "$SOURCE_DIR/download-gamepacks.sh"
+		LICENSEFILTER=GPL,BSD BATCH=1 $SH "$SOURCE_DIR/download-gamepacks.sh"
 		;;
 	all)
 		BATCH=1 $SH "$SOURCE_DIR/download-gamepacks.sh"

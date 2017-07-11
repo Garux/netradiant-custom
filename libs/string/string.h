@@ -194,6 +194,14 @@ inline char* string_new( std::size_t length ){
 	return string_new( length, allocator );
 }
 
+/// \brief Allocates a new buffer large enough to hold two concatenated strings and fills it with strings.
+inline char* string_new_concat( const char* a, const char* b ){
+	char* str = string_new( string_length( a ) + string_length( b ) );
+	strcpy( str, a );
+	strcat( str, b );
+	return str;
+}
+
 /// \brief Deallocates the \p buffer large enough to hold \p length characters.
 inline void string_release( char* string, std::size_t length ){
 	DefaultAllocator<char> allocator;

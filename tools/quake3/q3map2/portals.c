@@ -519,7 +519,7 @@ void MakeTreePortals_r( node_t *node ){
 
 	CalcNodeBounds( node );
 	if ( node->mins[0] >= node->maxs[0] ) {
-		Sys_Printf( "WARNING: node without a volume\n" );
+		Sys_FPrintf( SYS_WRN, "WARNING: node without a volume\n" );
 		Sys_Printf( "node has %d tiny portals\n", node->tinyportals );
 		Sys_Printf( "node reference point %1.2f %1.2f %1.2f\n", node->referencepoint[0],
 					node->referencepoint[1],
@@ -664,7 +664,7 @@ qboolean PlaceOccupant( node_t *headnode, vec3_t origin, entity_t *occupant, qbo
 int FloodEntities( tree_t *tree ){
 	int i, s;
 	vec3_t origin, offset, scale, angles;
-	qboolean r, inside, skybox;
+	qboolean r, inside, skybox, found;
 	node_t      *headnode;
 	entity_t    *e, *tripped;
 	const char  *value;
@@ -684,10 +684,10 @@ int FloodEntities( tree_t *tree ){
 		e = &entities[ i ];
 
 		/* get origin */
-		GetVectorForKey( e, "origin", origin );
+		found = GetVectorForKey( e, "origin", origin );
 
 		/* as a special case, allow origin-less entities */
-		if ( VectorCompare( origin, vec3_origin ) ) {
+		if ( !found ) {
 			continue;
 		}
 
@@ -811,7 +811,7 @@ void FloodAreas_r( node_t *node ){
 
 		// note the current area as bounding the portal
 		if ( b->portalareas[ 1 ] != -1 ) {
-			Sys_Printf( "WARNING: areaportal brush %i touches > 2 areas\n", b->brushNum );
+			Sys_FPrintf( SYS_WRN, "WARNING: areaportal brush %i touches > 2 areas\n", b->brushNum );
 			return;
 		}
 		if ( b->portalareas[ 0 ] != -1 ) {
@@ -898,7 +898,7 @@ void CheckAreas_r( node_t *node ){
 
 	if ( node->cluster != -1 ) {
 		if ( node->area == -1 ) {
-			Sys_Printf( "WARNING: cluster %d has area set to -1\n", node->cluster );
+			Sys_FPrintf( SYS_WRN, "WARNING: cluster %d has area set to -1\n", node->cluster );
 		}
 	}
 	if ( node->areaportal ) {
@@ -906,7 +906,7 @@ void CheckAreas_r( node_t *node ){
 
 		// check if the areaportal touches two areas
 		if ( b->portalareas[0] == -1 || b->portalareas[1] == -1 ) {
-			Sys_Printf( "WARNING: areaportal brush %i doesn't touch two areas\n", b->brushNum );
+			Sys_FPrintf( SYS_WRN, "WARNING: areaportal brush %i doesn't touch two areas\n", b->brushNum );
 		}
 	}
 }

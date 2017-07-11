@@ -76,11 +76,11 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
 			objLastShaderNum = ds->lightmapNum[0] + deluxemap;
 		}
 		if ( ds->lightmapNum[0] + (int)deluxemap < firstLightmap ) {
-			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] + deluxemap );
+			Sys_FPrintf( SYS_WRN, "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] + deluxemap );
 			firstLightmap = ds->lightmapNum[0] + deluxemap;
 		}
 		if ( ds->lightmapNum[0] > lastLightmap ) {
-			Sys_Printf( "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] + deluxemap );
+			Sys_FPrintf( SYS_WRN, "WARNING: lightmap %d out of range (exporting anyway)\n", ds->lightmapNum[0] + deluxemap );
 			lastLightmap = ds->lightmapNum[0] + deluxemap;
 		}
 	}
@@ -160,7 +160,7 @@ static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum ){
 	/* get shader */
 	si = ShaderInfoForShader( shader->shader );
 	if ( si == NULL ) {
-		Sys_Printf( "WARNING: NULL shader in BSP\n" );
+		Sys_FPrintf( SYS_WRN, "WARNING: NULL shader in BSP\n" );
 		return;
 	}
 
