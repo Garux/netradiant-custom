@@ -35,10 +35,9 @@ bool open_url( const char* url ){
 #if defined( __linux__ ) || defined( __FreeBSD__ )
 #include <stdlib.h>
 bool open_url( const char* url ){
-	// \todo FIXME: the way we open URLs on *nix should be improved. A script is good (see how I do on RTCW)
 	char command[2 * PATH_MAX];
 	snprintf( command, sizeof( command ),
-			  "firefox -remote \"openURL(%s,new-window)\" || firefox \"%s\" &", url, url );
+			  "xdg-open \"%s\" &", url, url );
 	return system( command ) == 0;
 }
 #endif
