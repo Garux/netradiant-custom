@@ -3314,11 +3314,11 @@ void testSelect( Selector& selector, SelectionTest& test ){
 	}
 }
 
-void selectVerticesOnFaces( const FaceInstances_ptrs& faceinstances ){
+void selectVerticesOfFace( const FaceInstance& faceinstance ){
 	FaceVertexId faceVertex = m_vertex->m_faceVertex;
 	do
 	{
-		if( std::find( faceinstances.begin(), faceinstances.end(), &m_faceInstances[faceVertex.getFace()] ) != faceinstances.end() ){
+		if( &faceinstance == &m_faceInstances[faceVertex.getFace()] ){
 			setSelected( true );
 		}
 		faceVertex = next_vertex( m_vertex->m_faces, faceVertex );
@@ -3873,43 +3873,17 @@ void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersectio
 	}
 }
 void selectByPlane( const Plane3& plane ){
-	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
-		if( plane3_equal( plane, ( *i ).getFace().plane3() ) || plane3_equal( plane, plane3_flipped( ( *i ).getFace().plane3() ) ) )
-			( *i ).setSelected( SelectionSystem::eFace, true );
+	for ( FaceInstance& fi : m_faceInstances )
+		if( plane3_equal( plane, fi.getFace().plane3() ) || plane3_equal( plane, plane3_flipped( fi.getFace().plane3() ) ) )
+			fi.setSelected( SelectionSystem::eFace, true );
 }
 
-
-void selectVerticesOnPlanes( SelectionTest& test ){
-	FaceInstances_ptrs bestInstances;
-	selectPlanes( test, bestInstances );
-
-	if( test.getVolume().fill() && !bestInstances.empty() ) // select only plane in camera
-		for( FaceInstances_ptrs::iterator i = bestInstances.end() - 1; i != bestInstances.begin(); --i )
-			bestInstances.pop_back();
-	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i )
-		( *i ).selectVerticesOnFaces( bestInstances );
+void selectVerticesOnPlane( const Plane3& plane ){
+	for ( FaceInstance& fi : m_faceInstances )
+		if( plane3_equal( plane, fi.getFace().plane3() ) || plane3_equal( plane, plane3_flipped( fi.getFace().plane3() ) ) )
+			for ( VertexInstance& vi : m_vertexInstances )
+				vi.selectVerticesOfFace( fi );
 }
-
-void selectVerticesOnTestedFaces( SelectionTest& test ){
-	test.BeginMesh( localToWorld() );
-
-	FaceInstances::iterator f;
-	SelectionIntersection si;
-	for ( f = m_faceInstances.begin(); f != m_faceInstances.end(); ++f ){
-		( *f ).testSelect( test, si );
-		if( si.valid() ){
-			break;
-		}
-	}
-	if( f != m_faceInstances.end() ){
-		FaceInstances_ptrs bestInstances;
-		bestInstances.push_back( &( *f ) );
-		for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
-			( *i ).selectVerticesOnFaces( bestInstances );
-		}
-	}
-}
-
 
 void transformComponents( const Matrix4& matrix );
 

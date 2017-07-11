@@ -2950,55 +2950,6 @@ bool Scene_forEachBrush_setupExtrude( scene::Graph& graph, SelectionTest& test, 
 }
 
 
-class TestedBrushFacesSelectVeritces : public scene::Graph::Walker
-{
-SelectionTest& m_test;
-public:
-TestedBrushFacesSelectVeritces( SelectionTest& test )
-	: m_test( test ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
-			BrushInstance* brushInstance = Instance_getBrush( instance );
-			if ( brushInstance != 0 ) {
-				brushInstance->selectVerticesOnTestedFaces( m_test );
-			}
-		}
-	}
-	return true;
-}
-};
-
-void Scene_forEachTestedBrushFace_selectVertices( scene::Graph& graph, SelectionTest& test ){
-	graph.traverse( TestedBrushFacesSelectVeritces( test ) );
-}
-
-class BrushPlanesSelectVeritces : public scene::Graph::Walker
-{
-SelectionTest& m_test;
-public:
-BrushPlanesSelectVeritces( SelectionTest& test )
-	: m_test( test ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
-			BrushInstance* brushInstance = Instance_getBrush( instance );
-			if ( brushInstance != 0 ) {
-				brushInstance->selectVerticesOnPlanes( m_test );
-			}
-		}
-	}
-	return true;
-}
-};
-
-void Scene_forEachBrushPlane_selectVertices( scene::Graph& graph, SelectionTest& test ){
-	graph.traverse( BrushPlanesSelectVeritces( test ) );
-}
 
 void Scene_Translate_Component_Selected( scene::Graph& graph, const Vector3& translation );
 void Scene_Translate_Selected( scene::Graph& graph, const Vector3& translation );
@@ -4143,6 +4094,44 @@ bool scene_insert_brush_vertices( const View& view, TranslateFreeXY_Z& freeDragX
 	return false;
 }
 
+bool selection_selectVerticesOrFaceVertices( SelectionTest& test ){
+	{ /* try to hit vertices */
+		DeepBestSelector deepSelector;
+		Scene_TestSelect_Component_Selected( deepSelector, test, test.getVolume(), SelectionSystem::eVertex );
+		if( !deepSelector.best().empty() ){
+			for ( Selectable* s : deepSelector.best() )
+				s->setSelected( true );
+			return true;
+		}
+	}
+	/* otherwise select vertices of brush faces, which lay on best plane */
+	Plane3 plane( 0, 0, 0, 0 );
+	SelectionIntersection intersection;
+	auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
+		brushInstance.bestPlaneDirect( test, plane, intersection );
+	};
+	Scene_forEachVisibleSelectedBrush( bestPlaneDirect );
+
+	if( !plane3_valid( plane ) ){
+		Vector3 intersectionPoint;
+		float dist( FLT_MAX );
+		auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
+			brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
+		};
+		Scene_forEachVisibleSelectedBrush( bestPlaneIndirect );
+	}
+
+	if( plane3_valid( plane ) ){
+		auto selectVerticesOnPlane = [&plane]( BrushInstance& brushInstance ){
+			brushInstance.selectVerticesOnPlane( plane );
+		};
+		Scene_forEachVisibleSelectedBrush( selectVerticesOnPlane );
+
+	}
+	return plane3_valid( plane );
+}
+
+
 
 static ModifierFlags g_modifiers = c_modifierNone; //AltDragManipulatorResize, extrude, uvtool skew, select primitives in component modes
 static bool g_bTmpComponentMode = false;
@@ -4186,8 +4175,13 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 
 	if( GlobalSelectionSystem().countSelected() != 0 ){
 		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
-			if( g_modifiers == c_modifierAlt && view.fill() ){
-				m_selected2 = Scene_forEachPlaneSelectable_selectPlanes2( GlobalSceneGraph(), test, m_axisResize );
+			if( g_modifiers == c_modifierAlt ){
+				if( view.fill() ){
+					m_selected2 = Scene_forEachPlaneSelectable_selectPlanes2( GlobalSceneGraph(), test, m_axisResize );
+				}
+				else{
+					m_selected = selection_selectVerticesOrFaceVertices( test );
+				}
 			}
 			else if( g_modifiers == ( c_modifierAlt | c_modifierControl ) ){ // extrude
 				m_extrudeFaces = Scene_forEachBrush_setupExtrude( GlobalSceneGraph(), test, m_dragExtrudeFaces );
@@ -4197,39 +4191,22 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				Scene_TestSelect_Primitive( booleanSelector, test, view );
 
 				if ( booleanSelector.isSelected() ) { /* hit a primitive */
-					if( g_modifiers == c_modifierAlt ){
-						DeepBestSelector deepSelector;
-						Scene_TestSelect_Component_Selected( deepSelector, test, view, SelectionSystem::eVertex ); /* try to quickly select hit vertices */
-						for ( std::list<Selectable*>::iterator i = deepSelector.best().begin(); i != deepSelector.best().end(); ++i )
-							selector.addSelectable( SelectionIntersection( 0, 0 ), ( *i ) );
-						if( deepSelector.best().empty() ) /* otherwise drag clicked face's vertices */
-							Scene_forEachTestedBrushFace_selectVertices( GlobalSceneGraph(), test );
-						m_selected = true;
-					}
-					else{ /* drag a primitive */
-						m_dragSelected = true;
-						test.BeginMesh( g_matrix4_identity, true );
-						m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, booleanSelector.bestIntersection().depth(), 1 ) ) ) );
-					}
+					m_dragSelected = true; /* drag a primitive */
+					test.BeginMesh( g_matrix4_identity, true );
+					m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, booleanSelector.bestIntersection().depth(), 1 ) ) ) );
 				}
 				else{ /* haven't hit a primitive */
-					if( g_modifiers == c_modifierAlt ){
-						Scene_forEachBrushPlane_selectVertices( GlobalSceneGraph(), test ); /* select vertices on planeSelectables */
-						m_selected = true;
-					}
-					else{
-						m_selected = Scene_forEachPlaneSelectable_selectPlanes( GlobalSceneGraph(), selector, test ); /* select faces on planeSelectables */
-					}
+					m_selected = Scene_forEachPlaneSelectable_selectPlanes( GlobalSceneGraph(), selector, test ); /* select faces on planeSelectables */
 				}
 			}
 		}
 		else{
 			BestSelector bestSelector;
 			Scene_TestSelect_Component_Selected( bestSelector, test, view, GlobalSelectionSystem().ComponentMode() ); /* drag components */
-			for ( std::list<Selectable*>::iterator i = bestSelector.best().begin(); i != bestSelector.best().end(); ++i ){
-				if ( !( *i )->isSelected() )
+			for ( Selectable* s : bestSelector.best() ){
+				if ( !s->isSelected() )
 					GlobalSelectionSystem().setSelectedAllComponents( false );
-				selector.addSelectable( SelectionIntersection( 0, 0 ), ( *i ) );
+				selector.addSelectable( SelectionIntersection( 0, 0 ), s );
 				m_dragSelected = true;
 			}
 			if( bestSelector.bestIntersection().valid() ){
@@ -4237,19 +4214,19 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestSelector.bestIntersection().depth(), 1 ) ) ) );
 			}
 			else{
-				if( GlobalSelectionSystem().countSelectedComponents() != 0 ){ /* even if hit nothing, but got selected */
+				if( GlobalSelectionSystem().countSelectedComponents() != 0 ){ /* drag, even if hit nothing, but got selected */
 					m_dragSelected = true;
 					m_freeDragXY_Z.set0( g_vector3_identity );
 				}
-				else if( GlobalSelectionSystem().ComponentMode() == SelectionSystem::eVertex ){
+				else if( GlobalSelectionSystem().ComponentMode() == SelectionSystem::eVertex ){ /* otherwise insert */
 					m_dragSelected = g_bTmpComponentMode = scene_insert_brush_vertices( view, m_freeDragXY_Z ); //hack: indicating not a tmp mode
 					return;
 				}
 			}
 		}
 
-		for ( SelectionPool::iterator i = selector.begin(); i != selector.end(); ++i )
-			( *i ).second->setSelected( true );
+		for ( SelectableSortedSet::value_type& value : selector )
+			value.second->setSelected( true );
 		g_bTmpComponentMode = m_selected | m_selected2;
 	}
 	else if( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
