@@ -141,8 +141,7 @@ bool pre( const scene::Path& path, scene::Instance& instance, VolumeIntersection
 			renderable->viewChanged();
 		}
 
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
+		if ( Instance_isSelected( instance ) ) {
 			if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 				m_renderer.Highlight( Renderer::eFace );
 			}

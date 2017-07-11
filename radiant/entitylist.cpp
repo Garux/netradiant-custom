@@ -340,22 +340,19 @@ gboolean searchEntryScroll( GtkWidget* widget, GdkEventScroll* event, gpointer u
 					if( node ){
 						scene::Instance* instance;
 						gtk_tree_model_get_pointer( model, &iter, 1, &instance );
-						Selectable* selectable = Instance_getSelectable( *instance );
-						if( selectable ){
-							if( selectable->isSelected() || instance->childSelected() ){
-								if( iter_first.stamp == 0 ){
-									iter_first = iter;
-								}
-								if( iter_found.stamp != 0 ){
-									iter_next = iter;
-									break;
-								}
-								if( node == getEntityList().m_search_focus_node ){
-									iter_found = iter;
-								}
-								else{
-									iter_prev = iter;
-								}
+						if( Instance_isSelected( *instance ) || instance->childSelected() ){
+							if( iter_first.stamp == 0 ){
+								iter_first = iter;
+							}
+							if( iter_found.stamp != 0 ){
+								iter_next = iter;
+								break;
+							}
+							if( node == getEntityList().m_search_focus_node ){
+								iter_found = iter;
+							}
+							else{
+								iter_prev = iter;
 							}
 						}
 					}

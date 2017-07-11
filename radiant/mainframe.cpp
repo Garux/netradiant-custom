@@ -1246,9 +1246,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	}
 
 	if ( !path.top().get().isRoot() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0
-			 && selectable->isSelected() ) {
+		if ( Instance_isSelected( instance ) ) {
 			return false;
 		}
 		if( m_makeUnique && instance.childSelected() ){ /* clone group entity primitives to new group entity */
@@ -1271,9 +1269,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	}
 
 	if ( !path.top().get().isRoot() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0
-			 && selectable->isSelected() ) {
+		if ( Instance_isSelected( instance ) ) {
 			NodeSmartReference clone( Node_Clone( path.top() ) );
 			Map_gatherNamespaced( clone );
 			Node_getTraversable( path.parent().get() )->insert( clone );
@@ -1748,7 +1744,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		Snappable* snappable = Node_getSnappable( path.top() );
 		if ( snappable != 0
-			 && Instance_getSelectable( instance )->isSelected() ) {
+			 && Instance_isSelected( instance ) ) {
 			snappable->snapto( m_snap );
 		}
 	}
@@ -1771,7 +1767,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		ComponentSnappable* componentSnappable = Instance_getComponentSnappable( instance );
 		if ( componentSnappable != 0
-			 && Instance_getSelectable( instance )->isSelected() ) {
+			 && Instance_isSelected( instance ) ) {
 			componentSnappable->snapComponents( m_snap );
 		}
 	}

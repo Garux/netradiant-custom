@@ -1219,9 +1219,7 @@ AnyInstanceSelected( bool& selected ) : m_selected( selected ){
 	m_selected = false;
 }
 void visit( scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0
-		 && selectable->isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		m_selected = true;
 	}
 }
@@ -1819,8 +1817,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	if ( Node_isPrimitive( path.top() ) ){
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable && selectable->isSelected() ){
+		if ( Instance_isSelected( instance ) ){
 			NodeSmartReference node( path.top().get() );
 			scene::Traversable* parent_traversable = Node_getTraversable( path.parent() );
 			parent_traversable->erase( node );
@@ -1856,9 +1853,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( ++m_depth != 1 && path.top().get().isRoot() ) {
 		return false;
 	}
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0
-		 && selectable->isSelected()
+	if ( Instance_isSelected( instance )
 		 && Node_isPrimitive( path.top() ) ) {
 		++m_count;
 	}

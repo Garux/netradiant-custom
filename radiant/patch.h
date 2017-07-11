@@ -1881,7 +1881,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		Patch* patch = Node_getPatch( path.top() );
 		if ( patch != 0
-			 && Instance_getSelectable( instance )->isSelected() ) {
+			 && Instance_isSelected( instance ) ) {
 			m_functor( *patch );
 		}
 	}

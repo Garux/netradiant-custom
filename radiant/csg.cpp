@@ -379,7 +379,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
-			 && Instance_getSelectable( instance )->isSelected() ) {
+			 && Instance_isSelected( instance ) ) {
 			m_brushlist.push_back( brush );
 		}
 	}
@@ -397,7 +397,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
-			 && Instance_getSelectable( instance )->isSelected()
+			 && Instance_isSelected( instance )
 			 && path.size() > 1 ) {
 			Path_deleteTop( path );
 		}
@@ -424,7 +424,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
-			 && Instance_getSelectable( instance )->isSelected()
+			 && Instance_isSelected( instance )
 			 && path.size() > 1
 			 && path.top().get_pointer() != m_keepNode ) {
 			scene::Node& parent = path.parent();
@@ -622,7 +622,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
-			 && !Instance_getSelectable( instance )->isSelected() ) {
+			 && !Instance_isSelected( instance ) ) {
 			brush_vector_t buffer[2];
 			bool swap = false;
 			Brush* original = new Brush( *brush );
@@ -734,7 +734,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
-			 && Instance_getSelectable( instance )->isSelected() ) {
+			 && Instance_isSelected( instance ) ) {
 			const brushsplit_t split = Brush_classifyPlane( *brush, m_plane );
 			if ( split.counts[ePlaneBack] && split.counts[ePlaneFront] ) {
 				// the plane intersects this brush

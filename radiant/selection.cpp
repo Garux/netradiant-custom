@@ -2678,13 +2678,10 @@ PlaneSelectableSelectPlanes( Selector& selector, SelectionTest& test, const Plan
 	: m_selector( selector ), m_test( test ), m_selectedPlaneCallback( selectedPlaneCallback ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
-			PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-			if ( planeSelectable != 0 ) {
-				planeSelectable->selectPlanes( m_selector, m_test, m_selectedPlaneCallback );
-			}
+	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
+		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
+		if ( planeSelectable != 0 ) {
+			planeSelectable->selectPlanes( m_selector, m_test, m_selectedPlaneCallback );
 		}
 	}
 	return true;
@@ -2700,13 +2697,10 @@ PlaneSelectableSelectReversedPlanes( Selector& selector, const SelectedPlanes& s
 	: m_selector( selector ), m_selectedPlanes( selectedPlanes ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
-			PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-			if ( planeSelectable != 0 ) {
-				planeSelectable->selectReversedPlanes( m_selector, m_selectedPlanes );
-			}
+	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
+		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
+		if ( planeSelectable != 0 ) {
+			planeSelectable->selectReversedPlanes( m_selector, m_selectedPlanes );
 		}
 	}
 	return true;
@@ -2809,13 +2803,10 @@ PlaneSelectable_bestPlaneDirect( SelectionTest& test, Plane3& plane )
 	: m_test( test ), m_plane( plane ), m_intersection(){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
-			PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-			if ( planeSelectable != 0 ) {
-				planeSelectable->bestPlaneDirect( m_test, m_plane, m_intersection );
-			}
+	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
+		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
+		if ( planeSelectable != 0 ) {
+			planeSelectable->bestPlaneDirect( m_test, m_plane, m_intersection );
 		}
 	}
 	return true;
@@ -2832,13 +2823,10 @@ PlaneSelectable_bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& 
 	: m_test( test ), m_plane( plane ), m_intersection( intersection ), m_dist( FLT_MAX ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
-			PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-			if ( planeSelectable != 0 ) {
-				planeSelectable->bestPlaneIndirect( m_test, m_plane, m_intersection, m_dist );
-			}
+	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
+		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
+		if ( planeSelectable != 0 ) {
+			planeSelectable->bestPlaneIndirect( m_test, m_plane, m_intersection, m_dist );
 		}
 	}
 	return true;
@@ -2853,13 +2841,10 @@ PlaneSelectable_selectByPlane( const Plane3& plane )
 	: m_plane( plane ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0 && selectable->isSelected() ) {
-			PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-			if ( planeSelectable != 0 ) {
-				planeSelectable->selectByPlane( m_plane );
-			}
+	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
+		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
+		if ( planeSelectable != 0 ) {
+			planeSelectable->selectByPlane( m_plane );
 		}
 	}
 	return true;
@@ -7386,8 +7371,7 @@ testselect_component_visible_selected( Selector& selector, SelectionTest& test, 
 	: m_selector( selector ), m_test( test ), m_mode( mode ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0 && selectable->isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
 		if ( componentSelectionTestable ) {
 			componentSelectionTestable->testSelectComponents( m_selector, m_test, m_mode );
@@ -7551,9 +7535,7 @@ bounds_selected( AABB& bounds )
 	m_bounds = AABB();
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0
-		 && selectable->isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		aabb_extend_by_aabb_safe( m_bounds, Instance_getPivotBounds( instance ) );
 	}
 	return true;
@@ -7569,9 +7551,7 @@ bounds_selected_component( AABB& bounds )
 	m_bounds = AABB();
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0
-		 && selectable->isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		ComponentEditable* componentEditable = Instance_getComponentEditable( instance );
 		if ( componentEditable ) {
 			aabb_extend_by_aabb_safe( m_bounds, aabb_for_oriented_aabb_safe( componentEditable->getSelectedComponentsBounds(), instance.localToWorld() ) );

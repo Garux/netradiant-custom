@@ -75,7 +75,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0
-		 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
+		 && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
 		entity->setKeyValue( m_key, m_value );
 	}
 }
@@ -95,7 +95,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
+	if ( entity != 0 && ( instance.childSelected() || Instance_isSelected( instance ) ) ) {
 		if( path.top().get_pointer() == m_world ){ /* do not want to convert whole worldspawn entity */
 			if( instance.childSelected() && !m_2world ){ /* create an entity from world brushes instead */
 				EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( m_classname, true );
@@ -230,7 +230,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0
-		 && Instance_getSelectable( instance )->isSelected()
+		 && Instance_isSelected( instance )
 		 && node_is_group( path.top() )
 		 && !groupPath ) {
 		groupPath = &path;
@@ -251,8 +251,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	return true;
 }
 void post( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable *selectable = Instance_getSelectable( instance );
-	if ( selectable && selectable->isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity == 0 && Node_isPrimitive( path.top() ) ) {
 			NodeSmartReference child( path.top().get() );

@@ -80,9 +80,7 @@ void visit( scene::Instance& instance ) const {
 		return;
 	}
 
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( ( selectable != 0 )
-		 && instance.isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		// brushes only
 		if ( Instance_getBrush( instance ) != 0 ) {
 			m_bounds[m_count] = instance.worldAABB();
@@ -226,9 +224,7 @@ DeleteSelected()
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	m_removedChild = false;
 
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0
-		 && selectable->isSelected()
+	if ( Instance_isSelected( instance )
 		 && path.size() > 1
 		 && !path.top().get().isRoot() ) {
 		m_remove = true;
@@ -782,8 +778,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 ){
 		if( path.top().get_pointer() != m_world ){
-			Selectable* selectable = Instance_getSelectable( instance );
-			if ( ( selectable != 0 && selectable->isSelected() ) || instance.childSelected() ) {
+			if ( Instance_isSelected( instance ) || instance.childSelected() ) {
 				if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
 					m_propertyvalues.push_back( entity->getKeyValue( m_prop ) );
 				}
@@ -806,9 +801,7 @@ EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propert
 	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_selected_children( false ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0
-		 && selectable->isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		Entity* entity = Node_getEntity( path.top() );
 		if ( entity != 0 ) {
 			if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
@@ -931,9 +924,7 @@ HideSelectedWalker( bool hide )
 	: m_hide( hide ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0
-		 && selectable->isSelected() ) {
+	if ( Instance_isSelected( instance ) ) {
 		g_nodes_be_hidden = m_hide;
 		hide_node( path.top(), m_hide );
 	}
@@ -1491,8 +1482,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 ){
 		if( path.top().get_pointer() != m_world ){
-			Selectable* selectable = Instance_getSelectable( instance );
-			if ( ( selectable != 0 && selectable->isSelected() ) || instance.childSelected() ) {
+			if ( Instance_isSelected( instance ) || instance.childSelected() ) {
 				const char* keyvalue = entity->getKeyValue( m_prop );
 				if ( !string_empty( keyvalue ) && !propertyvalues_contain( m_propertyvalues, keyvalue ) ) {
 					m_propertyvalues.push_back( keyvalue );
