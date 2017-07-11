@@ -484,15 +484,6 @@ inline const char* GameDescription_getIdentifier( const CGameDescription& gameDe
 	return identifier;
 }
 
-void CGameDialog::AddPacksURL( StringOutputStream &URL ){
-	// add the URLs for the list of game packs installed
-	// FIXME: this is kinda hardcoded for now..
-	std::list<CGameDescription *>::iterator iGame;
-	for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame )
-	{
-		URL << "&Games_dlup%5B%5D=" << GameDescription_getIdentifier( *( *iGame ) );
-	}
-}
 
 CGameDialog g_GamesDialog;
 
