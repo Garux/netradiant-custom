@@ -955,11 +955,6 @@ void thunk_OnSleep(){
 	g_pParentWnd->OnSleep();
 }
 
-void OpenUpdateURL(){
-	OpenURL( "https://gitlab.com/xonotic/netradiant/tags" );
-}
-
-// open the Q3Rad manual
 void OpenHelpURL(){
 	OpenURL( "https://gitlab.com/xonotic/xonotic/wikis/Mapping" );
 }
@@ -1832,7 +1827,6 @@ GtkMenuItem* create_file_menu(){
 	menu_separator( menu );
 	MRU_constructMenu( menu );
 	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Check for NetRadiant update", "CheckForUpdate" ); // FIXME
 	create_menu_item_with_mnemonic( menu, "E_xit", "Exit" );
 
 	return file_menu_item;
@@ -3192,7 +3186,6 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "SaveRegion", FreeCaller<SaveRegion>() );
 	GlobalCommands_insert( "RefreshReferences", FreeCaller<RefreshReferences>() );
 	GlobalCommands_insert( "ProjectSettings", FreeCaller<DoProjectSettings>() );
-	GlobalCommands_insert( "CheckForUpdate", FreeCaller<OpenUpdateURL>() );
 	GlobalCommands_insert( "Exit", FreeCaller<Exit>() );
 
 	GlobalCommands_insert( "Undo", FreeCaller<Undo>(), Accelerator( 'Z', (GdkModifierType)GDK_CONTROL_MASK ) );
