@@ -1815,7 +1815,7 @@ GtkMenuItem* create_file_menu(){
 	create_menu_item_with_mnemonic( menu, "_Import...", "ImportMap" );
 	create_menu_item_with_mnemonic( menu, "_Save", "SaveMap" );
 	create_menu_item_with_mnemonic( menu, "Save _as...", "SaveMapAs" );
-	create_menu_item_with_mnemonic( menu, "Save s_elected...", "SaveSelected" );
+	create_menu_item_with_mnemonic( menu, "_Export selected...", "ExportSelected" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Save re_gion...", "SaveRegion" );
 	menu_separator( menu );
@@ -3182,7 +3182,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ImportMap", FreeCaller<ImportMap>() );
 	GlobalCommands_insert( "SaveMap", FreeCaller<SaveMap>(), Accelerator( 'S', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "SaveMapAs", FreeCaller<SaveMapAs>() );
-	GlobalCommands_insert( "SaveSelected", FreeCaller<ExportMap>() );
+	GlobalCommands_insert( "ExportSelected", FreeCaller<ExportMap>() );
 	GlobalCommands_insert( "SaveRegion", FreeCaller<SaveRegion>() );
 	GlobalCommands_insert( "RefreshReferences", FreeCaller<RefreshReferences>() );
 	GlobalCommands_insert( "ProjectSettings", FreeCaller<DoProjectSettings>() );
