@@ -660,7 +660,7 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 				for ( Archives::iterator i = archives.begin(); i != archives.end(); ++i ) {
 					const char* name = i->c_str();
 					const char* ext = strrchr( name, '.' );
-					if ( !string_compare_nocase_upper( ext, "dpk" ) ) {
+					if ( !string_compare_nocase_upper( ext, ".dpk" ) ) {
 						CopiedString name_final = CopiedString( StringRange( name, ext ) );
 						fullpath = string_new_concat( path, name );
 						AddDpkPak( name_final.c_str(), fullpath, true );
@@ -673,8 +673,8 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 				{
 					const char* name = i->c_str();
 					const char* ext = strrchr( name, '.' );
-					if ( !string_compare_nocase_upper( ext, "pk3" )
-						|| !string_compare_nocase_upper( ext, "pk4" ) ) {
+					if ( !string_compare_nocase_upper( ext, ".pk3" )
+						|| !string_compare_nocase_upper( ext, ".pk4" ) ) {
 						fullpath = string_new_concat( path, i->c_str() );
 						InitPakFile( archiveModules, fullpath );
 						string_release( fullpath, string_length( fullpath ) );
@@ -684,8 +684,8 @@ void InitDirectory( const char* directory, ArchiveModules& archiveModules ){
 				{
 					const char* name = i->c_str();
 					const char* ext = strrchr( name, '.' );
-					if ( !string_compare_nocase_upper( ext, "pk3" )
-						|| !string_compare_nocase_upper( ext, "pk4" ) ) {
+					if ( !string_compare_nocase_upper( ext, ".pk3" )
+						|| !string_compare_nocase_upper( ext, ".pk4" ) ) {
 						fullpath = string_new_concat( path, i->c_str() );
 						InitPakFile( archiveModules, fullpath );
 						string_release( fullpath, string_length( fullpath ) );

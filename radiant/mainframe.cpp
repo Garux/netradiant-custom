@@ -955,32 +955,12 @@ void thunk_OnSleep(){
 	g_pParentWnd->OnSleep();
 }
 
-void OpenUpdateURL(){
-	// build the URL
-	StringOutputStream URL( 256 );
-	URL << "http://www.icculus.org/netradiant/?cmd=update&data=dlupdate&query_dlup=1";
-#ifdef WIN32
-	URL << "&OS_dlup=1";
-#elif defined( __APPLE__ )
-	URL << "&OS_dlup=2";
-#else
-	URL << "&OS_dlup=3";
-#endif
-	URL << "&Version_dlup=" RADIANT_VERSION;
-	g_GamesDialog.AddPacksURL( URL );
-	OpenURL( URL.c_str() );
-}
-
-// open the Q3Rad manual
 void OpenHelpURL(){
-	// at least on win32, AppPath + "docs/index.html"
-	StringOutputStream help( 256 );
-	help << AppPath_get() << "docs/index.html";
-	OpenURL( help.c_str() );
+	OpenURL( "https://gitlab.com/xonotic/xonotic/wikis/Mapping" );
 }
 
 void OpenBugReportURL(){
-	OpenURL( "http://www.icculus.org/netradiant/?cmd=bugs" );
+	OpenURL( "https://gitlab.com/xonotic/netradiant/issues" );
 }
 
 
@@ -1835,7 +1815,7 @@ GtkMenuItem* create_file_menu(){
 	create_menu_item_with_mnemonic( menu, "_Import...", "ImportMap" );
 	create_menu_item_with_mnemonic( menu, "_Save", "SaveMap" );
 	create_menu_item_with_mnemonic( menu, "Save _as...", "SaveMapAs" );
-	create_menu_item_with_mnemonic( menu, "Save s_elected...", "SaveSelected" );
+	create_menu_item_with_mnemonic( menu, "_Export selected...", "ExportSelected" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Save re_gion...", "SaveRegion" );
 	menu_separator( menu );
@@ -1847,7 +1827,6 @@ GtkMenuItem* create_file_menu(){
 	menu_separator( menu );
 	MRU_constructMenu( menu );
 	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Check for NetRadiant update (web)", "CheckForUpdate" ); // FIXME
 	create_menu_item_with_mnemonic( menu, "E_xit", "Exit" );
 
 	return file_menu_item;
@@ -3215,11 +3194,10 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ImportMap", FreeCaller<ImportMap>() );
 	GlobalCommands_insert( "SaveMap", FreeCaller<SaveMap>(), Accelerator( 'S', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "SaveMapAs", FreeCaller<SaveMapAs>() );
-	GlobalCommands_insert( "SaveSelected", FreeCaller<ExportMap>() );
+	GlobalCommands_insert( "ExportSelected", FreeCaller<ExportMap>() );
 	GlobalCommands_insert( "SaveRegion", FreeCaller<SaveRegion>() );
 	GlobalCommands_insert( "RefreshReferences", FreeCaller<RefreshReferences>() );
 	GlobalCommands_insert( "ProjectSettings", FreeCaller<DoProjectSettings>() );
-	GlobalCommands_insert( "CheckForUpdate", FreeCaller<OpenUpdateURL>() );
 	GlobalCommands_insert( "Exit", FreeCaller<Exit>() );
 
 	GlobalCommands_insert( "Undo", FreeCaller<Undo>(), Accelerator( 'Z', (GdkModifierType)GDK_CONTROL_MASK ) );

@@ -434,13 +434,19 @@ void DoSides( int type, int axis ){
 
 void about_button_changelog( GtkWidget *widget, gpointer data ){
 	StringOutputStream log( 256 );
-	log << AppPath_get() << "changelog.txt";
+	log << "https://gitlab.com/xonotic/netradiant/commits/master";
 	OpenURL( log.c_str() );
 }
 
 void about_button_credits( GtkWidget *widget, gpointer data ){
 	StringOutputStream cred( 256 );
-	cred << AppPath_get() << "credits.html";
+	cred << "https://gitlab.com/xonotic/netradiant/graphs/master";
+	OpenURL( cred.c_str() );
+}
+
+void about_button_issues( GtkWidget *widget, gpointer data ){
+	StringOutputStream cred( 256 );
+	cred << "https://gitlab.com/xonotic/netradiant/issues";
 	OpenURL( cred.c_str() );
 }
 
@@ -476,12 +482,11 @@ void DoAbout(){
 				GtkLabel* label = GTK_LABEL( gtk_label_new( "NetRadiant " RADIANT_VERSION "\n"
 															__DATE__ "\n\n"
 															RADIANT_ABOUTMSG "\n\n"
-																			 "By alientrap.org\n\n"
+																			 "By xonotic.org\n\n"
 																			 "This program is free software\n"
 																			 "licensed under the GNU GPL.\n\n"
 																			 "NetRadiant is unsupported, however\n"
-																			 "you may report your problems at\n"
-																			 "http://www.icculus.org/netradiant/"
+																			 "you may report your problems on issue tracker.\n"
 															) );
 
 				gtk_widget_show( GTK_WIDGET( label ) );
@@ -502,7 +507,11 @@ void DoAbout(){
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 				}
 				{
-					GtkButton* button = create_dialog_button( "Changelog", G_CALLBACK( about_button_changelog ), 0 );
+					GtkButton* button = create_dialog_button( "Changes", G_CALLBACK( about_button_changelog ), 0 );
+					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+				}
+				{
+					GtkButton* button = create_dialog_button( "Issues", G_CALLBACK( about_button_issues ), 0 );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 				}
 			}
