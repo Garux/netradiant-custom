@@ -1,9 +1,9 @@
 add_library(xmllib
-        ixml.cpp ixml.h
-        xmlelement.cpp xmlelement.h
-        xmlparser.cpp xmlparser.h
+        ixml.h
+        xmlelement.h
+        xmlparser.h
         xmltextags.cpp xmltextags.h
-        xmlwriter.cpp xmlwriter.h
+        xmlwriter.h
         )
 
 find_package(GLIB REQUIRED)

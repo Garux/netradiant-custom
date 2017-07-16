@@ -1,7 +1,8 @@
 add_library(os
-        dir.cpp dir.h
-        file.cpp file.h
-        path.cpp path.h
+        _.cpp
+        dir.h
+        file.h
+        path.h
         )
 
 find_package(GLIB REQUIRED)

@@ -32,8 +32,6 @@
 #include "archivelib.h"
 
 
-#include "plugin.h"
-
 #include <map>
 #include "string/string.h"
 #include "fs_filesystem.h"

@@ -1,5 +1,5 @@
 add_library(signal
-        isignal.cpp isignal.h
+        isignal.h
         signal.cpp signal.h
-        signalfwd.cpp signalfwd.h
+        signalfwd.h
         )

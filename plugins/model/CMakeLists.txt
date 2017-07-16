@@ -1,6 +1,6 @@
 radiant_plugin(model
         model.cpp model.h
-        plugin.cpp plugin.h
+        plugin.cpp
         )
 
 target_include_directories(model PRIVATE picomodel)

@@ -31,8 +31,6 @@
 
 #include "archivelib.h"
 
-#include "plugin.h"
-
 #include <map>
 #include "string/string.h"
 

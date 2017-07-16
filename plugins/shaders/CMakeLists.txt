@@ -1,5 +1,5 @@
 radiant_plugin(shaders
-        plugin.cpp plugin.h
+        plugin.cpp
         shaders.cpp shaders.h
         )
 

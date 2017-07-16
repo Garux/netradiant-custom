@@ -25,35 +25,36 @@ add_subdirectory(uilib)
 add_subdirectory(xml)
 
 add_library(libs
-        archivelib.cpp archivelib.h
-        bytebool.cpp bytebool.h
-        bytestreamutils.cpp bytestreamutils.h
-        character.cpp character.h
-        convert.cpp convert.h
-        dragplanes.cpp dragplanes.h
-        eclasslib.cpp eclasslib.h
-        entitylib.cpp entitylib.h
-        entityxml.cpp entityxml.h
-        fs_filesystem.cpp fs_filesystem.h
-        fs_path.cpp fs_path.h
-        imagelib.cpp imagelib.h
-        instancelib.cpp instancelib.h
-        maplib.cpp maplib.h
-        moduleobservers.cpp moduleobservers.h
-        pivot.cpp pivot.h
-        render.cpp render.h
-        scenelib.cpp scenelib.h
-        selectionlib.cpp selectionlib.h
-        shaderlib.cpp shaderlib.h
-        str.cpp str.h
-        stringio.cpp stringio.h
-        texturelib.cpp texturelib.h
-        transformlib.cpp transformlib.h
-        traverselib.cpp traverselib.h
-        typesystem.cpp typesystem.h
-        undolib.cpp undolib.h
-        uniquenames.cpp uniquenames.h
-        versionlib.cpp versionlib.h
+        _.cpp
+        archivelib.h
+        bytebool.h
+        bytestreamutils.h
+        character.h
+        convert.h
+        dragplanes.h
+        eclasslib.h
+        entitylib.h
+        entityxml.h
+        fs_filesystem.h
+        fs_path.h
+        imagelib.h
+        instancelib.h
+        maplib.h
+        moduleobservers.h
+        pivot.h
+        render.h
+        scenelib.h
+        selectionlib.h
+        shaderlib.h
+        str.h
+        stringio.h
+        texturelib.h
+        transformlib.h
+        traverselib.h
+        typesystem.h
+        undolib.h
+        uniquenames.h
+        versionlib.h
         )
 
 find_package(GLIB REQUIRED)

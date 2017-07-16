@@ -1,11 +1,12 @@
 add_library(math
-        aabb.cpp aabb.h
-        curve.cpp curve.h
-        frustum.cpp frustum.h
-        line.cpp line.h
-        matrix.cpp matrix.h
-        pi.cpp pi.h
-        plane.cpp plane.h
-        quaternion.cpp quaternion.h
-        vector.cpp vector.h
+        _.cpp
+        aabb.h
+        curve.h
+        frustum.h
+        line.h
+        matrix.h
+        pi.h
+        plane.h
+        quaternion.h
+        vector.h
         )

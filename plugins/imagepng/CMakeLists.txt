@@ -1,5 +1,5 @@
 radiant_plugin(imagepng
-        plugin.cpp plugin.h
+        plugin.cpp
         )
 
 find_package(PNG REQUIRED)

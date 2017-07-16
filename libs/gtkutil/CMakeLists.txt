@@ -2,26 +2,26 @@ add_library(gtkutil
         accelerator.cpp accelerator.h
         button.cpp button.h
         clipboard.cpp clipboard.h
-        closure.cpp closure.h
-        container.cpp container.h
+        closure.h
+        container.h
         cursor.cpp cursor.h
         dialog.cpp dialog.h
-        entry.cpp entry.h
+        entry.h
         filechooser.cpp filechooser.h
         frame.cpp frame.h
         glfont.cpp glfont.h
         glwidget.cpp glwidget.h
-        idledraw.cpp idledraw.h
+        idledraw.h
         image.cpp image.h
         menu.cpp menu.h
         messagebox.cpp messagebox.h
-        nonmodal.cpp nonmodal.h
+        nonmodal.h
         paned.cpp paned.h
-        pointer.cpp pointer.h
+        pointer.h
         toolbar.cpp toolbar.h
-        widget.cpp widget.h
+        widget.h
         window.cpp window.h
-        xorrectangle.cpp xorrectangle.h
+        xorrectangle.h
         )
 
 target_include_directories(gtkutil PRIVATE uilib)

@@ -1,5 +1,5 @@
 radiant_plugin(mapxml
-        plugin.cpp plugin.h
+        plugin.cpp
         xmlparse.cpp xmlparse.h
         xmlwrite.cpp xmlwrite.h
         )

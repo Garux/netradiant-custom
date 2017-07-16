@@ -26,7 +26,6 @@ radiant_plugin(bobtoolz
         resource-gtk.h
         ScriptParser.cpp ScriptParser.h
         shapes.cpp shapes.h
-        StdAfx.cpp StdAfx.h
         visfind.cpp visfind.h
         )
 

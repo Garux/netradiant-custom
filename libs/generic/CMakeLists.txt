@@ -1,14 +1,14 @@
 add_library(generic
-        arrayrange.cpp arrayrange.h
-        bitfield.cpp bitfield.h
+        arrayrange.h
+        bitfield.h
         callback.cpp callback.h
-        callbackfwd.cpp callbackfwd.h
+        callbackfwd.h
         constant.cpp constant.h
-        enumeration.cpp enumeration.h
-        functional.cpp functional.h
+        enumeration.h
+        functional.h
         object.cpp object.h
-        reference.cpp reference.h
-        referencecounted.cpp referencecounted.h
+        reference.h
+        referencecounted.h
         static.cpp static.h
-        vector.cpp vector.h
+        vector.h
         )

@@ -1,7 +1,7 @@
 radiant_plugin(image
         bmp.cpp bmp.h
         dds.cpp dds.h
-        image.cpp image.h
+        image.cpp
         jpeg.cpp jpeg.h
         ktx.cpp ktx.h
         pcx.cpp pcx.h
