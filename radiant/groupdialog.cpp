@@ -64,8 +64,6 @@ void Show(){
 	/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
 	GtkWidget* glwidget = GTK_WIDGET( g_object_get_data( G_OBJECT( m_window ), "glwidget" ) );
 	if ( glwidget ){
-		//if ( widget_is_visible( glwidget ) )
-			//globalOutputStream() << "glwidget have been already visible :0\n"; /* is not hidden aswell, according to this */
 		gtk_widget_hide( glwidget );
 		gtk_widget_show( glwidget );
 	}
