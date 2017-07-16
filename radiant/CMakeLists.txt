@@ -99,6 +99,7 @@ target_link_libraries(radiant
     ${CMAKE_DL_LIBS}
     ${LIBXML2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
+    ${${GTK_NS}_LIBRARIES}
     ${GTKGL_LIBRARIES}
     includes
     cmdlib

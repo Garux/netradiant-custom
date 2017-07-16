@@ -51,7 +51,7 @@ void WinPrint( const char *str, ... ){
 	vsprintf( text, str, argptr );
 	va_end( argptr );
 
-	printf( text );
+	printf( "%s", text );
 }
 #else
 void WinPrint( const char *str, ... ){

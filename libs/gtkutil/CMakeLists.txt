@@ -27,8 +27,8 @@ add_library(gtkutil
 target_include_directories(gtkutil PRIVATE uilib)
 target_link_libraries(gtkutil PRIVATE uilib)
 
-target_include_directories(gtkutil PRIVATE ${GTK2_PANGO_INCLUDE_DIR})
-target_link_libraries(gtkutil PRIVATE ${GTK2_PANGO_LIBRARY})
+target_include_directories(gtkutil PRIVATE ${${GTK_NS}_INCLUDE_DIRS})
+target_link_libraries(gtkutil PRIVATE ${${GTK_NS}_LIBRARIES})
 
 find_package(GtkGLExt REQUIRED)
 target_include_directories(gtkutil PRIVATE ${GTKGL_INCLUDE_DIRS})

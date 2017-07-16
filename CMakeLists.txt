@@ -63,6 +63,7 @@ endif ()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}   -fno-strict-aliasing")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing -fno-exceptions -fno-rtti")
 set(CMAKE_POSITION_INDEPENDENT_CODE 1)
+set(GTK_NS "GTK2" CACHE STRING "GTK variable prefix")
 
 #-----------------------------------------------------------------------
 # Defs
