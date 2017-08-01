@@ -1,0 +1,62 @@
+/**
+ * @mainpage
+ *
+ * @section org Organization
+ *
+ * At a high level this design separates code specific to MeshTex functionality
+ * from code that could apply to Radiant plugins in general, especially plugins
+ * that have similar interface needs (i.e. accept some numbers/choices from user
+ * input and apply to selected objects). Within both of those broad categories,
+ * further separation is enforced between the plugin framework, patch mesh
+ * manipulation, and UI. See the Modules page of this documentation for
+ * specifics.
+ *
+ * @section flow Control Flow
+ *
+ * A Radiant plugin is a library that exports only one function:
+ * Radiant_RegisterModules. This returns a function table that Radiant will
+ * use to identify the plugin, populate the main menu for the plugin, and notify
+ * the plugin when one of those menu entries is selected.
+ *
+ * When a menu entry is selected, the plugin code is sent a string token that
+ * identifies the entry, and it must use that token to decide what to do.
+ *
+ * The MeshTex menu entries lead to three kinds of operations:
+ *   - Raise a popup message dialog with fixed text, such as the Help dialog.
+ *   - Execute an operation on selected patch mesh entities. This operation is
+ *     completely specified by the selected menu entry.
+ *   - Raise a window that accepts further input. When the OK or Apply button is
+ *     clicked on that window, execute an operation on selected patch mesh
+ *     entities, using values read from the window's input widgets as arguments.
+ *
+ * Most MeshTex operations follow this general flow:
+ *   - Create a visitor object that understands how to execute the operation on
+ *     any input that is a valid patch mesh.
+ *   - Instantiate the Radiant class UndoableCommand to identify the operation.
+ *   - Use the Radiant function GlobalSelectionSystem().foreachSelected to
+ *     iterate over the currently selected objects and pass them to the visitor
+ *     object.
+ *   - Destroy the UndoableCommand object (implicitly on scope exit).
+ *
+ * The visitor object follows these steps when processing a mesh:
+ *   - Use the Radiant function GlobalPatchCreator().Patch_undoSave if it is
+ *     about to modify the mesh.
+ *   - Read mesh characteristics and control point data, and possibly modify
+ *     the texture coordinates in the control point data.
+ *   - If the mesh was modified, use the Radiant functions
+ *     GlobalPatchCreator().Patch_controlPointsChanged and
+ *     GlobalPatchCreator().Patch_undoSave.
+ *
+ * The complete list of Radiant systems used by MeshTex is defined in the
+ * MeshTexPluginDependencies class declaration.
+ *
+ * @section external External Dependences
+ *
+ * This version of MeshTex uses types and functions from these other sources:
+ *   - GtkRadiant 1.5: https://github.com/TTimo/GtkRadiant/tree/1.5-release
+ *   - GTK+ 2 stack: http://www.gtk.org/download/index.php
+ *   - STLport 5: http://sourceforge.net/projects/stlport/files/STLport/
+ *
+ * The specific minor versions last used to build MeshTex are GtkRadiant 1.5.0,
+ * GTK+ 2.24.10, and STLport 5.2.1.
+ */

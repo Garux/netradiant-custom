@@ -1,0 +1,65 @@
+*** Downloading the latest source:
+
+https://github.com/neogeographica/MeshTex
+
+
+*** Downloading dependences:
+
+This project depends on sources/SDKs for GtkRadiant 1.5, GTK+ 2, and STLport 5.  It was most recently compiled against minor versions GtkRadiant 1.5.0, GTK+ 2.24.10 (32-bit), and STLport 5.2.1.  At the time of writing this file, those were available at:
+
+  - GtkRadiant 1.5: https://github.com/TTimo/GtkRadiant/tree/1.5-release
+  - GTK+ 2 stack: http://www.gtk.org/download/index.php
+  - STLport 5: http://sourceforge.net/projects/stlport/files/STLport/
+
+Note that you should get the entire GTK+ stack (linked as an "all-in-one bundle" on the GTK+ download page), not just the gtk library.
+
+Unzip the resources that you download and place them in a handy location that can be accessed by the computer you will be using to build the plugin.  You do not need to build any libraries for these dependences:
+
+  - For GtkRadiant, only the header files are important.
+  - The GTK+ download includes prebuilt libraries.
+  - STLport does not need a library built, as long as you are not using STL iostreams.  In the folder where you placed the STLport distribution, navigate into stlport\stl\config and open user_config.h in a text editor.  Uncomment the line that defines _STLP_NO_IOSTREAMS to a value of 1.
+
+You also need an installation of the GtkRadiant 1.5 application in order to actually use the plugin.  Rather than building it from source, you will probably just want to download and execute the usual GtkRadiant installer: http://icculus.org/gtkradiant/downloads.html#gtkr15
+
+It can also be helpful to have git installed... which you probably do, if you got this from GitHub.  Nevertheless it's not actually necessary to have git available during the compile process; it's just used to gather some information if it is available, as described below.
+
+
+*** Building:
+
+There's no platform-specific code in the MeshTex plugin, but currently I'm only building it on Windows.  Adventurous Mac/Linux porters are welcome to have a go.
+
+meshtex.sln is a Visual Studio 2008 solution.  (It may very well also import correctly into later versions of Visual Studio.)
+
+Open meshtex.sln using Visual Studio.  Before building the project you must configure a few directories, as follows:
+
+- In the left pane, choose the Property Manager tab.
+- Under either the "Debug | Win32" or "Release | Win32" folder (it doesn't matter which), double-click on "localdirs".  This opens a custom properties dialog.
+- On the left side of the custom properties dialog, select "User Macros".  This will display definitions for some necessary directories on the right side of the dialog.
+- On the right side, double-click on "RadiantSrcDir".  This will open a dialog to edit its value.
+- Replace the Value entry here with the correct path to the root of your GtkRadiant source.  The directory referenced here should be the one that CONTAINS the "include" and "libs" directories.
+- Click OK to set that value for "RadiantSrcDir".
+- Similarly you should edit the value for "StlportDir".  The directory referenced here is the one that CONTAINS the "stlport" directory for your downloaded STLport source.
+- Similarly you should edit the value for "GtkDir".  The directory referenced here is the one that CONTAINS the "include" and "lib" directories for your downloaded GTK+ SDK.
+- Similarly you should edit the value for "GitDir".  The directory referenced here is the one that contains the "git.exe" program on your system.  If you don't have git installed, this can be any bogus path.  It is used in a pre-build step as described below.
+- Finally, edit the value for "RadiantExeDir".  The directory referenced here is the one that contains "GtkRadiant.exe" for your working installation of the GtkRadiant 1.5 application.  It is used in a post-build step as described below.
+- Click the OK button to accept and close the dialog.
+
+Once you have configured the directories, it seems to be helpful to quit out of Visual Studio (save your changes when prompted) and restart before attempting to build.
+
+The build process has a pre-build step that uses <GitDir>/git to find the current git commit hash for the codebase that you are building.  This commit hash is placed in a generated header file, CodeVersion.h.  If the git executable cannot be located then the string "n/a" will be used for the commit hash.  During the build process the commit hash will be used as part of the product version string that will be visible in the DLL properties.  This information is just FYI; you don't need to do anything about this other than set the value of GitDir as per above if you do have git installed.
+
+The build process also has a post-build step that will copy meshtex.dll to <RadiantExeDir>/plugins after each build.  If RadiantExeDir points to a protected directory that requires elevated user permissions (such as "Program Files (x86)") then you will need to be running Visual Studio as administrator in order for this copy to succeed.
+
+If you do NOT want the build process to perform the post-build copy of meshtex.dll, then follow these steps:
+
+- Right click on the "meshtex" project in the Solution Explorer or Property Manager, and choose "properties".  This opens its properties dialog.
+- In the "Configuration" dropdown, choose "All Configurations".
+- On the left side of the dialog, find "Post-Build Event" under "Build Events", which is under "Configuration Properties".  Select "Post-Build Event".
+- The right-hand side should now show the command line and description for the copy process.
+- The right-hand side also has a property called "Excluded From Build".  Change that from "No" to "Yes".
+- Click the OK button to accept and close the dialog.
+
+
+You should be ready to build!  Press F7, or select "Build Solution" from the "Build" menu on the top bar.
+
+After building, you can run GtkRadiant by pressing F5, or selecting "Start Debugging" from the "Debug" menu on the top bar.  If you have not removed the post-build copy step -- and that step has succeeded -- then GtkRadiant will have the most recently built version of the plugin installed.

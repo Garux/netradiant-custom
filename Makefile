@@ -397,6 +397,7 @@ binaries-radiant-plugins: \
 	$(INSTALLDIR)/plugins/shaderplug.$(DLL) \
 	$(INSTALLDIR)/plugins/sunplug.$(DLL) \
 	$(INSTALLDIR)/plugins/ufoaiplug.$(DLL) \
+	$(INSTALLDIR)/plugins/meshtex.$(DLL) \
 
 .PHONY: binaries-radiant
 binaries-radiant-core: \
@@ -1001,6 +1002,23 @@ $(INSTALLDIR)/plugins/ufoaiplug.$(DLL): \
 	contrib/ufoaiplug/ufoai_gtk.o \
 	contrib/ufoaiplug/ufoai_level.o \
 	contrib/ufoaiplug/ufoai.o \
+
+$(INSTALLDIR)/plugins/meshtex.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
+$(INSTALLDIR)/plugins/meshtex.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude
+$(INSTALLDIR)/plugins/meshtex.$(DLL): \
+	contrib/meshtex/GeneralFunctionDialog.o \
+	contrib/meshtex/GenericDialog.o \
+	contrib/meshtex/GenericMainMenu.o \
+	contrib/meshtex/GenericPluginUI.o \
+	contrib/meshtex/GetInfoDialog.o \
+	contrib/meshtex/MainMenu.o \
+	contrib/meshtex/MeshEntity.o \
+	contrib/meshtex/MeshVisitor.o \
+	contrib/meshtex/PluginModule.o \
+	contrib/meshtex/PluginRegistration.o \
+	contrib/meshtex/PluginUI.o \
+	contrib/meshtex/RefCounted.o \
+	contrib/meshtex/SetScaleDialog.o \
 
 $(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): LIBS_EXTRA := $(LIBS_GLIB) $(LIBS_GTK)
 $(INSTALLDIR)/plugins/bkgrnd2d.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_GLIB) $(CPPFLAGS_GTK) -Ilibs -Iinclude

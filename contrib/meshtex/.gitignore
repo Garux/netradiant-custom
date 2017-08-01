@@ -1,0 +1,10 @@
+# Visual Studio generated files
+*.aps
+*.ncb
+*.suo
+*.user
+CodeVersion.h
+
+# build results
+Debug/
+Release/

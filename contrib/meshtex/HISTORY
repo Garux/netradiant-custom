@@ -1,0 +1,41 @@
+Version history
+
+3.0 in progress:
+- Rewrite.  Bugfixes along the way.  Bugs undoubtedly introduced.
+- Moved to GtkRadiant 1.5 compatibility.
+- A few new features, TBD (to be documented).
+- Dropped Linux build for now.
+
+...time passes, things happen, continents drift...
+
+2.4 May 17, 2001:
+- Flipped the T scaling, to be consistent with the way Natural scaling works
+  in the new GtkRadiant.
+- Linux version still untested, but it's been updated too.
+
+2.3 May 13, 2001:
+- Added a Version resource.
+- Added a TEST compile of the plugin for Linux... no idea if it works.
+
+2.2 May 8, 2001:
+- Flipped sense of min/max align if scale/reps is negative.
+- Disallowed scale/reps of zero.
+
+2.1 May 5, 2001:
+- Fixed max align for natural scale without reference row.
+
+2.0 May 5, 2001:
+- Added the Set S/T Scale dialog and the General Function dialog.
+- Reworked Get Info, added capability to transfer scale info to the
+  Set S/T Scale dialog.
+- General noodlings to make negative scales work, other fixes.
+- Updated the texture mapping explanation and moved it into its own file.
+
+1.1 April 28, 2001:
+- Fixed the Min/Max Align functions, they weren't getting dispatched.
+- Fixed the Stretch/Shrink functions to work if the min S/T is nonzero.
+- Added Both Align, S Align, and T Align.
+- Added the +/- indicator in the info dialog.
+
+1.0 April 27, 2001:
+- Hey, it works and stuff.

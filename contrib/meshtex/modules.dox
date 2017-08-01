@@ -1,0 +1,31 @@
+/** @defgroup generic Generic
+ *  Broadly applicable to Radiant plugin implementation.
+ *  @{
+ */
+   /** @defgroup generic-plugin Generic Plugin
+    *  Framework for defining and registering a plugin.
+    */
+   /** @defgroup generic-ui Generic UI
+    *  Framework for implementing and managing a main menu and dialog windows.
+    */
+   /** @defgroup generic-util Generic Util
+    *  Universal utility classes.
+    */
+/** @} */
+/** @defgroup meshtex MeshTex
+ *  Specific to the MeshTex plugin.
+ *  @{
+ */
+   /** @defgroup meshtex-core MeshTex Core
+    *  Logic for manipulating patch mesh entities.
+    */
+   /** @defgroup meshtex-plugin MeshTex Plugin
+    *  Defining and registering the MeshTex plugin.
+    */
+   /** @defgroup meshtex-ui MeshTex UI
+    *  Implementing and managing the MeshTex main menu and dialog windows.
+    */
+   /** @defgroup meshtex-util MeshTex Util
+    *  Utility classes for patch mesh manipulation.
+    */
+/** @} */
