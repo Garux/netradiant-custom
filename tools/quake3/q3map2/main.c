@@ -1723,7 +1723,7 @@ char q3map2path[1024];
 
 int pk3BSPMain( int argc, char **argv ){
 	int i, j, len;
-	qboolean dbg = qfalse, png = qfalse;
+	qboolean dbg = qfalse, png = qfalse, packFAIL = qfalse;
 
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); i++ ){
@@ -1746,7 +1746,7 @@ int pk3BSPMain( int argc, char **argv ){
 	ParseEntities();
 
 
-	char packname[ 1024 ], base[ 1024 ], nameOFmap[ 1024 ], temp[ 1024 ];
+	char packname[ 1024 ], packFailName[ 1024 ], base[ 1024 ], nameOFmap[ 1024 ], temp[ 1024 ];
 
 	/* copy map name */
 	strcpy( base, source );
@@ -1769,20 +1769,15 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	int pk3ShadersN = 0;
-	char* pk3Shaders;
-	pk3Shaders = (char *)calloc( 1024*65, sizeof( char ) );
+	char* pk3Shaders = (char *)calloc( 1024*65, sizeof( char ) );
 	int pk3SoundsN = 0;
-	char* pk3Sounds;
-	pk3Sounds = (char *)calloc( 1024*65, sizeof( char ) );
+	char* pk3Sounds = (char *)calloc( 1024*65, sizeof( char ) );
 	int pk3ShaderfilesN = 0;
-	char* pk3Shaderfiles;
-	pk3Shaderfiles = (char *)calloc( 1024*65, sizeof( char ) );
+	char* pk3Shaderfiles = (char *)calloc( 1024*65, sizeof( char ) );
 	int pk3TexturesN = 0;
-	char* pk3Textures;
-	pk3Textures = (char *)calloc( 1024*65, sizeof( char ) );
+	char* pk3Textures = (char *)calloc( 1024*65, sizeof( char ) );
 	int pk3VideosN = 0;
-	char* pk3Videos;
-	pk3Videos = (char *)calloc( 1024*65, sizeof( char ) );
+	char* pk3Videos = (char *)calloc( 1024*65, sizeof( char ) );
 
 
 
@@ -1842,11 +1837,11 @@ int pk3BSPMain( int argc, char **argv ){
 
 
 	if( dbg ){
-		Sys_Printf( "\tDrawsurface+ent calls....%i\n", pk3ShadersN );
+		Sys_Printf( "\n\tDrawsurface+ent calls....%i\n", pk3ShadersN );
 		for ( i = 0; i < pk3ShadersN; i++ ){
 			Sys_Printf( "%s\n", pk3Shaders + i*65 );
 		}
-		Sys_Printf( "\tSounds....%i\n", pk3SoundsN );
+		Sys_Printf( "\n\tSounds....%i\n", pk3SoundsN );
 		for ( i = 0; i < pk3SoundsN; i++ ){
 			Sys_Printf( "%s\n", pk3Sounds + i*65 );
 		}
@@ -1855,7 +1850,7 @@ int pk3BSPMain( int argc, char **argv ){
 	vfsListShaderFiles( pk3Shaderfiles, &pk3ShaderfilesN );
 
 	if( dbg ){
-		Sys_Printf( "\tSchroider fileses.....%i\n", pk3ShaderfilesN );
+		Sys_Printf( "\n\tSchroider fileses.....%i\n", pk3ShaderfilesN );
 		for ( i = 0; i < pk3ShaderfilesN; i++ ){
 			Sys_Printf( "%s\n", pk3Shaderfiles + i*65 );
 		}
@@ -1863,21 +1858,21 @@ int pk3BSPMain( int argc, char **argv ){
 
 
 	/* load exclusions file */
-	int EXpk3TexturesN = 0;
-	char* EXpk3Textures;
-	EXpk3Textures = (char *)calloc( 4096*65, sizeof( char ) );
-	int EXpk3ShadersN = 0;
-	char* EXpk3Shaders;
-	EXpk3Shaders = (char *)calloc( 4096*65, sizeof( char ) );
-	int EXpk3SoundsN = 0;
-	char* EXpk3Sounds;
-	EXpk3Sounds = (char *)calloc( 4096*65, sizeof( char ) );
-	int EXpk3ShaderfilesN = 0;
-	char* EXpk3Shaderfiles;
-	EXpk3Shaderfiles = (char *)calloc( 4096*65, sizeof( char ) );
-	int EXpk3VideosN = 0;
-	char* EXpk3Videos;
-	EXpk3Videos = (char *)calloc( 4096*65, sizeof( char ) );
+	int ExTexturesN = 0;
+	char* ExTextures = (char *)calloc( 4096*65, sizeof( char ) );
+	int ExShadersN = 0;
+	char* ExShaders = (char *)calloc( 4096*65, sizeof( char ) );
+	int ExSoundsN = 0;
+	char* ExSounds = (char *)calloc( 4096*65, sizeof( char ) );
+	int ExShaderfilesN = 0;
+	char* ExShaderfiles = (char *)calloc( 4096*65, sizeof( char ) );
+	int ExVideosN = 0;
+	char* ExVideos = (char *)calloc( 4096*65, sizeof( char ) );
+	int ExPureTexturesN = 0;
+	char* ExPureTextures = (char *)calloc( 4096*65, sizeof( char ) );
+
+	char* ExReasonShader[4096] = { NULL };
+	char* ExReasonShaderFile[4096] = { NULL };
 
 	char exName[ 1024 ];
 	byte *buffer;
@@ -1915,19 +1910,19 @@ int pk3BSPMain( int argc, char **argv ){
 
 		/* blocks */
 		if ( !stricmp( token, "textures" ) ){
-			parseEXblock ( EXpk3Textures, &EXpk3TexturesN, exName );
+			parseEXblock ( ExTextures, &ExTexturesN, exName );
 		}
 		else if ( !stricmp( token, "shaders" ) ){
-			parseEXblock ( EXpk3Shaders, &EXpk3ShadersN, exName );
+			parseEXblock ( ExShaders, &ExShadersN, exName );
 		}
 		else if ( !stricmp( token, "shaderfiles" ) ){
-			parseEXblock ( EXpk3Shaderfiles, &EXpk3ShaderfilesN, exName );
+			parseEXblock ( ExShaderfiles, &ExShaderfilesN, exName );
 		}
 		else if ( !stricmp( token, "sounds" ) ){
-			parseEXblock ( EXpk3Sounds, &EXpk3SoundsN, exName );
+			parseEXblock ( ExSounds, &ExSoundsN, exName );
 		}
 		else if ( !stricmp( token, "videos" ) ){
-			parseEXblock ( EXpk3Videos, &EXpk3VideosN, exName );
+			parseEXblock ( ExVideos, &ExVideosN, exName );
 		}
 		else{
 			Error( "ReadExclusionsFile: %s, line %d: unknown block name!\nValid ones are: textures, shaders, shaderfiles, sounds, videos.", exName, scriptline );
@@ -1937,32 +1932,131 @@ int pk3BSPMain( int argc, char **argv ){
 	/* free the buffer */
 	free( buffer );
 
+	for ( i = 0; i < ExTexturesN; i++ ){
+		for ( j = 0; j < ExShadersN; j++ ){
+			if ( !stricmp( ExTextures + i*65, ExShaders + j*65 ) ){
+				break;
+			}
+		}
+		if ( j == ExShadersN ){
+			strcpy ( ExPureTextures + ExPureTexturesN*65, ExTextures + i*65 );
+			ExPureTexturesN++;
+		}
+	}
+
 skipEXfile:
 
 	if( dbg ){
-		Sys_Printf( "\tEXpk3Textures....%i\n", EXpk3TexturesN );
-		for ( i = 0; i < EXpk3TexturesN; i++ ) Sys_Printf( "%s\n", EXpk3Textures + i*65 );
-		Sys_Printf( "\tEXpk3Shaders....%i\n", EXpk3ShadersN );
-		for ( i = 0; i < EXpk3ShadersN; i++ ) Sys_Printf( "%s\n", EXpk3Shaders + i*65 );
-		Sys_Printf( "\tEXpk3Shaderfiles....%i\n", EXpk3ShaderfilesN );
-		for ( i = 0; i < EXpk3ShaderfilesN; i++ ) Sys_Printf( "%s\n", EXpk3Shaderfiles + i*65 );
-		Sys_Printf( "\tEXpk3Sounds....%i\n", EXpk3SoundsN );
-		for ( i = 0; i < EXpk3SoundsN; i++ ) Sys_Printf( "%s\n", EXpk3Sounds + i*65 );
-		Sys_Printf( "\tEXpk3Videos....%i\n", EXpk3VideosN );
-		for ( i = 0; i < EXpk3VideosN; i++ ) Sys_Printf( "%s\n", EXpk3Videos + i*65 );
+		Sys_Printf( "\n\tExTextures....%i\n", ExTexturesN );
+		for ( i = 0; i < ExTexturesN; i++ ) Sys_Printf( "%s\n", ExTextures + i*65 );
+		Sys_Printf( "\n\tExPureTextures....%i\n", ExPureTexturesN );
+		for ( i = 0; i < ExPureTexturesN; i++ ) Sys_Printf( "%s\n", ExPureTextures + i*65 );
+		Sys_Printf( "\n\tExShaders....%i\n", ExShadersN );
+		for ( i = 0; i < ExShadersN; i++ ) Sys_Printf( "%s\n", ExShaders + i*65 );
+		Sys_Printf( "\n\tExShaderfiles....%i\n", ExShaderfilesN );
+		for ( i = 0; i < ExShaderfilesN; i++ ) Sys_Printf( "%s\n", ExShaderfiles + i*65 );
+		Sys_Printf( "\n\tExSounds....%i\n", ExSoundsN );
+		for ( i = 0; i < ExSoundsN; i++ ) Sys_Printf( "%s\n", ExSounds + i*65 );
+		Sys_Printf( "\n\tExVideos....%i\n", ExVideosN );
+		for ( i = 0; i < ExVideosN; i++ ) Sys_Printf( "%s\n", ExVideos + i*65 );
 	}
 
+	/* can exclude pure textures right now, shouldn't create shaders for them anyway */
+	for ( i = 0; i < pk3ShadersN ; i++ ){
+		for ( j = 0; j < ExPureTexturesN ; j++ ){
+			if ( !stricmp( pk3Shaders + i*65, ExPureTextures + j*65 ) ){
+				*( pk3Shaders + i*65 ) = '\0';
+				break;
+			}
+		}
+	}
 
 	//Parse Shader Files
+	 /* hack */
+	endofscript = qtrue;
+
 	for ( i = 0; i < pk3ShaderfilesN; i++ ){
-		qboolean wantShader = qfalse, wantShaderFile = qfalse;
-		char shadername[ 1024 ], lastwantedShader[ 1024 ];
+		qboolean wantShader = qfalse, wantShaderFile = qfalse, ShaderFileExcluded = qfalse;
+		int shader;
+		char* reasonShader = NULL, reasonShaderFile = NULL;
 
 		/* load the shader */
 		sprintf( temp, "%s/%s", game->shaderPath, pk3Shaderfiles + i*65 );
-		LoadScriptFile( temp, 0 );
+		SilentLoadScriptFile( temp, 0 );
+		if( dbg ) Sys_Printf( "\n\tentering %s\n", pk3Shaderfiles + i*65 );
 
+		/* do wanna le shader file? */
+		for ( j = 0; j < ExShaderfilesN; j++ ){
+			if ( !stricmp( ExShaderfiles + j*65, pk3Shaderfiles + i*65 ) ){
+				ShaderFileExcluded = qtrue;
+				reasonShaderFile = ExShaderfiles + j*65;
+				break;
+			}
+		}
 		/* tokenize it */
+		/* check if shader file has to be excluded */
+		while ( !ShaderFileExcluded )
+		{
+			/* test for end of file */
+			if ( !GetToken( qtrue ) ) {
+				break;
+			}
+
+			/* does it contain restricted shaders/textures? */
+			for ( j = 0; j < ExShadersN; j++ ){
+				if ( !stricmp( ExShaders + j*65, token ) ){
+					ShaderFileExcluded = qtrue;
+					reasonShader = ExShaders + j*65;
+					break;
+				}
+			}
+			if ( ShaderFileExcluded )
+				break;
+			for ( j = 0; j < ExPureTexturesN; j++ ){
+				if ( !stricmp( ExPureTextures + j*65, token ) ){
+					ShaderFileExcluded = qtrue;
+					reasonShader = ExPureTextures + j*65;
+					break;
+				}
+			}
+			if ( ShaderFileExcluded )
+				break;
+
+			/* handle { } section */
+			if ( !GetToken( qtrue ) ) {
+				break;
+			}
+			if ( strcmp( token, "{" ) ) {
+					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s",
+						temp, scriptline, token );
+			}
+
+			while ( 1 )
+			{
+				/* get the next token */
+				if ( !GetToken( qtrue ) ) {
+					break;
+				}
+				if ( !strcmp( token, "}" ) ) {
+					break;
+				}
+				/* parse stage directives */
+				if ( !strcmp( token, "{" ) ) {
+					while ( 1 )
+					{
+						if ( !GetToken( qtrue ) ) {
+							break;
+						}
+						if ( !strcmp( token, "}" ) ) {
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		/* tokenize it again */
+		SilentLoadScriptFile( temp, 0 );
 		while ( 1 )
 		{
 			/* test for end of file */
@@ -1976,8 +2070,7 @@ skipEXfile:
 			wantShader = qfalse;
 			for ( j = 0; j < pk3ShadersN; j++ ){
 				if ( !stricmp( pk3Shaders + j*65, token) ){
-					strcpy ( shadername, pk3Shaders + j*65 );
-					*(pk3Shaders + j*65) = '\0';
+					shader = j;
 					wantShader = qtrue;
 					break;
 				}
@@ -2027,7 +2120,7 @@ skipEXfile:
 							/* get an image */
 							GetToken( qfalse );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
-								tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+								tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 							}
 						}
 						else if ( !stricmp( token, "animMap" ) ||
@@ -2035,7 +2128,7 @@ skipEXfile:
 							GetToken( qfalse );// skip num
 							while ( TokenAvailable() ){
 								GetToken( qfalse );
-								tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+								tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 							}
 						}
 						else if ( !stricmp( token, "videoMap" ) ){
@@ -2050,8 +2143,8 @@ skipEXfile:
 									goto away;
 								}
 							}
-							for ( j = 0; j < EXpk3VideosN; j++ ){
-								if ( !stricmp( EXpk3Videos + j*65, token ) ){
+							for ( j = 0; j < ExVideosN; j++ ){
+								if ( !stricmp( ExVideos + j*65, token ) ){
 									goto away;
 								}
 							}
@@ -2074,6 +2167,7 @@ skipEXfile:
 					GetToken( qfalse );
 					if ( !stricmp( token, "nodraw" ) ) {
 						wantShader = qfalse;
+						*( pk3Shaders + shader*65 ) = '\0';
 					}
 				}
 
@@ -2086,65 +2180,74 @@ skipEXfile:
 					if ( stricmp( token, "-" ) && stricmp( token, "full" ) ) {
 						strcpy ( temp, token );
 						sprintf( token, "%s_up", temp );
-						tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+						tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 						sprintf( token, "%s_dn", temp );
-						tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+						tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 						sprintf( token, "%s_lf", temp );
-						tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+						tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 						sprintf( token, "%s_rt", temp );
-						tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+						tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 						sprintf( token, "%s_bk", temp );
-						tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+						tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 						sprintf( token, "%s_ft", temp );
-						tex2list( pk3Textures, &pk3TexturesN, EXpk3Textures, &EXpk3TexturesN );
+						tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 					}
 					/* skip rest of line */
 					GetToken( qfalse );
 					GetToken( qfalse );
 				}
 			}
+
 			//exclude shader
 			if ( wantShader ){
-				for ( j = 0; j < EXpk3ShadersN; j++ ){
-					if ( !stricmp( EXpk3Shaders + j*65, shadername ) ){
+				for ( j = 0; j < ExShadersN; j++ ){
+					if ( !stricmp( ExShaders + j*65, pk3Shaders + shader*65 ) ){
 						wantShader = qfalse;
+						*( pk3Shaders + shader*65 ) = '\0';
 						break;
 					}
 				}
-				/* shouldnt make shaders for shipped with the game textures aswell */
 				if ( wantShader ){
-					for ( j = 0; j < EXpk3TexturesN; j++ ){
-						if ( !stricmp( EXpk3Textures + j*65, shadername ) ){
-							wantShader = qfalse;
-							break;
+					if ( ShaderFileExcluded ){
+						if ( reasonShaderFile != NULL ){
+							ExReasonShaderFile[ shader ] = reasonShaderFile;
 						}
+						else{
+							ExReasonShaderFile[ shader ] = ( char* ) calloc( 65, sizeof( char ) );
+							strcpy( ExReasonShaderFile[ shader ], pk3Shaderfiles + i*65 );
+						}
+						ExReasonShader[ shader ] = reasonShader;
+					}
+					else{
+						wantShaderFile = qtrue;
+						*( pk3Shaders + shader*65 ) = '\0';
 					}
 				}
-				if ( wantShader ){
-					wantShaderFile = qtrue;
-					strcpy( lastwantedShader, shadername );
-				}
 			}
 		}
-		//exclude shader file
-		if ( wantShaderFile ){
-			for ( j = 0; j < EXpk3ShaderfilesN; j++ ){
-				if ( !stricmp( EXpk3Shaderfiles + j*65, pk3Shaderfiles + i*65 ) ){
-					Sys_Printf( "WARNING: excluded shader %s, since it was located in restricted shader file: %s\n", lastwantedShader, pk3Shaderfiles + i*65 );
-					*( pk3Shaderfiles + i*65 ) = '\0';
-					break;
-				}
-			}
-		}
-		else {
+		if ( !wantShaderFile ){
 			*( pk3Shaderfiles + i*65 ) = '\0';
 		}
-
 	}
 
 
 
 /* exclude stuff */
+//wanted shaders from excluded .shaders
+	Sys_Printf( "\n" );
+	for ( i = 0; i < pk3ShadersN; i++ ){
+		if ( *( pk3Shaders + i*65 ) != '\0' && ( ExReasonShader[i] != NULL || ExReasonShaderFile[i] != NULL ) ){
+			Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+			packFAIL = qtrue;
+			if ( ExReasonShader[i] != NULL ){
+				Sys_Printf( "     reason: is located in %s,\n     containing restricted shader %s\n", ExReasonShaderFile[i], ExReasonShader[i] );
+			}
+			else{
+				Sys_Printf( "     reason: is located in restricted %s\n", ExReasonShaderFile[i] );
+			}
+			*( pk3Shaders + i*65 ) = '\0';
+		}
+	}
 //pure textures (shader ones are done)
 	for ( i = 0; i < pk3ShadersN; i++ ){
 		if ( *( pk3Shaders + i*65 ) != '\0' ){
@@ -2156,8 +2259,8 @@ skipEXfile:
 				}
 			}
 			if ( *( pk3Shaders + i*65 ) == '\0' ) continue;
-			for ( j = 0; j < EXpk3TexturesN; j++ ){
-				if ( !stricmp( pk3Shaders + i*65, EXpk3Textures + j*65 ) ){
+			for ( j = 0; j < ExTexturesN; j++ ){
+				if ( !stricmp( pk3Shaders + i*65, ExTextures + j*65 ) ){
 					*( pk3Shaders + i*65 ) = '\0';
 					break;
 				}
@@ -2167,34 +2270,21 @@ skipEXfile:
 
 //snds
 	for ( i = 0; i < pk3SoundsN; i++ ){
-		for ( j = 0; j < EXpk3SoundsN; j++ ){
-			if ( !stricmp( pk3Sounds + i*65, EXpk3Sounds + j*65 ) ){
+		for ( j = 0; j < ExSoundsN; j++ ){
+			if ( !stricmp( pk3Sounds + i*65, ExSounds + j*65 ) ){
 				*( pk3Sounds + i*65 ) = '\0';
 				break;
 			}
 		}
 	}
 
-	if( dbg ){
-		Sys_Printf( "\tShader referenced textures....%i\n", pk3TexturesN );
-		for ( i = 0; i < pk3TexturesN; i++ ){
-			Sys_Printf( "%s\n", pk3Textures + i*65 );
-		}
-		Sys_Printf( "\tShader files....\n" );
-		for ( i = 0; i < pk3ShaderfilesN; i++ ){
-			if ( *( pk3Shaderfiles + i*65 ) != '\0' ) Sys_Printf( "%s\n", pk3Shaderfiles + i*65 );
-		}
-		Sys_Printf( "\tPure textures....\n" );
-		for ( i = 0; i < pk3ShadersN; i++ ){
-			if ( *( pk3Shaders + i*65 ) != '\0' ) Sys_Printf( "%s\n", pk3Shaders + i*65 );
-		}
-	}
-
-
+	/* make a pack */
 	sprintf( packname, "%s/%s_autopacked.pk3", EnginePath, nameOFmap );
 	remove( packname );
+	sprintf( packFailName, "%s/%s_FAILEDpack.pk3", EnginePath, nameOFmap );
+	remove( packFailName );
 
-	Sys_Printf( "--- ZipZip ---\n" );
+	Sys_Printf( "\n--- ZipZip ---\n" );
 
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
@@ -2217,6 +2307,7 @@ skipEXfile:
 			continue;
 		}
 		Sys_Printf( "  !FAIL! %s\n", pk3Textures + i*65 );
+		packFAIL = qtrue;
 	}
 
 	Sys_Printf( "\n\tPure textures....\n" );
@@ -2241,6 +2332,7 @@ skipEXfile:
 				continue;
 			}
 			Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+			if ( i != pk3ShadersN - 1 ) packFAIL = qtrue; //levelshot typically
 		}
 	}
 
@@ -2254,6 +2346,7 @@ skipEXfile:
 				continue;
 			}
 			Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+			packFAIL = qtrue;
 		}
 	}
 
@@ -2266,6 +2359,7 @@ skipEXfile:
 				continue;
 			}
 			Sys_Printf( "  !FAIL! %s\n", pk3Sounds + i*65 );
+			packFAIL = qtrue;
 		}
 	}
 
@@ -2277,9 +2371,10 @@ skipEXfile:
 			continue;
 		}
 		Sys_Printf( "  !FAIL! %s\n", pk3Videos + i*65 );
+		packFAIL = qtrue;
 	}
 
-	Sys_Printf( "\n\t.\n" );
+	Sys_Printf( "\n\t.bsp and stuff\n" );
 
 	sprintf( temp, "maps/%s.bsp", nameOFmap );
 	if ( vfsPackFile( temp, packname ) ){
@@ -2287,6 +2382,7 @@ skipEXfile:
 		}
 	else{
 		Sys_Printf( "  !FAIL! %s\n", temp );
+		packFAIL = qtrue;
 	}
 
 	sprintf( temp, "maps/%s.aas", nameOFmap );
@@ -2313,7 +2409,13 @@ skipEXfile:
 		Sys_Printf( "  !FAIL! %s\n", temp );
 	}
 
+	if ( !packFAIL ){
 	Sys_Printf( "\nSaved to %s\n", packname );
+	}
+	else{
+		rename( packname, packFailName );
+		Sys_Printf( "\nSaved to %s\n", packFailName );
+	}
 	/* return to sender */
 	return 0;
 }

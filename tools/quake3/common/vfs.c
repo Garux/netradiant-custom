@@ -545,6 +545,9 @@ qboolean vfsPackFile( const char *filename, const char *packname ){
 		// we need to end the buffer with a 0
 		( (char*) ( bufferptr ) )[file->size] = 0;
 
+		mz_uint16 DOS_time = (mz_uint16)(((file->zipinfo.cur_file_info.tmu_date.tm_hour) << 11) + ((file->zipinfo.cur_file_info.tmu_date.tm_min) << 5) + ((file->zipinfo.cur_file_info.tmu_date.tm_sec) >> 1));
+		mz_uint16 DOS_date = (mz_uint16)(((file->zipinfo.cur_file_info.tmu_date.tm_year - 1980) << 9) + ((file->zipinfo.cur_file_info.tmu_date.tm_mon + 1) << 5) + file->zipinfo.cur_file_info.tmu_date.tm_mday);
+
 		i = unzReadCurrentFile( file->zipfile, bufferptr, file->size );
 		unzCloseCurrentFile( file->zipfile );
 		if ( i < 0 ) {
@@ -552,7 +555,7 @@ qboolean vfsPackFile( const char *filename, const char *packname ){
 		}
 		else{
 			mz_bool success = MZ_TRUE;
-			success &= mz_zip_add_mem_to_archive_file_in_place( packname, filename, bufferptr, i, 0, 0, 10 );
+			success &= mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, bufferptr, i, 0, 0, 10, DOS_time, DOS_date );
 				if ( !success ){
 					Error( "Failed creating zip archive \"%s\"!\n", packname );
 				}

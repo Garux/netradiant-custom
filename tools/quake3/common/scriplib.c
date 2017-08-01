@@ -98,7 +98,35 @@ void LoadScriptFile( const char *filename, int index ){
 	endofscript = qfalse;
 	tokenready = qfalse;
 }
+/* &unload current; for autopacker */
+void SilentLoadScriptFile( const char *filename, int index ){
+	int size;
 
+	if ( script->buffer != NULL && !endofscript ) {
+		free( script->buffer );
+		script->buffer = NULL;
+	}
+
+	script = scriptstack;
+
+	script++;
+	if ( script == &scriptstack[MAX_INCLUDES] ) {
+		Error( "script file exceeded MAX_INCLUDES" );
+	}
+	strcpy( script->filename, ExpandPath( filename ) );
+
+	size = vfsLoadFile( script->filename, (void **)&script->buffer, index );
+
+	if ( size == -1 ) {
+		Sys_Printf( "Script file %s was not found\n", script->filename );
+	}
+	script->line = 1;
+	script->script_p = script->buffer;
+	script->end_p = script->buffer + size;
+
+	endofscript = qfalse;
+	tokenready = qfalse;
+}
 
 /*
    ==============
