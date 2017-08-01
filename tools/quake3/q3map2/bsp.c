@@ -196,7 +196,7 @@ static void SetCloneModelNumbers( void ){
 					Sys_Printf( "WARNING: Cloned entity %s referenced entity without model\n", value2 );
 					continue;
 				}
-				models = atoi( &value2[ 1 ] );
+				models = atoi( &value3[ 1 ] );
 
 				/* add the model key */
 				sprintf( modelValue, "*%d", models );
@@ -980,6 +980,10 @@ int BSPMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ], "-bsp" ) ) {
 			Sys_Printf( "-bsp argument unnecessary\n" );
+		}
+		else if ( !strcmp( argv[ i ], "-noob" ) ) {
+			Sys_Printf( "No oBs!\n" );
+			noob = qtrue;
 		}
 		else
 		{

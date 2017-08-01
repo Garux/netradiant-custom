@@ -62,6 +62,8 @@ void Select_RotateTexture( float amt );
 void Select_ScaleTexture( float x, float y );
 void Select_ShiftTexture( float x, float y );
 void Select_FitTexture( float horizontal = 1, float vertical = 1 );
+void Select_FitTextureW( float horizontal = 1, float vertical = 1 );
+void Select_FitTextureH( float horizontal = 1, float vertical = 1 );
 void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelected );
 
 void HideSelected();

@@ -318,13 +318,22 @@ void CalcVis( void ){
 	}
 	if ( value[ 0 ] != '\0' ) {
 		farPlaneDist = atof( value );
-		if ( farPlaneDist > 0.0f ) {
+		farPlaneDistMode = value[strlen(value) - 1 ];
+		if ( farPlaneDist != 0.0f ) {
 			Sys_Printf( "farplane distance = %.1f\n", farPlaneDist );
 		}
-		else{
-			farPlaneDist = 0.0f;
+			if ( farPlaneDist != 0.0f && farPlaneDistMode == 'o' ) {
+			Sys_Printf( "farplane Origin2Origin mode on\n" );
 		}
+			if ( farPlaneDist != 0.0f && farPlaneDistMode == 'r' ) {
+			Sys_Printf( "farplane Radius+Radius mode on\n" );
+		}
+			if ( farPlaneDist != 0.0f && farPlaneDistMode == 'e' ) {
+			Sys_Printf( "farplane Exact distance mode on\n" );
+		}
+
 	}
+
 
 
 

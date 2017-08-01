@@ -660,7 +660,7 @@ static shaderInfo_t *AllocShaderInfo( void ){
 	si->patchShadows = qfalse;
 	si->vertexShadows = qtrue;  /* ydnar: changed default behavior */
 	si->forceSunlight = qfalse;
-	si->vertexScale = 1.0;
+	si->vertexScale = vertexglobalscale;
 	si->notjunc = qfalse;
 
 	/* ydnar: set texture coordinate transform matrix to identity */
@@ -727,6 +727,9 @@ void FinishShader( shaderInfo_t *si ){
 			}
 		}
 	}
+		if (noob && !(si->compileFlags & C_OB)){
+			ApplySurfaceParm( "noob", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
+		}
 
 	/* set to finished */
 	si->finished = qtrue;
@@ -1603,11 +1606,11 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_vertexScale (scale vertex lighting by this fraction) */
 				else if ( !Q_stricmp( token, "q3map_vertexScale" ) ) {
 					GetTokenAppend( shaderText, qfalse );
-					si->vertexScale = atof( token );
+					si->vertexScale *= atof( token );
 				}
 
 				/* q3map_noVertexLight */
-				else if ( !Q_stricmp( token, "q3map_noVertexLight" )  ) {
+				else if ( !Q_stricmp( token, "q3map_noVertexLight" ) ) {
 					si->noVertexLight = qtrue;
 				}
 

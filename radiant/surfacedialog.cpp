@@ -441,6 +441,16 @@ void SurfaceInspector_FitTexture(){
 	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
 }
 
+void SurfaceInspector_FitTextureW(){
+	UndoableCommand undo( "textureAutoFitW" );
+	Select_FitTextureW( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
+}
+
+void SurfaceInspector_FitTextureH(){
+	UndoableCommand undo( "textureAutoFitH" );
+	Select_FitTextureH( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
+}
+
 static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
 	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
 }
@@ -494,6 +504,18 @@ static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
 	getSurfaceInspector().exportData();
 	SurfaceInspector_FitTexture();
 }
+
+static void OnBtnFaceFitW( GtkWidget *widget, gpointer data ){
+	getSurfaceInspector().exportData();
+	SurfaceInspector_FitTextureW();
+}
+
+static void OnBtnFaceFitH( GtkWidget *widget, gpointer data ){
+	getSurfaceInspector().exportData();
+	SurfaceInspector_FitTextureH();
+}
+
+
 
 typedef const char* FlagName;
 
@@ -853,18 +875,24 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Width" );
-					gtk_widget_show( label );
-					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL ),
+					GtkWidget* button = gtk_button_new_with_label( "Width" );
+					gtk_widget_show( button );
+					gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 0, 1,
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					g_signal_connect( G_OBJECT( button ), "clicked",
+									  G_CALLBACK( OnBtnFaceFitW ), 0 );
+					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Height" );
-					gtk_widget_show( label );
-					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 0, 1,
-									  (GtkAttachOptions) ( GTK_FILL ),
+					GtkWidget* button = gtk_button_new_with_label( "Height" );
+					gtk_widget_show( button );
+					gtk_table_attach( GTK_TABLE( table ), button, 3, 4, 0, 1,
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					g_signal_connect( G_OBJECT( button ), "clicked",
+									  G_CALLBACK( OnBtnFaceFitH ), 0 );
+					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
 					GtkWidget* button = gtk_button_new_with_label( "Axial" );

@@ -1291,13 +1291,13 @@ int ScaleBSPMain( int argc, char **argv ){
 		GetVectorForKey( &entities[ i ], "origin", vec );
 		if ( ( vec[ 0 ] || vec[ 1 ] || vec[ 2 ] ) ) {
 			if ( !strncmp( ValueForKey( &entities[i], "classname" ), "info_player_", 12 ) ) {
-				vec[2] += spawn_ref;
+//				vec[2] += spawn_ref;
 			}
 			vec[0] *= scale[0];
 			vec[1] *= scale[1];
 			vec[2] *= scale[2];
 			if ( !strncmp( ValueForKey( &entities[i], "classname" ), "info_player_", 12 ) ) {
-				vec[2] -= spawn_ref;
+				vec[2] += spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 			SetKeyValue( &entities[ i ], "origin", str );
@@ -1467,6 +1467,265 @@ int ScaleBSPMain( int argc, char **argv ){
 	/* return to sender */
 	return 0;
 }
+
+
+/*
+   ShiftBSPMain()
+   shifts a map: works correctly only with axial faces, placed in positive half of axis
+   for testing physics with huge coordinates
+ */
+
+int ShiftBSPMain( int argc, char **argv ){
+	int i, j;
+	float f, a;
+	vec3_t scale;
+	vec3_t vec;
+	char str[ 1024 ];
+	int uniform, axis;
+	qboolean texscale;
+	float *old_xyzst = NULL;
+	float spawn_ref = 0;
+
+
+	/* arg checking */
+	if ( argc < 3 ) {
+		Sys_Printf( "Usage: q3map [-v] -shift [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
+		return 0;
+	}
+
+	texscale = qfalse;
+	for ( i = 1; i < argc - 2; ++i )
+	{
+		if ( !strcmp( argv[i], "-tex" ) ) {
+			texscale = qtrue;
+		}
+		else if ( !strcmp( argv[i], "-spawn_ref" ) ) {
+			spawn_ref = atof( argv[i + 1] );
+			++i;
+		}
+		else{
+			break;
+		}
+	}
+
+	/* get scale */
+	// if(argc-2 >= i) // always true
+	scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
+	if ( argc - 3 >= i ) {
+		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
+	}
+	if ( argc - 4 >= i ) {
+		scale[0] = atof( argv[ argc - 4 ] );
+	}
+
+	uniform = ( ( scale[0] == scale[1] ) && ( scale[1] == scale[2] ) );
+
+
+	/* do some path mangling */
+	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	StripExtension( source );
+	DefaultExtension( source, ".bsp" );
+
+	/* load the bsp */
+	Sys_Printf( "Loading %s\n", source );
+	LoadBSPFile( source );
+	ParseEntities();
+
+	/* note it */
+	Sys_Printf( "--- ShiftBSP ---\n" );
+	Sys_FPrintf( SYS_VRB, "%9d entities\n", numEntities );
+
+	/* scale entity keys */
+	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
+	{
+		/* scale origin */
+		GetVectorForKey( &entities[ i ], "origin", vec );
+		if ( ( vec[ 0 ] || vec[ 1 ] || vec[ 2 ] ) ) {
+			if ( !strncmp( ValueForKey( &entities[i], "classname" ), "info_player_", 12 ) ) {
+				vec[2] += spawn_ref;
+			}
+			vec[0] += scale[0];
+			vec[1] += scale[1];
+			vec[2] += scale[2];
+			if ( !strncmp( ValueForKey( &entities[i], "classname" ), "info_player_", 12 ) ) {
+				vec[2] -= spawn_ref;
+			}
+			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
+			SetKeyValue( &entities[ i ], "origin", str );
+		}
+
+	}
+
+	/* scale models */
+	for ( i = 0; i < numBSPModels; i++ )
+	{
+		bspModels[ i ].mins[0] += scale[0];
+		bspModels[ i ].mins[1] += scale[1];
+		bspModels[ i ].mins[2] += scale[2];
+		bspModels[ i ].maxs[0] += scale[0];
+		bspModels[ i ].maxs[1] += scale[1];
+		bspModels[ i ].maxs[2] += scale[2];
+	}
+
+	/* scale nodes */
+	for ( i = 0; i < numBSPNodes; i++ )
+	{
+		bspNodes[ i ].mins[0] += scale[0];
+		bspNodes[ i ].mins[1] += scale[1];
+		bspNodes[ i ].mins[2] += scale[2];
+		bspNodes[ i ].maxs[0] += scale[0];
+		bspNodes[ i ].maxs[1] += scale[1];
+		bspNodes[ i ].maxs[2] += scale[2];
+	}
+
+	/* scale leafs */
+	for ( i = 0; i < numBSPLeafs; i++ )
+	{
+		bspLeafs[ i ].mins[0] += scale[0];
+		bspLeafs[ i ].mins[1] += scale[1];
+		bspLeafs[ i ].mins[2] += scale[2];
+		bspLeafs[ i ].maxs[0] += scale[0];
+		bspLeafs[ i ].maxs[1] += scale[1];
+		bspLeafs[ i ].maxs[2] += scale[2];
+	}
+/*
+	if ( texscale ) {
+		Sys_Printf( "Using texture unlocking (and probably breaking texture alignment a lot)\n" );
+		old_xyzst = safe_malloc( sizeof( *old_xyzst ) * numBSPDrawVerts * 5 );
+		for ( i = 0; i < numBSPDrawVerts; i++ )
+		{
+			old_xyzst[5 * i + 0] = bspDrawVerts[i].xyz[0];
+			old_xyzst[5 * i + 1] = bspDrawVerts[i].xyz[1];
+			old_xyzst[5 * i + 2] = bspDrawVerts[i].xyz[2];
+			old_xyzst[5 * i + 3] = bspDrawVerts[i].st[0];
+			old_xyzst[5 * i + 4] = bspDrawVerts[i].st[1];
+		}
+	}
+*/
+	/* scale drawverts */
+	for ( i = 0; i < numBSPDrawVerts; i++ )
+	{
+		bspDrawVerts[i].xyz[0] += scale[0];
+		bspDrawVerts[i].xyz[1] += scale[1];
+		bspDrawVerts[i].xyz[2] += scale[2];
+//		bspDrawVerts[i].normal[0] /= scale[0];
+//		bspDrawVerts[i].normal[1] /= scale[1];
+//		bspDrawVerts[i].normal[2] /= scale[2];
+//		VectorNormalize( bspDrawVerts[i].normal, bspDrawVerts[i].normal );
+	}
+/*
+	if ( texscale ) {
+		for ( i = 0; i < numBSPDrawSurfaces; i++ )
+		{
+			switch ( bspDrawSurfaces[i].surfaceType )
+			{
+			case SURFACE_FACE:
+			case SURFACE_META:
+				if ( bspDrawSurfaces[i].numIndexes % 3 ) {
+					Error( "Not a triangulation!" );
+				}
+				for ( j = bspDrawSurfaces[i].firstIndex; j < bspDrawSurfaces[i].firstIndex + bspDrawSurfaces[i].numIndexes; j += 3 )
+				{
+					int ia = bspDrawIndexes[j] + bspDrawSurfaces[i].firstVert, ib = bspDrawIndexes[j + 1] + bspDrawSurfaces[i].firstVert, ic = bspDrawIndexes[j + 2] + bspDrawSurfaces[i].firstVert;
+					bspDrawVert_t *a = &bspDrawVerts[ia], *b = &bspDrawVerts[ib], *c = &bspDrawVerts[ic];
+					float *oa = &old_xyzst[ia * 5], *ob = &old_xyzst[ib * 5], *oc = &old_xyzst[ic * 5];
+					// extrapolate:
+					//   a->xyz -> oa
+					//   b->xyz -> ob
+					//   c->xyz -> oc
+					ExtrapolateTexcoords(
+						&oa[0], &oa[3],
+						&ob[0], &ob[3],
+						&oc[0], &oc[3],
+						a->xyz, a->st,
+						b->xyz, b->st,
+						c->xyz, c->st );
+				}
+				break;
+			}
+		}
+	}
+*/
+	/* scale planes */
+
+	for ( i = 0; i < numBSPPlanes; i++ )
+	{
+		if ( bspPlanes[ i ].dist > 0 ){
+				if ( bspPlanes[ i ].normal[0] ){
+					bspPlanes[ i ].dist += scale[0];
+					continue;
+				}
+				else if ( bspPlanes[ i ].normal[1] ){
+					bspPlanes[ i ].dist += scale[1];
+					continue;
+				}
+				else if ( bspPlanes[ i ].normal[2] ){
+					bspPlanes[ i ].dist += scale[2];
+					continue;
+				}
+		}
+		else{
+				if ( bspPlanes[ i ].normal[0] ){
+					bspPlanes[ i ].dist -= scale[0];
+					continue;
+				}
+				else if ( bspPlanes[ i ].normal[1] ){
+					bspPlanes[ i ].dist -= scale[1];
+					continue;
+				}
+				else if ( bspPlanes[ i ].normal[2] ){
+					bspPlanes[ i ].dist -= scale[2];
+					continue;
+				}
+		}
+	}
+
+
+/*	if ( uniform ) {
+		for ( i = 0; i < numBSPPlanes; i++ )
+		{
+			bspPlanes[ i ].dist += scale[0];
+		}
+	}
+	else
+	{
+		for ( i = 0; i < numBSPPlanes; i++ )
+		{
+//			bspPlanes[ i ].normal[0] /= scale[0];
+//			bspPlanes[ i ].normal[1] /= scale[1];
+//			bspPlanes[ i ].normal[2] /= scale[2];
+			f = 1 / VectorLength( bspPlanes[i].normal );
+			VectorScale( bspPlanes[i].normal, f, bspPlanes[i].normal );
+			bspPlanes[ i ].dist *= f;
+		}
+	}*/
+
+	/* scale gridsize */
+	/*
+	GetVectorForKey( &entities[ 0 ], "gridsize", vec );
+	if ( ( vec[ 0 ] + vec[ 1 ] + vec[ 2 ] ) == 0.0f ) {
+		VectorCopy( gridSize, vec );
+	}
+	vec[0] *= scale[0];
+	vec[1] *= scale[1];
+	vec[2] *= scale[2];
+	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
+	SetKeyValue( &entities[ 0 ], "gridsize", str );
+*/
+	/* inject command line parameters */
+	InjectCommandLine( argv, 0, argc - 1 );
+
+	/* write the bsp */
+	UnparseEntities();
+	StripExtension( source );
+	DefaultExtension( source, "_sh.bsp" );
+	Sys_Printf( "Writing %s\n", source );
+	WriteBSPFile( source );
+
+	/* return to sender */
+	return 0;
+}
+
 
 
 /*
@@ -1771,6 +2030,13 @@ int main( int argc, char **argv ){
 			numthreads = atoi( argv[ i ] );
 			argv[ i ] = NULL;
 		}
+		else if( !strcmp( argv[ i ], "-nocmdline" ) )
+		{
+			Sys_Printf( "noCmdLine\n" );
+			nocmdline = qtrue;
+			argv[ i ] = NULL;
+		}
+
 	}
 
 	/* init model library */
@@ -1857,6 +2123,11 @@ int main( int argc, char **argv ){
 	/* ydnar: bsp scaling */
 	else if ( !strcmp( argv[ 1 ], "-scale" ) ) {
 		r = ScaleBSPMain( argc - 1, argv + 1 );
+	}
+
+	/* bsp shifting */
+	else if ( !strcmp( argv[ 1 ], "-shift" ) ) {
+		r = ShiftBSPMain( argc - 1, argv + 1 );
 	}
 
 	/* ydnar: bsp conversion */

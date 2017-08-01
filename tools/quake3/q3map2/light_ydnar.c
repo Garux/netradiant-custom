@@ -2222,7 +2222,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 			}
 
 			/* allocate sampling flags storage */
-			if ( ( lightSamples > 1 || lightRandomSamples ) && luxelFilterRadius == 0 ) {
+			if ( lightSamples > 1 || lightRandomSamples ) {
 				size = lm->sw * lm->sh * SUPER_LUXEL_SIZE * sizeof( unsigned char );
 				if ( lm->superFlags == NULL ) {
 					lm->superFlags = safe_malloc( size );
@@ -2276,7 +2276,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 						}
 
 						/* check for evilness */
-						if ( trace.forceSubsampling > 1.0f && ( lightSamples > 1 || lightRandomSamples ) && luxelFilterRadius == 0 ) {
+						if ( trace.forceSubsampling > 1.0f && ( lightSamples > 1 || lightRandomSamples ) ) {
 							totalLighted++;
 							*flag |= FLAG_FORCE_SUBSAMPLING; /* force */
 						}
@@ -2295,7 +2295,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 			/* secondary pass, adaptive supersampling (fixme: use a contrast function to determine if subsampling is necessary) */
 			/* 2003-09-27: changed it so filtering disamples supersampling, as it would waste time */
-			if ( ( lightSamples > 1 || lightRandomSamples ) && luxelFilterRadius == 0 ) {
+			if ( lightSamples > 1 || lightRandomSamples ) {
 				/* walk luxels */
 				for ( y = 0; y < ( lm->sh - 1 ); y++ )
 				{
@@ -2858,6 +2858,14 @@ void IlluminateVertexes( int num ){
 				radVertLuxel[ 2 ] = ( verts[ i ].normal[ 2 ] + 1.0f ) * 127.5f;
 			}
 
+			else if ( info->si->noVertexLight ) {
+				VectorSet( radVertLuxel, 127.5f, 127.5f, 127.5f );
+			}
+
+			else if ( noVertexLighting > 0 ) {
+				VectorSet( radVertLuxel, 127.5f * noVertexLighting, 127.5f * noVertexLighting, 127.5f * noVertexLighting );
+			}
+
 			/* illuminate the vertex */
 			else
 			{
@@ -3105,6 +3113,14 @@ void IlluminateVertexes( int num ){
 			/* color the luxel with surface num? */
 			else if ( debugSurfaces ) {
 				VectorCopy( debugColors[ num % 12 ], radVertLuxel );
+			}
+
+			else if ( info->si->noVertexLight ) {
+				VectorSet( radVertLuxel, 127.5f, 127.5f, 127.5f );
+			}
+
+			else if ( noVertexLighting > 0 ) {
+				VectorSet( radVertLuxel, 127.5f * noVertexLighting, 127.5f * noVertexLighting, 127.5f * noVertexLighting );
 			}
 
 			/* divine color from the superluxels */

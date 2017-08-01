@@ -598,6 +598,14 @@ void fit( const Vector3& normal, const Winding& winding, float s_repeat, float t
 	Texdef_FitTexture( m_projection, m_shader.width(), m_shader.height(), normal, winding, s_repeat, t_repeat );
 }
 
+void fitW( const Vector3& normal, const Winding& winding, float s_repeat, float t_repeat ){
+	Texdef_FitTextureW( m_projection, m_shader.width(), m_shader.height(), normal, winding, s_repeat, t_repeat );
+}
+
+void fitH( const Vector3& normal, const Winding& winding, float s_repeat, float t_repeat ){
+	Texdef_FitTextureH( m_projection, m_shader.width(), m_shader.height(), normal, winding, s_repeat, t_repeat );
+}
+
 void emitTextureCoordinates( Winding& winding, const Vector3& normal, const Matrix4& localToWorld ){
 	Texdef_EmitTextureCoordinates( m_projection, m_shader.width(), m_shader.height(), winding, normal, localToWorld );
 }
@@ -1196,6 +1204,18 @@ void RotateTexdef( float angle ){
 void FitTexture( float s_repeat, float t_repeat ){
 	undoSave();
 	m_texdef.fit( m_plane.plane3().normal(), m_winding, s_repeat, t_repeat );
+	texdefChanged();
+}
+
+void FitTextureW( float s_repeat, float t_repeat ){
+	undoSave();
+	m_texdef.fitW( m_plane.plane3().normal(), m_winding, s_repeat, t_repeat );
+	texdefChanged();
+}
+
+void FitTextureH( float s_repeat, float t_repeat ){
+	undoSave();
+	m_texdef.fitH( m_plane.plane3().normal(), m_winding, s_repeat, t_repeat );
 	texdefChanged();
 }
 

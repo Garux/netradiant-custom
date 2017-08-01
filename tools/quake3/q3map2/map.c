@@ -1769,6 +1769,9 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 	else if ( strcmp( "", ValueForKey( mapEnt, "_sn" ) ) ) {
 		shadeAngle = FloatForKey( mapEnt, "_sn" );
 	}
+	else if ( strcmp( "", ValueForKey( mapEnt, "_sa" ) ) ) {
+		shadeAngle = FloatForKey( mapEnt, "_sa" );
+	}
 	else if ( strcmp( "", ValueForKey( mapEnt, "_smooth" ) ) ) {
 		shadeAngle = FloatForKey( mapEnt, "_smooth" );
 	}
@@ -1788,6 +1791,9 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 	}
 	else if ( strcmp( "", ValueForKey( mapEnt, "_samplesize" ) ) ) {
 		lightmapSampleSize = IntForKey( mapEnt, "_samplesize" );
+	}
+	else if ( strcmp( "", ValueForKey( mapEnt, "_ss" ) ) ) {
+		lightmapSampleSize = IntForKey( mapEnt, "_ss" );
 	}
 
 	if ( lightmapSampleSize < 0 ) {

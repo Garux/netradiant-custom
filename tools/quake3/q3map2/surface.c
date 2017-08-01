@@ -598,7 +598,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		   ----------------------------------------------------------------- */
 
 		/* vertex lit surfaces don't need this information */
-		if ( si->compileFlags & C_VERTEXLIT || ds->type == SURFACE_TRIANGLES ) {
+		if ( si->compileFlags & C_VERTEXLIT || ds->type == SURFACE_TRIANGLES || nolm == qtrue ) {
 			VectorClear( ds->lightmapAxis );
 			//%	VectorClear( ds->lightmapVecs[ 2 ] );
 			ds->sampleSize = 0;
@@ -3648,10 +3648,10 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 		}
 
 		/* ydnar: remap shader */
-		if ( ds->shaderInfo->remapShader && ds->shaderInfo->remapShader[ 0 ] ) {
+/*		if ( ds->shaderInfo->remapShader && ds->shaderInfo->remapShader[ 0 ] ) {
 			ds->shaderInfo = ShaderInfoForShader( ds->shaderInfo->remapShader );
 		}
-
+*/
 		/* ydnar: gs mods: handle the various types of surfaces */
 		switch ( ds->type )
 		{

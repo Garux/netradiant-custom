@@ -1092,7 +1092,8 @@ void SetupSurfaceLightmaps( void ){
 			/* determine if surface requires a lightmap */
 			if ( ds->surfaceType == MST_TRIANGLE_SOUP ||
 				 ds->surfaceType == MST_FOLIAGE ||
-				 ( info->si->compileFlags & C_VERTEXLIT ) ) {
+				( info->si->compileFlags & C_VERTEXLIT ) ||
+				nolm == qtrue ) {
 				numSurfsVertexLit++;
 			}
 			else

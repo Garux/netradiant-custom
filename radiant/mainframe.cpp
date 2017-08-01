@@ -3201,13 +3201,15 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "PasteToCamera", FreeCaller<PasteToCamera>(), Accelerator( 'V', (GdkModifierType)GDK_MOD1_MASK ) );
 	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), Accelerator( GDK_space ) );
 	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
+//	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
+	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( 'Z' ) );
 	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
-	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
+//	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
+	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( 'C' ) );
 	GlobalCommands_insert( "InvertSelection", FreeCaller<Select_Invert>(), Accelerator( 'I' ) );
 	GlobalCommands_insert( "SelectInside", FreeCaller<Select_Inside>() );
 	GlobalCommands_insert( "SelectTouching", FreeCaller<Select_Touching>() );
-	GlobalCommands_insert( "ExpandSelectionToEntities", FreeCaller<Scene_ExpandSelectionToEntities>(), Accelerator( 'E', (GdkModifierType)( GDK_MOD1_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalCommands_insert( "ExpandSelectionToEntities", FreeCaller<Scene_ExpandSelectionToEntities>(), Accelerator( 'E', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "Preferences", FreeCaller<PreferencesDialog_showDialog>(), Accelerator( 'P' ) );
 
 	GlobalCommands_insert( "ToggleConsole", FreeCaller<Console_ToggleShow>(), Accelerator( 'O' ) );
@@ -3228,8 +3230,8 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "MirrorSelectionZ", FreeCaller<Selection_Flipz>() );
 	GlobalCommands_insert( "RotateSelectionZ", FreeCaller<Selection_Rotatez>() );
 
-	GlobalCommands_insert( "ArbitraryRotation", FreeCaller<DoRotateDlg>() );
-	GlobalCommands_insert( "ArbitraryScale", FreeCaller<DoScaleDlg>() );
+	GlobalCommands_insert( "ArbitraryRotation", FreeCaller<DoRotateDlg>(), Accelerator( 'R', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "ArbitraryScale", FreeCaller<DoScaleDlg>(), Accelerator( 'S', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 
 	GlobalCommands_insert( "BuildMenuCustomize", FreeCaller<DoBuildMenu>() );
 

@@ -169,7 +169,7 @@ void SwapBlock( int *block, int size ){
 
 void SwapBSPFile( void ){
 	int i, j;
-
+	shaderInfo_t    *si;
 
 	/* models */
 	SwapBlock( (int*) bspModels, numBSPModels * sizeof( bspModels[ 0 ] ) );
@@ -177,6 +177,11 @@ void SwapBSPFile( void ){
 	/* shaders (don't swap the name) */
 	for ( i = 0; i < numBSPShaders ; i++ )
 	{
+		si = ShaderInfoForShader( bspShaders[ i ].shader );
+		if ( si->remapShader && si->remapShader[ 0 ] ) {
+			strcpy( bspShaders[ i ].shader, si->remapShader );
+		}
+
 		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
 		bspShaders[ i ].surfaceFlags = LittleLong( bspShaders[ i ].surfaceFlags );
 	}
@@ -592,6 +597,10 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
 	char *sentinel = newCommandLine + sizeof( newCommandLine ) - 1;
 	int i;
 
+if (nocmdline)
+{
+	return;
+}
 	previousCommandLine = ValueForKey( &entities[0], "_q3map2_cmdline" );
 	if ( previousCommandLine && *previousCommandLine ) {
 		inpos = previousCommandLine;

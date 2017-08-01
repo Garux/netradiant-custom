@@ -418,7 +418,15 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		if ( ( si != NULL && si->forceMeta ) || ( spawnFlags & 4 ) ) { /* 3rd bit */
 			ds->type = SURFACE_FORCED_META;
 		}
-
+/*		else
+			{
+				//fix not requested lightmapping of models :E
+				// else force vertexlit
+				//	ApplySurfaceParm( "pointlight", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
+				//   si->compileFlags |= C_VERTEXLIT;
+				//ds->type == SURFACE_TRIANGLES;
+			}
+*/
 		/* fix the surface's normals (jal: conditioned by shader info) */
 		if ( !( spawnFlags & 64 ) && ( shadeAngle == 0.0f || ds->type != SURFACE_FORCED_META ) ) {
 			PicoFixSurfaceNormals( surface );
@@ -875,6 +883,9 @@ void AddTriangleModels( entity_t *e ){
 		else if ( strcmp( "", ValueForKey( e2, "_samplesize" ) ) ) {
 			lightmapSampleSize = IntForKey( e2, "_samplesize" );
 		}
+		else if ( strcmp( "", ValueForKey( e2, "_ss" ) ) ) {
+			lightmapSampleSize = IntForKey( e2, "_ss" );
+		}
 
 		if ( lightmapSampleSize < 0 ) {
 			lightmapSampleSize = 0;
@@ -916,6 +927,9 @@ void AddTriangleModels( entity_t *e ){
 		}
 		else if ( strcmp( "", ValueForKey( e2, "_sn" ) ) ) {
 			shadeAngle = FloatForKey( e2, "_sn" );
+		}
+		else if ( strcmp( "", ValueForKey( e2, "_sa" ) ) ) {
+			shadeAngle = FloatForKey( e2, "_sa" );
 		}
 		else if ( strcmp( "", ValueForKey( e2, "_smooth" ) ) ) {
 			shadeAngle = FloatForKey( e2, "_smooth" );
