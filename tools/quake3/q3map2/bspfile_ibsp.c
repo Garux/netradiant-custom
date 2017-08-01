@@ -519,7 +519,39 @@ void LoadIBSPFile( const char *filename ){
 	free( header );
 }
 
+/*
+   PartialLoadIBSPFile()
+   loads a part of quake 3 bsp file, required by packer, into memory
+ */
 
+void PartialLoadIBSPFile( const char *filename ){
+	ibspHeader_t    *header;
+
+
+	/* load the file header */
+	LoadFile( filename, (void**) &header );
+
+	/* swap the header (except the first 4 bytes) */
+	SwapBlock( (int*) ( (byte*) header + sizeof( int ) ), sizeof( *header ) - sizeof( int ) );
+
+	/* make sure it matches the format we're trying to load */
+	if ( force == qfalse && *( (int*) header->ident ) != *( (int*) game->bspIdent ) ) {
+		Error( "%s is not a %s file", filename, game->bspIdent );
+	}
+	if ( force == qfalse && header->version != game->bspVersion ) {
+		Error( "%s is version %d, not %d", filename, header->version, game->bspVersion );
+	}
+
+	/* load/convert lumps */
+	numBSPShaders = CopyLump_Allocate( (bspHeader_t*) header, LUMP_SHADERS, (void **) &bspShaders, sizeof( bspShader_t ), &allocatedBSPShaders );
+
+	CopyDrawSurfacesLump( header );
+
+	bspEntDataSize = CopyLump_Allocate( (bspHeader_t*) header, LUMP_ENTITIES, (void **) &bspEntData, 1, &allocatedBSPEntData );
+
+	/* free the file buffer */
+	free( header );
+}
 
 /*
    WriteIBSPFile()

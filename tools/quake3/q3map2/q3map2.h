@@ -1885,6 +1885,7 @@ int                         CopyLump_Allocate( bspHeader_t *header, int lump, vo
 void                        AddLump( FILE *file, bspHeader_t *header, int lumpNum, const void *data, int length );
 
 void                        LoadBSPFile( const char *filename );
+void                        PartialLoadBSPFile( const char *filename );
 void                        WriteBSPFile( const char *filename );
 void                        PrintBSPFileSizes( void );
 
@@ -1907,6 +1908,8 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs );
 /* bspfile_ibsp.c */
 void                        LoadIBSPFile( const char *filename );
 void                        WriteIBSPFile( const char *filename );
+void						PartialLoadIBSPFile( const char *filename );
+
 
 
 /* bspfile_rbsp.c */

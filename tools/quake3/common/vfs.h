@@ -52,7 +52,7 @@ void vfsShutdown();
 int vfsGetFileCount( const char *filename );
 int vfsLoadFile( const char *filename, void **buffer, int index );
 void vfsListShaderFiles( char* list, int *num );
-qboolean vfsPackFile( const char *filename, const char *packname );
+qboolean vfsPackFile( const char *filename, const char *packname, const int compLevel );
 
 extern char g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX + 1];
 extern int g_numForbiddenDirs;

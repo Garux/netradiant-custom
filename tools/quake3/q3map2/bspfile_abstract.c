@@ -263,8 +263,6 @@ void SwapBSPFile( void ){
 	}
 }
 
-
-
 /*
    GetLumpElements()
    gets the number of elements in a bsp lump
@@ -375,7 +373,37 @@ void LoadBSPFile( const char *filename ){
 	SwapBSPFile();
 }
 
+/*
+   PartialLoadBSPFile()
+   partially loads a bsp file into memory
+   for autopacker
+ */
 
+void PartialLoadBSPFile( const char *filename ){
+	/* dummy check */
+	if ( game == NULL || game->load == NULL ) {
+		Error( "LoadBSPFile: unsupported BSP file format" );
+	}
+
+	/* load it, then byte swap the in-memory version */
+	//game->load( filename );
+	PartialLoadIBSPFile( filename );
+
+	/* PartialSwapBSPFile() */
+	int i, j;
+	shaderInfo_t    *si;
+
+	/* shaders (don't swap the name) */
+	for ( i = 0; i < numBSPShaders ; i++ )
+	{
+		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
+		bspShaders[ i ].surfaceFlags = LittleLong( bspShaders[ i ].surfaceFlags );
+	}
+
+	/* drawsurfs */
+	/* note: rbsp files (and hence q3map2 abstract bsp) have byte lightstyles index arrays, this follows sof2map convention */
+	SwapBlock( (int*) bspDrawSurfaces, numBSPDrawSurfaces * sizeof( bspDrawSurfaces[ 0 ] ) );
+}
 
 /*
    WriteBSPFile()
