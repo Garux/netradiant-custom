@@ -497,6 +497,7 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/threads.o \
 	tools/quake3/common/unzip.o \
 	tools/quake3/common/vfs.o \
+	tools/quake3/common/miniz.o \
 	tools/quake3/q3map2/brush.o \
 	tools/quake3/q3map2/brush_primit.o \
 	tools/quake3/q3map2/bspfile_abstract.o \
@@ -598,6 +599,7 @@ $(INSTALLDIR)/q3data.$(EXE): \
 	tools/quake3/common/trilib.o \
 	tools/quake3/common/unzip.o \
 	tools/quake3/common/vfs.o \
+	tools/quake3/common/miniz.o \
 	tools/quake3/q3data/3dslib.o \
 	tools/quake3/q3data/compress.o \
 	tools/quake3/q3data/images.o \

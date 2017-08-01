@@ -51,6 +51,7 @@
 #include "inout.h"
 #include "vfs.h"
 #include "unzip.h"
+#include "miniz.h"
 
 typedef struct
 {
@@ -244,6 +245,72 @@ void vfsInitDirectory( const char *path ){
 	}
 }
 
+
+// lists all .shader files
+void vfsListShaderFiles( char list[512][64], int *num ){
+	//char filename[PATH_MAX];
+	char *dirlist;
+	GDir *dir;
+	int i, k;
+	char path[NAME_MAX];
+/* search in dirs */
+	for ( i = 0; i < g_numDirs; i++ ){
+		strncpy( path, g_strDirs[ i ], NAME_MAX );
+		strcat( path, "scripts/" );
+
+		dir = g_dir_open( path, 0, NULL );
+
+		if ( dir != NULL ) {
+			while ( 1 )
+			{
+				const char* name = g_dir_read_name( dir );
+				if ( name == NULL ) {
+					break;
+				}
+				dirlist = g_strdup( name );
+				char *ext = strrchr( dirlist, '.' );
+
+				if ( ( ext == NULL ) || ( Q_stricmp( ext, ".shader" ) != 0 ) ) {
+					continue;
+				}
+
+				for ( k = 0; k < *num; k++ ){
+					if ( !stricmp( list[k], dirlist ) ) goto shISdouplicate;
+				}
+				strcpy( list[*num], dirlist );
+				(*num)++;
+shISdouplicate:
+				g_free( dirlist );
+			}
+			g_dir_close( dir );
+		}
+	}
+	/* search in packs */
+	GSList *lst;
+
+	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
+	{
+		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
+
+		char *ext = strrchr( file->name, '.' );
+
+		if ( ( ext == NULL ) || ( Q_stricmp( ext, ".shader" ) != 0 ) ) {
+			continue;
+		}
+		//name + ext this time
+		ext = strrchr( file->name, '/' );
+		ext++;
+
+		for ( k = 0; k < *num; k++ ){
+			if ( !stricmp( list[k], ext ) ) goto shISdouplicate2;
+		}
+		strcpy( list[*num], ext );
+		(*num)++;
+shISdouplicate2:
+		continue;
+	}
+}
+
 // frees all memory that we allocated
 void vfsShutdown(){
 	while ( g_unzFiles )
@@ -408,4 +475,91 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 	}
 
 	return -1;
+}
+
+
+
+
+qboolean vfsPackFile( const char *filename, const char *packname ){
+	int i;
+	char tmp[NAME_MAX], fixed[NAME_MAX];
+	GSList *lst;
+
+	byte *bufferptr = NULL;
+	strcpy( fixed, filename );
+	vfsFixDOSName( fixed );
+	g_strdown( fixed );
+
+	for ( i = 0; i < g_numDirs; i++ )
+	{
+		strcpy( tmp, g_strDirs[i] );
+		strcat( tmp, filename );
+		if ( access( tmp, R_OK ) == 0 ) {
+			if ( access( packname, R_OK ) == 0 ) {
+				mz_zip_archive zip;
+				memset( &zip, 0, sizeof(zip) );
+				mz_zip_reader_init_file( &zip, packname, 0 );
+				mz_zip_writer_init_from_reader( &zip, packname );
+
+				mz_bool success = MZ_TRUE;
+				success &= mz_zip_writer_add_file( &zip, filename, tmp, 0, 0, 10 );
+				if ( !success || !mz_zip_writer_finalize_archive( &zip ) ){
+					Error( "Failed creating zip archive \"%s\"!\n", packname );
+				}
+				mz_zip_reader_end( &zip);
+				mz_zip_writer_end( &zip );
+			}
+			else{
+				mz_zip_archive zip;
+				memset( &zip, 0, sizeof(zip) );
+				if( !mz_zip_writer_init_file( &zip, packname, 0 ) ){
+					Error( "Failed creating zip archive \"%s\"!\n", packname );
+				}
+				mz_bool success = MZ_TRUE;
+				success &= mz_zip_writer_add_file( &zip, filename, tmp, 0, 0, 10 );
+				if ( !success || !mz_zip_writer_finalize_archive( &zip ) ){
+					Error( "Failed creating zip archive \"%s\"!\n", packname );
+				}
+				mz_zip_writer_end( &zip );
+			}
+
+			return qtrue;
+		}
+	}
+
+	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
+	{
+		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
+
+		if ( strcmp( file->name, fixed ) != 0 ) {
+			continue;
+		}
+
+		memcpy( file->zipfile, &file->zipinfo, sizeof( unz_s ) );
+
+		if ( unzOpenCurrentFile( file->zipfile ) != UNZ_OK ) {
+			return qfalse;
+		}
+
+		bufferptr = safe_malloc( file->size + 1 );
+		// we need to end the buffer with a 0
+		( (char*) ( bufferptr ) )[file->size] = 0;
+
+		i = unzReadCurrentFile( file->zipfile, bufferptr, file->size );
+		unzCloseCurrentFile( file->zipfile );
+		if ( i < 0 ) {
+			return qfalse;
+		}
+		else{
+			mz_bool success = MZ_TRUE;
+			success &= mz_zip_add_mem_to_archive_file_in_place( packname, filename, bufferptr, i, 0, 0, 10 );
+				if ( !success ){
+					Error( "Failed creating zip archive \"%s\"!\n", packname );
+				}
+			free( bufferptr );
+			return qtrue;
+		}
+	}
+
+	return qfalse;
 }

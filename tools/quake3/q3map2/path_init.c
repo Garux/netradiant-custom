@@ -256,6 +256,7 @@ void AddBasePath( char *path ){
 	basePaths[ numBasePaths ] = safe_malloc( strlen( path ) + 1 );
 	strcpy( basePaths[ numBasePaths ], path );
 	CleanPath( basePaths[ numBasePaths ] );
+	if ( EnginePath[0] == '\0' ) strcpy( EnginePath, basePaths[ numBasePaths ] );
 	numBasePaths++;
 }
 
@@ -373,6 +374,8 @@ void InitPaths( int *argc, char **argv ){
 	game = &games[ 0 ];
 	numBasePaths = 0;
 	numGamePaths = 0;
+
+	EnginePath[0] = '\0';
 
 	/* parse through the arguments and extract those relevant to paths */
 	for ( i = 0; i < *argc; i++ )

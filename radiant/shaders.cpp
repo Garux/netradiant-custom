@@ -70,7 +70,8 @@ void ViewShader( const char *pFile, const char *pName ){
 				break;
 			}
 		}
-		for ( const char* i = substr + strlen( strFind.c_str() ); i < strLook.c_str() + strlen( strLook.c_str() ); i++ ){
+		const char* b = strLook.c_str() + strlen( strLook.c_str() );
+		for ( const char* i = substr + strlen( strFind.c_str() ); i < b; i++ ){
 			if( (strncmp( i, "\t", 1 ) == 0) || (strncmp( i, " ", 1 ) == 0) ){
 				endOK = true;
 				continue;
@@ -113,7 +114,8 @@ void ViewShader( const char *pFile, const char *pName ){
 		break;*/
 	}
 	//fix up length
-	for ( const char* i = strLook.c_str(); i < strLook.c_str() + strlen( strLook.c_str() ) - 1; i++ ){
+	const char* b = strLook.c_str() + strlen( strLook.c_str() ) - 1;
+	for ( const char* i = strLook.c_str(); i < b; i++ ){
 		if ( (strncmp( i, "\r\n", 2 ) == 0) ){
 		length--;
 		}

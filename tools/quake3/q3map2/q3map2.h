@@ -2088,6 +2088,8 @@ Q_EXTERN int blockSize[ 3 ]                                 /* should be the sam
 	= { 1024, 1024, 1024 };
 #endif
 
+Q_EXTERN char EnginePath[ 1024 ];
+
 Q_EXTERN char name[ 1024 ];
 Q_EXTERN char source[ 1024 ];
 Q_EXTERN char outbase[ 32 ];

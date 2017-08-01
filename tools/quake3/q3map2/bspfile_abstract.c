@@ -927,7 +927,7 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 		}
 	}
 
-	/* vortex: game-specific default eneity keys */
+	/* vortex: game-specific default entity keys */
 	value = ValueForKey( ent, "classname" );
 	if ( !Q_stricmp( game->magic, "dq" ) || !Q_stricmp( game->magic, "prophecy" ) ) {
 		/* vortex: deluxe quake default shadow flags */
