@@ -2781,37 +2781,61 @@ void MainFrame::Create(){
 	GtkToolbar* main_toolbar = create_main_toolbar( CurrentStyle() );
 	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( main_toolbar ), FALSE, FALSE, 0 );
 
-	GtkToolbar* plugin_toolbar = create_plugin_toolbar();
-	if ( !g_Layout_enablePluginToolbar.m_value ) {
-		gtk_widget_hide( GTK_WIDGET( plugin_toolbar ) );
+
+
+
+	if ( g_Layout_enablePluginToolbar.m_value || g_Layout_enableFilterToolbar.m_value ){
+		GtkWidget* PFbox = gtk_hbox_new( FALSE, 3 );
+		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( PFbox ), FALSE, FALSE, 0 );
+		gtk_widget_show( PFbox );
+		if ( g_Layout_enablePluginToolbar.m_value ){
+			GtkToolbar* plugin_toolbar = create_plugin_toolbar();
+			if ( g_Layout_enableFilterToolbar.m_value ){
+				gtk_box_pack_start( GTK_BOX( PFbox ), GTK_WIDGET( plugin_toolbar ), FALSE, FALSE, 0 );
+			}
+			else{
+				gtk_box_pack_start( GTK_BOX( PFbox ), GTK_WIDGET( plugin_toolbar ), TRUE, TRUE, 0 );
+			}
+		}
+		if ( g_Layout_enableFilterToolbar.m_value ){
+			GtkToolbar* filter_toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
+			gtk_widget_show( GTK_WIDGET( filter_toolbar ) );
+
+			toolbar_append_toggle_button( filter_toolbar, "World (ALT + 1)", "f-world.bmp", "FilterWorldBrushes" );
+			toolbar_append_toggle_button( filter_toolbar, "Details (CTRL + D)", "f-details.bmp", "FilterDetails" );
+			toolbar_append_toggle_button( filter_toolbar, "Structural (CTRL + SHIFT + D)", "f-structural.bmp", "FilterStructural" );
+			toolbar_append_toggle_button( filter_toolbar, "Patches (CTRL + P)", "patch_wireframe.bmp", "FilterPatches" );
+			gtk_toolbar_append_space( GTK_TOOLBAR( filter_toolbar ) );
+			toolbar_append_toggle_button( filter_toolbar, "Areaportals (ALT + 3)", "f-areaportal.bmp", "FilterAreaportals" );
+			toolbar_append_toggle_button( filter_toolbar, "Translucent (ALT + 4)", "f-translucent.bmp", "FilterTranslucent" );
+			toolbar_append_toggle_button( filter_toolbar, "Liquids (ALT + 5)", "f-liquids.bmp", "FilterLiquids" );
+			toolbar_append_toggle_button( filter_toolbar, "Caulk (ALT + 6)", "f-caulk.bmp", "FilterCaulk" );
+			toolbar_append_toggle_button( filter_toolbar, "Clips (ALT + 7)", "f-clip.bmp", "FilterClips" );
+			toolbar_append_toggle_button( filter_toolbar, "HintsSkips (CTRL + H)", "f-hint.bmp", "FilterHintsSkips" );
+			//toolbar_append_toggle_button( filter_toolbar, "Paths (ALT + 8)", "texture_lock.bmp", "FilterPaths" );
+			gtk_toolbar_append_space( GTK_TOOLBAR( filter_toolbar ) );
+			toolbar_append_toggle_button( filter_toolbar, "Entities (ALT + 2)", "f-entities.bmp", "FilterEntities" );
+			toolbar_append_toggle_button( filter_toolbar, "Lights (ALT + 0)", "lightinspector.bmp", "FilterLights" );
+			toolbar_append_toggle_button( filter_toolbar, "Models (SHIFT + M)", "f-models.bmp", "FilterModels" );
+			toolbar_append_toggle_button( filter_toolbar, "Triggers (CTRL + SHIFT + T)", "f-triggers.bmp", "FilterTriggers" );
+			//toolbar_append_toggle_button( filter_toolbar, "Decals (SHIFT + D)", "f-decals.bmp", "FilterDecals" );
+			gtk_toolbar_append_space( GTK_TOOLBAR( filter_toolbar ) );
+			toolbar_append_button( filter_toolbar, "InvertFilters", "f-invert.bmp", "InvertFilters" );
+			toolbar_append_button( filter_toolbar, "ResetFilters", "f-reset.bmp", "ResetFilters" );
+
+			gtk_box_pack_start( GTK_BOX( PFbox ), GTK_WIDGET( filter_toolbar ), TRUE, TRUE, 0 );
+		}
 	}
 
+	/*GtkToolbar* plugin_toolbar = create_plugin_toolbar();
+	if ( !g_Layout_enablePluginToolbar.m_value ) {
+		gtk_widget_hide( GTK_WIDGET( plugin_toolbar ) );
+	}*/
 	if ( g_Layout_enableFilterToolbar.m_value ) {
-		gtk_toolbar_append_space( GTK_TOOLBAR( plugin_toolbar ) );
-		gtk_toolbar_append_space( GTK_TOOLBAR( plugin_toolbar ) );
-		toolbar_append_toggle_button( plugin_toolbar, "World (ALT + 1)", "f-world.bmp", "FilterWorldBrushes" );
-		toolbar_append_toggle_button( plugin_toolbar, "Details (CTRL + D)", "f-details.bmp", "FilterDetails" );
-		toolbar_append_toggle_button( plugin_toolbar, "Structural (CTRL + SHIFT + D)", "f-structural.bmp", "FilterStructural" );
-		toolbar_append_toggle_button( plugin_toolbar, "Patches (CTRL + P)", "patch_wireframe.bmp", "FilterPatches" );
-		gtk_toolbar_append_space( GTK_TOOLBAR( plugin_toolbar ) );
-		toolbar_append_toggle_button( plugin_toolbar, "Areaportals (ALT + 3)", "f-areaportal.bmp", "FilterAreaportals" );
-		toolbar_append_toggle_button( plugin_toolbar, "Translucent (ALT + 4)", "f-translucent.bmp", "FilterTranslucent" );
-		toolbar_append_toggle_button( plugin_toolbar, "Liquids (ALT + 5)", "f-liquids.bmp", "FilterLiquids" );
-		toolbar_append_toggle_button( plugin_toolbar, "Caulk (ALT + 6)", "f-caulk.bmp", "FilterCaulk" );
-		toolbar_append_toggle_button( plugin_toolbar, "Clips (ALT + 7)", "f-clip.bmp", "FilterClips" );
-		toolbar_append_toggle_button( plugin_toolbar, "HintsSkips (CTRL + H)", "f-hint.bmp", "FilterHintsSkips" );
-		//toolbar_append_toggle_button( plugin_toolbar, "Paths (ALT + 8)", "texture_lock.bmp", "FilterPaths" );
-		gtk_toolbar_append_space( GTK_TOOLBAR( plugin_toolbar ) );
-		toolbar_append_toggle_button( plugin_toolbar, "Entities (ALT + 2)", "f-entities.bmp", "FilterEntities" );
-		toolbar_append_toggle_button( plugin_toolbar, "Lights (ALT + 0)", "lightinspector.bmp", "FilterLights" );
-		toolbar_append_toggle_button( plugin_toolbar, "Models (SHIFT + M)", "f-models.bmp", "FilterModels" );
-		toolbar_append_toggle_button( plugin_toolbar, "Triggers (CTRL + SHIFT + T)", "f-triggers.bmp", "FilterTriggers" );
-//		toolbar_append_toggle_button( plugin_toolbar, "Decals (SHIFT + D)", "f-decals.bmp", "FilterDecals" );
-		gtk_toolbar_append_space( GTK_TOOLBAR( plugin_toolbar ) );
-		toolbar_append_button( plugin_toolbar, "InvertFilters", "f-invert.bmp", "InvertFilters" );
-		toolbar_append_button( plugin_toolbar, "ResetFilters", "f-reset.bmp", "ResetFilters" );
 	}
-	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( plugin_toolbar ), FALSE, FALSE, 0 );
+
+
+
 
 	GtkWidget* main_statusbar = create_main_statusbar( m_pStatusLabel );
 	gtk_box_pack_end( GTK_BOX( vbox ), main_statusbar, FALSE, TRUE, 2 );
