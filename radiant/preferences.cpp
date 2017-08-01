@@ -71,7 +71,7 @@ void Global_constructPreferences( PreferencesPage& page ){
 
 void Interface_constructPreferences( PreferencesPage& page ){
 #ifdef WIN32
-	page.appendCheckBox( "", "Default Text Editor", g_TextEditor_useWin32Editor );
+	page.appendCheckBox( "", "External Shader Editor", g_TextEditor_useWin32Editor );
 #else
 	{
 		GtkWidget* use_custom = page.appendCheckBox( "Text Editor", "Custom", g_TextEditor_useCustomEditor );

@@ -693,16 +693,33 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 		}
 	}
 
-	if ( sampleSize != lm->sampleSize && lmLimitSize == 0 ) {
-		Sys_FPrintf( SYS_VRB,"WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
-					 info->mins[0],
-					 info->mins[1],
-					 info->mins[2],
-					 info->maxs[0],
-					 info->maxs[1],
-					 info->maxs[2],
-					 lm->sampleSize,
-					 (int) sampleSize );
+	if ( sampleSize != lm->sampleSize && lmLimitSize == 0 ){
+		if ( debugSampleSize == 1 || lm->customWidth > 128 ){
+			Sys_FPrintf( SYS_VRB,"WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
+						info->mins[0],
+						info->mins[1],
+						info->mins[2],
+						info->maxs[0],
+						info->maxs[1],
+						info->maxs[2],
+						lm->sampleSize,
+						(int) sampleSize );
+		}
+		else if ( debugSampleSize == 0 ){
+			Sys_FPrintf( SYS_VRB,"WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
+						info->mins[0],
+						info->mins[1],
+						info->mins[2],
+						info->maxs[0],
+						info->maxs[1],
+						info->maxs[2],
+						lm->sampleSize,
+						(int) sampleSize );
+			debugSampleSize--;
+		}
+		else{
+			debugSampleSize--;
+		}
 	}
 
 	/* set actual sample size */
@@ -1200,6 +1217,10 @@ void SetupSurfaceLightmaps( void ){
 
 		/* finish the lightmap and allocate the various buffers */
 		FinishRawLightmap( lm );
+	}
+
+	if ( debugSampleSize < -1 ){
+		Sys_FPrintf( SYS_VRB, "+%d similar occurrences;\t-debugSampleSize to show ones\n", -debugSampleSize - 1 );
 	}
 
 	/* allocate vertex luxel storage */

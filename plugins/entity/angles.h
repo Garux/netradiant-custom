@@ -73,8 +73,9 @@ inline void write_angles( const Vector3& angles, Entity* entity ){
 		char value[64];
 
 		if ( angles[0] == 0 && angles[1] == 0 ) {
+			float yaw = angles[2];
 			entity->setKeyValue( "angles", "" );
-			write_angle( angles[2], entity );
+			write_angle( yaw, entity );
 		}
 		else
 		{

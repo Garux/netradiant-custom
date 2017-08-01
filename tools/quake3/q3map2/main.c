@@ -60,7 +60,7 @@ char *Q_strncpyz( char *dst, const char *src, size_t len ) {
 
 
 char *Q_strcat( char *dst, size_t dlen, const char *src ) {
-	size_t n = strlen( dst  );
+	size_t n = strlen( dst );
 
 	if ( n > dlen ) {
 		abort(); /* buffer overflow */
@@ -1471,8 +1471,7 @@ int ScaleBSPMain( int argc, char **argv ){
 
 /*
    ShiftBSPMain()
-   shifts a map: works correctly only with axial faces, placed in positive half of axis
-   for testing physics with huge coordinates
+   shifts a map: for testing physics with huge coordinates
  */
 
 int ShiftBSPMain( int argc, char **argv ){
@@ -1949,6 +1948,7 @@ int main( int argc, char **argv ){
 			numthreads = atoi( argv[ i ] );
 			argv[ i ] = NULL;
 		}
+
 		else if( !strcmp( argv[ i ], "-nocmdline" ) )
 		{
 			Sys_Printf( "noCmdLine\n" );

@@ -2768,6 +2768,10 @@ int LightMain( int argc, char **argv ){
 			i++;
 			Sys_Printf( "Lightmaps sample scale set to %d\n", sampleScale );
 		}
+		else if ( !strcmp( argv[ i ],  "-debugsamplesize" ) ) {
+			debugSampleSize = 1;
+			Sys_Printf( "debugging Lightmaps SampleSize\n" );
+		}
 		else if ( !strcmp( argv[ i ], "-novertex" ) ) {
 			noVertexLighting = 1;
 			if ( ( atof( argv[ i + 1 ] ) != 0 ) && ( atof( argv[ i + 1 ] )) < 1 ) {

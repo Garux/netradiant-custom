@@ -39,17 +39,65 @@ void ViewShader( const char *pFile, const char *pName ){
 	StringOutputStream strFind( string_length( pName ) );
 	strFind << LowerCase( pName );
 	StringOutputStream strLook( string_length( pBuff ) );
-	strFind << LowerCase( pBuff );
+	strLook << LowerCase( pBuff );
 	// offset used when jumping over commented out definitions
+	int length = string_length( pBuff );
 	std::size_t nOffset = 0;
-	while ( true )
-	{
-		const char* substr = strstr( strFind.c_str() + nOffset, strFind.c_str() );
+	bool startOK = false;
+	bool endOK = false;
+	while ( !startOK || !endOK ){
+		const char* substr = strstr( strLook.c_str() + nOffset, strFind.c_str() );
 		if ( substr == 0 ) {
 			break;
 		}
 		std::size_t nStart = substr - strLook.c_str();
-		// we have found something, maybe it's a commented out shader name?
+		startOK = endOK = false;
+		if ( nStart == 0 ){
+			startOK = true;
+		}
+		//validate found one...
+		for ( const char* i = substr - 1; i > strLook.c_str(); i-- ){
+			if( (strncmp( i, "\t", 1 ) == 0) || (strncmp( i, " ", 1 ) == 0) ){
+				startOK = true;
+				continue;
+			}
+			else if ( (strncmp( i, "\n", 1 ) == 0) || (strncmp( i, "\r", 1 ) == 0) ){
+				startOK = true;
+				break;
+			}
+			else{
+				startOK = false;
+				break;
+			}
+		}
+		for ( const char* i = substr + strlen( strFind.c_str() ); i < strLook.c_str() + strlen( strLook.c_str() ); i++ ){
+			if( (strncmp( i, "\t", 1 ) == 0) || (strncmp( i, " ", 1 ) == 0) ){
+				endOK = true;
+				continue;
+			}
+			else if ( (strncmp( i, "\n", 1 ) == 0) || (strncmp( i, "\r", 1 ) == 0) || (strncmp( i, "{", 1 ) == 0) || (strncmp( i, ":q3map", 6 ) == 0) ){
+				endOK = true;
+				break;
+			}
+			else{
+				endOK = false;
+				break;
+			}
+		}
+		if( !startOK || !endOK ){
+			nOffset = nStart + 1;
+		}
+		else{
+			//globalErrorStream() << "Validated successfully" << "\n";
+			nOffset = nStart;
+			//fix cr+lf
+			for ( const char* i = strLook.c_str(); i < substr ; i++ ){
+				if ( (strncmp( i, "\r\n", 2 ) == 0) ){
+				nOffset--;
+				}
+			}
+		}
+		/*// we have found something, maybe it's a commented out shader name?
 		char *strCheck = new char[string_length( strLook.c_str() ) + 1];
 		strcpy( strCheck, strLook.c_str() );
 		strCheck[nStart] = 0;
@@ -62,10 +110,16 @@ void ViewShader( const char *pFile, const char *pName ){
 		}
 		delete[] strCheck;
 		nOffset = nStart;
-		break;
+		break;*/
+	}
+	//fix up length
+	for ( const char* i = strLook.c_str(); i < strLook.c_str() + strlen( strLook.c_str() ) - 1; i++ ){
+		if ( (strncmp( i, "\r\n", 2 ) == 0) ){
+		length--;
+		}
 	}
 	// now close the file
 	vfsFreeFile( pBuff );
 
-	DoTextEditor( pFile, static_cast<int>( nOffset ) );
+	DoTextEditor( pFile, static_cast<int>( nOffset ), length );
 }
