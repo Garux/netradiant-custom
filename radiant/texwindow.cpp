@@ -272,49 +272,11 @@ bool m_hideUnused;
 bool m_rmbSelected;
 bool m_searchedTags;
 bool m_tags;
+bool m_move_started;
 // The uniform size (in pixels) that textures are resized to when m_resizeTextures is true.
 int m_uniformTextureSize;
 int m_uniformTextureMinSize;
 // Return the display width of a texture in the texture browser
-/*void getTextureWH( qtexture_t* tex, int *width, int *height ){
-	if ( !g_TextureBrowser_fixedSize ) {
-		// Don't use uniform size
-		*width = (int)( tex->width * ( (float)m_textureScale / 100 ) );
-		*height = (int)( tex->height * ( (float)m_textureScale / 100 ) );
-
-	}
-	else if	( tex->width >= tex->height ) {
-		// Texture is square, or wider than it is tall
-		if ( tex->width >= m_uniformTextureSize ){
-			*width = m_uniformTextureSize;
-			*height = (int)( m_uniformTextureSize * ( (float)tex->height / tex->width ) );
-		}
-		else if ( tex->width <= m_uniformTextureMinSize ){
-			*width = m_uniformTextureMinSize;
-			*height = (int)( m_uniformTextureMinSize * ( (float)tex->height / tex->width ) );
-		}
-		else {
-			*width = tex->width;
-			*height = tex->height;
-		}
-	}
-	else {
-		// Texture taller than it is wide
-		if ( tex->height >= m_uniformTextureSize ){
-			*height = m_uniformTextureSize;
-			*width = (int)( m_uniformTextureSize * ( (float)tex->width / tex->height ) );
-		}
-		else if ( tex->height <= m_uniformTextureMinSize ){
-			*height = m_uniformTextureMinSize;
-			*width = (int)( m_uniformTextureMinSize * ( (float)tex->width / tex->height ) );
-		}
-		else {
-			*width = tex->width;
-			*height = tex->height;
-		}
-	}
-}
-*/
 void getTextureWH( qtexture_t* tex, int &W, int &H ){
 		// Don't use uniform size
 		W = (int)( tex->width * ( (float)m_textureScale / 100 ) );
@@ -372,7 +334,8 @@ TextureBrowser() :
 	m_searchedTags( false ),
 	m_tags( false ),
 	m_uniformTextureSize( 160 ),
-	m_uniformTextureMinSize( 48 ){
+	m_uniformTextureMinSize( 48 ),
+	m_move_started( false ){
 }
 };
 
@@ -1055,12 +1018,17 @@ void TextureBrowser_trackingDelta( int x, int y, unsigned int state, void* data 
 	}
 }
 
-void TextureBrowser_Tracking_MouseDown( TextureBrowser& textureBrowser ){
-	textureBrowser.m_freezePointer.freeze_pointer( textureBrowser.m_parent, TextureBrowser_trackingDelta, &textureBrowser );
+void TextureBrowser_Tracking_MouseUp( TextureBrowser& textureBrowser ){
+	textureBrowser.m_move_started = false;
+	textureBrowser.m_freezePointer.unfreeze_pointer( textureBrowser.m_parent );
 }
 
-void TextureBrowser_Tracking_MouseUp( TextureBrowser& textureBrowser ){
-	textureBrowser.m_freezePointer.unfreeze_pointer( textureBrowser.m_parent );
+void TextureBrowser_Tracking_MouseDown( TextureBrowser& textureBrowser ){
+	if( textureBrowser.m_move_started ){
+		TextureBrowser_Tracking_MouseUp( textureBrowser );
+	}
+	textureBrowser.m_move_started = true;
+	textureBrowser.m_freezePointer.freeze_pointer( textureBrowser.m_parent, textureBrowser.m_gl_widget, TextureBrowser_trackingDelta, &textureBrowser );
 }
 
 void TextureBrowser_Selection_MouseDown( TextureBrowser& textureBrowser, guint32 flags, int pointx, int pointy ){

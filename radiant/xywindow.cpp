@@ -1205,7 +1205,7 @@ void XYWnd::Move_Begin(){
 		Move_End();
 	}
 	m_move_started = true;
-	g_xywnd_freezePointer.freeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), XYWnd_moveDelta, this );
+	g_xywnd_freezePointer.freeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), m_gl_widget, XYWnd_moveDelta, this );
 	m_move_focusOut = g_signal_connect( G_OBJECT( m_gl_widget ), "focus_out_event", G_CALLBACK( XYWnd_Move_focusOut ), this );
 }
 
@@ -1250,7 +1250,7 @@ void XYWnd::Zoom_Begin(){
 	}
 	m_zoom_started = true;
 	g_dragZoom = 0;
-	g_xywnd_freezePointer.freeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), XYWnd_zoomDelta, this );
+	g_xywnd_freezePointer.freeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), m_gl_widget, XYWnd_zoomDelta, this );
 	m_zoom_focusOut = g_signal_connect( G_OBJECT( m_gl_widget ), "focus_out_event", G_CALLBACK( XYWnd_Zoom_focusOut ), this );
 }
 

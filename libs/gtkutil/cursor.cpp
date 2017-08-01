@@ -27,7 +27,7 @@
 #include <gdk/gdkcursor.h>
 #include <gdk/gdkpixmap.h>
 
-
+#if 0
 GdkCursor* create_blank_cursor(){
 	GdkPixmap *pixmap;
 	GdkBitmap *mask;
@@ -53,6 +53,7 @@ void blank_cursor( GtkWidget* widget ){
 void default_cursor( GtkWidget* widget ){
 	gdk_window_set_cursor( widget->window, 0 );
 }
+#endif
 
 
 void Sys_GetCursorPos( GtkWindow* window, int *x, int *y ){

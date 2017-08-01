@@ -26,6 +26,7 @@
 #include <gdk/gdkevents.h>
 #include <gtk/gtkwidget.h>
 #include <gtk/gtkwindow.h>
+#include <gtk/gtkmain.h>
 
 #include "debugging/debugging.h"
 
@@ -33,9 +34,11 @@ typedef struct _GdkCursor GdkCursor;
 typedef struct _GtkWidget GtkWidget;
 typedef struct _GtkWindow GtkWindow;
 
+#if 0
 GdkCursor* create_blank_cursor();
 void blank_cursor( GtkWidget* widget );
 void default_cursor( GtkWidget* widget );
+#endif
 void Sys_GetCursorPos( GtkWindow* window, int *x, int *y );
 void Sys_SetCursorPos( GtkWindow* window, int x, int y );
 
@@ -114,7 +117,8 @@ void motion_delta( int x, int y, unsigned int state ){
 class FreezePointer
 {
 unsigned int handle_motion;
-int recorded_x, recorded_y, last_x, last_y;
+int recorded_x, recorded_y, last_x, last_y, center_x, center_y;
+GtkWidget* weedjet;
 typedef void ( *MotionDeltaFunction )( int x, int y, unsigned int state, void* data );
 MotionDeltaFunction m_function;
 void* m_data;
@@ -126,23 +130,23 @@ static gboolean motion_delta( GtkWidget *widget, GdkEventMotion *event, FreezePo
 	Sys_GetCursorPos( GTK_WINDOW( widget ), &current_x, &current_y );
 	int dx = current_x - self->last_x;
 	int dy = current_y - self->last_y;
-	int ddx = current_x - self->recorded_x;
-	int ddy = current_y - self->recorded_y;
+	int ddx = current_x - self->center_x;
+	int ddy = current_y - self->center_y;
 	self->last_x = current_x;
 	self->last_y = current_y;
 	if ( dx != 0 || dy != 0 ) {
 		//globalOutputStream() << "motion x: " << dx << ", y: " << dy << "\n";
 		if (ddx < -32 || ddx > 32 || ddy < -32 || ddy > 32) {
-			Sys_SetCursorPos( GTK_WINDOW( widget ), self->recorded_x, self->recorded_y );
-			self->last_x = self->recorded_x;
-			self->last_y = self->recorded_y;
+			Sys_SetCursorPos( GTK_WINDOW( widget ), self->center_x, self->center_y );
+			self->last_x = self->center_x;
+			self->last_y = self->center_y;
 		}
 		self->m_function( dx, dy, event->state, self->m_data );
 	}
 	return FALSE;
 }
 
-void freeze_pointer( GtkWindow* window, MotionDeltaFunction function, void* data ){
+void freeze_pointer( GtkWindow* window, GtkWidget* widget, MotionDeltaFunction function, void* data ){
 	ASSERT_MESSAGE( m_function == 0, "can't freeze pointer" );
 
 	const GdkEventMask mask = static_cast<GdkEventMask>( GDK_POINTER_MOTION_MASK
@@ -155,17 +159,30 @@ void freeze_pointer( GtkWindow* window, MotionDeltaFunction function, void* data
 														 | GDK_BUTTON_RELEASE_MASK
 														 | GDK_VISIBILITY_NOTIFY_MASK );
 
-	GdkCursor* cursor = create_blank_cursor();
+	GdkCursor* cursor = gdk_cursor_new( GDK_BLANK_CURSOR );
+	//GdkCursor* cursor = create_blank_cursor();
 	//GdkGrabStatus status =
+	/*	fixes cursor runaways during srsly quick drags in camera
+	drags with pressed buttons have no problem at all w/o this	*/
 	gdk_pointer_grab( GTK_WIDGET( window )->window, TRUE, mask, 0, cursor, GDK_CURRENT_TIME );
+	//gdk_window_set_cursor ( GTK_WIDGET( window )->window, cursor );
+	/*	is needed to fix activating neighbour widgets, that happens, if using upper one	*/
+	gtk_grab_add( widget );
+	weedjet = widget;
+
 	gdk_cursor_unref( cursor );
 
 	Sys_GetCursorPos( window, &recorded_x, &recorded_y );
 
-	Sys_SetCursorPos( window, recorded_x, recorded_y );
+	/*	using center for tracking for max safety	*/
+	gdk_window_get_origin( widget->window, &center_x, &center_y );
+	center_y += widget->allocation.height / 2;
+	center_x += widget->allocation.width / 2;
 
-	last_x = recorded_x;
-	last_y = recorded_y;
+	Sys_SetCursorPos( window, center_x, center_y );
+
+	last_x = center_x;
+	last_y = center_y;
 
 	m_function = function;
 	m_data = data;
@@ -181,7 +198,9 @@ void unfreeze_pointer( GtkWindow* window ){
 
 	Sys_SetCursorPos( window, recorded_x, recorded_y );
 
+//	gdk_window_set_cursor( GTK_WIDGET( window )->window, 0 );
 	gdk_pointer_ungrab( GDK_CURRENT_TIME );
+	gtk_grab_remove( weedjet );
 }
 };
 

@@ -1325,7 +1325,7 @@ void CamWnd::EnableFreeMove(){
 
 	gtk_window_set_focus( m_parent, m_gl_widget );
 	m_freemove_handle_focusout = g_signal_connect( G_OBJECT( m_gl_widget ), "focus_out_event", G_CALLBACK( camwindow_freemove_focusout ), this );
-	m_freezePointer.freeze_pointer( m_parent, Camera_motionDelta, &m_Camera );
+	m_freezePointer.freeze_pointer( m_parent, m_gl_widget, Camera_motionDelta, &m_Camera );
 
 	CamWnd_Update( *this );
 }

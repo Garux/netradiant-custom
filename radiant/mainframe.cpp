@@ -3028,7 +3028,7 @@ void MainFrame::Create(){
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( split ), TRUE, TRUE, 0 );
 
 		{
-			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( window ) );
+			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
 			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
 			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
 			g_object_set_data( G_OBJECT( GroupDialog_getWindow() ), "glwidget", TextureBrowser_getGLWidget() );
