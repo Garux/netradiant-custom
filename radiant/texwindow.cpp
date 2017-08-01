@@ -2086,6 +2086,7 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		GtkWidget* menu_view = gtk_menu_new();
 		//GtkWidget* view_item = (GtkWidget*)
 		TextureBrowser_constructViewMenu( GTK_MENU( menu_view ) );
+		gtk_menu_set_title( GTK_MENU( menu_view ), "View" );
 		//gtk_menu_item_set_submenu( GTK_MENU_ITEM( view_item ), menu_view );
 		//gtk_menu_bar_append( GTK_MENU_BAR( menu_bar ), view_item );
 
@@ -2099,13 +2100,14 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		button_set_icon( button, "texbro_view.png" );
 		gtk_widget_show( GTK_WIDGET( button ) );
 		gtk_button_set_relief( button, GTK_RELIEF_NONE );
-		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
+		gtk_widget_set_size_request( GTK_WIDGET( button ), 24, 24 );
 		GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
 		GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_DEFAULT );
 		gtk_toolbar_append_element( toolbar, GTK_TOOLBAR_CHILD_WIDGET, GTK_WIDGET( button ), "", "View", "", 0, 0, 0 );
 		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( Popup_View_Menu ), menu_view );
 
-
+		//to show detached menu over floating tex bro
+		gtk_menu_attach_to_widget( GTK_MENU( menu_view ), GTK_WIDGET( button ), NULL );
 
 		button = toolbar_append_button( toolbar, "Find / Replace...", "texbro_gtk-find-and-replace.png", "FindReplaceTextures" );
 		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );

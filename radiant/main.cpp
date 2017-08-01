@@ -543,6 +543,21 @@ void user_shortcuts_save(){
 	SaveCommandMap( path.c_str() );
 }
 
+void add_local_rc_files(){
+	{
+		StringOutputStream path( 512 );
+		path << AppPath_get() << ".gtkrc-2.0.radiant";
+		gtk_rc_add_default_file( path.c_str() );
+	}
+#ifdef WIN32
+	{
+		StringOutputStream path( 512 );
+		path << AppPath_get() << ".gtkrc-2.0.win";
+		gtk_rc_add_default_file( path.c_str() );
+	}
+#endif
+}
+
 int main( int argc, char* argv[] ){
 	crt_init();
 
@@ -593,6 +608,8 @@ int main( int argc, char* argv[] ){
 	environment_init( argc, argv );
 
 	paths_init();
+
+	add_local_rc_files();
 
 	if ( !check_version() ) {
 		return EXIT_FAILURE;

@@ -720,7 +720,16 @@ Shader* XYWnd::m_state_selected = 0;
 
 void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
 	if ( GTK_WIDGET_VISIBLE( self.GetWidget() ) ) {
-		self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.Width(), self.Height() ) );
+		rectangle_t rect = rectangle_from_area( area.min, area.max, self.Width(), self.Height() );
+		int nDim1 = ( self.GetViewType() == YZ ) ? 1 : 0;
+		int nDim2 = ( self.GetViewType() == XY ) ? 1 : 2;
+		rect.x /= self.Scale();
+		rect.y /= self.Scale();
+		rect.w /= self.Scale();
+		rect.h /= self.Scale();
+		rect.x += self.GetOrigin()[nDim1];
+		rect.y += self.GetOrigin()[nDim2];
+		self.m_XORRectangle.set( rect );
 	}
 }
 

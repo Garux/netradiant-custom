@@ -654,6 +654,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/groupdialog.o \
 	radiant/gtkdlgs.o \
 	radiant/gtkmisc.o \
+	radiant/gtktheme.o \
 	radiant/help.o \
 	radiant/image.o \
 	radiant/mainframe.o \

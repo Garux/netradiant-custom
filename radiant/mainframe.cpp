@@ -118,6 +118,7 @@
 #include "referencecache.h"
 
 #include "filterbar.h"
+#include "gtktheme.h"
 
 
 struct layout_globals_t
@@ -903,6 +904,8 @@ GtkMenuItem* create_colours_menu(){
 	create_menu_item_with_mnemonic( menu_3, "Q3Radiant Original", "ColorSchemeQER" );
 	create_menu_item_with_mnemonic( menu_3, "Black and Green", "ColorSchemeBlackAndGreen" );
 	create_menu_item_with_mnemonic( menu_3, "Maya/Max/Lightwave Emulation", "ColorSchemeYdnar" );
+
+	create_menu_item_with_mnemonic( menu_in_menu, "GTK Theme...", "gtkThemeDlg" );
 
 	menu_separator( menu_in_menu );
 
@@ -3306,6 +3309,7 @@ void MainFrame_Construct(){
 	GlobalToggles_insert( "MouseScale", FreeCaller<ScaleMode>(), ToggleItem::AddCallbackCaller( g_scalemode_button ) );
 	GlobalToggles_insert( "MouseDrag", FreeCaller<DragMode>(), ToggleItem::AddCallbackCaller( g_dragmode_button ), Accelerator( 'Q' ) );
 
+	GlobalCommands_insert( "gtkThemeDlg", FreeCaller<gtkThemeDlg>() );
 	GlobalCommands_insert( "ColorSchemeOriginal", FreeCaller<ColorScheme_Original>() );
 	GlobalCommands_insert( "ColorSchemeQER", FreeCaller<ColorScheme_QER>() );
 	GlobalCommands_insert( "ColorSchemeBlackAndGreen", FreeCaller<ColorScheme_Black>() );
