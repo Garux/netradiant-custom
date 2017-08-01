@@ -1390,9 +1390,10 @@ void Brush_constructMenu( GtkMenu* menu ){
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( menu_in_menu );
 		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Make _Hollow", "CSGHollow" );
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Subtract", "CSGSubtract" );
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Merge", "CSGMerge" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Make _Room", "CSGroom" );
+		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Tool", "CSGTool" );
 	}
 	menu_separator( menu );
 	{

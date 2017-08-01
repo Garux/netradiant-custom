@@ -1166,12 +1166,14 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 				glVertex2f( xfMax ,yfMin );
 				glVertex2f( xfMax ,yfMax );
 				glEnd();
+				glEnable( GL_TEXTURE_2D );
 			}
 
 			// shader stipple:
 			if ( !shader->IsDefault() ) {
 				glEnable( GL_LINE_STIPPLE );
 				glLineStipple( 1, 0xF000 );
+				glDisable( GL_TEXTURE_2D );
 				glBegin( GL_LINE_LOOP );
 				glColor3f( 0, 0, 0 );
 				glVertex2f( xfMin ,yfMax );

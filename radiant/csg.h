@@ -22,10 +22,10 @@
 #if !defined( INCLUDED_CSG_H )
 #define INCLUDED_CSG_H
 
-void CSG_MakeHollow( void );
 void CSG_MakeRoom( void );
 void CSG_Subtract( void );
 void CSG_Merge( void );
+void CSG_Tool( void );
 
 namespace scene
 {

@@ -29,7 +29,7 @@
 #include "brushmanip.h"
 #include "brushnode.h"
 #include "grid.h"
-
+/*
 void Face_makeBrush( Face& face, const Brush& brush, brush_vector_t& out, float offset ){
 	if ( face.contributes() ) {
 		out.push_back( new Brush( brush ) );
@@ -56,39 +56,248 @@ void Face_extrude( Face& face, const Brush& brush, brush_vector_t& out, float of
 		}
 	}
 }
+*/
+#include "preferences.h"
+#include "texwindow.h"
 
+
+enum eHollowType
+{
+	diag = 0,
+	wrap = 1,
+	extrude = 2,
+	pull = 3,
+	room = 4,
+};
+
+const char* getCaulkShader(){
+	const char* gotShader = g_pGameDescription->getKeyValue( "shader_caulk" );
+	if ( gotShader && *gotShader ){
+		return gotShader;
+	}
+	return "textures/common/caulk";
+}
+
+class CaulkFace
+{
+DoubleVector3 ExclusionAxis;
+double &mindot;
+double &maxdot;
+public:
+CaulkFace( DoubleVector3 ExclusionAxis,
+			double &mindot,
+			double &maxdot ):
+			ExclusionAxis( ExclusionAxis ),
+			mindot( mindot ),
+			maxdot( maxdot ){}
+void operator()( Face& face ) const {
+	double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
+	if( dot == 0 || ( dot > mindot + 0.005 && dot < maxdot - 0.005 ) )
+		face.SetShader( getCaulkShader() );
+}
+};
 
 class FaceMakeBrush
 {
 const Brush& brush;
 brush_vector_t& out;
 float offset;
-bool room;
+eHollowType HollowType;
+DoubleVector3 ExclusionAxis;
+double &mindot;
+double &maxdot;
+bool caulk;
+bool RemoveInner;
 public:
-FaceMakeBrush( const Brush& brush, brush_vector_t& out, float offset, bool room )
-	: brush( brush ), out( out ), offset( offset ), room( room ){
+FaceMakeBrush( const Brush& brush,
+			brush_vector_t& out,
+			float offset,
+			eHollowType HollowType,
+			DoubleVector3 ExclusionAxis,
+			double &mindot,
+			double &maxdot,
+			bool caulk,
+			bool RemoveInner )
+	: brush( brush ),
+	out( out ),
+	offset( offset ),
+	HollowType( HollowType ),
+	ExclusionAxis( ExclusionAxis ),
+	mindot( mindot ),
+	maxdot( maxdot ),
+	caulk( caulk ),
+	RemoveInner( RemoveInner ){
 }
 void operator()( Face& face ) const {
-	if( room ){
-		Face_extrude( face, brush, out, offset );
-	}
-	else{
-		Face_makeBrush( face, brush, out, offset );
+	double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
+	if( dot == 0 || ( dot > mindot + 0.005 && dot < maxdot - 0.005 ) ){
+		if( HollowType == pull ){
+			if ( face.contributes() ) {
+				face.getPlane().offset( offset );
+				face.planeChanged();
+				out.push_back( new Brush( brush ) );
+				face.getPlane().offset( -offset );
+				face.planeChanged();
+
+				if( caulk ){
+					Brush_forEachFace( *out.back(), CaulkFace( ExclusionAxis, mindot, maxdot ) );
+				}
+				Face* newFace = out.back()->addFace( face );
+				if ( newFace != 0 ) {
+					newFace->flipWinding();
+				}
+			}
+		}
+		else if( HollowType == wrap ){
+			//Face_makeBrush( face, brush, out, offset );
+			if ( face.contributes() ) {
+				face.undoSave();
+				out.push_back( new Brush( brush ) );
+				if( !RemoveInner && caulk )
+					face.SetShader( getCaulkShader() );
+				Face* newFace = out.back()->addFace( face );
+				face.getPlane().offset( -offset );
+				face.planeChanged();
+				if( caulk )
+					face.SetShader( getCaulkShader() );
+				if ( newFace != 0 ) {
+					newFace->flipWinding();
+					newFace->getPlane().offset( offset );
+					newFace->planeChanged();
+				}
+			}
+		}
+		else if( HollowType == extrude ){
+			if ( face.contributes() ) {
+				//face.undoSave();
+				out.push_back( new Brush( brush ) );
+				out.back()->clear();
+
+				Face* newFace = out.back()->addFace( face );
+				if ( newFace != 0 ) {
+					newFace->getPlane().offset( offset );
+					newFace->planeChanged();
+				}
+
+				if( !RemoveInner && caulk )
+					face.SetShader( getCaulkShader() );
+				newFace = out.back()->addFace( face );
+				if ( newFace != 0 ) {
+					newFace->flipWinding();
+				}
+				Winding& winding = face.getWinding();
+				TextureProjection projection;
+				TexDef_Construct_Default( projection );
+				for ( Winding::iterator j = winding.begin(); j != winding.end(); ++j ){
+					std::size_t index = std::distance( winding.begin(), j );
+					std::size_t next = Winding_next( winding, index );
+
+					out.back()->addPlane( winding[index].vertex, winding[next].vertex, winding[next].vertex + face.getPlane().plane3().normal() * offset, TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), projection );
+				}
+			}
+		}
+		else if( HollowType == diag ){
+			if ( face.contributes() ) {
+				out.push_back( new Brush( brush ) );
+				out.back()->clear();
+
+				Face* newFace = out.back()->addFace( face );
+				if ( newFace != 0 ) {
+
+					newFace->planeChanged();
+				}
+				newFace = out.back()->addFace( face );
+
+				if ( newFace != 0 ) {
+					if( !RemoveInner && caulk )
+						newFace->SetShader( getCaulkShader() );
+					newFace->flipWinding();
+					newFace->getPlane().offset( offset );
+					newFace->planeChanged();
+				}
+
+				Winding& winding = face.getWinding();
+				TextureProjection projection;
+				TexDef_Construct_Default( projection );
+				for ( Winding::iterator i = winding.begin(); i != winding.end(); ++i ){
+					std::size_t index = std::distance( winding.begin(), i );
+					std::size_t next = Winding_next( winding, index );
+					Vector3 BestPoint;
+					float bestdist = 999999;
+
+					for( Brush::const_iterator j = brush.begin(); j != brush.end(); ++j ){
+						Winding& winding2 = ( *j )->getWinding();
+						for ( Winding::iterator k = winding2.begin(); k != winding2.end(); ++k ){
+							std::size_t index2 = std::distance( winding2.begin(), k );
+							float testdist = vector3_length( winding[index].vertex - winding2[index2].vertex );
+							if( testdist < bestdist ){
+								bestdist = testdist;
+								BestPoint = winding2[index2].vertex;
+							}
+						}
+					}
+					out.back()->addPlane( winding[next].vertex, winding[index].vertex, BestPoint, caulk? getCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), projection );
+				}
+			}
+		}
 	}
 }
 };
 
-void Brush_makeHollow( const Brush& brush, brush_vector_t& out, float offset, bool room ){
-	Brush_forEachFace( brush, FaceMakeBrush( brush, out, offset, room ) );
+class FaceExclude
+{
+DoubleVector3 ExclusionAxis;
+double &mindot;
+double &maxdot;
+public:
+FaceExclude( DoubleVector3 ExclusionAxis, double &mindot, double &maxdot )
+	: ExclusionAxis( ExclusionAxis ), mindot( mindot ), maxdot( maxdot ){
 }
+void operator()( Face& face ) const {
+	if( vector3_length_squared( ExclusionAxis ) != 0 ){
+		double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
+		if( dot < mindot ){
+			mindot = dot;
+		}
+		else if( dot > maxdot ){
+			maxdot = dot;
+		}
+	}
+}
+};
+
+class FaceOffset
+{
+float offset;
+DoubleVector3 ExclusionAxis;
+double &mindot;
+double &maxdot;
+public:
+FaceOffset( float offset, DoubleVector3 ExclusionAxis, double &mindot, double &maxdot )
+	: offset( offset ), ExclusionAxis( ExclusionAxis ), mindot( mindot ), maxdot( maxdot ){
+}
+void operator()( Face& face ) const {
+	double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
+	if( dot == 0 || ( dot > mindot + 0.005 && dot < maxdot - 0.005 ) ){
+		face.undoSave();
+		face.getPlane().offset( offset );
+		face.planeChanged();
+	}
+}
+};
+
+
+DoubleVector3 getExclusion();
+bool getCaulk();
+bool getRemoveInner();
 
 class BrushHollowSelectedWalker : public scene::Graph::Walker
 {
-float m_offset;
-bool room;
+float offset;
+eHollowType HollowType;
 public:
-BrushHollowSelectedWalker( float offset, bool room )
-	: m_offset( offset ), room( room ){
+BrushHollowSelectedWalker( float offset, eHollowType HollowType )
+	: offset( offset ), HollowType( HollowType ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
@@ -97,14 +306,52 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			 && Instance_getSelectable( instance )->isSelected()
 			 && path.size() > 1 ) {
 			brush_vector_t out;
-			Brush_makeHollow( *brush, out, m_offset, room );
+			double mindot = 0;
+			double maxdot = 0;
+			if( HollowType != room ){
+				Brush_forEachFace( *brush, FaceExclude( getExclusion(), mindot, maxdot ) );
+			}
+			if( HollowType == room ){
+				Brush* tmpbrush = new Brush( *brush );
+				tmpbrush->removeEmptyFaces();
+				Brush_forEachFace( *brush, FaceMakeBrush( *brush, out, offset, pull, DoubleVector3( 0, 0, 0 ), mindot, maxdot, true, true ) );
+				delete tmpbrush;
+			}
+			else if( HollowType == pull ){
+				if( !getRemoveInner() && getCaulk() ){
+					Brush_forEachFace( *brush, CaulkFace( getExclusion(), mindot, maxdot ) );
+				}
+				Brush* tmpbrush = new Brush( *brush );
+				tmpbrush->removeEmptyFaces();
+				Brush_forEachFace( *tmpbrush, FaceMakeBrush( *tmpbrush, out, offset, HollowType, getExclusion(), mindot, maxdot, getCaulk(), getRemoveInner() ) );
+				delete tmpbrush;
+			}
+			else if( HollowType == diag ){
+				Brush* tmpbrush = new Brush( *brush );
+				Brush_forEachFace( *tmpbrush, FaceOffset( offset, getExclusion(), mindot, maxdot ) );
+				tmpbrush->removeEmptyFaces();
+				Brush_forEachFace( *tmpbrush, FaceMakeBrush( *brush, out, offset, HollowType, getExclusion(), mindot, maxdot, getCaulk(), getRemoveInner() ) );
+				delete tmpbrush;
+				if( !getRemoveInner() && getCaulk() ){
+					Brush_forEachFace( *brush, CaulkFace( getExclusion(), mindot, maxdot ) );
+				}
+			}
+			else{
+				Brush_forEachFace( *brush, FaceMakeBrush( *brush, out, offset, HollowType, getExclusion(), mindot, maxdot, getCaulk(), getRemoveInner() ) );
+			}
 			for ( brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i )
 			{
 				( *i )->removeEmptyFaces();
-				NodeSmartReference node( ( new BrushNode() )->node() );
-				Node_getBrush( node )->copy( *( *i ) );
-				delete ( *i );
-				Node_getTraversable( path.parent() )->insert( node );
+				if( ( *i )->hasContributingFaces() ){
+					NodeSmartReference node( ( new BrushNode() )->node() );
+					Node_getBrush( node )->copy( *( *i ) );
+					delete ( *i );
+					Node_getTraversable( path.parent() )->insert( node );
+					//path.push( makeReference( node.get() ) );
+					//selectPath( path, true );
+					//Instance_getSelectable( *GlobalSceneGraph().find( path ) )->setSelected( true );
+					//Path_deleteTop( path );
+				}
 			}
 		}
 	}
@@ -151,30 +398,16 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Scene_BrushMakeHollow_Selected( scene::Graph& graph, bool room ){
-	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( GetGridSize(), room ) );
-	GlobalSceneGraph().traverse( BrushDeleteSelected() );
-}
 
 /*
    =============
-   CSG_MakeHollow
+   CSG_MakeRoom
    =============
  */
-
-void CSG_MakeHollow( void ){
-	UndoableCommand undo( "brushHollow" );
-
-	Scene_BrushMakeHollow_Selected( GlobalSceneGraph(), false );
-
-	SceneChangeNotify();
-}
-
 void CSG_MakeRoom( void ){
 	UndoableCommand undo( "makeRoom" );
-
-	Scene_BrushMakeHollow_Selected( GlobalSceneGraph(), true );
-
+	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( GetGridSize(), room ) );
+	GlobalSceneGraph().traverse( BrushDeleteSelected() );
 	SceneChangeNotify();
 }
 
@@ -647,3 +880,313 @@ void CSG_Merge( void ){
 		SceneChangeNotify();
 	}
 }
+
+
+
+
+
+
+/*
+   =============
+   CSG_Tool
+   =============
+ */
+#include "mainframe.h"
+#include <gtk/gtk.h>
+#include "gtkutil/dialog.h"
+#include "gtkutil/button.h"
+#include "gtkutil/accelerator.h"
+
+struct CSGToolDialog
+{
+	GtkSpinButton* spin;
+	GtkWindow *window;
+	GtkToggleButton *radXYZ, *radX, *radY, *radZ, *caulk, *removeInner;
+};
+
+CSGToolDialog g_csgtool_dialog;
+
+DoubleVector3 getExclusion(){
+	if( gtk_toggle_button_get_active( g_csgtool_dialog.radX ) ){
+		return DoubleVector3( 1, 0, 0 );
+	}
+	else if( gtk_toggle_button_get_active( g_csgtool_dialog.radY ) ){
+		return DoubleVector3( 0, 1, 0 );
+	}
+	else if( gtk_toggle_button_get_active( g_csgtool_dialog.radZ ) ){
+		return DoubleVector3( 0, 0, 1 );
+	}
+	return DoubleVector3( 0, 0, 0 );
+}
+
+bool getCaulk(){
+		if( gtk_toggle_button_get_active( g_csgtool_dialog.caulk ) ){
+		return true;
+	}
+	return false;
+}
+
+bool getRemoveInner(){
+		if( gtk_toggle_button_get_active( g_csgtool_dialog.removeInner ) ){
+		return true;
+	}
+	return false;
+}
+
+class BrushFaceOffset
+{
+float offset;
+public:
+BrushFaceOffset( float offset )
+	: offset( offset ){
+}
+void operator()( BrushInstance& brush ) const {
+	double mindot = 0;
+	double maxdot = 0;
+	Brush_forEachFace( brush, FaceExclude( getExclusion(), mindot, maxdot ) );
+	Brush_forEachFace( brush, FaceOffset( offset, getExclusion(), mindot, maxdot ) );
+}
+};
+
+//=================DLG
+
+static gboolean CSGdlg_HollowDiag( GtkWidget *widget, CSGToolDialog* dialog ){
+	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
+	UndoableCommand undo( "brushHollow::Diag" );
+	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, diag ) );
+	if( getRemoveInner() )
+		GlobalSceneGraph().traverse( BrushDeleteSelected() );
+	SceneChangeNotify();
+	return TRUE;
+}
+
+static gboolean CSGdlg_HollowWrap( GtkWidget *widget, CSGToolDialog* dialog ){
+	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
+	UndoableCommand undo( "brushHollow::Wrap" );
+	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, wrap ) );
+	if( getRemoveInner() )
+		GlobalSceneGraph().traverse( BrushDeleteSelected() );
+	SceneChangeNotify();
+	return TRUE;
+}
+
+static gboolean CSGdlg_HollowExtrude( GtkWidget *widget, CSGToolDialog* dialog ){
+	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
+	UndoableCommand undo( "brushHollow::Extrude" );
+	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, extrude ) );
+	if( getRemoveInner() )
+		GlobalSceneGraph().traverse( BrushDeleteSelected() );
+	SceneChangeNotify();
+	return TRUE;
+}
+
+static gboolean CSGdlg_HollowPull( GtkWidget *widget, CSGToolDialog* dialog ){
+	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
+	UndoableCommand undo( "brushHollow::Pull" );
+	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, pull ) );
+	if( getRemoveInner() )
+		GlobalSceneGraph().traverse( BrushDeleteSelected() );
+	SceneChangeNotify();
+	return TRUE;
+}
+
+static gboolean CSGdlg_BrushShrink( GtkWidget *widget, CSGToolDialog* dialog ){
+	gtk_spin_button_update ( dialog->spin );
+	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
+	offset *= -1;
+	UndoableCommand undo( "Shrink brush" );
+//	GlobalSceneGraph().traverse( OffsetBrushFacesSelectedWalker( offset ) );
+	//Scene_ForEachSelectedBrush_ForEachFace( GlobalSceneGraph(), BrushFaceOffset( offset ) );
+	Scene_forEachSelectedBrush( BrushFaceOffset( offset ) );
+	SceneChangeNotify();
+	return TRUE;
+}
+
+static gboolean CSGdlg_BrushExpand( GtkWidget *widget, CSGToolDialog* dialog ){
+	gtk_spin_button_update ( dialog->spin );
+	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
+	UndoableCommand undo( "Expand brush" );
+//	GlobalSceneGraph().traverse( OffsetBrushFacesSelectedWalker( offset ) );
+	//Scene_ForEachSelectedBrush_ForEachFace( GlobalSceneGraph(), BrushFaceOffset( offset ) );
+	Scene_forEachSelectedBrush( BrushFaceOffset( offset ) );
+	SceneChangeNotify();
+	return TRUE;
+}
+
+static gboolean CSGdlg_grid2spin( GtkWidget *widget, CSGToolDialog* dialog ){
+	gtk_spin_button_set_value( dialog->spin, GetGridSize() );
+	return TRUE;
+}
+
+static gboolean CSGdlg_delete( GtkWidget *widget, GdkEventAny *event, CSGToolDialog* dialog ){
+	gtk_widget_hide( GTK_WIDGET( dialog->window ) );
+	return TRUE;
+}
+
+void CSG_Tool(){
+	if ( g_csgtool_dialog.window == NULL ) {
+		g_csgtool_dialog.window = create_dialog_window( MainFrame_getWindow(), "CSG Tool", G_CALLBACK( CSGdlg_delete ), &g_csgtool_dialog );
+		gtk_window_set_type_hint( g_csgtool_dialog.window, GDK_WINDOW_TYPE_HINT_UTILITY );
+
+		//GtkAccelGroup* accel = gtk_accel_group_new();
+		//gtk_window_add_accel_group( g_csgtool_dialog.window, accel );
+		global_accel_connect_window( g_csgtool_dialog.window );
+
+		{
+			GtkHBox* hbox = create_dialog_hbox( 4, 4 );
+			gtk_container_add( GTK_CONTAINER( g_csgtool_dialog.window ), GTK_WIDGET( hbox ) );
+			{
+				GtkTable* table = create_dialog_table( 3, 8, 4, 4 );
+				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
+				{
+					//GtkWidget* label = gtk_label_new( "<->" );
+					//gtk_widget_show( label );
+					GtkWidget* button = gtk_button_new_with_label( "Grid->" );
+					gtk_table_attach( table, button, 0, 1, 0, 1,
+									  (GtkAttachOptions) ( 0 ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_show( button );
+					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_grid2spin ), &g_csgtool_dialog );
+				}
+				{
+					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 16, 0, 9999, 1, 10, 0 ) );
+					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 3 ) );
+					gtk_widget_show( GTK_WIDGET( spin ) );
+					gtk_widget_set_tooltip_text( GTK_WIDGET( spin ), "Thickness" );
+					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_size_request( GTK_WIDGET( spin ), 64, -1 );
+					gtk_spin_button_set_numeric( spin, TRUE );
+
+					g_csgtool_dialog.spin = spin;
+				}
+				{
+					//radio button group for choosing the exclude axis
+					GtkWidget* radXYZ = gtk_radio_button_new_with_label( NULL, "XYZ" );
+					GtkWidget* radX = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radXYZ), "-X" );
+					GtkWidget* radY = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radXYZ), "-Y" );
+					GtkWidget* radZ = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radXYZ), "-Z" );
+					gtk_widget_show( radXYZ );
+					gtk_widget_show( radX );
+					gtk_widget_show( radY );
+					gtk_widget_show( radZ );
+
+					gtk_table_attach( table, radXYZ, 2, 3, 0, 1,
+									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									(GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_table_attach( table, radX, 3, 4, 0, 1,
+									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									(GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_table_attach( table, radY, 4, 5, 0, 1,
+									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									(GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_table_attach( table, radZ, 5, 6, 0, 1,
+									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									(GtkAttachOptions) ( 0 ), 0, 0 );
+
+					g_csgtool_dialog.radXYZ = GTK_TOGGLE_BUTTON( radXYZ );
+					g_csgtool_dialog.radX = GTK_TOGGLE_BUTTON( radX );
+					g_csgtool_dialog.radY = GTK_TOGGLE_BUTTON( radY );
+					g_csgtool_dialog.radZ = GTK_TOGGLE_BUTTON( radZ );
+				}
+				{
+					GtkWidget* button = gtk_toggle_button_new();
+					button_set_icon( GTK_BUTTON( button ), "f-caulk.png" );
+					gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
+					gtk_table_attach( table, button, 6, 7, 0, 1,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Caulk some faces" );
+					gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( button ), TRUE );
+					gtk_widget_show( button );
+					g_csgtool_dialog.caulk = GTK_TOGGLE_BUTTON( button );
+				}
+				{
+					GtkWidget* button = gtk_toggle_button_new();
+					button_set_icon( GTK_BUTTON( button ), "csgtool_removeinner.png" );
+					gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
+					gtk_table_attach( table, button, 7, 8, 0, 1,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Remove inner brush" );
+					gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( button ), TRUE );
+					gtk_widget_show( button );
+					g_csgtool_dialog.removeInner = GTK_TOGGLE_BUTTON( button );
+				}
+				{
+					GtkWidget* sep = gtk_hseparator_new();
+					gtk_widget_show( sep );
+					gtk_table_attach( table, sep, 0, 8, 1, 2,
+									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									(GtkAttachOptions) ( 0 ), 0, 0 );
+				}
+				{
+					GtkWidget* button = gtk_button_new();
+					button_set_icon( GTK_BUTTON( button ), "csgtool_shrink.png" );
+					gtk_table_attach( table, button, 0, 1, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Shrink brush" );
+					gtk_widget_show( button );
+					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_BrushShrink ), &g_csgtool_dialog );
+				}
+				{
+					GtkWidget* button = gtk_button_new();
+					button_set_icon( GTK_BUTTON( button ), "csgtool_expand.png" );
+					gtk_table_attach( table, button, 1, 2, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Expand brush" );
+					gtk_widget_show( button );
+					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_BrushExpand ), &g_csgtool_dialog );
+				}
+				{
+					GtkWidget* button = gtk_button_new();
+					button_set_icon( GTK_BUTTON( button ), "csgtool_diagonal.png" );
+					gtk_table_attach( table, button, 3, 4, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Hollow::diagonal joints" );
+					gtk_widget_show( button );
+					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowDiag ), &g_csgtool_dialog );
+				}
+				{
+					GtkWidget* button = gtk_button_new();
+					button_set_icon( GTK_BUTTON( button ), "csgtool_wrap.png" );
+					gtk_table_attach( table, button, 4, 5, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Hollow::warp" );
+					gtk_widget_show( button );
+					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowWrap ), &g_csgtool_dialog );
+				}
+				{
+					GtkWidget* button = gtk_button_new();
+					button_set_icon( GTK_BUTTON( button ), "csgtool_extrude.png" );
+					gtk_table_attach( table, button, 5, 6, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Hollow::extrude faces" );
+					gtk_widget_show( button );
+					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowExtrude ), &g_csgtool_dialog );
+				}
+				{
+					GtkWidget* button = gtk_button_new();
+					button_set_icon( GTK_BUTTON( button ), "csgtool_pull.png" );
+					gtk_table_attach( table, button, 6, 7, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_widget_set_tooltip_text( button, "Hollow::pull faces" );
+					gtk_widget_show( button );
+					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowPull ), &g_csgtool_dialog );
+				}
+
+			}
+		}
+	}
+
+	gtk_widget_show( GTK_WIDGET( g_csgtool_dialog.window ) );
+	gtk_window_present( g_csgtool_dialog.window );
+}
+
