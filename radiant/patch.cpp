@@ -2778,30 +2778,30 @@ void Patch::BuildVertexArray(){
 }
 
 
-Vector3 getAverageNormal(const Vector3& normal1, const Vector3& normal2, double thickness)
+Vector3 getAverageNormal(const Vector3& normal1, const Vector3& normal2)
 {
 	// Beware of normals with 0 length
-	if ( ( fabs( normal1[0] ) + fabs( normal1[1] ) + fabs( normal1[2] ) ) == 0 ) return normal2;
-	if ( ( fabs( normal2[0] ) + fabs( normal2[1] ) + fabs( normal2[2] ) ) == 0) return normal1;
+	if ( vector3_length_squared( normal1 ) == 0 ) return normal2;
+	if ( vector3_length_squared( normal2 ) == 0 ) return normal1;
 
 	// Both normals have length > 0
-	Vector3 n1 = vector3_normalised( normal1 );
-	Vector3 n2 = vector3_normalised( normal2 );
+	//Vector3 n1 = vector3_normalised( normal1 );
+	//Vector3 n2 = vector3_normalised( normal2 );
 
 	// Get the angle bisector
-	Vector3 normal = vector3_normalised (n1 + n2);
+	if( vector3_length_squared( normal1 + normal2 ) == 0 ) return normal1;
+
+	Vector3 normal = vector3_normalised (normal1 + normal2);
 
 	// Now calculate the length correction out of the angle
 	// of the two normals
 		/* float factor = cos(n1.angle(n2) * 0.5); */
-	float factor = (float) vector3_dot( n1, n2 );
+	float factor = (float) vector3_dot( normal1, normal2 );
 	if ( factor > 1.0 ) factor = 1;
+	if ( factor < -1.0 ) factor = -1;
 	factor = acos( factor );
 
 	factor = cos( factor * 0.5 );
-
-	// Stretch the normal to fit the required thickness
-	normal *= thickness;
 
 	// Check for div by zero (if the normals are antiparallel)
 	// and stretch the resulting normal, if necessary
@@ -2846,7 +2846,7 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 			break;
 	}
 
-	//check if certain seams are required
+	//check if certain seams are required + cycling in normals calculation is needed
 	//( endpoints != startpoints ) - not a cylinder or something
 	for (std::size_t col = 0; col < m_width; col++){
 		if( vector3_length_squared( sourcePatch.ctrlAt( 0, col ).m_vertex - sourcePatch.ctrlAt( m_height - 1, col ).m_vertex ) > 0.1f ){
@@ -2878,10 +2878,10 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 				// The col tangents (empty if 0,0,0)
 				Vector3 colTangent[2] = { Vector3(0,0,0), Vector3(0,0,0) };
 
-				// Are we at the beginning/end of the column?
-				if (col == 0 || col == m_width - 1)
+				// Are we at the beginning/end of the row? + not cylinder
+				if ( (col == 0 || col == m_width - 1) && !no34 )
 				{
-					// Get the next row index
+					// Get the next col index
 					std::size_t nextCol = (col == m_width - 1) ? (col - 1) : (col + 1);
 
 					const PatchControl& colNeighbour = sourcePatch.ctrlAt(row, nextCol);
@@ -2890,13 +2890,29 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 					colTangent[0] = colNeighbour.m_vertex - curCtrl.m_vertex;
 					// Reverse it if we're at the end of the column
 					colTangent[0] *= (col == m_width - 1) ? -1 : +1;
+					//normalize
+					if ( vector3_length_squared( colTangent[0] ) != 0 ) vector3_normalise( colTangent[0] );
 				}
 				// We are in between, two tangents can be calculated
 				else
 				{
 					// Take two neighbouring vertices that should form a line segment
-					const PatchControl& neighbour1 = sourcePatch.ctrlAt(row, col+1);
-					const PatchControl& neighbour2 = sourcePatch.ctrlAt(row, col-1);
+					std::size_t nextCol, prevCol;
+					if( col == 0 ){
+						nextCol = col+1;
+						prevCol = m_width-2;
+					}
+					else if( col == m_width - 1 ){
+						nextCol = 1;
+						prevCol = col-1;
+					}
+					else{
+						nextCol = col+1;
+						prevCol = col-1;
+					}
+					const PatchControl& neighbour1 = sourcePatch.ctrlAt(row, nextCol);
+					const PatchControl& neighbour2 = sourcePatch.ctrlAt(row, prevCol);
+
 
 					// Calculate both available tangents
 					colTangent[0] = neighbour1.m_vertex - curCtrl.m_vertex;
@@ -2905,10 +2921,13 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 					// Reverse the second one
 					colTangent[1] *= -1;
 
+					//normalize b4 stuff
+					if ( vector3_length_squared( colTangent[0] ) != 0 ) vector3_normalise( colTangent[0] );
+					if ( vector3_length_squared( colTangent[1] ) != 0 ) vector3_normalise( colTangent[1] );
+
 					// Cull redundant tangents (parallel)
-					if ( ( fabs( colTangent[1][0] + colTangent[0][0] ) + fabs( colTangent[1][1] + colTangent[0][1] ) + fabs( colTangent[1][2] + colTangent[0][2] ) ) < 0.00001 ||
-						( fabs( colTangent[1][0] - colTangent[0][0] ) + fabs( colTangent[1][1] - colTangent[0][1] ) + fabs( colTangent[1][2] - colTangent[0][2] ) ) < 0.00001 )
-					{
+					if ( vector3_length_squared( colTangent[1] + colTangent[0] ) == 0 ||
+						vector3_length_squared( colTangent[1] - colTangent[0] ) == 0 ){
 						colTangent[1] = Vector3(0,0,0);
 					}
 				}
@@ -2917,7 +2936,7 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 				Vector3 rowTangent[2] = { Vector3(0,0,0), Vector3(0,0,0) };
 
 				// Are we at the beginning or the end?
-				if (row == 0 || row == m_height - 1)
+				if ( (row == 0 || row == m_height - 1) && !no12 )
 				{
 					// Yes, only calculate one row tangent
 					// Get the next row index
@@ -2929,12 +2948,27 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 					rowTangent[0] = rowNeighbour.m_vertex - curCtrl.m_vertex;
 					// Reverse it accordingly
 					rowTangent[0] *= (row == m_height - 1) ? -1 : +1;
+					//normalize
+					if ( vector3_length_squared( rowTangent[0] ) != 0 ) vector3_normalise( rowTangent[0] );
 				}
 				else
 				{
 					// Two tangents to calculate
-					const PatchControl& rowNeighbour1 = sourcePatch.ctrlAt(row + 1, col);
-					const PatchControl& rowNeighbour2 = sourcePatch.ctrlAt(row - 1, col);
+					std::size_t nextRow, prevRow;
+					if( row == 0 ){
+						nextRow = row+1;
+						prevRow = m_height-2;
+					}
+					else if( row == m_height - 1 ){
+						nextRow = 1;
+						prevRow = row-1;
+					}
+					else{
+						nextRow = row+1;
+						prevRow = row-1;
+					}
+					const PatchControl& rowNeighbour1 = sourcePatch.ctrlAt(nextRow, col);
+					const PatchControl& rowNeighbour2 = sourcePatch.ctrlAt(prevRow, col);
 
 					// First tangent
 					rowTangent[0] = rowNeighbour1.m_vertex - curCtrl.m_vertex;
@@ -2943,47 +2977,109 @@ void Patch::createThickenedOpposite(const Patch& sourcePatch,
 					// Reverse the second one
 					rowTangent[1] *= -1;
 
-					// Cull redundant tangents
-					if ( ( fabs( rowTangent[1][0] + rowTangent[0][0] ) + fabs( rowTangent[1][1] + rowTangent[0][1] ) + fabs( rowTangent[1][2] + rowTangent[0][2] ) ) < 0.00001 ||
-						( fabs( rowTangent[1][0] - rowTangent[0][0] ) + fabs( rowTangent[1][1] - rowTangent[0][1] ) + fabs( rowTangent[1][2] - rowTangent[0][2] ) ) < 0.00001 )
-					{
+					//normalize b4 stuff
+					if ( vector3_length_squared( rowTangent[0] ) != 0 ) vector3_normalise( rowTangent[0] );
+					if ( vector3_length_squared( rowTangent[1] ) != 0 ) vector3_normalise( rowTangent[1] );
+
+					// Cull redundant tangents (parallel)
+					if ( vector3_length_squared( rowTangent[1] + rowTangent[0] ) == 0 ||
+						vector3_length_squared( rowTangent[1] - rowTangent[0] ) == 0 ){
 						rowTangent[1] = Vector3(0,0,0);
 					}
 				}
 
-				// If two column tangents are available, take the length-corrected average
-				if ( ( fabs( colTangent[1][0] ) + fabs( colTangent[1][1] ) + fabs( colTangent[1][2] ) ) > 0)
-				{
-					// Two column normals to calculate
-					Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
-					Vector3 normal2 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[1] ) );
 
-					normal = getAverageNormal(normal1, normal2, thickness);
-
-					// Scale the normal down, as it is multiplied with thickness later on
-					normal /= thickness;
+				//clean parallel pairs...
+				if ( vector3_length_squared( rowTangent[0] + colTangent[0] ) == 0 ||
+					vector3_length_squared( rowTangent[0] - colTangent[0] ) == 0 ){
+					rowTangent[0] = Vector3(0,0,0);
 				}
-				else
-				{
-					// One column tangent available, maybe we have a second rowtangent?
-					if ( ( fabs( rowTangent[1][0] ) + fabs( rowTangent[1][1] ) + fabs( rowTangent[1][2] ) ) > 0)
+				if ( vector3_length_squared( rowTangent[1] + colTangent[1] ) == 0 ||
+					vector3_length_squared( rowTangent[1] - colTangent[1] ) == 0 ){
+					rowTangent[1] = Vector3(0,0,0);
+				}
+				if ( vector3_length_squared( rowTangent[0] + colTangent[1] ) == 0 ||
+					vector3_length_squared( rowTangent[0] - colTangent[1] ) == 0 ){
+					colTangent[1] = Vector3(0,0,0);
+				}
+				if ( vector3_length_squared( rowTangent[1] + colTangent[0] ) == 0 ||
+					vector3_length_squared( rowTangent[1] - colTangent[0] ) == 0 ){
+					rowTangent[1] = Vector3(0,0,0);
+				}
+
+				//clean dummies
+				if ( vector3_length_squared( colTangent[0] ) == 0 ){
+					colTangent[0] = colTangent[1];
+					colTangent[1] = Vector3(0,0,0);
+				}
+				if ( vector3_length_squared( rowTangent[0] ) == 0 ){
+					rowTangent[0] = rowTangent[1];
+					rowTangent[1] = Vector3(0,0,0);
+				}
+				if( vector3_length_squared( rowTangent[0] ) == 0 || vector3_length_squared( colTangent[0] ) == 0 ){
+					normal = extrudeAxis;
+
+				}
+				else{
+					// If two column + two row tangents are available, take the length-corrected average
+					if ( ( fabs( colTangent[1][0] ) + fabs( colTangent[1][1] ) + fabs( colTangent[1][2] ) ) > 0 &&
+							( fabs( rowTangent[1][0] ) + fabs( rowTangent[1][1] ) + fabs( rowTangent[1][2] ) ) > 0 )
 					{
-						// Two row normals to calculate
+						// Two column normals to calculate
 						Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
-						Vector3 normal2 = vector3_normalised( vector3_cross( rowTangent[1], colTangent[0] ) );
+						Vector3 normal2 = vector3_normalised( vector3_cross( rowTangent[1], colTangent[1] ) );
 
-						normal = getAverageNormal(normal1, normal2, thickness);
+						normal = getAverageNormal(normal1, normal2);
+						/*globalOutputStream() << "0\n";
+						globalOutputStream() << normal1 << "\n";
+						globalOutputStream() << normal2 << "\n";
+						globalOutputStream() << normal << "\n";*/
 
-						// Scale the normal down, as it is multiplied with thickness later on
-						normal /= thickness;
+					}
+					// If two column tangents are available, take the length-corrected average
+					else if ( ( fabs( colTangent[1][0] ) + fabs( colTangent[1][1] ) + fabs( colTangent[1][2] ) ) > 0)
+					{
+						// Two column normals to calculate
+						Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
+						Vector3 normal2 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[1] ) );
+
+						normal = getAverageNormal(normal1, normal2);
+						/*globalOutputStream() << "1\n";
+						globalOutputStream() << normal1 << "\n";
+						globalOutputStream() << normal2 << "\n";
+						globalOutputStream() << normal << "\n";*/
+
 					}
 					else
 					{
-						if ( vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) > 0 ){
-							normal = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
+						// One column tangent available, maybe we have a second rowtangent?
+						if ( ( fabs( rowTangent[1][0] ) + fabs( rowTangent[1][1] ) + fabs( rowTangent[1][2] ) ) > 0)
+						{
+							// Two row normals to calculate
+							Vector3 normal1 = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
+							Vector3 normal2 = vector3_normalised( vector3_cross( rowTangent[1], colTangent[0] ) );
+
+							normal = getAverageNormal(normal1, normal2);
+							/*globalOutputStream() << "2\n";
+							globalOutputStream() << rowTangent[0] << "\n";
+							globalOutputStream() << colTangent[0] << "\n";
+							globalOutputStream() << vector3_cross( rowTangent[0], colTangent[0]) << "\n";
+							globalOutputStream() << normal1 << "\n";
+							globalOutputStream() << normal2 << "\n";
+							globalOutputStream() << normal << "\n";*/
+
 						}
-						else{
-							normal = extrudeAxis;
+						else
+						{
+							if ( vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) > 0 ){
+								normal = vector3_normalised( vector3_cross( rowTangent[0], colTangent[0] ) );
+								/*globalOutputStream() << "3\n";
+								globalOutputStream() << (float)vector3_length_squared( vector3_cross( rowTangent[0], colTangent[0] ) ) << "\n";
+								globalOutputStream() << normal << "\n";*/
+							}
+							else{
+								normal = extrudeAxis;
+							}
 						}
 					}
 				}

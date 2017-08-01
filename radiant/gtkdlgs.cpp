@@ -839,6 +839,7 @@ static void DoGtkTextEditor( const char* filename, guint cursorpos, int length )
 
 		// trying to show later
 		gtk_widget_show( text_editor );
+		gtk_window_present( GTK_WINDOW( text_editor ) );
 
 #ifdef WIN32
 		process_gui();
