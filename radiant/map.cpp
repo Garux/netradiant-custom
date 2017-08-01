@@ -1521,7 +1521,7 @@ bool Map_ImportFile( const char* filename ){
 
 tryDecompile:
 
-	const char *type = GlobalRadiant().getRequiredGameDescriptionKeyValue( "q3map2_type" );
+	const char *type = GlobalRadiant().getGameDescriptionKeyValue( "q3map2_type" );
 	int n = string_length( path_get_extension( filename ) );
 	if ( n && ( extension_equal( path_get_extension( filename ), "bsp" ) || extension_equal( path_get_extension( filename ), "map" ) ) ) {
 		StringBuffer output;

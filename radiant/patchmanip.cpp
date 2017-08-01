@@ -196,6 +196,83 @@ void Scene_PatchDeform( scene::Graph& graph, const int deform )
 
 }
 
+void Patch_thicken( Patch& patch, scene::Instance& instance, const float thickness, bool seams, const int axis ){
+
+		// Create a new patch node
+		NodeSmartReference node(g_patchCreator->createPatch());
+		// Insert the node into worldspawn
+		Node_getTraversable(Map_FindOrInsertWorldspawn(g_map))->insert(node);
+
+		// Retrieve the contained patch from the node
+		Patch* targetPatch = Node_getPatch(node);
+
+		// Create the opposite patch with the given thickness = distance
+		bool no12 = true;
+		bool no34 = true;
+		targetPatch->createThickenedOpposite(patch, thickness, axis, no12, no34);
+
+		// Now select the newly created patches
+		{
+			scene::Path patchpath(makeReference(GlobalSceneGraph().root()));
+			patchpath.push(makeReference(*Map_GetWorldspawn(g_map)));
+			patchpath.push(makeReference(node.get()));
+			Instance_getSelectable(*GlobalSceneGraph().find(patchpath))->setSelected(true);
+		}
+
+		if (seams && thickness != 0.0f) {
+			int i = 0;
+			if ( no12 ){
+				i = 2;
+			}
+			int iend = 4;
+			if ( no34 ){
+				iend = 2;
+			}
+			// Now create the four walls
+			for ( ; i < iend; i++ ) {
+				// Allocate new patch
+				NodeSmartReference node = NodeSmartReference(g_patchCreator->createPatch());
+				// Insert each node into worldspawn
+				Node_getTraversable(Map_FindOrInsertWorldspawn(g_map))->insert(node);
+
+				// Retrieve the contained patch from the node
+				Patch* wallPatch = Node_getPatch(node);
+
+				// Create the wall patch by passing i as wallIndex
+				wallPatch->createThickenedWall( patch, *targetPatch, i);
+
+				if( ( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[1] <= 0.00005 ) ||
+					( wallPatch->localAABB().extents[1] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ||
+					( wallPatch->localAABB().extents[0] <= 0.00005 && wallPatch->localAABB().extents[2] <= 0.00005 ) ){
+					//globalOutputStream() << "Thicken: Discarding degenerate patch.\n";
+					Node_getTraversable( Map_FindOrInsertWorldspawn(g_map) )->erase( node );
+				}
+				else
+				// Now select the newly created patches
+				{
+					scene::Path patchpath(makeReference(GlobalSceneGraph().root()));
+					patchpath.push(makeReference(*Map_GetWorldspawn(g_map)));
+					patchpath.push(makeReference(node.get()));
+					Instance_getSelectable(*GlobalSceneGraph().find(patchpath))->setSelected(true);
+				}
+			}
+		}
+
+		// Invert the target patch so that it faces the opposite direction
+		targetPatch->InvertMatrix();
+}
+
+void Scene_PatchThicken( scene::Graph& graph, const int thickness, bool seams, const int axis )
+{
+	InstanceVector instances;
+	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
+	for ( InstanceVector::const_iterator i = instances.begin(); i != instances.end(); ++i )
+	{
+		Patch_thicken( *Node_getPatch( ( *i )->path().top() ), *( *i ), thickness, seams, axis );
+	}
+
+}
+
 Patch* Scene_GetUltimateSelectedVisiblePatch(){
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		scene::Node& node = GlobalSelectionSystem().ultimateSelected().path().top();
@@ -618,6 +695,13 @@ void Patch_Deform(){
 	DoPatchDeformDlg();
 }
 
+void DoPatchThickenDlg();
+
+void Patch_Thicken(){
+	UndoableCommand undo( "patchThicken" );
+
+	DoPatchThickenDlg();
+}
 
 
 
@@ -732,6 +816,7 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), Accelerator( 'Y' ) );
 	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), Accelerator( 'L', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchDeform", FreeCaller<Patch_Deform>() );
+	GlobalCommands_insert( "PatchThicken", FreeCaller<Patch_Thicken>() );
 }
 
 void Patch_constructToolbar( GtkToolbar* toolbar ){
@@ -840,6 +925,7 @@ void Patch_constructMenu( GtkMenu* menu ){
 	}
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Deform...", "PatchDeform" );
+	create_menu_item_with_mnemonic( menu, "Thicken...", "PatchThicken" );
 }
 
 
@@ -1197,4 +1283,129 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 	gtk_widget_destroy( GTK_WIDGET( window ) );
 
 	return ret;
+}
+
+
+void DoPatchThickenDlg(){
+	ModalDialog dialog;
+	GtkWidget* thicknessW;
+	GtkWidget* seamsW;
+	GtkWidget* radX;
+	GtkWidget* radY;
+	GtkWidget* radZ;
+	GtkWidget* radNormals;
+
+	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Patch thicken", G_CALLBACK( dialog_delete_callback ), &dialog );
+
+	GtkAccelGroup* accel = gtk_accel_group_new();
+	gtk_window_add_accel_group( window, accel );
+
+	{
+		GtkHBox* hbox = create_dialog_hbox( 4, 4 );
+		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( hbox ) );
+		{
+			GtkTable* table = create_dialog_table( 2, 4, 4, 4 );
+			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
+			{
+				GtkLabel* label = GTK_LABEL( gtk_label_new( "Thickness:" ) );
+				gtk_widget_show( GTK_WIDGET( label ) );
+				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 0, 1,
+								  (GtkAttachOptions) ( GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+			}
+			{
+				GtkWidget* entry = gtk_entry_new();
+				gtk_entry_set_text( GTK_ENTRY( entry ), "16" );
+				gtk_widget_set_size_request( entry, 40, -1 );
+				gtk_widget_show( entry );
+				gtk_table_attach( table, entry, 1, 2, 0, 1,
+								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+
+				thicknessW = entry;
+			}
+			{
+				// Create the "create seams" label
+				GtkWidget* _seamsCheckBox = gtk_check_button_new_with_label( "Side walls" );
+				gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( _seamsCheckBox ), TRUE );
+				gtk_widget_show( _seamsCheckBox );
+				gtk_table_attach( table, _seamsCheckBox, 3, 4, 0, 1,
+								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				seamsW = _seamsCheckBox;
+
+			}
+			{
+				// Create the radio button group for choosing the extrude axis
+				GtkWidget* _radNormals = gtk_radio_button_new_with_label( NULL, "Normal" );
+				GtkWidget* _radX = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_radNormals), "X" );
+				GtkWidget* _radY = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_radNormals), "Y" );
+				GtkWidget* _radZ = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_radNormals), "Z" );
+				gtk_widget_show( _radNormals );
+				gtk_widget_show( _radX );
+				gtk_widget_show( _radY );
+				gtk_widget_show( _radZ );
+
+
+				// Pack the buttons into the table
+				gtk_table_attach( table, _radNormals, 0, 1, 1, 2,
+								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_table_attach( table, _radX, 1, 2, 1, 2,
+								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_table_attach( table, _radY, 2, 3, 1, 2,
+								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_table_attach( table, _radZ, 3, 4, 1, 2,
+								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				radX = _radX;
+				radY = _radY;
+				radZ = _radZ;
+				radNormals = _radNormals;
+			}
+		}
+		{
+			GtkVBox* vbox = create_dialog_vbox( 4 );
+			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
+			{
+				GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &dialog );
+				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+				widget_make_default( GTK_WIDGET( button ) );
+				gtk_widget_grab_focus( GTK_WIDGET( button ) );
+				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
+			}
+			{
+				GtkButton* button = create_dialog_button( "Cancel", G_CALLBACK( dialog_button_cancel ), &dialog );
+				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
+			}
+		}
+	}
+
+	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
+		int axis;
+		bool seams;
+		float thickness = static_cast<float>( atoi( gtk_entry_get_text( GTK_ENTRY( thicknessW ) ) ) );
+		seams = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( seamsW )) ? true : false;
+
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radX))) {
+			axis = 0;
+		}
+		else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radY))) {
+			axis = 1;
+		}
+		else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radZ))) {
+			axis = 2;
+		}
+		else  {
+			// Extrude along normals
+			axis = 3;
+		}
+		Scene_PatchThicken( GlobalSceneGraph(), thickness, seams, axis );
+	}
+
+	gtk_widget_destroy( GTK_WIDGET( window ) );
 }

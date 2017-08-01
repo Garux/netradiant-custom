@@ -880,6 +880,12 @@ const_iterator end() const {
 PatchControlArray& getControlPoints(){
 	return m_ctrl;
 }
+
+// Same as above, just for const arguments
+const PatchControlArray& getControlPoints() const {
+	return m_ctrl;
+}
+
 PatchControlArray& getControlPointsTransformed(){
 	return m_ctrlTransformed;
 }
@@ -916,6 +922,8 @@ void SetTextureRepeat( float s, float t ); // call with s=1 t=1 for FIT
 void CapTexture();
 void NaturalTexture();
 void ProjectTexture( int nAxis );
+void createThickenedOpposite(const Patch& sourcePatch, const float thickness, const int axis, bool& no12, bool& no34 );
+void createThickenedWall(const Patch& sourcePatch, const Patch& targetPatch, const int wallIndex);
 
 void undoSave(){
 	if ( m_map != 0 ) {

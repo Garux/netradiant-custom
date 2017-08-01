@@ -2221,13 +2221,13 @@ void PatchInspector_registerShortcuts(){
 }
 
 void Patch_registerShortcuts(){
-	command_connect_accelerator( "InvertCurveTextureX" );
-	command_connect_accelerator( "InvertCurveTextureY" );
+//	command_connect_accelerator( "InvertCurveTextureX" );
+//	command_connect_accelerator( "InvertCurveTextureY" );
 	command_connect_accelerator( "IncPatchColumn" );
 	command_connect_accelerator( "IncPatchRow" );
 	command_connect_accelerator( "DecPatchColumn" );
 	command_connect_accelerator( "DecPatchRow" );
-	command_connect_accelerator( "NaturalizePatch" );
+//	command_connect_accelerator( "NaturalizePatch" );
 	//command_connect_accelerator("CapCurrentCurve");
 }
 
@@ -2259,6 +2259,8 @@ void SelectNudge_registerShortcuts(){
 	//command_connect_accelerator("SelectNudgeRight");
 	//command_connect_accelerator("SelectNudgeUp");
 	//command_connect_accelerator("SelectNudgeDown");
+	command_connect_accelerator( "UnSelectSelection2" );
+	command_connect_accelerator( "DeleteSelection2" );
 }
 
 void SnapToGrid_registerShortcuts(){
@@ -2275,17 +2277,17 @@ void SurfaceInspector_registerShortcuts(){
 
 
 void register_shortcuts(){
-	PatchInspector_registerShortcuts();
+//	PatchInspector_registerShortcuts();
 	Patch_registerShortcuts();
 	Grid_registerShortcuts();
-	XYWnd_registerShortcuts();
+//	XYWnd_registerShortcuts();
 	CamWnd_registerShortcuts();
 	Manipulators_registerShortcuts();
 	SurfaceInspector_registerShortcuts();
 	TexdefNudge_registerShortcuts();
 	SelectNudge_registerShortcuts();
-	SnapToGrid_registerShortcuts();
-	SelectByType_registerShortcuts();
+//	SnapToGrid_registerShortcuts();
+//	SelectByType_registerShortcuts();
 }
 
 void File_constructToolbar( GtkToolbar* toolbar ){
@@ -2804,7 +2806,7 @@ void MainFrame::Create(){
 		toolbar_append_toggle_button( plugin_toolbar, "Lights (ALT + 0)", "lightinspector.bmp", "FilterLights" );
 		toolbar_append_toggle_button( plugin_toolbar, "Models (SHIFT + M)", "f-models.bmp", "FilterModels" );
 		toolbar_append_toggle_button( plugin_toolbar, "Triggers (CTRL + SHIFT + T)", "f-triggers.bmp", "FilterTriggers" );
-		toolbar_append_toggle_button( plugin_toolbar, "Decals (SHIFT + D)", "f-decals.bmp", "FilterDecals" );
+//		toolbar_append_toggle_button( plugin_toolbar, "Decals (SHIFT + D)", "f-decals.bmp", "FilterDecals" );
 		gtk_toolbar_append_space( GTK_TOOLBAR( plugin_toolbar ) );
 		toolbar_append_button( plugin_toolbar, "InvertFilters", "f-invert.bmp", "InvertFilters" );
 		toolbar_append_button( plugin_toolbar, "ResetFilters", "f-reset.bmp", "ResetFilters" );
@@ -3245,9 +3247,11 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), Accelerator( GDK_space ) );
 	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
 //	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
+	GlobalCommands_insert( "DeleteSelection2", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
 	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( 'Z' ) );
 	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
 //	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
+	GlobalCommands_insert( "UnSelectSelection2", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
 	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( 'C' ) );
 	GlobalCommands_insert( "InvertSelection", FreeCaller<Select_Invert>(), Accelerator( 'I' ) );
 	GlobalCommands_insert( "SelectInside", FreeCaller<Select_Inside>() );

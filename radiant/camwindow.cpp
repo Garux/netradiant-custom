@@ -970,6 +970,24 @@ void CamWnd_registerCommands( CamWnd& camwnd ){
 							FreeMoveCameraMoveRightKeyDownCaller( camwnd.getCamera() ),
 							FreeMoveCameraMoveRightKeyUpCaller( camwnd.getCamera() )
 							);
+
+	GlobalKeyEvents_insert( "CameraFreeMoveForward2", Accelerator( GDK_Up ),
+							FreeMoveCameraMoveForwardKeyDownCaller( camwnd.getCamera() ),
+							FreeMoveCameraMoveForwardKeyUpCaller( camwnd.getCamera() )
+							);
+	GlobalKeyEvents_insert( "CameraFreeMoveBack2", Accelerator( GDK_Down ),
+							FreeMoveCameraMoveBackKeyDownCaller( camwnd.getCamera() ),
+							FreeMoveCameraMoveBackKeyUpCaller( camwnd.getCamera() )
+							);
+	GlobalKeyEvents_insert( "CameraFreeMoveLeft2", Accelerator( GDK_Left ),
+							FreeMoveCameraMoveLeftKeyDownCaller( camwnd.getCamera() ),
+							FreeMoveCameraMoveLeftKeyUpCaller( camwnd.getCamera() )
+							);
+	GlobalKeyEvents_insert( "CameraFreeMoveRight2", Accelerator( GDK_Right ),
+							FreeMoveCameraMoveRightKeyDownCaller( camwnd.getCamera() ),
+							FreeMoveCameraMoveRightKeyUpCaller( camwnd.getCamera() )
+							);
+
 	GlobalKeyEvents_insert( "CameraFreeMoveUp", Accelerator( GDK_period ),
 							FreeMoveCameraMoveUpKeyDownCaller( camwnd.getCamera() ),
 							FreeMoveCameraMoveUpKeyUpCaller( camwnd.getCamera() )
@@ -1119,6 +1137,12 @@ void CamWnd_Add_Handlers_FreeMove( CamWnd& camwnd ){
 	KeyEvent_connect( "CameraFreeMoveBack" );
 	KeyEvent_connect( "CameraFreeMoveLeft" );
 	KeyEvent_connect( "CameraFreeMoveRight" );
+
+	KeyEvent_connect( "CameraFreeMoveForward2" );
+	KeyEvent_connect( "CameraFreeMoveBack2" );
+	KeyEvent_connect( "CameraFreeMoveLeft2" );
+	KeyEvent_connect( "CameraFreeMoveRight2" );
+
 	KeyEvent_connect( "CameraFreeMoveUp" );
 	KeyEvent_connect( "CameraFreeMoveDown" );
 }
@@ -1128,6 +1152,12 @@ void CamWnd_Remove_Handlers_FreeMove( CamWnd& camwnd ){
 	KeyEvent_disconnect( "CameraFreeMoveBack" );
 	KeyEvent_disconnect( "CameraFreeMoveLeft" );
 	KeyEvent_disconnect( "CameraFreeMoveRight" );
+
+	KeyEvent_disconnect( "CameraFreeMoveForward2" );
+	KeyEvent_disconnect( "CameraFreeMoveBack2" );
+	KeyEvent_disconnect( "CameraFreeMoveLeft2" );
+	KeyEvent_disconnect( "CameraFreeMoveRight2" );
+
 	KeyEvent_disconnect( "CameraFreeMoveUp" );
 	KeyEvent_disconnect( "CameraFreeMoveDown" );
 
@@ -1909,6 +1939,11 @@ void CamWnd_Construct(){
 	GlobalShortcuts_insert( "CameraFreeMoveBack", Accelerator( 'S' ) );
 	GlobalShortcuts_insert( "CameraFreeMoveLeft", Accelerator( 'A' ) );
 	GlobalShortcuts_insert( "CameraFreeMoveRight", Accelerator( 'D' ) );
+
+	GlobalShortcuts_insert( "CameraFreeMoveForward2", Accelerator( GDK_Up ) );
+	GlobalShortcuts_insert( "CameraFreeMoveBack2", Accelerator( GDK_Down ) );
+	GlobalShortcuts_insert( "CameraFreeMoveLeft2", Accelerator( GDK_Left ) );
+	GlobalShortcuts_insert( "CameraFreeMoveRight2", Accelerator( GDK_Right ) );
 
 	GlobalToggles_insert( "ShowStats", ShowStatsToggleCaller(), ToggleItem::AddCallbackCaller( g_show_stats ) );
 

@@ -257,6 +257,18 @@ void environment_init( int argc, char* argv[] ){
 
 #include <windows.h>
 
+char openCmdMap[260];
+
+void cmdMap(){
+	openCmdMap[0] = '\0';
+	for ( int i = 1; i < g_argc; ++i )
+	{
+		if ( !stricmp( g_argv[i] + strlen(g_argv[i]) - 4, ".map" ) ){
+			strcpy( openCmdMap, g_argv[i] );
+		}
+	}
+}
+
 void environment_init( int argc, char* argv[] ){
 	args_init( argc, argv );
 
@@ -294,6 +306,7 @@ void environment_init( int argc, char* argv[] ){
 		home_path = home.c_str();
 	}
 	gamedetect();
+	cmdMap();
 }
 
 #else

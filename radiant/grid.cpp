@@ -228,7 +228,7 @@ void Grid_constructMenu( GtkMenu* menu ){
 }
 
 void Grid_registerShortcuts(){
-	command_connect_accelerator( "ToggleGrid" );
+//	command_connect_accelerator( "ToggleGrid" );
 	command_connect_accelerator( "GridDown" );
 	command_connect_accelerator( "GridUp" );
 	command_connect_accelerator( "ToggleGridSnap" );

@@ -29,4 +29,9 @@ const char* environment_get_app_path();
 extern int g_argc;
 extern char** g_argv;
 
+#if defined( WIN32 )
+extern char openCmdMap[260];
+#endif
+
+
 #endif

@@ -554,8 +554,18 @@ int main( int argc, char* argv[] ){
 	if ( lib != 0 ) {
 		void ( WINAPI *qDwmEnableComposition )( bool bEnable ) = ( void (WINAPI *) ( bool bEnable ) )GetProcAddress( lib, "DwmEnableComposition" );
 		if ( qDwmEnableComposition ) {
+			bool Aero = false;
+			for ( int i = 1; i < argc; ++i ){
+				if ( !stricmp( argv[i], "-aero" ) ){
+					Aero = true;
+					qDwmEnableComposition( TRUE );
+					break;
+				}
+			}
 			// disable Aero
-			qDwmEnableComposition( FALSE );
+			if ( !Aero ){
+				qDwmEnableComposition( FALSE );
+			}
 		}
 		FreeLibrary( lib );
 	}
@@ -624,6 +634,12 @@ int main( int argc, char* argv[] ){
 
 	hide_splash();
 
+#ifdef WIN32
+	if( openCmdMap[0] != '\0' ){
+		Map_LoadFile( openCmdMap );
+	}
+	else
+#endif // WIN32
 	if ( g_bLoadLastMap && !g_strLastMap.empty() ) {
 		Map_LoadFile( g_strLastMap.c_str() );
 	}
