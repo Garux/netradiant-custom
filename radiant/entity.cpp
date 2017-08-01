@@ -571,7 +571,9 @@ void Entity_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "_Regroup", "GroupSelection" );
 	create_menu_item_with_mnemonic( menu, "_Ungroup", "UngroupSelection" );
 	create_menu_item_with_mnemonic( menu, "_Connect", "ConnectSelection" );
-	create_menu_item_with_mnemonic( menu, "_KillConnect", "KillConnectSelection" );
+	if ( g_pGameDescription->mGameType == "nexuiz" ) {
+		create_menu_item_with_mnemonic( menu, "_KillConnect", "KillConnectSelection" );
+	}
 	create_menu_item_with_mnemonic( menu, "_Select Color...", "EntityColor" );
 	create_menu_item_with_mnemonic( menu, "_Normalize Color...", "NormalizeColor" );
 }

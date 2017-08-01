@@ -1505,7 +1505,7 @@ void SurfaceInspector_registerPreferencesPage(){
 }
 
 void SurfaceInspector_registerCommands(){
-	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), Accelerator( 'B', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), Accelerator( 'F', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "SurfaceInspector", FreeCaller<SurfaceInspector_toggleShown>(), Accelerator( 'S' ) );
 
 	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<SelectedFaces_copyTexture>() );

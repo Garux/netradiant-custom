@@ -932,7 +932,8 @@ void PreferencesDialog_restartRequired( const char* staticName ){
 }
 
 void PreferencesDialog_showDialog(){
-	if ( ConfirmModified( "Edit Preferences" ) && g_Preferences.DoModal() == eIDOK ) {
+	//if ( ConfirmModified( "Edit Preferences" ) && g_Preferences.DoModal() == eIDOK ) {
+	if ( g_Preferences.DoModal() == eIDOK ) {
 		if ( !g_restart_required.empty() ) {
 			StringOutputStream message( 256 );
 			message << "Preference changes require a restart:\n";

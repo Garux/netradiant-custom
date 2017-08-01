@@ -772,11 +772,11 @@ void CWatchBSP::DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName ){
 	if ( m_eState != EIdle ) {
 		globalOutputStream() << "WatchBSP got a monitoring request while not idling...\n";
 		// prompt the user, should we cancel the current process and go ahead?
-		if ( gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "I am already monitoring a Build process.\nDo you want me to override and start a new compilation?",
-							 "Build process monitoring", eMB_YESNO ) == eIDYES ) {
+//		if ( gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "I am already monitoring a Build process.\nDo you want me to override and start a new compilation?",
+//							 "Build process monitoring", eMB_YESNO ) == eIDYES ) {
 			// disconnect and set EIdle state
 			Reset();
-		}
+//		}
 	}
 	m_pCmd = str_ptr_array_clone( pCmd );
 	m_iCurrentStep = 0;

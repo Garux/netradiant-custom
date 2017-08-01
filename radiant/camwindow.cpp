@@ -1897,8 +1897,8 @@ void CamWnd_Construct(){
 	GlobalShortcuts_insert( "CameraBack", Accelerator( GDK_Down ) );
 	GlobalShortcuts_insert( "CameraLeft", Accelerator( GDK_Left ) );
 	GlobalShortcuts_insert( "CameraRight", Accelerator( GDK_Right ) );
-	GlobalShortcuts_insert( "CameraStrafeRight", Accelerator( GDK_period ) );
-	GlobalShortcuts_insert( "CameraStrafeLeft", Accelerator( GDK_comma ) );
+	GlobalShortcuts_insert( "CameraStrafeRight", Accelerator( 'D' ) );
+	GlobalShortcuts_insert( "CameraStrafeLeft", Accelerator( 'A' ) );
 
 	GlobalShortcuts_insert( "CameraUp", accelerator_null() );
 	GlobalShortcuts_insert( "CameraDown", accelerator_null() );

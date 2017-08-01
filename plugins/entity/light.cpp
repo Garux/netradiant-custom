@@ -531,10 +531,12 @@ Callback m_changed;
 bool m_useCenterKey;
 
 Doom3LightRadius( const char* defaultRadius ) : m_defaultRadius( 300, 300, 300 ), m_center( 0, 0, 0 ), m_useCenterKey( false ){
-	if ( !string_parse_vector3( defaultRadius, m_defaultRadius ) ) {
+	if ( g_lightType == LIGHTTYPE_DOOM3 ){
+		if ( !string_parse_vector3( defaultRadius, m_defaultRadius ) ) {
 		globalErrorStream() << "Doom3LightRadius: failed to parse default light radius\n";
-	}
+		}
 	m_radius = m_defaultRadius;
+	}
 }
 
 void lightRadiusChanged( const char* value ){
@@ -655,7 +657,7 @@ void render( RenderStateFlags state ) const {
 };
 
 inline void default_extents( Vector3& extents ){
-	extents = Vector3( 8, 8, 8 );
+	extents = Vector3( 12, 12, 12 );
 }
 
 class ShaderRef

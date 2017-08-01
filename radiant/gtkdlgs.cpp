@@ -362,7 +362,7 @@ void ProjectSettingsDialog_ok( ProjectSettingsDialog& dialog ){
 }
 
 void DoProjectSettings(){
-	if ( ConfirmModified( "Edit Project Settings" ) ) {
+	//if ( ConfirmModified( "Edit Project Settings" ) ) {
 		ModalDialog modal;
 		ProjectSettingsDialog dialog;
 
@@ -373,7 +373,7 @@ void DoProjectSettings(){
 		}
 
 		gtk_widget_destroy( GTK_WIDGET( window ) );
-	}
+	//}
 }
 
 // =============================================================================
@@ -478,10 +478,7 @@ void DoAbout(){
 															RADIANT_ABOUTMSG "\n\n"
 																			 "By alientrap.org\n\n"
 																			 "This program is free software\n"
-																			 "licensed under the GNU GPL.\n\n"
-																			 "NetRadiant is unsupported, however\n"
-																			 "you may report your problems at\n"
-																			 "http://www.icculus.org/netradiant/"
+																			 "licensed under the GNU GPL.\n"
 															) );
 
 				gtk_widget_show( GTK_WIDGET( label ) );
@@ -677,13 +674,13 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 			}
 		}
 	}
-	
+
 	// Initialize with last used values
 	char buf[16];
-	
+
 	sprintf( buf, "%f", last_used_texture_layout_scale_x );
 	gtk_entry_set_text( x, buf );
-	
+
 	sprintf( buf, "%f", last_used_texture_layout_scale_y );
 	gtk_entry_set_text( y, buf );
 
@@ -694,7 +691,7 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 	if ( ret == eIDOK ) {
 		*fx = static_cast<float>( atof( gtk_entry_get_text( x ) ) );
 		*fy = static_cast<float>( atof( gtk_entry_get_text( y ) ) );
-	
+
 		// Remember last used values
 		last_used_texture_layout_scale_x = *fx;
 		last_used_texture_layout_scale_y = *fy;

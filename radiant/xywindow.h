@@ -255,10 +255,10 @@ struct xywindow_globals_t
 	bool m_bNoStipple;
 
 	xywindow_globals_t() :
-		color_gridback( 1.f, 1.f, 1.f ),
-		color_gridminor( 0.75f, 0.75f, 0.75f ),
-		color_gridmajor( 0.5f, 0.5f, 0.5f ),
-		color_gridblock( 0.f, 0.f, 1.f ),
+		color_gridback( 0.77f, 0.77f, 0.77f ),
+		color_gridminor( 0.83f, 0.83f, 0.83f ),
+		color_gridmajor( 0.89f, 0.89f, 0.89f ),
+		color_gridblock( 1.0f, 1.0f, 1.0f ),
 		color_gridtext( 0.f, 0.f, 0.f ),
 		color_brushes( 0.f, 0.f, 0.f ),
 		color_selbrushes( 1.f, 0.f, 0.f ),

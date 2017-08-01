@@ -2758,6 +2758,7 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "NewRightClick", BoolImportStringCaller( g_xywindow_globals.m_bRightClick ), BoolExportStringCaller( g_xywindow_globals.m_bRightClick ) );
 	GlobalPreferenceSystem().registerPreference( "ChaseMouse", BoolImportStringCaller( g_xywindow_globals_private.m_bChaseMouse ), BoolExportStringCaller( g_xywindow_globals_private.m_bChaseMouse ) );
 	GlobalPreferenceSystem().registerPreference( "SizePainting", BoolImportStringCaller( g_xywindow_globals_private.m_bSizePaint ), BoolExportStringCaller( g_xywindow_globals_private.m_bSizePaint ) );
+	GlobalPreferenceSystem().registerPreference( "ShowCrosshair", BoolImportStringCaller( g_bCrossHairs ), BoolExportStringCaller( g_bCrossHairs ) );
 	GlobalPreferenceSystem().registerPreference( "NoStipple", BoolImportStringCaller( g_xywindow_globals.m_bNoStipple ), BoolExportStringCaller( g_xywindow_globals.m_bNoStipple ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowCoords", BoolImportStringCaller( g_xywindow_globals_private.show_coordinates ), BoolExportStringCaller( g_xywindow_globals_private.show_coordinates ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowOutlines", BoolImportStringCaller( g_xywindow_globals_private.show_outline ), BoolExportStringCaller( g_xywindow_globals_private.show_outline ) );

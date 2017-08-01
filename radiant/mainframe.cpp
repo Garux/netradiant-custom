@@ -1822,16 +1822,16 @@ GtkMenuItem* create_file_menu(){
 	create_menu_item_with_mnemonic( menu, "Save s_elected...", "SaveSelected" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Save re_gion...", "SaveRegion" );
-	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "_Refresh models", "RefreshReferences" );
-	menu_separator( menu );
+//	menu_separator( menu );
+//	create_menu_item_with_mnemonic( menu, "_Refresh models", "RefreshReferences" );
+//	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Pro_ject settings...", "ProjectSettings" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "_Pointfile...", "TogglePointfile" );
 	menu_separator( menu );
 	MRU_constructMenu( menu );
 	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Check for NetRadiant update (web)", "CheckForUpdate" ); // FIXME
+//	create_menu_item_with_mnemonic( menu, "Check for NetRadiant update (web)", "CheckForUpdate" ); // FIXME
 	create_menu_item_with_mnemonic( menu, "E_xit", "Exit" );
 
 	return file_menu_item;
@@ -1855,18 +1855,22 @@ GtkMenuItem* create_edit_menu(){
 	create_menu_item_with_mnemonic( menu, "Duplicate, make uni_que", "CloneSelectionAndMakeUnique" );
 	create_menu_item_with_mnemonic( menu, "D_elete", "DeleteSelection" );
 	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Pa_rent", "ParentSelection" );
+	create_menu_item_with_mnemonic( menu, "Snap To Grid", "SnapToGrid" );
+	//create_menu_item_with_mnemonic( menu, "Pa_rent", "ParentSelection" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "C_lear Selection", "UnSelectSelection" );
 	create_menu_item_with_mnemonic( menu, "_Invert Selection", "InvertSelection" );
 	create_menu_item_with_mnemonic( menu, "Select i_nside", "SelectInside" );
 	create_menu_item_with_mnemonic( menu, "Select _touching", "SelectTouching" );
 
-	GtkMenu* convert_menu = create_sub_menu_with_mnemonic( menu, "E_xpand Selection" );
-	if ( g_Layout_enableDetachableMenus.m_value ) {
-		menu_tearoff( convert_menu );
-	}
-	create_menu_item_with_mnemonic( convert_menu, "To Whole _Entities", "ExpandSelectionToEntities" );
+	menu_separator( menu );
+
+//	GtkMenu* convert_menu = create_sub_menu_with_mnemonic( menu, "E_xpand Selection" );
+//	if ( g_Layout_enableDetachableMenus.m_value ) {
+//		menu_tearoff( convert_menu );
+//	}
+	create_menu_item_with_mnemonic( menu, "Select All Of Type", "SelectAllOfType" );
+	create_menu_item_with_mnemonic( menu, "_Expand Selection To Entities", "ExpandSelectionToEntities" );
 
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Pre_ferences...", "Preferences" );
@@ -1918,6 +1922,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		create_menu_item_with_mnemonic( menu, "Entity Inspector", "ViewEntityInfo" );
 	}
 	create_menu_item_with_mnemonic( menu, "_Surface Inspector", "SurfaceInspector" );
+	create_menu_item_with_mnemonic( menu, "_Patch Inspector", "PatchInspector" );
 	create_menu_item_with_mnemonic( menu, "Entity List", "EntityList" );
 
 	menu_separator( menu );
@@ -1953,6 +1958,8 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 			menu_separator( orthographic_menu );
 		}
 
+		create_menu_item_with_mnemonic( orthographic_menu, "Center on Selected", "CenterXYView" );
+		menu_separator( orthographic_menu );
 		create_menu_item_with_mnemonic( orthographic_menu, "_XY 100%", "Zoom100" );
 		create_menu_item_with_mnemonic( orthographic_menu, "XY Zoom _In", "ZoomIn" );
 		create_menu_item_with_mnemonic( orthographic_menu, "XY Zoom _Out", "ZoomOut" );
@@ -1965,6 +1972,12 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( menu_in_menu );
 		}
+		create_menu_item_with_mnemonic( menu_in_menu, "Show Size Info", "ToggleSizePaint" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Show Crosshair", "ToggleCrosshairs" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Show Grid", "ToggleGrid" );
+
+		menu_separator( menu_in_menu );
+
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show _Angles", "ShowAngles" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show _Names", "ShowNames" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Blocks", "ShowBlocks" );
@@ -1984,12 +1997,14 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 	}
 	menu_separator( menu );
 	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Hide/Show" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_in_menu );
-		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Hide Selected", "HideSelected" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Show Hidden", "ShowHidden" );
+//		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Hide/Show" );
+//		if ( g_Layout_enableDetachableMenus.m_value ) {
+//			menu_tearoff( menu_in_menu );
+//		}
+//		create_menu_item_with_mnemonic( menu_in_menu, "Hide Selected", "HideSelected" );
+//		create_menu_item_with_mnemonic( menu_in_menu, "Show Hidden", "ShowHidden" );
+		create_menu_item_with_mnemonic( menu, "Hide Selected", "HideSelected" );
+		create_menu_item_with_mnemonic( menu, "Show Hidden", "ShowHidden" );
 	}
 	menu_separator( menu );
 	{
@@ -2164,13 +2179,13 @@ GtkMenuItem* create_help_menu(){
 		menu_tearoff( menu );
 	}
 
-	create_menu_item_with_mnemonic( menu, "Manual", "OpenManual" );
+//	create_menu_item_with_mnemonic( menu, "Manual", "OpenManual" );
 
 	// this creates all the per-game drop downs for the game pack helps
 	// it will take care of hooking the Sys_OpenURL calls etc.
 	create_game_help_menu( menu );
 
-	create_menu_item_with_mnemonic( menu, "Bug report", FreeCaller<OpenBugReportURL>() );
+//	create_menu_item_with_mnemonic( menu, "Bug report", FreeCaller<OpenBugReportURL>() );
 	create_menu_item_with_mnemonic( menu, "Shortcuts list", FreeCaller<DoCommandListDlg>() );
 	create_menu_item_with_mnemonic( menu, "_About", FreeCaller<DoAbout>() );
 

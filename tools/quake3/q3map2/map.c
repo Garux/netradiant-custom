@@ -528,7 +528,8 @@ void SetBrushContents( brush_t *b ){
 	//%	mixed = qfalse;
 
 	/* get the content/compile flags for every side in the brush */
-	for ( i = 1; i < b->numsides; i++, s++ )
+	//for ( i = 1; i < b->numsides; i++, s++ )
+	for ( i = 1; i < b->numsides; i++ )
 	{
 		s = &b->sides[ i ];
 		if ( s->shaderInfo == NULL ) {
@@ -539,6 +540,33 @@ void SetBrushContents( brush_t *b ){
 
 		contentFlags |= s->contentFlags;
 		compileFlags |= s->compileFlags;
+
+		/* resolve inconsistency, when brush content was determined by 1st face */
+		if ( b->contentShader->compileFlags & C_LIQUID ){
+			continue;
+		}
+		else if ( s->compileFlags & C_LIQUID ){
+			b->contentShader = s->shaderInfo;
+		}
+		else if ( b->contentShader->compileFlags & C_FOG ){
+			continue;
+		}
+		else if ( s->compileFlags & C_FOG ){
+			b->contentShader = s->shaderInfo;
+		}
+		//playerclip
+		else if ( b->contentShader->contentFlags & 0x10000 ){
+			continue;
+		}
+		else if ( s->contentFlags & 0x10000 ){
+			b->contentShader = s->shaderInfo;
+		}
+		else if (!( b->contentShader->compileFlags & C_SOLID )){
+			continue;
+		}
+		else if (!( s->compileFlags & C_SOLID )){
+			b->contentShader = s->shaderInfo;
+		}
 	}
 
 	/* ydnar: getting rid of this stupid warning */

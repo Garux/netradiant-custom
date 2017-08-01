@@ -1418,7 +1418,7 @@ void Brush_registerCommands(){
 	GlobalCommands_insert( "FlipClip", FreeCaller<FlipClipper>(), Accelerator( GDK_Return, (GdkModifierType)GDK_CONTROL_MASK ) );
 
 	GlobalCommands_insert( "MakeDetail", FreeCaller<Select_MakeDetail>(), Accelerator( 'D', (GdkModifierType)GDK_MOD1_MASK ) );
-	GlobalCommands_insert( "MakeStructural", FreeCaller<Select_MakeStructural>(), Accelerator( 'S', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalCommands_insert( "MakeStructural", FreeCaller<Select_MakeStructural>(), Accelerator( 'S', (GdkModifierType)GDK_MOD1_MASK ) );
 }
 
 void Brush_constructMenu( GtkMenu* menu ){

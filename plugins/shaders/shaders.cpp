@@ -1255,6 +1255,7 @@ bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 
 				if ( string_equal_nocase( surfaceparm, "fog" ) ) {
 					m_nFlags |= QER_FOG;
+					m_nFlags |= QER_TRANS;
 					if ( m_fTrans == 1.0f ) { // has not been explicitly set by qer_trans
 						m_fTrans = 0.35f;
 					}

@@ -695,7 +695,7 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "SmoothCols", FreeCaller<Patch_SmoothCols>(), Accelerator( 'W', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "MatrixTranspose", FreeCaller<Patch_Transpose>(), Accelerator( 'M', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "CapCurrentCurve", FreeCaller<Patch_Cap>(), Accelerator( 'C', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "CycleCapTexturePatch", FreeCaller<Patch_CycleProjection>(), Accelerator( 'N', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalCommands_insert( "CycleCapTexturePatch", FreeCaller<Patch_CycleProjection>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), Accelerator( 'Y' ) );
 	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), Accelerator( 'L', (GdkModifierType)GDK_CONTROL_MASK ) );
 }
@@ -720,12 +720,12 @@ void Patch_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "End cap", "PatchEndCap" );
 	create_menu_item_with_mnemonic( menu, "Bevel", "PatchBevel" );
 	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "More End caps, Bevels" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_in_menu );
-		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Square Endcap", "PatchSquareBevel" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Square Bevel", "PatchSquareEndcap" );
+//		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "More End caps, Bevels" );
+//		if ( g_Layout_enableDetachableMenus.m_value ) {
+//			menu_tearoff( menu_in_menu );
+//		}
+		create_menu_item_with_mnemonic( menu, "Square Endcap", "PatchSquareBevel" );
+		create_menu_item_with_mnemonic( menu, "Square Bevel", "PatchSquareEndcap" );
 	}
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Cone", "PatchCone" );
@@ -765,23 +765,36 @@ void Patch_constructMenu( GtkMenu* menu ){
 			menu_tearoff( menu_in_menu );
 		}
 		create_menu_item_with_mnemonic( menu_in_menu, "Invert", "InvertCurve" );
-		GtkMenu* menu_3 = create_sub_menu_with_mnemonic( menu_in_menu, "Re-disperse" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_3 );
-		}
-		create_menu_item_with_mnemonic( menu_3, "Rows", "RedisperseRows" );
-		create_menu_item_with_mnemonic( menu_3, "Columns", "RedisperseCols" );
-		GtkMenu* menu_4 = create_sub_menu_with_mnemonic( menu_in_menu, "Smooth" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_4 );
-		}
-		create_menu_item_with_mnemonic( menu_4, "Rows", "SmoothRows" );
-		create_menu_item_with_mnemonic( menu_4, "Columns", "SmoothCols" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Transpose", "MatrixTranspose" );
+//		GtkMenu* menu_3 = create_sub_menu_with_mnemonic( menu_in_menu, "Re-disperse" );
+//		if ( g_Layout_enableDetachableMenus.m_value ) {
+//			menu_tearoff( menu_3 );
+//		}
+		menu_separator( menu_in_menu );
+		create_menu_item_with_mnemonic( menu_in_menu, "Re-disperse Rows", "RedisperseRows" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Re-disperse Columns", "RedisperseCols" );
+//		GtkMenu* menu_4 = create_sub_menu_with_mnemonic( menu_in_menu, "Smooth" );
+//		if ( g_Layout_enableDetachableMenus.m_value ) {
+//			menu_tearoff( menu_4 );
+//		}
+		menu_separator( menu_in_menu );
+		create_menu_item_with_mnemonic( menu_in_menu, "Smooth Rows", "SmoothRows" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Smooth Columns", "SmoothCols" );
 	}
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Cap Selection", "CapCurrentCurve" );
-	create_menu_item_with_mnemonic( menu, "Cycle Cap Texture", "CycleCapTexturePatch" );
+	menu_separator( menu );
+	{
+		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Texture" );
+		if ( g_Layout_enableDetachableMenus.m_value ) {
+			menu_tearoff( menu_in_menu );
+		}
+		create_menu_item_with_mnemonic( menu_in_menu, "Cycle Projection", "CycleCapTexturePatch" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Naturalize", "NaturalizePatch" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Invert X", "InvertCurveTextureX" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Invert Y", "InvertCurveTextureY" );
+
+	}
 	menu_separator( menu );
 	{
 		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Overlay" );
