@@ -5,7 +5,7 @@ MAKEFILE_CONF      ?= Makefile.conf
 # user customizable stuf
 # you may override this in Makefile.conf or the environment
 BUILD              ?= debug
-# or: release, or: extradebug, or: profile
+# or: release, or: extradebug, or: profile, or: debug
 OS                 ?= $(shell uname)
 # or: Linux, Win32, Darwin
 LDFLAGS            ?=

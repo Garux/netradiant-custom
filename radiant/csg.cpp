@@ -29,10 +29,25 @@
 #include "brushmanip.h"
 #include "brushnode.h"
 #include "grid.h"
+/*
+void Face_makeBrush( Face& face, const Brush& brush, brush_vector_t& out, float offset ){
+	if ( face.contributes() ) {
+		out.push_back( new Brush( brush ) );
+		Face* newFace = out.back()->addFace( face );
+		if ( newFace != 0 ) {
+			newFace->flipWinding();
+			newFace->getPlane().offset( offset );
+			newFace->planeChanged();
+		}
+	}
+}
+*/
 
 void Face_makeBrush( Face& face, const Brush& brush, brush_vector_t& out, float offset ){
 	if ( face.contributes() ) {
 		out.push_back( new Brush( brush ) );
+		//face.getPlane().offset( -offset );
+		//face.planeChanged();
 		Face* newFace = out.back()->addFace( face );
 		if ( newFace != 0 ) {
 			newFace->flipWinding();

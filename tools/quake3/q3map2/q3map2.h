@@ -1675,7 +1675,7 @@ void                        PicoPrintFunc( int level, const char *str );
 void                        PicoLoadFileFunc( const char *name, byte **buffer, int *bufSize );
 picoModel_t                 *FindModel( const char *name, int frame );
 picoModel_t                 *LoadModel( const char *name, int frame );
-void                        InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle );
+void                        InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
 void                        AddTriangleModels( entity_t *e );
 
 
@@ -2001,8 +2001,6 @@ Q_EXTERN float jitters[ MAX_JITTERS ];
 
 /*can't code*/
 Q_EXTERN qboolean doingBSP Q_ASSIGN( qfalse );
-Q_EXTERN qboolean doingModelClip Q_ASSIGN( qfalse );
-Q_EXTERN qboolean snapModelClip Q_ASSIGN( qfalse );
 
 /* commandline arguments */
 Q_EXTERN qboolean			nocmdline Q_ASSIGN( qfalse );
@@ -2045,6 +2043,7 @@ Q_EXTERN qboolean debugSurfaces Q_ASSIGN( qfalse );
 Q_EXTERN qboolean debugInset Q_ASSIGN( qfalse );
 Q_EXTERN qboolean debugPortals Q_ASSIGN( qfalse );
 Q_EXTERN qboolean debugClip Q_ASSIGN( qfalse );			/* debug model autoclipping */
+Q_EXTERN float clipDepthGlobal Q_ASSIGN( 2.0f );
 Q_EXTERN qboolean lightmapTriangleCheck Q_ASSIGN( qfalse );
 Q_EXTERN qboolean lightmapExtraVisClusterNudge Q_ASSIGN( qfalse );
 Q_EXTERN qboolean lightmapFill Q_ASSIGN( qfalse );

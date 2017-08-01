@@ -955,9 +955,10 @@ int BSPMain( int argc, char **argv ){
 			Sys_Printf( "Debug model clip enabled\n" );
 			debugClip = qtrue;
 		}
-		else if ( !strcmp( argv[ i ], "-snapmodelclip" ) ) {
-			Sys_Printf( "Snapping model clip enabled\n" );
-			snapModelClip = qtrue;
+		else if ( !strcmp( argv[ i ],  "-clipdepth" ) ) {
+			clipDepthGlobal = atof( argv[ i + 1 ] );
+			i++;
+			Sys_Printf( "Model autoclip thickness set to %.3f\n", clipDepthGlobal );
 		}
 		else if ( !strcmp( argv[ i ], "-sRGBtex" ) ) {
 			texturesRGB = qtrue;
