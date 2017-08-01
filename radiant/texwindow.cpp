@@ -134,7 +134,7 @@ namespace
 bool g_TextureBrowser_shaderlistOnly = false;
 bool g_TextureBrowser_fixedSize = true;
 bool g_TextureBrowser_filterNotex = false;
-bool g_TextureBrowser_enableAlpha = true;
+bool g_TextureBrowser_enableAlpha = false;
 }
 
 class DeferredAdjustment

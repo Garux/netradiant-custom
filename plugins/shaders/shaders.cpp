@@ -633,7 +633,7 @@ bool ShaderTemplate::parseDoom3( Tokeniser& tokeniser ){
 				m_nFlags |= QER_NONSOLID;
 			}
 			else if ( string_equal_nocase( token, "liquid" ) ) {
-				m_nFlags |= QER_WATER;
+				m_nFlags |= QER_LIQUID;
 			}
 			else if ( string_equal_nocase( token, "areaportal" ) ) {
 				m_nFlags |= QER_AREAPORTAL;
@@ -1266,11 +1266,10 @@ bool ShaderTemplate::parseQuake3( Tokeniser& tokeniser ){
 				else if ( string_equal_nocase( surfaceparm, "nonsolid" ) ) {
 					m_nFlags |= QER_NONSOLID;
 				}
-				else if ( string_equal_nocase( surfaceparm, "water" ) ) {
-					m_nFlags |= QER_WATER;
-				}
-				else if ( string_equal_nocase( surfaceparm, "lava" ) ) {
-					m_nFlags |= QER_LAVA;
+				else if ( string_equal_nocase( surfaceparm, "water" ) ||
+							string_equal_nocase( surfaceparm, "lava" ) ||
+							string_equal_nocase( surfaceparm, "slime") ){
+					m_nFlags |= QER_LIQUID;
 				}
 				else if ( string_equal_nocase( surfaceparm, "areaportal" ) ) {
 					m_nFlags |= QER_AREAPORTAL;

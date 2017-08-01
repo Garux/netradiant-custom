@@ -8,7 +8,7 @@
 <item name="Mouse Shortcuts" url="docs/Mouse Shortcuts.txt"/>
 <item name="Additional map compiler features" url="docs/Additional_map_compiler_features.htm"/>
 <item name="Additional map editor features" url="docs/Additional_map_editor_features.htm"/>
-<item name="Complete list of command line parameters" url="docs/Complete_list_of_command_line_parameters.htm"/>
+<item name="Complete list of Q3map2 command line parameters" url="docs/Complete_list_of_command_line_parameters.htm"/>
 <item name="Complete list of entity keys" url="docs/Complete_list_of_entity_keys.htm"/>
 <item name="Complete list of shader keywords" url="docs/Complete_list_of_shader_keywords.htm"/>
 <item name="Q3Map2 - FS20 - R5 readme" url="docs/fsr_readme.txt"/>

@@ -979,8 +979,11 @@ filter_brush_all_faces g_filter_brush_caulk( &g_filter_face_caulk );
 filter_face_shader_prefix g_filter_face_caulk_ja( "textures/system/caulk" );
 filter_brush_all_faces g_filter_brush_caulk_ja( &g_filter_face_caulk_ja );
 
-filter_face_shader_prefix g_filter_face_liquids( "textures/liquids/" );
+filter_face_flags g_filter_face_liquids( QER_LIQUID );
 filter_brush_any_face g_filter_brush_liquids( &g_filter_face_liquids );
+
+filter_face_shader_prefix g_filter_face_liquidsdir( "textures/liquids/" );
+filter_brush_any_face g_filter_brush_liquidsdir( &g_filter_face_liquidsdir );
 
 filter_face_shader g_filter_face_hint( "textures/common/hint" );
 filter_brush_any_face g_filter_brush_hint( &g_filter_face_hint );
@@ -995,7 +998,7 @@ filter_face_shader g_filter_face_hint_ja( "textures/system/hint" );
 filter_brush_any_face g_filter_brush_hint_ja( &g_filter_face_hint_ja );
 
 filter_face_shader g_filter_face_areaportal( "textures/common/areaportal" );
-filter_brush_all_faces g_filter_brush_areaportal( &g_filter_face_areaportal );
+filter_brush_any_face g_filter_brush_areaportal( &g_filter_face_areaportal );
 
 filter_face_shader g_filter_face_visportal( "textures/editor/visportal" );
 filter_brush_any_face g_filter_brush_visportal( &g_filter_face_visportal );
@@ -1006,8 +1009,8 @@ filter_brush_all_faces g_filter_brush_clusterportal( &g_filter_face_clusterporta
 filter_face_shader g_filter_face_lightgrid( "textures/common/lightgrid" );
 filter_brush_all_faces g_filter_brush_lightgrid( &g_filter_face_lightgrid );
 
-filter_face_flags g_filter_face_translucent( QER_TRANS );
-filter_brush_all_faces g_filter_brush_translucent( &g_filter_face_translucent );
+filter_face_flags g_filter_face_translucent( QER_TRANS | QER_ALPHATEST );
+filter_brush_any_face g_filter_brush_translucent( &g_filter_face_translucent );
 
 filter_face_contents g_filter_face_detail( BRUSH_DETAIL_MASK );
 filter_brush_all_faces g_filter_brush_detail( &g_filter_face_detail );
@@ -1028,6 +1031,7 @@ void BrushFilters_construct(){
 	add_face_filter( g_filter_face_caulk, EXCLUDE_CAULK );
 	add_face_filter( g_filter_face_caulk_ja, EXCLUDE_CAULK );
 	add_brush_filter( g_filter_brush_liquids, EXCLUDE_LIQUIDS );
+	add_brush_filter( g_filter_brush_liquidsdir, EXCLUDE_LIQUIDS );
 	add_brush_filter( g_filter_brush_hint, EXCLUDE_HINTSSKIPS );
 	add_brush_filter( g_filter_brush_hintlocal, EXCLUDE_HINTSSKIPS );
 	add_brush_filter( g_filter_brush_hint_q2, EXCLUDE_HINTSSKIPS );

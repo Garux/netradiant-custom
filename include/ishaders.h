@@ -31,14 +31,13 @@ enum
 	QER_NOCARVE = 1 << 1,
 	QER_NODRAW = 1 << 2,
 	QER_NONSOLID = 1 << 3,
-	QER_WATER = 1 << 4,
-	QER_LAVA = 1 << 5,
-	QER_FOG = 1 << 6,
-	QER_ALPHATEST = 1 << 7,
-	QER_CULL = 1 << 8,
-	QER_AREAPORTAL = 1 << 9,
-	QER_CLIP = 1 << 10,
-	QER_BOTCLIP = 1 << 11,
+	QER_LIQUID = 1 << 4,
+	QER_FOG = 1 << 5,
+	QER_ALPHATEST = 1 << 6,
+	QER_CULL = 1 << 7,
+	QER_AREAPORTAL = 1 << 8,
+	QER_CLIP = 1 << 9,
+	QER_BOTCLIP = 1 << 10,
 };
 
 struct qtexture_t;

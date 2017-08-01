@@ -184,9 +184,57 @@ TargetLinesPushBack( RenderablePointVector& targetLines, const Vector3& worldPos
 	m_targetLines( targetLines ), m_worldPosition( worldPosition ), m_volume( volume ){
 }
 void operator()( const Vector3& worldPosition ) const {
-	if ( m_volume.TestLine( segment_for_startend( m_worldPosition, worldPosition ) ) ) {
+	Vector3 dir( worldPosition - m_worldPosition );//end - start
+	double len = vector3_length( dir );
+	if ( len != 0 && m_volume.TestLine( segment_for_startend( m_worldPosition, worldPosition ) ) ) {
 		m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( m_worldPosition ) ) );
 		m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( worldPosition ) ) );
+
+		Vector3 mid( ( worldPosition + m_worldPosition ) * 0.5f );
+		//vector3_normalise( dir );
+		dir /= len;
+		Vector3 hack( 0.57735, 0.57735, 0.57735 );
+		int maxI = 0;
+		float max = 0;
+		for ( int i = 0; i < 3 ; ++i ){
+			if ( dir[i] < 0 ){
+				hack[i] *= -1;
+			}
+			if ( fabs( dir[i] ) > max ){
+				maxI = i;
+			}
+		}
+		hack[maxI] *= -1;
+
+		Vector3 ort( vector3_cross( dir, hack ) );
+		//vector3_normalise( ort );
+		Vector3 wing1( mid - dir*12 + ort*6 );
+		Vector3 wing2( wing1 - ort*12 );
+
+		if( len <= 512 || len > 768 ){
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( mid ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing1 ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( mid ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing2 ) ) );
+		}
+		if( len > 512 ){
+			Vector3 wing1_delta( mid - wing1 );
+			Vector3 wing2_delta( mid - wing2 );
+			Vector3 point( m_worldPosition + dir*256 );
+			wing1 = point - wing1_delta;
+			wing2 = point - wing2_delta;
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( point ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing1 ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( point ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing2 ) ) );
+			point =  worldPosition - dir*256;
+			wing1 = point - wing1_delta;
+			wing2 = point - wing2_delta;
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( point ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing1 ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( point ) ) );
+			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing2 ) ) );
+		}
 	}
 }
 };
@@ -253,7 +301,7 @@ RenderableTargetingEntity( TargetingEntity& targets )
 }
 void compile( const VolumeTest& volume, const Vector3& world_position ) const {
 	m_target_lines.clear();
-	m_target_lines.reserve( m_targets.size() * 2 );
+	m_target_lines.reserve( m_targets.size() * 14 );
 	TargetingEntity_forEach( m_targets, TargetLinesPushBack( m_target_lines, world_position, volume ) );
 }
 void render( Renderer& renderer, const VolumeTest& volume, const Vector3& world_position ) const {

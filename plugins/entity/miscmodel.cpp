@@ -199,7 +199,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
 	renderSolid( renderer, volume, localToWorld, selected );
-	if ( g_showNames ) {
+	if ( g_showNames  && !string_equal( m_named.name(), "misc_model" ) ) {
 		renderer.addRenderable( m_renderName, localToWorld );
 	}
 }
