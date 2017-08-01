@@ -2363,6 +2363,7 @@ void OpenGLShader::construct( const char* name ){
 				BlendFunc blendFunc = m_shader->getBlendFunc();
 				state.m_blend_src = convertBlendFactor( blendFunc.m_src );
 				state.m_blend_dst = convertBlendFactor( blendFunc.m_dst );
+				state.m_depthfunc = GL_LEQUAL;
 				if ( state.m_blend_src == GL_SRC_ALPHA || state.m_blend_dst == GL_SRC_ALPHA ) {
 					state.m_state |= RENDER_DEPTHWRITE;
 				}

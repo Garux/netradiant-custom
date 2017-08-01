@@ -1291,13 +1291,13 @@ int ScaleBSPMain( int argc, char **argv ){
 		GetVectorForKey( &entities[ i ], "origin", vec );
 		if ( ( vec[ 0 ] || vec[ 1 ] || vec[ 2 ] ) ) {
 			if ( !strncmp( ValueForKey( &entities[i], "classname" ), "info_player_", 12 ) ) {
-//				vec[2] += spawn_ref;
+				vec[2] += spawn_ref;
 			}
 			vec[0] *= scale[0];
 			vec[1] *= scale[1];
 			vec[2] *= scale[2];
 			if ( !strncmp( ValueForKey( &entities[i], "classname" ), "info_player_", 12 ) ) {
-				vec[2] += spawn_ref;
+				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 			SetKeyValue( &entities[ i ], "origin", str );

@@ -2791,12 +2791,11 @@ int LightMain( int argc, char **argv ){
 				lightAngleHL = ( atoi( argv[ i + 1 ] ) != 0 );
 				if ( lightAngleHL ) {
 					Sys_Printf( "Enabling half lambert light angle attenuation\n" );
-					i++;
 				}
 				else{
 					Sys_Printf( "Disabling half lambert light angle attenuation\n" );
-					i++;
 				}
+				i++;
 			}
 		}
 		else if ( !strcmp( argv[ i ], "-nostyle" ) || !strcmp( argv[ i ], "-nostyles" ) ) {
@@ -2842,7 +2841,7 @@ int LightMain( int argc, char **argv ){
 				Sys_Printf( "Enabling randomized dirtmapping\n" );
 			}
 			else{
-				Sys_Printf( "Enabling ordered dir mapping\n" );
+				Sys_Printf( "Enabling ordered dirtmapping\n" );
 			}
 			i++;
 		}

@@ -1999,6 +1999,9 @@ Q_EXTERN qboolean warnImage Q_ASSIGN( qtrue );
 /* ydnar: sinusoid samples */
 Q_EXTERN float jitters[ MAX_JITTERS ];
 
+/*can't code*/
+Q_EXTERN qboolean doingBSP Q_ASSIGN( qfalse );
+
 
 /* commandline arguments */
 Q_EXTERN qboolean			nocmdline Q_ASSIGN( qfalse );

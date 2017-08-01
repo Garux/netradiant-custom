@@ -177,11 +177,12 @@ void SwapBSPFile( void ){
 	/* shaders (don't swap the name) */
 	for ( i = 0; i < numBSPShaders ; i++ )
 	{
+	if ( doingBSP ){
 		si = ShaderInfoForShader( bspShaders[ i ].shader );
 		if ( si->remapShader && si->remapShader[ 0 ] ) {
 			strcpy( bspShaders[ i ].shader, si->remapShader );
 		}
-
+	}
 		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
 		bspShaders[ i ].surfaceFlags = LittleLong( bspShaders[ i ].surfaceFlags );
 	}
