@@ -2808,8 +2808,6 @@ void MainFrame::Create(){
 	if ( !g_Layout_enablePluginToolbar.m_value ) {
 		gtk_widget_hide( GTK_WIDGET( plugin_toolbar ) );
 	}*/
-	if ( g_Layout_enableFilterToolbar.m_value ) {
-	}
 
 
 

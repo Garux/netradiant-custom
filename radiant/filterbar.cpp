@@ -175,11 +175,11 @@ GtkToolbar* create_filter_toolbar(){
 
 			toolbar_append_toggle_button( filter_toolbar, "World (ALT + 1)", "f-world.png", "FilterWorldBrushes" );
 
-			button = toolbar_append_toggle_button( filter_toolbar, "Details (CTRL + D)\nRightClick: MakeDetail", "f-details.png", "FilterDetails" );
-			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Detail_button_press ), 0 );
-
 			button = toolbar_append_toggle_button( filter_toolbar, "Structural (CTRL + SHIFT + D)\nRightClick: MakeStructural", "f-structural.png", "FilterStructural" );
 			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Structural_button_press ), 0 );
+
+			button = toolbar_append_toggle_button( filter_toolbar, "Details (CTRL + D)\nRightClick: MakeDetail", "f-details.png", "FilterDetails" );
+			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Detail_button_press ), 0 );
 
 
 			toolbar_append_toggle_button( filter_toolbar, "Patches (CTRL + P)", "patch_wireframe.png", "FilterPatches" );
@@ -207,7 +207,7 @@ GtkToolbar* create_filter_toolbar(){
 			//toolbar_append_toggle_button( filter_toolbar, "Paths (ALT + 8)", "texture_lock.png", "FilterPaths" );
 			gtk_toolbar_append_space( GTK_TOOLBAR( filter_toolbar ) );
 			toolbar_append_toggle_button( filter_toolbar, "Entities (ALT + 2)", "f-entities.png", "FilterEntities" );
-			toolbar_append_toggle_button( filter_toolbar, "Lights (ALT + 0)", "lightinspector.png", "FilterLights" );
+			toolbar_append_toggle_button( filter_toolbar, "Lights (ALT + 0)", "f-lights.png", "FilterLights" );
 			toolbar_append_toggle_button( filter_toolbar, "Models (SHIFT + M)", "f-models.png", "FilterModels" );
 
 			button = toolbar_append_toggle_button( filter_toolbar, "Triggers (CTRL + SHIFT + T)\nRightClick: tex Trigger", "f-triggers.png", "FilterTriggers" );
