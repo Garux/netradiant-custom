@@ -59,4 +59,6 @@ void TextureBrowser_setBackgroundColour( TextureBrowser& textureBrowser, const V
 void TextureBrowser_addActiveShadersChangedCallback( const SignalHandler& handler );
 void TextureBrowser_addShadersRealiseCallback( const SignalHandler& handler );
 
+GtkWidget* TextureBrowser_getGLWidget();
+
 #endif

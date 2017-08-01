@@ -573,6 +573,7 @@ int main( int argc, char* argv[] ){
 #endif
 
 	gtk_disable_setlocale();
+
 	gtk_init( &argc, &argv );
 
 	// redirect Gtk warnings to the console

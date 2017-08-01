@@ -2918,6 +2918,8 @@ void MainFrame::Create(){
 				gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( frame ) );
 			}
 			CamWnd_setParent( *m_pCamWnd, window );
+			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+			g_object_set_data( G_OBJECT( window ), "glwidget", CamWnd_getWidget( *m_pCamWnd ) );
 
 			g_floating_windows.push_back( GTK_WIDGET( window ) );
 		}
@@ -2937,6 +2939,8 @@ void MainFrame::Create(){
 				gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( frame ) );
 			}
 			XY_Top_Shown_Construct( window );
+			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+			g_object_set_data( G_OBJECT( window ), "glwidget", m_pXYWnd->GetWidget() );
 
 			g_floating_windows.push_back( GTK_WIDGET( window ) );
 		}
@@ -2956,6 +2960,8 @@ void MainFrame::Create(){
 			}
 
 			XZ_Front_Shown_Construct( window );
+			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+			g_object_set_data( G_OBJECT( window ), "glwidget", m_pXZWnd->GetWidget() );
 
 			g_floating_windows.push_back( GTK_WIDGET( window ) );
 		}
@@ -2975,6 +2981,8 @@ void MainFrame::Create(){
 			}
 
 			YZ_Side_Shown_Construct( window );
+			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+			g_object_set_data( G_OBJECT( window ), "glwidget", m_pYZWnd->GetWidget() );
 
 			g_floating_windows.push_back( GTK_WIDGET( window ) );
 		}
@@ -2982,6 +2990,9 @@ void MainFrame::Create(){
 		{
 			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
 			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
+			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+			g_object_set_data( G_OBJECT( GroupDialog_getWindow() ), "glwidget", TextureBrowser_getGLWidget() );
+
 		}
 
 		GroupDialog_show();
@@ -3015,6 +3026,8 @@ void MainFrame::Create(){
 		{
 			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( window ) );
 			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
+			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+			g_object_set_data( G_OBJECT( GroupDialog_getWindow() ), "glwidget", TextureBrowser_getGLWidget() );
 		}
 	}
 
