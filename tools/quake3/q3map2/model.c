@@ -652,8 +652,15 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						/* set up brush sides */
 						buildBrush->numsides = 5;
 						buildBrush->sides[ 0 ].shaderInfo = si;
-						for ( j = 1; j < buildBrush->numsides; j++ )
-							buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+						for ( j = 1; j < buildBrush->numsides; j++ ) {
+							if ( debugClip ) {
+								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
+								buildBrush->sides[ j ].shaderInfo = ShaderInfoForShader( "debugclip" );
+							}
+							else {
+								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
+							}
+						}
 
 						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
 						buildBrush->sides[ 1 ].planenum = FindFloatPlane( pa, pa[ 3 ], 2, &points[ 1 ] ); // pa contains points[1] and points[2]
@@ -713,6 +720,8 @@ void AddTriangleModels( entity_t *e ){
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- AddTriangleModels ---\n" );
+
+	doingModelClip = qtrue;
 
 	/* get current brush entity targetname */
 	if ( e == entities ) {
@@ -962,4 +971,6 @@ void AddTriangleModels( entity_t *e ){
 			remap = remap2;
 		}
 	}
+
+	doingModelClip = qfalse;
 }

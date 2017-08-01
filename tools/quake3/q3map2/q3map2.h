@@ -2001,7 +2001,8 @@ Q_EXTERN float jitters[ MAX_JITTERS ];
 
 /*can't code*/
 Q_EXTERN qboolean doingBSP Q_ASSIGN( qfalse );
-
+Q_EXTERN qboolean doingModelClip Q_ASSIGN( qfalse );
+Q_EXTERN qboolean snapModelClip Q_ASSIGN( qfalse );
 
 /* commandline arguments */
 Q_EXTERN qboolean			nocmdline Q_ASSIGN( qfalse );
@@ -2043,6 +2044,7 @@ Q_EXTERN qboolean emitFlares Q_ASSIGN( qfalse );
 Q_EXTERN qboolean debugSurfaces Q_ASSIGN( qfalse );
 Q_EXTERN qboolean debugInset Q_ASSIGN( qfalse );
 Q_EXTERN qboolean debugPortals Q_ASSIGN( qfalse );
+Q_EXTERN qboolean debugClip Q_ASSIGN( qfalse );			/* debug model autoclipping */
 Q_EXTERN qboolean lightmapTriangleCheck Q_ASSIGN( qfalse );
 Q_EXTERN qboolean lightmapExtraVisClusterNudge Q_ASSIGN( qfalse );
 Q_EXTERN qboolean lightmapFill Q_ASSIGN( qfalse );
@@ -2302,6 +2304,7 @@ Q_EXTERN float spotScale Q_ASSIGN( 7500.0f );
 Q_EXTERN float areaScale Q_ASSIGN( 0.25f );
 Q_EXTERN float skyScale Q_ASSIGN( 1.0f );
 Q_EXTERN float bounceScale Q_ASSIGN( 0.25f );
+Q_EXTERN float bounceColorRatio Q_ASSIGN( 1.0f );
 Q_EXTERN float vertexglobalscale Q_ASSIGN( 1.0f );
 
 /* jal: alternative angle attenuation curve */

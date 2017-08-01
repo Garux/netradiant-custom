@@ -319,6 +319,10 @@ void ProcessWorldModel( void ){
 	/* check for patches with adjacent edges that need to lod together */
 	PatchMapDrawSurfs( e );
 
+	if ( debugClip ) {
+		AddTriangleModels( e );
+	}
+
 	/* build an initial bsp tree using all of the sides of all of the structural brushes */
 	faces = MakeStructuralBSPFaceList( entities[ 0 ].brushes );
 	tree = FaceBSP( faces );
@@ -387,7 +391,9 @@ void ProcessWorldModel( void ){
 	FloodAreas( tree );
 
 	/* create drawsurfs for triangle models */
-	AddTriangleModels( e );
+	if ( !debugClip ) {
+		AddTriangleModels( e );
+	}
 
 	/* create drawsurfs for surface models */
 	AddEntitySurfaceModels( e );
@@ -944,6 +950,14 @@ int BSPMain( int argc, char **argv ){
 		else if ( !strcmp( argv[ i ], "-debugportals" ) ) {
 			Sys_Printf( "Debug portal surfaces enabled\n" );
 			debugPortals = qtrue;
+		}
+		else if ( !strcmp( argv[ i ], "-debugclip" ) ) {
+			Sys_Printf( "Debug model clip enabled\n" );
+			debugClip = qtrue;
+		}
+		else if ( !strcmp( argv[ i ], "-snapmodelclip" ) ) {
+			Sys_Printf( "Snapping model clip enabled\n" );
+			snapModelClip = qtrue;
 		}
 		else if ( !strcmp( argv[ i ], "-sRGBtex" ) ) {
 			texturesRGB = qtrue;

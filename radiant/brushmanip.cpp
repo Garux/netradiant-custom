@@ -1024,6 +1024,9 @@ filter_brush_any_face g_filter_brush_liquids( &g_filter_face_liquids );
 filter_face_shader g_filter_face_hint( "textures/common/hint" );
 filter_brush_any_face g_filter_brush_hint( &g_filter_face_hint );
 
+filter_face_shader g_filter_face_hintlocal( "textures/common/hintlocal" );
+filter_brush_any_face g_filter_brush_hintlocal( &g_filter_face_hintlocal );
+
 filter_face_shader g_filter_face_hint_q2( "textures/hint" );
 filter_brush_any_face g_filter_brush_hint_q2( &g_filter_face_hint_q2 );
 
@@ -1065,6 +1068,7 @@ void BrushFilters_construct(){
 	add_face_filter( g_filter_face_caulk_ja, EXCLUDE_CAULK );
 	add_brush_filter( g_filter_brush_liquids, EXCLUDE_LIQUIDS );
 	add_brush_filter( g_filter_brush_hint, EXCLUDE_HINTSSKIPS );
+	add_brush_filter( g_filter_brush_hintlocal, EXCLUDE_HINTSSKIPS );
 	add_brush_filter( g_filter_brush_hint_q2, EXCLUDE_HINTSSKIPS );
 	add_brush_filter( g_filter_brush_hint_ja, EXCLUDE_HINTSSKIPS );
 	add_brush_filter( g_filter_brush_clusterportal, EXCLUDE_CLUSTERPORTALS );

@@ -256,7 +256,7 @@ qboolean RadSampleImage( byte *pixels, int width, int height, float st[ 2 ], flo
 #define SAMPLE_GRANULARITY  6
 
 static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm, shaderInfo_t *si, radWinding_t *rw, vec3_t average, vec3_t gradient, int *style ){
-	int i, j, k, l, v, x, y, samples;
+	int i, j, k, l, v, x, y, samples, avgcolor;
 	vec3_t color, mins, maxs;
 	vec4_t textureColor;
 	float alpha, alphaI, bf;
@@ -290,8 +290,10 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 				VectorCopy( si->averageColor, textureColor );
 				textureColor[ 4 ] = 255.0f;
 			}
+			avgcolor = ( textureColor[ 0 ] + textureColor[ 1 ] + textureColor[ 2 ] ) / 3;
 			for ( i = 0; i < 3; i++ )
-				color[ i ] = ( textureColor[ i ] / 255 ) * ( rw->verts[ samples ].color[ lightmapNum ][ i ] / 255.0f );
+				color[ i ] = ( ( textureColor[ i ] * bounceColorRatio + ( avgcolor * ( 1 - bounceColorRatio ) ) ) / 255 ) * ( rw->verts[ samples ].color[ lightmapNum ][ i ] / 255.0f );
+//				color[ i ] = ( textureColor[ i ] / 255 ) * ( rw->verts[ samples ].color[ lightmapNum ][ i ] / 255.0f );
 
 			AddPointToBounds( color, mins, maxs );
 			VectorAdd( average, color, average );
@@ -374,9 +376,11 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 							VectorCopy( si->averageColor, textureColor );
 							textureColor[ 4 ] = 255;
 						}
-						for ( i = 0; i < 3; i++ )
-							color[ i ] = ( textureColor[ i ] / 255 ) * ( radLuxel[ i ] / 255 );
-
+						avgcolor = ( textureColor[ 0 ] + textureColor[ 1 ] + textureColor[ 2 ] ) / 3;
+						for ( l = 0; l < 3; l++ ){
+							color[ l ] = ( ( textureColor[ l ] * bounceColorRatio + ( avgcolor * ( 1 - bounceColorRatio ) ) ) / 255 ) * ( radLuxel[ l ] / 255 );
+						//Sys_Printf( "%i %i %i %i %i \n", (int) textureColor[ 0 ], (int) textureColor[ 1 ], (int) textureColor[ 2 ], (int) avgcolor, (int) color[ i ] );
+						}
 						AddPointToBounds( color, mins, maxs );
 						VectorAdd( average, color, average );
 

@@ -237,7 +237,7 @@ qboolean SnapNormal( vec3_t normal ){
    snaps a plane to normal/distance epsilons
  */
 
-void SnapPlane( vec3_t normal, vec_t *dist, vec3_t center ){
+void SnapPlane( vec3_t normal, vec_t *dist ){
 // SnapPlane disabled by LordHavoc because it often messes up collision
 // brushes made from triangles of embedded models, and it has little effect
 // on anything else (axial planes are usually derived from snapped points)
@@ -326,7 +326,12 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 
 	VectorCopy( innormal, normal );
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
-	SnapPlaneImproved( normal, &dist, numPoints, (const vec3_t *) points );
+	if ( !doingModelClip ) {
+		SnapPlaneImproved( normal, &dist, numPoints, (const vec3_t *) points );
+	}
+	if ( doingModelClip && snapModelClip ) {
+		SnapPlane( normal, &dist );
+	}
 #else
 	SnapPlane( normal, &dist );
 #endif
