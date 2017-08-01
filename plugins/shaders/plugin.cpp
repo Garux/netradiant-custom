@@ -41,7 +41,8 @@ class ShadersDependencies :
 ImageModuleRef m_bitmapModule;
 public:
 ShadersDependencies() :
-	m_bitmapModule( "bmp" ){
+	//m_bitmapModule( "bmp" ){
+	m_bitmapModule( "png" ){
 }
 ImageModuleRef& getBitmapModule(){
 	return m_bitmapModule;

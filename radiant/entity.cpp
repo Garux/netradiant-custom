@@ -391,7 +391,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	}
 
 	if ( string_compare_nocase_n( name, "trigger_", 8 ) == 0 && brushesSelected ){
-		const char* shader = g_pGameDescription->getKeyValue( "trigger_shader" );
+		const char* shader = g_pGameDescription->getKeyValue( "shader_trigger" );
 		if ( shader && *shader ){
 			Scene_PatchSetShader_Selected( GlobalSceneGraph(), shader );
 			Scene_BrushSetShader_Selected( GlobalSceneGraph(), shader );

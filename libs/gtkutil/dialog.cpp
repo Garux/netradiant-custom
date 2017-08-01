@@ -219,7 +219,7 @@ PathEntry PathEntry_new(){
 
 	// browse button
 	GtkButton* button = GTK_BUTTON( gtk_button_new() );
-	button_set_icon( button, "ellipsis.bmp" );
+	button_set_icon( button, "ellipsis.png" );
 	gtk_widget_show( GTK_WIDGET( button ) );
 	gtk_box_pack_end( GTK_BOX( hbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 

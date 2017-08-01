@@ -635,7 +635,7 @@ int main( int argc, char* argv[] ){
 	hide_splash();
 
 #ifdef WIN32
-	if( openCmdMap[0] != '\0' ){
+	if( openCmdMap && *openCmdMap ){
 		Map_LoadFile( openCmdMap );
 	}
 	else

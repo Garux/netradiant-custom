@@ -468,7 +468,7 @@ void DoAbout(){
 					GtkFrame* frame = create_dialog_frame( 0, GTK_SHADOW_IN );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 					{
-						GtkImage* image = new_local_image( "logo.bmp" );
+						GtkImage* image = new_local_image( "logo.png" );
 						gtk_widget_show( GTK_WIDGET( image ) );
 						gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( image ) );
 					}
