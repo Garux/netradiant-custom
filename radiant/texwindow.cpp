@@ -2019,7 +2019,7 @@ void TextureBrowser_checkTagFile(){
 		}
 		else
 		{
-			globalErrorStream() << "Unable to find default tag file " << default_filename.c_str() << ". No tag support.\n";
+			globalOutputStream() << "Unable to find default tag file " << default_filename.c_str() << ". No tag support. Plugins -> ShaderPlug -> Create tag file: to start using tags\n";
 		}
 	}
 }

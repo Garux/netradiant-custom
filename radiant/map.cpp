@@ -1842,6 +1842,9 @@ void SaveMap(){
 	}
 	else if ( Map_Modified( g_map ) ) {
 		Map_Save();
+#ifdef WIN32
+		MRU_AddFile( g_map.m_name.c_str() );	//add on saving, but not opening via cmd line: spoils the list
+#endif
 	}
 }
 

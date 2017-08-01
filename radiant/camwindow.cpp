@@ -280,7 +280,7 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 
 		camera.origin -= camera.vright * strafespeed * dx;
 		if ( camera.m_strafe_forward ) {
-			camera.origin += camera.vpn * strafespeed * dy;
+			camera.origin -= camera.vpn * strafespeed * dy;
 		}
 		else{
 			camera.origin += camera.vup * strafespeed * dy;

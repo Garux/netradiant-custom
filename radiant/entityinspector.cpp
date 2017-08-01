@@ -715,8 +715,10 @@ typedef MemberCaller<ListAttribute, &ListAttribute::update> UpdateCaller;
 
 namespace
 {
+GtkWidget* g_entity_split0 = 0;
 GtkWidget* g_entity_split1 = 0;
 GtkWidget* g_entity_split2 = 0;
+int g_entitysplit0_position;
 int g_entitysplit1_position;
 int g_entitysplit2_position;
 
@@ -1322,18 +1324,18 @@ static gint EntityEntry_keypress( GtkEntry* widget, GdkEventKey* event, gpointer
 }
 
 void EntityInspector_destroyWindow( GtkWidget* widget, gpointer data ){
+	g_entitysplit0_position = gtk_paned_get_position( GTK_PANED( g_entity_split0 ) );
 	g_entitysplit1_position = gtk_paned_get_position( GTK_PANED( g_entity_split1 ) );
 	g_entitysplit2_position = gtk_paned_get_position( GTK_PANED( g_entity_split2 ) );
-
 	g_entityInspector_windowConstructed = false;
 	GlobalEntityAttributes_clear();
 }
 
-static gint EntityInspector_destroyWindowKB( GtkWidget* widget, GdkEventKey* event, gpointer data ){
+static gint EntityInspector_hideWindowKB( GtkWidget* widget, GdkEventKey* event, gpointer data ){
 	//if ( event->keyval == GDK_Escape && GTK_WIDGET_VISIBLE( GTK_WIDGET( widget ) ) ) {
 	if ( event->keyval == GDK_Escape  ) {
-		//globalErrorStream() << "Doom3Light_getBounds: failed to parse default light radius\n";
-		GroupDialog_showPage( g_page_entity );
+		//GroupDialog_showPage( g_page_entity );
+		gtk_widget_hide( GTK_WIDGET( GroupDialog_getWindow() ) );
 		return TRUE;
 	}
 	if ( event->keyval == GDK_Tab  ) {
@@ -1348,7 +1350,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 2 );
 
-	g_signal_connect( G_OBJECT( toplevel ), "key_press_event", G_CALLBACK( EntityInspector_destroyWindowKB ), 0 );
+	g_signal_connect( G_OBJECT( toplevel ), "key_press_event", G_CALLBACK( EntityInspector_hideWindowKB ), 0 );
 	g_signal_connect( G_OBJECT( vbox ), "destroy", G_CALLBACK( EntityInspector_destroyWindow ), 0 );
 
 	{
@@ -1360,7 +1362,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 
 		{
 			GtkWidget* split2 = gtk_vpaned_new();
-			gtk_paned_add1( GTK_PANED( split1 ), split2 );
+			//gtk_paned_add1( GTK_PANED( split1 ), split2 );
+			gtk_paned_pack1( GTK_PANED( split1 ), split2, FALSE, FALSE );
 			gtk_widget_show( split2 );
 
 			g_entity_split2 = split2;
@@ -1369,7 +1372,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 				// class list
 				GtkWidget* scr = gtk_scrolled_window_new( 0, 0 );
 				gtk_widget_show( scr );
-				gtk_paned_add1( GTK_PANED( split2 ), scr );
+				//gtk_paned_add1( GTK_PANED( split2 ), scr );
+				gtk_paned_pack1( GTK_PANED( split2 ), scr, FALSE, FALSE );
 				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
 				gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
 
@@ -1406,7 +1410,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 			{
 				GtkWidget* scr = gtk_scrolled_window_new( 0, 0 );
 				gtk_widget_show( scr );
-				gtk_paned_add2( GTK_PANED( split2 ), scr );
+				//gtk_paned_add2( GTK_PANED( split2 ), scr );
+				gtk_paned_pack2( GTK_PANED( split2 ), scr, FALSE, FALSE );
 				gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
 				gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
 
@@ -1423,14 +1428,16 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 		}
 
 		{
-			GtkWidget* split2 = gtk_vpaned_new();
-			gtk_paned_add2( GTK_PANED( split1 ), split2 );
-			gtk_widget_show( split2 );
+			GtkWidget* split0 = gtk_vpaned_new();
+			//gtk_paned_add2( GTK_PANED( split1 ), split0 );
+			gtk_paned_pack2( GTK_PANED( split1 ), split0, FALSE, FALSE );
+			gtk_widget_show( split0 );
+			g_entity_split0 = split0;
 
 			{
 				GtkWidget* vbox2 = gtk_vbox_new( FALSE, 2 );
 				gtk_widget_show( vbox2 );
-				gtk_paned_pack1( GTK_PANED( split2 ), vbox2, FALSE, FALSE );
+				gtk_paned_pack1( GTK_PANED( split0 ), vbox2, FALSE, FALSE );
 
 				{
 					// Spawnflags (4 colums wide max, or window gets too wide.)
@@ -1575,27 +1582,23 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 
 				gtk_container_add( GTK_CONTAINER( viewport ), GTK_WIDGET( g_attributeBox ) );
 				gtk_container_add( GTK_CONTAINER( scr ), viewport );
-				gtk_paned_pack2( GTK_PANED( split2 ), scr, FALSE, FALSE );
+				gtk_paned_pack2( GTK_PANED( split0 ), scr, FALSE, FALSE );
 			}
 		}
 	}
 
 
 	{
-		// show the sliders in any case
-		if ( g_entitysplit2_position > 22 ) {
-			gtk_paned_set_position( GTK_PANED( g_entity_split2 ), g_entitysplit2_position );
-		}
-		else {
+		// show the sliders in any case //no need, gtk can care
+		/*if ( g_entitysplit2_position < 22 ) {
 			g_entitysplit2_position = 22;
-			gtk_paned_set_position( GTK_PANED( g_entity_split2 ), 22 );
-		}
-		if ( ( g_entitysplit1_position - g_entitysplit2_position ) > 27 ) {
-			gtk_paned_set_position( GTK_PANED( g_entity_split1 ), g_entitysplit1_position );
-		}
-		else {
-			gtk_paned_set_position( GTK_PANED( g_entity_split1 ), g_entitysplit2_position + 27 );
-		}
+		}*/
+		gtk_paned_set_position( GTK_PANED( g_entity_split2 ), g_entitysplit2_position );
+		/*if ( ( g_entitysplit1_position - g_entitysplit2_position ) < 27 ) {
+			g_entitysplit1_position = g_entitysplit2_position + 27;
+		}*/
+		gtk_paned_set_position( GTK_PANED( g_entity_split1 ), g_entitysplit1_position );
+		gtk_paned_set_position( GTK_PANED( g_entity_split0 ), g_entitysplit0_position );
 	}
 
 	g_entityInspector_windowConstructed = true;
@@ -1643,6 +1646,7 @@ EntityInspector g_EntityInspector;
 void EntityInspector_construct(){
 	GlobalEntityClassManager().attach( g_EntityInspector );
 
+	GlobalPreferenceSystem().registerPreference( "EntitySplit0", IntImportStringCaller( g_entitysplit0_position ), IntExportStringCaller( g_entitysplit0_position ) );
 	GlobalPreferenceSystem().registerPreference( "EntitySplit1", IntImportStringCaller( g_entitysplit1_position ), IntExportStringCaller( g_entitysplit1_position ) );
 	GlobalPreferenceSystem().registerPreference( "EntitySplit2", IntImportStringCaller( g_entitysplit2_position ), IntExportStringCaller( g_entitysplit2_position ) );
 

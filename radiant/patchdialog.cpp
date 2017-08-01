@@ -301,6 +301,8 @@ void PatchInspector_queueDraw(){
 void DoPatchInspector(){
 	g_PatchInspector.GetPatchInfo();
 	if ( !g_PatchInspector.visible() ) {
+		// workaround for strange gtk behaviour - modifying the contents of a window while it is not visible causes the window position to change without sending a configure_event
+		g_PatchInspector.m_position_tracker.sync( g_PatchInspector.GetWidget() );
 		g_PatchInspector.ShowDlg();
 	}
 }
@@ -907,7 +909,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
@@ -928,7 +930,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
@@ -949,7 +951,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
@@ -970,7 +972,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 3, 4,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 						{
@@ -991,7 +993,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 4, 5,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 10, -2 );
+							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
 							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
 						}
 					}

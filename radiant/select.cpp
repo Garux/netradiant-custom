@@ -692,24 +692,6 @@ void Select_FitTexture( float horizontal, float vertical ){
 	SceneChangeNotify();
 }
 
-void Select_FitTextureW( float horizontal, float vertical ){
-	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
-		Scene_BrushFitTexture_SelectedW( GlobalSceneGraph(), horizontal, vertical );
-	}
-	Scene_BrushFitTexture_Component_SelectedW( GlobalSceneGraph(), horizontal, vertical );
-
-	SceneChangeNotify();
-}
-
-void Select_FitTextureH( float horizontal, float vertical ){
-	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
-		Scene_BrushFitTexture_SelectedH( GlobalSceneGraph(), horizontal, vertical );
-	}
-	Scene_BrushFitTexture_Component_SelectedH( GlobalSceneGraph(), horizontal, vertical );
-
-	SceneChangeNotify();
-}
-
 inline void hide_node( scene::Node& node, bool hide ){
 	hide
 	? node.enable( scene::Node::eHidden )

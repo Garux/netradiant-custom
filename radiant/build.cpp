@@ -671,6 +671,7 @@ class ProjectList
 public:
 Project& m_project;
 GtkListStore* m_store;
+GtkWidget* m_buildView;
 bool m_changed;
 ProjectList( Project& project ) : m_project( project ), m_changed( false ){
 }
@@ -706,6 +707,8 @@ gboolean project_cell_edited( GtkCellRendererText* cell, gchar* path_string, gch
 		gtk_list_store_set( projectList->m_store, &iter, 0, new_text, -1 );
 		GtkTreeIter lastIter;
 		gtk_list_store_append( projectList->m_store, &lastIter );
+		//make command field activatable
+		g_signal_emit_by_name( G_OBJECT( gtk_tree_view_get_selection( GTK_TREE_VIEW( projectList->m_buildView ) ) ), "changed" );
 	}
 
 	gtk_tree_path_free( path );
@@ -894,6 +897,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 					gtk_widget_show( view );
 
 					buildView = view;
+					projectList.m_buildView = buildView;
 					projectList.m_store = store;
 					gtk_container_add( GTK_CONTAINER( scr ), view );
 

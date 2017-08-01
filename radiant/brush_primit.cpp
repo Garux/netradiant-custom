@@ -1108,89 +1108,27 @@ void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::s
 	bounds.extents.z() = 1;
 
 	// the bounds of a perfectly fitted texture transform
-	AABB perfect( Vector3( s_repeat * 0.5, t_repeat * 0.5, 0 ), Vector3( s_repeat * 0.5, t_repeat * 0.5, 1 ) );
-
-	// the difference between the current texture transform and the perfectly fitted transform
-	Matrix4 matrix( matrix4_translation_for_vec3( bounds.origin - perfect.origin ) );
-	matrix4_pivoted_scale_by_vec3( matrix, bounds.extents / perfect.extents, perfect.origin );
-	matrix4_affine_invert( matrix );
-
-	// apply the difference to the current texture transform
-	matrix4_premultiply_by_matrix4( st2tex, matrix );
-
-	Texdef_fromTransform( projection, (float)width, (float)height, st2tex );
-	Texdef_normalise( projection, (float)width, (float)height );
-}
-
-void Texdef_FitTextureW( TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, const Winding& w, float s_repeat, float t_repeat ){
-	if ( w.numpoints < 3 ) {
-		return;
+	AABB perfect;
+	if( t_repeat == 0 && s_repeat == 0 ){
+		//bad user's input
+		t_repeat = s_repeat = 1;
+		perfect.origin = Vector3( s_repeat * 0.5, t_repeat * 0.5, 0 );
+		perfect.extents = Vector3( s_repeat * 0.5, t_repeat * 0.5, 1 );
 	}
-
-	Matrix4 st2tex;
-	Texdef_toTransform( projection, (float)width, (float)height, st2tex );
-
-	// the current texture transform
-	Matrix4 local2tex = st2tex;
-	{
-		Matrix4 xyz2st;
-		Texdef_basisForNormal( projection, normal, xyz2st );
-		matrix4_multiply_by_matrix4( local2tex, xyz2st );
+	if( t_repeat == 0 ){
+		//fit width
+		perfect.origin = Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 0 );
+		perfect.extents = Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 1 );
 	}
-
-	// the bounds of the current texture transform
-	AABB bounds;
-	for ( Winding::const_iterator i = w.begin(); i != w.end(); ++i )
-	{
-		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).vertex );
-		aabb_extend_by_point_safe( bounds, texcoord );
+	else if( s_repeat == 0 ){
+		//fit height
+		perfect.origin = Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 0 );
+		perfect.extents = Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 1 );
 	}
-	bounds.origin.z() = 0;
-	bounds.extents.z() = 1;
-
-	// the bounds of a perfectly fitted texture transform
-	AABB perfect( Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 0 ), Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 1 ) );
-
-	// the difference between the current texture transform and the perfectly fitted transform
-	Matrix4 matrix( matrix4_translation_for_vec3( bounds.origin - perfect.origin ) );
-	matrix4_pivoted_scale_by_vec3( matrix, bounds.extents / perfect.extents, perfect.origin );
-	matrix4_affine_invert( matrix );
-
-	// apply the difference to the current texture transform
-	matrix4_premultiply_by_matrix4( st2tex, matrix );
-
-	Texdef_fromTransform( projection, (float)width, (float)height, st2tex );
-	Texdef_normalise( projection, (float)width, (float)height );
-}
-
-void Texdef_FitTextureH( TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, const Winding& w, float s_repeat, float t_repeat ){
-	if ( w.numpoints < 3 ) {
-		return;
+	else{
+		perfect.origin = Vector3( s_repeat * 0.5, t_repeat * 0.5, 0 );
+		perfect.extents = Vector3( s_repeat * 0.5, t_repeat * 0.5, 1 );
 	}
-
-	Matrix4 st2tex;
-	Texdef_toTransform( projection, (float)width, (float)height, st2tex );
-
-	// the current texture transform
-	Matrix4 local2tex = st2tex;
-	{
-		Matrix4 xyz2st;
-		Texdef_basisForNormal( projection, normal, xyz2st );
-		matrix4_multiply_by_matrix4( local2tex, xyz2st );
-	}
-
-	// the bounds of the current texture transform
-	AABB bounds;
-	for ( Winding::const_iterator i = w.begin(); i != w.end(); ++i )
-	{
-		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).vertex );
-		aabb_extend_by_point_safe( bounds, texcoord );
-	}
-	bounds.origin.z() = 0;
-	bounds.extents.z() = 1;
-
-	// the bounds of a perfectly fitted texture transform
-	AABB perfect( Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 0 ), Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 1 ) );
 
 	// the difference between the current texture transform and the perfectly fitted transform
 	Matrix4 matrix( matrix4_translation_for_vec3( bounds.origin - perfect.origin ) );

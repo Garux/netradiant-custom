@@ -500,10 +500,12 @@ void DoAbout(){
 				{
 					GtkButton* button = create_dialog_button( "Credits", G_CALLBACK( about_button_credits ), 0 );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+					gtk_widget_set_sensitive( GTK_WIDGET( button ), FALSE);
 				}
 				{
 					GtkButton* button = create_dialog_button( "Changelog", G_CALLBACK( about_button_changelog ), 0 );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+					gtk_widget_set_sensitive( GTK_WIDGET( button ), FALSE);
 				}
 			}
 		}
