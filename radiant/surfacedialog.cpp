@@ -1392,6 +1392,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			}
 		}
 	}
+	else{
+		return false;
+	}
 	return true;
 }
 };

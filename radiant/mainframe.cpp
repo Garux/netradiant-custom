@@ -2778,6 +2778,7 @@ void MainFrame::Create(){
 	GtkWidget* vbox = gtk_vbox_new( FALSE, 0 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
 	gtk_widget_show( vbox );
+	gtk_container_set_focus_chain( GTK_CONTAINER( vbox ), NULL );
 
 	global_accel_connect_window( window );
 

@@ -205,6 +205,7 @@ void Filters_constructMenu( GtkMenu* menu_in_menu ){
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Botclips", "FilterBotClips" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Decals", "FilterDecals" );
 	}
+	create_check_menu_item_with_mnemonic( menu_in_menu, "FuncGroups", "FilterFuncGroups" );
 	// filter manipulation
 	menu_separator( menu_in_menu );
 	create_menu_item_with_mnemonic( menu_in_menu, "Invert filters", "InvertFilters" );
@@ -252,6 +253,7 @@ void ConstructFilters(){
 		add_filter_command( EXCLUDE_BOTCLIP, "FilterBotClips", Accelerator( 'M', (GdkModifierType)GDK_MOD1_MASK ) );
 		add_filter_command( EXCLUDE_DECALS, "FilterDecals", Accelerator( 'D', (GdkModifierType)GDK_SHIFT_MASK ) );
 	}
+	add_filter_command( EXCLUDE_FUNC_GROUPS, "FilterFuncGroups", accelerator_null() );
 
 	PerformFiltering();
 }

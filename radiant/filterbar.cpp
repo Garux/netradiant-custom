@@ -11,7 +11,7 @@
 #include "gtkutil/accelerator.h"
 #include "generic/callback.h"
 
-
+#include "entity.h"
 
 
 int ToggleActions = 0;
@@ -147,6 +147,16 @@ gboolean Trigger_button_press( GtkWidget *widget, GdkEventButton *event, gpointe
 	return FALSE;
 }
 
+gboolean Func_Groups_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
+	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
+		UndoableCommand undo( "create func_group" );
+		Entity_createFromSelection( "func_group", g_vector3_identity );
+		ToggleActions = 0;
+		return TRUE;
+	}
+	return FALSE;
+}
+
 gboolean Detail_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
 		GlobalCommands_find( "MakeDetail" ).m_callback();
@@ -181,6 +191,8 @@ GtkToolbar* create_filter_toolbar(){
 			button = toolbar_append_toggle_button( filter_toolbar, "Details (CTRL + D)\nRightClick: MakeDetail", "f-details.png", "FilterDetails" );
 			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Detail_button_press ), 0 );
 
+			button = toolbar_append_toggle_button( filter_toolbar, "Func_Groups\nRightClick: create func_group", "f-funcgroups.png", "FilterFuncGroups" );
+			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Func_Groups_button_press ), 0 );
 
 			toolbar_append_toggle_button( filter_toolbar, "Patches (CTRL + P)", "patch_wireframe.png", "FilterPatches" );
 			gtk_toolbar_append_space( GTK_TOOLBAR( filter_toolbar ) );
@@ -216,6 +228,7 @@ GtkToolbar* create_filter_toolbar(){
 			//toolbar_append_toggle_button( filter_toolbar, "Decals (SHIFT + D)", "f-decals.png", "FilterDecals" );
 			gtk_toolbar_append_space( GTK_TOOLBAR( filter_toolbar ) );
 			toolbar_append_button( filter_toolbar, "InvertFilters", "f-invert.png", "InvertFilters" );
+
 			toolbar_append_button( filter_toolbar, "ResetFilters", "f-reset.png", "ResetFilters" );
 			return filter_toolbar;
 }

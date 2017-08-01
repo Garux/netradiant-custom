@@ -110,26 +110,32 @@ SelectByBounds( AABB* aabbs, Unsigned count )
 }
 
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Selectable* selectable = Instance_getSelectable( instance );
+	if( path.top().get().visible() ){
+		Selectable* selectable = Instance_getSelectable( instance );
 
-	// ignore worldspawn
-	Entity* entity = Node_getEntity( path.top() );
-	if ( entity ) {
-		if ( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ) {
-			return true;
-		}
-	}
-
-	if ( ( path.size() > 1 ) &&
-		 ( !path.top().get().isRoot() ) &&
-		 ( selectable != 0 )
-		 ) {
-		for ( Unsigned i = 0; i < m_count; ++i )
-		{
-			if ( policy.Evaluate( m_aabbs[i], instance ) ) {
-				selectable->setSelected( true );
+		// ignore worldspawn
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity ) {
+			if ( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ) {
+				return true;
 			}
 		}
+
+		if ( ( path.size() > 1 ) &&
+			( !path.top().get().isRoot() ) &&
+			( selectable != 0 ) &&
+			( !node_is_group( path.top() ) )
+			) {
+			for ( Unsigned i = 0; i < m_count; ++i )
+			{
+				if ( policy.Evaluate( m_aabbs[i], instance ) ) {
+					selectable->setSelected( true );
+				}
+			}
+		}
+	}
+	else{
+		return false;
 	}
 
 	return true;
@@ -275,6 +281,10 @@ InvertSelectionWalker( SelectionSystem::EMode mode )
 	: m_mode( mode ), m_selectable( 0 ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	if( !path.top().get().visible() ){
+		m_selectable = 0;
+		return false;
+	}
 	Selectable* selectable = Instance_getSelectable( instance );
 	if ( selectable ) {
 		switch ( m_mode )
@@ -608,6 +618,9 @@ EntityFindByPropertyValueWalker( const char *prop, const PropertyValues& propert
 	: m_propertyvalues( propertyvalues ), m_prop( prop ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	if( !path.top().get().visible() ){
+		return false;
+	}
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0
 		 && propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {

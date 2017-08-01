@@ -379,7 +379,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	return true;
 }
 };
-
+/*
 class BrushDeleteSelected : public scene::Graph::Walker
 {
 public:
@@ -397,7 +397,47 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	}
 }
 };
+*/
+#include "ientity.h"
 
+class BrushDeleteSelected : public scene::Graph::Walker
+{
+scene::Node* m_keepNode;
+mutable bool m_eraseParent;
+public:
+BrushDeleteSelected( scene::Node* keepNode ): m_keepNode( keepNode ), m_eraseParent( false ){
+}
+BrushDeleteSelected(): m_keepNode( NULL ), m_eraseParent( false ){
+}
+bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	return true;
+}
+void post( const scene::Path& path, scene::Instance& instance ) const {
+	//globalOutputStream() << path.size() << "\n";
+	if ( path.top().get().visible() ) {
+		Brush* brush = Node_getBrush( path.top() );
+		if ( brush != 0
+			 && Instance_getSelectable( instance )->isSelected()
+			 && path.size() > 1 ) {
+			Path_deleteTop( path );
+			if( Node_getTraversable( path.parent() )->empty() ){
+				m_eraseParent = true;
+				//globalOutputStream() << "Empty node?!.\n";
+			}
+		}
+	}
+	if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
+		//globalOutputStream() << "about to Delete empty node!.\n";
+		m_eraseParent = false;
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
+			&& Node_getTraversable( path.top() )->empty() && path.top().get_pointer() != m_keepNode ) {
+			//globalOutputStream() << "now Deleting empty node!.\n";
+			Path_deleteTop( path );
+		}
+	}
+}
+};
 
 /*
    =============
@@ -568,12 +608,16 @@ class SubtractBrushesFromUnselected : public scene::Graph::Walker
 const brush_vector_t& m_brushlist;
 std::size_t& m_before;
 std::size_t& m_after;
+mutable bool m_eraseParent;
 public:
 SubtractBrushesFromUnselected( const brush_vector_t& brushlist, std::size_t& before, std::size_t& after )
-	: m_brushlist( brushlist ), m_before( before ), m_after( after ){
+	: m_brushlist( brushlist ), m_before( before ), m_after( after ), m_eraseParent( false ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	return true;
+	if ( path.top().get().visible() ) {
+		return true;
+	}
+	return false;
 }
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
@@ -626,7 +670,18 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 					}
 				}
 				Path_deleteTop( path );
+				if( Node_getTraversable( path.parent() )->empty() ){
+					m_eraseParent = true;
+				}
 			}
+		}
+	}
+	if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
+		m_eraseParent = false;
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )
+			&& Node_getTraversable( path.top() )->empty() ) {
+			Path_deleteTop( path );
 		}
 	}
 }
@@ -868,7 +923,7 @@ void CSG_Merge( void ){
 		ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after merge" );
 
 		// free the original brushes
-		GlobalSceneGraph().traverse( BrushDeleteSelected() );
+		GlobalSceneGraph().traverse( BrushDeleteSelected( merged_path.parent().get_pointer() ) );
 
 		merged_path.pop();
 		Node_getTraversable( merged_path.top() )->insert( node );

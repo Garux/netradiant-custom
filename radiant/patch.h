@@ -1810,6 +1810,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			m_functor( *patch );
 		}
 	}
+	else{
+		return false;
+	}
 	return true;
 }
 };
@@ -1834,6 +1837,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			m_functor( *patch );
 		}
 	}
+	else{
+		return false;
+	}
 	return true;
 }
 };
@@ -1856,6 +1862,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( patch != 0 ) {
 			m_functor( *patch );
 		}
+	}
+	else{
+		return false;
 	}
 	return true;
 }

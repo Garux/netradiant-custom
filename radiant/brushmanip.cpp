@@ -696,6 +696,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			Instance_getSelectable( instance )->setSelected( true );
 		}
 	}
+	else{
+		return false;
+	}
 	return true;
 }
 };

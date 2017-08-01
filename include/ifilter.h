@@ -47,6 +47,7 @@ enum
 	EXCLUDE_BOTCLIP          = 0x00040000,
 	EXCLUDE_VISPORTALS       = 0x00080000,
 	EXCLUDE_DECALS           = 0x00100000,
+	EXCLUDE_FUNC_GROUPS       = 0x00200000,
 };
 
 class Filter

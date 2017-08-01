@@ -453,12 +453,28 @@ void operator()( Patch& patch ) const {
 }
 };
 
+namespace{
+bool DoingSearch( const char *repl ){
+	return ( repl == NULL || ( strcmp( "textures/", repl ) == 0 ) );
+}
+}
 void Scene_PatchFindReplaceShader( scene::Graph& graph, const char* find, const char* replace ){
-	Scene_forEachVisiblePatch( PatchFindReplaceShader( find, replace ) );
+	if( DoingSearch( replace ) ){
+		Scene_forEachVisiblePatchInstance( PatchSelectByShader( find ) );
+	}
+	else{
+		Scene_forEachVisiblePatch( PatchFindReplaceShader( find, replace ) );
+	}
 }
 
 void Scene_PatchFindReplaceShader_Selected( scene::Graph& graph, const char* find, const char* replace ){
-	Scene_forEachVisibleSelectedPatch( PatchFindReplaceShader( find, replace ) );
+	if( DoingSearch( replace ) ){
+		//do nothing, because alternative is replacing to notex
+		//perhaps deselect ones with not matching shaders here?
+	}
+	else{
+		Scene_forEachVisibleSelectedPatch( PatchFindReplaceShader( find, replace ) );
+	}
 }
 
 
