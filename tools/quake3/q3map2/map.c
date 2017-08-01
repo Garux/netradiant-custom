@@ -164,10 +164,10 @@ qboolean SnapNormal( vec3_t normal ){
 	// normalized).  The original SnapNormal() didn't snap such vectors - it
 	// only snapped vectors that were near a perfect axis.
 
-	//adjusting vectors, that were near a perfect axis, with bigger epsilon
+	//adjusting vectors, that are near perfect axis, with bigger epsilon
 	//they cause precision errors
 
-	/*
+
 	if ( ( normal[0] != 0.0 || normal[1] != 0.0 ) && fabs(normal[0]) < 0.00025 && fabs(normal[1]) < 0.00025){
 		normal[0] = normal[1] = 0.0;
 		adjusted = qtrue;
@@ -180,7 +180,7 @@ qboolean SnapNormal( vec3_t normal ){
 		normal[2] = normal[1] = 0.0;
 		adjusted = qtrue;
 	}
-	*/
+
 
 	/*
 	for ( i=0; i<30; i++ )

@@ -1508,7 +1508,7 @@ int ShiftBSPMain( int argc, char **argv ){
 		}
 	}
 
-	/* get scale */
+	/* get shift */
 	// if(argc-2 >= i) // always true
 	scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
 	if ( argc - 3 >= i ) {
@@ -1535,10 +1535,10 @@ int ShiftBSPMain( int argc, char **argv ){
 	Sys_Printf( "--- ShiftBSP ---\n" );
 	Sys_FPrintf( SYS_VRB, "%9d entities\n", numEntities );
 
-	/* scale entity keys */
+	/* shift entity keys */
 	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
 	{
-		/* scale origin */
+		/* shift origin */
 		GetVectorForKey( &entities[ i ], "origin", vec );
 		if ( ( vec[ 0 ] || vec[ 1 ] || vec[ 2 ] ) ) {
 			if ( !strncmp( ValueForKey( &entities[i], "classname" ), "info_player_", 12 ) ) {
@@ -1556,7 +1556,7 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	}
 
-	/* scale models */
+	/* shift models */
 	for ( i = 0; i < numBSPModels; i++ )
 	{
 		bspModels[ i ].mins[0] += scale[0];
@@ -1567,7 +1567,7 @@ int ShiftBSPMain( int argc, char **argv ){
 		bspModels[ i ].maxs[2] += scale[2];
 	}
 
-	/* scale nodes */
+	/* shift nodes */
 	for ( i = 0; i < numBSPNodes; i++ )
 	{
 		bspNodes[ i ].mins[0] += scale[0];
@@ -1578,7 +1578,7 @@ int ShiftBSPMain( int argc, char **argv ){
 		bspNodes[ i ].maxs[2] += scale[2];
 	}
 
-	/* scale leafs */
+	/* shift leafs */
 	for ( i = 0; i < numBSPLeafs; i++ )
 	{
 		bspLeafs[ i ].mins[0] += scale[0];
@@ -1588,117 +1588,36 @@ int ShiftBSPMain( int argc, char **argv ){
 		bspLeafs[ i ].maxs[1] += scale[1];
 		bspLeafs[ i ].maxs[2] += scale[2];
 	}
-/*
-	if ( texscale ) {
-		Sys_Printf( "Using texture unlocking (and probably breaking texture alignment a lot)\n" );
-		old_xyzst = safe_malloc( sizeof( *old_xyzst ) * numBSPDrawVerts * 5 );
-		for ( i = 0; i < numBSPDrawVerts; i++ )
-		{
-			old_xyzst[5 * i + 0] = bspDrawVerts[i].xyz[0];
-			old_xyzst[5 * i + 1] = bspDrawVerts[i].xyz[1];
-			old_xyzst[5 * i + 2] = bspDrawVerts[i].xyz[2];
-			old_xyzst[5 * i + 3] = bspDrawVerts[i].st[0];
-			old_xyzst[5 * i + 4] = bspDrawVerts[i].st[1];
-		}
-	}
-*/
-	/* scale drawverts */
+
+	/* shift drawverts */
 	for ( i = 0; i < numBSPDrawVerts; i++ )
 	{
 		bspDrawVerts[i].xyz[0] += scale[0];
 		bspDrawVerts[i].xyz[1] += scale[1];
 		bspDrawVerts[i].xyz[2] += scale[2];
-//		bspDrawVerts[i].normal[0] /= scale[0];
-//		bspDrawVerts[i].normal[1] /= scale[1];
-//		bspDrawVerts[i].normal[2] /= scale[2];
-//		VectorNormalize( bspDrawVerts[i].normal, bspDrawVerts[i].normal );
 	}
-/*
-	if ( texscale ) {
-		for ( i = 0; i < numBSPDrawSurfaces; i++ )
-		{
-			switch ( bspDrawSurfaces[i].surfaceType )
-			{
-			case SURFACE_FACE:
-			case SURFACE_META:
-				if ( bspDrawSurfaces[i].numIndexes % 3 ) {
-					Error( "Not a triangulation!" );
-				}
-				for ( j = bspDrawSurfaces[i].firstIndex; j < bspDrawSurfaces[i].firstIndex + bspDrawSurfaces[i].numIndexes; j += 3 )
-				{
-					int ia = bspDrawIndexes[j] + bspDrawSurfaces[i].firstVert, ib = bspDrawIndexes[j + 1] + bspDrawSurfaces[i].firstVert, ic = bspDrawIndexes[j + 2] + bspDrawSurfaces[i].firstVert;
-					bspDrawVert_t *a = &bspDrawVerts[ia], *b = &bspDrawVerts[ib], *c = &bspDrawVerts[ic];
-					float *oa = &old_xyzst[ia * 5], *ob = &old_xyzst[ib * 5], *oc = &old_xyzst[ic * 5];
-					// extrapolate:
-					//   a->xyz -> oa
-					//   b->xyz -> ob
-					//   c->xyz -> oc
-					ExtrapolateTexcoords(
-						&oa[0], &oa[3],
-						&ob[0], &ob[3],
-						&oc[0], &oc[3],
-						a->xyz, a->st,
-						b->xyz, b->st,
-						c->xyz, c->st );
-				}
-				break;
-			}
-		}
-	}
-*/
-	/* scale planes */
+
+	/* shift planes */
+
+	vec3_t point;
 
 	for ( i = 0; i < numBSPPlanes; i++ )
 	{
-		if ( bspPlanes[ i ].dist > 0 ){
-				if ( bspPlanes[ i ].normal[0] ){
-					bspPlanes[ i ].dist += scale[0];
-					continue;
-				}
-				else if ( bspPlanes[ i ].normal[1] ){
-					bspPlanes[ i ].dist += scale[1];
-					continue;
-				}
-				else if ( bspPlanes[ i ].normal[2] ){
-					bspPlanes[ i ].dist += scale[2];
-					continue;
-				}
+		//find point on plane
+		for ( j=0; j<3; j++ ){
+			if ( fabs( bspPlanes[ i ].normal[j] ) > 0.5 ){
+				point[j] = bspPlanes[ i ].dist / bspPlanes[ i ].normal[j];
+				point[(j+1)%3] = point[(j+2)%3] = 0;
+				break;
+			}
 		}
-		else{
-				if ( bspPlanes[ i ].normal[0] ){
-					bspPlanes[ i ].dist -= scale[0];
-					continue;
-				}
-				else if ( bspPlanes[ i ].normal[1] ){
-					bspPlanes[ i ].dist -= scale[1];
-					continue;
-				}
-				else if ( bspPlanes[ i ].normal[2] ){
-					bspPlanes[ i ].dist -= scale[2];
-					continue;
-				}
+		//shift point
+		for ( j=0; j<3; j++ ){
+			point[j] += scale[j];
 		}
+		//calc new plane dist
+		bspPlanes[ i ].dist = DotProduct( point, bspPlanes[ i ].normal );
 	}
-
-
-/*	if ( uniform ) {
-		for ( i = 0; i < numBSPPlanes; i++ )
-		{
-			bspPlanes[ i ].dist += scale[0];
-		}
-	}
-	else
-	{
-		for ( i = 0; i < numBSPPlanes; i++ )
-		{
-//			bspPlanes[ i ].normal[0] /= scale[0];
-//			bspPlanes[ i ].normal[1] /= scale[1];
-//			bspPlanes[ i ].normal[2] /= scale[2];
-			f = 1 / VectorLength( bspPlanes[i].normal );
-			VectorScale( bspPlanes[i].normal, f, bspPlanes[i].normal );
-			bspPlanes[ i ].dist *= f;
-		}
-	}*/
 
 	/* scale gridsize */
 	/*

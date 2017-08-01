@@ -70,7 +70,7 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 			VectorSet( mult, 1.0f, 1.0f, 1.0f );
 			mult[ 3 ] = 1.0f;
 			VectorSet( add, 0.0f, 0.0f, 0.0f );
-			mult[ 3 ] = 0.0f;
+			add[ 3 ] = 0.0f;
 
 			/* switch on type */
 			switch ( cm2->type )
