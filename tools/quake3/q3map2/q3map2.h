@@ -1590,6 +1590,7 @@ void                        MakeNormalVectors( vec3_t forward, vec3_t right, vec
 /* map.c */
 void                        LoadMapFile( char *filename, qboolean onlyLights, qboolean noCollapseGroups );
 int                         FindFloatPlane( vec3_t normal, vec_t dist, int numPoints, vec3_t *points );
+qboolean					PlaneEqual( plane_t *p, vec3_t normal, vec_t dist );
 int                         PlaneTypeForNormal( vec3_t normal );
 void                        AddBrushBevels( void );
 brush_t                     *FinishBrush( qboolean noCollapseGroups );

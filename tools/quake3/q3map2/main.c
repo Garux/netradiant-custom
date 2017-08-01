@@ -3628,6 +3628,9 @@ int ConvertBSPMain( int argc, char **argv ){
 			meta = qtrue;
 			patchMeta = qtrue;
 		}
+		else if ( !strcmp( argv[ i ],  "-fast" ) ) {
+			fast = qtrue;
+		}
 	}
 
 	LoadShaderInfo();

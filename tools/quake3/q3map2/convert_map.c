@@ -88,13 +88,16 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 			vert[1] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 1]];
 			vert[2] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 2]];
 			if ( s->surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
-				VectorSubtract( vert[0]->normal, buildPlane->normal, normdiff ); if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				VectorSubtract( vert[0]->normal, buildPlane->normal, normdiff );
+				if ( VectorLength( normdiff ) >= normalEpsilon ) {
 					continue;
 				}
-				VectorSubtract( vert[1]->normal, buildPlane->normal, normdiff ); if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				VectorSubtract( vert[1]->normal, buildPlane->normal, normdiff );
+				if ( VectorLength( normdiff ) >= normalEpsilon ) {
 					continue;
 				}
-				VectorSubtract( vert[2]->normal, buildPlane->normal, normdiff ); if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				VectorSubtract( vert[2]->normal, buildPlane->normal, normdiff );
+				if ( VectorLength( normdiff ) >= normalEpsilon ) {
 					continue;
 				}
 			}
@@ -106,7 +109,8 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				VectorSubtract( vert[2]->xyz, vert[0]->xyz, v2v0 );
 				CrossProduct( v2v0, v1v0, norm );
 				VectorNormalize( norm, norm );
-				VectorSubtract( norm, buildPlane->normal, normdiff ); if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				VectorSubtract( norm, buildPlane->normal, normdiff );
+				if ( VectorLength( normdiff ) >= normalEpsilon ) {
 					continue;
 				}
 			}
@@ -220,24 +224,15 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushP
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qboolean brushPrimitives ){
-	int i, j;
+static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qboolean brushPrimitives ){
+	int i;
 	bspBrushSide_t  *side;
 	side_t          *buildSide;
 	bspShader_t     *shader;
 	char            *texture;
 	plane_t         *buildPlane;
 	vec3_t pts[ 3 ];
-	bspDrawVert_t   *vert[3];
 
-
-	/* start brush */
-	fprintf( f, "\t// brush %d\n", num );
-	fprintf( f, "\t{\n" );
-	if ( brushPrimitives ) {
-		fprintf( f, "\tbrushDef\n" );
-		fprintf( f, "\t{\n" );
-	}
 
 	/* clear out build brush */
 	for ( i = 0; i < buildBrush->numsides; i++ )
@@ -250,6 +245,32 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 	}
 	buildBrush->numsides = 0;
 
+	qboolean modelclip = qfalse;
+	/* try to guess if thats model clip */
+	if ( force ){
+		int notNoShader = 0;
+		modelclip = qtrue;
+		for ( i = 0; i < brush->numSides; i++ )
+		{
+			/* get side */
+			side = &bspBrushSides[ brush->firstSide + i ];
+
+			/* get shader */
+			if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+				continue;
+			}
+			shader = &bspShaders[ side->shaderNum ];
+			//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
+			if( Q_stricmp( shader->shader, "noshader" ) ){
+				notNoShader++;
+			}
+			if( notNoShader > 1 ){
+				modelclip = qfalse;
+				break;
+			}
+		}
+	}
+
 	/* iterate through bsp brush sides */
 	for ( i = 0; i < brush->numSides; i++ )
 	{
@@ -261,8 +282,159 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 			continue;
 		}
 		shader = &bspShaders[ side->shaderNum ];
-		//if( !Q_stricmp( shader->shader, "default" ) || !Q_stricmp( shader->shader, "noshader" ) )
-		//	continue;
+		//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
+		if( !Q_stricmp( shader->shader, "default" ) || ( !Q_stricmp( shader->shader, "noshader" ) && !modelclip ) )
+			continue;
+
+		/* add build side */
+		buildSide = &buildBrush->sides[ buildBrush->numsides ];
+		buildBrush->numsides++;
+
+		/* tag it */
+		buildSide->shaderInfo = ShaderInfoForShader( shader->shader );
+		buildSide->planenum = side->planeNum;
+		buildSide->winding = NULL;
+	}
+
+	if ( !CreateBrushWindings( buildBrush ) ) {
+		//Sys_Printf( "CreateBrushWindings failed\n" );
+		return;
+	}
+
+	/* start brush */
+	fprintf( f, "\t// brush %d\n", num );
+	fprintf( f, "\t{\n" );
+	if ( brushPrimitives ) {
+		fprintf( f, "\tbrushDef\n" );
+		fprintf( f, "\t{\n" );
+	}
+
+	/* iterate through build brush sides */
+	for ( i = 0; i < buildBrush->numsides; i++ )
+	{
+		/* get build side */
+		buildSide = &buildBrush->sides[ i ];
+
+		/* get plane */
+		buildPlane = &mapplanes[ buildSide->planenum ];
+
+		/* dummy check */
+		if ( buildSide->shaderInfo == NULL || buildSide->winding == NULL ) {
+			continue;
+		}
+
+		/* get texture name */
+		if ( !Q_strncasecmp( buildSide->shaderInfo->shader, "textures/", 9 ) ) {
+			texture = buildSide->shaderInfo->shader + 9;
+		}
+		else{
+			texture = buildSide->shaderInfo->shader;
+		}
+
+		{
+			vec3_t vecs[ 2 ];
+			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
+			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );
+			VectorAdd( pts[ 0 ], origin, pts[ 0 ] );
+			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
+			VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
+		}
+
+		{
+			if ( brushPrimitives ) {
+				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
+						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+						 1.0f / 32.0f, 0.0f, 0.0f,
+						 0.0f, 1.0f / 32.0f, 0.0f,
+						 texture,
+						 0
+						 );
+			}
+			else
+			{
+				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) %s %.8f %.8f %.8f %.8f %.8f %d 0 0\n",
+						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
+						 pts[ 1 ][ 0 ], pts[ 1 ][ 1 ], pts[ 1 ][ 2 ],
+						 pts[ 2 ][ 0 ], pts[ 2 ][ 1 ], pts[ 2 ][ 2 ],
+						 texture,
+						 0.0f, 0.0f, 0.0f, 0.5f, 0.5f,
+						 0
+						 );
+			}
+		}
+	}
+
+	/* end brush */
+	if ( brushPrimitives ) {
+		fprintf( f, "\t}\n" );
+	}
+	fprintf( f, "\t}\n\n" );
+}
+
+static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qboolean brushPrimitives ){
+	int i, j;
+	bspBrushSide_t  *side;
+	side_t          *buildSide;
+	bspShader_t     *shader;
+	char            *texture;
+	plane_t         *buildPlane;
+	vec3_t pts[ 3 ];
+	bspDrawVert_t   *vert[3];
+
+
+	/* clear out build brush */
+	for ( i = 0; i < buildBrush->numsides; i++ )
+	{
+		buildSide = &buildBrush->sides[ i ];
+		if ( buildSide->winding != NULL ) {
+			FreeWinding( buildSide->winding );
+			buildSide->winding = NULL;
+		}
+	}
+	buildBrush->numsides = 0;
+
+	qboolean modelclip = qfalse;
+	/* try to guess if thats model clip */
+	if ( force ){
+		int notNoShader = 0;
+		modelclip = qtrue;
+		for ( i = 0; i < brush->numSides; i++ )
+		{
+			/* get side */
+			side = &bspBrushSides[ brush->firstSide + i ];
+
+			/* get shader */
+			if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+				continue;
+			}
+			shader = &bspShaders[ side->shaderNum ];
+			//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
+			if( Q_stricmp( shader->shader, "noshader" ) ){
+				notNoShader++;
+			}
+			if( notNoShader > 1 ){
+				modelclip = qfalse;
+				break;
+			}
+		}
+	}
+
+	/* iterate through bsp brush sides */
+	for ( i = 0; i < brush->numSides; i++ )
+	{
+		/* get side */
+		side = &bspBrushSides[ brush->firstSide + i ];
+
+		/* get shader */
+		if ( side->shaderNum < 0 || side->shaderNum >= numBSPShaders ) {
+			continue;
+		}
+		shader = &bspShaders[ side->shaderNum ];
+		//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
+		if( !Q_stricmp( shader->shader, "default" ) || ( !Q_stricmp( shader->shader, "noshader" ) && !modelclip ) )
+			continue;
 
 		/* add build side */
 		buildSide = &buildBrush->sides[ buildBrush->numsides ];
@@ -276,8 +448,16 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 
 	/* make brush windings */
 	if ( !CreateBrushWindings( buildBrush ) ) {
-		Sys_Printf( "CreateBrushWindings failed\n" );
+		//Sys_Printf( "CreateBrushWindings failed\n" );
 		return;
+	}
+
+	/* start brush */
+	fprintf( f, "\t// brush %d\n", num );
+	fprintf( f, "\t{\n" );
+	if ( brushPrimitives ) {
+		fprintf( f, "\tbrushDef\n" );
+		fprintf( f, "\t{\n" );
 	}
 
 	/* iterate through build brush sides */
@@ -314,13 +494,51 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 			texture = buildSide->shaderInfo->shader;
 		}
 
-		/* get plane points and offset by origin */
-		for ( j = 0; j < 3; j++ )
-		{
-			VectorAdd( buildSide->winding->p[ j ], origin, pts[ j ] );
-			//%	pts[ j ][ 0 ] = SNAP_INT_TO_FLOAT * floor( pts[ j ][ 0 ] * SNAP_FLOAT_TO_INT + 0.5f );
-			//%	pts[ j ][ 1 ] = SNAP_INT_TO_FLOAT * floor( pts[ j ][ 1 ] * SNAP_FLOAT_TO_INT + 0.5f );
-			//%	pts[ j ][ 2 ] = SNAP_INT_TO_FLOAT * floor( pts[ j ][ 2 ] * SNAP_FLOAT_TO_INT + 0.5f );
+		/* recheck and fix winding points, fails occur somehow */
+		int match = 0;
+		for ( j = 0; j < buildSide->winding->numpoints; j++ ){
+			if ( fabs( DotProduct( buildSide->winding->p[ j ], buildPlane->normal ) - buildPlane->dist ) >= distanceEpsilon ) {
+				continue;
+			}
+			else{
+				VectorCopy( buildSide->winding->p[ j ], pts[ match ] );
+				match++;
+				/* got 3 fine points? */
+				if( match > 2 )
+					break;
+			}
+		}
+
+		if( match > 2 ){
+			//Sys_Printf( "pointsKK " );
+			vec4_t testplane;
+			if ( PlaneFromPoints( testplane, pts[0], pts[1], pts[2] ) ){
+				if( !PlaneEqual( buildPlane, testplane, testplane[3] ) ){
+					//Sys_Printf( "1: %f %f %f %f\n2: %f %f %f %f\n", buildPlane->normal[0], buildPlane->normal[1], buildPlane->normal[2], buildPlane->dist, testplane[0], testplane[1], testplane[2], testplane[3] );
+					match--;
+					//Sys_Printf( "planentEQ " );
+				}
+			}
+			else{
+				match--;
+			}
+		}
+
+
+		if( match > 2 ){
+			//Sys_Printf( "ok " );
+			/* offset by origin */
+			for ( j = 0; j < 3; j++ )
+				VectorAdd( pts[ j ], origin, pts[ j ] );
+		}
+		else{
+			vec3_t vecs[ 2 ];
+			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
+			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );
+			VectorAdd( pts[ 0 ], origin, pts[ 0 ] );
+			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
+			VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
+			//Sys_Printf( "not\n" );
 		}
 
 		if ( vert[0] && vert[1] && vert[2] ) {
@@ -495,20 +713,21 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 		}
 		else
 		{
-			vec3_t vecs[ 2 ];
+			//vec3_t vecs[ 2 ];
 			if ( strncmp( buildSide->shaderInfo->shader, "textures/common/", 16 ) ) {
 				if ( strcmp( buildSide->shaderInfo->shader, "noshader" ) ) {
 					if ( strcmp( buildSide->shaderInfo->shader, "default" ) ) {
-						fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader );
+						//fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader );
 						texture = "common/WTF";
 					}
 				}
 			}
-
+/*
 			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
 			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );
-			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
 			VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
+			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
+*/
 			if ( brushPrimitives ) {
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
 						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
@@ -717,7 +936,12 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
 	{
 		num = i + model->firstBSPBrush;
 		brush = &bspBrushes[ num ];
-		ConvertBrush( f, num, brush, origin, brushPrimitives );
+		if( fast ){
+			ConvertBrushFast( f, num, brush, origin, brushPrimitives );
+		}
+		else{
+			ConvertBrush( f, num, brush, origin, brushPrimitives );
+		}
 	}
 
 	/* free the build brush */

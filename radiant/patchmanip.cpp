@@ -112,6 +112,7 @@ void Patch_makeCaps( Patch& patch, scene::Instance& instance, EPatchCap type, co
 	}
 }
 
+
 typedef std::vector<scene::Instance*> InstanceVector;
 
 class PatchStoreInstance
@@ -169,6 +170,30 @@ void Scene_PatchDoCap_Selected( scene::Graph& graph, const char* shader ){
 			Patch_makeCaps( *Node_getPatch( ( *i )->path().top() ), *( *i ), eType, shader );
 		}
 	}
+}
+
+void Patch_deform( Patch& patch, scene::Instance& instance, const int deform ){
+	patch.undoSave();
+
+	for (PatchControlIter i = patch.begin(); i != patch.end(); ++i)
+	{
+		PatchControl& control = *i;
+		int randomNumber = int( deform * (float(std::rand()) / float(RAND_MAX)));
+		control.m_vertex[2] += randomNumber;
+	}
+
+	patch.controlPointsChanged();
+}
+
+void Scene_PatchDeform( scene::Graph& graph, const int deform )
+{
+	InstanceVector instances;
+	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
+	for ( InstanceVector::const_iterator i = instances.begin(); i != instances.end(); ++i )
+	{
+		Patch_deform( *Node_getPatch( ( *i )->path().top() ), *( *i ), deform );
+	}
+
 }
 
 Patch* Scene_GetUltimateSelectedVisiblePatch(){
@@ -585,6 +610,14 @@ void Patch_NaturalTexture(){
 	Scene_PatchNaturalTexture_Selected( GlobalSceneGraph() );
 }
 
+void DoPatchDeformDlg();
+
+void Patch_Deform(){
+	UndoableCommand undo( "patchDeform" );
+
+	DoPatchDeformDlg();
+}
+
 
 
 
@@ -698,6 +731,7 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "CycleCapTexturePatch", FreeCaller<Patch_CycleProjection>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), Accelerator( 'Y' ) );
 	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), Accelerator( 'L', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "PatchDeform", FreeCaller<Patch_Deform>() );
 }
 
 void Patch_constructToolbar( GtkToolbar* toolbar ){
@@ -804,6 +838,8 @@ void Patch_constructMenu( GtkMenu* menu ){
 		create_menu_item_with_mnemonic( menu_in_menu, "Set", "MakeOverlayPatch" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Clear", "ClearPatchOverlays" );
 	}
+	menu_separator( menu );
+	create_menu_item_with_mnemonic( menu, "Deform...", "PatchDeform" );
 }
 
 
@@ -935,6 +971,66 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 	gtk_widget_destroy( GTK_WIDGET( window ) );
 }
 
+
+void DoPatchDeformDlg(){
+	ModalDialog dialog;
+	GtkWidget* deformW;
+
+	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Patch deform", G_CALLBACK( dialog_delete_callback ), &dialog );
+
+	GtkAccelGroup* accel = gtk_accel_group_new();
+	gtk_window_add_accel_group( window, accel );
+
+	{
+		GtkHBox* hbox = create_dialog_hbox( 4, 4 );
+		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( hbox ) );
+		{
+			GtkTable* table = create_dialog_table( 2, 2, 4, 4 );
+			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
+			{
+				GtkLabel* label = GTK_LABEL( gtk_label_new( "Max deform:" ) );
+				gtk_widget_show( GTK_WIDGET( label ) );
+				gtk_table_attach( table, GTK_WIDGET( label ), 0, 1, 0, 1,
+								  (GtkAttachOptions) ( GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+			}
+			{
+				GtkWidget* entry = gtk_entry_new();
+				gtk_entry_set_text( GTK_ENTRY( entry ), "16" );
+				gtk_widget_show( entry );
+				gtk_table_attach( table, entry, 1, 2, 0, 1,
+								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+
+				deformW = entry;
+			}
+		}
+		{
+			GtkVBox* vbox = create_dialog_vbox( 4 );
+			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox ), TRUE, TRUE, 0 );
+			{
+				GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &dialog );
+				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+				widget_make_default( GTK_WIDGET( button ) );
+				gtk_widget_grab_focus( GTK_WIDGET( button ) );
+				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
+			}
+			{
+				GtkButton* button = create_dialog_button( "Cancel", G_CALLBACK( dialog_button_cancel ), &dialog );
+				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
+			}
+		}
+	}
+
+	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
+		int deform = static_cast<int>( atoi( gtk_entry_get_text( GTK_ENTRY( deformW ) ) ) );
+		Scene_PatchDeform( GlobalSceneGraph(), deform );
+	}
+
+	gtk_widget_destroy( GTK_WIDGET( window ) );
+}
 
 
 
