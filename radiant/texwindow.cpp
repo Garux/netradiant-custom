@@ -305,34 +305,32 @@ int m_uniformTextureMinSize;
 	}
 }
 */
-void getTextureWH( qtexture_t* tex, int *width, int *height ){
+void getTextureWH( qtexture_t* tex, int &W, int &H ){
 		// Don't use uniform size
-		*width = (int)( tex->width * ( (float)m_textureScale / 100 ) );
-		*height = (int)( tex->height * ( (float)m_textureScale / 100 ) );
+		W = (int)( tex->width * ( (float)m_textureScale / 100 ) );
+		H = (int)( tex->height * ( (float)m_textureScale / 100 ) );
 
 	if ( g_TextureBrowser_fixedSize ){
-		int W = *width;
-		int H = *height;
 		if	( W >= H ) {
 			// Texture is square, or wider than it is tall
 			if ( W >= m_uniformTextureSize ){
-				*width = m_uniformTextureSize;
-				*height = m_uniformTextureSize * H / W;
+				H = m_uniformTextureSize * H / W;
+				W = m_uniformTextureSize;
 			}
 			else if ( W <= m_uniformTextureMinSize ){
-				*width = m_uniformTextureMinSize;
-				*height = m_uniformTextureMinSize * H / W;
+				H = m_uniformTextureMinSize * H / W;
+				W = m_uniformTextureMinSize;
 			}
 		}
 		else {
 			// Texture taller than it is wide
 			if ( H >= m_uniformTextureSize ){
-				*height = m_uniformTextureSize;
-				*width = m_uniformTextureSize * W / H;
+				W = m_uniformTextureSize * W / H;
+				H = m_uniformTextureSize;
 			}
 			else if ( H <= m_uniformTextureMinSize ){
-				*height = m_uniformTextureMinSize;
-				*width = m_uniformTextureMinSize * W / H;
+				W = m_uniformTextureMinSize * W / H;
+				H = m_uniformTextureMinSize;
 			}
 		}
 	}
@@ -461,7 +459,7 @@ void Texture_NextPos( TextureBrowser& textureBrowser, TextureLayout& layout, qte
 	qtexture_t* q = current_texture;
 
 	int nWidth, nHeight;
-	textureBrowser.getTextureWH( q, &nWidth, &nHeight );
+	textureBrowser.getTextureWH( q, nWidth, nHeight );
 	if ( layout.current_x + nWidth > textureBrowser.width - 8 && layout.current_row ) { // go to the next row unless the texture is the first on the row
 		layout.current_x = 8;
 		layout.current_y -= layout.current_row + TextureBrowser_fontHeight( textureBrowser ) + 4;
@@ -574,7 +572,7 @@ void TextureBrowser_evaluateHeight( TextureBrowser& textureBrowser ){
 			int x, y;
 			Texture_NextPos( textureBrowser, layout, shader->getTexture(), &x, &y );
 			int nWidth, nHeight;
-			textureBrowser.getTextureWH( shader->getTexture(), &nWidth, &nHeight );
+			textureBrowser.getTextureWH( shader->getTexture(), nWidth, nHeight );
 			textureBrowser.m_nTotalHeight = std::max( textureBrowser.m_nTotalHeight, abs( layout.current_y ) + TextureBrowser_fontHeight( textureBrowser ) + nHeight + 4 );
 		}
 	}
@@ -960,7 +958,7 @@ IShader* Texture_At( TextureBrowser& textureBrowser, int mx, int my ){
 		}
 
 		int nWidth, nHeight;
-		textureBrowser.getTextureWH( q, &nWidth, &nHeight );
+		textureBrowser.getTextureWH( q, nWidth, nHeight );
 		if ( mx > x && mx - x < nWidth
 			 && my < y && y - my < nHeight + TextureBrowser_fontHeight( textureBrowser ) ) {
 			return shader;
@@ -1091,7 +1089,7 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 		}
 
 		int nWidth, nHeight;
-		textureBrowser.getTextureWH( q, &nWidth, &nHeight );
+		textureBrowser.getTextureWH( q, nWidth, nHeight );
 
 		if ( y != last_y ) {
 			last_y = y;

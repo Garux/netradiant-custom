@@ -2166,6 +2166,10 @@ static void FindOutLightmaps( rawLightmap_t *lm ){
 			/* allocate LIGHTMAP_RESERVE_COUNT new output lightmaps */
 			numOutLightmaps += LIGHTMAP_RESERVE_COUNT;
 			olm = safe_malloc( numOutLightmaps * sizeof( outLightmap_t ) );
+			if ( !olm ){
+				Error( "FindOutLightmaps: Failed to allocate memory.\n" );
+			}
+
 			if ( outLightmaps != NULL && numOutLightmaps > LIGHTMAP_RESERVE_COUNT ) {
 				memcpy( olm, outLightmaps, ( numOutLightmaps - LIGHTMAP_RESERVE_COUNT ) * sizeof( outLightmap_t ) );
 				free( outLightmaps );

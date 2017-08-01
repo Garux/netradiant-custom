@@ -185,10 +185,10 @@ static void RadClipWindingEpsilon( radWinding_t *in, vec3_t normal, vec_t dist,
 	}
 
 	/* error check */
-	if ( front->numVerts > maxPoints || front->numVerts > maxPoints ) {
+	if ( front->numVerts > maxPoints ) {
 		Error( "RadClipWindingEpsilon: points exceeded estimate" );
 	}
-	if ( front->numVerts > MAX_POINTS_ON_WINDING || front->numVerts > MAX_POINTS_ON_WINDING ) {
+	if ( front->numVerts > MAX_POINTS_ON_WINDING ) {
 		Error( "RadClipWindingEpsilon: MAX_POINTS_ON_WINDING" );
 	}
 }
@@ -288,7 +288,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 			/* multiply by texture color */
 			if ( !RadSampleImage( si->lightImage->pixels, si->lightImage->width, si->lightImage->height, rw->verts[ samples ].st, textureColor ) ) {
 				VectorCopy( si->averageColor, textureColor );
-				textureColor[ 4 ] = 255.0f;
+				textureColor[ 3 ] = 255.0f;
 			}
 			avgcolor = ( textureColor[ 0 ] + textureColor[ 1 ] + textureColor[ 2 ] ) / 3;
 			for ( i = 0; i < 3; i++ )
@@ -374,7 +374,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 						/* multiply by texture color */
 						if ( !RadSampleImage( si->lightImage->pixels, si->lightImage->width, si->lightImage->height, st, textureColor ) ) {
 							VectorCopy( si->averageColor, textureColor );
-							textureColor[ 4 ] = 255;
+							textureColor[ 3 ] = 255;
 						}
 						avgcolor = ( textureColor[ 0 ] + textureColor[ 1 ] + textureColor[ 2 ] ) / 3;
 						for ( l = 0; l < 3; l++ ){

@@ -1595,38 +1595,49 @@ bool Map_SaveSelected( const char* filename ){
 	return MapResource_saveFile( MapFormat_forFile( filename ), GlobalSceneGraph().root(), Map_Traverse_Selected, filename );
 }
 
-
 class ParentSelectedBrushesToEntityWalker : public scene::Graph::Walker
 {
-scene::Node& m_parent;
+	scene::Node& m_parent;
+	mutable bool m_emptyOldParent;
+
 public:
-ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ){
+ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ), m_emptyOldParent( false ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get_pointer() != &m_parent
-		 && Node_isPrimitive( path.top() ) ) {
+	if ( path.top().get_pointer() != &m_parent && ( Node_isPrimitive( path.top() ) || m_emptyOldParent ) ) {
 		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0
-			 && selectable->isSelected()
-			 && path.size() > 1 ) {
+		if ( selectable && selectable->isSelected() && path.size() > 1 ) {
 			return false;
 		}
 	}
 	return true;
 }
 void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get_pointer() != &m_parent
-		 && Node_isPrimitive( path.top() ) ) {
+	if ( path.top().get_pointer() == &m_parent )
+		return;
+
+	if ( Node_isPrimitive( path.top() ) ){
+		m_emptyOldParent = false;
 		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable != 0
-			 && selectable->isSelected()
-			 && path.size() > 1 ) {
+
+		if ( selectable && selectable->isSelected() && path.size() > 1 ){
 			scene::Node& parent = path.parent();
-			if ( &parent != &m_parent ) {
+			if ( &parent != &m_parent ){
 				NodeSmartReference node( path.top().get() );
-				Node_getTraversable( parent )->erase( node );
+				scene::Traversable* traversable_parent = Node_getTraversable( parent );
+				traversable_parent->erase( node );
 				Node_getTraversable( m_parent )->insert( node );
+				if ( traversable_parent->empty() )
+					m_emptyOldParent = true;
 			}
+		}
+	}
+	else if ( m_emptyOldParent ){
+		m_emptyOldParent = false;
+		// delete empty entities
+		Entity* entity = Node_getEntity( path.top() );
+		if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )	&& Node_getTraversable( path.top() )->empty() ) {
+			Path_deleteTop( path );
 		}
 	}
 }

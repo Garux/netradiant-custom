@@ -952,7 +952,8 @@ void MakeEntityMetaTriangles( entity_t *e ){
 
 typedef struct edge_s
 {
-	vec3_t origin, edge;
+	vec3_t origin;
+	vec4_t edge;
 	vec_t length, kingpinLength;
 	int kingpin;
 	vec4_t plane;

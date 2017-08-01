@@ -447,8 +447,10 @@ GtkWindow* BuildDialog(){
 
 PathsDialog g_PathsDialog;
 
+bool g_strEnginePath_was_empty_1st_start = false;
+
 void EnginePath_verify(){
-	if ( !file_exists( g_strEnginePath.c_str() ) ) {
+	if ( !file_exists( g_strEnginePath.c_str() ) || g_strEnginePath_was_empty_1st_start ) {
 		g_PathsDialog.Create();
 		g_PathsDialog.DoModal();
 		g_PathsDialog.Destroy();
@@ -3365,7 +3367,10 @@ void MainFrame_Construct(){
 	GlobalPreferenceSystem().registerPreference( "YZWnd", WindowPositionTrackerImportStringCaller( g_posYZWnd ), WindowPositionTrackerExportStringCaller( g_posYZWnd ) );
 	GlobalPreferenceSystem().registerPreference( "XZWnd", WindowPositionTrackerImportStringCaller( g_posXZWnd ), WindowPositionTrackerExportStringCaller( g_posXZWnd ) );
 
+	GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
+	if ( g_strEnginePath.empty() )
 	{
+		g_strEnginePath_was_empty_1st_start = true;
 		const char* ENGINEPATH_ATTRIBUTE =
 #if defined( WIN32 )
 			"enginepath_win32"
@@ -3380,9 +3385,10 @@ void MainFrame_Construct(){
 		StringOutputStream path( 256 );
 		path << DirectoryCleaned( g_pGameDescription->getRequiredKeyValue( ENGINEPATH_ATTRIBUTE ) );
 		g_strEnginePath = path.c_str();
+		GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
 	}
 
-	GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
+
 
 	g_Layout_viewStyle.useLatched();
 	g_Layout_enableDetachableMenus.useLatched();
