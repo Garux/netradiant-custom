@@ -1170,6 +1170,23 @@ void EntityInspector_clearKeyValue(){
 	}
 }
 
+static gint EntityInspector_clearKeyValueKB( GtkEntry* widget, GdkEventKey* event, gpointer data ){
+	if ( event->keyval == GDK_Delete ) {
+		// Get current selection text
+		StringOutputStream key( 64 );
+		key << gtk_entry_get_text( g_entityKeyEntry );
+
+		if ( strcmp( key.c_str(), "classname" ) != 0 ) {
+			StringOutputStream command;
+			command << "entityDeleteKey -key " << key.c_str();
+			UndoableCommand undo( command.c_str() );
+			Scene_EntitySetKeyValue_Selected( key.c_str(), "" );
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+
 void EntityInspector_clearAllKeyValues(){
 	UndoableCommand undo( "entityClear" );
 
@@ -1285,8 +1302,19 @@ static gint EntityEntry_keypress( GtkEntry* widget, GdkEventKey* event, gpointer
 		}
 		return TRUE;
 	}
+	if ( event->keyval == GDK_Tab ) {
+		if ( widget == g_entityKeyEntry ) {
+			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityValueEntry ) );
+		}
+		else
+		{
+			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityKeyEntry ) );
+		}
+		return TRUE;
+	}
 	if ( event->keyval == GDK_Escape ) {
-		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), NULL );
+		//gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), NULL );
+		GroupDialog_showPage( g_page_entity );
 		return TRUE;
 	}
 
@@ -1301,11 +1329,26 @@ void EntityInspector_destroyWindow( GtkWidget* widget, gpointer data ){
 	GlobalEntityAttributes_clear();
 }
 
+static gint EntityInspector_destroyWindowKB( GtkWidget* widget, GdkEventKey* event, gpointer data ){
+	//if ( event->keyval == GDK_Escape && GTK_WIDGET_VISIBLE( GTK_WIDGET( widget ) ) ) {
+	if ( event->keyval == GDK_Escape  ) {
+		//globalErrorStream() << "Doom3Light_getBounds: failed to parse default light radius\n";
+		GroupDialog_showPage( g_page_entity );
+		return TRUE;
+	}
+	if ( event->keyval == GDK_Tab  ) {
+		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityKeyEntry ) );
+		return TRUE;
+	}
+	return FALSE;
+}
+
 GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 	GtkWidget* vbox = gtk_vbox_new( FALSE, 2 );
 	gtk_widget_show( vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 2 );
 
+	g_signal_connect( G_OBJECT( toplevel ), "key_press_event", G_CALLBACK( EntityInspector_destroyWindowKB ), 0 );
 	g_signal_connect( G_OBJECT( vbox ), "destroy", G_CALLBACK( EntityInspector_destroyWindow ), 0 );
 
 	{
@@ -1420,6 +1463,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
 						gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), FALSE );
 						gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
+						g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( EntityInspector_clearKeyValueKB ), 0 );
 
 						{
 							GtkCellRenderer* renderer = gtk_cell_renderer_text_new();

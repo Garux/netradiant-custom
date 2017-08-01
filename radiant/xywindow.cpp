@@ -493,17 +493,17 @@ void XYWnd::SetScale( float f ){
 	XYWnd_Update( *this );
 }
 
-void XYWnd_ZoomIn( XYWnd* xy ){
+void XYWnd::ZoomIn(){
 	float max_scale = 64;
-	float scale = xy->Scale() * 5.0f / 4.0f;
+	float scale = Scale() * 5.0f / 4.0f;
 	if ( scale > max_scale ) {
-		if ( xy->Scale() != max_scale ) {
-			xy->SetScale( max_scale );
+		if ( Scale() != max_scale ) {
+			SetScale( max_scale );
 		}
 	}
 	else
 	{
-		xy->SetScale( scale );
+		SetScale( scale );
 	}
 }
 
@@ -511,17 +511,31 @@ void XYWnd_ZoomIn( XYWnd* xy ){
 // NOTE: the zoom out factor is 4/5, we could think about customizing it
 //  we don't go below a zoom factor corresponding to 10% of the max world size
 //  (this has to be computed against the window size)
-void XYWnd_ZoomOut( XYWnd* xy ){
-	float min_scale = MIN( xy->Width(),xy->Height() ) / ( 1.1f * ( g_MaxWorldCoord - g_MinWorldCoord ) );
-	float scale = xy->Scale() * 4.0f / 5.0f;
+void XYWnd::ZoomOut(){
+	float min_scale = MIN( Width(), Height() ) / ( 1.1f * ( g_MaxWorldCoord - g_MinWorldCoord ) );
+	float scale = Scale() * 4.0f / 5.0f;
 	if ( scale < min_scale ) {
-		if ( xy->Scale() != min_scale ) {
-			xy->SetScale( min_scale );
+		if ( Scale() != min_scale ) {
+			SetScale( min_scale );
 		}
 	}
 	else
 	{
-		xy->SetScale( scale );
+		SetScale( scale );
+	}
+}
+
+void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
+	float old_scale = Scale();
+	ZoomIn();
+	if ( g_xywindow_globals.m_bImprovedWheelZoom ) {
+		float scale_diff = 1.0 / old_scale - 1.0 / Scale();
+		int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
+		int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+		Vector3 origin = GetOrigin();
+		origin[nDim1] += scale_diff * (pointx - 0.5 * Width());
+		origin[nDim2] -= scale_diff * (pointy - 0.5 * Height());
+		SetOrigin( origin );
 	}
 }
 
@@ -748,10 +762,10 @@ void xywnd_motion( gdouble x, gdouble y, guint state, void* data ){
 
 gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xywnd ){
 	if ( event->direction == GDK_SCROLL_UP ) {
-		XYWnd_ZoomIn( xywnd );
+		xywnd->ZoomInWithMouse( (int)event->x, (int)event->y );
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
-		XYWnd_ZoomOut( xywnd );
+		xywnd->ZoomOut();
 	}
 	return FALSE;
 }
@@ -1201,16 +1215,15 @@ int g_dragZoom = 0;
 void XYWnd_zoomDelta( int x, int y, unsigned int state, void* data ){
 	if ( y != 0 ) {
 		g_dragZoom += y;
-
 		while ( abs( g_dragZoom ) > 8 )
 		{
 			if ( g_dragZoom > 0 ) {
-				XYWnd_ZoomOut( reinterpret_cast<XYWnd*>( data ) );
+				reinterpret_cast<XYWnd*>( data )->ZoomOut();
 				g_dragZoom -= 8;
 			}
 			else
 			{
-				XYWnd_ZoomIn( reinterpret_cast<XYWnd*>( data ) );
+				reinterpret_cast<XYWnd*>( data )->ZoomIn();
 				g_dragZoom += 8;
 			}
 		}
@@ -2508,14 +2521,14 @@ void XY_Zoom100(){
 }
 
 void XY_ZoomIn(){
-	XYWnd_ZoomIn( g_pParentWnd->ActiveXY() );
+	g_pParentWnd->ActiveXY()->ZoomIn();
 }
 
 // NOTE: the zoom out factor is 4/5, we could think about customizing it
 //  we don't go below a zoom factor corresponding to 10% of the max world size
 //  (this has to be computed against the window size)
 void XY_ZoomOut(){
-	XYWnd_ZoomOut( g_pParentWnd->ActiveXY() );
+	g_pParentWnd->ActiveXY()->ZoomOut();
 }
 
 
@@ -2756,6 +2769,7 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "ClipCaulk", BoolImportStringCaller( g_clip_useCaulk ), BoolExportStringCaller( g_clip_useCaulk ) );
 
 	GlobalPreferenceSystem().registerPreference( "NewRightClick", BoolImportStringCaller( g_xywindow_globals.m_bRightClick ), BoolExportStringCaller( g_xywindow_globals.m_bRightClick ) );
+	GlobalPreferenceSystem().registerPreference( "ImprovedWheelZoom", BoolImportStringCaller( g_xywindow_globals.m_bImprovedWheelZoom ), BoolExportStringCaller( g_xywindow_globals.m_bImprovedWheelZoom ) );
 	GlobalPreferenceSystem().registerPreference( "ChaseMouse", BoolImportStringCaller( g_xywindow_globals_private.m_bChaseMouse ), BoolExportStringCaller( g_xywindow_globals_private.m_bChaseMouse ) );
 	GlobalPreferenceSystem().registerPreference( "SizePainting", BoolImportStringCaller( g_xywindow_globals_private.m_bSizePaint ), BoolExportStringCaller( g_xywindow_globals_private.m_bSizePaint ) );
 	GlobalPreferenceSystem().registerPreference( "ShowCrosshair", BoolImportStringCaller( g_bCrossHairs ), BoolExportStringCaller( g_bCrossHairs ) );

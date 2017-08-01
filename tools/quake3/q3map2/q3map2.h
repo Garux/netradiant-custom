@@ -2330,6 +2330,8 @@ Q_EXTERN float texturesRGB Q_ASSIGN( qfalse );
 Q_EXTERN float colorsRGB Q_ASSIGN( qfalse );
 Q_EXTERN float lightmapExposure Q_ASSIGN( 0.0f );
 Q_EXTERN float lightmapCompensate Q_ASSIGN( 1.0f );
+Q_EXTERN float lightmapBrightness Q_ASSIGN( 1.0f );
+Q_EXTERN float lightmapContrast Q_ASSIGN( 1.0f );
 
 /* ydnar: for runtime tweaking of falloff tolerance */
 Q_EXTERN float falloffTolerance Q_ASSIGN( 1.0f );

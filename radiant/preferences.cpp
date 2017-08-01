@@ -87,6 +87,7 @@ void Mouse_constructPreferences( PreferencesPage& page ){
 		page.appendRadio( "Mouse Type",  g_glwindow_globals.m_nMouseType, STRING_ARRAY_RANGE( buttons ) );
 	}
 	page.appendCheckBox( "Right Button", "Activates Context Menu", g_xywindow_globals.m_bRightClick );
+	page.appendCheckBox( "", "Improved mousewheel zoom", g_xywindow_globals.m_bImprovedWheelZoom );
 }
 void Mouse_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Mouse", "Mouse Preferences" ) );

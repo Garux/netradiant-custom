@@ -550,7 +550,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			vec3_t min = { 999999, 999999, 999999 }, max = { -999999, -999999, -999999 };
 			vec3_t avgDirection = { 0, 0, 0 };
 			int axis;
-			#define nonax_clip_dbg 1
+			#define nonax_clip_dbg 0
 
 			/* temp hack */
 			if ( !si->clipModel && !( si->compileFlags & C_SOLID ) ) {

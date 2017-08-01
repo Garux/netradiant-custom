@@ -894,6 +894,9 @@ struct RotateDialog
 static gboolean rotatedlg_apply( GtkWidget *widget, RotateDialog* rotateDialog ){
 	Vector3 eulerXYZ;
 
+	gtk_spin_button_update ( rotateDialog->x );
+	gtk_spin_button_update ( rotateDialog->y );
+	gtk_spin_button_update ( rotateDialog->z );
 	eulerXYZ[0] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->x ) );
 	eulerXYZ[1] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->y ) );
 	eulerXYZ[2] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->z ) );
@@ -918,7 +921,8 @@ static gboolean rotatedlg_cancel( GtkWidget *widget, RotateDialog* rotateDialog 
 
 static gboolean rotatedlg_ok( GtkWidget *widget, RotateDialog* rotateDialog ){
 	rotatedlg_apply( widget, rotateDialog );
-	rotatedlg_cancel( widget, rotateDialog );
+//	rotatedlg_cancel( widget, rotateDialog );
+	gtk_widget_hide( GTK_WIDGET( rotateDialog->window ) );
 	return TRUE;
 }
 
@@ -1070,7 +1074,8 @@ static gboolean scaledlg_cancel( GtkWidget *widget, ScaleDialog* scaleDialog ){
 
 static gboolean scaledlg_ok( GtkWidget *widget, ScaleDialog* scaleDialog ){
 	scaledlg_apply( widget, scaleDialog );
-	scaledlg_cancel( widget, scaleDialog );
+	//scaledlg_cancel( widget, scaleDialog );
+	gtk_widget_hide( GTK_WIDGET( scaleDialog->window ) );
 	return TRUE;
 }
 

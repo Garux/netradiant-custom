@@ -113,7 +113,7 @@ Counter* EntityKeyValues::m_counter = 0;
 bool g_showNames = true;
 bool g_showAngles = true;
 bool g_newLightDraw = true;
-bool g_lightRadii = false;
+bool g_lightRadii = true;
 
 class ConnectEntities
 {
@@ -208,22 +208,48 @@ void connectEntities( const scene::Path& path, const scene::Path& targetPath, in
 	else
 	{
 		ConnectEntities connector( e1, e2, index );
-		const char* value = e2->getKeyValue( "targetname" );
-		if ( !string_empty( value ) ) {
-			connector.connect( value );
-		}
-		else
-		{
-			const char* type = e2->getKeyValue( "classname" );
-			if ( string_empty( type ) ) {
-				type = "t";
+		//killconnect
+		if( index == 1 ){
+			const char* value = e2->getKeyValue( "targetname" );
+			if ( !string_empty( value ) ) {
+				connector.connect( value );
 			}
-			StringOutputStream key( 64 );
-			key << type << "1";
-			GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
+			else
+			{
+				const char* type = e2->getKeyValue( "classname" );
+				if ( string_empty( type ) ) {
+					type = "t";
+				}
+				StringOutputStream key( 64 );
+				key << type << "1";
+				GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
+			}
+		}
+		//normal connect
+		else{
+			//prioritize existing target key
+			//checking, if ent got other connected ones already, could be better solution
+			const char* value = e1->getKeyValue( "target" );
+			if ( !string_empty( value ) ) {
+				connector.connect( value );
+			}
+			else{
+				value = e2->getKeyValue( "targetname" );
+				if ( !string_empty( value ) ) {
+					connector.connect( value );
+				}
+				else{
+					const char* type = e2->getKeyValue( "classname" );
+					if ( string_empty( type ) ) {
+						type = "t";
+					}
+					StringOutputStream key( 64 );
+					key << type << "1";
+					GlobalNamespace().makeUnique( key.c_str(), ConnectEntities::ConnectCaller( connector ) );
+				}
+			}
 		}
 	}
-
 	SceneChangeNotify();
 }
 void setLightRadii( bool lightRadii ){

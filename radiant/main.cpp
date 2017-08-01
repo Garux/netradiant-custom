@@ -554,6 +554,7 @@ int main( int argc, char* argv[] ){
 	if ( lib != 0 ) {
 		void ( WINAPI *qDwmEnableComposition )( bool bEnable ) = ( void (WINAPI *) ( bool bEnable ) )GetProcAddress( lib, "DwmEnableComposition" );
 		if ( qDwmEnableComposition ) {
+			// disable Aero
 			qDwmEnableComposition( FALSE );
 		}
 		FreeLibrary( lib );

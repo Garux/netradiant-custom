@@ -73,7 +73,7 @@ struct camwindow_globals_t
 	camwindow_globals_t() :
 		color_cameraback( 0.25f, 0.25f, 0.25f ),
 		color_selbrushes3d( 1.0f, 0.f, 0.f ),
-		m_nCubicScale( 13 ){
+		m_nCubicScale( 14 ){
 	}
 
 };

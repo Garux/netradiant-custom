@@ -365,7 +365,9 @@ void Keys_releaseAll( PressedKeys::Keys& keys, guint state ){
 
 gboolean PressedKeys_key_press( GtkWidget* widget, GdkEventKey* event, PressedKeys* pressedKeys ){
 	//globalOutputStream() << "pressed: " << event->keyval << "\n";
-	return event->state == 0 && Keys_press( pressedKeys->keys, event->keyval );
+	//return event->state == 0 && Keys_press( pressedKeys->keys, event->keyval );
+	//NumLock perspective window fix
+	return ( event->state & ALLOWED_MODIFIERS ) == 0 && Keys_press( pressedKeys->keys, event->keyval );
 }
 
 gboolean PressedKeys_key_release( GtkWidget* widget, GdkEventKey* event, PressedKeys* pressedKeys ){

@@ -126,6 +126,10 @@ void Zoom_End();
 bool m_zoom_started;
 guint m_zoom_focusOut;
 
+void ZoomIn();
+void ZoomOut();
+void ZoomInWithMouse( int pointx, int pointy );
+
 void SetActive( bool b ){
 	m_bActive = b;
 };
@@ -253,6 +257,7 @@ struct xywindow_globals_t
 
 	bool m_bRightClick;
 	bool m_bNoStipple;
+	bool m_bImprovedWheelZoom;
 
 	xywindow_globals_t() :
 		color_gridback( 0.77f, 0.77f, 0.77f ),
@@ -271,7 +276,8 @@ struct xywindow_globals_t
 		AxisColorY( 0.f, 1.f, 0.f ),
 		AxisColorZ( 0.f, 0.f, 1.f ),
 		m_bRightClick( true ),
-		m_bNoStipple( false ){
+		m_bNoStipple( false ),
+		m_bImprovedWheelZoom( true ){
 	}
 
 };

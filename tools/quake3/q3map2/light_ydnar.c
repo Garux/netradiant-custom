@@ -55,6 +55,8 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 	if ( scale <= 0.0f ) {
 		scale = 1.0f;
 	}
+	/* globally */
+	scale *= lightmapBrightness;
 
 	/* make a local copy */
 	VectorScale( color, scale, sample );
@@ -118,6 +120,23 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 
 	/* compensate for ingame overbrighting/bitshifting */
 	VectorScale( sample, ( 1.0f / lightmapCompensate ), sample );
+
+	/* contrast */
+	if ( lightmapContrast != 1.0f ){
+		for ( i = 0; i < 3; i++ ){
+			sample[i] = lightmapContrast * ( sample[i] - 128 ) + 128;
+			if ( sample[i] < 0 ){
+				sample[i] = 0;
+			}
+		}
+		if ( ( sample[0] > 255 ) || ( sample[1] > 255 ) || ( sample[2] > 255 ) ) {
+			max = sample[0] > sample[1] ? sample[0] : sample[1];
+			max = max > sample[2] ? max : sample[2];
+			sample[0] = sample[0] * 255 / max;
+			sample[1] = sample[1] * 255 / max;
+			sample[2] = sample[2] * 255 / max;
+		}
+	}
 
 	/* sRGB lightmaps */
 	if ( lightmapsRGB ) {

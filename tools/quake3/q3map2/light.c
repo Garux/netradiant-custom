@@ -2403,6 +2403,30 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
+		/* Lighting brightness */
+		else if( !strcmp( argv[ i ], "-brightness" ) ){
+			f = atof( argv[ i + 1 ] );
+			lightmapBrightness = f;
+			Sys_Printf( "Lighting brightness set to %f\n", lightmapBrightness );
+			i++;
+		}
+
+		/* Lighting contrast */
+		else if( !strcmp( argv[ i ], "-contrast" ) ){
+			f = atof( argv[ i + 1 ] );
+			lightmapContrast = f;
+			if( lightmapContrast > 255 ){
+				lightmapContrast = 255;
+			}
+			else if( lightmapContrast < -255 ){
+				lightmapContrast = -255;
+			}
+			Sys_Printf( "Lighting contrast set to %f\n", lightmapContrast );
+			i++;
+			/* change to factor in range of 0 to 129.5 */
+			lightmapContrast = ( 259 * ( lightmapContrast + 255 ) ) / ( 255 * ( 259 - lightmapContrast ) );
+		}
+
 		/* ydnar switches */
 		else if ( !strcmp( argv[ i ], "-bounce" ) ) {
 			bounce = atoi( argv[ i + 1 ] );

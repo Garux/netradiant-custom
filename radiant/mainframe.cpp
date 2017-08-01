@@ -2314,6 +2314,7 @@ void CSG_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_button( toolbar, "CSG Subtract (SHIFT + U)", "selection_csgsubtract.bmp", "CSGSubtract" );
 	toolbar_append_button( toolbar, "CSG Merge (CTRL + U)", "selection_csgmerge.bmp", "CSGMerge" );
 	toolbar_append_button( toolbar, "Hollow", "selection_makehollow.bmp", "CSGHollow" );
+	toolbar_append_button( toolbar, "Room", "selection_makeroom.bmp", "CSGroom" );
 }
 
 void ComponentModes_constructToolbar( GtkToolbar* toolbar ){
@@ -2841,42 +2842,35 @@ void MainFrame::Create(){
 
 	if ( CurrentStyle() == eRegular || CurrentStyle() == eRegularLeft ) {
 		{
-			GtkWidget* vsplit = gtk_vpaned_new();
-			m_vSplit = vsplit;
-			gtk_box_pack_start( GTK_BOX( vbox ), vsplit, TRUE, TRUE, 0 );
-			gtk_widget_show( vsplit );
-
-			// console
-			GtkWidget* console_window = Console_constructWindow( window );
-			gtk_paned_pack2( GTK_PANED( vsplit ), console_window, FALSE, TRUE );
-
+			GtkWidget* hsplit = gtk_hpaned_new();
+			m_hSplit = hsplit;
+			gtk_box_pack_start( GTK_BOX( vbox ), hsplit, TRUE, TRUE, 0 );
+			gtk_widget_show( hsplit );
 			{
-				GtkWidget* hsplit = gtk_hpaned_new();
-				gtk_widget_show( hsplit );
-				m_hSplit = hsplit;
-				gtk_paned_add1( GTK_PANED( vsplit ), hsplit );
+				GtkWidget* vsplit = gtk_vpaned_new();
+				gtk_widget_show( vsplit );
+				m_vSplit = vsplit;
+				GtkWidget* vsplit2 = gtk_vpaned_new();
+				gtk_widget_show( vsplit2 );
+				m_vSplit2 = vsplit2;
+				if ( CurrentStyle() == eRegular ){
+					gtk_paned_add1( GTK_PANED( hsplit ), vsplit );
+					gtk_paned_add2( GTK_PANED( hsplit ), vsplit2 );
+				}
+				else{
+					gtk_paned_add2( GTK_PANED( hsplit ), vsplit );
+					gtk_paned_add1( GTK_PANED( hsplit ), vsplit2 );
+				}
+				// console
+				GtkWidget* console_window = Console_constructWindow( window );
+				gtk_paned_pack2( GTK_PANED( vsplit ), console_window, FALSE, TRUE );
 
 				// xy
 				m_pXYWnd = new XYWnd();
 				m_pXYWnd->SetViewType( XY );
 				GtkWidget* xy_window = GTK_WIDGET( create_framed_widget( m_pXYWnd->GetWidget() ) );
-
+				gtk_paned_add1( GTK_PANED( vsplit ), xy_window );
 				{
-					GtkWidget* vsplit2 = gtk_vpaned_new();
-					gtk_widget_show( vsplit2 );
-					m_vSplit2 = vsplit2;
-
-					if ( CurrentStyle() == eRegular ) {
-						gtk_paned_add1( GTK_PANED( hsplit ), xy_window );
-						gtk_paned_add2( GTK_PANED( hsplit ), vsplit2 );
-					}
-					else
-					{
-						gtk_paned_add1( GTK_PANED( hsplit ), vsplit2 );
-						gtk_paned_add2( GTK_PANED( hsplit ), xy_window );
-					}
-
-
 					// camera
 					m_pCamWnd = NewCamWnd();
 					GlobalCamera_setCamWnd( *m_pCamWnd );
@@ -3317,6 +3311,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "CSGSubtract", FreeCaller<CSG_Subtract>(), Accelerator( 'U', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "CSGMerge", FreeCaller<CSG_Merge>(), Accelerator( 'U', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "CSGHollow", FreeCaller<CSG_MakeHollow>() );
+	GlobalCommands_insert( "CSGroom", FreeCaller<CSG_MakeRoom>() );
 
 	Grid_registerCommands();
 
