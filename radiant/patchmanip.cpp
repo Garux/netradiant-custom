@@ -687,6 +687,24 @@ void Patch_NaturalTexture(){
 	Scene_PatchNaturalTexture_Selected( GlobalSceneGraph() );
 }
 
+void Patch_CapTexture(){
+	UndoableCommand command( "patchCapTexture" );
+	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
+}
+
+void Patch_ResetTexture(){
+	float fx, fy;
+	if ( DoTextureLayout( &fx, &fy ) == eIDOK ) {
+		UndoableCommand command( "patchTileTexture" );
+		Scene_PatchTileTexture_Selected( GlobalSceneGraph(), fx, fy );
+	}
+}
+
+void Patch_FitTexture(){
+	UndoableCommand command( "patchFitTexture" );
+	Scene_PatchTileTexture_Selected( GlobalSceneGraph(), 1, 1 );
+}
+
 void DoPatchDeformDlg();
 
 void Patch_Deform(){
@@ -778,10 +796,6 @@ void PatchPreferences_construct(){
 void Patch_registerCommands(){
 	GlobalCommands_insert( "InvertCurveTextureX", FreeCaller<Patch_FlipTextureX>(), Accelerator( 'I', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "InvertCurveTextureY", FreeCaller<Patch_FlipTextureY>(), Accelerator( 'I', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "IncPatchColumn", FreeCaller<Patch_InsertInsertColumn>(), Accelerator( GDK_KP_Add, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "IncPatchRow", FreeCaller<Patch_InsertInsertRow>(), Accelerator( GDK_KP_Add, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "DecPatchColumn", FreeCaller<Patch_DeleteLastColumn>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "DecPatchRow", FreeCaller<Patch_DeleteLastRow>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "NaturalizePatch", FreeCaller<Patch_NaturalTexture>(), Accelerator( 'N', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchCylinder", FreeCaller<Patch_Cylinder>() );
 	GlobalCommands_insert( "PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>() );
@@ -797,14 +811,14 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "PatchCone", FreeCaller<Patch_Cone>() );
 	GlobalCommands_insert( "PatchSphere", FreeCaller<Patch_Sphere>() );
 	GlobalCommands_insert( "SimplePatchMesh", FreeCaller<Patch_Plane>(), Accelerator( 'P', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "PatchInsertInsertColumn", FreeCaller<Patch_InsertInsertColumn>() );
+	GlobalCommands_insert( "PatchInsertInsertColumn", FreeCaller<Patch_InsertInsertColumn>(), Accelerator( GDK_KP_Add, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "PatchInsertAddColumn", FreeCaller<Patch_InsertAddColumn>() );
-	GlobalCommands_insert( "PatchInsertInsertRow", FreeCaller<Patch_InsertInsertRow>() );
+	GlobalCommands_insert( "PatchInsertInsertRow", FreeCaller<Patch_InsertInsertRow>(), Accelerator( GDK_KP_Add, (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchInsertAddRow", FreeCaller<Patch_InsertAddRow>() );
 	GlobalCommands_insert( "PatchDeleteFirstColumn", FreeCaller<Patch_DeleteFirstColumn>() );
-	GlobalCommands_insert( "PatchDeleteLastColumn", FreeCaller<Patch_DeleteLastColumn>() );
+	GlobalCommands_insert( "PatchDeleteLastColumn", FreeCaller<Patch_DeleteLastColumn>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "PatchDeleteFirstRow", FreeCaller<Patch_DeleteFirstRow>() );
-	GlobalCommands_insert( "PatchDeleteLastRow", FreeCaller<Patch_DeleteLastRow>() );
+	GlobalCommands_insert( "PatchDeleteLastRow", FreeCaller<Patch_DeleteLastRow>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "InvertCurve", FreeCaller<Patch_Invert>(), Accelerator( 'I', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "RedisperseRows", FreeCaller<Patch_RedisperseRows>(), Accelerator( 'E', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "RedisperseCols", FreeCaller<Patch_RedisperseCols>(), Accelerator( 'E', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
@@ -860,11 +874,11 @@ void Patch_constructMenu( GtkMenu* menu ){
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( menu_in_menu );
 		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Columns", "PatchInsertInsertColumn" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Add (2) Columns", "PatchInsertAddColumn" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Columns", "PatchInsertInsertColumn" );
 		menu_separator( menu_in_menu );
-		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Rows", "PatchInsertInsertRow" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Add (2) Rows", "PatchInsertAddRow" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Rows", "PatchInsertInsertRow" );
 	}
 	{
 		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Delete" );

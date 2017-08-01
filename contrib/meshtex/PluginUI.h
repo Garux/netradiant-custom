@@ -43,6 +43,15 @@ private: // private methods
    PluginUI();
    ~PluginUI();
    //@}
+   // C++ 03
+   // ========
+   // Dont forget to declare these two. You want to make sure they
+   // are unacceptable otherwise you may accidentally get copies of
+   // your singleton appearing.
+   PluginUI(PluginUI const&);              // Don't Implement
+   void operator=(PluginUI const&); // Don't implement
+
+   static PluginUI* singleton;
 
 public: // public methods
 

@@ -36,6 +36,7 @@
  */
 PluginUI::PluginUI()
 {
+	PluginUI::singleton = this;
    // Instantiate and register the Set S/T Scale dialog. We need a non-generic
    // handle on this one too, because it will be used as input to the Get Info
    // dialog constructor below.
@@ -69,6 +70,7 @@ PluginUI::~PluginUI()
 {
 }
 
+PluginUI* PluginUI::singleton = 0;
 /**
  * Get the singleton instance of the UI manager. Note that callers should
  * almost certainly invoke the UIInstance global function instead of using
@@ -79,8 +81,11 @@ PluginUI::~PluginUI()
 PluginUI&
 PluginUI::Instance()
 {
-   static PluginUI singleton;
-   return singleton;
+   //static PluginUI singleton;
+   //return singleton;
+    if(!singleton)
+            singleton = new PluginUI();
+        return *singleton;
 }
 
 /**

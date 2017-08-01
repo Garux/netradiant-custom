@@ -38,8 +38,8 @@
 template<typename Element>
 class AllocatedMatrix : public Matrix<Element>
 {
-	std::size_t m_x, m_y;
-	Element* m_data; 
+	//std::size_t m_x, m_y;
+	//Element* m_data;
 public: // public methods
 
    /**
@@ -48,8 +48,11 @@ public: // public methods
     * @param x Matrix x dimension.
     * @param y Matrix y dimension.
     */
-   AllocatedMatrix(std::size_t x, std::size_t y) : m_x(x), m_y(y), m_data(_allocated = new Element[x*y]){}
-//      Matrix(x, y, (_allocated = new Element[x*y])) {}
+   //AllocatedMatrix(std::size_t x, std::size_t y) : m_x(x), m_y(y), m_data(_allocated = new Element[x*y]){} //doesnt work.
+   //AllocatedMatrix(std::size_t x, std::size_t y) : Matrix(x, y, (_allocated = new Element[x*y])) {} //msvc
+   typedef Matrix<Element> matrix_type;
+   AllocatedMatrix(std::size_t x, std::size_t y) : matrix_type(x, y, (_allocated = new Element[x*y])) {}
+
 
    /**
     * Destructor. Deallocates the data array.

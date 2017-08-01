@@ -502,7 +502,10 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 		else
 		{
 			CopiedString tmp( key );
-			ASSERT_MESSAGE( !string_equal_n( key, "editor_", 7 ), "unsupported editor key: " << makeQuoted( key ) );
+			//ASSERT_MESSAGE( !string_equal_n( key, "editor_", 7 ), "unsupported editor key: " << makeQuoted( key ) );
+			if ( string_equal_n( key, "editor_", 7 ) ) {
+				globalErrorStream() << "unsupported editor key " << makeQuoted( key ) ;
+			}
 			EntityClassAttribute& attribute = EntityClass_insertAttribute( entityClass, key ).second;
 			attribute.m_type = "string";
 			const char* value;

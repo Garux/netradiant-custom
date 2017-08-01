@@ -319,6 +319,8 @@ void getTextureWH( qtexture_t* tex, int &W, int &H ){
 		// Don't use uniform size
 		W = (int)( tex->width * ( (float)m_textureScale / 100 ) );
 		H = (int)( tex->height * ( (float)m_textureScale / 100 ) );
+		if ( W < 1 ) W = 1;
+		if ( H < 1 ) H = 1;
 
 	if ( g_TextureBrowser_fixedSize ){
 		if	( W >= H ) {
@@ -475,7 +477,7 @@ void Texture_NextPos( TextureBrowser& textureBrowser, TextureLayout& layout, qte
 	textureBrowser.getTextureWH( q, nWidth, nHeight );
 	if ( layout.current_x + nWidth > textureBrowser.width - 8 && layout.current_row ) { // go to the next row unless the texture is the first on the row
 		layout.current_x = 8;
-		layout.current_y -= layout.current_row + TextureBrowser_fontHeight( textureBrowser ) + 4;
+		layout.current_y -= layout.current_row + TextureBrowser_fontHeight( textureBrowser ) + 4;//+4
 		layout.current_row = 0;
 	}
 
@@ -947,12 +949,15 @@ void TextureBrowser_Focus( TextureBrowser& textureBrowser, const char* name ){
 		// we have found when texdef->name and the shader name match
 		// NOTE: as everywhere else for our comparisons, we are not case sensitive
 		if ( shader_equal( name, shader->getName() ) ) {
-			int textureHeight = (int)( q->height * ( (float)textureBrowser.m_textureScale / 100 ) )
-								+ 2 * TextureBrowser_fontHeight( textureBrowser );
+			//int textureHeight = (int)( q->height * ( (float)textureBrowser.m_textureScale / 100 ) ) + 2 * TextureBrowser_fontHeight( textureBrowser );
+			int textureWidth, textureHeight;
+			textureBrowser.getTextureWH( q, textureWidth, textureHeight );
+			textureHeight += 2 * TextureBrowser_fontHeight( textureBrowser );
+
 
 			int originy = TextureBrowser_getOriginY( textureBrowser );
 			if ( y > originy ) {
-				originy = y;
+				originy = y + 4;
 			}
 
 			if ( y - textureHeight < originy - textureBrowser.height ) {
@@ -1142,38 +1147,14 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 			// if !texture_showinuse: (some textures displayed may not be in use)
 			// draw an additional square around with 0.5 1 0.5 color
 			glLineWidth( 1 );
-			// shader border:
-			if ( !shader->IsDefault() ) {
-			//real 1px white/black stipple
-				glColor3f( 0, 0, 0 );
-				glDisable( GL_TEXTURE_2D );
+			const float xf = (float)x;
+			const float yf = (float)( y - TextureBrowser_fontHeight( textureBrowser ) );
+			float xfMax = xf + 1.5 + nWidth;
+			float xfMin = xf - 1.5;
+			float yfMax = yf + 1.5;
+			float yfMin = yf - nHeight - 1.5;
 
-				float xf = (float)x;
-				float yf = (float)( y - TextureBrowser_fontHeight( textureBrowser ) );
-				glBegin( GL_LINE_LOOP );
-				glVertex2f( xf - 1.5,yf + 1.5 );
-				glVertex2f( xf - 1.5,yf - nHeight - 1.5 );
-				glVertex2f( xf + 1.5 + nWidth,yf - nHeight - 1.5 );
-				glVertex2f( xf + 1.5 + nWidth,yf + 1.5 );
-
-				glEnd();
-
-				glEnable( GL_LINE_STIPPLE );
-				glLineStipple( 1, 0x0FFF );
-
-				glBegin( GL_LINE_LOOP );
-				glColor3f( 1, 1, 1 );
-
-				glVertex2f( xf - 1.5,yf + 1.5 );
-				glVertex2f( xf - 1.5,yf - nHeight - 1.5 );
-				glVertex2f( xf + 1.5 + nWidth,yf - nHeight - 1.5 );
-				glVertex2f( xf + 1.5 + nWidth,yf + 1.5 );
-
-				glEnd();
-				glDisable( GL_LINE_STIPPLE );
-				glEnable( GL_TEXTURE_2D );
-
-			}
+			//selected texture
 			if ( shader_equal( TextureBrowser_GetSelectedShader( textureBrowser ), shader->getName() ) ) {
 				glLineWidth( 2 );
 				if ( textureBrowser.m_rmbSelected ) {
@@ -1182,31 +1163,55 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 				else {
 					glColor3f( 1,0,0 );
 				}
+				xfMax += .5;
+				xfMin -= .5;
+				yfMax += .5;
+				yfMin -= .5;
 				glDisable( GL_TEXTURE_2D );
-
 				glBegin( GL_LINE_LOOP );
-				glVertex2i( x - 4,y - TextureBrowser_fontHeight( textureBrowser ) + 4 );
-				glVertex2i( x - 4,y - TextureBrowser_fontHeight( textureBrowser ) - nHeight - 4 );
-				glVertex2i( x + 4 + nWidth,y - TextureBrowser_fontHeight( textureBrowser ) - nHeight - 4 );
-				glVertex2i( x + 4 + nWidth,y - TextureBrowser_fontHeight( textureBrowser ) + 4 );
+				glVertex2f( xfMin ,yfMax );
+				glVertex2f( xfMin ,yfMin );
+				glVertex2f( xfMax ,yfMin );
+				glVertex2f( xfMax ,yfMax );
 				glEnd();
-
 				glEnable( GL_TEXTURE_2D );
-				glLineWidth( 1 );
 			}
 			// highlight in-use textures
 			else if ( !textureBrowser.m_hideUnused && shader->IsInUse() ) {
-			//1px with float
-				float xf = (float)x;
-				float yf = (float)( y - TextureBrowser_fontHeight( textureBrowser ) );
 				glColor3f( 0.5,1,0.5 );
 				glDisable( GL_TEXTURE_2D );
 				glBegin( GL_LINE_LOOP );
-				glVertex2f( xf - 3.5,yf + 3.5 );
-				glVertex2f( xf - 3.5,yf - nHeight - 3.5 );
-				glVertex2f( xf + 3.5 + nWidth,yf - nHeight - 3.5 );
-				glVertex2f( xf + 3.5 + nWidth,yf + 3.5 );
+				glVertex2f( xfMin ,yfMax );
+				glVertex2f( xfMin ,yfMin );
+				glVertex2f( xfMax ,yfMin );
+				glVertex2f( xfMax ,yfMax );
 				glEnd();
+				glEnable( GL_TEXTURE_2D );
+			}
+			// shader white border:
+			else if ( !shader->IsDefault() ) {
+				glColor3f( 1, 1, 1 );
+				glDisable( GL_TEXTURE_2D );
+				glBegin( GL_LINE_LOOP );
+				glVertex2f( xfMin ,yfMax );
+				glVertex2f( xfMin ,yfMin );
+				glVertex2f( xfMax ,yfMin );
+				glVertex2f( xfMax ,yfMax );
+				glEnd();
+			}
+
+			// shader stipple:
+			if ( !shader->IsDefault() ) {
+				glEnable( GL_LINE_STIPPLE );
+				glLineStipple( 1, 0xF000 );
+				glBegin( GL_LINE_LOOP );
+				glColor3f( 0, 0, 0 );
+				glVertex2f( xfMin ,yfMax );
+				glVertex2f( xfMin ,yfMin );
+				glVertex2f( xfMax ,yfMin );
+				glVertex2f( xfMax ,yfMax );
+				glEnd();
+				glDisable( GL_LINE_STIPPLE );
 				glEnable( GL_TEXTURE_2D );
 			}
 
@@ -1253,7 +1258,7 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 			glDisable( GL_TEXTURE_2D );
 			glColor3f( 1,1,1 );
 
-			glRasterPos2i( x, y - TextureBrowser_fontHeight( textureBrowser ) + 5 );
+			glRasterPos2i( x, y - TextureBrowser_fontHeight( textureBrowser ) + 2 );//+5
 
 			// don't draw the directory name
 			const char* name = shader->getName();

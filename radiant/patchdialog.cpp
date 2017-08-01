@@ -376,29 +376,27 @@ void Scene_PatchTileTexture_Selected( scene::Graph& graph, float s, float t ){
 }
 
 static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
-	UndoableCommand command( "patchCapTexture" );
-
-	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
+	Patch_CapTexture();
 }
 
 static void OnBtnPatchfit( GtkWidget *widget, gpointer data ){
-	UndoableCommand command( "patchFitTexture" );
-
-	Scene_PatchTileTexture_Selected( GlobalSceneGraph(), 1, 1 );
+	Patch_FitTexture();
 }
 
 static void OnBtnPatchnatural( GtkWidget *widget, gpointer data ){
-	UndoableCommand command( "patchNaturalTexture" );
-
-	Scene_PatchNaturalTexture_Selected( GlobalSceneGraph() );
+	Patch_NaturalTexture();
 }
 
 static void OnBtnPatchreset( GtkWidget *widget, gpointer data ){
-	float fx, fy;
-	if ( DoTextureLayout( &fx, &fy ) == eIDOK ) {
-		UndoableCommand command( "patchTileTexture" );
-		Scene_PatchTileTexture_Selected( GlobalSceneGraph(), fx, fy );
-	}
+	Patch_ResetTexture();
+}
+
+static void OnBtnPatchFlipX( GtkWidget *widget, gpointer data ){
+	Patch_FlipTextureX();
+}
+
+static void OnBtnPatchFlipY( GtkWidget *widget, gpointer data ){
+	Patch_FlipTextureY();
 }
 
 struct PatchRotateTexture
@@ -825,7 +823,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 						g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( OnDialogKey ), 0 );
 					}
 					{
-						GtkTable* table = GTK_TABLE( gtk_table_new( 5, 3, FALSE ) );
+						GtkTable* table = GTK_TABLE( gtk_table_new( 5, 4, FALSE ) );
 						gtk_widget_show( GTK_WIDGET( table ) );
 						gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 						gtk_table_set_row_spacings( table, 5 );
@@ -833,16 +831,16 @@ GtkWindow* PatchInspector::BuildDialog(){
 						{
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Horizontal Shift Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
-							gtk_table_attach( table, GTK_WIDGET( label ), 2, 3, 0, 1,
-											  (GtkAttachOptions)( GTK_FILL ),
+							gtk_table_attach( table, GTK_WIDGET( label ), 2, 4, 0, 1,
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
 						{
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Vertical Shift Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
-							gtk_table_attach( table, GTK_WIDGET( label ), 2, 3, 1, 2,
-											  (GtkAttachOptions)( GTK_FILL ),
+							gtk_table_attach( table, GTK_WIDGET( label ), 2, 4, 1, 2,
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
@@ -850,23 +848,41 @@ GtkWindow* PatchInspector::BuildDialog(){
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Horizontal Stretch Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
 							gtk_table_attach( table, GTK_WIDGET( label ), 2, 3, 2, 3,
-											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+						}
+						{
+							GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "FlipX" ) );
+							gtk_widget_show( GTK_WIDGET( button ) );
+							gtk_table_attach( table, GTK_WIDGET( button ), 3, 4, 2, 3,
+											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( 0 ), 0, 0 );
+							g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFlipX ), 0 );
+							gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 						}
 						{
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Vertical Stretch Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
 							gtk_table_attach( table, GTK_WIDGET( label ), 2, 3, 3, 4,
-											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}
 						{
+							GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "FlipY" ) );
+							gtk_widget_show( GTK_WIDGET( button ) );
+							gtk_table_attach( table, GTK_WIDGET( button ), 3, 4, 3, 4,
+											  (GtkAttachOptions)( GTK_FILL ),
+											  (GtkAttachOptions)( 0 ), 0, 0 );
+							g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFlipY ), 0 );
+							gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						}
+						{
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Rotate Step" ) );
 							gtk_widget_show( GTK_WIDGET( label ) );
-							gtk_table_attach( table, GTK_WIDGET( label ), 2, 3, 4, 5,
-											  (GtkAttachOptions)( GTK_FILL ),
+							gtk_table_attach( table, GTK_WIDGET( label ), 2, 4, 4, 5,
+											  (GtkAttachOptions)( GTK_FILL|GTK_EXPAND ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 						}

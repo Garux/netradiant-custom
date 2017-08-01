@@ -1861,8 +1861,6 @@ GtkMenuItem* create_edit_menu(){
 	create_menu_item_with_mnemonic( menu, "_Duplicate", "CloneSelection" );
 	create_menu_item_with_mnemonic( menu, "Duplicate, make uni_que", "CloneSelectionAndMakeUnique" );
 	create_menu_item_with_mnemonic( menu, "D_elete", "DeleteSelection" );
-	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Snap To Grid", "SnapToGrid" );
 	//create_menu_item_with_mnemonic( menu, "Pa_rent", "ParentSelection" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "C_lear Selection", "UnSelectSelection" );
@@ -2049,6 +2047,9 @@ GtkMenuItem* create_selection_menu(){
 	}
 
 	menu_separator( menu );
+	create_menu_item_with_mnemonic( menu, "Snap To Grid", "SnapToGrid" );
+
+	menu_separator( menu );
 
 	{
 		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Nudge" );
@@ -2227,10 +2228,10 @@ void PatchInspector_registerShortcuts(){
 void Patch_registerShortcuts(){
 //	command_connect_accelerator( "InvertCurveTextureX" );
 //	command_connect_accelerator( "InvertCurveTextureY" );
-	command_connect_accelerator( "IncPatchColumn" );
-	command_connect_accelerator( "IncPatchRow" );
-	command_connect_accelerator( "DecPatchColumn" );
-	command_connect_accelerator( "DecPatchRow" );
+//	command_connect_accelerator( "PatchInsertInsertColumn" );
+//	command_connect_accelerator( "PatchInsertInsertRow" );
+//	command_connect_accelerator( "PatchDeleteLastColumn" );
+//	command_connect_accelerator( "PatchDeleteLastRow" );
 //	command_connect_accelerator( "NaturalizePatch" );
 	//command_connect_accelerator("CapCurrentCurve");
 }

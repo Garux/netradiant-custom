@@ -299,7 +299,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 
 	bool isModel = ( string_compare_nocase_n( name, "misc_", 5 ) == 0 && string_equal_nocase( name + string_length( name ) - 5, "model" ) ) // misc_*model (also misc_model)
 				   || string_equal_nocase( name, "model_static" )
-				   || ( GlobalSelectionSystem().countSelected() == 0 && string_equal_nocase( name, "func_static" ) );
+				   || ( GlobalSelectionSystem().countSelected() == 0 && string_equal_nocase( name, "func_static" ) && g_pGameDescription->mGameType == "doom3" );
 
 	bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
 
