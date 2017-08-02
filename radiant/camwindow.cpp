@@ -1008,6 +1008,7 @@ gboolean selection_motion_freemove( GtkWidget *widget, GdkEventMotion *event, Wi
 void selection_motion_freemove( gdouble x, gdouble y, guint state, void* data ){
 	//globalOutputStream() << "motion... ";
 	CamWnd* camwnd = reinterpret_cast<CamWnd*>( data );
+	camwnd->m_window_observer->setMouseMoved();
 	camwnd->m_window_observer->onMouseMotion( windowvector_for_widget_centre( camwnd->m_gl_widget ), modifiers_for_state( state ) );
 }
 

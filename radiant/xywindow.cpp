@@ -1100,10 +1100,10 @@ void XYWnd::SetCustomPivotOrigin( int pointx, int pointy ){
 	XY_ToPoint( pointx, pointy, point );
 	VIEWTYPE viewtype = GetViewType();
 	const int nDim = ( viewtype == YZ ) ? 0 : ( ( viewtype == XZ ) ? 1 : 2 );
-	//vector3_snap( point, GetSnapGridSize() );
-	point[nDim] = 999999;
+	bool set[3] = { true, true, true };
+	set[nDim] = false;
 
-	GlobalSelectionSystem().setCustomPivotOrigin( point );
+	GlobalSelectionSystem().setCustomTransformOrigin( point, set );
 	SceneChangeNotify();
 }
 

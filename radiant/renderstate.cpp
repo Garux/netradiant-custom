@@ -2202,8 +2202,8 @@ void OpenGLShader::construct( const char* name ){
 			state.m_pointsize = 4;
 		}
 		else if ( string_equal( name + 1, "BIGPOINT" ) ) {
-			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
-			state.m_sort = OpenGLState::eSortControlFirst;
+			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_OVERRIDE;
+			state.m_sort = OpenGLState::eSortGUI1 + 1;
 			state.m_pointsize = 6;
 		}
 		else if ( string_equal( name + 1, "PIVOT" ) ) {

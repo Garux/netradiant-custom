@@ -36,6 +36,7 @@
 
 #include <gtk/gtkcolorseldialog.h>
 #include <gtk/gtkentry.h>
+#include <gtk/gtkfontsel.h>
 
 #include "math/vector.h"
 #include "os/path.h"
