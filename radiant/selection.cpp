@@ -2537,7 +2537,9 @@ EManipulatorMode m_manipulator_mode;
 Manipulator* m_manipulator;
 
 // state
+public:
 bool m_undo_begun;
+private:
 EMode m_mode;
 EComponentMode m_componentmode;
 
@@ -3445,6 +3447,7 @@ Single<MouseEventCallback> g_mouseUpCallback;
 
 #if 1
 const ButtonIdentifier c_button_select = c_buttonLeft;
+const ButtonIdentifier c_button_select2 = c_buttonRight;
 const ModifierFlags c_modifier_manipulator = c_modifierNone;
 const ModifierFlags c_modifier_toggle = c_modifierShift;
 const ModifierFlags c_modifier_replace = c_modifierShift | c_modifierAlt;
@@ -3525,6 +3528,20 @@ void testSelect( DeviceVector position ){
 	m_start = m_current = DeviceVector( 0.0f, 0.0f );
 	draw_area();
 }
+
+void testSelect_simpleM1( DeviceVector position ){
+	RadiantSelectionSystem::EModifier modifier = RadiantSelectionSystem::eReplace;
+	if ( m_unmoved_replaces++ > 0 ) {
+		if( GlobalSelectionSystem().countSelected() != 0 ){
+			modifier = RadiantSelectionSystem::eCycle;
+		}
+		else{
+			m_unmoved_replaces = 0;
+		}
+	}
+	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, false );
+}
+
 
 bool selecting() const {
 	return m_state != c_modifier_manipulator;
@@ -3673,6 +3690,11 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 
 		g_mouseUpCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
 	}
+	//L button w/o scene changed = tunnel selection
+	if( !getSelectionSystem().m_undo_begun && modifiers == c_modifierNone && button == c_button_select && GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ){
+		m_selector.testSelect_simpleM1( window_to_normalised_device( position, m_width, m_height ) );
+	}
+	getSelectionSystem().m_undo_begun = false;
 }
 void onModifierDown( ModifierFlags type ){
 	m_selector.modifierEnable( type );

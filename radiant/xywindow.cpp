@@ -1332,6 +1332,10 @@ void XYWnd::XY_MouseUp( int x, int y, unsigned int buttons ){
 	else if ( m_bNewBrushDrag ) {
 		m_bNewBrushDrag = false;
 		NewBrushDrag_End( x, y );
+		if ( m_NewBrushDrag == 0 ) {
+			//L button w/o created brush = tunnel selection
+			m_window_observer->onMouseUp( WindowVector_forInteger( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
+		}
 	}
 	else
 	{
