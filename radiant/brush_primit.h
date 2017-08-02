@@ -102,6 +102,7 @@ void Normal_GetTransform( const Vector3& normal, Matrix4& transform );
 void TexDef_Construct_Default( TextureProjection& projection );
 
 void Texdef_Assign( TextureProjection& projection, const TextureProjection& other );
+void Texdef_Assign( TextureProjection& projection, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 void Texdef_Shift( TextureProjection& projection, float s, float t );
 void Texdef_Scale( TextureProjection& projection, float s, float t );
 void Texdef_Rotate( TextureProjection& projection, float angle );

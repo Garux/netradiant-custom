@@ -569,6 +569,12 @@ void setTexdef( const TextureProjection& projection ){
 	addScale();
 }
 
+void setTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	removeScale();
+	Texdef_Assign( m_projection, hShift, vShift, hScale, vScale, rotation );
+	addScale();
+}
+
 void shift( float s, float t ){
 	ASSERT_MESSAGE( texdef_sane( m_projection.m_texdef ), "FaceTexdef::shift: bad texdef" );
 	removeScale();
@@ -1164,6 +1170,12 @@ void GetTexdef( TextureProjection& projection ) const {
 void SetTexdef( const TextureProjection& projection ){
 	undoSave();
 	m_texdef.setTexdef( projection );
+	texdefChanged();
+}
+
+void SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	undoSave();
+	m_texdef.setTexdef( hShift, vShift, hScale, vScale, rotation );
 	texdefChanged();
 }
 

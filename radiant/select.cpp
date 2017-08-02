@@ -524,6 +524,13 @@ void Select_SetTexdef( const TextureProjection& projection ){
 	Scene_BrushSetTexdef_Component_Selected( GlobalSceneGraph(), projection );
 }
 
+void Select_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
+		Scene_BrushSetTexdef_Selected( GlobalSceneGraph(), hShift, vShift, hScale, vScale, rotation );
+	}
+	Scene_BrushSetTexdef_Component_Selected( GlobalSceneGraph(), hShift, vShift, hScale, vScale, rotation );
+}
+
 void Select_SetFlags( const ContentsFlagsValue& flags ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushSetFlags_Selected( GlobalSceneGraph(), flags );

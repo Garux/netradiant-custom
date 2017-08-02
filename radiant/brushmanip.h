@@ -49,6 +49,8 @@ void Scene_BrushResize_Selected( scene::Graph& graph, const AABB& bounds, const 
 void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds );
 void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection );
 void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const TextureProjection& projection );
+void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
+void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& projection );
 void Scene_BrushGetTexdef_Component_Selected( scene::Graph& graph, TextureProjection& projection );
 void Scene_BrushGetShaderSize_Component_Selected( scene::Graph& graph, size_t& width, size_t& height );

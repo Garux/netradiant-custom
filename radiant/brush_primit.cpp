@@ -344,14 +344,54 @@ void Texdef_Assign( texdef_t& td, const texdef_t& other ){
 	td = other;
 }
 
+
+void Texdef_Assign( texdef_t& td, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	if( hShift ){
+		td.shift[0] = *hShift;
+	}
+	if( vShift ){
+		td.shift[1] = *vShift;
+	}
+	if( hScale ){
+		if( fabs( *hScale ) > 1e-5 ){
+			td.scale[0] = *hScale;
+		}
+		else{
+			td.scale[0] = -td.scale[0];
+		}
+	}
+	if( vScale ){
+		if( fabs( *vScale ) > 1e-5 ){
+			td.scale[1] = *vScale;
+		}
+		else{
+			td.scale[1] = -td.scale[1];
+		}
+	}
+	if( rotation ){
+		td.rotate = *rotation;
+		td.rotate = static_cast<float>( float_to_integer( td.rotate ) % 360 );
+	}
+}
+
 void Texdef_Shift( texdef_t& td, float s, float t ){
 	td.shift[0] += s;
 	td.shift[1] += t;
 }
 
 void Texdef_Scale( texdef_t& td, float s, float t ){
-	td.scale[0] += s;
-	td.scale[1] += t;
+	if( fabs( td.scale[0] + s ) > 1e-5 ){
+		td.scale[0] += s;
+	}
+	else{
+		td.scale[0] = -td.scale[0];
+	}
+	if( fabs( td.scale[1] + t ) > 1e-5 ){
+		td.scale[1] += t;
+	}
+	else{
+		td.scale[1] = -td.scale[1];
+	}
 }
 
 void Texdef_Rotate( texdef_t& td, float angle ){
@@ -635,6 +675,7 @@ void ConvertTexMatWithQTexture( const brushprimit_texdef_t *texMat1, const qtext
 // Note: this code looks similar to Texdef_fromTransform, but the algorithm is slightly different.
 
 void TexMatToFakeTexCoords( const brushprimit_texdef_t& bp_texdef, texdef_t& texdef ){
+#if 0
 	texdef.scale[0] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[1][0] ) ) );
 	texdef.scale[1] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[0][1], bp_texdef.coords[1][1] ) ) );
 
@@ -659,6 +700,26 @@ void TexMatToFakeTexCoords( const brushprimit_texdef_t& bp_texdef, texdef_t& tex
 			texdef.scale[1] = -texdef.scale[1];
 		}
 	}
+#else
+	texdef.scale[0] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[0][1] ) ) );
+	texdef.scale[1] = static_cast<float>( 1.0 / vector2_length( Vector2( bp_texdef.coords[1][0], bp_texdef.coords[1][1] ) ) );
+	if( bp_texdef.coords[0][0] < 0 ){
+		texdef.scale[0] = -texdef.scale[0];
+	}
+	if( bp_texdef.coords[1][1] < 0 ){
+		texdef.scale[1] = -texdef.scale[1];
+	}
+#if 1
+	texdef.rotate = static_cast<float>( radians_to_degrees( acos( vector2_normalised( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[0][1] ) )[0] ) ) );
+	if( bp_texdef.coords[0][1] < 0 ){
+		texdef.rotate = -texdef.rotate;
+	}
+#else
+	texdef.rotate = static_cast<float>( radians_to_degrees( arctangent_yx( bp_texdef.coords[0][1], bp_texdef.coords[0][0] ) ) );
+#endif
+	texdef.shift[0] = -bp_texdef.coords[0][2];
+	texdef.shift[1] = bp_texdef.coords[1][2];
+#endif
 }
 
 // compute back the texture matrix from fake shift scale rot
@@ -1028,6 +1089,7 @@ void BPTexdef_Shift( brushprimit_texdef_t& bp_td, float s, float t ){
 }
 
 void BPTexdef_Scale( brushprimit_texdef_t& bp_td, float s, float t ){
+#if 0
 	// apply same scale as the spinner button of the surface inspector
 	texdef_t texdef;
 	// compute fake shift scale rot
@@ -1037,9 +1099,27 @@ void BPTexdef_Scale( brushprimit_texdef_t& bp_td, float s, float t ){
 	texdef.scale[1] += t;
 	// compute new normalized texture matrix
 	FakeTexCoordsToTexMat( texdef, bp_td );
+#else
+	texdef_t texdef;
+	TexMatToFakeTexCoords( bp_td, texdef );
+
+	float scaleS = -1.f;
+	float scaleT = -1.f;
+	if( fabs( texdef.scale[0] + s ) > 1e-5 ){
+		scaleS = texdef.scale[0] / ( texdef.scale[0] + s );
+	}
+	if( fabs( texdef.scale[1] + t ) > 1e-5 ){
+		scaleT = texdef.scale[1] / ( texdef.scale[1] + t );
+	}
+	bp_td.coords[0][0] *= scaleS;
+	bp_td.coords[0][1] *= scaleS;
+	bp_td.coords[1][0] *= scaleT;
+	bp_td.coords[1][1] *= scaleT;
+#endif
 }
 
 void BPTexdef_Rotate( brushprimit_texdef_t& bp_td, float angle ){
+#if 0
 	// apply same scale as the spinner button of the surface inspector
 	texdef_t texdef;
 	// compute fake shift scale rot
@@ -1048,6 +1128,49 @@ void BPTexdef_Rotate( brushprimit_texdef_t& bp_td, float angle ){
 	texdef.rotate += angle;
 	// compute new normalized texture matrix
 	FakeTexCoordsToTexMat( texdef, bp_td );
+#else
+	const float x = bp_td.coords[0][0];
+	const float y = bp_td.coords[0][1];
+	const float x1 = bp_td.coords[1][0];
+	const float y1 = bp_td.coords[1][1];
+	const float s = sin( degrees_to_radians( angle ) );
+	const float c = cos( degrees_to_radians( angle ) );
+	bp_td.coords[0][0] = x * c - y * s ;
+	bp_td.coords[0][1] = x * s + y * c;
+	bp_td.coords[1][0] = x1 * c - y1 * s;
+	bp_td.coords[1][1] = x1 * s + y1 * c;
+#endif
+}
+
+void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	texdef_t texdef;
+	TexMatToFakeTexCoords( bp_td, texdef );
+
+	if( hShift ){
+		bp_td.coords[0][2] = -*hShift;
+	}
+	if( vShift ){
+		bp_td.coords[1][2] = *vShift;
+	}
+	if( hScale ){
+		float scaleS = -1.f;
+		if( fabs( *hScale ) > 1e-5 ){
+			scaleS = texdef.scale[0] / *hScale;
+		}
+		bp_td.coords[0][0] *= scaleS;
+		bp_td.coords[0][1] *= scaleS;
+	}
+	if( vScale ){
+		float scaleT = -1.f;
+		if( fabs( *vScale ) > 1e-5 ){
+			scaleT = texdef.scale[1] / *vScale;
+		}
+		bp_td.coords[1][0] *= scaleT;
+		bp_td.coords[1][1] *= scaleT;
+	}
+	if( rotation ){
+		BPTexdef_Rotate( bp_td, *rotation - texdef.rotate );
+	}
 }
 
 void BPTexdef_Construct( brushprimit_texdef_t& bp_td, std::size_t width, std::size_t height ){
@@ -1067,6 +1190,20 @@ void Texdef_Assign( TextureProjection& projection, const TextureProjection& othe
 			projection.m_basis_s = other.m_basis_s;
 			projection.m_basis_t = other.m_basis_t;
 		}
+	}
+}
+
+void Texdef_Assign( TextureProjection& projection, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
+		BPTexdef_Assign( projection.m_brushprimit_texdef, hShift, vShift, hScale, vScale, rotation );
+	}
+	else
+	{
+		Texdef_Assign( projection.m_texdef, hShift, vShift, hScale, vScale, rotation);
+//		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+//			projection.m_basis_s = other.m_basis_s;
+//			projection.m_basis_t = other.m_basis_t;
+//		}
 	}
 }
 

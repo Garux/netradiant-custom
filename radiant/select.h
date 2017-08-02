@@ -59,6 +59,7 @@ void Select_SetShader_Undo( const char* shader );
 
 class TextureProjection;
 void Select_SetTexdef( const TextureProjection& projection );
+void Select_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 
 class ContentsFlagsValue;
 void Select_SetFlags( const ContentsFlagsValue& flags );

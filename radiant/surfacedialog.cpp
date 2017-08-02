@@ -186,15 +186,15 @@ GtkEntry* m_texture;
 
 SurfaceInspector() :
 	m_textureEntry( ApplyShaderCaller( *this ), UpdateCaller( *this ) ),
-	m_hshiftSpinner( ApplyTexdefCaller( *this ), UpdateCaller( *this ) ),
+	m_hshiftSpinner( ApplyTexdef_HShiftCaller( *this ), UpdateCaller( *this ) ),
 	m_hshiftEntry( Increment::ApplyCaller( m_hshiftIncrement ), Increment::CancelCaller( m_hshiftIncrement ) ),
-	m_vshiftSpinner( ApplyTexdefCaller( *this ), UpdateCaller( *this ) ),
+	m_vshiftSpinner( ApplyTexdef_VShiftCaller( *this ), UpdateCaller( *this ) ),
 	m_vshiftEntry( Increment::ApplyCaller( m_vshiftIncrement ), Increment::CancelCaller( m_vshiftIncrement ) ),
-	m_hscaleSpinner( ApplyTexdefCaller( *this ), UpdateCaller( *this ) ),
+	m_hscaleSpinner( ApplyTexdef_HScaleCaller( *this ), UpdateCaller( *this ) ),
 	m_hscaleEntry( Increment::ApplyCaller( m_hscaleIncrement ), Increment::CancelCaller( m_hscaleIncrement ) ),
-	m_vscaleSpinner( ApplyTexdefCaller( *this ), UpdateCaller( *this ) ),
+	m_vscaleSpinner( ApplyTexdef_VScaleCaller( *this ), UpdateCaller( *this ) ),
 	m_vscaleEntry( Increment::ApplyCaller( m_vscaleIncrement ), Increment::CancelCaller( m_vscaleIncrement ) ),
-	m_rotateSpinner( ApplyTexdefCaller( *this ), UpdateCaller( *this ) ),
+	m_rotateSpinner( ApplyTexdef_RotationCaller( *this ), UpdateCaller( *this ) ),
 	m_rotateEntry( Increment::ApplyCaller( m_rotateIncrement ), Increment::CancelCaller( m_rotateIncrement ) ),
 	m_idleDraw( UpdateCaller( *this ) ),
 	m_valueEntry( ApplyFlagsCaller( *this ), UpdateCaller( *this ) ),
@@ -232,8 +232,20 @@ void Update();
 typedef MemberCaller<SurfaceInspector, &SurfaceInspector::Update> UpdateCaller;
 void ApplyShader();
 typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyShader> ApplyShaderCaller;
-void ApplyTexdef();
-typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef> ApplyTexdefCaller;
+
+//void ApplyTexdef();
+//typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef> ApplyTexdefCaller;
+void ApplyTexdef_HShift();
+typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_HShift> ApplyTexdef_HShiftCaller;
+void ApplyTexdef_VShift();
+typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_VShift> ApplyTexdef_VShiftCaller;
+void ApplyTexdef_HScale();
+typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_HScale> ApplyTexdef_HScaleCaller;
+void ApplyTexdef_VScale();
+typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_VScale> ApplyTexdef_VScaleCaller;
+void ApplyTexdef_Rotation();
+typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_Rotation> ApplyTexdef_RotationCaller;
+
 void ApplyFlags();
 typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyFlags> ApplyFlagsCaller;
 };
@@ -1318,7 +1330,7 @@ void SurfaceInspector::ApplyShader(){
 	UndoableCommand undo( "textureNameSetSelected" );
 	Select_SetShader( name.c_str() );
 }
-
+#if 0
 void SurfaceInspector::ApplyTexdef(){
 	texdef_t shiftScaleRotate;
 
@@ -1336,6 +1348,46 @@ void SurfaceInspector::ApplyTexdef(){
 
 	UndoableCommand undo( "textureProjectionSetSelected" );
 	Select_SetTexdef( projection );
+}
+#endif
+void SurfaceInspector::ApplyTexdef_HShift(){
+	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_hshiftIncrement.m_spin ) );
+	StringOutputStream command;
+	command << "textureProjectionSetSelected -hShift " << value;
+	UndoableCommand undo( command.c_str() );
+	Select_SetTexdef( &value, 0, 0, 0, 0 );
+}
+
+void SurfaceInspector::ApplyTexdef_VShift(){
+	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_vshiftIncrement.m_spin ) );
+	StringOutputStream command;
+	command << "textureProjectionSetSelected -vShift " << value;
+	UndoableCommand undo( command.c_str() );
+	Select_SetTexdef( 0, &value, 0, 0, 0 );
+}
+
+void SurfaceInspector::ApplyTexdef_HScale(){
+	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_hscaleIncrement.m_spin ) );
+	StringOutputStream command;
+	command << "textureProjectionSetSelected -hScale " << value;
+	UndoableCommand undo( command.c_str() );
+	Select_SetTexdef( 0, 0, &value, 0, 0 );
+}
+
+void SurfaceInspector::ApplyTexdef_VScale(){
+	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_vscaleIncrement.m_spin ) );
+	StringOutputStream command;
+	command << "textureProjectionSetSelected -vScale " << value;
+	UndoableCommand undo( command.c_str() );
+	Select_SetTexdef( 0, 0, 0, &value, 0 );
+}
+
+void SurfaceInspector::ApplyTexdef_Rotation(){
+	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_rotateIncrement.m_spin ) );
+	StringOutputStream command;
+	command << "textureProjectionSetSelected -rotation " << value;
+	UndoableCommand undo( command.c_str() );
+	Select_SetTexdef( 0, 0, 0, 0, &value );
 }
 
 void SurfaceInspector::ApplyFlags(){

@@ -273,6 +273,22 @@ inline double vector2_cross( const BasicVector2<Element>& self, const BasicVecto
 	return self.x() * other.y() - self.y() * other.x();
 }
 
+template<typename Element>
+inline Element float_divided( Element f, Element other ){
+	//ASSERT_MESSAGE(other != 0, "float_divided: invalid divisor");
+	return f / other;
+}
+
+template<typename Element>
+inline BasicVector2<Element> vector2_normalised( const BasicVector2<Element>& self ){
+	return vector2_scaled( self, float_divided( 1.0, vector2_length( self ) ) );
+}
+
+template<typename Element>
+inline void vector2_normalise( BasicVector2<Element>& self ){
+	self = vector2_normalised( self );
+}
+
 const Vector3 g_vector3_identity( 0, 0, 0 );
 const Vector3 g_vector3_max = Vector3( FLT_MAX, FLT_MAX, FLT_MAX );
 const Vector3 g_vector3_axis_x( 1, 0, 0 );
@@ -496,12 +512,6 @@ inline double vector3_length_squared( const BasicVector3<Element>& self ){
 template<typename Element>
 inline double vector3_length( const BasicVector3<Element>& self ){
 	return sqrt( vector3_length_squared( self ) );
-}
-
-template<typename Element>
-inline Element float_divided( Element f, Element other ){
-	//ASSERT_MESSAGE(other != 0, "float_divided: invalid divisor");
-	return f / other;
 }
 
 template<typename Element>

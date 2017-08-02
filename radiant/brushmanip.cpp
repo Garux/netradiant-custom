@@ -511,6 +511,32 @@ void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const Texture
 	SceneChangeNotify();
 }
 
+class FaceSetTexdef_
+{
+const float* m_hShift;
+const float* m_vShift;
+const float* m_hScale;
+const float* m_vScale;
+const float* m_rotation;
+public:
+FaceSetTexdef_( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ) :
+	m_hShift( hShift ), m_vShift( vShift ), m_hScale( hScale ), m_vScale( vScale ), m_rotation( rotation ) {
+}
+void operator()( Face& face ) const {
+	face.SetTexdef( m_hShift, m_vShift, m_hScale, m_vScale, m_rotation );
+}
+};
+
+void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceSetTexdef_( hShift, vShift, hScale, vScale, rotation ) );
+	SceneChangeNotify();
+}
+
+void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
+	Scene_ForEachSelectedBrushFace( graph, FaceSetTexdef_( hShift, vShift, hScale, vScale, rotation ) );
+	SceneChangeNotify();
+}
+
 
 class FaceSetFlags
 {
