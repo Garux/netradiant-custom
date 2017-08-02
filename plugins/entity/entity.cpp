@@ -44,6 +44,8 @@
 #include "generic.h"
 #include "doom3group.h"
 
+#include "namedentity.h"
+
 
 
 EGameType g_gameType;
@@ -391,6 +393,7 @@ void Entity_Construct( EGameType gameType ){
 	Doom3Group_construct();
 
 	RenderablePivot::StaticShader::instance() = GlobalShaderCache().capture( "$PIVOT" );
+	RenderableNamedEntity::StaticShader::instance() = GlobalShaderCache().capture( "$TEXT" );
 
 	GlobalShaderCache().attachRenderable( StaticRenderableConnectionLines::instance() );
 }
@@ -399,6 +402,7 @@ void Entity_Destroy(){
 	GlobalShaderCache().detachRenderable( StaticRenderableConnectionLines::instance() );
 
 	GlobalShaderCache().release( "$PIVOT" );
+	GlobalShaderCache().release( "$TEXT" );
 
 	Doom3Group_destroy();
 	MiscModel_destroy();

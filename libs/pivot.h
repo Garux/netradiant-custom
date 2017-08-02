@@ -235,7 +235,7 @@ class RenderablePivot : public OpenGLRenderable
 VertexBuffer<PointVertex> m_vertices;
 public:
 mutable Matrix4 m_localToWorld;
-typedef Static<Shader*> StaticShader;
+typedef Static<Shader*, RenderablePivot> StaticShader;
 static Shader* getShader(){
 	return StaticShader::instance();
 }

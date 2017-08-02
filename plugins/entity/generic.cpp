@@ -215,17 +215,20 @@ void renderArrow( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		renderer.addRenderable( m_arrow, localToWorld );
 	}
 }
-void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
+void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
 	renderer.SetState( m_entity.getEntityClass().m_state_fill, Renderer::eFullMaterials );
 	renderer.addRenderable( m_aabb_solid, localToWorld );
 	renderArrow( renderer, volume, localToWorld );
+	if ( g_showNames ) {
+		m_renderName.render( renderer, volume, localToWorld, selected );
+	}
 }
-void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
+void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
 	renderer.addRenderable( m_aabb_wire, localToWorld );
 	renderArrow( renderer, volume, localToWorld );
 	if ( g_showNames ) {
-		renderer.addRenderable( m_renderName, localToWorld );
+		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }
 
@@ -322,10 +325,10 @@ GenericEntityInstance( const scene::Path& path, scene::Instance* parent, Generic
 }
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderSolid( renderer, volume, Instance::localToWorld() );
+	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected() );
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderWireframe( renderer, volume, Instance::localToWorld() );
+	m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected() );
 }
 
 void testSelect( Selector& selector, SelectionTest& test ){

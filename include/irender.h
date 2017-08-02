@@ -52,7 +52,8 @@ const unsigned int RENDER_TEXTURE = 1 << 18; // glEnable(GL_TEXTURE_2D)
 const unsigned int RENDER_BUMP = 1 << 19;
 const unsigned int RENDER_PROGRAM = 1 << 20;
 const unsigned int RENDER_SCREEN = 1 << 21;
-const unsigned int RENDER_OVERRIDE = 1 << 22;
+const unsigned int RENDER_TEXT = 1 << 22;
+const unsigned int RENDER_OVERRIDE = 1 << 23;
 typedef unsigned int RenderStateFlags;
 
 

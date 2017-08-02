@@ -148,13 +148,8 @@ void detach( scene::Traversable::Observer* observer ){
 	m_traverse.detach( observer );
 }
 
-void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
+void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-}
-
-void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, const AABB& childBounds ) const {
-	renderSolid( renderer, volume, localToWorld );
-
 	if ( g_showNames ) {
 		// don't draw the name for worldspawn
 		if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
@@ -164,8 +159,12 @@ void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix
 		// place name in the middle of the "children cloud"
 		m_name_origin = childBounds.origin;
 
-		renderer.addRenderable( m_renderName, localToWorld );
+		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
+}
+
+void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
+	renderSolid( renderer, volume, localToWorld, selected, childBounds );
 }
 
 void updateTransform(){
@@ -299,10 +298,10 @@ GroupInstance( const scene::Path& path, scene::Instance* parent, Group& group ) 
 	m_contained.instanceDetach( Instance::path() );
 }
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderSolid( renderer, volume, Instance::localToWorld() );
+	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childBounds() );
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), Instance::childBounds() );
+	m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childBounds() );
 }
 
 STRING_CONSTANT( Name, "GroupInstance" );

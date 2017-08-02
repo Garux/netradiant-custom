@@ -348,7 +348,7 @@ const AABB& localAABB() const {
 	return m_curveBounds;
 }
 
-void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
+void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
 	if ( isModel() && selected ) {
 		m_renderOrigin.render( renderer, volume, localToWorld );
 	}
@@ -362,10 +362,6 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 	if ( !m_curveCatmullRom.m_renderCurve.m_vertices.empty() ) {
 		renderer.addRenderable( m_curveCatmullRom.m_renderCurve, localToWorld );
 	}
-}
-
-void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
-	renderSolid( renderer, volume, localToWorld, selected );
 
 	if ( g_showNames ) {
 		// draw models as usual
@@ -379,8 +375,12 @@ void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix
 			m_name_origin = childBounds.origin;
 		}
 
-		renderer.addRenderable( m_renderName, localToWorld );
+		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
+}
+
+void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
+	renderSolid( renderer, volume, localToWorld, selected, childBounds );
 }
 
 void testSelect( Selector& selector, SelectionTest& test, SelectionIntersection& best ){
@@ -499,7 +499,7 @@ Doom3GroupInstance( const scene::Path& path, scene::Instance* parent, Doom3Group
 	m_contained.instanceDetach( Instance::path() );
 }
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected() );
+	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childBounds() );
 
 	m_curveNURBS.renderComponentsSelected( renderer, volume, localToWorld() );
 	m_curveCatmullRom.renderComponentsSelected( renderer, volume, localToWorld() );

@@ -22,6 +22,9 @@
 #include "glfont.h"
 #include "igl.h"
 
+#include <pango/pangoft2.h>
+#include <pango/pango-utils.h>
+
 // generic string printing with call lists
 class GLFontCallList : public GLFont
 {
@@ -29,15 +32,256 @@ GLuint m_displayList;
 int m_pixelHeight;
 int m_pixelAscent;
 int m_pixelDescent;
+PangoFontMap *m_fontmap;
+PangoContext *m_ft2_context;
 public:
-GLFontCallList( GLuint displayList, int asc, int desc, int pixelHeight ) : m_displayList( displayList ), m_pixelHeight( pixelHeight ), m_pixelAscent( asc ), m_pixelDescent( desc ){
+GLFontCallList( GLuint displayList, int asc, int desc, int pixelHeight, PangoFontMap *fontmap, PangoContext *ft2_context ) :
+	 m_displayList( displayList ), m_pixelHeight( pixelHeight ), m_pixelAscent( asc ), m_pixelDescent( desc ), m_fontmap( fontmap ), m_ft2_context( ft2_context ){
 }
 virtual ~GLFontCallList(){
 	glDeleteLists( m_displayList, 256 );
+	g_object_unref( G_OBJECT( m_ft2_context ) );
+	g_object_unref( G_OBJECT( m_fontmap ) );
 }
 void printString( const char *s ){
 	GlobalOpenGL().m_glListBase( m_displayList );
 	GlobalOpenGL().m_glCallLists( GLsizei( strlen( s ) ), GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>( s ) );
+}
+
+void renderString( const char *s, const GLuint& tex, const unsigned int colour[3], int& wid, int& hei ){
+
+	PangoLayout *layout;
+	PangoRectangle log_rect;
+	FT_Bitmap bitmap;
+
+	layout = pango_layout_new( m_ft2_context );
+	pango_layout_set_width( layout, -1 );   // -1 no wrapping.  All text on one line.
+	pango_layout_set_text( layout, s, -1 );   // -1 null-terminated string.
+	pango_layout_get_extents( layout, NULL, &log_rect );
+
+	if ( log_rect.width > 0 && log_rect.height > 0 ) {
+		hei = bitmap.rows = PANGO_PIXELS_CEIL( log_rect.height );//m_pixelAscent + m_pixelDescent;
+		wid = bitmap.width = PANGO_PIXELS_CEIL( log_rect.width );
+//			globalOutputStream() << width << " " << height << "rendering\n";
+		bitmap.pitch = bitmap.width;
+		unsigned char *boo = (unsigned char *) malloc( bitmap.rows * bitmap.width );
+		memset( boo, 0, bitmap.rows * bitmap.width );
+		bitmap.buffer = boo;
+		bitmap.num_grays = 0xff;
+		bitmap.pixel_mode = FT_PIXEL_MODE_GRAY;
+		pango_ft2_render_layout_subpixel( &bitmap, layout, -log_rect.x, 0 );
+
+		hei += 2;
+		wid += 2;
+		unsigned char *buf = (unsigned char *) malloc( 4 * hei * wid );
+		memset( buf, 0x00, 4 * hei * wid );
+
+#if 0
+		GLfloat color[4] = { 1, 0, 0, 1 };
+		guint32 rgb = ( ( ( guint32 )( color[0] * 255.0 ) ) << 24 ) |
+		( ( ( guint32 )( color[1] * 255.0 ) ) << 16 ) |
+		( ( ( guint32 )( color[2] * 255.0 ) ) << 8 );
+
+		GLfloat a = color[3];
+
+		guint32 *t;
+		guint8 *row, *row_end;
+		row = bitmap.buffer + bitmap.rows * bitmap.width; /* past-the-end */
+		row_end = bitmap.buffer;      /* beginning */
+
+		t = ( guint32* ) buf;
+
+		if( a == 1.0 ) {
+			do {
+				row -= bitmap.width;
+				for( unsigned int i = 0; i < bitmap.width; i++ )
+					*t++ = rgb | ( ( guint32 ) row[i] );
+
+			} while( row != row_end );
+		} else
+		{
+			do
+			{
+				row -= bitmap.width;
+				for( unsigned int i = 0; i < bitmap.width; i++ )
+					* t++ = rgb | ( ( guint32 )( a* row[i] ) );
+			} while( row != row_end );
+		}
+#endif // 0
+
+#if 0
+		if( withfond ){ /* with background rectangle */
+			int x_max = wid;
+			int y_max = hei;
+			int x, y, bitmapIter = 0;
+
+			unsigned int fontColorR = 255;
+			unsigned int fontColorG = 255;
+			unsigned int fontColorB = 0;
+
+			unsigned int backgroundColorR = 64;
+			unsigned int backgroundColorG = 64;
+			unsigned int backgroundColorB = 64;
+			float opacity;
+
+			for( y = 0; y < y_max; y++ ) {
+				for( x = 0; x < x_max; x++ ) {
+					int iter = ( y * x_max + x ) * 4;
+					if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
+						buf[iter] = backgroundColorB;
+						buf[iter + 1] = backgroundColorG;
+						buf[iter + 2] = backgroundColorR;
+						buf[iter + 3] = 150; /* half trans border */
+						continue;
+					}
+					if( bitmap.buffer[bitmapIter] == 0 ) {
+						/* Render background color. */
+						buf[iter] = backgroundColorB;
+						buf[iter + 1] = backgroundColorG;
+						buf[iter + 2] = backgroundColorR;
+						buf[iter + 3] = 255;
+					}
+					else {
+						/* Calculate alpha (opacity). */
+						opacity = bitmap.buffer[bitmapIter] / 255.f;
+						buf[iter] = fontColorB * opacity + ( 1 - opacity ) * backgroundColorB;
+						buf[iter + 1] = fontColorG * opacity + ( 1 - opacity ) * backgroundColorG;
+						buf[iter + 2] = fontColorR * opacity + ( 1 - opacity ) * backgroundColorR;
+						buf[iter + 3] = 255;
+					}
+					++bitmapIter;
+				}
+			}
+		}
+#else
+	if( 1 ){ /* normal with shadow */
+			int x_max = wid;
+			int y_max = hei;
+			int x, y, bitmapIter = 0;
+
+//			unsigned int fontColorR = 255;
+//			unsigned int fontColorG = 255;
+//			unsigned int fontColorB = 0;
+			unsigned int fontColorR = colour[0];
+			unsigned int fontColorG = colour[1];
+			unsigned int fontColorB = colour[2];
+
+			unsigned int backgroundColorR = 0;
+			unsigned int backgroundColorG = 0;
+			unsigned int backgroundColorB = 0;
+
+			for( y = 0; y < y_max; y++ ) {
+				for( x = 0; x < x_max; x++ ) {
+					int iter = ( y * x_max + x ) * 4;
+					if( x == 0 || y == 0 || x == 1 || y == 1 ) {
+						buf[iter] = fontColorB;
+						buf[iter + 1] = fontColorG;
+						buf[iter + 2] = fontColorR;
+						buf[iter + 3] = 0;
+						continue;
+					}
+					if( bitmap.buffer[bitmapIter] == 0 ){
+						buf[iter] = fontColorB;
+						buf[iter + 1] = fontColorG;
+						buf[iter + 2] = fontColorR;
+						buf[iter + 3] = 0;
+					}
+					else{
+						buf[iter] = backgroundColorB;
+						buf[iter + 1] = backgroundColorG;
+						buf[iter + 2] = backgroundColorR;
+						buf[iter + 3] = bitmap.buffer[bitmapIter];
+					}
+					++bitmapIter;
+				}
+			}
+
+			bitmapIter = 0;
+			for( y = 0; y < y_max; y++ ) {
+				for( x = 0; x < x_max; x++ ) {
+					int iter = ( y * x_max + x ) * 4;
+					if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
+						continue;
+					}
+					if( bitmap.buffer[bitmapIter] != 0 ) {
+						if( buf[iter + 3] == 0 ){
+							buf[iter] = fontColorB;
+							buf[iter + 1] = fontColorG;
+							buf[iter + 2] = fontColorR;
+							buf[iter + 3] = bitmap.buffer[bitmapIter];
+						}
+						else{
+							/* Calculate alpha (opacity). */
+							float opacityFont = bitmap.buffer[bitmapIter] / 255.f;
+							float opacityBack = buf[iter + 3] / 255.f;
+							buf[iter] = fontColorB * opacityFont + ( 1 - opacityFont ) * backgroundColorB;
+							buf[iter + 1] = fontColorG * opacityFont + ( 1 - opacityFont ) * backgroundColorG;
+							buf[iter + 2] = fontColorR * opacityFont + ( 1 - opacityFont ) * backgroundColorR;
+							buf[iter + 3] = ( opacityFont + ( 1 - opacityFont ) * opacityBack ) * 255.f;
+						}
+					}
+					++bitmapIter;
+				}
+			}
+		}
+#endif // 0
+		else{ /* normal */
+			int x_max = wid;
+			int y_max = hei;
+			int x, y, bitmapIter = 0;
+
+//			unsigned int fontColorR = 0;
+//			unsigned int fontColorG = 255;
+//			unsigned int fontColorB = 0;
+			unsigned int fontColorR = colour[0];
+			unsigned int fontColorG = colour[1];
+			unsigned int fontColorB = colour[2];
+
+			for( y = 0; y < y_max; y++ ) {
+				for( x = 0; x < x_max; x++ ) {
+					int iter = ( y * x_max + x ) * 4;
+					if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
+						buf[iter] = fontColorB;
+						buf[iter + 1] = fontColorG;
+						buf[iter + 2] = fontColorR;
+						buf[iter + 3] = 0;
+						continue;
+					}
+					buf[iter] = fontColorB;
+					buf[iter + 1] = fontColorG;
+					buf[iter + 2] = fontColorR;
+					buf[iter + 3] = bitmap.buffer[bitmapIter];
+					++bitmapIter;
+				}
+			}
+		}
+
+
+
+		//Now we just setup some texture paramaters.
+		glBindTexture( GL_TEXTURE_2D, tex );
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+//   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//   glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+//	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+		//Here we actually create the texture itself
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, wid, hei,
+						0, GL_BGRA, GL_UNSIGNED_BYTE, buf );
+
+		glBindTexture( GL_TEXTURE_2D, 0 );
+
+		free( buf );
+		free( boo );
+	}
+	g_object_unref( G_OBJECT( layout ) );
 }
 virtual int getPixelAscent() const {
 	return m_pixelAscent;
@@ -351,6 +595,9 @@ GLFont *glfont_create( const char* font_string ){
 
 	PangoFont* font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
 
+	PangoFontMap *fontmap = 0;
+	PangoContext *ft2_context = 0;
+
 	if ( font == 0 ) {
 		pango_font_description_free( font_desc );
 		font_desc = pango_font_description_from_string( "arial 8" );
@@ -382,9 +629,9 @@ GLFont *glfont_create( const char* font_string ){
 
 	if ( font != 0 ) {
 
-		PangoFontMap *fontmap = pango_ft2_font_map_new();
+		fontmap = pango_ft2_font_map_new();
 		pango_ft2_font_map_set_resolution( PANGO_FT2_FONT_MAP( fontmap ), 72, 72 );
-		PangoContext *ft2_context = pango_font_map_create_context( fontmap );
+		ft2_context = pango_font_map_create_context( fontmap );
 		pango_context_set_font_description( ft2_context, font_desc );
 		PangoLayout *layout = pango_layout_new( ft2_context );
 
@@ -399,15 +646,22 @@ GLFont *glfont_create( const char* font_string ){
 		g_object_unref( G_OBJECT( layout ) );
 		int font_descent_pango_units = log_rect.height - font_ascent_pango_units;
 
+		/* settings for render to tex; need to multiply size, so that bitmap callLists way size would be approximately = texture way */
+		gint fontsize = pango_font_description_get_size( font_desc );
+		fontsize *= 3;
+		fontsize /= 2; //*15/11 is equal to bitmap callLists size
+		pango_font_description_set_size( font_desc, fontsize );
+		pango_context_set_font_description( ft2_context, font_desc );
+
 		pango_font_description_free( font_desc );
-		g_object_unref( G_OBJECT( ft2_context ) );
-		g_object_unref( G_OBJECT( fontmap ) );
+//		g_object_unref( G_OBJECT( ft2_context ) );
+//		g_object_unref( G_OBJECT( fontmap ) );
 
 		font_ascent = PANGO_PIXELS_CEIL( font_ascent_pango_units );
 		font_descent = PANGO_PIXELS_CEIL( font_descent_pango_units );
 		font_height = font_ascent + font_descent;
 	}
-	return new GLFontCallList( font_list_base, font_ascent, font_descent, font_height );
+	return new GLFontCallList( font_list_base, font_ascent, font_descent, font_height, fontmap, ft2_context );
 }
 
 

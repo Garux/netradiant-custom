@@ -1408,12 +1408,13 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 			renderer.addRenderable( m_render_center, localToWorld );
 		}
 	}
+
+	if ( g_showNames && !string_equal( m_named.name(), "light" ) ) {
+		m_renderName.render( renderer, volume, localToWorld, selected );
+	}
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
 	renderSolid( renderer, volume, localToWorld, selected );
-	if ( g_showNames && !string_equal( m_named.name(), "light" ) ) {
-		renderer.addRenderable( m_renderName, localToWorld );
-	}
 }
 
 void testSelect( Selector& selector, SelectionTest& test, const Matrix4& localToWorld ){

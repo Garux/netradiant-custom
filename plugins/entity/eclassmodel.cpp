@@ -253,12 +253,12 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		renderer.PopState();
 	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
+	if ( g_showNames ) {
+		m_renderName.render( renderer, volume, localToWorld, selected );
+	}
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
 	renderSolid( renderer, volume, localToWorld, selected );
-	if ( g_showNames ) {
-		renderer.addRenderable( m_renderName, localToWorld );
-	}
 }
 
 void translate( const Vector3& translation ){
