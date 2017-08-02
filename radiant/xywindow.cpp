@@ -989,6 +989,18 @@ void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
 	}
 }
 
+void XYWnd::SetCustomPivotOrigin( int pointx, int pointy ){
+	Vector3 point;
+	XY_ToPoint( pointx, pointy, point );
+	VIEWTYPE viewtype = static_cast<VIEWTYPE>( GetViewType() );
+	const int nDim = ( viewtype == YZ ) ? 0 : ( ( viewtype == XZ ) ? 1 : 2 );
+	//vector3_snap( point, GetSnapGridSize() );
+	point[nDim] = 999999;
+
+	GlobalSelectionSystem().setCustomPivotOrigin( point );
+	SceneChangeNotify();
+}
+
 unsigned int MoveCamera_buttons(){
 	return RAD_CONTROL | ( g_glwindow_globals.m_nMouseType == ETwoButton ? RAD_RBUTTON : RAD_MBUTTON );
 }
@@ -1021,6 +1033,10 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 		angles[nAngle] = static_cast<float>( radians_to_degrees( atan2( point[n1], point[n2] ) ) );
 		Camera_setAngles( camwnd, angles );
 	}
+}
+
+unsigned int SetCustomPivotOrigin_buttons(){
+	return RAD_MBUTTON | RAD_SHIFT;
 }
 
 /*
@@ -1224,7 +1240,7 @@ void XYWnd::Move_Begin(){
 
 void XYWnd::Move_End(){
 	m_move_started = false;
-	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow() );
+	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), false );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_move_focusOut );
 }
 
@@ -1269,7 +1285,7 @@ void XYWnd::Zoom_Begin(){
 
 void XYWnd::Zoom_End(){
 	m_zoom_started = false;
-	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow() );
+	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), false );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_zoom_focusOut );
 }
 
@@ -1330,6 +1346,9 @@ void XYWnd::XY_MouseDown( int x, int y, unsigned int buttons ){
 	else if ( buttons == OrientCamera_buttons() ) {
 		XYWnd_OrientCamera( this, x, y, *g_pParentWnd->GetCamWnd() );
 	}
+	else if ( buttons == SetCustomPivotOrigin_buttons() ) {
+		SetCustomPivotOrigin( x, y );
+	}
 	else
 	{
 		m_window_observer->onMouseDown( WindowVector_forInteger( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
@@ -1385,6 +1404,10 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 	// mbutton = angle camera
 	else if ( getButtonState() == OrientCamera_buttons() ) {
 		XYWnd_OrientCamera( this, x, y, *g_pParentWnd->GetCamWnd() );
+	}
+
+	else if ( buttons == SetCustomPivotOrigin_buttons() ) {
+		SetCustomPivotOrigin( x, y );
 	}
 
 	else

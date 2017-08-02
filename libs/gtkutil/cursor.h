@@ -118,7 +118,7 @@ class FreezePointer
 {
 unsigned int handle_motion;
 int recorded_x, recorded_y, last_x, last_y, center_x, center_y;
-GtkWidget* weedjet;
+GtkWidget* m_weedjet;
 typedef void ( *MotionDeltaFunction )( int x, int y, unsigned int state, void* data );
 MotionDeltaFunction m_function;
 void* m_data;
@@ -168,7 +168,7 @@ void freeze_pointer( GtkWindow* window, GtkWidget* widget, MotionDeltaFunction f
 	//gdk_window_set_cursor ( GTK_WIDGET( window )->window, cursor );
 	/*	is needed to fix activating neighbour widgets, that happens, if using upper one	*/
 	gtk_grab_add( widget );
-	weedjet = widget;
+	m_weedjet = widget;
 
 	gdk_cursor_unref( cursor );
 
@@ -190,17 +190,22 @@ void freeze_pointer( GtkWindow* window, GtkWidget* widget, MotionDeltaFunction f
 	handle_motion = g_signal_connect( G_OBJECT( window ), "motion_notify_event", G_CALLBACK( motion_delta ), this );
 }
 
-void unfreeze_pointer( GtkWindow* window ){
+void unfreeze_pointer( GtkWindow* window, bool centerize ){
 	g_signal_handler_disconnect( G_OBJECT( window ), handle_motion );
 
 	m_function = 0;
 	m_data = 0;
 
-	Sys_SetCursorPos( window, recorded_x, recorded_y );
-
+	if( centerize ){
+		Sys_SetCursorPos( window, center_x, center_y );
+	}
+	else{
+		Sys_SetCursorPos( window, recorded_x, recorded_y );
+	}
 //	gdk_window_set_cursor( GTK_WIDGET( window )->window, 0 );
 	gdk_pointer_ungrab( GDK_CURRENT_TIME );
-	gtk_grab_remove( weedjet );
+	if( m_weedjet )
+		gtk_grab_remove( m_weedjet );
 }
 };
 

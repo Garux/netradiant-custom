@@ -124,6 +124,7 @@ virtual void rotateSelected( const Quaternion& rotation ) = 0;
 virtual void scaleSelected( const Vector3& scaling ) = 0;
 
 virtual void pivotChanged() const = 0;
+virtual void setCustomPivotOrigin( Vector3& point ) const = 0;
 };
 
 #include "modulesystem.h"

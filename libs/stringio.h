@@ -234,7 +234,7 @@ inline bool Tokeniser_getFloat( Tokeniser& tokeniser, float& f ){
 	//fallback for 1.#IND 1.#INF 1.#QNAN cases, happening sometimes after rotating & often scaling with tex lock in BP mode
 	else if ( token != 0 && strstr( token, ".#" ) ) {
 		globalErrorStream() << "Warning: " << Unsigned( tokeniser.getLine() ) << ":" << Unsigned( tokeniser.getColumn() ) << ": expected parse problem at '" << token << "': wanted '#number'\nProcessing anyway\n";
-		*strstr( token, ".#" ) = '\0';
+//		*strstr( token, ".#" ) = '\0';
 		return true;
 	}
 	Tokeniser_unexpectedError( tokeniser, token, "#number" );

@@ -143,6 +143,8 @@ void Clipper_OnMouseMoved( int x, int y );
 void Clipper_Crosshair_OnMouseMoved( int x, int y );
 void DropClipPoint( int pointx, int pointy );
 
+void SetCustomPivotOrigin( int pointx, int pointy );
+
 void SetViewType( VIEWTYPE n );
 bool m_bActive;
 

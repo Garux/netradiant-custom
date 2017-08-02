@@ -325,6 +325,8 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 }
 };
 
+void GetSelectionAABB( AABB& bounds );
+const Matrix4& ssGetPivot2World();
 
 class Scalable
 {
@@ -339,14 +341,28 @@ private:
 Vector3 m_start;
 Vector3 m_axis;
 Scalable& m_scalable;
+
+AABB m_aabb;
+Vector3 m_transform_origin;
+Vector3 m_choosen_extent;
+
 public:
 ScaleAxis( Scalable& scalable )
 	: m_scalable( scalable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y ){
 	point_on_axis( m_start, m_axis, device2manip, x, y );
+
+	GetSelectionAABB( m_aabb );
+	m_transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
+	m_choosen_extent = Vector3( std::max( m_aabb.origin[0] + m_aabb.extents[0] - m_transform_origin[0], - m_aabb.origin[0] + m_aabb.extents[0] + m_transform_origin[0] ),
+					std::max( m_aabb.origin[1] + m_aabb.extents[1] - m_transform_origin[1], - m_aabb.origin[1] + m_aabb.extents[1] + m_transform_origin[1] ),
+					std::max( m_aabb.origin[2] + m_aabb.extents[2] - m_transform_origin[2], - m_aabb.origin[2] + m_aabb.extents[2] + m_transform_origin[2] )
+							);
+
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
+	//globalOutputStream() << "manip2object: " << manip2object << "  device2manip: " << device2manip << "  x: " << x << "  y:" << y <<"\n";
 	Vector3 current;
 	point_on_axis( current, m_axis, device2manip, x, y );
 	Vector3 delta = vector3_subtracted( current, m_start );
@@ -355,11 +371,19 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	vector3_snap( delta, GetSnapGridSize() );
 
 	Vector3 start( vector3_snapped( m_start, GetSnapGridSize() ) );
+	//globalOutputStream() << "start: " << start << "   delta: " << delta <<"\n";
 	Vector3 scale(
 		start[0] == 0 ? 1 : 1 + delta[0] / start[0],
 		start[1] == 0 ? 1 : 1 + delta[1] / start[1],
 		start[2] == 0 ? 1 : 1 + delta[2] / start[2]
 		);
+
+	for( std::size_t i = 0; i < 3; i++ ){
+		if( m_choosen_extent[i] > 0.0625 ){ //epsilon to prevent too high scale for set of models, having really small extent, formed by origins
+			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
+		}
+	}
+
 	m_scalable.scale( scale );
 }
 
@@ -373,12 +397,24 @@ class ScaleFree : public Manipulatable
 private:
 Vector3 m_start;
 Scalable& m_scalable;
+
+AABB m_aabb;
+Vector3 m_transform_origin;
+Vector3 m_choosen_extent;
+
 public:
 ScaleFree( Scalable& scalable )
 	: m_scalable( scalable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y ){
 	point_on_plane( m_start, device2manip, x, y );
+
+	GetSelectionAABB( m_aabb );
+	m_transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
+	m_choosen_extent = Vector3( std::max( m_aabb.origin[0] + m_aabb.extents[0] - m_transform_origin[0], - m_aabb.origin[0] + m_aabb.extents[0] + m_transform_origin[0] ),
+					std::max( m_aabb.origin[1] + m_aabb.extents[1] - m_transform_origin[1], - m_aabb.origin[1] + m_aabb.extents[1] + m_transform_origin[1] ),
+					std::max( m_aabb.origin[2] + m_aabb.extents[2] - m_transform_origin[2], - m_aabb.origin[2] + m_aabb.extents[2] + m_transform_origin[2] )
+							);
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
 	Vector3 current;
@@ -394,6 +430,13 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 		start[1] == 0 ? 1 : 1 + delta[1] / start[1],
 		start[2] == 0 ? 1 : 1 + delta[2] / start[2]
 		);
+
+	for( std::size_t i = 0; i < 3; i++ ){
+		if( m_choosen_extent[i] > 0.0625 ){
+			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
+		}
+	}
+
 	m_scalable.scale( scale );
 }
 };
@@ -2537,9 +2580,7 @@ EManipulatorMode m_manipulator_mode;
 Manipulator* m_manipulator;
 
 // state
-public:
 bool m_undo_begun;
-private:
 EMode m_mode;
 EComponentMode m_componentmode;
 
@@ -2559,8 +2600,13 @@ selection_t m_component_selection;
 Signal1<const Selectable&> m_selectionChanged_callbacks;
 
 void ConstructPivot() const;
+void setCustomPivotOrigin( Vector3& point ) const;
+public:
+void getSelectionAABB( AABB& bounds ) const;
+private:
 mutable bool m_pivotChanged;
 bool m_pivot_moving;
+mutable bool m_pivotIsCustom;
 
 void Scene_TestSelect( Selector& selector, SelectionTest& test, const View& view, SelectionSystem::EMode mode, SelectionSystem::EComponentMode componentMode );
 
@@ -2591,7 +2637,8 @@ RadiantSelectionSystem() :
 	m_rotate_manipulator( *this, 8, 64 ),
 	m_scale_manipulator( *this, 0, 64 ),
 	m_pivotChanged( false ),
-	m_pivot_moving( false ){
+	m_pivot_moving( false ),
+	m_pivotIsCustom( false ){
 	SetManipulatorMode( eTranslate );
 	pivotChanged();
 	addSelectionChangeCallback( PivotChangedSelectionCaller( *this ) );
@@ -2623,6 +2670,7 @@ EComponentMode ComponentMode() const {
 	return m_componentmode;
 }
 void SetManipulatorMode( EManipulatorMode mode ){
+	m_pivotIsCustom = false;
 	m_manipulator_mode = mode;
 	switch ( m_manipulator_mode )
 	{
@@ -2864,15 +2912,45 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			break;
 			case RadiantSelectionSystem::eSelect:
 			{
-				if( !( *selector.begin() ).second->isSelected() ){
-					( *selector.begin() ).second->setSelected( true );
+				SelectionPool::iterator best = selector.begin();
+				if( !( *best ).second->isSelected() ){
+					( *best ).second->setSelected( true );
+				}
+				SelectionPool::iterator i = best;
+				++i;
+				while ( i != selector.end() )
+				{
+					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+						if( !( *i ).second->isSelected() ){
+							( *i ).second->setSelected( true );
+						}
+					}
+					else{
+						break;
+					}
+					++i;
 				}
 			}
 			break;
 			case RadiantSelectionSystem::eDeselect:
 			{
-				if( ( *selector.begin() ).second->isSelected() ){
-					( *selector.begin() ).second->setSelected( false );
+				SelectionPool::iterator best = selector.begin();
+				if( ( *best ).second->isSelected() ){
+					( *best ).second->setSelected( false );
+				}
+				SelectionPool::iterator i = best;
+				++i;
+				while ( i != selector.end() )
+				{
+					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+						if( ( *i ).second->isSelected() ){
+							( *i ).second->setSelected( false );
+						}
+					}
+					else{
+						break;
+					}
+					++i;
 				}
 			}
 			break;
@@ -2908,14 +2986,21 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 
 		if ( !selector.failed() ) {
 			SelectableSortedSet::iterator best = selector.begin();
-			if ( ( *best ).second->isSelected() ) {
-				( *best ).second->setSelected( false );
-				return false;
+			const bool wasSelected = ( *best ).second->isSelected();
+			( *best ).second->setSelected( !wasSelected );
+			SelectableSortedSet::iterator i = best;
+			++i;
+			while ( i != selector.end() )
+			{
+				if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+					( *i ).second->setSelected( !wasSelected );
+				}
+				else{
+					break;
+				}
+				++i;
 			}
-			else{
-				( *best ).second->setSelected( true );
-				return true;
-			}
+			return !wasSelected;
 		}
 		else{
 			return true;
@@ -3380,7 +3465,7 @@ inline void pivot_for_node( Matrix4& pivot, scene::Node& node, scene::Instance& 
 #endif
 
 void RadiantSelectionSystem::ConstructPivot() const {
-	if ( !m_pivotChanged || m_pivot_moving ) {
+	if ( !m_pivotChanged || m_pivot_moving || m_pivotIsCustom ) {
 		return;
 	}
 	m_pivotChanged = false;
@@ -3401,6 +3486,7 @@ void RadiantSelectionSystem::ConstructPivot() const {
 		}
 
 		//vector3_snap( m_object_pivot, GetSnapGridSize() );
+		//globalOutputStream() << m_object_pivot << "\n";
 		m_pivot2world = matrix4_translation_for_vec3( m_object_pivot );
 
 		switch ( m_manipulator_mode )
@@ -3429,6 +3515,106 @@ void RadiantSelectionSystem::ConstructPivot() const {
 			break;
 		}
 	}
+}
+
+void RadiantSelectionSystem::setCustomPivotOrigin( Vector3& point ) const {
+	/*if ( !m_pivotChanged || m_pivot_moving ) {
+		return;
+	}*/
+	//m_pivotChanged = false;
+
+	if ( !nothingSelected() && ( m_manipulator_mode == eTranslate || m_manipulator_mode == eRotate || m_manipulator_mode == eScale ) ) {
+		AABB bounds;
+		if ( Mode() == eComponent ) {
+			Scene_BoundsSelectedComponent( GlobalSceneGraph(), bounds );
+		}
+		else
+		{
+			Scene_BoundsSelected( GlobalSceneGraph(), bounds );
+		}
+		//globalOutputStream() << point << "\n";
+		const float gridsize = GetSnapGridSize();
+		//const float bbox_epsilon = gridsize / 4.0;
+
+		for( std::size_t i = 0; i < 3; i++ ){
+			if( point[i] < 900000 ){
+				float bestsnapDist = fabs( bounds.origin[i] - point[i] );
+				float bestsnapTo = bounds.origin[i];
+				float othersnapDist = fabs( bounds.origin[i] + bounds.extents[i] - point[i] );
+				if( othersnapDist < bestsnapDist ){
+					bestsnapDist = othersnapDist;
+					bestsnapTo = bounds.origin[i] + bounds.extents[i];
+				}
+				othersnapDist = fabs( bounds.origin[i] - bounds.extents[i] - point[i] );
+				if( othersnapDist < bestsnapDist ){
+					bestsnapDist = othersnapDist;
+					bestsnapTo = bounds.origin[i] - bounds.extents[i];
+				}
+				othersnapDist = fabs( float_snapped( point[i], gridsize ) - point[i] );
+				if( othersnapDist < bestsnapDist ){
+					bestsnapDist = othersnapDist;
+					bestsnapTo = float_snapped( point[i], gridsize );
+				}
+				point[i] = bestsnapTo;
+
+/*				if( float_equal_epsilon( point[i], bestsnapTo, bbox_epsilon ) ){
+					point[i] = bestsnapTo;
+				}
+				else{
+					point[i] = float_snapped( point[i], gridsize );
+				}
+				*/
+				m_pivot2world[i + 12] = point[i]; //m_pivot2world.tx() .ty() .tz()
+			}
+		}
+
+		switch ( m_manipulator_mode )
+		{
+		case eTranslate:
+			break;
+		case eRotate:
+			if ( Mode() == eComponent ) {
+				matrix4_assign_rotation_for_pivot( m_pivot2world, m_component_selection.back() );
+			}
+			else
+			{
+				matrix4_assign_rotation_for_pivot( m_pivot2world, m_selection.back() );
+			}
+			break;
+		case eScale:
+			if ( Mode() == eComponent ) {
+				matrix4_assign_rotation_for_pivot( m_pivot2world, m_component_selection.back() );
+			}
+			else
+			{
+				matrix4_assign_rotation_for_pivot( m_pivot2world, m_selection.back() );
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	m_pivotIsCustom = true;
+}
+
+void RadiantSelectionSystem::getSelectionAABB( AABB& bounds ) const {
+	if ( !nothingSelected() ) {
+		if ( Mode() == eComponent ) {
+			Scene_BoundsSelectedComponent( GlobalSceneGraph(), bounds );
+		}
+		else
+		{
+			Scene_BoundsSelected( GlobalSceneGraph(), bounds );
+		}
+	}
+}
+
+void GetSelectionAABB( AABB& bounds ){
+	getSelectionSystem().getSelectionAABB( bounds );
+}
+
+const Matrix4& ssGetPivot2World(){
+	return getSelectionSystem().GetPivot2World();
 }
 
 void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
@@ -3773,6 +3959,7 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
 	m_selector.m_mouseMoved = true;
 	if ( m_mouse_down && !g_mouseMovedCallback.empty() ) {
+		m_selector.m_mouseMovedWhilePressed = true;
 		g_mouseMovedCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
 	}
 }
@@ -3783,12 +3970,14 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 		g_mouseUpCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
 	}
 	//L button w/o scene changed = tunnel selection
-	if( !getSelectionSystem().m_undo_begun && modifiers == c_modifierNone && button == c_button_select &&
+	if( // !getSelectionSystem().m_undo_begun &&
+		modifiers == c_modifierNone && button == c_button_select &&
 		//( !m_selector.m_mouseMoved || !m_mouse_down ) &&
-		( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent || GlobalSelectionSystem().ManipulatorMode() != SelectionSystem::eDrag ) ){
+		!m_selector.m_mouseMovedWhilePressed &&
+		( getSelectionSystem().Mode() != SelectionSystem::eComponent || getSelectionSystem().ManipulatorMode() != SelectionSystem::eDrag ) ){
 		m_selector.testSelect_simpleM1( device_constrained( window_to_normalised_device( position, m_width, m_height ) ) );
 	}
-	getSelectionSystem().m_undo_begun = false;
+	//getSelectionSystem().m_undo_begun = false;
 	m_selector.m_mouseMoved = false;
 	m_selector.m_mouseMovedWhilePressed = false;
 }

@@ -1660,10 +1660,10 @@ void tex2list( char* texlist, int *texnum, char* EXtex, int *EXtexnum ){
 	StripExtension( token );
 	FixDOSName( token );
 	for ( i = 0; i < *texnum; i++ ){
-		if ( !stricmp( texlist + i*65, token ) ) return;
+		if ( !Q_stricmp( texlist + i*65, token ) ) return;
 	}
 	for ( i = 0; i < *EXtexnum; i++ ){
-		if ( !stricmp( EXtex + i*65, token ) ) return;
+		if ( !Q_stricmp( EXtex + i*65, token ) ) return;
 	}
 	strcpy ( texlist + (*texnum)*65, token );
 	(*texnum)++;
@@ -1677,7 +1677,7 @@ void tex2list2( char* texlist, int *texnum, char* EXtex, int *EXtexnum, char* rE
 	//StripExtension( token );
 	char* dot = strrchr( token, '.' );
 	if ( dot != NULL){
-		if ( stricmp( dot, ".tga" ) && stricmp( dot, ".jpg" ) && stricmp( dot, ".png" ) ){
+		if ( Q_stricmp( dot, ".tga" ) && Q_stricmp( dot, ".jpg" ) && Q_stricmp( dot, ".png" ) ){
 			Sys_Printf( "WARNING4: %s : weird or missing extension in shader\n", token );
 		}
 		else{
@@ -1690,13 +1690,13 @@ void tex2list2( char* texlist, int *texnum, char* EXtex, int *EXtexnum, char* rE
 
 	/* exclude */
 	for ( i = 0; i < *texnum; i++ ){
-		if ( !stricmp( texlist + i*65, texlist + (*texnum)*65 ) ) return;
+		if ( !Q_stricmp( texlist + i*65, texlist + (*texnum)*65 ) ) return;
 	}
 	for ( i = 0; i < *EXtexnum; i++ ){
-		if ( !stricmp( EXtex + i*65, texlist + (*texnum)*65 ) ) return;
+		if ( !Q_stricmp( EXtex + i*65, texlist + (*texnum)*65 ) ) return;
 	}
 	for ( i = 0; i < *rEXtexnum; i++ ){
-		if ( !stricmp( rEXtex + i*65, texlist + (*texnum)*65 ) ) return;
+		if ( !Q_stricmp( rEXtex + i*65, texlist + (*texnum)*65 ) ) return;
 	}
 	(*texnum)++;
 	return;
@@ -1717,7 +1717,7 @@ void res2list( char* data, int *num ){
 	}
 	if ( *( data + (*num)*65 ) == '\0') return;
 	for ( i = 0; i < *num; i++ ){
-		if ( !stricmp( data + i*65, data + (*num)*65 ) ) return;
+		if ( !Q_stricmp( data + i*65, data + (*num)*65 ) ) return;
 	}
 	(*num)++;
 	return;
@@ -1825,7 +1825,7 @@ int pk3BSPMain( int argc, char **argv ){
 	epair_t *ep;
 	for ( ep = entities[0].epairs; ep != NULL; ep = ep->next )
 	{
-		if ( !strnicmp( ep->key, "vertexremapshader", 17 ) ) {
+		if ( !Q_strncasecmp( ep->key, "vertexremapshader", 17 ) ) {
 			sscanf( ep->value, "%*[^;] %*[;] %s", pk3Shaders + pk3ShadersN*65 );
 			res2list( pk3Shaders, &pk3ShadersN );
 		}
@@ -1846,13 +1846,13 @@ int pk3BSPMain( int argc, char **argv ){
 			res2list( pk3Sounds, &pk3SoundsN );
 		}
 
-		if ( !stricmp( ValueForKey( &entities[i], "classname" ), "func_plat" ) ){
+		if ( !Q_stricmp( ValueForKey( &entities[i], "classname" ), "func_plat" ) ){
 			strcpy( pk3Sounds + pk3SoundsN*65, "sound/movers/plats/pt1_strt.wav");
 			res2list( pk3Sounds, &pk3SoundsN );
 			strcpy( pk3Sounds + pk3SoundsN*65, "sound/movers/plats/pt1_end.wav");
 			res2list( pk3Sounds, &pk3SoundsN );
 		}
-		if ( !stricmp( ValueForKey( &entities[i], "classname" ), "target_push" ) ){
+		if ( !Q_stricmp( ValueForKey( &entities[i], "classname" ), "target_push" ) ){
 			if ( !(IntForKey( &entities[i], "spawnflags") & 1) ){
 				strcpy( pk3Sounds + pk3SoundsN*65, "sound/misc/windfly.wav");
 				res2list( pk3Sounds, &pk3SoundsN );
@@ -1940,19 +1940,19 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 
 		/* blocks */
-		if ( !stricmp( token, "textures" ) ){
+		if ( !Q_stricmp( token, "textures" ) ){
 			parseEXblock ( ExTextures, &ExTexturesN, exName );
 		}
-		else if ( !stricmp( token, "shaders" ) ){
+		else if ( !Q_stricmp( token, "shaders" ) ){
 			parseEXblock ( ExShaders, &ExShadersN, exName );
 		}
-		else if ( !stricmp( token, "shaderfiles" ) ){
+		else if ( !Q_stricmp( token, "shaderfiles" ) ){
 			parseEXblock ( ExShaderfiles, &ExShaderfilesN, exName );
 		}
-		else if ( !stricmp( token, "sounds" ) ){
+		else if ( !Q_stricmp( token, "sounds" ) ){
 			parseEXblock ( ExSounds, &ExSoundsN, exName );
 		}
-		else if ( !stricmp( token, "videos" ) ){
+		else if ( !Q_stricmp( token, "videos" ) ){
 			parseEXblock ( ExVideos, &ExVideosN, exName );
 		}
 		else{
@@ -1965,7 +1965,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < ExTexturesN; i++ ){
 		for ( j = 0; j < ExShadersN; j++ ){
-			if ( !stricmp( ExTextures + i*65, ExShaders + j*65 ) ){
+			if ( !Q_stricmp( ExTextures + i*65, ExShaders + j*65 ) ){
 				break;
 			}
 		}
@@ -1995,7 +1995,7 @@ skipEXfile:
 	/* can exclude pure textures right now, shouldn't create shaders for them anyway */
 	for ( i = 0; i < pk3ShadersN ; i++ ){
 		for ( j = 0; j < ExPureTexturesN ; j++ ){
-			if ( !stricmp( pk3Shaders + i*65, ExPureTextures + j*65 ) ){
+			if ( !Q_stricmp( pk3Shaders + i*65, ExPureTextures + j*65 ) ){
 				*( pk3Shaders + i*65 ) = '\0';
 				break;
 			}
@@ -2019,7 +2019,7 @@ skipEXfile:
 
 		/* do wanna le shader file? */
 		for ( j = 0; j < ExShaderfilesN; j++ ){
-			if ( !stricmp( ExShaderfiles + j*65, pk3Shaderfiles + i*65 ) ){
+			if ( !Q_stricmp( ExShaderfiles + j*65, pk3Shaderfiles + i*65 ) ){
 				ShaderFileExcluded = qtrue;
 				reasonShaderFile = ExShaderfiles + j*65;
 				break;
@@ -2036,7 +2036,7 @@ skipEXfile:
 
 			/* does it contain restricted shaders/textures? */
 			for ( j = 0; j < ExShadersN; j++ ){
-				if ( !stricmp( ExShaders + j*65, token ) ){
+				if ( !Q_stricmp( ExShaders + j*65, token ) ){
 					ShaderFileExcluded = qtrue;
 					reasonShader = ExShaders + j*65;
 					break;
@@ -2045,7 +2045,7 @@ skipEXfile:
 			if ( ShaderFileExcluded )
 				break;
 			for ( j = 0; j < ExPureTexturesN; j++ ){
-				if ( !stricmp( ExPureTextures + j*65, token ) ){
+				if ( !Q_stricmp( ExPureTextures + j*65, token ) ){
 					ShaderFileExcluded = qtrue;
 					reasonShader = ExPureTextures + j*65;
 					break;
@@ -2101,7 +2101,7 @@ skipEXfile:
 			/* do wanna le shader? */
 			wantShader = qfalse;
 			for ( j = 0; j < pk3ShadersN; j++ ){
-				if ( !stricmp( pk3Shaders + j*65, token) ){
+				if ( !Q_stricmp( pk3Shaders + j*65, token) ){
 					shader = j;
 					wantShader = qtrue;
 					break;
@@ -2146,15 +2146,15 @@ skipEXfile:
 						if ( !strcmp( token, "{" ) ) {
 							Sys_Printf( "WARNING9: %s : line %d : opening brace inside shader stage\n", temp, scriptline );
 						}
-						if ( !stricmp( token, "mapComp" ) || !stricmp( token, "mapNoComp" ) || !stricmp( token, "animmapcomp" ) || !stricmp( token, "animmapnocomp" ) ){
+						if ( !Q_stricmp( token, "mapComp" ) || !Q_stricmp( token, "mapNoComp" ) || !Q_stricmp( token, "animmapcomp" ) || !Q_stricmp( token, "animmapnocomp" ) ){
 							Sys_Printf( "WARNING7: %s : line %d : unsupported '%s' map directive\n", temp, scriptline, token );
 						}
 						/* skip the shader */
 						if ( !wantShader ) continue;
 
 						/* digest any images */
-						if ( !stricmp( token, "map" ) ||
-							!stricmp( token, "clampMap" ) ) {
+						if ( !Q_stricmp( token, "map" ) ||
+							!Q_stricmp( token, "clampMap" ) ) {
 							hasmap = qtrue;
 							/* get an image */
 							GetToken( qfalse );
@@ -2162,8 +2162,8 @@ skipEXfile:
 								tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 							}
 						}
-						else if ( !stricmp( token, "animMap" ) ||
-							!stricmp( token, "clampAnimMap" ) ) {
+						else if ( !Q_stricmp( token, "animMap" ) ||
+							!Q_stricmp( token, "clampAnimMap" ) ) {
 							hasmap = qtrue;
 							GetToken( qfalse );// skip num
 							while ( TokenAvailable() ){
@@ -2171,7 +2171,7 @@ skipEXfile:
 								tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
 							}
 						}
-						else if ( !stricmp( token, "videoMap" ) ){
+						else if ( !Q_stricmp( token, "videoMap" ) ){
 							hasmap = qtrue;
 							GetToken( qfalse );
 							FixDOSName( token );
@@ -2181,12 +2181,12 @@ skipEXfile:
 							}
 							FixDOSName( token );
 							for ( j = 0; j < pk3VideosN; j++ ){
-								if ( !stricmp( pk3Videos + j*65, token ) ){
+								if ( !Q_stricmp( pk3Videos + j*65, token ) ){
 									goto away;
 								}
 							}
 							for ( j = 0; j < ExVideosN; j++ ){
-								if ( !stricmp( ExVideos + j*65, token ) ){
+								if ( !Q_stricmp( ExVideos + j*65, token ) ){
 									goto away;
 								}
 							}
@@ -2197,7 +2197,7 @@ skipEXfile:
 						}
 					}
 				}
-				else if ( !strnicmp( token, "implicit", 8 ) ){
+				else if ( !Q_strncasecmp( token, "implicit", 8 ) ){
 					Sys_Printf( "WARNING5: %s : line %d : unsupported %s shader\n", temp, scriptline, token );
 				}
 				/* skip the shader */
@@ -2208,22 +2208,22 @@ skipEXfile:
 				----------------------------------------------------------------- */
 
 				/* match surfaceparm */
-				else if ( !stricmp( token, "surfaceparm" ) ) {
+				else if ( !Q_stricmp( token, "surfaceparm" ) ) {
 					GetToken( qfalse );
-					if ( !stricmp( token, "nodraw" ) ) {
+					if ( !Q_stricmp( token, "nodraw" ) ) {
 						wantShader = qfalse;
 						*( pk3Shaders + shader*65 ) = '\0';
 					}
 				}
 
 				/* skyparms <outer image> <cloud height> <inner image> */
-				else if ( !stricmp( token, "skyParms" ) ) {
+				else if ( !Q_stricmp( token, "skyParms" ) ) {
 					hasmap = qtrue;
 					/* get image base */
 					GetToken( qfalse );
 
 					/* ignore bogus paths */
-					if ( stricmp( token, "-" ) && stricmp( token, "full" ) ) {
+					if ( Q_stricmp( token, "-" ) && Q_stricmp( token, "full" ) ) {
 						strcpy ( temp, token );
 						sprintf( token, "%s_up", temp );
 						tex2list( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN );
@@ -2242,7 +2242,7 @@ skipEXfile:
 					GetToken( qfalse );
 					GetToken( qfalse );
 				}
-				else if ( !stricmp( token, "fogparms" ) ){
+				else if ( !Q_stricmp( token, "fogparms" ) ){
 					hasmap = qtrue;
 				}
 			}
@@ -2250,7 +2250,7 @@ skipEXfile:
 			//exclude shader
 			if ( wantShader ){
 				for ( j = 0; j < ExShadersN; j++ ){
-					if ( !stricmp( ExShaders + j*65, pk3Shaders + shader*65 ) ){
+					if ( !Q_stricmp( ExShaders + j*65, pk3Shaders + shader*65 ) ){
 						wantShader = qfalse;
 						*( pk3Shaders + shader*65 ) = '\0';
 						break;
@@ -2305,14 +2305,14 @@ skipEXfile:
 		if ( *( pk3Shaders + i*65 ) != '\0' ){
 			FixDOSName( pk3Shaders + i*65 );
 			for ( j = 0; j < pk3TexturesN; j++ ){
-				if ( !stricmp( pk3Shaders + i*65, pk3Textures + j*65 ) ){
+				if ( !Q_stricmp( pk3Shaders + i*65, pk3Textures + j*65 ) ){
 					*( pk3Shaders + i*65 ) = '\0';
 					break;
 				}
 			}
 			if ( *( pk3Shaders + i*65 ) == '\0' ) continue;
 			for ( j = 0; j < ExTexturesN; j++ ){
-				if ( !stricmp( pk3Shaders + i*65, ExTextures + j*65 ) ){
+				if ( !Q_stricmp( pk3Shaders + i*65, ExTextures + j*65 ) ){
 					*( pk3Shaders + i*65 ) = '\0';
 					break;
 				}
@@ -2323,7 +2323,7 @@ skipEXfile:
 //snds
 	for ( i = 0; i < pk3SoundsN; i++ ){
 		for ( j = 0; j < ExSoundsN; j++ ){
-			if ( !stricmp( pk3Sounds + i*65, ExSounds + j*65 ) ){
+			if ( !Q_stricmp( pk3Sounds + i*65, ExSounds + j*65 ) ){
 				*( pk3Sounds + i*65 ) = '\0';
 				break;
 			}
@@ -2429,7 +2429,8 @@ skipEXfile:
 	Sys_Printf( "\n\t.bsp and stuff\n" );
 
 	sprintf( temp, "maps/%s.bsp", nameOFmap );
-	if ( vfsPackFile( temp, packname, 10 ) ){
+	//if ( vfsPackFile( temp, packname, 10 ) ){
+	if ( vfsPackFile_Absolute_Path( source, temp, packname, 10 ) ){
 			Sys_Printf( "++%s\n", temp );
 		}
 	else{
@@ -2550,19 +2551,19 @@ int repackBSPMain( int argc, char **argv ){
 		}
 
 		/* blocks */
-		if ( !stricmp( token, "textures" ) ){
+		if ( !Q_stricmp( token, "textures" ) ){
 			parseEXblock ( ExTextures, &ExTexturesN, exName );
 		}
-		else if ( !stricmp( token, "shaders" ) ){
+		else if ( !Q_stricmp( token, "shaders" ) ){
 			parseEXblock ( ExShaders, &ExShadersN, exName );
 		}
-		else if ( !stricmp( token, "shaderfiles" ) ){
+		else if ( !Q_stricmp( token, "shaderfiles" ) ){
 			parseEXblock ( ExShaderfiles, &ExShaderfilesN, exName );
 		}
-		else if ( !stricmp( token, "sounds" ) ){
+		else if ( !Q_stricmp( token, "sounds" ) ){
 			parseEXblock ( ExSounds, &ExSoundsN, exName );
 		}
-		else if ( !stricmp( token, "videos" ) ){
+		else if ( !Q_stricmp( token, "videos" ) ){
 			parseEXblock ( ExVideos, &ExVideosN, exName );
 		}
 		else{
@@ -2575,7 +2576,7 @@ int repackBSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < ExTexturesN; i++ ){
 		for ( j = 0; j < ExShadersN; j++ ){
-			if ( !stricmp( ExTextures + i*65, ExShaders + j*65 ) ){
+			if ( !Q_stricmp( ExTextures + i*65, ExShaders + j*65 ) ){
 				break;
 			}
 		}
@@ -2647,19 +2648,19 @@ skipEXfile:
 		}
 
 		/* blocks */
-		if ( !stricmp( token, "textures" ) ){
+		if ( !Q_stricmp( token, "textures" ) ){
 			parseEXblock ( rExTextures, &rExTexturesN, exName );
 		}
-		else if ( !stricmp( token, "shaders" ) ){
+		else if ( !Q_stricmp( token, "shaders" ) ){
 			parseEXblock ( rExShaders, &rExShadersN, exName );
 		}
-		else if ( !stricmp( token, "shaderfiles" ) ){
+		else if ( !Q_stricmp( token, "shaderfiles" ) ){
 			parseEXblock ( rExShaderfiles, &rExShaderfilesN, exName );
 		}
-		else if ( !stricmp( token, "sounds" ) ){
+		else if ( !Q_stricmp( token, "sounds" ) ){
 			parseEXblock ( rExSounds, &rExSoundsN, exName );
 		}
-		else if ( !stricmp( token, "videos" ) ){
+		else if ( !Q_stricmp( token, "videos" ) ){
 			parseEXblock ( rExVideos, &rExVideosN, exName );
 		}
 		else{
@@ -2693,7 +2694,7 @@ skipEXrefile:
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	if ( !stricmp( strrchr( source, '.' ), ".bsp" ) ){
+	if ( !Q_stricmp( strrchr( source, '.' ), ".bsp" ) ){
 		strcpy( bspList, source );
 		bspListN++;
 	}
@@ -2790,7 +2791,7 @@ skipEXrefile:
 		epair_t *ep;
 		for ( ep = entities[0].epairs; ep != NULL; ep = ep->next )
 		{
-			if ( !strnicmp( ep->key, "vertexremapshader", 17 ) ) {
+			if ( !Q_strncasecmp( ep->key, "vertexremapshader", 17 ) ) {
 				sscanf( ep->value, "%*[^;] %*[;] %s", pk3Shaders + pk3ShadersN*65 );
 				res2list( pk3Shaders, &pk3ShadersN );
 			}
@@ -2811,13 +2812,13 @@ skipEXrefile:
 				res2list( pk3Sounds, &pk3SoundsN );
 			}
 
-			if ( !stricmp( ValueForKey( &entities[i], "classname" ), "func_plat" ) ){
+			if ( !Q_stricmp( ValueForKey( &entities[i], "classname" ), "func_plat" ) ){
 				strcpy( pk3Sounds + pk3SoundsN*65, "sound/movers/plats/pt1_strt.wav");
 				res2list( pk3Sounds, &pk3SoundsN );
 				strcpy( pk3Sounds + pk3SoundsN*65, "sound/movers/plats/pt1_end.wav");
 				res2list( pk3Sounds, &pk3SoundsN );
 			}
-			if ( !stricmp( ValueForKey( &entities[i], "classname" ), "target_push" ) ){
+			if ( !Q_stricmp( ValueForKey( &entities[i], "classname" ), "target_push" ) ){
 				if ( !(IntForKey( &entities[i], "spawnflags") & 1) ){
 					strcpy( pk3Sounds + pk3SoundsN*65, "sound/misc/windfly.wav");
 					res2list( pk3Sounds, &pk3SoundsN );
@@ -2988,7 +2989,7 @@ skipEXrefile:
 	/* can exclude pure *base* textures right now, shouldn't create shaders for them anyway */
 	for ( i = 0; i < pk3ShadersN ; i++ ){
 		for ( j = 0; j < ExPureTexturesN ; j++ ){
-			if ( !stricmp( pk3Shaders + i*65, ExPureTextures + j*65 ) ){
+			if ( !Q_stricmp( pk3Shaders + i*65, ExPureTextures + j*65 ) ){
 				*( pk3Shaders + i*65 ) = '\0';
 				break;
 			}
@@ -2997,7 +2998,7 @@ skipEXrefile:
 	/* can exclude repack.exclude shaders, assuming they got all their images */
 	for ( i = 0; i < pk3ShadersN ; i++ ){
 		for ( j = 0; j < rExShadersN ; j++ ){
-			if ( !stricmp( pk3Shaders + i*65, rExShaders + j*65 ) ){
+			if ( !Q_stricmp( pk3Shaders + i*65, rExShaders + j*65 ) ){
 				*( pk3Shaders + i*65 ) = '\0';
 				break;
 			}
@@ -3040,7 +3041,7 @@ skipEXrefile:
 			/* do wanna le shader? */
 			wantShader = qfalse;
 			for ( j = 0; j < pk3ShadersN; j++ ){
-				if ( !stricmp( pk3Shaders + j*65, token) ){
+				if ( !Q_stricmp( pk3Shaders + j*65, token) ){
 					shader = j;
 					wantShader = qtrue;
 					break;
@@ -3048,7 +3049,7 @@ skipEXrefile:
 			}
 			if ( wantShader ){
 				for ( j = 0; j < rExTexturesN ; j++ ){
-					if ( !stricmp( pk3Shaders + shader*65, rExTextures + j*65 ) ){
+					if ( !Q_stricmp( pk3Shaders + shader*65, rExTextures + j*65 ) ){
 						Sys_Printf( "WARNING3: %s : about to include shader for excluded texture\n", pk3Shaders + shader*65 );
 						break;
 					}
@@ -3101,8 +3102,8 @@ skipEXrefile:
 						if ( !wantShader ) continue;
 
 						/* digest any images */
-						if ( !stricmp( token, "map" ) ||
-							!stricmp( token, "clampMap" ) ) {
+						if ( !Q_stricmp( token, "map" ) ||
+							!Q_stricmp( token, "clampMap" ) ) {
 							strcat( shaderText, "\n\t\t" );
 							strcat( shaderText, token );
 							hasmap = qtrue;
@@ -3115,8 +3116,8 @@ skipEXrefile:
 							strcat( shaderText, " " );
 							strcat( shaderText, token );
 						}
-						else if ( !stricmp( token, "animMap" ) ||
-							!stricmp( token, "clampAnimMap" ) ) {
+						else if ( !Q_stricmp( token, "animMap" ) ||
+							!Q_stricmp( token, "clampAnimMap" ) ) {
 							strcat( shaderText, "\n\t\t" );
 							strcat( shaderText, token );
 							hasmap = qtrue;
@@ -3132,7 +3133,7 @@ skipEXrefile:
 							}
 							tokenready = qtrue;
 						}
-						else if ( !stricmp( token, "videoMap" ) ){
+						else if ( !Q_stricmp( token, "videoMap" ) ){
 							strcat( shaderText, "\n\t\t" );
 							strcat( shaderText, token );
 							hasmap = qtrue;
@@ -3146,17 +3147,17 @@ skipEXrefile:
 							}
 							FixDOSName( token );
 							for ( j = 0; j < pk3VideosN; j++ ){
-								if ( !stricmp( pk3Videos + j*65, token ) ){
+								if ( !Q_stricmp( pk3Videos + j*65, token ) ){
 									goto away;
 								}
 							}
 							for ( j = 0; j < ExVideosN; j++ ){
-								if ( !stricmp( ExVideos + j*65, token ) ){
+								if ( !Q_stricmp( ExVideos + j*65, token ) ){
 									goto away;
 								}
 							}
 							for ( j = 0; j < rExVideosN; j++ ){
-								if ( !stricmp( rExVideos + j*65, token ) ){
+								if ( !Q_stricmp( rExVideos + j*65, token ) ){
 									goto away;
 								}
 							}
@@ -3165,7 +3166,7 @@ skipEXrefile:
 							away:
 							j = 0;
 						}
-						else if ( !stricmp( token, "mapComp" ) || !stricmp( token, "mapNoComp" ) || !stricmp( token, "animmapcomp" ) || !stricmp( token, "animmapnocomp" ) ){
+						else if ( !Q_stricmp( token, "mapComp" ) || !Q_stricmp( token, "mapNoComp" ) || !Q_stricmp( token, "animmapcomp" ) || !Q_stricmp( token, "animmapnocomp" ) ){
 							Sys_Printf( "WARNING7: %s : %s shader\n", pk3Shaders + shader*65, token );
 							hasmap = qtrue;
 							if ( line == scriptline ){
@@ -3195,18 +3196,18 @@ skipEXrefile:
 				----------------------------------------------------------------- */
 
 				/* match surfaceparm */
-				else if ( !stricmp( token, "surfaceparm" ) ) {
+				else if ( !Q_stricmp( token, "surfaceparm" ) ) {
 					strcat( shaderText, "\n\tsurfaceparm " );
 					GetToken( qfalse );
 					strcat( shaderText, token );
-					if ( !stricmp( token, "nodraw" ) ) {
+					if ( !Q_stricmp( token, "nodraw" ) ) {
 						wantShader = qfalse;
 						*( pk3Shaders + shader*65 ) = '\0';
 					}
 				}
 
 				/* skyparms <outer image> <cloud height> <inner image> */
-				else if ( !stricmp( token, "skyParms" ) ) {
+				else if ( !Q_stricmp( token, "skyParms" ) ) {
 					strcat( shaderText, "\n\tskyParms " );
 					hasmap = qtrue;
 					/* get image base */
@@ -3214,7 +3215,7 @@ skipEXrefile:
 					strcat( shaderText, token );
 
 					/* ignore bogus paths */
-					if ( stricmp( token, "-" ) && stricmp( token, "full" ) ) {
+					if ( Q_stricmp( token, "-" ) && Q_stricmp( token, "full" ) ) {
 						strcpy ( temp, token );
 						sprintf( token, "%s_up", temp );
 						tex2list2( pk3Textures, &pk3TexturesN, ExTextures, &ExTexturesN, rExTextures, &rExTexturesN );
@@ -3237,7 +3238,7 @@ skipEXrefile:
 					strcat( shaderText, " " );
 					strcat( shaderText, token );
 				}
-				else if ( !strnicmp( token, "implicit", 8 ) ){
+				else if ( !Q_strncasecmp( token, "implicit", 8 ) ){
 					Sys_Printf( "WARNING5: %s : %s shader\n", pk3Shaders + shader*65, token );
 					hasmap = qtrue;
 					if ( line == scriptline ){
@@ -3249,7 +3250,7 @@ skipEXrefile:
 						strcat( shaderText, token );
 					}
 				}
-				else if ( !stricmp( token, "fogparms" ) ){
+				else if ( !Q_stricmp( token, "fogparms" ) ){
 					hasmap = qtrue;
 					if ( line == scriptline ){
 						strcat( shaderText, " " );
@@ -3273,7 +3274,7 @@ skipEXrefile:
 			//exclude shader
 			if ( wantShader ){
 				for ( j = 0; j < ExShadersN; j++ ){
-					if ( !stricmp( ExShaders + j*65, pk3Shaders + shader*65 ) ){
+					if ( !Q_stricmp( ExShaders + j*65, pk3Shaders + shader*65 ) ){
 						wantShader = qfalse;
 						*( pk3Shaders + shader*65 ) = '\0';
 						break;
@@ -3304,7 +3305,7 @@ skipEXrefile:
 				FixDOSName( pk3Shaders + i*65 );
 				//what if theres properly slashed one in the list?
 				for ( j = 0; j < pk3ShadersN; j++ ){
-					if ( !stricmp( pk3Shaders + i*65, pk3Shaders + j*65 ) && (i != j) ){
+					if ( !Q_stricmp( pk3Shaders + i*65, pk3Shaders + j*65 ) && (i != j) ){
 						*( pk3Shaders + i*65 ) = '\0';
 						break;
 					}
@@ -3312,21 +3313,21 @@ skipEXrefile:
 			}
 			if ( *( pk3Shaders + i*65 ) == '\0' ) continue;
 			for ( j = 0; j < pk3TexturesN; j++ ){
-				if ( !stricmp( pk3Shaders + i*65, pk3Textures + j*65 ) ){
+				if ( !Q_stricmp( pk3Shaders + i*65, pk3Textures + j*65 ) ){
 					*( pk3Shaders + i*65 ) = '\0';
 					break;
 				}
 			}
 			if ( *( pk3Shaders + i*65 ) == '\0' ) continue;
 			for ( j = 0; j < ExTexturesN; j++ ){
-				if ( !stricmp( pk3Shaders + i*65, ExTextures + j*65 ) ){
+				if ( !Q_stricmp( pk3Shaders + i*65, ExTextures + j*65 ) ){
 					*( pk3Shaders + i*65 ) = '\0';
 					break;
 				}
 			}
 			if ( *( pk3Shaders + i*65 ) == '\0' ) continue;
 			for ( j = 0; j < rExTexturesN; j++ ){
-				if ( !stricmp( pk3Shaders + i*65, rExTextures + j*65 ) ){
+				if ( !Q_stricmp( pk3Shaders + i*65, rExTextures + j*65 ) ){
 					*( pk3Shaders + i*65 ) = '\0';
 					break;
 				}
@@ -3337,14 +3338,14 @@ skipEXrefile:
 //snds
 	for ( i = 0; i < pk3SoundsN; i++ ){
 		for ( j = 0; j < ExSoundsN; j++ ){
-			if ( !stricmp( pk3Sounds + i*65, ExSounds + j*65 ) ){
+			if ( !Q_stricmp( pk3Sounds + i*65, ExSounds + j*65 ) ){
 				*( pk3Sounds + i*65 ) = '\0';
 				break;
 			}
 		}
 		if ( *( pk3Sounds + i*65 ) == '\0' ) continue;
 		for ( j = 0; j < rExSoundsN; j++ ){
-			if ( !stricmp( pk3Sounds + i*65, rExSounds + j*65 ) ){
+			if ( !Q_stricmp( pk3Sounds + i*65, rExSounds + j*65 ) ){
 				*( pk3Sounds + i*65 ) = '\0';
 				break;
 			}
