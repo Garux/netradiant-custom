@@ -462,7 +462,7 @@ void DoMergePatches(){
 	merge_info = mrgPatches[0].IsMergable( &mrgPatches[1] );
 
 	if ( merge_info.mergable ) {
-		globalOutputStream() << merge_info.pos1 << " " <<  merge_info.pos2;
+//		globalOutputStream() << merge_info.pos1 << " " <<  merge_info.pos2;
 		//Message removed, No tools give feedback on success.
 		//globalOutputStream() << "bobToolz MergePatches: Patches Mergable.\n";
 		DPatch* newPatch = mrgPatches[0].MergePatches( merge_info, &mrgPatches[0], &mrgPatches[1] );
@@ -480,10 +480,17 @@ void DoMergePatches(){
 		}
 		else
 		{
+			newPatch->BuildInRadiant( patches[0]->path().parent().get_pointer() );
+
+			scene::Instance& parent = *( patches[1]->parent() );
 			Path_deleteTop( patches[0]->path() );
 			Path_deleteTop( patches[1]->path() );
+			Entity* entity = Node_getEntity( parent.path().top() );
+			if ( entity != 0
+				&& Node_getTraversable( parent.path().top() )->empty() ) {
+				Path_deleteTop( parent.path() );
+			}
 
-			newPatch->BuildInRadiant();
 			delete newPatch;
 		}
 	}
@@ -518,7 +525,7 @@ void DoSplitPatch() {
 
 	std::list<DPatch> patchList = patch.Split();
 	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
-		( *patches ).BuildInRadiant();
+		( *patches ).BuildInRadiant( instance.path().parent().get_pointer() );
 	}
 
 	Path_deleteTop( instance.path() );
@@ -548,7 +555,7 @@ void DoSplitPatchCols() {
 
 	std::list<DPatch> patchList = patch.SplitCols();
 	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
-		( *patches ).BuildInRadiant();
+		( *patches ).BuildInRadiant( instance.path().parent().get_pointer() );
 	}
 
 	Path_deleteTop( instance.path() );
@@ -578,7 +585,7 @@ void DoSplitPatchRows() {
 
 	std::list<DPatch> patchList = patch.SplitRows();
 	for ( std::list<DPatch>::iterator patches = patchList.begin(); patches != patchList.end(); patches++ ) {
-		( *patches ).BuildInRadiant();
+		( *patches ).BuildInRadiant( instance.path().parent().get_pointer() );
 	}
 
 	Path_deleteTop( instance.path() );

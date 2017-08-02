@@ -144,7 +144,7 @@ struct layout_globals_t
 };
 
 layout_globals_t g_layout_globals;
-glwindow_globals_t g_glwindow_globals;
+//glwindow_globals_t g_glwindow_globals;
 
 
 // VFS
@@ -1936,6 +1936,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( camera_menu );
 		}
+		create_menu_item_with_mnemonic( camera_menu, "Focus on Selected", "CameraFocusOnSelected" );
 		create_menu_item_with_mnemonic( camera_menu, "_Center", "CenterView" );
 		create_menu_item_with_mnemonic( camera_menu, "_Up Floor", "UpFloor" );
 		create_menu_item_with_mnemonic( camera_menu, "_Down Floor", "DownFloor" );
@@ -2059,6 +2060,9 @@ GtkMenuItem* create_selection_menu(){
 		create_menu_item_with_mnemonic( menu_in_menu, "Nudge Right", "SelectNudgeRight" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Nudge Up", "SelectNudgeUp" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Nudge Down", "SelectNudgeDown" );
+		menu_separator( menu_in_menu );
+		create_menu_item_with_mnemonic( menu_in_menu, "Nudge +Z", "MoveSelectionUP" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Nudge -Z", "MoveSelectionDOWN" );
 	}
 	{
 		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Rotate" );
@@ -2202,7 +2206,7 @@ GtkMenuItem* create_help_menu(){
 	create_game_help_menu( menu );
 
 //	create_menu_item_with_mnemonic( menu, "Bug report", FreeCaller<OpenBugReportURL>() );
-	create_menu_item_with_mnemonic( menu, "Shortcuts list", FreeCaller<DoCommandListDlg>() );
+	create_menu_item_with_mnemonic( menu, "Shortcuts", FreeCaller<DoCommandListDlg>() );
 	create_menu_item_with_mnemonic( menu, "_About", FreeCaller<DoAbout>() );
 
 	return help_menu_item;
@@ -2266,8 +2270,8 @@ void TexdefNudge_registerShortcuts(){
 }
 
 void SelectNudge_registerShortcuts(){
-	command_connect_accelerator( "MoveSelectionDOWN" );
-	command_connect_accelerator( "MoveSelectionUP" );
+	//command_connect_accelerator( "MoveSelectionDOWN" );
+	//command_connect_accelerator( "MoveSelectionUP" );
 	//command_connect_accelerator("SelectNudgeLeft");
 	//command_connect_accelerator("SelectNudgeRight");
 	//command_connect_accelerator("SelectNudgeUp");
@@ -3554,7 +3558,7 @@ void MainFrame_Destroy(){
 
 
 void GLWindow_Construct(){
-	GlobalPreferenceSystem().registerPreference( "MouseButtons", IntImportStringCaller( g_glwindow_globals.m_nMouseType ), IntExportStringCaller( g_glwindow_globals.m_nMouseType ) );
+//	GlobalPreferenceSystem().registerPreference( "MouseButtons", IntImportStringCaller( g_glwindow_globals.m_nMouseType ), IntExportStringCaller( g_glwindow_globals.m_nMouseType ) );
 }
 
 void GLWindow_Destroy(){

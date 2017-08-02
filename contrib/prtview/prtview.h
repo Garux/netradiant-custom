@@ -28,6 +28,9 @@ void SaveConfig();
 int INIGetInt( char *key, int def );
 void INISetInt( char *key, int val, char *comment = 0 );
 
+typedef struct _GtkWidget GtkWidget;
+extern GtkWidget *g_pRadiantWnd;
+
 #define IDOK                1
 #define IDCANCEL            2
 

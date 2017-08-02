@@ -712,7 +712,7 @@ static void releaseStates(){
 
 camera_t& getCamera(){
 	return m_Camera;
-};
+}
 
 void BenchMark();
 void Cam_ChangeFloor( bool up );
@@ -1648,6 +1648,50 @@ void GlobalCamera_ResetAngles(){
 	Camera_setAngles( camwnd, angles );
 }
 
+#include "select.h"
+
+void GlobalCamera_FocusOnSelected(){
+	CamWnd& camwnd = *g_camwnd;
+
+	Vector3 angles( Camera_getAngles( camwnd ) );
+	Vector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
+	Vector3 viewvector;
+	viewvector[0] = cos( radangles[1] ) * cos( radangles[0] );
+	viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
+	viewvector[2] = sin( radangles[0] );
+
+	Vector3 camorigin( Camera_getOrigin( camwnd ) );
+
+	AABB aabb( aabb_for_minmax( Select_getWorkZone().d_work_min, Select_getWorkZone().d_work_max ) );
+
+	View& view = *( camwnd.getCamera().m_view );
+
+	Plane3 frustumPlanes[4];
+	frustumPlanes[0] = plane3_translated( view.getFrustum().left, camorigin - aabb.origin );
+	frustumPlanes[1] = plane3_translated( view.getFrustum().right, camorigin - aabb.origin );
+	frustumPlanes[2] = plane3_translated( view.getFrustum().top, camorigin - aabb.origin );
+	frustumPlanes[3] = plane3_translated( view.getFrustum().bottom, camorigin - aabb.origin );
+
+	float offset = 64.0f;
+
+	Vector3 corners[8];
+	aabb_corners( aabb, corners );
+
+	for ( size_t i = 0; i < 4; ++i ){
+		for ( size_t j = 0; j < 8; ++j ){
+			Ray ray( aabb.origin, -viewvector );
+			//Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] - frustumPlanes[i].normal() * 16.0f ) );
+			Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] ) );
+			float d = vector3_dot( ray.direction, newplane.normal() );
+			if( d != 0 ){
+				float s = vector3_dot( newplane.normal() * newplane.dist() - ray.origin, newplane.normal() ) / d;
+				offset = std::max( offset, s );
+			}
+		}
+	}
+	Camera_setOrigin( camwnd, aabb.origin - viewvector * offset );
+}
+
 void Camera_ChangeFloorUp(){
 	CamWnd& camwnd = *g_camwnd;
 	camwnd.Cam_ChangeFloor( true );
@@ -1911,6 +1955,7 @@ void CameraSpeed_decrease(){
 /// \brief Initialisation for things that have the same lifespan as this module.
 void CamWnd_Construct(){
 	GlobalCommands_insert( "CenterView", FreeCaller<GlobalCamera_ResetAngles>(), Accelerator( GDK_End ) );
+	GlobalCommands_insert( "CameraFocusOnSelected", FreeCaller<GlobalCamera_FocusOnSelected>(), Accelerator( GDK_Tab ) );
 
 	GlobalToggles_insert( "ToggleCubicClip", FreeCaller<Camera_ToggleFarClip>(), ToggleItem::AddCallbackCaller( g_getfarclip_item ), Accelerator( '\\', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "CubicClipZoomIn", FreeCaller<Camera_CubeIn>(), Accelerator( '[', (GdkModifierType)GDK_CONTROL_MASK ) );

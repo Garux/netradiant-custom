@@ -186,6 +186,9 @@ bool fill() const {
 const Vector3& getViewer() const {
 	return vector4_to_vector3( m_viewer );
 }
+const Frustum& getFrustum() const {
+	return m_frustum;
+}
 };
 
 #endif

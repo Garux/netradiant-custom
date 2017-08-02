@@ -342,8 +342,6 @@ Vector3 m_start;
 Vector3 m_axis;
 Scalable& m_scalable;
 
-AABB m_aabb;
-Vector3 m_transform_origin;
 Vector3 m_choosen_extent;
 
 public:
@@ -353,11 +351,12 @@ ScaleAxis( Scalable& scalable )
 void Construct( const Matrix4& device2manip, const float x, const float y ){
 	point_on_axis( m_start, m_axis, device2manip, x, y );
 
-	GetSelectionAABB( m_aabb );
-	m_transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
-	m_choosen_extent = Vector3( std::max( m_aabb.origin[0] + m_aabb.extents[0] - m_transform_origin[0], - m_aabb.origin[0] + m_aabb.extents[0] + m_transform_origin[0] ),
-					std::max( m_aabb.origin[1] + m_aabb.extents[1] - m_transform_origin[1], - m_aabb.origin[1] + m_aabb.extents[1] + m_transform_origin[1] ),
-					std::max( m_aabb.origin[2] + m_aabb.extents[2] - m_transform_origin[2], - m_aabb.origin[2] + m_aabb.extents[2] + m_transform_origin[2] )
+	AABB aabb;
+	GetSelectionAABB( aabb );
+	Vector3 transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
+	m_choosen_extent = Vector3( std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
+					std::max( aabb.origin[1] + aabb.extents[1] - transform_origin[1], - aabb.origin[1] + aabb.extents[1] + transform_origin[1] ),
+					std::max( aabb.origin[2] + aabb.extents[2] - transform_origin[2], - aabb.origin[2] + aabb.extents[2] + transform_origin[2] )
 							);
 
 }
@@ -398,8 +397,6 @@ private:
 Vector3 m_start;
 Scalable& m_scalable;
 
-AABB m_aabb;
-Vector3 m_transform_origin;
 Vector3 m_choosen_extent;
 
 public:
@@ -409,11 +406,12 @@ ScaleFree( Scalable& scalable )
 void Construct( const Matrix4& device2manip, const float x, const float y ){
 	point_on_plane( m_start, device2manip, x, y );
 
-	GetSelectionAABB( m_aabb );
-	m_transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
-	m_choosen_extent = Vector3( std::max( m_aabb.origin[0] + m_aabb.extents[0] - m_transform_origin[0], - m_aabb.origin[0] + m_aabb.extents[0] + m_transform_origin[0] ),
-					std::max( m_aabb.origin[1] + m_aabb.extents[1] - m_transform_origin[1], - m_aabb.origin[1] + m_aabb.extents[1] + m_transform_origin[1] ),
-					std::max( m_aabb.origin[2] + m_aabb.extents[2] - m_transform_origin[2], - m_aabb.origin[2] + m_aabb.extents[2] + m_transform_origin[2] )
+	AABB aabb;
+	GetSelectionAABB( aabb );
+	Vector3 transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
+	m_choosen_extent = Vector3( std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
+					std::max( aabb.origin[1] + aabb.extents[1] - transform_origin[1], - aabb.origin[1] + aabb.extents[1] + transform_origin[1] ),
+					std::max( aabb.origin[2] + aabb.extents[2] - transform_origin[2], - aabb.origin[2] + aabb.extents[2] + transform_origin[2] )
 							);
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
@@ -3197,7 +3195,12 @@ void outputScale( TextOutputStream& ostream ){
 	ostream << " -scale " << m_scale.x() << " " << m_scale.y() << " " << m_scale.z();
 }
 
-void rotateSelected( const Quaternion& rotation ){
+void rotateSelected( const Quaternion& rotation, bool snapOrigin ){
+	if( snapOrigin && !m_pivotIsCustom ){
+		m_pivot2world.tx() = float_snapped( m_pivot2world.tx(), GetSnapGridSize() );
+		m_pivot2world.ty() = float_snapped( m_pivot2world.ty(), GetSnapGridSize() );
+		m_pivot2world.tz() = float_snapped( m_pivot2world.tz(), GetSnapGridSize() );
+	}
 	startMove();
 	rotate( rotation );
 	freezeTransforms();

@@ -48,12 +48,15 @@ void CreateWindow( void );
 void DestroyWindow( void );
 bool IsWindowOpen( void );
 
+GtkWidget *g_pRadiantWnd = NULL;
+
 namespace BrushExport
 {
 GtkWindow* g_mainwnd;
 
 const char* init( void* hApp, void* pMainWidget ){
 	g_mainwnd = (GtkWindow*)pMainWidget;
+	g_pRadiantWnd = (GtkWidget*)pMainWidget;
 	ASSERT_NOTNULL( g_mainwnd );
 	return "";
 }

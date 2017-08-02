@@ -486,18 +486,23 @@ std::list<DPatch> DPatch::Split(){
 	int i;
 	int x, y;
 
-	if ( width >= 5 ) {
+	if ( height >= 5 ) {
 		std::list<DPatch> patchColList = SplitCols();
 		for ( std::list<DPatch>::iterator patchesCol = patchColList.begin(); patchesCol != patchColList.end(); patchesCol++ )
 		{
-			std::list<DPatch> patchRowList = ( *patchesCol ).SplitRows();
-			for ( std::list<DPatch>::iterator patchesRow = patchRowList.begin(); patchesRow != patchRowList.end(); patchesRow++ )
-			{
-				patchList.push_front( *patchesRow );
+			if( width >= 5 ){
+				std::list<DPatch> patchRowList = ( *patchesCol ).SplitRows();
+				for ( std::list<DPatch>::iterator patchesRow = patchRowList.begin(); patchesRow != patchRowList.end(); patchesRow++ )
+				{
+					patchList.push_front( *patchesRow );
+				}
+			}
+			else{
+				patchList.push_front( *patchesCol );
 			}
 		}
 	}
-	else if ( height >= 5 ) {
+	else if ( width >= 5 ) {
 		std::list<DPatch> patchRowList = SplitRows();
 		for ( std::list<DPatch>::iterator patchesRow = patchRowList.begin(); patchesRow != patchRowList.end(); patchesRow++ )
 		{

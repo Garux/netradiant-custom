@@ -201,8 +201,10 @@ static const char *PLUGIN_COMMANDS =
 	Q3R_CMD_LOAD;
 
 
+GtkWidget *g_pRadiantWnd = NULL;
 
 const char* QERPlug_Init( void *hApp, void* pMainWidget ){
+	g_pRadiantWnd = (GtkWidget*)pMainWidget;
 	return "Portal Viewer for Q3Radiant";
 }
 

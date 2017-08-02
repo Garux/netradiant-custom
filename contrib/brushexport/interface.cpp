@@ -4,6 +4,7 @@
 #include "debugging/debugging.h"
 #include "callbacks.h"
 #include "support.h"
+#include "plugin.h"
 
 #define GLADE_HOOKUP_OBJECT( component,widget,name ) \
 	g_object_set_data_full( G_OBJECT( component ), name, \
@@ -44,7 +45,8 @@ create_w_plugplug2( void ){
 	w_plugplug2 = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	gtk_widget_set_name( w_plugplug2, "w_plugplug2" );
 	gtk_window_set_title( GTK_WINDOW( w_plugplug2 ), "BrushExport-Plugin 3.0 by namespace" );
-	gtk_window_set_position( GTK_WINDOW( w_plugplug2 ), GTK_WIN_POS_CENTER );
+	gtk_window_set_position( GTK_WINDOW( w_plugplug2 ), GTK_WIN_POS_CENTER_ON_PARENT );
+	gtk_window_set_transient_for( GTK_WINDOW( w_plugplug2 ), GTK_WINDOW( g_pRadiantWnd ) );
 	gtk_window_set_destroy_with_parent( GTK_WINDOW( w_plugplug2 ), TRUE );
 
 	vbox1 = gtk_vbox_new( FALSE, 0 );

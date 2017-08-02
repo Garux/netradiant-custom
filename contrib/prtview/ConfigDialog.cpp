@@ -62,6 +62,9 @@ static int DoColor( PackedColour *c ){
 	clr[2] = ( (double)GetBValue( *c ) ) / 255.0;
 
 	dlg = gtk_color_selection_dialog_new( "Choose Color" );
+	gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( g_pRadiantWnd ) );
+	gtk_window_set_position( GTK_WINDOW( dlg ),GTK_WIN_POS_CENTER_ON_PARENT );
+	gtk_window_set_modal( GTK_WINDOW( dlg ), TRUE );
 	gtk_color_selection_set_color( GTK_COLOR_SELECTION( GTK_COLOR_SELECTION_DIALOG( dlg )->colorsel ), clr );
 	gtk_signal_connect( GTK_OBJECT( dlg ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
@@ -247,6 +250,9 @@ void DoConfigDialog(){
 	GtkObject *adj;
 
 	dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( g_pRadiantWnd ) );
+	gtk_window_set_position( GTK_WINDOW( dlg ),GTK_WIN_POS_CENTER_ON_PARENT );
+	gtk_window_set_modal( GTK_WINDOW( dlg ), TRUE );
 	gtk_window_set_title( GTK_WINDOW( dlg ), "Portal Viewer Configuration" );
 	gtk_signal_connect( GTK_OBJECT( dlg ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );

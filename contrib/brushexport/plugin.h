@@ -22,4 +22,7 @@
 #if !defined( INCLUDED_BRUSH_EXPORT_H )
 #define INCLUDED_BRUSH_EXPORT_H
 
+typedef struct _GtkWidget GtkWidget;
+extern GtkWidget *g_pRadiantWnd;
+
 #endif

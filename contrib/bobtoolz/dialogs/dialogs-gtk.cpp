@@ -28,6 +28,8 @@
 #include "../lists.h"
 #include "../misc.h"
 
+#include "../bobToolz-GTK.h"
+
 
 /*--------------------------------
         Callback Functions
@@ -214,6 +216,8 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 	int loop = 1;
 
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event",
 						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy",
@@ -307,7 +311,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		ret = eIDNO;
 	}
 
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
+	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_widget_show( window );
 	gtk_grab_add( window );
 
@@ -426,6 +430,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	int loop = 1;
 
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -547,7 +552,8 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- /vbox ----
 
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
+	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_widget_show( window );
 	gtk_grab_add( window );
 
@@ -1313,6 +1319,8 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	int loop = 1;
 
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	gtk_window_set_transient_for( GTK_WINDOW( window ), GTK_WINDOW( g_pRadiantWnd ) );
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 
 	gtk_signal_connect( GTK_OBJECT( window ), "delete_event", GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
 	gtk_signal_connect( GTK_OBJECT( window ), "destroy", GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
@@ -1570,7 +1578,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	// ---- /vbox ----
 
-	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
+	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_widget_show( window );
 	gtk_grab_add( window );
 

@@ -34,6 +34,8 @@
 #include "dialogs/dialogs-gtk.h"
 #include "../../libs/cmdlib.h"
 
+#include "bobToolz-GTK.h"
+
 void BobToolz_construct(){
 }
 
