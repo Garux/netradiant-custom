@@ -1666,6 +1666,8 @@ void TextureBrowser_createContextMenu( GtkWidget *treeview, GdkEventButton *even
 					gdk_event_get_time( (GdkEvent*)event ) );
 }
 
+void TextureBrowser_searchTags();
+
 gboolean TreeViewTags_onButtonPressed( GtkWidget *treeview, GdkEventButton *event ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
 		GtkTreePath *path;
@@ -1678,6 +1680,10 @@ gboolean TreeViewTags_onButtonPressed( GtkWidget *treeview, GdkEventButton *even
 		}
 
 		TextureBrowser_createContextMenu( treeview, event );
+		return TRUE;
+	}
+	if( event->type == GDK_2BUTTON_PRESS && event->button == 1 ){
+		TextureBrowser_searchTags();
 		return TRUE;
 	}
 	return FALSE;

@@ -1887,6 +1887,59 @@ bool Scene_forEachPlaneSelectable_selectPlanes( scene::Graph& graph, Selector& s
 	return !selectedPlanes.empty();
 }
 
+
+#include "brush.h"
+/*
+class TestedBrushPlanesSelectVeritces : public scene::Graph::Walker
+{
+SelectionTest& m_test;
+public:
+TestedBrushPlanesSelectVeritces( SelectionTest& test )
+	: m_test( test ){
+}
+bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	if ( path.top().get().visible() ) {
+		Selectable* selectable = Instance_getSelectable( instance );
+		if ( selectable != 0 && selectable->isSelected() ) {
+			BrushInstance* brushInstance = Instance_getBrush( instance );
+			if ( brushInstance != 0 ) {
+				brushInstance->selectVerticesOnPlanes( m_test );
+			}
+		}
+	}
+	return true;
+}
+};
+
+void Scene_forEachTestedBrushPlane_selectVertices( scene::Graph& graph, SelectionTest& test ){
+	graph.traverse( TestedBrushPlanesSelectVeritces( test ) );
+}
+*/
+class BrushPlanesSelectVeritces : public scene::Graph::Walker
+{
+SelectionTest& m_test;
+public:
+BrushPlanesSelectVeritces( SelectionTest& test )
+	: m_test( test ){
+}
+bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	if ( path.top().get().visible() ) {
+		Selectable* selectable = Instance_getSelectable( instance );
+		if ( selectable != 0 && selectable->isSelected() ) {
+			BrushInstance* brushInstance = Instance_getBrush( instance );
+			if ( brushInstance != 0 ) {
+				brushInstance->selectVerticesOnPlanes( m_test );
+			}
+		}
+	}
+	return true;
+}
+};
+
+void Scene_forEachBrushPlane_selectVertices( scene::Graph& graph, SelectionTest& test ){
+	graph.traverse( BrushPlanesSelectVeritces( test ) );
+}
+
 void Scene_Translate_Component_Selected( scene::Graph& graph, const Vector3& translation );
 void Scene_Translate_Selected( scene::Graph& graph, const Vector3& translation );
 void Scene_TestSelect_Primitive( Selector& selector, SelectionTest& test, const VolumeTest& volume );
@@ -2550,22 +2603,58 @@ std::list<Selectable*>& best(){
 }
 };
 
+class DeepBestSelector : public Selector
+{
+SelectionIntersection m_intersection;
+Selectable* m_selectable;
+SelectionIntersection m_bestIntersection;
+std::list<Selectable*> m_bestSelectable;
+public:
+DeepBestSelector() : m_bestIntersection( SelectionIntersection() ), m_bestSelectable( 0 ){
+}
+
+void pushSelectable( Selectable& selectable ){
+	m_intersection = SelectionIntersection();
+	m_selectable = &selectable;
+}
+void popSelectable(){
+	if ( m_intersection.equalEpsilon( m_bestIntersection, 0.25f, 2.f ) ) {
+		m_bestSelectable.push_back( m_selectable );
+		m_bestIntersection = m_intersection;
+	}
+	else if ( m_intersection < m_bestIntersection ) {
+		m_bestSelectable.clear();
+		m_bestSelectable.push_back( m_selectable );
+		m_bestIntersection = m_intersection;
+	}
+	m_intersection = SelectionIntersection();
+}
+void addIntersection( const SelectionIntersection& intersection ){
+	assign_if_closer( m_intersection, intersection );
+}
+
+std::list<Selectable*>& best(){
+	return m_bestSelectable;
+}
+};
+
+bool g_bAltDragManipulatorResize = false;
+
 class DragManipulator : public Manipulator
 {
 TranslateFree m_freeResize;
 TranslateFree m_freeDrag;
 ResizeTranslatable m_resize;
 DragTranslatable m_drag;
-SelectableBool m_dragSelectable;
+SelectableBool m_dragSelectable; //drag already selected stuff
 public:
 
-bool m_selected;
+bool m_selected; //selected temporally for drag
 
 DragManipulator() : m_freeResize( m_resize ), m_freeDrag( m_drag ), m_selected( false ){
 }
 
 Manipulatable* GetManipulatable(){
-	//globalOutputStream() << ( m_dragSelectable.isSelected() ? "m_freeDrag\n" : "m_freeResize\n" );
 	return m_dragSelectable.isSelected() ? &m_freeDrag : &m_freeResize;
 }
 
@@ -2580,12 +2669,38 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 		Scene_TestSelect_Primitive( booleanSelector, test, view );
 
 		if ( booleanSelector.isSelected() ) {
-			selector.addSelectable( SelectionIntersection( 0, 0 ), &m_dragSelectable );
-			m_selected = false;
+			if( g_bAltDragManipulatorResize ){
+				DeepBestSelector deepSelector;
+				Scene_TestSelect_Component_Selected( deepSelector, test, view, SelectionSystem::eVertex );
+				for ( std::list<Selectable*>::iterator i = deepSelector.best().begin(); i != deepSelector.best().end(); ++i )
+				{
+					if ( !( *i )->isSelected() ) {
+						GlobalSelectionSystem().setSelectedAllComponents( false );
+					}
+					selector.addSelectable( SelectionIntersection( 0, 0 ), ( *i ) );
+					m_selected = true;
+					m_dragSelectable.setSelected( false );
+				}
+				if( deepSelector.best().empty() ){
+					//Scene_forEachTestedBrushPlane_selectVertices( GlobalSceneGraph(), test );	//todo? drag clicked face
+					Scene_forEachBrushPlane_selectVertices( GlobalSceneGraph(), test );
+					m_selected = true;
+				}
+			}
+			else{
+				selector.addSelectable( SelectionIntersection( 0, 0 ), &m_dragSelectable );
+				m_selected = false;
+			}
 		}
 		else
 		{
-			m_selected = Scene_forEachPlaneSelectable_selectPlanes( GlobalSceneGraph(), selector, test );
+			if( g_bAltDragManipulatorResize ){
+				Scene_forEachBrushPlane_selectVertices( GlobalSceneGraph(), test );
+				m_selected = true;
+			}
+			else{
+				m_selected = Scene_forEachPlaneSelectable_selectPlanes( GlobalSceneGraph(), selector, test );
+			}
 		}
 	}
 	else
@@ -3562,7 +3677,12 @@ void RadiantSelectionSystem::endMove(){
 
 	if ( Mode() == ePrimitive ) {
 		if ( ManipulatorMode() == eDrag ) {
-			Scene_SelectAll_Component( false, SelectionSystem::eFace );
+			if( g_bAltDragManipulatorResize ){
+				Scene_SelectAll_Component( false, SelectionSystem::eVertex );
+			}
+			else{
+				Scene_SelectAll_Component( false, SelectionSystem::eFace );
+			}
 		}
 	}
 
@@ -4157,7 +4277,8 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 		//m_selector.m_mouseMoved = false;
 
 		DeviceVector devicePosition( window_to_normalised_device( position, m_width, m_height ) );
-		if ( modifiers == c_modifier_manipulator && m_manipulator.mouseDown( devicePosition ) ) {
+		g_bAltDragManipulatorResize = ( modifiers == c_modifierAlt ) ? true : false;
+		if ( ( modifiers == c_modifier_manipulator || modifiers == c_modifierAlt ) && m_manipulator.mouseDown( devicePosition ) ) {
 			g_mouseMovedCallback.insert( MouseEventCallback( Manipulator_::MouseMovedCaller( m_manipulator ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Manipulator_::MouseUpCaller( m_manipulator ) ) );
 		}

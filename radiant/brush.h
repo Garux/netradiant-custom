@@ -2402,9 +2402,6 @@ inline bool triangles_same_winding( const BasicVector3<Element>& x1, const Basic
 }
 
 
-typedef const Plane3* PlanePointer;
-typedef PlanePointer* PlanesIterator;
-
 class VectorLightList : public LightList
 {
 typedef std::vector<const RendererLight*> Lights;
@@ -2622,7 +2619,7 @@ void testSelect_centroid( Selector& selector, SelectionTest& test ){
 	}
 }
 
-void selectPlane( Selector& selector, const Line& line, PlanesIterator first, PlanesIterator last, const PlaneCallback& selectedPlaneCallback ){
+void selectPlane( Selector& selector, const Line& line, const PlaneCallback& selectedPlaneCallback ){
 	for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i )
 	{
 		Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
@@ -2640,6 +2637,17 @@ void selectReversedPlane( Selector& selector, const SelectedPlanes& selectedPlan
 	if ( selectedPlanes.contains( plane3_flipped( getFace().plane3() ) ) ) {
 		Selector_add( selector, m_selectable );
 	}
+}
+
+bool trySelectPlane( const Line& line ){
+	for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i ){
+		Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
+		double dot = vector3_dot( getFace().plane3().normal(), v );
+		if ( dot <= 0 ) {
+			return false;
+		}
+	}
+	return true;
 }
 
 void transformComponents( const Matrix4& matrix ){
@@ -2997,6 +3005,20 @@ void testSelect( Selector& selector, SelectionTest& test ){
 	if ( best.valid() ) {
 		Selector_add( selector, *this, best );
 	}
+}
+
+void selectVerticesOnPlanes( SelectionTest& test ){
+	Line line( test.getNear(), test.getFar() );
+	FaceVertexId faceVertex = m_vertex->m_faceVertex;
+	do
+	{
+		if( m_faceInstances[faceVertex.getFace()].trySelectPlane( line ) ){
+			//m_faceInstances[faceVertex.getFace()].select_vertex( faceVertex.getVertex(), true );
+			setSelected( true );
+		}
+		faceVertex = next_vertex( m_vertex->m_faces, faceVertex );
+	}
+	while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
 }
 };
 
@@ -3409,23 +3431,24 @@ void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSys
 void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
 	test.BeginMesh( localToWorld() );
 
-	PlanePointer brushPlanes[c_brush_maxFaces];
-	PlanesIterator j = brushPlanes;
-
-	for ( Brush::const_iterator i = m_brush.begin(); i != m_brush.end(); ++i )
-	{
-		*j++ = &( *i )->plane3();
-	}
-
 	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
 	{
-		( *i ).selectPlane( selector, Line( test.getNear(), test.getFar() ), brushPlanes, j, selectedPlaneCallback );
+		( *i ).selectPlane( selector, Line( test.getNear(), test.getFar() ), selectedPlaneCallback );
 	}
 }
 void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
 	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
 	{
 		( *i ).selectReversedPlane( selector, selectedPlanes );
+	}
+}
+
+
+void selectVerticesOnPlanes( SelectionTest& test ){
+	test.BeginMesh( localToWorld() );
+
+	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
+		( *i ).selectVerticesOnPlanes( test );
 	}
 }
 
