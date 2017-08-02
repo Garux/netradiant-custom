@@ -1492,7 +1492,8 @@ std::size_t planeNormalIndex( const Vector3& normal ) {
 
 void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& identity2transformed, const Vector3 centroid ){
 	if( identity2transformed == g_matrix4_identity ){
-		return; //TODO FIXME !!! this (and whole pipeline?) is called with g_matrix4_identity after every transform
+		//globalOutputStream() << "identity2transformed == g_matrix4_identity\n";
+		return; //TODO FIXME !!! this (and whole pipeline?) is called with g_matrix4_identity after every transform //now only on freezeTransform, it seems
 	}
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
 #if 1

@@ -1737,9 +1737,16 @@ void updateFiltered(){
 
 // observer
 void planeChanged(){
-	m_planeChanged = true;
-	aabbChanged();
-	m_lightsChanged();
+	/* m_planeChanged vs m_transformChanged relationship is important
+	b4 (w/o one) cycling dependency occured:
+	transformModifier.set ; transformChanged() ; planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
+	sceneRender() ; localAABB ; evaluateBRep ; buildBRep() ; evaluateTransform ; !!!problem starts here!!!! planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
+	sceneRender() ; localAABB ; evaluateBRep ; buildBRep() ; */
+	if( !m_transformChanged ){
+		m_planeChanged = true;
+		aabbChanged();
+		m_lightsChanged();
+	}
 }
 void shaderChanged(){
 	updateFiltered();
@@ -1754,16 +1761,18 @@ void evaluateBRep() const {
 }
 
 void transformChanged(){
-	m_transformChanged = true;
+	//m_transformChanged = true;
 	planeChanged();
+	m_transformChanged = true; //experimental fix of cyclic dependency
 }
 typedef MemberCaller<Brush, &Brush::transformChanged> TransformChangedCaller;
 
 void evaluateTransform(){
 	if ( m_transformChanged ) {
-		m_transformChanged = false;
+		//m_transformChanged = false;
 		revertTransform();
 		m_evaluateTransform();
+		m_transformChanged = false; //experimental fix of cyclic dependency
 	}
 }
 const Matrix4& localToParent() const {

@@ -302,7 +302,8 @@ void Patch::UpdateCachedData(){
 	}
 #endif
 
-	SceneChangeNotify();
+	if( !m_transformChanged ) //experimental! fixing extra sceneChangeNotify call during scene rendering
+		SceneChangeNotify();
 }
 
 void Patch::InvertMatrix(){
@@ -750,7 +751,8 @@ void Patch::AccumulateBBox(){
 		aabb_extend_by_point_safe( m_aabb_local, ( *i ).m_vertex );
 	}
 
-	m_boundsChanged();
+	if( !m_transformChanged ) //experimental! fixing extra sceneChangeNotify call during scene rendering
+		m_boundsChanged();
 	m_lightsChanged();
 }
 

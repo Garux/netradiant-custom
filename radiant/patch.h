@@ -619,6 +619,7 @@ const Matrix4& localToParent() const {
 	return g_matrix4_identity;
 }
 const AABB& localAABB() const {
+	const_cast<Patch*>( this )->evaluateTransform(); //experimental! fixing extra sceneChangeNotify call during scene rendering
 	return m_aabb_local;
 }
 VolumeIntersectionValue intersectVolume( const VolumeTest& test, const Matrix4& localToWorld ) const {
@@ -673,6 +674,7 @@ void transform( const Matrix4& matrix ){
 }
 void transformChanged(){
 	m_transformChanged = true;
+	m_boundsChanged(); //experimental! fixing extra sceneChangeNotify call during scene rendering
 	m_lightsChanged();
 	SceneChangeNotify();
 }
@@ -680,9 +682,10 @@ typedef MemberCaller<Patch, &Patch::transformChanged> TransformChangedCaller;
 
 void evaluateTransform(){
 	if ( m_transformChanged ) {
-		m_transformChanged = false;
+		//m_transformChanged = false;
 		revertTransform();
 		m_evaluateTransform();
+		m_transformChanged = false; //experimental! fixing extra sceneChangeNotify call during scene rendering
 	}
 }
 
