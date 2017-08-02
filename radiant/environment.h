@@ -27,9 +27,9 @@ const char* environment_get_home_path();
 const char* environment_get_app_path();
 
 extern int g_argc;
-extern char** g_argv;
+extern const char** g_argv;
 
-extern char* openCmdMap;
+extern const char* g_openCmdMap;
 
 
 #endif

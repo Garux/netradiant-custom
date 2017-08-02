@@ -23,10 +23,6 @@
 
 #include "DBrush.h"
 
-#ifdef WIN32
-#pragma warning(disable : 4786)
-#endif
-
 #include <list>
 #include "str.h"
 
@@ -284,8 +280,12 @@ bool DBrush::BBoxCollision( DBrush* chkBrush ){
 	vec3_t min1, min2;
 	vec3_t max1, max2;
 
-	GetBounds( min1, max1 );
-	chkBrush->GetBounds( min2, max2 );
+	if( !GetBounds( min1, max1 ) ){
+		return false;
+	}
+	if( !chkBrush->GetBounds( min2, max2 ) ){
+		return false;
+	}
 
 	if ( min1[0] >= max2[0] ) {
 		return false;
@@ -558,8 +558,12 @@ bool DBrush::BBoxTouch( DBrush *chkBrush ){
 	vec3_t min1, min2;
 	vec3_t max1, max2;
 
-	GetBounds( min1, max1 );
-	chkBrush->GetBounds( min2, max2 );
+	if( !GetBounds( min1, max1 ) ){
+		return false;
+	}
+	if( !chkBrush->GetBounds( min2, max2 ) ){
+		return false;
+	}
 
 	if ( ( min1[0] - max2[0] ) > MAX_ROUND_ERROR ) {
 		return false;
@@ -726,7 +730,9 @@ void DBrush::Rotate( vec3_t vOrigin, vec3_t vRotation ){
 
 void DBrush::RotateAboutCentre( vec3_t vRotation ){
 	vec3_t min, max, centre;
-	GetBounds( min, max );
+	if( !GetBounds( min, max ) ){
+		return;
+	}
 	VectorAdd( min, max, centre );
 	VectorScale( centre, 0.5f, centre );
 

@@ -92,7 +92,7 @@ bool Q_Exec( const char *cmd, char *cmdline, const char *, bool, bool waitfor ){
 // NOTE TTimo windows is VERY nitpicky about the syntax in CreateProcess
 bool Q_Exec( const char *cmd, char *cmdline, const char *execdir, bool bCreateConsole, bool waitfor ){
 	PROCESS_INFORMATION ProcessInformation;
-	STARTUPINFO startupinfo = {0};
+	STARTUPINFO startupinfo;
 	DWORD dwCreationFlags;
 	GetStartupInfo( &startupinfo );
 	if ( bCreateConsole ) {

@@ -41,7 +41,7 @@
 #include "picointernal.h"
 
 /* disable warnings */
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning( disable:4100 )		/* unref param */
 #endif
 

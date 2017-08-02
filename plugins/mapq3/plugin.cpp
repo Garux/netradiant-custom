@@ -106,12 +106,12 @@ void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& 
 	if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
 		return;
 	}
-	std::size_t version;
-	if ( !Tokeniser_getSize( tokeniser, version ) ) {
+	int version;
+	if ( !Tokeniser_getInteger( tokeniser, version ) ) {
 		return;
 	}
 	if ( version != MapVersion() ) {
-		globalErrorStream() << "Doom 3 map version " << MapVersion() << " supported, version is " << Unsigned( version ) << "\n";
+		globalErrorStream() << "Doom 3 map version " << MapVersion() << " supported, version is " << version << "\n";
 		return;
 	}
 	tokeniser.nextLine();
@@ -177,12 +177,12 @@ void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& 
 	if ( !Tokeniser_parseToken( tokeniser, "Version" ) ) {
 		return;
 	}
-	std::size_t version;
-	if ( !Tokeniser_getSize( tokeniser, version ) ) {
+	int version;
+	if ( !Tokeniser_getInteger( tokeniser, version ) ) {
 		return;
 	}
 	if ( version != MapVersion() ) {
-		globalErrorStream() << "Quake 4 map version " << MapVersion() << " supported, version is " << Unsigned( version ) << "\n";
+		globalErrorStream() << "Quake 4 map version " << MapVersion() << " supported, version is " << version << "\n";
 		return;
 	}
 	tokeniser.nextLine();

@@ -44,7 +44,7 @@
 #define R_OK 04
 #endif
 
-#define S_ISDIR( mode ) ( mode & _S_IFDIR )
+//#define S_ISDIR( mode ) ( mode & _S_IFDIR )
 #define PATH_MAX 260
 #endif
 #include <glib.h>

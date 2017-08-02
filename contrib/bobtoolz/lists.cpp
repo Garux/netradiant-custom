@@ -19,10 +19,6 @@
 
 #include "lists.h"
 
-#ifdef WIN32
-#pragma warning(disable : 4786)
-#endif
-
 #include <glib.h>
 
 #include "misc.h"

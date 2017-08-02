@@ -785,6 +785,7 @@ float evaluateFloat( const ShaderValue& value, const ShaderParameters& params, c
 	float f;
 	if ( !string_parse_float( result, f ) ) {
 		globalErrorStream() << "parsing float value failed: " << makeQuoted( result ) << "\n";
+		return 1.f;
 	}
 	return f;
 }

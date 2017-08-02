@@ -1357,7 +1357,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		// vPos[1] = aabb.origin;
 		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
-		int i, j;
+		unsigned int i, j;
 		float f = 1 / cos( M_PI / n );
 		for ( i = 0; i < width; ++i )
 		{
@@ -1383,7 +1383,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		// vPos[1] = aabb.origin;
 		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
-		int i, j;
+		unsigned int i, j;
 		float f = 1 / cos( M_PI / n );
 		for ( i = 0; i < width; ++i )
 		{
@@ -1410,7 +1410,7 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		// vPos[1] = aabb.origin;
 		// vPos[2] = vector3_added(aabb.origin, aabb.extents);
 
-		int i, j;
+		unsigned int i, j;
 		float f = 1 / cos( M_PI / n );
 		float g = 1 / cos( M_PI / ( 2 * m ) );
 		for ( i = 0; i < width; ++i )

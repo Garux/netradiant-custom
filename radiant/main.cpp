@@ -652,8 +652,8 @@ int main( int argc, char* argv[] ){
 
 	hide_splash();
 
-	if( openCmdMap && *openCmdMap ){
-		Map_LoadFile( openCmdMap );
+	if( g_openCmdMap && *g_openCmdMap ){
+		Map_LoadFile( g_openCmdMap );
 	}
 	else if ( g_bLoadLastMap && !g_strLastMap.empty() ) {
 		Map_LoadFile( g_strLastMap.c_str() );

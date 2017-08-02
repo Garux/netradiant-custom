@@ -41,7 +41,7 @@
 #include "picointernal.h"
 
 /* disable warnings */
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning( disable:4100 )		/* unref param */
 #endif
 
@@ -508,7 +508,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 	picoModel_t    *model;
 	picoSurface_t  *curSurface  = NULL;
 	picoParser_t   *p;
-	int allocated;
+	int allocated = 0;
 	int entries;
 	int numVerts    = 0;
 	int numNormals  = 0;

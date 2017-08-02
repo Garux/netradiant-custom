@@ -279,7 +279,13 @@ const Vector3 g_vector3_axis_x( 1, 0, 0 );
 const Vector3 g_vector3_axis_y( 0, 1, 0 );
 const Vector3 g_vector3_axis_z( 0, 0, 1 );
 
-const Vector3 g_vector3_axes[3] = { g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z };
+#ifdef __GNUC__
+#define VARIABLE_IS_NOT_USED __attribute__ ((unused))
+#else
+#define VARIABLE_IS_NOT_USED
+#endif
+
+const Vector3 VARIABLE_IS_NOT_USED g_vector3_axes[3] = { g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z };
 
 template<typename Element, typename OtherElement>
 inline void vector3_swap( BasicVector3<Element>& self, BasicVector3<OtherElement>& other ){

@@ -19,10 +19,6 @@
 
 #include "funchandlers.h"
 
-#ifdef WIN32
-#pragma warning(disable : 4786)
-#endif
-
 #include "dialogs/dialogs-gtk.h"
 
 #include <list>

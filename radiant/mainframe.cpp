@@ -923,6 +923,7 @@ GtkMenuItem* create_colours_menu(){
 	create_menu_item_with_mnemonic( menu_3, "Maya/Max/Lightwave Emulation", "ColorSchemeYdnar" );
 
 	create_menu_item_with_mnemonic( menu_in_menu, "GTK Theme...", "gtkThemeDlg" );
+	create_menu_item_with_mnemonic( menu_in_menu, "OpenGL Font...", "OpenGLFont" );
 
 	menu_separator( menu_in_menu );
 
@@ -3344,9 +3345,23 @@ void GridStatus_onTextureLockEnabledChanged(){
 	}
 }
 
-void GlobalGL_sharedContextCreated(){
-	GLFont *g_font = NULL;
+CopiedString g_strOpenGLFont = "arial 8";
 
+void OpenGLFont_select(){
+	CopiedString newfont;
+	if( OpenGLFont_dialog( GTK_WIDGET( MainFrame_getWindow() ), g_strOpenGLFont.c_str(), newfont ) ){
+		{
+			ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Changing OpenGL Font" );
+			delete GlobalOpenGL().m_font;
+			g_strOpenGLFont = newfont;
+			GlobalOpenGL().m_font = glfont_create( g_strOpenGLFont.c_str() );
+		}
+		UpdateAllWindows();
+	}
+}
+
+
+void GlobalGL_sharedContextCreated(){
 	// report OpenGL information
 	globalOutputStream() << "GL_VENDOR: " << reinterpret_cast<const char*>( glGetString( GL_VENDOR ) ) << "\n";
 	globalOutputStream() << "GL_RENDERER: " << reinterpret_cast<const char*>( glGetString( GL_RENDERER ) ) << "\n";
@@ -3360,17 +3375,7 @@ void GlobalGL_sharedContextCreated(){
 	GlobalShaderCache().realise();
 	Textures_Realise();
 
-#ifdef WIN32
-	/* win32 is dodgy here, just use courier new then */
-	g_font = glfont_create( "arial 8" );
-#else
-	GtkSettings *settings = gtk_settings_get_default();
-	gchar *fontname;
-	g_object_get( settings, "gtk-font-name", &fontname, NULL );
-	g_font = glfont_create( fontname );
-#endif
-
-	GlobalOpenGL().m_font = g_font;
+	GlobalOpenGL().m_font = glfont_create( g_strOpenGLFont.c_str() );
 }
 
 void GlobalGL_sharedContextDestroyed(){
@@ -3509,6 +3514,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "MouseDragOrScale", FreeCaller<ToggleDragScaleModes>(), Accelerator( 'Q' ) );
 
 	GlobalCommands_insert( "gtkThemeDlg", FreeCaller<gtkThemeDlg>() );
+	GlobalCommands_insert( "OpenGLFont", FreeCaller<OpenGLFont_select>() );
 	GlobalCommands_insert( "ColorSchemeOriginal", FreeCaller<ColorScheme_Original>() );
 	GlobalCommands_insert( "ColorSchemeQER", FreeCaller<ColorScheme_QER>() );
 	GlobalCommands_insert( "ColorSchemeBlackAndGreen", FreeCaller<ColorScheme_Black>() );
@@ -3591,6 +3597,7 @@ void MainFrame_Construct(){
 	GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
 
 	GlobalPreferenceSystem().registerPreference( "NudgeAfterClone", BoolImportStringCaller( g_bNudgeAfterClone ), BoolExportStringCaller( g_bNudgeAfterClone ) );
+	GlobalPreferenceSystem().registerPreference( "OpenGLFont", CopiedStringImportStringCaller( g_strOpenGLFont ), CopiedStringExportStringCaller( g_strOpenGLFont ) );
 	if ( g_strEnginePath.empty() )
 	{
 		g_strEnginePath_was_empty_1st_start = true;

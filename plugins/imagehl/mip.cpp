@@ -138,7 +138,6 @@ static const byte quakepalette[768] =
 Image* LoadMIPBuff( byte* buffer ){
 	byte *buf_p;
 	int palettelength;
-	unsigned long mipdatasize;
 	int columns, rows, numPixels;
 	byte *pixbuf;
 	int i;
@@ -158,7 +157,7 @@ Image* LoadMIPBuff( byte* buffer ){
 		return 0;
 	}
 
-	mipdatasize = GET_MIP_DATA_SIZE( columns, rows );
+	//unsigned long mipdatasize = GET_MIP_DATA_SIZE( columns, rows );
 
 	palettelength = vfsLoadFile( "gfx/palette.lmp", (void **) &loadedpalette );
 	if ( palettelength == 768 ) {

@@ -261,12 +261,10 @@ const char* QERPlug_GetCommandList(){
 
 char *TranslateString( char *buf ){
 	static char buf2[32768];
-	int i, l;
-	char  *out;
 
-	l = strlen( buf );
-	out = buf2;
-	for ( i = 0 ; i < l ; i++ )
+	std::size_t l = strlen( buf );
+	char* out = buf2;
+	for ( std::size_t i = 0 ; i < l ; i++ )
 	{
 		if ( buf[i] == '\n' ) {
 			*out++ = '\r';

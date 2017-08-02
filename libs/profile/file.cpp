@@ -175,7 +175,7 @@ MemStream::size_type MemStream::write( const byte_type* buffer, size_type length
 		GrowFile( m_nPosition + length );
 	}
 
-	memcpy( (unsigned char*)m_pBuffer + m_nPosition, (unsigned char*)buffer, length );
+	memcpy( (unsigned char*)m_pBuffer + m_nPosition, (const unsigned char*)buffer, length );
 
 	m_nPosition += size_type( length );
 
@@ -271,7 +271,7 @@ int MemStream::Seek( offset_type lOff, int nFrom ){
 		lNewPos = m_nFileSize + lOff;
 	}
 	else{
-		return ( position_type ) - 1;
+		return -1;
 	}
 
 	m_nPosition = lNewPos;

@@ -32,7 +32,8 @@ multimon_globals_t g_multimon_globals;
 //LatchedBool g_Multimon_enableSysMenuPopups( false, "Floating windows sysmenu icons" );
 
 void MultiMonitor_constructPreferences( PreferencesPage& page ){
-	GtkWidget* primary_monitor = page.appendCheckBox( "Multi Monitor", "Start on Primary Monitor", g_multimon_globals.m_bStartOnPrimMon );
+	//GtkWidget* primary_monitor =
+	page.appendCheckBox( "Multi Monitor", "Start on Primary Monitor", g_multimon_globals.m_bStartOnPrimMon );
 //	GtkWidget* popup = page.appendCheckBox(
 //		"", "Disable system menu on popup windows",
 //		LatchedBoolImportCaller( g_Multimon_enableSysMenuPopups ),

@@ -1330,13 +1330,13 @@ BrushPrefab g_brushcone( eBrushCone );
 BrushPrefab g_brushsphere( eBrushSphere );
 BrushPrefab g_brushrock( eBrushRock );
 
-
+/*
 void FlipClip();
 void SplitClip();
 void Clip();
 void OnClipMode( bool enable );
 bool ClipMode();
-
+*/
 
 void ClipSelected(){
 	if ( ClipMode() ) {

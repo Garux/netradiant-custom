@@ -193,12 +193,13 @@ inline Matrix4 projection_for_camera( float near_z, float far_z, float fieldOfVi
 }
 
 float Camera_getFarClipPlane( camera_t& camera ){
-	return ( g_camwindow_globals_private.m_bCubicClipping ) ? pow( 2.0, ( g_camwindow_globals.m_nCubicScale + 7 ) / 2.0 ) : 32768.0f;
+	return ( g_camwindow_globals_private.m_bCubicClipping ) ? pow( 2.0, ( g_camwindow_globals.m_nCubicScale + 7 ) / 2.0 ) : ( ( g_MaxWorldCoord - g_MinWorldCoord ) * sqrt( 3 ) );
 }
 
 void Camera_updateProjection( camera_t& camera ){
 	float farClip = Camera_getFarClipPlane( camera );
-	camera.projection = projection_for_camera( farClip / 4096.0f, farClip, camera_t::fieldOfView, camera.width, camera.height );
+
+	camera.projection = projection_for_camera( 1.f, farClip, camera_t::fieldOfView, camera.width, camera.height );
 
 	camera.m_view->Construct( camera.projection, camera.modelview, camera.width, camera.height );
 }
@@ -750,7 +751,7 @@ CameraView& getCameraView(){
 	return m_cameraview;
 }
 
-guint32 m_rightClickTime;
+Timer m_rightClickTimer;
 
 private:
 void Cam_Draw();
@@ -826,39 +827,39 @@ void Camera_setAngles( CamWnd& camwnd, const Vector3& angles ){
 // =============================================================================
 // CamWnd class
 
-void context_menu(){
+void context_menu_show(){
 	if( g_pParentWnd->ActiveXY() ){
 		g_pParentWnd->ActiveXY()->OnContextMenu();
 		g_bCamEntityMenu = true;
 	}
 }
 
+void context_menu(){
+	//need this hack, otherwise button wont be released = global accels broken, until correct button pressed again...
+	GdkEvent* event_ = gtk_get_current_event();
+	if( event_ ){
+		event_->type = GDK_BUTTON_RELEASE;
+		gtk_main_do_event( event_ );
+		gdk_event_free( event_ );
+		context_menu_show();
+	}
+}
+
 /* GDK_2BUTTON_PRESS doesn't always work in this case, so... */
-bool context_menu_try( GdkEventButton* event, CamWnd* camwnd ){
-	if( ( event->time - camwnd->m_rightClickTime ) < 200 ){
-		camwnd->m_rightClickTime = event->time;
-		return true;
-	}
-	else{
-		camwnd->m_rightClickTime = event->time;
-		return false;
-	}
+bool context_menu_try( CamWnd* camwnd ){
+	//globalOutputStream() << camwnd->m_rightClickTimer.elapsed_msec() << "\n";
+	return camwnd->m_rightClickTimer.elapsed_msec() < 200;
+	//doesn't work if cam redraw > 200msec (3x click works): gtk_widget_queue_draw proceeds after timer.start()
 }
 
 gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
-		if( context_menu_try( event, camwnd ) ){
-			//need this hack, otherwise button wont be released = global accels broken, until correct button pressed again...
-			GdkEvent* event_ = gtk_get_current_event();
-			if( event_ ){
-				event_->type = GDK_BUTTON_RELEASE;
-				gtk_main_do_event( event_ );
-				gdk_event_free( event_ );
-				context_menu();
-			}
+		if( context_menu_try( camwnd ) ){
+			context_menu();
 		}
 		else{
 			camwnd->EnableFreeMove();
+			camwnd->m_rightClickTimer.start();
 		}
 		return TRUE;
 	}
@@ -867,16 +868,13 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 
 gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+		bool doubleclicked = context_menu_try( camwnd );
 		camwnd->DisableFreeMove();
-		if( context_menu_try( event, camwnd ) ){
-			//need this hack, otherwise button wont be released = global accels broken, until correct button pressed again...
-			GdkEvent* event_ = gtk_get_current_event();
-			if( event_ ){
-				event_->type = GDK_BUTTON_RELEASE;
-				gtk_main_do_event( event_ );
-				gdk_event_free( event_ );
-				context_menu();
-			}
+		if( doubleclicked ){
+			context_menu();
+		}
+		else{
+			camwnd->m_rightClickTimer.start();
 		}
 		return TRUE;
 	}
@@ -973,7 +971,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 			normalized[1] *= -1.f;
 			normalized[2] = 0.f;
 
-			normalized *= 16.0f;
+			normalized *= 2.0f; //*= 2 * nearplane
 				//globalOutputStream() << normalized << " normalized    ";
 			matrix4_transform_point( maa, normalized );
 				//globalOutputStream() << normalized << "\n";
@@ -1297,8 +1295,7 @@ CamWnd::CamWnd() :
 	m_selection_button_release_handler( 0 ),
 	m_selection_motion_handler( 0 ),
 	m_freelook_button_press_handler( 0 ),
-	m_drawing( false ),
-	m_rightClickTime( 0 ){
+	m_drawing( false ){
 	m_bFreeMove = false;
 
 	GlobalWindowObservers_add( m_window_observer );
@@ -1503,7 +1500,7 @@ void SetState( Shader* state, EStyle style ){
 		m_state_stack.back().m_state = state;
 	}
 }
-const EStyle getStyle() const {
+EStyle getStyle() const {
 	return eFullMaterials;
 }
 void PushState(){

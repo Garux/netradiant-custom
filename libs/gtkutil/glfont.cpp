@@ -369,6 +369,17 @@ GLFont *glfont_create( const char* font_string ){
 		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
 	}
 
+	if ( font == 0 ) {
+		pango_font_description_free( font_desc );
+
+		GtkSettings *settings = gtk_settings_get_default();
+		gchar *fontname;
+		g_object_get( settings, "gtk-font-name", &fontname, NULL );
+
+		font_desc = pango_font_description_from_string( fontname );
+		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+	}
+
 	if ( font != 0 ) {
 
 		PangoFontMap *fontmap = pango_ft2_font_map_new();

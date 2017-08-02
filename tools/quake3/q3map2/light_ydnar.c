@@ -3221,7 +3221,7 @@ void IlluminateVertexes( int num ){
 
 void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all ){
 	int i, j, b;
-	unsigned int compileFlags, allCompileFlags;
+	int compileFlags, allCompileFlags;
 	bspBrush_t      *brush;
 	bspBrushSide_t  *side;
 	bspShader_t     *shader;
@@ -3249,7 +3249,7 @@ void SetupBrushesFlags( int mask_any, int test_any, int mask_all, int test_all )
 
 		/* check all sides */
 		compileFlags = 0;
-		allCompileFlags = ~( 0u );
+		allCompileFlags = ~( 0 );
 		for ( j = 0; j < brush->numSides; j++ )
 		{
 			/* do bsp shader calculations */

@@ -30,7 +30,7 @@
 #include "cmdlib.h"
 
 int g_argc;
-char** g_argv;
+const char** g_argv;
 
 void args_init( int argc, char* argv[] ){
 	int i, j, k;
@@ -51,11 +51,11 @@ void args_init( int argc, char* argv[] ){
 	}
 
 	g_argc = argc;
-	g_argv = argv;
+	g_argv = const_cast<const char **>( argv );
 }
 
-char *gamedetect_argv_buffer[1024];
-void gamedetect_found_game( char *game, char *path ){
+const char *gamedetect_argv_buffer[1024];
+void gamedetect_found_game( const char *game, char *path ){
 	int argc;
 	static char buf[128];
 
@@ -79,7 +79,7 @@ void gamedetect_found_game( char *game, char *path ){
 	g_argv = gamedetect_argv_buffer;
 }
 
-bool gamedetect_check_game( char *gamefile, const char *checkfile1, const char *checkfile2, char *buf /* must have 64 bytes free after bufpos */, int bufpos ){
+bool gamedetect_check_game( const char *gamefile, const char *checkfile1, const char *checkfile2, char *buf /* must have 64 bytes free after bufpos */, int bufpos ){
 	buf[bufpos] = '/';
 
 	strcpy( buf + bufpos + 1, checkfile1 );
@@ -181,15 +181,15 @@ bool portable_app_setup(){
 }
 
 
-char* openCmdMap;
+const char* g_openCmdMap;
 
 void cmdMap(){
-	openCmdMap = NULL;
+	g_openCmdMap = NULL;
 	for ( int i = 1; i < g_argc; ++i )
 	{
 		//if ( !stricmp( g_argv[i] + strlen(g_argv[i]) - 4, ".map" ) ){
 		if( string_equal_suffix_nocase( g_argv[i], ".map" ) ){
-			openCmdMap = g_argv[i];
+			g_openCmdMap = g_argv[i];
 		}
 	}
 }
@@ -211,7 +211,7 @@ const char* LINK_NAME =
 ;
 
 /// brief Returns the filename of the executable belonging to the current process, or 0 if not found.
-char* getexename( char *buf ){
+const char* getexename( char *buf ){
 	/* Now read the symbolic link */
 	int ret = readlink( LINK_NAME, buf, PATH_MAX );
 

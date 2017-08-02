@@ -1255,7 +1255,7 @@ inline Matrix4 matrix4_reflection_for_plane45( const Plane3& plane, const Vector
 	Vector3 first = from;
 	Vector3 second = to;
 
-	if ( vector3_dot( from, plane.normal() ) > 0 == vector3_dot( to, plane.normal() ) > 0 ) {
+	if ( ( vector3_dot( from, plane.normal() ) > 0 ) == ( vector3_dot( to, plane.normal() ) > 0 ) ) {
 		first = vector3_negated( first );
 		second = vector3_negated( second );
 	}
@@ -1273,7 +1273,7 @@ inline Matrix4 matrix4_reflection_for_plane45( const Plane3& plane, const Vector
 
 	Matrix4 swap = matrix4_swap_axes( first, second );
 
-	Matrix4 tmp = matrix4_reflection_for_plane( plane );
+	//Matrix4 tmp = matrix4_reflection_for_plane( plane );
 
 	swap.tx() = -static_cast<float>( -2 * plane.a * plane.d );
 	swap.ty() = -static_cast<float>( -2 * plane.b * plane.d );

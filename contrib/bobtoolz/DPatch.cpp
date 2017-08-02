@@ -483,8 +483,6 @@ std::list<DPatch> DPatch::SplitRows(){
 
 std::list<DPatch> DPatch::Split(){
 	std::list<DPatch> patchList;
-	int i;
-	int x, y;
 
 	if ( height >= 5 ) {
 		std::list<DPatch> patchColList = SplitCols();

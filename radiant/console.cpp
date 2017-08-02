@@ -147,8 +147,12 @@ GtkTextTag* tag;
 public:
 GtkTextBufferOutputStream( GtkTextBuffer* textBuffer, GtkTextIter* iter, GtkTextTag* tag ) : textBuffer( textBuffer ), iter( iter ), tag( tag ){
 }
-std::size_t __attribute__((optimize("O0"))) write( const char* buffer, std::size_t length ){
-	gtk_text_buffer_insert_with_tags( textBuffer, iter, buffer, gint( length ), tag, 0 );
+std::size_t
+#ifdef __GNUC__
+__attribute__((optimize("O0")))
+#endif
+write( const char* buffer, std::size_t length ){
+	gtk_text_buffer_insert_with_tags( textBuffer, iter, buffer, gint( length ), tag, NULL );
 	return length;
 }
 };

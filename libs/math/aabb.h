@@ -245,7 +245,13 @@ inline void aabb_planes_oriented( const AABB& aabb, const Matrix4& rotation, Pla
 	planes[5] = Plane3( -vector4_to_vector3( rotation.z() ), -( z - aabb.extents[2] ) );
 }
 
-const Vector3 aabb_normals[6] = {
+#ifdef __GNUC__
+#define VARIABLE_IS_NOT_USED __attribute__ ((unused))
+#else
+#define VARIABLE_IS_NOT_USED
+#endif
+
+const Vector3 VARIABLE_IS_NOT_USED aabb_normals[6] = {
 	Vector3( 1, 0, 0 ),
 	Vector3( 0, 1, 0 ),
 	Vector3( 0, 0, 1 ),

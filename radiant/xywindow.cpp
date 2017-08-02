@@ -89,7 +89,7 @@ ClipPoint(){
 	Reset();
 };
 void Reset(){
-	m_ptClip[0] = m_ptClip[1] = m_ptClip[2] = 0.0;
+	m_ptClip[0] = m_ptClip[1] = m_ptClip[2] = 0.f;
 	m_bSet = false;
 }
 bool Set(){
@@ -198,7 +198,7 @@ inline bool GlobalClipPoints_valid(){
 	return g_Clip1.Set() && g_Clip2.Set();
 }
 
-void PlanePointsFromClipPoints( Vector3 planepts[3], const AABB& bounds, int viewtype ){
+void PlanePointsFromClipPoints( Vector3 planepts[3], const AABB& bounds, VIEWTYPE viewtype ){
 	ASSERT_MESSAGE( GlobalClipPoints_valid(), "clipper points not initialised" );
 	planepts[0] = g_Clip1.m_ptClip;
 	planepts[1] = g_Clip2.m_ptClip;
@@ -231,9 +231,6 @@ void PlanePointsFromClipPoints( Vector3 planepts[3], const AABB& bounds, int vie
 void Clip_Update(){
 	Vector3 planepts[3];
 	if ( !GlobalClipPoints_valid() ) {
-		planepts[0] = Vector3( 0, 0, 0 );
-		planepts[1] = Vector3( 0, 0, 0 );
-		planepts[2] = Vector3( 0, 0, 0 );
 		Scene_BrushSetClipPlane( GlobalSceneGraph(), Plane3( 0, 0, 0, 0 ) );
 	}
 	else
@@ -264,7 +261,6 @@ void Clip(){
 		g_Clip2.Reset();
 		g_Clip3.Reset();
 		Clip_Update();
-		ClipperChangeNotify();
 		if( g_quick_clipper ){
 			g_quick_clipper = false;
 			ClipperMode();
@@ -282,7 +278,6 @@ void SplitClip(){
 		g_Clip2.Reset();
 		g_Clip3.Reset();
 		Clip_Update();
-		ClipperChangeNotify();
 		if( g_quick_clipper ){
 			g_quick_clipper = false;
 			ClipperMode();
@@ -293,7 +288,6 @@ void SplitClip(){
 void FlipClip(){
 	g_bSwitch = !g_bSwitch;
 	Clip_Update();
-	ClipperChangeNotify();
 }
 
 void OnClipMode( bool enabled ){
@@ -306,7 +300,6 @@ void OnClipMode( bool enabled ){
 	}
 
 	Clip_Update();
-	ClipperChangeNotify();
 }
 
 bool ClipMode(){
@@ -336,7 +329,6 @@ void NewClipPoint( const Vector3& point ){
 	}
 
 	Clip_Update();
-	ClipperChangeNotify();
 }
 
 
@@ -428,6 +420,7 @@ inline unsigned int buttons_for_button_and_modifiers( ButtonIdentifier button, M
 	case ButtonEnumeration::LEFT: buttons |= RAD_LBUTTON; break;
 	case ButtonEnumeration::MIDDLE: buttons |= RAD_MBUTTON; break;
 	case ButtonEnumeration::RIGHT: buttons |= RAD_RBUTTON; break;
+	default: break;
 	}
 
 	if ( bitfield_enabled( flags, c_modifierControl ) ) {
@@ -978,20 +971,31 @@ void XYWnd::DropClipPoint( int pointx, int pointy ){
 
 	Vector3 mid;
 	Select_GetMid( mid );
-	g_clip_viewtype = static_cast<VIEWTYPE>( GetViewType() );
+	g_clip_viewtype = GetViewType();
 	const int nDim = ( g_clip_viewtype == YZ ) ? 0 : ( ( g_clip_viewtype == XZ ) ? 1 : 2 );
 	point[nDim] = mid[nDim];
 	vector3_snap( point, GetSnapGridSize() );
 	NewClipPoint( point );
 }
 
+Timer g_clipper_timer;
+bool g_clipper_doubleclicked = false;
+
 void XYWnd::Clipper_OnLButtonDown( int x, int y ){
+	bool doubleclick = g_clipper_timer.elapsed_msec() < 200;
+
 	Vector3 mousePosition;
 	XY_ToPoint( x, y, mousePosition );
-	g_pMovingClip = GlobalClipPoints_Find( mousePosition, (VIEWTYPE)m_viewType, m_fScale );
+	g_pMovingClip = GlobalClipPoints_Find( mousePosition, m_viewType, m_fScale );
 	if ( !g_pMovingClip ) {
 		DropClipPoint( x, y );
 	}
+	else if( doubleclick ){
+		UndoableCommand undo( "clipperClip" );
+		Clip();
+		g_clipper_doubleclicked = true;
+	}
+	g_clipper_timer.start();
 }
 
 void XYWnd::Clipper_OnLButtonUp( int x, int y ){
@@ -1005,7 +1009,6 @@ void XYWnd::Clipper_OnMouseMoved( int x, int y ){
 		XY_ToPoint( x, y, g_pMovingClip->m_ptClip );
 		XY_SnapToGrid( g_pMovingClip->m_ptClip );
 		Clip_Update();
-		ClipperChangeNotify();
 	}
 }
 
@@ -1016,7 +1019,7 @@ void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
 	Vector3 mousePosition;
 	XY_ToPoint( x, y, mousePosition );
 	if ( ClipMode() ) {
-		if( GlobalClipPoints_Find( mousePosition, (VIEWTYPE)m_viewType, m_fScale ) != 0 ){
+		if( GlobalClipPoints_Find( mousePosition, m_viewType, m_fScale ) != 0 ){
 			GdkCursor *cursor;
 			cursor = gdk_cursor_new( GDK_CROSSHAIR );
 			//cursor = gdk_cursor_new( GDK_FLEUR );
@@ -1031,7 +1034,6 @@ void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
 //			g_object_unref( pixbuf );
 			gdk_window_set_cursor( m_gl_widget->window, cursor );
 			gdk_cursor_unref( cursor );
-
 		}
 	}
 	else
@@ -1518,8 +1520,10 @@ void XYWnd::XY_MouseUp( int x, int y, unsigned int buttons ){
 	else if ( m_zoom_started ) {
 		Zoom_End();
 	}
-	else if ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() ) ) {
+	else if ( ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() ) ) ||
+			g_clipper_doubleclicked ){
 		Clipper_OnLButtonUp( x, y );
+		g_clipper_doubleclicked = false;
 	}
 	else if ( m_bNewBrushDrag ) {
 		m_bNewBrushDrag = false;
@@ -2455,7 +2459,7 @@ void SetState( Shader* state, EStyle style ){
 		m_state_stack.back().m_state = state;
 	}
 }
-const EStyle getStyle() const {
+EStyle getStyle() const {
 	return eWireframeOnly;
 }
 void PushState(){

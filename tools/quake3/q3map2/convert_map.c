@@ -674,11 +674,13 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 							vert[2]->xyz[sv], vert[2]->xyz[tv], stK[i]
 							);
 						VectorSet( sts[i], D0 / D, D1 / D, D2 / D );
+						//Sys_Printf( "%.3f %.3f %.3f \n", sts[i][0], sts[i][1], sts[i][2] );
 					}
 				}
 				else{
 					fprintf( stderr, "degenerate triangle found when solving texDef equations\n" ); // FIXME add stuff here
-
+					VectorSet( sts[0], 2.f, 0.f, 0.f );
+					VectorSet( sts[1], 0.f, -2.f, 0.f );
 				}
 				// now we must solve:
 				//	// now we must invert:

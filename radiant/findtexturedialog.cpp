@@ -100,7 +100,7 @@ static void OnApply( GtkWidget* widget, gpointer data ){
 	g_FindTextureDialog.exportData();
 	FindTextureDialog_apply();
 }
-
+#if 0
 static void OnFind( GtkWidget* widget, gpointer data ){
 	g_FindTextureDialog.exportData();
 	FindTextureDialog_apply();
@@ -111,7 +111,7 @@ static void OnOK( GtkWidget* widget, gpointer data ){
 	FindTextureDialog_apply();
 	g_FindTextureDialog.HideDlg();
 }
-
+#endif
 static void OnClose( GtkWidget* widget, gpointer data ){
 	g_FindTextureDialog.HideDlg();
 }

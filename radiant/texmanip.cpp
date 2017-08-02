@@ -118,12 +118,13 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 
 	if ( bytesperpixel == 4 ) {
 		int i, j, yi, oldy, f, fstep, lerp, endy = ( inheight - 1 ), inwidth4 = inwidth * 4, outwidth4 = outwidth * 4;
-		byte *inrow, *out;
+		const byte *inrow;
+		byte *out;
 		out = (byte *)outdata;
 		fstep = (int) ( inheight * 65536.0f / outheight );
 #define LERPBYTE( i ) out[i] = (byte) ( ( ( ( row2[i] - row1[i] ) * lerp ) >> 16 ) + row1[i] )
 
-		inrow = (byte *)indata;
+		inrow = (const byte *)indata;
 		oldy = 0;
 		R_ResampleTextureLerpLine( inrow, row1, inwidth, outwidth, bytesperpixel );
 		R_ResampleTextureLerpLine( inrow + inwidth4, row2, inwidth, outwidth, bytesperpixel );
@@ -134,7 +135,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 			if ( yi < endy ) {
 				lerp = f & 0xFFFF;
 				if ( yi != oldy ) {
-					inrow = (byte *)indata + inwidth4 * yi;
+					inrow = (const byte *)indata + inwidth4 * yi;
 					if ( yi == oldy + 1 ) {
 						memcpy( row1, row2, outwidth4 );
 					}
@@ -197,7 +198,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 			else
 			{
 				if ( yi != oldy ) {
-					inrow = (byte *)indata + inwidth4 * yi;
+					inrow = (const byte *)indata + inwidth4 * yi;
 					if ( yi == oldy + 1 ) {
 						memcpy( row1, row2, outwidth4 );
 					}
@@ -213,12 +214,13 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 	}
 	else if ( bytesperpixel == 3 ) {
 		int i, j, yi, oldy, f, fstep, lerp, endy = ( inheight - 1 ), inwidth3 = inwidth * 3, outwidth3 = outwidth * 3;
-		byte *inrow, *out;
+		const byte *inrow;
+		byte *out;
 		out = (byte *)outdata;
 		fstep = (int) ( inheight * 65536.0f / outheight );
 #define LERPBYTE( i ) out[i] = (byte) ( ( ( ( row2[i] - row1[i] ) * lerp ) >> 16 ) + row1[i] )
 
-		inrow = (byte *)indata;
+		inrow = (const byte *)indata;
 		oldy = 0;
 		R_ResampleTextureLerpLine( inrow, row1, inwidth, outwidth, bytesperpixel );
 		R_ResampleTextureLerpLine( inrow + inwidth3, row2, inwidth, outwidth, bytesperpixel );
@@ -228,7 +230,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 			if ( yi < endy ) {
 				lerp = f & 0xFFFF;
 				if ( yi != oldy ) {
-					inrow = (byte *)indata + inwidth3 * yi;
+					inrow = (const byte *)indata + inwidth3 * yi;
 					if ( yi == oldy + 1 ) {
 						memcpy( row1, row2, outwidth3 );
 					}
@@ -284,7 +286,7 @@ void R_ResampleTexture( const void *indata, int inwidth, int inheight, void *out
 			else
 			{
 				if ( yi != oldy ) {
-					inrow = (byte *)indata + inwidth3 * yi;
+					inrow = (const byte *)indata + inwidth3 * yi;
 					if ( yi == oldy + 1 ) {
 						memcpy( row1, row2, outwidth3 );
 					}

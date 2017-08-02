@@ -68,6 +68,9 @@ template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
 bool color_dialog( GtkWidget *parent, Vector3& color, const char* title = "Choose Color" );
 
+#include "string/stringfwd.h"
+bool OpenGLFont_dialog( GtkWidget *parent, const char* font, CopiedString &newfont );
+
 typedef struct _GtkEntry GtkEntry;
 void button_clicked_entry_browse_file( GtkWidget* widget, GtkEntry* entry );
 void button_clicked_entry_browse_directory( GtkWidget* widget, GtkEntry* entry );

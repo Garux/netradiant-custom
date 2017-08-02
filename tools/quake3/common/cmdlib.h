@@ -26,7 +26,7 @@
 
 #include "bytebool.h"
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable : 4244)     // MIPS
 #pragma warning(disable : 4136)     // X86
 #pragma warning(disable : 4051)     // ALPHA
@@ -46,7 +46,7 @@
 #include <time.h>
 #include <stdarg.h>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 
 #pragma intrinsic( memset, memcpy )
 

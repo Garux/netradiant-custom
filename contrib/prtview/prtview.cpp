@@ -48,23 +48,23 @@ CopiedString INIfn;
 /////////////////////////////////////////////////////////////////////////////
 // CPrtViewApp construction
 
-#define RENDER_2D "Render2D"
-#define WIDTH_2D "Width2D"
-#define AA_2D "AntiAlias2D"
-#define COLOR_2D "Color2D"
+const char RENDER_2D[] = "Render2D";
+const char WIDTH_2D[] = "Width2D";
+const char AA_2D[] = "AntiAlias2D";
+const char COLOR_2D[] = "Color2D";
 
-#define RENDER_3D "Render3D"
-#define WIDTH_3D "Width3D"
-#define AA_3D "AntiAlias3D"
-#define COLOR_3D "Color3D"
-#define COLOR_FOG "ColorFog"
-#define FOG "Fog"
-#define ZBUFFER "ZBuffer"
-#define POLYGON "Polygons"
-#define LINE "Lines"
-#define TRANS_3D "Transparency"
-#define CLIP_RANGE "ClipRange"
-#define CLIP "Clip"
+const char RENDER_3D[] = "Render3D";
+const char WIDTH_3D[] = "Width3D";
+const char AA_3D[] = "AntiAlias3D";
+const char COLOR_3D[] = "Color3D";
+const char COLOR_FOG[] = "ColorFog";
+const char FOG[] = "Fog";
+const char ZBUFFER[] = "ZBuffer";
+const char POLYGON[] = "Polygons";
+const char LINE[] = "Lines";
+const char TRANS_3D[] = "Transparency";
+const char CLIP_RANGE[] = "ClipRange";
+const char CLIP[] = "Clip";
 
 
 void PrtView_construct(){
@@ -160,9 +160,9 @@ void SaveConfig(){
 }
 
 
-#define CONFIG_SECTION "Configuration"
+const char CONFIG_SECTION[] = "Configuration";
 
-int INIGetInt( char *key, int def ){
+int INIGetInt( const char *key, int def ){
 	char value[1024];
 
 	if ( read_var( INIfn.c_str(), CONFIG_SECTION, key, value ) ) {
@@ -173,7 +173,7 @@ int INIGetInt( char *key, int def ){
 	}
 }
 
-void INISetInt( char *key, int val, char *comment /* = NULL */ ){
+void INISetInt( const char *key, int val, const char *comment /* = NULL */ ){
 	char s[1000];
 
 	if ( comment ) {

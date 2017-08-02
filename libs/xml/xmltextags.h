@@ -58,7 +58,7 @@ xmlXPathContextPtr context;
 xmlNodeSetPtr nodePtr;
 
 xmlXPathObjectPtr XpathEval( const char* queryString ){
-	xmlChar* expression = (xmlChar*)queryString;
+	const xmlChar* expression = (const xmlChar*)queryString;
 	xmlXPathObjectPtr result = xmlXPathEvalExpression( expression, context );
 	return result;
 };

@@ -25,8 +25,8 @@
 void InitInstance();
 void SaveConfig();
 
-int INIGetInt( char *key, int def );
-void INISetInt( char *key, int val, char *comment = 0 );
+int INIGetInt( const char *key, int def );
+void INISetInt( const char *key, int val, const char *comment = 0 );
 
 typedef struct _GtkWidget GtkWidget;
 extern GtkWidget *g_pRadiantWnd;

@@ -43,13 +43,14 @@ struct filetype_copy_t
 	filetype_t getType() const {
 		return filetype_t( m_name.c_str(), m_pattern.c_str(), m_can_load, m_can_save, m_can_import );
 	}
-	bool m_can_load;
-	bool m_can_import;
-	bool m_can_save;
 private:
 	CopiedString m_moduleName;
 	CopiedString m_name;
 	CopiedString m_pattern;
+public:
+	bool m_can_load;
+	bool m_can_import;
+	bool m_can_save;
 };
 typedef std::vector<filetype_copy_t> filetype_list_t;
 std::map<CopiedString, filetype_list_t> m_typelists;

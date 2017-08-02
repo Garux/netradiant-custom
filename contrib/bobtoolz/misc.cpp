@@ -129,7 +129,7 @@ char* TranslateString( char *buf ){
 
 	std::size_t l = strlen( buf );
 	char* out = buf2;
-	for ( int i = 0 ; i < l ; i++ )
+	for ( std::size_t i = 0 ; i < l ; i++ )
 	{
 		if ( buf[i] == '\n' ) {
 			*out++ = '\r';
@@ -182,60 +182,7 @@ extern char* PLUGIN_NAME;
     return buffer;
    }*/
 
-#if defined ( POSIX )
-// the bCreateConsole parameter is ignored on linux ..
-bool Q_Exec( const char *pCmd, bool bCreateConsole ){
-	switch ( fork() )
-	{
-	case -1:
-		return false;
-//      Error ("CreateProcess failed");
-		break;
-	case 0:
-#ifdef _DEBUG
-		printf( "Running system...\n" );
-		printf( "Command: %s\n", pCmd );
-#endif
-		// NOTE: we could use that to detect when a step finishes. But then it
-		// would not work for remote compiling stuff.
-//      execlp (pCmd, pCmd, NULL);
-		system( pCmd );
-		printf( "system() returned" );
-		_exit( 0 );
-		break;
-	}
-	return true;
-}
-#endif
-
-#ifdef WIN32
-
-#include <windows.h>
-
-bool Q_Exec( const char *pCmd, bool bCreateConsole ){
-	// G_DeWan: Don't know if this is needed for linux version
-
-	PROCESS_INFORMATION pi;
-	STARTUPINFO si = {0};            // Initialize all members to zero
-	si.cb = sizeof( STARTUPINFO );     // Set byte count
-	DWORD dwCreationFlags;
-
-	if ( bCreateConsole ) {
-		dwCreationFlags = CREATE_NEW_CONSOLE | NORMAL_PRIORITY_CLASS;
-	}
-	else{
-		dwCreationFlags = DETACHED_PROCESS | NORMAL_PRIORITY_CLASS;
-	}
-
-	for (; *pCmd == ' '; pCmd++ ) ;
-
-	if ( !CreateProcess( NULL, (char *)pCmd, NULL, NULL, false, dwCreationFlags, NULL, NULL, &si, &pi ) ) {
-		return false;
-	}
-
-	return true;
-}
-#endif
+#include "cmdlib.h"
 
 void StartBSP(){
 	char exename[256];
@@ -252,7 +199,7 @@ void StartBSP(){
 	char command[1024];
 	sprintf( command, "%s -nowater -fulldetail %s", exename, mapname );
 
-	Q_Exec( command, true );
+	Q_Exec( NULL, command, NULL, false, true );
 }
 
 class EntityWriteMiniPrt

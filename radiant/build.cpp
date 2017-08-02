@@ -55,6 +55,7 @@ const char* build_get_variable( const char* name ){
 class Evaluatable
 {
 public:
+virtual ~Evaluatable(){}
 virtual void evaluate( StringBuffer& output ) = 0;
 virtual void exportXML( XMLImporter& importer ) = 0;
 };
@@ -896,7 +897,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
 					g_signal_connect( renderer, "edited", G_CALLBACK( project_cell_edited ), &projectList );
 
-					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, 0 );
+					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, NULL );
 					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 
 					GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( view ) );
@@ -937,7 +938,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 					object_set_int_property( G_OBJECT( renderer ), "wrap-width", 640 );
 					g_signal_connect( renderer, "edited", G_CALLBACK( commands_cell_edited ), store );
 
-					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, 0 );
+					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, NULL );
 					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
 
 					GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( view ) );

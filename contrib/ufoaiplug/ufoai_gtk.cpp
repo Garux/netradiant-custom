@@ -36,6 +36,7 @@ UFOAIGtk( void* gtk_window ) : m_gtk_window( ( GtkWindow* )gtk_window ){
 }
 };
 
+#if 0
 /**
  * @brief If you return FALSE in the "delete_event" signal handler,
  * GTK will emit the "destroy" signal. Returning TRUE means
@@ -60,6 +61,7 @@ static void destroy( GtkWidget *widget, gpointer data ){
 static void close_window( GtkWidget *widget, gpointer data ){
 	gtk_widget_destroy( gtk_widget_get_toplevel( widget ) );
 }
+#endif
 
 /* =============================== */
 

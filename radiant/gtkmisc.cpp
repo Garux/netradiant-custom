@@ -134,6 +134,34 @@ bool color_dialog( GtkWidget *parent, Vector3& color, const char* title ){
 	return ok;
 }
 
+bool OpenGLFont_dialog( GtkWidget *parent, const char* font, CopiedString &newfont ){
+	GtkWidget* dlg;
+	ModalDialog dialog;
+
+
+	dlg = gtk_font_selection_dialog_new( "OpenGLFont" );
+	gtk_font_selection_dialog_set_font_name( GTK_FONT_SELECTION_DIALOG( dlg ), font );
+
+	g_signal_connect( G_OBJECT( dlg ), "delete_event", G_CALLBACK( dialog_delete_callback ), &dialog );
+	g_signal_connect( G_OBJECT( gtk_font_selection_dialog_get_ok_button( GTK_FONT_SELECTION_DIALOG( dlg ) ) ), "clicked", G_CALLBACK( dialog_button_ok ), &dialog );
+	g_signal_connect( G_OBJECT( gtk_font_selection_dialog_get_cancel_button( GTK_FONT_SELECTION_DIALOG( dlg ) ) ), "clicked", G_CALLBACK( dialog_button_cancel ), &dialog );
+
+	if ( parent != 0 ) {
+		gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( parent ) );
+	}
+
+	bool ok = modal_dialog_show( GTK_WINDOW( dlg ), dialog ) == eIDOK;
+	if ( ok ) {
+		gchar* selectedfont = gtk_font_selection_dialog_get_font_name( GTK_FONT_SELECTION_DIALOG( dlg ) );
+		newfont = selectedfont;
+		g_free( selectedfont );
+	}
+
+	gtk_widget_destroy( dlg );
+
+	return ok;
+}
+
 void button_clicked_entry_browse_file( GtkWidget* widget, GtkEntry* entry ){
 	const char *filename = file_dialog( gtk_widget_get_toplevel( widget ), TRUE, "Choose File", gtk_entry_get_text( entry ) );
 
