@@ -2727,6 +2727,13 @@ GtkWindow* create_splash(){
 	gtk_widget_show( GTK_WIDGET( image ) );
 	gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( image ) );
 
+	if( gtk_image_get_storage_type( image ) == GTK_IMAGE_PIXBUF ){
+		GdkBitmap* mask;
+		GdkPixbuf* pix = gtk_image_get_pixbuf( image );
+		gdk_pixbuf_render_pixmap_and_mask( pix, NULL, &mask, 255 );
+		gtk_widget_shape_combine_mask ( GTK_WIDGET( window ), mask, 0, 0 );
+	}
+
 	gtk_widget_set_size_request( GTK_WIDGET( window ), -1, -1 );
 	gtk_widget_show( GTK_WIDGET( window ) );
 

@@ -498,12 +498,13 @@ void DoAbout(){
 				GtkVBox* vbox2 = create_dialog_vbox( 4 );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( vbox2 ), TRUE, FALSE, 0 );
 				{
-					GtkFrame* frame = create_dialog_frame( 0, GTK_SHADOW_IN );
-					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
+					//GtkFrame* frame = create_dialog_frame( 0, GTK_SHADOW_IN );
+					//gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 					{
 						GtkImage* image = new_local_image( "logo.png" );
 						gtk_widget_show( GTK_WIDGET( image ) );
-						gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( image ) );
+						gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( image ), FALSE, FALSE, 0 );
+						//gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( image ) );
 					}
 				}
 			}
