@@ -64,6 +64,8 @@
 #include "xml/ixml.h"
 #include "dragplanes.h"
 
+#include "brush_primit.h"
+
 enum EPatchType
 {
 	ePatchTypeQuake3,
@@ -467,7 +469,7 @@ void construct(){
 public:
 Callback m_lightsChanged;
 
-static int m_CycleCapIndex;  // = 0;
+//static int m_CycleCapIndex;  // = 0;
 static EPatchType m_type;
 
 STRING_CONSTANT( Name, "Patch" );
@@ -921,7 +923,9 @@ void RotateTexture( float angle );
 void SetTextureRepeat( float s, float t ); // call with s=1 t=1 for FIT
 void CapTexture();
 void NaturalTexture();
-void ProjectTexture( int nAxis );
+Vector3 Calculate_AvgNormal();
+void ProjectTexture( TextureProjection projection, const Vector3& normal );
+void ProjectTexture( const texdef_t& texdef, const Vector3* direction );
 void createThickenedOpposite(const Patch& sourcePatch, const float thickness, const int axis, bool& no12, bool& no34 );
 void createThickenedWall(const Patch& sourcePatch, const Patch& targetPatch, const int wallIndex);
 

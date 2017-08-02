@@ -42,6 +42,10 @@ void Scene_PatchFindReplaceShader( scene::Graph& graph, const char* find, const 
 void Scene_PatchFindReplaceShader_Selected( scene::Graph& graph, const char* find, const char* replace );
 
 void Scene_PatchCapTexture_Selected( scene::Graph& graph );
+class texdef_t;
+template<typename Element> class BasicVector3;
+typedef BasicVector3<float> Vector3;
+void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction );
 void Scene_PatchNaturalTexture_Selected( scene::Graph& graph );
 void Scene_PatchTileTexture_Selected( scene::Graph& graph, float s, float t );
 

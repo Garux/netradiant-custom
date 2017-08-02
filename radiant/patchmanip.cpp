@@ -291,13 +291,31 @@ class PatchCapTexture
 {
 public:
 void operator()( Patch& patch ) const {
-	patch.ProjectTexture( Patch::m_CycleCapIndex );
+	//patch.ProjectTexture( Patch::m_CycleCapIndex );
+	patch.CapTexture();
 }
 };
 
 void Scene_PatchCapTexture_Selected( scene::Graph& graph ){
 	Scene_forEachVisibleSelectedPatch( PatchCapTexture() );
-	Patch::m_CycleCapIndex = ( Patch::m_CycleCapIndex + 1 ) % 3;
+	//Patch::m_CycleCapIndex = ( Patch::m_CycleCapIndex + 1 ) % 3;
+	SceneChangeNotify();
+}
+
+class PatchProjectTexture
+{
+	const texdef_t& m_texdef;
+	const Vector3* m_direction;
+public:
+	PatchProjectTexture( const texdef_t& texdef, const Vector3* direction ) : m_texdef( texdef ), m_direction( direction ) {
+	}
+	void operator()( Patch& patch ) const {
+		patch.ProjectTexture( m_texdef, m_direction );
+	}
+};
+
+void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction ){
+	Scene_forEachVisibleSelectedPatch( PatchProjectTexture( texdef, direction ) );
 	SceneChangeNotify();
 }
 
@@ -674,12 +692,6 @@ void Patch_Cap(){
 	Scene_PatchDoCap_Selected( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
 }
 
-void Patch_CycleProjection(){
-	UndoableCommand undo( "patchCycleUVProjectionAxis" );
-
-	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
-}
-
 ///\todo Unfinished.
 void Patch_OverlayOn(){
 }
@@ -849,7 +861,7 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "SmoothCols", FreeCaller<Patch_SmoothCols>(), Accelerator( 'W', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "MatrixTranspose", FreeCaller<Patch_Transpose>(), Accelerator( 'M', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "CapCurrentCurve", FreeCaller<Patch_Cap>(), Accelerator( 'C', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "CycleCapTexturePatch", FreeCaller<Patch_CycleProjection>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "PatchCapTexture", FreeCaller<Patch_CapTexture>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
 //	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), Accelerator( 'Y' ) );
 //	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), Accelerator( 'L', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchDeform", FreeCaller<Patch_Deform>() );
@@ -928,7 +940,7 @@ void Patch_constructMenu( GtkMenu* menu ){
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( menu_in_menu );
 		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Cycle Projection", "CycleCapTexturePatch" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Project", "PatchCapTexture" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Naturalize", "NaturalizePatch" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Invert X", "InvertCurveTextureX" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Invert Y", "InvertCurveTextureY" );

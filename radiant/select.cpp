@@ -891,6 +891,7 @@ void Select_Touching( void ){
 void Select_ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushProjectTexture_Selected( GlobalSceneGraph(), texdef, direction );
+		Scene_PatchProjectTexture_Selected( GlobalSceneGraph(), texdef, direction );
 	}
 	Scene_BrushProjectTexture_Component_Selected( GlobalSceneGraph(), texdef, direction );
 

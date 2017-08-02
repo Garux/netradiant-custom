@@ -549,8 +549,8 @@ static void OnBtnReset( GtkWidget *widget, gpointer data ){
 
 static void OnBtnProject( GtkWidget *widget, gpointer data ){
 	if ( g_bp_globals.m_texdefTypeId != TEXDEFTYPEID_BRUSHPRIMITIVES ) {
-		globalErrorStream() << "function is implemented for BRUSHPRIMITIVES map format only\n";
-		return;
+		globalErrorStream() << "function doesn't work for *brushes* in map formats other than BRUSHPRIMITIVES\n";
+		//return;
 	}
 	getSurfaceInspector().exportData();
 	SurfaceInspector_ProjectTexture();
@@ -1453,7 +1453,7 @@ void Face_getTexture( Face& face, CopiedString& shader, TextureProjection& proje
 typedef Function4<Face&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Face_getTexture> FaceGetTexture;
 
 
-
+/* copied from winding.cpp */
 inline bool float_is_largest_absolute( double axis, double other ){
 	return fabs( axis ) > fabs( other );
 }
@@ -1502,7 +1502,8 @@ void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProj
 	face.SetShader( shader );
 
 	DoubleLine line = plane3_intersect_plane3( g_faceTextureClipboard.m_plane, face.getPlane().plane3() );
-	Quaternion rotation = Quaternion( vector3_cross( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ), static_cast<float>( 1.0 + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ) ) );
+	Quaternion rotation = Quaternion( vector3_cross( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ),
+									static_cast<float>( 1.0 + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ) ) );
 	//Quaternion rotation = quaternion_for_unit_vectors( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
 	//rotation.w() = sqrt( vector3_length_squared( g_faceTextureClipboard.m_plane.normal() ) * vector3_length_squared( face.getPlane().plane3().normal() ) ) + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
 	//globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
@@ -1540,6 +1541,16 @@ void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProj
 typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture_Seamless> FaceSetTextureSeamless;
 
 
+void Face_setTexture_Project( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
+	face.SetShader( shader );
+	//face.SetTexdef( projection );
+	face.SetFlags( flags );
+
+	face.ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
+}
+typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture_Project> FaceSetTextureProject;
+
+
 void Face_setTexture( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
 	face.SetShader( shader );
 	face.SetTexdef( projection );
@@ -1554,6 +1565,12 @@ void Patch_getTexture( Patch& patch, CopiedString& shader, TextureProjection& pr
 	flags = ContentsFlagsValue( 0, 0, 0, false );
 }
 typedef Function4<Patch&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Patch_getTexture> PatchGetTexture;
+
+void Patch_setTexture_Project( Patch& patch, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
+	patch.SetShader( shader );
+	patch.ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
+}
+typedef Function4<Patch&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Patch_setTexture_Project> PatchSetTextureProject;
 
 void Patch_setTexture( Patch& patch, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
 	patch.SetShader( shader );
@@ -1571,7 +1588,7 @@ struct Texturable
 };
 
 
-void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& bestIntersection, Texturable& texturable, bool seamless ){
+void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& bestIntersection, Texturable& texturable, bool seamless, bool project ){
 	if ( face.isFiltered() ) {
 		return;
 	}
@@ -1580,7 +1597,9 @@ void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& be
 	if ( intersection.valid()
 		 && SelectionIntersection_closer( intersection, bestIntersection ) ) {
 		bestIntersection = intersection;
-		if( seamless )
+		if( project )
+			texturable.setTexture = makeCallback3( FaceSetTextureProject(), face );
+		else if( seamless )
 			texturable.setTexture = makeCallback3( FaceSetTextureSeamless(), face );
 		else
 			texturable.setTexture = makeCallback3( FaceSetTexture(), face );
@@ -1614,9 +1633,10 @@ class BrushGetClosestFaceVisibleWalker : public scene::Graph::Walker
 SelectionTest& m_test;
 Texturable& m_texturable;
 bool m_seamless;
+bool m_project;
 mutable SelectionIntersection m_bestIntersection;
 public:
-BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable, bool seamless ) : m_test( test ), m_texturable( texturable ), m_seamless( seamless ){
+BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable, bool seamless, bool project ) : m_test( test ), m_texturable( texturable ), m_seamless( seamless ), m_project( project ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
@@ -1626,7 +1646,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 
 			for ( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i )
 			{
-				Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable, m_seamless );
+				Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable, m_seamless, m_project );
 			}
 		}
 		else
@@ -1639,7 +1659,10 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 				if ( occluded ) {
 					Patch* patch = Node_getPatch( path.top() );
 					if ( patch != 0 ) {
-						m_texturable.setTexture = makeCallback3( PatchSetTexture(), *patch );
+						if( m_project )
+							m_texturable.setTexture = makeCallback3( PatchSetTextureProject(), *patch );
+						else
+							m_texturable.setTexture = makeCallback3( PatchSetTexture(), *patch );
 						m_texturable.getTexture = makeCallback3( PatchGetTexture(), *patch );
 					}
 					else
@@ -1657,9 +1680,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-Texturable Scene_getClosestTexturable( scene::Graph& graph, SelectionTest& test, bool seamless = false ){
+Texturable Scene_getClosestTexturable( scene::Graph& graph, SelectionTest& test, bool seamless = false, bool project = false ){
 	Texturable texturable;
-	graph.traverse( BrushGetClosestFaceVisibleWalker( test, texturable, seamless ) );
+	graph.traverse( BrushGetClosestFaceVisibleWalker( test, texturable, seamless, project ) );
 	return texturable;
 }
 
@@ -1672,8 +1695,8 @@ bool Scene_getClosestTexture( scene::Graph& graph, SelectionTest& test, CopiedSt
 	return false;
 }
 
-void Scene_setClosestTexture( scene::Graph& graph, SelectionTest& test, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags, bool seamless ){
-	Texturable texturable = Scene_getClosestTexturable( graph, test, seamless );
+void Scene_setClosestTexture( scene::Graph& graph, SelectionTest& test, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags, bool seamless, bool project ){
+	Texturable texturable = Scene_getClosestTexturable( graph, test, seamless, project );
 	if ( texturable.setTexture != SetTextureCallback() ) {
 		texturable.setTexture( shader, projection, flags );
 	}
@@ -1694,10 +1717,10 @@ void Scene_copyClosestTexture( SelectionTest& test ){
 	}
 }
 
-void Scene_applyClosestTexture( SelectionTest& test, bool seamless ){
+void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project ){
 //	UndoableCommand command( "facePaintTexture" );
 
-	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader( g_TextureBrowser ), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags, seamless );
+	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader( g_TextureBrowser ), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags, seamless, project );
 
 	SceneChangeNotify();
 }

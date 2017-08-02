@@ -168,7 +168,7 @@ void BezierCurveTree_FromCurveList( BezierCurveTree *pTree, GSList *pCurveList, 
 }
 
 
-int Patch::m_CycleCapIndex = 0;
+//int Patch::m_CycleCapIndex = 0;
 
 
 void Patch::setDims( std::size_t w, std::size_t h ){
@@ -600,12 +600,31 @@ void Patch::SetTextureRepeat( float s, float t ){
    }
  */
 
+Vector3 Patch::Calculate_AvgNormal(){
+	Vector3 wDir( 0, 0, 0 ), hDir( 0, 0, 0 );
+	for ( std::size_t i = 0; i < m_height; ++i ){
+		wDir += ctrlAt( i, m_width - 1 ).m_vertex - ctrlAt( i, 0 ).m_vertex;
+	}
+	for ( std::size_t i = 0; i < m_width; ++i ){
+		hDir += ctrlAt( m_height - 1, i ).m_vertex - ctrlAt( 0, i ).m_vertex;
+	}
+	Vector3 normal( vector3_cross( wDir, hDir ) );
+	if ( vector3_equal( normal, g_vector3_identity ) ) {
+		normal = Vector3( 0, 0, 1 );
+	}
+	else{
+		vector3_normalise( normal );
+	}
+	return normal;
+}
+
 inline int texture_axis( const Vector3& normal ){
 	// axis dominance order: Z, X, Y
 	return ( normal.x() >= normal.y() ) ? ( normal.x() > normal.z() ) ? 0 : 2 : ( normal.y() > normal.z() ) ? 1 : 2;
 }
 
 void Patch::CapTexture(){
+#if 0
 	const PatchControl& p1 = m_ctrl[m_width];
 	const PatchControl& p2 = m_ctrl[m_width * ( m_height - 1 )];
 	const PatchControl& p3 = m_ctrl[( m_width * m_height ) - 1];
@@ -636,6 +655,12 @@ void Patch::CapTexture(){
 	normal[2] = fabs( normal[2] );
 
 	ProjectTexture( texture_axis( normal ) );
+#else
+	Vector3 normal = Calculate_AvgNormal();
+	TextureProjection projection;
+	TexDef_Construct_Default( projection );
+	ProjectTexture( projection, normal );
+#endif
 }
 
 // uses longest parallel chord to calculate texture coords for each row/col
@@ -1125,7 +1150,7 @@ void Patch::ConstructSeam( EPatchCap eType, Vector3* p, std::size_t width ){
 	CapTexture();
 	controlPointsChanged();
 }
-
+#if 0
 void Patch::ProjectTexture( int nAxis ){
 	undoSave();
 
@@ -1157,6 +1182,41 @@ void Patch::ProjectTexture( int nAxis ){
 	{
 		( *i ).m_texcoord[0] = ( *i ).m_vertex[s] * fWidth;
 		( *i ).m_texcoord[1] = ( *i ).m_vertex[t] * fHeight;
+	}
+
+	controlPointsChanged();
+}
+#else
+void Patch::ProjectTexture( TextureProjection projection, const Vector3& normal ){
+	undoSave();
+
+	projection.m_brushprimit_texdef.addScale( m_state->getTexture().width, m_state->getTexture().height );
+
+	Matrix4 local2tex;
+	Texdef_Construct_local2tex( projection, m_state->getTexture().width, m_state->getTexture().height, normal, local2tex );
+
+	for ( PatchControlIter i = m_ctrl.data(); i != m_ctrl.data() + m_ctrl.size(); ++i )
+	{
+		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).m_vertex );
+		( *i ).m_texcoord[0] = texcoord[0];
+		( *i ).m_texcoord[1] = texcoord[1];
+	}
+
+	controlPointsChanged();
+}
+#endif
+
+void Patch::ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
+	undoSave();
+
+	Matrix4 local2tex;
+	Texdef_Construct_local2tex4projection( texdef, m_state->getTexture().width, m_state->getTexture().height, Calculate_AvgNormal(), direction, local2tex );
+
+	for ( PatchControlIter i = m_ctrl.data(); i != m_ctrl.data() + m_ctrl.size(); ++i )
+	{
+		Vector3 texcoord = matrix4_transformed_point( local2tex, ( *i ).m_vertex );
+		( *i ).m_texcoord[0] = texcoord[0];
+		( *i ).m_texcoord[1] = texcoord[1];
 	}
 
 	controlPointsChanged();

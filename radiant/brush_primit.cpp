@@ -256,6 +256,15 @@ void Texdef_basisForNormal( const TextureProjection& projection, const Vector3& 
 	}
 }
 
+void Texdef_Construct_local2tex( const TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, Matrix4& local2tex ){
+	Texdef_toTransform( projection, (float)width, (float)height, local2tex );
+	{
+		Matrix4 xyz2st;
+		Texdef_basisForNormal( projection, normal, xyz2st );
+		matrix4_multiply_by_matrix4( local2tex, xyz2st );
+	}
+}
+
 void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::size_t width, std::size_t height, Winding& w, const Vector3& normal, const Matrix4& localToWorld ){
 	if ( w.numpoints < 3 ) {
 		return;
@@ -1552,8 +1561,7 @@ void Q3_to_BP( const texdef_t& texdef, float width, float height, const Vector3&
 
 
 /// for arbitrary texture projections
-void Emit3TextureCoordinates( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, DoubleVector3 points[3], DoubleVector3 st[3], const Vector3* direction ){
-	Matrix4 local2tex;
+void Texdef_Construct_local2tex4projection( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, const Vector3* direction, Matrix4& local2tex ){
 	Texdef_toTransform( texdef, (float)width, (float)height, local2tex );
 	{
 		if( direction ){ //arbitrary
@@ -1569,14 +1577,6 @@ void Emit3TextureCoordinates( const texdef_t& texdef, std::size_t width, std::si
 			Normal_GetTransform( normal, xyz2st ); //Texdef_basisForNormal for ap
 			matrix4_multiply_by_matrix4( local2tex, xyz2st );
 		}
-	}
-
-	for ( std::size_t i = 0; i < 3; ++i )
-	{
-		DoubleVector3 texcoord = matrix4_transformed_point( local2tex, points[i] );
-		//globalOutputStream() << texcoord << "\n";
-		st[i][0] = texcoord[0];
-		st[i][1] = texcoord[1];
 	}
 }
 
@@ -1602,7 +1602,16 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 	points[0] = anchor;
 	points[1] = texX + anchor;
 	points[2] = texY + anchor;
-	Emit3TextureCoordinates( texdef, width, height, plane.normal(), points, st, direction );
+
+	Matrix4 local2tex;
+	Texdef_Construct_local2tex4projection( texdef, width, height, plane.normal(), direction, local2tex );
+	for ( std::size_t i = 0; i < 3; ++i )
+	{
+		DoubleVector3 texcoord = matrix4_transformed_point( local2tex, points[i] );
+		//globalOutputStream() << texcoord << "\n";
+		st[i][0] = texcoord[0];
+		st[i][1] = texcoord[1];
+	}
 	// compute texture matrix
 	projection.m_brushprimit_texdef.coords[0][2] = st[0][0];
 	projection.m_brushprimit_texdef.coords[1][2] = st[0][1];
@@ -1612,4 +1621,56 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 	projection.m_brushprimit_texdef.coords[1][1] = st[2][1] - st[0][1];
 
 	Texdef_normalise( projection, (float)width, (float)height );
+}
+
+void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, TextureProjection other_proj, const Vector3& other_normal ){
+	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
+		other_proj.m_brushprimit_texdef.addScale( width, height );
+
+		DoubleVector3 texX, texY;
+
+		// compute axis base
+		ComputeAxisBase( plane.normal(), texX, texY );
+		// compute projection vector
+		const DoubleVector3 anchor = plane.normal() * plane.dist();
+
+		// (0,0) in plane axis base is (0,0,0) in world coordinates + projection on the affine plane
+		// (1,0) in plane axis base is texX in world coordinates + projection on the affine plane
+		// (0,1) in plane axis base is texY in world coordinates + projection on the affine plane
+		// use old texture code to compute the ST coords of these points
+		// ST of (0,0) (1,0) (0,1)
+		DoubleVector3 points[3];
+		DoubleVector3 st[3];
+
+		points[0] = anchor;
+		points[1] = texX + anchor;
+		points[2] = texY + anchor;
+
+		Matrix4 local2tex;
+		Texdef_Construct_local2tex( other_proj, width, height, other_normal, local2tex );
+		for ( std::size_t i = 0; i < 3; ++i )
+		{
+			DoubleVector3 texcoord = matrix4_transformed_point( local2tex, points[i] );
+			//globalOutputStream() << texcoord << "\n";
+			st[i][0] = texcoord[0];
+			st[i][1] = texcoord[1];
+		}
+		// compute texture matrix
+		projection.m_brushprimit_texdef.coords[0][2] = st[0][0];
+		projection.m_brushprimit_texdef.coords[1][2] = st[0][1];
+		projection.m_brushprimit_texdef.coords[0][0] = st[1][0] - st[0][0];
+		projection.m_brushprimit_texdef.coords[1][0] = st[1][1] - st[0][1];
+		projection.m_brushprimit_texdef.coords[0][1] = st[2][0] - st[0][0];
+		projection.m_brushprimit_texdef.coords[1][1] = st[2][1] - st[0][1];
+
+		Texdef_normalise( projection, (float)width, (float)height );
+	}
+	else
+	{
+		Texdef_Assign( projection.m_texdef, other_proj.m_texdef );
+		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+			projection.m_basis_s = other_proj.m_basis_s;
+			projection.m_basis_t = other_proj.m_basis_t;
+		}
+	}
 }

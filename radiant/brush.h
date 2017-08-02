@@ -598,6 +598,10 @@ void ProjectTexture( const Plane3& plane, const texdef_t& texdef, const Vector3*
 	Texdef_ProjectTexture( m_projection, m_shader.width(), m_shader.height(), plane, texdef, direction );
 }
 
+void ProjectTexture( const Plane3& plane, const TextureProjection& projection, const Vector3& normal ){
+	Texdef_ProjectTexture( m_projection, m_shader.width(), m_shader.height(), plane, projection, normal );
+}
+
 void fit( const Vector3& normal, const Winding& winding, float s_repeat, float t_repeat ){
 	Texdef_FitTexture( m_projection, m_shader.width(), m_shader.height(), normal, winding, s_repeat, t_repeat );
 }
@@ -1210,6 +1214,12 @@ void RotateTexdef( float angle ){
 void ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 	undoSave();
 	m_texdef.ProjectTexture( m_plane.plane3(), texdef, direction );
+	texdefChanged();
+}
+
+void ProjectTexture( const TextureProjection& projection, const Vector3& normal ){
+	undoSave();
+	m_texdef.ProjectTexture( m_plane.plane3(), projection, normal );
 	texdefChanged();
 }
 
