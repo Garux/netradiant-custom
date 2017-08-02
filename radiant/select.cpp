@@ -778,12 +778,6 @@ void Select_ShowAllHidden(){
 	g_hidden_item.update();
 }
 
-void Hide_registerCommands(){
-	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalToggles_insert( "HideSelected", FreeCaller<HideSelected>(), ToggleItem::AddCallbackCaller( g_hidden_item ), Accelerator( 'H' ) );
-}
-
-
 
 void Selection_Flipx(){
 	UndoableCommand undo( "mirrorSelected -axis x" );
@@ -814,7 +808,89 @@ void Selection_Rotatez(){
 	UndoableCommand undo( "rotateSelected -axis z -angle -90" );
 	Select_RotateAxis( 2,-90 );
 }
+#include "xywindow.h"
+void Selection_FlipHorizontally(){
+	VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
+	switch ( viewtype )
+	{
+	case XY:
+	case XZ:
+		Selection_Flipx();
+		break;
+	default:
+		Selection_Flipy();
+		break;
+	}
+}
 
+void Selection_FlipVertically(){
+	VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
+	switch ( viewtype )
+	{
+	case XZ:
+	case YZ:
+		Selection_Flipz();
+		break;
+	default:
+		Selection_Flipy();
+		break;
+	}
+}
+
+void Selection_RotateClockwise(){
+	UndoableCommand undo( "rotateSelected Clockwise 90" );
+	VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
+	switch ( viewtype )
+	{
+	case XY:
+		Select_RotateAxis( 2, -90 );
+		break;
+	case XZ:
+		Select_RotateAxis( 1, 90 );
+		break;
+	default:
+		Select_RotateAxis( 0, -90 );
+		break;
+	}
+}
+
+void Selection_RotateAnticlockwise(){
+	UndoableCommand undo( "rotateSelected Anticlockwise 90" );
+	VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
+	switch ( viewtype )
+	{
+	case XY:
+		Select_RotateAxis( 2, 90 );
+		break;
+	case XZ:
+		Select_RotateAxis( 1, -90 );
+		break;
+	default:
+		Select_RotateAxis( 0, 90 );
+		break;
+	}
+
+}
+
+
+
+void Select_registerCommands(){
+	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalToggles_insert( "HideSelected", FreeCaller<HideSelected>(), ToggleItem::AddCallbackCaller( g_hidden_item ), Accelerator( 'H' ) );
+
+	GlobalCommands_insert( "MirrorSelectionX", FreeCaller<Selection_Flipx>() );
+	GlobalCommands_insert( "RotateSelectionX", FreeCaller<Selection_Rotatex>() );
+	GlobalCommands_insert( "MirrorSelectionY", FreeCaller<Selection_Flipy>() );
+	GlobalCommands_insert( "RotateSelectionY", FreeCaller<Selection_Rotatey>() );
+	GlobalCommands_insert( "MirrorSelectionZ", FreeCaller<Selection_Flipz>() );
+	GlobalCommands_insert( "RotateSelectionZ", FreeCaller<Selection_Rotatez>() );
+
+	GlobalCommands_insert( "MirrorSelectionHorizontally", FreeCaller<Selection_FlipHorizontally>() );
+	GlobalCommands_insert( "MirrorSelectionVertically", FreeCaller<Selection_FlipVertically>() );
+
+	GlobalCommands_insert( "RotateSelectionClockwise", FreeCaller<Selection_RotateClockwise>() );
+	GlobalCommands_insert( "RotateSelectionAnticlockwise", FreeCaller<Selection_RotateAnticlockwise>() );
+}
 
 
 void Nudge( int nDim, float fNudge ){

@@ -33,12 +33,12 @@ void Select_Inside();
 void Select_Touching();
 void Scene_ExpandSelectionToEntities();
 
-void Selection_Flipx();
-void Selection_Flipy();
-void Selection_Flipz();
-void Selection_Rotatex();
-void Selection_Rotatey();
-void Selection_Rotatez();
+//void Selection_Flipx();
+//void Selection_Flipy();
+//void Selection_Flipz();
+//void Selection_Rotatex();
+//void Selection_Rotatey();
+//void Selection_Rotatez();
 
 
 void Selection_MoveDown();
@@ -66,7 +66,7 @@ void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelecte
 
 void HideSelected();
 void Select_ShowAllHidden();
-void Hide_registerCommands();
+void Select_registerCommands();
 
 // updating workzone to a given brush (depends on current view)
 

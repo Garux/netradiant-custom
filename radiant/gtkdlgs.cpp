@@ -794,11 +794,8 @@ static void CreateGtkTextEditor(){
 	GtkWidget *dlg;
 	GtkWidget *vbox, *hbox, *button, *scr, *text;
 
-	dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-
-	g_signal_connect( G_OBJECT( dlg ), "delete_event",
-					  G_CALLBACK( editor_delete ), 0 );
-	gtk_window_set_default_size( GTK_WINDOW( dlg ), 400, 600 );
+	GtkWindow* dlg_wnd = create_dialog_window( MainFrame_getWindow(), "", G_CALLBACK( editor_delete ), 0, 400, 600 );
+	dlg = GTK_WIDGET( dlg_wnd );
 
 	vbox = gtk_vbox_new( FALSE, 5 );
 	gtk_widget_show( vbox );

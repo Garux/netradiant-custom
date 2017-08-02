@@ -2068,6 +2068,9 @@ GtkMenuItem* create_selection_menu(){
 		create_menu_item_with_mnemonic( menu_in_menu, "Rotate X", "RotateSelectionX" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Rotate Y", "RotateSelectionY" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Rotate Z", "RotateSelectionZ" );
+		menu_separator( menu_in_menu );
+		create_menu_item_with_mnemonic( menu_in_menu, "Rotate Clockwise", "RotateSelectionClockwise" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Rotate Anticlockwise", "RotateSelectionAnticlockwise" );
 	}
 	{
 		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Flip" );
@@ -2077,6 +2080,9 @@ GtkMenuItem* create_selection_menu(){
 		create_menu_item_with_mnemonic( menu_in_menu, "Flip _X", "MirrorSelectionX" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Flip _Y", "MirrorSelectionY" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Flip _Z", "MirrorSelectionZ" );
+		menu_separator( menu_in_menu );
+		create_menu_item_with_mnemonic( menu_in_menu, "Flip Horizontally", "MirrorSelectionHorizontally" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Flip Vertically", "MirrorSelectionVertically" );
 	}
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Arbitrary rotation...", "ArbitraryRotation" );
@@ -2322,12 +2328,17 @@ void UndoRedo_constructToolbar( GtkToolbar* toolbar ){
 }
 
 void RotateFlip_constructToolbar( GtkToolbar* toolbar ){
-	toolbar_append_button( toolbar, "x-axis Flip", "brush_flipx.png", "MirrorSelectionX" );
-	toolbar_append_button( toolbar, "x-axis Rotate", "brush_rotatex.png", "RotateSelectionX" );
-	toolbar_append_button( toolbar, "y-axis Flip", "brush_flipy.png", "MirrorSelectionY" );
-	toolbar_append_button( toolbar, "y-axis Rotate", "brush_rotatey.png", "RotateSelectionY" );
-	toolbar_append_button( toolbar, "z-axis Flip", "brush_flipz.png", "MirrorSelectionZ" );
-	toolbar_append_button( toolbar, "z-axis Rotate", "brush_rotatez.png", "RotateSelectionZ" );
+//	toolbar_append_button( toolbar, "x-axis Flip", "brush_flipx.png", "MirrorSelectionX" );
+//	toolbar_append_button( toolbar, "x-axis Rotate", "brush_rotatex.png", "RotateSelectionX" );
+//	toolbar_append_button( toolbar, "y-axis Flip", "brush_flipy.png", "MirrorSelectionY" );
+//	toolbar_append_button( toolbar, "y-axis Rotate", "brush_rotatey.png", "RotateSelectionY" );
+//	toolbar_append_button( toolbar, "z-axis Flip", "brush_flipz.png", "MirrorSelectionZ" );
+//	toolbar_append_button( toolbar, "z-axis Rotate", "brush_rotatez.png", "RotateSelectionZ" );
+	toolbar_append_button( toolbar, "Flip Horizontally", "brush_flip_hor.png", "MirrorSelectionHorizontally" );
+	toolbar_append_button( toolbar, "Flip Vertically", "brush_flip_vert.png", "MirrorSelectionVertically" );
+
+	toolbar_append_button( toolbar, "Rotate Clockwise", "brush_rotate_clock.png", "RotateSelectionClockwise" );
+	toolbar_append_button( toolbar, "Rotate Anticlockwise", "brush_rotate_anti.png", "RotateSelectionAnticlockwise" );
 }
 
 void Select_constructToolbar( GtkToolbar* toolbar ){
@@ -2393,7 +2404,7 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	ComponentModes_constructToolbar( toolbar );
 	gtk_toolbar_append_space( toolbar );
 
-	if ( style == MainFrame::eRegular || style == MainFrame::eRegularLeft ) {
+	if ( style != MainFrame::eSplit ) {
 		XYWnd_constructToolbar( toolbar );
 		gtk_toolbar_append_space( toolbar );
 	}
@@ -3384,18 +3395,11 @@ void MainFrame_Construct(){
 
 //	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', (GdkModifierType)GDK_SHIFT_MASK ) );
 //	GlobalCommands_insert( "HideSelected", FreeCaller<HideSelected>(), Accelerator( 'H' ) );
-	Hide_registerCommands();
+	Select_registerCommands();
 
 	GlobalToggles_insert( "DragVertices", FreeCaller<SelectVertexMode>(), ToggleItem::AddCallbackCaller( g_vertexMode_button ), Accelerator( 'V' ) );
 	GlobalToggles_insert( "DragEdges", FreeCaller<SelectEdgeMode>(), ToggleItem::AddCallbackCaller( g_edgeMode_button ), Accelerator( 'E' ) );
 	GlobalToggles_insert( "DragFaces", FreeCaller<SelectFaceMode>(), ToggleItem::AddCallbackCaller( g_faceMode_button ), Accelerator( 'F' ) );
-
-	GlobalCommands_insert( "MirrorSelectionX", FreeCaller<Selection_Flipx>() );
-	GlobalCommands_insert( "RotateSelectionX", FreeCaller<Selection_Rotatex>() );
-	GlobalCommands_insert( "MirrorSelectionY", FreeCaller<Selection_Flipy>() );
-	GlobalCommands_insert( "RotateSelectionY", FreeCaller<Selection_Rotatey>() );
-	GlobalCommands_insert( "MirrorSelectionZ", FreeCaller<Selection_Flipz>() );
-	GlobalCommands_insert( "RotateSelectionZ", FreeCaller<Selection_Rotatez>() );
 
 	GlobalCommands_insert( "ArbitraryRotation", FreeCaller<DoRotateDlg>(), Accelerator( 'R', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "ArbitraryScale", FreeCaller<DoScaleDlg>(), Accelerator( 'S', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
