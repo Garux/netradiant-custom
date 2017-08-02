@@ -2308,6 +2308,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "CameraFaceWire", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceWire ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceWire ) );
 	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_camwindow_globals.m_bZoomInToPointer ) );
 	GlobalPreferenceSystem().registerPreference( "fieldOfView", FloatImportStringCaller( camera_t::fieldOfView ), FloatExportStringCaller( camera_t::fieldOfView ) );
+	GlobalPreferenceSystem().registerPreference( "CamVIS", makeBoolStringImportCallback( ToggleShownImportBoolCaller( g_camera_shown ) ), makeBoolStringExportCallback( ToggleShownExportBoolCaller( g_camera_shown ) ) );
 
 	CamWnd_constructStatic();
 

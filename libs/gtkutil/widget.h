@@ -28,8 +28,11 @@
 #include "warnings.h"
 #include "debugging/debugging.h"
 
+#include <gtk/gtkmain.h>
+
 inline bool widget_is_visible( GtkWidget* widget ){
-	return GTK_WIDGET_VISIBLE( widget ) != FALSE;
+	//return GTK_WIDGET_VISIBLE( widget ) != FALSE;
+	return gtk_widget_get_visible( widget ) != FALSE;
 }
 
 inline void widget_set_visible( GtkWidget* widget, bool show ){
@@ -37,8 +40,6 @@ inline void widget_set_visible( GtkWidget* widget, bool show ){
 		/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
 		GtkWidget* glwidget = GTK_WIDGET( g_object_get_data( G_OBJECT( widget ), "glwidget" ) );
 		if ( glwidget ){
-			//if ( widget_is_visible( glwidget ) )
-				//globalOutputStream() << "glwidget have been already visible :0\n"; /* is not hidden aswell, according to this */
 			gtk_widget_hide( glwidget );
 			gtk_widget_show( glwidget );
 		}
@@ -86,11 +87,17 @@ ToggleShown( const ToggleShown& other ); // NOT COPYABLE
 ToggleShown& operator=( const ToggleShown& other ); // NOT ASSIGNABLE
 
 static gboolean notify_visible( GtkWidget* widget, gpointer dummy, ToggleShown* self ){
+	/* destroy = notify::visible with visible = 0, thus let's filter it out  */
+	if( gtk_main_level() > 0 ){ //== 0 at destroy time
+		self->m_shownDeferred = widget_is_visible( self->m_widget );
+	}
+//globalOutputStream() << "ToggleShown::notify_visible time  " << gtk_get_current_event_time() << "  visible " << self->m_shownDeferred << "\n";
 	self->update();
 	return FALSE;
 }
 static gboolean destroy( GtkWidget* widget, ToggleShown* self ){
-	self->m_shownDeferred = GTK_WIDGET_VISIBLE( self->m_widget ) != FALSE;
+//globalOutputStream() << "ToggleShown::destroy time  " << gtk_get_current_event_time() << "  visible " << self->m_shownDeferred << "\n";
+	//self->m_shownDeferred = widget_is_visible( self->m_widget ); //always 0 at destroy time
 	self->m_widget = 0;
 	return FALSE;
 }
@@ -102,22 +109,26 @@ ToggleShown( bool shown )
 	: m_shownDeferred( shown ), m_widget( 0 ), m_item( ActiveCaller( *this ) ){
 }
 void update(){
+//globalOutputStream() << "ToggleShown::update\n";
 	m_item.update();
 }
 bool active() const {
+//globalOutputStream() << "ToggleShown::active\n";
 	if ( m_widget == 0 ) {
 		return m_shownDeferred;
 	}
 	else
 	{
-		return GTK_WIDGET_VISIBLE( m_widget ) != FALSE;
+		return widget_is_visible( m_widget );
 	}
 }
 void exportActive( const BoolImportCallback& importCallback ){
+//globalOutputStream() << "ToggleShown::exportActive\n";
 	importCallback( active() );
 }
 typedef MemberCaller1<ToggleShown, const BoolImportCallback&, &ToggleShown::exportActive> ActiveCaller;
 void set( bool shown ){
+//globalOutputStream() << "ToggleShown::set\n";
 	if ( m_widget == 0 ) {
 		m_shownDeferred = shown;
 	}
@@ -127,10 +138,12 @@ void set( bool shown ){
 	}
 }
 void toggle(){
+//globalOutputStream() << "ToggleShown::toggle\n";
 	widget_toggle_visible( m_widget );
 }
 typedef MemberCaller<ToggleShown, &ToggleShown::toggle> ToggleCaller;
 void connect( GtkWidget* widget ){
+//globalOutputStream() << "ToggleShown::connect\n";
 	m_widget = widget;
 	widget_set_visible( m_widget, m_shownDeferred );
 	g_signal_connect( G_OBJECT( m_widget ), "notify::visible", G_CALLBACK( notify_visible ), this );
@@ -139,6 +152,18 @@ void connect( GtkWidget* widget ){
 }
 };
 
+namespace{
+
+void ToggleShown_importBool( ToggleShown& self, bool value ){
+	self.set( value );
+}
+typedef ReferenceCaller1<ToggleShown, bool, ToggleShown_importBool> ToggleShownImportBoolCaller;
+void ToggleShown_exportBool( const ToggleShown& self, const BoolImportCallback& importer ){
+	importer( self.active() );
+}
+typedef ConstReferenceCaller1<ToggleShown, const BoolImportCallback&, ToggleShown_exportBool> ToggleShownExportBoolCaller;
+
+}
 
 inline void widget_queue_draw( GtkWidget& widget ){
 	gtk_widget_queue_draw( &widget );

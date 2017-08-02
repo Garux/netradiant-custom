@@ -253,8 +253,6 @@ void FindTextureDialog::setReplaceStr( const char* name ){
 }
 
 void FindTextureDialog::show(){
-	// workaround for strange gtk behaviour - modifying the contents of a window while it is not visible causes the window position to change without sending a configure_event
-	g_FindTextureDialog.m_position_tracker.sync( g_FindTextureDialog.GetWidget() );
 	g_FindTextureDialog.ShowDlg();
 	gtk_window_present( g_FindTextureDialog.GetWidget() );
 }

@@ -108,32 +108,59 @@ typedef ConstReferenceCaller1<WindowPosition, const StringImportCallback&, Windo
 class WindowPositionTracker
 {
 WindowPosition m_position;
+GtkWindow* m_window;
 
 static gboolean configure( GtkWidget* widget, GdkEventConfigure *event, WindowPositionTracker* self ){
+//globalOutputStream() << "WindowPositionTracker::configure\n";
 	self->m_position = WindowPosition( event->x, event->y, event->width, event->height );
 	return FALSE;
 }
 
 public:
 WindowPositionTracker()
-	: m_position( c_default_window_pos ){
+	: m_position( c_default_window_pos ), m_window( 0 ){
 }
 
 void sync( GtkWindow* window ){
+//globalOutputStream() << "WindowPositionTracker::sync\n";
 	window_set_position( window, m_position );
 }
 
+void sync(){
+	if( m_window )
+		sync( m_window );
+}
+
+/** need to reapply pos on every hiding to keep wnd pos after hide+show (flickering between two positions, if doing on showing)
+this stuff is weird: some wnds, like entity list, keep pos on hide/show... untill you resize them -)
+some, like floating xy/cam/groupdialog do not; if you remove glwidget from floating xy - it does xD
+if you gtk_window_set_position( window, GTK_WIN_POS_CENTER_ALWAYS ), they do keep it, except of random centering after resizing (ms windows)
+but this option doesn't sound healthy;
+gtk_window_set_transient_for seems to do some gtk_window_set_position also
+old questionable comment on this issue:
+workaround for strange gtk behaviour - modifying the contents of a window while it is not visible causes the window position to change without sending a configure_event */
+static gboolean notify_visible( GtkWidget* widget, gpointer dummy, WindowPositionTracker* self ){
+	if( !widget_is_visible( GTK_WIDGET( self->m_window ) ) )
+		self->sync();
+	return FALSE;
+}
+
 void connect( GtkWindow* window ){
+//globalOutputStream() << "WindowPositionTracker::connect\n";
+	m_window = window;
 	sync( window );
 	g_signal_connect( G_OBJECT( window ), "configure_event", G_CALLBACK( configure ), this );
+	g_signal_connect( G_OBJECT( window ), "notify::visible", G_CALLBACK( notify_visible ), this );
 }
 
 const WindowPosition& getPosition() const {
+//globalOutputStream() << "WindowPositionTracker::getPosition\n";
 	return m_position;
 }
 
 //hack
 void setPosition( const WindowPosition& position ){
+//globalOutputStream() << "WindowPositionTracker::setPosition\n";
 	m_position = position;
 }
 };

@@ -142,6 +142,10 @@ void entitylist_treeviewcolumn_celldatafunc( GtkTreeViewColumn* column, GtkCellR
 	}
 }
 
+void entitylist_focusSelected( GtkButton *button, gpointer user_data ){
+	FocusAllViews();
+}
+
 static gboolean entitylist_tree_select( GtkTreeSelection *selection, GtkTreeModel *model, GtkTreePath *path, gboolean path_currently_selected, gpointer data ){
 	GtkTreeIter iter;
 	gtk_tree_model_get_iter( model, &iter, path );
@@ -339,6 +343,7 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 			gtk_widget_show( check );
 			gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, FALSE, 0 );
 			getEntityList().m_check = check;
+			g_signal_connect( G_OBJECT( check ), "clicked", G_CALLBACK( entitylist_focusSelected ), 0 );
 		}
 	}
 

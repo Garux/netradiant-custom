@@ -1429,6 +1429,10 @@ void EntityInspector_selectConnected( GtkButton *button, gpointer user_data ){
 	Select_ConnectedEntities( true, true, focus );
 }
 
+void EntityInspector_focusSelected( GtkButton *button, gpointer user_data ){
+	FocusAllViews();
+}
+
 GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 	GtkWidget* vbox = gtk_vbox_new( FALSE, 2 );
 	gtk_widget_show( vbox );
@@ -1690,6 +1694,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						gtk_widget_set_tooltip_text( button, "AutoFocus on Selection" );
 						gtk_widget_show( button );
 						g_focusToggleButton = GTK_TOGGLE_BUTTON( button );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_focusSelected ), 0 );
 					}
 				}
 			}

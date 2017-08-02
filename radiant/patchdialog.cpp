@@ -301,8 +301,6 @@ void PatchInspector_queueDraw(){
 void DoPatchInspector(){
 	g_PatchInspector.GetPatchInfo();
 	if ( !g_PatchInspector.visible() ) {
-		// workaround for strange gtk behaviour - modifying the contents of a window while it is not visible causes the window position to change without sending a configure_event
-		g_PatchInspector.m_position_tracker.sync( g_PatchInspector.GetWidget() );
 		g_PatchInspector.ShowDlg();
 	}
 }

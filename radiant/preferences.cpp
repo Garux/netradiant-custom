@@ -753,6 +753,7 @@ GtkWindow* PrefsDlg::BuildDialog(){
 					GtkTreeStore* store = gtk_tree_store_new( 2, G_TYPE_STRING, G_TYPE_POINTER );
 
 					GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
+					m_treeview = view;
 					gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
 
 					{
@@ -932,6 +933,8 @@ void PreferencesDialog_restartRequired( const char* staticName ){
 
 void PreferencesDialog_showDialog(){
 	//if ( ConfirmModified( "Edit Preferences" ) && g_Preferences.DoModal() == eIDOK ) {
+	if( gtk_widget_get_realized( g_Preferences.m_treeview ) == TRUE )
+		gtk_widget_grab_focus( g_Preferences.m_treeview );
 	if ( g_Preferences.DoModal() == eIDOK ) {
 		if ( !g_restart_required.empty() ) {
 			StringOutputStream message( 256 );

@@ -321,8 +321,6 @@ CGameDescription *GameDescriptionForComboItem();
 extern CGameDialog g_GamesDialog;
 
 
-class texdef_t;
-
 class PrefsDlg : public Dialog
 {
 public:
@@ -332,6 +330,7 @@ std::list<CGameDescription *> mGames;
 public:
 
 GtkWidget *m_notebook;
+GtkWidget *m_treeview;
 
 virtual ~PrefsDlg(){
 	g_string_free( m_rc_path, true );

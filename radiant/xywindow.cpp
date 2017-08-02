@@ -809,6 +809,8 @@ gboolean xywnd_button_release( GtkWidget* widget, GdkEventButton* event, XYWnd* 
 		xywnd->XY_MouseUp( static_cast<int>( event->x ), static_cast<int>( event->y ), buttons_for_event_button( event ) );
 
 		xywnd->ButtonState_onMouseUp( buttons_for_event_button( event ) );
+
+		xywnd->chaseMouseMotion( static_cast<int>( event->x ), static_cast<int>( event->y ) ); /* stop chaseMouseMotion this way */
 	}
 	return FALSE;
 }
@@ -3391,24 +3393,12 @@ void Clipper_registerPreferencesPage(){
 #include "stringio.h"
 
 
-
-
-void ToggleShown_importBool( ToggleShown& self, bool value ){
-	self.set( value );
-}
-typedef ReferenceCaller1<ToggleShown, bool, ToggleShown_importBool> ToggleShownImportBoolCaller;
-void ToggleShown_exportBool( const ToggleShown& self, const BoolImportCallback& importer ){
-	importer( self.active() );
-}
-typedef ConstReferenceCaller1<ToggleShown, const BoolImportCallback&, ToggleShown_exportBool> ToggleShownExportBoolCaller;
-
-
 void XYWindow_Construct(){
 //	GlobalCommands_insert( "ToggleCrosshairs", FreeCaller<ToggleShowCrosshair>(), Accelerator( 'X', (GdkModifierType)GDK_SHIFT_MASK ) );
 //	GlobalCommands_insert( "ToggleSizePaint", FreeCaller<ToggleShowSizeInfo>(), Accelerator( 'J' ) );
 //	GlobalCommands_insert( "ToggleGrid", FreeCaller<ToggleShowGrid>(), Accelerator( '0' ) );
 
-	GlobalToggles_insert( "ToggleView", ToggleShown::ToggleCaller( g_xy_top_shown ), ToggleItem::AddCallbackCaller( g_xy_top_shown.m_item ), Accelerator( 'V', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalToggles_insert( "ToggleView", ToggleShown::ToggleCaller( g_xy_top_shown ), ToggleItem::AddCallbackCaller( g_xy_top_shown.m_item ) );
 	GlobalToggles_insert( "ToggleSideView", ToggleShown::ToggleCaller( g_yz_side_shown ), ToggleItem::AddCallbackCaller( g_yz_side_shown.m_item ) );
 	GlobalToggles_insert( "ToggleFrontView", ToggleShown::ToggleCaller( g_xz_front_shown ), ToggleItem::AddCallbackCaller( g_xz_front_shown.m_item ) );
 	GlobalCommands_insert( "NextView", FreeCaller<XY_Next>(), Accelerator( GDK_Tab, (GdkModifierType)GDK_CONTROL_MASK ) );
@@ -3450,6 +3440,7 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_Colors11", Vector3ImportStringCaller( g_xywindow_globals.color_selbrushes ), Vector3ExportStringCaller( g_xywindow_globals.color_selbrushes ) );
 
 
+	GlobalPreferenceSystem().registerPreference( "XYVIS", makeBoolStringImportCallback( ToggleShownImportBoolCaller( g_xy_top_shown ) ), makeBoolStringExportCallback( ToggleShownExportBoolCaller( g_xy_top_shown ) ) );
 	GlobalPreferenceSystem().registerPreference( "XZVIS", makeBoolStringImportCallback( ToggleShownImportBoolCaller( g_xz_front_shown ) ), makeBoolStringExportCallback( ToggleShownExportBoolCaller( g_xz_front_shown ) ) );
 	GlobalPreferenceSystem().registerPreference( "YZVIS", makeBoolStringImportCallback( ToggleShownImportBoolCaller( g_yz_side_shown ) ), makeBoolStringExportCallback( ToggleShownExportBoolCaller( g_yz_side_shown ) ) );
 

@@ -1772,10 +1772,12 @@ bool MainFrame_isActiveApp(){
 		//globalOutputStream() << "toplevel.. ";
 		if ( gtk_window_is_active( GTK_WINDOW( i->data ) ) ) {
 			//globalOutputStream() << "is active\n";
+			g_list_free( list );
 			return true;
 		}
 		//globalOutputStream() << "not active\n";
 	}
+	g_list_free( list );
 	return false;
 }
 
@@ -2967,6 +2969,7 @@ gboolean toolbar_redirect_scroll( GtkWidget* widget, GdkEventScroll* event, gpoi
 	return FALSE;
 }
 
+
 void MainFrame::Create(){
 	GtkWindow* window = GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) );
 
@@ -3157,8 +3160,6 @@ void MainFrame::Create(){
 			global_accel_connect_window( window );
 			g_posCamWnd.connect( window );
 
-			gtk_widget_show( GTK_WIDGET( window ) );
-
 			m_pCamWnd = NewCamWnd();
 			GlobalCamera_setCamWnd( *m_pCamWnd );
 
@@ -3166,6 +3167,7 @@ void MainFrame::Create(){
 				GtkFrame* frame = create_framed_widget( CamWnd_getWidget( *m_pCamWnd ) );
 				gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( frame ) );
 			}
+
 			CamWnd_setParent( *m_pCamWnd, window );
 			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
 			g_object_set_data( G_OBJECT( window ), "glwidget", CamWnd_getWidget( *m_pCamWnd ) );
@@ -3182,11 +3184,11 @@ void MainFrame::Create(){
 			m_pXYWnd->m_parent = window;
 			m_pXYWnd->SetViewType( XY );
 
-
 			{
 				GtkFrame* frame = create_framed_widget( m_pXYWnd->GetWidget() );
 				gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( frame ) );
 			}
+
 			XY_Top_Shown_Construct( window );
 			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
 			g_object_set_data( G_OBJECT( window ), "glwidget", m_pXYWnd->GetWidget() );
