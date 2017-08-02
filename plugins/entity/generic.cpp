@@ -219,7 +219,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 	renderer.SetState( m_entity.getEntityClass().m_state_fill, Renderer::eFullMaterials );
 	renderer.addRenderable( m_aabb_solid, localToWorld );
 	renderArrow( renderer, volume, localToWorld );
-	if ( g_showNames ) {
+	if ( g_showNames || selected ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }
@@ -227,7 +227,7 @@ void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
 	renderer.addRenderable( m_aabb_wire, localToWorld );
 	renderArrow( renderer, volume, localToWorld );
-	if ( g_showNames ) {
+	if ( g_showNames || selected ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

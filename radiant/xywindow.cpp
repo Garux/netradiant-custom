@@ -3038,7 +3038,7 @@ ToggleItem g_show_names( g_show_names_caller );
 void ShowNamesToggle(){
 	GlobalEntityCreator().setShowNames( !GlobalEntityCreator().getShowNames() );
 	g_show_names.update();
-	XY_UpdateAllWindows();
+	UpdateAllWindows();
 }
 
 void ShowTargetNamesExport( const BoolImportCallback& importer ){
@@ -3062,7 +3062,7 @@ ToggleItem g_show_angles( g_show_angles_caller );
 void ShowAnglesToggle(){
 	GlobalEntityCreator().setShowAngles( !GlobalEntityCreator().getShowAngles() );
 	g_show_angles.update();
-	XY_UpdateAllWindows();
+	UpdateAllWindows();
 }
 
 BoolExportCaller g_show_blocks_caller( g_xywindow_globals_private.show_blocks );

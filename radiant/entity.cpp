@@ -576,6 +576,24 @@ void Entity_constructPreferences( PreferencesPage& page ){
 		LightRadiiExportCaller( GlobalEntityCreator() )
 		);
 }
+*/
+void ShowNamesDistImport( EntityCreator& self, int value ){
+	self.setShowNamesDist( value );
+	UpdateAllWindows();
+}
+typedef ReferenceCaller1<EntityCreator, int, ShowNamesDistImport> ShowNamesDistImportCaller;
+
+void ShowNamesDistExport( EntityCreator& self, const IntImportCallback& importer ){
+	importer( self.getShowNamesDist() );
+}
+typedef ReferenceCaller1<EntityCreator, const IntImportCallback&, ShowNamesDistExport> ShowNamesDistExportCaller;
+
+void Entity_constructPreferences( PreferencesPage& page ){
+	page.appendSpinner(	"Names Display Distance", 512.0, 0.0, 200500.0,
+		IntImportCallback( ShowNamesDistImportCaller( GlobalEntityCreator() ) ),
+		IntExportCallback( ShowNamesDistExportCaller( GlobalEntityCreator() ) )
+		);
+}
 void Entity_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Entities", "Entity Display Preferences" ) );
 	Entity_constructPreferences( page );
@@ -583,7 +601,7 @@ void Entity_constructPage( PreferenceGroup& group ){
 void Entity_registerPreferencesPage(){
 	PreferencesDialog_addDisplayPage( FreeCaller1<PreferenceGroup&, Entity_constructPage>() );
 }
-*/
+
 
 void ShowLightRadiiExport( const BoolImportCallback& importer ){
 	importer( GlobalEntityCreator().getLightRadii() );
@@ -626,7 +644,7 @@ void Entity_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_Colors5", Vector3ImportStringCaller( g_entity_globals.color_entity ), Vector3ExportStringCaller( g_entity_globals.color_entity ) );
 	GlobalPreferenceSystem().registerPreference( "LastLightIntensity", IntImportStringCaller( g_iLastLightIntensity ), IntExportStringCaller( g_iLastLightIntensity ) );
 
-//	Entity_registerPreferencesPage();
+	Entity_registerPreferencesPage();
 }
 
 void Entity_Destroy(){

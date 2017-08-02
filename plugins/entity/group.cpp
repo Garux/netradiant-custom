@@ -150,7 +150,7 @@ void detach( scene::Traversable::Observer* observer ){
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( g_showNames ) {
+	if ( g_showNames || selected || childSelected ) {
 		// don't draw the name for worldspawn
 		if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
 			return;

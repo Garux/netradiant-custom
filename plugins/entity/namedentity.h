@@ -181,7 +181,7 @@ public:
 			Matrix4 viewproj = matrix4_multiplied_by_matrix4( volume.GetProjection(), volume.GetModelview() );
 			Vector3 viewer = vector4_to_vector3( viewer_from_viewproj( viewproj ) );
 			Vector3 pos_in_world = matrix4_transformed_point( localToWorld, m_position );
-			if( vector3_length_squared( pos_in_world - viewer ) > 512*512 ){
+			if( vector3_length_squared( pos_in_world - viewer ) > g_showNamesDist * g_showNamesDist ){
 				return;
 			}
 			//globalOutputStream() << viewer[0] << " " << viewer[1] << " " << viewer[2] << " Viewer\n";

@@ -253,7 +253,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		renderer.PopState();
 	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( g_showNames ) {
+	if ( g_showNames || selected ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

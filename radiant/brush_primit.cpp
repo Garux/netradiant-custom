@@ -1345,6 +1345,9 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 
 		identity2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, identityCorrected );
 	}
+	else if( dot != dot ){ //catch QNAN: happens on scaling cuboid on Z and sometimes on rotating
+		return;
+	}
 
 	Matrix4 stTransformed2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, stTransformed2identity );
 

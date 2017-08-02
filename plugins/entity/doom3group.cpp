@@ -363,7 +363,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		renderer.addRenderable( m_curveCatmullRom.m_renderCurve, localToWorld );
 	}
 
-	if ( g_showNames ) {
+	if ( g_showNames || selected || childSelected ) {
 		// draw models as usual
 		if ( !isModel() ) {
 			// don't draw the name for worldspawn

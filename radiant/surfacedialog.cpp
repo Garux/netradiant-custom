@@ -1321,6 +1321,9 @@ struct Texturable
 
 
 void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& bestIntersection, Texturable& texturable ){
+	if ( face.isFiltered() ) {
+		return;
+	}
 	SelectionIntersection intersection;
 	face.testSelect( test, intersection );
 	if ( intersection.valid()
@@ -1453,11 +1456,11 @@ void Scene_copyClosestTexture( SelectionTest& test ){
 }
 
 void Scene_applyClosestTexture( SelectionTest& test ){
-	UndoableCommand command( "facePaintTexture" );
+//	UndoableCommand command( "facePaintTexture" );
 
 	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader( g_TextureBrowser ), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags );
 
-	SceneChangeNotify();
+	//SceneChangeNotify();
 }
 
 

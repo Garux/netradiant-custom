@@ -195,7 +195,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		m_renderOrigin.render( renderer, volume, localToWorld );
 	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( g_showNames  && !string_equal( m_named.name(), "misc_model" ) ) {
+	if ( ( g_showNames || selected )  && !string_equal( m_named.name(), "misc_model" ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

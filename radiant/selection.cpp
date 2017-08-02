@@ -4072,6 +4072,75 @@ const ModifierFlags c_modifier_apply_texture2 = c_modifierControl;
 const ModifierFlags c_modifier_apply_texture3 =                     c_modifierShift;
 const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 
+
+
+void Scene_copyClosestTexture( SelectionTest& test );
+void Scene_applyClosestTexture( SelectionTest& test );
+
+class TexManipulator_
+{
+public:
+DeviceVector m_epsilon;
+const View* m_view;
+ModifierFlags m_state;
+bool m_undo_begun;
+
+TexManipulator_() : m_state( c_modifierNone ), m_undo_begun( false ){
+}
+
+void mouseDown( DeviceVector position ){
+	View scissored( *m_view );
+	ConstructSelectionTest( scissored, SelectionBoxForPoint( &position[0], &m_epsilon[0] ) );
+	SelectionVolume volume( scissored );
+
+	if ( m_state == c_modifier_apply_texture1 || m_state == c_modifier_apply_texture2 || m_state == c_modifier_apply_texture3 ) {
+		m_undo_begun = true;
+		GlobalUndoSystem().start();
+		Scene_applyClosestTexture( volume );
+	}
+	else if ( m_state == c_modifier_copy_texture ) {
+		Scene_copyClosestTexture( volume );
+	}
+}
+
+void mouseMoved( DeviceVector position ){
+	if( m_undo_begun ){
+		View scissored( *m_view );
+		ConstructSelectionTest( scissored, SelectionBoxForPoint( &device_constrained( position )[0], &m_epsilon[0] ) );
+		SelectionVolume volume( scissored );
+
+		Scene_applyClosestTexture( volume );
+	}
+}
+typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseMoved> MouseMovedCaller;
+
+void mouseUp( DeviceVector position ){
+	if( m_undo_begun ){
+		GlobalUndoSystem().finish( "paintTexture" );
+		m_undo_begun = false;
+	}
+	g_mouseMovedCallback.clear();
+	g_mouseUpCallback.clear();
+}
+typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseUp> MouseUpCaller;
+
+void setState( ModifierFlags state ){
+	m_state = state;
+}
+
+ModifierFlags getState() const {
+	return m_state;
+}
+
+void modifierEnable( ModifierFlags type ){
+	setState( bitfield_enable( getState(), type ) );
+}
+void modifierDisable( ModifierFlags type ){
+	setState( bitfield_disable( getState(), type ) );
+}
+};
+
+
 class Selector_
 {
 RadiantSelectionSystem::EModifier modifier_for_state( ModifierFlags state ){
@@ -4253,8 +4322,7 @@ void modifierDisable( ModifierFlags type ){
 }
 };
 
-void Scene_copyClosestTexture( SelectionTest& test );
-void Scene_applyClosestTexture( SelectionTest& test );
+
 
 class RadiantWindowObserver : public SelectionSystemWindowObserver
 {
@@ -4271,6 +4339,7 @@ bool m_mouse_down;
 public:
 Selector_ m_selector;
 Manipulator_ m_manipulator;
+TexManipulator_ m_texmanipulator;
 
 RadiantWindowObserver() : m_mouse_down( false ){
 }
@@ -4280,6 +4349,7 @@ void release(){
 void setView( const View& view ){
 	m_selector.m_view = &view;
 	m_manipulator.m_view = &view;
+	m_texmanipulator.m_view = &view;
 }
 void setRectangleDrawCallback( const RectangleCallback& callback ){
 	m_selector.m_window_update = callback;
@@ -4288,7 +4358,7 @@ void onSizeChanged( int width, int height ){
 	m_width = width;
 	m_height = height;
 	DeviceVector epsilon( SELECT_EPSILON / static_cast<float>( m_width ), SELECT_EPSILON / static_cast<float>( m_height ) );
-	m_selector.m_epsilon = m_manipulator.m_epsilon = epsilon;
+	m_selector.m_epsilon = m_manipulator.m_epsilon = m_texmanipulator.m_epsilon = epsilon;
 }
 void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
 	if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
@@ -4310,18 +4380,14 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 		}
 	}
 	else if ( button == c_button_texture ) {
+		m_mouse_down = true;
 		DeviceVector devicePosition( device_constrained( window_to_normalised_device( position, m_width, m_height ) ) );
 
-		View scissored( *m_selector.m_view );
-		ConstructSelectionTest( scissored, SelectionBoxForPoint( &devicePosition[0], &m_selector.m_epsilon[0] ) );
-		SelectionVolume volume( scissored );
+		m_texmanipulator.mouseDown( devicePosition );
+		g_mouseMovedCallback.insert( MouseEventCallback( TexManipulator_::MouseMovedCaller( m_texmanipulator ) ) );
+		g_mouseUpCallback.insert( MouseEventCallback( TexManipulator_::MouseUpCaller( m_texmanipulator ) ) );
 
-		if ( modifiers == c_modifier_apply_texture1 || modifiers == c_modifier_apply_texture2 || modifiers == c_modifier_apply_texture3 ) {
-			Scene_applyClosestTexture( volume );
-		}
-		else if ( modifiers == c_modifier_copy_texture ) {
-			Scene_copyClosestTexture( volume );
-		}
+
 	}
 }
 void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
@@ -4332,7 +4398,7 @@ void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
 	}
 }
 void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
-	if ( ( button == c_button_select || button == c_button_select2 ) && !g_mouseUpCallback.empty() ) {
+	if ( ( button == c_button_select || button == c_button_select2 || button == c_button_texture ) && !g_mouseUpCallback.empty() ) {
 		m_mouse_down = false;
 
 		g_mouseUpCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
@@ -4352,10 +4418,12 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 void onModifierDown( ModifierFlags type ){
 	m_selector.modifierEnable( type );
 	m_manipulator.modifierEnable( type );
+	m_texmanipulator.modifierEnable( type );
 }
 void onModifierUp( ModifierFlags type ){
 	m_selector.modifierDisable( type );
 	m_manipulator.modifierDisable( type );
+	m_texmanipulator.modifierDisable( type );
 }
 };
 

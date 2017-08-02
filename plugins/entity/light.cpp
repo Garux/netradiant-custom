@@ -1460,7 +1460,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		}
 	}
 
-	if ( g_showNames && !string_equal( m_named.name(), "light" ) ) {
+	if ( ( g_showNames || selected ) && !string_equal( m_named.name(), "light" ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

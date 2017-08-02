@@ -1937,6 +1937,7 @@ GtkMenuItem* create_edit_menu(){
 //		menu_tearoff( convert_menu );
 //	}
 	create_menu_item_with_mnemonic( menu, "Select All Of Type", "SelectAllOfType" );
+	create_menu_item_with_mnemonic( menu, "_Expand Selection To Primitives", "ExpandSelectionToPrimitives" );
 	create_menu_item_with_mnemonic( menu, "_Expand Selection To Entities", "ExpandSelectionToEntities" );
 	create_menu_item_with_mnemonic( menu, "Select Connected Entities", "SelectConnectedEntities" );
 
@@ -3478,6 +3479,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "InvertSelection", FreeCaller<Select_Invert>(), Accelerator( 'I' ) );
 	GlobalCommands_insert( "SelectInside", FreeCaller<Select_Inside>() );
 	GlobalCommands_insert( "SelectTouching", FreeCaller<Select_Touching>() );
+	GlobalCommands_insert( "ExpandSelectionToPrimitives", FreeCaller<Scene_ExpandSelectionToPrimitives>(), Accelerator( 'E', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "ExpandSelectionToEntities", FreeCaller<Scene_ExpandSelectionToEntities>(), Accelerator( 'E', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "SelectConnectedEntities", FreeCaller<SelectConnectedEntities>(), Accelerator( 'E', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "Preferences", FreeCaller<PreferencesDialog_showDialog>(), Accelerator( 'P' ) );

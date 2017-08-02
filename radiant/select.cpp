@@ -384,6 +384,50 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
+class ExpandSelectionToPrimitivesWalker : public scene::Graph::Walker
+{
+mutable std::size_t m_depth;
+NodeSmartReference worldspawn;
+public:
+ExpandSelectionToPrimitivesWalker() : m_depth( 0 ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+}
+bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	++m_depth;
+
+	if( !path.top().get().visible() )
+		return false;
+
+	// ignore worldspawn
+//	NodeSmartReference me( path.top().get() );
+//	if ( me == worldspawn ) {
+//		return false;
+//	}
+
+	if ( m_depth == 2 ) { // entity depth
+		// traverse and select children if any one is selected
+		bool beselected = false;
+		const bool isContainer = Node_getEntity( path.top() )->isContainer();
+		if ( instance.childSelected() || instance.isSelected() ) {
+			beselected = true;
+			Instance_setSelected( instance, !isContainer );
+		}
+		return isContainer && beselected;
+	}
+	else if ( m_depth == 3 ) { // primitive depth
+		Instance_setSelected( instance, true );
+		return false;
+	}
+	return true;
+}
+void post( const scene::Path& path, scene::Instance& instance ) const {
+	--m_depth;
+}
+};
+
+void Scene_ExpandSelectionToPrimitives(){
+	GlobalSceneGraph().traverse( ExpandSelectionToPrimitivesWalker() );
+}
+
 class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 {
 mutable std::size_t m_depth;
