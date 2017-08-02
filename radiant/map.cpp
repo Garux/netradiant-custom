@@ -1622,16 +1622,13 @@ void Map_RegionSelectedBrushes( void ){
    Map_RegionXY
    ===========
  */
-void Map_RegionXY( float x_min, float y_min, float x_max, float y_max ){
-	Map_RegionOff();
+void Map_RegionXY( const Vector3& min, const Vector3& max ){
+	//Map_RegionOff();
 
-	g_region_mins[0] = x_min;
-	g_region_maxs[0] = x_max;
-	g_region_mins[1] = y_min;
-	g_region_maxs[1] = y_max;
-	g_region_mins[2] = g_MinWorldCoord + 64;
-	g_region_maxs[2] = g_MaxWorldCoord - 64;
-
+	for( std::size_t i = 0; i < 3; ++i ){
+		g_region_mins[i] = std::max( g_region_mins[i], min[i] );
+		g_region_maxs[i] = std::min( g_region_maxs[i], max[i] );
+	}
 	Map_ApplyRegion();
 }
 
@@ -2057,12 +2054,20 @@ void RegionOff(){
 }
 
 void RegionXY(){
-	Map_RegionXY(
-		g_pParentWnd->GetXYWnd()->GetOrigin()[0] - 0.5f * g_pParentWnd->GetXYWnd()->Width() / g_pParentWnd->GetXYWnd()->Scale(),
-		g_pParentWnd->GetXYWnd()->GetOrigin()[1] - 0.5f * g_pParentWnd->GetXYWnd()->Height() / g_pParentWnd->GetXYWnd()->Scale(),
-		g_pParentWnd->GetXYWnd()->GetOrigin()[0] + 0.5f * g_pParentWnd->GetXYWnd()->Width() / g_pParentWnd->GetXYWnd()->Scale(),
-		g_pParentWnd->GetXYWnd()->GetOrigin()[1] + 0.5f * g_pParentWnd->GetXYWnd()->Height() / g_pParentWnd->GetXYWnd()->Scale()
-		);
+	VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
+	int nDim1 = ( viewtype == YZ ) ? 1 : 0;
+	int nDim2 = ( viewtype == XY ) ? 1 : 2;
+	int nDim = static_cast<int>( viewtype );
+	XYWnd* wnd = g_pParentWnd->ActiveXY();
+	Vector3 min, max;
+	min[nDim1] = wnd->GetOrigin()[nDim1] - 0.5f * wnd->Width() / wnd->Scale();
+	min[nDim2] = wnd->GetOrigin()[nDim2] - 0.5f * wnd->Height() / wnd->Scale();
+	min[nDim] = g_MinWorldCoord + 64;
+	max[nDim1] = wnd->GetOrigin()[nDim1] + 0.5f * wnd->Width() / wnd->Scale();
+	max[nDim2] = wnd->GetOrigin()[nDim2] + 0.5f * wnd->Height() / wnd->Scale();
+	max[nDim] = g_MaxWorldCoord - 64;
+
+	Map_RegionXY( min, max );
 	SceneChangeNotify();
 }
 

@@ -425,6 +425,9 @@ void DoSides( int type, int axis ){
 			case eBrushRock :
 				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 32, 10, 1000, 1, 10, 0 ) );
 				break;
+			case eBrushIcosahedron :
+				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 2, 1, 10, 0 ) ); //possible with 3, but buggy
+				break;
 			default:
 				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 8, 3, 31, 1, 10, 0 ) );
 				break;

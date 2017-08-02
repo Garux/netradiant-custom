@@ -118,7 +118,7 @@ void XY_MouseDown( int x, int y, unsigned int buttons );
 void XY_MouseMoved( int x, int y, unsigned int buttons );
 
 void NewBrushDrag_Begin( int x, int y );
-void NewBrushDrag( int x, int y, bool square );
+void NewBrushDrag( int x, int y, bool square, bool cube );
 void NewBrushDrag_End( int x, int y );
 
 void XY_ToPoint( int x, int y, Vector3& point );

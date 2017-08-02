@@ -207,10 +207,18 @@ void translate( const Vector3& translation ){
 	m_origin = origin_translated( m_origin, translation );
 }
 void rotate( const Quaternion& rotation ){
-	m_angles = angles_rotated_for_rotated_pivot( m_angles, rotation );
+	//m_angles = angles_rotated_for_rotated_pivot( m_angles, rotation );
+	m_angles = angles_rotated( m_angles, rotation );
 }
 void scale( const Vector3& scaling ){
-	m_scale = scale_scaled( m_scale, scaling );
+	//m_scale = scale_scaled( m_scale, scaling );
+
+	Matrix4 mat( matrix4_scale_for_vec3( scaling ) );
+	matrix4_multiply_by_matrix4( mat, matrix4_rotation_for_euler_xyz_degrees( m_anglesKey.m_angles ) );
+	matrix4_scale_by_vec3( mat, m_scale );
+
+	m_scale = matrix4_get_scale_vec3( mat );
+	//m_angles = angles_snapped_to_zero( matrix4_get_rotation_euler_xyz_degrees( mat ) );
 }
 void snapto( float snap ){
 	m_originKey.m_origin = origin_snapped( m_originKey.m_origin, snap );
@@ -285,7 +293,9 @@ void evaluateTransform(){
 		if( getRotation() != c_quaternion_identity ){
 			m_contained.rotate( getRotation() );
 		}
-		m_contained.scale( getScale() );
+		if( getScale() != c_scale_identity ){
+			m_contained.scale( getScale() );
+		}
 	}
 }
 void applyTransform(){

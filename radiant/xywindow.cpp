@@ -1059,7 +1059,7 @@ void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
 void XYWnd::SetCustomPivotOrigin( int pointx, int pointy ){
 	Vector3 point;
 	XY_ToPoint( pointx, pointy, point );
-	VIEWTYPE viewtype = static_cast<VIEWTYPE>( GetViewType() );
+	VIEWTYPE viewtype = GetViewType();
 	const int nDim = ( viewtype == YZ ) ? 0 : ( ( viewtype == XZ ) ? 1 : 2 );
 	//vector3_snap( point, GetSnapGridSize() );
 	point[nDim] = 999999;
@@ -1157,7 +1157,7 @@ void XYWnd::NewBrushDrag_End( int x, int y ){
 	}
 }
 
-void XYWnd::NewBrushDrag( int x, int y, bool square ){
+void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 	Vector3 mins, maxs;
 	XY_ToPoint( m_nNewBrushPressx, m_nNewBrushPressy, mins );
 	XY_SnapToGrid( mins );
@@ -1173,10 +1173,13 @@ void XYWnd::NewBrushDrag( int x, int y, bool square ){
 		maxs[nDim] = mins[nDim] + GetGridSize();
 	}
 
-	if( square ){
+	if( square || cube ){
 		float squaresize = std::max( fabs( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ), fabs( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) );
 		maxs[(nDim + 1) % 3] = ( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ) > 0.f ? ( mins[(nDim + 1) % 3] + squaresize ) : ( mins[(nDim + 1) % 3] - squaresize );
 		maxs[(nDim + 2) % 3] = ( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) > 0.f ? ( mins[(nDim + 2) % 3] + squaresize ) : ( mins[(nDim + 2) % 3] - squaresize );
+		if( cube ){
+			maxs[nDim] = ( maxs[nDim] - mins[nDim] ) > 0.f ? ( mins[nDim] + squaresize ) : ( mins[nDim] - squaresize );
+		}
 	}
 
 	for ( int i = 0 ; i < 3 ; i++ )
@@ -1222,13 +1225,16 @@ void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
 			StringOutputStream command;
 			command << "entityCreate -class " << entity_name;
 			UndoableCommand undo( command.c_str() );
-
+#if 0
 			Vector3 angles( Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
 			Vector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
 			Vector3 viewvector;
 			viewvector[0] = cos( radangles[1] ) * cos( radangles[0] );
 			viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
 			viewvector[2] = sin( radangles[0] );
+#else
+			Vector3 viewvector = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
+#endif
 
 			float offset_for_multiple = ( GetSnapGridSize() < 8.f ? 8.f : GetSnapGridSize() ) * g_entityCreationOffset;
 			Vector3 point = viewvector * ( 64.f + offset_for_multiple ) + Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
@@ -1241,26 +1247,19 @@ void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
 		++g_entityCreationOffset;
 	}
 	else {
-		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!"
-																			  "",
-										 "Info",
-										 eMB_OK,
-										 eMB_ICONDEFAULT );
+//		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!"
+//																			  "",
+//										 "Info",
+//										 eMB_OK,
+//										 eMB_ICONDEFAULT );
+		Scene_EntitySetClassname_Selected( entity_name ); //ungroupSelectedPrimitives
 	}
 }
 
 gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
 	/* convert entities */
 	if ( event->button.button == 3 ) {
-//		globalOutputStream() << "yo+\n";
-
-		const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( widget )->child ) );
-		StringOutputStream command;
-		command << "entitySetClass -class " << entity_name;
-		UndoableCommand undo( command.c_str() );
-
-		Scene_EntitySetClassname_Selected( entity_name );
-
+		Scene_EntitySetClassname_Selected( gtk_label_get_text( GTK_LABEL( GTK_BIN( widget )->child ) ) );
 		if( ( event->button.state & GDK_CONTROL_MASK ) == 0 ){
 			gtk_menu_popdown( XYWnd::m_mnuDrop );
 		}
@@ -1277,7 +1276,6 @@ gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer
 /* This handles unwanted rightclick release, that can occur with low res display, while activating menu from camera (=activate top menu entry) */
 gboolean entitycreate_rightUnClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
 	if ( event->button.button == 3 ) {
-//		globalOutputStream() << "yo-\n";
 		return TRUE;
 	}
 	else if ( event->button.button == 1 && ( ( event->button.state & GDK_CONTROL_MASK ) != 0 || gtk_menu_get_tearoff_state( XYWnd::m_mnuDrop ) == TRUE ) ) {
@@ -1572,7 +1570,7 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 	}
 	// lbutton without selection = drag new brush
 	else if ( m_bNewBrushDrag ) {
-		NewBrushDrag( x, y, buttons == ( RAD_LBUTTON | RAD_SHIFT ) );
+		NewBrushDrag( x, y, buttons & RAD_SHIFT, buttons & RAD_CONTROL );
 	}
 
 	// control mbutton = move camera

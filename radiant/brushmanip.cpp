@@ -320,6 +320,74 @@ void Brush_ConstructRock( Brush& brush, const AABB& bounds, std::size_t sides, c
 	}
 }
 
+namespace icosahedron{
+
+#define X .525731112119133606
+#define Z .850650808352039932
+
+static float vdata[12][3] = {
+	{ -X, 0.0, Z}, {X, 0.0, Z}, { -X, 0.0, -Z}, {X, 0.0, -Z},
+	{0.0, Z, X}, {0.0, Z, -X}, {0.0, -Z, X}, {0.0, -Z, -X},
+	{Z, X, 0.0}, { -Z, X, 0.0}, {Z, -X, 0.0}, { -Z, -X, 0.0}
+};
+static unsigned int tindices[20][3] = {
+	{0, 4, 1}, {0, 9, 4}, {9, 5, 4}, {4, 5, 8}, {4, 8, 1},
+	{8, 10, 1}, {8, 3, 10}, {5, 3, 8}, {5, 2, 3}, {2, 7, 3},
+	{7, 10, 3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1, 6},
+	{6, 1, 10}, {9, 0, 11}, {9, 11, 2}, {9, 2, 5}, {7, 2, 11}
+};
+
+void normalize( float* a ) {
+	float d = sqrt( a[0] * a[0] + a[1] * a[1] + a[2] * a[2] );
+	a[0] /= d;
+	a[1] /= d;
+	a[2] /= d;
+}
+
+void drawtri( float* a, float* b, float* c, std::size_t subdivisions, Brush& brush, float radius, const Vector3& mid, const char* shader, const TextureProjection& projection ) {
+	if( subdivisions <= 0 ) {
+		brush.addPlane( Vector3( a[0], a[1], a[2] ) * radius + mid,
+						Vector3( b[0], b[1], b[2] ) * radius + mid,
+						Vector3( c[0], c[1], c[2] ) * radius + mid,
+						shader, projection );
+	}
+	else{
+		float ab[3], ac[3], bc[3];
+		for( int i = 0; i < 3; i++ ) {
+			ab[i] = ( a[i] + b[i] ) / 2;
+			ac[i] = ( a[i] + c[i] ) / 2;
+			bc[i] = ( b[i] + c[i] ) / 2;
+		}
+		normalize( ab );
+		normalize( ac );
+		normalize( bc );
+		drawtri( a, ab, ac, subdivisions - 1, brush, radius, mid, shader, projection );
+		drawtri( b, bc, ab, subdivisions - 1, brush, radius, mid, shader, projection );
+		drawtri( c, ac, bc, subdivisions - 1, brush, radius, mid, shader, projection );
+		drawtri( ab, bc, ac, subdivisions - 1, brush, radius, mid, shader, projection ); //<--Comment this line and sphere looks really cool!
+	}
+}
+
+
+void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t subdivisions, const char* shader, const TextureProjection& projection ){
+	if ( Unsigned( 20 * ( 4 << subdivisions ) ) > c_brush_maxFaces ) {
+		globalErrorStream() << "brushIcosahedron" << ": subdivisions " << Unsigned( subdivisions ) << ": wrong sides count requested\n";
+		return;
+	}
+
+	brush.clear();
+	brush.reserve( 20 * ( 4 << subdivisions ) );
+
+	float radius = max_extent( bounds.extents );
+	const Vector3& mid = bounds.origin;
+
+	for( int i = 0; i < 20; i++ ){
+		drawtri( vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], subdivisions, brush, radius, mid, shader, projection );
+	}
+}
+
+} //namespace icosahedron
+
 int GetViewAxis(){
 	switch ( GlobalXYWnd_getCurrentViewType() )
 	{
@@ -378,6 +446,15 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 		UndoableCommand undo( command.c_str() );
 
 		Brush_ConstructRock( brush, bounds, sides, shader, projection );
+	}
+	break;
+	case eBrushIcosahedron:
+	{
+		StringOutputStream command;
+		command << "brushIcosahedron" << " -subdivisions " << Unsigned( sides );
+		UndoableCommand undo( command.c_str() );
+
+		icosahedron::Brush_ConstructIcosahedron( brush, bounds, sides, shader, projection );
 	}
 	break;
 	}
@@ -705,6 +782,12 @@ void Scene_BrushResize_Selected( scene::Graph& graph, const AABB& bounds, const 
 			SceneChangeNotify();
 		}
 	}
+}
+
+void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds ){
+	scene::Node* brush = &GlobalBrushCreator().createBrush();
+	Node_getTraversable( node )->insert( NodeSmartReference( *brush ) );
+	Brush_ConstructCuboid( *Node_getBrush( *brush ), bounds, texdef_name_default(), TextureTransform_getDefault() );
 }
 
 bool Brush_hasShader( const Brush& brush, const char* name ){
@@ -1325,18 +1408,6 @@ BrushMakeSided g_brushmakesided7( 7 );
 BrushMakeSided g_brushmakesided8( 8 );
 BrushMakeSided g_brushmakesided9( 9 );
 
-inline int axis_for_viewtype( int viewtype ){
-	switch ( viewtype )
-	{
-	case XY:
-		return 2;
-	case XZ:
-		return 1;
-	case YZ:
-		return 0;
-	}
-	return 2;
-}
 
 class BrushPrefab
 {
@@ -1346,7 +1417,7 @@ BrushPrefab( EBrushPrefab type )
 	: m_type( type ){
 }
 void set(){
-	DoSides( m_type, axis_for_viewtype( GetViewAxis() ) );
+	DoSides( m_type, GetViewAxis() );
 }
 typedef MemberCaller<BrushPrefab, &BrushPrefab::set> SetCaller;
 };
@@ -1355,6 +1426,7 @@ BrushPrefab g_brushprism( eBrushPrism );
 BrushPrefab g_brushcone( eBrushCone );
 BrushPrefab g_brushsphere( eBrushSphere );
 BrushPrefab g_brushrock( eBrushRock );
+BrushPrefab g_brushicosahedron( eBrushIcosahedron );
 
 /*
 void FlipClip();
@@ -1404,6 +1476,7 @@ void Brush_registerCommands(){
 	GlobalCommands_insert( "BrushCone", BrushPrefab::SetCaller( g_brushcone ) );
 	GlobalCommands_insert( "BrushSphere", BrushPrefab::SetCaller( g_brushsphere ) );
 	GlobalCommands_insert( "BrushRock", BrushPrefab::SetCaller( g_brushrock ) );
+	GlobalCommands_insert( "BrushIcosahedron", BrushPrefab::SetCaller( g_brushicosahedron ) );
 
 	GlobalCommands_insert( "Brush3Sided", BrushMakeSided::SetCaller( g_brushmakesided3 ), Accelerator( '3', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "Brush4Sided", BrushMakeSided::SetCaller( g_brushmakesided4 ), Accelerator( '4', (GdkModifierType)GDK_CONTROL_MASK ) );
@@ -1426,6 +1499,7 @@ void Brush_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "Cone...", "BrushCone" );
 	create_menu_item_with_mnemonic( menu, "Sphere...", "BrushSphere" );
 	create_menu_item_with_mnemonic( menu, "Rock...", "BrushRock" );
+	create_menu_item_with_mnemonic( menu, "Icosahedron...", "BrushIcosahedron" );
 	menu_separator( menu );
 	{
 		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "CSG" );

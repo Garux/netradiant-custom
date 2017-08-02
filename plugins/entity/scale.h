@@ -84,7 +84,6 @@ inline Vector3 scale_scaled( const Vector3& scale, const Vector3& scaling ){
 			   );
 }
 
-
 class ScaleKey
 {
 Callback m_scaleChanged;

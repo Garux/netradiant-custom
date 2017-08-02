@@ -1184,12 +1184,9 @@ void EntityInspector_selectionChanged( const Selectable& ){
 	EntityInspector_keyValueChanged();
 }
 
-// Creates a new entity based on the currently selected brush and entity type.
-//
-void EntityClassList_createEntity(){
+void EntityClassList_convertEntity(){
 	GtkTreeView* view = g_entityClassList;
 
-	// find out what type of entity we are trying to create
 	GtkTreeModel* model;
 	GtkTreeIter iter;
 	if ( gtk_tree_selection_get_selected( gtk_tree_view_get_selection( view ), &model, &iter ) == FALSE ) {
@@ -1201,12 +1198,7 @@ void EntityClassList_createEntity(){
 	gtk_tree_model_get( model, &iter, 0, &text, -1 );
 
 	{
-		StringOutputStream command;
-		command << "entityCreate -class " << text;
-
-		UndoableCommand undo( command.c_str() );
-
-		Entity_createFromSelection( text, g_vector3_identity );
+		Scene_EntitySetClassname_Selected( text );
 	}
 	g_free( text );
 }
@@ -1218,13 +1210,11 @@ void EntityInspector_applyKeyValue(){
 	StringOutputStream value( 64 );
 	value << gtk_entry_get_text( g_entityValueEntry );
 
-
 	// TTimo: if you change the classname to worldspawn you won't merge back in the structural brushes but create a parasite entity
-	if ( !strcmp( key.c_str(), "classname" ) && !strcmp( value.c_str(), "worldspawn" ) ) {
-		gtk_MessageBox( gtk_widget_get_toplevel( GTK_WIDGET( g_entityKeyEntry ) ),  "Cannot change \"classname\" key back to worldspawn.", 0, eMB_OK );
-		return;
-	}
-
+//	if ( !strcmp( key.c_str(), "classname" ) && !strcmp( value.c_str(), "worldspawn" ) ) {
+//		gtk_MessageBox( gtk_widget_get_toplevel( GTK_WIDGET( g_entityKeyEntry ) ),  "Cannot change \"classname\" key back to worldspawn.", 0, eMB_OK );
+//		return;
+//	}
 
 	// RR2DO2: we don't want spaces in entity keys
 	if ( strstr( key.c_str(), " " ) ) {
@@ -1233,9 +1223,6 @@ void EntityInspector_applyKeyValue(){
 	}
 
 	if ( strcmp( key.c_str(), "classname" ) == 0 ) {
-		StringOutputStream command;
-		command << "entitySetClass -class " << value.c_str();
-		UndoableCommand undo( command.c_str() );
 		Scene_EntitySetClassname_Selected( value.c_str() );
 	}
 	else
@@ -1298,7 +1285,7 @@ static void EntityClassList_selection_changed( GtkTreeSelection* selection, gpoi
 
 static gint EntityClassList_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->type == GDK_2BUTTON_PRESS ) {
-		EntityClassList_createEntity();
+		EntityClassList_convertEntity();
 		return TRUE;
 	}
 	return FALSE;
@@ -1306,7 +1293,7 @@ static gint EntityClassList_button_press( GtkWidget *widget, GdkEventButton *eve
 
 static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpointer data ){
 	if ( event->keyval == GDK_Return ) {
-		EntityClassList_createEntity();
+		EntityClassList_convertEntity();
 		return TRUE;
 	}
 

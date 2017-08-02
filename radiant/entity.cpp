@@ -93,18 +93,22 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0
 		 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
-		if( string_equal_nocase( entity->getKeyValue( "classname" ), "worldspawn" ) ){
+		if( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ){
 			globalErrorStream() << "do not want to convert worldspawn entity\n";
 			return;
 		}
 
 		EntityClass* eclass = GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) );
-		if( !eclass->fixedsize && !entity->isContainer() ){
-			globalErrorStream() << "can't convert point to group entity\n";
-			return;
-		}
 		//NodeSmartReference node( GlobalEntityCreator().createEntity( GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) ) ) );
 		NodeSmartReference node( GlobalEntityCreator().createEntity( eclass ) );
+
+		if( eclass->fixedsize && entity->isContainer() ){
+			//group to point entity
+			char value[64];
+			sprintf( value, "%g %g %g", instance.worldAABB().origin[0], instance.worldAABB().origin[1], instance.worldAABB().origin[2] );
+			entity->setKeyValue( "origin", value );
+		}
+
 
 		EntityCopyingVisitor visitor( *Node_getEntity( node ) );
 
@@ -121,6 +125,16 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		Node_getTraversable( parent )->insert( node );
 		/* must do this after inserting node, otherwise problem: targeted + having model + not loaded b4 new entities aren't selectable normally + rendered only while 0 0 0 is rendered */
 		entity->forEachKeyValue( visitor );
+		if( !eclass->fixedsize && !entity->isContainer() ){
+			//globalErrorStream() << "can't convert point to group entity\n";
+			//return;
+			AABB bounds( g_vector3_identity, Vector3( 16, 16, 16 ) );
+			if ( !string_parse_vector3( entity->getKeyValue( "origin" ), bounds.origin ) ) {
+				bounds.origin = g_vector3_identity;
+			}
+			Brush_ConstructPlacehoderCuboid( node.get(), bounds );
+			Node_getEntity( node )->setKeyValue( "origin", "" );
+		}
 		Node_getTraversable( parent )->erase( child );
 	}
 }
@@ -131,7 +145,21 @@ void Scene_EntitySetKeyValue_Selected( const char* key, const char* value ){
 }
 
 void Scene_EntitySetClassname_Selected( const char* classname ){
-	GlobalSceneGraph().traverse( EntitySetClassnameSelected( classname ) );
+	if ( GlobalSelectionSystem().countSelected() < 1 ) {
+		return;
+	}
+
+	if( string_equal( classname, "worldspawn" ) ){
+		UndoableCommand undo( "ungroupSelectedPrimitives" );
+		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), Map_FindOrInsertWorldspawn( g_map ) ); //=no action, if no worldspawn (but one inserted)
+		//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), *Map_FindWorldspawn( g_map )); = crash, if no worldspawn
+	}
+	else{
+		StringOutputStream command;
+		command << "entitySetClass -class " << classname;
+		UndoableCommand undo( command.c_str() );
+		GlobalSceneGraph().traverse( EntitySetClassnameSelected( classname ) );
+	}
 }
 
 

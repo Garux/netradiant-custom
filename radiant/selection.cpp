@@ -2267,8 +2267,9 @@ inline void matrix4_assign_rotation( Matrix4& matrix, const Matrix4& other ){
 	matrix[9] = other[9];
 	matrix[10] = other[10];
 }
-
+#define SELECTIONSYSTEM_AXIAL_PIVOTS
 void matrix4_assign_rotation_for_pivot( Matrix4& matrix, scene::Instance& instance ){
+#ifndef SELECTIONSYSTEM_AXIAL_PIVOTS
 	Editable* editable = Node_getEditable( instance.path().top() );
 	if ( editable != 0 ) {
 		matrix4_assign_rotation( matrix, matrix4_multiplied_by_matrix4( instance.localToWorld(), editable->getLocalPivot() ) );
@@ -2277,6 +2278,7 @@ void matrix4_assign_rotation_for_pivot( Matrix4& matrix, scene::Instance& instan
 	{
 		matrix4_assign_rotation( matrix, instance.localToWorld() );
 	}
+#endif
 }
 
 inline bool Instance_isSelectedComponents( scene::Instance& instance ){
@@ -2408,8 +2410,13 @@ void visit( scene::Instance& instance ) const {
 					parent_translation,
 					m_rotate,
 					m_world_pivot,
+#ifdef SELECTIONSYSTEM_AXIAL_PIVOTS
+					matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( matrix4_get_translation_vec3( instance.localToWorld() ) ), localPivot ),
+					matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( matrix4_get_translation_vec3( transformNode->localToParent() ) ), localPivot )
+#else
 					matrix4_multiplied_by_matrix4( instance.localToWorld(), localPivot ),
 					matrix4_multiplied_by_matrix4( transformNode->localToParent(), localPivot )
+#endif
 					);
 
 				transform->setTranslation( parent_translation );
@@ -3876,6 +3883,7 @@ void RadiantSelectionSystem::ConstructPivot() const {
 		default:
 			break;
 		}
+
 	}
 }
 

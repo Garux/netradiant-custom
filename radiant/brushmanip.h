@@ -33,6 +33,7 @@ enum EBrushPrefab
 	eBrushCone,
 	eBrushSphere,
 	eBrushRock,
+	eBrushIcosahedron,
 };
 
 class TextureProjection;
@@ -40,10 +41,12 @@ class ContentsFlagsValue;
 namespace scene
 {
 class Graph;
+class Node;
 }
 void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::size_t sides, const char* shader );
 class AABB;
 void Scene_BrushResize_Selected( scene::Graph& graph, const AABB& bounds, const char* shader );
+void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds );
 void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection );
 void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const TextureProjection& projection );
 void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& projection );

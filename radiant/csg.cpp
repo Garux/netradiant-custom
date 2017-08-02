@@ -63,341 +63,338 @@ void Face_extrude( Face& face, const Brush& brush, brush_vector_t& out, float of
 
 typedef std::vector<DoubleVector3> doublevector_vector_t;
 
-enum eHollowType
+enum EHollowType
 {
-	diag = 0,
-	wrap = 1,
-	extrude = 2,
-	pull = 3,
-	room = 4,
+	eDiag = 0,
+	eWrap = 1,
+	eExtrude = 2,
+	ePull = 3,
+//	eRoom = 4,
 };
 
-class CaulkFace
+class HollowSettings
 {
-DoubleVector3 ExclusionAxis;
-double &mindot;
-double &maxdot;
-doublevector_vector_t &exclude_vec;
 public:
-CaulkFace( DoubleVector3 ExclusionAxis,
-			double &mindot,
-			double &maxdot,
-			doublevector_vector_t &exclude_vec ):
-			ExclusionAxis( ExclusionAxis ),
-			mindot( mindot ),
-			maxdot( maxdot ),
-			exclude_vec( exclude_vec ){}
-void operator()( Face& face ) const {
-	double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
-	if( dot == 0 || ( dot > mindot + 0.005 && dot < maxdot - 0.005 ) ){
-		if( !exclude_vec.empty() ){
-			for ( doublevector_vector_t::const_iterator i = exclude_vec.begin(); i != exclude_vec.end(); ++i ){
-				if( ( *i ) == face.getPlane().plane3().normal() ){
-					return;
-				}
-			}
-		}
-		face.SetShader( GetCaulkShader() );
+	EHollowType m_hollowType;
+	float m_offset;
+	Vector3 m_exclusionAxis;
+	double m_mindot;
+	double m_maxdot;
+	bool m_caulk;
+	bool m_removeInner;
+};
+
+
+class CaulkFace {
+	const HollowSettings& m_settings;
+	const doublevector_vector_t& m_exclude_vec;
+public:
+	CaulkFace( const HollowSettings& settings, const doublevector_vector_t& exclude_vec ):
+		m_settings( settings ), m_exclude_vec( exclude_vec ) {
 	}
-}
-};
-
-class FaceMakeBrush
-{
-const Brush& brush;
-brush_vector_t& out;
-float offset;
-eHollowType HollowType;
-DoubleVector3 ExclusionAxis;
-double &mindot;
-double &maxdot;
-doublevector_vector_t &exclude_vec;
-bool caulk;
-bool RemoveInner;
-public:
-FaceMakeBrush( const Brush& brush,
-			brush_vector_t& out,
-			float offset,
-			eHollowType HollowType,
-			DoubleVector3 ExclusionAxis,
-			double &mindot,
-			double &maxdot,
-			doublevector_vector_t &exclude_vec,
-			bool caulk,
-			bool RemoveInner )
-	: brush( brush ),
-	out( out ),
-	offset( offset ),
-	HollowType( HollowType ),
-	ExclusionAxis( ExclusionAxis ),
-	mindot( mindot ),
-	maxdot( maxdot ),
-	exclude_vec( exclude_vec ),
-	caulk( caulk ),
-	RemoveInner( RemoveInner ){
-}
-void operator()( Face& face ) const {
-	double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
-	if( dot == 0 || ( dot > mindot + 0.005 && dot < maxdot - 0.005 ) ){
-		if( !exclude_vec.empty() ){
-			for ( doublevector_vector_t::const_iterator i = exclude_vec.begin(); i != exclude_vec.end(); ++i ){
-				if( ( *i ) == face.getPlane().plane3().normal() ){
+	void operator()( Face& face ) const {
+		double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
+		if( dot == 0 || ( dot > m_settings.m_mindot + 0.001 && dot < m_settings.m_maxdot - 0.001 ) ) {
+			for( doublevector_vector_t::const_iterator i = m_exclude_vec.begin(); i != m_exclude_vec.end(); ++i ) {
+				if( ( *i ) == face.getPlane().plane3().normal() ) {
 					return;
 				}
 			}
+			face.SetShader( GetCaulkShader() );
 		}
+	}
+};
 
-		if( HollowType == pull ){
-			if ( face.contributes() ) {
-				face.getPlane().offset( offset );
-				face.planeChanged();
-				out.push_back( new Brush( brush ) );
-				face.getPlane().offset( -offset );
-				face.planeChanged();
+class FaceMakeBrush {
+	const Brush& m_brush;
+	brush_vector_t& m_out;
+	const HollowSettings& m_settings;
+	doublevector_vector_t& exclude_vec;
 
-				if( caulk ){
-					Brush_forEachFace( *out.back(), CaulkFace( ExclusionAxis, mindot, maxdot, exclude_vec ) );
-				}
-				Face* newFace = out.back()->addFace( face );
-				if ( newFace != 0 ) {
-					newFace->flipWinding();
+public:
+	FaceMakeBrush( const Brush& brush, brush_vector_t& out, const HollowSettings& settings, doublevector_vector_t& exclude_vec )
+		: m_brush( brush ),
+		  m_out( out ),
+		  m_settings( settings ),
+		  exclude_vec( exclude_vec ) {
+	}
+	void operator()( Face& face ) const {
+		double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
+		if( dot == 0 || ( dot > m_settings.m_mindot + 0.001 && dot < m_settings.m_maxdot - 0.001 ) ) {
+			for( doublevector_vector_t::const_iterator i = exclude_vec.begin(); i != exclude_vec.end(); ++i ) {
+				if( ( *i ) == face.getPlane().plane3().normal() ) {
+					return;
 				}
 			}
-		}
-		else if( HollowType == wrap ){
-			//Face_makeBrush( face, brush, out, offset );
-			if ( face.contributes() ) {
-				face.undoSave();
-				out.push_back( new Brush( brush ) );
-				if( !RemoveInner && caulk )
-					face.SetShader( GetCaulkShader() );
-				Face* newFace = out.back()->addFace( face );
-				face.getPlane().offset( -offset );
-				face.planeChanged();
-				if( caulk )
-					face.SetShader( GetCaulkShader() );
-				if ( newFace != 0 ) {
-					newFace->flipWinding();
-					newFace->getPlane().offset( offset );
-					newFace->planeChanged();
+
+			if( m_settings.m_hollowType == ePull ) {
+				if( face.contributes() ) {
+					face.getPlane().offset( m_settings.m_offset );
+					face.planeChanged();
+					m_out.push_back( new Brush( m_brush ) );
+					face.getPlane().offset( -m_settings.m_offset );
+					face.planeChanged();
+
+					if( m_settings.m_caulk ) {
+						Brush_forEachFace( *m_out.back(), CaulkFace( m_settings, exclude_vec ) );
+					}
+					Face* newFace = m_out.back()->addFace( face );
+					if( newFace != 0 ) {
+						newFace->flipWinding();
+					}
 				}
 			}
-		}
-		else if( HollowType == extrude ){
-			if ( face.contributes() ) {
-				//face.undoSave();
-				out.push_back( new Brush( brush ) );
-				out.back()->clear();
-
-				Face* newFace = out.back()->addFace( face );
-				if ( newFace != 0 ) {
-					newFace->getPlane().offset( offset );
-					newFace->planeChanged();
-				}
-
-				if( !RemoveInner && caulk )
-					face.SetShader( GetCaulkShader() );
-				newFace = out.back()->addFace( face );
-				if ( newFace != 0 ) {
-					newFace->flipWinding();
-				}
-				Winding& winding = face.getWinding();
-				TextureProjection projection;
-				TexDef_Construct_Default( projection );
-				for ( Winding::iterator j = winding.begin(); j != winding.end(); ++j ){
-					std::size_t index = std::distance( winding.begin(), j );
-					std::size_t next = Winding_next( winding, index );
-
-					out.back()->addPlane( winding[index].vertex, winding[next].vertex, winding[next].vertex + face.getPlane().plane3().normal() * offset, TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), projection );
+			else if( m_settings.m_hollowType == eWrap ) {
+				//Face_makeBrush( face, brush, m_out, offset );
+				if( face.contributes() ) {
+					face.undoSave();
+					m_out.push_back( new Brush( m_brush ) );
+					if( !m_settings.m_removeInner && m_settings.m_caulk )
+						face.SetShader( GetCaulkShader() );
+					Face* newFace = m_out.back()->addFace( face );
+					face.getPlane().offset( -m_settings.m_offset );
+					face.planeChanged();
+					if( m_settings.m_caulk )
+						face.SetShader( GetCaulkShader() );
+					if( newFace != 0 ) {
+						newFace->flipWinding();
+						newFace->getPlane().offset( m_settings.m_offset );
+						newFace->planeChanged();
+					}
 				}
 			}
-		}
-		else if( HollowType == diag ){
-			if ( face.contributes() ) {
-				out.push_back( new Brush( brush ) );
-				out.back()->clear();
+			else if( m_settings.m_hollowType == eExtrude ) {
+				if( face.contributes() ) {
+					//face.undoSave();
+					m_out.push_back( new Brush( m_brush ) );
+					m_out.back()->clear();
 
-				Face* newFace = out.back()->addFace( face );
-				if ( newFace != 0 ) {
+					Face* newFace = m_out.back()->addFace( face );
+					if( newFace != 0 ) {
+						newFace->getPlane().offset( m_settings.m_offset );
+						newFace->planeChanged();
+					}
 
-					newFace->planeChanged();
+					if( !m_settings.m_removeInner && m_settings.m_caulk )
+						face.SetShader( GetCaulkShader() );
+					newFace = m_out.back()->addFace( face );
+					if( newFace != 0 ) {
+						newFace->flipWinding();
+					}
+					Winding& winding = face.getWinding();
+					TextureProjection projection;
+					TexDef_Construct_Default( projection );
+					for( Winding::iterator j = winding.begin(); j != winding.end(); ++j ) {
+						std::size_t index = std::distance( winding.begin(), j );
+						std::size_t next = Winding_next( winding, index );
+
+						m_out.back()->addPlane( winding[index].vertex,
+												winding[next].vertex,
+												winding[next].vertex + face.getPlane().plane3().normal() * m_settings.m_offset,
+												TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ),
+												projection );
+					}
 				}
-				newFace = out.back()->addFace( face );
+			}
+			else if( m_settings.m_hollowType == eDiag ) {
+				if( face.contributes() ) {
+					m_out.push_back( new Brush( m_brush ) );
+					m_out.back()->clear();
 
-				if ( newFace != 0 ) {
-					if( !RemoveInner && caulk )
-						newFace->SetShader( GetCaulkShader() );
-					newFace->flipWinding();
-					newFace->getPlane().offset( offset );
-					newFace->planeChanged();
-				}
+					Face* newFace = m_out.back()->addFace( face );
+					if( newFace != 0 ) {
+						newFace->planeChanged();
+					}
+					newFace = m_out.back()->addFace( face );
 
-				Winding& winding = face.getWinding();
-				TextureProjection projection;
-				TexDef_Construct_Default( projection );
-				for ( Winding::iterator i = winding.begin(); i != winding.end(); ++i ){
-					std::size_t index = std::distance( winding.begin(), i );
-					std::size_t next = Winding_next( winding, index );
-					Vector3 BestPoint;
-					float bestdist = 999999;
+					if( newFace != 0 ) {
+						if( !m_settings.m_removeInner && m_settings.m_caulk ){
+							newFace->SetShader( GetCaulkShader() );
+						}
+						newFace->flipWinding();
+						newFace->getPlane().offset( m_settings.m_offset );
+						newFace->planeChanged();
+					}
 
-					for( Brush::const_iterator j = brush.begin(); j != brush.end(); ++j ){
-						Winding& winding2 = ( *j )->getWinding();
-						for ( Winding::iterator k = winding2.begin(); k != winding2.end(); ++k ){
-							std::size_t index2 = std::distance( winding2.begin(), k );
-							float testdist = vector3_length( winding[index].vertex - winding2[index2].vertex );
-							if( testdist < bestdist ){
-								bestdist = testdist;
-								BestPoint = winding2[index2].vertex;
+					Winding& winding = face.getWinding();
+					TextureProjection projection;
+					TexDef_Construct_Default( projection );
+					for( Winding::iterator i = winding.begin(); i != winding.end(); ++i ) {
+						std::size_t index = std::distance( winding.begin(), i );
+						std::size_t next = Winding_next( winding, index );
+						Vector3 BestPoint;
+						float bestdist = 999999;
+
+						Face* parallel_face = 0;
+						for( Brush::const_iterator j = m_brush.begin(); j != m_brush.end(); ++j ) {
+							if( vector3_equal_epsilon( face.getPlane().plane3().normal(), ( *j )->getPlane().plane3().normal(), 1e-6 ) ){
+								parallel_face = ( *j );
+								break;
 							}
 						}
+
+						if( parallel_face ){
+							Winding& winding2 = parallel_face->getWinding();
+							float bestdot = -1;
+							for( Winding::iterator k = winding2.begin(); k != winding2.end(); ++k ) {
+								std::size_t index2 = std::distance( winding2.begin(), k );
+								float dot = vector3_dot(
+												vector3_normalised(
+													vector3_cross(
+														winding[index].vertex - winding[next].vertex,
+														winding[index].vertex - winding2[index2].vertex
+													)
+												),
+												face.getPlane().plane3().normal()
+											);
+								if( dot > bestdot ) {
+									bestdot = dot;
+									BestPoint = winding2[index2].vertex;
+								}
+							}
+						}
+						else{
+							for( Brush::const_iterator j = m_brush.begin(); j != m_brush.end(); ++j ) {
+								Winding& winding2 = ( *j )->getWinding();
+								for( Winding::iterator k = winding2.begin(); k != winding2.end(); ++k ) {
+									std::size_t index2 = std::distance( winding2.begin(), k );
+									float testdist = vector3_length( winding[index].vertex - winding2[index2].vertex );
+									if( testdist < bestdist ) {
+										bestdist = testdist;
+										BestPoint = winding2[index2].vertex;
+									}
+								}
+							}
+						}
+						m_out.back()->addPlane( winding[next].vertex,
+												winding[index].vertex,
+												BestPoint,
+												m_settings.m_caulk ? GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ),
+												projection );
 					}
-					out.back()->addPlane( winding[next].vertex, winding[index].vertex, BestPoint, caulk? GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), projection );
 				}
 			}
 		}
 	}
-}
 };
 
-class FaceExclude
-{
-DoubleVector3 ExclusionAxis;
-double &mindot;
-double &maxdot;
+class FaceExclude {
+	HollowSettings& m_settings;
 public:
-FaceExclude( DoubleVector3 ExclusionAxis, double &mindot, double &maxdot )
-	: ExclusionAxis( ExclusionAxis ), mindot( mindot ), maxdot( maxdot ){
-}
-void operator()( Face& face ) const {
-	if( vector3_length_squared( ExclusionAxis ) != 0 ){
-		double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
-		if( dot < mindot ){
-			mindot = dot;
+	FaceExclude( HollowSettings& settings )
+		: m_settings( settings ) {
+	}
+	void operator()( Face& face ) const {
+		double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
+		if( dot < m_settings.m_mindot ) {
+			m_settings.m_mindot = dot;
 		}
-		else if( dot > maxdot ){
-			maxdot = dot;
+		else if( dot > m_settings.m_maxdot ) {
+			m_settings.m_maxdot = dot;
 		}
 	}
-}
 };
 
-class FaceOffset
-{
-float offset;
-DoubleVector3 ExclusionAxis;
-double &mindot;
-double &maxdot;
-doublevector_vector_t &exclude_vec;
+class FaceOffset {
+	const HollowSettings& m_settings;
+	const doublevector_vector_t& m_exclude_vec;
 public:
-FaceOffset( float offset, DoubleVector3 ExclusionAxis, double &mindot, double &maxdot, doublevector_vector_t &exclude_vec )
-	: offset( offset ), ExclusionAxis( ExclusionAxis ), mindot( mindot ), maxdot( maxdot ), exclude_vec( exclude_vec ){
-}
-void operator()( Face& face ) const {
-	double dot = vector3_dot( face.getPlane().plane3().normal(), ExclusionAxis );
-	if( dot == 0 || ( dot > mindot + 0.005 && dot < maxdot - 0.005 ) ){
-		if( !exclude_vec.empty() ){
-			for ( doublevector_vector_t::const_iterator i = exclude_vec.begin(); i != exclude_vec.end(); ++i ){
-				if( ( *i ) == face.getPlane().plane3().normal() ){
+	FaceOffset( const HollowSettings& settings, const doublevector_vector_t& exclude_vec )
+		: m_settings( settings ), m_exclude_vec( exclude_vec ) {
+	}
+	void operator()( Face& face ) const {
+		const double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
+		if( dot == 0 || ( dot > m_settings.m_mindot + 0.001 && dot < m_settings.m_maxdot - 0.001 ) ) {
+			for( doublevector_vector_t::const_iterator i = m_exclude_vec.begin(); i != m_exclude_vec.end(); ++i ) {
+				if( ( *i ) == face.getPlane().plane3().normal() ) {
 					return;
 				}
 			}
+			face.undoSave();
+			face.getPlane().offset( m_settings.m_offset );
+			face.planeChanged();
 		}
-		face.undoSave();
-		face.getPlane().offset( offset );
-		face.planeChanged();
 	}
-}
 };
 
-class FaceExcludeSelected
-{
-doublevector_vector_t &outvec;
+class FaceExcludeSelected {
+	doublevector_vector_t& m_outvec;
 public:
-FaceExcludeSelected( doublevector_vector_t &outvec ): outvec( outvec ){
-}
-void operator()( FaceInstance& face ) const {
-	if( face.isSelected() ){
-		outvec.push_back( face.getFace().getPlane().plane3().normal() );
+	FaceExcludeSelected( doublevector_vector_t& outvec ): m_outvec( outvec ) {
 	}
-}
+	void operator()( FaceInstance& face ) const {
+		if( face.isSelected() ) {
+			m_outvec.push_back( face.getFace().getPlane().plane3().normal() );
+		}
+	}
 };
 
 
-DoubleVector3 getExclusion();
-bool getCaulk();
-bool getRemoveInner();
+class BrushHollowSelectedWalker : public scene::Graph::Walker {
+	HollowSettings& m_settings;
 
-class BrushHollowSelectedWalker : public scene::Graph::Walker
-{
-float offset;
-eHollowType HollowType;
+	float offset;
+	EHollowType HollowType;
 public:
-BrushHollowSelectedWalker( float offset, eHollowType HollowType )
-	: offset( offset ), HollowType( HollowType ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		Brush* brush = Node_getBrush( path.top() );
-		if ( brush != 0
-			 && Instance_getSelectable( instance )->isSelected()
-			 && path.size() > 1 ) {
-			brush_vector_t out;
-			doublevector_vector_t exclude_vec;
-			double mindot = 0;
-			double maxdot = 0;
-			if( HollowType != room ){
-				Brush_forEachFace( *brush, FaceExclude( getExclusion(), mindot, maxdot ) );
-				if( mindot == 0 && maxdot == 0 ){
+	BrushHollowSelectedWalker( HollowSettings& settings )
+		: m_settings( settings ) {
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		if( path.top().get().visible() ) {
+			Brush* brush = Node_getBrush( path.top() );
+			if( brush != 0
+					&& Instance_getSelectable( instance )->isSelected()
+					&& path.size() > 1 ) {
+				brush_vector_t out;
+				doublevector_vector_t exclude_vec;
+				m_settings.m_mindot = m_settings.m_maxdot = 0;
+
+				if( m_settings.m_exclusionAxis != g_vector3_identity ) {
+					Brush_forEachFace( *brush, FaceExclude( m_settings ) );
+				}
+				else {
 					Brush_ForEachFaceInstance( *Instance_getBrush( instance ), FaceExcludeSelected( exclude_vec ) );
 				}
-			}
-			if( HollowType == room ){
-				Brush* tmpbrush = new Brush( *brush );
-				tmpbrush->removeEmptyFaces();
-				Brush_forEachFace( *brush, FaceMakeBrush( *brush, out, offset, pull, DoubleVector3( 0, 0, 0 ), mindot, maxdot, exclude_vec, true, true ) );
-				delete tmpbrush;
-			}
-			else if( HollowType == pull ){
-				if( !getRemoveInner() && getCaulk() ){
-					Brush_forEachFace( *brush, CaulkFace( getExclusion(), mindot, maxdot, exclude_vec ) );
+
+				if( m_settings.m_hollowType == ePull ) {
+					if( !m_settings.m_removeInner && m_settings.m_caulk ) {
+						Brush_forEachFace( *brush, CaulkFace( m_settings, exclude_vec ) );
+					}
+					Brush* tmpbrush = new Brush( *brush );
+					tmpbrush->removeEmptyFaces();
+					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *tmpbrush, out, m_settings, exclude_vec ) );
+					delete tmpbrush;
 				}
-				Brush* tmpbrush = new Brush( *brush );
-				tmpbrush->removeEmptyFaces();
-				Brush_forEachFace( *tmpbrush, FaceMakeBrush( *tmpbrush, out, offset, HollowType, getExclusion(), mindot, maxdot, exclude_vec, getCaulk(), getRemoveInner() ) );
-				delete tmpbrush;
-			}
-			else if( HollowType == diag ){
-				Brush* tmpbrush = new Brush( *brush );
-				Brush_forEachFace( *tmpbrush, FaceOffset( offset, getExclusion(), mindot, maxdot, exclude_vec ) );
-				tmpbrush->removeEmptyFaces();
-				Brush_forEachFace( *tmpbrush, FaceMakeBrush( *brush, out, offset, HollowType, getExclusion(), mindot, maxdot, exclude_vec, getCaulk(), getRemoveInner() ) );
-				delete tmpbrush;
-				if( !getRemoveInner() && getCaulk() ){
-					Brush_forEachFace( *brush, CaulkFace( getExclusion(), mindot, maxdot, exclude_vec ) );
+				else if( m_settings.m_hollowType == eDiag ) {
+					Brush* tmpbrush = new Brush( *brush );
+					Brush_forEachFace( *tmpbrush, FaceOffset( m_settings, exclude_vec ) );
+					tmpbrush->removeEmptyFaces();
+					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *brush, out, m_settings, exclude_vec ) );
+					delete tmpbrush;
+					if( !m_settings.m_removeInner && m_settings.m_caulk ) {
+						Brush_forEachFace( *brush, CaulkFace( m_settings, exclude_vec ) );
+					}
 				}
-			}
-			else{
-				Brush_forEachFace( *brush, FaceMakeBrush( *brush, out, offset, HollowType, getExclusion(), mindot, maxdot, exclude_vec, getCaulk(), getRemoveInner() ) );
-			}
-			for ( brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i )
-			{
-				( *i )->removeEmptyFaces();
-				if( ( *i )->hasContributingFaces() ){
-					NodeSmartReference node( ( new BrushNode() )->node() );
-					Node_getBrush( node )->copy( *( *i ) );
-					delete ( *i );
-					Node_getTraversable( path.parent() )->insert( node );
-					//path.push( makeReference( node.get() ) );
-					//selectPath( path, true );
-					//Instance_getSelectable( *GlobalSceneGraph().find( path ) )->setSelected( true );
-					//Path_deleteTop( path );
+				else {
+					Brush_forEachFace( *brush, FaceMakeBrush( *brush, out, m_settings, exclude_vec ) );
+				}
+				for( brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i ) {
+					( *i )->removeEmptyFaces();
+					if( ( *i )->hasContributingFaces() ) {
+						NodeSmartReference node( ( new BrushNode() )->node() );
+						Node_getBrush( node )->copy( *( *i ) );
+						delete( *i );
+						Node_getTraversable( path.parent() )->insert( node );
+						//path.push( makeReference( node.get() ) );
+						//selectPath( path, true );
+						//Instance_getSelectable( *GlobalSceneGraph().find( path ) )->setSelected( true );
+						//Path_deleteTop( path );
+					}
 				}
 			}
 		}
+		return true;
 	}
-	return true;
-}
 };
 
 typedef std::list<Brush*> brushlist_t;
@@ -481,17 +478,6 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-/*
-   =============
-   CSG_MakeRoom
-   =============
- */
-void CSG_MakeRoom( void ){
-	UndoableCommand undo( "makeRoom" );
-	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( GetGridSize(), room ) );
-	GlobalSceneGraph().traverse( BrushDeleteSelected() );
-	SceneChangeNotify();
-}
 
 template<typename Type>
 class RemoveReference
@@ -1006,6 +992,7 @@ struct CSGToolDialog
 
 CSGToolDialog g_csgtool_dialog;
 
+#if 0
 DoubleVector3 getExclusion(){
 	if( gtk_toggle_button_get_active( g_csgtool_dialog.radProj ) ){
 		if( GlobalXYWnd_getCurrentViewType() == YZ ){
@@ -1035,101 +1022,113 @@ DoubleVector3 getExclusion(){
 	}
 	return DoubleVector3( 0, 0, 0 );
 }
+#endif
 
-bool getCaulk(){
-		if( gtk_toggle_button_get_active( g_csgtool_dialog.caulk ) ){
-		return true;
-	}
-	return false;
-}
-
-bool getRemoveInner(){
-		if( gtk_toggle_button_get_active( g_csgtool_dialog.removeInner ) ){
-		return true;
-	}
-	return false;
-}
-
-class BrushFaceOffset
-{
-float offset;
+class BrushFaceOffset {
+	HollowSettings& m_settings;
 public:
-BrushFaceOffset( float offset )
-	: offset( offset ){
-}
-void operator()( BrushInstance& brush ) const {
-	double mindot = 0;
-	double maxdot = 0;
-	doublevector_vector_t exclude_vec;
-	Brush_forEachFace( brush, FaceExclude( getExclusion(), mindot, maxdot ) );
-	if( mindot == 0 && maxdot == 0 ){
-		Brush_ForEachFaceInstance( brush, FaceExcludeSelected( exclude_vec ) );
+	BrushFaceOffset( HollowSettings& settings )
+		: m_settings( settings ) {
 	}
-	Brush_forEachFace( brush, FaceOffset( offset, getExclusion(), mindot, maxdot, exclude_vec ) );
-}
+	void operator()( BrushInstance& brush ) const {
+		m_settings.m_mindot = m_settings.m_maxdot = 0;
+		doublevector_vector_t exclude_vec;
+		if( m_settings.m_exclusionAxis != g_vector3_identity ) {
+			Brush_forEachFace( brush, FaceExclude( m_settings ) );
+		}
+		else {
+			Brush_ForEachFaceInstance( brush, FaceExcludeSelected( exclude_vec ) );
+		}
+		Brush_forEachFace( brush, FaceOffset( m_settings, exclude_vec ) );
+	}
 };
+
+/*
+   =============
+   CSG_MakeRoom
+   =============
+ */
+void CSG_MakeRoom(){
+	HollowSettings settings;
+	settings.m_offset = GetGridSize();
+	settings.m_exclusionAxis = g_vector3_identity;
+	settings.m_caulk = true;
+	settings.m_removeInner = true;
+	settings.m_hollowType = ePull;
+
+	UndoableCommand undo( "makeRoom" );
+	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( settings ) );
+	GlobalSceneGraph().traverse( BrushDeleteSelected() );
+	SceneChangeNotify();
+}
+
+void CSGdlg_getSettings( HollowSettings& settings, const CSGToolDialog& dialog ){
+	gtk_spin_button_update( dialog.spin );
+	settings.m_offset = static_cast<float>( gtk_spin_button_get_value( dialog.spin ) );
+	settings.m_exclusionAxis = g_vector3_identity;
+	if( gtk_toggle_button_get_active( dialog.radProj ) ){
+		settings.m_exclusionAxis[ static_cast<int>( GlobalXYWnd_getCurrentViewType() ) ] = 1;
+	}
+	else if( gtk_toggle_button_get_active( dialog.radCam ) ){
+		settings.m_exclusionAxis = Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
+	}
+	settings.m_caulk = gtk_toggle_button_get_active( dialog.caulk );
+	settings.m_removeInner = gtk_toggle_button_get_active( dialog.removeInner );
+}
+
+void CSG_Hollow( EHollowType type, const char* undoString, const CSGToolDialog& dialog ){
+	HollowSettings settings;
+	CSGdlg_getSettings( settings, dialog );
+	settings.m_hollowType = type;
+	UndoableCommand undo( undoString );
+	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( settings ) );
+	if( settings.m_removeInner ){
+		GlobalSceneGraph().traverse( BrushDeleteSelected() );
+	}
+	SceneChangeNotify();
+}
 
 //=================DLG
 
 static gboolean CSGdlg_HollowDiag( GtkWidget *widget, CSGToolDialog* dialog ){
-	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
-	UndoableCommand undo( "brushHollow::Diag" );
-	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, diag ) );
-	if( getRemoveInner() )
-		GlobalSceneGraph().traverse( BrushDeleteSelected() );
-	SceneChangeNotify();
+	CSG_Hollow( eDiag, "brushHollow::Diag", *dialog );
 	return TRUE;
 }
 
 static gboolean CSGdlg_HollowWrap( GtkWidget *widget, CSGToolDialog* dialog ){
-	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
-	UndoableCommand undo( "brushHollow::Wrap" );
-	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, wrap ) );
-	if( getRemoveInner() )
-		GlobalSceneGraph().traverse( BrushDeleteSelected() );
-	SceneChangeNotify();
+	CSG_Hollow( eWrap, "brushHollow::Wrap", *dialog );
 	return TRUE;
 }
 
 static gboolean CSGdlg_HollowExtrude( GtkWidget *widget, CSGToolDialog* dialog ){
-	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
-	UndoableCommand undo( "brushHollow::Extrude" );
-	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, extrude ) );
-	if( getRemoveInner() )
-		GlobalSceneGraph().traverse( BrushDeleteSelected() );
-	SceneChangeNotify();
+	CSG_Hollow( eExtrude, "brushHollow::Extrude", *dialog );
 	return TRUE;
 }
 
 static gboolean CSGdlg_HollowPull( GtkWidget *widget, CSGToolDialog* dialog ){
-	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
-	UndoableCommand undo( "brushHollow::Pull" );
-	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( offset, pull ) );
-	if( getRemoveInner() )
-		GlobalSceneGraph().traverse( BrushDeleteSelected() );
-	SceneChangeNotify();
+	CSG_Hollow( ePull, "brushHollow::Pull", *dialog );
 	return TRUE;
 }
 
 static gboolean CSGdlg_BrushShrink( GtkWidget *widget, CSGToolDialog* dialog ){
-	gtk_spin_button_update ( dialog->spin );
-	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
-	offset *= -1;
+	HollowSettings settings;
+	CSGdlg_getSettings( settings, *dialog );
+	settings.m_offset *= -1;
 	UndoableCommand undo( "Shrink brush" );
 //	GlobalSceneGraph().traverse( OffsetBrushFacesSelectedWalker( offset ) );
 	//Scene_ForEachSelectedBrush_ForEachFace( GlobalSceneGraph(), BrushFaceOffset( offset ) );
-	Scene_forEachSelectedBrush( BrushFaceOffset( offset ) );
+	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
 	SceneChangeNotify();
 	return TRUE;
 }
 
 static gboolean CSGdlg_BrushExpand( GtkWidget *widget, CSGToolDialog* dialog ){
-	gtk_spin_button_update ( dialog->spin );
-	float offset = static_cast<float>( gtk_spin_button_get_value( dialog->spin ) );
+	HollowSettings settings;
+	CSGdlg_getSettings( settings, *dialog );
 	UndoableCommand undo( "Expand brush" );
 //	GlobalSceneGraph().traverse( OffsetBrushFacesSelectedWalker( offset ) );
 	//Scene_ForEachSelectedBrush_ForEachFace( GlobalSceneGraph(), BrushFaceOffset( offset ) );
-	Scene_forEachSelectedBrush( BrushFaceOffset( offset ) );
+	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
 	SceneChangeNotify();
 	return TRUE;
 }
