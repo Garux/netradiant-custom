@@ -76,6 +76,8 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 // d1223m
 extern bool g_brush_always_caulk;
 
+bool g_bCamEntityMenu = false;
+
 //!\todo Rewrite.
 class ClipPoint
 {
@@ -1190,7 +1192,25 @@ void entitycreate_activated( GtkWidget* item ){
 	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
 
 	if ( !( world_node && string_equal( entity_name, "worldspawn" ) ) ) {
-		g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );
+		if( g_bCamEntityMenu ){
+			StringOutputStream command;
+			command << "entityCreate -class " << entity_name;
+			UndoableCommand undo( command.c_str() );
+
+			Vector3 angles( Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+			Vector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
+			Vector3 viewvector;
+			viewvector[0] = cos( radangles[1] ) * cos( radangles[0] );
+			viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
+			viewvector[2] = sin( radangles[0] );
+
+			Vector3 point = viewvector * 64.f + Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
+			vector3_snap( point, GetSnapGridSize() );
+			Entity_createFromSelection( entity_name, point );
+		}
+		else{
+			g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );
+		}
 	}
 	else {
 		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!"
@@ -1285,6 +1305,7 @@ void XYWnd::OnContextMenu(){
 		GlobalEntityClassManager().forEach( inserter );
 	}
 
+	g_bCamEntityMenu = false;
 	gtk_menu_popup( m_mnuDrop, 0, 0, 0, 0, 1, GDK_CURRENT_TIME );
 }
 

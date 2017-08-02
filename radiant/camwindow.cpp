@@ -751,6 +751,8 @@ CameraView& getCameraView(){
 	return m_cameraview;
 }
 
+guint32 m_rightClickTime;
+
 private:
 void Cam_Draw();
 };
@@ -825,9 +827,40 @@ void Camera_setAngles( CamWnd& camwnd, const Vector3& angles ){
 // =============================================================================
 // CamWnd class
 
+void context_menu(){
+	if( g_pParentWnd->ActiveXY() ){
+		g_pParentWnd->ActiveXY()->OnContextMenu();
+		g_bCamEntityMenu = true;
+	}
+}
+
+/* GDK_2BUTTON_PRESS doesn't always work in this case, so... */
+bool context_menu_try( GdkEventButton* event, CamWnd* camwnd ){
+	if( ( event->time - camwnd->m_rightClickTime ) < 200 ){
+		camwnd->m_rightClickTime = event->time;
+		return true;
+	}
+	else{
+		camwnd->m_rightClickTime = event->time;
+		return false;
+	}
+}
+
 gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
-		camwnd->EnableFreeMove();
+		if( context_menu_try( event, camwnd ) ){
+			//need this hack, otherwise button wont be released = global accels broken, until correct button pressed again...
+			GdkEvent* event_ = gtk_get_current_event();
+			if( event_ ){
+				event_->type = GDK_BUTTON_RELEASE;
+				gtk_main_do_event( event_ );
+				gdk_event_free( event_ );
+				context_menu();
+			}
+		}
+		else{
+			camwnd->EnableFreeMove();
+		}
 		return TRUE;
 	}
 	return FALSE;
@@ -836,6 +869,16 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
 		camwnd->DisableFreeMove();
+		if( context_menu_try( event, camwnd ) ){
+			//need this hack, otherwise button wont be released = global accels broken, until correct button pressed again...
+			GdkEvent* event_ = gtk_get_current_event();
+			if( event_ ){
+				event_->type = GDK_BUTTON_RELEASE;
+				gtk_main_do_event( event_ );
+				gdk_event_free( event_ );
+				context_menu();
+			}
+		}
 		return TRUE;
 	}
 	return FALSE;
@@ -1247,7 +1290,8 @@ CamWnd::CamWnd() :
 	m_selection_button_release_handler( 0 ),
 	m_selection_motion_handler( 0 ),
 	m_freelook_button_press_handler( 0 ),
-	m_drawing( false ){
+	m_drawing( false ),
+	m_rightClickTime( 0 ){
 	m_bFreeMove = false;
 
 	GlobalWindowObservers_add( m_window_observer );

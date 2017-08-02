@@ -34,6 +34,8 @@
 
 #include "qerplugin.h"
 
+extern bool g_bCamEntityMenu;
+
 class Shader;
 class SelectionSystemWindowObserver;
 namespace scene
@@ -205,13 +207,13 @@ VIEWTYPE m_viewType;
 void OriginalButtonUp( guint32 nFlags, int point, int pointy );
 void OriginalButtonDown( guint32 nFlags, int point, int pointy );
 
-void OnContextMenu();
 void PaintSizeInfo( int nDim1, int nDim2, Vector3& vMinBounds, Vector3& vMaxBounds );
 
 int m_entityCreate_x, m_entityCreate_y;
 bool m_entityCreate;
 
 public:
+void OnContextMenu();
 void ButtonState_onMouseDown( unsigned int buttons ){
 	//m_buttonstate |= buttons;
 	m_buttonstate = buttons;
