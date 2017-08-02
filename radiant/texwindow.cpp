@@ -2216,6 +2216,7 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		gtk_entry_set_icon_from_stock( GTK_ENTRY( entry ), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR );
 		gtk_entry_set_icon_sensitive( GTK_ENTRY( entry ), GTK_ENTRY_ICON_SECONDARY, FALSE );
 		TextureBrowser_filterSetModeIcon( GTK_ENTRY( entry ) );
+		gtk_entry_set_icon_tooltip_text( GTK_ENTRY( entry ), GTK_ENTRY_ICON_PRIMARY, "toggle match mode ( start / any position )" );
 		gtk_widget_show( entry );
 		g_TextureBrowser.m_filter_entry = entry;
 		g_signal_connect( G_OBJECT( entry ), "changed", G_CALLBACK( TextureBrowser_filterChanged ), &g_TextureBrowser );

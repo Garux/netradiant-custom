@@ -115,7 +115,7 @@ inline void aabb_draw_wire( const Vector3 points[8] ){
 	glBegin( GL_LINES );
 	for ( std::size_t i = 0; i < sizeof( indices ) / sizeof( indices[0] ); ++i )
 	{
-		glVertex3fv( points[indices[i]] );
+		glVertex3fv( vector3_to_array( points[indices[i]] ) );
 	}
 	glEnd();
 #endif

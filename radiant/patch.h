@@ -317,7 +317,7 @@ void render( RenderStateFlags state ) const {
 		}
 	}
 
-#if defined( _DEBUG )
+#if defined( _DEBUG ) && !defined( _DEBUG_QUICKER )
 	RenderNormals();
 #endif
 }

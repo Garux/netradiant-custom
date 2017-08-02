@@ -83,13 +83,6 @@ enum EBrushType
 #define BRUSH_CONNECTIVITY_DEBUG 0
 #define BRUSH_DEGENERATE_DEBUG 0
 
-template<typename TextOuputStreamType>
-inline TextOuputStreamType& ostream_write( TextOuputStreamType& ostream, const Matrix4& m ){
-	return ostream << "(" << m[0] << " " << m[1] << " " << m[2] << " " << m[3] << ", "
-				   << m[4] << " " << m[5] << " " << m[6] << " " << m[7] << ", "
-				   << m[8] << " " << m[9] << " " << m[10] << " " << m[11] << ", "
-				   << m[12] << " " << m[13] << " " << m[14] << " " << m[15] << ")";
-}
 
 inline void print_vector3( const Vector3& v ){
 	globalOutputStream() << "( " << v.x() << " " << v.y() << " " << v.z() << " )\n";

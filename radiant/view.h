@@ -26,7 +26,7 @@
 #include "math/frustum.h"
 
 
-#if defined( _DEBUG )
+#if defined( _DEBUG ) && !defined( _DEBUG_QUICKER )
 #define DEBUG_CULLING
 #endif
 

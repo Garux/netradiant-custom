@@ -118,6 +118,7 @@ public:
 void updateTransform(){
 	m_transform.localToParent() = g_matrix4_identity;
 	matrix4_translate_by_vec3( m_transform.localToParent(), m_origin );
+	//matrix4_transform_by_euler_xyz_degrees( m_transform.localToParent(), m_origin, m_angles, Vector3( 1, 1, 1 ) );
 	m_transformChanged();
 }
 typedef MemberCaller<GenericEntity, &GenericEntity::updateTransform> UpdateTransformCaller;

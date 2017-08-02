@@ -5,7 +5,7 @@ MAKEFILE_CONF      ?= Makefile.conf
 # user customizable stuf
 # you may override this in Makefile.conf or the environment
 BUILD              ?= debug
-# or: release, or: debug, or: extradebug, or: profile, or: native
+# or: release, or: debug, or: extradebug, or: extradebug_quicker, or: profile, or: native
 OS                 ?= $(shell uname)
 # or: Linux, Win32, Darwin
 LDFLAGS            ?=
@@ -137,6 +137,15 @@ endif
 	LDFLAGS_COMMON +=
 else
 
+ifeq ($(BUILD),extradebug_quicker)
+ifeq ($(findstring $(CFLAGS),-g),)
+	CFLAGS_COMMON += -g3
+	# only add -g3 if no -g flag is in $(CFLAGS)
+endif
+	CPPFLAGS_COMMON += -D_DEBUG -D_DEBUG_QUICKER
+	LDFLAGS_COMMON +=
+else
+
 ifeq ($(BUILD),profile)
 ifeq ($(findstring $(CFLAGS),-g),)
 	CFLAGS_COMMON += -g
@@ -171,6 +180,7 @@ endif
 else
 
 $(error Unsupported build type: $(BUILD))
+endif
 endif
 endif
 endif

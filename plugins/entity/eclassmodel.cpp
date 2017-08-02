@@ -54,6 +54,10 @@
 
 #include "entity.h"
 
+inline void read_aabb( AABB& aabb, const EntityClass& eclass ){
+	aabb = aabb_for_minmax( eclass.mins, eclass.maxs );
+}
+
 class EclassModel :
 	public Snappable
 {
@@ -76,10 +80,16 @@ RenderablePivot m_renderOrigin;
 RenderableNamedEntity m_renderName;
 ModelSkinKey m_skin;
 
+AABB m_aabb_local;
+RenderableWireframeAABB m_aabb_wire;
+Matrix4 m_translation;
+
 Callback m_transformChanged;
 Callback m_evaluateTransform;
 
 void construct(){
+	read_aabb( m_aabb_local, m_entity.getEntityClass() );
+
 	default_rotation( m_rotation );
 
 	m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
@@ -103,6 +113,8 @@ public:
 void updateTransform(){
 	m_transform.localToParent() = g_matrix4_identity;
 	matrix4_translate_by_vec3( m_transform.localToParent(), m_origin );
+
+	m_translation = m_transform.localToParent();
 
 	if ( g_gameType == eGameTypeDoom3 ) {
 		matrix4_multiply_by_matrix4( m_transform.localToParent(), rotation_toMatrix( m_rotation ) );
@@ -154,6 +166,8 @@ EclassModel( EntityClass* eclass, scene::Node& node, const Callback& transformCh
 	m_nameKeys( m_entity ),
 	m_renderName( m_named, g_vector3_identity ),
 	m_skin( SkinChangedCaller( *this ) ),
+	m_aabb_wire( m_aabb_local ),
+	m_translation( g_matrix4_identity ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -170,6 +184,8 @@ EclassModel( const EclassModel& other, scene::Node& node, const Callback& transf
 	m_nameKeys( m_entity ),
 	m_renderName( m_named, g_vector3_identity ),
 	m_skin( SkinChangedCaller( *this ) ),
+	m_aabb_wire( m_aabb_local ),
+	m_translation( g_matrix4_identity ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -228,8 +244,14 @@ void detach( scene::Traversable::Observer* observer ){
 void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
 	if ( selected ) {
 		m_renderOrigin.render( renderer, volume, localToWorld );
-	}
 
+		renderer.PushState();
+		renderer.Highlight( Renderer::ePrimitive, false );
+		renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
+		renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eFullMaterials );
+		renderer.addRenderable( m_aabb_wire, m_translation );
+		renderer.PopState();
+	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
