@@ -141,6 +141,10 @@ inline bool string_equal_prefix( const char* string, const char* prefix ){
 	return string_equal_n( string, prefix, string_length( prefix ) );
 }
 
+inline bool string_equal_prefix_nocase( const char* string, const char* prefix ){
+	return string_equal_nocase_n( string, prefix, string_length( prefix ) );
+}
+
 /// \brief Returns true if the ending of \p string is equal to \p suffix.
 /// O(n)
 inline bool string_equal_suffix( const char* string, const char* suffix){

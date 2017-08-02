@@ -2346,6 +2346,7 @@ void SurfaceInspector_registerShortcuts(){
 void TexBro_registerShortcuts(){
 	command_connect_accelerator( "FindReplaceTextures" );
 	command_connect_accelerator( "RefreshShaders" );
+	toggle_add_accelerator( "SearchFromStart" );
 }
 
 void Misc_registerShortcuts(){
