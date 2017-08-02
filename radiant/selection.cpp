@@ -2638,7 +2638,7 @@ std::list<Selectable*>& best(){
 }
 };
 
-bool g_bAltDragManipulatorResize = false;
+bool g_bAltDragManipulatorResize = false; //+select primitives in component modes
 bool g_bTmpComponentMode = false;
 
 class DragManipulator : public Manipulator
@@ -3157,7 +3157,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				Scene_TestSelect_Component( selector, volume, scissored, eFace );
 			}
 			else{
-				Scene_TestSelect( selector, volume, scissored, Mode(), ComponentMode() );
+				Scene_TestSelect( selector, volume, scissored, g_bAltDragManipulatorResize ? ePrimitive : Mode(), ComponentMode() );
 			}
 
 			if ( !selector.failed() ) {
@@ -3306,7 +3306,7 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 				Scene_TestSelect_Component( selector, volume, scissored, eFace );
 			}
 			else{
-				Scene_TestSelect( selector, volume, scissored, Mode(), ComponentMode() );
+				Scene_TestSelect( selector, volume, scissored, g_bAltDragManipulatorResize ? ePrimitive : Mode(), ComponentMode() );
 			}
 			if ( !selector.failed() ){
 				SelectableSortedSet::iterator best = selector.begin();
@@ -4065,7 +4065,7 @@ const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 class Selector_
 {
 RadiantSelectionSystem::EModifier modifier_for_state( ModifierFlags state ){
-	if ( ( state == c_modifier_toggle || state == c_modifier_toggle_face || state == c_modifier_face ) ) {
+	if ( ( state == c_modifier_toggle || state == c_modifier_toggle_face || state == c_modifier_face || state == c_modifierAlt ) ) {
 		if( m_mouse2 ){
 			return RadiantSelectionSystem::eReplace;
 		}
@@ -4287,7 +4287,7 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 
 		DeviceVector devicePosition( window_to_normalised_device( position, m_width, m_height ) );
 		g_bAltDragManipulatorResize = ( modifiers == c_modifierAlt ) ? true : false;
-		if ( ( modifiers == c_modifier_manipulator || modifiers == c_modifierAlt ) && m_manipulator.mouseDown( devicePosition ) ) {
+		if ( ( modifiers == c_modifier_manipulator || ( modifiers == c_modifierAlt && getSelectionSystem().Mode() != SelectionSystem::eComponent ) ) && m_manipulator.mouseDown( devicePosition ) ) {
 			g_mouseMovedCallback.insert( MouseEventCallback( Manipulator_::MouseMovedCaller( m_manipulator ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Manipulator_::MouseUpCaller( m_manipulator ) ) );
 		}

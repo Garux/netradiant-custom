@@ -2322,6 +2322,8 @@ Q_EXTERN float skyScale Q_ASSIGN( 1.0f );
 Q_EXTERN float bounceScale Q_ASSIGN( 0.25f );
 Q_EXTERN float bounceColorRatio Q_ASSIGN( 1.0f );
 Q_EXTERN float vertexglobalscale Q_ASSIGN( 1.0f );
+Q_EXTERN float g_backsplashFractionScale Q_ASSIGN( 1.0f );
+Q_EXTERN float g_backsplashDistance Q_ASSIGN( -999.0f );
 
 /* jal: alternative angle attenuation curve */
 Q_EXTERN qboolean lightAngleHL Q_ASSIGN( qfalse );

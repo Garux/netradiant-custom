@@ -645,8 +645,8 @@ static shaderInfo_t *AllocShaderInfo( void ){
 	/* set defaults */
 	ApplySurfaceParm( "default", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
 
-	si->backsplashFraction = DEF_BACKSPLASH_FRACTION;
-	si->backsplashDistance = DEF_BACKSPLASH_DISTANCE;
+	si->backsplashFraction = DEF_BACKSPLASH_FRACTION * g_backsplashFractionScale;
+	si->backsplashDistance = g_backsplashDistance < -900.0f ? DEF_BACKSPLASH_DISTANCE : g_backsplashDistance;
 
 	si->bounceScale = DEF_RADIOSITY_BOUNCE;
 

@@ -2256,6 +2256,18 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
+		else if ( !strcmp( argv[ i ], "-backsplash" ) && i < ( argc - 3 ) ) {
+			f = atof( argv[ i + 1 ] );
+			g_backsplashFractionScale = f;
+			Sys_Printf( "Area lights backsplash fraction scaled by %f\n", f, g_backsplashFractionScale );
+			f = atof( argv[ i + 2 ] );
+			if ( f >= -900.0f ){
+				g_backsplashDistance = f;
+				Sys_Printf( "Area lights backsplash distance set globally to %f\n", f, g_backsplashDistance );
+			}
+			i+=2;
+		}
+
 		else if ( !strcmp( argv[ i ], "-nolm" ) ) {
 			nolm = qtrue;
 			Sys_Printf( "No lightmaps yo\n" );

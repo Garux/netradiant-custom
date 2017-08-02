@@ -1585,6 +1585,13 @@ void transformComponents( const Matrix4& matrix ){
 	}
 }
 
+void invertComponentSelection(){
+	for ( PatchControlInstances::iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+	{
+		( *i ).m_selectable.setSelected( !( *i ).m_selectable.isSelected() );
+	}
+}
+
 
 void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
 	test.BeginMesh( localToWorld() );

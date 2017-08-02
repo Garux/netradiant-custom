@@ -39,6 +39,7 @@
 #include "gtkutil/widget.h"
 #include "brushmanip.h"
 #include "brush.h"
+#include "patch.h"
 #include "patchmanip.h"
 #include "patchdialog.h"
 #include "selection.h"
@@ -275,10 +276,11 @@ void Select_Delete( void ){
 class InvertSelectionWalker : public scene::Graph::Walker
 {
 SelectionSystem::EMode m_mode;
+SelectionSystem::EComponentMode m_compmode;
 mutable Selectable* m_selectable;
 public:
-InvertSelectionWalker( SelectionSystem::EMode mode )
-	: m_mode( mode ), m_selectable( 0 ){
+InvertSelectionWalker( SelectionSystem::EMode mode, SelectionSystem::EComponentMode compmode )
+	: m_mode( mode ), m_compmode( compmode ), m_selectable( 0 ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if( !path.top().get().visible() ){
@@ -298,6 +300,18 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			m_selectable = path.top().get().visible() ? selectable : 0;
 			break;
 		case SelectionSystem::eComponent:
+			BrushInstance* brushinstance = Instance_getBrush( instance );
+			if( brushinstance != 0 ){
+				if( brushinstance->isSelected() )
+					brushinstance->invertComponentSelection( m_compmode );
+			}
+			else{
+				PatchInstance* patchinstance = Instance_getPatch( instance );
+				if( patchinstance != 0 && m_compmode == SelectionSystem::eVertex ){
+					if( patchinstance->isSelected() )
+						patchinstance->invertComponentSelection();
+				}
+			}
 			break;
 		}
 	}
@@ -312,7 +326,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 };
 
 void Scene_Invert_Selection( scene::Graph& graph ){
-	graph.traverse( InvertSelectionWalker( GlobalSelectionSystem().Mode() ) );
+	graph.traverse( InvertSelectionWalker( GlobalSelectionSystem().Mode(), GlobalSelectionSystem().ComponentMode() ) );
 }
 
 void Select_Invert(){

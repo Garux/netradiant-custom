@@ -1233,7 +1233,7 @@ static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpo
 	}
 
 	// select the entity that starts with the key pressed
-	if ( code <= 'Z' && code >= 'A' ) {
+	if ( code <= 'Z' && code >= 'A' && event->state == 0 ) {
 		GtkTreeView* view = g_entityClassList;
 		GtkTreeModel* model;
 		GtkTreeIter iter;
@@ -1339,7 +1339,7 @@ static gint EntityInspector_hideWindowKB( GtkWidget* widget, GdkEventKey* event,
 		return TRUE;
 	}
 	/* this doesn't work, if tab is bound (func is not called then) */
-	if ( event->keyval == GDK_Tab  ) {
+	if ( event->keyval == GDK_Tab ) {
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityKeyEntry ) );
 		return TRUE;
 	}

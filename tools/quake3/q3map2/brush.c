@@ -257,7 +257,7 @@ void SnapWeldVector( vec3_t a, vec3_t b, vec3_t out ){
 	{
 		/* round to integer */
 		ai = Q_rint( a[ i ] );
-		bi = Q_rint( a[ i ] );
+		bi = Q_rint( b[ i ] );
 
 		/* prefer exact integer */
 		if ( ai == a[ i ] ) {
@@ -268,7 +268,7 @@ void SnapWeldVector( vec3_t a, vec3_t b, vec3_t out ){
 		}
 
 		/* use nearest */
-		else if ( fabs( ai - a[ i ] ) < fabs( bi < b[ i ] ) ) {
+		else if ( fabs( ai - a[ i ] ) < fabs( bi - b[ i ] ) ) {
 			out[ i ] = a[ i ];
 		}
 		else{

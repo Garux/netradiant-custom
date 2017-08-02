@@ -3428,6 +3428,39 @@ void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSys
 	}
 }
 
+void invertComponentSelection( SelectionSystem::EComponentMode mode ){
+	switch ( mode )
+	{
+	case SelectionSystem::eVertex:
+	{
+		for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i )
+		{
+			( *i ).setSelected( !( *i ).isSelected() );
+		}
+	}
+	break;
+	case SelectionSystem::eEdge:
+	{
+		for ( EdgeInstances::iterator i = m_edgeInstances.begin(); i != m_edgeInstances.end(); ++i )
+		{
+			( *i ).setSelected( !( *i ).isSelected() );
+		}
+	}
+	break;
+	case SelectionSystem::eFace:
+	{
+		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		{
+			if( !( *i ).getFace().isFiltered() )
+				( *i ).setSelected( mode, !( *i ).isSelected() );
+		}
+	}
+	break;
+	default:
+		break;
+	}
+}
+
 void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
 	test.BeginMesh( localToWorld() );
 
