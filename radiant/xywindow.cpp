@@ -1187,6 +1187,31 @@ void XYWnd::NewBrushDrag( int x, int y ){
 								"textures/common/caulk" : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
 }
 
+gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
+	if ( event->button.button == 3 ) {
+//		globalOutputStream() << "yo+\n";
+
+		const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( widget )->child ) );
+		StringOutputStream command;
+		command << "entitySetClass -class " << entity_name;
+		UndoableCommand undo( command.c_str() );
+
+		Scene_EntitySetClassname_Selected( entity_name );
+
+		gtk_menu_popdown( XYWnd::m_mnuDrop );
+		return TRUE;
+	}
+	return FALSE;
+}
+
+gboolean entitycreate_rightUnClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
+	if ( event->button.button == 3 ) {
+//		globalOutputStream() << "yo-\n";
+		return TRUE;
+	}
+	return FALSE;
+}
+
 void entitycreate_activated( GtkWidget* item ){
 	scene::Node* world_node = Map_FindWorldspawn( g_map );
 	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
@@ -1223,6 +1248,8 @@ void entitycreate_activated( GtkWidget* item ){
 
 void EntityClassMenu_addItem( GtkMenu* menu, const char* name ){
 	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name ) );
+	g_signal_connect( G_OBJECT( item ), "button-press-event", G_CALLBACK( entitycreate_rightClicked ), item );
+	g_signal_connect( G_OBJECT( item ), "button-release-event", G_CALLBACK( entitycreate_rightUnClicked ), item );
 	g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( entitycreate_activated ), item );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	menu_add_item( menu, item );

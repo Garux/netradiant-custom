@@ -708,21 +708,28 @@ void Paste(){
 	}
 }
 
-void PasteToCamera(){
+void TranslateToCamera(){
 	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
-	GlobalSelectionSystem().setSelectedAll( false );
-
-	UndoableCommand undo( "pasteToCamera" );
-
-	Selection_Paste();
-
 	// Work out the delta
 	Vector3 mid;
 	Select_GetMid( mid );
-	Vector3 delta = vector3_subtracted( vector3_snapped( Camera_getOrigin( camwnd ), GetSnapGridSize() ), mid );
+	//Vector3 delta = vector3_subtracted( vector3_snapped( Camera_getOrigin( camwnd ), GetSnapGridSize() ), mid );
+	Vector3 delta = vector3_snapped( vector3_subtracted( Camera_getOrigin( camwnd ), mid ), GetSnapGridSize() );
 
 	// Move to camera
 	GlobalSelectionSystem().translateSelected( delta );
+}
+
+void PasteToCamera(){
+	GlobalSelectionSystem().setSelectedAll( false );
+	UndoableCommand undo( "pasteToCamera" );
+	Selection_Paste();
+	TranslateToCamera();
+}
+
+void MoveToCamera(){
+	UndoableCommand undo( "moveToCamera" );
+	TranslateToCamera();
 }
 
 
@@ -1903,6 +1910,7 @@ GtkMenuItem* create_edit_menu(){
 	create_menu_item_with_mnemonic( menu, "_Copy", "Copy" );
 	create_menu_item_with_mnemonic( menu, "_Paste", "Paste" );
 	create_menu_item_with_mnemonic( menu, "P_aste To Camera", "PasteToCamera" );
+	create_menu_item_with_mnemonic( menu, "Move To Camera", "MoveToCamera" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "_Duplicate", "CloneSelection" );
 	create_menu_item_with_mnemonic( menu, "Duplicate, make uni_que", "CloneSelectionAndMakeUnique" );
@@ -3430,6 +3438,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "Copy", FreeCaller<Copy>(), Accelerator( 'C', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "Paste", FreeCaller<Paste>(), Accelerator( 'V', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PasteToCamera", FreeCaller<PasteToCamera>(), Accelerator( 'V', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "MoveToCamera", FreeCaller<MoveToCamera>(), Accelerator( 'V', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), Accelerator( GDK_space ) );
 	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
 //	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );

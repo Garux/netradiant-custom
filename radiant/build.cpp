@@ -641,6 +641,8 @@ void build_commands_write( const char* filename ){
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkliststore.h>
 #include <gtk/gtkscrolledwindow.h>
+#include <gtk/gtkexpander.h>
+#include <gtk/gtklabel.h>
 
 #include "gtkutil/dialog.h"
 #include "gtkutil/closure.h"
@@ -846,6 +848,7 @@ gboolean commands_key_press( GtkWidget* widget, GdkEventKey* event, GtkListStore
 	return FALSE;
 }
 
+#include "qe3.h"
 
 GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectList ){
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Build Menu", G_CALLBACK( dialog_delete_callback ), &modal, -1, 400 );
@@ -853,7 +856,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 	GtkWidget* buildView = 0;
 
 	{
-		GtkTable* table1 = create_dialog_table( 2, 2, 4, 4, 4 );
+		GtkTable* table1 = create_dialog_table( 3, 2, 4, 4, 4 );
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( table1 ) );
 		{
 			GtkVBox* vbox = create_dialog_vbox( 4 );
@@ -866,6 +869,11 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 			}
 			{
 				GtkButton* button = create_dialog_button( "Cancel", G_CALLBACK( dialog_button_cancel ), &modal );
+				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+			}
+			{
+				GtkButton* button = create_dialog_button( "Reset", G_CALLBACK( dialog_button_no ), &modal );
+				gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Reset to editor start state" );
 				gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 			}
 		}
@@ -947,6 +955,38 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 				}
 			}
 		}
+		{
+			GtkWidget* expander = gtk_expander_new_with_mnemonic( "build variables" );
+			gtk_widget_show( expander );
+			gtk_table_attach( table1, expander, 0, 2, 2, 3,
+							  (GtkAttachOptions) ( GTK_FILL ),
+							  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
+
+			bsp_init();
+			for ( Tools::iterator i = g_build_tools.begin(); i != g_build_tools.end(); ++i ){
+				StringBuffer output;
+				( *i ).second.evaluate( output );
+				build_set_variable( ( *i ).first.c_str(), output.c_str() );
+			}
+			StringOutputStream stream;
+			for( Variables::iterator i = g_build_variables.begin(); i != g_build_variables.end(); ++i ){
+				stream << "[" << ( *i ).first.c_str() << "] = " << ( *i ).second.c_str() << "\n";
+			}
+			build_clear_variables();
+
+			GtkWidget* label = gtk_label_new( stream.c_str() );
+			gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+#if 1
+			gtk_label_set_ellipsize( GTK_LABEL( label ), PANGO_ELLIPSIZE_END );
+#else
+			gtk_label_set_line_wrap( GTK_LABEL( label ), TRUE );
+			//gtk_label_set_max_width_chars( GTK_LABEL( label ), 100 );
+			//gtk_label_set_width_chars( GTK_LABEL( label ), 100 );
+			gtk_widget_set_size_request( label, 500, -1 );
+#endif
+			gtk_widget_show( label );
+			gtk_container_add( GTK_CONTAINER( expander ), label );
+		}
 	}
 
 	BSPCommandList_Construct( projectList.m_store, g_build_project );
@@ -969,7 +1009,16 @@ void DoBuildMenu(){
 
 	GtkWindow* window = BuildMenuDialog_construct( modal, projectList );
 
-	if ( modal_dialog_show( window, modal ) == eIDCANCEL ) {
+	Project bakproj = g_build_project;
+
+	EMessageBoxReturn ret = modal_dialog_show( window, modal );
+	if ( ret == eIDCANCEL ) {
+		if ( projectList.m_changed || g_build_changed ){
+			g_build_project = bakproj;
+			Build_refreshMenu( g_bsp_menu );
+		}
+	}
+	else if( ret == eIDNO ){//RESET
 		build_commands_clear();
 		LoadBuildMenu();
 
@@ -987,7 +1036,6 @@ void DoBuildMenu(){
 #include "gtkutil/menu.h"
 #include "mainframe.h"
 #include "preferences.h"
-#include "qe3.h"
 
 typedef struct _GtkMenuItem GtkMenuItem;
 

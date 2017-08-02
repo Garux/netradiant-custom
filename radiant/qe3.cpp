@@ -165,8 +165,11 @@ void bsp_init(){
 	build_set_variable( "GameName", gamename_get() );
 
 	const char* mapname = Map_Name( g_map );
-	StringOutputStream name( 256 );
-	name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".bsp";
+	{
+		StringOutputStream name( 256 );
+		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".bsp";
+		build_set_variable( "BspFile", name.c_str() );
+	}
 
 	if( region_active ){
 		StringOutputStream name( 256 );
@@ -177,7 +180,11 @@ void bsp_init(){
 		build_set_variable( "MapFile", mapname );
 	}
 
-	build_set_variable( "BspFile", name.c_str() );
+	{
+		StringOutputStream name( 256 );
+		name << StringRange( path_get_filename_start( mapname ), path_get_filename_base_end( mapname ) );
+		build_set_variable( "MapName", name.c_str() );
+	}
 }
 
 void bsp_shutdown(){

@@ -62,5 +62,6 @@ class SimpleCounter;
 extern SimpleCounter g_brushCount;
 extern SimpleCounter g_entityCount;
 
+void bsp_init();
 
 #endif

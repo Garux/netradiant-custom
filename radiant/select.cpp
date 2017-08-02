@@ -394,6 +394,9 @@ ExpandSelectionToEntitiesWalker() : m_depth( 0 ), worldspawn( Map_FindOrInsertWo
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	++m_depth;
 
+	if( !path.top().get().visible() )
+		return false;
+
 	// ignore worldspawn
 //	NodeSmartReference me( path.top().get() );
 //	if ( me == worldspawn ) {

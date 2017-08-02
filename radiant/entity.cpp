@@ -336,7 +336,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	scene::Instance& instance = findInstance( entitypath );
 
 	if ( entityClass->fixedsize || ( isModel && !brushesSelected ) ) {
-		Select_Delete();
+		//Select_Delete();
 
 		Transformable* transform = Instance_getTransformable( instance );
 		if ( transform != 0 ) {
@@ -359,7 +359,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 		Scene_forEachChildSelectable( SelectableSetSelected( true ), instance.path() );
 	}
 
-	// tweaking: when right clic dropping a light entity, ask for light value in a custom dialog box
+	// tweaking: when right click dropping a light entity, ask for light value in a custom dialog box
 	// see SF bug 105383
 
 	if ( g_pGameDescription->mGameType == "hl" ) {
