@@ -1197,5 +1197,235 @@ inline void ArbitraryMeshTriangle_sumTangents( ArbitraryMeshVertex& a, Arbitrary
 	reinterpret_cast<Vector3&>( c.bitangent ) += t;
 }
 
+namespace {
+///////////////////////////////////////////////////////////////////////////////
+// check FBO completeness
+///////////////////////////////////////////////////////////////////////////////
+bool checkFramebufferStatus() {
+	// check FBO status
+	GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+	switch( status ) {
+	case GL_FRAMEBUFFER_COMPLETE:
+//		globalErrorStream() << "Framebuffer complete.\n";
+		return true;
+
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: Attachment is NOT complete.\n";
+		return false;
+
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: No image is attached to FBO.\n";
+		return false;
+/*
+	case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: Attached images have different dimensions.\n";
+		return false;
+
+	case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: Color attached images have different internal formats.\n";
+		return false;
+*/
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: Draw buffer.\n";
+		return false;
+
+	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: Read buffer.\n";
+		return false;
+
+	case GL_FRAMEBUFFER_UNSUPPORTED:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: Unsupported by FBO implementation.\n";
+		return false;
+
+	default:
+		globalErrorStream() << "[ERROR] Framebuffer incomplete: Unknown error.\n";
+		return false;
+	}
+}
+
+} //namespace
+
+class FBO
+{
+public:
+	FBO():
+		_constructed( false ),
+		_has_depth( false ),
+		_width( 0 ),
+		_height( 0 ),
+		_fbo( 0 ),
+		_tex( 0 ),
+		_depth( 0 ),
+		_color( 0 ){
+	}
+	virtual ~FBO(){
+		reset( 0, 0, 0, false );
+	}
+	virtual void reset( int width, int height, int samples, bool has_depth ){
+		_width = width;
+		_height = height;
+		_samples = samples;
+		_has_depth = has_depth;
+		if( _depth )
+			glDeleteRenderbuffers( 1, &_depth );
+		_depth = 0;
+		if( _color )
+			glDeleteRenderbuffers( 1, &_color );
+		_color = 0;
+		if( _fbo )
+			glDeleteFramebuffers( 1, &_fbo );
+		_fbo = 0;
+		_constructed = false;
+	}
+	virtual void start(){
+//		if ( GlobalOpenGL().GL_1_3() ) {
+//			glDisable( GL_MULTISAMPLE );
+//		}
+		if( !_constructed ){
+			construct();
+		}
+		glBindFramebuffer( GL_FRAMEBUFFER, _fbo );
+	}
+	virtual void save(){
+		blit();
+	}
+	virtual void blit(){
+		glBindFramebuffer( GL_READ_FRAMEBUFFER, _fbo );
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		//glDrawBuffer( GL_BACK );
+		glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST );
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+	}
+protected:
+	bool _constructed;
+	bool _has_depth;
+	int _width;
+	int _height;
+	int _samples;
+	GLuint _fbo;
+	GLuint _tex;
+	GLuint _depth;
+	GLuint _color;
+	virtual void construct() {
+		int curSamples;
+		glGetIntegerv( GL_SAMPLES, &curSamples );
+		if( curSamples > 0 && _samples != 0 ){
+			_samples = curSamples;
+		}
+		else{
+			int maxSamples;
+			glGetIntegerv( GL_MAX_SAMPLES, &maxSamples );
+			if( _samples > maxSamples ){
+				_samples = maxSamples;
+			}
+		}
+
+		glGenFramebuffers( 1, &_fbo );
+		glBindFramebuffer( GL_FRAMEBUFFER, _fbo );
+
+		// Color buffer
+		glGenRenderbuffers( 1, &_color );
+		glBindRenderbuffer( GL_RENDERBUFFER, _color );
+		glRenderbufferStorageMultisample( GL_RENDERBUFFER, _samples, GL_RGBA8, _width, _height );
+		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _color );
+
+		if( _has_depth ){
+			// Depth buffer
+			glGenRenderbuffers( 1, &_depth );
+			glBindRenderbuffer( GL_RENDERBUFFER, _depth );
+			glRenderbufferStorageMultisample( GL_RENDERBUFFER, _samples, GL_DEPTH_COMPONENT, _width, _height );
+			glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depth );
+		}
+
+		if( !checkFramebufferStatus() && _samples > 0 ){
+			globalErrorStream() << "Falling back to no multisampling.\n";
+			_samples = 0;
+			reset( _width, _height, 0, _has_depth );
+			construct();
+		}
+
+		_constructed = true;
+	}
+private:
+};
+
+class FBO_fallback : public FBO
+{
+public:
+	~FBO_fallback(){
+		reset( 0, 0, 0, false );
+	}
+	void reset( int width, int height, int samples, bool has_depth ){
+		_width = width;
+		_height = height;
+		if( _tex )
+			glDeleteTextures( 1, &_tex );
+		_tex = 0;
+		_constructed = false;
+	}
+	void start(){
+		if( !_constructed ){
+			construct();
+		}
+	}
+	void save(){
+		glBindTexture( GL_TEXTURE_2D, _tex );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, 0, 0, _width, _height, 0 );
+		//glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_nWidth, m_nHeight );
+		glBindTexture( GL_TEXTURE_2D, 0 );
+	}
+	void blit(){
+		glViewport( 0, 0, _width, _height );
+
+		glMatrixMode( GL_PROJECTION );
+		glLoadIdentity();
+		glOrtho( 0, _width, 0, _height, -100, 100 );
+
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity();
+
+		glDisable( GL_LINE_STIPPLE );
+		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		glDisableClientState( GL_NORMAL_ARRAY );
+		glDisableClientState( GL_COLOR_ARRAY );
+		glDisable( GL_LIGHTING );
+		glDisable( GL_COLOR_MATERIAL );
+		glDisable( GL_DEPTH_TEST );
+		glDisable( GL_TEXTURE_1D );
+
+		glEnable( GL_TEXTURE_2D );
+		glDisable( GL_BLEND );
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+		glBindTexture( GL_TEXTURE_2D, _tex );
+
+
+		glColor4f( 1.0, 1.0, 1.0, 1.0 );
+		glBegin( GL_QUADS );
+
+		glTexCoord2f( 0, 0 );
+		glVertex3f( 0, 0, 0 );
+		glTexCoord2f( 0, 1 );
+		glVertex3f( 0, _height, 0 );
+		glTexCoord2f( 1, 1 );
+		glVertex3f( _width, _height, 0 );
+		glTexCoord2f( 1, 0 );
+		glVertex3f( _width, 0, 0 );
+		glEnd();
+		glBindTexture( GL_TEXTURE_2D, 0 );
+	}
+protected:
+	void construct() {
+		glGenTextures( 1, &_tex );
+		_constructed = true;
+	}
+private:
+};
+
 
 #endif

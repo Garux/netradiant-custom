@@ -81,6 +81,7 @@ struct camwindow_globals_private_t
 	bool m_bCubicClipping;
 	int m_nStrafeMode;
 	bool m_bFaceWire;
+	int m_MSAA;
 
 	camwindow_globals_private_t() :
 		m_nMoveSpeed( 100 ),
@@ -90,7 +91,8 @@ struct camwindow_globals_private_t
 		m_bCamDiscrete( true ),
 		m_bCubicClipping( false ),
 		m_nStrafeMode( 3 ),
-		m_bFaceWire( true ){
+		m_bFaceWire( true ),
+		m_MSAA( 8 ){
 	}
 
 };
@@ -710,6 +712,7 @@ static Shader* m_state_facewire;
 FreezePointer m_freezePointer;
 
 public:
+FBO* m_fbo;
 GtkWidget* m_gl_widget;
 GtkWindow* m_parent;
 
@@ -940,7 +943,30 @@ gboolean mousecontrol_button_press( GtkWidget* widget, GdkEventButton* event, Ca
 
 void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 	if ( GTK_WIDGET_VISIBLE( self.m_gl_widget ) ) {
-		self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.getCamera().width, self.getCamera().height ) );
+		if ( glwidget_make_current( self.m_gl_widget ) != FALSE ) {
+			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
+				GlobalOpenGL_debugAssertNoErrors();
+
+				glDrawBuffer( GL_FRONT );
+				self.m_fbo->blit();
+
+				glViewport( 0, 0, self.getCamera().width, self.getCamera().height );
+				// set up viewpoint
+				glMatrixMode( GL_PROJECTION );
+				glLoadIdentity();
+				glOrtho( 0, self.getCamera().width, 0, self.getCamera().height, -100, 100 );
+
+				glMatrixMode( GL_MODELVIEW );
+				glLoadIdentity();
+
+				self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.getCamera().width, self.getCamera().height ) );
+
+				glDrawBuffer( GL_BACK );
+
+				GlobalOpenGL_debugAssertNoErrors();
+				glwidget_make_current( self.m_gl_widget );
+			}
+		}
 	}
 }
 
@@ -1048,6 +1074,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 }
 
 gboolean camera_size_allocate( GtkWidget* widget, GtkAllocation* allocation, CamWnd* camwnd ){
+	camwnd->m_fbo->reset( allocation->width, allocation->height, g_camwindow_globals_private.m_MSAA, true );
 	camwnd->getCamera().width = allocation->width;
 	camwnd->getCamera().height = allocation->height;
 	Camera_updateProjection( camwnd->getCamera() );
@@ -1347,7 +1374,6 @@ CamWnd::CamWnd() :
 	m_cameraview( m_Camera, &m_view, ReferenceCaller<CamWnd, CamWnd_Update>( *this ) ),
 	m_gl_widget( glwidget_new( TRUE ) ),
 	m_window_observer( NewWindowObserver() ),
-	m_XORRectangle( m_gl_widget ),
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
 	m_deferred_motion( selection_motion, m_window_observer ),
 	m_deferred_motion_freemove( selection_motion_freemove, this ),
@@ -1357,6 +1383,8 @@ CamWnd::CamWnd() :
 	m_freelook_button_press_handler( 0 ),
 	m_freelook_button_release_handler( 0 ),
 	m_drawing( false ){
+	m_fbo = GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
+
 	m_bFreeMove = false;
 
 	GlobalWindowObservers_add( m_window_observer );
@@ -1397,6 +1425,8 @@ CamWnd::~CamWnd(){
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_exposeHandler );
 
 	gtk_widget_unref( m_gl_widget );
+
+	delete m_fbo;
 
 	m_window_observer->release();
 }
@@ -1637,6 +1667,8 @@ void ShowStatsToggle(){
 
 void CamWnd::Cam_Draw(){
 //		globalOutputStream() << "Cam_Draw()\n";
+	m_fbo->start();
+
 	glViewport( 0, 0, m_Camera.width, m_Camera.height );
 #if 0
 	GLint viewprt[4];
@@ -1797,6 +1829,8 @@ void CamWnd::Cam_Draw(){
 	// bind back to the default texture so that we don't have problems
 	// elsewhere using/modifying texture maps between contexts
 	glBindTexture( GL_TEXTURE_2D, 0 );
+
+	m_fbo->save();
 }
 
 void CamWnd::draw(){
@@ -1810,7 +1844,7 @@ void CamWnd::draw(){
 			GlobalOpenGL_debugAssertNoErrors();
 			//qglFinish();
 
-			m_XORRectangle.set( rectangle_t() );
+			//m_XORRectangle.set( rectangle_t() );
 		}
 
 		glwidget_swap_buffers( m_gl_widget );
@@ -2085,6 +2119,28 @@ void RenderModeExport( const IntImportCallback& importer ){
 }
 typedef FreeCaller1<const IntImportCallback&, RenderModeExport> RenderModeExportCaller;
 
+void CamMSAAImport( int value ){
+	g_camwindow_globals_private.m_MSAA = value ? 1 << value : value;
+	if ( g_camwnd != 0 ) {
+		g_camwnd->m_fbo->reset( g_camwnd->getCamera().width, g_camwnd->getCamera().height, g_camwindow_globals_private.m_MSAA, true );
+	}
+}
+typedef FreeCaller1<int, CamMSAAImport> MSAAImportCaller;
+
+void CamMSAAExport( const IntImportCallback& importer ){
+	if( g_camwindow_globals_private.m_MSAA <= 0 ){
+		importer( 0 );
+	}
+	else{
+		int exponent = 1;
+		while( !( ( g_camwindow_globals_private.m_MSAA >> exponent ) & 1 ) ){
+			++exponent;
+		}
+		importer( exponent );
+	}
+}
+typedef FreeCaller1<const IntImportCallback&, CamMSAAExport> MSAAExportCaller;
+
 void fieldOfViewImport( float value ){
 	camera_t::fieldOfView = value;
 	if( g_camwnd ){
@@ -2134,6 +2190,17 @@ void Camera_constructPreferences( PreferencesPage& page ){
 			STRING_ARRAY_RANGE( render_mode ),
 			IntImportCallback( RenderModeImportCaller() ),
 			IntExportCallback( RenderModeExportCaller() )
+			);
+	}
+
+	if( GlobalOpenGL().support_ARB_framebuffer_object ){
+		const char* samples[] = { "0", "2", "4", "8", "16", "32" };
+
+		page.appendCombo(
+			"MSAA",
+			STRING_ARRAY_RANGE( samples ),
+			IntImportCallback( MSAAImportCaller() ),
+			IntExportCallback( MSAAExportCaller() )
 			);
 	}
 
@@ -2245,6 +2312,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_Colors4", Vector3ImportStringCaller( g_camwindow_globals.color_cameraback ), Vector3ExportStringCaller( g_camwindow_globals.color_cameraback ) );
 	GlobalPreferenceSystem().registerPreference( "SI_Colors12", Vector3ImportStringCaller( g_camwindow_globals.color_selbrushes3d ), Vector3ExportStringCaller( g_camwindow_globals.color_selbrushes3d ) );
 	GlobalPreferenceSystem().registerPreference( "CameraRenderMode", makeIntStringImportCallback( RenderModeImportCaller() ), makeIntStringExportCallback( RenderModeExportCaller() ) );
+	GlobalPreferenceSystem().registerPreference( "CameraMSAA", IntImportStringCaller( g_camwindow_globals_private.m_MSAA ), IntExportStringCaller( g_camwindow_globals_private.m_MSAA ) );
 	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_nStrafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_nStrafeMode ) );
 	GlobalPreferenceSystem().registerPreference( "CameraFaceWire", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceWire ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceWire ) );
 	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_camwindow_globals.m_bZoomInToPointer ) );

@@ -71,6 +71,8 @@
 #include "grid.h"
 #include "windowobservers.h"
 
+#include "render.h"
+
 void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHeight );
 
 // d1223m
@@ -354,6 +356,8 @@ struct xywindow_globals_private_t
 	bool m_bChaseMouse;
 	bool m_bSizePaint;
 
+	int m_MSAA;
+
 	xywindow_globals_private_t() :
 		d_showgrid( true ),
 
@@ -369,7 +373,8 @@ struct xywindow_globals_private_t
 
 //		m_bCamXYUpdate( true ),
 		m_bChaseMouse( true ),
-		m_bSizePaint( true ){
+		m_bSizePaint( true ),
+		m_MSAA( 8 ){
 	}
 
 };
@@ -743,16 +748,31 @@ Shader* XYWnd::m_state_selected = 0;
 
 void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
 	if ( GTK_WIDGET_VISIBLE( self.GetWidget() ) ) {
-		rectangle_t rect = rectangle_from_area( area.min, area.max, self.Width(), self.Height() );
-//		int nDim1 = ( self.GetViewType() == YZ ) ? 1 : 0;
-//		int nDim2 = ( self.GetViewType() == XY ) ? 1 : 2;
-//		rect.x /= self.Scale();
-//		rect.y /= self.Scale();
-//		rect.w /= self.Scale();
-//		rect.h /= self.Scale();
-//		rect.x += self.GetOrigin()[nDim1];
-//		rect.y += self.GetOrigin()[nDim2];
-		self.m_XORRectangle.set( rect );
+		if ( glwidget_make_current( self.GetWidget() ) != FALSE ) {
+			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
+				GlobalOpenGL_debugAssertNoErrors();
+
+				glDrawBuffer( GL_FRONT );
+				self.m_fbo->blit();
+
+				glViewport( 0, 0, self.Width(), self.Height() );
+				// set up viewpoint
+				glMatrixMode( GL_PROJECTION );
+				glLoadIdentity();
+				glOrtho( 0, self.Width(), 0, self.Height(), -100, 100 );
+
+				glMatrixMode( GL_MODELVIEW );
+				glLoadIdentity();
+
+				rectangle_t rect = rectangle_from_area( area.min, area.max, self.Width(), self.Height() );
+				self.m_XORRectangle.set( rect );
+
+				glDrawBuffer( GL_BACK );
+
+				GlobalOpenGL_debugAssertNoErrors();
+				glwidget_make_current( self.GetWidget() );
+			}
+		}
 	}
 }
 
@@ -817,6 +837,7 @@ gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xy
 }
 
 gboolean xywnd_size_allocate( GtkWidget* widget, GtkAllocation* allocation, XYWnd* xywnd ){
+	xywnd->m_fbo->reset( allocation->width, allocation->height, g_xywindow_globals_private.m_MSAA, false );
 	xywnd->m_nWidth = allocation->width;
 	xywnd->m_nHeight = allocation->height;
 	xywnd->updateProjection();
@@ -831,7 +852,7 @@ gboolean xywnd_expose( GtkWidget* widget, GdkEventExpose* event, XYWnd* xywnd ){
 			xywnd->XY_Draw();
 			GlobalOpenGL_debugAssertNoErrors();
 
-			xywnd->m_XORRectangle.set( rectangle_t() );
+			//xywnd->m_XORRectangle.set( rectangle_t() );
 		}
 		glwidget_swap_buffers( xywnd->GetWidget() );
 	}
@@ -852,8 +873,9 @@ XYWnd::XYWnd() :
 	m_deferred_motion( xywnd_motion, this ),
 	m_parent( 0 ),
 	m_window_observer( NewWindowObserver() ),
-	m_XORRectangle( m_gl_widget ),
 	m_chasemouse_handler( 0 ){
+	m_fbo = GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
+
 	m_bActive = false;
 	m_buttonstate = 0;
 
@@ -917,6 +939,8 @@ XYWnd::XYWnd() :
 
 XYWnd::~XYWnd(){
 	onDestroyed();
+
+	delete m_fbo;
 
 	if ( m_mnuDrop != 0 ) {
 		gtk_widget_destroy( GTK_WIDGET( m_mnuDrop ) );
@@ -1774,13 +1798,14 @@ void XYWnd::XY_DrawAxis( void ){
 
 		Vector3 colourX = ( m_viewType == YZ ) ? g_xywindow_globals.AxisColorY : g_xywindow_globals.AxisColorX;
 		Vector3 colourY = ( m_viewType == XY ) ? g_xywindow_globals.AxisColorY : g_xywindow_globals.AxisColorZ;
+#if 0 //gray for nonActive
 		if( !Active() ){
 			float grayX = vector3_dot( colourX, Vector3( 0.2989, 0.5870, 0.1140 ) );
 			float grayY = vector3_dot( colourY, Vector3( 0.2989, 0.5870, 0.1140 ) );
 			colourX[0] = colourX[1] = colourX[2] = grayX;
 			colourY[0] = colourY[1] = colourY[2] = grayY;
 		}
-
+#endif
 		// draw two lines with corresponding axis colors to highlight current view
 		// horizontal line: nDim1 color
 		glLineWidth( 2 );
@@ -1854,6 +1879,7 @@ void XYWnd::RenderActive( void ){
 				glVertex2f( 0.5, m_nHeight - 0.5 );
 				glEnd();
 			}
+#if 0 //gray for nonActive
 			// we do this part (the old way) only if show_axis is disabled
 			if ( !g_xywindow_globals_private.show_axis ) {
 				glMatrixMode( GL_PROJECTION );
@@ -1902,7 +1928,7 @@ void XYWnd::RenderActive( void ){
 
 				XYWnd::XY_DrawAxis();
 			}
-
+#endif
 			glDrawBuffer( GL_BACK );
 			GlobalOpenGL_debugAssertNoErrors();
 			glwidget_make_current( m_gl_widget );
@@ -2277,42 +2303,44 @@ void XYWnd::XY_DrawBlockGrid(){
 }
 
 void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
-	Cam.fov = 48 / m_fScale;
-	Cam.box = 16 / m_fScale;
+	float x, y, fov, box;
+	double a;
+
+	fov = 48 / m_fScale;
+	box = 16 / m_fScale;
 //	globalOutputStream() << "pitch " << angles[CAMERA_PITCH] << "   yaw " << angles[CAMERA_YAW] << "\n";
 
 	if ( m_viewType == XY ) {
-		Cam.x = origin[0];
-		Cam.y = origin[1];
-		Cam.a = degrees_to_radians( angles[CAMERA_YAW] );
+		x = origin[0];
+		y = origin[1];
+		a = degrees_to_radians( angles[CAMERA_YAW] );
 	}
 	else if ( m_viewType == YZ ) {
-		Cam.x = origin[1];
-		Cam.y = origin[2];
-		Cam.a = degrees_to_radians( ( angles[CAMERA_YAW] > 180 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
+		x = origin[1];
+		y = origin[2];
+		a = degrees_to_radians( ( angles[CAMERA_YAW] > 180 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
 	}
 	else
 	{
-		Cam.x = origin[0];
-		Cam.y = origin[2];
-		Cam.a = degrees_to_radians( ( angles[CAMERA_YAW] < 270 && angles[CAMERA_YAW] > 90 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
+		x = origin[0];
+		y = origin[2];
+		a = degrees_to_radians( ( angles[CAMERA_YAW] < 270 && angles[CAMERA_YAW] > 90 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
 	}
 
-	//glColor3f( 0.0, 0.0, 1.0 );
-	glColor3f( 1.0, 1.0, 1.0 );
+	glColor3f( 0.0, 0.0, 1.0 );
 	glBegin( GL_LINE_STRIP );
-	glVertex3f( Cam.x - Cam.box,Cam.y,0 );
-	glVertex3f( Cam.x,Cam.y + ( Cam.box / 2 ),0 );
-	glVertex3f( Cam.x + Cam.box,Cam.y,0 );
-	glVertex3f( Cam.x,Cam.y - ( Cam.box / 2 ),0 );
-	glVertex3f( Cam.x - Cam.box,Cam.y,0 );
-	glVertex3f( Cam.x + Cam.box,Cam.y,0 );
+	glVertex3f( x - box,y,0 );
+	glVertex3f( x,y + ( box / 2 ),0 );
+	glVertex3f( x + box,y,0 );
+	glVertex3f( x,y - ( box / 2 ),0 );
+	glVertex3f( x - box,y,0 );
+	glVertex3f( x + box,y,0 );
 	glEnd();
 
 	glBegin( GL_LINE_STRIP );
-	glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a + c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a + c_pi / 4 ) ), 0 );
-	glVertex3f( Cam.x, Cam.y, 0 );
-	glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a - c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a - c_pi / 4 ) ), 0 );
+	glVertex3f( x + static_cast<float>( fov * cos( a + c_pi / 4 ) ), y + static_cast<float>( fov * sin( a + c_pi / 4 ) ), 0 );
+	glVertex3f( x, y, 0 );
+	glVertex3f( x + static_cast<float>( fov * cos( a - c_pi / 4 ) ), y + static_cast<float>( fov * sin( a - c_pi / 4 ) ), 0 );
 	glEnd();
 
 }
@@ -2321,58 +2349,36 @@ void XYWnd::UpdateCameraIcon( void ){
 	if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
 		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 			GlobalOpenGL_debugAssertNoErrors();
+
 			glDrawBuffer( GL_FRONT );
-			{
-				// clear
-				glViewport( 0, 0, m_nWidth, m_nHeight );
-				// set up viewpoint
-				glMatrixMode( GL_PROJECTION );
-				glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
+			m_fbo->blit();
 
-				glMatrixMode( GL_MODELVIEW );
-				glLoadIdentity();
-				glScalef( m_fScale, m_fScale, 1 );
-				int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-				int nDim2 = ( m_viewType == XY ) ? 1 : 2;
-				glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
+			glViewport( 0, 0, m_nWidth, m_nHeight );
+			// set up viewpoint
+			glMatrixMode( GL_PROJECTION );
+			glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
 
-				glDisable( GL_LINE_STIPPLE );
-				glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-				glDisableClientState( GL_NORMAL_ARRAY );
-				glDisableClientState( GL_COLOR_ARRAY );
-				glDisable( GL_TEXTURE_2D );
-				glDisable( GL_LIGHTING );
-				glDisable( GL_COLOR_MATERIAL );
-				glDisable( GL_DEPTH_TEST );
-				glDisable( GL_TEXTURE_1D );
+			glMatrixMode( GL_MODELVIEW );
+			glLoadIdentity();
+			glScalef( m_fScale, m_fScale, 1 );
+			int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
+			int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+			glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
 
-				glEnable( GL_BLEND );
-				glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
+			glDisable( GL_LINE_STIPPLE );
+			glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+			glDisableClientState( GL_NORMAL_ARRAY );
+			glDisableClientState( GL_COLOR_ARRAY );
+			glDisable( GL_TEXTURE_2D );
+			glDisable( GL_LIGHTING );
+			glDisable( GL_COLOR_MATERIAL );
+			glDisable( GL_DEPTH_TEST );
+			glDisable( GL_TEXTURE_1D );
 
-				//glColor3f( 0.0, 0.0, 1.0 );
-				glColor3f( 1.0, 1.0, 1.0 );
-				glBegin( GL_LINE_STRIP );
-				glVertex3f( Cam.x - Cam.box,Cam.y,0 );
-				glVertex3f( Cam.x,Cam.y + ( Cam.box / 2 ),0 );
-				glVertex3f( Cam.x + Cam.box,Cam.y,0 );
-				glVertex3f( Cam.x,Cam.y - ( Cam.box / 2 ),0 );
-				glVertex3f( Cam.x - Cam.box,Cam.y,0 );
-				glVertex3f( Cam.x + Cam.box,Cam.y,0 );
-				glEnd();
-
-				glBegin( GL_LINE_STRIP );
-				glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a + c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a + c_pi / 4 ) ), 0 );
-				glVertex3f( Cam.x, Cam.y, 0 );
-				glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a - c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a - c_pi / 4 ) ), 0 );
-				glEnd();
-
-				XYWnd::DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
-
-				glDisable( GL_BLEND );
-				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-			}
+			XYWnd::DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
 
 			glDrawBuffer( GL_BACK );
+
 			GlobalOpenGL_debugAssertNoErrors();
 			glwidget_make_current( m_gl_widget );
 		}
@@ -2680,6 +2686,17 @@ void XYWnd::updateModelview(){
 
 void XYWnd::XY_Draw(){
 //		globalOutputStream() << "XY_Draw()\n";
+/*
+	int maxSamples;
+	glGetIntegerv(GL_MAX_SAMPLES,&maxSamples);
+	globalOutputStream() << maxSamples << " GL_MAX_SAMPLES\n";
+	int curSamples;
+	glGetIntegerv(GL_SAMPLE_BUFFERS,&curSamples);
+	globalOutputStream() << curSamples << " GL_SAMPLE_BUFFERS\n";
+	glGetIntegerv(GL_SAMPLES,&curSamples);
+	globalOutputStream() << curSamples << " GL_SAMPLES\n";
+*/
+	m_fbo->start();
 	//
 	// clear
 	//
@@ -2812,18 +2829,14 @@ void XYWnd::XY_Draw(){
 
 	GlobalOpenGL_debugAssertNoErrors();
 
-	// reset modelview
-	glLoadIdentity();
-	glScalef( m_fScale, m_fScale, 1 );
-	glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
+	{
+		// reset modelview
+		glLoadIdentity();
+		glScalef( m_fScale, m_fScale, 1 );
+		glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
 
-	glEnable( GL_BLEND );
-	glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
-	DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	glDisable( GL_BLEND );
-
-	Feedback_draw2D( m_viewType );
+		Feedback_draw2D( m_viewType );
+	}
 
 	if ( g_xywindow_globals_private.show_outline ) {
 		if ( Active() ) {
@@ -2882,6 +2895,20 @@ void XYWnd::XY_Draw(){
 		stream << " | f2f: " << m_render_time.elapsed_msec();
 		GlobalOpenGL().drawString( stream.c_str() );
 		m_render_time.start();
+	}
+
+	m_fbo->save();
+
+	{
+		// reset modelview
+		glMatrixMode( GL_PROJECTION );
+		glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
+
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity();
+		glScalef( m_fScale, m_fScale, 1 );
+		glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
+		DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
 	}
 
 	GlobalOpenGL_debugAssertNoErrors();
@@ -3266,6 +3293,34 @@ void ToggleShowGrid(){
 	XY_UpdateAllWindows();
 }
 
+void MSAAImport( int value ){
+	g_xywindow_globals_private.m_MSAA = value ? 1 << value : value;
+	if ( g_pParentWnd->GetXYWnd() ) {
+		g_pParentWnd->GetXYWnd()->m_fbo->reset( g_pParentWnd->GetXYWnd()->Width(), g_pParentWnd->GetXYWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
+	}
+	if ( g_pParentWnd->GetXZWnd() ) {
+		g_pParentWnd->GetXZWnd()->m_fbo->reset( g_pParentWnd->GetXZWnd()->Width(), g_pParentWnd->GetXZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
+	}
+	if ( g_pParentWnd->GetYZWnd() ) {
+		g_pParentWnd->GetYZWnd()->m_fbo->reset( g_pParentWnd->GetYZWnd()->Width(), g_pParentWnd->GetYZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
+	}
+}
+typedef FreeCaller1<int, MSAAImport> MSAAImportCaller;
+
+void MSAAExport( const IntImportCallback& importer ){
+	if( g_xywindow_globals_private.m_MSAA <= 0 ){
+		importer( 0 );
+	}
+	else{
+		int exponent = 1;
+		while( !( ( g_xywindow_globals_private.m_MSAA >> exponent ) & 1 ) ){
+			++exponent;
+		}
+		importer( exponent );
+	}
+}
+typedef FreeCaller1<const IntImportCallback&, MSAAExport> MSAAExportCaller;
+
 
 void XYShow_registerCommands(){
 	GlobalToggles_insert( "ToggleSizePaint", FreeCaller<ToggleShowSizeInfo>(), ToggleItem::AddCallbackCaller( g_show_size_item ), Accelerator( 'J' ) );
@@ -3296,6 +3351,17 @@ void Orthographic_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Chase mouse during drags", g_xywindow_globals_private.m_bChaseMouse );
 //	page.appendCheckBox( "", "Update views on camera move", g_xywindow_globals_private.m_bCamXYUpdate );
 	page.appendCheckBox( "", "Zoom In to Mouse pointer", g_xywindow_globals.m_bZoomInToPointer );
+
+	if( GlobalOpenGL().support_ARB_framebuffer_object ){
+		const char* samples[] = { "0", "2", "4", "8", "16", "32" };
+
+		page.appendCombo(
+			"MSAA",
+			STRING_ARRAY_RANGE( samples ),
+			IntImportCallback( MSAAImportCaller() ),
+			IntExportCallback( MSAAExportCaller() )
+			);
+	}
 }
 void Orthographic_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Orthographic", "Orthographic View Preferences" ) );
@@ -3354,6 +3420,7 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "ClipCaulk", BoolImportStringCaller( g_clip_useCaulk ), BoolExportStringCaller( g_clip_useCaulk ) );
 
 //	GlobalPreferenceSystem().registerPreference( "NewRightClick", BoolImportStringCaller( g_xywindow_globals.m_bRightClick ), BoolExportStringCaller( g_xywindow_globals.m_bRightClick ) );
+	GlobalPreferenceSystem().registerPreference( "XYMSAA", IntImportStringCaller( g_xywindow_globals_private.m_MSAA ), IntExportStringCaller( g_xywindow_globals_private.m_MSAA ) );
 	GlobalPreferenceSystem().registerPreference( "2DZoomInToPointer", BoolImportStringCaller( g_xywindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_xywindow_globals.m_bZoomInToPointer ) );
 	GlobalPreferenceSystem().registerPreference( "ChaseMouse", BoolImportStringCaller( g_xywindow_globals_private.m_bChaseMouse ), BoolExportStringCaller( g_xywindow_globals_private.m_bChaseMouse ) );
 	GlobalPreferenceSystem().registerPreference( "SizePainting", BoolImportStringCaller( g_xywindow_globals_private.m_bSizePaint ), BoolExportStringCaller( g_xywindow_globals_private.m_bSizePaint ) );

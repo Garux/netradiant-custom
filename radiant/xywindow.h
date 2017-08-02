@@ -66,6 +66,7 @@ inline const char* ViewType_getTitle( VIEWTYPE viewtype ){
 }
 
 #include "timer.h"
+class FBO;
 
 class XYWnd
 {
@@ -76,6 +77,7 @@ guint m_exposeHandler;
 DeferredDraw m_deferredDraw;
 DeferredMotion m_deferred_motion;
 public:
+FBO* m_fbo;
 GtkWindow* m_parent;
 XYWnd();
 ~XYWnd();
@@ -147,12 +149,6 @@ void SetActive( bool b ){
 bool Active(){
 	return m_bActive;
 };
-struct camera_icon_t
-{
-	float x, y, fov, box;
-	double a;
-};
-camera_icon_t Cam;
 void UpdateCameraIcon();
 
 
