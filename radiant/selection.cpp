@@ -2577,6 +2577,8 @@ enum EModifier
 	eToggle,
 	eReplace,
 	eCycle,
+	eSelect,
+	eDeselect,
 };
 
 RadiantSelectionSystem() :
@@ -2769,16 +2771,27 @@ void deselectAll(){
 	}
 }
 
+void deselectComponentsOrAll( bool components ){
+	if ( components ) {
+		setSelectedAllComponents( false );
+	}
+	else
+	{
+		deselectAll();
+	}
+}
+
 void SelectPoint( const View& view, const float device_point[2], const float device_epsilon[2], RadiantSelectionSystem::EModifier modifier, bool face ){
+	//globalOutputStream() << device_point[0] << "   " << device_point[1] << "\n";
+#ifdef _DEBUG
 	ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.0f && fabs( device_point[1] ) <= 1.0f, "point-selection error" );
+#else
+	if( fabs( device_point[0] ) >= 1.0f || fabs( device_point[1] ) >= 1.0f ){
+		return;
+	}
+#endif
 	if ( modifier == eReplace ) {
-		if ( face ) {
-			setSelectedAllComponents( false );
-		}
-		else
-		{
-			deselectAll();
-		}
+		deselectComponentsOrAll( face );
 	}
 /*
 //nothingSelected() doesn't consider faces, selected in non-component mode, m
@@ -2834,7 +2847,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				while ( i != selector.end() )
 				{
 					if ( ( *i ).second->isSelected() ) {
-						( *i ).second->setSelected( false );
+						deselectComponentsOrAll( face );
 						++i;
 						if ( i != selector.end() ) {
 							i->second->setSelected( true );
@@ -2849,40 +2862,77 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 					++i;
 				}
 				if( !CycleSelectionOccured ){
-					if ( face ){
-						setSelectedAllComponents( false );
-					}
-					else{
-						deselectAll();
-					}
+					deselectComponentsOrAll( face );
 					( *selector.begin() ).second->setSelected( true );
 				}
+			}
+			break;
+			case RadiantSelectionSystem::eSelect:
+			{
+				( *selector.begin() ).second->setSelected( true );
+			}
+			break;
+			case RadiantSelectionSystem::eDeselect:
+			{
+				( *selector.begin() ).second->setSelected( false );
 			}
 			break;
 			default:
 				break;
 			}
 		}
-		else if( modifier == eCycle || modifier == eReplace ){
-			if ( face ){
-				setSelectedAllComponents( false );
+		else if( modifier == eCycle ){
+			deselectComponentsOrAll( face );
+		}
+	}
+}
+
+bool SelectPoint_InitPaint( const View& view, const float device_point[2], const float device_epsilon[2], bool face ){
+#ifdef _DEBUG
+	ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.0f && fabs( device_point[1] ) <= 1.0f, "point-selection error" );
+#else
+	if( fabs( device_point[0] ) >= 1.0f || fabs( device_point[1] ) >= 1.0f ){
+		return true;
+	}
+#endif
+  #if defined ( DEBUG_SELECTION )
+	g_render_clipped.destroy();
+  #endif
+
+	{
+		View scissored( view );
+		ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
+
+		SelectionVolume volume( scissored );
+		SelectionPool selector;
+		if ( face ) {
+			Scene_TestSelect_Component( selector, volume, scissored, eFace );
+		}
+		else
+		{
+			Scene_TestSelect( selector, volume, scissored, Mode(), ComponentMode() );
+		}
+
+		if ( !selector.failed() ) {
+			SelectableSortedSet::iterator best = selector.begin();
+			if ( ( *best ).second->isSelected() ) {
+				( *best ).second->setSelected( false );
+				return false;
 			}
 			else{
-				deselectAll();
+				( *best ).second->setSelected( true );
+				return true;
 			}
+		}
+		else{
+			return true;
 		}
 	}
 }
 
 void SelectArea( const View& view, const float device_point[2], const float device_delta[2], RadiantSelectionSystem::EModifier modifier, bool face ){
 	if ( modifier == eReplace ) {
-		if ( face ) {
-			setSelectedAllComponents( false );
-		}
-		else
-		{
-			deselectAll();
-		}
+		deselectComponentsOrAll( face );
 	}
 
   #if defined ( DEBUG_SELECTION )
@@ -3524,6 +3574,8 @@ DeviceVector m_current;
 DeviceVector m_epsilon;
 ModifierFlags m_state;
 bool m_mouse2;
+bool m_paintInitialized;
+bool m_paintSelect;
 const View* m_view;
 RectangleCallback m_window_update;
 
@@ -3567,7 +3619,7 @@ void testSelect_simpleM1( DeviceVector position ){
 
 
 bool selecting() const {
-	return m_state != c_modifier_manipulator;
+	return m_state != c_modifier_manipulator && !m_mouse2;
 }
 
 void setState( ModifierFlags state ){
@@ -3591,16 +3643,36 @@ void modifierDisable( ModifierFlags type ){
 
 void mouseDown( DeviceVector position ){
 	m_start = m_current = device_constrained( position );
+	m_paintInitialized = false;
 }
 
 void mouseMoved( DeviceVector position ){
 	m_current = device_constrained( position );
-	draw_area();
+	if( !m_mouse2 ){
+		draw_area();
+	}
+	else if( m_paintInitialized ){
+		getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0],
+										m_paintSelect ? RadiantSelectionSystem::eSelect : RadiantSelectionSystem::eDeselect,
+										( m_state & c_modifier_face ) != c_modifierNone );
+	}
+	else{
+		DeviceVector delta( position - m_start );
+		if ( fabs( delta.x() ) > m_epsilon.x() || fabs( delta.y() ) > m_epsilon.y() ) {
+			m_paintSelect = getSelectionSystem().SelectPoint_InitPaint( *m_view, &position[0], &m_epsilon[0], ( m_state & c_modifier_face ) != c_modifierNone );
+			m_paintInitialized = true;
+		}
+	}
 }
 typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseMoved> MouseMovedCaller;
 
 void mouseUp( DeviceVector position ){
-	testSelect( device_constrained( position ) );
+	if( !m_paintInitialized ){
+		testSelect( device_constrained( position ) );
+	}
+	else{
+		m_start = m_current = DeviceVector( 0.0f, 0.0f );
+	}
 
 	g_mouseMovedCallback.clear();
 	g_mouseUpCallback.clear();
