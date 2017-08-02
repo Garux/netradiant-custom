@@ -361,7 +361,7 @@ struct xywindow_globals_private_t
 		show_names( false ),
 		show_coordinates( false ),
 		show_angles( true ),
-		show_outline( false ),
+		show_outline( true ),
 		show_axis( true ),
 
 		d_show_work( false ),
@@ -820,7 +820,8 @@ gboolean xywnd_expose( GtkWidget* widget, GdkEventExpose* event, XYWnd* xywnd ){
 
 void XYWnd_CameraMoved( XYWnd& xywnd ){
 	if ( g_xywindow_globals_private.m_bCamXYUpdate ) {
-		XYWnd_Update( xywnd );
+		//XYWnd_Update( xywnd );
+		xywnd.UpdateCameraIcon();
 	}
 }
 
@@ -2034,45 +2035,104 @@ void XYWnd::XY_DrawBlockGrid(){
 }
 
 void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
-	float x, y, fov, box;
-	double a;
-
-	fov = 48 / m_fScale;
-	box = 16 / m_fScale;
+	Cam.fov = 48 / m_fScale;
+	Cam.box = 16 / m_fScale;
 
 	if ( m_viewType == XY ) {
-		x = origin[0];
-		y = origin[1];
-		a = degrees_to_radians( angles[CAMERA_YAW] );
+		Cam.x = origin[0];
+		Cam.y = origin[1];
+		Cam.a = degrees_to_radians( angles[CAMERA_YAW] );
 	}
 	else if ( m_viewType == YZ ) {
-		x = origin[1];
-		y = origin[2];
-		a = degrees_to_radians( angles[CAMERA_PITCH] );
+		Cam.x = origin[1];
+		Cam.y = origin[2];
+		Cam.a = degrees_to_radians( angles[CAMERA_PITCH] );
 	}
 	else
 	{
-		x = origin[0];
-		y = origin[2];
-		a = degrees_to_radians( angles[CAMERA_PITCH] );
+		Cam.x = origin[0];
+		Cam.y = origin[2];
+		Cam.a = degrees_to_radians( angles[CAMERA_PITCH] );
 	}
 
-	glColor3f( 0.0, 0.0, 1.0 );
+	//glColor3f( 0.0, 0.0, 1.0 );
+	glColor3f( 1.0, 1.0, 1.0 );
 	glBegin( GL_LINE_STRIP );
-	glVertex3f( x - box,y,0 );
-	glVertex3f( x,y + ( box / 2 ),0 );
-	glVertex3f( x + box,y,0 );
-	glVertex3f( x,y - ( box / 2 ),0 );
-	glVertex3f( x - box,y,0 );
-	glVertex3f( x + box,y,0 );
+	glVertex3f( Cam.x - Cam.box,Cam.y,0 );
+	glVertex3f( Cam.x,Cam.y + ( Cam.box / 2 ),0 );
+	glVertex3f( Cam.x + Cam.box,Cam.y,0 );
+	glVertex3f( Cam.x,Cam.y - ( Cam.box / 2 ),0 );
+	glVertex3f( Cam.x - Cam.box,Cam.y,0 );
+	glVertex3f( Cam.x + Cam.box,Cam.y,0 );
 	glEnd();
 
 	glBegin( GL_LINE_STRIP );
-	glVertex3f( x + static_cast<float>( fov * cos( a + c_pi / 4 ) ), y + static_cast<float>( fov * sin( a + c_pi / 4 ) ), 0 );
-	glVertex3f( x, y, 0 );
-	glVertex3f( x + static_cast<float>( fov * cos( a - c_pi / 4 ) ), y + static_cast<float>( fov * sin( a - c_pi / 4 ) ), 0 );
+	glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a + c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a + c_pi / 4 ) ), 0 );
+	glVertex3f( Cam.x, Cam.y, 0 );
+	glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a - c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a - c_pi / 4 ) ), 0 );
 	glEnd();
 
+}
+
+void XYWnd::UpdateCameraIcon( void ){
+	if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
+		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
+			GlobalOpenGL_debugAssertNoErrors();
+			glDrawBuffer( GL_FRONT );
+			{
+				// clear
+				glViewport( 0, 0, m_nWidth, m_nHeight );
+				// set up viewpoint
+				glMatrixMode( GL_PROJECTION );
+				glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
+
+				glMatrixMode( GL_MODELVIEW );
+				glLoadIdentity();
+				glScalef( m_fScale, m_fScale, 1 );
+				int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
+				int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+				glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
+
+				glDisable( GL_LINE_STIPPLE );
+				glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+				glDisableClientState( GL_NORMAL_ARRAY );
+				glDisableClientState( GL_COLOR_ARRAY );
+				glDisable( GL_TEXTURE_2D );
+				glDisable( GL_LIGHTING );
+				glDisable( GL_COLOR_MATERIAL );
+				glDisable( GL_DEPTH_TEST );
+				glDisable( GL_TEXTURE_1D );
+
+				glEnable( GL_BLEND );
+				glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
+
+				//glColor3f( 0.0, 0.0, 1.0 );
+				glColor3f( 1.0, 1.0, 1.0 );
+				glBegin( GL_LINE_STRIP );
+				glVertex3f( Cam.x - Cam.box,Cam.y,0 );
+				glVertex3f( Cam.x,Cam.y + ( Cam.box / 2 ),0 );
+				glVertex3f( Cam.x + Cam.box,Cam.y,0 );
+				glVertex3f( Cam.x,Cam.y - ( Cam.box / 2 ),0 );
+				glVertex3f( Cam.x - Cam.box,Cam.y,0 );
+				glVertex3f( Cam.x + Cam.box,Cam.y,0 );
+				glEnd();
+
+				glBegin( GL_LINE_STRIP );
+				glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a + c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a + c_pi / 4 ) ), 0 );
+				glVertex3f( Cam.x, Cam.y, 0 );
+				glVertex3f( Cam.x + static_cast<float>( Cam.fov * cos( Cam.a - c_pi / 4 ) ), Cam.y + static_cast<float>( Cam.fov * sin( Cam.a - c_pi / 4 ) ), 0 );
+				glEnd();
+
+				XYWnd::DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+
+				glDisable( GL_BLEND );
+			}
+
+			glDrawBuffer( GL_BACK );
+			GlobalOpenGL_debugAssertNoErrors();
+			glwidget_make_current( m_gl_widget );
+		}
+	}
 }
 
 
@@ -2509,7 +2569,10 @@ void XYWnd::XY_Draw(){
 	glScalef( m_fScale, m_fScale, 1 );
 	glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
 
+	glEnable( GL_BLEND );
+	glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
 	DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+	glDisable( GL_BLEND );
 
 	Feedback_draw2D( m_viewType );
 
@@ -2606,65 +2669,42 @@ void XY_Split_Focus(){
 }
 
 void XY_Focus(){
+	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating ) {
+		// cannot do this in a split window
+		// do something else that the user may want here
+		XY_Split_Focus();
+		return;
+	}
+
+	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
+	XYWnd_Focus( xywnd );
+}
+
+void XY_TopFrontSide( VIEWTYPE viewtype ){
 	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit ) {
 		// cannot do this in a split window
 		// do something else that the user may want here
 		XY_Split_Focus();
 		return;
 	}
-
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
+	XYWnd* xywnd = g_pParentWnd->CurrentStyle() == MainFrame::eFloating ? g_pParentWnd->ActiveXY() : g_pParentWnd->GetXYWnd();
+	xywnd->SetViewType( viewtype );
 	XYWnd_Focus( xywnd );
 }
 
 void XY_Top(){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating ) {
-		// cannot do this in a split window
-		// do something else that the user may want here
-		XY_Split_Focus();
-		return;
-	}
-
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
-	xywnd->SetViewType( XY );
-	XYWnd_Focus( xywnd );
+	XY_TopFrontSide( XY );
 }
 
 void XY_Side(){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating ) {
-		// cannot do this in a split window
-		// do something else that the user may want here
-		XY_Split_Focus();
-		return;
-	}
-
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
-	xywnd->SetViewType( XZ );
-	XYWnd_Focus( xywnd );
+	XY_TopFrontSide( XZ );
 }
 
 void XY_Front(){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating ) {
-		// cannot do this in a split window
-		// do something else that the user may want here
-		XY_Split_Focus();
-		return;
-	}
-
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
-	xywnd->SetViewType( YZ );
-	XYWnd_Focus( xywnd );
+	XY_TopFrontSide( YZ );
 }
 
-void XY_Next(){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating ) {
-		// cannot do this in a split window
-		// do something else that the user may want here
-		XY_Split_Focus();
-		return;
-	}
-
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
+void XY_NextView( XYWnd* xywnd ){
 	if ( xywnd->GetViewType() == XY ) {
 		xywnd->SetViewType( XZ );
 	}
@@ -2675,6 +2715,17 @@ void XY_Next(){
 		xywnd->SetViewType( XY );
 	}
 	XYWnd_Focus( xywnd );
+}
+
+void XY_Next(){
+	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit ) {
+		// cannot do this in a split window
+		// do something else that the user may want here
+		XY_Split_Focus();
+		return;
+	}
+	XYWnd* xywnd = g_pParentWnd->CurrentStyle() == MainFrame::eFloating ? g_pParentWnd->ActiveXY() : g_pParentWnd->GetXYWnd();
+	XY_NextView( xywnd );
 }
 
 void XY_Zoom100(){

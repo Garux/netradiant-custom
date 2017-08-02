@@ -1640,10 +1640,6 @@ void CamWnd::BenchMark(){
 }
 
 
-void fill_view_camera_menu( GtkMenu* menu ){
-	create_check_menu_item_with_mnemonic( menu, "Camera View", "ToggleCamera" );
-}
-
 void GlobalCamera_ResetAngles(){
 	CamWnd& camwnd = *g_camwnd;
 	Vector3 angles;
@@ -1924,8 +1920,8 @@ void CamWnd_Construct(){
 	GlobalCommands_insert( "DownFloor", FreeCaller<Camera_ChangeFloorDown>(), Accelerator( GDK_Next ) );
 
 	GlobalToggles_insert( "ToggleCamera", ToggleShown::ToggleCaller( g_camera_shown ), ToggleItem::AddCallbackCaller( g_camera_shown.m_item ), Accelerator( 'C', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "LookThroughSelected", FreeCaller<GlobalCamera_LookThroughSelected>() );
-	GlobalCommands_insert( "LookThroughCamera", FreeCaller<GlobalCamera_LookThroughCamera>() );
+//	GlobalCommands_insert( "LookThroughSelected", FreeCaller<GlobalCamera_LookThroughSelected>() );
+//	GlobalCommands_insert( "LookThroughCamera", FreeCaller<GlobalCamera_LookThroughCamera>() );
 
 	if ( g_pGameDescription->mGameType == "doom3" ) {
 		GlobalCommands_insert( "TogglePreview", FreeCaller<CamWnd_TogglePreview>(), Accelerator( GDK_F3 ) );

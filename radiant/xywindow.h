@@ -138,6 +138,14 @@ void SetActive( bool b ){
 bool Active(){
 	return m_bActive;
 };
+struct camera_icon_t
+{
+	float x, y, fov, box;
+	double a;
+};
+camera_icon_t Cam;
+void UpdateCameraIcon();
+
 
 void Clipper_OnLButtonDown( int x, int y );
 void Clipper_OnLButtonUp( int x, int y );

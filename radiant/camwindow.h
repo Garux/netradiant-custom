@@ -41,8 +41,6 @@ void CamWnd_setParent( CamWnd& camwnd, GtkWindow* parent );
 
 void GlobalCamera_setCamWnd( CamWnd& camwnd );
 
-typedef struct _GtkMenu GtkMenu;
-void fill_view_camera_menu( GtkMenu* menu );
 typedef struct _GtkToolbar GtkToolbar;
 void CamWnd_constructToolbar( GtkToolbar* toolbar );
 void CamWnd_registerShortcuts();
