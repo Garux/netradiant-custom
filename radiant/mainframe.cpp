@@ -2158,8 +2158,9 @@ GtkMenuItem* create_misc_menu(){
 	create_menu_item_with_mnemonic( menu, "Map Info...", "MapInfo" );
 	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=394
 //  create_menu_item_with_mnemonic(menu, "_Print XY View", FreeCaller<WXY_Print>());
-	create_menu_item_with_mnemonic( menu, "_Background select", FreeCaller<WXY_BackgroundSelect>() );
+	create_menu_item_with_mnemonic( menu, "_Background image...", FreeCaller<WXY_BackgroundSelect>() );
 	create_menu_item_with_mnemonic( menu, "Fullscreen", "Fullscreen" );
+	create_menu_item_with_mnemonic( menu, "Maximize view", "MaximizeView" );
 	return misc_menu_item;
 }
 
@@ -3013,8 +3014,11 @@ void MainFrame::Create(){
 			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
 			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
 			g_object_set_data( G_OBJECT( GroupDialog_getWindow() ), "glwidget", TextureBrowser_getGLWidget() );
-
 		}
+
+		m_vSplit = 0;
+		m_hSplit = 0;
+		m_vSplit2 = 0;
 
 		GroupDialog_show();
 	}
@@ -3041,8 +3045,8 @@ void MainFrame::Create(){
 
 		GtkWidget* xz = m_pXZWnd->GetWidget();
 
-		GtkHPaned* split = create_split_views( camera, yz, xy, xz );
-		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( split ), TRUE, TRUE, 0 );
+		m_hSplit = create_split_views( camera, yz, xy, xz, m_vSplit, m_vSplit2 );
+		gtk_box_pack_start( GTK_BOX( vbox ), m_hSplit, TRUE, TRUE, 0 );
 
 		{
 			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
@@ -3293,6 +3297,73 @@ void MainFrame_toggleFullscreen(){
 	}
 }
 
+class MaximizeView
+{
+public:
+	MaximizeView(): m_maximized( false ){
+	}
+	void toggle(){
+		return m_maximized ? restore() : maximize();
+	}
+private:
+	bool m_maximized;
+	int m_vSplitPos;
+	int m_vSplit2Pos;
+	int m_hSplitPos;
+
+	void restore(){
+		m_maximized = false;
+		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), m_vSplitPos );
+		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), m_vSplit2Pos );
+		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), m_hSplitPos );
+	}
+
+	void maximize(){
+		m_maximized = true;
+		m_vSplitPos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_vSplit ) );
+		m_vSplit2Pos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_vSplit2 ) );
+		m_hSplitPos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_hSplit ) );
+
+		int vSplitX, vSplitY, vSplit2X, vSplit2Y, hSplitX, hSplitY;
+		gdk_window_get_origin( g_pParentWnd->m_vSplit->window, &vSplitX, &vSplitY );
+		gdk_window_get_origin( g_pParentWnd->m_vSplit2->window, &vSplit2X, &vSplit2Y );
+		gdk_window_get_origin( g_pParentWnd->m_hSplit->window, &hSplitX, &hSplitY );
+
+		vSplitY += m_vSplitPos;
+		vSplit2Y += m_vSplit2Pos;
+		hSplitX += m_hSplitPos;
+
+		int cur_x, cur_y;
+		Sys_GetCursorPos( MainFrame_getWindow(), &cur_x, &cur_y );
+
+		if( cur_x > hSplitX ){
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), 0 );
+		}
+		else{
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), 9999 );
+		}
+		if( cur_y > vSplitY ){
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), 0 );
+		}
+		else{
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), 9999 );
+		}
+		if( cur_y > vSplit2Y ){
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), 0 );
+		}
+		else{
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), 9999 );
+		}
+	}
+};
+
+MaximizeView g_maximizeview;
+
+void Maximize_View(){
+	if( g_pParentWnd != 0 && g_pParentWnd->m_vSplit != 0 && g_pParentWnd->m_vSplit2 != 0 && g_pParentWnd->m_hSplit != 0 )
+		g_maximizeview.toggle();
+}
+
 
 #include "preferencesystem.h"
 #include "stringio.h"
@@ -3392,6 +3463,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ChooseOrthoViewNameColor", makeCallback( g_ColoursMenu.m_viewname ) );
 
 	GlobalCommands_insert( "Fullscreen", FreeCaller<MainFrame_toggleFullscreen>(), Accelerator( GDK_F11 ) );
+	GlobalCommands_insert( "MaximizeView", FreeCaller<Maximize_View>(), Accelerator( GDK_F12 ) );
 
 
 	GlobalCommands_insert( "CSGSubtract", FreeCaller<CSG_Subtract>(), Accelerator( 'U', (GdkModifierType)GDK_SHIFT_MASK ) );

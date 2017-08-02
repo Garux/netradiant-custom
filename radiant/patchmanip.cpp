@@ -46,7 +46,7 @@
 
 PatchCreator* g_patchCreator = 0;
 
-void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const char* shader, EPatchPrefab eType, int axis, std::size_t width = 3, std::size_t height = 3 ){
+void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const char* shader, EPatchPrefab eType, int axis, std::size_t width = 3, std::size_t height = 3, bool redisperse = false ){
 	Select_Delete();
 	GlobalSelectionSystem().setSelectedAll( false );
 
@@ -57,6 +57,10 @@ void Scene_PatchConstructPrefab( scene::Graph& graph, const AABB aabb, const cha
 	patch->SetShader( shader );
 
 	patch->ConstructPrefab( aabb, eType, axis, width, height );
+	if( redisperse ){
+		patch->Redisperse( COL );
+		patch->Redisperse( ROW );
+	}
 	patch->controlPointsChanged();
 
 	{
@@ -172,26 +176,25 @@ void Scene_PatchDoCap_Selected( scene::Graph& graph, const char* shader ){
 	}
 }
 
-void Patch_deform( Patch& patch, scene::Instance& instance, const int deform ){
+void Patch_deform( Patch& patch, scene::Instance& instance, const int deform, const int axis ){
 	patch.undoSave();
 
-	for (PatchControlIter i = patch.begin(); i != patch.end(); ++i)
-	{
+	for ( PatchControlIter i = patch.begin(); i != patch.end(); ++i ){
 		PatchControl& control = *i;
-		int randomNumber = int( deform * (float(std::rand()) / float(RAND_MAX)));
-		control.m_vertex[2] += randomNumber;
+		int randomNumber = int( deform * ( float( std::rand() ) / float( RAND_MAX ) ) );
+		control.m_vertex[ axis ] += randomNumber;
 	}
 
 	patch.controlPointsChanged();
 }
 
-void Scene_PatchDeform( scene::Graph& graph, const int deform )
+void Scene_PatchDeform( scene::Graph& graph, const int deform, const int axis )
 {
 	InstanceVector instances;
 	Scene_forEachVisibleSelectedPatchInstance( PatchStoreInstance( instances ) );
 	for ( InstanceVector::const_iterator i = instances.begin(); i != instances.end(); ++i )
 	{
-		Patch_deform( *Node_getPatch( ( *i )->path().top() ), *( *i ), deform );
+		Patch_deform( *Node_getPatch( ( *i )->path().top() ), *( *i ), deform, axis );
 	}
 
 }
@@ -579,28 +582,28 @@ void Patch_Plane(){
 	DoNewPatchDlg( ePlane, 3, 3, 3, 3, 0, 0 );
 }
 
-void Patch_InsertInsertColumn(){
-	UndoableCommand undo( "patchInsertColumns" );
-
-	Scene_PatchInsertRemove_Selected( GlobalSceneGraph(), true, true, false );
-}
-
-void Patch_InsertAddColumn(){
-	UndoableCommand undo( "patchAddColumns" );
+void Patch_InsertFirstColumn(){
+	UndoableCommand undo( "patchInsertFirstColumns" );
 
 	Scene_PatchInsertRemove_Selected( GlobalSceneGraph(), true, true, true );
 }
 
-void Patch_InsertInsertRow(){
-	UndoableCommand undo( "patchInsertRows" );
+void Patch_InsertLastColumn(){
+	UndoableCommand undo( "patchInsertLastColumns" );
 
-	Scene_PatchInsertRemove_Selected( GlobalSceneGraph(), true, false, false );
+	Scene_PatchInsertRemove_Selected( GlobalSceneGraph(), true, true, false );
 }
 
-void Patch_InsertAddRow(){
-	UndoableCommand undo( "patchAddRows" );
+void Patch_InsertFirstRow(){
+	UndoableCommand undo( "patchInsertFirstRows" );
 
 	Scene_PatchInsertRemove_Selected( GlobalSceneGraph(), true, false, true );
+}
+
+void Patch_InsertLastRow(){
+	UndoableCommand undo( "patchInsertLastRows" );
+
+	Scene_PatchInsertRemove_Selected( GlobalSceneGraph(), true, false, false );
 }
 
 void Patch_DeleteFirstColumn(){
@@ -816,23 +819,23 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "InvertCurveTextureY", FreeCaller<Patch_FlipTextureY>(), Accelerator( 'I', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "NaturalizePatch", FreeCaller<Patch_NaturalTexture>(), Accelerator( 'N', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchCylinder", FreeCaller<Patch_Cylinder>() );
-	GlobalCommands_insert( "PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>() );
-	GlobalCommands_insert( "PatchVeryDenseCylinder", FreeCaller<Patch_VeryDenseCylinder>() );
+//	GlobalCommands_insert( "PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>() );
+//	GlobalCommands_insert( "PatchVeryDenseCylinder", FreeCaller<Patch_VeryDenseCylinder>() );
 	GlobalCommands_insert( "PatchSquareCylinder", FreeCaller<Patch_SquareCylinder>() );
 	GlobalCommands_insert( "PatchXactCylinder", FreeCaller<Patch_XactCylinder>() );
 	GlobalCommands_insert( "PatchXactSphere", FreeCaller<Patch_XactSphere>() );
 	GlobalCommands_insert( "PatchXactCone", FreeCaller<Patch_XactCone>() );
 	GlobalCommands_insert( "PatchEndCap", FreeCaller<Patch_Endcap>() );
 	GlobalCommands_insert( "PatchBevel", FreeCaller<Patch_Bevel>() );
-	GlobalCommands_insert( "PatchSquareBevel", FreeCaller<Patch_SquareBevel>() );
-	GlobalCommands_insert( "PatchSquareEndcap", FreeCaller<Patch_SquareEndcap>() );
+//	GlobalCommands_insert( "PatchSquareBevel", FreeCaller<Patch_SquareBevel>() );
+//	GlobalCommands_insert( "PatchSquareEndcap", FreeCaller<Patch_SquareEndcap>() );
 	GlobalCommands_insert( "PatchCone", FreeCaller<Patch_Cone>() );
 	GlobalCommands_insert( "PatchSphere", FreeCaller<Patch_Sphere>() );
 	GlobalCommands_insert( "SimplePatchMesh", FreeCaller<Patch_Plane>(), Accelerator( 'P', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "PatchInsertInsertColumn", FreeCaller<Patch_InsertInsertColumn>(), Accelerator( GDK_KP_Add, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "PatchInsertAddColumn", FreeCaller<Patch_InsertAddColumn>() );
-	GlobalCommands_insert( "PatchInsertInsertRow", FreeCaller<Patch_InsertInsertRow>(), Accelerator( GDK_KP_Add, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "PatchInsertAddRow", FreeCaller<Patch_InsertAddRow>() );
+	GlobalCommands_insert( "PatchInsertFirstColumn", FreeCaller<Patch_InsertFirstColumn>(), Accelerator( GDK_KP_Add, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalCommands_insert( "PatchInsertLastColumn", FreeCaller<Patch_InsertLastColumn>() );
+	GlobalCommands_insert( "PatchInsertFirstRow", FreeCaller<Patch_InsertFirstRow>(), Accelerator( GDK_KP_Add, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "PatchInsertLastRow", FreeCaller<Patch_InsertLastRow>() );
 	GlobalCommands_insert( "PatchDeleteFirstColumn", FreeCaller<Patch_DeleteFirstColumn>() );
 	GlobalCommands_insert( "PatchDeleteLastColumn", FreeCaller<Patch_DeleteLastColumn>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "PatchDeleteFirstRow", FreeCaller<Patch_DeleteFirstRow>() );
@@ -845,10 +848,10 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "MatrixTranspose", FreeCaller<Patch_Transpose>(), Accelerator( 'M', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "CapCurrentCurve", FreeCaller<Patch_Cap>(), Accelerator( 'C', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "CycleCapTexturePatch", FreeCaller<Patch_CycleProjection>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), Accelerator( 'Y' ) );
-	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), Accelerator( 'L', (GdkModifierType)GDK_CONTROL_MASK ) );
+//	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), Accelerator( 'Y' ) );
+//	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), Accelerator( 'L', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchDeform", FreeCaller<Patch_Deform>() );
-	GlobalCommands_insert( "PatchThicken", FreeCaller<Patch_Thicken>() );
+	GlobalCommands_insert( "PatchThicken", FreeCaller<Patch_Thicken>(), Accelerator( 'T', (GdkModifierType)GDK_CONTROL_MASK ) );
 }
 
 void Patch_constructToolbar( GtkToolbar* toolbar ){
@@ -856,58 +859,49 @@ void Patch_constructToolbar( GtkToolbar* toolbar ){
 }
 
 void Patch_constructMenu( GtkMenu* menu ){
-	create_menu_item_with_mnemonic( menu, "Cylinder", "PatchCylinder" );
-	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "More Cylinders" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_in_menu );
-		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Dense Cylinder", "PatchDenseCylinder" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Very Dense Cylinder", "PatchVeryDenseCylinder" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Square Cylinder", "PatchSquareCylinder" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Exact Cylinder...", "PatchXactCylinder" );
-	}
-	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "End cap", "PatchEndCap" );
+	create_menu_item_with_mnemonic( menu, "Simple Patch Mesh...", "SimplePatchMesh" );
 	create_menu_item_with_mnemonic( menu, "Bevel", "PatchBevel" );
-	{
-//		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "More End caps, Bevels" );
+	create_menu_item_with_mnemonic( menu, "End cap", "PatchEndCap" );
+	create_menu_item_with_mnemonic( menu, "Cylinder (9x3)", "PatchCylinder" );
+	create_menu_item_with_mnemonic( menu, "Square Cylinder (9x3)", "PatchSquareCylinder" );
+	create_menu_item_with_mnemonic( menu, "Exact Cylinder...", "PatchXactCylinder" );
+	create_menu_item_with_mnemonic( menu, "Cone (9x3)", "PatchCone" );
+	create_menu_item_with_mnemonic( menu, "Exact Cone...", "PatchXactCone" );
+	create_menu_item_with_mnemonic( menu, "Sphere (9x5)", "PatchSphere" );
+	create_menu_item_with_mnemonic( menu, "Exact Sphere...", "PatchXactSphere" );
+//	{
+//		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "More Cylinders" );
 //		if ( g_Layout_enableDetachableMenus.m_value ) {
 //			menu_tearoff( menu_in_menu );
 //		}
-		create_menu_item_with_mnemonic( menu, "Square Endcap", "PatchSquareBevel" );
-		create_menu_item_with_mnemonic( menu, "Square Bevel", "PatchSquareEndcap" );
-	}
+//		create_menu_item_with_mnemonic( menu_in_menu, "Dense Cylinder", "PatchDenseCylinder" );
+//		create_menu_item_with_mnemonic( menu_in_menu, "Very Dense Cylinder", "PatchVeryDenseCylinder" );
+//		create_menu_item_with_mnemonic( menu_in_menu, "Square Cylinder", "PatchSquareCylinder" );
+//	}
+//	{
+//		//not implemented
+//		create_menu_item_with_mnemonic( menu, "Square Endcap", "PatchSquareBevel" );
+//		create_menu_item_with_mnemonic( menu, "Square Bevel", "PatchSquareEndcap" );
+//	}
 	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Cone", "PatchCone" );
-	create_menu_item_with_mnemonic( menu, "Exact Cone...", "PatchXactCone" );
-	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Sphere", "PatchSphere" );
-	create_menu_item_with_mnemonic( menu, "Exact Sphere...", "PatchXactSphere" );
-	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Simple Patch Mesh...", "SimplePatchMesh" );
+	create_menu_item_with_mnemonic( menu, "Cap Selection", "CapCurrentCurve" );
 	menu_separator( menu );
 	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Insert" );
+		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Insert/Delete" );
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( menu_in_menu );
 		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Add (2) Columns", "PatchInsertAddColumn" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Columns", "PatchInsertInsertColumn" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) First Columns", "PatchInsertFirstColumn" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Last Columns", "PatchInsertLastColumn" );
 		menu_separator( menu_in_menu );
-		create_menu_item_with_mnemonic( menu_in_menu, "Add (2) Rows", "PatchInsertAddRow" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Rows", "PatchInsertInsertRow" );
-	}
-	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Delete" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_in_menu );
-		}
-		create_menu_item_with_mnemonic( menu_in_menu, "First (2) Columns", "PatchDeleteFirstColumn" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Last (2) Columns", "PatchDeleteLastColumn" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) First Rows", "PatchInsertFirstRow" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Insert (2) Last Rows", "PatchInsertLastRow" );
 		menu_separator( menu_in_menu );
-		create_menu_item_with_mnemonic( menu_in_menu, "First (2) Rows", "PatchDeleteFirstRow" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Last (2) Rows", "PatchDeleteLastRow" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Del First (2) Columns", "PatchDeleteFirstColumn" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Del Last (2) Columns", "PatchDeleteLastColumn" );
+		menu_separator( menu_in_menu );
+		create_menu_item_with_mnemonic( menu_in_menu, "Del First (2) Rows", "PatchDeleteFirstRow" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Del Last (2) Rows", "PatchDeleteLastRow" );
 	}
 	menu_separator( menu );
 	{
@@ -917,23 +911,15 @@ void Patch_constructMenu( GtkMenu* menu ){
 		}
 		create_menu_item_with_mnemonic( menu_in_menu, "Invert", "InvertCurve" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Transpose", "MatrixTranspose" );
-//		GtkMenu* menu_3 = create_sub_menu_with_mnemonic( menu_in_menu, "Re-disperse" );
-//		if ( g_Layout_enableDetachableMenus.m_value ) {
-//			menu_tearoff( menu_3 );
-//		}
+
 		menu_separator( menu_in_menu );
 		create_menu_item_with_mnemonic( menu_in_menu, "Re-disperse Rows", "RedisperseRows" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Re-disperse Columns", "RedisperseCols" );
-//		GtkMenu* menu_4 = create_sub_menu_with_mnemonic( menu_in_menu, "Smooth" );
-//		if ( g_Layout_enableDetachableMenus.m_value ) {
-//			menu_tearoff( menu_4 );
-//		}
+
 		menu_separator( menu_in_menu );
 		create_menu_item_with_mnemonic( menu_in_menu, "Smooth Rows", "SmoothRows" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Smooth Columns", "SmoothCols" );
 	}
-	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Cap Selection", "CapCurrentCurve" );
 	menu_separator( menu );
 	{
 		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Texture" );
@@ -946,15 +932,15 @@ void Patch_constructMenu( GtkMenu* menu ){
 		create_menu_item_with_mnemonic( menu_in_menu, "Invert Y", "InvertCurveTextureY" );
 
 	}
-	menu_separator( menu );
-	{
-		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Overlay" );
-		if ( g_Layout_enableDetachableMenus.m_value ) {
-			menu_tearoff( menu_in_menu );
-		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Set", "MakeOverlayPatch" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Clear", "ClearPatchOverlays" );
-	}
+//	menu_separator( menu );
+//	{ //unfinished
+//		GtkMenu* menu_in_menu = create_sub_menu_with_mnemonic( menu, "Overlay" );
+//		if ( g_Layout_enableDetachableMenus.m_value ) {
+//			menu_tearoff( menu_in_menu );
+//		}
+//		create_menu_item_with_mnemonic( menu_in_menu, "Set", "MakeOverlayPatch" );
+//		create_menu_item_with_mnemonic( menu_in_menu, "Clear", "ClearPatchOverlays" );
+//	}
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Deform...", "PatchDeform" );
 	create_menu_item_with_mnemonic( menu, "Thicken...", "PatchThicken" );
@@ -966,6 +952,7 @@ void Patch_constructMenu( GtkMenu* menu ){
 #include <gtk/gtktogglebutton.h>
 #include <gtk/gtkradiobutton.h>
 #include <gtk/gtkcombobox.h>
+#include <gtk/gtkspinbutton.h>
 #include <gtk/gtklabel.h>
 #include "gtkutil/dialog.h"
 #include "gtkutil/widget.h"
@@ -974,6 +961,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 	ModalDialog dialog;
 	GtkComboBox* width;
 	GtkComboBox* height;
+	GtkWidget* redisperseCheckBox;
 
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Patch density", G_CALLBACK( dialog_delete_callback ), &dialog );
 
@@ -984,7 +972,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 		GtkHBox* hbox = create_dialog_hbox( 4, 4 );
 		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( hbox ) );
 		{
-			GtkTable* table = create_dialog_table( 2, 2, 4, 4 );
+			GtkTable* table = create_dialog_table( 3, 2, 4, 4 );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
 			{
 				GtkLabel* label = GTK_LABEL( gtk_label_new( "Width:" ) );
@@ -1055,6 +1043,18 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 
 				height = combo;
 			}
+
+			if( prefab != ePlane ){
+				GtkWidget* _redisperseCheckBox = gtk_check_button_new_with_label( "Square" );
+				gtk_widget_set_tooltip_text( _redisperseCheckBox, "Redisperse columns & rows" );
+				gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( _redisperseCheckBox ), FALSE );
+				gtk_widget_show( _redisperseCheckBox );
+				gtk_table_attach( table, _redisperseCheckBox, 0, 2, 2, 3,
+								(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+								(GtkAttachOptions) ( 0 ), 0, 0 );
+				redisperseCheckBox = _redisperseCheckBox;
+			}
+
 		}
 
 		{
@@ -1082,8 +1082,11 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
 		int w = gtk_combo_box_get_active( width ) * 2 + mincols;
 		int h = gtk_combo_box_get_active( height ) * 2 + minrows;
-
-		Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), prefab, GlobalXYWnd_getCurrentViewType(), w, h );
+		bool redisperse = false;
+		if( prefab != ePlane ){
+			redisperse = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( redisperseCheckBox ) ) ? true : false;
+		}
+		Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), prefab, GlobalXYWnd_getCurrentViewType(), w, h, redisperse );
 	}
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );
@@ -1093,6 +1096,9 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 void DoPatchDeformDlg(){
 	ModalDialog dialog;
 	GtkWidget* deformW;
+
+    GtkWidget* rndY;
+	GtkWidget* rndX;
 
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Patch deform", G_CALLBACK( dialog_delete_callback ), &dialog );
 
@@ -1113,15 +1119,49 @@ void DoPatchDeformDlg(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 			}
+//			{
+//				GtkWidget* entry = gtk_entry_new();
+//				gtk_entry_set_text( GTK_ENTRY( entry ), "64" );
+//				gtk_widget_show( entry );
+//				gtk_table_attach( table, entry, 1, 2, 0, 1,
+//								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+//								  (GtkAttachOptions) ( 0 ), 0, 0 );
+//
+//				deformW = entry;
+//			}
 			{
-				GtkWidget* entry = gtk_entry_new();
-				gtk_entry_set_text( GTK_ENTRY( entry ), "16" );
-				gtk_widget_show( entry );
-				gtk_table_attach( table, entry, 1, 2, 0, 1,
+				GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 64, -9999, 9999, 1, 10, 0 ) );
+				//GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 0 ) );
+				GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
+				gtk_widget_show( spin );
+				gtk_table_attach( table, spin, 1, 2, 0, 1,
 								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_widget_set_size_request( spin, 64, -1 );
+				gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
 
-				deformW = entry;
+				deformW = spin;
+			}
+			{
+				// Create the radio button group for choosing the axis
+				GtkWidget* _rndZ = gtk_radio_button_new_with_label_from_widget( NULL, "Z" );
+				GtkWidget* _rndY = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_rndZ), "Y" );
+				GtkWidget* _rndX = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_rndZ), "X" );
+				gtk_widget_show( _rndZ );
+				gtk_widget_show( _rndY );
+				gtk_widget_show( _rndX );
+
+
+				GtkHBox* _hbox = create_dialog_hbox( 4, 4 );
+				gtk_table_attach( table, GTK_WIDGET( _hbox ), 0, 2, 1, 2,
+								  (GtkAttachOptions) ( GTK_FILL ),
+								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_box_pack_start( GTK_BOX( _hbox ), GTK_WIDGET( _rndX ), TRUE, TRUE, 0 );
+				gtk_box_pack_start( GTK_BOX( _hbox ), GTK_WIDGET( _rndY ), TRUE, TRUE, 0 );
+				gtk_box_pack_start( GTK_BOX( _hbox ), GTK_WIDGET( _rndZ ), TRUE, TRUE, 0 );
+
+				rndX = _rndX;
+				rndY = _rndY;
 			}
 		}
 		{
@@ -1143,10 +1183,18 @@ void DoPatchDeformDlg(){
 	}
 
 	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
-		int deform = static_cast<int>( atoi( gtk_entry_get_text( GTK_ENTRY( deformW ) ) ) );
-		Scene_PatchDeform( GlobalSceneGraph(), deform );
+		//int deform = static_cast<int>( atoi( gtk_entry_get_text( GTK_ENTRY( deformW ) ) ) );
+		gtk_spin_button_update ( GTK_SPIN_BUTTON( deformW ) );
+		int deform = static_cast<int>( gtk_spin_button_get_value( GTK_SPIN_BUTTON( deformW ) ) );
+		int axis = 2; //Z
+		if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( rndX ) ) ){
+			axis = 0;
+		}
+		else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( rndY ) ) ){
+			axis = 1;
+		}
+		Scene_PatchDeform( GlobalSceneGraph(), deform, axis );
 	}
-
 	gtk_widget_destroy( GTK_WIDGET( window ) );
 }
 
@@ -1325,7 +1373,6 @@ void DoPatchThickenDlg(){
 	GtkWidget* radX;
 	GtkWidget* radY;
 	GtkWidget* radZ;
-	GtkWidget* radNormals;
 
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Patch thicken", G_CALLBACK( dialog_delete_callback ), &dialog );
 
@@ -1346,23 +1393,35 @@ void DoPatchThickenDlg(){
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 				gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 			}
+//			{
+//				GtkWidget* entry = gtk_entry_new();
+//				gtk_entry_set_text( GTK_ENTRY( entry ), "16" );
+//				gtk_widget_set_size_request( entry, 40, -1 );
+//				gtk_widget_show( entry );
+//				gtk_table_attach( table, entry, 1, 2, 0, 1,
+//								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+//								  (GtkAttachOptions) ( 0 ), 0, 0 );
+//
+//				thicknessW = entry;
+//			}
 			{
-				GtkWidget* entry = gtk_entry_new();
-				gtk_entry_set_text( GTK_ENTRY( entry ), "16" );
-				gtk_widget_set_size_request( entry, 40, -1 );
-				gtk_widget_show( entry );
-				gtk_table_attach( table, entry, 1, 2, 0, 1,
+				GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 16, -9999, 9999, 1, 10, 0 ) );
+				GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
+				gtk_widget_show( spin );
+				gtk_table_attach( table, spin, 1, 2, 0, 1,
 								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
+				gtk_widget_set_size_request( spin, 48, -1 );
+				gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
 
-				thicknessW = entry;
+				thicknessW = spin;
 			}
 			{
 				// Create the "create seams" label
 				GtkWidget* _seamsCheckBox = gtk_check_button_new_with_label( "Side walls" );
 				gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( _seamsCheckBox ), TRUE );
 				gtk_widget_show( _seamsCheckBox );
-				gtk_table_attach( table, _seamsCheckBox, 3, 4, 0, 1,
+				gtk_table_attach( table, _seamsCheckBox, 2, 4, 0, 1,
 								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 								  (GtkAttachOptions) ( 0 ), 0, 0 );
 				seamsW = _seamsCheckBox;
@@ -1396,7 +1455,6 @@ void DoPatchThickenDlg(){
 				radX = _radX;
 				radY = _radY;
 				radZ = _radZ;
-				radNormals = _radNormals;
 			}
 		}
 		{
@@ -1418,9 +1476,11 @@ void DoPatchThickenDlg(){
 	}
 
 	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
-		int axis;
+		int axis = 3; // Extrude along normals
 		bool seams;
-		float thickness = static_cast<float>( atoi( gtk_entry_get_text( GTK_ENTRY( thicknessW ) ) ) );
+		//float thickness = static_cast<float>( atoi( gtk_entry_get_text( GTK_ENTRY( thicknessW ) ) ) );
+		gtk_spin_button_update ( GTK_SPIN_BUTTON( thicknessW ) );
+		float thickness = static_cast<float>( gtk_spin_button_get_value( GTK_SPIN_BUTTON( thicknessW ) ) );
 		seams = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( seamsW )) ? true : false;
 
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radX))) {
@@ -1432,10 +1492,7 @@ void DoPatchThickenDlg(){
 		else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radZ))) {
 			axis = 2;
 		}
-		else  {
-			// Extrude along normals
-			axis = 3;
-		}
+
 		Scene_PatchThicken( GlobalSceneGraph(), thickness, seams, axis );
 	}
 

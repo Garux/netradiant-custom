@@ -73,9 +73,12 @@ void Create();
 void SaveWindowInfo();
 void Shutdown();
 
+public:
 GtkWidget* m_vSplit;
 GtkWidget* m_hSplit;
 GtkWidget* m_vSplit2;
+
+private:
 
 XYWnd* m_pXYWnd;
 XYWnd* m_pYZWnd;

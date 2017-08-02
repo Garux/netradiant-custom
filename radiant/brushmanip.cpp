@@ -155,7 +155,7 @@ void Brush_ConstructPrism( Brush& brush, const AABB& bounds, std::size_t sides, 
 }
 
 const std::size_t c_brushCone_minSides = 3;
-const std::size_t c_brushCone_maxSides = 32;
+const std::size_t c_brushCone_maxSides = c_brush_maxFaces - 1;
 const char* const c_brushCone_name = "brushCone";
 
 void Brush_ConstructCone( Brush& brush, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){

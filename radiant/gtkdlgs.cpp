@@ -61,6 +61,7 @@
 #include <gtk/gtkcellrenderertext.h>
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkliststore.h>
+#include <gtk/gtkspinbutton.h>
 
 #include "os/path.h"
 #include "math/aabb.h"
@@ -384,7 +385,8 @@ void DoProjectSettings(){
 
 void DoSides( int type, int axis ){
 	ModalDialog dialog;
-	GtkEntry* sides_entry;
+	//GtkEntry* sides_entry;
+	GtkWidget* sides_spin;
 
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Arbitrary sides", G_CALLBACK( dialog_delete_callback ), &dialog );
 
@@ -399,12 +401,40 @@ void DoSides( int type, int axis ){
 			gtk_widget_show( GTK_WIDGET( label ) );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( label ), FALSE, FALSE, 0 );
 		}
+//		{
+//			GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
+//			gtk_widget_show( GTK_WIDGET( entry ) );
+//			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( entry ), FALSE, FALSE, 0 );
+//			sides_entry = entry;
+//			gtk_widget_grab_focus( GTK_WIDGET( entry ) );
+//		}
 		{
-			GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-			gtk_widget_show( GTK_WIDGET( entry ) );
-			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( entry ), FALSE, FALSE, 0 );
-			sides_entry = entry;
-			gtk_widget_grab_focus( GTK_WIDGET( entry ) );
+			GtkAdjustment* adj;
+			EBrushPrefab BrushPrefabType = (EBrushPrefab)type;
+			switch ( BrushPrefabType )
+			{
+			case eBrushPrism :
+			case eBrushCone :
+				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 8, 3, 1022, 1, 10, 0 ) );
+				break;
+			case eBrushSphere :
+				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 8, 3, 31, 1, 10, 0 ) );
+				break;
+			case eBrushRock :
+				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 32, 10, 1000, 1, 10, 0 ) );
+				break;
+			default:
+				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 8, 3, 31, 1, 10, 0 ) );
+				break;
+			}
+
+			GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
+			gtk_widget_show( spin );
+			gtk_box_pack_start( GTK_BOX( hbox ), spin, FALSE, FALSE, 0 );
+			gtk_widget_set_size_request( spin, 64, -1 );
+			gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
+
+			sides_spin = spin;
 		}
 		{
 			GtkVBox* vbox = create_dialog_vbox( 4 );
@@ -424,9 +454,12 @@ void DoSides( int type, int axis ){
 	}
 
 	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
-		const char *str = gtk_entry_get_text( sides_entry );
+//		const char *str = gtk_entry_get_text( sides_entry );
 
-		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, atoi( str ), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+//		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, atoi( str ), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+		gtk_spin_button_update ( GTK_SPIN_BUTTON( sides_spin ) );
+		int sides = static_cast<int>( gtk_spin_button_get_value( GTK_SPIN_BUTTON( sides_spin ) ) );
+		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, sides, TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
 	}
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );
