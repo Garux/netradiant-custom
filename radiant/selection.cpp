@@ -3073,7 +3073,7 @@ void deselectComponentsOrAll( bool components ){
 		deselectAll();
 	}
 }
-
+#define SELECT_MATCHING
 void SelectPoint( const View& view, const float device_point[2], const float device_epsilon[2], RadiantSelectionSystem::EModifier modifier, bool face ){
 	//globalOutputStream() << device_point[0] << "   " << device_point[1] << "\n";
 	ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.0f && fabs( device_point[1] ) <= 1.0f, "point-selection error" );
@@ -3120,6 +3120,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				if( !( *best ).second->isSelected() ){
 					( *best ).second->setSelected( true );
 				}
+#ifdef SELECT_MATCHING
 				SelectionPool::iterator i = best;
 				++i;
 				while ( i != selector_point_ents.end() )
@@ -3134,6 +3135,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 					}
 					++i;
 				}
+#endif // SELECT_MATCHING
 			}
 			break;
 			case RadiantSelectionSystem::eDeselect:
@@ -3142,6 +3144,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				if( ( *best ).second->isSelected() ){
 					( *best ).second->setSelected( false );
 				}
+#ifdef SELECT_MATCHING
 				SelectionPool::iterator i = best;
 				++i;
 				while ( i != selector_point_ents.end() )
@@ -3156,6 +3159,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 					}
 					++i;
 				}
+#endif // SELECT_MATCHING
 			}
 			break;
 			default:
@@ -3226,6 +3230,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 					if( !( *best ).second->isSelected() ){
 						( *best ).second->setSelected( true );
 					}
+#ifdef SELECT_MATCHING
 					SelectionPool::iterator i = best;
 					++i;
 					while ( i != selector.end() )
@@ -3240,6 +3245,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 						}
 						++i;
 					}
+#endif // SELECT_MATCHING
 				}
 				break;
 				case RadiantSelectionSystem::eDeselect:
@@ -3248,6 +3254,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 					if( ( *best ).second->isSelected() ){
 						( *best ).second->setSelected( false );
 					}
+#ifdef SELECT_MATCHING
 					SelectionPool::iterator i = best;
 					++i;
 					while ( i != selector.end() )
@@ -3262,6 +3269,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 						}
 						++i;
 					}
+#endif // SELECT_MATCHING
 				}
 				break;
 				default:
@@ -3297,6 +3305,7 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 			SelectableSortedSet::iterator best = selector_point_ents.begin();
 			const bool wasSelected = ( *best ).second->isSelected();
 			( *best ).second->setSelected( !wasSelected );
+#ifdef SELECT_MATCHING
 			SelectableSortedSet::iterator i = best;
 			++i;
 			while ( i != selector_point_ents.end() )
@@ -3309,6 +3318,7 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 				}
 				++i;
 			}
+#endif // SELECT_MATCHING
 			return !wasSelected;
 		}
 		else{//do primitives, if ents failed
@@ -3322,6 +3332,7 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 				SelectableSortedSet::iterator best = selector.begin();
 				const bool wasSelected = ( *best ).second->isSelected();
 				( *best ).second->setSelected( !wasSelected );
+#ifdef SELECT_MATCHING
 				SelectableSortedSet::iterator i = best;
 				++i;
 				while ( i != selector.end() )
@@ -3334,6 +3345,7 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 					}
 					++i;
 				}
+#endif // SELECT_MATCHING
 				return !wasSelected;
 			}
 			else{

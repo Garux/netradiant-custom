@@ -1210,6 +1210,18 @@ void Patch::constructPlane( const AABB& aabb, int axis, std::size_t width, std::
 void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std::size_t width, std::size_t height ){
 	Vector3 vPos[3];
 
+	int x, y, z;
+	switch ( axis )
+	{
+	case 2: x = 0; y = 1; z = 2; break;
+	//case 1: x = 0; y = 2; z = 1; break;
+	case 1: x = 2; y = 0; z = 1; break;
+	case 0: x = 1; y = 2; z = 0; break;
+	default:
+		ERROR_MESSAGE( "invalid view-type" );
+		return;
+	}
+
 	if ( eType != ePlane ) {
 		vPos[0] = vector3_subtracted( aabb.origin, aabb.extents );
 		vPos[1] = aabb.origin;
@@ -1270,9 +1282,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			PatchControl* pCtrl = pStart;
 			for ( std::size_t w = 0; w < 8; w++, pCtrl++ )
 			{
-				pCtrl->m_vertex[0] = vPos[pIndex[0]][0];
-				pCtrl->m_vertex[1] = vPos[pIndex[1]][1];
-				pCtrl->m_vertex[2] = vPos[h][2];
+				pCtrl->m_vertex[x] = vPos[pIndex[0]][x];
+				pCtrl->m_vertex[y] = vPos[pIndex[1]][y];
+				pCtrl->m_vertex[z] = vPos[h][z];
 				pIndex += 2;
 			}
 		}
@@ -1311,9 +1323,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 				PatchControl* pCtrl = m_ctrl.data() + 9 * 2;
 				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
 				{
-					pCtrl->m_vertex[0] = vPos[1][0];
-					pCtrl->m_vertex[1] = vPos[1][1];
-					pCtrl->m_vertex[2] = vPos[2][2];
+					pCtrl->m_vertex[x] = vPos[1][x];
+					pCtrl->m_vertex[y] = vPos[1][y];
+					pCtrl->m_vertex[z] = vPos[2][z];
 				}
 			}
 			break;
@@ -1329,18 +1341,18 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 				PatchControl* pCtrl = m_ctrl.data();
 				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
 				{
-					pCtrl->m_vertex[0] = vPos[1][0];
-					pCtrl->m_vertex[1] = vPos[1][1];
-					pCtrl->m_vertex[2] = vPos[0][2];
+					pCtrl->m_vertex[x] = vPos[1][x];
+					pCtrl->m_vertex[y] = vPos[1][y];
+					pCtrl->m_vertex[z] = vPos[0][z];
 				}
 			}
 			{
 				PatchControl* pCtrl = m_ctrl.data() + ( 9 * 4 );
 				for ( std::size_t w = 0; w < 9; w++, pCtrl++ )
 				{
-					pCtrl->m_vertex[0] = vPos[1][0];
-					pCtrl->m_vertex[1] = vPos[1][1];
-					pCtrl->m_vertex[2] = vPos[2][2];
+					pCtrl->m_vertex[x] = vPos[1][x];
+					pCtrl->m_vertex[y] = vPos[1][y];
+					pCtrl->m_vertex[z] = vPos[2][z];
 				}
 			}
 			break;
@@ -1362,16 +1374,16 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		for ( i = 0; i < width; ++i )
 		{
 			float angle = ( M_PI * i ) / n; // 0 to 2pi
-			float x = vPos[1][0] + ( vPos[2][0] - vPos[1][0] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
-			float y = vPos[1][1] + ( vPos[2][1] - vPos[1][1] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
+			float x_ = vPos[1][x] + ( vPos[2][x] - vPos[1][x] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
+			float y_ = vPos[1][y] + ( vPos[2][y] - vPos[1][y] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
 			for ( j = 0; j < height; ++j )
 			{
-				float z = vPos[0][2] + ( vPos[2][2] - vPos[0][2] ) * ( j / (float)( height - 1 ) );
+				float z_ = vPos[0][z] + ( vPos[2][z] - vPos[0][z] ) * ( j / (float)( height - 1 ) );
 				PatchControl *v;
 				v = &m_ctrl.data()[j * width + i];
-				v->m_vertex[0] = x;
-				v->m_vertex[1] = y;
-				v->m_vertex[2] = z;
+				v->m_vertex[x] = x_;
+				v->m_vertex[y] = y_;
+				v->m_vertex[z] = z_;
 			}
 		}
 	}
@@ -1390,14 +1402,14 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			float angle = ( M_PI * i ) / n;
 			for ( j = 0; j < height; ++j )
 			{
-				float x = vPos[1][0] + ( 1.0f - ( j / (float)( height - 1 ) ) ) * ( vPos[2][0] - vPos[1][0] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
-				float y = vPos[1][1] + ( 1.0f - ( j / (float)( height - 1 ) ) ) * ( vPos[2][1] - vPos[1][1] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
-				float z = vPos[0][2] + ( vPos[2][2] - vPos[0][2] ) * ( j / (float)( height - 1 ) );
+				float x_ = vPos[1][x] + ( 1.0f - ( j / (float)( height - 1 ) ) ) * ( vPos[2][x] - vPos[1][x] ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
+				float y_ = vPos[1][y] + ( 1.0f - ( j / (float)( height - 1 ) ) ) * ( vPos[2][y] - vPos[1][y] ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
+				float z_ = vPos[0][z] + ( vPos[2][z] - vPos[0][z] ) * ( j / (float)( height - 1 ) );
 				PatchControl *v;
 				v = &m_ctrl.data()[j * width + i];
-				v->m_vertex[0] = x;
-				v->m_vertex[1] = y;
-				v->m_vertex[2] = z;
+				v->m_vertex[x] = x_;
+				v->m_vertex[y] = y_;
+				v->m_vertex[z] = z_;
 			}
 		}
 	}
@@ -1419,14 +1431,14 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			for ( j = 0; j < height; ++j )
 			{
 				float angle2 = ( M_PI * j ) / ( 2 * m );
-				float x = vPos[1][0] + ( vPos[2][0] - vPos[1][0] ) *  sin( angle2 ) * ( ( j & 1 ) ? g : 1.0f ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
-				float y = vPos[1][1] + ( vPos[2][1] - vPos[1][1] ) *  sin( angle2 ) * ( ( j & 1 ) ? g : 1.0f ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
-				float z = vPos[1][2] + ( vPos[2][2] - vPos[1][2] ) * -cos( angle2 ) * ( ( j & 1 ) ? g : 1.0f );
+				float x_ = vPos[1][x] + ( vPos[2][x] - vPos[1][x] ) *  sin( angle2 ) * ( ( j & 1 ) ? g : 1.0f ) * cos( angle ) * ( ( i & 1 ) ? f : 1.0f );
+				float y_ = vPos[1][y] + ( vPos[2][y] - vPos[1][y] ) *  sin( angle2 ) * ( ( j & 1 ) ? g : 1.0f ) * sin( angle ) * ( ( i & 1 ) ? f : 1.0f );
+				float z_ = vPos[1][z] + ( vPos[2][z] - vPos[1][z] ) * -cos( angle2 ) * ( ( j & 1 ) ? g : 1.0f );
 				PatchControl *v;
 				v = &m_ctrl.data()[j * width + i];
-				v->m_vertex[0] = x;
-				v->m_vertex[1] = y;
-				v->m_vertex[2] = z;
+				v->m_vertex[x] = x_;
+				v->m_vertex[y] = y_;
+				v->m_vertex[z] = z_;
 			}
 		}
 	}
@@ -1447,9 +1459,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			pIndex = pBevIndex;
 			for ( std::size_t w = 0; w < 3; w++, pIndex += 2, pCtrl++ )
 			{
-				pCtrl->m_vertex[0] = vPos[pIndex[0]][0];
-				pCtrl->m_vertex[1] = vPos[pIndex[1]][1];
-				pCtrl->m_vertex[2] = vPos[h][2];
+				pCtrl->m_vertex[x] = vPos[pIndex[0]][x];
+				pCtrl->m_vertex[y] = vPos[pIndex[1]][y];
+				pCtrl->m_vertex[z] = vPos[h][z];
 			}
 		}
 	}
@@ -1472,9 +1484,9 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 			pIndex = pEndIndex;
 			for ( std::size_t w = 0; w < 5; w++, pIndex += 2, pCtrl++ )
 			{
-				pCtrl->m_vertex[0] = vPos[pIndex[0]][0];
-				pCtrl->m_vertex[1] = vPos[pIndex[1]][1];
-				pCtrl->m_vertex[2] = vPos[h][2];
+				pCtrl->m_vertex[x] = vPos[pIndex[0]][x];
+				pCtrl->m_vertex[y] = vPos[pIndex[1]][y];
+				pCtrl->m_vertex[z] = vPos[h][z];
 			}
 		}
 	}

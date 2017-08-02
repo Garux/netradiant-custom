@@ -700,7 +700,7 @@ ShaderArguments args;
 const char* filename;
 };
 
-typedef std::map<CopiedString, ShaderDefinition> ShaderDefinitionMap;
+typedef std::map<CopiedString, ShaderDefinition, shader_less_t> ShaderDefinitionMap;
 
 ShaderDefinitionMap g_shaderDefinitions;
 
