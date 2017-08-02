@@ -175,6 +175,8 @@ WindowPositionTrackerExportStringCaller m_exportPosition;
 float m_fitHorizontal;
 float m_fitVertical;
 
+int m_projectRadio;
+
 Increment m_hshiftIncrement;
 Increment m_vshiftIncrement;
 Increment m_hscaleIncrement;
@@ -205,6 +207,7 @@ SurfaceInspector() :
 	m_rotateIncrement( g_si_globals.rotate ){
 	m_fitVertical = 1;
 	m_fitHorizontal = 1;
+	m_projectRadio = 0;
 	m_positionTracker.setPosition( c_default_window_pos );
 }
 
@@ -436,6 +439,42 @@ void SurfaceInspector_toggleShown(){
 	}
 }
 
+#include "camwindow.h"
+
+void SurfaceInspector_ProjectTexture(){
+	UndoableCommand undo( "textureProject" );
+
+	texdef_t texdef;
+	texdef.shift[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hshiftIncrement.m_spin ) );
+	texdef.shift[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vshiftIncrement.m_spin ) );
+	texdef.scale[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
+	texdef.scale[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
+	texdef.rotate = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_rotateIncrement.m_spin ) );
+
+	Vector3 direction;
+
+	if( getSurfaceInspector().m_projectRadio == 0 ){
+		return Select_ProjectTexture( texdef, NULL );
+	}
+	else if( getSurfaceInspector().m_projectRadio == 1 ){
+		if( GlobalXYWnd_getCurrentViewType() == YZ ){
+			direction = Vector3( 1, 0, 0 );
+		}
+		else if( GlobalXYWnd_getCurrentViewType() == XZ ){
+			direction = Vector3( 0, 1, 0 );
+		}
+		else if( GlobalXYWnd_getCurrentViewType() == XY ){
+			direction = Vector3( 0, 0, 1 );
+		}
+	}
+	else if( getSurfaceInspector().m_projectRadio == 2 ){
+		//direction = -g_pParentWnd->GetCamWnd()->getCamera().vpn ;
+		direction = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
+	}
+
+	Select_ProjectTexture( texdef, &direction );
+}
+
 void SurfaceInspector_FitTexture(){
 	UndoableCommand undo( "textureAutoFit" );
 	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
@@ -467,7 +506,7 @@ static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
 	Patch_FitTexture();
 }
 
-static void OnBtnAxial( GtkWidget *widget, gpointer data ){
+static void OnBtnReset( GtkWidget *widget, gpointer data ){
 //globalOutputStream() << "--> [OnBtnAxial]...\n";
 	UndoableCommand undo( "textureDefault" );
 	TextureProjection projection;
@@ -494,6 +533,15 @@ static void OnBtnAxial( GtkWidget *widget, gpointer data ){
 #endif
 
 	Select_SetTexdef( projection );
+}
+
+static void OnBtnProject( GtkWidget *widget, gpointer data ){
+	if ( g_bp_globals.m_texdefTypeId != TEXDEFTYPEID_BRUSHPRIMITIVES ) {
+		globalErrorStream() << "function is implemented for BRUSHPRIMITIVES map format only\n";
+		return;
+	}
+	getSurfaceInspector().exportData();
+	SurfaceInspector_ProjectTexture();
 }
 
 static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
@@ -850,7 +898,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 			gtk_widget_show( frame );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( frame ), FALSE, FALSE, 0 );
 			{
-				GtkWidget* table = gtk_table_new( 4, 4, FALSE );
+				GtkWidget* table = gtk_table_new( 5, 4, FALSE );
 				gtk_widget_show( table );
 				gtk_container_add( GTK_CONTAINER( frame ), table );
 				gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
@@ -866,7 +914,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				{
 					GtkWidget* label = gtk_label_new( "Patch" );
 					gtk_widget_show( label );
-					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 2, 3,
+					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 3, 4,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
@@ -891,13 +939,13 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "Axial" );
+					GtkWidget* button = gtk_button_new_with_label( "Reset" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnAxial ), 0 );
+									  G_CALLBACK( OnBtnReset ), 0 );
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
@@ -911,9 +959,41 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
+					GtkWidget* button = gtk_button_new_with_label( "Project" );
+					gtk_widget_show( button );
+					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					g_signal_connect( G_OBJECT( button ), "clicked",
+									  G_CALLBACK( OnBtnProject ), 0 );
+					gtk_widget_set_usize( button, 60, -2 );
+				}
+				{
+					//radio button group for choosing projection style
+					GtkWidget* radAxial = gtk_radio_button_new_with_label( NULL, "Axial" );
+					gtk_widget_set_tooltip_text( radAxial, "Axial projection (along nearest axis)" );
+					gtk_widget_show( radAxial );
+					gtk_table_attach( GTK_TABLE( table ), radAxial, 1, 2, 2, 3,
+									( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),
+									( GtkAttachOptions )( 0 ), 0, 0 );
+					GtkWidget* rad = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radAxial ), "Ortho" );
+					gtk_widget_set_tooltip_text( rad, "Project along active ortho view" );
+					gtk_widget_show( rad );
+					gtk_table_attach( GTK_TABLE( table ), rad, 2, 3, 2, 3,
+									( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),
+									( GtkAttachOptions )( 0 ), 0, 0 );
+					rad = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radAxial ), "Cam" );
+					gtk_widget_set_tooltip_text( rad, "Project along camera view direction" );
+					gtk_widget_show( rad );
+					gtk_table_attach( GTK_TABLE( table ), rad, 3, 4, 2, 3,
+									( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),
+									( GtkAttachOptions )( 0 ), 0, 0 );
+					AddDialogData( *GTK_RADIO_BUTTON( radAxial ), m_projectRadio );
+				}
+				{
 					GtkWidget* button = gtk_button_new_with_label( "CAP" );
 					gtk_widget_show( button );
-					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 3, 4,
+					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 4, 5,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
@@ -923,7 +1003,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				{
 					GtkWidget* button = gtk_button_new_with_label( "Set..." );
 					gtk_widget_show( button );
-					gtk_table_attach( GTK_TABLE( table ), button, 1, 2, 3, 4,
+					gtk_table_attach( GTK_TABLE( table ), button, 1, 2, 4, 5,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
@@ -933,7 +1013,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				{
 					GtkWidget* button = gtk_button_new_with_label( "Natural" );
 					gtk_widget_show( button );
-					gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 3, 4,
+					gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 4, 5,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
@@ -943,7 +1023,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				{
 					GtkWidget* button = gtk_button_new_with_label( "Fit" );
 					gtk_widget_show( button );
-					gtk_table_attach( GTK_TABLE( table ), button, 3, 4, 3, 4,
+					gtk_table_attach( GTK_TABLE( table ), button, 3, 4, 4, 5,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",

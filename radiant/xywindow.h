@@ -65,6 +65,8 @@ inline const char* ViewType_getTitle( VIEWTYPE viewtype ){
 	return "";
 }
 
+#include "timer.h"
+
 class XYWnd
 {
 GtkWidget* m_gl_widget;
@@ -92,6 +94,10 @@ WindowPositionTracker m_positionTracker;
 
 static void captureStates();
 static void releaseStates();
+static void recaptureStates(){
+	releaseStates();
+	captureStates();
+}
 
 void PositionView( const Vector3& position );
 const Vector3& GetOrigin();
@@ -211,6 +217,8 @@ void PaintSizeInfo( int nDim1, int nDim2, Vector3& vMinBounds, Vector3& vMaxBoun
 
 int m_entityCreate_x, m_entityCreate_y;
 bool m_entityCreate;
+
+Timer m_render_time;
 
 public:
 void OnContextMenu();

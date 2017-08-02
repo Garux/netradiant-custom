@@ -876,6 +876,15 @@ void Select_Touching( void ){
 	SelectByBounds<SelectionPolicy_Touching>::DoSelection( false );
 }
 
+void Select_ProjectTexture( const texdef_t& texdef, Vector3* direction ){
+	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
+		Scene_BrushProjectTexture_Selected( GlobalSceneGraph(), texdef, direction );
+	}
+	Scene_BrushProjectTexture_Component_Selected( GlobalSceneGraph(), texdef, direction );
+
+	SceneChangeNotify();
+}
+
 void Select_FitTexture( float horizontal, float vertical ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushFitTexture_Selected( GlobalSceneGraph(), horizontal, vertical );

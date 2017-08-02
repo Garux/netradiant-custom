@@ -68,6 +68,13 @@ void Scene_BrushFindReplaceShader_Selected( scene::Graph& graph, const char* fin
 void Scene_BrushFindReplaceShader_Component_Selected( scene::Graph& graph, const char* find, const char* replace );
 void Scene_BrushSelectByShader( scene::Graph& graph, const char* name );
 void Scene_BrushSelectByShader_Component( scene::Graph& graph, const char* name );
+
+#include "itexdef.h"
+template<typename Element> class BasicVector3;
+typedef BasicVector3<float> Vector3;
+void Scene_BrushProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, Vector3* direction );
+void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const texdef_t& texdef, Vector3* direction );
+
 void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat );
 void Scene_BrushFitTexture_Component_Selected( scene::Graph& graph, float s_repeat, float t_repeat );
 

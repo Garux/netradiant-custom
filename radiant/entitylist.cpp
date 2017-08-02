@@ -334,7 +334,7 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 			getEntityList().m_tree_view = GTK_TREE_VIEW( view );
 		}
 		{
-			GtkWidget* check = gtk_check_button_new_with_label( "Focus on Selected" );
+			GtkWidget* check = gtk_check_button_new_with_label( "AutoFocus on Selection" );
 			gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( check ), FALSE );
 			gtk_widget_show( check );
 			gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, FALSE, 0 );

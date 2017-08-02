@@ -141,6 +141,7 @@ struct camera_t
 	bool m_strafe; // true when in strafemode toggled by the ctrl-key
 	bool m_strafe_forward; // true when in strafemode by ctrl-key and shift is pressed for forward strafing
 	bool m_strafe_forward_invert; //silly option to invert forward strafing to support old fegs
+	int m_focus_offset;
 
 	unsigned int movementflags; // movement flags
 	Timer m_keycontrol_timer;
@@ -167,6 +168,7 @@ struct camera_t
 		origin( 0, 0, 0 ),
 		angles( 0, 0, 0 ),
 		color( 0, 0, 0 ),
+		m_focus_offset( 0 ),
 		movementflags( 0 ),
 		m_keymove_handler( 0 ),
 		m_mouseMove( motionDelta, this ),
@@ -526,9 +528,11 @@ void Camera_PitchDown_KeyUp( camera_t& camera ){
 
 void Camera_Focus_KeyDown( camera_t& camera ){
 	Camera_setMovementFlags( camera, MOVE_FOCUS );
+	camera.m_focus_offset = 0;
 }
 void Camera_Focus_KeyUp( camera_t& camera ){
 	Camera_clearMovementFlags( camera, MOVE_FOCUS );
+	camera.m_focus_offset = 0;
 }
 
 typedef ReferenceCaller<camera_t, &Camera_MoveForward_KeyDown> FreeMoveCameraMoveForwardKeyDownCaller;
@@ -713,6 +717,8 @@ guint m_freelook_button_press_handler;
 guint m_sizeHandler;
 guint m_exposeHandler;
 
+Timer m_render_time;
+
 CamWnd();
 ~CamWnd();
 
@@ -777,6 +783,11 @@ void CamWnd_destroyStatic(){
 	CamWnd::releaseStates();
 }
 
+void CamWnd_reconstructStatic(){
+	CamWnd_destroyStatic();
+	CamWnd_constructStatic();
+}
+
 static CamWnd* g_camwnd = 0;
 
 void GlobalCamera_setCamWnd( CamWnd& camwnd ){
@@ -821,6 +832,10 @@ const Vector3& Camera_getAngles( CamWnd& camwnd ){
 
 void Camera_setAngles( CamWnd& camwnd, const Vector3& angles ){
 	Camera_setAngles( camwnd.getCamera(), angles );
+}
+
+const Vector3& Camera_getViewVector( CamWnd& camwnd ){
+	return camwnd.getCamera().vpn;
 }
 
 
@@ -953,6 +968,11 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 		gtk_window_present( camwnd->m_parent );
 
 	if ( event->direction == GDK_SCROLL_UP ) {
+		if ( camwnd->getCamera().movementflags & MOVE_FOCUS ) {
+			++camwnd->getCamera().m_focus_offset;
+			return FALSE;
+		}
+
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
 		if( camwnd->m_bFreeMove || !g_camwindow_globals.m_bZoomInToPointer ){
 			Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( camwnd->getCamera().forward, static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
@@ -982,6 +1002,11 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 		}
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
+		if ( camwnd->getCamera().movementflags & MOVE_FOCUS ) {
+			--camwnd->getCamera().m_focus_offset;
+			return FALSE;
+		}
+
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
 		Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( camwnd->getCamera().forward, -static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
 	}
@@ -1562,6 +1587,8 @@ void ShowStatsToggle(){
 	UpdateAllWindows();
 }
 
+#include "stream/stringstream.h"
+
 void CamWnd::Cam_Draw(){
 	glViewport( 0, 0, m_Camera.width, m_Camera.height );
 #if 0
@@ -1709,6 +1736,11 @@ void CamWnd::Cam_Draw(){
 		extern const char* Renderer_GetStats();
 		GlobalOpenGL().drawString( Renderer_GetStats() );
 
+		StringOutputStream stream;
+		stream << " | f2f: " << m_render_time.elapsed_msec();
+		GlobalOpenGL().drawString( stream.c_str() );
+		m_render_time.start();
+
 		glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ) - GlobalOpenGL().m_font->getPixelDescent() - GlobalOpenGL().m_font->getPixelHeight(), 0.0f );
 		extern const char* Cull_GetStats();
 		GlobalOpenGL().drawString( Cull_GetStats() );
@@ -1792,8 +1824,8 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 	Vector3 corners[8];
 	aabb_corners( aabb, corners );
 
-	for ( size_t i = 0; i < 4; ++i ){
-		for ( size_t j = 0; j < 8; ++j ){
+	for ( std::size_t i = 0; i < 4; ++i ){
+		for ( std::size_t j = 0; j < 8; ++j ){
 			Ray ray( aabb.origin, -viewvector );
 			//Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] - frustumPlanes[i].normal() * 16.0f ) );
 			Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] ) );
@@ -1803,6 +1835,12 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 				offset = std::max( offset, s );
 			}
 		}
+	}
+	if( camera.m_focus_offset < 0 || camera.m_focus_offset > 16 ){
+		offset -= offset * camera.m_focus_offset / 8 * pow( 2.0f, static_cast<float>( camera.m_focus_offset < 0 ? -camera.m_focus_offset : camera.m_focus_offset - 16 ) / 8.f );
+	}
+	else{
+		offset -= offset * camera.m_focus_offset / 8;
 	}
 	return ( aabb.origin - viewvector * offset );
 }

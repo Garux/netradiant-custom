@@ -61,6 +61,7 @@ enum
 
 const Vector3& Camera_getAngles( CamWnd& camwnd );
 void Camera_setAngles( CamWnd& camwnd, const Vector3& angles );
+const Vector3& Camera_getViewVector( CamWnd& camwnd );
 
 
 struct camwindow_globals_t
@@ -85,6 +86,8 @@ struct camwindow_globals_t
 };
 
 extern camwindow_globals_t g_camwindow_globals;
+
+void CamWnd_reconstructStatic();
 
 void CamWnd_Construct();
 void CamWnd_Destroy();

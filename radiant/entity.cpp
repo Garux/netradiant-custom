@@ -213,12 +213,12 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Entity_groupSelected(){
+void Entity_regroupSelected(){
 	if ( GlobalSelectionSystem().countSelected() < 1 ) {
 		return;
 	}
 
-	UndoableCommand undo( "groupSelectedEntities" );
+	UndoableCommand undo( "reGroupSelectedEntities" );
 
 	scene::Path world_path( makeReference( GlobalSceneGraph().root() ) );
 	world_path.push( makeReference( Map_FindOrInsertWorldspawn( g_map ) ) );
@@ -633,7 +633,7 @@ void ToggleShowLightRadii(){
 }
 
 void Entity_constructMenu( GtkMenu* menu ){
-	create_menu_item_with_mnemonic( menu, "_Regroup", "GroupSelection" );
+	create_menu_item_with_mnemonic( menu, "_Regroup", "RegroupSelection" );
 	create_menu_item_with_mnemonic( menu, "_Ungroup", "UngroupSelection" );
 	create_menu_item_with_mnemonic( menu, "_Connect", "ConnectSelection" );
 	if ( g_pGameDescription->mGameType == "nexuiz" ) {
@@ -653,7 +653,7 @@ void Entity_Construct(){
 	GlobalCommands_insert( "NormalizeColor", FreeCaller<Entity_normalizeColor>() );
 	GlobalCommands_insert( "ConnectSelection", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "KillConnectSelection", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)( GDK_SHIFT_MASK ) ) );
-	GlobalCommands_insert( "GroupSelection", FreeCaller<Entity_groupSelected>() );
+	GlobalCommands_insert( "RegroupSelection", FreeCaller<Entity_regroupSelected>() );
 	GlobalCommands_insert( "UngroupSelection", FreeCaller<Entity_ungroupSelected>() );
 
 	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );

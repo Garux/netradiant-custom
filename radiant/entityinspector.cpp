@@ -1700,7 +1700,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
 						GTK_WIDGET_UNSET_FLAGS( button, GTK_CAN_FOCUS );
 						gtk_box_pack_start( hbox, button, FALSE, FALSE, 0 );
-						gtk_widget_set_tooltip_text( button, "Focus on Selected" );
+						gtk_widget_set_tooltip_text( button, "AutoFocus on Selection" );
 						gtk_widget_show( button );
 						g_focusToggleButton = GTK_TOGGLE_BUTTON( button );
 					}

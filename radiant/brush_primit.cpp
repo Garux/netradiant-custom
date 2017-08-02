@@ -181,6 +181,7 @@ inline void BPTexdef_fromTransform( brushprimit_texdef_t& bp_texdef, const Matri
 	bp_texdef.coords[1][0] = transform.xy();
 	bp_texdef.coords[1][1] = transform.yy();
 	bp_texdef.coords[1][2] = transform.ty();
+	//globalOutputStream() << bp_texdef.coords[0][0] << " " << bp_texdef.coords[0][1] << " " << bp_texdef.coords[0][2] << "\n";
 }
 
 inline void Texdef_fromTransform( TextureProjection& projection, float width, float height, const Matrix4& transform ){
@@ -222,7 +223,9 @@ void Texdef_normalise( TextureProjection& projection, float width, float height 
 	}
 }
 
-void ComputeAxisBase( const Vector3& normal, Vector3& texS, Vector3& texT );
+//void ComputeAxisBase( const Vector3& normal, Vector3& texS, Vector3& texT );
+template <typename Element>
+void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT );
 
 inline void DebugAxisBase( const Vector3& normal ){
 	Vector3 x, y;
@@ -455,18 +458,19 @@ void MatrixForPoints( Vector3 M[3], Vector3 D[2], brushprimit_texdef_t *T ){
 // NOTE : ComputeAxisBase here and in q3map code must always BE THE SAME !
 // WARNING : special case behaviour of atan2(y,x) <-> atan(y/x) might not be the same everywhere when x == 0
 // rotation by (0,RotY,RotZ) assigns X to normal
-void ComputeAxisBase( const Vector3& normal, Vector3& texS, Vector3& texT ){
+template <typename Element>
+void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT ){
 #if 1
-	const Vector3 up( 0, 0, 1 );
-	const Vector3 down( 0, 0, -1 );
+	const BasicVector3<Element> up( 0, 0, 1 );
+	const BasicVector3<Element> down( 0, 0, -1 );
 
-	if ( vector3_equal_epsilon( normal, up, float(1e-6) ) ) {
-		texS = Vector3( 0, 1, 0 );
-		texT = Vector3( 1, 0, 0 );
+	if ( vector3_equal_epsilon( normal, up, Element(1e-6) ) ) {
+		texS = BasicVector3<Element>( 0, 1, 0 );
+		texT = BasicVector3<Element>( 1, 0, 0 );
 	}
-	else if ( vector3_equal_epsilon( normal, down, float(1e-6) ) ) {
-		texS = Vector3( 0, 1, 0 );
-		texT = Vector3( -1, 0, 0 );
+	else if ( vector3_equal_epsilon( normal, down, Element(1e-6) ) ) {
+		texS = BasicVector3<Element>( 0, 1, 0 );
+		texT = BasicVector3<Element>( -1, 0, 0 );
 	}
 	else
 	{
@@ -1385,3 +1389,83 @@ void Q3_to_BP( const texdef_t& texdef, float width, float height, const Vector3&
 	BP_from_matrix( bp_texdef, normal, matrix );
 }
 #endif
+
+
+
+
+/// for arbitrary texture projections
+void EmitTextureCoordinates( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, DoubleVector3 points[3], DoubleVector3 st[3], Vector3* direction ){
+	Matrix4 local2tex;
+	Texdef_toTransform( texdef, (float)width, (float)height, local2tex );
+	{
+		if( direction ){ //arbitrary
+			Matrix4 basis = g_matrix4_identity;
+			ComputeAxisBase( *direction, vector4_to_vector3( basis.x() ), vector4_to_vector3( basis.y() ) );
+			vector4_to_vector3( basis.z() ) = *direction;
+			matrix4_transpose( basis );
+
+			matrix4_multiply_by_matrix4( local2tex, basis );
+		}
+		else{ //ap
+			Matrix4 xyz2st;
+			Normal_GetTransform( normal, xyz2st ); //Texdef_basisForNormal for ap
+			matrix4_multiply_by_matrix4( local2tex, xyz2st );
+		}
+	}
+
+	for ( std::size_t i = 0; i < 3; ++i )
+	{
+		DoubleVector3 texcoord = matrix4_transformed_point( local2tex, points[i] );
+		//globalOutputStream() << texcoord << "\n";
+		st[i][0] = texcoord[0];
+		st[i][1] = texcoord[1];
+	}
+}
+
+void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const texdef_t& texdef, Vector3* direction ){
+	//texdef_t texdef;
+	//Q3_to_BP( texdef, (float)width, (float)height, normal, projection.m_brushprimit_texdef );
+
+
+	DoubleVector3 texX, texY;
+	DoubleVector3 proj;
+
+#ifdef DBG_BP
+	if( f->plane.normal[0] == 0.0f && f->plane.normal[1] == 0.0f && f->plane.normal[2] == 0.0f ) {
+		globalOutputStream() << "Warning : f->plane.normal is (0,0,0) in FaceToBrushPrimitFace\n";
+	}
+	// check d_texture
+	if( !f->d_texture ) {
+		globalOutputStream() << "Warning : f.d_texture is 0 in FaceToBrushPrimitFace\n";
+		return;
+	}
+#endif
+	// compute axis base
+	ComputeAxisBase( plane.normal(), texX, texY );
+	// compute projection vector
+	proj = plane.normal() * plane.dist();
+
+	// (0,0) in plane axis base is (0,0,0) in world coordinates + projection on the affine plane
+	// (1,0) in plane axis base is texX in world coordinates + projection on the affine plane
+	// (0,1) in plane axis base is texY in world coordinates + projection on the affine plane
+	// use old texture code to compute the ST coords of these points
+	// ST of (0,0) (1,0) (0,1)
+	DoubleVector3 points[3];
+	DoubleVector3 st[3];
+//	texdef_t texdef;
+//	texdef.scale[0] = texdef.scale[1] = 0.5f;
+
+	points[0] = proj;
+	points[1] = texX + proj;
+	points[2] = texY + proj;
+	EmitTextureCoordinates( texdef, width, height, plane.normal(), points, st, direction );
+	// compute texture matrix
+	projection.m_brushprimit_texdef.coords[0][2] = st[0][0];
+	projection.m_brushprimit_texdef.coords[1][2] = st[0][1];
+	projection.m_brushprimit_texdef.coords[0][0] = st[1][0] - st[0][0];
+	projection.m_brushprimit_texdef.coords[1][0] = st[1][1] - st[0][1];
+	projection.m_brushprimit_texdef.coords[0][1] = st[2][0] - st[0][0];
+	projection.m_brushprimit_texdef.coords[1][1] = st[2][1] - st[0][1];
+
+	Texdef_normalise( projection, (float)width, (float)height );
+}

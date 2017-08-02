@@ -105,6 +105,7 @@ void Texdef_Assign( TextureProjection& projection, const TextureProjection& othe
 void Texdef_Shift( TextureProjection& projection, float s, float t );
 void Texdef_Scale( TextureProjection& projection, float s, float t );
 void Texdef_Rotate( TextureProjection& projection, float angle );
+void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const texdef_t& texdef, Vector3* direction );
 void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, const Winding& w, float s_repeat, float t_repeat );
 void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::size_t width, std::size_t height, Winding& w, const Vector3& normal, const Matrix4& localToWorld );
 
@@ -132,6 +133,8 @@ struct bp_globals_t
 extern bp_globals_t g_bp_globals;
 extern float g_texdef_default_scale;
 
-void ComputeAxisBase( const Vector3& normal, Vector3& texS, Vector3& texT );
+//void ComputeAxisBase( const Vector3& normal, Vector3& texS, Vector3& texT );
+template <typename Element>
+void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT );
 
 #endif

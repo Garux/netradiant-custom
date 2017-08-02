@@ -2784,6 +2784,12 @@ void XYWnd::XY_Draw(){
 		glRasterPos3f( 2.f, GlobalOpenGL().m_font->getPixelDescent() + 1.f, 0.0f );
 		extern const char* Renderer_GetStats();
 		GlobalOpenGL().drawString( Renderer_GetStats() );
+
+		//globalOutputStream() << m_render_time.elapsed_msec() << "\n";
+		StringOutputStream stream;
+		stream << " | f2f: " << m_render_time.elapsed_msec();
+		GlobalOpenGL().drawString( stream.c_str() );
+		m_render_time.start();
 	}
 
 	GlobalOpenGL_debugAssertNoErrors();
