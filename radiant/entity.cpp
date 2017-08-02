@@ -93,7 +93,18 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0
 		 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
-		NodeSmartReference node( GlobalEntityCreator().createEntity( GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) ) ) );
+		if( string_equal_nocase( entity->getKeyValue( "classname" ), "worldspawn" ) ){
+			globalErrorStream() << "do not want to convert worldspawn entity\n";
+			return;
+		}
+
+		EntityClass* eclass = GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) );
+		if( !eclass->fixedsize && !entity->isContainer() ){
+			globalErrorStream() << "can't convert point to group entity\n";
+			return;
+		}
+		//NodeSmartReference node( GlobalEntityCreator().createEntity( GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) ) ) );
+		NodeSmartReference node( GlobalEntityCreator().createEntity( eclass ) );
 
 		EntityCopyingVisitor visitor( *Node_getEntity( node ) );
 

@@ -40,17 +40,20 @@ inline void read_origin( Vector3& origin, const char* value ){
 }
 inline void write_origin( const Vector3& origin, Entity* entity, const char* key ){
 	char value[64];
-	sprintf( value, "%f %f %f", origin[0], origin[1], origin[2] );
+	sprintf( value, "%g %g %g", origin[0], origin[1], origin[2] );
 	entity->setKeyValue( key, value );
 }
 
 inline Vector3 origin_translated( const Vector3& origin, const Vector3& translation ){
-	return matrix4_get_translation_vec3(
-			   matrix4_multiplied_by_matrix4(
-				   matrix4_translation_for_vec3( origin ),
-				   matrix4_translation_for_vec3( translation )
-				   )
-			   );
+	return vector3_snapped(
+		matrix4_get_translation_vec3(
+			matrix4_multiplied_by_matrix4(
+				matrix4_translation_for_vec3( origin ),
+				matrix4_translation_for_vec3( translation )
+			)
+		),
+		1e-4
+	);
 }
 
 inline Vector3 origin_snapped( const Vector3& origin, float snap ){

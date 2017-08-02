@@ -227,7 +227,7 @@ void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
 	renderer.addRenderable( m_aabb_wire, localToWorld );
 	renderArrow( renderer, volume, localToWorld );
-	if ( selected || ( g_showNames && aabb_fits_view( aabb_for_oriented_aabb( m_aabb_local, volume.GetModelview() ), volume.GetViewport(), g_showNamesRatio ) ) ) {
+	if ( selected || ( g_showNames && aabb_fits_view( m_aabb_local, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }
@@ -260,8 +260,10 @@ void revertTransform(){
 void freezeTransform(){
 	m_originKey.m_origin = m_origin;
 	m_originKey.write( &m_entity );
-	m_anglesKey.m_angles = m_angles;
-	m_anglesKey.write( &m_entity );
+	if( m_anglesKey.m_angles != m_angles ){
+		m_anglesKey.m_angles = m_angles;
+		m_anglesKey.write( &m_entity );
+	}
 }
 void transformChanged(){
 	revertTransform();
@@ -338,7 +340,9 @@ void testSelect( Selector& selector, SelectionTest& test ){
 void evaluateTransform(){
 	if ( getType() == TRANSFORM_PRIMITIVE ) {
 		m_contained.translate( getTranslation() );
-		m_contained.rotate( getRotation() );
+		if( getRotation() != c_quaternion_identity ){
+			m_contained.rotate( getRotation() );
+		}
 	}
 }
 void applyTransform(){

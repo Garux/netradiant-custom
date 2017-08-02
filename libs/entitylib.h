@@ -675,9 +675,14 @@ namespace std
 	}
 }
 
-inline bool aabb_fits_view( const AABB& aabb, const Matrix4& viewport, int ratio ){
+inline bool aabb_fits_view( const AABB& aabb, const Matrix4& modelview, const Matrix4& viewport, int ratio ){
+	const AABB transformed_bounds = aabb_for_oriented_aabb(
+		AABB( aabb.origin, Vector3( std::max( aabb.extents[0], 8.f ), std::max( aabb.extents[1], 8.f ), std::max( aabb.extents[2], 8.f ) ) ),
+		modelview
+	);
+
 	//return ( aabb.extents[0] / viewport[0] ) > 0.25f || ( aabb.extents[1] / viewport[5] ) > 0.25f;
-	return ( viewport[0] + viewport[5] ) / ( aabb.extents[0] + aabb.extents[1] ) < ratio;
+	return ( viewport[0] + viewport[5] ) / ( transformed_bounds.extents[0] + transformed_bounds.extents[1] ) < ratio;
 }
 
 #endif

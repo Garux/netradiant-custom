@@ -62,13 +62,13 @@ inline void write_scale( const Vector3& scale, Entity* entity ){
 		char value[64];
 
 		if ( scale[0] == scale[1] && scale[0] == scale[2] ) {
-			sprintf( value, "%f", scale[0] );
+			sprintf( value, "%g", scale[0] );
 			entity->setKeyValue( "modelscale_vec", "" );
 			entity->setKeyValue( "modelscale", value );
 		}
 		else
 		{
-			sprintf( value, "%f %f %f", scale[0], scale[1], scale[2] );
+			sprintf( value, "%g %g %g", scale[0], scale[1], scale[2] );
 			entity->setKeyValue( "modelscale", "" );
 			entity->setKeyValue( "modelscale_vec", value );
 		}

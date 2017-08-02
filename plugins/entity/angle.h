@@ -52,7 +52,7 @@ inline void write_angle( float angle, Entity* entity ){
 	else
 	{
 		char value[64];
-		sprintf( value, "%f", angle );
+		sprintf( value, "%g", angle );
 		entity->setKeyValue( "angle", value );
 	}
 }
@@ -79,13 +79,19 @@ void write( Entity* entity ) const {
 }
 };
 
+inline float float_snapped_to_zero( float value ){
+	return fabs( value ) < 1e-6 ? 0.f : value;
+}
+
 inline float angle_rotated( float angle, const Quaternion& rotation ){
-	return matrix4_get_rotation_euler_xyz_degrees(
-			   matrix4_multiplied_by_matrix4(
-				   matrix4_rotation_for_z_degrees( angle ),
-				   matrix4_rotation_for_quaternion_quantised( rotation )
-				   )
-			   ).z();
+	return float_snapped_to_zero(
+			matrix4_get_rotation_euler_xyz_degrees(
+				matrix4_multiplied_by_matrix4(
+					matrix4_rotation_for_quaternion_quantised( rotation ),
+					matrix4_rotation_for_z_degrees( angle )
+				)
+			).z()
+		);
 }
 
 #endif

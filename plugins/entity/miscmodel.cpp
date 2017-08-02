@@ -195,7 +195,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		m_renderOrigin.render( renderer, volume, localToWorld );
 	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( aabb_for_oriented_aabb( AABB( Vector3( 0, 0, 0 ), Vector3( 32, 32, 32 ) ), volume.GetModelview() ), volume.GetViewport(), g_showNamesRatio ) ) ) ) && !string_equal( m_named.name(), "misc_model" ) ) {
+	if ( ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( AABB( Vector3( 0, 0, 0 ), Vector3( 32, 32, 32 ) ), volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) && !string_equal( m_named.name(), "misc_model" ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }
@@ -207,7 +207,7 @@ void translate( const Vector3& translation ){
 	m_origin = origin_translated( m_origin, translation );
 }
 void rotate( const Quaternion& rotation ){
-	m_angles = angles_rotated( m_angles, rotation );
+	m_angles = angles_rotated_for_rotated_pivot( m_angles, rotation );
 }
 void scale( const Vector3& scaling ){
 	m_scale = scale_scaled( m_scale, scaling );
@@ -224,8 +224,10 @@ void revertTransform(){
 void freezeTransform(){
 	m_originKey.m_origin = m_origin;
 	m_originKey.write( &m_entity );
-	m_anglesKey.m_angles = m_angles;
-	m_anglesKey.write( &m_entity );
+	if( m_anglesKey.m_angles != m_angles ){
+		m_anglesKey.m_angles = m_angles;
+		m_anglesKey.write( &m_entity );
+	}
 	m_scaleKey.m_scale = m_scale;
 	m_scaleKey.write( &m_entity );
 }
@@ -280,7 +282,9 @@ void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
 void evaluateTransform(){
 	if ( getType() == TRANSFORM_PRIMITIVE ) {
 		m_contained.translate( getTranslation() );
-		m_contained.rotate( getRotation() );
+		if( getRotation() != c_quaternion_identity ){
+			m_contained.rotate( getRotation() );
+		}
 		m_contained.scale( getScale() );
 	}
 }
