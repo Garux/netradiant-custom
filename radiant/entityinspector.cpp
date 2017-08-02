@@ -222,6 +222,52 @@ ShaderAttribute( const char* key ) : StringAttribute( key ){
 };
 
 
+class ColorAttribute : public EntityAttribute
+{
+CopiedString m_key;
+BrowsedPathEntry m_entry;
+NonModalEntry m_nonModal;
+public:
+ColorAttribute( const char* key ) :
+	m_key( key ),
+	m_entry( BrowseCaller( *this ) ),
+	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
+	m_nonModal.connect( m_entry.m_entry.m_entry );
+}
+void release(){
+	delete this;
+}
+GtkWidget* getWidget() const {
+	return GTK_WIDGET( m_entry.m_entry.m_frame );
+}
+void apply(){
+	StringOutputStream value( 64 );
+	value << gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) );
+	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.c_str() );
+}
+typedef MemberCaller<ColorAttribute, &ColorAttribute::apply> ApplyCaller;
+void update(){
+	StringOutputStream value( 64 );
+	value << SelectedEntity_getValueForKey( m_key.c_str() );
+	gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
+}
+typedef MemberCaller<ColorAttribute, &ColorAttribute::update> UpdateCaller;
+void browse( const BrowsedPathEntry::SetPathCallback& setPath ){
+	//const char *filename = misc_model_dialog( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ) );
+
+	/* hijack BrowsedPathEntry to call colour chooser */
+	Entity_setColour();
+
+//	if ( filename != 0 ) {
+//		setPath( filename );
+//		apply();
+//	}
+	update();
+}
+typedef MemberCaller1<ColorAttribute, const BrowsedPathEntry::SetPathCallback&, &ColorAttribute::browse> BrowseCaller;
+};
+
+
 class ModelAttribute : public EntityAttribute
 {
 CopiedString m_key;
@@ -847,7 +893,34 @@ void SetComment( EntityClass* eclass ){
 	g_current_comment = eclass;
 
 	GtkTextBuffer* buffer = gtk_text_view_get_buffer( g_entityClassComment );
-	gtk_text_buffer_set_text( buffer, eclass->comments(), -1 );
+	//gtk_text_buffer_set_text( buffer, eclass->comments(), -1 );
+	const char* comment = eclass->comments(), *c;
+	int offset = 0, pattern_start = -1, spaces = 0;
+
+	gtk_text_buffer_set_text( buffer, comment, -1 );
+
+	// Catch patterns like "\nstuff :" used to describe keys and spawnflags, and make them bold for readability.
+
+	for( c = comment; *c; ++c, ++offset ) {
+		if( *c == '\n' ) {
+			pattern_start = offset;
+			spaces = 0;
+		}
+		else if( pattern_start >= 0 && ( *c < 'a' || *c > 'z' ) && ( *c < 'A' || *c > 'Z' ) && ( *c < '0' || *c > '9' ) && ( *c != '_' ) ) {
+			if( *c == ':' && spaces <= 1 ) {
+				GtkTextIter iter_start, iter_end;
+
+				gtk_text_buffer_get_iter_at_offset( buffer, &iter_start, pattern_start );
+				gtk_text_buffer_get_iter_at_offset( buffer, &iter_end, offset );
+				gtk_text_buffer_apply_tag_by_name( buffer, "bold", &iter_start, &iter_end );
+			}
+
+			if( *c == ' ' )
+				++spaces;
+			else
+				pattern_start = -1;
+		}
+	}
 }
 
 void SurfaceFlags_setEntityClass( EntityClass* eclass ){
@@ -948,7 +1021,7 @@ Creators m_creators;
 public:
 EntityAttributeFactory(){
 	m_creators.insert( Creators::value_type( "string", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "color", &StatelessAttributeCreator<StringAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "color", &StatelessAttributeCreator<ColorAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "integer", &StatelessAttributeCreator<StringAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "real", &StatelessAttributeCreator<StringAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "shader", &StatelessAttributeCreator<ShaderAttribute>::create ) );
@@ -1416,6 +1489,10 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 					gtk_widget_show( GTK_WIDGET( text ) );
 					gtk_container_add( GTK_CONTAINER( scr ), GTK_WIDGET( text ) );
 					g_entityClassComment = text;
+					{
+						GtkTextBuffer *buffer = gtk_text_view_get_buffer( text );
+						gtk_text_buffer_create_tag( buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL );
+					}
 				}
 			}
 		}

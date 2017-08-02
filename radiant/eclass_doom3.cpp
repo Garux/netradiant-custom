@@ -84,7 +84,8 @@ inline void printParseError( const char* message ){
 	globalErrorStream() << message;
 }
 
-#define PARSE_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; } else
+//#define PARSE_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; } else
+#define PARSE_RETURN_FALSE_IF_FAIL( expression ) do{ if ( !( expression ) ) { printParseError( FILE_LINE "\nparse failed: " # expression "\n" ); return false; } }while( 0 )
 
 bool EntityClassDoom3_parseToken( Tokeniser& tokeniser ){
 	const char* token = tokeniser.getToken();

@@ -29,7 +29,8 @@
 
 #include "model.h"
 
-#define MD5_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { globalErrorStream() << "md5 parse failed: " # expression "\n"; return false; } else
+//#define MD5_RETURN_FALSE_IF_FAIL( expression ) if ( !( expression ) ) { globalErrorStream() << "md5 parse failed: " # expression "\n"; return false; } else
+#define MD5_RETURN_FALSE_IF_FAIL( expression ) do{ if ( !( expression ) ) { globalErrorStream() << "md5 parse failed: " # expression "\n"; return false; } }while( 0 )
 
 bool MD5_parseToken( Tokeniser& tokeniser, const char* string ){
 	const char* token = tokeniser.getToken();

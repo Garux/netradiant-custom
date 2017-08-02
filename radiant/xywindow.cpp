@@ -746,6 +746,8 @@ void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
 
 gboolean xywnd_button_press( GtkWidget* widget, GdkEventButton* event, XYWnd* xywnd ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
+		gtk_widget_grab_focus( xywnd->GetWidget() );
+
 		if( !xywnd->Active() ){
 			g_pParentWnd->SetActiveXY( xywnd );
 		}
@@ -785,6 +787,11 @@ void xywnd_motion( gdouble x, gdouble y, guint state, void* data ){
 }
 
 gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xywnd ){
+	gtk_widget_grab_focus( xywnd->GetWidget() );
+	GtkWindow* window = xywnd->m_parent != 0 ? xywnd->m_parent : MainFrame_getWindow();
+	if( !gtk_window_is_active( window ) )
+		gtk_window_present( window );
+
 	if( !xywnd->Active() ){
 		g_pParentWnd->SetActiveXY( xywnd );
 	}

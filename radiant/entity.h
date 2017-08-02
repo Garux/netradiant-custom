@@ -32,6 +32,7 @@ void Scene_EntitySetClassname_Selected( const char* classname );
 
 typedef struct _GtkWidget GtkWidget;
 const char* misc_model_dialog( GtkWidget* parent );
+void Entity_setColour();
 
 typedef struct _GtkMenu GtkMenu;
 void Entity_constructMenu( GtkMenu* menu );

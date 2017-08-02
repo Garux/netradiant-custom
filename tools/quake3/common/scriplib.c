@@ -263,7 +263,7 @@ skipspace:
 			Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 		}
 		script->script_p += 2;
-		while ( script->script_p[0] != '*' && script->script_p[1] != '/' )
+		while ( script->script_p[0] != '*' || script->script_p[1] != '/' )
 		{
 			if ( *script->script_p == '\n' ) {
 				script->line++;

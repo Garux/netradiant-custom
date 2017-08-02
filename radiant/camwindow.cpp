@@ -845,6 +845,7 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 
 gboolean selection_button_press( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
+		gtk_widget_grab_focus( widget );
 		observer->onMouseDown( WindowVector_forDouble( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
@@ -886,6 +887,11 @@ gboolean selection_motion_freemove( GtkWidget *widget, GdkEventMotion *event, Wi
 }
 
 gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* camwnd ){
+	//gtk_window_set_focus( camwnd->m_parent, camwnd->m_gl_widget );
+	gtk_widget_grab_focus( camwnd->m_gl_widget );
+	if( !gtk_window_is_active( camwnd->m_parent ) )
+		gtk_window_present( camwnd->m_parent );
+
 	if ( event->direction == GDK_SCROLL_UP ) {
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
 		if( camwnd->m_bFreeMove || !g_camwindow_globals.m_bZoomInToPointer ){

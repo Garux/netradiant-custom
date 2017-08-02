@@ -668,7 +668,7 @@ int FloodEntities( tree_t *tree ){
 	node_t      *headnode;
 	entity_t    *e, *tripped;
 	const char  *value;
-	int tripcount;
+	int tripcount = INT_MIN;
 
 
 	headnode = tree->headnode;

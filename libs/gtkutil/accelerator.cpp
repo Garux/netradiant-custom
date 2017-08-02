@@ -342,14 +342,14 @@ AcceleratorMap g_keydown_accelerators;
 AcceleratorMap g_keyup_accelerators;
 
 bool Keys_press( PressedKeys::Keys& keys, guint keyval ){
-	if ( keys.insert( keyval ).second ) {
+	if ( keys.insert( gdk_keyval_to_upper( keyval ) ).second ) {
 		return AcceleratorMap_activate( g_keydown_accelerators, accelerator_for_event_key( keyval, 0 ) );
 	}
 	return g_keydown_accelerators.find( accelerator_for_event_key( keyval, 0 ) ) != g_keydown_accelerators.end();
 }
 
 bool Keys_release( PressedKeys::Keys& keys, guint keyval ){
-	if ( keys.erase( keyval ) != 0 ) {
+	if ( keys.erase( gdk_keyval_to_upper( keyval ) ) != 0 ) {
 		return AcceleratorMap_activate( g_keyup_accelerators, accelerator_for_event_key( keyval, 0 ) );
 	}
 	return g_keyup_accelerators.find( accelerator_for_event_key( keyval, 0 ) ) != g_keyup_accelerators.end();
