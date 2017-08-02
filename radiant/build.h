@@ -40,5 +40,6 @@ typedef struct _GtkMenu GtkMenu;
 void Build_constructMenu( GtkMenu* menu );
 extern GtkMenu* g_bsp_menu;
 
+void Build_runRecentExecutedBuild();
 
 #endif

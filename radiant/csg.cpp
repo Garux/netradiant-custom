@@ -670,8 +670,9 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 						delete ( *i );
 					}
 				}
+				scene::Node& parent = path.parent();
 				Path_deleteTop( path );
-				if( Node_getTraversable( path.parent() )->empty() ){
+				if( Node_getTraversable( parent )->empty() ){
 					m_eraseParent = true;
 				}
 			}

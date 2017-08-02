@@ -144,6 +144,10 @@ FunctionPointer findSymbol( const char* symbol ){
 
 #include <dlfcn.h>
 
+#ifndef RTLD_DEEPBIND
+#define RTLD_DEEPBIND 0
+#endif
+
 class DynamicLibrary
 {
 void* m_library;
@@ -151,7 +155,7 @@ public:
 typedef int ( *FunctionPointer )();
 
 DynamicLibrary( const char* filename ){
-	m_library = dlopen( filename, RTLD_NOW );
+	m_library = dlopen( filename, RTLD_NOW | (RTLD_DEEPBIND + 0) );
 }
 ~DynamicLibrary(){
 	if ( !failed() ) {

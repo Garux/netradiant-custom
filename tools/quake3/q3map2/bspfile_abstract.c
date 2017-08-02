@@ -630,10 +630,9 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
 	char *sentinel = newCommandLine + sizeof( newCommandLine ) - 1;
 	int i;
 
-if (nocmdline)
-{
-	return;
-}
+	if ( nocmdline ){
+		return;
+	}
 	previousCommandLine = ValueForKey( &entities[0], "_q3map2_cmdline" );
 	if ( previousCommandLine && *previousCommandLine ) {
 		inpos = previousCommandLine;

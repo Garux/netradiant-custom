@@ -133,7 +133,7 @@ static gint replace_focus_in( GtkWidget* widget, GdkEventFocus *event, gpointer 
 
 FindTextureDialog::FindTextureDialog(){
 	m_bSelectedOnly = FALSE;
-	//m_position_tracker.setPosition( c_default_window_pos );
+	m_position_tracker.setPosition( WindowPosition( -1, -1, 0, 0 ) );
 }
 
 FindTextureDialog::~FindTextureDialog(){

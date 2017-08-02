@@ -2003,11 +2003,10 @@ Q_EXTERN qboolean warnImage Q_ASSIGN( qtrue );
 /* ydnar: sinusoid samples */
 Q_EXTERN float jitters[ MAX_JITTERS ];
 
-/*can't code*/
+/* can't code */
 Q_EXTERN qboolean doingBSP Q_ASSIGN( qfalse );
 
 /* commandline arguments */
-Q_EXTERN qboolean			nocmdline Q_ASSIGN( qfalse );
 Q_EXTERN qboolean verbose;
 Q_EXTERN qboolean verboseEntities Q_ASSIGN( qfalse );
 Q_EXTERN qboolean force Q_ASSIGN( qfalse );
@@ -2030,6 +2029,7 @@ Q_EXTERN qboolean skyFixHack Q_ASSIGN( qfalse );                    /* ydnar */
 Q_EXTERN qboolean bspAlternateSplitWeights Q_ASSIGN( qfalse );                      /* 27 */
 Q_EXTERN qboolean deepBSP Q_ASSIGN( qfalse );                   /* div0 */
 Q_EXTERN qboolean maxAreaFaceSurface Q_ASSIGN( qfalse );                    /* divVerent */
+Q_EXTERN qboolean nocmdline Q_ASSIGN( qfalse );
 
 Q_EXTERN int patchSubdivisions Q_ASSIGN( 8 );                       /* ydnar: -patchmeta subdivisions */
 

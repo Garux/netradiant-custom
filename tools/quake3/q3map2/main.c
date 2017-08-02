@@ -2383,8 +2383,14 @@ skipEXfile:
 				Sys_Printf( "++%s\n", temp );
 				continue;
 			}
-			Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
-			if ( i != pk3ShadersN - 1 ) packFAIL = qtrue; //levelshot typically
+
+			if ( i == pk3ShadersN - 1 ){ //levelshot typically
+				Sys_Printf( "  ~fail  %s\n", pk3Shaders + i*65 );
+			}
+			else{
+				Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+				packFAIL = qtrue;
+			}
 		}
 	}
 
@@ -2443,7 +2449,7 @@ skipEXfile:
 			Sys_Printf( "++%s\n", temp );
 		}
 	else{
-		Sys_Printf( "  !FAIL! %s\n", temp );
+		Sys_Printf( "  ~fail  %s\n", temp );
 	}
 
 	sprintf( temp, "scripts/%s.arena", nameOFmap );
@@ -2451,7 +2457,7 @@ skipEXfile:
 			Sys_Printf( "++%s\n", temp );
 		}
 	else{
-		Sys_Printf( "  !FAIL! %s\n", temp );
+		Sys_Printf( "  ~fail  %s\n", temp );
 	}
 
 	sprintf( temp, "scripts/%s.defi", nameOFmap );
@@ -2459,7 +2465,7 @@ skipEXfile:
 			Sys_Printf( "++%s\n", temp );
 		}
 	else{
-		Sys_Printf( "  !FAIL! %s\n", temp );
+		Sys_Printf( "  ~fail  %s\n", temp );
 	}
 
 	if ( !packFAIL ){
