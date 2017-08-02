@@ -395,8 +395,7 @@ void PartialLoadBSPFile( const char *filename ){
 	PartialLoadIBSPFile( filename );
 
 	/* PartialSwapBSPFile() */
-	int i, j;
-	shaderInfo_t    *si;
+	int i;
 
 	/* shaders (don't swap the name) */
 	for ( i = 0; i < numBSPShaders ; i++ )

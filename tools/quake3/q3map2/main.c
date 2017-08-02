@@ -2059,8 +2059,8 @@ skipEXfile:
 				break;
 			}
 			if ( strcmp( token, "{" ) ) {
-					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s",
-						temp, scriptline, token );
+					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+						temp, scriptline, token, g_strLoadedFileLocation );
 			}
 
 			while ( 1 )
@@ -2113,8 +2113,8 @@ skipEXfile:
 				break;
 			}
 			if ( strcmp( token, "{" ) ) {
-					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s",
-						temp, scriptline, token );
+					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+						temp, scriptline, token, g_strLoadedFileLocation );
 			}
 
 			qboolean hasmap = qfalse;
@@ -3061,8 +3061,8 @@ skipEXrefile:
 				break;
 			}
 			if ( strcmp( token, "{" ) ) {
-					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s",
-						temp, scriptline, token );
+					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
+						temp, scriptline, token, g_strLoadedFileLocation );
 			}
 			strcat( shaderText, "\n{" );
 			qboolean hasmap = qfalse;

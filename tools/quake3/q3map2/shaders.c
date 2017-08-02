@@ -947,17 +947,17 @@ void Parse1DMatrixAppend( char *buffer, int x, vec_t *m ){
 
 
 	if ( !GetTokenAppend( buffer, qtrue ) || strcmp( token, "(" ) ) {
-		Error( "Parse1DMatrixAppend(): line %d: ( not found!", scriptline );
+		Error( "Parse1DMatrixAppend(): line %d: ( not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
 	for ( i = 0; i < x; i++ )
 	{
 		if ( !GetTokenAppend( buffer, qfalse ) ) {
-			Error( "Parse1DMatrixAppend(): line %d: Number not found!", scriptline );
+			Error( "Parse1DMatrixAppend(): line %d: Number not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 		}
 		m[ i ] = atof( token );
 	}
 	if ( !GetTokenAppend( buffer, qtrue ) || strcmp( token, ")" ) ) {
-		Error( "Parse1DMatrixAppend(): line %d: ) not found!", scriptline );
+		Error( "Parse1DMatrixAppend(): line %d: ) not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
 }
 
@@ -1019,12 +1019,12 @@ static void ParseShaderFile( const char *filename ){
 		}
 		if ( strcmp( token, "{" ) ) {
 			if ( si != NULL ) {
-				Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s\nLast known shader: %s",
-					   filename, scriptline, token, si->shader );
+				Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s\nLast known shader: %s\nFile location be: %s\n",
+					   filename, scriptline, token, si->shader, g_strLoadedFileLocation );
 			}
 			else{
-				Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s",
-					   filename, scriptline, token );
+				Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s\nFile location be: %s\n",
+					   filename, scriptline, token, g_strLoadedFileLocation );
 			}
 		}
 

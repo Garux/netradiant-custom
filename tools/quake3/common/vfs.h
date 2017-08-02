@@ -61,5 +61,6 @@ qboolean vfsPackFile_Absolute_Path( const char *filepath, const char *filename, 
 
 extern char g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX + 1];
 extern int g_numForbiddenDirs;
+extern char g_strLoadedFileLocation[1024];
 
 #endif // _VFS_H_
