@@ -1615,6 +1615,7 @@ void ShowStatsToggle(){
 #include "stream/stringstream.h"
 
 void CamWnd::Cam_Draw(){
+//		globalOutputStream() << "Cam_Draw()\n";
 	glViewport( 0, 0, m_Camera.width, m_Camera.height );
 #if 0
 	GLint viewprt[4];

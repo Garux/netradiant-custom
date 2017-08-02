@@ -116,7 +116,7 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 void ShiftScaleRotate_fromFace( texdef_t& shiftScaleRotate, const TextureProjection& projection );
 void ShiftScaleRotate_toFace( const texdef_t& shiftScaleRotate, TextureProjection& projection );
 
-void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& transform );
+void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& transform, const Vector3 centroid = Vector3( 0, 0, 0 ) );
 void Texdef_normalise( TextureProjection& projection, float width, float height );
 
 enum TexdefTypeId

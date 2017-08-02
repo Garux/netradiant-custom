@@ -369,7 +369,7 @@ SavedState( const FaceShader& faceShader ){
 
 void exportState( FaceShader& faceShader ) const {
 	faceShader.setShader( m_shader.c_str() );
-	//faceShader.setFlags( m_flags );
+	//faceShader.setFlags( m_flags ); //detail, structural flags aren't undoable with this
 	faceShader.m_flags = m_flags;
 }
 };
@@ -902,6 +902,7 @@ void exportState( Face& face ) const {
 	m_planeState.exportState( face.getPlane() );
 	m_shaderState.exportState( face.getShader() );
 	m_texdefState.exportState( face.getTexdef() );
+	face.centroid_saved_reset();
 }
 
 void release(){
@@ -924,6 +925,8 @@ TextureProjection m_texdefTransformed;
 
 Winding m_winding;
 Vector3 m_centroid;
+Vector3 m_centroid_saved; //this is far not pretty hack! (invariant point for texlock in AP)
+bool m_centroid_saved_reset; //fixme please :3
 bool m_filtered;
 
 FaceObserver* m_observer;
@@ -941,6 +944,7 @@ Face( FaceObserver* observer ) :
 	m_refcount( 0 ),
 	m_shader( texdef_name_default() ),
 	m_texdef( m_shader, TextureProjection(), false ),
+	m_centroid_saved_reset( true ),
 	m_filtered( false ),
 	m_observer( observer ),
 	m_undoable_observer( 0 ),
@@ -961,6 +965,7 @@ Face(
 	m_refcount( 0 ),
 	m_shader( shader ),
 	m_texdef( m_shader, projection ),
+	m_centroid_saved_reset( true ),
 	m_observer( observer ),
 	m_undoable_observer( 0 ),
 	m_map( 0 ){
@@ -974,6 +979,7 @@ Face( const Face& other, FaceObserver* observer ) :
 	m_refcount( 0 ),
 	m_shader( other.m_shader.getShader(), other.m_shader.m_flags ),
 	m_texdef( m_shader, other.getTexdef().normalised() ),
+	m_centroid_saved_reset( true ),
 	m_observer( observer ),
 	m_undoable_observer( 0 ),
 	m_map( 0 ){
@@ -1074,7 +1080,11 @@ void render( Renderer& renderer, const Matrix4& localToWorld ) const {
 
 void transform( const Matrix4& matrix, bool mirror ){
 	if ( g_brush_texturelock_enabled ) {
-		Texdef_transformLocked( m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix );
+		if( m_centroid_saved_reset ){
+			m_centroid_saved = m_centroid;
+			m_centroid_saved_reset = false;
+		}
+		Texdef_transformLocked( m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix, contributes() ? m_centroid_saved : static_cast<Vector3>( m_plane.plane3().normal() * m_plane.plane3().dist() ) );
 	}
 
 	m_planeTransformed.transform( matrix, mirror );
@@ -1105,6 +1115,8 @@ void freezeTransform(){
 	m_plane = m_planeTransformed;
 	planepts_assign( m_move_planepts, m_move_planeptsTransformed );
 	m_texdef.m_projection = m_texdefTransformed;
+
+	m_centroid_saved_reset = true;
 }
 
 void update_move_planepts_vertex( std::size_t index, PlanePoints planePoints ){
@@ -1256,6 +1268,10 @@ const Winding& getWinding() const {
 }
 Winding& getWinding(){
 	return m_winding;
+}
+
+void centroid_saved_reset() {
+	m_centroid_saved_reset = true;
 }
 
 const Plane3& plane3() const {

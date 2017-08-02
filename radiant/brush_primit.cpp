@@ -1447,95 +1447,362 @@ inline Matrix4 matrix4_reflection_for_plane45( const Plane3& plane, const Vector
 	return swap;
 }
 
-void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& identity2transformed ){
-	if( identity2transformed == g_matrix4_identity ) return; //TODO FIXME !!! this is called with g_matrix4_identity after every transform (and whole pipeline?)
-//		globalOutputStream() << "\t\t----------------------\n";
-//		globalOutputStream() << "AP: scale[0]:" << projection.m_texdef.scale[0] << " scale[1]:" << projection.m_texdef.scale[1] << " shift[0]:" << projection.m_texdef.shift[0] << " shift[1]:" << projection.m_texdef.shift[1] << " rotate:" << projection.m_texdef.rotate << "\n";
-//		globalOutputStream() << "BP: coords[0][0]:" << projection.m_brushprimit_texdef.coords[0][0] << " coords[0][1]:" << projection.m_brushprimit_texdef.coords[0][1] << " coords[0][2]:" << projection.m_brushprimit_texdef.coords[0][2] << " coords[1][0]:" << projection.m_brushprimit_texdef.coords[1][0] << " coords[1][1]:" << projection.m_brushprimit_texdef.coords[1][1] << " coords[1][2]:" << projection.m_brushprimit_texdef.coords[1][2] << "\n";
-//		globalOutputStream() << "width:" << width << " height" << height << "\n";
+double Det3x3( double a00, double a01, double a02,
+			  double a10, double a11, double a12,
+			  double a20, double a21, double a22 ){
+	return
+		a00 * ( a11 * a22 - a12 * a21 )
+		-   a01 * ( a10 * a22 - a12 * a20 )
+		+   a02 * ( a10 * a21 - a11 * a20 );
+}
 
-	//globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
+Vector3 plane3_project_point( const Plane3& plane, const Vector3& point, const Vector3& direction ){
+	const float f = vector3_dot( plane.normal(), direction );
+	const float d = ( vector3_dot( plane.normal() * plane.dist()- point, plane.normal() ) ) / f;
+	return point + direction * d;
+}
 
-	//globalOutputStream() << "plane.normal(): " << plane.normal() << "\n";
+Vector3 plane3_project_point( const Plane3& plane, const Vector3& point ){
+	return ( point - plane.normal() * vector3_dot( point, plane.normal() ) + plane.normal() * plane.dist() );
+}
+
+const Vector3 BaseAxes[] = {
+            Vector3( 0.0,  0.0,  1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
+            Vector3( 0.0,  0.0, -1.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0, -1.0,  0.0),
+            Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+            Vector3(-1.0,  0.0,  0.0), Vector3( 0.0,  1.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+            Vector3( 0.0,  1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+            Vector3( 0.0, -1.0,  0.0), Vector3( 1.0,  0.0,  0.0), Vector3( 0.0,  0.0, -1.0),
+        };
+
+std::size_t planeNormalIndex( const Vector3& normal ) {
+	std::size_t bestIndex = 0;
+	float bestDot = 0.f;
+	for( std::size_t i = 0; i < 6; ++i ) {
+		const float dot = vector3_dot( normal, BaseAxes[i * 3] );
+		if( dot > bestDot ) { // no need to use -altaxis for qbsp, but -oldaxis is necessary
+			bestDot = dot;
+			bestIndex = i;
+		}
+	}
+	return bestIndex;
+}
+
+#include "math/quaternion.h"
+
+void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& identity2transformed, const Vector3 centroid ){
+	if( identity2transformed == g_matrix4_identity ){
+		return; //TODO FIXME !!! this (and whole pipeline?) is called with g_matrix4_identity after every transform
+	}
+	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
+#if 1
+//			globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
+//			globalOutputStream() << "BP in: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+		DoubleVector3 texX, texY;
+		DoubleVector3 points[3];
+		DoubleVector3 st[3];
+
+		ComputeAxisBase( plane.normal(), texX, texY );
+		const DoubleVector3 anchor = plane.normal() * plane.dist();
+
+		points[0] = anchor;
+		points[1] = texX + anchor;
+		points[2] = texY + anchor;
+
+		Matrix4 local2tex;
+		Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
+		for ( std::size_t i = 0; i < 3; ++i )
+		{
+			DoubleVector3 texcoord = matrix4_transformed_point( local2tex, points[i] );
+			st[i][0] = texcoord[0];
+			st[i][1] = texcoord[1];
+			matrix4_transform_point( identity2transformed, points[i] );
+		}
+
+
+		double xyI[2], xyJ[2], xyK[2];
+		double stI[2], stJ[2], stK[2];
+		double D, D0, D1, D2;
+
+		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
+		matrix4_transpose( maa );
+		DoubleVector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+
+		ComputeAxisBase( normalTransformed, texX, texY );
+
+		xyI[0] = vector3_dot( points[0], texX );
+		xyI[1] = vector3_dot( points[0], texY );
+		xyJ[0] = vector3_dot( points[1], texX );
+		xyJ[1] = vector3_dot( points[1], texY );
+		xyK[0] = vector3_dot( points[2], texX );
+		xyK[1] = vector3_dot( points[2], texY );
+		stI[0] = st[0][0]; stI[1] = st[0][1];
+		stJ[0] = st[1][0]; stJ[1] = st[1][1];
+		stK[0] = st[2][0]; stK[1] = st[2][1];
+
+		//   - solve linear equations:
+		//     - (x, y) := xyz . (texX, texY)
+		//     - st[i] = texMat[i][0]*x + texMat[i][1]*y + texMat[i][2]
+		//       (for three vertices)
+		D = Det3x3(
+			xyI[0], xyI[1], 1,
+			xyJ[0], xyJ[1], 1,
+			xyK[0], xyK[1], 1
+			);
+		if ( D != 0 ) {
+			for ( std::size_t i = 0; i < 2; ++i )
+			{
+				D0 = Det3x3(
+					stI[i], xyI[1], 1,
+					stJ[i], xyJ[1], 1,
+					stK[i], xyK[1], 1
+					);
+				D1 = Det3x3(
+					xyI[0], stI[i], 1,
+					xyJ[0], stJ[i], 1,
+					xyK[0], stK[i], 1
+					);
+				D2 = Det3x3(
+					xyI[0], xyI[1], stI[i],
+					xyJ[0], xyJ[1], stJ[i],
+					xyK[0], xyK[1], stK[i]
+					);
+				projection.m_brushprimit_texdef.coords[i][0] = D0 / D;
+				projection.m_brushprimit_texdef.coords[i][1] = D1 / D;
+				projection.m_brushprimit_texdef.coords[i][2] = fmod( D2 / D, 1 );
+			}
+//				globalOutputStream() << "BP out: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+		}
+#else
+			globalOutputStream() << "\t\t**********\n";
+			globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
+		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
+		matrix4_transpose( maa );
+		Vector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+
+
+		Matrix4 xyz2st;
+		Texdef_basisForNormal( projection, plane.normal(), xyz2st );
+			globalOutputStream() << "plane.normal() " << plane.normal() << "\n";
+			globalOutputStream() << "normalTransformed " << normalTransformed << "\n";
+			globalOutputStream() << "Texdef_basisForNormal " << xyz2st << "\n";
+		Matrix4 local2tex;
+		Texdef_toTransform( projection, (float)width, (float)height, local2tex );
+			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+			globalOutputStream() << "Texdef_toTransform " << local2tex << "\n";
+		local2tex = matrix4_multiplied_by_matrix4( matrix4_transposed( xyz2st ), local2tex );
+			globalOutputStream() << "Texdef_toTransform rebased " << local2tex << "\n";
+		local2tex = matrix4_multiplied_by_matrix4( identity2transformed, local2tex );
+			globalOutputStream() << "Texdef_toTransform rebased transformed " << local2tex << "\n";
+		Texdef_basisForNormal( projection, normalTransformed, xyz2st );
+			globalOutputStream() << "NEW Texdef_basisForNormal " << xyz2st << "\n";
+		//local2tex = matrix4_multiplied_by_matrix4( matrix4_affine_inverse( xyz2st ), local2tex );
+		local2tex = matrix4_multiplied_by_matrix4( xyz2st, local2tex );
+			globalOutputStream() << "Texdef_toTransform rebased transformed back to basis" << local2tex << "\n";
+		Texdef_fromTransform( projection, (float)width, (float)height, local2tex );
+			globalOutputStream() << "BP NEW: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+#endif // 0
+	}
+	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
+//			globalOutputStream() << "\t\t***: " << centroid << "\n";
+//			globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
+//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+		if( projection.m_texdef.scale[0] == 0.0f || projection.m_texdef.scale[1] == 0.0f ) {
+			return;
+		}
+
+		const Vector3 oldInvariant( centroid );
+		const Vector3 offset = matrix4_transformed_point( identity2transformed, Vector3( 0, 0, 0 ) );
+		#if 0//not ok, if scaling
+		Vector3 newNormal  = matrix4_transformed_point( identity2transformed, plane.normal() ) - offset;
+		#else
+		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
+		matrix4_transpose( maa );
+		Vector3 newNormal( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+		#endif
 #if 0
-	Vector3 normalTransformed( matrix4_transformed_direction( identity2transformed, plane.normal() ) );
-#else //preserves scale in BP while scaling, but not shift //fixes QNAN
-	Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
-	matrix4_transpose( maa );
-	//Vector4 vec4 = matrix4_transformed_vector4( maa, Vector4( plane.normal(), 0 ) );
-	//Vector3 normalTransformed( vector3_normalised( vector4_to_vector3( vec4 ) ) );
-	Vector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+		// fix some rounding errors - if the old and new texture axes are almost the same, use the old axis
+		if( vector3_equal_epsilon( newNormal, plane.normal(), 0.01f ) ){
+			newNormal = plane.normal();
+		}
 #endif
+		// calculate the current texture coordinates of the origin
+		const std::size_t index = planeNormalIndex( plane.normal() );
+		Vector3 xAxis = BaseAxes[index * 3 + 1];
+		Vector3 yAxis = BaseAxes[index * 3 + 2];
+		Vector3 zAxis = BaseAxes[( index / 2 ) * 6];
+//			globalOutputStream() << xAxis << " " << yAxis << " " << zAxis << "\n";
+        Matrix4 rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), degrees_to_radians( projection.m_texdef.rotate ) );
+        matrix4_transform_direction( rotmat, xAxis );
+        matrix4_transform_direction( rotmat, yAxis );
 
-	//globalOutputStream() << "normalTransformed: " << normalTransformed << "\n";
+		const Vector2 oldInvariantTexCoords( vector3_dot( xAxis / projection.m_texdef.scale[0], oldInvariant ) + projection.m_texdef.shift[0],
+											vector3_dot( yAxis / projection.m_texdef.scale[1], oldInvariant ) + projection.m_texdef.shift[1] );
+//			globalOutputStream() << "oldInvariantTexCoords: " << oldInvariantTexCoords[0] << " " << oldInvariantTexCoords[1] << "\n";
+		// project the texture axes onto the boundary plane along the texture Z axis
+		const Vector3 boundaryOffset     = plane3_project_point( plane, Vector3( 0, 0, 0 ), zAxis );
+		const Vector3 oldXAxisOnBoundary = plane3_project_point( plane, xAxis * projection.m_texdef.scale[0], zAxis ) - boundaryOffset;
+		const Vector3 oldYAxisOnBoundary = plane3_project_point( plane, yAxis * projection.m_texdef.scale[1], zAxis ) - boundaryOffset;
 
-	// identity: identity space
-	// transformed: transformation
-	// stIdentity: base st projection space before transformation
-	// stTransformed: base st projection space after transformation
-	// stOriginal: original texdef space
+		// transform the projected texture axes and compensate the translational component
+		const Vector3 transformedXAxis = matrix4_transformed_point( identity2transformed, oldXAxisOnBoundary ) - offset;
+		const Vector3 transformedYAxis = matrix4_transformed_point( identity2transformed, oldYAxisOnBoundary ) - offset;
 
-	// stTransformed2stOriginal = stTransformed -> transformed -> identity -> stIdentity -> stOriginal
+		// obtain the new texture plane norm and the new base texture axes
+		const std::size_t newIndex = planeNormalIndex( newNormal );
+		xAxis = BaseAxes[newIndex * 3 + 1];
+		yAxis = BaseAxes[newIndex * 3 + 2];
+		zAxis = BaseAxes[( newIndex / 2 ) * 6];
 
-	Matrix4 identity2stIdentity;
-	Texdef_basisForNormal( projection, plane.normal(), identity2stIdentity );
-	//globalOutputStream() << "identity2stIdentity: " << identity2stIdentity << "\n";
+		const Plane3 newTexturePlane( zAxis, 0 );
 
-	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
-		matrix4_transform_direction( identity2transformed, projection.m_basis_s );
-		matrix4_transform_direction( identity2transformed, projection.m_basis_t );
+		// project the transformed texture axes onto the new texture projection plane
+		const Vector3 projectedTransformedXAxis = plane3_project_point( newTexturePlane, transformedXAxis );
+		const Vector3 projectedTransformedYAxis = plane3_project_point( newTexturePlane, transformedYAxis );
+
+		const Vector3 normalizedXAxis = vector3_normalised( projectedTransformedXAxis );
+		const Vector3 normalizedYAxis = vector3_normalised( projectedTransformedYAxis );
+
+		// determine the rotation angle from the dot product of the new base axes and the transformed, projected and normalized texture axes
+		float cosX = vector3_dot( xAxis, normalizedXAxis );
+		float cosY = vector3_dot( yAxis, normalizedYAxis );
+
+		float radX = std::acos( cosX );
+		if( vector3_dot( vector3_cross( xAxis, normalizedXAxis ), zAxis ) < 0.0 )
+			radX *= -1.0f;
+
+		float radY = std::acos( cosY );
+		if( vector3_dot( vector3_cross( yAxis, normalizedYAxis ), zAxis ) < 0.0 )
+			radY *= -1.0f;
+
+		// choosing between the X and Y axis rotations
+		float rad = width >= height ? radX : radY;
+
+		// for some reason, when the texture plane normal is the Y axis, we must rotation clockwise
+		if( ( newIndex / 2 ) * 6 == 12 )
+			rad *= -1.0f;
+
+		//	doSetRotation( newNormal, newRotation, newRotation );
+        rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), rad );
+        matrix4_transform_direction( rotmat, xAxis );
+        matrix4_transform_direction( rotmat, yAxis );
+
+		// finally compute the scaling factors
+		Vector2 newScale( vector3_length( projectedTransformedXAxis ),
+						  vector3_length( projectedTransformedYAxis ) );
+
+		// the sign of the scaling factors depends on the angle between the new texture axis and the projected transformed axis
+		if( vector3_dot( xAxis, normalizedXAxis ) < 0 )
+			newScale[0] *= -1.0f;
+		if( vector3_dot( yAxis, normalizedYAxis ) < 0 )
+			newScale[1] *= -1.0f;
+
+		// compute the parameters of the transformed texture coordinate system
+		const Vector3 newInvariant =  matrix4_transformed_point( identity2transformed, oldInvariant );
+
+		// determine the new texture coordinates of the transformed center of the face, sans offsets
+		const Vector2 newInvariantTexCoords( vector3_dot( xAxis / newScale[0], newInvariant ),
+											vector3_dot( yAxis / newScale[1], newInvariant ) );
+//			globalOutputStream() << "newInvariantTexCoords: " << newInvariantTexCoords[0] << " " << newInvariantTexCoords[1] << "\n";
+		// since the center should be invariant, the offsets are determined by the difference of the current and
+		// the original texture coordinates of the center
+		projection.m_texdef.shift[0] = oldInvariantTexCoords[0] - newInvariantTexCoords[0];
+		projection.m_texdef.shift[1] = oldInvariantTexCoords[1] - newInvariantTexCoords[1];
+		projection.m_texdef.scale[0] = newScale[0];
+		projection.m_texdef.scale[1] = newScale[1];
+		projection.m_texdef.rotate = radians_to_degrees( rad );
+		Texdef_normalise( projection, (float)width, (float)height );
+//			globalOutputStream() << "AP new: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
 	}
+	else{ //TEXDEFTYPEID_HALFLIFE
+//			globalOutputStream() << "\t\t----------------------\n";
+//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+//			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+//			globalOutputStream() << "width:" << width << " height" << height << "\n";
 
-	Matrix4 transformed2stTransformed;
-	Texdef_basisForNormal( projection, normalTransformed, transformed2stTransformed );
-//		globalOutputStream() << "transformed2stTransformed: " << transformed2stTransformed << "\n";
-	Matrix4 stTransformed2identity( matrix4_affine_inverse( matrix4_multiplied_by_matrix4( transformed2stTransformed, identity2transformed ) ) );
-//		globalOutputStream() << "stTransformed2identity: " << stTransformed2identity << "\n";
-	Vector3 originalProjectionAxis( vector4_to_vector3( matrix4_affine_inverse( identity2stIdentity ).z() ) );
+		//globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
 
-	Vector3 transformedProjectionAxis( vector4_to_vector3( stTransformed2identity.z() ) );
+		//globalOutputStream() << "plane.normal(): " << plane.normal() << "\n";
+		#if 0
+		Vector3 normalTransformed( matrix4_transformed_direction( identity2transformed, plane.normal() ) );
+		#else //preserves scale in BP while scaling, but not shift //fixes QNAN
+		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
+		matrix4_transpose( maa );
+		//Vector4 vec4 = matrix4_transformed_vector4( maa, Vector4( plane.normal(), 0 ) );
+		//Vector3 normalTransformed( vector3_normalised( vector4_to_vector3( vec4 ) ) );
+		Vector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+		#endif
 
-	Matrix4 stIdentity2stOriginal;
-	Texdef_toTransform( projection, (float)width, (float)height, stIdentity2stOriginal );
-//		globalOutputStream() << "stIdentity2stOriginal: " << stIdentity2stOriginal << "\n";
-	Matrix4 identity2stOriginal( matrix4_multiplied_by_matrix4( stIdentity2stOriginal, identity2stIdentity ) );
-//		globalOutputStream() << "identity2stOriginal: " << identity2stOriginal << "\n";
-	//globalOutputStream() << "originalProj: " << originalProjectionAxis << "\n";
-	//globalOutputStream() << "transformedProj: " << transformedProjectionAxis << "\n";
-	double dot = vector3_dot( originalProjectionAxis, transformedProjectionAxis );
-	//globalOutputStream() << "dot: " << dot << "\n";
-	if ( dot == 0 ) {
-		// The projection axis chosen for the transformed normal is at 90 degrees
-		// to the transformed projection axis chosen for the original normal.
-		// This happens when the projection axis is ambiguous - e.g. for the plane
-		// 'X == Y' the projection axis could be either X or Y.
-		//globalOutputStream() << "flipped\n";
-#if 0
-		globalOutputStream() << "projection off by 90\n";
-		globalOutputStream() << "normal: ";
-		print_vector3( plane.normal() );
-		globalOutputStream() << "original projection: ";
-		print_vector3( originalProjectionAxis );
-		globalOutputStream() << "transformed projection: ";
-		print_vector3( transformedProjectionAxis );
-#endif
+		//globalOutputStream() << "normalTransformed: " << normalTransformed << "\n";
 
-		Matrix4 identityCorrected = matrix4_reflection_for_plane45( plane, originalProjectionAxis, transformedProjectionAxis );
+		// identity: identity space
+		// transformed: transformation
+		// stIdentity: base st projection space before transformation
+		// stTransformed: base st projection space after transformation
+		// stOriginal: original texdef space
 
-		identity2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, identityCorrected );
+		// stTransformed2stOriginal = stTransformed -> transformed -> identity -> stIdentity -> stOriginal
+
+		Matrix4 identity2stIdentity;
+		Texdef_basisForNormal( projection, plane.normal(), identity2stIdentity );
+		//globalOutputStream() << "identity2stIdentity: " << identity2stIdentity << "\n";
+
+		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+			matrix4_transform_direction( identity2transformed, projection.m_basis_s );
+			matrix4_transform_direction( identity2transformed, projection.m_basis_t );
+		}
+
+		Matrix4 transformed2stTransformed;
+		Texdef_basisForNormal( projection, normalTransformed, transformed2stTransformed );
+//			globalOutputStream() << "transformed2stTransformed: " << transformed2stTransformed << "\n";
+		Matrix4 stTransformed2identity( matrix4_affine_inverse( matrix4_multiplied_by_matrix4( transformed2stTransformed, identity2transformed ) ) );
+//			globalOutputStream() << "stTransformed2identity: " << stTransformed2identity << "\n";
+		Vector3 originalProjectionAxis( vector4_to_vector3( matrix4_affine_inverse( identity2stIdentity ).z() ) );
+
+		Vector3 transformedProjectionAxis( vector4_to_vector3( stTransformed2identity.z() ) );
+
+		Matrix4 stIdentity2stOriginal;
+		Texdef_toTransform( projection, (float)width, (float)height, stIdentity2stOriginal );
+//			globalOutputStream() << "stIdentity2stOriginal: " << stIdentity2stOriginal << "\n";
+		Matrix4 identity2stOriginal( matrix4_multiplied_by_matrix4( stIdentity2stOriginal, identity2stIdentity ) );
+//			globalOutputStream() << "identity2stOriginal: " << identity2stOriginal << "\n";
+		//globalOutputStream() << "originalProj: " << originalProjectionAxis << "\n";
+		//globalOutputStream() << "transformedProj: " << transformedProjectionAxis << "\n";
+		double dot = vector3_dot( originalProjectionAxis, transformedProjectionAxis );
+		//globalOutputStream() << "dot: " << dot << "\n";
+		if ( dot == 0 ) {
+			// The projection axis chosen for the transformed normal is at 90 degrees
+			// to the transformed projection axis chosen for the original normal.
+			// This happens when the projection axis is ambiguous - e.g. for the plane
+			// 'X == Y' the projection axis could be either X or Y.
+			//globalOutputStream() << "flipped\n";
+	#if 0
+			globalOutputStream() << "projection off by 90\n";
+			globalOutputStream() << "normal: ";
+			print_vector3( plane.normal() );
+			globalOutputStream() << "original projection: ";
+			print_vector3( originalProjectionAxis );
+			globalOutputStream() << "transformed projection: ";
+			print_vector3( transformedProjectionAxis );
+	#endif
+
+			Matrix4 identityCorrected = matrix4_reflection_for_plane45( plane, originalProjectionAxis, transformedProjectionAxis );
+
+			identity2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, identityCorrected );
+		}
+		else if( dot != dot ){ //catch QNAN: happens on scaling cuboid on Z and sometimes on rotating (in bp mode) //and in making seamless to self or parallel
+			return;
+		}
+
+		Matrix4 stTransformed2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, stTransformed2identity );
+//			globalOutputStream() << "stTransformed2stOriginal: " << stTransformed2stOriginal << "\n";
+		Texdef_fromTransform( projection, (float)width, (float)height, stTransformed2stOriginal );
+//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+//			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+		Texdef_normalise( projection, (float)width, (float)height );
+//			globalOutputStream() << "AP norm: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+//			globalOutputStream() << "BP norm: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
 	}
-	else if( dot != dot ){ //catch QNAN: happens on scaling cuboid on Z and sometimes on rotating (in bp mode) //and in making seamless to self or parallel
-		return;
-	}
-
-	Matrix4 stTransformed2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, stTransformed2identity );
-//		globalOutputStream() << "stTransformed2stOriginal: " << stTransformed2stOriginal << "\n";
-	Texdef_fromTransform( projection, (float)width, (float)height, stTransformed2stOriginal );
-//		globalOutputStream() << "AP: scale[0]:" << projection.m_texdef.scale[0] << " scale[1]:" << projection.m_texdef.scale[1] << " shift[0]:" << projection.m_texdef.shift[0] << " shift[1]:" << projection.m_texdef.shift[1] << " rotate:" << projection.m_texdef.rotate << "\n";
-//		globalOutputStream() << "BP: coords[0][0]:" << projection.m_brushprimit_texdef.coords[0][0] << " coords[0][1]:" << projection.m_brushprimit_texdef.coords[0][1] << " coords[0][2]:" << projection.m_brushprimit_texdef.coords[0][2] << " coords[1][0]:" << projection.m_brushprimit_texdef.coords[1][0] << " coords[1][1]:" << projection.m_brushprimit_texdef.coords[1][1] << " coords[1][2]:" << projection.m_brushprimit_texdef.coords[1][2] << "\n";
-	Texdef_normalise( projection, (float)width, (float)height );
-//		globalOutputStream() << "AP norm: scale[0]:" << projection.m_texdef.scale[0] << " scale[1]:" << projection.m_texdef.scale[1] << " shift[0]:" << projection.m_texdef.shift[0] << " shift[1]:" << projection.m_texdef.shift[1] << " rotate:" << projection.m_texdef.rotate << "\n";
-//		globalOutputStream() << "BP norm: coords[0][0]:" << projection.m_brushprimit_texdef.coords[0][0] << " coords[0][1]:" << projection.m_brushprimit_texdef.coords[0][1] << " coords[0][2]:" << projection.m_brushprimit_texdef.coords[0][2] << " coords[1][0]:" << projection.m_brushprimit_texdef.coords[1][0] << " coords[1][1]:" << projection.m_brushprimit_texdef.coords[1][1] << " coords[1][2]:" << projection.m_brushprimit_texdef.coords[1][2] << "\n";
 }
 
 #if 1

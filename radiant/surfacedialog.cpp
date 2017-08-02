@@ -1502,6 +1502,11 @@ void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProj
 	face.SetShader( shader );
 
 	DoubleLine line = plane3_intersect_plane3( g_faceTextureClipboard.m_plane, face.getPlane().plane3() );
+	if( vector3_length_squared( line.direction ) == 0 ){
+		face.SetTexdef( projection );
+		face.SetFlags( flags );
+		return;
+	}
 	Quaternion rotation = Quaternion( vector3_cross( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ),
 									static_cast<float>( 1.0 + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ) ) );
 	//Quaternion rotation = quaternion_for_unit_vectors( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
@@ -1528,7 +1533,9 @@ void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProj
 
 	//globalOutputStream() << "transform: " << transform << "\n";
 	TextureProjection proj = projection;
-	Texdef_transformLocked( proj, g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height, g_faceTextureClipboard.m_plane, transform );
+	proj.m_brushprimit_texdef.addScale( g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height );
+	Texdef_transformLocked( proj, g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height, g_faceTextureClipboard.m_plane, transform, line.origin );
+	proj.m_brushprimit_texdef.removeScale( g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height );
 
 
 	//face.SetTexdef( projection );

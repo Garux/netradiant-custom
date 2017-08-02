@@ -2679,6 +2679,7 @@ void XYWnd::updateModelview(){
 //#define DBG_SCENEDUMP
 
 void XYWnd::XY_Draw(){
+//		globalOutputStream() << "XY_Draw()\n";
 	//
 	// clear
 	//
