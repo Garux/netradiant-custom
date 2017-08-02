@@ -1305,8 +1305,14 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 	//globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
 
 	//globalOutputStream() << "plane.normal(): " << plane.normal() << "\n";
-
+#if 1
 	Vector3 normalTransformed( matrix4_transformed_direction( identity2transformed, plane.normal() ) );
+#else //preserves scale in BP while scaling, but not shift
+	Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
+	matrix4_transpose( maa );
+	Vector4 vec4 = matrix4_transformed_vector4( maa, Vector4( plane.normal(), 0 ) );
+	Vector3 normalTransformed = vector3_normalised( vector4_to_vector3( vec4 ) );
+#endif
 
 	//globalOutputStream() << "normalTransformed: " << normalTransformed << "\n";
 

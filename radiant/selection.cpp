@@ -3459,7 +3459,7 @@ void outputScale( TextOutputStream& ostream ){
 	ostream << " -scale " << m_scale.x() << " " << m_scale.y() << " " << m_scale.z();
 }
 
-void rotateSelected( const Quaternion& rotation, bool snapOrigin ){
+void rotateSelected( const Quaternion& rotation, bool snapOrigin = false ){
 	if( snapOrigin && !m_pivotIsCustom ){
 		m_pivot2world.tx() = float_snapped( m_pivot2world.tx(), GetSnapGridSize() );
 		m_pivot2world.ty() = float_snapped( m_pivot2world.ty(), GetSnapGridSize() );
@@ -3474,7 +3474,12 @@ void translateSelected( const Vector3& translation ){
 	translate( translation );
 	freezeTransforms();
 }
-void scaleSelected( const Vector3& scaling ){
+void scaleSelected( const Vector3& scaling, bool snapOrigin = false ){
+	if( snapOrigin && !m_pivotIsCustom ){
+		m_pivot2world.tx() = float_snapped( m_pivot2world.tx(), GetSnapGridSize() );
+		m_pivot2world.ty() = float_snapped( m_pivot2world.ty(), GetSnapGridSize() );
+		m_pivot2world.tz() = float_snapped( m_pivot2world.tz(), GetSnapGridSize() );
+	}
 	startMove();
 	scale( scaling );
 	freezeTransforms();

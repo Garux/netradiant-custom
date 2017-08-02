@@ -30,6 +30,8 @@
 
 #include "angle.h"
 
+#include "entity.h"
+
 const Vector3 ANGLESKEY_IDENTITY = Vector3( 0, 0, 0 );
 
 inline void default_angles( Vector3& angles ){
@@ -57,7 +59,7 @@ inline void read_angles( Vector3& angles, const char* value ){
 	}
 	else
 	{
-		angles = Vector3( angles[2], angles[0], angles[1] );
+		angles = Vector3( angles[2], g_stupidQuakeBug? -angles[0] : angles[0], angles[1] );
 		normalise_angles( angles );
 	}
 }
@@ -71,14 +73,14 @@ inline void write_angles( const Vector3& angles, Entity* entity ){
 	else
 	{
 		if ( angles[0] == 0 && angles[1] == 0 ) {
-			float yaw = angles[2];
+			const float yaw = angles[2];
 			entity->setKeyValue( "angles", "" );
 			write_angle( yaw, entity );
 		}
 		else
 		{
 			char value[64];
-			sprintf( value, "%g %g %g", angles[1], angles[2], angles[0] );
+			sprintf( value, "%g %g %g", g_stupidQuakeBug? -angles[1] : angles[1], angles[2], angles[0] );
 			entity->setKeyValue( "angle", "" );
 			entity->setKeyValue( "angles", value );
 		}

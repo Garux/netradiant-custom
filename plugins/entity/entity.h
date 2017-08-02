@@ -28,6 +28,7 @@ EntityCreator& GetEntityCreator();
 enum EGameType
 {
 	eGameTypeQuake3,
+	eGameTypeQuake1,
 	eGameTypeRTCW,
 	eGameTypeDoom3,
 };
@@ -45,5 +46,7 @@ extern int g_showNamesRatio;
 extern bool g_showTargetNames;
 extern bool g_showAngles;
 extern bool g_lightRadii;
+
+extern bool g_stupidQuakeBug;
 
 #endif

@@ -1382,6 +1382,7 @@ void StitchSurfaceLightmaps( void ){
 
 							/* add luxel */
 							//%	VectorSet( luxel2, 255, 0, 255 );
+							numLuxels++;
 							VectorAdd( average, luxel2, average );
 							totalColor += luxel2[ 3 ];
 						}

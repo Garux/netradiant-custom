@@ -970,11 +970,16 @@ void XYWnd::DropClipPoint( int pointx, int pointy ){
 
 	XY_ToPoint( pointx, pointy, point );
 
-	Vector3 mid;
-	Select_GetMid( mid );
+	Vector3 mins, maxs;
+	Select_GetBounds( mins, maxs );
 	g_clip_viewtype = GetViewType();
 	const int nDim = ( g_clip_viewtype == YZ ) ? 0 : ( ( g_clip_viewtype == XZ ) ? 1 : 2 );
-	point[nDim] = mid[nDim];
+	if( g_Clip2.Set() && !g_Clip3.Set() ){
+		point[nDim] = maxs[nDim];
+	}
+	else{
+		point[nDim] = mins[nDim];
+	}
 	vector3_snap( point, GetSnapGridSize() );
 	NewClipPoint( point );
 }

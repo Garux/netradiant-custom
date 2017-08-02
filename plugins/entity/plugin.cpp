@@ -86,6 +86,33 @@ typedef SingletonModule<EntityQ3API, EntityDependencies> EntityQ3Module;
 EntityQ3Module g_EntityQ3Module;
 
 
+class EntityQ1API : public TypeSystemRef
+{
+EntityCreator* m_entityq1;
+public:
+typedef EntityCreator Type;
+STRING_CONSTANT( Name, "quake" );
+
+EntityQ1API(){
+	Entity_Construct( eGameTypeQuake1);
+
+	m_entityq1 = &GetEntityCreator();
+
+	GlobalReferenceCache().setEntityCreator( *m_entityq1 );
+}
+~EntityQ1API(){
+	Entity_Destroy();
+}
+EntityCreator* getTable(){
+	return m_entityq1;
+}
+};
+
+typedef SingletonModule<EntityQ1API, EntityDependencies> EntityQ1Module;
+
+EntityQ1Module g_EntityQ1Module;
+
+
 class EntityWolfAPI : public TypeSystemRef
 {
 EntityCreator* m_entitywolf;
@@ -144,6 +171,7 @@ extern "C" void RADIANT_DLLEXPORT Radiant_RegisterModules( ModuleServer& server 
 	initialiseModule( server );
 
 	g_EntityQ3Module.selfRegister();
+	g_EntityQ1Module.selfRegister();
 	g_EntityWolfModule.selfRegister();
 	g_EntityDoom3Module.selfRegister();
 	Doom3ModelSkinCacheModule_selfRegister( server );

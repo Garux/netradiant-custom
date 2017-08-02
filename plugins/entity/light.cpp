@@ -673,7 +673,7 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 
 inline void write_intensity( const float intensity, Entity* entity ){
 	char value[64];
-	sprintf( value, "%f", intensity );
+	sprintf( value, "%g", intensity );
 
 	//primaryIntensity
 	if( !string_empty( entity->getKeyValue( "_light" ) ) ){

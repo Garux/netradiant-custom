@@ -632,8 +632,12 @@ inline Plane3 Plane3_applyTranslation( const Plane3& plane, const Vector3& trans
 }
 
 inline Plane3 Plane3_applyTransform( const Plane3& plane, const Matrix4& matrix ){
-	Plane3 tmp( plane3_transformed( Plane3( plane.normal(), -plane.dist() ), matrix ) );
-	return Plane3( tmp.normal(), -tmp.dist() );
+	//Plane3 tmp( plane3_transformed( Plane3( plane.normal(), -plane.dist() ), matrix ) );
+	//return Plane3( tmp.normal(), -tmp.dist() );
+	Vector4 anchor = matrix4_transformed_vector4( matrix, Vector4( plane.normal() * plane.dist(), 1 ) );
+	Matrix4 mat = matrix4_transposed( matrix4_full_inverse( matrix ) );
+	Vector4 normal = matrix4_transformed_vector4( mat, Vector4( plane.normal(), 0 ) );
+	return plane3_normalised( Plane3( vector4_to_vector3( normal ), vector3_dot( vector4_to_vector3( normal ), vector4_to_vector3( anchor ) ) ) );
 }
 
 class FacePlane

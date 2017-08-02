@@ -120,6 +120,9 @@ bool g_showTargetNames = false;
 bool g_showAngles = true;
 bool g_lightRadii = true;
 
+bool g_stupidQuakeBug = false;
+
+
 class ConnectEntities
 {
 public:
@@ -398,6 +401,10 @@ void Entity_Construct( EGameType gameType ){
 	{
 		Static<KeyIsName>::instance().m_keyIsName = keyIsNameQuake3;
 		Static<KeyIsName>::instance().m_nameKey = "targetname";
+	}
+
+	if( g_gameType == eGameTypeQuake1 ){
+		g_stupidQuakeBug = true;
 	}
 
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNames", BoolImportStringCaller( g_showNames ), BoolExportStringCaller( g_showNames ) );

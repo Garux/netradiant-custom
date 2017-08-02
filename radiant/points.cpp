@@ -272,7 +272,14 @@ void Pointfile_Parse( CPointfile& pointfile ){
 	size = LoadFile( name.c_str(), (void**)&data );
 	if ( size == -1 ) {
 		globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";
-		return;
+		/* try .pts (q1) */
+		name.clear();
+		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".pts";
+		size = LoadFile( name.c_str(), (void**)&data );
+		if ( size == -1 ) {
+			globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";
+			return;
+		}
 	}
 
 	// store a pointer

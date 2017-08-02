@@ -548,7 +548,7 @@ void Select_GetMid( Vector3& mid ){
 void Select_FlipAxis( int axis ){
 	Vector3 flip( 1, 1, 1 );
 	flip[axis] = -1;
-	GlobalSelectionSystem().scaleSelected( flip );
+	GlobalSelectionSystem().scaleSelected( flip, true );
 }
 
 
@@ -652,13 +652,13 @@ void Select_RotateAxis( int axis, float deg ){
 		switch ( axis )
 		{
 		case 0:
-			GlobalSelectionSystem().rotateSelected( quaternion_for_matrix4_rotation( matrix4_rotation_for_x_degrees( deg ) ), false );
+			GlobalSelectionSystem().rotateSelected( quaternion_for_matrix4_rotation( matrix4_rotation_for_x_degrees( deg ) ) );
 			break;
 		case 1:
-			GlobalSelectionSystem().rotateSelected( quaternion_for_matrix4_rotation( matrix4_rotation_for_y_degrees( deg ) ), false );
+			GlobalSelectionSystem().rotateSelected( quaternion_for_matrix4_rotation( matrix4_rotation_for_y_degrees( deg ) ) );
 			break;
 		case 2:
-			GlobalSelectionSystem().rotateSelected( quaternion_for_matrix4_rotation( matrix4_rotation_for_z_degrees( deg ) ), false );
+			GlobalSelectionSystem().rotateSelected( quaternion_for_matrix4_rotation( matrix4_rotation_for_z_degrees( deg ) ) );
 			break;
 		}
 	}
@@ -1190,7 +1190,7 @@ static gboolean rotatedlg_apply( GtkWidget *widget, RotateDialog* rotateDialog )
 	command << "rotateSelectedEulerXYZ -x " << eulerXYZ[0] << " -y " << eulerXYZ[1] << " -z " << eulerXYZ[2];
 	UndoableCommand undo( command.c_str() );
 
-	GlobalSelectionSystem().rotateSelected( quaternion_for_euler_xyz_degrees( eulerXYZ ), false );
+	GlobalSelectionSystem().rotateSelected( quaternion_for_euler_xyz_degrees( eulerXYZ ) );
 	return TRUE;
 }
 
