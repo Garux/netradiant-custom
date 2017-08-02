@@ -2783,13 +2783,8 @@ void deselectComponentsOrAll( bool components ){
 
 void SelectPoint( const View& view, const float device_point[2], const float device_epsilon[2], RadiantSelectionSystem::EModifier modifier, bool face ){
 	//globalOutputStream() << device_point[0] << "   " << device_point[1] << "\n";
-#ifdef _DEBUG
 	ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.0f && fabs( device_point[1] ) <= 1.0f, "point-selection error" );
-#else
-	if( fabs( device_point[0] ) >= 1.0f || fabs( device_point[1] ) >= 1.0f ){
-		return;
-	}
-#endif
+
 	if ( modifier == eReplace ) {
 		deselectComponentsOrAll( face );
 	}
@@ -2869,12 +2864,16 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			break;
 			case RadiantSelectionSystem::eSelect:
 			{
-				( *selector.begin() ).second->setSelected( true );
+				if( !( *selector.begin() ).second->isSelected() ){
+					( *selector.begin() ).second->setSelected( true );
+				}
 			}
 			break;
 			case RadiantSelectionSystem::eDeselect:
 			{
-				( *selector.begin() ).second->setSelected( false );
+				if( ( *selector.begin() ).second->isSelected() ){
+					( *selector.begin() ).second->setSelected( false );
+				}
 			}
 			break;
 			default:
@@ -2888,13 +2887,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 }
 
 bool SelectPoint_InitPaint( const View& view, const float device_point[2], const float device_epsilon[2], bool face ){
-#ifdef _DEBUG
 	ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.0f && fabs( device_point[1] ) <= 1.0f, "point-selection error" );
-#else
-	if( fabs( device_point[0] ) >= 1.0f || fabs( device_point[1] ) >= 1.0f ){
-		return true;
-	}
-#endif
   #if defined ( DEBUG_SELECTION )
 	g_render_clipped.destroy();
   #endif
@@ -3574,12 +3567,13 @@ DeviceVector m_current;
 DeviceVector m_epsilon;
 ModifierFlags m_state;
 bool m_mouse2;
-bool m_paintInitialized;
+bool m_mouseMoved;
+bool m_mouseMovedWhilePressed;
 bool m_paintSelect;
 const View* m_view;
 RectangleCallback m_window_update;
 
-Selector_() : m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ), m_mouse2( false ){
+Selector_() : m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ), m_mouse2( false ), m_mouseMoved( false ), m_mouseMovedWhilePressed( false ){
 }
 
 void draw_area(){
@@ -3592,11 +3586,11 @@ void testSelect( DeviceVector position ){
 		DeviceVector delta( position - m_start );
 		if ( fabs( delta.x() ) > m_epsilon.x() && fabs( delta.y() ) > m_epsilon.y() ) {
 			DeviceVector delta( position - m_start );
-			getSelectionSystem().SelectArea( *m_view, &m_start[0], &delta[0], modifier, ( m_state & c_modifier_face ) != c_modifierNone );
+			//getSelectionSystem().SelectArea( *m_view, &m_start[0], &delta[0], modifier, ( m_state & c_modifier_face ) != c_modifierNone );
+			getSelectionSystem().SelectArea( *m_view, &m_start[0], &delta[0], RadiantSelectionSystem::eToggle, ( m_state & c_modifier_face ) != c_modifierNone );
 		}
-		else
-		{
-			if ( modifier == RadiantSelectionSystem::eReplace ) {
+		else if( !m_mouseMovedWhilePressed ){
+			if ( modifier == RadiantSelectionSystem::eReplace && !m_mouseMoved ) {
 				modifier = RadiantSelectionSystem::eCycle;
 			}
 			getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, ( m_state & c_modifier_face ) != c_modifierNone );
@@ -3608,18 +3602,19 @@ void testSelect( DeviceVector position ){
 }
 
 void testSelect_simpleM1( DeviceVector position ){
-	RadiantSelectionSystem::EModifier modifier = RadiantSelectionSystem::eReplace;
+	/*RadiantSelectionSystem::EModifier modifier = RadiantSelectionSystem::eReplace;
 	DeviceVector delta( position - m_start );
 	if ( fabs( delta.x() ) < m_epsilon.x() && fabs( delta.y() ) < m_epsilon.y() ) {
 		modifier = RadiantSelectionSystem::eCycle;
 	}
-	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, false );
+	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, false );*/
+	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
 	m_start = m_current = device_constrained( position );
 }
 
 
 bool selecting() const {
-	return m_state != c_modifier_manipulator && !m_mouse2;
+	return m_state != c_modifier_manipulator && m_mouse2;
 }
 
 void setState( ModifierFlags state ){
@@ -3643,31 +3638,27 @@ void modifierDisable( ModifierFlags type ){
 
 void mouseDown( DeviceVector position ){
 	m_start = m_current = device_constrained( position );
-	m_paintInitialized = false;
+	if( !m_mouse2 && m_state != c_modifierNone ){
+		m_paintSelect = getSelectionSystem().SelectPoint_InitPaint( *m_view, &position[0], &m_epsilon[0], ( m_state & c_modifier_face ) != c_modifierNone );
+	}
 }
 
 void mouseMoved( DeviceVector position ){
 	m_current = device_constrained( position );
-	if( !m_mouse2 ){
+	m_mouseMovedWhilePressed = true;
+	if( m_mouse2 ){
 		draw_area();
 	}
-	else if( m_paintInitialized ){
-		getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0],
+	else if( m_state != c_modifier_manipulator ){
+		getSelectionSystem().SelectPoint( *m_view, &m_current[0], &m_epsilon[0],
 										m_paintSelect ? RadiantSelectionSystem::eSelect : RadiantSelectionSystem::eDeselect,
 										( m_state & c_modifier_face ) != c_modifierNone );
-	}
-	else{
-		DeviceVector delta( position - m_start );
-		if ( fabs( delta.x() ) > m_epsilon.x() || fabs( delta.y() ) > m_epsilon.y() ) {
-			m_paintSelect = getSelectionSystem().SelectPoint_InitPaint( *m_view, &position[0], &m_epsilon[0], ( m_state & c_modifier_face ) != c_modifierNone );
-			m_paintInitialized = true;
-		}
 	}
 }
 typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseMoved> MouseMovedCaller;
 
 void mouseUp( DeviceVector position ){
-	if( !m_paintInitialized ){
+	if( m_mouse2 ){
 		testSelect( device_constrained( position ) );
 	}
 	else{
@@ -3744,6 +3735,7 @@ void onSizeChanged( int width, int height ){
 void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
 	if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
 		m_mouse_down = true;
+		//m_selector.m_mouseMoved = false;
 
 		DeviceVector devicePosition( window_to_normalised_device( position, m_width, m_height ) );
 		if ( modifiers == c_modifier_manipulator && m_manipulator.mouseDown( devicePosition ) ) {
@@ -3752,13 +3744,13 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 		}
 		else
 		{
-			m_selector.mouseDown( devicePosition );
 			if ( button == c_button_select ) {
 				m_selector.m_mouse2 = false;
 			}
 			else{
 				m_selector.m_mouse2 = true;
 			}
+			m_selector.mouseDown( devicePosition );
 			g_mouseMovedCallback.insert( MouseEventCallback( Selector_::MouseMovedCaller( m_selector ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Selector_::MouseUpCaller( m_selector ) ) );
 		}
@@ -3779,6 +3771,7 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 	}
 }
 void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
+	m_selector.m_mouseMoved = true;
 	if ( m_mouse_down && !g_mouseMovedCallback.empty() ) {
 		g_mouseMovedCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
 	}
@@ -3791,10 +3784,13 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 	}
 	//L button w/o scene changed = tunnel selection
 	if( !getSelectionSystem().m_undo_begun && modifiers == c_modifierNone && button == c_button_select &&
+		//( !m_selector.m_mouseMoved || !m_mouse_down ) &&
 		( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent || GlobalSelectionSystem().ManipulatorMode() != SelectionSystem::eDrag ) ){
-		m_selector.testSelect_simpleM1( window_to_normalised_device( position, m_width, m_height ) );
+		m_selector.testSelect_simpleM1( device_constrained( window_to_normalised_device( position, m_width, m_height ) ) );
 	}
 	getSelectionSystem().m_undo_begun = false;
+	m_selector.m_mouseMoved = false;
+	m_selector.m_mouseMovedWhilePressed = false;
 }
 void onModifierDown( ModifierFlags type ){
 	m_selector.modifierEnable( type );

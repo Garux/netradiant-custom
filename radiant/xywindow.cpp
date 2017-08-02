@@ -933,7 +933,7 @@ unsigned int Clipper_buttons(){
 }
 
 unsigned int Clipper_quick_buttons(){
-	return RAD_RBUTTON | RAD_CONTROL;
+	return RAD_LBUTTON | RAD_CONTROL;
 }
 
 void XYWnd::DropClipPoint( int pointx, int pointy ){
