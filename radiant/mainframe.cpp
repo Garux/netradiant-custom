@@ -1552,23 +1552,11 @@ void ClipperMode(){
 
 
 void ToggleRotateScaleModes(){
-	if ( g_currentToolMode == RotateMode ) {
-		ScaleMode();
-	}
-	else
-	{
-		RotateMode();
-	}
+	return g_currentToolMode == RotateMode? ScaleMode() : RotateMode();
 }
 
 void ToggleDragScaleModes(){
-	if ( g_currentToolMode == DragMode ) {
-		ScaleMode();
-	}
-	else
-	{
-		DragMode();
-	}
+	return g_currentToolMode == DragMode? ScaleMode() : DragMode();
 }
 
 

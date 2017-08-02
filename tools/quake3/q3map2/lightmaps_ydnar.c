@@ -1220,7 +1220,7 @@ void SetupSurfaceLightmaps( void ){
 	}
 
 	if ( debugSampleSize < -1 ){
-		Sys_FPrintf( SYS_VRB, "+%d similar occurrences;\t-debugSampleSize to show ones\n", -debugSampleSize - 1 );
+		Sys_FPrintf( SYS_VRB, "+%d similar occurrences;\t-debugsamplesize to show ones\n", -debugSampleSize - 1 );
 	}
 
 	/* allocate vertex luxel storage */

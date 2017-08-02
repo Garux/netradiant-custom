@@ -172,7 +172,7 @@ const Matrix4& GetViewMatrix() const {
 }
 const Matrix4& GetViewport() const {
 	return m_viewport;
-};
+}
 const Matrix4& GetModelview() const {
 	return m_modelview;
 }

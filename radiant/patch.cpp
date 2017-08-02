@@ -631,6 +631,9 @@ void Patch::CapTexture(){
 			vector3_add( normal, tmp );
 		}
 	}
+	normal[0] = fabs( normal[0] );
+	normal[1] = fabs( normal[1] );
+	normal[2] = fabs( normal[2] );
 
 	ProjectTexture( texture_axis( normal ) );
 }

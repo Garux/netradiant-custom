@@ -465,10 +465,10 @@ void SurfaceInspector_ProjectTexture(){
 
 	Vector3 direction;
 
-	if( getSurfaceInspector().m_projectRadio == 0 ){
+	if( getSurfaceInspector().m_projectRadio == 0 ){ //axial
 		return Select_ProjectTexture( texdef, NULL );
 	}
-	else if( getSurfaceInspector().m_projectRadio == 1 ){
+	else if( getSurfaceInspector().m_projectRadio == 1 ){ //ortho
 		if( GlobalXYWnd_getCurrentViewType() == YZ ){
 			direction = Vector3( 1, 0, 0 );
 		}
@@ -479,7 +479,7 @@ void SurfaceInspector_ProjectTexture(){
 			direction = Vector3( 0, 0, 1 );
 		}
 	}
-	else if( getSurfaceInspector().m_projectRadio == 2 ){
+	else if( getSurfaceInspector().m_projectRadio == 2 ){ //cam
 		//direction = -g_pParentWnd->GetCamWnd()->getCamera().vpn ;
 		direction = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
 	}
@@ -1688,6 +1688,9 @@ void Scene_copyClosestTexture( SelectionTest& test ){
 	CopiedString shader;
 	if ( Scene_getClosestTexture( GlobalSceneGraph(), test, shader, g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags ) ) {
 		TextureBrowser_SetSelectedShader( g_TextureBrowser, shader.c_str() );
+		UndoableCommand undo( "textureNameAndProjectionSetSelected" );
+		Select_SetShader( shader.c_str() );
+		Select_SetTexdef( g_faceTextureClipboard.m_projection );
 	}
 }
 

@@ -1507,7 +1507,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 
 		identity2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, identityCorrected );
 	}
-	else if( dot != dot ){ //catch QNAN: happens on scaling cuboid on Z and sometimes on rotating (in bp mode)
+	else if( dot != dot ){ //catch QNAN: happens on scaling cuboid on Z and sometimes on rotating (in bp mode) //and in making seamless to self or parallel
 		return;
 	}
 
@@ -1552,7 +1552,7 @@ void Q3_to_BP( const texdef_t& texdef, float width, float height, const Vector3&
 
 
 /// for arbitrary texture projections
-void EmitTextureCoordinates( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, DoubleVector3 points[3], DoubleVector3 st[3], Vector3* direction ){
+void Emit3TextureCoordinates( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, DoubleVector3 points[3], DoubleVector3 st[3], const Vector3* direction ){
 	Matrix4 local2tex;
 	Texdef_toTransform( texdef, (float)width, (float)height, local2tex );
 	{
@@ -1580,28 +1580,16 @@ void EmitTextureCoordinates( const texdef_t& texdef, std::size_t width, std::siz
 	}
 }
 
-void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const texdef_t& texdef, Vector3* direction ){
+void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const texdef_t& texdef, const Vector3* direction ){
 	//texdef_t texdef;
 	//Q3_to_BP( texdef, (float)width, (float)height, normal, projection.m_brushprimit_texdef );
 
-
 	DoubleVector3 texX, texY;
-	DoubleVector3 proj;
 
-#ifdef DBG_BP
-	if( f->plane.normal[0] == 0.0f && f->plane.normal[1] == 0.0f && f->plane.normal[2] == 0.0f ) {
-		globalOutputStream() << "Warning : f->plane.normal is (0,0,0) in FaceToBrushPrimitFace\n";
-	}
-	// check d_texture
-	if( !f->d_texture ) {
-		globalOutputStream() << "Warning : f.d_texture is 0 in FaceToBrushPrimitFace\n";
-		return;
-	}
-#endif
 	// compute axis base
 	ComputeAxisBase( plane.normal(), texX, texY );
 	// compute projection vector
-	proj = plane.normal() * plane.dist();
+	const DoubleVector3 anchor = plane.normal() * plane.dist();
 
 	// (0,0) in plane axis base is (0,0,0) in world coordinates + projection on the affine plane
 	// (1,0) in plane axis base is texX in world coordinates + projection on the affine plane
@@ -1610,13 +1598,11 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 	// ST of (0,0) (1,0) (0,1)
 	DoubleVector3 points[3];
 	DoubleVector3 st[3];
-//	texdef_t texdef;
-//	texdef.scale[0] = texdef.scale[1] = 0.5f;
 
-	points[0] = proj;
-	points[1] = texX + proj;
-	points[2] = texY + proj;
-	EmitTextureCoordinates( texdef, width, height, plane.normal(), points, st, direction );
+	points[0] = anchor;
+	points[1] = texX + anchor;
+	points[2] = texY + anchor;
+	Emit3TextureCoordinates( texdef, width, height, plane.normal(), points, st, direction );
 	// compute texture matrix
 	projection.m_brushprimit_texdef.coords[0][2] = st[0][0];
 	projection.m_brushprimit_texdef.coords[1][2] = st[0][1];

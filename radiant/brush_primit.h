@@ -106,7 +106,7 @@ void Texdef_Assign( TextureProjection& projection, const float* hShift, const fl
 void Texdef_Shift( TextureProjection& projection, float s, float t );
 void Texdef_Scale( TextureProjection& projection, float s, float t );
 void Texdef_Rotate( TextureProjection& projection, float angle );
-void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const texdef_t& texdef, Vector3* direction );
+void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const texdef_t& texdef, const Vector3* direction );
 void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, const Winding& w, float s_repeat, float t_repeat );
 void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::size_t width, std::size_t height, Winding& w, const Vector3& normal, const Matrix4& localToWorld );
 

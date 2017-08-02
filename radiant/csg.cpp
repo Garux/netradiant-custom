@@ -1275,7 +1275,7 @@ void CSG_Tool(){
 					gtk_table_attach( table, button, 4, 5, 2, 3,
 									  (GtkAttachOptions) ( GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_widget_set_tooltip_text( button, "Hollow::warp" );
+					gtk_widget_set_tooltip_text( button, "Hollow::wrap" );
 					gtk_widget_show( button );
 					g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( CSGdlg_HollowWrap ), &g_csgtool_dialog );
 				}

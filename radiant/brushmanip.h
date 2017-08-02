@@ -78,8 +78,8 @@ void Scene_BrushFacesSelectByShader( scene::Graph& graph, const char* name );
 #include "itexdef.h"
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
-void Scene_BrushProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, Vector3* direction );
-void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const texdef_t& texdef, Vector3* direction );
+void Scene_BrushProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction );
+void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction );
 
 void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat );
 void Scene_BrushFitTexture_Component_Selected( scene::Graph& graph, float s_repeat, float t_repeat );

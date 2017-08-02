@@ -888,7 +888,7 @@ void Select_Touching( void ){
 	SelectByBounds<SelectionPolicy_Touching>::DoSelection( false );
 }
 
-void Select_ProjectTexture( const texdef_t& texdef, Vector3* direction ){
+void Select_ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushProjectTexture_Selected( GlobalSceneGraph(), texdef, direction );
 	}

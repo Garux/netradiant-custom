@@ -297,7 +297,7 @@ void operator()( Patch& patch ) const {
 
 void Scene_PatchCapTexture_Selected( scene::Graph& graph ){
 	Scene_forEachVisibleSelectedPatch( PatchCapTexture() );
-	Patch::m_CycleCapIndex = ( Patch::m_CycleCapIndex == 0 ) ? 1 : ( Patch::m_CycleCapIndex == 1 ) ? 2 : 0;
+	Patch::m_CycleCapIndex = ( Patch::m_CycleCapIndex + 1 ) % 3;
 	SceneChangeNotify();
 }
 

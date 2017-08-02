@@ -68,7 +68,7 @@ void Select_RotateTexture( float amt );
 void Select_ScaleTexture( float x, float y );
 void Select_ShiftTexture( float x, float y );
 class texdef_t;
-void Select_ProjectTexture( const texdef_t& texdef, Vector3* direction );
+void Select_ProjectTexture( const texdef_t& texdef, const Vector3* direction );
 void Select_FitTexture( float horizontal = 1, float vertical = 1 );
 void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelected );
 

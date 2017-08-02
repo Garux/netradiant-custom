@@ -594,7 +594,7 @@ void rotate( float angle ){
 	addScale();
 }
 
-void ProjectTexture( const Plane3& plane, const texdef_t& texdef, Vector3* direction ){
+void ProjectTexture( const Plane3& plane, const texdef_t& texdef, const Vector3* direction ){
 	Texdef_ProjectTexture( m_projection, m_shader.width(), m_shader.height(), plane, texdef, direction );
 }
 
@@ -1207,7 +1207,7 @@ void RotateTexdef( float angle ){
 	texdefChanged();
 }
 
-void ProjectTexture( const texdef_t& texdef, Vector3* direction ){
+void ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 	undoSave();
 	m_texdef.ProjectTexture( m_plane.plane3(), texdef, direction );
 	texdefChanged();

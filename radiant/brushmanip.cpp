@@ -738,21 +738,21 @@ void Scene_BrushFindReplaceShader_Component_Selected( scene::Graph& graph, const
 class FaceProjectTexture
 {
 	const texdef_t& m_texdef;
-	Vector3* m_direction;
+	const Vector3* m_direction;
 public:
-	FaceProjectTexture( const texdef_t& texdef, Vector3* direction ) : m_texdef( texdef ), m_direction( direction ) {
+	FaceProjectTexture( const texdef_t& texdef, const Vector3* direction ) : m_texdef( texdef ), m_direction( direction ) {
 	}
 	void operator()( Face& face ) const {
 		face.ProjectTexture( m_texdef, m_direction );
 	}
 };
 
-void Scene_BrushProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, Vector3* direction ){
+void Scene_BrushProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction ){
 	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceProjectTexture( texdef, direction ) );
 	SceneChangeNotify();
 }
 
-void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const texdef_t& texdef, Vector3* direction ){
+void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction ){
 	Scene_ForEachSelectedBrushFace( graph, FaceProjectTexture( texdef, direction ) );
 	SceneChangeNotify();
 }
