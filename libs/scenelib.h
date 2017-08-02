@@ -739,6 +739,10 @@ bool parentSelected() const {
 	}
 	return m_parentSelected;
 }
+Instance* parent() const
+{
+	return m_parent;
+}
 };
 }
 

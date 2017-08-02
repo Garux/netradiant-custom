@@ -149,7 +149,10 @@ bool pre( const scene::Path& path, scene::Instance& instance, VolumeIntersection
 			else if ( renderable ) {
 				renderable->renderComponents( m_renderer, m_volume );
 			}
-			m_renderer.Highlight( Renderer::ePrimitive );
+			//if( !(GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && path.size() == 2) )
+			//if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && node_is_group( path.top() ) ) )
+			if( !( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && Node_isEntity( path.top() ) ) )
+				m_renderer.Highlight( Renderer::ePrimitive );
 		}
 
 		if ( renderable ) {

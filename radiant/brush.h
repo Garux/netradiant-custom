@@ -3197,6 +3197,11 @@ bool isSelected() const {
 }
 void setSelected( bool select ){
 	m_selectable.setSelected( select );
+	if ( !select && parent() ){
+		Selectable* sel_parent = Instance_getSelectable( *parent() );
+		if ( sel_parent && sel_parent->isSelected() )
+			sel_parent->setSelected( false );
+	}
 }
 
 void update_selected() const {
