@@ -4080,14 +4080,14 @@ const ModifierFlags c_modifier_replace_face = c_modifier_replace | c_modifier_fa
 
 const ButtonIdentifier c_button_texture = c_buttonMiddle;
 const ModifierFlags c_modifier_apply_texture1 = c_modifierControl | c_modifierShift;
-const ModifierFlags c_modifier_apply_texture2 = c_modifierControl;
+const ModifierFlags c_modifier_apply_texture2_seamless = c_modifierControl;
 const ModifierFlags c_modifier_apply_texture3 =                     c_modifierShift;
 const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 
 
 
 void Scene_copyClosestTexture( SelectionTest& test );
-void Scene_applyClosestTexture( SelectionTest& test );
+void Scene_applyClosestTexture( SelectionTest& test, bool seamless );
 
 class TexManipulator_
 {
@@ -4105,10 +4105,10 @@ void mouseDown( DeviceVector position ){
 	ConstructSelectionTest( scissored, SelectionBoxForPoint( &position[0], &m_epsilon[0] ) );
 	SelectionVolume volume( scissored );
 
-	if ( m_state == c_modifier_apply_texture1 || m_state == c_modifier_apply_texture2 || m_state == c_modifier_apply_texture3 ) {
+	if ( m_state == c_modifier_apply_texture1 || m_state == c_modifier_apply_texture2_seamless || m_state == c_modifier_apply_texture3 ) {
 		m_undo_begun = true;
 		GlobalUndoSystem().start();
-		Scene_applyClosestTexture( volume );
+		Scene_applyClosestTexture( volume, m_state == c_modifier_apply_texture2_seamless );
 	}
 	else if ( m_state == c_modifier_copy_texture ) {
 		Scene_copyClosestTexture( volume );
@@ -4121,7 +4121,7 @@ void mouseMoved( DeviceVector position ){
 		ConstructSelectionTest( scissored, SelectionBoxForPoint( &device_constrained( position )[0], &m_epsilon[0] ) );
 		SelectionVolume volume( scissored );
 
-		Scene_applyClosestTexture( volume );
+		Scene_applyClosestTexture( volume, m_state == c_modifier_apply_texture2_seamless );
 	}
 }
 typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseMoved> MouseMovedCaller;

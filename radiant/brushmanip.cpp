@@ -579,7 +579,6 @@ void operator()( Face& face ) const {
 class FaceFindShader
 {
 const char* m_find;
-const char* m_replace;
 public:
 FaceFindShader( const char* find ) : m_find( find ){
 }
@@ -589,6 +588,10 @@ void operator()( FaceInstance& faceinst ) const {
 	}
 }
 };
+
+void Scene_BrushFacesSelectByShader( scene::Graph& graph, const char* name ){
+	Scene_ForEachBrush_ForEachFaceInstance( graph, FaceFindShader( name ) );
+}
 
 bool DoingSearch( const char *repl ){
 	return ( repl == NULL || ( strcmp( "textures/", repl ) == 0 ) );

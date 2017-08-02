@@ -868,6 +868,11 @@ void Select_AllOfType(){
 	}
 }
 
+void Select_FacesAndPatchesByShader(){
+	Scene_BrushFacesSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+	Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+}
+
 void Select_Inside( void ){
 	SelectByBounds<SelectionPolicy_Inside>::DoSelection();
 }
@@ -1079,6 +1084,8 @@ void Select_registerCommands(){
 
 	GlobalCommands_insert( "RotateSelectionClockwise", FreeCaller<Selection_RotateClockwise>() );
 	GlobalCommands_insert( "RotateSelectionAnticlockwise", FreeCaller<Selection_RotateAnticlockwise>() );
+
+	GlobalCommands_insert( "SelectTextured", FreeCaller<Select_FacesAndPatchesByShader>(), Accelerator( 'A', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 }
 
 

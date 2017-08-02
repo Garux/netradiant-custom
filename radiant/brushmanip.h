@@ -68,6 +68,7 @@ void Scene_BrushFindReplaceShader_Selected( scene::Graph& graph, const char* fin
 void Scene_BrushFindReplaceShader_Component_Selected( scene::Graph& graph, const char* find, const char* replace );
 void Scene_BrushSelectByShader( scene::Graph& graph, const char* name );
 void Scene_BrushSelectByShader_Component( scene::Graph& graph, const char* name );
+void Scene_BrushFacesSelectByShader( scene::Graph& graph, const char* name );
 
 #include "itexdef.h"
 template<typename Element> class BasicVector3;

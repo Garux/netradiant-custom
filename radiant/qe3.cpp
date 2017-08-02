@@ -171,7 +171,7 @@ void bsp_init(){
 		build_set_variable( "BspFile", name.c_str() );
 	}
 
-	if( region_active ){
+	if( g_region_active ){
 		StringOutputStream name( 256 );
 		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".reg";
 		build_set_variable( "MapFile", name.c_str() );
@@ -240,7 +240,7 @@ bool Region_cameraValid(){
 
 	for ( int i = 0 ; i < 3 ; i++ )
 	{
-		if ( vOrig[i] > region_maxs[i] || vOrig[i] < region_mins[i] ) {
+		if ( vOrig[i] > g_region_maxs[i] || vOrig[i] < g_region_mins[i] ) {
 			return false;
 		}
 	}
@@ -251,7 +251,7 @@ bool Region_cameraValid(){
 void RunBSP( const char* name ){
 	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=503
 	// make sure we don't attempt to region compile a map with the camera outside the region
-	if ( region_active && !Region_cameraValid() ) {
+	if ( g_region_active && !Region_cameraValid() ) {
 		globalErrorStream() << "The camera must be in the region to start a region compile.\n";
 		return;
 	}
@@ -267,7 +267,7 @@ void RunBSP( const char* name ){
 		Map_Snapshot();
 	}
 
-	if ( region_active ) {
+	if ( g_region_active ) {
 		const char* mapname = Map_Name( g_map );
 		StringOutputStream name( 256 );
 		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".reg";

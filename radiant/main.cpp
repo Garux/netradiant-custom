@@ -564,25 +564,26 @@ int main( int argc, char* argv[] ){
 	streams_init();
 
 #ifdef WIN32
-	HMODULE lib;
-	lib = LoadLibrary( "dwmapi.dll" );
-	if ( lib != 0 ) {
-		void ( WINAPI *qDwmEnableComposition )( bool bEnable ) = ( void (WINAPI *) ( bool bEnable ) )GetProcAddress( lib, "DwmEnableComposition" );
-		if ( qDwmEnableComposition ) {
-			bool Aero = false;
-			for ( int i = 1; i < argc; ++i ){
-				if ( !stricmp( argv[i], "-aero" ) ){
-					Aero = true;
-					qDwmEnableComposition( TRUE );
-					break;
-				}
-			}
-			// disable Aero
-			if ( !Aero ){
-				qDwmEnableComposition( FALSE );
+	{
+		bool aero = true;
+		for ( int i = 1; i < argc; ++i ){
+			if ( !stricmp( argv[i], "-aero" ) ){
+				aero = false;
+				break;
 			}
 		}
-		FreeLibrary( lib );
+		if( !aero ){
+			HMODULE lib;
+			lib = LoadLibrary( "dwmapi.dll" );
+			if ( lib != 0 ) {
+				void ( WINAPI *qDwmEnableComposition )( bool bEnable ) = ( void (WINAPI *) ( bool bEnable ) )GetProcAddress( lib, "DwmEnableComposition" );
+				if ( qDwmEnableComposition ) {
+					// disable Aero
+					qDwmEnableComposition( FALSE );
+				}
+				FreeLibrary( lib );
+			}
+		}
 	}
 	_setmaxstdio(2048);
 #endif

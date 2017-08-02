@@ -1362,12 +1362,131 @@ void SurfaceInspector::ApplyFlags(){
 }
 
 
+class FaceTexture
+{
+public:
+	TextureProjection m_projection;
+	ContentsFlagsValue m_flags;
+
+	Plane3 m_plane;
+	std::size_t m_width;
+	std::size_t m_height;
+
+	FaceTexture() : m_plane( 0, 0, 1, 0 ), m_width( 64 ), m_height( 64 ) {
+	}
+};
+
+FaceTexture g_faceTextureClipboard;
+
+void FaceTextureClipboard_setDefault(){
+	g_faceTextureClipboard.m_flags = ContentsFlagsValue( 0, 0, 0, false );
+	TexDef_Construct_Default( g_faceTextureClipboard.m_projection );
+}
+
+void TextureClipboard_textureSelected( const char* shader ){
+	FaceTextureClipboard_setDefault();
+}
+
+
+
 void Face_getTexture( Face& face, CopiedString& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
 	shader = face.GetShader();
 	face.GetTexdef( projection );
 	flags = face.getShader().m_flags;
+
+	g_faceTextureClipboard.m_plane = face.getPlane().plane3();
+	g_faceTextureClipboard.m_width = face.getShader().width();
+	g_faceTextureClipboard.m_height = face.getShader().height();
 }
 typedef Function4<Face&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Face_getTexture> FaceGetTexture;
+
+
+
+inline bool float_is_largest_absolute( double axis, double other ){
+	return fabs( axis ) > fabs( other );
+}
+
+/// \brief Returns the index of the component of \p v that has the largest absolute value.
+inline int vector3_largest_absolute_component_index( const DoubleVector3& v ){
+	return ( float_is_largest_absolute( v[1], v[0] ) )
+		   ? ( float_is_largest_absolute( v[1], v[2] ) )
+		   ? 1
+		   : 2
+		   : ( float_is_largest_absolute( v[0], v[2] ) )
+		   ? 0
+		   : 2;
+}
+
+/// \brief Returns the infinite line that is the intersection of \p plane and \p other.
+inline DoubleLine plane3_intersect_plane3( const Plane3& plane, const Plane3& other ){
+	DoubleLine line;
+	line.direction = vector3_cross( plane.normal(), other.normal() );
+	switch ( vector3_largest_absolute_component_index( line.direction ) )
+	{
+	case 0:
+		line.origin.x() = 0;
+		line.origin.y() = ( -other.dist() * plane.normal().z() - -plane.dist() * other.normal().z() ) / line.direction.x();
+		line.origin.z() = ( -plane.dist() * other.normal().y() - -other.dist() * plane.normal().y() ) / line.direction.x();
+		break;
+	case 1:
+		line.origin.x() = ( -plane.dist() * other.normal().z() - -other.dist() * plane.normal().z() ) / line.direction.y();
+		line.origin.y() = 0;
+		line.origin.z() = ( -other.dist() * plane.normal().x() - -plane.dist() * other.normal().x() ) / line.direction.y();
+		break;
+	case 2:
+		line.origin.x() = ( -other.dist() * plane.normal().y() - -plane.dist() * other.normal().y() ) / line.direction.z();
+		line.origin.y() = ( -plane.dist() * other.normal().x() - -other.dist() * plane.normal().x() ) / line.direction.z();
+		line.origin.z() = 0;
+		break;
+	default:
+		break;
+	}
+
+	return line;
+}
+
+
+void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
+	face.SetShader( shader );
+
+	DoubleLine line = plane3_intersect_plane3( g_faceTextureClipboard.m_plane, face.getPlane().plane3() );
+	Quaternion rotation = Quaternion( vector3_cross( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ), static_cast<float>( 1.0 + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ) ) );
+	//Quaternion rotation = quaternion_for_unit_vectors( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
+	//rotation.w() = sqrt( vector3_length_squared( g_faceTextureClipboard.m_plane.normal() ) * vector3_length_squared( face.getPlane().plane3().normal() ) ) + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
+	//globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
+	//quaternion_normalise( rotation );
+	const double n = ( 1.0 / sqrt( rotation[0] * rotation[0] + rotation[1] * rotation[1] + rotation[2] * rotation[2] + rotation[3] * rotation[3] ) );
+	rotation = Quaternion(
+			   static_cast<float>( rotation[0] * n ),
+			   static_cast<float>( rotation[1] * n ),
+			   static_cast<float>( rotation[2] * n ),
+			   static_cast<float>( rotation[3] * n )
+			   );
+	//globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
+	Matrix4 transform = g_matrix4_identity;
+	matrix4_pivoted_rotate_by_quaternion( transform, rotation, line.origin );
+//	Matrix4 transform = matrix4_rotation_for_quaternion_quantised( rotation );
+//	Vector3 translation;
+//	translation_for_pivoted_matrix_transform( translation, transform, line.origin );
+//	transform.tx() = translation.x();
+//	transform.ty() = translation.y();
+//	transform.tz() = translation.z();
+
+
+	//globalOutputStream() << "transform: " << transform << "\n";
+	TextureProjection proj = projection;
+	Texdef_transformLocked( proj, g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height, g_faceTextureClipboard.m_plane, transform );
+
+
+	//face.SetTexdef( projection );
+	face.SetTexdef( proj );
+	face.SetFlags( flags );
+
+	g_faceTextureClipboard.m_plane = face.getPlane().plane3();
+	g_faceTextureClipboard.m_projection = proj;
+}
+typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture_Seamless> FaceSetTextureSeamless;
+
 
 void Face_setTexture( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
 	face.SetShader( shader );
@@ -1400,7 +1519,7 @@ struct Texturable
 };
 
 
-void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& bestIntersection, Texturable& texturable ){
+void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& bestIntersection, Texturable& texturable, bool seamless ){
 	if ( face.isFiltered() ) {
 		return;
 	}
@@ -1409,7 +1528,10 @@ void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& be
 	if ( intersection.valid()
 		 && SelectionIntersection_closer( intersection, bestIntersection ) ) {
 		bestIntersection = intersection;
-		texturable.setTexture = makeCallback3( FaceSetTexture(), face );
+		if( seamless )
+			texturable.setTexture = makeCallback3( FaceSetTextureSeamless(), face );
+		else
+			texturable.setTexture = makeCallback3( FaceSetTexture(), face );
 		texturable.getTexture = makeCallback3( FaceGetTexture(), face );
 	}
 }
@@ -1439,9 +1561,10 @@ class BrushGetClosestFaceVisibleWalker : public scene::Graph::Walker
 {
 SelectionTest& m_test;
 Texturable& m_texturable;
+bool m_seamless;
 mutable SelectionIntersection m_bestIntersection;
 public:
-BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable ) : m_test( test ), m_texturable( texturable ){
+BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable, bool seamless ) : m_test( test ), m_texturable( texturable ), m_seamless( seamless ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
@@ -1451,7 +1574,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 
 			for ( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i )
 			{
-				Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable );
+				Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable, m_seamless );
 			}
 		}
 		else
@@ -1482,9 +1605,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-Texturable Scene_getClosestTexturable( scene::Graph& graph, SelectionTest& test ){
+Texturable Scene_getClosestTexturable( scene::Graph& graph, SelectionTest& test, bool seamless = false ){
 	Texturable texturable;
-	graph.traverse( BrushGetClosestFaceVisibleWalker( test, texturable ) );
+	graph.traverse( BrushGetClosestFaceVisibleWalker( test, texturable, seamless ) );
 	return texturable;
 }
 
@@ -1497,30 +1620,11 @@ bool Scene_getClosestTexture( scene::Graph& graph, SelectionTest& test, CopiedSt
 	return false;
 }
 
-void Scene_setClosestTexture( scene::Graph& graph, SelectionTest& test, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
-	Texturable texturable = Scene_getClosestTexturable( graph, test );
+void Scene_setClosestTexture( scene::Graph& graph, SelectionTest& test, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags, bool seamless ){
+	Texturable texturable = Scene_getClosestTexturable( graph, test, seamless );
 	if ( texturable.setTexture != SetTextureCallback() ) {
 		texturable.setTexture( shader, projection, flags );
 	}
-}
-
-
-class FaceTexture
-{
-public:
-TextureProjection m_projection;
-ContentsFlagsValue m_flags;
-};
-
-FaceTexture g_faceTextureClipboard;
-
-void FaceTextureClipboard_setDefault(){
-	g_faceTextureClipboard.m_flags = ContentsFlagsValue( 0, 0, 0, false );
-	TexDef_Construct_Default( g_faceTextureClipboard.m_projection );
-}
-
-void TextureClipboard_textureSelected( const char* shader ){
-	FaceTextureClipboard_setDefault();
 }
 
 class TextureBrowser;
@@ -1535,12 +1639,12 @@ void Scene_copyClosestTexture( SelectionTest& test ){
 	}
 }
 
-void Scene_applyClosestTexture( SelectionTest& test ){
+void Scene_applyClosestTexture( SelectionTest& test, bool seamless ){
 //	UndoableCommand command( "facePaintTexture" );
 
-	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader( g_TextureBrowser ), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags );
+	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader( g_TextureBrowser ), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags, seamless );
 
-	//SceneChangeNotify();
+	SceneChangeNotify();
 }
 
 

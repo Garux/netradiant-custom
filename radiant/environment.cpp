@@ -104,17 +104,16 @@ bool gamedetect_check_game( const char *gamefile, const char *checkfile1, const 
 void gamedetect(){
 	// if we're inside a Nexuiz install
 	// default to nexuiz.game (unless the user used an option to inhibit this)
-	//bool nogamedetect = false;
-	bool nogamedetect = true;
+	bool gamedetect = false;
 	int i;
-	for ( i = 1; i < g_argc - 1; ++i )
-		if ( g_argv[i][0] == '-' ) {
-			if ( !strcmp( g_argv[i], "-gamedetect" ) ) {
-				nogamedetect = !strcmp( g_argv[i + 1], "false" );
-			}
-			++i;
+	for ( i = 1; i < g_argc; ++i ){
+		if ( !strcmp( g_argv[i], "-gamedetect" ) ) {
+			gamedetect = true;
+			//nogamedetect = !strcmp( g_argv[i + 1], "false" );
+			break;
 		}
-	if ( !nogamedetect ) {
+	}
+	if ( gamedetect ) {
 		static char buf[1024 + 64];
 		strncpy( buf, environment_get_app_path(), sizeof( buf ) );
 		buf[sizeof( buf ) - 1 - 64] = 0;

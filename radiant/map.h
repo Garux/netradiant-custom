@@ -95,8 +95,8 @@ scene::Node& Map_FindOrInsertWorldspawn( Map& map );
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
 
-extern Vector3 region_mins, region_maxs;
-extern bool region_active;
+extern Vector3 g_region_mins, g_region_maxs;
+extern bool g_region_active;
 
 // used to be #defines, multiple engine support suggests we should go towards dynamic
 extern float g_MaxWorldCoord;

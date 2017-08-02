@@ -904,8 +904,18 @@ static void DoGtkTextEditor( const char* filename, guint cursorpos, int length )
 
 // =============================================================================
 // Light Intensity dialog
+#include <gtk/gtkcheckbutton.h>
+
+bool g_dontDoLightIntensityDlg = false;
+
+void dontDoLightIntensityDlg_toggled( GtkToggleButton* togglebutton, gpointer user_data ){
+	g_dontDoLightIntensityDlg = gtk_toggle_button_get_active( togglebutton );
+}
 
 EMessageBoxReturn DoLightIntensityDlg( int *intensity ){
+	if( g_dontDoLightIntensityDlg ){
+		return eIDOK;
+	}
 	ModalDialog dialog;
 	GtkEntry* intensity_entry;
 	ModalDialogButton ok_button( dialog, eIDOK );
@@ -935,6 +945,13 @@ EMessageBoxReturn DoLightIntensityDlg( int *intensity ){
 				gtk_widget_grab_focus( GTK_WIDGET( entry ) );
 
 				intensity_entry = entry;
+			}
+			{
+				GtkWidget* check = gtk_check_button_new_with_label( "Don't Show" );
+				gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( check ), FALSE );
+				gtk_widget_show( check );
+				gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, FALSE, 0 );
+				g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( dontDoLightIntensityDlg_toggled ), 0 );
 			}
 		}
 		{

@@ -118,7 +118,7 @@ void XY_MouseDown( int x, int y, unsigned int buttons );
 void XY_MouseMoved( int x, int y, unsigned int buttons );
 
 void NewBrushDrag_Begin( int x, int y );
-void NewBrushDrag( int x, int y );
+void NewBrushDrag( int x, int y, bool square );
 void NewBrushDrag_End( int x, int y );
 
 void XY_ToPoint( int x, int y, Vector3& point );
@@ -158,7 +158,7 @@ void UpdateCameraIcon();
 
 void Clipper_OnLButtonDown( int x, int y );
 void Clipper_OnLButtonUp( int x, int y );
-void Clipper_OnMouseMoved( int x, int y );
+void Clipper_OnMouseMoved( int x, int y, bool snap );
 void Clipper_Crosshair_OnMouseMoved( int x, int y );
 void DropClipPoint( int pointx, int pointy );
 

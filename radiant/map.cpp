@@ -1448,13 +1448,13 @@ void ConstructRegionStartpoint( scene::Node* startpoint, const Vector3& region_m
 
    ===========================================================
  */
-bool region_active = false;
+bool g_region_active = false;
 
-BoolExportCaller g_region_caller( region_active );
+BoolExportCaller g_region_caller( g_region_active );
 ToggleItem g_region_item( g_region_caller );
 
-Vector3 region_mins( g_MinWorldCoord, g_MinWorldCoord, g_MinWorldCoord );
-Vector3 region_maxs( g_MaxWorldCoord, g_MaxWorldCoord, g_MaxWorldCoord );
+Vector3 g_region_mins( g_MinWorldCoord, g_MinWorldCoord, g_MinWorldCoord );
+Vector3 g_region_maxs( g_MaxWorldCoord, g_MaxWorldCoord, g_MaxWorldCoord );
 
 scene::Node* region_sides[6];
 scene::Node* region_startpoint = 0;
@@ -1479,8 +1479,8 @@ void AddRegionBrushes( void ){
 
 	region_startpoint = &GlobalEntityCreator().createEntity( GlobalEntityClassManager().findOrInsert( "info_player_start", false ) );
 
-	ConstructRegionBrushes( region_sides, region_mins, region_maxs );
-	ConstructRegionStartpoint( region_startpoint, region_mins, region_maxs );
+	ConstructRegionBrushes( region_sides, g_region_mins, g_region_maxs );
+	ConstructRegionStartpoint( region_startpoint, g_region_mins, g_region_maxs );
 
 	Node_getTraversable( GlobalSceneGraph().root() )->insert( NodeSmartReference( *region_startpoint ) );
 }
@@ -1553,7 +1553,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			(
 				aabb_intersects_aabb(
 					instance.worldAABB(),
-					aabb_for_minmax( region_mins, region_maxs )
+					aabb_for_minmax( g_region_mins, g_region_maxs )
 					) != 0
 			) ^ m_exclude
 			)
@@ -1575,21 +1575,21 @@ void Scene_Exclude_Region( bool exclude ){
    ===========
  */
 void Map_RegionOff(){
-	region_active = false;
+	g_region_active = false;
 	g_region_item.update();
 
-	region_maxs[0] = g_MaxWorldCoord - 64;
-	region_mins[0] = g_MinWorldCoord + 64;
-	region_maxs[1] = g_MaxWorldCoord - 64;
-	region_mins[1] = g_MinWorldCoord + 64;
-	region_maxs[2] = g_MaxWorldCoord - 64;
-	region_mins[2] = g_MinWorldCoord + 64;
+	g_region_maxs[0] = g_MaxWorldCoord - 64;
+	g_region_mins[0] = g_MinWorldCoord + 64;
+	g_region_maxs[1] = g_MaxWorldCoord - 64;
+	g_region_mins[1] = g_MinWorldCoord + 64;
+	g_region_maxs[2] = g_MaxWorldCoord - 64;
+	g_region_mins[2] = g_MinWorldCoord + 64;
 
 	Scene_Exclude_All( false );
 }
 
 void Map_ApplyRegion( void ){
-	region_active = true;
+	g_region_active = true;
 	g_region_item.update();
 
 	Scene_Exclude_Region( false );
@@ -1606,9 +1606,9 @@ void Map_RegionSelectedBrushes( void ){
 
 	if ( GlobalSelectionSystem().countSelected() != 0
 		 && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
-		region_active = true;
+		g_region_active = true;
 		g_region_item.update();
-		Select_GetBounds( region_mins, region_maxs );
+		Select_GetBounds( g_region_mins, g_region_maxs );
 
 		Scene_Exclude_Selected( false );
 
@@ -1625,12 +1625,12 @@ void Map_RegionSelectedBrushes( void ){
 void Map_RegionXY( float x_min, float y_min, float x_max, float y_max ){
 	Map_RegionOff();
 
-	region_mins[0] = x_min;
-	region_maxs[0] = x_max;
-	region_mins[1] = y_min;
-	region_maxs[1] = y_max;
-	region_mins[2] = g_MinWorldCoord + 64;
-	region_maxs[2] = g_MaxWorldCoord - 64;
+	g_region_mins[0] = x_min;
+	g_region_maxs[0] = x_max;
+	g_region_mins[1] = y_min;
+	g_region_maxs[1] = y_max;
+	g_region_mins[2] = g_MinWorldCoord + 64;
+	g_region_maxs[2] = g_MaxWorldCoord - 64;
 
 	Map_ApplyRegion();
 }
@@ -1638,8 +1638,8 @@ void Map_RegionXY( float x_min, float y_min, float x_max, float y_max ){
 void Map_RegionBounds( const AABB& bounds ){
 	Map_RegionOff();
 
-	region_mins = vector3_subtracted( bounds.origin, bounds.extents );
-	region_maxs = vector3_added( bounds.origin, bounds.extents );
+	g_region_mins = vector3_subtracted( bounds.origin, bounds.extents );
+	g_region_maxs = vector3_added( bounds.origin, bounds.extents );
 
 	deleteSelection();
 

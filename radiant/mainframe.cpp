@@ -1987,6 +1987,7 @@ GtkMenuItem* create_edit_menu(){
 //		menu_tearoff( convert_menu );
 //	}
 	create_menu_item_with_mnemonic( menu, "Select All Of Type", "SelectAllOfType" );
+	create_menu_item_with_mnemonic( menu, "Select Textured", "SelectTextured" );
 	create_menu_item_with_mnemonic( menu, "_Expand Selection To Primitives", "ExpandSelectionToPrimitives" );
 	create_menu_item_with_mnemonic( menu, "_Expand Selection To Entities", "ExpandSelectionToEntities" );
 	create_menu_item_with_mnemonic( menu, "Select Connected Entities", "SelectConnectedEntities" );

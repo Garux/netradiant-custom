@@ -83,6 +83,7 @@ class ClipPoint
 {
 public:
 Vector3 m_ptClip;        // the 3d point
+Vector3 m_ptStart;
 bool m_bSet;
 
 ClipPoint(){
@@ -308,15 +309,15 @@ bool ClipMode(){
 
 void NewClipPoint( const Vector3& point ){
 	if ( g_Clip1.Set() == false ) {
-		g_Clip1.m_ptClip = point;
+		g_Clip1.m_ptClip = g_Clip1.m_ptStart = point;
 		g_Clip1.Set( true );
 	}
 	else if ( g_Clip2.Set() == false ) {
-		g_Clip2.m_ptClip = point;
+		g_Clip2.m_ptClip = g_Clip2.m_ptStart = point;
 		g_Clip2.Set( true );
 	}
 	else if ( g_Clip3.Set() == false ) {
-		g_Clip3.m_ptClip = point;
+		g_Clip3.m_ptClip = g_Clip3.m_ptStart = point;
 		g_Clip3.Set( true );
 	}
 	else
@@ -324,7 +325,7 @@ void NewClipPoint( const Vector3& point ){
 		g_Clip1.Reset();
 		g_Clip2.Reset();
 		g_Clip3.Reset();
-		g_Clip1.m_ptClip = point;
+		g_Clip1.m_ptClip = g_Clip1.m_ptStart = point;
 		g_Clip1.Set( true );
 	}
 
@@ -1000,14 +1001,27 @@ void XYWnd::Clipper_OnLButtonDown( int x, int y ){
 
 void XYWnd::Clipper_OnLButtonUp( int x, int y ){
 	if ( g_pMovingClip ) {
+		g_pMovingClip->m_ptStart = g_pMovingClip->m_ptClip;
 		g_pMovingClip = 0;
 	}
 }
 
-void XYWnd::Clipper_OnMouseMoved( int x, int y ){
+void XYWnd::Clipper_OnMouseMoved( int x, int y, bool snap ){
 	if ( g_pMovingClip ) {
 		XY_ToPoint( x, y, g_pMovingClip->m_ptClip );
 		XY_SnapToGrid( g_pMovingClip->m_ptClip );
+		if( snap ){
+			Vector3 diff = g_pMovingClip->m_ptClip - g_pMovingClip->m_ptStart;
+			int largest_index = ( fabs( diff[1] ) >  fabs( diff[0] ) )
+				? ( fabs( diff[1] ) >  fabs( diff[2] ) )
+				? 1
+				: 2
+				: ( fabs( diff[0] ) >  fabs( diff[2] ) )
+				? 0
+				: 2;
+			g_pMovingClip->m_ptClip[( largest_index + 1 ) % 3] = g_pMovingClip->m_ptStart[( largest_index + 1 ) % 3];
+			g_pMovingClip->m_ptClip[( largest_index + 2 ) % 3] = g_pMovingClip->m_ptStart[( largest_index + 2 ) % 3];
+		}
 		Clip_Update();
 	}
 }
@@ -1143,7 +1157,7 @@ void XYWnd::NewBrushDrag_End( int x, int y ){
 	}
 }
 
-void XYWnd::NewBrushDrag( int x, int y ){
+void XYWnd::NewBrushDrag( int x, int y, bool square ){
 	Vector3 mins, maxs;
 	XY_ToPoint( m_nNewBrushPressx, m_nNewBrushPressy, mins );
 	XY_SnapToGrid( mins );
@@ -1157,6 +1171,12 @@ void XYWnd::NewBrushDrag( int x, int y ){
 
 	if ( maxs[nDim] <= mins[nDim] ) {
 		maxs[nDim] = mins[nDim] + GetGridSize();
+	}
+
+	if( square ){
+		float squaresize = std::max( fabs( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ), fabs( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) );
+		maxs[(nDim + 1) % 3] = ( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ) > 0.f ? ( mins[(nDim + 1) % 3] + squaresize ) : ( mins[(nDim + 1) % 3] - squaresize );
+		maxs[(nDim + 2) % 3] = ( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) > 0.f ? ( mins[(nDim + 2) % 3] + squaresize ) : ( mins[(nDim + 2) % 3] - squaresize );
 	}
 
 	for ( int i = 0 ; i < 3 ; i++ )
@@ -1520,8 +1540,8 @@ void XYWnd::XY_MouseUp( int x, int y, unsigned int buttons ){
 	else if ( m_zoom_started ) {
 		Zoom_End();
 	}
-	else if ( ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() ) ) ||
-			g_clipper_doubleclicked ){
+	else if ( ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() || g_pMovingClip ) ) ||
+			g_clipper_doubleclicked ){ // handle mouse release, if quit quick clipper mode via doubleclick
 		Clipper_OnLButtonUp( x, y );
 		g_clipper_doubleclicked = false;
 	}
@@ -1548,11 +1568,11 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 	}
 
 	else if ( ClipMode() && g_pMovingClip != 0 ) {
-		Clipper_OnMouseMoved( x, y );
+		Clipper_OnMouseMoved( x, y, buttons & RAD_SHIFT );
 	}
 	// lbutton without selection = drag new brush
 	else if ( m_bNewBrushDrag ) {
-		NewBrushDrag( x, y );
+		NewBrushDrag( x, y, buttons == ( RAD_LBUTTON | RAD_SHIFT ) );
 	}
 
 	// control mbutton = move camera
@@ -1961,26 +1981,26 @@ void XYWnd::XY_DrawGrid( void ) {
 	const int nDim2 = ( m_viewType == XY ) ? 1 : 2;
 
 	xb = m_vOrigin[nDim1] - w;
-	if ( xb < region_mins[nDim1] ) {
-		xb = region_mins[nDim1];
+	if ( xb < g_region_mins[nDim1] ) {
+		xb = g_region_mins[nDim1];
 	}
 	xb = step * floor( xb / step );
 
 	xe = m_vOrigin[nDim1] + w;
-	if ( xe > region_maxs[nDim1] ) {
-		xe = region_maxs[nDim1];
+	if ( xe > g_region_maxs[nDim1] ) {
+		xe = g_region_maxs[nDim1];
 	}
 	xe = step * ceil( xe / step );
 
 	yb = m_vOrigin[nDim2] - h;
-	if ( yb < region_mins[nDim2] ) {
-		yb = region_mins[nDim2];
+	if ( yb < g_region_mins[nDim2] ) {
+		yb = g_region_mins[nDim2];
 	}
 	yb = step * floor( yb / step );
 
 	ye = m_vOrigin[nDim2] + h;
-	if ( ye > region_maxs[nDim2] ) {
-		ye = region_maxs[nDim2];
+	if ( ye > g_region_maxs[nDim2] ) {
+		ye = g_region_maxs[nDim2];
 	}
 	ye = step * ceil( ye / step );
 
@@ -1991,7 +2011,7 @@ void XYWnd::XY_DrawGrid( void ) {
 
 	// djbob
 	// draw minor blocks
-	if ( g_xywindow_globals_private.d_showgrid || a < 1.0f ) {
+	if ( g_xywindow_globals_private.d_showgrid /*|| a < 1.0f*/ ) {
 		if ( a < 1.0f ) {
 			glEnable( GL_BLEND );
 		}
@@ -2034,6 +2054,74 @@ void XYWnd::XY_DrawGrid( void ) {
 		}
 
 		if ( a < 1.0f ) {
+			glDisable( GL_BLEND );
+		}
+
+		if( g_region_active ){
+			float xb_, xe_, yb_, ye_;
+
+			xb_ = m_vOrigin[nDim1] - w;
+			if ( xb_ < g_MinWorldCoord ) {
+				xb_ = g_MinWorldCoord;
+			}
+			xb_ = step * floor( xb_ / step );
+
+			xe_ = m_vOrigin[nDim1] + w;
+			if ( xe_ > g_MaxWorldCoord ) {
+				xe_ = g_MaxWorldCoord;
+			}
+			xe_ = step * ceil( xe_ / step );
+
+			yb_ = m_vOrigin[nDim2] - h;
+			if ( yb_ < g_MinWorldCoord ) {
+				yb_ = g_MinWorldCoord;
+			}
+			yb_ = step * floor( yb_ / step );
+
+			ye_ = m_vOrigin[nDim2] + h;
+			if ( ye_ > g_MaxWorldCoord ) {
+				ye_ = g_MaxWorldCoord;
+			}
+			ye_ = step * ceil( ye_ / step );
+
+			glEnable( GL_BLEND );
+			// draw minor blocks
+			if ( COLORS_DIFFER( g_xywindow_globals.color_gridminor, g_xywindow_globals.color_gridback ) ) {
+				glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridminor, .5f ) ) );
+
+				glBegin( GL_LINES );
+				int i = 0;
+				for ( x = xb_ ; x < xe_ ; x += minor_step, ++i ) {
+					if ( ( i & mask ) != 0 ) {
+						glVertex2f( x, yb_ );
+						glVertex2f( x, ye_ );
+					}
+				}
+				i = 0;
+				for ( y = yb_ ; y < ye_ ; y += minor_step, ++i ) {
+					if ( ( i & mask ) != 0 ) {
+						glVertex2f( xb_, y );
+						glVertex2f( xe_, y );
+					}
+				}
+				glEnd();
+			}
+
+			// draw major blocks
+			if ( COLORS_DIFFER( g_xywindow_globals.color_gridmajor, g_xywindow_globals.color_gridminor ) ) {
+				glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridmajor, .5f ) ) );
+
+				glBegin( GL_LINES );
+				for ( x = xb_ ; x <= xe_ ; x += step ) {
+					glVertex2f( x, yb_ );
+					glVertex2f( x, ye_ );
+				}
+				for ( y = yb_ ; y <= ye_ ; y += step ) {
+					glVertex2f( xb_, y );
+					glVertex2f( xe_, y );
+				}
+				glEnd();
+			}
 			glDisable( GL_BLEND );
 		}
 	}
@@ -2123,26 +2211,26 @@ void XYWnd::XY_DrawBlockGrid(){
 	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
 
 	xb = m_vOrigin[nDim1] - w;
-	if ( xb < region_mins[nDim1] ) {
-		xb = region_mins[nDim1];
+	if ( xb < g_region_mins[nDim1] ) {
+		xb = g_region_mins[nDim1];
 	}
 	xb = static_cast<float>( g_xywindow_globals_private.blockSize * floor( xb / g_xywindow_globals_private.blockSize ) );
 
 	xe = m_vOrigin[nDim1] + w;
-	if ( xe > region_maxs[nDim1] ) {
-		xe = region_maxs[nDim1];
+	if ( xe > g_region_maxs[nDim1] ) {
+		xe = g_region_maxs[nDim1];
 	}
 	xe = static_cast<float>( g_xywindow_globals_private.blockSize * ceil( xe / g_xywindow_globals_private.blockSize ) );
 
 	yb = m_vOrigin[nDim2] - h;
-	if ( yb < region_mins[nDim2] ) {
-		yb = region_mins[nDim2];
+	if ( yb < g_region_mins[nDim2] ) {
+		yb = g_region_mins[nDim2];
 	}
 	yb = static_cast<float>( g_xywindow_globals_private.blockSize * floor( yb / g_xywindow_globals_private.blockSize ) );
 
 	ye = m_vOrigin[nDim2] + h;
-	if ( ye > region_maxs[nDim2] ) {
-		ye = region_maxs[nDim2];
+	if ( ye > g_region_maxs[nDim2] ) {
+		ye = g_region_maxs[nDim2];
 	}
 	ye = static_cast<float>( g_xywindow_globals_private.blockSize * ceil( ye / g_xywindow_globals_private.blockSize ) );
 

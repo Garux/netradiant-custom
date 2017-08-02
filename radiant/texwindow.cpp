@@ -2288,10 +2288,10 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 			//gtk_menu_bar_append( GTK_MENU_BAR( menu_bar ), tags_item );
 
 			GtkButton* button = GTK_BUTTON( gtk_button_new() );
-			//button_set_icon( button, "texbro_tags.png" );
-			GtkWidget *label = gtk_label_new (">t");
-			gtk_container_add (GTK_CONTAINER (button), label);
-			gtk_widget_show (label);
+			button_set_icon( button, "texbro_tags.png" );
+//			GtkWidget *label = gtk_label_new (">t");
+//			gtk_container_add (GTK_CONTAINER (button), label);
+//			gtk_widget_show (label);
 
 			gtk_widget_show( GTK_WIDGET( button ) );
 			gtk_button_set_relief( button, GTK_RELIEF_NONE );

@@ -663,6 +663,7 @@ void TexMatToFakeTexCoords( const brushprimit_texdef_t& bp_texdef, texdef_t& tex
 
 // compute back the texture matrix from fake shift scale rot
 void FakeTexCoordsToTexMat( const texdef_t& texdef, brushprimit_texdef_t& bp_texdef ){
+#if 1
 	double r = degrees_to_radians( -texdef.rotate );
 	double c = cos( r );
 	double s = sin( r );
@@ -674,6 +675,20 @@ void FakeTexCoordsToTexMat( const texdef_t& texdef, brushprimit_texdef_t& bp_tex
 	bp_texdef.coords[1][1] = static_cast<float>( y * c );
 	bp_texdef.coords[0][2] = -texdef.shift[0];
 	bp_texdef.coords[1][2] = texdef.shift[1];
+#else
+	double r = degrees_to_radians( texdef.rotate );
+	double c = cos( r );
+	double s = sin( r );
+	double x = 1.0f / texdef.scale[0];
+	double y = 1.0f / texdef.scale[1];
+	bp_texdef.coords[0][0] = static_cast<float>( x * c );
+	bp_texdef.coords[1][0] = static_cast<float>( -y * s );
+	bp_texdef.coords[0][1] = static_cast<float>( x * s );
+	bp_texdef.coords[1][1] = static_cast<float>( y * c );
+	bp_texdef.coords[0][2] = -texdef.shift[0];
+	bp_texdef.coords[1][2] = texdef.shift[1];
+#endif
+//	globalOutputStream() << "[ " << bp_texdef.coords[0][0] << " " << bp_texdef.coords[0][1] << " ][ " << bp_texdef.coords[1][0] << " " << bp_texdef.coords[1][1] << " ]\n";
 }
 
 #if 0 // texture locking (brush primit)
@@ -1349,7 +1364,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 
 		identity2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, identityCorrected );
 	}
-	else if( dot != dot ){ //catch QNAN: happens on scaling cuboid on Z and sometimes on rotating
+	else if( dot != dot ){ //catch QNAN: happens on scaling cuboid on Z and sometimes on rotating (in bp mode)
 		return;
 	}
 

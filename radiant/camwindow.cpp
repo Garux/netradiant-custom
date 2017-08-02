@@ -320,6 +320,7 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 	Camera_Freemove_updateAxes( camera );
 }
 
+#if 0
 void Cam_MouseControl( camera_t& camera, int x, int y ){
 //	int xl, xh;
 //	int yl, yh;
@@ -353,6 +354,7 @@ void Cam_MouseControl( camera_t& camera, int x, int y ){
 
 	Camera_updateModelview( camera );
 }
+#endif // 0
 
 void Camera_mouseMove( camera_t& camera, int x, int y ){
 	//globalOutputStream() << "mousemove... ";
@@ -655,17 +657,17 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 		cam->m_strafe = false;
 		break;
 	case 1:
-		cam->m_strafe = ( state & GDK_CONTROL_MASK ) != 0 && ( state & GDK_SHIFT_MASK ) == 0;
+		cam->m_strafe = ( ( state & GDK_CONTROL_MASK ) != 0 || ( state & GDK_BUTTON3_MASK ) != 0 ) && ( state & GDK_SHIFT_MASK ) == 0;
 		cam->m_strafe_forward = false;
 		break;
 	case 2:
-		cam->m_strafe = ( state & GDK_CONTROL_MASK ) != 0 && ( state & GDK_SHIFT_MASK ) == 0;
+		cam->m_strafe = ( ( state & GDK_CONTROL_MASK ) != 0 || ( state & GDK_BUTTON3_MASK ) != 0 ) && ( state & GDK_SHIFT_MASK ) == 0;
 		cam->m_strafe_forward = cam->m_strafe;
 		break;
 	case 4:
 		cam->m_strafe_forward_invert = true;
 	default:
-		cam->m_strafe = ( state & GDK_CONTROL_MASK ) != 0;
+		cam->m_strafe = ( state & GDK_CONTROL_MASK ) != 0 || ( state & GDK_BUTTON3_MASK ) != 0;
 		if ( cam->m_strafe ) {
 			cam->m_strafe_forward = ( state & GDK_SHIFT_MASK ) != 0;
 		}
@@ -673,6 +675,11 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 			cam->m_strafe_forward = false;
 		}
 		break;
+	}
+
+	if( ( state & GDK_BUTTON1_MASK ) != 0 ){
+		cam->m_strafe = true;
+		cam->m_strafe_forward = false;
 	}
 }
 
@@ -713,6 +720,7 @@ guint m_selection_button_release_handler;
 guint m_selection_motion_handler;
 
 guint m_freelook_button_press_handler;
+guint m_freelook_button_release_handler;
 
 guint m_sizeHandler;
 guint m_exposeHandler;
@@ -752,6 +760,7 @@ void Cam_ChangeFloor( bool up );
 void DisableFreeMove();
 void EnableFreeMove();
 bool m_bFreeMove;
+bool m_bFreeMove_entering;
 
 CameraView& getCameraView(){
 	return m_cameraview;
@@ -863,12 +872,13 @@ void context_menu(){
 /* GDK_2BUTTON_PRESS doesn't always work in this case, so... */
 bool context_menu_try( CamWnd* camwnd ){
 	//globalOutputStream() << camwnd->m_rightClickTimer.elapsed_msec() << "\n";
-	return camwnd->m_rightClickTimer.elapsed_msec() < 200;
+	return camwnd->m_rightClickTimer.elapsed_msec() < 250;
 	//doesn't work if cam redraw > 200msec (3x click works): gtk_widget_queue_draw proceeds after timer.start()
 }
 
 gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+		camwnd->m_bFreeMove_entering = true;
 		if( context_menu_try( camwnd ) ){
 			context_menu();
 		}
@@ -883,15 +893,27 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 
 gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+		camwnd->m_bFreeMove_entering = false;
 		bool doubleclicked = context_menu_try( camwnd );
-		camwnd->DisableFreeMove();
 		if( doubleclicked ){
+			camwnd->DisableFreeMove();
 			context_menu();
 		}
 		else{
 			camwnd->m_rightClickTimer.start();
 		}
 		return TRUE;
+	}
+	return FALSE;
+}
+
+gboolean disable_freelook_button_release( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
+	if ( event->type == GDK_BUTTON_RELEASE && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+		if( ( camwnd->m_rightClickTimer.elapsed_msec() > 300 && camwnd->m_bFreeMove_entering ) ||
+			( camwnd->m_rightClickTimer.elapsed_msec() < 300 && !camwnd->m_bFreeMove_entering ) ){
+			camwnd->DisableFreeMove();
+			return TRUE;
+		}
 	}
 	return FALSE;
 }
@@ -1266,6 +1288,7 @@ void CamWnd_Add_Handlers_FreeMove( CamWnd& camwnd ){
 	camwnd.m_selection_motion_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "motion_notify_event", G_CALLBACK( DeferredMotion::gtk_motion ), &camwnd.m_deferred_motion_freemove );
 
 	camwnd.m_freelook_button_press_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_press_event", G_CALLBACK( disable_freelook_button_press ), &camwnd );
+	camwnd.m_freelook_button_release_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_release_event", G_CALLBACK( disable_freelook_button_release ), &camwnd );
 
 	KeyEvent_connect( "CameraFreeMoveForward" );
 	KeyEvent_connect( "CameraFreeMoveBack" );
@@ -1304,6 +1327,7 @@ void CamWnd_Remove_Handlers_FreeMove( CamWnd& camwnd ){
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_selection_motion_handler );
 
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_freelook_button_press_handler );
+	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_freelook_button_release_handler );
 }
 
 CamWnd::CamWnd() :
@@ -1320,6 +1344,7 @@ CamWnd::CamWnd() :
 	m_selection_button_release_handler( 0 ),
 	m_selection_motion_handler( 0 ),
 	m_freelook_button_press_handler( 0 ),
+	m_freelook_button_release_handler( 0 ),
 	m_drawing( false ){
 	m_bFreeMove = false;
 
