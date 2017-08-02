@@ -49,7 +49,6 @@ enum ETexturesMode
 	eTextures_LINEAR = 3,
 	eTextures_LINEAR_MIPMAP_NEAREST = 4,
 	eTextures_LINEAR_MIPMAP_LINEAR = 5,
-	eTextures_MAX_ANISOTROPY = 6,
 };
 
 enum TextureCompressionFormat
@@ -89,15 +88,6 @@ struct texture_globals_t
 texture_globals_t g_texture_globals( GL_RGBA );
 
 void SetTexParameters( ETexturesMode mode ){
-	float maxAniso = QGL_maxTextureAnisotropy();
-	if ( maxAniso > 1 ) {
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f );
-	}
-	else
-	if ( mode == eTextures_MAX_ANISOTROPY ) {
-		mode = eTextures_LINEAR_MIPMAP_LINEAR;
-	}
-
 	switch ( mode )
 	{
 	case eTextures_NEAREST:
@@ -124,15 +114,20 @@ void SetTexParameters( ETexturesMode mode ){
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 		break;
-	case eTextures_MAX_ANISOTROPY:
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso );
-		break;
 	default:
 		globalOutputStream() << "invalid texture mode\n";
 	}
 }
 
+void SetTexAnisotropy( bool anisotropy ){
+	float maxAniso = QGL_maxTextureAnisotropy();
+	if ( maxAniso > 1 ) {
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy ? maxAniso : 1.f );
+	}
+}
+
 ETexturesMode g_texture_mode = eTextures_LINEAR_MIPMAP_LINEAR;
+bool g_TextureAnisotropy = true;
 
 
 
@@ -206,6 +201,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	glBindTexture( GL_TEXTURE_2D, q->texture_number );
 
 	SetTexParameters( g_texture_mode );
+	SetTexAnisotropy( g_TextureAnisotropy );
 
 	int gl_width = 1;
 	while ( gl_width < nWidth )
@@ -557,11 +553,13 @@ void Textures_setModeChangedNotify( const Callback& notify ){
 void Textures_ModeChanged(){
 	if ( g_texturesmap->realised() ) {
 		SetTexParameters( g_texture_mode );
+		SetTexAnisotropy( g_TextureAnisotropy );
 
 		for ( TexturesMap::iterator i = g_texturesmap->begin(); i != g_texturesmap->end(); ++i )
 		{
 			glBindTexture( GL_TEXTURE_2D, ( *i ).value->texture_number );
 			SetTexParameters( g_texture_mode );
+			SetTexAnisotropy( g_TextureAnisotropy );
 		}
 
 		glBindTexture( GL_TEXTURE_2D, 0 );
@@ -572,6 +570,14 @@ void Textures_ModeChanged(){
 void Textures_SetMode( ETexturesMode mode ){
 	if ( g_texture_mode != mode ) {
 		g_texture_mode = mode;
+
+		Textures_ModeChanged();
+	}
+}
+
+void Textures_SetAnisotropy( bool anisotropy ){
+	if ( g_TextureAnisotropy != anisotropy ) {
+		g_TextureAnisotropy = anisotropy;
 
 		Textures_ModeChanged();
 	}
@@ -677,9 +683,6 @@ void TextureModeImport( ETexturesMode& self, int value ){
 		break;
 	case 5:
 		Textures_SetMode( eTextures_LINEAR_MIPMAP_LINEAR );
-		break;
-	case 6:
-		Textures_SetMode( eTextures_MAX_ANISOTROPY );
 	}
 }
 typedef ReferenceCaller1<ETexturesMode, int, TextureModeImport> TextureModeImportCaller;
@@ -704,9 +707,6 @@ void TextureModeExport( ETexturesMode& self, const IntImportCallback& importer )
 		break;
 	case eTextures_LINEAR_MIPMAP_LINEAR:
 		importer( 5 );
-		break;
-	case eTextures_MAX_ANISOTROPY:
-		importer( 6 );
 		break;
 	default:
 		importer( 4 );
@@ -733,7 +733,7 @@ void Textures_constructPreferences( PreferencesPage& page ){
 		FloatExportCallback( FloatExportCaller( g_texture_globals.fGamma ) )
 		);
 	{
-		const char* texture_mode[] = { "Nearest", "Nearest Mipmap", "Linear", "Bilinear", "Bilinear Mipmap", "Trilinear", "Anisotropy" };
+		const char* texture_mode[] = { "Nearest", "Nearest Mipmap", "Linear", "Bilinear", "Bilinear Mipmap", "Trilinear" };
 		page.appendCombo(
 			"Texture Render Mode",
 			STRING_ARRAY_RANGE( texture_mode ),
@@ -762,6 +762,9 @@ void Textures_constructPreferences( PreferencesPage& page ){
 			IntExportCaller( reinterpret_cast<int&>( g_texture_globals.m_nTextureCompressionFormat ) )
 			);
 	}
+	page.appendCheckBox( "", "Anisotropy",
+		FreeCaller1<bool, Textures_SetAnisotropy>(),
+		BoolExportCaller( g_TextureAnisotropy ) );
 }
 void Textures_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Textures", "Texture Settings" ) );
@@ -783,6 +786,7 @@ void Textures_Construct(){
 
 	GlobalPreferenceSystem().registerPreference( "TextureCompressionFormat", TextureCompressionImportStringCaller(), IntExportStringCaller( reinterpret_cast<int&>( g_texture_globals.m_nTextureCompressionFormat ) ) );
 	GlobalPreferenceSystem().registerPreference( "TextureFiltering", IntImportStringCaller( reinterpret_cast<int&>( g_texture_mode ) ), IntExportStringCaller( reinterpret_cast<int&>( g_texture_mode ) ) );
+	GlobalPreferenceSystem().registerPreference( "TextureAnisotropy", BoolImportStringCaller( g_TextureAnisotropy ), BoolExportStringCaller( g_TextureAnisotropy ) );
 	GlobalPreferenceSystem().registerPreference( "TextureQuality", IntImportStringCaller( g_Textures_textureQuality.m_latched ), IntExportStringCaller( g_Textures_textureQuality.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "SI_Gamma", FloatImportStringCaller( g_texture_globals.fGamma ), FloatExportStringCaller( g_texture_globals.fGamma ) );
 

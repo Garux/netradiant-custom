@@ -1192,6 +1192,7 @@ Shader* capture( const char* name ){
 					|| *name == '['
 					|| *name == '<'
 					|| *name == '('
+					|| *name == '{'
 					|| strchr( name, '\\' ) == 0, "shader name contains invalid characters: \"" << name << "\"" );
 #if DEBUG_SHADERS
 	globalOutputStream() << "shaders capture: " << makeQuoted( name ) << '\n';
@@ -2080,21 +2081,30 @@ void OpenGLShader::construct( const char* name ){
 	OpenGLState& state = appendDefaultPass();
 	switch ( name[0] )
 	{
-	case '(':
+	case '{':	//add
+		sscanf( name, "{%g %g %g}", &state.m_colour[0], &state.m_colour[1], &state.m_colour[2] );
+		state.m_colour[3] = 1.0f;
+		state.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_BLEND | RENDER_FILL | RENDER_COLOURWRITE /*| RENDER_DEPTHWRITE*/ | RENDER_LIGHTING;
+		state.m_blend_src = GL_ONE;
+		state.m_blend_dst = GL_ONE;
+		state.m_sort = OpenGLState::eSortTranslucent;
+		break;
+
+	case '(':	//fill
 		sscanf( name, "(%g %g %g)", &state.m_colour[0], &state.m_colour[1], &state.m_colour[2] );
 		state.m_colour[3] = 1.0f;
 		state.m_state = RENDER_FILL | RENDER_LIGHTING | RENDER_DEPTHTEST | RENDER_CULLFACE | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
 		state.m_sort = OpenGLState::eSortFullbright;
 		break;
 
-	case '[':
+	case '[':	//blend
 		sscanf( name, "[%g %g %g]", &state.m_colour[0], &state.m_colour[1], &state.m_colour[2] );
 		state.m_colour[3] = 0.5f;
 		state.m_state = RENDER_FILL | RENDER_LIGHTING | RENDER_DEPTHTEST | RENDER_CULLFACE | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_BLEND;
 		state.m_sort = OpenGLState::eSortTranslucent;
 		break;
 
-	case '<':
+	case '<':	//wire
 		sscanf( name, "<%g %g %g>", &state.m_colour[0], &state.m_colour[1], &state.m_colour[2] );
 		state.m_colour[3] = 1;
 		state.m_state = RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
@@ -2156,7 +2166,7 @@ void OpenGLShader::construct( const char* name ){
 			state.m_colour[1] = g_camwindow_globals.color_selbrushes3d[1];
 			state.m_colour[2] = g_camwindow_globals.color_selbrushes3d[2];
 			state.m_colour[3] = 0.3f;
-			state.m_state = RENDER_FILL | RENDER_DEPTHTEST | RENDER_CULLFACE | RENDER_BLEND | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
+			state.m_state = RENDER_FILL | RENDER_DEPTHTEST | RENDER_CULLFACE | RENDER_BLEND | RENDER_COLOURWRITE/* | RENDER_DEPTHWRITE*/;
 			state.m_sort = OpenGLState::eSortHighlight;
 			state.m_depthfunc = GL_LEQUAL;
 		}
@@ -2203,6 +2213,7 @@ void OpenGLShader::construct( const char* name ){
 			state.m_sort = OpenGLState::eSortFullbright;
 			state.m_linewidth = 4;
 		}
+#if 0
 		else if ( string_equal( name + 1, "LIGHT_SPHERE" ) ) {
 			state.m_colour[0] = .15f * .95f;
 			state.m_colour[1] = .15f * .95f;
@@ -2223,6 +2234,7 @@ void OpenGLShader::construct( const char* name ){
 			state.m_blend_dst = GL_ONE;
 			state.m_sort = OpenGLState::eSortTranslucent;
 		}
+#endif // 0
 		else if ( string_equal( name + 1, "WIRE_OVERLAY" ) ) {
 #if 0
 			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST | RENDER_OVERRIDE;
@@ -2365,9 +2377,9 @@ void OpenGLShader::construct( const char* name ){
 				state.m_blend_src = convertBlendFactor( blendFunc.m_src );
 				state.m_blend_dst = convertBlendFactor( blendFunc.m_dst );
 				state.m_depthfunc = GL_LEQUAL;
-				if ( state.m_blend_src == GL_SRC_ALPHA || state.m_blend_dst == GL_SRC_ALPHA ) {
-					state.m_state |= RENDER_DEPTHWRITE;
-				}
+//				if ( state.m_blend_src == GL_SRC_ALPHA || state.m_blend_dst == GL_SRC_ALPHA ) {
+//					state.m_state |= RENDER_DEPTHWRITE;
+//				}
 			}
 			else
 			{

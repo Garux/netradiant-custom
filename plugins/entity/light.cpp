@@ -66,7 +66,61 @@
 #include "entity.h"
 extern bool g_newLightDraw;
 
+#define SPHERE_FILL_SIDES 16
+#define SPHERE_FILL_POINTS SPHERE_FILL_SIDES * (SPHERE_FILL_SIDES - 1) * 6 + SPHERE_FILL_SIDES * 3
 
+#define SPHERE_WIRE_SIDES 24
+#define SPHERE_WIRE_POINTS SPHERE_WIRE_SIDES * 3
+
+void sphere_construct_fill( Vector3 (&radiiPoints)[SPHERE_FILL_POINTS] ){
+
+	const double dt = c_2pi / static_cast<double>( SPHERE_FILL_SIDES );
+	const double dp = c_pi / static_cast<double>( SPHERE_FILL_SIDES );
+	int k = 0;
+
+	for ( int i = 0; i <= SPHERE_FILL_SIDES - 1; ++i )
+	{
+		for ( int j = 0; j <= SPHERE_FILL_SIDES - 2; ++j )
+		{
+			const double t = i * dt;
+			const double p = ( j * dp ) - ( c_pi / 2.0 );
+
+			radiiPoints[k++] = vector3_for_spherical( t, p );
+			radiiPoints[k++] = vector3_for_spherical( t, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t, p );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p );
+		}
+	}
+
+	{
+		const double p = ( SPHERE_FILL_SIDES - 1 ) * dp - ( c_pi / 2.0 );
+		for ( int i = 0; i <= SPHERE_FILL_SIDES - 1; ++i )
+		{
+			const double t = i * dt;
+
+			radiiPoints[k++] = vector3_for_spherical( t, p );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p );
+		}
+	}
+}
+
+void sphere_draw_fill_( const Vector3& origin, float radius, const Vector3 (&radiiPoints)[SPHERE_FILL_POINTS] ){
+	if ( radius <= 0 ) {
+		return;
+	}
+
+	glBegin( GL_TRIANGLES );
+	for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
+	{
+		glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
+	}
+	glEnd();
+}
+
+#if 0
 void sphere_draw_fill( const Vector3& origin, float radius, int sides ){
 	if ( radius <= 0 ) {
 		return;
@@ -195,6 +249,67 @@ void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 		glEnd();
 	}
 }
+#endif // 0
+
+void sphere_construct_wire( Vector3 (&radiiPoints)[SPHERE_WIRE_POINTS] ){
+	int k = 0;
+
+	for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+	{
+		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+
+		radiiPoints[k++] =
+		Vector3(
+			static_cast<float>( dc ),
+			static_cast<float>( ds ),
+			0.f
+			);
+	}
+
+	for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+	{
+		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+
+		radiiPoints[k++] =
+		Vector3(
+			static_cast<float>( dc ),
+			0.f,
+			static_cast<float>( ds )
+			);
+	}
+
+	for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+	{
+		double ds = sin( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+		double dc = cos( ( i * 2 * c_pi ) / SPHERE_WIRE_SIDES );
+
+		radiiPoints[k++] =
+		Vector3(
+			0.f,
+			static_cast<float>( dc ),
+			static_cast<float>( ds )
+			);
+	}
+
+}
+
+
+void sphere_draw_wire_( const Vector3& origin, float radius, const Vector3 (&radiiPoints)[SPHERE_WIRE_POINTS] ){
+	int k = 0;
+	for( int j = 0; j < 3; j++ )
+	{
+		glBegin( GL_LINE_LOOP );
+
+		for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
+		{
+			glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[k++], radius ) ) ) );
+		}
+
+		glEnd();
+	}
+}
 
 void light_draw_box_lines( const Vector3& origin, const Vector3 points[8] ){
 	//draw lines from the center of the bbox to the corners
@@ -226,7 +341,7 @@ void light_draw_box_lines( const Vector3& origin, const Vector3 points[8] ){
 
 	glEnd();
 }
-
+#if 0
 void light_draw_radius_wire( const Vector3& origin, const float envelope[3] ){
 	if ( envelope[0] > 0 ) {
 		sphere_draw_wire( origin, envelope[0], 24 );
@@ -238,7 +353,19 @@ void light_draw_radius_wire( const Vector3& origin, const float envelope[3] ){
 		sphere_draw_wire( origin, envelope[2], 24 );
 	}
 }
-
+#endif // 0
+void light_draw_radius_wire_( const Vector3& origin, const float envelope[3], const Vector3 (&radiiPoints)[SPHERE_WIRE_POINTS] ){
+	if ( envelope[0] > 0 ) {
+		sphere_draw_wire_( origin, envelope[0], radiiPoints );
+	}
+	if ( envelope[1] > 0 ) {
+		sphere_draw_wire_( origin, envelope[1], radiiPoints );
+	}
+	if ( envelope[2] > 0 ) {
+		sphere_draw_wire_( origin, envelope[2], radiiPoints );
+	}
+}
+#if 0
 void light_draw_radius_fill( const Vector3& origin, const float envelope[3] ){
 	if ( envelope[0] > 0 ) {
 		sphere_draw_fill( origin, envelope[0], 16 );
@@ -248,6 +375,18 @@ void light_draw_radius_fill( const Vector3& origin, const float envelope[3] ){
 	}
 	if ( envelope[2] > 0 ) {
 		sphere_draw_fill( origin, envelope[2], 16 );
+	}
+}
+#endif // 0
+void light_draw_radius_fill_( const Vector3& origin, const float envelope[3], const Vector3 (&radiiPoints)[SPHERE_FILL_POINTS] ){
+	if ( envelope[0] > 0 ) {
+		sphere_draw_fill_( origin, envelope[0], radiiPoints );
+	}
+	if ( envelope[1] > 0 ) {
+		sphere_draw_fill_( origin, envelope[1], radiiPoints );
+	}
+	if ( envelope[2] > 0 ) {
+		sphere_draw_fill_( origin, envelope[2], radiiPoints );
 	}
 }
 
@@ -533,7 +672,7 @@ bool m_useCenterKey;
 Doom3LightRadius( const char* defaultRadius ) : m_defaultRadius( 300, 300, 300 ), m_center( 0, 0, 0 ), m_useCenterKey( false ){
 	if ( g_lightType == LIGHTTYPE_DOOM3 ){
 		if ( !string_parse_vector3( defaultRadius, m_defaultRadius ) ) {
-		globalErrorStream() << "Doom3LightRadius: failed to parse default light radius\n";
+			globalErrorStream() << "Doom3LightRadius: failed to parse default light radius\n";
 		}
 	m_radius = m_defaultRadius;
 	}
@@ -564,33 +703,41 @@ class RenderLightRadiiWire : public OpenGLRenderable
 LightRadii& m_radii;
 const Vector3& m_origin;
 public:
+static Vector3 m_radiiPoints[SPHERE_WIRE_POINTS];
+
 RenderLightRadiiWire( LightRadii& radii, const Vector3& origin ) : m_radii( radii ), m_origin( origin ){
 }
 void render( RenderStateFlags state ) const {
-	light_draw_radius_wire( m_origin, m_radii.m_radii );
+	//light_draw_radius_wire( m_origin, m_radii.m_radii );
+	light_draw_radius_wire_( m_origin, m_radii.m_radii, m_radiiPoints );
 }
 };
+Vector3 RenderLightRadiiWire::m_radiiPoints[SPHERE_WIRE_POINTS] = {g_vector3_identity};
 
 class RenderLightRadiiFill : public OpenGLRenderable
 {
 LightRadii& m_radii;
 const Vector3& m_origin;
 public:
-static Shader* m_state;
+//static Shader* m_state;
+static Vector3 m_radiiPoints[SPHERE_FILL_POINTS];
 
 RenderLightRadiiFill( LightRadii& radii, const Vector3& origin ) : m_radii( radii ), m_origin( origin ){
 }
 void render( RenderStateFlags state ) const {
-	light_draw_radius_fill( m_origin, m_radii.m_radii );
+	//light_draw_radius_fill( m_origin, m_radii.m_radii );
+	light_draw_radius_fill_( m_origin, m_radii.m_radii, m_radiiPoints );
 }
 };
+//Shader* RenderLightRadiiFill::m_state = 0;
+Vector3 RenderLightRadiiFill::m_radiiPoints[SPHERE_FILL_POINTS] = {g_vector3_identity};
 
 class RenderLightRadiiBox : public OpenGLRenderable
 {
 const Vector3& m_origin;
 public:
 mutable Vector3 m_points[8];
-static Shader* m_state;
+//static Shader* m_state;
 
 RenderLightRadiiBox( const Vector3& origin ) : m_origin( origin ){
 }
@@ -609,8 +756,6 @@ void render( RenderStateFlags state ) const {
   #endif
 }
 };
-
-Shader* RenderLightRadiiFill::m_state = 0;
 
 class RenderLightCenter : public OpenGLRenderable
 {
@@ -1104,18 +1249,20 @@ const AABB& localAABB() const {
 mutable Matrix4 m_projectionOrientation;
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
-	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
+	renderer.SetState( m_colour.state(), Renderer::eWireframeOnly );
 	renderer.SetState( m_colour.state(), Renderer::eFullMaterials );
 	renderer.addRenderable( *this, localToWorld );
 
 	if ( selected && g_lightRadii && string_empty( m_entity.getKeyValue( "target" ) ) ) {
 		if ( renderer.getStyle() == Renderer::eFullMaterials ) {
-			renderer.SetState( RenderLightRadiiFill::m_state, Renderer::eFullMaterials );
+			renderer.SetState( m_colour.state_add(), Renderer::eFullMaterials );
 			renderer.Highlight( Renderer::ePrimitive, false );
+			renderer.Highlight( Renderer::eFace, false );
 			renderer.addRenderable( m_radii_fill, localToWorld );
 		}
 		else
 		{
+			renderer.Highlight( Renderer::ePrimitive, false );
 			renderer.addRenderable( m_radii_wire, localToWorld );
 		}
 	}
@@ -1709,11 +1856,13 @@ void Light_Construct( LightType lightType ){
 		LightShader::m_defaultShader = "lights/defaultProjectedLight";
 #endif
 	}
-	RenderLightRadiiFill::m_state = GlobalShaderCache().capture( "$Q3MAP2_LIGHT_SPHERE" );
+	//RenderLightRadiiFill::m_state = GlobalShaderCache().capture( "$Q3MAP2_LIGHT_SPHERE" );
 	RenderLightCenter::m_state = GlobalShaderCache().capture( "$BIGPOINT" );
+	sphere_construct_fill( RenderLightRadiiFill::m_radiiPoints );
+	sphere_construct_wire( RenderLightRadiiWire::m_radiiPoints );
 }
 void Light_Destroy(){
-	GlobalShaderCache().release( "$Q3MAP2_LIGHT_SPHERE" );
+	//GlobalShaderCache().release( "$Q3MAP2_LIGHT_SPHERE" );
 	GlobalShaderCache().release( "$BIGPOINT" );
 }
 

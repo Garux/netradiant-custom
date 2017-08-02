@@ -49,12 +49,15 @@ class Colour
 {
 Callback m_colourChanged;
 Shader* m_state;
+Shader* m_state_additive;
 
 void capture_state(){
 	m_state = colour_capture_state_fill( m_colour );
+	m_state_additive = colour_capture_state_add( m_colour );
 }
 void release_state(){
 	colour_release_state_fill( m_colour );
+	colour_release_state_add( m_colour );
 }
 
 public:
@@ -85,6 +88,9 @@ void write( Entity* entity ) const {
 
 Shader* state() const {
 	return m_state;
+}
+Shader* state_additive() const {
+	return m_state_additive;
 }
 };
 
