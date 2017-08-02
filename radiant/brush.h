@@ -376,7 +376,8 @@ SavedState( const FaceShader& faceShader ){
 
 void exportState( FaceShader& faceShader ) const {
 	faceShader.setShader( m_shader.c_str() );
-	faceShader.setFlags( m_flags );
+	//faceShader.setFlags( m_flags );
+	faceShader.m_flags = m_flags;
 }
 };
 

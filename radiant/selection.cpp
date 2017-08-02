@@ -193,7 +193,7 @@ class Manipulatable
 {
 public:
 virtual void Construct( const Matrix4& device2manip, const float x, const float y ) = 0;
-virtual void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ) = 0;
+virtual void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ) = 0;
 };
 
 void transform_local2object( Matrix4& object, const Matrix4& local, const Matrix4& local2object ){
@@ -221,12 +221,26 @@ void Construct( const Matrix4& device2manip, const float x, const float y ){
 	point_on_sphere( m_start, device2manip, x, y );
 	vector3_normalise( m_start );
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
 	Vector3 current;
-
 	point_on_sphere( current, device2manip, x, y );
-	vector3_normalise( current );
 
+	if( snap ){
+		Vector3 axis( 0, 0, 0 );
+		for( std::size_t i = 0; i < 3; ++i ){
+			if( current[i] == 0.0f ){
+				axis[i] = 1.0f;
+				break;
+			}
+		}
+		if( vector3_length_squared( axis ) != 0 ){
+			constrain_to_axis( current, axis );
+			m_rotatable.rotate( quaternion_for_axisangle( axis, float_snapped( angle_for_axis( m_start, current, axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
+			return;
+		}
+	}
+
+	vector3_normalise( current );
 	m_rotatable.rotate( quaternion_for_unit_vectors( m_start, current ) );
 }
 };
@@ -245,12 +259,17 @@ void Construct( const Matrix4& device2manip, const float x, const float y ){
 	constrain_to_axis( m_start, m_axis );
 }
 /// \brief Converts current position to a normalised vector orthogonal to axis.
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
 	Vector3 current;
 	point_on_sphere( current, device2manip, x, y );
 	constrain_to_axis( current, m_axis );
 
-	m_rotatable.rotate( quaternion_for_axisangle( m_axis, angle_for_axis( m_start, current, m_axis ) ) );
+	if( snap ){
+		m_rotatable.rotate( quaternion_for_axisangle( m_axis, float_snapped( angle_for_axis( m_start, current, m_axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
+	}
+	else{
+		m_rotatable.rotate( quaternion_for_axisangle( m_axis, angle_for_axis( m_start, current, m_axis ) ) );
+	}
 }
 
 void SetAxis( const Vector3& axis ){
@@ -285,7 +304,7 @@ TranslateAxis( Translatable& translatable )
 void Construct( const Matrix4& device2manip, const float x, const float y ){
 	point_on_axis( m_start, m_axis, device2manip, x, y );
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
 	Vector3 current;
 	point_on_axis( current, m_axis, device2manip, x, y );
 	current = vector3_scaled( m_axis, distance_for_axis( m_start, current, m_axis ) );
@@ -313,10 +332,21 @@ TranslateFree( Translatable& translatable )
 void Construct( const Matrix4& device2manip, const float x, const float y ){
 	point_on_plane( m_start, device2manip, x, y );
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
 	Vector3 current;
 	point_on_plane( current, device2manip, x, y );
 	current = vector3_subtracted( current, m_start );
+
+	if( snap ){
+		for ( std::size_t i = 0; i < 3 ; ++i ){
+			if( fabs( current[i] ) >= fabs( current[(i + 1) % 3] ) ){
+				current[(i + 1) % 3] = 0.0f;
+			}
+			else{
+				current[i] = 0.0f;
+			}
+		}
+	}
 
 	translation_local2object( current, current, manip2object );
 	vector3_snap( current, GetSnapGridSize() );
@@ -326,7 +356,7 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 };
 
 void GetSelectionAABB( AABB& bounds );
-const Matrix4& ssGetPivot2World();
+const Matrix4& SelectionSystem_GetPivot2World();
 
 class Scalable
 {
@@ -353,14 +383,15 @@ void Construct( const Matrix4& device2manip, const float x, const float y ){
 
 	AABB aabb;
 	GetSelectionAABB( aabb );
-	Vector3 transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
-	m_choosen_extent = Vector3( std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
+	Vector3 transform_origin = vector4_to_vector3( SelectionSystem_GetPivot2World().t() );
+	m_choosen_extent = Vector3(
+					std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
 					std::max( aabb.origin[1] + aabb.extents[1] - transform_origin[1], - aabb.origin[1] + aabb.extents[1] + transform_origin[1] ),
 					std::max( aabb.origin[2] + aabb.extents[2] - transform_origin[2], - aabb.origin[2] + aabb.extents[2] + transform_origin[2] )
 							);
 
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
 	//globalOutputStream() << "manip2object: " << manip2object << "  device2manip: " << device2manip << "  x: " << x << "  y:" << y <<"\n";
 	Vector3 current;
 	point_on_axis( current, m_axis, device2manip, x, y );
@@ -369,8 +400,13 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	translation_local2object( delta, delta, manip2object );
 	vector3_snap( delta, GetSnapGridSize() );
 
-	Vector3 start( vector3_snapped( m_start, GetSnapGridSize() ) );
-	//globalOutputStream() << "start: " << start << "   delta: " << delta <<"\n";
+	Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0.0f ? GetSnapGridSize() : 0.001f ) );
+	for ( std::size_t i = 0; i < 3 ; ++i ){ //prevent snapping to 0 with big gridsize
+		if( float_snapped( m_start[i], 0.001f ) != 0.0f && start[i] == 0.0f ){
+			start[i] = GetSnapGridSize();
+		}
+	}
+	//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta <<"\n";
 	Vector3 scale(
 		start[0] == 0 ? 1 : 1 + delta[0] / start[0],
 		start[1] == 0 ? 1 : 1 + delta[1] / start[1],
@@ -378,11 +414,18 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 		);
 
 	for( std::size_t i = 0; i < 3; i++ ){
-		if( m_choosen_extent[i] > 0.0625 ){ //epsilon to prevent too high scale for set of models, having really small extent, formed by origins
+		if( m_choosen_extent[i] > 0.0625f ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
 			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
 		}
 	}
-
+	if( snap ){
+		for( std::size_t i = 0; i < 3; i++ ){
+			if( scale[i] == 1.0f ){
+				scale[i] = vector3_dot( scale, m_axis );
+			}
+		}
+	}
+	//globalOutputStream() << "scale: " << scale <<"\n";
 	m_scalable.scale( scale );
 }
 
@@ -408,13 +451,14 @@ void Construct( const Matrix4& device2manip, const float x, const float y ){
 
 	AABB aabb;
 	GetSelectionAABB( aabb );
-	Vector3 transform_origin = vector4_to_vector3( ssGetPivot2World().t() );
-	m_choosen_extent = Vector3( std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
+	Vector3 transform_origin = vector4_to_vector3( SelectionSystem_GetPivot2World().t() );
+	m_choosen_extent = Vector3(
+					std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
 					std::max( aabb.origin[1] + aabb.extents[1] - transform_origin[1], - aabb.origin[1] + aabb.extents[1] + transform_origin[1] ),
 					std::max( aabb.origin[2] + aabb.extents[2] - transform_origin[2], - aabb.origin[2] + aabb.extents[2] + transform_origin[2] )
 							);
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
 	Vector3 current;
 	point_on_plane( current, device2manip, x, y );
 	Vector3 delta = vector3_subtracted( current, m_start );
@@ -422,19 +466,41 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	translation_local2object( delta, delta, manip2object );
 	vector3_snap( delta, GetSnapGridSize() );
 
-	Vector3 start( vector3_snapped( m_start, GetSnapGridSize() ) );
+	Vector3 start( vector3_snapped( m_start, GetSnapGridSize() != 0.0f ? GetSnapGridSize() : 0.001f ) );
+	for ( std::size_t i = 0; i < 3 ; ++i ){ //prevent snapping to 0 with big gridsize
+		if( float_snapped( m_start[i], 0.001f ) != 0.0f && start[i] == 0.0f ){
+			start[i] = GetSnapGridSize();
+		}
+	}
 	Vector3 scale(
 		start[0] == 0 ? 1 : 1 + delta[0] / start[0],
 		start[1] == 0 ? 1 : 1 + delta[1] / start[1],
 		start[2] == 0 ? 1 : 1 + delta[2] / start[2]
 		);
 
+	//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta <<"\n";
 	for( std::size_t i = 0; i < 3; i++ ){
-		if( m_choosen_extent[i] > 0.0625 ){
+		if( m_choosen_extent[i] > 0.0625f ){
 			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
 		}
 	}
-
+	//globalOutputStream() << "pre snap scale: " << scale <<"\n";
+	if( snap ){
+		float bestscale = scale[0];
+		for( std::size_t i = 1; i < 3; i++ ){
+			//if( fabs( 1.0f - fabs( scale[i] ) ) > fabs( 1.0f - fabs( bestscale ) ) ){
+			if( fabs( scale[i] ) > fabs( bestscale ) && scale[i] != 1.0f ){ //harder to scale down with this, but glitchier with upper one
+				bestscale = scale[i];
+			}
+			//globalOutputStream() << "bestscale: " << bestscale <<"\n";
+		}
+		for( std::size_t i = 0; i < 3; i++ ){
+			if( start[i] != 0.0f ){ // !!!!check grid == 0 case
+				scale[i] = ( scale[i] < 0.0f ) ? -fabs( bestscale ) : fabs( bestscale );
+			}
+		}
+	}
+	//globalOutputStream() << "scale: " << scale <<"\n";
 	m_scalable.scale( scale );
 }
 };
@@ -940,6 +1006,8 @@ RotateManipulator( Rotatable& rotatable, std::size_t segments, float radius ) :
 
 	draw_circle( segments, radius * 1.15f, m_circle_screen.m_vertices.data(), RemapXYZ() );
 	draw_circle( segments, radius, m_circle_sphere.m_vertices.data(), RemapXYZ() );
+
+	m_selectable_sphere.setSelected( true );
 }
 
 
@@ -3216,7 +3284,7 @@ void scaleSelected( const Vector3& scaling ){
 	freezeTransforms();
 }
 
-void MoveSelected( const View& view, const float device_point[2] ){
+void MoveSelected( const View& view, const float device_point[2], bool snap ){
 	if ( m_manipulator->isSelected() ) {
 		if ( !m_undo_begun ) {
 			m_undo_begun = true;
@@ -3225,7 +3293,7 @@ void MoveSelected( const View& view, const float device_point[2] ){
 
 		Matrix4 device2manip;
 		ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
-		m_manipulator->GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point[0], device_point[1] );
+		m_manipulator->GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point[0], device_point[1], snap );
 	}
 }
 
@@ -3617,11 +3685,6 @@ void RadiantSelectionSystem::ConstructPivot() const {
 }
 
 void RadiantSelectionSystem::setCustomPivotOrigin( Vector3& point ) const {
-	/*if ( !m_pivotChanged || m_pivot_moving ) {
-		return;
-	}*/
-	//m_pivotChanged = false;
-
 	if ( !nothingSelected() && ( m_manipulator_mode == eTranslate || m_manipulator_mode == eRotate || m_manipulator_mode == eScale ) ) {
 		AABB bounds;
 		if ( Mode() == eComponent ) {
@@ -3632,11 +3695,8 @@ void RadiantSelectionSystem::setCustomPivotOrigin( Vector3& point ) const {
 			Scene_BoundsSelected( GlobalSceneGraph(), bounds );
 		}
 		//globalOutputStream() << point << "\n";
-		const float gridsize = GetSnapGridSize();
-		//const float bbox_epsilon = gridsize / 4.0;
-
 		for( std::size_t i = 0; i < 3; i++ ){
-			if( point[i] < 900000 ){
+			if( point[i] < 900000.0f ){
 				float bestsnapDist = fabs( bounds.origin[i] - point[i] );
 				float bestsnapTo = bounds.origin[i];
 				float othersnapDist = fabs( bounds.origin[i] + bounds.extents[i] - point[i] );
@@ -3649,20 +3709,13 @@ void RadiantSelectionSystem::setCustomPivotOrigin( Vector3& point ) const {
 					bestsnapDist = othersnapDist;
 					bestsnapTo = bounds.origin[i] - bounds.extents[i];
 				}
-				othersnapDist = fabs( float_snapped( point[i], gridsize ) - point[i] );
+				othersnapDist = fabs( float_snapped( point[i], GetSnapGridSize() ) - point[i] );
 				if( othersnapDist < bestsnapDist ){
 					bestsnapDist = othersnapDist;
-					bestsnapTo = float_snapped( point[i], gridsize );
+					bestsnapTo = float_snapped( point[i], GetSnapGridSize() );
 				}
 				point[i] = bestsnapTo;
 
-/*				if( float_equal_epsilon( point[i], bestsnapTo, bbox_epsilon ) ){
-					point[i] = bestsnapTo;
-				}
-				else{
-					point[i] = float_snapped( point[i], gridsize );
-				}
-				*/
 				m_pivot2world[i + 12] = point[i]; //m_pivot2world.tx() .ty() .tz()
 			}
 		}
@@ -3692,8 +3745,9 @@ void RadiantSelectionSystem::setCustomPivotOrigin( Vector3& point ) const {
 		default:
 			break;
 		}
+
+		m_pivotIsCustom = true;
 	}
-	m_pivotIsCustom = true;
 }
 
 void RadiantSelectionSystem::getSelectionAABB( AABB& bounds ) const {
@@ -3712,7 +3766,7 @@ void GetSelectionAABB( AABB& bounds ){
 	getSelectionSystem().getSelectionAABB( bounds );
 }
 
-const Matrix4& ssGetPivot2World(){
+const Matrix4& SelectionSystem_GetPivot2World(){
 	return getSelectionSystem().GetPivot2World();
 }
 
@@ -3979,13 +4033,17 @@ class Manipulator_
 public:
 DeviceVector m_epsilon;
 const View* m_view;
+ModifierFlags m_state;
+
+Manipulator_() : m_state( c_modifierNone ){
+}
 
 bool mouseDown( DeviceVector position ){
 	return getSelectionSystem().SelectManipulator( *m_view, &position[0], &m_epsilon[0] );
 }
 
 void mouseMoved( DeviceVector position ){
-	getSelectionSystem().MoveSelected( *m_view, &position[0] );
+	getSelectionSystem().MoveSelected( *m_view, &position[0], ( m_state & c_modifierShift ) == c_modifierShift );
 }
 typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseMoved> MouseMovedCaller;
 
@@ -3995,6 +4053,21 @@ void mouseUp( DeviceVector position ){
 	g_mouseUpCallback.clear();
 }
 typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseUp> MouseUpCaller;
+
+void setState( ModifierFlags state ){
+	m_state = state;
+}
+
+ModifierFlags getState() const {
+	return m_state;
+}
+
+void modifierEnable( ModifierFlags type ){
+	setState( bitfield_enable( getState(), type ) );
+}
+void modifierDisable( ModifierFlags type ){
+	setState( bitfield_disable( getState(), type ) );
+}
 };
 
 void Scene_copyClosestTexture( SelectionTest& test );
@@ -4099,9 +4172,11 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 }
 void onModifierDown( ModifierFlags type ){
 	m_selector.modifierEnable( type );
+	m_manipulator.modifierEnable( type );
 }
 void onModifierUp( ModifierFlags type ){
 	m_selector.modifierDisable( type );
+	m_manipulator.modifierDisable( type );
 }
 };
 

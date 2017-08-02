@@ -104,7 +104,7 @@ void Map_Snapshot(){
  */
 
 bool g_AutoSave_Enabled = true;
-int m_AutoSave_Frequency = 5;
+int m_AutoSave_Frequency = 15;
 bool g_SnapShots_Enabled = false;
 
 namespace

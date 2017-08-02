@@ -122,6 +122,7 @@ void set( rectangle_t rectangle ){
 				glVertex2f( rectangle.x, rectangle.y );
 				glEnd();
 
+				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 				glDrawBuffer( GL_BACK );
 				GlobalOpenGL_debugAssertNoErrors();
 				//glwidget_swap_buffers( m_widget );

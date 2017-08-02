@@ -2155,6 +2155,7 @@ void XYWnd::UpdateCameraIcon( void ){
 				XYWnd::DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
 
 				glDisable( GL_BLEND );
+				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 			}
 
 			glDrawBuffer( GL_BACK );
@@ -2601,6 +2602,7 @@ void XYWnd::XY_Draw(){
 	glEnable( GL_BLEND );
 	glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
 	DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	glDisable( GL_BLEND );
 
 	Feedback_draw2D( m_viewType );

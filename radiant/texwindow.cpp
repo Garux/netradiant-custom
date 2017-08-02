@@ -276,6 +276,8 @@ bool m_move_started;
 // The uniform size (in pixels) that textures are resized to when m_resizeTextures is true.
 int m_uniformTextureSize;
 int m_uniformTextureMinSize;
+
+bool m_hideNonShadersInCommon;
 // Return the display width of a texture in the texture browser
 void getTextureWH( qtexture_t* tex, int &W, int &H ){
 		// Don't use uniform size
@@ -335,6 +337,7 @@ TextureBrowser() :
 	m_tags( false ),
 	m_uniformTextureSize( 160 ),
 	m_uniformTextureMinSize( 48 ),
+	m_hideNonShadersInCommon( true ),
 	m_move_started( false ){
 }
 };
@@ -476,7 +479,7 @@ CopiedString g_notex;
 CopiedString g_shadernotex;
 
 // if texture_showinuse jump over non in-use textures
-bool Texture_IsShown( IShader* shader, bool show_shaders, bool show_textures, bool hideUnused ){
+bool Texture_IsShown( IShader* shader, bool show_shaders, bool show_textures, bool hideUnused, bool hideNonShadersInCommon ){
 	// filter notex / shadernotex images
 	if ( g_TextureBrowser_filterNotex && ( string_equal( g_notex.c_str(), shader->getTexture()->name ) || string_equal( g_shadernotex.c_str(), shader->getTexture()->name ) ) ) {
 		return false;
@@ -508,6 +511,11 @@ bool Texture_IsShown( IShader* shader, bool show_shaders, bool show_textures, bo
 	}
 
 	if ( hideUnused && !shader->IsInUse() ) {
+		return false;
+	}
+
+	if( hideNonShadersInCommon && shader->IsDefault() && !shader->IsInUse() //&& g_TextureBrowser_currentDirectory != ""
+		&& shader_equal_prefix( shader_get_textureName( shader->getName() ), TextureBrowser_getComonShadersDir() ) ){
 		return false;
 	}
 
@@ -547,7 +555,7 @@ void TextureBrowser_evaluateHeight( TextureBrowser& textureBrowser ){
 		{
 			IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-			if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused ) ) {
+			if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
 				continue;
 			}
 
@@ -864,13 +872,7 @@ void TextureBrowser_enableAlpha( const BoolImportCallback& importer ){
 typedef FreeCaller1<const BoolImportCallback&, TextureBrowser_enableAlpha> TextureBrowser_enableAlphaExport;
 
 void TextureBrowser_SetHideUnused( TextureBrowser& textureBrowser, bool hideUnused ){
-	if ( hideUnused ) {
-		textureBrowser.m_hideUnused = true;
-	}
-	else
-	{
-		textureBrowser.m_hideUnused = false;
-	}
+	textureBrowser.m_hideUnused = hideUnused;
 
 	textureBrowser.m_hideunused_item.update();
 
@@ -898,7 +900,7 @@ void TextureBrowser_Focus( TextureBrowser& textureBrowser, const char* name ){
 	{
 		IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused ) ) {
+		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
 			continue;
 		}
 
@@ -942,7 +944,7 @@ IShader* Texture_At( TextureBrowser& textureBrowser, int mx, int my ){
 	{
 		IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused ) ) {
+		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
 			continue;
 		}
 
@@ -1086,7 +1088,7 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 	{
 		IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused ) ) {
+		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
 			continue;
 		}
 
@@ -2717,6 +2719,14 @@ void TextureBrowser_constructPreferences( PreferencesPage& page ){
 		const char* startup_shaders[] = { "None", TextureBrowser_getComonShadersName() };
 		page.appendCombo( "Load Shaders at Startup", reinterpret_cast<int&>( GlobalTextureBrowser().m_startupShaders ), STRING_ARRAY_RANGE( startup_shaders ) );
 	}
+	{
+		StringOutputStream sstream( 256 );
+		sstream << "Hide nonShaders in " << TextureBrowser_getComonShadersDir() << " folder";
+		page.appendCheckBox(
+			"", sstream.c_str(),
+			GlobalTextureBrowser().m_hideNonShadersInCommon
+			);
+	}
 }
 void TextureBrowser_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Texture Browser", "Texture Browser Preferences" ) );
@@ -2778,6 +2788,7 @@ void TextureBrowser_Construct(){
 	GlobalPreferenceSystem().registerPreference( "LoadShaders", IntImportStringCaller( reinterpret_cast<int&>( GlobalTextureBrowser().m_startupShaders ) ), IntExportStringCaller( reinterpret_cast<int&>( GlobalTextureBrowser().m_startupShaders ) ) );
 	GlobalPreferenceSystem().registerPreference( "WheelMouseInc", SizeImportStringCaller( GlobalTextureBrowser().m_mouseWheelScrollIncrement ), SizeExportStringCaller( GlobalTextureBrowser().m_mouseWheelScrollIncrement ) );
 	GlobalPreferenceSystem().registerPreference( "SI_Colors0", Vector3ImportStringCaller( GlobalTextureBrowser().color_textureback ), Vector3ExportStringCaller( GlobalTextureBrowser().color_textureback ) );
+	GlobalPreferenceSystem().registerPreference( "HideNonShadersInCommon", BoolImportStringCaller( GlobalTextureBrowser().m_hideNonShadersInCommon ), BoolExportStringCaller( GlobalTextureBrowser().m_hideNonShadersInCommon ) );
 
 	g_TextureBrowser.shader = texdef_name_default();
 
