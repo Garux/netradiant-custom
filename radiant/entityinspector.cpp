@@ -153,7 +153,7 @@ void release(){
 	delete this;
 }
 void apply(){
-	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( m_check ) ) ? "1" : "0" );
+	Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( m_check ) ) ? "1" : "" );
 }
 typedef MemberCaller<BooleanAttribute, &BooleanAttribute::apply> ApplyCaller;
 
@@ -1174,16 +1174,7 @@ void EntityInspector_clearKeyValue(){
 
 static gint EntityInspector_clearKeyValueKB( GtkEntry* widget, GdkEventKey* event, gpointer data ){
 	if ( event->keyval == GDK_Delete ) {
-		// Get current selection text
-		StringOutputStream key( 64 );
-		key << gtk_entry_get_text( g_entityKeyEntry );
-
-		if ( strcmp( key.c_str(), "classname" ) != 0 ) {
-			StringOutputStream command;
-			command << "entityDeleteKey -key " << key.c_str();
-			UndoableCommand undo( command.c_str() );
-			Scene_EntitySetKeyValue_Selected( key.c_str(), "" );
-		}
+		EntityInspector_clearKeyValue();
 		return TRUE;
 	}
 	return FALSE;
@@ -1225,14 +1216,14 @@ static gint EntityClassList_button_press( GtkWidget *widget, GdkEventButton *eve
 }
 
 static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	unsigned int code = gdk_keyval_to_upper( event->keyval );
-
 	if ( event->keyval == GDK_Return ) {
 		EntityClassList_createEntity();
 		return TRUE;
 	}
 
 	// select the entity that starts with the key pressed
+/*
+	unsigned int code = gdk_keyval_to_upper( event->keyval );
 	if ( code <= 'Z' && code >= 'A' && event->state == 0 ) {
 		GtkTreeView* view = g_entityClassList;
 		GtkTreeModel* model;
@@ -1266,6 +1257,7 @@ static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpo
 
 		return TRUE;
 	}
+*/
 	return FALSE;
 }
 
@@ -1295,7 +1287,7 @@ static void SpawnflagCheck_toggled( GtkWidget *widget, gpointer data ){
 static gint EntityEntry_keypress( GtkEntry* widget, GdkEventKey* event, gpointer data ){
 	if ( event->keyval == GDK_Return ) {
 		if ( widget == g_entityKeyEntry ) {
-			gtk_entry_set_text( g_entityValueEntry, "" );
+			//gtk_entry_set_text( g_entityValueEntry, "" );
 			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityValueEntry ) );
 		}
 		else
@@ -1382,7 +1374,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 					GtkListStore* store = gtk_list_store_new( 2, G_TYPE_STRING, G_TYPE_POINTER );
 
 					GtkTreeView* view = GTK_TREE_VIEW( gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) ) );
-					gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), FALSE );
+					//gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), FALSE );
 					gtk_tree_view_set_headers_visible( view, FALSE );
 					g_signal_connect( G_OBJECT( view ), "button_press_event", G_CALLBACK( EntityClassList_button_press ), 0 );
 					g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( EntityClassList_keypress ), 0 );

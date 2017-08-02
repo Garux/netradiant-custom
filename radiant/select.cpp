@@ -403,7 +403,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( m_depth == 2 ) { // entity depth
 		// traverse and select children if any one is selected
 		bool beselected = false;
-		if ( instance.childSelected() ) {
+		if ( instance.childSelected() || instance.isSelected() ) {
 			beselected = true;
 			if( path.top().get() != worldspawn ){
 				Instance_setSelected( instance, true );

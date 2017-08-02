@@ -97,17 +97,20 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 
 		EntityCopyingVisitor visitor( *Node_getEntity( node ) );
 
-		entity->forEachKeyValue( visitor );
+		//entity->forEachKeyValue( visitor );
 
 		NodeSmartReference child( path.top().get() );
 		NodeSmartReference parent( path.parent().get() );
-		Node_getTraversable( parent )->erase( child );
+		//Node_getTraversable( parent )->erase( child );
 		if ( Node_getTraversable( child ) != 0
 			 && Node_getTraversable( node ) != 0
 			 && node_is_group( node ) ) {
 			parentBrushes( child, node );
 		}
 		Node_getTraversable( parent )->insert( node );
+		/* must do this after inserting node, otherwise problem: targeted + having model + not loaded b4 new entities aren't selectable normally + rendered only while 0 0 0 is rendered */
+		entity->forEachKeyValue( visitor );
+		Node_getTraversable( parent )->erase( child );
 	}
 }
 };
@@ -477,6 +480,10 @@ void Entity_normalizeColor(){
 		const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
 		Entity* entity = Node_getEntity( path.top() );
 
+		if( entity == 0 && path.size() == 3 ){
+			entity = Node_getEntity( path.parent() );
+		}
+
 		if ( entity != 0 ) {
 			const char* strColor = entity->getKeyValue( "_color" );
 			if ( !string_empty( strColor ) ) {
@@ -504,6 +511,11 @@ void Entity_setColour(){
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
 		Entity* entity = Node_getEntity( path.top() );
+
+		if( entity == 0 && path.size() == 3 ){
+			entity = Node_getEntity( path.parent() );
+		}
+
 		if ( entity != 0 ) {
 			const char* strColor = entity->getKeyValue( "_color" );
 			if ( !string_empty( strColor ) ) {
