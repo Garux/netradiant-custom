@@ -130,8 +130,10 @@ void ZoomIn();
 void ZoomOut();
 void ZoomInWithMouse( int pointx, int pointy );
 
+void RenderActive();
 void SetActive( bool b ){
 	m_bActive = b;
+	RenderActive();
 };
 bool Active(){
 	return m_bActive;
@@ -251,8 +253,6 @@ struct xywindow_globals_t
 	Vector3 color_selbrushes;
 	Vector3 color_clipper;
 	Vector3 color_viewname;
-	Vector3 color_gridminor_alt;
-	Vector3 color_gridmajor_alt;
 	Vector3 AxisColorX;
 	Vector3 AxisColorY;
 	Vector3 AxisColorZ;
@@ -271,14 +271,12 @@ struct xywindow_globals_t
 		color_selbrushes( 1.f, 0.f, 0.f ),
 		color_clipper( 0.f, 0.f, 1.f ),
 		color_viewname( 0.5f, 0.f, 0.75f ),
-		color_gridminor_alt( 0.f, 0.f, 0.f ),
-		color_gridmajor_alt( 0.f, 0.f, 0.f ),
 
 		AxisColorX( 1.f, 0.f, 0.f ),
 		AxisColorY( 0.f, 1.f, 0.f ),
 		AxisColorZ( 0.f, 0.f, 1.f ),
 		m_bRightClick( true ),
-		m_bNoStipple( false ),
+		m_bNoStipple( true ),
 		m_bImprovedWheelZoom( true ){
 	}
 

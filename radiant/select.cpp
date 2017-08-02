@@ -705,11 +705,20 @@ void Select_FitTexture( float horizontal, float vertical ){
 	SceneChangeNotify();
 }
 
+
+#include "commands.h"
+#include "dialog.h"
+
 inline void hide_node( scene::Node& node, bool hide ){
 	hide
 	? node.enable( scene::Node::eHidden )
 	: node.disable( scene::Node::eHidden );
 }
+
+bool g_nodes_be_hidden = false;
+
+BoolExportCaller g_hidden_caller( g_nodes_be_hidden );
+ToggleItem g_hidden_item( g_hidden_caller );
 
 class HideSelectedWalker : public scene::Graph::Walker
 {
@@ -722,6 +731,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	Selectable* selectable = Instance_getSelectable( instance );
 	if ( selectable != 0
 		 && selectable->isSelected() ) {
+		g_nodes_be_hidden = m_hide;
 		hide_node( path.top(), m_hide );
 	}
 	return true;
@@ -740,6 +750,7 @@ void Select_Hide(){
 void HideSelected(){
 	Select_Hide();
 	GlobalSelectionSystem().setSelectedAll( false );
+	g_hidden_item.update();
 }
 
 
@@ -763,6 +774,13 @@ void Scene_Hide_All( bool hide ){
 void Select_ShowAllHidden(){
 	Scene_Hide_All( false );
 	SceneChangeNotify();
+	g_nodes_be_hidden = false;
+	g_hidden_item.update();
+}
+
+void Hide_registerCommands(){
+	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalToggles_insert( "HideSelected", FreeCaller<HideSelected>(), ToggleItem::AddCallbackCaller( g_hidden_item ), Accelerator( 'H' ) );
 }
 
 

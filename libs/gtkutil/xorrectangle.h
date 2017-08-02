@@ -93,6 +93,10 @@ void set( rectangle_t rectangle ){
 				glMatrixMode( GL_PROJECTION );
 				glLoadIdentity();
 				glOrtho( 0, width, 0, height, -100, 100 );
+
+				glMatrixMode( GL_MODELVIEW );
+				glLoadIdentity();
+
 				glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 				glDisable( GL_DEPTH_TEST );
 

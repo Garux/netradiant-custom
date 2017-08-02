@@ -66,6 +66,7 @@ void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelecte
 
 void HideSelected();
 void Select_ShowAllHidden();
+void Hide_registerCommands();
 
 // updating workzone to a given brush (depends on current view)
 

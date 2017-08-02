@@ -554,7 +554,7 @@ const char* misc_model_dialog( GtkWidget* parent ){
 	}
 	return 0;
 }
-
+/*
 void LightRadiiImport( EntityCreator& self, bool value ){
 	self.setLightRadii( value );
 }
@@ -579,8 +579,19 @@ void Entity_constructPage( PreferenceGroup& group ){
 void Entity_registerPreferencesPage(){
 	PreferencesDialog_addDisplayPage( FreeCaller1<PreferenceGroup&, Entity_constructPage>() );
 }
+*/
 
-
+void ShowLightRadiiExport( const BoolImportCallback& importer ){
+	importer( GlobalEntityCreator().getLightRadii() );
+}
+typedef FreeCaller1<const BoolImportCallback&, ShowLightRadiiExport> ShowLightRadiiExportCaller;
+ShowLightRadiiExportCaller g_show_lightradii_caller;
+ToggleItem g_show_lightradii_item( g_show_lightradii_caller );
+void ToggleShowLightRadii(){
+	GlobalEntityCreator().setLightRadii( !GlobalEntityCreator().getLightRadii() );
+	g_show_lightradii_item.update();
+	UpdateAllWindows();
+}
 
 void Entity_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "_Regroup", "GroupSelection" );
@@ -606,10 +617,12 @@ void Entity_Construct(){
 	GlobalCommands_insert( "GroupSelection", FreeCaller<Entity_groupSelected>() );
 	GlobalCommands_insert( "UngroupSelection", FreeCaller<Entity_ungroupSelected>() );
 
+	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
+
 	GlobalPreferenceSystem().registerPreference( "SI_Colors5", Vector3ImportStringCaller( g_entity_globals.color_entity ), Vector3ExportStringCaller( g_entity_globals.color_entity ) );
 	GlobalPreferenceSystem().registerPreference( "LastLightIntensity", IntImportStringCaller( g_iLastLightIntensity ), IntExportStringCaller( g_iLastLightIntensity ) );
 
-	Entity_registerPreferencesPage();
+//	Entity_registerPreferencesPage();
 }
 
 void Entity_Destroy(){

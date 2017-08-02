@@ -2575,6 +2575,7 @@ Rotation m_rotation;
 Scale m_scale;
 public:
 static Shader* m_state;
+bool m_bPreferPointEntsIn2D;
 private:
 EManipulatorMode m_manipulator_mode;
 Manipulator* m_manipulator;
@@ -2628,6 +2629,7 @@ enum EModifier
 };
 
 RadiantSelectionSystem() :
+	m_bPreferPointEntsIn2D( true ),
 	m_undo_begun( false ),
 	m_mode( ePrimitive ),
 	m_componentmode( eDefault ),
@@ -2852,73 +2854,32 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 
 		SelectionVolume volume( scissored );
 		SelectionPool selector;
-		if ( face ) {
-			Scene_TestSelect_Component( selector, volume, scissored, eFace );
-		}
-		else
-		{
-			Scene_TestSelect( selector, volume, scissored, Mode(), ComponentMode() );
-		}
+		SelectionPool selector_point_ents;
+		const bool prefer_point_ents = m_bPreferPointEntsIn2D && Mode() == ePrimitive && !view.fill() && !face
+			&& ( modifier == RadiantSelectionSystem::eReplace || modifier == RadiantSelectionSystem::eSelect || modifier == RadiantSelectionSystem::eDeselect );
 
-		if ( !selector.failed() ) {
+		if( prefer_point_ents ){
+			Scene_TestSelect( selector_point_ents, volume, scissored, eEntity, ComponentMode() );
+		}
+		if( prefer_point_ents && !selector_point_ents.failed() ){
 			switch ( modifier )
 			{
-			case RadiantSelectionSystem::eToggle:
-			{
-				SelectableSortedSet::iterator best = selector.begin();
-				// toggle selection of the object with least depth
-				if ( ( *best ).second->isSelected() ) {
-					( *best ).second->setSelected( false );
-				}
-				else{
-					( *best ).second->setSelected( true );
-				}
-			}
-			break;
 			// if cycle mode not enabled, enable it
 			case RadiantSelectionSystem::eReplace:
 			{
 				// select closest
-				( *selector.begin() ).second->setSelected( true );
-			}
-			break;
-			// select the next object in the list from the one already selected
-			case RadiantSelectionSystem::eCycle:
-			{
-				bool CycleSelectionOccured = false;
-				SelectionPool::iterator i = selector.begin();
-				while ( i != selector.end() )
-				{
-					if ( ( *i ).second->isSelected() ) {
-						deselectComponentsOrAll( face );
-						++i;
-						if ( i != selector.end() ) {
-							i->second->setSelected( true );
-						}
-						else
-						{
-							selector.begin()->second->setSelected( true );
-						}
-						CycleSelectionOccured = true;
-						break;
-					}
-					++i;
-				}
-				if( !CycleSelectionOccured ){
-					deselectComponentsOrAll( face );
-					( *selector.begin() ).second->setSelected( true );
-				}
+				( *selector_point_ents.begin() ).second->setSelected( true );
 			}
 			break;
 			case RadiantSelectionSystem::eSelect:
 			{
-				SelectionPool::iterator best = selector.begin();
+				SelectionPool::iterator best = selector_point_ents.begin();
 				if( !( *best ).second->isSelected() ){
 					( *best ).second->setSelected( true );
 				}
 				SelectionPool::iterator i = best;
 				++i;
-				while ( i != selector.end() )
+				while ( i != selector_point_ents.end() )
 				{
 					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
 						if( !( *i ).second->isSelected() ){
@@ -2934,13 +2895,13 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			break;
 			case RadiantSelectionSystem::eDeselect:
 			{
-				SelectionPool::iterator best = selector.begin();
+				SelectionPool::iterator best = selector_point_ents.begin();
 				if( ( *best ).second->isSelected() ){
 					( *best ).second->setSelected( false );
 				}
 				SelectionPool::iterator i = best;
 				++i;
-				while ( i != selector.end() )
+				while ( i != selector_point_ents.end() )
 				{
 					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
 						if( ( *i ).second->isSelected() ){
@@ -2958,8 +2919,115 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				break;
 			}
 		}
-		else if( modifier == eCycle ){
-			deselectComponentsOrAll( face );
+		else{
+			if ( face ){
+				Scene_TestSelect_Component( selector, volume, scissored, eFace );
+			}
+			else{
+				Scene_TestSelect( selector, volume, scissored, Mode(), ComponentMode() );
+			}
+
+			if ( !selector.failed() ) {
+				switch ( modifier )
+				{
+				case RadiantSelectionSystem::eToggle:
+				{
+					SelectableSortedSet::iterator best = selector.begin();
+					// toggle selection of the object with least depth
+					if ( ( *best ).second->isSelected() ) {
+						( *best ).second->setSelected( false );
+					}
+					else{
+						( *best ).second->setSelected( true );
+					}
+				}
+				break;
+				// if cycle mode not enabled, enable it
+				case RadiantSelectionSystem::eReplace:
+				{
+					// select closest
+					( *selector.begin() ).second->setSelected( true );
+				}
+				break;
+				// select the next object in the list from the one already selected
+				case RadiantSelectionSystem::eCycle:
+				{
+					bool CycleSelectionOccured = false;
+					SelectionPool::iterator i = selector.begin();
+					while ( i != selector.end() )
+					{
+						if ( ( *i ).second->isSelected() ) {
+							deselectComponentsOrAll( face );
+							++i;
+							if ( i != selector.end() ) {
+								i->second->setSelected( true );
+							}
+							else
+							{
+								selector.begin()->second->setSelected( true );
+							}
+							CycleSelectionOccured = true;
+							break;
+						}
+						++i;
+					}
+					if( !CycleSelectionOccured ){
+						deselectComponentsOrAll( face );
+						( *selector.begin() ).second->setSelected( true );
+					}
+				}
+				break;
+				case RadiantSelectionSystem::eSelect:
+				{
+					SelectionPool::iterator best = selector.begin();
+					if( !( *best ).second->isSelected() ){
+						( *best ).second->setSelected( true );
+					}
+					SelectionPool::iterator i = best;
+					++i;
+					while ( i != selector.end() )
+					{
+						if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+							if( !( *i ).second->isSelected() ){
+								( *i ).second->setSelected( true );
+							}
+						}
+						else{
+							break;
+						}
+						++i;
+					}
+				}
+				break;
+				case RadiantSelectionSystem::eDeselect:
+				{
+					SelectionPool::iterator best = selector.begin();
+					if( ( *best ).second->isSelected() ){
+						( *best ).second->setSelected( false );
+					}
+					SelectionPool::iterator i = best;
+					++i;
+					while ( i != selector.end() )
+					{
+						if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+							if( ( *i ).second->isSelected() ){
+								( *i ).second->setSelected( false );
+							}
+						}
+						else{
+							break;
+						}
+						++i;
+					}
+				}
+				break;
+				default:
+					break;
+				}
+			}
+			else if( modifier == eCycle ){
+				deselectComponentsOrAll( face );
+			}
 		}
 	}
 }
@@ -2976,21 +3044,19 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 
 		SelectionVolume volume( scissored );
 		SelectionPool selector;
-		if ( face ) {
-			Scene_TestSelect_Component( selector, volume, scissored, eFace );
-		}
-		else
-		{
-			Scene_TestSelect( selector, volume, scissored, Mode(), ComponentMode() );
-		}
+		SelectionPool selector_point_ents;
+		const bool prefer_point_ents = m_bPreferPointEntsIn2D && Mode() == ePrimitive && !view.fill() && !face;
 
-		if ( !selector.failed() ) {
-			SelectableSortedSet::iterator best = selector.begin();
+		if( prefer_point_ents ){
+			Scene_TestSelect( selector_point_ents, volume, scissored, eEntity, ComponentMode() );
+		}
+		if( prefer_point_ents && !selector_point_ents.failed() ){
+			SelectableSortedSet::iterator best = selector_point_ents.begin();
 			const bool wasSelected = ( *best ).second->isSelected();
 			( *best ).second->setSelected( !wasSelected );
 			SelectableSortedSet::iterator i = best;
 			++i;
-			while ( i != selector.end() )
+			while ( i != selector_point_ents.end() )
 			{
 				if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
 					( *i ).second->setSelected( !wasSelected );
@@ -3002,8 +3068,34 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 			}
 			return !wasSelected;
 		}
-		else{
-			return true;
+		else{//do primitives, if ents failed
+			if ( face ){
+				Scene_TestSelect_Component( selector, volume, scissored, eFace );
+			}
+			else{
+				Scene_TestSelect( selector, volume, scissored, Mode(), ComponentMode() );
+			}
+			if ( !selector.failed() ){
+				SelectableSortedSet::iterator best = selector.begin();
+				const bool wasSelected = ( *best ).second->isSelected();
+				( *best ).second->setSelected( !wasSelected );
+				SelectableSortedSet::iterator i = best;
+				++i;
+				while ( i != selector.end() )
+				{
+					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+						( *i ).second->setSelected( !wasSelected );
+					}
+					else{
+						break;
+					}
+					++i;
+				}
+				return !wasSelected;
+			}
+			else{
+				return true;
+			}
 		}
 	}
 }
@@ -3187,7 +3279,7 @@ inline RadiantSelectionSystem& getSelectionSystem(){
 }
 }
 
-
+#include "map.h"
 
 class testselect_entity_visible : public scene::Graph::Walker
 {
@@ -3198,6 +3290,10 @@ testselect_entity_visible( Selector& selector, SelectionTest& test )
 	: m_selector( selector ), m_test( test ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	if( path.top().get_pointer() == Map_GetWorldspawn( g_map ) ||
+		node_is_group( path.top().get() ) ){
+		return false;
+	}
 	Selectable* selectable = Instance_getSelectable( instance );
 	if ( selectable != 0
 		 && Node_isEntity( path.top() ) ) {
@@ -3636,11 +3732,25 @@ void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& 
 #endif
 }
 
+#include "preferencesystem.h"
+#include "preferences.h"
+
+void SelectionSystem_constructPreferences( PreferencesPage& page ){
+	page.appendCheckBox( "", "Prefer point entities in 2D", getSelectionSystem().m_bPreferPointEntsIn2D );
+}
+void SelectionSystem_constructPage( PreferenceGroup& group ){
+	PreferencesPage page( group.createPage( "Selection", "Selection System Settings" ) );
+	SelectionSystem_constructPreferences( page );
+}
+void SelectionSystem_registerPreferencesPage(){
+	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, SelectionSystem_constructPage>() );
+}
+
+
 
 void SelectionSystem_OnBoundsChanged(){
 	getSelectionSystem().pivotChanged();
 }
-
 
 SignalHandlerId SelectionSystem_boundsChanged;
 
@@ -3652,6 +3762,9 @@ void SelectionSystem_Construct(){
 	SelectionSystem_boundsChanged = GlobalSceneGraph().addBoundsChangedCallback( FreeCaller<SelectionSystem_OnBoundsChanged>() );
 
 	GlobalShaderCache().attachRenderable( getSelectionSystem() );
+
+	GlobalPreferenceSystem().registerPreference( "PreferPointEntsIn2D", BoolImportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ), BoolExportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ) );
+	SelectionSystem_registerPreferencesPage();
 }
 
 void SelectionSystem_Destroy(){

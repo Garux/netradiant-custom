@@ -37,7 +37,7 @@
 GtkImage* new_plugin_image( const char* filename ){
 	{
 		StringOutputStream fullpath( 256 );
-		fullpath << GameToolsPath_get() << g_pluginsDir << "bitmaps/" << filename;
+		fullpath << AppPath_get() << g_pluginsDir << "bitmaps/" << filename;
 		GtkImage* image = image_new_from_file_with_mask( fullpath.c_str() );
 		if ( image != 0 ) {
 			return image;
@@ -46,7 +46,7 @@ GtkImage* new_plugin_image( const char* filename ){
 
 	{
 		StringOutputStream fullpath( 256 );
-		fullpath << AppPath_get() << g_pluginsDir << "bitmaps/" << filename;
+		fullpath << GameToolsPath_get() << g_pluginsDir << "bitmaps/" << filename;
 		GtkImage* image = image_new_from_file_with_mask( fullpath.c_str() );
 		if ( image != 0 ) {
 			return image;
@@ -130,6 +130,7 @@ GtkToolbar* create_plugin_toolbar(){
 	toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
 	gtk_toolbar_set_orientation( toolbar, GTK_ORIENTATION_HORIZONTAL );
 	gtk_toolbar_set_style( toolbar, GTK_TOOLBAR_ICONS );
+//	gtk_toolbar_set_show_arrow( toolbar, TRUE );
 	gtk_widget_show( GTK_WIDGET( toolbar ) );
 
 	g_plugin_toolbar = toolbar;

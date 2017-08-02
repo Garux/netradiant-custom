@@ -1425,7 +1425,7 @@ void render( const Matrix4& modelview, const Matrix4& projection ){
    Cam_Draw
    ==============
  */
-
+/*
 void ShowStatsToggle(){
 	g_camwindow_globals_private.m_showStats ^= 1;
 }
@@ -1439,6 +1439,14 @@ typedef FreeCaller1<const BoolImportCallback&, ShowStatsExport> ShowStatsExportC
 ShowStatsExportCaller g_show_stats_caller;
 BoolExportCallback g_show_stats_callback( g_show_stats_caller );
 ToggleItem g_show_stats( g_show_stats_callback );
+*/
+BoolExportCaller g_show_stats_caller( g_camwindow_globals_private.m_showStats );
+ToggleItem g_show_stats( g_show_stats_caller );
+void ShowStatsToggle(){
+	g_camwindow_globals_private.m_showStats ^= 1;
+	g_show_stats.update();
+	UpdateAllWindows();
+}
 
 void CamWnd::Cam_Draw(){
 	glViewport( 0, 0, m_Camera.width, m_Camera.height );
@@ -1529,9 +1537,9 @@ void CamWnd::Cam_Draw(){
 		break;
 	}
 
-	if ( !g_xywindow_globals.m_bNoStipple ) {
+//	if ( !g_xywindow_globals.m_bNoStipple ) {
 		globalstate |= RENDER_LINESTIPPLE | RENDER_POLYGONSTIPPLE;
-	}
+//	}
 
 	{
 		CamRenderer renderer( globalstate, m_state_select2, m_state_select1, m_view.getViewer() );
@@ -1948,7 +1956,7 @@ void CamWnd_Construct(){
 	GlobalShortcuts_insert( "CameraFreeMoveLeft2", Accelerator( GDK_Left ) );
 	GlobalShortcuts_insert( "CameraFreeMoveRight2", Accelerator( GDK_Right ) );
 
-	GlobalToggles_insert( "ShowStats", ShowStatsToggleCaller(), ToggleItem::AddCallbackCaller( g_show_stats ) );
+	GlobalToggles_insert( "ShowStats", FreeCaller<ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
 
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals_private.m_showStats ), BoolExportStringCaller( g_camwindow_globals_private.m_showStats ) );
 	GlobalPreferenceSystem().registerPreference( "MoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );

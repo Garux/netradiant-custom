@@ -155,7 +155,7 @@ const char* QERPlug_GetCommandTitleList(){
 }
 
 
-#define NUM_TOOLBARBUTTONS 14
+#define NUM_TOOLBARBUTTONS 13
 
 std::size_t ToolbarButtonCount( void ) {
 	return NUM_TOOLBARBUTTONS;
@@ -168,27 +168,27 @@ virtual const char* getImage() const {
 	switch ( mIndex ) {
 	case 0: return "bobtoolz_cleanup.png";
 	case 1: return "bobtoolz_poly.png";
-	case 2: return "bobtoolz_caulk.png";
-	case 3: return "";
-	case 4: return "bobtoolz_treeplanter.png";
-	case 5: return "bobtoolz_trainpathplot.png";
-	case 6: return "bobtoolz_dropent.png";
-	case 7: return "";
-	case 8: return "bobtoolz_merge.png";
-	case 9: return "bobtoolz_split.png";
-	case 10: return "bobtoolz_splitrow.png";
-	case 11: return "bobtoolz_splitcol.png";
-	case 12: return "";
-	case 13: return "bobtoolz_turnedge.png";
+//	case 2: return "bobtoolz_caulk.png";
+	case 2: return "";
+	case 3: return "bobtoolz_treeplanter.png";
+	case 4: return "bobtoolz_trainpathplot.png";
+	case 5: return "bobtoolz_dropent.png";
+	case 6: return "";
+	case 7: return "bobtoolz_merge.png";
+	case 8: return "bobtoolz_split.png";
+	case 9: return "bobtoolz_splitrow.png";
+	case 10: return "bobtoolz_splitcol.png";
+	case 11: return "";
+	case 12: return "bobtoolz_turnedge.png";
 	}
 	return NULL;
 }
 virtual EType getType() const {
 	switch ( mIndex ) {
-	case 3: return eSpace;
-	case 4: return eToggleButton;
-	case 7: return eSpace;
-	case 12: return eSpace;
+	case 2: return eSpace;
+	case 3: return eToggleButton;
+	case 6: return eSpace;
+	case 11: return eSpace;
 	default: return eButton;
 	}
 }
@@ -196,15 +196,15 @@ virtual const char* getText() const {
 	switch ( mIndex ) {
 	case 0: return "Cleanup";
 	case 1: return "Polygons";
-	case 2: return "Caulk";
-	case 4: return "Tree Planter";
-	case 5: return "Plot Splines";
-	case 6: return "Drop Entity";
-	case 8: return "Merge 2 Patches";
-	case 9: return "Split Patch";
-	case 10: return "Split Patch Rows";
-	case 11: return "Split Patch Columns";
-	case 13: return "Flip Terrain";
+//	case 2: return "Caulk";
+	case 3: return "Tree Planter";
+	case 4: return "Plot Splines";
+	case 5: return "Drop Entity";
+	case 7: return "Merge 2 Patches";
+	case 8: return "Split Patch";
+	case 9: return "Split Patch Rows";
+	case 10: return "Split Patch Columns";
+	case 12: return "Flip Terrain";
 	}
 	return NULL;
 }
@@ -212,15 +212,15 @@ virtual const char* getTooltip() const {
 	switch ( mIndex ) {
 	case 0: return "Brush Cleanup";
 	case 1: return "Polygons";
-	case 2: return "Caulk selection";
-	case 4: return "Tree Planter";
-	case 5: return "Plot Splines";
-	case 6: return "Drop Entity";
-	case 8: return "Merge 2 Patches";
-	case 9: return "Split Patch";
-	case 10: return "Split Patch Rows";
-	case 11: return "Split Patch Columns";
-	case 13: return "Flip Terrain (Turn Edge)";
+//	case 2: return "Caulk selection";
+	case 3: return "Tree Planter";
+	case 4: return "Plot Splines";
+	case 5: return "Drop Entity";
+	case 7: return "Merge 2 Patches";
+	case 8: return "Split Patch";
+	case 9: return "Split Patch Rows";
+	case 10: return "Split Patch Columns";
+	case 12: return "Flip Terrain (Turn Edge)";
 	}
 	return NULL;
 }
@@ -231,15 +231,15 @@ virtual void activate() const {
 	switch ( mIndex ) {
 	case 0: DoFixBrushes(); break;
 	case 1: DoPolygonsTB(); break;
-	case 2: DoCaulkSelection(); break;
-	case 4: DoTreePlanter(); break;
-	case 5: DoTrainPathPlot(); break;
-	case 6: DoDropEnts(); break;
-	case 8: DoMergePatches(); break;
-	case 9: DoSplitPatch(); break;
-	case 10: DoSplitPatchRows(); break;
-	case 11: DoSplitPatchCols(); break;
-	case 13: DoFlipTerrain(); break;
+//	case 2: DoCaulkSelection(); break;
+	case 3: DoTreePlanter(); break;
+	case 4: DoTrainPathPlot(); break;
+	case 5: DoDropEnts(); break;
+	case 7: DoMergePatches(); break;
+	case 8: DoSplitPatch(); break;
+	case 9: DoSplitPatchRows(); break;
+	case 10: DoSplitPatchCols(); break;
+	case 12: DoFlipTerrain(); break;
 	}
 }
 
