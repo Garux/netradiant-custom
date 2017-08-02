@@ -800,7 +800,7 @@ void Camera_setAngles( CamWnd& camwnd, const Vector3& angles ){
 // CamWnd class
 
 gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
+	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
 		camwnd->EnableFreeMove();
 		return TRUE;
 	}
@@ -808,7 +808,7 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 }
 
 gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
+	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
 		camwnd->DisableFreeMove();
 		return TRUE;
 	}

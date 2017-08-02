@@ -1216,7 +1216,7 @@ void XYWnd::Move_End(){
 }
 
 unsigned int Zoom_buttons(){
-	return RAD_RBUTTON | RAD_SHIFT;
+	return RAD_RBUTTON | RAD_ALT;
 }
 
 int g_dragZoom = 0;

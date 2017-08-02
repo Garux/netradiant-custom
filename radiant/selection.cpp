@@ -2780,11 +2780,12 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			deselectAll();
 		}
 	}
-
+/*
+//nothingSelected() doesn't consider faces, selected in non-component mode, m
 	if ( modifier == eCycle && nothingSelected() ){
 		modifier = eReplace;
 	}
-
+*/
   #if defined ( DEBUG_SELECTION )
 	g_render_clipped.destroy();
   #endif
@@ -3494,11 +3495,13 @@ const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 class Selector_
 {
 RadiantSelectionSystem::EModifier modifier_for_state( ModifierFlags state ){
-	if ( state == c_modifier_toggle || state == c_modifier_toggle_face ) {
-		return RadiantSelectionSystem::eToggle;
-	}
-	if ( state == c_modifier_replace || state == c_modifier_replace_face ) {
-		return RadiantSelectionSystem::eReplace;
+	if ( ( state == c_modifier_toggle || state == c_modifier_toggle_face || state == c_modifier_face ) ) {
+		if( m_mouse2 ){
+			return RadiantSelectionSystem::eReplace;
+		}
+		else{
+			return RadiantSelectionSystem::eToggle;
+		}
 	}
 	return RadiantSelectionSystem::eManipulator;
 }
@@ -3520,10 +3523,11 @@ DeviceVector m_start;
 DeviceVector m_current;
 DeviceVector m_epsilon;
 ModifierFlags m_state;
+bool m_mouse2;
 const View* m_view;
 RectangleCallback m_window_update;
 
-Selector_() : m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ){
+Selector_() : m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ), m_mouse2( false ){
 }
 
 void draw_area(){
@@ -3666,7 +3670,7 @@ void onSizeChanged( int width, int height ){
 	m_selector.m_epsilon = m_manipulator.m_epsilon = epsilon;
 }
 void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
-	if ( button == c_button_select ) {
+	if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
 		m_mouse_down = true;
 
 		DeviceVector devicePosition( window_to_normalised_device( position, m_width, m_height ) );
@@ -3677,6 +3681,12 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 		else
 		{
 			m_selector.mouseDown( devicePosition );
+			if ( button == c_button_select ) {
+				m_selector.m_mouse2 = false;
+			}
+			else{
+				m_selector.m_mouse2 = true;
+			}
 			g_mouseMovedCallback.insert( MouseEventCallback( Selector_::MouseMovedCaller( m_selector ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Selector_::MouseUpCaller( m_selector ) ) );
 		}
@@ -3702,7 +3712,7 @@ void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
 	}
 }
 void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
-	if ( button == c_button_select && !g_mouseUpCallback.empty() ) {
+	if ( ( button == c_button_select || button == c_button_select2 ) && !g_mouseUpCallback.empty() ) {
 		m_mouse_down = false;
 
 		g_mouseUpCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
