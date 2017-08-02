@@ -138,8 +138,8 @@ void ClipPoint::Draw( const char *label, float scale ){
 
 	// draw label
 	glRasterPos3f( m_ptClip[0] + offset, m_ptClip[1] + offset, m_ptClip[2] + offset );
-	//glCallLists( GLsizei( strlen( label ) ), GL_UNSIGNED_BYTE, label );	//fails with GCC
-	//glCallLists( GLsizei( strlen( label ) ), GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>( label ) );	//worx
+	//glCallLists( GLsizei( strlen( label ) ), GL_UNSIGNED_BYTE, label );	//fails //new font rendering?
+	//glCallLists( GLsizei( strlen( label ) ), GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>( label ) );	//worx :o
 	GlobalOpenGL().drawString( label );
 }
 
@@ -2594,6 +2594,9 @@ void XYWnd::XY_Draw(){
 
 	glClear( GL_COLOR_BUFFER_BIT );
 
+	extern void Renderer_ResetStats();
+	Renderer_ResetStats();
+
 	//
 	// set up viewpoint
 	//
@@ -2761,6 +2764,22 @@ void XYWnd::XY_Draw(){
 			glVertex2f( 0.5, m_nHeight - 0.5 );
 			glEnd();
 		}
+	}
+
+
+	if( g_camwindow_globals.m_showStats ){
+		glMatrixMode( GL_PROJECTION );
+		glLoadIdentity();
+		glOrtho( 0, m_nWidth, 0, m_nHeight, 0, 1 );
+
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity();
+
+		glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
+
+		glRasterPos3f( 2.f, GlobalOpenGL().m_font->getPixelDescent() + 1.f, 0.0f );
+		extern const char* Renderer_GetStats();
+		GlobalOpenGL().drawString( Renderer_GetStats() );
 	}
 
 	GlobalOpenGL_debugAssertNoErrors();

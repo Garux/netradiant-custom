@@ -1940,6 +1940,7 @@ GtkMenuItem* create_edit_menu(){
 	create_menu_item_with_mnemonic( menu, "Select Connected Entities", "SelectConnectedEntities" );
 
 	menu_separator( menu );
+	create_menu_item_with_mnemonic( menu, "Shortcuts...", FreeCaller<DoCommandListDlg>() );
 	create_menu_item_with_mnemonic( menu, "Pre_ferences...", "Preferences" );
 
 	return edit_menu_item;
@@ -2046,7 +2047,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Window Outline", "ShowWindowOutline" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Axes", "ShowAxes" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Workzone", "ShowWorkzone" );
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Camera Stats", "ShowStats" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Renderer Stats", "ShowStats" );
 	}
 
 	{
@@ -2256,7 +2257,6 @@ GtkMenuItem* create_help_menu(){
 	create_game_help_menu( menu );
 
 //	create_menu_item_with_mnemonic( menu, "Bug report", FreeCaller<OpenBugReportURL>() );
-	create_menu_item_with_mnemonic( menu, "Shortcuts", FreeCaller<DoCommandListDlg>() );
 	create_menu_item_with_mnemonic( menu, "_About", FreeCaller<DoAbout>() );
 
 	return help_menu_item;
@@ -2768,6 +2768,98 @@ void MainFrame::OnSleep(){
 }
 
 
+void MainFrame_toggleFullscreen(){
+	GtkWindow* wnd = MainFrame_getWindow();
+	if( gdk_window_get_state( GTK_WIDGET( wnd )->window ) & GDK_WINDOW_STATE_FULLSCREEN ){
+		//some portion of buttsex, because gtk_window_unfullscreen doesn't work correctly after calling some modal window
+		bool maximized = ( gdk_window_get_state( GTK_WIDGET( wnd )->window ) & GDK_WINDOW_STATE_MAXIMIZED );
+		gtk_window_unfullscreen( wnd );
+		if( maximized ){
+			gtk_window_unmaximize( wnd );
+			gtk_window_maximize( wnd );
+		}
+		else{
+			gtk_window_move( wnd, g_layout_globals.m_position.x, g_layout_globals.m_position.y );
+			gtk_window_resize( wnd, g_layout_globals.m_position.w, g_layout_globals.m_position.h );
+		}
+	}
+	else{
+		gtk_window_fullscreen( wnd );
+	}
+}
+
+class MaximizeView
+{
+public:
+	MaximizeView(): m_maximized( false ){
+	}
+	void toggle(){
+		return m_maximized ? restore() : maximize();
+	}
+	bool isMaximized(){
+		return m_maximized;
+	}
+private:
+	bool m_maximized;
+	int m_vSplitPos;
+	int m_vSplit2Pos;
+	int m_hSplitPos;
+
+	void restore(){
+		m_maximized = false;
+		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), m_vSplitPos );
+		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), m_vSplit2Pos );
+		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), m_hSplitPos );
+	}
+
+	void maximize(){
+		m_maximized = true;
+		m_vSplitPos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_vSplit ) );
+		m_vSplit2Pos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_vSplit2 ) );
+		m_hSplitPos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_hSplit ) );
+
+		int vSplitX, vSplitY, vSplit2X, vSplit2Y, hSplitX, hSplitY;
+		gdk_window_get_origin( g_pParentWnd->m_vSplit->window, &vSplitX, &vSplitY );
+		gdk_window_get_origin( g_pParentWnd->m_vSplit2->window, &vSplit2X, &vSplit2Y );
+		gdk_window_get_origin( g_pParentWnd->m_hSplit->window, &hSplitX, &hSplitY );
+
+		vSplitY += m_vSplitPos;
+		vSplit2Y += m_vSplit2Pos;
+		hSplitX += m_hSplitPos;
+
+		int cur_x, cur_y;
+		Sys_GetCursorPos( MainFrame_getWindow(), &cur_x, &cur_y );
+
+		if( cur_x > hSplitX ){
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), 0 );
+		}
+		else{
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), 9999 );
+		}
+		if( cur_y > vSplitY ){
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), 0 );
+		}
+		else{
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), 9999 );
+		}
+		if( cur_y > vSplit2Y ){
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), 0 );
+		}
+		else{
+			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), 9999 );
+		}
+	}
+};
+
+MaximizeView g_maximizeview;
+
+void Maximize_View(){
+	if( g_pParentWnd != 0 && g_pParentWnd->m_vSplit != 0 && g_pParentWnd->m_vSplit2 != 0 && g_pParentWnd->m_hSplit != 0 )
+		g_maximizeview.toggle();
+}
+
+
+
 GtkWindow* create_splash(){
 	GtkWindow* window = GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) );
 	gtk_window_set_decorated( window, FALSE );
@@ -3143,6 +3235,14 @@ void MainFrame::Create(){
 }
 
 void MainFrame::SaveWindowInfo(){
+	//restore good state first
+	if( gdk_window_get_state( GTK_WIDGET( m_window )->window ) & GDK_WINDOW_STATE_ICONIFIED ){
+		gtk_window_deiconify( m_window );
+	}
+	if( g_maximizeview.isMaximized() ){
+		g_maximizeview.toggle();
+	}
+
 	if ( !FloatingGroupDialog() ) {
 		g_layout_globals.nXYHeight = gtk_paned_get_position( GTK_PANED( m_vSplit ) );
 
@@ -3262,7 +3362,7 @@ void GlobalGL_sharedContextCreated(){
 
 #ifdef WIN32
 	/* win32 is dodgy here, just use courier new then */
-	g_font = glfont_create( "arial 9" );
+	g_font = glfont_create( "arial 8" );
 #else
 	GtkSettings *settings = gtk_settings_get_default();
 	gchar *fontname;
@@ -3329,92 +3429,6 @@ void Layout_registerPreferencesPage(){
 	PreferencesDialog_addInterfacePage( FreeCaller1<PreferenceGroup&, Layout_constructPage>() );
 }
 
-void MainFrame_toggleFullscreen(){
-	GtkWindow* wnd = MainFrame_getWindow();
-	if( gdk_window_get_state( GTK_WIDGET( wnd )->window ) & GDK_WINDOW_STATE_FULLSCREEN ){
-		//some portion of buttsex, because gtk_window_unfullscreen doesn't work correctly after calling some modal window
-		bool maximize = ( gdk_window_get_state( GTK_WIDGET( wnd )->window ) & GDK_WINDOW_STATE_MAXIMIZED );
-		gtk_window_unfullscreen( wnd );
-		if( maximize ){
-			gtk_window_unmaximize( wnd );
-			gtk_window_maximize( wnd );
-		}
-		else{
-			gtk_window_move( wnd, g_layout_globals.m_position.x, g_layout_globals.m_position.y );
-			gtk_window_resize( wnd, g_layout_globals.m_position.w, g_layout_globals.m_position.h );
-		}
-	}
-	else{
-		gtk_window_fullscreen( wnd );
-	}
-}
-
-class MaximizeView
-{
-public:
-	MaximizeView(): m_maximized( false ){
-	}
-	void toggle(){
-		return m_maximized ? restore() : maximize();
-	}
-private:
-	bool m_maximized;
-	int m_vSplitPos;
-	int m_vSplit2Pos;
-	int m_hSplitPos;
-
-	void restore(){
-		m_maximized = false;
-		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), m_vSplitPos );
-		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), m_vSplit2Pos );
-		gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), m_hSplitPos );
-	}
-
-	void maximize(){
-		m_maximized = true;
-		m_vSplitPos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_vSplit ) );
-		m_vSplit2Pos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_vSplit2 ) );
-		m_hSplitPos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_hSplit ) );
-
-		int vSplitX, vSplitY, vSplit2X, vSplit2Y, hSplitX, hSplitY;
-		gdk_window_get_origin( g_pParentWnd->m_vSplit->window, &vSplitX, &vSplitY );
-		gdk_window_get_origin( g_pParentWnd->m_vSplit2->window, &vSplit2X, &vSplit2Y );
-		gdk_window_get_origin( g_pParentWnd->m_hSplit->window, &hSplitX, &hSplitY );
-
-		vSplitY += m_vSplitPos;
-		vSplit2Y += m_vSplit2Pos;
-		hSplitX += m_hSplitPos;
-
-		int cur_x, cur_y;
-		Sys_GetCursorPos( MainFrame_getWindow(), &cur_x, &cur_y );
-
-		if( cur_x > hSplitX ){
-			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), 0 );
-		}
-		else{
-			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_hSplit ), 9999 );
-		}
-		if( cur_y > vSplitY ){
-			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), 0 );
-		}
-		else{
-			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit ), 9999 );
-		}
-		if( cur_y > vSplit2Y ){
-			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), 0 );
-		}
-		else{
-			gtk_paned_set_position( GTK_PANED( g_pParentWnd->m_vSplit2 ), 9999 );
-		}
-	}
-};
-
-MaximizeView g_maximizeview;
-
-void Maximize_View(){
-	if( g_pParentWnd != 0 && g_pParentWnd->m_vSplit != 0 && g_pParentWnd->m_vSplit2 != 0 && g_pParentWnd->m_hSplit != 0 )
-		g_maximizeview.toggle();
-}
 
 void FocusAllViews(){
 	XY_Centralize(); //using centralizing here, not focusing function

@@ -158,14 +158,15 @@ void MDLSurface_read( Surface& surface, const byte* buffer, const char* name ){
 				break;
 			case MDL_FRAME_GROUP:
 				int numframes = istream_read_int32_le( inputStream );
-				inputStream.seek( ( MDL_XYZNORMAL_SIZE * 2 ) + ( numframes * 4 ) );
+				//inputStream.seek( ( MDL_XYZNORMAL_SIZE * 2 ) + ( numframes * 4 ) );
+				inputStream.seek( ( MDL_XYZNORMAL_SIZE * 4 ) + ( numframes * 4 ) + 16 );//group min_vec3 + max_vec3 + timings_float[numframes] + frame min_vec3 + max_vec3 + name_char[16]
 				found = true;
 				break;
 			}
 		}
 	}
 
-	Array<mdlXyzNormal_t> mdlXyzNormals( header.numtris );
+	Array<mdlXyzNormal_t> mdlXyzNormals( header.numverts );
 	for ( Array<mdlXyzNormal_t>::iterator i = mdlXyzNormals.begin(); i != mdlXyzNormals.end(); ++i )
 	{
 		inputStream.read( ( *i ).v, 3 );

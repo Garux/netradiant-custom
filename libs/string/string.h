@@ -251,6 +251,23 @@ inline char* string_to_uppercase( char* string ){
 	return string;
 }
 
+//http://stackoverflow.com/questions/27303062/strstr-function-like-that-ignores-upper-or-lower-case
+//chux: Somewhat tricky to match the corner cases of strstr() with inputs like "x","", "","x", "",""
+inline const char* string_in_string_nocase( const char* haystack, const char* needle ) {
+	do {
+		const char* h = haystack;
+		const char* n = needle;
+		while ( std::tolower( ( unsigned char ) *h ) == std::tolower( ( unsigned char ) *n ) && *n ) {
+			h++;
+			n++;
+		}
+		if ( *n == 0 ) {
+			return haystack;
+		}
+	} while ( *haystack++ );
+	return 0;
+}
+
 /// \brief A re-entrant string tokeniser similar to strchr.
 class StringTokeniser
 {

@@ -343,13 +343,15 @@ void ProjectSettingsDialog_ok( ProjectSettingsDialog& dialog ){
 							   : dir;
 
 	if ( !path_equal( new_gamename, gamename_get() ) ) {
-		ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Changing Game Name" );
+		if ( ConfirmModified( "Edit Project Settings" ) ) {
+			ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Changing Game Name" );
 
-		EnginePath_Unrealise();
+			EnginePath_Unrealise();
 
-		gamename_set( new_gamename );
+			gamename_set( new_gamename );
 
-		EnginePath_Realise();
+			EnginePath_Realise();
+		}
 	}
 
 	if ( globalMappingMode().do_mapping_mode ) {

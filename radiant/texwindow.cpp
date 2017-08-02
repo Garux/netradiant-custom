@@ -234,6 +234,7 @@ GtkWidget* m_scr_win_tags;
 GtkWidget* m_tag_notebook;
 GtkWidget* m_search_button;
 GtkWidget* m_shader_info_item;
+GtkWidget* m_filter_entry;
 
 std::set<CopiedString> m_all_tags;
 GtkListStore* m_all_tags_list;
@@ -444,7 +445,7 @@ void Texture_NextPos( TextureBrowser& textureBrowser, TextureLayout& layout, qte
 	textureBrowser.getTextureWH( q, nWidth, nHeight );
 	if ( layout.current_x + nWidth > textureBrowser.width - 8 && layout.current_row ) { // go to the next row unless the texture is the first on the row
 		layout.current_x = 8;
-		layout.current_y -= layout.current_row + TextureBrowser_fontHeight( textureBrowser ) + 4;//+4
+		layout.current_y -= layout.current_row + TextureBrowser_fontHeight( textureBrowser ) + 5;//+4
 		layout.current_row = 0;
 	}
 
@@ -476,11 +477,26 @@ bool TextureSearch_IsShown( const char* name ){
 	}
 }
 
+bool Texture_filtered( const char* name, TextureBrowser& textureBrowser ){
+	const char* filter = gtk_entry_get_text( GTK_ENTRY( textureBrowser.m_filter_entry ) );
+	if( string_empty( filter ) ){
+		return false;
+	}
+	if( string_in_string_nocase( name, filter ) != 0 ){
+		return false;
+	}
+	return true;
+}
+
 CopiedString g_notex;
 CopiedString g_shadernotex;
 
 // if texture_showinuse jump over non in-use textures
-bool Texture_IsShown( IShader* shader, bool show_shaders, bool show_textures, bool hideUnused, bool hideNonShadersInCommon ){
+/*
+bool show_shaders, bool show_textures, bool hideUnused, bool hideNonShadersInCommon
+textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon
+*/
+bool Texture_IsShown( IShader* shader, TextureBrowser& textureBrowser ){
 	// filter notex / shadernotex images
 	if ( g_TextureBrowser_filterNotex && ( string_equal( g_notex.c_str(), shader->getTexture()->name ) || string_equal( g_shadernotex.c_str(), shader->getTexture()->name ) ) ) {
 		return false;
@@ -503,19 +519,19 @@ bool Texture_IsShown( IShader* shader, bool show_shaders, bool show_textures, bo
 		return false;
 	}
 
-	if ( !show_shaders && !shader->IsDefault() ) {
+	if ( !textureBrowser.m_showShaders && !shader->IsDefault() ) {
 		return false;
 	}
 
-	if ( !show_textures && shader->IsDefault() ) {
+	if ( !textureBrowser.m_showTextures && shader->IsDefault() ) {
 		return false;
 	}
 
-	if ( hideUnused && !shader->IsInUse() ) {
+	if ( textureBrowser.m_hideUnused && !shader->IsInUse() ) {
 		return false;
 	}
 
-	if( hideNonShadersInCommon && shader->IsDefault() && !shader->IsInUse() //&& g_TextureBrowser_currentDirectory != ""
+	if( textureBrowser.m_hideNonShadersInCommon && shader->IsDefault() && !shader->IsInUse() //&& g_TextureBrowser_currentDirectory != ""
 		&& shader_equal_prefix( shader_get_textureName( shader->getName() ), TextureBrowser_getComonShadersDir() ) ){
 		return false;
 	}
@@ -532,6 +548,10 @@ bool Texture_IsShown( IShader* shader, bool show_shaders, bool show_textures, bo
 		if ( !shader_equal_prefix( shader_get_textureName( shader->getName() ), g_TextureBrowser_currentDirectory.c_str() ) ) {
 			return false;
 		}
+	}
+
+	if( Texture_filtered( path_get_filename_start( shader->getName() ), textureBrowser ) ){
+		return false;
 	}
 
 	return true;
@@ -556,7 +576,7 @@ void TextureBrowser_evaluateHeight( TextureBrowser& textureBrowser ){
 		{
 			IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-			if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
+			if ( !Texture_IsShown( shader, textureBrowser ) ) {
 				continue;
 			}
 
@@ -908,7 +928,7 @@ void TextureBrowser_Focus( TextureBrowser& textureBrowser, const char* name ){
 	{
 		IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
+		if ( !Texture_IsShown( shader, textureBrowser ) ) {
 			continue;
 		}
 
@@ -952,7 +972,7 @@ IShader* Texture_At( TextureBrowser& textureBrowser, int mx, int my ){
 	{
 		IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
+		if ( !Texture_IsShown( shader, textureBrowser ) ) {
 			continue;
 		}
 
@@ -1019,8 +1039,10 @@ void TextureBrowser_trackingDelta( int x, int y, unsigned int state, void* data 
 }
 
 void TextureBrowser_Tracking_MouseUp( TextureBrowser& textureBrowser ){
-	textureBrowser.m_move_started = false;
-	textureBrowser.m_freezePointer.unfreeze_pointer( textureBrowser.m_parent, false );
+	if( textureBrowser.m_move_started ){
+		textureBrowser.m_move_started = false;
+		textureBrowser.m_freezePointer.unfreeze_pointer( textureBrowser.m_parent, false );
+	}
 }
 
 void TextureBrowser_Tracking_MouseDown( TextureBrowser& textureBrowser ){
@@ -1100,7 +1122,7 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 	{
 		IShader* shader = QERApp_ActiveShaders_IteratorCurrent();
 
-		if ( !Texture_IsShown( shader, textureBrowser.m_showShaders, textureBrowser.m_showTextures, textureBrowser.m_hideUnused, textureBrowser.m_hideNonShadersInCommon ) ) {
+		if ( !Texture_IsShown( shader, textureBrowser ) ) {
 			continue;
 		}
 
@@ -1242,7 +1264,7 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 			glDisable( GL_TEXTURE_2D );
 			glColor3f( 1,1,1 );
 
-			glRasterPos2i( x, y - TextureBrowser_fontHeight( textureBrowser ) + 2 );//+5
+			glRasterPos2i( x, y - TextureBrowser_fontHeight( textureBrowser ) + 3 );//+5
 
 			// don't draw the directory name
 			const char* name = shader->getName();
@@ -1676,6 +1698,7 @@ void TextureBrowser_createTreeViewTree(){
 	g_signal_connect( g_TextureBrowser.m_treeViewTree, "row-activated", (GCallback) TreeView_onRowActivated, NULL );
 
 	renderer = gtk_cell_renderer_text_new();
+	//g_object_set( G_OBJECT( renderer ), "ellipsize", PANGO_ELLIPSIZE_START, NULL );
 	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), -1, "", renderer, "text", 0, NULL );
 
 	TextureBrowser_constructTreeStore();
@@ -2087,6 +2110,11 @@ void TextureBrowser_SetNotex(){
 	g_shadernotex = name.c_str();
 }
 
+void TextureBrowser_filterChanged( GtkEditable *editable, TextureBrowser* textureBrowser ){
+	TextureBrowser_heightChanged( *textureBrowser );
+	textureBrowser->m_originInvalid = true;
+}
+
 GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 	// The gl_widget and the tag assignment frame should be packed into a GtkVPaned with the slider
 	// position stored in local.pref. gtk_paned_get_position() and gtk_paned_set_position() don't
@@ -2153,6 +2181,13 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 */
 		//gtk_table_attach( GTK_TABLE( table ), menu_bar, 0, 3, 0, 1, GTK_FILL, GTK_SHRINK, 0, 0 );
 		//gtk_widget_show( menu_bar );
+	}
+	{//filter entry
+		GtkWidget* entry = gtk_entry_new();
+		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( entry ), FALSE, FALSE, 0 );
+		gtk_widget_show( entry );
+		g_TextureBrowser.m_filter_entry = entry;
+		g_signal_connect( G_OBJECT( entry ), "changed", G_CALLBACK( TextureBrowser_filterChanged ), &g_TextureBrowser );
 	}
 	{ // Texture TreeView
 		g_TextureBrowser.m_scr_win_tree = gtk_scrolled_window_new( NULL, NULL );

@@ -79,7 +79,6 @@ struct camwindow_globals_private_t
 	bool m_bCamInverseMouse;
 	bool m_bCamDiscrete;
 	bool m_bCubicClipping;
-	bool m_showStats;
 	int m_nStrafeMode;
 
 	camwindow_globals_private_t() :
@@ -89,7 +88,6 @@ struct camwindow_globals_private_t
 		m_bCamInverseMouse( false ),
 		m_bCamDiscrete( true ),
 		m_bCubicClipping( false ),
-		m_showStats( true ),
 		m_nStrafeMode( 3 ){
 	}
 
@@ -1559,10 +1557,10 @@ ShowStatsExportCaller g_show_stats_caller;
 BoolExportCallback g_show_stats_callback( g_show_stats_caller );
 ToggleItem g_show_stats( g_show_stats_callback );
 */
-BoolExportCaller g_show_stats_caller( g_camwindow_globals_private.m_showStats );
+BoolExportCaller g_show_stats_caller( g_camwindow_globals.m_showStats );
 ToggleItem g_show_stats( g_show_stats_caller );
 void ShowStatsToggle(){
-	g_camwindow_globals_private.m_showStats ^= 1;
+	g_camwindow_globals.m_showStats ^= 1;
 	g_show_stats.update();
 	UpdateAllWindows();
 }
@@ -1709,7 +1707,7 @@ void CamWnd::Cam_Draw(){
 		glEnd();
 	}
 
-	if ( g_camwindow_globals_private.m_showStats ) {
+	if ( g_camwindow_globals.m_showStats ) {
 		glRasterPos3f( 1.0f, static_cast<float>( m_Camera.height ) - GlobalOpenGL().m_font->getPixelDescent(), 0.0f );
 		extern const char* Renderer_GetStats();
 		GlobalOpenGL().drawString( Renderer_GetStats() );
@@ -2142,7 +2140,7 @@ void CamWnd_Construct(){
 
 	GlobalToggles_insert( "ShowStats", FreeCaller<ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
 
-	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals_private.m_showStats ), BoolExportStringCaller( g_camwindow_globals_private.m_showStats ) );
+	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
 	GlobalPreferenceSystem().registerPreference( "MoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamLinkSpeed", BoolImportStringCaller( g_camwindow_globals_private.m_bCamLinkSpeed ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamLinkSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "AngleSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nAngleSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nAngleSpeed ) );

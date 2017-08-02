@@ -169,7 +169,7 @@ GLFont *glfont_create( const char* font_string ){
 
 	return new GLFontCallList( font_list_base, font_ascent, font_descent, font_height );
 }
-#else
+#elif 0
 
 // new font code ripped from ZeroRadiant
 
@@ -335,5 +335,69 @@ virtual int getPixelHeight() const {
 GLFont *glfont_create( const char* font_string ){
 	return new GLFontInternal( font_string );
 }
+
+#elif 1
+
+#include <pango/pangoft2.h>
+#include <pango/pango-utils.h>
+#include <gtk/gtkglwidget.h>
+
+GLFont *glfont_create( const char* font_string ){
+	GLuint font_list_base = glGenLists( 256 );
+	int font_height = 0, font_ascent = 0, font_descent = 0;
+
+	PangoFontDescription* font_desc = pango_font_description_from_string( font_string );
+	//PangoFontDescription* font_desc = pango_font_description_from_string( "arial 7" );
+
+	PangoFont* font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+
+	if ( font == 0 ) {
+		pango_font_description_free( font_desc );
+		font_desc = pango_font_description_from_string( "arial 8" );
+		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+	}
+
+	if ( font == 0 ) {
+		pango_font_description_free( font_desc );
+		font_desc = pango_font_description_from_string( "fixed 8" );
+		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+	}
+
+	if ( font == 0 ) {
+		pango_font_description_free( font_desc );
+		font_desc = pango_font_description_from_string( "courier new 8" );
+		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+	}
+
+	if ( font != 0 ) {
+
+		PangoFontMap *fontmap = pango_ft2_font_map_new();
+		pango_ft2_font_map_set_resolution( PANGO_FT2_FONT_MAP( fontmap ), 72, 72 );
+		PangoContext *ft2_context = pango_font_map_create_context( fontmap );
+		pango_context_set_font_description( ft2_context, font_desc );
+		PangoLayout *layout = pango_layout_new( ft2_context );
+
+#if 1 //FONT_SIZE_WORKAROUND
+		pango_layout_set_width( layout, -1 );   // -1 no wrapping.  All text on one line.
+		pango_layout_set_text( layout, "_|The quick brown fox jumped over the lazy sleeping dog's back then sat on a tack.", -1 );   // -1 null-terminated string.
+#endif
+
+		int font_ascent_pango_units = pango_layout_get_baseline( layout );
+		PangoRectangle log_rect;
+		pango_layout_get_extents( layout, NULL, &log_rect );
+		g_object_unref( G_OBJECT( layout ) );
+		int font_descent_pango_units = log_rect.height - font_ascent_pango_units;
+
+		pango_font_description_free( font_desc );
+		g_object_unref( G_OBJECT( ft2_context ) );
+		g_object_unref( G_OBJECT( fontmap ) );
+
+		font_ascent = PANGO_PIXELS_CEIL( font_ascent_pango_units );
+		font_descent = PANGO_PIXELS_CEIL( font_descent_pango_units );
+		font_height = font_ascent + font_descent;
+	}
+	return new GLFontCallList( font_list_base, font_ascent, font_descent, font_height );
+}
+
 
 #endif

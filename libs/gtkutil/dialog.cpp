@@ -166,8 +166,13 @@ gboolean dialog_delete_callback( GtkWidget *widget, GdkEventAny* event, ModalDia
 	return TRUE;
 }
 
+#include <gdk/gdkkeysyms.h>
+
 GtkWindow* create_simple_modal_dialog_window( const char* title, ModalDialog& dialog, GtkWidget* contents ){
 	GtkWindow* window = create_fixedsize_modal_dialog_window( 0, title, dialog );
+
+	GtkAccelGroup* accel = gtk_accel_group_new();
+	gtk_window_add_accel_group( window, accel );
 
 	GtkVBox* vbox1 = create_dialog_vbox( 8, 4 );
 	gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( vbox1 ) );
@@ -180,6 +185,8 @@ GtkWindow* create_simple_modal_dialog_window( const char* title, ModalDialog& di
 
 	GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &dialog );
 	gtk_container_add( GTK_CONTAINER( alignment ), GTK_WIDGET( button ) );
+	gtk_widget_grab_default( GTK_WIDGET( button ) );
+	gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
 
 	return window;
 }

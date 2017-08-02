@@ -825,7 +825,8 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if( entity->isContainer() ){
 			++m_groupents;
 			if( !string_equal_nocase( "func_group", entity->getKeyValue( "classname" ) ) &&
-				!string_equal_nocase( "_decal", entity->getKeyValue( "classname" ) ) ){
+				!string_equal_nocase( "_decal", entity->getKeyValue( "classname" ) ) &&
+				!string_equal_nocase( "func_detail", entity->getKeyValue( "classname" ) ) ){
 				++m_groupents_ingame;
 				++m_ents_ingame;
 			}
