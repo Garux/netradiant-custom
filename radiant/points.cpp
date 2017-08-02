@@ -96,8 +96,10 @@ bool shown() const {
 void show( bool show ){
 	if ( show && !shown() ) {
 		Pointfile_Parse( *this );
-		GenerateDisplayList();
-		SceneChangeNotify();
+		if( s_num_points > 0 ){
+			GenerateDisplayList();
+			SceneChangeNotify();
+		}
 	}
 	else if ( !show && shown() ) {
 		glDeleteLists( m_displaylist, 1 );

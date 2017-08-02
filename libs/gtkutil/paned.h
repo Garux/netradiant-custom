@@ -23,7 +23,6 @@
 #define INCLUDED_GTKUTIL_PANED_H
 
 typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkHPaned GtkHPaned;
 GtkWidget* create_split_views( GtkWidget* topleft, GtkWidget* botleft, GtkWidget* topright, GtkWidget* botright, GtkWidget*& vsplit1, GtkWidget*& vsplit2 );
 
 #endif

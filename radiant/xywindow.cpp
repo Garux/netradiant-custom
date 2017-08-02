@@ -248,8 +248,10 @@ void Clip_Update(){
 	ClipperChangeNotify();
 }
 
+#include "filterbar.h"
+
 const char* Clip_getShader(){
-	return g_clip_useCaulk ? "textures/common/caulk" : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
+	return g_clip_useCaulk ? GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
 }
 
 void Clip(){
@@ -1184,35 +1186,12 @@ void XYWnd::NewBrushDrag( int x, int y ){
 	//Scene_BrushResize_Selected(GlobalSceneGraph(), aabb_for_minmax(mins, maxs), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()));
 	Scene_BrushResize_Selected( GlobalSceneGraph(), aabb_for_minmax( mins, maxs ),
 								g_brush_always_caulk ?
-								"textures/common/caulk" : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+								GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
 }
 
-gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
-	if ( event->button.button == 3 ) {
-//		globalOutputStream() << "yo+\n";
+int g_entityCreationOffset = 0;
 
-		const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( widget )->child ) );
-		StringOutputStream command;
-		command << "entitySetClass -class " << entity_name;
-		UndoableCommand undo( command.c_str() );
-
-		Scene_EntitySetClassname_Selected( entity_name );
-
-		gtk_menu_popdown( XYWnd::m_mnuDrop );
-		return TRUE;
-	}
-	return FALSE;
-}
-
-gboolean entitycreate_rightUnClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
-	if ( event->button.button == 3 ) {
-//		globalOutputStream() << "yo-\n";
-		return TRUE;
-	}
-	return FALSE;
-}
-
-void entitycreate_activated( GtkWidget* item ){
+void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
 	scene::Node* world_node = Map_FindWorldspawn( g_map );
 	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
 
@@ -1229,13 +1208,15 @@ void entitycreate_activated( GtkWidget* item ){
 			viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
 			viewvector[2] = sin( radangles[0] );
 
-			Vector3 point = viewvector * 64.f + Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
+			float offset_for_multiple = ( GetSnapGridSize() < 8.f ? 8.f : GetSnapGridSize() ) * g_entityCreationOffset;
+			Vector3 point = viewvector * ( 64.f + offset_for_multiple ) + Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
 			vector3_snap( point, GetSnapGridSize() );
 			Entity_createFromSelection( entity_name, point );
 		}
 		else{
 			g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );
 		}
+		++g_entityCreationOffset;
 	}
 	else {
 		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!"
@@ -1246,11 +1227,48 @@ void entitycreate_activated( GtkWidget* item ){
 	}
 }
 
+gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
+	/* convert entities */
+	if ( event->button.button == 3 ) {
+//		globalOutputStream() << "yo+\n";
+
+		const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( widget )->child ) );
+		StringOutputStream command;
+		command << "entitySetClass -class " << entity_name;
+		UndoableCommand undo( command.c_str() );
+
+		Scene_EntitySetClassname_Selected( entity_name );
+
+		if( ( event->button.state & GDK_CONTROL_MASK ) == 0 ){
+			gtk_menu_popdown( XYWnd::m_mnuDrop );
+		}
+		return TRUE;
+	}
+	/* create entities, don't close menu */
+	else if ( event->button.button == 1 && ( ( event->button.state & GDK_CONTROL_MASK ) != 0 || gtk_menu_get_tearoff_state( XYWnd::m_mnuDrop ) == TRUE ) ) {
+		entitycreate_activated( GTK_MENU_ITEM( widget ), 0 );
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/* This handles unwanted rightclick release, that can occur with low res display, while activating menu from camera (=activate top menu entry) */
+gboolean entitycreate_rightUnClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
+	if ( event->button.button == 3 ) {
+//		globalOutputStream() << "yo-\n";
+		return TRUE;
+	}
+	else if ( event->button.button == 1 && ( ( event->button.state & GDK_CONTROL_MASK ) != 0 || gtk_menu_get_tearoff_state( XYWnd::m_mnuDrop ) == TRUE ) ) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
 void EntityClassMenu_addItem( GtkMenu* menu, const char* name ){
 	GtkMenuItem* item = GTK_MENU_ITEM( gtk_menu_item_new_with_label( name ) );
-	g_signal_connect( G_OBJECT( item ), "button-press-event", G_CALLBACK( entitycreate_rightClicked ), item );
-	g_signal_connect( G_OBJECT( item ), "button-release-event", G_CALLBACK( entitycreate_rightUnClicked ), item );
-	g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( entitycreate_activated ), item );
+	g_signal_connect( G_OBJECT( item ), "button-press-event", G_CALLBACK( entitycreate_rightClicked ), 0 );
+	g_signal_connect( G_OBJECT( item ), "button-release-event", G_CALLBACK( entitycreate_rightUnClicked ), 0 );
+	g_signal_connect( G_OBJECT( item ), "activate", G_CALLBACK( entitycreate_activated ), 0 );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	menu_add_item( menu, item );
 }
@@ -1327,11 +1345,16 @@ void XYWnd::OnContextMenu(){
 
 	if ( m_mnuDrop == 0 ) { // first time, load it up
 		GtkMenu* menu = m_mnuDrop = GTK_MENU( gtk_menu_new() );
+//		menu_tearoff( menu );
+		g_signal_connect( G_OBJECT( menu_tearoff( menu ) ), "button-release-event", G_CALLBACK( entitycreate_rightUnClicked ), 0 );
+		gtk_menu_attach_to_widget( m_mnuDrop, GTK_WIDGET( m_parent != 0 ? m_parent : MainFrame_getWindow() ), NULL );
+		gtk_menu_set_title( m_mnuDrop, "" );
 
 		EntityClassMenuInserter inserter( menu );
 		GlobalEntityClassManager().forEach( inserter );
 	}
 
+	g_entityCreationOffset = 0;
 	g_bCamEntityMenu = false;
 	gtk_menu_popup( m_mnuDrop, 0, 0, 0, 0, 1, GDK_CURRENT_TIME );
 }
@@ -1659,7 +1682,7 @@ void XYWnd::XY_LoadBackgroundImage( const char *name ){
 		m_ix = 0;
 		m_iy = 2;
 		break;
-	case YZ:
+	default: //case YZ:
 		m_ix = 1;
 		m_iy = 2;
 		break;
@@ -2760,6 +2783,21 @@ void XYWnd::OnEntityCreate( const char* item ){
 	UndoableCommand undo( command.c_str() );
 	Vector3 point;
 	XYWnd_MouseToPoint( this, m_entityCreate_x, m_entityCreate_y, point );
+
+	Vector3 offset( 0, 0, 0 );
+	float offset_for_multiple = ( GetSnapGridSize() < 8.f ? 8.f : GetSnapGridSize() ) * g_entityCreationOffset;
+	switch ( m_viewType )
+	{
+	case XY:
+	case XZ:
+		offset[0] = 1.f;
+		break;
+	default: //case YZ:
+		offset[1] = 1.f;
+		break;
+	}
+	point += offset * offset_for_multiple;
+
 	Entity_createFromSelection( item, point );
 }
 

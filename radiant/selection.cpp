@@ -514,6 +514,17 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 			start[i] = GetSnapGridSize();
 		}
 	}
+
+	std::size_t ignore_axis = 0;
+	if( snap ){
+		for ( std::size_t i = 1; i < 3 ; ++i ){
+			if( fabs( m_start[i] ) < fabs( m_start[ignore_axis] ) ){
+				ignore_axis = i;
+			}
+		}
+		start[ignore_axis] = 0.f;
+	}
+
 	Vector3 scale(
 		start[0] == 0 ? 1 : 1 + delta[0] / start[0],
 		start[1] == 0 ? 1 : 1 + delta[1] / start[1],
@@ -522,9 +533,9 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 
 	//globalOutputStream() << "m_start: " << m_start << "   start: " << start << "   delta: " << delta <<"\n";
 	for( std::size_t i = 0; i < 3; i++ ){
-		if( m_choosen_extent[i] > 0.0625f ){
+		if( m_choosen_extent[i] > 0.0625f && start[i] != 0.f ){
 			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
-			if( snapbbox && start[i] != 0.f ){
+			if( snapbbox ){
 				float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
 				scale[i] = snappdwidth / ( m_bounds.extents[i] * 2.f );
 			}
@@ -532,16 +543,15 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	}
 	//globalOutputStream() << "pre snap scale: " << scale <<"\n";
 	if( snap ){
-		float bestscale = scale[0];
-		for( std::size_t i = 1; i < 3; i++ ){
-			//if( fabs( 1.0f - fabs( scale[i] ) ) > fabs( 1.0f - fabs( bestscale ) ) ){
-			if( fabs( scale[i] ) > fabs( bestscale ) && scale[i] != 1.0f ){ //harder to scale down with this, but glitchier with upper one
+		float bestscale = ignore_axis != 0 ? scale[0] : scale[1];
+		for( std::size_t i = ignore_axis != 0 ? 1 : 2; i < 3; i++ ){
+			if( ignore_axis != i && fabs( scale[i] ) < fabs( bestscale ) ){
 				bestscale = scale[i];
 			}
 			//globalOutputStream() << "bestscale: " << bestscale <<"\n";
 		}
 		for( std::size_t i = 0; i < 3; i++ ){
-			if( start[i] != 0.0f ){ // !!!!check grid == 0 case
+			if( ignore_axis != i ){
 				scale[i] = ( scale[i] < 0.0f ) ? -fabs( bestscale ) : fabs( bestscale );
 			}
 		}
@@ -2638,7 +2648,7 @@ std::list<Selectable*>& best(){
 }
 };
 
-bool g_bAltDragManipulatorResize = false; //+select primitives in component modes
+bool g_bAltResize_AltSelect = false; //AltDragManipulatorResize + select primitives in component modes
 bool g_bTmpComponentMode = false;
 
 class DragManipulator : public Manipulator
@@ -2670,7 +2680,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 		Scene_TestSelect_Primitive( booleanSelector, test, view );
 
 		if ( booleanSelector.isSelected() ) {
-			if( g_bAltDragManipulatorResize ){
+			if( g_bAltResize_AltSelect ){
 				DeepBestSelector deepSelector;
 				Scene_TestSelect_Component_Selected( deepSelector, test, view, SelectionSystem::eVertex );
 				for ( std::list<Selectable*>::iterator i = deepSelector.best().begin(); i != deepSelector.best().end(); ++i )
@@ -2695,7 +2705,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 		}
 		else
 		{
-			if( g_bAltDragManipulatorResize ){
+			if( g_bAltResize_AltSelect ){
 				Scene_forEachBrushPlane_selectVertices( GlobalSceneGraph(), test );
 				m_selected = true;
 			}
@@ -3157,7 +3167,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				Scene_TestSelect_Component( selector, volume, scissored, eFace );
 			}
 			else{
-				Scene_TestSelect( selector, volume, scissored, g_bAltDragManipulatorResize ? ePrimitive : Mode(), ComponentMode() );
+				Scene_TestSelect( selector, volume, scissored, g_bAltResize_AltSelect ? ePrimitive : Mode(), ComponentMode() );
 			}
 
 			if ( !selector.failed() ) {
@@ -3220,7 +3230,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 					++i;
 					while ( i != selector.end() )
 					{
-						if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+						if( ( *i ).first.equalEpsilon( ( *best ).first, Mode() == eComponent ? 0.25f : 0.000001f, 0.000001f ) ){
 							if( !( *i ).second->isSelected() ){
 								( *i ).second->setSelected( true );
 							}
@@ -3242,7 +3252,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 					++i;
 					while ( i != selector.end() )
 					{
-						if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+						if( ( *i ).first.equalEpsilon( ( *best ).first, Mode() == eComponent ? 0.25f : 0.000001f, 0.000001f ) ){
 							if( ( *i ).second->isSelected() ){
 								( *i ).second->setSelected( false );
 							}
@@ -3306,7 +3316,7 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 				Scene_TestSelect_Component( selector, volume, scissored, eFace );
 			}
 			else{
-				Scene_TestSelect( selector, volume, scissored, g_bAltDragManipulatorResize ? ePrimitive : Mode(), ComponentMode() );
+				Scene_TestSelect( selector, volume, scissored, g_bAltResize_AltSelect ? ePrimitive : Mode(), ComponentMode() );
 			}
 			if ( !selector.failed() ){
 				SelectableSortedSet::iterator best = selector.begin();
@@ -3316,7 +3326,7 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 				++i;
 				while ( i != selector.end() )
 				{
-					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
+					if( ( *i ).first.equalEpsilon( ( *best ).first, Mode() == eComponent ? 0.25f : 0.000001f, 0.000001f ) ){
 						( *i ).second->setSelected( !wasSelected );
 					}
 					else{
@@ -3680,7 +3690,7 @@ void RadiantSelectionSystem::endMove(){
 	if ( Mode() == ePrimitive ) {
 		if ( ManipulatorMode() == eDrag ) {
 			g_bTmpComponentMode = false;
-			if( g_bAltDragManipulatorResize ){
+			if( g_bAltResize_AltSelect ){
 				Scene_SelectAll_Component( false, SelectionSystem::eVertex );
 			}
 			else{
@@ -4286,7 +4296,7 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 		//m_selector.m_mouseMoved = false;
 
 		DeviceVector devicePosition( window_to_normalised_device( position, m_width, m_height ) );
-		g_bAltDragManipulatorResize = ( modifiers == c_modifierAlt ) ? true : false;
+		g_bAltResize_AltSelect = ( modifiers == c_modifierAlt ) ? true : false;
 		if ( ( modifiers == c_modifier_manipulator || ( modifiers == c_modifierAlt && getSelectionSystem().Mode() != SelectionSystem::eComponent ) ) && m_manipulator.mouseDown( devicePosition ) ) {
 			g_mouseMovedCallback.insert( MouseEventCallback( Manipulator_::MouseMovedCaller( m_manipulator ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Manipulator_::MouseUpCaller( m_manipulator ) ) );

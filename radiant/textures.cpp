@@ -728,7 +728,7 @@ void Textures_constructPreferences( PreferencesPage& page ){
 		"Texture Gamma",
 		1.0,
 		0.0,
-		1.0,
+		5.0,
 		FloatImportCallback( TextureGammaImportCaller( g_texture_globals.fGamma ) ),
 		FloatExportCallback( FloatExportCaller( g_texture_globals.fGamma ) )
 		);

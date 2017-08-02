@@ -149,7 +149,7 @@ struct camera_t
 	guint m_keymove_handler;
 
 
-	float fieldOfView;
+	static float fieldOfView;
 
 	DeferredMotionDelta m_mouseMove;
 
@@ -171,13 +171,13 @@ struct camera_t
 		color( 0, 0, 0 ),
 		movementflags( 0 ),
 		m_keymove_handler( 0 ),
-		fieldOfView( 110.0f ),
 		m_mouseMove( motionDelta, this ),
 		m_view( view ),
 		m_update( update ){
 	}
 };
 
+float camera_t::fieldOfView = 110.0f;
 camera_draw_mode camera_t::draw_mode = cd_texture;
 
 inline Matrix4 projection_for_camera( float near_z, float far_z, float fieldOfView, int width, int height ){
@@ -200,7 +200,7 @@ float Camera_getFarClipPlane( camera_t& camera ){
 
 void Camera_updateProjection( camera_t& camera ){
 	float farClip = Camera_getFarClipPlane( camera );
-	camera.projection = projection_for_camera( farClip / 4096.0f, farClip, camera.fieldOfView, camera.width, camera.height );
+	camera.projection = projection_for_camera( farClip / 4096.0f, farClip, camera_t::fieldOfView, camera.width, camera.height );
 
 	camera.m_view->Construct( camera.projection, camera.modelview, camera.width, camera.height );
 }
@@ -703,6 +703,7 @@ XORRectangle m_XORRectangle;
 
 DeferredDraw m_deferredDraw;
 DeferredMotion m_deferred_motion;
+DeferredMotion m_deferred_motion_freemove;
 
 guint m_selection_button_press_handler;
 guint m_selection_button_release_handler;
@@ -937,10 +938,16 @@ gboolean selection_button_release_freemove( GtkWidget* widget, GdkEventButton* e
 	}
 	return FALSE;
 }
-
+#if 0
 gboolean selection_motion_freemove( GtkWidget *widget, GdkEventMotion *event, WindowObserver* observer ){
 	observer->onMouseMotion( windowvector_for_widget_centre( widget ), modifiers_for_state( event->state ) );
 	return FALSE;
+}
+#endif
+void selection_motion_freemove( gdouble x, gdouble y, guint state, void* data ){
+	//globalOutputStream() << "motion... ";
+	CamWnd* camwnd = reinterpret_cast<CamWnd*>( data );
+	camwnd->m_window_observer->onMouseMotion( windowvector_for_widget_centre( camwnd->m_gl_widget ), modifiers_for_state( state ) );
 }
 
 gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* camwnd ){
@@ -1234,7 +1241,8 @@ void CamWnd_Remove_Handlers_Move( CamWnd& camwnd ){
 void CamWnd_Add_Handlers_FreeMove( CamWnd& camwnd ){
 	camwnd.m_selection_button_press_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_press_event", G_CALLBACK( selection_button_press_freemove ), camwnd.m_window_observer );
 	camwnd.m_selection_button_release_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_release_event", G_CALLBACK( selection_button_release_freemove ), camwnd.m_window_observer );
-	camwnd.m_selection_motion_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "motion_notify_event", G_CALLBACK( selection_motion_freemove ), camwnd.m_window_observer );
+	//camwnd.m_selection_motion_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "motion_notify_event", G_CALLBACK( selection_motion_freemove ), camwnd.m_window_observer );
+	camwnd.m_selection_motion_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "motion_notify_event", G_CALLBACK( DeferredMotion::gtk_motion ), &camwnd.m_deferred_motion_freemove );
 
 	camwnd.m_freelook_button_press_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_press_event", G_CALLBACK( disable_freelook_button_press ), &camwnd );
 
@@ -1286,6 +1294,7 @@ CamWnd::CamWnd() :
 	m_XORRectangle( m_gl_widget ),
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
 	m_deferred_motion( selection_motion, m_window_observer ),
+	m_deferred_motion_freemove( selection_motion_freemove, this ),
 	m_selection_button_press_handler( 0 ),
 	m_selection_button_release_handler( 0 ),
 	m_selection_motion_handler( 0 ),
@@ -1989,6 +1998,14 @@ void RenderModeExport( const IntImportCallback& importer ){
 }
 typedef FreeCaller1<const IntImportCallback&, RenderModeExport> RenderModeExportCaller;
 
+void fieldOfViewImport( float value ){
+	camera_t::fieldOfView = value;
+	if( g_camwnd ){
+		Camera_updateProjection( g_camwnd->getCamera() );
+	}
+}
+typedef FreeCaller1<float, fieldOfViewImport> fieldOfViewImportCaller;
+
 void Camera_constructPreferences( PreferencesPage& page ){
 	page.appendSlider( "Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 100, MIN_CAM_SPEED, MAX_CAM_SPEED, 1, 10 );
 	page.appendCheckBox( "", "Link strafe speed to movement speed", g_camwindow_globals_private.m_bCamLinkSpeed );
@@ -2034,6 +2051,11 @@ void Camera_constructPreferences( PreferencesPage& page ){
 		"Strafe Mode",
 		g_camwindow_globals_private.m_nStrafeMode,
 		STRING_ARRAY_RANGE( strafe_mode )
+		);
+
+	page.appendSpinner(	"Field Of View", 110.0, 1.0, 175.0,
+		FloatImportCallback( fieldOfViewImportCaller() ),
+		FloatExportCallback( FloatExportCaller( camera_t::fieldOfView ) )
 		);
 }
 void Camera_constructPage( PreferenceGroup& group ){
@@ -2133,6 +2155,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "CameraRenderMode", makeIntStringImportCallback( RenderModeImportCaller() ), makeIntStringExportCallback( RenderModeExportCaller() ) );
 	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_nStrafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_nStrafeMode ) );
 	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_camwindow_globals.m_bZoomInToPointer ) );
+	GlobalPreferenceSystem().registerPreference( "fieldOfView", FloatImportStringCaller( camera_t::fieldOfView ), FloatExportStringCaller( camera_t::fieldOfView ) );
 
 	CamWnd_constructStatic();
 

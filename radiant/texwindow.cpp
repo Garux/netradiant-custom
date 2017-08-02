@@ -393,13 +393,14 @@ void TextureBrowser_SetSelectedShader( TextureBrowser& textureBrowser, const cha
 	}
 
 	// disable the menu item "shader info" if no shader was selected
+	if ( textureBrowser.m_shader_info_item == NULL ){
+		return;
+	}
 	IShader* ishader = QERApp_Shader_ForName( shader );
 	CopiedString filename = ishader->getShaderFileName();
 
 	if ( filename.empty() ) {
-		if ( textureBrowser.m_shader_info_item != NULL ) {
-			gtk_widget_set_sensitive( textureBrowser.m_shader_info_item, FALSE );
-		}
+		gtk_widget_set_sensitive( textureBrowser.m_shader_info_item, FALSE );
 	}
 	else {
 		gtk_widget_set_sensitive( textureBrowser.m_shader_info_item, TRUE );
@@ -782,9 +783,15 @@ void TextureBrowser_ShowDirectory( TextureBrowser& textureBrowser, const char* d
 	textureBrowser.m_searchedTags = false;
 	if ( TextureBrowser_showWads() ) {
 		Archive* archive = GlobalFileSystem().getArchive( directory );
-		ASSERT_NOTNULL( archive );
-		LoadShaderVisitor visitor;
-		archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, 0 ), "textures/" );
+		//ASSERT_NOTNULL( archive );
+		if( archive ){
+			globalOutputStream() << "Loading " << makeQuoted( directory ) << " wad file.\n";
+			LoadShaderVisitor visitor;
+			archive->forEachFile( Archive::VisitorFunc( visitor, Archive::eFiles, 0 ), "textures/" );
+		}
+		else{
+			globalErrorStream() << "Attempted to load " << makeQuoted( directory ) << " wad file.\n";
+		}
 	}
 	else
 	{
@@ -1406,7 +1413,8 @@ gboolean TextureBrowser_button_press( GtkWidget* widget, GdkEventButton* event, 
 			}
 		}
 	}
-	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 1 ) {
+	/* loads directory, containing active shader + focuses on it */
+	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 1 && !TextureBrowser_showWads() ) {
 		CopiedString texName = textureBrowser->shader;
 		char* sh = const_cast<char*>( texName.c_str() );
 		char* dir = strrchr( sh, '/' );
@@ -1569,6 +1577,22 @@ void TextureGroups_constructTreeModel( TextureGroups groups, GtkTreeStore* store
 	}
 }
 
+void TextureGroups_constructTreeModel_childless( TextureGroups groups, GtkTreeStore* store ){
+	// put the information from the old textures menu into a treeview
+	GtkTreeIter iter;
+
+	TextureGroups::const_iterator i = groups.begin();
+	while ( i != groups.end() )
+	{
+		const char* dirName = ( *i ).c_str();
+		{
+			gtk_tree_store_append( store, &iter, NULL );
+			gtk_tree_store_set( store, &iter, 0, dirName, -1 );
+			++i;
+		}
+	}
+}
+
 TextureGroups TextureGroups_constructTreeView(){
 	TextureGroups groups;
 
@@ -1591,7 +1615,12 @@ TextureGroups TextureGroups_constructTreeView(){
 void TextureBrowser_constructTreeStore(){
 	TextureGroups groups = TextureGroups_constructTreeView();
 	GtkTreeStore* store = gtk_tree_store_new( 1, G_TYPE_STRING );
-	TextureGroups_constructTreeModel( groups, store );
+	if( !TextureBrowser_showWads() ){
+		TextureGroups_constructTreeModel( groups, store );
+	}
+	else{
+		TextureGroups_constructTreeModel_childless( groups, store );
+	}
 	//std::set<CopiedString>::iterator iter;
 
 	GtkTreeModel* model = GTK_TREE_MODEL( store );
@@ -1729,7 +1758,7 @@ GtkMenuItem* TextureBrowser_constructViewMenu( GtkMenu* menu ){
 
 
 	// we always want to show shaders but don't want a "Show Shaders" menu for doom3 and .wad file games
-	if ( g_pGameDescription->mGameType == "doom3" || !string_empty( g_pGameDescription->getKeyValue( "show_wads" ) ) ) {
+	if ( g_pGameDescription->mGameType == "doom3" || TextureBrowser_showWads() ) {
 		g_TextureBrowser.m_showShaders = true;
 	}
 	else
@@ -1742,10 +1771,10 @@ GtkMenuItem* TextureBrowser_constructViewMenu( GtkMenu* menu ){
 	if ( g_TextureBrowser.m_tags ) {
 		create_menu_item_with_mnemonic( menu, "Show Untagged", "ShowUntagged" );
 	}
-	if ( g_pGameDescription->mGameType != "doom3" && string_empty( g_pGameDescription->getKeyValue( "show_wads" ) ) ) {
+	if ( g_pGameDescription->mGameType != "doom3" && !TextureBrowser_showWads() ) {
 		create_check_menu_item_with_mnemonic( menu, "ShaderList Only", "ToggleShowShaderlistOnly" );
 	}
-	if ( string_empty( g_pGameDescription->getKeyValue( "show_wads" ) ) ) {
+	if ( !TextureBrowser_showWads() ) {
 		create_check_menu_item_with_mnemonic( menu, "Hide Image Missing", "FilterNotex" );
 		menu_separator( menu );
 	}
@@ -1753,7 +1782,7 @@ GtkMenuItem* TextureBrowser_constructViewMenu( GtkMenu* menu ){
 	create_check_menu_item_with_mnemonic( menu, "Fixed Size", "FixedSize" );
 	create_check_menu_item_with_mnemonic( menu, "Transparency", "EnableAlpha" );
 
-	if ( string_empty( g_pGameDescription->getKeyValue( "show_wads" ) ) ) {
+	if ( !TextureBrowser_showWads() ) {
 		menu_separator( menu );
 		g_TextureBrowser.m_shader_info_item = GTK_WIDGET( create_menu_item_with_mnemonic( menu, "Shader Info", "ShaderInfo" ) );
 		gtk_widget_set_sensitive( g_TextureBrowser.m_shader_info_item, FALSE );
@@ -2739,8 +2768,8 @@ void TextureBrowser_constructPreferences( PreferencesPage& page ){
 			IntExportCallback( TextureScaleExportCaller( GlobalTextureBrowser() ) )
 			);
 	}
-	page.appendSpinner( "Thumbnails Max Size", GlobalTextureBrowser().m_uniformTextureSize, GlobalTextureBrowser().m_uniformTextureSize, 16, 8192 );
-	page.appendSpinner( "Thumbnails Min Size", GlobalTextureBrowser().m_uniformTextureMinSize, GlobalTextureBrowser().m_uniformTextureMinSize, 16, 8192 );
+	page.appendSpinner( "Thumbnails Max Size", GlobalTextureBrowser().m_uniformTextureSize, 160.0, 16, 8192 );
+	page.appendSpinner( "Thumbnails Min Size", GlobalTextureBrowser().m_uniformTextureMinSize, 48.0, 16, 8192 );
 	page.appendEntry( "Mousewheel Increment", GlobalTextureBrowser().m_mouseWheelScrollIncrement );
 	{
 		const char* startup_shaders[] = { "None", TextureBrowser_getComonShadersName() };

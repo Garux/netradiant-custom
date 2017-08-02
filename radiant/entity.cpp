@@ -288,6 +288,8 @@ AABB Doom3Light_getBounds( const AABB& workzone ){
 	return AABB( Vector3( 0, 0, 0 ), Vector3( 64, 64, 64 ) );
 }
 
+#include "filterbar.h"
+
 int g_iLastLightIntensity;
 
 void Entity_createFromSelection( const char* name, const Vector3& origin ){
@@ -307,16 +309,10 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
 
 	//is important to have retexturing here; if doing in the end, undo doesn't succeed;
-	if ( string_compare_nocase_n( name, "trigger_", 8 ) == 0 && brushesSelected ){
-		const char* shader = g_pGameDescription->getKeyValue( "shader_trigger" );
-		if ( shader && *shader ){
-			Scene_PatchSetShader_Selected( GlobalSceneGraph(), shader );
-			Scene_BrushSetShader_Selected( GlobalSceneGraph(), shader );
-		}
-		else{
-			Scene_PatchSetShader_Selected( GlobalSceneGraph(), "textures/common/trigger" );
-			Scene_BrushSetShader_Selected( GlobalSceneGraph(), "textures/common/trigger" );
-		}
+	if ( string_compare_nocase_n( name, "trigger_", 8 ) == 0 && brushesSelected && !entityClass->fixedsize ){
+		//const char* shader = GetCommonShader( "trigger" ).c_str();
+		Scene_PatchSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
+		Scene_BrushSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
 	}
 
 	if ( !( entityClass->fixedsize || isModel ) && !brushesSelected ) {

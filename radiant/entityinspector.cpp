@@ -920,10 +920,17 @@ void SetComment( EntityClass* eclass ){
 				gtk_text_buffer_apply_tag_by_name( buffer, "bold", &iter_start, &iter_end );
 			}
 
-			if( *c == ' ' )
-				++spaces;
-			else
+			if( *c == ' ' ){
+				if( offset - pattern_start == 1 ){
+					pattern_start = offset;
+				}
+				else{
+					++spaces;
+				}
+			}
+			else{
 				pattern_start = -1;
+			}
 		}
 	}
 }
@@ -1250,9 +1257,13 @@ void EntityInspector_clearKeyValue(){
 	}
 }
 
-static gint EntityInspector_clearKeyValueKB( GtkEntry* widget, GdkEventKey* event, gpointer data ){
+static gint EntityProperties_keypress( GtkEntry* widget, GdkEventKey* event, gpointer data ){
 	if ( event->keyval == GDK_Delete ) {
 		EntityInspector_clearKeyValue();
+		return TRUE;
+	}
+	if ( event->keyval == GDK_Tab ) {
+		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityKeyEntry ) );
 		return TRUE;
 	}
 	return FALSE;
@@ -1560,7 +1571,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
 						gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), FALSE );
 						gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( view ), FALSE );
-						g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( EntityInspector_clearKeyValueKB ), 0 );
+						g_signal_connect( G_OBJECT( view ), "key_press_event", G_CALLBACK( EntityProperties_keypress ), 0 );
 
 						{
 							GtkCellRenderer* renderer = gtk_cell_renderer_text_new();

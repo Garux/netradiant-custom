@@ -23,17 +23,38 @@ gboolean ToggleActions0( GtkWidget *widget, GdkEvent *event, gpointer user_data 
 	//globalOutputStream() << "ToggleActions\n";
 }
 
-void SetCommonShader( const char* key, const char* shader ){
-	const char* gotShader = g_pGameDescription->getKeyValue( key );
-	UndoableCommand undo( "textureNameSetSelected" );
-	if ( gotShader && *gotShader ){
-		Select_SetShader( gotShader );
+CopiedString GetCommonShader( const char* name ){
+	StringOutputStream sstream( 128 );
+	sstream << "shader_" << name;
+	const char* gotShader = g_pGameDescription->getKeyValue( sstream.c_str() );
+	if( !string_empty( gotShader ) ){
+		return gotShader;
 	}
 	else{
-		Select_SetShader( shader );
+		sstream.clear();
+		if( string_empty( g_pGameDescription->getKeyValue( "show_wads" ) ) ){
+			sstream << "textures/common/" << name;
+		}
+		else{
+			sstream << "textures/" << name;
+		}
+		return sstream.c_str();
 	}
 }
 
+void SetCommonShader( const char* name ){
+	UndoableCommand undo( "textureNameSetSelected" );
+	Select_SetShader( GetCommonShader( name ).c_str() );
+}
+
+const char* g_caulk_shader = 0;
+
+const char* GetCaulkShader(){
+	if( !g_caulk_shader ){
+		g_caulk_shader = strdup( GetCommonShader( "caulk" ).c_str() );
+	}
+	return g_caulk_shader;
+}
 
 gboolean Areaportals_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
@@ -45,13 +66,11 @@ gboolean Areaportals_button_press( GtkWidget *widget, GdkEventButton *event, gpo
 			ButtonNum = 1;
 		}
 		if( ToggleActions == 0 ){
-			SetCommonShader( "shader_nodraw", "textures/common/nodraw" );
+			SetCommonShader( "nodraw" );
 		}
 		else if( ToggleActions == 1 ){
-			SetCommonShader( "shader_nodrawnonsolid", "textures/common/nodrawnonsolid" );
+			SetCommonShader( "nodrawnonsolid" );
 		}
-		//SetCommonShader( "shader_caulk", "textures/common/caulk" );
-		//globalOutputStream() << "Found '" << "fullname" << "'\n";
 		ToggleActions++;
 		return TRUE;
 	}
@@ -61,7 +80,7 @@ gboolean Areaportals_button_press( GtkWidget *widget, GdkEventButton *event, gpo
 
 gboolean Caulk_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
-		SetCommonShader( "shader_caulk", "textures/common/caulk" );
+		SetCommonShader( "caulk" );
 		ToggleActions = 0;
 		return TRUE;
 	}
@@ -78,10 +97,10 @@ gboolean Clip_button_press( GtkWidget *widget, GdkEventButton *event, gpointer d
 			ButtonNum = 3;
 		}
 		if( ToggleActions == 0 ){
-			SetCommonShader( "shader_clip", "textures/common/clip" );
+			SetCommonShader( "clip" );
 		}
 		else if( ToggleActions == 1 ){
-			SetCommonShader( "shader_weapclip", "textures/common/weapclip" );
+			SetCommonShader( "weapclip" );
 		}
 		ToggleActions++;
 		return TRUE;
@@ -99,13 +118,13 @@ gboolean Liquids_button_press( GtkWidget *widget, GdkEventButton *event, gpointe
 			ButtonNum = 4;
 		}
 		if( ToggleActions == 0 ){
-			SetCommonShader( "shader_watercaulk", "textures/common/watercaulk" );
+			SetCommonShader( "watercaulk" );
 		}
 		else if( ToggleActions == 1 ){
-			SetCommonShader( "shader_lavacaulk", "textures/common/lavacaulk" );
+			SetCommonShader( "lavacaulk" );
 		}
 		else if( ToggleActions == 2 ){
-			SetCommonShader( "shader_slimecaulk", "textures/common/slimecaulk" );
+			SetCommonShader( "slimecaulk" );
 		}
 		ToggleActions++;
 		return TRUE;
@@ -124,13 +143,13 @@ gboolean Hint_button_press( GtkWidget *widget, GdkEventButton *event, gpointer d
 			ButtonNum = 5;
 		}
 		if( ToggleActions == 0 ){
-			SetCommonShader( "shader_hint", "textures/common/hint" );
+			SetCommonShader( "hint" );
 		}
 		else if( ToggleActions == 1 ){
-			SetCommonShader( "shader_hintlocal", "textures/common/hintlocal" );
+			SetCommonShader( "hintlocal" );
 		}
 		else if( ToggleActions == 2 ){
-			SetCommonShader( "shader_hintskip", "textures/common/hintskip" );
+			SetCommonShader( "hintskip" );
 		}
 		ToggleActions++;
 		return TRUE;
@@ -140,7 +159,7 @@ gboolean Hint_button_press( GtkWidget *widget, GdkEventButton *event, gpointer d
 
 gboolean Trigger_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
-		SetCommonShader( "shader_trigger", "textures/common/trigger" );
+		SetCommonShader( "trigger" );
 		ToggleActions = 0;
 		return TRUE;
 	}

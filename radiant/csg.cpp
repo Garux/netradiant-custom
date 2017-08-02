@@ -59,6 +59,7 @@ void Face_extrude( Face& face, const Brush& brush, brush_vector_t& out, float of
 */
 #include "preferences.h"
 #include "texwindow.h"
+#include "filterbar.h"
 
 typedef std::vector<DoubleVector3> doublevector_vector_t;
 
@@ -70,14 +71,6 @@ enum eHollowType
 	pull = 3,
 	room = 4,
 };
-
-const char* getCaulkShader(){
-	const char* gotShader = g_pGameDescription->getKeyValue( "shader_caulk" );
-	if ( gotShader && *gotShader ){
-		return gotShader;
-	}
-	return "textures/common/caulk";
-}
 
 class CaulkFace
 {
@@ -104,7 +97,7 @@ void operator()( Face& face ) const {
 				}
 			}
 		}
-		face.SetShader( getCaulkShader() );
+		face.SetShader( GetCaulkShader() );
 	}
 }
 };
@@ -177,12 +170,12 @@ void operator()( Face& face ) const {
 				face.undoSave();
 				out.push_back( new Brush( brush ) );
 				if( !RemoveInner && caulk )
-					face.SetShader( getCaulkShader() );
+					face.SetShader( GetCaulkShader() );
 				Face* newFace = out.back()->addFace( face );
 				face.getPlane().offset( -offset );
 				face.planeChanged();
 				if( caulk )
-					face.SetShader( getCaulkShader() );
+					face.SetShader( GetCaulkShader() );
 				if ( newFace != 0 ) {
 					newFace->flipWinding();
 					newFace->getPlane().offset( offset );
@@ -203,7 +196,7 @@ void operator()( Face& face ) const {
 				}
 
 				if( !RemoveInner && caulk )
-					face.SetShader( getCaulkShader() );
+					face.SetShader( GetCaulkShader() );
 				newFace = out.back()->addFace( face );
 				if ( newFace != 0 ) {
 					newFace->flipWinding();
@@ -233,7 +226,7 @@ void operator()( Face& face ) const {
 
 				if ( newFace != 0 ) {
 					if( !RemoveInner && caulk )
-						newFace->SetShader( getCaulkShader() );
+						newFace->SetShader( GetCaulkShader() );
 					newFace->flipWinding();
 					newFace->getPlane().offset( offset );
 					newFace->planeChanged();
@@ -259,7 +252,7 @@ void operator()( Face& face ) const {
 							}
 						}
 					}
-					out.back()->addPlane( winding[next].vertex, winding[index].vertex, BestPoint, caulk? getCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), projection );
+					out.back()->addPlane( winding[next].vertex, winding[index].vertex, BestPoint, caulk? GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), projection );
 				}
 			}
 		}
