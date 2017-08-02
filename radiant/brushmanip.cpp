@@ -757,6 +757,28 @@ void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const te
 	SceneChangeNotify();
 }
 
+class FaceProjectTexture_fromFace
+{
+	const TextureProjection& m_projection;
+	const Vector3& m_normal;
+public:
+	FaceProjectTexture_fromFace( const TextureProjection& projection, const Vector3& normal ) : m_projection( projection ), m_normal( normal ) {
+	}
+	void operator()( Face& face ) const {
+		face.ProjectTexture( m_projection, m_normal );
+	}
+};
+
+void Scene_BrushProjectTexture_Selected( scene::Graph& graph, const TextureProjection& projection, const Vector3& normal ){
+	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceProjectTexture_fromFace( projection, normal ) );
+	SceneChangeNotify();
+}
+
+void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const TextureProjection& projection, const Vector3& normal ){
+	Scene_ForEachSelectedBrushFace( graph, FaceProjectTexture_fromFace( projection, normal ) );
+	SceneChangeNotify();
+}
+
 
 class FaceFitTexture
 {

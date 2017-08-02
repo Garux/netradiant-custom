@@ -107,6 +107,8 @@ void SetOrigin( const Vector3& origin );
 void Scroll( int x, int y );
 
 void XY_Draw();
+bool XY_Draw_Overlay_start();
+void XY_Draw_Overlay_finish();
 void DrawCameraIcon( const Vector3& origin, const Vector3& angles );
 void XY_DrawBlockGrid();
 void XY_DrawAxis();
@@ -150,6 +152,7 @@ bool Active(){
 	return m_bActive;
 };
 void UpdateCameraIcon();
+void UpdateCameraIcon_();
 
 
 void Clipper_OnLButtonDown( int x, int y );
@@ -215,8 +218,10 @@ int m_entityCreate_x, m_entityCreate_y;
 bool m_entityCreate;
 
 Timer m_render_time;
+GdkCursor* m_cursorCurrent;
 
 public:
+void CursorSet( GdkCursor* cursor );
 void OnContextMenu();
 void ButtonState_onMouseDown( unsigned int buttons ){
 	//m_buttonstate |= buttons;

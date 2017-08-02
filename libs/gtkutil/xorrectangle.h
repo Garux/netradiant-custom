@@ -73,9 +73,18 @@ public:
 	}
 	~XORRectangle() {
 	}
-	void set( rectangle_t rectangle ) {
+	void set( rectangle_t rectangle, int width, int height ) {
 		if( rectangle.w != 0.f && rectangle.h != 0.f ) {
 			GlobalOpenGL_debugAssertNoErrors();
+
+			glViewport( 0, 0, width, height );
+			// set up viewpoint
+			glMatrixMode( GL_PROJECTION );
+			glLoadIdentity();
+			glOrtho( 0, width, 0, height, -100, 100 );
+
+			glMatrixMode( GL_MODELVIEW );
+			glLoadIdentity();
 
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 			glDisable( GL_DEPTH_TEST );

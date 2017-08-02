@@ -4100,7 +4100,7 @@ const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 
 
 void Scene_copyClosestTexture( SelectionTest& test );
-void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project );
+void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project, bool texturize_selected = false );
 void Scene_projectClosestTexture( SelectionTest& test );
 
 class TexManipulator_
@@ -4122,7 +4122,7 @@ void mouseDown( DeviceVector position ){
 	if ( m_state == c_modifier_apply_texture1_project || m_state == c_modifier_apply_texture2_seamless || m_state == c_modifier_apply_texture3 ) {
 		m_undo_begun = true;
 		GlobalUndoSystem().start();
-		Scene_applyClosestTexture( volume, m_state == c_modifier_apply_texture2_seamless, m_state == c_modifier_apply_texture1_project );
+		Scene_applyClosestTexture( volume, m_state == c_modifier_apply_texture2_seamless, m_state == c_modifier_apply_texture1_project, true );
 	}
 	else if ( m_state == c_modifier_copy_texture ) {
 		Scene_copyClosestTexture( volume );
@@ -4142,7 +4142,7 @@ typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseMove
 
 void mouseUp( DeviceVector position ){
 	if( m_undo_begun ){
-		GlobalUndoSystem().finish( ( m_state == c_modifier_apply_texture1_project ) ? "projectTexture" : "paintTexture" );
+		GlobalUndoSystem().finish( ( m_state == c_modifier_apply_texture1_project )? "projectTexture" : ( m_state == c_modifier_apply_texture2_seamless )? "paintTextureSeamless" : "paintTexture&Projection" );
 		m_undo_begun = false;
 	}
 	g_mouseMovedCallback.clear();

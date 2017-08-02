@@ -898,6 +898,16 @@ void Select_ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 	SceneChangeNotify();
 }
 
+void Select_ProjectTexture( const TextureProjection& projection, const Vector3& normal ){
+	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
+		Scene_BrushProjectTexture_Selected( GlobalSceneGraph(), projection, normal );
+		Scene_PatchProjectTexture_Selected( GlobalSceneGraph(), projection, normal );
+	}
+	Scene_BrushProjectTexture_Component_Selected( GlobalSceneGraph(), projection, normal );
+
+	SceneChangeNotify();
+}
+
 void Select_FitTexture( float horizontal, float vertical ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushFitTexture_Selected( GlobalSceneGraph(), horizontal, vertical );

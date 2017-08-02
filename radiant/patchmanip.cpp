@@ -319,6 +319,23 @@ void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const texdef_t& te
 	SceneChangeNotify();
 }
 
+class PatchProjectTexture_fromFace
+{
+	const TextureProjection& m_projection;
+	const Vector3& m_normal;
+public:
+	PatchProjectTexture_fromFace( const TextureProjection& projection, const Vector3& normal ) : m_projection( projection ), m_normal( normal ) {
+	}
+	void operator()( Patch& patch ) const {
+		patch.ProjectTexture( m_projection, m_normal );
+	}
+};
+
+void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const TextureProjection& projection, const Vector3& normal ){
+	Scene_forEachVisibleSelectedPatch( PatchProjectTexture_fromFace( projection, normal ) );
+	SceneChangeNotify();
+}
+
 class PatchFlipTexture
 {
 int m_axis;

@@ -57,6 +57,9 @@ virtual bool fill() const = 0;
 virtual const Matrix4& GetViewport() const = 0;
 virtual const Matrix4& GetProjection() const = 0;
 virtual const Matrix4& GetModelview() const = 0;
+
+virtual const Matrix4& GetViewMatrix() const = 0; //viewproj
+virtual const Vector3& getViewer() const = 0;
 };
 
 class Cullable

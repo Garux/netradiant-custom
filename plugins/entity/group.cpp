@@ -49,6 +49,8 @@
 
 /// The "origin" key directly controls the entity's local-to-parent transform.
 
+const char EXCLUDE_NAME[] = "worldspawn";
+
 class Group
 {
 EntityKeyValues m_entity;
@@ -84,7 +86,7 @@ Group( EntityClass* eclass, scene::Node& node, const Callback& transformChanged,
 	m_originKey( OriginChangedCaller( *this ) ),
 	m_origin( ORIGINKEY_IDENTITY ),
 	m_name_origin( g_vector3_identity ),
-	m_renderName( m_named, m_name_origin ),
+	m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -97,7 +99,7 @@ Group( const Group& other, scene::Node& node, const Callback& transformChanged, 
 	m_originKey( OriginChangedCaller( *this ) ),
 	m_origin( ORIGINKEY_IDENTITY ),
 	m_name_origin( g_vector3_identity ),
-	m_renderName( m_named, m_name_origin ),
+	m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -150,11 +152,12 @@ void detach( scene::Traversable::Observer* observer ){
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) {
+	if ( m_renderName.excluded_not()
+		&& ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
 		// don't draw the name for worldspawn
-		if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
-			return;
-		}
+//		if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
+//			return;
+//		}
 
 		// place name in the middle of the "children cloud"
 		m_name_origin = childBounds.origin;

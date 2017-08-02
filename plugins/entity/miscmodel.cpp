@@ -50,6 +50,8 @@
 
 #include "entity.h"
 
+const char EXCLUDE_NAME[] = "misc_model";
+
 class MiscModel :
 	public Snappable
 {
@@ -125,7 +127,7 @@ MiscModel( EntityClass* eclass, scene::Node& node, const Callback& transformChan
 	m_filter( m_entity, node ),
 	m_named( m_entity ),
 	m_nameKeys( m_entity ),
-	m_renderName( m_named, g_vector3_identity ),
+	m_renderName( m_named, g_vector3_identity, EXCLUDE_NAME ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -141,7 +143,7 @@ MiscModel( const MiscModel& other, scene::Node& node, const Callback& transformC
 	m_filter( m_entity, node ),
 	m_named( m_entity ),
 	m_nameKeys( m_entity ),
-	m_renderName( m_named, g_vector3_identity ),
+	m_renderName( m_named, g_vector3_identity, EXCLUDE_NAME ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -195,7 +197,8 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		m_renderOrigin.render( renderer, volume, localToWorld );
 	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( AABB( Vector3( 0, 0, 0 ), Vector3( 32, 32, 32 ) ), volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) && !string_equal( m_named.name(), "misc_model" ) ) {
+	if ( m_renderName.excluded_not()
+		&& ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( AABB( Vector3( 0, 0, 0 ), Vector3( 32, 32, 32 ) ), volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

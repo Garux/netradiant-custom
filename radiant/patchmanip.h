@@ -46,6 +46,8 @@ class texdef_t;
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
 void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const texdef_t& texdef, const Vector3* direction );
+class TextureProjection;
+void Scene_PatchProjectTexture_Selected( scene::Graph& graph, const TextureProjection& projection, const Vector3& normal );
 void Scene_PatchNaturalTexture_Selected( scene::Graph& graph );
 void Scene_PatchTileTexture_Selected( scene::Graph& graph, float s, float t );
 

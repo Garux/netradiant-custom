@@ -1718,14 +1718,25 @@ void Scene_copyClosestTexture( SelectionTest& test ){
 	CopiedString shader;
 	if ( Scene_getClosestTexture( GlobalSceneGraph(), test, shader, g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags ) ) {
 		TextureBrowser_SetSelectedShader( g_TextureBrowser, shader.c_str() );
-		UndoableCommand undo( "textureNameAndProjectionSetSelected" );
-		Select_SetShader( shader.c_str() );
-		Select_SetTexdef( g_faceTextureClipboard.m_projection );
+//		UndoableCommand undo( "textureNameAndProjectionSetSelected" );
+//		Select_SetShader( shader.c_str() );
+//		Select_SetTexdef( g_faceTextureClipboard.m_projection );
 	}
 }
 
-void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project ){
+void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project, bool texturize_selected = false ){
 //	UndoableCommand command( "facePaintTexture" );
+
+	if( texturize_selected ){
+		if( project ){
+			Select_SetShader( TextureBrowser_GetSelectedShader( g_TextureBrowser ) );
+			Select_ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
+		}
+		else if( !seamless ){
+			Select_SetShader( TextureBrowser_GetSelectedShader( g_TextureBrowser ) );
+			Select_SetTexdef( g_faceTextureClipboard.m_projection );
+		}
+	}
 
 	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader( g_TextureBrowser ), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags, seamless, project );
 

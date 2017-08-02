@@ -121,6 +121,9 @@ ClipPoint g_Clip2;
 ClipPoint g_Clip3;
 ClipPoint* g_pMovingClip = 0;
 
+GdkCursor* g_cursorClipper;
+GdkCursor* g_cursorMoveClipper;
+
 /* Drawing clip points */
 void ClipPoint::Draw( int num, float scale ){
 	StringOutputStream label( 4 );
@@ -300,6 +303,19 @@ void OnClipMode( bool enabled ){
 
 	if ( !enabled && g_pMovingClip ) {
 		g_pMovingClip = 0;
+	}
+
+	if( g_pParentWnd ){
+		GdkCursor* cursor = enabled? g_cursorClipper : 0;
+		if( g_pParentWnd->GetXYWnd() ){
+			g_pParentWnd->GetXYWnd()->CursorSet( cursor );
+		}
+		if( g_pParentWnd->GetXZWnd() ){
+			g_pParentWnd->GetXZWnd()->CursorSet( cursor );
+		}
+		if( g_pParentWnd->GetYZWnd() ){
+			g_pParentWnd->GetYZWnd()->CursorSet( cursor );
+		}
 	}
 
 	Clip_Update();
@@ -746,33 +762,30 @@ bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 // XYWnd class
 Shader* XYWnd::m_state_selected = 0;
 
-void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
-	if ( GTK_WIDGET_VISIBLE( self.GetWidget() ) ) {
-		if ( glwidget_make_current( self.GetWidget() ) != FALSE ) {
+bool XYWnd::XY_Draw_Overlay_start(){
+	if ( GTK_WIDGET_VISIBLE( m_gl_widget ) ) {
+		if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
 			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 				GlobalOpenGL_debugAssertNoErrors();
-
 				glDrawBuffer( GL_FRONT );
-				self.m_fbo->blit();
-
-				glViewport( 0, 0, self.Width(), self.Height() );
-				// set up viewpoint
-				glMatrixMode( GL_PROJECTION );
-				glLoadIdentity();
-				glOrtho( 0, self.Width(), 0, self.Height(), -100, 100 );
-
-				glMatrixMode( GL_MODELVIEW );
-				glLoadIdentity();
-
-				rectangle_t rect = rectangle_from_area( area.min, area.max, self.Width(), self.Height() );
-				self.m_XORRectangle.set( rect );
-
-				glDrawBuffer( GL_BACK );
-
-				GlobalOpenGL_debugAssertNoErrors();
-				glwidget_make_current( self.GetWidget() );
+				m_fbo->blit();
+				return true;
 			}
 		}
+	}
+	return false;
+}
+void XYWnd::XY_Draw_Overlay_finish(){
+	glDrawBuffer( GL_BACK );
+	GlobalOpenGL_debugAssertNoErrors();
+	glwidget_make_current( m_gl_widget );
+}
+
+void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
+	if ( self.XY_Draw_Overlay_start() ) {
+		self.UpdateCameraIcon_();
+		self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.Width(), self.Height() ), self.Width(), self.Height() );
+		self.XY_Draw_Overlay_finish();
 	}
 }
 
@@ -873,8 +886,11 @@ XYWnd::XYWnd() :
 	m_deferred_motion( xywnd_motion, this ),
 	m_parent( 0 ),
 	m_window_observer( NewWindowObserver() ),
-	m_chasemouse_handler( 0 ){
+	m_chasemouse_handler( 0 )
+{
 	m_fbo = GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
+
+	m_cursorCurrent = 0;
 
 	m_bActive = false;
 	m_buttonstate = 0;
@@ -919,7 +935,7 @@ XYWnd::XYWnd() :
 
 	g_signal_connect( G_OBJECT( m_gl_widget ), "button_press_event", G_CALLBACK( xywnd_button_press ), this );
 	g_signal_connect( G_OBJECT( m_gl_widget ), "button_release_event", G_CALLBACK( xywnd_button_release ), this );
-	g_signal_connect( G_OBJECT( m_gl_widget ), "focus_in_event", G_CALLBACK( xywnd_focus_in ), this );	//works only in floating views layout
+	g_signal_connect( G_OBJECT( m_gl_widget ), "focus_in_event", G_CALLBACK( xywnd_focus_in ), this );
 	g_signal_connect( G_OBJECT( m_gl_widget ), "motion_notify_event", G_CALLBACK( DeferredMotion::gtk_motion ), &m_deferred_motion );
 
 	g_signal_connect( G_OBJECT( m_gl_widget ), "scroll_event", G_CALLBACK( xywnd_wheel_scroll ), this );
@@ -1055,34 +1071,26 @@ void XYWnd::Clipper_OnMouseMoved( int x, int y, bool snap ){
 	}
 }
 
-//#include "gtkutil/image.h"
+void XYWnd::CursorSet( GdkCursor* cursor ){
+	if( m_cursorCurrent != cursor ){
+		m_cursorCurrent = cursor;
+		gdk_window_set_cursor( m_gl_widget->window, m_cursorCurrent );
+	}
+}
 
-/* is called on every mouse move fraction; ain't good! */
 void XYWnd::Clipper_Crosshair_OnMouseMoved( int x, int y ){
-	Vector3 mousePosition;
-	XY_ToPoint( x, y, mousePosition );
+	GdkCursor* cursor = 0;
 	if ( ClipMode() ) {
+		Vector3 mousePosition;
+		XY_ToPoint( x, y, mousePosition );
 		if( GlobalClipPoints_Find( mousePosition, m_viewType, m_fScale ) != 0 ){
-			GdkCursor *cursor;
-			cursor = gdk_cursor_new( GDK_CROSSHAIR );
-			//cursor = gdk_cursor_new( GDK_FLEUR );
-			gdk_window_set_cursor( m_gl_widget->window, cursor );
-			gdk_cursor_unref( cursor );
+			cursor = g_cursorMoveClipper;
 		}
 		else{
-			GdkCursor *cursor;
-			cursor = gdk_cursor_new( GDK_HAND2 );
-//			GdkPixbuf* pixbuf = pixbuf_new_from_file_with_mask( "bitmaps/icon.png" );
-//			cursor = gdk_cursor_new_from_pixbuf( gdk_display_get_default(), pixbuf, 0, 0 );
-//			g_object_unref( pixbuf );
-			gdk_window_set_cursor( m_gl_widget->window, cursor );
-			gdk_cursor_unref( cursor );
+			cursor = g_cursorClipper;
 		}
 	}
-	else
-	{
-		gdk_window_set_cursor( m_gl_widget->window, 0 );
-	}
+	CursorSet( cursor );
 }
 
 void XYWnd::SetCustomPivotOrigin( int pointx, int pointy ){
@@ -1634,7 +1642,9 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 			XYWnd_Update( *this );
 		}
 
-		Clipper_Crosshair_OnMouseMoved( x, y );
+		if( ClipMode() ){
+			Clipper_Crosshair_OnMouseMoved( x, y );
+		}
 	}
 }
 
@@ -2345,43 +2355,37 @@ void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
 
 }
 
-void XYWnd::UpdateCameraIcon( void ){
-	if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
-		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
-			GlobalOpenGL_debugAssertNoErrors();
+void XYWnd::UpdateCameraIcon_(){
+	glViewport( 0, 0, m_nWidth, m_nHeight );
 
-			glDrawBuffer( GL_FRONT );
-			m_fbo->blit();
+	glMatrixMode( GL_PROJECTION );
+	glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
 
-			glViewport( 0, 0, m_nWidth, m_nHeight );
-			// set up viewpoint
-			glMatrixMode( GL_PROJECTION );
-			glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
 
-			glMatrixMode( GL_MODELVIEW );
-			glLoadIdentity();
-			glScalef( m_fScale, m_fScale, 1 );
-			int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-			int nDim2 = ( m_viewType == XY ) ? 1 : 2;
-			glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
+	glScalef( m_fScale, m_fScale, 1 );
+	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
+	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
 
-			glDisable( GL_LINE_STIPPLE );
-			glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-			glDisableClientState( GL_NORMAL_ARRAY );
-			glDisableClientState( GL_COLOR_ARRAY );
-			glDisable( GL_TEXTURE_2D );
-			glDisable( GL_LIGHTING );
-			glDisable( GL_COLOR_MATERIAL );
-			glDisable( GL_DEPTH_TEST );
-			glDisable( GL_TEXTURE_1D );
+	glDisable( GL_LINE_STIPPLE );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	glDisableClientState( GL_NORMAL_ARRAY );
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisable( GL_TEXTURE_2D );
+	glDisable( GL_LIGHTING );
+	glDisable( GL_COLOR_MATERIAL );
+	glDisable( GL_DEPTH_TEST );
+	glDisable( GL_TEXTURE_1D );
 
-			XYWnd::DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+	DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+}
 
-			glDrawBuffer( GL_BACK );
-
-			GlobalOpenGL_debugAssertNoErrors();
-			glwidget_make_current( m_gl_widget );
-		}
+void XYWnd::UpdateCameraIcon(){
+	if ( XY_Draw_Overlay_start() ) {
+		UpdateCameraIcon_();
+		XY_Draw_Overlay_finish();
 	}
 }
 
@@ -3452,11 +3456,23 @@ void XYWindow_Construct(){
 	Orthographic_registerPreferencesPage();
 	Clipper_registerPreferencesPage();
 
+	g_cursorMoveClipper = gdk_cursor_new( GDK_CROSSHAIR );
+	g_cursorClipper = gdk_cursor_new( GDK_HAND2 );
+//	cursor = gdk_cursor_new( GDK_FLEUR );
+//	gdk_cursor_unref( cursor );
+//#include "gtkutil/image.h"
+//	GdkPixbuf* pixbuf = pixbuf_new_from_file_with_mask( "bitmaps/icon.png" );
+//	cursor = gdk_cursor_new_from_pixbuf( gdk_display_get_default(), pixbuf, 0, 0 );
+//	g_object_unref( pixbuf );
+
 	XYWnd::captureStates();
 	GlobalEntityClassManager().attach( g_EntityClassMenu );
 }
 
 void XYWindow_Destroy(){
+	gdk_cursor_unref( g_cursorMoveClipper );
+	gdk_cursor_unref( g_cursorClipper );
+
 	GlobalEntityClassManager().detach( g_EntityClassMenu );
 	XYWnd::releaseStates();
 }

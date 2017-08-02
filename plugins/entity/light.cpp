@@ -1066,6 +1066,8 @@ inline Matrix4 matrix4_from_planes( const Plane3& left, const Plane3& right, con
 			   );
 }
 
+const char EXCLUDE_NAME[] = "light";
+
 class Light :
 	public OpenGLRenderable,
 	public Cullable,
@@ -1306,7 +1308,7 @@ Light( EntityClass* eclass, scene::Node& node, const Callback& transformChanged,
 	m_radii_fill( m_radii, m_aabb_light.origin ),
 	m_radii_box( m_aabb_light.origin ),
 	m_render_center( m_doom3Radius.m_center, m_entity.getEntityClass() ),
-	m_renderName( m_named, m_aabb_light.origin ),
+	m_renderName( m_named, m_aabb_light.origin, EXCLUDE_NAME ),
 	m_useLightOrigin( false ),
 	m_useLightRotation( false ),
 	m_renderProjection( m_doom3Projection ),
@@ -1330,7 +1332,7 @@ Light( const Light& other, scene::Node& node, const Callback& transformChanged, 
 	m_radii_fill( m_radii, m_aabb_light.origin ),
 	m_radii_box( m_aabb_light.origin ),
 	m_render_center( m_doom3Radius.m_center, m_entity.getEntityClass() ),
-	m_renderName( m_named, m_aabb_light.origin ),
+	m_renderName( m_named, m_aabb_light.origin, EXCLUDE_NAME ),
 	m_useLightOrigin( false ),
 	m_useLightRotation( false ),
 	m_renderProjection( m_doom3Projection ),
@@ -1460,7 +1462,8 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		}
 	}
 
-	if ( ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( m_aabb_light, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) && !string_equal( m_named.name(), "light" ) ) {
+	if ( m_renderName.excluded_not()
+		&& ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( m_aabb_light, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

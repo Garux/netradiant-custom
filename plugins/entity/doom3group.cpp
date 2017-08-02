@@ -69,6 +69,8 @@ inline void PointVertexArray_testSelect( PointVertex* first, std::size_t count, 
 		);
 }
 
+const char EXCLUDE_NAME[] = "worldspawn";
+
 class Doom3Group :
 	public Bounded,
 	public Snappable
@@ -260,7 +262,7 @@ Doom3Group( EntityClass* eclass, scene::Node& node, const Callback& transformCha
 	m_nameKeys( m_entity ),
 	m_funcStaticOrigin( m_traverse, m_origin ),
 	m_name_origin( g_vector3_identity ),
-	m_renderName( m_named, m_name_origin ),
+	m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
 	m_skin( SkinChangedCaller( *this ) ),
 	m_curveNURBS( boundsChanged ),
 	m_curveCatmullRom( boundsChanged ),
@@ -279,7 +281,7 @@ Doom3Group( const Doom3Group& other, scene::Node& node, const Callback& transfor
 	m_nameKeys( m_entity ),
 	m_funcStaticOrigin( m_traverse, m_origin ),
 	m_name_origin( g_vector3_identity ),
-	m_renderName( m_named, m_name_origin ),
+	m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
 	m_skin( SkinChangedCaller( *this ) ),
 	m_curveNURBS( boundsChanged ),
 	m_curveCatmullRom( boundsChanged ),
@@ -363,13 +365,14 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		renderer.addRenderable( m_curveCatmullRom.m_renderCurve, localToWorld );
 	}
 
-	if ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) {
+	if ( m_renderName.excluded_not()
+		&& ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
 		// draw models as usual
 		if ( !isModel() ) {
 			// don't draw the name for worldspawn
-			if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
-				return;
-			}
+//			if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
+//				return;
+//			}
 
 			// place name in the middle of the "children cloud"
 			m_name_origin = childBounds.origin;

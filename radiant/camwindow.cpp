@@ -950,16 +950,7 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 				glDrawBuffer( GL_FRONT );
 				self.m_fbo->blit();
 
-				glViewport( 0, 0, self.getCamera().width, self.getCamera().height );
-				// set up viewpoint
-				glMatrixMode( GL_PROJECTION );
-				glLoadIdentity();
-				glOrtho( 0, self.getCamera().width, 0, self.getCamera().height, -100, 100 );
-
-				glMatrixMode( GL_MODELVIEW );
-				glLoadIdentity();
-
-				self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.getCamera().width, self.getCamera().height ) );
+				self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.getCamera().width, self.getCamera().height ), self.getCamera().width, self.getCamera().height );
 
 				glDrawBuffer( GL_BACK );
 
