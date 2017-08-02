@@ -712,7 +712,7 @@ int FogForBounds( vec3_t mins, vec3_t maxs, float epsilon ){
  */
 
 void CreateMapFogs( void ){
-	int i;
+	int i, j;
 	entity_t    *entity;
 	brush_t     *brush;
 	fog_t       *fog;
@@ -759,10 +759,10 @@ void CreateMapFogs( void ){
 				VectorScale( fog->si->fogDir, -1.0f, invFogDir );
 
 				/* find the brush side */
-				for ( i = 0; i < brush->numsides; i++ )
+				for ( j = 0; j < brush->numsides; j++ )
 				{
-					if ( VectorCompare( invFogDir, mapplanes[ brush->sides[ i ].planenum ].normal ) ) {
-						fog->visibleSide = i;
+					if ( VectorCompare( invFogDir, mapplanes[ brush->sides[ j ].planenum ].normal ) ) {
+						fog->visibleSide = j;
 						//%	Sys_Printf( "Brush num: %d Side num: %d\n", fog->brushNum, fog->visibleSide );
 						break;
 					}

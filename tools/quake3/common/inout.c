@@ -70,7 +70,7 @@ xmlNodePtr xml_NodeForVec( vec3_t v ){
 
 	sprintf( buf, "%f %f %f", v[0], v[1], v[2] );
 	ret = xmlNewNode( NULL, (xmlChar*)"point" );
-	xmlNodeSetContent( ret, (xmlChar*)buf );
+	xmlNodeAddContent( ret, (xmlChar*)buf );
 	return ret;
 }
 
@@ -148,14 +148,14 @@ void xml_Select( char *msg, int entitynum, int brushnum, qboolean bError ){
 	// now build a proper "select" XML node
 	sprintf( buf, "Entity %i, Brush %i: %s", entitynum, brushnum, msg );
 	node = xmlNewNode( NULL, (xmlChar*)"select" );
-	xmlNodeSetContent( node, (xmlChar*)buf );
+	xmlNodeAddContent( node, (xmlChar*)buf );
 	level[0] = (int)'0' + ( bError ? SYS_ERR : SYS_WRN )  ;
 	level[1] = 0;
 	xmlSetProp( node, (xmlChar*)"level", (xmlChar *)&level );
 	// a 'select' information
 	sprintf( buf, "%i %i", entitynum, brushnum );
 	select = xmlNewNode( NULL, (xmlChar*)"brush" );
-	xmlNodeSetContent( select, (xmlChar*)buf );
+	xmlNodeAddContent( select, (xmlChar*)buf );
 	xmlAddChild( node, select );
 	xml_SendNode( node );
 
@@ -175,14 +175,14 @@ void xml_Point( char *msg, vec3_t pt ){
 	char level[2];
 
 	node = xmlNewNode( NULL, (xmlChar*)"pointmsg" );
-	xmlNodeSetContent( node, (xmlChar*)msg );
+	xmlNodeAddContent( node, (xmlChar*)msg );
 	level[0] = (int)'0' + SYS_ERR;
 	level[1] = 0;
 	xmlSetProp( node, (xmlChar*)"level", (xmlChar *)&level );
 	// a 'point' node
 	sprintf( buf, "%g %g %g", pt[0], pt[1], pt[2] );
 	point = xmlNewNode( NULL, (xmlChar*)"point" );
-	xmlNodeSetContent( point, (xmlChar*)buf );
+	xmlNodeAddContent( point, (xmlChar*)buf );
 	xmlAddChild( node, point );
 	xml_SendNode( node );
 
@@ -199,7 +199,7 @@ void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die ){
 	int i;
 
 	node = xmlNewNode( NULL, (xmlChar*)"windingmsg" );
-	xmlNodeSetContent( node, (xmlChar*)msg );
+	xmlNodeAddContent( node, (xmlChar*)msg );
 	level[0] = (int)'0' + SYS_ERR;
 	level[1] = 0;
 	xmlSetProp( node, (xmlChar*)"level", (xmlChar *)&level );
@@ -216,7 +216,7 @@ void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die ){
 	}
 
 	winding = xmlNewNode( NULL, (xmlChar*)"winding" );
-	xmlNodeSetContent( winding, (xmlChar*)buf );
+	xmlNodeAddContent( winding, (xmlChar*)buf );
 	xmlAddChild( node, winding );
 	xml_SendNode( node );
 
@@ -287,7 +287,7 @@ void FPrintf( int flag, char *buf ){
 	node = xmlNewNode( NULL, (xmlChar*)"message" );
 	{
 		gchar* utf8 = g_locale_to_utf8( buf, -1, NULL, NULL, NULL );
-		xmlNodeSetContent( node, (xmlChar*)utf8 );
+		xmlNodeAddContent( node, (xmlChar*)utf8 );
 		g_free( utf8 );
 	}
 	level[0] = (int)'0' + flag;

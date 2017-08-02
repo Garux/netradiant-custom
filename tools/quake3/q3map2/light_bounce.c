@@ -580,7 +580,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		VectorMA( light->origin, 1.0f, light->normal, light->origin );
 		light->dist = DotProduct( light->origin, normal );
 
-		/* optionally create a point splashsplash light for first pass */
+		/* optionally create a point backsplash light for first pass */
 		if ( original && si->backsplashFraction > 0 ) {
 			/* allocate a new point light */
 			splash = safe_malloc( sizeof( *splash ) );

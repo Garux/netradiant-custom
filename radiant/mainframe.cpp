@@ -1,4 +1,4 @@
-/*
+﻿/*
    Copyright (C) 1999-2006 Id Software, Inc. and contributors.
    For a list of contributors, see the accompanying CONTRIBUTORS file.
 
@@ -232,7 +232,7 @@ void HomePaths_Realise(){
 			if ( shfolder ) {
 				FreeLibrary( shfolder );
 			}
-			if ( SHGetFolderPath( NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir ) ) {
+			if ( SUCCEEDED( SHGetFolderPath( NULL, CSIDL_PERSONAL, NULL, 0, mydocsdir ) ) ) {
 				path.clear();
 				path << DirectoryCleaned( mydocsdir ) << "My Games/" << ( prefix + 1 ) << "/";
 				// win32: only add it if it already exists
@@ -2756,7 +2756,7 @@ void MainFrame::Create(){
 		GdkPixbuf* pixbuf = pixbuf_new_from_file_with_mask( "bitmaps/icon.png" );
 		if ( pixbuf != 0 ) {
 			gtk_window_set_icon( window, pixbuf );
-			gdk_pixbuf_unref( pixbuf );
+			g_object_unref( pixbuf );
 		}
 	}
 #endif

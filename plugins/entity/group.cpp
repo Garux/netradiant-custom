@@ -63,8 +63,8 @@ NameKeys m_nameKeys;
 OriginKey m_originKey;
 Vector3 m_origin;
 
-RenderableNamedEntity m_renderName;
 mutable Vector3 m_name_origin;
+RenderableNamedEntity m_renderName;
 
 Callback m_transformChanged;
 Callback m_evaluateTransform;
@@ -83,8 +83,8 @@ Group( EntityClass* eclass, scene::Node& node, const Callback& transformChanged,
 	m_nameKeys( m_entity ),
 	m_originKey( OriginChangedCaller( *this ) ),
 	m_origin( ORIGINKEY_IDENTITY ),
-	m_renderName( m_named, m_name_origin ),
 	m_name_origin( g_vector3_identity ),
+	m_renderName( m_named, m_name_origin ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -96,7 +96,8 @@ Group( const Group& other, scene::Node& node, const Callback& transformChanged, 
 	m_nameKeys( m_entity ),
 	m_originKey( OriginChangedCaller( *this ) ),
 	m_origin( ORIGINKEY_IDENTITY ),
-	m_renderName( m_named, g_vector3_identity ),
+	m_name_origin( g_vector3_identity ),
+	m_renderName( m_named, m_name_origin ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();

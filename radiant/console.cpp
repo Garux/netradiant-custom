@@ -136,6 +136,9 @@ GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
 	return scr;
 }
 
+//#pragma GCC push_options
+//#pragma GCC optimize ("O0")
+
 class GtkTextBufferOutputStream : public TextOutputStream
 {
 GtkTextBuffer* textBuffer;
@@ -144,11 +147,13 @@ GtkTextTag* tag;
 public:
 GtkTextBufferOutputStream( GtkTextBuffer* textBuffer, GtkTextIter* iter, GtkTextTag* tag ) : textBuffer( textBuffer ), iter( iter ), tag( tag ){
 }
-std::size_t write( const char* buffer, std::size_t length ){
+std::size_t __attribute__((optimize("O0"))) write( const char* buffer, std::size_t length ){
 	gtk_text_buffer_insert_with_tags( textBuffer, iter, buffer, gint( length ), tag, 0 );
 	return length;
 }
 };
+
+//#pragma GCC pop_options
 
 std::size_t Sys_Print( int level, const char* buf, std::size_t length ){
 	bool contains_newline = std::find( buf, buf + length, '\n' ) != buf + length;

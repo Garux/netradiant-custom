@@ -603,7 +603,7 @@ int EdgeCompare( const void *elem1, const void *elem2 ) {
 	if ( d1 < d2 ) {
 		return -1;
 	}
-	if ( d2 > d1 ) {
+	if ( d1 > d2 ) {
 		return 1;
 	}
 	return 0;

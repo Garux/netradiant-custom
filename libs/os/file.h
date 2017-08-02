@@ -28,9 +28,19 @@
 #if defined( WIN32 )
 #define S_ISDIR( mode ) ( mode & _S_IFDIR )
 #include <io.h> // _access()
+
+#ifndef F_OK
 #define F_OK 0x00
+#endif
+
+#ifndef W_OK
 #define W_OK 0x02
+#endif
+
+#ifndef R_OK
 #define R_OK 0x04
+#endif
+
 #define access( path, mode ) _access( path, mode )
 #else
 #include <unistd.h> // access()

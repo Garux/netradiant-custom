@@ -84,7 +84,7 @@ void insert( RenderIndex index ){
 	m_data.push_back( index );
 }
 void swap( IndexBuffer& other ){
-	std::swap( m_data, m_data );
+	std::swap( m_data, other.m_data );
 }
 };
 

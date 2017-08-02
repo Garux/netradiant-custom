@@ -91,8 +91,8 @@ NameKeys m_nameKeys;
 TraversableObserverPairRelay m_traverseObservers;
 Doom3GroupOrigin m_funcStaticOrigin;
 RenderablePivot m_renderOrigin;
-RenderableNamedEntity m_renderName;
 mutable Vector3 m_name_origin;
+RenderableNamedEntity m_renderName;
 ModelSkinKey m_skin;
 
 public:
@@ -259,8 +259,8 @@ Doom3Group( EntityClass* eclass, scene::Node& node, const Callback& transformCha
 	m_named( m_entity ),
 	m_nameKeys( m_entity ),
 	m_funcStaticOrigin( m_traverse, m_origin ),
-	m_renderName( m_named, m_name_origin ),
 	m_name_origin( g_vector3_identity ),
+	m_renderName( m_named, m_name_origin ),
 	m_skin( SkinChangedCaller( *this ) ),
 	m_curveNURBS( boundsChanged ),
 	m_curveCatmullRom( boundsChanged ),
@@ -278,7 +278,8 @@ Doom3Group( const Doom3Group& other, scene::Node& node, const Callback& transfor
 	m_named( m_entity ),
 	m_nameKeys( m_entity ),
 	m_funcStaticOrigin( m_traverse, m_origin ),
-	m_renderName( m_named, g_vector3_identity ),
+	m_name_origin( g_vector3_identity ),
+	m_renderName( m_named, m_name_origin ),
 	m_skin( SkinChangedCaller( *this ) ),
 	m_curveNURBS( boundsChanged ),
 	m_curveCatmullRom( boundsChanged ),

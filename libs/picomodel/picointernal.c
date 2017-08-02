@@ -606,12 +606,12 @@ int _pico_nofname( const char *path, char *dest, int destSize ){
  *  string otherwise. given 'path' is not altered. -sea
  */
 const char *_pico_nopath( const char *path ){
-	const char *src;
-	src = path + ( strlen( path ) - 1 );
-
 	if ( path == NULL ) {
 		return "";
 	}
+	const char *src;
+	src = path + ( strlen( path ) - 1 );
+
 	if ( !strchr( path,'/' ) && !strchr( path,'\\' ) ) {
 		return ( path );
 	}

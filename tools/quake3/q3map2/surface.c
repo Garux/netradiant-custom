@@ -82,7 +82,7 @@ void FinishSurface( mapDrawSurface_t *ds ){
 
 
 	/* dummy check */
-	if ( ds->type <= SURFACE_BAD || ds->type >= NUM_SURFACE_TYPES || ds == NULL || ds->shaderInfo == NULL ) {
+	if ( ds == NULL || ds->shaderInfo == NULL || ds->type <= SURFACE_BAD || ds->type >= NUM_SURFACE_TYPES ) {
 		return;
 	}
 
@@ -3368,7 +3368,7 @@ int AddSurfaceModels( mapDrawSurface_t *ds ){
 			alpha /= ds->numVerts;
 			centroid.color[ 0 ][ 0 ] = 0xFF;
 			centroid.color[ 0 ][ 1 ] = 0xFF;
-			centroid.color[ 0 ][ 2 ] = 0xFF;
+			//centroid.color[ 0 ][ 2 ] = 0xFF;
 			centroid.color[ 0 ][ 2 ] = ( alpha > 255.0f ? 0xFF : alpha );
 
 			/* head vert is centroid */

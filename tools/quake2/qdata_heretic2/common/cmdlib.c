@@ -900,7 +900,7 @@ int ParseNum( const char *str ){
    // all output ends up through here
    void FPrintf (int flag, char *buf)
    {
-   printf(buf);
+   printf( "%s", buf );
 
    }
 

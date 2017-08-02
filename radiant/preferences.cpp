@@ -1,4 +1,4 @@
-/*
+﻿/*
    Copyright (C) 1999-2006 Id Software, Inc. and contributors.
    For a list of contributors, see the accompanying CONTRIBUTORS file.
 
@@ -118,7 +118,7 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 	// read the user-friendly game name
 	xmlNodePtr pNode = pDoc->children;
 
-	while ( strcmp( (const char*)pNode->name, "game" ) && pNode != 0 )
+	while ( pNode != 0 && strcmp( (const char*)pNode->name, "game" ) )
 	{
 		pNode = pNode->next;
 	}
