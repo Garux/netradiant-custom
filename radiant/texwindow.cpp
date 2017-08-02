@@ -2441,6 +2441,9 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 	// TODO do we need this?
 	//gtk_container_set_focus_chain(GTK_CONTAINER(hbox_table), NULL);
 
+	//prevent focusing on filter entry or tex dirs treeview after click on tab of floating group dialog (np, if called via hotkey)
+	gtk_container_set_focus_chain( GTK_CONTAINER( table ), NULL );
+
 	return table;
 }
 

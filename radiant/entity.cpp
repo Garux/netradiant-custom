@@ -47,6 +47,8 @@
 
 #include "brushmanip.h"
 #include "patchmanip.h"
+#include "filterbar.h"
+
 
 struct entity_globals_t
 {
@@ -91,10 +93,37 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
-	if ( entity != 0
-		 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
+	if ( entity != 0 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
 		if( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ){
-			globalErrorStream() << "do not want to convert worldspawn entity\n";
+			//globalErrorStream() << "do not want to convert worldspawn entity\n";
+
+			if( instance.childSelected() ){
+				EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( m_classname, true );
+				if( entityClass->fixedsize )
+					return;
+
+				//is important to have retexturing here; if doing in the end, undo doesn't succeed;
+//				if ( string_compare_nocase_n( m_classname, "trigger_", 8 ) == 0 ){
+//					Scene_PatchSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
+//					Scene_BrushSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
+//				}
+
+				NodeSmartReference node( GlobalEntityCreator().createEntity( entityClass ) );
+
+				Node_getTraversable( GlobalSceneGraph().root() )->insert( node );
+
+				scene::Path entitypath( makeReference( GlobalSceneGraph().root() ) );
+				entitypath.push( makeReference( node.get() ) );
+				scene::Instance& entityInstance = findInstance( entitypath );
+
+				if ( g_pGameDescription->mGameType == "doom3" ) {
+					Node_getEntity( node )->setKeyValue( "model", Node_getEntity( node )->getKeyValue( "name" ) );
+				}
+
+				//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
+				Scene_parentSubgraphSelectedBrushesToEntity( GlobalSceneGraph(), node, path );
+				Scene_forEachChildSelectable( SelectableSetSelected( true ), entityInstance.path() );
+			}
 			return;
 		}
 
@@ -327,7 +356,6 @@ AABB Doom3Light_getBounds( const AABB& workzone ){
 	return AABB( Vector3( 0, 0, 0 ), Vector3( 64, 64, 64 ) );
 }
 
-#include "filterbar.h"
 
 int g_iLastLightIntensity;
 

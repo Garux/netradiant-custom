@@ -106,6 +106,8 @@ gboolean destroy_set_null( GtkWindow* widget, GtkWidget** p ){
 
 WidgetFocusPrinter g_consoleWidgetFocusPrinter( "console" );
 
+#include <gtk/gtkvbox.h>
+
 GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
 	GtkWidget* scr = gtk_scrolled_window_new( 0, 0 );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
@@ -131,9 +133,13 @@ GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
 		g_signal_connect( G_OBJECT( g_console ), "destroy", G_CALLBACK( destroy_set_null ), &g_console );
 	}
 
-	gtk_container_set_focus_chain( GTK_CONTAINER( scr ), NULL );
+	//prevent focusing on text view after click on tab of floating group dialog (np, if called via hotkey)
+	GtkWidget* vbox = gtk_vbox_new( FALSE, 0 );
+	gtk_widget_show( vbox );
+	gtk_box_pack_start( GTK_BOX( vbox ), scr, TRUE, TRUE, 0 );
+	gtk_container_set_focus_chain( GTK_CONTAINER( vbox ), NULL );
 
-	return scr;
+	return vbox;
 }
 
 //#pragma GCC push_options

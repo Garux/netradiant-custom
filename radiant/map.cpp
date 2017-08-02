@@ -1832,6 +1832,10 @@ void Scene_parentSelectedBrushesToEntity( scene::Graph& graph, scene::Node& pare
 	graph.traverse( ParentSelectedBrushesToEntityWalker( parent ) );
 }
 
+void Scene_parentSubgraphSelectedBrushesToEntity( scene::Graph& graph, scene::Node& parent, const scene::Path& start ){
+	graph.traverse_subgraph( ParentSelectedBrushesToEntityWalker( parent ), start );
+}
+
 class CountSelectedBrushes : public scene::Graph::Walker
 {
 std::size_t& m_count;
