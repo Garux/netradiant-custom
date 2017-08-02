@@ -732,7 +732,7 @@ inline SelectionIntersection select_point_from_clipped( Vector4& clipped ){
 	return SelectionIntersection( clipped[2] / clipped[3], static_cast<float>( vector3_length_squared( Vector3( clipped[0] / clipped[3], clipped[1] / clipped[3], 0 ) ) ) );
 }
 
-void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& best, clipcull_t cull ){
+void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& best, clipcull_t cull, const Plane3* plane = 0 ){
 	Vector3 normalised[9];
 
 	{
@@ -743,6 +743,13 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 			normalised[i][2] = clipped[i][2] / clipped[i][3];
 		}
 	}
+
+//	if( cull == eClipCullCW ){
+//		globalOutputStream() << "eClipCullCW\n";
+//	}
+//	else if( cull == eClipCullCCW ){
+//		globalOutputStream() << "eClipCullCCW\n";
+//	}
 
 	if ( cull != eClipCullNone && count > 2 ) {
 		double signed_area = triangle_signed_area_XY( normalised[0], normalised[1], normalised[2] );
@@ -759,6 +766,12 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 		assign_if_closer( best, SelectionIntersection( point.z(), 0 ) );
 	}
 	else if ( count > 2 && !point_test_polygon_2d( Vector3( 0, 0, 0 ), normalised, normalised + count ) ) {
+		Plane3 plaine;
+		if( !plane ){
+			plaine = plane3_for_points( normalised[0], normalised[1], normalised[2] );
+			plane = &plaine;
+		}
+//globalOutputStream() << plane.a << " " << plane.b << " " << plane.c << " " << "\n";
 		point_iterator_t end = normalised + count;
 		for ( point_iterator_t previous = end - 1, current = normalised; current != end; previous = current, ++current )
 		{
@@ -768,18 +781,39 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 			point.z() = 0;
 			float distance = static_cast<float>( vector3_length_squared( point ) );
 
-			assign_if_closer( best, SelectionIntersection( depth, distance ) );
+			if( plane->c == 0 ){
+				assign_if_closer( best, SelectionIntersection( depth, distance ) );
+			}
+			else{
+				assign_if_closer( best, SelectionIntersection( depth, distance, ray_distance_to_plane(
+										Ray( Vector3( 0, 0, 0 ), Vector3( 0, 0, 1 ) ),
+										*plane
+										) ) );
+//										globalOutputStream() << static_cast<float>( ray_distance_to_plane(
+//										Ray( Vector3( 0, 0, 0 ), Vector3( 0, 0, 1 ) ),
+//										plane
+//										) ) << "\n";
+			}
 		}
 	}
 	else if ( count > 2 ) {
+		Plane3 plaine;
+		if( !plane ){
+			plaine = plane3_for_points( normalised[0], normalised[1], normalised[2] );
+			plane = &plaine;
+		}
 		assign_if_closer(
 			best,
 			SelectionIntersection(
-				static_cast<float>( ray_distance_to_plane(
+				ray_distance_to_plane(
 										Ray( Vector3( 0, 0, 0 ), Vector3( 0, 0, 1 ) ),
-										plane3_for_points( normalised[0], normalised[1], normalised[2] )
-										) ),
-				0
+										*plane
+										),
+				0,
+				ray_distance_to_plane(
+										Ray( Vector3( 10, 8, 0 ), Vector3( 0, 0, 1 ) ),
+										*plane
+										)
 				)
 			);
 	}
@@ -2035,7 +2069,13 @@ void TestPoint( const Vector3& point, SelectionIntersection& best ){
 		best = select_point_from_clipped( clipped );
 	}
 }
-void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ){
+void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const DoubleVector3 planepoints[3] ){
+	DoubleVector3 pts[3];
+	pts[0] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[0], 1 ) ) );
+	pts[1] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[1], 1 ) ) );
+	pts[2] = vector4_projected( matrix4_transformed_vector4( m_local2view, BasicVector4<double>( planepoints[2], 1 ) ) );
+	const Plane3 planeTransformed( plane3_for_points( pts ) );
+
 	Vector4 clipped[9];
 	for ( std::size_t i = 0; i + 2 < count; ++i )
 	{
@@ -2049,7 +2089,8 @@ void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionInt
 				),
 			clipped,
 			best,
-			m_cull
+			m_cull,
+			&planeTransformed
 			);
 	}
 }
@@ -3081,6 +3122,32 @@ void deselectComponentsOrAll( bool components ){
 	}
 }
 #define SELECT_MATCHING
+#define SELECT_MATCHING_DEPTH 1e-6f
+#define SELECT_MATCHING_DIST 1e-6f
+#define SELECT_MATCHING_COMPONENTS_DIST .25f
+void SelectionPool_Select( SelectionPool& pool, bool select, float dist_epsilon ){
+	SelectionPool::iterator best = pool.begin();
+	if( ( *best ).second->isSelected() != select ){
+		( *best ).second->setSelected( select );
+	}
+#ifdef SELECT_MATCHING
+	SelectionPool::iterator i = best;
+	++i;
+	while ( i != pool.end() )
+	{
+		if( ( *i ).first.equalEpsilon( ( *best ).first, dist_epsilon, SELECT_MATCHING_DEPTH ) ){
+			//if( ( *i ).second->isSelected() != select ){
+				( *i ).second->setSelected( select );
+			//}
+		}
+		else{
+			break;
+		}
+		++i;
+	}
+#endif // SELECT_MATCHING
+}
+
 void SelectPoint( const View& view, const float device_point[2], const float device_epsilon[2], RadiantSelectionSystem::EModifier modifier, bool face ){
 	//globalOutputStream() << device_point[0] << "   " << device_point[1] << "\n";
 	ASSERT_MESSAGE( fabs( device_point[0] ) <= 1.0f && fabs( device_point[1] ) <= 1.0f, "point-selection error" );
@@ -3123,50 +3190,12 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			break;
 			case RadiantSelectionSystem::eSelect:
 			{
-				SelectionPool::iterator best = selector_point_ents.begin();
-				if( !( *best ).second->isSelected() ){
-					( *best ).second->setSelected( true );
-				}
-#ifdef SELECT_MATCHING
-				SelectionPool::iterator i = best;
-				++i;
-				while ( i != selector_point_ents.end() )
-				{
-					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
-						if( !( *i ).second->isSelected() ){
-							( *i ).second->setSelected( true );
-						}
-					}
-					else{
-						break;
-					}
-					++i;
-				}
-#endif // SELECT_MATCHING
+				SelectionPool_Select( selector_point_ents, true, SELECT_MATCHING_DIST );
 			}
 			break;
 			case RadiantSelectionSystem::eDeselect:
 			{
-				SelectionPool::iterator best = selector_point_ents.begin();
-				if( ( *best ).second->isSelected() ){
-					( *best ).second->setSelected( false );
-				}
-#ifdef SELECT_MATCHING
-				SelectionPool::iterator i = best;
-				++i;
-				while ( i != selector_point_ents.end() )
-				{
-					if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
-						if( ( *i ).second->isSelected() ){
-							( *i ).second->setSelected( false );
-						}
-					}
-					else{
-						break;
-					}
-					++i;
-				}
-#endif // SELECT_MATCHING
+				SelectionPool_Select( selector_point_ents, false, SELECT_MATCHING_DIST );
 			}
 			break;
 			default:
@@ -3186,7 +3215,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				{
 				case RadiantSelectionSystem::eToggle:
 				{
-					SelectableSortedSet::iterator best = selector.begin();
+					SelectionPool::iterator best = selector.begin();
 					// toggle selection of the object with least depth
 					if ( ( *best ).second->isSelected() ) {
 						( *best ).second->setSelected( false );
@@ -3206,7 +3235,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				// select the next object in the list from the one already selected
 				case RadiantSelectionSystem::eCycle:
 				{
-					bool CycleSelectionOccured = false;
+					bool cycleSelectionOccured = false;
 					SelectionPool::iterator i = selector.begin();
 					while ( i != selector.end() )
 					{
@@ -3220,12 +3249,12 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 							{
 								selector.begin()->second->setSelected( true );
 							}
-							CycleSelectionOccured = true;
+							cycleSelectionOccured = true;
 							break;
 						}
 						++i;
 					}
-					if( !CycleSelectionOccured ){
+					if( !cycleSelectionOccured ){
 						deselectComponentsOrAll( face );
 						( *selector.begin() ).second->setSelected( true );
 					}
@@ -3233,50 +3262,12 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 				break;
 				case RadiantSelectionSystem::eSelect:
 				{
-					SelectionPool::iterator best = selector.begin();
-					if( !( *best ).second->isSelected() ){
-						( *best ).second->setSelected( true );
-					}
-#ifdef SELECT_MATCHING
-					SelectionPool::iterator i = best;
-					++i;
-					while ( i != selector.end() )
-					{
-						if( ( *i ).first.equalEpsilon( ( *best ).first, Mode() == eComponent ? 0.25f : 0.000001f, 0.000001f ) ){
-							if( !( *i ).second->isSelected() ){
-								( *i ).second->setSelected( true );
-							}
-						}
-						else{
-							break;
-						}
-						++i;
-					}
-#endif // SELECT_MATCHING
+					SelectionPool_Select( selector, true, ( Mode() == eComponent && !g_bAltResize_AltSelect )? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
 				}
 				break;
 				case RadiantSelectionSystem::eDeselect:
 				{
-					SelectionPool::iterator best = selector.begin();
-					if( ( *best ).second->isSelected() ){
-						( *best ).second->setSelected( false );
-					}
-#ifdef SELECT_MATCHING
-					SelectionPool::iterator i = best;
-					++i;
-					while ( i != selector.end() )
-					{
-						if( ( *i ).first.equalEpsilon( ( *best ).first, Mode() == eComponent ? 0.25f : 0.000001f, 0.000001f ) ){
-							if( ( *i ).second->isSelected() ){
-								( *i ).second->setSelected( false );
-							}
-						}
-						else{
-							break;
-						}
-						++i;
-					}
-#endif // SELECT_MATCHING
+					SelectionPool_Select( selector, false, ( Mode() == eComponent && !g_bAltResize_AltSelect )? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
 				}
 				break;
 				default:
@@ -3309,23 +3300,8 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 			Scene_TestSelect( selector_point_ents, volume, scissored, eEntity, ComponentMode() );
 		}
 		if( prefer_point_ents && !selector_point_ents.failed() ){
-			SelectableSortedSet::iterator best = selector_point_ents.begin();
-			const bool wasSelected = ( *best ).second->isSelected();
-			( *best ).second->setSelected( !wasSelected );
-#ifdef SELECT_MATCHING
-			SelectableSortedSet::iterator i = best;
-			++i;
-			while ( i != selector_point_ents.end() )
-			{
-				if( ( *i ).first.equalEpsilon( ( *best ).first, 0.25f, 0.000001f ) ){
-					( *i ).second->setSelected( !wasSelected );
-				}
-				else{
-					break;
-				}
-				++i;
-			}
-#endif // SELECT_MATCHING
+			const bool wasSelected = ( *selector_point_ents.begin() ).second->isSelected();
+			SelectionPool_Select( selector_point_ents, !wasSelected, SELECT_MATCHING_DIST );
 			return !wasSelected;
 		}
 		else{//do primitives, if ents failed
@@ -3336,23 +3312,21 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 				Scene_TestSelect( selector, volume, scissored, g_bAltResize_AltSelect ? ePrimitive : Mode(), ComponentMode() );
 			}
 			if ( !selector.failed() ){
-				SelectableSortedSet::iterator best = selector.begin();
-				const bool wasSelected = ( *best ).second->isSelected();
-				( *best ).second->setSelected( !wasSelected );
-#ifdef SELECT_MATCHING
-				SelectableSortedSet::iterator i = best;
-				++i;
+				const bool wasSelected = ( *selector.begin() ).second->isSelected();
+				SelectionPool_Select( selector, !wasSelected, ( Mode() == eComponent && !g_bAltResize_AltSelect )? SELECT_MATCHING_COMPONENTS_DIST : SELECT_MATCHING_DIST );
+
+				#if 0
+				SelectionPool::iterator best = selector.begin();
+				SelectionPool::iterator i = best;
+				globalOutputStream() << "\n\n\n===========\n";
 				while ( i != selector.end() )
 				{
-					if( ( *i ).first.equalEpsilon( ( *best ).first, Mode() == eComponent ? 0.25f : 0.000001f, 0.000001f ) ){
-						( *i ).second->setSelected( !wasSelected );
-					}
-					else{
-						break;
-					}
+					globalOutputStream() << "depth:" << ( *i ).first.m_depth << " dist:" << ( *i ).first.m_distance << " depth2:" << ( *i ).first.m_depth2 << "\n";
+					globalOutputStream() << "depth - best depth:" << ( *i ).first.m_depth - ( *best ).first.m_depth << "\n";
 					++i;
 				}
-#endif // SELECT_MATCHING
+				#endif
+
 				return !wasSelected;
 			}
 			else{

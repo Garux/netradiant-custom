@@ -30,16 +30,30 @@
 
 class SelectionIntersection
 {
-float m_depth;
+//public:
+double m_depth;
 float m_distance;
+double m_depth2;
+bool m_direct;
 public:
-SelectionIntersection() : m_depth( 1 ), m_distance( 2 ){
+SelectionIntersection() : m_depth( 1 ), m_distance( 2 ), m_depth2( -1 ), m_direct( false ){
 }
-SelectionIntersection( float depth, float distance ) : m_depth( depth ), m_distance( distance ){
+SelectionIntersection( float depth, float distance ) : m_depth( depth ), m_distance( distance ), m_depth2( -1 ), m_direct( distance == 0.f ){
+}
+SelectionIntersection( float depth, float distance, float depth2 ) : m_depth( depth ), m_distance( distance ), m_depth2( depth2 ), m_direct( distance == 0.f ){
 }
 bool operator<( const SelectionIntersection& other ) const {
-	if ( m_distance != other.m_distance ) {
+	if ( ( m_direct ^ other.m_direct ) ||
+		( !m_direct && !other.m_direct && fabs( m_distance - other.m_distance ) > 1e-3f /*0.00002f*/ ) ) {
 		return m_distance < other.m_distance;
+	}
+	if( !m_direct && !other.m_direct ){
+		if( fabs( m_depth - other.m_depth ) > 1e-6 ){
+			return m_depth < other.m_depth;
+		}
+		else{
+			return m_depth2 > other.m_depth2;
+		}
 	}
 	if ( m_depth != other.m_depth ) {
 		return m_depth < other.m_depth;
@@ -47,8 +61,23 @@ bool operator<( const SelectionIntersection& other ) const {
 	return false;
 }
 bool equalEpsilon( const SelectionIntersection& other, float distanceEpsilon, float depthEpsilon ) const {
+	if ( m_direct ^ other.m_direct ) {
+		return false;
+	}
+	if( !m_direct && !other.m_direct ){
+#if 1
+		return float_equal_epsilon( m_distance, other.m_distance, distanceEpsilon )
+		   && float_equal_epsilon( m_depth, other.m_depth, static_cast<double>( depthEpsilon ) )
+		   && float_equal_epsilon( m_depth2, other.m_depth2, 3e-7 );
+#else
+		return ( m_distance == other.m_distance )
+		   && ( m_depth == other.m_depth )
+		   && ( m_depth2 == other.m_depth2 );
+#endif
+	}
 	return float_equal_epsilon( m_distance, other.m_distance, distanceEpsilon )
-		   && float_equal_epsilon( m_depth, other.m_depth, depthEpsilon );
+		   && float_equal_epsilon( m_depth, other.m_depth, static_cast<double>( depthEpsilon ) )
+		   && float_equal_epsilon( m_depth2, other.m_depth2, static_cast<double>( depthEpsilon ) );
 }
 float depth() const {
 	return m_depth;
@@ -195,6 +224,8 @@ typedef BasicVector3<float> Vector3;
 class Matrix4;
 class VolumeTest;
 
+typedef BasicVector3<double> DoubleVector3;
+
 class SelectionTest
 {
 public:
@@ -203,7 +234,7 @@ virtual const VolumeTest& getVolume() const = 0;
 virtual const Vector3& getNear() const = 0;
 virtual const Vector3& getFar() const = 0;
 virtual void TestPoint( const Vector3& point, SelectionIntersection& best ) = 0;
-virtual void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;
+virtual void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const DoubleVector3 planepoints[3] ) = 0;
 virtual void TestLineLoop( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;
 virtual void TestLineStrip( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;
 virtual void TestLines( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;

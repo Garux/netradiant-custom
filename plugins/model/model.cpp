@@ -156,7 +156,7 @@ void render( Renderer& renderer, const Matrix4& localToWorld ) const {
 }
 
 void testSelect( Selector& selector, SelectionTest& test, const Matrix4& localToWorld ){
-	test.BeginMesh( localToWorld );
+	test.BeginMesh( localToWorld, true );
 
 	SelectionIntersection best;
 	testSelect( test, best );

@@ -396,17 +396,19 @@ inline void matrix4_transform_direction( const Matrix4& self, BasicVector3<Eleme
 }
 
 /// \brief Returns \p vector4 transformed by \p self.
-inline Vector4 matrix4_transformed_vector4( const Matrix4& self, const Vector4& vector4 ){
-	return Vector4(
-			   self[0]  * vector4[0] + self[4]  * vector4[1] + self[8]  * vector4[2] + self[12] * vector4[3],
-			   self[1]  * vector4[0] + self[5]  * vector4[1] + self[9]  * vector4[2] + self[13] * vector4[3],
-			   self[2]  * vector4[0] + self[6]  * vector4[1] + self[10] * vector4[2] + self[14] * vector4[3],
-			   self[3]  * vector4[0] + self[7]  * vector4[1] + self[11] * vector4[2] + self[15] * vector4[3]
+template<typename Element>
+inline BasicVector4<Element> matrix4_transformed_vector4( const Matrix4& self, const BasicVector4<Element>& vector4 ){
+	return BasicVector4<Element>(
+			   static_cast<Element>( self[0]  * vector4[0] + self[4]  * vector4[1] + self[8]  * vector4[2] + self[12] * vector4[3] ),
+			   static_cast<Element>( self[1]  * vector4[0] + self[5]  * vector4[1] + self[9]  * vector4[2] + self[13] * vector4[3] ),
+			   static_cast<Element>( self[2]  * vector4[0] + self[6]  * vector4[1] + self[10] * vector4[2] + self[14] * vector4[3] ),
+			   static_cast<Element>( self[3]  * vector4[0] + self[7]  * vector4[1] + self[11] * vector4[2] + self[15] * vector4[3] )
 			   );
 }
 
 /// \brief Transforms \p vector4 by \p self in-place.
-inline void matrix4_transform_vector4( const Matrix4& self, Vector4& vector4 ){
+template<typename Element>
+inline void matrix4_transform_vector4( const Matrix4& self, BasicVector4<Element>& vector4 ){
 	vector4 = matrix4_transformed_vector4( self, vector4 );
 }
 

@@ -653,9 +653,9 @@ inline Plane3 Plane3_applyTransform( const Plane3& plane, const Matrix4& matrix 
 //	Vector4 normal = matrix4_transformed_vector4( mat, Vector4( plane.normal(), 0 ) );
 //	return plane3_normalised( Plane3( vector4_to_vector3( normal ), vector3_dot( vector4_to_vector3( normal ), vector4_to_vector3( anchor ) ) ) );
 
-	const Vector3 anchor( matrix4_transformed_point( matrix, plane.normal() * plane.dist() ) );
+	const DoubleVector3 anchor( matrix4_transformed_point( matrix, plane.normal() * plane.dist() ) );
 	const Matrix4 mat( matrix4_transposed( matrix4_affine_inverse( matrix ) ) );
-	const Vector3 normal( vector3_normalised( matrix4_transformed_direction( mat, plane.normal() ) ) );
+	const DoubleVector3 normal( vector3_normalised( matrix4_transformed_direction( mat, plane.normal() ) ) );
 	return Plane3( normal, vector3_dot( normal, anchor ) );
 }
 
@@ -801,6 +801,15 @@ PlanePoints& planePoints(){
 const PlanePoints& planePoints() const {
 	return m_planepts;
 }
+const PlanePoints& getPlanePoints(){
+	if( isDoom3Plane() ){
+		m_planepts[0] = m_planeCached.normal() * m_planeCached.dist();
+		ComputeAxisBase( m_planeCached.normal(), m_planepts[1], m_planepts[2] );
+		m_planepts[1] = m_planepts[1] + m_planepts[0];
+		m_planepts[2] = m_planepts[2] + m_planepts[0];
+	}
+	return m_planepts;
+}
 const Plane3& plane3() const {
 	return m_planeCached;
 }
@@ -838,8 +847,8 @@ void copy( const Vector3& p0, const Vector3& p1, const Vector3& p2 ){
 }
 };
 
-inline void Winding_testSelect( Winding& winding, SelectionTest& test, SelectionIntersection& best ){
-	test.TestPolygon( VertexPointer( reinterpret_cast<VertexPointer::pointer>( &winding.points.data()->vertex ), sizeof( WindingVertex ) ), winding.numpoints, best );
+inline void Winding_testSelect( Winding& winding, SelectionTest& test, SelectionIntersection& best, const DoubleVector3 planepoints[3] ){
+	test.TestPolygon( VertexPointer( reinterpret_cast<VertexPointer::pointer>( &winding.points.data()->vertex ), sizeof( WindingVertex ) ), winding.numpoints, best, planepoints );
 }
 
 const double GRID_MIN = 0.125;
@@ -1155,7 +1164,7 @@ void snapto( float snap ){
 }
 
 void testSelect( SelectionTest& test, SelectionIntersection& best ){
-	Winding_testSelect( m_winding, test, best );
+	Winding_testSelect( m_winding, test, best, m_plane.getPlanePoints() );
 }
 
 void testSelect_centroid( SelectionTest& test, SelectionIntersection& best ){
