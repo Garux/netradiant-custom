@@ -64,63 +64,9 @@
 #include "rotation.h"
 
 #include "entity.h"
-extern bool g_newLightDraw;
 
-#define SPHERE_FILL_SIDES 16
-#define SPHERE_FILL_POINTS SPHERE_FILL_SIDES * (SPHERE_FILL_SIDES - 1) * 6 + SPHERE_FILL_SIDES * 3
 
-#define SPHERE_WIRE_SIDES 24
-#define SPHERE_WIRE_POINTS SPHERE_WIRE_SIDES * 3
-
-void sphere_construct_fill( Vector3 (&radiiPoints)[SPHERE_FILL_POINTS] ){
-
-	const double dt = c_2pi / static_cast<double>( SPHERE_FILL_SIDES );
-	const double dp = c_pi / static_cast<double>( SPHERE_FILL_SIDES );
-	int k = 0;
-
-	for ( int i = 0; i <= SPHERE_FILL_SIDES - 1; ++i )
-	{
-		for ( int j = 0; j <= SPHERE_FILL_SIDES - 2; ++j )
-		{
-			const double t = i * dt;
-			const double p = ( j * dp ) - ( c_pi / 2.0 );
-
-			radiiPoints[k++] = vector3_for_spherical( t, p );
-			radiiPoints[k++] = vector3_for_spherical( t, p + dp );
-			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
-			radiiPoints[k++] = vector3_for_spherical( t, p );
-			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
-			radiiPoints[k++] = vector3_for_spherical( t + dt, p );
-		}
-	}
-
-	{
-		const double p = ( SPHERE_FILL_SIDES - 1 ) * dp - ( c_pi / 2.0 );
-		for ( int i = 0; i <= SPHERE_FILL_SIDES - 1; ++i )
-		{
-			const double t = i * dt;
-
-			radiiPoints[k++] = vector3_for_spherical( t, p );
-			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
-			radiiPoints[k++] = vector3_for_spherical( t + dt, p );
-		}
-	}
-}
-
-void sphere_draw_fill_( const Vector3& origin, float radius, const Vector3 (&radiiPoints)[SPHERE_FILL_POINTS] ){
-	if ( radius <= 0 ) {
-		return;
-	}
-
-	glBegin( GL_TRIANGLES );
-	for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
-	{
-		glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
-	}
-	glEnd();
-}
-
-#if 0
+#if 0 //old straight calculations + render
 void sphere_draw_fill( const Vector3& origin, float radius, int sides ){
 	if ( radius <= 0 ) {
 		return;
@@ -194,6 +140,202 @@ void sphere_draw_fill( const Vector3& origin, float radius, int sides ){
 	glEnd();
 }
 
+void light_draw_radius_fill( const Vector3& origin, const float envelope[3] ){
+	if ( envelope[0] > 0 ) {
+		sphere_draw_fill( origin, envelope[0], 16 );
+	}
+	if ( envelope[1] > 0 ) {
+		sphere_draw_fill( origin, envelope[1], 16 );
+	}
+	if ( envelope[2] > 0 ) {
+		sphere_draw_fill( origin, envelope[2], 16 );
+	}
+}
+#elif 1 //precalculated sphere
+
+	#if 1 //GL_TRIANGLE_STRIP
+
+#define SPHERE_FILL_SIDES 12 //must be n*2
+
+#if 0
+	#define SPHERE_FILL_POINTS 1261
+	#define SPHERE_FILL_STEP 10.f
+#elif 0
+	#define SPHERE_FILL_POINTS 241
+	#define SPHERE_FILL_STEP 22.5f
+#else
+	//#define SPHERE_FILL_POINTS 553 // ( (12 - 1)*2 + 1)*2*12 + 1
+	#define SPHERE_FILL_POINTS ((SPHERE_FILL_SIDES - 1)*2 + 1)*2*SPHERE_FILL_SIDES + 1
+	#define SPHERE_FILL_STEP 15.f
+#endif
+
+
+
+void cartesian( const double Long, const double Lat, float cart[3] ) {
+	cart[0] = cos( Long ) * fabs( cos( Lat ) );
+	cart[1] = sin( Long ) * fabs( cos( Lat ) );
+	cart[2] = sin( Lat );
+}
+
+void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+	float cart[3];
+	int k = 0;
+	const double step = c_pi / static_cast<double>( SPHERE_FILL_SIDES );
+
+	radiiPoints[k++] = Vector3( 0.0, 0.0, -1.0 );
+	for( int i = 0; i < SPHERE_FILL_SIDES * 2; i+=2 ) {
+		for( int j = -SPHERE_FILL_SIDES / 2 + 1; j < SPHERE_FILL_SIDES / 2; ++j ) {
+			cartesian( step * i, step * j, cart );
+			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
+			cartesian( step * ( i + 1 ), step * j, cart );
+			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
+		}
+		radiiPoints[k++] = Vector3( 0.0, 0.0, 1.0 );
+		for( int j = SPHERE_FILL_SIDES / 2 - 1; j > -SPHERE_FILL_SIDES / 2; --j ) {
+			cartesian( step * ( i + 1 ), step * j, cart );
+			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
+			cartesian( step * ( i + 2 ), step * j, cart );
+			radiiPoints[k++] = Vector3( cart[0], cart[1], cart[2] );
+		}
+		radiiPoints[k++] = Vector3( 0.0, 0.0, -1.0 );
+	}
+	//globalOutputStream() << k << "!!!!!!!!!!!!\n";
+}
+
+void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+	glBegin( GL_TRIANGLE_STRIP );
+	for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
+	{
+		glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
+	}
+	glEnd();
+}
+
+	#elif 0 // triangles
+		#if 1 // icosahedron
+
+#define SPHERE_FILL_SIDES 16
+#define SPHERE_FILL_DIV 2
+#define SPHERE_FILL_POINTS 20 * ( 4 << SPHERE_FILL_DIV ) * 3
+
+#define X .525731112119133606
+#define Z .850650808352039932
+
+static float vdata[12][3] = {
+	{ -X, 0.0, Z}, {X, 0.0, Z}, { -X, 0.0, -Z}, {X, 0.0, -Z},
+	{0.0, Z, X}, {0.0, Z, -X}, {0.0, -Z, X}, {0.0, -Z, -X},
+	{Z, X, 0.0}, { -Z, X, 0.0}, {Z, -X, 0.0}, { -Z, -X, 0.0}
+};
+static unsigned int tindices[20][3] = {
+	{0, 4, 1}, {0, 9, 4}, {9, 5, 4}, {4, 5, 8}, {4, 8, 1},
+	{8, 10, 1}, {8, 3, 10}, {5, 3, 8}, {5, 2, 3}, {2, 7, 3},
+	{7, 10, 3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1, 6},
+	{6, 1, 10}, {9, 0, 11}, {9, 11, 2}, {9, 2, 5}, {7, 2, 11}
+};
+
+void normalize( float * a ) {
+	float d = sqrt( a[0] * a[0] + a[1] * a[1] + a[2] * a[2] );
+	a[0] /= d;
+	a[1] /= d;
+	a[2] /= d;
+}
+
+void drawtri( float * a, float * b, float * c, int div, Vector3 radiiPoints[SPHERE_FILL_POINTS], int& k ) {
+	if( div <= 0 ) {
+		radiiPoints[k++] = Vector3( a[0], a[1], a[2] );
+		radiiPoints[k++] = Vector3( b[0], b[1], b[2] );
+		radiiPoints[k++] = Vector3( c[0], c[1], c[2] );
+	} else {
+		float ab[3], ac[3], bc[3];
+		for( int i = 0; i < 3; i++ ) {
+			ab[i] = ( a[i] + b[i] ) / 2;
+			ac[i] = ( a[i] + c[i] ) / 2;
+			bc[i] = ( b[i] + c[i] ) / 2;
+		}
+		normalize( ab );
+		normalize( ac );
+		normalize( bc );
+		drawtri( a, ab, ac, div - 1, radiiPoints, k );
+		drawtri( b, bc, ab, div - 1, radiiPoints, k );
+		drawtri( c, ac, bc, div - 1, radiiPoints, k );
+		drawtri( ab, bc, ac, div - 1, radiiPoints, k ); //<--Comment this line and sphere looks really cool!
+	}
+}
+
+void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+	int k = 0;
+	for( int i = 0; i < 20; i++ )
+		drawtri( vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], SPHERE_FILL_DIV, radiiPoints, k );
+}
+
+		#elif 0 //old precalculated
+
+#define SPHERE_FILL_SIDES 16
+#define SPHERE_FILL_POINTS SPHERE_FILL_SIDES * (SPHERE_FILL_SIDES - 1) * 6 + SPHERE_FILL_SIDES * 3
+
+void sphere_construct_fill( Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+
+	const double dt = c_2pi / static_cast<double>( SPHERE_FILL_SIDES );
+	const double dp = c_pi / static_cast<double>( SPHERE_FILL_SIDES );
+	int k = 0;
+
+	for ( int i = 0; i <= SPHERE_FILL_SIDES - 1; ++i )
+	{
+		for ( int j = 0; j <= SPHERE_FILL_SIDES - 2; ++j )
+		{
+			const double t = i * dt;
+			const double p = ( j * dp ) - ( c_pi / 2.0 );
+
+			radiiPoints[k++] = vector3_for_spherical( t, p );
+			radiiPoints[k++] = vector3_for_spherical( t, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t, p );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p );
+		}
+	}
+
+	{
+		const double p = ( SPHERE_FILL_SIDES - 1 ) * dp - ( c_pi / 2.0 );
+		for ( int i = 0; i <= SPHERE_FILL_SIDES - 1; ++i )
+		{
+			const double t = i * dt;
+
+			radiiPoints[k++] = vector3_for_spherical( t, p );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p + dp );
+			radiiPoints[k++] = vector3_for_spherical( t + dt, p );
+		}
+	}
+}
+
+		#endif
+
+void sphere_draw_fill( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+	glBegin( GL_TRIANGLES );
+	for ( int i = 0; i < SPHERE_FILL_POINTS; ++i )
+	{
+		glVertex3fv( vector3_to_array( vector3_added( origin, vector3_scaled( radiiPoints[i], radius ) ) ) );
+	}
+	glEnd();
+}
+
+	#endif
+
+void light_draw_radius_fill( const Vector3& origin, const float envelope[3], const Vector3 radiiPoints[SPHERE_FILL_POINTS] ){
+	if ( envelope[0] > 0 ) {
+		sphere_draw_fill( origin, envelope[0], radiiPoints );
+	}
+	if ( envelope[1] > 0 ) {
+		sphere_draw_fill( origin, envelope[1], radiiPoints );
+	}
+	if ( envelope[2] > 0 ) {
+		sphere_draw_fill( origin, envelope[2], radiiPoints );
+	}
+}
+#endif
+
+
+#if 0 //old straight calculations + render
 void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 	{
 		glBegin( GL_LINE_LOOP );
@@ -249,9 +391,25 @@ void sphere_draw_wire( const Vector3& origin, float radius, int sides ){
 		glEnd();
 	}
 }
-#endif // 0
 
-void sphere_construct_wire( Vector3 (&radiiPoints)[SPHERE_WIRE_POINTS] ){
+void light_draw_radius_wire( const Vector3& origin, const float envelope[3] ){
+	if ( envelope[0] > 0 ) {
+		sphere_draw_wire( origin, envelope[0], 24 );
+	}
+	if ( envelope[1] > 0 ) {
+		sphere_draw_wire( origin, envelope[1], 24 );
+	}
+	if ( envelope[2] > 0 ) {
+		sphere_draw_wire( origin, envelope[2], 24 );
+	}
+}
+
+#elif 1 //precalculated circle
+
+#define SPHERE_WIRE_SIDES 24
+#define SPHERE_WIRE_POINTS SPHERE_WIRE_SIDES * 3
+
+void sphere_construct_wire( Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 	int k = 0;
 
 	for ( int i = 0; i < SPHERE_WIRE_SIDES; i++ )
@@ -295,8 +453,7 @@ void sphere_construct_wire( Vector3 (&radiiPoints)[SPHERE_WIRE_POINTS] ){
 
 }
 
-
-void sphere_draw_wire_( const Vector3& origin, float radius, const Vector3 (&radiiPoints)[SPHERE_WIRE_POINTS] ){
+void sphere_draw_wire( const Vector3& origin, float radius, const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
 	int k = 0;
 	for( int j = 0; j < 3; j++ )
 	{
@@ -310,6 +467,20 @@ void sphere_draw_wire_( const Vector3& origin, float radius, const Vector3 (&rad
 		glEnd();
 	}
 }
+
+void light_draw_radius_wire( const Vector3& origin, const float envelope[3], const Vector3 radiiPoints[SPHERE_WIRE_POINTS] ){
+	if ( envelope[0] > 0 ) {
+		sphere_draw_wire( origin, envelope[0], radiiPoints );
+	}
+	if ( envelope[1] > 0 ) {
+		sphere_draw_wire( origin, envelope[1], radiiPoints );
+	}
+	if ( envelope[2] > 0 ) {
+		sphere_draw_wire( origin, envelope[2], radiiPoints );
+	}
+}
+#endif
+
 
 void light_draw_box_lines( const Vector3& origin, const Vector3 points[8] ){
 	//draw lines from the center of the bbox to the corners
@@ -340,54 +511,6 @@ void light_draw_box_lines( const Vector3& origin, const Vector3 points[8] ){
 	glVertex3fv( vector3_to_array( points[7] ) );
 
 	glEnd();
-}
-#if 0
-void light_draw_radius_wire( const Vector3& origin, const float envelope[3] ){
-	if ( envelope[0] > 0 ) {
-		sphere_draw_wire( origin, envelope[0], 24 );
-	}
-	if ( envelope[1] > 0 ) {
-		sphere_draw_wire( origin, envelope[1], 24 );
-	}
-	if ( envelope[2] > 0 ) {
-		sphere_draw_wire( origin, envelope[2], 24 );
-	}
-}
-#endif // 0
-void light_draw_radius_wire_( const Vector3& origin, const float envelope[3], const Vector3 (&radiiPoints)[SPHERE_WIRE_POINTS] ){
-	if ( envelope[0] > 0 ) {
-		sphere_draw_wire_( origin, envelope[0], radiiPoints );
-	}
-	if ( envelope[1] > 0 ) {
-		sphere_draw_wire_( origin, envelope[1], radiiPoints );
-	}
-	if ( envelope[2] > 0 ) {
-		sphere_draw_wire_( origin, envelope[2], radiiPoints );
-	}
-}
-#if 0
-void light_draw_radius_fill( const Vector3& origin, const float envelope[3] ){
-	if ( envelope[0] > 0 ) {
-		sphere_draw_fill( origin, envelope[0], 16 );
-	}
-	if ( envelope[1] > 0 ) {
-		sphere_draw_fill( origin, envelope[1], 16 );
-	}
-	if ( envelope[2] > 0 ) {
-		sphere_draw_fill( origin, envelope[2], 16 );
-	}
-}
-#endif // 0
-void light_draw_radius_fill_( const Vector3& origin, const float envelope[3], const Vector3 (&radiiPoints)[SPHERE_FILL_POINTS] ){
-	if ( envelope[0] > 0 ) {
-		sphere_draw_fill_( origin, envelope[0], radiiPoints );
-	}
-	if ( envelope[1] > 0 ) {
-		sphere_draw_fill_( origin, envelope[1], radiiPoints );
-	}
-	if ( envelope[2] > 0 ) {
-		sphere_draw_fill_( origin, envelope[2], radiiPoints );
-	}
 }
 
 void light_vertices( const AABB& aabb_light, Vector3 points[6] ){
@@ -709,7 +832,7 @@ RenderLightRadiiWire( LightRadii& radii, const Vector3& origin ) : m_radii( radi
 }
 void render( RenderStateFlags state ) const {
 	//light_draw_radius_wire( m_origin, m_radii.m_radii );
-	light_draw_radius_wire_( m_origin, m_radii.m_radii, m_radiiPoints );
+	light_draw_radius_wire( m_origin, m_radii.m_radii, m_radiiPoints );
 }
 };
 Vector3 RenderLightRadiiWire::m_radiiPoints[SPHERE_WIRE_POINTS] = {g_vector3_identity};
@@ -726,7 +849,7 @@ RenderLightRadiiFill( LightRadii& radii, const Vector3& origin ) : m_radii( radi
 }
 void render( RenderStateFlags state ) const {
 	//light_draw_radius_fill( m_origin, m_radii.m_radii );
-	light_draw_radius_fill_( m_origin, m_radii.m_radii, m_radiiPoints );
+	light_draw_radius_fill( m_origin, m_radii.m_radii, m_radiiPoints );
 }
 };
 //Shader* RenderLightRadiiFill::m_state = 0;
@@ -1227,13 +1350,7 @@ void detach( scene::Traversable::Observer* observer ){
 }
 
 void render( RenderStateFlags state ) const {
-	if ( !g_newLightDraw ) {
-		aabb_draw( m_aabb_light, state );
-	}
-	else
-	{
-		light_draw( m_aabb_light, state );
-	}
+	light_draw( m_aabb_light, state );
 }
 
 VolumeIntersectionValue intersectVolume( const VolumeTest& volume, const Matrix4& localToWorld ) const {
@@ -1255,7 +1372,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 
 	if ( selected && g_lightRadii && string_empty( m_entity.getKeyValue( "target" ) ) ) {
 		if ( renderer.getStyle() == Renderer::eFullMaterials ) {
-			renderer.SetState( m_colour.state_add(), Renderer::eFullMaterials );
+			renderer.SetState( m_colour.state_additive(), Renderer::eFullMaterials );
 			renderer.Highlight( Renderer::ePrimitive, false );
 			renderer.Highlight( Renderer::eFace, false );
 			renderer.addRenderable( m_radii_fill, localToWorld );

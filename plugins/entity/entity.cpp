@@ -113,7 +113,6 @@ Counter* EntityKeyValues::m_counter = 0;
 bool g_showNames = true;
 bool g_showTargetNames = false;
 bool g_showAngles = true;
-bool g_newLightDraw = true;
 bool g_lightRadii = true;
 
 class ConnectEntities
@@ -377,7 +376,6 @@ void Entity_Construct( EGameType gameType ){
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNames", BoolImportStringCaller( g_showNames ), BoolExportStringCaller( g_showNames ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowTargetNames", BoolImportStringCaller( g_showTargetNames ), BoolExportStringCaller( g_showTargetNames ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowAngles", BoolImportStringCaller( g_showAngles ), BoolExportStringCaller( g_showAngles ) );
-	GlobalPreferenceSystem().registerPreference( "NewLightStyle", BoolImportStringCaller( g_newLightDraw ), BoolExportStringCaller( g_newLightDraw ) );
 	GlobalPreferenceSystem().registerPreference( "LightRadiuses", BoolImportStringCaller( g_lightRadii ), BoolExportStringCaller( g_lightRadii ) );
 
 	Entity_InitFilters();

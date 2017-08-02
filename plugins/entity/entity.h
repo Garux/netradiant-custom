@@ -41,7 +41,6 @@ void Entity_Destroy();
 extern bool g_showNames;
 extern bool g_showTargetNames;
 extern bool g_showAngles;
-extern bool g_newLightDraw;
 extern bool g_lightRadii;
 
 #endif
