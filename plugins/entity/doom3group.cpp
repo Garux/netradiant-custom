@@ -348,7 +348,7 @@ const AABB& localAABB() const {
 	return m_curveBounds;
 }
 
-void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
+void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
 	if ( isModel() && selected ) {
 		m_renderOrigin.render( renderer, volume, localToWorld );
 	}
@@ -375,12 +375,12 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 			m_name_origin = childBounds.origin;
 		}
 
-		m_renderName.render( renderer, volume, localToWorld, selected );
+		m_renderName.render( renderer, volume, localToWorld, selected, childSelected );
 	}
 }
 
-void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
-	renderSolid( renderer, volume, localToWorld, selected, childBounds );
+void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
+	renderSolid( renderer, volume, localToWorld, selected, childSelected, childBounds );
 }
 
 void testSelect( Selector& selector, SelectionTest& test, SelectionIntersection& best ){
@@ -499,13 +499,13 @@ Doom3GroupInstance( const scene::Path& path, scene::Instance* parent, Doom3Group
 	m_contained.instanceDetach( Instance::path() );
 }
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childBounds() );
+	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childSelected(), Instance::childBounds() );
 
 	m_curveNURBS.renderComponentsSelected( renderer, volume, localToWorld() );
 	m_curveCatmullRom.renderComponentsSelected( renderer, volume, localToWorld() );
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childBounds() );
+	m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childSelected(), Instance::childBounds() );
 
 	m_curveNURBS.renderComponentsSelected( renderer, volume, localToWorld() );
 	m_curveCatmullRom.renderComponentsSelected( renderer, volume, localToWorld() );

@@ -25,6 +25,70 @@
 #include <pango/pangoft2.h>
 #include <pango/pango-utils.h>
 
+
+void gray_to_texture( const int x_max, const int y_max, const unsigned char *in, unsigned char *out, const unsigned int fontColorR, const unsigned int fontColorG, const unsigned int fontColorB ){ /* normal with shadow */
+	int x, y, bitmapIter = 0;
+
+	const unsigned int backgroundColorR = 0;
+	const unsigned int backgroundColorG = 0;
+	const unsigned int backgroundColorB = 0;
+
+	for( y = 0; y < y_max; y++ ) {
+		for( x = 0; x < x_max; x++ ) {
+			int iter = ( y * x_max + x ) * 4;
+			if( x == 0 || y == 0 || x == 1 || y == 1 ) {
+				out[iter] = fontColorB;
+				out[iter + 1] = fontColorG;
+				out[iter + 2] = fontColorR;
+				out[iter + 3] = 0;
+				continue;
+			}
+			if( in[bitmapIter] == 0 ){
+				out[iter] = fontColorB;
+				out[iter + 1] = fontColorG;
+				out[iter + 2] = fontColorR;
+				out[iter + 3] = 0;
+			}
+			else{
+				out[iter] = backgroundColorB;
+				out[iter + 1] = backgroundColorG;
+				out[iter + 2] = backgroundColorR;
+				out[iter + 3] = in[bitmapIter];
+			}
+			++bitmapIter;
+		}
+	}
+
+	bitmapIter = 0;
+	for( y = 0; y < y_max; y++ ) {
+		for( x = 0; x < x_max; x++ ) {
+			int iter = ( y * x_max + x ) * 4;
+			if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
+				continue;
+			}
+			if( in[bitmapIter] != 0 ) {
+				if( out[iter + 3] == 0 ){
+					out[iter] = fontColorB;
+					out[iter + 1] = fontColorG;
+					out[iter + 2] = fontColorR;
+					out[iter + 3] = in[bitmapIter];
+				}
+				else{
+					/* Calculate alpha (opacity). */
+					float opacityFont = in[bitmapIter] / 255.f;
+					float opacityBack = out[iter + 3] / 255.f;
+					out[iter] = fontColorB * opacityFont + ( 1 - opacityFont ) * backgroundColorB;
+					out[iter + 1] = fontColorG * opacityFont + ( 1 - opacityFont ) * backgroundColorG;
+					out[iter + 2] = fontColorR * opacityFont + ( 1 - opacityFont ) * backgroundColorR;
+					out[iter + 3] = ( opacityFont + ( 1 - opacityFont ) * opacityBack ) * 255.f;
+				}
+			}
+			++bitmapIter;
+		}
+	}
+}
+
+
 // generic string printing with call lists
 class GLFontCallList : public GLFont
 {
@@ -153,7 +217,7 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 				}
 			}
 		}
-#else
+#elif 0
 	if( 1 ){ /* normal with shadow */
 			int x_max = wid;
 			int y_max = hei;
@@ -224,7 +288,6 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 				}
 			}
 		}
-#endif // 0
 		else{ /* normal */
 			int x_max = wid;
 			int y_max = hei;
@@ -255,6 +318,7 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 				}
 			}
 		}
+#endif // 0
 
 
 
@@ -273,8 +337,23 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 //	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 		//Here we actually create the texture itself
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, wid, hei,
-						0, GL_BGRA, GL_UNSIGNED_BYTE, buf );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, wid * 3, hei,
+						0, GL_BGRA, GL_UNSIGNED_BYTE, 0 );
+
+		/* normal with shadow */
+		gray_to_texture( wid, hei, bitmap.buffer, buf, colour[0], colour[1], colour[2] );
+		glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, wid, hei, GL_BGRA, GL_UNSIGNED_BYTE, buf );
+
+		memset( buf, 0x00, 4 * hei * wid );
+		/* yellow selected with shadow */
+		gray_to_texture( wid, hei, bitmap.buffer, buf, 255, 255, 0 );
+		glTexSubImage2D( GL_TEXTURE_2D, 0, wid, 0, wid, hei, GL_BGRA, GL_UNSIGNED_BYTE, buf );
+
+		memset( buf, 0x00, 4 * hei * wid );
+		/* orange childSselected with shadow */
+		gray_to_texture( wid, hei, bitmap.buffer, buf, 255, 128, 0 );
+		glTexSubImage2D( GL_TEXTURE_2D, 0, wid * 2, 0, wid, hei, GL_BGRA, GL_UNSIGNED_BYTE, buf );
+
 
 		glBindTexture( GL_TEXTURE_2D, 0 );
 

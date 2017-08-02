@@ -95,14 +95,18 @@ typedef MemberCaller1<NamedEntity, const char*, &NamedEntity::identifierChanged>
 #include "math/frustum.h"
 
 class RenderableNamedEntity : public OpenGLRenderable {
+	enum ENameMode{
+		eNameNormal = 0,
+		eNameSelected = 1,
+		eNameChildSelected = 2,
+	};
+	mutable ENameMode m_nameMode;
+
 	NamedEntity& m_named;
 	const Vector3& m_position;
-	mutable GLuint m_tex_normal;
-	mutable GLuint m_tex_selected;
-	mutable GLuint* m_tex;
+	GLuint m_tex;
 	int m_width;
 	int m_height;
-	unsigned int m_colour[3];
 	mutable float m_screenPos[2];
 public:
 	typedef Static<Shader*, RenderableNamedEntity> StaticShader;
@@ -110,50 +114,40 @@ public:
 		return StaticShader::instance();
 	}
 	RenderableNamedEntity( NamedEntity& named, const Vector3& position )
-		: m_named( named ), m_position( position ), m_tex_normal( 0 ), m_tex_selected( 0 ) {
+		: m_named( named ), m_position( position ), m_tex( 0 ) {
 		construct_textures( g_showTargetNames ? m_named.name() : m_named.classname() );
 		m_named.attach( IdentifierChangedCaller( *this ) );
 	}
 private:
-	void setSelected( bool selected ) const {
-		m_tex = selected ? &m_tex_selected : &m_tex_normal;
-	}
-	void setSelectedColour( bool selected ){
-		if( selected ){
-			m_colour[0] = 255;
-			m_colour[1] = 255;
-			m_colour[2] = 0;
-		}
-		else{
-			m_colour[0] = static_cast<unsigned int>( m_named.color()[0] * 255.f );
-			m_colour[1] = static_cast<unsigned int>( m_named.color()[1] * 255.f );
-			m_colour[2] = static_cast<unsigned int>( m_named.color()[2] * 255.f );
-		}
-	}
-	void construct_texture( const char* name ){
-		glGenTextures( 1, m_tex );
-		if( *m_tex > 0 ) {
-			GlobalOpenGL().m_font->renderString( name, *m_tex, m_colour, m_width, m_height );
-		}
-	}
 	void construct_textures( const char* name ){
-		setSelected( false );
-		setSelectedColour( false );
-		construct_texture( name );
-		setSelected( true );
-		setSelectedColour( true );
-		construct_texture( name );
+		glGenTextures( 1, &m_tex );
+		if( m_tex > 0 ) {
+			unsigned int colour[3];
+			colour[0] = static_cast<unsigned int>( m_named.color()[0] * 255.f );
+			colour[1] = static_cast<unsigned int>( m_named.color()[1] * 255.f );
+			colour[2] = static_cast<unsigned int>( m_named.color()[2] * 255.f );
+			GlobalOpenGL().m_font->renderString( name, m_tex, colour, m_width, m_height );
+		}
 	}
 	void delete_textures(){
-		glDeleteTextures( 1, &m_tex_normal );
-		glDeleteTextures( 1, &m_tex_selected );
-		m_tex_normal = 0;
-		m_tex_selected = 0;
+		glDeleteTextures( 1, &m_tex );
+		m_tex = 0;
+	}
+	void setMode( bool selected, bool childSelected ) const{
+		if( selected ){
+			m_nameMode = eNameSelected;
+		}
+		else if( childSelected ){
+			m_nameMode = eNameChildSelected;
+		}
+		else{
+			m_nameMode = eNameNormal;
+		}
 	}
 public:
 	void render( RenderStateFlags state ) const {
-		if( *m_tex > 0 ){
-			glBindTexture( GL_TEXTURE_2D, *m_tex );
+		if( m_tex > 0 ){
+			glBindTexture( GL_TEXTURE_2D, m_tex );
 
 			//Here we draw the texturemaped quads.
 			//The bitmap that we got from FreeType was not
@@ -161,21 +155,25 @@ public:
 			//so we need to link the texture to the quad
 			//so that the result will be properly aligned.
 			glBegin( GL_QUADS );
-			glTexCoord2i( 0, 1 );
+			float xoffset0 = m_nameMode / 3.f;
+			float xoffset1 = ( m_nameMode + 1 ) / 3.f;
+			glTexCoord2f( xoffset0, 1 );
 			glVertex2f( m_screenPos[0], m_screenPos[1] );
-			glTexCoord2i( 0, 0 );
+			glTexCoord2f( xoffset0, 0 );
 			glVertex2f( m_screenPos[0], m_screenPos[1] + m_height + .01f );
-			glTexCoord2i( 1, 0 );
+			glTexCoord2f( xoffset1, 0 );
 			glVertex2f( m_screenPos[0] + m_width + .01f, m_screenPos[1] + m_height + .01f );
-			glTexCoord2i( 1, 1 );
+			glTexCoord2f( xoffset1, 1 );
 			glVertex2f( m_screenPos[0] + m_width + .01f, m_screenPos[1] );
 			glEnd();
 
 			glBindTexture( GL_TEXTURE_2D, 0 );
 		}
 	}
-	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const{
-		if( !selected && volume.fill() ){
+	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected = false ) const{
+		setMode( selected, childSelected );
+
+		if( m_nameMode == eNameNormal && volume.fill() ){
 //			globalOutputStream() << localToWorld << " localToWorld\n";
 //			globalOutputStream() << volume.GetModelview() << " modelview\n";
 //			globalOutputStream() << volume.GetProjection() << " Projection\n";
@@ -191,7 +189,6 @@ public:
 			//globalOutputStream() << m_position[0] << " " << m_position[1] << " " << m_position[2] << " position\n";
 		}
 
-		setSelected( selected );
 
 		Vector4 position;
 		position[0] = m_position[0];

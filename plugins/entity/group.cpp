@@ -148,7 +148,7 @@ void detach( scene::Traversable::Observer* observer ){
 	m_traverse.detach( observer );
 }
 
-void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
+void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
 	if ( g_showNames ) {
 		// don't draw the name for worldspawn
@@ -159,12 +159,12 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		// place name in the middle of the "children cloud"
 		m_name_origin = childBounds.origin;
 
-		m_renderName.render( renderer, volume, localToWorld, selected );
+		m_renderName.render( renderer, volume, localToWorld, selected, childSelected );
 	}
 }
 
-void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, const AABB& childBounds ) const {
-	renderSolid( renderer, volume, localToWorld, selected, childBounds );
+void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
+	renderSolid( renderer, volume, localToWorld, selected, childSelected, childBounds );
 }
 
 void updateTransform(){
@@ -298,10 +298,10 @@ GroupInstance( const scene::Path& path, scene::Instance* parent, Group& group ) 
 	m_contained.instanceDetach( Instance::path() );
 }
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childBounds() );
+	m_contained.renderSolid( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childSelected(), Instance::childBounds() );
 }
 void renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
-	m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childBounds() );
+	m_contained.renderWireframe( renderer, volume, Instance::localToWorld(), getSelectable().isSelected(), Instance::childSelected(), Instance::childBounds() );
 }
 
 STRING_CONSTANT( Name, "GroupInstance" );
