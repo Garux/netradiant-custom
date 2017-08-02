@@ -29,16 +29,16 @@
 
 multimon_globals_t g_multimon_globals;
 
-LatchedBool g_Multimon_enableSysMenuPopups( false, "Floating windows sysmenu icons" );
+//LatchedBool g_Multimon_enableSysMenuPopups( false, "Floating windows sysmenu icons" );
 
 void MultiMonitor_constructPreferences( PreferencesPage& page ){
 	GtkWidget* primary_monitor = page.appendCheckBox( "Multi Monitor", "Start on Primary Monitor", g_multimon_globals.m_bStartOnPrimMon );
-	GtkWidget* popup = page.appendCheckBox(
-		"", "Disable system menu on popup windows",
-		LatchedBoolImportCaller( g_Multimon_enableSysMenuPopups ),
-		BoolExportCaller( g_Multimon_enableSysMenuPopups.m_latched )
-		);
-	Widget_connectToggleDependency( popup, primary_monitor );
+//	GtkWidget* popup = page.appendCheckBox(
+//		"", "Disable system menu on popup windows",
+//		LatchedBoolImportCaller( g_Multimon_enableSysMenuPopups ),
+//		BoolExportCaller( g_Multimon_enableSysMenuPopups.m_latched )
+//		);
+//	Widget_connectToggleDependency( popup, primary_monitor );
 }
 
 #include "preferencesystem.h"
@@ -88,9 +88,9 @@ void MultiMon_Construct(){
 	}
 
 	GlobalPreferenceSystem().registerPreference( "StartOnPrimMon", BoolImportStringCaller( g_multimon_globals.m_bStartOnPrimMon ), BoolExportStringCaller( g_multimon_globals.m_bStartOnPrimMon ) );
-	GlobalPreferenceSystem().registerPreference( "NoSysMenuPopups", BoolImportStringCaller( g_Multimon_enableSysMenuPopups.m_latched ), BoolExportStringCaller( g_Multimon_enableSysMenuPopups.m_latched ) );
+//	GlobalPreferenceSystem().registerPreference( "NoSysMenuPopups", BoolImportStringCaller( g_Multimon_enableSysMenuPopups.m_latched ), BoolExportStringCaller( g_Multimon_enableSysMenuPopups.m_latched ) );
 
-	g_Multimon_enableSysMenuPopups.useLatched();
+//	g_Multimon_enableSysMenuPopups.useLatched();
 
 	PreferencesDialog_addInterfacePreferences( FreeCaller1<PreferencesPage&, MultiMonitor_constructPreferences>() );
 }

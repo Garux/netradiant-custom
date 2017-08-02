@@ -193,7 +193,8 @@ void Pointfile_Next( void ){
 
 	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
 	Camera_setOrigin( camwnd, *i );
-	g_pParentWnd->GetXYWnd()->SetOrigin( *i );
+	g_pParentWnd->ActiveXY()->SetOrigin( *i );
+	g_pParentWnd->ActiveXY()->queueDraw();
 	{
 		Vector3 dir( vector3_normalised( vector3_subtracted( *( ++i ), Camera_getOrigin( camwnd ) ) ) );
 		Vector3 angles( Camera_getAngles( camwnd ) );
@@ -218,7 +219,8 @@ void Pointfile_Prev( void ){
 
 	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
 	Camera_setOrigin( camwnd, *i );
-	g_pParentWnd->GetXYWnd()->SetOrigin( *i );
+	g_pParentWnd->ActiveXY()->SetOrigin( *i );
+	g_pParentWnd->ActiveXY()->queueDraw();
 	{
 		Vector3 dir( vector3_normalised( vector3_subtracted( *( ++i ), Camera_getOrigin( camwnd ) ) ) );
 		Vector3 angles( Camera_getAngles( camwnd ) );

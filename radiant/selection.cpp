@@ -3466,9 +3466,9 @@ void MoveSelected( const View& view, const float device_point[2], bool snap, boo
 
 /// \todo Support view-dependent nudge.
 void NudgeManipulator( const Vector3& nudge, const Vector3& view ){
-	if ( ManipulatorMode() == eTranslate || ManipulatorMode() == eDrag ) {
+//	if ( ManipulatorMode() == eTranslate || ManipulatorMode() == eDrag ) {
 		translateSelected( nudge );
-	}
+//	}
 }
 
 void endMove();
@@ -3959,8 +3959,11 @@ void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& 
 #include "preferencesystem.h"
 #include "preferences.h"
 
+bool g_bLeftMouseClickSelector = true;
+
 void SelectionSystem_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Prefer point entities in 2D", getSelectionSystem().m_bPreferPointEntsIn2D );
+	page.appendCheckBox( "", "Left mouse click tunnel selector", g_bLeftMouseClickSelector );
 }
 void SelectionSystem_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Selection", "Selection System Settings" ) );
@@ -3988,6 +3991,7 @@ void SelectionSystem_Construct(){
 	GlobalShaderCache().attachRenderable( getSelectionSystem() );
 
 	GlobalPreferenceSystem().registerPreference( "PreferPointEntsIn2D", BoolImportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ), BoolExportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ) );
+	GlobalPreferenceSystem().registerPreference( "LeftMouseClickSelector", BoolImportStringCaller( g_bLeftMouseClickSelector ), BoolExportStringCaller( g_bLeftMouseClickSelector ) );
 	SelectionSystem_registerPreferencesPage();
 }
 
@@ -4131,7 +4135,9 @@ void testSelect_simpleM1( DeviceVector position ){
 		modifier = RadiantSelectionSystem::eCycle;
 	}
 	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, false );*/
-	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
+	if( g_bLeftMouseClickSelector ){
+		getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
+	}
 	m_start = m_current = device_constrained( position );
 }
 
@@ -4287,12 +4293,7 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 		}
 		else
 		{
-			if ( button == c_button_select ) {
-				m_selector.m_mouse2 = false;
-			}
-			else{
-				m_selector.m_mouse2 = true;
-			}
+			m_selector.m_mouse2 = ( button == c_button_select ) ? false : true;
 			m_selector.mouseDown( devicePosition );
 			g_mouseMovedCallback.insert( MouseEventCallback( Selector_::MouseMovedCaller( m_selector ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Selector_::MouseUpCaller( m_selector ) ) );

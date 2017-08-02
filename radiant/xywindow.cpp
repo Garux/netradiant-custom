@@ -1090,7 +1090,6 @@ void XYWnd::NewBrushDrag_Begin( int x, int y ){
 	m_nNewBrushPressy = y;
 
 	m_bNewBrushDrag = true;
-	GlobalUndoSystem().start();
 }
 
 void XYWnd::NewBrushDrag_End( int x, int y ){
@@ -1128,6 +1127,7 @@ void XYWnd::NewBrushDrag( int x, int y ){
 	}
 
 	if ( m_NewBrushDrag == 0 ) {
+		GlobalUndoSystem().start();
 		NodeSmartReference node( GlobalBrushCreator().createBrush() );
 		Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
 

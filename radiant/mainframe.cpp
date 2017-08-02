@@ -1232,6 +1232,12 @@ Vector3 AxisBase_axisForDirection( const AxisBase& axes, ENudgeDirection directi
 	return Vector3( 0, 0, 0 );
 }
 
+bool g_bNudgeAfterClone = false;
+
+void Nudge_constructPreferences( PreferencesPage& page ){
+	page.appendCheckBox( "", "Nudge selected after duplication", g_bNudgeAfterClone );
+}
+
 void NudgeSelection( ENudgeDirection direction, float fAmount, VIEWTYPE viewtype ){
 	AxisBase axes( AxisBase_forViewType( viewtype ) );
 	Vector3 view_direction( vector3_negated( axes.z ) );
@@ -1245,8 +1251,10 @@ void Selection_Clone(){
 
 		Scene_Clone_Selected( GlobalSceneGraph(), false );
 
-		//NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-		//NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+		if( g_bNudgeAfterClone ){
+			NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+			NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+		}
 	}
 }
 
@@ -1256,8 +1264,10 @@ void Selection_Clone_MakeUnique(){
 
 		Scene_Clone_Selected( GlobalSceneGraph(), true );
 
-		//NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
-		//NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+		if( g_bNudgeAfterClone ){
+			NudgeSelection(eNudgeRight, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+			NudgeSelection(eNudgeDown, GetGridSize(), GlobalXYWnd_getCurrentViewType());
+		}
 	}
 }
 
@@ -1848,7 +1858,7 @@ GtkMenuItem* create_file_menu(){
 //	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Pro_ject settings...", "ProjectSettings" );
 	//menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "_Pointfile...", "TogglePointfile" );
+	create_menu_item_with_mnemonic( menu, "_Pointfile", "TogglePointfile" );
 	menu_separator( menu );
 	MRU_constructMenu( menu );
 	menu_separator( menu );
@@ -3513,6 +3523,8 @@ void MainFrame_Construct(){
 	GlobalPreferenceSystem().registerPreference( "XZWnd", WindowPositionTrackerImportStringCaller( g_posXZWnd ), WindowPositionTrackerExportStringCaller( g_posXZWnd ) );
 
 	GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
+
+	GlobalPreferenceSystem().registerPreference( "NudgeAfterClone", BoolImportStringCaller( g_bNudgeAfterClone ), BoolExportStringCaller( g_bNudgeAfterClone ) );
 	if ( g_strEnginePath.empty() )
 	{
 		g_strEnginePath_was_empty_1st_start = true;
@@ -3544,6 +3556,7 @@ void MainFrame_Construct(){
 
 	Layout_registerPreferencesPage();
 	Paths_registerPreferencesPage();
+	PreferencesDialog_addSettingsPreferences( FreeCaller1<PreferencesPage&, Nudge_constructPreferences>() );
 
 	g_brushCount.setCountChangedCallback( FreeCaller<QE_brushCountChanged>() );
 	g_entityCount.setCountChangedCallback( FreeCaller<QE_entityCountChanged>() );
