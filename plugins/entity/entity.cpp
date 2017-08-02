@@ -113,7 +113,9 @@ EntityCreator::KeyValueChangedFunc KeyValue::m_entityKeyValueChanged = 0;
 Counter* EntityKeyValues::m_counter = 0;
 
 bool g_showNames = true;
+bool g_showBboxes = false;
 int g_showNamesDist = 512;
+int g_showNamesRatio = 64;
 bool g_showTargetNames = false;
 bool g_showAngles = true;
 bool g_lightRadii = true;
@@ -267,11 +269,23 @@ void setShowNames( bool showNames ){
 bool getShowNames(){
 	return g_showNames;
 }
+void setShowBboxes( bool showBboxes ){
+	g_showBboxes = showBboxes;
+}
+bool getShowBboxes(){
+	return g_showBboxes;
+}
 void setShowNamesDist( int dist ){
 	g_showNamesDist = dist;
 }
 int getShowNamesDist(){
 	return g_showNamesDist;
+}
+void setShowNamesRatio( int ratio ){
+	g_showNamesRatio = ratio;
+}
+int getShowNamesRatio(){
+	return g_showNamesRatio;
 }
 void setShowTargetNames( bool showNames ){
 	g_showTargetNames = showNames;
@@ -383,7 +397,9 @@ void Entity_Construct( EGameType gameType ){
 	}
 
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNames", BoolImportStringCaller( g_showNames ), BoolExportStringCaller( g_showNames ) );
+	GlobalPreferenceSystem().registerPreference( "SI_ShowBboxes", BoolImportStringCaller( g_showBboxes ), BoolExportStringCaller( g_showBboxes ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNamesDist", IntImportStringCaller( g_showNamesDist ), IntExportStringCaller( g_showNamesDist ) );
+	GlobalPreferenceSystem().registerPreference( "SI_ShowNamesRatio", IntImportStringCaller( g_showNamesRatio ), IntExportStringCaller( g_showNamesRatio ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowTargetNames", BoolImportStringCaller( g_showTargetNames ), BoolExportStringCaller( g_showTargetNames ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowAngles", BoolImportStringCaller( g_showAngles ), BoolExportStringCaller( g_showAngles ) );
 	GlobalPreferenceSystem().registerPreference( "LightRadiuses", BoolImportStringCaller( g_lightRadii ), BoolExportStringCaller( g_lightRadii ) );

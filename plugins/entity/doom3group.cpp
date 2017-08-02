@@ -363,7 +363,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		renderer.addRenderable( m_curveCatmullRom.m_renderCurve, localToWorld );
 	}
 
-	if ( g_showNames || selected || childSelected ) {
+	if ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( aabb_for_oriented_aabb( childBounds, volume.GetModelview() ), volume.GetViewport(), g_showNamesRatio ) ) ) ) {
 		// draw models as usual
 		if ( !isModel() ) {
 			// don't draw the name for worldspawn

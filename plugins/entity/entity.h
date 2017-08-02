@@ -39,7 +39,9 @@ void Entity_Construct( EGameType gameType = eGameTypeQuake3 );
 void Entity_Destroy();
 
 extern bool g_showNames;
+extern bool g_showBboxes;
 extern int g_showNamesDist;
+extern int g_showNamesRatio;
 extern bool g_showTargetNames;
 extern bool g_showAngles;
 extern bool g_lightRadii;

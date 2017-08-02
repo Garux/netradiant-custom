@@ -227,7 +227,7 @@ void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
 	renderer.addRenderable( m_aabb_wire, localToWorld );
 	renderArrow( renderer, volume, localToWorld );
-	if ( g_showNames || selected ) {
+	if ( selected || ( g_showNames && aabb_fits_view( aabb_for_oriented_aabb( m_aabb_local, volume.GetModelview() ), volume.GetViewport(), g_showNamesRatio ) ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

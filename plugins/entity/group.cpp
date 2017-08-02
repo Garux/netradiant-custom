@@ -150,7 +150,7 @@ void detach( scene::Traversable::Observer* observer ){
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( g_showNames || selected || childSelected ) {
+	if ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( aabb_for_oriented_aabb( childBounds, volume.GetModelview() ), volume.GetViewport(), g_showNamesRatio ) ) ) ) {
 		// don't draw the name for worldspawn
 		if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
 			return;

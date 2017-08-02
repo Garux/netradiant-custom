@@ -242,8 +242,9 @@ void detach( scene::Traversable::Observer* observer ){
 }
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected ) const {
-	if ( selected ) {
-		m_renderOrigin.render( renderer, volume, localToWorld );
+	if ( selected || g_showBboxes ) {
+		if( selected )
+			m_renderOrigin.render( renderer, volume, localToWorld );
 
 		renderer.PushState();
 		renderer.Highlight( Renderer::ePrimitive, false );
@@ -253,7 +254,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		renderer.PopState();
 	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( g_showNames || selected ) {
+	if ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( aabb_for_oriented_aabb( m_aabb_local, volume.GetModelview() ), volume.GetViewport(), g_showNamesRatio ) ) ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }

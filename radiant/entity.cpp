@@ -588,10 +588,27 @@ void ShowNamesDistExport( EntityCreator& self, const IntImportCallback& importer
 }
 typedef ReferenceCaller1<EntityCreator, const IntImportCallback&, ShowNamesDistExport> ShowNamesDistExportCaller;
 
+
+void ShowNamesRatioImport( EntityCreator& self, int value ){
+	self.setShowNamesRatio( value );
+	UpdateAllWindows();
+}
+typedef ReferenceCaller1<EntityCreator, int, ShowNamesRatioImport> ShowNamesRatioImportCaller;
+
+void ShowNamesRatioExport( EntityCreator& self, const IntImportCallback& importer ){
+	importer( self.getShowNamesRatio() );
+}
+typedef ReferenceCaller1<EntityCreator, const IntImportCallback&, ShowNamesRatioExport> ShowNamesRatioExportCaller;
+
+
 void Entity_constructPreferences( PreferencesPage& page ){
-	page.appendSpinner(	"Names Display Distance", 512.0, 0.0, 200500.0,
+	page.appendSpinner(	"Names Display Distance (3D)", 512.0, 0.0, 200500.0,
 		IntImportCallback( ShowNamesDistImportCaller( GlobalEntityCreator() ) ),
 		IntExportCallback( ShowNamesDistExportCaller( GlobalEntityCreator() ) )
+		);
+	page.appendSpinner(	"Names Display Ratio (2D)", 64.0, 0.0, 100500.0,
+		IntImportCallback( ShowNamesRatioImportCaller( GlobalEntityCreator() ) ),
+		IntExportCallback( ShowNamesRatioExportCaller( GlobalEntityCreator() ) )
 		);
 }
 void Entity_constructPage( PreferenceGroup& group ){

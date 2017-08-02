@@ -3041,6 +3041,18 @@ void ShowNamesToggle(){
 	UpdateAllWindows();
 }
 
+void ShowBboxesExport( const BoolImportCallback& importer ){
+	importer( GlobalEntityCreator().getShowBboxes() );
+}
+typedef FreeCaller1<const BoolImportCallback&, ShowBboxesExport> ShowBboxesExportCaller;
+ShowBboxesExportCaller g_show_bboxes_caller;
+ToggleItem g_show_bboxes( g_show_bboxes_caller );
+void ShowBboxesToggle(){
+	GlobalEntityCreator().setShowBboxes( !GlobalEntityCreator().getShowBboxes() );
+	g_show_bboxes.update();
+	UpdateAllWindows();
+}
+
 void ShowTargetNamesExport( const BoolImportCallback& importer ){
 	importer( GlobalEntityCreator().getShowTargetNames() );
 }
@@ -3164,6 +3176,7 @@ void XYShow_registerCommands(){
 
 	GlobalToggles_insert( "ShowAngles", FreeCaller<ShowAnglesToggle>(), ToggleItem::AddCallbackCaller( g_show_angles ) );
 	GlobalToggles_insert( "ShowNames", FreeCaller<ShowNamesToggle>(), ToggleItem::AddCallbackCaller( g_show_names ) );
+	GlobalToggles_insert( "ShowBboxes", FreeCaller<ShowBboxesToggle>(), ToggleItem::AddCallbackCaller( g_show_bboxes ) );
 	GlobalToggles_insert( "ShowTargetNames", FreeCaller<ShowTargetNamesToggle>(), ToggleItem::AddCallbackCaller( g_show_targetnames ) );
 	GlobalToggles_insert( "ShowBlocks", FreeCaller<ShowBlocksToggle>(), ToggleItem::AddCallbackCaller( g_show_blocks ) );
 	GlobalToggles_insert( "ShowCoordinates", FreeCaller<ShowCoordinatesToggle>(), ToggleItem::AddCallbackCaller( g_show_coordinates ) );

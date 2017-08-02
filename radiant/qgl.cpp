@@ -1453,6 +1453,39 @@ void QGL_sharedContextCreated( OpenGLBinding& table ){
 		globalOutputStream() << "No Anisotropic filtering available\n";
 		g_maxTextureAnisotropy = 0;
 	}
+
+
+	if ( QGL_ExtensionSupported( "GL_ARB_framebuffer_object" ) ) {
+		table.support_ARB_framebuffer_object =
+			QGL_constructExtensionFunc( table.m_glBindFramebuffer, "glBindFramebuffer" )
+			&& QGL_constructExtensionFunc( table.m_glBindRenderbuffer, "glBindRenderbuffer" )
+			&& QGL_constructExtensionFunc( table.m_glBlitFramebuffer, "glBlitFramebuffer" )
+			&& QGL_constructExtensionFunc( table.m_glCheckFramebufferStatus, "glCheckFramebufferStatus" )
+			&& QGL_constructExtensionFunc( table.m_glDeleteFramebuffers, "glDeleteFramebuffers" )
+			&& QGL_constructExtensionFunc( table.m_glDeleteRenderbuffers, "glDeleteRenderbuffers" )
+			&& QGL_constructExtensionFunc( table.m_glFramebufferRenderbuffer, "glFramebufferRenderbuffer" )
+			&& QGL_constructExtensionFunc( table.m_glFramebufferTexture1D, "glFramebufferTexture1D" )
+			&& QGL_constructExtensionFunc( table.m_glFramebufferTexture2D, "glFramebufferTexture2D" )
+			&& QGL_constructExtensionFunc( table.m_glFramebufferTexture3D, "glFramebufferTexture3D" )
+			&& QGL_constructExtensionFunc( table.m_glFramebufferTextureLayer, "glFramebufferTextureLayer" )
+			&& QGL_constructExtensionFunc( table.m_glGenFramebuffers, "glGenFramebuffers" )
+			&& QGL_constructExtensionFunc( table.m_glGenRenderbuffers, "glGenRenderbuffers" )
+			&& QGL_constructExtensionFunc( table.m_glGenerateMipmap, "glGenerateMipmap" )
+			&& QGL_constructExtensionFunc( table.m_glGetFramebufferAttachmentParameteriv, "glGetFramebufferAttachmentParameteriv" )
+			&& QGL_constructExtensionFunc( table.m_glGetRenderbufferParameteriv, "glGetRenderbufferParameteriv" )
+			&& QGL_constructExtensionFunc( table.m_glIsFramebuffer, "glIsFramebuffer" )
+			&& QGL_constructExtensionFunc( table.m_glIsRenderbuffer, "glIsRenderbuffer" )
+			&& QGL_constructExtensionFunc( table.m_glRenderbufferStorage, "glRenderbufferStorage" )
+			&& QGL_constructExtensionFunc( table.m_glRenderbufferStorageMultisample, "glRenderbufferStorageMultisample" );
+
+		if ( !table.support_ARB_framebuffer_object ) {
+			extension_not_implemented( "GL_ARB_framebuffer_object" );
+		}
+	}
+	else
+	{
+		table.support_ARB_framebuffer_object = false;
+	}
 }
 
 void QGL_sharedContextDestroyed( OpenGLBinding& table ){

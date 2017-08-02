@@ -195,7 +195,7 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 		m_renderOrigin.render( renderer, volume, localToWorld );
 	}
 	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( ( g_showNames || selected )  && !string_equal( m_named.name(), "misc_model" ) ) {
+	if ( ( selected || ( g_showNames && ( volume.fill() || aabb_fits_view( aabb_for_oriented_aabb( AABB( Vector3( 0, 0, 0 ), Vector3( 32, 32, 32 ) ), volume.GetModelview() ), volume.GetViewport(), g_showNamesRatio ) ) ) ) && !string_equal( m_named.name(), "misc_model" ) ) {
 		m_renderName.render( renderer, volume, localToWorld, selected );
 	}
 }
