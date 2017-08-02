@@ -133,12 +133,12 @@ struct layout_globals_t
 	int nState;
 
 	layout_globals_t() :
-		m_position( -1, -1, 640, 480 ),
+		m_position( -1, -1, 962, 480 ),
 
-		nXYHeight( 350 ),
+		nXYHeight( 377 ),
 		nXYWidth( 600 ),
 		nCamWidth( 300 ),
-		nCamHeight( 210 ),
+		nCamHeight( 230 ),
 		nState( 0 ){
 	}
 };
@@ -1900,6 +1900,8 @@ LatchedBool g_Layout_enablePatchToolbar( true, "Patch Toolbar" );
 LatchedBool g_Layout_enablePluginToolbar( true, "Plugin Toolbar" );
 LatchedBool g_Layout_enableFilterToolbar( true, "Filter Toolbar" );
 
+LatchedBool g_Layout_SingleToolbar( true, "Single Scrollable Toolbar" );
+
 
 
 GtkMenuItem* create_file_menu(){
@@ -2954,6 +2956,17 @@ static gint mainframe_delete( GtkWidget *widget, GdkEvent *event, gpointer data 
 	return TRUE;
 }
 
+gboolean toolbar_redirect_scroll( GtkWidget* widget, GdkEventScroll* event, gpointer user_data ){
+	//globalOutputStream() << "scroll\n";
+	if ( event->direction == GDK_SCROLL_UP ) {
+		event->direction = GDK_SCROLL_RIGHT;
+	}
+	else if ( event->direction == GDK_SCROLL_DOWN ) {
+		event->direction = GDK_SCROLL_LEFT;
+	}
+	return FALSE;
+}
+
 void MainFrame::Create(){
 	GtkWindow* window = GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) );
 
@@ -2999,31 +3012,65 @@ void MainFrame::Create(){
 	GtkMenuBar* main_menu = create_main_menu( CurrentStyle() );
 	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( main_menu ), FALSE, FALSE, 0 );
 
-	if( g_Layout_enableMainToolbar.m_value ){
-		GtkToolbar* main_toolbar = create_main_toolbar( CurrentStyle() );
-		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( main_toolbar ), FALSE, FALSE, 0 );
-	}
+	if( g_Layout_SingleToolbar.m_value ){
+		if( g_Layout_enableMainToolbar.m_value || g_Layout_enablePluginToolbar.m_value || g_Layout_enableFilterToolbar.m_value ){
+			GtkWidget* scr_win = gtk_scrolled_window_new( NULL, NULL );
+			gtk_container_set_border_width( GTK_CONTAINER( scr_win ), 0 );
+			gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr_win ), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER );
 
+			GtkWidget* scrollbar = gtk_scrolled_window_get_hscrollbar( GTK_SCROLLED_WINDOW( scr_win ) );
+			gtk_widget_set_size_request( scrollbar, 0, 0 );
+			//gtk_widget_set_child_visible( scrollbar, FALSE );
+			//gtk_container_set_border_width( GTK_CONTAINER( scrollbar ), 0 );
 
-	if ( g_Layout_enablePluginToolbar.m_value || g_Layout_enableFilterToolbar.m_value ){
-		GtkWidget* PFbox = gtk_hbox_new( FALSE, 3 );
-		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( PFbox ), FALSE, FALSE, 0 );
-		gtk_widget_show( PFbox );
-		if ( g_Layout_enablePluginToolbar.m_value ){
-			GtkToolbar* plugin_toolbar = create_plugin_toolbar();
+			gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr_win ), GTK_SHADOW_NONE );
+			gtk_box_pack_start( GTK_BOX( vbox ), scr_win, FALSE, FALSE, 0 );
+			gtk_widget_show( scr_win );
+			g_signal_connect( G_OBJECT( scr_win ), "scroll_event", G_CALLBACK( toolbar_redirect_scroll ), 0 );
+
+			GtkWidget* hbox = gtk_hbox_new( FALSE, 3 );
+			gtk_widget_show( hbox );
+			gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( scr_win ), hbox );
+
+			if( g_Layout_enableMainToolbar.m_value ){
+				GtkToolbar* main_toolbar = create_main_toolbar( CurrentStyle() );
+				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( main_toolbar ), TRUE, TRUE, 0 );
+			}
 			if ( g_Layout_enableFilterToolbar.m_value ){
-				gtk_box_pack_start( GTK_BOX( PFbox ), GTK_WIDGET( plugin_toolbar ), FALSE, FALSE, 0 );
+				GtkToolbar* filter_toolbar = create_filter_toolbar();
+				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( filter_toolbar ), TRUE, TRUE, 0 );
 			}
-			else{
-				gtk_box_pack_start( GTK_BOX( PFbox ), GTK_WIDGET( plugin_toolbar ), TRUE, TRUE, 0 );
+			if ( g_Layout_enablePluginToolbar.m_value ){
+				GtkToolbar* plugin_toolbar = create_plugin_toolbar();
+				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( plugin_toolbar ), TRUE, TRUE, 0 );
 			}
 		}
-		if ( g_Layout_enableFilterToolbar.m_value ){
-			GtkToolbar* filter_toolbar = create_filter_toolbar();
-			gtk_box_pack_start( GTK_BOX( PFbox ), GTK_WIDGET( filter_toolbar ), TRUE, TRUE, 0 );
+
+	}
+	else{
+		if( g_Layout_enableMainToolbar.m_value ){
+			GtkToolbar* main_toolbar = create_main_toolbar( CurrentStyle() );
+			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( main_toolbar ), FALSE, FALSE, 0 );
+		}
+		if ( g_Layout_enablePluginToolbar.m_value || g_Layout_enableFilterToolbar.m_value ){
+			GtkWidget* hbox = gtk_hbox_new( FALSE, 3 );
+			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, FALSE, 0 );
+			gtk_widget_show( hbox );
+			if ( g_Layout_enablePluginToolbar.m_value ){
+				GtkToolbar* plugin_toolbar = create_plugin_toolbar();
+				if ( g_Layout_enableFilterToolbar.m_value ){
+					gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( plugin_toolbar ), FALSE, FALSE, 0 );
+				}
+				else{
+					gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( plugin_toolbar ), TRUE, TRUE, 0 );
+				}
+			}
+			if ( g_Layout_enableFilterToolbar.m_value ){
+				GtkToolbar* filter_toolbar = create_filter_toolbar();
+				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( filter_toolbar ), TRUE, TRUE, 0 );
+			}
 		}
 	}
-
 	/*GtkToolbar* plugin_toolbar = create_plugin_toolbar();
 	if ( !g_Layout_enablePluginToolbar.m_value ) {
 		gtk_widget_hide( GTK_WIDGET( plugin_toolbar ) );
@@ -3465,6 +3512,11 @@ void Layout_constructPreferences( PreferencesPage& page ){
 		LatchedBoolImportCaller( g_Layout_enableFilterToolbar ),
 		BoolExportCaller( g_Layout_enableFilterToolbar.m_latched )
 		);
+	page.appendCheckBox(
+		"", "Single Scrollable Toolbar",
+		LatchedBoolImportCaller( g_Layout_SingleToolbar ),
+		BoolExportCaller( g_Layout_SingleToolbar.m_latched )
+		);
 }
 
 void Layout_constructPage( PreferenceGroup& group ){
@@ -3621,6 +3673,7 @@ void MainFrame_Construct(){
 	GlobalPreferenceSystem().registerPreference( "PatchToolBar", BoolImportStringCaller( g_Layout_enablePatchToolbar.m_latched ), BoolExportStringCaller( g_Layout_enablePatchToolbar.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "PluginToolBar", BoolImportStringCaller( g_Layout_enablePluginToolbar.m_latched ), BoolExportStringCaller( g_Layout_enablePluginToolbar.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "FilterToolBar", BoolImportStringCaller( g_Layout_enableFilterToolbar.m_latched ), BoolExportStringCaller( g_Layout_enableFilterToolbar.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "SingleToolBar", BoolImportStringCaller( g_Layout_SingleToolbar.m_latched ), BoolExportStringCaller( g_Layout_SingleToolbar.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "QE4StyleWindows", IntImportStringCaller( g_Layout_viewStyle.m_latched ), IntExportStringCaller( g_Layout_viewStyle.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "XYHeight", IntImportStringCaller( g_layout_globals.nXYHeight ), IntExportStringCaller( g_layout_globals.nXYHeight ) );
 	GlobalPreferenceSystem().registerPreference( "XYWidth", IntImportStringCaller( g_layout_globals.nXYWidth ), IntExportStringCaller( g_layout_globals.nXYWidth ) );
@@ -3670,6 +3723,7 @@ void MainFrame_Construct(){
 	g_Layout_enablePatchToolbar.useLatched();
 	g_Layout_enablePluginToolbar.useLatched();
 	g_Layout_enableFilterToolbar.useLatched();
+	g_Layout_SingleToolbar.useLatched();
 
 	Layout_registerPreferencesPage();
 	Paths_registerPreferencesPage();

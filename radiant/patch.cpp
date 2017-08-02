@@ -1246,7 +1246,7 @@ void Patch::constructPlane( const AABB& aabb, int axis, std::size_t width, std::
 	Vector3 vStart;
 	vStart[x] = aabb.origin[x] - aabb.extents[x];
 	vStart[y] = aabb.origin[y] - aabb.extents[y];
-	vStart[z] = aabb.origin[z];
+	vStart[z] = aabb.origin[z] + aabb.extents[z];
 
 	float xAdj = fabsf( ( vStart[x] - ( aabb.origin[x] + aabb.extents[x] ) ) / (float)( m_width - 1 ) );
 	float yAdj = fabsf( ( vStart[y] - ( aabb.origin[y] + aabb.extents[y] ) ) / (float)( m_height - 1 ) );
@@ -1266,8 +1266,6 @@ void Patch::constructPlane( const AABB& aabb, int axis, std::size_t width, std::
 		}
 		vTmp[y] += yAdj;
 	}
-
-	NaturalTexture();
 }
 
 void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std::size_t width, std::size_t height ){

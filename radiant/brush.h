@@ -641,13 +641,22 @@ inline Plane3 Plane3_applyTranslation( const Plane3& plane, const Vector3& trans
 	return Plane3( tmp.normal(), -tmp.dist() );
 }
 
+/// lets say M is a transformation matrix, then transforming vertex v is just M*v
+/// but transforming the normal is M^(-T) n
 inline Plane3 Plane3_applyTransform( const Plane3& plane, const Matrix4& matrix ){
+	/* fails for scaling */
 	//Plane3 tmp( plane3_transformed( Plane3( plane.normal(), -plane.dist() ), matrix ) );
 	//return Plane3( tmp.normal(), -tmp.dist() );
-	Vector4 anchor = matrix4_transformed_vector4( matrix, Vector4( plane.normal() * plane.dist(), 1 ) );
-	Matrix4 mat = matrix4_transposed( matrix4_full_inverse( matrix ) );
-	Vector4 normal = matrix4_transformed_vector4( mat, Vector4( plane.normal(), 0 ) );
-	return plane3_normalised( Plane3( vector4_to_vector3( normal ), vector3_dot( vector4_to_vector3( normal ), vector4_to_vector3( anchor ) ) ) );
+	/* ok */
+//	Vector4 anchor = matrix4_transformed_vector4( matrix, Vector4( plane.normal() * plane.dist(), 1 ) );
+//	Matrix4 mat = matrix4_transposed( matrix4_full_inverse( matrix ) );
+//	Vector4 normal = matrix4_transformed_vector4( mat, Vector4( plane.normal(), 0 ) );
+//	return plane3_normalised( Plane3( vector4_to_vector3( normal ), vector3_dot( vector4_to_vector3( normal ), vector4_to_vector3( anchor ) ) ) );
+
+	const Vector3 anchor( matrix4_transformed_point( matrix, plane.normal() * plane.dist() ) );
+	const Matrix4 mat( matrix4_transposed( matrix4_affine_inverse( matrix ) ) );
+	const Vector3 normal( vector3_normalised( matrix4_transformed_direction( mat, plane.normal() ) ) );
+	return Plane3( normal, vector3_dot( normal, anchor ) );
 }
 
 class FacePlane
@@ -2681,7 +2690,7 @@ void selectPlane( Selector& selector, const Line& line, const PlaneCallback& sel
 	{
 		Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
 		double dot = vector3_dot( getFace().plane3().normal(), v );
-		//globalOutputStream() << dot << "\n";
+//		globalOutputStream() << getFace().plane3().normal()[0] << " " << getFace().plane3().normal()[1] << " " << getFace().plane3().normal()[2] << " DOT " << dot << "\n";
 		//epsilon to prevent perpendicular faces pickup
 		if ( dot <= 0.005 ) {
 			return;
