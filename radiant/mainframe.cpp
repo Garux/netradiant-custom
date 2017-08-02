@@ -1994,6 +1994,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		}
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Entity _Angles", "ShowAngles" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Entity _Names", "ShowNames" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Entity Names = Targetnames", "ShowTargetNames" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Light Radiuses", "ShowLightRadiuses" );
 
 		menu_separator( menu_in_menu );

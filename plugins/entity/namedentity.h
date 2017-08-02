@@ -26,6 +26,7 @@
 #include "eclasslib.h"
 #include "generic/callback.h"
 #include "nameable.h"
+#include "entity.h" //g_showTargetNames
 
 #include <set>
 
@@ -62,6 +63,9 @@ const char* name() const {
 	}
 	return m_name.c_str();
 }
+const char* classname() const {
+	return m_entity.getEntityClass().name();
+}
 void attach( const NameCallback& callback ){
 	m_changed.insert( callback );
 }
@@ -92,7 +96,7 @@ RenderableNamedEntity( const NamedEntity& named, const Vector3& position )
 }
 void render( RenderStateFlags state ) const {
 	glRasterPos3fv( vector3_to_array( m_position ) );
-	GlobalOpenGL().drawString( m_named.name() );
+	GlobalOpenGL().drawString( g_showTargetNames ? m_named.name() : m_named.classname() );
 }
 };
 
