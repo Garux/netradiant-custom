@@ -2680,8 +2680,10 @@ bool intersectVolume( const VolumeTest& volume, const Matrix4& localToWorld ) co
 void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
 	if ( !m_face->isFiltered() && m_face->contributes() && intersectVolume( volume, localToWorld ) ) {
 		renderer.PushState();
+		renderer.Highlight( Renderer::ePrimitiveWire );
 		if ( selectedComponents() ) {
 			renderer.Highlight( Renderer::eFace );
+			renderer.Highlight( Renderer::eFaceWire );
 		}
 		m_face->render( renderer, localToWorld );
 		renderer.PopState();

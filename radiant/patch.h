@@ -1477,6 +1477,7 @@ void render( Renderer& renderer, const VolumeTest& volume ) const {
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
 	m_patch.evaluateTransform();
 	renderer.setLights( *m_lightList );
+	renderer.Highlight( Renderer::ePrimitiveWire );
 	m_patch.render_solid( renderer, volume, localToWorld() );
 
 	renderComponentsSelected( renderer, volume );

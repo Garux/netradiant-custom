@@ -37,6 +37,8 @@ enum EHighlightMode
 	eFace = 1 << 0,
 	/*! Full highlighting. */
 	ePrimitive = 1 << 1,
+	ePrimitiveWire = 1 << 2, //always draw wire for primitives
+	eFaceWire = 1 << 3,	//wire for selected faces
 };
 
 enum EStyle

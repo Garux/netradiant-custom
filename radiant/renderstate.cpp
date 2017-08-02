@@ -2259,6 +2259,34 @@ void OpenGLShader::construct( const char* name ){
 			hiddenLine.m_linestipple_factor = 2;
 #endif
 		}
+		else if ( string_equal( name + 1, "CAM_WIRE" ) ) {
+			state.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_COLOURWRITE;// | RENDER_OFFSETLINE;
+			state.m_colour[0] = 0.75;
+			state.m_colour[1] = 0.75;
+			state.m_colour[2] = 0.75;
+			state.m_linewidth = 0.5;
+			state.m_sort = OpenGLState::eSortOverlayFirst + 1;
+			state.m_depthfunc = GL_LEQUAL;
+		}
+		else if ( string_equal( name + 1, "CAM_FACEWIRE" ) ) {
+			state.m_colour[0] = g_xywindow_globals.color_selbrushes[0];
+			state.m_colour[1] = g_xywindow_globals.color_selbrushes[1];
+			state.m_colour[2] = g_xywindow_globals.color_selbrushes[2];
+			state.m_colour[3] = 1;
+			state.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_OFFSETLINE;
+			state.m_sort = OpenGLState::eSortOverlayFirst + 2;
+			state.m_depthfunc = GL_LEQUAL;
+
+			OpenGLState& hiddenLine = appendDefaultPass();
+			hiddenLine.m_colour[0] = g_xywindow_globals.color_selbrushes[0];
+			hiddenLine.m_colour[1] = g_xywindow_globals.color_selbrushes[1];
+			hiddenLine.m_colour[2] = g_xywindow_globals.color_selbrushes[2];
+			hiddenLine.m_colour[3] = 1;
+			hiddenLine.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_OFFSETLINE | RENDER_LINESTIPPLE;
+			hiddenLine.m_sort = OpenGLState::eSortOverlayFirst + 1;
+			hiddenLine.m_depthfunc = GL_GREATER;
+			hiddenLine.m_linestipple_factor = 2;
+		}
 		else if ( string_equal( name + 1, "XY_OVERLAY" ) ) {
 			state.m_colour[0] = g_xywindow_globals.color_selbrushes[0];
 			state.m_colour[1] = g_xywindow_globals.color_selbrushes[1];

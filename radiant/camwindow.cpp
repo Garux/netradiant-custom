@@ -80,6 +80,7 @@ struct camwindow_globals_private_t
 	bool m_bCamDiscrete;
 	bool m_bCubicClipping;
 	int m_nStrafeMode;
+	bool m_bFaceWire;
 
 	camwindow_globals_private_t() :
 		m_nMoveSpeed( 100 ),
@@ -88,7 +89,8 @@ struct camwindow_globals_private_t
 		m_bCamInverseMouse( false ),
 		m_bCamDiscrete( true ),
 		m_bCubicClipping( false ),
-		m_nStrafeMode( 3 ){
+		m_nStrafeMode( 3 ),
+		m_bFaceWire( true ){
 	}
 
 };
@@ -118,6 +120,7 @@ enum camera_draw_mode
 	cd_wire,
 	cd_solid,
 	cd_texture,
+	cd_texture_plus_wire,
 	cd_lighting
 };
 
@@ -699,8 +702,10 @@ int m_PositionDragCursorY;
 
 guint m_freemove_handle_focusout;
 
+static Shader* m_state_select0;
 static Shader* m_state_select1;
-static Shader* m_state_select2;
+static Shader* m_state_wire;
+static Shader* m_state_facewire;
 
 FreezePointer m_freezePointer;
 
@@ -742,12 +747,16 @@ void queue_draw(){
 void draw();
 
 static void captureStates(){
+	m_state_facewire = GlobalShaderCache().capture( "$CAM_FACEWIRE" );
+	m_state_wire = GlobalShaderCache().capture( "$CAM_WIRE" );
+	m_state_select0 = GlobalShaderCache().capture( "$CAM_OVERLAY" );
 	m_state_select1 = GlobalShaderCache().capture( "$CAM_HIGHLIGHT" );
-	m_state_select2 = GlobalShaderCache().capture( "$CAM_OVERLAY" );
 }
 static void releaseStates(){
 	GlobalShaderCache().release( "$CAM_HIGHLIGHT" );
 	GlobalShaderCache().release( "$CAM_OVERLAY" );
+	GlobalShaderCache().release( "$CAM_WIRE" );
+	GlobalShaderCache().release( "$CAM_FACEWIRE" );
 }
 
 camera_t& getCamera(){
@@ -774,8 +783,10 @@ void Cam_Draw();
 
 typedef MemberCaller<CamWnd, &CamWnd::queue_draw> CamWndQueueDraw;
 
+Shader* CamWnd::m_state_select0 = 0;
 Shader* CamWnd::m_state_select1 = 0;
-Shader* CamWnd::m_state_select2 = 0;
+Shader* CamWnd::m_state_wire = 0;
+Shader* CamWnd::m_state_facewire = 0;
 
 CamWnd* NewCamWnd(){
 	return new CamWnd;
@@ -1529,13 +1540,17 @@ struct state_type
 
 std::vector<state_type> m_state_stack;
 RenderStateFlags m_globalstate;
+Shader* m_state_facewire;
+Shader* m_state_wire;
 Shader* m_state_select0;
 Shader* m_state_select1;
 const Vector3& m_viewer;
 
 public:
-CamRenderer( RenderStateFlags globalstate, Shader* select0, Shader* select1, const Vector3& viewer ) :
+CamRenderer( RenderStateFlags globalstate, Shader* facewire, Shader* wire, Shader* select0, Shader* select1, const Vector3& viewer ) :
 	m_globalstate( globalstate ),
+	m_state_facewire( facewire ),
+	m_state_wire( wire ),
 	m_state_select0( select0 ),
 	m_state_select1( select1 ),
 	m_viewer( viewer ){
@@ -1572,8 +1587,14 @@ void addRenderable( const OpenGLRenderable& renderable, const Matrix4& world ){
 	if ( m_state_stack.back().m_highlight & ePrimitive ) {
 		m_state_select0->addRenderable( renderable, world, m_state_stack.back().m_lights );
 	}
+	else if ( m_state_wire && m_state_stack.back().m_highlight & ePrimitiveWire ) {
+		m_state_wire->addRenderable( renderable, world, m_state_stack.back().m_lights );
+	}
 	if ( m_state_stack.back().m_highlight & eFace ) {
 		m_state_select1->addRenderable( renderable, world, m_state_stack.back().m_lights );
+		if ( m_state_facewire && m_state_stack.back().m_highlight & eFaceWire ) {
+			m_state_facewire->addRenderable( renderable, world, m_state_stack.back().m_lights );
+		}
 	}
 
 	m_state_stack.back().m_state->addRenderable( renderable, world, m_state_stack.back().m_lights );
@@ -1683,6 +1704,7 @@ void CamWnd::Cam_Draw(){
 					   | RENDER_SCALED;
 		break;
 	case cd_texture:
+	case cd_texture_plus_wire:
 		globalstate |= RENDER_FILL
 					   | RENDER_LIGHTING
 					   | RENDER_TEXTURE
@@ -1709,7 +1731,7 @@ void CamWnd::Cam_Draw(){
 //	}
 
 	{
-		CamRenderer renderer( globalstate, m_state_select2, m_state_select1, m_view.getViewer() );
+		CamRenderer renderer( globalstate, g_camwindow_globals_private.m_bFaceWire ? m_state_facewire : 0, m_Camera.draw_mode == cd_texture_plus_wire ? m_state_wire : 0, m_state_select0, m_state_select1, m_view.getViewer() );
 
 		Scene_Render( renderer, m_view );
 
@@ -2030,6 +2052,9 @@ void RenderModeImport( int value ){
 		CamWnd_SetMode( cd_texture );
 		break;
 	case 3:
+		CamWnd_SetMode( cd_texture_plus_wire );
+		break;
+	case 4:
 		CamWnd_SetMode( cd_lighting );
 		break;
 	default:
@@ -2050,8 +2075,11 @@ void RenderModeExport( const IntImportCallback& importer ){
 	case cd_texture:
 		importer( 2 );
 		break;
-	case cd_lighting:
+	case cd_texture_plus_wire:
 		importer( 3 );
+		break;
+	case cd_lighting:
+		importer( 4 );
 		break;
 	}
 }
@@ -2081,9 +2109,14 @@ void Camera_constructPreferences( PreferencesPage& page ){
 		FreeCaller1<bool, Camera_SetFarClip>(),
 		BoolExportCaller( g_camwindow_globals_private.m_bCubicClipping )
 		);
+	page.appendCheckBox(
+		"", "Selected faces wire",
+		BoolImportCaller( g_camwindow_globals_private.m_bFaceWire ),
+		BoolExportCaller( g_camwindow_globals_private.m_bFaceWire )
+		);
 
 	if ( g_pGameDescription->mGameType == "doom3" ) {
-		const char* render_mode[] = { "Wireframe", "Flatshade", "Textured", "Lighting" };
+		const char* render_mode[] = { "Wireframe", "Flatshade", "Textured", "Textured+Wire", "Lighting" };
 
 		page.appendCombo(
 			"Render Mode",
@@ -2094,7 +2127,7 @@ void Camera_constructPreferences( PreferencesPage& page ){
 	}
 	else
 	{
-		const char* render_mode[] = { "Wireframe", "Flatshade", "Textured" };
+		const char* render_mode[] = { "Wireframe", "Flatshade", "Textured", "Textured+Wire" };
 
 		page.appendCombo(
 			"Render Mode",
@@ -2213,6 +2246,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_Colors12", Vector3ImportStringCaller( g_camwindow_globals.color_selbrushes3d ), Vector3ExportStringCaller( g_camwindow_globals.color_selbrushes3d ) );
 	GlobalPreferenceSystem().registerPreference( "CameraRenderMode", makeIntStringImportCallback( RenderModeImportCaller() ), makeIntStringExportCallback( RenderModeExportCaller() ) );
 	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_nStrafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_nStrafeMode ) );
+	GlobalPreferenceSystem().registerPreference( "CameraFaceWire", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceWire ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceWire ) );
 	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_camwindow_globals.m_bZoomInToPointer ) );
 	GlobalPreferenceSystem().registerPreference( "fieldOfView", FloatImportStringCaller( camera_t::fieldOfView ), FloatExportStringCaller( camera_t::fieldOfView ) );
 
