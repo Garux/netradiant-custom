@@ -522,10 +522,10 @@ void global_accel_connect_window( GtkWindow* window ){
 	unsigned int override_handler = g_signal_connect( G_OBJECT( window ), "key_press_event", G_CALLBACK( override_global_accelerators ), 0 );
 	g_object_set_data( G_OBJECT( window ), "override_handler", gint_to_pointer( override_handler ) );
 
+	GlobalPressedKeys_connect( window );
+
 	unsigned int special_key_press_handler = g_signal_connect( G_OBJECT( window ), "key_press_event", G_CALLBACK( accelerator_key_event ), &g_special_accelerators );
 	g_object_set_data( G_OBJECT( window ), "special_key_press_handler", gint_to_pointer( special_key_press_handler ) );
-
-	GlobalPressedKeys_connect( window );
 #else
 	unsigned int key_press_handler = g_signal_connect( G_OBJECT( window ), "key_press_event", G_CALLBACK( accelerator_key_event ), &g_keydown_accelerators );
 	unsigned int key_release_handler = g_signal_connect( G_OBJECT( window ), "key_release_event", G_CALLBACK( accelerator_key_event ), &g_keyup_accelerators );

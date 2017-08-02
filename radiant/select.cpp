@@ -450,9 +450,9 @@ void UpdateWorkzone_ForSelection(){
 
 // update the workzone to the current selection
 void UpdateWorkzone_ForSelectionChanged( const Selectable& selectable ){
-	if ( selectable.isSelected() ) {
+	//if ( selectable.isSelected() ) {
 		UpdateWorkzone_ForSelection();
-	}
+	//}
 }
 
 void Select_SetShader( const char* shader ){

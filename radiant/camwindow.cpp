@@ -371,7 +371,10 @@ const unsigned int MOVE_UP = 1 << 6;
 const unsigned int MOVE_DOWN = 1 << 7;
 const unsigned int MOVE_PITCHUP = 1 << 8;
 const unsigned int MOVE_PITCHDOWN = 1 << 9;
-const unsigned int MOVE_ALL = MOVE_FORWARD | MOVE_BACK | MOVE_ROTRIGHT | MOVE_ROTLEFT | MOVE_STRAFERIGHT | MOVE_STRAFELEFT | MOVE_UP | MOVE_DOWN | MOVE_PITCHUP | MOVE_PITCHDOWN;
+const unsigned int MOVE_FOCUS = 1 << 10;
+const unsigned int MOVE_ALL = MOVE_FORWARD | MOVE_BACK | MOVE_ROTRIGHT | MOVE_ROTLEFT | MOVE_STRAFERIGHT | MOVE_STRAFELEFT | MOVE_UP | MOVE_DOWN | MOVE_PITCHUP | MOVE_PITCHDOWN | MOVE_FOCUS;
+
+Vector3 Camera_getFocusPos( camera_t& camera );
 
 void Cam_KeyControl( camera_t& camera, float dtime ){
 	// Update angles
@@ -415,6 +418,9 @@ void Cam_KeyControl( camera_t& camera, float dtime ){
 	}
 	if ( camera.movementflags & MOVE_DOWN ) {
 		vector3_add( camera.origin, vector3_scaled( g_vector3_axis_z, -dtime * g_camwindow_globals_private.m_nMoveSpeed ) );
+	}
+	if ( camera.movementflags & MOVE_FOCUS ) {
+		camera.origin = Camera_getFocusPos( camera );
 	}
 
 	Camera_updateModelview( camera );
@@ -519,6 +525,12 @@ void Camera_PitchDown_KeyUp( camera_t& camera ){
 	Camera_clearMovementFlags( camera, MOVE_PITCHDOWN );
 }
 
+void Camera_Focus_KeyDown( camera_t& camera ){
+	Camera_setMovementFlags( camera, MOVE_FOCUS );
+}
+void Camera_Focus_KeyUp( camera_t& camera ){
+	Camera_clearMovementFlags( camera, MOVE_FOCUS );
+}
 
 typedef ReferenceCaller<camera_t, &Camera_MoveForward_KeyDown> FreeMoveCameraMoveForwardKeyDownCaller;
 typedef ReferenceCaller<camera_t, &Camera_MoveForward_KeyUp> FreeMoveCameraMoveForwardKeyUpCaller;
@@ -533,6 +545,8 @@ typedef ReferenceCaller<camera_t, &Camera_MoveUp_KeyUp> FreeMoveCameraMoveUpKeyU
 typedef ReferenceCaller<camera_t, &Camera_MoveDown_KeyDown> FreeMoveCameraMoveDownKeyDownCaller;
 typedef ReferenceCaller<camera_t, &Camera_MoveDown_KeyUp> FreeMoveCameraMoveDownKeyUpCaller;
 
+typedef ReferenceCaller<camera_t, &Camera_Focus_KeyDown> FreeMoveCameraFocusKeyDownCaller;
+typedef ReferenceCaller<camera_t, &Camera_Focus_KeyUp> FreeMoveCameraFocusKeyUpCaller;
 
 #define SPEED_MOVE 32
 #define SPEED_TURN 22.5
@@ -1040,6 +1054,11 @@ void CamWnd_registerCommands( CamWnd& camwnd ){
 							FreeMoveCameraMoveDownKeyUpCaller( camwnd.getCamera() )
 							);
 
+	GlobalKeyEvents_insert( "CameraFreeFocus", accelerator_null(),
+							FreeMoveCameraFocusKeyDownCaller( camwnd.getCamera() ),
+							FreeMoveCameraFocusKeyUpCaller( camwnd.getCamera() )
+							);
+
 	GlobalCommands_insert( "CameraForward", ReferenceCaller<camera_t, Camera_MoveForward_Discrete>( camwnd.getCamera() ) );
 	GlobalCommands_insert( "CameraBack", ReferenceCaller<camera_t, Camera_MoveBack_Discrete>( camwnd.getCamera() ) );
 	GlobalCommands_insert( "CameraLeft", ReferenceCaller<camera_t, Camera_RotateLeft_Discrete>( camwnd.getCamera() ) );
@@ -1188,6 +1207,8 @@ void CamWnd_Add_Handlers_FreeMove( CamWnd& camwnd ){
 
 	KeyEvent_connect( "CameraFreeMoveUp" );
 	KeyEvent_connect( "CameraFreeMoveDown" );
+
+	KeyEvent_connect( "CameraFreeFocus" );
 }
 
 void CamWnd_Remove_Handlers_FreeMove( CamWnd& camwnd ){
@@ -1203,6 +1224,8 @@ void CamWnd_Remove_Handlers_FreeMove( CamWnd& camwnd ){
 
 	KeyEvent_disconnect( "CameraFreeMoveUp" );
 	KeyEvent_disconnect( "CameraFreeMoveDown" );
+
+	KeyEvent_disconnect( "CameraFreeFocus" );
 
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_selection_button_press_handler );
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_selection_button_release_handler );
@@ -1693,23 +1716,22 @@ void GlobalCamera_ResetAngles(){
 
 #include "select.h"
 
-void GlobalCamera_FocusOnSelected(){
-	CamWnd& camwnd = *g_camwnd;
-/*
-	Vector3 angles( Camera_getAngles( camwnd ) );
+Vector3 Camera_getFocusPos( camera_t& camera ){
+	Vector3 camorigin( Camera_getOrigin( camera ) );
+	AABB aabb( aabb_for_minmax( Select_getWorkZone().d_work_min, Select_getWorkZone().d_work_max ) );
+	View& view = *( camera.m_view );
+#if 0
+	Vector3 angles( Camera_getAngles( camera ) );
 	Vector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
 	Vector3 viewvector;
 	viewvector[0] = cos( radangles[1] ) * cos( radangles[0] );
 	viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
 	viewvector[2] = sin( radangles[0] );
-*/
-	Vector3 camorigin( Camera_getOrigin( camwnd ) );
-
-	AABB aabb( aabb_for_minmax( Select_getWorkZone().d_work_min, Select_getWorkZone().d_work_max ) );
-
-	View& view = *( camwnd.getCamera().m_view );
-
+#elif 0
 	Vector3 viewvector( -view.GetModelview()[2], -view.GetModelview()[6], -view.GetModelview()[10] );
+#elif 1
+	Vector3 viewvector( -camera.vpn );
+#endif
 
 	Plane3 frustumPlanes[4];
 	frustumPlanes[0] = plane3_translated( view.getFrustum().left, camorigin - aabb.origin );
@@ -1734,14 +1756,11 @@ void GlobalCamera_FocusOnSelected(){
 			}
 		}
 	}
-/*
-	globalOutputStream() << viewvector << "\n";
-	globalOutputStream() << view.GetModelview()[0] << " " << view.GetModelview()[1] << " " << view.GetModelview()[2] << " " << view.GetModelview()[3] << "\n"
-	 << view.GetModelview()[4] << " " << view.GetModelview()[5] << " " << view.GetModelview()[6] << " " << view.GetModelview()[7] << "\n"
-	  << view.GetModelview()[8] << " " << view.GetModelview()[9] << " " << view.GetModelview()[10] << " " << view.GetModelview()[11] << "\n"
-	   << view.GetModelview()[12] << " " << view.GetModelview()[13] << " " << view.GetModelview()[14] << " " << view.GetModelview()[15] << "\n";
-*/
-	Camera_setOrigin( camwnd, aabb.origin - viewvector * offset );
+	return ( aabb.origin - viewvector * offset );
+}
+
+void GlobalCamera_FocusOnSelected(){
+	Camera_setOrigin( *g_camwnd, Camera_getFocusPos( g_camwnd->getCamera() ) );
 }
 
 void Camera_ChangeFloorUp(){
@@ -2052,6 +2071,8 @@ void CamWnd_Construct(){
 
 	GlobalShortcuts_insert( "CameraFreeMoveUp", accelerator_null() );
 	GlobalShortcuts_insert( "CameraFreeMoveDown", accelerator_null() );
+
+	GlobalShortcuts_insert( "CameraFreeFocus", Accelerator( GDK_Tab ) );
 
 	GlobalToggles_insert( "ShowStats", FreeCaller<ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
 
