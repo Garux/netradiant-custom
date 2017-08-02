@@ -38,7 +38,7 @@ EMessageBoxReturn DoLightIntensityDlg( int *intensity );
 EMessageBoxReturn DoShaderTagDlg( CopiedString *tag, char* title );
 EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, char* title );
 EMessageBoxReturn DoTextureLayout( float *fx, float *fy );
-void DoTextEditor( const char* filename, int cursorpos, int length );
+void DoTextEditor( const char* filename, int cursorpos, int length, bool external_editor );
 
 void DoProjectSettings();
 
@@ -47,13 +47,8 @@ void DoSides( int type, int axis );
 void DoAbout();
 
 
-#ifdef WIN32
-extern bool g_TextEditor_useWin32Editor;
-#else
 #include "string/stringfwd.h"
-extern bool g_TextEditor_useCustomEditor;
 extern CopiedString g_TextEditor_editorCommand;
-#endif
 
 
 #endif

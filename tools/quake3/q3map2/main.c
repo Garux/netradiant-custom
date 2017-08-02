@@ -1596,6 +1596,7 @@ int ShiftBSPMain( int argc, char **argv ){
 	{
 		//find point on plane
 		for ( j=0; j<3; j++ ){
+			//point[j] = bspPlanes[ i ].dist * bspPlanes[ i ].normal[j];
 			if ( fabs( bspPlanes[ i ].normal[j] ) > 0.5 ){
 				point[j] = bspPlanes[ i ].dist / bspPlanes[ i ].normal[j];
 				point[(j+1)%3] = point[(j+2)%3] = 0;

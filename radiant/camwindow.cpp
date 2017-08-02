@@ -888,7 +888,32 @@ gboolean selection_motion_freemove( GtkWidget *widget, GdkEventMotion *event, Wi
 gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* camwnd ){
 	if ( event->direction == GDK_SCROLL_UP ) {
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
-		Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( camwnd->getCamera().forward, static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
+		if( camwnd->m_bFreeMove || !g_camwindow_globals.m_bZoomInToPointer ){
+			Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( camwnd->getCamera().forward, static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
+		}
+		else{
+			//Matrix4 maa = matrix4_multiplied_by_matrix4( camwnd->getCamera().projection, camwnd->getCamera().modelview );
+			Matrix4 maa = camwnd->getCamera().m_view->GetViewMatrix();
+			matrix4_affine_invert( maa );
+
+			float x = static_cast<float>( event->x );
+			float y = static_cast<float>( event->y );
+			Vector3 normalized;
+
+			normalized[0] = 2.0f * ( x ) / static_cast<float>( camwnd->getCamera().width ) - 1.0f;
+			normalized[1] = 2.0f * ( y )/ static_cast<float>( camwnd->getCamera().height ) - 1.0f;
+			normalized[1] *= -1.f;
+			normalized[2] = 0.f;
+
+			normalized *= 16.0f;
+				//globalOutputStream() << normalized << " normalized    ";
+			matrix4_transform_point( maa, normalized );
+				//globalOutputStream() << normalized << "\n";
+			Vector3 norm = vector3_normalised( normalized - Camera_getOrigin( *camwnd ) );
+				//globalOutputStream() << normalized - Camera_getOrigin( *camwnd ) << "  normalized - Camera_getOrigin( *camwnd )\n";
+				//globalOutputStream() << norm << "  norm\n";
+			Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( norm, static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
+		}
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
@@ -1891,6 +1916,7 @@ void Camera_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Link strafe speed to movement speed", g_camwindow_globals_private.m_bCamLinkSpeed );
 	page.appendSlider( "Rotation Speed", g_camwindow_globals_private.m_nAngleSpeed, TRUE, 0, 0, 3, 1, 180, 1, 10 );
 	page.appendCheckBox( "", "Invert mouse vertical axis", g_camwindow_globals_private.m_bCamInverseMouse );
+	page.appendCheckBox( "", "Zoom In to Mouse pointer", g_camwindow_globals.m_bZoomInToPointer );
 	page.appendCheckBox(
 		"", "Discrete movement",
 		FreeCaller1<bool, CamWnd_Move_Discrete_Import>(),
@@ -2026,6 +2052,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_Colors12", Vector3ImportStringCaller( g_camwindow_globals.color_selbrushes3d ), Vector3ExportStringCaller( g_camwindow_globals.color_selbrushes3d ) );
 	GlobalPreferenceSystem().registerPreference( "CameraRenderMode", makeIntStringImportCallback( RenderModeImportCaller() ), makeIntStringExportCallback( RenderModeExportCaller() ) );
 	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_nStrafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_nStrafeMode ) );
+	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_camwindow_globals.m_bZoomInToPointer ) );
 
 	CamWnd_constructStatic();
 

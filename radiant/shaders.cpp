@@ -27,7 +27,7 @@
 
 #include "gtkdlgs.h"
 
-void ViewShader( const char *pFile, const char *pName ){
+void ViewShader( const char *pFile, const char *pName, bool external_editor ){
 	char* pBuff = 0;
 	//int nSize =
 	vfsLoadFile( pFile, reinterpret_cast<void**>( &pBuff ) );
@@ -123,5 +123,5 @@ void ViewShader( const char *pFile, const char *pName ){
 	// now close the file
 	vfsFreeFile( pBuff );
 
-	DoTextEditor( pFile, static_cast<int>( nOffset ), length );
+	DoTextEditor( pFile, static_cast<int>( nOffset ), length, external_editor );
 }

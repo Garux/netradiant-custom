@@ -22,6 +22,6 @@
 #if !defined( INCLUDED_SHADERS_H )
 #define INCLUDED_SHADERS_H
 
-void ViewShader( const char* file, const char* shader );
+void ViewShader( const char* file, const char* shader, bool external_editor );
 
 #endif

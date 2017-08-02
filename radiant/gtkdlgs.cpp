@@ -874,9 +874,9 @@ static void DoGtkTextEditor( const char* filename, guint cursorpos, int length )
 		gtk_widget_show( text_editor );
 		gtk_window_present( GTK_WINDOW( text_editor ) );
 
-#ifdef WIN32
+//#ifdef WIN32
 		process_gui();
-#endif
+//#endif
 
 		// only move the cursor if it's not exceeding the size..
 		// NOTE: this is erroneous, cursorpos is the offset in bytes, not in characters
@@ -890,9 +890,9 @@ static void DoGtkTextEditor( const char* filename, guint cursorpos, int length )
 			gtk_text_view_scroll_to_iter( GTK_TEXT_VIEW( text_widget ), &text_iter, 0, TRUE, 0, 0);
 		}
 
-#ifdef WIN32
+//#ifdef WIN32
 		gtk_widget_queue_draw( text_widget );
-#endif
+//#endif
 
 		text_buffer_ = text_buffer;
 		free( buf );
@@ -1088,77 +1088,72 @@ EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, char*
 #include <gdk/gdkwin32.h>
 #endif
 
-#ifdef WIN32
-// use the file associations to open files instead of builtin Gtk editor
-bool g_TextEditor_useWin32Editor = false;
-#else
-// custom shader editor
-bool g_TextEditor_useCustomEditor = false;
 CopiedString g_TextEditor_editorCommand( "" );
-#endif
 
-void DoTextEditor( const char* filename, int cursorpos, int length ){
-#ifdef WIN32
-	if ( g_TextEditor_useWin32Editor ) {
-		StringOutputStream path( 256 );
-		StringOutputStream modpath( 256 );
-		const char* gamename = GlobalRadiant().getGameName();
-		const char* basegame = GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" );
-		const char* enginePath = GlobalRadiant().getEnginePath();
-		path << enginePath << basegame << '/' << filename;
-		modpath << enginePath << gamename << '/' << filename;
-		if ( file_exists( modpath.c_str() ) ){
-			globalOutputStream() << "opening file '" << modpath.c_str() << "' (line " << cursorpos << " info ignored)\n";
-			ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), "open", modpath.c_str(), 0, 0, SW_SHOW );
+void DoTextEditor( const char* filename, int cursorpos, int length, bool external_editor ){
+	//StringOutputStream paths[4]( 256 );
+	StringOutputStream paths[4] = { StringOutputStream(256) };
+	StringOutputStream* goodpath = 0;
+
+	const char* gamename = GlobalRadiant().getGameName();
+	const char* basegame = GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" );
+	const char* enginePath = GlobalRadiant().getEnginePath();
+	const char* homeEnginePath = g_qeglobals.m_userEnginePath.c_str();
+
+	paths[0] << homeEnginePath << gamename << '/' << filename;
+	paths[1] << enginePath << gamename << '/' << filename;
+	paths[2] << homeEnginePath << basegame << '/' << filename;
+	paths[3] << enginePath << basegame << '/' << filename;
+
+	for ( std::size_t i = 0; i < 4; ++i ){
+		if ( file_exists( paths[i].c_str() ) ){
+			goodpath = &paths[i];
+			break;
 		}
-		else if ( file_exists( path.c_str() ) ){
-			globalOutputStream() << "opening file '" << path.c_str() << "' (line " << cursorpos << " info ignored)\n";
-			ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), "open", path.c_str(), 0, 0, SW_SHOW );
+	}
+
+	if( goodpath ){
+		globalOutputStream() << "opening file '" << goodpath->c_str() << "' (line " << cursorpos << " info ignored)\n";
+		if( external_editor ){
+			if( g_TextEditor_editorCommand.empty() ){
+#ifdef WIN32
+				ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), 0, goodpath->c_str(), 0, 0, SW_SHOWNORMAL );
+//				SHELLEXECUTEINFO ShExecInfo;
+//				ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+//				ShExecInfo.fMask = 0;
+//				ShExecInfo.hwnd = (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window );
+//				ShExecInfo.lpVerb = NULL;
+//				ShExecInfo.lpFile = goodpath->c_str();
+//				ShExecInfo.lpParameters = NULL;
+//				ShExecInfo.lpDirectory = NULL;
+//				ShExecInfo.nShow = SW_SHOWNORMAL;
+//				ShExecInfo.hInstApp = NULL;
+//				ShellExecuteEx(&ShExecInfo);
+#else
+				globalOutputStream() << "Failed to open '" << goodpath->c_str() << "'\nSet Shader Editor Command in preferences\n";
+#endif
+			}
+			else{
+				StringOutputStream strEditCommand( 256 );
+				strEditCommand << g_TextEditor_editorCommand.c_str() << " \"" << goodpath->c_str() << "\"";
+
+				globalOutputStream() << "Launching: " << strEditCommand.c_str() << "\n";
+				// note: linux does not return false if the command failed so it will assume success
+				if ( Q_Exec( 0, const_cast<char*>( strEditCommand.c_str() ), 0, true, false ) == false ) {
+					globalOutputStream() << "Failed to execute " << strEditCommand.c_str() << "\n";
+				}
+				else
+				{
+					// the command (appeared) to run successfully, no need to do anything more
+					return;
+				}
+			}
 		}
 		else{
-			globalOutputStream() << "Failed to open '" << filename << "'\nOne sits in .pk3 most likely!\n";
+			DoGtkTextEditor( goodpath->c_str(), cursorpos, length );
 		}
-		return;
 	}
 	else{
-		StringOutputStream path( 256 );
-		StringOutputStream modpath( 256 );
-		const char* gamename = GlobalRadiant().getGameName();
-		const char* basegame = GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" );
-		const char* enginePath = GlobalRadiant().getEnginePath();
-		path << enginePath << basegame << '/' << filename;
-		modpath << enginePath << gamename << '/' << filename;
-		if ( file_exists( modpath.c_str() ) ){
-			globalOutputStream() << "opening file '" << modpath.c_str() << "' (line " << cursorpos << " info ignored)\n";
-			DoGtkTextEditor( modpath.c_str(), cursorpos, length );
-		}
-		else if ( file_exists( path.c_str() ) ){
-			globalOutputStream() << "opening file '" << path.c_str() << "' (line " << cursorpos << " info ignored)\n";
-			DoGtkTextEditor( path.c_str(), cursorpos, length );
-		}
-		else{
-			globalOutputStream() << "Failed to open '" << filename << "'\nOne sits in .pk3 most likely!\n";
-		}
-		return;
+		globalOutputStream() << "Failed to open '" << filename << "'\nOne sits in .pk3 most likely!\n";
 	}
-#else
-	// check if a custom editor is set
-	if ( g_TextEditor_useCustomEditor && !g_TextEditor_editorCommand.empty() ) {
-		StringOutputStream strEditCommand( 256 );
-		strEditCommand << g_TextEditor_editorCommand.c_str() << " \"" << filename << "\"";
-
-		globalOutputStream() << "Launching: " << strEditCommand.c_str() << "\n";
-		// note: linux does not return false if the command failed so it will assume success
-		if ( Q_Exec( 0, const_cast<char*>( strEditCommand.c_str() ), 0, true, false ) == false ) {
-			globalOutputStream() << "Failed to execute " << strEditCommand.c_str() << ", using default\n";
-		}
-		else
-		{
-			// the command (appeared) to run successfully, no need to do anything more
-			return;
-		}
-	}
-
-	DoGtkTextEditor( filename, cursorpos, length );
-#endif
 }

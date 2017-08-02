@@ -1338,6 +1338,7 @@ static gint EntityInspector_hideWindowKB( GtkWidget* widget, GdkEventKey* event,
 		gtk_widget_hide( GTK_WIDGET( GroupDialog_getWindow() ) );
 		return TRUE;
 	}
+	/* this doesn't work, if tab is bound (func is not called then) */
 	if ( event->keyval == GDK_Tab  ) {
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityKeyEntry ) );
 		return TRUE;

@@ -973,19 +973,10 @@ IShader* Texture_At( TextureBrowser& textureBrowser, int mx, int my ){
    By mouse click
    ==============
  */
-void SelectTexture( TextureBrowser& textureBrowser, int mx, int my, bool bShift ){
-	IShader* shader = Texture_At( textureBrowser, mx, my );
-	if ( shader != 0 ) {
-		if ( bShift ) {
-			if ( shader->IsDefault() ) {
-				globalOutputStream() << "ERROR: " << shader->getName() << " is not a shader, it's a texture.\n";
-			}
-			else{
-				ViewShader( shader->getShaderFileName(), shader->getName() );
-			}
-		}
-		else
-		{
+void SelectTexture( TextureBrowser& textureBrowser, int mx, int my, guint32 flags ){
+	if ( ( flags & GDK_SHIFT_MASK ) == 0 ) {
+		IShader* shader = Texture_At( textureBrowser, mx, my );
+		if ( shader != 0 ) {
 			TextureBrowser_SetSelectedShader( textureBrowser, shader->getName() );
 			TextureBrowser_textureSelected( shader->getName() );
 
@@ -1034,7 +1025,21 @@ void TextureBrowser_Tracking_MouseDown( TextureBrowser& textureBrowser ){
 }
 
 void TextureBrowser_Selection_MouseDown( TextureBrowser& textureBrowser, guint32 flags, int pointx, int pointy ){
-	SelectTexture( textureBrowser, pointx, textureBrowser.height - 1 - pointy, ( flags & GDK_SHIFT_MASK ) != 0 );
+	SelectTexture( textureBrowser, pointx, textureBrowser.height - 1 - pointy, flags );
+}
+
+void TextureBrowser_Selection_MouseUp( TextureBrowser& textureBrowser, guint32 flags, int pointx, int pointy ){
+	if ( ( flags & GDK_SHIFT_MASK ) != 0 ) {
+		IShader* shader = Texture_At( textureBrowser, pointx, textureBrowser.height - 1 - pointy );
+		if ( shader != 0 ) {
+			if ( shader->IsDefault() ) {
+				globalOutputStream() << "ERROR: " << shader->getName() << " is not a shader, it's a texture.\n";
+			}
+			else{
+				ViewShader( shader->getShaderFileName(), shader->getName(), ( flags & GDK_CONTROL_MASK ) != 0 );
+			}
+		}
+	}
 }
 
 /*
@@ -1433,6 +1438,9 @@ gboolean TextureBrowser_button_release( GtkWidget* widget, GdkEventButton* event
 			if ( !GlobalTextureBrowser().m_tags ) {
 				TextureBrowser_Tracking_MouseUp( *textureBrowser );
 			}
+		}
+		if ( event->button == 1 ) {
+			TextureBrowser_Selection_MouseUp( *textureBrowser, event->state, static_cast<int>( event->x ), static_cast<int>( event->y ) );
 		}
 	}
 	return FALSE;
