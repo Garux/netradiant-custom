@@ -671,6 +671,19 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 #endif
 }
 
+inline void write_intensity( const float intensity, Entity* entity ){
+	char value[64];
+	sprintf( value, "%f", intensity );
+
+	//primaryIntensity
+	if( !string_empty( entity->getKeyValue( "_light" ) ) ){
+		entity->setKeyValue( "_light", value );
+	}
+	else{ //secondaryIntensity
+		entity->setKeyValue( "light", value );
+	}
+}
+
 // These variables are tweakable on the q3map2 console, setting to q3map2
 // default here as there is no way to find out what the user actually uses
 // right now. Maybe move them to worldspawn?
@@ -711,6 +724,7 @@ class LightRadii
 {
 public:
 float m_radii[3];
+float m_radii_transformed[3];
 
 private:
 float m_primaryIntensity;
@@ -732,20 +746,21 @@ void calculateRadii(){
 	intensity *= m_scale;
 
 	if ( spawnflags_linear( m_flags ) ) {
-		m_radii[0] = light_radius_linear( intensity, 1.0f ) / m_fade;
-		m_radii[1] = light_radius_linear( intensity, 48.0f ) / m_fade;
-		m_radii[2] = light_radius_linear( intensity, 255.0f ) / m_fade;
+		m_radii_transformed[0] = m_radii[0] = light_radius_linear( intensity, 1.0f ) / m_fade;
+		m_radii_transformed[1] = m_radii[1] = light_radius_linear( intensity, 48.0f ) / m_fade;
+		m_radii_transformed[2] = m_radii[2] = light_radius_linear( intensity, 255.0f ) / m_fade;
 	}
 	else
 	{
-		m_radii[0] = light_radius( intensity, 1.0f );
-		m_radii[1] = light_radius( intensity, 48.0f );
-		m_radii[2] = light_radius( intensity, 255.0f );
+		m_radii_transformed[0] = m_radii[0] = light_radius( intensity, 1.0f );
+		m_radii_transformed[1] = m_radii[1] = light_radius( intensity, 48.0f );
+		m_radii_transformed[2] = m_radii[2] = light_radius( intensity, 255.0f );
 	}
 }
 
 public:
 LightRadii() : m_primaryIntensity( 0 ), m_secondaryIntensity( 0 ), m_flags( 0 ), m_fade( 1 ), m_scale( 1 ){
+	calculateRadii();
 }
 
 
@@ -780,6 +795,42 @@ void flagsChanged( const char* value ){
 	calculateRadii();
 }
 typedef MemberCaller1<LightRadii, const char*, &LightRadii::flagsChanged> FlagsChangedCaller;
+
+void calculateTransformedRadii( const float& radius ){
+	if ( spawnflags_linear( m_flags ) ) {
+		m_radii_transformed[0] = radius + 47.0f / m_fade;
+		if( m_radii_transformed[0] <= 1.f ){
+			m_radii_transformed[0] = m_radii_transformed[1] = m_radii_transformed[2] = 1.f;
+			return;
+		}
+		m_radii_transformed[1] = radius;
+		m_radii_transformed[2] = radius - 207.0f / m_fade;;
+	}
+	else
+	{
+		m_radii_transformed[0] = radius * sqrt( 48.f );
+		if( m_radii_transformed[0] <= 1.f ){
+			m_radii_transformed[0] = m_radii_transformed[1] = m_radii_transformed[2] = 1.f;
+			return;
+		}
+		m_radii_transformed[1] = radius;
+		m_radii_transformed[2] = m_radii_transformed[0] / sqrt( 255.f );
+	}
+	//globalOutputStream() << m_radii_transformed[0] << " " << m_radii_transformed[1] << " " << m_radii_transformed[2] << " \n";
+}
+float calculateIntensityFromRadii(){
+	float intensity;
+
+	if ( spawnflags_linear( m_flags ) ) {
+		intensity = ( m_radii_transformed[0] * m_fade + 1.f ) / ( fPointScale * fLinearScale );
+	}
+	else
+	{
+		intensity = m_radii_transformed[0] * m_radii_transformed[0] * 1.f / fPointScale;
+	}
+	intensity /= m_scale;
+	return intensity;
+}
 };
 
 class Doom3LightRadius
@@ -832,7 +883,7 @@ RenderLightRadiiWire( LightRadii& radii, const Vector3& origin ) : m_radii( radi
 }
 void render( RenderStateFlags state ) const {
 	//light_draw_radius_wire( m_origin, m_radii.m_radii );
-	light_draw_radius_wire( m_origin, m_radii.m_radii, m_radiiPoints );
+	light_draw_radius_wire( m_origin, m_radii.m_radii_transformed, m_radiiPoints );
 }
 };
 Vector3 RenderLightRadiiWire::m_radiiPoints[SPHERE_WIRE_POINTS] = {g_vector3_identity};
@@ -849,7 +900,7 @@ RenderLightRadiiFill( LightRadii& radii, const Vector3& origin ) : m_radii( radi
 }
 void render( RenderStateFlags state ) const {
 	//light_draw_radius_fill( m_origin, m_radii.m_radii );
-	light_draw_radius_fill( m_origin, m_radii.m_radii, m_radiiPoints );
+	light_draw_radius_fill( m_origin, m_radii.m_radii_transformed, m_radiiPoints );
 }
 };
 //Shader* RenderLightRadiiFill::m_state = 0;
@@ -1449,6 +1500,9 @@ void snapto( float snap ){
 		m_originKey.write( &m_entity );
 	}
 }
+void setLightRadii( const float& radius ){
+	m_radii.calculateTransformedRadii( radius );
+}
 void setLightRadius( const AABB& aabb ){
 	m_aabb_light.origin = aabb.origin;
 	m_doom3Radius.m_radiusTransformed = aabb.extents;
@@ -1460,6 +1514,9 @@ void revertTransform(){
 	m_aabb_light.origin = m_useLightOrigin ? m_lightOrigin : m_originKey.m_origin;
 	rotation_assign( m_rotation, m_useLightRotation ? m_lightRotation : m_rotationKey.m_rotation );
 	m_doom3Radius.m_radiusTransformed = m_doom3Radius.m_radius;
+	m_radii.m_radii_transformed[0] = m_radii.m_radii[0];
+	m_radii.m_radii_transformed[1] = m_radii.m_radii[1];
+	m_radii.m_radii_transformed[2] = m_radii.m_radii[2];
 }
 void freezeTransform(){
 	if ( g_lightType == LIGHTTYPE_DOOM3 && !m_useLightOrigin && !m_traverse.empty() ) {
@@ -1491,6 +1548,12 @@ void freezeTransform(){
 
 		m_doom3Radius.m_radius = m_doom3Radius.m_radiusTransformed;
 		write_origin( m_doom3Radius.m_radius, &m_entity, "light_radius" );
+	}
+	else{
+		write_intensity( m_radii.calculateIntensityFromRadii(), &m_entity );
+		m_radii.m_radii[0] = m_radii.m_radii_transformed[0];
+		m_radii.m_radii[1] = m_radii.m_radii_transformed[1];
+		m_radii.m_radii[2] = m_radii.m_radii_transformed[2];
 	}
 }
 void transformChanged(){
@@ -1692,6 +1755,10 @@ const Matrix4& projection() const {
 	return m_doom3Projection;
 }
 
+const LightRadii& getLightRadii() const {
+	return m_radii;
+}
+
 Shader* getShader() const {
 	return m_shader.get();
 }
@@ -1728,6 +1795,7 @@ InstanceTypeCastTable& get(){
 
 Light& m_contained;
 DragPlanes m_dragPlanes;  // dragplanes for lightresizing using mousedrag
+ScaleRadius m_scaleRadius;
 public:
 typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
@@ -1741,7 +1809,8 @@ LightInstance( const scene::Path& path, scene::Instance* parent, Light& containe
 	TargetableInstance( path, parent, this, StaticTypeCasts::instance().get(), contained.getEntity(), *this ),
 	TransformModifier( Light::TransformChangedCaller( contained ), ApplyTransformCaller( *this ) ),
 	m_contained( contained ),
-	m_dragPlanes( SelectedChangedComponentCaller( *this ) ){
+	m_dragPlanes( SelectedChangedComponentCaller( *this ) ),
+	m_scaleRadius( SelectedChangedComponentCaller( *this ) ){
 	m_contained.instanceAttach( Instance::path() );
 
 	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
@@ -1773,18 +1842,35 @@ void testSelect( Selector& selector, SelectionTest& test ){
 
 void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
 	test.BeginMesh( localToWorld() );
-	m_dragPlanes.selectPlanes( m_contained.aabb(), selector, test, selectedPlaneCallback, rotation() );
+	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+		m_dragPlanes.selectPlanes( m_contained.aabb(), selector, test, selectedPlaneCallback, rotation() );
+	}
+	else{
+		m_scaleRadius.selectPlanes( m_contained.getLightRadii().m_radii[1], selector, test, selectedPlaneCallback );
+	}
 }
 void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
-	m_dragPlanes.selectReversedPlanes( m_contained.aabb(), selector, selectedPlanes, rotation() );
+	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+		m_dragPlanes.selectReversedPlanes( m_contained.aabb(), selector, selectedPlanes, rotation() );
+	}
 }
 
 bool isSelectedComponents() const {
-	return m_dragPlanes.isSelected();
+	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+		return m_dragPlanes.isSelected();
+	}
+	else{
+		return m_scaleRadius.isSelected();
+	}
 }
 void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ){
 	if ( mode == SelectionSystem::eFace ) {
-		m_dragPlanes.setSelected( false );
+		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+			m_dragPlanes.setSelected( false );
+		}
+		else{
+			m_scaleRadius.setSelected( false );
+		}
 	}
 }
 void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
@@ -1804,9 +1890,14 @@ void evaluateTransform(){
 	else
 	{
 		//globalOutputStream() << getTranslation() << "\n";
-
-		m_dragPlanes.m_bounds = m_contained.aabb();
-		m_contained.setLightRadius( m_dragPlanes.evaluateResize( getTranslation(), rotation() ) );
+		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+			m_dragPlanes.m_bounds = m_contained.aabb();
+			m_contained.setLightRadius( m_dragPlanes.evaluateResize( getTranslation(), rotation() ) );
+		}
+		else{
+			m_scaleRadius.m_radius = m_contained.getLightRadii().m_radii[1];
+			m_contained.setLightRadii( m_scaleRadius.evaluateResize( getTranslation() ) );
+		}
 	}
 }
 void applyTransform(){

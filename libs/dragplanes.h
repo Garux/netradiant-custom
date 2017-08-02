@@ -225,4 +225,53 @@ Matrix4 evaluateTransform( const Vector3& translation ) const {
 }
 };
 
+
+namespace{
+
+class ScaleRadius {
+	ObservedSelectable m_selectable;
+public:
+	static Matrix4 m_model;
+	float m_radius;
+
+	ScaleRadius( const SelectionChangeCallback& onchanged ) :
+		m_selectable( onchanged ) {
+	}
+	bool isSelected() const {
+		return m_selectable.isSelected();
+	}
+	void setSelected( bool selected ) {
+		m_selectable.setSelected( selected );
+	}
+	void selectPlanes( const float& radius, Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) {
+		m_model = test.getVolume().GetModelview();
+		m_model[0] = m_model[0] >= 0 ? 1 : -1;
+		m_model[5] = m_model[5] >= 0 ? 1 : -1;
+		m_model[10] = m_model[10] >= 0 ? 1 : -1;
+
+		Plane3 plane( 1, 0, 0, 0 );
+		Selector_add( selector, m_selectable );
+		selectedPlaneCallback( plane );
+
+		m_radius = radius;
+	}
+	float evaluateResize( const Vector3& translation ) const {
+		float delta;
+		Vector3 tra = matrix4_transformed_direction( m_model, translation );
+		//globalOutputStream() << tra << " tra\n";
+		//globalOutputStream() << m_model << " m_model\n";
+//		if( ( tra[0] + tra[1] + tra[2] ) >= 0.f ){
+//			delta = vector3_length( translation );
+//		}
+//		else{
+//			delta = vector3_length( translation ) * -1.f;
+//		}
+		delta = tra[0];
+
+		return ( m_radius + delta );
+	}
+};
+Matrix4 ScaleRadius::m_model = g_matrix4_identity;
+
+}//namespace
 #endif
