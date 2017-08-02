@@ -1998,7 +1998,7 @@ static void SetupOutLightmap( rawLightmap_t *lm, outLightmap_t *olm ){
  */
 
 #define LIGHTMAP_RESERVE_COUNT 1
-static void FindOutLightmaps( rawLightmap_t *lm ){
+static void FindOutLightmaps( rawLightmap_t *lm, qboolean fastAllocate ){
 	int i, j, k, lightmapNum, xMax, yMax, x = -1, y = -1, sx, sy, ox, oy, offset;
 	outLightmap_t       *olm;
 	surfaceInfo_t       *info;
@@ -2006,6 +2006,7 @@ static void FindOutLightmaps( rawLightmap_t *lm ){
 	vec3_t color, direction;
 	byte                *pixel;
 	qboolean ok;
+	int xIncrement, yIncrement;
 
 
 	/* set default lightmap number (-3 = LIGHTMAP_BY_VERTEX) */
@@ -2116,6 +2117,13 @@ static void FindOutLightmaps( rawLightmap_t *lm ){
 					continue;
 				}
 
+				/* if fast allocation, skip lightmap files that are more than 90% complete */
+				if ( fastAllocate == qtrue ) {
+					if (olm->freeLuxels < (olm->customWidth * olm->customHeight) / 10) {
+						continue;
+					}
+				}
+
 				/* don't store non-custom raw lightmaps on custom bsp lightmaps */
 				if ( olm->customWidth != lm->customWidth ||
 					 olm->customHeight != lm->customHeight ) {
@@ -2133,10 +2141,20 @@ static void FindOutLightmaps( rawLightmap_t *lm ){
 					yMax = ( olm->customHeight - lm->h ) + 1;
 				}
 
+				/* if fast allocation, do not test allocation on every pixels, especially for large lightmaps */
+				if ( fastAllocate == qtrue ) {
+					xIncrement = MAX(1, lm->w / 15);
+					yIncrement = MAX(1, lm->h / 15);
+				}
+				else {
+					xIncrement = 1;
+					yIncrement = 1;
+				}
+
 				/* walk the origin around the lightmap */
-				for ( y = 0; y < yMax; y++ )
+				for ( y = 0; y < yMax; y += yIncrement )
 				{
-					for ( x = 0; x < xMax; x++ )
+					for ( x = 0; x < xMax; x += xIncrement )
 					{
 						/* find a fine tract of lauhnd */
 						ok = TestOutLightmapStamp( lm, lightmapNum, olm, x, y );
@@ -2318,6 +2336,16 @@ static int CompareRawLightmap( const void *a, const void *b ){
 	/* get min number of surfaces */
 	min = ( alm->numLightSurfaces < blm->numLightSurfaces ? alm->numLightSurfaces : blm->numLightSurfaces );
 
+//#define allocate_bigger_first
+#ifdef allocate_bigger_first
+	/* compare size, allocate bigger first */
+	// fastAllocate commit part: can kick fps by unique lightmap/shader combinations*=~2 + bigger compile time
+	//return -diff; makes packing faster and rough
+	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
+	if ( diff != 0 ) {
+		return diff;
+	}
+#endif
 	/* iterate */
 	for ( i = 0; i < min; i++ )
 	{
@@ -2339,13 +2367,13 @@ static int CompareRawLightmap( const void *a, const void *b ){
 	if ( diff ) {
 		return diff;
 	}
-
+#ifndef allocate_bigger_first
 	/* compare size */
 	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
 	if ( diff != 0 ) {
 		return diff;
 	}
-
+#endif
 	/* must be equivalent */
 	return 0;
 }
@@ -2467,8 +2495,8 @@ void FillOutLightmap( outLightmap_t *olm ){
    stores the surface lightmaps into the bsp as byte rgb triplets
  */
 
-void StoreSurfaceLightmaps( void ){
-	int i, j, k, x, y, lx, ly, sx, sy, *cluster, mappedSamples;
+void StoreSurfaceLightmaps( qboolean fastAllocate ){
+	int i, j, k, x, y, lx, ly, sx, sy, *cluster, mappedSamples, timer_start;
 	int style, size, lightmapNum, lightmapNum2;
 	float               *normal, *luxel, *bspLuxel, *bspLuxel2, *radLuxel, samples, occludedSamples;
 	vec3_t sample, occludedSample, dirSample, colorMins, colorMaxs;
@@ -2510,6 +2538,8 @@ void StoreSurfaceLightmaps( void ){
 
 	/* note it */
 	Sys_Printf( "Subsampling..." );
+
+	timer_start = I_FloatTime();
 
 	/* walk the list of raw lightmaps */
 	numUsed = 0;
@@ -2845,6 +2875,8 @@ void StoreSurfaceLightmaps( void ){
 		}
 	}
 
+	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+
 	/* -----------------------------------------------------------------
 	   convert modelspace deluxemaps to tangentspace
 	   ----------------------------------------------------------------- */
@@ -2853,6 +2885,8 @@ void StoreSurfaceLightmaps( void ){
 		if ( deluxemap && deluxemode == 1 ) {
 			vec3_t worldUp, myNormal, myTangent, myBinormal;
 			float dist;
+
+			timer_start = I_FloatTime();
 
 			Sys_Printf( "converting..." );
 
@@ -2923,6 +2957,8 @@ void StoreSurfaceLightmaps( void ){
 					}
 				}
 			}
+
+			Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
 		}
 	}
 
@@ -2978,6 +3014,8 @@ void StoreSurfaceLightmaps( void ){
 	if ( noCollapse == qfalse && deluxemap == qfalse ) {
 		/* note it */
 		Sys_Printf( "collapsing..." );
+
+		timer_start = I_FloatTime();
 
 		/* set all twin refs to null */
 		for ( i = 0; i < numRawLightmaps; i++ )
@@ -3039,6 +3077,8 @@ void StoreSurfaceLightmaps( void ){
 				}
 			}
 		}
+
+		Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
 	}
 
 	/* -----------------------------------------------------------------
@@ -3047,6 +3087,8 @@ void StoreSurfaceLightmaps( void ){
 
 	/* note it */
 	Sys_Printf( "sorting..." );
+
+	timer_start = I_FloatTime();
 
 	/* allocate a new sorted list */
 	if ( sortLightmaps == NULL ) {
@@ -3058,12 +3100,16 @@ void StoreSurfaceLightmaps( void ){
 		sortLightmaps[ i ] = i;
 	qsort( sortLightmaps, numRawLightmaps, sizeof( int ), CompareRawLightmap );
 
+	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+
 	/* -----------------------------------------------------------------
 	   allocate output lightmaps
 	   ----------------------------------------------------------------- */
 
 	/* note it */
 	Sys_Printf( "allocating..." );
+
+	timer_start = I_FloatTime();
 
 	/* kill all existing output lightmaps */
 	if ( outLightmaps != NULL ) {
@@ -3085,7 +3131,7 @@ void StoreSurfaceLightmaps( void ){
 	for ( i = 0; i < numRawLightmaps; i++ )
 	{
 		lm = &rawLightmaps[ sortLightmaps[ i ] ];
-		FindOutLightmaps( lm );
+		FindOutLightmaps( lm, fastAllocate );
 	}
 
 	/* set output numbers in twinned lightmaps */
@@ -3111,12 +3157,16 @@ void StoreSurfaceLightmaps( void ){
 		}
 	}
 
+	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+
 	/* -----------------------------------------------------------------
 	   store output lightmaps
 	   ----------------------------------------------------------------- */
 
 	/* note it */
 	Sys_Printf( "storing..." );
+
+	timer_start = I_FloatTime();
 
 	/* count the bsp lightmaps and allocate space */
 	if ( bspLightBytes != NULL ) {
@@ -3202,12 +3252,16 @@ void StoreSurfaceLightmaps( void ){
 		remove( filename );
 	}
 
+	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
+
 	/* -----------------------------------------------------------------
 	   project the lightmaps onto the bsp surfaces
 	   ----------------------------------------------------------------- */
 
 	/* note it */
 	Sys_Printf( "projecting..." );
+
+	timer_start = I_FloatTime();
 
 	/* walk the list of surfaces */
 	for ( i = 0; i < numBSPDrawSurfaces; i++ )
@@ -3484,6 +3538,8 @@ void StoreSurfaceLightmaps( void ){
 			ds->shaderNum = EmitShader( info->si->shader, &bspShaders[ ds->shaderNum ].contentFlags, &bspShaders[ ds->shaderNum ].surfaceFlags );
 		}
 	}
+
+	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
 
 	/* finish */
 	Sys_Printf( "done.\n" );

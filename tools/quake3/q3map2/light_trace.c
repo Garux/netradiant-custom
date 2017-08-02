@@ -1633,10 +1633,10 @@ static qboolean TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end,
 	traceNode_t     *node;
 	int side;
 	float front, back, frac;
-	vec3_t origin, mid;
-	qboolean r;
+	vec3_t mid;
 
 #if TRACELINE_R_HALF_ITERATIVE
+	vec3_t origin;
 	VectorCopy( start, origin );
 
 	while ( 1 )

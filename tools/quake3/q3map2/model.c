@@ -230,7 +230,8 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	char                *skinfilecontent;
 	int skinfilesize;
 	char                *skinfileptr, *skinfilenextptr;
-	int ok=0, notok=0, spf = ( spawnFlags & 8088 );
+	//int ok=0, notok=0;
+	int spf = ( spawnFlags & 8088 );
 	float limDepth=0;
 
 
@@ -543,7 +544,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			( spf == 5632 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+AXIAL_BACKPLANE
 			( spf == 3072 ) ||	//EXTRUDE_UPWARDS+MAX_EXTRUDE
 			( spf == 5120 ) ){	//EXTRUDE_UPWARDS+AXIAL_BACKPLANE
-			vec3_t points[ 4 ], backs[ 3 ], cnt, bestNormal, nrm, Vnorm[3], Enorm[3];
+			vec3_t points[ 4 ], cnt, bestNormal, nrm, Vnorm[3], Enorm[3];
 			vec4_t plane, reverse, p[3];
 			double normalEpsilon_save;
 			qboolean snpd;
