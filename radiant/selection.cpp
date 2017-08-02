@@ -2781,6 +2781,10 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 		}
 	}
 
+	if ( modifier == eCycle && nothingSelected() ){
+		modifier = eReplace;
+	}
+
   #if defined ( DEBUG_SELECTION )
 	g_render_clipped.destroy();
   #endif
@@ -2824,6 +2828,7 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			// select the next object in the list from the one already selected
 			case RadiantSelectionSystem::eCycle:
 			{
+				bool CycleSelectionOccured = false;
 				SelectionPool::iterator i = selector.begin();
 				while ( i != selector.end() )
 				{
@@ -2837,14 +2842,32 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 						{
 							selector.begin()->second->setSelected( true );
 						}
+						CycleSelectionOccured = true;
 						break;
 					}
 					++i;
+				}
+				if( !CycleSelectionOccured ){
+					if ( face ){
+						setSelectedAllComponents( false );
+					}
+					else{
+						deselectAll();
+					}
+					( *selector.begin() ).second->setSelected( true );
 				}
 			}
 			break;
 			default:
 				break;
+			}
+		}
+		else if( modifier == eCycle || modifier == eReplace ){
+			if ( face ){
+				setSelectedAllComponents( false );
+			}
+			else{
+				deselectAll();
 			}
 		}
 	}
@@ -3496,12 +3519,11 @@ public:
 DeviceVector m_start;
 DeviceVector m_current;
 DeviceVector m_epsilon;
-std::size_t m_unmoved_replaces;
 ModifierFlags m_state;
 const View* m_view;
 RectangleCallback m_window_update;
 
-Selector_() : m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_unmoved_replaces( 0 ), m_state( c_modifierNone ){
+Selector_() : m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ){
 }
 
 void draw_area(){
@@ -3518,7 +3540,7 @@ void testSelect( DeviceVector position ){
 		}
 		else
 		{
-			if ( modifier == RadiantSelectionSystem::eReplace && m_unmoved_replaces++ > 0 ) {
+			if ( modifier == RadiantSelectionSystem::eReplace ) {
 				modifier = RadiantSelectionSystem::eCycle;
 			}
 			getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, ( m_state & c_modifier_face ) != c_modifierNone );
@@ -3531,15 +3553,12 @@ void testSelect( DeviceVector position ){
 
 void testSelect_simpleM1( DeviceVector position ){
 	RadiantSelectionSystem::EModifier modifier = RadiantSelectionSystem::eReplace;
-	if ( m_unmoved_replaces++ > 0 ) {
-		if( GlobalSelectionSystem().countSelected() != 0 ){
-			modifier = RadiantSelectionSystem::eCycle;
-		}
-		else{
-			m_unmoved_replaces = 0;
-		}
+	DeviceVector delta( position - m_start );
+	if ( fabs( delta.x() ) < m_epsilon.x() && fabs( delta.y() ) < m_epsilon.y() ) {
+		modifier = RadiantSelectionSystem::eCycle;
 	}
 	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, false );
+	m_start = m_current = device_constrained( position );
 }
 
 
@@ -3678,8 +3697,6 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 	}
 }
 void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
-	m_selector.m_unmoved_replaces = 0;
-
 	if ( m_mouse_down && !g_mouseMovedCallback.empty() ) {
 		g_mouseMovedCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
 	}
@@ -3691,7 +3708,8 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 		g_mouseUpCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
 	}
 	//L button w/o scene changed = tunnel selection
-	if( !getSelectionSystem().m_undo_begun && modifiers == c_modifierNone && button == c_button_select && GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ){
+	if( !getSelectionSystem().m_undo_begun && modifiers == c_modifierNone && button == c_button_select &&
+		( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent || GlobalSelectionSystem().ManipulatorMode() != SelectionSystem::eDrag ) ){
 		m_selector.testSelect_simpleM1( window_to_normalised_device( position, m_width, m_height ) );
 	}
 	getSelectionSystem().m_undo_begun = false;
