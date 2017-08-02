@@ -428,13 +428,15 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 #define RADIOSITY_MIN               0.0001f
 #define RADIOSITY_CLIP_EPSILON      0.125f
 
+
+
 static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm, shaderInfo_t *si,
-									  float scale, float subdivide, qboolean original, radWinding_t *rw, clipWork_t *cw ){
+									  float scale, float subdivide, radWinding_t *rw, clipWork_t *cw ){
 	int i, style = 0;
 	float dist, area, value;
 	vec3_t mins, maxs, normal, d1, d2, cross, color, gradient;
 	light_t         *light, *splash;
-	winding_t       *w;
+	winding_t       *w, *splash_w;
 
 
 	/* dummy check */
@@ -463,8 +465,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			RadClipWindingEpsilon( rw, normal, dist, RADIOSITY_CLIP_EPSILON, &front, &back, cw );
 
 			/* recurse */
-			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, qfalse, &front, cw );
-			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, qfalse, &back, cw );
+			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &front, cw );
+			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &back, cw );
 			return;
 		}
 	}
@@ -490,7 +492,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		/* if color gradient is too high, subdivide again */
 		if ( subdivide > minDiffuseSubdivide &&
 			 ( gradient[ 0 ] > RADIOSITY_MAX_GRADIENT || gradient[ 1 ] > RADIOSITY_MAX_GRADIENT || gradient[ 2 ] > RADIOSITY_MAX_GRADIENT ) ) {
-			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, ( subdivide / 2.0f ), qfalse, rw, cw );
+			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, ( subdivide / 2.0f ), rw, cw );
 			return;
 		}
 	}
@@ -580,28 +582,78 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		VectorMA( light->origin, 1.0f, light->normal, light->origin );
 		light->dist = DotProduct( light->origin, normal );
 
-		/* optionally create a point backsplash light for first pass */
-		if ( original && si->backsplashFraction > 0 ) {
+#if 0
+		/* optionally create a point backsplash light */
+		if ( si->backsplashFraction > 0 ) {
+
 			/* allocate a new point light */
 			splash = safe_malloc( sizeof( *splash ) );
 			memset( splash, 0, sizeof( *splash ) );
+
 			splash->next = lights;
 			lights = splash;
+
 
 			/* set it up */
 			splash->flags = LIGHT_Q3A_DEFAULT;
 			splash->type = EMIT_POINT;
 			splash->photons = light->photons * si->backsplashFraction;
+
 			splash->fade = 1.0f;
 			splash->si = si;
 			VectorMA( light->origin, si->backsplashDistance, normal, splash->origin );
 			VectorCopy( si->color, splash->color );
+
 			splash->falloffTolerance = falloffTolerance;
 			splash->style = noStyles ? LS_NORMAL : light->style;
 
 			/* add to counts */
 			numPointLights++;
 		}
+#endif
+
+#if 1
+		/* optionally create area backsplash light */
+		//if ( original && si->backsplashFraction > 0 ) {
+		if ( si->backsplashFraction > 0 && !( si->compileFlags & C_SKY ) ) {
+			/* allocate a new area light */
+			splash = safe_malloc( sizeof( *splash ) );
+			memset( splash, 0, sizeof( *splash ) );
+			ThreadLock();
+			splash->next = lights;
+			lights = splash;
+			ThreadUnlock();
+
+			/* set it up */
+			splash->flags = LIGHT_AREA_DEFAULT;
+			splash->type = EMIT_AREA;
+			splash->photons = light->photons * 7.0f * si->backsplashFraction;
+			splash->add = light->add * 7.0f * si->backsplashFraction;
+			splash->fade = 1.0f;
+			splash->si = si;
+			VectorCopy( si->color, splash->color );
+			VectorScale( splash->color, splash->add, splash->emitColor );
+			splash->falloffTolerance = falloffTolerance;
+			splash->style = noStyles ? LS_NORMAL : si->lightStyle;
+			if ( splash->style < LS_NORMAL || splash->style >= LS_NONE ) {
+				splash->style = LS_NORMAL;
+			}
+
+			/* create a regular winding */
+			splash_w = AllocWinding( rw->numVerts );
+			splash_w->numpoints = rw->numVerts;
+			for ( i = 0; i < rw->numVerts; i++ )
+				VectorMA( rw->verts[rw->numVerts - 1 - i].xyz, si->backsplashDistance, normal, splash_w->p[ i ] );
+			splash->w = splash_w;
+
+			VectorMA( light->origin, si->backsplashDistance, normal, splash->origin );
+			VectorNegate( normal, splash->normal );
+            splash->dist = DotProduct( splash->origin, splash->normal );
+
+//			splash->flags |= LIGHT_TWOSIDED;
+		}
+#endif
+
 	}
 	else
 	{
@@ -638,7 +690,6 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	//%		light->normal[ 0 ], light->normal[ 1 ], light->normal[ 2 ],
 	//%		light->si->shader );
 }
-
 
 
 /*
@@ -679,7 +730,7 @@ void RadLightForTriangles( int num, int lightmapNum, rawLightmap_t *lm, shaderIn
 		}
 
 		/* subdivide into area lights */
-		RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, qtrue, &rw, cw );
+		RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &rw, cw );
 	}
 }
 
@@ -788,7 +839,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t
 				}
 
 				/* subdivide into area lights */
-				RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, qtrue, &rw, cw );
+				RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &rw, cw );
 			}
 
 			/* generate 2 tris */
@@ -817,7 +868,7 @@ void RadLightForPatch( int num, int lightmapNum, rawLightmap_t *lm, shaderInfo_t
 					}
 
 					/* subdivide into area lights */
-					RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, qtrue, &rw, cw );
+					RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &rw, cw );
 				}
 			}
 		}

@@ -41,6 +41,7 @@
 /* path support */
 #define MAX_BASE_PATHS  10
 #define MAX_GAME_PATHS  10
+#define MAX_PAK_PATHS  200
 
 char                    *homePath;
 char installPath[ MAX_OS_PATH ];
@@ -49,6 +50,8 @@ int numBasePaths;
 char                    *basePaths[ MAX_BASE_PATHS ];
 int numGamePaths;
 char                    *gamePaths[ MAX_GAME_PATHS ];
+int numPakPaths;
+char                    *pakPaths[ MAX_PAK_PATHS ];
 char                    *homeBasePath = NULL;
 
 
@@ -119,7 +122,6 @@ void LokiInitPaths( char *argv0 ){
 	strcpy( installPath, "../" );
 	#else
 	char temp[ MAX_OS_PATH ];
-	char last0[ 2 ];
 	char        *path;
 	char        *last;
 	qboolean found;
@@ -133,6 +135,25 @@ void LokiInitPaths( char *argv0 ){
 		argv0 = strrchr( argv0, '/' ) + 1;
 	}
 	else if ( path ) {
+
+		/*
+		   This code has a special behavior when q3map2 is a symbolic link.
+
+		   For each dir in ${PATH} (example: "/usr/bin", "/usr/local/bin" if ${PATH} == "/usr/bin:/usr/local/bin"),
+		   it looks for "${dir}/q3map2" (file exists and is executable),
+		   then it uses "dirname(realpath("${dir}/q3map2"))/../" as installPath.
+
+		   So, if "/usr/bin/q3map2" is a symbolic link to "/opt/radiant/tools/q3map2",
+		   it will find the installPath "/usr/share/radiant/",
+		   so q3map2 will look for "/opt/radiant/baseq3" to find paks.
+
+		   More precisely, it looks for "${dir}/${argv[0]}",
+		   so if "/usr/bin/q3map2" is a symbolic link to "/opt/radiant/tools/q3map2",
+		   and if "/opt/radiant/tools/q3ma2" is a symbolic link to "/opt/radiant/tools/q3map2.x86_64",
+		   it will use "dirname("/opt/radiant/tools/q3map2.x86_64")/../" as path,
+		   so it will use "/opt/radiant/" as installPath, which will be expanded later to "/opt/radiant/baseq3" to find paks.
+		*/
+
 		found = qfalse;
 		last = path;
 
@@ -154,17 +175,20 @@ void LokiInitPaths( char *argv0 ){
 				path++;
 			}
 
+
 			/* concatenate */
 			if ( last > ( path + 1 ) ) {
-				Q_strncat( temp, sizeof( temp ), path, ( last - path ) );
+				// +1 hack: Q_strncat calls Q_strncpyz that expects a len including '\0'
+				// so that extraneous char will be rewritten by '\0', so it's ok.
+				// Also, in this case this extraneous char is always ':' or '\0', so it's ok.
+				Q_strncat( temp, sizeof( temp ), path, ( last - path + 1) );
 				Q_strcat( temp, sizeof( temp ), "/" );
 			}
-			Q_strcat( temp, sizeof( temp ), "./" );
 			Q_strcat( temp, sizeof( temp ), argv0 );
 
 			/* verify the path */
 			if ( access( temp, X_OK ) == 0 ) {
-				found++;
+				found = qtrue;
 			}
 			path = last + 1;
 		}
@@ -172,9 +196,12 @@ void LokiInitPaths( char *argv0 ){
 
 	/* flake */
 	if ( realpath( temp, installPath ) ) {
-		/* q3map is in "tools/" */
+		/*
+		   if "q3map2" is "/opt/radiant/tools/q3map2",
+		   installPath is "/opt/radiant"
+		*/
 		*( strrchr( installPath, '/' ) ) = '\0';
-		*( strrchr( installPath, '/' ) + 1 ) = '\0';
+		*( strrchr( installPath, '/' ) ) = '\0';
 	}
 	#endif
 }
@@ -351,6 +378,24 @@ void AddGamePath( char *path ){
 }
 
 
+/*
+   AddPakPath()
+   adds a pak path to the list
+ */
+
+void AddPakPath( char *path ){
+	/* dummy check */
+	if ( path == NULL || path[ 0 ] == '\0' || numPakPaths >= MAX_PAK_PATHS ) {
+		return;
+	}
+
+	/* add it to the list */
+	pakPaths[ numPakPaths ] = safe_malloc( strlen( path ) + 1 );
+	strcpy( pakPaths[ numPakPaths ], path );
+	CleanPath( pakPaths[ numPakPaths ] );
+	numPakPaths++;
+}
+
 
 
 /*
@@ -462,6 +507,17 @@ void InitPaths( int *argc, char **argv ){
 			homeBasePath = ".";
 			argv[ i ] = NULL;
 		}
+
+		/* -fs_pakpath */
+		else if ( strcmp( argv[ i ], "-fs_pakpath" ) == 0 ) {
+			if ( ++i >= *argc ) {
+				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
+			}
+			argv[ i - 1 ] = NULL;
+			AddPakPath( argv[ i ] );
+			argv[ i ] = NULL;
+		}
+
 	}
 
 	/* remove processed arguments */
@@ -543,6 +599,18 @@ void InitPaths( int *argc, char **argv ){
 			sprintf( temp, "%s/%s/", basePaths[ i ], gamePaths[ j ] );
 			vfsInitDirectory( temp );
 		}
+	}
+
+	/* initialize vfs paths */
+	if ( numPakPaths > MAX_PAK_PATHS ) {
+		numPakPaths = MAX_PAK_PATHS;
+	}
+
+	/* walk the list of pak paths */
+	for ( i = 0; i < numPakPaths; i++ )
+	{
+		/* initialize this pak path */
+		vfsInitDirectory( pakPaths[ i ] );
 	}
 
 	/* done */

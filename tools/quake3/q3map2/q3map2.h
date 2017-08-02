@@ -1521,6 +1521,8 @@ int                         ScaleBSPMain( int argc, char **argv );
 int                         ShiftBSPMain( int argc, char **argv );
 int                         ConvertMain( int argc, char **argv );
 
+/* help.c */
+void                        HelpMain(const char* arg);
 
 /* path_init.c */
 game_t                      *GetGame( char *arg );
@@ -1841,6 +1843,11 @@ void                        StitchSurfaceLightmaps( void );
 void                        StoreSurfaceLightmaps( void );
 
 
+/* exportents.c */
+void                        ExportEntities( void );
+int                         ExportEntitiesMain( int argc, char **argv );
+
+
 /* image.c */
 void                        ImageFree( image_t *image );
 image_t                     *ImageFind( const char *filename );
@@ -1949,6 +1956,8 @@ Q_EXTERN game_t games[]
 								#include "game_xonotic.h" /* most be after game_quake3.h as they share defines! */
 	,
 								#include "game_tremulous.h" /*LinuxManMikeC: must be after game_quake3.h, depends on #define's set in it */
+	,
+								#include "game_unvanquished.h"
 	,
 								#include "game_tenebrae.h"
 	,

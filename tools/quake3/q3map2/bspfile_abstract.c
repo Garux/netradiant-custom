@@ -450,7 +450,12 @@ void PrintBSPFileSizes( void ){
 	if ( numEntities <= 0 ) {
 		ParseEntities();
 	}
-
+	int patchCount = 0;
+	bspDrawSurface_t *s;
+	for ( s = bspDrawSurfaces; s != bspDrawSurfaces + numBSPDrawSurfaces; ++s ){
+		if ( s->surfaceType == MST_PATCH )
+			++patchCount;
+	}
 	/* note that this is abstracted */
 	Sys_Printf( "Abstracted BSP file components (*actual sizes may differ)\n" );
 
@@ -483,6 +488,8 @@ void PrintBSPFileSizes( void ){
 
 	Sys_Printf( "%9d drawsurfaces  %9d *\n",
 				numBSPDrawSurfaces, (int) ( numBSPDrawSurfaces * sizeof( *bspDrawSurfaces ) ) );
+	Sys_Printf( "%9d patchsurfaces       \n",
+				patchCount );
 	Sys_Printf( "%9d drawverts     %9d *\n",
 				numBSPDrawVerts, (int) ( numBSPDrawVerts * sizeof( *bspDrawVerts ) ) );
 	Sys_Printf( "%9d drawindexes   %9d\n",

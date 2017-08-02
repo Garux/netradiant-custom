@@ -3718,6 +3718,13 @@ int main( int argc, char **argv ){
 	/* read general options first */
 	for ( i = 1; i < argc; i++ )
 	{
+		/* -help */
+		if ( !strcmp( argv[ i ], "-h" ) || !strcmp( argv[ i ], "--help" )
+			|| !strcmp( argv[ i ], "-help" ) ) {
+			HelpMain(argv[i+1]);
+			return 0;
+		}
+
 		/* -connect */
 		if ( !strcmp( argv[ i ], "-connect" ) ) {
 			argv[ i ] = NULL;
@@ -3807,7 +3814,7 @@ int main( int argc, char **argv ){
 
 	/* check if we have enough options left to attempt something */
 	if ( argc < 2 ) {
-		Error( "Usage: %s [general options] [options] mapfile", argv[ 0 ] );
+		Error( "Usage: %s [general options] [options] mapfile\n%s -help for help", argv[ 0 ] , argv[ 0 ] );
 	}
 
 	/* fixaas */
@@ -3840,6 +3847,11 @@ int main( int argc, char **argv ){
 		Sys_Printf( "WARNING: VLight is no longer supported, defaulting to -light -fast instead\n\n" );
 		argv[ 1 ] = "-fast";    /* eek a hack */
 		r = LightMain( argc, argv );
+	}
+
+	/* QBall: export entities */
+	else if ( !strcmp( argv[ 1 ], "-exportents" ) ) {
+		r = ExportEntitiesMain( argc - 1, argv + 1 );
 	}
 
 	/* ydnar: lightmap export */
