@@ -86,6 +86,7 @@ MapModules& ReferenceAPI_getMapModules();
 #include "autosave.h"
 #include "brushmodule.h"
 #include "brush.h"
+#include "patch.h"
 
 class NameObserver
 {
@@ -760,13 +761,57 @@ void Scene_EntityBreakdown( EntityBreakdown& entitymap ){
 	GlobalSceneGraph().traverse( EntityBreakdownWalker( entitymap ) );
 }
 
+class CountStuffWalker : public scene::Graph::Walker
+{
+int& m_patches;
+int& m_ents_ingame;
+int& m_groupents;
+int& m_groupents_ingame;
+public:
+CountStuffWalker( int& patches, int& ents_ingame, int& groupents, int& groupents_ingame )
+	: m_patches( patches ), m_ents_ingame( ents_ingame ), m_groupents( groupents ), m_groupents_ingame( groupents_ingame ){
+}
+bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	Patch* patch = Node_getPatch( path.top() );
+	if( patch != 0 ){
+		++m_patches;
+	}
+	Entity* entity = Node_getEntity( path.top() );
+	if ( entity != 0 ){
+		if( entity->isContainer() ){
+			++m_groupents;
+			if( !string_equal_nocase( "func_group", entity->getKeyValue( "classname" ) ) &&
+				!string_equal_nocase( "_decal", entity->getKeyValue( "classname" ) ) ){
+				++m_groupents_ingame;
+				++m_ents_ingame;
+			}
+			return true;
+		}
+		if( !string_equal_nocase_n( "light", entity->getKeyValue( "classname" ), 5 ) &&
+			!string_equal_nocase( "misc_model", entity->getKeyValue( "classname" ) ) ){
+			++m_ents_ingame;
+		}
+	}
+	return true;
+}
+};
+
+void Scene_CountStuff( int& patches, int& ents_ingame, int& groupents, int& groupents_ingame ){
+	GlobalSceneGraph().traverse( CountStuffWalker( patches, ents_ingame, groupents, groupents_ingame ) );
+}
 
 WindowPosition g_posMapInfoWnd( c_default_window_pos );
 
 void DoMapInfo(){
 	ModalDialog dialog;
-	GtkEntry* brushes_entry;
-	GtkEntry* entities_entry;
+
+	GtkWidget* w_brushes;
+	GtkWidget* w_patches;
+	GtkWidget* w_ents;
+	GtkWidget* w_ents_ingame;
+	GtkWidget* w_groupents;
+	GtkWidget* w_groupents_ingame;
+
 	GtkListStore* EntityBreakdownWalker;
 
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Map Info", G_CALLBACK( dialog_delete_callback ), &dialog );
@@ -779,48 +824,114 @@ void DoMapInfo(){
 
 		{
 			GtkHBox* hbox = create_dialog_hbox( 4 );
-			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, TRUE, 0 );
+			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, FALSE, 0 );
 
 			{
-				GtkTable* table = create_dialog_table( 2, 2, 4, 4 );
+				GtkTable* table = create_dialog_table( 3, 4, 4, 4 );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( table ), TRUE, TRUE, 0 );
-
 				{
-					GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-					gtk_widget_show( GTK_WIDGET( entry ) );
-					gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 0, 1,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_entry_set_editable( entry, FALSE );
-
-					brushes_entry = entry;
-				}
-				{
-					GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-					gtk_widget_show( GTK_WIDGET( entry ) );
-					gtk_table_attach( table, GTK_WIDGET( entry ), 1, 2, 1, 2,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
-									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_entry_set_editable( entry, FALSE );
-
-					entities_entry = entry;
-				}
-				{
-					GtkWidget* label = gtk_label_new( "Total Brushes" );
+					GtkWidget* label = gtk_label_new( "Total Brushes:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
 				{
-					GtkWidget* label = gtk_label_new( "Total Entities" );
+					GtkWidget* label = gtk_label_new( "" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 1, 2, 0, 1,
+									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					w_brushes = label;
+				}
+				{
+					GtkWidget* label = gtk_label_new( "Total Patches:" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 0, 1,
+									  (GtkAttachOptions) ( GTK_FILL ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+				}
+				{
+					GtkWidget* label = gtk_label_new( "" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 0, 1,
+									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					w_patches = label;
+				}
+				{
+					GtkWidget* label = gtk_label_new( "Total Entities:" );
 					gtk_widget_show( label );
 					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 1, 2,
 									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
 				}
+				{
+					GtkWidget* label = gtk_label_new( "" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 1, 2, 1, 2,
+									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					w_ents = label;
+				}
+				{
+					GtkWidget* label = gtk_label_new( "Ingame Entities:" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 1, 2,
+									  (GtkAttachOptions) ( GTK_FILL ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+				}
+				{
+					GtkWidget* label = gtk_label_new( "" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 1, 2,
+									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					w_ents_ingame = label;
+				}
+				{
+					GtkWidget* label = gtk_label_new( "Group Entities:" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 2, 3,
+									  (GtkAttachOptions) ( GTK_FILL ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+				}
+				{
+					GtkWidget* label = gtk_label_new( "" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 1, 2, 2, 3,
+									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					w_groupents = label;
+				}
+				{
+					GtkWidget* label = gtk_label_new( "Ingame Group Entities:" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 2, 3, 2, 3,
+									  (GtkAttachOptions) ( GTK_FILL ),
+									  (GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+				}
+				{
+					GtkWidget* label = gtk_label_new( "" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 3, 4, 2, 3,
+									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
+									  (GtkAttachOptions) ( 0 ), 3, 0 );
+					gtk_misc_set_alignment( GTK_MISC( label ), 0.0, 0.5 );
+					w_groupents_ingame = label;
+				}
+
 			}
 			{
 				GtkVBox* vbox2 = create_dialog_vbox( 4 );
@@ -833,17 +944,17 @@ void DoMapInfo(){
 			}
 		}
 		{
-			GtkWidget* label = gtk_label_new( "Entity breakdown" );
+			GtkWidget* label = gtk_label_new( "*** Entity breakdown ***" );
 			gtk_widget_show( label );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( label ), FALSE, TRUE, 0 );
-			gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+			gtk_misc_set_alignment( GTK_MISC( label ), 0.5, 0.5 );
 		}
 		{
 			GtkScrolledWindow* scr = create_scrolled_window( GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC, 4 );
 			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( scr ), TRUE, TRUE, 0 );
 
 			{
-				GtkListStore* store = gtk_list_store_new( 2, G_TYPE_STRING, G_TYPE_STRING );
+				GtkListStore* store = gtk_list_store_new( 2, G_TYPE_STRING, G_TYPE_UINT );
 
 				GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
 				gtk_tree_view_set_headers_clickable( GTK_TREE_VIEW( view ), TRUE );
@@ -879,21 +990,46 @@ void DoMapInfo(){
 
 		for ( EntityBreakdown::iterator i = entitymap.begin(); i != entitymap.end(); ++i )
 		{
-			char tmp[16];
-			sprintf( tmp, "%u", Unsigned( ( *i ).second ) );
 			GtkTreeIter iter;
 			gtk_list_store_append( GTK_LIST_STORE( EntityBreakdownWalker ), &iter );
-			gtk_list_store_set( GTK_LIST_STORE( EntityBreakdownWalker ), &iter, 0, ( *i ).first.c_str(), 1, tmp, -1 );
+			gtk_list_store_set( GTK_LIST_STORE( EntityBreakdownWalker ), &iter, 0, ( *i ).first.c_str(), 1, Unsigned( ( *i ).second ), -1 );
 		}
 	}
 
 	g_object_unref( G_OBJECT( EntityBreakdownWalker ) );
 
-	char tmp[16];
-	sprintf( tmp, "%u", Unsigned( g_brushCount.get() ) );
-	gtk_entry_set_text( GTK_ENTRY( brushes_entry ), tmp );
-	sprintf( tmp, "%u", Unsigned( g_entityCount.get() ) );
-	gtk_entry_set_text( GTK_ENTRY( entities_entry ), tmp );
+	int n_patches = 0;
+	int n_ents_ingame = 0;
+	int n_groupents = 0;
+	int n_groupents_ingame = 0;
+	Scene_CountStuff( n_patches, n_ents_ingame, n_groupents, n_groupents_ingame );
+	//globalOutputStream() << n_patches << n_ents_ingame << n_groupents << n_groupents_ingame << "\n";
+
+	char *markup;
+
+	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%u</b></span>  ", Unsigned( g_brushCount.get() ) );
+	gtk_label_set_markup( GTK_LABEL( w_brushes ), markup );
+	g_free( markup );
+
+	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%i</b></span>  ", n_patches );
+	gtk_label_set_markup( GTK_LABEL( w_patches ), markup );
+	g_free( markup );
+
+	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%u</b></span>  ", Unsigned( g_entityCount.get() ) );
+	gtk_label_set_markup( GTK_LABEL( w_ents ), markup );
+	g_free( markup );
+
+	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%i</b></span>  ", n_ents_ingame );
+	gtk_label_set_markup( GTK_LABEL( w_ents_ingame ), markup );
+	g_free( markup );
+
+	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%i</b></span>  ", n_groupents );
+	gtk_label_set_markup( GTK_LABEL( w_groupents ), markup );
+	g_free( markup );
+
+	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%i</b></span>  ", n_groupents_ingame );
+	gtk_label_set_markup( GTK_LABEL( w_groupents_ingame ), markup );
+	g_free( markup );
 
 	modal_dialog_show( window, dialog );
 
@@ -2104,7 +2240,7 @@ void DoFind(){
 }
 
 void Map_constructPreferences( PreferencesPage& page ){
-	page.appendCheckBox( "", "Load last map on open", g_bLoadLastMap );
+	page.appendCheckBox( "", "Load last map at startup", g_bLoadLastMap );
 }
 
 

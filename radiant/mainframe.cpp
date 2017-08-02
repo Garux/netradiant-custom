@@ -3074,12 +3074,14 @@ void MainFrame::Create(){
 
 	EverySecondTimer_enable();
 
-	if ( g_layout_globals.nState & GDK_WINDOW_STATE_MAXIMIZED ) {
+	if ( g_layout_globals.nState & GDK_WINDOW_STATE_MAXIMIZED ||
+		g_layout_globals.nState & GDK_WINDOW_STATE_ICONIFIED ) {
 		gtk_window_maximize( window );
 	}
 	if ( g_layout_globals.nState & GDK_WINDOW_STATE_FULLSCREEN ) {
 		gtk_window_fullscreen( window );
 	}
+
 	if ( !FloatingGroupDialog() ) {
 		gtk_paned_set_position( GTK_PANED( m_vSplit ), g_layout_globals.nXYHeight );
 
