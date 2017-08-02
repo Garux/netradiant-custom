@@ -192,8 +192,8 @@ float distance_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis
 class Manipulatable
 {
 public:
-virtual void Construct( const Matrix4& device2manip, const float x, const float y ) = 0;
-virtual void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ) = 0;
+virtual void Construct( const Matrix4& device2manip, const float x, const float y, const AABB bounds, const Vector3 transform_origin ) = 0;
+virtual void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ) = 0;
 };
 
 void transform_local2object( Matrix4& object, const Matrix4& local, const Matrix4& local2object ){
@@ -217,11 +217,11 @@ public:
 RotateFree( Rotatable& rotatable )
 	: m_rotatable( rotatable ){
 }
-void Construct( const Matrix4& device2manip, const float x, const float y ){
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB bounds, const Vector3 transform_origin ){
 	point_on_sphere( m_start, device2manip, x, y );
 	vector3_normalise( m_start );
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
 	Vector3 current;
 	point_on_sphere( current, device2manip, x, y );
 
@@ -254,12 +254,12 @@ public:
 RotateAxis( Rotatable& rotatable )
 	: m_rotatable( rotatable ){
 }
-void Construct( const Matrix4& device2manip, const float x, const float y ){
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB bounds, const Vector3 transform_origin ){
 	point_on_sphere( m_start, device2manip, x, y );
 	constrain_to_axis( m_start, m_axis );
 }
 /// \brief Converts current position to a normalised vector orthogonal to axis.
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
 	Vector3 current;
 	point_on_sphere( current, device2manip, x, y );
 	constrain_to_axis( current, m_axis );
@@ -297,20 +297,43 @@ class TranslateAxis : public Manipulatable
 Vector3 m_start;
 Vector3 m_axis;
 Translatable& m_translatable;
+AABB m_bounds;
 public:
 TranslateAxis( Translatable& translatable )
 	: m_translatable( translatable ){
 }
-void Construct( const Matrix4& device2manip, const float x, const float y ){
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB bounds, const Vector3 transform_origin ){
 	point_on_axis( m_start, m_axis, device2manip, x, y );
+	m_bounds = bounds;
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
 	Vector3 current;
 	point_on_axis( current, m_axis, device2manip, x, y );
 	current = vector3_scaled( m_axis, distance_for_axis( m_start, current, m_axis ) );
 
 	translation_local2object( current, current, manip2object );
-	vector3_snap( current, GetSnapGridSize() );
+	if( snapbbox ){
+		float grid = GetSnapGridSize();
+		Vector3 maxs( m_bounds.origin + m_bounds.extents );
+		Vector3 mins( m_bounds.origin - m_bounds.extents );
+//		globalOutputStream() << "current: " << current << "\n";
+		for( std::size_t i = 0; i < 3; ++i ){
+			if( m_axis[i] != 0.f ){
+				float snapto1 = float_snapped( maxs[i] + current[i] , grid );
+				float snapto2 = float_snapped( mins[i] + current[i] , grid );
+
+				float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
+				float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
+
+//				globalOutputStream() << "maxs[i] + current[i]: " << maxs[i] + current[i]  << "    snapto1: " << snapto1 << "   dist1: " << dist1 << "\n";
+//				globalOutputStream() << "mins[i] + current[i]: " << mins[i] + current[i]  << "    snapto2: " << snapto2 << "   dist2: " << dist2 << "\n";
+				current[i] = dist2 > dist1 ? snapto1 - maxs[i] : snapto2 - mins[i];
+			}
+		}
+	}
+	else{
+		vector3_snap( current, GetSnapGridSize() );
+	}
 
 	m_translatable.translate( current );
 }
@@ -325,14 +348,16 @@ class TranslateFree : public Manipulatable
 private:
 Vector3 m_start;
 Translatable& m_translatable;
+AABB m_bounds;
 public:
 TranslateFree( Translatable& translatable )
 	: m_translatable( translatable ){
 }
-void Construct( const Matrix4& device2manip, const float x, const float y ){
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB bounds, const Vector3 transform_origin ){
 	point_on_plane( m_start, device2manip, x, y );
+	m_bounds = bounds;
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
 	Vector3 current;
 	point_on_plane( current, device2manip, x, y );
 	current = vector3_subtracted( current, m_start );
@@ -349,14 +374,30 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	}
 
 	translation_local2object( current, current, manip2object );
-	vector3_snap( current, GetSnapGridSize() );
+	if( snapbbox ){
+		float grid = GetSnapGridSize();
+		Vector3 maxs( m_bounds.origin + m_bounds.extents );
+		Vector3 mins( m_bounds.origin - m_bounds.extents );
+//		globalOutputStream() << "current: " << current << "\n";
+		for( std::size_t i = 0; i < 3; ++i ){
+			if( current[i] != 0.f ){
+				float snapto1 = float_snapped( maxs[i] + current[i] , grid );
+				float snapto2 = float_snapped( mins[i] + current[i] , grid );
+
+				float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
+				float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
+
+				current[i] = dist2 > dist1 ? snapto1 - maxs[i] : snapto2 - mins[i];
+			}
+		}
+	}
+	else{
+		vector3_snap( current, GetSnapGridSize() );
+	}
 
 	m_translatable.translate( current );
 }
 };
-
-void GetSelectionAABB( AABB& bounds );
-const Matrix4& SelectionSystem_GetPivot2World();
 
 class Scalable
 {
@@ -373,25 +414,23 @@ Vector3 m_axis;
 Scalable& m_scalable;
 
 Vector3 m_choosen_extent;
+AABB m_bounds;
 
 public:
 ScaleAxis( Scalable& scalable )
 	: m_scalable( scalable ){
 }
-void Construct( const Matrix4& device2manip, const float x, const float y ){
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB bounds, const Vector3 transform_origin ){
 	point_on_axis( m_start, m_axis, device2manip, x, y );
 
-	AABB aabb;
-	GetSelectionAABB( aabb );
-	Vector3 transform_origin = vector4_to_vector3( SelectionSystem_GetPivot2World().t() );
 	m_choosen_extent = Vector3(
-					std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
-					std::max( aabb.origin[1] + aabb.extents[1] - transform_origin[1], - aabb.origin[1] + aabb.extents[1] + transform_origin[1] ),
-					std::max( aabb.origin[2] + aabb.extents[2] - transform_origin[2], - aabb.origin[2] + aabb.extents[2] + transform_origin[2] )
+					std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], - bounds.origin[0] + bounds.extents[0] + transform_origin[0] ),
+					std::max( bounds.origin[1] + bounds.extents[1] - transform_origin[1], - bounds.origin[1] + bounds.extents[1] + transform_origin[1] ),
+					std::max( bounds.origin[2] + bounds.extents[2] - transform_origin[2], - bounds.origin[2] + bounds.extents[2] + transform_origin[2] )
 							);
-
+	m_bounds = bounds;
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
 	//globalOutputStream() << "manip2object: " << manip2object << "  device2manip: " << device2manip << "  x: " << x << "  y:" << y <<"\n";
 	Vector3 current;
 	point_on_axis( current, m_axis, device2manip, x, y );
@@ -414,8 +453,12 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 		);
 
 	for( std::size_t i = 0; i < 3; i++ ){
-		if( m_choosen_extent[i] > 0.0625f ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
+		if( m_choosen_extent[i] > 0.0625f && m_axis[i] != 0.f ){ //epsilon to prevent super high scale for set of models, having really small extent, formed by origins
 			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
+			if( snapbbox ){
+				float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
+				scale[i] = snappdwidth / ( m_bounds.extents[i] * 2.f );
+			}
 		}
 	}
 	if( snap ){
@@ -441,24 +484,23 @@ Vector3 m_start;
 Scalable& m_scalable;
 
 Vector3 m_choosen_extent;
+AABB m_bounds;
 
 public:
 ScaleFree( Scalable& scalable )
 	: m_scalable( scalable ){
 }
-void Construct( const Matrix4& device2manip, const float x, const float y ){
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB bounds, const Vector3 transform_origin ){
 	point_on_plane( m_start, device2manip, x, y );
 
-	AABB aabb;
-	GetSelectionAABB( aabb );
-	Vector3 transform_origin = vector4_to_vector3( SelectionSystem_GetPivot2World().t() );
 	m_choosen_extent = Vector3(
-					std::max( aabb.origin[0] + aabb.extents[0] - transform_origin[0], - aabb.origin[0] + aabb.extents[0] + transform_origin[0] ),
-					std::max( aabb.origin[1] + aabb.extents[1] - transform_origin[1], - aabb.origin[1] + aabb.extents[1] + transform_origin[1] ),
-					std::max( aabb.origin[2] + aabb.extents[2] - transform_origin[2], - aabb.origin[2] + aabb.extents[2] + transform_origin[2] )
+					std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], - bounds.origin[0] + bounds.extents[0] + transform_origin[0] ),
+					std::max( bounds.origin[1] + bounds.extents[1] - transform_origin[1], - bounds.origin[1] + bounds.extents[1] + transform_origin[1] ),
+					std::max( bounds.origin[2] + bounds.extents[2] - transform_origin[2], - bounds.origin[2] + bounds.extents[2] + transform_origin[2] )
 							);
+	m_bounds = bounds;
 }
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap ){
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
 	Vector3 current;
 	point_on_plane( current, device2manip, x, y );
 	Vector3 delta = vector3_subtracted( current, m_start );
@@ -482,6 +524,10 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	for( std::size_t i = 0; i < 3; i++ ){
 		if( m_choosen_extent[i] > 0.0625f ){
 			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
+			if( snapbbox && start[i] != 0.f ){
+				float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
+				scale[i] = snappdwidth / ( m_bounds.extents[i] * 2.f );
+			}
 		}
 	}
 	//globalOutputStream() << "pre snap scale: " << scale <<"\n";
@@ -2519,6 +2565,7 @@ DragManipulator() : m_freeResize( m_resize ), m_freeDrag( m_drag ), m_selected( 
 }
 
 Manipulatable* GetManipulatable(){
+	//globalOutputStream() << ( m_dragSelectable.isSelected() ? "m_freeDrag\n" : "m_freeResize\n" );
 	return m_dragSelectable.isSelected() ? &m_freeDrag : &m_freeResize;
 }
 
@@ -2552,6 +2599,9 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 			}
 			m_selected = false;
 			selector.addSelectable( SelectionIntersection( 0, 0 ), ( *i ) );
+			m_dragSelectable.setSelected( true );
+		}
+		if( GlobalSelectionSystem().countSelectedComponents() != 0 ){
 			m_dragSelectable.setSelected( true );
 		}
 	}
@@ -2669,7 +2719,7 @@ Signal1<const Selectable&> m_selectionChanged_callbacks;
 void ConstructPivot() const;
 void setCustomPivotOrigin( Vector3& point ) const;
 public:
-void getSelectionAABB( AABB& bounds ) const;
+AABB getSelectionAABB() const;
 private:
 mutable bool m_pivotChanged;
 bool m_pivot_moving;
@@ -2866,7 +2916,7 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 
 			Matrix4 device2manip;
 			ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
-			m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1] );
+			m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], getSelectionAABB(), vector4_to_vector3( GetPivot2World().t() ) );
 
 			m_undo_begun = false;
 		}
@@ -3284,7 +3334,7 @@ void scaleSelected( const Vector3& scaling ){
 	freezeTransforms();
 }
 
-void MoveSelected( const View& view, const float device_point[2], bool snap ){
+void MoveSelected( const View& view, const float device_point[2], bool snap, bool snapbbox ){
 	if ( m_manipulator->isSelected() ) {
 		if ( !m_undo_begun ) {
 			m_undo_begun = true;
@@ -3293,7 +3343,7 @@ void MoveSelected( const View& view, const float device_point[2], bool snap ){
 
 		Matrix4 device2manip;
 		ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
-		m_manipulator->GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point[0], device_point[1], snap );
+		m_manipulator->GetManipulatable()->Transform( m_manip2pivot_start, device2manip, device_point[0], device_point[1], snap, snapbbox );
 	}
 }
 
@@ -3750,7 +3800,8 @@ void RadiantSelectionSystem::setCustomPivotOrigin( Vector3& point ) const {
 	}
 }
 
-void RadiantSelectionSystem::getSelectionAABB( AABB& bounds ) const {
+AABB RadiantSelectionSystem::getSelectionAABB() const {
+	AABB bounds;
 	if ( !nothingSelected() ) {
 		if ( Mode() == eComponent ) {
 			Scene_BoundsSelectedComponent( GlobalSceneGraph(), bounds );
@@ -3760,14 +3811,7 @@ void RadiantSelectionSystem::getSelectionAABB( AABB& bounds ) const {
 			Scene_BoundsSelected( GlobalSceneGraph(), bounds );
 		}
 	}
-}
-
-void GetSelectionAABB( AABB& bounds ){
-	getSelectionSystem().getSelectionAABB( bounds );
-}
-
-const Matrix4& SelectionSystem_GetPivot2World(){
-	return getSelectionSystem().GetPivot2World();
+	return bounds;
 }
 
 void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
@@ -4043,7 +4087,7 @@ bool mouseDown( DeviceVector position ){
 }
 
 void mouseMoved( DeviceVector position ){
-	getSelectionSystem().MoveSelected( *m_view, &position[0], ( m_state & c_modifierShift ) == c_modifierShift );
+	getSelectionSystem().MoveSelected( *m_view, &position[0], ( m_state & c_modifierShift ) == c_modifierShift, ( m_state & c_modifierControl ) == c_modifierControl );
 }
 typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseMoved> MouseMovedCaller;
 
