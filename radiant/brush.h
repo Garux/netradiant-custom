@@ -2014,6 +2014,11 @@ void windingForClipPlane( Winding& winding, const Plane3& plane ) const {
 				continue;
 			}
 
+			if( buffer[swap].points.empty() ){
+				//globalErrorStream() << "windingForClipPlane: about to feed empty winding\n";
+				break;
+			}
+
 			buffer[!swap].clear();
 
 #if BRUSH_CONNECTIVITY_DEBUG

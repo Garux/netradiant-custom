@@ -419,8 +419,9 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		if ( brush != 0
 			 && Instance_getSelectable( instance )->isSelected()
 			 && path.size() > 1 ) {
+			scene::Node& parent = path.parent();
 			Path_deleteTop( path );
-			if( Node_getTraversable( path.parent() )->empty() ){
+			if( Node_getTraversable( parent )->empty() ){
 				m_eraseParent = true;
 				//globalOutputStream() << "Empty node?!.\n";
 			}

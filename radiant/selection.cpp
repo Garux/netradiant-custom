@@ -3400,7 +3400,7 @@ void RadiantSelectionSystem::ConstructPivot() const {
 			m_object_pivot = bounds.origin;
 		}
 
-		vector3_snap( m_object_pivot, GetSnapGridSize() );
+		//vector3_snap( m_object_pivot, GetSnapGridSize() );
 		m_pivot2world = matrix4_translation_for_vec3( m_object_pivot );
 
 		switch ( m_manipulator_mode )
