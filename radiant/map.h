@@ -125,6 +125,7 @@ bool Map_Save();
 bool Map_SaveAs();
 
 scene::Node& Node_Clone( scene::Node& node );
+scene::Node& Node_Clone_Selected( scene::Node& node );
 
 void DoMapInfo();
 

@@ -102,12 +102,19 @@ void _CrossProduct( vec3_t v1, vec3_t v2, vec3_t cross );
 // This define affect the precision of VectorNormalize() function only.
 #define MATHLIB_VECTOR_NORMALIZE_PRECISION_FIX 1
 vec_t VectorAccurateNormalize( const vec3_t in, vec3_t out );
-vec_t VectorFastNormalize( const vec3_t in, vec3_t out );
+vec_t VectorFastNormalize_( const vec3_t in, vec3_t out );
 #if MATHLIB_VECTOR_NORMALIZE_PRECISION_FIX
 #define VectorNormalize VectorAccurateNormalize
 #else
-#define VectorNormalize VectorFastNormalize
+#define VectorNormalize VectorFastNormalize_
 #endif
+
+#if 0 //use fastnormalize in a few -light spots
+	#define VectorFastNormalize VectorFastNormalize_
+#else
+	#define VectorFastNormalize VectorNormalize
+#endif
+
 vec_t ColorNormalize( const vec3_t in, vec3_t out );
 void VectorInverse( vec3_t v );
 void VectorPolar( vec3_t v, float radius, float theta, float phi );

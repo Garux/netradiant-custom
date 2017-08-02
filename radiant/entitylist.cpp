@@ -27,6 +27,8 @@
 #include <gtk/gtktreeview.h>
 #include <gtk/gtktreeselection.h>
 #include <gtk/gtkcellrenderertext.h>
+#include <gtk/gtkcheckbutton.h>
+#include <gtk/gtkvbox.h>
 
 #include "string/string.h"
 #include "scenelib.h"
@@ -41,6 +43,8 @@
 #include "gtkutil/closure.h"
 
 #include "treemodel.h"
+
+#include "mainframe.h"
 
 void RedrawEntityList();
 typedef FreeCaller<RedrawEntityList> RedrawEntityListCaller;
@@ -63,6 +67,7 @@ IdleDraw m_idleDraw;
 WindowPositionTracker m_positionTracker;
 
 GtkWindow* m_window;
+GtkWidget* m_check;
 GtkTreeView* m_tree_view;
 GraphTreeModel* m_tree_model;
 bool m_selection_disabled;
@@ -157,6 +162,9 @@ static gboolean entitylist_tree_select( GtkTreeSelection *selection, GtkTreeMode
 		getEntityList().m_selection_disabled = true;
 		selectable->setSelected( path_currently_selected == FALSE );
 		getEntityList().m_selection_disabled = false;
+		if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( getEntityList().m_check ) ) ){
+			FocusAllViews();
+		}
 		return TRUE;
 	}
 
@@ -295,8 +303,14 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 	getEntityList().m_window = window;
 
 	{
+		GtkVBox* vbox = GTK_VBOX( gtk_vbox_new( FALSE, 0 ) );
+		gtk_container_set_border_width( GTK_CONTAINER( vbox ), 0 );
+		gtk_widget_show( GTK_WIDGET( vbox ) );
+		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( vbox ) );
+
 		GtkScrolledWindow* scr = create_scrolled_window( GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( scr ) );
+		//gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( scr ) );
+		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( scr ), TRUE, TRUE, 0 );
 
 		{
 			GtkWidget* view = gtk_tree_view_new();
@@ -318,6 +332,13 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 			gtk_widget_show( view );
 			gtk_container_add( GTK_CONTAINER( scr ), view );
 			getEntityList().m_tree_view = GTK_TREE_VIEW( view );
+		}
+		{
+			GtkWidget* check = gtk_check_button_new_with_label( "Focus on Selected" );
+			gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( check ), FALSE );
+			gtk_widget_show( check );
+			gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, FALSE, 0 );
+			getEntityList().m_check = check;
 		}
 	}
 

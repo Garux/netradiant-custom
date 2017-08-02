@@ -463,6 +463,13 @@ void Select_SetShader( const char* shader ){
 	Scene_BrushSetShader_Component_Selected( GlobalSceneGraph(), shader );
 }
 
+void Select_SetShader_Undo( const char* shader ){
+	if ( GlobalSelectionSystem().countSelectedComponents() != 0 || GlobalSelectionSystem().countSelected() != 0 ) {
+		UndoableCommand undo( "textureNameSetSelected" );
+		Select_SetShader( shader );
+	}
+}
+
 void Select_SetTexdef( const TextureProjection& projection ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 		Scene_BrushSetTexdef_Selected( GlobalSceneGraph(), projection );
@@ -1389,4 +1396,80 @@ void DoScaleDlg(){
 	}
 
 	gtk_widget_show( GTK_WIDGET( g_scale_dialog.window ) );
+}
+
+
+class EntityGetSelectedPropertyValuesWalker_nonEmpty : public scene::Graph::Walker
+{
+PropertyValues& m_propertyvalues;
+const char *m_prop;
+const NodeSmartReference worldspawn;
+public:
+EntityGetSelectedPropertyValuesWalker_nonEmpty( const char *prop, PropertyValues& propertyvalues )
+	: m_propertyvalues( propertyvalues ), m_prop( prop ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+}
+bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	Entity* entity = Node_getEntity( path.top() );
+	if ( entity != 0 ){
+		if( path.top().get() != worldspawn ){
+			Selectable* selectable = Instance_getSelectable( instance );
+			if ( ( selectable != 0 && selectable->isSelected() ) || instance.childSelected() ) {
+				const char* keyvalue = entity->getKeyValue( m_prop );
+				if ( !string_empty( keyvalue ) && !propertyvalues_contain( m_propertyvalues, keyvalue ) ) {
+					m_propertyvalues.push_back( keyvalue );
+				}
+			}
+		}
+		return false;
+	}
+	return true;
+}
+};
+
+void Scene_EntityGetPropertyValues_nonEmpty( scene::Graph& graph, const char *prop, PropertyValues& propertyvalues ){
+	graph.traverse( EntityGetSelectedPropertyValuesWalker_nonEmpty( prop, propertyvalues ) );
+}
+
+#include "preferences.h"
+
+void Select_ConnectedEntities( bool targeting, bool targets, bool focus ){
+	PropertyValues target_propertyvalues;
+	PropertyValues targetname_propertyvalues;
+	const char *target_prop = "target";
+	const char *targetname_prop;
+	if ( g_pGameDescription->mGameType == "doom3" ) {
+		targetname_prop = "name";
+	}
+	else{
+		targetname_prop = "targetname";
+	}
+
+	if( targeting ){
+		Scene_EntityGetPropertyValues_nonEmpty( GlobalSceneGraph(), targetname_prop, targetname_propertyvalues );
+	}
+	if( targets ){
+		Scene_EntityGetPropertyValues_nonEmpty( GlobalSceneGraph(), target_prop, target_propertyvalues );
+	}
+
+	if( target_propertyvalues.empty() && targetname_propertyvalues.empty() ){
+		globalErrorStream() << "SelectConnectedEntities: nothing found\n";
+		return;
+	}
+
+	if( !targeting || !targets ){
+		GlobalSelectionSystem().setSelectedAll( false );
+	}
+	if ( targeting && !targetname_propertyvalues.empty() ) {
+		Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), target_prop, targetname_propertyvalues );
+	}
+	if ( targets && !target_propertyvalues.empty() ) {
+		Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), targetname_prop, target_propertyvalues );
+	}
+	if( focus ){
+		FocusAllViews();
+	}
+}
+
+void SelectConnectedEntities(){
+	Select_ConnectedEntities( true, true, false );
 }

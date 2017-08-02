@@ -277,4 +277,6 @@ void XYWindowMouseDown_disconnect( MouseEventHandlerId id );
 
 extern GtkWidget* g_page_entity;
 
+void FocusAllViews();
+
 #endif

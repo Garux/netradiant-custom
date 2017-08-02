@@ -179,7 +179,7 @@ vec_t VectorAccurateNormalize( const vec3_t in, vec3_t out ) {
 	return (vec_t) length;
 }
 
-vec_t VectorFastNormalize( const vec3_t in, vec3_t out ) {
+vec_t VectorFastNormalize_( const vec3_t in, vec3_t out ) {
 
 	// SmileTheory: This is ioquake3's VectorNormalize2
 	//              for when accuracy matters less than speed

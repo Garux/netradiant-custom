@@ -2425,6 +2425,34 @@ void forEachLight( const RendererLightCallback& callback ) const {
 }
 };
 
+class BoolSelector : public Selector
+{
+bool m_selected;
+SelectionIntersection m_intersection;
+Selectable* m_selectable;
+public:
+BoolSelector() : m_selected( false ){
+}
+
+void pushSelectable( Selectable& selectable ){
+	m_intersection = SelectionIntersection();
+	m_selectable = &selectable;
+}
+void popSelectable(){
+	if ( m_intersection.valid() ) {
+		m_selected = true;
+	}
+	m_intersection = SelectionIntersection();
+}
+void addIntersection( const SelectionIntersection& intersection ){
+	assign_if_closer( m_intersection, intersection );
+}
+
+bool isSelected(){
+	return m_selected;
+}
+};
+
 class FaceInstance
 {
 Face* m_face;
@@ -2624,7 +2652,9 @@ void selectPlane( Selector& selector, const Line& line, const PlaneCallback& sel
 	{
 		Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
 		double dot = vector3_dot( getFace().plane3().normal(), v );
-		if ( dot <= 0 ) {
+		//globalOutputStream() << dot << "\n";
+		//epsilon to prevent perpendicular faces pickup
+		if ( dot <= 0.005 ) {
 			return;
 		}
 	}
@@ -2643,7 +2673,8 @@ bool trySelectPlane( const Line& line ){
 	for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i ){
 		Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
 		double dot = vector3_dot( getFace().plane3().normal(), v );
-		if ( dot <= 0 ) {
+		//epsilon to prevent perpendicular faces pickup
+		if ( dot <= 0.005 ) {
 			return false;
 		}
 	}
@@ -3014,6 +3045,20 @@ void selectVerticesOnPlanes( SelectionTest& test ){
 	{
 		if( m_faceInstances[faceVertex.getFace()].trySelectPlane( line ) ){
 			//m_faceInstances[faceVertex.getFace()].select_vertex( faceVertex.getVertex(), true );
+			setSelected( true );
+		}
+		faceVertex = next_vertex( m_vertex->m_faces, faceVertex );
+	}
+	while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
+}
+
+void selectVerticesOnTestedFaces( SelectionTest& test ){
+	FaceVertexId faceVertex = m_vertex->m_faceVertex;
+	do
+	{
+		BoolSelector selector;
+		m_faceInstances[faceVertex.getFace()].testSelect( selector, test );
+		if( selector.isSelected() ){
 			setSelected( true );
 		}
 		faceVertex = next_vertex( m_vertex->m_faces, faceVertex );
@@ -3482,6 +3527,15 @@ void selectVerticesOnPlanes( SelectionTest& test ){
 
 	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
 		( *i ).selectVerticesOnPlanes( test );
+	}
+}
+
+
+void selectVerticesOnTestedFaces( SelectionTest& test ){
+	test.BeginMesh( localToWorld() );
+
+	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
+		( *i ).selectVerticesOnTestedFaces( test );
 	}
 }
 

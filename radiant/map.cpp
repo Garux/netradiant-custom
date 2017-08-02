@@ -734,6 +734,50 @@ scene::Node& Node_Clone( scene::Node& node ){
 	return clone;
 }
 
+bool Node_instanceSelected( scene::Node& node );
+
+class CloneAllSelected : public scene::Traversable::Walker
+{
+mutable scene::Path m_path;
+public:
+CloneAllSelected( scene::Node& root )
+	: m_path( makeReference( root ) ){
+}
+bool pre( scene::Node& node ) const {
+	if ( node.isRoot() ) {
+		return false;
+	}
+
+	if( Node_instanceSelected( node ) ){
+		m_path.push( makeReference( node_clone( node ) ) );
+		m_path.top().get().IncRef();
+	}
+
+	return true;
+}
+void post( scene::Node& node ) const {
+	if ( node.isRoot() ) {
+		return;
+	}
+
+	if( Node_instanceSelected( node ) ){
+		Node_getTraversable( m_path.parent() )->insert( m_path.top() );
+
+		m_path.top().get().DecRef();
+		m_path.pop();
+	}
+}
+};
+
+scene::Node& Node_Clone_Selected( scene::Node& node ){
+	scene::Node& clone = node_clone( node );
+	scene::Traversable* traversable = Node_getTraversable( node );
+	if ( traversable != 0 ) {
+		traversable->traverse( CloneAllSelected( clone ) );
+	}
+	return clone;
+}
+
 
 typedef std::map<CopiedString, std::size_t> EntityBreakdown;
 

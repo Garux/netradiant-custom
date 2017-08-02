@@ -49,6 +49,7 @@
 #include <gtk/gtkscrolledwindow.h>
 #include <gtk/gtkentry.h>
 #include <gtk/gtkcombobox.h>
+#include <gtk/gtkstock.h>
 
 
 #include "os/path.h"
@@ -77,6 +78,8 @@
 #include "mainframe.h"
 #include "textureentry.h"
 #include "groupdialog.h"
+
+#include "select.h"
 
 GtkEntry* numeric_entry_new(){
 	GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
@@ -778,6 +781,8 @@ GtkCheckButton* g_entitySpawnflagsCheck[MAX_FLAGS];
 GtkEntry* g_entityKeyEntry;
 GtkEntry* g_entityValueEntry;
 
+GtkToggleButton* g_focusToggleButton;
+
 GtkListStore* g_entlist_store;
 GtkListStore* g_entprops_store;
 const EntityClass* g_current_flags = 0;
@@ -1411,6 +1416,21 @@ static gint EntityInspector_hideWindowKB( GtkWidget* widget, GdkEventKey* event,
 	return FALSE;
 }
 
+void EntityInspector_selectTargeting( GtkButton *button, gpointer user_data ){
+	bool focus = gtk_toggle_button_get_active( g_focusToggleButton );
+	Select_ConnectedEntities( true, false, focus );
+}
+
+void EntityInspector_selectTargets( GtkButton *button, gpointer user_data ){
+	bool focus = gtk_toggle_button_get_active( g_focusToggleButton );
+	Select_ConnectedEntities( false, true, focus );
+}
+
+void EntityInspector_selectConnected( GtkButton *button, gpointer user_data ){
+	bool focus = gtk_toggle_button_get_active( g_focusToggleButton );
+	Select_ConnectedEntities( true, true, focus );
+}
+
 GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 	GtkWidget* vbox = gtk_vbox_new( FALSE, 2 );
 	gtk_widget_show( vbox );
@@ -1619,21 +1639,59 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 				}
 
 				{
-					GtkBox* hbox = GTK_BOX( gtk_hbox_new( TRUE, 4 ) );
+					GtkBox* hbox = GTK_BOX( gtk_hbox_new( FALSE, 4 ) );
 					gtk_widget_show( GTK_WIDGET( hbox ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( hbox ), FALSE, TRUE, 0 );
 
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Clear All" ) );
+						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_clearAllKeyValues ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), TRUE, TRUE, 0 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Delete Key" ) );
+						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_clearKeyValue ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), TRUE, TRUE, 0 );
+					}
+					{
+						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "<" ) );
+						gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Select targeting entities" );
+						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_show( GTK_WIDGET( button ) );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectTargeting ), 0 );
+						gtk_box_pack_start( hbox, GTK_WIDGET( button ), FALSE, FALSE, 0 );
+					}
+					{
+						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( ">" ) );
+						gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Select targets" );
+						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_show( GTK_WIDGET( button ) );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectTargets ), 0 );
+						gtk_box_pack_start( hbox, GTK_WIDGET( button ), FALSE, FALSE, 0 );
+					}
+					{
+						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "<->" ) );
+						gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Select connected entities" );
+						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_show( GTK_WIDGET( button ) );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectConnected ), 0 );
+						gtk_box_pack_start( hbox, GTK_WIDGET( button ), FALSE, FALSE, 0 );
+					}
+					{
+						GtkWidget* button = gtk_toggle_button_new();
+						GtkImage* image = GTK_IMAGE( gtk_image_new_from_stock( GTK_STOCK_ZOOM_IN, GTK_ICON_SIZE_SMALL_TOOLBAR ) );
+						gtk_widget_show( GTK_WIDGET( image ) );
+						gtk_container_add( GTK_CONTAINER( button ), GTK_WIDGET( image ) );
+						gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
+						GTK_WIDGET_UNSET_FLAGS( button, GTK_CAN_FOCUS );
+						gtk_box_pack_start( hbox, button, FALSE, FALSE, 0 );
+						gtk_widget_set_tooltip_text( button, "Focus on Selected" );
+						gtk_widget_show( button );
+						g_focusToggleButton = GTK_TOGGLE_BUTTON( button );
 					}
 				}
 			}

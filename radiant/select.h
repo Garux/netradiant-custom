@@ -46,11 +46,15 @@ void Selection_MoveUp();
 
 void Select_AllOfType();
 
+void Select_ConnectedEntities( bool targeting, bool targets, bool focus );
+void SelectConnectedEntities();
+
 void DoRotateDlg();
 void DoScaleDlg();
 
 
 void Select_SetShader( const char* shader );
+void Select_SetShader_Undo( const char* shader );
 
 class TextureProjection;
 void Select_SetTexdef( const TextureProjection& projection );

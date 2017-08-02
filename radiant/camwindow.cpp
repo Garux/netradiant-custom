@@ -1695,19 +1695,21 @@ void GlobalCamera_ResetAngles(){
 
 void GlobalCamera_FocusOnSelected(){
 	CamWnd& camwnd = *g_camwnd;
-
+/*
 	Vector3 angles( Camera_getAngles( camwnd ) );
 	Vector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
 	Vector3 viewvector;
 	viewvector[0] = cos( radangles[1] ) * cos( radangles[0] );
 	viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
 	viewvector[2] = sin( radangles[0] );
-
+*/
 	Vector3 camorigin( Camera_getOrigin( camwnd ) );
 
 	AABB aabb( aabb_for_minmax( Select_getWorkZone().d_work_min, Select_getWorkZone().d_work_max ) );
 
 	View& view = *( camwnd.getCamera().m_view );
+
+	Vector3 viewvector( -view.GetModelview()[2], -view.GetModelview()[6], -view.GetModelview()[10] );
 
 	Plane3 frustumPlanes[4];
 	frustumPlanes[0] = plane3_translated( view.getFrustum().left, camorigin - aabb.origin );
@@ -1732,6 +1734,13 @@ void GlobalCamera_FocusOnSelected(){
 			}
 		}
 	}
+/*
+	globalOutputStream() << viewvector << "\n";
+	globalOutputStream() << view.GetModelview()[0] << " " << view.GetModelview()[1] << " " << view.GetModelview()[2] << " " << view.GetModelview()[3] << "\n"
+	 << view.GetModelview()[4] << " " << view.GetModelview()[5] << " " << view.GetModelview()[6] << " " << view.GetModelview()[7] << "\n"
+	  << view.GetModelview()[8] << " " << view.GetModelview()[9] << " " << view.GetModelview()[10] << " " << view.GetModelview()[11] << "\n"
+	   << view.GetModelview()[12] << " " << view.GetModelview()[13] << " " << view.GetModelview()[14] << " " << view.GetModelview()[15] << "\n";
+*/
 	Camera_setOrigin( camwnd, aabb.origin - viewvector * offset );
 }
 

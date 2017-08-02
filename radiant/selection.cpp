@@ -1889,12 +1889,12 @@ bool Scene_forEachPlaneSelectable_selectPlanes( scene::Graph& graph, Selector& s
 
 
 #include "brush.h"
-/*
-class TestedBrushPlanesSelectVeritces : public scene::Graph::Walker
+
+class TestedBrushFacesSelectVeritces : public scene::Graph::Walker
 {
 SelectionTest& m_test;
 public:
-TestedBrushPlanesSelectVeritces( SelectionTest& test )
+TestedBrushFacesSelectVeritces( SelectionTest& test )
 	: m_test( test ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
@@ -1903,7 +1903,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( selectable != 0 && selectable->isSelected() ) {
 			BrushInstance* brushInstance = Instance_getBrush( instance );
 			if ( brushInstance != 0 ) {
-				brushInstance->selectVerticesOnPlanes( m_test );
+				brushInstance->selectVerticesOnTestedFaces( m_test );
 			}
 		}
 	}
@@ -1911,10 +1911,10 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Scene_forEachTestedBrushPlane_selectVertices( scene::Graph& graph, SelectionTest& test ){
-	graph.traverse( TestedBrushPlanesSelectVeritces( test ) );
+void Scene_forEachTestedBrushFace_selectVertices( scene::Graph& graph, SelectionTest& test ){
+	graph.traverse( TestedBrushFacesSelectVeritces( test ) );
 }
-*/
+
 class BrushPlanesSelectVeritces : public scene::Graph::Walker
 {
 SelectionTest& m_test;
@@ -2683,8 +2683,8 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 					m_dragSelectable.setSelected( false );
 				}
 				if( deepSelector.best().empty() ){
-					//Scene_forEachTestedBrushPlane_selectVertices( GlobalSceneGraph(), test );	//todo? drag clicked face
-					Scene_forEachBrushPlane_selectVertices( GlobalSceneGraph(), test );
+					Scene_forEachTestedBrushFace_selectVertices( GlobalSceneGraph(), test );	//drag clicked face
+					//Scene_forEachBrushPlane_selectVertices( GlobalSceneGraph(), test );
 					m_selected = true;
 				}
 			}
