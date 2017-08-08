@@ -56,7 +56,7 @@ const char* GetCaulkShader(){
 	return g_caulk_shader;
 }
 
-gboolean Areaportals_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
+gboolean Translucent_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
 		if ( ButtonNum == 1 ){
 			ToggleActions %= 2;
@@ -235,16 +235,17 @@ GtkToolbar* create_filter_toolbar(){
 			toolbar_append_toggle_button( toolbar, "Patches (CTRL + P)", "patch_wireframe.png", "FilterPatches" );
 			gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
 
-			if ( g_pGameDescription->mGameType == "doom3" ) {
-				button = toolbar_append_toggle_button( toolbar, "Visportals (ALT + 3)\nRightClick: toggle tex\n\tnoDraw\n\tnoDrawNonSolid", "f-areaportal.png", "FilterVisportals" );
-			}
-			else{
-				button = toolbar_append_toggle_button( toolbar, "Areaportals (ALT + 3)\nRightClick: toggle tex\n\tnoDraw\n\tnoDrawNonSolid", "f-areaportal.png", "FilterAreaportals" );
-			}
-			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Areaportals_button_press ), 0 );
+//			if ( g_pGameDescription->mGameType == "doom3" ) {
+//				button = toolbar_append_toggle_button( toolbar, "Visportals (ALT + 3)\nRightClick: toggle tex\n\tnoDraw\n\tnoDrawNonSolid", "f-areaportal.png", "FilterVisportals" );
+//			}
+//			else{
+//				button = toolbar_append_toggle_button( toolbar, "Areaportals (ALT + 3)\nRightClick: toggle tex\n\tnoDraw\n\tnoDrawNonSolid", "f-areaportal.png", "FilterAreaportals" );
+//			}
+//			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Translucent_button_press ), 0 );
 
 
-			toolbar_append_toggle_button( toolbar, "Translucent (ALT + 4)", "f-translucent.png", "FilterTranslucent" );
+			button = toolbar_append_toggle_button( toolbar, "Translucent (ALT + 4)\nRightClick: toggle tex\n\tnoDraw\n\tnoDrawNonSolid", "f-translucent.png", "FilterTranslucent" );
+			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Translucent_button_press ), 0 );
 
 			button = toolbar_append_toggle_button( toolbar, "Liquids (ALT + 5)\nRightClick: toggle tex\n\twaterCaulk\n\tlavaCaulk\n\tslimeCaulk", "f-liquids.png", "FilterLiquids" );
 			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Liquids_button_press ), 0 );
