@@ -128,19 +128,32 @@ FreezePointer() : handle_motion( 0 ), m_function( 0 ), m_data( 0 ){
 static gboolean motion_delta( GtkWidget *widget, GdkEventMotion *event, FreezePointer* self ){
 	int current_x, current_y;
 	Sys_GetCursorPos( GTK_WINDOW( widget ), &current_x, &current_y );
-	int dx = current_x - self->last_x;
-	int dy = current_y - self->last_y;
-	int ddx = current_x - self->center_x;
-	int ddy = current_y - self->center_y;
+#define FIX_LINUX_TOUCHPAD 0 /* issues with this: mouse juddering
+													in win10 (system is already at normal scaling)
+													Leaving the DPI scaling to the application instead of the system half fixes it
+													in GNU/Linux
+													Mouselook is broken with custom Input Coordinate Tranformation */
+#if FIX_LINUX_TOUCHPAD
+	const int dx = current_x - self->last_x;
+	const int dy = current_y - self->last_y;
+	const int ddx = current_x - self->center_x;
+	const int ddy = current_y - self->center_y;
 	self->last_x = current_x;
 	self->last_y = current_y;
 	if ( dx != 0 || dy != 0 ) {
 		//globalOutputStream() << "motion x: " << dx << ", y: " << dy << "\n";
-		if (ddx < -32 || ddx > 32 || ddy < -32 || ddy > 32) {
+		if ( ddx < -32 || ddx > 32 || ddy < -32 || ddy > 32 ) {
 			Sys_SetCursorPos( GTK_WINDOW( widget ), self->center_x, self->center_y );
 			self->last_x = self->center_x;
 			self->last_y = self->center_y;
 		}
+#else
+	const int dx = current_x - self->center_x;
+	const int dy = current_y - self->center_y;
+	if ( dx != 0 || dy != 0 ) {
+		//globalOutputStream() << "motion x: " << dx << ", y: " << dy << "\n";
+		Sys_SetCursorPos( GTK_WINDOW( widget ), self->center_x, self->center_y );
+#endif
 		self->m_function( dx, dy, event->state, self->m_data );
 	}
 	return FALSE;
