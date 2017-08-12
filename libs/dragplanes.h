@@ -249,9 +249,8 @@ public:
 		m_model[5] = m_model[5] >= 0 ? 1 : -1;
 		m_model[10] = m_model[10] >= 0 ? 1 : -1;
 
-		Plane3 plane( 1, 0, 0, 0 );
 		Selector_add( selector, m_selectable );
-		selectedPlaneCallback( plane );
+		selectedPlaneCallback( Plane3( 2, 0, 0, 0 ) );
 
 		m_radius = radius;
 	}

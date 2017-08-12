@@ -2497,33 +2497,6 @@ void forEachLight( const RendererLightCallback& callback ) const {
 }
 };
 
-class BoolSelector : public Selector
-{
-bool m_selected;
-SelectionIntersection m_intersection;
-Selectable* m_selectable;
-public:
-BoolSelector() : m_selected( false ){
-}
-
-void pushSelectable( Selectable& selectable ){
-	m_intersection = SelectionIntersection();
-	m_selectable = &selectable;
-}
-void popSelectable(){
-	if ( m_intersection.valid() ) {
-		m_selected = true;
-	}
-	m_intersection = SelectionIntersection();
-}
-void addIntersection( const SelectionIntersection& intersection ){
-	assign_if_closer( m_intersection, intersection );
-}
-
-bool isSelected(){
-	return m_selected;
-}
-};
 
 class FaceInstance
 {
@@ -2721,22 +2694,10 @@ void testSelect_centroid( Selector& selector, SelectionTest& test ){
 	}
 }
 
-void selectPlane( Selector& selector, const Line& line, const PlaneCallback& selectedPlaneCallback ){
-	for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i )
-	{
-		Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
-		double dot = vector3_dot( getFace().plane3().normal(), v );
-//		globalOutputStream() << getFace().plane3().normal()[0] << " " << getFace().plane3().normal()[1] << " " << getFace().plane3().normal()[2] << " DOT " << dot << "\n";
-		//epsilon to prevent perpendicular faces pickup
-		if ( dot <= 0.005 ) {
-			return;
-		}
-	}
-
+void addSelectable( Selector& selector ){
 	Selector_add( selector, m_selectable );
-
-	selectedPlaneCallback( getFace().plane3() );
 }
+
 void selectReversedPlane( Selector& selector, const SelectedPlanes& selectedPlanes ){
 	if ( selectedPlanes.contains( plane3_flipped( getFace().plane3() ) ) ) {
 		Selector_add( selector, m_selectable );
@@ -2745,10 +2706,11 @@ void selectReversedPlane( Selector& selector, const SelectedPlanes& selectedPlan
 
 bool trySelectPlane( const Line& line ){
 	for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i ){
-		Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
-		double dot = vector3_dot( getFace().plane3().normal(), v );
-		//epsilon to prevent perpendicular faces pickup
-		if ( dot <= 0.005 ) {
+		const Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
+		const double dot = vector3_dot( getFace().plane3().normal(), v );
+//		globalOutputStream() << getFace().plane3().normal()[0] << " " << getFace().plane3().normal()[1] << " " << getFace().plane3().normal()[2] << " DOT " << dot << "\n";
+		//epsilon to prevent almost perpendicular faces pickup
+		if ( dot < 0.005 ) {
 			return false;
 		}
 	}
@@ -3010,6 +2972,7 @@ inline void Face_addLight( const FaceInstance& face, const Matrix4& localToWorld
 
 
 typedef std::vector<FaceInstance> FaceInstances;
+typedef std::vector<FaceInstance*> FaceInstances_ptrs;
 
 class EdgeInstance : public Selectable
 {
@@ -3112,27 +3075,11 @@ void testSelect( Selector& selector, SelectionTest& test ){
 	}
 }
 
-void selectVerticesOnPlanes( SelectionTest& test ){
-	Line line( test.getNear(), test.getFar() );
+void selectVerticesOnFaces( const FaceInstances_ptrs& faceinstances ){
 	FaceVertexId faceVertex = m_vertex->m_faceVertex;
 	do
 	{
-		if( m_faceInstances[faceVertex.getFace()].trySelectPlane( line ) ){
-			//m_faceInstances[faceVertex.getFace()].select_vertex( faceVertex.getVertex(), true );
-			setSelected( true );
-		}
-		faceVertex = next_vertex( m_vertex->m_faces, faceVertex );
-	}
-	while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
-}
-
-void selectVerticesOnTestedFaces( SelectionTest& test ){
-	FaceVertexId faceVertex = m_vertex->m_faceVertex;
-	do
-	{
-		BoolSelector selector;
-		m_faceInstances[faceVertex.getFace()].testSelect( selector, test );
-		if( selector.isSelected() ){
+		if( std::find( faceinstances.begin(), faceinstances.end(), &m_faceInstances[faceVertex.getFace()] ) != faceinstances.end() ){
 			setSelected( true );
 		}
 		faceVertex = next_vertex( m_vertex->m_faces, faceVertex );
@@ -3580,12 +3527,37 @@ void invertComponentSelection( SelectionSystem::EComponentMode mode ){
 	}
 }
 
-void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
+void selectPlanes( SelectionTest& test, FaceInstances_ptrs& bestInstances ){
 	test.BeginMesh( localToWorld() );
+
+	const Line line( test.getNear(), test.getFar() );
+	const Vector3 viewer( vector3_normalised( test.getNear() - test.getFar() ) );
+	double bestDot = 1;
 
 	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
 	{
-		( *i ).selectPlane( selector, Line( test.getNear(), test.getFar() ), selectedPlaneCallback );
+		if( !( *i ).trySelectPlane( line ) ){
+			continue;
+		}
+		const double dot = fabs( vector3_dot( ( *i ).getFace().plane3().normal(), viewer ) );
+		const double diff = bestDot - dot;
+		if( diff > 0.03 ){
+			bestDot = dot;
+			bestInstances.clear();
+			bestInstances.push_back( &( *i ) );
+		}
+		else if( fabs( diff ) <= 0.03 ){
+			bestInstances.push_back( &( *i ) );
+		}
+	}
+}
+void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ){
+	FaceInstances_ptrs bestInstances;
+	selectPlanes( test, bestInstances );
+
+	for ( FaceInstances_ptrs::iterator i = bestInstances.begin(); i != bestInstances.end(); ++i ){
+		( *i )->addSelectable( selector );
+		selectedPlaneCallback( ( *i )->getFace().plane3() );
 	}
 }
 void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
@@ -3597,19 +3569,31 @@ void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPla
 
 
 void selectVerticesOnPlanes( SelectionTest& test ){
-	test.BeginMesh( localToWorld() );
+	FaceInstances_ptrs bestInstances;
+	selectPlanes( test, bestInstances );
 
 	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
-		( *i ).selectVerticesOnPlanes( test );
+		( *i ).selectVerticesOnFaces( bestInstances );
 	}
 }
-
 
 void selectVerticesOnTestedFaces( SelectionTest& test ){
 	test.BeginMesh( localToWorld() );
 
-	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
-		( *i ).selectVerticesOnTestedFaces( test );
+	FaceInstances::iterator f;
+	SelectionIntersection si;
+	for ( f = m_faceInstances.begin(); f != m_faceInstances.end(); ++f ){
+		( *f ).testSelect( test, si );
+		if( si.valid() ){
+			break;
+		}
+	}
+	if( f != m_faceInstances.end() ){
+		FaceInstances_ptrs bestInstances;
+		bestInstances.push_back( &( *f ) );
+		for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
+			( *i ).selectVerticesOnFaces( bestInstances );
+		}
 	}
 }
 
