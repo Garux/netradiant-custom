@@ -415,6 +415,10 @@ void Entity_Construct( EGameType gameType ){
 	GlobalPreferenceSystem().registerPreference( "SI_ShowAngles", BoolImportStringCaller( g_showAngles ), BoolExportStringCaller( g_showAngles ) );
 	GlobalPreferenceSystem().registerPreference( "LightRadiuses", BoolImportStringCaller( g_lightRadii ), BoolExportStringCaller( g_lightRadii ) );
 
+	if( !g_showTargetNames ){
+		Static<KeyIsName>::instance().m_nameKey = "classname";
+	}
+
 	Entity_InitFilters();
 	LightType lightType = LIGHTTYPE_DEFAULT;
 	if ( g_gameType == eGameTypeRTCW ) {

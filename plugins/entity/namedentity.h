@@ -26,7 +26,7 @@
 #include "eclasslib.h"
 #include "generic/callback.h"
 #include "nameable.h"
-#include "entity.h" //g_showTargetNames
+#include "entity.h"
 
 #include <set>
 
@@ -117,7 +117,8 @@ public:
 	}
 	RenderableNamedEntity( NamedEntity& named, const Vector3& position, const char* exclude = 0 )
 		: m_named( named ), m_position( position ), m_tex( 0 ), m_exclude( exclude ) {
-		construct_textures( g_showTargetNames ? m_named.name() : m_named.classname() );
+//		construct_textures( g_showTargetNames ? m_named.name() : m_named.classname() );
+		construct_textures( m_named.name() );
 		m_named.attach( IdentifierChangedCaller( *this ) );
 	}
 	bool excluded_not() const {
@@ -261,7 +262,8 @@ public:
 	}
 	void identifierChanged( const char* value ){
 		delete_textures();
-		construct_textures( g_showTargetNames ? value : m_named.classname() );
+//		construct_textures( g_showTargetNames ? value : m_named.classname() );
+		construct_textures( value );
 	}
 	typedef MemberCaller1<RenderableNamedEntity, const char*, &RenderableNamedEntity::identifierChanged> IdentifierChangedCaller;
 };

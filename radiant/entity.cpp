@@ -668,6 +668,21 @@ void ShowNamesRatioExport( EntityCreator& self, const IntImportCallback& importe
 typedef ReferenceCaller1<EntityCreator, const IntImportCallback&, ShowNamesRatioExport> ShowNamesRatioExportCaller;
 
 
+void ShowTargetNamesImport( EntityCreator& self, bool value ){
+	const bool oldvalue = self.getShowTargetNames();
+	self.setShowTargetNames( value );
+	if( oldvalue != value ){
+		PreferencesDialog_restartRequired( "Entity Names = Targetnames" );
+	}
+}
+typedef ReferenceCaller1<EntityCreator, bool, ShowTargetNamesImport> ShowTargetNamesImportCaller;
+
+void ShowTargetNamesExport( EntityCreator& self, const BoolImportCallback& importer ){
+	importer( self.getShowTargetNames() );
+}
+typedef ReferenceCaller1<EntityCreator, const BoolImportCallback&, ShowTargetNamesExport> ShowTargetNamesExportCaller;
+
+
 void Entity_constructPreferences( PreferencesPage& page ){
 	page.appendSpinner(	"Names Display Distance (3D)", 512.0, 0.0, 200500.0,
 		IntImportCallback( ShowNamesDistImportCaller( GlobalEntityCreator() ) ),
@@ -677,6 +692,9 @@ void Entity_constructPreferences( PreferencesPage& page ){
 		IntImportCallback( ShowNamesRatioImportCaller( GlobalEntityCreator() ) ),
 		IntExportCallback( ShowNamesRatioExportCaller( GlobalEntityCreator() ) )
 		);
+	page.appendCheckBox( "Entity Names", "= Targetnames",
+		BoolImportCallback( ShowTargetNamesImportCaller( GlobalEntityCreator() ) ),
+		BoolExportCallback( ShowTargetNamesExportCaller( GlobalEntityCreator() ) ) );
 }
 void Entity_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Entities", "Entity Display Preferences" ) );
