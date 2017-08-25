@@ -404,6 +404,14 @@ public:
    };
  */
 
+static gboolean mid_search_func( GtkTreeModel* model, gint column, const gchar* key, GtkTreeIter* iter, gpointer search_data ) {
+	gchar* iter_string = 0;
+	gtk_tree_model_get( model, iter, column, &iter_string, -1 );
+	const gboolean ret = iter_string? !string_in_string_nocase( iter_string, key ) : TRUE;
+	g_free( iter_string );
+	return ret;
+}
+
 void DoCommandListDlg(){
 	command_list_dialog_t dialog;
 
@@ -427,6 +435,8 @@ void DoCommandListDlg(){
 			dialog.m_list = GTK_TREE_VIEW( view );
 
 			//gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), false ); // annoying
+			gtk_tree_view_set_search_column( dialog.m_list, 0 );
+			gtk_tree_view_set_search_equal_func( dialog.m_list, (GtkTreeViewSearchEqualFunc)mid_search_func, 0, 0 );
 
 			g_signal_connect( G_OBJECT( view ), "button_press_event", G_CALLBACK( accelerator_tree_butt_press ), &dialog );
 
