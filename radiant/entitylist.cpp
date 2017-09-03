@@ -29,6 +29,7 @@
 #include <gtk/gtkcellrenderertext.h>
 #include <gtk/gtkcheckbutton.h>
 #include <gtk/gtkvbox.h>
+#include <gtk/gtkhbox.h>
 
 #include "string/string.h"
 #include "scenelib.h"
@@ -72,11 +73,16 @@ GtkTreeView* m_tree_view;
 GraphTreeModel* m_tree_model;
 bool m_selection_disabled;
 
+bool m_search_from_start;
+scene::Node* m_search_focus_node;
+
 EntityList() :
 	m_dirty( EntityList::eDefault ),
 	m_idleDraw( RedrawEntityListCaller() ),
 	m_window( 0 ),
-	m_selection_disabled( false ){
+	m_selection_disabled( false ),
+	m_search_from_start( false ),
+	m_search_focus_node( 0 ){
 }
 
 bool visible() const {
@@ -260,6 +266,12 @@ void entitylist_treeview_row_expanded( GtkTreeView* view, GtkTreeIter* iter, Gtk
 
 void EntityList_SetShown( bool shown ){
 	widget_set_visible( GTK_WIDGET( getEntityList().m_window ), shown );
+	if( shown ){ /* expand map's root node for convenience */
+		GtkTreePath* path = gtk_tree_path_new_from_string( "1" );
+		if( gtk_tree_view_row_expanded( getEntityList().m_tree_view, path ) == FALSE )
+			gtk_tree_view_expand_row( getEntityList().m_tree_view, path, FALSE );
+		gtk_tree_path_free( path );
+	}
 }
 
 void EntityList_toggleShown(){
@@ -281,11 +293,137 @@ gint graph_tree_model_compare_name( GtkTreeModel *model, GtkTreeIter *a, GtkTree
 	return result;
 }
 
+/* search */
+#include <gtk/gtkstock.h>
+static gboolean tree_view_search_equal_func( GtkTreeModel* model, gint column, const gchar* key, GtkTreeIter* iter, gpointer search_from_start ) {
+	scene::Node* node;
+	gtk_tree_model_get( model, iter, column, (gpointer*)&node, -1 );
+	/* return FALSE means match */
+	return ( node && !node->isRoot() )? *(bool*)search_from_start? !string_equal_prefix_nocase( node_get_name( *node ), key ) : !string_in_string_nocase( node_get_name( *node ), key ) : TRUE;
+}
+
+void searchEntrySetModeIcon( GtkEntry* entry, bool search_from_start ){
+	gtk_entry_set_icon_from_stock( entry, GTK_ENTRY_ICON_PRIMARY, search_from_start? GTK_STOCK_MEDIA_PLAY : GTK_STOCK_ABOUT );
+	g_signal_emit_by_name( G_OBJECT( entry ), "changed" );
+}
+
+void searchEntryIconPress( GtkEntry* entry, gint position, GdkEventButton* event, gpointer user_data ) {
+	if( position == GTK_ENTRY_ICON_PRIMARY ){
+		getEntityList().m_search_from_start = !getEntityList().m_search_from_start;
+		searchEntrySetModeIcon( entry, getEntityList().m_search_from_start );
+	}
+}
+
+gboolean searchEntryFocus( GtkWidget *widget, GdkEvent *event, gpointer user_data ){
+	gtk_widget_grab_focus( widget );
+	return FALSE;
+}
+
+gboolean searchEntryUnfocus( GtkWidget *widget, GdkEvent *event, gpointer user_data ){
+	gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( widget ) ), NULL );
+	return FALSE;
+}
+
+gboolean searchEntryScroll( GtkWidget* widget, GdkEventScroll* event, gpointer user_data ){
+//	globalOutputStream() << "scroll\n";
+	if( string_empty( gtk_entry_get_text( GTK_ENTRY( widget ) ) ) ){ /* scroll through selected/child selected entities */
+		GtkTreeModel* model = gtk_tree_view_get_model( getEntityList().m_tree_view );
+		GtkTreePath* path0 = gtk_tree_path_new_from_string( "1" );
+		GtkTreeIter iter0, iter, iter_first, iter_prev, iter_found, iter_next;
+		iter_first.stamp = iter_prev.stamp = iter_found.stamp = iter_next.stamp = 0;
+		if( gtk_tree_model_get_iter( model, &iter0, path0 ) ){
+			if( gtk_tree_model_iter_children( model, &iter, &iter0 ) ) {
+				do{
+					scene::Node* node;
+					gtk_tree_model_get_pointer( model, &iter, 0, &node );
+					if( node ){
+						scene::Instance* instance;
+						gtk_tree_model_get_pointer( model, &iter, 1, &instance );
+						Selectable* selectable = Instance_getSelectable( *instance );
+						if( selectable ){
+							if( selectable->isSelected() || instance->childSelected() ){
+								if( iter_first.stamp == 0 ){
+									iter_first = iter;
+								}
+								if( iter_found.stamp != 0 ){
+									iter_next = iter;
+									break;
+								}
+								if( node == getEntityList().m_search_focus_node ){
+									iter_found = iter;
+								}
+								else{
+									iter_prev = iter;
+								}
+							}
+						}
+					}
+				} while( gtk_tree_model_iter_next( model, &iter ) );
+			}
+		}
+		iter.stamp = 0;
+		if( iter_found.stamp != 0 ){
+			iter = iter_found;
+			if( event->direction == GDK_SCROLL_DOWN ){
+				if( iter_next.stamp != 0 ){
+					iter = iter_next;
+				}
+			}
+			else{
+				if( iter_prev.stamp != 0 ){
+					iter = iter_prev;
+				}
+			}
+		}
+		else if( iter_first.stamp != 0 ){
+			iter = iter_first;
+		}
+		if( iter.stamp != 0 ){
+			gtk_tree_model_get_pointer( model, &iter, 0, &getEntityList().m_search_focus_node );
+			GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
+			gtk_tree_view_scroll_to_cell( getEntityList().m_tree_view, path, 0, TRUE, .5f, 0.f );
+			gtk_tree_path_free( path );
+		}
+		gtk_tree_path_free( path0 );
+		return FALSE;
+	}
+	/* hijack internal gtk keypress function for handling scroll via synthesized event */
+	GdkEvent* eventmp = gdk_event_new( GDK_KEY_PRESS );
+	if ( event->direction == GDK_SCROLL_UP ) {
+		eventmp->key.keyval = GDK_Up;
+	}
+	else if ( event->direction == GDK_SCROLL_DOWN ) {
+		eventmp->key.keyval = GDK_Down;
+	}
+	if( eventmp->key.keyval ){
+		eventmp->key.window = gtk_widget_get_window( widget );
+		if( eventmp->key.window )
+			g_object_ref( eventmp->key.window );
+		gtk_widget_event( widget, eventmp );
+//		gtk_window_propagate_key_event( GTK_WINDOW( gtk_widget_get_toplevel( widget ) ), (GdkEventKey*)eventmp );
+//		gtk_main_do_event( eventmp );
+//		gdk_event_put( eventmp );
+	}
+	gdk_event_free( eventmp );
+	return FALSE;
+}
+
+static gboolean searchEntryKeypress( GtkEntry* widget, GdkEventKey* event, gpointer user_data ){
+	if ( event->keyval == GDK_Escape ) {
+		gtk_entry_set_text( GTK_ENTRY( widget ), "" );
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
 extern GraphTreeModel* scene_graph_get_tree_model();
 void AttachEntityTreeModel(){
 	getEntityList().m_tree_model = scene_graph_get_tree_model();
 
 	gtk_tree_view_set_model( getEntityList().m_tree_view, GTK_TREE_MODEL( getEntityList().m_tree_model ) );
+
+	gtk_tree_view_set_search_column( getEntityList().m_tree_view, 0 );
 }
 
 void DetachEntityTreeModel(){
@@ -299,7 +437,8 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 
 	GtkWindow* window = create_persistent_floating_window( "Entity List", main_window );
 
-	gtk_window_add_accel_group( window, global_accel );
+	//gtk_window_add_accel_group( window, global_accel );
+	global_accel_connect_window( window );
 
 	getEntityList().m_positionTracker.connect( window );
 
@@ -338,12 +477,32 @@ void EntityList_constructWindow( GtkWindow* main_window ){
 			getEntityList().m_tree_view = GTK_TREE_VIEW( view );
 		}
 		{
-			GtkWidget* check = gtk_check_button_new_with_label( "AutoFocus on Selection" );
-			gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( check ), FALSE );
-			gtk_widget_show( check );
-			gtk_box_pack_start( GTK_BOX( vbox ), check, FALSE, FALSE, 0 );
-			getEntityList().m_check = check;
-			g_signal_connect( G_OBJECT( check ), "clicked", G_CALLBACK( entitylist_focusSelected ), 0 );
+			GtkHBox* hbox = GTK_HBOX( gtk_hbox_new( FALSE, 0 ) );
+			gtk_container_set_border_width( GTK_CONTAINER( hbox ), 0 );
+			gtk_widget_show( GTK_WIDGET( hbox ) );
+			gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, FALSE, 0 );
+			{
+				GtkWidget* check = gtk_check_button_new_with_label( "AutoFocus on Selection" );
+				gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( check ), FALSE );
+				gtk_widget_show( check );
+				gtk_box_pack_start( GTK_BOX( hbox ), check, FALSE, FALSE, 0 );
+				getEntityList().m_check = check;
+				g_signal_connect( G_OBJECT( check ), "clicked", G_CALLBACK( entitylist_focusSelected ), 0 );
+			}
+			{//search entry
+				GtkWidget* entry = gtk_entry_new();
+				gtk_box_pack_start( GTK_BOX( hbox ), entry, TRUE, TRUE, 8 );
+				searchEntrySetModeIcon( GTK_ENTRY( entry ), getEntityList().m_search_from_start );
+				gtk_entry_set_icon_tooltip_text( GTK_ENTRY( entry ), GTK_ENTRY_ICON_PRIMARY, "toggle search mode ( start / any position )" );
+				gtk_widget_show( entry );
+				g_signal_connect( G_OBJECT( entry ), "icon-press", G_CALLBACK( searchEntryIconPress ), 0 );
+				g_signal_connect( G_OBJECT( entry ), "enter_notify_event", G_CALLBACK( searchEntryFocus ), 0 );
+				g_signal_connect( G_OBJECT( entry ), "leave_notify_event", G_CALLBACK( searchEntryUnfocus ), 0 );
+				g_signal_connect( G_OBJECT( entry ), "scroll_event", G_CALLBACK( searchEntryScroll ), 0 );
+				g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( searchEntryKeypress ), 0 );
+				gtk_tree_view_set_search_entry( getEntityList().m_tree_view, GTK_ENTRY( entry ) );
+				gtk_tree_view_set_search_equal_func( getEntityList().m_tree_view, (GtkTreeViewSearchEqualFunc)tree_view_search_equal_func, &getEntityList().m_search_from_start, 0 );
+			}
 		}
 	}
 
@@ -396,6 +555,7 @@ bool isSelected() const {
 
 typedef LazyStatic<NullSelectedInstance> StaticNullSelectedInstance;
 
+#include "stringio.h"
 
 void EntityList_Construct(){
 	graph_tree_model_insert( scene_graph_get_tree_model(), StaticNullSelectedInstance::instance() );
@@ -405,6 +565,7 @@ void EntityList_Construct(){
 	getEntityList().m_positionTracker.setPosition( c_default_window_pos );
 
 	GlobalPreferenceSystem().registerPreference( "EntityInfoDlg", WindowPositionTrackerImportStringCaller( getEntityList().m_positionTracker ), WindowPositionTrackerExportStringCaller( getEntityList().m_positionTracker ) );
+	GlobalPreferenceSystem().registerPreference( "EntListSearchFromStart", BoolImportStringCaller( getEntityList().m_search_from_start ), BoolExportStringCaller( getEntityList().m_search_from_start ) );
 
 	typedef FreeCaller1<const Selectable&, EntityList_SelectionChanged> EntityListSelectionChangedCaller;
 	GlobalSelectionSystem().addSelectionChangeCallback( EntityListSelectionChangedCaller() );

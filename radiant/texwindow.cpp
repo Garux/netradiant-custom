@@ -2113,13 +2113,21 @@ void TextureBrowser_filterChanged( GtkEditable *editable, TextureBrowser* textur
 	textureBrowser->m_originInvalid = true;
 }
 
-void TextureBrowser_filterIconPress( GtkEntry* entry, gint position, GdkEventButton* event, gpointer data ) {
+void TextureBrowser_filterIconPress( GtkEntry* entry, gint position, GdkEventButton* event, gpointer user_data ) {
 	if( position == GTK_ENTRY_ICON_PRIMARY ){
 		GlobalToggles_find( "SearchFromStart" ).m_command.m_callback();
 	}
 	else{
 		gtk_entry_set_text( entry, "" );
 	}
+}
+
+static gboolean TextureBrowser_filterKeypress( GtkEntry* widget, GdkEventKey* event, gpointer user_data ){
+	if ( event->keyval == GDK_Escape ) {
+		gtk_entry_set_text( GTK_ENTRY( widget ), "" );
+		return TRUE;
+	}
+	return FALSE;
 }
 
 gboolean TextureBrowser_filterEntryFocus( GtkWidget *widget, GdkEvent *event, gpointer user_data ){
@@ -2220,7 +2228,8 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		gtk_widget_show( entry );
 		g_TextureBrowser.m_filter_entry = entry;
 		g_signal_connect( G_OBJECT( entry ), "changed", G_CALLBACK( TextureBrowser_filterChanged ), &g_TextureBrowser );
-		g_signal_connect( entry, "icon-press", G_CALLBACK( TextureBrowser_filterIconPress ), NULL );
+		g_signal_connect( G_OBJECT( entry ), "icon-press", G_CALLBACK( TextureBrowser_filterIconPress ), 0 );
+		g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( TextureBrowser_filterKeypress ), 0 );
 		g_signal_connect( G_OBJECT( entry ), "enter_notify_event", G_CALLBACK( TextureBrowser_filterEntryFocus ), 0 );
 		g_signal_connect( G_OBJECT( entry ), "leave_notify_event", G_CALLBACK( TextureBrowser_filterEntryUnfocus ), 0 );
 	}
