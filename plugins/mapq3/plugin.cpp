@@ -228,7 +228,6 @@ MapDependencies() :
 
 class MapQ3API : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
-mutable bool detectedFormat;
 public:
 typedef MapFormat Type;
 STRING_CONSTANT( Name, "mapq3" );
@@ -248,31 +247,38 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 		if ( string_equal( primitive, "patchDef2" ) ) {
 			return GlobalPatchModule::getTable().createPatch();
 		}
-		if ( GlobalBrushModule::getTable().useAlternativeTextureProjection() ) {
+		if( !m_detectedFormat ){
 			if ( string_equal( primitive, "brushDef" ) ) {
-				detectedFormat = true;
-				return GlobalBrushModule::getTable().createBrush();
+				m_detectedFormat = eBrushTypeQuake3BP;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3BP\n";
 			}
-			else if ( !detectedFormat && string_equal( primitive, "(" ) ) {
-				detectedFormat = true;
-				wrongFormat = true;
-				Tokeniser_unexpectedError( tokeniser, primitive, "#quake3-switch-to-texdef" );
+			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
+				m_detectedFormat = eBrushTypeQuake3Valve220;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3Valve220\n";
+			}
+			else if ( string_equal( primitive, "(" ) ) {
+				m_detectedFormat = eBrushTypeQuake3;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3\n";
+			}
+			else{
+				globalErrorStream() << "Format is not detected\n";
+			}
+
+			if( m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ){
+				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
 				return g_nullNode;
 			}
 		}
-		else
+
+		switch ( GlobalBrushModule::getTable().getCurrentFormat() )
 		{
-			if ( string_equal( primitive, "(" ) ) {
-				detectedFormat = true;
-				tokeniser.ungetToken(); // (
-				return GlobalBrushModule::getTable().createBrush();
-			}
-			else if ( !detectedFormat && string_equal( primitive, "brushDef" ) ) {
-				detectedFormat = true;
-				wrongFormat = true;
-				Tokeniser_unexpectedError( tokeniser, primitive, "#quake3-switch-to-brush-primitives" );
-				return g_nullNode;
-			}
+		case eBrushTypeQuake3:
+		case eBrushTypeQuake3Valve220:
+			tokeniser.ungetToken(); // (
+		case eBrushTypeQuake3BP:
+			return GlobalBrushModule::getTable().createBrush();
+		default:
+			break;
 		}
 	}
 
@@ -281,8 +287,6 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 }
 
 void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
-	detectedFormat = false;
-	wrongFormat = false;
 	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
 	Map_Read( root, tokeniser, entityTable, *this );
 	tokeniser.release();
@@ -316,9 +320,38 @@ MapFormat* getTable(){
 scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 	const char* primitive = tokeniser.getToken();
 	if ( primitive != 0 ) {
-		if ( string_equal( primitive, "(" ) ) {
+		if( !m_detectedFormat ){
+			if ( string_equal( primitive, "brushDef" ) ) {
+				m_detectedFormat = eBrushTypeQuake3BP;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3BP\n";
+			}
+			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
+				m_detectedFormat = eBrushTypeValve220;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeValve220\n";
+			}
+			else if ( string_equal( primitive, "(" ) ) {
+				m_detectedFormat = eBrushTypeQuake;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake\n";
+			}
+			else{
+				globalErrorStream() << "Format is not detected\n";
+			}
+
+			if( m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ){
+				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
+				return g_nullNode;
+			}
+		}
+
+		switch ( GlobalBrushModule::getTable().getCurrentFormat() )
+		{
+		case eBrushTypeQuake:
+		case eBrushTypeValve220:
 			tokeniser.ungetToken(); // (
+		case eBrushTypeQuake3BP:
 			return GlobalBrushModule::getTable().createBrush();
+		default:
+			break;
 		}
 	}
 
@@ -401,9 +434,38 @@ MapFormat* getTable(){
 scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 	const char* primitive = tokeniser.getToken();
 	if ( primitive != 0 ) {
-		if ( string_equal( primitive, "(" ) ) {
+		if( !m_detectedFormat ){
+			if ( string_equal( primitive, "brushDef" ) ) {
+				m_detectedFormat = eBrushTypeQuake3BP;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3BP\n";
+			}
+			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
+				m_detectedFormat = eBrushTypeQuake3Valve220;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3Valve220\n";
+			}
+			else if ( string_equal( primitive, "(" ) ) {
+				m_detectedFormat = eBrushTypeQuake2;
+				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake2\n";
+			}
+			else{
+				globalErrorStream() << "Format is not detected\n";
+			}
+
+			if( m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ){
+				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
+				return g_nullNode;
+			}
+		}
+
+		switch ( GlobalBrushModule::getTable().getCurrentFormat() )
+		{
+		case eBrushTypeQuake2:
+		case eBrushTypeQuake3Valve220:
 			tokeniser.ungetToken(); // (
+		case eBrushTypeQuake3BP:
 			return GlobalBrushModule::getTable().createBrush();
+		default:
+			break;
 		}
 	}
 

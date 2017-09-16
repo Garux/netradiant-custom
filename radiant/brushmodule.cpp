@@ -35,11 +35,34 @@
 #include "preferences.h"
 
 LatchedBool g_useAlternativeTextureProjection( false, "Use alternative texture-projection (\"brush primitives\")" );
-bool g_showAlternativeTextureProjectionOption = false;
+bool g_multipleBrushTypes = false;
+EBrushType g_brushTypes[3];
+int g_brushType;
 bool g_brush_always_caulk;
 
 bool getTextureLockEnabled(){
 	return g_brush_texturelock_enabled;
+}
+
+const char* BrushType_getName( EBrushType type ){
+	switch ( type )
+	{
+	case eBrushTypeQuake:
+	case eBrushTypeQuake2:
+	case eBrushTypeQuake3:
+		return "Axial Projection";
+	case eBrushTypeQuake3BP:
+		return "Brush Primitives";
+	case eBrushTypeQuake3Valve220:
+	case eBrushTypeValve220:
+		return "Valve 220";
+	case eBrushTypeDoom3:
+		return "Doom3";
+	case eBrushTypeQuake4:
+		return "Quake4";
+	default:
+		return "unknown";
+	}
 }
 
 void Face_importSnapPlanes( bool value ){
@@ -62,11 +85,12 @@ void Brush_constructPreferences( PreferencesPage& page ){
 		"Default texture scale",
 		g_texdef_default_scale
 		);
-	if ( g_showAlternativeTextureProjectionOption ) {
-		page.appendCheckBox(
-			"", "Use alternative texture-projection (\"brush primitives\")",
-			LatchedBoolImportCaller( g_useAlternativeTextureProjection ),
-			BoolExportCaller( g_useAlternativeTextureProjection.m_latched )
+	if ( g_multipleBrushTypes ) {
+		const char* names[] = { BrushType_getName( g_brushTypes[0] ), BrushType_getName( g_brushTypes[1] ), BrushType_getName( g_brushTypes[2] ) };
+		page.appendCombo(
+			"Brush Type",
+			g_brushType,
+			STRING_ARRAY_RANGE( names )
 			);
 	}
 	// d1223m
@@ -83,51 +107,38 @@ void Brush_registerPreferencesPage(){
 	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Brush_constructPage>() );
 }
 
-void Brush_unlatchPreferences(){
-	Brush_toggleFormat( 0 );
-}
-
-void Brush_toggleFormat( int i ){
-	if ( g_showAlternativeTextureProjectionOption ) {
-		g_useAlternativeTextureProjection.m_value = g_useAlternativeTextureProjection.m_latched ^ i;
+void Brush_toggleFormat( EBrushType type ){
+	if( g_multipleBrushTypes ){
 		Brush::destroyStatic();
-		Brush::constructStatic( g_useAlternativeTextureProjection.m_value ? eBrushTypeQuake3BP : eBrushTypeQuake3 );
+		Brush::constructStatic( type );
 	}
 }
 
-int Brush_toggleFormatCount(){
-	if ( g_showAlternativeTextureProjectionOption ) {
-		return 2;
-	}
-	return 1;
+void Brush_unlatchPreferences(){
+	if( g_multipleBrushTypes )
+		Brush_toggleFormat( g_brushTypes[g_brushType] );
 }
 
 void Brush_Construct( EBrushType type ){
-	if ( type == eBrushTypeQuake3 ) {
-		g_showAlternativeTextureProjectionOption = true;
-
-		const char *value = g_pGameDescription->getKeyValue( "brush_primit" );
-		if ( !string_empty( value ) ) {
-			g_useAlternativeTextureProjection.m_latched = atoi( value );
+	if ( g_multipleBrushTypes ) {
+		for ( int i = 0; i < 3; ++i ){
+			if( g_brushTypes[i] == type ){
+				g_brushType = i;
+				break;
+			}
 		}
-
 		GlobalPreferenceSystem().registerPreference(
-			"AlternativeTextureProjection",
-			BoolImportStringCaller( g_useAlternativeTextureProjection.m_latched ),
-			BoolExportStringCaller( g_useAlternativeTextureProjection.m_latched )
+			"BrushType",
+			IntImportStringCaller( g_brushType ),
+			IntExportStringCaller( g_brushType )
 			);
-		g_useAlternativeTextureProjection.useLatched();
-
-		if ( g_useAlternativeTextureProjection.m_value ) {
-			type = eBrushTypeQuake3BP;
-		}
-
-		// d1223m
-		GlobalPreferenceSystem().registerPreference(
-			"BrushAlwaysCaulk",
-			BoolImportStringCaller( g_brush_always_caulk ),
-			BoolExportStringCaller( g_brush_always_caulk ) );
+		type = g_brushTypes[g_brushType];
 	}
+	// d1223m
+	GlobalPreferenceSystem().registerPreference(
+		"BrushAlwaysCaulk",
+		BoolImportStringCaller( g_brush_always_caulk ),
+		BoolExportStringCaller( g_brush_always_caulk ) );
 
 	Brush_registerCommands();
 	Brush_registerPreferencesPage();
@@ -137,6 +148,7 @@ void Brush_Construct( EBrushType type ){
 	BrushClipPlane::constructStatic();
 	BrushInstance::constructStatic();
 	Brush::constructStatic( type );
+	Face::m_quantise = quantiseFloating;
 
 	Brush::m_maxWorldCoord = g_MaxWorldCoord;
 	BrushInstance::m_counter = &g_brushCount;
@@ -197,8 +209,8 @@ public:
 scene::Node& createBrush(){
 	return ( new BrushNode )->node();
 }
-bool useAlternativeTextureProjection() const {
-	return g_useAlternativeTextureProjection.m_value;
+EBrushType getCurrentFormat() const {
+	return Brush::m_type;
 }
 void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ){
 	::Brush_forEachFace( *Node_getBrush( brush ), FaceCallback( BrushFaceDataFromFaceCaller( callback ) ) );
@@ -288,7 +300,12 @@ typedef BrushCreator Type;
 STRING_CONSTANT( Name, "quake3" );
 
 BrushQuake3API(){
-	Brush_Construct( eBrushTypeQuake3 );
+	g_multipleBrushTypes = true;
+	g_brushTypes[0] = eBrushTypeQuake3;
+	g_brushTypes[1] = eBrushTypeQuake3BP;
+	g_brushTypes[2] = eBrushTypeQuake3Valve220;
+
+	Brush_Construct( eBrushTypeQuake3BP );
 
 	m_brushquake3 = &GetBrushCreator();
 }
@@ -313,6 +330,11 @@ typedef BrushCreator Type;
 STRING_CONSTANT( Name, "quake2" );
 
 BrushQuake2API(){
+	g_multipleBrushTypes = true;
+	g_brushTypes[0] = eBrushTypeQuake2;
+	g_brushTypes[1] = eBrushTypeQuake3BP;
+	g_brushTypes[2] = eBrushTypeQuake3Valve220;
+
 	Brush_Construct( eBrushTypeQuake2 );
 
 	m_brushquake2 = &GetBrushCreator();
@@ -338,6 +360,11 @@ typedef BrushCreator Type;
 STRING_CONSTANT( Name, "quake" );
 
 BrushQuake1API(){
+	g_multipleBrushTypes = true;
+	g_brushTypes[0] = eBrushTypeQuake;
+	g_brushTypes[1] = eBrushTypeQuake3BP;
+	g_brushTypes[2] = eBrushTypeValve220;
+
 	Brush_Construct( eBrushTypeQuake );
 
 	m_brushquake1 = &GetBrushCreator();
@@ -363,7 +390,7 @@ typedef BrushCreator Type;
 STRING_CONSTANT( Name, "halflife" );
 
 BrushHalfLifeAPI(){
-	Brush_Construct( eBrushTypeHalfLife );
+	Brush_Construct( eBrushTypeValve220 );
 
 	m_brushhalflife = &GetBrushCreator();
 }

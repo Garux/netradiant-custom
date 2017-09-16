@@ -39,6 +39,7 @@ virtual const char* getToken() = 0;
 virtual void ungetToken() = 0;
 virtual std::size_t getLine() const = 0;
 virtual std::size_t getColumn() const = 0;
+virtual bool bufferContains( const char* str ) = 0;
 };
 
 class TextInputStream;

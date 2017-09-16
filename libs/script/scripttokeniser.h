@@ -41,7 +41,7 @@ typedef bool ( ScriptTokeniser::*Tokenise )( char c );
 
 Tokenise m_stack[3];
 Tokenise* m_state;
-SingleCharacterInputStream<TextInputStream> m_istream;
+SingleCharacterInputStreamDoubleBuffered<TextInputStream> m_istream;
 std::size_t m_scriptline;
 std::size_t m_scriptcolumn;
 
@@ -328,6 +328,9 @@ std::size_t getLine() const {
 }
 std::size_t getColumn() const {
 	return m_scriptcolumn;
+}
+bool bufferContains( const char* str ){
+	return m_istream.bufferContains( str );
 }
 };
 

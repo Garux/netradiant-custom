@@ -22,9 +22,10 @@
 #if !defined( INCLUDED_BRUSHMODULE_H )
 #define INCLUDED_BRUSHMODULE_H
 
+#include "ibrush.h"
+
 void Brush_clipperColourChanged();
 void Brush_unlatchPreferences();
-int Brush_toggleFormatCount();
-void Brush_toggleFormat( int i );
+void Brush_toggleFormat( EBrushType type );
 
 #endif

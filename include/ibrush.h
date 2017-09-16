@@ -27,6 +27,20 @@
 #include "generic/vector.h"
 #include "itexdef.h"
 
+enum EBrushType
+{
+	eBrushTypeUNKNOWN = 0,
+	eBrushTypeQuake,
+	eBrushTypeQuake2,
+	eBrushTypeQuake3,
+	eBrushTypeQuake3BP,
+	eBrushTypeQuake3Valve220,
+	eBrushTypeDoom3,
+	eBrushTypeQuake4,
+	eBrushTypeValve220,
+};
+
+
 namespace scene
 {
 class Node;
@@ -103,7 +117,7 @@ public:
 INTEGER_CONSTANT( Version, 1 );
 STRING_CONSTANT( Name, "brush" );
 virtual scene::Node& createBrush() = 0;
-virtual bool useAlternativeTextureProjection() const = 0;
+virtual EBrushType getCurrentFormat() const = 0;
 virtual void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ) = 0;
 virtual bool Brush_addFace( scene::Node& brush, const _QERFaceData& faceData ) = 0;
 };

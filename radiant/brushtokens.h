@@ -67,7 +67,7 @@ inline bool FaceTexdef_BP_importTokens( FaceTexdef& texdef, Tokeniser& tokeniser
 	return true;
 }
 
-inline bool FaceTexdef_HalfLife_importTokens( FaceTexdef& texdef, Tokeniser& tokeniser ){
+inline bool FaceTexdef_Valve220_importTokens( FaceTexdef& texdef, Tokeniser& tokeniser ){
 	// parse texdef
 	RETURN_FALSE_IF_FAIL( Tokeniser_parseToken( tokeniser, "[" ) );
 	RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, texdef.m_projection.m_basis_s.x() ) );
@@ -221,7 +221,9 @@ bool importTokens( Tokeniser& tokeniser ){
 	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
 	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
 	RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
+		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	}
 	m_face.getTexdef().m_scaleApplied = true;
 	return true;
 }
@@ -237,7 +239,9 @@ bool importTokens( Tokeniser& tokeniser ){
 	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
 	RETURN_FALSE_IF_FAIL( FaceTexdef_BP_importTokens( m_face.getTexdef(), tokeniser ) );
 	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
+		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	}
 
 	m_face.getTexdef().m_projectionInitialised = true;
 	m_face.getTexdef().m_scaleApplied = true;
@@ -256,21 +260,45 @@ bool importTokens( Tokeniser& tokeniser ){
 	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
 	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
 	RETURN_FALSE_IF_FAIL( FaceTexdef_importTokens( m_face.getTexdef(), tokeniser ) );
+	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///try to load for more flexibility
+		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	}
 	m_face.getTexdef().m_scaleApplied = true;
 	return true;
 }
 };
 
-class HalfLifeFaceTokenImporter
+class Valve220FaceTokenImporter
 {
 Face& m_face;
 public:
-HalfLifeFaceTokenImporter( Face& face ) : m_face( face ){
+Valve220FaceTokenImporter( Face& face ) : m_face( face ){
 }
 bool importTokens( Tokeniser& tokeniser ){
 	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
 	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
-	RETURN_FALSE_IF_FAIL( FaceTexdef_HalfLife_importTokens( m_face.getTexdef(), tokeniser ) );
+	RETURN_FALSE_IF_FAIL( FaceTexdef_Valve220_importTokens( m_face.getTexdef(), tokeniser ) );
+	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///try to load for more flexibility
+		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	}
+	m_face.getTexdef().m_scaleApplied = true;
+	return true;
+}
+};
+
+class Quake3Valve220FaceTokenImporter
+{
+Face& m_face;
+public:
+Quake3Valve220FaceTokenImporter( Face& face ) : m_face( face ){
+}
+bool importTokens( Tokeniser& tokeniser ){
+	RETURN_FALSE_IF_FAIL( FacePlane_importTokens( m_face.getPlane(), tokeniser ) );
+	RETURN_FALSE_IF_FAIL( FaceShader_importTokens( m_face.getShader(), tokeniser ) );
+	RETURN_FALSE_IF_FAIL( FaceTexdef_Valve220_importTokens( m_face.getTexdef(), tokeniser ) );
+	if ( Tokeniser_nextTokenIsDigit( tokeniser ) ) { ///optional for more flexibility
+		RETURN_FALSE_IF_FAIL( FaceShader_importContentsFlagsValue( m_face.getShader(), tokeniser ) );
+	}
 	m_face.getTexdef().m_scaleApplied = true;
 	return true;
 }
@@ -471,16 +499,31 @@ void exportTokens( TokenWriter& writer ) const {
 }
 };
 
-class HalfLifeFaceTokenExporter
+class Valve220FaceTokenExporter
 {
 const Face& m_face;
 public:
-HalfLifeFaceTokenExporter( const Face& face ) : m_face( face ){
+Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
 }
 void exportTokens( TokenWriter& writer ) const {
 	FacePlane_exportTokens( m_face.getPlane(), writer );
 	FaceShader_exportTokens( m_face.getShader(), writer );
 	FaceTexdef_HalfLife_exportTokens( m_face.getTexdef(), writer );
+	writer.nextLine();
+}
+};
+
+class Quake3Valve220FaceTokenExporter
+{
+const Face& m_face;
+public:
+Quake3Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
+}
+void exportTokens( TokenWriter& writer ) const {
+	FacePlane_exportTokens( m_face.getPlane(), writer );
+	FaceShader_exportTokens( m_face.getShader(), writer );
+	FaceTexdef_HalfLife_exportTokens( m_face.getTexdef(), writer );
+	FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
 	writer.nextLine();
 }
 };
@@ -554,9 +597,15 @@ bool importTokens( Tokeniser& tokeniser ){
 			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
 		}
 		break;
-		case eBrushTypeHalfLife:
+		case eBrushTypeValve220:
 		{
-			HalfLifeFaceTokenImporter importer( face );
+			Valve220FaceTokenImporter importer( face );
+			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
+		}
+		break;
+		case eBrushTypeQuake3Valve220:
+		{
+			Quake3Valve220FaceTokenImporter importer( face );
 			RETURN_FALSE_IF_FAIL( importer.importTokens( tokeniser ) );
 		}
 		break;
@@ -650,9 +699,15 @@ void exportTokens( TokenWriter& writer ) const {
 				exporter.exportTokens( writer );
 			}
 			break;
-			case eBrushTypeHalfLife:
+			case eBrushTypeValve220:
 			{
-				HalfLifeFaceTokenExporter exporter( face );
+				Valve220FaceTokenExporter exporter( face );
+				exporter.exportTokens( writer );
+			}
+			break;
+			case eBrushTypeQuake3Valve220:
+			{
+				Quake3Valve220FaceTokenExporter exporter( face );
 				exporter.exportTokens( writer );
 			}
 			break;

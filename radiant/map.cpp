@@ -1119,27 +1119,20 @@ void Map_LoadFile( const char *filename ){
 		if ( string_not_empty( moduleName ) ) {
 			format = ReferenceAPI_getMapModules().findModule( moduleName );
 		}
-
-		for ( int i = 0; i < Brush_toggleFormatCount(); ++i )
-		{
-			if ( i ) {
-				Map_Free();
-			}
-			Brush_toggleFormat( i );
-			g_map.m_name = filename;
-			Map_UpdateTitle( g_map );
-			g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
-			if ( format ) {
-				format->wrongFormat = false;
-			}
-			g_map.m_resource->attach( g_map );
-			if ( format ) {
-				if ( !format->wrongFormat ) {
-					break;
-				}
-			}
+		if ( format ) {
+			format->m_detectedFormat = eBrushTypeUNKNOWN;
 		}
 
+		g_map.m_name = filename;
+		Map_UpdateTitle( g_map );
+		g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
+		g_map.m_resource->attach( g_map );
+		if ( format && format->m_detectedFormat && format->m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ) {
+			Map_Free();
+			Brush_toggleFormat( format->m_detectedFormat );
+			g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
+			g_map.m_resource->attach( g_map );
+		}
 		Node_getTraversable( GlobalSceneGraph().root() )->traverse( entity_updateworldspawn() );
 	}
 
@@ -1675,21 +1668,19 @@ bool Map_ImportFile( const char* filename ){
 		if ( string_not_empty( moduleName ) ) {
 			format = ReferenceAPI_getMapModules().findModule( moduleName );
 		}
-
 		if ( format ) {
-			format->wrongFormat = false;
+			format->m_detectedFormat = eBrushTypeUNKNOWN;
 		}
+
 		Resource* resource = GlobalReferenceCache().capture( filename );
 		resource->refresh(); // avoid loading old version if map has changed on disk since last import
 		if ( !resource->load() ) {
 			GlobalReferenceCache().release( filename );
 			goto tryDecompile;
 		}
-		if ( format ) {
-			if ( format->wrongFormat ) {
-				GlobalReferenceCache().release( filename );
-				goto tryDecompile;
-			}
+		if ( format && /*format->m_detectedFormat &&*/ format->m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ) {
+			GlobalReferenceCache().release( filename );
+			goto tryDecompile;
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );
@@ -1744,7 +1735,7 @@ tryDecompile:
 		resource->refresh(); // avoid loading old version if map has changed on disk since last import
 		if ( !resource->load() ) {
 			GlobalReferenceCache().release( filename );
-			goto tryDecompile;
+			return success;
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );

@@ -68,17 +68,6 @@
 const unsigned int BRUSH_DETAIL_FLAG = 27;
 const unsigned int BRUSH_DETAIL_MASK = ( 1 << BRUSH_DETAIL_FLAG );
 
-enum EBrushType
-{
-	eBrushTypeQuake,
-	eBrushTypeQuake2,
-	eBrushTypeQuake3,
-	eBrushTypeQuake3BP,
-	eBrushTypeDoom3,
-	eBrushTypeQuake4,
-	eBrushTypeHalfLife,
-};
-
 
 #define BRUSH_CONNECTIVITY_DEBUG 0
 #define BRUSH_DEGENERATE_DEBUG 0
@@ -1934,14 +1923,10 @@ static void constructStatic( EBrushType type ){
 	g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_QUAKE;
 	if ( m_type == eBrushTypeQuake3BP || m_type == eBrushTypeDoom3 || m_type == eBrushTypeQuake4 ) {
 		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
-		// g_brush_texturelock_enabled = true; // bad idea, this overrides user setting
 	}
-	else if ( m_type == eBrushTypeHalfLife ) {
+	else if ( m_type == eBrushTypeValve220 || m_type == eBrushTypeQuake3Valve220 ) {
 		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_HALFLIFE;
-		// g_brush_texturelock_enabled = true; // bad idea, this overrides user setting
 	}
-
-	Face::m_quantise = ( m_type == eBrushTypeQuake ) ? quantiseInteger : quantiseFloating;
 
 	m_state_point = GlobalShaderCache().capture( "$POINT" );
 }
