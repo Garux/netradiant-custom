@@ -59,7 +59,7 @@ inline int vector3_largest_absolute_component_index( const DoubleVector3& v ){
 }
 
 /// \brief Returns the infinite line that is the intersection of \p plane and \p other.
-inline DoubleLine plane3_intersect_plane3( const Plane3& plane, const Plane3& other ){
+DoubleLine plane3_intersect_plane3( const Plane3& plane, const Plane3& other ){
 	DoubleLine line;
 	line.direction = vector3_cross( plane.normal(), other.normal() );
 	switch ( vector3_largest_absolute_component_index( line.direction ) )

@@ -1453,51 +1453,6 @@ void Face_getTexture( Face& face, CopiedString& shader, TextureProjection& proje
 typedef Function4<Face&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Face_getTexture> FaceGetTexture;
 
 
-/* copied from winding.cpp */
-inline bool float_is_largest_absolute( double axis, double other ){
-	return fabs( axis ) > fabs( other );
-}
-
-/// \brief Returns the index of the component of \p v that has the largest absolute value.
-inline int vector3_largest_absolute_component_index( const DoubleVector3& v ){
-	return ( float_is_largest_absolute( v[1], v[0] ) )
-		   ? ( float_is_largest_absolute( v[1], v[2] ) )
-		   ? 1
-		   : 2
-		   : ( float_is_largest_absolute( v[0], v[2] ) )
-		   ? 0
-		   : 2;
-}
-
-/// \brief Returns the infinite line that is the intersection of \p plane and \p other.
-inline DoubleLine plane3_intersect_plane3( const Plane3& plane, const Plane3& other ){
-	DoubleLine line;
-	line.direction = vector3_cross( plane.normal(), other.normal() );
-	switch ( vector3_largest_absolute_component_index( line.direction ) )
-	{
-	case 0:
-		line.origin.x() = 0;
-		line.origin.y() = ( -other.dist() * plane.normal().z() - -plane.dist() * other.normal().z() ) / line.direction.x();
-		line.origin.z() = ( -plane.dist() * other.normal().y() - -other.dist() * plane.normal().y() ) / line.direction.x();
-		break;
-	case 1:
-		line.origin.x() = ( -plane.dist() * other.normal().z() - -other.dist() * plane.normal().z() ) / line.direction.y();
-		line.origin.y() = 0;
-		line.origin.z() = ( -other.dist() * plane.normal().x() - -plane.dist() * other.normal().x() ) / line.direction.y();
-		break;
-	case 2:
-		line.origin.x() = ( -other.dist() * plane.normal().y() - -plane.dist() * other.normal().y() ) / line.direction.z();
-		line.origin.y() = ( -plane.dist() * other.normal().x() - -other.dist() * plane.normal().x() ) / line.direction.z();
-		line.origin.z() = 0;
-		break;
-	default:
-		break;
-	}
-
-	return line;
-}
-
-
 void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
 	face.SetShader( shader );
 

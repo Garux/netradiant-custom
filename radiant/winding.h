@@ -286,4 +286,6 @@ inline void Winding_printConnectivity( Winding& winding ){
 	}
 }
 
+DoubleLine plane3_intersect_plane3( const Plane3& plane, const Plane3& other );
+
 #endif
