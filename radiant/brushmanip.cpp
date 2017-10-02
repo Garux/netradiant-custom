@@ -497,7 +497,7 @@ public:
 FaceSetTexdef( const TextureProjection& projection ) : m_projection( projection ){
 }
 void operator()( Face& face ) const {
-	face.SetTexdef( m_projection );
+	face.SetTexdef( m_projection, true ); /* reset valve220 basis, once this chain is used for reset only atm */
 }
 };
 

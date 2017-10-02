@@ -548,8 +548,8 @@ static void OnBtnReset( GtkWidget *widget, gpointer data ){
 }
 
 static void OnBtnProject( GtkWidget *widget, gpointer data ){
-	if ( g_bp_globals.m_texdefTypeId != TEXDEFTYPEID_BRUSHPRIMITIVES ) {
-		globalErrorStream() << "function doesn't work for *brushes* in map formats other than BRUSHPRIMITIVES\n";
+	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
+		globalErrorStream() << "function doesn't work for *brushes*, having Axial Projection type\n";
 		//return;
 	}
 	getSurfaceInspector().exportData();

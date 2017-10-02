@@ -57,7 +57,7 @@ MapDoom3Dependencies() :
 	m_patchDoom3Module( "doom3" ){
 }
 BrushCreator& getBrushDoom3(){
-	return GlobalBrushModule::getTable();
+	return GlobalBrushCreator();
 }
 PatchCreator& getPatchDoom3(){
 	return *m_patchDoom3Module.getTable();
@@ -228,6 +228,7 @@ MapDependencies() :
 
 class MapQ3API : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
+mutable bool m_formatDetected;
 public:
 typedef MapFormat Type;
 STRING_CONSTANT( Name, "mapq3" );
@@ -247,36 +248,38 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 		if ( string_equal( primitive, "patchDef2" ) ) {
 			return GlobalPatchModule::getTable().createPatch();
 		}
-		if( !m_detectedFormat ){
+		if( !m_formatDetected ){
+			EBrushType detectedFormat;
 			if ( string_equal( primitive, "brushDef" ) ) {
-				m_detectedFormat = eBrushTypeQuake3BP;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3BP\n";
+				detectedFormat = eBrushTypeQuake3BP;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake3BP\n";
 			}
 			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
-				m_detectedFormat = eBrushTypeQuake3Valve220;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3Valve220\n";
+				detectedFormat = eBrushTypeQuake3Valve220;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
 			}
 			else if ( string_equal( primitive, "(" ) ) {
-				m_detectedFormat = eBrushTypeQuake3;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3\n";
+				detectedFormat = eBrushTypeQuake3;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake3\n";
 			}
 			else{
 				globalErrorStream() << "Format is not detected\n";
-			}
-
-			if( m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ){
 				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
 				return g_nullNode;
 			}
+			m_formatDetected = true;
+			if( detectedFormat != GlobalBrushCreator().getFormat() ){
+				GlobalBrushCreator().toggleFormat( detectedFormat );
+			}
 		}
 
-		switch ( GlobalBrushModule::getTable().getCurrentFormat() )
+		switch ( GlobalBrushCreator().getFormat() )
 		{
 		case eBrushTypeQuake3:
 		case eBrushTypeQuake3Valve220:
 			tokeniser.ungetToken(); // (
 		case eBrushTypeQuake3BP:
-			return GlobalBrushModule::getTable().createBrush();
+			return GlobalBrushCreator().createBrush();
 		default:
 			break;
 		}
@@ -288,6 +291,7 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 
 void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
 	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+	m_formatDetected = false;
 	Map_Read( root, tokeniser, entityTable, *this );
 	tokeniser.release();
 }
@@ -305,6 +309,7 @@ MapQ3Module g_MapQ3Module;
 
 class MapQ1API : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
+mutable bool m_formatDetected;
 public:
 typedef MapFormat Type;
 STRING_CONSTANT( Name, "mapq1" );
@@ -320,36 +325,38 @@ MapFormat* getTable(){
 scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 	const char* primitive = tokeniser.getToken();
 	if ( primitive != 0 ) {
-		if( !m_detectedFormat ){
+		if( !m_formatDetected ){
+			EBrushType detectedFormat;
 			if ( string_equal( primitive, "brushDef" ) ) {
-				m_detectedFormat = eBrushTypeQuake3BP;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3BP\n";
+				detectedFormat = eBrushTypeQuake3BP;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake3BP\n";
 			}
 			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
-				m_detectedFormat = eBrushTypeValve220;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeValve220\n";
+				detectedFormat = eBrushTypeValve220;
+				globalErrorStream() << "detectedFormat = eBrushTypeValve220\n";
 			}
 			else if ( string_equal( primitive, "(" ) ) {
-				m_detectedFormat = eBrushTypeQuake;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake\n";
+				detectedFormat = eBrushTypeQuake;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake\n";
 			}
 			else{
 				globalErrorStream() << "Format is not detected\n";
-			}
-
-			if( m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ){
 				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
 				return g_nullNode;
 			}
+			m_formatDetected = true;
+			if( detectedFormat != GlobalBrushCreator().getFormat() ){
+				GlobalBrushCreator().toggleFormat( detectedFormat );
+			}
 		}
 
-		switch ( GlobalBrushModule::getTable().getCurrentFormat() )
+		switch ( GlobalBrushCreator().getFormat() )
 		{
 		case eBrushTypeQuake:
 		case eBrushTypeValve220:
 			tokeniser.ungetToken(); // (
 		case eBrushTypeQuake3BP:
-			return GlobalBrushModule::getTable().createBrush();
+			return GlobalBrushCreator().createBrush();
 		default:
 			break;
 		}
@@ -360,6 +367,7 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 }
 void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
 	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+	m_formatDetected = false;
 	Map_Read( root, tokeniser, entityTable, *this );
 	tokeniser.release();
 }
@@ -394,7 +402,7 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 	if ( primitive != 0 ) {
 		if ( string_equal( primitive, "(" ) ) {
 			tokeniser.ungetToken(); // (
-			return GlobalBrushModule::getTable().createBrush();
+			return GlobalBrushCreator().createBrush();
 		}
 	}
 
@@ -420,6 +428,7 @@ MapHalfLifeModule g_MapHalfLifeModule;
 
 class MapQ2API : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
+mutable bool m_formatDetected;
 public:
 typedef MapFormat Type;
 STRING_CONSTANT( Name, "mapq2" );
@@ -434,36 +443,38 @@ MapFormat* getTable(){
 scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 	const char* primitive = tokeniser.getToken();
 	if ( primitive != 0 ) {
-		if( !m_detectedFormat ){
+		if( !m_formatDetected ){
+			EBrushType detectedFormat;
 			if ( string_equal( primitive, "brushDef" ) ) {
-				m_detectedFormat = eBrushTypeQuake3BP;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3BP\n";
+				detectedFormat = eBrushTypeQuake3BP;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake3BP\n";
 			}
 			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
-				m_detectedFormat = eBrushTypeQuake3Valve220;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake3Valve220\n";
+				detectedFormat = eBrushTypeQuake3Valve220;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
 			}
 			else if ( string_equal( primitive, "(" ) ) {
-				m_detectedFormat = eBrushTypeQuake2;
-				globalErrorStream() << "m_detectedFormat = eBrushTypeQuake2\n";
+				detectedFormat = eBrushTypeQuake2;
+				globalErrorStream() << "detectedFormat = eBrushTypeQuake2\n";
 			}
 			else{
 				globalErrorStream() << "Format is not detected\n";
-			}
-
-			if( m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ){
 				Tokeniser_unexpectedError( tokeniser, primitive, "#different-brush-format" );
 				return g_nullNode;
 			}
+			m_formatDetected = true;
+			if( detectedFormat != GlobalBrushCreator().getFormat() ){
+				GlobalBrushCreator().toggleFormat( detectedFormat );
+			}
 		}
 
-		switch ( GlobalBrushModule::getTable().getCurrentFormat() )
+		switch ( GlobalBrushCreator().getFormat() )
 		{
 		case eBrushTypeQuake2:
 		case eBrushTypeQuake3Valve220:
 			tokeniser.ungetToken(); // (
 		case eBrushTypeQuake3BP:
-			return GlobalBrushModule::getTable().createBrush();
+			return GlobalBrushCreator().createBrush();
 		default:
 			break;
 		}
@@ -474,6 +485,7 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 }
 void readGraph( scene::Node& root, TextInputStream& inputStream, EntityCreator& entityTable ) const {
 	Tokeniser& tokeniser = GlobalScripLibModule::getTable().m_pfnNewSimpleTokeniser( inputStream );
+	m_formatDetected = false;
 	Map_Read( root, tokeniser, entityTable, *this );
 	tokeniser.release();
 }

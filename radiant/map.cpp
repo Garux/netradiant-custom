@@ -24,7 +24,6 @@
 #include "debugging/debugging.h"
 
 #include "imap.h"
-MapModules& ReferenceAPI_getMapModules();
 #include "iselection.h"
 #include "iundo.h"
 #include "ibrush.h"
@@ -675,9 +674,48 @@ scene::Node& node(){
 void MergeMap( scene::Node& node ){
 	Node_getTraversable( node )->traverse( MapMergeEntities( scene::Path( makeReference( GlobalSceneGraph().root() ) ) ) );
 }
+
+
+class Convert_Faces {
+	const TexdefTypeId _in, _out;
+public:
+	Convert_Faces( TexdefTypeId in, TexdefTypeId out )
+		: _in( in ), _out( out ) {
+	}
+	void operator()( Face& face ) const {
+		face.Convert( _in, _out );
+	}
+};
+#include "brushnode.h"
+class Convert_Brushes : public scene::Traversable::Walker {
+	const Convert_Faces _convert_faces;
+public:
+	Convert_Brushes( TexdefTypeId in, TexdefTypeId out )
+		: _convert_faces( in, out ) {
+	}
+	bool pre( scene::Node& node ) const {
+		if( node.isRoot() ) {
+			return false;
+		}
+		Brush* brush = Node_getBrush( node );
+		if( brush ) {
+			Brush_forEachFace( *brush, _convert_faces );
+		}
+		return true;
+	}
+	void post( scene::Node& node ) const {
+	}
+};
+
+
 void Map_ImportSelected( TextInputStream& in, const MapFormat& format ){
 	NodeSmartReference node( ( new BasicContainer )->node() );
+	EBrushType brush_type = GlobalBrushCreator().getFormat();
 	format.readGraph( node, in, GlobalEntityCreator() );
+	if ( brush_type != GlobalBrushCreator().getFormat() ) {
+		Node_getTraversable( *node.get_pointer() )->traverse( Convert_Brushes( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ), BrushType_getTexdefType( brush_type ) ) );
+		GlobalBrushCreator().toggleFormat( brush_type );
+	}
 	Map_gatherNamespaced( node );
 	Map_mergeClonedNames();
 	MergeMap( node );
@@ -1113,26 +1151,10 @@ void Map_LoadFile( const char *filename ){
 
 	{
 		ScopeTimer timer( "map load" );
-
-		const MapFormat* format = NULL;
-		const char* moduleName = findModuleName( &GlobalFiletypes(), MapFormat::Name(), path_get_extension( filename ) );
-		if ( string_not_empty( moduleName ) ) {
-			format = ReferenceAPI_getMapModules().findModule( moduleName );
-		}
-		if ( format ) {
-			format->m_detectedFormat = eBrushTypeUNKNOWN;
-		}
-
 		g_map.m_name = filename;
 		Map_UpdateTitle( g_map );
 		g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
 		g_map.m_resource->attach( g_map );
-		if ( format && format->m_detectedFormat && format->m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ) {
-			Map_Free();
-			Brush_toggleFormat( format->m_detectedFormat );
-			g_map.m_resource = GlobalReferenceCache().capture( g_map.m_name.c_str() );
-			g_map.m_resource->attach( g_map );
-		}
 		Node_getTraversable( GlobalSceneGraph().root() )->traverse( entity_updateworldspawn() );
 	}
 
@@ -1144,9 +1166,7 @@ void Map_LoadFile( const char *filename ){
 
 	//GlobalEntityCreator().printStatistics();
 
-	//
-	// move the view to a start position
-	//
+	/* move the view to a start position */
 	Map_StartPosition();
 
 	g_currentMap = &g_map;
@@ -1663,24 +1683,20 @@ bool Map_ImportFile( const char* filename ){
 	}
 
 	{
-		const MapFormat* format = NULL;
-		const char* moduleName = findModuleName( &GlobalFiletypes(), MapFormat::Name(), path_get_extension( filename ) );
-		if ( string_not_empty( moduleName ) ) {
-			format = ReferenceAPI_getMapModules().findModule( moduleName );
-		}
-		if ( format ) {
-			format->m_detectedFormat = eBrushTypeUNKNOWN;
-		}
+		EBrushType brush_type = GlobalBrushCreator().getFormat();
 
 		Resource* resource = GlobalReferenceCache().capture( filename );
 		resource->refresh(); // avoid loading old version if map has changed on disk since last import
 		if ( !resource->load() ) {
 			GlobalReferenceCache().release( filename );
+			if ( brush_type != GlobalBrushCreator().getFormat() ) {
+				GlobalBrushCreator().toggleFormat( brush_type );
+			}
 			goto tryDecompile;
 		}
-		if ( format && /*format->m_detectedFormat &&*/ format->m_detectedFormat != GlobalBrushModule::getTable().getCurrentFormat() ) {
-			GlobalReferenceCache().release( filename );
-			goto tryDecompile;
+		if ( brush_type != GlobalBrushCreator().getFormat() ) {
+			Node_getTraversable( *resource->getNode() )->traverse( Convert_Brushes( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ), BrushType_getTexdefType( brush_type ) ) );
+			GlobalBrushCreator().toggleFormat( brush_type );
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );
@@ -1713,7 +1729,7 @@ tryDecompile:
 		output.push_string( "\" -fs_game " );
 		output.push_string( gamename_get() );
 		output.push_string( " -convert -format " );
-		output.push_string( Brush::m_type == eBrushTypeQuake3BP ? "map_bp" : "map" );
+		output.push_string( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ) == TEXDEFTYPEID_QUAKE ? "map" : "map_bp" );
 		if ( extension_equal( path_get_extension( filename ), "map" ) ) {
 			output.push_string( " -readmap " );
 		}
@@ -1730,12 +1746,20 @@ tryDecompile:
 		output.push_string( "_converted.map" );
 		filename = output.c_str();
 
+		EBrushType brush_type = GlobalBrushCreator().getFormat();
 		// open
 		Resource* resource = GlobalReferenceCache().capture( filename );
 		resource->refresh(); // avoid loading old version if map has changed on disk since last import
 		if ( !resource->load() ) {
 			GlobalReferenceCache().release( filename );
+			if ( brush_type != GlobalBrushCreator().getFormat() ) {
+				GlobalBrushCreator().toggleFormat( brush_type );
+			}
 			return success;
+		}
+		if ( brush_type != GlobalBrushCreator().getFormat() ) {
+			Node_getTraversable( *resource->getNode() )->traverse( Convert_Brushes( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ), BrushType_getTexdefType( brush_type ) ) );
+			GlobalBrushCreator().toggleFormat( brush_type );
 		}
 		NodeSmartReference clone( NewMapRoot( "" ) );
 		Node_getTraversable( *resource->getNode() )->traverse( CloneAll( clone ) );

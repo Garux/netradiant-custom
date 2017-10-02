@@ -26,6 +26,5 @@
 
 void Brush_clipperColourChanged();
 void Brush_unlatchPreferences();
-void Brush_toggleFormat( EBrushType type );
 
 #endif

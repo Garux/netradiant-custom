@@ -29,7 +29,6 @@
 
 enum EBrushType
 {
-	eBrushTypeUNKNOWN = 0,
 	eBrushTypeQuake,
 	eBrushTypeQuake2,
 	eBrushTypeQuake3,
@@ -117,7 +116,8 @@ public:
 INTEGER_CONSTANT( Version, 1 );
 STRING_CONSTANT( Name, "brush" );
 virtual scene::Node& createBrush() = 0;
-virtual EBrushType getCurrentFormat() const = 0;
+virtual EBrushType getFormat() const = 0;
+virtual void toggleFormat( EBrushType type ) const = 0;
 virtual void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ) = 0;
 virtual bool Brush_addFace( scene::Node& brush, const _QERFaceData& faceData ) = 0;
 };

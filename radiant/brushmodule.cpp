@@ -209,8 +209,11 @@ public:
 scene::Node& createBrush(){
 	return ( new BrushNode )->node();
 }
-EBrushType getCurrentFormat() const {
+EBrushType getFormat() const {
 	return Brush::m_type;
+}
+void toggleFormat( EBrushType type ) const {
+	Brush_toggleFormat( type );
 }
 void Brush_forEachFace( scene::Node& brush, const BrushFaceDataCallback& callback ){
 	::Brush_forEachFace( *Node_getBrush( brush ), FaceCallback( BrushFaceDataFromFaceCaller( callback ) ) );

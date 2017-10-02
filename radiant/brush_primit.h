@@ -134,6 +134,7 @@ struct bp_globals_t
 extern bp_globals_t g_bp_globals;
 extern float g_texdef_default_scale;
 
+void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height );
 //void ComputeAxisBase( const Vector3& normal, Vector3& texS, Vector3& texT );
 template <typename Element>
 void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT );

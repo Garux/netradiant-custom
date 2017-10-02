@@ -561,6 +561,9 @@ void setTexdef( const TextureProjection& projection ){
 void setTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
 	removeScale();
 	Texdef_Assign( m_projection, hShift, vShift, hScale, vScale, rotation );
+//	if( hShift || vShift ){
+//		Texdef_normalise( m_projection, m_shader.width(), m_shader.height() );
+//	}
 	addScale();
 }
 
@@ -568,6 +571,7 @@ void shift( float s, float t ){
 	ASSERT_MESSAGE( texdef_sane( m_projection.m_texdef ), "FaceTexdef::shift: bad texdef" );
 	removeScale();
 	Texdef_Shift( m_projection, s, t );
+//	Texdef_normalise( m_projection, m_shader.width(), m_shader.height() );
 	addScale();
 }
 
@@ -582,13 +586,18 @@ void rotate( float angle ){
 	Texdef_Rotate( m_projection, angle );
 	addScale();
 }
-
+///ProjectTexture along 'direction' with parameters, defined by texdef_t
 void ProjectTexture( const Plane3& plane, const texdef_t& texdef, const Vector3* direction ){
 	Texdef_ProjectTexture( m_projection, m_shader.width(), m_shader.height(), plane, texdef, direction );
 }
-
+///ProjectTexture along 'normal' with parameters, defined by TextureProjection
 void ProjectTexture( const Plane3& plane, const TextureProjection& projection, const Vector3& normal ){
 	Texdef_ProjectTexture( m_projection, m_shader.width(), m_shader.height(), plane, projection, normal );
+}
+
+void Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane ){
+	Texdef_Convert( in, out, plane, m_projection, m_shader.width(), m_shader.height() );
+	m_scaleApplied = true;
 }
 
 void fit( const Vector3& normal, const Winding& winding, float s_repeat, float t_repeat ){
@@ -610,12 +619,18 @@ TextureProjection normalised() const {
 	tmp.removeScale( m_shader.width(), m_shader.height() );
 	return TextureProjection( m_projection.m_texdef, tmp, m_projection.m_basis_s, m_projection.m_basis_t );
 }
+#if 0 /* axial projection */
 void setBasis( const Vector3& normal ){
 	Matrix4 basis;
 	Normal_GetTransform( normal, basis );
 	m_projection.m_basis_s = Vector3( basis.xx(), basis.yx(), basis.zx() );
 	m_projection.m_basis_t = Vector3( -basis.xy(), -basis.yy(), -basis.zy() );
 }
+#else /* face projection */
+void setBasis( const Vector3& normal ){
+	ComputeAxisBase( normal, m_projection.m_basis_s, m_projection.m_basis_t );
+}
+#endif
 };
 
 inline void planepts_print( const PlanePoints& planePoints, TextOutputStream& ostream ){
@@ -869,6 +884,21 @@ void Brush_textureChanged();
 
 extern bool g_brush_texturelock_enabled;
 
+inline TexdefTypeId BrushType_getTexdefType( EBrushType type ){
+	switch ( type )
+	{
+	case eBrushTypeQuake3BP:
+	case eBrushTypeDoom3:
+	case eBrushTypeQuake4:
+		return TEXDEFTYPEID_BRUSHPRIMITIVES;
+	case eBrushTypeValve220:
+	case eBrushTypeQuake3Valve220:
+		return TEXDEFTYPEID_HALFLIFE;
+	default:
+		return TEXDEFTYPEID_QUAKE;
+	}
+}
+
 class FaceObserver
 {
 public:
@@ -984,7 +1014,7 @@ Face( const Face& other, FaceObserver* observer ) :
 	m_shader.attach( *this );
 	m_plane.copy( other.m_plane );
 	planepts_assign( m_move_planepts, other.m_move_planepts );
-	m_texdef.setBasis( m_plane.plane3().normal() );
+//	m_texdef.setBasis( m_plane.plane3().normal() );
 	planeChanged();
 	updateFiltered();
 }
@@ -1190,9 +1220,12 @@ void texdefChanged(){
 void GetTexdef( TextureProjection& projection ) const {
 	projection = m_texdef.normalised();
 }
-void SetTexdef( const TextureProjection& projection ){
+void SetTexdef( const TextureProjection& projection, bool resetBasis = false ){
 	undoSave();
 	m_texdef.setTexdef( projection );
+	if( resetBasis ){
+		m_texdef.setBasis( m_plane.plane3().normal() );
+	}
 	texdefChanged();
 }
 
@@ -1239,6 +1272,11 @@ void ProjectTexture( const texdef_t& texdef, const Vector3* direction ){
 void ProjectTexture( const TextureProjection& projection, const Vector3& normal ){
 	undoSave();
 	m_texdef.ProjectTexture( m_plane.plane3(), projection, normal );
+	texdefChanged();
+}
+
+void Convert( TexdefTypeId in, TexdefTypeId out ){
+	m_texdef.Convert( in, out, m_plane.plane3() );
 	texdefChanged();
 }
 
@@ -1920,13 +1958,7 @@ static void constructStatic( EBrushType type ){
 	Face::m_type = type;
 	FacePlane::m_type = type;
 
-	g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_QUAKE;
-	if ( m_type == eBrushTypeQuake3BP || m_type == eBrushTypeDoom3 || m_type == eBrushTypeQuake4 ) {
-		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
-	}
-	else if ( m_type == eBrushTypeValve220 || m_type == eBrushTypeQuake3Valve220 ) {
-		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_HALFLIFE;
-	}
+	g_bp_globals.m_texdefTypeId = BrushType_getTexdefType( type );
 
 	m_state_point = GlobalShaderCache().capture( "$POINT" );
 }
