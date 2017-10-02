@@ -519,12 +519,9 @@ static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
 }
 
 static void OnBtnReset( GtkWidget *widget, gpointer data ){
-//globalOutputStream() << "--> [OnBtnAxial]...\n";
 	UndoableCommand undo( "textureDefault" );
 	TextureProjection projection;
-//globalOutputStream() << "    TexDef_Construct_Default()...\n";
 	TexDef_Construct_Default( projection );
-//globalOutputStream() << "    Select_SetTexdef()...\n";
 
 #if TEXTOOL_ENABLED
 

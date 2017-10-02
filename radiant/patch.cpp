@@ -660,6 +660,7 @@ void Patch::CapTexture(){
 	Vector3 normal = Calculate_AvgNormal();
 	TextureProjection projection;
 	TexDef_Construct_Default( projection );
+	ComputeAxisBase( normal, projection.m_basis_s, projection.m_basis_t ); /* Valve220 */
 	ProjectTexture( projection, normal );
 #endif
 }
@@ -1563,7 +1564,10 @@ void Patch::ConstructPrefab( const AABB& aabb, EPatchPrefab eType, int axis, std
 		InsertRemove( true, false, true );
 	}
 
-	NaturalTexture();
+	if ( eType == ePlane )
+		CapTexture();
+	else
+		NaturalTexture();
 }
 
 void Patch::RenderDebug( RenderStateFlags state ) const {
