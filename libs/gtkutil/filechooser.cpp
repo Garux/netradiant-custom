@@ -193,7 +193,7 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 
 	if ( open && masks.m_filters.size() > 1 ){
 		GtkFileFilter* filter = gtk_file_filter_new();
-		gtk_file_filter_set_name( filter, "Supported formats" );
+		gtk_file_filter_set_name( filter, "All supported formats" );
 		for ( std::size_t i = 0; i < masks.m_filters.size(); ++i )
 		{
 			gtk_file_filter_add_pattern( filter, masks.m_filters[i].c_str() );
@@ -214,7 +214,7 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 
 		if ( !string_equal( pattern, "*" ) ) {
 			GtkFileFilter* filter = gtk_file_chooser_get_filter( GTK_FILE_CHOOSER( dialog ) );
-			if ( filter != 0 && !string_equal( gtk_file_filter_get_name( filter ), "Supported formats" ) ) { // no filter set? some file-chooser implementations may allow the user to set no filter, which we treat as 'all files'
+			if ( filter != 0 && !string_equal( gtk_file_filter_get_name( filter ), "All supported formats" ) ) { // no filter set? some file-chooser implementations may allow the user to set no filter, which we treat as 'all files'
 				type = masks.GetTypeForGTKMask( gtk_file_filter_get_name( filter ) ).m_type;
 				// last ext separator
 				const char* extension = path_get_extension( g_file_dialog_file );
