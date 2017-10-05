@@ -147,18 +147,27 @@ pack()
 }
 
 mkdir -p games
-pack DarkPlacesPack  GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/DarkPlacesPack/branches/1.5/
-pack NexuizPack      GPL         gitdir git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
-pack OpenArenaPack   unknown     zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/OpenArenaPack.zip
-pack OsirionPack     GPL         zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/OsirionPack.zip
-pack Q3Pack          proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
-pack Quake2Pack      proprietary zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/Quake2Pack.zip
-pack Quake2WorldPack GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
-pack QuakePack       GPL         zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/Quake1Pack.zip
-pack QuetooPack      GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
-pack TremulousPack   proprietary zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/TremulousPack.zip
-pack UFOAIPack       proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
-#pack WarsowPack     GPL         svn    https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
-#pack WarsowPack     GPL         zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/WarsowPack.zip
-pack WarsowPack      GPL         git    https://github.com/Warsow/NetRadiantPack.git
-pack XonoticPack     GPL         git    https://gitlab.com/xonotic/netradiant-xonoticpack.git
+pack DarkPlacesPack	GPL		svn	svn://svn.icculus.org/gtkradiant-gamepacks/DarkPlacesPack/branches/1.5/
+pack Doom3Pack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Doom3Pack/branches/1.5/
+pack ETPack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/ETPack/branches/1.5/
+pack Heretic2Pack	proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Her2Pack/branches/1.5/
+pack JediAcademyPack	proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/JAPack/branches/1.5/
+pack NeverballPack	proprietary	zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/NeverballPack.zip
+pack NexuizPack		GPL		gitdir	git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
+pack OpenArenaPack	GPL		git	https://github.com/NeonKnightOA/oaassets/tree/master/tools/gamepacks/netradiant-oa088
+pack OsirionPack	GPL		zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/OsirionPack.zip
+pack Q3Pack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
+pack Quake2Pack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Q2Pack/branches/1.5/
+pack Quake2WorldPack	GPL		svn	svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
+pack Quake4Pack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Q4Pack/branches/1.5/
+pack QuakePack		GPL		zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/Quake1Pack.zip
+#pack QuakePack		proprietary	zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/QuakePack.zip
+pack QuetooPack		GPL		svn	svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
+pack TremulousPack	proprietary	zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/TremulousPack.zip
+pack UFOAIPack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
+pack UnvanquishedPack	unknown		zip1	http://ingar.satgnu.net/gtkradiant/files/gamepacks/UnvanquishedPack.zip
+#pack WarsowPack	GPL		svn	https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
+#pack WarsowPack	GPL		zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/WarsowPack.zip
+pack WarsowPack		GPL		git	https://github.com/Warsow/NetRadiantPack.git
+pack WolfPack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/WolfPack/branches/1.5/
+pack XonoticPack	GPL		git	git://git.xonotic.org/xonotic/netradiant-xonoticpack.git
