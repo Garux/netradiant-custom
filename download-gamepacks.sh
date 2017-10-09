@@ -154,7 +154,7 @@ pack Heretic2Pack	proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Her
 pack JediAcademyPack	proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/JAPack/branches/1.5/
 pack NeverballPack	proprietary	zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/NeverballPack.zip
 pack NexuizPack		GPL		gitdir	git://git.icculus.org/divverent/nexuiz.git misc/netradiant-NexuizPack master
-pack OpenArenaPack	GPL		git	https://github.com/NeonKnightOA/oaassets/tools/gamepacks/netradiant-oa088
+pack OpenArenaPack	GPL		git	https://github.com/NeonKnightOA/oagamepack
 pack OsirionPack	GPL		zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/OsirionPack.zip
 pack Q3Pack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Q3Pack/trunk/ -r29
 pack Quake2Pack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/Q2Pack/branches/1.5/
