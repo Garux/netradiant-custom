@@ -165,9 +165,9 @@ pack QuakePack		GPL		zip1	http://ingar.intranifty.net/files/netradiant/gamepacks
 pack QuetooPack		GPL		svn	svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
 pack TremulousPack	proprietary	zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/TremulousPack.zip
 pack UFOAIPack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/UFOAIPack/branches/1.5/
-pack UnvanquishedPack	unknown		zip1	http://ingar.satgnu.net/gtkradiant/files/gamepacks/UnvanquishedPack.zip
+pack UnvanquishedPack  BSD         svn    https://github.com/Unvanquished/unvanquished-mapeditor-support.git/trunk/build/netradiant
 #pack WarsowPack	GPL		svn	https://svn.bountysource.com/wswpack/trunk/netradiant/games/WarsowPack/
 #pack WarsowPack	GPL		zip1	http://ingar.intranifty.net/files/netradiant/gamepacks/WarsowPack.zip
 pack WarsowPack		GPL		git	https://github.com/Warsow/NetRadiantPack.git
 pack WolfPack		proprietary	svn	svn://svn.icculus.org/gtkradiant-gamepacks/WolfPack/branches/1.5/
-pack XonoticPack	GPL		git	https://gitlab.com/xonotic/netradiant
+pack XonoticPack GPL git https://gitlab.com/xonotic/netradiant
