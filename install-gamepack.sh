@@ -12,9 +12,19 @@ set -ex
 pack=$1
 dest=$2
 
-if [ -d "$pack/tools" ]; then
-	pack="$pack/tools"
-fi
+# Some per-game workaround for malformed gamepack
+case $pack in
+	*/JediAcademyPack)
+		pack="$pack/Tools"
+	;;
+	*/PreyPack|*/Q3Pack)
+		pack="$pack/tools"
+	;;
+	*/WolfPack)
+		pack="$pack/bin"
+	;;
+esac
+
 for GAMEFILE in "$pack/games"/*.game; do
 	if [ x"$GAMEFILE" != x"$pack/games/*.game" ]; then
 		$CP "$GAMEFILE" "$dest/games/"
