@@ -1074,7 +1074,7 @@ static void ParseRawBrush( qboolean onlyLights ){
 	buildBrush->detail = qfalse;
 
 	/* bp */
-	if ( g_bBrushPrimit == BPRIMIT_NEWBRUSHES ) {
+	if ( g_brushType == BPRIMIT_BP ) {
 		MatchToken( "{" );
 	}
 
@@ -1089,7 +1089,7 @@ static void ParseRawBrush( qboolean onlyLights ){
 		}
 
 		/* ttimo : bp: here we may have to jump over brush epairs (only used in editor) */
-		if ( g_bBrushPrimit == BPRIMIT_NEWBRUSHES ) {
+		if ( g_brushType == BPRIMIT_BP ) {
 			while ( 1 )
 			{
 				if ( strcmp( token, "(" ) ) {
@@ -1119,7 +1119,7 @@ static void ParseRawBrush( qboolean onlyLights ){
 		Parse1DMatrix( 3, planePoints[ 2 ] );
 
 		/* bp: read the texture matrix */
-		if ( g_bBrushPrimit == BPRIMIT_NEWBRUSHES ) {
+		if ( g_brushType == BPRIMIT_BP ) {
 			Parse2DMatrix( 2, 3, (float*) side->texMat );
 		}
 
@@ -1127,8 +1127,21 @@ static void ParseRawBrush( qboolean onlyLights ){
 		GetToken( qfalse );
 		strcpy( name, token );
 
-		/* bp */
-		if ( g_bBrushPrimit == BPRIMIT_OLDBRUSHES ) {
+		/* AP or 220? */
+		if ( g_brushType == BPRIMIT_UNDEFINED ){
+			GetToken( qfalse );
+			if ( !strcmp( token, "[" ) ){
+				g_brushType = BPRIMIT_VALVE220;
+				Sys_FPrintf( SYS_VRB, "detected brushType = VALVE 220\n" );
+			}
+			else{
+				g_brushType = BPRIMIT_QUAKE;
+				Sys_FPrintf( SYS_VRB, "detected brushType = QUAKE (Axial Projection)\n" );
+			}
+			UnGetToken();
+		}
+
+		if ( g_brushType == BPRIMIT_QUAKE ) {
 			GetToken( qfalse );
 			shift[ 0 ] = atof( token );
 			GetToken( qfalse );
@@ -1139,6 +1152,29 @@ static void ParseRawBrush( qboolean onlyLights ){
 			scale[ 0 ] = atof( token );
 			GetToken( qfalse );
 			scale[ 1 ] = atof( token );
+		}
+		else if ( g_brushType == BPRIMIT_VALVE220 ){
+			int axis, comp;
+			for ( axis = 0; axis < 2; ++axis ){
+				MatchToken( "[" );
+				for ( comp = 0; comp < 4; ++comp ){
+					GetToken( qfalse );
+					side->vecs[axis][comp] = atof( token );
+				}
+				MatchToken( "]" );
+			}
+			GetToken( qfalse );
+			rotate = atof( token );
+			GetToken( qfalse );
+			scale[ 0 ] = atof( token );
+			GetToken( qfalse );
+			scale[ 1 ] = atof( token );
+
+			if ( !scale[0] ) scale[0] = 1.f;
+			if ( !scale[1] ) scale[1] = 1.f;
+			for ( axis = 0; axis < 2; ++axis )
+				for ( comp = 0; comp < 3; ++comp )
+					side->vecs[axis][comp] /= scale[axis];
 		}
 
 		/* set default flags and values */
@@ -1192,13 +1228,13 @@ static void ParseRawBrush( qboolean onlyLights ){
 		side->planenum = planenum;
 
 		/* bp: get the texture mapping for this texturedef / plane combination */
-		if ( g_bBrushPrimit == BPRIMIT_OLDBRUSHES ) {
+		if ( g_brushType == BPRIMIT_QUAKE ) {
 			QuakeTextureVecs( &mapplanes[ planenum ], shift, rotate, scale, side->vecs );
 		}
 	}
 
 	/* bp */
-	if ( g_bBrushPrimit == BPRIMIT_NEWBRUSHES ) {
+	if ( g_brushType == BPRIMIT_BP ) {
 		UnGetToken();
 		MatchToken( "}" );
 		MatchToken( "}" );
@@ -1712,23 +1748,16 @@ static qboolean ParseMapEntity( qboolean onlyLights, qboolean noCollapseGroups )
 				Sys_Printf( "WARNING: Terrain entity parsing not supported in this build.\n" ); /* ydnar */
 			}
 			else if ( !strcmp( token, "brushDef" ) ) {
-				if ( g_bBrushPrimit == BPRIMIT_OLDBRUSHES ) {
-					Error( "Old brush format not allowed in new brush format map" );
+				if ( g_brushType == BPRIMIT_UNDEFINED ) {
+					Sys_FPrintf( SYS_VRB, "detected brushType = BRUSH PRIMITIVES\n" );
+					g_brushType = BPRIMIT_BP;
 				}
-				g_bBrushPrimit = BPRIMIT_NEWBRUSHES;
-
-				/* parse brush primitive */
 				ParseBrush( onlyLights, noCollapseGroups );
 			}
 			else
 			{
-				if ( g_bBrushPrimit == BPRIMIT_NEWBRUSHES ) {
-					Error( "New brush format not allowed in old brush format map" );
-				}
-				g_bBrushPrimit = BPRIMIT_OLDBRUSHES;
-
-				/* parse old brush format */
-				UnGetToken();
+				/* AP or 220 */
+				UnGetToken(); // (
 				ParseBrush( onlyLights, noCollapseGroups );
 			}
 			entitySourceBrushes++;
@@ -1956,7 +1985,7 @@ void LoadMapFile( char *filename, qboolean onlyLights, qboolean noCollapseGroups
 	/* initial setup */
 	numMapDrawSurfs = 0;
 	c_detail = 0;
-	g_bBrushPrimit = BPRIMIT_UNDEFINED;
+	g_brushType = BPRIMIT_UNDEFINED;
 
 	/* allocate a very large temporary brush for building the brushes as they are loaded */
 	buildBrush = AllocBrush( MAX_BUILD_SIDES );

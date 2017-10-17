@@ -208,10 +208,13 @@
 #define PSIDE_BOTH              ( PSIDE_FRONT | PSIDE_BACK )
 #define PSIDE_FACING            4
 
-#define BPRIMIT_UNDEFINED       0
-#define BPRIMIT_OLDBRUSHES      1
-#define BPRIMIT_NEWBRUSHES      2
-
+typedef enum{
+	BPRIMIT_UNDEFINED = 0,
+	BPRIMIT_QUAKE,
+	BPRIMIT_BP,
+	BPRIMIT_VALVE220
+}
+brushType_t;
 
 /* vis */
 #define VIS_HEADER_SIZE         8
@@ -2128,7 +2131,7 @@ Q_EXTERN fog_t mapFogs[ MAX_MAP_FOGS ];
 Q_EXTERN entity_t           *mapEnt;
 Q_EXTERN brush_t            *buildBrush;
 Q_EXTERN int numActiveBrushes;
-Q_EXTERN int g_bBrushPrimit;
+Q_EXTERN brushType_t g_brushType;
 
 Q_EXTERN int numStrippedLights Q_ASSIGN( 0 );
 

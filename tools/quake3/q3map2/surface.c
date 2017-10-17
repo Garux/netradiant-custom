@@ -992,23 +992,22 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 			dv->st[ 1 ] = DotProduct( si->vecs[ 1 ], vTranslated );
 		}
 
-		/* old quake-style texturing */
-		else if ( g_bBrushPrimit == BPRIMIT_OLDBRUSHES ) {
-			/* nearest-axial projection */
-			dv->st[ 0 ] = s->vecs[ 0 ][ 3 ] + DotProduct( s->vecs[ 0 ], vTranslated );
-			dv->st[ 1 ] = s->vecs[ 1 ][ 3 ] + DotProduct( s->vecs[ 1 ], vTranslated );
-			dv->st[ 0 ] /= si->shaderWidth;
-			dv->st[ 1 ] /= si->shaderHeight;
-		}
-
 		/* brush primitive texturing */
-		else
-		{
+		else if ( g_brushType == BPRIMIT_BP ) {
 			/* calculate texture s/t from brush primitive texture matrix */
 			x = DotProduct( vTranslated, texX );
 			y = DotProduct( vTranslated, texY );
 			dv->st[ 0 ] = s->texMat[ 0 ][ 0 ] * x + s->texMat[ 0 ][ 1 ] * y + s->texMat[ 0 ][ 2 ];
 			dv->st[ 1 ] = s->texMat[ 1 ][ 0 ] * x + s->texMat[ 1 ][ 1 ] * y + s->texMat[ 1 ][ 2 ];
+		}
+
+		/* old quake-style or valve 220 texturing */
+		else {
+			/* nearest-axial projection */
+			dv->st[ 0 ] = s->vecs[ 0 ][ 3 ] + DotProduct( s->vecs[ 0 ], vTranslated );
+			dv->st[ 1 ] = s->vecs[ 1 ][ 3 ] + DotProduct( s->vecs[ 1 ], vTranslated );
+			dv->st[ 0 ] /= si->shaderWidth;
+			dv->st[ 1 ] /= si->shaderHeight;
 		}
 
 		/* copy normal */
