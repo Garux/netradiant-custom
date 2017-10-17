@@ -19,8 +19,8 @@ case "$DOWNLOAD_GAMEPACKS" in
 esac
 
 set -e
-for GAME in games/*; do
-	if [ "$GAME" = "games/*" ]; then
+for GAME in games/*Pack; do
+	if [ "$GAME" = "games/*Pack" ]; then
 		$ECHO "Game packs not found, please run"
 		$ECHO "  ./download-gamepacks.sh"
 		$ECHO "and then try again!"
