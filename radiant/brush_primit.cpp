@@ -241,7 +241,7 @@ void Texdef_basisForNormal( const TextureProjection& projection, const Vector3& 
 		matrix4_transpose( basis );
 		//DebugAxisBase( normal );
 	}
-	else if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+	else if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 		basis = g_matrix4_identity;
 		vector4_to_vector3( basis.x() ) = projection.m_basis_s;
 		vector4_to_vector3( basis.y() ) = vector3_negated( projection.m_basis_t );
@@ -1191,7 +1191,7 @@ void Texdef_Assign( TextureProjection& projection, const TextureProjection& othe
 	else
 	{
 		Texdef_Assign( projection.m_texdef, other.m_texdef );
-		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 			projection.m_basis_s = other.m_basis_s;
 			projection.m_basis_t = other.m_basis_t;
 		}
@@ -1204,7 +1204,7 @@ void Texdef_Assign( TextureProjection& projection, const float* hShift, const fl
 	}
 	else
 	{
-		if ( rotation && g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+		if ( rotation && g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 			Valve220_rotate( projection, *rotation - projection.m_texdef.rotate );
 		}
 		Texdef_Assign( projection.m_texdef, hShift, vShift, hScale, vScale, rotation );
@@ -1237,7 +1237,7 @@ void Texdef_Rotate( TextureProjection& projection, float angle ){
 	}
 	else
 	{
-		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 			Valve220_rotate( projection, angle );
 		}
 		Texdef_Rotate( projection.m_texdef, angle );
@@ -1482,7 +1482,7 @@ void Texdef_transformLocked_original( TextureProjection& projection, std::size_t
 		Texdef_basisForNormal( projection, plane.normal(), identity2stIdentity );
 		//globalOutputStream() << "identity2stIdentity: " << identity2stIdentity << "\n";
 
-		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 			matrix4_transform_direction( maa, projection.m_basis_s );
 			matrix4_transform_direction( maa, projection.m_basis_t );
 		}
@@ -1769,7 +1769,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		Texdef_normalise( projection, (float)width, (float)height );
 //			globalOutputStream() << "AP new: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
 	}
-	else{ //TEXDEFTYPEID_HALFLIFE
+	else{ //TEXDEFTYPEID_VALVE
 //			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
 //			globalOutputStream() << "220: projection.m_basis_s: " << projection.m_basis_s << " projection.m_basis_t: " << projection.m_basis_t << "\n";
 		//globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
@@ -1912,7 +1912,7 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 		Texdef_Construct_local2tex4projection( texdef, width, height, plane.normal(), direction, local2tex );
 		BPTexdef_fromST011( projection, plane, local2tex );
 	}
-	else if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+	else if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 		Texdef_Assign( projection.m_texdef, texdef );
 		if( direction ){ //arbitrary
 			ComputeAxisBase( *direction, projection.m_basis_s, projection.m_basis_t );
@@ -1937,7 +1937,7 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 	else
 	{
 		Texdef_Assign( projection.m_texdef, other_proj.m_texdef );
-		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_HALFLIFE ) {
+		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 			projection.m_basis_s = other_proj.m_basis_s;
 			projection.m_basis_t = other_proj.m_basis_t;
 		}
@@ -1960,7 +1960,7 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 		BPTexdef_normalise( projection.m_brushprimit_texdef, (float)width, (float)height );
 	}
 	break;
-	case TEXDEFTYPEID_HALFLIFE:
+	case TEXDEFTYPEID_VALVE:
 		if( in == TEXDEFTYPEID_QUAKE ) {
 			Matrix4 basis;
 			Normal_GetTransform( plane.normal(), basis );

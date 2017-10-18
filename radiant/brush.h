@@ -893,7 +893,7 @@ inline TexdefTypeId BrushType_getTexdefType( EBrushType type ){
 		return TEXDEFTYPEID_BRUSHPRIMITIVES;
 	case eBrushTypeValve220:
 	case eBrushTypeQuake3Valve220:
-		return TEXDEFTYPEID_HALFLIFE;
+		return TEXDEFTYPEID_VALVE;
 	default:
 		return TEXDEFTYPEID_QUAKE;
 	}
