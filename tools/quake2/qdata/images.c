@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright (C) 1999-2006 Id Software, Inc. and contributors.
    For a list of contributors, see the accompanying CONTRIBUTORS file.
 
