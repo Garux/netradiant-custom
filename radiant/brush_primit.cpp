@@ -379,7 +379,8 @@ void Texdef_Assign( texdef_t& td, const float* hShift, const float* vShift, cons
 	}
 	if( rotation ){
 		td.rotate = *rotation;
-		td.rotate = static_cast<float>( float_to_integer( td.rotate ) % 360 );
+		//td.rotate = static_cast<float>( float_to_integer( td.rotate * 100.f ) % 36000 ) / 100.f;
+		td.rotate = fmod( td.rotate, 360.f );
 	}
 }
 
@@ -405,7 +406,7 @@ void Texdef_Scale( texdef_t& td, float s, float t ){
 
 void Texdef_Rotate( texdef_t& td, float angle ){
 	td.rotate += angle;
-	td.rotate = static_cast<float>( float_to_integer( td.rotate ) % 360 );
+	td.rotate = fmod( td.rotate, 360.f );
 }
 #if 0
 // NOTE: added these from Ritual's Q3Radiant
