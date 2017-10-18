@@ -609,6 +609,26 @@ Vector3 Patch::Calculate_AvgNormal(){
 	for ( std::size_t i = 0; i < m_width; ++i ){
 		hDir += ctrlAt( m_height - 1, i ).m_vertex - ctrlAt( 0, i ).m_vertex;
 	}
+	/* fallback */
+	if ( vector3_equal_epsilon( wDir, g_vector3_identity, 1e-3f ) || vector3_equal_epsilon( hDir, g_vector3_identity, 1e-3f ) ) {
+		for ( std::size_t i = 0; i < m_height; ++i ){
+			for ( std::size_t j = 0; j < m_width - 1; ++j ){
+				wDir = ctrlAt( i, j + 1 ).m_vertex - ctrlAt( i, j ).m_vertex;
+				if ( !vector3_equal_epsilon( wDir, g_vector3_identity, 1e-3f ) )
+					goto break1;
+			}
+		}
+break1:
+		for ( std::size_t i = 0; i < m_width; ++i ){
+			for ( std::size_t j = 0; j < m_height; ++j ){
+				hDir = ctrlAt( j + 1, i ).m_vertex - ctrlAt( j, i ).m_vertex;
+				if ( !vector3_equal_epsilon( hDir, g_vector3_identity, 1e-3f ) )
+					goto break2;
+			}
+		}
+	}
+break2:
+
 	Vector3 normal( vector3_cross( wDir, hDir ) );
 	if ( vector3_equal( normal, g_vector3_identity ) ) {
 		normal = Vector3( 0, 0, 1 );
