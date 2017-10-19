@@ -1382,7 +1382,7 @@ void SurfaceInspector::ApplyTexdef_VScale(){
 void SurfaceInspector::ApplyTexdef_Rotation(){
 	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_rotateIncrement.m_spin ) );
 	StringOutputStream command;
-	command << "textureProjectionSetSelected -rotation " << value;
+	command << "textureProjectionSetSelected -rotation " << static_cast<float>( float_to_integer( value * 100.f ) ) / 100.f;;
 	UndoableCommand undo( command.c_str() );
 	Select_SetTexdef( 0, 0, 0, 0, &value );
 }
