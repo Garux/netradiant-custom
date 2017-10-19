@@ -1162,7 +1162,6 @@ void DoPatchDeformDlg(){
 //			}
 			{
 				GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 64, -9999, 9999, 1, 10, 0 ) );
-				//GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 0 ) );
 				GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
 				gtk_widget_show( spin );
 				gtk_table_attach( table, spin, 1, 2, 0, 1,

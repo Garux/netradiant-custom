@@ -394,20 +394,20 @@ void MapCoordinator(){
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 1, 2 ); // insert label into table
 
-		spinnerMinX = gtk_spin_button_new( spinner_adj_MinX, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMinX = gtk_spin_button_new( spinner_adj_MinX, 1.0, 0 ); // create textbox with value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMinX, 1, 2, 1, 2 ); // insert spinbox into table
 
-		spinnerMinY = gtk_spin_button_new( spinner_adj_MinY, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMinY = gtk_spin_button_new( spinner_adj_MinY, 1.0, 0 ); // create textbox with value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMinY, 2, 3, 1, 2 ); // insert spinbox into table
 
 		label = gtk_label_new( "mapcoordsmaxs" ); // create label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // align text to the left side
 		gtk_table_attach_defaults( GTK_TABLE( table ), label, 0, 1, 2, 3 ); // insert label into table
 
-		spinnerMaxX = gtk_spin_button_new( spinner_adj_MaxX, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMaxX = gtk_spin_button_new( spinner_adj_MaxX, 1.0, 0 ); // create textbox with value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMaxX, 1, 2, 2, 3 ); // insert spinbox into table
 
-		spinnerMaxY = gtk_spin_button_new( spinner_adj_MaxY, 1.0, 0 ); // create textbox wiht value spin, value and value range
+		spinnerMaxY = gtk_spin_button_new( spinner_adj_MaxY, 1.0, 0 ); // create textbox with value spin, value and value range
 		gtk_table_attach_defaults( GTK_TABLE( table ), spinnerMaxY, 2, 3, 2, 3 ); // insert spinbox into table
 
 		// put the references to the spinboxes and the worldspawn into the global exchange
