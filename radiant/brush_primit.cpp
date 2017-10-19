@@ -707,7 +707,7 @@ void TexMatToFakeTexCoords( const brushprimit_texdef_t& bp_texdef, texdef_t& tex
 	}
 #if 1
 	texdef.rotate = static_cast<float>( radians_to_degrees( acos( vector2_normalised( Vector2( bp_texdef.coords[0][0], bp_texdef.coords[0][1] ) )[0] ) ) );
-	if( bp_texdef.coords[0][1] < 0 ){
+	if( bp_texdef.coords[0][1] > 0 ){
 		texdef.rotate = -texdef.rotate;
 	}
 #else
@@ -1139,8 +1139,8 @@ void BPTexdef_Rotate( brushprimit_texdef_t& bp_td, float angle ){
 	const float y = bp_td.coords[0][1];
 	const float x1 = bp_td.coords[1][0];
 	const float y1 = bp_td.coords[1][1];
-	const float s = sin( degrees_to_radians( angle ) );
-	const float c = cos( degrees_to_radians( angle ) );
+	const float s = sin( degrees_to_radians( -angle ) );
+	const float c = cos( degrees_to_radians( -angle ) );
 	bp_td.coords[0][0] = x * c - y * s ;
 	bp_td.coords[0][1] = x * s + y * c;
 	bp_td.coords[1][0] = x1 * c - y1 * s;
@@ -1993,7 +1993,6 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 			projection.m_brushprimit_texdef.removeScale( width, height );
 			TexMatToFakeTexCoords( projection.m_brushprimit_texdef, projection.m_texdef );
 			projection.m_texdef.shift[0] *= -1.f;
-			projection.m_texdef.rotate *= -1.f;
 			if( projection.m_brushprimit_texdef.coords[0][0] < 0 )
 				projection.m_basis_s *= -1.f;
 			if( projection.m_brushprimit_texdef.coords[1][1] < 0 )

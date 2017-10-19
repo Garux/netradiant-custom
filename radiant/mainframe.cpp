@@ -1566,13 +1566,14 @@ void Texdef_Rotate( float angle ){
 	UndoableCommand undo( command.c_str() );
 	Select_RotateTexture( angle );
 }
-
+// these are actually {Anti,}Clockwise in BP mode only (AP/220 - 50/50)
+// TODO is possible to make really {Anti,}Clockwise
 void Texdef_RotateClockwise(){
-	Texdef_Rotate( static_cast<float>( fabs( g_si_globals.rotate ) ) );
+	Texdef_Rotate( static_cast<float>( -fabs( g_si_globals.rotate ) ) );
 }
 
 void Texdef_RotateAntiClockwise(){
-	Texdef_Rotate( static_cast<float>( -fabs( g_si_globals.rotate ) ) );
+	Texdef_Rotate( static_cast<float>( fabs( g_si_globals.rotate ) ) );
 }
 
 void Texdef_Scale( float x, float y ){
