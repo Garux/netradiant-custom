@@ -2681,8 +2681,7 @@ void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localT
 		renderer.PushState();
 		renderer.Highlight( Renderer::ePrimitiveWire );
 		if ( selectedComponents() ) {
-			renderer.Highlight( Renderer::eFace );
-			renderer.Highlight( Renderer::eFaceWire );
+			renderer.Highlight( Renderer::EHighlightMode( Renderer::eFace | Renderer::eFaceWire ) );
 		}
 		m_face->render( renderer, localToWorld );
 		renderer.PopState();

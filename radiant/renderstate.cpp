@@ -2269,18 +2269,18 @@ void OpenGLShader::construct( const char* name ){
 			state.m_depthfunc = GL_LEQUAL;
 		}
 		else if ( string_equal( name + 1, "CAM_FACEWIRE" ) ) {
-			state.m_colour[0] = g_xywindow_globals.color_selbrushes[0];
-			state.m_colour[1] = g_xywindow_globals.color_selbrushes[1];
-			state.m_colour[2] = g_xywindow_globals.color_selbrushes[2];
+			state.m_colour[0] = g_camwindow_globals.color_selbrushes3d[0];
+			state.m_colour[1] = g_camwindow_globals.color_selbrushes3d[1];
+			state.m_colour[2] = g_camwindow_globals.color_selbrushes3d[2];
 			state.m_colour[3] = 1;
 			state.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_OFFSETLINE;
 			state.m_sort = OpenGLState::eSortOverlayFirst + 2;
 			state.m_depthfunc = GL_LEQUAL;
 
 			OpenGLState& hiddenLine = appendDefaultPass();
-			hiddenLine.m_colour[0] = g_xywindow_globals.color_selbrushes[0];
-			hiddenLine.m_colour[1] = g_xywindow_globals.color_selbrushes[1];
-			hiddenLine.m_colour[2] = g_xywindow_globals.color_selbrushes[2];
+			hiddenLine.m_colour[0] = g_camwindow_globals.color_selbrushes3d[0];
+			hiddenLine.m_colour[1] = g_camwindow_globals.color_selbrushes3d[1];
+			hiddenLine.m_colour[2] = g_camwindow_globals.color_selbrushes3d[2];
 			hiddenLine.m_colour[3] = 1;
 			hiddenLine.m_state = RENDER_CULLFACE | RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_OFFSETLINE | RENDER_LINESTIPPLE;
 			hiddenLine.m_sort = OpenGLState::eSortOverlayFirst + 1;

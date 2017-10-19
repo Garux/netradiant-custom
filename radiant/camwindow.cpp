@@ -81,6 +81,7 @@ struct camwindow_globals_private_t
 	bool m_bCubicClipping;
 	int m_nStrafeMode;
 	bool m_bFaceWire;
+	bool m_bFaceFill;
 	int m_MSAA;
 
 	camwindow_globals_private_t() :
@@ -92,6 +93,7 @@ struct camwindow_globals_private_t
 		m_bCubicClipping( false ),
 		m_nStrafeMode( 3 ),
 		m_bFaceWire( true ),
+		m_bFaceFill( true ),
 		m_MSAA( 8 ){
 	}
 
@@ -1577,7 +1579,7 @@ CamRenderer( RenderStateFlags globalstate, Shader* facewire, Shader* wire, Shade
 	m_state_select1( select1 ),
 	m_viewer( viewer ){
 	ASSERT_NOTNULL( select0 );
-	ASSERT_NOTNULL( select1 );
+//	ASSERT_NOTNULL( select1 );
 	m_state_stack.push_back( state_type() );
 }
 
@@ -1600,7 +1602,7 @@ void PopState(){
 void Highlight( EHighlightMode mode, bool bEnable = true ){
 	( bEnable )
 	? m_state_stack.back().m_highlight |= mode
-										  : m_state_stack.back().m_highlight &= ~mode;
+	: m_state_stack.back().m_highlight &= ~mode;
 }
 void setLights( const LightList& lights ){
 	m_state_stack.back().m_lights = &lights;
@@ -1612,11 +1614,11 @@ void addRenderable( const OpenGLRenderable& renderable, const Matrix4& world ){
 	else if ( m_state_wire && m_state_stack.back().m_highlight & ePrimitiveWire ) {
 		m_state_wire->addRenderable( renderable, world, m_state_stack.back().m_lights );
 	}
-	if ( m_state_stack.back().m_highlight & eFace ) {
+	if ( m_state_select1 && m_state_stack.back().m_highlight & eFace ) {
 		m_state_select1->addRenderable( renderable, world, m_state_stack.back().m_lights );
-		if ( m_state_facewire && m_state_stack.back().m_highlight & eFaceWire ) {
-			m_state_facewire->addRenderable( renderable, world, m_state_stack.back().m_lights );
-		}
+	}
+	if ( m_state_facewire && m_state_stack.back().m_highlight & eFaceWire ) {
+		m_state_facewire->addRenderable( renderable, world, m_state_stack.back().m_lights );
 	}
 
 	m_state_stack.back().m_state->addRenderable( renderable, world, m_state_stack.back().m_lights );
@@ -1755,7 +1757,12 @@ void CamWnd::Cam_Draw(){
 //	}
 
 	{
-		CamRenderer renderer( globalstate, g_camwindow_globals_private.m_bFaceWire ? m_state_facewire : 0, m_Camera.draw_mode == cd_texture_plus_wire ? m_state_wire : 0, m_state_select0, m_state_select1, m_view.getViewer() );
+		CamRenderer renderer( globalstate,
+							g_camwindow_globals_private.m_bFaceWire ? m_state_facewire : 0,
+							m_Camera.draw_mode == cd_texture_plus_wire ? m_state_wire : 0,
+							m_state_select0,
+							g_camwindow_globals_private.m_bFaceFill ? m_state_select1 : 0,
+							m_view.getViewer() );
 
 		Scene_Render( renderer, m_view );
 
@@ -2156,6 +2163,11 @@ void Camera_constructPreferences( PreferencesPage& page ){
 		"", "Enable far-clip plane",
 		FreeCaller1<bool, Camera_SetFarClip>(),
 		BoolExportCaller( g_camwindow_globals_private.m_bCubicClipping )
+		);
+	page.appendCheckBox(
+		"", "Colorize selection",
+		BoolImportCaller( g_camwindow_globals_private.m_bFaceFill ),
+		BoolExportCaller( g_camwindow_globals_private.m_bFaceFill )
 		);
 	page.appendCheckBox(
 		"", "Selected faces wire",

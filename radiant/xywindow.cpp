@@ -2575,7 +2575,7 @@ void PopState(){
 void Highlight( EHighlightMode mode, bool bEnable = true ){
 	( bEnable )
 	? m_state_stack.back().m_highlight |= mode
-										  : m_state_stack.back().m_highlight &= ~mode;
+	: m_state_stack.back().m_highlight &= ~mode;
 }
 void addRenderable( const OpenGLRenderable& renderable, const Matrix4& localToWorld ){
 	if ( m_state_stack.back().m_highlight & ePrimitive ) {
