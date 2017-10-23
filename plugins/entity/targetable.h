@@ -47,7 +47,7 @@ typedef std::set<Targetable*> targetables_t;
 extern const char* g_targetable_nameKey;
 
 targetables_t* getTargetables( const char* targetname );
-
+#if 0
 class EntityConnectionLine : public OpenGLRenderable
 {
 public:
@@ -84,7 +84,7 @@ void render( RenderStateFlags state ) const {
 	glEnd();
 }
 };
-
+#endif
 class TargetedEntity
 {
 Targetable& m_targetable;
@@ -185,31 +185,32 @@ TargetLinesPushBack( RenderablePointVector& targetLines, const Vector3& worldPos
 }
 void operator()( const Vector3& worldPosition ) const {
 	Vector3 dir( worldPosition - m_worldPosition );//end - start
-	double len = vector3_length( dir );
+	const double len = vector3_length( dir );
 	if ( len != 0 && m_volume.TestLine( segment_for_startend( m_worldPosition, worldPosition ) ) ) {
 		m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( m_worldPosition ) ) );
 		m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( worldPosition ) ) );
 
-		Vector3 mid( ( worldPosition + m_worldPosition ) * 0.5f );
+		const Vector3 mid( ( worldPosition + m_worldPosition ) * .5f );
 		//vector3_normalise( dir );
-		dir /= len;
-		Vector3 hack( 0.57735, 0.57735, 0.57735 );
+		dir *= ( 1.0 / len );
+		Vector3 hack( 0.57735f, 0.57735f, 0.57735f );
 		int maxI = 0;
 		float max = 0;
 		for ( int i = 0; i < 3 ; ++i ){
 			if ( dir[i] < 0 ){
-				hack[i] *= -1;
+				hack[i] *= -1.f;
 			}
 			if ( fabs( dir[i] ) > max ){
 				maxI = i;
+				max = fabs( dir[i] );
 			}
 		}
-		hack[maxI] *= -1;
+		hack[maxI] *= -1.f;
 
-		Vector3 ort( vector3_cross( dir, hack ) );
+		const Vector3 ort( vector3_cross( dir, hack ) );
 		//vector3_normalise( ort );
-		Vector3 wing1( mid - dir*12 + ort*6 );
-		Vector3 wing2( wing1 - ort*12 );
+		Vector3 wing1( mid - dir * 12.f + ort * 6.f );
+		Vector3 wing2( wing1 - ort * 12.f );
 
 		if( len <= 512 || len > 768 ){
 			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( mid ) ) );
@@ -218,16 +219,16 @@ void operator()( const Vector3& worldPosition ) const {
 			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing2 ) ) );
 		}
 		if( len > 512 ){
-			Vector3 wing1_delta( mid - wing1 );
-			Vector3 wing2_delta( mid - wing2 );
-			Vector3 point( m_worldPosition + dir*256 );
+			const Vector3 wing1_delta( mid - wing1 );
+			const Vector3 wing2_delta( mid - wing2 );
+			Vector3 point( m_worldPosition + dir * 256.f );
 			wing1 = point - wing1_delta;
 			wing2 = point - wing2_delta;
 			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( point ) ) );
 			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing1 ) ) );
 			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( point ) ) );
 			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( wing2 ) ) );
-			point =  worldPosition - dir*256;
+			point =  worldPosition - dir * 256.f;
 			wing1 = point - wing1_delta;
 			wing2 = point - wing2_delta;
 			m_targetLines.push_back( PointVertex( reinterpret_cast<const Vertex3f&>( point ) ) );
