@@ -256,16 +256,16 @@ void RunBSP( const char* name ){
 		return;
 	}
 
-	SaveMap();
+	if( !g_region_active )
+		SaveMap();
 
 	if ( Map_Unnamed( g_map ) ) {
-		globalOutputStream() << "build cancelled\n";
+		globalErrorStream() << "build cancelled: the map is unnamed\n";
 		return;
 	}
 
-	if ( g_SnapShots_Enabled && !Map_Unnamed( g_map ) && Map_Modified( g_map ) ) {
+	if ( !g_region_active && g_SnapShots_Enabled && Map_Modified( g_map ) )
 		Map_Snapshot();
-	}
 
 	if ( g_region_active ) {
 		const char* mapname = Map_Name( g_map );
