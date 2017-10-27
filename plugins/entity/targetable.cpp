@@ -34,4 +34,4 @@ targetables_t* getTargetables( const char* targetname ){
 	return &g_targetnames[targetname];
 }
 
-Shader* RenderableTargetingEntity::m_state;
+//Shader* RenderableTargetingEntity::m_state;

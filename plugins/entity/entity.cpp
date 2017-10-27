@@ -114,6 +114,7 @@ Counter* EntityKeyValues::m_counter = 0;
 
 bool g_showNames = true;
 bool g_showBboxes = false;
+bool g_showConnections = true;
 int g_showNamesDist = 512;
 int g_showNamesRatio = 64;
 bool g_showTargetNames = false;
@@ -278,6 +279,12 @@ void setShowBboxes( bool showBboxes ){
 bool getShowBboxes(){
 	return g_showBboxes;
 }
+void setShowConnections( bool showConnections ){
+	g_showConnections = showConnections;
+}
+bool getShowConnections(){
+	return g_showConnections;
+}
 void setShowNamesDist( int dist ){
 	g_showNamesDist = dist;
 }
@@ -409,6 +416,7 @@ void Entity_Construct( EGameType gameType ){
 
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNames", BoolImportStringCaller( g_showNames ), BoolExportStringCaller( g_showNames ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowBboxes", BoolImportStringCaller( g_showBboxes ), BoolExportStringCaller( g_showBboxes ) );
+	GlobalPreferenceSystem().registerPreference( "SI_ShowConnections", BoolImportStringCaller( g_showConnections ), BoolExportStringCaller( g_showConnections ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNamesDist", IntImportStringCaller( g_showNamesDist ), IntExportStringCaller( g_showNamesDist ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNamesRatio", IntImportStringCaller( g_showNamesRatio ), IntExportStringCaller( g_showNamesRatio ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowTargetNames", BoolImportStringCaller( g_showTargetNames ), BoolExportStringCaller( g_showTargetNames ) );

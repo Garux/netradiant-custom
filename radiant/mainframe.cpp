@@ -2082,6 +2082,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Entity _Names", "ShowNames" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Light Radiuses", "ShowLightRadiuses" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Entity Boxes", "ShowBboxes" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Entity Connections", "ShowConnections" );
 
 		menu_separator( menu_in_menu );
 

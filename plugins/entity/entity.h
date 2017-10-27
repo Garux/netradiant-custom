@@ -41,6 +41,7 @@ void Entity_Destroy();
 
 extern bool g_showNames;
 extern bool g_showBboxes;
+extern bool g_showConnections;
 extern int g_showNamesDist;
 extern int g_showNamesRatio;
 extern bool g_showTargetNames;

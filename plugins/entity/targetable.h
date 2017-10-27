@@ -289,7 +289,7 @@ const TargetingEntities& get() const {
 };
 
 
-
+#if 0
 class RenderableTargetingEntity
 {
 TargetingEntity& m_targets;
@@ -314,13 +314,13 @@ void render( Renderer& renderer, const VolumeTest& volume, const Vector3& world_
 	}
 }
 };
-
+#endif
 class RenderableTargetingEntities
 {
 const TargetingEntities& m_targets;
 mutable RenderablePointVector m_target_lines;
 public:
-static Shader* m_state;
+//static Shader* m_state;
 
 RenderableTargetingEntities( const TargetingEntities& targets )
 	: m_targets( targets ), m_target_lines( GL_LINES ){
@@ -416,6 +416,7 @@ const TargetingEntities& getTargeting() const {
 }
 };
 
+#include "entity.h"
 
 class RenderableConnectionLines : public Renderable
 {
@@ -432,10 +433,12 @@ void detach( TargetableInstance& instance ){
 }
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
-	for ( TargetableInstances::const_iterator i = m_instances.begin(); i != m_instances.end(); ++i )
-	{
-		if ( ( *i )->path().top().get().visible() ) {
-			( *i )->render( renderer, volume );
+	if( g_showConnections ){
+		for ( TargetableInstances::const_iterator i = m_instances.begin(); i != m_instances.end(); ++i )
+		{
+			if ( ( *i )->path().top().get().visible() ) {
+				( *i )->render( renderer, volume );
+			}
 		}
 	}
 }
