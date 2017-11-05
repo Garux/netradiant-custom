@@ -1543,7 +1543,8 @@ ExcludeSelectedWalker( bool exclude )
 	: m_exclude( exclude ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	exclude_node( path.top(), ( instance.isSelected() || instance.childSelected() || instance.parentSelected() ) == m_exclude );
+	if( !path.top().get().isRoot() ) /* don't touch model node: disabling one will disable all instances! */
+		exclude_node( path.top(), ( instance.isSelected() || instance.childSelected() || instance.parentSelected() ) == m_exclude );
 	return true;
 }
 };
@@ -1560,17 +1561,18 @@ ExcludeRegionedWalker( bool exclude )
 	: m_exclude( exclude ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	exclude_node(
-		path.top(),
-		!(
-			(
-				aabb_intersects_aabb(
-					instance.worldAABB(),
-					aabb_for_minmax( g_region_mins, g_region_maxs )
-					) != 0
-			) ^ m_exclude
-			)
-		);
+	if( !path.top().get().isRoot() ) /* don't touch model node: disabling one will disable all its instances! */
+		exclude_node(
+			path.top(),
+			!(
+				(
+					aabb_intersects_aabb(
+						instance.worldAABB(),
+						aabb_for_minmax( g_region_mins, g_region_maxs )
+						) != 0
+				) ^ m_exclude
+				)
+			);
 
 	return true;
 }
@@ -1591,21 +1593,26 @@ void Map_RegionOff(){
 	g_region_active = false;
 	g_region_item.update();
 
-	g_region_maxs[0] = g_MaxWorldCoord - 64;
-	g_region_mins[0] = g_MinWorldCoord + 64;
-	g_region_maxs[1] = g_MaxWorldCoord - 64;
-	g_region_mins[1] = g_MinWorldCoord + 64;
-	g_region_maxs[2] = g_MaxWorldCoord - 64;
-	g_region_mins[2] = g_MinWorldCoord + 64;
+	g_region_maxs[0] = g_region_maxs[1] = g_region_maxs[2] = g_MaxWorldCoord - 64;
+	g_region_mins[0] = g_region_mins[1] = g_region_mins[2] = g_MinWorldCoord + 64;
 
 	Scene_Exclude_All( false );
 }
 
-void Map_ApplyRegion( void ){
+void Map_ApplyRegion(){
+	if( GlobalSelectionSystem().countSelectedComponents() != 0 )
+		GlobalSelectionSystem().setSelectedAllComponents( false );
+
 	g_region_active = true;
 	g_region_item.update();
 
 	Scene_Exclude_Region( false );
+	/* newly created brushes have to visible! */
+	if( scene::Node* w = Map_FindWorldspawn( g_map ) )
+		exclude_node( *w, false );
+
+	if( GlobalSelectionSystem().countSelected() != 0 )
+		GlobalSelectionSystem().setSelectedAll( false );
 }
 
 
@@ -1614,18 +1621,24 @@ void Map_ApplyRegion( void ){
    Map_RegionSelectedBrushes
    ========================
  */
-void Map_RegionSelectedBrushes( void ){
-	Map_RegionOff();
+void Map_RegionSelectedBrushes(){
+	if ( GlobalSelectionSystem().countSelected() != 0 ) {
+		if( GlobalSelectionSystem().countSelectedComponents() != 0 )
+			GlobalSelectionSystem().setSelectedAllComponents( false );
 
-	if ( GlobalSelectionSystem().countSelected() != 0
-		 && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) {
 		g_region_active = true;
 		g_region_item.update();
 		Select_GetBounds( g_region_mins, g_region_maxs );
 
 		Scene_Exclude_Selected( false );
+		/* newly created brushes have to visible! */
+		if( scene::Node* w = Map_FindWorldspawn( g_map ) )
+			exclude_node( *w, false );
 
 		GlobalSelectionSystem().setSelectedAll( false );
+	}
+	else{
+		Map_RegionOff();
 	}
 }
 
@@ -1651,7 +1664,7 @@ void Map_RegionBounds( const AABB& bounds ){
 	g_region_mins = vector3_subtracted( bounds.origin, bounds.extents );
 	g_region_maxs = vector3_added( bounds.origin, bounds.extents );
 
-	deleteSelection();
+//	deleteSelection();
 
 	Map_ApplyRegion();
 }
@@ -1665,6 +1678,14 @@ void Map_RegionBrush( void ){
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
 		Map_RegionBounds( instance.worldAABB() );
+
+		if( Selectable* selectable = Instance_getSelectable( instance ) ){
+			selectable->setSelected( true );
+			deleteSelection();
+		}
+	}
+	else{
+		globalErrorStream() << "Nothing is selected!\n";
 	}
 }
 

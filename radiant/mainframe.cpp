@@ -2118,7 +2118,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		create_menu_item_with_mnemonic( menu_in_menu, "_Off", "RegionOff" );
 		create_menu_item_with_mnemonic( menu_in_menu, "_Set XY", "RegionSetXY" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Set _Brush", "RegionSetBrush" );
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Set Se_lected Brushes", "RegionSetSelection" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Set Se_lection", "RegionSetSelection" );
 	}
 
 	//command_connect_accelerator( "CenterXYView" );
