@@ -552,9 +552,9 @@ void unrealiseShader(){
 	}
 }
 
-void setTexdef( const TextureProjection& projection ){
+void setTexdef( const TextureProjection& projection, bool setBasis ){
 	removeScale();
-	Texdef_Assign( m_projection, projection );
+	Texdef_Assign( m_projection, projection, setBasis );
 	addScale();
 }
 
@@ -1014,7 +1014,7 @@ Face( const Face& other, FaceObserver* observer ) :
 	m_shader.attach( *this );
 	m_plane.copy( other.m_plane );
 	planepts_assign( m_move_planepts, other.m_move_planepts );
-//	m_texdef.setBasis( m_plane.plane3().normal() );
+//	m_texdef.setBasis( m_plane.plane3().normal() ); //don't reset basis on face clone
 	planeChanged();
 	updateFiltered();
 }
@@ -1220,9 +1220,9 @@ void texdefChanged(){
 void GetTexdef( TextureProjection& projection ) const {
 	projection = m_texdef.normalised();
 }
-void SetTexdef( const TextureProjection& projection, bool resetBasis = false ){
+void SetTexdef( const TextureProjection& projection, bool setBasis = true, bool resetBasis = false ){
 	undoSave();
-	m_texdef.setTexdef( projection );
+	m_texdef.setTexdef( projection, setBasis );
 	if( resetBasis ){
 		m_texdef.setBasis( m_plane.plane3().normal() );
 	}

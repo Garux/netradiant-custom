@@ -1185,14 +1185,14 @@ void BPTexdef_Construct( brushprimit_texdef_t& bp_td, std::size_t width, std::si
 	ConvertTexMatWithDimensions( bp_td.coords, 2, 2, bp_td.coords, width, height );
 }
 
-void Texdef_Assign( TextureProjection& projection, const TextureProjection& other ){
+void Texdef_Assign( TextureProjection& projection, const TextureProjection& other, bool setBasis /*= true*/ ){
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
 		BPTexdef_Assign( projection.m_brushprimit_texdef, other.m_brushprimit_texdef );
 	}
 	else
 	{
 		Texdef_Assign( projection.m_texdef, other.m_texdef );
-		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
+		if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE && setBasis ) {
 			projection.m_basis_s = other.m_basis_s;
 			projection.m_basis_t = other.m_basis_t;
 		}

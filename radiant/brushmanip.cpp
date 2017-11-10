@@ -493,21 +493,23 @@ void ConstructRegionBrushes( scene::Node* brushes[6], const Vector3& region_mins
 class FaceSetTexdef
 {
 const TextureProjection& m_projection;
+const bool m_setBasis;
+const bool m_resetBasis;
 public:
-FaceSetTexdef( const TextureProjection& projection ) : m_projection( projection ){
+FaceSetTexdef( const TextureProjection& projection, bool setBasis, bool resetBasis ) : m_projection( projection ), m_setBasis( setBasis ), m_resetBasis( resetBasis ){
 }
 void operator()( Face& face ) const {
-	face.SetTexdef( m_projection, true ); /* reset valve220 basis, once this chain is used for reset only atm */
+	face.SetTexdef( m_projection, m_setBasis, m_resetBasis );
 }
 };
 
-void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection ){
-	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceSetTexdef( projection ) );
+void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection, bool setBasis, bool resetBasis ){
+	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceSetTexdef( projection, setBasis, resetBasis ) );
 	SceneChangeNotify();
 }
 
-void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const TextureProjection& projection ){
-	Scene_ForEachSelectedBrushFace( graph, FaceSetTexdef( projection ) );
+void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const TextureProjection& projection, bool setBasis, bool resetBasis ){
+	Scene_ForEachSelectedBrushFace( graph, FaceSetTexdef( projection, setBasis, resetBasis ) );
 	SceneChangeNotify();
 }
 

@@ -541,7 +541,7 @@ static void OnBtnReset( GtkWidget *widget, gpointer data ){
 	}
 #endif
 
-	Select_SetTexdef( projection );
+	Select_SetTexdef( projection, false, true );
 }
 
 static void OnBtnProject( GtkWidget *widget, gpointer data ){
@@ -1519,7 +1519,7 @@ typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFl
 
 void Face_setTexture( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
 	face.SetShader( shader );
-	face.SetTexdef( projection );
+	face.SetTexdef( projection, false );
 	face.SetFlags( flags );
 }
 typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture> FaceSetTexture;
@@ -1693,7 +1693,7 @@ void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project
 		}
 		else if( !seamless ){
 			Select_SetShader( TextureBrowser_GetSelectedShader( g_TextureBrowser ) );
-			Select_SetTexdef( g_faceTextureClipboard.m_projection );
+			Select_SetTexdef( g_faceTextureClipboard.m_projection, false, false );
 		}
 	}
 

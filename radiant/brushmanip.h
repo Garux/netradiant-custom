@@ -47,8 +47,8 @@ void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::si
 class AABB;
 void Scene_BrushResize_Selected( scene::Graph& graph, const AABB& bounds, const char* shader );
 void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds );
-void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection );
-void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const TextureProjection& projection );
+void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection, bool setBasis, bool resetBasis );
+void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const TextureProjection& projection, bool setBasis, bool resetBasis );
 void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation );
 void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& projection );

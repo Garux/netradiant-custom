@@ -517,11 +517,11 @@ void Select_SetShader_Undo( const char* shader ){
 	}
 }
 
-void Select_SetTexdef( const TextureProjection& projection ){
+void Select_SetTexdef( const TextureProjection& projection, bool setBasis /*= true*/, bool resetBasis /*= false*/ ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
-		Scene_BrushSetTexdef_Selected( GlobalSceneGraph(), projection );
+		Scene_BrushSetTexdef_Selected( GlobalSceneGraph(), projection, setBasis, resetBasis );
 	}
-	Scene_BrushSetTexdef_Component_Selected( GlobalSceneGraph(), projection );
+	Scene_BrushSetTexdef_Component_Selected( GlobalSceneGraph(), projection, setBasis, resetBasis );
 }
 
 void Select_SetTexdef( const float* hShift, const float* vShift, const float* hScale, const float* vScale, const float* rotation ){
