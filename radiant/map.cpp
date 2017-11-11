@@ -412,6 +412,9 @@ void RemoveRegionBrushes( void );
    ================
  */
 void Map_Free(){
+	Map_RegionOff();
+	Select_ShowAllHidden();
+
 	Pointfile_Clear();
 
 	g_map.m_resource->detach( g_map );
@@ -1649,8 +1652,6 @@ void Map_RegionSelectedBrushes(){
    ===========
  */
 void Map_RegionXY( const Vector3& min, const Vector3& max ){
-	//Map_RegionOff();
-
 	for( std::size_t i = 0; i < 3; ++i ){
 		g_region_mins[i] = std::max( g_region_mins[i], min[i] );
 		g_region_maxs[i] = std::min( g_region_maxs[i], max[i] );
@@ -1998,7 +1999,6 @@ public:
 
 void NewMap(){
 	if ( ConfirmModified( "New Map" ) ) {
-		Map_RegionOff();
 		Map_Free();
 		Map_New();
 	}
@@ -2031,7 +2031,6 @@ void OpenMap(){
 
 	if ( filename != 0 ) {
 		MRU_AddFile( filename );
-		Map_RegionOff();
 		Map_Free();
 		Map_LoadFile( filename );
 	}

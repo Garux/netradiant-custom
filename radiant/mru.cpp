@@ -147,7 +147,6 @@ void MRU_Activate( std::size_t index ){
 
 	if ( file_readable( text ) ) { //\todo Test 'map load succeeds' instead of 'file is readable'.
 		MRU_AddFile( text );
-		Map_RegionOff();
 		Map_Free();
 		Map_LoadFile( text );
 	}
