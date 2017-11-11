@@ -961,6 +961,8 @@ void Select_Hide(){
 
 void HideSelected(){
 	Select_Hide();
+	if( GlobalSelectionSystem().countSelectedComponents() != 0 )
+		GlobalSelectionSystem().setSelectedAllComponents( false );
 	GlobalSelectionSystem().setSelectedAll( false );
 	g_hidden_item.update();
 }
