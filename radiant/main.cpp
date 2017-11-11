@@ -673,12 +673,6 @@ int main( int argc, char* argv[] ){
 
 	gtk_main();
 
-	// avoid saving prefs when the app is minimized
-	if ( g_pParentWnd->IsSleeping() ) {
-		globalOutputStream() << "Shutdown while sleeping, not saving prefs\n";
-		g_preferences_globals.disable_ini = true;
-	}
-
 	Map_Free();
 
 	if ( !Map_Unnamed( g_map ) ) {

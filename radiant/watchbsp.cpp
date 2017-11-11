@@ -168,8 +168,6 @@ bool g_WatchBSP_Enabled = true;
 // do we stop the compilation process if we come accross a leak?
 bool g_WatchBSP_LeakStop = true;
 bool g_WatchBSP_RunQuake = false;
-// store prefs setting for automatic sleep mode activation
-bool g_WatchBSP_DoSleep = true;
 // timeout when beginning a step (in seconds)
 // if we don't get a connection quick enough we assume something failed and go back to idling
 int g_WatchBSP_Timeout = 10;
@@ -179,10 +177,8 @@ void Build_constructPreferences( PreferencesPage& page ){
 	GtkWidget* monitorbsp = page.appendCheckBox( "", "Enable Build Process Monitoring", g_WatchBSP_Enabled );
 	GtkWidget* leakstop = page.appendCheckBox( "", "Stop Compilation on Leak", g_WatchBSP_LeakStop );
 	GtkWidget* runengine = page.appendCheckBox( "", "Run Engine After Compile", g_WatchBSP_RunQuake );
-	GtkWidget* sleep = page.appendCheckBox ( "", "Sleep When Running the Engine", g_WatchBSP_DoSleep );
 	Widget_connectToggleDependency( leakstop, monitorbsp );
 	Widget_connectToggleDependency( runengine, monitorbsp );
-	Widget_connectToggleDependency( sleep, runengine );
 }
 void Build_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Build", "Build Preferences" ) );
@@ -203,7 +199,6 @@ void BuildMonitor_Construct(){
 	GlobalPreferenceSystem().registerPreference( "WatchBSP", BoolImportStringCaller( g_WatchBSP_Enabled ), BoolExportStringCaller( g_WatchBSP_Enabled ) );
 	GlobalPreferenceSystem().registerPreference( "RunQuake2Run", BoolImportStringCaller( g_WatchBSP_RunQuake ), BoolExportStringCaller( g_WatchBSP_RunQuake ) );
 	GlobalPreferenceSystem().registerPreference( "LeakStop", BoolImportStringCaller( g_WatchBSP_LeakStop ), BoolExportStringCaller( g_WatchBSP_LeakStop ) );
-	GlobalPreferenceSystem().registerPreference( "SleepMode", BoolImportStringCaller( g_WatchBSP_DoSleep ), BoolExportStringCaller( g_WatchBSP_DoSleep ) );
 
 	Build_registerPreferencesPage();
 }
@@ -706,13 +701,6 @@ void CWatchBSP::RoutineProcessing(){
 				{
 					// launch the engine .. OMG
 					if ( g_WatchBSP_RunQuake ) {
-#if 0
-						// do we enter sleep mode before?
-						if ( g_WatchBSP_DoSleep ) {
-							globalOutputStream() << "Going into sleep mode..\n";
-							g_pParentWnd->OnSleep();
-						}
-#endif
 						globalOutputStream() << "Running engine...\n";
 						StringOutputStream cmd( 256 );
 						// build the command line

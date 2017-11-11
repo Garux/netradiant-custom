@@ -1007,10 +1007,6 @@ void Restart(){
 }
 
 
-void thunk_OnSleep(){
-	g_pParentWnd->OnSleep();
-}
-
 void OpenUpdateURL(){
 	// build the URL
 	StringOutputStream URL( 256 );
@@ -1918,13 +1914,6 @@ GtkMenuItem* create_file_menu(){
 	create_menu_item_with_mnemonic( menu, "_New Map", "NewMap" );
 	menu_separator( menu );
 
-#if 0
-	//++timo temporary experimental stuff for sleep mode..
-	create_menu_item_with_mnemonic( menu, "_Sleep", "Sleep" );
-	menu_separator( menu );
-	// end experimental
-#endif
-
 	create_menu_item_with_mnemonic( menu, "_Open...", "OpenMap" );
 	create_menu_item_with_mnemonic( menu, "_Import...", "ImportMap" );
 	menu_separator( menu );
@@ -2679,8 +2668,6 @@ MainFrame::MainFrame() : m_window( 0 ), m_idleRedrawStatusText( RedrawStatusText
 		m_pStatusLabel[n] = 0;
 	}
 
-	m_bSleeping = false;
-
 	Create();
 }
 
@@ -2710,109 +2697,6 @@ void MainFrame::SetActiveXY( XYWnd* p ){
 		m_pActiveXY->SetActive( true );
 	}
 
-}
-
-void MainFrame::ReleaseContexts(){
-#if 0
-	if ( m_pXYWnd ) {
-		m_pXYWnd->DestroyContext();
-	}
-	if ( m_pYZWnd ) {
-		m_pYZWnd->DestroyContext();
-	}
-	if ( m_pXZWnd ) {
-		m_pXZWnd->DestroyContext();
-	}
-	if ( m_pCamWnd ) {
-		m_pCamWnd->DestroyContext();
-	}
-	if ( m_pTexWnd ) {
-		m_pTexWnd->DestroyContext();
-	}
-	if ( m_pZWnd ) {
-		m_pZWnd->DestroyContext();
-	}
-#endif
-}
-
-void MainFrame::CreateContexts(){
-#if 0
-	if ( m_pCamWnd ) {
-		m_pCamWnd->CreateContext();
-	}
-	if ( m_pXYWnd ) {
-		m_pXYWnd->CreateContext();
-	}
-	if ( m_pYZWnd ) {
-		m_pYZWnd->CreateContext();
-	}
-	if ( m_pXZWnd ) {
-		m_pXZWnd->CreateContext();
-	}
-	if ( m_pTexWnd ) {
-		m_pTexWnd->CreateContext();
-	}
-	if ( m_pZWnd ) {
-		m_pZWnd->CreateContext();
-	}
-#endif
-}
-
-#ifdef _DEBUG
-//#define DBG_SLEEP
-#endif
-
-void MainFrame::OnSleep(){
-#if 0
-	m_bSleeping ^= 1;
-	if ( m_bSleeping ) {
-		// useful when trying to debug crashes in the sleep code
-		globalOutputStream() << "Going into sleep mode..\n";
-
-		globalOutputStream() << "Dispatching sleep msg...";
-		DispatchRadiantMsg( RADIANT_SLEEP );
-		globalOutputStream() << "Done.\n";
-
-		gtk_window_iconify( m_window );
-		GlobalSelectionSystem().setSelectedAll( false );
-
-		GlobalShaderCache().unrealise();
-		Shaders_Free();
-		GlobalOpenGL_debugAssertNoErrors();
-		ScreenUpdates_Disable();
-
-		// release contexts
-		globalOutputStream() << "Releasing contexts...";
-		ReleaseContexts();
-		globalOutputStream() << "Done.\n";
-	}
-	else
-	{
-		globalOutputStream() << "Waking up\n";
-
-		gtk_window_deiconify( m_window );
-
-		// create contexts
-		globalOutputStream() << "Creating contexts...";
-		CreateContexts();
-		globalOutputStream() << "Done.\n";
-
-		globalOutputStream() << "Making current on camera...";
-		m_pCamWnd->MakeCurrent();
-		globalOutputStream() << "Done.\n";
-
-		globalOutputStream() << "Reloading shaders...";
-		Shaders_Load();
-		GlobalShaderCache().realise();
-		globalOutputStream() << "Done.\n";
-
-		ScreenUpdates_Enable();
-
-		globalOutputStream() << "Dispatching wake msg...";
-		DispatchRadiantMsg( RADIANT_WAKEUP );
-		globalOutputStream() << "Done\n";
-	}
-#endif
 }
 
 
@@ -3543,7 +3427,6 @@ void FocusAllViews(){
 void MainFrame_Construct(){
 	GlobalCommands_insert( "OpenManual", FreeCaller<OpenHelpURL>(), Accelerator( GDK_F1 ) );
 
-	GlobalCommands_insert( "Sleep", FreeCaller<thunk_OnSleep>(), Accelerator( 'P', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "NewMap", FreeCaller<NewMap>() );
 	GlobalCommands_insert( "OpenMap", FreeCaller<OpenMap>(), Accelerator( 'O', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "ImportMap", FreeCaller<ImportMap>() );
