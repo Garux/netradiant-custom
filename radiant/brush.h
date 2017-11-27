@@ -1106,6 +1106,15 @@ void render( Renderer& renderer, const Matrix4& localToWorld ) const {
 	renderer.addRenderable( *this, localToWorld );
 }
 
+void transform_texdef( const Matrix4& matrix ){
+	if( m_centroid_saved_reset ){
+		m_centroid_saved = m_centroid;
+		m_centroid_saved_reset = false;
+	}
+	Texdef_transformLocked( m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix, contributes() ? m_centroid_saved : static_cast<Vector3>( m_plane.plane3().normal() * m_plane.plane3().dist() ) );
+	Brush_textureChanged();
+}
+
 void transform( const Matrix4& matrix, bool mirror ){
 	if ( g_brush_texturelock_enabled ) {
 		if( m_centroid_saved_reset ){
@@ -2766,6 +2775,18 @@ void transformComponents( const Matrix4& matrix ){
 			matrix4_transform_point( matrix, m_face->m_move_planeptsTransformed[2] );
 			m_face->assign_planepts( m_face->m_move_planeptsTransformed );
 		}
+	}
+	if ( selectedVertices() || selectedEdges() ) {
+		Matrix4 matrix0( g_matrix4_identity );
+		vector4_to_vector3( matrix0.x() ) = m_face->m_move_planepts[0];
+		vector4_to_vector3( matrix0.y() ) = m_face->m_move_planepts[1];
+		vector4_to_vector3( matrix0.z() ) = m_face->m_move_planepts[2];
+		Matrix4 matrix1( g_matrix4_identity );
+		vector4_to_vector3( matrix1.x() ) = m_face->m_move_planeptsTransformed[0];
+		vector4_to_vector3( matrix1.y() ) = m_face->m_move_planeptsTransformed[1];
+		vector4_to_vector3( matrix1.z() ) = m_face->m_move_planeptsTransformed[2];
+
+		m_face->transform_texdef( matrix4_multiplied_by_matrix4( matrix1, matrix4_full_inverse( matrix0 ) ) );
 	}
 }
 
