@@ -28,6 +28,13 @@
 #include "math/vector.h"
 
 /// \brief A 4x4 matrix stored in single-precision floating-point.
+/// column-major matrix!
+/// translation lives in [12], [13], [14] (.t())
+/// [0] [4]  [8] [12]
+/// [1] [5]  [9] [13]
+/// [2] [6] [10] [14]
+/// [3] [7] [11] [15]
+
 class Matrix4
 {
 float m_elements[16];
