@@ -1570,6 +1570,7 @@ const Vector3 BaseAxes[] = {
         };
 
 std::size_t planeNormalIndex( const Vector3& normal ) {
+#if 0
 	std::size_t bestIndex = 0;
 	float bestDot = 0.f;
 	for( std::size_t i = 0; i < 6; ++i ) {
@@ -1580,6 +1581,20 @@ std::size_t planeNormalIndex( const Vector3& normal ) {
 		}
 	}
 	return bestIndex;
+#else
+	switch ( projectionaxis_for_normal( normal ) )
+	{
+	case eProjectionAxisZ:
+		return normal.z() > 0 ? 0 : 1;
+		break;
+	case eProjectionAxisX:
+		return normal.x() > 0 ? 2 : 3;
+		break;
+	default: //case eProjectionAxisY:
+		return normal.y() > 0 ? 4 : 5;
+		break;
+	}
+#endif
 }
 
 
