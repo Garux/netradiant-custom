@@ -1623,11 +1623,16 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		double xyI[2], xyJ[2], xyK[2];
 		double stI[2], stJ[2], stK[2];
 		double D, D0, D1, D2;
-
+#if 0
 		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
 		matrix4_transpose( maa );
-		DoubleVector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
-
+		const DoubleVector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+#else
+        /* this is also handling scale = 0 case */
+		DoubleVector3 normalTransformed( plane3_for_points( points ).normal() );
+		if( matrix4_handedness( identity2transformed ) == MATRIX4_LEFTHANDED )
+			vector3_negate( normalTransformed );
+#endif
 		ComputeAxisBase( normalTransformed, texX, texY );
 
 		xyI[0] = vector3_dot( points[0], texX );
