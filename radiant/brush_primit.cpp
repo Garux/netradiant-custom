@@ -1552,7 +1552,7 @@ double Det3x3( double a00, double a01, double a02,
 
 Vector3 plane3_project_point( const Plane3& plane, const Vector3& point, const Vector3& direction ){
 	const float f = vector3_dot( plane.normal(), direction );
-	const float d = ( vector3_dot( plane.normal() * plane.dist()- point, plane.normal() ) ) / f;
+	const float d = ( vector3_dot( plane.normal() * plane.dist() - point, plane.normal() ) ) / f;
 	return point + direction * d;
 }
 
@@ -1688,13 +1688,35 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		}
 
 		const Vector3 oldInvariant( centroid );
-		const Vector3 offset = matrix4_transformed_point( identity2transformed, Vector3( 0, 0, 0 ) );
 		#if 0//not ok, if scaling
+		const Vector3 offset = matrix4_transformed_point( identity2transformed, Vector3( 0, 0, 0 ) );
 		Vector3 newNormal  = matrix4_transformed_point( identity2transformed, plane.normal() ) - offset;
 		#else
-		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
-		matrix4_transpose( maa );
+		Matrix4 maa( identity2transformed );
+		if( maa.xx() != 0 && maa.yy() != 0 && maa.zz() != 0 ){
+			matrix4_affine_invert( maa );
+			matrix4_transpose( maa );
+		}
+		else{ /* we are only performing scale alone, so this must work; sup with more complex (+non orthonormal) matrices? */
+			if( maa.xx() == 0 ){
+				maa.xx() = 1;
+				maa.yy() = 0;
+				maa.zz() = 0;
+			}
+			else if( maa.yy() == 0 ){
+				maa.xx() = 0;
+				maa.yy() = 1;
+				maa.zz() = 0;
+			}
+			else if( maa.zz() == 0 ){
+				maa.xx() = 0;
+				maa.yy() = 0;
+				maa.zz() = 1;
+			}
+		}
+//			globalOutputStream() << "maa: " << maa << "\n";
 		Vector3 newNormal( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+//			globalOutputStream() << plane.normal() << newNormal << "\n";
 		#endif
 #if 0
 		// fix some rounding errors - if the old and new texture axes are almost the same, use the old axis
@@ -1721,8 +1743,8 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		const Vector3 oldYAxisOnBoundary = plane3_project_point( plane, yAxis * projection.m_texdef.scale[1], zAxis ) - boundaryOffset;
 
 		// transform the projected texture axes and compensate the translational component
-		const Vector3 transformedXAxis = matrix4_transformed_point( identity2transformed, oldXAxisOnBoundary ) - offset;
-		const Vector3 transformedYAxis = matrix4_transformed_point( identity2transformed, oldYAxisOnBoundary ) - offset;
+		const Vector3 transformedXAxis = matrix4_transformed_direction( identity2transformed, oldXAxisOnBoundary );
+		const Vector3 transformedYAxis = matrix4_transformed_direction( identity2transformed, oldYAxisOnBoundary );
 
 		// obtain the new texture plane norm and the new base texture axes
 		const std::size_t newIndex = planeNormalIndex( newNormal );
@@ -1793,7 +1815,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 	else{ //TEXDEFTYPEID_VALVE
 //			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
 //			globalOutputStream() << "220: projection.m_basis_s: " << projection.m_basis_s << " projection.m_basis_t: " << projection.m_basis_t << "\n";
-		//globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
+//			globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
 		/* hack: is often broken with niggative scale */
 		if( projection.m_texdef.scale[0] < 0 ){
 			projection.m_texdef.scale[0] *= -1.f;
@@ -1827,7 +1849,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 
 		Matrix4 transformed2stTransformed;
 		Texdef_basisForNormal( projection, normalTransformed, transformed2stTransformed );
-		Matrix4 stTransformed2identity( matrix4_affine_inverse( matrix4_multiplied_by_matrix4( transformed2stTransformed, identity2transformed ) ) );
+		Matrix4 stTransformed2identity( matrix4_affine_inverse( matrix4_multiplied_by_matrix4( transformed2stTransformed, identity2transformed ) ) ); //QNAN here, if some scale = 0
 
 		Matrix4 stIdentity2stOriginal;
 		Texdef_toTransform( projection, (float)width, (float)height, stIdentity2stOriginal );
