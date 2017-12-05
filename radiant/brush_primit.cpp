@@ -1986,13 +1986,96 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 		}
 	}
 }
+/// g_bp_globals.m_texdefTypeId must be == TEXDEFTYPEID_BRUSHPRIMITIVES during this
+void AP_from_BP( const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
+	const Vector3 invariant( static_cast<Vector3>( plane.normal() * plane.dist() ) );
+
+	Matrix4 local2tex;
+	Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
+	const Vector3 st = matrix4_transformed_point( local2tex, invariant );
+	const Vector2 oldInvariantTexCoords( st[0] * width, st[1] * height );
+//		globalOutputStream() << "local2tex: " << local2tex << "\n";
+//		globalOutputStream() << "oldInvariantTexCoords: " << oldInvariantTexCoords[0] << " " << oldInvariantTexCoords[1] << "\n";
+
+	// obtain AP base texture axes
+	const std::size_t newIndex = planeNormalIndex( plane.normal() );
+	Vector3 xAxis = BaseAxes[newIndex * 3 + 1];
+	Vector3 yAxis = BaseAxes[newIndex * 3 + 2];
+	const Vector3 zAxis = BaseAxes[( newIndex / 2 ) * 6];
+
+	/* hacky hack: transform BP by scale 0 @ zAxis */
+	const Matrix4 transform( matrix4_scale_for_vec3( Vector3( zAxis[0] == 0? 1 : 0, zAxis[1] == 0? 1 : 0, zAxis[2] == 0? 1 : 0 ) ) );
+	Texdef_transformLocked( projection, width, height, plane, transform, g_vector3_identity );
+	Texdef_Construct_local2tex( projection, width, height, BaseAxes[newIndex * 3], local2tex );
+
+	const Vector3 projectedTransformedXAxis( Vector3( local2tex[0], local2tex[4], local2tex[8] ) * width );
+	const Vector3 projectedTransformedYAxis( Vector3( local2tex[1], local2tex[5], local2tex[9] ) * height );
+//		globalOutputStream() << "projectedTransformedXAxis: " << projectedTransformedXAxis << "\n";
+//		globalOutputStream() << "projectedTransformedYAxis: " << projectedTransformedYAxis << "\n";
+
+	const Vector3 normalizedXAxis = vector3_normalised( projectedTransformedXAxis );
+	const Vector3 normalizedYAxis = vector3_normalised( projectedTransformedYAxis );
+
+	// determine the rotation angle from the dot product of base axes and the transformed, projected and normalized texture axes
+	float cosX = vector3_dot( xAxis, normalizedXAxis );
+	float cosY = vector3_dot( yAxis, normalizedYAxis );
+
+	float radX = std::acos( cosX );
+	if( vector3_dot( vector3_cross( xAxis, normalizedXAxis ), zAxis ) < 0.0 )
+		radX *= -1.0f;
+
+	float radY = std::acos( cosY );
+	if( vector3_dot( vector3_cross( yAxis, normalizedYAxis ), zAxis ) < 0.0 )
+		radY *= -1.0f;
+
+	// choosing between the X and Y axis rotations
+	float rad = width >= height ? radX : radY;
+
+	// for some reason, when the texture plane normal is the Y axis, we must rotation clockwise
+	if( ( newIndex / 2 ) * 6 == 12 )
+		rad *= -1.0f;
+
+	//	doSetRotation( newNormal, newRotation, newRotation );
+	const Matrix4 rotmat = matrix4_rotation_for_axisangle( vector3_cross( yAxis, xAxis ), rad );
+	matrix4_transform_direction( rotmat, xAxis );
+	matrix4_transform_direction( rotmat, yAxis );
+
+	// finally compute the scaling factors
+	Vector2 newScale( 1.0 / vector3_length( projectedTransformedXAxis ),
+					1.0 / vector3_length( projectedTransformedYAxis ) );
+
+	// the sign of the scaling factors depends on the angle between the new texture axis and the projected transformed axis
+	if( vector3_dot( xAxis, normalizedXAxis ) < 0 )
+		newScale[0] *= -1.0f;
+	if( vector3_dot( yAxis, normalizedYAxis ) < 0 )
+		newScale[1] *= -1.0f;
+
+	// determine the new texture coordinates of the transformed center of the face, sans offsets
+	const Vector2 newInvariantTexCoords( vector3_dot( xAxis / newScale[0], invariant ),
+										vector3_dot( yAxis / newScale[1], invariant ) );
+//		globalOutputStream() << "newInvariantTexCoords: " << newInvariantTexCoords[0] << " " << newInvariantTexCoords[1] << "\n";
+	// since the center should be invariant, the offsets are determined by the difference of the current and
+	// the original texture coordinates of the center
+	projection.m_texdef.shift[0] = oldInvariantTexCoords[0] - newInvariantTexCoords[0];
+	projection.m_texdef.shift[1] = oldInvariantTexCoords[1] - newInvariantTexCoords[1];
+	projection.m_texdef.scale[0] = newScale[0];
+	projection.m_texdef.scale[1] = newScale[1];
+	projection.m_texdef.rotate = radians_to_degrees( rad );
+	Texdef_normalise( projection.m_texdef, (float)width, (float)height );
+}
+
 /// g_bp_globals.m_texdefTypeId == 'in' during this
 void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
 	switch( out ) {
 	case TEXDEFTYPEID_QUAKE: {
-		texdef_t texdef;
-		projection.m_texdef = texdef;
-		TexDef_Construct_Default( projection );
+		if( in == TEXDEFTYPEID_VALVE ){
+			texdef_t texdef;
+			projection.m_texdef = texdef;
+			TexDef_Construct_Default( projection );
+		}
+		else if( in == TEXDEFTYPEID_BRUSHPRIMITIVES ){
+			AP_from_BP( plane, projection, width, height );
+		}
 	}
 	break;
 	case TEXDEFTYPEID_BRUSHPRIMITIVES:
@@ -2027,7 +2110,7 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
 			projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
 #else
-			/* more reliable values this way, but broken tex lock, if S scale is negative */
+			/* more reliable values this way */
 			DoubleVector3 texX, texY;
 			ComputeAxisBase( plane.normal(), texX, texY );
 			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
