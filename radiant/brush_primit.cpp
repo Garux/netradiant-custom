@@ -2069,9 +2069,15 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 	switch( out ) {
 	case TEXDEFTYPEID_QUAKE: {
 		if( in == TEXDEFTYPEID_VALVE ){
-			texdef_t texdef;
-			projection.m_texdef = texdef;
-			TexDef_Construct_Default( projection );
+			Matrix4 local2tex;
+			Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
+			BPTexdef_fromST011( projection, plane, local2tex );
+			BPTexdef_normalise( projection.m_brushprimit_texdef, (float)width, (float)height );
+
+			TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
+			g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
+			AP_from_BP( plane, projection, width, height );
+			g_bp_globals.m_texdefTypeId = tmp;
 		}
 		else if( in == TEXDEFTYPEID_BRUSHPRIMITIVES ){
 			AP_from_BP( plane, projection, width, height );
