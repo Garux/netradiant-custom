@@ -167,6 +167,7 @@ void Brush_Construct( EBrushType type ){
 	}
 
 	GlobalPreferenceSystem().registerPreference( "TextureLock", BoolImportStringCaller( g_brush_texturelock_enabled ), BoolExportStringCaller( g_brush_texturelock_enabled ) );
+	GlobalPreferenceSystem().registerPreference( "TextureVertexLock", BoolImportStringCaller( g_brush_textureVertexlock_enabled ), BoolExportStringCaller( g_brush_textureVertexlock_enabled ) );
 	GlobalPreferenceSystem().registerPreference( "BrushSnapPlanes", makeBoolStringImportCallback( FaceImportSnapPlanesCaller() ), makeBoolStringExportCallback( FaceExportSnapPlanesCaller() ) );
 	GlobalPreferenceSystem().registerPreference( "TexdefDefaultScale", FloatImportStringCaller( g_texdef_default_scale ), FloatExportStringCaller( g_texdef_default_scale ) );
 

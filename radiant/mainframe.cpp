@@ -2512,6 +2512,7 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	}
 
 	toolbar_append_toggle_button( toolbar, "Texture Lock (SHIFT + T)", "texture_lock.png", "TogTexLock" );
+	toolbar_append_toggle_button( toolbar, "Texture Vertex Lock", "texture_vertexlock.png", "TogTexVertexLock" );
 	gtk_toolbar_append_space( toolbar );
 
 	toolbar_append_button( toolbar, "Entities (N)", "entities.png", "ToggleEntityInspector" );

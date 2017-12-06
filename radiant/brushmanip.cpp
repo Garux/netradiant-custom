@@ -1515,12 +1515,19 @@ void Texdef_ToggleMoveLock(){
 	g_texture_lock_status_changed();
 }
 
+BoolExportCaller g_texdef_moveVlock_caller( g_brush_textureVertexlock_enabled );
+ToggleItem g_texdef_moveVlock_item( g_texdef_moveVlock_caller );
+void Texdef_ToggleMoveVLock(){
+	g_brush_textureVertexlock_enabled = !g_brush_textureVertexlock_enabled;
+	g_texdef_moveVlock_item.update();
+}
 
 
 
 
 void Brush_registerCommands(){
 	GlobalToggles_insert( "TogTexLock", FreeCaller<Texdef_ToggleMoveLock>(), ToggleItem::AddCallbackCaller( g_texdef_movelock_item ), Accelerator( 'T', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalToggles_insert( "TogTexVertexLock", FreeCaller<Texdef_ToggleMoveVLock>(), ToggleItem::AddCallbackCaller( g_texdef_moveVlock_item ), accelerator_null() );
 
 	GlobalCommands_insert( "BrushPrism", BrushPrefab::SetCaller( g_brushprism ) );
 	GlobalCommands_insert( "BrushCone", BrushPrefab::SetCaller( g_brushcone ) );
@@ -1578,6 +1585,7 @@ void Brush_constructMenu( GtkMenu* menu ){
 //	create_menu_item_with_mnemonic( menu, "Snap selection to _grid", "SnapToGrid" );
 
 	create_check_menu_item_with_mnemonic( menu, "Texture Lock", "TogTexLock" );
+	create_check_menu_item_with_mnemonic( menu, "Texture Vertex Lock", "TogTexVertexLock" );
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Copy Face Texture", "FaceCopyTexture" );
 	create_menu_item_with_mnemonic( menu, "Paste Face Texture", "FacePasteTexture" );

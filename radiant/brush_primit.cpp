@@ -1550,6 +1550,58 @@ double Det3x3( double a00, double a01, double a02,
 		+   a02 * ( a10 * a21 - a11 * a20 );
 }
 
+void BP_from_ST( brushprimit_texdef_t& bp, DoubleVector3 points[3], DoubleVector3 st[3], const DoubleVector3& normal ){
+	double xyI[2], xyJ[2], xyK[2];
+	double stI[2], stJ[2], stK[2];
+	double D, D0, D1, D2;
+	DoubleVector3 texX, texY;
+	ComputeAxisBase( normal, texX, texY );
+
+	xyI[0] = vector3_dot( points[0], texX );
+	xyI[1] = vector3_dot( points[0], texY );
+	xyJ[0] = vector3_dot( points[1], texX );
+	xyJ[1] = vector3_dot( points[1], texY );
+	xyK[0] = vector3_dot( points[2], texX );
+	xyK[1] = vector3_dot( points[2], texY );
+	stI[0] = st[0][0]; stI[1] = st[0][1];
+	stJ[0] = st[1][0]; stJ[1] = st[1][1];
+	stK[0] = st[2][0]; stK[1] = st[2][1];
+
+	//   - solve linear equations:
+	//     - (x, y) := xyz . (texX, texY)
+	//     - st[i] = texMat[i][0]*x + texMat[i][1]*y + texMat[i][2]
+	//       (for three vertices)
+	D = Det3x3(
+		xyI[0], xyI[1], 1,
+		xyJ[0], xyJ[1], 1,
+		xyK[0], xyK[1], 1
+		);
+	if ( D != 0 ) {
+		for ( std::size_t i = 0; i < 2; ++i )
+		{
+			D0 = Det3x3(
+				stI[i], xyI[1], 1,
+				stJ[i], xyJ[1], 1,
+				stK[i], xyK[1], 1
+				);
+			D1 = Det3x3(
+				xyI[0], stI[i], 1,
+				xyJ[0], stJ[i], 1,
+				xyK[0], stK[i], 1
+				);
+			D2 = Det3x3(
+				xyI[0], xyI[1], stI[i],
+				xyJ[0], xyJ[1], stJ[i],
+				xyK[0], xyK[1], stK[i]
+				);
+			bp.coords[i][0] = D0 / D;
+			bp.coords[i][1] = D1 / D;
+			bp.coords[i][2] = fmod( D2 / D, 1.0 );
+		}
+//			globalOutputStream() << "BP out: ( " << bp.coords[0][0] << " " << bp.coords[0][1] << " " << bp.coords[0][2] << " ) ( " << bp.coords[1][0] << " " << bp.coords[1][1] << " " << bp.coords[1][2] << " )\n";
+	}
+}
+
 Vector3 plane3_project_point( const Plane3& plane, const Vector3& point, const Vector3& direction ){
 	const float f = vector3_dot( plane.normal(), direction );
 	const float d = ( vector3_dot( plane.normal() * plane.dist() - point, plane.normal() ) ) / f;
@@ -1620,9 +1672,6 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 			matrix4_transform_point( identity2transformed, points[i] );
 		}
 
-		double xyI[2], xyJ[2], xyK[2];
-		double stI[2], stJ[2], stK[2];
-		double D, D0, D1, D2;
 #if 0
 		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
 		matrix4_transpose( maa );
@@ -1633,51 +1682,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		if( matrix4_handedness( identity2transformed ) == MATRIX4_LEFTHANDED )
 			vector3_negate( normalTransformed );
 #endif
-		ComputeAxisBase( normalTransformed, texX, texY );
-
-		xyI[0] = vector3_dot( points[0], texX );
-		xyI[1] = vector3_dot( points[0], texY );
-		xyJ[0] = vector3_dot( points[1], texX );
-		xyJ[1] = vector3_dot( points[1], texY );
-		xyK[0] = vector3_dot( points[2], texX );
-		xyK[1] = vector3_dot( points[2], texY );
-		stI[0] = st[0][0]; stI[1] = st[0][1];
-		stJ[0] = st[1][0]; stJ[1] = st[1][1];
-		stK[0] = st[2][0]; stK[1] = st[2][1];
-
-		//   - solve linear equations:
-		//     - (x, y) := xyz . (texX, texY)
-		//     - st[i] = texMat[i][0]*x + texMat[i][1]*y + texMat[i][2]
-		//       (for three vertices)
-		D = Det3x3(
-			xyI[0], xyI[1], 1,
-			xyJ[0], xyJ[1], 1,
-			xyK[0], xyK[1], 1
-			);
-		if ( D != 0 ) {
-			for ( std::size_t i = 0; i < 2; ++i )
-			{
-				D0 = Det3x3(
-					stI[i], xyI[1], 1,
-					stJ[i], xyJ[1], 1,
-					stK[i], xyK[1], 1
-					);
-				D1 = Det3x3(
-					xyI[0], stI[i], 1,
-					xyJ[0], stJ[i], 1,
-					xyK[0], stK[i], 1
-					);
-				D2 = Det3x3(
-					xyI[0], xyI[1], stI[i],
-					xyJ[0], xyJ[1], stJ[i],
-					xyK[0], xyK[1], stK[i]
-					);
-				projection.m_brushprimit_texdef.coords[i][0] = D0 / D;
-				projection.m_brushprimit_texdef.coords[i][1] = D1 / D;
-				projection.m_brushprimit_texdef.coords[i][2] = fmod( D2 / D, 1.0 );
-			}
-//				globalOutputStream() << "BP out: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
-		}
+		BP_from_ST( projection.m_brushprimit_texdef, points, st, normalTransformed );
 	}
 	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
 //			globalOutputStream() << "\t\t***: " << centroid << "\n";
@@ -2064,6 +2069,38 @@ void AP_from_BP( const Plane3& plane, TextureProjection& projection, std::size_t
 	Texdef_normalise( projection.m_texdef, (float)width, (float)height );
 }
 
+void Valve220_from_BP( const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
+//			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+#if 0
+			projection.m_texdef.scale[0] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[0][0], projection.m_brushprimit_texdef.coords[0][1] ) ) * (double)width );
+			projection.m_texdef.scale[1] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) * (double)height );
+			projection.m_texdef.shift[0] = projection.m_brushprimit_texdef.coords[0][2] * (float)width;
+			projection.m_texdef.shift[1] = projection.m_brushprimit_texdef.coords[1][2] * (float)height;
+			projection.m_texdef.rotate = static_cast<float>( -radians_to_degrees( arctangent_yx( projection.m_brushprimit_texdef.coords[0][1], projection.m_brushprimit_texdef.coords[0][0] ) ) );
+			if( projection.m_brushprimit_texdef.coords[0][0] * projection.m_brushprimit_texdef.coords[1][1] < 0 )
+				projection.m_texdef.rotate = -projection.m_texdef.rotate;
+
+			DoubleVector3 texX, texY;
+			ComputeAxisBase( plane.normal(), texX, texY );
+			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
+			projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
+#else
+			/* more reliable values this way */
+			DoubleVector3 texX, texY;
+			ComputeAxisBase( plane.normal(), texX, texY );
+			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
+			projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
+			projection.m_brushprimit_texdef.removeScale( width, height );
+			TexMatToFakeTexCoords( projection.m_brushprimit_texdef, projection.m_texdef );
+			projection.m_texdef.shift[0] *= -1.f;
+			if( projection.m_brushprimit_texdef.coords[0][0] < 0 )
+				projection.m_basis_s *= -1.f;
+			if( projection.m_brushprimit_texdef.coords[1][1] < 0 )
+				projection.m_basis_t *= -1.f;
+#endif
+//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+		}
+
 /// g_bp_globals.m_texdefTypeId == 'in' during this
 void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
 	switch( out ) {
@@ -2101,38 +2138,24 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 			Valve220_rotate( projection, projection.m_texdef.rotate );
 		}
 		else if( in == TEXDEFTYPEID_BRUSHPRIMITIVES ){
-//			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
-#if 0
-			projection.m_texdef.scale[0] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[0][0], projection.m_brushprimit_texdef.coords[0][1] ) ) * (double)width );
-			projection.m_texdef.scale[1] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) * (double)height );
-			projection.m_texdef.shift[0] = projection.m_brushprimit_texdef.coords[0][2] * (float)width;
-			projection.m_texdef.shift[1] = projection.m_brushprimit_texdef.coords[1][2] * (float)height;
-			projection.m_texdef.rotate = static_cast<float>( -radians_to_degrees( arctangent_yx( projection.m_brushprimit_texdef.coords[0][1], projection.m_brushprimit_texdef.coords[0][0] ) ) );
-			if( projection.m_brushprimit_texdef.coords[0][0] * projection.m_brushprimit_texdef.coords[1][1] < 0 )
-				projection.m_texdef.rotate = -projection.m_texdef.rotate;
-
-			DoubleVector3 texX, texY;
-			ComputeAxisBase( plane.normal(), texX, texY );
-			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
-			projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
-#else
-			/* more reliable values this way */
-			DoubleVector3 texX, texY;
-			ComputeAxisBase( plane.normal(), texX, texY );
-			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
-			projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
-			projection.m_brushprimit_texdef.removeScale( width, height );
-			TexMatToFakeTexCoords( projection.m_brushprimit_texdef, projection.m_texdef );
-			projection.m_texdef.shift[0] *= -1.f;
-			if( projection.m_brushprimit_texdef.coords[0][0] < 0 )
-				projection.m_basis_s *= -1.f;
-			if( projection.m_brushprimit_texdef.coords[1][1] < 0 )
-				projection.m_basis_t *= -1.f;
-#endif
-//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+			Valve220_from_BP( plane, projection, width, height );
 		}
 		break;
 	default:
 		break;
+	}
+}
+
+void Texdef_from_ST( TextureProjection& projection, DoubleVector3 points[3], DoubleVector3 st[3], std::size_t width, std::size_t height ){
+	const Plane3 plane( plane3_for_points( points ) );
+	BP_from_ST( projection.m_brushprimit_texdef, points, st, plane.normal() );
+	if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ){
+		TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
+		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
+		AP_from_BP( plane, projection, width, height );
+		g_bp_globals.m_texdefTypeId = tmp;
+	}
+	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ){
+		Valve220_from_BP( plane, projection, width, height );
 	}
 }

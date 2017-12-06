@@ -883,6 +883,7 @@ void Brush_textureChanged();
 
 
 extern bool g_brush_texturelock_enabled;
+extern bool g_brush_textureVertexlock_enabled;
 
 inline TexdefTypeId BrushType_getTexdefType( EBrushType type ){
 	switch ( type )
@@ -1104,6 +1105,17 @@ bool intersectVolume( const VolumeTest& volume, const Matrix4& localToWorld ) co
 void render( Renderer& renderer, const Matrix4& localToWorld ) const {
 	renderer.SetState( m_shader.state(), Renderer::eFullMaterials );
 	renderer.addRenderable( *this, localToWorld );
+}
+
+void texdef_from_points(){
+	Matrix4 local2tex;
+	Texdef_Construct_local2tex( m_texdef.m_projection, m_shader.width(), m_shader.height(), m_plane.plane3().normal(), local2tex );
+	DoubleVector3 st[3];
+	for ( std::size_t i = 0; i < 3; ++i )
+		st[i] = matrix4_transformed_point( local2tex, m_move_planepts[i] );
+	Texdef_from_ST( m_texdefTransformed, m_move_planeptsTransformed, st, m_shader.width(), m_shader.height() );
+
+	Brush_textureChanged();
 }
 
 void transform( const Matrix4& matrix, bool mirror ){
@@ -2766,6 +2778,9 @@ void transformComponents( const Matrix4& matrix ){
 			matrix4_transform_point( matrix, m_face->m_move_planeptsTransformed[2] );
 			m_face->assign_planepts( m_face->m_move_planeptsTransformed );
 		}
+	}
+	if ( g_brush_textureVertexlock_enabled && ( selectedVertices() || selectedEdges() ) ) {
+		m_face->texdef_from_points();
 	}
 }
 
