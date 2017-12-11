@@ -3661,7 +3661,12 @@ void evaluateTransform(){
 	}
 	else
 	{
+		const bool tmp = g_brush_texturelock_enabled;
+		/* do not want texture projection transformation while resizing brush */
+		if( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eDrag && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive )
+			g_brush_texturelock_enabled = false;
 		transformComponents( matrix );
+		g_brush_texturelock_enabled = tmp;
 	}
 }
 void applyTransform(){
