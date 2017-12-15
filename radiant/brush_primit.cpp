@@ -1971,6 +1971,7 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 			projection.m_basis_s = Vector3( basis.xx(), basis.yx(), basis.zx() );
 			projection.m_basis_t = Vector3( -basis.xy(), -basis.yy(), -basis.zy() );
 		}
+		Valve220_rotate( projection, texdef.rotate );
 	}
 }
 
