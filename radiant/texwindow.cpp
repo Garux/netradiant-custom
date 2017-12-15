@@ -1100,7 +1100,9 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glDisable( GL_DEPTH_TEST );
-	//glDisable( GL_BLEND );
+	if( GlobalOpenGL().GL_1_3() ) {
+		glDisable( GL_MULTISAMPLE );
+	}
 	if ( g_TextureBrowser_enableAlpha ) {
 		glEnable( GL_BLEND );
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1282,6 +1284,10 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 
 	// reset the current texture
 	glBindTexture( GL_TEXTURE_2D, 0 );
+	if( GlobalOpenGL().GL_1_3() ) {
+		glEnable( GL_MULTISAMPLE );
+	}
+	glDisable( GL_BLEND );
 	//qglFinish();
 }
 
