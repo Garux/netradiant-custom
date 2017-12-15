@@ -1026,6 +1026,10 @@ void DoMapInfo(){
 				{
 					GtkButton* button = create_dialog_button( "Close", G_CALLBACK( dialog_button_ok ), &dialog );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
+
+					GtkAccelGroup *accel_group = gtk_accel_group_new();
+					gtk_window_add_accel_group( window, accel_group );
+					gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel_group, GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE );
 				}
 			}
 		}
