@@ -886,7 +886,7 @@ void Scene_CountStuff( int& patches, int& ents_ingame, int& groupents, int& grou
 	GlobalSceneGraph().traverse( CountStuffWalker( patches, ents_ingame, groupents, groupents_ingame ) );
 }
 
-WindowPosition g_posMapInfoWnd( c_default_window_pos );
+WindowPosition g_posMapInfoWnd( -1, -1, c_default_window_pos.w, c_default_window_pos.h );
 
 void DoMapInfo(){
 	ModalDialog dialog;
@@ -1124,6 +1124,7 @@ void DoMapInfo(){
 	modal_dialog_show( window, dialog );
 
 	// save before exit
+	/* it's saving centered position, set by create_dialog_window() somehow(TM), not actual one or set by window_set_position() */
 	window_get_position( window, g_posMapInfoWnd );
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );
