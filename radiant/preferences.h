@@ -58,6 +58,9 @@ void appendCombo( const char* name, int& data, StringArrayRange values ){
 void appendSlider( const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
 	m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
 }
+void appendSlider( const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
+	m_dialog.addSlider( m_vbox, name, data, draw_value, low, high, value, lower, upper, step_increment, page_increment );
+}
 void appendRadio( const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback ){
 	m_dialog.addRadio( m_vbox, name, names, importCallback, exportCallback );
 }

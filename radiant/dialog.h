@@ -143,6 +143,7 @@ GtkWidget* addCheckBox( GtkWidget* vbox, const char* name, const char* flag, boo
 void addCombo( GtkWidget* vbox, const char* name, StringArrayRange values, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
 void addCombo( GtkWidget* vbox, const char* name, int& data, StringArrayRange values );
 void addSlider( GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment );
+void addSlider( GtkWidget* vbox, const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment );
 void addRadio( GtkWidget* vbox, const char* name, StringArrayRange names, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
 void addRadio( GtkWidget* vbox, const char* name, int& data, StringArrayRange names );
 void addRadioIcons( GtkWidget* vbox, const char* name, StringArrayRange icons, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
@@ -176,6 +177,7 @@ void AddFloatEntryData( GtkEntry& object, const FloatImportCallback& importCallb
 void AddFloatSpinnerData( GtkSpinButton& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
 void AddIntSpinnerData( GtkSpinButton& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
 void AddIntAdjustmentData( GtkAdjustment& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
+void AddFloatAdjustmentData( GtkAdjustment& object, const FloatImportCallback& importCallback, const FloatExportCallback& exportCallback );
 void AddIntComboData( GtkComboBox& object, const IntImportCallback& importCallback, const IntExportCallback& exportCallback );
 
 void AddDialogData( GtkToggleButton& object, bool& data );
@@ -187,6 +189,7 @@ void AddDialogData( GtkEntry& object, float& data );
 void AddDialogData( GtkSpinButton& object, float& data );
 void AddDialogData( GtkSpinButton& object, int& data );
 void AddDialogData( GtkAdjustment& object, int& data );
+void AddDialogData( GtkAdjustment& object, float& data );
 void AddDialogData( GtkComboBox& object, int& data );
 };
 

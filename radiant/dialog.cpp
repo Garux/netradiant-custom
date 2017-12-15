@@ -227,6 +227,14 @@ void IntAdjustmentExport( GtkAdjustment& widget, const IntImportCallback& import
 }
 typedef ImportExport<GtkAdjustment, int, IntAdjustmentImport, IntAdjustmentExport> IntAdjustmentImportExport;
 
+void FloatAdjustmentImport( GtkAdjustment& widget, float value ){
+	gtk_adjustment_set_value( &widget, value );
+}
+void FloatAdjustmentExport( GtkAdjustment& widget, const FloatImportCallback& importCallback ){
+	importCallback( (float)gtk_adjustment_get_value( &widget ) );
+}
+typedef ImportExport<GtkAdjustment, float, FloatAdjustmentImport, FloatAdjustmentExport> FloatAdjustmentImportExport;
+
 
 void IntComboImport( GtkComboBox& widget, int value ){
 	gtk_combo_box_set_active( &widget, value );
@@ -391,6 +399,10 @@ void Dialog::AddIntAdjustmentData( GtkAdjustment& widget, const IntImportCallbac
 	AddCustomData<IntAdjustmentImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
 
+void Dialog::AddFloatAdjustmentData( GtkAdjustment& widget, const FloatImportCallback& importViewer, const FloatExportCallback& exportViewer ){
+	AddCustomData<FloatAdjustmentImportExport>( m_data ).apply( widget, importViewer, exportViewer );
+}
+
 void Dialog::AddIntComboData( GtkComboBox& widget, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){
 	AddCustomData<IntComboImportExport>( m_data ).apply( widget, importViewer, exportViewer );
 }
@@ -422,6 +434,9 @@ void Dialog::AddDialogData( GtkSpinButton& widget, int& data ){
 }
 void Dialog::AddDialogData( GtkAdjustment& widget, int& data ){
 	AddData<IntAdjustmentImportExport, IntImportExport>( m_data ).apply( widget, data );
+}
+void Dialog::AddDialogData( GtkAdjustment& widget, float& data ){
+	AddData<FloatAdjustmentImportExport, FloatImportExport>( m_data ).apply( widget, data );
 }
 void Dialog::AddDialogData( GtkComboBox& widget, int& data ){
 	AddData<IntComboImportExport, IntImportExport>( m_data ).apply( widget, data );
@@ -503,7 +518,7 @@ void Dialog::addCombo( GtkWidget* vbox, const char* name, int& data, StringArray
 	addCombo( vbox, name, values, IntImportCaller( data ), IntExportCaller( data ) );
 }
 
-void Dialog::addSlider( GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
+void addSlider_( GtkAdjustment* adj, GtkWidget* vbox, const char* name, gboolean draw_value, const char* low, const char* high, int digits ){
 #if 0
 	if ( draw_value == FALSE ) {
 		GtkWidget* hbox2 = gtk_hbox_new( FALSE, 0 );
@@ -521,25 +536,36 @@ void Dialog::addSlider( GtkWidget* vbox, const char* name, int& data, gboolean d
 		}
 	}
 #endif
-
-	// adjustment
-	GtkObject* adj = gtk_adjustment_new( value, lower, upper, step_increment, page_increment, 0 );
-	AddIntAdjustmentData( *GTK_ADJUSTMENT( adj ), IntImportCaller( data ), IntExportCaller( data ) );
-
 	// scale
 	GtkWidget* alignment = gtk_alignment_new( 0.0, 0.5, 1.0, 0.0 );
 	gtk_widget_show( alignment );
 
-	GtkWidget* scale = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
+	GtkWidget* scale = gtk_hscale_new( adj );
 	gtk_scale_set_value_pos( GTK_SCALE( scale ), GTK_POS_LEFT );
 	gtk_widget_show( scale );
 	gtk_container_add( GTK_CONTAINER( alignment ), scale );
 
 	gtk_scale_set_draw_value( GTK_SCALE( scale ), draw_value );
-	gtk_scale_set_digits( GTK_SCALE( scale ), 0 );
+	gtk_scale_set_digits( GTK_SCALE( scale ), digits );
 
 	GtkTable* row = DialogRow_new( name, alignment );
 	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( row ) );
+}
+
+void Dialog::addSlider( GtkWidget* vbox, const char* name, int& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
+	// adjustment
+	GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( value, lower, upper, step_increment, page_increment, 0 ) );
+	AddIntAdjustmentData( *adj, IntImportCaller( data ), IntExportCaller( data ) );
+
+	addSlider_( adj, vbox, name, draw_value, low, high, 0 );
+}
+
+void Dialog::addSlider( GtkWidget* vbox, const char* name, float& data, gboolean draw_value, const char* low, const char* high, double value, double lower, double upper, double step_increment, double page_increment ){
+	// adjustment
+	GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( value, lower, upper, step_increment, page_increment, 0 ) );
+	AddFloatAdjustmentData( *adj, FloatImportCaller( data ), FloatExportCaller( data ) );
+
+	addSlider_( adj, vbox, name, draw_value, low, high, 1 );
 }
 
 void Dialog::addRadio( GtkWidget* vbox, const char* name, StringArrayRange names, const IntImportCallback& importViewer, const IntExportCallback& exportViewer ){

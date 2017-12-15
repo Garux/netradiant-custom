@@ -75,7 +75,7 @@ struct camwindow_globals_private_t
 {
 	int m_nMoveSpeed;
 	bool m_bCamLinkSpeed;
-	int m_nAngleSpeed;
+	float m_angleSpeed;
 	bool m_bCamInverseMouse;
 	bool m_bCamDiscrete;
 	bool m_bCubicClipping;
@@ -87,7 +87,7 @@ struct camwindow_globals_private_t
 	camwindow_globals_private_t() :
 		m_nMoveSpeed( 100 ),
 		m_bCamLinkSpeed( true ),
-		m_nAngleSpeed( 3 ),
+		m_angleSpeed( 9.f ),
 		m_bCamInverseMouse( false ),
 		m_bCamDiscrete( true ),
 		m_bCubicClipping( false ),
@@ -297,16 +297,16 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 	}
 	else // free rotation
 	{
-		const float dtime = 0.1f;
+		const float dtime = 0.0333333f;
 
 		if ( g_camwindow_globals_private.m_bCamInverseMouse ) {
-			camera.angles[CAMERA_PITCH] -= dy * dtime * g_camwindow_globals_private.m_nAngleSpeed;
+			camera.angles[CAMERA_PITCH] -= dy * dtime * g_camwindow_globals_private.m_angleSpeed;
 		}
 		else{
-			camera.angles[CAMERA_PITCH] += dy * dtime * g_camwindow_globals_private.m_nAngleSpeed;
+			camera.angles[CAMERA_PITCH] += dy * dtime * g_camwindow_globals_private.m_angleSpeed;
 		}
 
-		camera.angles[CAMERA_YAW] += dx * dtime * g_camwindow_globals_private.m_nAngleSpeed;
+		camera.angles[CAMERA_YAW] += dx * dtime * g_camwindow_globals_private.m_angleSpeed;
 
 		if ( camera.angles[CAMERA_PITCH] > 90 ) {
 			camera.angles[CAMERA_PITCH] = 90;
@@ -357,7 +357,7 @@ void Cam_MouseControl( camera_t& camera, int x, int y ){
 	}
 
 	vector3_add( camera.origin, vector3_scaled( camera.forward, yf * 0.1f * g_camwindow_globals_private.m_nMoveSpeed ) );
-	camera.angles[CAMERA_YAW] += xf * -0.1f * g_camwindow_globals_private.m_nAngleSpeed;
+	camera.angles[CAMERA_YAW] += xf * -0.1f * g_camwindow_globals_private.m_angleSpeed;
 
 	Camera_updateModelview( camera );
 }
@@ -389,19 +389,19 @@ Vector3 Camera_getFocusPos( camera_t& camera );
 void Cam_KeyControl( camera_t& camera, float dtime ){
 	// Update angles
 	if ( camera.movementflags & MOVE_ROTLEFT ) {
-		camera.angles[CAMERA_YAW] += 15 * dtime * g_camwindow_globals_private.m_nAngleSpeed;
+		camera.angles[CAMERA_YAW] += 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
 	}
 	if ( camera.movementflags & MOVE_ROTRIGHT ) {
-		camera.angles[CAMERA_YAW] -= 15 * dtime * g_camwindow_globals_private.m_nAngleSpeed;
+		camera.angles[CAMERA_YAW] -= 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
 	}
 	if ( camera.movementflags & MOVE_PITCHUP ) {
-		camera.angles[CAMERA_PITCH] += 15 * dtime * g_camwindow_globals_private.m_nAngleSpeed;
+		camera.angles[CAMERA_PITCH] += 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
 		if ( camera.angles[CAMERA_PITCH] > 90 ) {
 			camera.angles[CAMERA_PITCH] = 90;
 		}
 	}
 	if ( camera.movementflags & MOVE_PITCHDOWN ) {
-		camera.angles[CAMERA_PITCH] -= 15 * dtime * g_camwindow_globals_private.m_nAngleSpeed;
+		camera.angles[CAMERA_PITCH] -= 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
 		if ( camera.angles[CAMERA_PITCH] < -90 ) {
 			camera.angles[CAMERA_PITCH] = -90;
 		}
@@ -2151,7 +2151,7 @@ typedef FreeCaller1<float, fieldOfViewImport> fieldOfViewImportCaller;
 void Camera_constructPreferences( PreferencesPage& page ){
 	page.appendSlider( "Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 100, MIN_CAM_SPEED, MAX_CAM_SPEED, 1, 10 );
 	page.appendCheckBox( "", "Link strafe speed to movement speed", g_camwindow_globals_private.m_bCamLinkSpeed );
-	page.appendSlider( "Rotation Speed", g_camwindow_globals_private.m_nAngleSpeed, TRUE, 0, 0, 3, 1, 180, 1, 10 );
+	page.appendSlider( "Mouse Sensitivity", g_camwindow_globals_private.m_angleSpeed, TRUE, 0, 0, 9, 0.1, 180, 0.1, 1 );
 	page.appendCheckBox( "", "Invert mouse vertical axis", g_camwindow_globals_private.m_bCamInverseMouse );
 	page.appendCheckBox( "", "Zoom In to Mouse pointer", g_camwindow_globals.m_bZoomInToPointer );
 	page.appendCheckBox(
@@ -2308,7 +2308,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
 	GlobalPreferenceSystem().registerPreference( "MoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamLinkSpeed", BoolImportStringCaller( g_camwindow_globals_private.m_bCamLinkSpeed ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamLinkSpeed ) );
-	GlobalPreferenceSystem().registerPreference( "AngleSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nAngleSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nAngleSpeed ) );
+	GlobalPreferenceSystem().registerPreference( "Sensitivity", FloatImportStringCaller( g_camwindow_globals_private.m_angleSpeed ), FloatExportStringCaller( g_camwindow_globals_private.m_angleSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamInverseMouse", BoolImportStringCaller( g_camwindow_globals_private.m_bCamInverseMouse ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamInverseMouse ) );
 	GlobalPreferenceSystem().registerPreference( "CamDiscrete", makeBoolStringImportCallback( CamWndMoveDiscreteImportCaller() ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamDiscrete ) );
 	GlobalPreferenceSystem().registerPreference( "CubicClipping", BoolImportStringCaller( g_camwindow_globals_private.m_bCubicClipping ), BoolExportStringCaller( g_camwindow_globals_private.m_bCubicClipping ) );
