@@ -489,17 +489,8 @@ void SurfaceInspector_ProjectTexture(){
 
 void SurfaceInspector_FitTexture(){
 	UndoableCommand undo( "textureAutoFit" );
+	getSurfaceInspector().exportData();
 	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
-}
-
-void SurfaceInspector_FitTextureW(){
-	UndoableCommand undo( "textureAutoFitW" );
-	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, 0 );
-}
-
-void SurfaceInspector_FitTextureH(){
-	UndoableCommand undo( "textureAutoFitH" );
-	Select_FitTexture( 0, getSurfaceInspector().m_fitVertical );
 }
 
 static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
@@ -554,18 +545,19 @@ static void OnBtnProject( GtkWidget *widget, gpointer data ){
 }
 
 static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
-	getSurfaceInspector().exportData();
 	SurfaceInspector_FitTexture();
 }
 
 static void OnBtnFaceFitW( GtkWidget *widget, gpointer data ){
+	UndoableCommand undo( "textureAutoFitWidth" );
 	getSurfaceInspector().exportData();
-	SurfaceInspector_FitTextureW();
+	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, 0 );
 }
 
 static void OnBtnFaceFitH( GtkWidget *widget, gpointer data ){
+	UndoableCommand undo( "textureAutoFitHeight" );
 	getSurfaceInspector().exportData();
-	SurfaceInspector_FitTextureH();
+	Select_FitTexture( 0, getSurfaceInspector().m_fitVertical );
 }
 
 
