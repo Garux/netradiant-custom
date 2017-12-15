@@ -1948,7 +1948,7 @@ void Camera_CubeIn(){
 	}
 	Camera_updateProjection( camwnd.getCamera() );
 	CamWnd_Update( camwnd );
-	g_pParentWnd->SetGridStatus();
+	GridStatus_changed();
 }
 
 void Camera_CubeOut(){
@@ -1959,7 +1959,7 @@ void Camera_CubeOut(){
 	}
 	Camera_updateProjection( camwnd.getCamera() );
 	CamWnd_Update( camwnd );
-	g_pParentWnd->SetGridStatus();
+	GridStatus_changed();
 }
 
 bool Camera_GetFarClip(){

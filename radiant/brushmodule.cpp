@@ -44,6 +44,10 @@ bool getTextureLockEnabled(){
 	return g_brush_texturelock_enabled;
 }
 
+const char* getTexdefTypeIdLabel(){
+	return g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ? "AP" : g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ? "BP" : "220";
+}
+
 const char* BrushType_getName( EBrushType type ){
 	switch ( type )
 	{
@@ -172,7 +176,8 @@ void Brush_Construct( EBrushType type ){
 	GlobalPreferenceSystem().registerPreference( "TexdefDefaultScale", FloatImportStringCaller( g_texdef_default_scale ), FloatExportStringCaller( g_texdef_default_scale ) );
 
 	GridStatus_getTextureLockEnabled = getTextureLockEnabled;
-	g_texture_lock_status_changed = FreeCaller<GridStatus_onTextureLockEnabledChanged>();
+	GridStatus_getTexdefTypeIdLabel = getTexdefTypeIdLabel;
+	g_texture_lock_status_changed = FreeCaller<GridStatus_changed>();
 }
 
 void Brush_Destroy(){

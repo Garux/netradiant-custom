@@ -2551,6 +2551,9 @@ GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_count_status] ){
 		gtk_table_attach_defaults( table, GTK_WIDGET( frame ), i, i + 1, 0, 1 );
 		gtk_frame_set_shadow_type( frame, GTK_SHADOW_IN );
 
+		if( i == c_grid_status )
+			gtk_widget_set_tooltip_text( GTK_WIDGET( frame ), "G: Grid size\nF: map Format\nC: camera Clip scale\nL: texture Lock	" );
+
 		GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
 		if( i == c_texture_status )
 			gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_START );
@@ -3293,30 +3296,31 @@ void Sys_Status( const char* status ){
 	}
 }
 
-int getRotateIncrement(){
-	return static_cast<int>( g_si_globals.rotate );
-}
+//int getRotateIncrement(){
+//	return static_cast<int>( g_si_globals.rotate );
+//}
 
 int getFarClipDistance(){
 	return g_camwindow_globals.m_nCubicScale;
 }
 
 float ( *GridStatus_getGridSize )() = GetGridSize;
-int ( *GridStatus_getRotateIncrement )() = getRotateIncrement;
+//int ( *GridStatus_getRotateIncrement )() = getRotateIncrement;
 int ( *GridStatus_getFarClipDistance )() = getFarClipDistance;
 bool ( *GridStatus_getTextureLockEnabled )();
+const char* ( *GridStatus_getTexdefTypeIdLabel )();
 
 void MainFrame::SetGridStatus(){
 	StringOutputStream status( 64 );
 	const char* lock = ( GridStatus_getTextureLockEnabled() ) ? "ON" : "OFF";
 	status << ( GetSnapGridSize() > 0 ? "G:" : "g:" ) << GridStatus_getGridSize()
-		   << "  R:" << GridStatus_getRotateIncrement()
+		   << "  F:" << GridStatus_getTexdefTypeIdLabel()
 		   << "  C:" << GridStatus_getFarClipDistance()
 		   << "  L:" << lock;
 	SetStatusText( m_grid_status, status.c_str() );
 }
 
-void GridStatus_onTextureLockEnabledChanged(){
+void GridStatus_changed(){
 	if ( g_pParentWnd != 0 ) {
 		g_pParentWnd->SetGridStatus();
 	}

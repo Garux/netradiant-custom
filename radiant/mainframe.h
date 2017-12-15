@@ -255,10 +255,11 @@ void MainFrame_Destroy();
 
 
 extern float ( *GridStatus_getGridSize )();
-extern int ( *GridStatus_getRotateIncrement )();
+//extern int ( *GridStatus_getRotateIncrement )();
 extern int ( *GridStatus_getFarClipDistance )();
 extern bool ( *GridStatus_getTextureLockEnabled )();
-void GridStatus_onTextureLockEnabledChanged();
+extern const char* ( *GridStatus_getTexdefTypeIdLabel )();
+void GridStatus_changed();
 
 SignalHandlerId XYWindowDestroyed_connect( const SignalHandler& handler );
 void XYWindowDestroyed_disconnect( SignalHandlerId id );

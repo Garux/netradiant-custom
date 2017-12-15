@@ -1178,6 +1178,8 @@ void Map_LoadFile( const char *filename ){
 	Map_StartPosition();
 
 	g_currentMap = &g_map;
+
+	GridStatus_changed();
 }
 
 class Excluder
@@ -1433,6 +1435,8 @@ void Map_New(){
 	FocusViews( g_vector3_identity, 0 );
 
 	g_currentMap = &g_map;
+
+	GridStatus_changed();
 }
 
 extern void ConstructRegionBrushes( scene::Node * brushes[6], const Vector3 &region_mins, const Vector3 &region_maxs );
