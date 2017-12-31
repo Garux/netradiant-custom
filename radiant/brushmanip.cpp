@@ -889,25 +889,15 @@ void Scene_BrushSelectByShader_Component( scene::Graph& graph, const char* name 
 	Scene_ForEachSelectedBrush_ForEachFaceInstance( graph, FaceSelectByShader( name ) );
 }
 
-class FaceGetTexdef
-{
-	TextureProjection& m_projection;
-	mutable bool m_done;
-public:
-	FaceGetTexdef( TextureProjection& projection )
-		: m_projection( projection ), m_done( false ){
-	}
-	void operator()( Face& face ) const {
-		if ( !m_done ) {
-			m_done = true;
-			face.GetTexdef( m_projection );
-		}
-	}
-};
-
 
 void Scene_BrushGetTexdef_Selected( scene::Graph& graph, TextureProjection& projection ){
-	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceGetTexdef( projection ) );
+	bool done = false;
+	Scene_ForEachSelectedBrush_ForEachFace( graph, [&]( Face& face ){
+		if ( !done ) {
+			done = true;
+			face.GetTexdef( projection );
+		}
+	});
 }
 
 bool Scene_BrushGetShaderTexdef_Selected( scene::Graph& graph, CopiedString& shader, TextureProjection& projection ){
@@ -938,29 +928,17 @@ void Scene_BrushGetTexdef_Component_Selected( scene::Graph& graph, TextureProjec
 }
 
 
-class FaceGetFlags
-{
-	ContentsFlagsValue& m_flags;
-	mutable bool m_done;
-public:
-	FaceGetFlags( ContentsFlagsValue& flags )
-		: m_flags( flags ), m_done( false ){
-	}
-	void operator()( Face& face ) const {
-		if ( !m_done ) {
-			m_done = true;
-			face.GetFlags( m_flags );
-		}
-	}
-};
-
-
 void Scene_BrushGetFlags_Selected( scene::Graph& graph, ContentsFlagsValue& flags ){
 #if 1
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
-		BrushInstance* brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() );
-		if ( brush != 0 ) {
-			Brush_forEachFace( *brush, FaceGetFlags( flags ) );
+		if ( BrushInstance* brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() ) ) {
+			bool done = false;
+			Brush_forEachFace( *brush, [&]( Face& face ){
+				if ( !done ) {
+					done = true;
+					face.GetFlags( flags );
+				}
+			});
 		}
 	}
 #else
@@ -980,28 +958,17 @@ void Scene_BrushGetFlags_Component_Selected( scene::Graph& graph, ContentsFlagsV
 }
 
 
-class FaceGetShader
-{
-	CopiedString& m_shader;
-	mutable bool m_done;
-public:
-	FaceGetShader( CopiedString& shader )
-		: m_shader( shader ), m_done( false ){
-	}
-	void operator()( Face& face ) const {
-		if ( !m_done ) {
-			m_done = true;
-			m_shader = face.GetShader();
-		}
-	}
-};
-
 void Scene_BrushGetShader_Selected( scene::Graph& graph, CopiedString& shader ){
 #if 1
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
-		BrushInstance* brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() );
-		if ( brush != 0 ) {
-			Brush_forEachFace( *brush, FaceGetShader( shader ) );
+		if ( BrushInstance* brush = Instance_getBrush( GlobalSelectionSystem().ultimateSelected() ) ) {
+			bool done = false;
+			Brush_forEachFace( *brush, [&]( Face& face ){
+				if ( !done ) {
+					done = true;
+					shader = face.GetShader();
+				}
+			});
 		}
 	}
 #else
@@ -1068,21 +1035,6 @@ public:
 
 
 
-class FaceFilterAny
-{
-	FaceFilter* m_filter;
-	bool& m_filtered;
-public:
-	FaceFilterAny( FaceFilter* filter, bool& filtered ) : m_filter( filter ), m_filtered( filtered ){
-		m_filtered = false;
-	}
-	void operator()( Face& face ) const {
-		if ( m_filter->filter( face ) ) {
-			m_filtered = true;
-		}
-	}
-};
-
 class filter_brush_any_face : public BrushFilter
 {
 	FaceFilter* m_filter;
@@ -1090,24 +1042,13 @@ public:
 	filter_brush_any_face( FaceFilter* filter ) : m_filter( filter ){
 	}
 	bool filter( const Brush& brush ) const {
-		bool filtered;
-		Brush_forEachFace( brush, FaceFilterAny( m_filter, filtered ) );
+		bool filtered = false;
+		Brush_forEachFace( brush, [&]( Face& face ){
+			if ( m_filter->filter( face ) ) {
+				filtered = true;
+			}
+		});
 		return filtered;
-	}
-};
-
-class FaceFilterAll
-{
-	FaceFilter* m_filter;
-	bool& m_filtered;
-public:
-	FaceFilterAll( FaceFilter* filter, bool& filtered ) : m_filter( filter ), m_filtered( filtered ){
-		m_filtered = true;
-	}
-	void operator()( Face& face ) const {
-		if ( !m_filter->filter( face ) ) {
-			m_filtered = false;
-		}
 	}
 };
 
@@ -1118,8 +1059,12 @@ public:
 	filter_brush_all_faces( FaceFilter* filter ) : m_filter( filter ){
 	}
 	bool filter( const Brush& brush ) const {
-		bool filtered;
-		Brush_forEachFace( brush, FaceFilterAll( m_filter, filtered ) );
+		bool filtered = true;
+		Brush_forEachFace( brush, [&]( Face& face ){
+			if ( !m_filter->filter( face ) ) {
+				filtered = false;
+			}
+		});
 		return filtered;
 	}
 };

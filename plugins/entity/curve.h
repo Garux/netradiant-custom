@@ -110,50 +110,6 @@ inline void ControlPoint_testSelect( const Vector3& point, ObservedSelectable& s
 	}
 }
 
-class ControlPointTransform
-{
-	const Matrix4& m_matrix;
-public:
-	ControlPointTransform( const Matrix4& matrix ) : m_matrix( matrix ){
-	}
-	void operator()( Vector3& point ) const {
-		matrix4_transform_point( m_matrix, point );
-	}
-};
-
-class ControlPointSnap
-{
-	float m_snap;
-public:
-	ControlPointSnap( float snap ) : m_snap( snap ){
-	}
-	void operator()( Vector3& point ) const {
-		vector3_snap( point, m_snap );
-	}
-};
-
-class ControlPointAdd
-{
-	RenderablePointVector& m_points;
-public:
-	ControlPointAdd( RenderablePointVector& points ) : m_points( points ){
-	}
-	void operator()( const Vector3& point ) const {
-		m_points.push_back( PointVertex( vertex3f_for_vector3( point ), colour_vertex ) );
-	}
-};
-
-class ControlPointAddSelected
-{
-	RenderablePointVector& m_points;
-public:
-	ControlPointAddSelected( RenderablePointVector& points ) : m_points( points ){
-	}
-	void operator()( const Vector3& point ) const {
-		m_points.push_back( PointVertex( vertex3f_for_vector3( point ), colour_selected ) );
-	}
-};
-
 class CurveEditType
 {
 public:
@@ -252,15 +208,21 @@ public:
 	}
 
 	void transform( const Matrix4& matrix ){
-		forEachSelected( ControlPointTransform( matrix ) );
+		forEachSelected( [&]( Vector3& point ){
+			matrix4_transform_point( matrix, point );
+		});
 	}
 	void snapto( float snap ){
-		forEachSelected( ControlPointSnap( snap ) );
+		forEachSelected( [&]( Vector3& point ){
+			vector3_snap( point, snap );
+		});
 	}
 
 	void updateSelected() const {
 		m_selectedRender.clear();
-		forEachSelected( ControlPointAddSelected( m_selectedRender ) );
+		forEachSelected( [&]( const Vector3& point ){
+			m_selectedRender.push_back( PointVertex( vertex3f_for_vector3( point ), colour_selected ) );
+		});
 	}
 
 	void renderComponents( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld ) const {
@@ -284,7 +246,9 @@ public:
 
 		m_controlsRender.clear();
 		m_controlsRender.reserve( m_controlPoints.size() );
-		forEach( ControlPointAdd( m_controlsRender ) );
+		forEach( [&]( const Vector3& point ){
+			m_controlsRender.push_back( PointVertex( vertex3f_for_vector3( point ), colour_vertex ) );
+		});
 
 		m_selectedRender.reserve( m_controlPoints.size() );
 	}

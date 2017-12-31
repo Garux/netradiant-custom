@@ -174,22 +174,11 @@ struct PathLess
 
 typedef std::map<CopiedString, const char*, PathLess> Paths;
 
-class PathsInsert
-{
-	Paths& m_paths;
-	const char* m_directory;
-public:
-	PathsInsert( Paths& paths, const char* directory ) : m_paths( paths ), m_directory( directory ){
-	}
-	void operator()( const char* name ) const {
-		m_paths.insert( Paths::value_type( name, m_directory ) );
-	}
-};
-
-
 void EntityClassQuake3_constructDirectory( const char* directory, const char* extension, Paths& paths ){
 	globalOutputStream() << "EntityClass: searching " << makeQuoted( directory ) << " for *." << extension << '\n';
-	Directory_forEach( directory, matchFileExtension( extension, PathsInsert( paths, directory ) ) );
+	Directory_forEach( directory, matchFileExtension( extension, [&]( const char *name ){
+		paths.insert( Paths::value_type( name, directory ) );
+	}));
 }
 
 

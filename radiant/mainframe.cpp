@@ -535,22 +535,6 @@ void gamemode_set( const char* gamemode ){
 
 #include "os/dir.h"
 
-class CLoadModule
-{
-	const char* m_path;
-public:
-	CLoadModule( const char* path ) : m_path( path ){
-	}
-	void operator()( const char* name ) const {
-		char fullname[1024];
-		ASSERT_MESSAGE( strlen( m_path ) + strlen( name ) < 1024, "" );
-		strcpy( fullname, m_path );
-		strcat( fullname, name );
-		globalOutputStream() << "Found '" << fullname << "'\n";
-		GlobalModuleServer_loadModule( fullname );
-	}
-};
-
 const char* const c_library_extension =
 #if defined( WIN32 )
     "dll"
@@ -562,7 +546,14 @@ const char* const c_library_extension =
     ;
 
 void Radiant_loadModules( const char* path ){
-	Directory_forEach( path, MatchFileExtension<CLoadModule>( c_library_extension, CLoadModule( path ) ) );
+	Directory_forEach( path, matchFileExtension( c_library_extension, [&]( const char *name ){
+		char fullname[1024];
+		ASSERT_MESSAGE( strlen( path ) + strlen( name ) < 1024, "" );
+		strcpy( fullname, path );
+		strcat( fullname, name );
+		globalOutputStream() << "Found '" << fullname << "'\n";
+		GlobalModuleServer_loadModule( fullname );
+	}));
 }
 
 void Radiant_loadModulesFromRoot( const char* directory ){

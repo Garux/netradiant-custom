@@ -112,17 +112,6 @@ inline void aabb_extend_by_point_safe( AABB& aabb, const Vector3& point ){
 	}
 }
 
-class AABBExtendByPoint
-{
-	AABB& m_aabb;
-public:
-	AABBExtendByPoint( AABB& aabb ) : m_aabb( aabb ){
-	}
-	void operator()( const Vector3& point ) const {
-		aabb_extend_by_point_safe( m_aabb, point );
-	}
-};
-
 inline void aabb_extend_by_aabb( AABB& aabb, const AABB& other ){
 	AABBExtend< 0 >::apply( aabb, other );
 	AABBExtend< 1 >::apply( aabb, other );

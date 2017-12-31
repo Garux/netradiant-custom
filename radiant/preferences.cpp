@@ -312,32 +312,6 @@ void CGameDialog::BuildDialog(){
 	}
 }
 
-class LoadGameFile
-{
-	std::list<CGameDescription*>& mGames;
-	const char* mPath;
-public:
-	LoadGameFile( std::list<CGameDescription*>& games, const char* path ) : mGames( games ), mPath( path ){
-	}
-	void operator()( const char* name ) const {
-		if ( !path_extension_is( name, "game" ) ) {
-			return;
-		}
-		const auto strPath = StringStream( mPath, name );
-		globalOutputStream() << strPath << '\n';
-
-		xmlDocPtr pDoc = xmlParseFile( strPath );
-		if ( pDoc ) {
-			mGames.push_back( new CGameDescription( pDoc, name ) );
-			xmlFreeDoc( pDoc );
-		}
-		else
-		{
-			globalErrorStream() << "XML parser failed on '" << strPath << "'\n";
-		}
-	}
-};
-
 void CGameDialog::ScanForGames(){
 	const auto path = StringStream( AppPath_get(), "gamepacks/games/" );
 
@@ -352,7 +326,23 @@ void CGameDialog::ScanForGames(){
 	   (if that's really needed)
 	 */
 
-	Directory_forEach( path, LoadGameFile( mGames, path ) );
+	Directory_forEach( path, [&]( const char *name ){
+		if ( !path_extension_is( name, "game" ) ) {
+			return;
+		}
+		const auto strPath = StringStream( path, name );
+		globalOutputStream() << strPath << '\n';
+
+		xmlDocPtr pDoc = xmlParseFile( strPath );
+		if ( pDoc ) {
+			mGames.push_back( new CGameDescription( pDoc, name ) );
+			xmlFreeDoc( pDoc );
+		}
+		else
+		{
+			globalErrorStream() << "XML parser failed on '" << strPath << "'\n";
+		}
+	});
 }
 
 void CGameDialog::InitGlobalPrefPath(){

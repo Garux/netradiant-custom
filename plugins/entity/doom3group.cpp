@@ -547,8 +547,12 @@ public:
 
 	const AABB& getSelectedComponentsBounds() const {
 		m_aabb_component = AABB();
-		m_curveNURBS.forEachSelected( AABBExtendByPoint( m_aabb_component ) );
-		m_curveCatmullRom.forEachSelected( AABBExtendByPoint( m_aabb_component ) );
+		m_curveNURBS.forEachSelected( [&]( const Vector3& point ){
+			aabb_extend_by_point_safe( m_aabb_component, point );
+		});
+		m_curveCatmullRom.forEachSelected( [&]( const Vector3& point ){
+			aabb_extend_by_point_safe( m_aabb_component, point );
+		});
 		return m_aabb_component;
 	}
 	void gatherSelectedComponents( const Vector3Callback& callback ) const {

@@ -2769,7 +2769,7 @@ public:
 	}
 
 	void iterate_selected( AABB& aabb ) const {
-		SelectedComponents_foreach( AABBExtendByPoint( aabb ) );
+		SelectedComponents_foreach( [&]( const Vector3& point ){ aabb_extend_by_point_safe( aabb, point ); } );
 	}
 
 	void gatherSelectedComponents( const Vector3Callback& callback ) const {
@@ -2793,19 +2793,10 @@ public:
 		}
 	}
 
-	class RenderablePointVectorPushBack
-	{
-		RenderablePointVector& m_points;
-	public:
-		RenderablePointVectorPushBack( RenderablePointVector& points ) : m_points( points ){
-		}
-		void operator()( const Vector3& point ) const {
-			m_points.push_back( pointvertex_for_windingpoint( point, colour_selected ) );
-		}
-	};
-
 	void iterate_selected( RenderablePointVector& points ) const {
-		SelectedComponents_foreach( RenderablePointVectorPushBack( points ) );
+		SelectedComponents_foreach( [&]( const Vector3& point ){
+			points.push_back( pointvertex_for_windingpoint( point, colour_selected ) );
+		} );
 	}
 
 	bool intersectVolume( const VolumeTest& volume, const Matrix4& localToWorld ) const {
