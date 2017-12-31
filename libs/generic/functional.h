@@ -197,6 +197,8 @@ public:
 template<class Functor>
 using FunctorInvoke = FunctorNInvoke<Functor, get_func<Functor>>;
 
+// todo: inline
+
 template<class Object, class R, R(Object::*member)()>
 using Member = typename MemberN<Object, R()>::template instance<member>;
 
@@ -238,38 +240,3 @@ using Function4 = typename FunctionN<R(A1, A2, A3, A4)>::template instance<func>
 
 template<class A1, class A2, class A3, class A4, class A5, class R, R(*func)(A1, A2, A3, A4, A5)>
 using Function5 = typename FunctionN<R(A1, A2, A3, A4, A5)>::template instance<func>;
-
-template<class Caller, class FirstArgument = void *>
-using Caller0To1 = CallerShiftFirst<Caller, get_result_type<Caller>(
-        FirstArgument
-)>;
-
-template<class Caller, class FirstArgument = void *>
-using Caller1To2 = CallerShiftFirst<Caller, get_result_type<Caller>(
-        FirstArgument,
-        get_argument<Caller, 0>
-)>;
-
-template<class Caller, class FirstArgument = void *>
-using Caller2To3 = CallerShiftFirst<Caller, get_result_type<Caller>(
-        FirstArgument,
-        get_argument<Caller, 0>,
-        get_argument<Caller, 1>
-)>;
-
-template<class Caller, class FirstArgument = void *>
-using Caller3To4 = CallerShiftFirst<Caller, get_result_type<Caller>(
-        FirstArgument,
-        get_argument<Caller, 0>,
-        get_argument<Caller, 1>,
-        get_argument<Caller, 2>
-)>;
-
-template<class Caller, class FirstArgument = void *>
-using Caller4To5 = CallerShiftFirst<Caller, get_result_type<Caller>(
-        FirstArgument,
-        get_argument<Caller, 0>,
-        get_argument<Caller, 1>,
-        get_argument<Caller, 2>,
-        get_argument<Caller, 3>
-)>;

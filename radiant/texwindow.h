@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "generic/callbackfwd.h"
+#include "generic/callback.h"
 #include "signal/signalfwd.h"
 
 class QWidget;
@@ -36,8 +36,6 @@ void TextureBrowser_Destroy();
 
 
 typedef Callback1<const char*> StringImportCallback;
-template<typename FirstArgument, void( *func ) (FirstArgument)>
-class FreeCaller1;
 
 extern QWidget* g_page_textures;
 void TextureBrowser_exportTitle( const StringImportCallback& importer );

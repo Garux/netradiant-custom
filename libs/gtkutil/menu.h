@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "generic/callbackfwd.h"
+#include "generic/callback.h"
 
 #include <QMenu>
 

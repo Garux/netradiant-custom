@@ -23,7 +23,7 @@
 
 #include <cstddef>
 #include "string/stringfwd.h"
-#include "generic/callbackfwd.h"
+#include "generic/callback.h"
 
 enum class EBrushPrefab
 {

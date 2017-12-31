@@ -25,7 +25,7 @@
 
 #include "generic/vector.h"
 #include "scenelib.h"
-#include "generic/callbackfwd.h"
+#include "generic/callback.h"
 
 class SelectionIntersection
 {

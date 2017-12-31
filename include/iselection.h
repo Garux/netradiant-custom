@@ -23,7 +23,7 @@
 
 #include <cstddef>
 #include "generic/constant.h"
-#include "generic/callbackfwd.h"
+#include "generic/callback.h"
 #include "signal/signalfwd.h"
 
 class Renderer;
