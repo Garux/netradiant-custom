@@ -23,12 +23,10 @@
 
 #include <list>
 
+#include "generic/callback.h"
 #include "gtkutil/dialog.h"
 #include "generic/callback.h"
 #include "string/string.h"
-
-template<typename Environment, typename FirstArgument, void( *func ) ( Environment&, FirstArgument )>
-class ReferenceCaller1;
 
 inline void BoolImport( bool& self, bool value ){
 	self = value;

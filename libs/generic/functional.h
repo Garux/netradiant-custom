@@ -1,315 +1,225 @@
 
 #pragma once
 
-template<typename Object, typename R, R( Object::*member ) ( )>
-class Member
+#include <tuple>
+
+namespace detail {
+	template<class F>
+	struct Fn;
+
+	template<class R, class... Ts>
+	struct Fn<R(Ts...)>
+	{
+		using result_type = R;
+
+		template<int N>
+		using get = typename std::tuple_element<N, std::tuple<Ts...>>::type;
+	};
+}
+
+template<class Caller>
+using get_result_type = typename detail::Fn<typename Caller::func>::result_type;
+
+template<class Caller, int N>
+using get_argument = typename detail::Fn<typename Caller::func>::template get<N>;
+
+template<class Object, class F>
+class MemberN;
+
+template<class Object, class R, class... Ts>
+class MemberN<Object, R(Ts...)>
 {
 public:
-	typedef Object& first_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object ){
-		return ( object.*member )();
+	template<R(Object::*f)(Ts...)>
+	class instance
+	{
+	public:
+		using func = R(Object &, Ts...);
+
+		static R call( Object& object, Ts... args ){
+			return ( object.*f )( args... );
+		}
+	};
+};
+
+template<class Object, class F>
+class ConstMemberN;
+
+template<class Object, class R, class... Ts>
+class ConstMemberN<Object, R(Ts...)>
+{
+public:
+	template<R(Object::*f)(Ts...) const>
+	class instance
+	{
+	public:
+		using func = R(const Object &, Ts...);
+
+		static R call( const Object& object, Ts... args ){
+			return ( object.*f )( args... );
+		}
+	};
+};
+
+template<class F>
+class FunctionN;
+
+template<class R, class... Ts>
+class FunctionN<R(Ts...)>
+{
+public:
+	template<R(*f)(Ts...)>
+	class instance
+	{
+	public:
+		using func = R(Ts...);
+
+		static R call( Ts... args ){
+			return ( f )( args... );
+		}
+	};
+};
+
+template<class Caller, class F>
+class CallerShiftFirst;
+
+template<class Caller, class R, class FirstArgument, class... Ts>
+class CallerShiftFirst<Caller, R(FirstArgument, Ts...)>
+{
+public:
+	using func = R(FirstArgument, Ts...);
+
+	static R call( FirstArgument, Ts... args ){
+		return Caller::call( args... );
 	}
 };
 
-template<typename Object, typename R, R( Object::*member ) ( ) const>
-class ConstMember
+template<class Functor, class F>
+class FunctorNInvoke;
+
+namespace detail {
+	template<int ...>
+	struct seq
+	{
+	};
+
+	template<int N, int... S>
+	struct gens : gens<N - 1, N - 1, S...>
+	{
+	};
+
+	template<int... S>
+	struct gens<0, S...>
+	{
+		using type = seq<S...>;
+	};
+
+	template<int N>
+	using seq_new = typename gens<N>::type;
+}
+
+template<class Functor, class R, class... Ts>
+class FunctorNInvoke<Functor, R(Ts...)>
 {
+	std::tuple<Ts...> args;
+
+	template<class T>
+	struct caller;
+
+	template<int ...I>
+	struct caller<detail::seq<I...>>
+	{
+		static inline R call( FunctorNInvoke<Functor, R(Ts...)> *self, Functor functor ){
+			(void) self;
+			return functor( std::get<I>( self->args )... );
+		}
+	};
+
 public:
-	typedef const Object& first_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object ){
-		return ( object.*member )();
+	FunctorNInvoke( Ts... args ) : args( args... ){
+	}
+
+	inline R operator()( Functor functor ) {
+		return caller<detail::seq_new<sizeof...(Ts)>>::call( this, functor );
 	}
 };
 
-template<typename Object, typename A1, typename R, R( Object::*member ) (A1)>
-class Member1
-{
-public:
-	typedef Object& first_argument_type;
-	typedef A1 second_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object, second_argument_type a1 ){
-		return ( object.*member )( a1 );
-	}
-};
+template<class Functor>
+using FunctorInvoke = FunctorNInvoke<Functor, typename Functor::func>;
 
-template<typename Object, typename A1, typename R, R( Object::*member ) (A1) const>
-class ConstMember1
-{
-public:
-	typedef const Object& first_argument_type;
-	typedef A1 second_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object, second_argument_type a1 ){
-		return ( object.*member )( a1 );
-	}
-};
+template<class Object, class R, R(Object::*member)()>
+using Member = typename MemberN<Object, R()>::template instance<member>;
 
-template<typename Object, typename A2, typename A3, typename R, R( Object::*member ) ( A2, A3 )>
-class Member2
-{
-public:
-	typedef Object& first_argument_type;
-	typedef A2 second_argument_type;
-	typedef A3 third_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object, second_argument_type a2, third_argument_type a3 ){
-		return ( object.*member )( a2, a3 );
-	}
-};
+template<class Object, class R, R(Object::*member)() const>
+using ConstMember = typename ConstMemberN<Object, R()>::template instance<member>;
 
-template<typename Object, typename A2, typename A3, typename R, R( Object::*member ) ( A2, A3 ) const>
-class ConstMember2
-{
-public:
-	typedef const Object& first_argument_type;
-	typedef A2 second_argument_type;
-	typedef A3 third_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object, second_argument_type a2, third_argument_type a3 ){
-		return ( object.*member )( a2, a3 );
-	}
-};
+template<class Object, class A1, class R, R(Object::*member)(A1)>
+using Member1 = typename MemberN<Object, R(A1)>::template instance<member>;
 
-template<typename Object, typename A2, typename A3, typename A4, typename R, R( Object::*member ) ( A2, A3, A4 )>
-class Member3
-{
-public:
-	typedef Object& first_argument_type;
-	typedef A2 second_argument_type;
-	typedef A3 third_argument_type;
-	typedef A4 fourth_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ){
-		return ( object.*member )( a2, a3, a4 );
-	}
-};
+template<class Object, class A1, class R, R(Object::*member)(A1) const>
+using ConstMember1 = typename ConstMemberN<Object, R(A1)>::template instance<member>;
 
-template<typename Object, typename A2, typename A3, typename A4, typename R, R( Object::*member ) ( A2, A3, A4 ) const>
-class ConstMember3
-{
-public:
-	typedef const Object& first_argument_type;
-	typedef A2 second_argument_type;
-	typedef A3 third_argument_type;
-	typedef A4 fourth_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type object, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ){
-		return ( object.*member )( a2, a3, a4 );
-	}
-};
+template<class Object, class A1, class A2, class R, R(Object::*member)(A1, A2)>
+using Member2 = typename MemberN<Object, R(A1, A2)>::template instance<member>;
 
-template<typename R, R( *func ) ( )>
-class Function0
-{
-public:
-	typedef R result_type;
-	static result_type call(){
-		return (func)( );
-	}
-};
+template<class Object, class A1, class A2, class R, R(Object::*member)(A1, A2) const>
+using ConstMember2 = typename ConstMemberN<Object, R(A1, A2)>::template instance<member>;
 
-template<typename A1, typename R, R( *func ) (A1)>
-class Function1
-{
-public:
-	typedef A1 first_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type a1 ){
-		return (func)( a1 );
-	}
-};
+template<class Object, class A1, class A2, class A3, class R, R(Object::*member)(A1, A2, A3)>
+using Member3 = typename MemberN<Object, R(A1, A2, A3)>::template instance<member>;
 
-template<typename A1, typename A2, typename R, R( *func ) ( A1, A2 )>
-class Function2
-{
-public:
-	typedef A1 first_argument_type;
-	typedef A2 second_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type a1, second_argument_type a2 ){
-		return (func)( a1, a2 );
-	}
-};
+template<class Object, class A1, class A2, class A3, class R, R(Object::*member)(A1, A2, A3) const>
+using ConstMember3 = typename ConstMemberN<Object, R(A1, A2, A3)>::template instance<member>;
 
-template<typename A1, typename A2, typename A3, typename R, R( *func ) ( A1, A2, A3 )>
-class Function3
-{
-public:
-	typedef A1 first_argument_type;
-	typedef A2 second_argument_type;
-	typedef A3 third_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type a1, second_argument_type a2, third_argument_type a3 ){
-		return (func)( a1, a2, a3 );
-	}
-};
+template<class R, R(*func)()>
+using Function0 = typename FunctionN<R()>::template instance<func>;
 
-template<typename A1, typename A2, typename A3, typename A4, typename R, R( *func ) ( A1, A2, A3, A4 )>
-class Function4
-{
-public:
-	typedef A1 first_argument_type;
-	typedef A2 second_argument_type;
-	typedef A3 third_argument_type;
-	typedef A4 fourth_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type a1, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ){
-		return (func)( a1, a2, a3, a4 );
-	}
-};
+template<class A1, class R, R(*func)(A1)>
+using Function1 = typename FunctionN<R(A1)>::template instance<func>;
 
-template<typename A1, typename A2, typename A3, typename A4, typename A5, typename R, R( *func ) ( A1, A2, A3, A4, A5 )>
-class Function5
-{
-public:
-	typedef A1 first_argument_type;
-	typedef A2 second_argument_type;
-	typedef A3 third_argument_type;
-	typedef A4 fourth_argument_type;
-	typedef A5 fifth_argument_type;
-	typedef R result_type;
-	static result_type call( first_argument_type a1, second_argument_type a2, third_argument_type a3, fourth_argument_type a4, fifth_argument_type a5 ){
-		return (func)( a1, a2, a3, a4, a5 );
-	}
-};
+template<class A1, class A2, class R, R(*func)(A1, A2)>
+using Function2 = typename FunctionN<R(A1, A2)>::template instance<func>;
 
-template<typename Caller, typename FirstArgument = void*>
-class Caller0To1
-{
-public:
-	typedef FirstArgument first_argument_type;
-	typedef typename Caller::result_type result_type;
-	static result_type call( first_argument_type ){
-		return Caller::call();
-	}
-};
+template<class A1, class A2, class A3, class R, R(*func)(A1, A2, A3)>
+using Function3 = typename FunctionN<R(A1, A2, A3)>::template instance<func>;
 
-template<typename Caller, typename FirstArgument = void*>
-class Caller1To2
-{
-public:
-	typedef FirstArgument first_argument_type;
-	typedef typename Caller::first_argument_type second_argument_type;
-	typedef typename Caller::result_type result_type;
-	static result_type call( first_argument_type, second_argument_type a2 ){
-		return Caller::call( a2 );
-	}
-};
+template<class A1, class A2, class A3, class A4, class R, R(*func)(A1, A2, A3, A4)>
+using Function4 = typename FunctionN<R(A1, A2, A3, A4)>::template instance<func>;
 
-template<typename Caller, typename FirstArgument = void*>
-class Caller2To3
-{
-public:
-	typedef FirstArgument first_argument_type;
-	typedef typename Caller::first_argument_type second_argument_type;
-	typedef typename Caller::second_argument_type third_argument_type;
-	typedef typename Caller::result_type result_type;
-	static result_type call( first_argument_type, second_argument_type a2, third_argument_type a3 ){
-		return Caller::call( a2, a3 );
-	}
-};
+template<class A1, class A2, class A3, class A4, class A5, class R, R(*func)(A1, A2, A3, A4, A5)>
+using Function5 = typename FunctionN<R(A1, A2, A3, A4, A5)>::template instance<func>;
 
-template<typename Caller, typename FirstArgument = void*>
-class Caller3To4
-{
-public:
-	typedef FirstArgument first_argument_type;
-	typedef typename Caller::first_argument_type second_argument_type;
-	typedef typename Caller::second_argument_type third_argument_type;
-	typedef typename Caller::third_argument_type fourth_argument_type;
-	typedef typename Caller::result_type result_type;
-	static result_type call( first_argument_type, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ){
-		return Caller::call( a2, a3, a4 );
-	}
-};
+template<class Caller, class FirstArgument = void *>
+using Caller0To1 = CallerShiftFirst<Caller, get_result_type<Caller>(
+        FirstArgument
+)>;
 
-template<typename Caller, typename FirstArgument = void*>
-class Caller4To5
-{
-public:
-	typedef FirstArgument first_argument_type;
-	typedef typename Caller::first_argument_type second_argument_type;
-	typedef typename Caller::second_argument_type third_argument_type;
-	typedef typename Caller::third_argument_type fourth_argument_type;
-	typedef typename Caller::fourth_argument_type fifth_argument_type;
-	typedef typename Caller::result_type result_type;
-	static result_type call( first_argument_type, second_argument_type a2, third_argument_type a3, fourth_argument_type a4, fifth_argument_type a5 ){
-		return Caller::call( a2, a3, a4, a5 );
-	}
-};
+template<class Caller, class FirstArgument = void *>
+using Caller1To2 = CallerShiftFirst<Caller, get_result_type<Caller>(
+        FirstArgument,
+        get_argument<Caller, 0>
+)>;
 
-template<typename Functor>
-class FunctorInvoke
-{
-public:
-	typedef typename Functor::result_type result_type;
-	inline result_type operator()( Functor functor ){
-		return functor();
-	}
-};
+template<class Caller, class FirstArgument = void *>
+using Caller2To3 = CallerShiftFirst<Caller, get_result_type<Caller>(
+        FirstArgument,
+        get_argument<Caller, 0>,
+        get_argument<Caller, 1>
+)>;
 
-template<typename Functor>
-class Functor1Invoke
-{
-	typename Functor::first_argument_type a1;
-public:
-	typedef typename Functor::first_argument_type first_argument_type;
-	typedef typename Functor::result_type result_type;
-	Functor1Invoke( first_argument_type a1 ) : a1( a1 ){
-	}
-	inline result_type operator()( Functor functor ){
-		return functor( a1 );
-	}
-};
+template<class Caller, class FirstArgument = void *>
+using Caller3To4 = CallerShiftFirst<Caller, get_result_type<Caller>(
+        FirstArgument,
+        get_argument<Caller, 0>,
+        get_argument<Caller, 1>,
+        get_argument<Caller, 2>
+)>;
 
-template<typename Functor>
-class Functor2Invoke
-{
-	typename Functor::first_argument_type a1;
-	typename Functor::second_argument_type a2;
-public:
-	typedef typename Functor::first_argument_type first_argument_type;
-	typedef typename Functor::second_argument_type second_argument_type;
-	typedef typename Functor::result_type result_type;
-	Functor2Invoke( first_argument_type a1, second_argument_type a2 )
-		: a1( a1 ), a2( a2 ){
-	}
-	inline result_type operator()( Functor functor ){
-		return functor( a1, a2 );
-	}
-};
-
-template<typename Functor>
-class Functor3Invoke
-{
-	typename Functor::first_argument_type a1;
-	typename Functor::second_argument_type a2;
-	typename Functor::third_argument_type a3;
-public:
-	typedef typename Functor::first_argument_type first_argument_type;
-	typedef typename Functor::second_argument_type second_argument_type;
-	typedef typename Functor::third_argument_type third_argument_type;
-	typedef typename Functor::result_type result_type;
-	Functor3Invoke( first_argument_type a1, second_argument_type a2, third_argument_type a3 )
-		: a1( a1 ), a2( a2 ), a3( a3 ){
-	}
-	inline result_type operator()( Functor functor ){
-		return functor( a1, a2, a3 );
-	}
-};
-
-template<typename Other, typename True, typename False, typename Type>
-class TypeEqual
-{
-public:
-	typedef False type;
-};
-template<typename Other, typename True, typename False>
-class TypeEqual<Other, True, False, Other>
-{
-public:
-	typedef True type;
-};
+template<class Caller, class FirstArgument = void *>
+using Caller4To5 = CallerShiftFirst<Caller, get_result_type<Caller>(
+        FirstArgument,
+        get_argument<Caller, 0>,
+        get_argument<Caller, 1>,
+        get_argument<Caller, 2>,
+        get_argument<Caller, 3>
+)>;

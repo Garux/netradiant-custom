@@ -585,7 +585,7 @@ class OpenGLStateBucketAdd
 	const OpenGLRenderable& m_renderable;
 	const Matrix4& m_modelview;
 public:
-	typedef const RendererLight& first_argument_type;
+	using func = void(const RendererLight&);
 
 	OpenGLStateBucketAdd( OpenGLStateBucket& bucket, const OpenGLRenderable& renderable, const Matrix4& modelview ) :
 		m_bucket( bucket ), m_renderable( renderable ), m_modelview( modelview ){
@@ -599,7 +599,7 @@ class CountLights
 {
 	std::size_t m_count;
 public:
-	typedef const RendererLight& first_argument_type;
+	using func = void(RendererLight&);
 
 	CountLights() : m_count( 0 ){
 	}

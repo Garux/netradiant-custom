@@ -314,7 +314,7 @@ class Signal1 : public SignalBase< SignalHandler1<FirstArgument> >
 	typedef SignalBase< SignalHandler1<FirstArgument> > Base;
 public:
 	void operator()( FirstArgument a1 ) const {
-		invokeSignalHandlers( Base::begin(), Base::end(), Functor1Invoke<typename Base::handler_type>( a1 ) );
+		invokeSignalHandlers( Base::begin(), Base::end(), FunctorInvoke<typename Base::handler_type>( a1 ) );
 	}
 };
 
@@ -324,7 +324,7 @@ class Signal2 : public SignalBase< SignalHandler2<FirstArgument, SecondArgument>
 	typedef SignalBase< SignalHandler2<FirstArgument, SecondArgument> > Base;
 public:
 	void operator()( FirstArgument a1, SecondArgument a2 ) const {
-		invokeSignalHandlers( Base::begin(), Base::end(), Functor2Invoke<typename Base::handler_type>( a1, a2 ) );
+		invokeSignalHandlers( Base::begin(), Base::end(), FunctorInvoke<typename Base::handler_type>( a1, a2 ) );
 	}
 };
 
@@ -334,6 +334,6 @@ class Signal3 : public SignalBase< SignalHandler3<FirstArgument, SecondArgument,
 	typedef SignalBase< SignalHandler3<FirstArgument, SecondArgument, ThirdArgument> > Base;
 public:
 	void operator()( FirstArgument a1, SecondArgument a2, ThirdArgument a3 ) const {
-		invokeSignalHandlers( Base::begin(), Base::end(), Functor3Invoke<typename Base::handler_type>( a1, a2, a3 ) );
+		invokeSignalHandlers( Base::begin(), Base::end(), FunctorInvoke<typename Base::handler_type>( a1, a2, a3 ) );
 	}
 };

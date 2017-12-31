@@ -21,72 +21,68 @@ public:
 const SignalHandlerResult SIGNAL_CONTINUE_EMISSION = SignalHandlerResult( false );
 const SignalHandlerResult SIGNAL_STOP_EMISSION = SignalHandlerResult( true );
 
-template<typename Caller>
-class SignalHandlerCaller1
+template<class Caller, class F>
+class SignalHandlerCallerN;
+
+template<class Caller, class R, class... Ts>
+class SignalHandlerCallerN<Caller, R(Ts...)>
 {
 public:
-	typedef typename Caller::first_argument_type first_argument_type;
-	typedef SignalHandlerResult result_type;
-	static result_type call( first_argument_type a1 ){
-		Caller::call( a1 );
+	using func = SignalHandlerResult(Ts...);
+
+	static SignalHandlerResult call( Ts... args ) {
+		Caller::call( args... );
 		return SIGNAL_CONTINUE_EMISSION;
 	}
 };
 
-template<typename Caller>
-class SignalHandlerCaller2
-{
-public:
-	typedef typename Caller::first_argument_type first_argument_type;
-	typedef typename Caller::second_argument_type second_argument_type;
-	typedef SignalHandlerResult result_type;
-	static result_type call( first_argument_type a1, second_argument_type a2 ){
-		Caller::call( a1, a2 );
-		return SIGNAL_CONTINUE_EMISSION;
-	}
-};
+template<class Caller>
+using SignalHandlerCaller = SignalHandlerCallerN<Caller, typename Caller::func>;
+
+template<class Caller>
+using SignalHandlerCaller1 = SignalHandlerCaller<Caller>;
+
+template<class Caller>
+using SignalHandlerCaller2 = SignalHandlerCaller<Caller>;
 
 template<typename Caller>
-class SignalHandlerCaller3
-{
-public:
-	typedef typename Caller::first_argument_type first_argument_type;
-	typedef typename Caller::second_argument_type second_argument_type;
-	typedef typename Caller::third_argument_type third_argument_type;
-	typedef SignalHandlerResult result_type;
-	static result_type call( first_argument_type a1, second_argument_type a2, third_argument_type a3 ){
-		Caller::call( a1, a2, a3 );
-		return SIGNAL_CONTINUE_EMISSION;
-	}
-};
+using SignalHandlerCaller3 = SignalHandlerCaller<Caller>;
 
 template<typename Caller>
-class SignalHandlerCaller4
+using SignalHandlerCaller4 = SignalHandlerCaller<Caller>;
+
+template<typename Other, typename True, typename False, typename Type>
+class TypeEqual
 {
 public:
-	typedef typename Caller::first_argument_type first_argument_type;
-	typedef typename Caller::second_argument_type second_argument_type;
-	typedef typename Caller::third_argument_type third_argument_type;
-	typedef typename Caller::fourth_argument_type fourth_argument_type;
-	typedef SignalHandlerResult result_type;
-	static result_type call( first_argument_type a1, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ){
-		Caller::call( a1, a2, a3, a4 );
-		return SIGNAL_CONTINUE_EMISSION;
-	}
+	using type = False;
 };
 
-class SignalHandler : public Callback0<SignalHandlerResult>
+template<typename Other, typename True, typename False>
+class TypeEqual<Other, True, False, Other>
+{
+public:
+	using type = True;
+};
+
+template<class CB, template<class T> class Wrapper>
+class SignalHandlerN : public CB
 {
 public:
 	template<typename Caller>
-	SignalHandler( const BindFirstOpaque<Caller>& caller )
-		: Callback0<SignalHandlerResult>( BindFirstOpaque<typename TypeEqual<
-		                                                      SignalHandlerResult,
-		                                                      Caller,
-		                                                      SignalHandlerCaller1<Caller>,
-		                                                      typename Caller::result_type
-		                                                      >::type>( caller.getBound() ) ){
+	SignalHandlerN( const BindFirstOpaque<Caller>& caller )
+		: CB( BindFirstOpaque<typename TypeEqual<
+			SignalHandlerResult,
+			Caller,
+			Wrapper<Caller>,
+			get_result_type<Caller>
+			>::type>( caller.getBound() ) ){
 	}
+};
+
+class SignalHandler : public SignalHandlerN<Callback0<SignalHandlerResult>, SignalHandlerCaller1>
+{
+	using SignalHandlerN<Callback0<SignalHandlerResult>, SignalHandlerCaller1>::SignalHandlerN;
 };
 
 template<typename Caller>
@@ -94,109 +90,80 @@ inline SignalHandler makeSignalHandler( const BindFirstOpaque<Caller>& caller ){
 	return SignalHandler( caller );
 }
 template<typename Caller>
-inline SignalHandler makeSignalHandler( const Caller& caller, typename Caller::first_argument_type callee ){
+inline SignalHandler makeSignalHandler( const Caller& caller, get_argument<Caller, 0> callee ){
 	return SignalHandler( BindFirstOpaque<Caller>( callee ) );
 }
 
-
 template<typename FirstArgument>
-class SignalHandler1 : public Callback1<FirstArgument, SignalHandlerResult>
+class SignalHandler1 : public SignalHandlerN<Callback1<FirstArgument, SignalHandlerResult>, SignalHandlerCaller2>
 {
-public:
-	template<typename Caller>
-	SignalHandler1( const BindFirstOpaque1<Caller>& caller )
-		: Callback1<FirstArgument, SignalHandlerResult>( BindFirstOpaque1<typename TypeEqual<
-		                                                                      SignalHandlerResult,
-		                                                                      Caller,
-		                                                                      SignalHandlerCaller2<Caller>,
-		                                                                      typename Caller::result_type
-		                                                                      >::type>( caller.getBound() ) ){
-	}
+    using SignalHandlerN<Callback1<FirstArgument, SignalHandlerResult>, SignalHandlerCaller2>::SignalHandlerN;
 };
 
 template<typename Caller>
-inline SignalHandler1<typename Caller::second_argument_type> makeSignalHandler1( const BindFirstOpaque1<Caller>& caller ){
-	return SignalHandler1<typename Caller::second_argument_type>( caller );
+inline SignalHandler1<get_argument<Caller, 1>> makeSignalHandler1(const BindFirstOpaque<Caller>& caller){
+	return SignalHandler1<get_argument<Caller, 1>>( caller );
 }
 template<typename Caller>
-inline SignalHandler1<typename Caller::second_argument_type> makeSignalHandler1( const Caller& caller, typename Caller::first_argument_type callee ){
-	return SignalHandler1<typename Caller::second_argument_type>( BindFirstOpaque1<Caller>( callee ) );
+inline SignalHandler1<get_argument<Caller, 1>>
+makeSignalHandler1(const Caller &caller, get_argument<Caller, 0> callee) {
+    return SignalHandler1<get_argument<Caller, 1>>(BindFirstOpaque<Caller>(callee));
 }
-
 
 template<typename FirstArgument, typename SecondArgument>
-class SignalHandler2 : public Callback2<FirstArgument, SecondArgument, SignalHandlerResult>
+class SignalHandler2 : public SignalHandlerN<Callback2<FirstArgument, SecondArgument, SignalHandlerResult>, SignalHandlerCaller3>
 {
-public:
-	template<typename Caller>
-	SignalHandler2( const BindFirstOpaque2<Caller>& caller )
-		: Callback2<FirstArgument, SecondArgument, SignalHandlerResult>( BindFirstOpaque2<typename TypeEqual<
-		                                                                                      SignalHandlerResult,
-		                                                                                      Caller,
-		                                                                                      SignalHandlerCaller3<Caller>,
-		                                                                                      typename Caller::result_type
-		                                                                                      >::type>( caller.getBound() ) ){
-	}
+	using SignalHandlerN<Callback2<FirstArgument, SecondArgument, SignalHandlerResult>, SignalHandlerCaller3>::SignalHandlerN;
 };
 
 template<typename Caller>
 inline SignalHandler2<
-        typename Caller::second_argument_type,
-        typename Caller::third_argument_type
-> makeSignalHandler2( const BindFirstOpaque2<Caller>& caller ){
+            get_argument<Caller, 1>,
+            get_argument<Caller, 2>
+> makeSignalHandler2( const BindFirstOpaque<Caller>& caller ){
 	return SignalHandler2<
-	            typename Caller::second_argument_type,
-	            typename Caller::third_argument_type
+	            get_argument<Caller, 1>,
+	            get_argument<Caller, 2>
 	       >( caller );
 }
 template<typename Caller>
 inline SignalHandler2<
-            typename Caller::second_argument_type,
-            typename Caller::third_argument_type
-> makeSignalHandler2( const Caller& caller, typename Caller::first_argument_type callee ){
+            get_argument<Caller, 1>,
+            get_argument<Caller, 2>
+> makeSignalHandler2( const Caller& caller, get_argument<Caller, 0> callee ){
 	return SignalHandler2<
-	            typename Caller::second_argument_type,
-	            typename Caller::third_argument_type
-	       >( BindFirstOpaque2<Caller>( callee ) );
+	            get_argument<Caller, 1>,
+	            get_argument<Caller, 2>
+	       >( BindFirstOpaque<Caller>( callee ) );
 }
-
 
 template<typename FirstArgument, typename SecondArgument, typename ThirdArgument>
-class SignalHandler3 : public Callback3<FirstArgument, SecondArgument, ThirdArgument, SignalHandlerResult>
+class SignalHandler3 : public SignalHandlerN<Callback3<FirstArgument, SecondArgument, ThirdArgument, SignalHandlerResult>, SignalHandlerCaller4>
 {
-public:
-	template<typename Caller>
-	SignalHandler3( const BindFirstOpaque3<Caller>& caller )
-		: Callback3<FirstArgument, SecondArgument, ThirdArgument, SignalHandlerResult>( BindFirstOpaque3<typename TypeEqual<
-		                                                                                                     SignalHandlerResult,
-		                                                                                                     Caller,
-		                                                                                                     SignalHandlerCaller4<Caller>,
-		                                                                                                     typename Caller::result_type
-		                                                                                                     >::type>( caller.getBound() ) ){
-	}
+	using SignalHandlerN<Callback3<FirstArgument, SecondArgument, ThirdArgument, SignalHandlerResult>, SignalHandlerCaller4>::SignalHandlerN;
 };
 
 template<typename Caller>
 inline SignalHandler3<
-         typename Caller::second_argument_type,
-         typename Caller::third_argument_type,
-         typename Caller::fourth_argument_type
-> makeSignalHandler3( const BindFirstOpaque3<Caller>& caller ){
+         get_argument<Caller, 1>,
+         get_argument<Caller, 2>,
+         get_argument<Caller, 3>
+> makeSignalHandler3( const BindFirstOpaque<Caller>& caller ){
 	return SignalHandler3<
-	            typename Caller::second_argument_type,
-	            typename Caller::third_argument_type,
-	            typename Caller::fourth_argument_type
+	            get_argument<Caller, 1>,
+	            get_argument<Caller, 2>,
+	            get_argument<Caller, 3>
 	       >( caller );
 }
 template<typename Caller>
 inline SignalHandler3<
-         typename Caller::second_argument_type,
-         typename Caller::third_argument_type,
-         typename Caller::fourth_argument_type
-> makeSignalHandler3( const Caller& caller, typename Caller::first_argument_type callee ){
+        get_argument<Caller, 1>,
+        get_argument<Caller, 2>,
+        get_argument<Caller, 3>
+> makeSignalHandler3( const Caller& caller, get_argument<Caller, 0> callee ){
 	return SignalHandler3<
-	            typename Caller::second_argument_type,
-	            typename Caller::third_argument_type,
-	            typename Caller::fourth_argument_type
-	       >( BindFirstOpaque3<Caller>( callee ) );
+	            get_argument<Caller, 1>,
+	            get_argument<Caller, 2>,
+	            get_argument<Caller, 3>
+	       >( BindFirstOpaque<Caller>( callee ) );
 }

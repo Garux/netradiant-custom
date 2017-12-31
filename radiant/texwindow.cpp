@@ -656,7 +656,7 @@ class TextureCategoryLoadShader
 	const char* m_directory;
 	std::size_t& m_count;
 public:
-	typedef const char* first_argument_type;
+	using func = void(const char *);
 
 	TextureCategoryLoadShader( const char* directory, std::size_t& count )
 		: m_directory( directory ), m_count( count ){
