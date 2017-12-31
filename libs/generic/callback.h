@@ -148,7 +148,7 @@ public:
 };
 
 template<class Caller>
-using BindFirstOpaque = BindFirstOpaqueN<Caller, typename Caller::func>;
+using BindFirstOpaque = BindFirstOpaqueN<Caller, get_func<Caller>>;
 
 template<class F>
 class CallbackN;

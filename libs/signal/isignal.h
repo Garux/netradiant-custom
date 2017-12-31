@@ -37,7 +37,7 @@ public:
 };
 
 template<class Caller>
-using SignalHandlerCaller = SignalHandlerCallerN<Caller, typename Caller::func>;
+using SignalHandlerCaller = SignalHandlerCallerN<Caller, get_func<Caller>>;
 
 template<class Caller>
 using SignalHandlerCaller1 = SignalHandlerCaller<Caller>;
