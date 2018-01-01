@@ -27,127 +27,144 @@
 #include <cstddef>
 #include "functional.h"
 
-template<typename Type>
-inline void* convertToOpaque( Type* t ){
-	return t;
-}
-template<typename Type>
-inline void* convertToOpaque( const Type* t ){
-	return const_cast<Type*>( t );
-}
-template<typename Type>
-inline void* convertToOpaque( Type& t ){
-	return &t;
-}
-template<typename Type>
-inline void* convertToOpaque( const Type& t ){
-	return const_cast<Type*>( &t );
-}
+namespace detail {
 
+	template<typename Thunk_>
+	class CallbackBase
+	{
+		void* m_environment;
+		Thunk_ m_thunk;
+	public:
+		typedef Thunk_ Thunk;
 
-template<typename Type>
-class ConvertFromOpaque
-{
-};
+		CallbackBase( void* environment, Thunk function ) : m_environment( environment ), m_thunk( function ){
+		}
 
-template<typename Type>
-class ConvertFromOpaque<Type&>
-{
-public:
-	static Type& apply( void* p ){
-		return *static_cast<Type*>( p );
+		void* getEnvironment() const {
+			return m_environment;
+		}
+
+		Thunk getThunk() const {
+			return m_thunk;
+		}
+	};
+
+	template<typename Thunk>
+	inline bool operator==( const CallbackBase<Thunk>& self, const CallbackBase<Thunk>& other ){
+		return self.getEnvironment() == other.getEnvironment() && self.getThunk() == other.getThunk();
 	}
-};
 
-template<typename Type>
-class ConvertFromOpaque<const Type&>
-{
-public:
-	static const Type& apply( void* p ){
-		return *static_cast<Type*>( p );
+	template<typename Thunk>
+	inline bool operator!=( const CallbackBase<Thunk>& self, const CallbackBase<Thunk>& other ){
+		return !( self == other );
 	}
-};
 
+	template<typename Thunk>
+	inline bool operator<( const CallbackBase<Thunk>& self, const CallbackBase<Thunk>& other ){
+		return self.getEnvironment() < other.getEnvironment() ||
+		       ( !( other.getEnvironment() < self.getEnvironment() ) && self.getThunk() < other.getThunk() );
+	}
 
-template<typename Type>
-class ConvertFromOpaque<Type*>
-{
-public:
-	static Type* apply( void* p ){
-		return static_cast<Type*>( p );
-	}
-};
-
-template<typename Type>
-class ConvertFromOpaque<const Type*>
-{
-public:
-	static const Type* apply( void* p ){
-		return static_cast<Type*>( p );
-	}
-};
-
-template<typename Thunk_>
-class CallbackBase
-{
-	void* m_environment;
-	Thunk_ m_thunk;
-public:
-	typedef Thunk_ Thunk;
-	CallbackBase( void* environment, Thunk function ) : m_environment( environment ), m_thunk( function ){
-	}
-	void* getEnvironment() const {
-		return m_environment;
-	}
-	Thunk getThunk() const {
-		return m_thunk;
-	}
-};
-
-template<typename Thunk>
-inline bool operator==( const CallbackBase<Thunk>& self, const CallbackBase<Thunk>& other ){
-	return self.getEnvironment() == other.getEnvironment() && self.getThunk() == other.getThunk();
-}
-template<typename Thunk>
-inline bool operator!=( const CallbackBase<Thunk>& self, const CallbackBase<Thunk>& other ){
-	return !( self == other );
-}
-template<typename Thunk>
-inline bool operator<( const CallbackBase<Thunk>& self, const CallbackBase<Thunk>& other ){
-	return self.getEnvironment() < other.getEnvironment() ||
-	       ( !( other.getEnvironment() < self.getEnvironment() ) && self.getThunk() < other.getThunk() );
 }
 
-template<class Caller, class F>
-class BindFirstOpaqueN;
+namespace detail {
 
-template<class Caller, class R, class FirstBound, class... Ts>
-class BindFirstOpaqueN<Caller, R(FirstBound, Ts...)>
-{
-	FirstBound firstBound;
-public:
-	explicit BindFirstOpaqueN( FirstBound firstBound ) : firstBound( firstBound ){
+	template<typename Type>
+	inline void* convertToOpaque( Type* t ){
+		return t;
 	}
 
-	R operator()( Ts... args ) const {
-		return Caller::call( firstBound, args... );
+	template<typename Type>
+	inline void* convertToOpaque( const Type* t ){
+		return const_cast<Type*>( t );
 	}
 
-	FirstBound getBound() const {
-		return firstBound;
+	template<typename Type>
+	inline void* convertToOpaque( Type& t ){
+		return &t;
 	}
 
-	static R thunk( void *environment, Ts... args ){
-		return Caller::call( ConvertFromOpaque<FirstBound>::apply( environment ), args... );
+	template<typename Type>
+	inline void* convertToOpaque( const Type& t ){
+		return const_cast<Type*>( &t );
 	}
 
-	void *getEnvironment() const {
-		return convertToOpaque( firstBound );
-	}
-};
+
+	template<typename Type>
+	class ConvertFromOpaque
+	{
+	};
+
+	template<typename Type>
+	class ConvertFromOpaque<Type&>
+	{
+	public:
+		static Type& apply( void* p ){
+			return *static_cast<Type*>( p );
+		}
+	};
+
+	template<typename Type>
+	class ConvertFromOpaque<const Type&>
+	{
+	public:
+		static const Type& apply( void* p ){
+			return *static_cast<Type*>( p );
+		}
+	};
+
+
+	template<typename Type>
+	class ConvertFromOpaque<Type*>
+	{
+	public:
+		static Type* apply( void* p ){
+			// illegal cast
+			return reinterpret_cast<Type*>( p );
+		}
+	};
+
+	template<typename Type>
+	class ConvertFromOpaque<const Type*>
+	{
+	public:
+		static const Type* apply( void* p ){
+			return static_cast<Type*>( p );
+		}
+	};
+
+	template<class Caller, class F>
+	class BindFirstOpaqueN;
+
+	template<class Caller, class R, class FirstBound, class... Ts>
+	class BindFirstOpaqueN<Caller, R(FirstBound, Ts...)>
+	{
+		FirstBound firstBound;
+	public:
+		explicit BindFirstOpaqueN( FirstBound firstBound ) : firstBound( firstBound ){
+		}
+
+		R operator()( Ts... args ) const {
+			return Caller::call( firstBound, args... );
+		}
+
+		FirstBound getBound() const {
+			return firstBound;
+		}
+
+		static R thunk( void *environment, Ts... args ){
+			return Caller::call(detail::ConvertFromOpaque<FirstBound>::apply( environment ), args... );
+		}
+
+		void *getEnvironment() const {
+			return detail::convertToOpaque( firstBound );
+		}
+	};
+
+}
 
 template<class Caller>
-using BindFirstOpaque = BindFirstOpaqueN<Caller, get_func<Caller>>;
+using BindFirstOpaque = detail::BindFirstOpaqueN<Caller, get_func<Caller>>;
 
 /// \brief Combines a void pointer with a pointer to a function which operates on a void pointer.
 ///
@@ -156,9 +173,9 @@ template<class F>
 class Callback;
 
 template<class R, class... Ts>
-class Callback<R(Ts...)> : public CallbackBase<R(*)(void *, Ts...)>
+class Callback<R(Ts...)> : public detail::CallbackBase<R(*)(void *, Ts...)>
 {
-	using Base = CallbackBase<R (*)(void *, Ts...)>;
+	using Base = detail::CallbackBase<R (*)(void *, Ts...)>;
 
 	static R nullThunk( void *, Ts... ){
 	}
@@ -204,89 +221,112 @@ namespace detail {
 		template <class Unshift>
 		using unshift = Arglist<R(Unshift, Ts...)>;
 	};
+
+	template<class F>
+	using ArgShift = typename detail::Arglist<F>::shift::type;
+
+	template<class F, class T>
+	using ArgUnshift = typename detail::Arglist<F>::template unshift<T>::type;
 }
 
 template<typename Caller>
-inline Callback<typename detail::Arglist<get_func<Caller>>::shift::type> makeCallback( const Caller& caller, get_argument<Caller, 0> callee ){
-	return Callback<typename detail::Arglist<get_func<Caller>>::shift::type>( BindFirstOpaque<Caller>( callee ) );
+inline Callback<detail::ArgShift<get_func<Caller>>> makeCallback( const Caller& caller, get_argument<Caller, 0> callee ){
+	return BindFirstOpaque<Caller>(callee);
 }
+
+template<class Caller, class F>
+class CallerShiftFirst;
+
+template<class Caller, class R, class FirstArgument, class... Ts>
+class CallerShiftFirst<Caller, R(FirstArgument, Ts...)>
+{
+public:
+	using func = R(FirstArgument, Ts...);
+
+	static R call( FirstArgument, Ts... args ){
+		return Caller::call( args... );
+	}
+};
 
 template<typename Caller>
 inline Callback<get_func<Caller>> makeStatelessCallback( const Caller& caller ){
-	return makeCallback( CallerShiftFirst<Caller, typename detail::Arglist<get_func<Caller>>::template unshift<void *>::type>(), nullptr );
+	return makeCallback(CallerShiftFirst<Caller, detail::ArgUnshift<get_func<Caller>, void *>>(), nullptr);
 }
 
 /// \brief Forms a Callback from a non-const Environment reference and a non-const Environment member-function.
-///
-/// \dontinclude generic/callback.cpp
-/// \skipline MemberCaller0 example
-/// \until end example
-
 template<class Environment, class F, MemberFunction<Environment, F> member>
-using MemberCaller = BindFirstOpaque<typename MemberN<Environment, F>::template instance<member>>;
-
-/// \brief Forms a Callback from a const Environment reference and a const Environment member-function.
-///
-/// \dontinclude generic/callback.cpp
-/// \skipline MemberCaller0 example
-/// \until end example
-template<class Environment, class F, ConstMemberFunction<Environment, F> member>
-using ConstMemberCaller = BindFirstOpaque<typename ConstMemberN<Environment, F>::template instance<member>>;
-
-/// \brief Forms a Callback from a non-const Environment reference and a free function which operates on a non-const Environment reference.
-///
-/// \dontinclude generic/callback.cpp
-/// \skipline ReferenceCaller0 example
-/// \until end example
-template<class Environment, class F, typename detail::Arglist<F>::template unshift<Environment &>::type *func>
-using ReferenceCaller = BindFirstOpaque<typename FunctionN<typename detail::Arglist<F>::template unshift<Environment &>::type>::template instance<func>>;
-
-/// \brief Forms a Callback from a const Environment reference and a free function which operates on a const Environment reference.
-///
-/// \dontinclude generic/callback.cpp
-/// \skipline ReferenceCaller0 example
-/// \until end example
-template<class Environment, class F, typename detail::Arglist<F>::template unshift<const Environment &>::type *func>
-using ConstReferenceCaller = BindFirstOpaque<typename FunctionN<typename detail::Arglist<F>::template unshift<const Environment &>::type>::template instance<func>>;
-
-/// \brief Forms a Callback from a non-const Environment pointer and a free function which operates on a non-const Environment pointer.
-template<class Environment, class F, typename detail::Arglist<F>::template unshift<Environment *>::type *func>
-using PointerCaller = BindFirstOpaque<typename FunctionN<typename detail::Arglist<F>::template unshift<Environment *>::type>::template instance<func>>;
-
-/// \brief Forms a Callback from a const Environment pointer and a free function which operates on a const Environment pointer.
-template<class Environment, class F, typename detail::Arglist<F>::template unshift<const Environment *>::type *func>
-using ConstPointerCaller = BindFirstOpaque<typename FunctionN<typename detail::Arglist<F>::template unshift<const Environment *>::type>::template instance<func>>;
-
-/// \brief Forms a Callback from a free function
-template<class F, F *func>
-class FreeCaller : public BindFirstOpaque<CallerShiftFirst<
-        typename FunctionN<F>::template instance<func>,
-        typename detail::Arglist<F>::template unshift<void *>::type
->> {
-public:
-	FreeCaller()
-	        : BindFirstOpaque<CallerShiftFirst<
-	        typename FunctionN<F>::template instance<func>,
-	        typename detail::Arglist<F>::template unshift<void *>::type
-	>>( nullptr ) {
-	}
-};
+using MemberCaller = BindFirstOpaque<Member<Environment, F, member>>;
 
 /// \brief  Constructs a Callback1 from a non-const \p functor
 ///
 /// \param Functor Must define \c operator()(argument) and its signature as \c func.
 template<typename Functor>
 inline Callback<get_func<Functor>> makeCallback( Functor& functor ){
-	return Callback<get_func<Functor>>( MemberCaller<Functor, get_func<Functor>, &Functor::operator()>( functor ) );
+	return MemberCaller<Functor, get_func<Functor>, &Functor::operator()>( functor );
 }
+
+/// \brief Forms a Callback from a const Environment reference and a const Environment member-function.
+template<class Environment, class F, ConstMemberFunction<Environment, F> member>
+using ConstMemberCaller = BindFirstOpaque<ConstMember<Environment, F, member>>;
 
 /// \brief  Constructs a Callback1 from a const \p functor
 ///
 /// \param Functor Must define const \c operator()(argument) and its signature as \c func.
 template<typename Functor>
 inline Callback<get_func<Functor>> makeCallback( const Functor& functor ){
-	return Callback<get_func<Functor>>( ConstMemberCaller<Functor, get_func<Functor>, &Functor::operator()>( functor ) );
+	return ConstMemberCaller<Functor, get_func<Functor>, &Functor::operator()>( functor );
 }
+
+/// \brief Forms a Callback from a non-const Environment reference and a free function which operates on a non-const Environment reference.
+template<class Environment, class F, detail::ArgUnshift<F, Environment &> *func>
+using ReferenceCaller = BindFirstOpaque<Function<detail::ArgUnshift<F, Environment &>, func>>;
+
+/// \brief Forms a Callback from a const Environment reference and a free function which operates on a const Environment reference.
+template<class Environment, class F, detail::ArgUnshift<F, const Environment &> *func>
+using ConstReferenceCaller = BindFirstOpaque<Function<detail::ArgUnshift<F, const Environment &>, func>>;
+
+/// \brief Forms a Callback from a non-const Environment pointer and a free function which operates on a non-const Environment pointer.
+template<class Environment, class F, detail::ArgUnshift<F, Environment *> *func>
+using PointerCaller = BindFirstOpaque<Function<detail::ArgUnshift<F, Environment *>, func>>;
+
+/// \brief Forms a Callback from a const Environment pointer and a free function which operates on a const Environment pointer.
+template<class Environment, class F, detail::ArgUnshift<F, const Environment *> *func>
+using ConstPointerCaller = BindFirstOpaque<Function<detail::ArgUnshift<F, const Environment *>, func>>;
+
+namespace detail {
+	template<class Caller, class F>
+	class FreeCaller : public BindFirstOpaque<CallerShiftFirst<Caller, detail::ArgUnshift<F, void *>>>
+	{
+	public:
+		FreeCaller() : BindFirstOpaque<CallerShiftFirst<Caller, detail::ArgUnshift<F, void *>>>( nullptr ){
+		}
+	};
+
+	template <class F>
+	struct freecallwrapper;
+
+	template <class R, class... Ts>
+	struct freecallwrapper<R(Ts...)>
+	{
+		using func = R(R(Ts...), Ts...);
+		static R call( R(*f)(Ts...), Ts... args ){
+			// ideally, we'd get the implementation of the function type directly. Instead, it's passed in
+			return f( args... );
+		}
+	};
+}
+
+/// \brief Forms a Callback from a free function
+template<class F, F *func>
+using FreeCaller = detail::FreeCaller<Function<F, func>, F>;
+
+template<class F>
+inline Callback<F> makeCallbackF( F *func ){
+	// illegal cast
+	return Callback<F>( reinterpret_cast<void *>( func ), BindFirstOpaque<detail::freecallwrapper<F>>::thunk );
+}
+
+// todo: remove
 
 using BoolImportCallback = Callback<void(bool)>;
 using BoolExportCallback = Callback<void(const BoolImportCallback&)>;

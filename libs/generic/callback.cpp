@@ -152,10 +152,8 @@ public:
 
 void test0free(){
 }
-typedef FreeCaller<void(), &test0free> Test0FreeCaller;
 void test1free( A1 ){
 }
-typedef FreeCaller<void(A1), &test1free> Test1FreeCaller;
 void test2free( A1, A2 ){
 }
 typedef Function<void(A1, A2), &test2free> Test2Free;
@@ -208,7 +206,7 @@ void instantiate(){
 	Test test;
 	const Test& testconst = test;
 	{
-		Callback<void()> a = Test0FreeCaller();
+		Callback<void()> a = makeCallbackF( test0free );
 		Callback<void()> b = Test::Test0Caller( test );
 		b = makeCallback( Test::Test0(), test );
 		Callback<void()> c = Test::Test0ConstCaller( testconst );
@@ -222,7 +220,7 @@ void instantiate(){
 	}
 	{
 		typedef Callback<void(A1)> TestCallback1;
-		TestCallback1 a = Test1FreeCaller();
+		TestCallback1 a = makeCallbackF( test1free );
 		TestCallback1 b = Test::Test1Caller( test );
 		b = makeCallback( Test::Test1(), test );
 		TestCallback1 c = Test::Test1ConstCaller( testconst );

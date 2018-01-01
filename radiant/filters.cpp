@@ -217,8 +217,8 @@ void Filters_constructMenu( QMenu* menu ){
 void ConstructFilters(){
 	GlobalPreferenceSystem().registerPreference( "SI_Exclude", SizeImportStringCaller( g_filters_globals.exclude ), SizeExportStringCaller( g_filters_globals.exclude ) );
 
-	GlobalCommands_insert( "InvertFilters", FreeCaller<void(), InvertFilters>() );
-	GlobalCommands_insert( "ResetFilters", FreeCaller<void(), ResetFilters>() );
+	GlobalCommands_insert( "InvertFilters", makeCallbackF( InvertFilters ) );
+	GlobalCommands_insert( "ResetFilters", makeCallbackF( ResetFilters ) );
 
 	add_filter_command( EXCLUDE_WORLD, "FilterWorldBrushes", QKeySequence( "Alt+1" ) );
 	add_filter_command( EXCLUDE_ENT, "FilterEntities", QKeySequence( "Alt+2" ) );

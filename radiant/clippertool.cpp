@@ -186,13 +186,13 @@ void Clipper_constructPage( PreferenceGroup& group ){
 	Clipper_constructPreferences( page );
 }
 void Clipper_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Clipper_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( Clipper_constructPage ) );
 }
 
 void Clipper_registerCommands(){
-	GlobalCommands_insert( "ClipperClip", FreeCaller<void(), Clipper_doClip>(), QKeySequence( "Return" ) );
-	GlobalCommands_insert( "ClipperSplit", FreeCaller<void(), Clipper_doSplit>(), QKeySequence( "Shift+Return" ) );
-	GlobalCommands_insert( "ClipperFlip", FreeCaller<void(), Clipper_doFlip>(), QKeySequence( "Ctrl+Return" ) );
+	GlobalCommands_insert( "ClipperClip", makeCallbackF( Clipper_doClip ), QKeySequence( "Return" ) );
+	GlobalCommands_insert( "ClipperSplit", makeCallbackF( Clipper_doSplit ), QKeySequence( "Shift+Return" ) );
+	GlobalCommands_insert( "ClipperFlip", makeCallbackF( Clipper_doFlip ), QKeySequence( "Ctrl+Return" ) );
 }
 
 SignalHandlerId ClipperTool_boundsChanged;

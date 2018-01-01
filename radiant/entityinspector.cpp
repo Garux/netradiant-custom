@@ -1064,7 +1064,7 @@ class EntityInspectorDraw
 {
 	IdleDraw m_idleDraw;
 public:
-	EntityInspectorDraw() : m_idleDraw( FreeCaller<void(), EntityInspector_updateKeyValues>( ) ){
+	EntityInspectorDraw() : m_idleDraw( makeCallbackF( EntityInspector_updateKeyValues ) ){
 	}
 	void queueDraw(){
 		m_idleDraw.queueDraw();

@@ -174,7 +174,7 @@ void Autosave_constructPage( PreferenceGroup& group ){
 	Autosave_constructPreferences( page );
 }
 void Autosave_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Autosave_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( Autosave_constructPage ) );
 }
 
 

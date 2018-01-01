@@ -182,25 +182,25 @@ typedef FreeCaller<void(const IntImportCallback&), maxGridCoordPowerExport> maxG
 
 
 void Grid_registerCommands(){
-	GlobalCommands_insert( "GridDown", FreeCaller<void(), GridPrev>(), QKeySequence( "[" ) );
-	GlobalCommands_insert( "GridUp", FreeCaller<void(), GridNext>(), QKeySequence( "]" ) );
+	GlobalCommands_insert( "GridDown", makeCallbackF( GridPrev ), QKeySequence( "[" ) );
+	GlobalCommands_insert( "GridUp", makeCallbackF( GridNext ), QKeySequence( "]" ) );
 
-	GlobalCommands_insert( "ToggleGridSnap", FreeCaller<void(), ToggleGridSnap>() );
+	GlobalCommands_insert( "ToggleGridSnap", makeCallbackF(ToggleGridSnap) );
 
-	GlobalCommands_insert( "SetGrid0.125", FreeCaller<void(), setGridPower<GRIDPOWER_0125>>() );
-	GlobalCommands_insert( "SetGrid0.25", FreeCaller<void(), setGridPower<GRIDPOWER_025>>() );
-	GlobalCommands_insert( "SetGrid0.5", FreeCaller<void(), setGridPower<GRIDPOWER_05>>() );
-	GlobalCommands_insert( "SetGrid1", FreeCaller<void(), setGridPower<GRIDPOWER_1>>(), QKeySequence( "1" ) );
-	GlobalCommands_insert( "SetGrid2", FreeCaller<void(), setGridPower<GRIDPOWER_2>>(), QKeySequence( "2" ) );
-	GlobalCommands_insert( "SetGrid4", FreeCaller<void(), setGridPower<GRIDPOWER_4>>(), QKeySequence( "3" ) );
-	GlobalCommands_insert( "SetGrid8", FreeCaller<void(), setGridPower<GRIDPOWER_8>>(), QKeySequence( "4" ) );
-	GlobalCommands_insert( "SetGrid16", FreeCaller<void(), setGridPower<GRIDPOWER_16>>(), QKeySequence( "5" ) );
-	GlobalCommands_insert( "SetGrid32", FreeCaller<void(), setGridPower<GRIDPOWER_32>>(), QKeySequence( "6" ) );
-	GlobalCommands_insert( "SetGrid64", FreeCaller<void(), setGridPower<GRIDPOWER_64>>(), QKeySequence( "7" ) );
-	GlobalCommands_insert( "SetGrid128", FreeCaller<void(), setGridPower<GRIDPOWER_128>>(), QKeySequence( "8" ) );
-	GlobalCommands_insert( "SetGrid256", FreeCaller<void(), setGridPower<GRIDPOWER_256>>(), QKeySequence( "9" ) );
-	GlobalCommands_insert( "SetGrid512", FreeCaller<void(), setGridPower<GRIDPOWER_512>>() );
-	GlobalCommands_insert( "SetGrid1024", FreeCaller<void(), setGridPower<GRIDPOWER_1024>>() );
+	GlobalCommands_insert( "SetGrid0.125", makeCallbackF( setGridPower<GRIDPOWER_0125> ) );
+	GlobalCommands_insert( "SetGrid0.25", makeCallbackF( setGridPower<GRIDPOWER_025> ) );
+	GlobalCommands_insert( "SetGrid0.5", makeCallbackF( setGridPower<GRIDPOWER_05> ) );
+	GlobalCommands_insert( "SetGrid1", makeCallbackF( setGridPower<GRIDPOWER_1> ), QKeySequence( "1" ) );
+	GlobalCommands_insert( "SetGrid2", makeCallbackF( setGridPower<GRIDPOWER_2> ), QKeySequence( "2" ) );
+	GlobalCommands_insert( "SetGrid4", makeCallbackF( setGridPower<GRIDPOWER_4> ), QKeySequence( "3" ) );
+	GlobalCommands_insert( "SetGrid8", makeCallbackF( setGridPower<GRIDPOWER_8> ), QKeySequence( "4" ) );
+	GlobalCommands_insert( "SetGrid16", makeCallbackF( setGridPower<GRIDPOWER_16> ), QKeySequence( "5" ) );
+	GlobalCommands_insert( "SetGrid32", makeCallbackF( setGridPower<GRIDPOWER_32> ), QKeySequence( "6" ) );
+	GlobalCommands_insert( "SetGrid64", makeCallbackF( setGridPower<GRIDPOWER_64> ), QKeySequence( "7" ) );
+	GlobalCommands_insert( "SetGrid128", makeCallbackF( setGridPower<GRIDPOWER_128> ), QKeySequence( "8" ) );
+	GlobalCommands_insert( "SetGrid256", makeCallbackF( setGridPower<GRIDPOWER_256> ), QKeySequence( "9" ) );
+	GlobalCommands_insert( "SetGrid512", makeCallbackF( setGridPower<GRIDPOWER_512> ) );
+	GlobalCommands_insert( "SetGrid1024", makeCallbackF( setGridPower<GRIDPOWER_1024> ) );
 }
 
 
@@ -260,7 +260,7 @@ void Grid_constructPage( PreferenceGroup& group ){
 	Grid_constructPreferences( page );
 }
 void Grid_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Grid_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( Grid_constructPage ) );
 }
 
 void Grid_construct(){

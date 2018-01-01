@@ -2218,19 +2218,19 @@ typedef FreeCaller<void(const IntImportCallback&), MSAAExport> MSAAExportCaller;
 
 
 void XYShow_registerCommands(){
-	GlobalToggles_insert( "ShowSize2d", FreeCaller<void(), ToggleShowSizeInfo>(), ToggleItem::AddCallbackCaller( g_show_size_item ), QKeySequence( "J" ) );
-	GlobalToggles_insert( "ToggleCrosshairs", FreeCaller<void(), ToggleShowCrosshair>(), ToggleItem::AddCallbackCaller( g_show_crosshair_item ), QKeySequence( "Shift+X" ) );
-	GlobalToggles_insert( "ToggleGrid", FreeCaller<void(), ToggleShowGrid>(), ToggleItem::AddCallbackCaller( g_show_grid_item ), QKeySequence( "0" ) );
+	GlobalToggles_insert( "ShowSize2d", makeCallbackF( ToggleShowSizeInfo ), ToggleItem::AddCallbackCaller( g_show_size_item ), QKeySequence( "J" ) );
+	GlobalToggles_insert( "ToggleCrosshairs", makeCallbackF( ToggleShowCrosshair ), ToggleItem::AddCallbackCaller( g_show_crosshair_item ), QKeySequence( "Shift+X" ) );
+	GlobalToggles_insert( "ToggleGrid", makeCallbackF( ToggleShowGrid ), ToggleItem::AddCallbackCaller( g_show_grid_item ), QKeySequence( "0" ) );
 
-	GlobalToggles_insert( "ShowAngles", FreeCaller<void(), ShowAnglesToggle>(), ToggleItem::AddCallbackCaller( g_show_angles ) );
-	GlobalToggles_insert( "ShowNames", FreeCaller<void(), ShowNamesToggle>(), ToggleItem::AddCallbackCaller( g_show_names ) );
-	GlobalToggles_insert( "ShowBboxes", FreeCaller<void(), ShowBboxesToggle>(), ToggleItem::AddCallbackCaller( g_show_bboxes ) );
-	GlobalToggles_insert( "ShowConnections", FreeCaller<void(), ShowConnectionsToggle>(), ToggleItem::AddCallbackCaller( g_show_connections ) );
-	GlobalToggles_insert( "ShowBlocks", FreeCaller<void(), ShowBlocksToggle>(), ToggleItem::AddCallbackCaller( g_show_blocks ) );
-	GlobalToggles_insert( "ShowCoordinates", FreeCaller<void(), ShowCoordinatesToggle>(), ToggleItem::AddCallbackCaller( g_show_coordinates ) );
-	GlobalToggles_insert( "ShowWindowOutline", FreeCaller<void(), ShowOutlineToggle>(), ToggleItem::AddCallbackCaller( g_show_outline ) );
-	GlobalToggles_insert( "ShowAxes", FreeCaller<void(), ShowAxesToggle>(), ToggleItem::AddCallbackCaller( g_show_axes ) );
-	GlobalToggles_insert( "ShowWorkzone2d", FreeCaller<void(), ShowWorkzoneToggle>(), ToggleItem::AddCallbackCaller( g_show_workzone ) );
+	GlobalToggles_insert( "ShowAngles", makeCallbackF( ShowAnglesToggle ), ToggleItem::AddCallbackCaller( g_show_angles ) );
+	GlobalToggles_insert( "ShowNames", makeCallbackF( ShowNamesToggle ), ToggleItem::AddCallbackCaller( g_show_names ) );
+	GlobalToggles_insert( "ShowBboxes", makeCallbackF( ShowBboxesToggle ), ToggleItem::AddCallbackCaller( g_show_bboxes ) );
+	GlobalToggles_insert( "ShowConnections", makeCallbackF( ShowConnectionsToggle ), ToggleItem::AddCallbackCaller( g_show_connections ) );
+	GlobalToggles_insert( "ShowBlocks", makeCallbackF( ShowBlocksToggle ), ToggleItem::AddCallbackCaller( g_show_blocks ) );
+	GlobalToggles_insert( "ShowCoordinates", makeCallbackF( ShowCoordinatesToggle ), ToggleItem::AddCallbackCaller( g_show_coordinates ) );
+	GlobalToggles_insert( "ShowWindowOutline", makeCallbackF( ShowOutlineToggle ), ToggleItem::AddCallbackCaller( g_show_outline ) );
+	GlobalToggles_insert( "ShowAxes", makeCallbackF( ShowAxesToggle ), ToggleItem::AddCallbackCaller( g_show_axes ) );
+	GlobalToggles_insert( "ShowWorkzone2d", makeCallbackF( ShowWorkzoneToggle ), ToggleItem::AddCallbackCaller( g_show_workzone ) );
 }
 
 void XYWnd_registerShortcuts(){
@@ -2262,7 +2262,7 @@ void Orthographic_constructPage( PreferenceGroup& group ){
 	Orthographic_constructPreferences( page );
 }
 void Orthographic_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Orthographic_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( Orthographic_constructPage ) );
 }
 
 
@@ -2274,15 +2274,15 @@ void XYWindow_Construct(){
 	GlobalToggles_insert( "ToggleView", ToggleShown::ToggleCaller( g_xy_top_shown ), ToggleItem::AddCallbackCaller( g_xy_top_shown.m_item ) );
 	GlobalToggles_insert( "ToggleSideView", ToggleShown::ToggleCaller( g_yz_side_shown ), ToggleItem::AddCallbackCaller( g_yz_side_shown.m_item ) );
 	GlobalToggles_insert( "ToggleFrontView", ToggleShown::ToggleCaller( g_xz_front_shown ), ToggleItem::AddCallbackCaller( g_xz_front_shown.m_item ) );
-	GlobalCommands_insert( "NextView", FreeCaller<void(), XY_NextView>(), QKeySequence( "Ctrl+Tab" ) );
-	GlobalCommands_insert( "ZoomIn", FreeCaller<void(), XY_ZoomIn>(), QKeySequence( "Delete" ) );
-	GlobalCommands_insert( "ZoomOut", FreeCaller<void(), XY_ZoomOut>(), QKeySequence( "Insert" ) );
-	GlobalCommands_insert( "ViewTop", FreeCaller<void(), XY_Top>(), QKeySequence( Qt::Key_7 + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "ViewFront", FreeCaller<void(), XY_Front>(), QKeySequence( Qt::Key_1 + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "ViewSide", FreeCaller<void(), XY_Side>(), QKeySequence( Qt::Key_3 + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "Zoom100", FreeCaller<void(), XY_Zoom100>() );
-	GlobalCommands_insert( "CenterXYView", FreeCaller<void(), XY_Centralize>(), QKeySequence( "Ctrl+Shift+Tab" ) );
-	GlobalCommands_insert( "XYFocusOnSelected", FreeCaller<void(), XY_Focus>(), QKeySequence( "`" ) );
+	GlobalCommands_insert( "NextView", makeCallbackF( XY_NextView ), QKeySequence( "Ctrl+Tab" ) );
+	GlobalCommands_insert( "ZoomIn", makeCallbackF( XY_ZoomIn ), QKeySequence( "Delete" ) );
+	GlobalCommands_insert( "ZoomOut", makeCallbackF( XY_ZoomOut ), QKeySequence( "Insert" ) );
+	GlobalCommands_insert( "ViewTop", makeCallbackF( XY_Top ), QKeySequence( Qt::Key_7 + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "ViewFront", makeCallbackF( XY_Front ), QKeySequence( Qt::Key_1 + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "ViewSide", makeCallbackF( XY_Side ), QKeySequence( Qt::Key_3 + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "Zoom100", makeCallbackF( XY_Zoom100 ) );
+	GlobalCommands_insert( "CenterXYView", makeCallbackF( XY_Centralize ), QKeySequence( "Ctrl+Shift+Tab" ) );
+	GlobalCommands_insert( "XYFocusOnSelected", makeCallbackF( XY_Focus ), QKeySequence( "`" ) );
 
 	GlobalPreferenceSystem().registerPreference( "XYMSAA", IntImportStringCaller( g_xywindow_globals_private.m_MSAA ), IntExportStringCaller( g_xywindow_globals_private.m_MSAA ) );
 	GlobalPreferenceSystem().registerPreference( "2DZoomInToPointer", BoolImportStringCaller( g_xywindow_globals_private.m_bZoomToPointer ), BoolExportStringCaller( g_xywindow_globals_private.m_bZoomToPointer ) );

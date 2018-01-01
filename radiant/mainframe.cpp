@@ -418,7 +418,7 @@ void Paths_constructPage( PreferenceGroup& group ){
 
 }
 void Paths_registerPreferencesPage(){
-	PreferencesDialog_addGamePage( FreeCaller<void(PreferenceGroup&), Paths_constructPage>() );
+	PreferencesDialog_addGamePage( makeCallbackF( Paths_constructPage ) );
 }
 
 
@@ -926,7 +926,7 @@ void create_edit_menu( QMenuBar *menubar ){
 	create_menu_item_with_mnemonic( menu, "Select Connected Entities", "SelectConnectedEntities" );
 
 	menu->addSeparator();
-	create_menu_item_with_mnemonic( menu, "&Shortcuts...", FreeCaller<void(), DoCommandListDlg>() );
+	create_menu_item_with_mnemonic( menu, "&Shortcuts...", makeCallbackF( DoCommandListDlg ) );
 	create_menu_item_with_mnemonic( menu, "Pre&ferences...", "Preferences" );
 }
 
@@ -1149,13 +1149,13 @@ void create_misc_menu( QMenuBar *menubar ){
 
 	menu->setTearOffEnabled( g_Layout_enableDetachableMenus.m_value );
 #if 0
-	create_menu_item_with_mnemonic( menu, "&Benchmark", FreeCaller<void(), GlobalCamera_Benchmark>() );
+	create_menu_item_with_mnemonic( menu, "&Benchmark", makeCallbackF( GlobalCamera_Benchmark ) );
 #endif
 	create_colours_menu( menu );
 
 	create_menu_item_with_mnemonic( menu, "Find brush...", "FindBrush" );
 	create_menu_item_with_mnemonic( menu, "Map Info...", "MapInfo" );
-	create_menu_item_with_mnemonic( menu, "Set 2D &Background image...", FreeCaller<void(), WXY_SetBackgroundImage>() );
+	create_menu_item_with_mnemonic( menu, "Set 2D &Background image...", makeCallbackF( WXY_SetBackgroundImage ) );
 	create_menu_item_with_mnemonic( menu, "Fullscreen", "Fullscreen" );
 	create_menu_item_with_mnemonic( menu, "Maximize view", "MaximizeView" );
 }
@@ -1199,9 +1199,9 @@ void create_help_menu( QMenuBar *menubar ){
 	// it will take care of hooking the Sys_OpenURL calls etc.
 	create_game_help_menu( menu );
 
-	create_menu_item_with_mnemonic( menu, "Bug report", FreeCaller<void(), OpenBugReportURL>() );
+	create_menu_item_with_mnemonic( menu, "Bug report", makeCallbackF( OpenBugReportURL ) );
 	create_menu_item_with_mnemonic( menu, "Check for NetRadiant update", "CheckForUpdate" ); // FIXME
-	create_menu_item_with_mnemonic( menu, "&About", FreeCaller<void(), DoAbout>() );
+	create_menu_item_with_mnemonic( menu, "&About", makeCallbackF( DoAbout ) );
 }
 
 void create_main_menu( QMenuBar *menubar, MainFrame::EViewStyle style ){
@@ -2010,7 +2010,7 @@ void Layout_constructPage( PreferenceGroup& group ){
 }
 
 void Layout_registerPreferencesPage(){
-	PreferencesDialog_addInterfacePage( FreeCaller<void(PreferenceGroup&), Layout_constructPage>() );
+	PreferencesDialog_addInterfacePage( makeCallbackF( Layout_constructPage ) );
 }
 
 
@@ -2023,32 +2023,32 @@ void FocusAllViews(){
 #include "stringio.h"
 
 void MainFrame_Construct(){
-	GlobalCommands_insert( "OpenManual", FreeCaller<void(), OpenHelpURL>(), QKeySequence( "F1" ) );
+	GlobalCommands_insert( "OpenManual", makeCallbackF( OpenHelpURL ), QKeySequence( "F1" ) );
 
-	GlobalCommands_insert( "RefreshReferences", FreeCaller<void(), RefreshReferences>() );
-	GlobalCommands_insert( "CheckForUpdate", FreeCaller<void(), OpenUpdateURL>() );
-	GlobalCommands_insert( "Exit", FreeCaller<void(), Exit>() );
+	GlobalCommands_insert( "RefreshReferences", makeCallbackF( RefreshReferences ) );
+	GlobalCommands_insert( "CheckForUpdate", makeCallbackF( OpenUpdateURL ) );
+	GlobalCommands_insert( "Exit", makeCallbackF( Exit ) );
 
-	GlobalCommands_insert( "Preferences", FreeCaller<void(), PreferencesDialog_showDialog>(), QKeySequence( "P" ) );
+	GlobalCommands_insert( "Preferences", makeCallbackF( PreferencesDialog_showDialog ), QKeySequence( "P" ) );
 
-	GlobalCommands_insert( "ToggleConsole", FreeCaller<void(), Console_ToggleShow>(), QKeySequence( "O" ) );
-	GlobalCommands_insert( "ToggleEntityInspector", FreeCaller<void(), EntityInspector_ToggleShow>(), QKeySequence( "N" ) );
-	GlobalCommands_insert( "ToggleModelBrowser", FreeCaller<void(), ModelBrowser_ToggleShow>(), QKeySequence( "/" ) );
-	GlobalCommands_insert( "EntityList", FreeCaller<void(), EntityList_toggleShown>(), QKeySequence( "L" ) );
+	GlobalCommands_insert( "ToggleConsole", makeCallbackF( Console_ToggleShow ), QKeySequence( "O" ) );
+	GlobalCommands_insert( "ToggleEntityInspector", makeCallbackF( EntityInspector_ToggleShow ), QKeySequence( "N" ) );
+	GlobalCommands_insert( "ToggleModelBrowser", makeCallbackF( ModelBrowser_ToggleShow ), QKeySequence( "/" ) );
+	GlobalCommands_insert( "EntityList", makeCallbackF( EntityList_toggleShown ), QKeySequence( "L" ) );
 
 	Select_registerCommands();
 
 	Tools_registerCommands();
 
-	GlobalCommands_insert( "BuildMenuCustomize", FreeCaller<void(), DoBuildMenu>() );
-	GlobalCommands_insert( "Build_runRecentExecutedBuild", FreeCaller<void(), Build_runRecentExecutedBuild>(), QKeySequence( "F5" ) );
+	GlobalCommands_insert( "BuildMenuCustomize", makeCallbackF( DoBuildMenu ) );
+	GlobalCommands_insert( "Build_runRecentExecutedBuild", makeCallbackF( Build_runRecentExecutedBuild ), QKeySequence( "F5" ) );
 
-	GlobalCommands_insert( "OpenGLFont", FreeCaller<void(), OpenGLFont_select>() );
+	GlobalCommands_insert( "OpenGLFont", makeCallbackF( OpenGLFont_select ) );
 
 	Colors_registerCommands();
 
-	GlobalCommands_insert( "Fullscreen", FreeCaller<void(), MainFrame_toggleFullscreen>(), QKeySequence( "F11" ) );
-	GlobalCommands_insert( "MaximizeView", FreeCaller<void(), Maximize_View>(), QKeySequence( "F12" ) );
+	GlobalCommands_insert( "Fullscreen", makeCallbackF( MainFrame_toggleFullscreen ), QKeySequence( "F11" ) );
+	GlobalCommands_insert( "MaximizeView", makeCallbackF( Maximize_View ), QKeySequence( "F12" ) );
 
 	CSG_registerCommands();
 
@@ -2090,9 +2090,9 @@ void MainFrame_Construct(){
 	Layout_registerPreferencesPage();
 	Paths_registerPreferencesPage();
 
-	g_brushCount.setCountChangedCallback( FreeCaller<void(), QE_brushCountChanged>() );
-	g_patchCount.setCountChangedCallback( FreeCaller<void(), QE_brushCountChanged>() );
-	g_entityCount.setCountChangedCallback( FreeCaller<void(), QE_brushCountChanged>() );
+	g_brushCount.setCountChangedCallback( makeCallbackF( QE_brushCountChanged ) );
+	g_patchCount.setCountChangedCallback( makeCallbackF( QE_brushCountChanged ) );
+	g_entityCount.setCountChangedCallback( makeCallbackF( QE_brushCountChanged ) );
 	GlobalEntityCreator().setCounter( &g_entityCount );
 	GlobalSelectionSystem().addSelectionChangeCallback( FreeCaller<void(const Selectable&), brushCountChanged>() );
 

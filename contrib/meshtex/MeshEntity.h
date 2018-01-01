@@ -119,7 +119,7 @@ public: // public types
     */
    template<typename ObjectClass, void (ObjectClass::*member)(float, float)>
    class TexInfoCallbackMethod :
-      public BindFirstOpaque<Member2<ObjectClass, float, float, void, member> >
+      public BindFirstOpaque<Member<ObjectClass, void(float, float), member> >
    {
    public:
       /**
@@ -128,7 +128,7 @@ public: // public types
        * @param object The object on which to invoke the callback method.
        */
       TexInfoCallbackMethod(ObjectClass& object) :
-         BindFirstOpaque<Member2<ObjectClass, float, float, void, member> >(object) {}
+         BindFirstOpaque<Member<ObjectClass, void(float, float), member> >(object) {}
    };
 
 public: // public methods

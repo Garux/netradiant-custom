@@ -1586,10 +1586,10 @@ void CSG_Tool(){
 #include "commands.h"
 
 void CSG_registerCommands(){
-	GlobalCommands_insert( "CSGSubtract", FreeCaller<void(), CSG_Subtract>(), QKeySequence( "Shift+U" ) );
-	GlobalCommands_insert( "CSGMerge", FreeCaller<void(), CSG_Merge>() );
+	GlobalCommands_insert( "CSGSubtract", makeCallbackF( CSG_Subtract ), QKeySequence( "Shift+U" ) );
+	GlobalCommands_insert( "CSGMerge", makeCallbackF( CSG_Merge ) );
 	GlobalCommands_insert( "CSGWrapMerge", FreeCaller<void(), CSG_WrapMerge>(), QKeySequence( "Ctrl+U" ) );
-	GlobalCommands_insert( "CSGIntersect", FreeCaller<void(), CSG_Intersect>(), QKeySequence( "Ctrl+Shift+U" ) );
-	GlobalCommands_insert( "CSGroom", FreeCaller<void(), CSG_MakeRoom>() );
-	GlobalCommands_insert( "CSGTool", FreeCaller<void(), CSG_Tool>() );
+	GlobalCommands_insert( "CSGIntersect", makeCallbackF( CSG_Intersect ), QKeySequence( "Ctrl+Shift+U" ) );
+	GlobalCommands_insert( "CSGroom", makeCallbackF( CSG_MakeRoom ) );
+	GlobalCommands_insert( "CSGTool", makeCallbackF( CSG_Tool ) );
 }

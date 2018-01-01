@@ -138,7 +138,7 @@ void create_plugins_menu( QMenuBar *menubar ){
 
 	//TODO: some modules/plugins do not yet support refresh
 #if 0
-	create_menu_item_with_mnemonic( menu, "Refresh", FreeCaller<void(), Restart>() );
+	create_menu_item_with_mnemonic( menu, "Refresh", makeCallbackF( Restart ) );
 
 	// NOTE: the separator is used when doing a refresh of the list, everything past the separator is removed
 	g_plugins_menu_separator = menu_separator( menu );

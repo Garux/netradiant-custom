@@ -607,7 +607,7 @@ public:
 };
 
 void PrefsDlg::BuildDialog(){
-	PreferencesDialog_addInterfacePreferences( FreeCaller<void(PreferencesPage&), Interface_constructPreferences>() );
+	PreferencesDialog_addInterfacePreferences( makeCallbackF( Interface_constructPreferences ) );
 
 	GetWidget()->setWindowTitle( "NetRadiant Preferences" );
 

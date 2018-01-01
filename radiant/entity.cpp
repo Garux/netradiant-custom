@@ -674,7 +674,7 @@ void Entity_constructPage( PreferenceGroup& group ){
 	Entity_constructPreferences( page );
 }
 void Entity_registerPreferencesPage(){
-	PreferencesDialog_addDisplayPage( FreeCaller<void(PreferenceGroup&), Entity_constructPage>() );
+	PreferencesDialog_addDisplayPage( makeCallbackF( Entity_constructPage ) );
 }
 
 
@@ -718,17 +718,17 @@ void Entity_registerShortcuts(){
 #include "stringio.h"
 
 void Entity_Construct(){
-	GlobalCommands_insert( "EntityColorSet", FreeCaller<void(), Entity_setColour>(), QKeySequence( "K" ) );
-	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<void(), Entity_normalizeColor>() );
-	GlobalCommands_insert( "EntitiesConnect", FreeCaller<void(), Entity_connectSelected>(), QKeySequence( "Ctrl+K" ) );
+	GlobalCommands_insert( "EntityColorSet", makeCallbackF( Entity_setColour ), QKeySequence( "K" ) );
+	GlobalCommands_insert( "EntityColorNormalize", makeCallbackF( Entity_normalizeColor ) );
+	GlobalCommands_insert( "EntitiesConnect", makeCallbackF( Entity_connectSelected ), QKeySequence( "Ctrl+K" ) );
 	if ( game_has_killConnect() )
-		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<void(), Entity_killconnectSelected>(), QKeySequence( "Shift+K" ) );
-	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<void(), Entity_moveSelectedPrimitivesToLast>(), QKeySequence( "Ctrl+M" ) );
-	GlobalCommands_insert( "EntityMovePrimitivesToFirst", FreeCaller<void(), Entity_moveSelectedPrimitivesToFirst>() );
-	GlobalCommands_insert( "EntityUngroup", FreeCaller<void(), Entity_ungroup>() );
-	GlobalCommands_insert( "EntityUngroupPrimitives", FreeCaller<void(), Entity_ungroupSelectedPrimitives>() );
+		GlobalCommands_insert( "EntitiesKillConnect", makeCallbackF( Entity_killconnectSelected ), QKeySequence( "Shift+K" ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToLast", makeCallbackF( Entity_moveSelectedPrimitivesToLast ), QKeySequence( "Ctrl+M" ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToFirst", makeCallbackF( Entity_moveSelectedPrimitivesToFirst ) );
+	GlobalCommands_insert( "EntityUngroup", makeCallbackF( Entity_ungroup ) );
+	GlobalCommands_insert( "EntityUngroupPrimitives", makeCallbackF( Entity_ungroupSelectedPrimitives ) );
 
-	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<void(), ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
+	GlobalToggles_insert( "ShowLightRadiuses", makeCallbackF( ToggleShowLightRadii ), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
 
 	GlobalPreferenceSystem().registerPreference( "SI_Colors5", Vector3ImportStringCaller( g_entity_globals.color_entity ), Vector3ExportStringCaller( g_entity_globals.color_entity ) );
 	GlobalPreferenceSystem().registerPreference( "LastLightIntensity", IntImportStringCaller( g_iLastLightIntensity ), IntExportStringCaller( g_iLastLightIntensity ) );

@@ -1355,7 +1355,7 @@ void ModelBrowser_constructPage( PreferenceGroup& group ){
 	                  StringExportCallback( StringExportCaller( g_ModelBrowser.m_prefFoldersToLoad ) ) );
 }
 void ModelBrowser_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), ModelBrowser_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( ModelBrowser_constructPage ) );
 }
 
 void ModelBrowser_Construct(){

@@ -1468,8 +1468,8 @@ void Texdef_ToggleMoveVLock(){
 
 
 void Brush_registerCommands(){
-	GlobalToggles_insert( "TogTexLock", FreeCaller<void(), Texdef_ToggleMoveLock>(), ToggleItem::AddCallbackCaller( g_texdef_movelock_item ), QKeySequence( "Shift+T" ) );
-	GlobalToggles_insert( "TogTexVertexLock", FreeCaller<void(), Texdef_ToggleMoveVLock>(), ToggleItem::AddCallbackCaller( g_texdef_moveVlock_item ) );
+	GlobalToggles_insert( "TogTexLock", makeCallbackF( Texdef_ToggleMoveLock ), ToggleItem::AddCallbackCaller( g_texdef_movelock_item ), QKeySequence( "Shift+T" ) );
+	GlobalToggles_insert( "TogTexVertexLock", makeCallbackF( Texdef_ToggleMoveVLock ), ToggleItem::AddCallbackCaller( g_texdef_moveVlock_item ) );
 
 	GlobalCommands_insert( "BrushPrism", BrushPrefab::SetCaller( g_brushprism ) );
 	GlobalCommands_insert( "BrushCone", BrushPrefab::SetCaller( g_brushcone ) );
@@ -1485,8 +1485,8 @@ void Brush_registerCommands(){
 	GlobalCommands_insert( "Brush8Sided", BrushMakeSided::SetCaller( g_brushmakesided8 ), QKeySequence( "Ctrl+8" ) );
 	GlobalCommands_insert( "Brush9Sided", BrushMakeSided::SetCaller( g_brushmakesided9 ), QKeySequence( "Ctrl+9" ) );
 
-	GlobalCommands_insert( "MakeDetail", FreeCaller<void(), Select_MakeDetail>(), QKeySequence( "Alt+D" ) );
-	GlobalCommands_insert( "MakeStructural", FreeCaller<void(), Select_MakeStructural>(), QKeySequence( "Alt+S" ) );
+	GlobalCommands_insert( "MakeDetail", makeCallbackF( Select_MakeDetail ), QKeySequence( "Alt+D" ) );
+	GlobalCommands_insert( "MakeStructural", makeCallbackF( Select_MakeStructural ), QKeySequence( "Alt+S" ) );
 }
 
 void Brush_constructMenu( QMenu* menu ){

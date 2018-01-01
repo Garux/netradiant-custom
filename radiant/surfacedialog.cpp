@@ -1743,23 +1743,23 @@ void SurfaceInspector_constructPage( PreferenceGroup& group ){
 	SurfaceInspector_constructPreferences( page );
 }
 void SurfaceInspector_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), SurfaceInspector_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( SurfaceInspector_constructPage ) );
 }
 
 void SurfaceInspector_registerCommands(){
-	GlobalCommands_insert( "TextureReset/Cap", FreeCaller<void(), SurfaceInspector_ResetTexture>(), QKeySequence( "Shift+N" ) );
-	GlobalCommands_insert( "FitTexture", FreeCaller<void(), SurfaceInspector_FitTexture>(), QKeySequence( "Ctrl+F" ) );
-	GlobalCommands_insert( "FitTextureWidth", FreeCaller<void(), SurfaceInspector_FaceFitWidth>() );
-	GlobalCommands_insert( "FitTextureHeight", FreeCaller<void(), SurfaceInspector_FaceFitHeight>() );
-	GlobalCommands_insert( "FitTextureWidthOnly", FreeCaller<void(), SurfaceInspector_FaceFitWidthOnly>() );
-	GlobalCommands_insert( "FitTextureHeightOnly", FreeCaller<void(), SurfaceInspector_FaceFitHeightOnly>() );
-	GlobalCommands_insert( "TextureProjectAxial", FreeCaller<void(), SurfaceInspector_ProjectTexture_eProjectAxial>() );
-	GlobalCommands_insert( "TextureProjectOrtho", FreeCaller<void(), SurfaceInspector_ProjectTexture_eProjectOrtho>() );
-	GlobalCommands_insert( "TextureProjectCam", FreeCaller<void(), SurfaceInspector_ProjectTexture_eProjectCam>() );
-	GlobalCommands_insert( "SurfaceInspector", FreeCaller<void(), SurfaceInspector_toggleShown>(), QKeySequence( "S" ) );
+	GlobalCommands_insert( "TextureReset/Cap", makeCallbackF( SurfaceInspector_ResetTexture ), QKeySequence( "Shift+N" ) );
+	GlobalCommands_insert( "FitTexture", makeCallbackF( SurfaceInspector_FitTexture ), QKeySequence( "Ctrl+F" ) );
+	GlobalCommands_insert( "FitTextureWidth", makeCallbackF( SurfaceInspector_FaceFitWidth ) );
+	GlobalCommands_insert( "FitTextureHeight", makeCallbackF( SurfaceInspector_FaceFitHeight ) );
+	GlobalCommands_insert( "FitTextureWidthOnly", makeCallbackF( SurfaceInspector_FaceFitWidthOnly ) );
+	GlobalCommands_insert( "FitTextureHeightOnly", makeCallbackF( SurfaceInspector_FaceFitHeightOnly ) );
+	GlobalCommands_insert( "TextureProjectAxial", makeCallbackF( SurfaceInspector_ProjectTexture_eProjectAxial ) );
+	GlobalCommands_insert( "TextureProjectOrtho", makeCallbackF( SurfaceInspector_ProjectTexture_eProjectOrtho ) );
+	GlobalCommands_insert( "TextureProjectCam", makeCallbackF( SurfaceInspector_ProjectTexture_eProjectCam ) );
+	GlobalCommands_insert( "SurfaceInspector", makeCallbackF( SurfaceInspector_toggleShown ), QKeySequence( "S" ) );
 
-//	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<void(), SelectedFaces_copyTexture>() );
-//	GlobalCommands_insert( "FacePasteTexture", FreeCaller<void(), SelectedFaces_pasteTexture>() );
+//	GlobalCommands_insert( "FaceCopyTexture", makeCallbackF( SelectedFaces_copyTexture ) );
+//	GlobalCommands_insert( "FacePasteTexture", makeCallbackF( SelectedFaces_pasteTexture ) );
 }
 
 

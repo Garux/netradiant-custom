@@ -471,7 +471,7 @@ struct ModelResource final : public Resource
 	void connectMap(){
 		MapFile* map = Node_getMapFile( m_model );
 		if ( map != 0 ) {
-			map->setChangedCallback( FreeCaller<void(), MapChanged>() );
+			map->setChangedCallback( makeCallbackF( MapChanged ) );
 		}
 	}
 	std::time_t modified() const {

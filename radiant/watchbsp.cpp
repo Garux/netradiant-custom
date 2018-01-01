@@ -252,7 +252,7 @@ void Build_constructPage( PreferenceGroup& group ){
 	Build_constructPreferences( page );
 }
 void Build_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Build_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( Build_constructPage ) );
 }
 
 #include "preferencesystem.h"

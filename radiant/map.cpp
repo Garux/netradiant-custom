@@ -2383,28 +2383,28 @@ CopiedString g_strLastMap;
 bool g_bLoadLastMap = true;
 
 void Map_Construct(){
-	GlobalCommands_insert( "NewMap", FreeCaller<void(), NewMap>() );
-	GlobalCommands_insert( "OpenMap", FreeCaller<void(), OpenMap>(), QKeySequence( "Ctrl+O" ) );
-	GlobalCommands_insert( "ImportMap", FreeCaller<void(), ImportMap>() );
-	GlobalCommands_insert( "SaveMap", FreeCaller<void(), SaveMap>(), QKeySequence( "Ctrl+S" ) );
-	GlobalCommands_insert( "SaveMapAs", FreeCaller<void(), SaveMapAs>() );
-	GlobalCommands_insert( "SaveSelected", FreeCaller<void(), ExportMap>() );
-	GlobalCommands_insert( "SaveRegion", FreeCaller<void(), SaveRegion>() );
+	GlobalCommands_insert( "NewMap", makeCallbackF( NewMap ) );
+	GlobalCommands_insert( "OpenMap", makeCallbackF( OpenMap ), QKeySequence( "Ctrl+O" ) );
+	GlobalCommands_insert( "ImportMap", makeCallbackF( ImportMap ) );
+	GlobalCommands_insert( "SaveMap", makeCallbackF( SaveMap ), QKeySequence( "Ctrl+S" ) );
+	GlobalCommands_insert( "SaveMapAs", makeCallbackF( SaveMapAs ) );
+	GlobalCommands_insert( "SaveSelected", makeCallbackF( ExportMap ) );
+	GlobalCommands_insert( "SaveRegion", makeCallbackF( SaveRegion ) );
 
-	GlobalCommands_insert( "RegionOff", FreeCaller<void(), RegionOff>() );
-	GlobalCommands_insert( "RegionSetXY", FreeCaller<void(), RegionXY>() );
-	GlobalCommands_insert( "RegionSetBrush", FreeCaller<void(), RegionBrush>() );
-	//GlobalCommands_insert( "RegionSetSelection", FreeCaller<void(), RegionSelected>(), QKeySequence( "Ctrl+Shift+R" ) );
-	GlobalToggles_insert( "RegionSetSelection", FreeCaller<void(), RegionSelected>(), ToggleItem::AddCallbackCaller( g_region_item ), QKeySequence( "Ctrl+Shift+R" ) );
-	GlobalCommands_insert( "AutoCaulkSelected", FreeCaller<void(), map_autocaulk_selected>(), QKeySequence( "F4" ) );
+	GlobalCommands_insert( "RegionOff", makeCallbackF( RegionOff ) );
+	GlobalCommands_insert( "RegionSetXY", makeCallbackF( RegionXY ) );
+	GlobalCommands_insert( "RegionSetBrush", makeCallbackF( RegionBrush ) );
+	//GlobalCommands_insert( "RegionSetSelection", makeCallbackF( RegionSelected ), QKeySequence( "Ctrl+Shift+R" ) );
+	GlobalToggles_insert( "RegionSetSelection", makeCallbackF( RegionSelected ), ToggleItem::AddCallbackCaller( g_region_item ), QKeySequence( "Ctrl+Shift+R" ) );
+	GlobalCommands_insert( "AutoCaulkSelected", makeCallbackF( map_autocaulk_selected ), QKeySequence( "F4" ) );
 
-	GlobalCommands_insert( "FindBrush", FreeCaller<void(), DoFind>() );
-	GlobalCommands_insert( "MapInfo", FreeCaller<void(), DoMapInfo>(), QKeySequence( "M" ) );
+	GlobalCommands_insert( "FindBrush", makeCallbackF( DoFind ) );
+	GlobalCommands_insert( "MapInfo", makeCallbackF( DoMapInfo ), QKeySequence( "M" ) );
 
 	GlobalPreferenceSystem().registerPreference( "LastMap", CopiedStringImportStringCaller( g_strLastMap ), CopiedStringExportStringCaller( g_strLastMap ) );
 	GlobalPreferenceSystem().registerPreference( "LoadLastMap", BoolImportStringCaller( g_bLoadLastMap ), BoolExportStringCaller( g_bLoadLastMap ) );
 
-	PreferencesDialog_addSettingsPreferences( FreeCaller<void(PreferencesPage&), Map_constructPreferences>() );
+	PreferencesDialog_addSettingsPreferences( makeCallbackF( Map_constructPreferences ) );
 
 	GlobalEntityClassManager().attach( g_MapEntityClasses );
 	Radiant_attachHomePathsObserver( g_MapModuleObserver );

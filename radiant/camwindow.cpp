@@ -1899,14 +1899,12 @@ public:
 void ShowStatsToggle(){
 	g_camwindow_globals_private.m_showStats ^= 1;
 }
-typedef FreeCaller<void(), ShowStatsToggle> ShowStatsToggleCaller;
 
 void ShowStatsExport( const BoolImportCallback& importer ){
 	importer( g_camwindow_globals_private.m_showStats );
 }
-typedef FreeCaller<void(const BoolImportCallback&), ShowStatsExport> ShowStatsExportCaller;
 
-ShowStatsExportCaller g_show_stats_caller;
+FreeCaller<void(const BoolImportCallback&), ShowStatsExport> g_show_stats_caller;
 BoolExportCallback g_show_stats_callback( g_show_stats_caller );
 ToggleItem g_show_stats( g_show_stats_callback );
 */
@@ -2461,7 +2459,7 @@ void Camera_constructPage( PreferenceGroup& group ){
 	Camera_constructPreferences( page );
 }
 void Camera_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Camera_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( Camera_constructPage ) );
 }
 
 #include "preferencesystem.h"
@@ -2484,29 +2482,29 @@ void CameraSpeed_decrease(){
 
 /// \brief Initialisation for things that have the same lifespan as this module.
 void CamWnd_Construct(){
-	GlobalCommands_insert( "CenterView", FreeCaller<void(), GlobalCamera_ResetAngles>(), QKeySequence( "End" ) );
-	GlobalCommands_insert( "CameraFocusOnSelected", FreeCaller<void(), GlobalCamera_FocusOnSelected>(), QKeySequence( "Tab" ) );
+	GlobalCommands_insert( "CenterView", makeCallbackF( GlobalCamera_ResetAngles ), QKeySequence( "End" ) );
+	GlobalCommands_insert( "CameraFocusOnSelected", makeCallbackF( GlobalCamera_FocusOnSelected ), QKeySequence( "Tab" ) );
 
-	GlobalToggles_insert( "ToggleCubicClip", FreeCaller<void(), Camera_ToggleFarClip>(), ToggleItem::AddCallbackCaller( g_getfarclip_item ), QKeySequence( "Ctrl+\\" ) );
-	GlobalCommands_insert( "CubicClipZoomIn", FreeCaller<void(), Camera_CubeIn>(), QKeySequence( "Ctrl+[" ) );
-	GlobalCommands_insert( "CubicClipZoomOut", FreeCaller<void(), Camera_CubeOut>(), QKeySequence( "Ctrl+]" ) );
+	GlobalToggles_insert( "ToggleCubicClip", makeCallbackF( Camera_ToggleFarClip ), ToggleItem::AddCallbackCaller( g_getfarclip_item ), QKeySequence( "Ctrl+\\" ) );
+	GlobalCommands_insert( "CubicClipZoomIn", makeCallbackF( Camera_CubeIn ), QKeySequence( "Ctrl+[" ) );
+	GlobalCommands_insert( "CubicClipZoomOut", makeCallbackF( Camera_CubeOut ), QKeySequence( "Ctrl+]" ) );
 
-	GlobalCommands_insert( "UpFloor", FreeCaller<void(), Camera_ChangeFloorUp>(), QKeySequence( "PgUp" ) );
-	GlobalCommands_insert( "DownFloor", FreeCaller<void(), Camera_ChangeFloorDown>(), QKeySequence( "PgDown" ) );
+	GlobalCommands_insert( "UpFloor", makeCallbackF( Camera_ChangeFloorUp ), QKeySequence( "PgUp" ) );
+	GlobalCommands_insert( "DownFloor", makeCallbackF( Camera_ChangeFloorDown ), QKeySequence( "PgDown" ) );
 
 	GlobalToggles_insert( "ToggleCamera", ToggleShown::ToggleCaller( g_camera_shown ), ToggleItem::AddCallbackCaller( g_camera_shown.m_item ), QKeySequence( "Ctrl+Shift+C" ) );
-//	GlobalCommands_insert( "LookThroughSelected", FreeCaller<void(), GlobalCamera_LookThroughSelected>() );
-//	GlobalCommands_insert( "LookThroughCamera", FreeCaller<void(), GlobalCamera_LookThroughCamera>() );
+//	GlobalCommands_insert( "LookThroughSelected", makeCallbackF( GlobalCamera_LookThroughSelected ) );
+//	GlobalCommands_insert( "LookThroughCamera", makeCallbackF( GlobalCamera_LookThroughCamera ) );
 
 	if ( g_pGameDescription->mGameType == "doom3" ) {
-		GlobalCommands_insert( "TogglePreview", FreeCaller<void(), CamWnd_TogglePreview>(), QKeySequence( "F3" ) );
+		GlobalCommands_insert( "TogglePreview", makeCallbackF( CamWnd_TogglePreview ), QKeySequence( "F3" ) );
 	}
 
-	GlobalCommands_insert( "CameraModeNext", FreeCaller<void(), CameraModeNext>(), QKeySequence( "Shift+]" ) );
-	GlobalCommands_insert( "CameraModePrev", FreeCaller<void(), CameraModePrev>(), QKeySequence( "Shift+[" ) );
+	GlobalCommands_insert( "CameraModeNext", makeCallbackF( CameraModeNext ), QKeySequence( "Shift+]" ) );
+	GlobalCommands_insert( "CameraModePrev", makeCallbackF( CameraModePrev ), QKeySequence( "Shift+[" ) );
 
-	GlobalCommands_insert( "CameraSpeedInc", FreeCaller<void(), CameraSpeed_increase>(), QKeySequence( Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "CameraSpeedDec", FreeCaller<void(), CameraSpeed_decrease>(), QKeySequence( Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedInc", makeCallbackF( CameraSpeed_increase ), QKeySequence( Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "CameraSpeedDec", makeCallbackF( CameraSpeed_decrease ), QKeySequence( Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
 
 	GlobalShortcuts_insert( "CameraForward", QKeySequence( "Up" ) );
 	GlobalShortcuts_insert( "CameraBack", QKeySequence( "Down" ) );
@@ -2535,9 +2533,9 @@ void CamWnd_Construct(){
 
 	GlobalShortcuts_insert( "CameraFreeFocus", QKeySequence( "Tab" ) );
 
-	GlobalToggles_insert( "ShowStats", FreeCaller<void(), ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
-	GlobalToggles_insert( "ShowWorkzone3d", FreeCaller<void(), ShowWorkzone3dToggle>(), ToggleItem::AddCallbackCaller( g_show_workzone3d ) );
-	GlobalToggles_insert( "ShowSize3d", FreeCaller<void(), ShowSize3dToggle>(), ToggleItem::AddCallbackCaller( g_show_size3d ) );
+	GlobalToggles_insert( "ShowStats", makeCallbackF( ShowStatsToggle ), ToggleItem::AddCallbackCaller( g_show_stats ) );
+	GlobalToggles_insert( "ShowWorkzone3d", makeCallbackF( ShowWorkzone3dToggle ), ToggleItem::AddCallbackCaller( g_show_workzone3d ) );
+	GlobalToggles_insert( "ShowSize3d", makeCallbackF( ShowSize3dToggle ), ToggleItem::AddCallbackCaller( g_show_size3d ) );
 
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
 	GlobalPreferenceSystem().registerPreference( "ShowWorkzone3d", BoolImportStringCaller( g_camwindow_globals_private.m_bShowWorkzone ), BoolExportStringCaller( g_camwindow_globals_private.m_bShowWorkzone ) );

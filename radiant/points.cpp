@@ -322,9 +322,9 @@ void Pointfile_Construct(){
 
 	GlobalShaderCache().attachRenderable( s_pointfile );
 
-	GlobalCommands_insert( "TogglePointfile", FreeCaller<void(), Pointfile_Toggle>() );
-	GlobalCommands_insert( "NextLeakSpot", FreeCaller<void(), Pointfile_Next>(), QKeySequence( "Ctrl+Shift+K" ) );
-	GlobalCommands_insert( "PrevLeakSpot", FreeCaller<void(), Pointfile_Prev>(), QKeySequence( "Ctrl+Shift+L" ) );
+	GlobalCommands_insert( "TogglePointfile", makeCallbackF( Pointfile_Toggle ) );
+	GlobalCommands_insert( "NextLeakSpot", makeCallbackF( Pointfile_Next ), QKeySequence( "Ctrl+Shift+K" ) );
+	GlobalCommands_insert( "PrevLeakSpot", makeCallbackF( Pointfile_Prev ), QKeySequence( "Ctrl+Shift+L" ) );
 }
 
 void Pointfile_Destroy(){

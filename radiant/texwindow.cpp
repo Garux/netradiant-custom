@@ -2028,7 +2028,7 @@ void TextureBrowser_constructPage( PreferenceGroup& group ){
 	TextureBrowser_constructPreferences( page );
 }
 void TextureBrowser_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), TextureBrowser_constructPage>() );
+	PreferencesDialog_addSettingsPage( makeCallbackF( TextureBrowser_constructPage ) );
 }
 
 
@@ -2042,26 +2042,26 @@ typedef ReferenceCaller<TextureBrowser, void(std::size_t), TextureBrowser_setSca
 void TextureClipboard_textureSelected( const char* shader );
 
 void TextureBrowser_Construct(){
-	GlobalCommands_insert( "ShaderInfo", FreeCaller<void(), TextureBrowser_shaderInfo>() );
-	GlobalCommands_insert( "TagSearchUntagged", FreeCaller<void(), TextureBrowser_showUntagged>() );
-	GlobalCommands_insert( "TagSearch", FreeCaller<void(), TextureBrowser_searchTags>() );
-	GlobalCommands_insert( "TagAdd", FreeCaller<void(), TextureBrowser_addTag>() );
-	GlobalCommands_insert( "TagRename", FreeCaller<void(), TextureBrowser_renameTag>() );
-	GlobalCommands_insert( "TagDelete", FreeCaller<void(), TextureBrowser_deleteTag>() );
-	GlobalCommands_insert( "TagCopy", FreeCaller<void(), TextureBrowser_copyTag>() );
-	GlobalCommands_insert( "TagPaste", FreeCaller<void(), TextureBrowser_pasteTag>() );
-	GlobalCommands_insert( "RefreshShaders", FreeCaller<void(), RefreshShaders>() );
-	GlobalToggles_insert( "ShowInUse", FreeCaller<void(), TextureBrowser_ToggleHideUnused>(), ToggleItem::AddCallbackCaller( g_TexBro.m_hideunused_item ), QKeySequence( "U" ) );
-	GlobalCommands_insert( "ShowAllTextures", FreeCaller<void(), TextureBrowser_showAll>(), QKeySequence( "Ctrl+A" ) );
-	GlobalCommands_insert( "ToggleTextures", FreeCaller<void(), TextureBrowser_toggleShow>(), QKeySequence( "T" ) );
-	GlobalToggles_insert( "ToggleShowShaders", FreeCaller<void(), TextureBrowser_ToggleShowShaders>(), ToggleItem::AddCallbackCaller( g_TexBro.m_showshaders_item ) );
-	GlobalToggles_insert( "ToggleShowTextures", FreeCaller<void(), TextureBrowser_ToggleShowTextures>(), ToggleItem::AddCallbackCaller( g_TexBro.m_showtextures_item ) );
-	GlobalToggles_insert( "ToggleShowShaderlistOnly", FreeCaller<void(), TextureBrowser_ToggleShowShaderListOnly>(), ToggleItem::AddCallbackCaller( g_TexBro.m_showshaderlistonly_item ) );
-	GlobalToggles_insert( "FixedSize", FreeCaller<void(), TextureBrowser_FixedSize>(), ToggleItem::AddCallbackCaller( g_TexBro.m_fixedsize_item ) );
-	GlobalToggles_insert( "FilterNotex", FreeCaller<void(), TextureBrowser_FilterNotex>(), ToggleItem::AddCallbackCaller( g_TexBro.m_filternotex_item ) );
-	GlobalToggles_insert( "EnableAlpha", FreeCaller<void(), TextureBrowser_EnableAlpha>(), ToggleItem::AddCallbackCaller( g_TexBro.m_enablealpha_item ) );
-	GlobalToggles_insert( "TagsToggleGui", FreeCaller<void(), TextureBrowser_tagsToggleGui>(), ToggleItem::AddCallbackCaller( g_TexBro.m_tags_item ) );
-	GlobalToggles_insert( "SearchFromStart", FreeCaller<void(), TextureBrowser_filter_searchFromStart>(), ToggleItem::AddCallbackCaller( g_TexBro.m_filter_searchFromStart_item ) );
+	GlobalCommands_insert( "ShaderInfo", makeCallbackF( TextureBrowser_shaderInfo ) );
+	GlobalCommands_insert( "TagSearchUntagged", makeCallbackF( TextureBrowser_showUntagged ) );
+	GlobalCommands_insert( "TagSearch", makeCallbackF( TextureBrowser_searchTags ) );
+	GlobalCommands_insert( "TagAdd", makeCallbackF( TextureBrowser_addTag ) );
+	GlobalCommands_insert( "TagRename", makeCallbackF( TextureBrowser_renameTag ) );
+	GlobalCommands_insert( "TagDelete", makeCallbackF( TextureBrowser_deleteTag ) );
+	GlobalCommands_insert( "TagCopy", makeCallbackF( TextureBrowser_copyTag ) );
+	GlobalCommands_insert( "TagPaste", makeCallbackF( TextureBrowser_pasteTag ) );
+	GlobalCommands_insert( "RefreshShaders", makeCallbackF( RefreshShaders ) );
+	GlobalToggles_insert( "ShowInUse", makeCallbackF( TextureBrowser_ToggleHideUnused ), ToggleItem::AddCallbackCaller( g_TexBro.m_hideunused_item ), QKeySequence( "U" ) );
+	GlobalCommands_insert( "ShowAllTextures", makeCallbackF( TextureBrowser_showAll ), QKeySequence( "Ctrl+A" ) );
+	GlobalCommands_insert( "ToggleTextures", makeCallbackF( TextureBrowser_toggleShow ), QKeySequence( "T" ) );
+	GlobalToggles_insert( "ToggleShowShaders", makeCallbackF( TextureBrowser_ToggleShowShaders ), ToggleItem::AddCallbackCaller( g_TexBro.m_showshaders_item ) );
+	GlobalToggles_insert( "ToggleShowTextures", makeCallbackF( TextureBrowser_ToggleShowTextures ), ToggleItem::AddCallbackCaller( g_TexBro.m_showtextures_item ) );
+	GlobalToggles_insert( "ToggleShowShaderlistOnly", makeCallbackF( TextureBrowser_ToggleShowShaderListOnly ), ToggleItem::AddCallbackCaller( g_TexBro.m_showshaderlistonly_item ) );
+	GlobalToggles_insert( "FixedSize", makeCallbackF( TextureBrowser_FixedSize ), ToggleItem::AddCallbackCaller( g_TexBro.m_fixedsize_item ) );
+	GlobalToggles_insert( "FilterNotex", makeCallbackF( TextureBrowser_FilterNotex ), ToggleItem::AddCallbackCaller( g_TexBro.m_filternotex_item ) );
+	GlobalToggles_insert( "EnableAlpha", makeCallbackF( TextureBrowser_EnableAlpha ), ToggleItem::AddCallbackCaller( g_TexBro.m_enablealpha_item ) );
+	GlobalToggles_insert( "TagsToggleGui", makeCallbackF( TextureBrowser_tagsToggleGui ), ToggleItem::AddCallbackCaller( g_TexBro.m_tags_item ) );
+	GlobalToggles_insert( "SearchFromStart", makeCallbackF( TextureBrowser_filter_searchFromStart ), ToggleItem::AddCallbackCaller( g_TexBro.m_filter_searchFromStart_item ) );
 
 	GlobalPreferenceSystem().registerPreference( "TextureScale",
 	                                             makeSizeStringImportCallback( TextureBrowserSetScaleCaller( g_TexBro ) ),

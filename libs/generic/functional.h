@@ -74,6 +74,32 @@ template<class Caller, int N>
 using get_argument = typename detail::Fn<get_func<Caller>>::template get<N>;
 
 namespace detail {
+
+	template<class F>
+	class FunctionN;
+
+	template<class R, class... Ts>
+	class FunctionN<R(Ts...)>
+	{
+	public:
+		template<R(*f)(Ts...)>
+		class instance
+		{
+		public:
+			using func = R(Ts...);
+
+			static R call( Ts... args ){
+				return ( f )( args... );
+			}
+		};
+	};
+
+}
+
+template<class F, F *func>
+using Function = typename detail::FunctionN<F>::template instance<func>;
+
+namespace detail {
 	template<class Object, class F>
 	struct MemberFunction;
 
@@ -85,94 +111,61 @@ namespace detail {
 	};
 }
 
+namespace detail {
+	template<class Object, class F>
+	class MemberN;
+
+	template<class Object, class R, class... Ts>
+	class MemberN<Object, R(Ts...)>
+	{
+	public:
+		template<R(Object::*f)(Ts...)>
+		class instance
+		{
+		public:
+			using func = R(Object &, Ts...);
+
+			static R call( Object& object, Ts... args ){
+				return ( object.*f )( args... );
+			}
+		};
+	};
+}
+
 template<class Object, class F>
 using MemberFunction = typename detail::MemberFunction<Object, F>::type;
+
+template<class Object, class F, MemberFunction<Object, F> func>
+using Member = typename detail::MemberN<Object, F>::template instance<func>;
+
+namespace detail {
+	template<class Object, class F>
+	class ConstMemberN;
+
+	template<class Object, class R, class... Ts>
+	class ConstMemberN<Object, R(Ts...)>
+	{
+	public:
+		template<R(Object::*f)(Ts...) const>
+		class instance
+		{
+		public:
+			using func = R(const Object &, Ts...);
+
+			static R call( const Object& object, Ts... args ){
+				return ( object.*f )( args... );
+			}
+		};
+	};
+}
 
 template<class Object, class F>
 using ConstMemberFunction = typename detail::MemberFunction<Object, F>::type_const;
 
-template<class Object, class F>
-class MemberN;
-
-template<class Object, class R, class... Ts>
-class MemberN<Object, R(Ts...)>
-{
-public:
-	template<R(Object::*f)(Ts...)>
-	class instance
-	{
-	public:
-		using func = R(Object &, Ts...);
-
-		static R call( Object& object, Ts... args ){
-			return ( object.*f )( args... );
-		}
-	};
-};
-
-template<class Object, class F, MemberFunction<Object, F> func>
-using Member = typename MemberN<Object, F>::template instance<func>;
-
-template<class Object, class F>
-class ConstMemberN;
-
-template<class Object, class R, class... Ts>
-class ConstMemberN<Object, R(Ts...)>
-{
-public:
-	template<R(Object::*f)(Ts...) const>
-	class instance
-	{
-	public:
-		using func = R(const Object &, Ts...);
-
-		static R call( const Object& object, Ts... args ){
-			return ( object.*f )( args... );
-		}
-	};
-};
-
 template<class Object, class F, ConstMemberFunction<Object, F> func>
-using ConstMember = typename ConstMemberN<Object, F>::template instance<func>;
+using ConstMember = typename detail::ConstMemberN<Object, F>::template instance<func>;
 
-template<class F>
-class FunctionN;
-
-template<class R, class... Ts>
-class FunctionN<R(Ts...)>
-{
-public:
-	template<R(*f)(Ts...)>
-	class instance
-	{
-	public:
-		using func = R(Ts...);
-
-		static R call( Ts... args ){
-			return ( f )( args... );
-		}
-	};
-};
-
-template<class F, F *func>
-using Function = typename FunctionN<F>::template instance<func>;
-
-template<class Caller, class F>
-class CallerShiftFirst;
-
-template<class Caller, class R, class FirstArgument, class... Ts>
-class CallerShiftFirst<Caller, R(FirstArgument, Ts...)>
-{
-public:
-	using func = R(FirstArgument, Ts...);
-
-	static R call( FirstArgument, Ts... args ){
-		return Caller::call( args... );
-	}
-};
-
-template<class Functor, class F>
-class FunctorNInvoke;
+// misc
 
 namespace detail {
 	template<int ...>
@@ -193,33 +186,36 @@ namespace detail {
 
 	template<int N>
 	using seq_new = typename gens<N>::type;
-}
 
-template<class Functor, class R, class... Ts>
-class FunctorNInvoke<Functor, R(Ts...)>
-{
-	std::tuple<Ts...> args;
+	template<class Functor, class F>
+	class FunctorNInvoke;
 
-	template<class T>
-	struct caller;
-
-	template<int ...I>
-	struct caller<detail::seq<I...>>
+	template<class Functor, class R, class... Ts>
+	class FunctorNInvoke<Functor, R(Ts...)>
 	{
-		static inline R call( FunctorNInvoke<Functor, R(Ts...)> *self, Functor functor ){
-			(void) self;
-			return functor( std::get<I>( self->args )... );
+		std::tuple<Ts...> args;
+
+		template<class T>
+		struct caller;
+
+		template<int ...I>
+		struct caller<seq<I...>>
+		{
+			static inline R call( FunctorNInvoke<Functor, R(Ts...)> *self, Functor functor ){
+				(void) self;
+				return functor( std::get<I>( self->args )... );
+			}
+		};
+
+	public:
+		FunctorNInvoke( Ts... args ) : args( args... ){
+		}
+
+		inline R operator()( Functor functor ) {
+			return caller<seq_new<sizeof...(Ts)>>::call( this, functor );
 		}
 	};
-
-public:
-	FunctorNInvoke( Ts... args ) : args( args... ){
-	}
-
-	inline R operator()( Functor functor ) {
-		return caller<detail::seq_new<sizeof...(Ts)>>::call( this, functor );
-	}
-};
+}
 
 template<class Functor>
-using FunctorInvoke = FunctorNInvoke<Functor, get_func<Functor>>;
+using FunctorInvoke = detail::FunctorNInvoke<Functor, get_func<Functor>>;
