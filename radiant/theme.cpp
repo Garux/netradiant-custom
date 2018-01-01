@@ -241,12 +241,12 @@ void ThemeImport( int value ){
 		s_theme_group->actions().at( value )->setChecked( true );
 	}
 }
-typedef FreeCaller1<int, ThemeImport> ThemeImportCaller;
+typedef FreeCaller<void(int), ThemeImport> ThemeImportCaller;
 
 void ThemeExport( const IntImportCallback& importer ){
 	importer( static_cast<int>( s_theme ) );
 }
-typedef FreeCaller1<const IntImportCallback&, ThemeExport> ThemeExportCaller;
+typedef FreeCaller<void(const IntImportCallback&), ThemeExport> ThemeExportCaller;
 
 
 void theme_contruct(){

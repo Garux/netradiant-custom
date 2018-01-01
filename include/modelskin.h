@@ -33,7 +33,7 @@ public:
 	}
 };
 
-typedef Callback1<SkinRemap> SkinRemapCallback;
+typedef Callback<void(SkinRemap)> SkinRemapCallback;
 class ModuleObserver;
 
 class ModelSkin

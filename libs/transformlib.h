@@ -193,11 +193,11 @@ public:
 class TransformModifier : public Transforms, public Transformable
 {
 protected:
-	Callback m_changed;
-	Callback m_apply;
+	Callback<void()> m_changed;
+	Callback<void()> m_apply;
 	TransformModifierType m_type;
 public:
-	TransformModifier( const Callback& changed, const Callback& apply ) :
+	TransformModifier( const Callback<void()>& changed, const Callback<void()>& apply ) :
 		m_changed( changed ),
 		m_apply( apply ),
 		m_type( TRANSFORM_PRIMITIVE ){

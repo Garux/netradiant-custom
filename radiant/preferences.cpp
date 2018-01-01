@@ -188,7 +188,7 @@ void LogConsole_importString( const char* string ){
 	g_Console_enableLogging = string_equal( string, "true" );
 	Sys_LogFile( g_Console_enableLogging );
 }
-typedef FreeCaller1<const char*, LogConsole_importString> LogConsoleImportStringCaller;
+typedef FreeCaller<void(const char*), LogConsole_importString> LogConsoleImportStringCaller;
 
 
 void RegisterGlobalPreferences( PreferenceSystem& preferences ){
@@ -279,9 +279,9 @@ void CGameDialog::CreateGlobalFrame( PreferencesPage& page, bool global ){
 	    "Select the game",
 	    StringArrayRange( games ),
 	    global?
-	    IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileAssign>( *this ) ):
-	    IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileImport>( *this ) ),
-	    ConstMemberCaller1<CGameDialog, const IntImportCallback&, &CGameDialog::GameFileExport>( *this )
+	    IntImportCallback( MemberCaller<CGameDialog, void(int), &CGameDialog::GameFileAssign>( *this ) ):
+	    IntImportCallback( MemberCaller<CGameDialog, void(int), &CGameDialog::GameFileImport>( *this ) ),
+	    ConstMemberCaller<CGameDialog, void(const IntImportCallback&), &CGameDialog::GameFileExport>( *this )
 	);
 	page.appendCheckBox( "Startup", "Show Global Preferences", m_bGamePrompt );
 }
@@ -607,7 +607,7 @@ public:
 };
 
 void PrefsDlg::BuildDialog(){
-	PreferencesDialog_addInterfacePreferences( FreeCaller1<PreferencesPage&, Interface_constructPreferences>() );
+	PreferencesDialog_addInterfacePreferences( FreeCaller<void(PreferencesPage&), Interface_constructPreferences>() );
 
 	GetWidget()->setWindowTitle( "NetRadiant Preferences" );
 
@@ -835,20 +835,20 @@ void PreferencesDialog_showDialog(){
 void GameName_importString( const char* value ){
 	gamename_set( value );
 }
-typedef FreeCaller1<const char*, GameName_importString> GameNameImportStringCaller;
+typedef FreeCaller<void(const char*), GameName_importString> GameNameImportStringCaller;
 void GameName_exportString( const StringImportCallback& importer ){
 	importer( gamename_get() );
 }
-typedef FreeCaller1<const StringImportCallback&, GameName_exportString> GameNameExportStringCaller;
+typedef FreeCaller<void(const StringImportCallback&), GameName_exportString> GameNameExportStringCaller;
 
 void GameMode_importString( const char* value ){
 	gamemode_set( value );
 }
-typedef FreeCaller1<const char*, GameMode_importString> GameModeImportStringCaller;
+typedef FreeCaller<void(const char*), GameMode_importString> GameModeImportStringCaller;
 void GameMode_exportString( const StringImportCallback& importer ){
 	importer( gamemode_get() );
 }
-typedef FreeCaller1<const StringImportCallback&, GameMode_exportString> GameModeExportStringCaller;
+typedef FreeCaller<void(const StringImportCallback&), GameMode_exportString> GameModeExportStringCaller;
 
 
 void RegisterPreferences( PreferenceSystem& preferences ){

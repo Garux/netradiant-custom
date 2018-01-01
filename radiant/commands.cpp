@@ -68,7 +68,7 @@ typedef std::map<CopiedString, Command> Commands;
 
 Commands g_commands;
 
-void GlobalCommands_insert( const char* name, const Callback& callback, const QKeySequence& accelerator ){
+void GlobalCommands_insert( const char* name, const Callback<void()>& callback, const QKeySequence& accelerator ){
 	bool added = g_commands.insert( Commands::value_type( name, Command( callback, GlobalShortcuts_insert( name, accelerator ) ) ) ).second;
 	ASSERT_MESSAGE( added, "command already registered: " << makeQuoted( name ) );
 }
@@ -84,7 +84,7 @@ typedef std::map<CopiedString, Toggle> Toggles;
 
 Toggles g_toggles;
 
-void GlobalToggles_insert( const char* name, const Callback& callback, const BoolExportCallback& exportCallback, const QKeySequence& accelerator ){
+void GlobalToggles_insert( const char* name, const Callback<void()>& callback, const BoolExportCallback& exportCallback, const QKeySequence& accelerator ){
 	bool added = g_toggles.insert( Toggles::value_type( name, Toggle( callback, GlobalShortcuts_insert( name, accelerator ), exportCallback ) ) ).second;
 	ASSERT_MESSAGE( added, "toggle already registered: " << makeQuoted( name ) );
 }
@@ -99,7 +99,7 @@ typedef std::map<CopiedString, KeyEvent> KeyEvents;
 
 KeyEvents g_keyEvents;
 
-void GlobalKeyEvents_insert( const char* name, const Callback& keyDown, const Callback& keyUp, const QKeySequence& accelerator ){
+void GlobalKeyEvents_insert( const char* name, const Callback<void()>& keyDown, const Callback<void()>& keyUp, const QKeySequence& accelerator ){
 	bool added = g_keyEvents.insert( KeyEvents::value_type( name, KeyEvent( GlobalShortcuts_insert( name, accelerator ), keyDown, keyUp ) ) ).second;
 	ASSERT_MESSAGE( added, "command already registered: " << makeQuoted( name ) );
 }

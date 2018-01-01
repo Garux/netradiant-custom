@@ -1207,7 +1207,7 @@ void ModelPaths_addFromArchive( ModelPaths_ArchiveVisitor& visitor, const char *
 		}
 	}
 }
-typedef ReferenceCaller1<ModelPaths_ArchiveVisitor, const char*, ModelPaths_addFromArchive> ModelPaths_addFromArchiveCaller;
+typedef ReferenceCaller<ModelPaths_ArchiveVisitor, void(const char*), ModelPaths_addFromArchive> ModelPaths_addFromArchiveCaller;
 
 void ModelBrowser_constructTree(){
 	g_ModelBrowser.m_modelFS.m_folders.clear();
@@ -1279,7 +1279,7 @@ QWidget* ModelBrowser_constructWindow( QWidget* toplevel ){
 		QToolBar* toolbar = new QToolBar;
 		vbox->addWidget( toolbar );
 
-		toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<ModelBrowser_constructTree>() );
+		toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<void(), ModelBrowser_constructTree>() );
 	}
 	{	// TreeView
 		g_ModelBrowser.m_treeView = new TexBro_QTreeView;
@@ -1334,7 +1334,7 @@ void CellSizeImport( int& oldvalue, int value ){
 		g_ModelBrowser.queueDraw();
 	}
 }
-typedef ReferenceCaller1<int, int, CellSizeImport> CellSizeImportCaller;
+typedef ReferenceCaller<int, void(int), CellSizeImport> CellSizeImportCaller;
 
 void FoldersToLoadImport( CopiedString& self, const char* value ){
 	if( self != value ){
@@ -1342,7 +1342,7 @@ void FoldersToLoadImport( CopiedString& self, const char* value ){
 		ModelBrowser_constructTree();
 	}
 }
-typedef ReferenceCaller1<CopiedString, const char*, FoldersToLoadImport> FoldersToLoadImportCaller;
+typedef ReferenceCaller<CopiedString, void(const char*), FoldersToLoadImport> FoldersToLoadImportCaller;
 
 void ModelBrowser_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Model Browser", "Model Browser Preferences" ) );
@@ -1355,7 +1355,7 @@ void ModelBrowser_constructPage( PreferenceGroup& group ){
 	                  StringExportCallback( StringExportCaller( g_ModelBrowser.m_prefFoldersToLoad ) ) );
 }
 void ModelBrowser_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, ModelBrowser_constructPage>() );
+	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), ModelBrowser_constructPage>() );
 }
 
 void ModelBrowser_Construct(){

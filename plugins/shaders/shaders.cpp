@@ -79,7 +79,7 @@ void ActiveShaders_IteratorBegin();
 bool ActiveShaders_IteratorAtEnd();
 IShader *ActiveShaders_IteratorCurrent();
 void ActiveShaders_IteratorIncrement();
-Callback g_ActiveShadersChangedNotify;
+Callback<void()> g_ActiveShadersChangedNotify;
 
 void FreeShaders();
 void LoadShaderFile( const char *filename );
@@ -1462,7 +1462,7 @@ void LoadShaderFile( const char* filename ){
 	}
 }
 
-typedef FreeCaller1<const char*, LoadShaderFile> LoadShaderFileCaller;
+typedef FreeCaller<void(const char*), LoadShaderFile> LoadShaderFileCaller;
 
 
 void loadGuideFile( const char* filename ){
@@ -1485,7 +1485,7 @@ void loadGuideFile( const char* filename ){
 	}
 }
 
-typedef FreeCaller1<const char*, loadGuideFile> LoadGuideFileCaller;
+typedef FreeCaller<void(const char*), loadGuideFile> LoadGuideFileCaller;
 
 
 CShader* Try_Shader_ForName( const char* name ){
@@ -1558,7 +1558,7 @@ void IfFound_dumpUnreferencedShader( bool& bFound, const char* filename ){
 		globalOutputStream() << '\t' << filename << '\n';
 	}
 }
-typedef ReferenceCaller1<bool, const char*, IfFound_dumpUnreferencedShader> IfFoundDumpUnreferencedShaderCaller;
+typedef ReferenceCaller<bool, void(const char*), IfFound_dumpUnreferencedShader> IfFoundDumpUnreferencedShaderCaller;
 
 void DumpUnreferencedShaders(){
 	bool bFound = false;
@@ -1582,7 +1582,7 @@ void ShaderList_addShaderFile( const char* dirstring ){
 	}
 }
 
-typedef FreeCaller1<const char*, ShaderList_addShaderFile> AddShaderFileCaller;
+typedef FreeCaller<void(const char*), ShaderList_addShaderFile> AddShaderFileCaller;
 
 
 /*
@@ -1623,7 +1623,7 @@ void ShaderList_addFromArchive( const char *archivename ){
 	}
 }
 
-typedef FreeCaller1<const char *, ShaderList_addFromArchive> AddShaderListFromArchiveCaller;
+typedef FreeCaller<void(const char *), ShaderList_addFromArchive> AddShaderListFromArchiveCaller;
 
 #include "stream/filestream.h"
 
@@ -1760,7 +1760,7 @@ public:
 	void incrementActiveShadersIterator(){
 		ActiveShaders_IteratorIncrement();
 	}
-	void setActiveShadersChangedNotify( const Callback& notify ){
+	void setActiveShadersChangedNotify( const Callback<void()>& notify ){
 		g_ActiveShadersChangedNotify = notify;
 	}
 

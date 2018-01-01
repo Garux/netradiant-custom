@@ -94,7 +94,7 @@ void command_disconnect_accelerator( const char* name ){
 static void action_set_checked_callback( QAction& action, bool enabled ){
 	action.setChecked( enabled );
 }
-typedef ReferenceCaller1<QAction, bool, action_set_checked_callback> ActionSetCheckedCaller;
+typedef ReferenceCaller<QAction, void(bool), action_set_checked_callback> ActionSetCheckedCaller;
 
 inline QAction* toggle_add_accelerator_( const char* name ){
 	GlobalShortcuts_register( name, 2 );

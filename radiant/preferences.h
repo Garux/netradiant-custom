@@ -101,7 +101,7 @@ public:
 	}
 };
 
-typedef Callback1<PreferencesPage&> PreferencesPageCallback;
+typedef Callback<void(PreferencesPage&)> PreferencesPageCallback;
 
 class PreferenceGroup
 {
@@ -109,7 +109,7 @@ public:
 	virtual PreferencesPage createPage( const char* treeName, const char* frameName ) = 0;
 };
 
-typedef Callback1<PreferenceGroup&> PreferenceGroupCallback;
+typedef Callback<void(PreferenceGroup&)> PreferenceGroupCallback;
 
 void PreferencesDialog_addGamePreferences( const PreferencesPageCallback& callback );
 void PreferencesDialog_addGamePage( const PreferenceGroupCallback& callback );
@@ -146,12 +146,12 @@ public:
 typedef LatchedValue<bool> LatchedBool;
 typedef LatchedValue<int> LatchedInt;
 
-template<typename T, typename R = MemberCaller1<LatchedValue<T>, T, &LatchedValue<T>::assign>>
+template<typename T, typename R = MemberCaller<LatchedValue<T>, void(T), &LatchedValue<T>::assign>>
 inline R LatchedAssignCaller( LatchedValue<T>& latchedValue ){
 	return R( latchedValue );
 }
 
-template<typename T, typename R = MemberCaller1<LatchedValue<T>, T, &LatchedValue<T>::import>>
+template<typename T, typename R = MemberCaller<LatchedValue<T>, void(T), &LatchedValue<T>::import>>
 inline R LatchedImportCaller( LatchedValue<T>& latchedValue ){
 	return R( latchedValue );
 }

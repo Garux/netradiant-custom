@@ -82,7 +82,7 @@ protected: // protected types
     * Function signature for a menu command callback. The callback takes a
     * string argument (the command token); it has no return value.
     */
-   typedef Callback1<const std::string&, void> CommandCallback;
+   typedef Callback<void(const std::string&)> CommandCallback;
 
    /**
     * An instance of this class can be used as a
@@ -95,7 +95,7 @@ protected: // protected types
     */
    template<typename ObjectClass, void (ObjectClass::*member)(const std::string&)>
    class CommandCallbackMethod :
-      public MemberCaller1<ObjectClass, const std::string&, member>
+      public MemberCaller<ObjectClass, void(const std::string&), member>
    {
    public:
       /**
@@ -104,7 +104,7 @@ protected: // protected types
        * @param object The object on which to invoke the callback method.
        */
       CommandCallbackMethod(ObjectClass& object) :
-         MemberCaller1<ObjectClass, const std::string&, member>(object) {}
+         MemberCaller<ObjectClass, void(const std::string&), member>(object) {}
    };
 
 protected: // protected methods

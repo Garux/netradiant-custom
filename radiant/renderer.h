@@ -129,7 +129,7 @@ public:
 			break;
 		}
 	}
-	typedef ConstMemberCaller1<RenderHighlighted, const Renderable&, &RenderHighlighted::render> RenderCaller;
+	typedef ConstMemberCaller<RenderHighlighted, void(const Renderable&), &RenderHighlighted::render> RenderCaller;
 
 	bool pre( const scene::Path& path, scene::Instance& instance, VolumeIntersectionValue parentVisible ) const {
 		m_renderer.PushState();

@@ -27,10 +27,10 @@
 
 class IdleDraw
 {
-	Callback m_draw;
+	Callback<void()> m_draw;
 	QTimer m_timer;
 public:
-	IdleDraw( const Callback& draw ) : m_draw( draw ){
+	IdleDraw( const Callback<void()>& draw ) : m_draw( draw ){
 		m_timer.setSingleShot( true );
 		m_timer.callOnTimeout( m_draw );
 	}
@@ -38,7 +38,7 @@ public:
 		if( !m_timer.isActive() )
 			m_timer.start();
 	}
-	typedef MemberCaller<IdleDraw, &IdleDraw::queueDraw> QueueDrawCaller;
+	typedef MemberCaller<IdleDraw, void(), &IdleDraw::queueDraw> QueueDrawCaller;
 
 	void flush(){
 		if ( m_timer.isActive() ) {

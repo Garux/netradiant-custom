@@ -31,55 +31,55 @@
 inline void BoolImport( bool& self, bool value ){
 	self = value;
 }
-typedef ReferenceCaller1<bool, bool, BoolImport> BoolImportCaller;
+typedef ReferenceCaller<bool, void(bool), BoolImport> BoolImportCaller;
 
 inline void BoolExport( bool& self, const BoolImportCallback& importCallback ){
 	importCallback( self );
 }
-typedef ReferenceCaller1<bool, const BoolImportCallback&, BoolExport> BoolExportCaller;
+typedef ReferenceCaller<bool, void(const BoolImportCallback&), BoolExport> BoolExportCaller;
 
 
 inline void IntImport( int& self, int value ){
 	self = value;
 }
-typedef ReferenceCaller1<int, int, IntImport> IntImportCaller;
+typedef ReferenceCaller<int, void(int), IntImport> IntImportCaller;
 
 inline void IntExport( int& self, const IntImportCallback& importCallback ){
 	importCallback( self );
 }
-typedef ReferenceCaller1<int, const IntImportCallback&, IntExport> IntExportCaller;
+typedef ReferenceCaller<int, void(const IntImportCallback&), IntExport> IntExportCaller;
 
 
 inline void SizeImport( std::size_t& self, std::size_t value ){
 	self = value;
 }
-typedef ReferenceCaller1<std::size_t, std::size_t, SizeImport> SizeImportCaller;
+typedef ReferenceCaller<std::size_t, void(std::size_t), SizeImport> SizeImportCaller;
 
 inline void SizeExport( std::size_t& self, const SizeImportCallback& importCallback ){
 	importCallback( self );
 }
-typedef ReferenceCaller1<std::size_t, const SizeImportCallback&, SizeExport> SizeExportCaller;
+typedef ReferenceCaller<std::size_t, void(const SizeImportCallback&), SizeExport> SizeExportCaller;
 
 
 inline void FloatImport( float& self, float value ){
 	self = value;
 }
-typedef ReferenceCaller1<float, float, FloatImport> FloatImportCaller;
+typedef ReferenceCaller<float, void(float), FloatImport> FloatImportCaller;
 
 inline void FloatExport( float& self, const FloatImportCallback& importCallback ){
 	importCallback( self );
 }
-typedef ReferenceCaller1<float, const FloatImportCallback&, FloatExport> FloatExportCaller;
+typedef ReferenceCaller<float, void(const FloatImportCallback&), FloatExport> FloatExportCaller;
 
 
 inline void StringImport( CopiedString& self, const char* value ){
 	self = value;
 }
-typedef ReferenceCaller1<CopiedString, const char*, StringImport> StringImportCaller;
+typedef ReferenceCaller<CopiedString, void(const char*), StringImport> StringImportCaller;
 inline void StringExport( CopiedString& self, const StringImportCallback& importCallback ){
 	importCallback( self.c_str() );
 }
-typedef ReferenceCaller1<CopiedString, const StringImportCallback&, StringExport> StringExportCaller;
+typedef ReferenceCaller<CopiedString, void(const StringImportCallback&), StringExport> StringExportCaller;
 
 
 struct DLG_DATA

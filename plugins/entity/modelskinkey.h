@@ -37,7 +37,7 @@ class ModelSkinKey : public ModuleObserver
 {
 	CopiedString m_name;
 	ModelSkin* m_skin;
-	Callback m_skinChangedCallback;
+	Callback<void()> m_skinChangedCallback;
 
 	void construct(){
 		m_skin = &GlobalModelSkinCache().capture( m_name.c_str() );
@@ -52,7 +52,7 @@ public:
 	ModelSkinKey( const ModelSkinKey& ) = delete; // not copyable
 	ModelSkinKey operator=( const ModelSkinKey& ) = delete; // not assignable
 
-	ModelSkinKey( const Callback& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
+	ModelSkinKey( const Callback<void()>& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
 		construct();
 	}
 	~ModelSkinKey(){
@@ -66,7 +66,7 @@ public:
 		parseTextureName( m_name, value );
 		construct();
 	}
-	typedef MemberCaller1<ModelSkinKey, const char*, &ModelSkinKey::skinChanged> SkinChangedCaller;
+	typedef MemberCaller<ModelSkinKey, void(const char*), &ModelSkinKey::skinChanged> SkinChangedCaller;
 
 	void realise(){
 		m_skinChangedCallback();

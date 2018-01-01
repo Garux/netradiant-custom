@@ -186,8 +186,8 @@ void ColorScheme_AdwaitaDark()
 	XY_UpdateAllWindows();
 }
 
-typedef Callback1<Vector3&> GetColourCallback;
-typedef Callback1<const Vector3&> SetColourCallback;
+typedef Callback<void(Vector3&)> GetColourCallback;
+typedef Callback<void(const Vector3&)> SetColourCallback;
 
 class ChooseColour
 {
@@ -224,51 +224,51 @@ public:
 void Colour_get( const Vector3& colour, Vector3& other ){
 	other = colour;
 }
-typedef ConstReferenceCaller1<Vector3, Vector3&, Colour_get> ColourGetCaller;
+typedef ConstReferenceCaller<Vector3, void(Vector3&), Colour_get> ColourGetCaller;
 
 void Colour_set( Vector3& colour, const Vector3& other ){
 	colour = other;
 	SceneChangeNotify();
 }
-typedef ReferenceCaller1<Vector3, const Vector3&, Colour_set> ColourSetCaller;
+typedef ReferenceCaller<Vector3, void(const Vector3&), Colour_set> ColourSetCaller;
 
 void BrushColour_set( const Vector3& other ){
 	g_xywindow_globals.color_brushes = other;
 	SetWorldspawnColour( g_xywindow_globals.color_brushes );
 	SceneChangeNotify();
 }
-typedef FreeCaller1<const Vector3&, BrushColour_set> BrushColourSetCaller;
+typedef FreeCaller<void(const Vector3&), BrushColour_set> BrushColourSetCaller;
 
 void SelectedBrushColour_set( const Vector3& other ){
 	g_xywindow_globals.color_selbrushes = other;
 	XYWnd::recaptureStates();
 	SceneChangeNotify();
 }
-typedef FreeCaller1<const Vector3&, SelectedBrushColour_set> SelectedBrushColourSetCaller;
+typedef FreeCaller<void(const Vector3&), SelectedBrushColour_set> SelectedBrushColourSetCaller;
 
 void SelectedBrush3dColour_set( const Vector3& other ){
 	g_camwindow_globals.color_selbrushes3d = other;
 	CamWnd_reconstructStatic();
 	SceneChangeNotify();
 }
-typedef FreeCaller1<const Vector3&, SelectedBrush3dColour_set> SelectedBrush3dColourSetCaller;
+typedef FreeCaller<void(const Vector3&), SelectedBrush3dColour_set> SelectedBrush3dColourSetCaller;
 
 void ClipperColour_set( const Vector3& other ){
 	g_xywindow_globals.color_clipper = other;
 	Brush_clipperColourChanged();
 	SceneChangeNotify();
 }
-typedef FreeCaller1<const Vector3&, ClipperColour_set> ClipperColourSetCaller;
+typedef FreeCaller<void(const Vector3&), ClipperColour_set> ClipperColourSetCaller;
 
 void TextureBrowserColour_get( Vector3& other ){
 	other = TextureBrowser_getBackgroundColour();
 }
-typedef FreeCaller1<Vector3&, TextureBrowserColour_get> TextureBrowserColourGetCaller;
+typedef FreeCaller<void(Vector3&), TextureBrowserColour_get> TextureBrowserColourGetCaller;
 
 void TextureBrowserColour_set( const Vector3& other ){
 	TextureBrowser_setBackgroundColour( other );
 }
-typedef FreeCaller1<const Vector3&, TextureBrowserColour_set> TextureBrowserColourSetCaller;
+typedef FreeCaller<void(const Vector3&), TextureBrowserColour_set> TextureBrowserColourSetCaller;
 
 
 class ColoursMenu
@@ -344,12 +344,12 @@ void create_colours_menu( QMenu *menu ){
 }
 
 void Colors_registerCommands(){
-	GlobalCommands_insert( "ColorSchemeOriginal", FreeCaller<ColorScheme_Original>() );
-	GlobalCommands_insert( "ColorSchemeQER", FreeCaller<ColorScheme_QER>() );
-	GlobalCommands_insert( "ColorSchemeBlackAndGreen", FreeCaller<ColorScheme_Black>() );
-	GlobalCommands_insert( "ColorSchemeYdnar", FreeCaller<ColorScheme_Ydnar>() );
-	GlobalCommands_insert( "ColorSchemeBlender", FreeCaller<ColorScheme_Blender>() );
-	GlobalCommands_insert( "ColorSchemeAdwaitaDark", FreeCaller<ColorScheme_AdwaitaDark>() );
+	GlobalCommands_insert( "ColorSchemeOriginal", FreeCaller<void(), ColorScheme_Original>() );
+	GlobalCommands_insert( "ColorSchemeQER", FreeCaller<void(), ColorScheme_QER>() );
+	GlobalCommands_insert( "ColorSchemeBlackAndGreen", FreeCaller<void(), ColorScheme_Black>() );
+	GlobalCommands_insert( "ColorSchemeYdnar", FreeCaller<void(), ColorScheme_Ydnar>() );
+	GlobalCommands_insert( "ColorSchemeBlender", FreeCaller<void(), ColorScheme_Blender>() );
+	GlobalCommands_insert( "ColorSchemeAdwaitaDark", FreeCaller<void(), ColorScheme_AdwaitaDark>() );
 	GlobalCommands_insert( "ChooseTextureBackgroundColor"  , makeCallback( g_ColoursMenu.m_textureback ) );
 	GlobalCommands_insert( "ChooseCameraBackgroundColor"   , makeCallback( g_ColoursMenu.m_cameraback ) );
 	GlobalCommands_insert( "ChooseGridBackgroundColor"     , makeCallback( g_ColoursMenu.m_xyback ) );

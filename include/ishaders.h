@@ -73,7 +73,7 @@ public:
 	virtual float alphaTest() const = 0;
 };
 
-typedef Callback1<const ShaderLayer&> ShaderLayerCallback;
+typedef Callback<void(const ShaderLayer&)> ShaderLayerCallback;
 
 
 class IShader
@@ -127,7 +127,7 @@ public:
 	virtual qtexture_t* lightFalloffImage() const = 0;
 };
 
-typedef Callback1<const char*> ShaderNameCallback;
+typedef Callback<void(const char*)> ShaderNameCallback;
 
 class ModuleObserver;
 
@@ -154,7 +154,7 @@ public:
 	virtual IShader* dereferenceActiveShadersIterator() = 0;
 	virtual void incrementActiveShadersIterator() = 0;
 
-	virtual void setActiveShadersChangedNotify( const Callback& notify ) = 0;
+	virtual void setActiveShadersChangedNotify( const Callback<void()>& notify ) = 0;
 
 	virtual void attach( ModuleObserver& observer ) = 0;
 	virtual void detach( ModuleObserver& observer ) = 0;

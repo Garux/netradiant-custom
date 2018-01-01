@@ -45,9 +45,9 @@ public:
 };
 
 
-typedef MemberCaller1<EntityKeyValue, const char*, &EntityKeyValue::assign> KeyValueAssignCaller;
-typedef MemberCaller1<EntityKeyValue, const KeyObserver&, &EntityKeyValue::attach> KeyValueAttachCaller;
-typedef MemberCaller1<EntityKeyValue, const KeyObserver&, &EntityKeyValue::detach> KeyValueDetachCaller;
+typedef MemberCaller<EntityKeyValue, void(const char*), &EntityKeyValue::assign> KeyValueAssignCaller;
+typedef MemberCaller<EntityKeyValue, void(const KeyObserver&), &EntityKeyValue::attach> KeyValueAttachCaller;
+typedef MemberCaller<EntityKeyValue, void(const KeyObserver&), &EntityKeyValue::detach> KeyValueDetachCaller;
 
 class NameKeys : public Entity::Observer, public Namespaced
 {

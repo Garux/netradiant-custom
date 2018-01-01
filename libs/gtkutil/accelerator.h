@@ -43,9 +43,9 @@ TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const QKeySe
 	return ostream;
 }
 
-void keydown_accelerators_add( QKeySequence accelerator, const Callback& callback );
+void keydown_accelerators_add( QKeySequence accelerator, const Callback<void()>& callback );
 void keydown_accelerators_remove( QKeySequence accelerator );
-void keyup_accelerators_add( QKeySequence accelerator, const Callback& callback );
+void keyup_accelerators_add( QKeySequence accelerator, const Callback<void()>& callback );
 void keyup_accelerators_remove( QKeySequence accelerator );
 
 void GlobalPressedKeys_releaseAll();
@@ -61,9 +61,9 @@ public:
 	QAction*& getAction() const {
 		return m_action;
 	}
-	Callback m_callback;
+	Callback<void()> m_callback;
 	const QKeySequence& m_accelerator;
-	Command( const Callback& callback, const QKeySequence& accelerator ) : m_callback( callback ), m_accelerator( accelerator ){
+	Command( const Callback<void()>& callback, const QKeySequence& accelerator ) : m_callback( callback ), m_accelerator( accelerator ){
 	}
 };
 
@@ -72,7 +72,7 @@ class Toggle
 public:
 	Command m_command;
 	BoolExportCallback m_exportCallback;
-	Toggle( const Callback& callback, const QKeySequence& accelerator, const BoolExportCallback& exportCallback ) : m_command( callback, accelerator ), m_exportCallback( exportCallback ){
+	Toggle( const Callback<void()>& callback, const QKeySequence& accelerator, const BoolExportCallback& exportCallback ) : m_command( callback, accelerator ), m_exportCallback( exportCallback ){
 	}
 };
 
@@ -80,8 +80,8 @@ class KeyEvent
 {
 public:
 	const QKeySequence& m_accelerator;
-	Callback m_keyDown;
-	Callback m_keyUp;
-	KeyEvent( const QKeySequence& accelerator, const Callback& keyDown, const Callback& keyUp ) : m_accelerator( accelerator ), m_keyDown( keyDown ), m_keyUp( keyUp ){
+	Callback<void()> m_keyDown;
+	Callback<void()> m_keyUp;
+	KeyEvent( const QKeySequence& accelerator, const Callback<void()>& keyDown, const Callback<void()>& keyUp ) : m_accelerator( accelerator ), m_keyDown( keyDown ), m_keyUp( keyUp ){
 	}
 };

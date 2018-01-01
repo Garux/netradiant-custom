@@ -276,10 +276,10 @@ public:
 		parent->insert( new GraphTreeNode( const_cast<scene::Instance&>( instance ), node_get_name_safe( instance.path().top().get() ), instance.path().top().get_pointer() ) );
 		endInsertRows();
 
-		node_attach_name_changed_callback( instance.path().top(), ConstReferenceCaller1<scene::Instance, const char*, graph_tree_model_set_name>( instance ) );
+		node_attach_name_changed_callback( instance.path().top(), ConstReferenceCaller<scene::Instance, void(const char*), graph_tree_model_set_name>( instance ) );
 	}
 	void remove( const scene::Instance& instance ) {
-		node_detach_name_changed_callback( instance.path().top(), ConstReferenceCaller1<scene::Instance, const char*, graph_tree_model_set_name>( instance ) );
+		node_detach_name_changed_callback( instance.path().top(), ConstReferenceCaller<scene::Instance, void(const char*), graph_tree_model_set_name>( instance ) );
 
 		auto [parent, index] = findParents( instance.path() );
 

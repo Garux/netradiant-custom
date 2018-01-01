@@ -1001,7 +1001,7 @@ public:
 	void run() const {
 		RunBSP( m_buildIdx );
 	}
-	typedef ConstMemberCaller<BuildMenuItem, &BuildMenuItem::run> RunCaller;
+	typedef ConstMemberCaller<BuildMenuItem, void(), &BuildMenuItem::run> RunCaller;
 };
 
 typedef std::list<BuildMenuItem> BuildMenuItems;

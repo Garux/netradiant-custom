@@ -152,7 +152,7 @@ public:
 		}
 	}
 
-	typedef MemberCaller1<GlobalSkins, const char*, &GlobalSkins::parseFile> ParseFileCaller;
+	typedef MemberCaller<GlobalSkins, void(const char*), &GlobalSkins::parseFile> ParseFileCaller;
 
 	void construct(){
 		GlobalFileSystem().forEachFile( "skins/", "skin", ParseFileCaller( *this ) );

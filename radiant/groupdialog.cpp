@@ -74,7 +74,7 @@ std::vector<StringExportCallback> g_pages;
 void GroupDialog_updatePageTitle( QWidget* window, int pageIndex ){
 	if ( pageIndex >= 0 && pageIndex < static_cast<int>( g_pages.size() ) ) {
 		const auto la = [window]( const char *title ){ window->setWindowTitle( title ); };
-		g_pages[pageIndex]( ConstMemberCaller1<decltype( la ), const char*, &decltype( la )::operator()>( la ) );
+		g_pages[pageIndex]( ConstMemberCaller<decltype( la ), void(const char*), &decltype( la )::operator()>( la ) );
 	}
 }
 

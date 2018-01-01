@@ -89,12 +89,12 @@ public:
 	void cancel(){
 		entry_set_float( m_entry, m_f );
 	}
-	typedef MemberCaller<Increment, &Increment::cancel> CancelCaller;
+	typedef MemberCaller<Increment, void(), &Increment::cancel> CancelCaller;
 	void apply(){
 		m_f = entry_get_float( m_entry );
 		m_spin->setSingleStep( m_f );
 	}
-	typedef MemberCaller<Increment, &Increment::apply> ApplyCaller;
+	typedef MemberCaller<Increment, void(), &Increment::apply> ApplyCaller;
 };
 
 void SurfaceInspector_GridChange();
@@ -136,7 +136,7 @@ public:
 
 	void constructWindow( QWidget* main_window ){
 		Create( main_window );
-		AddGridChangeCallback( FreeCaller<SurfaceInspector_GridChange>() );
+		AddGridChangeCallback( FreeCaller<void(), SurfaceInspector_GridChange>() );
 	}
 	void destroyWindow(){
 		Destroy();
@@ -151,25 +151,25 @@ public:
 	}
 
 	void Update();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::Update> UpdateCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::Update> UpdateCaller;
 	void ApplyShader();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyShader> ApplyShaderCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyShader> ApplyShaderCaller;
 
 //void ApplyTexdef();
-//typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef> ApplyTexdefCaller;
+//typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyTexdef> ApplyTexdefCaller;
 	void ApplyTexdef_HShift();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_HShift> ApplyTexdef_HShiftCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyTexdef_HShift> ApplyTexdef_HShiftCaller;
 	void ApplyTexdef_VShift();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_VShift> ApplyTexdef_VShiftCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyTexdef_VShift> ApplyTexdef_VShiftCaller;
 	void ApplyTexdef_HScale();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_HScale> ApplyTexdef_HScaleCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyTexdef_HScale> ApplyTexdef_HScaleCaller;
 	void ApplyTexdef_VScale();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_VScale> ApplyTexdef_VScaleCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyTexdef_VScale> ApplyTexdef_VScaleCaller;
 	void ApplyTexdef_Rotation();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyTexdef_Rotation> ApplyTexdef_RotationCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyTexdef_Rotation> ApplyTexdef_RotationCaller;
 
 	void ApplyFlags();
-	typedef MemberCaller<SurfaceInspector, &SurfaceInspector::ApplyFlags> ApplyFlagsCaller;
+	typedef MemberCaller<SurfaceInspector, void(), &SurfaceInspector::ApplyFlags> ApplyFlagsCaller;
 };
 
 namespace
@@ -1368,7 +1368,7 @@ void Face_getTexture( Face& face, CopiedString& shader, FaceTexture& clipboard )
 
 	clipboard.m_pasteSource = FaceTexture::eBrush;
 }
-typedef Function3<Face&, CopiedString&, FaceTexture&, void, Face_getTexture> FaceGetTexture;
+typedef Function<void(Face&, CopiedString&, FaceTexture&), Face_getTexture> FaceGetTexture;
 
 void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboard, EPasteMode mode, bool setShader ){
 	if( setShader ){
@@ -1435,7 +1435,7 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 
 	}
 }
-typedef Function5<Face&, const char*, const FaceTexture&, EPasteMode, bool, void, Face_setTexture> FaceSetTexture;
+typedef Function<void(Face&, const char*, const FaceTexture&, EPasteMode, bool), Face_setTexture> FaceSetTexture;
 
 
 void Patch_getTexture( Patch& patch, CopiedString& shader, FaceTexture& clipboard ){
@@ -1451,7 +1451,7 @@ void Patch_getTexture( Patch& patch, CopiedString& shader, FaceTexture& clipboar
 
 	clipboard.m_pasteSource = FaceTexture::ePatch;
 }
-typedef Function3<Patch&, CopiedString&, FaceTexture&, void, Patch_getTexture> PatchGetTexture;
+typedef Function<void(Patch&, CopiedString&, FaceTexture&), Patch_getTexture> PatchGetTexture;
 
 void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clipboard, EPasteMode mode, bool setShader ){
 	if( setShader )
@@ -1510,7 +1510,7 @@ void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clip
 		g_faceTextureClipboard.m_pasteSource = FaceTexture::ePatch;
 	}
 }
-typedef Function5<Patch&, const char*, const FaceTexture&, EPasteMode, bool, void, Patch_setTexture> PatchSetTexture;
+typedef Function<void(Patch&, const char*, const FaceTexture&, EPasteMode, bool), Patch_setTexture> PatchSetTexture;
 
 #include "ientity.h"
 void Light_getTexture( Entity& entity, CopiedString& shader, FaceTexture& clipboard ){
@@ -1520,7 +1520,7 @@ void Light_getTexture( Entity& entity, CopiedString& shader, FaceTexture& clipbo
 
 	shader = TextureBrowser_GetSelectedShader(); // preserve shader
 }
-typedef Function3<Entity&, CopiedString&, FaceTexture&, void, Light_getTexture> LightGetTexture;
+typedef Function<void(Entity&, CopiedString&, FaceTexture&), Light_getTexture> LightGetTexture;
 
 void Light_setTexture( Entity& entity, const char* shader, const FaceTexture& clipboard, EPasteMode mode, bool setShader ){
 	if( mode == ePasteSeamless || mode == ePasteProject ){
@@ -1538,11 +1538,11 @@ void Light_setTexture( Entity& entity, const char* shader, const FaceTexture& cl
 			entity.setKeyValue( "light", value ); //otherwise default to "light", which is understood by both q3 and q1
 	}
 }
-typedef Function5<Entity&, const char*, const FaceTexture&, EPasteMode, bool, void, Light_setTexture> LightSetTexture;
+typedef Function<void(Entity&, const char*, const FaceTexture&, EPasteMode, bool), Light_setTexture> LightSetTexture;
 
 
-typedef Callback2<CopiedString&, FaceTexture&> GetTextureCallback;
-typedef Callback4<const char*, const FaceTexture&, EPasteMode, bool, void> SetTextureCallback;
+typedef Callback<void(CopiedString&, FaceTexture&)> GetTextureCallback;
+typedef Callback<void(const char*, const FaceTexture&, EPasteMode, bool)> SetTextureCallback;
 
 struct Texturable
 {
@@ -1560,8 +1560,8 @@ void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& be
 	if ( intersection.valid()
 	  && SelectionIntersection_closer( intersection, bestIntersection ) ) {
 		bestIntersection = intersection;
-		texturable.setTexture = makeCallback4( FaceSetTexture(), face );
-		texturable.getTexture = makeCallback2( FaceGetTexture(), face );
+		texturable.setTexture = makeCallback( FaceSetTexture(), face );
+		texturable.getTexture = makeCallback( FaceGetTexture(), face );
 	}
 }
 
@@ -1616,14 +1616,14 @@ public:
 				if ( occluded ) {
 					Patch* patch = Node_getPatch( path.top() );
 					if ( patch != 0 ) {
-						m_texturable.setTexture = makeCallback4( PatchSetTexture(), *patch );
-						m_texturable.getTexture = makeCallback2( PatchGetTexture(), *patch );
+						m_texturable.setTexture = makeCallback( PatchSetTexture(), *patch );
+						m_texturable.getTexture = makeCallback( PatchGetTexture(), *patch );
 						return true;
 					}
 					Entity* entity = Node_getEntity( path.top() );
 					if( entity != 0 && string_equal_n( entity->getClassName(), "light", 5 ) ){
-						m_texturable.setTexture = makeCallback4( LightSetTexture(), *entity );
-						m_texturable.getTexture = makeCallback2( LightGetTexture(), *entity );
+						m_texturable.setTexture = makeCallback( LightSetTexture(), *entity );
+						m_texturable.getTexture = makeCallback( LightGetTexture(), *entity );
 					}
 					else{
 						m_texturable = Texturable();
@@ -1743,23 +1743,23 @@ void SurfaceInspector_constructPage( PreferenceGroup& group ){
 	SurfaceInspector_constructPreferences( page );
 }
 void SurfaceInspector_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, SurfaceInspector_constructPage>() );
+	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), SurfaceInspector_constructPage>() );
 }
 
 void SurfaceInspector_registerCommands(){
-	GlobalCommands_insert( "TextureReset/Cap", FreeCaller<SurfaceInspector_ResetTexture>(), QKeySequence( "Shift+N" ) );
-	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), QKeySequence( "Ctrl+F" ) );
-	GlobalCommands_insert( "FitTextureWidth", FreeCaller<SurfaceInspector_FaceFitWidth>() );
-	GlobalCommands_insert( "FitTextureHeight", FreeCaller<SurfaceInspector_FaceFitHeight>() );
-	GlobalCommands_insert( "FitTextureWidthOnly", FreeCaller<SurfaceInspector_FaceFitWidthOnly>() );
-	GlobalCommands_insert( "FitTextureHeightOnly", FreeCaller<SurfaceInspector_FaceFitHeightOnly>() );
-	GlobalCommands_insert( "TextureProjectAxial", FreeCaller<SurfaceInspector_ProjectTexture_eProjectAxial>() );
-	GlobalCommands_insert( "TextureProjectOrtho", FreeCaller<SurfaceInspector_ProjectTexture_eProjectOrtho>() );
-	GlobalCommands_insert( "TextureProjectCam", FreeCaller<SurfaceInspector_ProjectTexture_eProjectCam>() );
-	GlobalCommands_insert( "SurfaceInspector", FreeCaller<SurfaceInspector_toggleShown>(), QKeySequence( "S" ) );
+	GlobalCommands_insert( "TextureReset/Cap", FreeCaller<void(), SurfaceInspector_ResetTexture>(), QKeySequence( "Shift+N" ) );
+	GlobalCommands_insert( "FitTexture", FreeCaller<void(), SurfaceInspector_FitTexture>(), QKeySequence( "Ctrl+F" ) );
+	GlobalCommands_insert( "FitTextureWidth", FreeCaller<void(), SurfaceInspector_FaceFitWidth>() );
+	GlobalCommands_insert( "FitTextureHeight", FreeCaller<void(), SurfaceInspector_FaceFitHeight>() );
+	GlobalCommands_insert( "FitTextureWidthOnly", FreeCaller<void(), SurfaceInspector_FaceFitWidthOnly>() );
+	GlobalCommands_insert( "FitTextureHeightOnly", FreeCaller<void(), SurfaceInspector_FaceFitHeightOnly>() );
+	GlobalCommands_insert( "TextureProjectAxial", FreeCaller<void(), SurfaceInspector_ProjectTexture_eProjectAxial>() );
+	GlobalCommands_insert( "TextureProjectOrtho", FreeCaller<void(), SurfaceInspector_ProjectTexture_eProjectOrtho>() );
+	GlobalCommands_insert( "TextureProjectCam", FreeCaller<void(), SurfaceInspector_ProjectTexture_eProjectCam>() );
+	GlobalCommands_insert( "SurfaceInspector", FreeCaller<void(), SurfaceInspector_toggleShown>(), QKeySequence( "S" ) );
 
-//	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<SelectedFaces_copyTexture>() );
-//	GlobalCommands_insert( "FacePasteTexture", FreeCaller<SelectedFaces_pasteTexture>() );
+//	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<void(), SelectedFaces_copyTexture>() );
+//	GlobalCommands_insert( "FacePasteTexture", FreeCaller<void(), SelectedFaces_pasteTexture>() );
 }
 
 
@@ -1780,9 +1780,9 @@ void SurfaceInspector_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_SurfaceTexdef_Rotate", FloatImportStringCaller( g_si_globals.rotate ), FloatExportStringCaller( g_si_globals.rotate ) );
 	GlobalPreferenceSystem().registerPreference( "SnapTToGrid", BoolImportStringCaller( g_si_globals.m_bSnapTToGrid ), BoolExportStringCaller( g_si_globals.m_bSnapTToGrid ) );
 
-	typedef FreeCaller1<const Selectable&, SurfaceInspector_SelectionChanged> SurfaceInspectorSelectionChangedCaller;
+	typedef FreeCaller<void(const Selectable&), SurfaceInspector_SelectionChanged> SurfaceInspectorSelectionChangedCaller;
 	GlobalSelectionSystem().addSelectionChangeCallback( SurfaceInspectorSelectionChangedCaller() );
-	typedef FreeCaller<SurfaceInspector_updateSelection> SurfaceInspectorUpdateSelectionCaller;
+	typedef FreeCaller<void(), SurfaceInspector_updateSelection> SurfaceInspectorUpdateSelectionCaller;
 	Brush_addTextureChangedCallback( SurfaceInspectorUpdateSelectionCaller() );
 	Patch_addTextureChangedCallback( SurfaceInspectorUpdateSelectionCaller() );
 

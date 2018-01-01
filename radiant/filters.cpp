@@ -126,7 +126,7 @@ public:
 	void active( const BoolImportCallback& importCallback ){
 		importCallback( ( g_filters_globals.exclude & m_mask ) != 0 );
 	}
-	typedef MemberCaller1<ToggleFilterFlag, const BoolImportCallback&, &ToggleFilterFlag::active> ActiveCaller;
+	typedef MemberCaller<ToggleFilterFlag, void(const BoolImportCallback&), &ToggleFilterFlag::active> ActiveCaller;
 	void toggle(){
 		g_filters_globals.exclude ^= m_mask;
 		m_item.update();
@@ -137,7 +137,7 @@ public:
 		m_item.update();
 		PerformFiltering();
 	}
-	typedef MemberCaller<ToggleFilterFlag, &ToggleFilterFlag::toggle> ToggleCaller;
+	typedef MemberCaller<ToggleFilterFlag, void(), &ToggleFilterFlag::toggle> ToggleCaller;
 };
 
 
@@ -217,8 +217,8 @@ void Filters_constructMenu( QMenu* menu ){
 void ConstructFilters(){
 	GlobalPreferenceSystem().registerPreference( "SI_Exclude", SizeImportStringCaller( g_filters_globals.exclude ), SizeExportStringCaller( g_filters_globals.exclude ) );
 
-	GlobalCommands_insert( "InvertFilters", FreeCaller<InvertFilters>() );
-	GlobalCommands_insert( "ResetFilters", FreeCaller<ResetFilters>() );
+	GlobalCommands_insert( "InvertFilters", FreeCaller<void(), InvertFilters>() );
+	GlobalCommands_insert( "ResetFilters", FreeCaller<void(), ResetFilters>() );
 
 	add_filter_command( EXCLUDE_WORLD, "FilterWorldBrushes", QKeySequence( "Alt+1" ) );
 	add_filter_command( EXCLUDE_ENT, "FilterEntities", QKeySequence( "Alt+2" ) );

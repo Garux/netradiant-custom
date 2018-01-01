@@ -100,7 +100,7 @@ template<
     typename Type_,
     typename Other_,
     void( *Import ) ( Type_&, Other_ ),
-    void( *Export ) ( Type_&, const Callback1<Other_>& )
+    void( *Export ) ( Type_&, const Callback<void(Other_)>& )
     >
 class ImportExport
 {
@@ -108,8 +108,8 @@ public:
 	typedef Type_ Type;
 	typedef Other_ Other;
 
-	typedef ReferenceCaller1<Type, Other, Import> ImportCaller;
-	typedef ReferenceCaller1<Type, const Callback1<Other>&, Export> ExportCaller;
+	typedef ReferenceCaller<Type, void(Other), Import> ImportCaller;
+	typedef ReferenceCaller<Type, void(const Callback<void(Other)>&), Export> ExportCaller;
 };
 
 typedef ImportExport<bool, bool, BoolImport, BoolExport> BoolImportExport;
@@ -196,8 +196,8 @@ template<typename FirstArgument>
 class CallbackDialogData final : public DLG_DATA
 {
 public:
-	typedef Callback1<FirstArgument> ImportCallback;
-	typedef Callback1<const ImportCallback&> ExportCallback;
+	typedef Callback<void(FirstArgument)> ImportCallback;
+	typedef Callback<void(const ImportCallback&)> ExportCallback;
 
 private:
 	ImportCallback m_importWidget;
@@ -248,8 +248,8 @@ public:
 	}
 	void apply(
 	    typename Widget::Type& widget,
-	    const Callback1<typename Widget::Other>& importViewer,
-	    const Callback1<const Callback1<typename Widget::Other>&>& exportViewer
+	    const Callback<void(typename Widget::Other)>& importViewer,
+	    const Callback<void(const Callback<void(typename Widget::Other)>&)>& exportViewer
 	) const {
 		m_data.push_back(
 		    new CallbackDialogData<typename Widget::Other>(

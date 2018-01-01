@@ -64,7 +64,7 @@ public:
 			m_model->setData( m_model->index( m_model->rowCount() - 1 ), string );
 		}
 	}
-	typedef MemberCaller1<EntryCompletion, const char*, &EntryCompletion::append> AppendCaller;
+	typedef MemberCaller<EntryCompletion, void(const char*), &EntryCompletion::append> AppendCaller;
 
 	void fill(){
 		StringList().forEach( AppendCaller( *this ) );
@@ -85,7 +85,7 @@ public:
 	void invalidate(){
 		m_invalid = true;
 	}
-	typedef MemberCaller<EntryCompletion, &EntryCompletion::invalidate> InvalidateCaller;
+	typedef MemberCaller<EntryCompletion, void(), &EntryCompletion::invalidate> InvalidateCaller;
 protected:
 	bool eventFilter( QObject *obj, QEvent *event ) override {
 		if( event->type() == QEvent::FocusIn ) {

@@ -77,12 +77,12 @@ const char* BrushType_getName( EBrushType type ){
 void Face_importSnapPlanes( bool value ){
 	Face::m_quantise = value ? quantiseInteger : quantiseFloating;
 }
-typedef FreeCaller1<bool, Face_importSnapPlanes> FaceImportSnapPlanesCaller;
+typedef FreeCaller<void(bool), Face_importSnapPlanes> FaceImportSnapPlanesCaller;
 
 void Face_exportSnapPlanes( const BoolImportCallback& importer ){
 	importer( Face::m_quantise == quantiseInteger );
 }
-typedef FreeCaller1<const BoolImportCallback&, Face_exportSnapPlanes> FaceExportSnapPlanesCaller;
+typedef FreeCaller<void(const BoolImportCallback&), Face_exportSnapPlanes> FaceExportSnapPlanesCaller;
 
 void Brush_constructPreferences( PreferencesPage& page ){
 	page.appendSpinner(
@@ -116,7 +116,7 @@ void Brush_constructPage( PreferenceGroup& group ){
 	Brush_constructPreferences( page );
 }
 void Brush_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Brush_constructPage>() );
+	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Brush_constructPage>() );
 }
 
 void Brush_toggleFormat( EBrushType type ){
@@ -185,7 +185,7 @@ void Brush_Construct( EBrushType type ){
 
 	GridStatus_getTextureLockEnabled = getTextureLockEnabled;
 	GridStatus_getTexdefTypeIdLabel = getTexdefTypeIdLabel;
-	g_texture_lock_status_changed = FreeCaller<GridStatus_changed>();
+	g_texture_lock_status_changed = FreeCaller<void(), GridStatus_changed>();
 
 	Clipper_Construct();
 }
@@ -218,8 +218,8 @@ void BrushFaceData_fromFace( const BrushFaceDataCallback& callback, Face& face )
 	faceData.value = face.getShader().m_flags.m_value;
 	callback( faceData );
 }
-typedef ConstReferenceCaller1<BrushFaceDataCallback, Face&, BrushFaceData_fromFace> BrushFaceDataFromFaceCaller;
-typedef Callback1<Face&> FaceCallback;
+typedef ConstReferenceCaller<BrushFaceDataCallback, void(Face&), BrushFaceData_fromFace> BrushFaceDataFromFaceCaller;
+typedef Callback<void(Face&)> FaceCallback;
 
 class Quake3BrushCreator : public BrushCreator
 {

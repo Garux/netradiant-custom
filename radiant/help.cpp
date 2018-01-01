@@ -91,7 +91,7 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 
 						prop = xmlGetProp( pNode, reinterpret_cast<const xmlChar*>( "name" ) );
 						ASSERT_NOTNULL( prop );
-						create_menu_item_with_mnemonic( menu, reinterpret_cast<const char*>( prop ), ReferenceCaller<CopiedString, HandleHelpCommand>( mHelpURLs.back() ) );
+						create_menu_item_with_mnemonic( menu, reinterpret_cast<const char*>( prop ), ReferenceCaller<CopiedString, void(), HandleHelpCommand>( mHelpURLs.back() ) );
 						xmlFree( prop );
 					}
 					pNode = pNode->next;

@@ -48,7 +48,7 @@ public:
 		m_importCallbacks.push_back( callback );
 		m_exportCallback( callback );
 	}
-	typedef MemberCaller1<ToggleItem, const BoolImportCallback&, &ToggleItem::addCallback> AddCallbackCaller;
+	typedef MemberCaller<ToggleItem, void(const BoolImportCallback&), &ToggleItem::addCallback> AddCallbackCaller;
 };
 
 class ToggleShown : public QObject
@@ -75,7 +75,7 @@ public:
 	void exportActive( const BoolImportCallback& importCallback ){
 		importCallback( active() );
 	}
-	typedef MemberCaller1<ToggleShown, const BoolImportCallback&, &ToggleShown::exportActive> ActiveCaller;
+	typedef MemberCaller<ToggleShown, void(const BoolImportCallback&), &ToggleShown::exportActive> ActiveCaller;
 	void set( bool shown ){
 		m_shownDeferred = shown;
 		if ( m_widget != nullptr )
@@ -84,7 +84,7 @@ public:
 	void toggle(){
 		m_widget->setVisible( m_shownDeferred = !m_widget->isVisible() );
 	}
-	typedef MemberCaller<ToggleShown, &ToggleShown::toggle> ToggleCaller;
+	typedef MemberCaller<ToggleShown, void(), &ToggleShown::toggle> ToggleCaller;
 	void connect( QWidget* widget ){
 		m_widget = widget;
 		m_widget->setVisible( m_shownDeferred );
@@ -110,11 +110,11 @@ namespace{
 void ToggleShown_importBool( ToggleShown& self, bool value ){
 	self.set( value );
 }
-typedef ReferenceCaller1<ToggleShown, bool, ToggleShown_importBool> ToggleShownImportBoolCaller;
+typedef ReferenceCaller<ToggleShown, void(bool), ToggleShown_importBool> ToggleShownImportBoolCaller;
 void ToggleShown_exportBool( const ToggleShown& self, const BoolImportCallback& importer ){
 	importer( self.active() );
 }
-typedef ConstReferenceCaller1<ToggleShown, const BoolImportCallback&, ToggleShown_exportBool> ToggleShownExportBoolCaller;
+typedef ConstReferenceCaller<ToggleShown, void(const BoolImportCallback&), ToggleShown_exportBool> ToggleShownExportBoolCaller;
 
 }
 
@@ -122,5 +122,5 @@ typedef ConstReferenceCaller1<ToggleShown, const BoolImportCallback&, ToggleShow
 inline void widget_queue_draw( QWidget& widget ){
 	widget.update();
 }
-typedef ReferenceCaller<QWidget, widget_queue_draw> WidgetQueueDrawCaller;
+typedef ReferenceCaller<QWidget, void(), widget_queue_draw> WidgetQueueDrawCaller;
 

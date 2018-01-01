@@ -143,12 +143,12 @@ inline void read_angle( Float9 rotation, const char* value ){
 
 class RotationKey
 {
-	Callback m_rotationChanged;
+	Callback<void()> m_rotationChanged;
 public:
 	Float9 m_rotation;
 
 
-	RotationKey( const Callback& rotationChanged )
+	RotationKey( const Callback<void()>& rotationChanged )
 		: m_rotationChanged( rotationChanged ){
 		default_rotation( m_rotation );
 	}
@@ -157,13 +157,13 @@ public:
 		read_angle( m_rotation, value );
 		m_rotationChanged();
 	}
-	typedef MemberCaller1<RotationKey, const char*, &RotationKey::angleChanged> AngleChangedCaller;
+	typedef MemberCaller<RotationKey, void(const char*), &RotationKey::angleChanged> AngleChangedCaller;
 
 	void rotationChanged( const char* value ){
 		read_rotation( m_rotation, value );
 		m_rotationChanged();
 	}
-	typedef MemberCaller1<RotationKey, const char*, &RotationKey::rotationChanged> RotationChangedCaller;
+	typedef MemberCaller<RotationKey, void(const char*), &RotationKey::rotationChanged> RotationChangedCaller;
 
 	void write( Entity* entity ) const {
 		Vector3 euler = matrix4_get_rotation_euler_xyz_degrees( rotation_toMatrix( m_rotation ) );

@@ -58,12 +58,12 @@ inline void write_angle( float angle, Entity* entity ){
 
 class AngleKey
 {
-	Callback m_angleChanged;
+	Callback<void()> m_angleChanged;
 public:
 	float m_angle;
 
 
-	AngleKey( const Callback& angleChanged )
+	AngleKey( const Callback<void()>& angleChanged )
 		: m_angleChanged( angleChanged ), m_angle( ANGLEKEY_IDENTITY ){
 	}
 
@@ -71,7 +71,7 @@ public:
 		read_angle( m_angle, value );
 		m_angleChanged();
 	}
-	typedef MemberCaller1<AngleKey, const char*, &AngleKey::angleChanged> AngleChangedCaller;
+	typedef MemberCaller<AngleKey, void(const char*), &AngleKey::angleChanged> AngleChangedCaller;
 
 	void write( Entity* entity ) const {
 		write_angle( m_angle, entity );

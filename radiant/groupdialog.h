@@ -36,7 +36,7 @@ void GroupDialog_show();
 inline void RawStringExport( const char* string, const StringImportCallback& importer ){
 	importer( string );
 }
-typedef ConstPointerCaller1<char, const StringImportCallback&, RawStringExport> RawStringExportCaller;
+typedef ConstPointerCaller<char, void(const StringImportCallback&), RawStringExport> RawStringExportCaller;
 QWidget* GroupDialog_addPage( const char* tabLabel, QWidget* widget, const StringExportCallback& title );
 
 void GroupDialog_showPage( QWidget* page );

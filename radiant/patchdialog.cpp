@@ -135,7 +135,7 @@ public:
 	void cancel(){
 		update();
 	}
-	typedef MemberCaller<Subdivisions, &Subdivisions::cancel> CancelCaller;
+	typedef MemberCaller<Subdivisions, void(), &Subdivisions::cancel> CancelCaller;
 	void apply(){
 		Scene_PatchSetFixedSubdivisions(
 		    PatchFixedSubdivisions(
@@ -145,7 +145,7 @@ public:
 		    )
 		);
 	}
-	typedef MemberCaller<Subdivisions, &Subdivisions::apply> ApplyCaller;
+	typedef MemberCaller<Subdivisions, void(), &Subdivisions::apply> ApplyCaller;
 };
 
 

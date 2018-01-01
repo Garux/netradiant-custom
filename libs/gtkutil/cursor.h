@@ -65,7 +65,7 @@ public:
 	void invoke(){
 		m_func( m_mouseMoveEvent );
 	}
-	typedef MemberCaller<DeferredMotion2, &DeferredMotion2::invoke> InvokeCaller;
+	typedef MemberCaller<DeferredMotion2, void(), &DeferredMotion2::invoke> InvokeCaller;
 };
 
 class DeferredMotionDelta
@@ -122,7 +122,7 @@ public:
 		m_delta_x = 0;
 		m_delta_y = 0;
 	}
-	typedef MemberCaller<DeferredMotionDelta2, &DeferredMotionDelta2::invoke> InvokeCaller;
+	typedef MemberCaller<DeferredMotionDelta2, void(), &DeferredMotionDelta2::invoke> InvokeCaller;
 };
 
 

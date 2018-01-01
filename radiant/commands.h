@@ -28,13 +28,13 @@ const QKeySequence& GlobalShortcuts_insert( const char* name, const QKeySequence
 void GlobalShortcuts_register( const char* name, int type ); // 1 = command, 2 = toggle
 void GlobalShortcuts_reportUnregistered();
 
-void GlobalCommands_insert( const char* name, const Callback& callback, const QKeySequence& accelerator = {} );
+void GlobalCommands_insert( const char* name, const Callback<void()>& callback, const QKeySequence& accelerator = {} );
 const Command& GlobalCommands_find( const char* name );
 
-void GlobalToggles_insert( const char* name, const Callback& callback, const BoolExportCallback& exportCallback, const QKeySequence& accelerator = {} );
+void GlobalToggles_insert( const char* name, const Callback<void()>& callback, const BoolExportCallback& exportCallback, const QKeySequence& accelerator = {} );
 const Toggle& GlobalToggles_find( const char* name );
 
-void GlobalKeyEvents_insert( const char* name, const Callback& keyDown, const Callback& keyUp, const QKeySequence& accelerator = {} );
+void GlobalKeyEvents_insert( const char* name, const Callback<void()>& keyDown, const Callback<void()>& keyUp, const QKeySequence& accelerator = {} );
 const KeyEvent& GlobalKeyEvents_find( const char* name );
 
 

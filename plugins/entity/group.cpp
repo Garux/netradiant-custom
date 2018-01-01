@@ -75,10 +75,10 @@ class Group
 		m_anglesDraw = m_entity.getEntityClass().has_angles || m_entity.hasKeyValue( "angle" ) || m_entity.hasKeyValue( "angles" );
 		SceneChangeNotify();
 	}
-	typedef MemberCaller<Group, &Group::updateAnglesDraw> UpdateAnglesDrawCaller;
+	typedef MemberCaller<Group, void(), &Group::updateAnglesDraw> UpdateAnglesDrawCaller;
 
-	Callback m_transformChanged;
-	Callback m_evaluateTransform;
+	Callback<void()> m_transformChanged;
+	Callback<void()> m_evaluateTransform;
 
 	void construct(){
 		m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
@@ -90,7 +90,7 @@ class Group
 	}
 
 public:
-	Group( EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	Group( EntityClass* eclass, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( eclass ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
@@ -105,7 +105,7 @@ public:
 		m_evaluateTransform( evaluateTransform ){
 		construct();
 	}
-	Group( const Group& other, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	Group( const Group& other, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( other.m_entity ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
@@ -220,12 +220,12 @@ public:
 		matrix4_translate_by_vec3( m_transform.localToParent(), m_origin );
 		m_transformChanged();
 	}
-	typedef MemberCaller<Group, &Group::updateTransform> UpdateTransformCaller;
+	typedef MemberCaller<Group, void(), &Group::updateTransform> UpdateTransformCaller;
 	void originChanged(){
 		m_origin = m_originKey.m_origin;
 		updateTransform();
 	}
-	typedef MemberCaller<Group, &Group::originChanged> OriginChangedCaller;
+	typedef MemberCaller<Group, void(), &Group::originChanged> OriginChangedCaller;
 
 	void translate( const Vector3& translation ){
 		m_origin = origin_translated( m_origin, translation );
@@ -243,7 +243,7 @@ public:
 		m_evaluateTransform();
 		updateTransform();
 	}
-	typedef MemberCaller<Group, &Group::transformChanged> TransformChangedCaller;
+	typedef MemberCaller<Group, void(), &Group::transformChanged> TransformChangedCaller;
 };
 
 #if 0
@@ -385,7 +385,7 @@ public:
 		evaluateTransform();
 		m_contained.freezeTransform();
 	}
-	typedef MemberCaller<GroupInstance, &GroupInstance::applyTransform> ApplyTransformCaller;
+	typedef MemberCaller<GroupInstance, void(), &GroupInstance::applyTransform> ApplyTransformCaller;
 };
 
 class GroupNode :

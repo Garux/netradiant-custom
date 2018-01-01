@@ -79,7 +79,7 @@ inline scene::Node& entity_for_eclass( EntityClass* eclass ){
 void Entity_setName( Entity& entity, const char* name ){
 	entity.setKeyValue( "name", name );
 }
-typedef ReferenceCaller1<Entity, const char*, Entity_setName> EntitySetNameCaller;
+typedef ReferenceCaller<Entity, void(const char*), Entity_setName> EntitySetNameCaller;
 
 inline Namespaced* Node_getNamespaced( scene::Node& node ){
 	return NodeTypeCast<Namespaced>::cast( node );
@@ -135,7 +135,7 @@ public:
 		m_e1->setKeyValue( m_targetkey, name );
 		m_e2->setKeyValue( "targetname", name );
 	}
-	typedef MemberCaller1<ConnectEntities, const char*, &ConnectEntities::connect> ConnectCaller;
+	typedef MemberCaller<ConnectEntities, void(const char*), &ConnectEntities::connect> ConnectCaller;
 };
 
 inline Entity* ScenePath_getEntity( const scene::Path& path ){

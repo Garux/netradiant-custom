@@ -27,4 +27,4 @@ void Textures_Realise();
 void Textures_Unrealise();
 void Textures_sharedContextDestroyed();
 
-void Textures_setModeChangedNotify( const Callback& notify );
+void Textures_setModeChangedNotify( const Callback<void()>& notify );

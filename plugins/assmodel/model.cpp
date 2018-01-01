@@ -372,7 +372,7 @@ class PicoModel :
 
 	AABB m_aabb_local;
 public:
-	Callback m_lightsChanged;
+	Callback<void()> m_lightsChanged;
 
 	PicoModel(){
 		constructNull();
@@ -507,7 +507,7 @@ public:
 	void lightsChanged(){
 		m_lightList->lightsChanged();
 	}
-	typedef MemberCaller<PicoModelInstance, &PicoModelInstance::lightsChanged> LightsChangedCaller;
+	typedef MemberCaller<PicoModelInstance, void(), &PicoModelInstance::lightsChanged> LightsChangedCaller;
 
 	void constructRemaps(){
 		ASSERT_MESSAGE( m_skins.size() == m_picomodel.size(), "ERROR" );
@@ -562,9 +562,9 @@ public:
 	~PicoModelInstance(){
 		destroyRemaps();
 
-		Instance::setTransformChangedCallback( Callback() );
+		Instance::setTransformChangedCallback( Callback<void()>() );
 
-		m_picomodel.m_lightsChanged = Callback();
+		m_picomodel.m_lightsChanged = Callback<void()>();
 		GlobalShaderCache().detach( *this );
 	}
 

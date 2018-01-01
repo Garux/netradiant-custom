@@ -102,7 +102,7 @@ public:
 	void initialise(){
 		m_typeId = GlobalSceneGraph().getNodeTypeId( Type::Name );
 	}
-	typedef MemberCaller<NodeType<Type>, &NodeType<Type>::initialise> InitialiseCaller;
+	typedef MemberCaller<NodeType<Type>, void(), &NodeType<Type>::initialise> InitialiseCaller;
 	TypeId getTypeId(){
 #if defined( _DEBUG )
 		ASSERT_MESSAGE( m_typeId != NODETYPEID_NONE, "node-type " << makeQuoted( Type::Name ) << " used before being initialised" );
@@ -438,7 +438,7 @@ public:
 	void initialise(){
 		m_typeId = GlobalSceneGraph().getInstanceTypeId( Type::Name );
 	}
-	typedef MemberCaller<InstanceType<Type>, &InstanceType<Type>::initialise> InitialiseCaller;
+	typedef MemberCaller<InstanceType<Type>, void(), &InstanceType<Type>::initialise> InitialiseCaller;
 	TypeId getTypeId(){
 #if defined( _DEBUG )
 		ASSERT_MESSAGE( m_typeId != INSTANCETYPEID_NONE, "instance-type " << makeQuoted( Type::Name ) << " used before being initialised" );
@@ -571,8 +571,8 @@ class Instance
 	mutable bool m_childSelectedChanged;
 	mutable bool m_parentSelected;
 	mutable bool m_parentSelectedChanged;
-	Callback m_childSelectedChangedCallback;
-	Callback m_transformChangedCallback;
+	Callback<void()> m_childSelectedChangedCallback;
+	Callback<void()> m_transformChangedCallback;
 
 
 	void evaluateTransform() const {
@@ -670,7 +670,7 @@ public:
 		GlobalSceneGraph().traverse_subgraph( TransformChangedWalker(), m_path );
 		boundsChanged();
 	}
-	void setTransformChangedCallback( const Callback& callback ){
+	void setTransformChangedCallback( const Callback<void()>& callback ){
 		m_transformChangedCallback = callback;
 	}
 
@@ -707,7 +707,7 @@ public:
 		return m_childSelected;
 	}
 
-	void setChildSelectedChangedCallback( const Callback& callback ){
+	void setChildSelectedChangedCallback( const Callback<void()>& callback ){
 		m_childSelectedChangedCallback = callback;
 	}
 	void selectedChanged(){
@@ -942,10 +942,10 @@ public:
 
 class SimpleCounter : public Counter
 {
-	Callback m_countChanged;
+	Callback<void()> m_countChanged;
 	std::size_t m_count;
 public:
-	void setCountChangedCallback( const Callback& countChanged ){
+	void setCountChangedCallback( const Callback<void()>& countChanged ){
 		m_countChanged = countChanged;
 	}
 	void increment(){

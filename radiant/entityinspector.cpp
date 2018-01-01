@@ -176,13 +176,13 @@ public:
 	void apply(){
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), m_check->isChecked() ? "1" : "" );
 	}
-	typedef MemberCaller<BooleanAttribute, &BooleanAttribute::apply> ApplyCaller;
+	typedef MemberCaller<BooleanAttribute, void(), &BooleanAttribute::apply> ApplyCaller;
 
 	void update() override {
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
 		m_check->setChecked( atoi( value ) != 0 ); // atoi( empty ) is also 0
 	}
-	typedef MemberCaller<BooleanAttribute, &BooleanAttribute::update> UpdateCaller;
+	typedef MemberCaller<BooleanAttribute, void(), &BooleanAttribute::update> UpdateCaller;
 };
 
 
@@ -211,12 +211,12 @@ public:
 		const auto value = m_entry->text().toLatin1();
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), value.constData() );
 	}
-	typedef MemberCaller<StringAttribute, &StringAttribute::apply> ApplyCaller;
+	typedef MemberCaller<StringAttribute, void(), &StringAttribute::apply> ApplyCaller;
 
 	void update() override {
 		m_entry->setText( SelectedEntity_getValueForKey( m_key.c_str() ) );
 	}
-	typedef MemberCaller<StringAttribute, &StringAttribute::update> UpdateCaller;
+	typedef MemberCaller<StringAttribute, void(), &StringAttribute::update> UpdateCaller;
 };
 
 class ShaderAttribute : public StringAttribute
@@ -260,11 +260,11 @@ public:
 	void apply(){
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), m_entry->text().toLatin1().constData() );
 	}
-	typedef MemberCaller<ColorAttribute, &ColorAttribute::apply> ApplyCaller;
+	typedef MemberCaller<ColorAttribute, void(), &ColorAttribute::apply> ApplyCaller;
 	void update() override {
 		m_entry->setText( SelectedEntity_getValueForKey( m_key.c_str() ) );
 	}
-	typedef MemberCaller<ColorAttribute, &ColorAttribute::update> UpdateCaller;
+	typedef MemberCaller<ColorAttribute, void(), &ColorAttribute::update> UpdateCaller;
 	void browse(){
 		Vector3 color( 1, 1, 1 );
 		string_parse_vector3( m_entry->text().toLatin1().constData(), color );
@@ -299,11 +299,11 @@ public:
 	void apply(){
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), m_entry->text().toLatin1().constData() );
 	}
-	typedef MemberCaller<ModelAttribute, &ModelAttribute::apply> ApplyCaller;
+	typedef MemberCaller<ModelAttribute, void(), &ModelAttribute::apply> ApplyCaller;
 	void update() override {
 		m_entry->setText( SelectedEntity_getValueForKey( m_key.c_str() ) );
 	}
-	typedef MemberCaller<ModelAttribute, &ModelAttribute::update> UpdateCaller;
+	typedef MemberCaller<ModelAttribute, void(), &ModelAttribute::update> UpdateCaller;
 	void browse(){
 		const char *filename = misc_model_dialog( m_entry->window(), m_entry->text().toLatin1().constData() );
 
@@ -363,11 +363,11 @@ public:
 	void apply(){
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), m_entry->text().toLatin1().constData() );
 	}
-	typedef MemberCaller<SoundAttribute, &SoundAttribute::apply> ApplyCaller;
+	typedef MemberCaller<SoundAttribute, void(), &SoundAttribute::apply> ApplyCaller;
 	void update() override {
 		m_entry->setText( SelectedEntity_getValueForKey( m_key.c_str() ) );
 	}
-	typedef MemberCaller<SoundAttribute, &SoundAttribute::update> UpdateCaller;
+	typedef MemberCaller<SoundAttribute, void(), &SoundAttribute::update> UpdateCaller;
 	void browse(){
 		const char *filename = browse_sound( m_entry->window(), m_entry->text().toLatin1().constData() );
 
@@ -385,7 +385,7 @@ inline double angle_normalised( double angle ){
 #include "camwindow.h"
 class CamAnglesButton
 {
-	typedef Callback1<const Vector3&> ApplyCallback;
+	typedef Callback<void(const Vector3&)> ApplyCallback;
 	ApplyCallback m_apply;
 public:
 	QPushButton* m_button;
@@ -431,7 +431,7 @@ public:
 		const auto angle = StringStream<32>( angle_normalised( entry_get_float( m_entry ) ) );
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle );
 	}
-	typedef MemberCaller<AngleAttribute, &AngleAttribute::apply> ApplyCaller;
+	typedef MemberCaller<AngleAttribute, void(), &AngleAttribute::apply> ApplyCaller;
 
 	void update() override {
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
@@ -444,13 +444,13 @@ public:
 			m_entry->setText( "0" );
 		}
 	}
-	typedef MemberCaller<AngleAttribute, &AngleAttribute::update> UpdateCaller;
+	typedef MemberCaller<AngleAttribute, void(), &AngleAttribute::update> UpdateCaller;
 
 	void apply( const Vector3& angles ){
 		entry_set_float( m_entry, angles[1] );
 		apply();
 	}
-	typedef MemberCaller1<AngleAttribute, const Vector3&, &AngleAttribute::apply> ApplyVecCaller;
+	typedef MemberCaller<AngleAttribute, void(const Vector3&), &AngleAttribute::apply> ApplyVecCaller;
 };
 
 class DirectionAttribute final : public EntityAttribute
@@ -483,7 +483,7 @@ public:
 		const auto angle = StringStream<32>( angle_normalised( entry_get_float( m_entry ) ) );
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angle );
 	}
-	typedef MemberCaller<DirectionAttribute, &DirectionAttribute::apply> ApplyCaller;
+	typedef MemberCaller<DirectionAttribute, void(), &DirectionAttribute::apply> ApplyCaller;
 
 	void update() override {
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
@@ -513,7 +513,7 @@ public:
 			m_entry->setText( "0" );
 		}
 	}
-	typedef MemberCaller<DirectionAttribute, &DirectionAttribute::update> UpdateCaller;
+	typedef MemberCaller<DirectionAttribute, void(), &DirectionAttribute::update> UpdateCaller;
 
 	void applyRadio( int id ){
 		if ( id == 0 ) {
@@ -526,13 +526,13 @@ public:
 			apply();
 		}
 	}
-	typedef MemberCaller1<DirectionAttribute, int, &DirectionAttribute::applyRadio> ApplyRadioCaller;
+	typedef MemberCaller<DirectionAttribute, void(int), &DirectionAttribute::applyRadio> ApplyRadioCaller;
 
 	void apply( const Vector3& angles ){
 		entry_set_float( m_entry, angles[1] );
 		apply();
 	}
-	typedef MemberCaller1<DirectionAttribute, const Vector3&, &DirectionAttribute::apply> ApplyVecCaller;
+	typedef MemberCaller<DirectionAttribute, void(const Vector3&), &DirectionAttribute::apply> ApplyVecCaller;
 };
 
 
@@ -574,7 +574,7 @@ public:
 		                                 ' ', angle_normalised( entry_get_float( m_angles.m_roll ) ) );
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), angles );
 	}
-	typedef MemberCaller<AnglesAttribute, &AnglesAttribute::apply> ApplyCaller;
+	typedef MemberCaller<AnglesAttribute, void(), &AnglesAttribute::apply> ApplyCaller;
 
 	void update() override {
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
@@ -601,7 +601,7 @@ public:
 			m_angles.m_roll->setText( "0" );
 		}
 	}
-	typedef MemberCaller<AnglesAttribute, &AnglesAttribute::update> UpdateCaller;
+	typedef MemberCaller<AnglesAttribute, void(), &AnglesAttribute::update> UpdateCaller;
 
 	void apply( const Vector3& angles ){
 		entry_set_float( m_angles.m_pitch, angles[0] );
@@ -609,7 +609,7 @@ public:
 		entry_set_float( m_angles.m_roll, 0 );
 		apply();
 	}
-	typedef MemberCaller1<AnglesAttribute, const Vector3&, &AnglesAttribute::apply> ApplyVecCaller;
+	typedef MemberCaller<AnglesAttribute, void(const Vector3&), &AnglesAttribute::apply> ApplyVecCaller;
 };
 
 class Vector3Entry
@@ -647,7 +647,7 @@ public:
 		                                  ' ', entry_get_float( m_vector3.m_z ) );
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), vector3 );
 	}
-	typedef MemberCaller<Vector3Attribute, &Vector3Attribute::apply> ApplyCaller;
+	typedef MemberCaller<Vector3Attribute, void(), &Vector3Attribute::apply> ApplyCaller;
 
 	void update() override {
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
@@ -674,7 +674,7 @@ public:
 			m_vector3.m_z->setText( "0" );
 		}
 	}
-	typedef MemberCaller<Vector3Attribute, &Vector3Attribute::update> UpdateCaller;
+	typedef MemberCaller<Vector3Attribute, void(), &Vector3Attribute::update> UpdateCaller;
 };
 
 class ListAttribute final : public EntityAttribute
@@ -703,7 +703,7 @@ public:
 		// looks safe to assume that user actions wont make m_combo->currentIndex() -1
 		Scene_EntitySetKeyValue_Selected_Undoable( m_key.c_str(), m_type[m_combo->currentIndex()].second.c_str() );
 	}
-	typedef MemberCaller<ListAttribute, &ListAttribute::apply> ApplyCaller;
+	typedef MemberCaller<ListAttribute, void(), &ListAttribute::apply> ApplyCaller;
 
 	void update() override {
 		const char* value = SelectedEntity_getValueForKey( m_key.c_str() );
@@ -716,7 +716,7 @@ public:
 			m_combo->setCurrentIndex( 0 );
 		}
 	}
-	typedef MemberCaller<ListAttribute, &ListAttribute::update> UpdateCaller;
+	typedef MemberCaller<ListAttribute, void(), &ListAttribute::update> UpdateCaller;
 };
 
 
@@ -1064,7 +1064,7 @@ class EntityInspectorDraw
 {
 	IdleDraw m_idleDraw;
 public:
-	EntityInspectorDraw() : m_idleDraw( FreeCaller<EntityInspector_updateKeyValues>( ) ){
+	EntityInspectorDraw() : m_idleDraw( FreeCaller<void(), EntityInspector_updateKeyValues>( ) ){
 	}
 	void queueDraw(){
 		m_idleDraw.queueDraw();
@@ -1381,7 +1381,7 @@ QWidget* EntityInspector_constructWindow( QWidget* toplevel ){
 	g_entityInspector_windowConstructed = true;
 	EntityClassList_fill();
 
-	typedef FreeCaller1<const Selectable&, EntityInspector_selectionChanged> EntityInspectorSelectionChangedCaller;
+	typedef FreeCaller<void(const Selectable&), EntityInspector_selectionChanged> EntityInspectorSelectionChangedCaller;
 	GlobalSelectionSystem().addSelectionChangeCallback( EntityInspectorSelectionChangedCaller() );
 	GlobalEntityCreator().setKeyValueChangedFunc( EntityInspector_keyValueChanged );
 

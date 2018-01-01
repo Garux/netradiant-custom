@@ -72,17 +72,17 @@ public:
 	}
 };
 
-typedef FreeCaller1<const BoolImportCallback&, &BoolFunctionExport<EdgeMode>::apply> EdgeModeApplyCaller;
+typedef FreeCaller<void(const BoolImportCallback&), &BoolFunctionExport<EdgeMode>::apply> EdgeModeApplyCaller;
 EdgeModeApplyCaller g_edgeMode_button_caller;
 BoolExportCallback g_edgeMode_button_callback( g_edgeMode_button_caller );
 ToggleItem g_edgeMode_button( g_edgeMode_button_callback );
 
-typedef FreeCaller1<const BoolImportCallback&, &BoolFunctionExport<VertexMode>::apply> VertexModeApplyCaller;
+typedef FreeCaller<void(const BoolImportCallback&), &BoolFunctionExport<VertexMode>::apply> VertexModeApplyCaller;
 VertexModeApplyCaller g_vertexMode_button_caller;
 BoolExportCallback g_vertexMode_button_callback( g_vertexMode_button_caller );
 ToggleItem g_vertexMode_button( g_vertexMode_button_callback );
 
-typedef FreeCaller1<const BoolImportCallback&, &BoolFunctionExport<FaceMode>::apply> FaceModeApplyCaller;
+typedef FreeCaller<void(const BoolImportCallback&), &BoolFunctionExport<FaceMode>::apply> FaceModeApplyCaller;
 FaceModeApplyCaller g_faceMode_button_caller;
 BoolExportCallback g_faceMode_button_callback( g_faceMode_button_caller );
 ToggleItem g_faceMode_button( g_faceMode_button_callback );
@@ -207,35 +207,35 @@ void UVToolExport( const BoolImportCallback& importCallback ){
 	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eUV );
 }
 
-FreeCaller1<const BoolImportCallback&, TranslateToolExport> g_translatemode_button_caller;
+FreeCaller<void(const BoolImportCallback&), TranslateToolExport> g_translatemode_button_caller;
 BoolExportCallback g_translatemode_button_callback( g_translatemode_button_caller );
 ToggleItem g_translatemode_button( g_translatemode_button_callback );
 
-FreeCaller1<const BoolImportCallback&, RotateToolExport> g_rotatemode_button_caller;
+FreeCaller<void(const BoolImportCallback&), RotateToolExport> g_rotatemode_button_caller;
 BoolExportCallback g_rotatemode_button_callback( g_rotatemode_button_caller );
 ToggleItem g_rotatemode_button( g_rotatemode_button_callback );
 
-FreeCaller1<const BoolImportCallback&, ScaleToolExport> g_scalemode_button_caller;
+FreeCaller<void(const BoolImportCallback&), ScaleToolExport> g_scalemode_button_caller;
 BoolExportCallback g_scalemode_button_callback( g_scalemode_button_caller );
 ToggleItem g_scalemode_button( g_scalemode_button_callback );
 
-FreeCaller1<const BoolImportCallback&, SkewToolExport> g_skewmode_button_caller;
+FreeCaller<void(const BoolImportCallback&), SkewToolExport> g_skewmode_button_caller;
 BoolExportCallback g_skewmode_button_callback( g_skewmode_button_caller );
 ToggleItem g_skewmode_button( g_skewmode_button_callback );
 
-FreeCaller1<const BoolImportCallback&, DragToolExport> g_dragmode_button_caller;
+FreeCaller<void(const BoolImportCallback&), DragToolExport> g_dragmode_button_caller;
 BoolExportCallback g_dragmode_button_callback( g_dragmode_button_caller );
 ToggleItem g_dragmode_button( g_dragmode_button_callback );
 
-FreeCaller1<const BoolImportCallback&, ClipperToolExport> g_clipper_button_caller;
+FreeCaller<void(const BoolImportCallback&), ClipperToolExport> g_clipper_button_caller;
 BoolExportCallback g_clipper_button_callback( g_clipper_button_caller );
 ToggleItem g_clipper_button( g_clipper_button_callback );
 
-FreeCaller1<const BoolImportCallback&, BuildToolExport> g_build_button_caller;
+FreeCaller<void(const BoolImportCallback&), BuildToolExport> g_build_button_caller;
 BoolExportCallback g_build_button_callback( g_build_button_caller );
 ToggleItem g_build_button( g_build_button_callback );
 
-FreeCaller1<const BoolImportCallback&, UVToolExport> g_uv_button_caller;
+FreeCaller<void(const BoolImportCallback&), UVToolExport> g_uv_button_caller;
 BoolExportCallback g_uv_button_callback( g_uv_button_caller );
 ToggleItem g_uv_button( g_uv_button_callback );
 
@@ -419,23 +419,23 @@ void ToggleDragSkewModes(){
 
 
 void Tools_registerCommands(){
-	GlobalToggles_insert( "DragVertices", FreeCaller<SelectVertexMode>(), ToggleItem::AddCallbackCaller( g_vertexMode_button ), QKeySequence( "V" ) );
-	GlobalToggles_insert( "DragEdges", FreeCaller<SelectEdgeMode>(), ToggleItem::AddCallbackCaller( g_edgeMode_button ), QKeySequence( "E" ) );
-	GlobalToggles_insert( "DragFaces", FreeCaller<SelectFaceMode>(), ToggleItem::AddCallbackCaller( g_faceMode_button ), QKeySequence( "F" ) );
+	GlobalToggles_insert( "DragVertices", FreeCaller<void(), SelectVertexMode>(), ToggleItem::AddCallbackCaller( g_vertexMode_button ), QKeySequence( "V" ) );
+	GlobalToggles_insert( "DragEdges", FreeCaller<void(), SelectEdgeMode>(), ToggleItem::AddCallbackCaller( g_edgeMode_button ), QKeySequence( "E" ) );
+	GlobalToggles_insert( "DragFaces", FreeCaller<void(), SelectFaceMode>(), ToggleItem::AddCallbackCaller( g_faceMode_button ), QKeySequence( "F" ) );
 
-	GlobalToggles_insert( "ToggleClipper", FreeCaller<ClipperMode>(), ToggleItem::AddCallbackCaller( g_clipper_button ), QKeySequence( "X" ) );
+	GlobalToggles_insert( "ToggleClipper", FreeCaller<void(), ClipperMode>(), ToggleItem::AddCallbackCaller( g_clipper_button ), QKeySequence( "X" ) );
 
-	GlobalToggles_insert( "MouseTranslate", FreeCaller<TranslateMode>(), ToggleItem::AddCallbackCaller( g_translatemode_button ), QKeySequence( "W" ) );
-	GlobalToggles_insert( "MouseRotate", FreeCaller<RotateMode>(), ToggleItem::AddCallbackCaller( g_rotatemode_button ), QKeySequence( "R" ) );
-	GlobalToggles_insert( "MouseScale", FreeCaller<ScaleMode>(), ToggleItem::AddCallbackCaller( g_scalemode_button ) );
-	GlobalToggles_insert( "MouseTransform", FreeCaller<SkewMode>(), ToggleItem::AddCallbackCaller( g_skewmode_button ) );
-	GlobalToggles_insert( "MouseDrag", FreeCaller<DragMode>(), ToggleItem::AddCallbackCaller( g_dragmode_button ) );
-	GlobalToggles_insert( "MouseBuild", FreeCaller<BuildMode>(), ToggleItem::AddCallbackCaller( g_build_button ), QKeySequence( "B" ) );
-	GlobalToggles_insert( "MouseUV", FreeCaller<UVMode>(), ToggleItem::AddCallbackCaller( g_uv_button ), QKeySequence( "G" ) );
-	GlobalCommands_insert( "MouseRotateOrScale", FreeCaller<ToggleRotateScaleModes>() );
-	GlobalCommands_insert( "MouseDragOrTransform", FreeCaller<ToggleDragSkewModes>(), QKeySequence( "Q" ) );
+	GlobalToggles_insert( "MouseTranslate", FreeCaller<void(), TranslateMode>(), ToggleItem::AddCallbackCaller( g_translatemode_button ), QKeySequence( "W" ) );
+	GlobalToggles_insert( "MouseRotate", FreeCaller<void(), RotateMode>(), ToggleItem::AddCallbackCaller( g_rotatemode_button ), QKeySequence( "R" ) );
+	GlobalToggles_insert( "MouseScale", FreeCaller<void(), ScaleMode>(), ToggleItem::AddCallbackCaller( g_scalemode_button ) );
+	GlobalToggles_insert( "MouseTransform", FreeCaller<void(), SkewMode>(), ToggleItem::AddCallbackCaller( g_skewmode_button ) );
+	GlobalToggles_insert( "MouseDrag", FreeCaller<void(), DragMode>(), ToggleItem::AddCallbackCaller( g_dragmode_button ) );
+	GlobalToggles_insert( "MouseBuild", FreeCaller<void(), BuildMode>(), ToggleItem::AddCallbackCaller( g_build_button ), QKeySequence( "B" ) );
+	GlobalToggles_insert( "MouseUV", FreeCaller<void(), UVMode>(), ToggleItem::AddCallbackCaller( g_uv_button ), QKeySequence( "G" ) );
+	GlobalCommands_insert( "MouseRotateOrScale", FreeCaller<void(), ToggleRotateScaleModes>() );
+	GlobalCommands_insert( "MouseDragOrTransform", FreeCaller<void(), ToggleDragSkewModes>(), QKeySequence( "Q" ) );
 
-	GlobalSelectionSystem().addSelectionChangeCallback( FreeCaller1<const Selectable&, ComponentMode_SelectionChanged>() );
+	GlobalSelectionSystem().addSelectionChangeCallback( FreeCaller<void(const Selectable&), ComponentMode_SelectionChanged>() );
 
 	g_defaultToolMode = DragMode;
 	g_defaultToolMode();

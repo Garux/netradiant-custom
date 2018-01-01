@@ -49,7 +49,7 @@
 #include "mainframe.h"
 
 void RedrawEntityList();
-typedef FreeCaller<RedrawEntityList> RedrawEntityListCaller;
+typedef FreeCaller<void(), RedrawEntityList> RedrawEntityListCaller;
 
 class EntityList
 {
@@ -342,7 +342,7 @@ void EntityList_Construct(){
 
 	GlobalPreferenceSystem().registerPreference( "EntListSearchFromStart", BoolImportStringCaller( getEntityList().m_search_from_start ), BoolExportStringCaller( getEntityList().m_search_from_start ) );
 
-	typedef FreeCaller1<const Selectable&, EntityList_SelectionChanged> EntityListSelectionChangedCaller;
+	typedef FreeCaller<void(const Selectable&), EntityList_SelectionChanged> EntityListSelectionChangedCaller;
 	GlobalSelectionSystem().addSelectionChangeCallback( EntityListSelectionChangedCaller() );
 }
 void EntityList_Destroy(){

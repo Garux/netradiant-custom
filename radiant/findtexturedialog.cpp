@@ -58,7 +58,7 @@ public:
 	static void setFindStr( const char* name );
 	static bool isOpen();
 	static void show();
-	typedef FreeCaller<&FindTextureDialog::show> ShowCaller;
+	typedef FreeCaller<void(), &FindTextureDialog::show> ShowCaller;
 	static void updateTextures( const char* name );
 
 	FindTextureDialog();

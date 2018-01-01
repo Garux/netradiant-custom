@@ -81,8 +81,8 @@ class GenericEntity :
 	RenderableWireframeAABB m_aabb_wire;
 	RenderableNamedEntity m_renderName;
 
-	Callback m_transformChanged;
-	Callback m_evaluateTransform;
+	Callback<void()> m_transformChanged;
+	Callback<void()> m_evaluateTransform;
 
 	void construct(){
 		read_aabb( m_aabb_local, m_entity.getEntityClass() );
@@ -107,20 +107,20 @@ public:
 		matrix4_translate_by_vec3( m_transform.localToParent(), m_origin );
 		m_transformChanged();
 	}
-	typedef MemberCaller<GenericEntity, &GenericEntity::updateTransform> UpdateTransformCaller;
+	typedef MemberCaller<GenericEntity, void(), &GenericEntity::updateTransform> UpdateTransformCaller;
 	void originChanged(){
 		m_origin = m_originKey.m_origin;
 		updateTransform();
 	}
-	typedef MemberCaller<GenericEntity, &GenericEntity::originChanged> OriginChangedCaller;
+	typedef MemberCaller<GenericEntity, void(), &GenericEntity::originChanged> OriginChangedCaller;
 	void anglesChanged(){
 		m_angles = m_anglesKey.m_angles;
 		updateTransform();
 	}
-	typedef MemberCaller<GenericEntity, &GenericEntity::anglesChanged> AnglesChangedCaller;
+	typedef MemberCaller<GenericEntity, void(), &GenericEntity::anglesChanged> AnglesChangedCaller;
 public:
 
-	GenericEntity( EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	GenericEntity( EntityClass* eclass, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( eclass ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
@@ -137,7 +137,7 @@ public:
 		m_evaluateTransform( evaluateTransform ){
 		construct();
 	}
-	GenericEntity( const GenericEntity& other, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	GenericEntity( const GenericEntity& other, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( other.m_entity ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
@@ -256,7 +256,7 @@ public:
 		m_evaluateTransform();
 		updateTransform();
 	}
-	typedef MemberCaller<GenericEntity, &GenericEntity::transformChanged> TransformChangedCaller;
+	typedef MemberCaller<GenericEntity, void(), &GenericEntity::transformChanged> TransformChangedCaller;
 };
 
 class GenericEntityInstance :
@@ -336,7 +336,7 @@ public:
 		evaluateTransform();
 		m_contained.freezeTransform();
 	}
-	typedef MemberCaller<GenericEntityInstance, &GenericEntityInstance::applyTransform> ApplyTransformCaller;
+	typedef MemberCaller<GenericEntityInstance, void(), &GenericEntityInstance::applyTransform> ApplyTransformCaller;
 };
 
 class GenericEntityNode :

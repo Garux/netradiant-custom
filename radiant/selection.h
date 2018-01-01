@@ -25,7 +25,7 @@
 #include "generic/callback.h"
 #include "rect_t.h"
 
-typedef Callback1<rect_t> RectangleCallback;
+typedef Callback<void(rect_t)> RectangleCallback;
 
 class View;
 

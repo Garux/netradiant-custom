@@ -182,7 +182,7 @@ inline const Functor& Scene_forEachSelectedBrush( const Functor& functor ){
 void DEntity_loadBrush( DEntity& entity, scene::Instance& brush ){
 	entity.NewBrush()->LoadFromBrush( brush, true );
 }
-typedef ReferenceCaller1<DEntity, scene::Instance&, DEntity_loadBrush> DEntityLoadBrushCaller;
+typedef ReferenceCaller<DEntity, void(scene::Instance&), DEntity_loadBrush> DEntityLoadBrushCaller;
 
 void DEntity::LoadSelectedBrushes(){
 	ClearBrushes();
@@ -215,7 +215,7 @@ void DEntity_loadPatch( DEntity& entity, scene::Instance& patch ){
 	DPatch* loadPatch = entity.NewPatch();
 	loadPatch->LoadFromPatch( patch );
 }
-typedef ReferenceCaller1<DEntity, scene::Instance&, DEntity_loadPatch> DEntityLoadPatchCaller;
+typedef ReferenceCaller<DEntity, void(scene::Instance&), DEntity_loadPatch> DEntityLoadPatchCaller;
 
 void DEntity::LoadSelectedPatches(){
 	ClearPatches();

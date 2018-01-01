@@ -690,7 +690,7 @@ public:
 	void realise(){
 		if ( --m_unrealised == 0 ) {
 			globalOutputStream() << "searching vfs directory " << makeQuoted( "def" ) << " for *.def\n";
-			GlobalFileSystem().forEachFile( "def/", "def", FreeCaller1<const char*, EntityClassDoom3_loadFile>() );
+			GlobalFileSystem().forEachFile( "def/", "def", FreeCaller<void(const char*), EntityClassDoom3_loadFile>() );
 
 			{
 				for ( Models::iterator i = g_models.begin(); i != g_models.end(); ++i )

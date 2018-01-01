@@ -378,22 +378,22 @@ void UndoLevels_importString( RadiantUndoSystem& undo, const char* value ){
 	Int_importString( levels, value );
 	undo.setLevels( levels );
 }
-typedef ReferenceCaller1<RadiantUndoSystem, const char*, UndoLevels_importString> UndoLevelsImportStringCaller;
+typedef ReferenceCaller<RadiantUndoSystem, void(const char*), UndoLevels_importString> UndoLevelsImportStringCaller;
 void UndoLevels_exportString( const RadiantUndoSystem& undo, const StringImportCallback& importer ){
 	Int_exportString( static_cast<int>( undo.getLevels() ), importer );
 }
-typedef ConstReferenceCaller1<RadiantUndoSystem, const StringImportCallback&, UndoLevels_exportString> UndoLevelsExportStringCaller;
+typedef ConstReferenceCaller<RadiantUndoSystem, void(const StringImportCallback&), UndoLevels_exportString> UndoLevelsExportStringCaller;
 
 #include "generic/callback.h"
 
 void UndoLevelsImport( RadiantUndoSystem& self, int value ){
 	self.setLevels( value );
 }
-typedef ReferenceCaller1<RadiantUndoSystem, int, UndoLevelsImport> UndoLevelsImportCaller;
+typedef ReferenceCaller<RadiantUndoSystem, void(int), UndoLevelsImport> UndoLevelsImportCaller;
 void UndoLevelsExport( const RadiantUndoSystem& self, const IntImportCallback& importCallback ){
 	importCallback( static_cast<int>( self.getLevels() ) );
 }
-typedef ConstReferenceCaller1<RadiantUndoSystem, const IntImportCallback&, UndoLevelsExport> UndoLevelsExportCaller;
+typedef ConstReferenceCaller<RadiantUndoSystem, void(const IntImportCallback&), UndoLevelsExport> UndoLevelsExportCaller;
 
 
 void Undo_constructPreferences( RadiantUndoSystem& undo, PreferencesPage& page ){
@@ -404,7 +404,7 @@ void Undo_constructPage( RadiantUndoSystem& undo, PreferenceGroup& group ){
 	Undo_constructPreferences( undo, page );
 }
 void Undo_registerPreferencesPage( RadiantUndoSystem& undo ){
-	PreferencesDialog_addSettingsPage( ReferenceCaller1<RadiantUndoSystem, PreferenceGroup&, Undo_constructPage>( undo ) );
+	PreferencesDialog_addSettingsPage( ReferenceCaller<RadiantUndoSystem, void(PreferenceGroup&), Undo_constructPage>( undo ) );
 }
 
 class UndoSystemDependencies : public GlobalPreferenceSystemModuleRef

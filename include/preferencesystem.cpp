@@ -75,11 +75,11 @@ public:
 		m_string = value;
 		m_observer.onChanged();
 	}
-	typedef MemberCaller1<StringPreference, const char*, &StringPreference::importString> ImportStringCaller;
+	typedef MemberCaller<StringPreference, void(const char*), &StringPreference::importString> ImportStringCaller;
 	void exportString( StringImportCallback& importer ){
 		importer( m_string.c_str() );
 	}
-	typedef MemberCaller1<StringPreference, StringImportCallback&, &StringPreference::exportString> ExportStringCaller;
+	typedef MemberCaller<StringPreference, void(StringImportCallback&), &StringPreference::exportString> ExportStringCaller;
 };
 
 inline void int_export( int i, StringImportCallback& importer ){
@@ -113,11 +113,11 @@ public:
 		m_int = int_import( value );
 		m_observer.onChanged();
 	}
-	typedef MemberCaller1<IntPreference, const char*, &IntPreference::importString> ImportStringCaller;
+	typedef MemberCaller<IntPreference, void(const char*), &IntPreference::importString> ImportStringCaller;
 	void exportString( StringImportCallback& importer ){
 		int_export( m_int, importer );
 	}
-	typedef MemberCaller1<IntPreference, StringImportCallback&, &IntPreference::exportString> ExportStringCaller;
+	typedef MemberCaller<IntPreference, void(StringImportCallback&), &IntPreference::exportString> ExportStringCaller;
 };
 
 class IntPreferenceImporter

@@ -61,12 +61,12 @@ inline Vector3 origin_snapped( const Vector3& origin, float snap ){
 
 class OriginKey
 {
-	Callback m_originChanged;
+	Callback<void()> m_originChanged;
 public:
 	Vector3 m_origin;
 
 
-	OriginKey( const Callback& originChanged )
+	OriginKey( const Callback<void()>& originChanged )
 		: m_originChanged( originChanged ), m_origin( ORIGINKEY_IDENTITY ){
 	}
 
@@ -74,7 +74,7 @@ public:
 		read_origin( m_origin, value );
 		m_originChanged();
 	}
-	typedef MemberCaller1<OriginKey, const char*, &OriginKey::originChanged> OriginChangedCaller;
+	typedef MemberCaller<OriginKey, void(const char*), &OriginKey::originChanged> OriginChangedCaller;
 
 
 	void write( Entity* entity ) const {

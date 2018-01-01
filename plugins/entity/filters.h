@@ -68,5 +68,5 @@ public:
 	void classnameChanged( const char* value ){
 		updateFiltered();
 	}
-	typedef MemberCaller1<ClassnameFilter, const char*, &ClassnameFilter::classnameChanged> ClassnameChangedCaller;
+	typedef MemberCaller<ClassnameFilter, void(const char*), &ClassnameFilter::classnameChanged> ClassnameChangedCaller;
 };

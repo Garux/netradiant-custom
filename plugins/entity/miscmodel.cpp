@@ -57,11 +57,11 @@ class RemapKeysObserver : public Entity::Observer, public ModelSkin
 {
 	class RemapKey
 	{
-		const Callback& m_skinChangedCallback;
+		const Callback<void()>& m_skinChangedCallback;
 	public:
 		CopiedString m_from;
 		CopiedString m_to;
-		RemapKey( const Callback& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
+		RemapKey( const Callback<void()>& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
 		}
 		void remapKeyChanged( const char* value ){
 			const char* split = strchr( value, ';' );
@@ -75,17 +75,17 @@ class RemapKeysObserver : public Entity::Observer, public ModelSkin
 			}
 			m_skinChangedCallback();
 		}
-		typedef MemberCaller1<RemapKey, const char*, &RemapKey::remapKeyChanged> remapKeyChangedCaller;
+		typedef MemberCaller<RemapKey, void(const char*), &RemapKey::remapKeyChanged> remapKeyChangedCaller;
 	};
 	typedef std::multimap<CopiedString, RemapKey> RemapKeys;
 	RemapKeys m_remapKeys;
-	const Callback m_skinChangedCallback;
+	const Callback<void()> m_skinChangedCallback;
 
 public:
 	RemapKeysObserver() = delete;
 	RemapKeysObserver( const RemapKeysObserver& ) = delete;
 	RemapKeysObserver operator=( const RemapKeysObserver& ) = delete;
-	RemapKeysObserver( const Callback& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
+	RemapKeysObserver( const Callback<void()>& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
 	}
 
 	void insert( const char* key, EntityKeyValue& value ) override {
@@ -154,8 +154,8 @@ class MiscModel :
 	RenderablePivot m_renderOrigin;
 	RenderableNamedEntity m_renderName;
 
-	Callback m_transformChanged;
-	Callback m_evaluateTransform;
+	Callback<void()> m_transformChanged;
+	Callback<void()> m_evaluateTransform;
 
 	void construct(){
 		m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
@@ -183,17 +183,17 @@ public:
 		m_origin = m_originKey.m_origin;
 		updateTransform();
 	}
-	typedef MemberCaller<MiscModel, &MiscModel::originChanged> OriginChangedCaller;
+	typedef MemberCaller<MiscModel, void(), &MiscModel::originChanged> OriginChangedCaller;
 	void anglesChanged(){
 		m_angles = m_anglesKey.m_angles;
 		updateTransform();
 	}
-	typedef MemberCaller<MiscModel, &MiscModel::anglesChanged> AnglesChangedCaller;
+	typedef MemberCaller<MiscModel, void(), &MiscModel::anglesChanged> AnglesChangedCaller;
 	void scaleChanged(){
 		m_scale = m_scaleKey.m_scale;
 		updateTransform();
 	}
-	typedef MemberCaller<MiscModel, &MiscModel::scaleChanged> ScaleChangedCaller;
+	typedef MemberCaller<MiscModel, void(), &MiscModel::scaleChanged> ScaleChangedCaller;
 
 	void skinChanged(){
 		scene::Node* node = m_model.getNode();
@@ -201,11 +201,11 @@ public:
 			Node_modelSkinChanged( *node );
 		}
 	}
-	typedef MemberCaller<MiscModel, &MiscModel::skinChanged> SkinChangedCaller;
+	typedef MemberCaller<MiscModel, void(), &MiscModel::skinChanged> SkinChangedCaller;
 
 public:
 
-	MiscModel( EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	MiscModel( EntityClass* eclass, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( eclass ),
 		m_remapKeysObserver( SkinChangedCaller( *this ) ),
 		m_originKey( OriginChangedCaller( *this ) ),
@@ -222,7 +222,7 @@ public:
 		m_evaluateTransform( evaluateTransform ){
 		construct();
 	}
-	MiscModel( const MiscModel& other, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	MiscModel( const MiscModel& other, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( other.m_entity ),
 		m_remapKeysObserver( SkinChangedCaller( *this ) ),
 		m_originKey( OriginChangedCaller( *this ) ),
@@ -365,7 +365,7 @@ public:
 		m_evaluateTransform();
 		updateTransform();
 	}
-	typedef MemberCaller<MiscModel, &MiscModel::transformChanged> TransformChangedCaller;
+	typedef MemberCaller<MiscModel, void(), &MiscModel::transformChanged> TransformChangedCaller;
 };
 
 class MiscModelInstance : public TargetableInstance, public TransformModifier, public Renderable
@@ -424,7 +424,7 @@ public:
 		evaluateTransform();
 		m_contained.freezeTransform();
 	}
-	typedef MemberCaller<MiscModelInstance, &MiscModelInstance::applyTransform> ApplyTransformCaller;
+	typedef MemberCaller<MiscModelInstance, void(), &MiscModelInstance::applyTransform> ApplyTransformCaller;
 };
 
 class MiscModelNode :

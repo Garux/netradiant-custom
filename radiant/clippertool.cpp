@@ -79,7 +79,7 @@ void Clipper_BoundsChanged(){
 		Clipper_update();
 }
 
-IdleDraw g_idle_clipper_update = IdleDraw( FreeCaller<Clipper_BoundsChanged>() );
+IdleDraw g_idle_clipper_update = IdleDraw( FreeCaller<void(), Clipper_BoundsChanged>() );
 
 void Clipper_BoundsChanged_Queue(){
 	g_idle_clipper_update.queueDraw();
@@ -186,13 +186,13 @@ void Clipper_constructPage( PreferenceGroup& group ){
 	Clipper_constructPreferences( page );
 }
 void Clipper_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Clipper_constructPage>() );
+	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Clipper_constructPage>() );
 }
 
 void Clipper_registerCommands(){
-	GlobalCommands_insert( "ClipperClip", FreeCaller<Clipper_doClip>(), QKeySequence( "Return" ) );
-	GlobalCommands_insert( "ClipperSplit", FreeCaller<Clipper_doSplit>(), QKeySequence( "Shift+Return" ) );
-	GlobalCommands_insert( "ClipperFlip", FreeCaller<Clipper_doFlip>(), QKeySequence( "Ctrl+Return" ) );
+	GlobalCommands_insert( "ClipperClip", FreeCaller<void(), Clipper_doClip>(), QKeySequence( "Return" ) );
+	GlobalCommands_insert( "ClipperSplit", FreeCaller<void(), Clipper_doSplit>(), QKeySequence( "Shift+Return" ) );
+	GlobalCommands_insert( "ClipperFlip", FreeCaller<void(), Clipper_doFlip>(), QKeySequence( "Ctrl+Return" ) );
 }
 
 SignalHandlerId ClipperTool_boundsChanged;
@@ -206,10 +206,10 @@ void Clipper_Construct(){
 	GlobalPreferenceSystem().registerPreference( "ClipperDoubleclickedSplit", IntImportStringCaller( g_clipper_doubleclicked_split ), IntExportStringCaller( g_clipper_doubleclicked_split ) );
 	Clipper_registerPreferencesPage();
 
-	typedef FreeCaller1<const Selectable&, Clipper_SelectionChanged> ClipperSelectionChangedCaller;
+	typedef FreeCaller<void(const Selectable&), Clipper_SelectionChanged> ClipperSelectionChangedCaller;
 	GlobalSelectionSystem().addSelectionChangeCallback( ClipperSelectionChangedCaller() );
 
-	ClipperTool_boundsChanged = GlobalSceneGraph().addBoundsChangedCallback( FreeCaller<Clipper_BoundsChanged_Queue>() );
+	ClipperTool_boundsChanged = GlobalSceneGraph().addBoundsChangedCallback( FreeCaller<void(), Clipper_BoundsChanged_Queue>() );
 }
 
 void Clipper_Destroy(){

@@ -63,7 +63,7 @@ public:
 	void valueChanged( const char* value ){
 		UpdatePath();
 	}
-	typedef MemberCaller1<DBobView, const char*, &DBobView::valueChanged> ValueChangedCaller;
+	typedef MemberCaller<DBobView, void(const char*), &DBobView::valueChanged> ValueChangedCaller;
 	void insert( const char* key, EntityKeyValue& value ) override {
 		value.attach( ValueChangedCaller( *this ) );
 	}

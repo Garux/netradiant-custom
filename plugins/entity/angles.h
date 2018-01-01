@@ -137,7 +137,7 @@ inline Vector3 angles_rotated_for_rotated_pivot( const Vector3& angles, const Qu
 #endif
 class AnglesKey
 {
-	Callback m_anglesChanged;
+	Callback<void()> m_anglesChanged;
 	KeyObserver m_angleCB;
 	KeyObserver m_anglesCB;
 	const Entity& m_entity;
@@ -145,7 +145,7 @@ public:
 	Vector3 m_angles;
 
 
-	AnglesKey( const Callback& anglesChanged, const Entity& entity )
+	AnglesKey( const Callback<void()>& anglesChanged, const Entity& entity )
 		: m_anglesChanged( anglesChanged ), m_angleCB(), m_anglesCB(), m_entity( entity ), m_angles( ANGLESKEY_IDENTITY ){
 	}
 
@@ -156,7 +156,7 @@ public:
 		}
 	}
 	KeyObserver getAngleChangedCallback(){
-		return m_angleCB = MemberCaller1<AnglesKey, const char*, &AnglesKey::angleChanged>( *this );
+		return m_angleCB = MemberCaller<AnglesKey, void(const char*), &AnglesKey::angleChanged>( *this );
 	}
 
 	void groupAngleChanged( const char* value ){
@@ -166,7 +166,7 @@ public:
 		}
 	}
 	KeyObserver getGroupAngleChangedCallback(){
-		return m_angleCB = MemberCaller1<AnglesKey, const char*, &AnglesKey::groupAngleChanged>( *this );
+		return m_angleCB = MemberCaller<AnglesKey, void(const char*), &AnglesKey::groupAngleChanged>( *this );
 	}
 
 	void anglesChanged( const char* value ){
@@ -178,7 +178,7 @@ public:
 			m_angleCB( m_entity.getKeyValue( "angle" ) );
 	}
 	KeyObserver getAnglesChangedCallback(){
-		return m_anglesCB = MemberCaller1<AnglesKey, const char*, &AnglesKey::anglesChanged>( *this );
+		return m_anglesCB = MemberCaller<AnglesKey, void(const char*), &AnglesKey::anglesChanged>( *this );
 	}
 
 	void write( Entity* entity ) const {

@@ -70,13 +70,13 @@ public: // public types
     * Type for info/warning/error callbacks. The callback takes a const
     * char* argument (the message string); it has no return value.
     */
-   typedef Callback1<const char *, void> MessageCallback;
+   typedef Callback<void(const char *)> MessageCallback;
 
    /**
     * Type for texture scale info callbacks. The callback takes two float
     * arguments (scale and tiles); it has no return value.
     */
-   typedef Callback2<float, float, void> TexInfoCallback;
+   typedef Callback<void(float, float)> TexInfoCallback;
 
    /**
     * Type for defining how to manipulate control point or surface values

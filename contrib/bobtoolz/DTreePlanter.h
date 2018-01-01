@@ -41,12 +41,12 @@ class DTreePlanter {
 	SignalHandlerId m_destroyed;
 public:
 	SignalHandlerResult mouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers );
-	typedef Member3<DTreePlanter, const WindowVector&, ButtonIdentifier, ModifierFlags, SignalHandlerResult, &DTreePlanter::mouseDown> MouseDownCaller;
+	typedef Member<DTreePlanter, SignalHandlerResult(const WindowVector&, ButtonIdentifier, ModifierFlags), &DTreePlanter::mouseDown> MouseDownCaller;
 	void destroyed(){
 		m_mouseDown = MouseEventHandlerId();
 		m_destroyed = SignalHandlerId();
 	}
-	typedef Member<DTreePlanter, void, &DTreePlanter::destroyed> DestroyedCaller;
+	typedef Member<DTreePlanter, void(), &DTreePlanter::destroyed> DestroyedCaller;
 
 	DTreePlanter() {
 		m_world.LoadSelectedBrushes();

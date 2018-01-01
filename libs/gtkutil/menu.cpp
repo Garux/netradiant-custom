@@ -26,11 +26,11 @@
 #include "accelerator.h"
 
 
-QAction* create_menu_item_with_mnemonic( QMenu* menu, const char *mnemonic, const Callback& callback ){
+QAction* create_menu_item_with_mnemonic( QMenu* menu, const char *mnemonic, const Callback<void()>& callback ){
 	return menu->addAction( mnemonic, callback );
 }
 
-QAction* create_check_menu_item_with_mnemonic( QMenu* menu, const char* mnemonic, const Callback& callback ){
+QAction* create_check_menu_item_with_mnemonic( QMenu* menu, const char* mnemonic, const Callback<void()>& callback ){
 	QAction *item = menu->addAction( mnemonic, callback );
 	item->setCheckable( true );
 	return item;

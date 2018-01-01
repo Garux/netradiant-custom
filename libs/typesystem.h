@@ -29,13 +29,13 @@
 
 class InitialiserList
 {
-	typedef std::list<Callback> Initialisers;
+	typedef std::list<Callback<void()>> Initialisers;
 	Initialisers m_initialisers;
 	mutable bool m_initialised;
 public:
 	InitialiserList() : m_initialised( false ){
 	}
-	void addInitialiser( const Callback& callback ){
+	void addInitialiser( const Callback<void()>& callback ){
 		m_initialisers.push_back( callback );
 	}
 	void initialise() const {

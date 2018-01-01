@@ -44,9 +44,9 @@ void accelerator_write( const QKeySequence& accelerator, TextOutputStream& ostre
 	ostream << accelerator.toString().toLatin1().constData();
 }
 
-typedef std::map<QKeySequence, Callback> AcceleratorMap;
+typedef std::map<QKeySequence, Callback<void()>> AcceleratorMap;
 
-bool accelerator_map_insert( AcceleratorMap& acceleratorMap, QKeySequence accelerator, const Callback& callback ){
+bool accelerator_map_insert( AcceleratorMap& acceleratorMap, QKeySequence accelerator, const Callback<void()>& callback ){
 	if ( QKeySequence_valid( accelerator ) ) {
 		return acceleratorMap.insert( AcceleratorMap::value_type( accelerator, callback ) ).second;
 	}
@@ -171,7 +171,7 @@ void GlobalPressedKeys_connect( QWidget* window ){
 
 
 
-void keydown_accelerators_add( QKeySequence accelerator, const Callback& callback ){
+void keydown_accelerators_add( QKeySequence accelerator, const Callback<void()>& callback ){
 	//globalOutputStream() << "keydown_accelerators_add: " << makeQuoted(accelerator) << '\n';
 	if ( !accelerator_map_insert( g_keydown_accelerators, accelerator, callback ) ) {
 		globalErrorStream() << "keydown_accelerators_add: already exists: " << makeQuoted( accelerator ) << '\n';
@@ -184,7 +184,7 @@ void keydown_accelerators_remove( QKeySequence accelerator ){
 	}
 }
 
-void keyup_accelerators_add( QKeySequence accelerator, const Callback& callback ){
+void keyup_accelerators_add( QKeySequence accelerator, const Callback<void()>& callback ){
 	//globalOutputStream() << "keyup_accelerators_add: " << makeQuoted(accelerator) << '\n';
 	if ( !accelerator_map_insert( g_keyup_accelerators, accelerator, callback ) ) {
 		globalErrorStream() << "keyup_accelerators_add: already exists: " << makeQuoted( accelerator ) << '\n';

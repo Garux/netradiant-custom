@@ -173,34 +173,34 @@ void maxGridCoordPowerImport( int value ){
 	Region_defaultMinMax();
 	GridChangeNotify();
 }
-typedef FreeCaller1<int, maxGridCoordPowerImport> maxGridCoordPowerImportCaller;
+typedef FreeCaller<void(int), maxGridCoordPowerImport> maxGridCoordPowerImportCaller;
 
 void maxGridCoordPowerExport( const IntImportCallback& importer ){
 	importer( std::clamp( g_maxGridCoordPower, 0, 4 ) );
 }
-typedef FreeCaller1<const IntImportCallback&, maxGridCoordPowerExport> maxGridCoordPowerExportCaller;
+typedef FreeCaller<void(const IntImportCallback&), maxGridCoordPowerExport> maxGridCoordPowerExportCaller;
 
 
 void Grid_registerCommands(){
-	GlobalCommands_insert( "GridDown", FreeCaller<GridPrev>(), QKeySequence( "[" ) );
-	GlobalCommands_insert( "GridUp", FreeCaller<GridNext>(), QKeySequence( "]" ) );
+	GlobalCommands_insert( "GridDown", FreeCaller<void(), GridPrev>(), QKeySequence( "[" ) );
+	GlobalCommands_insert( "GridUp", FreeCaller<void(), GridNext>(), QKeySequence( "]" ) );
 
-	GlobalCommands_insert( "ToggleGridSnap", FreeCaller<ToggleGridSnap>() );
+	GlobalCommands_insert( "ToggleGridSnap", FreeCaller<void(), ToggleGridSnap>() );
 
-	GlobalCommands_insert( "SetGrid0.125", FreeCaller<setGridPower<GRIDPOWER_0125>>() );
-	GlobalCommands_insert( "SetGrid0.25", FreeCaller<setGridPower<GRIDPOWER_025>>() );
-	GlobalCommands_insert( "SetGrid0.5", FreeCaller<setGridPower<GRIDPOWER_05>>() );
-	GlobalCommands_insert( "SetGrid1", FreeCaller<setGridPower<GRIDPOWER_1>>(), QKeySequence( "1" ) );
-	GlobalCommands_insert( "SetGrid2", FreeCaller<setGridPower<GRIDPOWER_2>>(), QKeySequence( "2" ) );
-	GlobalCommands_insert( "SetGrid4", FreeCaller<setGridPower<GRIDPOWER_4>>(), QKeySequence( "3" ) );
-	GlobalCommands_insert( "SetGrid8", FreeCaller<setGridPower<GRIDPOWER_8>>(), QKeySequence( "4" ) );
-	GlobalCommands_insert( "SetGrid16", FreeCaller<setGridPower<GRIDPOWER_16>>(), QKeySequence( "5" ) );
-	GlobalCommands_insert( "SetGrid32", FreeCaller<setGridPower<GRIDPOWER_32>>(), QKeySequence( "6" ) );
-	GlobalCommands_insert( "SetGrid64", FreeCaller<setGridPower<GRIDPOWER_64>>(), QKeySequence( "7" ) );
-	GlobalCommands_insert( "SetGrid128", FreeCaller<setGridPower<GRIDPOWER_128>>(), QKeySequence( "8" ) );
-	GlobalCommands_insert( "SetGrid256", FreeCaller<setGridPower<GRIDPOWER_256>>(), QKeySequence( "9" ) );
-	GlobalCommands_insert( "SetGrid512", FreeCaller<setGridPower<GRIDPOWER_512>>() );
-	GlobalCommands_insert( "SetGrid1024", FreeCaller<setGridPower<GRIDPOWER_1024>>() );
+	GlobalCommands_insert( "SetGrid0.125", FreeCaller<void(), setGridPower<GRIDPOWER_0125>>() );
+	GlobalCommands_insert( "SetGrid0.25", FreeCaller<void(), setGridPower<GRIDPOWER_025>>() );
+	GlobalCommands_insert( "SetGrid0.5", FreeCaller<void(), setGridPower<GRIDPOWER_05>>() );
+	GlobalCommands_insert( "SetGrid1", FreeCaller<void(), setGridPower<GRIDPOWER_1>>(), QKeySequence( "1" ) );
+	GlobalCommands_insert( "SetGrid2", FreeCaller<void(), setGridPower<GRIDPOWER_2>>(), QKeySequence( "2" ) );
+	GlobalCommands_insert( "SetGrid4", FreeCaller<void(), setGridPower<GRIDPOWER_4>>(), QKeySequence( "3" ) );
+	GlobalCommands_insert( "SetGrid8", FreeCaller<void(), setGridPower<GRIDPOWER_8>>(), QKeySequence( "4" ) );
+	GlobalCommands_insert( "SetGrid16", FreeCaller<void(), setGridPower<GRIDPOWER_16>>(), QKeySequence( "5" ) );
+	GlobalCommands_insert( "SetGrid32", FreeCaller<void(), setGridPower<GRIDPOWER_32>>(), QKeySequence( "6" ) );
+	GlobalCommands_insert( "SetGrid64", FreeCaller<void(), setGridPower<GRIDPOWER_64>>(), QKeySequence( "7" ) );
+	GlobalCommands_insert( "SetGrid128", FreeCaller<void(), setGridPower<GRIDPOWER_128>>(), QKeySequence( "8" ) );
+	GlobalCommands_insert( "SetGrid256", FreeCaller<void(), setGridPower<GRIDPOWER_256>>(), QKeySequence( "9" ) );
+	GlobalCommands_insert( "SetGrid512", FreeCaller<void(), setGridPower<GRIDPOWER_512>>() );
+	GlobalCommands_insert( "SetGrid1024", FreeCaller<void(), setGridPower<GRIDPOWER_1024>>() );
 }
 
 
@@ -260,7 +260,7 @@ void Grid_constructPage( PreferenceGroup& group ){
 	Grid_constructPreferences( page );
 }
 void Grid_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Grid_constructPage>() );
+	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Grid_constructPage>() );
 }
 
 void Grid_construct(){

@@ -85,7 +85,7 @@ public:
 		}
 		m_name = value;
 	}
-	typedef MemberCaller1<NamedEntity, const char*, &NamedEntity::identifierChanged> IdentifierChangedCaller;
+	typedef MemberCaller<NamedEntity, void(const char*), &NamedEntity::identifierChanged> IdentifierChangedCaller;
 };
 
 
@@ -165,7 +165,7 @@ public:
 			return;
 		m_label.texAlloc( value, m_named.color() );
 	}
-	typedef MemberCaller1<RenderableNamedEntity, const char*, &RenderableNamedEntity::identifierChanged> IdentifierChangedCaller;
+	typedef MemberCaller<RenderableNamedEntity, void(const char*), &RenderableNamedEntity::identifierChanged> IdentifierChangedCaller;
 };
 
 

@@ -1596,8 +1596,8 @@ private:
 	AABB m_aabb_local;
 // ----
 
-	Callback m_evaluateTransform;
-	Callback m_boundsChanged;
+	Callback<void()> m_evaluateTransform;
+	Callback<void()> m_boundsChanged;
 
 	mutable bool m_planeChanged;   // b-rep evaluation required
 	mutable bool m_transformChanged;   // transform evaluation required
@@ -1607,7 +1607,7 @@ private:
 public:
 	STRING_CONSTANT( Name, "Brush" );
 
-	Callback m_lightsChanged;
+	Callback<void()> m_lightsChanged;
 
 // static data
 	static Shader* m_state_point;
@@ -1617,7 +1617,7 @@ public:
 	static EBrushType m_type;
 	static double m_maxWorldCoord;
 
-	Brush( scene::Node& node, const Callback& evaluateTransform, const Callback& boundsChanged ) :
+	Brush( scene::Node& node, const Callback<void()>& evaluateTransform, const Callback<void()>& boundsChanged ) :
 		m_node( &node ),
 		m_undoable_observer( 0 ),
 		m_map( 0 ),
@@ -1631,7 +1631,7 @@ public:
 		m_transformChanged( false ){
 		planeChanged();
 	}
-	Brush( const Brush& other, scene::Node& node, const Callback& evaluateTransform, const Callback& boundsChanged ) :
+	Brush( const Brush& other, scene::Node& node, const Callback<void()>& evaluateTransform, const Callback<void()>& boundsChanged ) :
 		m_node( &node ),
 		m_undoable_observer( 0 ),
 		m_map( 0 ),
@@ -1799,7 +1799,7 @@ public:
 		planeChanged();
 		m_transformChanged = true;
 	}
-	typedef MemberCaller<Brush, &Brush::transformChanged> TransformChangedCaller;
+	typedef MemberCaller<Brush, void(), &Brush::transformChanged> TransformChangedCaller;
 
 	void evaluateTransform(){
 		if ( m_transformChanged ) {
@@ -2681,7 +2681,7 @@ public:
 		}
 		m_selectionChanged( selectable );
 	}
-	typedef MemberCaller1<FaceInstance, const Selectable&, &FaceInstance::selectedChanged> SelectedChangedCaller;
+	typedef MemberCaller<FaceInstance, void(const Selectable&), &FaceInstance::selectedChanged> SelectedChangedCaller;
 
 	bool selectedVertices() const {
 		return !m_vertexSelection.empty();
@@ -3378,7 +3378,7 @@ public:
 	void lightsChanged(){
 		m_lightList->lightsChanged();
 	}
-	typedef MemberCaller<BrushInstance, &BrushInstance::lightsChanged> LightsChangedCaller;
+	typedef MemberCaller<BrushInstance, void(), &BrushInstance::lightsChanged> LightsChangedCaller;
 
 	STRING_CONSTANT( Name, "BrushInstance" );
 
@@ -3403,9 +3403,9 @@ public:
 		Instance::setTransformChangedCallback( LightsChangedCaller( *this ) );
 	}
 	~BrushInstance(){
-		Instance::setTransformChangedCallback( Callback() );
+		Instance::setTransformChangedCallback( Callback<void()>() );
 
-		m_brush.m_lightsChanged = Callback();
+		m_brush.m_lightsChanged = Callback<void()>();
 		GlobalShaderCache().detach( *this );
 
 		m_counter->decrement();
@@ -3436,13 +3436,13 @@ public:
 
 		Instance::selectedChanged();
 	}
-	typedef MemberCaller1<BrushInstance, const Selectable&, &BrushInstance::selectedChanged> SelectedChangedCaller;
+	typedef MemberCaller<BrushInstance, void(const Selectable&), &BrushInstance::selectedChanged> SelectedChangedCaller;
 
 	void selectedChangedComponent( const Selectable& selectable ){
 		GlobalSelectionSystem().getObserver ( SelectionSystem::eComponent )( selectable );
 		GlobalSelectionSystem().onComponentSelection( *this, selectable );
 	}
-	typedef MemberCaller1<BrushInstance, const Selectable&, &BrushInstance::selectedChangedComponent> SelectedChangedComponentCaller;
+	typedef MemberCaller<BrushInstance, void(const Selectable&), &BrushInstance::selectedChangedComponent> SelectedChangedComponentCaller;
 
 	const BrushInstanceVisitor& forEachFaceInstance( const BrushInstanceVisitor& visitor ){
 		for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
@@ -4058,7 +4058,7 @@ public:
 		}
 		m_brush.vertexModeFree();
 	}
-	typedef MemberCaller<BrushInstance, &BrushInstance::applyTransform> ApplyTransformCaller;
+	typedef MemberCaller<BrushInstance, void(), &BrushInstance::applyTransform> ApplyTransformCaller;
 
 	void setClipPlane( const Plane3& plane ){
 		m_clipPlane.setPlane( m_brush, plane );

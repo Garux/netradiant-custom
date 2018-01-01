@@ -84,9 +84,9 @@ public:
 };
 
 class Renderable;
-typedef Callback1<const Renderable&> RenderableCallback;
+typedef Callback<void(const Renderable&)> RenderableCallback;
 
-typedef Callback1<const RendererLight&> RendererLightCallback;
+typedef Callback<void(const RendererLight&)> RendererLightCallback;
 
 class LightList
 {

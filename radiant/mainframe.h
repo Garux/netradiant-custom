@@ -95,10 +95,10 @@ public:
 	void SetStatusText( int status_n, const char* status );
 	void UpdateStatusText();
 	void RedrawStatusText();
-	typedef MemberCaller<MainFrame, &MainFrame::RedrawStatusText> RedrawStatusTextCaller;
+	typedef MemberCaller<MainFrame, void(), &MainFrame::RedrawStatusText> RedrawStatusTextCaller;
 
 	void SetGridStatus();
-	typedef MemberCaller<MainFrame, &MainFrame::SetGridStatus> SetGridStatusCaller;
+	typedef MemberCaller<MainFrame, void(), &MainFrame::SetGridStatus> SetGridStatusCaller;
 
 	void SetActiveXY( XYWnd* p );
 	XYWnd* ActiveXY(){

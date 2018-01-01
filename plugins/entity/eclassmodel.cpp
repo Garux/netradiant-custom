@@ -84,8 +84,8 @@ class EclassModel :
 	RenderableWireframeAABB m_aabb_wire;
 	Matrix4 m_translation;
 
-	Callback m_transformChanged;
-	Callback m_evaluateTransform;
+	Callback<void()> m_transformChanged;
+	Callback<void()> m_evaluateTransform;
 
 	void construct(){
 		read_aabb( m_aabb_local, m_entity.getEntityClass() );
@@ -128,23 +128,23 @@ public:
 
 		m_transformChanged();
 	}
-	typedef MemberCaller<EclassModel, &EclassModel::updateTransform> UpdateTransformCaller;
+	typedef MemberCaller<EclassModel, void(), &EclassModel::updateTransform> UpdateTransformCaller;
 
 	void originChanged(){
 		m_origin = m_originKey.m_origin;
 		updateTransform();
 	}
-	typedef MemberCaller<EclassModel, &EclassModel::originChanged> OriginChangedCaller;
+	typedef MemberCaller<EclassModel, void(), &EclassModel::originChanged> OriginChangedCaller;
 	void anglesChanged(){
 		m_angles = m_anglesKey.m_angles;
 		updateTransform();
 	}
-	typedef MemberCaller<EclassModel, &EclassModel::anglesChanged> AnglesChangedCaller;
+	typedef MemberCaller<EclassModel, void(), &EclassModel::anglesChanged> AnglesChangedCaller;
 	void rotationChanged(){
 		rotation_assign( m_rotation, m_rotationKey.m_rotation );
 		updateTransform();
 	}
-	typedef MemberCaller<EclassModel, &EclassModel::rotationChanged> RotationChangedCaller;
+	typedef MemberCaller<EclassModel, void(), &EclassModel::rotationChanged> RotationChangedCaller;
 
 	void skinChanged(){
 		scene::Node* node = m_model.getNode();
@@ -152,11 +152,11 @@ public:
 			Node_modelSkinChanged( *node );
 		}
 	}
-	typedef MemberCaller<EclassModel, &EclassModel::skinChanged> SkinChangedCaller;
+	typedef MemberCaller<EclassModel, void(), &EclassModel::skinChanged> SkinChangedCaller;
 
 public:
 
-	EclassModel( EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	EclassModel( EntityClass* eclass, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( eclass ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
@@ -174,7 +174,7 @@ public:
 		m_evaluateTransform( evaluateTransform ){
 		construct();
 	}
-	EclassModel( const EclassModel& other, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
+	EclassModel( const EclassModel& other, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( other.m_entity ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_origin( ORIGINKEY_IDENTITY ),
@@ -310,7 +310,7 @@ public:
 		m_evaluateTransform();
 		updateTransform();
 	}
-	typedef MemberCaller<EclassModel, &EclassModel::transformChanged> TransformChangedCaller;
+	typedef MemberCaller<EclassModel, void(), &EclassModel::transformChanged> TransformChangedCaller;
 };
 
 class EclassModelInstance : public TargetableInstance, public TransformModifier, public Renderable
@@ -370,7 +370,7 @@ public:
 		evaluateTransform();
 		m_contained.freezeTransform();
 	}
-	typedef MemberCaller<EclassModelInstance, &EclassModelInstance::applyTransform> ApplyTransformCaller;
+	typedef MemberCaller<EclassModelInstance, void(), &EclassModelInstance::applyTransform> ApplyTransformCaller;
 };
 
 class EclassModelNode :

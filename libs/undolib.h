@@ -47,7 +47,7 @@ public:
 template<typename Copyable>
 class ObservedUndoableObject : public Undoable
 {
-	typedef Callback1<const Copyable&> ImportCallback;
+	typedef Callback<void(const Copyable&)> ImportCallback;
 
 	Copyable& m_object;
 	ImportCallback m_importCallback;

@@ -24,8 +24,8 @@
 #include "generic/constant.h"
 #include "generic/callback.h"
 
-typedef Callback1<const char*> StringImportCallback;
-typedef Callback1<const StringImportCallback&> StringExportCallback;
+typedef Callback<void(const char*)> StringImportCallback;
+typedef Callback<void(const StringImportCallback&)> StringExportCallback;
 
 class PreferenceSystem
 {

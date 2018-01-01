@@ -32,24 +32,24 @@
  * Use GenericPluginUI::InfoReportDialog as MeshEntity info callback.
  */
 const MeshEntity::MessageCallback MeshVisitor::_infoReportCallback(
-   PointerCaller1<const char,
-                  const char *,
+   PointerCaller<const char,
+                  void(const char *),
                   &GenericPluginUI::InfoReportDialog>(DIALOG_MESH_INFO_TITLE));
 
 /**
  * Use GenericPluginUI::WarningReportDialog as MeshEntity warning callback.
  */
 const MeshEntity::MessageCallback MeshVisitor::_warningReportCallback(
-   PointerCaller1<const char,
-                  const char *,
+   PointerCaller<const char,
+                  void(const char *),
                   &GenericPluginUI::WarningReportDialog>(DIALOG_WARNING_TITLE));
 
 /**
  * Use GenericPluginUI::ErrorReportDialog as MeshEntity error callback.
  */
 const MeshEntity::MessageCallback MeshVisitor::_errorReportCallback(
-   PointerCaller1<const char,
-                  const char *,
+   PointerCaller<const char,
+                  void(const char *),
                   &GenericPluginUI::ErrorReportDialog>(DIALOG_ERROR_TITLE));
 
 

@@ -43,7 +43,7 @@ class CameraModel
 {
 public:
 	STRING_CONSTANT( Name, "CameraModel" );
-	virtual void setCameraView( CameraView* view, const Callback& disconnect ) = 0;
+	virtual void setCameraView( CameraView* view, const Callback<void()>& disconnect ) = 0;
 };
 
 template<typename Element> class BasicVector3;

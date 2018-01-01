@@ -161,13 +161,13 @@ public:
 		importer( m_string.c_str() );
 	}
 	auto getImportCaller(){
-		return MemberCaller1<DefaultableString, const char*, &DefaultableString::Import>( *this );
+		return MemberCaller<DefaultableString, void(const char*), &DefaultableString::Import>( *this );
 	}
 	auto getExportWithDefaultCaller(){
-		return ConstMemberCaller1<DefaultableString, const StringImportCallback&, &DefaultableString::ExportWithDefault>( *this );
+		return ConstMemberCaller<DefaultableString, void(const StringImportCallback&), &DefaultableString::ExportWithDefault>( *this );
 	}
 	auto getExportCaller(){
-		return ConstMemberCaller1<DefaultableString, const StringImportCallback&, &DefaultableString::Export>( *this );
+		return ConstMemberCaller<DefaultableString, void(const StringImportCallback&), &DefaultableString::Export>( *this );
 	}
 	CopiedString string() const {
 		return m_string.empty()? m_getDefault() : m_string;
@@ -252,7 +252,7 @@ void Build_constructPage( PreferenceGroup& group ){
 	Build_constructPreferences( page );
 }
 void Build_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Build_constructPage>() );
+	PreferencesDialog_addSettingsPage( FreeCaller<void(PreferenceGroup&), Build_constructPage>() );
 }
 
 #include "preferencesystem.h"

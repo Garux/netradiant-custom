@@ -532,7 +532,7 @@ BindArguments2<Caller> bindArguments( const Caller& caller, FirstBound firstBoun
 inline bool Face_testPlane( const Face& face, const Plane3& plane, bool flipped ){
 	return face.contributes() && !Winding_TestPlane( face.getWinding(), plane, flipped );
 }
-typedef Function3<const Face&, const Plane3&, bool, bool, Face_testPlane> FaceTestPlane;
+typedef Function<bool(const Face&, const Plane3&, bool), Face_testPlane> FaceTestPlane;
 
 
 
@@ -1586,10 +1586,10 @@ void CSG_Tool(){
 #include "commands.h"
 
 void CSG_registerCommands(){
-	GlobalCommands_insert( "CSGSubtract", FreeCaller<CSG_Subtract>(), QKeySequence( "Shift+U" ) );
-	GlobalCommands_insert( "CSGMerge", FreeCaller<CSG_Merge>() );
-	GlobalCommands_insert( "CSGWrapMerge", FreeCaller<CSG_WrapMerge>(), QKeySequence( "Ctrl+U" ) );
-	GlobalCommands_insert( "CSGIntersect", FreeCaller<CSG_Intersect>(), QKeySequence( "Ctrl+Shift+U" ) );
-	GlobalCommands_insert( "CSGroom", FreeCaller<CSG_MakeRoom>() );
-	GlobalCommands_insert( "CSGTool", FreeCaller<CSG_Tool>() );
+	GlobalCommands_insert( "CSGSubtract", FreeCaller<void(), CSG_Subtract>(), QKeySequence( "Shift+U" ) );
+	GlobalCommands_insert( "CSGMerge", FreeCaller<void(), CSG_Merge>() );
+	GlobalCommands_insert( "CSGWrapMerge", FreeCaller<void(), CSG_WrapMerge>(), QKeySequence( "Ctrl+U" ) );
+	GlobalCommands_insert( "CSGIntersect", FreeCaller<void(), CSG_Intersect>(), QKeySequence( "Ctrl+Shift+U" ) );
+	GlobalCommands_insert( "CSGroom", FreeCaller<void(), CSG_MakeRoom>() );
+	GlobalCommands_insert( "CSGTool", FreeCaller<void(), CSG_Tool>() );
 }

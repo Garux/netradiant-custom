@@ -668,7 +668,7 @@ void Patch_constructPage( PreferenceGroup& group ){
 	Patch_constructPreferences( page );
 }
 void Patch_registerPreferencesPage(){
-	PreferencesDialog_addDisplayPage( FreeCaller1<PreferenceGroup&, Patch_constructPage>() );
+	PreferencesDialog_addDisplayPage( FreeCaller<void(PreferenceGroup&), Patch_constructPage>() );
 }
 
 
@@ -682,44 +682,44 @@ void PatchPreferences_construct(){
 #include "generic/callback.h"
 
 void Patch_registerCommands(){
-	GlobalCommands_insert( "InvertCurveTextureX", FreeCaller<Patch_FlipTextureX>(), QKeySequence( "Ctrl+Shift+I" ) );
-	GlobalCommands_insert( "InvertCurveTextureY", FreeCaller<Patch_FlipTextureY>(), QKeySequence( "Shift+I" ) );
-	GlobalCommands_insert( "NaturalizePatch", FreeCaller<Patch_NaturalTexture>(), QKeySequence( "Ctrl+N" ) );
-	GlobalCommands_insert( "PatchCylinder", FreeCaller<Patch_Cylinder>() );
-//	GlobalCommands_insert( "PatchDenseCylinder", FreeCaller<Patch_DenseCylinder>() );
-//	GlobalCommands_insert( "PatchVeryDenseCylinder", FreeCaller<Patch_VeryDenseCylinder>() );
-	GlobalCommands_insert( "PatchSquareCylinder", FreeCaller<Patch_SquareCylinder>() );
-	GlobalCommands_insert( "PatchXactCylinder", FreeCaller<Patch_XactCylinder>() );
-	GlobalCommands_insert( "PatchXactSphere", FreeCaller<Patch_XactSphere>() );
-	GlobalCommands_insert( "PatchXactCone", FreeCaller<Patch_XactCone>() );
-	GlobalCommands_insert( "PatchEndCap", FreeCaller<Patch_Endcap>() );
-	GlobalCommands_insert( "PatchBevel", FreeCaller<Patch_Bevel>() );
-//	GlobalCommands_insert( "PatchSquareBevel", FreeCaller<Patch_SquareBevel>() );
-//	GlobalCommands_insert( "PatchSquareEndcap", FreeCaller<Patch_SquareEndcap>() );
-	GlobalCommands_insert( "PatchCone", FreeCaller<Patch_Cone>() );
-	GlobalCommands_insert( "PatchSphere", FreeCaller<Patch_Sphere>() );
-	GlobalCommands_insert( "SimplePatchMesh", FreeCaller<Patch_Plane>(), QKeySequence( "Shift+P" ) );
-	GlobalCommands_insert( "PatchInsertFirstColumn", FreeCaller<Patch_InsertFirstColumn>(), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "PatchInsertLastColumn", FreeCaller<Patch_InsertLastColumn>() );
-	GlobalCommands_insert( "PatchInsertFirstRow", FreeCaller<Patch_InsertFirstRow>(), QKeySequence( Qt::CTRL + Qt::Key_Plus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "PatchInsertLastRow", FreeCaller<Patch_InsertLastRow>() );
-	GlobalCommands_insert( "PatchDeleteFirstColumn", FreeCaller<Patch_DeleteFirstColumn>() );
-	GlobalCommands_insert( "PatchDeleteLastColumn", FreeCaller<Patch_DeleteLastColumn>(), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "PatchDeleteFirstRow", FreeCaller<Patch_DeleteFirstRow>() );
-	GlobalCommands_insert( "PatchDeleteLastRow", FreeCaller<Patch_DeleteLastRow>(), QKeySequence( Qt::CTRL + Qt::Key_Minus + Qt::KeypadModifier ) );
-	GlobalCommands_insert( "InvertCurve", FreeCaller<Patch_Invert>(), QKeySequence( "Ctrl+I" ) );
-	//GlobalCommands_insert( "RedisperseRows", FreeCaller<Patch_RedisperseRows>(), QKeySequence( "Ctrl+E" ) );
-	GlobalCommands_insert( "RedisperseRows", FreeCaller<Patch_RedisperseRows>() );
-	//GlobalCommands_insert( "RedisperseCols", FreeCaller<Patch_RedisperseCols>(), QKeySequence( "Ctrl+Shift+E" ) );
-	GlobalCommands_insert( "RedisperseCols", FreeCaller<Patch_RedisperseCols>() );
-	GlobalCommands_insert( "SmoothRows", FreeCaller<Patch_SmoothRows>(), QKeySequence( "Ctrl+W" ) );
-	GlobalCommands_insert( "SmoothCols", FreeCaller<Patch_SmoothCols>(), QKeySequence( "Ctrl+Shift+W" ) );
-	GlobalCommands_insert( "MatrixTranspose", FreeCaller<Patch_Transpose>(), QKeySequence( "Ctrl+Shift+M" ) );
-	GlobalCommands_insert( "CapCurrentCurve", FreeCaller<Patch_Cap>(), QKeySequence( "Shift+C" ) );
-//	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), QKeySequence( "Y" ) );
-//	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), QKeySequence( "Ctrl+L" ) );
-	GlobalCommands_insert( "PatchDeform", FreeCaller<Patch_Deform>() );
-	GlobalCommands_insert( "PatchThicken", FreeCaller<Patch_Thicken>(), QKeySequence( "Ctrl+T" ) );
+	GlobalCommands_insert( "InvertCurveTextureX", FreeCaller<void(), Patch_FlipTextureX>(), QKeySequence( "Ctrl+Shift+I" ) );
+	GlobalCommands_insert( "InvertCurveTextureY", FreeCaller<void(), Patch_FlipTextureY>(), QKeySequence( "Shift+I" ) );
+	GlobalCommands_insert( "NaturalizePatch", FreeCaller<void(), Patch_NaturalTexture>(), QKeySequence( "Ctrl+N" ) );
+	GlobalCommands_insert( "PatchCylinder", FreeCaller<void(), Patch_Cylinder>() );
+//	GlobalCommands_insert( "PatchDenseCylinder", FreeCaller<void(), Patch_DenseCylinder>() );
+//	GlobalCommands_insert( "PatchVeryDenseCylinder", FreeCaller<void(), Patch_VeryDenseCylinder>() );
+	GlobalCommands_insert( "PatchSquareCylinder", FreeCaller<void(), Patch_SquareCylinder>() );
+	GlobalCommands_insert( "PatchXactCylinder", FreeCaller<void(), Patch_XactCylinder>() );
+	GlobalCommands_insert( "PatchXactSphere", FreeCaller<void(), Patch_XactSphere>() );
+	GlobalCommands_insert( "PatchXactCone", FreeCaller<void(), Patch_XactCone>() );
+	GlobalCommands_insert( "PatchEndCap", FreeCaller<void(), Patch_Endcap>() );
+	GlobalCommands_insert( "PatchBevel", FreeCaller<void(), Patch_Bevel>() );
+//	GlobalCommands_insert( "PatchSquareBevel", FreeCaller<void(), Patch_SquareBevel>() );
+//	GlobalCommands_insert( "PatchSquareEndcap", FreeCaller<void(), Patch_SquareEndcap>() );
+	GlobalCommands_insert( "PatchCone", FreeCaller<void(), Patch_Cone>() );
+	GlobalCommands_insert( "PatchSphere", FreeCaller<void(), Patch_Sphere>() );
+	GlobalCommands_insert( "SimplePatchMesh", FreeCaller<void(), Patch_Plane>(), QKeySequence( "Shift+P" ) );
+	GlobalCommands_insert( "PatchInsertFirstColumn", FreeCaller<void(), Patch_InsertFirstColumn>(), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_Plus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "PatchInsertLastColumn", FreeCaller<void(), Patch_InsertLastColumn>() );
+	GlobalCommands_insert( "PatchInsertFirstRow", FreeCaller<void(), Patch_InsertFirstRow>(), QKeySequence( Qt::CTRL + Qt::Key_Plus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "PatchInsertLastRow", FreeCaller<void(), Patch_InsertLastRow>() );
+	GlobalCommands_insert( "PatchDeleteFirstColumn", FreeCaller<void(), Patch_DeleteFirstColumn>() );
+	GlobalCommands_insert( "PatchDeleteLastColumn", FreeCaller<void(), Patch_DeleteLastColumn>(), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "PatchDeleteFirstRow", FreeCaller<void(), Patch_DeleteFirstRow>() );
+	GlobalCommands_insert( "PatchDeleteLastRow", FreeCaller<void(), Patch_DeleteLastRow>(), QKeySequence( Qt::CTRL + Qt::Key_Minus + Qt::KeypadModifier ) );
+	GlobalCommands_insert( "InvertCurve", FreeCaller<void(), Patch_Invert>(), QKeySequence( "Ctrl+I" ) );
+	//GlobalCommands_insert( "RedisperseRows", FreeCaller<void(), Patch_RedisperseRows>(), QKeySequence( "Ctrl+E" ) );
+	GlobalCommands_insert( "RedisperseRows", FreeCaller<void(), Patch_RedisperseRows>() );
+	//GlobalCommands_insert( "RedisperseCols", FreeCaller<void(), Patch_RedisperseCols>(), QKeySequence( "Ctrl+Shift+E" ) );
+	GlobalCommands_insert( "RedisperseCols", FreeCaller<void(), Patch_RedisperseCols>() );
+	GlobalCommands_insert( "SmoothRows", FreeCaller<void(), Patch_SmoothRows>(), QKeySequence( "Ctrl+W" ) );
+	GlobalCommands_insert( "SmoothCols", FreeCaller<void(), Patch_SmoothCols>(), QKeySequence( "Ctrl+Shift+W" ) );
+	GlobalCommands_insert( "MatrixTranspose", FreeCaller<void(), Patch_Transpose>(), QKeySequence( "Ctrl+Shift+M" ) );
+	GlobalCommands_insert( "CapCurrentCurve", FreeCaller<void(), Patch_Cap>(), QKeySequence( "Shift+C" ) );
+//	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<void(), Patch_OverlayOn>(), QKeySequence( "Y" ) );
+//	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<void(), Patch_OverlayOff>(), QKeySequence( "Ctrl+L" ) );
+	GlobalCommands_insert( "PatchDeform", FreeCaller<void(), Patch_Deform>() );
+	GlobalCommands_insert( "PatchThicken", FreeCaller<void(), Patch_Thicken>(), QKeySequence( "Ctrl+T" ) );
 }
 
 void Patch_constructToolbar( QToolBar* toolbar ){

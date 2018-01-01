@@ -179,22 +179,22 @@ static GameCombo s_gameCombo;
 void GameModeImport( int value ){
 	gamemode_set( value == 0? "sp" : "mp" );
 }
-typedef FreeCaller1<int, GameModeImport> GameModeImportCaller;
+typedef FreeCaller<void(int), GameModeImport> GameModeImportCaller;
 
 void GameModeExport( const IntImportCallback& importer ){
 	const char *gamemode = gamemode_get();
 	importer( ( string_empty( gamemode ) || string_equal( gamemode, "sp" ) )? 0 : 1 );
 }
-typedef FreeCaller1<const IntImportCallback&, GameModeExport> GameModeExportCaller;
+typedef FreeCaller<void(const IntImportCallback&), GameModeExport> GameModeExportCaller;
 
 
 void FSGameImport( int value ){
 }
-typedef FreeCaller1<int, FSGameImport> FSGameImportCaller;
+typedef FreeCaller<void(int), FSGameImport> FSGameImportCaller;
 
 void FSGameExport( const IntImportCallback& importer ){
 }
-typedef FreeCaller1<const IntImportCallback&, FSGameExport> FSGameExportCaller;
+typedef FreeCaller<void(const IntImportCallback&), FSGameExport> FSGameExportCaller;
 
 
 void GameImport( int value ){
@@ -216,7 +216,7 @@ void GameImport( int value ){
 		}
 	}
 }
-typedef FreeCaller1<int, GameImport> GameImportCaller;
+typedef FreeCaller<void(int), GameImport> GameImportCaller;
 
 void GameExport( const IntImportCallback& importer ){
 	const gamecombo_t gamecombo = gamecombo_for_dir( gamename_get() );
@@ -225,7 +225,7 @@ void GameExport( const IntImportCallback& importer ){
 	s_gameCombo.fsgame_entry->setEditText( gamecombo.fs_game );
 	s_gameCombo.fsgame_entry->setEnabled( gamecombo.sensitive );
 }
-typedef FreeCaller1<const IntImportCallback&, GameExport> GameExportCaller;
+typedef FreeCaller<void(const IntImportCallback&), GameExport> GameExportCaller;
 
 
 void Game_constructPreferences( PreferencesPage& page ){
@@ -1727,7 +1727,7 @@ public:
 class LineNumberArea : public QWidget
 {
 	QPlainTextEdit *m_textEdit;
-	const Callback1<QPaintEvent*> m_paintCallback;
+	const Callback<void(QPaintEvent*)> m_paintCallback;
 public:
 	LineNumberArea( QPlainTextEdit *textEdit, const decltype( m_paintCallback )& paintCallback ) :
 		QWidget( textEdit ), m_textEdit( textEdit ), m_paintCallback( paintCallback ){}
@@ -1771,7 +1771,7 @@ public:
 		updateTabStopDistance();
 		new ShaderHighlighter( document() );
 
-		m_lineNumberArea = new LineNumberArea( this, MemberCaller1<QPlainTextEdit_Shader, QPaintEvent *, &QPlainTextEdit_Shader::lineNumberAreaPaintEvent>( *this ) );
+		m_lineNumberArea = new LineNumberArea( this, MemberCaller<QPlainTextEdit_Shader, void(QPaintEvent *), &QPlainTextEdit_Shader::lineNumberAreaPaintEvent>( *this ) );
 		QObject::connect( this, &QPlainTextEdit::blockCountChanged, [this]( int newBlockCount ){ updateLineNumberAreaWidth(); } );
 		QObject::connect( this, &QPlainTextEdit::updateRequest, [this]( const QRect &rect, int dy ){
 			m_lineNumberArea->updateLineNumberArea( rect, dy );
@@ -2026,7 +2026,7 @@ private:
 			void insert( const char *name ) const {
 				m_texTree.insert( m_stringStream( m_dirstring, PathExtensionless( name ) ) );
 			}
-			typedef ConstMemberCaller1<LoadTexturesByTypeVisitor, const char*, &LoadTexturesByTypeVisitor::insert> InsertCaller;
+			typedef ConstMemberCaller<LoadTexturesByTypeVisitor, void(const char*), &LoadTexturesByTypeVisitor::insert> InsertCaller;
 			LoadTexturesByTypeVisitor( const char* dirstring, TexTree& texTree ) :
 				m_dirstring( dirstring ), m_texTree( texTree ), m_stringStream( 64 )
 			{}

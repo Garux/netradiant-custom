@@ -58,7 +58,7 @@ inline void write_colour( const Vector3& colour, Entity* entity ){
 
 class Colour
 {
-	Callback m_colourChanged;
+	Callback<void()> m_colourChanged;
 	Shader* m_state;
 	Shader* m_state_additive;
 
@@ -75,7 +75,7 @@ class Colour
 public:
 	Vector3 m_colour;
 
-	Colour( const Callback& colourChanged )
+	Colour( const Callback<void()>& colourChanged )
 		: m_colourChanged( colourChanged ){
 		default_colour( m_colour );
 		m_colour_add = m_colour / 8;
@@ -93,7 +93,7 @@ public:
 
 		m_colourChanged();
 	}
-	typedef MemberCaller1<Colour, const char*, &Colour::colourChanged> ColourChangedCaller;
+	typedef MemberCaller<Colour, void(const char*), &Colour::colourChanged> ColourChangedCaller;
 
 
 	void write( Entity* entity ) const {

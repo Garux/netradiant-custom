@@ -36,11 +36,11 @@ bool Map_Valid( const Map& map );
 
 class DeferredDraw
 {
-	Callback m_draw;
+	Callback<void()> m_draw;
 	bool m_defer;
 	bool m_deferred;
 public:
-	DeferredDraw( const Callback& draw ) : m_draw( draw ), m_defer( false ), m_deferred( false ){
+	DeferredDraw( const Callback<void()>& draw ) : m_draw( draw ), m_defer( false ), m_deferred( false ){
 	}
 	void defer(){
 		m_defer = true;
@@ -72,7 +72,7 @@ inline void DeferredDraw_onMapValidChanged( DeferredDraw& self ){
 		self.defer();
 	}
 }
-typedef ReferenceCaller<DeferredDraw, DeferredDraw_onMapValidChanged> DeferredDrawOnMapValidChangedCaller;
+typedef ReferenceCaller<DeferredDraw, void(), DeferredDraw_onMapValidChanged> DeferredDrawOnMapValidChangedCaller;
 
 
 

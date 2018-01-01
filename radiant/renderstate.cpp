@@ -643,7 +643,7 @@ public:
 			if ( ( ( *i )->state().m_state & RENDER_BUMP ) != 0 ) {
 				if ( lights != 0 ) {
 					CountLights counter;
-					lights->forEachLight( makeCallback1( counter ) );
+					lights->forEachLight( makeCallback( counter ) );
 					globalOutputStream() << "count = " << counter.count() << '\n';
 					for ( std::size_t i = 0; i < counter.count(); ++i )
 					{
@@ -656,7 +656,7 @@ public:
 			if ( ( ( *i )->state().m_state & RENDER_BUMP ) != 0 ) {
 				if ( lights != 0 ) {
 					OpenGLStateBucketAdd add( *( *i ), renderable, modelview );
-					lights->forEachLight( makeCallback1( add ) );
+					lights->forEachLight( makeCallback( add ) );
 				}
 			}
 			else
@@ -748,13 +748,13 @@ class LinearLightList : public LightList
 {
 	LightCullable& m_cullable;
 	RendererLights& m_allLights;
-	Callback m_evaluateChanged;
+	Callback<void()> m_evaluateChanged;
 
 	typedef std::list<RendererLight*> Lights;
 	mutable Lights m_lights;
 	mutable bool m_lightsChanged;
 public:
-	LinearLightList( LightCullable& cullable, RendererLights& lights, const Callback& evaluateChanged ) :
+	LinearLightList( LightCullable& cullable, RendererLights& lights, const Callback<void()>& evaluateChanged ) :
 		m_cullable( cullable ), m_allLights( lights ), m_evaluateChanged( evaluateChanged ){
 		m_lightsChanged = true;
 	}
@@ -1086,7 +1086,7 @@ public:
 			}
 		}
 	}
-	typedef MemberCaller<OpenGLShaderCache, &OpenGLShaderCache::evaluateChanged> EvaluateChangedCaller;
+	typedef MemberCaller<OpenGLShaderCache, void(), &OpenGLShaderCache::evaluateChanged> EvaluateChangedCaller;
 
 	typedef std::set<const Renderable*> Renderables;
 	Renderables m_renderables;

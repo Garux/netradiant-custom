@@ -604,12 +604,12 @@ const char* misc_model_dialog( QWidget* parent, const char* filepath ){
 void LightRadiiImport( EntityCreator& self, bool value ){
 	self.setLightRadii( value );
 }
-typedef ReferenceCaller1<EntityCreator, bool, LightRadiiImport> LightRadiiImportCaller;
+typedef ReferenceCaller<EntityCreator, void(bool), LightRadiiImport> LightRadiiImportCaller;
 
 void LightRadiiExport( EntityCreator& self, const BoolImportCallback& importer ){
 	importer( self.getLightRadii() );
 }
-typedef ReferenceCaller1<EntityCreator, const BoolImportCallback&, LightRadiiExport> LightRadiiExportCaller;
+typedef ReferenceCaller<EntityCreator, void(const BoolImportCallback&), LightRadiiExport> LightRadiiExportCaller;
 
 void Entity_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox(
@@ -623,24 +623,24 @@ void ShowNamesDistImport( EntityCreator& self, int value ){
 	self.setShowNamesDist( value );
 	UpdateAllWindows();
 }
-typedef ReferenceCaller1<EntityCreator, int, ShowNamesDistImport> ShowNamesDistImportCaller;
+typedef ReferenceCaller<EntityCreator, void(int), ShowNamesDistImport> ShowNamesDistImportCaller;
 
 void ShowNamesDistExport( EntityCreator& self, const IntImportCallback& importer ){
 	importer( self.getShowNamesDist() );
 }
-typedef ReferenceCaller1<EntityCreator, const IntImportCallback&, ShowNamesDistExport> ShowNamesDistExportCaller;
+typedef ReferenceCaller<EntityCreator, void(const IntImportCallback&), ShowNamesDistExport> ShowNamesDistExportCaller;
 
 
 void ShowNamesRatioImport( EntityCreator& self, int value ){
 	self.setShowNamesRatio( value );
 	UpdateAllWindows();
 }
-typedef ReferenceCaller1<EntityCreator, int, ShowNamesRatioImport> ShowNamesRatioImportCaller;
+typedef ReferenceCaller<EntityCreator, void(int), ShowNamesRatioImport> ShowNamesRatioImportCaller;
 
 void ShowNamesRatioExport( EntityCreator& self, const IntImportCallback& importer ){
 	importer( self.getShowNamesRatio() );
 }
-typedef ReferenceCaller1<EntityCreator, const IntImportCallback&, ShowNamesRatioExport> ShowNamesRatioExportCaller;
+typedef ReferenceCaller<EntityCreator, void(const IntImportCallback&), ShowNamesRatioExport> ShowNamesRatioExportCaller;
 
 
 void ShowTargetNamesImport( EntityCreator& self, bool value ){
@@ -648,12 +648,12 @@ void ShowTargetNamesImport( EntityCreator& self, bool value ){
 		PreferencesDialog_restartRequired( "Entity Names = Targetnames" ); // technically map reloading or entities recreation do update too, as it's not LatchedValue
 	self.setShowTargetNames( value );
 }
-typedef ReferenceCaller1<EntityCreator, bool, ShowTargetNamesImport> ShowTargetNamesImportCaller;
+typedef ReferenceCaller<EntityCreator, void(bool), ShowTargetNamesImport> ShowTargetNamesImportCaller;
 
 void ShowTargetNamesExport( EntityCreator& self, const BoolImportCallback& importer ){
 	importer( self.getShowTargetNames() );
 }
-typedef ReferenceCaller1<EntityCreator, const BoolImportCallback&, ShowTargetNamesExport> ShowTargetNamesExportCaller;
+typedef ReferenceCaller<EntityCreator, void(const BoolImportCallback&), ShowTargetNamesExport> ShowTargetNamesExportCaller;
 
 
 void Entity_constructPreferences( PreferencesPage& page ){
@@ -674,14 +674,14 @@ void Entity_constructPage( PreferenceGroup& group ){
 	Entity_constructPreferences( page );
 }
 void Entity_registerPreferencesPage(){
-	PreferencesDialog_addDisplayPage( FreeCaller1<PreferenceGroup&, Entity_constructPage>() );
+	PreferencesDialog_addDisplayPage( FreeCaller<void(PreferenceGroup&), Entity_constructPage>() );
 }
 
 
 void ShowLightRadiiExport( const BoolImportCallback& importer ){
 	importer( GlobalEntityCreator().getLightRadii() );
 }
-typedef FreeCaller1<const BoolImportCallback&, ShowLightRadiiExport> ShowLightRadiiExportCaller;
+typedef FreeCaller<void(const BoolImportCallback&), ShowLightRadiiExport> ShowLightRadiiExportCaller;
 ShowLightRadiiExportCaller g_show_lightradii_caller;
 ToggleItem g_show_lightradii_item( g_show_lightradii_caller );
 void ToggleShowLightRadii(){
@@ -718,17 +718,17 @@ void Entity_registerShortcuts(){
 #include "stringio.h"
 
 void Entity_Construct(){
-	GlobalCommands_insert( "EntityColorSet", FreeCaller<Entity_setColour>(), QKeySequence( "K" ) );
-	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<Entity_normalizeColor>() );
-	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), QKeySequence( "Ctrl+K" ) );
+	GlobalCommands_insert( "EntityColorSet", FreeCaller<void(), Entity_setColour>(), QKeySequence( "K" ) );
+	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<void(), Entity_normalizeColor>() );
+	GlobalCommands_insert( "EntitiesConnect", FreeCaller<void(), Entity_connectSelected>(), QKeySequence( "Ctrl+K" ) );
 	if ( game_has_killConnect() )
-		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), QKeySequence( "Shift+K" ) );
-	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<Entity_moveSelectedPrimitivesToLast>(), QKeySequence( "Ctrl+M" ) );
-	GlobalCommands_insert( "EntityMovePrimitivesToFirst", FreeCaller<Entity_moveSelectedPrimitivesToFirst>() );
-	GlobalCommands_insert( "EntityUngroup", FreeCaller<Entity_ungroup>() );
-	GlobalCommands_insert( "EntityUngroupPrimitives", FreeCaller<Entity_ungroupSelectedPrimitives>() );
+		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<void(), Entity_killconnectSelected>(), QKeySequence( "Shift+K" ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<void(), Entity_moveSelectedPrimitivesToLast>(), QKeySequence( "Ctrl+M" ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToFirst", FreeCaller<void(), Entity_moveSelectedPrimitivesToFirst>() );
+	GlobalCommands_insert( "EntityUngroup", FreeCaller<void(), Entity_ungroup>() );
+	GlobalCommands_insert( "EntityUngroupPrimitives", FreeCaller<void(), Entity_ungroupSelectedPrimitives>() );
 
-	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
+	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<void(), ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
 
 	GlobalPreferenceSystem().registerPreference( "SI_Colors5", Vector3ImportStringCaller( g_entity_globals.color_entity ), Vector3ExportStringCaller( g_entity_globals.color_entity ) );
 	GlobalPreferenceSystem().registerPreference( "LastLightIntensity", IntImportStringCaller( g_iLastLightIntensity ), IntExportStringCaller( g_iLastLightIntensity ) );

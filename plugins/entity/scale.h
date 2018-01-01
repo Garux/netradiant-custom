@@ -85,13 +85,13 @@ inline Vector3 scale_scaled( const Vector3& scale, const Vector3& scaling ){
 
 class ScaleKey
 {
-	Callback m_scaleChanged;
+	Callback<void()> m_scaleChanged;
 	const Entity& m_entity;
 public:
 	Vector3 m_scale;
 
 
-	ScaleKey( const Callback& scaleChanged, const Entity& entity )
+	ScaleKey( const Callback<void()>& scaleChanged, const Entity& entity )
 		: m_scaleChanged( scaleChanged ), m_entity( entity ), m_scale( SCALEKEY_IDENTITY ){
 	}
 
@@ -101,7 +101,7 @@ public:
 			m_scaleChanged();
 		}
 	}
-	typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::uniformScaleChanged> UniformScaleChangedCaller;
+	typedef MemberCaller<ScaleKey, void(const char*), &ScaleKey::uniformScaleChanged> UniformScaleChangedCaller;
 
 	void scaleChanged( const char* value ){
 		if( m_entity.hasKeyValue( "modelscale_vec" ) ) // check actual key presence, as this may be notified by default value on key removal
@@ -110,7 +110,7 @@ public:
 			read_scale( m_scale, m_entity.getKeyValue( "modelscale" ) );
 		m_scaleChanged();
 	}
-	typedef MemberCaller1<ScaleKey, const char*, &ScaleKey::scaleChanged> ScaleChangedCaller;
+	typedef MemberCaller<ScaleKey, void(const char*), &ScaleKey::scaleChanged> ScaleChangedCaller;
 
 	void write( Entity* entity ) const {
 		write_scale( m_scale, entity );

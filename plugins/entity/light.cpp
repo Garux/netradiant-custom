@@ -786,13 +786,13 @@ public:
 		calculateRadii();
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<LightRadii, const char*, &LightRadii::primaryIntensityChanged> PrimaryIntensityChangedCaller;
+	typedef MemberCaller<LightRadii, void(const char*), &LightRadii::primaryIntensityChanged> PrimaryIntensityChangedCaller;
 	void secondaryIntensityChanged( const char* value ){
 		m_secondaryIntensity = string_read_float( value );
 		calculateRadii();
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<LightRadii, const char*, &LightRadii::secondaryIntensityChanged> SecondaryIntensityChangedCaller;
+	typedef MemberCaller<LightRadii, void(const char*), &LightRadii::secondaryIntensityChanged> SecondaryIntensityChangedCaller;
 	void scaleChanged( const char* value ){
 		m_scale = string_read_float( value );
 		if ( m_scale <= 0.0f ) {
@@ -801,7 +801,7 @@ public:
 		calculateRadii();
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<LightRadii, const char*, &LightRadii::scaleChanged> ScaleChangedCaller;
+	typedef MemberCaller<LightRadii, void(const char*), &LightRadii::scaleChanged> ScaleChangedCaller;
 	void fadeChanged( const char* value ){
 		m_fade = string_read_float( value );
 		if ( m_fade <= 0.0f ) {
@@ -810,13 +810,13 @@ public:
 		calculateRadii();
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<LightRadii, const char*, &LightRadii::fadeChanged> FadeChangedCaller;
+	typedef MemberCaller<LightRadii, void(const char*), &LightRadii::fadeChanged> FadeChangedCaller;
 	void flagsChanged( const char* value ){
 		m_flags = string_read_int( value );
 		calculateRadii();
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<LightRadii, const char*, &LightRadii::flagsChanged> FlagsChangedCaller;
+	typedef MemberCaller<LightRadii, void(const char*), &LightRadii::flagsChanged> FlagsChangedCaller;
 
 	void transformRadii( float offset ){
 		const float radius = m_radii[1] + offset;
@@ -863,7 +863,7 @@ public:
 	Vector3 m_radius;
 	Vector3 m_radiusTransformed;
 	Vector3 m_center;
-	Callback m_changed;
+	Callback<void()> m_changed;
 	bool m_useCenterKey;
 
 	Doom3LightRadius( const char* defaultRadius ) : m_defaultRadius( 300, 300, 300 ), m_center( 0, 0, 0 ), m_useCenterKey( false ){
@@ -883,7 +883,7 @@ public:
 		m_changed();
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<Doom3LightRadius, const char*, &Doom3LightRadius::lightRadiusChanged> LightRadiusChangedCaller;
+	typedef MemberCaller<Doom3LightRadius, void(const char*), &Doom3LightRadius::lightRadiusChanged> LightRadiusChangedCaller;
 
 	void lightCenterChanged( const char* value ){
 		m_useCenterKey = string_parse_vector3( value, m_center );
@@ -892,7 +892,7 @@ public:
 		}
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<Doom3LightRadius, const char*, &Doom3LightRadius::lightCenterChanged> LightCenterChangedCaller;
+	typedef MemberCaller<Doom3LightRadius, void(const char*), &Doom3LightRadius::lightCenterChanged> LightCenterChangedCaller;
 };
 
 class RenderLightRadiiWire : public OpenGLRenderable
@@ -1050,7 +1050,7 @@ public:
 		}
 		SceneChangeNotify();
 	}
-	typedef MemberCaller1<LightShader, const char*, &LightShader::valueChanged> ValueChangedCaller;
+	typedef MemberCaller<LightShader, void(const char*), &LightShader::valueChanged> ValueChangedCaller;
 
 	Shader* get() const {
 		return m_shader.get();
@@ -1150,9 +1150,9 @@ class Light :
 
 	LightShader m_shader;
 
-	Callback m_transformChanged;
-	Callback m_boundsChanged;
-	Callback m_evaluateTransform;
+	Callback<void()> m_transformChanged;
+	Callback<void()> m_boundsChanged;
+	Callback<void()> m_evaluateTransform;
 
 	void construct(){
 		default_rotation( m_rotation );
@@ -1221,7 +1221,7 @@ public:
 		m_aabb_light.origin = m_useLightOrigin ? m_lightOrigin : m_originKey.m_origin;
 		updateOrigin();
 	}
-	typedef MemberCaller<Light, &Light::originChanged> OriginChangedCaller;
+	typedef MemberCaller<Light, void(), &Light::originChanged> OriginChangedCaller;
 
 	void lightOriginChanged( const char* value ){
 		m_useLightOrigin = !string_empty( value );
@@ -1230,7 +1230,7 @@ public:
 		}
 		originChanged();
 	}
-	typedef MemberCaller1<Light, const char*, &Light::lightOriginChanged> LightOriginChangedCaller;
+	typedef MemberCaller<Light, void(const char*), &Light::lightOriginChanged> LightOriginChangedCaller;
 
 	void lightTargetChanged( const char* value ){
 		m_useLightTarget = !string_empty( value );
@@ -1239,7 +1239,7 @@ public:
 		}
 		projectionChanged();
 	}
-	typedef MemberCaller1<Light, const char*, &Light::lightTargetChanged> LightTargetChangedCaller;
+	typedef MemberCaller<Light, void(const char*), &Light::lightTargetChanged> LightTargetChangedCaller;
 	void lightUpChanged( const char* value ){
 		m_useLightUp = !string_empty( value );
 		if ( m_useLightUp ) {
@@ -1247,7 +1247,7 @@ public:
 		}
 		projectionChanged();
 	}
-	typedef MemberCaller1<Light, const char*, &Light::lightUpChanged> LightUpChangedCaller;
+	typedef MemberCaller<Light, void(const char*), &Light::lightUpChanged> LightUpChangedCaller;
 	void lightRightChanged( const char* value ){
 		m_useLightRight = !string_empty( value );
 		if ( m_useLightRight ) {
@@ -1255,7 +1255,7 @@ public:
 		}
 		projectionChanged();
 	}
-	typedef MemberCaller1<Light, const char*, &Light::lightRightChanged> LightRightChangedCaller;
+	typedef MemberCaller<Light, void(const char*), &Light::lightRightChanged> LightRightChangedCaller;
 	void lightStartChanged( const char* value ){
 		m_useLightStart = !string_empty( value );
 		if ( m_useLightStart ) {
@@ -1263,7 +1263,7 @@ public:
 		}
 		projectionChanged();
 	}
-	typedef MemberCaller1<Light, const char*, &Light::lightStartChanged> LightStartChangedCaller;
+	typedef MemberCaller<Light, void(const char*), &Light::lightStartChanged> LightStartChangedCaller;
 	void lightEndChanged( const char* value ){
 		m_useLightEnd = !string_empty( value );
 		if ( m_useLightEnd ) {
@@ -1271,7 +1271,7 @@ public:
 		}
 		projectionChanged();
 	}
-	typedef MemberCaller1<Light, const char*, &Light::lightEndChanged> LightEndChangedCaller;
+	typedef MemberCaller<Light, void(const char*), &Light::lightEndChanged> LightEndChangedCaller;
 
 	void writeLightOrigin(){
 		write_origin( m_lightOrigin, &m_entity, "light_origin" );
@@ -1302,7 +1302,7 @@ public:
 		rotation_assign( m_rotation, m_useLightRotation ? m_lightRotation : m_rotationKey.m_rotation );
 		GlobalSelectionSystem().pivotChanged();
 	}
-	typedef MemberCaller<Light, &Light::rotationChanged> RotationChangedCaller;
+	typedef MemberCaller<Light, void(), &Light::rotationChanged> RotationChangedCaller;
 
 	void lightRotationChanged( const char* value ){
 		m_useLightRotation = !string_empty( value );
@@ -1311,15 +1311,15 @@ public:
 		}
 		rotationChanged();
 	}
-	typedef MemberCaller1<Light, const char*, &Light::lightRotationChanged> LightRotationChangedCaller;
+	typedef MemberCaller<Light, void(const char*), &Light::lightRotationChanged> LightRotationChangedCaller;
 
 public:
 
-	Light( EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& boundsChanged, const Callback& evaluateTransform ) :
+	Light( EntityClass* eclass, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& boundsChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( eclass ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
-		m_colour( FreeCaller<SceneChangeNotify>() ),
+		m_colour( FreeCaller<void(), SceneChangeNotify>() ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
 		m_nameKeys( m_entity ),
@@ -1339,11 +1339,11 @@ public:
 		m_evaluateTransform( evaluateTransform ){
 		construct();
 	}
-	Light( const Light& other, scene::Node& node, const Callback& transformChanged, const Callback& boundsChanged, const Callback& evaluateTransform ) :
+	Light( const Light& other, scene::Node& node, const Callback<void()>& transformChanged, const Callback<void()>& boundsChanged, const Callback<void()>& evaluateTransform ) :
 		m_entity( other.m_entity ),
 		m_originKey( OriginChangedCaller( *this ) ),
 		m_rotationKey( RotationChangedCaller( *this ) ),
-		m_colour( FreeCaller<SceneChangeNotify>() ),
+		m_colour( FreeCaller<void(), SceneChangeNotify>() ),
 		m_filter( m_entity, node ),
 		m_named( m_entity ),
 		m_nameKeys( m_entity ),
@@ -1584,7 +1584,7 @@ public:
 		m_evaluateTransform();
 		updateOrigin();
 	}
-	typedef MemberCaller<Light, &Light::transformChanged> TransformChangedCaller;
+	typedef MemberCaller<Light, void(), &Light::transformChanged> TransformChangedCaller;
 
 	mutable Matrix4 m_localPivot;
 	const Matrix4& getLocalPivot() const {
@@ -1593,7 +1593,7 @@ public:
 		return m_localPivot;
 	}
 
-	void setLightChangedCallback( const Callback& callback ){
+	void setLightChangedCallback( const Callback<void()>& callback ){
 		m_doom3Radius.m_changed = callback;
 	}
 
@@ -1843,7 +1843,7 @@ public:
 		StaticRenderableConnectionLines::instance().detach( *this );
 
 		if ( g_lightType == LIGHTTYPE_DOOM3 ) {
-			m_contained.setLightChangedCallback( Callback() );
+			m_contained.setLightChangedCallback( Callback<void()>() );
 			GlobalShaderCache().detach( *this );
 		}
 
@@ -1925,7 +1925,7 @@ public:
 		GlobalSelectionSystem().getObserver ( SelectionSystem::eComponent )( selectable );
 		GlobalSelectionSystem().onComponentSelection( *this, selectable );
 	}
-	typedef MemberCaller1<LightInstance, const Selectable&, &LightInstance::selectedChangedComponent> SelectedChangedComponentCaller;
+	typedef MemberCaller<LightInstance, void(const Selectable&), &LightInstance::selectedChangedComponent> SelectedChangedComponentCaller;
 
 	void evaluateTransform(){
 		if ( getType() == TRANSFORM_PRIMITIVE ) {
@@ -1949,12 +1949,12 @@ public:
 		evaluateTransform();
 		m_contained.freezeTransform( m_scaleRadius.isSelected() );
 	}
-	typedef MemberCaller<LightInstance, &LightInstance::applyTransform> ApplyTransformCaller;
+	typedef MemberCaller<LightInstance, void(), &LightInstance::applyTransform> ApplyTransformCaller;
 
 	void lightChanged(){
 		GlobalShaderCache().changed( *this );
 	}
-	typedef MemberCaller<LightInstance, &LightInstance::lightChanged> LightChangedCaller;
+	typedef MemberCaller<LightInstance, void(), &LightInstance::lightChanged> LightChangedCaller;
 
 	Shader* getShader() const {
 		return m_contained.getShader();

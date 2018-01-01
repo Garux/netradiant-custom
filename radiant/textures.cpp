@@ -594,9 +594,9 @@ void Textures_Unrealise(){
 }
 
 
-Callback g_texturesModeChangedNotify;
+Callback<void()> g_texturesModeChangedNotify;
 
-void Textures_setModeChangedNotify( const Callback& notify ){
+void Textures_setModeChangedNotify( const Callback<void()>& notify ){
 	g_texturesModeChangedNotify = notify;
 }
 
@@ -692,7 +692,7 @@ void TextureCompressionImport( TextureCompressionFormat& self, int value ){
 	}
 	Textures_UpdateTextureCompressionFormat();
 }
-typedef ReferenceCaller1<TextureCompressionFormat, int, TextureCompressionImport> TextureCompressionImportCaller;
+typedef ReferenceCaller<TextureCompressionFormat, void(int), TextureCompressionImport> TextureCompressionImportCaller;
 
 void TextureMiplevelImport( int& self, int value ){
 	if ( self != value ) {
@@ -701,7 +701,7 @@ void TextureMiplevelImport( int& self, int value ){
 		Textures_Realise();
 	}
 }
-typedef ReferenceCaller1<int, int, TextureMiplevelImport> TextureMiplevelImportCaller;
+typedef ReferenceCaller<int, void(int), TextureMiplevelImport> TextureMiplevelImportCaller;
 
 void TextureGammaImport( float& self, float value ){
 	if ( self != value ) {
@@ -710,7 +710,7 @@ void TextureGammaImport( float& self, float value ){
 		Textures_Realise();
 	}
 }
-typedef ReferenceCaller1<float, float, TextureGammaImport> TextureGammaImportCaller;
+typedef ReferenceCaller<float, void(float), TextureGammaImport> TextureGammaImportCaller;
 
 void TextureModeImport( ETexturesMode& self, int value ){
 	switch ( value )
@@ -734,7 +734,7 @@ void TextureModeImport( ETexturesMode& self, int value ){
 		Textures_SetMode( eTextures_LINEAR_MIPMAP_LINEAR );
 	}
 }
-typedef ReferenceCaller1<ETexturesMode, int, TextureModeImport> TextureModeImportCaller;
+typedef ReferenceCaller<ETexturesMode, void(int), TextureModeImport> TextureModeImportCaller;
 
 void TextureModeExport( ETexturesMode& self, const IntImportCallback& importer ){
 	switch ( self )
@@ -761,7 +761,7 @@ void TextureModeExport( ETexturesMode& self, const IntImportCallback& importer )
 		importer( 4 );
 	}
 }
-typedef ReferenceCaller1<ETexturesMode, const IntImportCallback&, TextureModeExport> TextureModeExportCaller;
+typedef ReferenceCaller<ETexturesMode, void(const IntImportCallback&), TextureModeExport> TextureModeExportCaller;
 
 #include <QComboBox>
 #include <QEvent>
@@ -832,7 +832,7 @@ void Textures_constructPreferences( PreferencesPage& page ){
 		combo->installEventFilter( new Filter( combo ) );
 	}
 	page.appendCheckBox( "", "Anisotropy",
-	                     FreeCaller1<bool, Textures_SetAnisotropy>(),
+	                     FreeCaller<void(bool), Textures_SetAnisotropy>(),
 	                     BoolExportCaller( g_TextureAnisotropy ) );
 }
 void Textures_constructPage( PreferenceGroup& group ){
@@ -840,14 +840,14 @@ void Textures_constructPage( PreferenceGroup& group ){
 	Textures_constructPreferences( page );
 }
 void Textures_registerPreferencesPage(){
-	PreferencesDialog_addDisplayPage( FreeCaller1<PreferenceGroup&, Textures_constructPage>() );
+	PreferencesDialog_addDisplayPage( FreeCaller<void(PreferenceGroup&), Textures_constructPage>() );
 }
 
 void TextureCompression_importString( const char* string ){
 	g_texture_globals.m_nTextureCompressionFormat = static_cast<TextureCompressionFormat>( atoi( string ) );
 	Textures_UpdateTextureCompressionFormat();
 }
-typedef FreeCaller1<const char*, TextureCompression_importString> TextureCompressionImportStringCaller;
+typedef FreeCaller<void(const char*), TextureCompression_importString> TextureCompressionImportStringCaller;
 
 
 void Textures_Construct(){

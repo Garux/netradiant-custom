@@ -124,7 +124,7 @@ void QE_brushCountChange(){
 	}
 }
 
-IdleDraw g_idle_scene_counts_update = IdleDraw( FreeCaller<QE_brushCountChange>() );
+IdleDraw g_idle_scene_counts_update = IdleDraw( FreeCaller<void(), QE_brushCountChange>() );
 void QE_brushCountChanged(){
 	g_idle_scene_counts_update.queueDraw();
 }

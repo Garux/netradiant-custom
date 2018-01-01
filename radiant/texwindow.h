@@ -35,11 +35,11 @@ void TextureBrowser_Construct();
 void TextureBrowser_Destroy();
 
 
-typedef Callback1<const char*> StringImportCallback;
+typedef Callback<void(const char*)> StringImportCallback;
 
 extern QWidget* g_page_textures;
 void TextureBrowser_exportTitle( const StringImportCallback& importer );
-typedef FreeCaller1<const StringImportCallback&, TextureBrowser_exportTitle> TextureBrowserExportTitleCaller;
+typedef FreeCaller<void(const StringImportCallback&), TextureBrowser_exportTitle> TextureBrowserExportTitleCaller;
 
 
 template<typename Element> class BasicVector3;

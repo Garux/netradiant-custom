@@ -27,11 +27,11 @@
 #include "image.h"
 
 
-QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const char* icon, const Callback& callback ){
+QAction* toolbar_append_button( QToolBar* toolbar, const char* description, const char* icon, const Callback<void()>& callback ){
 	return toolbar->addAction( new_local_icon( icon ), description, callback );
 }
 
-QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const Callback& callback ){
+QAction* toolbar_append_toggle_button( QToolBar* toolbar, const char* description, const char* icon, const Callback<void()>& callback ){
 	QAction *button = toolbar_append_button( toolbar, description, icon, callback );
 	button->setCheckable( true );
 	return button;
