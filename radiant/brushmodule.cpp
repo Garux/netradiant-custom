@@ -92,7 +92,7 @@ void Brush_constructPreferences( PreferencesPage& page ){
 	if ( g_multipleBrushTypes ) {
 		const char* names[] = { BrushType_getName( g_brushTypes[0] ), BrushType_getName( g_brushTypes[1] ), BrushType_getName( g_brushTypes[2] ) };
 		page.appendCombo(
-			"Brush Type",
+			"New map Brush Type",
 			g_brushType,
 			STRING_ARRAY_RANGE( names )
 			);
