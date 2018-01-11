@@ -1405,6 +1405,10 @@ void ScaleToolExport( const BoolImportCallback& importCallback ){
 	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eScale );
 }
 
+void SkewToolExport( const BoolImportCallback& importCallback ){
+	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eSkew );
+}
+
 void DragToolExport( const BoolImportCallback& importCallback ){
 	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eDrag );
 }
@@ -1425,6 +1429,10 @@ FreeCaller1<const BoolImportCallback&, ScaleToolExport> g_scalemode_button_calle
 BoolExportCallback g_scalemode_button_callback( g_scalemode_button_caller );
 ToggleItem g_scalemode_button( g_scalemode_button_callback );
 
+FreeCaller1<const BoolImportCallback&, SkewToolExport> g_skewmode_button_caller;
+BoolExportCallback g_skewmode_button_callback( g_skewmode_button_caller );
+ToggleItem g_skewmode_button( g_skewmode_button_callback );
+
 FreeCaller1<const BoolImportCallback&, DragToolExport> g_dragmode_button_caller;
 BoolExportCallback g_dragmode_button_callback( g_dragmode_button_caller );
 ToggleItem g_dragmode_button( g_dragmode_button_callback );
@@ -1437,6 +1445,7 @@ void ToolChanged(){
 	g_translatemode_button.update();
 	g_rotatemode_button.update();
 	g_scalemode_button.update();
+	g_skewmode_button.update();
 	g_dragmode_button.update();
 	g_clipper_button.update();
 }
@@ -1522,8 +1531,28 @@ void ScaleMode(){
 	}
 }
 
+const char* const c_SkewMode_status = "Transform Tool: transform objects and components";
 
-const char* const c_ClipperMode_status = "Clipper Tool: apply clip planes to objects";
+void SkewMode(){
+	if ( g_currentToolMode == SkewMode && g_defaultToolMode != SkewMode ) {
+		g_defaultToolMode();
+	}
+	else
+	{
+		g_currentToolMode = SkewMode;
+		g_currentToolModeSupportsComponentEditing = true;
+
+		OnClipMode( false );
+
+		Sys_Status( c_SkewMode_status );
+		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eSkew );
+		ToolChanged();
+		ModeChangeNotify();
+	}
+}
+
+
+const char* const c_ClipperMode_status = "Clipper Tool: apply clip planes to brushes";
 
 
 void ClipperMode(){
@@ -1551,8 +1580,8 @@ void ToggleRotateScaleModes(){
 	return g_currentToolMode == RotateMode? ScaleMode() : RotateMode();
 }
 
-void ToggleDragScaleModes(){
-	return g_currentToolMode == DragMode? ScaleMode() : DragMode();
+void ToggleDragSkewModes(){
+	return g_currentToolMode == DragMode? SkewMode() : DragMode();
 }
 
 
@@ -2388,7 +2417,7 @@ void Misc_registerShortcuts(){
 	//refresh models
 	command_connect_accelerator( "RefreshReferences" );
 	command_connect_accelerator( "MouseRotateOrScale" );
-	command_connect_accelerator( "MouseDragOrScale" );
+	command_connect_accelerator( "MouseDragOrTransform" );
 }
 
 
@@ -2462,7 +2491,8 @@ void XYWnd_constructToolbar( GtkToolbar* toolbar ){
 void Manipulators_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "Translate (W)", "select_mousetranslate.png", "MouseTranslate" );
 	toolbar_append_toggle_button( toolbar, "Rotate (R)", "select_mouserotate.png", "MouseRotate" );
-	toolbar_append_toggle_button( toolbar, "Scale (Q)", "select_mousescale.png", "MouseScale" );
+	toolbar_append_toggle_button( toolbar, "Scale", "select_mousescale.png", "MouseScale" );
+	toolbar_append_toggle_button( toolbar, "Transform (Q)", "texture_vertexlock.png", "MouseTransform" );
 	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.png", "MouseDrag" );
 
 	Clipper_constructToolbar( toolbar );
@@ -3495,9 +3525,10 @@ void MainFrame_Construct(){
 	GlobalToggles_insert( "MouseTranslate", FreeCaller<TranslateMode>(), ToggleItem::AddCallbackCaller( g_translatemode_button ), Accelerator( 'W' ) );
 	GlobalToggles_insert( "MouseRotate", FreeCaller<RotateMode>(), ToggleItem::AddCallbackCaller( g_rotatemode_button ), Accelerator( 'R' ) );
 	GlobalToggles_insert( "MouseScale", FreeCaller<ScaleMode>(), ToggleItem::AddCallbackCaller( g_scalemode_button ) );
+	GlobalToggles_insert( "MouseTransform", FreeCaller<SkewMode>(), ToggleItem::AddCallbackCaller( g_skewmode_button ) );
 	GlobalToggles_insert( "MouseDrag", FreeCaller<DragMode>(), ToggleItem::AddCallbackCaller( g_dragmode_button ) );
 	GlobalCommands_insert( "MouseRotateOrScale", FreeCaller<ToggleRotateScaleModes>() );
-	GlobalCommands_insert( "MouseDragOrScale", FreeCaller<ToggleDragScaleModes>(), Accelerator( 'Q' ) );
+	GlobalCommands_insert( "MouseDragOrTransform", FreeCaller<ToggleDragSkewModes>(), Accelerator( 'Q' ) );
 
 	GlobalCommands_insert( "gtkThemeDlg", FreeCaller<gtkThemeDlg>() );
 	GlobalCommands_insert( "OpenGLFont", FreeCaller<OpenGLFont_select>() );

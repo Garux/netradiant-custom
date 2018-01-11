@@ -562,6 +562,53 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 };
 
 
+class Skewable
+{
+public:
+virtual void skew( const Skew& skew ) = 0;
+};
+
+
+class SkewAxis : public Manipulatable
+{
+private:
+Vector3 m_start;
+Vector3 m_axis_which;
+int m_axis_by;
+int m_axis_by_sign;
+Skewable& m_skewable;
+
+float m_axis_by_extent;
+AABB m_bounds;
+
+public:
+SkewAxis( Skewable& skewable )
+	: m_skewable( skewable ){
+}
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+	point_on_axis( m_start, m_axis_which, device2manip, x, y );
+	m_bounds = bounds;
+	m_axis_by_extent = bounds.origin[m_axis_by] + bounds.extents[m_axis_by] * m_axis_by_sign - transform_origin[m_axis_by];
+}
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
+	Vector3 current;
+	point_on_axis( current, m_axis_which, device2manip, x, y );
+	current = vector3_scaled( m_axis_which, distance_for_axis( m_start, current, m_axis_which ) );
+
+	translation_local2object( current, current, manip2object );
+	vector3_snap( current, GetSnapGridSize() );
+
+	const int axis_which_index = m_axis_which[0] > 0? 0 : m_axis_which[1] > 0? 1 : 2;
+//	globalOutputStream() << m_axis_which << " by axis " << m_axis_by << "\n";
+	m_skewable.skew( Skew( m_axis_by * 4 + axis_which_index, m_axis_by_extent != 0.f? current[axis_which_index] / m_axis_by_extent : 0 ) );
+}
+void SetAxes( const Vector3& axis_which, int axis_by, int axis_by_sign ){
+	m_axis_which = axis_which;
+	m_axis_by = axis_by;
+	m_axis_by_sign = axis_by_sign;
+}
+};
+
 
 
 
@@ -1728,10 +1775,6 @@ ScaleManipulator( Scalable& scalable, std::size_t segments, float length ) :
 	draw_quad( 16, m_quad_screen.m_quad );
 }
 
-Pivot2World& getPivot(){
-	return m_pivot;
-}
-
 void UpdateColours(){
 	m_arrow_x.setColour( colourSelected( g_colour_x, m_selectable_x.isSelected() ) );
 	m_arrow_y.setColour( colourSelected( g_colour_y, m_selectable_y.isSelected() ) );
@@ -1836,6 +1879,190 @@ bool isSelected() const {
 		   | m_selectable_screen.isSelected();
 }
 };
+
+
+class SkewManipulator : public Manipulator {
+	struct RenderableLine : public OpenGLRenderable {
+		PointVertex m_line[2];
+
+		RenderableLine() {
+		}
+		void render( RenderStateFlags state ) const {
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
+			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
+			glDrawArrays( GL_LINES, 0, 2 );
+		}
+		void setColour( const Colour4b& colour ) {
+			m_line[0].colour = colour;
+			m_line[1].colour = colour;
+		}
+	};
+	SkewAxis m_skew;
+	const AABB& m_bounds;
+	Matrix4& m_pivot2world;
+	const bool& m_pivotIsCustom;
+/*
+	RenderableLine m_lineXy_;
+	RenderableLine m_lineXy;
+	RenderableLine m_lineXz_;
+	RenderableLine m_lineXz;
+	RenderableLine m_lineYz_;
+	RenderableLine m_lineYz;
+	RenderableLine m_lineYx_;
+	RenderableLine m_lineYx;
+	RenderableLine m_lineZx_;
+	RenderableLine m_lineZx;
+	RenderableLine m_lineZy_;
+	RenderableLine m_lineZy;
+*/
+	RenderableLine m_lines[3][2][2];
+	SelectableBool m_selectables[3][2][2];
+	Selectable* m_selectable_prev_ptr;
+	Pivot2World m_pivot;
+	Matrix4 m_worldSpace;
+public:
+	static Shader* m_state_wire;
+	SkewManipulator( Skewable& skewable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom ) :
+		m_skew( skewable ),
+		m_bounds( bounds ),
+		m_pivot2world( pivot2world ),
+		m_pivotIsCustom( pivotIsCustom ),
+		m_selectable_prev_ptr( 0 ) {
+		for ( int i = 0; i < 3; ++i ){
+			for ( int j = 0; j < 2; ++j ){
+				const int x = i;
+				const int y = ( i + j + 1 )%3;
+				Vertex3f& xy_ = m_lines[i][j][0].m_line[0].vertex;
+				Vertex3f& x_y_ = m_lines[i][j][0].m_line[1].vertex;
+				Vertex3f& xy = m_lines[i][j][1].m_line[0].vertex;
+				Vertex3f& x_y = m_lines[i][j][1].m_line[1].vertex;
+				xy = x_y = xy_ = x_y_ = vertex3f_identity;
+				xy[x] = xy_[x] = 1;
+				x_y[x] = x_y_[x] = -1;
+				xy[y] = x_y[y] = 1;
+				xy_[y] = x_y_[y] = -1;
+			}
+		}
+	}
+
+	void UpdateColours() {
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j )
+				for ( int k = 0; k < 2; ++k )
+					m_lines[i][j][k].setColour( colourSelected( g_colour_screen, m_selectables[i][j][k].isSelected() ) );
+	}
+
+	void updateModelview( const VolumeTest& volume, const Matrix4& pivot2world ){
+		//m_pivot.update( matrix4_translation_for_vec3( matrix4_get_translation_vec3( pivot2world ) ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
+		m_pivot.update( g_matrix4_identity, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() ); //no shaking in cam due to low precision this way; smooth and a bit incorrect result
+//		globalOutputStream() << m_pivot.m_worldSpace << "\n";
+		AABB bo = aabb_for_oriented_aabb( m_bounds, matrix4_full_inverse( m_pivot.m_worldSpace ) );
+		for ( int i = 0; i < 3; ++i ){
+			if( bo.extents[i] < 16 )
+				bo.extents[i] = 18;
+			else
+				bo.extents[i] += 2.0f;
+		}
+		bo = aabb_for_oriented_aabb( bo, m_pivot.m_worldSpace );
+		m_worldSpace = matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( bo.origin ), matrix4_scale_for_vec3( bo.extents ) );
+		matrix4_premultiply_by_matrix4( m_worldSpace, matrix4_translation_for_vec3( -matrix4_get_translation_vec3( pivot2world ) ) );
+		matrix4_premultiply_by_matrix4( m_worldSpace, pivot2world );
+
+//		globalOutputStream() << m_worldSpace << "\n";
+//		globalOutputStream() << pivot2world << "\n";
+	}
+
+	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ) {
+		updateModelview( volume, pivot2world );
+
+		// temp hack
+		UpdateColours();
+
+		renderer.SetState( m_state_wire, Renderer::eWireframeOnly );
+		renderer.SetState( m_state_wire, Renderer::eFullMaterials );
+
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j ){
+				const Vector3 dir = ( m_lines[i][j][0].m_line[0].vertex - m_lines[i][j][1].m_line[0].vertex ) / 2;
+				const float dot = vector3_dot( dir, m_pivot.m_axis_screen );
+				if( dot > 0.9999f )
+					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );
+				else if( dot < -0.9999f )
+					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
+				else{
+					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
+				}
+			}
+	}
+	void testSelect( const View& view, const Matrix4& pivot2world ) {
+		updateModelview( view, pivot2world );
+
+		SelectionPool selector;
+
+		Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_worldSpace ) );
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j )
+				for ( int k = 0; k < 2; ++k ){
+					SelectionIntersection best;
+					Line_BestPoint( local2view, m_lines[i][j][k].m_line, best );
+					selector.addSelectable( best, &m_selectables[i][j][k] );
+				}
+
+
+		if( !selector.failed() ) {
+			( *selector.begin() ).second->setSelected( true );
+			if( !m_pivotIsCustom )
+				for ( int i = 0; i < 3; ++i )
+					for ( int j = 0; j < 2; ++j )
+						for ( int k = 0; k < 2; ++k )
+							if( m_selectables[i][j][k].isSelected() ){
+								const int axis_by = ( i + j + 1 ) % 3;
+								Vector3 origin = m_bounds.origin;
+								origin[axis_by] += k? -m_bounds.extents[axis_by] : m_bounds.extents[axis_by];
+								m_pivot2world = matrix4_translation_for_vec3( origin );
+							}
+			if( m_selectable_prev_ptr != ( *selector.begin() ).second ) {
+				m_selectable_prev_ptr = ( *selector.begin() ).second;
+				SceneChangeNotify();
+			}
+		}
+		else if( m_selectable_prev_ptr ) {
+			m_selectable_prev_ptr = 0;
+			SceneChangeNotify();
+		}
+	}
+
+	Manipulatable* GetManipulatable() {
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j )
+				for ( int k = 0; k < 2; ++k )
+					if( m_selectables[i][j][k].isSelected() ){
+						Vector3 axis_which( g_vector3_identity );
+						axis_which[i] = 1;
+						m_skew.SetAxes( axis_which, ( i + j + 1 ) % 3, k? 1 : -1 );
+						return &m_skew;
+					}
+		return &m_skew;
+	}
+
+	void setSelected( bool select ) {
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j )
+				for ( int k = 0; k < 2; ++k )
+					m_selectables[i][j][k].setSelected( select );
+	}
+	bool isSelected() const {
+		bool selected = false;
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j )
+				for ( int k = 0; k < 2; ++k )
+					selected |= m_selectables[i][j][k].isSelected();
+		return selected;
+	}
+};
+
+Shader* SkewManipulator::m_state_wire;
+
 
 
 inline PlaneSelectable* Instance_getPlaneSelectable( scene::Instance& instance ){
@@ -2461,6 +2688,12 @@ void translation_for_pivoted_scale( Vector3& parent_translation, const Vector3& 
 	translation_for_pivoted_matrix_transform( parent_translation, local_transform, world_pivot, localToWorld, localToParent );
 }
 
+void translation_for_pivoted_skew( Vector3& parent_translation, const Skew& local_skew, const Vector3& world_pivot, const Matrix4& localToWorld, const Matrix4& localToParent ){
+	Matrix4 local_transform( g_matrix4_identity );
+	local_transform[local_skew.index] = local_skew.amount;
+	translation_for_pivoted_matrix_transform( parent_translation, local_transform, world_pivot, localToWorld, localToParent );
+}
+
 class rotate_selected : public SelectionSystem::Visitor
 {
 const Quaternion& m_rotate;
@@ -2557,6 +2790,51 @@ void Scene_Scale_Selected( scene::Graph& graph, const Vector3& scaling, const Ve
 	}
 }
 
+class skew_selected : public SelectionSystem::Visitor
+{
+const Skew& m_skew;
+const Vector3& m_world_pivot;
+public:
+skew_selected( const Skew& skew, const Vector3& world_pivot )
+	: m_skew( skew ), m_world_pivot( world_pivot ){
+}
+void visit( scene::Instance& instance ) const {
+	TransformNode* transformNode = Node_getTransformNode( instance.path().top() );
+	if ( transformNode != 0 ) {
+		Transformable* transform = Instance_getTransformable( instance );
+		if ( transform != 0 ) {
+			transform->setType( TRANSFORM_PRIMITIVE );
+			transform->setScale( c_scale_identity );
+			transform->setTranslation( c_translation_identity );
+
+			transform->setType( TRANSFORM_PRIMITIVE );
+			transform->setSkew( m_skew );
+			{
+				Editable* editable = Node_getEditable( instance.path().top() );
+				const Matrix4& localPivot = editable != 0 ? editable->getLocalPivot() : g_matrix4_identity;
+
+				Vector3 parent_translation;
+				translation_for_pivoted_skew(
+					parent_translation,
+					m_skew,
+					m_world_pivot,
+					matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( matrix4_get_translation_vec3( instance.localToWorld() ) ), localPivot ),
+					matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( matrix4_get_translation_vec3( transformNode->localToParent() ) ), localPivot )
+					);
+
+				transform->setTranslation( parent_translation );
+			}
+		}
+	}
+}
+};
+
+void Scene_Skew_Selected( scene::Graph& graph, const Skew& skew, const Vector3& world_pivot ){
+	if ( GlobalSelectionSystem().countSelected() != 0 ) {
+		GlobalSelectionSystem().foreachSelected( skew_selected( skew, world_pivot ) );
+	}
+}
+
 
 class translate_component_selected : public SelectionSystem::Visitor
 {
@@ -2631,6 +2909,33 @@ void visit( scene::Instance& instance ) const {
 void Scene_Scale_Component_Selected( scene::Graph& graph, const Vector3& scaling, const Vector3& world_pivot ){
 	if ( GlobalSelectionSystem().countSelectedComponents() != 0 ) {
 		GlobalSelectionSystem().foreachSelectedComponent( scale_component_selected( scaling, world_pivot ) );
+	}
+}
+
+class skew_component_selected : public SelectionSystem::Visitor
+{
+const Skew& m_skew;
+const Vector3& m_world_pivot;
+public:
+skew_component_selected( const Skew& skew, const Vector3& world_pivot )
+	: m_skew( skew ), m_world_pivot( world_pivot ){
+}
+void visit( scene::Instance& instance ) const {
+	Transformable* transform = Instance_getTransformable( instance );
+	if ( transform != 0 ) {
+		Vector3 parent_translation;
+		translation_for_pivoted_skew( parent_translation, m_skew, m_world_pivot, instance.localToWorld(), Node_getTransformNode( instance.path().top() )->localToParent() );
+
+		transform->setType( TRANSFORM_COMPONENT );
+		transform->setSkew( m_skew );
+		transform->setTranslation( parent_translation );
+	}
+}
+};
+
+void Scene_Skew_Component_Selected( scene::Graph& graph, const Skew& skew, const Vector3& world_pivot ){
+	if ( GlobalSelectionSystem().countSelectedComponents() != 0 ) {
+		GlobalSelectionSystem().foreachSelectedComponent( skew_component_selected( skew, world_pivot ) );
 	}
 }
 
@@ -2854,7 +3159,7 @@ bool isSelected() const {
 class TransformOriginTranslatable
 {
 public:
-virtual void transformOriginTranslate( const Vector3& translation, const bool set[3], const AABB& bounds ) = 0;
+virtual void transformOriginTranslate( const Vector3& translation, const bool set[3] ) = 0;
 };
 
 class TransformOriginTranslate : public Manipulatable
@@ -2862,14 +3167,12 @@ class TransformOriginTranslate : public Manipulatable
 private:
 Vector3 m_start;
 TransformOriginTranslatable& m_transformOriginTranslatable;
-AABB m_bounds;
 public:
 TransformOriginTranslate( TransformOriginTranslatable& transformOriginTranslatable )
 	: m_transformOriginTranslatable( transformOriginTranslatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
 	point_on_plane( m_start, device2manip, x, y );
-	m_bounds = bounds;
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
 	Vector3 current;
@@ -2896,7 +3199,7 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 
 	translation_local2object( current, current, manip2object );
 
-	m_transformOriginTranslatable.transformOriginTranslate( current, set, m_bounds );
+	m_transformOriginTranslatable.transformOriginTranslate( current, set );
 }
 };
 
@@ -3033,15 +3336,18 @@ class RadiantSelectionSystem :
 	public Translatable,
 	public Rotatable,
 	public Scalable,
+	public Skewable,
 	public TransformOriginTranslatable,
 	public Renderable
 {
 mutable Matrix4 m_pivot2world;
+mutable AABB m_bounds;
 Matrix4 m_pivot2world_start;
 Matrix4 m_manip2pivot_start;
 Translation m_translation;
 Rotation m_rotation;
 Scale m_scale;
+Skew m_skew;
 public:
 static Shader* m_state;
 bool m_bPreferPointEntsIn2D;
@@ -3060,6 +3366,7 @@ SelectionCounter m_count_component;
 TranslateManipulator m_translate_manipulator;
 RotateManipulator m_rotate_manipulator;
 ScaleManipulator m_scale_manipulator;
+SkewManipulator m_skew_manipulator;
 DragManipulator m_drag_manipulator;
 ClipManipulator m_clip_manipulator;
 mutable TransformOriginManipulator m_transformOrigin_manipulator;
@@ -3073,10 +3380,7 @@ Signal1<const Selectable&> m_selectionChanged_callbacks;
 void ConstructPivot() const;
 void ConstructPivotRotation() const;
 void setCustomTransformOrigin( const Vector3& origin, const bool set[3] ) const;
-void setCustomTransformOrigin( const Vector3& origin, const bool set[3], const AABB& bounds ) const;
-public:
 AABB getSelectionAABB() const;
-private:
 mutable bool m_pivotChanged;
 bool m_pivot_moving;
 mutable bool m_pivotIsCustom;
@@ -3110,6 +3414,7 @@ RadiantSelectionSystem() :
 	m_translate_manipulator( *this, 2, 64 ),
 	m_rotate_manipulator( *this, 8, 64 ),
 	m_scale_manipulator( *this, 0, 64 ),
+	m_skew_manipulator( *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
 	m_transformOrigin_manipulator( *this ),
 	m_pivotChanged( false ),
 	m_pivot_moving( false ),
@@ -3152,6 +3457,7 @@ void SetManipulatorMode( EManipulatorMode mode ){
 	case eTranslate: m_manipulator = &m_translate_manipulator; break;
 	case eRotate: m_manipulator = &m_rotate_manipulator; break;
 	case eScale: m_manipulator = &m_scale_manipulator; break;
+	case eSkew: m_manipulator = &m_skew_manipulator; break;
 	case eDrag: m_manipulator = &m_drag_manipulator; break;
 	case eClip: m_manipulator = &m_clip_manipulator; break;
 	}
@@ -3284,12 +3590,12 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 			Matrix4 device2manip;
 			ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 			if( m_pivot_moving ){
-				m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], getSelectionAABB(), vector4_to_vector3( GetPivot2World().t() ) );
+				m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, vector4_to_vector3( GetPivot2World().t() ) );
 
 				m_undo_begun = false;
 			}
 			else if( movingOrigin ){
-				m_transformOrigin_manipulator.GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], getSelectionAABB(), vector4_to_vector3( GetPivot2World().t() ) );
+				m_transformOrigin_manipulator.GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, vector4_to_vector3( GetPivot2World().t() ) );
 			}
 		}
 
@@ -3623,6 +3929,9 @@ void rotate( const Quaternion& rotation ){
 
 			matrix4_assign_rotation_for_pivot( m_pivot2world, m_selection.back() );
 		}
+#ifdef SELECTIONSYSTEM_AXIAL_PIVOTS
+		matrix4_assign_rotation( m_pivot2world, matrix4_rotation_for_quaternion_quantised( m_rotation ) );
+#endif
 
 		SceneChangeNotify();
 	}
@@ -3647,6 +3956,22 @@ void scale( const Vector3& scaling ){
 }
 void outputScale( TextOutputStream& ostream ){
 	ostream << " -scale " << m_scale.x() << " " << m_scale.y() << " " << m_scale.z();
+}
+
+void skew( const Skew& skew ){
+	if ( !nothingSelected() ) {
+		m_skew = skew;
+
+		if ( Mode() == eComponent ) {
+			Scene_Skew_Component_Selected( GlobalSceneGraph(), m_skew, vector4_to_vector3( m_pivot2world.t() ) );
+		}
+		else
+		{
+			Scene_Skew_Selected( GlobalSceneGraph(), m_skew, vector4_to_vector3( m_pivot2world.t() ) );
+		}
+		m_pivot2world[skew.index] = skew.amount;
+		SceneChangeNotify();
+	}
 }
 
 void rotateSelected( const Quaternion& rotation, bool snapOrigin = false ){
@@ -3677,13 +4002,14 @@ void scaleSelected( const Vector3& scaling, bool snapOrigin = false ){
 
 bool transformOrigin_isTranslatable() const{
 	return ManipulatorMode() == eScale
+		|| ManipulatorMode() == eSkew
 		|| ManipulatorMode() == eRotate
 		|| ManipulatorMode() == eTranslate;
 }
 
-void transformOriginTranslate( const Vector3& translation, const bool set[3], const AABB& bounds ){
+void transformOriginTranslate( const Vector3& translation, const bool set[3] ){
 	m_pivot2world = m_pivot2world_start;
-	setCustomTransformOrigin( translation + vector4_to_vector3( m_pivot2world_start.t() ), set, bounds );
+	setCustomTransformOrigin( translation + vector4_to_vector3( m_pivot2world_start.t() ), set );
 	SceneChangeNotify();
 }
 
@@ -3734,12 +4060,14 @@ static void constructStatic(){
 	TranslateManipulator::m_state_fill = GlobalShaderCache().capture( "$FLATSHADE_OVERLAY" );
 	RotateManipulator::m_state_outer = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
 	TransformOriginManipulator::m_state = GlobalShaderCache().capture( "$BIGPOINT" );
+	SkewManipulator::m_state_wire = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
 }
 
 static void destroyStatic(){
   #if defined( DEBUG_SELECTION )
 	GlobalShaderCache().release( "$DEBUG_CLIPPED" );
   #endif
+	GlobalShaderCache().release( "$WIRE_OVERLAY" );
 	GlobalShaderCache().release( "$BIGPOINT" );
 	GlobalShaderCache().release( "$WIRE_OVERLAY" );
 	GlobalShaderCache().release( "$FLATSHADE_OVERLAY" );
@@ -3960,6 +4288,10 @@ bool RadiantSelectionSystem::endMove(){
 			command << "scaleTool";
 			outputScale( command );
 		}
+		else if ( ManipulatorMode() == eSkew ) {
+			command << "transformTool";
+//			outputScale( command );
+		}
 		else if ( ManipulatorMode() == eDrag ) {
 			command << "dragTool";
 		}
@@ -4084,46 +4416,47 @@ void RadiantSelectionSystem::ConstructPivotRotation() const {
 }
 
 void RadiantSelectionSystem::ConstructPivot() const {
-	if ( !m_pivotChanged || m_pivot_moving || m_pivotIsCustom ) {
+	if ( !m_pivotChanged || m_pivot_moving ) {
 		return;
 	}
 	m_pivotChanged = false;
 
 	if ( !nothingSelected() ) {
-		AABB bounds( getSelectionAABB() );
-		Vector3 m_object_pivot = bounds.origin;
+		m_bounds = getSelectionAABB();
+		if( !m_pivotIsCustom ){
+			Vector3 object_pivot = m_bounds.origin;
 
-		//vector3_snap( m_object_pivot, GetSnapGridSize() );
-		//globalOutputStream() << m_object_pivot << "\n";
-		m_pivot2world = matrix4_translation_for_vec3( m_object_pivot );
+			//vector3_snap( object_pivot, GetSnapGridSize() );
+			//globalOutputStream() << object_pivot << "\n";
+			m_pivot2world = matrix4_translation_for_vec3( object_pivot );
+		}
+		else{
+//			m_pivot2world = matrix4_translation_for_vec3( vector4_to_vector3( m_pivot2world.t() ) );
+			matrix4_assign_rotation( m_pivot2world, g_matrix4_identity );
+		}
 
 		ConstructPivotRotation();
 	}
 }
 
 void RadiantSelectionSystem::setCustomTransformOrigin( const Vector3& origin, const bool set[3] ) const {
-	AABB bounds( getSelectionAABB() );
-	setCustomTransformOrigin( origin, set, bounds );
-}
-
-void RadiantSelectionSystem::setCustomTransformOrigin( const Vector3& origin, const bool set[3], const AABB& bounds ) const {
 	if ( !nothingSelected() && transformOrigin_isTranslatable() ) {
 
 		//globalOutputStream() << origin << "\n";
 		for( std::size_t i = 0; i < 3; i++ ){
 			float value = origin[i];
 			if( set[i] ){
-				float bestsnapDist = fabs( bounds.origin[i] - value );
-				float bestsnapTo = bounds.origin[i];
-				float othersnapDist = fabs( bounds.origin[i] + bounds.extents[i] - value );
+				float bestsnapDist = fabs( m_bounds.origin[i] - value );
+				float bestsnapTo = m_bounds.origin[i];
+				float othersnapDist = fabs( m_bounds.origin[i] + m_bounds.extents[i] - value );
 				if( othersnapDist < bestsnapDist ){
 					bestsnapDist = othersnapDist;
-					bestsnapTo = bounds.origin[i] + bounds.extents[i];
+					bestsnapTo = m_bounds.origin[i] + m_bounds.extents[i];
 				}
-				othersnapDist = fabs( bounds.origin[i] - bounds.extents[i] - value );
+				othersnapDist = fabs( m_bounds.origin[i] - m_bounds.extents[i] - value );
 				if( othersnapDist < bestsnapDist ){
 					bestsnapDist = othersnapDist;
-					bestsnapTo = bounds.origin[i] - bounds.extents[i];
+					bestsnapTo = m_bounds.origin[i] - m_bounds.extents[i];
 				}
 				othersnapDist = fabs( float_snapped( value, GetSnapGridSize() ) - value );
 				if( othersnapDist < bestsnapDist ){

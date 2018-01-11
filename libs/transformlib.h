@@ -70,8 +70,27 @@ typedef Vector3 Translation;
 typedef Quaternion Rotation;
 typedef Vector3 Scale;
 
-inline Matrix4 matrix4_transform_for_components( const Translation& translation, const Rotation& rotation, const Scale& scale ){
+//simple one axis skew
+/// [0]     [4]x(y)  [8]x(z) [12]
+/// [1]y(x) [5]      [9]y(z) [13]
+/// [2]z(x) [6]z(y)  [10]    [14]
+/// [3]     [7]      [11]    [15]
+struct Skew{
+	std::size_t index;
+	float amount;
+	Skew(){
+	}
+	Skew( std::size_t index_, float amount_ ) : index( index_ ), amount( amount_ ){
+	}
+	bool operator!= ( const Skew& other ){
+		return index != other.index || amount != other.amount;
+	}
+};
+
+
+inline Matrix4 matrix4_transform_for_components( const Translation& translation, const Rotation& rotation, const Scale& scale, const Skew& skew ){
 	Matrix4 result( matrix4_rotation_for_quaternion_quantised( rotation ) );
+	result[skew.index] += skew.amount;
 	vector4_to_vector3( result.x() ) *= scale.x();
 	vector4_to_vector3( result.y() ) *= scale.y();
 	vector4_to_vector3( result.z() ) *= scale.z();
@@ -87,7 +106,7 @@ const TransformModifierType TRANSFORM_COMPONENT = true;
 
 /// \brief A transformable scene-graph instance.
 ///
-/// A transformable instance may be translated, rotated or scaled.
+/// A transformable instance may be translated, rotated, scaled or skewed.
 /// The state of the instanced node's geometrical representation
 /// will be the product of its geometry and the transforms of each
 /// of its instances, applied in the order they appear in a graph
@@ -103,12 +122,14 @@ virtual void setType( TransformModifierType type ) = 0;
 virtual void setTranslation( const Translation& value ) = 0;
 virtual void setRotation( const Rotation& value ) = 0;
 virtual void setScale( const Scale& value ) = 0;
+virtual void setSkew( const Skew& value ) = 0;
 virtual void freezeTransform() = 0;
 };
 
 const Translation c_translation_identity = Translation( 0, 0, 0 );
 const Rotation c_rotation_identity = c_quaternion_identity;
 const Scale c_scale_identity = Scale( 1, 1, 1 );
+const Skew c_skew_identity = Skew( 4, 0 );
 
 
 class TransformModifier : public Transformable
@@ -116,6 +137,7 @@ class TransformModifier : public Transformable
 Translation m_translation;
 Rotation m_rotation;
 Scale m_scale;
+Skew m_skew;
 Callback m_changed;
 Callback m_apply;
 TransformModifierType m_type;
@@ -125,6 +147,7 @@ TransformModifier( const Callback& changed, const Callback& apply ) :
 	m_translation( c_translation_identity ),
 	m_rotation( c_quaternion_identity ),
 	m_scale( c_scale_identity ),
+	m_skew( c_skew_identity ),
 	m_changed( changed ),
 	m_apply( apply ),
 	m_type( TRANSFORM_PRIMITIVE ){
@@ -147,14 +170,20 @@ void setScale( const Scale& value ){
 	m_scale = value;
 	m_changed();
 }
+void setSkew( const Skew& value ){
+	m_skew = value;
+	m_changed();
+}
 void freezeTransform(){
 	if ( m_translation != c_translation_identity
 		 || m_rotation != c_rotation_identity
-		 || m_scale != c_scale_identity ) {
+		 || m_scale != c_scale_identity
+		 || m_skew != c_skew_identity ) {
 		m_apply();
 		m_translation = c_translation_identity;
 		m_rotation = c_rotation_identity;
 		m_scale = c_scale_identity;
+		m_skew = c_skew_identity;
 		m_changed();
 	}
 }
@@ -167,8 +196,11 @@ const Rotation& getRotation() const {
 const Scale& getScale() const {
 	return m_scale;
 }
+const Skew& getSkew() const {
+	return m_skew;
+}
 Matrix4 calculateTransform() const {
-	return matrix4_transform_for_components( getTranslation(), getRotation(), getScale() );
+	return matrix4_transform_for_components( getTranslation(), getRotation(), getScale(), getSkew() );
 }
 };
 

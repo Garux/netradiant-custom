@@ -86,6 +86,7 @@ enum EManipulatorMode
 	eTranslate,
 	eRotate,
 	eScale,
+	eSkew,
 	eDrag,
 	eClip,
 };
