@@ -924,6 +924,51 @@ void Quad_BestPoint( const Matrix4& local2view, clipcull_t cull, const PointVert
 	}
 }
 
+void AABB_BestPoint( const Matrix4& local2view, clipcull_t cull, const AABB& aabb, SelectionIntersection& best ){
+	const IndexPointer::index_type indices_[24] = {
+		2, 1, 5, 6,
+		1, 0, 4, 5,
+		0, 1, 2, 3,
+		3, 7, 4, 0,
+		3, 2, 6, 7,
+		7, 6, 5, 4,
+	};
+
+	Vector3 points[8];
+	aabb_corners( aabb, points );
+
+	const IndexPointer indices( indices_, 24 );
+
+	Vector4 clipped[9];
+	for ( IndexPointer::iterator i( indices.begin() ); i != indices.end(); i += 4 )
+	{
+		BestPoint(
+			matrix4_clip_triangle(
+				local2view,
+				points[*i],
+				points[*( i + 1 )],
+				points[*( i + 3 )],
+				clipped
+				),
+			clipped,
+			best,
+			cull
+			);
+		BestPoint(
+			matrix4_clip_triangle(
+				local2view,
+				points[*( i + 1 )],
+				points[*( i + 2 )],
+				points[*( i + 3 )],
+				clipped
+				),
+			clipped,
+			best,
+			cull
+			);
+	}
+}
+
 struct FlatShadedVertex
 {
 	Vertex3f vertex;
@@ -1898,6 +1943,7 @@ class SkewManipulator : public Manipulator {
 		}
 	};
 	SkewAxis m_skew;
+	TranslateFree m_translateFree;
 	const AABB& m_bounds;
 	Matrix4& m_pivot2world;
 	const bool& m_pivotIsCustom;
@@ -1917,13 +1963,15 @@ class SkewManipulator : public Manipulator {
 */
 	RenderableLine m_lines[3][2][2];
 	SelectableBool m_selectables[3][2][2];
+	SelectableBool m_selectable_translateFree;
 	Selectable* m_selectable_prev_ptr;
 	Pivot2World m_pivot;
 	Matrix4 m_worldSpace;
 public:
 	static Shader* m_state_wire;
-	SkewManipulator( Skewable& skewable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom ) :
+	SkewManipulator( Skewable& skewable, Translatable& translatable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom ) :
 		m_skew( skewable ),
+		m_translateFree( translatable ),
 		m_bounds( bounds ),
 		m_pivot2world( pivot2world ),
 		m_pivotIsCustom( pivotIsCustom ),
@@ -2008,7 +2056,6 @@ public:
 					selector.addSelectable( best, &m_selectables[i][j][k] );
 				}
 
-
 		if( !selector.failed() ) {
 			( *selector.begin() ).second->setSelected( true );
 			if( !m_pivotIsCustom )
@@ -2021,6 +2068,15 @@ public:
 								origin[axis_by] += k? -m_bounds.extents[axis_by] : m_bounds.extents[axis_by];
 								m_pivot2world = matrix4_translation_for_vec3( origin );
 							}
+		}
+		else{
+			SelectionIntersection best;
+			AABB_BestPoint( local2view, eClipCullCW, AABB( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) ), best );
+			selector.addSelectable( best, &m_selectable_translateFree );
+		}
+
+		if( !selector.failed() ) {
+			( *selector.begin() ).second->setSelected( true );
 			if( m_selectable_prev_ptr != ( *selector.begin() ).second ) {
 				m_selectable_prev_ptr = ( *selector.begin() ).second;
 				SceneChangeNotify();
@@ -2042,10 +2098,11 @@ public:
 						m_skew.SetAxes( axis_which, ( i + j + 1 ) % 3, k? 1 : -1 );
 						return &m_skew;
 					}
-		return &m_skew;
+		return &m_translateFree;
 	}
 
 	void setSelected( bool select ) {
+		m_selectable_translateFree.setSelected( select );
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
 				for ( int k = 0; k < 2; ++k )
@@ -2057,7 +2114,7 @@ public:
 			for ( int j = 0; j < 2; ++j )
 				for ( int k = 0; k < 2; ++k )
 					selected |= m_selectables[i][j][k].isSelected();
-		return selected;
+		return selected | m_selectable_translateFree.isSelected();
 	}
 };
 
@@ -3414,7 +3471,7 @@ RadiantSelectionSystem() :
 	m_translate_manipulator( *this, 2, 64 ),
 	m_rotate_manipulator( *this, 8, 64 ),
 	m_scale_manipulator( *this, 0, 64 ),
-	m_skew_manipulator( *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
+	m_skew_manipulator( *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
 	m_transformOrigin_manipulator( *this ),
 	m_pivotChanged( false ),
 	m_pivot_moving( false ),
