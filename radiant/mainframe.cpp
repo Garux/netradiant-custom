@@ -2481,7 +2481,7 @@ void ComponentModes_constructToolbar( GtkToolbar* toolbar ){
 
 void Clipper_constructToolbar( GtkToolbar* toolbar ){
 
-	toolbar_append_toggle_button( toolbar, "Clipper (X)", "view_clipper.png", "ToggleClipper" );
+	toolbar_append_toggle_button( toolbar, "Clipper (X)", "select_clipper.png", "ToggleClipper" );
 }
 
 void XYWnd_constructToolbar( GtkToolbar* toolbar ){
@@ -2492,7 +2492,7 @@ void Manipulators_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "Translate (W)", "select_mousetranslate.png", "MouseTranslate" );
 	toolbar_append_toggle_button( toolbar, "Rotate (R)", "select_mouserotate.png", "MouseRotate" );
 	toolbar_append_toggle_button( toolbar, "Scale", "select_mousescale.png", "MouseScale" );
-	toolbar_append_toggle_button( toolbar, "Transform (Q)", "texture_vertexlock.png", "MouseTransform" );
+	toolbar_append_toggle_button( toolbar, "Transform (Q)", "select_mousetransform.png", "MouseTransform" );
 	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.png", "MouseDrag" );
 
 	Clipper_constructToolbar( toolbar );
