@@ -383,15 +383,16 @@ int XmlTagBuilder::RenameShaderTag( const char* oldtag, CopiedString newtag ){
 		return 0;
 	}
 	xmlNodeSetPtr nodePtr = result->nodesetval;
+	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
+		for ( int i = 0; i < nodePtr->nodeNr; i++ )
+		{
+			xmlNodePtr ptrContent = nodePtr->nodeTab[i];
+			char* content = (char*)xmlNodeGetContent( ptrContent );
 
-	for ( int i = 0; i < nodePtr->nodeNr; i++ )
-	{
-		xmlNodePtr ptrContent = nodePtr->nodeTab[i];
-		char* content = (char*)xmlNodeGetContent( ptrContent );
-
-		if ( strcmp( content, oldtag ) == 0 ) { // found a node with old content?
-			xmlNodeSetContent( ptrContent, (const xmlChar*)newtag.c_str() );
-			num++;
+			if ( strcmp( content, oldtag ) == 0 ) { // found a node with old content?
+				xmlNodeSetContent( ptrContent, (const xmlChar*)newtag.c_str() );
+				num++;
+			}
 		}
 	}
 
@@ -500,7 +501,7 @@ void XmlTagBuilder::GetShaderTags( const char* shader, std::vector<CopiedString>
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
-			tags.push_back( (CopiedString)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
+			tags.push_back( CopiedString( (char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) ) );
 		}
 	}
 	xmlXPathFreeObject( xpathPtr );
@@ -556,7 +557,7 @@ void XmlTagBuilder::GetAllTags( std::set<CopiedString>& tags ){
 	if ( !xmlXPathNodeSetIsEmpty( nodePtr ) ) {
 		for ( int i = 0; i < nodePtr->nodeNr; i++ )
 		{
-			tags.insert( (CopiedString)(char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) );
+			tags.insert( CopiedString( (char*)xmlNodeGetContent( nodePtr->nodeTab[i] ) ) );
 		}
 	}
 
@@ -587,7 +588,7 @@ void XmlTagBuilder::TagSearch( const char* expression, std::set<CopiedString>& p
 		{
 			ptr = nodePtr->nodeTab[i];
 			xmlattrib = xmlGetProp( ptr, (const xmlChar*)"path" );
-			paths.insert( (CopiedString)(char*)xmlattrib );
+			paths.insert( CopiedString( (char*)xmlattrib ) );
 		}
 	}
 	xmlXPathFreeObject( xpathPtr );

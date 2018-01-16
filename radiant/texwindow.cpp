@@ -2553,7 +2553,7 @@ void TextureBrowser_renameTag(){
 
 			TagBuilder.RenameShaderTag( oldTag, newTag.c_str() );
 
-			g_TextureBrowser.m_all_tags.erase( (CopiedString)oldTag );
+			g_TextureBrowser.m_all_tags.erase( CopiedString( oldTag ) );
 			g_TextureBrowser.m_all_tags.insert( newTag );
 
 			BuildStoreAssignedTags( g_TextureBrowser.m_assigned_store, g_TextureBrowser.shader.c_str(), &g_TextureBrowser );
@@ -2595,7 +2595,7 @@ void TextureBrowser_deleteTag(){
 			}
 
 			TagBuilder.DeleteTag( tagSelected );
-			g_TextureBrowser.m_all_tags.erase( (CopiedString)tagSelected );
+			g_TextureBrowser.m_all_tags.erase( CopiedString( tagSelected ) );
 
 			BuildStoreAssignedTags( g_TextureBrowser.m_assigned_store, g_TextureBrowser.shader.c_str(), &g_TextureBrowser );
 			BuildStoreAvailableTags( g_TextureBrowser.m_available_store, g_TextureBrowser.m_assigned_store, g_TextureBrowser.m_all_tags, &g_TextureBrowser );
