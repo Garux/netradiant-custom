@@ -1953,6 +1953,26 @@ class SkewManipulator : public Manipulator {
 			m_line[1].colour = colour;
 		}
 	};
+	struct RenderableArrowHead : public OpenGLRenderable
+	{
+		Array<FlatShadedVertex> m_vertices;
+
+		RenderableArrowHead( std::size_t size )
+			: m_vertices( size ) {
+		}
+		void render( RenderStateFlags state ) const {
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( FlatShadedVertex ), &m_vertices.data()->colour );
+			glVertexPointer( 3, GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->vertex );
+			glNormalPointer( GL_FLOAT, sizeof( FlatShadedVertex ), &m_vertices.data()->normal );
+			glDrawArrays( GL_TRIANGLES, 0, GLsizei( m_vertices.size() ) );
+		}
+		void setColour( const Colour4b & colour ) {
+			for( Array<FlatShadedVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i ) {
+				( *i ).colour = colour;
+			}
+		}
+	};
+
 	SkewAxis m_skew;
 	TranslateFree m_translateFree;
 	ScaleAxis m_scaleAxis;
@@ -1983,9 +2003,13 @@ class SkewManipulator : public Manipulator {
 	Selectable* m_selectable_prev_ptr2;
 	Pivot2World m_pivot;
 	Matrix4 m_worldSpace;
+	RenderableArrowHead m_arrow;
+	Matrix4 m_arrow_modelview;
+	Matrix4 m_arrow_modelview2;
 public:
 	static Shader* m_state_wire;
-	SkewManipulator( Skewable& skewable, Translatable& translatable, Scalable& scalable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom ) :
+	static Shader* m_state_fill;
+	SkewManipulator( Skewable& skewable, Translatable& translatable, Scalable& scalable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom, const std::size_t segments = 2 ) :
 		m_skew( skewable ),
 		m_translateFree( translatable ),
 		m_scaleAxis( scalable ),
@@ -1994,7 +2018,8 @@ public:
 		m_pivot2world( pivot2world ),
 		m_pivotIsCustom( pivotIsCustom ),
 		m_selectable_prev_ptr( 0 ),
-		m_selectable_prev_ptr2( 0 ) {
+		m_selectable_prev_ptr2( 0 ),
+		m_arrow( 3 * 2 * ( segments << 3 ) ) {
 		for ( int i = 0; i < 3; ++i ){
 			for ( int j = 0; j < 2; ++j ){
 				const int x = i;
@@ -2010,6 +2035,8 @@ public:
 				xy_[y] = x_y_[y] = -1;
 			}
 		}
+		draw_arrowhead( segments, 0, m_arrow.m_vertices.data(), TripleRemapXYZ<Vertex3f>(), TripleRemapXYZ<Normal3f>() );
+		m_arrow.setColour( g_colour_selected );
 	}
 
 	void UpdateColours() {
@@ -2025,10 +2052,15 @@ public:
 	}
 
 	void updateModelview( const VolumeTest& volume, const Matrix4& pivot2world ){
+		//m_pivot.update( pivot2world, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
 		//m_pivot.update( matrix4_translation_for_vec3( matrix4_get_translation_vec3( pivot2world ) ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
-		m_pivot.update( g_matrix4_identity, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() ); //no shaking in cam due to low precision this way; smooth and a bit incorrect result
+		m_pivot.update( matrix4_translation_for_vec3( m_bounds.origin ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
+		//m_pivot.update( g_matrix4_identity, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() ); //no shaking in cam due to low precision this way; smooth and sometimes very incorrect result
 //		globalOutputStream() << m_pivot.m_worldSpace << "\n";
-		m_bounds_draw = aabb_for_oriented_aabb_safe( m_bounds, matrix4_full_inverse( m_pivot.m_worldSpace ) );
+		Matrix4& m = m_pivot.m_worldSpace; /* go affine to increase precision */
+		m[1] = m[2] = m[3] = m[4] = m[6] = m[7] = m[8] = m[9] = m[11] = 0;
+		m[15] = 1;
+		m_bounds_draw = aabb_for_oriented_aabb( m_bounds, matrix4_affine_inverse( m_pivot.m_worldSpace ) );
 		for ( int i = 0; i < 3; ++i ){
 			if( m_bounds_draw.extents[i] < 16 )
 				m_bounds_draw.extents[i] = 18;
@@ -2036,6 +2068,8 @@ public:
 				m_bounds_draw.extents[i] += 2.0f;
 		}
 		m_bounds_draw = aabb_for_oriented_aabb( m_bounds_draw, m_pivot.m_worldSpace );
+		m_bounds_draw.origin = m_bounds.origin;
+
 		m_worldSpace = matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( m_bounds_draw.origin ), matrix4_scale_for_vec3( m_bounds_draw.extents ) );
 		matrix4_premultiply_by_matrix4( m_worldSpace, matrix4_translation_for_vec3( -matrix4_get_translation_vec3( pivot2world ) ) );
 		matrix4_premultiply_by_matrix4( m_worldSpace, pivot2world );
@@ -2065,6 +2099,31 @@ public:
 					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
 				}
 			}
+
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j )
+				for ( int k = 0; k < 2; ++k )
+					if( m_selectables[i][j][k].isSelected() ){
+						Vector3 origin = matrix4_transformed_point( m_worldSpace, m_lines[i][j][k].m_line[0].vertex );
+						Vector3 origin2 = matrix4_transformed_point( m_worldSpace, m_lines[i][j][k].m_line[1].vertex );
+
+						Pivot2World_worldSpace( m_arrow_modelview, matrix4_translation_for_vec3( origin ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
+						Pivot2World_worldSpace( m_arrow_modelview2, matrix4_translation_for_vec3( origin2 ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
+
+						const Matrix4 rot( i == 0? g_matrix4_identity: i == 1? matrix4_rotation_for_sincos_z( 1, 0 ): matrix4_rotation_for_sincos_y( -1, 0 ) );
+						matrix4_multiply_by_matrix4( m_arrow_modelview, rot );
+						matrix4_multiply_by_matrix4( m_arrow_modelview2, rot );
+						const float x = 0.7f;
+						matrix4_multiply_by_matrix4( m_arrow_modelview, matrix4_scale_for_vec3( Vector3( x, x, x ) ) );
+						matrix4_multiply_by_matrix4( m_arrow_modelview2, matrix4_scale_for_vec3( Vector3( -x, x, x ) ) );
+
+						renderer.SetState( m_state_fill, Renderer::eWireframeOnly );
+						renderer.SetState( m_state_fill, Renderer::eFullMaterials );
+						renderer.addRenderable( m_arrow, m_arrow_modelview );
+						renderer.addRenderable( m_arrow, m_arrow_modelview2 );
+						return;
+					}
+
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) {
 		updateModelview( view, pivot2world );
@@ -2072,6 +2131,7 @@ public:
 		SelectionPool selector;
 
 		Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_worldSpace ) );
+		/* try lines to skew */
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
 				for ( int k = 0; k < 2; ++k ){
@@ -2093,12 +2153,13 @@ public:
 								m_pivot2world = matrix4_translation_for_vec3( origin );
 							}
 		}
-		else{
+		else{ /* try bbox to translate */
 			SelectionIntersection best;
 			AABB_BestPoint( local2view, eClipCullCW, AABB( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) ), best );
 			selector.addSelectable( best, &m_selectable_translateFree );
 		}
 
+		/* try bbox planes to scale*/
 		if( selector.failed() ){
 			const Matrix4 screen2world( matrix4_full_inverse( view.GetViewMatrix() ) );
 			const Vector3 near = vector4_projected(
@@ -2244,6 +2305,7 @@ public:
 };
 
 Shader* SkewManipulator::m_state_wire;
+Shader* SkewManipulator::m_state_fill;
 
 
 
@@ -4249,12 +4311,14 @@ static void constructStatic(){
 	RotateManipulator::m_state_outer = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
 	TransformOriginManipulator::m_state = GlobalShaderCache().capture( "$BIGPOINT" );
 	SkewManipulator::m_state_wire = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
+	SkewManipulator::m_state_fill = GlobalShaderCache().capture( "$FLATSHADE_OVERLAY" );
 }
 
 static void destroyStatic(){
   #if defined( DEBUG_SELECTION )
 	GlobalShaderCache().release( "$DEBUG_CLIPPED" );
   #endif
+	GlobalShaderCache().release( "$FLATSHADE_OVERLAY" );
 	GlobalShaderCache().release( "$WIRE_OVERLAY" );
 	GlobalShaderCache().release( "$BIGPOINT" );
 	GlobalShaderCache().release( "$WIRE_OVERLAY" );
