@@ -83,6 +83,8 @@
 #include "vfs.h"
 #include "png.h"
 #include "md4.h"
+
+#include <stddef.h>
 #include <stdlib.h>
 
 

@@ -20,6 +20,8 @@
  */
 
 
+#include <stddef.h>
+
 #include "cmdlib.h"
 #include "mathlib.h"
 #include "inout.h"
@@ -467,7 +469,7 @@ winding_t   *CopyWinding( winding_t *w ){
 	}
 
 	c = AllocWinding( w->numpoints );
-	size = (size_t)( (winding_t *)NULL )->p[w->numpoints];
+	size = offsetof( winding_t, p ) + sizeof( *w->p ) * w->numpoints;
 	memcpy( c, w, size );
 	return c;
 }
