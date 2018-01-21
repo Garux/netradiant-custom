@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "aas_store.h"
 #include "aas_cfg.h"
 
-#include <stddef.h>
 #include <assert.h>
 
 /*
@@ -42,7 +41,7 @@ evaluate split side
 cost = 0
 for all sides
 	for all sides
-		get 
+		get
 		if side splits side and splitside is on same child
 			cost++;
 }
@@ -425,7 +424,7 @@ bspbrush_t *AllocBrush (int numsides)
 	bspbrush_t	*bb;
 	size_t		c;
 
-	c = offsetof(bspbrush_t, sides[numsides]);
+	c = sizeof(*bb) + sizeof(*bb->sides) * numsides;
 	bb = GetMemory(c);
 	memset (bb, 0, c);
 	if (numthreads == 1)
@@ -487,8 +486,8 @@ bspbrush_t *CopyBrush (bspbrush_t *brush)
 	bspbrush_t *newbrush;
 	size_t		size;
 	int			i;
-	
-	size = offsetof(bspbrush_t, sides[brush->numsides]);
+
+	size = sizeof(*newbrush) + sizeof(*brush->sides) * brush->numsides;
 
 	newbrush = AllocBrush (brush->numsides);
 	memcpy (newbrush, brush, size);
@@ -590,7 +589,7 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, plane_t *p)
 		if (emins[p->type] < p->dist-PLANESIDE_EPSILON) sides |= PSIDE_BACK;
 		return sides;
 	} //end if
-	
+
 // general case
 	switch (p->signbits)
 	{
@@ -1339,7 +1338,7 @@ void SplitBrush (bspbrush_t *brush, int planenum,
 // Returns:				-
 // Changes Globals:		-
 //===========================================================================
-void SplitBrushList (bspbrush_t *brushes, 
+void SplitBrushList (bspbrush_t *brushes,
 	node_t *node, bspbrush_t **front, bspbrush_t **back)
 {
 	bspbrush_t	*brush, *newbrush, *newbrush2;
