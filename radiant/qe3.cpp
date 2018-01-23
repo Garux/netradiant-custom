@@ -80,6 +80,10 @@ void QE_InitVFS(){
 	const char* userRoot = g_qeglobals.m_userEnginePath.c_str();
 	const char* globalRoot = EnginePath_get();
 
+	const char* extrapath = ExtraResourcePath_get();
+	if( !string_empty( extrapath ) )
+		GlobalFileSystem().initDirectory( extrapath );
+
 	// if we have a mod dir
 	if ( !string_equal( gamename, basegame ) ) {
 		// ~/.<gameprefix>/<fs_game>

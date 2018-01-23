@@ -338,10 +338,10 @@ void EnginePath_Unrealise(){
 	}
 }
 
-void setEnginePath( const char* path ){
+void setEnginePath( CopiedString& self, const char* value ){
 	StringOutputStream buffer( 256 );
-	buffer << DirectoryCleaned( path );
-	if ( !path_equal( buffer.c_str(), g_strEnginePath.c_str() ) ) {
+	buffer << DirectoryCleaned( value );
+	if ( !path_equal( buffer.c_str(), self.c_str() ) ) {
 #if 0
 		while ( !ConfirmModified( "Paths Changed" ) )
 		{
@@ -360,10 +360,20 @@ void setEnginePath( const char* path ){
 
 		EnginePath_Unrealise();
 
-		g_strEnginePath = buffer.c_str();
+		self = buffer.c_str();
 
 		EnginePath_Realise();
 	}
+}
+typedef ReferenceCaller1<CopiedString, const char*, setEnginePath> EnginePathImportCaller;
+
+
+// Extra Resource Path
+
+CopiedString g_strExtraResourcePath;
+
+const char* ExtraResourcePath_get(){
+	return g_strExtraResourcePath.c_str();
 }
 
 
@@ -376,7 +386,7 @@ const char* AppPath_get(){
 }
 
 /// the path to the local rc-dir
-const char* LocalRcPath_get( void ){
+const char* LocalRcPath_get(){
 	static CopiedString rc_path;
 	if ( rc_path.empty() ) {
 		StringOutputStream stream( 256 );
@@ -409,10 +419,6 @@ const char* GameToolsPath_get(){
 	return g_strGameToolsPath.c_str();
 }
 
-void EnginePathImport( CopiedString& self, const char* value ){
-	setEnginePath( value );
-}
-typedef ReferenceCaller1<CopiedString, const char*, EnginePathImport> EnginePathImportCaller;
 
 void Paths_constructPreferences( PreferencesPage& page ){
 	page.appendPathEntry( "Engine Path", true,
@@ -423,6 +429,11 @@ void Paths_constructPreferences( PreferencesPage& page ){
 void Paths_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Paths", "Path Settings" ) );
 	Paths_constructPreferences( page );
+	page.appendPathEntry( "Extra Resource Path", true,
+						  StringImportCallback( EnginePathImportCaller( g_strExtraResourcePath ) ),
+						  StringExportCallback( StringExportCaller( g_strExtraResourcePath ) )
+						  );
+
 }
 void Paths_registerPreferencesPage(){
 	PreferencesDialog_addGamePage( FreeCaller1<PreferenceGroup&, Paths_constructPage>() );
@@ -3613,10 +3624,11 @@ void MainFrame_Construct(){
 	GlobalPreferenceSystem().registerPreference( "YZWnd", WindowPositionTrackerImportStringCaller( g_posYZWnd ), WindowPositionTrackerExportStringCaller( g_posYZWnd ) );
 	GlobalPreferenceSystem().registerPreference( "XZWnd", WindowPositionTrackerImportStringCaller( g_posXZWnd ), WindowPositionTrackerExportStringCaller( g_posXZWnd ) );
 
-	GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
-
 	GlobalPreferenceSystem().registerPreference( "NudgeAfterClone", BoolImportStringCaller( g_bNudgeAfterClone ), BoolExportStringCaller( g_bNudgeAfterClone ) );
 	GlobalPreferenceSystem().registerPreference( "OpenGLFont", CopiedStringImportStringCaller( g_strOpenGLFont ), CopiedStringExportStringCaller( g_strOpenGLFont ) );
+
+	GlobalPreferenceSystem().registerPreference( "ExtraResoucePath", CopiedStringImportStringCaller( g_strExtraResourcePath ), CopiedStringExportStringCaller( g_strExtraResourcePath ) );
+	GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
 	if ( g_strEnginePath.empty() )
 	{
 		g_strEnginePath_was_empty_1st_start = true;
@@ -3634,7 +3646,6 @@ void MainFrame_Construct(){
 		StringOutputStream path( 256 );
 		path << DirectoryCleaned( g_pGameDescription->getRequiredKeyValue( ENGINEPATH_ATTRIBUTE ) );
 		g_strEnginePath = path.c_str();
-		GlobalPreferenceSystem().registerPreference( "EnginePath", CopiedStringImportStringCaller( g_strEnginePath ), CopiedStringExportStringCaller( g_strEnginePath ) );
 	}
 
 

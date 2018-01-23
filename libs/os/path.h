@@ -243,7 +243,7 @@ TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Direct
 		}
 	}
 	char c = *( i - 1 );
-	if ( c != '/' && c != '\\' ) {
+	if ( c != '/' && c != '\\' && !string_empty( path.m_path ) ) {
 		ostream << '/';
 	}
 	return ostream;
