@@ -1861,11 +1861,13 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		Matrix4 identity2stOriginal( matrix4_multiplied_by_matrix4( stIdentity2stOriginal, identity2stIdentity ) );
 
 		Matrix4 stTransformed2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, stTransformed2identity );
-		Texdef_fromTransform( projection, (float)width, (float)height, stTransformed2stOriginal );
-		Texdef_normalise( projection, (float)width, (float)height );
+		if( stTransformed2stOriginal[0] == stTransformed2stOriginal[0] ){ /* catch QNAN: happens when projecting along plane */
+			Texdef_fromTransform( projection, (float)width, (float)height, stTransformed2stOriginal );
+			Texdef_normalise( projection, (float)width, (float)height );
 
-		projection.m_texdef.scale[0] /= vector3_length( projection.m_basis_s );
-		projection.m_texdef.scale[1] /= vector3_length( projection.m_basis_t );
+			projection.m_texdef.scale[0] /= vector3_length( projection.m_basis_s );
+			projection.m_texdef.scale[1] /= vector3_length( projection.m_basis_t );
+		}
 		vector3_normalise( projection.m_basis_s );
 		vector3_normalise( projection.m_basis_t );
 	}
