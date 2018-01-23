@@ -118,6 +118,8 @@ virtual PreferencesPage createPage( const char* treeName, const char* frameName 
 
 typedef Callback1<PreferenceGroup&> PreferenceGroupCallback;
 
+void PreferencesDialog_addGamePreferences( const PreferencesPageCallback& callback );
+void PreferencesDialog_addGamePage( const PreferenceGroupCallback& callback );
 void PreferencesDialog_addInterfacePreferences( const PreferencesPageCallback& callback );
 void PreferencesDialog_addInterfacePage( const PreferenceGroupCallback& callback );
 void PreferencesDialog_addDisplayPreferences( const PreferencesPageCallback& callback );

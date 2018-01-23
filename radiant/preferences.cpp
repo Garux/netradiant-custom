@@ -594,6 +594,15 @@ inline void PreferencesPageCallbacks_pushBack( PreferencesPageCallbacks& callbac
 	callbacks.push_back( callback );
 }
 
+PreferencesPageCallbacks g_gamePreferences;
+void PreferencesDialog_addGamePreferences( const PreferencesPageCallback& callback ){
+	PreferencesPageCallbacks_pushBack( g_gamePreferences, callback );
+}
+PreferenceGroupCallbacks g_gameCallbacks;
+void PreferencesDialog_addGamePage( const PreferenceGroupCallback& callback ){
+	PreferenceGroupCallbacks_pushBack( g_gameCallbacks, callback );
+}
+
 PreferencesPageCallbacks g_interfacePreferences;
 void PreferencesDialog_addInterfacePreferences( const PreferencesPageCallback& callback ){
 	PreferencesPageCallbacks_pushBack( g_interfacePreferences, callback );
@@ -793,6 +802,19 @@ GtkWindow* PrefsDlg::BuildDialog(){
 
 								PreferenceTree_appendPage( store, &group, "Game", game );
 							}
+						}
+
+						{
+							GtkWidget* gamePage = PreferencePages_addPage( m_notebook, "Game Settings" );
+							{
+								PreferencesPage preferencesPage( *this, getVBox( gamePage ) );
+								PreferencesPageCallbacks_constructPage( g_gamePreferences, preferencesPage );
+							}
+
+							GtkTreeIter group = PreferenceTree_appendPage( store, 0, "Game", gamePage );
+							PreferenceTreeGroup preferenceGroup( *this, m_notebook, store, group );
+
+							PreferenceGroupCallbacks_constructGroup( g_gameCallbacks, preferenceGroup );
 						}
 
 						{

@@ -425,7 +425,7 @@ void Paths_constructPage( PreferenceGroup& group ){
 	Paths_constructPreferences( page );
 }
 void Paths_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Paths_constructPage>() );
+	PreferencesDialog_addGamePage( FreeCaller1<PreferenceGroup&, Paths_constructPage>() );
 }
 
 
