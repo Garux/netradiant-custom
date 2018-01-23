@@ -627,6 +627,7 @@ void EmitBrushPrimitTextureCoordinates( face_t * f, Winding * w ){
 }
 #endif
 
+#if 0
 typedef float texmat_t[2][3];
 
 void TexMat_Scale( texmat_t texmat, float s, float t ){
@@ -653,7 +654,6 @@ void ConvertTexMatWithDimensions( const texmat_t texmat1, std::size_t w1, std::s
 	TexMat_Scale( texmat2, static_cast<float>( w1 ) / static_cast<float>( w2 ), static_cast<float>( h1 ) / static_cast<float>( h2 ) );
 }
 
-#if 0
 // convert a texture matrix between two qtexture_t
 // if 0 for qtexture_t, basic 2x2 texture is assumed ( straight mapping between s/t coordinates and geometric coordinates )
 void ConvertTexMatWithQTexture( const float texMat1[2][3], const qtexture_t *qtex1, float texMat2[2][3], const qtexture_t *qtex2 ){
@@ -1178,13 +1178,13 @@ void BPTexdef_Assign( brushprimit_texdef_t& bp_td, const float* hShift, const fl
 		BPTexdef_Rotate( bp_td, *rotation - texdef.rotate );
 	}
 }
-
+#if 0
 void BPTexdef_Construct( brushprimit_texdef_t& bp_td, std::size_t width, std::size_t height ){
 	bp_td.coords[0][0] = 1.0f;
 	bp_td.coords[1][1] = 1.0f;
 	ConvertTexMatWithDimensions( bp_td.coords, 2, 2, bp_td.coords, width, height );
 }
-
+#endif
 void Texdef_Assign( TextureProjection& projection, const TextureProjection& other, bool setBasis /*= true*/ ){
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
 		BPTexdef_Assign( projection.m_brushprimit_texdef, other.m_brushprimit_texdef );
@@ -1347,6 +1347,17 @@ void ShiftScaleRotate_toFace( const texdef_t& shiftScaleRotate, TextureProjectio
 	}
 }
 
+inline void printAP( const TextureProjection& projection ){
+	globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+}
+inline void printBP( const TextureProjection& projection ){
+	globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+}
+inline void print220( const TextureProjection& projection ){
+	globalOutputStream() << "220: projection.m_basis_s: " << projection.m_basis_s << " projection.m_basis_t: " << projection.m_basis_t << "\n";
+	printAP( projection );
+}
+
 #if 0
 inline void print_vector3( const Vector3& v ){
 	globalOutputStream() << "( " << v.x() << " " << v.y() << " " << v.z() << " )\n";
@@ -1452,8 +1463,8 @@ inline Matrix4 matrix4_reflection_for_plane45( const Plane3& plane, const Vector
 
 void Texdef_transformLocked_original( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& identity2transformed, const Vector3 centroid ){
 //			globalOutputStream() << "\t\t----------------------\n";
-//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
-//			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+//			printAP( projection );
+//			printBP( projection );
 //			globalOutputStream() << "width:" << width << " height" << height << "\n";
 
 		//globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
@@ -1533,11 +1544,11 @@ void Texdef_transformLocked_original( TextureProjection& projection, std::size_t
 		Matrix4 stTransformed2stOriginal = matrix4_multiplied_by_matrix4( identity2stOriginal, stTransformed2identity );
 //			globalOutputStream() << "stTransformed2stOriginal: " << stTransformed2stOriginal << "\n";
 		Texdef_fromTransform( projection, (float)width, (float)height, stTransformed2stOriginal );
-//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
-//			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+//			printAP( projection );
+//			printBP( projection );
 		Texdef_normalise( projection, (float)width, (float)height );
-//			globalOutputStream() << "AP norm: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
-//			globalOutputStream() << "BP norm: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+//			globalOutputStream() << "norm ";	printAP( projection );
+//			globalOutputStream() << "norm ";	printBP( projection );
 }
 #endif
 
@@ -1550,7 +1561,7 @@ double Det3x3( double a00, double a01, double a02,
 		+   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-void BP_from_ST( brushprimit_texdef_t& bp, DoubleVector3 points[3], DoubleVector3 st[3], const DoubleVector3& normal ){
+void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const DoubleVector3 st[3], const DoubleVector3& normal ){
 	double xyI[2], xyJ[2], xyK[2];
 	double stI[2], stJ[2], stK[2];
 	double D, D0, D1, D2;
@@ -1657,7 +1668,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 	}
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
 //			globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
-//			globalOutputStream() << "BP in: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+//			globalOutputStream() << "in ";	printBP( projection );
 		DoubleVector3 texX, texY;
 		ComputeAxisBase( plane.normal(), texX, texY );
 
@@ -1687,7 +1698,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
 //			globalOutputStream() << "\t\t***: " << centroid << "\n";
 //			globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
-//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+//			printAP( projection );
 		if( projection.m_texdef.scale[0] == 0.0f || projection.m_texdef.scale[1] == 0.0f ) {
 			return;
 		}
@@ -1815,11 +1826,10 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		projection.m_texdef.scale[1] = newScale[1];
 		projection.m_texdef.rotate = radians_to_degrees( rad );
 		Texdef_normalise( projection, (float)width, (float)height );
-//			globalOutputStream() << "AP new: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
+//			globalOutputStream() << "new "; printAP( projection );
 	}
 	else{ //TEXDEFTYPEID_VALVE
-//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
-//			globalOutputStream() << "220: projection.m_basis_s: " << projection.m_basis_s << " projection.m_basis_t: " << projection.m_basis_t << "\n";
+//			print220( projection );
 //			globalOutputStream() << "identity2transformed: " << identity2transformed << "\n";
 		/* hack: is often broken with niggative scale */
 		if( projection.m_texdef.scale[0] < 0 ){
@@ -1994,8 +2004,21 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 		}
 	}
 }
+
+inline bool BP_degenerate( const TextureProjection& projection ){
+	return vector2_cross( Vector2( projection.m_brushprimit_texdef.coords[0][0], projection.m_brushprimit_texdef.coords[0][1] ),
+							Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) == 0;
+}
+
 /// g_bp_globals.m_texdefTypeId must be == TEXDEFTYPEID_BRUSHPRIMITIVES during this
-void AP_from_BP( const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
+void AP_from_BP( TextureProjection& projection, const Plane3& plane, std::size_t width, std::size_t height ) {
+	/* catch degenerate BP basis, go default if so */
+	if( BP_degenerate( projection ) ){
+		projection.m_texdef.scale[0] = Texdef_getDefaultTextureScale();
+		projection.m_texdef.scale[1] = Texdef_getDefaultTextureScale();
+		return;
+	}
+
 	const Vector3 invariant( static_cast<Vector3>( plane.normal() * plane.dist() ) );
 
 	Matrix4 local2tex;
@@ -2072,37 +2095,46 @@ void AP_from_BP( const Plane3& plane, TextureProjection& projection, std::size_t
 	Texdef_normalise( projection.m_texdef, (float)width, (float)height );
 }
 
-void Valve220_from_BP( const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
-//			globalOutputStream() << "BP: ( " << projection.m_brushprimit_texdef.coords[0][0] << " " << projection.m_brushprimit_texdef.coords[0][1] << " " << projection.m_brushprimit_texdef.coords[0][2] << " ) ( " << projection.m_brushprimit_texdef.coords[1][0] << " " << projection.m_brushprimit_texdef.coords[1][1] << " " << projection.m_brushprimit_texdef.coords[1][2] << " )\n";
+void Valve220_from_BP( TextureProjection& projection, const Plane3& plane, std::size_t width, std::size_t height ) {
+//		printBP( projection );
 #if 0
-			projection.m_texdef.scale[0] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[0][0], projection.m_brushprimit_texdef.coords[0][1] ) ) * (double)width );
-			projection.m_texdef.scale[1] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) * (double)height );
-			projection.m_texdef.shift[0] = projection.m_brushprimit_texdef.coords[0][2] * (float)width;
-			projection.m_texdef.shift[1] = projection.m_brushprimit_texdef.coords[1][2] * (float)height;
-			projection.m_texdef.rotate = static_cast<float>( -radians_to_degrees( arctangent_yx( projection.m_brushprimit_texdef.coords[0][1], projection.m_brushprimit_texdef.coords[0][0] ) ) );
-			if( projection.m_brushprimit_texdef.coords[0][0] * projection.m_brushprimit_texdef.coords[1][1] < 0 )
-				projection.m_texdef.rotate = -projection.m_texdef.rotate;
+	projection.m_texdef.scale[0] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[0][0], projection.m_brushprimit_texdef.coords[0][1] ) ) * (double)width );
+	projection.m_texdef.scale[1] = 1.0 / ( vector2_length( Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) * (double)height );
+	projection.m_texdef.shift[0] = projection.m_brushprimit_texdef.coords[0][2] * (float)width;
+	projection.m_texdef.shift[1] = projection.m_brushprimit_texdef.coords[1][2] * (float)height;
+	projection.m_texdef.rotate = static_cast<float>( -radians_to_degrees( arctangent_yx( projection.m_brushprimit_texdef.coords[0][1], projection.m_brushprimit_texdef.coords[0][0] ) ) );
+	if( projection.m_brushprimit_texdef.coords[0][0] * projection.m_brushprimit_texdef.coords[1][1] < 0 )
+		projection.m_texdef.rotate = -projection.m_texdef.rotate;
 
-			DoubleVector3 texX, texY;
-			ComputeAxisBase( plane.normal(), texX, texY );
-			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
-			projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
+	DoubleVector3 texX, texY;
+	ComputeAxisBase( plane.normal(), texX, texY );
+	projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
+	projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
 #else
-			/* more reliable values this way */
-			DoubleVector3 texX, texY;
-			ComputeAxisBase( plane.normal(), texX, texY );
-			projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
-			projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
-			projection.m_brushprimit_texdef.removeScale( width, height );
-			TexMatToFakeTexCoords( projection.m_brushprimit_texdef, projection.m_texdef );
-			projection.m_texdef.shift[0] *= -1.f;
-			if( projection.m_brushprimit_texdef.coords[0][0] < 0 )
-				projection.m_basis_s *= -1.f;
-			if( projection.m_brushprimit_texdef.coords[1][1] < 0 )
-				projection.m_basis_t *= -1.f;
+	/* more reliable values this way */
+	DoubleVector3 texX, texY;
+	ComputeAxisBase( plane.normal(), texX, texY );
+	/* catch degenerate BP basis, go default if so */
+	if( BP_degenerate( projection ) ){
+		projection.m_basis_s = texX;
+		projection.m_basis_t = texY;
+		projection.m_texdef.scale[0] = Texdef_getDefaultTextureScale();
+		projection.m_texdef.scale[1] = Texdef_getDefaultTextureScale();
+		return;
+	}
+	projection.m_basis_s = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[0][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[0][1] ) );
+	projection.m_basis_t = vector3_normalised( texX * static_cast<double>( projection.m_brushprimit_texdef.coords[1][0] ) + texY * static_cast<double>( projection.m_brushprimit_texdef.coords[1][1] ) );
+	projection.m_brushprimit_texdef.removeScale( width, height );
+	TexMatToFakeTexCoords( projection.m_brushprimit_texdef, projection.m_texdef );
+	projection.m_texdef.shift[0] *= -1.f;
+	if( projection.m_brushprimit_texdef.coords[0][0] < 0 )
+		projection.m_basis_s *= -1.f;
+	if( projection.m_brushprimit_texdef.coords[1][1] < 0 )
+		projection.m_basis_t *= -1.f;
+	projection.m_brushprimit_texdef.addScale( width, height );
 #endif
-//			globalOutputStream() << "AP: scale( " << projection.m_texdef.scale[0] << " " << projection.m_texdef.scale[1] << " ) shift( " << projection.m_texdef.shift[0] << " " << projection.m_texdef.shift[1] << " ) rotate: " << projection.m_texdef.rotate << "\n";
-		}
+//		print220( projection );
+}
 
 /// g_bp_globals.m_texdefTypeId == 'in' during this
 void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height ) {
@@ -2112,15 +2144,14 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 			Matrix4 local2tex;
 			Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
 			BPTexdef_fromST011( projection, plane, local2tex );
-			BPTexdef_normalise( projection.m_brushprimit_texdef, (float)width, (float)height );
 
-			TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
+			const TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
 			g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
-			AP_from_BP( plane, projection, width, height );
+			AP_from_BP( projection, plane, width, height );
 			g_bp_globals.m_texdefTypeId = tmp;
 		}
 		else if( in == TEXDEFTYPEID_BRUSHPRIMITIVES ){
-			AP_from_BP( plane, projection, width, height );
+			AP_from_BP( projection, plane, width, height );
 		}
 	}
 	break;
@@ -2129,7 +2160,6 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 		Matrix4 local2tex;
 		Texdef_Construct_local2tex( projection, width, height, plane.normal(), local2tex );
 		BPTexdef_fromST011( projection, plane, local2tex );
-		BPTexdef_normalise( projection.m_brushprimit_texdef, (float)width, (float)height );
 	}
 	break;
 	case TEXDEFTYPEID_VALVE:
@@ -2141,7 +2171,7 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 			Valve220_rotate( projection, projection.m_texdef.rotate );
 		}
 		else if( in == TEXDEFTYPEID_BRUSHPRIMITIVES ){
-			Valve220_from_BP( plane, projection, width, height );
+			Valve220_from_BP( projection, plane, width, height );
 		}
 		break;
 	default:
@@ -2149,16 +2179,18 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 	}
 }
 
-void Texdef_from_ST( TextureProjection& projection, DoubleVector3 points[3], DoubleVector3 st[3], std::size_t width, std::size_t height ){
+void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3], const DoubleVector3 st[3], std::size_t width, std::size_t height ){
 	const Plane3 plane( plane3_for_points( points ) );
 	BP_from_ST( projection.m_brushprimit_texdef, points, st, plane.normal() );
 	if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ){
-		TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
+		const TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
 		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
-		AP_from_BP( plane, projection, width, height );
+		AP_from_BP( projection, plane, width, height );
 		g_bp_globals.m_texdefTypeId = tmp;
 	}
 	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ){
-		Valve220_from_BP( plane, projection, width, height );
+		/* catch degenerate BP basis, do nothing if so */
+		if( !BP_degenerate( projection ) )
+			Valve220_from_BP( projection, plane, width, height );
 	}
 }
