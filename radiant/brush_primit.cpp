@@ -113,6 +113,14 @@ inline void Texdef_toTransform( const texdef_t& texdef, float width, float heigh
 	transform[10] = transform[15] = 1;
 }
 
+inline void Valve220Texdef_toTransform( const texdef_t& texdef, float width, float height, Matrix4& transform ){
+	transform = g_matrix4_identity;
+	transform[12] = texdef.shift[0] / width;
+	transform[13] = -texdef.shift[1] / -height;
+	transform[0] = 1 / ( texdef.scale[0] * width );
+	transform[5] = 1 / ( texdef.scale[1] * -height );
+}
+
 inline void BPTexdef_toTransform( const brushprimit_texdef_t& bp_texdef, Matrix4& transform ){
 	transform = g_matrix4_identity;
 	transform.xx() = bp_texdef.coords[0][0];
@@ -124,12 +132,17 @@ inline void BPTexdef_toTransform( const brushprimit_texdef_t& bp_texdef, Matrix4
 }
 
 inline void Texdef_toTransform( const TextureProjection& projection, float width, float height, Matrix4& transform ){
-	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_BRUSHPRIMITIVES ) {
-		BPTexdef_toTransform( projection.m_brushprimit_texdef, transform );
-	}
-	else
+	switch ( g_bp_globals.m_texdefTypeId )
 	{
+	case TEXDEFTYPEID_BRUSHPRIMITIVES:
+		BPTexdef_toTransform( projection.m_brushprimit_texdef, transform );
+		break;
+	case TEXDEFTYPEID_VALVE:
+		Valve220Texdef_toTransform( projection.m_texdef, width, height, transform );
+		break;
+	default: //case TEXDEFTYPEID_QUAKE:
 		Texdef_toTransform( projection.m_texdef, width, height, transform );
+		break;
 	}
 }
 
@@ -246,7 +259,7 @@ void Texdef_basisForNormal( const TextureProjection& projection, const Vector3& 
 		vector4_to_vector3( basis.x() ) = projection.m_basis_s;
 		vector4_to_vector3( basis.y() ) = vector3_negated( projection.m_basis_t );
 		vector4_to_vector3( basis.z() ) = vector3_normalised( vector3_cross( vector4_to_vector3( basis.x() ), vector4_to_vector3( basis.y() ) ) );
-		matrix4_multiply_by_matrix4( basis, matrix4_rotation_for_z_degrees( -projection.m_texdef.rotate ) );
+//		matrix4_multiply_by_matrix4( basis, matrix4_rotation_for_z_degrees( -projection.m_texdef.rotate ) );
 		//globalOutputStream() << "debug: " << projection.m_basis_s << projection.m_basis_t << normal << "\n";
 		matrix4_transpose( basis );
 	}
