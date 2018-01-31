@@ -208,6 +208,10 @@ AttributeImporter( StringOutputStream& comment, EntityClass* entityClass, const 
 		ASSERT_MESSAGE( string_empty( entityClass->flagnames[bit] ), "non-unique flag bit" );
 		strcpy( entityClass->flagnames[bit], key );
 	}
+	else if( entityClass->fixedsize && string_equal( type, "model" ) ){
+		entityClass->miscmodel_is = true;
+		entityClass->m_miscmodel_key = key;
+	}
 
 	m_comment << key;
 	m_comment << " : ";

@@ -369,9 +369,8 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 
 	EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( name, true );
 
-	bool isModel = ( string_compare_nocase_n( name, "misc_", 5 ) == 0 && string_equal_nocase( name + string_length( name ) - 5, "model" ) ) // misc_*model (also misc_model)
-				   || string_equal_nocase( name, "model_static" )
-				   || ( GlobalSelectionSystem().countSelected() == 0 && string_equal_nocase( name, "func_static" ) && g_pGameDescription->mGameType == "doom3" );
+	const bool isModel = EntityClass_miscmodel_is( entityClass )
+				   || ( GlobalSelectionSystem().countSelected() == 0 && classname_equal( name, "func_static" ) && g_pGameDescription->mGameType == "doom3" );
 
 	bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
 
@@ -465,7 +464,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	if ( isModel ) {
 		const char* model = misc_model_dialog( GTK_WIDGET( MainFrame_getWindow() ) );
 		if ( model != 0 ) {
-			Node_getEntity( node )->setKeyValue( "model", model );
+			Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key() , model );
 		}
 	}
 }

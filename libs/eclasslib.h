@@ -107,6 +107,8 @@ CopiedString m_name;
 StringList m_parent;
 bool fixedsize;
 bool unknown;               // wasn't found in source
+bool miscmodel_is;			// definable via model attribute presence in xml .ent definition
+CopiedString m_miscmodel_key;
 Vector3 mins;
 Vector3 maxs;
 
@@ -141,6 +143,9 @@ const char* modelpath() const {
 const char* skin() const {
 	return m_skin.c_str();
 }
+const char* miscmodel_key() const {
+	return m_miscmodel_key.c_str();
+}
 };
 
 inline const char* EntityClass_valueForKey( const EntityClass& entityClass, const char* key ){
@@ -156,6 +161,17 @@ inline const char* EntityClass_valueForKey( const EntityClass& entityClass, cons
 inline EntityClassAttributePair& EntityClass_insertAttribute( EntityClass& entityClass, const char* key, const EntityClassAttribute& attribute = EntityClassAttribute() ){
 	entityClass.m_attributes.push_back( EntityClassAttributePair( key, attribute ) );
 	return entityClass.m_attributes.back();
+}
+
+
+inline bool classname_equal( const char* classname, const char* other ){
+	return string_equal_nocase( classname, other );
+}
+
+inline bool EntityClass_miscmodel_is( const EntityClass* entityClass ){
+	return entityClass->miscmodel_is
+		|| ( string_compare_nocase_n( entityClass->name(), "misc_", 5 ) == 0 && string_equal_nocase( entityClass->name() + string_length( entityClass->name() ) - 5, "model" ) ) // misc_*model (also misc_model)
+		 || classname_equal( entityClass->name(), "model_static" );
 }
 
 
@@ -241,6 +257,8 @@ inline EntityClass* Eclass_Alloc(){
 
 	e->fixedsize = false;
 	e->unknown = false;
+	e->miscmodel_is = false;
+	e->m_miscmodel_key = "model";
 	memset( e->flagnames, 0, MAX_FLAGS * 32 );
 
 	e->maxs = Vector3( -1,-1,-1 );
@@ -260,10 +278,6 @@ inline void Eclass_Free( EntityClass* e ){
 	eclass_release_state( e );
 
 	delete e;
-}
-
-inline bool classname_equal( const char* classname, const char* other ){
-	return string_equal( classname, other );
 }
 
 inline EntityClass* EClass_Create( const char* name, const Vector3& colour, const char* comments ){

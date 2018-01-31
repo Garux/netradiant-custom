@@ -80,7 +80,7 @@ Callback m_evaluateTransform;
 void construct(){
 	m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
 	m_keyObservers.insert( Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller( m_named ) );
-	m_keyObservers.insert( "model", SingletonModel::ModelChangedCaller( m_model ) );
+	m_keyObservers.insert( m_entity.getEntityClass().miscmodel_key(), SingletonModel::ModelChangedCaller( m_model ) );
 	m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
 	m_keyObservers.insert( "angle", AnglesKey::AngleChangedCaller( m_anglesKey ) );
 	m_keyObservers.insert( "angles", AnglesKey::AnglesChangedCaller( m_anglesKey ) );
