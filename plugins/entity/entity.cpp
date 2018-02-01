@@ -347,7 +347,7 @@ bool filter( const Entity& entity ) const {
 
 //filter_entity_classname g_filter_entity_world( "worldspawn" );
 filter_entity_classname g_filter_entity_func_group( "func_group" );
-filter_entity_classname g_filter_entity_func_detail( "func_detail" );
+filter_entity_classgroup g_filter_entity_func_detail( "func_detail" );
 filter_entity_classname g_filter_entity_light( "light" );
 filter_entity_classname g_filter_entity_misc_model( "misc_model" );
 filter_entity_classname g_filter_entity_misc_gamemodel( "misc_gamemodel" );
@@ -373,7 +373,7 @@ bool filter( const Entity& entity ) const {
 	const char* value = entity.getKeyValue( "classname" );
 	return string_equal( value, "worldspawn" )
 		   || string_equal( value, "func_group" )
-		   || string_equal( value, "func_detail" );
+		   || string_equal_n( value, "func_detail", 11 );
 }
 };
 
