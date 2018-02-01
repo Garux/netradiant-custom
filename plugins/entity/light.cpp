@@ -47,7 +47,6 @@
 #include "instancelib.h"
 #include "transformlib.h"
 #include "entitylib.h"
-#include "render.h"
 #include "eclasslib.h"
 #include "render.h"
 #include "stringio.h"

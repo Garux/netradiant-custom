@@ -345,7 +345,6 @@ bool filter( const Entity& entity ) const {
 }
 };
 
-//filter_entity_classname g_filter_entity_world( "worldspawn" );
 filter_entity_classname g_filter_entity_func_group( "func_group" );
 filter_entity_classgroup g_filter_entity_func_detail( "func_detail" );
 filter_entity_classname g_filter_entity_light( "light" );
@@ -382,7 +381,10 @@ filter_entity_world g_filter_entity_world;
 void Entity_InitFilters(){
 	add_entity_filter( g_filter_entity_world, EXCLUDE_WORLD );
 	add_entity_filter( g_filter_entity_func_group, EXCLUDE_FUNC_GROUPS );
-	add_entity_filter( g_filter_entity_func_detail, EXCLUDE_DETAILS );
+	if( g_gameType == eGameTypeQuake1 ){
+		add_entity_filter( g_filter_entity_func_detail, EXCLUDE_DETAILS );
+		add_entity_filter( g_filter_entity_func_detail, EXCLUDE_STRUCTURAL, true );
+	}
 	add_entity_filter( g_filter_entity_world, EXCLUDE_ENT, true );
 	add_entity_filter( g_filter_entity_trigger, EXCLUDE_TRIGGERS );
 	add_entity_filter( g_filter_entity_misc_model, EXCLUDE_MODELS );
@@ -409,9 +411,7 @@ void Entity_Construct( EGameType gameType ){
 		Static<KeyIsName>::instance().m_nameKey = "targetname";
 	}
 
-	if( g_gameType == eGameTypeQuake1 ){
-		g_stupidQuakeBug = true;
-	}
+	g_stupidQuakeBug = ( g_gameType == eGameTypeQuake1 );
 
 	GlobalPreferenceSystem().registerPreference( "SI_ShowNames", BoolImportStringCaller( g_showNames ), BoolExportStringCaller( g_showNames ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowBboxes", BoolImportStringCaller( g_showBboxes ), BoolExportStringCaller( g_showBboxes ) );

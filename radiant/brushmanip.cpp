@@ -1208,8 +1208,10 @@ void BrushFilters_construct(){
 	add_brush_filter( g_filter_brush_visportal, EXCLUDE_VISPORTALS );
 	add_brush_filter( g_filter_brush_areaportal, EXCLUDE_AREAPORTALS );
 	add_brush_filter( g_filter_brush_translucent, EXCLUDE_TRANSLUCENT );
-	add_brush_filter( g_filter_brush_detail, EXCLUDE_DETAILS );
-	add_brush_filter( g_filter_brush_detail, EXCLUDE_STRUCTURAL, true );
+	if( !string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ), "quake" ) ){ /* conditional for entity based struct/det filters; see entity plugin */
+		add_brush_filter( g_filter_brush_detail, EXCLUDE_DETAILS );
+		add_brush_filter( g_filter_brush_detail, EXCLUDE_STRUCTURAL, true );
+	}
 	add_brush_filter( g_filter_brush_lightgrid, EXCLUDE_LIGHTGRID );
 	add_brush_filter( g_filter_brush_decals, EXCLUDE_DECALS );
 }
