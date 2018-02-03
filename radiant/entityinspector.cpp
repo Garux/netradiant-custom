@@ -1259,10 +1259,10 @@ static gint EntityProperties_keypress( GtkEntry* widget, GdkEventKey* event, gpo
 void EntityInspector_clearAllKeyValues(){
 	UndoableCommand undo( "entityClear" );
 
-	// remove all keys except classname
+	// remove all keys except classname and origin
 	for ( KeyValues::iterator i = g_selectedKeyValues.begin(); i != g_selectedKeyValues.end(); ++i )
 	{
-		if ( strcmp( ( *i ).first.c_str(), "classname" ) != 0 ) {
+		if ( !string_equal( ( *i ).first.c_str(), "classname" ) && !string_equal( ( *i ).first.c_str(), "origin" ) ) {
 			Scene_EntitySetKeyValue_Selected( ( *i ).first.c_str(), "" );
 		}
 	}
