@@ -1273,8 +1273,7 @@ void DoRotateDlg(){
 				}
 				{
 					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -359, 359, 1, 10, 0 ) );
-					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 1 ) );
-					gtk_spin_button_set_numeric( spin, TRUE );
+					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
 					gtk_widget_show( GTK_WIDGET( spin ) );
 					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1288,8 +1287,7 @@ void DoRotateDlg(){
 				}
 				{
 					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -359, 359, 1, 10, 0 ) );
-					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 1 ) );
-					gtk_spin_button_set_numeric( spin, TRUE );
+					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
 					gtk_widget_show( GTK_WIDGET( spin ) );
 					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1301,8 +1299,7 @@ void DoRotateDlg(){
 				}
 				{
 					GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -359, 359, 1, 10, 0 ) );
-					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 1 ) );
-					gtk_spin_button_set_numeric( spin, TRUE );
+					GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( adj, 1, 2 ) );
 					gtk_widget_show( GTK_WIDGET( spin ) );
 					gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),

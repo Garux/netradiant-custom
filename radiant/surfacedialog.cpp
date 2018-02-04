@@ -714,7 +714,6 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, -8192, 8192, 2, 8, 0 ) ), 0, 2 ) );
 				m_hshiftIncrement.m_spin = spin;
 				m_hshiftSpinner.connect( spin );
-				gtk_spin_button_set_numeric( spin, TRUE );
 				gtk_widget_show( GTK_WIDGET( spin ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( spin ), 1, 2, 0, 1,
 								  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -751,7 +750,6 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, -8192, 8192, 2, 8, 0 ) ), 0, 2 ) );
 				m_vshiftIncrement.m_spin = spin;
 				m_vshiftSpinner.connect( spin );
-				gtk_spin_button_set_numeric( spin, TRUE );
 				gtk_widget_show( GTK_WIDGET( spin ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( spin ), 1, 2, 1, 2,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -788,7 +786,6 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, -8192, 8192, 2, 8, 0 ) ), 0, 5 ) );
 				m_hscaleIncrement.m_spin = spin;
 				m_hscaleSpinner.connect( spin );
-				gtk_spin_button_set_numeric( spin, TRUE );
 				gtk_widget_show( GTK_WIDGET( spin ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( spin ), 1, 2, 2, 3,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -825,7 +822,6 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, -8192, 8192, 2, 8, 0 ) ), 0, 5 ) );
 				m_vscaleIncrement.m_spin = spin;
 				m_vscaleSpinner.connect( spin );
-				gtk_spin_button_set_numeric( spin, TRUE );
 				gtk_widget_show( GTK_WIDGET( spin ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( spin ), 1, 2, 3, 4,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -862,7 +858,6 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				GtkSpinButton* spin = GTK_SPIN_BUTTON( gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, -8192, 8192, 2, 45, 0 ) ), 0, 2 ) );
 				m_rotateIncrement.m_spin = spin;
 				m_rotateSpinner.connect( spin );
-				gtk_spin_button_set_numeric( spin, TRUE );
 				gtk_widget_show( GTK_WIDGET( spin ) );
 				gtk_table_attach( GTK_TABLE( table ), GTK_WIDGET( spin ), 1, 2, 4, 5,
 								  (GtkAttachOptions) ( GTK_FILL ),
@@ -1038,7 +1033,6 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				}
 				{
 					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 2 );
-					gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 2, 3, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1048,7 +1042,6 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				}
 				{
 					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 2 );
-					gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 3, 4, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
