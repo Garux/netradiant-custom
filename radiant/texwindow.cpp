@@ -1443,21 +1443,13 @@ gboolean TextureBrowser_button_press( GtkWidget* widget, GdkEventButton* event, 
 	}
 	/* loads directory, containing active shader + focuses on it */
 	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 1 && !TextureBrowser_showWads() ) {
-		CopiedString texName = textureBrowser->shader;
-		char* sh = const_cast<char*>( texName.c_str() );
-		char* dir = strrchr( sh, '/' );
-		if( dir != NULL ){
-			*(dir + 1) = '\0';
-			dir = strchr( sh, '/' );
-			if( dir != NULL ){
-				dir++;
-				if( *dir != '\0'){
-					ScopeDisableScreenUpdates disableScreenUpdates( dir, "Loading Textures" );
-					TextureBrowser_ShowDirectory( *textureBrowser, dir );
-					TextureBrowser_Focus( *textureBrowser, textureBrowser->shader.c_str() );
-					TextureBrowser_queueDraw( *textureBrowser );
-				}
-			}
+		const StringRange range( strchr( textureBrowser->shader.c_str(), '/' ) + 1, strrchr( textureBrowser->shader.c_str(), '/' ) + 1 );
+		if( range.last - range.first != 0 ){
+			const CopiedString dir = range;
+			ScopeDisableScreenUpdates disableScreenUpdates( dir.c_str(), "Loading Textures" );
+			TextureBrowser_ShowDirectory( *textureBrowser, dir.c_str() );
+			TextureBrowser_Focus( *textureBrowser, textureBrowser->shader.c_str() );
+			TextureBrowser_queueDraw( *textureBrowser );
 		}
 	}
 	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 3 ) {
