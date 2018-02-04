@@ -156,6 +156,7 @@ struct camera_t
 
 
 	static float fieldOfView;
+	static const float near_z;
 
 	DeferredMotionDelta m_mouseMove;
 
@@ -185,6 +186,7 @@ struct camera_t
 };
 
 float camera_t::fieldOfView = 110.0f;
+const float camera_t::near_z = 1.f;
 camera_draw_mode camera_t::draw_mode = cd_texture;
 
 inline Matrix4 projection_for_camera( float near_z, float far_z, float fieldOfView, int width, int height ){
@@ -207,8 +209,8 @@ float Camera_getFarClipPlane( camera_t& camera ){
 
 void Camera_updateProjection( camera_t& camera ){
 	float farClip = Camera_getFarClipPlane( camera );
-
-	camera.projection = projection_for_camera( 1.f, farClip, camera_t::fieldOfView, camera.width, camera.height );
+	//~near_z = farClip / 4096.0f
+	camera.projection = projection_for_camera( camera_t::near_z, farClip, camera_t::fieldOfView, camera.width, camera.height );
 
 	camera.m_view->Construct( camera.projection, camera.modelview, camera.width, camera.height );
 }
@@ -645,7 +647,7 @@ void setModelview( const Matrix4& modelview ){
 }
 void setFieldOfView( float fieldOfView ){
 	float farClip = Camera_getFarClipPlane( m_camera );
-	m_camera.projection = projection_for_camera( farClip / 4096.0f, farClip, fieldOfView, m_camera.width, m_camera.height );
+	m_camera.projection = projection_for_camera( camera_t::near_z, farClip, fieldOfView, m_camera.width, m_camera.height );
 	update();
 }
 };
@@ -1044,7 +1046,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 			normalized[1] *= -1.f;
 			normalized[2] = 0.f;
 
-			normalized *= 2.0f; //*= 2 * nearplane
+			normalized *= ( camera_t::near_z * 2.f );
 				//globalOutputStream() << normalized << " normalized    ";
 			matrix4_transform_point( maa, normalized );
 				//globalOutputStream() << normalized << "\n";
