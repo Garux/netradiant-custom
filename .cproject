@@ -20,9 +20,22 @@
 							<tool id="cdt.managedbuild.tool.llvm.assembler.base.1540137577" name="LLVM assembler" superClass="cdt.managedbuild.tool.llvm.assembler.base"/>
 							<tool id="cdt.managedbuild.tool.llvm.archiver.base.726448752" name="LLVM archiver" superClass="cdt.managedbuild.tool.llvm.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.llvm.c.compiler.base.423406515" name="LLVM Clang" superClass="cdt.managedbuild.tool.llvm.c.compiler.base">
+								<option id="llvm.c_cpp.compiler.option.include.paths.1177478676" name="Include paths (-I)" superClass="llvm.c_cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/opt/local/include"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/glib-2.0"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/gtk-2.0"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.llvm.c.compiler.input.1702833029" superClass="cdt.managedbuild.tool.llvm.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.llvm.cpp.compiler.base.1130692273" name="LLVM Clang++" superClass="cdt.managedbuild.tool.llvm.cpp.compiler.base">
+								<option id="llvm.c_cpp.compiler.option.include.paths.1703680230" name="Include paths (-I)" superClass="llvm.c_cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/opt/local/include"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/gtk-2.0"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/glib-2.0"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NetRadiant/plugins}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NetRadiant/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NetRadiant/radiant}&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.llvm.cpp.compiler.input.1553525897" superClass="cdt.managedbuild.tool.llvm.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.llvm.c.linker.base.391098519" name="LLVM Clang C linker" superClass="cdt.managedbuild.tool.llvm.c.linker.base"/>
@@ -34,6 +47,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -46,4 +62,9 @@
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/NetRadiant"/>
+		</configuration>
+	</storageModule>
 </cproject>
