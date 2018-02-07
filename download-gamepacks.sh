@@ -163,7 +163,7 @@ pack Quake2Pack        proprietary svn    svn://svn.icculus.org/gtkradiant-gamep
 pack Quake4Pack        proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q4Pack/branches/1.5/
 #pack QuakePack        proprietary zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/QuakePack.zip
 pack QuakePack         GPL         zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/Quake1Pack.zip
-#pack Quake2WorldPack  GPL         svn    svn://jdolan.dyndns.org/quake2world/trunk/gtkradiant
+#pack Quake2WorldPack  GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/Q2WPack/branches/1.5/
 pack QuetooPack        GPL         svn    svn://svn.icculus.org/gtkradiant-gamepacks/QuetooPack/branches/1.5/
 #pack TremulousPack    proprietary svn    svn://svn.icculus.org/gtkradiant-gamepacks/TremulousPack/branches/1.5/
 pack TremulousPack     proprietary zip1   http://ingar.intranifty.net/files/netradiant/gamepacks/TremulousPack.zip
