@@ -1,6 +1,6 @@
 # Makefile for NetRadiant.app, requires http://macdylibbundler.sourceforge.net/
 
-INSTALL = ../../../install
+INSTALL = ../../install
 TARGET = target
 RESOURCES = $(TARGET)/NetRadiant.app/Contents/Resources
 BINDIR = $(RESOURCES)/install
