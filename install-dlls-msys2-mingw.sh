@@ -73,6 +73,7 @@ for EXTRAPATH in \
     './lib/gtk-2.0/2.10.0/engines/*.dll' \
     './lib/gtk-2.0/modules/*.dll' \
     './share/themes' \
+    './etc/fonts/fonts.conf' \
 ; do
     cp --parent -v `find $EXTRAPATH -type f` "$INSTALLDIR"
 done
