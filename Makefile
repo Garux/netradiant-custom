@@ -174,7 +174,7 @@ ifeq ($(findstring $(CFLAGS),-O),)
 	CFLAGS_COMMON += -O3
 	# only add -O3 if no -O flag is in $(CFLAGS)
 endif
-	CFLAGS_COMMON += -march=native -mcpu=native
+	CFLAGS_COMMON += -march=native -mtune=native
 	CPPFLAGS_COMMON +=
 	LDFLAGS_COMMON += -s
 else
@@ -248,6 +248,24 @@ else
 $(error Unsupported build OS: $(OS))
 endif
 endif
+endif
+
+# MSYS2
+UNAME_S := $(shell uname -s)
+UNAME_O := $(shell uname -o)
+
+ifneq "$(filter MINGW32_NT%,$(UNAME_S))" ""
+	OS = Win32
+	ifeq ($(UNAME_O),Msys)
+		DLLINSTALL = install-dlls-msys2-mingw.sh
+	endif
+endif
+
+ifneq "$(filter MINGW64_NT%,$(UNAME_S))" ""
+	OS = Win32
+	ifeq ($(UNAME_O),Msys)
+		DLLINSTALL = install-dlls-msys2-mingw.sh
+	endif
 endif
 
 # VERSION!
@@ -456,8 +474,8 @@ binaries-q3map2: \
 
 .PHONY: clean
 clean:
-	$(RM_R) $(INSTALLDIR_BASE)/
 	$(FIND) . \( -name \*.o -o -name \*.d -o -name \*.$(DLL) -o -name \*.$(A) -o -name \*.$(EXE) \) -exec $(RM) {} \;
+	$(RM_R) $(INSTALLDIR_BASE)/
 	$(RM) icons/*.rc
 
 %.$(EXE):
