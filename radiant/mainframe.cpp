@@ -202,6 +202,8 @@ void HomePaths_Realise(){
 				g_qeglobals.m_userEnginePath = path.c_str();
 				break;
 			}
+			path.clear();
+			path << DirectoryCleaned( g_get_home_dir() ) << prefix << "/";
 #endif
 
 #if defined( WIN32 )
@@ -3635,10 +3637,10 @@ void MainFrame_Construct(){
 		const char* ENGINEPATH_ATTRIBUTE =
 #if defined( WIN32 )
 			"enginepath_win32"
-#elif defined( __linux__ ) || defined ( __FreeBSD__ )
-			"enginepath_linux"
 #elif defined( __APPLE__ )
 			"enginepath_macos"
+#elif defined( __linux__ ) || defined ( __FreeBSD__ )
+			"enginepath_linux"
 #else
 #error "unknown platform"
 #endif
