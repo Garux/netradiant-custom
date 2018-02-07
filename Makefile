@@ -510,10 +510,10 @@ endif
 	$(CC) $< $(CFLAGS) $(CFLAGS_COMMON) $(CPPFLAGS_EXTRA) $(CPPFLAGS_COMMON) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@
 
 ifeq ($(OS),Win32)
-ifeq ($(ARCH),x64)
-$(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA := -Wl,--stack,4194304
-else
+ifeq ($(shell ARCH),i686)
 $(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA := -Wl,--large-address-aware,--stack,4194304
+else
+$(INSTALLDIR)/q3map2.$(EXE): LDFLAGS_EXTRA := -Wl,--stack,4194304
 endif
 endif
 $(INSTALLDIR)/q3map2.$(EXE): LIBS_EXTRA := $(LIBS_XML) $(LIBS_GLIB) $(LIBS_PNG) $(LIBS_JPEG) $(LIBS_ZLIB)
