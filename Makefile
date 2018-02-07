@@ -243,8 +243,6 @@ ifeq ($(OS),Darwin)
 	# workaround: we have no "ldd" for OS X, so...
 	LDD =
 	OTOOL = otool
-
-	INSTALLDIR := $(INSTALLDIR_BASE)/NetRadiant.app/Contents/MacOS/install
 else
 
 $(error Unsupported build OS: $(OS))
@@ -1085,7 +1083,6 @@ $(INSTALLDIR)/heretic2/h2data.$(EXE): \
 install-data: binaries
 	$(MKDIR) $(INSTALLDIR)/games
 	$(FIND) $(INSTALLDIR_BASE)/ -name .svn -exec $(RM_R) {} \; -prune
-	[ "$(OS)" != "Darwin" ] || $(CP_R) setup/data/osx/NetRadiant.app/* $(INSTALLDIR_BASE)/NetRadiant.app/
 	DOWNLOAD_GAMEPACKS="$(DOWNLOAD_GAMEPACKS)" GIT="$(GIT)" SVN="$(SVN)" WGET="$(WGET)" RM_R="$(RM_R)" MV="$(MV)" UNZIPPER="$(UNZIPPER)" ECHO="$(ECHO)" SH="$(SH)" CP="$(CP)" CP_R="$(CP_R)" $(SH) install-gamepacks.sh "$(INSTALLDIR)"
 	$(ECHO) $(RADIANT_MINOR_VERSION) > $(INSTALLDIR)/RADIANT_MINOR
 	$(ECHO) $(RADIANT_MAJOR_VERSION) > $(INSTALLDIR)/RADIANT_MAJOR
@@ -1099,13 +1096,8 @@ ifeq ($(OS),Win32)
 install-dll: binaries
 	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" $(SH) $(DLLINSTALL) 
 else
-ifeq ($(OS),Darwin)
-install-dll: binaries
-	EXE="$(EXE)" MACLIBDIR="$(MACLIBDIR)" CP="$(CP)" OTOOL="$(OTOOL)" INSTALLDIR="$(INSTALLDIR)" $(SH) install-dylibs.sh
-else
 install-dll: binaries
 	@$(ECHO) No DLL inclusion implemented for this target.
-endif
 endif
 
 # release building... NOT for general users
