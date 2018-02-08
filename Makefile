@@ -86,6 +86,7 @@ CPPFLAGS_JPEG      ?=
 LIBS_JPEG          ?= -ljpeg
 DEPEND_ON_MAKEFILE ?= yes
 DOWNLOAD_GAMEPACKS ?= yes
+INSTALL_DLLS       ?= yes
 # set to no to disable gamepack, set to all to even download undistributable gamepacks
 
 # Support CHECK_DEPENDENCIES with DOWNLOAD_GAMEPACKS semantics
@@ -1112,7 +1113,9 @@ install-data: binaries
 .PHONY: install-dll
 ifeq ($(OS),Win32)
 install-dll: binaries
+ifeq ($(INSTALL_DLLS),yes)
 	MKDIR="$(MKDIR)" CP="$(CP)" CAT="$(CAT)" GTKDIR="$(GTKDIR)" WHICHDLL="$(WHICHDLL)" INSTALLDIR="$(INSTALLDIR)" $(SH) $(DLLINSTALL) 
+endif
 else
 install-dll: binaries
 	@$(ECHO) No DLL inclusion implemented for this target.
