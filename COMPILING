@@ -1,22 +1,20 @@
 
-developer documentation for NetRadiant
+developer documentation for NetRadiant-custom
 ======================================
-
-(NOTE: outdated stuff has been ROT13ed)
 
 getting the source
 ==================
 
 The latest source is available from the git repository.
-  git://git.icculus.org/divverent/netradiant.git
+  https://github.com/Garux/netradiant-custom.git
 
 The git client can be obtained from the Subversion site.
   http://git-scm.org
 
 To get a copy of the source using the commandline git client:
   Change the current directory to the desired location for the source.
-  git clone git://git.icculus.org/divverent/netradiant.git
-  cd netradiant
+  git clone https://github.com/Garux/netradiant-custom.git
+  cd netradiant-custom
 
 
 
@@ -40,6 +38,7 @@ run 'make'
 
 run:
 Execute 'install/radiant.x86'
+
 
 OSX(using X-windows)
 ====================
@@ -67,7 +66,33 @@ make'
 run:
 Switch into the install folder, and run NetRadiant.app
 
-Win32 (2000, XP, Vista or Windows 7)
+
+Win32 (unsing MSYS2)(recommended)
+==================
+
+environment:
+- MSYS2 (http://www.msys2.org/)
+- from msys2_shell:
+  pacman -S --needed base-devel
+    32 bit:
+  pacman -S --needed mingw-w64-i686-{toolchain,gtk2,gtkglext}
+    64 bit:
+  pacman -S mingw-w64-x86_64-{toolchain,gtk2,gtkglext}
+    these are only strictly required for gamepacks:
+  pacman -S --needed unzip svn git
+
+build:
+- Start respective mingw shell
+- Switch to the directory with NetRadiant-custom source
+- Typical release build:
+  make MAKEFILE_CONF=msys2-Makefile.conf BUILD=release -j$(nproc)
+- Typical developer's build:
+  make MAKEFILE_CONF=msys2-Makefile.conf DEPENDENCIES_CHECK=off DOWNLOAD_GAMEPACKS=no INSTALL_DLLS=no BUILD=debug RADIANT_ABOUTMSG="NetRadiant custom dev build" -j$(nproc)
+run:
+- in the "install" directory, double click netradiant.exe
+
+
+Win32 (unsing MinGW)
 ==================
 
 environment:
@@ -86,7 +111,7 @@ environment:
 
 build:
 - Start the MSYS shell
-- Switch to the directory with NetRadiant source
+- Switch to the directory with NetRadiant-custom source
 - make MAKEFILE_CONF=mingw-Makefile.conf
 
 run:
