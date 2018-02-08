@@ -13,7 +13,7 @@ fi
 function dependencies_single_target_no_depth {
     local TARGET=$1
 
-    local DEPENDENCIESFILTER="| grep 'DLL Name' | sed -r 's/\s+DLL\s+Name\:\s+//' | xargs -i{} which {} | grep $MINGWDIR/bin"
+    local DEPENDENCIESFILTER="| grep -a 'DLL Name' | sed -r 's/\s+DLL\s+Name\:\s+//' | xargs -i{} which {} | grep -a $MINGWDIR/bin"
     local COMMAND="objdump -x $TARGET $DEPENDENCIESFILTER | xargs -i{} echo {}"
 
     local DEPENDENCIES=`eval "$COMMAND"`
