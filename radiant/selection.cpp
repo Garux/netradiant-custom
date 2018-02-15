@@ -85,7 +85,8 @@ void ray_for_device_point( Ray& ray, const Matrix4& device2object, const float x
 	point_for_device_point( ray.origin, device2object, x, y, -1 );
 
 	// point at x, y, zFar
-	point_for_device_point( ray.direction, device2object, x, y, 1 );
+	//point_for_device_point( ray.direction, device2object, x, y, 1 ); //sometimes is inaccurate up to negative ray direction
+	point_for_device_point( ray.direction, device2object, x, y, 0 );
 
 	// construct ray
 	vector3_subtract( ray.direction, ray.origin );
