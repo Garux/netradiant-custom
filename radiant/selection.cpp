@@ -131,10 +131,10 @@ void ray_intersect_ray( const Ray& ray, const Ray& other, Vector3& intersection 
 const Vector3 g_origin( 0, 0, 0 );
 const float g_radius = 64;
 
-void point_on_sphere( Vector3& point, const Matrix4& device2object, const float x, const float y ){
+void point_on_sphere( Vector3& point, const Matrix4& device2object, const float x, const float y, const Vector3& origin = g_origin, const float radius = g_radius ){
 	Ray ray;
 	ray_for_device_point( ray, device2object, x, y );
-	sphere_intersect_ray( g_origin, g_radius, ray, point );
+	sphere_intersect_ray( origin, radius, ray, point );
 }
 
 void point_on_axis( Vector3& point, const Vector3& axis, const Matrix4& device2object, const float x, const float y ){
@@ -278,6 +278,82 @@ void SetAxis( const Vector3& axis ){
 }
 };
 
+class RotateAxis_radiused : public Manipulatable
+{
+Vector3 m_axis;
+Vector3 m_start;
+float m_radius;
+Rotatable& m_rotatable;
+public:
+RotateAxis_radiused( Rotatable& rotatable )
+	: m_rotatable( rotatable ){
+}
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+	point_on_sphere( m_start, device2manip, x, y, g_origin, m_radius );
+	constrain_to_axis( m_start, m_axis );
+}
+/// \brief Converts current position to a normalised vector orthogonal to axis.
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
+	Vector3 current;
+	point_on_sphere( current, device2manip, x, y, g_origin, m_radius );
+	constrain_to_axis( current, m_axis );
+
+	if( snap ){
+		m_rotatable.rotate( quaternion_for_axisangle( m_axis, float_snapped( angle_for_axis( m_start, current, m_axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
+	}
+	else{
+		m_rotatable.rotate( quaternion_for_axisangle( m_axis, angle_for_axis( m_start, current, m_axis ) ) );
+	}
+}
+
+void SetAxis( const Vector3& axis ){
+	m_axis = axis;
+}
+void SetRadius( const float radius ){
+	m_radius = radius;
+}
+};
+#if 0
+class RotateAxis_centered : public Manipulatable
+{
+Vector3 m_axis;
+Vector3 m_start;
+Vector3 m_sphere_origin;
+Rotatable& m_rotatable;
+public:
+RotateAxis_centered( Rotatable& rotatable )
+	: m_rotatable( rotatable ){
+}
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+	//point_for_device_point( m_sphere_origin, device2manip, x, y, 0 );
+	m_sphere_origin = vector4_to_vector3( matrix4_transformed_vector4( device2manip, Vector4( x, y, 0, 1 ) ) );
+	point_on_sphere( m_start, device2manip, x, y, m_sphere_origin );
+	m_start -= m_sphere_origin;
+	globalOutputStream() << m_sphere_origin << "\n";
+	constrain_to_axis( m_start, m_axis );
+}
+/// \brief Converts current position to a normalised vector orthogonal to axis.
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox ){
+	Vector3 current;
+	point_on_sphere( current, device2manip, x, y, m_sphere_origin );
+	current -= m_sphere_origin;
+	globalOutputStream() << current << "\n";
+	constrain_to_axis( current, m_axis );
+	globalOutputStream() << current << "\n";
+
+	if( snap ){
+		m_rotatable.rotate( quaternion_for_axisangle( m_axis, float_snapped( angle_for_axis( m_start, current, m_axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
+	}
+	else{
+		m_rotatable.rotate( quaternion_for_axisangle( m_axis, angle_for_axis( m_start, current, m_axis ) ) );
+	}
+}
+
+void SetAxis( const Vector3& axis ){
+	m_axis = axis;
+}
+};
+#endif
 void translation_local2object( Vector3& object, const Vector3& local, const Matrix4& local2object ){
 	object = matrix4_get_translation_vec3(
 		matrix4_multiplied_by_matrix4(
@@ -1973,11 +2049,27 @@ class SkewManipulator : public Manipulator {
 			}
 		}
 	};
+	struct RenderablePoint : public OpenGLRenderable
+	{
+		PointVertex m_point;
+		RenderablePoint():
+			m_point( vertex3f_identity ) {
+		}
+		void render( RenderStateFlags state ) const {
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
+			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
+			glDrawArrays( GL_POINTS, 0, 1 );
+		}
+		void setColour( const Colour4b & colour ) {
+			m_point.colour = colour;
+		}
+	};
 
 	SkewAxis m_skew;
 	TranslateFree m_translateFree;
 	ScaleAxis m_scaleAxis;
 	ScaleFree m_scaleFree;
+	RotateAxis_radiused m_rotateAxis;
 	AABB m_bounds_draw;
 	const AABB& m_bounds;
 	Matrix4& m_pivot2world;
@@ -1997,9 +2089,10 @@ class SkewManipulator : public Manipulator {
 	RenderableLine m_lineZy;
 */
 	RenderableLine m_lines[3][2][2];
-	SelectableBool m_selectables[3][2][2];
+	SelectableBool m_selectables[3][2][2];	//[X][YZ][-+]
 	SelectableBool m_selectable_translateFree;
-	SelectableBool m_selectables_scale[3][2];
+	SelectableBool m_selectables_scale[3][2];	//[X][-+]
+	SelectableBool m_selectables_rotate[3][2][2];	//[X][-+Y][-+Z]
 	Selectable* m_selectable_prev_ptr;
 	Selectable* m_selectable_prev_ptr2;
 	Pivot2World m_pivot;
@@ -2007,14 +2100,17 @@ class SkewManipulator : public Manipulator {
 	RenderableArrowHead m_arrow;
 	Matrix4 m_arrow_modelview;
 	Matrix4 m_arrow_modelview2;
+	RenderablePoint m_point;
 public:
 	static Shader* m_state_wire;
 	static Shader* m_state_fill;
-	SkewManipulator( Skewable& skewable, Translatable& translatable, Scalable& scalable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom, const std::size_t segments = 2 ) :
+	static Shader* m_state_point;
+	SkewManipulator( Skewable& skewable, Translatable& translatable, Scalable& scalable, Rotatable& rotatable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom, const std::size_t segments = 2 ) :
 		m_skew( skewable ),
 		m_translateFree( translatable ),
 		m_scaleAxis( scalable ),
 		m_scaleFree( scalable ),
+		m_rotateAxis( rotatable ),
 		m_bounds( bounds ),
 		m_pivot2world( pivot2world ),
 		m_pivotIsCustom( pivotIsCustom ),
@@ -2038,6 +2134,7 @@ public:
 		}
 		draw_arrowhead( segments, 0, m_arrow.m_vertices.data(), TripleRemapXYZ<Vertex3f>(), TripleRemapXYZ<Normal3f>() );
 		m_arrow.setColour( g_colour_selected );
+		m_point.setColour( g_colour_selected );
 	}
 
 	void UpdateColours() {
@@ -2048,7 +2145,8 @@ public:
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
 				if( m_selectables_scale[i][j].isSelected() ){
-					m_lines[(i + 1)%3][1][j].setColour( g_colour_z );					m_lines[(i + 2)%3][0][j].setColour( g_colour_z );
+					m_lines[(i + 1)%3][1][j].setColour( g_colour_z );
+					m_lines[(i + 2)%3][0][j].setColour( g_colour_z );
 				}
 	}
 
@@ -2061,14 +2159,14 @@ public:
 		Matrix4& m = m_pivot.m_worldSpace; /* go affine to increase precision */
 		m[1] = m[2] = m[3] = m[4] = m[6] = m[7] = m[8] = m[9] = m[11] = 0;
 		m[15] = 1;
-		m_bounds_draw = aabb_for_oriented_aabb( m_bounds, matrix4_affine_inverse( m_pivot.m_worldSpace ) );
+		m_bounds_draw = aabb_for_oriented_aabb( m_bounds, matrix4_affine_inverse( m_pivot.m_worldSpace ) ); //screen scale
 		for ( int i = 0; i < 3; ++i ){
 			if( m_bounds_draw.extents[i] < 16 )
 				m_bounds_draw.extents[i] = 18;
 			else
 				m_bounds_draw.extents[i] += 2.0f;
 		}
-		m_bounds_draw = aabb_for_oriented_aabb( m_bounds_draw, m_pivot.m_worldSpace );
+		m_bounds_draw = aabb_for_oriented_aabb( m_bounds_draw, m_pivot.m_worldSpace ); //world scale
 		m_bounds_draw.origin = m_bounds.origin;
 
 		m_worldSpace = matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( m_bounds_draw.origin ), matrix4_scale_for_vec3( m_bounds_draw.extents ) );
@@ -2097,7 +2195,8 @@ public:
 				else if( dot < -0.9999f )
 					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
 				else{
-					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
+					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );
+					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
 				}
 			}
 
@@ -2125,6 +2224,16 @@ public:
 						return;
 					}
 
+		for ( int i = 0; i < 3; ++i )
+			for ( int j = 0; j < 2; ++j )
+				for ( int k = 0; k < 2; ++k )
+					if( m_selectables_rotate[i][j][k].isSelected() ){
+						renderer.SetState( m_state_point, Renderer::eWireframeOnly );
+						renderer.SetState( m_state_point, Renderer::eFullMaterials );
+						renderer.addRenderable( m_point, m_worldSpace );
+						renderer.addRenderable( m_point, m_worldSpace );
+						return;
+					}
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) {
 		updateModelview( view, pivot2world );
@@ -2132,32 +2241,76 @@ public:
 		SelectionPool selector;
 
 		Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_worldSpace ) );
-		/* try lines to skew */
+		/* try corner points to rotate */
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
 				for ( int k = 0; k < 2; ++k ){
+					m_point.m_point.vertex[i] = 0;
+					m_point.m_point.vertex[(i + 1)%3] = j? 1 : -1;
+					m_point.m_point.vertex[(i + 2)%3] = k? 1 : -1;
 					SelectionIntersection best;
-					Line_BestPoint( local2view, m_lines[i][j][k].m_line, best );
-					selector.addSelectable( best, &m_selectables[i][j][k] );
+					Point_BestPoint( local2view, m_point.m_point, best );
+					selector.addSelectable( best, &m_selectables_rotate[i][j][k] );
 				}
-
 		if( !selector.failed() ) {
 			( *selector.begin() ).second->setSelected( true );
-			if( !m_pivotIsCustom )
-				for ( int i = 0; i < 3; ++i )
-					for ( int j = 0; j < 2; ++j )
-						for ( int k = 0; k < 2; ++k )
-							if( m_selectables[i][j][k].isSelected() ){
-								const int axis_by = ( i + j + 1 ) % 3;
-								Vector3 origin = m_bounds.origin;
-								origin[axis_by] += k? -m_bounds.extents[axis_by] : m_bounds.extents[axis_by];
+			for ( int i = 0; i < 3; ++i )
+				for ( int j = 0; j < 2; ++j )
+					for ( int k = 0; k < 2; ++k )
+						if( m_selectables_rotate[i][j][k].isSelected() ){
+							m_point.m_point.vertex[i] = 0;
+							m_point.m_point.vertex[(i + 1)%3] = j? 1 : -1;
+							m_point.m_point.vertex[(i + 2)%3] = k? 1 : -1;
+							if( !m_pivotIsCustom ){
+								const Vector3 origin = m_bounds.origin + m_point.m_point.vertex * -1 * m_bounds.extents;
 								m_pivot2world = matrix4_translation_for_vec3( origin );
 							}
+							/* set radius */
+							if( fabs( vector3_dot( m_pivot.m_axis_screen, g_vector3_axes[i] ) ) < 0.2 ){
+								Vector3 origin = matrix4_get_translation_vec3( m_pivot2world );
+								Vector3 point = m_bounds_draw.origin + m_point.m_point.vertex * m_bounds_draw.extents;
+								const Matrix4 inv = matrix4_affine_inverse( m_pivot.m_worldSpace );
+								matrix4_transform_point( inv, origin );
+								matrix4_transform_point( inv, point );
+								point -= origin;
+								point = vector3_added( point, vector3_scaled( m_pivot.m_axis_screen, -vector3_dot( point, m_pivot.m_axis_screen ) ) ); //constrain_to_axis
+								m_rotateAxis.SetRadius( vector3_length( point ) - 4 ); //- SELECT_EPSILON / 2
+								//globalOutputStream() << "radius\n";
+							}
+							else{
+								m_rotateAxis.SetRadius( g_radius );
+								//globalOutputStream() << "g_radius\n";
+							}
+						}
 		}
-		else{ /* try bbox to translate */
-			SelectionIntersection best;
-			AABB_BestPoint( local2view, eClipCullCW, AABB( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) ), best );
-			selector.addSelectable( best, &m_selectable_translateFree );
+		else{
+			/* try lines to skew */
+			for ( int i = 0; i < 3; ++i )
+				for ( int j = 0; j < 2; ++j )
+					for ( int k = 0; k < 2; ++k ){
+						SelectionIntersection best;
+						Line_BestPoint( local2view, m_lines[i][j][k].m_line, best );
+						selector.addSelectable( best, &m_selectables[i][j][k] );
+					}
+
+			if( !selector.failed() ) {
+				( *selector.begin() ).second->setSelected( true );
+				if( !m_pivotIsCustom )
+					for ( int i = 0; i < 3; ++i )
+						for ( int j = 0; j < 2; ++j )
+							for ( int k = 0; k < 2; ++k )
+								if( m_selectables[i][j][k].isSelected() ){
+									const int axis_by = ( i + j + 1 ) % 3;
+									Vector3 origin = m_bounds.origin;
+									origin[axis_by] += k? -m_bounds.extents[axis_by] : m_bounds.extents[axis_by];
+									m_pivot2world = matrix4_translation_for_vec3( origin );
+								}
+			}
+			else{ /* try bbox to translate */
+				SelectionIntersection best;
+				AABB_BestPoint( local2view, eClipCullCW, AABB( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) ), best );
+				selector.addSelectable( best, &m_selectable_translateFree );
+			}
 		}
 
 		/* try bbox planes to scale*/
@@ -2197,8 +2350,7 @@ public:
 			const Vector3 viewer = vector3_normalised( view.getViewer() );
 			for ( int i = 0; i < 3; ++i ){
 				for ( int j = 0; j < 2; ++j ){
-					Vector3 normal = g_vector3_identity;
-					normal[i] = j? 1 : -1;
+					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
 					const int index = i * 8 + j * 4;
 					if( vector3_dot( normal, corners[indices[index]] ) > 0
 						&& vector3_dot( normal, corners[indices[index + 1]] ) > 0
@@ -2258,10 +2410,12 @@ public:
 			for ( int j = 0; j < 2; ++j )
 				for ( int k = 0; k < 2; ++k )
 					if( m_selectables[i][j][k].isSelected() ){
-						Vector3 axis_which( g_vector3_identity );
-						axis_which[i] = 1;
-						m_skew.SetAxes( axis_which, ( i + j + 1 ) % 3, k? 1 : -1 );
+						m_skew.SetAxes( g_vector3_axes[i], ( i + j + 1 ) % 3, k? 1 : -1 );
 						return &m_skew;
+					}
+					else if( m_selectables_rotate[i][j][k].isSelected() ){
+						m_rotateAxis.SetAxis( g_vector3_axes[i] );
+						return &m_rotateAxis;
 					}
 		{
 			Vector3 axes[2] = { g_vector3_identity, g_vector3_identity };
@@ -2286,8 +2440,10 @@ public:
 		m_selectable_translateFree.setSelected( select );
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
-				for ( int k = 0; k < 2; ++k )
+				for ( int k = 0; k < 2; ++k ){
 					m_selectables[i][j][k].setSelected( select );
+					m_selectables_rotate[i][j][k].setSelected( select );
+				}
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
 				 m_selectables_scale[i][j].setSelected( select );
@@ -2296,8 +2452,10 @@ public:
 		bool selected = false;
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
-				for ( int k = 0; k < 2; ++k )
+				for ( int k = 0; k < 2; ++k ){
 					selected |= m_selectables[i][j][k].isSelected();
+					selected |= m_selectables_rotate[i][j][k].isSelected();
+				}
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j )
 				 selected |= m_selectables_scale[i][j].isSelected();
@@ -2307,6 +2465,7 @@ public:
 
 Shader* SkewManipulator::m_state_wire;
 Shader* SkewManipulator::m_state_fill;
+Shader* SkewManipulator::m_state_point;
 
 
 
@@ -3659,7 +3818,7 @@ RadiantSelectionSystem() :
 	m_translate_manipulator( *this, 2, 64 ),
 	m_rotate_manipulator( *this, 8, 64 ),
 	m_scale_manipulator( *this, 0, 64 ),
-	m_skew_manipulator( *this, *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
+	m_skew_manipulator( *this, *this, *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
 	m_transformOrigin_manipulator( *this ),
 	m_pivotChanged( false ),
 	m_pivot_moving( false ),
@@ -4303,26 +4462,24 @@ const Matrix4& GetPivot2World() const {
 }
 
 static void constructStatic(){
-	m_state = GlobalShaderCache().capture( "$POINT" );
   #if defined( DEBUG_SELECTION )
 	g_state_clipped = GlobalShaderCache().capture( "$DEBUG_CLIPPED" );
   #endif
-	TranslateManipulator::m_state_wire = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
-	TranslateManipulator::m_state_fill = GlobalShaderCache().capture( "$FLATSHADE_OVERLAY" );
-	RotateManipulator::m_state_outer = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
-	TransformOriginManipulator::m_state = GlobalShaderCache().capture( "$BIGPOINT" );
+	m_state = GlobalShaderCache().capture( "$POINT" );
+	TranslateManipulator::m_state_wire =
+	RotateManipulator::m_state_outer =
 	SkewManipulator::m_state_wire = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
+	TranslateManipulator::m_state_fill =
 	SkewManipulator::m_state_fill = GlobalShaderCache().capture( "$FLATSHADE_OVERLAY" );
+	TransformOriginManipulator::m_state =
+	SkewManipulator::m_state_point = GlobalShaderCache().capture( "$BIGPOINT" );
 }
 
 static void destroyStatic(){
   #if defined( DEBUG_SELECTION )
 	GlobalShaderCache().release( "$DEBUG_CLIPPED" );
   #endif
-	GlobalShaderCache().release( "$FLATSHADE_OVERLAY" );
-	GlobalShaderCache().release( "$WIRE_OVERLAY" );
 	GlobalShaderCache().release( "$BIGPOINT" );
-	GlobalShaderCache().release( "$WIRE_OVERLAY" );
 	GlobalShaderCache().release( "$FLATSHADE_OVERLAY" );
 	GlobalShaderCache().release( "$WIRE_OVERLAY" );
 	GlobalShaderCache().release( "$POINT" );
