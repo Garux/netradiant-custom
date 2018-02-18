@@ -204,7 +204,7 @@ EntityClass *Eclass_InitFromText( const char *text ){
 
 	// grab the name
 	text = COM_Parse( text );
-	e->m_name = Get_COM_Token();
+	e->name_set( Get_COM_Token() );
 	debugname = e->name();
 
 	{

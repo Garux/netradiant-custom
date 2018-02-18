@@ -313,7 +313,9 @@ inline const char* string_findFirstNonSpaceOrTab( const char* string ){
 
 
 static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
-	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, entityClass.m_name ) );
+	const char* name;
+	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, name ) );
+	entityClass.name_set( name );
 
 	PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseToken( tokeniser, "{" ) );
 	tokeniser.nextLine();
@@ -512,7 +514,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 			const char* value;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, value ) );
 			if ( string_equal( value, "}" ) ) { // hack for quake4 powerups.def bug
-				globalErrorStream() << "entityDef " << makeQuoted( entityClass.m_name.c_str() ) << " key " << makeQuoted( tmp.c_str() ) << " has no value\n";
+				globalErrorStream() << "entityDef " << makeQuoted( entityClass.name() ) << " key " << makeQuoted( tmp.c_str() ) << " has no value\n";
 				break;
 			}
 			else
@@ -525,7 +527,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 
 	entityClass.m_comments = usage.c_str();
 
-	if ( string_equal( entityClass.m_name.c_str(), "light" ) ) {
+	if ( string_equal( entityClass.name(), "light" ) ) {
 		{
 			EntityClassAttribute& attribute = EntityClass_insertAttribute( entityClass, "light_radius" ).second;
 			attribute.m_type = "vector3";
@@ -656,7 +658,7 @@ void EntityClass_resolveInheritance( EntityClass* derivedClass ){
 		derivedClass->inheritanceResolved = true;
 		EntityClasses::iterator i = g_EntityClassDoom3_classes.find( derivedClass->m_parent.front().c_str() );
 		if ( i == g_EntityClassDoom3_classes.end() ) {
-			globalErrorStream() << "failed to find entityDef " << makeQuoted( derivedClass->m_parent.front().c_str() ) << " inherited by "  << makeQuoted( derivedClass->m_name.c_str() ) << "\n";
+			globalErrorStream() << "failed to find entityDef " << makeQuoted( derivedClass->m_parent.front().c_str() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << "\n";
 		}
 		else
 		{

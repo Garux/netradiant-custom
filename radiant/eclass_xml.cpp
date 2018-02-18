@@ -276,7 +276,7 @@ ClassImporter( EntityClassCollector& collector, ListAttributeTypes& listTypes, c
 
 	const char* name = element.attribute( "name" );
 	ASSERT_MESSAGE( !string_empty( name ), "name attribute not specified for class" );
-	m_eclass->m_name = name;
+	m_eclass->name_set( name );
 
 	const char* color = element.attribute( "color" );
 	ASSERT_MESSAGE( !string_empty( name ), "color attribute not specified for class " << name );

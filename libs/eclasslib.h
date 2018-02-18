@@ -100,14 +100,19 @@ inline const char* EntityClassAttributePair_getDescription( const EntityClassAtt
 	return EntityClassAttributePair_getName( attributePair );
 }
 
+inline bool classname_equal( const char* classname, const char* other ){
+	return string_equal_nocase( classname, other );
+}
+
 class EntityClass
 {
-public:
+private:
 CopiedString m_name;
+public:
 StringList m_parent;
 bool fixedsize;
 bool unknown;               // wasn't found in source
-bool miscmodel_is;			// definable via model attribute presence in xml .ent definition
+bool miscmodel_is;			// also definable via model attribute presence in xml .ent definition
 CopiedString m_miscmodel_key;
 Vector3 mins;
 Vector3 maxs;
@@ -131,6 +136,11 @@ bool inheritanceResolved;
 bool sizeSpecified;
 bool colorSpecified;
 
+void name_set( const char* name_ ) {
+	m_name = name_;
+	miscmodel_is = ( string_equal_prefix_nocase( name(), "misc_" ) && string_equal_suffix_nocase( name(), "model" ) ) // misc_*model (also misc_model)
+			|| classname_equal( name(), "model_static" );
+}
 const char* name() const {
 	return m_name.c_str();
 }
@@ -161,17 +171,6 @@ inline const char* EntityClass_valueForKey( const EntityClass& entityClass, cons
 inline EntityClassAttributePair& EntityClass_insertAttribute( EntityClass& entityClass, const char* key, const EntityClassAttribute& attribute = EntityClassAttribute() ){
 	entityClass.m_attributes.push_back( EntityClassAttributePair( key, attribute ) );
 	return entityClass.m_attributes.back();
-}
-
-
-inline bool classname_equal( const char* classname, const char* other ){
-	return string_equal_nocase( classname, other );
-}
-
-inline bool EntityClass_miscmodel_is( const EntityClass* entityClass ){
-	return entityClass->miscmodel_is
-		|| ( string_compare_nocase_n( entityClass->name(), "misc_", 5 ) == 0 && string_equal_nocase( entityClass->name() + string_length( entityClass->name() ) - 5, "model" ) ) // misc_*model (also misc_model)
-		 || classname_equal( entityClass->name(), "model_static" );
 }
 
 
@@ -284,7 +283,7 @@ inline EntityClass* EClass_Create( const char* name, const Vector3& colour, cons
 	EntityClass *e = Eclass_Alloc();
 	e->free = &Eclass_Free;
 
-	e->m_name = name;
+	e->name_set( name );
 
 	e->color = colour;
 	eclass_capture_state( e );
@@ -300,7 +299,7 @@ inline EntityClass* EClass_Create_FixedSize( const char* name, const Vector3& co
 	EntityClass *e = Eclass_Alloc();
 	e->free = &Eclass_Free;
 
-	e->m_name = name;
+	e->name_set( name );
 
 	e->color = colour;
 	eclass_capture_state( e );

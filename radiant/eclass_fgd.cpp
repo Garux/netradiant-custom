@@ -233,7 +233,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 	}
 
-	entityClass->m_name = tokeniser.getToken();
+	entityClass->name_set( tokeniser.getToken() );
 
 	if ( !isBase ) {
 		ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ":" ), PARSE_ERROR );
@@ -361,7 +361,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 			tokeniser.nextLine();
 
 			StringOutputStream listTypeName( 64 );
-			listTypeName << entityClass->m_name.c_str() << "_" << attribute.m_name.c_str();
+			listTypeName << entityClass->name() << "_" << attribute.m_name.c_str();
 			attribute.m_type = listTypeName.c_str();
 
 			ListAttributeType& listType = g_listTypesFGD[listTypeName.c_str()];
@@ -572,7 +572,7 @@ void EntityClassFGD_resolveInheritance( EntityClass* derivedClass ){
 		{
 			BaseClasses::iterator i = g_EntityClassFGD_bases.find( ( *j ).c_str() );
 			if ( i == g_EntityClassFGD_bases.end() ) {
-				globalErrorStream() << "failed to find entityDef " << makeQuoted( ( *j ).c_str() ) << " inherited by "  << makeQuoted( derivedClass->m_name.c_str() ) << "\n";
+				globalErrorStream() << "failed to find entityDef " << makeQuoted( ( *j ).c_str() ) << " inherited by "  << makeQuoted( derivedClass->name() ) << "\n";
 			}
 			else
 			{
@@ -616,10 +616,10 @@ void realise(){
 				EntityClassFGD_resolveInheritance( ( *i ).second );
 				if ( ( *i ).second->fixedsize && string_empty( ( *i ).second->m_modelpath.c_str() ) ) {
 					if ( !( *i ).second->sizeSpecified ) {
-						globalErrorStream() << "size not specified for entity class: " << makeQuoted( ( *i ).second->m_name.c_str() ) << '\n';
+						globalErrorStream() << "size not specified for entity class: " << makeQuoted( ( *i ).second->name() ) << '\n';
 					}
 					if ( !( *i ).second->colorSpecified ) {
-						globalErrorStream() << "color not specified for entity class: " << makeQuoted( ( *i ).second->m_name.c_str() ) << '\n';
+						globalErrorStream() << "color not specified for entity class: " << makeQuoted( ( *i ).second->name() ) << '\n';
 					}
 				}
 			}

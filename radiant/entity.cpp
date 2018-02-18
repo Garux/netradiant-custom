@@ -369,10 +369,10 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 
 	EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( name, true );
 
-	const bool isModel = EntityClass_miscmodel_is( entityClass )
+	const bool isModel = entityClass->miscmodel_is
 				   || ( GlobalSelectionSystem().countSelected() == 0 && classname_equal( name, "func_static" ) && g_pGameDescription->mGameType == "doom3" );
 
-	bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
+	const bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
 
 	//is important to have retexturing here; if doing in the end, undo doesn't succeed;
 	if ( string_compare_nocase_n( name, "trigger_", 8 ) == 0 && brushesSelected && !entityClass->fixedsize ){
