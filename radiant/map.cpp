@@ -1169,7 +1169,7 @@ void Map_LoadFile( const char *filename ){
 	globalOutputStream() << "--- LoadMapFile ---\n";
 	globalOutputStream() << g_map.m_name.c_str() << "\n";
 
-	globalOutputStream() << Unsigned( g_brushCount.get() ) << " primitive\n";
+	globalOutputStream() << Unsigned( g_brushCount.get() ) << " primitives\n";
 	globalOutputStream() << Unsigned( g_entityCount.get() ) << " entities\n";
 
 	//GlobalEntityCreator().printStatistics();
