@@ -867,7 +867,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			++m_groupents;
 			if( !string_equal_nocase( "func_group", entity->getKeyValue( "classname" ) ) &&
 				!string_equal_nocase( "_decal", entity->getKeyValue( "classname" ) ) &&
-				!string_equal_nocase( "func_detail", entity->getKeyValue( "classname" ) ) ){
+				!string_equal_nocase_n( "func_detail", entity->getKeyValue( "classname" ), 11 ) ){
 				++m_groupents_ingame;
 				++m_ents_ingame;
 			}
