@@ -175,8 +175,6 @@ WindowPositionTrackerExportStringCaller m_exportPosition;
 float m_fitHorizontal;
 float m_fitVertical;
 
-int m_projectRadio;
-
 Increment m_hshiftIncrement;
 Increment m_vshiftIncrement;
 Increment m_hscaleIncrement;
@@ -207,7 +205,6 @@ SurfaceInspector() :
 	m_rotateIncrement( g_si_globals.rotate ){
 	m_fitVertical = 1;
 	m_fitHorizontal = 1;
-	m_projectRadio = 0;
 	m_positionTracker.setPosition( c_default_window_pos );
 }
 
@@ -453,7 +450,14 @@ void SurfaceInspector_toggleShown(){
 
 #include "camwindow.h"
 
-void SurfaceInspector_ProjectTexture(){
+enum EProjectTexture
+{
+	eProjectAxial = 0,
+	eProjectOrtho = 1,
+	eProjectCam = 2,
+};
+
+void SurfaceInspector_ProjectTexture( EProjectTexture type ){
 	UndoableCommand undo( "textureProject" );
 
 	texdef_t texdef;
@@ -465,23 +469,17 @@ void SurfaceInspector_ProjectTexture(){
 
 	Vector3 direction;
 
-	if( getSurfaceInspector().m_projectRadio == 0 ){ //axial
-		return Select_ProjectTexture( texdef, NULL );
-	}
-	else if( getSurfaceInspector().m_projectRadio == 1 ){ //ortho
-		if( GlobalXYWnd_getCurrentViewType() == YZ ){
-			direction = Vector3( 1, 0, 0 );
-		}
-		else if( GlobalXYWnd_getCurrentViewType() == XZ ){
-			direction = Vector3( 0, 1, 0 );
-		}
-		else if( GlobalXYWnd_getCurrentViewType() == XY ){
-			direction = Vector3( 0, 0, 1 );
-		}
-	}
-	else if( getSurfaceInspector().m_projectRadio == 2 ){ //cam
+	switch ( type )
+	{
+	case eProjectAxial:
+		return Select_ProjectTexture( texdef, 0 );
+	case eProjectOrtho:
+		direction = g_vector3_axes[GlobalXYWnd_getCurrentViewType()];
+		break;
+	case eProjectCam:
 		//direction = -g_pParentWnd->GetCamWnd()->getCamera().vpn ;
 		direction = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
+		break;
 	}
 
 	Select_ProjectTexture( texdef, &direction );
@@ -535,13 +533,12 @@ static void OnBtnReset( GtkWidget *widget, gpointer data ){
 	Select_SetTexdef( projection, false, true );
 }
 
-static void OnBtnProject( GtkWidget *widget, gpointer data ){
+static void OnBtnProject( GtkWidget *widget, EProjectTexture type ){
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
-		globalErrorStream() << "function doesn't work for *brushes*, having Axial Projection type\n";
-		//return;
+		globalErrorStream() << "function doesn't work for *brushes*, having Axial Projection type\n"; //works for patches
 	}
 	getSurfaceInspector().exportData();
-	SurfaceInspector_ProjectTexture();
+	SurfaceInspector_ProjectTexture( type );
 }
 
 static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
@@ -960,36 +957,50 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* button = gtk_button_new_with_label( "Project" );
-					gtk_widget_show( button );
-					gtk_table_attach( GTK_TABLE( table ), button, 0, 1, 2, 3,
-									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+					GtkWidget* label = gtk_label_new( "Project:" );
+					gtk_widget_show( label );
+					gtk_table_attach( GTK_TABLE( table ), label, 0, 1, 2, 3,
+									  (GtkAttachOptions) ( GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnProject ), 0 );
-					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					//radio button group for choosing projection style
-					GtkWidget* radAxial = gtk_radio_button_new_with_label( NULL, "Axial" );
-					gtk_widget_set_tooltip_text( radAxial, "Axial projection (along nearest axis)" );
-					gtk_widget_show( radAxial );
-					gtk_table_attach( GTK_TABLE( table ), radAxial, 1, 2, 2, 3,
-									( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),
-									( GtkAttachOptions )( 0 ), 0, 0 );
-					GtkWidget* rad = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radAxial ), "Ortho" );
-					gtk_widget_set_tooltip_text( rad, "Project along active ortho view" );
-					gtk_widget_show( rad );
-					gtk_table_attach( GTK_TABLE( table ), rad, 2, 3, 2, 3,
-									( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),
-									( GtkAttachOptions )( 0 ), 0, 0 );
-					rad = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radAxial ), "Cam" );
-					gtk_widget_set_tooltip_text( rad, "Project along camera view direction" );
-					gtk_widget_show( rad );
-					gtk_table_attach( GTK_TABLE( table ), rad, 3, 4, 2, 3,
-									( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),
-									( GtkAttachOptions )( 0 ), 0, 0 );
-					AddDialogData( *GTK_RADIO_BUTTON( radAxial ), m_projectRadio );
+					GtkWidget* button = gtk_button_new_with_label( "Axial" );
+					gtk_widget_set_tooltip_text( button, "Axial projection (along nearest axis)" );
+					gtk_widget_show( button );
+					gtk_table_attach( GTK_TABLE( table ), button, 1, 2, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 5 );
+					g_signal_connect( G_OBJECT( button ), "clicked",
+									  G_CALLBACK( OnBtnProject ), (gpointer)eProjectAxial );
+					GtkRequisition req;
+					gtk_widget_size_request( button, &req );
+					gtk_widget_set_usize( button, 60, req.height * 3 / 4 );
+				}
+				{
+					GtkWidget* button = gtk_button_new_with_label( "Ortho" );
+					gtk_widget_set_tooltip_text( button, "Project along active ortho view" );
+					gtk_widget_show( button );
+					gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 5 );
+					g_signal_connect( G_OBJECT( button ), "clicked",
+									  G_CALLBACK( OnBtnProject ), (gpointer)eProjectOrtho );
+					GtkRequisition req;
+					gtk_widget_size_request( button, &req );
+					gtk_widget_set_usize( button, 60, req.height * 3 / 4 );
+				}
+				{
+					GtkWidget* button = gtk_button_new_with_label( "Cam" );
+					gtk_widget_set_tooltip_text( button, "Project along camera view direction" );
+					gtk_widget_show( button );
+					gtk_table_attach( GTK_TABLE( table ), button, 3, 4, 2, 3,
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 5 );
+					g_signal_connect( G_OBJECT( button ), "clicked",
+									  G_CALLBACK( OnBtnProject ), (gpointer)eProjectCam );
+					GtkRequisition req;
+					gtk_widget_size_request( button, &req );
+					gtk_widget_set_usize( button, 60, req.height * 3 / 4 );
 				}
 				{
 					GtkWidget* button = gtk_button_new_with_label( "CAP" );
