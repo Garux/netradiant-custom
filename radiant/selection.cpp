@@ -2188,6 +2188,7 @@ public:
 
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j ){
+#if 0
 				const Vector3 dir = ( m_lines[i][j][0].m_line[0].vertex - m_lines[i][j][1].m_line[0].vertex ) / 2;
 				const float dot = vector3_dot( dir, m_pivot.m_axis_screen );
 				if( dot > 0.9999f )
@@ -2198,6 +2199,16 @@ public:
 					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );
 					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
 				}
+#else
+				if( m_selectables[i][j][0].isSelected() ){ /* add selected last to get highlighted one rendered on top in 2d */
+					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
+					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );
+				}
+				else{
+					renderer.addRenderable( m_lines[i][j][0], m_worldSpace );
+					renderer.addRenderable( m_lines[i][j][1], m_worldSpace );
+				}
+#endif
 			}
 
 		for ( int i = 0; i < 3; ++i )
