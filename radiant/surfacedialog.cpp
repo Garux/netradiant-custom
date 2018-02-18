@@ -1032,7 +1032,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
-					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 2 );
+					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 3 );
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 2, 3, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
@@ -1041,7 +1041,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 					AddDialogData( *GTK_SPIN_BUTTON( spin ), m_fitHorizontal );
 				}
 				{
-					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 2 );
+					GtkWidget* spin = gtk_spin_button_new( GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1 << 16, 1, 10, 0 ) ), 0, 3 );
 					gtk_widget_show( spin );
 					gtk_table_attach( GTK_TABLE( table ), spin, 3, 4, 1, 2,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
