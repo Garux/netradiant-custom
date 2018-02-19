@@ -545,18 +545,37 @@ static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
 	SurfaceInspector_FitTexture();
 }
 
-static void OnBtnFaceFitW( GtkWidget *widget, gpointer data ){
+static void OnBtnFaceFitWidth( GtkWidget *widget, gpointer data ){
 	UndoableCommand undo( "textureAutoFitWidth" );
 	getSurfaceInspector().exportData();
 	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, 0 );
 }
 
-static void OnBtnFaceFitH( GtkWidget *widget, gpointer data ){
+static void OnBtnFaceFitHeight( GtkWidget *widget, gpointer data ){
 	UndoableCommand undo( "textureAutoFitHeight" );
 	getSurfaceInspector().exportData();
 	Select_FitTexture( 0, getSurfaceInspector().m_fitVertical );
 }
 
+static gboolean OnBtnFaceFitWidthOnly( GtkWidget *widget, GdkEventButton *event, gpointer data ){
+	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
+		UndoableCommand undo( "textureAutoFitWidthOnly" );
+		getSurfaceInspector().exportData();
+		Select_FitTexture( getSurfaceInspector().m_fitHorizontal, 0, true );
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static gboolean OnBtnFaceFitHeightOnly( GtkWidget *widget, GdkEventButton *event, gpointer data ){
+	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
+		UndoableCommand undo( "textureAutoFitHeightOnly" );
+		getSurfaceInspector().exportData();
+		Select_FitTexture( 0, getSurfaceInspector().m_fitVertical, true );
+		return TRUE;
+	}
+	return FALSE;
+}
 
 
 typedef const char* FlagName;
@@ -918,22 +937,26 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				}
 				{
 					GtkWidget* button = gtk_button_new_with_label( "Width" );
+					gtk_widget_set_tooltip_text( button, "Fit texture width, scale height\nRightClick: fit width, keep height" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 0, 1,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnFaceFitW ), 0 );
+									  G_CALLBACK( OnBtnFaceFitWidth ), 0 );
+					g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( OnBtnFaceFitWidthOnly ), 0 );
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
 					GtkWidget* button = gtk_button_new_with_label( "Height" );
+					gtk_widget_set_tooltip_text( button, "Fit texture height, scale width\nRightClick: fit height, keep width" );
 					gtk_widget_show( button );
 					gtk_table_attach( GTK_TABLE( table ), button, 3, 4, 0, 1,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnFaceFitH ), 0 );
+									  G_CALLBACK( OnBtnFaceFitHeight ), 0 );
+					g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( OnBtnFaceFitHeightOnly ), 0 );
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{

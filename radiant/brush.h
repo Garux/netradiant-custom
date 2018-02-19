@@ -600,8 +600,8 @@ void Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane ){
 	m_scaleApplied = true;
 }
 
-void fit( const Vector3& normal, const Winding& winding, float s_repeat, float t_repeat ){
-	Texdef_FitTexture( m_projection, m_shader.width(), m_shader.height(), normal, winding, s_repeat, t_repeat );
+void fit( const Vector3& normal, const Winding& winding, float s_repeat, float t_repeat, bool only_dimension ){
+	Texdef_FitTexture( m_projection, m_shader.width(), m_shader.height(), normal, winding, s_repeat, t_repeat, only_dimension );
 }
 
 void emitTextureCoordinates( Winding& winding, const Vector3& normal, const Matrix4& localToWorld ){
@@ -1292,9 +1292,9 @@ void Convert( TexdefTypeId in, TexdefTypeId out ){
 	texdefChanged();
 }
 
-void FitTexture( float s_repeat, float t_repeat ){
+void FitTexture( float s_repeat, float t_repeat, bool only_dimension ){
 	undoSave();
-	m_texdef.fit( m_plane.plane3().normal(), m_winding, s_repeat, t_repeat );
+	m_texdef.fit( m_plane.plane3().normal(), m_winding, s_repeat, t_repeat, only_dimension );
 	texdefChanged();
 }
 

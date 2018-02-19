@@ -1258,7 +1258,7 @@ void Texdef_Rotate( TextureProjection& projection, float angle ){
 	}
 }
 
-void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, const Winding& w, float s_repeat, float t_repeat ){
+void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, const Winding& w, float s_repeat, float t_repeat, bool only_dimension ){
 	if ( w.numpoints < 3 ) {
 		return;
 	}
@@ -1293,14 +1293,24 @@ void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::s
 		perfect.extents = Vector3( s_repeat * 0.5, t_repeat * 0.5, 1 );
 	}
 	if( t_repeat == 0 ){
-		//fit width
-		perfect.origin = Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 0 );
-		perfect.extents = Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 1 );
+		if( only_dimension ){ //fit width, keep height
+			perfect.origin = Vector3( s_repeat * 0.5, bounds.origin.y(), 0 );
+			perfect.extents = Vector3( s_repeat * 0.5, bounds.extents.y(), 1 );
+		}
+		else{ //fit width
+			perfect.origin = Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 0 );
+			perfect.extents = Vector3( s_repeat * 0.5, s_repeat * 0.5 * bounds.extents.y() / bounds.extents.x(), 1 );
+		}
 	}
 	else if( s_repeat == 0 ){
-		//fit height
-		perfect.origin = Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 0 );
-		perfect.extents = Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 1 );
+		if( only_dimension ){ //fit height, keep width
+			perfect.origin = Vector3( bounds.origin.x(), t_repeat * 0.5, 0 );
+			perfect.extents = Vector3( bounds.extents.x(), t_repeat * 0.5, 1 );
+		}
+		else{ //fit height
+			perfect.origin = Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 0 );
+			perfect.extents = Vector3( t_repeat * 0.5 * bounds.extents.x() / bounds.extents.y(), t_repeat * 0.5, 1 );
+		}
 	}
 	else{
 		perfect.origin = Vector3( s_repeat * 0.5, t_repeat * 0.5, 0 );

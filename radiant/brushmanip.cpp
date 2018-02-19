@@ -784,22 +784,23 @@ void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const Te
 
 class FaceFitTexture
 {
-float m_s_repeat, m_t_repeat;
+const float m_s_repeat, m_t_repeat;
+const bool m_only_dimension;
 public:
-FaceFitTexture( float s_repeat, float t_repeat ) : m_s_repeat( s_repeat ), m_t_repeat( t_repeat ){
+FaceFitTexture( float s_repeat, float t_repeat, bool only_dimension ) : m_s_repeat( s_repeat ), m_t_repeat( t_repeat ), m_only_dimension( only_dimension ) {
 }
 void operator()( Face& face ) const {
-	face.FitTexture( m_s_repeat, m_t_repeat );
+	face.FitTexture( m_s_repeat, m_t_repeat, m_only_dimension );
 }
 };
 
-void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat ){
-	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceFitTexture( s_repeat, t_repeat ) );
+void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat, bool only_dimension ){
+	Scene_ForEachSelectedBrush_ForEachFace( graph, FaceFitTexture( s_repeat, t_repeat, only_dimension ) );
 	SceneChangeNotify();
 }
 
-void Scene_BrushFitTexture_Component_Selected( scene::Graph& graph, float s_repeat, float t_repeat ){
-	Scene_ForEachSelectedBrushFace( graph, FaceFitTexture( s_repeat, t_repeat ) );
+void Scene_BrushFitTexture_Component_Selected( scene::Graph& graph, float s_repeat, float t_repeat, bool only_dimension ){
+	Scene_ForEachSelectedBrushFace( graph, FaceFitTexture( s_repeat, t_repeat, only_dimension ) );
 	SceneChangeNotify();
 }
 

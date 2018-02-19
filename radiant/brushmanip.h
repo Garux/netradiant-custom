@@ -83,8 +83,8 @@ void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const te
 void Scene_BrushProjectTexture_Selected( scene::Graph& graph, const TextureProjection& projection, const Vector3& normal );
 void Scene_BrushProjectTexture_Component_Selected( scene::Graph& graph, const TextureProjection& projection, const Vector3& normal );
 
-void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat );
-void Scene_BrushFitTexture_Component_Selected( scene::Graph& graph, float s_repeat, float t_repeat );
+void Scene_BrushFitTexture_Selected( scene::Graph& graph, float s_repeat, float t_repeat, bool only_dimension );
+void Scene_BrushFitTexture_Component_Selected( scene::Graph& graph, float s_repeat, float t_repeat, bool only_dimension );
 
 typedef struct _GtkMenu GtkMenu;
 void Brush_constructMenu( GtkMenu* menu );

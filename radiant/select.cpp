@@ -908,11 +908,11 @@ void Select_ProjectTexture( const TextureProjection& projection, const Vector3& 
 	SceneChangeNotify();
 }
 
-void Select_FitTexture( float horizontal, float vertical ){
+void Select_FitTexture( float horizontal, float vertical, bool only_dimension ){
 	if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
-		Scene_BrushFitTexture_Selected( GlobalSceneGraph(), horizontal, vertical );
+		Scene_BrushFitTexture_Selected( GlobalSceneGraph(), horizontal, vertical, only_dimension );
 	}
-	Scene_BrushFitTexture_Component_Selected( GlobalSceneGraph(), horizontal, vertical );
+	Scene_BrushFitTexture_Component_Selected( GlobalSceneGraph(), horizontal, vertical, only_dimension );
 
 	SceneChangeNotify();
 }
