@@ -1458,7 +1458,7 @@ void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProj
 
 	DoubleLine line = plane3_intersect_plane3( g_faceTextureClipboard.m_plane, face.getPlane().plane3() );
 	if( vector3_length_squared( line.direction ) == 0 ){
-		face.SetTexdef( projection );
+		face.ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
 		face.SetFlags( flags );
 		return;
 	}
