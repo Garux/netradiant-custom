@@ -1730,32 +1730,22 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		#if 0//not ok, if scaling
 		const Vector3 offset = matrix4_transformed_point( identity2transformed, Vector3( 0, 0, 0 ) );
 		Vector3 newNormal  = matrix4_transformed_point( identity2transformed, plane.normal() ) - offset;
-		#else
-		Matrix4 maa( identity2transformed );
-		if( maa.xx() != 0 && maa.yy() != 0 && maa.zz() != 0 ){
-			matrix4_affine_invert( maa );
-			matrix4_transpose( maa );
-		}
-		else{ /* we are only performing scale alone, so this must work; sup with more complex (+non orthonormal) matrices? */
-			if( maa.xx() == 0 ){
-				maa.xx() = 1;
-				maa.yy() = 0;
-				maa.zz() = 0;
-			}
-			else if( maa.yy() == 0 ){
-				maa.xx() = 0;
-				maa.yy() = 1;
-				maa.zz() = 0;
-			}
-			else if( maa.zz() == 0 ){
-				maa.xx() = 0;
-				maa.yy() = 0;
-				maa.zz() = 1;
-			}
-		}
+		#elif 0
+		const Matrix4 maa( matrix4_transposed( matrix4_affine_inverse( identity2transformed ) ) );
 //			globalOutputStream() << "maa: " << maa << "\n";
 		Vector3 newNormal( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
 //			globalOutputStream() << plane.normal() << newNormal << "\n";
+		#elif 1
+        /* this is also handling scale = 0 case */
+		DoubleVector3 texX, texY;
+		ComputeAxisBase( plane.normal(), texX, texY );
+		const DoubleVector3 anchor = plane.normal() * plane.dist();
+		DoubleVector3 points[3] = { anchor, anchor + texX, anchor + texY };
+		for ( std::size_t i = 0; i < 3; ++i )
+			matrix4_transform_point( identity2transformed, points[i] );
+		Vector3 newNormal( plane3_for_points( points ).normal() );
+		if( matrix4_handedness( identity2transformed ) == MATRIX4_LEFTHANDED )
+			vector3_negate( newNormal );
 		#endif
 #if 0
 		// fix some rounding errors - if the old and new texture axes are almost the same, use the old axis
