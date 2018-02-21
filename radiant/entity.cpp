@@ -736,7 +736,8 @@ void Entity_Construct(){
 	GlobalCommands_insert( "EntityColor", FreeCaller<Entity_setColour>(), Accelerator( 'K' ) );
 	GlobalCommands_insert( "NormalizeColor", FreeCaller<Entity_normalizeColor>() );
 	GlobalCommands_insert( "ConnectSelection", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "KillConnectSelection", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)( GDK_SHIFT_MASK ) ) );
+	if ( g_pGameDescription->mGameType == "nexuiz" )
+		GlobalCommands_insert( "KillConnectSelection", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)( GDK_SHIFT_MASK ) ) );
 	GlobalCommands_insert( "RegroupSelection", FreeCaller<Entity_regroupSelected>() );
 	GlobalCommands_insert( "UngroupSelection", FreeCaller<Entity_ungroupSelected>() );
 
