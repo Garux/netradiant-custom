@@ -3636,6 +3636,7 @@ class TransformOriginManipulator : public Manipulator {
 	};
 
 	TransformOriginTranslate m_translate;
+	const bool& m_pivotIsCustom;
 	RenderablePoint m_point;
 	SelectableBool m_selectable;
 	Selectable* m_selectable_prev_ptr;
@@ -3643,13 +3644,19 @@ class TransformOriginManipulator : public Manipulator {
 public:
 	static Shader* m_state;
 
-	TransformOriginManipulator( TransformOriginTranslatable& transformOriginTranslatable ) :
+	TransformOriginManipulator( TransformOriginTranslatable& transformOriginTranslatable, const bool& pivotIsCustom ) :
 		m_translate( transformOriginTranslatable ),
+		m_pivotIsCustom( pivotIsCustom ),
 		m_selectable_prev_ptr( 0 ) {
 	}
 
 	void UpdateColours() {
-		m_point.setColour( colourSelected( g_colour_screen, m_selectable.isSelected() ) );
+		m_point.setColour(
+			m_selectable.isSelected()?
+				m_pivotIsCustom? Colour4b( 255, 232, 0, 255 )
+				: g_colour_selected
+			:	m_pivotIsCustom? Colour4b( 0, 125, 255, 255 )
+				: g_colour_screen );
 	}
 
 	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ) {
@@ -3830,7 +3837,7 @@ RadiantSelectionSystem() :
 	m_rotate_manipulator( *this, 8, 64 ),
 	m_scale_manipulator( *this, 0, 64 ),
 	m_skew_manipulator( *this, *this, *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
-	m_transformOrigin_manipulator( *this ),
+	m_transformOrigin_manipulator( *this, m_pivotIsCustom ),
 	m_pivotChanged( false ),
 	m_pivot_moving( false ),
 	m_pivotIsCustom( false ){
@@ -4669,7 +4676,7 @@ void RadiantSelectionSystem::freezeTransforms(){
 bool RadiantSelectionSystem::endMove(){
 	if( m_transformOrigin_manipulator.isSelected() ){
 		if( m_pivot2world == m_pivot2world_start ){
-			m_pivotIsCustom = false;
+			m_pivotIsCustom = !m_pivotIsCustom;
 			pivotChanged();
 		}
 		return true;
