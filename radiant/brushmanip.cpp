@@ -1154,6 +1154,9 @@ filter_brush_any_face g_filter_brush_liquids( &g_filter_face_liquids );
 filter_face_shader_prefix g_filter_face_liquidsdir( "textures/liquids/" );
 filter_brush_any_face g_filter_brush_liquidsdir( &g_filter_face_liquidsdir );
 
+filter_face_shader_prefix g_filter_face_liquids_q1( "textures/*" ); // textures/*04water1
+filter_brush_any_face g_filter_brush_liquids_q1( &g_filter_face_liquids_q1 );
+
 filter_face_shader g_filter_face_hint( "textures/common/hint" );
 filter_brush_any_face g_filter_brush_hint( &g_filter_face_hint );
 
@@ -1212,6 +1215,9 @@ void BrushFilters_construct(){
 	if( !string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ), "quake" ) ){ /* conditional for entity based struct/det filters; see entity plugin */
 		add_brush_filter( g_filter_brush_detail, EXCLUDE_DETAILS );
 		add_brush_filter( g_filter_brush_detail, EXCLUDE_STRUCTURAL, true );
+	}
+	else{
+		add_brush_filter( g_filter_brush_liquids_q1, EXCLUDE_LIQUIDS );
 	}
 	add_brush_filter( g_filter_brush_lightgrid, EXCLUDE_LIGHTGRID );
 	add_brush_filter( g_filter_brush_decals, EXCLUDE_DECALS );
