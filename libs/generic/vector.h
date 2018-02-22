@@ -205,8 +205,22 @@ typedef BasicVector2<float> Vector2;
 /// \brief A 3-element vector stored in single-precision floating-point.
 typedef BasicVector3<float> Vector3;
 
+/// \brief A 3-element vector stored in double-precision floating-point.
+typedef BasicVector3<double> DoubleVector3;
+
 /// \brief A 4-element vector stored in single-precision floating-point.
 typedef BasicVector4<float> Vector4;
+
+
+template<typename TextOutputStreamType>
+inline TextOutputStreamType& ostream_write( TextOutputStreamType& outputStream, const Vector3& v ){
+	return outputStream << '(' << v.x() << ' ' << v.y() << ' ' << v.z() << ')';
+}
+
+template<typename TextOutputStreamType>
+TextOutputStreamType& ostream_write( TextOutputStreamType& t, const Vector4& v ){
+	return t << "[ " << v.x() << " " << v.y() << " " << v.z() << " " << v.w() << " ]";
+}
 
 
 #endif

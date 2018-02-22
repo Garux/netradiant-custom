@@ -52,14 +52,6 @@
 
 #include "grid.h"
 
-TextOutputStream& ostream_write( TextOutputStream& t, const Vector4& v ){
-	return t << "[ " << v.x() << " " << v.y() << " " << v.z() << " " << v.w() << " ]";
-}
-
-TextOutputStream& ostream_write( TextOutputStream& t, const Matrix4& m ){
-	return t << "[ " << m.x() << " " << m.y() << " " << m.z() << " " << m.t() << " ]";
-}
-
 struct Pivot2World
 {
 	Matrix4 m_worldSpace;

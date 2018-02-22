@@ -42,10 +42,6 @@ enum
 
 struct qtexture_t;
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
-typedef Vector3 Colour3;
-
 typedef unsigned char BlendFactor;
 const BlendFactor BLEND_ZERO = 0;
 const BlendFactor BLEND_ONE = 1;

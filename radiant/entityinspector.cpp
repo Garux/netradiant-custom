@@ -523,8 +523,6 @@ AnglesEntry() : m_roll( 0 ), m_pitch( 0 ), m_yaw( 0 ){
 }
 };
 
-typedef BasicVector3<double> DoubleVector3;
-
 class AnglesAttribute : public EntityAttribute
 {
 CopiedString m_key;

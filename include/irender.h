@@ -24,6 +24,7 @@
 
 #include "generic/constant.h"
 #include "generic/callbackfwd.h"
+#include "generic/vector.h"
 
 
 // Rendering states to sort by.
@@ -59,9 +60,6 @@ typedef unsigned int RenderStateFlags;
 
 class AABB;
 class Matrix4;
-
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
 
 class Shader;
 
@@ -114,8 +112,6 @@ virtual void render( RenderStateFlags state ) const = 0;
 class Matrix4;
 struct qtexture_t;
 class ModuleObserver;
-
-#include "generic/vector.h"
 
 class Shader
 {

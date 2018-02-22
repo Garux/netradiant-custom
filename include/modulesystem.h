@@ -120,8 +120,6 @@ virtual Type* findModule( const char* name ) = 0;
 virtual void foreachModule( const Visitor& visitor ) = 0;
 };
 
-#include "debugging/debugging.h"
-
 template<typename Type>
 class ModuleRef
 {

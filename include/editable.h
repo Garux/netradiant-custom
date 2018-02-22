@@ -22,12 +22,7 @@
 #if !defined( INCLUDED_EDITABLE_H )
 #define INCLUDED_EDITABLE_H
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
-template<typename Element> class BasicVector4;
-typedef BasicVector4<float> Vector4;
 class Matrix4;
-typedef Vector4 Quaternion;
 
 #include "scenelib.h"
 

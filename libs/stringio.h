@@ -288,11 +288,6 @@ inline bool Tokeniser_nextTokenIsDigit( Tokeniser& tokeniser ){
 	return std::isdigit( c ) != 0;
 }
 
-template<typename TextOutputStreamType>
-inline TextOutputStreamType& ostream_write( TextOutputStreamType& outputStream, const Vector3& v ){
-	return outputStream << '(' << v.x() << ' ' << v.y() << ' ' << v.z() << ')';
-}
-
 
 
 

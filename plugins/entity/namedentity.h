@@ -91,8 +91,6 @@ typedef MemberCaller1<NamedEntity, const char*, &NamedEntity::identifierChanged>
 
 
 #include "renderable.h"
-//#include "pivot.h"
-//#include "math/frustum.h"
 #include "cullable.h"
 
 class RenderableNamedEntity : public OpenGLRenderable {
@@ -117,7 +115,6 @@ public:
 	}
 	RenderableNamedEntity( NamedEntity& named, const Vector3& position, const char* exclude = 0 )
 		: m_named( named ), m_position( position ), m_tex( 0 ), m_exclude( exclude ) {
-//		construct_textures( g_showTargetNames ? m_named.name() : m_named.classname() );
 		construct_textures( m_named.name() );
 		m_named.attach( IdentifierChangedCaller( *this ) );
 	}
@@ -182,75 +179,36 @@ public:
 		setMode( selected, childSelected );
 
 		if( volume.fill() ){
-//			globalOutputStream() << localToWorld << " localToWorld\n";
-//			globalOutputStream() << volume.GetModelview() << " modelview\n";
-//			globalOutputStream() << volume.GetProjection() << " Projection\n";
-//			globalOutputStream() << volume.GetViewport() << " Viewport\n";
-			//Matrix4 viewproj = matrix4_multiplied_by_matrix4( volume.GetProjection(), volume.GetModelview() );
 			const Matrix4& viewproj = volume.GetViewMatrix();
-			//Vector3 viewer = vector4_to_vector3( viewer_from_viewproj( viewproj ) );
 			const Vector3 pos_in_world = matrix4_transformed_point( localToWorld, m_position );
-			if( viewproj[3] * pos_in_world[0] + viewproj[7] * pos_in_world[1] + viewproj[11] * pos_in_world[2] + viewproj[15] < 3e-5 ) //z < 0: behind nearplane
+			if( viewproj[3] * pos_in_world[0] + viewproj[7] * pos_in_world[1] + viewproj[11] * pos_in_world[2] + viewproj[15] < 3e-5 ) //w < 0: behind nearplane
 				return;
 			if( m_nameMode == eNameNormal && vector3_length_squared( pos_in_world - volume.getViewer() ) > static_cast<float>( g_showNamesDist ) * static_cast<float>( g_showNamesDist ) )
 				return;
-
-			//globalOutputStream() << viewer[0] << " " << viewer[1] << " " << viewer[2] << " Viewer\n";
-			//globalOutputStream() << m_position[0] << " " << m_position[1] << " " << m_position[2] << " m_position\n";
-			//globalOutputStream() << pos_in_world[0] << " " << pos_in_world[1] << " " << pos_in_world[2] << " pos_in_world\n";
 		}
 
-
 		Vector4 position( m_position, 1.f );
-
-#if 0
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " position\n";
-		matrix4_transform_vector4( localToWorld, position );
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " localToWorld\n";
-		matrix4_transform_vector4( volume.GetModelview(), position );
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " Modelview\n";
-		matrix4_transform_vector4( volume.GetProjection(), position );
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " Projection\n";
-		position[0] /= position[3];
-		position[1] /= position[3];
-		position[2] /= position[3];
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " Projection division\n";
-		matrix4_transform_vector4( volume.GetViewport(), position );
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " Viewport\n";
-
-#else
-		//Matrix4 object2screen = volume.GetProjection();
 		Matrix4 object2screen( volume.GetViewMatrix() );
-		//matrix4_multiply_by_matrix4( object2screen, volume.GetModelview() );
 		matrix4_multiply_by_matrix4( object2screen, localToWorld );
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " position\n";
 		matrix4_transform_vector4( object2screen, position );
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " Projection\n";
+//			globalOutputStream() << position << " Projection\n";
 		position[0] /= position[3];
 		position[1] /= position[3];
 		position[2] /= position[3];
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " Projection division\n";
+//			globalOutputStream() << position << " Projection division\n";
 		matrix4_transform_vector4( volume.GetViewport(), position );
-//			globalOutputStream() << position[0] << " " << position[1] << " " << position[2] << " " << position[3] << " Viewport\n";
-#endif
-
-			//globalOutputStream() << volume.GetViewport()[0] << " " << volume.GetViewport()[5] << " Viewport size\n";
-
+//			globalOutputStream() << position << " Viewport\n";
+//			globalOutputStream() << volume.GetViewport()[0] << " " << volume.GetViewport()[5] << " Viewport size\n";
 		m_screenPos[0] = position[0];
 		m_screenPos[1] = position[1];
-			//globalOutputStream() << m_screenPos[0] << " " << m_screenPos[1] << "\n";
+//			globalOutputStream() << m_screenPos[0] << " " << m_screenPos[1] << "\n";
 
 		renderer.PushState();
-
-//		Pivot2World_viewplaneSpace( m_localToWorld, localToWorld, volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
 
 		renderer.Highlight( Renderer::ePrimitive, false );
 		renderer.Highlight( Renderer::eFace, false );
 		renderer.SetState( getShader(), Renderer::eWireframeOnly );
 		renderer.SetState( getShader(), Renderer::eFullMaterials );
-
-//		m_localToWorld = volume.GetViewport();
-//		matrix4_full_invert( m_localToWorld );
 
 		renderer.addRenderable( *this, g_matrix4_identity );
 
@@ -262,7 +220,6 @@ public:
 	}
 	void identifierChanged( const char* value ){
 		delete_textures();
-//		construct_textures( g_showTargetNames ? value : m_named.classname() );
 		construct_textures( value );
 	}
 	typedef MemberCaller1<RenderableNamedEntity, const char*, &RenderableNamedEntity::identifierChanged> IdentifierChangedCaller;

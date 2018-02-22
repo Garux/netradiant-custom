@@ -1156,13 +1156,9 @@ inline void matrix4_pivoted_transform_by_euler_xyz_degrees( Matrix4& self, const
 	matrix4_translate_by_vec3( self, vector3_negated( pivotpoint ) );
 }
 
-
 template<typename TextOutputStreamType>
 inline TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const Matrix4& m ){
-	return ostream << "[ " << m[0] << " " << m[1] << " " << m[2] << " " << m[3] << " ]*[ "
-				   << m[4] << " " << m[5] << " " << m[6] << " " << m[7] << " ]*[ "
-				   << m[8] << " " << m[9] << " " << m[10] << " " << m[11] << " ]*[ "
-				   << m[12] << " " << m[13] << " " << m[14] << " " << m[15] << " ]";
+	return ostream << m.x() << " " << m.y() << " " << m.z() << " " << m.t();
 }
 
 #endif

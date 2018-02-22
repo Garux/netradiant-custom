@@ -219,12 +219,8 @@ pointer m_indices;
 pointer m_finish;
 };
 
-template<typename Element> class BasicVector3;
-typedef BasicVector3<float> Vector3;
 class Matrix4;
 class VolumeTest;
-
-typedef BasicVector3<double> DoubleVector3;
 
 class SelectionTest
 {
