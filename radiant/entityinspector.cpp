@@ -375,29 +375,55 @@ void browse( const BrowsedPathEntry::SetPathCallback& setPath ){
 typedef MemberCaller1<SoundAttribute, const BrowsedPathEntry::SetPathCallback&, &SoundAttribute::browse> BrowseCaller;
 };
 
+
 inline double angle_normalised( double angle ){
 	return float_mod( angle, 360.0 );
 }
+#include "camwindow.h"
+class CamAnglesButton
+{
+	typedef Callback1<const Vector3&> ApplyCallback;
+	ApplyCallback m_apply;
+	static void click( GtkWidget* widget, CamAnglesButton* self ){
+		Vector3 angles( Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+		if( !string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ), "quake" ) ) /* stupid quake bug */
+			angles[0] = -angles[0];
+		self->m_apply( angles );
+	}
+public:
+	GtkButton* m_button;
+	CamAnglesButton( const ApplyCallback& apply ) : m_apply( apply ){
+		m_button = GTK_BUTTON( gtk_button_new_with_label( "<-cam" ) );
+		gtk_widget_show( GTK_WIDGET( m_button ) );
+		g_signal_connect( G_OBJECT( m_button ), "clicked", G_CALLBACK( click ), this );
+	}
+};
 
 class AngleAttribute : public EntityAttribute
 {
 CopiedString m_key;
 GtkEntry* m_entry;
 NonModalEntry m_nonModal;
+CamAnglesButton m_butt;
+GtkBox* m_hbox;
 public:
 AngleAttribute( const char* key ) :
 	m_key( key ),
-	m_entry( 0 ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	GtkEntry* entry = numeric_entry_new();
-	m_entry = entry;
+	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
+	m_butt( ApplyVecCaller( *this ) ){
+	m_entry = numeric_entry_new();
 	m_nonModal.connect( m_entry );
+
+	m_hbox = GTK_BOX( gtk_hbox_new( FALSE, 4 ) );
+	gtk_widget_show( GTK_WIDGET( m_hbox ) );
+	gtk_box_pack_start( m_hbox, GTK_WIDGET( m_entry ), TRUE, TRUE, 0 );
+	gtk_box_pack_start( m_hbox, GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
 }
 void release(){
 	delete this;
 }
 GtkWidget* getWidget() const {
-	return GTK_WIDGET( m_entry );
+	return GTK_WIDGET( m_hbox );
 }
 void apply(){
 	StringOutputStream angle( 32 );
@@ -419,12 +445,18 @@ void update(){
 	}
 }
 typedef MemberCaller<AngleAttribute, &AngleAttribute::update> UpdateCaller;
+
+void apply( const Vector3& angles ){
+	entry_set_float( m_entry, angles[1] );
+	apply();
+}
+typedef MemberCaller1<AngleAttribute, const Vector3&, &AngleAttribute::apply> ApplyVecCaller;
 };
 
 namespace
 {
 typedef const char* String;
-const String buttons[] = { "up", "down", "z-axis" };
+const String buttons[] = { "up", "down", "yaw" };
 }
 
 class DirectionAttribute : public EntityAttribute
@@ -434,16 +466,16 @@ GtkEntry* m_entry;
 NonModalEntry m_nonModal;
 RadioHBox m_radio;
 NonModalRadio m_nonModalRadio;
+CamAnglesButton m_butt;
 GtkHBox* m_hbox;
 public:
 DirectionAttribute( const char* key ) :
 	m_key( key ),
-	m_entry( 0 ),
 	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
 	m_radio( RadioHBox_new( STRING_ARRAY_RANGE( buttons ) ) ),
-	m_nonModalRadio( ApplyRadioCaller( *this ) ){
-	GtkEntry* entry = numeric_entry_new();
-	m_entry = entry;
+	m_nonModalRadio( ApplyRadioCaller( *this ) ),
+	m_butt( ApplyVecCaller( *this ) ){
+	m_entry = numeric_entry_new();
 	m_nonModal.connect( m_entry );
 
 	m_nonModalRadio.connect( m_radio.m_radio );
@@ -453,6 +485,7 @@ DirectionAttribute( const char* key ) :
 
 	gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_radio.m_hbox ), TRUE, TRUE, 0 );
 	gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_entry ), TRUE, TRUE, 0 );
+	gtk_box_pack_start( GTK_BOX( m_hbox ), GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
 }
 void release(){
 	delete this;
@@ -510,6 +543,12 @@ void applyRadio(){
 	}
 }
 typedef MemberCaller<DirectionAttribute, &DirectionAttribute::applyRadio> ApplyRadioCaller;
+
+void apply( const Vector3& angles ){
+	entry_set_float( m_entry, angles[1] );
+	apply();
+}
+typedef MemberCaller1<DirectionAttribute, const Vector3&, &DirectionAttribute::apply> ApplyVecCaller;
 };
 
 
@@ -528,12 +567,14 @@ class AnglesAttribute : public EntityAttribute
 CopiedString m_key;
 AnglesEntry m_angles;
 NonModalEntry m_nonModal;
+CamAnglesButton m_butt;
 GtkBox* m_hbox;
 public:
 AnglesAttribute( const char* key ) :
 	m_key( key ),
-	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ){
-	m_hbox = GTK_BOX( gtk_hbox_new( TRUE, 4 ) );
+	m_nonModal( ApplyCaller( *this ), UpdateCaller( *this ) ),
+	m_butt( ApplyVecCaller( *this ) ){
+	m_hbox = GTK_BOX( gtk_hbox_new( FALSE, 4 ) );
 	gtk_widget_show( GTK_WIDGET( m_hbox ) );
 	{
 		GtkEntry* entry = numeric_entry_new();
@@ -553,6 +594,7 @@ AnglesAttribute( const char* key ) :
 		m_angles.m_roll = entry;
 		m_nonModal.connect( m_angles.m_roll );
 	}
+	gtk_box_pack_start( m_hbox, GTK_WIDGET( m_butt.m_button ), FALSE, FALSE, 0 );
 }
 void release(){
 	delete this;
@@ -598,6 +640,14 @@ void update(){
 	}
 }
 typedef MemberCaller<AnglesAttribute, &AnglesAttribute::update> UpdateCaller;
+
+void apply( const Vector3& angles ){
+	entry_set_float( m_angles.m_pitch, angles[0] );
+	entry_set_float( m_angles.m_yaw, angles[1] );
+	entry_set_float( m_angles.m_roll, 0 );
+	apply();
+}
+typedef MemberCaller1<AnglesAttribute, const Vector3&, &AnglesAttribute::apply> ApplyVecCaller;
 };
 
 class Vector3Entry
