@@ -255,17 +255,15 @@ void update(){
 	gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), value.c_str() );
 }
 typedef MemberCaller<ColorAttribute, &ColorAttribute::update> UpdateCaller;
-void browse( const BrowsedPathEntry::SetPathCallback& setPath ){
-	//const char *filename = misc_model_dialog( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ) );
-
-	/* hijack BrowsedPathEntry to call colour chooser */
-	Entity_setColour();
-
-//	if ( filename != 0 ) {
-//		setPath( filename );
-//		apply();
-//	}
-	update();
+void browse( const BrowsedPathEntry::SetPathCallback& setPath ){ /* hijack BrowsedPathEntry to call colour chooser */
+	Vector3 color( 1, 1, 1 );
+	string_parse_vector3( gtk_entry_get_text( GTK_ENTRY( m_entry.m_entry.m_entry ) ), color );
+	if( color_dialog( gtk_widget_get_toplevel( GTK_WIDGET( m_entry.m_entry.m_frame ) ), color ) ){
+		char buffer[64];
+		sprintf( buffer, "%g %g %g", color[0], color[1], color[2] );
+		gtk_entry_set_text( GTK_ENTRY( m_entry.m_entry.m_entry ), buffer );
+		apply();
+	}
 }
 typedef MemberCaller1<ColorAttribute, const BrowsedPathEntry::SetPathCallback&, &ColorAttribute::browse> BrowseCaller;
 };
