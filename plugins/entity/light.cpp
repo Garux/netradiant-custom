@@ -795,40 +795,36 @@ void flagsChanged( const char* value ){
 }
 typedef MemberCaller1<LightRadii, const char*, &LightRadii::flagsChanged> FlagsChangedCaller;
 
-void calculateTransformedRadii( const float& radius ){
+void calculateTransformedRadii( float radius ){
+	float (&r)[3] = m_radii_transformed;
 	if ( spawnflags_linear( m_flags ) ) {
-		m_radii_transformed[0] = radius + 47.0f / m_fade;
-		if( m_radii_transformed[0] <= 1.f ){
-			m_radii_transformed[0] = m_radii_transformed[1] = m_radii_transformed[2] = 1.f;
+		r[0] = radius + 47.0f / m_fade;
+		if( r[0] <= 1.f ){
+			r[0] = r[1] = r[2] = 1.f;
 			return;
 		}
-		m_radii_transformed[1] = radius;
-		m_radii_transformed[2] = radius - 207.0f / m_fade;;
+		r[1] = radius;
+		r[2] = radius - 207.0f / m_fade;;
 	}
 	else
 	{
-		m_radii_transformed[0] = radius * sqrt( 48.f );
-		if( m_radii_transformed[0] <= 1.f ){
-			m_radii_transformed[0] = m_radii_transformed[1] = m_radii_transformed[2] = 1.f;
+		r[0] = radius * sqrt( 48.f );
+		if( r[0] <= 1.f ){
+			r[0] = r[1] = r[2] = 1.f;
 			return;
 		}
-		m_radii_transformed[1] = radius;
-		m_radii_transformed[2] = m_radii_transformed[0] / sqrt( 255.f );
+		r[1] = radius;
+		r[2] = r[0] / sqrt( 255.f );
 	}
-	//globalOutputStream() << m_radii_transformed[0] << " " << m_radii_transformed[1] << " " << m_radii_transformed[2] << " \n";
+	//globalOutputStream() << r[0] << " " << r[1] << " " << r[2] << " \n";
 }
 float calculateIntensityFromRadii(){
 	float intensity;
-
-	if ( spawnflags_linear( m_flags ) ) {
+	if ( spawnflags_linear( m_flags ) )
 		intensity = ( m_radii_transformed[0] * m_fade + 1.f ) / ( fPointScale * fLinearScale );
-	}
 	else
-	{
 		intensity = m_radii_transformed[0] * m_radii_transformed[0] * 1.f / fPointScale;
-	}
-	intensity /= m_scale;
-	return intensity;
+	return intensity / m_scale;
 }
 };
 
@@ -1502,7 +1498,7 @@ void snapto( float snap ){
 		m_originKey.write( &m_entity );
 	}
 }
-void setLightRadii( const float& radius ){
+void setLightRadii( float radius ){
 	m_radii.calculateTransformedRadii( radius );
 }
 void setLightRadius( const AABB& aabb ){
@@ -1773,7 +1769,8 @@ class LightInstance :
 	public SelectionTestable,
 	public RendererLight,
 	public PlaneSelectable,
-	public ComponentSelectionTestable
+	public ComponentSelectionTestable,
+	public ComponentEditable
 {
 class TypeCasts
 {
@@ -1788,6 +1785,7 @@ TypeCasts(){
 	InstanceStaticCast<LightInstance, Transformable>::install( m_casts );
 	InstanceStaticCast<LightInstance, PlaneSelectable>::install( m_casts );
 	InstanceStaticCast<LightInstance, ComponentSelectionTestable>::install( m_casts );
+	InstanceStaticCast<LightInstance, ComponentEditable>::install( m_casts );
 	InstanceIdentityCast<LightInstance>::install( m_casts );
 }
 InstanceTypeCastTable& get(){
@@ -1848,7 +1846,7 @@ void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback&
 		m_dragPlanes.selectPlanes( m_contained.aabb(), selector, test, selectedPlaneCallback, rotation() );
 	}
 	else{
-		m_scaleRadius.selectPlanes( m_contained.getLightRadii().m_radii[1], selector, test, selectedPlaneCallback );
+		m_scaleRadius.selectPlanes( selector, test, selectedPlaneCallback );
 	}
 }
 void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
@@ -1878,6 +1876,10 @@ void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ){
 void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
 }
 
+const AABB& getSelectedComponentsBounds() const {
+	return m_contained.aabb();
+}
+
 void selectedChangedComponent( const Selectable& selectable ){
 	GlobalSelectionSystem().getObserver ( SelectionSystem::eComponent )( selectable );
 	GlobalSelectionSystem().onComponentSelection( *this, selectable );
@@ -1897,8 +1899,7 @@ void evaluateTransform(){
 			m_contained.setLightRadius( m_dragPlanes.evaluateResize( getTranslation(), rotation() ) );
 		}
 		else{
-			m_scaleRadius.m_radius = m_contained.getLightRadii().m_radii[1];
-			m_contained.setLightRadii( m_scaleRadius.evaluateResize( getTranslation() ) );
+			m_contained.setLightRadii( m_contained.getLightRadii().m_radii[1] + m_scaleRadius.evaluateResize( getTranslation() ) );
 		}
 	}
 }
