@@ -1418,42 +1418,44 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 	renderer.SetState( m_colour.state(), Renderer::eFullMaterials );
 	renderer.addRenderable( *this, localToWorld );
 
-	if ( selected && g_lightRadii && string_empty( m_entity.getKeyValue( "target" ) ) ) {
-		if ( renderer.getStyle() == Renderer::eFullMaterials ) {
-			renderer.SetState( m_colour.state_additive(), Renderer::eFullMaterials );
-			renderer.Highlight( Renderer::ePrimitive, false );
-			renderer.Highlight( Renderer::eFace, false );
-			renderer.addRenderable( m_radii_fill, localToWorld );
+	if( selected ){
+		if ( g_lightType != LIGHTTYPE_DOOM3 ) {
+			if ( g_lightRadii && string_empty( m_entity.getKeyValue( "target" ) ) ) {
+				if ( renderer.getStyle() == Renderer::eFullMaterials ) {
+					renderer.SetState( m_colour.state_additive(), Renderer::eFullMaterials );
+					renderer.Highlight( Renderer::ePrimitive, false );
+					renderer.Highlight( Renderer::eFace, false );
+					renderer.addRenderable( m_radii_fill, localToWorld );
+				}
+				else
+				{
+					renderer.Highlight( Renderer::ePrimitive, false );
+					renderer.addRenderable( m_radii_wire, localToWorld );
+				}
+			}
 		}
-		else
-		{
-			renderer.Highlight( Renderer::ePrimitive, false );
-			renderer.addRenderable( m_radii_wire, localToWorld );
-		}
-	}
+		else{
+			renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eFullMaterials );
+			if ( isProjected() ) {
+				projection();
+				m_projectionOrientation = rotation();
+				vector4_to_vector3( m_projectionOrientation.t() ) = localAABB().origin;
+				renderer.addRenderable( m_renderProjection, m_projectionOrientation );
+			}
+			else
+			{
+				updateLightRadiiBox();
+				renderer.addRenderable( m_radii_box, localToWorld );
+			}
 
-	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eFullMaterials );
-
-	if ( g_lightType == LIGHTTYPE_DOOM3 && selected ) {
-		if ( isProjected() ) {
-			projection();
-			m_projectionOrientation = rotation();
-			vector4_to_vector3( m_projectionOrientation.t() ) = localAABB().origin;
-			renderer.addRenderable( m_renderProjection, m_projectionOrientation );
-		}
-		else
-		{
-			updateLightRadiiBox();
-			renderer.addRenderable( m_radii_box, localToWorld );
-		}
-
-		//draw the center of the light
-		if ( m_doom3Radius.m_useCenterKey ) {
-			renderer.Highlight( Renderer::ePrimitive, false );
-			renderer.Highlight( Renderer::eFace, false );
-			renderer.SetState( m_render_center.m_state, Renderer::eFullMaterials );
-			renderer.SetState( m_render_center.m_state, Renderer::eWireframeOnly );
-			renderer.addRenderable( m_render_center, localToWorld );
+			//draw the center of the light
+			if ( m_doom3Radius.m_useCenterKey ) {
+				renderer.Highlight( Renderer::ePrimitive, false );
+				renderer.Highlight( Renderer::eFace, false );
+				renderer.SetState( m_render_center.m_state, Renderer::eFullMaterials );
+				renderer.SetState( m_render_center.m_state, Renderer::eWireframeOnly );
+				renderer.addRenderable( m_render_center, localToWorld );
+			}
 		}
 	}
 

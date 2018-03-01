@@ -94,7 +94,7 @@ typedef EntityCreator Type;
 STRING_CONSTANT( Name, "quake" );
 
 EntityQ1API(){
-	Entity_Construct( eGameTypeQuake1);
+	Entity_Construct( eGameTypeQuake1 );
 
 	m_entityq1 = &GetEntityCreator();
 
