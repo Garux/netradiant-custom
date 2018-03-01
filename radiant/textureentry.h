@@ -37,9 +37,14 @@ template<typename StringList>
 class EntryCompletion
 {
 GtkListStore* m_store;
-IdleDraw m_idleUpdate;
+bool m_invalid;
 public:
-EntryCompletion() : m_store( 0 ), m_idleUpdate( UpdateCaller( *this ) ){
+EntryCompletion() : m_store( 0 ), m_invalid( true ){
+}
+
+static gboolean focus_in( GtkEntry* entry, GdkEventFocus *event, EntryCompletion* self ){
+	self->update();
+	return FALSE;
 }
 
 void connect( GtkEntry* entry ){
@@ -48,13 +53,14 @@ void connect( GtkEntry* entry ){
 
 		fill();
 
-		StringList().connect( IdleDraw::QueueDrawCaller( m_idleUpdate ) );
+		StringList().connect( InvalidateCaller( *this ) );
 	}
 
 	GtkEntryCompletion* completion = gtk_entry_completion_new();
 	gtk_entry_set_completion( entry, completion );
 	gtk_entry_completion_set_model( completion, GTK_TREE_MODEL( m_store ) );
 	gtk_entry_completion_set_text_column( completion, 0 );
+	g_signal_connect( G_OBJECT( entry ), "focus_in_event", G_CALLBACK( focus_in ), this );
 }
 
 void append( const char* string ){
@@ -66,6 +72,7 @@ typedef MemberCaller1<EntryCompletion, const char*, &EntryCompletion::append> Ap
 
 void fill(){
 	StringList().forEach( AppendCaller( *this ) );
+	m_invalid = false;
 }
 
 void clear(){
@@ -73,19 +80,26 @@ void clear(){
 }
 
 void update(){
-	clear();
-	fill();
+	if( m_invalid ){
+		clear();
+		fill();
+	}
 }
-typedef MemberCaller<EntryCompletion, &EntryCompletion::update> UpdateCaller;
+
+void invalidate(){
+	m_invalid = true;
+}
+typedef MemberCaller<EntryCompletion, &EntryCompletion::invalidate> InvalidateCaller;
 };
 
+/* loaded ( shaders + textures ) */
 class TextureNameList
 {
 public:
 void forEach( const ShaderNameCallback& callback ) const {
 	for ( QERApp_ActiveShaders_IteratorBegin(); !QERApp_ActiveShaders_IteratorAtEnd(); QERApp_ActiveShaders_IteratorIncrement() )
 	{
-		IShader *shader = QERApp_ActiveShaders_IteratorCurrent();
+		const IShader *shader = QERApp_ActiveShaders_IteratorCurrent();
 
 		if ( shader_equal_prefix( shader->getName(), "textures/" ) ) {
 			callback( shader->getName() + 9 );
@@ -99,7 +113,21 @@ void connect( const SignalHandler& update ) const {
 
 typedef Static< EntryCompletion<TextureNameList> > GlobalTextureEntryCompletion;
 
+/* shaders + loaded textures */
+class AllShadersNameList
+{
+public:
+void forEach( const ShaderNameCallback& callback ) const {
+	GlobalShaderSystem().foreachShaderName( callback );
+}
+void connect( const SignalHandler& update ) const {
+	TextureBrowser_addActiveShadersChangedCallback( update );
+}
+};
 
+typedef Static< EntryCompletion<AllShadersNameList> > GlobalAllShadersEntryCompletion;
+
+/* shaders + may also include plain textures, loaded before first use */
 class ShaderList
 {
 public:

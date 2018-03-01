@@ -52,11 +52,12 @@
 /// array           an array of strings - value is a semi-colon-delimited string
 /// integer         an integer value
 /// boolean         an integer - shows as a checkbox - true = non-zero
-/// integer2        two integer values
-/// integer3        three integer values
-/// real3           three floating-point values
+/// integer2        two integer values		//not supported
+/// integer3        three integer values	//not supported
+/// real            floating-point value
 /// angle           specialisation of real - Yaw angle
 /// direction       specialisation of real - Yaw angle, -1 = down, -2 = up
+/// real3           three floating-point values
 /// angles          specialisation of real3 - Pitch Yaw Roll
 /// color           specialisation of real3 - RGB floating-point colour
 /// target          a string that uniquely identifies an entity or group of entities
@@ -233,25 +234,25 @@ std::size_t write( const char* data, std::size_t length ){
 };
 
 bool attributeSupported( const char* name ){
-	return string_equal( name, "real" )
-		   || string_equal( name, "integer" )
-		   || string_equal( name, "boolean" )
-		   || string_equal( name, "string" )
-		   || string_equal( name, "array" )
-		   || string_equal( name, "flag" )
-		   || string_equal( name, "real3" )
-		   || string_equal( name, "integer3" )
-		   || string_equal( name, "direction" )
-		   || string_equal( name, "angle" )
-		   || string_equal( name, "angles" )
-		   || string_equal( name, "color" )
-		   || string_equal( name, "target" )
-		   || string_equal( name, "targetname" )
-		   || string_equal( name, "sound" )
-		   || string_equal( name, "texture" )
-		   || string_equal( name, "model" )
-		   || string_equal( name, "skin" )
-		   || string_equal( name, "integer2" );
+	return	string_equal( name, "string" )
+			|| string_equal( name, "array" )
+			|| string_equal( name, "integer" )
+			|| string_equal( name, "boolean" )
+			|| string_equal( name, "integer2" )
+			|| string_equal( name, "integer3" )
+			|| string_equal( name, "real" )
+			|| string_equal( name, "angle" )
+			|| string_equal( name, "direction" )
+			|| string_equal( name, "real3" )
+			|| string_equal( name, "angles" )
+			|| string_equal( name, "color" )
+			|| string_equal( name, "target" )
+			|| string_equal( name, "targetname" )
+			|| string_equal( name, "sound" )
+			|| string_equal( name, "texture" )
+			|| string_equal( name, "model" )
+			|| string_equal( name, "skin" )
+			|| string_equal( name, "flag" );
 }
 
 typedef std::map<CopiedString, ListAttributeType> ListAttributeTypes;

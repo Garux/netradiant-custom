@@ -224,6 +224,17 @@ ShaderAttribute( const char* key ) : StringAttribute( key ){
 }
 };
 
+class TextureAttribute : public StringAttribute
+{
+public:
+TextureAttribute( const char* key ) : StringAttribute( key ){
+	if( string_empty( GlobalRadiant().getGameDescriptionKeyValue( "show_wads" ) ) )
+		GlobalAllShadersEntryCompletion::instance().connect( StringAttribute::getEntry() );	// with textures/
+	else
+		GlobalTextureEntryCompletion::instance().connect( StringAttribute::getEntry() );	// w/o
+}
+};
+
 
 class ColorAttribute : public EntityAttribute
 {
@@ -1079,18 +1090,23 @@ Creators m_creators;
 public:
 EntityAttributeFactory(){
 	m_creators.insert( Creators::value_type( "string", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "color", &StatelessAttributeCreator<ColorAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "array", &StatelessAttributeCreator<StringAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "integer", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "real", &StatelessAttributeCreator<StringAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "shader", &StatelessAttributeCreator<ShaderAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "boolean", &StatelessAttributeCreator<BooleanAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "real", &StatelessAttributeCreator<StringAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "angle", &StatelessAttributeCreator<AngleAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "direction", &StatelessAttributeCreator<DirectionAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "angles", &StatelessAttributeCreator<AnglesAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "model", &StatelessAttributeCreator<ModelAttribute>::create ) );
-	m_creators.insert( Creators::value_type( "sound", &StatelessAttributeCreator<SoundAttribute>::create ) );
 	m_creators.insert( Creators::value_type( "vector3", &StatelessAttributeCreator<Vector3Attribute>::create ) );
 	m_creators.insert( Creators::value_type( "real3", &StatelessAttributeCreator<Vector3Attribute>::create ) );
+	m_creators.insert( Creators::value_type( "angles", &StatelessAttributeCreator<AnglesAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "color", &StatelessAttributeCreator<ColorAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "target", &StatelessAttributeCreator<StringAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "targetname", &StatelessAttributeCreator<StringAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "sound", &StatelessAttributeCreator<SoundAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "shader", &StatelessAttributeCreator<ShaderAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "texture", &StatelessAttributeCreator<TextureAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "model", &StatelessAttributeCreator<ModelAttribute>::create ) );
+	m_creators.insert( Creators::value_type( "skin", &StatelessAttributeCreator<StringAttribute>::create ) );
 }
 EntityAttribute* create( const char* type, const char* name ){
 	Creators::iterator i = m_creators.find( type );
