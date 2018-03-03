@@ -1343,8 +1343,8 @@ XmlTagBuilder TagBuilder;
 
 enum
 {
-	TAG_COLUMN,
-	N_COLUMNS
+	TAG_COLUMN = 0,
+	N_COLUMNS = 1
 };
 
 void BuildStoreAssignedTags( GtkListStore* store, const char* shader, TextureBrowser* textureBrowser ){
@@ -1441,7 +1441,7 @@ gboolean TextureBrowser_button_press( GtkWidget* widget, GdkEventButton* event, 
 	/* loads directory, containing active shader + focuses on it */
 	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 1 && !TextureBrowser::wads ) {
 		const StringRange range( strchr( textureBrowser->shader.c_str(), '/' ) + 1, strrchr( textureBrowser->shader.c_str(), '/' ) + 1 );
-		if( range.last - range.first != 0 ){
+		if( range.last > range.first ){
 			const CopiedString dir = range;
 			ScopeDisableScreenUpdates disableScreenUpdates( dir.c_str(), "Loading Textures" );
 			TextureBrowser_ShowDirectory( *textureBrowser, dir.c_str() );
@@ -1550,7 +1550,6 @@ void TextureBrowser_ToggleHideUnused(){
 }
 
 void TextureGroups_constructTreeModel( TextureGroups groups, GtkTreeStore* store ){
-	// put the information from the old textures menu into a treeview
 	GtkTreeIter iter, child;
 
 	TextureGroups::const_iterator i = groups.begin();
@@ -1566,36 +1565,38 @@ void TextureGroups_constructTreeModel( TextureGroups groups, GtkTreeStore* store
 			 && next != groups.end()
 			 && string_equal_start( ( *next ).c_str(), dirRoot ) ) {
 			gtk_tree_store_append( store, &iter, NULL );
-			gtk_tree_store_set( store, &iter, 0, CopiedString( StringRange( dirName, firstUnderscore ) ).c_str(), -1 );
+			gtk_tree_store_set( store, &iter, 0, CopiedString( StringRange( dirName, firstUnderscore ) ).c_str(), 1 , "", -1 );
 
 			// keep going...
 			while ( i != groups.end() && string_equal_start( ( *i ).c_str(), dirRoot ) )
 			{
 				gtk_tree_store_append( store, &child, &iter );
-				gtk_tree_store_set( store, &child, 0, ( *i ).c_str(), -1 );
+				gtk_tree_store_set( store, &child, 0, ( *i ).c_str(), 1, ( *i ).c_str(), -1 );
 				++i;
 			}
 		}
 		else
 		{
 			gtk_tree_store_append( store, &iter, NULL );
-			gtk_tree_store_set( store, &iter, 0, dirName, -1 );
+			gtk_tree_store_set( store, &iter, 0, dirName, 1, dirName, -1 );
 			++i;
 		}
 	}
 }
 
 void TextureGroups_constructTreeModel_childless( TextureGroups groups, GtkTreeStore* store ){
-	// put the information from the old textures menu into a treeview
 	GtkTreeIter iter;
 
 	TextureGroups::const_iterator i = groups.begin();
 	while ( i != groups.end() )
 	{
 		const char* dirName = ( *i ).c_str();
+		const char* pakName = strrchr( dirName, '/' );
+		const char* pakNameEnd = strrchr( dirName, '.' );
+		ASSERT_MESSAGE( pakName != 0 && pakNameEnd != 0 && pakNameEnd > pakName, "interesting wad path" );
 		{
 			gtk_tree_store_append( store, &iter, NULL );
-			gtk_tree_store_set( store, &iter, 0, dirName, -1 );
+			gtk_tree_store_set( store, &iter, 0, CopiedString( StringRange( pakName + 1, pakNameEnd ) ).c_str(), 1, dirName, -1 );
 			++i;
 		}
 	}
@@ -1619,13 +1620,11 @@ void TextureGroups_constructTreeView( TextureGroups& groups ){
 void TextureBrowser_constructTreeStore(){
 	TextureGroups groups;
 	TextureGroups_constructTreeView( groups );
-	GtkTreeStore* store = gtk_tree_store_new( 1, G_TYPE_STRING );
-	if( !TextureBrowser::wads ){
+	GtkTreeStore* store = gtk_tree_store_new( 2, G_TYPE_STRING, G_TYPE_STRING ); /* 0=display name;1=load path */
+	if( !TextureBrowser::wads )
 		TextureGroups_constructTreeModel( groups, store );
-	}
-	else{
+	else
 		TextureGroups_constructTreeModel_childless( groups, store );
-	}
 
 	gtk_tree_view_set_model( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), GTK_TREE_MODEL( store ) );
 
@@ -1650,9 +1649,12 @@ void TreeView_onRowActivated( GtkTreeView* treeview, GtkTreePath* path, GtkTreeV
 		gchar dirName[1024];
 
 		gchar* buffer;
-		gtk_tree_model_get( model, &iter, 0, &buffer, -1 );
+		gtk_tree_model_get( model, &iter, 1, &buffer, -1 );
 		strcpy( dirName, buffer );
 		g_free( buffer );
+
+		if( string_empty( dirName ) ) //empty = directory group root
+			return;
 
 		g_TextureBrowser.m_searchedTags = false;
 
@@ -1668,17 +1670,41 @@ void TreeView_onRowActivated( GtkTreeView* treeview, GtkTreePath* path, GtkTreeV
 	}
 }
 
+static gboolean TextureBrowser_tree_view_set_tooltip_query_cb( GtkWidget* widget, gint x, gint y, gboolean keyboard_tip, GtkTooltip* tooltip, gpointer data ){
+	GtkTreeIter iter;
+	GtkTreePath* path;
+	GtkTreeModel* model;
+	GtkTreeView* tree_view = GTK_TREE_VIEW( widget );
+	if( !gtk_tree_view_get_tooltip_context( GTK_TREE_VIEW( widget ), &x, &y, keyboard_tip, &model, &path, &iter ) )
+		return FALSE;
+	gchar* buffer;
+	gtk_tree_model_get( model, &iter, 1, &buffer, -1 );
+	gtk_tooltip_set_text( tooltip, buffer );
+	gtk_tree_view_set_tooltip_row( tree_view, tooltip, path );
+	g_free( buffer );
+	gtk_tree_path_free( path );
+	return TRUE;
+}
+
 void TextureBrowser_createTreeViewTree(){
 	GtkCellRenderer* renderer;
-	g_TextureBrowser.m_treeViewTree = GTK_WIDGET( gtk_tree_view_new() );
-	//gtk_tree_view_set_enable_search( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), FALSE );
+	g_TextureBrowser.m_treeViewTree = gtk_tree_view_new();
+	GtkTreeView* treeview = GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree );
+	//gtk_tree_view_set_enable_search( treeview, FALSE );
 
-	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), FALSE );
-	g_signal_connect( g_TextureBrowser.m_treeViewTree, "row-activated", (GCallback) TreeView_onRowActivated, NULL );
+	gtk_tree_view_set_headers_visible( treeview, FALSE );
+	g_signal_connect( treeview, "row-activated", (GCallback) TreeView_onRowActivated, NULL );
 
 	renderer = gtk_cell_renderer_text_new();
 	//g_object_set( G_OBJECT( renderer ), "ellipsize", PANGO_ELLIPSIZE_START, NULL );
-	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTree ), -1, "", renderer, "text", 0, NULL );
+	gtk_tree_view_insert_column_with_attributes( treeview, -1, "", renderer, "text", 0, NULL );
+
+	if( TextureBrowser::wads ){
+		//gtk_tree_view_set_tooltip_column( treeview, 1 );
+		/* set own tooltip callback, since convenience function is using markup */
+		g_signal_connect( treeview, "query-tooltip", G_CALLBACK( TextureBrowser_tree_view_set_tooltip_query_cb ), NULL );
+		gtk_widget_set_has_tooltip( g_TextureBrowser.m_treeViewTree, TRUE );
+	}
 
 	TextureBrowser_constructTreeStore();
 }
@@ -1734,15 +1760,16 @@ gboolean TreeViewTags_onButtonPressed( GtkWidget *treeview, GdkEventButton *even
 
 void TextureBrowser_createTreeViewTags(){
 	GtkCellRenderer* renderer;
-	g_TextureBrowser.m_treeViewTags = GTK_WIDGET( gtk_tree_view_new() );
-//	gtk_tree_view_set_enable_search( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), FALSE );
+	g_TextureBrowser.m_treeViewTags = gtk_tree_view_new();
+	GtkTreeView* treeview = GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags );
+//	gtk_tree_view_set_enable_search( treeview, FALSE );
 
-	g_signal_connect( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), "button-press-event", (GCallback)TreeViewTags_onButtonPressed, NULL );
+	g_signal_connect( treeview, "button-press-event", (GCallback)TreeViewTags_onButtonPressed, NULL );
 
-	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), FALSE );
+	gtk_tree_view_set_headers_visible( treeview, FALSE );
 
 	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW( g_TextureBrowser.m_treeViewTags ), -1, "", renderer, "text", 0, NULL );
+	gtk_tree_view_insert_column_with_attributes( treeview, -1, "", renderer, "text", 0, NULL );
 
 	TextureBrowser_constructTreeStoreTags();
 }
@@ -2605,16 +2632,20 @@ void RefreshShaders(){
 	/* When shaders are refreshed, forces reloading the textures as well.
 	Previously it would at best only display shaders, at worst mess up some textured objects. */
 
-	GtkTreeSelection* selection = gtk_tree_view_get_selection((GtkTreeView*)GlobalTextureBrowser().m_treeViewTree);
+	GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( GlobalTextureBrowser().m_treeViewTree ) );
 	GtkTreeModel* model = NULL;
 	GtkTreeIter iter;
-	if ( gtk_tree_selection_get_selected (selection, &model, &iter) )
+	if ( gtk_tree_selection_get_selected( selection, &model, &iter ) )
 	{
 		gchar dirName[1024];
 		gchar* buffer;
-		gtk_tree_model_get( model, &iter, 0, &buffer, -1 );
+		gtk_tree_model_get( model, &iter, 1, &buffer, -1 );
 		strcpy( dirName, buffer );
 		g_free( buffer );
+
+		if( string_empty( dirName ) ) //empty = directory group root
+			return;
+
 		if ( !TextureBrowser::wads ) {
 			strcat( dirName, "/" );
 		}
