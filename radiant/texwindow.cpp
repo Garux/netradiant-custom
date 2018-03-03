@@ -485,12 +485,7 @@ bool TextureSearch_IsShown( const char* name ){
 
 	iter = GlobalTextureBrowser().m_found_shaders.find( name );
 
-	if ( iter == GlobalTextureBrowser().m_found_shaders.end() ) {
-		return false;
-	}
-	else {
-		return true;
-	}
+	return iter != GlobalTextureBrowser().m_found_shaders.end();
 }
 
 bool Texture_filtered( const char* name, TextureBrowser& textureBrowser ){
@@ -528,9 +523,9 @@ bool Texture_IsShown( IShader* shader, TextureBrowser& textureBrowser ){
 	if ( g_TextureBrowser_currentDirectory == "Untagged" ) {
 		std::set<CopiedString>::iterator iter;
 
-		iter = GlobalTextureBrowser().m_found_shaders.find( shader->getName() );
+		iter = textureBrowser.m_found_shaders.find( shader->getName() );
 
-		if ( iter == GlobalTextureBrowser().m_found_shaders.end() ) {
+		if ( iter == textureBrowser.m_found_shaders.end() ) {
 			return false;
 		}
 		else {
@@ -559,13 +554,8 @@ bool Texture_IsShown( IShader* shader, TextureBrowser& textureBrowser ){
 		return false;
 	}
 
-	if ( GlobalTextureBrowser().m_searchedTags ) {
-		if ( !TextureSearch_IsShown( shader->getName() ) ) {
-			return false;
-		}
-		else {
-			return true;
-		}
+	if ( textureBrowser.m_searchedTags ) {
+		return TextureSearch_IsShown( shader->getName() );
 	}
 	else {
 		if ( !shader_equal_prefix( shader_get_textureName( shader->getName() ), g_TextureBrowser_currentDirectory.c_str() ) ) {
@@ -837,7 +827,6 @@ void TextureBrowser_ShowDirectory( TextureBrowser& textureBrowser, const char* d
 	else
 	{
 		g_TextureBrowser_currentDirectory = directory;
-		TextureBrowser_heightChanged( textureBrowser );
 
 		std::size_t shaders_count;
 		GlobalShaderSystem().foreachShaderName( makeCallback1( TextureCategoryLoadShader( directory, shaders_count ) ) );
@@ -853,7 +842,6 @@ void TextureBrowser_ShowDirectory( TextureBrowser& textureBrowser, const char* d
 		}
 	}
 
-	// we'll display the newly loaded textures + all the ones already in use
 	TextureBrowser_SetHideUnused( textureBrowser, false );
 
 	TextureBrowser_updateTitle();
@@ -2628,45 +2616,14 @@ void TextureBrowser_pasteTag(){
 }
 
 void RefreshShaders(){
+	g_TextureBrowser_currentDirectory = "";
+	g_TextureBrowser.m_searchedTags = false;
+	TextureBrowser_updateTitle();
 
-	/* When shaders are refreshed, forces reloading the textures as well.
-	Previously it would at best only display shaders, at worst mess up some textured objects. */
-
-	GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( GlobalTextureBrowser().m_treeViewTree ) );
-	GtkTreeModel* model = NULL;
-	GtkTreeIter iter;
-	if ( gtk_tree_selection_get_selected( selection, &model, &iter ) )
-	{
-		gchar dirName[1024];
-		gchar* buffer;
-		gtk_tree_model_get( model, &iter, 1, &buffer, -1 );
-		strcpy( dirName, buffer );
-		g_free( buffer );
-
-		if( string_empty( dirName ) ) //empty = directory group root
-			return;
-
-		if ( !TextureBrowser::wads ) {
-			strcat( dirName, "/" );
-		}
-
-		ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Shaders" );
-		GlobalShaderSystem().refresh();
-		/* texturebrowser tree update on vfs restart */
-		TextureBrowser_constructTreeStore();
-		UpdateAllWindows();
-
-		TextureBrowser_ShowDirectory( GlobalTextureBrowser(), dirName );
-		TextureBrowser_queueDraw( GlobalTextureBrowser() );
-	}
-	else{
-		ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Shaders" );
-		GlobalShaderSystem().refresh();
-		/* texturebrowser tree update on vfs restart */
-		TextureBrowser_constructTreeStore();
-		UpdateAllWindows();
-	}
-
+	ScopeDisableScreenUpdates disableScreenUpdates( "Processing...", "Loading Shaders" );
+	GlobalShaderSystem().refresh();
+	TextureBrowser_constructTreeStore(); /* texturebrowser tree update on vfs restart */
+	UpdateAllWindows();
 }
 
 void TextureBrowser_ToggleShowShaders(){
