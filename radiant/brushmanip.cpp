@@ -1596,8 +1596,8 @@ void Brush_constructMenu( GtkMenu* menu ){
 	create_check_menu_item_with_mnemonic( menu, "Texture Lock", "TogTexLock" );
 	create_check_menu_item_with_mnemonic( menu, "Texture Vertex Lock", "TogTexVertexLock" );
 	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Copy Face Texture", "FaceCopyTexture" );
-	create_menu_item_with_mnemonic( menu, "Paste Face Texture", "FacePasteTexture" );
+	create_menu_item_with_mnemonic( menu, "Copy Face Texture", "Copy" );
+	create_menu_item_with_mnemonic( menu, "Paste Face Texture", "Paste" );
 
 	command_connect_accelerator( "Brush3Sided" );
 	command_connect_accelerator( "Brush4Sided" );

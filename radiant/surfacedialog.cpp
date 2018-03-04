@@ -1768,8 +1768,8 @@ void SurfaceInspector_registerCommands(){
 	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), Accelerator( 'F', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "SurfaceInspector", FreeCaller<SurfaceInspector_toggleShown>(), Accelerator( 'S' ) );
 
-	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<SelectedFaces_copyTexture>() );
-	GlobalCommands_insert( "FacePasteTexture", FreeCaller<SelectedFaces_pasteTexture>() );
+//	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<SelectedFaces_copyTexture>() );
+//	GlobalCommands_insert( "FacePasteTexture", FreeCaller<SelectedFaces_pasteTexture>() );
 }
 
 
