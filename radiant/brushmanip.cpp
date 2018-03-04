@@ -1593,9 +1593,10 @@ void Brush_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "Make structural", "MakeStructural" );
 //	create_menu_item_with_mnemonic( menu, "Snap selection to _grid", "SnapToGrid" );
 
+	menu_separator( menu );
 	create_check_menu_item_with_mnemonic( menu, "Texture Lock", "TogTexLock" );
 	create_check_menu_item_with_mnemonic( menu, "Texture Vertex Lock", "TogTexVertexLock" );
-	menu_separator( menu );
+	create_menu_item_with_mnemonic( menu, "Reset Texture", "TextureReset/Cap" );
 	create_menu_item_with_mnemonic( menu, "Copy Face Texture", "Copy" );
 	create_menu_item_with_mnemonic( menu, "Paste Face Texture", "Paste" );
 

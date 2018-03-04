@@ -485,30 +485,8 @@ void SurfaceInspector_ProjectTexture( EProjectTexture type ){
 	Select_ProjectTexture( texdef, &direction );
 }
 
-void SurfaceInspector_FitTexture(){
-	UndoableCommand undo( "textureAutoFit" );
-	getSurfaceInspector().exportData();
-	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
-}
-
-static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
-	Patch_CapTexture();
-}
-
-static void OnBtnPatchnatural( GtkWidget *widget, gpointer data ){
-	Patch_NaturalTexture();
-}
-
-static void OnBtnPatchreset( GtkWidget *widget, gpointer data ){
-	Patch_ResetTexture();
-}
-
-static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
-	Patch_FitTexture();
-}
-
-static void OnBtnReset( GtkWidget *widget, gpointer data ){
-	UndoableCommand undo( "textureDefault" );
+void SurfaceInspector_ResetTexture(){
+	UndoableCommand undo( "textureReset/Cap" );
 	TextureProjection projection;
 	TexDef_Construct_Default( projection );
 
@@ -531,6 +509,33 @@ static void OnBtnReset( GtkWidget *widget, gpointer data ){
 #endif
 
 	Select_SetTexdef( projection, false, true );
+	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
+}
+
+void SurfaceInspector_FitTexture(){
+	UndoableCommand undo( "textureAutoFit" );
+	getSurfaceInspector().exportData();
+	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
+}
+
+static void OnBtnPatchCap( GtkWidget *widget, gpointer data ){
+	Patch_CapTexture();
+}
+
+static void OnBtnPatchNatural( GtkWidget *widget, gpointer data ){
+	Patch_NaturalTexture();
+}
+
+static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
+	Patch_FitTexture();
+}
+
+static void OnBtnPatchFit11( GtkWidget *widget, gpointer data ){
+	Patch_FitTexture11();
+}
+
+static void OnBtnReset( GtkWidget *widget, gpointer data ){
+	SurfaceInspector_ResetTexture();
 }
 
 static void OnBtnProject( GtkWidget *widget, EProjectTexture type ){
@@ -1032,7 +1037,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnPatchdetails ), 0 );
+									  G_CALLBACK( OnBtnPatchCap ), 0 );
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
@@ -1042,7 +1047,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnPatchreset ), 0 );
+									  G_CALLBACK( OnBtnPatchFit ), 0 );
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
@@ -1052,7 +1057,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnPatchnatural ), 0 );
+									  G_CALLBACK( OnBtnPatchNatural ), 0 );
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
@@ -1062,7 +1067,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					g_signal_connect( G_OBJECT( button ), "clicked",
-									  G_CALLBACK( OnBtnPatchFit ), 0 );
+									  G_CALLBACK( OnBtnPatchFit11 ), 0 );
 					gtk_widget_set_usize( button, 60, -2 );
 				}
 				{
@@ -1767,6 +1772,7 @@ void SurfaceInspector_registerPreferencesPage(){
 }
 
 void SurfaceInspector_registerCommands(){
+	GlobalCommands_insert( "TextureReset/Cap", FreeCaller<SurfaceInspector_ResetTexture>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), Accelerator( 'F', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "SurfaceInspector", FreeCaller<SurfaceInspector_toggleShown>(), Accelerator( 'S' ) );
 

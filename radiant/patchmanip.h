@@ -59,8 +59,8 @@ void Patch_registerPreferencesPage();
 
 void Patch_NaturalTexture();
 void Patch_CapTexture();
-void Patch_ResetTexture();
 void Patch_FitTexture();
+void Patch_FitTexture11();
 void Patch_FlipTextureX();
 void Patch_FlipTextureY();
 

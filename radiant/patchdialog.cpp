@@ -375,20 +375,20 @@ void Scene_PatchTileTexture_Selected( scene::Graph& graph, float s, float t ){
 	SceneChangeNotify();
 }
 
-static void OnBtnPatchdetails( GtkWidget *widget, gpointer data ){
+static void OnBtnPatchCap( GtkWidget *widget, gpointer data ){
 	Patch_CapTexture();
 }
 
-static void OnBtnPatchfit( GtkWidget *widget, gpointer data ){
-	Patch_FitTexture();
+static void OnBtnPatchFit11( GtkWidget *widget, gpointer data ){
+	Patch_FitTexture11();
 }
 
-static void OnBtnPatchnatural( GtkWidget *widget, gpointer data ){
+static void OnBtnPatchNatural( GtkWidget *widget, gpointer data ){
 	Patch_NaturalTexture();
 }
 
-static void OnBtnPatchreset( GtkWidget *widget, gpointer data ){
-	Patch_ResetTexture();
+static void OnBtnPatchFit( GtkWidget *widget, gpointer data ){
+	Patch_FitTexture();
 }
 
 static void OnBtnPatchFlipX( GtkWidget *widget, gpointer data ){
@@ -1002,28 +1002,28 @@ GtkWindow* PatchInspector::BuildDialog(){
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "CAP" ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
-						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchdetails ), 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchCap ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Set..." ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
-						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchreset ), 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFit ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Natural" ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
-						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchnatural ), 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchNatural ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Fit" ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
-						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchfit ), 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFit11 ), 0 );
 						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
 					}
 				}

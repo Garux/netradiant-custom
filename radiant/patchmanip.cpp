@@ -740,7 +740,7 @@ void Patch_CapTexture(){
 	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
 }
 
-void Patch_ResetTexture(){
+void Patch_FitTexture(){
 	float fx, fy;
 	if ( DoTextureLayout( &fx, &fy ) == eIDOK ) {
 		UndoableCommand command( "patchTileTexture" );
@@ -748,7 +748,7 @@ void Patch_ResetTexture(){
 	}
 }
 
-void Patch_FitTexture(){
+void Patch_FitTexture11(){
 	UndoableCommand command( "patchFitTexture" );
 	Scene_PatchTileTexture_Selected( GlobalSceneGraph(), 1, 1 );
 }
@@ -878,7 +878,6 @@ void Patch_registerCommands(){
 	GlobalCommands_insert( "SmoothCols", FreeCaller<Patch_SmoothCols>(), Accelerator( 'W', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "MatrixTranspose", FreeCaller<Patch_Transpose>(), Accelerator( 'M', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "CapCurrentCurve", FreeCaller<Patch_Cap>(), Accelerator( 'C', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "PatchCapTexture", FreeCaller<Patch_CapTexture>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
 //	GlobalCommands_insert( "MakeOverlayPatch", FreeCaller<Patch_OverlayOn>(), Accelerator( 'Y' ) );
 //	GlobalCommands_insert( "ClearPatchOverlays", FreeCaller<Patch_OverlayOff>(), Accelerator( 'L', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PatchDeform", FreeCaller<Patch_Deform>() );
@@ -957,7 +956,7 @@ void Patch_constructMenu( GtkMenu* menu ){
 		if ( g_Layout_enableDetachableMenus.m_value ) {
 			menu_tearoff( menu_in_menu );
 		}
-		create_menu_item_with_mnemonic( menu_in_menu, "Project", "PatchCapTexture" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Project", "TextureReset/Cap" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Naturalize", "NaturalizePatch" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Invert X", "InvertCurveTextureX" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Invert Y", "InvertCurveTextureY" );
