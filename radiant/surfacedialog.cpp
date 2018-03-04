@@ -1448,6 +1448,8 @@ public:
 	std::size_t m_height;
 
 	FaceTexture() : m_plane( 0, 0, 1, 0 ), m_width( 64 ), m_height( 64 ) {
+		m_projection.m_basis_s = Vector3( 0.7071067811865, 0.7071067811865, 0 );
+		m_projection.m_basis_t = Vector3( -0.4082482904639, 0.4082482904639, -0.4082482904639 * 2.0 );
 	}
 };
 
