@@ -1278,12 +1278,10 @@ public:
 		_constructed = false;
 	}
 	virtual void start(){
-//		if ( GlobalOpenGL().GL_1_3() ) {
-//			glDisable( GL_MULTISAMPLE );
-//		}
 		if( !_constructed ){
 			construct();
 		}
+		setMultisample();
 		glBindFramebuffer( GL_FRAMEBUFFER, _fbo );
 	}
 	virtual void save(){
@@ -1306,6 +1304,14 @@ protected:
 	GLuint _tex;
 	GLuint _depth;
 	GLuint _color;
+	void setMultisample(){
+		if( GlobalOpenGL().GL_1_3() ) {
+			if( _samples )
+				glEnable( GL_MULTISAMPLE );
+			else
+				glDisable( GL_MULTISAMPLE );
+		}
+	}
 	virtual void construct() {
 		int curSamples;
 		glGetIntegerv( GL_SAMPLES, &curSamples );
@@ -1319,6 +1325,8 @@ protected:
 				_samples = maxSamples;
 			}
 		}
+//		globalErrorStream() << _samples << " samples\n";
+		setMultisample();
 
 		glGenFramebuffers( 1, &_fbo );
 		glBindFramebuffer( GL_FRAMEBUFFER, _fbo );
@@ -1381,7 +1389,7 @@ public:
 
 		glMatrixMode( GL_PROJECTION );
 		glLoadIdentity();
-		glOrtho( 0, _width, 0, _height, -100, 100 );
+		glOrtho( 0, 1, 0, 1, -100, 100 );
 
 		glMatrixMode( GL_MODELVIEW );
 		glLoadIdentity();
@@ -1405,17 +1413,17 @@ public:
 		glBindTexture( GL_TEXTURE_2D, _tex );
 
 
-		glColor4f( 1.0, 1.0, 1.0, 1.0 );
+		glColor4f( 1.f, 1.f, 1.f, 1.f );
 		glBegin( GL_QUADS );
 
-		glTexCoord2f( 0, 0 );
-		glVertex3f( 0, 0, 0 );
-		glTexCoord2f( 0, 1 );
-		glVertex3f( 0, _height, 0 );
-		glTexCoord2f( 1, 1 );
-		glVertex3f( _width, _height, 0 );
-		glTexCoord2f( 1, 0 );
-		glVertex3f( _width, 0, 0 );
+		glTexCoord2i( 0, 0 );
+		glVertex2i( 0, 0 );
+		glTexCoord2i( 0, 1 );
+		glVertex2i( 0, 1 );
+		glTexCoord2i( 1, 1 );
+		glVertex2i( 1, 1 );
+		glTexCoord2i( 1, 0 );
+		glVertex2i( 1, 0 );
 		glEnd();
 		glBindTexture( GL_TEXTURE_2D, 0 );
 	}

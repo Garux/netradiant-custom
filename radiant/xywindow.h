@@ -78,6 +78,7 @@ DeferredDraw m_deferredDraw;
 DeferredMotion m_deferred_motion;
 public:
 FBO* m_fbo;
+FBO* fbo_get();
 GtkWindow* m_parent;
 XYWnd();
 ~XYWnd();

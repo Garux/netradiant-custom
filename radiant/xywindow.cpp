@@ -768,7 +768,7 @@ bool XYWnd::XY_Draw_Overlay_start(){
 			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 				GlobalOpenGL_debugAssertNoErrors();
 				glDrawBuffer( GL_FRONT );
-				m_fbo->blit();
+				fbo_get()->blit();
 				return true;
 			}
 		}
@@ -852,7 +852,7 @@ gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xy
 }
 
 gboolean xywnd_size_allocate( GtkWidget* widget, GtkAllocation* allocation, XYWnd* xywnd ){
-	xywnd->m_fbo->reset( allocation->width, allocation->height, g_xywindow_globals_private.m_MSAA, false );
+	xywnd->fbo_get()->reset( allocation->width, allocation->height, g_xywindow_globals_private.m_MSAA, false );
 	xywnd->m_nWidth = allocation->width;
 	xywnd->m_nHeight = allocation->height;
 	xywnd->updateProjection();
@@ -888,10 +888,9 @@ XYWnd::XYWnd() :
 	m_deferred_motion( xywnd_motion, this ),
 	m_parent( 0 ),
 	m_window_observer( NewWindowObserver() ),
-	m_chasemouse_handler( 0 )
+	m_chasemouse_handler( 0 ),
+	m_fbo( 0 )
 {
-	m_fbo = GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
-
 	m_cursorCurrent = 0;
 
 	m_bActive = false;
@@ -997,6 +996,10 @@ void XYWnd::Scroll( int x, int y ){
 	m_vOrigin[nDim2] += y / m_fScale;
 	updateModelview();
 	queueDraw();
+}
+
+FBO* XYWnd::fbo_get(){
+	return m_fbo = m_fbo? m_fbo : GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
 }
 
 unsigned int Clipper_buttons(){
@@ -2702,7 +2705,7 @@ void XYWnd::XY_Draw(){
 	glGetIntegerv(GL_SAMPLES,&curSamples);
 	globalOutputStream() << curSamples << " GL_SAMPLES\n";
 */
-	m_fbo->start();
+	fbo_get()->start();
 	//
 	// clear
 	//
@@ -2903,7 +2906,7 @@ void XYWnd::XY_Draw(){
 		m_render_time.start();
 	}
 
-	m_fbo->save();
+	fbo_get()->save();
 
 	{
 		// reset modelview
@@ -3302,13 +3305,13 @@ void ToggleShowGrid(){
 void MSAAImport( int value ){
 	g_xywindow_globals_private.m_MSAA = value ? 1 << value : value;
 	if ( g_pParentWnd->GetXYWnd() ) {
-		g_pParentWnd->GetXYWnd()->m_fbo->reset( g_pParentWnd->GetXYWnd()->Width(), g_pParentWnd->GetXYWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
+		g_pParentWnd->GetXYWnd()->fbo_get()->reset( g_pParentWnd->GetXYWnd()->Width(), g_pParentWnd->GetXYWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
 	}
 	if ( g_pParentWnd->GetXZWnd() ) {
-		g_pParentWnd->GetXZWnd()->m_fbo->reset( g_pParentWnd->GetXZWnd()->Width(), g_pParentWnd->GetXZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
+		g_pParentWnd->GetXZWnd()->fbo_get()->reset( g_pParentWnd->GetXZWnd()->Width(), g_pParentWnd->GetXZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
 	}
 	if ( g_pParentWnd->GetYZWnd() ) {
-		g_pParentWnd->GetYZWnd()->m_fbo->reset( g_pParentWnd->GetYZWnd()->Width(), g_pParentWnd->GetYZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
+		g_pParentWnd->GetYZWnd()->fbo_get()->reset( g_pParentWnd->GetYZWnd()->Width(), g_pParentWnd->GetYZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
 	}
 }
 typedef FreeCaller1<int, MSAAImport> MSAAImportCaller;

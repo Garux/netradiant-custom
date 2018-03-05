@@ -1269,9 +1269,6 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 
 	// reset the current texture
 	glBindTexture( GL_TEXTURE_2D, 0 );
-	if( GlobalOpenGL().GL_1_3() ) {
-		glEnable( GL_MULTISAMPLE );
-	}
 	glDisable( GL_BLEND );
 	//qglFinish();
 }

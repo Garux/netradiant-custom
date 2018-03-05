@@ -120,9 +120,6 @@ public:
 			glVertex2f( rectangle.x, rectangle.y );
 			glEnd();
 
-			if( GlobalOpenGL().GL_1_3() ) {
-				glEnable( GL_MULTISAMPLE );
-			}
 			GlobalOpenGL_debugAssertNoErrors();
 		}
 	}

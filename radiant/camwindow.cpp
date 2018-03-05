@@ -717,6 +717,9 @@ FreezePointer m_freezePointer;
 
 public:
 FBO* m_fbo;
+FBO* fbo_get(){
+	return m_fbo = m_fbo? m_fbo : GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
+}
 GtkWidget* m_gl_widget;
 GtkWindow* m_parent;
 
@@ -952,7 +955,7 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 				GlobalOpenGL_debugAssertNoErrors();
 
 				glDrawBuffer( GL_FRONT );
-				self.m_fbo->blit();
+				self.fbo_get()->blit();
 
 				self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.getCamera().width, self.getCamera().height ), self.getCamera().width, self.getCamera().height );
 
@@ -1070,7 +1073,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 }
 
 gboolean camera_size_allocate( GtkWidget* widget, GtkAllocation* allocation, CamWnd* camwnd ){
-	camwnd->m_fbo->reset( allocation->width, allocation->height, g_camwindow_globals_private.m_MSAA, true );
+	camwnd->fbo_get()->reset( allocation->width, allocation->height, g_camwindow_globals_private.m_MSAA, true );
 	camwnd->getCamera().width = allocation->width;
 	camwnd->getCamera().height = allocation->height;
 	Camera_updateProjection( camwnd->getCamera() );
@@ -1378,9 +1381,9 @@ CamWnd::CamWnd() :
 	m_selection_motion_handler( 0 ),
 	m_freelook_button_press_handler( 0 ),
 	m_freelook_button_release_handler( 0 ),
-	m_drawing( false ){
-	m_fbo = GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
-
+	m_drawing( false ),
+	m_fbo( 0 )
+{
 	m_bFreeMove = false;
 
 	GlobalWindowObservers_add( m_window_observer );
@@ -1663,7 +1666,7 @@ void ShowStatsToggle(){
 
 void CamWnd::Cam_Draw(){
 //		globalOutputStream() << "Cam_Draw()\n";
-	m_fbo->start();
+	fbo_get()->start();
 
 	glViewport( 0, 0, m_Camera.width, m_Camera.height );
 #if 0
@@ -1831,7 +1834,7 @@ void CamWnd::Cam_Draw(){
 	// elsewhere using/modifying texture maps between contexts
 	glBindTexture( GL_TEXTURE_2D, 0 );
 
-	m_fbo->save();
+	fbo_get()->save();
 }
 
 void CamWnd::draw(){
@@ -2123,7 +2126,7 @@ typedef FreeCaller1<const IntImportCallback&, RenderModeExport> RenderModeExport
 void CamMSAAImport( int value ){
 	g_camwindow_globals_private.m_MSAA = value ? 1 << value : value;
 	if ( g_camwnd != 0 ) {
-		g_camwnd->m_fbo->reset( g_camwnd->getCamera().width, g_camwnd->getCamera().height, g_camwindow_globals_private.m_MSAA, true );
+		g_camwnd->fbo_get()->reset( g_camwnd->getCamera().width, g_camwnd->getCamera().height, g_camwindow_globals_private.m_MSAA, true );
 	}
 }
 typedef FreeCaller1<int, CamMSAAImport> MSAAImportCaller;
