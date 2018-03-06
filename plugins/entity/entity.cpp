@@ -372,6 +372,17 @@ bool filter( const Entity& entity ) const {
 filter_entity_doom3model g_filter_entity_doom3model;
 
 
+class filter_entity_not_func_detail : public EntityFilter
+{
+public:
+bool filter( const Entity& entity ) const {
+	return entity.isContainer()
+		   && !string_equal_n( entity.getKeyValue( "classname" ), "func_detail", 11 );
+}
+};
+
+filter_entity_not_func_detail g_filter_entity_not_func_detail;
+
 class filter_entity_world : public EntityFilter
 {
 public:
@@ -390,7 +401,7 @@ void Entity_InitFilters(){
 	add_entity_filter( g_filter_entity_func_group, EXCLUDE_FUNC_GROUPS );
 	if( g_gameType == eGameTypeQuake1 ){
 		add_entity_filter( g_filter_entity_func_detail, EXCLUDE_DETAILS );
-		add_entity_filter( g_filter_entity_func_detail, EXCLUDE_STRUCTURAL, true );
+		add_entity_filter( g_filter_entity_not_func_detail, EXCLUDE_STRUCTURAL );
 	}
 	add_entity_filter( g_filter_entity_world, EXCLUDE_ENT, true );
 	add_entity_filter( g_filter_entity_trigger, EXCLUDE_TRIGGERS );
