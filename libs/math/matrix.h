@@ -374,9 +374,9 @@ inline void matrix4_affine_premultiply_by_matrix4( Matrix4& self, const Matrix4&
 template<typename Element>
 inline BasicVector3<Element> matrix4_transformed_point( const Matrix4& self, const BasicVector3<Element>& point ){
 	return BasicVector3<Element>(
-			   static_cast<Element>( self[0]  * point[0] + self[4]  * point[1] + self[8]  * point[2] + self[12] ),
-			   static_cast<Element>( self[1]  * point[0] + self[5]  * point[1] + self[9]  * point[2] + self[13] ),
-			   static_cast<Element>( self[2]  * point[0] + self[6]  * point[1] + self[10] * point[2] + self[14] )
+			   static_cast<Element>( point[0] * self[0]  + point[1] * self[4]  + point[2] * self[8]  + self[12] ),
+			   static_cast<Element>( point[0] * self[1]  + point[1] * self[5]  + point[2] * self[9]  + self[13] ),
+			   static_cast<Element>( point[0] * self[2]  + point[1] * self[6]  + point[2] * self[10] + self[14] )
 			   );
 }
 
@@ -390,9 +390,9 @@ inline void matrix4_transform_point( const Matrix4& self, BasicVector3<Element>&
 template<typename Element>
 inline BasicVector3<Element> matrix4_transformed_direction( const Matrix4& self, const BasicVector3<Element>& direction ){
 	return BasicVector3<Element>(
-			   static_cast<Element>( self[0]  * direction[0] + self[4]  * direction[1] + self[8]  * direction[2] ),
-			   static_cast<Element>( self[1]  * direction[0] + self[5]  * direction[1] + self[9]  * direction[2] ),
-			   static_cast<Element>( self[2]  * direction[0] + self[6]  * direction[1] + self[10] * direction[2] )
+			   static_cast<Element>( direction[0] * self[0]  + direction[1] * self[4]  + direction[2] * self[8]  ),
+			   static_cast<Element>( direction[0] * self[1]  + direction[1] * self[5]  + direction[2] * self[9]  ),
+			   static_cast<Element>( direction[0] * self[2]  + direction[1] * self[6]  + direction[2] * self[10] )
 			   );
 }
 
@@ -406,10 +406,10 @@ inline void matrix4_transform_direction( const Matrix4& self, BasicVector3<Eleme
 template<typename Element>
 inline BasicVector4<Element> matrix4_transformed_vector4( const Matrix4& self, const BasicVector4<Element>& vector4 ){
 	return BasicVector4<Element>(
-			   static_cast<Element>( self[0]  * vector4[0] + self[4]  * vector4[1] + self[8]  * vector4[2] + self[12] * vector4[3] ),
-			   static_cast<Element>( self[1]  * vector4[0] + self[5]  * vector4[1] + self[9]  * vector4[2] + self[13] * vector4[3] ),
-			   static_cast<Element>( self[2]  * vector4[0] + self[6]  * vector4[1] + self[10] * vector4[2] + self[14] * vector4[3] ),
-			   static_cast<Element>( self[3]  * vector4[0] + self[7]  * vector4[1] + self[11] * vector4[2] + self[15] * vector4[3] )
+			   static_cast<Element>( vector4[0] * self[0]  + vector4[1] * self[4]  + vector4[2] * self[8]  + vector4[3] * self[12] ),
+			   static_cast<Element>( vector4[0] * self[1]  + vector4[1] * self[5]  + vector4[2] * self[9]  + vector4[3] * self[13] ),
+			   static_cast<Element>( vector4[0] * self[2]  + vector4[1] * self[6]  + vector4[2] * self[10] + vector4[3] * self[14] ),
+			   static_cast<Element>( vector4[0] * self[3]  + vector4[1] * self[7]  + vector4[2] * self[11] + vector4[3] * self[15] )
 			   );
 }
 
