@@ -87,6 +87,8 @@ char *Q_strncat( char *dst, size_t dlen, const char *src, size_t slen ) {
  */
 
 static void ExitQ3Map( void ){
+	/* flush xml send buffer, shut down connection */
+	Broadcast_Shutdown();
 	BSPFilesCleanup();
 	if ( mapDrawSurfs != NULL ) {
 		free( mapDrawSurfs );
@@ -3903,9 +3905,6 @@ int main( int argc, char **argv ){
 	/* emit time */
 	end = I_FloatTime();
 	Sys_Printf( "%9.0f seconds elapsed\n", end - start );
-
-	/* shut down connection */
-	Broadcast_Shutdown();
 
 	/* return any error code */
 	return r;

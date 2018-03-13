@@ -45,12 +45,6 @@
 // utf8 conversion
 #include <glib.h>
 
-#ifdef WIN32
-HWND hwndOut = NULL;
-qboolean lookedForServer = qfalse;
-UINT wm_BroadcastCommand = -1;
-#endif
-
 socket_t *brdcst_socket;
 netmessage_t msg;
 
@@ -95,10 +89,12 @@ void xml_SendNode( xmlNodePtr node ){
 		while ( pos < (int)xml_buf->use )
 		{
 			// what size are we gonna send now?
-			( xml_buf->use - pos < MAX_NETMESSAGE - 10 ) ? ( size = xml_buf->use - pos ) : ( size = MAX_NETMESSAGE - 10 );
-			//++timo just a debug thing
-			if ( size == MAX_NETMESSAGE - 10 ) {
-				Sys_FPrintf( SYS_NOXML, "Got to split the buffer\n" );
+			if( xml_buf->use - pos < MAX_NETMESSAGE - 10 ){
+				size = xml_buf->use - pos;
+			}
+			else{
+				size = MAX_NETMESSAGE - 10;
+				Sys_FPrintf( SYS_NOXML, "Got to split the buffer\n" ); //++timo just a debug thing
 			}
 			memcpy( xmlbuf, xml_buf->content + pos, size );
 			xmlbuf[size] = '\0';
@@ -252,16 +248,63 @@ void Broadcast_Setup( const char *dest ){
 void Broadcast_Shutdown(){
 	if ( brdcst_socket ) {
 		Sys_Printf( "Disconnecting\n" );
+		xml_message_flush();
 		Net_Disconnect( brdcst_socket );
 		brdcst_socket = NULL;
 	}
 }
 
+#define MAX_MESEGE      MAX_NETMESSAGE / 2
+char mesege[MAX_MESEGE];
+size_t mesege_len = 0;
+int mesege_flag = SYS_STD;
+
+void xml_message_flush(){
+	if( mesege_len == 0 )
+		return;
+	xmlNodePtr node;
+	node = xmlNewNode( NULL, (xmlChar*)"message" );
+	{
+		mesege[mesege_len] = '\0';
+		mesege_len = 0;
+		gchar* utf8 = g_locale_to_utf8( mesege, -1, NULL, NULL, NULL );
+		xmlNodeAddContent( node, (xmlChar*)utf8 );
+		g_free( utf8 );
+	}
+	char level[2];
+	level[0] = (int)'0' + mesege_flag;
+	level[1] = 0;
+	xmlSetProp( node, (xmlChar*)"level", (xmlChar *)&level );
+
+	xml_SendNode( node );
+}
+
+void xml_message_push( int flag, const char* characters, size_t length ){
+	if( flag != mesege_flag ){
+		xml_message_flush();
+		mesege_flag = flag;
+	}
+
+	const char* end = characters + length;
+	while ( characters != end )
+	{
+		size_t space = MAX_MESEGE - 1 - mesege_len;
+		if ( space == 0 ) {
+			xml_message_flush();
+		}
+		else
+		{
+			size_t size = ( space < ( size_t )( end - characters ) ) ? space : ( size_t )( end - characters );
+			memcpy( mesege + mesege_len, characters, size );
+			mesege_len += size;
+			characters += size;
+		}
+	}
+}
+
 // all output ends up through here
 void FPrintf( int flag, char *buf ){
-	xmlNodePtr node;
 	static qboolean bGotXML = qfalse;
-	char level[2];
 
 	printf( "%s", buf );
 
@@ -284,17 +327,7 @@ void FPrintf( int flag, char *buf ){
 		doc->children = xmlNewDocRawNode( doc, NULL, (xmlChar*)"q3map_feedback", NULL );
 		bGotXML = qtrue;
 	}
-	node = xmlNewNode( NULL, (xmlChar*)"message" );
-	{
-		gchar* utf8 = g_locale_to_utf8( buf, -1, NULL, NULL, NULL );
-		xmlNodeAddContent( node, (xmlChar*)utf8 );
-		g_free( utf8 );
-	}
-	level[0] = (int)'0' + flag;
-	level[1] = 0;
-	xmlSetProp( node, (xmlChar*)"level", (xmlChar *)&level );
-
-	xml_SendNode( node );
+	xml_message_push( flag, buf, strlen( buf ) );
 }
 
 #ifdef DBG_XML
@@ -341,13 +374,14 @@ void Error( const char *error, ... ){
 	char tmp[4096];
 	va_list argptr;
 
-	va_start( argptr,error );
+	va_start( argptr, error );
 	vsprintf( tmp, error, argptr );
 	va_end( argptr );
 
 	sprintf( out_buffer, "************ ERROR ************\n%s\n", tmp );
 
 	FPrintf( SYS_ERR, out_buffer );
+	xml_message_flush();
 
 #ifdef DBG_XML
 	DumpXML();
@@ -356,8 +390,6 @@ void Error( const char *error, ... ){
 	//++timo HACK ALERT .. if we shut down too fast the xml stream won't reach the listener.
 	// a clean solution is to send a sync request node in the stream and wait for an answer before exiting
 	Sys_Sleep( 1000 );
-
-	Broadcast_Shutdown();
 
 	exit( 1 );
 }

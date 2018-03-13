@@ -348,6 +348,7 @@ void ProcessWorldModel( void ){
 		Sys_FPrintf( SYS_NOXML, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXML, "**********************\n" );
 		polyline = LeakFile( tree );
+		xml_message_flush();
 		leaknode = xmlNewNode( NULL, (xmlChar*)"message" );
 		xmlNodeAddContent( leaknode, (xmlChar*)"MAP LEAKED\n" );
 		xmlAddChild( leaknode, polyline );
@@ -356,7 +357,7 @@ void ProcessWorldModel( void ){
 		xmlSetProp( leaknode, (xmlChar*)"level", (xmlChar*) &level );
 		xml_SendNode( leaknode );
 		if ( leaktest ) {
-			Sys_Printf( "--- MAP LEAKED, ABORTING LEAKTEST ---\n" );
+			Sys_FPrintf( SYS_WRN, "--- MAP LEAKED, ABORTING LEAKTEST ---\n" );
 			exit( 0 );
 		}
 	}
