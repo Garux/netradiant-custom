@@ -33,6 +33,7 @@
 std::size_t Sys_Print( int level, const char* buf, std::size_t length );
 class TextOutputStream;
 TextOutputStream& getSysPrintOutputStream();
+TextOutputStream& getSysPrintWarningStream();
 TextOutputStream& getSysPrintErrorStream();
 
 typedef struct _GtkWidget GtkWidget;

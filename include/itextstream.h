@@ -96,6 +96,14 @@ inline TextOutputStream& globalOutputStream(){
 	return GlobalOutputStream::instance().getOutputStream();
 }
 
+class WarningStreamHolder : public OutputStreamHolder {};
+typedef Static<WarningStreamHolder> GlobalWarningStream;
+
+/// \brief Returns the global warning stream. Used to display warning messages to the user.
+inline TextOutputStream& globalWarningStream(){
+	return GlobalWarningStream::instance().getOutputStream();
+}
+
 class ErrorStreamHolder : public OutputStreamHolder {};
 typedef Static<ErrorStreamHolder> GlobalErrorStream;
 

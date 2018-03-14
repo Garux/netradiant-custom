@@ -52,6 +52,9 @@ bool getError() const {
 TextOutputStream& getOutputStream(){
 	return globalOutputStream();
 }
+TextOutputStream& getWarningStream(){
+	return globalWarningStream();
+}
 TextOutputStream& getErrorStream(){
 	return globalErrorStream();
 }

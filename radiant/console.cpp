@@ -253,10 +253,24 @@ std::size_t write( const char* buffer, std::size_t length ){
 }
 };
 
+class SysPrintWarningStream : public TextOutputStream
+{
+public:
+std::size_t write( const char* buffer, std::size_t length ){
+	return Sys_Print( SYS_WRN, buffer, length );
+}
+};
+
 SysPrintOutputStream g_outputStream;
 
 TextOutputStream& getSysPrintOutputStream(){
 	return g_outputStream;
+}
+
+SysPrintWarningStream g_warningStream;
+
+TextOutputStream& getSysPrintWarningStream(){
+	return g_warningStream;
 }
 
 SysPrintErrorStream g_errorStream;
