@@ -362,6 +362,18 @@ void Sys_Printf( const char *format, ... ){
 	FPrintf( SYS_STD, out_buffer );
 }
 
+void Sys_Warning( const char *format, ... ){
+	char out_buffer[4096];
+	va_list argptr;
+
+	va_start( argptr, format );
+	sprintf( out_buffer, "WARNING: " );
+	vsprintf( out_buffer + strlen( "WARNING: " ), format, argptr );
+	va_end( argptr );
+
+	FPrintf( SYS_WRN, out_buffer );
+}
+
 /*
    =================
    Error

@@ -53,30 +53,30 @@
 void ExportEntities( void ){
         char filename[ 1024 ];
         FILE *file;
-		
+
         /* note it */
         Sys_FPrintf( SYS_VRB, "--- ExportEntities ---\n" );
-		
+
         /* do some path mangling */
         strcpy( filename, source );
         StripExtension( filename );
         strcat( filename, ".ent" );
-		
+
         /* sanity check */
         if ( bspEntData == NULL || bspEntDataSize == 0 ) {
-                Sys_Printf( "WARNING: No BSP entity data. aborting...\n" );
+                Sys_Warning( "No BSP entity data. aborting...\n" );
                 return;
         }
-		
+
         /* write it */
         Sys_Printf( "Writing %s\n", filename );
         Sys_FPrintf( SYS_VRB, "(%d bytes)\n", bspEntDataSize );
         file = fopen( filename, "w" );
-		
+
         if ( file == NULL ) {
                 Error( "Unable to open %s for writing", filename );
         }
-		
+
         fprintf( file, "%s\n", bspEntData );
         fclose( file );
 }
@@ -94,19 +94,19 @@ int ExportEntitiesMain( int argc, char **argv ){
                 Sys_Printf( "Usage: q3map -exportents [-v] <mapname>\n" );
                 return 0;
         }
-		
+
         /* do some path mangling */
         strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
         StripExtension( source );
         DefaultExtension( source, ".bsp" );
-		
+
         /* load the bsp */
         Sys_Printf( "Loading %s\n", source );
         LoadBSPFile( source );
-		
+
         /* export the lightmaps */
         ExportEntities();
-		
+
         /* return to sender */
         return 0;
 }

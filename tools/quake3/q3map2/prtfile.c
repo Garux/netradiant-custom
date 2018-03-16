@@ -288,7 +288,7 @@ void NumberLeafs_r( node_t *node, int c ){
 		if ( node->has_structural_children ) {
 #if 0
 			if ( c >= 0 ) {
-				Sys_FPrintf( SYS_ERR,"THIS CANNOT HAPPEN\n" );
+				Sys_FPrintf( SYS_ERR, "THIS CANNOT HAPPEN\n" );
 			}
 #endif
 			NumberLeafs_r( node->children[0], c );

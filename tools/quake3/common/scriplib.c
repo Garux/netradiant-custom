@@ -181,7 +181,7 @@ qboolean EndOfScript( qboolean crossline ){
 	}
 
 	if ( script->buffer == NULL ) {
-		Sys_Printf( "WARNING: Attempt to free already freed script buffer\n" );
+		Sys_Warning( "Attempt to free already freed script buffer\n" );
 	}
 	else{
 		free( script->buffer );

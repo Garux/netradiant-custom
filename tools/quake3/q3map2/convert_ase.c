@@ -169,7 +169,7 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 			fprintf( f, "\t*MATERIAL_REF\t%d\r\n", ds->lightmapNum[0] + deluxemap );
 		}
 		else{
-			Sys_Printf( "WARNING: lightmap %d out of range, not exporting\n", ds->lightmapNum[0] + deluxemap );
+			Sys_Warning( "lightmap %d out of range, not exporting\n", ds->lightmapNum[0] + deluxemap );
 		}
 	}
 	else{
@@ -253,7 +253,7 @@ static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum ){
 	/* get shader */
 	si = ShaderInfoForShader( shader->shader );
 	if ( si == NULL ) {
-		Sys_Printf( "WARNING: NULL shader in BSP\n" );
+		Sys_Warning( "NULL shader in BSP\n" );
 		return;
 	}
 

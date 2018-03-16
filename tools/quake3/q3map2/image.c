@@ -67,13 +67,13 @@ static void LoadDDSBuffer( byte *buffer, int size, byte **pixels, int *width, in
 
 	/* get dds info */
 	if ( DDSGetInfo( (ddsBuffer_t*) buffer, &w, &h, &pf ) ) {
-		Sys_Printf( "WARNING: Invalid DDS texture\n" );
+		Sys_Warning( "Invalid DDS texture\n" );
 		return;
 	}
 
 	/* only certain types of dds textures are supported */
 	if ( pf != DDS_PF_ARGB8888 && pf != DDS_PF_DXT1 && pf != DDS_PF_DXT3 && pf != DDS_PF_DXT5 ) {
-		Sys_Printf( "WARNING: Only DDS texture formats ARGB8888, DXT1, DXT3, and DXT5 are supported (%d)\n", pf );
+		Sys_Warning( "Only DDS texture formats ARGB8888, DXT1, DXT3, and DXT5 are supported (%d)\n", pf );
 		return;
 	}
 
@@ -140,27 +140,27 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 
 	/* determine if this is a png file */
 	if ( png_sig_cmp( buffer, 0, 8 ) != 0 ) {
-		Sys_Printf( "WARNING: Invalid PNG file\n" );
+		Sys_Warning( "Invalid PNG file\n" );
 		return;
 	}
 
 	/* create png structs */
 	png = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
 	if ( png == NULL ) {
-		Sys_Printf( "WARNING: Unable to create PNG read struct\n" );
+		Sys_Warning( "Unable to create PNG read struct\n" );
 		return;
 	}
 
 	info = png_create_info_struct( png );
 	if ( info == NULL ) {
-		Sys_Printf( "WARNING: Unable to create PNG info struct\n" );
+		Sys_Warning( "Unable to create PNG info struct\n" );
 		png_destroy_read_struct( &png, NULL, NULL );
 		return;
 	}
 
 	end = png_create_info_struct( png );
 	if ( end == NULL ) {
-		Sys_Printf( "WARNING: Unable to create PNG end info struct\n" );
+		Sys_Warning( "Unable to create PNG end info struct\n" );
 		png_destroy_read_struct( &png, &info, NULL );
 		return;
 	}
@@ -174,7 +174,7 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
 
 	/* set error longjmp */
 	if ( setjmp( png_jmpbuf(png) ) ) {
-		Sys_Printf( "WARNING: An error occurred reading PNG image\n" );
+		Sys_Warning( "An error occurred reading PNG image\n" );
 		png_destroy_read_struct( &png, &info, &end );
 		return;
 	}
@@ -403,7 +403,7 @@ image_t *ImageLoad( const char *filename ){
 			if ( size > 0 ) {
 				if ( LoadJPGBuff( buffer, size, &image->pixels, &image->width, &image->height ) == -1 && image->pixels != NULL ) {
 					// On error, LoadJPGBuff might store a pointer to the error message in image->pixels
-					Sys_Printf( "WARNING: LoadJPGBuff %s %s\n", name, (unsigned char*) image->pixels );
+					Sys_Warning( "LoadJPGBuff %s %s\n", name, (unsigned char*) image->pixels );
 				}
 				alphaHack = qtrue;
 			}
@@ -464,8 +464,8 @@ image_t *ImageLoad( const char *filename ){
 			if ( LoadJPGBuff( buffer, size, &pixels, &width, &height ) == -1 ) {
 				if (pixels) {
 					// On error, LoadJPGBuff might store a pointer to the error message in pixels
-					Sys_Printf( "WARNING: LoadJPGBuff %s %s\n", name, (unsigned char*) pixels );
-				}				
+					Sys_Warning( "LoadJPGBuff %s %s\n", name, (unsigned char*) pixels );
+				}
 			} else {
 				if ( width == image->width && height == image->height ) {
 					int i;

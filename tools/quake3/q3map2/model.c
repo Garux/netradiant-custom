@@ -58,11 +58,11 @@ void PicoPrintFunc( int level, const char *str ){
 		break;
 
 	case PICO_WARNING:
-		Sys_Printf( "WARNING: %s\n", str );
+		Sys_Warning( "%s\n", str );
 		break;
 
 	case PICO_ERROR:
-		Sys_Printf( "ERROR: %s\n", str );
+		Sys_FPrintf( SYS_WRN, "ERROR: %s\n", str ); /* let it be a warning, since radiant stops monitoring on error message flag */
 		break;
 
 	case PICO_FATAL:
@@ -1240,7 +1240,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						}
 						else
 						{
-							Sys_Printf( "WARNING: triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 							free( buildBrush );
 							continue;
 						}
@@ -1317,7 +1317,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						entities[ mapEntityNum ].numBrushes++;
 					}
 					else{
-						Sys_Printf( "WARNING: triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 						free( buildBrush );
 					}
 				}
@@ -1325,7 +1325,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			normalEpsilon = normalEpsilon_save;
 		}
 		else if ( spawnFlags & 8090 ){
-			Sys_Printf( "WARNING: nonexistent clipping mode selected\n" );
+			Sys_Warning( "nonexistent clipping mode selected\n" );
 		}
 	}
 }
@@ -1414,7 +1414,7 @@ void AddTriangleModels( entity_t *e ){
 		/* get model name */
 		model = ValueForKey( e2, "model" );
 		if ( model[ 0 ] == '\0' ) {
-			Sys_Printf( "WARNING: misc_model at %i %i %i without a model key\n",
+			Sys_Warning( "misc_model at %i %i %i without a model key\n",
 						(int) origin[ 0 ], (int) origin[ 1 ], (int) origin[ 2 ] );
 			continue;
 		}
@@ -1491,7 +1491,7 @@ void AddTriangleModels( entity_t *e ){
 				/* split the string */
 				split = strchr( remap->from, ';' );
 				if ( split == NULL ) {
-					Sys_Printf( "WARNING: Shader _remap key found in misc_model without a ; character\n" );
+					Sys_Warning( "Shader _remap key found in misc_model without a ; character\n" );
 					free( remap );
 					remap = remap2;
 					continue;

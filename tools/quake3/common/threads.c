@@ -59,7 +59,7 @@ int GetThreadWork( void ){
 
 	f = 40 * dispatch / workcount;
 	if ( f < oldf ) {
-		Sys_Printf( "warning: progress went backwards (should never happen)\n" );
+		Sys_Warning( "progress went backwards (should never happen)\n" );
 		oldf = f;
 	}
 	while ( f > oldf )

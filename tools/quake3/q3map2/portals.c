@@ -519,9 +519,11 @@ void MakeTreePortals_r( node_t *node ){
 
 	CalcNodeBounds( node );
 	if ( node->mins[0] >= node->maxs[0] ) {
-		Sys_Printf( "WARNING: node without a volume\n" );
-		Sys_Printf( "node has %d tiny portals\n", node->tinyportals );
-		Sys_Printf( "node reference point %1.2f %1.2f %1.2f\n", node->referencepoint[0],
+		Sys_Warning( "node without a volume\n"
+						"node has %d tiny portals\n"
+						"node reference point %1.2f %1.2f %1.2f\n",
+					node->tinyportals,
+					node->referencepoint[0],
 					node->referencepoint[1],
 					node->referencepoint[2] );
 	}
@@ -811,7 +813,7 @@ void FloodAreas_r( node_t *node ){
 
 		// note the current area as bounding the portal
 		if ( b->portalareas[ 1 ] != -1 ) {
-			Sys_Printf( "WARNING: areaportal brush %i touches > 2 areas\n", b->brushNum );
+			Sys_Warning( "areaportal brush %i touches > 2 areas\n", b->brushNum );
 			return;
 		}
 		if ( b->portalareas[ 0 ] != -1 ) {
@@ -898,7 +900,7 @@ void CheckAreas_r( node_t *node ){
 
 	if ( node->cluster != -1 ) {
 		if ( node->area == -1 ) {
-			Sys_Printf( "WARNING: cluster %d has area set to -1\n", node->cluster );
+			Sys_Warning( "cluster %d has area set to -1\n", node->cluster );
 		}
 	}
 	if ( node->areaportal ) {
@@ -906,7 +908,7 @@ void CheckAreas_r( node_t *node ){
 
 		// check if the areaportal touches two areas
 		if ( b->portalareas[0] == -1 || b->portalareas[1] == -1 ) {
-			Sys_Printf( "WARNING: areaportal brush %i doesn't touch two areas\n", b->brushNum );
+			Sys_Warning( "areaportal brush %i doesn't touch two areas\n", b->brushNum );
 		}
 	}
 }

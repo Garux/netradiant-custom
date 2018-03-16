@@ -51,6 +51,7 @@ void Broadcast_Shutdown();
 extern qboolean verbose;
 void Sys_Printf( const char *text, ... );
 void Sys_FPrintf( int flag, const char *text, ... );
+void Sys_Warning( const char *format, ... );
 
 #ifdef _DEBUG
 #define DBG_XML 1

@@ -459,9 +459,9 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 	shiftWidth = sqrt( A ) * 0.0125;
 	/*     3->1 6->2 12->3 ... */
 	if ( A - ceil( log( cnt / 1.5 ) / log( 2 ) ) * V * shiftWidth * 2 < 0 ) {
-		/* printf("Small triangle detected (area %f, circumference %f), adjusting shiftWidth from %f to ", A, V, shiftWidth); */
+		/* Sys_FPrintf( SYS_WRN, "Small triangle detected (area %f, circumference %f), adjusting shiftWidth from %f to ", A, V, shiftWidth ); */
 		shiftWidth = A / ( ceil( log( cnt / 1.5 ) / log( 2 ) ) * V * 2 );
-		/* printf("%f\n", shiftWidth); */
+		/* Sys_FPrintf( SYS_WRN, "%f\n", shiftWidth ); */
 	}
 
 	/* find the triangle with highest area */
@@ -489,8 +489,8 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 			}
 
 	/*
-	   if(bestV < 0)
-	    printf("value was REALLY bad\n");
+		if(bestV < 0)
+			Sys_FPrintf( SYS_WRN, "value was REALLY bad\n" );
 	 */
 
 	for ( try = 0; try < MAXAREA_MAXTRIES; ++try )
@@ -1595,7 +1595,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 			 ( bi == ds->indexes[ i ] && ci == ds->indexes[ i + 2 ] && ai == ds->indexes[ i + 1 ] ) ||
 			 ( ci == ds->indexes[ i ] && ai == ds->indexes[ i + 2 ] && bi == ds->indexes[ i + 1 ] ) ) {
 			/* warn about it */
-			Sys_Printf( "WARNING: Flipped triangle: (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f)\n",
+			Sys_Warning( "Flipped triangle: (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f)\n",
 						ds->verts[ ai ].xyz[ 0 ], ds->verts[ ai ].xyz[ 1 ], ds->verts[ ai ].xyz[ 2 ],
 						ds->verts[ bi ].xyz[ 0 ], ds->verts[ bi ].xyz[ 1 ], ds->verts[ bi ].xyz[ 2 ],
 						ds->verts[ ci ].xyz[ 0 ], ds->verts[ ci ].xyz[ 1 ], ds->verts[ ci ].xyz[ 2 ] );

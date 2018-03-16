@@ -1681,7 +1681,7 @@ void tex2list2( char* texlist, int *texnum, char* EXtex, int *EXtexnum, char* rE
 	char* dot = strrchr( token, '.' );
 	if ( dot != NULL){
 		if ( Q_stricmp( dot, ".tga" ) && Q_stricmp( dot, ".jpg" ) && Q_stricmp( dot, ".png" ) ){
-			Sys_Printf( "WARNING4: %s : weird or missing extension in shader\n", token );
+			Sys_FPrintf( SYS_WRN, "WARNING4: %s : weird or missing extension in shader\n", token );
 		}
 		else{
 			*dot = '\0';
@@ -1712,7 +1712,7 @@ void tex2list2( char* texlist, int *texnum, char* EXtex, int *EXtexnum, char* rE
 void res2list( char* data, int *num ){
 	int i;
 	if ( strlen( data + (*num)*65 ) > 64 ){
-		Sys_Printf( "WARNING6: %s : path too long.\n", data + (*num)*65 );
+		Sys_FPrintf( SYS_WRN, "WARNING6: %s : path too long.\n", data + (*num)*65 );
 	}
 	while ( *( data + (*num)*65 ) == '\\' || *( data + (*num)*65 ) == '/' ){
 		char* cut = data + (*num)*65 + 1;
@@ -1916,7 +1916,7 @@ int pk3BSPMain( int argc, char **argv ){
 	char *cut = strrchr( exName, '\\' );
 	char *cut2 = strrchr( exName, '/' );
 	if ( cut == NULL && cut2 == NULL ){
-		Sys_Printf( "WARNING: Unable to load exclusions file.\n" );
+		Sys_Warning( "Unable to load exclusions file.\n" );
 		goto skipEXfile;
 	}
 	if ( cut2 > cut ) cut = cut2;
@@ -1927,7 +1927,7 @@ int pk3BSPMain( int argc, char **argv ){
 	Sys_Printf( "Loading %s\n", exName );
 	size = TryLoadFile( exName, (void**) &buffer );
 	if ( size <= 0 ) {
-		Sys_Printf( "WARNING: Unable to find exclusions file %s.\n", exName );
+		Sys_Warning( "Unable to find exclusions file %s.\n", exName );
 		goto skipEXfile;
 	}
 
@@ -2147,10 +2147,10 @@ skipEXfile:
 							break;
 						}
 						if ( !strcmp( token, "{" ) ) {
-							Sys_Printf( "WARNING9: %s : line %d : opening brace inside shader stage\n", temp, scriptline );
+							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", temp, scriptline );
 						}
 						if ( !Q_stricmp( token, "mapComp" ) || !Q_stricmp( token, "mapNoComp" ) || !Q_stricmp( token, "animmapcomp" ) || !Q_stricmp( token, "animmapnocomp" ) ){
-							Sys_Printf( "WARNING7: %s : line %d : unsupported '%s' map directive\n", temp, scriptline, token );
+							Sys_FPrintf( SYS_WRN, "WARNING7: %s : line %d : unsupported '%s' map directive\n", temp, scriptline, token );
 						}
 						/* skip the shader */
 						if ( !wantShader ) continue;
@@ -2201,7 +2201,7 @@ skipEXfile:
 					}
 				}
 				else if ( !Q_strncasecmp( token, "implicit", 8 ) ){
-					Sys_Printf( "WARNING5: %s : line %d : unsupported %s shader\n", temp, scriptline, token );
+					Sys_FPrintf( SYS_WRN, "WARNING5: %s : line %d : unsupported %s shader\n", temp, scriptline, token );
 				}
 				/* skip the shader */
 				else if ( !wantShader ) continue;
@@ -2292,7 +2292,7 @@ skipEXfile:
 	Sys_Printf( "\n" );
 	for ( i = 0; i < pk3ShadersN; i++ ){
 		if ( *( pk3Shaders + i*65 ) != '\0' && ( ExReasonShader[i] != NULL || ExReasonShaderFile[i] != NULL ) ){
-			Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders + i*65 );
 			packFAIL = qtrue;
 			if ( ExReasonShader[i] != NULL ){
 				Sys_Printf( "     reason: is located in %s,\n     containing restricted shader %s\n", ExReasonShaderFile[i], ExReasonShader[i] );
@@ -2361,7 +2361,7 @@ skipEXfile:
 			Sys_Printf( "++%s\n", temp );
 			continue;
 		}
-		Sys_Printf( "  !FAIL! %s\n", pk3Textures + i*65 );
+		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures + i*65 );
 		packFAIL = qtrue;
 	}
 
@@ -2391,7 +2391,7 @@ skipEXfile:
 				Sys_Printf( "  ~fail  %s\n", pk3Shaders + i*65 );
 			}
 			else{
-				Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders + i*65 );
 				packFAIL = qtrue;
 			}
 		}
@@ -2406,7 +2406,7 @@ skipEXfile:
 				Sys_Printf( "++%s\n", temp );
 				continue;
 			}
-			Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders + i*65 );
 			packFAIL = qtrue;
 		}
 	}
@@ -2419,7 +2419,7 @@ skipEXfile:
 				Sys_Printf( "++%s\n", pk3Sounds + i*65 );
 				continue;
 			}
-			Sys_Printf( "  !FAIL! %s\n", pk3Sounds + i*65 );
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds + i*65 );
 			packFAIL = qtrue;
 		}
 	}
@@ -2431,7 +2431,7 @@ skipEXfile:
 			Sys_Printf( "++%s\n", pk3Videos + i*65 );
 			continue;
 		}
-		Sys_Printf( "  !FAIL! %s\n", pk3Videos + i*65 );
+		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos + i*65 );
 		packFAIL = qtrue;
 	}
 
@@ -2443,7 +2443,7 @@ skipEXfile:
 			Sys_Printf( "++%s\n", temp );
 		}
 	else{
-		Sys_Printf( "  !FAIL! %s\n", temp );
+		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", temp );
 		packFAIL = qtrue;
 	}
 
@@ -2533,7 +2533,7 @@ int repackBSPMain( int argc, char **argv ){
 	char *cut = strrchr( exName, '\\' );
 	char *cut2 = strrchr( exName, '/' );
 	if ( cut == NULL && cut2 == NULL ){
-		Sys_Printf( "WARNING: Unable to load exclusions file.\n" );
+		Sys_Warning( "Unable to load exclusions file.\n" );
 		goto skipEXfile;
 	}
 	if ( cut2 > cut ) cut = cut2;
@@ -2544,7 +2544,7 @@ int repackBSPMain( int argc, char **argv ){
 	Sys_Printf( "Loading %s\n", exName );
 	size = TryLoadFile( exName, (void**) &buffer );
 	if ( size <= 0 ) {
-		Sys_Printf( "WARNING: Unable to find exclusions file %s.\n", exName );
+		Sys_Warning( "Unable to find exclusions file %s.\n", exName );
 		goto skipEXfile;
 	}
 
@@ -2631,7 +2631,7 @@ skipEXfile:
 	cut = strrchr( exName, '\\' );
 	cut2 = strrchr( exName, '/' );
 	if ( cut == NULL && cut2 == NULL ){
-		Sys_Printf( "WARNING: Unable to load repack exclusions file.\n" );
+		Sys_Warning( "Unable to load repack exclusions file.\n" );
 		goto skipEXrefile;
 	}
 	if ( cut2 > cut ) cut = cut2;
@@ -2641,7 +2641,7 @@ skipEXfile:
 	Sys_Printf( "Loading %s\n", exName );
 	size = TryLoadFile( exName, (void**) &buffer );
 	if ( size <= 0 ) {
-		Sys_Printf( "WARNING: Unable to find repack exclusions file %s.\n", exName );
+		Sys_Warning( "Unable to find repack exclusions file %s.\n", exName );
 		goto skipEXrefile;
 	}
 
@@ -2712,7 +2712,7 @@ skipEXrefile:
 		Sys_Printf( "Loading %s\n", source );
 		size = TryLoadFile( source, (void**) &buffer );
 		if ( size <= 0 ) {
-			Sys_Printf( "WARNING: Unable to open bsps paths list file %s.\n", source );
+			Sys_Warning( "Unable to open bsps paths list file %s.\n", source );
 		}
 
 		/* parse the file */
@@ -3044,7 +3044,7 @@ skipEXrefile:
 			strcpy( shaderText, token );
 
 			if ( strchr( token, '\\') != NULL  ){
-				Sys_Printf( "WARNING1: %s : %s : shader name with backslash\n", pk3Shaderfiles + i*65, token );
+				Sys_FPrintf( SYS_WRN, "WARNING1: %s : %s : shader name with backslash\n", pk3Shaderfiles + i*65, token );
 			}
 
 			/* do wanna le shader? */
@@ -3059,7 +3059,7 @@ skipEXrefile:
 			if ( wantShader ){
 				for ( j = 0; j < rExTexturesN ; j++ ){
 					if ( !Q_stricmp( pk3Shaders + shader*65, rExTextures + j*65 ) ){
-						Sys_Printf( "WARNING3: %s : about to include shader for excluded texture\n", pk3Shaders + shader*65 );
+						Sys_FPrintf( SYS_WRN, "WARNING3: %s : about to include shader for excluded texture\n", pk3Shaders + shader*65 );
 						break;
 					}
 				}
@@ -3105,7 +3105,7 @@ skipEXrefile:
 						}
 						if ( !strcmp( token, "{" ) ) {
 							strcat( shaderText, "\n\t{" );
-							Sys_Printf( "WARNING9: %s : line %d : opening brace inside shader stage\n", temp, scriptline );
+							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", temp, scriptline );
 						}
 						/* skip the shader */
 						if ( !wantShader ) continue;
@@ -3176,7 +3176,7 @@ skipEXrefile:
 							j = 0;
 						}
 						else if ( !Q_stricmp( token, "mapComp" ) || !Q_stricmp( token, "mapNoComp" ) || !Q_stricmp( token, "animmapcomp" ) || !Q_stricmp( token, "animmapnocomp" ) ){
-							Sys_Printf( "WARNING7: %s : %s shader\n", pk3Shaders + shader*65, token );
+							Sys_FPrintf( SYS_WRN, "WARNING7: %s : %s shader\n", pk3Shaders + shader*65, token );
 							hasmap = qtrue;
 							if ( line == scriptline ){
 								strcat( shaderText, " " );
@@ -3248,7 +3248,7 @@ skipEXrefile:
 					strcat( shaderText, token );
 				}
 				else if ( !Q_strncasecmp( token, "implicit", 8 ) ){
-					Sys_Printf( "WARNING5: %s : %s shader\n", pk3Shaders + shader*65, token );
+					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", pk3Shaders + shader*65, token );
 					hasmap = qtrue;
 					if ( line == scriptline ){
 						strcat( shaderText, " " );
@@ -3290,7 +3290,7 @@ skipEXrefile:
 					}
 				}
 				if ( wantShader && !hasmap ){
-					Sys_Printf( "WARNING8: %s : shader has no known maps\n", pk3Shaders + shader*65 );
+					Sys_FPrintf( SYS_WRN, "WARNING8: %s : shader has no known maps\n", pk3Shaders + shader*65 );
 					wantShader = qfalse;
 					*( pk3Shaders + shader*65 ) = '\0';
 				}
@@ -3310,7 +3310,7 @@ skipEXrefile:
 	for ( i = 0; i < pk3ShadersN; i++ ){
 		if ( *( pk3Shaders + i*65 ) != '\0' ){
 			if ( strchr( pk3Shaders + i*65, '\\') != NULL  ){
-				Sys_Printf( "WARNING2: %s : bsp shader path with backslash\n", pk3Shaders + i*65 );
+				Sys_FPrintf( SYS_WRN, "WARNING2: %s : bsp shader path with backslash\n", pk3Shaders + i*65 );
 				FixDOSName( pk3Shaders + i*65 );
 				//what if theres properly slashed one in the list?
 				for ( j = 0; j < pk3ShadersN; j++ ){
@@ -3395,7 +3395,7 @@ skipEXrefile:
 			Sys_Printf( "++%s\n", temp );
 			continue;
 		}
-		Sys_Printf( "  !FAIL! %s\n", pk3Textures + i*65 );
+		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures + i*65 );
 	}
 
 	Sys_Printf( "\n\tPure textures....\n" );
@@ -3419,7 +3419,7 @@ skipEXrefile:
 				Sys_Printf( "++%s\n", temp );
 				continue;
 			}
-			Sys_Printf( "  !FAIL! %s\n", pk3Shaders + i*65 );
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders + i*65 );
 		}
 	}
 
@@ -3431,7 +3431,7 @@ skipEXrefile:
 				Sys_Printf( "++%s\n", pk3Sounds + i*65 );
 				continue;
 			}
-			Sys_Printf( "  !FAIL! %s\n", pk3Sounds + i*65 );
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds + i*65 );
 		}
 	}
 
@@ -3442,7 +3442,7 @@ skipEXrefile:
 			Sys_Printf( "++%s\n", pk3Videos + i*65 );
 			continue;
 		}
-		Sys_Printf( "  !FAIL! %s\n", pk3Videos + i*65 );
+		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos + i*65 );
 	}
 
 	Sys_Printf( "\nSaved to %s\n", packname );
@@ -3655,7 +3655,7 @@ int ConvertBSPMain( int argc, char **argv ){
 
 	if ( force_map || ( !force_bsp && !Q_stricmp( ext, "map" ) && map_allowed ) ) {
 		if ( !map_allowed ) {
-			Sys_Printf( "WARNING: the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
+			Sys_Warning( "the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
 		}
 		StripExtension( source );
 		DefaultExtension( source, ".map" );
@@ -3724,7 +3724,7 @@ int main( int argc, char **argv ){
 		/* -help */
 		if ( !strcmp( argv[ i ], "-h" ) || !strcmp( argv[ i ], "--help" )
 			|| !strcmp( argv[ i ], "-help" ) ) {
-			HelpMain(argv[i+1]);
+			HelpMain( argv[i+1] );
 			return 0;
 		}
 
@@ -3847,7 +3847,7 @@ int main( int argc, char **argv ){
 
 	/* vlight */
 	else if ( !strcmp( argv[ 1 ], "-vlight" ) ) {
-		Sys_Printf( "WARNING: VLight is no longer supported, defaulting to -light -fast instead\n\n" );
+		Sys_Warning( "VLight is no longer supported, defaulting to -light -fast instead\n\n" );
 		argv[ 1 ] = "-fast";    /* eek a hack */
 		r = LightMain( argc, argv );
 	}
