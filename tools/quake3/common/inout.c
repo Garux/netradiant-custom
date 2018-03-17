@@ -226,6 +226,32 @@ void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die ){
 	}
 }
 
+void set_console_colour_for_flag( int flag ){
+#ifdef WIN32
+	static int curFlag = SYS_STD;
+	static qboolean ok = qtrue;
+	static qboolean initialized = qfalse;
+	static HANDLE hConsole;
+	static WORD colour_saved;
+	if( !ok )
+		return;
+	if( !initialized ){
+		hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
+		CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+		if( hConsole == INVALID_HANDLE_VALUE || !GetConsoleScreenBufferInfo( hConsole, &consoleInfo ) ){
+			ok = qfalse;
+			return;
+		}
+		colour_saved = consoleInfo.wAttributes;
+		initialized = qtrue;
+	}
+	if( curFlag != flag ){
+		curFlag = flag;
+		SetConsoleTextAttribute( hConsole, flag == SYS_WRN ? FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY : flag == SYS_ERR ? FOREGROUND_RED | FOREGROUND_INTENSITY : colour_saved );
+	}
+#endif
+}
+
 // in include
 #include "stream_version.h"
 
@@ -252,6 +278,7 @@ void Broadcast_Shutdown(){
 		Net_Disconnect( brdcst_socket );
 		brdcst_socket = NULL;
 	}
+	set_console_colour_for_flag( SYS_STD ); //restore default on exit
 }
 
 #define MAX_MESEGE      MAX_NETMESSAGE / 2
@@ -306,6 +333,7 @@ void xml_message_push( int flag, const char* characters, size_t length ){
 void FPrintf( int flag, char *buf ){
 	static qboolean bGotXML = qfalse;
 
+	set_console_colour_for_flag( flag );
 	printf( "%s", buf );
 
 	// the following part is XML stuff only.. but maybe we don't want that message to go down the XML pipe?
