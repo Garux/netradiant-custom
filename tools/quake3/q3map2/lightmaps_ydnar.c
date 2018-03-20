@@ -695,7 +695,7 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 
 	if ( sampleSize != lm->sampleSize && lmLimitSize == 0 ){
 		if ( debugSampleSize == 1 || lm->customWidth > 128 ){
-			Sys_FPrintf( SYS_VRB,"WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
+			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
 						info->mins[0],
 						info->mins[1],
 						info->mins[2],
@@ -706,7 +706,7 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 						(int) sampleSize );
 		}
 		else if ( debugSampleSize == 0 ){
-			Sys_FPrintf( SYS_VRB,"WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
+			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
 						info->mins[0],
 						info->mins[1],
 						info->mins[2],
@@ -795,7 +795,7 @@ qboolean AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 			verts[ i ].lightmap[ 0 ][ 1 ] = t * superSample;
 
 			if ( s > (float) lm->w || t > (float) lm->h ) {
-				Sys_FPrintf( SYS_VRB, "WARNING: Lightmap texture coords out of range: S %1.4f > %3d || T %1.4f > %3d\n",
+				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Lightmap texture coords out of range: S %1.4f > %3d || T %1.4f > %3d\n",
 							 s, lm->w, t, lm->h );
 			}
 		}
@@ -1220,7 +1220,7 @@ void SetupSurfaceLightmaps( void ){
 	}
 
 	if ( debugSampleSize < -1 ){
-		Sys_FPrintf( SYS_VRB, "+%d similar occurrences;\t-debugsamplesize to show ones\n", -debugSampleSize - 1 );
+		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "+%d similar occurrences;\t-debugsamplesize to show ones\n", -debugSampleSize - 1 );
 	}
 
 	/* allocate vertex luxel storage */

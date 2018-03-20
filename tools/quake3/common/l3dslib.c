@@ -278,7 +278,7 @@ void Load3DSTriangleList( char *filename, triangle_t **pptri, int *numtriangles 
 	trisfound = 0;
 
 	if ( ( input = fopen( filename, "rb" ) ) == 0 ) {
-		fprintf( stderr,"reader: could not open file '%s'\n", filename );
+		fprintf( stderr, "reader: could not open file '%s'\n", filename );
 		exit( 0 );
 	}
 
@@ -287,7 +287,7 @@ void Load3DSTriangleList( char *filename, triangle_t **pptri, int *numtriangles 
 // should only be MAIN3DS, but some files seem to start with EDIT3DS, with
 // no MAIN3DS
 	if ( ( tshort != MAIN3DS ) && ( tshort != EDIT3DS ) ) {
-		fprintf( stderr,"File is not a 3DS file.\n" );
+		fprintf( stderr, "File is not a 3DS file.\n" );
 		exit( 0 );
 	}
 

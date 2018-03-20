@@ -2773,14 +2773,14 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				luxel = SUPER_LUXEL( lightmapNum, x, y );
 				deluxel = SUPER_DELUXEL( x, y );
 				if ( !luxel || !deluxel || !cluster ) {
-					Sys_FPrintf( SYS_VRB, "WARNING: I got NULL'd.\n" );
+					Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: I got NULL'd.\n" );
 					continue;
 				}
 				else if ( *cluster < 0 ) {
 					// unmapped pixel
 					// should have neither deluxemap nor lightmap
 					if ( deluxel[3] ) {
-						Sys_FPrintf( SYS_VRB, "WARNING: I have written deluxe to an unmapped luxel. Sorry.\n" );
+						Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: I have written deluxe to an unmapped luxel. Sorry.\n" );
 					}
 				}
 				else
@@ -2788,7 +2788,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 					// mapped pixel
 					// should have both deluxemap and lightmap
 					if ( deluxel[3] ) {
-						Sys_FPrintf( SYS_VRB, "WARNING: I forgot to write deluxe to a mapped luxel. Sorry.\n" );
+						Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: I forgot to write deluxe to a mapped luxel. Sorry.\n" );
 					}
 				}
 			}

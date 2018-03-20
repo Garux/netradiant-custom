@@ -123,7 +123,7 @@ void SplitMeshByPlane( mesh_t *in, vec3_t normal, float dist, mesh_t **front, me
 
 		if ( split == -1 ) {
 			if ( i == 1 ) {
-				Sys_FPrintf( SYS_VRB, "No crossing points in patch\n" );
+				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "No crossing points in patch\n" );
 				*front = in;
 				return;
 			}

@@ -765,7 +765,7 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 				Error( "ChopWindingInPlaceAccu: MAX_POINTS_ON_WINDING" );
 			}
 			if ( f->numpoints >= maxpts ) { // This will probably never happen.
-				Sys_FPrintf( SYS_VRB, "WARNING: estimate on chopped winding size incorrect (no problem)\n" );
+				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: estimate on chopped winding size incorrect (no problem)\n" );
 				f = CopyWindingAccuIncreaseSizeAndFreeOld( f );
 				maxpts++;
 			}
@@ -801,7 +801,7 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 			Error( "ChopWindingInPlaceAccu: MAX_POINTS_ON_WINDING" );
 		}
 		if ( f->numpoints >= maxpts ) { // This will probably never happen.
-			Sys_FPrintf( SYS_VRB, "WARNING: estimate on chopped winding size incorrect (no problem)\n" );
+			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: estimate on chopped winding size incorrect (no problem)\n" );
 			f = CopyWindingAccuIncreaseSizeAndFreeOld( f );
 			maxpts++;
 		}

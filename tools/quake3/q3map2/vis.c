@@ -204,13 +204,13 @@ void ClusterMerge( int leafnum ){
 	numvis = LeafVectorFromPortalVector( portalvector, uncompressed );
 
 //	if (uncompressed[leafnum>>3] & (1<<(leafnum&7)))
-//		Sys_Warning ("Leaf portals saw into leaf\n");
+//		Sys_Warning( "Leaf portals saw into leaf\n" );
 
 //	uncompressed[leafnum>>3] |= (1<<(leafnum&7));
 
 	numvis++;       // count the leaf itself
 
-	//Sys_FPrintf (SYS_VRB,"cluster %4i : %4i visible\n", leafnum, numvis);
+	//Sys_FPrintf( SYS_VRB, "cluster %4i : %4i visible\n", leafnum, numvis );
 	++clustersizehistogram[numvis];
 
 	memcpy( bspVisBytes + VIS_HEADER_SIZE + leafnum * leafbytes, uncompressed, leafbytes );
@@ -859,17 +859,17 @@ void WritePortals( char *filename ){
 //		if (!p->hint)
 //			continue;
 		w = p->winding;
-		fprintf( pf,"%i %i %i ",w->numpoints, 0, 0 );
+		fprintf( pf, "%i %i %i ",w->numpoints, 0, 0 );
 		fprintf( pf, "%d ", p->hint );
 		for ( i = 0 ; i < w->numpoints ; i++ )
 		{
-			fprintf( pf,"(" );
+			fprintf( pf, "(" );
 			WriteFloat( pf, w->points[i][0] );
 			WriteFloat( pf, w->points[i][1] );
 			WriteFloat( pf, w->points[i][2] );
-			fprintf( pf,") " );
+			fprintf( pf, ") " );
 		}
-		fprintf( pf,"\n" );
+		fprintf( pf, "\n" );
 	}
 
 	/*
@@ -909,7 +909,7 @@ void LoadPortals( char *name ){
 	int leafnums[2];
 	visPlane_t plane;
 
-	if ( !strcmp( name,"-" ) ) {
+	if ( !strcmp( name, "-" ) ) {
 		f = stdin;
 	}
 	else
@@ -920,7 +920,7 @@ void LoadPortals( char *name ){
 		}
 	}
 
-	if ( fscanf( f,"%79s\n%i\n%i\n%i\n",magic, &portalclusters, &numportals, &numfaces ) != 4 ) {
+	if ( fscanf( f, "%79s\n%i\n%i\n%i\n", magic, &portalclusters, &numportals, &numfaces ) != 4 ) {
 		Error( "LoadPortals: failed to read header" );
 	}
 	if ( strcmp( magic,PORTALFILE ) ) {
@@ -1138,11 +1138,11 @@ int VisMain( int argc, char **argv ){
 			Sys_Printf( "passageOnly = true\n" );
 			passageVisOnly = qtrue;
 		}
-		else if ( !strcmp( argv[i],"-nosort" ) ) {
+		else if ( !strcmp( argv[i], "-nosort" ) ) {
 			Sys_Printf( "nosort = true\n" );
 			nosort = qtrue;
 		}
-		else if ( !strcmp( argv[i],"-saveprt" ) ) {
+		else if ( !strcmp( argv[i], "-saveprt" ) ) {
 			Sys_Printf( "saveprt = true\n" );
 			saveprt = qtrue;
 		}
@@ -1150,10 +1150,10 @@ int VisMain( int argc, char **argv ){
 			debugCluster = qtrue;
 			Sys_Printf( "Extra verbous mode enabled\n" );
 		}
-		else if ( !strcmp( argv[i],"-tmpin" ) ) {
+		else if ( !strcmp( argv[i], "-tmpin" ) ) {
 			strcpy( inbase, "/tmp" );
 		}
-		else if ( !strcmp( argv[i],"-tmpout" ) ) {
+		else if ( !strcmp( argv[i], "-tmpout" ) ) {
 			strcpy( outbase, "/tmp" );
 		}
 

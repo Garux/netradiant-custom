@@ -626,7 +626,7 @@ void UnparseEntities( void ) {
 			continue;   // ent got removed
 		}
 
-		strcat( end,"{\n" );
+		strcat( end, "{\n" );
 		end += 2;
 
 		for ( ep = entities[i].epairs ; ep ; ep = ep->next ) {
@@ -639,7 +639,7 @@ void UnparseEntities( void ) {
 			strcat( end, line );
 			end += strlen( line );
 		}
-		strcat( end,"}\n" );
+		strcat( end, "}\n" );
 		end += 2;
 
 		if ( end > buf + MAX_MAP_ENTSTRING ) {

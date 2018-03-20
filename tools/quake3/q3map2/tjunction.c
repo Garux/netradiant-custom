@@ -536,7 +536,7 @@ qboolean FixBrokenSurface( mapDrawSurface_t *ds ){
 		VectorSubtract( dv1->xyz, dv2->xyz, avg.xyz );
 		dist = VectorLength( avg.xyz );
 		if ( dist < DEGENERATE_EPSILON ) {
-			Sys_FPrintf( SYS_VRB, "WARNING: Degenerate T-junction edge found, fixing...\n" );
+			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Degenerate T-junction edge found, fixing...\n" );
 
 			/* create an average drawvert */
 			/* ydnar 2002-01-26: added nearest-integer welding preference */

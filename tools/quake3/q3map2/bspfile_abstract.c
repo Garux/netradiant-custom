@@ -737,7 +737,7 @@ void UnparseEntities( void ){
 		}
 
 		/* add trailing brace */
-		strcat( end,"}\n" );
+		strcat( end, "}\n" );
 		end += 2;
 
 		/* check for overflow */

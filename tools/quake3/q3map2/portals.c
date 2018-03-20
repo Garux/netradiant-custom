@@ -674,7 +674,7 @@ int FloodEntities( tree_t *tree ){
 
 
 	headnode = tree->headnode;
-	Sys_FPrintf( SYS_VRB,"--- FloodEntities ---\n" );
+	Sys_FPrintf( SYS_VRB, "--- FloodEntities ---\n" );
 	inside = qfalse;
 	tree->outside_node.occupied = 0;
 
@@ -764,11 +764,11 @@ int FloodEntities( tree_t *tree ){
 	Sys_FPrintf( SYS_VRB, "%9d flooded leafs\n", c_floodedleafs );
 
 	if ( !inside ) {
-		Sys_FPrintf( SYS_VRB, "no entities in open -- no filling\n" );
+		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "no entities in open -- no filling\n" );
 		return FLOODENTITIES_EMPTY;
 	}
 	if ( tree->outside_node.occupied ) {
-		Sys_FPrintf( SYS_VRB, "entity reached from outside -- leak detected\n" );
+		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "entity reached from outside -- leak detected\n" );
 		return FLOODENTITIES_LEAKED;
 	}
 
@@ -946,7 +946,7 @@ void FloodSkyboxArea_r( node_t *node ){
  */
 
 void FloodAreas( tree_t *tree ){
-	Sys_FPrintf( SYS_VRB,"--- FloodAreas ---\n" );
+	Sys_FPrintf( SYS_VRB, "--- FloodAreas ---\n" );
 	FindAreas_r( tree->headnode );
 
 	/* ydnar: flood all skybox nodes */
@@ -1002,9 +1002,9 @@ void FillOutside( node_t *headnode ){
 	c_outside = 0;
 	c_inside = 0;
 	c_solid = 0;
-	Sys_FPrintf( SYS_VRB,"--- FillOutside ---\n" );
+	Sys_FPrintf( SYS_VRB, "--- FillOutside ---\n" );
 	FillOutside_r( headnode );
-	Sys_FPrintf( SYS_VRB,"%9d solid leafs\n", c_solid );
+	Sys_FPrintf( SYS_VRB, "%9d solid leafs\n", c_solid );
 	Sys_Printf( "%9d leafs filled\n", c_outside );
 	Sys_FPrintf( SYS_VRB, "%9d inside leafs\n", c_inside );
 }

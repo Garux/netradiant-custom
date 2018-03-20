@@ -320,7 +320,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	/* create transform matrix for normals */
 	memcpy( nTransform, transform, sizeof( m4x4_t ) );
 	if ( m4x4_invert( nTransform ) ) {
-		Sys_FPrintf( SYS_VRB, "WARNING: Can't invert model transform matrix, using transpose instead\n" );
+		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Can't invert model transform matrix, using transpose instead\n" );
 	}
 	m4x4_transpose( nTransform );
 

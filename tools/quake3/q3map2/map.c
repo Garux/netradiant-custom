@@ -571,7 +571,7 @@ void SetBrushContents( brush_t *b ){
 
 	/* ydnar: getting rid of this stupid warning */
 	//%	if( mixed )
-	//%		Sys_FPrintf( SYS_VRB,"Entity %i, Brush %i: mixed face contentFlags\n", b->entitynum, b->brushnum );
+	//%		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "Entity %i, Brush %i: mixed face contentFlags\n", b->entitynum, b->brushnum );
 
 	/* check for detail & structural */
 	if ( ( compileFlags & C_DETAIL ) && ( compileFlags & C_STRUCTURAL ) ) {

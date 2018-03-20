@@ -123,7 +123,7 @@ void FreeBrush( brush_t *b ){
 
 	/* error check */
 	if ( *( (unsigned int*) b ) == 0xFEFEFEFE ) {
-		Sys_FPrintf( SYS_VRB, "WARNING: Attempt to free an already freed brush!\n" );
+		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Attempt to free an already freed brush!\n" );
 		return;
 	}
 
@@ -366,7 +366,7 @@ qboolean FixWinding( winding_t *w ){
 		dist = VectorLength( vec );
 		if ( dist < DEGENERATE_EPSILON ) {
 			valid = qfalse;
-			//Sys_FPrintf( SYS_VRB, "WARNING: Degenerate winding edge found, fixing...\n" );
+			//Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Degenerate winding edge found, fixing...\n" );
 
 			/* create an average point (ydnar 2002-01-26: using nearest-integer weld preference) */
 			SnapWeldVector( w->p[ i ], w->p[ j ], vec );
@@ -664,9 +664,9 @@ void WriteBSPBrushMap( char *name, brush_t *list ){
 			// Is WriteBSPBrushMap() used only to decompile maps?
 			w = BaseWindingForPlane( mapplanes[s->planenum].normal, mapplanes[s->planenum].dist );
 
-			fprintf( f,"( %i %i %i ) ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2] );
-			fprintf( f,"( %i %i %i ) ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2] );
-			fprintf( f,"( %i %i %i ) ", (int)w->p[2][0], (int)w->p[2][1], (int)w->p[2][2] );
+			fprintf( f, "( %i %i %i ) ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2] );
+			fprintf( f, "( %i %i %i ) ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2] );
+			fprintf( f, "( %i %i %i ) ", (int)w->p[2][0], (int)w->p[2][1], (int)w->p[2][2] );
 
 			fprintf( f, "notexture 0 0 0 1 1\n" );
 			FreeWinding( w );
@@ -1017,7 +1017,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 	}
 
 	if ( WindingIsHuge( w ) ) {
-		Sys_FPrintf( SYS_VRB,"WARNING: huge winding\n" );
+		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: huge winding\n" );
 	}
 
 	midwinding = w;
@@ -1062,7 +1062,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 	{
 		if ( b[i]->numsides < 3 || !BoundBrush( b[i] ) ) {
 			if ( b[i]->numsides >= 3 ) {
-				Sys_FPrintf( SYS_VRB,"bogus brush after clip\n" );
+				Sys_FPrintf( SYS_WRN | SYS_VRBflag, "bogus brush after clip\n" );
 			}
 			FreeBrush( b[i] );
 			b[i] = NULL;
@@ -1071,10 +1071,10 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 
 	if ( !( b[0] && b[1] ) ) {
 		if ( !b[0] && !b[1] ) {
-			Sys_FPrintf( SYS_VRB,"split removed brush\n" );
+			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "split removed brush\n" );
 		}
 		else{
-			Sys_FPrintf( SYS_VRB,"split not on both sides\n" );
+			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "split not on both sides\n" );
 		}
 		if ( b[0] ) {
 			FreeBrush( b[0] );
@@ -1114,7 +1114,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 			if ( v1 < 1.0 ) {
 				FreeBrush( b[i] );
 				b[i] = NULL;
-				//			Sys_FPrintf (SYS_VRB,"tiny volume after clip\n");
+				//			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "tiny volume after clip\n" );
 			}
 		}
 	}

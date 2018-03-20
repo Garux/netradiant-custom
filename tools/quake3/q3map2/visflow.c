@@ -686,7 +686,7 @@ void PortalFlow( int portalnum ){
 
 	c_can = CountBits( p->portalvis, numportals * 2 );
 
-	Sys_FPrintf( SYS_VRB,"portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
+	Sys_FPrintf( SYS_VRB, "portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
 				 (int)( p - portals ), c_might, c_can, data.c_chains );
 }
 
@@ -812,8 +812,8 @@ void PassageFlow( int portalnum ){
 	/*
 	   c_can = CountBits (p->portalvis, numportals*2);
 
-	   Sys_FPrintf (SYS_VRB,"portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
-	    (int)(p - portals),	c_might, c_can, data.c_chains);
+	   Sys_FPrintf( SYS_VRB, "portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
+	    (int)(p - portals),	c_might, c_can, data.c_chains );
 	 */
 }
 
@@ -1076,8 +1076,8 @@ void PassagePortalFlow( int portalnum ){
 	/*
 	   c_can = CountBits (p->portalvis, numportals*2);
 
-	   Sys_FPrintf (SYS_VRB,"portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
-	    (int)(p - portals),	c_might, c_can, data.c_chains);
+	   Sys_FPrintf( SYS_VRB, "portal:%4i  mightsee:%4i  cansee:%4i (%i chains)\n",
+	    (int)(p - portals),	c_might, c_can, data.c_chains );
 	 */
 }
 

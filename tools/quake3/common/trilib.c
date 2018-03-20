@@ -159,13 +159,13 @@ void TRI_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets )
 				strlwr( pPSET[pset].name );
 
 //				indent();
-//				fprintf(stdout,"OBJECT START: %s\n",name);
+//				fprintf( stdout, "OBJECT START: %s\n", name );
 				fread( &count, sizeof( int ), 1, input );
 				count = BigLong( count );
 				++iLevel;
 				if ( count != 0 ) {
 //					indent();
-//					fprintf(stdout,"NUMBER OF TRIANGLES: %d\n",count);
+//					fprintf( stdout, "NUMBER OF TRIANGLES: %d\n", count );
 
 					i = -1;
 					do {
@@ -182,7 +182,7 @@ void TRI_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets )
  */
 
 //					indent();
-//					fprintf(stdout,"  Object texture name: '%s'\n",tex);
+//					fprintf( stdout, "  Object texture name: '%s'\n", tex );
 				}
 
 				/* Else (count == 0) this is the start of a group, and */
@@ -211,7 +211,7 @@ void TRI_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets )
 				strlwr( pPSET[pset].name );
 
 //				indent();
-//				fprintf(stdout,"OBJECT END: %s\n",name);
+//				fprintf( stdout, "OBJECT END: %s\n", name );
 				continue;
 			}
 		}

@@ -38,15 +38,19 @@ void xml_Select( char *msg, int entitynum, int brushnum, qboolean bError );
 void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die );
 void xml_Point( char *msg, vec3_t pt );
 
-extern qboolean bNetworkBroadcast;
 void Broadcast_Setup( const char *dest );
 void Broadcast_Shutdown();
 
-#define SYS_VRB 0 // verbose support (on/off)
+#define SYS_VRBflag 8 // verbose support (on/off) //internal only, not for sending!
+#define SYS_NOXMLflag 16 // don't send that down the XML stream //internal only, not for sending!
+
+//#define SYS_VRB 0 // verbose support (on/off)
 #define SYS_STD 1 // standard print level
 #define SYS_WRN 2 // warnings
 #define SYS_ERR 3 // error
-#define SYS_NOXML 4 // don't send that down the XML stream
+//#define SYS_NOXML 4 // don't send that down the XML stream
+
+#define SYS_VRB SYS_STD | SYS_VRBflag // verbose support (on/off) //a shortcut, not for sending!
 
 extern qboolean verbose;
 void Sys_Printf( const char *text, ... );

@@ -191,7 +191,7 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 		return;
 	}
 
-	//Sys_FPrintf (SYS_VRB, "F: %d B:%d S:%d FA:%ds\n",frontC,backC,splitsC,facingC );
+	//Sys_FPrintf( SYS_VRB, "F: %d B:%d S:%d FA:%ds\n", frontC, backC, splitsC, facingC );
 
 	/* set best split data */
 	*splitPlaneNum = bestSplit->planenum;

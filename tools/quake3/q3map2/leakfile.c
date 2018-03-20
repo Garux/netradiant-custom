@@ -71,7 +71,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 		return NULL;
 	}
 
-	Sys_FPrintf( SYS_VRB,"--- LeakFile ---\n" );
+	Sys_FPrintf( SYS_VRB, "--- LeakFile ---\n" );
 
 	//
 	// write the points to the file

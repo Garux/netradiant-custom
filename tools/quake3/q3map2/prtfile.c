@@ -57,10 +57,10 @@ int num_solidfaces;
 
 void WriteFloat( FILE *f, vec_t v ){
 	if ( fabs( v - Q_rint( v ) ) < 0.001 ) {
-		fprintf( f,"%i ",(int)Q_rint( v ) );
+		fprintf( f, "%i ", (int)Q_rint( v ) );
 	}
 	else{
-		fprintf( f,"%f ",v );
+		fprintf( f, "%f ", v );
 	}
 }
 
@@ -140,10 +140,10 @@ void WritePortalFile_r( node_t *node ){
 			WindingPlane( w, normal, &dist );
 
 			if ( DotProduct( p->plane.normal, normal ) < 0.99 ) { // backwards...
-				fprintf( pf,"%i %i %i ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster );
+				fprintf( pf, "%i %i %i ", w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster );
 			}
 			else{
-				fprintf( pf,"%i %i %i ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster );
+				fprintf( pf, "%i %i %i ", w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster );
 			}
 
 			flags = 0;
@@ -163,13 +163,13 @@ void WritePortalFile_r( node_t *node ){
 			/* write the winding */
 			for ( i = 0 ; i < w->numpoints ; i++ )
 			{
-				fprintf( pf,"(" );
+				fprintf( pf, "(" );
 				WriteFloat( pf, w->p[i][0] );
 				WriteFloat( pf, w->p[i][1] );
 				WriteFloat( pf, w->p[i][2] );
-				fprintf( pf,") " );
+				fprintf( pf, ") " );
 			}
-			fprintf( pf,"\n" );
+			fprintf( pf, "\n" );
 		}
 	}
 
@@ -244,29 +244,29 @@ void WriteFaceFile_r( node_t *node ){
 			// write out to the file
 
 			if ( p->nodes[0] == node ) {
-				fprintf( pf,"%i %i ",w->numpoints, p->nodes[0]->cluster );
+				fprintf( pf, "%i %i ", w->numpoints, p->nodes[0]->cluster );
 				for ( i = 0 ; i < w->numpoints ; i++ )
 				{
-					fprintf( pf,"(" );
+					fprintf( pf, "(" );
 					WriteFloat( pf, w->p[i][0] );
 					WriteFloat( pf, w->p[i][1] );
 					WriteFloat( pf, w->p[i][2] );
-					fprintf( pf,") " );
+					fprintf( pf, ") " );
 				}
-				fprintf( pf,"\n" );
+				fprintf( pf, "\n" );
 			}
 			else
 			{
-				fprintf( pf,"%i %i ",w->numpoints, p->nodes[1]->cluster );
+				fprintf( pf, "%i %i ", w->numpoints, p->nodes[1]->cluster );
 				for ( i = w->numpoints - 1; i >= 0; i-- )
 				{
-					fprintf( pf,"(" );
+					fprintf( pf, "(" );
 					WriteFloat( pf, w->p[i][0] );
 					WriteFloat( pf, w->p[i][1] );
 					WriteFloat( pf, w->p[i][2] );
-					fprintf( pf,") " );
+					fprintf( pf, ") " );
 				}
-				fprintf( pf,"\n" );
+				fprintf( pf, "\n" );
 			}
 		}
 	}
@@ -354,7 +354,7 @@ void NumberClusters( tree_t *tree ) {
 	num_visportals = 0;
 	num_solidfaces = 0;
 
-	Sys_FPrintf( SYS_VRB,"--- NumberClusters ---\n" );
+	Sys_FPrintf( SYS_VRB, "--- NumberClusters ---\n" );
 
 	// set the cluster field in every leaf and count the total number of portals
 	NumberLeafs_r( tree->headnode, -1 );
@@ -374,7 +374,7 @@ void NumberClusters( tree_t *tree ) {
 void WritePortalFile( tree_t *tree ){
 	char filename[1024];
 
-	Sys_FPrintf( SYS_VRB,"--- WritePortalFile ---\n" );
+	Sys_FPrintf( SYS_VRB, "--- WritePortalFile ---\n" );
 
 	// write the file
 	sprintf( filename, "%s.prt", source );

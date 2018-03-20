@@ -94,7 +94,7 @@ void xml_SendNode( xmlNodePtr node ){
 			}
 			else{
 				size = MAX_NETMESSAGE - 10;
-				Sys_FPrintf( SYS_NOXML, "Got to split the buffer\n" ); //++timo just a debug thing
+				Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, "Got to split the buffer\n" ); //++timo just a debug thing
 			}
 			memcpy( xmlbuf, xml_buf->content + pos, size );
 			xmlbuf[size] = '\0';
@@ -118,9 +118,9 @@ void xml_SendNode( xmlNodePtr node ){
 			// if we send that we are probably gonna break the stream at the other end..
 			// and Error will call right there
 			//Error( "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use);
-			Sys_FPrintf( SYS_NOXML, "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use );
+			Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, "MAX_NETMESSAGE exceeded for XML feedback stream in FPrintf (%d)\n", xml_buf->use );
 			xml_buf->content[xml_buf->use] = '\0'; //++timo this corrupts the buffer but we don't care it's for printing
-			Sys_FPrintf( SYS_NOXML, xml_buf->content );
+			Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, xml_buf->content );
 
 		}
 
@@ -160,7 +160,7 @@ void xml_Select( char *msg, int entitynum, int brushnum, qboolean bError ){
 		Error( buf );
 	}
 	else{
-		Sys_FPrintf( SYS_NOXML, "%s\n", buf );
+		Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, "%s\n", buf );
 	}
 
 }
@@ -247,7 +247,9 @@ void set_console_colour_for_flag( int flag ){
 	}
 	if( curFlag != flag ){
 		curFlag = flag;
-		SetConsoleTextAttribute( hConsole, flag == SYS_WRN ? FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY : flag == SYS_ERR ? FOREGROUND_RED | FOREGROUND_INTENSITY : colour_saved );
+		SetConsoleTextAttribute( hConsole, flag == SYS_WRN ? FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY
+											: flag == SYS_ERR ? FOREGROUND_RED | FOREGROUND_INTENSITY
+											: colour_saved );
 	}
 #endif
 }
@@ -333,11 +335,11 @@ void xml_message_push( int flag, const char* characters, size_t length ){
 void FPrintf( int flag, char *buf ){
 	static qboolean bGotXML = qfalse;
 
-	set_console_colour_for_flag( flag );
+	set_console_colour_for_flag( flag & ~( SYS_NOXMLflag | SYS_VRBflag ) );
 	printf( "%s", buf );
 
 	// the following part is XML stuff only.. but maybe we don't want that message to go down the XML pipe?
-	if ( flag == SYS_NOXML ) {
+	if ( flag & SYS_NOXMLflag ) {
 		return;
 	}
 
@@ -355,7 +357,7 @@ void FPrintf( int flag, char *buf ){
 		doc->children = xmlNewDocRawNode( doc, NULL, (xmlChar*)"q3map_feedback", NULL );
 		bGotXML = qtrue;
 	}
-	xml_message_push( flag, buf, strlen( buf ) );
+	xml_message_push( flag & ~( SYS_NOXMLflag | SYS_VRBflag ), buf, strlen( buf ) );
 }
 
 #ifdef DBG_XML
@@ -368,7 +370,7 @@ void Sys_FPrintf( int flag, const char *format, ... ){
 	char out_buffer[4096];
 	va_list argptr;
 
-	if ( ( flag == SYS_VRB ) && ( verbose == qfalse ) ) {
+	if ( ( flag & SYS_VRBflag ) && ( verbose == qfalse ) ) {
 		return;
 	}
 
