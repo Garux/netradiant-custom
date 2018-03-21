@@ -2319,19 +2319,6 @@ public:
 		/* try bbox planes to scale*/
 		if( selector.failed() ){
 			const Matrix4 screen2world( matrix4_full_inverse( view.GetViewMatrix() ) );
-			const Vector3 near = vector4_projected(
-				matrix4_transformed_vector4(
-					screen2world,
-					Vector4( 0, 0, -1, 1 )
-					)
-				);
-			const Vector3 far = vector4_projected(
-				matrix4_transformed_vector4(
-					screen2world,
-					Vector4( 0, 0, 1, 1 )
-					)
-				);
-			const Line line( near, far );
 
 			Vector3 corners[8];
 			aabb_corners( m_bounds_draw, corners );
@@ -2353,7 +2340,18 @@ public:
 				for ( int j = 0; j < 2; ++j ){
 					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
 					const Vector3 centroid = m_bounds.origin + m_bounds.extents * normal;
-					const Vector3 closest_point = line_closest_point( line, centroid );
+					const Vector3 projected = vector4_projected(
+						matrix4_transformed_vector4(
+							view.GetViewMatrix(),
+							Vector4( centroid, 1 )
+							)
+						);
+					const Vector3 closest_point = vector4_projected(
+						matrix4_transformed_vector4(
+							screen2world,
+							Vector4( 0, 0, projected[2], 1 )
+							)
+						);
 
 					const int index = i * 8 + j * 4;
 					if( vector3_dot( normal, closest_point - corners[indices[index]] ) > 0
