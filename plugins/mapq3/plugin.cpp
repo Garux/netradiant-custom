@@ -252,15 +252,15 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 			EBrushType detectedFormat;
 			if ( string_equal( primitive, "brushDef" ) ) {
 				detectedFormat = eBrushTypeQuake3BP;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake3BP\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
 			}
 			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
 				detectedFormat = eBrushTypeQuake3Valve220;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
 			}
 			else if ( string_equal( primitive, "(" ) ) {
 				detectedFormat = eBrushTypeQuake3;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake3\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake3\n";
 			}
 			else{
 				globalErrorStream() << "Format is not detected\n";
@@ -329,15 +329,15 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 			EBrushType detectedFormat;
 			if ( string_equal( primitive, "brushDef" ) ) {
 				detectedFormat = eBrushTypeQuake3BP;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake3BP\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
 			}
 			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
 				detectedFormat = eBrushTypeValve220;
-				globalErrorStream() << "detectedFormat = eBrushTypeValve220\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeValve220\n";
 			}
 			else if ( string_equal( primitive, "(" ) ) {
 				detectedFormat = eBrushTypeQuake;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake\n";
 			}
 			else{
 				globalErrorStream() << "Format is not detected\n";
@@ -447,15 +447,15 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 			EBrushType detectedFormat;
 			if ( string_equal( primitive, "brushDef" ) ) {
 				detectedFormat = eBrushTypeQuake3BP;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake3BP\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake3BP\n";
 			}
 			else if ( string_equal( primitive, "(" ) && tokeniser.bufferContains( " [ " ) && tokeniser.bufferContains( " ] " ) ) {
 				detectedFormat = eBrushTypeQuake3Valve220;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake3Valve220\n";
 			}
 			else if ( string_equal( primitive, "(" ) ) {
 				detectedFormat = eBrushTypeQuake2;
-				globalErrorStream() << "detectedFormat = eBrushTypeQuake2\n";
+				globalWarningStream() << "detectedFormat = eBrushTypeQuake2\n";
 			}
 			else{
 				globalErrorStream() << "Format is not detected\n";

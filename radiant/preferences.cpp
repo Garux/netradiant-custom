@@ -136,7 +136,7 @@ CGameDescription::CGameDescription( xmlDocPtr pDoc, const CopiedString& gameFile
 	{
 		GameDescription::iterator i = m_gameDescription.find( "type" );
 		if ( i == m_gameDescription.end() ) {
-			globalErrorStream() << "Warning, 'type' attribute not found in '" << reinterpret_cast<const char*>( pDoc->URL ) << "'\n";
+			globalWarningStream() << "Warning, 'type' attribute not found in '" << reinterpret_cast<const char*>( pDoc->URL ) << "'\n";
 			// default
 			mGameType = "q3";
 		}

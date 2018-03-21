@@ -336,7 +336,7 @@ const char* browse_sound( GtkWidget* parent ){
 	if ( filename != 0 ) {
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );
 		if ( relative == filename ) {
-			globalOutputStream() << "WARNING: could not extract the relative path, using full path instead\n";
+			globalWarningStream() << "WARNING: could not extract the relative path, using full path instead\n";
 		}
 		return relative;
 	}

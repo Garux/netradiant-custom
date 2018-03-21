@@ -618,7 +618,7 @@ const char* misc_model_dialog( GtkWidget* parent ){
 		// use VFS to get the correct relative path
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );
 		if ( relative == filename ) {
-			globalOutputStream() << "WARNING: could not extract the relative path, using full path instead\n";
+			globalWarningStream() << "WARNING: could not extract the relative path, using full path instead\n";
 		}
 		return relative;
 	}

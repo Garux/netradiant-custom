@@ -129,7 +129,7 @@ static void characters( void *user_data, const xmlChar *ch, int len ){
 static void warning( void *user_data, const char *msg, ... ){
 	va_list args;
 	va_start( args, msg );
-	globalErrorStream() << "XML WARNING: " << FormattedVA( msg, args );
+	globalWarningStream() << "XML WARNING: " << FormattedVA( msg, args );
 	va_end( args );
 }
 static void error( void *user_data, const char *msg, ... ){

@@ -779,7 +779,7 @@ void add_remap( const char *remap ){
 
 	if ( *ch == '\0' ) {
 		// bad remap
-		globalErrorStream() << "WARNING: Shader _remap key found in a model entity without a ; character\n";
+		globalWarningStream() << "WARNING: Shader _remap key found in a model entity without a ; character\n";
 	}
 	else {
 		pRemap = new remap_t;

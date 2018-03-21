@@ -78,7 +78,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			}
 			else
 			{
-				globalOutputStream() << "UFO:AI: Warning: no spawnflags for " << m_name << ".\n";
+				globalWarningStream() << "UFO:AI: Warning: no spawnflags for " << m_name << ".\n";
 			}
 		}
 	}

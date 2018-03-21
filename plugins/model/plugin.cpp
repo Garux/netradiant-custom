@@ -61,7 +61,7 @@ void PicoPrintFunc( int level, const char *str ){
 		break;
 
 	case PICO_WARNING:
-		globalErrorStream() << "PICO_WARNING: " << str << "\n";
+		globalWarningStream() << "PICO_WARNING: " << str << "\n";
 		break;
 
 	case PICO_ERROR:

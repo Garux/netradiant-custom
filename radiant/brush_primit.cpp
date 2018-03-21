@@ -567,11 +567,11 @@ void FaceToBrushPrimitFace( face_t *f ){
     strcpy(f->brushprimit_texdef.name,f->texdef.name); */
 #ifdef DBG_BP
 	if ( f->plane.normal[0] == 0.0f && f->plane.normal[1] == 0.0f && f->plane.normal[2] == 0.0f ) {
-		globalOutputStream() << "Warning : f->plane.normal is (0,0,0) in FaceToBrushPrimitFace\n";
+		globalWarningStream() << "Warning : f->plane.normal is (0,0,0) in FaceToBrushPrimitFace\n";
 	}
 	// check d_texture
 	if ( !f->d_texture ) {
-		globalOutputStream() << "Warning : f.d_texture is 0 in FaceToBrushPrimitFace\n";
+		globalWarningStream() << "Warning : f.d_texture is 0 in FaceToBrushPrimitFace\n";
 		return;
 	}
 #endif
@@ -626,10 +626,10 @@ void EmitBrushPrimitTextureCoordinates( face_t * f, Winding * w ){
 			float T = f->brushprimit_texdef.coords[1][0] * x + f->brushprimit_texdef.coords[1][1] * y + f->brushprimit_texdef.coords[1][2];
 			if ( fabs( S - w.point_at( i )[3] ) > 1e-2 || fabs( T - w.point_at( i )[4] ) > 1e-2 ) {
 				if ( fabs( S - w.point_at( i )[3] ) > 1e-4 || fabs( T - w.point_at( i )[4] ) > 1e-4 ) {
-					globalOutputStream() << "Warning : precision loss in brush -> brush primitive texture computation\n";
+					globalWarningStream() << "Warning : precision loss in brush -> brush primitive texture computation\n";
 				}
 				else{
-					globalOutputStream() << "Warning : brush -> brush primitive texture computation bug detected\n";
+					globalWarningStream() << "Warning : brush -> brush primitive texture computation bug detected\n";
 				}
 			}
 		}
@@ -1059,7 +1059,7 @@ void ShiftTextureRelative_Camera( face_t *f, int x, int y ){
 	// for which the solution is easy (the other one being unknown)
 	// so this warning could be removed
 	if ( axis[0] == axis[1] ) {
-		globalOutputStream() << "Warning: degenerate in ShiftTextureRelative_Camera\n";
+		globalWarningStream() << "Warning: degenerate in ShiftTextureRelative_Camera\n";
 	}
 
 	// compute the X Y geometric increments

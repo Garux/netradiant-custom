@@ -1109,7 +1109,7 @@ void PatchInspector::GetPatchInfo(){
 	}
 	else
 	{
-		//globalOutputStream() << "WARNING: no patch\n";
+		//globalWarningStream() << "WARNING: no patch\n";
 	}
 	// fill in our internal structs
 	m_nRow = 0; m_nCol = 0;

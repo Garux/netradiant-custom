@@ -161,7 +161,7 @@ bool read_record(){
 	{
 		ZipFileSystem::entry_type& file = m_filesystem[filename.data()];
 		if ( !file.is_directory() ) {
-			globalOutputStream() << "Warning: zip archive " << makeQuoted( m_name.c_str() ) << " contains duplicated file: " << makeQuoted( filename.data() ) << "\n";
+			globalWarningStream() << "Warning: zip archive " << makeQuoted( m_name.c_str() ) << " contains duplicated file: " << makeQuoted( filename.data() ) << "\n";
 		}
 		else
 		{

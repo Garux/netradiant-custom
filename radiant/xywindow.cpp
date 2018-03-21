@@ -1719,7 +1719,7 @@ void XYWnd::XY_SnapToGrid( Vector3& point ){
 void XYWnd::XY_LoadBackgroundImage( const char *name ){
 	const char* relative = path_make_relative( name, GlobalFileSystem().findRoot( name ) );
 	if ( relative == name ) {
-		globalOutputStream() << "WARNING: could not extract the relative path, using full path instead\n";
+		globalWarningStream() << "WARNING: could not extract the relative path, using full path instead\n";
 	}
 
 	char fileNameWithoutExt[512];
@@ -1729,7 +1729,7 @@ void XYWnd::XY_LoadBackgroundImage( const char *name ){
 
 	Image *image = QERApp_LoadImage( 0, fileNameWithoutExt );
 	if ( !image ) {
-		globalOutputStream() << "Could not load texture " << fileNameWithoutExt << "\n";
+		globalErrorStream() << "Could not load texture " << fileNameWithoutExt << "\n";
 		return;
 	}
 	g_pParentWnd->ActiveXY()->m_tex = (qtexture_t*)malloc( sizeof( qtexture_t ) );

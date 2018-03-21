@@ -583,7 +583,7 @@ void visit( const char* name, Accelerator& accelerator ){
 		}
 		else
 		{
-			globalOutputStream() << "WARNING: failed to parse user command " << makeQuoted( name ) << ": unknown key " << makeQuoted( value ) << "\n";
+			globalWarningStream() << "WARNING: failed to parse user command " << makeQuoted( name ) << ": unknown key " << makeQuoted( value ) << "\n";
 		}
 	}
 }

@@ -61,7 +61,7 @@ void CSelectMsg::saxStartElement( message_info_t *ctx, const xmlChar *name, cons
 		ASSERT_MESSAGE( string_equal( reinterpret_cast<const char*>( name ), "brush" ), "FEEDBACK PARSE ERROR" );
 		ASSERT_MESSAGE( ESelectState == SELECT_MESSAGE, "FEEDBACK PARSE ERROR" );
 		ESelectState = SELECT_BRUSH;
-		globalOutputStream() << message.c_str() << '\n';
+		globalWarningStream() << message.c_str() << '\n';
 	}
 }
 
@@ -100,7 +100,7 @@ void CPointMsg::saxStartElement( message_info_t *ctx, const xmlChar *name, const
 		ASSERT_MESSAGE( string_equal( reinterpret_cast<const char*>( name ), "point" ), "FEEDBACK PARSE ERROR" );
 		ASSERT_MESSAGE( EPointState == POINT_MESSAGE, "FEEDBACK PARSE ERROR" );
 		EPointState = POINT_POINT;
-		globalOutputStream() << message.c_str() << '\n';
+		globalWarningStream() << message.c_str() << '\n';
 	}
 }
 
@@ -158,7 +158,7 @@ void CWindingMsg::saxStartElement( message_info_t *ctx, const xmlChar *name, con
 		ASSERT_MESSAGE( string_equal( reinterpret_cast<const char*>( name ), "winding" ), "FEEDBACK PARSE ERROR" );
 		ASSERT_MESSAGE( EPointState == WINDING_MESSAGE, "FEEDBACK PARSE ERROR" );
 		EPointState = WINDING_WINDING;
-		globalOutputStream() << message.c_str() << '\n';
+		globalWarningStream() << message.c_str() << '\n';
 	}
 }
 

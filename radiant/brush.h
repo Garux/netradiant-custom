@@ -1177,7 +1177,7 @@ void snapto( float snap ){
 #endif
 		SceneChangeNotify();
 		if ( !plane3_valid( m_plane.plane3() ) ) {
-			globalErrorStream() << "WARNING: invalid plane after snap to grid\n";
+			globalWarningStream() << "WARNING: invalid plane after snap to grid\n";
 		}
 	}
 }

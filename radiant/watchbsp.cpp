@@ -308,7 +308,7 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 			}
 			else
 			{
-				globalErrorStream() << "Warning: ignoring unrecognized node in XML stream (" << reinterpret_cast<const char*>( name ) << ")\n";
+				globalWarningStream() << "Warning: ignoring unrecognized node in XML stream (" << reinterpret_cast<const char*>( name ) << ")\n";
 				// we don't recognize this node, jump over it
 				// (NOTE: the ignore mechanism is a bit screwed, only works when starting an ignore at the highest level)
 				data->ignore_depth = data->recurse;
@@ -401,7 +401,7 @@ static void saxWarning( void *ctx, const char *msg, ... ){
 	va_start( args, msg );
 	vsprintf( saxMsgBuffer, msg, args );
 	va_end( args );
-	globalOutputStream() << "XML warning: " << saxMsgBuffer << "\n";
+	globalWarningStream() << "XML warning: " << saxMsgBuffer << "\n";
 }
 
 static void saxError( void *ctx, const char *msg, ... ){
@@ -648,8 +648,8 @@ void CWatchBSP::RoutineProcessing(){
 
 		int ret = Net_Wait( m_pInSocket, 0, 0 );
 		if ( ret == -1 ) {
-			globalOutputStream() << "WARNING: SOCKET_ERROR in CWatchBSP::RoutineProcessing\n";
-			globalOutputStream() << "Terminating the connection.\n";
+			globalErrorStream() << "SOCKET_ERROR in CWatchBSP::RoutineProcessing\n";
+			globalErrorStream() << "Terminating the connection.\n";
 			EndMonitoringLoop();
 			return;
 		}

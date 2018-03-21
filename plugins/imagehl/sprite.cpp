@@ -120,13 +120,13 @@ Image* LoadIDSPBuff( byte *buffer ){
 	header = (dspriteheader_t *)buffer;
 
 	if ( header->ident != IDSPRITEHEADER ) {
-		globalErrorStream() << "WARNING: IDSP file has wrong header\n";
+		globalWarningStream() << "WARNING: IDSP file has wrong header\n";
 		return 0;
 	}
 
 	version = header->version;
 	if ( version != 1 && version != 2 ) {
-		globalErrorStream() << "WARNING: IDSP file has wrong version number "
+		globalWarningStream() << "WARNING: IDSP file has wrong version number "
 							   "(" << version << " should be 1 or 2)\n";
 		return 0;
 	}
@@ -149,11 +149,11 @@ Image* LoadIDSPBuff( byte *buffer ){
 		pframetype = (dspriteframetype_t *)( pinv2 + 1 );
 		break;
 	default:
-		globalErrorStream() << "WARNING: IDSP file has unsupported version\n";
+		globalWarningStream() << "WARNING: IDSP file has unsupported version\n";
 		return 0;
 	}
 	if ( numframes > 1 ) {
-		globalErrorStream() << "WARNING: IDSP file has multiple frames, only the first frame will be used.\n";
+		globalWarningStream() << "WARNING: IDSP file has multiple frames, only the first frame will be used.\n";
 	}
 
 	// palette = buffer+mipdatasize+2;
