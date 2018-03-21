@@ -2350,7 +2350,7 @@ public:
 			Selectable* selectable = 0;
 			Selectable* selectable2 = 0;
 			double bestDot = 1;
-			const Vector3 viewer = vector3_normalised( view.getViewer() );
+			const Vector3 viewdir( vector3_normalised( Vector3( view.GetModelview()[2], view.GetModelview()[6], view.GetModelview()[10] ) ) );
 			for ( int i = 0; i < 3; ++i ){
 				for ( int j = 0; j < 2; ++j ){
 					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
@@ -2360,7 +2360,7 @@ public:
 						&& vector3_dot( normal, corners[indices[index + 2]] ) > 0
 						&& vector3_dot( normal, corners[indices[index + 3]] ) > 0 )
 					{
-						const double dot = fabs( vector3_dot( normal, viewer ) );
+						const double dot = fabs( vector3_dot( normal, viewdir ) );
 						const double diff = bestDot - dot;
 						if( diff > 0.03 ){
 							bestDot = dot;
