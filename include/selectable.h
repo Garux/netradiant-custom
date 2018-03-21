@@ -229,6 +229,7 @@ virtual void BeginMesh( const Matrix4& localToWorld, bool twoSided = false ) = 0
 virtual const VolumeTest& getVolume() const = 0;
 virtual const Vector3& getNear() const = 0;
 virtual const Vector3& getFar() const = 0;
+virtual const Matrix4& getScreen2world() const = 0;
 virtual void TestPoint( const Vector3& point, SelectionIntersection& best ) = 0;
 virtual void TestPolygon( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best, const DoubleVector3 planepoints[3] ) = 0;
 virtual void TestLineLoop( const VertexPointer& vertices, std::size_t count, SelectionIntersection& best ) = 0;

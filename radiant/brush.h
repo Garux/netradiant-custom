@@ -2720,15 +2720,22 @@ void selectReversedPlane( Selector& selector, const SelectedPlanes& selectedPlan
 	}
 }
 
-bool trySelectPlane( const Line& line ){
+bool trySelectPlane( const SelectionTest& test ){
+	const Vector3 projected = vector4_projected(
+		matrix4_transformed_vector4(
+			test.getVolume().GetViewMatrix(),
+			Vector4( getFace().centroid(), 1 )
+			)
+		);
+	const Vector3 closest_point = vector4_projected(
+		matrix4_transformed_vector4(
+			test.getScreen2world(),
+			Vector4( 0, 0, projected[2], 1 )
+			)
+		);
 	for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i ){
-		const Vector3 v( vector3_subtracted( line_closest_point( line, ( *i ).vertex ), ( *i ).vertex ) );
-		const double dot = vector3_dot( getFace().plane3().normal(), v );
-//		globalOutputStream() << getFace().plane3().normal()[0] << " " << getFace().plane3().normal()[1] << " " << getFace().plane3().normal()[2] << " DOT " << dot << "\n";
-		//epsilon to prevent almost perpendicular faces pickup
-		if ( dot < 0.005 ) {
+		if ( vector3_dot( getFace().plane3().normal(), closest_point - ( *i ).vertex ) < 0.005 ) /* epsilon to prevent almost perpendicular faces pickup */
 			return false;
-		}
 	}
 	return true;
 }
@@ -3549,16 +3556,15 @@ void invertComponentSelection( SelectionSystem::EComponentMode mode ){
 void selectPlanes( SelectionTest& test, FaceInstances_ptrs& bestInstances ){
 	test.BeginMesh( localToWorld() );
 
-	const Line line( test.getNear(), test.getFar() );
-	const Vector3 viewer( vector3_normalised( test.getNear() - test.getFar() ) );
+	const Vector3 viewdir( vector3_normalised( Vector3( test.getVolume().GetModelview()[2], test.getVolume().GetModelview()[6], test.getVolume().GetModelview()[10] ) ) );
 	double bestDot = 1;
 
 	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
 	{
-		if( !( *i ).trySelectPlane( line ) ){
+		if( !( *i ).trySelectPlane( test ) ){
 			continue;
 		}
-		const double dot = fabs( vector3_dot( ( *i ).getFace().plane3().normal(), viewer ) );
+		const double dot = fabs( vector3_dot( ( *i ).getFace().plane3().normal(), viewdir ) );
 		const double diff = bestDot - dot;
 		if( diff > 0.03 ){
 			bestDot = dot;

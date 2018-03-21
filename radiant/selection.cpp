@@ -2690,6 +2690,7 @@ const View& m_view;
 clipcull_t m_cull;
 Vector3 m_near;
 Vector3 m_far;
+Matrix4 m_screen2world;
 public:
 SelectionVolume( const View& view )
 	: m_view( view ){
@@ -2706,6 +2707,10 @@ const Vector3& getFar() const {
 	return m_far;
 }
 
+const Matrix4& getScreen2world() const {
+	return m_screen2world;
+}
+
 void BeginMesh( const Matrix4& localToWorld, bool twoSided ){
 	m_local2view = matrix4_multiplied_by_matrix4( m_view.GetViewMatrix(), localToWorld );
 
@@ -2714,18 +2719,18 @@ void BeginMesh( const Matrix4& localToWorld, bool twoSided ){
 	m_cull = twoSided && !m_view.fill() ? eClipCullNone : ( matrix4_handedness( localToWorld ) == MATRIX4_RIGHTHANDED ) ? eClipCullCW : eClipCullCCW;
 
 	{
-		Matrix4 screen2world( matrix4_full_inverse( m_local2view ) );
+		m_screen2world = matrix4_full_inverse( m_local2view );
 
 		m_near = vector4_projected(
 			matrix4_transformed_vector4(
-				screen2world,
+				m_screen2world,
 				Vector4( 0, 0, -1, 1 )
 				)
 			);
 
 		m_far = vector4_projected(
 			matrix4_transformed_vector4(
-				screen2world,
+				m_screen2world,
 				Vector4( 0, 0, 1, 1 )
 				)
 			);
