@@ -103,12 +103,12 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 		}
 		else
 		{
-			globalOutputStream() << "'" << filename << "' parse failed\n";
+			globalWarningStream() << "'" << filename << "' parse failed\n";
 		}
 	}
 	else
 	{
-		globalOutputStream() << "'" << filename << "' not found\n";
+		globalWarningStream() << "'" << filename << "' not found\n";
 	}
 }
 

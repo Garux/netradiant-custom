@@ -376,15 +376,15 @@ void DoPathPlotter(){
 	   if( GlobalSelectionSystem().countSelected() != 1 )
 	   {
 	    //DoMessageBox("Invalid number of brushes selected, choose 1 only", "Error", eMB_OK);
-	    globalOutputStream() << "bobToolz PathPlotter: Invalid number of entities selected, choose 1 trigger_push entity only.\n";
+	    globalErrorStream() << "bobToolz PathPlotter: Invalid number of entities selected, choose 1 trigger_push entity only.\n";
 	    return;
 	   }
 	 */
 	Entity* entity = Node_getEntity( GlobalSelectionSystem().ultimateSelected().path().top() );
-	if ( entity != 0 ) {
+	if ( entity != 0 )
 		DBobView_setEntity( *entity, rs.fMultiplier, rs.nPoints, rs.fGravity, rs.bNoUpdate, rs.bShowExtra );
-	}
-	else{ globalErrorStream() << "bobToolz PathPlotter: No trigger_push entitity selected, select 1 only (Use list to select it).\n"; }
+	else
+		globalErrorStream() << "bobToolz PathPlotter: No trigger_push entitity selected, select 1 only (Use list to select it).\n";
 	return;
 }
 

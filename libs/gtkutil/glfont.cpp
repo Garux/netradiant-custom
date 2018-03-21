@@ -126,7 +126,7 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 	if ( log_rect.width > 0 && log_rect.height > 0 ) {
 		hei = bitmap.rows = PANGO_PIXELS_CEIL( log_rect.height );//m_pixelAscent + m_pixelDescent;
 		wid = bitmap.width = PANGO_PIXELS_CEIL( log_rect.width );
-//			globalOutputStream() << width << " " << height << "rendering\n";
+//			globalOutputStream() << width << " " << height << " rendering\n";
 		bitmap.pitch = bitmap.width;
 		unsigned char *boo = (unsigned char *) malloc( bitmap.rows * bitmap.width );
 		memset( boo, 0, bitmap.rows * bitmap.width );

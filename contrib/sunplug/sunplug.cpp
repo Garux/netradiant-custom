@@ -426,7 +426,7 @@ void MapCoordinator(){
 		gtk_table_attach_defaults( GTK_TABLE( table ), button, 2, 3, 3, 4 ); // insert button into table
 	}
 	else {
-		globalOutputStream() << "SunPlug: no worldspawn found!\n"; // output error to console
+		globalErrorStream() << "SunPlug: no worldspawn found!\n"; // output error to console
 
 		label = gtk_label_new( "ERROR: No worldspawn was found in the map!\nIn order to use this tool the map must have at least one brush in the worldspawn. " ); // create a label
 		gtk_label_set_justify( GTK_LABEL( label ), GTK_JUSTIFY_LEFT ); // text align left

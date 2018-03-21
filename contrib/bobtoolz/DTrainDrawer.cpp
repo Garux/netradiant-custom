@@ -187,7 +187,7 @@ void operator()( scene::Instance& instance ) const {
 
 	if ( !strcmp( classname, "info_train_spline_main" ) ) {
 		if ( !targetname ) {
-			globalOutputStream() << "info_train_spline_main with no targetname";
+			globalWarningStream() << "info_train_spline_main with no targetname";
 			return;
 		}
 
@@ -220,7 +220,7 @@ void operator()( scene::Instance& instance ) const {
 	}
 	else if ( !strcmp( classname, "info_train_spline_control" ) ) {
 		if ( !targetname ) {
-			globalOutputStream() << "info_train_spline_control with no targetname";
+			globalWarningStream() << "info_train_spline_control with no targetname";
 			return;
 		}
 
@@ -239,7 +239,7 @@ void DTrainDrawer::BuildPaths() {
 		controlPoint_t* pTarget = FindControlPoint( pSP->strTarget );
 
 		if ( !pTarget ) {
-			globalOutputStream() << "couldn't find target " << pSP->strTarget;
+			globalWarningStream() << "couldn't find target " << pSP->strTarget;
 			return;
 //			continue;
 		}
@@ -250,7 +250,7 @@ void DTrainDrawer::BuildPaths() {
 		for ( std::list<controlPoint_t >::iterator cp = pSP->m_pointList.begin(); cp != pSP->m_pointList.end(); cp++ ) {
 			controlPoint_t* pControl = FindControlPoint( ( *cp ).strName );
 			if ( !pControl ) {
-				globalOutputStream() << "couldn't find control " << ( *cp ).strName;
+				globalWarningStream() << "couldn't find control " << ( *cp ).strName;
 				return;
 			}
 

@@ -721,7 +721,7 @@ void CSG_Subtract(){
 	GlobalSceneGraph().traverse( BrushGatherSelected( selected_brushes ) );
 
 	if ( selected_brushes.empty() ) {
-		globalOutputStream() << "CSG Subtract: No brushes selected.\n";
+		globalWarningStream() << "CSG Subtract: No brushes selected.\n";
 	}
 	else
 	{
@@ -926,12 +926,12 @@ void CSG_Merge( void ){
 	GlobalSceneGraph().traverse( BrushGatherSelected( selected_brushes ) );
 
 	if ( selected_brushes.empty() ) {
-		globalOutputStream() << "CSG Merge: No brushes selected.\n";
+		globalWarningStream() << "CSG Merge: No brushes selected.\n";
 		return;
 	}
 
 	if ( selected_brushes.size() < 2 ) {
-		globalOutputStream() << "CSG Merge: At least two brushes have to be selected.\n";
+		globalWarningStream() << "CSG Merge: At least two brushes have to be selected.\n";
 		return;
 	}
 
@@ -945,7 +945,7 @@ void CSG_Merge( void ){
 	Brush* brush = Node_getBrush( node );
 	// if the new brush would not be convex
 	if ( !Brush_merge( *brush, selected_brushes, true ) ) {
-		globalOutputStream() << "CSG Merge: Failed - result would not be convex.\n";
+		globalWarningStream() << "CSG Merge: Failed - result would not be convex.\n";
 	}
 	else
 	{

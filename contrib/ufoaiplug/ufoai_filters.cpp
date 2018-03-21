@@ -105,13 +105,13 @@ void visit( Face& face ) const {
 		m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;
 	}
 	else if ( m_surfaceFlagsVis >= 0 && m_surfaceFlagsVis != face.getShader().m_flags.m_surfaceFlags ) {
-		globalOutputStream() << "Faces with different surfaceflags at brush\n";
+		globalWarningStream() << "Faces with different surfaceflags at brush\n";
 	}
 	if ( m_contentFlagsVis < 0 ) {
 		m_contentFlagsVis = face.getShader().m_flags.m_contentFlags;
 	}
 	else if ( m_contentFlagsVis >= 0 && m_contentFlagsVis != face.getShader().m_flags.m_contentFlags ) {
-		globalOutputStream() << "Faces with different contentflags at brush\n";
+		globalWarningStream() << "Faces with different contentflags at brush\n";
 	}
 #else
 	m_surfaceFlagsVis = face.getShader().m_flags.m_surfaceFlags;

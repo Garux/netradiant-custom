@@ -215,7 +215,7 @@ const char* getexename( char *buf ){
 	int ret = readlink( LINK_NAME, buf, PATH_MAX );
 
 	if ( ret == -1 ) {
-		globalOutputStream() << "getexename: falling back to argv[0]: " << makeQuoted( g_argv[0] );
+		globalWarningStream() << "getexename: falling back to argv[0]: " << makeQuoted( g_argv[0] );
 		const char* path = realpath( g_argv[0], buf );
 		if ( path == 0 ) {
 			/* In case of an error, leave the handling up to the caller */

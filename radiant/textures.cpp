@@ -115,7 +115,7 @@ void SetTexParameters( ETexturesMode mode ){
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 		break;
 	default:
-		globalOutputStream() << "invalid texture mode\n";
+		globalErrorStream() << "invalid texture mode\n";
 	}
 }
 

@@ -139,7 +139,7 @@ void assign_default_values_to_worldspawn( bool override, char **returnMsg ){
 
 	worldspawn = Scene_FindEntityByClass( "worldspawn" );
 	if ( !worldspawn ) {
-		globalOutputStream() << "UFO:AI: Could not find worldspawn.\n";
+		globalWarningStream() << "UFO:AI: Could not find worldspawn.\n";
 		*returnMsg = "Could not find worldspawn";
 		return;
 	}
@@ -200,7 +200,7 @@ void check_map_values( char **returnMsg ){
 
 	worldspawn = Scene_FindEntityByClass( "worldspawn" );
 	if ( !worldspawn ) {
-		globalOutputStream() << "UFO:AI: Could not find worldspawn.\n";
+		globalWarningStream() << "UFO:AI: Could not find worldspawn.\n";
 		*returnMsg = "Could not find worldspawn";
 		return;
 	}

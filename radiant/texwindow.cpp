@@ -788,7 +788,7 @@ void TextureDirectory_loadTexture( const char* directory, const char* texture ){
 	}
 
 	if ( !shader_valid( name.c_str() ) ) {
-		globalOutputStream() << "Skipping invalid texture name: [" << name.c_str() << "]\n";
+		globalWarningStream() << "Skipping invalid texture name: [" << name.c_str() << "]\n";
 		return;
 	}
 
@@ -1047,7 +1047,7 @@ void TextureBrowser_Selection_MouseUp( TextureBrowser& textureBrowser, guint32 f
 		IShader* shader = Texture_At( textureBrowser, pointx, textureBrowser.height - 1 - pointy );
 		if ( shader != 0 ) {
 			if ( shader->IsDefault() ) {
-				globalOutputStream() << "ERROR: " << shader->getName() << " is not a shader, it's a texture.\n";
+				globalWarningStream() << shader->getName() << " is not a shader, it's a texture.\n";
 			}
 			else{
 				ViewShader( shader->getShaderFileName(), shader->getName(), ( flags & GDK_CONTROL_MASK ) != 0 );
@@ -2086,7 +2086,7 @@ void TextureBrowser_checkTagFile(){
 		}
 		else
 		{
-			globalOutputStream() << "Unable to find default tag file " << default_filename.c_str() << ". No tag support. Plugins -> ShaderPlug -> Create tag file: to start using tags\n";
+			globalWarningStream() << "Unable to find default tag file " << default_filename.c_str() << ". No tag support. Plugins -> ShaderPlug -> Create tag file: to start using texture tags\n";
 		}
 	}
 }

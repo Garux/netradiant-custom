@@ -125,7 +125,7 @@ void CPortals::Load(){
 	in = fopen( fn, "rt" );
 
 	if ( in == NULL ) {
-		globalOutputStream() << "  ERROR - could not open file.\n";
+		globalErrorStream() << "  ERROR - could not open file.\n";
 
 		return;
 	}
@@ -133,7 +133,7 @@ void CPortals::Load(){
 	if ( !fgets( buf, LINE_BUF, in ) ) {
 		fclose( in );
 
-		globalOutputStream() << "  ERROR - File ended prematurely.\n";
+		globalErrorStream() << "  ERROR - File ended prematurely.\n";
 
 		return;
 	}
@@ -141,7 +141,7 @@ void CPortals::Load(){
 	if ( strncmp( "PRT1", buf, 4 ) != 0 ) {
 		fclose( in );
 
-		globalOutputStream() << "  ERROR - File header indicates wrong file type (should be \"PRT1\").\n";
+		globalErrorStream() << "  ERROR - File header indicates wrong file type (should be \"PRT1\").\n";
 
 		return;
 	}
@@ -149,7 +149,7 @@ void CPortals::Load(){
 	if ( !fgets( buf, LINE_BUF, in ) ) {
 		fclose( in );
 
-		globalOutputStream() << "  ERROR - File ended prematurely.\n";
+		globalErrorStream() << "  ERROR - File ended prematurely.\n";
 
 		return;
 	}
@@ -161,7 +161,7 @@ void CPortals::Load(){
 
 		node_count = 0;
 
-		globalOutputStream() << "  ERROR - Extreme number of nodes, aborting.\n";
+		globalErrorStream() << "  ERROR - Extreme number of nodes, aborting.\n";
 
 		return;
 	}
@@ -171,7 +171,7 @@ void CPortals::Load(){
 
 		node_count = 0;
 
-		globalOutputStream() << "  ERROR - File ended prematurely.\n";
+		globalErrorStream() << "  ERROR - File ended prematurely.\n";
 
 		return;
 	}
@@ -184,7 +184,7 @@ void CPortals::Load(){
 
 		node_count = 0;
 
-		globalOutputStream() << "  ERROR - File ended prematurely.\n";
+		globalErrorStream() << "  ERROR - File ended prematurely.\n";
 
 		return;
 	}
@@ -202,7 +202,7 @@ void CPortals::Load(){
 
 			node_count = 0;
 
-			globalOutputStream() << "  ERROR - File ended prematurely.\n";
+			globalErrorStream() << "  ERROR - File ended prematurely.\n";
 
 			return;
 		}
@@ -221,7 +221,7 @@ void CPortals::Load(){
 
 			node_count = 0;
 
-			globalOutputStream() << "  ERROR - File ended prematurely.\n";
+			globalErrorStream() << "  ERROR - File ended prematurely.\n";
 
 			return;
 		}
@@ -252,7 +252,7 @@ void CPortals::Load(){
 
 			Purge();
 
-			globalOutputStream() << "  ERROR - Could not find information for portal number " << n + 1 << " of " << p_count << ".\n";
+			globalErrorStream() << "  ERROR - Could not find information for portal number " << n + 1 << " of " << p_count << ".\n";
 
 			return;
 		}
@@ -265,7 +265,7 @@ void CPortals::Load(){
 
 			Purge();
 
-			globalOutputStream() << "  ERROR - Information for portal number " << n + 1 << " of " << p_count << " is not formatted correctly.\n";
+			globalErrorStream() << "  ERROR - Information for portal number " << n + 1 << " of " << p_count << " is not formatted correctly.\n";
 
 			return;
 		}
@@ -275,7 +275,7 @@ void CPortals::Load(){
 
 			Purge();
 
-			globalOutputStream() << "  ERROR - Information for portal number " << n + 1 << " of " << p_count << " is not formatted correctly.\n";
+			globalErrorStream() << "  ERROR - Information for portal number " << n + 1 << " of " << p_count << " is not formatted correctly.\n";
 
 			return;
 		}
@@ -288,7 +288,7 @@ void CPortals::Load(){
 
 			Purge();
 
-			globalOutputStream() << "  ERROR - Could not find information for portal number " << n + 1 << " of " << p_count << ".\n";
+			globalErrorStream() << "  ERROR - Could not find information for portal number " << n + 1 << " of " << p_count << ".\n";
 
 			return;
 		}
@@ -301,7 +301,7 @@ void CPortals::Load(){
 
 			Purge();
 
-			globalOutputStream() << "  ERROR - Information for portal number " << n + 1 << " of " << p_count << " is not formatted correctly.\n";
+			globalErrorStream() << "  ERROR - Information for portal number " << n + 1 << " of " << p_count << " is not formatted correctly.\n";
 
 			return;
 		}

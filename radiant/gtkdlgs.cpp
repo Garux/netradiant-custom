@@ -851,7 +851,7 @@ static void DoGtkTextEditor( const char* filename, guint cursorpos, int length )
 	FILE *f = fopen( filename, "r" );
 
 	if ( f == 0 ) {
-		globalOutputStream() << "Unable to load file " << filename << " in shader editor.\n";
+		globalWarningStream() << "Unable to load file " << filename << " in shader editor.\n";
 		gtk_widget_hide( text_editor );
 	}
 	else
@@ -1152,7 +1152,7 @@ void DoTextEditor( const char* filename, int cursorpos, int length, bool externa
 //				ShExecInfo.hInstApp = NULL;
 //				ShellExecuteEx(&ShExecInfo);
 #else
-				globalOutputStream() << "Failed to open '" << goodpath->c_str() << "'\nSet Shader Editor Command in preferences\n";
+				globalWarningStream() << "Failed to open '" << goodpath->c_str() << "'\nSet Shader Editor Command in preferences\n";
 #endif
 			}
 			else{
@@ -1162,7 +1162,7 @@ void DoTextEditor( const char* filename, int cursorpos, int length, bool externa
 				globalOutputStream() << "Launching: " << strEditCommand.c_str() << "\n";
 				// note: linux does not return false if the command failed so it will assume success
 				if ( Q_Exec( 0, const_cast<char*>( strEditCommand.c_str() ), 0, true, false ) == false ) {
-					globalOutputStream() << "Failed to execute " << strEditCommand.c_str() << "\n";
+					globalErrorStream() << "Failed to execute " << strEditCommand.c_str() << "\n";
 				}
 				else
 				{
@@ -1176,6 +1176,6 @@ void DoTextEditor( const char* filename, int cursorpos, int length, bool externa
 		}
 	}
 	else{
-		globalOutputStream() << "Failed to open '" << filename << "'\nOne sits in .pk3 most likely!\n";
+		globalWarningStream() << "Failed to open '" << filename << "'\nOne sits in .pk3 most likely!\n";
 	}
 }

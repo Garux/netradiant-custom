@@ -293,7 +293,7 @@ void Pointfile_Parse( CPointfile& pointfile ){
 	{
 		Vector3 v;
 		if ( sscanf( data,"%f %f %f", &v[0], &v[1], &v[2] ) != 3 ) {
-			globalOutputStream() << "Corrupt point file, line " << line << "\n";
+			globalWarningStream() << "Corrupt point file, line " << line << "\n";
 			break;
 		}
 
@@ -307,7 +307,7 @@ void Pointfile_Parse( CPointfile& pointfile ){
 		// deal with zhlt style point files.
 		if ( *data == '-' ) {
 			if ( sscanf( data,"- %f %f %f", &v[0], &v[1], &v[2] ) != 3 ) {
-				globalOutputStream() << "Corrupt point file, line " << line << "\n";
+				globalWarningStream() << "Corrupt point file, line " << line << "\n";
 				break;
 			}
 

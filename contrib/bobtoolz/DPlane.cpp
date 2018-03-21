@@ -160,7 +160,7 @@ DWinding* DPlane::BaseWindingForPlane(){
 		}
 	}
 	if ( x == -1 ) {
-		globalOutputStream() << "BaseWindingForPlane: no axis found";
+		globalWarningStream() << "BaseWindingForPlane: no axis found";
 	}
 
 	VectorCopy( vec3_origin, vup );

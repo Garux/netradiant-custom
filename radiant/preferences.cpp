@@ -917,7 +917,7 @@ void Preferences_Load(){
 	globalOutputStream() << "loading local preferences from " << g_Preferences.m_inipath->str << "\n";
 
 	if ( !Preferences_Load( g_preferences, g_Preferences.m_inipath->str, g_GamesDialog.m_sGameFile.c_str() ) ) {
-		globalOutputStream() << "failed to load local preferences from " << g_Preferences.m_inipath->str << "\n";
+		globalWarningStream() << "failed to load local preferences from " << g_Preferences.m_inipath->str << "\n";
 	}
 }
 
@@ -931,7 +931,7 @@ void Preferences_Save(){
 	globalOutputStream() << "saving local preferences to " << g_Preferences.m_inipath->str << "\n";
 
 	if ( !Preferences_Save_Safe( g_preferences, g_Preferences.m_inipath->str ) ) {
-		globalOutputStream() << "failed to save local preferences to " << g_Preferences.m_inipath->str << "\n";
+		globalWarningStream() << "failed to save local preferences to " << g_Preferences.m_inipath->str << "\n";
 	}
 }
 

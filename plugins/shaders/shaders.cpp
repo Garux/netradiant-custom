@@ -1438,7 +1438,7 @@ void LoadShaderFile( const char* filename ){
 	}
 	else
 	{
-		globalOutputStream() << "Unable to read shaderfile " << filename << "\n";
+		globalWarningStream() << "Unable to read shaderfile " << filename << "\n";
 	}
 }
 
@@ -1462,7 +1462,7 @@ void loadGuideFile( const char* filename ){
 	}
 	else
 	{
-		globalOutputStream() << "Unable to read guide file " << fullname.c_str() << "\n";
+		globalWarningStream() << "Unable to read guide file " << fullname.c_str() << "\n";
 	}
 }
 

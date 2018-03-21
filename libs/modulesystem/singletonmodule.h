@@ -110,7 +110,7 @@ void capture(){
 		}
 		else
 		{
-			globalOutputStream() << "Module Dependencies Failed: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
+			globalErrorStream() << "Module Dependencies Failed: '" << typename Type::Name() << "' '" << APIConstructor::getName() << "'\n";
 		}
 		m_cycleCheck = true;
 	}

@@ -418,7 +418,7 @@ static void OnBtnMatchGrid( GtkWidget *widget, gpointer data ){
 	vscale = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
 
 	if ( hscale == 0.0f || vscale == 0.0f ) {
-		globalOutputStream() << "ERROR: unexpected scale == 0.0f\n";
+		globalErrorStream() << "ERROR: unexpected scale == 0.0f\n";
 		return;
 	}
 

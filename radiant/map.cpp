@@ -2000,7 +2000,7 @@ public:
 	}
 	else
 	{
-		globalOutputStream() << "failed - did not find two selected nodes.\n";
+		globalWarningStream() << "failed - did not find two selected nodes.\n";
 	}
 }
 

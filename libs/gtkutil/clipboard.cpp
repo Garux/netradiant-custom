@@ -59,7 +59,7 @@ void clipboard_copy( ClipboardCopyFunc copy ){
 	}
 
 	if ( !bClipped ) {
-		globalOutputStream() << "Unable to register Windows clipboard formats, copy/paste between editors will not be possible\n";
+		globalWarningStream() << "Unable to register Windows clipboard formats, copy/paste between editors will not be possible\n";
 	}
 }
 

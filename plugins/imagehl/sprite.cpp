@@ -171,7 +171,7 @@ Image* LoadIDSPBuff( byte *buffer ){
 	}
 	else
 	{
-		globalOutputStream() << "Bleh!\n"; // <-- we always get this, wtf!
+		globalWarningStream() << "Bleh!\n"; // <-- we always get this, wtf!
 	}
 #endif
 

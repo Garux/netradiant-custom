@@ -64,7 +64,7 @@ void GlobalShortcuts_reportUnregistered(){
 	for ( Shortcuts::iterator i = g_shortcuts.begin(); i != g_shortcuts.end(); ++i )
 	{
 		if ( ( *i ).second.first.key != 0 && !( *i ).second.second ) {
-			globalOutputStream() << "shortcut not registered: " << ( *i ).first.c_str() << "\n";
+			globalWarningStream() << "shortcut not registered: " << ( *i ).first.c_str() << "\n";
 		}
 	}
 }
@@ -619,11 +619,11 @@ void LoadCommandMap( const char* path ){
 		}
 		else
 		{
-			globalOutputStream() << "commands import: data version " << dataVersion << " is not compatible with code version " << version << "\n";
+			globalWarningStream() << "commands import: data version " << dataVersion << " is not compatible with code version " << version << "\n";
 		}
 	}
 	else
 	{
-		globalOutputStream() << "failed to load custom shortcuts from " << makeQuoted( strINI.c_str() ) << "\n";
+		globalWarningStream() << "failed to load custom shortcuts from " << makeQuoted( strINI.c_str() ) << "\n";
 	}
 }

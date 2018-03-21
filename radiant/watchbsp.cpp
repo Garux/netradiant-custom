@@ -340,7 +340,7 @@ static void saxEndElement( message_info_t *data, const xmlChar *name ){
 	if ( data->recurse == data->stop_depth ) {
 		message_flush( data );
 #ifdef _DEBUG
-		globalOutputStream() << "Received error msg .. shutting down..\n";
+		globalWarningStream() << "Received error msg .. shutting down..\n";
 #endif
 		GetWatchBSP()->EndMonitoringLoop();
 		// tell there has been an error
@@ -492,7 +492,7 @@ void CWatchBSP::Reset(){
 bool CWatchBSP::SetupListening(){
 #ifdef _DEBUG
 	if ( m_pListenSocket ) {
-		globalOutputStream() << "ERROR: m_pListenSocket != NULL in CWatchBSP::SetupListening\n";
+		globalErrorStream() << "ERROR: m_pListenSocket != NULL in CWatchBSP::SetupListening\n";
 		return false;
 	}
 #endif

@@ -188,12 +188,12 @@ void DWinding::CheckWinding(){
 	vec3_t dir, edgenormal;
 
 	if ( numpoints < 3 ) {
-		globalOutputStream() << "CheckWinding: " << numpoints << " points\n";
+		globalWarningStream() << "CheckWinding: " << numpoints << " points\n";
 	}
 
 	vec_t area = WindingArea();
 	if ( area < 1 ) {
-		globalOutputStream() << "CheckWinding: " << area << " area\n";
+		globalWarningStream() << "CheckWinding: " << area << " area\n";
 	}
 
 	DPlane* wPlane = WindingPlane();
@@ -205,7 +205,7 @@ void DWinding::CheckWinding(){
 		int j;
 		for ( j = 0; j < 3; j++ )
 			if ( p1[j] > BOGUS_RANGE || p1[j] < -BOGUS_RANGE ) {
-				globalOutputStream() << "CheckFace: BOGUS_RANGE: " << p1[j] << "\n";
+				globalWarningStream() << "CheckFace: BOGUS_RANGE: " << p1[j] << "\n";
 			}
 
 		j = i + 1 == numpoints ? 0 : i + 1;
@@ -213,7 +213,7 @@ void DWinding::CheckWinding(){
 		// check the point is on the face plane
 		vec_t d = DotProduct( p1, wPlane->normal ) - wPlane->_d;
 		if ( d < -ON_EPSILON || d > ON_EPSILON ) {
-			globalOutputStream() << "CheckWinding: point off plane\n";
+			globalWarningStream() << "CheckWinding: point off plane\n";
 		}
 
 		// check the edge isnt degenerate
@@ -221,7 +221,7 @@ void DWinding::CheckWinding(){
 		VectorSubtract( p2, p1, dir );
 
 		if ( VectorLength( dir ) < ON_EPSILON ) {
-			globalOutputStream() << "CheckWinding: degenerate edge\n";
+			globalWarningStream() << "CheckWinding: degenerate edge\n";
 		}
 
 		CrossProduct( wPlane->normal, dir, edgenormal );
@@ -237,7 +237,7 @@ void DWinding::CheckWinding(){
 
 			d = DotProduct( p[j], edgenormal );
 			if ( d > ( edgedist + ON_EPSILON ) ) {
-				globalOutputStream() << "CheckWinding: non-convex\n";
+				globalWarningStream() << "CheckWinding: non-convex\n";
 			}
 		}
 	}
@@ -344,10 +344,10 @@ bool DWinding::ChopWindingInPlace( DPlane* chopPlane, vec_t epsilon ){
 	}
 
 	if ( f->numpoints > maxpts ) {
-		globalOutputStream() << "ClipWinding: points exceeded estimate\n";
+		globalWarningStream() << "ClipWinding: points exceeded estimate\n";
 	}
 	if ( f->numpoints > MAX_POINTS_ON_WINDING ) {
-		globalOutputStream() << "ClipWinding: MAX_POINTS_ON_WINDING\n";
+		globalWarningStream() << "ClipWinding: MAX_POINTS_ON_WINDING\n";
 	}
 
 	delete[] p;
@@ -463,10 +463,10 @@ void DWinding::ClipWindingEpsilon( DPlane* chopPlane, vec_t epsilon, DWinding **
 	}
 
 	if ( f->numpoints > maxpts || b->numpoints > maxpts ) {
-		globalOutputStream() << "ClipWinding: points exceeded estimate\n";
+		globalWarningStream() << "ClipWinding: points exceeded estimate\n";
 	}
 	if ( f->numpoints > MAX_POINTS_ON_WINDING || b->numpoints > MAX_POINTS_ON_WINDING ) {
-		globalOutputStream() << "ClipWinding: MAX_POINTS_ON_WINDING\n";
+		globalWarningStream() << "ClipWinding: MAX_POINTS_ON_WINDING\n";
 	}
 }
 
