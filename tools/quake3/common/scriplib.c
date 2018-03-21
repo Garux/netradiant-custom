@@ -68,7 +68,7 @@ void AddScriptToStack( const char *filename, int index ){
 	size = vfsLoadFile( script->filename, (void **)&script->buffer, index );
 
 	if ( size == -1 ) {
-		Sys_Printf( "Script file %s was not found\n", script->filename );
+		Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", script->filename );
 	}
 	else
 	{
@@ -118,7 +118,7 @@ void SilentLoadScriptFile( const char *filename, int index ){
 	size = vfsLoadFile( script->filename, (void **)&script->buffer, index );
 
 	if ( size == -1 ) {
-		Sys_Printf( "Script file %s was not found\n", script->filename );
+		Sys_FPrintf( SYS_WRN, "Script file %s was not found\n", script->filename );
 	}
 	script->line = 1;
 	script->script_p = script->buffer;

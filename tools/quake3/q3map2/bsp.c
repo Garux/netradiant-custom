@@ -348,7 +348,6 @@ void ProcessWorldModel( void ){
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
 		polyline = LeakFile( tree );
-		xml_message_flush();
 		leaknode = xmlNewNode( NULL, (xmlChar*)"message" );
 		xmlNodeAddContent( leaknode, (xmlChar*)"MAP LEAKED\n" );
 		xmlAddChild( leaknode, polyline );

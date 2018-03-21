@@ -29,7 +29,6 @@
 // some useful xml routines
 xmlNodePtr xml_NodeForVec( vec3_t v );
 void xml_SendNode( xmlNodePtr node );
-void xml_message_flush();
 // print a message in q3map output and send the corresponding select information down the xml stream
 // bError: do we end with an error on this one or do we go ahead?
 void xml_Select( char *msg, int entitynum, int brushnum, qboolean bError );

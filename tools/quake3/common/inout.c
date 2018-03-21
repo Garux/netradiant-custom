@@ -68,8 +68,12 @@ xmlNodePtr xml_NodeForVec( vec3_t v ){
 	return ret;
 }
 
+void xml_message_flush();
+
 // send a node down the stream, add it to the document
 void xml_SendNode( xmlNodePtr node ){
+	xml_message_flush(); /* flush regular print messages buffer, so that special ones will appear at correct spot */
+
 	xmlBufferPtr xml_buf;
 	char xmlbuf[MAX_NETMESSAGE]; // we have to copy content from the xmlBufferPtr into an aux buffer .. that sucks ..
 	// this index loops through the node buffer
@@ -162,7 +166,6 @@ void xml_Select( char *msg, int entitynum, int brushnum, qboolean bError ){
 	else{
 		Sys_FPrintf( SYS_NOXMLflag | SYS_WRN, "%s\n", buf );
 	}
-
 }
 
 void xml_Point( char *msg, vec3_t pt ){

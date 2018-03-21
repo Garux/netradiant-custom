@@ -747,7 +747,7 @@ int FloodEntities( tree_t *tree ){
 			inside = qtrue;
 		}
 		if ( !r ) {
-			Sys_Printf( "Entity %i, Brush %i: Entity in solid\n", e->mapEntityNum, 0 );
+			Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: Entity in solid\n", e->mapEntityNum, 0 );
 		}
 		else if ( tree->outside_node.occupied ) {
 			if ( !tripped || tree->outside_node.occupied < tripcount ) {

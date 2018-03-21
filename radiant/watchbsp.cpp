@@ -289,18 +289,21 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "select" ) == 0 ) {
+				message_flush( data );
 				CSelectMsg *pSelect = new CSelectMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pSelect;
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "pointmsg" ) == 0 ) {
+				message_flush( data );
 				CPointMsg *pPoint = new CPointMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pPoint;
 				data->pGeometry->saxStartElement( data, name, attrs );
 			}
 			else if ( strcmp( reinterpret_cast<const char*>( name ), "windingmsg" ) == 0 ) {
+				message_flush( data );
 				CWindingMsg *pWinding = new CWindingMsg();
 				data->geometry_depth = data->recurse;
 				data->pGeometry = pWinding;
@@ -308,6 +311,7 @@ static void saxStartElement( message_info_t *data, const xmlChar *name, const xm
 			}
 			else
 			{
+				message_flush( data );
 				globalWarningStream() << "Warning: ignoring unrecognized node in XML stream (" << reinterpret_cast<const char*>( name ) << ")\n";
 				// we don't recognize this node, jump over it
 				// (NOTE: the ignore mechanism is a bit screwed, only works when starting an ignore at the highest level)
