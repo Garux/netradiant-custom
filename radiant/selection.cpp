@@ -2367,7 +2367,7 @@ public:
 			Vector3 corners[8];
 			aabb_corners( m_bounds_draw, corners );
 
-
+/*
 			for ( Vector3* i = corners; i != corners + 8; ++i ){
 //				*i = vector3_subtracted( line_closest_point( line, *i ), *i );
 				const Vector3 projected = vector4_projected(
@@ -2390,7 +2390,7 @@ public:
 				//*i = closest_point - *i;
 				*i = intersection - *i;
 			}
-
+*/
 			const int indices[24] = {
 				3, 7, 4, 0, //-x
 				2, 1, 5, 6, //+x
@@ -2406,16 +2406,22 @@ public:
 			for ( int i = 0; i < 3; ++i ){
 				for ( int j = 0; j < 2; ++j ){
 					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
+					const Vector3 centroid = m_bounds.origin + m_bounds.extents * normal;
+					const Vector3 closest_point = line_closest_point( line, centroid );
+
+					m_debug_lines[i * 2 + j].m_line[0].vertex = vertex3f_for_vector3( centroid );
+					m_debug_lines[i * 2 + j].m_line[1].vertex = vertex3f_for_vector3( closest_point );
+
 					const int index = i * 8 + j * 4;
 					globalWarningStream() << normal << " normal\t";
 					globalOutputStream() << vector3_dot( normal, corners[indices[index]] ) << "\t";
 					globalOutputStream() << vector3_dot( normal, corners[indices[index + 1]] ) << "\t";
 					globalOutputStream() << vector3_dot( normal, corners[indices[index + 2]] ) << "\t";
 					globalOutputStream() << vector3_dot( normal, corners[indices[index + 3]] ) << "\n";
-					if( vector3_dot( normal, corners[indices[index]] ) > 0
-						&& vector3_dot( normal, corners[indices[index + 1]] ) > 0
-						&& vector3_dot( normal, corners[indices[index + 2]] ) > 0
-						&& vector3_dot( normal, corners[indices[index + 3]] ) > 0 )
+					if( vector3_dot( normal, closest_point - corners[indices[index]] ) > 0
+						&& vector3_dot( normal, closest_point - corners[indices[index + 1]] ) > 0
+						&& vector3_dot( normal, closest_point - corners[indices[index + 2]] ) > 0
+						&& vector3_dot( normal, closest_point - corners[indices[index + 3]] ) > 0 )
 					{
 						const double dot = fabs( vector3_dot( normal, viewdir ) );
 						const double diff = bestDot - dot;
