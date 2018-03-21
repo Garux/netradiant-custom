@@ -1771,8 +1771,7 @@ class LightInstance :
 	public SelectionTestable,
 	public RendererLight,
 	public PlaneSelectable,
-	public ComponentSelectionTestable,
-	public ComponentEditable
+	public ComponentSelectionTestable
 {
 class TypeCasts
 {
@@ -1787,7 +1786,6 @@ TypeCasts(){
 	InstanceStaticCast<LightInstance, Transformable>::install( m_casts );
 	InstanceStaticCast<LightInstance, PlaneSelectable>::install( m_casts );
 	InstanceStaticCast<LightInstance, ComponentSelectionTestable>::install( m_casts );
-	InstanceStaticCast<LightInstance, ComponentEditable>::install( m_casts );
 	InstanceIdentityCast<LightInstance>::install( m_casts );
 }
 InstanceTypeCastTable& get(){
@@ -1876,10 +1874,6 @@ void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ){
 	}
 }
 void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
-}
-
-const AABB& getSelectedComponentsBounds() const {
-	return m_contained.aabb();
 }
 
 void selectedChangedComponent( const Selectable& selectable ){

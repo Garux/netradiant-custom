@@ -4899,6 +4899,8 @@ AABB RadiantSelectionSystem::getSelectionAABB() const {
 	if ( !nothingSelected() ) {
 		if ( Mode() == eComponent || g_bTmpComponentMode ) {
 			Scene_BoundsSelectedComponent( GlobalSceneGraph(), bounds );
+			if( !aabb_valid( bounds ) ) /* selecting PlaneSelectables sets g_bTmpComponentMode, but only brushes return correct componentEditable->getSelectedComponentsBounds() */
+				Scene_BoundsSelected( GlobalSceneGraph(), bounds );
 		}
 		else
 		{
