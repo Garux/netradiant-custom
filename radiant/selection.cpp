@@ -2006,6 +2006,19 @@ bool isSelected() const {
 };
 
 
+inline double plane3_distance_to_point( const Plane3& plane, const Vector3& point ){
+	return vector3_dot( point, plane.normal() ) - plane.dist();
+}
+
+inline Vector3 ray_intersect_plane( const Ray& ray, const Plane3& plane ){
+	return ray.origin + vector3_scaled(
+			   ray.direction,
+			   -plane3_distance_to_point( plane, ray.origin )
+			   / vector3_dot( ray.direction, plane.normal() )
+			   );
+}
+
+
 class SkewManipulator : public Manipulator {
 	struct RenderableLine : public OpenGLRenderable {
 		PointVertex m_line[2];
@@ -2329,6 +2342,8 @@ public:
 
 		/* try bbox planes to scale*/
 		if( selector.failed() ){
+			const Vector3 viewdir( vector3_normalised( Vector3( view.GetModelview()[2], view.GetModelview()[6], view.GetModelview()[10] ) ) );
+			globalWarningStream() << viewdir << "viewdir\n";
 			const Matrix4 screen2world( matrix4_full_inverse( view.GetViewMatrix() ) );
 			const Vector3 near = vector4_projected(
 				matrix4_transformed_vector4(
@@ -2343,6 +2358,7 @@ public:
 					)
 				);
 			const Line line( near, far );
+			const Ray ray( near, vector3_normalised( far - near ) );
 			globalWarningStream() << near << " " << far << " near far\n";
 
 			m_debug_lines[8].m_line[0].vertex = vertex3f_for_vector3( near );
@@ -2352,14 +2368,28 @@ public:
 			aabb_corners( m_bounds_draw, corners );
 
 
-			for ( int i = 0; i < 8; ++i ){
-				m_debug_lines[i].m_line[0].vertex = vertex3f_for_vector3( corners[i] );
-				m_debug_lines[i].m_line[1].vertex = vertex3f_for_vector3( line_closest_point( line, corners[i] ) );
+			for ( Vector3* i = corners; i != corners + 8; ++i ){
+//				*i = vector3_subtracted( line_closest_point( line, *i ), *i );
+				const Vector3 projected = vector4_projected(
+				matrix4_transformed_vector4(
+					view.GetViewMatrix(),
+					Vector4( *i, 1 )
+					)
+				);
+				const Vector3 closest_point = vector4_projected(
+				matrix4_transformed_vector4(
+					screen2world,
+					Vector4( 0, 0, projected[2], 1 )
+					)
+				);
+				const Plane3 plane( viewdir, vector3_dot( *i, viewdir ) );
+				const Vector3 intersection = ray_intersect_plane( ray, plane );
+				globalOutputStream() << intersection << "intersection\n";
+				m_debug_lines[i - corners].m_line[0].vertex = vertex3f_for_vector3( *i );
+				m_debug_lines[i - corners].m_line[1].vertex = vertex3f_for_vector3( intersection );
+				//*i = closest_point - *i;
+				*i = intersection - *i;
 			}
-
-
-			for ( Vector3* i = corners; i != corners + 8; ++i )
-				*i = vector3_subtracted( line_closest_point( line, *i ), *i );
 
 			const int indices[24] = {
 				3, 7, 4, 0, //-x
@@ -2373,7 +2403,6 @@ public:
 			Selectable* selectable = 0;
 			Selectable* selectable2 = 0;
 			double bestDot = 1;
-			const Vector3 viewdir( vector3_normalised( Vector3( view.GetModelview()[2], view.GetModelview()[6], view.GetModelview()[10] ) ) );
 			for ( int i = 0; i < 3; ++i ){
 				for ( int j = 0; j < 2; ++j ){
 					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
