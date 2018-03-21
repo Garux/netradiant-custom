@@ -2093,6 +2093,8 @@ class SkewManipulator : public Manipulator {
 	Matrix4 m_arrow_modelview;
 	Matrix4 m_arrow_modelview2;
 	RenderablePoint m_point;
+
+	RenderableLine m_debug_lines[9];
 public:
 	static Shader* m_state_wire;
 	static Shader* m_state_fill;
@@ -2127,6 +2129,10 @@ public:
 		draw_arrowhead( segments, 0, m_arrow.m_vertices.data(), TripleRemapXYZ<Vertex3f>(), TripleRemapXYZ<Normal3f>() );
 		m_arrow.setColour( g_colour_selected );
 		m_point.setColour( g_colour_selected );
+
+		m_debug_lines[8].setColour( Colour4b( 255, 127, 0, 255 ) );
+		for ( int i = 0; i < 8; ++i )
+			m_debug_lines[i].setColour( Colour4b( 0, 255, 0, 255 ) );
 	}
 
 	void UpdateColours() {
@@ -2177,6 +2183,9 @@ public:
 
 		renderer.SetState( m_state_wire, Renderer::eWireframeOnly );
 		renderer.SetState( m_state_wire, Renderer::eFullMaterials );
+
+		for ( int i = 0; i < 9; ++i )
+			renderer.addRenderable( m_debug_lines[i], g_matrix4_identity );
 
 		for ( int i = 0; i < 3; ++i )
 			for ( int j = 0; j < 2; ++j ){
@@ -2239,6 +2248,8 @@ public:
 					}
 	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) {
+		SceneChangeNotify();
+
 		updateModelview( view, pivot2world );
 
 		SelectionPool selector;
@@ -2332,9 +2343,21 @@ public:
 					)
 				);
 			const Line line( near, far );
+			globalWarningStream() << near << " " << far << " near far\n";
+
+			m_debug_lines[8].m_line[0].vertex = vertex3f_for_vector3( near );
+			m_debug_lines[8].m_line[1].vertex = vertex3f_for_vector3( far );
 
 			Vector3 corners[8];
 			aabb_corners( m_bounds_draw, corners );
+
+
+			for ( int i = 0; i < 8; ++i ){
+				m_debug_lines[i].m_line[0].vertex = vertex3f_for_vector3( corners[i] );
+				m_debug_lines[i].m_line[1].vertex = vertex3f_for_vector3( line_closest_point( line, corners[i] ) );
+			}
+
+
 			for ( Vector3* i = corners; i != corners + 8; ++i )
 				*i = vector3_subtracted( line_closest_point( line, *i ), *i );
 
@@ -2355,6 +2378,11 @@ public:
 				for ( int j = 0; j < 2; ++j ){
 					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
 					const int index = i * 8 + j * 4;
+					globalWarningStream() << normal << " normal\t";
+					globalOutputStream() << vector3_dot( normal, corners[indices[index]] ) << "\t";
+					globalOutputStream() << vector3_dot( normal, corners[indices[index + 1]] ) << "\t";
+					globalOutputStream() << vector3_dot( normal, corners[indices[index + 2]] ) << "\t";
+					globalOutputStream() << vector3_dot( normal, corners[indices[index + 3]] ) << "\n";
 					if( vector3_dot( normal, corners[indices[index]] ) > 0
 						&& vector3_dot( normal, corners[indices[index + 1]] ) > 0
 						&& vector3_dot( normal, corners[indices[index + 2]] ) > 0
