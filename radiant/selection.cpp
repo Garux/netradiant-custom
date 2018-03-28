@@ -2688,8 +2688,10 @@ class SelectionVolume : public SelectionTest
 Matrix4 m_local2view;
 const View& m_view;
 clipcull_t m_cull;
+#if 0
 Vector3 m_near;
 Vector3 m_far;
+#endif
 Matrix4 m_screen2world;
 public:
 SelectionVolume( const View& view )
@@ -2699,14 +2701,14 @@ SelectionVolume( const View& view )
 const VolumeTest& getVolume() const {
 	return m_view;
 }
-
+#if 0
 const Vector3& getNear() const {
 	return m_near;
 }
 const Vector3& getFar() const {
 	return m_far;
 }
-
+#endif
 const Matrix4& getScreen2world() const {
 	return m_screen2world;
 }
@@ -2720,7 +2722,7 @@ void BeginMesh( const Matrix4& localToWorld, bool twoSided ){
 
 	{
 		m_screen2world = matrix4_full_inverse( m_local2view );
-
+#if 0
 		m_near = vector4_projected(
 			matrix4_transformed_vector4(
 				m_screen2world,
@@ -2734,6 +2736,7 @@ void BeginMesh( const Matrix4& localToWorld, bool twoSided ){
 				Vector4( 0, 0, 1, 1 )
 				)
 			);
+#endif
 	}
 
 #if defined( DEBUG_SELECTION )

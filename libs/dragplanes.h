@@ -46,163 +46,137 @@ inline Vector3 translation_from_local( const Vector3& translation, const Matrix4
 				   )
 			   );
 }
+#if 0
+namespace{
+// https://www.gamedev.net/forums/topic/230443-initializing-array-member-objects-in-c/?page=2
+class ObservedSelectables6x {
+	ObservedSelectable m_selectable0, m_selectable1, m_selectable2, m_selectable3, m_selectable4, m_selectable5;
+
+	// array of 6 pointers to ObservedSelectable members of ObservedSelectables6x
+	static ObservedSelectable ObservedSelectables6x::* const array[6];
+
+public:
+	ObservedSelectables6x( const SelectionChangeCallback& onchanged ) :
+		m_selectable0( onchanged ),
+		m_selectable1( onchanged ),
+		m_selectable2( onchanged ),
+		m_selectable3( onchanged ),
+		m_selectable4( onchanged ),
+		m_selectable5( onchanged ) {
+	}
+	ObservedSelectable& operator[]( std::size_t idx ) {
+		return this->*array[idx];
+	}
+	const ObservedSelectable& operator[]( std::size_t idx ) const {
+		return this->*array[idx];
+	}
+};
+
+// Parse this
+ObservedSelectable ObservedSelectables6x::* const ObservedSelectables6x::array[6] = { &ObservedSelectables6x::m_selectable0,
+																						&ObservedSelectables6x::m_selectable1,
+																						&ObservedSelectables6x::m_selectable2,
+																						&ObservedSelectables6x::m_selectable3,
+																						&ObservedSelectables6x::m_selectable4,
+																						&ObservedSelectables6x::m_selectable5 };
+} //namespace
+#endif
 
 class DragPlanes
 {
+std::vector<ObservedSelectable> m_selectables;
 public:
-ObservedSelectable m_selectable_right;   // +x
-ObservedSelectable m_selectable_left;   // -x
-ObservedSelectable m_selectable_front;   // +y
-ObservedSelectable m_selectable_back;   // -y
-ObservedSelectable m_selectable_top;   // +z
-ObservedSelectable m_selectable_bottom;   // -z
 AABB m_bounds;
-
-DragPlanes( const SelectionChangeCallback& onchanged ) :
-	m_selectable_right( onchanged ),
-	m_selectable_left( onchanged ),
-	m_selectable_front( onchanged ),
-	m_selectable_back( onchanged ),
-	m_selectable_top( onchanged ),
-	m_selectable_bottom( onchanged ){
+DragPlanes( const SelectionChangeCallback& onchanged ){
+	for ( std::size_t i = 0; i < 6; ++i )
+		m_selectables.push_back( ObservedSelectable( onchanged ) );
 }
 bool isSelected() const {
-	return m_selectable_right.isSelected()
-		   || m_selectable_left.isSelected()
-		   || m_selectable_front.isSelected()
-		   || m_selectable_back.isSelected()
-		   || m_selectable_top.isSelected()
-		   || m_selectable_bottom.isSelected();
+	for ( std::size_t i = 0; i < 6; ++i )
+		if( m_selectables[i].isSelected() )
+			return true;
+	return false;
 }
 void setSelected( bool selected ){
-	m_selectable_right.setSelected( selected );
-	m_selectable_left.setSelected( selected );
-	m_selectable_front.setSelected( selected );
-	m_selectable_back.setSelected( selected );
-	m_selectable_top.setSelected( selected );
-	m_selectable_bottom.setSelected( selected );
+	for ( std::size_t i = 0; i < 6; ++i )
+		m_selectables[i].setSelected( selected );
 }
 void selectPlanes( const AABB& aabb, Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback, const Matrix4& rotation = g_matrix4_identity ){
-	Line line( test.getNear(), test.getFar() );
 	Vector3 corners[8];
 	aabb_corners_oriented( aabb, rotation, corners );
 
 	Plane3 planes[6];
 	aabb_planes_oriented( aabb, rotation, planes );
 
-	for ( Vector3* i = corners; i != corners + 8; ++i )
-	{
-		*i = vector3_subtracted( line_closest_point( line, *i ), *i );
-	}
+	const std::size_t indices[24] = {
+		2, 1, 5, 6, //+x //right
+		3, 7, 4, 0, //-x //left
+		1, 0, 4, 5, //+y //front
+		3, 2, 6, 7, //-y //back
+		0, 1, 2, 3, //+z //top
+		7, 6, 5, 4, //-z //bottom
+	};
 
-	if ( vector3_dot( planes[0].normal(), corners[1] ) > 0
-		 && vector3_dot( planes[0].normal(), corners[2] ) > 0
-		 && vector3_dot( planes[0].normal(), corners[5] ) > 0
-		 && vector3_dot( planes[0].normal(), corners[6] ) > 0 ) {
-		Selector_add( selector, m_selectable_right );
-		selectedPlaneCallback( planes[0] );
-		//globalOutputStream() << "right\n";
-	}
-	if ( vector3_dot( planes[1].normal(), corners[0] ) > 0
-		 && vector3_dot( planes[1].normal(), corners[3] ) > 0
-		 && vector3_dot( planes[1].normal(), corners[4] ) > 0
-		 && vector3_dot( planes[1].normal(), corners[7] ) > 0 ) {
-		Selector_add( selector, m_selectable_left );
-		selectedPlaneCallback( planes[1] );
-		//globalOutputStream() << "left\n";
-	}
-	if ( vector3_dot( planes[2].normal(), corners[0] ) > 0
-		 && vector3_dot( planes[2].normal(), corners[1] ) > 0
-		 && vector3_dot( planes[2].normal(), corners[4] ) > 0
-		 && vector3_dot( planes[2].normal(), corners[5] ) > 0 ) {
-		Selector_add( selector, m_selectable_front );
-		selectedPlaneCallback( planes[2] );
-		//globalOutputStream() << "front\n";
-	}
-	if ( vector3_dot( planes[3].normal(), corners[2] ) > 0
-		 && vector3_dot( planes[3].normal(), corners[3] ) > 0
-		 && vector3_dot( planes[3].normal(), corners[6] ) > 0
-		 && vector3_dot( planes[3].normal(), corners[7] ) > 0 ) {
-		Selector_add( selector, m_selectable_back );
-		selectedPlaneCallback( planes[3] );
-		//globalOutputStream() << "back\n";
-	}
-	if ( vector3_dot( planes[4].normal(), corners[0] ) > 0
-		 && vector3_dot( planes[4].normal(), corners[1] ) > 0
-		 && vector3_dot( planes[4].normal(), corners[2] ) > 0
-		 && vector3_dot( planes[4].normal(), corners[3] ) > 0 ) {
-		Selector_add( selector, m_selectable_top );
-		selectedPlaneCallback( planes[4] );
-		//globalOutputStream() << "top\n";
-	}
-	if ( vector3_dot( planes[5].normal(), corners[4] ) > 0
-		 && vector3_dot( planes[5].normal(), corners[5] ) > 0
-		 && vector3_dot( planes[5].normal(), corners[6] ) > 0
-		 && vector3_dot( planes[5].normal(), corners[7] ) > 0 ) {
-		Selector_add( selector, m_selectable_bottom );
-		selectedPlaneCallback( planes[5] );
-		//globalOutputStream() << "bottom\n";
-	}
+	const Vector3 viewdir( vector3_normalised( Vector3( test.getVolume().GetModelview()[2], test.getVolume().GetModelview()[6], test.getVolume().GetModelview()[10] ) ) );
+	double bestDot = 1;
+	ObservedSelectable* selectable = 0;
+	ObservedSelectable* selectable2 = 0;
 
+	for ( std::size_t i = 0; i < 6; ++i ){
+		const std::size_t index = i * 4;
+		const Vector3 centroid = vector3_mid( corners[indices[index]], corners[indices[index + 2]] );
+		const Vector3 projected = vector4_projected(
+			matrix4_transformed_vector4(
+				test.getVolume().GetViewMatrix(),
+				Vector4( centroid, 1 )
+				)
+			);
+		const Vector3 closest_point = vector4_projected(
+			matrix4_transformed_vector4(
+				test.getScreen2world(),
+				Vector4( 0, 0, projected[2], 1 )
+				)
+			);
+		if ( vector3_dot( planes[i].normal(), closest_point - corners[indices[index]] ) > 0
+			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 1]] ) > 0
+			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 2]] ) > 0
+			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 3]] ) > 0 ) {
+			const double dot = fabs( vector3_dot( planes[i].normal(), viewdir ) );
+			const double diff = bestDot - dot;
+			if( diff > 0.03 ){
+				bestDot = dot;
+				selectable = &m_selectables[i];
+				selectable2 = 0;
+			}
+			else if( fabs( diff ) <= 0.03 ){
+				selectable2 = &m_selectables[i];
+			}
+		}
+	}
+	for ( std::size_t i = 0; i < 6; ++i )
+		if( &m_selectables[i] == selectable || &m_selectables[i] == selectable2 ){
+			Selector_add( selector, m_selectables[i] );
+			selectedPlaneCallback( planes[i] );
+		}
 	m_bounds = aabb;
 }
 void selectReversedPlanes( const AABB& aabb, Selector& selector, const SelectedPlanes& selectedPlanes, const Matrix4& rotation = g_matrix4_identity ){
 	Plane3 planes[6];
 	aabb_planes_oriented( aabb, rotation, planes );
-
-	if ( selectedPlanes.contains( plane3_flipped( planes[0] ) ) ) {
-		Selector_add( selector, m_selectable_right );
-	}
-	if ( selectedPlanes.contains( plane3_flipped( planes[1] ) ) ) {
-		Selector_add( selector, m_selectable_left );
-	}
-	if ( selectedPlanes.contains( plane3_flipped( planes[2] ) ) ) {
-		Selector_add( selector, m_selectable_front );
-	}
-	if ( selectedPlanes.contains( plane3_flipped( planes[3] ) ) ) {
-		Selector_add( selector, m_selectable_back );
-	}
-	if ( selectedPlanes.contains( plane3_flipped( planes[4] ) ) ) {
-		Selector_add( selector, m_selectable_top );
-	}
-	if ( selectedPlanes.contains( plane3_flipped( planes[5] ) ) ) {
-		Selector_add( selector, m_selectable_bottom );
-	}
+	for ( std::size_t i = 0; i < 6; ++i )
+		if ( selectedPlanes.contains( plane3_flipped( planes[i] ) ) )
+			Selector_add( selector, m_selectables[i] );
 }
 AABB evaluateResize( const Vector3& translation ) const {
 	Vector3 min = m_bounds.origin - m_bounds.extents;
 	Vector3 max = m_bounds.origin + m_bounds.extents;
-	if ( m_bounds.extents[0] != 0 ) {
-		if ( m_selectable_right.isSelected() ) {
-			max[0] += translation[0];
-			//globalOutputStream() << "moving right\n";
+	for ( std::size_t i = 0; i < 3; ++i )
+		if ( m_bounds.extents[i] != 0 ){
+			if ( m_selectables[i * 2].isSelected() )
+				max[i] += translation[i];
+			if ( m_selectables[i * 2 + 1].isSelected() )
+				min[i] += translation[i];
 		}
-		if ( m_selectable_left.isSelected() ) {
-			min[0] += translation[0];
-			//globalOutputStream() << "moving left\n";
-		}
-	}
-	if ( m_bounds.extents[1] != 0 ) {
-		if ( m_selectable_front.isSelected() ) {
-			max[1] += translation[1];
-			//globalOutputStream() << "moving front\n";
-		}
-		if ( m_selectable_back.isSelected() ) {
-			min[1] += translation[1];
-			//globalOutputStream() << "moving back\n";
-		}
-	}
-	if ( m_bounds.extents[2] != 0 ) {
-		if ( m_selectable_top.isSelected() ) {
-			max[2] += translation[2];
-			//globalOutputStream() << "moving top\n";
-		}
-		if ( m_selectable_bottom.isSelected() ) {
-			min[2] += translation[2];
-			//globalOutputStream() << "moving bottom\n";
-		}
-	}
-
 	return AABB( vector3_mid( min, max ), vector3_scaled( vector3_subtracted( max, min ), 0.5 ) );
 }
 AABB evaluateResize( const Vector3& translation, const Matrix4& rotation ) const {
@@ -226,12 +200,13 @@ Matrix4 evaluateTransform( const Vector3& translation ) const {
 };
 
 
-namespace{
-
 class ScaleRadius {
 	ObservedSelectable m_selectable;
 public:
-	static Matrix4 m_model;
+	static Matrix4& m_model() {
+		static Matrix4 model;
+		return model;
+	}
 
 	ScaleRadius( const SelectionChangeCallback& onchanged ) :
 		m_selectable( onchanged ) {
@@ -243,7 +218,7 @@ public:
 		m_selectable.setSelected( selected );
 	}
 	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) {
-		m_model = test.getVolume().GetModelview();
+		m_model() = test.getVolume().GetModelview();
 		Selector_add( selector, m_selectable );
 		selectedPlaneCallback( Plane3( 2, 0, 0, 0 ) );
 	}
@@ -251,12 +226,10 @@ public:
 		const float len = vector3_length( translation );
 		if( len == 0 )
 			return 0;
-		Vector3 tra = matrix4_transformed_direction( m_model, translation );
+		Vector3 tra = matrix4_transformed_direction( m_model(), translation );
 		vector3_normalise( tra );
 		return tra[0] * len;
 	}
 };
-Matrix4 ScaleRadius::m_model = g_matrix4_identity;
 
-}//namespace
 #endif
