@@ -2372,6 +2372,8 @@ public:
 					}
 				}
 			}
+			if( view.GetViewMatrix().xw() != 0 || view.GetViewMatrix().yw() != 0 ) // select only plane in camera
+				selectable2 = 0;
 			if( selectable ){
 				Vector3 origin = m_bounds.origin;
 				for ( int i = 0; i < 3; ++i )

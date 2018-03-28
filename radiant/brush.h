@@ -3580,9 +3580,12 @@ void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback&
 	FaceInstances_ptrs bestInstances;
 	selectPlanes( test, bestInstances );
 
+	const bool cam = test.getVolume().GetViewMatrix().xw() != 0 || test.getVolume().GetViewMatrix().yw() != 0;
 	for ( FaceInstances_ptrs::iterator i = bestInstances.begin(); i != bestInstances.end(); ++i ){
 		( *i )->addSelectable( selector );
 		selectedPlaneCallback( ( *i )->getFace().plane3() );
+		if( cam )
+			return; // select only plane in camera
 	}
 }
 void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
@@ -3597,9 +3600,11 @@ void selectVerticesOnPlanes( SelectionTest& test ){
 	FaceInstances_ptrs bestInstances;
 	selectPlanes( test, bestInstances );
 
-	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i ){
+	if( ( test.getVolume().GetViewMatrix().xw() != 0 || test.getVolume().GetViewMatrix().yw() != 0 ) && !bestInstances.empty() ) // select only plane in camera
+		for( FaceInstances_ptrs::iterator i = bestInstances.end() - 1; i != bestInstances.begin(); --i )
+			bestInstances.pop_back();
+	for ( VertexInstances::iterator i = m_vertexInstances.begin(); i != m_vertexInstances.end(); ++i )
 		( *i ).selectVerticesOnFaces( bestInstances );
-	}
 }
 
 void selectVerticesOnTestedFaces( SelectionTest& test ){
