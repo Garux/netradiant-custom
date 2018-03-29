@@ -39,5 +39,6 @@ void BuildMonitor_Run( GPtrArray* commands, const char* mapName );
 
 extern bool g_WatchBSP_Enabled;
 extern bool g_WatchBSP_LeakStop;
+extern bool g_WatchBSP0_DumpLog;
 
 #endif

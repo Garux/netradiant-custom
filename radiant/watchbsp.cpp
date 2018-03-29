@@ -168,9 +168,10 @@ bool g_WatchBSP_Enabled = true;
 // do we stop the compilation process if we come accross a leak?
 bool g_WatchBSP_LeakStop = true;
 bool g_WatchBSP_RunQuake = false;
+bool g_WatchBSP0_DumpLog = false;
 // timeout when beginning a step (in seconds)
 // if we don't get a connection quick enough we assume something failed and go back to idling
-int g_WatchBSP_Timeout = 10;
+const int g_WatchBSP_Timeout = 5;
 
 
 void Build_constructPreferences( PreferencesPage& page ){
@@ -179,6 +180,7 @@ void Build_constructPreferences( PreferencesPage& page ){
 	GtkWidget* runengine = page.appendCheckBox( "", "Run Engine After Compile", g_WatchBSP_RunQuake );
 	Widget_connectToggleDependency( leakstop, monitorbsp );
 	Widget_connectToggleDependency( runengine, monitorbsp );
+	page.appendCheckBox( "", "Dump non Monitored Builds Log", g_WatchBSP0_DumpLog );
 }
 void Build_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Build", "Build Preferences" ) );
@@ -196,9 +198,10 @@ void BuildMonitor_Construct(){
 
 	g_WatchBSP_Enabled = !string_equal( g_pGameDescription->getKeyValue( "no_bsp_monitor" ), "1" );
 
-	GlobalPreferenceSystem().registerPreference( "WatchBSP", BoolImportStringCaller( g_WatchBSP_Enabled ), BoolExportStringCaller( g_WatchBSP_Enabled ) );
-	GlobalPreferenceSystem().registerPreference( "RunQuake2Run", BoolImportStringCaller( g_WatchBSP_RunQuake ), BoolExportStringCaller( g_WatchBSP_RunQuake ) );
-	GlobalPreferenceSystem().registerPreference( "LeakStop", BoolImportStringCaller( g_WatchBSP_LeakStop ), BoolExportStringCaller( g_WatchBSP_LeakStop ) );
+	GlobalPreferenceSystem().registerPreference( "BuildMonitor", BoolImportStringCaller( g_WatchBSP_Enabled ), BoolExportStringCaller( g_WatchBSP_Enabled ) );
+	GlobalPreferenceSystem().registerPreference( "BuildRunGame", BoolImportStringCaller( g_WatchBSP_RunQuake ), BoolExportStringCaller( g_WatchBSP_RunQuake ) );
+	GlobalPreferenceSystem().registerPreference( "BuildLeakStop", BoolImportStringCaller( g_WatchBSP_LeakStop ), BoolExportStringCaller( g_WatchBSP_LeakStop ) );
+	GlobalPreferenceSystem().registerPreference( "BuildDumpLog", BoolImportStringCaller( g_WatchBSP0_DumpLog ), BoolExportStringCaller( g_WatchBSP0_DumpLog ) );
 
 	Build_registerPreferencesPage();
 }
@@ -764,7 +767,7 @@ GPtrArray* str_ptr_array_clone( GPtrArray* array ){
 void CWatchBSP::DoMonitoringLoop( GPtrArray *pCmd, const char *sBSPName ){
 	m_sBSPName = string_clone( sBSPName );
 	if ( m_eState != EIdle ) {
-		globalOutputStream() << "WatchBSP got a monitoring request while not idling...\n";
+		globalWarningStream() << "WatchBSP got a monitoring request while not idling...\n";
 		// prompt the user, should we cancel the current process and go ahead?
 //		if ( gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ),  "I am already monitoring a Build process.\nDo you want me to override and start a new compilation?",
 //							 "Build process monitoring", eMB_YESNO ) == eIDYES ) {

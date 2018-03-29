@@ -68,6 +68,8 @@ QEGlobals_t g_qeglobals;
 #define PATH_MAX 260
 #endif
 
+#define RADIANT_MONITOR_ADDRESS "127.0.0.1:39000"
+
 
 void QE_InitVFS(){
 	// VFS initialization -----------------------
@@ -165,7 +167,7 @@ void bsp_init(){
 	build_set_variable( "ExecutableType", RADIANT_EXECUTABLE );
 	build_set_variable( "EnginePath", EnginePath_get() );
 	build_set_variable( "UserEnginePath", g_qeglobals.m_userEnginePath.c_str() );
-	build_set_variable( "MonitorAddress", ( g_WatchBSP_Enabled ) ? "127.0.0.1:39000" : "" );
+	build_set_variable( "MonitorAddress", ( g_WatchBSP_Enabled ) ? RADIANT_MONITOR_ADDRESS : "" );
 	build_set_variable( "GameName", gamename_get() );
 
 	const char* mapname = Map_Name( g_map );
@@ -226,14 +228,10 @@ BatchCommandListener( TextOutputStream& file, const char* outputRedirect ) : m_f
 
 void execute( const char* command ){
 	m_file << command;
-	if ( m_commandCount == 0 ) {
-		m_file << " > ";
+	if( m_outputRedirect ){
+		m_file << ( m_commandCount == 0? " > " : " >> " );
+		m_file << "\"" << m_outputRedirect << "\"";
 	}
-	else
-	{
-		m_file << " >> ";
-	}
-	m_file << "\"" << m_outputRedirect << "\"";
 	m_file << "\n";
 	++m_commandCount;
 }
@@ -282,9 +280,14 @@ void RunBSP( const char* name ){
 
 	bsp_init();
 
-	if ( g_WatchBSP_Enabled ) {
-		ArrayCommandListener listener;
-		build_run( name, listener );
+	ArrayCommandListener listener;
+	build_run( name, listener );
+	bool monitor = false;
+	for ( guint i = 0; i < listener.array()->len; ++i )
+		if( strstr( (char*)g_ptr_array_index( listener.array(), i ), RADIANT_MONITOR_ADDRESS ) )
+			monitor = true;
+
+	if ( g_WatchBSP_Enabled && monitor ) {
 		// grab the file name for engine running
 		const char* fullname = Map_Name( g_map );
 		StringOutputStream bspname( 64 );
@@ -314,7 +317,7 @@ void RunBSP( const char* name ){
 #if defined ( POSIX )
 				batchFile << "#!/bin/sh \n\n";
 #endif
-				BatchCommandListener listener( batchFile, junkpath );
+				BatchCommandListener listener( batchFile, g_WatchBSP0_DumpLog? junkpath : 0 );
 				build_run( name, listener );
 				written = true;
 			}
@@ -324,7 +327,8 @@ void RunBSP( const char* name ){
 			chmod( batpath, 0744 );
 #endif
 			globalOutputStream() << "Writing the compile script to '" << batpath << "'\n";
-			globalOutputStream() << "The build output will be saved in '" << junkpath << "'\n";
+			if( g_WatchBSP0_DumpLog )
+				globalOutputStream() << "The build output will be saved in '" << junkpath << "'\n";
 			Q_Exec( batpath, NULL, NULL, true, false );
 		}
 	}
