@@ -494,7 +494,8 @@ void build_run( const char* name, CommandListener& listener ){
 			{
 				StringBuffer output;
 				( *j ).evaluate( output );
-				listener.execute( output.c_str() );
+				if ( !output.empty() )
+					listener.execute( output.c_str() );
 			}
 		}
 		else
