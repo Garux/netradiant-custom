@@ -2018,15 +2018,16 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 	}
 }
 
-inline bool BP_degenerate( const TextureProjection& projection ){
-	return vector2_cross( Vector2( projection.m_brushprimit_texdef.coords[0][0], projection.m_brushprimit_texdef.coords[0][1] ),
-							Vector2( projection.m_brushprimit_texdef.coords[1][0], projection.m_brushprimit_texdef.coords[1][1] ) ) == 0;
+inline bool BP_degenerate( const brushprimit_texdef_t& bp ){
+	return vector2_cross( Vector2( bp.coords[0][0], bp.coords[0][1] ),
+							Vector2( bp.coords[1][0], bp.coords[1][1] ) ) == 0
+							|| bp.coords[0][0] != bp.coords[0][0];
 }
 
 /// g_bp_globals.m_texdefTypeId must be == TEXDEFTYPEID_BRUSHPRIMITIVES during this
 void AP_from_BP( TextureProjection& projection, const Plane3& plane, std::size_t width, std::size_t height ) {
 	/* catch degenerate BP basis, go default if so */
-	if( BP_degenerate( projection ) ){
+	if( BP_degenerate( projection.m_brushprimit_texdef ) ){
 		projection.m_texdef.scale[0] = Texdef_getDefaultTextureScale();
 		projection.m_texdef.scale[1] = Texdef_getDefaultTextureScale();
 		return;
@@ -2128,7 +2129,7 @@ void Valve220_from_BP( TextureProjection& projection, const Plane3& plane, std::
 	DoubleVector3 texX, texY;
 	ComputeAxisBase( plane.normal(), texX, texY );
 	/* catch degenerate BP basis, go default if so */
-	if( BP_degenerate( projection ) ){
+	if( BP_degenerate( projection.m_brushprimit_texdef ) ){
 		projection.m_basis_s = texX;
 		projection.m_basis_t = texY;
 		projection.m_texdef.scale[0] = Texdef_getDefaultTextureScale();
@@ -2194,7 +2195,12 @@ void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, Tex
 
 void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3], const DoubleVector3 st[3], std::size_t width, std::size_t height ){
 	const Plane3 plane( plane3_for_points( points ) );
-	BP_from_ST( projection.m_brushprimit_texdef, points, st, plane.normal() );
+	brushprimit_texdef_t bp;
+	BP_from_ST( bp, points, st, plane.normal() );
+	if( BP_degenerate( bp ) )
+		return;
+	else
+		projection.m_brushprimit_texdef = bp;
 	if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ){
 		const TexdefTypeId tmp = g_bp_globals.m_texdefTypeId;
 		g_bp_globals.m_texdefTypeId = TEXDEFTYPEID_BRUSHPRIMITIVES;
@@ -2202,8 +2208,6 @@ void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3
 		g_bp_globals.m_texdefTypeId = tmp;
 	}
 	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ){
-		/* catch degenerate BP basis, do nothing if so */
-		if( !BP_degenerate( projection ) )
-			Valve220_from_BP( projection, plane, width, height );
+		Valve220_from_BP( projection, plane, width, height );
 	}
 }
