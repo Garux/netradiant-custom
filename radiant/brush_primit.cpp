@@ -38,6 +38,9 @@
 #include "preferences.h"
 
 
+bp_globals_t g_bp_globals;
+float g_texdef_default_scale;
+
 /*!
    \brief Construct a transform from XYZ space to ST space (3d to 2d).
    This will be one of three axis-aligned spaces, depending on the surface normal.
@@ -236,9 +239,54 @@ void Texdef_normalise( TextureProjection& projection, float width, float height 
 	}
 }
 
-//void ComputeAxisBase( const Vector3& normal, Vector3& texS, Vector3& texT );
+//++timo replace everywhere texX by texS etc. ( ----> and in q3map !)
+// NOTE : ComputeAxisBase here and in q3map code must always BE THE SAME !
+// WARNING : special case behaviour of atan2(y,x) <-> atan(y/x) might not be the same everywhere when x == 0
+// rotation by (0,RotY,RotZ) assigns X to normal
 template <typename Element>
-void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT );
+void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT ){
+#if 1
+	const BasicVector3<Element> up( 0, 0, 1 );
+	const BasicVector3<Element> down( 0, 0, -1 );
+
+	if ( vector3_equal_epsilon( normal, up, Element(1e-6) ) ) {
+		texS = BasicVector3<Element>( 0, 1, 0 );
+		texT = BasicVector3<Element>( 1, 0, 0 );
+	}
+	else if ( vector3_equal_epsilon( normal, down, Element(1e-6) ) ) {
+		texS = BasicVector3<Element>( 0, 1, 0 );
+		texT = BasicVector3<Element>( -1, 0, 0 );
+	}
+	else
+	{
+		texS = vector3_normalised( vector3_cross( normal, up ) );
+		texT = vector3_normalised( vector3_cross( normal, texS ) );
+		vector3_negate( texS );
+	}
+
+#else
+	float RotY,RotZ;
+	// do some cleaning
+	/*
+	   if (fabs(normal[0])<1e-6)
+	      normal[0]=0.0f;
+	   if (fabs(normal[1])<1e-6)
+	      normal[1]=0.0f;
+	   if (fabs(normal[2])<1e-6)
+	      normal[2]=0.0f;
+	 */
+	RotY = -atan2( normal[2],sqrt( normal[1] * normal[1] + normal[0] * normal[0] ) );
+	RotZ = atan2( normal[1],normal[0] );
+	// rotate (0,1,0) and (0,0,1) to compute texS and texT
+	texS[0] = -sin( RotZ );
+	texS[1] = cos( RotZ );
+	texS[2] = 0;
+	// the texT vector is along -Z ( T texture coorinates axis )
+	texT[0] = -sin( RotY ) * cos( RotZ );
+	texT[1] = -sin( RotY ) * sin( RotZ );
+	texT[2] = -cos( RotY );
+#endif
+}
 
 inline void DebugAxisBase( const Vector3& normal ){
 	Vector3 x, y;
@@ -444,6 +492,8 @@ void AddPointToBounds( const Vector3& v, Vector3& mins, Vector3& maxs ){
 	}
 }
 #endif
+
+#if 0
 template<typename Element>
 inline BasicVector3<Element> vector3_inverse( const BasicVector3<Element>& self ){
 	return BasicVector3<Element>(
@@ -452,9 +502,7 @@ inline BasicVector3<Element> vector3_inverse( const BasicVector3<Element>& self 
 			   Element( 1.0 / self.z() )
 			   );
 }
-
-bp_globals_t g_bp_globals;
-float g_texdef_default_scale;
+#endif
 
 #if 0
 // compute a determinant using Sarrus rule
@@ -499,54 +547,6 @@ void MatrixForPoints( Vector3 M[3], Vector3 D[2], brushprimit_texdef_t *T ){
 	T->coords[1][2] = SarrusDet( M[0], M[1], D[1] ) / det;
 }
 #endif
-//++timo replace everywhere texX by texS etc. ( ----> and in q3map !)
-// NOTE : ComputeAxisBase here and in q3map code must always BE THE SAME !
-// WARNING : special case behaviour of atan2(y,x) <-> atan(y/x) might not be the same everywhere when x == 0
-// rotation by (0,RotY,RotZ) assigns X to normal
-template <typename Element>
-void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT ){
-#if 1
-	const BasicVector3<Element> up( 0, 0, 1 );
-	const BasicVector3<Element> down( 0, 0, -1 );
-
-	if ( vector3_equal_epsilon( normal, up, Element(1e-6) ) ) {
-		texS = BasicVector3<Element>( 0, 1, 0 );
-		texT = BasicVector3<Element>( 1, 0, 0 );
-	}
-	else if ( vector3_equal_epsilon( normal, down, Element(1e-6) ) ) {
-		texS = BasicVector3<Element>( 0, 1, 0 );
-		texT = BasicVector3<Element>( -1, 0, 0 );
-	}
-	else
-	{
-		texS = vector3_normalised( vector3_cross( normal, up ) );
-		texT = vector3_normalised( vector3_cross( normal, texS ) );
-		vector3_negate( texS );
-	}
-
-#else
-	float RotY,RotZ;
-	// do some cleaning
-	/*
-	   if (fabs(normal[0])<1e-6)
-	      normal[0]=0.0f;
-	   if (fabs(normal[1])<1e-6)
-	      normal[1]=0.0f;
-	   if (fabs(normal[2])<1e-6)
-	      normal[2]=0.0f;
-	 */
-	RotY = -atan2( normal[2],sqrt( normal[1] * normal[1] + normal[0] * normal[0] ) );
-	RotZ = atan2( normal[1],normal[0] );
-	// rotate (0,1,0) and (0,0,1) to compute texS and texT
-	texS[0] = -sin( RotZ );
-	texS[1] = cos( RotZ );
-	texS[2] = 0;
-	// the texT vector is along -Z ( T texture coorinates axis )
-	texT[0] = -sin( RotY ) * cos( RotZ );
-	texT[1] = -sin( RotY ) * sin( RotZ );
-	texT[2] = -cos( RotY );
-#endif
-}
 
 #if 0
 

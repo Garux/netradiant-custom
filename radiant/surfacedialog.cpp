@@ -540,7 +540,7 @@ static void OnBtnReset( GtkWidget *widget, gpointer data ){
 
 static void OnBtnProject( GtkWidget *widget, EProjectTexture type ){
 	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
-		globalErrorStream() << "function doesn't work for *brushes*, having Axial Projection type\n"; //works for patches
+		globalWarningStream() << "function doesn't work for *brushes*, having Axial Projection type\n"; //works for patches
 	}
 	getSurfaceInspector().exportData();
 	SurfaceInspector_ProjectTexture( type );
