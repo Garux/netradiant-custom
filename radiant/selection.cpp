@@ -140,6 +140,23 @@ void point_on_plane( Vector3& point, const Matrix4& device2object, const float x
 	point = vector4_projected( matrix4_transformed_vector4( device2object, Vector4( x, y, object2device[14] / object2device[15], 1 ) ) );
 }
 
+inline double plane3_distance_to_point( const Plane3& plane, const Vector3& point ){
+	return vector3_dot( point, plane.normal() ) - plane.dist();
+}
+
+inline Vector3 ray_intersect_plane( const Ray& ray, const Plane3& plane ){
+	return ray.origin + vector3_scaled(
+			   ray.direction,
+			   -plane3_distance_to_point( plane, ray.origin )
+			   / vector3_dot( ray.direction, plane.normal() )
+			   );
+}
+Vector3 point_on_plane( const Plane3& plane, const Matrix4& object2device, const float x, const float y ){
+	Ray ray;
+	ray_for_device_point( ray, matrix4_full_inverse( object2device ), x, y );
+	return ray_intersect_plane( ray, plane );
+}
+
 //! a and b are unit vectors .. returns angle in radians
 inline float angle_between( const Vector3& a, const Vector3& b ){
 	return static_cast<float>( 2.0 * atan2(
@@ -691,45 +708,54 @@ void SetAxes( const Vector3& axis_which, int axis_by, int axis_by_sign ){
 class DragNewBrush : public Manipulatable
 {
 private:
-Vector3 m_start;
 Vector3 m_0;
 Vector3 m_size;
+float m_setSizeZ; /* store separately for fine square/cube modes handling */
 scene::Node* m_newBrushNode;
 public:
+const View* m_view;
 DragNewBrush(){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_plane( m_start, device2manip, x, y );
-	m_size[0] = m_size[1] = m_size[2] = GetGridSize();
+	m_setSizeZ = m_size[0] = m_size[1] = m_size[2] = GetGridSize();
 	m_newBrushNode = 0;
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_plane( current, device2manip, x, y );
-	current = vector3_subtracted( current, m_start );
-	translation_local2object( current, current, manip2object );
-	Vector3 current_snapped = vector3_snapped( current, GetSnapGridSize() );
+	Vector3 diff_raw = point_on_plane( Plane3( g_vector3_axis_z, vector3_dot( g_vector3_axis_z, Vector3( m_size.x(), m_size.y(), m_setSizeZ ) + m_0 ) ), m_view->GetViewMatrix(), x, y ) - m_0;
+	const Vector3 xydir( vector3_normalised( Vector3( m_view->GetModelview()[2], m_view->GetModelview()[6], 0 ) ) );
+	diff_raw.z() = ( point_on_plane( Plane3( xydir, vector3_dot( xydir, Vector3( m_size.x(), m_size.y(), m_setSizeZ ) + m_0 ) ), m_view->GetViewMatrix(), x, y ) - m_0 ).z();
+	Vector3 diff = vector3_snapped( diff_raw, GetSnapGridSize() );
+
 	for ( std::size_t i = 0; i < 3; ++i )
-		if( current_snapped[i] == 0 )
-			current_snapped[i] = current[i] < 0? -GetGridSize() : GetGridSize();
+		if( diff[i] == 0 )
+			diff[i] = diff_raw[i] < 0? -GetGridSize() : GetGridSize();
+
 	if( alt ){
-		current_snapped.x() = m_size.x();
-		current_snapped.y() = m_size.y();
+		diff.x() = m_size.x();
+		diff.y() = m_size.y();
 	}
 	else{
-		current_snapped.z() = m_size.z();
+		diff.z() = m_size.z();
 	}
+
+	const float z = vector4_projected( matrix4_transformed_vector4( m_view->GetViewMatrix(), Vector4( diff + m_0, 1 ) ) ).z();
+	if( z != z || z > 1 ) //catch NAN and behind near, far planes cases
+		return;
+
 	if( snap || snapbbox ){
-		const float squaresize = std::max( fabs( current_snapped.x() ), fabs( current_snapped.y() ) );
-		current_snapped.x() = current_snapped.x() > 0? squaresize : -squaresize;
-		current_snapped.y() = current_snapped.y() > 0? squaresize : -squaresize;
+		const float squaresize = std::max( fabs( diff.x() ), fabs( diff.y() ) );
+		diff.x() = diff.x() > 0? squaresize : -squaresize;
+		diff.y() = diff.y() > 0? squaresize : -squaresize;
 		if( snapbbox && !alt )
-			current_snapped.z() = current_snapped.z() > 0? squaresize : -squaresize;
+			diff.z() = diff.z() > 0? squaresize : -squaresize;
 	}
-	m_size = current_snapped;
+
+	m_size = diff;
+	if( alt )
+		m_setSizeZ = diff.z();
 
 	Vector3 mins( m_0 );
-	Vector3 maxs( current_snapped + m_0 );
+	Vector3 maxs( m_0 + diff );
 	for ( std::size_t i = 0; i < 3; ++i )
 		if( mins[i] > maxs[i] )
 			std::swap( mins[i], maxs[i] );
@@ -3536,11 +3562,10 @@ DragNewBrush m_dragNewBrush;
 bool m_dragSelected; //drag selected primitives or components
 bool m_selected; //components selected temporally for drag
 bool m_newBrush;
-Matrix4& m_pivot2world;
 
 public:
 
-DragManipulator( Matrix4& pivot2world ) : m_freeResize( m_resize ), m_freeDrag( m_drag ), m_selected( false ), m_newBrush( false ), m_pivot2world( pivot2world ){
+DragManipulator() : m_freeResize( m_resize ), m_freeDrag( m_drag ), m_selected( false ), m_newBrush( false ){
 }
 
 Manipulatable* GetManipulatable(){
@@ -3548,6 +3573,10 @@ Manipulatable* GetManipulatable(){
 		return &m_dragNewBrush;
 	else
 		return m_dragSelected? &m_freeDrag : &m_freeResize;
+}
+
+void setView( const View& view ){
+	m_dragNewBrush.m_view = &view;
 }
 
 void testSelect( const View& view, const Matrix4& pivot2world ){
@@ -3616,7 +3645,6 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 		}
 		vector3_snap( start, GetSnapGridSize() );
 		m_dragNewBrush.set0( start );
-		m_pivot2world = matrix4_translation_for_vec3( start );
 	}
 }
 
@@ -3912,7 +3940,6 @@ RadiantSelectionSystem() :
 	m_rotate_manipulator( *this, 8, 64 ),
 	m_scale_manipulator( *this, 0, 64 ),
 	m_skew_manipulator( *this, *this, *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
-	m_drag_manipulator( m_pivot2world ),
 	m_transformOrigin_manipulator( *this, m_pivotIsCustom ),
 	m_pivotChanged( false ),
 	m_pivot_moving( false ),
@@ -4089,6 +4116,8 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 			ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 			if( m_pivot_moving ){
 				m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, vector4_to_vector3( GetPivot2World().t() ) );
+
+				m_drag_manipulator.setView( view ); //hack, sorta
 
 				m_undo_begun = false;
 			}
