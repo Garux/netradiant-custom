@@ -1631,42 +1631,39 @@ public:
 BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable, bool seamless, bool project ) : m_test( test ), m_texturable( texturable ), m_seamless( seamless ), m_project( project ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		BrushInstance* brush = Instance_getBrush( instance );
-		if ( brush != 0 ) {
-			m_test.BeginMesh( brush->localToWorld() );
+	if ( !path.top().get().visible() )
+		return false;
+	BrushInstance* brush = Instance_getBrush( instance );
+	if ( brush != 0 ) {
+		m_test.BeginMesh( brush->localToWorld() );
 
-			for ( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i )
-			{
-				Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable, m_seamless, m_project );
-			}
-		}
-		else
+		for ( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i )
 		{
-			SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance );
-			if ( selectionTestable ) {
-				bool occluded;
-				OccludeSelector selector( m_bestIntersection, occluded );
-				selectionTestable->testSelect( selector, m_test );
-				if ( occluded ) {
-					Patch* patch = Node_getPatch( path.top() );
-					if ( patch != 0 ) {
-						if( m_project )
-							m_texturable.setTexture = makeCallback3( PatchSetTextureProject(), *patch );
-						else
-							m_texturable.setTexture = makeCallback3( PatchSetTexture(), *patch );
-						m_texturable.getTexture = makeCallback3( PatchGetTexture(), *patch );
-					}
+			Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable, m_seamless, m_project );
+		}
+	}
+	else
+	{
+		SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance );
+		if ( selectionTestable ) {
+			bool occluded;
+			OccludeSelector selector( m_bestIntersection, occluded );
+			selectionTestable->testSelect( selector, m_test );
+			if ( occluded ) {
+				Patch* patch = Node_getPatch( path.top() );
+				if ( patch != 0 ) {
+					if( m_project )
+						m_texturable.setTexture = makeCallback3( PatchSetTextureProject(), *patch );
 					else
-					{
-						m_texturable = Texturable();
-					}
+						m_texturable.setTexture = makeCallback3( PatchSetTexture(), *patch );
+					m_texturable.getTexture = makeCallback3( PatchGetTexture(), *patch );
+				}
+				else
+				{
+					m_texturable = Texturable();
 				}
 			}
 		}
-	}
-	else{
-		return false;
 	}
 	return true;
 }

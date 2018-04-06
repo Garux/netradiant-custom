@@ -75,9 +75,6 @@
 
 void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHeight );
 
-// d1223m
-extern bool g_brush_always_caulk;
-
 bool g_bCamEntityMenu = false;
 
 //!\todo Rewrite.
@@ -1206,7 +1203,7 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 	XY_ToPoint( x, y, maxs );
 	XY_SnapToGrid( maxs );
 
-	int nDim = ( m_viewType == XY ) ? 2 : ( m_viewType == YZ ) ? 0 : 1;
+	const int nDim = ( m_viewType == XY ) ? 2 : ( m_viewType == YZ ) ? 0 : 1;
 
 	mins[nDim] = float_snapped( Select_getWorkZone().d_work_min[nDim], GetSnapGridSize() );
 	maxs[nDim] = float_snapped( Select_getWorkZone().d_work_max[nDim], GetSnapGridSize() );
@@ -1216,7 +1213,7 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 	}
 
 	if( square || cube ){
-		float squaresize = std::max( fabs( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ), fabs( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) );
+		const float squaresize = std::max( fabs( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ), fabs( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) );
 		maxs[(nDim + 1) % 3] = ( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ) > 0.f ? ( mins[(nDim + 1) % 3] + squaresize ) : ( mins[(nDim + 1) % 3] - squaresize );
 		maxs[(nDim + 2) % 3] = ( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) > 0.f ? ( mins[(nDim + 2) % 3] + squaresize ) : ( mins[(nDim + 2) % 3] - squaresize );
 		if( cube ){
@@ -1226,34 +1223,16 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 
 	for ( int i = 0 ; i < 3 ; i++ )
 	{
-		if ( mins[i] == maxs[i] ) {
+		if ( mins[i] == maxs[i] )
 			return; // don't create a degenerate brush
-		}
-		if ( mins[i] > maxs[i] ) {
-			float temp = mins[i];
-			mins[i] = maxs[i];
-			maxs[i] = temp;
-		}
+		if ( mins[i] > maxs[i] )
+			std::swap( mins[i], maxs[i] );
 	}
 
-	if ( m_NewBrushDrag == 0 ) {
+	if ( m_NewBrushDrag == 0 )
 		GlobalUndoSystem().start();
-		NodeSmartReference node( GlobalBrushCreator().createBrush() );
-		Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node );
 
-		scene::Path brushpath( makeReference( GlobalSceneGraph().root() ) );
-		brushpath.push( makeReference( *Map_GetWorldspawn( g_map ) ) );
-		brushpath.push( makeReference( node.get() ) );
-		selectPath( brushpath, true );
-
-		m_NewBrushDrag = node.get_pointer();
-	}
-
-	// d1223m
-	//Scene_BrushResize_Selected(GlobalSceneGraph(), aabb_for_minmax(mins, maxs), TextureBrowser_GetSelectedShader(GlobalTextureBrowser()));
-	Scene_BrushResize_Selected( GlobalSceneGraph(), aabb_for_minmax( mins, maxs ),
-								g_brush_always_caulk ?
-								GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+	Scene_BrushResize_Cuboid( m_NewBrushDrag, aabb_for_minmax( mins, maxs ) );
 }
 
 int g_entityCreationOffset = 0;

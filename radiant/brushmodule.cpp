@@ -38,7 +38,7 @@ LatchedBool g_useAlternativeTextureProjection( false, "Use alternative texture-p
 bool g_multipleBrushTypes = false;
 EBrushType g_brushTypes[3];
 int g_brushType;
-bool g_brush_always_caulk;
+bool g_brush_always_caulk = false;
 
 bool getTextureLockEnabled(){
 	return g_brush_texturelock_enabled;

@@ -125,18 +125,8 @@ void selectPlanes( const AABB& aabb, Selector& selector, SelectionTest& test, co
 	for ( std::size_t i = 0; i < 6; ++i ){
 		const std::size_t index = i * 4;
 		const Vector3 centroid = vector3_mid( corners[indices[index]], corners[indices[index + 2]] );
-		const Vector3 projected = vector4_projected(
-			matrix4_transformed_vector4(
-				test.getVolume().GetViewMatrix(),
-				Vector4( centroid, 1 )
-				)
-			);
-		const Vector3 closest_point = vector4_projected(
-			matrix4_transformed_vector4(
-				test.getScreen2world(),
-				Vector4( 0, 0, projected[2], 1 )
-				)
-			);
+		const Vector3 projected = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( centroid, 1 ) ) );
+		const Vector3 closest_point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, projected[2], 1 ) ) );
 		if ( vector3_dot( planes[i].normal(), closest_point - corners[indices[index]] ) > 0
 			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 1]] ) > 0
 			&& vector3_dot( planes[i].normal(), closest_point - corners[indices[index + 2]] ) > 0

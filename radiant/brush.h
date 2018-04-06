@@ -2721,18 +2721,8 @@ void selectReversedPlane( Selector& selector, const SelectedPlanes& selectedPlan
 }
 
 bool trySelectPlane( const SelectionTest& test ){
-	const Vector3 projected = vector4_projected(
-		matrix4_transformed_vector4(
-			test.getVolume().GetViewMatrix(),
-			Vector4( getFace().centroid(), 1 )
-			)
-		);
-	const Vector3 closest_point = vector4_projected(
-		matrix4_transformed_vector4(
-			test.getScreen2world(),
-			Vector4( 0, 0, projected[2], 1 )
-			)
-		);
+	const Vector3 projected = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( getFace().centroid(), 1 ) ) );
+	const Vector3 closest_point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, projected[2], 1 ) ) );
 	for ( Winding::const_iterator i = getFace().getWinding().begin(); i != getFace().getWinding().end(); ++i ){
 		if ( vector3_dot( getFace().plane3().normal(), closest_point - ( *i ).vertex ) < 0.005 ) /* epsilon to prevent almost perpendicular faces pickup */
 			return false;

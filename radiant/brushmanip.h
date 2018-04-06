@@ -45,7 +45,7 @@ class Node;
 }
 void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::size_t sides, const char* shader );
 class AABB;
-void Scene_BrushResize_Selected( scene::Graph& graph, const AABB& bounds, const char* shader );
+void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds );
 void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds );
 void Scene_BrushSetTexdef_Selected( scene::Graph& graph, const TextureProjection& projection, bool setBasis, bool resetBasis );
 void Scene_BrushSetTexdef_Component_Selected( scene::Graph& graph, const TextureProjection& projection, bool setBasis, bool resetBasis );

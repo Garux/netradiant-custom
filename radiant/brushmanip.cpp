@@ -42,6 +42,13 @@ void Brush_ConstructCuboid( Brush& brush, const AABB& bounds, const char* shader
 	Vector3 mins( vector3_subtracted( bounds.origin, bounds.extents ) );
 	Vector3 maxs( vector3_added( bounds.origin, bounds.extents ) );
 
+	for( std::size_t i = 0; i < 3; ++i ){
+		if( mins[i] < g_MinWorldCoord )
+			mins[i] = g_MinWorldCoord;
+		if( maxs[i] > g_MaxWorldCoord )
+			maxs[i] = g_MaxWorldCoord;
+	}
+
 	brush.clear();
 	brush.reserve( 6 );
 
@@ -823,15 +830,29 @@ void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::si
 	}
 }
 
-void Scene_BrushResize_Selected( scene::Graph& graph, const AABB& bounds, const char* shader ){
-	if ( GlobalSelectionSystem().countSelected() != 0 ) {
-		const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
+#include "filterbar.h"
+extern bool g_brush_always_caulk;
 
-		Brush* brush = Node_getBrush( path.top() );
-		if ( brush != 0 ) {
-			Brush_ConstructCuboid( *brush, bounds, shader, TextureTransform_getDefault() );
-			SceneChangeNotify();
-		}
+void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds ){
+	if ( node == 0 ) {
+		NodeSmartReference node_( GlobalBrushCreator().createBrush() );
+		Node_getTraversable( Map_FindOrInsertWorldspawn( g_map ) )->insert( node_ );
+
+		scene::Path brushpath( makeReference( GlobalSceneGraph().root() ) );
+		brushpath.push( makeReference( *Map_GetWorldspawn( g_map ) ) );
+		brushpath.push( makeReference( node_.get() ) );
+		selectPath( brushpath, true );
+
+		node = node_.get_pointer();
+	}
+
+	Brush* brush = Node_getBrush( *node );
+	if ( brush != 0 ) {
+		const char* shader = g_brush_always_caulk?
+								GetCaulkShader()
+								: TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
+		Brush_ConstructCuboid( *brush, bounds, shader, TextureTransform_getDefault() );
+		SceneChangeNotify();
 	}
 }
 
