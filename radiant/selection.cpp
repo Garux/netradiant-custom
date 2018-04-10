@@ -744,9 +744,9 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 
 	if( snap || snapbbox ){
 		const float squaresize = std::max( fabs( diff.x() ), fabs( diff.y() ) );
-		diff.x() = diff.x() > 0? squaresize : -squaresize;
+		diff.x() = diff.x() > 0? squaresize : -squaresize; //square
 		diff.y() = diff.y() > 0? squaresize : -squaresize;
-		if( snapbbox && !alt )
+		if( snapbbox && !alt ) //cube
 			diff.z() = diff.z() > 0? squaresize : -squaresize;
 	}
 
@@ -3641,7 +3641,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 		else{
 			const Vector3 near = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, -1, 1 ) ) );
 			const Vector3 far = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, 1, 1 ) ) );
-			start = vector3_normalised( far - near ) * 256.f + near;
+			start = vector3_normalised( far - near ) * ( 256.f + GetGridSize() ) + near;
 		}
 		vector3_snap( start, GetSnapGridSize() );
 		m_dragNewBrush.set0( start );
