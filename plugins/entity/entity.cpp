@@ -396,10 +396,12 @@ bool filter( const Entity& entity ) const {
 
 filter_entity_world g_filter_entity_world;
 
+#include "qerplugin.h"
+
 void Entity_InitFilters(){
 	add_entity_filter( g_filter_entity_world, EXCLUDE_WORLD );
 	add_entity_filter( g_filter_entity_func_group, EXCLUDE_FUNC_GROUPS );
-	if( g_gameType == eGameTypeQuake1 ){
+	if( string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ), "quake" ) ){
 		add_entity_filter( g_filter_entity_func_detail, EXCLUDE_DETAILS );
 		add_entity_filter( g_filter_entity_not_func_detail, EXCLUDE_STRUCTURAL );
 	}
@@ -444,13 +446,7 @@ void Entity_Construct( EGameType gameType ){
 	}
 
 	Entity_InitFilters();
-	LightType lightType = LIGHTTYPE_DEFAULT;
-	if ( g_gameType == eGameTypeRTCW ) {
-		lightType = LIGHTTYPE_RTCW;
-	}
-	else if ( g_gameType == eGameTypeDoom3 ) {
-		lightType = LIGHTTYPE_DOOM3;
-	}
+	const LightType lightType = g_gameType == eGameTypeRTCW? LIGHTTYPE_RTCW : g_gameType == eGameTypeDoom3? LIGHTTYPE_DOOM3 : LIGHTTYPE_DEFAULT;
 	Light_Construct( lightType );
 	MiscModel_construct();
 	Doom3Group_construct();

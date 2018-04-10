@@ -1233,13 +1233,12 @@ void BrushFilters_construct(){
 	add_brush_filter( g_filter_brush_visportal, EXCLUDE_VISPORTALS );
 	add_brush_filter( g_filter_brush_areaportal, EXCLUDE_AREAPORTALS );
 	add_brush_filter( g_filter_brush_translucent, EXCLUDE_TRANSLUCENT );
-	if( !string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ), "quake" ) ){ /* conditional for entity based struct/det filters; see entity plugin */
+	if( !string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "brushtypes" ), "quake" ) ){ /* conditional for entity based structural/detail filters; see entity plugin */
 		add_brush_filter( g_filter_brush_detail, EXCLUDE_DETAILS );
 		add_brush_filter( g_filter_brush_detail, EXCLUDE_STRUCTURAL, true );
 	}
-	else{
+	if( string_equal( GlobalRadiant().getRequiredGameDescriptionKeyValue( "entities" ), "quake" ) )
 		add_brush_filter( g_filter_brush_liquids_q1, EXCLUDE_LIQUIDS );
-	}
 	add_brush_filter( g_filter_brush_lightgrid, EXCLUDE_LIGHTGRID );
 	add_brush_filter( g_filter_brush_decals, EXCLUDE_DECALS );
 }
