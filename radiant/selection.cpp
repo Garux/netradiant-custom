@@ -2432,7 +2432,8 @@ public:
 					}
 				}
 			}
-			if( view.GetViewMatrix().xw() != 0 || view.GetViewMatrix().yw() != 0 ) // select only plane in camera
+//			if( view.GetViewMatrix().xw() != 0 || view.GetViewMatrix().yw() != 0 )
+			if( view.fill() ) // select only plane in camera
 				selectable2 = 0;
 			if( selectable ){
 				Vector3 origin = m_bounds.origin;

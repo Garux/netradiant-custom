@@ -143,7 +143,7 @@ void selectPlanes( const AABB& aabb, Selector& selector, SelectionTest& test, co
 			}
 		}
 	}
-	if( test.getVolume().GetViewMatrix().xw() != 0 || test.getVolume().GetViewMatrix().yw() != 0 ) // select only plane in camera
+	if( test.getVolume().fill() ) // select only plane in camera
 		selectable2 = 0;
 	for ( std::size_t i = 0; i < 6; ++i )
 		if( &m_selectables[i] == selectable || &m_selectables[i] == selectable2 ){
