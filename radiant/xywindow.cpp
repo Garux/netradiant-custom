@@ -560,8 +560,8 @@ void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
 		int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
 		int nDim2 = ( m_viewType == XY ) ? 1 : 2;
 		Vector3 origin = GetOrigin();
-		origin[nDim1] += scale_diff * (pointx - 0.5 * Width());
-		origin[nDim2] -= scale_diff * (pointy - 0.5 * Height());
+		origin[nDim1] += scale_diff * ( pointx - 0.5 * Width() );
+		origin[nDim2] -= scale_diff * ( pointy - 0.5 * Height() );
 		SetOrigin( origin );
 	}
 }
@@ -1442,21 +1442,17 @@ int g_zoom2y = 0;
 void XYWnd_zoomDelta( int x, int y, unsigned int state, void* data ){
 	if ( y != 0 ) {
 		g_dragZoom += y;
-		while ( abs( g_dragZoom ) > 8 )
+		const int threshold = 16;
+		while ( abs( g_dragZoom ) > threshold )
 		{
 			if ( g_dragZoom > 0 ) {
 				reinterpret_cast<XYWnd*>( data )->ZoomOut();
-				g_dragZoom -= 8;
+				g_dragZoom -= threshold;
 			}
 			else
 			{
-				if ( g_xywindow_globals.m_bZoomInToPointer ) {
-					reinterpret_cast<XYWnd*>( data )->ZoomInWithMouse( g_zoom2x, g_zoom2y );
-				}
-				else{
-					reinterpret_cast<XYWnd*>( data )->ZoomIn();
-				}
-				g_dragZoom += 8;
+				reinterpret_cast<XYWnd*>( data )->ZoomInWithMouse( g_zoom2x, g_zoom2y );
+				g_dragZoom += threshold;
 			}
 		}
 	}
