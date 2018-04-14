@@ -5264,7 +5264,6 @@ void testSelect( DeviceVector position ){
 		DeviceVector delta( position - m_start );
 		if ( fabs( delta.x() ) > m_epsilon.x() && fabs( delta.y() ) > m_epsilon.y() ) {
 			DeviceVector delta( position - m_start );
-			//getSelectionSystem().SelectArea( *m_view, &m_start[0], &delta[0], modifier, ( m_state & c_modifier_face ) != c_modifierNone );
 			getSelectionSystem().SelectArea( *m_view, &m_start[0], &delta[0], RadiantSelectionSystem::eToggle, ( m_state & c_modifier_face ) != c_modifierNone );
 		}
 		else if( !m_mouseMovedWhilePressed ){
@@ -5280,16 +5279,8 @@ void testSelect( DeviceVector position ){
 }
 
 void testSelect_simpleM1( DeviceVector position ){
-	/*RadiantSelectionSystem::EModifier modifier = RadiantSelectionSystem::eReplace;
-	DeviceVector delta( position - m_start );
-	if ( fabs( delta.x() ) < m_epsilon.x() && fabs( delta.y() ) < m_epsilon.y() ) {
-		modifier = RadiantSelectionSystem::eCycle;
-	}
-	getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], modifier, false );*/
-	if( g_bLeftMouseClickSelector ){
-		getSelectionSystem().SelectPoint( *m_view, &position[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
-	}
-	m_start = m_current = device_constrained( position );
+	if( g_bLeftMouseClickSelector )
+		getSelectionSystem().SelectPoint( *m_view, &device_constrained( position )[0], &m_epsilon[0], m_mouseMoved ? RadiantSelectionSystem::eReplace : RadiantSelectionSystem::eCycle, false );
 }
 
 
@@ -5325,7 +5316,6 @@ void mouseDown( DeviceVector position ){
 
 void mouseMoved( DeviceVector position ){
 	m_current = device_constrained( position );
-	//m_mouseMovedWhilePressed = true;
 	if( m_mouse2 ){
 		draw_area();
 	}
@@ -5401,15 +5391,7 @@ void modifierDisable( ModifierFlags type ){
 };
 
 
-inline bool mouse_moved_epsilon( const WindowVector& position, const DeviceVector& moveStart, int width, int height, float epsilon, float& move ){
-	if( move > epsilon )
-		return true;
-	const DeviceVector device( device_constrained( window_to_normalised_device( position, width, height ) ) );
-	const float currentMove = std::max( fabs( device.x() - moveStart.x() ), fabs( device.y() - moveStart.y() ) );
-	move = std::max( move, currentMove );
-	//globalOutputStream() << move << "\n";
-	return move > epsilon;
-}
+
 
 class RadiantWindowObserver : public SelectionSystemWindowObserver
 {
@@ -5454,13 +5436,14 @@ void onSizeChanged( int width, int height ){
 	m_selector.m_epsilon = m_manipulator.m_epsilon = m_texmanipulator.m_epsilon = epsilon;
 }
 void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
+	const DeviceVector devicePosition( device( position ) );
+
 	if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
 		m_mouse_down = true;
-		//m_selector.m_mouseMoved = false;
-
-		DeviceVector devicePosition( window_to_normalised_device( position, m_width, m_height ) );
 		g_bAltResize_AltSelect = ( modifiers == c_modifierAlt );
-		if ( ( modifiers == c_modifier_manipulator || ( modifiers == c_modifierAlt && getSelectionSystem().Mode() != SelectionSystem::eComponent ) ) && m_manipulator.mouseDown( devicePosition ) ) {
+		if ( ( modifiers == c_modifier_manipulator
+					|| ( modifiers == c_modifierAlt && getSelectionSystem().Mode() == SelectionSystem::ePrimitive )
+				) && m_manipulator.mouseDown( devicePosition ) ) {
 			g_mouseMovedCallback.insert( MouseEventCallback( Manipulator_::MouseMovedCaller( m_manipulator ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Manipulator_::MouseUpCaller( m_manipulator ) ) );
 		}
@@ -5474,46 +5457,41 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 	}
 	else if ( button == c_button_texture ) {
 		m_mouse_down = true;
-		DeviceVector devicePosition( device_constrained( window_to_normalised_device( position, m_width, m_height ) ) );
-
 		m_texmanipulator.mouseDown( devicePosition );
 		g_mouseMovedCallback.insert( MouseEventCallback( TexManipulator_::MouseMovedCaller( m_texmanipulator ) ) );
 		g_mouseUpCallback.insert( MouseEventCallback( TexManipulator_::MouseUpCaller( m_texmanipulator ) ) );
 	}
-	m_moveStart = device_constrained( window_to_normalised_device( position, m_width, m_height ) );
+
+	m_moveStart = devicePosition;
 	m_movePressed = 0.f;
 }
 void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
-	m_selector.m_mouseMoved = mouse_moved_epsilon( position, m_moveEnd, m_width, m_height, m_moveEpsilon, m_move );
+	m_selector.m_mouseMoved = mouse_moved_epsilon( position, m_moveEnd, m_move );
 	if ( m_mouse_down && !g_mouseMovedCallback.empty() ) {
-		m_manipulator.m_mouseMovedWhilePressed = m_selector.m_mouseMovedWhilePressed = mouse_moved_epsilon( position, m_moveStart, m_width, m_height, m_moveEpsilon, m_movePressed );
-		g_mouseMovedCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
+		m_manipulator.m_mouseMovedWhilePressed = m_selector.m_mouseMovedWhilePressed = mouse_moved_epsilon( position, m_moveStart, m_movePressed );
+		g_mouseMovedCallback.get() ( device( position ) );
 	}
 	else{
-		getSelectionSystem().HighlightManipulator( *m_manipulator.m_view, &window_to_normalised_device( position, m_width, m_height )[0], &m_manipulator.m_epsilon[0] );
+		getSelectionSystem().HighlightManipulator( *m_manipulator.m_view, &device( position )[0], &m_manipulator.m_epsilon[0] );
 	}
 }
 void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
 	if ( ( button == c_button_select || button == c_button_select2 || button == c_button_texture ) && !g_mouseUpCallback.empty() ) {
+		g_mouseUpCallback.get() ( device( position ) );
 		m_mouse_down = false;
-
-		g_mouseUpCallback.get() ( window_to_normalised_device( position, m_width, m_height ) );
 	}
-	//L button w/o scene changed = tunnel selection
-	if( // !getSelectionSystem().m_undo_begun &&
-		modifiers == c_modifierNone && button == c_button_select &&
-		//( !m_selector.m_mouseMoved || !m_mouse_down ) &&
-		!m_selector.m_mouseMovedWhilePressed &&
-		( getSelectionSystem().Mode() != SelectionSystem::eComponent || getSelectionSystem().ManipulatorMode() != SelectionSystem::eDrag )
-		&& !m_manipulator.m_moving_transformOrigin ){
-		m_selector.testSelect_simpleM1( device_constrained( window_to_normalised_device( position, m_width, m_height ) ) );
+	if( button == c_button_select	/* L button w/o mouse moved = tunnel selection */
+			&& modifiers == c_modifierNone
+			&& !m_selector.m_mouseMovedWhilePressed
+			&& !m_manipulator.m_moving_transformOrigin
+			&& !( getSelectionSystem().Mode() == SelectionSystem::eComponent && getSelectionSystem().ManipulatorMode() == SelectionSystem::eDrag ) ){
+		m_selector.testSelect_simpleM1( device( position ) );
 	}
-	//getSelectionSystem().m_undo_begun = false;
 	m_manipulator.m_moving_transformOrigin = false;
 	m_selector.m_mouseMoved = false;
 	m_selector.m_mouseMovedWhilePressed = false;
 	m_manipulator.m_mouseMovedWhilePressed = false;
-	m_moveEnd = device_constrained( window_to_normalised_device( position, m_width, m_height ) );
+	m_moveEnd = device( position );
 	m_move = 0.f;
 }
 void onModifierDown( ModifierFlags type ){
@@ -5526,10 +5504,24 @@ void onModifierUp( ModifierFlags type ){
 	m_manipulator.modifierDisable( type );
 	m_texmanipulator.modifierDisable( type );
 }
-/* TODO: support mouse_moved_epsilon in freelook too */
-void setMouseMoved(){
-	m_move = 1.f;
-	m_movePressed = 1.f;
+DeviceVector device( WindowVector window ) const {
+	return window_to_normalised_device( window, m_width, m_height );
+}
+bool mouse_moved_epsilon( const WindowVector& position, const DeviceVector& moveStart, float& move ){
+	if( move > m_moveEpsilon )
+		return true;
+	const DeviceVector devicePosition( device( position ) );
+	const float currentMove = std::max( fabs( devicePosition.x() - moveStart.x() ), fabs( devicePosition.y() - moveStart.y() ) );
+	move = std::max( move, currentMove );
+//	globalOutputStream() << move << " move\n";
+	return move > m_moveEpsilon;
+}
+/* support mouse_moved_epsilon with frozen pointer (camera freelook) */
+void incMouseMove( const WindowVector& delta ){
+	const WindowVector normalized_delta = device( delta );
+	m_moveEnd -= normalized_delta;
+	if( m_mouse_down )
+		m_moveStart -= normalized_delta;
 }
 };
 

@@ -1608,15 +1608,17 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 	{
 		m_window_observer->onMouseMotion( WindowVector_forInteger( x, y ), modifiers_for_flags( buttons ) );
 
-		m_mousePosition[0] = m_mousePosition[1] = m_mousePosition[2] = 0.0;
-		XY_ToPoint( x, y, m_mousePosition );
-		XY_SnapToGrid( m_mousePosition );
+		{
+			m_mousePosition[0] = m_mousePosition[1] = m_mousePosition[2] = 0.0;
+			XY_ToPoint( x, y, m_mousePosition );
+			XY_SnapToGrid( m_mousePosition );
 
-		StringOutputStream status( 64 );
-		status << "x:: " << FloatFormat( m_mousePosition[0], 6, 1 )
-			   << "  y:: " << FloatFormat( m_mousePosition[1], 6, 1 )
-			   << "  z:: " << FloatFormat( m_mousePosition[2], 6, 1 );
-		g_pParentWnd->SetStatusText( g_pParentWnd->m_position_status, status.c_str() );
+			StringOutputStream status( 64 );
+			status << "x:: " << FloatFormat( m_mousePosition[0], 6, 1 )
+				<< "  y:: " << FloatFormat( m_mousePosition[1], 6, 1 )
+				<< "  z:: " << FloatFormat( m_mousePosition[2], 6, 1 );
+			g_pParentWnd->SetStatusText( g_pParentWnd->m_position_status, status.c_str() );
+		}
 
 		if ( g_bCrossHairs ) {
 			XYWnd_Update( *this );

@@ -159,7 +159,7 @@ inline BasicVector2<Element> operator-( const BasicVector2<Element>& self, const
 template<typename Element, typename OtherElement>
 inline void vector2_subtract( BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
 	self.x() -= Element( other.x() );
-	self.y() -= lement( other.y() );
+	self.y() -= Element( other.y() );
 }
 template<typename Element, typename OtherElement>
 inline void operator-=( BasicVector2<Element>& self, const BasicVector2<OtherElement>& other ){
