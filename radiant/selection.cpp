@@ -5518,7 +5518,7 @@ bool mouse_moved_epsilon( const WindowVector& position, const DeviceVector& move
 }
 /* support mouse_moved_epsilon with frozen pointer (camera freelook) */
 void incMouseMove( const WindowVector& delta ){
-	const WindowVector normalized_delta = device( delta );
+	const WindowVector normalized_delta( delta.x() * 2.f / m_width, delta.y() * 2.f / m_height );
 	m_moveEnd -= normalized_delta;
 	if( m_mouse_down )
 		m_moveStart -= normalized_delta;

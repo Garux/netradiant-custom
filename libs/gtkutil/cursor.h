@@ -80,8 +80,9 @@ class DeferredMotionDelta
 {
 int m_delta_x;
 int m_delta_y;
+unsigned int m_state;
 guint m_motion_handler;
-typedef void ( *MotionDeltaFunction )( int x, int y, void* data );
+typedef void ( *MotionDeltaFunction )( int x, int y, unsigned int state, void* data );
 MotionDeltaFunction m_function;
 void* m_data;
 
@@ -89,6 +90,7 @@ static gboolean deferred_motion( gpointer data ){
 	reinterpret_cast<DeferredMotionDelta*>( data )->m_function(
 		reinterpret_cast<DeferredMotionDelta*>( data )->m_delta_x,
 		reinterpret_cast<DeferredMotionDelta*>( data )->m_delta_y,
+		reinterpret_cast<DeferredMotionDelta*>( data )->m_state,
 		reinterpret_cast<DeferredMotionDelta*>( data )->m_data
 		);
 	reinterpret_cast<DeferredMotionDelta*>( data )->m_motion_handler = 0;
@@ -108,6 +110,7 @@ void flush(){
 void motion_delta( int x, int y, unsigned int state ){
 	m_delta_x += x;
 	m_delta_y += y;
+	m_state = state;
 	if ( m_motion_handler == 0 ) {
 		m_motion_handler = g_idle_add( deferred_motion, this );
 	}

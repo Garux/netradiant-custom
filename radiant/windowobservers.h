@@ -62,8 +62,4 @@ inline ModifierFlags modifiers_for_state( unsigned int state ){
 	return modifiers;
 }
 
-inline WindowVector WindowVector_forDouble( double x, double y ){
-	return WindowVector( static_cast<float>( x ), static_cast<float>( y ) );
-}
-
 #endif

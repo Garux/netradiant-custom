@@ -117,7 +117,16 @@ const Matrix4 g_radiant2opengl(
 	);
 
 struct camera_t;
-void Camera_mouseMove( camera_t& camera, int x, int y );
+void Camera_mouseMove( camera_t& camera, int x, int y, unsigned int state );
+
+struct MotionDeltaValues {
+	int x;
+	int y;
+	unsigned int state;
+	MotionDeltaValues( int x_, int y_, unsigned int state_ ):
+		x( x_ ), y( y_ ), state( state_ ) {
+	}
+};
 
 enum camera_draw_mode
 {
@@ -160,16 +169,18 @@ struct camera_t
 
 	DeferredMotionDelta m_mouseMove;
 
-	static void motionDelta( int x, int y, void* data ){
-		Camera_mouseMove( *reinterpret_cast<camera_t*>( data ), x, y );
+	static void motionDelta( int x, int y, unsigned int state, void* data ){
+		Camera_mouseMove( *reinterpret_cast<camera_t*>( data ), x, y, state );
 	}
 
 	View* m_view;
 	Callback m_update;
 
+	Callback1<const MotionDeltaValues&> m_update_motion_freemove;
+
 	static camera_draw_mode draw_mode;
 
-	camera_t( View* view, const Callback& update )
+	camera_t( View* view, const Callback& update, const Callback1<const MotionDeltaValues&>& update_motion_freemove )
 		: width( 0 ),
 		height( 0 ),
 		timing( false ),
@@ -181,7 +192,8 @@ struct camera_t
 		m_keymove_handler( 0 ),
 		m_mouseMove( motionDelta, this ),
 		m_view( view ),
-		m_update( update ){
+		m_update( update ),
+		m_update_motion_freemove( update_motion_freemove ){
 	}
 };
 
@@ -365,9 +377,10 @@ void Cam_MouseControl( camera_t& camera, int x, int y ){
 }
 #endif // 0
 
-void Camera_mouseMove( camera_t& camera, int x, int y ){
+void Camera_mouseMove( camera_t& camera, int x, int y, unsigned int state ){
 	//globalOutputStream() << "mousemove... ";
 	Camera_FreeMove( camera, -x, -y );
+	camera.m_update_motion_freemove( MotionDeltaValues( x, y, state ) );
 	camera.m_update();
 	CameraMovedNotify();
 }
@@ -728,7 +741,6 @@ XORRectangle m_XORRectangle;
 
 DeferredDraw m_deferredDraw;
 DeferredMotion m_deferred_motion;
-DeferredMotion m_deferred_motion_freemove;
 
 guint m_selection_button_press_handler;
 guint m_selection_button_release_handler;
@@ -786,6 +798,8 @@ CameraView& getCameraView(){
 }
 
 Timer m_rightClickTimer;
+
+void selection_motion_freemove( const MotionDeltaValues& delta );
 
 private:
 void Cam_Draw();
@@ -972,21 +986,21 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 gboolean selection_button_press( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		gtk_widget_grab_focus( widget );
-		observer->onMouseDown( WindowVector_forDouble( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
+		observer->onMouseDown( WindowVector( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
 
 gboolean selection_button_release( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_RELEASE ) {
-		observer->onMouseUp( WindowVector_forDouble( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
+		observer->onMouseUp( WindowVector( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
 
 void selection_motion( gdouble x, gdouble y, guint state, void* data ){
 	//globalOutputStream() << "motion... ";
-	reinterpret_cast<WindowObserver*>( data )->onMouseMotion( WindowVector_forDouble( x, y ), modifiers_for_state( state ) );
+	reinterpret_cast<WindowObserver*>( data )->onMouseMotion( WindowVector( x, y ), modifiers_for_state( state ) );
 }
 
 inline WindowVector windowvector_for_widget_centre( GtkWidget* widget ){
@@ -1006,18 +1020,13 @@ gboolean selection_button_release_freemove( GtkWidget* widget, GdkEventButton* e
 	}
 	return FALSE;
 }
-#if 0
-gboolean selection_motion_freemove( GtkWidget *widget, GdkEventMotion *event, WindowObserver* observer ){
-	observer->onMouseMotion( windowvector_for_widget_centre( widget ), modifiers_for_state( event->state ) );
-	return FALSE;
+
+void CamWnd::selection_motion_freemove( const MotionDeltaValues& delta ){
+	m_window_observer->incMouseMove( WindowVector( delta.x, delta.y ) );
+	m_window_observer->onMouseMotion( windowvector_for_widget_centre( m_gl_widget ), modifiers_for_state( delta.state ) );
 }
-#endif
-void selection_motion_freemove( gdouble x, gdouble y, guint state, void* data ){
-	//globalOutputStream() << "motion... ";
-	CamWnd* camwnd = reinterpret_cast<CamWnd*>( data );
-	camwnd->m_window_observer->incMouseMove( WindowVector_forDouble( x, y ) );
-	camwnd->m_window_observer->onMouseMotion( windowvector_for_widget_centre( camwnd->m_gl_widget ), modifiers_for_state( state ) );
-}
+typedef MemberCaller1<CamWnd, const MotionDeltaValues&, &CamWnd::selection_motion_freemove> CamWnd_selection_motion_freemove;
+
 
 gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* camwnd ){
 	//gtk_window_set_focus( camwnd->m_parent, camwnd->m_gl_widget );
@@ -1321,8 +1330,6 @@ void CamWnd_Remove_Handlers_Move( CamWnd& camwnd ){
 void CamWnd_Add_Handlers_FreeMove( CamWnd& camwnd ){
 	camwnd.m_selection_button_press_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_press_event", G_CALLBACK( selection_button_press_freemove ), camwnd.m_window_observer );
 	camwnd.m_selection_button_release_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_release_event", G_CALLBACK( selection_button_release_freemove ), camwnd.m_window_observer );
-	//camwnd.m_selection_motion_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "motion_notify_event", G_CALLBACK( selection_motion_freemove ), camwnd.m_window_observer );
-	camwnd.m_selection_motion_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "motion_notify_event", G_CALLBACK( DeferredMotion::gtk_motion ), &camwnd.m_deferred_motion_freemove );
 
 	camwnd.m_freelook_button_press_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_press_event", G_CALLBACK( disable_freelook_button_press ), &camwnd );
 	camwnd.m_freelook_button_release_handler = g_signal_connect( G_OBJECT( camwnd.m_gl_widget ), "button_release_event", G_CALLBACK( disable_freelook_button_release ), &camwnd );
@@ -1361,7 +1368,6 @@ void CamWnd_Remove_Handlers_FreeMove( CamWnd& camwnd ){
 
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_selection_button_press_handler );
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_selection_button_release_handler );
-	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_selection_motion_handler );
 
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_freelook_button_press_handler );
 	g_signal_handler_disconnect( G_OBJECT( camwnd.m_gl_widget ), camwnd.m_freelook_button_release_handler );
@@ -1369,20 +1375,19 @@ void CamWnd_Remove_Handlers_FreeMove( CamWnd& camwnd ){
 
 CamWnd::CamWnd() :
 	m_view( true ),
-	m_Camera( &m_view, CamWndQueueDraw( *this ) ),
+	m_Camera( &m_view, CamWndQueueDraw( *this ), CamWnd_selection_motion_freemove( *this ) ),
 	m_cameraview( m_Camera, &m_view, ReferenceCaller<CamWnd, CamWnd_Update>( *this ) ),
+	m_fbo( 0 ),
 	m_gl_widget( glwidget_new( TRUE ) ),
 	m_window_observer( NewWindowObserver() ),
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
 	m_deferred_motion( selection_motion, m_window_observer ),
-	m_deferred_motion_freemove( selection_motion_freemove, this ),
 	m_selection_button_press_handler( 0 ),
 	m_selection_button_release_handler( 0 ),
 	m_selection_motion_handler( 0 ),
 	m_freelook_button_press_handler( 0 ),
 	m_freelook_button_release_handler( 0 ),
-	m_drawing( false ),
-	m_fbo( 0 )
+	m_drawing( false )
 {
 	m_bFreeMove = false;
 

@@ -1504,10 +1504,6 @@ void XYWnd::SetViewType( VIEWTYPE viewType ){
 }
 
 
-inline WindowVector WindowVector_forInteger( int x, int y ){
-	return WindowVector( static_cast<float>( x ), static_cast<float>( y ) );
-}
-
 void XYWnd::mouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
 	XY_MouseDown( static_cast<int>( position.x() ), static_cast<int>( position.y() ), buttons_for_button_and_modifiers( button, modifiers ) );
 }
@@ -1543,7 +1539,7 @@ void XYWnd::XY_MouseDown( int x, int y, unsigned int buttons ){
 	}
 	else
 	{
-		m_window_observer->onMouseDown( WindowVector_forInteger( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
+		m_window_observer->onMouseDown( WindowVector( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
 	}
 }
 
@@ -1565,12 +1561,12 @@ void XYWnd::XY_MouseUp( int x, int y, unsigned int buttons ){
 		NewBrushDrag_End( x, y );
 		if ( m_NewBrushDrag == 0 ) {
 			//L button w/o created brush = tunnel selection
-			m_window_observer->onMouseUp( WindowVector_forInteger( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
+			m_window_observer->onMouseUp( WindowVector( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
 		}
 	}
 	else
 	{
-		m_window_observer->onMouseUp( WindowVector_forInteger( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
+		m_window_observer->onMouseUp( WindowVector( x, y ), button_for_flags( buttons ), modifiers_for_flags( buttons ) );
 	}
 }
 
@@ -1606,7 +1602,7 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 
 	else
 	{
-		m_window_observer->onMouseMotion( WindowVector_forInteger( x, y ), modifiers_for_flags( buttons ) );
+		m_window_observer->onMouseMotion( WindowVector( x, y ), modifiers_for_flags( buttons ) );
 
 		{
 			m_mousePosition[0] = m_mousePosition[1] = m_mousePosition[2] = 0.0;
