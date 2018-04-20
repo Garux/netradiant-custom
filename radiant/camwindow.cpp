@@ -74,24 +74,24 @@ void CameraMovedNotify(){
 struct camwindow_globals_private_t
 {
 	int m_nMoveSpeed;
-	bool m_bCamLinkSpeed;
+	float m_strafeSpeed;
 	float m_angleSpeed;
 	bool m_bCamInverseMouse;
 	bool m_bCamDiscrete;
 	bool m_bCubicClipping;
-	int m_nStrafeMode;
+	int m_strafeMode;
 	bool m_bFaceWire;
 	bool m_bFaceFill;
 	int m_MSAA;
 
 	camwindow_globals_private_t() :
 		m_nMoveSpeed( 100 ),
-		m_bCamLinkSpeed( true ),
+		m_strafeSpeed( 1.f ),
 		m_angleSpeed( 9.f ),
 		m_bCamInverseMouse( false ),
 		m_bCamDiscrete( true ),
 		m_bCubicClipping( false ),
-		m_nStrafeMode( 3 ),
+		m_strafeMode( 3 ),
 		m_bFaceWire( true ),
 		m_bFaceFill( true ),
 		m_MSAA( 8 ){
@@ -295,19 +295,12 @@ void Camera_setAngles( camera_t& camera, const Vector3& angles ){
 void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 	// free strafe mode, toggled by the ctrl key with optional shift for forward movement
 	if ( camera.m_strafe ) {
-		float strafespeed = 0.65f;
-
-		if ( g_camwindow_globals_private.m_bCamLinkSpeed ) {
-			strafespeed = (float)g_camwindow_globals_private.m_nMoveSpeed / 100;
-		}
-
-		camera.origin -= camera.vright * strafespeed * dx;
-		if ( camera.m_strafe_forward ) {
-			camera.origin += camera.m_strafe_forward_invert ? ( camera.vpn * strafespeed * dy ) : ( -camera.vpn * strafespeed * dy );
-		}
-		else{
-			camera.origin += camera.vup * strafespeed * dy;
-		}
+		const float speed = g_camwindow_globals_private.m_strafeSpeed;
+		camera.origin -= camera.vright * speed * dx;
+		if ( camera.m_strafe_forward )
+			camera.origin += camera.vpn * speed * dy * ( camera.m_strafe_forward_invert ? 1 : -1 );
+		else
+			camera.origin += camera.vup * speed * dy;
 	}
 	else // free rotation
 	{
@@ -673,7 +666,7 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 
 	cam->m_strafe_forward_invert = false;
 
-	switch ( g_camwindow_globals_private.m_nStrafeMode )
+	switch ( g_camwindow_globals_private.m_strafeMode )
 	{
 	case 0:
 		cam->m_strafe = false;
@@ -2160,7 +2153,7 @@ typedef FreeCaller1<float, fieldOfViewImport> fieldOfViewImportCaller;
 
 void Camera_constructPreferences( PreferencesPage& page ){
 	page.appendSlider( "Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 100, MIN_CAM_SPEED, MAX_CAM_SPEED, 1, 10 );
-	page.appendCheckBox( "", "Link strafe speed to movement speed", g_camwindow_globals_private.m_bCamLinkSpeed );
+	page.appendSlider( "Strafe Speed", g_camwindow_globals_private.m_strafeSpeed, TRUE, 0, 0, 1, 0.1, 10, 0.1, 1 );
 	page.appendSlider( "Mouse Sensitivity", g_camwindow_globals_private.m_angleSpeed, TRUE, 0, 0, 9, 0.1, 180, 0.1, 1 );
 	page.appendCheckBox( "", "Invert mouse vertical axis", g_camwindow_globals_private.m_bCamInverseMouse );
 	page.appendCheckBox( "", "Zoom In to Mouse pointer", g_camwindow_globals.m_bZoomInToPointer );
@@ -2222,7 +2215,7 @@ void Camera_constructPreferences( PreferencesPage& page ){
 
 	page.appendCombo(
 		"Strafe Mode",
-		g_camwindow_globals_private.m_nStrafeMode,
+		g_camwindow_globals_private.m_strafeMode,
 		STRING_ARRAY_RANGE( strafe_mode )
 		);
 
@@ -2317,7 +2310,7 @@ void CamWnd_Construct(){
 
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
 	GlobalPreferenceSystem().registerPreference( "MoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
-	GlobalPreferenceSystem().registerPreference( "CamLinkSpeed", BoolImportStringCaller( g_camwindow_globals_private.m_bCamLinkSpeed ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamLinkSpeed ) );
+	GlobalPreferenceSystem().registerPreference( "CamStrafeSpeed", FloatImportStringCaller( g_camwindow_globals_private.m_strafeSpeed ), FloatExportStringCaller( g_camwindow_globals_private.m_strafeSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "Sensitivity", FloatImportStringCaller( g_camwindow_globals_private.m_angleSpeed ), FloatExportStringCaller( g_camwindow_globals_private.m_angleSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamInverseMouse", BoolImportStringCaller( g_camwindow_globals_private.m_bCamInverseMouse ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamInverseMouse ) );
 	GlobalPreferenceSystem().registerPreference( "CamDiscrete", makeBoolStringImportCallback( CamWndMoveDiscreteImportCaller() ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamDiscrete ) );
@@ -2327,7 +2320,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_Colors12", Vector3ImportStringCaller( g_camwindow_globals.color_selbrushes3d ), Vector3ExportStringCaller( g_camwindow_globals.color_selbrushes3d ) );
 	GlobalPreferenceSystem().registerPreference( "CameraRenderMode", makeIntStringImportCallback( RenderModeImportCaller() ), makeIntStringExportCallback( RenderModeExportCaller() ) );
 	GlobalPreferenceSystem().registerPreference( "CameraMSAA", IntImportStringCaller( g_camwindow_globals_private.m_MSAA ), IntExportStringCaller( g_camwindow_globals_private.m_MSAA ) );
-	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_nStrafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_nStrafeMode ) );
+	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_strafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_strafeMode ) );
 	GlobalPreferenceSystem().registerPreference( "CameraFaceWire", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceWire ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceWire ) );
 	GlobalPreferenceSystem().registerPreference( "CameraFaceFill", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceFill ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceFill ) );
 	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_camwindow_globals.m_bZoomInToPointer ) );
