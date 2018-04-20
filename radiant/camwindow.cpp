@@ -672,27 +672,22 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 		cam->m_strafe = false;
 		break;
 	case 1:
-		cam->m_strafe = ( ( state & GDK_CONTROL_MASK ) != 0 || ( state & GDK_BUTTON3_MASK ) != 0 ) && ( state & GDK_SHIFT_MASK ) == 0;
+		cam->m_strafe = ( state & GDK_CONTROL_MASK ) || ( state & GDK_BUTTON3_MASK );
 		cam->m_strafe_forward = false;
 		break;
 	case 2:
-		cam->m_strafe = ( ( state & GDK_CONTROL_MASK ) != 0 || ( state & GDK_BUTTON3_MASK ) != 0 ) && ( state & GDK_SHIFT_MASK ) == 0;
-		cam->m_strafe_forward = cam->m_strafe;
+		cam->m_strafe = ( state & GDK_CONTROL_MASK ) || ( state & GDK_BUTTON3_MASK );
+		cam->m_strafe_forward = true;
 		break;
 	case 4:
 		cam->m_strafe_forward_invert = true;
-	default:
-		cam->m_strafe = ( state & GDK_CONTROL_MASK ) != 0 || ( state & GDK_BUTTON3_MASK ) != 0;
-		if ( cam->m_strafe ) {
-			cam->m_strafe_forward = ( state & GDK_SHIFT_MASK ) != 0;
-		}
-		else{
-			cam->m_strafe_forward = false;
-		}
+	default: /* 3 & 4 */
+		cam->m_strafe = ( state & GDK_CONTROL_MASK ) || ( state & GDK_BUTTON3_MASK ) || ( state & GDK_SHIFT_MASK );
+		cam->m_strafe_forward = ( state & GDK_SHIFT_MASK ) != 0;
 		break;
 	}
 
-	if( ( state & GDK_BUTTON1_MASK ) != 0 ){
+	if( ( state & GDK_BUTTON1_MASK ) != 0 && g_camwindow_globals_private.m_strafeMode != 0 ){
 		cam->m_strafe = true;
 		cam->m_strafe_forward = false;
 	}
