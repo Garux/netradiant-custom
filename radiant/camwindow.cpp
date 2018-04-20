@@ -449,10 +449,10 @@ void Camera_keyMove( camera_t& camera ){
 
 	//globalOutputStream() << "keymove... ";
 	float time_seconds = camera.m_keycontrol_timer.elapsed_msec() / static_cast<float>( msec_per_sec );
+	if( time_seconds == 0 ) /* some reasonable move at the very start */
+		time_seconds = 0.008f;
 	camera.m_keycontrol_timer.start();
-	if ( time_seconds > 0.05f ) {
-		time_seconds = 0.05f; // 20fps
-	}
+
 	Cam_KeyControl( camera, time_seconds * 5.0f );
 
 	camera.m_update();
@@ -467,6 +467,7 @@ gboolean camera_keymove( gpointer data ){
 void Camera_setMovementFlags( camera_t& camera, unsigned int mask ){
 	if ( ( ~camera.movementflags & mask ) != 0 && camera.movementflags == 0 ) {
 		camera.m_keymove_handler = g_idle_add( camera_keymove, &camera );
+		camera.m_keycontrol_timer.start();
 	}
 	camera.movementflags |= mask;
 }
