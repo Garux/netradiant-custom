@@ -74,6 +74,7 @@ void CameraMovedNotify(){
 struct camwindow_globals_private_t
 {
 	int m_nMoveSpeed;
+	int m_time_toMaxSpeed;
 	int m_nScrollMoveSpeed;
 	float m_strafeSpeed;
 	float m_angleSpeed;
@@ -87,6 +88,7 @@ struct camwindow_globals_private_t
 
 	camwindow_globals_private_t() :
 		m_nMoveSpeed( 500 ),
+		m_time_toMaxSpeed( 200 ),
 		m_nScrollMoveSpeed( 100 ),
 		m_strafeSpeed( 1.f ),
 		m_angleSpeed( 9.f ),
@@ -164,6 +166,7 @@ struct camera_t
 	unsigned int movementflags; // movement flags
 	Timer m_keycontrol_timer;
 	guint m_keymove_handler;
+	float m_keymove_speed_current;
 
 
 	static float fieldOfView;
@@ -192,6 +195,7 @@ struct camera_t
 		m_focus_offset( 0 ),
 		movementflags( 0 ),
 		m_keymove_handler( 0 ),
+		m_keymove_speed_current( 0.f ),
 		m_mouseMove( motionDelta, this ),
 		m_view( view ),
 		m_update( update ),
@@ -415,7 +419,16 @@ void Cam_KeyControl( camera_t& camera, float dtime ){
 	Camera_updateModelview( camera );
 	Camera_Freemove_updateAxes( camera );
 
-	const float dpos = dtime * g_camwindow_globals_private.m_nMoveSpeed;
+	if( g_camwindow_globals_private.m_time_toMaxSpeed == 0 ){
+		camera.m_keymove_speed_current = g_camwindow_globals_private.m_nMoveSpeed;
+	}
+	else{ /* accelerate */
+		camera.m_keymove_speed_current = std::min( camera.m_keymove_speed_current
+													+ g_camwindow_globals_private.m_nMoveSpeed * dtime
+													/ g_camwindow_globals_private.m_time_toMaxSpeed * static_cast<float>( msec_per_sec ),
+													static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) );
+	}
+	const float dpos = dtime * camera.m_keymove_speed_current;
 	// Update position
 	if ( camera.movementflags & MOVE_FORWARD ) {
 		camera.origin += camera.forward * dpos;
@@ -466,6 +479,7 @@ void Camera_setMovementFlags( camera_t& camera, unsigned int mask ){
 	if ( ( ~camera.movementflags & mask ) != 0 && camera.movementflags == 0 ) {
 		camera.m_keymove_handler = g_idle_add( camera_keymove, &camera );
 		camera.m_keycontrol_timer.start();
+		camera.m_keymove_speed_current = 0;
 	}
 	camera.movementflags |= mask;
 }
@@ -2147,6 +2161,7 @@ typedef FreeCaller1<float, fieldOfViewImport> fieldOfViewImportCaller;
 
 void Camera_constructPreferences( PreferencesPage& page ){
 	page.appendSlider( "Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 500, 1, CAM_MAX_SPEED, 1, 10 );
+	page.appendSlider( "Time to Max Speed", g_camwindow_globals_private.m_time_toMaxSpeed, TRUE, 0, 0, 200, 0, 5000, 10, 100 );
 	page.appendSlider( "Scroll Move Speed", g_camwindow_globals_private.m_nScrollMoveSpeed, TRUE, 0, 0, 100, 0, 999, 1, 10 );
 	page.appendSlider( "Strafe Speed", g_camwindow_globals_private.m_strafeSpeed, TRUE, 0, 0, 1, 0.1, 10, 0.1, 1 );
 	page.appendSlider( "Mouse Sensitivity", g_camwindow_globals_private.m_angleSpeed, TRUE, 0, 0, 9, 0.1, 180, 0.1, 1 );
@@ -2298,7 +2313,8 @@ void CamWnd_Construct(){
 	GlobalToggles_insert( "ShowStats", FreeCaller<ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
 
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
-	GlobalPreferenceSystem().registerPreference( "MoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
+	GlobalPreferenceSystem().registerPreference( "CamMoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
+	GlobalPreferenceSystem().registerPreference( "CamMoveTimeToMaxSpeed", IntImportStringCaller( g_camwindow_globals_private.m_time_toMaxSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_time_toMaxSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "ScrollMoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamStrafeSpeed", FloatImportStringCaller( g_camwindow_globals_private.m_strafeSpeed ), FloatExportStringCaller( g_camwindow_globals_private.m_strafeSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "Sensitivity", FloatImportStringCaller( g_camwindow_globals_private.m_angleSpeed ), FloatExportStringCaller( g_camwindow_globals_private.m_angleSpeed ) );
