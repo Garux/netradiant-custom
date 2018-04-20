@@ -74,6 +74,7 @@ void CameraMovedNotify(){
 struct camwindow_globals_private_t
 {
 	int m_nMoveSpeed;
+	int m_nScrollMoveSpeed;
 	float m_strafeSpeed;
 	float m_angleSpeed;
 	bool m_bCamInverseMouse;
@@ -85,7 +86,8 @@ struct camwindow_globals_private_t
 	int m_MSAA;
 
 	camwindow_globals_private_t() :
-		m_nMoveSpeed( 100 ),
+		m_nMoveSpeed( 500 ),
+		m_nScrollMoveSpeed( 100 ),
 		m_strafeSpeed( 1.f ),
 		m_angleSpeed( 9.f ),
 		m_bCamInverseMouse( false ),
@@ -103,17 +105,17 @@ camwindow_globals_private_t g_camwindow_globals_private;
 
 
 const Matrix4 g_opengl2radiant(
-	0, 0,-1, 0,
+	 0, 0,-1, 0,
 	-1, 0, 0, 0,
-	0, 1, 0, 0,
-	0, 0, 0, 1
+	 0, 1, 0, 0,
+	 0, 0, 0, 1
 	);
 
 const Matrix4 g_radiant2opengl(
-	0,-1, 0, 0,
-	0, 0, 1, 0,
+	 0,-1, 0, 0,
+	 0, 0, 1, 0,
 	-1, 0, 0, 0,
-	0, 0, 0, 1
+	 0, 0, 0, 1
 	);
 
 struct camera_t;
@@ -363,7 +365,7 @@ void Cam_MouseControl( camera_t& camera, int x, int y ){
 		}
 	}
 
-	vector3_add( camera.origin, vector3_scaled( camera.forward, yf * 0.1f * g_camwindow_globals_private.m_nMoveSpeed ) );
+	vector3_add( camera.origin, vector3_scaled( camera.forward, yf * 0.02f * g_camwindow_globals_private.m_nMoveSpeed ) );
 	camera.angles[CAMERA_YAW] += xf * -0.1f * g_camwindow_globals_private.m_angleSpeed;
 
 	Camera_updateModelview( camera );
@@ -396,46 +398,42 @@ Vector3 Camera_getFocusPos( camera_t& camera );
 
 void Cam_KeyControl( camera_t& camera, float dtime ){
 	// Update angles
+	const float dangle = 25.f * dtime * g_camwindow_globals_private.m_angleSpeed;
 	if ( camera.movementflags & MOVE_ROTLEFT ) {
-		camera.angles[CAMERA_YAW] += 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
+		camera.angles[CAMERA_YAW] += dangle;
 	}
 	if ( camera.movementflags & MOVE_ROTRIGHT ) {
-		camera.angles[CAMERA_YAW] -= 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
+		camera.angles[CAMERA_YAW] -= dangle;
 	}
 	if ( camera.movementflags & MOVE_PITCHUP ) {
-		camera.angles[CAMERA_PITCH] += 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
-		if ( camera.angles[CAMERA_PITCH] > 90 ) {
-			camera.angles[CAMERA_PITCH] = 90;
-		}
+		camera.angles[CAMERA_PITCH] = std::min( camera.angles[CAMERA_PITCH] + dangle, 90.f );
 	}
 	if ( camera.movementflags & MOVE_PITCHDOWN ) {
-		camera.angles[CAMERA_PITCH] -= 5.f * dtime * g_camwindow_globals_private.m_angleSpeed;
-		if ( camera.angles[CAMERA_PITCH] < -90 ) {
-			camera.angles[CAMERA_PITCH] = -90;
-		}
+		camera.angles[CAMERA_PITCH] = std::max( camera.angles[CAMERA_PITCH] - dangle, -90.f );
 	}
 
 	Camera_updateModelview( camera );
 	Camera_Freemove_updateAxes( camera );
 
+	const float dpos = dtime * g_camwindow_globals_private.m_nMoveSpeed;
 	// Update position
 	if ( camera.movementflags & MOVE_FORWARD ) {
-		vector3_add( camera.origin, vector3_scaled( camera.forward, dtime * g_camwindow_globals_private.m_nMoveSpeed ) );
+		camera.origin += camera.forward * dpos;
 	}
 	if ( camera.movementflags & MOVE_BACK ) {
-		vector3_add( camera.origin, vector3_scaled( camera.forward, -dtime * g_camwindow_globals_private.m_nMoveSpeed ) );
-	}
-	if ( camera.movementflags & MOVE_STRAFELEFT ) {
-		vector3_add( camera.origin, vector3_scaled( camera.right, -dtime * g_camwindow_globals_private.m_nMoveSpeed ) );
+		camera.origin -= camera.forward * dpos;
 	}
 	if ( camera.movementflags & MOVE_STRAFERIGHT ) {
-		vector3_add( camera.origin, vector3_scaled( camera.right, dtime * g_camwindow_globals_private.m_nMoveSpeed ) );
+		camera.origin += camera.right * dpos;
+	}
+	if ( camera.movementflags & MOVE_STRAFELEFT ) {
+		camera.origin -= camera.right * dpos;
 	}
 	if ( camera.movementflags & MOVE_UP ) {
-		vector3_add( camera.origin, vector3_scaled( g_vector3_axis_z, dtime * g_camwindow_globals_private.m_nMoveSpeed ) );
+		camera.origin += g_vector3_axis_z * dpos;
 	}
 	if ( camera.movementflags & MOVE_DOWN ) {
-		vector3_add( camera.origin, vector3_scaled( g_vector3_axis_z, -dtime * g_camwindow_globals_private.m_nMoveSpeed ) );
+		camera.origin -= g_vector3_axis_z * dpos;
 	}
 	if ( camera.movementflags & MOVE_FOCUS ) {
 		camera.origin = Camera_getFocusPos( camera );
@@ -453,7 +451,7 @@ void Camera_keyMove( camera_t& camera ){
 		time_seconds = 0.008f;
 	camera.m_keycontrol_timer.start();
 
-	Cam_KeyControl( camera, time_seconds * 5.0f );
+	Cam_KeyControl( camera, time_seconds );
 
 	camera.m_update();
 	CameraMovedNotify();
@@ -571,9 +569,9 @@ typedef ReferenceCaller<camera_t, &Camera_Focus_KeyUp> FreeMoveCameraFocusKeyUpC
 
 #define SPEED_MOVE 32
 #define SPEED_TURN 22.5
-#define MIN_CAM_SPEED 10
-#define MAX_CAM_SPEED 610
-#define CAM_SPEED_STEP 50
+#define CAM_MIN_SPEED 50
+#define CAM_MAX_SPEED 9999
+#define CAM_SPEED_STEP 250
 
 void Camera_MoveForward_Discrete( camera_t& camera ){
 	Camera_Move_updateAxes( camera );
@@ -1031,7 +1029,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
 		if( camwnd->m_bFreeMove || !g_camwindow_globals.m_bZoomInToPointer ){
-			Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( camwnd->getCamera().forward, static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
+			Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) + camwnd->getCamera().forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
 		}
 		else{
 			//Matrix4 maa = matrix4_multiplied_by_matrix4( camwnd->getCamera().projection, camwnd->getCamera().modelview );
@@ -1054,7 +1052,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 			Vector3 norm = vector3_normalised( normalized - Camera_getOrigin( *camwnd ) );
 				//globalOutputStream() << normalized - Camera_getOrigin( *camwnd ) << "  normalized - Camera_getOrigin( *camwnd )\n";
 				//globalOutputStream() << norm << "  norm\n";
-			Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( norm, static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
+			Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) + norm * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
 		}
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
@@ -1064,7 +1062,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 		}
 
 		Camera_Freemove_updateAxes( camwnd->getCamera() );
-		Camera_setOrigin( *camwnd, vector3_added( Camera_getOrigin( *camwnd ), vector3_scaled( camwnd->getCamera().forward, -static_cast<float>( g_camwindow_globals_private.m_nMoveSpeed ) ) ) );
+		Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) - camwnd->getCamera().forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
 	}
 
 	return FALSE;
@@ -2148,7 +2146,8 @@ void fieldOfViewImport( float value ){
 typedef FreeCaller1<float, fieldOfViewImport> fieldOfViewImportCaller;
 
 void Camera_constructPreferences( PreferencesPage& page ){
-	page.appendSlider( "Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 100, MIN_CAM_SPEED, MAX_CAM_SPEED, 1, 10 );
+	page.appendSlider( "Movement Speed", g_camwindow_globals_private.m_nMoveSpeed, TRUE, 0, 0, 500, 1, CAM_MAX_SPEED, 1, 10 );
+	page.appendSlider( "Scroll Move Speed", g_camwindow_globals_private.m_nScrollMoveSpeed, TRUE, 0, 0, 100, 0, 999, 1, 10 );
 	page.appendSlider( "Strafe Speed", g_camwindow_globals_private.m_strafeSpeed, TRUE, 0, 0, 1, 0.1, 10, 0.1, 1 );
 	page.appendSlider( "Mouse Sensitivity", g_camwindow_globals_private.m_angleSpeed, TRUE, 0, 0, 9, 0.1, 180, 0.1, 1 );
 	page.appendCheckBox( "", "Invert mouse vertical axis", g_camwindow_globals_private.m_bCamInverseMouse );
@@ -2235,21 +2234,15 @@ void Camera_registerPreferencesPage(){
 typedef FreeCaller1<bool, CamWnd_Move_Discrete_Import> CamWndMoveDiscreteImportCaller;
 
 void CameraSpeed_increase(){
-	if ( g_camwindow_globals_private.m_nMoveSpeed <= ( MAX_CAM_SPEED - CAM_SPEED_STEP - 10 ) ) {
-		g_camwindow_globals_private.m_nMoveSpeed += CAM_SPEED_STEP;
-	}
-	else {
-		g_camwindow_globals_private.m_nMoveSpeed = MAX_CAM_SPEED - 10;
-	}
+	g_camwindow_globals_private.m_nMoveSpeed = std::min( g_camwindow_globals_private.m_nMoveSpeed + CAM_SPEED_STEP, CAM_MAX_SPEED );
+	globalOutputStream() << " ++Camera Move Speed: ";
+	globalWarningStream() << g_camwindow_globals_private.m_nMoveSpeed << "\n";
 }
 
 void CameraSpeed_decrease(){
-	if ( g_camwindow_globals_private.m_nMoveSpeed >= ( MIN_CAM_SPEED + CAM_SPEED_STEP ) ) {
-		g_camwindow_globals_private.m_nMoveSpeed -= CAM_SPEED_STEP;
-	}
-	else {
-		g_camwindow_globals_private.m_nMoveSpeed = MIN_CAM_SPEED;
-	}
+	g_camwindow_globals_private.m_nMoveSpeed = std::max( g_camwindow_globals_private.m_nMoveSpeed - CAM_SPEED_STEP, CAM_MIN_SPEED );
+	globalOutputStream() << " --Camera Move Speed: ";
+	globalWarningStream() << g_camwindow_globals_private.m_nMoveSpeed << "\n";
 }
 
 /// \brief Initialisation for things that have the same lifespan as this module.
@@ -2306,6 +2299,7 @@ void CamWnd_Construct(){
 
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
 	GlobalPreferenceSystem().registerPreference( "MoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
+	GlobalPreferenceSystem().registerPreference( "ScrollMoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamStrafeSpeed", FloatImportStringCaller( g_camwindow_globals_private.m_strafeSpeed ), FloatExportStringCaller( g_camwindow_globals_private.m_strafeSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "Sensitivity", FloatImportStringCaller( g_camwindow_globals_private.m_angleSpeed ), FloatExportStringCaller( g_camwindow_globals_private.m_angleSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamInverseMouse", BoolImportStringCaller( g_camwindow_globals_private.m_bCamInverseMouse ), BoolExportStringCaller( g_camwindow_globals_private.m_bCamInverseMouse ) );
