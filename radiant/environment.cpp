@@ -180,17 +180,16 @@ bool portable_app_setup(){
 }
 
 
-const char* g_openCmdMap;
+CopiedString g_openMapByCmd;
 
 void cmdMap(){
-	g_openCmdMap = NULL;
 	for ( int i = 1; i < g_argc; ++i )
-	{
-		//if ( !stricmp( g_argv[i] + strlen(g_argv[i]) - 4, ".map" ) ){
 		if( string_equal_suffix_nocase( g_argv[i], ".map" ) ){
-			g_openCmdMap = g_argv[i];
+			StringOutputStream stream( 256 );
+			stream << PathCleaned( g_argv[i] );
+			g_openMapByCmd = stream.c_str();
+			return;
 		}
-	}
 }
 
 #if defined( POSIX )
