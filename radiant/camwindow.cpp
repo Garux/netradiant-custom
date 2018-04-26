@@ -799,6 +799,7 @@ CameraView& getCameraView(){
 }
 
 Timer m_rightClickTimer;
+float m_rightClickMove;
 
 void selection_motion_freemove( const MotionDeltaValues& delta );
 
@@ -921,6 +922,7 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 		else{
 			camwnd->EnableFreeMove();
 			camwnd->m_rightClickTimer.start();
+			camwnd->m_rightClickMove = 0;
 		}
 		return TRUE;
 	}
@@ -930,13 +932,14 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
 		camwnd->m_bFreeMove_entering = false;
-		bool doubleclicked = context_menu_try( camwnd );
+		const bool doubleclicked = context_menu_try( camwnd );
 		if( doubleclicked ){
 			camwnd->DisableFreeMove();
 			context_menu();
 		}
 		else{
 			camwnd->m_rightClickTimer.start();
+			camwnd->m_rightClickMove = 0;
 		}
 		return TRUE;
 	}
@@ -945,8 +948,7 @@ gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event
 
 gboolean disable_freelook_button_release( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_RELEASE && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
-		if( ( camwnd->m_rightClickTimer.elapsed_msec() > 300 && camwnd->m_bFreeMove_entering ) ||
-			( camwnd->m_rightClickTimer.elapsed_msec() < 300 && !camwnd->m_bFreeMove_entering ) ){
+		if( ( ( camwnd->m_rightClickTimer.elapsed_msec() < 300 && camwnd->m_rightClickMove < 56 ) == !camwnd->m_bFreeMove_entering ) ){
 			camwnd->DisableFreeMove();
 			return TRUE;
 		}
@@ -1023,6 +1025,7 @@ gboolean selection_button_release_freemove( GtkWidget* widget, GdkEventButton* e
 }
 
 void CamWnd::selection_motion_freemove( const MotionDeltaValues& delta ){
+	m_rightClickMove += sqrt( static_cast<double>( delta.x * delta.x + delta.y * delta.y ) );
 	m_window_observer->incMouseMove( WindowVector( delta.x, delta.y ) );
 	m_window_observer->onMouseMotion( windowvector_for_widget_centre( m_gl_widget ), modifiers_for_state( delta.state ) );
 }
