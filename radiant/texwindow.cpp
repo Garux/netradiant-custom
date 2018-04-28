@@ -286,6 +286,8 @@ bool m_rmbSelected;
 bool m_searchedTags;
 bool m_tags;
 bool m_move_started;
+int m_move_amount;
+BasicVector2<int> m_move_start;
 // The uniform size (in pixels) that textures are resized to when m_resizeTextures is true.
 int m_uniformTextureSize;
 int m_uniformTextureMinSize;
@@ -1009,17 +1011,12 @@ void SelectTexture( TextureBrowser& textureBrowser, int mx, int my, guint32 flag
  */
 
 void TextureBrowser_trackingDelta( int x, int y, unsigned int state, void* data ){
-	TextureBrowser& textureBrowser = *reinterpret_cast<TextureBrowser*>( data );
 	if ( y != 0 ) {
-		int scale = 1;
-
-		if ( state & GDK_SHIFT_MASK ) {
-			scale = 4;
-		}
-
-		int originy = TextureBrowser_getOriginY( textureBrowser );
-		originy += y * scale;
+		TextureBrowser& textureBrowser = *reinterpret_cast<TextureBrowser*>( data );
+		const int scale = ( state & GDK_SHIFT_MASK )? 4 : 1;
+		const int originy = TextureBrowser_getOriginY( textureBrowser ) + y * scale;
 		TextureBrowser_setOriginY( textureBrowser, originy );
+		textureBrowser.m_move_amount += y;
 	}
 }
 
@@ -1035,6 +1032,7 @@ void TextureBrowser_Tracking_MouseDown( TextureBrowser& textureBrowser ){
 		TextureBrowser_Tracking_MouseUp( textureBrowser );
 	}
 	textureBrowser.m_move_started = true;
+	textureBrowser.m_move_amount = 0;
 	textureBrowser.m_freezePointer.freeze_pointer( textureBrowser.m_parent, textureBrowser.m_gl_widget, TextureBrowser_trackingDelta, &textureBrowser );
 }
 
@@ -1396,23 +1394,8 @@ gboolean TextureBrowser_button_press( GtkWidget* widget, GdkEventButton* event, 
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		gtk_widget_grab_focus( widget );
 		if ( event->button == 3 ) {
-			if ( GlobalTextureBrowser().m_tags ) {
-				textureBrowser->m_rmbSelected = true;
-				TextureBrowser_Selection_MouseDown( *textureBrowser, event->state, static_cast<int>( event->x ), static_cast<int>( event->y ), false );
-
-				BuildStoreAssignedTags( textureBrowser->m_assigned_store, textureBrowser->shader.c_str(), textureBrowser );
-				BuildStoreAvailableTags( textureBrowser->m_available_store, textureBrowser->m_assigned_store, textureBrowser->m_all_tags, textureBrowser );
-				textureBrowser->m_heightChanged = true;
-				gtk_widget_show( textureBrowser->m_tag_frame );
-
-				process_gui();
-
-				TextureBrowser_Focus( *textureBrowser, textureBrowser->shader.c_str() );
-			}
-			else
-			{
-				TextureBrowser_Tracking_MouseDown( *textureBrowser );
-			}
+			TextureBrowser_Tracking_MouseDown( *textureBrowser );
+			textureBrowser->m_move_start = BasicVector2<int>( event->x, event->y );
 		}
 		else if ( event->button == 1 || event->button == 2 ) {
 			TextureBrowser_Selection_MouseDown( *textureBrowser, event->state, static_cast<int>( event->x ), static_cast<int>( event->y ), event->button == 2 );
@@ -1445,11 +1428,22 @@ gboolean TextureBrowser_button_press( GtkWidget* widget, GdkEventButton* event, 
 gboolean TextureBrowser_button_release( GtkWidget* widget, GdkEventButton* event, TextureBrowser* textureBrowser ){
 	if ( event->type == GDK_BUTTON_RELEASE ) {
 		if ( event->button == 3 ) {
-			if ( !GlobalTextureBrowser().m_tags ) {
-				TextureBrowser_Tracking_MouseUp( *textureBrowser );
+			TextureBrowser_Tracking_MouseUp( *textureBrowser );
+			if ( GlobalTextureBrowser().m_tags && std::abs( textureBrowser->m_move_amount ) < 16 ) {
+				textureBrowser->m_rmbSelected = true;
+				TextureBrowser_Selection_MouseDown( *textureBrowser, event->state, textureBrowser->m_move_start.x(), textureBrowser->m_move_start.y(), false );
+
+				BuildStoreAssignedTags( textureBrowser->m_assigned_store, textureBrowser->shader.c_str(), textureBrowser );
+				BuildStoreAvailableTags( textureBrowser->m_available_store, textureBrowser->m_assigned_store, textureBrowser->m_all_tags, textureBrowser );
+				textureBrowser->m_heightChanged = true;
+				gtk_widget_show( textureBrowser->m_tag_frame );
+
+				process_gui();
+
+				TextureBrowser_Focus( *textureBrowser, textureBrowser->shader.c_str() );
 			}
 		}
-		if ( event->button == 1 ) {
+		else if ( event->button == 1 ) {
 			TextureBrowser_Selection_MouseUp( *textureBrowser, event->state, static_cast<int>( event->x ), static_cast<int>( event->y ) );
 		}
 	}
