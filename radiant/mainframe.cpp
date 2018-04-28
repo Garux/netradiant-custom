@@ -2084,7 +2084,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 			menu_tearoff( orthographic_menu );
 		}
 		if ( style == MainFrame::eRegular || style == MainFrame::eRegularLeft || style == MainFrame::eFloating ) {
-			create_menu_item_with_mnemonic( orthographic_menu, "_Next (XY, YZ, XY)", "NextView" );
+			create_menu_item_with_mnemonic( orthographic_menu, "_Next (XY, XZ, YZ)", "NextView" );
 			create_menu_item_with_mnemonic( orthographic_menu, "XY (Top)", "ViewTop" );
 			create_menu_item_with_mnemonic( orthographic_menu, "XZ (Front)", "ViewFront" );
 			create_menu_item_with_mnemonic( orthographic_menu, "YZ (Side)", "ViewSide" );
