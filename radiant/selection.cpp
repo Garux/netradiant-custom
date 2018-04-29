@@ -3464,7 +3464,7 @@ void pushSelectable( Selectable& selectable ){
 	m_selectable = &selectable;
 }
 void popSelectable(){
-	if ( m_intersection.equalEpsilon( m_bestIntersection, 0.25f, 0.001f ) ) {
+	if ( m_intersection.equalEpsilon( m_bestIntersection, 0.25f, 2e-6f ) ) {
 		m_bestSelectable.push_back( m_selectable );
 		m_bestIntersection = m_intersection;
 	}
