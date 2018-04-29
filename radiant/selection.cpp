@@ -52,6 +52,8 @@
 
 #include "grid.h"
 
+int g_SELECT_EPSILON = 8;
+
 struct Pivot2World
 {
 	Matrix4 m_worldSpace;
@@ -2347,8 +2349,8 @@ public:
 								matrix4_transform_point( inv, point );
 								point -= origin;
 								point = vector3_added( point, vector3_scaled( m_pivot.m_axis_screen, -vector3_dot( point, m_pivot.m_axis_screen ) ) ); //constrain_to_axis
-								m_rotateAxis.SetRadius( vector3_length( point ) - 4 ); //- SELECT_EPSILON / 2
-								//globalOutputStream() << "radius\n";
+								m_rotateAxis.SetRadius( vector3_length( point ) - g_SELECT_EPSILON / 2.0 - 1.0 ); /* use smaller radius to constrain to one rotation direction in 2D */
+								//globalOutputStream() << "radius " << ( vector3_length( point ) - g_SELECT_EPSILON / 2.0 - 1.0 ) << "\n";
 							}
 							else{
 								m_rotateAxis.SetRadius( g_radius );
@@ -5043,6 +5045,7 @@ void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& 
 bool g_bLeftMouseClickSelector = true;
 
 void SelectionSystem_constructPreferences( PreferencesPage& page ){
+	page.appendSpinner( "Selector size (pixels)", g_SELECT_EPSILON, 8, 2, 64 );
 	page.appendCheckBox( "", "Prefer point entities in 2D", getSelectionSystem().m_bPreferPointEntsIn2D );
 	page.appendCheckBox( "", "Left mouse click tunnel selector", g_bLeftMouseClickSelector );
 }
@@ -5071,6 +5074,7 @@ void SelectionSystem_Construct(){
 
 	GlobalShaderCache().attachRenderable( getSelectionSystem() );
 
+	GlobalPreferenceSystem().registerPreference( "SELECT_EPSILON", IntImportStringCaller( g_SELECT_EPSILON ), IntExportStringCaller( g_SELECT_EPSILON ) );
 	GlobalPreferenceSystem().registerPreference( "PreferPointEntsIn2D", BoolImportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ), BoolExportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ) );
 	GlobalPreferenceSystem().registerPreference( "LeftMouseClickSelector", BoolImportStringCaller( g_bLeftMouseClickSelector ), BoolExportStringCaller( g_bLeftMouseClickSelector ) );
 	SelectionSystem_registerPreferencesPage();
@@ -5151,13 +5155,13 @@ void Scene_projectClosestTexture( SelectionTest& test );
 
 class TexManipulator_
 {
+const DeviceVector& m_epsilon;
 public:
-DeviceVector m_epsilon;
 const View* m_view;
 ModifierFlags m_state;
 bool m_undo_begun;
 
-TexManipulator_() : m_state( c_modifierNone ), m_undo_begun( false ){
+TexManipulator_( const DeviceVector& epsilon ) : m_epsilon( epsilon ), m_state( c_modifierNone ), m_undo_begun( false ){
 }
 
 void mouseDown( DeviceVector position ){
@@ -5239,10 +5243,10 @@ rect_t getDeviceArea() const {
 	}
 }
 
+const DeviceVector& m_epsilon;
 public:
 DeviceVector m_start;
 DeviceVector m_current;
-DeviceVector m_epsilon;
 ModifierFlags m_state;
 bool m_mouse2;
 bool m_mouseMoved;
@@ -5251,7 +5255,7 @@ bool m_paintSelect;
 const View* m_view;
 RectangleCallback m_window_update;
 
-Selector_() : m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ), m_mouse2( false ), m_mouseMoved( false ), m_mouseMovedWhilePressed( false ){
+Selector_( const DeviceVector& epsilon ) : m_epsilon( epsilon ), m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ), m_mouse2( false ), m_mouseMoved( false ), m_mouseMovedWhilePressed( false ){
 }
 
 void draw_area(){
@@ -5344,15 +5348,15 @@ typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseUp> MouseUpCalle
 
 class Manipulator_
 {
+const DeviceVector& m_epsilon;
 public:
-DeviceVector m_epsilon;
 const View* m_view;
 ModifierFlags m_state;
 
 bool m_moving_transformOrigin;
 bool m_mouseMovedWhilePressed;
 
-Manipulator_() : m_state( c_modifierNone ), m_moving_transformOrigin( false ), m_mouseMovedWhilePressed( false ) {
+Manipulator_( const DeviceVector& epsilon ) : m_epsilon( epsilon ), m_state( c_modifierNone ), m_moving_transformOrigin( false ), m_mouseMovedWhilePressed( false ) {
 }
 
 bool mouseDown( DeviceVector position ){
@@ -5395,10 +5399,7 @@ void modifierDisable( ModifierFlags type ){
 
 class RadiantWindowObserver : public SelectionSystemWindowObserver
 {
-enum
-{
-	SELECT_EPSILON = 8,
-};
+DeviceVector m_epsilon;
 
 int m_width;
 int m_height;
@@ -5416,7 +5417,7 @@ Selector_ m_selector;
 Manipulator_ m_manipulator;
 TexManipulator_ m_texmanipulator;
 
-RadiantWindowObserver() : m_mouse_down( false ), m_moveEpsilon( .01f ){
+RadiantWindowObserver() : m_mouse_down( false ), m_moveEpsilon( .01f ), m_selector( m_epsilon ), m_manipulator( m_epsilon ), m_texmanipulator( m_epsilon ){
 }
 void release(){
 	delete this;
@@ -5429,13 +5430,17 @@ void setView( const View& view ){
 void setRectangleDrawCallback( const RectangleCallback& callback ){
 	m_selector.m_window_update = callback;
 }
+void updateEpsilon(){
+	m_epsilon = DeviceVector( g_SELECT_EPSILON / static_cast<float>( m_width ), g_SELECT_EPSILON / static_cast<float>( m_height ) );
+}
 void onSizeChanged( int width, int height ){
 	m_width = width;
 	m_height = height;
-	DeviceVector epsilon( SELECT_EPSILON / static_cast<float>( m_width ), SELECT_EPSILON / static_cast<float>( m_height ) );
-	m_selector.m_epsilon = m_manipulator.m_epsilon = m_texmanipulator.m_epsilon = epsilon;
+	updateEpsilon();
 }
 void onMouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
+	updateEpsilon(); /* could have changed, as it is user setting */
+
 	const DeviceVector devicePosition( device( position ) );
 
 	if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
@@ -5472,7 +5477,7 @@ void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
 		g_mouseMovedCallback.get() ( device( position ) );
 	}
 	else{
-		getSelectionSystem().HighlightManipulator( *m_manipulator.m_view, &device( position )[0], &m_manipulator.m_epsilon[0] );
+		getSelectionSystem().HighlightManipulator( *m_manipulator.m_view, &device( position )[0], &m_epsilon[0] );
 	}
 }
 void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
