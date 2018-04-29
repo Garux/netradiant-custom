@@ -5156,12 +5156,15 @@ void Scene_projectClosestTexture( SelectionTest& test );
 class TexManipulator_
 {
 const DeviceVector& m_epsilon;
+const ModifierFlags& m_state;
 public:
 const View* m_view;
-ModifierFlags m_state;
 bool m_undo_begun;
 
-TexManipulator_( const DeviceVector& epsilon ) : m_epsilon( epsilon ), m_state( c_modifierNone ), m_undo_begun( false ){
+TexManipulator_( const DeviceVector& epsilon, const ModifierFlags& state ) :
+		m_epsilon( epsilon ),
+		m_state( state ),
+		m_undo_begun( false ){
 }
 
 void mouseDown( DeviceVector position ){
@@ -5199,21 +5202,6 @@ void mouseUp( DeviceVector position ){
 	g_mouseUpCallback.clear();
 }
 typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseUp> MouseUpCaller;
-
-void setState( ModifierFlags state ){
-	m_state = state;
-}
-
-ModifierFlags getState() const {
-	return m_state;
-}
-
-void modifierEnable( ModifierFlags type ){
-	setState( bitfield_enable( getState(), type ) );
-}
-void modifierDisable( ModifierFlags type ){
-	setState( bitfield_disable( getState(), type ) );
-}
 };
 
 
@@ -5244,10 +5232,10 @@ rect_t getDeviceArea() const {
 }
 
 const DeviceVector& m_epsilon;
+ModifierFlags m_state;
 public:
 DeviceVector m_start;
 DeviceVector m_current;
-ModifierFlags m_state;
 bool m_mouse2;
 bool m_mouseMoved;
 bool m_mouseMovedWhilePressed;
@@ -5255,7 +5243,14 @@ bool m_paintSelect;
 const View* m_view;
 RectangleCallback m_window_update;
 
-Selector_( const DeviceVector& epsilon ) : m_epsilon( epsilon ), m_start( 0.0f, 0.0f ), m_current( 0.0f, 0.0f ), m_state( c_modifierNone ), m_mouse2( false ), m_mouseMoved( false ), m_mouseMovedWhilePressed( false ){
+Selector_( const DeviceVector& epsilon ) :
+		m_epsilon( epsilon ),
+		m_state( c_modifierNone ),
+		m_start( 0.f, 0.f ),
+		m_current( 0.f, 0.f ),
+		m_mouse2( false ),
+		m_mouseMoved( false ),
+		m_mouseMovedWhilePressed( false ){
 }
 
 void draw_area(){
@@ -5293,22 +5288,11 @@ bool selecting() const {
 }
 
 void setState( ModifierFlags state ){
-	bool was_selecting = selecting();
+	const bool was_selecting = selecting();
 	m_state = state;
 	if ( was_selecting ^ selecting() ) {
 		draw_area();
 	}
-}
-
-ModifierFlags getState() const {
-	return m_state;
-}
-
-void modifierEnable( ModifierFlags type ){
-	setState( bitfield_enable( getState(), type ) );
-}
-void modifierDisable( ModifierFlags type ){
-	setState( bitfield_disable( getState(), type ) );
 }
 
 void mouseDown( DeviceVector position ){
@@ -5349,14 +5333,18 @@ typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseUp> MouseUpCalle
 class Manipulator_
 {
 const DeviceVector& m_epsilon;
+const ModifierFlags& m_state;
 public:
 const View* m_view;
-ModifierFlags m_state;
 
 bool m_moving_transformOrigin;
 bool m_mouseMovedWhilePressed;
 
-Manipulator_( const DeviceVector& epsilon ) : m_epsilon( epsilon ), m_state( c_modifierNone ), m_moving_transformOrigin( false ), m_mouseMovedWhilePressed( false ) {
+Manipulator_( const DeviceVector& epsilon, const ModifierFlags& state ) :
+		m_epsilon( epsilon ),
+		m_state( state ),
+		m_moving_transformOrigin( false ),
+		m_mouseMovedWhilePressed( false ) {
 }
 
 bool mouseDown( DeviceVector position ){
@@ -5377,21 +5365,6 @@ void mouseUp( DeviceVector position ){
 	g_mouseUpCallback.clear();
 }
 typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseUp> MouseUpCaller;
-
-void setState( ModifierFlags state ){
-	m_state = state;
-}
-
-ModifierFlags getState() const {
-	return m_state;
-}
-
-void modifierEnable( ModifierFlags type ){
-	setState( bitfield_enable( getState(), type ) );
-}
-void modifierDisable( ModifierFlags type ){
-	setState( bitfield_disable( getState(), type ) );
-}
 };
 
 
@@ -5400,6 +5373,7 @@ void modifierDisable( ModifierFlags type ){
 class RadiantWindowObserver : public SelectionSystemWindowObserver
 {
 DeviceVector m_epsilon;
+ModifierFlags m_state;
 
 int m_width;
 int m_height;
@@ -5412,12 +5386,18 @@ float m_movePressed; /* pressed move after m_moveStart, for decision: m1 tunnel 
 DeviceVector m_moveStart;
 DeviceVector m_moveEnd;
 
-public:
 Selector_ m_selector;
 Manipulator_ m_manipulator;
 TexManipulator_ m_texmanipulator;
+public:
 
-RadiantWindowObserver() : m_mouse_down( false ), m_moveEpsilon( .01f ), m_selector( m_epsilon ), m_manipulator( m_epsilon ), m_texmanipulator( m_epsilon ){
+RadiantWindowObserver() :
+		m_state( c_modifierNone ),
+		m_mouse_down( false ),
+		m_moveEpsilon( .01f ),
+		m_selector( m_epsilon ),
+		m_manipulator( m_epsilon, m_state ),
+		m_texmanipulator( m_epsilon, m_state ){
 }
 void release(){
 	delete this;
@@ -5500,14 +5480,12 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 	m_move = 0.f;
 }
 void onModifierDown( ModifierFlags type ){
-	m_selector.modifierEnable( type );
-	m_manipulator.modifierEnable( type );
-	m_texmanipulator.modifierEnable( type );
+	m_state = bitfield_enable( m_state, type );
+	m_selector.setState( m_state );
 }
 void onModifierUp( ModifierFlags type ){
-	m_selector.modifierDisable( type );
-	m_manipulator.modifierDisable( type );
-	m_texmanipulator.modifierDisable( type );
+	m_state = bitfield_disable( m_state, type );
+	m_selector.setState( m_state );
 }
 DeviceVector device( WindowVector window ) const {
 	return window_to_normalised_device( window, m_width, m_height );
