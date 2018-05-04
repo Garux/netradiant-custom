@@ -5220,8 +5220,8 @@ RadiantSelectionSystem::EModifier modifier_for_state( ModifierFlags state ){
 }
 
 rect_t getDeviceArea() const {
-	DeviceVector delta( m_current - m_start );
-	if ( selecting() && fabs( delta.x() ) > m_epsilon.x() && fabs( delta.y() ) > m_epsilon.y() ) {
+	const DeviceVector delta( m_current - m_start );
+	if ( m_mouseMovedWhilePressed && selecting() && delta.x() != 0 && delta.y() != 0 ) {
 		return SelectionBoxForArea( &m_start[0], &delta[0] );
 	}
 	else
@@ -5260,9 +5260,8 @@ void draw_area(){
 void testSelect( DeviceVector position ){
 	RadiantSelectionSystem::EModifier modifier = modifier_for_state( m_state );
 	if ( modifier != RadiantSelectionSystem::eManipulator ) {
-		DeviceVector delta( position - m_start );
-		if ( fabs( delta.x() ) > m_epsilon.x() && fabs( delta.y() ) > m_epsilon.y() ) {
-			DeviceVector delta( position - m_start );
+		const DeviceVector delta( position - m_start );
+		if ( m_mouseMovedWhilePressed && delta.x() != 0 && delta.y() != 0 ) {
 			getSelectionSystem().SelectArea( *m_view, &m_start[0], &delta[0], RadiantSelectionSystem::eToggle, ( m_state & c_modifier_face ) != c_modifierNone );
 		}
 		else if( !m_mouseMovedWhilePressed ){
@@ -5273,7 +5272,7 @@ void testSelect( DeviceVector position ){
 		}
 	}
 
-	m_start = m_current = DeviceVector( 0.0f, 0.0f );
+	m_start = m_current = DeviceVector( 0.f, 0.f );
 	draw_area();
 }
 
