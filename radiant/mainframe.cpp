@@ -1474,7 +1474,7 @@ void DragMode(){
 		g_currentToolMode = DragMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-		OnClipMode( false );
+//		OnClipMode( false );
 
 		Sys_Status( c_ResizeMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eDrag );
@@ -1495,7 +1495,7 @@ void TranslateMode(){
 		g_currentToolMode = TranslateMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-		OnClipMode( false );
+//		OnClipMode( false );
 
 		Sys_Status( c_TranslateMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eTranslate );
@@ -1515,7 +1515,7 @@ void RotateMode(){
 		g_currentToolMode = RotateMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-		OnClipMode( false );
+//		OnClipMode( false );
 
 		Sys_Status( c_RotateMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eRotate );
@@ -1535,7 +1535,7 @@ void ScaleMode(){
 		g_currentToolMode = ScaleMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-		OnClipMode( false );
+//		OnClipMode( false );
 
 		Sys_Status( c_ScaleMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eScale );
@@ -1555,7 +1555,7 @@ void SkewMode(){
 		g_currentToolMode = SkewMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-		OnClipMode( false );
+//		OnClipMode( false );
 
 		Sys_Status( c_SkewMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eSkew );
@@ -1579,7 +1579,7 @@ void ClipperMode(){
 
 		SelectionSystem_DefaultMode();
 
-		OnClipMode( true );
+//		OnClipMode( true );
 
 		Sys_Status( c_ClipperMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eClip );

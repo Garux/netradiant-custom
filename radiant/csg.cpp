@@ -741,17 +741,17 @@ void CSG_Subtract(){
 	}
 }
 
+#include "clippertool.h"
 class BrushSplitByPlaneSelected : public scene::Graph::Walker
 {
-const Vector3& m_p0;
-const Vector3& m_p1;
-const Vector3& m_p2;
+const Plane3 m_plane;
+const ClipperPoints m_points;
 const char* m_shader;
 const TextureProjection& m_projection;
-EBrushSplit m_split;
+const bool m_split; /* split or clip */
 public:
-BrushSplitByPlaneSelected( const Vector3& p0, const Vector3& p1, const Vector3& p2, const char* shader, const TextureProjection& projection, EBrushSplit split )
-	: m_p0( p0 ), m_p1( p1 ), m_p2( p2 ), m_shader( shader ), m_projection( projection ), m_split( split ){
+BrushSplitByPlaneSelected( const ClipperPoints& points, const char* shader, const TextureProjection& projection, bool split )
+	: m_plane( plane3_for_points( points._points ) ), m_points( points ), m_shader( shader ), m_projection( projection ), m_split( split ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	return true;
@@ -761,63 +761,55 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
 			 && Instance_getSelectable( instance )->isSelected() ) {
-			Plane3 plane( plane3_for_points( m_p0, m_p1, m_p2 ) );
-			if ( plane3_valid( plane ) ) {
-				brushsplit_t split = Brush_classifyPlane( *brush, m_split == eFront ? plane3_flipped( plane ) : plane );
-				if ( split.counts[ePlaneBack] && split.counts[ePlaneFront] ) {
-					// the plane intersects this brush
-					if ( m_split == eFrontAndBack ) {
-						NodeSmartReference node( ( new BrushNode() )->node() );
-						Brush* fragment = Node_getBrush( node );
-						fragment->copy( *brush );
-						Face* newFace = fragment->addPlane( m_p0, m_p1, m_p2, m_shader, m_projection );
-						if ( newFace != 0 && m_split != eFront ) {
-							newFace->flipWinding();
-						}
-						fragment->removeEmptyFaces();
-						ASSERT_MESSAGE( !fragment->empty(), "brush left with no faces after split" );
+			const brushsplit_t split = Brush_classifyPlane( *brush, m_plane );
+			if ( split.counts[ePlaneBack] && split.counts[ePlaneFront] ) {
+				// the plane intersects this brush
+				if ( m_split ) {
+					NodeSmartReference node( ( new BrushNode() )->node() );
+					Brush* fragment = Node_getBrush( node );
+					fragment->copy( *brush );
+					fragment->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection ); /* flip plane points */
+					fragment->removeEmptyFaces();
+					ASSERT_MESSAGE( !fragment->empty(), "brush left with no faces after split" );
 
-						Node_getTraversable( path.parent() )->insert( node );
-						{
-							scene::Path fragmentPath = path;
-							fragmentPath.top() = makeReference( node.get() );
-							selectPath( fragmentPath, true );
-						}
+					Node_getTraversable( path.parent() )->insert( node );
+					{
+						scene::Path fragmentPath = path;
+						fragmentPath.top() = makeReference( node.get() );
+						selectPath( fragmentPath, true );
 					}
+				}
 
-					Face* newFace = brush->addPlane( m_p0, m_p1, m_p2, m_shader, m_projection );
-					if ( newFace != 0 && m_split == eFront ) {
-						newFace->flipWinding();
-					}
-					brush->removeEmptyFaces();
-					ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after split" );
-				}
-				else
-				// the plane does not intersect this brush
-				if ( m_split != eFrontAndBack && split.counts[ePlaneBack] != 0 ) {
-					// the brush is "behind" the plane
-					Path_deleteTop( path );
-				}
+				brush->addPlane( m_points[0], m_points[1], m_points[2], m_shader, m_projection );
+				brush->removeEmptyFaces();
+				ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after split" );
+			}
+			else
+			// the plane does not intersect this brush
+			if ( !m_split && split.counts[ePlaneFront] != 0 ) {
+				// the brush is "behind" the plane
+				Path_deleteTop( path );
 			}
 		}
 	}
 }
 };
 
-void Scene_BrushSplitByPlane( scene::Graph& graph, const Vector3& p0, const Vector3& p1, const Vector3& p2, const char* shader, EBrushSplit split ){
+void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool caulk, bool split ){
+	const char* shader = caulk? GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
 	TextureProjection projection;
 	TexDef_Construct_Default( projection );
-	graph.traverse( BrushSplitByPlaneSelected( p0, p1, p2, shader, projection, split ) );
+	graph.traverse( BrushSplitByPlaneSelected( points, shader, projection, split ) );
 	SceneChangeNotify();
 }
 
 
 class BrushInstanceSetClipPlane : public scene::Graph::Walker
 {
-Plane3 m_plane;
+const Plane3 m_plane;
 public:
-BrushInstanceSetClipPlane( const Plane3& plane )
-	: m_plane( plane ){
+BrushInstanceSetClipPlane( const ClipperPoints& points )
+	: m_plane( plane3_for_points( points._points ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	BrushInstance* brush = Instance_getBrush( instance );
@@ -831,8 +823,8 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Scene_BrushSetClipPlane( scene::Graph& graph, const Plane3& plane ){
-	graph.traverse( BrushInstanceSetClipPlane( plane ) );
+void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points ){
+	graph.traverse( BrushInstanceSetClipPlane( points ) );
 }
 
 /*

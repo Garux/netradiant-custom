@@ -108,7 +108,7 @@ typedef MemberCaller<MainFrame, &MainFrame::SetGridStatus> SetGridStatusCaller;
 void SetActiveXY( XYWnd* p );
 XYWnd* ActiveXY(){
 	return m_pActiveXY;
-};
+}
 XYWnd* GetXYWnd(){
 	return m_pXYWnd;
 }
@@ -127,10 +127,10 @@ CamWnd* GetCamWnd(){
 
 EViewStyle CurrentStyle(){
 	return m_nCurrentStyle;
-};
+}
 bool FloatingGroupDialog(){
 	return CurrentStyle() == eFloating || CurrentStyle() == eSplit;
-};
+}
 };
 
 extern MainFrame* g_pParentWnd;

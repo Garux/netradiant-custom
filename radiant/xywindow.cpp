@@ -234,7 +234,7 @@ void PlanePointsFromClipPoints( Vector3 planepts[3], const AABB& bounds, VIEWTYP
 void Clip_Update(){
 	Vector3 planepts[3];
 	if ( !GlobalClipPoints_valid() ) {
-		Scene_BrushSetClipPlane( GlobalSceneGraph(), Plane3( 0, 0, 0, 0 ) );
+//		Scene_BrushSetClipPlane( GlobalSceneGraph(), Plane3( 0, 0, 0, 0 ) );
 	}
 	else
 	{
@@ -243,7 +243,7 @@ void Clip_Update(){
 		if ( g_bSwitch ) {
 			std::swap( planepts[0], planepts[1] );
 		}
-		Scene_BrushSetClipPlane( GlobalSceneGraph(), plane3_for_points( planepts[0], planepts[1], planepts[2] ) );
+//		Scene_BrushSetClipPlane( GlobalSceneGraph(), plane3_for_points( planepts[0], planepts[1], planepts[2] ) );
 	}
 	ClipperChangeNotify();
 }
@@ -259,7 +259,7 @@ void Clip(){
 		Vector3 planepts[3];
 		AABB bounds( Vector3( 0, 0, 0 ), Vector3( 64, 64, 64 ) );
 		PlanePointsFromClipPoints( planepts, bounds, g_clip_viewtype );
-		Scene_BrushSplitByPlane( GlobalSceneGraph(), planepts[0], planepts[1], planepts[2], Clip_getShader(), ( !g_bSwitch ) ? eFront : eBack );
+//		Scene_BrushSplitByPlane( GlobalSceneGraph(), planepts[0], planepts[1], planepts[2], Clip_getShader(), ( !g_bSwitch ) ? eFront : eBack );
 		g_Clip1.Reset();
 		g_Clip2.Reset();
 		g_Clip3.Reset();
@@ -276,7 +276,7 @@ void SplitClip(){
 		Vector3 planepts[3];
 		AABB bounds( Vector3( 0, 0, 0 ), Vector3( 64, 64, 64 ) );
 		PlanePointsFromClipPoints( planepts, bounds, g_clip_viewtype );
-		Scene_BrushSplitByPlane( GlobalSceneGraph(), planepts[0], planepts[1], planepts[2], Clip_getShader(), eFrontAndBack );
+//		Scene_BrushSplitByPlane( GlobalSceneGraph(), planepts[0], planepts[1], planepts[2], Clip_getShader(), eFrontAndBack );
 		g_Clip1.Reset();
 		g_Clip2.Reset();
 		g_Clip3.Reset();
@@ -1515,15 +1515,15 @@ void XYWnd::XY_MouseDown( int x, int y, unsigned int buttons ){
 	else if ( buttons == Zoom_buttons() ) {
 		Zoom_Begin( x, y );
 	}
-	else if ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() ) ) {
-		Clipper_OnLButtonDown( x, y );
-	}
+//	else if ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() ) ) {
+//		Clipper_OnLButtonDown( x, y );
+//	}
 	else if ( !ClipMode() && buttons == Clipper_quick_buttons() ) {
 		ClipperMode();
 		g_quick_clipper = true;
 		Clipper_OnLButtonDown( x, y );
 	}
-	else if ( buttons == NewBrushDrag_buttons() && GlobalSelectionSystem().countSelected() == 0 ) {
+	else if ( buttons == NewBrushDrag_buttons() && GlobalSelectionSystem().countSelected() == 0 && !ClipMode() ) {
 		NewBrushDrag_Begin( x, y );
 	}
 	// control mbutton = move camera
@@ -1551,11 +1551,11 @@ void XYWnd::XY_MouseUp( int x, int y, unsigned int buttons ){
 	else if ( m_zoom_started ) {
 		Zoom_End();
 	}
-	else if ( ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() || g_pMovingClip ) ) ||
-			g_clipper_doubleclicked ){ // handle mouse release, if quit quick clipper mode via doubleclick
-		Clipper_OnLButtonUp( x, y );
-		g_clipper_doubleclicked = false;
-	}
+//	else if ( ( ClipMode() && ( buttons == Clipper_buttons() || buttons == Clipper_quick_buttons() || g_pMovingClip ) ) ||
+//			g_clipper_doubleclicked ){ // handle mouse release, if quit quick clipper mode via doubleclick
+//		Clipper_OnLButtonUp( x, y );
+//		g_clipper_doubleclicked = false;
+//	}
 	else if ( m_bNewBrushDrag ) {
 		m_bNewBrushDrag = false;
 		NewBrushDrag_End( x, y );
@@ -1578,9 +1578,9 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 	else if ( m_zoom_started ) {
 	}
 
-	else if ( ClipMode() && g_pMovingClip != 0 ) {
-		Clipper_OnMouseMoved( x, y, buttons & RAD_SHIFT );
-	}
+//	else if ( ClipMode() && g_pMovingClip != 0 ) {
+//		Clipper_OnMouseMoved( x, y, buttons & RAD_SHIFT );
+//	}
 	// lbutton without selection = drag new brush
 	else if ( m_bNewBrushDrag ) {
 		NewBrushDrag( x, y, buttons & RAD_SHIFT, buttons & RAD_CONTROL );
@@ -1620,9 +1620,9 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 			XYWnd_Update( *this );
 		}
 
-		if( ClipMode() ){
-			Clipper_Crosshair_OnMouseMoved( x, y );
-		}
+//		if( ClipMode() ){
+//			Clipper_Crosshair_OnMouseMoved( x, y );
+//		}
 	}
 }
 
@@ -2805,9 +2805,9 @@ void XYWnd::XY_Draw(){
 		glEnd();
 	}
 
-	if ( ClipMode() ) {
-		GlobalClipPoints_Draw( m_fScale );
-	}
+//	if ( ClipMode() ) {
+//		GlobalClipPoints_Draw( m_fScale );
+//	}
 
 	GlobalOpenGL_debugAssertNoErrors();
 
@@ -3353,17 +3353,6 @@ void Orthographic_registerPreferencesPage(){
 	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Orthographic_constructPage>() );
 }
 
-void Clipper_constructPreferences( PreferencesPage& page ){
-	page.appendCheckBox( "", "Clipper tool uses caulk", g_clip_useCaulk );
-}
-void Clipper_constructPage( PreferenceGroup& group ){
-	PreferencesPage page( group.createPage( "Clipper", "Clipper Tool Settings" ) );
-	Clipper_constructPreferences( page );
-}
-void Clipper_registerPreferencesPage(){
-	PreferencesDialog_addSettingsPage( FreeCaller1<PreferenceGroup&, Clipper_constructPage>() );
-}
-
 
 #include "preferencesystem.h"
 #include "stringio.h"
@@ -3386,8 +3375,6 @@ void XYWindow_Construct(){
 	GlobalCommands_insert( "Zoom100", FreeCaller<XY_Zoom100>() );
 	GlobalCommands_insert( "CenterXYView", FreeCaller<XY_Centralize>(), Accelerator( GDK_Tab, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "XYFocusOnSelected", FreeCaller<XY_Focus>(), Accelerator( GDK_grave ) );
-
-	GlobalPreferenceSystem().registerPreference( "ClipCaulk", BoolImportStringCaller( g_clip_useCaulk ), BoolExportStringCaller( g_clip_useCaulk ) );
 
 //	GlobalPreferenceSystem().registerPreference( "NewRightClick", BoolImportStringCaller( g_xywindow_globals.m_bRightClick ), BoolExportStringCaller( g_xywindow_globals.m_bRightClick ) );
 	GlobalPreferenceSystem().registerPreference( "XYMSAA", IntImportStringCaller( g_xywindow_globals_private.m_MSAA ), IntExportStringCaller( g_xywindow_globals_private.m_MSAA ) );
@@ -3421,7 +3408,6 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "YZVIS", makeBoolStringImportCallback( ToggleShownImportBoolCaller( g_yz_side_shown ) ), makeBoolStringExportCallback( ToggleShownExportBoolCaller( g_yz_side_shown ) ) );
 
 	Orthographic_registerPreferencesPage();
-	Clipper_registerPreferencesPage();
 
 	g_cursorMoveClipper = gdk_cursor_new( GDK_CROSSHAIR );
 	g_cursorClipper = gdk_cursor_new( GDK_HAND2 );

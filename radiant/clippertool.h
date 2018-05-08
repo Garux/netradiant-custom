@@ -22,4 +22,29 @@
 #if !defined( INCLUDED_CLIPPERTOOL_H )
 #define INCLUDED_CLIPPERTOOL_H
 
+#include "generic/vector.h"
+
+class ClipperPoints
+{
+public:
+	Vector3 _points[3];
+	ClipperPoints( const Vector3& p0, const Vector3& p1, const Vector3& p2 ){
+		_points[0] = p0;
+		_points[1] = p1;
+		_points[2] = p2;
+	}
+	const Vector3& operator[]( std::size_t i ) const {
+		return _points[i];
+	}
+	Vector3& operator[]( std::size_t i ){
+		return _points[i];
+	}
+};
+
+
+void Clipper_setPlanePoints( const ClipperPoints& points );
+void Clipper_Construct();
+void Clipper_Destroy();
+void Clipper_modeChanged( bool isClipper );
+
 #endif

@@ -34,6 +34,8 @@
 #include "mainframe.h"
 #include "preferences.h"
 
+#include "clippertool.h"
+
 LatchedBool g_useAlternativeTextureProjection( false, "Use alternative texture-projection (\"brush primitives\")" );
 bool g_multipleBrushTypes = false;
 EBrushType g_brushTypes[3];
@@ -178,9 +180,13 @@ void Brush_Construct( EBrushType type ){
 	GridStatus_getTextureLockEnabled = getTextureLockEnabled;
 	GridStatus_getTexdefTypeIdLabel = getTexdefTypeIdLabel;
 	g_texture_lock_status_changed = FreeCaller<GridStatus_changed>();
+
+	Clipper_Construct();
 }
 
 void Brush_Destroy(){
+	Clipper_Destroy();
+
 	Brush::m_maxWorldCoord = 0;
 	BrushInstance::m_counter = 0;
 

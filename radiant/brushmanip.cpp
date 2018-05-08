@@ -1507,31 +1507,7 @@ BrushPrefab g_brushsphere( eBrushSphere );
 BrushPrefab g_brushrock( eBrushRock );
 BrushPrefab g_brushicosahedron( eBrushIcosahedron );
 
-/*
-void FlipClip();
-void SplitClip();
-void Clip();
-void OnClipMode( bool enable );
-bool ClipMode();
-*/
 
-void ClipSelected(){
-	if ( ClipMode() ) {
-		UndoableCommand undo( "clipperClip" );
-		Clip();
-	}
-}
-
-void SplitSelected(){
-	if ( ClipMode() ) {
-		UndoableCommand undo( "clipperSplit" );
-		SplitClip();
-	}
-}
-
-void FlipClipper(){
-	FlipClip();
-}
 
 
 Callback g_texture_lock_status_changed;
@@ -1572,10 +1548,6 @@ void Brush_registerCommands(){
 	GlobalCommands_insert( "Brush8Sided", BrushMakeSided::SetCaller( g_brushmakesided8 ), Accelerator( '8', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "Brush9Sided", BrushMakeSided::SetCaller( g_brushmakesided9 ), Accelerator( '9', (GdkModifierType)GDK_CONTROL_MASK ) );
 
-	GlobalCommands_insert( "ClipSelected", FreeCaller<ClipSelected>(), Accelerator( GDK_Return ) );
-	GlobalCommands_insert( "SplitSelected", FreeCaller<SplitSelected>(), Accelerator( GDK_Return, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "FlipClip", FreeCaller<FlipClipper>(), Accelerator( GDK_Return, (GdkModifierType)GDK_CONTROL_MASK ) );
-
 	GlobalCommands_insert( "MakeDetail", FreeCaller<Select_MakeDetail>(), Accelerator( 'D', (GdkModifierType)GDK_MOD1_MASK ) );
 	GlobalCommands_insert( "MakeStructural", FreeCaller<Select_MakeStructural>(), Accelerator( 'S', (GdkModifierType)GDK_MOD1_MASK ) );
 }
@@ -1604,9 +1576,9 @@ void Brush_constructMenu( GtkMenu* menu ){
 			menu_tearoff( menu_in_menu );
 		}
 
-		create_menu_item_with_mnemonic( menu_in_menu, "Clip selection", "ClipSelected" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Split selection", "SplitSelected" );
-		create_menu_item_with_mnemonic( menu_in_menu, "Flip Clip orientation", "FlipClip" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Clip selection", "ClipperClip" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Split selection", "ClipperSplit" );
+		create_menu_item_with_mnemonic( menu_in_menu, "Flip Clip orientation", "ClipperFlip" );
 	}
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Make detail", "MakeDetail" );
