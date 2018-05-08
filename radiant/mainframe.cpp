@@ -144,7 +144,6 @@ struct layout_globals_t
 };
 
 layout_globals_t g_layout_globals;
-//glwindow_globals_t g_glwindow_globals;
 
 
 // VFS
@@ -1474,8 +1473,6 @@ void DragMode(){
 		g_currentToolMode = DragMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-//		OnClipMode( false );
-
 		Sys_Status( c_ResizeMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eDrag );
 		ToolChanged();
@@ -1495,8 +1492,6 @@ void TranslateMode(){
 		g_currentToolMode = TranslateMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-//		OnClipMode( false );
-
 		Sys_Status( c_TranslateMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eTranslate );
 		ToolChanged();
@@ -1514,8 +1509,6 @@ void RotateMode(){
 	{
 		g_currentToolMode = RotateMode;
 		g_currentToolModeSupportsComponentEditing = true;
-
-//		OnClipMode( false );
 
 		Sys_Status( c_RotateMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eRotate );
@@ -1535,8 +1528,6 @@ void ScaleMode(){
 		g_currentToolMode = ScaleMode;
 		g_currentToolModeSupportsComponentEditing = true;
 
-//		OnClipMode( false );
-
 		Sys_Status( c_ScaleMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eScale );
 		ToolChanged();
@@ -1554,8 +1545,6 @@ void SkewMode(){
 	{
 		g_currentToolMode = SkewMode;
 		g_currentToolModeSupportsComponentEditing = true;
-
-//		OnClipMode( false );
 
 		Sys_Status( c_SkewMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eSkew );
@@ -1578,8 +1567,6 @@ void ClipperMode(){
 		g_currentToolModeSupportsComponentEditing = false;
 
 		SelectionSystem_DefaultMode();
-
-//		OnClipMode( true );
 
 		Sys_Status( c_ClipperMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eClip );
@@ -1926,11 +1913,6 @@ void UpdateAllWindows(){
 
 void ModeChangeNotify(){
 	SceneChangeNotify();
-}
-
-void ClipperChangeNotify(){
-	GlobalCamera_UpdateWindow();
-	XY_UpdateAllWindows();
 }
 
 
@@ -3682,10 +3664,3 @@ void MainFrame_Destroy(){
 	g_brushCount.setCountChangedCallback( Callback() );
 }
 
-
-void GLWindow_Construct(){
-//	GlobalPreferenceSystem().registerPreference( "MouseButtons", IntImportStringCaller( g_glwindow_globals.m_nMouseType ), IntExportStringCaller( g_glwindow_globals.m_nMouseType ) );
-}
-
-void GLWindow_Destroy(){
-}

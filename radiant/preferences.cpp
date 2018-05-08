@@ -72,13 +72,8 @@ void Global_constructPreferences( PreferencesPage& page ){
 void Interface_constructPreferences( PreferencesPage& page ){
 	page.appendPathEntry( "Shader Editor Command", g_TextEditor_editorCommand, false );
 }
-
+#if 0
 void Mouse_constructPreferences( PreferencesPage& page ){
-//	{
-//		const char* buttons[] = { "2 button", "3 button", };
-//		page.appendRadio( "Mouse Type",  g_glwindow_globals.m_nMouseType, STRING_ARRAY_RANGE( buttons ) );
-//	}
-//	page.appendCheckBox( "Right Button", "Activates Context Menu", g_xywindow_globals.m_bRightClick );
 	page.appendCheckBox( "", "Zoom to mouse pointer", g_xywindow_globals.m_bZoomInToPointer );
 }
 void Mouse_constructPage( PreferenceGroup& group ){
@@ -88,7 +83,7 @@ void Mouse_constructPage( PreferenceGroup& group ){
 void Mouse_registerPreferencesPage(){
 	PreferencesDialog_addInterfacePage( FreeCaller1<PreferenceGroup&, Mouse_constructPage>() );
 }
-
+#endif
 
 /*!
    =========================================================

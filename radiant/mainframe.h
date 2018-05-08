@@ -136,26 +136,8 @@ bool FloatingGroupDialog(){
 extern MainFrame* g_pParentWnd;
 
 GtkWindow* MainFrame_getWindow();
-/*
-enum EMouseButtonMode
-{
-	ETwoButton = 0,
-	EThreeButton = 1,
-};
 
-struct glwindow_globals_t
-{
-	int m_nMouseType;
 
-	glwindow_globals_t() :
-		m_nMouseType( EThreeButton ){
-	}
-};
-*/
-void GLWindow_Construct();
-void GLWindow_Destroy();
-
-//extern glwindow_globals_t g_glwindow_globals;
 template<typename Value>
 class LatchedValue;
 typedef LatchedValue<bool> LatchedBool;
@@ -227,10 +209,8 @@ void XY_UpdateAllWindows();
 void UpdateAllWindows();
 
 
-void ClipperChangeNotify();
 void ClipperMode();
 
-void DefaultMode();
 
 const char* basegame_get();
 const char* gamename_get();

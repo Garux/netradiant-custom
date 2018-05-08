@@ -234,7 +234,6 @@ Radiant(){
 	MultiMon_Construct();
 	MRU_Construct();
 	Pointfile_Construct();
-	GLWindow_Construct();
 	BuildMenu_Construct();
 	Map_Construct();
 	EntityList_Construct();
@@ -276,7 +275,6 @@ Radiant(){
 	EntityList_Destroy();
 	Map_Destroy();
 	BuildMenu_Destroy();
-	GLWindow_Destroy();
 	Pointfile_Destroy();
 	MRU_Destroy();
 	MultiMon_Destroy();

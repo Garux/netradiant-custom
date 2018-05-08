@@ -45,13 +45,6 @@ class Node;
 typedef struct _GtkWindow GtkWindow;
 typedef struct _GtkMenu GtkMenu;
 
-
-void FlipClip();
-void SplitClip();
-void Clip();
-void OnClipMode( bool enabled );
-bool ClipMode();
-
 inline const char* ViewType_getTitle( VIEWTYPE viewtype ){
 	if ( viewtype == XY ) {
 		return "XY Top";
@@ -155,13 +148,6 @@ bool Active(){
 void UpdateCameraIcon();
 void UpdateCameraIcon_();
 
-
-void Clipper_OnLButtonDown( int x, int y );
-void Clipper_OnLButtonUp( int x, int y );
-void Clipper_OnMouseMoved( int x, int y, bool snap );
-void Clipper_Crosshair_OnMouseMoved( int x, int y );
-void DropClipPoint( int pointx, int pointy );
-
 void SetCustomPivotOrigin( int pointx, int pointy );
 
 void SetViewType( VIEWTYPE n );
@@ -219,10 +205,8 @@ int m_entityCreate_x, m_entityCreate_y;
 bool m_entityCreate;
 
 Timer m_render_time;
-GdkCursor* m_cursorCurrent;
 
 public:
-void CursorSet( GdkCursor* cursor );
 void OnContextMenu();
 void ButtonState_onMouseDown( unsigned int buttons ){
 	//m_buttonstate |= buttons;
@@ -281,7 +265,6 @@ struct xywindow_globals_t
 	Vector3 AxisColorY;
 	Vector3 AxisColorZ;
 
-//	bool m_bRightClick;
 	bool m_bNoStipple;
 	bool m_bZoomInToPointer;
 
@@ -299,7 +282,6 @@ struct xywindow_globals_t
 		AxisColorX( 1.f, 0.f, 0.f ),
 		AxisColorY( 0.f, 1.f, 0.f ),
 		AxisColorZ( 0.f, 0.f, 1.f ),
-//		m_bRightClick( true ),
 		m_bNoStipple( true ),
 		m_bZoomInToPointer( true ){
 	}
