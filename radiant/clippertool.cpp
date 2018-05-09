@@ -36,7 +36,15 @@ GdkCursor* g_clipper_cursor;
 ClipperPoints g_clipper_points( g_vector3_identity, g_vector3_identity, g_vector3_identity );
 bool g_clipper_flipped = false;
 
+/* preferences */
 bool g_clipper_caulk = true;
+bool g_clipper_resetFlip = true;
+bool g_clipper_resetPoints = true;
+bool g_clipper_2pointsIn2d = true;
+
+bool Clipper_get2pointsIn2d(){
+	return g_clipper_2pointsIn2d;
+}
 
 bool Clipper_ok(){
 	return GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eClip && plane3_valid( plane3_for_points( g_clipper_points._points ) );
@@ -75,6 +83,9 @@ void Clipper_modeChanged( bool isClipper ){
 		if( g_pParentWnd->GetCamWnd() )
 			gdk_window_set_cursor( CamWnd_getWidget( *g_pParentWnd->GetCamWnd() )->window, cursor );
 	}
+
+	if( g_clipper_resetFlip )
+		g_clipper_flipped = false;
 }
 
 
@@ -83,7 +94,11 @@ void Clipper_modeChanged( bool isClipper ){
 
 void Clipper_do( bool split ){
 	Scene_BrushSplitByPlane( GlobalSceneGraph(), Clipper_getPlanePoints(), g_clipper_caulk, split );
-	GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eClip ); /* reset points this way */
+	if( g_clipper_resetPoints ){
+		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eClip ); /* reset points this way */
+		if( g_clipper_resetFlip )
+			g_clipper_flipped = false;
+	}
 }
 
 
@@ -114,7 +129,11 @@ void Clipper_doFlip(){
 #include "commands.h"
 #include "signal/isignal.h"
 void Clipper_constructPreferences( PreferencesPage& page ){
-	page.appendCheckBox( "", "Caulk Clipper Splits", g_clipper_caulk );
+	page.appendCheckBox( "", "Caulk Clipper Cuts", g_clipper_caulk );
+	GtkWidget* resetFlip = page.appendCheckBox( "", "Reset Flipped State", g_clipper_resetFlip );
+	GtkWidget* resetPoints = page.appendCheckBox( "", "Reset Points on Split", g_clipper_resetPoints );
+	Widget_connectToggleDependency( resetFlip, resetPoints );
+	page.appendCheckBox( "", "2 Points in 2D Views", g_clipper_2pointsIn2d );
 }
 void Clipper_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Clipper", "Clipper Tool Settings" ) );
@@ -135,6 +154,9 @@ void Clipper_Construct(){
 
 	Clipper_registerCommands();
 	GlobalPreferenceSystem().registerPreference( "ClipperCaulk", BoolImportStringCaller( g_clipper_caulk ), BoolExportStringCaller( g_clipper_caulk ) );
+	GlobalPreferenceSystem().registerPreference( "ClipperResetFlip", BoolImportStringCaller( g_clipper_resetFlip ), BoolExportStringCaller( g_clipper_resetFlip ) );
+	GlobalPreferenceSystem().registerPreference( "ClipperResetPoints", BoolImportStringCaller( g_clipper_resetPoints ), BoolExportStringCaller( g_clipper_resetPoints ) );
+	GlobalPreferenceSystem().registerPreference( "Clipper2PointsIn2D", BoolImportStringCaller( g_clipper_2pointsIn2d ), BoolExportStringCaller( g_clipper_2pointsIn2d ) );
 	Clipper_registerPreferencesPage();
 
 	typedef FreeCaller1<const Selectable&, Clipper_SelectionChanged> ClipperSelectionChangedCaller;

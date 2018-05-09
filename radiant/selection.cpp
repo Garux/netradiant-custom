@@ -3726,18 +3726,19 @@ public:
 			if( !m_points[2].m_set ){
 				m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
 			}
-			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[1].m_point, m_points[2].m_point ) );
+			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[2].m_point, m_points[1].m_point ) ); /* points order corresponds the plane, we want to insert */
 		}
 		else{
 			Clipper_setPlanePoints( ClipperPoints( g_vector3_identity, g_vector3_identity, g_vector3_identity ) );
 		}
 	}
-	std::size_t newPointIndex() const {
+	std::size_t newPointIndex( const View& view ) const {
+		const std::size_t maxi = ( !view.fill() && Clipper_get2pointsIn2d() )? 2 : 3;
 		std::size_t i;
-		for( i = 0; i < 3; ++i )
+		for( i = 0; i < maxi; ++i )
 			if( !m_points[i].m_set )
 				break;
-		return i;
+		return i % maxi;
 	}
 	void newPoint( const Vector3& point, const View& view ){
 		{ /* update m_viewdir */
@@ -3750,11 +3751,9 @@ public:
 			if( view.fill() ) //viewdir, taken this way in perspective view is negative for some reason
 				m_viewdir *= -1;
 		}
-		std::size_t i = newPointIndex();
-		if( i == 3 ){
-			i = 0;
+		const std::size_t i = newPointIndex( view );
+		if( i == 0 )
 			m_points[1].m_set = m_points[2].m_set = false;
-		}
 		m_points[i].m_set = true;
 		m_points[i].m_point = point;
 
@@ -3787,7 +3786,7 @@ public:
 				Vector3 point = vector4_projected( matrix4_transformed_vector4( matrix4_full_inverse( view.GetViewMatrix() ), Vector4( 0, 0, 0, 1 ) ) );
 				vector3_snap( point, GetSnapGridSize() );
 				{
-					const std::size_t i = newPointIndex() % 3;
+					const std::size_t i = newPointIndex( view );
 					point[maxi] = m_bounds.origin[maxi] + ( i == 2? -1 : 1 ) * m_bounds.extents[maxi];
 				}
 				newPoint( point, view );

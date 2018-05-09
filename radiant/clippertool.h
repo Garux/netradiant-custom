@@ -46,5 +46,6 @@ void Clipper_setPlanePoints( const ClipperPoints& points );
 void Clipper_Construct();
 void Clipper_Destroy();
 void Clipper_modeChanged( bool isClipper );
+bool Clipper_get2pointsIn2d();
 
 #endif
