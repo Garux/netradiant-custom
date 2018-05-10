@@ -35,6 +35,7 @@ GdkCursor* g_clipper_cursor;
 
 ClipperPoints g_clipper_points( g_vector3_identity, g_vector3_identity, g_vector3_identity );
 bool g_clipper_flipped = false;
+bool g_clipper_quick = false;
 
 /* preferences */
 bool g_clipper_caulk = true;
@@ -45,6 +46,12 @@ bool g_clipper_2pointsIn2d = true;
 bool Clipper_get2pointsIn2d(){
 	return g_clipper_2pointsIn2d;
 }
+
+void ClipperModeQuick(){
+	g_clipper_quick = true;
+	ClipperMode(); //enable
+}
+
 
 bool Clipper_ok(){
 	return GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eClip && plane3_valid( plane3_for_points( g_clipper_points._points ) );
@@ -86,6 +93,8 @@ void Clipper_modeChanged( bool isClipper ){
 
 	if( g_clipper_resetFlip )
 		g_clipper_flipped = false;
+	if( !isClipper )
+		g_clipper_quick = false;
 }
 
 
@@ -99,6 +108,8 @@ void Clipper_do( bool split ){
 		if( g_clipper_resetFlip )
 			g_clipper_flipped = false;
 	}
+	if( g_clipper_quick )
+		ClipperMode(); //disable
 }
 
 

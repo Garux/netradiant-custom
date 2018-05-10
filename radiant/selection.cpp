@@ -5629,8 +5629,14 @@ void onMouseDown( const WindowVector& position, ButtonIdentifier button, Modifie
 	if ( button == c_button_select || ( button == c_button_select2 && modifiers != c_modifierNone ) ) {
 		m_mouse_down = true;
 		g_bAltResize_AltSelect = ( modifiers == c_modifierAlt );
+
+		const bool clipper2d( !m_manipulator.m_view->fill() && button == c_button_select && modifiers == c_modifierControl );
+		if( clipper2d && getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip )
+			ClipperModeQuick();
+
 		if ( ( modifiers == c_modifier_manipulator
-					|| ( modifiers == c_modifierAlt && getSelectionSystem().Mode() == SelectionSystem::ePrimitive )
+					|| clipper2d
+					|| ( modifiers == c_modifierAlt && getSelectionSystem().Mode() == SelectionSystem::ePrimitive ) /* AltResize */
 				) && m_manipulator.mouseDown( devicePosition ) ) {
 			g_mouseMovedCallback.insert( MouseEventCallback( Manipulator_::MouseMovedCaller( m_manipulator ) ) );
 			g_mouseUpCallback.insert( MouseEventCallback( Manipulator_::MouseUpCaller( m_manipulator ) ) );

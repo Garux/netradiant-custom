@@ -1123,7 +1123,7 @@ void XYWnd::SetViewType( VIEWTYPE viewType ){
 }
 
 
-bool ClipMode(){
+bool isClipperMode(){
 	return GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eClip;
 }
 
@@ -1138,7 +1138,7 @@ void XYWnd::XY_MouseDown( int x, int y, unsigned int buttons ){
 	else if ( buttons == Zoom_buttons() ) {
 		Zoom_Begin( x, y );
 	}
-	else if ( buttons == NewBrushDrag_buttons() && GlobalSelectionSystem().countSelected() == 0 && !ClipMode() ) {
+	else if ( buttons == NewBrushDrag_buttons() && GlobalSelectionSystem().countSelected() == 0 && !isClipperMode() ) {
 		NewBrushDrag_Begin( x, y );
 	}
 	// control mbutton = move camera
