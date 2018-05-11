@@ -526,6 +526,22 @@ void light_vertices( const AABB& aabb_light, Vector3 points[6] ){
 	points[5] = Vector3( min[0], mid[1], mid[2] );
 }
 
+inline void light_testselect( const AABB& aabb, SelectionTest& test, SelectionIntersection& best ){
+	const IndexPointer::index_type indices[24] = {
+		0, 2, 3,
+		0, 3, 4,
+		0, 4, 5,
+		0, 5, 2,
+		1, 2, 5,
+		1, 5, 4,
+		1, 4, 3,
+		1, 3, 2
+	};
+	Vector3 points[6];
+	light_vertices( aabb, points );
+	test.TestTriangles( VertexPointer( reinterpret_cast<VertexPointer::pointer>( points ), sizeof( Vector3 ) ), IndexPointer( indices, 24 ), best );
+}
+
 void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 	Vector3 points[6];
 	light_vertices( aabb_light, points );
@@ -1472,7 +1488,7 @@ void testSelect( Selector& selector, SelectionTest& test, const Matrix4& localTo
 	test.BeginMesh( localToWorld );
 
 	SelectionIntersection best;
-	aabb_testselect( m_aabb_light, test, best );
+	light_testselect( m_aabb_light, test, best );
 	if ( best.valid() ) {
 		selector.addIntersection( best );
 	}
