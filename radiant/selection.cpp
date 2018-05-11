@@ -5532,11 +5532,15 @@ void mouseUp( DeviceVector position ){
 typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseUp> MouseUpCaller;
 };
 
-
+#include "timer.h"
 class Manipulator_
 {
 const DeviceVector& m_epsilon;
 const ModifierFlags& m_state;
+
+Timer m_timer;
+bool m_timerDoubleClicked;
+
 public:
 const View* m_view;
 
@@ -5546,12 +5550,20 @@ bool m_mouseMovedWhilePressed;
 Manipulator_( const DeviceVector& epsilon, const ModifierFlags& state ) :
 		m_epsilon( epsilon ),
 		m_state( state ),
+		m_timerDoubleClicked( false ),
 		m_moving_transformOrigin( false ),
 		m_mouseMovedWhilePressed( false ) {
 }
 
 bool mouseDown( DeviceVector position ){
+	m_timerDoubleClicked = m_timer.elapsed_msec() < 200;
+	m_timer.start();
 	return getSelectionSystem().SelectManipulator( *m_view, &position[0], &m_epsilon[0] );
+}
+
+void tryClipperDoubleClick() const {
+	if( m_timerDoubleClicked && getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip )
+		Clipper_doClip();
 }
 
 void mouseMoved( DeviceVector position ){
@@ -5682,6 +5694,8 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 			&& getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip ){
 		m_selector.testSelect_simpleM1( device( position ) );
 	}
+	m_manipulator.tryClipperDoubleClick();
+
 	m_manipulator.m_moving_transformOrigin = false;
 	m_selector.m_mouseMoved = false;
 	m_selector.m_mouseMovedWhilePressed = false;
