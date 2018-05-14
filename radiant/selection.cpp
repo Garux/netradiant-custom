@@ -3506,30 +3506,21 @@ std::list<Selectable*>& best(){
 
 class BestPointSelector : public Selector
 {
-bool m_selected;
-SelectionIntersection m_intersection;
 SelectionIntersection m_bestIntersection;
-Selectable* m_selectable;
 public:
-BestPointSelector() : m_selected( false ), m_bestIntersection( SelectionIntersection() ){
+BestPointSelector() : m_bestIntersection( SelectionIntersection() ){
 }
 
 void pushSelectable( Selectable& selectable ){
-	m_intersection = SelectionIntersection();
 }
 void popSelectable(){
-	if ( m_intersection.valid() )
-		m_selected = true;
-	if ( m_intersection < m_bestIntersection )
-		m_bestIntersection = m_intersection;
-	m_intersection = SelectionIntersection();
 }
 void addIntersection( const SelectionIntersection& intersection ){
-	assign_if_closer( m_intersection, intersection );
+	assign_if_closer( m_bestIntersection, intersection );
 }
 
 bool isSelected(){
-	return m_selected;
+	return m_bestIntersection.valid();
 }
 const SelectionIntersection& best(){
 	return m_bestIntersection;
@@ -3644,6 +3635,71 @@ bool isSelected() const {
 
 
 
+
+class ClipperSelector : public Selector {
+	SelectionIntersection m_bestIntersection;
+	Face* m_face;
+public:
+	ClipperSelector() : m_bestIntersection( SelectionIntersection() ), m_face( 0 ) {
+	}
+
+	void pushSelectable( Selectable& selectable ) {
+	}
+	void popSelectable() {
+	}
+	void addIntersection( const SelectionIntersection& intersection ) {
+		if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
+			m_bestIntersection = intersection;
+			m_face = 0;
+		}
+	}
+
+	void addIntersection( const SelectionIntersection& intersection, Face* face ) {
+		if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
+			m_bestIntersection = intersection;
+			m_face = face;
+		}
+	}
+	bool isSelected() {
+		return m_bestIntersection.valid();
+	}
+	const SelectionIntersection& best() {
+		return m_bestIntersection;
+	}
+	const Face* face() {
+		return m_face;
+	}
+};
+
+class testselect_scene_4clipper : public scene::Graph::Walker {
+	ClipperSelector& m_clipperSelector;
+	SelectionTest& m_test;
+public:
+	testselect_scene_4clipper( ClipperSelector& clipperSelector, SelectionTest& test ) : m_clipperSelector( clipperSelector ), m_test( test ) {
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		BrushInstance* brush = Instance_getBrush( instance );
+		if( brush != 0 ) {
+			m_test.BeginMesh( brush->localToWorld() );
+			for( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i ) {
+				Face* face = *i;
+				if( !face->isFiltered() ) {
+					SelectionIntersection intersection;
+					face->testSelect( m_test, intersection );
+					m_clipperSelector.addIntersection( intersection, face );
+				}
+			}
+		}
+		else {
+			SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance );
+			if( selectionTestable ) {
+				selectionTestable->testSelect( m_clipperSelector, m_test );
+			}
+		}
+		return true;
+	}
+};
+
 #include "clippertool.h"
 
 class ClipManipulator : public Manipulator, public ManipulatorSelectionChangeable, public Translatable, public Manipulatable
@@ -3747,19 +3803,70 @@ public:
 
 		updatePlane();
 	}
+	bool testSelect_scene( const View& view, Vector3& point ){
+		SelectionVolume test( view );
+		ClipperSelector clipperSelector;
+		Scene_forEachVisible( GlobalSceneGraph(), view, testselect_scene_4clipper( clipperSelector, test ) );
+		test.BeginMesh( g_matrix4_identity, true );
+		if( clipperSelector.isSelected() ){
+			point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, clipperSelector.best().depth(), 1 ) ) );
+			if( clipperSelector.face() ){
+				const Face& face = *clipperSelector.face();
+				float bestDist = FLT_MAX;
+				Vector3 wannabePoint;
+				for ( Winding::const_iterator prev = face.getWinding().end() - 1, curr = face.getWinding().begin(); curr != face.getWinding().end(); prev = curr, ++curr ){
+					{ /* try vertices */
+						const float dist = vector3_length_squared( ( *curr ).vertex - point );
+						if( dist < bestDist ){
+							wannabePoint = ( *curr ).vertex;
+							bestDist = dist;
+						}
+					}
+					{ /* try edges */
+						Vector3 edgePoint = segment_closest_point_to_point( Segment3D( ( *prev ).vertex, ( *curr ).vertex ), point );
+						if( edgePoint != ( *prev ).vertex && edgePoint != ( *curr ).vertex ){
+							const Vector3 edgedir = vector3_normalised( ( *curr ).vertex - ( *prev ).vertex );
+							const std::size_t maxi = vector3_max_abs_component_index( edgedir );
+							// ( *prev ).vertex[maxi] + edgedir[maxi] * coef = float_snapped( point[maxi], GetSnapGridSize() )
+							const float coef = ( float_snapped( point[maxi], GetSnapGridSize() ) - ( *prev ).vertex[maxi] ) / edgedir[maxi];
+							edgePoint = ( *prev ).vertex + edgedir * coef;
+							const float dist = vector3_length_squared( edgePoint - point );
+							if( dist < bestDist ){
+								wannabePoint = edgePoint;
+								bestDist = dist;
+							}
+						}
+					}
+				}
+				if( clipperSelector.best().distance() == 0.f ){ /* try plane, if pointing inside of polygon */
+					const std::size_t maxi = vector3_max_abs_component_index( face.plane3().normal() );
+					Vector3 planePoint( vector3_snapped( point, GetSnapGridSize() ) );
+					// face.plane3().normal().dot( point snapped ) = face.plane3().dist()
+					planePoint[maxi] = ( face.plane3().dist()
+											- face.plane3().normal()[( maxi + 1 ) % 3] * planePoint[( maxi + 1 ) % 3]
+											- face.plane3().normal()[( maxi + 2 ) % 3] * planePoint[( maxi + 2 ) % 3] ) / face.plane3().normal()[maxi];
+					const float dist = vector3_length_squared( planePoint - point );
+					if( dist < bestDist ){
+						wannabePoint = planePoint;
+						bestDist = dist;
+					}
+				}
+				point = wannabePoint;
+			}
+			else{
+				vector3_snap( point, GetSnapGridSize() );
+			}
+			return true;
+		}
+		return false;
+	}
 	void testSelect( const View& view, const Matrix4& pivot2world ) {
 		testSelect_points( view );
 		if( !isSelected() ){
 			if( view.fill() ){
-				SelectionVolume test( view );
-				BestPointSelector bestPointSelector;
-				Scene_TestSelect_Primitive( bestPointSelector, test, view );
-				test.BeginMesh( g_matrix4_identity, true );
-				if( bestPointSelector.isSelected() ){
-					Vector3 point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestPointSelector.best().depth(), 1 ) ) );
-					vector3_snap( point, GetSnapGridSize() );
+				Vector3 point;
+				if( testSelect_scene( view, point ) )
 					newPoint( point, view );
-				}
 			}
 			else{
 				const Vector3 viewdir( Vector3( fabs( view.GetModelview()[2] ), fabs( view.GetModelview()[6] ), fabs( view.GetModelview()[10] ) ) );
@@ -3822,20 +3929,14 @@ public:
 		const float device_point[2] = { x, y };
 		ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, m_device_epsilon ) );
 
-		SelectionVolume test( scissored );
-		BestPointSelector bestPointSelector;
-		Scene_TestSelect_Primitive( bestPointSelector, test, scissored );
-		test.BeginMesh( g_matrix4_identity, true );
-		if( bestPointSelector.isSelected() ){
-			Vector3 point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestPointSelector.best().depth(), 1 ) ) );
-			vector3_snap( point, GetSnapGridSize() );
+		Vector3 point;
+		if( testSelect_scene( scissored, point ) )
 			for( std::size_t i = 0; i < 3; ++i )
 				if( m_points[i].isSelected() ){
 					m_points[i].m_point = point;
 					updatePlane();
 					break;
 				}
-		}
 	}
 
 	Manipulatable* GetManipulatable() {

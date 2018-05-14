@@ -83,6 +83,9 @@ bool equalEpsilon( const SelectionIntersection& other, float distanceEpsilon, fl
 float depth() const {
 	return m_depth;
 }
+float distance() const {
+	return m_distance;
+}
 bool valid() const {
 	return depth() < 1;
 }

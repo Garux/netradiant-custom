@@ -1624,8 +1624,8 @@ class BrushGetClosestFaceVisibleWalker : public scene::Graph::Walker
 {
 SelectionTest& m_test;
 Texturable& m_texturable;
-bool m_seamless;
-bool m_project;
+const bool m_seamless;
+const bool m_project;
 mutable SelectionIntersection m_bestIntersection;
 public:
 BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable, bool seamless, bool project ) : m_test( test ), m_texturable( texturable ), m_seamless( seamless ), m_project( project ){
