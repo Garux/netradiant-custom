@@ -410,11 +410,11 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 //		globalOutputStream() << "current: " << current << "\n";
 		for( std::size_t i = 0; i < 3; ++i ){
 			if( m_axis[i] != 0.f ){
-				float snapto1 = float_snapped( maxs[i] + current[i] , GetSnapGridSize() );
-				float snapto2 = float_snapped( mins[i] + current[i] , GetSnapGridSize() );
+				const float snapto1 = float_snapped( maxs[i] + current[i] , GetSnapGridSize() );
+				const float snapto2 = float_snapped( mins[i] + current[i] , GetSnapGridSize() );
 
-				float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
-				float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
+				const float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
+				const float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
 
 //				globalOutputStream() << "maxs[i] + current[i]: " << maxs[i] + current[i]  << "    snapto1: " << snapto1 << "   dist1: " << dist1 << "\n";
 //				globalOutputStream() << "mins[i] + current[i]: " << mins[i] + current[i]  << "    snapto2: " << snapto2 << "   dist2: " << dist2 << "\n";
@@ -453,29 +453,22 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	point_on_plane( current, device2manip, x, y );
 	current = vector3_subtracted( current, m_start );
 
-	if( snap ){
-		for ( std::size_t i = 0; i < 3 ; ++i ){
-			if( fabs( current[i] ) >= fabs( current[(i + 1) % 3] ) ){
-				current[(i + 1) % 3] = 0.f;
-			}
-			else{
-				current[i] = 0.f;
-			}
-		}
-	}
+	if( snap )
+		current *= g_vector3_axes[vector3_max_abs_component_index( current )];
 
 	translation_local2object( current, current, manip2object );
+
 	if( snapbbox ){
 		const Vector3 maxs( m_bounds.origin + m_bounds.extents );
 		const Vector3 mins( m_bounds.origin - m_bounds.extents );
 		//globalOutputStream() << "current: " << current << "\n";
 		for( std::size_t i = 0; i < 3; ++i ){
 			if( fabs( current[i] ) > 1e-6f ){
-				float snapto1 = float_snapped( maxs[i] + current[i] , GetSnapGridSize() );
-				float snapto2 = float_snapped( mins[i] + current[i] , GetSnapGridSize() );
+				const float snapto1 = float_snapped( maxs[i] + current[i] , GetSnapGridSize() );
+				const float snapto2 = float_snapped( mins[i] + current[i] , GetSnapGridSize() );
 
-				float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
-				float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
+				const float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
+				const float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
 
 				current[i] = dist2 > dist1 ? snapto1 - maxs[i] : snapto2 - mins[i];
 			}
@@ -611,15 +604,9 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 		}
 	}
 
-	std::size_t ignore_axis = 0;
-	if( snap ){
-		for ( std::size_t i = 1; i < 3 ; ++i ){
-			if( fabs( m_start[i] ) < fabs( m_start[ignore_axis] ) ){
-				ignore_axis = i;
-			}
-		}
+	const std::size_t ignore_axis = vector3_min_abs_component_index( m_start );
+	if( snap )
 		start[ignore_axis] = 0.f;
-	}
 
 	Vector3 scale(
 		start[0] == 0 ? 1 : 1 + delta[0] / start[0],
@@ -632,7 +619,7 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 		if( m_choosen_extent[i] > 0.0625f && start[i] != 0.f ){
 			scale[i] = ( m_choosen_extent[i] + delta[i] ) / m_choosen_extent[i];
 			if( snapbbox ){
-				float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
+				const float snappdwidth = float_snapped( scale[i] * m_bounds.extents[i] * 2.f, GetSnapGridSize() );
 				scale[i] = snappdwidth / ( m_bounds.extents[i] * 2.f );
 			}
 		}
@@ -3742,12 +3729,9 @@ public:
 	}
 	void newPoint( const Vector3& point, const View& view ){
 		{ /* update m_viewdir */
-			const Vector3 viewdir( Vector3( fabs( view.GetModelview()[2] ), fabs( view.GetModelview()[6] ), fabs( view.GetModelview()[10] ) ) );
-			std::size_t maxi = 0;
-			for( std::size_t i = 1; i < 3; ++i )
-				if( viewdir[i] > viewdir[maxi] )
-					maxi = i;
-			m_viewdir = ( view.GetModelview()[2 + 4 * maxi] > 0 )? g_vector3_axes[maxi] : -g_vector3_axes[maxi];
+			const Vector3 viewdir( view.GetModelview()[2], view.GetModelview()[6], view.GetModelview()[10] );
+			const std::size_t maxi = vector3_max_abs_component_index( viewdir );
+			m_viewdir = ( viewdir[maxi] > 0 )? g_vector3_axes[maxi] : -g_vector3_axes[maxi];
 			if( view.fill() ) //viewdir, taken this way in perspective view is negative for some reason
 				m_viewdir *= -1;
 		}

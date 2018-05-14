@@ -558,6 +558,24 @@ inline Vector3 vector3_for_spherical( double theta, double phi ){
 			   );
 }
 
+template<typename Element>
+inline std::size_t vector3_max_abs_component_index( const BasicVector3<Element>& self ){
+	std::size_t maxi = 0;
+	for( std::size_t i = 1; i < 3; ++i )
+		if( fabs( self[i] ) > fabs( self[maxi] ) )
+			maxi = i;
+	return maxi;
+}
+
+template<typename Element>
+inline std::size_t vector3_min_abs_component_index( const BasicVector3<Element>& self ){
+	std::size_t mini = 0;
+	for( std::size_t i = 1; i < 3; ++i )
+		if( fabs( self[i] ) < fabs( self[mini] ) )
+			mini = i;
+	return mini;
+}
+
 
 
 
