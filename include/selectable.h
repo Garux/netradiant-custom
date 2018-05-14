@@ -30,45 +30,46 @@
 
 class SelectionIntersection
 {
-//public:
-double m_depth;
+float m_depth;
 float m_distance;
-double m_depth2;
-bool m_direct;
+float m_depth2;
+bool m_indirect;
 public:
-SelectionIntersection() : m_depth( 1 ), m_distance( 2 ), m_depth2( -1 ), m_direct( false ){
+SelectionIntersection() : m_depth( 1 ), m_distance( 2 ), m_depth2( -1 ), m_indirect( true ){
 }
-SelectionIntersection( float depth, float distance ) : m_depth( depth ), m_distance( distance ), m_depth2( -1 ), m_direct( distance == 0.f ){
+SelectionIntersection( float depth, float distance ) : m_depth( depth ), m_distance( distance ), m_depth2( -1 ), m_indirect( distance != 0.f ){
 }
-SelectionIntersection( float depth, float distance, float depth2 ) : m_depth( depth ), m_distance( distance ), m_depth2( depth2 ), m_direct( distance == 0.f ){
+SelectionIntersection( float depth, float distance, float depth2 ) : m_depth( depth ), m_distance( distance ), m_depth2( depth2 ), m_indirect( distance != 0.f ){
 }
 bool operator<( const SelectionIntersection& other ) const {
-	if ( ( m_direct ^ other.m_direct ) ||
-		( !m_direct && !other.m_direct && fabs( m_distance - other.m_distance ) > 1e-3f /*0.00002f*/ ) ) {
-		return m_distance < other.m_distance;
+	if( m_indirect != other.m_indirect ){
+		return other.m_indirect; //m_distance < other.m_distance;
 	}
-	if( !m_direct && !other.m_direct ){
-		if( fabs( m_depth - other.m_depth ) > 1e-6 ){
+	else if( m_indirect && other.m_indirect ){
+		if( fabs( m_distance - other.m_distance ) > 1e-3f /*0.00002f*/ ){
+			return m_distance < other.m_distance;
+		}
+		else if( fabs( m_depth - other.m_depth ) > 1e-6f ){
 			return m_depth < other.m_depth;
 		}
 		else{
 			return m_depth2 > other.m_depth2;
 		}
 	}
-	if ( m_depth != other.m_depth ) {
+	else if( m_depth != other.m_depth ){
 		return m_depth < other.m_depth;
 	}
 	return false;
 }
 bool equalEpsilon( const SelectionIntersection& other, float distanceEpsilon, float depthEpsilon ) const {
-	if ( m_direct ^ other.m_direct ) {
+	if( m_indirect != other.m_indirect ){
 		return false;
 	}
-	if( !m_direct && !other.m_direct ){
+	else if( m_indirect && other.m_indirect ){
 #if 1
 		return float_equal_epsilon( m_distance, other.m_distance, distanceEpsilon )
-		   && float_equal_epsilon( m_depth, other.m_depth, static_cast<double>( depthEpsilon ) )
-		   && float_equal_epsilon( m_depth2, other.m_depth2, 3e-7 );
+		   && float_equal_epsilon( m_depth, other.m_depth, depthEpsilon )
+		   && float_equal_epsilon( m_depth2, other.m_depth2, 3e-7f );
 #else
 		return ( m_distance == other.m_distance )
 		   && ( m_depth == other.m_depth )
@@ -76,8 +77,8 @@ bool equalEpsilon( const SelectionIntersection& other, float distanceEpsilon, fl
 #endif
 	}
 	return float_equal_epsilon( m_distance, other.m_distance, distanceEpsilon )
-		   && float_equal_epsilon( m_depth, other.m_depth, static_cast<double>( depthEpsilon ) )
-		   && float_equal_epsilon( m_depth2, other.m_depth2, static_cast<double>( depthEpsilon ) );
+		   && float_equal_epsilon( m_depth, other.m_depth, depthEpsilon )
+		   && float_equal_epsilon( m_depth2, other.m_depth2, depthEpsilon );
 }
 float depth() const {
 	return m_depth;
