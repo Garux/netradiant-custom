@@ -72,9 +72,23 @@ void Clipper_setPlanePoints( const ClipperPoints& points ){
 }
 
 void Clipper_SelectionChanged( const Selectable& selectable ){
+//	globalOutputStream() << " Clipper_SelectionChanged\n";
 	if ( Clipper_ok() )
 		Clipper_update();
 }
+#include "gtkutil/idledraw.h"
+void Clipper_BoundsChanged(){
+//	globalOutputStream() << " Clipper_BoundsChanged\n";
+	if ( Clipper_ok() )
+		Clipper_update();
+}
+
+IdleDraw g_idle_clipper_update = IdleDraw( FreeCaller<Clipper_BoundsChanged>() );
+
+void Clipper_BoundsChanged_Queue(){
+	g_idle_clipper_update.queueDraw();
+}
+
 
 void Clipper_modeChanged( bool isClipper ){
 	GdkCursor* cursor = isClipper? g_clipper_cursor : 0;
@@ -160,6 +174,8 @@ void Clipper_registerCommands(){
 	GlobalCommands_insert( "ClipperFlip", FreeCaller<Clipper_doFlip>(), Accelerator( GDK_Return, (GdkModifierType)GDK_CONTROL_MASK ) );
 }
 
+SignalHandlerId ClipperTool_boundsChanged;
+
 void Clipper_Construct(){
 	g_clipper_cursor = gdk_cursor_new( GDK_HAND2 );
 
@@ -172,8 +188,11 @@ void Clipper_Construct(){
 
 	typedef FreeCaller1<const Selectable&, Clipper_SelectionChanged> ClipperSelectionChangedCaller;
 	GlobalSelectionSystem().addSelectionChangeCallback( ClipperSelectionChangedCaller() );
+
+	ClipperTool_boundsChanged = GlobalSceneGraph().addBoundsChangedCallback( FreeCaller<Clipper_BoundsChanged_Queue>() );
 }
 
 void Clipper_Destroy(){
 	gdk_cursor_unref( g_clipper_cursor );
+	GlobalSceneGraph().removeBoundsChangedCallback( ClipperTool_boundsChanged );
 }
