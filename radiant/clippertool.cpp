@@ -71,14 +71,8 @@ void Clipper_setPlanePoints( const ClipperPoints& points ){
 	Clipper_update();
 }
 
-void Clipper_SelectionChanged( const Selectable& selectable ){
-//	globalOutputStream() << " Clipper_SelectionChanged\n";
-	if ( Clipper_ok() )
-		Clipper_update();
-}
 #include "gtkutil/idledraw.h"
 void Clipper_BoundsChanged(){
-//	globalOutputStream() << " Clipper_BoundsChanged\n";
 	if ( Clipper_ok() )
 		Clipper_update();
 }
@@ -87,6 +81,10 @@ IdleDraw g_idle_clipper_update = IdleDraw( FreeCaller<Clipper_BoundsChanged>() )
 
 void Clipper_BoundsChanged_Queue(){
 	g_idle_clipper_update.queueDraw();
+}
+
+void Clipper_SelectionChanged( const Selectable& selectable ){
+	Clipper_BoundsChanged_Queue();
 }
 
 
