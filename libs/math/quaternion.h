@@ -46,7 +46,8 @@ inline void quaternion_multiply_by_quaternion( Quaternion& quaternion, const Qua
 }
 
 /// \brief Constructs a quaternion which rotates between two points on the unit-sphere, \p from and \p to.
-inline Quaternion quaternion_for_unit_vectors( const Vector3& from, const Vector3& to ){
+/// warning: wrong math!
+inline Quaternion quaternion_for_sphere_vectors( const Vector3& from, const Vector3& to ){
 	return Quaternion( vector3_cross( from, to ), static_cast<float>( vector3_dot( from, to ) ) );
 }
 
@@ -80,7 +81,7 @@ inline void quaternion_conjugate( Quaternion& quaternion ){
 }
 
 inline Quaternion quaternion_normalised( const Quaternion& quaternion ){
-	const double n = ( 1.0 / ( quaternion[0] * quaternion[0] + quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2] + quaternion[3] * quaternion[3] ) );
+	const double n = ( 1.0 / sqrt( quaternion[0] * quaternion[0] + quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2] + quaternion[3] * quaternion[3] ) );
 	return Quaternion(
 			   static_cast<float>( quaternion[0] * n ),
 			   static_cast<float>( quaternion[1] * n ),
@@ -91,6 +92,11 @@ inline Quaternion quaternion_normalised( const Quaternion& quaternion ){
 
 inline void quaternion_normalise( Quaternion& quaternion ){
 	quaternion = quaternion_normalised( quaternion );
+}
+
+template<typename T>
+inline Quaternion quaternion_for_unit_vectors( const BasicVector3<T>& from, const BasicVector3<T>& to ){
+	return quaternion_normalised( Quaternion( vector3_cross( from, to ), 1.0 + vector3_dot( from, to ) ) );
 }
 
 /// \brief Constructs a pure-rotation matrix from \p quaternion.

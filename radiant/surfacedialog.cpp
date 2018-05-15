@@ -1492,31 +1492,12 @@ void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProj
 		face.SetFlags( flags );
 		return;
 	}
-	Quaternion rotation = Quaternion( vector3_cross( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ),
-									static_cast<float>( 1.0 + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() ) ) );
-	//Quaternion rotation = quaternion_for_unit_vectors( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
-	//rotation.w() = sqrt( vector3_length_squared( g_faceTextureClipboard.m_plane.normal() ) * vector3_length_squared( face.getPlane().plane3().normal() ) ) + vector3_dot( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
-	//globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
-	//quaternion_normalise( rotation );
-	const double n = ( 1.0 / sqrt( rotation[0] * rotation[0] + rotation[1] * rotation[1] + rotation[2] * rotation[2] + rotation[3] * rotation[3] ) );
-	rotation = Quaternion(
-			   static_cast<float>( rotation[0] * n ),
-			   static_cast<float>( rotation[1] * n ),
-			   static_cast<float>( rotation[2] * n ),
-			   static_cast<float>( rotation[3] * n )
-			   );
-	//globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
+
+	const Quaternion rotation = quaternion_for_unit_vectors( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
+//	globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
 	Matrix4 transform = g_matrix4_identity;
 	matrix4_pivoted_rotate_by_quaternion( transform, rotation, line.origin );
-//	Matrix4 transform = matrix4_rotation_for_quaternion_quantised( rotation );
-//	Vector3 translation;
-//	translation_for_pivoted_matrix_transform( translation, transform, line.origin );
-//	transform.tx() = translation.x();
-//	transform.ty() = translation.y();
-//	transform.tz() = translation.z();
 
-
-	//globalOutputStream() << "transform: " << transform << "\n";
 	TextureProjection proj = projection;
 	proj.m_brushprimit_texdef.addScale( g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height );
 	Texdef_transformLocked( proj, g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height, g_faceTextureClipboard.m_plane, transform, line.origin );

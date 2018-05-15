@@ -258,6 +258,7 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 
 	vector3_normalise( current );
 	m_rotatable.rotate( quaternion_for_unit_vectors( m_start, current ) );
+//	m_rotatable.rotate( quaternion_for_sphere_vectors( m_start, current ) ); //wrong math, 2x more sensitive
 }
 };
 
@@ -3016,7 +3017,7 @@ inline const rect_t SelectionBoxForArea( const float device_point[2], const floa
 	selection_box.max[1] = ( device_delta[1] > 0 ) ? ( device_point[1] + device_delta[1] ) : ( device_point[1] );
 	return selection_box;
 }
-
+#if 0
 Quaternion construct_local_rotation( const Quaternion& world, const Quaternion& localToWorld ){
 	return quaternion_normalised( quaternion_multiplied_by_quaternion(
 									  quaternion_normalised( quaternion_multiplied_by_quaternion(
@@ -3026,7 +3027,7 @@ Quaternion construct_local_rotation( const Quaternion& world, const Quaternion& 
 									  localToWorld
 									  ) );
 }
-
+#endif
 inline void matrix4_assign_rotation( Matrix4& matrix, const Matrix4& other ){
 	matrix[0] = other[0];
 	matrix[1] = other[1];
