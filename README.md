@@ -26,6 +26,7 @@ Development is focused on smoothing and tweaking editing process.
 #### Random feature highlights
 
 * WASD camera binds
+* Clipper tool, brush and entity creation, working in camera
 * left mouse button click tunnel selector, paint selector
 * numerous mouse shortcuts (see help->General->Mouse Shortcuts)
 * focus camera on selected (Tab)
@@ -33,7 +34,6 @@ Development is focused on smoothing and tweaking editing process.
 * draggable renderable transform origin for manipulators
 * quick vertices drag / brush faces shear
 * shader editor
-* entities creation in camera
 * texture painting by drag
 * seamless brush face to face texture paste
 * keyboard shortcuts are customizable
