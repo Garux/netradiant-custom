@@ -1104,6 +1104,20 @@ void transform( const Matrix4& matrix, bool mirror ){
 		}
 		Texdef_transformLocked( m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix, contributes() ? m_centroid_saved : static_cast<Vector3>( m_plane.plane3().normal() * m_plane.plane3().dist() ) );
 	}
+	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ){
+		const DoubleVector3 from = vector3_normalised( vector3_cross( m_texdefTransformed.m_basis_s, m_texdefTransformed.m_basis_t ) );
+		const DoubleVector3 to = matrix4_transformed_normal( matrix, from );
+		Quaternion quat = quaternion_for_unit_vectors( from, to );
+		if( quat.w() != quat.w() ){ //handle 180` cases
+			if( vector3_max_abs_component_index( from ) == 2 )
+				quat = Quaternion( g_vector3_axis_y, 0 );
+			else
+				quat = Quaternion( g_vector3_axis_z, 0 );
+		}
+		const Matrix4 mat = matrix4_rotation_for_quaternion( quat );
+		m_texdefTransformed.m_basis_s = vector3_normalised( matrix4_transformed_direction( mat, m_texdefTransformed.m_basis_s ) );
+		m_texdefTransformed.m_basis_t = vector3_normalised( matrix4_transformed_direction( mat, m_texdefTransformed.m_basis_t ) );
+	}
 
 	m_planeTransformed.transform( matrix, mirror );
 
@@ -1112,7 +1126,7 @@ void transform( const Matrix4& matrix, bool mirror ){
 #endif
 	m_observer->planeChanged();
 
-	if ( g_brush_texturelock_enabled ) {
+	if ( g_brush_texturelock_enabled || g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ) {
 		Brush_textureChanged();
 	}
 }
