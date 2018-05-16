@@ -99,6 +99,12 @@ inline Plane3 plane3_inverse_transformed( const Plane3& plane, const Matrix4& tr
 		   );
 }
 
+inline Plane3 plane3_transformed_affine_full( const Plane3& plane, const Matrix4& transform ){
+	const DoubleVector3 anchor( matrix4_transformed_point( transform, plane.normal() * plane.dist() ) );
+	const DoubleVector3 normal( matrix4_transformed_normal( transform, plane.normal() ) );
+	return Plane3( normal, vector3_dot( normal, anchor ) );
+}
+
 inline Plane3 plane3_flipped( const Plane3& plane ){
 	return Plane3( vector3_negated( plane.normal() ), -plane.dist() );
 }

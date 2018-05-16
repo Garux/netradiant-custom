@@ -1494,13 +1494,10 @@ void Texdef_transformLocked_original( TextureProjection& projection, std::size_t
 
 		//globalOutputStream() << "plane.normal(): " << plane.normal() << "\n";
 		#if 0
-		Vector3 normalTransformed( matrix4_transformed_direction( identity2transformed, plane.normal() ) );
+		const Vector3 normalTransformed( matrix4_transformed_direction( identity2transformed, plane.normal() ) );
 		#else //preserves scale in BP while scaling, but not shift //fixes QNAN
-		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
-		matrix4_transpose( maa );
-		//Vector4 vec4 = matrix4_transformed_vector4( maa, Vector4( plane.normal(), 0 ) );
-		//Vector3 normalTransformed( vector3_normalised( vector4_to_vector3( vec4 ) ) );
-		Vector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+		const Matrix4 maa( matrix4_for_normal_transform( identity2transformed ) );
+		const Vector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
 		#endif
 
 		//globalOutputStream() << "normalTransformed: " << normalTransformed << "\n";
@@ -1707,9 +1704,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		}
 
 #if 0
-		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
-		matrix4_transpose( maa );
-		const DoubleVector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
+		const DoubleVector3 normalTransformed( matrix4_transformed_normal( identity2transformed, plane.normal() ) );
 #else
         /* this is also handling scale = 0 case */
 		DoubleVector3 normalTransformed( plane3_for_points( points ).normal() );
@@ -1731,10 +1726,7 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		const Vector3 offset = matrix4_transformed_point( identity2transformed, Vector3( 0, 0, 0 ) );
 		Vector3 newNormal  = matrix4_transformed_point( identity2transformed, plane.normal() ) - offset;
 		#elif 0
-		const Matrix4 maa( matrix4_transposed( matrix4_affine_inverse( identity2transformed ) ) );
-//			globalOutputStream() << "maa: " << maa << "\n";
-		Vector3 newNormal( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
-//			globalOutputStream() << plane.normal() << newNormal << "\n";
+		const Vector3 newNormal( matrix4_transformed_normal( identity2transformed, plane.normal() ) );
 		#elif 1
         /* this is also handling scale = 0 case */
 		DoubleVector3 texX, texY;
@@ -1855,10 +1847,8 @@ void Texdef_transformLocked( TextureProjection& projection, std::size_t width, s
 		}
 
 		//globalOutputStream() << "plane.normal(): " << plane.normal() << "\n";
-		Matrix4 maa( matrix4_affine_inverse( identity2transformed ) );
-		matrix4_transpose( maa );
-		Vector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
-
+		const Matrix4 maa( matrix4_for_normal_transform( identity2transformed ) );
+		const Vector3 normalTransformed( vector3_normalised( matrix4_transformed_direction( maa, plane.normal() ) ) );
 		//globalOutputStream() << "normalTransformed: " << normalTransformed << "\n";
 
 		// identity: identity space

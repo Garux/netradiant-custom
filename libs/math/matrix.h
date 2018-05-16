@@ -398,8 +398,8 @@ inline BasicVector3<Element> matrix4_transformed_direction( const Matrix4& self,
 
 /// \brief Transforms \p direction by \p self in-place.
 template<typename Element>
-inline void matrix4_transform_direction( const Matrix4& self, BasicVector3<Element>& normal ){
-	normal = matrix4_transformed_direction( self, normal );
+inline void matrix4_transform_direction( const Matrix4& self, BasicVector3<Element>& direction ){
+	direction = matrix4_transformed_direction( self, direction );
 }
 
 /// \brief Returns \p vector4 transformed by \p self.
@@ -588,6 +588,18 @@ inline Matrix4 matrix4_full_inverse( const Matrix4& self ){
 /// \brief Inverts \p self in-place using the Adjoint method.
 inline void matrix4_full_invert( Matrix4& self ){
 	self = matrix4_full_inverse( self );
+}
+
+
+/// lets say M is a transformation matrix, then transforming vertex v is just M*v
+/// but transforming the normal is M^(-T) n
+inline Matrix4 matrix4_for_normal_transform( const Matrix4& matrix ){
+	return matrix4_transposed( matrix4_affine_inverse( matrix ) );
+}
+
+template<typename Element>
+inline BasicVector3<Element> matrix4_transformed_normal( const Matrix4& matrix, const BasicVector3<Element>& normal ){
+	return vector3_normalised( matrix4_transformed_direction( matrix4_for_normal_transform( matrix ), normal ) );
 }
 
 
