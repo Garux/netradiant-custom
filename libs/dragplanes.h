@@ -117,7 +117,7 @@ void selectPlanes( const AABB& aabb, Selector& selector, SelectionTest& test, co
 		7, 6, 5, 4, //-z //bottom
 	};
 
-	const Vector3 viewdir( vector3_normalised( Vector3( test.getVolume().GetModelview()[2], test.getVolume().GetModelview()[6], test.getVolume().GetModelview()[10] ) ) );
+	const Vector3 viewdir( test.getVolume().getViewDir() );
 	double bestDot = 1;
 	ObservedSelectable* selectable = 0;
 	ObservedSelectable* selectable2 = 0;

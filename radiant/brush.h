@@ -3550,7 +3550,7 @@ void invertComponentSelection( SelectionSystem::EComponentMode mode ){
 void selectPlanes( SelectionTest& test, FaceInstances_ptrs& bestInstances ){
 	test.BeginMesh( localToWorld() );
 
-	const Vector3 viewdir( vector3_normalised( Vector3( test.getVolume().GetModelview()[2], test.getVolume().GetModelview()[6], test.getVolume().GetModelview()[10] ) ) );
+	const Vector3 viewdir( test.getVolume().getViewDir() );
 	double bestDot = 1;
 
 	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )

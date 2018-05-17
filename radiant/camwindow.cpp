@@ -1892,9 +1892,9 @@ void GlobalCamera_ResetAngles(){
 #include "select.h"
 
 Vector3 Camera_getFocusPos( camera_t& camera ){
-	Vector3 camorigin( Camera_getOrigin( camera ) );
-	AABB aabb( aabb_for_minmax( Select_getWorkZone().d_work_min, Select_getWorkZone().d_work_max ) );
-	View& view = *( camera.m_view );
+	const Vector3 camorigin( Camera_getOrigin( camera ) );
+	const AABB aabb( aabb_for_minmax( Select_getWorkZone().d_work_min, Select_getWorkZone().d_work_max ) );
+	const View& view = *( camera.m_view );
 #if 0
 	Vector3 angles( Camera_getAngles( camera ) );
 	Vector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
@@ -1903,9 +1903,9 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 	viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
 	viewvector[2] = sin( radangles[0] );
 #elif 0
-	Vector3 viewvector( -view.GetModelview()[2], -view.GetModelview()[6], -view.GetModelview()[10] );
+	const Vector3 viewvector( view.getViewDir() );
 #elif 1
-	Vector3 viewvector( -camera.vpn );
+	const Vector3 viewvector( -camera.vpn );
 #endif
 
 	Plane3 frustumPlanes[4];
@@ -1921,12 +1921,12 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 
 	for ( std::size_t i = 0; i < 4; ++i ){
 		for ( std::size_t j = 0; j < 8; ++j ){
-			Ray ray( aabb.origin, -viewvector );
+			const Ray ray( aabb.origin, -viewvector );
 			//Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] - frustumPlanes[i].normal() * 16.0f ) );
-			Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] ) );
-			float d = vector3_dot( ray.direction, newplane.normal() );
+			const Plane3 newplane( frustumPlanes[i].normal(), vector3_dot( frustumPlanes[i].normal(), corners[j] ) );
+			const float d = vector3_dot( ray.direction, newplane.normal() );
 			if( d != 0 ){
-				float s = vector3_dot( newplane.normal() * newplane.dist() - ray.origin, newplane.normal() ) / d;
+				const float s = vector3_dot( newplane.normal() * newplane.dist() - ray.origin, newplane.normal() ) / d;
 				offset = std::max( offset, s );
 			}
 		}

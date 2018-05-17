@@ -93,6 +93,8 @@ Vector4 m_viewer;
 /// view frustum in world space
 Frustum m_frustum;
 
+Vector3 m_viewdir;
+
 bool m_fill;
 
 void construct(){
@@ -100,6 +102,7 @@ void construct(){
 
 	m_frustum = frustum_from_viewproj( m_viewproj );
 	m_viewer = viewer_from_viewproj( m_viewproj );
+	m_viewdir = vector3_normalised( fill()? Vector3( -m_modelview[2], -m_modelview[6], -m_modelview[10] ) :  Vector3( m_modelview[2], m_modelview[6], m_modelview[10] ) );
 }
 public:
 View( bool fill = false ) :
@@ -185,6 +188,9 @@ bool fill() const {
 }
 const Vector3& getViewer() const {
 	return vector4_to_vector3( m_viewer );
+}
+const Vector3& getViewDir() const {
+	return m_viewdir;
 }
 const Frustum& getFrustum() const {
 	return m_frustum;

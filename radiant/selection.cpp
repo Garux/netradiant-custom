@@ -2393,7 +2393,7 @@ public:
 			Selectable* selectable = 0;
 			Selectable* selectable2 = 0;
 			double bestDot = 1;
-			const Vector3 viewdir( vector3_normalised( Vector3( view.GetModelview()[2], view.GetModelview()[6], view.GetModelview()[10] ) ) );
+			const Vector3 viewdir( view.getViewDir() );
 			for ( int i = 0; i < 3; ++i ){
 				for ( int j = 0; j < 2; ++j ){
 					const Vector3 normal = j? g_vector3_axes[i] : -g_vector3_axes[i];
@@ -3786,11 +3786,9 @@ public:
 	}
 	void newPoint( const Vector3& point, const View& view ){
 		{ /* update m_viewdir */
-			const Vector3 viewdir( view.GetModelview()[2], view.GetModelview()[6], view.GetModelview()[10] );
+			const Vector3 viewdir( view.getViewDir() );
 			const std::size_t maxi = vector3_max_abs_component_index( viewdir );
 			m_viewdir = ( viewdir[maxi] > 0 )? g_vector3_axes[maxi] : -g_vector3_axes[maxi];
-			if( view.fill() ) //viewdir, taken this way in perspective view is negative for some reason
-				m_viewdir *= -1;
 		}
 		const std::size_t i = newPointIndex( view );
 		if( i == 0 )
@@ -3870,14 +3868,10 @@ public:
 					newPoint( point, view );
 			}
 			else{
-				const Vector3 viewdir( Vector3( fabs( view.GetModelview()[2] ), fabs( view.GetModelview()[6] ), fabs( view.GetModelview()[10] ) ) );
-				std::size_t maxi = 0;
-				for( std::size_t i = 1; i < 3; ++i )
-					if( viewdir[i] > viewdir[maxi] )
-						maxi = i;
 				Vector3 point = vector4_projected( matrix4_transformed_vector4( matrix4_full_inverse( view.GetViewMatrix() ), Vector4( 0, 0, 0, 1 ) ) );
 				vector3_snap( point, GetSnapGridSize() );
 				{
+					const std::size_t maxi = vector3_max_abs_component_index( view.getViewDir() );
 					const std::size_t i = newPointIndex( view );
 					point[maxi] = m_bounds.origin[maxi] + ( i == 2? -1 : 1 ) * m_bounds.extents[maxi];
 				}
