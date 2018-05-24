@@ -84,9 +84,10 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 class EntitySetClassnameSelected : public scene::Graph::Walker
 {
 const char* m_classname;
+scene::Node* m_world;
 public:
 EntitySetClassnameSelected( const char* classname )
-	: m_classname( classname ){
+	: m_classname( classname ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	return true;
@@ -94,22 +95,19 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
-		if( string_equal( entity->getKeyValue( "classname" ), "worldspawn" ) ){
-			//globalErrorStream() << "do not want to convert worldspawn entity\n";
-
-			if( instance.childSelected() ){
+		if( path.top().get_pointer() == m_world ){ /* do not want to convert whole worldspawn entity */
+			if( instance.childSelected() ){ /* create an entity from world brushes instead */
 				EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( m_classname, true );
 				if( entityClass->fixedsize )
 					return;
 
-				//is important to have retexturing here; if doing in the end, undo doesn't succeed;
+				//is important to have retexturing here; if doing in the end, undo doesn't succeed; //don't do this extra now, as it requires retexturing, working for subgraph
 //				if ( string_compare_nocase_n( m_classname, "trigger_", 8 ) == 0 ){
 //					Scene_PatchSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
 //					Scene_BrushSetShader_Selected( GlobalSceneGraph(), GetCommonShader( "trigger" ).c_str() );
 //				}
 
 				NodeSmartReference node( GlobalEntityCreator().createEntity( entityClass ) );
-
 				Node_getTraversable( GlobalSceneGraph().root() )->insert( node );
 
 				scene::Path entitypath( makeReference( GlobalSceneGraph().root() ) );
@@ -128,35 +126,28 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		}
 
 		EntityClass* eclass = GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) );
-		//NodeSmartReference node( GlobalEntityCreator().createEntity( GlobalEntityClassManager().findOrInsert( m_classname, node_is_group( path.top() ) ) ) );
 		NodeSmartReference node( GlobalEntityCreator().createEntity( eclass ) );
 
-		if( eclass->fixedsize && entity->isContainer() ){
-			//group to point entity
+		if( entity->isContainer() && eclass->fixedsize ){ /* group entity to point one */
 			char value[64];
 			sprintf( value, "%g %g %g", instance.worldAABB().origin[0], instance.worldAABB().origin[1], instance.worldAABB().origin[2] );
 			entity->setKeyValue( "origin", value );
 		}
 
-
 		EntityCopyingVisitor visitor( *Node_getEntity( node ) );
-
-		//entity->forEachKeyValue( visitor );
+//		entity->forEachKeyValue( visitor );
 
 		NodeSmartReference child( path.top().get() );
 		NodeSmartReference parent( path.parent().get() );
-		//Node_getTraversable( parent )->erase( child );
-		if ( Node_getTraversable( child ) != 0
-			 && Node_getTraversable( node ) != 0
-			 && node_is_group( node ) ) {
+//		Node_getTraversable( parent )->erase( child );
+		if ( Node_getTraversable( child ) != 0 && node_is_group( node ) ) { /* group entity to group one */
 			parentBrushes( child, node );
 		}
 		Node_getTraversable( parent )->insert( node );
-		/* must do this after inserting node, otherwise problem: targeted + having model + not loaded b4 new entities aren't selectable normally + rendered only while 0 0 0 is rendered */
-		entity->forEachKeyValue( visitor );
-		if( !eclass->fixedsize && !entity->isContainer() ){
-			//globalErrorStream() << "can't convert point to group entity\n";
-			//return;
+
+		entity->forEachKeyValue( visitor ); /* must do this after inserting node, otherwise problem: targeted + having model + not loaded b4 new entities aren't selectable normally + rendered only while 0 0 0 is rendered */
+
+		if( !entity->isContainer() && !eclass->fixedsize ){ /* point entity to group one */
 			AABB bounds( g_vector3_identity, Vector3( 16, 16, 16 ) );
 			if ( !string_parse_vector3( entity->getKeyValue( "origin" ), bounds.origin ) ) {
 				bounds.origin = g_vector3_identity;
@@ -164,6 +155,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 			Brush_ConstructPlacehoderCuboid( node.get(), bounds );
 			Node_getEntity( node )->setKeyValue( "origin", "" );
 		}
+
 		Node_getTraversable( parent )->erase( child );
 	}
 }

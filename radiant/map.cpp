@@ -1829,47 +1829,29 @@ bool Map_SaveSelected( const char* filename ){
 class ParentSelectedBrushesToEntityWalker : public scene::Graph::Walker
 {
 	scene::Node& m_parent;
+	scene::Node* m_world;
 	mutable bool m_emptyOldParent;
-
 public:
-ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ), m_emptyOldParent( false ){
+ParentSelectedBrushesToEntityWalker( scene::Node& parent ) : m_parent( parent ), m_world( Map_FindWorldspawn( g_map ) ), m_emptyOldParent( false ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get_pointer() != &m_parent && ( Node_isPrimitive( path.top() ) || m_emptyOldParent ) ) {
-		Selectable* selectable = Instance_getSelectable( instance );
-		if ( selectable && selectable->isSelected() && path.size() > 1 ) {
-			return false;
-		}
-	}
-	return true;
+	return path.top().get_pointer() != &m_parent; /* skip traverse of target node */
 }
 void post( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get_pointer() == &m_parent )
-		return;
-
 	if ( Node_isPrimitive( path.top() ) ){
-		m_emptyOldParent = false;
 		Selectable* selectable = Instance_getSelectable( instance );
-
-		if ( selectable && selectable->isSelected() && path.size() > 1 ){
-			scene::Node& parent = path.parent();
-			if ( &parent != &m_parent ){
-				NodeSmartReference node( path.top().get() );
-				scene::Traversable* traversable_parent = Node_getTraversable( parent );
-				traversable_parent->erase( node );
-				Node_getTraversable( m_parent )->insert( node );
-				if ( traversable_parent->empty() )
-					m_emptyOldParent = true;
-			}
+		if ( selectable && selectable->isSelected() ){
+			NodeSmartReference node( path.top().get() );
+			scene::Traversable* parent_traversable = Node_getTraversable( path.parent() );
+			parent_traversable->erase( node );
+			Node_getTraversable( m_parent )->insert( node );
+			m_emptyOldParent = parent_traversable->empty();
 		}
 	}
 	else if ( m_emptyOldParent ){
 		m_emptyOldParent = false;
-		// delete empty entities
-		Entity* entity = Node_getEntity( path.top() );
-		if ( entity != 0 && path.top().get_pointer() != Map_FindWorldspawn( g_map )	&& Node_getTraversable( path.top() )->empty() ) {
+		if ( Node_isEntity( path.top() ) && path.top().get_pointer() != m_world	&& Node_getTraversable( path.top() )->empty() ) /* delete empty entity left */
 			Path_deleteTop( path );
-		}
 	}
 }
 };
