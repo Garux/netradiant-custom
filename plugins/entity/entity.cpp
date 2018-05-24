@@ -151,7 +151,7 @@ typedef MemberCaller1<ConnectEntities, const char*, &ConnectEntities::connect> C
 
 inline Entity* ScenePath_getEntity( const scene::Path& path ){
 	Entity* entity = Node_getEntity( path.top() );
-	if ( entity == 0 ) {
+	if ( entity == 0 && path.size() > 1 ) {
 		entity = Node_getEntity( path.parent() );
 	}
 	return entity;

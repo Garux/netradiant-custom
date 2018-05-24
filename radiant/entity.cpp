@@ -199,26 +199,25 @@ void Entity_ungroupSelected(){
 
 	UndoableCommand undo( "ungroupSelectedEntities" );
 
-	scene::Path world_path( makeReference( GlobalSceneGraph().root() ) );
-	world_path.push( makeReference( Map_FindOrInsertWorldspawn( g_map ) ) );
-
 	scene::Instance &instance = GlobalSelectionSystem().ultimateSelected();
 	scene::Path path = instance.path();
 
-	if ( !Node_isEntity( path.top() ) ) {
+	scene::Node& world = Map_FindOrInsertWorldspawn( g_map );
+
+	if ( !Node_isEntity( path.top() ) && path.size() > 1 ) {
 		path.pop();
 	}
 
-	if ( Node_getEntity( path.top() ) != 0
+	if ( Node_isEntity( path.top() )
 		 && node_is_group( path.top() ) ) {
-		if ( world_path.top().get_pointer() != path.top().get_pointer() ) {
-			parentBrushes( path.top(), world_path.top() );
+		if ( &world != path.top().get_pointer() ) {
+			parentBrushes( path.top(), world );
 			Path_deleteTop( path );
 		}
 	}
 }
 
-
+#if 0
 class EntityFindSelected : public scene::Graph::Walker
 {
 public:
@@ -280,8 +279,8 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	}
 }
 };
-
-void Entity_regroupSelected(){
+/// moves selected primitives to entity, whose entityNode is selected or to worldspawn, if none
+void Entity_moveSelectedPrimitives(){
 	if ( GlobalSelectionSystem().countSelected() < 1 ) {
 		return;
 	}
@@ -301,6 +300,25 @@ void Entity_regroupSelected(){
 		GlobalSceneGraph().traverse( EntityGroupSelected( world_path ) );
 	}
 }
+#else
+/// moves selected primitives to entity, which is or its primitive is ultimateSelected()
+void Entity_moveSelectedPrimitives(){
+	if ( GlobalSelectionSystem().countSelected() < 2 ) {
+		globalErrorStream() << "Source and target entity primitives should be selected!\n";
+		return;
+	}
+
+	const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
+	scene::Node& node = ( !Node_isEntity( path.top() ) && path.size() > 1 )? path.parent() : path.top();
+
+	if ( Node_isEntity( node ) && node_is_group( node ) ) {
+		StringOutputStream command;
+		command << "movePrimitivesToEntity " << makeQuoted( Node_getEntity( node )->getEntityClass().name() );
+		UndoableCommand undo( command.c_str() );
+		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
+	}
+}
+#endif
 
 
 
@@ -717,14 +735,14 @@ void ToggleShowLightRadii(){
 }
 
 void Entity_constructMenu( GtkMenu* menu ){
-	create_menu_item_with_mnemonic( menu, "_Regroup", "RegroupSelection" );
+	create_menu_item_with_mnemonic( menu, "_Move Primitives to Entity", "EntityMovePrimitives" );
 	create_menu_item_with_mnemonic( menu, "_Ungroup", "UngroupSelection" );
-	create_menu_item_with_mnemonic( menu, "_Connect", "ConnectSelection" );
+	create_menu_item_with_mnemonic( menu, "_Connect Entities", "EntitiesConnect" );
 	if ( g_pGameDescription->mGameType == "nexuiz" ) {
-		create_menu_item_with_mnemonic( menu, "_KillConnect", "KillConnectSelection" );
+		create_menu_item_with_mnemonic( menu, "_KillConnect Entities", "EntitiesKillConnect" );
 	}
-	create_menu_item_with_mnemonic( menu, "_Select Color...", "EntityColor" );
-	create_menu_item_with_mnemonic( menu, "_Normalize Color", "NormalizeColor" );
+	create_menu_item_with_mnemonic( menu, "_Select Color...", "EntityColorSet" );
+	create_menu_item_with_mnemonic( menu, "_Normalize Color", "EntityColorNormalize" );
 }
 
 
@@ -733,12 +751,12 @@ void Entity_constructMenu( GtkMenu* menu ){
 #include "stringio.h"
 
 void Entity_Construct(){
-	GlobalCommands_insert( "EntityColor", FreeCaller<Entity_setColour>(), Accelerator( 'K' ) );
-	GlobalCommands_insert( "NormalizeColor", FreeCaller<Entity_normalizeColor>() );
-	GlobalCommands_insert( "ConnectSelection", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "EntityColorSet", FreeCaller<Entity_setColour>(), Accelerator( 'K' ) );
+	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<Entity_normalizeColor>() );
+	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_CONTROL_MASK ) );
 	if ( g_pGameDescription->mGameType == "nexuiz" )
-		GlobalCommands_insert( "KillConnectSelection", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)( GDK_SHIFT_MASK ) ) );
-	GlobalCommands_insert( "RegroupSelection", FreeCaller<Entity_regroupSelected>() );
+		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "EntityMovePrimitives", FreeCaller<Entity_moveSelectedPrimitives>(), Accelerator( 'M', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "UngroupSelection", FreeCaller<Entity_ungroupSelected>() );
 
 	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );

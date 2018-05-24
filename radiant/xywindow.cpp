@@ -864,23 +864,18 @@ void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
 	scene::Node* world_node = Map_FindWorldspawn( g_map );
 	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
 
-	if ( !( world_node && string_equal( entity_name, "worldspawn" ) ) ) {
+	if ( world_node && string_equal( entity_name, "worldspawn" ) ) {
+//		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!", "Info", eMB_OK, eMB_ICONDEFAULT );
+		Scene_EntitySetClassname_Selected( entity_name ); /* ungroupSelectedPrimitives */
+	}
+	else {
 		if( g_bCamEntityMenu ){
 			StringOutputStream command;
 			command << "entityCreate -class " << entity_name;
 			UndoableCommand undo( command.c_str() );
-#if 0
-			Vector3 angles( Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
-			Vector3 radangles( degrees_to_radians( angles[0] ), degrees_to_radians( angles[1] ), degrees_to_radians( angles[2] ) );
-			Vector3 viewvector;
-			viewvector[0] = cos( radangles[1] ) * cos( radangles[0] );
-			viewvector[1] = sin( radangles[1] ) * cos( radangles[0] );
-			viewvector[2] = sin( radangles[0] );
-#else
-			Vector3 viewvector = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
-#endif
 
-			float offset_for_multiple = ( GetSnapGridSize() < 8.f ? 8.f : GetSnapGridSize() ) * g_entityCreationOffset;
+			const Vector3 viewvector = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
+			const float offset_for_multiple = std::max( GetSnapGridSize(), 8.f ) * g_entityCreationOffset;
 			Vector3 point = viewvector * ( 64.f + offset_for_multiple ) + Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
 			vector3_snap( point, GetSnapGridSize() );
 			Entity_createFromSelection( entity_name, point );
@@ -889,14 +884,6 @@ void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
 			g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );
 		}
 		++g_entityCreationOffset;
-	}
-	else {
-//		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!"
-//																			  "",
-//										 "Info",
-//										 eMB_OK,
-//										 eMB_ICONDEFAULT );
-		Scene_EntitySetClassname_Selected( entity_name ); //ungroupSelectedPrimitives
 	}
 }
 

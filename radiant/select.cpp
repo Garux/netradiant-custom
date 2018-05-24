@@ -254,7 +254,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 
 	// node should be removed
 	if ( m_remove ) {
-		if ( Node_isEntity( path.parent() ) != 0 ) {
+		if ( Node_isEntity( path.parent() ) ) {
 			m_removedChild = true;
 		}
 
