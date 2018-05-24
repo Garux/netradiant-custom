@@ -861,30 +861,18 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 int g_entityCreationOffset = 0;
 
 void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
-	scene::Node* world_node = Map_FindWorldspawn( g_map );
 	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
-
-	if ( world_node && string_equal( entity_name, "worldspawn" ) ) {
-//		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!", "Info", eMB_OK, eMB_ICONDEFAULT );
-		Scene_EntitySetClassname_Selected( entity_name ); /* ungroupSelectedPrimitives */
+	if( g_bCamEntityMenu ){
+		const Vector3 viewvector = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
+		const float offset_for_multiple = std::max( GetSnapGridSize(), 8.f ) * g_entityCreationOffset;
+		Vector3 point = viewvector * ( 64.f + offset_for_multiple ) + Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
+		vector3_snap( point, GetSnapGridSize() );
+		Entity_createFromSelection( entity_name, point );
 	}
-	else {
-		if( g_bCamEntityMenu ){
-			StringOutputStream command;
-			command << "entityCreate -class " << entity_name;
-			UndoableCommand undo( command.c_str() );
-
-			const Vector3 viewvector = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
-			const float offset_for_multiple = std::max( GetSnapGridSize(), 8.f ) * g_entityCreationOffset;
-			Vector3 point = viewvector * ( 64.f + offset_for_multiple ) + Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
-			vector3_snap( point, GetSnapGridSize() );
-			Entity_createFromSelection( entity_name, point );
-		}
-		else{
-			g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );
-		}
-		++g_entityCreationOffset;
+	else{
+		g_pParentWnd->ActiveXY()->OnEntityCreate( entity_name );
 	}
+	++g_entityCreationOffset;
 }
 
 gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
@@ -2494,9 +2482,6 @@ void XYWnd_MouseToPoint( XYWnd* xywnd, int x, int y, Vector3& point ){
 }
 
 void XYWnd::OnEntityCreate( const char* item ){
-	StringOutputStream command;
-	command << "entityCreate -class " << item;
-	UndoableCommand undo( command.c_str() );
 	Vector3 point;
 	XYWnd_MouseToPoint( this, m_entityCreate_x, m_entityCreate_y, point );
 

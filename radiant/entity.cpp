@@ -85,9 +85,10 @@ class EntitySetClassnameSelected : public scene::Graph::Walker
 {
 const char* m_classname;
 scene::Node* m_world;
+const bool m_2world;
 public:
 EntitySetClassnameSelected( const char* classname )
-	: m_classname( classname ), m_world( Map_FindWorldspawn( g_map ) ){
+	: m_classname( classname ), m_world( Map_FindWorldspawn( g_map ) ), m_2world( m_world && string_equal( m_classname, "worldspawn" ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	return true;
@@ -96,7 +97,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 && ( instance.childSelected() || Instance_getSelectable( instance )->isSelected() ) ) {
 		if( path.top().get_pointer() == m_world ){ /* do not want to convert whole worldspawn entity */
-			if( instance.childSelected() ){ /* create an entity from world brushes instead */
+			if( instance.childSelected() && !m_2world ){ /* create an entity from world brushes instead */
 				EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( m_classname, true );
 				if( entityClass->fixedsize )
 					return;
@@ -121,6 +122,13 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 				//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
 				Scene_parentSubgraphSelectedBrushesToEntity( GlobalSceneGraph(), node, path );
 				Scene_forEachChildSelectable( SelectableSetSelected( true ), entityInstance.path() );
+			}
+			return;
+		}
+		else if( m_2world ){ /* ungroupSelectedEntities */ //condition is skipped with world = 0, so code next to this may create multiple worldspawns; todo handle this very special case?
+			if( node_is_group( path.top() ) ){
+				parentBrushes( path.top(), *m_world );
+				Path_deleteTop( path );
 			}
 			return;
 		}
@@ -166,24 +174,18 @@ void Scene_EntitySetKeyValue_Selected( const char* key, const char* value ){
 }
 
 void Scene_EntitySetClassname_Selected( const char* classname ){
-	if ( GlobalSelectionSystem().countSelected() < 1 ) {
-		return;
-	}
-
-	if( string_equal( classname, "worldspawn" ) ){
-		UndoableCommand undo( "ungroupSelectedPrimitives" );
-		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), Map_FindOrInsertWorldspawn( g_map ) ); //=no action, if no worldspawn (but one inserted)
-		//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), *Map_FindWorldspawn( g_map )); = crash, if no worldspawn
-	}
-	else{
+	if ( GlobalSelectionSystem().countSelected() > 0 ) {
 		StringOutputStream command;
-		command << "entitySetClass -class " << classname;
+		if( string_equal( classname, "worldspawn" ) )
+			command << "ungroupSelectedEntities";
+		else
+			command << "entitySetClass -class " << classname;
 		UndoableCommand undo( command.c_str() );
 		GlobalSceneGraph().traverse( EntitySetClassnameSelected( classname ) );
 	}
 }
 
-
+#if 0
 void Entity_ungroupSelected(){
 	if ( GlobalSelectionSystem().countSelected() < 1 ) {
 		return;
@@ -208,6 +210,7 @@ void Entity_ungroupSelected(){
 		}
 	}
 }
+#endif
 
 #if 0
 class EntityFindSelected : public scene::Graph::Walker
@@ -375,7 +378,20 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Can't create an entity with worldspawn.", "info" );
 		return;
 	}
+#else
+	const scene::Node* world_node = Map_FindWorldspawn( g_map );
+	if ( world_node && string_equal( name, "worldspawn" ) ) {
+//		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( MainFrame_getWindow() ), "There's already a worldspawn in your map!", "Info", eMB_OK, eMB_ICONDEFAULT );
+		UndoableCommand undo( "ungroupSelectedPrimitives" );
+		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), Map_FindOrInsertWorldspawn( g_map ) ); //=no action, if no worldspawn (but one inserted) (since insertion deselects everything)
+		//Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), *Map_FindWorldspawn( g_map ) ); = crash, if no worldspawn
+		return;
+	}
 #endif
+
+	StringOutputStream command;
+	command << "entityCreate -class " << name;
+	UndoableCommand undo( command.c_str() );
 
 	EntityClass* entityClass = GlobalEntityClassManager().findOrInsert( name, true );
 
@@ -728,7 +744,6 @@ void ToggleShowLightRadii(){
 
 void Entity_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "_Move Primitives to Entity", "EntityMovePrimitives" );
-	create_menu_item_with_mnemonic( menu, "_Ungroup", "UngroupSelection" );
 	create_menu_item_with_mnemonic( menu, "_Connect Entities", "EntitiesConnect" );
 	if ( g_pGameDescription->mGameType == "nexuiz" ) {
 		create_menu_item_with_mnemonic( menu, "_KillConnect Entities", "EntitiesKillConnect" );
@@ -749,7 +764,6 @@ void Entity_Construct(){
 	if ( g_pGameDescription->mGameType == "nexuiz" )
 		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "EntityMovePrimitives", FreeCaller<Entity_moveSelectedPrimitives>(), Accelerator( 'M', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "UngroupSelection", FreeCaller<Entity_ungroupSelected>() );
 
 	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
 

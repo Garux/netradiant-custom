@@ -168,7 +168,6 @@ gboolean Trigger_button_press( GtkWidget *widget, GdkEventButton *event, gpointe
 
 gboolean Func_Groups_button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
-		UndoableCommand undo( "create func_group" );
 		Entity_createFromSelection( "func_group", g_vector3_identity );
 		ToggleActions = 0;
 		return TRUE;
