@@ -495,73 +495,14 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	}
 }
 
-#if 0
-bool DoNormalisedColor( Vector3& color ){
-	if ( !color_dialog( GTK_WIDGET( MainFrame_getWindow() ), color ) ) {
-		return false;
-	}
-	/*
-	** scale colors so that at least one component is at 1.0F
-	*/
 
-	float largest = 0.0F;
-
-	if ( color[0] > largest ) {
-		largest = color[0];
-	}
-	if ( color[1] > largest ) {
-		largest = color[1];
-	}
-	if ( color[2] > largest ) {
-		largest = color[2];
-	}
-
-	if ( largest == 0.0F ) {
-		color[0] = 1.0F;
-		color[1] = 1.0F;
-		color[2] = 1.0F;
-	}
-	else
-	{
-		float scaler = 1.0F / largest;
-
-		color[0] *= scaler;
-		color[1] *= scaler;
-		color[2] *= scaler;
-	}
-
-	return true;
-}
-#endif
-
+/* scale color so that at least one component is at 1.0F */
 void NormalizeColor( Vector3& color ){
-	// scale colors so that at least one component is at 1.0F
-
-	float largest = 0.0F;
-
-	if ( color[0] > largest ) {
-		largest = color[0];
-	}
-	if ( color[1] > largest ) {
-		largest = color[1];
-	}
-	if ( color[2] > largest ) {
-		largest = color[2];
-	}
-
-	if ( largest == 0.0F ) {
-		color[0] = 1.0F;
-		color[1] = 1.0F;
-		color[2] = 1.0F;
-	}
+	const std::size_t maxi = vector3_max_abs_component_index( color );
+	if ( color[maxi] == 0.f )
+		color = Vector3( 1, 1, 1 );
 	else
-	{
-		float scaler = 1.0F / largest;
-
-		color[0] *= scaler;
-		color[1] *= scaler;
-		color[2] *= scaler;
-	}
+		color /= color[maxi];
 }
 
 void Entity_normalizeColor(){
