@@ -848,19 +848,14 @@ void Scene_EntityBreakdown( EntityBreakdown& entitymap ){
 
 class CountStuffWalker : public scene::Graph::Walker
 {
-int& m_patches;
 int& m_ents_ingame;
 int& m_groupents;
 int& m_groupents_ingame;
 public:
-CountStuffWalker( int& patches, int& ents_ingame, int& groupents, int& groupents_ingame )
-	: m_patches( patches ), m_ents_ingame( ents_ingame ), m_groupents( groupents ), m_groupents_ingame( groupents_ingame ){
+CountStuffWalker( int& ents_ingame, int& groupents, int& groupents_ingame )
+	: m_ents_ingame( ents_ingame ), m_groupents( groupents ), m_groupents_ingame( groupents_ingame ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	Patch* patch = Node_getPatch( path.top() );
-	if( patch != 0 ){
-		++m_patches;
-	}
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 ){
 		if( entity->isContainer() ){
@@ -882,8 +877,8 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Scene_CountStuff( int& patches, int& ents_ingame, int& groupents, int& groupents_ingame ){
-	GlobalSceneGraph().traverse( CountStuffWalker( patches, ents_ingame, groupents, groupents_ingame ) );
+void Scene_CountStuff( int& ents_ingame, int& groupents, int& groupents_ingame ){
+	GlobalSceneGraph().traverse( CountStuffWalker( ents_ingame, groupents, groupents_ingame ) );
 }
 
 WindowPosition g_posMapInfoWnd( -1, -1, c_default_window_pos.w, c_default_window_pos.h );
@@ -1088,12 +1083,10 @@ void DoMapInfo(){
 
 	g_object_unref( G_OBJECT( EntityBreakdownWalker ) );
 
-	int n_patches = 0;
 	int n_ents_ingame = 0;
 	int n_groupents = 0;
 	int n_groupents_ingame = 0;
-	Scene_CountStuff( n_patches, n_ents_ingame, n_groupents, n_groupents_ingame );
-	//globalOutputStream() << n_patches << n_ents_ingame << n_groupents << n_groupents_ingame << "\n";
+	Scene_CountStuff( n_ents_ingame, n_groupents, n_groupents_ingame );
 
 	char *markup;
 
@@ -1101,7 +1094,7 @@ void DoMapInfo(){
 	gtk_label_set_markup( GTK_LABEL( w_brushes ), markup );
 	g_free( markup );
 
-	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%i</b></span>  ", n_patches );
+	markup = g_markup_printf_escaped( "<span style=\"italic\"><b>%i</b></span>  ", Unsigned( g_patchCount.get() ) );
 	gtk_label_set_markup( GTK_LABEL( w_patches ), markup );
 	g_free( markup );
 
@@ -1169,7 +1162,7 @@ void Map_LoadFile( const char *filename ){
 	globalOutputStream() << "--- LoadMapFile ---\n";
 	globalOutputStream() << g_map.m_name.c_str() << "\n";
 
-	globalOutputStream() << Unsigned( g_brushCount.get() ) << " primitives\n";
+	globalOutputStream() << Unsigned( g_brushCount.get() + g_patchCount.get() ) << " primitives\n";
 	globalOutputStream() << Unsigned( g_entityCount.get() ) << " entities\n";
 
 	//GlobalEntityCreator().printStatistics();

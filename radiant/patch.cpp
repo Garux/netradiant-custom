@@ -38,6 +38,7 @@ void Patch_textureChanged(){
 }
 
 
+Counter* PatchInstance::m_counter = 0;
 Shader* PatchInstance::m_state_selpoint;
 Shader* Patch::m_state_ctrl;
 Shader* Patch::m_state_lattice;

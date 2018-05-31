@@ -27,6 +27,8 @@
 #include "patch.h"
 #include "patchmanip.h"
 
+#include "qe3.h"
+
 namespace
 {
 std::size_t g_patchModuleCount = 0;
@@ -46,6 +48,8 @@ void Patch_Construct( EPatchType type ){
 	Patch::constructStatic( type );
 	PatchInstance::constructStatic();
 
+	PatchInstance::m_counter = &g_patchCount;
+
 	if ( type == ePatchTypeDoom3 ) {
 		MAX_PATCH_WIDTH = MAX_PATCH_HEIGHT = 99;
 	}
@@ -59,6 +63,8 @@ void Patch_Destroy(){
 	if ( --g_patchModuleCount != 0 ) {
 		return;
 	}
+
+	PatchInstance::m_counter = 0;
 
 	Patch::destroyStatic();
 	PatchInstance::destroyStatic();

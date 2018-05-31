@@ -1347,6 +1347,7 @@ const LightList* m_lightList;
 
 TransformModifier m_transform;
 public:
+static Counter* m_counter;
 
 typedef LazyStatic<TypeCasts> StaticTypeCasts;
 
@@ -1366,6 +1367,7 @@ PatchInstance( const scene::Path& path, scene::Instance* parent, Patch& patch ) 
 	m_transform( Patch::TransformChangedCaller( m_patch ), ApplyTransformCaller( *this ) ){
 	m_patch.instanceAttach( Instance::path() );
 	m_patch.attach( this );
+	m_counter->increment();
 
 	m_lightList = &GlobalShaderCache().attach( *this );
 	m_patch.m_lightsChanged = LightsChangedCaller( *this );
@@ -1378,6 +1380,7 @@ PatchInstance( const scene::Path& path, scene::Instance* parent, Patch& patch ) 
 	m_patch.m_lightsChanged = Callback();
 	GlobalShaderCache().detach( *this );
 
+	m_counter->decrement();
 	m_patch.detach( this );
 	m_patch.instanceDetach( Instance::path() );
 }

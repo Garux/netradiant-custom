@@ -3647,7 +3647,8 @@ void MainFrame_Construct(){
 	PreferencesDialog_addSettingsPreferences( FreeCaller1<PreferencesPage&, Nudge_constructPreferences>() );
 
 	g_brushCount.setCountChangedCallback( FreeCaller<QE_brushCountChanged>() );
-	g_entityCount.setCountChangedCallback( FreeCaller<QE_entityCountChanged>() );
+	g_patchCount.setCountChangedCallback( FreeCaller<QE_brushCountChanged>() );
+	g_entityCount.setCountChangedCallback( FreeCaller<QE_brushCountChanged>() );
 	GlobalEntityCreator().setCounter( &g_entityCount );
 
 	GLWidget_sharedContextCreated = GlobalGL_sharedContextCreated;
@@ -3661,6 +3662,7 @@ void MainFrame_Destroy(){
 
 	GlobalEntityCreator().setCounter( 0 );
 	g_entityCount.setCountChangedCallback( Callback() );
+	g_patchCount.setCountChangedCallback( Callback() );
 	g_brushCount.setCountChangedCallback( Callback() );
 }
 
