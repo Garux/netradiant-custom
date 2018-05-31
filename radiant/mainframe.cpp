@@ -2556,31 +2556,32 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	return toolbar;
 }
 
-GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_count_status] ){
-	GtkTable* table = GTK_TABLE( gtk_table_new( 1, c_count_status, FALSE ) );
+GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_status__count] ){
+	GtkTable* table = GTK_TABLE( gtk_table_new( 1, c_status__count, FALSE ) );
 	gtk_widget_show( GTK_WIDGET( table ) );
 
 	{
 		GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
+		gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_END );
 		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
 		gtk_misc_set_padding( GTK_MISC( label ), 4, 2 );
 		gtk_widget_show( GTK_WIDGET( label ) );
 		gtk_table_attach_defaults( table, GTK_WIDGET( label ), 0, 1, 0, 1 );
-		pStatusLabel[c_command_status] = GTK_WIDGET( label );
+		pStatusLabel[c_status_command] = GTK_WIDGET( label );
 	}
 
-	for ( int i = 1; i < c_count_status; ++i )
+	for ( int i = 1; i < c_status__count; ++i )
 	{
 		GtkFrame* frame = GTK_FRAME( gtk_frame_new( 0 ) );
 		gtk_widget_show( GTK_WIDGET( frame ) );
 		gtk_table_attach_defaults( table, GTK_WIDGET( frame ), i, i + 1, 0, 1 );
 		gtk_frame_set_shadow_type( frame, GTK_SHADOW_IN );
 
-		if( i == c_grid_status )
+		if( i == c_status_grid )
 			gtk_widget_set_tooltip_text( GTK_WIDGET( frame ), "G: Grid size\nF: map Format\nC: camera Clip scale\nL: texture Lock	" );
 
 		GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
-		if( i == c_texture_status )
+		if( i == c_status_texture )
 			gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_START );
 		else
 			gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_END );
@@ -2692,10 +2693,8 @@ MainFrame::MainFrame() : m_window( 0 ), m_idleRedrawStatusText( RedrawStatusText
 	m_pXZWnd = 0;
 	m_pActiveXY = 0;
 
-	for ( int n = 0; n < c_count_status; n++ )
-	{
-		m_pStatusLabel[n] = 0;
-	}
+	for ( int n = 0; n < c_status__count; ++n )
+		m_statusLabel[n] = 0;
 
 	Create();
 }
@@ -2996,7 +2995,7 @@ void MainFrame::Create(){
 
 
 
-	GtkWidget* main_statusbar = create_main_statusbar( m_pStatusLabel );
+	GtkWidget* main_statusbar = create_main_statusbar( m_statusLabel );
 	gtk_box_pack_end( GTK_BOX( vbox ), main_statusbar, FALSE, TRUE, 2 );
 
 	GroupDialog_constructWindow( window );
@@ -3212,7 +3211,7 @@ void MainFrame::Create(){
 
 	g_defaultToolMode = DragMode;
 	g_defaultToolMode();
-	SetStatusText( m_command_status, c_TranslateMode_status );
+	SetStatusText( c_status_command, c_TranslateMode_status );
 
 	EverySecondTimer_enable();
 
@@ -3299,26 +3298,22 @@ void MainFrame::Shutdown(){
 }
 
 void MainFrame::RedrawStatusText(){
-	gtk_label_set_text( GTK_LABEL( m_pStatusLabel[c_command_status] ), m_command_status.c_str() );
-	gtk_label_set_text( GTK_LABEL( m_pStatusLabel[c_position_status] ), m_position_status.c_str() );
-	gtk_label_set_text( GTK_LABEL( m_pStatusLabel[c_brushcount_status] ), m_brushcount_status.c_str() );
-	gtk_label_set_text( GTK_LABEL( m_pStatusLabel[c_texture_status] ), m_texture_status.c_str() );
-	gtk_label_set_text( GTK_LABEL( m_pStatusLabel[c_grid_status] ), m_grid_status.c_str() );
+	for( int i = 0; i < c_status__count; ++i )
+		gtk_label_set_text( GTK_LABEL( m_statusLabel[i] ), m_status[i].c_str() );
 }
 
 void MainFrame::UpdateStatusText(){
 	m_idleRedrawStatusText.queueDraw();
 }
 
-void MainFrame::SetStatusText( CopiedString& status_text, const char* pText ){
-	status_text = pText;
+void MainFrame::SetStatusText( int status_n, const char* status ){
+	m_status[status_n] = status;
 	UpdateStatusText();
 }
 
 void Sys_Status( const char* status ){
-	if ( g_pParentWnd != 0 ) {
-		g_pParentWnd->SetStatusText( g_pParentWnd->m_command_status, status );
-	}
+	if ( g_pParentWnd )
+		g_pParentWnd->SetStatusText( c_status_command, status );
 }
 
 //int getRotateIncrement(){
@@ -3342,7 +3337,7 @@ void MainFrame::SetGridStatus(){
 		   << "  F:" << GridStatus_getTexdefTypeIdLabel()
 		   << "  C:" << GridStatus_getFarClipDistance()
 		   << "  L:" << lock;
-	SetStatusText( m_grid_status, status.c_str() );
+	SetStatusText( c_status_grid, status.c_str() );
 }
 
 void GridStatus_changed(){

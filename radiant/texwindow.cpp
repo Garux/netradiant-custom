@@ -397,7 +397,7 @@ void TextureBrowser_SetStatus( TextureBrowser& textureBrowser, const char* name 
 	StringOutputStream strTex( 256 );
 	strTex << name << " W: " << Unsigned( q->width ) << " H: " << Unsigned( q->height );
 	shader->DecRef();
-	g_pParentWnd->SetStatusText( g_pParentWnd->m_texture_status, strTex.c_str() );
+	g_pParentWnd->SetStatusText( c_status_texture, strTex.c_str() );
 }
 
 void TextureBrowser_Focus( TextureBrowser& textureBrowser, const char* name );

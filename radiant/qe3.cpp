@@ -126,7 +126,7 @@ SimpleCounter g_entityCount;
 void QE_brushCountChanged(){
 	char buffer[128];
 	sprintf( buffer, "Brushes: %u Patches: %u Entities: %u", Unsigned( g_brushCount.get() ), Unsigned( g_patchCount.get() ), Unsigned( g_entityCount.get() ) );
-	g_pParentWnd->SetStatusText( g_pParentWnd->m_brushcount_status, buffer );
+	g_pParentWnd->SetStatusText( c_status_brushcount, buffer );
 }
 
 

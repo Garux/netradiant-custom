@@ -1195,7 +1195,7 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 			status << "x:: " << FloatFormat( m_mousePosition[0], 6, 1 )
 				<< "  y:: " << FloatFormat( m_mousePosition[1], 6, 1 )
 				<< "  z:: " << FloatFormat( m_mousePosition[2], 6, 1 );
-			g_pParentWnd->SetStatusText( g_pParentWnd->m_position_status, status.c_str() );
+			g_pParentWnd->SetStatusText( c_status_position, status.c_str() );
 		}
 
 		if ( g_bCrossHairs ) {

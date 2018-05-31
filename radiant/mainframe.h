@@ -39,12 +39,12 @@ class ZWnd;
 typedef struct _GtkWidget GtkWidget;
 typedef struct _GtkWindow GtkWindow;
 
-const int c_command_status = 0;
-const int c_position_status = 1;
-const int c_brushcount_status = 2;
-const int c_texture_status = 3;
-const int c_grid_status = 4;
-const int c_count_status = 5;
+const int c_status_command = 0;
+const int c_status_position = 1;
+const int c_status_brushcount = 2;
+const int c_status_texture = 3;
+const int c_status_grid = 4;
+const int c_status__count = 5;
 
 class MainFrame
 {
@@ -62,11 +62,6 @@ MainFrame();
 
 GtkWindow* m_window;
 
-CopiedString m_command_status;
-CopiedString m_position_status;
-CopiedString m_brushcount_status;
-CopiedString m_texture_status;
-CopiedString m_grid_status;
 private:
 
 void Create();
@@ -87,7 +82,8 @@ CamWnd* m_pCamWnd;
 ZWnd* m_pZWnd;
 XYWnd* m_pActiveXY;
 
-GtkWidget *m_pStatusLabel[c_count_status];
+CopiedString m_status[c_status__count];
+GtkWidget *m_statusLabel[c_status__count];
 
 
 EViewStyle m_nCurrentStyle;
@@ -97,7 +93,7 @@ IdleDraw m_idleRedrawStatusText;
 
 public:
 
-void SetStatusText( CopiedString& status_text, const char* pText );
+void SetStatusText( int status_n, const char* status );
 void UpdateStatusText();
 void RedrawStatusText();
 typedef MemberCaller<MainFrame, &MainFrame::RedrawStatusText> RedrawStatusTextCaller;
