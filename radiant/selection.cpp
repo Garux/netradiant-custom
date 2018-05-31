@@ -2996,6 +2996,37 @@ std::size_t m_count;
 SelectionChangeCallback m_onchanged;
 };
 
+class SelectedStuffCounter
+{
+public:
+	std::size_t m_brushcount;
+	std::size_t m_patchcount;
+	std::size_t m_entitycount;
+	SelectedStuffCounter() : m_brushcount( 0 ), m_patchcount( 0 ), m_entitycount( 0 ){
+	}
+	void increment( scene::Node& node ) {
+		if( Node_isBrush( node ) )
+			++m_brushcount;
+		else if( Node_isPatch( node ) )
+			++m_patchcount;
+		else if( Node_isEntity( node ) )
+			++m_entitycount;
+	}
+	void decrement( scene::Node& node ) {
+		if( Node_isBrush( node ) )
+			--m_brushcount;
+		else if( Node_isPatch( node ) )
+			--m_patchcount;
+		else if( Node_isEntity( node ) )
+			--m_entitycount;
+	}
+	void get( std::size_t& brushes, std::size_t& patches, std::size_t& entities ) const {
+		 brushes = m_brushcount;
+		 patches = m_patchcount;
+		 entities = m_entitycount;
+	}
+};
+
 inline void ConstructSelectionTest( View& view, const rect_t selection_box ){
 	view.EnableScissor( selection_box.min[0], selection_box.max[0], selection_box.min[1], selection_box.max[1] );
 }
@@ -4156,6 +4187,7 @@ EComponentMode m_componentmode;
 
 SelectionCounter m_count_primitive;
 SelectionCounter m_count_component;
+SelectedStuffCounter m_count_stuff;
 
 TranslateManipulator m_translate_manipulator;
 RotateManipulator m_rotate_manipulator;
@@ -4286,13 +4318,18 @@ std::size_t countSelected() const {
 std::size_t countSelectedComponents() const {
 	return m_count_component.size();
 }
+void countSelectedStuff( std::size_t& brushes, std::size_t& patches, std::size_t& entities ) const {
+	m_count_stuff.get( brushes, patches, entities );
+}
 void onSelectedChanged( scene::Instance& instance, const Selectable& selectable ){
 	if ( selectable.isSelected() ) {
 		m_selection.append( instance );
+		m_count_stuff.increment( instance.path().top() );
 	}
 	else
 	{
 		m_selection.erase( instance );
+		m_count_stuff.decrement( instance.path().top() );
 	}
 
 	ASSERT_MESSAGE( m_selection.size() == m_count_primitive.size(), "selection-tracking error" );

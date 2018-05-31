@@ -3316,6 +3316,10 @@ void Sys_Status( const char* status ){
 		g_pParentWnd->SetStatusText( c_status_command, status );
 }
 
+void brushCountChanged( const Selectable& selectable ){
+	QE_brushCountChanged();
+}
+
 //int getRotateIncrement(){
 //	return static_cast<int>( g_si_globals.rotate );
 //}
@@ -3645,6 +3649,7 @@ void MainFrame_Construct(){
 	g_patchCount.setCountChangedCallback( FreeCaller<QE_brushCountChanged>() );
 	g_entityCount.setCountChangedCallback( FreeCaller<QE_brushCountChanged>() );
 	GlobalEntityCreator().setCounter( &g_entityCount );
+	GlobalSelectionSystem().addSelectionChangeCallback( FreeCaller1<const Selectable&, brushCountChanged>() );
 
 	GLWidget_sharedContextCreated = GlobalGL_sharedContextCreated;
 	GLWidget_sharedContextDestroyed = GlobalGL_sharedContextDestroyed;
