@@ -370,6 +370,26 @@ void SetAxis( const Vector3& axis ){
 }
 };
 #endif
+/// \brief snaps changed axes of \p move so that \p bounds stick to closest grid lines.
+void aabb_snap_translation( Vector3& move, const AABB& bounds ){
+	const Vector3 maxs( bounds.origin + bounds.extents );
+	const Vector3 mins( bounds.origin - bounds.extents );
+//	globalOutputStream() << "move: " << move << "\n";
+	for( std::size_t i = 0; i < 3; ++i ){
+		if( fabs( move[i] ) > 1e-2f ){
+			const float snapto1 = float_snapped( maxs[i] + move[i] , GetSnapGridSize() );
+			const float snapto2 = float_snapped( mins[i] + move[i] , GetSnapGridSize() );
+
+			const float dist1 = fabs( fabs( maxs[i] + move[i] ) - fabs( snapto1 ) );
+			const float dist2 = fabs( fabs( mins[i] + move[i] ) - fabs( snapto2 ) );
+
+//			globalOutputStream() << "maxs[i] + move[i]: " << maxs[i] + move[i]  << "    snapto1: " << snapto1 << "   dist1: " << dist1 << "\n";
+//			globalOutputStream() << "mins[i] + move[i]: " << mins[i] + move[i]  << "    snapto2: " << snapto2 << "   dist2: " << dist2 << "\n";
+			move[i] = dist2 > dist1 ? snapto1 - maxs[i] : snapto2 - mins[i];
+		}
+	}
+}
+
 void translation_local2object( Vector3& object, const Vector3& local, const Matrix4& local2object ){
 	object = matrix4_get_translation_vec3(
 		matrix4_multiplied_by_matrix4(
@@ -405,27 +425,10 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	current = vector3_scaled( m_axis, distance_for_axis( m_start, current, m_axis ) );
 
 	translation_local2object( current, current, manip2object );
-	if( snapbbox ){
-		const Vector3 maxs( m_bounds.origin + m_bounds.extents );
-		const Vector3 mins( m_bounds.origin - m_bounds.extents );
-//		globalOutputStream() << "current: " << current << "\n";
-		for( std::size_t i = 0; i < 3; ++i ){
-			if( m_axis[i] != 0.f ){
-				const float snapto1 = float_snapped( maxs[i] + current[i] , GetSnapGridSize() );
-				const float snapto2 = float_snapped( mins[i] + current[i] , GetSnapGridSize() );
-
-				const float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
-				const float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
-
-//				globalOutputStream() << "maxs[i] + current[i]: " << maxs[i] + current[i]  << "    snapto1: " << snapto1 << "   dist1: " << dist1 << "\n";
-//				globalOutputStream() << "mins[i] + current[i]: " << mins[i] + current[i]  << "    snapto2: " << snapto2 << "   dist2: " << dist2 << "\n";
-				current[i] = dist2 > dist1 ? snapto1 - maxs[i] : snapto2 - mins[i];
-			}
-		}
-	}
-	else{
+	if( snapbbox )
+		aabb_snap_translation( current, m_bounds );
+	else
 		vector3_snap( current, GetSnapGridSize() );
-	}
 
 	m_translatable.translate( current );
 }
@@ -459,29 +462,72 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 
 	translation_local2object( current, current, manip2object );
 
-	if( snapbbox ){
-		const Vector3 maxs( m_bounds.origin + m_bounds.extents );
-		const Vector3 mins( m_bounds.origin - m_bounds.extents );
-		//globalOutputStream() << "current: " << current << "\n";
-		for( std::size_t i = 0; i < 3; ++i ){
-			if( fabs( current[i] ) > 1e-6f ){
-				const float snapto1 = float_snapped( maxs[i] + current[i] , GetSnapGridSize() );
-				const float snapto2 = float_snapped( mins[i] + current[i] , GetSnapGridSize() );
-
-				const float dist1 = fabs( fabs( maxs[i] + current[i] ) - fabs( snapto1 ) );
-				const float dist2 = fabs( fabs( mins[i] + current[i] ) - fabs( snapto2 ) );
-
-				current[i] = dist2 > dist1 ? snapto1 - maxs[i] : snapto2 - mins[i];
-			}
-		}
-	}
-	else{
+	if( snapbbox )
+		aabb_snap_translation( current, m_bounds );
+	else
 		vector3_snap( current, GetSnapGridSize() );
-	}
 
 	m_translatable.translate( current );
 }
 };
+
+class TranslateFreeXY_Z : public Manipulatable
+{
+private:
+Vector3 m_0;
+std::size_t m_axisZ;
+Plane3 m_planeXY;
+Plane3 m_planeZ;
+Vector3 m_startXY;
+Vector3 m_startZ;
+Translatable& m_translatable;
+AABB m_bounds;
+public:
+static int m_viewdependent;
+TranslateFreeXY_Z( Translatable& translatable )
+	: m_translatable( translatable ){
+}
+void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+	m_axisZ = m_viewdependent? vector3_max_abs_component_index( m_view->getViewDir() ) : 2;
+	if( m_0 == g_vector3_identity ) /* special value to indicate missing good point to start with */
+		m_0 = transform_origin;
+	m_planeXY = Plane3( g_vector3_axes[m_axisZ], m_0[m_axisZ] );
+#if 0
+	Vector3 xydir( m_view->getViewDir() );
+#else
+	Vector3 xydir( m_view->getViewer() - m_0 );
+#endif
+	xydir[m_axisZ] = 0;
+	vector3_normalise( xydir );
+	m_planeZ = Plane3( xydir, vector3_dot( xydir, m_0 ) );
+	m_startXY = point_on_plane( m_planeXY, m_view->GetViewMatrix(), x, y );
+	m_startZ = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y );
+	m_bounds = bounds;
+}
+void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
+	Vector3 current;
+	if( alt )
+		current = ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_startZ ) * g_vector3_axes[m_axisZ];
+	else{
+		current = point_on_plane( m_planeXY, m_view->GetViewMatrix(), x, y ) - m_startXY;
+		current[m_axisZ] = 0;
+	}
+
+	if( snap )
+		current *= g_vector3_axes[vector3_max_abs_component_index( current )];
+
+	if( snapbbox )
+		aabb_snap_translation( current, m_bounds );
+	else
+		vector3_snap( current, GetSnapGridSize() );
+
+	m_translatable.translate( current );
+}
+void set0( const Vector3& start ){
+	m_0 = start;
+}
+};
+int TranslateFreeXY_Z::m_viewdependent = 0;
 
 class Scalable
 {
@@ -3438,31 +3484,28 @@ void Scene_Skew_Component_Selected( scene::Graph& graph, const Skew& skew, const
 
 class BooleanSelector : public Selector
 {
-bool m_selected;
-SelectionIntersection m_intersection;
+SelectionIntersection m_bestIntersection;
 Selectable* m_selectable;
 public:
-BooleanSelector() : m_selected( false ){
+BooleanSelector() : m_bestIntersection( SelectionIntersection() ){
 }
 
 void pushSelectable( Selectable& selectable ){
-	m_intersection = SelectionIntersection();
 	m_selectable = &selectable;
 }
 void popSelectable(){
-	if ( m_intersection.valid() ) {
-		m_selected = true;
-	}
-	m_intersection = SelectionIntersection();
 }
 void addIntersection( const SelectionIntersection& intersection ){
 	if ( m_selectable->isSelected() ) {
-		assign_if_closer( m_intersection, intersection );
+		assign_if_closer( m_bestIntersection, intersection );
 	}
 }
 
 bool isSelected(){
-	return m_selected;
+	return m_bestIntersection.valid();
+}
+const SelectionIntersection& bestIntersection() const {
+	return m_bestIntersection;
 }
 };
 
@@ -3498,6 +3541,9 @@ void addIntersection( const SelectionIntersection& intersection ){
 
 std::list<Selectable*>& best(){
 	return m_bestSelectable;
+}
+const SelectionIntersection& bestIntersection() const {
+	return m_bestIntersection;
 }
 };
 
@@ -3554,7 +3600,7 @@ void addIntersection( const SelectionIntersection& intersection ){
 bool isSelected(){
 	return m_bestIntersection.valid();
 }
-const SelectionIntersection& best(){
+const SelectionIntersection& best() const {
 	return m_bestIntersection;
 }
 };
@@ -3567,6 +3613,7 @@ class DragManipulator : public Manipulator
 {
 TranslateFree m_freeResize;
 TranslateFree m_freeDrag;
+TranslateFreeXY_Z m_freeDragXY_Z;
 ResizeTranslatable m_resize;
 DragTranslatable m_drag;
 DragNewBrush m_dragNewBrush;
@@ -3576,14 +3623,18 @@ bool m_newBrush;
 
 public:
 
-DragManipulator() : m_freeResize( m_resize ), m_freeDrag( m_drag ), m_selected( false ), m_newBrush( false ){
+DragManipulator() : m_freeResize( m_resize ), m_freeDrag( m_drag ), m_freeDragXY_Z( m_drag ), m_selected( false ), m_newBrush( false ){
 }
 
 Manipulatable* GetManipulatable(){
 	if( m_newBrush )
 		return &m_dragNewBrush;
+	else if( m_selected )
+		return &m_freeResize;
+	else if( Manipulatable::m_view->fill() )
+		return &m_freeDragXY_Z;
 	else
-		return m_dragSelected? &m_freeDrag : &m_freeResize;
+		return &m_freeDrag;
 }
 
 void testSelect( const View& view, const Matrix4& pivot2world ){
@@ -3607,6 +3658,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				}
 				else{ /* drag a primitive */
 					m_dragSelected = true;
+					m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, booleanSelector.bestIntersection().depth(), 1 ) ) ) );
 				}
 			}
 			else{ /* haven't hit a primitive */
@@ -3628,8 +3680,12 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				selector.addSelectable( SelectionIntersection( 0, 0 ), ( *i ) );
 				m_dragSelected = true;
 			}
-			if( GlobalSelectionSystem().countSelectedComponents() != 0 ) /* even if hit nothing, but got selected */
+			if( GlobalSelectionSystem().countSelectedComponents() != 0 ){ /* even if hit nothing, but got selected */
 				m_dragSelected = true;
+				m_freeDragXY_Z.set0( g_vector3_identity );
+			}
+			if( bestSelector.bestIntersection().valid() )
+				m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestSelector.bestIntersection().depth(), 1 ) ) ) );
 		}
 
 		for ( SelectionPool::iterator i = selector.begin(); i != selector.end(); ++i )
@@ -5369,6 +5425,15 @@ void SelectionSystem_constructPreferences( PreferencesPage& page ){
 	page.appendSpinner( "Selector size (pixels)", g_SELECT_EPSILON, 8, 2, 64 );
 	page.appendCheckBox( "", "Prefer point entities in 2D", getSelectionSystem().m_bPreferPointEntsIn2D );
 	page.appendCheckBox( "", "Left mouse click tunnel selector", g_bLeftMouseClickSelector );
+	{
+		const char* styles[] = { "XY plane + Z with Alt", "View plane + Forward with Alt", };
+		page.appendCombo(
+			"Move style in 3D",
+			STRING_ARRAY_RANGE( styles ),
+			IntImportCaller( TranslateFreeXY_Z::m_viewdependent ),
+			IntExportCaller( TranslateFreeXY_Z::m_viewdependent )
+			);
+	}
 }
 void SelectionSystem_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Selection", "Selection System Settings" ) );
@@ -5398,6 +5463,7 @@ void SelectionSystem_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SELECT_EPSILON", IntImportStringCaller( g_SELECT_EPSILON ), IntExportStringCaller( g_SELECT_EPSILON ) );
 	GlobalPreferenceSystem().registerPreference( "PreferPointEntsIn2D", BoolImportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ), BoolExportStringCaller( getSelectionSystem().m_bPreferPointEntsIn2D ) );
 	GlobalPreferenceSystem().registerPreference( "LeftMouseClickSelector", BoolImportStringCaller( g_bLeftMouseClickSelector ), BoolExportStringCaller( g_bLeftMouseClickSelector ) );
+	GlobalPreferenceSystem().registerPreference( "3DMoveStyle", IntImportStringCaller( TranslateFreeXY_Z::m_viewdependent ), IntExportStringCaller( TranslateFreeXY_Z::m_viewdependent ) );
 	SelectionSystem_registerPreferencesPage();
 }
 
