@@ -1441,51 +1441,61 @@ CamWnd::~CamWnd(){
 
 class FloorHeightWalker : public scene::Graph::Walker
 {
-float m_current;
-float& m_bestUp;
-float& m_bestDown;
+Vector3 m_current;
 public:
-FloorHeightWalker( float current, float& bestUp, float& bestDown ) :
-	m_current( current ), m_bestUp( bestUp ), m_bestDown( bestDown ){
-	bestUp = g_MaxWorldCoord;
-	bestDown = -g_MaxWorldCoord;
+mutable float m_bestUp;
+mutable float m_bestDown;
+mutable float m_bottom;
+FloorHeightWalker( const Vector3& current ) :
+	m_current( current ), m_bestUp( g_MaxWorldCoord ), m_bestDown( g_MinWorldCoord ), m_bottom( g_MaxWorldCoord ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible()
-		 && Node_isBrush( path.top() ) ) { // this node is a floor
-		const AABB& aabb = instance.worldAABB();
-		float floorHeight = aabb.origin.z() + aabb.extents.z();
-		if ( floorHeight > m_current && floorHeight < m_bestUp ) {
-			m_bestUp = floorHeight;
-		}
-		if ( floorHeight < m_current && floorHeight > m_bestDown ) {
-			m_bestDown = floorHeight;
-		}
-	}
-	else if( !path.top().get().visible() ){
+	if( !path.top().get().visible() )
 		return false;
+	if ( !path.top().get().isRoot() && !node_is_group( path.top() ) ) {
+		const AABB& aabb = instance.worldAABB();
+		if( instance.isSelected() || ( m_current.x() > aabb.origin.x() - aabb.extents.x()
+										&& m_current.x() < aabb.origin.x() + aabb.extents.x()
+										&& m_current.y() > aabb.origin.y() - aabb.extents.y()
+										&& m_current.y() < aabb.origin.y() + aabb.extents.y() ) ){
+			const float floorHeight = aabb.origin.z() + aabb.extents.z() + 32.f;
+			if ( floorHeight > m_current.z() + 0.1f && floorHeight < m_bestUp ) /* 0.1f epsilon to prevent jam at (close?) coords */
+				m_bestUp = floorHeight;
+			if ( floorHeight < m_current.z() - 0.1f && floorHeight > m_bestDown )
+				m_bestDown = floorHeight;
+			const float bottom = aabb.origin.z() - aabb.extents.z() - 16.f;
+			if( m_bottom > bottom )
+				m_bottom = bottom;
+		}
 	}
 	return true;
 }
 };
 
 void CamWnd::Cam_ChangeFloor( bool up ){
-	float current = m_Camera.origin[2] - 48;
-	float bestUp;
-	float bestDown;
-	GlobalSceneGraph().traverse( FloorHeightWalker( current, bestUp, bestDown ) );
+	FloorHeightWalker walker( m_Camera.origin );
+	GlobalSceneGraph().traverse( walker );
+	float current = m_Camera.origin.z();
 
-	if ( up && bestUp != g_MaxWorldCoord ) {
-		current = bestUp;
+	if ( up ){
+		if( walker.m_bottom != g_MaxWorldCoord && walker.m_bottom > current )
+			current = walker.m_bottom;
+		else if( walker.m_bestUp != g_MaxWorldCoord )
+			current = walker.m_bestUp;
 	}
-	if ( !up && bestDown != -g_MaxWorldCoord ) {
-		current = bestDown;
+	else{
+		if ( walker.m_bestDown != g_MinWorldCoord )
+			current = walker.m_bestDown;
+		else if( walker.m_bottom != g_MaxWorldCoord && walker.m_bottom < current )
+			current = walker.m_bottom;
 	}
 
-	m_Camera.origin[2] = current + 48;
-	Camera_updateModelview( getCamera() );
-	CamWnd_Update( *this );
-	CameraMovedNotify();
+	if( m_Camera.origin.z() != current ){
+		m_Camera.origin.z() = current;
+		Camera_updateModelview( getCamera() );
+		CamWnd_Update( *this );
+		CameraMovedNotify();
+	}
 }
 
 

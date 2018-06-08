@@ -1999,7 +1999,7 @@ GtkMenuItem* create_edit_menu(){
 	create_menu_item_with_mnemonic( menu, "Select Connected Entities", "SelectConnectedEntities" );
 
 	menu_separator( menu );
-	create_menu_item_with_mnemonic( menu, "Shortcuts...", FreeCaller<DoCommandListDlg>() );
+	create_menu_item_with_mnemonic( menu, "_Shortcuts...", FreeCaller<DoCommandListDlg>() );
 	create_menu_item_with_mnemonic( menu, "Pre_ferences...", "Preferences" );
 
 	return edit_menu_item;
