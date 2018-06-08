@@ -181,7 +181,7 @@ public:
 		if( volume.fill() ){
 			const Matrix4& viewproj = volume.GetViewMatrix();
 			const Vector3 pos_in_world = matrix4_transformed_point( localToWorld, m_position );
-			if( viewproj[3] * pos_in_world[0] + viewproj[7] * pos_in_world[1] + viewproj[11] * pos_in_world[2] + viewproj[15] < 3e-5 ) //w < 0: behind nearplane
+			if( viewproj[3] * pos_in_world[0] + viewproj[7] * pos_in_world[1] + viewproj[11] * pos_in_world[2] + viewproj[15] < 0.005f ) //w < 0: behind nearplane
 				return;
 			if( m_nameMode == eNameNormal && vector3_length_squared( pos_in_world - volume.getViewer() ) > static_cast<float>( g_showNamesDist ) * static_cast<float>( g_showNamesDist ) )
 				return;
