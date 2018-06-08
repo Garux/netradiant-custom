@@ -684,11 +684,11 @@ void ToggleShowLightRadii(){
 }
 
 void Entity_constructMenu( GtkMenu* menu ){
-	create_menu_item_with_mnemonic( menu, "_Move Primitives to Entity", "EntityMovePrimitives" );
 	create_menu_item_with_mnemonic( menu, "_Connect Entities", "EntitiesConnect" );
-	if ( g_pGameDescription->mGameType == "nexuiz" ) {
+	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" ) {
 		create_menu_item_with_mnemonic( menu, "_KillConnect Entities", "EntitiesKillConnect" );
 	}
+	create_menu_item_with_mnemonic( menu, "_Move Primitives to Entity", "EntityMovePrimitives" );
 	create_menu_item_with_mnemonic( menu, "_Select Color...", "EntityColorSet" );
 	create_menu_item_with_mnemonic( menu, "_Normalize Color", "EntityColorNormalize" );
 }
@@ -702,7 +702,7 @@ void Entity_Construct(){
 	GlobalCommands_insert( "EntityColorSet", FreeCaller<Entity_setColour>(), Accelerator( 'K' ) );
 	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<Entity_normalizeColor>() );
 	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_CONTROL_MASK ) );
-	if ( g_pGameDescription->mGameType == "nexuiz" )
+	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" )
 		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "EntityMovePrimitives", FreeCaller<Entity_moveSelectedPrimitives>(), Accelerator( 'M', (GdkModifierType)GDK_CONTROL_MASK ) );
 
