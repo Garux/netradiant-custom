@@ -2556,16 +2556,21 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	return toolbar;
 }
 
+GtkLabel* create_main_statusbar_label(){
+	GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
+	gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+	gtk_misc_set_padding( GTK_MISC( label ), 4, 2 );
+	gtk_widget_show( GTK_WIDGET( label ) );
+	return label;
+}
+
 GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_status__count] ){
 	GtkTable* table = GTK_TABLE( gtk_table_new( 1, c_status__count, FALSE ) );
 	gtk_widget_show( GTK_WIDGET( table ) );
 
 	{
-		GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
+		GtkLabel* label = create_main_statusbar_label();
 		gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_END );
-		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
-		gtk_misc_set_padding( GTK_MISC( label ), 4, 2 );
-		gtk_widget_show( GTK_WIDGET( label ) );
 		gtk_table_attach_defaults( table, GTK_WIDGET( label ), 0, 1, 0, 1 );
 		pStatusLabel[c_status_command] = GTK_WIDGET( label );
 	}
@@ -2574,23 +2579,39 @@ GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_status__count] ){
 	{
 		GtkFrame* frame = GTK_FRAME( gtk_frame_new( 0 ) );
 		gtk_widget_show( GTK_WIDGET( frame ) );
-		gtk_table_attach_defaults( table, GTK_WIDGET( frame ), i, i + 1, 0, 1 );
 		gtk_frame_set_shadow_type( frame, GTK_SHADOW_IN );
-
-		if( i == c_status_grid )
-			gtk_widget_set_tooltip_text( GTK_WIDGET( frame ), "G: Grid size\nF: map Format\nC: camera Clip scale\nL: texture Lock	" );
-
-		GtkLabel* label = GTK_LABEL( gtk_label_new( "Label" ) );
-		if( i == c_status_texture )
-			gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_START );
+		if( i == c_status_grid || i == c_status_brushcount )
+			gtk_table_attach( table, GTK_WIDGET( frame ), i, i + 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0 );
 		else
-			gtk_label_set_ellipsize( label, PANGO_ELLIPSIZE_END );
+			gtk_table_attach_defaults( table, GTK_WIDGET( frame ), i, i + 1, 0, 1 );
 
-		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
-		gtk_misc_set_padding( GTK_MISC( label ), 4, 2 );
-		gtk_widget_show( GTK_WIDGET( label ) );
-		gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( label ) );
-		pStatusLabel[i] = GTK_WIDGET( label );
+		if( i == c_status_brushcount ){
+			GtkWidget* hbox = gtk_hbox_new( FALSE, 0 );
+			gtk_container_add( GTK_CONTAINER( frame ), hbox );
+			gtk_widget_show( hbox );
+
+			const char* imgs[3] = { "status_brush.png", "patch_wireframe.png", "status_entiy.png" };
+			for( ; i < c_status_brushcount + 3; ++i ){
+				GtkImage* image = new_local_image( imgs[i - c_status_brushcount] );
+				gtk_widget_show( GTK_WIDGET( image ) );
+				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( image ), FALSE, FALSE, 0 );
+
+				GtkLabel* label = create_main_statusbar_label();
+				gtk_label_set_width_chars( label, 5 );
+				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( label ), FALSE, TRUE, 0 );
+				pStatusLabel[i] = GTK_WIDGET( label );
+			}
+			--i;
+		}
+		else{
+			GtkLabel* label = create_main_statusbar_label();
+			if( i == c_status_grid )
+				gtk_widget_set_tooltip_text( GTK_WIDGET( frame ), "G: Grid size\nF: map Format\nC: camera Clip scale\nL: texture Lock	" );
+			else
+				gtk_label_set_ellipsize( label, i == c_status_texture? PANGO_ELLIPSIZE_START : PANGO_ELLIPSIZE_END );
+			gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( label ) );
+			pStatusLabel[i] = GTK_WIDGET( label );
+		}
 	}
 
 	return GTK_WIDGET( table );
@@ -3336,7 +3357,7 @@ const char* ( *GridStatus_getTexdefTypeIdLabel )();
 
 void MainFrame::SetGridStatus(){
 	StringOutputStream status( 64 );
-	const char* lock = ( GridStatus_getTextureLockEnabled() ) ? "ON" : "OFF";
+	const char* lock = ( GridStatus_getTextureLockEnabled() ) ? "ON   " : "OFF  ";
 	status << ( GetSnapGridSize() > 0 ? "G:" : "g:" ) << GridStatus_getGridSize()
 		   << "  F:" << GridStatus_getTexdefTypeIdLabel()
 		   << "  C:" << GridStatus_getFarClipDistance()

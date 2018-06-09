@@ -395,7 +395,7 @@ void TextureBrowser_SetStatus( TextureBrowser& textureBrowser, const char* name 
 	IShader* shader = QERApp_Shader_ForName( name );
 	qtexture_t* q = shader->getTexture();
 	StringOutputStream strTex( 256 );
-	strTex << name << " W: " << Unsigned( q->width ) << " H: " << Unsigned( q->height );
+	strTex << ( string_equal_prefix_nocase( name, "textures/" )? name + 9 : name ) << " W: " << Unsigned( q->width ) << " H: " << Unsigned( q->height );
 	shader->DecRef();
 	g_pParentWnd->SetStatusText( c_status_texture, strTex.c_str() );
 }

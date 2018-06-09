@@ -42,9 +42,11 @@ typedef struct _GtkWindow GtkWindow;
 const int c_status_command = 0;
 const int c_status_position = 1;
 const int c_status_brushcount = 2;
-const int c_status_texture = 3;
-const int c_status_grid = 4;
-const int c_status__count = 5;
+const int c_status_patchcount = 3;
+const int c_status_entitycount = 4;
+const int c_status_texture = 5;
+const int c_status_grid = 6;
+const int c_status__count = 7;
 
 class MainFrame
 {

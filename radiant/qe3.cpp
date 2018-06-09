@@ -124,15 +124,16 @@ SimpleCounter g_patchCount;
 SimpleCounter g_entityCount;
 
 void QE_brushCountChange(){
-	char buffer[128];
-	if( GlobalSelectionSystem().countSelected() == 0 )
-		sprintf( buffer, "Brushes: %u Patches: %u Entities: %u", Unsigned( g_brushCount.get() ), Unsigned( g_patchCount.get() ), Unsigned( g_entityCount.get() ) );
-	else{
-		std::size_t brushes, patches, entities;
-		GlobalSelectionSystem().countSelectedStuff( brushes, patches, entities );
-		sprintf( buffer, "Brushes: %u Patches: %u Entities: %u", Unsigned( brushes ), Unsigned( patches ), Unsigned( entities ) );
+	std::size_t counts[3] = { g_brushCount.get(), g_patchCount.get(), g_entityCount.get() };
+	if( GlobalSelectionSystem().countSelected() != 0 )
+		GlobalSelectionSystem().countSelectedStuff( counts[0], counts[1], counts[2] );
+	for ( int i = 0; i < 3; ++i ){
+		char buffer[32];
+		buffer[0] = '\0';
+		if( counts[i] != 0 )
+			sprintf( buffer, "%zu", counts[i] );
+		g_pParentWnd->SetStatusText( c_status_brushcount + i, buffer );
 	}
-	g_pParentWnd->SetStatusText( c_status_brushcount, buffer );
 }
 
 IdleDraw g_idle_scene_counts_update = IdleDraw( FreeCaller<QE_brushCountChange>() );
