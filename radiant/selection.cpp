@@ -52,7 +52,7 @@
 
 #include "grid.h"
 
-int g_SELECT_EPSILON = 8;
+int g_SELECT_EPSILON = 12;
 
 struct Pivot2World
 {
@@ -5718,6 +5718,17 @@ typedef MemberCaller1<Selector_, DeviceVector, &Selector_::mouseUp> MouseUpCalle
 
 class Manipulator_
 {
+DeviceVector getEpsilon(){
+	switch ( getSelectionSystem().ManipulatorMode() )
+	{
+	case SelectionSystem::eClip:
+		return m_epsilon / g_SELECT_EPSILON * ( g_SELECT_EPSILON + 4 );
+	case SelectionSystem::eDrag:
+		return m_epsilon;
+	default: //getSelectionSystem().transformOrigin_isTranslatable()
+		return m_epsilon / g_SELECT_EPSILON * 8;
+	}
+}
 const DeviceVector& m_epsilon;
 const ModifierFlags& m_state;
 
@@ -5737,7 +5748,7 @@ Manipulator_( const DeviceVector& epsilon, const ModifierFlags& state ) :
 bool mouseDown( DeviceVector position ){
 	if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip )
 		Clipper_tryDoubleclick();
-	return getSelectionSystem().SelectManipulator( *m_view, &position[0], &m_epsilon[0] );
+	return getSelectionSystem().SelectManipulator( *m_view, &position[0], &getEpsilon()[0] );
 }
 
 void mouseMoved( DeviceVector position ){
@@ -5754,6 +5765,10 @@ void mouseUp( DeviceVector position ){
 	g_mouseUpCallback.clear();
 }
 typedef MemberCaller1<Manipulator_, DeviceVector, &Manipulator_::mouseUp> MouseUpCaller;
+
+void highlight( DeviceVector position ){
+	getSelectionSystem().HighlightManipulator( *m_view, &position[0], &getEpsilon()[0] );
+}
 };
 
 
@@ -5852,7 +5867,7 @@ void onMouseMotion( const WindowVector& position, ModifierFlags modifiers ){
 		g_mouseMovedCallback.get() ( device( position ) );
 	}
 	else{
-		getSelectionSystem().HighlightManipulator( *m_manipulator.m_view, &device( position )[0], &m_epsilon[0] );
+		m_manipulator.highlight( device( position ) );
 	}
 }
 void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
