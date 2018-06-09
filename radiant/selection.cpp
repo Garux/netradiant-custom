@@ -4425,6 +4425,10 @@ void onComponentSelection( scene::Instance& instance, const Selectable& selectab
 
 	ASSERT_MESSAGE( m_component_selection.size() == m_count_component.size(), "selection-tracking error" );
 }
+scene::Instance& firstSelected() const {
+	ASSERT_MESSAGE( m_selection.size() > 0, "no instance selected" );
+	return **m_selection.begin();
+}
 scene::Instance& ultimateSelected() const {
 	ASSERT_MESSAGE( m_selection.size() > 0, "no instance selected" );
 	return m_selection.back();

@@ -185,6 +185,10 @@ void Scene_EntitySetClassname_Selected( const char* classname ){
 	}
 }
 
+void Entity_ungroup(){
+	Scene_EntitySetClassname_Selected( "worldspawn" );
+}
+
 #if 0
 void Entity_ungroupSelected(){
 	if ( GlobalSelectionSystem().countSelected() < 1 ) {
@@ -296,14 +300,14 @@ void Entity_moveSelectedPrimitives(){
 	}
 }
 #else
-/// moves selected primitives to entity, which is or its primitive is ultimateSelected()
-void Entity_moveSelectedPrimitives(){
+/// moves selected primitives to entity, which is or its primitive is ultimateSelected() or firstSelected()
+void Entity_moveSelectedPrimitives( bool toLast ){
 	if ( GlobalSelectionSystem().countSelected() < 2 ) {
 		globalErrorStream() << "Source and target entity primitives should be selected!\n";
 		return;
 	}
 
-	const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
+	const scene::Path& path = toLast? GlobalSelectionSystem().ultimateSelected().path() : GlobalSelectionSystem().firstSelected().path();
 	scene::Node& node = ( !Node_isEntity( path.top() ) && path.size() > 1 )? path.parent() : path.top();
 
 	if ( Node_isEntity( node ) && node_is_group( node ) ) {
@@ -312,6 +316,12 @@ void Entity_moveSelectedPrimitives(){
 		UndoableCommand undo( command.c_str() );
 		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
 	}
+}
+void Entity_moveSelectedPrimitivesToLast(){
+	Entity_moveSelectedPrimitives( true );
+}
+void Entity_moveSelectedPrimitivesToFirst(){
+	Entity_moveSelectedPrimitives( false );
 }
 #endif
 
@@ -493,6 +503,10 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 			Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key() , model );
 		}
 	}
+}
+
+void Entity_ungroupSelectedPrimitives(){
+	Entity_createFromSelection( "worldspawn", g_vector3_identity );
 }
 
 
@@ -688,9 +702,15 @@ void Entity_constructMenu( GtkMenu* menu ){
 	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" ) {
 		create_menu_item_with_mnemonic( menu, "_KillConnect Entities", "EntitiesKillConnect" );
 	}
-	create_menu_item_with_mnemonic( menu, "_Move Primitives to Entity", "EntityMovePrimitives" );
+	create_menu_item_with_mnemonic( menu, "_Move Primitives to Entity", "EntityMovePrimitivesToLast" );
 	create_menu_item_with_mnemonic( menu, "_Select Color...", "EntityColorSet" );
 	create_menu_item_with_mnemonic( menu, "_Normalize Color", "EntityColorNormalize" );
+}
+
+void Entity_registerShortcuts(){
+	command_connect_accelerator( "EntityMovePrimitivesToFirst" );
+	command_connect_accelerator( "EntityUngroup" );
+	command_connect_accelerator( "EntityUngroupPrimitives" );
 }
 
 
@@ -704,7 +724,10 @@ void Entity_Construct(){
 	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_CONTROL_MASK ) );
 	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" )
 		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "EntityMovePrimitives", FreeCaller<Entity_moveSelectedPrimitives>(), Accelerator( 'M', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<Entity_moveSelectedPrimitivesToLast>(), Accelerator( 'M', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToFirst", FreeCaller<Entity_moveSelectedPrimitivesToFirst>() );
+	GlobalCommands_insert( "EntityUngroup", FreeCaller<Entity_ungroup>() );
+	GlobalCommands_insert( "EntityUngroupPrimitives", FreeCaller<Entity_ungroupSelectedPrimitives>() );
 
 	GlobalToggles_insert( "ShowLightRadiuses", FreeCaller<ToggleShowLightRadii>(), ToggleItem::AddCallbackCaller( g_show_lightradii_item ) );
 

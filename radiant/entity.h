@@ -37,6 +37,8 @@ void Entity_setColour();
 typedef struct _GtkMenu GtkMenu;
 void Entity_constructMenu( GtkMenu* menu );
 
+void Entity_registerShortcuts();
+
 void Entity_Construct();
 void Entity_Destroy();
 

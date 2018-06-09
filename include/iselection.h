@@ -103,6 +103,7 @@ virtual std::size_t countSelectedComponents() const = 0;
 virtual void countSelectedStuff( std::size_t& brushes, std::size_t& patches, std::size_t& entities ) const = 0;
 virtual void onSelectedChanged( scene::Instance& instance, const Selectable& selectable ) = 0;
 virtual void onComponentSelection( scene::Instance& instance, const Selectable& selectable ) = 0;
+virtual scene::Instance& firstSelected() const = 0;
 virtual scene::Instance& ultimateSelected() const = 0;
 virtual scene::Instance& penultimateSelected() const = 0;
 virtual void setSelectedAll( bool selected ) = 0;

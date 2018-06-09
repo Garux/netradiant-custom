@@ -2433,6 +2433,7 @@ void register_shortcuts(){
 //	SelectByType_registerShortcuts();
 	TexBro_registerShortcuts();
 	Misc_registerShortcuts();
+	Entity_registerShortcuts();
 }
 
 void File_constructToolbar( GtkToolbar* toolbar ){
