@@ -37,12 +37,6 @@
 /* marker */
 #define PICOINTERNAL_C
 
-
-
-/* todo:
- * - fix p->curLine for parser routines. increased twice
- */
-
 /* dependencies */
 #include <string.h>
 #include "picointernal.h"
@@ -825,6 +819,7 @@ int _pico_parse_ex( picoParser_t *p, int allowLFs, int handleQuoted ){
 	/* return if we're not allowed to go beyond lfs */
 	if ( ( hasLFs > 0 ) && !allowLFs ) {
 		p->cursor = old;
+		p->curLine -= hasLFs;
 		return 0;
 	}
 	/* get next quoted string */
