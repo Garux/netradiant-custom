@@ -156,15 +156,13 @@ void ResampleGamma( float fGamma ){
 }
 
 int max_tex_size = 0;
-const int max_texture_quality = 3;
-LatchedInt g_Textures_textureQuality( 3, "Texture Quality" );
+int g_Textures_mipLevel = 0;
 
 /// \brief This function does the actual processing of raw RGBA data into a GL texture.
 /// It will also resample to power-of-two dimensions, generate the mipmaps and adjust gamma.
 void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHeight ){
 	static float fGamma = -1;
 	float total[3];
-	byte  *outpixels = 0;
 	int nCount = nWidth * nHeight;
 
 	if ( fGamma != g_texture_globals.fGamma ) {
@@ -202,7 +200,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 	glTexImage2D( GL_TEXTURE_2D, 0, g_texture_globals.texture_components, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pPixels );
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, std::min( max_texture_quality - g_Textures_textureQuality.m_value, static_cast<int>( log2( static_cast<float>( std::max( nWidth, nHeight ) ) ) ) ) );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, std::min( g_Textures_mipLevel, static_cast<int>( log2( static_cast<float>( std::max( nWidth, nHeight ) ) ) ) ) );
 
 	glBindTexture( GL_TEXTURE_2D, 0 );
 #else
@@ -214,6 +212,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	while ( gl_height < nHeight )
 		gl_height <<= 1;
 
+	byte  *outpixels = 0;
 	bool resampled = false;
 	if ( !( gl_width == nWidth && gl_height == nHeight ) ) {
 		resampled = true;
@@ -225,9 +224,8 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 		outpixels = pPixels;
 	}
 
-	int quality_reduction = max_texture_quality - g_Textures_textureQuality.m_value;
-	const int target_width = std::max( std::min( gl_width >> quality_reduction, max_tex_size ), 1 );
-	const int target_height = std::max( std::min( gl_height >> quality_reduction, max_tex_size ), 1 );
+	const int target_width = std::max( std::min( gl_width >> g_Textures_mipLevel, max_tex_size ), 1 );
+	const int target_height = std::max( std::min( gl_height >> g_Textures_mipLevel, max_tex_size ), 1 );
 
 	while ( gl_width > target_width || gl_height > target_height )
 	{
@@ -658,6 +656,15 @@ void TextureCompressionImport( TextureCompressionFormat& self, int value ){
 }
 typedef ReferenceCaller1<TextureCompressionFormat, int, TextureCompressionImport> TextureCompressionImportCaller;
 
+void TextureMiplevelImport( int& self, int value ){
+	if ( self != value ) {
+		Textures_Unrealise();
+		self = value;
+		Textures_Realise();
+	}
+}
+typedef ReferenceCaller1<int, int, TextureMiplevelImport> TextureMiplevelImportCaller;
+
 void TextureGammaImport( float& self, float value ){
 	if ( self != value ) {
 		Textures_Unrealise();
@@ -720,12 +727,12 @@ typedef ReferenceCaller1<ETexturesMode, const IntImportCallback&, TextureModeExp
 
 void Textures_constructPreferences( PreferencesPage& page ){
 	{
-		const char* percentages[] = { "12.5%", "25%", "50%", "100%", };
+		const char* percentages[] = { "100%", "50%", "25%", "12.5%", };
 		page.appendRadio(
 			"Texture Quality",
 			STRING_ARRAY_RANGE( percentages ),
-			LatchedIntImportCaller( g_Textures_textureQuality ),
-			IntExportCaller( g_Textures_textureQuality.m_latched )
+			TextureMiplevelImportCaller( g_Textures_mipLevel ),
+			IntExportCaller( g_Textures_mipLevel )
 			);
 	}
 	page.appendSpinner(
@@ -791,10 +798,8 @@ void Textures_Construct(){
 	GlobalPreferenceSystem().registerPreference( "TextureCompressionFormat", TextureCompressionImportStringCaller(), IntExportStringCaller( reinterpret_cast<int&>( g_texture_globals.m_nTextureCompressionFormat ) ) );
 	GlobalPreferenceSystem().registerPreference( "TextureFiltering", IntImportStringCaller( reinterpret_cast<int&>( g_texture_mode ) ), IntExportStringCaller( reinterpret_cast<int&>( g_texture_mode ) ) );
 	GlobalPreferenceSystem().registerPreference( "TextureAnisotropy", BoolImportStringCaller( g_TextureAnisotropy ), BoolExportStringCaller( g_TextureAnisotropy ) );
-	GlobalPreferenceSystem().registerPreference( "TextureQuality", IntImportStringCaller( g_Textures_textureQuality.m_latched ), IntExportStringCaller( g_Textures_textureQuality.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "TextureMipLevel", IntImportStringCaller( g_Textures_mipLevel ), IntExportStringCaller( g_Textures_mipLevel ) );
 	GlobalPreferenceSystem().registerPreference( "SI_Gamma", FloatImportStringCaller( g_texture_globals.fGamma ), FloatExportStringCaller( g_texture_globals.fGamma ) );
-
-	g_Textures_textureQuality.useLatched();
 
 	Textures_registerPreferencesPage();
 
