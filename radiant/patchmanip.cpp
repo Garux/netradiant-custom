@@ -582,7 +582,7 @@ void Patch_SquareCylinder(){
 }
 
 void Patch_Endcap(){
-	UndoableCommand undo( "patchCreateCaps" );
+	UndoableCommand undo( "patchCreateEndCap" );
 
 	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eEndCap, GlobalXYWnd_getCurrentViewType() );
 }
@@ -704,7 +704,7 @@ void Patch_Transpose(){
 void Patch_Cap(){
 	// FIXME: add support for patch cap creation
 	// Patch_CapCurrent();
-	UndoableCommand undo( "patchCreateCaps" );
+	UndoableCommand undo( "patchPutCaps" );
 
 	Scene_PatchDoCap_Selected( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
 }
