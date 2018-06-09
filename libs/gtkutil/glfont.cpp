@@ -350,7 +350,7 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 		glTexSubImage2D( GL_TEXTURE_2D, 0, wid, 0, wid, hei, GL_BGRA, GL_UNSIGNED_BYTE, buf );
 
 		memset( buf, 0x00, 4 * hei * wid );
-		/* orange childSselected with shadow */
+		/* orange childSelected with shadow */
 		gray_to_texture( wid, hei, bitmap.buffer, buf, 255, 128, 0 );
 		glTexSubImage2D( GL_TEXTURE_2D, 0, wid * 2, 0, wid, hei, GL_BGRA, GL_UNSIGNED_BYTE, buf );
 

@@ -202,7 +202,14 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 
 	SetTexParameters( g_texture_mode );
 	SetTexAnisotropy( g_TextureAnisotropy );
+#if 1
+	glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
+	glTexImage2D( GL_TEXTURE_2D, 0, g_texture_globals.texture_components, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pPixels );
 
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, std::min( max_texture_quality - g_Textures_textureQuality.m_value, static_cast<int>( log2( static_cast<float>( std::max( nWidth, nHeight ) ) ) ) ) );
+
+	glBindTexture( GL_TEXTURE_2D, 0 );
+#else
 	int gl_width = 1;
 	while ( gl_width < nWidth )
 		gl_width <<= 1;
@@ -258,6 +265,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	if ( resampled ) {
 		free( outpixels );
 	}
+#endif
 }
 
 #if 0
