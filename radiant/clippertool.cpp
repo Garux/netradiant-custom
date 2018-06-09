@@ -36,6 +36,7 @@ GdkCursor* g_clipper_cursor;
 ClipperPoints g_clipper_points( g_vector3_identity, g_vector3_identity, g_vector3_identity );
 bool g_clipper_flipped = false;
 bool g_clipper_quick = false;
+bool g_clipper_doubleclicked = false;
 
 /* preferences */
 bool g_clipper_caulk = true;
@@ -68,6 +69,7 @@ void Clipper_update(){
 
 void Clipper_setPlanePoints( const ClipperPoints& points ){
 	g_clipper_points = points;
+//	g_clipper_doubleclicked = false; //assuming, that new point was set... dragging in fact calls this too >_<
 	Clipper_update();
 }
 
@@ -145,6 +147,18 @@ void Clipper_doFlip(){
 		g_clipper_flipped = !g_clipper_flipped;
 		Clipper_update();
 	}
+}
+
+#include "timer.h"
+Timer g_clipper_timer;
+void Clipper_tryDoubleclick(){
+	g_clipper_doubleclicked = g_clipper_timer.elapsed_msec() < 200 && Clipper_ok();
+	g_clipper_timer.start();
+}
+
+void Clipper_tryDoubleclickedCut(){
+	if( g_clipper_doubleclicked )
+		Clipper_doClip();
 }
 
 #include "preferencesystem.h"
