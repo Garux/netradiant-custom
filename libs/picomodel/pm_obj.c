@@ -85,7 +85,7 @@ static int _obj_canload( PM_PARAMS_CANLOAD ){
 	/* few lines in file and look for common keywords often */
 	/* appearing at the beginning of wavefront objects */
 
-	/* alllocate a new pico parser */
+	/* allocate a new pico parser */
 	p = _pico_new_parser( (const picoByte_t *)buffer,bufSize );
 	if ( p == NULL ) {
 		return PICO_PMV_ERROR_MEMORY;
@@ -550,7 +550,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 		PicoFreeModel( model );	\
 		return NULL; \
 	}
-	/* alllocate a new pico parser */
+	/* allocate a new pico parser */
 	p = _pico_new_parser( (const picoByte_t *)buffer,bufSize );
 	if ( p == NULL ) {
 		return NULL;
@@ -866,6 +866,8 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 					/*if( has_v  )*/ PicoSetSurfaceXYZ( curSurface,  ( curVertex + i ), verts  [ i ] );
 					/*if( has_vt )*/ PicoSetSurfaceST( curSurface,0,( curVertex + i ), coords [ i ] );
 					/*if( has_vn )*/ PicoSetSurfaceNormal( curSurface,  ( curVertex + i ), normals[ i ] );
+					if( curSurface && curSurface->shader )
+						PicoSetSurfaceColor( curSurface, 0, ( curVertex + i ), curSurface->shader->diffuseColor );
 				}
 				/* add our triangle (A B C) */
 				PicoSetSurfaceIndex( curSurface,( curFace * 3 + 2 ),(picoIndex_t)( curVertex + 0 ) );

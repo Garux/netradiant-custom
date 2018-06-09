@@ -447,7 +447,7 @@ picoShader_t *PicoNewShader( picoModel_t *model ){
 
 	/* setup default shader colors */
 	_pico_set_color( shader->ambientColor,0,0,0,0 );
-	_pico_set_color( shader->diffuseColor,255,255,255,1 );
+	_pico_set_color( shader->diffuseColor,255,255,255,255 );
 	_pico_set_color( shader->specularColor,0,0,0,0 );
 
 	/* no need to do this, but i do it anyway */
