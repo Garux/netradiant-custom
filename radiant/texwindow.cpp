@@ -609,15 +609,11 @@ int TextureBrowser_TotalHeight( TextureBrowser& textureBrowser ){
 	return textureBrowser.m_nTotalHeight;
 }
 
-inline const int& min_int( const int& left, const int& right ){
-	return std::min( left, right );
-}
-
 void TextureBrowser_clampOriginY( TextureBrowser& textureBrowser ){
 	if ( textureBrowser.originy > 0 ) {
 		textureBrowser.originy = 0;
 	}
-	int lower = min_int( textureBrowser.height - TextureBrowser_TotalHeight( textureBrowser ), 0 );
+	const int lower = std::min( textureBrowser.height - TextureBrowser_TotalHeight( textureBrowser ), 0 );
 	if ( textureBrowser.originy < lower ) {
 		textureBrowser.originy = lower;
 	}

@@ -427,10 +427,6 @@ gboolean xywnd_chasemouse( gpointer data ){
 	return TRUE;
 }
 
-inline const int& min_int( const int& left, const int& right ){
-	return std::min( left, right );
-}
-
 bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 	m_chasemouse_delta_x = 0;
 	m_chasemouse_delta_y = 0;
@@ -442,14 +438,14 @@ bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 			m_chasemouse_delta_x = std::max( pointx, 0 ) - epsilon;
 		}
 		else if ( ( pointx - m_nWidth ) > -epsilon ) {
-			m_chasemouse_delta_x = min_int( ( pointx - m_nWidth ), 0 ) + epsilon;
+			m_chasemouse_delta_x = std::min( ( pointx - m_nWidth ), 0 ) + epsilon;
 		}
 
 		if ( pointy < epsilon ) {
 			m_chasemouse_delta_y = std::max( pointy, 0 ) - epsilon;
 		}
 		else if ( ( pointy - m_nHeight ) > -epsilon ) {
-			m_chasemouse_delta_y = min_int( ( pointy - m_nHeight ), 0 ) + epsilon;
+			m_chasemouse_delta_y = std::min( ( pointy - m_nHeight ), 0 ) + epsilon;
 		}
 
 		if ( m_chasemouse_delta_y != 0 || m_chasemouse_delta_x != 0 ) {

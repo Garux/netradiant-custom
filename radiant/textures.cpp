@@ -155,10 +155,6 @@ void ResampleGamma( float fGamma ){
 	}
 }
 
-inline const int& min_int( const int& left, const int& right ){
-	return std::min( left, right );
-}
-
 int max_tex_size = 0;
 const int max_texture_quality = 3;
 LatchedInt g_Textures_textureQuality( 3, "Texture Quality" );
@@ -230,8 +226,8 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 	}
 
 	int quality_reduction = max_texture_quality - g_Textures_textureQuality.m_value;
-	int target_width = min_int( gl_width >> quality_reduction, max_tex_size );
-	int target_height = min_int( gl_height >> quality_reduction, max_tex_size );
+	const int target_width = std::max( std::min( gl_width >> quality_reduction, max_tex_size ), 1 );
+	const int target_height = std::max( std::min( gl_height >> quality_reduction, max_tex_size ), 1 );
 
 	while ( gl_width > target_width || gl_height > target_height )
 	{
