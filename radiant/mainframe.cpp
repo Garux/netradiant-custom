@@ -2606,7 +2606,7 @@ GtkWidget* create_main_statusbar( GtkWidget *pStatusLabel[c_status__count] ){
 		else{
 			GtkLabel* label = create_main_statusbar_label();
 			if( i == c_status_grid )
-				gtk_widget_set_tooltip_text( GTK_WIDGET( frame ), "G: Grid size\nF: map Format\nC: camera Clip scale\nL: texture Lock	" );
+				 gtk_widget_set_tooltip_markup( GTK_WIDGET( frame ), " <b>G</b>: <u>G</u>rid size\n <b>F</b>: map <u>F</u>ormat\n <b>C</b>: camera <u>C</u>lip distance \n <b>L</b>: texture <u>L</u>ock" );
 			else
 				gtk_label_set_ellipsize( label, i == c_status_texture? PANGO_ELLIPSIZE_START : PANGO_ELLIPSIZE_END );
 			gtk_container_add( GTK_CONTAINER( frame ), GTK_WIDGET( label ) );
