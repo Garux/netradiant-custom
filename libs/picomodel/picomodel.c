@@ -998,7 +998,7 @@ void PicoSetSurfaceST( picoSurface_t *surface, int array, int num, picoVec2_t st
 
 
 
-void PicoSetSurfaceColor( picoSurface_t *surface, int array, int num, picoColor_t color ){
+void PicoSetSurfaceColor( picoSurface_t *surface, int array, int num, const picoColor_t color ){
 	if ( surface == NULL || num < 0 || color == NULL ) {
 		return;
 	}
@@ -1610,7 +1610,7 @@ picoVertexCombinationHash_t *PicoAddVertexCombinationToHashTable( picoVertexComb
    fixme: needs non-naive algorithm
  */
 
-int PicoFindSurfaceVertexNum( picoSurface_t *surface, picoVec3_t xyz, picoVec3_t normal, int numSTs, picoVec2_t *st, int numColors, picoColor_t *color, picoIndex_t smoothingGroup ){
+int PicoFindSurfaceVertexNum( picoSurface_t *surface, picoVec3_t xyz, picoVec3_t normal, int numSTs, picoVec2_t *st, int numColors, const picoColor_t *color, picoIndex_t smoothingGroup ){
 	int i, j;
 
 
@@ -1654,7 +1654,7 @@ int PicoFindSurfaceVertexNum( picoSurface_t *surface, picoVec3_t xyz, picoVec3_t
 		if ( numColors > 0 && color != NULL ) {
 			for ( j = 0; j < numSTs; j++ )
 			{
-				if ( *( (int*) surface->color[ j ] ) != *( (int*) color[ j ] ) ) {
+				if ( *( (const int*) surface->color[ j ] ) != *( (const int*) color[ j ] ) ) {
 					break;
 				}
 			}
@@ -2255,7 +2255,7 @@ int PicoRemapModel( picoModel_t *model, char *remapFile ){
  */
 
 void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** normals,
-							 int numSTs, picoVec2_t **st, int numColors, picoColor_t **colors,
+							 int numSTs, picoVec2_t **st, int numColors, const picoColor_t **colors,
 							 picoShader_t* shader, const char *name, picoIndex_t* smoothingGroup ){
 	int i,j;
 	int vertDataIndex;

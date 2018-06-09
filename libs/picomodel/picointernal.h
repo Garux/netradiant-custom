@@ -75,6 +75,8 @@ extern "C"
 #define PICO_IOEOF  1
 #define PICO_IOERR  2
 
+const picoColor_t picoColor_white;
+
 /* types */
 typedef struct picoParser_s
 {
@@ -146,7 +148,7 @@ void            _pico_zero_vec4( picoVec4_t vec );
 void            _pico_set_vec( picoVec3_t v, float a, float b, float c );
 void            _pico_set_vec4( picoVec4_t v, float a, float b, float c, float d );
 void            _pico_set_color( picoColor_t c, int r, int g, int b, int a );
-void            _pico_copy_color( picoColor_t src, picoColor_t dest );
+void            _pico_copy_color( const picoColor_t src, picoColor_t dest );
 void            _pico_copy_vec( picoVec3_t src, picoVec3_t dest );
 void            _pico_copy_vec2( picoVec2_t src, picoVec2_t dest );
 picoVec_t       _pico_normalize_vec( picoVec3_t vec );

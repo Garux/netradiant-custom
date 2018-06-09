@@ -544,7 +544,7 @@ static picoModel_t *_terrain_load( PM_PARAMS_LOAD ){
 				_pico_set_color( color, colorPixel[ 0 ], colorPixel[ 1 ], colorPixel[ 2 ], colorPixel[ 3 ] );
 			}
 			else{
-				_pico_set_color( color, 255, 255, 255, 255 );
+				_pico_copy_color( picoColor_white, color );
 			}
 			PicoSetSurfaceColor( picoSurface, 0, v, color );
 

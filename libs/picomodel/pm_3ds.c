@@ -40,9 +40,6 @@
 /* dependencies */
 #include "picointernal.h"
 
-/* ydnar */
-static picoColor_t white = { 255,255,255,255 };
-
 /* remarks:
  * - 3ds file version is stored in pico special field 0 on load (ydnar: removed)
  * todo:
@@ -299,7 +296,7 @@ static int GetMeshVertices( T3dsLoaderPers *pers ){
 
 		/* add current vertex */
 		PicoSetSurfaceXYZ( pers->surface,i,v );
-		PicoSetSurfaceColor( pers->surface,0,i,white ); /* ydnar */
+		PicoSetSurfaceColor( pers->surface, 0, i, picoColor_white );
 
 #ifdef DEBUG_PM_3DS_EX
 		printf( "Vertex: x: %f y: %f z: %f\n",v[0],v[1],v[2] );

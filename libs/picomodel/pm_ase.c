@@ -48,9 +48,6 @@
 #include "time.h"
 #endif
 
-/* plain white */
-static picoColor_t white = { 255, 255, 255, 255 };
-
 /* jhefty - multi-subobject material support */
 
 /* Material/SubMaterial management */
@@ -406,7 +403,7 @@ static void _ase_submit_triangles_unshared( picoModel_t* model, aseMaterial_t* m
 					}
 					else
 					{
-						PicoSetSurfaceColor( surface, 0, numVertexes, white );
+						PicoSetSurfaceColor( surface, 0, numVertexes, picoColor_white );
 					}
 
 					PicoSetSurfaceSmoothingGroup( surface, numVertexes, ( vertices[( *i ).indices[j]].id * ( 1 << 16 ) ) + ( *i ).smoothingGroup );
@@ -435,7 +432,7 @@ static void _ase_submit_triangles( picoModel_t* model, aseMaterial_t* materials,
 			picoVec3_t* xyz[3];
 			picoVec3_t* normal[3];
 			picoVec2_t* st[3];
-			picoColor_t* color[3];
+			const picoColor_t* color[3];
 			picoIndex_t smooth[3];
 			int j;
 			/* we pull the data from the vertex, color and texcoord arrays using the face index data */
@@ -450,7 +447,7 @@ static void _ase_submit_triangles( picoModel_t* model, aseMaterial_t* materials,
 				}
 				else
 				{
-					color[j] = &white;
+					color[j] = &picoColor_white;
 				}
 
 				smooth[j] = ( vertices[( *i ).indices[j]].id * ( 1 << 16 ) ) + ( *i ).smoothingGroup; /* don't merge vertices */

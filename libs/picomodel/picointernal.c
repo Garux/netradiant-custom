@@ -468,6 +468,8 @@ picoVec_t _pico_calc_plane( picoVec4_t plane, picoVec3_t a, picoVec3_t b, picoVe
 	return _pico_normalize_vec( plane );
 }
 
+const picoColor_t picoColor_white = { 255, 255, 255, 255 };
+
 /* separate from _pico_set_vec4 */
 void _pico_set_color( picoColor_t c, int r, int g, int b, int a ){
 	c[ 0 ] = r;
@@ -476,7 +478,7 @@ void _pico_set_color( picoColor_t c, int r, int g, int b, int a ){
 	c[ 3 ] = a;
 }
 
-void _pico_copy_color( picoColor_t src, picoColor_t dest ){
+void _pico_copy_color( const picoColor_t src, picoColor_t dest ){
 	dest[ 0 ] = src[ 0 ];
 	dest[ 1 ] = src[ 1 ];
 	dest[ 2 ] = src[ 2 ];

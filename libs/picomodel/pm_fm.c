@@ -215,7 +215,6 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD ){
 	picoShader_t    *picoShader;
 	picoVec3_t xyz, normal;
 	picoVec2_t st;
-	picoColor_t color;
 
 
 	bb0 = bb = (picoByte_t*) _pico_alloc( bufSize );
@@ -590,6 +589,9 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD ){
 		st[ 0 ] =  ( ( texCoord[p_index_LUT[i].ST].s ) / ( (float)fm_head->skinWidth ) );
 		st[ 1 ] =  ( texCoord[p_index_LUT[i].ST].t / ( (float)fm_head->skinHeight ) );
 		PicoSetSurfaceST( picoSurface, 0, i, st );
+
+		/* set color */
+		PicoSetSurfaceColor( picoSurface, 0, i, picoColor_white );
 	}
 
 	if ( dups ) {
@@ -612,11 +614,11 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD ){
 			st[ 0 ] =  ( ( texCoord[p_index_LUT_DUPS[i].ST].s ) / ( (float)fm_head->skinWidth ) );
 			st[ 1 ] =  ( texCoord[p_index_LUT_DUPS[i].ST].t / ( (float)fm_head->skinHeight ) );
 			PicoSetSurfaceST( picoSurface, 0, i + fm_head->numXYZ, st );
+
+			/* set color */
+			PicoSetSurfaceColor( picoSurface, 0, i + fm_head->numXYZ, picoColor_white );
 		}
 	}
-
-	/* set color */
-	PicoSetSurfaceColor( picoSurface, 0, 0, color );
 
 	// Free up malloc'ed LL entries
 	for ( i = 0; i < fm_head->numXYZ; i++ )
