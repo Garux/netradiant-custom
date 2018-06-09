@@ -43,6 +43,7 @@ bool g_clipper_caulk = true;
 bool g_clipper_resetFlip = true;
 bool g_clipper_resetPoints = true;
 bool g_clipper_2pointsIn2d = true;
+int g_clipper_doubleclicked_split = 1;
 
 bool Clipper_get2pointsIn2d(){
 	return g_clipper_2pointsIn2d;
@@ -157,8 +158,10 @@ void Clipper_tryDoubleclick(){
 }
 
 void Clipper_tryDoubleclickedCut(){
-	if( g_clipper_doubleclicked )
-		Clipper_doClip();
+	if( g_clipper_doubleclicked ){
+		g_clipper_doubleclicked = false;
+		return g_clipper_doubleclicked_split? Clipper_doSplit() : Clipper_doClip();
+	}
 }
 
 #include "preferencesystem.h"
@@ -172,6 +175,15 @@ void Clipper_constructPreferences( PreferencesPage& page ){
 	GtkWidget* resetPoints = page.appendCheckBox( "", "Reset Points on Split", g_clipper_resetPoints );
 	Widget_connectToggleDependency( resetFlip, resetPoints );
 	page.appendCheckBox( "", "2 Points in 2D Views", g_clipper_2pointsIn2d );
+	{
+		const char* dowhat[] = { "Clip    ", "Split", };
+		page.appendRadio(
+			"On DoubleClick do: ",
+			STRING_ARRAY_RANGE( dowhat ),
+			IntImportCaller( g_clipper_doubleclicked_split ),
+			IntExportCaller( g_clipper_doubleclicked_split )
+			);
+	}
 }
 void Clipper_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Clipper", "Clipper Tool Settings" ) );
@@ -197,6 +209,7 @@ void Clipper_Construct(){
 	GlobalPreferenceSystem().registerPreference( "ClipperResetFlip", BoolImportStringCaller( g_clipper_resetFlip ), BoolExportStringCaller( g_clipper_resetFlip ) );
 	GlobalPreferenceSystem().registerPreference( "ClipperResetPoints", BoolImportStringCaller( g_clipper_resetPoints ), BoolExportStringCaller( g_clipper_resetPoints ) );
 	GlobalPreferenceSystem().registerPreference( "Clipper2PointsIn2D", BoolImportStringCaller( g_clipper_2pointsIn2d ), BoolExportStringCaller( g_clipper_2pointsIn2d ) );
+	GlobalPreferenceSystem().registerPreference( "ClipperDoubleclickedSplit", IntImportStringCaller( g_clipper_doubleclicked_split ), IntExportStringCaller( g_clipper_doubleclicked_split ) );
 	Clipper_registerPreferencesPage();
 
 	typedef FreeCaller1<const Selectable&, Clipper_SelectionChanged> ClipperSelectionChangedCaller;
