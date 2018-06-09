@@ -3852,9 +3852,35 @@ public:
 				m_points[i].m_namePos = vector4_projected( matrix4_transformed_vector4( proj_inv, Vector4( pos, 1 ) ) );
 			}
 	}
+	/* these two functions and m_viewdir for 2 points only */
+	void viewdir_set( const Vector3 viewdir ){
+		const std::size_t maxi = vector3_max_abs_component_index( viewdir );
+		m_viewdir = ( viewdir[maxi] > 0 )? g_vector3_axes[maxi] : -g_vector3_axes[maxi];
+	}
+	void viewdir_fixup(){
+		if( m_view->fill() //3d
+			&& fabs( vector3_length( m_points[1].m_point - m_points[0].m_point ) ) > 1e-3 //two non coincident points
+			&& fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){ //on axis = m_viewdir
+			viewdir_set( m_view->getViewDir() );
+			if( fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){
+				const Matrix4 screen2world( matrix4_full_inverse( m_view->GetViewMatrix() ) );
+				Vector3 p[2];
+				for( std::size_t i = 0; i < 2; ++i ){
+					p[i] = vector4_projected( matrix4_transformed_vector4( m_view->GetViewMatrix(), Vector4( m_points[i].m_point, 1 ) ) );
+				}
+				const float depthdir = p[1].z() > p[0].z()? -1 : 1;
+				for( std::size_t i = 0; i < 2; ++i ){
+					p[i].z() = -1;
+					p[i] = vector4_projected( matrix4_transformed_vector4( screen2world, Vector4( p[i], 1 ) ) );
+				}
+				viewdir_set( ( p[1] - p[0] ) * depthdir );
+			}
+		}
+	}
 	void updatePlane(){
 		if( m_points[0].m_set && m_points[1].m_set ){
 			if( !m_points[2].m_set ){
+				viewdir_fixup();
 				m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
 			}
 			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[2].m_point, m_points[1].m_point ) ); /* points order corresponds the plane, we want to insert */
@@ -3872,11 +3898,6 @@ public:
 		return i % maxi;
 	}
 	void newPoint( const Vector3& point, const View& view ){
-		{ /* update m_viewdir */
-			const Vector3 viewdir( view.getViewDir() );
-			const std::size_t maxi = vector3_max_abs_component_index( viewdir );
-			m_viewdir = ( viewdir[maxi] > 0 )? g_vector3_axes[maxi] : -g_vector3_axes[maxi];
-		}
 		const std::size_t i = newPointIndex( view.fill() );
 		if( i == 0 )
 			m_points[1].m_set = m_points[2].m_set = false;
@@ -3886,6 +3907,9 @@ public:
 		SelectionPool selector;
 		selector.addSelectable( SelectionIntersection( 0, 0 ), &m_points[i] );
 		selectionChange( selector );
+
+		if( i == 1 )
+			viewdir_set( m_view->getViewDir() );
 
 		updatePlane();
 	}
@@ -4457,6 +4481,9 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
+		Manipulatable::m_view = &view; //this b4 m_manipulator calls!
+		Manipulatable::m_device_epsilon[0] = device_epsilon[0];
+		Manipulatable::m_device_epsilon[1] = device_epsilon[1];
 
 		m_transformOrigin_manipulator.setSelected( false );
 		m_manipulator->setSelected( false );
@@ -4487,12 +4514,7 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 			Matrix4 device2manip;
 			ConstructDevice2Manip( device2manip, m_pivot2world_start, view.GetModelview(), view.GetProjection(), view.GetViewport() );
 			if( m_pivot_moving ){
-				Manipulatable::m_view = &view; //this b4 GetManipulatable()!
-				Manipulatable::m_device_epsilon[0] = device_epsilon[0];
-				Manipulatable::m_device_epsilon[1] = device_epsilon[1];
-
 				m_manipulator->GetManipulatable()->Construct( device2manip, device_point[0], device_point[1], m_bounds, vector4_to_vector3( GetPivot2World().t() ) );
-
 				m_undo_begun = false;
 			}
 			else if( movingOrigin ){
