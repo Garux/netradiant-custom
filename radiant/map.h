@@ -133,7 +133,7 @@ void Scene_parentSelectedBrushesToEntity( scene::Graph& graph, scene::Node& pare
 void Scene_parentSubgraphSelectedBrushesToEntity( scene::Graph& graph, scene::Node& parent, const scene::Path& start );
 std::size_t Scene_countSelectedBrushes( scene::Graph& graph );
 
-void Scene_parentSelected();
+//void Scene_parentSelected();
 
 void OnUndoSizeChanged();
 

@@ -3502,7 +3502,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "DeleteSelection2", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
 	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( 'Z' ) );
-	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
+//	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
 	GlobalCommands_insert( "UnSelectSelection2", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
 	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( 'C' ) );
 	GlobalCommands_insert( "InvertSelection", FreeCaller<Select_Invert>(), Accelerator( 'I' ) );

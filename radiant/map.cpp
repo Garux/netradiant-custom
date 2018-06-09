@@ -1887,7 +1887,7 @@ std::size_t Scene_countSelectedBrushes( scene::Graph& graph ){
 	graph.traverse( CountSelectedBrushes( count ) );
 	return count;
 }
-
+#if 0
 enum ENodeType
 {
 	eNodeUnknown,
@@ -1978,7 +1978,7 @@ public:
 		globalWarningStream() << "failed - did not find two selected nodes.\n";
 	}
 }
-
+#endif
 
 
 void NewMap(){
