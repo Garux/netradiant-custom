@@ -3658,6 +3658,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				}
 				else{ /* drag a primitive */
 					m_dragSelected = true;
+					test.BeginMesh( g_matrix4_identity, true );
 					m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, booleanSelector.bestIntersection().depth(), 1 ) ) ) );
 				}
 			}
@@ -3684,8 +3685,10 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				m_dragSelected = true;
 				m_freeDragXY_Z.set0( g_vector3_identity );
 			}
-			if( bestSelector.bestIntersection().valid() )
+			if( bestSelector.bestIntersection().valid() ){
+				test.BeginMesh( g_matrix4_identity, true );
 				m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestSelector.bestIntersection().depth(), 1 ) ) ) );
+			}
 		}
 
 		for ( SelectionPool::iterator i = selector.begin(); i != selector.end(); ++i )
