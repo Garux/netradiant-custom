@@ -2028,12 +2028,8 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 	if ( style == MainFrame::eFloating || style == MainFrame::eSplit ) {
 		create_menu_item_with_mnemonic( menu, "Console", "ToggleConsole" );
 		create_menu_item_with_mnemonic( menu, "Texture Browser", "ToggleTextures" );
-		create_menu_item_with_mnemonic( menu, "Entity Inspector", "ToggleEntityInspector" );
 	}
-	else
-	{
-		create_menu_item_with_mnemonic( menu, "Entity Inspector", "ViewEntityInfo" );
-	}
+	create_menu_item_with_mnemonic( menu, "Entity Inspector", "ToggleEntityInspector" );
 	create_menu_item_with_mnemonic( menu, "_Surface Inspector", "SurfaceInspector" );
 	create_menu_item_with_mnemonic( menu, "_Patch Inspector", "PatchInspector" );
 	create_menu_item_with_mnemonic( menu, "Entity List", "EntityList" );
