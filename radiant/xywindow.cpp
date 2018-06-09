@@ -2929,10 +2929,6 @@ void Orthographic_registerPreferencesPage(){
 
 
 void XYWindow_Construct(){
-//	GlobalCommands_insert( "ToggleCrosshairs", FreeCaller<ToggleShowCrosshair>(), Accelerator( 'X', (GdkModifierType)GDK_SHIFT_MASK ) );
-//	GlobalCommands_insert( "ToggleSizePaint", FreeCaller<ToggleShowSizeInfo>(), Accelerator( 'J' ) );
-//	GlobalCommands_insert( "ToggleGrid", FreeCaller<ToggleShowGrid>(), Accelerator( '0' ) );
-
 	GlobalToggles_insert( "ToggleView", ToggleShown::ToggleCaller( g_xy_top_shown ), ToggleItem::AddCallbackCaller( g_xy_top_shown.m_item ) );
 	GlobalToggles_insert( "ToggleSideView", ToggleShown::ToggleCaller( g_yz_side_shown ), ToggleItem::AddCallbackCaller( g_yz_side_shown.m_item ) );
 	GlobalToggles_insert( "ToggleFrontView", ToggleShown::ToggleCaller( g_xz_front_shown ), ToggleItem::AddCallbackCaller( g_xz_front_shown.m_item ) );

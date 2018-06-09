@@ -2400,6 +2400,10 @@ void SelectByType_registerShortcuts(){
 
 void SurfaceInspector_registerShortcuts(){
 	command_connect_accelerator( "FitTexture" );
+	command_connect_accelerator( "FitTextureWidth" );
+	command_connect_accelerator( "FitTextureHeight" );
+	command_connect_accelerator( "FitTextureWidthOnly" );
+	command_connect_accelerator( "FitTextureHeightOnly" );
 }
 
 void TexBro_registerShortcuts(){
@@ -2409,8 +2413,7 @@ void TexBro_registerShortcuts(){
 }
 
 void Misc_registerShortcuts(){
-	//refresh models
-	command_connect_accelerator( "RefreshReferences" );
+	command_connect_accelerator( "RefreshReferences" ); //refresh models
 	command_connect_accelerator( "MouseRotateOrScale" );
 	command_connect_accelerator( "MouseDragOrTransform" );
 }
@@ -3497,11 +3500,9 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "MoveToCamera", FreeCaller<MoveToCamera>(), Accelerator( 'V', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), Accelerator( GDK_space ) );
 	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
-//	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
 	GlobalCommands_insert( "DeleteSelection2", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
 	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( 'Z' ) );
 	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
-//	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
 	GlobalCommands_insert( "UnSelectSelection2", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
 	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( 'C' ) );
 	GlobalCommands_insert( "InvertSelection", FreeCaller<Select_Invert>(), Accelerator( 'I' ) );

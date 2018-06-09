@@ -512,12 +512,6 @@ void SurfaceInspector_ResetTexture(){
 	Scene_PatchCapTexture_Selected( GlobalSceneGraph() );
 }
 
-void SurfaceInspector_FitTexture(){
-	UndoableCommand undo( "textureAutoFit" );
-	getSurfaceInspector().exportData();
-	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
-}
-
 static void OnBtnPatchCap( GtkWidget *widget, gpointer data ){
 	Patch_CapTexture();
 }
@@ -546,27 +540,53 @@ static void OnBtnProject( GtkWidget *widget, EProjectTexture type ){
 	SurfaceInspector_ProjectTexture( type );
 }
 
-static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
-	SurfaceInspector_FitTexture();
+
+void SurfaceInspector_FitTexture(){
+	UndoableCommand undo( "textureAutoFit" );
+	getSurfaceInspector().exportData();
+	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, getSurfaceInspector().m_fitVertical );
 }
 
-static void OnBtnFaceFitWidth( GtkWidget *widget, gpointer data ){
+void SurfaceInspector_FaceFitWidth(){
 	UndoableCommand undo( "textureAutoFitWidth" );
 	getSurfaceInspector().exportData();
 	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, 0 );
 }
 
-static void OnBtnFaceFitHeight( GtkWidget *widget, gpointer data ){
+void SurfaceInspector_FaceFitHeight(){
 	UndoableCommand undo( "textureAutoFitHeight" );
 	getSurfaceInspector().exportData();
 	Select_FitTexture( 0, getSurfaceInspector().m_fitVertical );
 }
 
+void SurfaceInspector_FaceFitWidthOnly(){
+	UndoableCommand undo( "textureAutoFitWidthOnly" );
+	getSurfaceInspector().exportData();
+	Select_FitTexture( getSurfaceInspector().m_fitHorizontal, 0, true );
+}
+
+void SurfaceInspector_FaceFitHeightOnly(){
+	UndoableCommand undo( "textureAutoFitHeightOnly" );
+	getSurfaceInspector().exportData();
+	Select_FitTexture( 0, getSurfaceInspector().m_fitVertical, true );
+}
+
+
+static void OnBtnFaceFit( GtkWidget *widget, gpointer data ){
+	SurfaceInspector_FitTexture();
+}
+
+static void OnBtnFaceFitWidth( GtkWidget *widget, gpointer data ){
+	SurfaceInspector_FaceFitWidth();
+}
+
+static void OnBtnFaceFitHeight( GtkWidget *widget, gpointer data ){
+	SurfaceInspector_FaceFitHeight();
+}
+
 static gboolean OnBtnFaceFitWidthOnly( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
-		UndoableCommand undo( "textureAutoFitWidthOnly" );
-		getSurfaceInspector().exportData();
-		Select_FitTexture( getSurfaceInspector().m_fitHorizontal, 0, true );
+		SurfaceInspector_FaceFitWidthOnly();
 		return TRUE;
 	}
 	return FALSE;
@@ -574,9 +594,7 @@ static gboolean OnBtnFaceFitWidthOnly( GtkWidget *widget, GdkEventButton *event,
 
 static gboolean OnBtnFaceFitHeightOnly( GtkWidget *widget, GdkEventButton *event, gpointer data ){
 	if ( event->button == 3 && event->type == GDK_BUTTON_PRESS ) {
-		UndoableCommand undo( "textureAutoFitHeightOnly" );
-		getSurfaceInspector().exportData();
-		Select_FitTexture( 0, getSurfaceInspector().m_fitVertical, true );
+		SurfaceInspector_FaceFitHeightOnly();
 		return TRUE;
 	}
 	return FALSE;
@@ -1752,6 +1770,10 @@ void SurfaceInspector_registerPreferencesPage(){
 void SurfaceInspector_registerCommands(){
 	GlobalCommands_insert( "TextureReset/Cap", FreeCaller<SurfaceInspector_ResetTexture>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), Accelerator( 'F', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "FitTextureWidth", FreeCaller<SurfaceInspector_FaceFitWidth>() );
+	GlobalCommands_insert( "FitTextureHeight", FreeCaller<SurfaceInspector_FaceFitHeight>() );
+	GlobalCommands_insert( "FitTextureWidthOnly", FreeCaller<SurfaceInspector_FaceFitWidthOnly>() );
+	GlobalCommands_insert( "FitTextureHeightOnly", FreeCaller<SurfaceInspector_FaceFitHeightOnly>() );
 	GlobalCommands_insert( "SurfaceInspector", FreeCaller<SurfaceInspector_toggleShown>(), Accelerator( 'S' ) );
 
 //	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<SelectedFaces_copyTexture>() );
