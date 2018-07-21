@@ -675,6 +675,7 @@ namespace std
 	}
 }
 
+/// this is only correct for radiant 2d views matrices
 inline bool aabb_fits_view( const AABB& aabb, const Matrix4& modelview, const Matrix4& viewport, int ratio ){
 	const AABB transformed_bounds = aabb_for_oriented_aabb(
 		AABB( aabb.origin, Vector3( std::max( aabb.extents[0], 8.f ), std::max( aabb.extents[1], 8.f ), std::max( aabb.extents[2], 8.f ) ) ),

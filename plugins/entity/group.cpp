@@ -160,9 +160,9 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 //		}
 
 		// place name in the middle of the "children cloud"
-		m_name_origin = childBounds.origin;
+		m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : vector4_to_vector3( localToWorld.t() );
 
-		m_renderName.render( renderer, volume, localToWorld, selected, childSelected );
+		m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );
 	}
 }
 

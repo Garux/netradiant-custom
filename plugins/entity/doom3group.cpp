@@ -368,17 +368,14 @@ void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& l
 	if ( m_renderName.excluded_not()
 		&& ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
 		// draw models as usual
-		if ( !isModel() ) {
-			// don't draw the name for worldspawn
-//			if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
-//				return;
-//			}
-
-			// place name in the middle of the "children cloud"
-			m_name_origin = childBounds.origin;
+		if ( isModel() ) {
+			m_renderName.render( renderer, volume, localToWorld, selected, childSelected );
 		}
-
-		m_renderName.render( renderer, volume, localToWorld, selected, childSelected );
+		else{
+			// place name in the middle of the "children cloud"
+			m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : vector4_to_vector3( localToWorld.t() );
+			m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );
+		}
 	}
 }
 
