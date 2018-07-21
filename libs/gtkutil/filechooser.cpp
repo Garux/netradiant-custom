@@ -128,8 +128,6 @@ filetype_pair_t GetTypeForGTKMask( const char *mask ) const {
 static char g_file_dialog_file[1024];
 
 const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, const char* path, const char* pattern, bool want_load, bool want_import, bool want_save ){
-	filetype_t type;
-
 	if ( pattern == 0 ) {
 		pattern = "*";
 	}
@@ -213,18 +211,26 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 		strcpy( g_file_dialog_file, gtk_file_chooser_get_filename( GTK_FILE_CHOOSER( dialog ) ) );
 
 		if ( !string_equal( pattern, "*" ) ) {
-			GtkFileFilter* filter = gtk_file_chooser_get_filter( GTK_FILE_CHOOSER( dialog ) );
-			if ( filter != 0 && !string_equal( gtk_file_filter_get_name( filter ), "All supported formats" ) ) { // no filter set? some file-chooser implementations may allow the user to set no filter, which we treat as 'all files'
-				type = masks.GetTypeForGTKMask( gtk_file_filter_get_name( filter ) ).m_type;
-				// last ext separator
-				const char* extension = path_get_extension( g_file_dialog_file );
-				// no extension
-				if ( string_empty( extension ) ) {
-					strcat( g_file_dialog_file, type.pattern + 1 );
-				}
+			const char* extension = path_get_extension( g_file_dialog_file ); /* anything may be entered via 'location' dialog field, thus try to be safe */
+			if ( string_empty( extension ) ) { /* add an extension */
+				filetype_t type;
+				GtkFileFilter* filter = gtk_file_chooser_get_filter( GTK_FILE_CHOOSER( dialog ) );
+				if ( filter != 0 // no filter set? some file-chooser implementations may allow the user to set no filter, which we treat as 'all files'
+									&& !string_equal( gtk_file_filter_get_name( filter ), "All supported formats" ) )
+					type = masks.GetTypeForGTKMask( gtk_file_filter_get_name( filter ) ).m_type;
 				else
-				{
-					strcpy( g_file_dialog_file + ( extension - g_file_dialog_file ), type.pattern + 2 );
+					type = masks.GetTypeForGTKMask( ( *masks.m_masks.begin() ).c_str() ).m_type;
+
+				strcat( g_file_dialog_file, type.pattern + 1 );
+			}
+			else{ /* validate extension */
+				bool valid = false;
+				for ( std::size_t i = 0; i < masks.m_filters.size(); ++i )
+					if( string_length( masks.m_filters[i].c_str() ) >= 2 && string_equal_nocase( extension, masks.m_filters[i].c_str() + 2 ) )
+						valid = true;
+				if( !valid ){
+					g_file_dialog_file[0] = '\0';
+					globalErrorStream() << makeQuoted( extension ) << " is unsupported file type for requested operation\n";
 				}
 			}
 		}
