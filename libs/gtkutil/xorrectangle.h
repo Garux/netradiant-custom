@@ -22,66 +22,32 @@
 #if !defined ( INCLUDED_XORRECTANGLE_H )
 #define INCLUDED_XORRECTANGLE_H
 
-#include <gtk/gtkwidget.h>
-#include "math/vector.h"
-
-
-#include "gtkutil/glwidget.h"
+#include "rect_t.h"
 #include "igl.h"
 
-#include <gtk/gtkglwidget.h>
-
-//#include "stream/stringstream.h"
-
-
-class rectangle_t
-{
-public:
-rectangle_t()
-	: x( 0 ), y( 0 ), w( 0 ), h( 0 )
-{}
-rectangle_t( float _x, float _y, float _w, float _h )
-	: x( _x ), y( _y ), w( _w ), h( _h )
-{}
-float x;
-float y;
-float w;
-float h;
-};
-
-struct Coord2D
-{
-	float x, y;
-	Coord2D( float _x, float _y )
-		: x( _x ), y( _y ){
-	}
-};
-
-inline Coord2D coord2d_device2screen( const Coord2D& coord, unsigned int width, unsigned int height ){
-	return Coord2D( ( ( coord.x + 1.0f ) * 0.5f ) * width, ( ( coord.y + 1.0f ) * 0.5f ) * height );
-}
-
-inline rectangle_t rectangle_from_area( const float min[2], const float max[2], unsigned int width, unsigned int height ){
-	Coord2D botleft( coord2d_device2screen( Coord2D( min[0], min[1] ), width, height ) );
-	Coord2D topright( coord2d_device2screen( Coord2D( max[0], max[1] ), width, height ) );
-	return rectangle_t( botleft.x, botleft.y, topright.x - botleft.x, topright.y - botleft.y );
-}
-
 class XORRectangle {
+	void draw( const rect_t& rect, const GLenum mode ) const{
+		glBegin( mode );
+		glVertex2f( rect.min[0], rect.max[1] );
+		glVertex2f( rect.max[0], rect.max[1] );
+		glVertex2f( rect.max[0], rect.min[1] );
+		glVertex2f( rect.min[0], rect.min[1] );
+		glEnd();
+	}
 public:
 	XORRectangle() {
 	}
 	~XORRectangle() {
 	}
-	void set( rectangle_t rectangle, int width, int height ) {
-		if( rectangle.w != 0.f && rectangle.h != 0.f ) {
+	void set( rect_t rect, int width, int height ) {
+		if( rect.max[0] - rect.min[0] != 0.f && rect.max[1] - rect.min[1] != 0.f ) {
 			GlobalOpenGL_debugAssertNoErrors();
 
 			glViewport( 0, 0, width, height );
 			// set up viewpoint
 			glMatrixMode( GL_PROJECTION );
 			glLoadIdentity();
-			glOrtho( 0, width, 0, height, -100, 100 );
+			glOrtho( -1, 1, -1, 1, -100, 100 );
 
 			glMatrixMode( GL_MODELVIEW );
 			glLoadIdentity();
@@ -95,30 +61,41 @@ public:
 			}
 
 			glEnable( GL_BLEND );
+			/* additive to handle dark background */
 			glBlendFunc( GL_ONE, GL_ONE );
-			//glColor4f( 0.94902f / 5.f, 0.396078f / 5.f, 0.133333f / 5.f, .2f );
-			glColor3f( 1.f / 10.f, .5f / 10.f, 0.f );
-
-			glBegin( GL_QUADS );
-			glVertex2f( rectangle.x, rectangle.y + rectangle.h );
-			glVertex2f( rectangle.x + rectangle.w, rectangle.y + rectangle.h );
-			glVertex2f( rectangle.x + rectangle.w, rectangle.y );
-			glVertex2f( rectangle.x, rectangle.y );
-			glEnd();
+			const float r = 10.f;
+			switch ( rect.modifier )
+			{
+			case rect_t::eSelect:	glColor3f( 1.f / r, .5f / r, 0.f );		break;
+			case rect_t::eDeselect:	glColor3f( 0.f, 0.f, 1.f / r  );		break;
+			case rect_t::eToggle:	glColor3f( 1.f / r, 1.f / r, 1.f / r );	break;
+			}
+			draw( rect, GL_QUADS );
+			/* filter to handle bright background */
+			glBlendFunc( GL_ZERO, GL_SRC_COLOR );
+			switch ( rect.modifier )
+			{
+			case rect_t::eSelect:	glColor3f( 1.f, .9f, 0.7f );	break;
+			case rect_t::eDeselect:	glColor3f( 0.8f, 0.8f, 1.f  );	break;
+			case rect_t::eToggle:	glColor3f( .8f, .8f, .8f );		break;
+			}
+			draw( rect, GL_QUADS );
+			/* alpha blend on top */
+			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			const float a = .3f;
+			switch ( rect.modifier )
+			{
+			case rect_t::eSelect:	glColor4f( 1.f, .5f, 0.f, a );	break;
+			case rect_t::eDeselect:	glColor4f( 0.f, 0.f, 1.f, a );	break;
+			case rect_t::eToggle:	glColor4f( 1.f, 1.f, 1.f, a );	break;
+			}
+			draw( rect, GL_QUADS );
 
 			glDisable( GL_BLEND );
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
 			glLineWidth( 1 );
-			//glColor3f( 0.94902f, 0.396078f, 0.133333f );
 			glColor3f( 1.f, .5f, 0.f );
-
-			glBegin( GL_LINE_LOOP );
-			glVertex2f( rectangle.x, rectangle.y + rectangle.h );
-			glVertex2f( rectangle.x + rectangle.w, rectangle.y + rectangle.h );
-			glVertex2f( rectangle.x + rectangle.w, rectangle.y );
-			glVertex2f( rectangle.x, rectangle.y );
-			glEnd();
+			draw( rect, GL_LINE_LOOP );
 
 			GlobalOpenGL_debugAssertNoErrors();
 		}

@@ -974,7 +974,7 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 				glDrawBuffer( GL_FRONT );
 				self.fbo_get()->blit();
 
-				self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.getCamera().width, self.getCamera().height ), self.getCamera().width, self.getCamera().height );
+				self.m_XORRectangle.set( area, self.getCamera().width, self.getCamera().height );
 
 				glDrawBuffer( GL_BACK );
 
@@ -1867,7 +1867,7 @@ void CamWnd::draw(){
 			GlobalOpenGL_debugAssertNoErrors();
 			//qglFinish();
 
-			//m_XORRectangle.set( rectangle_t() );
+			//m_XORRectangle.set( rect_t() );
 		}
 
 		glwidget_swap_buffers( m_gl_widget );

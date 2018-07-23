@@ -505,7 +505,7 @@ void XYWnd::XY_Draw_Overlay_finish(){
 void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
 	if ( self.XY_Draw_Overlay_start() ) {
 		self.UpdateCameraIcon_();
-		self.m_XORRectangle.set( rectangle_from_area( area.min, area.max, self.Width(), self.Height() ), self.Width(), self.Height() );
+		self.m_XORRectangle.set( area, self.Width(), self.Height() );
 		self.XY_Draw_Overlay_finish();
 	}
 }
@@ -588,7 +588,7 @@ gboolean xywnd_expose( GtkWidget* widget, GdkEventExpose* event, XYWnd* xywnd ){
 			xywnd->XY_Draw();
 			GlobalOpenGL_debugAssertNoErrors();
 
-			//xywnd->m_XORRectangle.set( rectangle_t() );
+			//xywnd->m_XORRectangle.set( rect_t() );
 		}
 		glwidget_swap_buffers( xywnd->GetWidget() );
 	}

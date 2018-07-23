@@ -19,32 +19,4 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if !defined( INCLUDED_SELECTION_H )
-#define INCLUDED_SELECTION_H
-
-#include "windowobserver.h"
-#include "generic/callbackfwd.h"
 #include "rect_t.h"
-
-typedef Callback1<rect_t> RectangleCallback;
-
-class View;
-
-class SelectionSystemWindowObserver : public WindowObserver
-{
-public:
-virtual void setView( const View& view ) = 0;
-virtual void setRectangleDrawCallback( const RectangleCallback& callback ) = 0;
-virtual void incMouseMove( const WindowVector& delta ) = 0;
-};
-
-SelectionSystemWindowObserver* NewWindowObserver();
-
-class AABB;
-namespace scene
-{
-class Graph;
-}
-void Scene_BoundsSelected( scene::Graph& graph, AABB& bounds );
-
-#endif

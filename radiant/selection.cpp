@@ -3092,6 +3092,11 @@ inline const rect_t SelectionBoxForArea( const float device_point[2], const floa
 	selection_box.min[1] = ( device_delta[1] < 0 ) ? ( device_point[1] + device_delta[1] ) : ( device_point[1] );
 	selection_box.max[0] = ( device_delta[0] > 0 ) ? ( device_point[0] + device_delta[0] ) : ( device_point[0] );
 	selection_box.max[1] = ( device_delta[1] > 0 ) ? ( device_point[1] + device_delta[1] ) : ( device_point[1] );
+	selection_box.modifier = device_delta[0] * device_delta[1] < 0?
+								rect_t::eToggle
+								: device_delta[0] < 0 ?
+								rect_t::eDeselect
+								: rect_t::eSelect;
 	return selection_box;
 }
 #if 0
@@ -4306,7 +4311,6 @@ public:
 enum EModifier
 {
 	eManipulator,
-	eToggle,
 	eReplace,
 	eCycle,
 	eSelect,
@@ -4670,18 +4674,6 @@ void SelectPoint( const View& view, const float device_point[2], const float dev
 			if ( !selector.failed() ) {
 				switch ( modifier )
 				{
-				case RadiantSelectionSystem::eToggle:
-				{
-					SelectionPool::iterator best = selector.begin();
-					// toggle selection of the object with least depth
-					if ( ( *best ).second->isSelected() ) {
-						( *best ).second->setSelected( false );
-					}
-					else{
-						( *best ).second->setSelected( true );
-					}
-				}
-				break;
 				// if cycle mode not enabled, enable it
 				case RadiantSelectionSystem::eReplace:
 				{
@@ -4793,33 +4785,26 @@ bool SelectPoint_InitPaint( const View& view, const float device_point[2], const
 	}
 }
 
-void SelectArea( const View& view, const float device_point[2], const float device_delta[2], RadiantSelectionSystem::EModifier modifier, bool face ){
-	if ( modifier == eReplace ) {
-		deselectComponentsOrAll( face );
-	}
-
+void SelectArea( const View& view, const rect_t rect, bool face ){
   #if defined ( DEBUG_SELECTION )
 	g_render_clipped.destroy();
   #endif
+	View scissored( view );
+	ConstructSelectionTest( scissored, rect );
 
+	SelectionVolume volume( scissored );
+	SelectionPool pool;
+	if ( face ) {
+		Scene_TestSelect_Component( pool, volume, scissored, eFace );
+	}
+	else
 	{
-		View scissored( view );
-		ConstructSelectionTest( scissored, SelectionBoxForArea( device_point, device_delta ) );
+		Scene_TestSelect( pool, volume, scissored, Mode(), ComponentMode() );
+	}
 
-		SelectionVolume volume( scissored );
-		SelectionPool pool;
-		if ( face ) {
-			Scene_TestSelect_Component( pool, volume, scissored, eFace );
-		}
-		else
-		{
-			Scene_TestSelect( pool, volume, scissored, Mode(), ComponentMode() );
-		}
-
-		for ( SelectionPool::iterator i = pool.begin(); i != pool.end(); ++i )
-		{
-			( *i ).second->setSelected( !( modifier == RadiantSelectionSystem::eToggle && ( *i ).second->isSelected() ) );
-		}
+	for ( SelectionPool::iterator i = pool.begin(); i != pool.end(); ++i )
+	{
+		( *i ).second->setSelected( rect.modifier == rect_t::eSelect? true : rect.modifier == rect_t::eDeselect? false : !( *i ).second->isSelected() );
 	}
 }
 
@@ -5624,27 +5609,19 @@ typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseUp> 
 class Selector_
 {
 RadiantSelectionSystem::EModifier modifier_for_state( ModifierFlags state ){
-	if ( ( state == c_modifier_toggle || state == c_modifier_toggle_face || state == c_modifier_face || state == c_modifierAlt ) ) {
-		if( m_mouse2 ){
-			return RadiantSelectionSystem::eReplace;
-		}
-		else{
-			return RadiantSelectionSystem::eToggle;
-		}
-	}
-	return RadiantSelectionSystem::eManipulator;
+	if ( ( state == c_modifier_toggle || state == c_modifier_toggle_face || state == c_modifier_face )
+			&& m_mouse2 )
+		return RadiantSelectionSystem::eReplace;
+	else
+		return RadiantSelectionSystem::eManipulator;
 }
 
 rect_t getDeviceArea() const {
 	const DeviceVector delta( m_current - m_start );
-	if ( m_mouseMovedWhilePressed && selecting() && delta.x() != 0 && delta.y() != 0 ) {
+	if ( m_mouseMovedWhilePressed && selecting() && delta.x() != 0 && delta.y() != 0 )
 		return SelectionBoxForArea( &m_start[0], &delta[0] );
-	}
 	else
-	{
-		rect_t default_area = { { 0, 0, }, { 0, 0, }, };
-		return default_area;
-	}
+		return rect_t();
 }
 
 const DeviceVector& m_epsilon;
@@ -5678,7 +5655,7 @@ void testSelect( DeviceVector position ){
 	if ( modifier != RadiantSelectionSystem::eManipulator ) {
 		const DeviceVector delta( position - m_start );
 		if ( m_mouseMovedWhilePressed && delta.x() != 0 && delta.y() != 0 ) {
-			getSelectionSystem().SelectArea( *m_view, &m_start[0], &delta[0], RadiantSelectionSystem::eToggle, ( m_state & c_modifier_face ) != c_modifierNone );
+			getSelectionSystem().SelectArea( *m_view, SelectionBoxForArea( &m_start[0], &delta[0] ), ( m_state & c_modifier_face ) != c_modifierNone );
 		}
 		else if( !m_mouseMovedWhilePressed ){
 			if ( modifier == RadiantSelectionSystem::eReplace && !m_mouseMoved ) {
