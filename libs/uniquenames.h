@@ -184,28 +184,21 @@ typedef std::map<CopiedString, PostFixes> names_t;
 names_t m_names;
 public:
 name_t make_unique( const name_t& name ) const {
+#if 0 //debug
 	char buf[80];
 	name_t r( "","" );
 	name_write( buf, name );
-	#ifdef _DEBUG
 	globalErrorStream() << "find unique name for " << buf << "\n";
 	globalErrorStream() << "> currently registered names:\n";
-	#endif
 	for ( names_t::const_iterator i = m_names.begin(); i != m_names.end(); ++i )
 	{
-		#ifdef _DEBUG
 		globalErrorStream() << ">> " << i->first.c_str() << ": ";
-		#endif
 		for ( PostFixes::postfixes_t::const_iterator j = i->second.m_postfixes.begin(); j != i->second.m_postfixes.end(); ++j )
 		{
 			j->first.write( buf );
-			#ifdef _DEBUG
 			globalErrorStream() << " '" << buf << "'";
-			#endif
 		}
-		#ifdef _DEBUG
 		globalErrorStream() << "\n";
-		#endif
 	}
 	names_t::const_iterator i = m_names.find( name.first );
 	if ( i == m_names.end() ) {
@@ -216,10 +209,18 @@ name_t make_unique( const name_t& name ) const {
 		r = name_t( name.first, ( *i ).second.make_unique( name.second ) );
 	}
 	name_write( buf, r );
-	#ifdef _DEBUG
 	globalErrorStream() << "> unique name is " << buf << "\n";
-	#endif
 	return r;
+#else
+	names_t::const_iterator i = m_names.find( name.first );
+	if ( i == m_names.end() ) {
+		return name;
+	}
+	else
+	{
+		return name_t( name.first, ( *i ).second.make_unique( name.second ) );
+	}
+#endif
 }
 
 void insert( const name_t& name ){

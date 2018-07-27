@@ -159,7 +159,7 @@ void Map_Destroy();
 
 
 void Map_gatherNamespaced( scene::Node& root );
-void Map_mergeClonedNames();
+void Map_mergeClonedNames( bool makeUnique = true );
 
 
 const char* getMapsPath();

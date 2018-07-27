@@ -240,12 +240,14 @@ void Map_gatherNamespaced( scene::Node& root ){
 	Node_traverseSubgraph( root, GatherNamespaced() );
 }
 
-void Map_mergeClonedNames(){
-	for ( std::list<Namespaced*>::const_iterator i = g_cloned.begin(); i != g_cloned.end(); ++i )
-	{
-		( *i )->setNamespace( g_cloneNamespace );
+void Map_mergeClonedNames( bool makeUnique /*= true*/ ){
+	if( makeUnique ){
+		for ( std::list<Namespaced*>::const_iterator i = g_cloned.begin(); i != g_cloned.end(); ++i )
+		{
+			( *i )->setNamespace( g_cloneNamespace );
+		}
+		g_cloneNamespace.mergeNames( g_defaultNamespace );
 	}
-	g_cloneNamespace.mergeNames( g_defaultNamespace );
 	for ( std::list<Namespaced*>::const_iterator i = g_cloned.begin(); i != g_cloned.end(); ++i )
 	{
 		( *i )->setNamespace( g_defaultNamespace );

@@ -1227,7 +1227,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			 && selectable->isSelected() ) {
 			return false;
 		}
-		if( m_makeUnique && instance.childSelected() ){
+		if( m_makeUnique && instance.childSelected() ){ /* clone group entity primitives to new group entity */
 			NodeSmartReference clone( Node_Clone_Selected( path.top() ) );
 			Map_gatherNamespaced( clone );
 			Node_getTraversable( path.parent().get() )->insert( clone );
@@ -1251,9 +1251,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		if ( selectable != 0
 			 && selectable->isSelected() ) {
 			NodeSmartReference clone( Node_Clone( path.top() ) );
-			if ( m_makeUnique ) {
-				Map_gatherNamespaced( clone );
-			}
+			Map_gatherNamespaced( clone );
 			Node_getTraversable( path.parent().get() )->insert( clone );
 		}
 	}
@@ -1263,7 +1261,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 void Scene_Clone_Selected( scene::Graph& graph, bool makeUnique ){
 	graph.traverse( CloneSelected( makeUnique ) );
 
-	Map_mergeClonedNames();
+	Map_mergeClonedNames( makeUnique );
 }
 
 enum ENudgeDirection
