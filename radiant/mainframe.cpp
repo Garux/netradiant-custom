@@ -1207,19 +1207,17 @@ void SelectFaceMode(){
 
 class CloneSelected : public scene::Graph::Walker
 {
-bool doMakeUnique;
-NodeSmartReference worldspawn;
+const bool m_makeUnique;
+const scene::Node* m_world;
 public:
-CloneSelected( bool d ) : doMakeUnique( d ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+CloneSelected( bool makeUnique ) : m_makeUnique( makeUnique ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.size() == 1 ) {
 		return true;
 	}
 
-	// ignore worldspawn, but keep checking children
-	NodeSmartReference me( path.top().get() );
-	if ( me == worldspawn ) {
+	if ( path.top().get_pointer() == m_world ) { // ignore worldspawn, but keep checking children
 		return true;
 	}
 
@@ -1229,7 +1227,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			 && selectable->isSelected() ) {
 			return false;
 		}
-		if( doMakeUnique && instance.childSelected() ){
+		if( m_makeUnique && instance.childSelected() ){
 			NodeSmartReference clone( Node_Clone_Selected( path.top() ) );
 			Map_gatherNamespaced( clone );
 			Node_getTraversable( path.parent().get() )->insert( clone );
@@ -1244,9 +1242,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		return;
 	}
 
-	// ignore worldspawn, but keep checking children
-	NodeSmartReference me( path.top().get() );
-	if ( me == worldspawn ) {
+	if ( path.top().get_pointer() == m_world ) { // ignore worldspawn
 		return;
 	}
 
@@ -1255,7 +1251,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		if ( selectable != 0
 			 && selectable->isSelected() ) {
 			NodeSmartReference clone( Node_Clone( path.top() ) );
-			if ( doMakeUnique ) {
+			if ( m_makeUnique ) {
 				Map_gatherNamespaced( clone );
 			}
 			Node_getTraversable( path.parent().get() )->insert( clone );
@@ -1264,8 +1260,8 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Scene_Clone_Selected( scene::Graph& graph, bool doMakeUnique ){
-	graph.traverse( CloneSelected( doMakeUnique ) );
+void Scene_Clone_Selected( scene::Graph& graph, bool makeUnique ){
+	graph.traverse( CloneSelected( makeUnique ) );
 
 	Map_mergeClonedNames();
 }

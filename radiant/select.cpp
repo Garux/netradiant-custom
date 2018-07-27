@@ -333,19 +333,20 @@ void Select_Invert(){
 	Scene_Invert_Selection( GlobalSceneGraph() );
 }
 
+#if 0
 //interesting printings
 class ExpandSelectionToEntitiesWalker_dbg : public scene::Graph::Walker
 {
 mutable std::size_t m_depth;
-NodeSmartReference worldspawn;
+const scene::Node* m_world;
 public:
-ExpandSelectionToEntitiesWalker_dbg() : m_depth( 0 ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+ExpandSelectionToEntitiesWalker_dbg() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	++m_depth;
 	globalOutputStream() << "pre depth_" << m_depth;
 	globalOutputStream() << " path.size()_" << path.size();
-	if ( path.top().get() == worldspawn )
+	if ( path.top().get_pointer() == m_world )
 		globalOutputStream() << " worldspawn";
 	if( path.top().get().isRoot() )
 		globalOutputStream() << " path.top().get().isRoot()";
@@ -367,7 +368,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 void post( const scene::Path& path, scene::Instance& instance ) const {
 	globalOutputStream() << "post depth_" << m_depth;
 	globalOutputStream() << " path.size()_" << path.size();
-	if ( path.top().get() == worldspawn )
+	if ( path.top().get_pointer() == m_world )
 		globalOutputStream() << " worldspawn";
 	if( path.top().get().isRoot() )
 		globalOutputStream() << " path.top().get().isRoot()";
@@ -383,13 +384,14 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	--m_depth;
 }
 };
+#endif
 
 class ExpandSelectionToPrimitivesWalker : public scene::Graph::Walker
 {
 mutable std::size_t m_depth;
-NodeSmartReference worldspawn;
+const scene::Node* m_world;
 public:
-ExpandSelectionToPrimitivesWalker() : m_depth( 0 ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+ExpandSelectionToPrimitivesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	++m_depth;
@@ -397,11 +399,8 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if( !path.top().get().visible() )
 		return false;
 
-	// ignore worldspawn
-//	NodeSmartReference me( path.top().get() );
-//	if ( me == worldspawn ) {
+//	if ( path.top().get_pointer() == m_world ) // ignore worldspawn
 //		return false;
-//	}
 
 	if ( m_depth == 2 ) { // entity depth
 		// traverse and select children if any one is selected
@@ -431,9 +430,9 @@ void Scene_ExpandSelectionToPrimitives(){
 class ExpandSelectionToEntitiesWalker : public scene::Graph::Walker
 {
 mutable std::size_t m_depth;
-NodeSmartReference worldspawn;
+const scene::Node* m_world;
 public:
-ExpandSelectionToEntitiesWalker() : m_depth( 0 ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+ExpandSelectionToEntitiesWalker() : m_depth( 0 ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	++m_depth;
@@ -441,18 +440,15 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if( !path.top().get().visible() )
 		return false;
 
-	// ignore worldspawn
-//	NodeSmartReference me( path.top().get() );
-//	if ( me == worldspawn ) {
+//	if ( path.top().get_pointer() == m_world ) // ignore worldspawn
 //		return false;
-//	}
 
 	if ( m_depth == 2 ) { // entity depth
 		// traverse and select children if any one is selected
 		bool beselected = false;
 		if ( instance.childSelected() || instance.isSelected() ) {
 			beselected = true;
-			if( path.top().get() != worldspawn ){
+			if( path.top().get_pointer() != m_world ){ //avoid selecting world node
 				Instance_setSelected( instance, true );
 			}
 		}
@@ -743,17 +739,17 @@ class EntityFindByPropertyValueWalker : public scene::Graph::Walker
 {
 const PropertyValues& m_propertyvalues;
 const char *m_prop;
-const NodeSmartReference worldspawn;
+const scene::Node* m_world;
 public:
 EntityFindByPropertyValueWalker( const char *prop, const PropertyValues& propertyvalues )
-	: m_propertyvalues( propertyvalues ), m_prop( prop ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if( !path.top().get().visible() ){
 		return false;
 	}
 	// ignore worldspawn
-	if ( path.top().get() == worldspawn ) {
+	if ( path.top().get_pointer() == m_world ) {
 		return false;
 	}
 
@@ -782,15 +778,15 @@ class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
 {
 PropertyValues& m_propertyvalues;
 const char *m_prop;
-const NodeSmartReference worldspawn;
+const scene::Node* m_world;
 public:
 EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propertyvalues )
-	: m_propertyvalues( propertyvalues ), m_prop( prop ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 ){
-		if( path.top().get() != worldspawn ){
+		if( path.top().get_pointer() != m_world ){
 			Selectable* selectable = Instance_getSelectable( instance );
 			if ( ( selectable != 0 && selectable->isSelected() ) || instance.childSelected() ) {
 				if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
@@ -809,10 +805,10 @@ class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
 PropertyValues& m_propertyvalues;
 const char *m_prop;
 mutable bool m_selected_children;
-const NodeSmartReference worldspawn;
+const scene::Node* m_world;
 public:
 EntityGetSelectedPropertyValuesWalker( const char *prop, PropertyValues& propertyvalues )
-	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_selected_children( false ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_selected_children( false ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	Selectable* selectable = Instance_getSelectable( instance );
@@ -835,7 +831,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if( entity != 0 && m_selected_children ){
 		m_selected_children = false;
-		if( path.top().get() == worldspawn )
+		if( path.top().get_pointer() == m_world )
 			return;
 		if ( !propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
 			m_propertyvalues.push_back( entity->getKeyValue( m_prop ) );
@@ -1486,15 +1482,15 @@ class EntityGetSelectedPropertyValuesWalker_nonEmpty : public scene::Graph::Walk
 {
 PropertyValues& m_propertyvalues;
 const char *m_prop;
-const NodeSmartReference worldspawn;
+const scene::Node* m_world;
 public:
 EntityGetSelectedPropertyValuesWalker_nonEmpty( const char *prop, PropertyValues& propertyvalues )
-	: m_propertyvalues( propertyvalues ), m_prop( prop ), worldspawn( Map_FindOrInsertWorldspawn( g_map ) ){
+	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 ){
-		if( path.top().get() != worldspawn ){
+		if( path.top().get_pointer() != m_world ){
 			Selectable* selectable = Instance_getSelectable( instance );
 			if ( ( selectable != 0 && selectable->isSelected() ) || instance.childSelected() ) {
 				const char* keyvalue = entity->getKeyValue( m_prop );
