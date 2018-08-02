@@ -3860,14 +3860,13 @@ public:
 				m_points[i].m_namePos = vector4_projected( matrix4_transformed_vector4( proj_inv, Vector4( pos, 1 ) ) );
 			}
 	}
-	/* these two functions and m_viewdir for 2 points only */
+	/* these three functions and m_viewdir for 2 points only */
 	void viewdir_set( const Vector3 viewdir ){
 		const std::size_t maxi = vector3_max_abs_component_index( viewdir );
 		m_viewdir = ( viewdir[maxi] > 0 )? g_vector3_axes[maxi] : -g_vector3_axes[maxi];
 	}
 	void viewdir_fixup(){
-		if( m_view->fill() //3d
-			&& fabs( vector3_length( m_points[1].m_point - m_points[0].m_point ) ) > 1e-3 //two non coincident points
+		if( fabs( vector3_length( m_points[1].m_point - m_points[0].m_point ) ) > 1e-3 //two non coincident points
 			&& fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){ //on axis = m_viewdir
 			viewdir_set( m_view->getViewDir() );
 			if( fabs( vector3_dot( m_viewdir, vector3_normalised( m_points[1].m_point - m_points[0].m_point ) ) ) > 0.999 ){
@@ -3885,10 +3884,30 @@ public:
 			}
 		}
 	}
+	void viewdir_make_cut_worthy( const Plane3& plane ){
+		const std::size_t maxi = vector3_max_abs_component_index( plane.normal() );
+		if( plane3_valid( plane )
+			&& aabb_valid( m_bounds )
+			&& fabs( plane.normal()[maxi] ) > 0.999 ){ //axial plane
+			const double anchor = plane.normal()[maxi] * plane.dist();
+			if( anchor > m_bounds.origin[maxi] ){
+				if( ( anchor - ( m_bounds.origin[maxi] + m_bounds.extents[maxi] ) ) > -0.1 )
+					viewdir_set( -g_vector3_axes[maxi] );
+			}
+			else{
+				if( ( -anchor + ( m_bounds.origin[maxi] - m_bounds.extents[maxi] ) ) > -0.1 )
+					viewdir_set( g_vector3_axes[maxi] );
+			}
+		}
+	}
 	void updatePlane(){
 		if( m_points[0].m_set && m_points[1].m_set ){
 			if( !m_points[2].m_set ){
-				viewdir_fixup();
+				if( m_view->fill() ){ //3d
+					viewdir_fixup();
+					m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
+					viewdir_make_cut_worthy( plane3_for_points( m_points[0].m_point, m_points[2].m_point, m_points[1].m_point ) );
+				}
 				m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
 			}
 			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[2].m_point, m_points[1].m_point ) ); /* points order corresponds the plane, we want to insert */
