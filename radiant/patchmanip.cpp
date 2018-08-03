@@ -560,43 +560,43 @@ void Patch_XactCone(){
 void Patch_Cylinder(){
 	UndoableCommand undo( "patchCreateCylinder" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eCylinder, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eCylinder, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_DenseCylinder(){
 	UndoableCommand undo( "patchCreateDenseCylinder" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eDenseCylinder, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eDenseCylinder, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_VeryDenseCylinder(){
 	UndoableCommand undo( "patchCreateVeryDenseCylinder" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eVeryDenseCylinder, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eVeryDenseCylinder, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_SquareCylinder(){
 	UndoableCommand undo( "patchCreateSquareCylinder" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eSqCylinder, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eSqCylinder, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_Endcap(){
 	UndoableCommand undo( "patchCreateEndCap" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eEndCap, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eEndCap, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_Bevel(){
 	UndoableCommand undo( "patchCreateBevel" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eBevel, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eBevel, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_Sphere(){
 	UndoableCommand undo( "patchCreateSphere" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eSphere, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eSphere, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_SquareBevel(){
@@ -608,7 +608,7 @@ void Patch_SquareEndcap(){
 void Patch_Cone(){
 	UndoableCommand undo( "patchCreateCone" );
 
-	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), eCone, GlobalXYWnd_getCurrentViewType() );
+	Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), eCone, GlobalXYWnd_getCurrentViewType() );
 }
 
 void Patch_Plane(){
@@ -706,7 +706,7 @@ void Patch_Cap(){
 	// Patch_CapCurrent();
 	UndoableCommand undo( "patchPutCaps" );
 
-	Scene_PatchDoCap_Selected( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+	Scene_PatchDoCap_Selected( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
 }
 
 ///\todo Unfinished.
@@ -1116,7 +1116,7 @@ void DoNewPatchDlg( EPatchPrefab prefab, int minrows, int mincols, int defrows, 
 		if( prefab != ePlane ){
 			redisperse = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( redisperseCheckBox ) ) ? true : false;
 		}
-		Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ), prefab, GlobalXYWnd_getCurrentViewType(), w, h, redisperse );
+		Scene_PatchConstructPrefab( GlobalSceneGraph(), PatchCreator_getBounds(), TextureBrowser_GetSelectedShader(), prefab, GlobalXYWnd_getCurrentViewType(), w, h, redisperse );
 	}
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );

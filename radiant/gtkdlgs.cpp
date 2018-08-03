@@ -461,10 +461,10 @@ void DoSides( int type, int axis ){
 	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
 //		const char *str = gtk_entry_get_text( sides_entry );
 
-//		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, atoi( str ), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+//		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, atoi( str ), TextureBrowser_GetSelectedShader() );
 		gtk_spin_button_update ( GTK_SPIN_BUTTON( sides_spin ) );
 		int sides = static_cast<int>( gtk_spin_button_get_value( GTK_SPIN_BUTTON( sides_spin ) ) );
-		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, sides, TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, sides, TextureBrowser_GetSelectedShader() );
 	}
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );

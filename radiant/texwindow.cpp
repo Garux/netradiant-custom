@@ -387,6 +387,10 @@ inline int TextureBrowser_fontHeight( TextureBrowser& textureBrowser ){
 	return GlobalOpenGL().m_font->getPixelHeight();
 }
 
+const char* TextureBrowser_GetSelectedShader(){
+	return GlobalTextureBrowser().shader.c_str();
+}
+
 const char* TextureBrowser_GetSelectedShader( TextureBrowser& textureBrowser ){
 	return textureBrowser.shader.c_str();
 }
@@ -426,6 +430,10 @@ void TextureBrowser_SetSelectedShader( TextureBrowser& textureBrowser, const cha
 	}
 
 	ishader->DecRef();
+}
+
+void TextureBrowser_SetSelectedShader( const char* shader ){
+	TextureBrowser_SetSelectedShader( GlobalTextureBrowser(), shader );
 }
 
 
@@ -2441,7 +2449,7 @@ void TextureBrowser_selectionHelper( GtkTreeModel* model, GtkTreePath* path, Gtk
 }
 
 void TextureBrowser_shaderInfo(){
-	const char* name = TextureBrowser_GetSelectedShader( g_TextureBrowser );
+	const char* name = TextureBrowser_GetSelectedShader();
 	IShader* shader = QERApp_Shader_ForName( name );
 
 	DoShaderInfoDlg( name, shader->getShaderFileName(), "Shader Info" );

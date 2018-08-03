@@ -40,7 +40,7 @@ void TextureBrowser_destroyWindow();
 void TextureBrowser_ShowDirectory( TextureBrowser& textureBrowser, const char* name );
 void TextureBrowser_ShowStartupShaders( TextureBrowser& textureBrowser );
 
-const char* TextureBrowser_GetSelectedShader( TextureBrowser& textureBrower );
+const char* TextureBrowser_GetSelectedShader();
 
 void TextureBrowser_Construct();
 void TextureBrowser_Destroy();

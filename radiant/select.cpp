@@ -848,7 +848,7 @@ void Select_AllOfType(){
 	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
 		if ( GlobalSelectionSystem().ComponentMode() == SelectionSystem::eFace ) {
 			GlobalSelectionSystem().setSelectedAllComponents( false );
-			Scene_BrushSelectByShader_Component( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+			Scene_BrushSelectByShader_Component( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
 		}
 	}
 	else
@@ -865,15 +865,15 @@ void Select_AllOfType(){
 		}
 		else
 		{
-			Scene_BrushSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
-			Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+			Scene_BrushSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
+			Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
 		}
 	}
 }
 
 void Select_FacesAndPatchesByShader(){
-	Scene_BrushFacesSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
-	Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+	Scene_BrushFacesSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
+	Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
 }
 
 void Select_Inside( void ){

@@ -850,7 +850,7 @@ void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds ){
 	if ( brush != 0 ) {
 		const char* shader = g_brush_always_caulk?
 								GetCaulkShader()
-								: TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
+								: TextureBrowser_GetSelectedShader();
 		Brush_ConstructCuboid( *brush, bounds, shader, TextureTransform_getDefault() );
 		SceneChangeNotify();
 	}
@@ -1473,7 +1473,7 @@ BrushMakeSided( std::size_t count )
 	: m_count( count ){
 }
 void set(){
-	Scene_BrushConstructPrefab( GlobalSceneGraph(), eBrushPrism, m_count, TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ) );
+	Scene_BrushConstructPrefab( GlobalSceneGraph(), eBrushPrism, m_count, TextureBrowser_GetSelectedShader() );
 }
 typedef MemberCaller<BrushMakeSided, &BrushMakeSided::set> SetCaller;
 };

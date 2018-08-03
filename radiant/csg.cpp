@@ -191,7 +191,7 @@ public:
 						m_out.back()->addPlane( winding[index].vertex,
 												winding[next].vertex,
 												winding[next].vertex + face.getPlane().plane3().normal() * m_settings.m_offset,
-												TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ),
+												TextureBrowser_GetSelectedShader(),
 												projection );
 					}
 				}
@@ -269,7 +269,7 @@ public:
 						m_out.back()->addPlane( winding[next].vertex,
 												winding[index].vertex,
 												BestPoint,
-												m_settings.m_caulk ? GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() ),
+												m_settings.m_caulk ? GetCaulkShader() : TextureBrowser_GetSelectedShader(),
 												projection );
 					}
 				}
@@ -796,7 +796,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 };
 
 void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool caulk, bool split ){
-	const char* shader = caulk? GetCaulkShader() : TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
+	const char* shader = caulk? GetCaulkShader() : TextureBrowser_GetSelectedShader();
 	TextureProjection projection;
 	TexDef_Construct_Default( projection );
 	graph.traverse( BrushSplitByPlaneSelected( points, shader, projection, split ) );

@@ -1690,15 +1690,13 @@ void Scene_setClosestTexture( scene::Graph& graph, SelectionTest& test, const ch
 	}
 }
 
-class TextureBrowser;
-extern TextureBrowser g_TextureBrowser;
-void TextureBrowser_SetSelectedShader( TextureBrowser& textureBrowser, const char* shader );
-const char* TextureBrowser_GetSelectedShader( TextureBrowser& textureBrowser );
+void TextureBrowser_SetSelectedShader( const char* shader );
+const char* TextureBrowser_GetSelectedShader();
 
 void Scene_copyClosestTexture( SelectionTest& test ){
 	CopiedString shader;
 	if ( Scene_getClosestTexture( GlobalSceneGraph(), test, shader, g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags ) ) {
-		TextureBrowser_SetSelectedShader( g_TextureBrowser, shader.c_str() );
+		TextureBrowser_SetSelectedShader( shader.c_str() );
 //		UndoableCommand undo( "textureNameAndProjectionSetSelected" );
 //		Select_SetShader( shader.c_str() );
 //		Select_SetTexdef( g_faceTextureClipboard.m_projection );
@@ -1710,16 +1708,16 @@ void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project
 
 	if( texturize_selected ){
 		if( project ){
-			Select_SetShader( TextureBrowser_GetSelectedShader( g_TextureBrowser ) );
+			Select_SetShader( TextureBrowser_GetSelectedShader() );
 			Select_ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
 		}
 		else if( !seamless ){
-			Select_SetShader( TextureBrowser_GetSelectedShader( g_TextureBrowser ) );
+			Select_SetShader( TextureBrowser_GetSelectedShader() );
 			Select_SetTexdef( g_faceTextureClipboard.m_projection, false, false );
 		}
 	}
 
-	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader( g_TextureBrowser ), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags, seamless, project );
+	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader(), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags, seamless, project );
 
 	SceneChangeNotify();
 }
@@ -1734,13 +1732,13 @@ void SelectedFaces_copyTexture(){
 		face.GetTexdef( g_faceTextureClipboard.m_projection );
 		g_faceTextureClipboard.m_flags = face.getShader().m_flags;
 
-		TextureBrowser_SetSelectedShader( g_TextureBrowser, face.getShader().getShader() );
+		TextureBrowser_SetSelectedShader( face.getShader().getShader() );
 	}
 }
 
 void FaceInstance_pasteTexture( FaceInstance& faceInstance ){
 	faceInstance.getFace().SetTexdef( g_faceTextureClipboard.m_projection );
-	faceInstance.getFace().SetShader( TextureBrowser_GetSelectedShader( g_TextureBrowser ) );
+	faceInstance.getFace().SetShader( TextureBrowser_GetSelectedShader() );
 	faceInstance.getFace().SetFlags( g_faceTextureClipboard.m_flags );
 	SceneChangeNotify();
 }

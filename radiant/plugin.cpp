@@ -109,10 +109,6 @@ Vector3 XYWindow_windowToWorld( const WindowVector& position ){
 	return result;
 }
 
-const char* TextureBrowser_getSelectedShader(){
-	return TextureBrowser_GetSelectedShader( GlobalTextureBrowser() );
-}
-
 class RadiantCoreAPI
 {
 _QERFuncTable_1 m_radiantcore;
@@ -153,7 +149,7 @@ RadiantCoreAPI(){
 	m_radiantcore.XYWindowMouseDown_disconnect = XYWindowMouseDown_disconnect;
 	m_radiantcore.XYWindow_getViewType = XYWindow_getViewType;
 	m_radiantcore.XYWindow_windowToWorld = XYWindow_windowToWorld;
-	m_radiantcore.TextureBrowser_getSelectedShader = TextureBrowser_getSelectedShader;
+	m_radiantcore.TextureBrowser_getSelectedShader = TextureBrowser_GetSelectedShader;
 
 	m_radiantcore.m_pfnMessageBox = &gtk_MessageBox;
 	m_radiantcore.m_pfnFileDialog = &file_dialog;

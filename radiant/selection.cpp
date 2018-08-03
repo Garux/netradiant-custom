@@ -5571,7 +5571,6 @@ const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 
 void Scene_copyClosestTexture( SelectionTest& test );
 void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project, bool texturize_selected = false );
-void Scene_projectClosestTexture( SelectionTest& test );
 
 class TexManipulator_
 {
