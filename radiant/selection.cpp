@@ -5570,7 +5570,8 @@ const ModifierFlags c_modifier_copy_texture = c_modifierNone;
 
 
 void Scene_copyClosestTexture( SelectionTest& test );
-void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project, bool texturize_selected = false );
+void Scene_applyClosestTexture( SelectionTest& test, bool shift, bool ctrl, bool alt, bool texturize_selected = false );
+const char* Scene_applyClosestTexture_getUndoName( bool shift, bool ctrl, bool alt );
 
 class TexManipulator_
 {
@@ -5591,13 +5592,15 @@ void mouseDown( DeviceVector position ){
 	ConstructSelectionTest( scissored, SelectionBoxForPoint( &position[0], &m_epsilon[0] ) );
 	SelectionVolume volume( scissored );
 
-	if ( m_state == c_modifier_apply_texture1_project || m_state == c_modifier_apply_texture2_seamless || m_state == c_modifier_apply_texture3 ) {
+	if( m_state == c_modifier_copy_texture ) {
+		Scene_copyClosestTexture( volume );
+	}
+	else{
 		m_undo_begun = true;
 		GlobalUndoSystem().start();
-		Scene_applyClosestTexture( volume, m_state == c_modifier_apply_texture2_seamless, m_state == c_modifier_apply_texture1_project, true );
-	}
-	else if ( m_state == c_modifier_copy_texture ) {
-		Scene_copyClosestTexture( volume );
+		Scene_applyClosestTexture( volume, bitfield_enabled( m_state, c_modifierShift ),
+											bitfield_enabled( m_state, c_modifierControl ),
+											bitfield_enabled( m_state, c_modifierAlt ), true );
 	}
 }
 
@@ -5607,14 +5610,18 @@ void mouseMoved( DeviceVector position ){
 		ConstructSelectionTest( scissored, SelectionBoxForPoint( &device_constrained( position )[0], &m_epsilon[0] ) );
 		SelectionVolume volume( scissored );
 
-		Scene_applyClosestTexture( volume, m_state == c_modifier_apply_texture2_seamless, m_state == c_modifier_apply_texture1_project );
+		Scene_applyClosestTexture( volume, bitfield_enabled( m_state, c_modifierShift ),
+											bitfield_enabled( m_state, c_modifierControl ),
+											bitfield_enabled( m_state, c_modifierAlt ) );
 	}
 }
 typedef MemberCaller1<TexManipulator_, DeviceVector, &TexManipulator_::mouseMoved> MouseMovedCaller;
 
 void mouseUp( DeviceVector position ){
 	if( m_undo_begun ){
-		GlobalUndoSystem().finish( ( m_state == c_modifier_apply_texture1_project )? "projectTexture" : ( m_state == c_modifier_apply_texture2_seamless )? "paintTextureSeamless" : "paintTexture&Projection" );
+		GlobalUndoSystem().finish( Scene_applyClosestTexture_getUndoName( bitfield_enabled( m_state, c_modifierShift ),
+															bitfield_enabled( m_state, c_modifierControl ),
+															bitfield_enabled( m_state, c_modifierAlt ) ) );
 		m_undo_begun = false;
 	}
 	g_mouseMovedCallback.clear();

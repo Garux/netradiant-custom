@@ -37,7 +37,7 @@ struct brushprimit_texdef_t
 		coords[1][1] = 2.0f;
 		coords[1][2] = 0.f;
 	}
-	void removeScale( std::size_t width, std::size_t height ){
+	void removeScale( std::size_t width, std::size_t height ){ /* values in texture size scale for certain operations */
 #if 1
 		coords[0][0] *= width;
 		coords[0][1] *= width;
@@ -47,7 +47,7 @@ struct brushprimit_texdef_t
 		coords[1][2] *= height;
 #endif
 	}
-	void addScale( std::size_t width, std::size_t height ){
+	void addScale( std::size_t width, std::size_t height ){ /* addScaled in .map; offsets in range -1..1; texture size irrelevant */
 #if 1
 		ASSERT_MESSAGE( width > 0, "shader-width is 0" );
 		ASSERT_MESSAGE( height > 0, "shader-height is 0" );

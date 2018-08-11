@@ -689,14 +689,10 @@ void light_draw( const AABB& aabb_light, RenderStateFlags state ){
 inline void write_intensity( const float intensity, Entity* entity ){
 	char value[64];
 	sprintf( value, "%g", intensity );
-
-	//primaryIntensity
-	if( !string_empty( entity->getKeyValue( "_light" ) ) ){
+	if( !string_empty( entity->getKeyValue( "_light" ) ) ) //primaryIntensity //if set or default is set in .ent
 		entity->setKeyValue( "_light", value );
-	}
-	else{ //secondaryIntensity
-		entity->setKeyValue( "light", value );
-	}
+	else //secondaryIntensity
+		entity->setKeyValue( "light", value ); //otherwise default to "light", which is understood by both q3 and q1
 }
 
 // These variables are tweakable on the q3map2 console, setting to q3map2

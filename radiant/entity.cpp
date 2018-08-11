@@ -515,8 +515,10 @@ void NormalizeColor( Vector3& color ){
 	const std::size_t maxi = vector3_max_abs_component_index( color );
 	if ( color[maxi] == 0.f )
 		color = Vector3( 1, 1, 1 );
-	else
-		color /= color[maxi];
+	else{
+		const float max = color[maxi];
+		color /= max;
+	}
 }
 
 void Entity_normalizeColor(){

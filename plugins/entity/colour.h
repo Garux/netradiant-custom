@@ -41,7 +41,7 @@ inline void read_colour( Vector3& colour, const char* value ){
 inline void write_colour( const Vector3& colour, Entity* entity ){
 	char value[64];
 
-	sprintf( value, "%f %f %f", colour[0], colour[1], colour[2] );
+	sprintf( value, "%g %g %g", colour[0], colour[1], colour[2] );
 	entity->setKeyValue( "_color", value );
 }
 

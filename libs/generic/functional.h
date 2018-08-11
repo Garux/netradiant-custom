@@ -162,6 +162,21 @@ static result_type call( first_argument_type a1, second_argument_type a2, third_
 }
 };
 
+template<typename A1, typename A2, typename A3, typename A4, typename A5, typename R, R( *func ) ( A1, A2, A3, A4, A5 )>
+class Function5
+{
+public:
+typedef A1 first_argument_type;
+typedef A2 second_argument_type;
+typedef A3 third_argument_type;
+typedef A4 fourth_argument_type;
+typedef A5 fifth_argument_type;
+typedef R result_type;
+static result_type call( first_argument_type a1, second_argument_type a2, third_argument_type a3, fourth_argument_type a4, fifth_argument_type a5 ){
+	return (func)( a1, a2, a3, a4, a5 );
+}
+};
+
 template<typename Caller, typename FirstArgument = void*>
 class Caller0To1
 {
@@ -209,6 +224,21 @@ typedef typename Caller::third_argument_type fourth_argument_type;
 typedef typename Caller::result_type result_type;
 static result_type call( first_argument_type, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ){
 	return Caller::call( a2, a3, a4 );
+}
+};
+
+template<typename Caller, typename FirstArgument = void*>
+class Caller4To5
+{
+public:
+typedef FirstArgument first_argument_type;
+typedef typename Caller::first_argument_type second_argument_type;
+typedef typename Caller::second_argument_type third_argument_type;
+typedef typename Caller::third_argument_type fourth_argument_type;
+typedef typename Caller::fourth_argument_type fifth_argument_type;
+typedef typename Caller::result_type result_type;
+static result_type call( first_argument_type, second_argument_type a2, third_argument_type a3, fourth_argument_type a4, fifth_argument_type a5 ){
+	return Caller::call( a2, a3, a4, a5 );
 }
 };
 

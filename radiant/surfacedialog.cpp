@@ -1460,17 +1460,40 @@ void SurfaceInspector::ApplyFlags(){
 }
 
 
+
+enum EPasteMode{
+	ePasteNone,
+	ePasteValues,
+	ePasteSeamless,
+	ePasteProject,
+};
+
+EPasteMode pastemode_for_modifiers( bool shift, bool ctrl ){
+	if( shift )
+		return ctrl? ePasteProject : ePasteValues;
+	else if( ctrl )
+		return ePasteSeamless;
+	return ePasteNone;
+}
+bool pastemode_if_setShader( EPasteMode mode, bool alt ){
+	return ( mode == ePasteNone ) || !alt;
+}
+
+
 class FaceTexture
 {
 public:
-	TextureProjection m_projection;
+	TextureProjection m_projection; //BP part is removeScale()'d
 	ContentsFlagsValue m_flags;
 
 	Plane3 m_plane;
 	std::size_t m_width;
 	std::size_t m_height;
 
-	FaceTexture() : m_plane( 0, 0, 1, 0 ), m_width( 64 ), m_height( 64 ) {
+	float m_light;
+	Vector3 m_colour;
+
+	FaceTexture() : m_plane( 0, 0, 1, 0 ), m_width( 64 ), m_height( 64 ), m_light( 300 ), m_colour( 1, 1, 1 ) {
 		m_projection.m_basis_s = Vector3( 0.7071067811865, 0.7071067811865, 0 );
 		m_projection.m_basis_t = Vector3( -0.4082482904639, 0.4082482904639, -0.4082482904639 * 2.0 );
 	}
@@ -1480,6 +1503,8 @@ FaceTexture g_faceTextureClipboard;
 
 void FaceTextureClipboard_setDefault(){
 	g_faceTextureClipboard.m_flags = ContentsFlagsValue( 0, 0, 0, false );
+	g_faceTextureClipboard.m_projection.m_texdef = texdef_t();
+	g_faceTextureClipboard.m_projection.m_brushprimit_texdef = brushprimit_texdef_t();
 	TexDef_Construct_Default( g_faceTextureClipboard.m_projection );
 }
 
@@ -1489,88 +1514,105 @@ void TextureClipboard_textureSelected( const char* shader ){
 
 
 
-void Face_getTexture( Face& face, CopiedString& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
+void Face_getTexture( Face& face, CopiedString& shader, FaceTexture& clipboard ){
 	shader = face.GetShader();
-	face.GetTexdef( projection );
-	flags = face.getShader().m_flags;
 
-	g_faceTextureClipboard.m_plane = face.getPlane().plane3();
-	g_faceTextureClipboard.m_width = face.getShader().width();
-	g_faceTextureClipboard.m_height = face.getShader().height();
+	face.GetTexdef( clipboard.m_projection );
+	clipboard.m_flags = face.getShader().m_flags;
+
+	clipboard.m_plane = face.getPlane().plane3();
+	clipboard.m_width = face.getShader().width();
+	clipboard.m_height = face.getShader().height();
+
+	clipboard.m_colour = face.getShader().state()->getTexture().color;
 }
-typedef Function4<Face&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Face_getTexture> FaceGetTexture;
+typedef Function3<Face&, CopiedString&, FaceTexture&, void, Face_getTexture> FaceGetTexture;
 
-
-void Face_setTexture_Seamless( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
-	face.SetShader( shader );
-
-	DoubleLine line = plane3_intersect_plane3( g_faceTextureClipboard.m_plane, face.getPlane().plane3() );
-	if( vector3_length_squared( line.direction ) == 0 ){
-		face.ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
-		face.SetFlags( flags );
-		return;
+void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboard, EPasteMode mode, bool setShader ){
+	if( setShader ){
+		face.SetShader( shader );
+		face.SetFlags( clipboard.m_flags );
 	}
+	if( mode == ePasteValues ){
+		face.SetTexdef( clipboard.m_projection, false );
+	}
+	else if( mode == ePasteProject ){
+		face.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
+	}
+	else if( mode == ePasteSeamless ){
+		DoubleLine line = plane3_intersect_plane3( clipboard.m_plane, face.getPlane().plane3() );
+		if( vector3_length_squared( line.direction ) == 0 ){
+			face.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
+			return;
+		}
 
-	const Quaternion rotation = quaternion_for_unit_vectors( g_faceTextureClipboard.m_plane.normal(), face.getPlane().plane3().normal() );
-//	globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
-	Matrix4 transform = g_matrix4_identity;
-	matrix4_pivoted_rotate_by_quaternion( transform, rotation, line.origin );
+		const Quaternion rotation = quaternion_for_unit_vectors( clipboard.m_plane.normal(), face.getPlane().plane3().normal() );
+//		globalOutputStream() << "rotation: " << rotation.x() << " " << rotation.y() << " " << rotation.z() << " " << rotation.w() << " " << "\n";
+		Matrix4 transform = g_matrix4_identity;
+		matrix4_pivoted_rotate_by_quaternion( transform, rotation, line.origin );
 
-	TextureProjection proj = projection;
-	proj.m_brushprimit_texdef.addScale( g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height );
-	Texdef_transformLocked( proj, g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height, g_faceTextureClipboard.m_plane, transform, line.origin );
-	proj.m_brushprimit_texdef.removeScale( g_faceTextureClipboard.m_width, g_faceTextureClipboard.m_height );
+		TextureProjection proj = clipboard.m_projection;
+		proj.m_brushprimit_texdef.addScale( clipboard.m_width, clipboard.m_height );
+		Texdef_transformLocked( proj, clipboard.m_width, clipboard.m_height, clipboard.m_plane, transform, line.origin );
+		proj.m_brushprimit_texdef.removeScale( clipboard.m_width, clipboard.m_height );
 
+		face.SetTexdef( proj );
 
-	//face.SetTexdef( projection );
-	face.SetTexdef( proj );
-	face.SetFlags( flags );
-
-	g_faceTextureClipboard.m_plane = face.getPlane().plane3();
-	g_faceTextureClipboard.m_projection = proj;
+		g_faceTextureClipboard.m_plane = face.getPlane().plane3();
+		g_faceTextureClipboard.m_projection = proj;
+	}
 }
-typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture_Seamless> FaceSetTextureSeamless;
+typedef Function5<Face&, const char*, const FaceTexture&, EPasteMode, bool, void, Face_setTexture> FaceSetTexture;
 
 
-void Face_setTexture_Project( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
-	face.SetShader( shader );
-	//face.SetTexdef( projection );
-	face.SetFlags( flags );
-
-	face.ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
-}
-typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture_Project> FaceSetTextureProject;
-
-
-void Face_setTexture( Face& face, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
-	face.SetShader( shader );
-	face.SetTexdef( projection, false );
-	face.SetFlags( flags );
-}
-typedef Function4<Face&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Face_setTexture> FaceSetTexture;
-
-
-void Patch_getTexture( Patch& patch, CopiedString& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
+void Patch_getTexture( Patch& patch, CopiedString& shader, FaceTexture& clipboard ){
 	shader = patch.GetShader();
-	projection = TextureProjection( texdef_t(), brushprimit_texdef_t(), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ) );
-	flags = ContentsFlagsValue( 0, 0, 0, false );
+	FaceTextureClipboard_setDefault();
+
+	clipboard.m_width = patch.getShader()->getTexture().width;
+	clipboard.m_height = patch.getShader()->getTexture().height;
+
+	clipboard.m_colour = patch.getShader()->getTexture().color;
 }
-typedef Function4<Patch&, CopiedString&, TextureProjection&, ContentsFlagsValue&, void, Patch_getTexture> PatchGetTexture;
+typedef Function3<Patch&, CopiedString&, FaceTexture&, void, Patch_getTexture> PatchGetTexture;
 
-void Patch_setTexture_Project( Patch& patch, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
-	patch.SetShader( shader );
-	patch.ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
+void Patch_setTexture( Patch& patch, const char* shader, const FaceTexture& clipboard, EPasteMode mode, bool setShader ){
+	if( setShader )
+		patch.SetShader( shader );
+	if( mode == ePasteProject )
+		patch.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
 }
-typedef Function4<Patch&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Patch_setTexture_Project> PatchSetTextureProject;
+typedef Function5<Patch&, const char*, const FaceTexture&, EPasteMode, bool, void, Patch_setTexture> PatchSetTexture;
 
-void Patch_setTexture( Patch& patch, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags ){
-	patch.SetShader( shader );
+#include "ientity.h"
+void Light_getTexture( Entity& entity, CopiedString& shader, FaceTexture& clipboard ){
+	string_parse_vector3( entity.getKeyValue( "_color" ), clipboard.m_colour );
+	if( !string_parse_float( entity.getKeyValue( "_light" ), clipboard.m_light ) )
+		string_parse_float( entity.getKeyValue( "light" ), clipboard.m_light );
 }
-typedef Function4<Patch&, const char*, const TextureProjection&, const ContentsFlagsValue&, void, Patch_setTexture> PatchSetTexture;
+typedef Function3<Entity&, CopiedString&, FaceTexture&, void, Light_getTexture> LightGetTexture;
+
+void Light_setTexture( Entity& entity, const char* shader, const FaceTexture& clipboard, EPasteMode mode, bool setShader ){
+	if( mode == ePasteSeamless || mode == ePasteProject ){
+		char value[64];
+		sprintf( value, "%g %g %g", clipboard.m_colour[0], clipboard.m_colour[1], clipboard.m_colour[2] );
+		entity.setKeyValue( "_color", value );
+	}
+	if( mode == ePasteValues || mode == ePasteProject ){
+		/* copypaste of write_intensity() from entity plugin */
+		char value[64];
+		sprintf( value, "%g", clipboard.m_light );
+		if( !string_empty( entity.getKeyValue( "_light" ) ) ) //primaryIntensity //if set or default is set in .ent
+			entity.setKeyValue( "_light", value );
+		else //secondaryIntensity
+			entity.setKeyValue( "light", value ); //otherwise default to "light", which is understood by both q3 and q1
+	}
+}
+typedef Function5<Entity&, const char*, const FaceTexture&, EPasteMode, bool, void, Light_setTexture> LightSetTexture;
 
 
-typedef Callback3<CopiedString&, TextureProjection&, ContentsFlagsValue&> GetTextureCallback;
-typedef Callback3<const char*, const TextureProjection&, const ContentsFlagsValue&> SetTextureCallback;
+typedef Callback2<CopiedString&, FaceTexture&> GetTextureCallback;
+typedef Callback4<const char*, const FaceTexture&, EPasteMode, bool, void> SetTextureCallback;
 
 struct Texturable
 {
@@ -1579,7 +1621,7 @@ struct Texturable
 };
 
 
-void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& bestIntersection, Texturable& texturable, bool seamless, bool project ){
+void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& bestIntersection, Texturable& texturable ){
 	if ( face.isFiltered() ) {
 		return;
 	}
@@ -1588,13 +1630,8 @@ void Face_getClosest( Face& face, SelectionTest& test, SelectionIntersection& be
 	if ( intersection.valid()
 		 && SelectionIntersection_closer( intersection, bestIntersection ) ) {
 		bestIntersection = intersection;
-		if( project )
-			texturable.setTexture = makeCallback3( FaceSetTextureProject(), face );
-		else if( seamless )
-			texturable.setTexture = makeCallback3( FaceSetTextureSeamless(), face );
-		else
-			texturable.setTexture = makeCallback3( FaceSetTexture(), face );
-		texturable.getTexture = makeCallback3( FaceGetTexture(), face );
+		texturable.setTexture = makeCallback4( FaceSetTexture(), face );
+		texturable.getTexture = makeCallback2( FaceGetTexture(), face );
 	}
 }
 
@@ -1618,16 +1655,14 @@ void addIntersection( const SelectionIntersection& intersection ){
 	}
 }
 };
-
+#include "eclasslib.h"
 class BrushGetClosestFaceVisibleWalker : public scene::Graph::Walker
 {
 SelectionTest& m_test;
 Texturable& m_texturable;
-const bool m_seamless;
-const bool m_project;
 mutable SelectionIntersection m_bestIntersection;
 public:
-BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable, bool seamless, bool project ) : m_test( test ), m_texturable( texturable ), m_seamless( seamless ), m_project( project ){
+BrushGetClosestFaceVisibleWalker( SelectionTest& test, Texturable& texturable ) : m_test( test ), m_texturable( texturable ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( !path.top().get().visible() )
@@ -1638,7 +1673,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 
 		for ( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i )
 		{
-			Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable, m_seamless, m_project );
+			Face_getClosest( *( *i ), m_test, m_bestIntersection, m_texturable );
 		}
 	}
 	else
@@ -1651,14 +1686,16 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 			if ( occluded ) {
 				Patch* patch = Node_getPatch( path.top() );
 				if ( patch != 0 ) {
-					if( m_project )
-						m_texturable.setTexture = makeCallback3( PatchSetTextureProject(), *patch );
-					else
-						m_texturable.setTexture = makeCallback3( PatchSetTexture(), *patch );
-					m_texturable.getTexture = makeCallback3( PatchGetTexture(), *patch );
+					m_texturable.setTexture = makeCallback4( PatchSetTexture(), *patch );
+					m_texturable.getTexture = makeCallback2( PatchGetTexture(), *patch );
+					return true;
 				}
-				else
-				{
+				Entity* entity = Node_getEntity( path.top() );
+				if( entity != 0 && string_equal_n( entity->getEntityClass().name(), "light", 5 ) ){
+					m_texturable.setTexture = makeCallback4( LightSetTexture(), *entity );
+					m_texturable.getTexture = makeCallback2( LightGetTexture(), *entity );
+				}
+				else{
 					m_texturable = Texturable();
 				}
 			}
@@ -1668,25 +1705,25 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-Texturable Scene_getClosestTexturable( scene::Graph& graph, SelectionTest& test, bool seamless = false, bool project = false ){
+Texturable Scene_getClosestTexturable( scene::Graph& graph, SelectionTest& test ){
 	Texturable texturable;
-	graph.traverse( BrushGetClosestFaceVisibleWalker( test, texturable, seamless, project ) );
+	graph.traverse( BrushGetClosestFaceVisibleWalker( test, texturable ) );
 	return texturable;
 }
 
-bool Scene_getClosestTexture( scene::Graph& graph, SelectionTest& test, CopiedString& shader, TextureProjection& projection, ContentsFlagsValue& flags ){
+bool Scene_getClosestTexture( scene::Graph& graph, SelectionTest& test, CopiedString& shader, FaceTexture& clipboard ){
 	Texturable texturable = Scene_getClosestTexturable( graph, test );
 	if ( texturable.getTexture != GetTextureCallback() ) {
-		texturable.getTexture( shader, projection, flags );
+		texturable.getTexture( shader, clipboard );
 		return true;
 	}
 	return false;
 }
 
-void Scene_setClosestTexture( scene::Graph& graph, SelectionTest& test, const char* shader, const TextureProjection& projection, const ContentsFlagsValue& flags, bool seamless, bool project ){
-	Texturable texturable = Scene_getClosestTexturable( graph, test, seamless, project );
+void Scene_setClosestTexture( scene::Graph& graph, SelectionTest& test, const char* shader, const FaceTexture& clipboard, EPasteMode mode, bool setShader ){
+	Texturable texturable = Scene_getClosestTexturable( graph, test );
 	if ( texturable.setTexture != SetTextureCallback() ) {
-		texturable.setTexture( shader, projection, flags );
+		texturable.setTexture( shader, clipboard, mode, setShader );
 	}
 }
 
@@ -1695,29 +1732,43 @@ const char* TextureBrowser_GetSelectedShader();
 
 void Scene_copyClosestTexture( SelectionTest& test ){
 	CopiedString shader;
-	if ( Scene_getClosestTexture( GlobalSceneGraph(), test, shader, g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags ) ) {
+	if ( Scene_getClosestTexture( GlobalSceneGraph(), test, shader, g_faceTextureClipboard ) ) {
 		TextureBrowser_SetSelectedShader( shader.c_str() );
-//		UndoableCommand undo( "textureNameAndProjectionSetSelected" );
-//		Select_SetShader( shader.c_str() );
-//		Select_SetTexdef( g_faceTextureClipboard.m_projection );
 	}
 }
 
-void Scene_applyClosestTexture( SelectionTest& test, bool seamless, bool project, bool texturize_selected = false ){
+const char* Scene_applyClosestTexture_getUndoName( bool shift, bool ctrl, bool alt ){
+	const EPasteMode mode = pastemode_for_modifiers( shift, ctrl );
+	const bool setShader = pastemode_if_setShader( mode, alt );
+	switch ( mode )
+	{
+	default: //case ePasteNone:
+		return "paintTexture";
+	case ePasteValues:
+		return setShader? "paintTexture,Values,LightPower" : "paintTexDefValues";
+	case ePasteSeamless:
+		return setShader? "paintTextureSeamless,LightColor" : "paintTexDefValuesSeamless";
+	case ePasteProject:
+		return setShader? "projectTexture,LightColor&Power" : "projectTexDefValues";
+	}
+}
+
+void Scene_applyClosestTexture( SelectionTest& test, bool shift, bool ctrl, bool alt, bool texturize_selected = false ){
 //	UndoableCommand command( "facePaintTexture" );
 
+	const EPasteMode mode = pastemode_for_modifiers( shift, ctrl );
+	const bool setShader = pastemode_if_setShader( mode, alt );
+
 	if( texturize_selected ){
-		if( project ){
+		if( setShader && mode != ePasteSeamless )
 			Select_SetShader( TextureBrowser_GetSelectedShader() );
-			Select_ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
-		}
-		else if( !seamless ){
-			Select_SetShader( TextureBrowser_GetSelectedShader() );
+		if( mode == ePasteValues )
 			Select_SetTexdef( g_faceTextureClipboard.m_projection, false, false );
-		}
+		else if( mode == ePasteProject )
+			Select_ProjectTexture( g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_plane.normal() );
 	}
 
-	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader(), g_faceTextureClipboard.m_projection, g_faceTextureClipboard.m_flags, seamless, project );
+	Scene_setClosestTexture( GlobalSceneGraph(), test, TextureBrowser_GetSelectedShader(), g_faceTextureClipboard, mode, setShader );
 
 	SceneChangeNotify();
 }

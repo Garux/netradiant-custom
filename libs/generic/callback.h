@@ -187,6 +187,33 @@ void* getEnvironment() const {
 }
 };
 
+template<typename Caller>
+class BindFirstOpaque4
+{
+typedef typename Caller::first_argument_type FirstBound;
+FirstBound firstBound;
+public:
+typedef typename Caller::second_argument_type first_argument_type;
+typedef typename Caller::third_argument_type second_argument_type;
+typedef typename Caller::fourth_argument_type third_argument_type;
+typedef typename Caller::fifth_argument_type fourth_argument_type;
+typedef typename Caller::result_type result_type;
+explicit BindFirstOpaque4( FirstBound firstBound ) : firstBound( firstBound ){
+}
+result_type operator()( first_argument_type a1, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ) const {
+	return Caller::call( firstBound, a1, a2, a3, a4 );
+}
+FirstBound getBound() const {
+	return firstBound;
+}
+static result_type thunk( void* environment, first_argument_type a1, second_argument_type a2, third_argument_type a3, fourth_argument_type a4 ){
+	return Caller::call( ConvertFromOpaque<FirstBound>::apply( environment ), a1, a2, a3, a4 );
+}
+void* getEnvironment() const {
+	return convertToOpaque( firstBound );
+}
+};
+
 template<typename Thunk_>
 class CallbackBase
 {
@@ -390,6 +417,62 @@ inline Callback3<
 	typename Caller::result_type
 	> makeStatelessCallback3( const Caller& caller ){
 	return makeCallback3( Caller3To4<Caller>(), 0 );
+}
+
+
+/// \brief Combines a void pointer with a pointer to a function which operates on a void pointer and four other arguments.
+///
+template<typename FirstArgument, typename SecondArgument, typename ThirdArgument, typename FourthArgument, typename Result>
+class Callback4 : public CallbackBase<Result ( * )( void*, FirstArgument, SecondArgument, ThirdArgument, FourthArgument )>
+{
+typedef CallbackBase<Result ( * )( void*, FirstArgument, SecondArgument, ThirdArgument, FourthArgument )> Base;
+static Result nullThunk( void*, FirstArgument, SecondArgument, ThirdArgument, FourthArgument ){
+}
+
+public:
+typedef FirstArgument first_argument_type;
+typedef SecondArgument second_argument_type;
+typedef ThirdArgument third_argument_type;
+typedef FourthArgument fourth_argument_type;
+typedef Result result_type;
+
+Callback4() : Base( 0, nullThunk ){
+}
+template<typename Caller>
+Callback4( const BindFirstOpaque4<Caller>& caller ) : Base( caller.getEnvironment(), BindFirstOpaque4<Caller>::thunk ){
+}
+Callback4( void* environment, typename Base::Thunk function ) : Base( environment, function ){
+}
+result_type operator()( FirstArgument firstArgument, SecondArgument secondArgument, ThirdArgument thirdArgument, FourthArgument fourthArgument ) const {
+	return Base::getThunk() ( Base::getEnvironment(), firstArgument, secondArgument, thirdArgument, fourthArgument );
+}
+};
+
+template<typename Caller>
+inline Callback4<
+	typename Caller::second_argument_type,
+	typename Caller::third_argument_type,
+	typename Caller::fourth_argument_type,
+	typename Caller::fifth_argument_type,
+	typename Caller::result_type
+	> makeCallback4( const Caller& caller, typename Caller::first_argument_type callee ){
+	return Callback4<
+			   typename Caller::second_argument_type,
+			   typename Caller::third_argument_type,
+			   typename Caller::fourth_argument_type,
+			   typename Caller::fifth_argument_type,
+			   typename Caller::result_type
+			   >( BindFirstOpaque4<Caller>( callee ) );
+}
+template<typename Caller>
+inline Callback4<
+	typename Caller::first_argument_type,
+	typename Caller::second_argument_type,
+	typename Caller::third_argument_type,
+	typename Caller::fourth_argument_type,
+	typename Caller::result_type
+	> makeStatelessCallback4( const Caller& caller ){
+	return makeCallback4( Caller4To5<Caller>(), 0 );
 }
 
 

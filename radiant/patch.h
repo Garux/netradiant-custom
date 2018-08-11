@@ -865,6 +865,10 @@ int getShaderFlags() const {
 	}
 	return 0;
 }
+const Shader* getShader(){
+	ASSERT_MESSAGE( m_state != 0, "patch shader is not realised" );
+	return m_state;
+}
 
 typedef PatchControl* iterator;
 typedef const PatchControl* const_iterator;
