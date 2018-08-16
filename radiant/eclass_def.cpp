@@ -280,7 +280,7 @@ EntityClass *Eclass_InitFromText( const char *text ){
 	e->m_modelpath = buffer.c_str();
 
 	if ( !e->fixedsize ) {
-		EntityClass_insertAttribute( *e, "angle", EntityClassAttribute( "direction", "Direction", "0" ) );
+		EntityClass_insertAttribute( *e, "angle", EntityClassAttribute( "direction", "Direction" ) );
 	}
 	else
 	{

@@ -56,7 +56,7 @@
 /// integer3        three integer values	//not supported
 /// real            floating-point value
 /// angle           specialisation of real - Yaw angle
-/// direction       specialisation of real - Yaw angle, -1 = down, -2 = up
+/// direction       specialisation of real - Yaw angle, -1 = up, -2 = down
 /// real3           three floating-point values
 /// angles          specialisation of real3 - Pitch Yaw Roll
 /// color           specialisation of real3 - RGB floating-point colour
@@ -212,6 +212,9 @@ AttributeImporter( StringOutputStream& comment, EntityClass* entityClass, const 
 	else if( entityClass->fixedsize && string_equal( type, "model" ) ){
 		entityClass->miscmodel_is = true;
 		entityClass->m_miscmodel_key = key;
+	}
+	else if( string_equal( type, "angle" ) || string_equal( type, "angles" ) || string_equal( type, "direction" ) ){
+		entityClass->has_angles = true;
 	}
 
 	m_comment << key;

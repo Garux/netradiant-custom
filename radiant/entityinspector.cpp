@@ -534,6 +534,7 @@ void update(){
 	}
 	else
 	{
+		radio_button_set_active_no_signal( m_radio.m_radio, 2 );
 		gtk_entry_set_text( m_entry, "0" );
 	}
 }

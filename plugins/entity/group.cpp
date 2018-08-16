@@ -68,6 +68,15 @@ Vector3 m_origin;
 mutable Vector3 m_name_origin;
 RenderableNamedEntity m_renderName;
 
+AnglesKey m_anglesKey;
+RenderableArrow m_arrow;
+bool m_anglesDraw;
+void updateAnglesDraw(){
+	m_anglesDraw = m_entity.getEntityClass().has_angles || !string_empty( m_entity.getKeyValue( "angle" ) ) || !string_empty( m_entity.getKeyValue( "angles" ) );
+	SceneChangeNotify();
+}
+typedef MemberCaller<Group, &Group::updateAnglesDraw> UpdateAnglesDrawCaller;
+
 Callback m_transformChanged;
 Callback m_evaluateTransform;
 
@@ -75,6 +84,9 @@ void construct(){
 	m_keyObservers.insert( "classname", ClassnameFilter::ClassnameChangedCaller( m_filter ) );
 	m_keyObservers.insert( Static<KeyIsName>::instance().m_nameKey, NamedEntity::IdentifierChangedCaller( m_named ) );
 	m_keyObservers.insert( "origin", OriginKey::OriginChangedCaller( m_originKey ) );
+	m_keyObservers.insert( "angle", AnglesKey::GroupAngleChangedCaller( m_anglesKey ) );
+	m_keyObservers.insert( "angles", AnglesKey::AnglesChangedCaller( m_anglesKey ) );
+	updateAnglesDraw();
 }
 
 public:
@@ -87,6 +99,8 @@ Group( EntityClass* eclass, scene::Node& node, const Callback& transformChanged,
 	m_origin( ORIGINKEY_IDENTITY ),
 	m_name_origin( g_vector3_identity ),
 	m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
+	m_anglesKey( UpdateAnglesDrawCaller( *this ) ),
+	m_arrow( m_name_origin, m_anglesKey.m_angles ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -100,6 +114,8 @@ Group( const Group& other, scene::Node& node, const Callback& transformChanged, 
 	m_origin( ORIGINKEY_IDENTITY ),
 	m_name_origin( g_vector3_identity ),
 	m_renderName( m_named, m_name_origin, EXCLUDE_NAME ),
+	m_anglesKey( UpdateAnglesDrawCaller( *this ) ),
+	m_arrow( m_name_origin, m_anglesKey.m_angles ),
 	m_transformChanged( transformChanged ),
 	m_evaluateTransform( evaluateTransform ){
 	construct();
@@ -151,23 +167,52 @@ void detach( scene::Traversable::Observer* observer ){
 }
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
-	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
-	if ( m_renderName.excluded_not()
-		&& ( selected || childSelected || ( g_showNames && ( volume.fill() || aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) ) ) ) {
-		// don't draw the name for worldspawn
-//		if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
-//			return;
-//		}
-
+	if ( m_renderName.excluded_not() ) {
 		// place name in the middle of the "children cloud"
 		m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : vector4_to_vector3( localToWorld.t() );
 
-		m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );
+		if ( selected || childSelected || g_showNames )
+			m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );
+		if ( m_anglesDraw && g_showAngles ) {
+			if( selected || childSelected ){
+				renderer.PushState();
+				renderer.Highlight( Renderer::ePrimitive );
+				renderer.SetState( m_entity.getEntityClass().m_state_fill, Renderer::eFullMaterials );
+				renderer.addRenderable( m_arrow, localToWorld );
+				renderer.PopState();
+			}
+			else{
+				renderer.SetState( m_entity.getEntityClass().m_state_fill, Renderer::eFullMaterials );
+				renderer.addRenderable( m_arrow, localToWorld );
+			}
+		}
 	}
 }
 
 void renderWireframe( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected, const AABB& childBounds ) const {
-	renderSolid( renderer, volume, localToWorld, selected, childSelected, childBounds );
+	renderer.SetState( m_entity.getEntityClass().m_state_wire, Renderer::eWireframeOnly );
+		// don't draw the name for worldspawn
+//		if ( !strcmp( m_entity.getEntityClass().name(), "worldspawn" ) ) {
+//			return;
+//		}
+	if ( m_renderName.excluded_not() ) {
+		// place name in the middle of the "children cloud"
+		m_name_origin = extents_valid( childBounds.extents.x() )? childBounds.origin : vector4_to_vector3( localToWorld.t() );
+
+		if ( selected || childSelected || ( g_showNames && aabb_fits_view( childBounds, volume.GetModelview(), volume.GetViewport(), g_showNamesRatio ) ) )
+			m_renderName.render( renderer, volume, g_matrix4_identity, selected, childSelected );
+		if ( m_anglesDraw && g_showAngles ) {
+			if( selected || childSelected ){
+				renderer.PushState();
+				renderer.Highlight( Renderer::ePrimitive );
+				renderer.addRenderable( m_arrow, localToWorld );
+				renderer.PopState();
+			}
+			else{
+				renderer.addRenderable( m_arrow, localToWorld );
+			}
+		}
+	}
 }
 
 void updateTransform(){

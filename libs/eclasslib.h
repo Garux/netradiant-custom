@@ -114,6 +114,7 @@ bool fixedsize;
 bool unknown;               // wasn't found in source
 bool miscmodel_is;			// also definable via model attribute presence in xml .ent definition
 CopiedString m_miscmodel_key;
+bool has_angles;			// definable via "angle"/"angles"/"direction" attribute presence in xml .ent definition, only affects rendering of group entities angles arrow now
 Vector3 mins;
 Vector3 maxs;
 
@@ -258,6 +259,7 @@ inline EntityClass* Eclass_Alloc(){
 	e->unknown = false;
 	e->miscmodel_is = false;
 	e->m_miscmodel_key = "model";
+	e->has_angles = false;
 	memset( e->flagnames, 0, MAX_FLAGS * 32 );
 
 	e->maxs = Vector3( -1,-1,-1 );

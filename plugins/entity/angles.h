@@ -147,6 +147,17 @@ void angleChanged( const char* value ){
 }
 typedef MemberCaller1<AnglesKey, const char*, &AnglesKey::angleChanged> AngleChangedCaller;
 
+void groupAngleChanged( const char* value ){
+	if( strlen( value ) == 2 && value[0] == '-' && value[1] == '1' )
+		m_angles = Vector3( 0, -90, 0 );
+	else if( strlen( value ) == 2 && value[0] == '-' && value[1] == '2' )
+		m_angles = Vector3( 0, 90, 0 );
+	else
+		read_angle( m_angles, value );
+	m_anglesChanged();
+}
+typedef MemberCaller1<AnglesKey, const char*, &AnglesKey::groupAngleChanged> GroupAngleChangedCaller;
+
 void anglesChanged( const char* value ){
 	read_angles( m_angles, value );
 	m_anglesChanged();

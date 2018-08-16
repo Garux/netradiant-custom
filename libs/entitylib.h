@@ -83,6 +83,23 @@ inline void arrow_draw( const Vector3& origin, const Vector3& direction_forward,
 	glEnd();
 }
 
+class RenderableArrow : public OpenGLRenderable
+{
+const Vector3& m_origin;
+const Vector3& m_angles;
+
+public:
+RenderableArrow( const Vector3& origin, const Vector3& angles )
+	: m_origin( origin ), m_angles( angles ){
+}
+
+void render( RenderStateFlags state ) const {
+	Matrix4 mat = matrix4_rotation_for_euler_xyz_degrees( m_angles );
+	arrow_draw( m_origin, matrix4_transformed_direction( mat, Vector3( 1, 0, 0 ) ), matrix4_transformed_direction( mat, Vector3( 0, 1, 0 ) ), matrix4_transformed_direction( mat, Vector3( 0, 0, 1 ) ) );
+}
+};
+
+
 class SelectionIntersection;
 
 inline void aabb_testselect( const AABB& aabb, SelectionTest& test, SelectionIntersection& best ){
