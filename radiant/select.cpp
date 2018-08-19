@@ -42,7 +42,6 @@
 #include "patch.h"
 #include "patchmanip.h"
 #include "patchdialog.h"
-#include "selection.h"
 #include "texwindow.h"
 #include "gtkmisc.h"
 #include "mainframe.h"
@@ -535,16 +534,13 @@ void Select_SetFlags( const ContentsFlagsValue& flags ){
 }
 
 void Select_GetBounds( Vector3& mins, Vector3& maxs ){
-	AABB bounds;
-	Scene_BoundsSelected( GlobalSceneGraph(), bounds );
+	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
 	maxs = vector3_added( bounds.origin, bounds.extents );
 	mins = vector3_subtracted( bounds.origin, bounds.extents );
 }
 
 void Select_GetMid( Vector3& mid ){
-	AABB bounds;
-	Scene_BoundsSelected( GlobalSceneGraph(), bounds );
-	mid = vector3_snapped( bounds.origin );
+	mid = vector3_snapped( GlobalSelectionSystem().getBoundsSelected().origin );
 }
 
 

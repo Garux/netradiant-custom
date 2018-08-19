@@ -56,6 +56,8 @@ template<typename Element> class BasicVector4;
 typedef BasicVector4<float> Vector4;
 typedef Vector4 Quaternion;
 
+class AABB;
+
 typedef Callback1<const Selectable&> SelectionChangeCallback;
 typedef SignalHandler1<const Selectable&> SelectionChangeHandler;
 
@@ -127,6 +129,8 @@ virtual void scaleSelected( const Vector3& scaling, bool snapOrigin = false ) = 
 
 virtual void pivotChanged() const = 0;
 virtual void setCustomTransformOrigin( const Vector3& origin, const bool set[3] ) const = 0;
+
+virtual const AABB& getBoundsSelected() const = 0; /* object bounds */
 };
 
 #include "modulesystem.h"

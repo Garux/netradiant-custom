@@ -40,11 +40,4 @@ virtual void incMouseMove( const WindowVector& delta ) = 0;
 
 SelectionSystemWindowObserver* NewWindowObserver();
 
-class AABB;
-namespace scene
-{
-class Graph;
-}
-void Scene_BoundsSelected( scene::Graph& graph, AABB& bounds );
-
 #endif

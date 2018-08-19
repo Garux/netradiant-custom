@@ -4261,6 +4261,26 @@ void Scene_SelectAll_Component( bool select, SelectionSystem::EComponentMode com
 	GlobalSceneGraph().traverse( select_all_component( select, componentMode ) );
 }
 
+void Scene_BoundsSelected( scene::Graph& graph, AABB& bounds );
+class LazyBounds
+{
+	AABB m_bounds;
+	bool m_valid;
+public:
+	LazyBounds() : m_valid( false ){
+	}
+	void setInvalid(){
+		m_valid = false;
+	}
+	const AABB& getBounds(){
+		if( !m_valid ){
+			Scene_BoundsSelected( GlobalSceneGraph(), m_bounds );
+			m_valid = true;
+		}
+		return m_bounds;
+	}
+};
+
 
 // RadiantSelectionSystem
 class RadiantSelectionSystem :
@@ -4274,6 +4294,7 @@ class RadiantSelectionSystem :
 {
 mutable Matrix4 m_pivot2world;
 mutable AABB m_bounds;
+mutable LazyBounds m_lazy_bounds;
 Matrix4 m_pivot2world_start;
 Matrix4 m_manip2pivot_start;
 Translation m_translation;
@@ -4359,6 +4380,7 @@ RadiantSelectionSystem() :
 }
 void pivotChanged() const {
 	m_pivotChanged = true;
+	m_lazy_bounds.setInvalid();
 	SceneChangeNotify();
 }
 typedef ConstMemberCaller<RadiantSelectionSystem, &RadiantSelectionSystem::pivotChanged> PivotChangedCaller;
@@ -4366,6 +4388,10 @@ void pivotChangedSelection( const Selectable& selectable ){
 	pivotChanged();
 }
 typedef MemberCaller1<RadiantSelectionSystem, const Selectable&, &RadiantSelectionSystem::pivotChangedSelection> PivotChangedSelectionCaller;
+
+const AABB& getBoundsSelected() const {
+	return m_lazy_bounds.getBounds();
+}
 
 void SetMode( EMode mode ){
 	if ( m_mode != mode ) {
@@ -5417,11 +5443,11 @@ AABB RadiantSelectionSystem::getSelectionAABB() const {
 		if ( Mode() == eComponent || g_bTmpComponentMode ) {
 			Scene_BoundsSelectedComponent( GlobalSceneGraph(), bounds );
 			if( !aabb_valid( bounds ) ) /* selecting PlaneSelectables sets g_bTmpComponentMode, but only brushes return correct componentEditable->getSelectedComponentsBounds() */
-				Scene_BoundsSelected( GlobalSceneGraph(), bounds );
+				bounds = getBoundsSelected();
 		}
 		else
 		{
-			Scene_BoundsSelected( GlobalSceneGraph(), bounds );
+			bounds = getBoundsSelected();
 		}
 	}
 	return bounds;

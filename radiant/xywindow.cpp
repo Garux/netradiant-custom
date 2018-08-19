@@ -2545,7 +2545,7 @@ void XY_Centralize(){
 
 void GetSelectionBbox( AABB& bounds ){
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
-		Scene_BoundsSelected( GlobalSceneGraph(), bounds );
+		bounds = GlobalSelectionSystem().getBoundsSelected();
 	}
 	else
 	{
