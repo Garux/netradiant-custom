@@ -1942,27 +1942,22 @@ void XYWnd::UpdateCameraIcon(){
 }
 
 
-float Betwixt( float f1, float f2 ){
-	if ( f1 > f2 ) {
-		return f2 + ( ( f1 - f2 ) / 2 );
-	}
-	else{
-		return f1 + ( ( f2 - f1 ) / 2 );
-	}
-}
-
-
 // can be greatly simplified but per usual i am in a hurry
 // which is not an excuse, just a fact
-void XYWnd::PaintSizeInfo( int nDim1, int nDim2, Vector3& vMinBounds, Vector3& vMaxBounds ){
-	if ( vector3_equal( vMinBounds, vMaxBounds ) ) {
+void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
+	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+	if ( bounds.extents == g_vector3_identity ) {
 		return;
 	}
-	const char* g_pDimStrings[] = {"x:", "y:", "z:"};
-	typedef const char* OrgStrings[2];
-	const OrgStrings g_pOrgStrings[] = { { "x:", "y:", }, { "x:", "z:", }, { "y:", "z:", } };
 
-	Vector3 vSize( vector3_subtracted( vMaxBounds, vMinBounds ) );
+	const Vector3 min = bounds.origin - bounds.extents;
+	const Vector3 max = bounds.origin + bounds.extents;
+	const Vector3 mid = bounds.origin;
+	const Vector3 size = bounds.extents * 2;
+
+	const char* dimStrings[] = {"x:", "y:", "z:"};
+	typedef const char* OrgStrings[2];
+	const OrgStrings orgStrings[] = { { "x:", "y:", }, { "x:", "z:", }, { "y:", "z:", } };
 
 	glColor3f( g_xywindow_globals.color_selbrushes[0] * .65f,
 			   g_xywindow_globals.color_selbrushes[1] * .65f,
@@ -1973,116 +1968,116 @@ void XYWnd::PaintSizeInfo( int nDim1, int nDim2, Vector3& vMinBounds, Vector3& v
 	if ( m_viewType == XY ) {
 		glBegin( GL_LINES );
 
-		glVertex3f( vMinBounds[nDim1], vMinBounds[nDim2] - 6.0f  / m_fScale, 0.0f );
-		glVertex3f( vMinBounds[nDim1], vMinBounds[nDim2] - 10.0f / m_fScale, 0.0f );
+		glVertex3f( min[nDim1], min[nDim2] - 6.0f  / m_fScale, 0.0f );
+		glVertex3f( min[nDim1], min[nDim2] - 10.0f / m_fScale, 0.0f );
 
-		glVertex3f( vMinBounds[nDim1], vMinBounds[nDim2] - 10.0f  / m_fScale, 0.0f );
-		glVertex3f( vMaxBounds[nDim1], vMinBounds[nDim2] - 10.0f  / m_fScale, 0.0f );
+		glVertex3f( min[nDim1], min[nDim2] - 10.0f  / m_fScale, 0.0f );
+		glVertex3f( max[nDim1], min[nDim2] - 10.0f  / m_fScale, 0.0f );
 
-		glVertex3f( vMaxBounds[nDim1], vMinBounds[nDim2] - 6.0f  / m_fScale, 0.0f );
-		glVertex3f( vMaxBounds[nDim1], vMinBounds[nDim2] - 10.0f / m_fScale, 0.0f );
+		glVertex3f( max[nDim1], min[nDim2] - 6.0f  / m_fScale, 0.0f );
+		glVertex3f( max[nDim1], min[nDim2] - 10.0f / m_fScale, 0.0f );
 
 
-		glVertex3f( vMaxBounds[nDim1] + 6.0f  / m_fScale, vMinBounds[nDim2], 0.0f );
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, vMinBounds[nDim2], 0.0f );
+		glVertex3f( max[nDim1] + 6.0f  / m_fScale, min[nDim2], 0.0f );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, min[nDim2], 0.0f );
 
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, vMinBounds[nDim2], 0.0f );
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, vMaxBounds[nDim2], 0.0f );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, min[nDim2], 0.0f );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, max[nDim2], 0.0f );
 
-		glVertex3f( vMaxBounds[nDim1] + 6.0f  / m_fScale, vMaxBounds[nDim2], 0.0f );
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, vMaxBounds[nDim2], 0.0f );
+		glVertex3f( max[nDim1] + 6.0f  / m_fScale, max[nDim2], 0.0f );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, max[nDim2], 0.0f );
 
 		glEnd();
 
-		glRasterPos3f( Betwixt( vMinBounds[nDim1], vMaxBounds[nDim1] ),  vMinBounds[nDim2] - 20.0f  / m_fScale, 0.0f );
-		dimensions << g_pDimStrings[nDim1] << vSize[nDim1];
+		glRasterPos3f( mid[nDim1], min[nDim2] - 20.0f  / m_fScale, 0.0f );
+		dimensions << dimStrings[nDim1] << size[nDim1];
 		GlobalOpenGL().drawString( dimensions.c_str() );
 		dimensions.clear();
 
-		glRasterPos3f( vMaxBounds[nDim1] + 16.0f  / m_fScale, Betwixt( vMinBounds[nDim2], vMaxBounds[nDim2] ), 0.0f );
-		dimensions << g_pDimStrings[nDim2] << vSize[nDim2];
+		glRasterPos3f( max[nDim1] + 16.0f  / m_fScale, mid[nDim2], 0.0f );
+		dimensions << dimStrings[nDim2] << size[nDim2];
 		GlobalOpenGL().drawString( dimensions.c_str() );
 		dimensions.clear();
 
-		glRasterPos3f( vMinBounds[nDim1] + 4, vMaxBounds[nDim2] + 8 / m_fScale, 0.0f );
-		dimensions << "(" << g_pOrgStrings[0][0] << vMinBounds[nDim1] << "  " << g_pOrgStrings[0][1] << vMaxBounds[nDim2] << ")";
+		glRasterPos3f( min[nDim1] + 4, max[nDim2] + 8 / m_fScale, 0.0f );
+		dimensions << "(" << orgStrings[0][0] << min[nDim1] << "  " << orgStrings[0][1] << max[nDim2] << ")";
 		GlobalOpenGL().drawString( dimensions.c_str() );
 	}
 	else if ( m_viewType == XZ ) {
 		glBegin( GL_LINES );
 
-		glVertex3f( vMinBounds[nDim1], 0, vMinBounds[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( vMinBounds[nDim1], 0, vMinBounds[nDim2] - 10.0f / m_fScale );
+		glVertex3f( min[nDim1], 0, min[nDim2] - 6.0f  / m_fScale );
+		glVertex3f( min[nDim1], 0, min[nDim2] - 10.0f / m_fScale );
 
-		glVertex3f( vMinBounds[nDim1], 0,vMinBounds[nDim2] - 10.0f  / m_fScale );
-		glVertex3f( vMaxBounds[nDim1], 0,vMinBounds[nDim2] - 10.0f  / m_fScale );
+		glVertex3f( min[nDim1], 0,min[nDim2] - 10.0f  / m_fScale );
+		glVertex3f( max[nDim1], 0,min[nDim2] - 10.0f  / m_fScale );
 
-		glVertex3f( vMaxBounds[nDim1], 0,vMinBounds[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( vMaxBounds[nDim1], 0,vMinBounds[nDim2] - 10.0f / m_fScale );
+		glVertex3f( max[nDim1], 0,min[nDim2] - 6.0f  / m_fScale );
+		glVertex3f( max[nDim1], 0,min[nDim2] - 10.0f / m_fScale );
 
 
-		glVertex3f( vMaxBounds[nDim1] + 6.0f  / m_fScale, 0,vMinBounds[nDim2] );
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, 0,vMinBounds[nDim2] );
+		glVertex3f( max[nDim1] + 6.0f  / m_fScale, 0,min[nDim2] );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,min[nDim2] );
 
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, 0,vMinBounds[nDim2] );
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, 0,vMaxBounds[nDim2] );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,min[nDim2] );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,max[nDim2] );
 
-		glVertex3f( vMaxBounds[nDim1] + 6.0f  / m_fScale, 0,vMaxBounds[nDim2] );
-		glVertex3f( vMaxBounds[nDim1] + 10.0f  / m_fScale, 0,vMaxBounds[nDim2] );
+		glVertex3f( max[nDim1] + 6.0f  / m_fScale, 0,max[nDim2] );
+		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,max[nDim2] );
 
 		glEnd();
 
-		glRasterPos3f( Betwixt( vMinBounds[nDim1], vMaxBounds[nDim1] ), 0, vMinBounds[nDim2] - 20.0f  / m_fScale );
-		dimensions << g_pDimStrings[nDim1] << vSize[nDim1];
+		glRasterPos3f( mid[nDim1], 0, min[nDim2] - 20.0f  / m_fScale );
+		dimensions << dimStrings[nDim1] << size[nDim1];
 		GlobalOpenGL().drawString( dimensions.c_str() );
 		dimensions.clear();
 
-		glRasterPos3f( vMaxBounds[nDim1] + 16.0f  / m_fScale, 0, Betwixt( vMinBounds[nDim2], vMaxBounds[nDim2] ) );
-		dimensions << g_pDimStrings[nDim2] << vSize[nDim2];
+		glRasterPos3f( max[nDim1] + 16.0f  / m_fScale, 0, mid[nDim2] );
+		dimensions << dimStrings[nDim2] << size[nDim2];
 		GlobalOpenGL().drawString( dimensions.c_str() );
 		dimensions.clear();
 
-		glRasterPos3f( vMinBounds[nDim1] + 4, 0, vMaxBounds[nDim2] + 8 / m_fScale );
-		dimensions << "(" << g_pOrgStrings[1][0] << vMinBounds[nDim1] << "  " << g_pOrgStrings[1][1] << vMaxBounds[nDim2] << ")";
+		glRasterPos3f( min[nDim1] + 4, 0, max[nDim2] + 8 / m_fScale );
+		dimensions << "(" << orgStrings[1][0] << min[nDim1] << "  " << orgStrings[1][1] << max[nDim2] << ")";
 		GlobalOpenGL().drawString( dimensions.c_str() );
 	}
 	else
 	{
 		glBegin( GL_LINES );
 
-		glVertex3f( 0, vMinBounds[nDim1], vMinBounds[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( 0, vMinBounds[nDim1], vMinBounds[nDim2] - 10.0f / m_fScale );
+		glVertex3f( 0, min[nDim1], min[nDim2] - 6.0f  / m_fScale );
+		glVertex3f( 0, min[nDim1], min[nDim2] - 10.0f / m_fScale );
 
-		glVertex3f( 0, vMinBounds[nDim1], vMinBounds[nDim2] - 10.0f  / m_fScale );
-		glVertex3f( 0, vMaxBounds[nDim1], vMinBounds[nDim2] - 10.0f  / m_fScale );
+		glVertex3f( 0, min[nDim1], min[nDim2] - 10.0f  / m_fScale );
+		glVertex3f( 0, max[nDim1], min[nDim2] - 10.0f  / m_fScale );
 
-		glVertex3f( 0, vMaxBounds[nDim1], vMinBounds[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( 0, vMaxBounds[nDim1], vMinBounds[nDim2] - 10.0f / m_fScale );
+		glVertex3f( 0, max[nDim1], min[nDim2] - 6.0f  / m_fScale );
+		glVertex3f( 0, max[nDim1], min[nDim2] - 10.0f / m_fScale );
 
 
-		glVertex3f( 0, vMaxBounds[nDim1] + 6.0f  / m_fScale, vMinBounds[nDim2] );
-		glVertex3f( 0, vMaxBounds[nDim1] + 10.0f  / m_fScale, vMinBounds[nDim2] );
+		glVertex3f( 0, max[nDim1] + 6.0f  / m_fScale, min[nDim2] );
+		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, min[nDim2] );
 
-		glVertex3f( 0, vMaxBounds[nDim1] + 10.0f  / m_fScale, vMinBounds[nDim2] );
-		glVertex3f( 0, vMaxBounds[nDim1] + 10.0f  / m_fScale, vMaxBounds[nDim2] );
+		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, min[nDim2] );
+		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, max[nDim2] );
 
-		glVertex3f( 0, vMaxBounds[nDim1] + 6.0f  / m_fScale, vMaxBounds[nDim2] );
-		glVertex3f( 0, vMaxBounds[nDim1] + 10.0f  / m_fScale, vMaxBounds[nDim2] );
+		glVertex3f( 0, max[nDim1] + 6.0f  / m_fScale, max[nDim2] );
+		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, max[nDim2] );
 
 		glEnd();
 
-		glRasterPos3f( 0, Betwixt( vMinBounds[nDim1], vMaxBounds[nDim1] ),  vMinBounds[nDim2] - 20.0f  / m_fScale );
-		dimensions << g_pDimStrings[nDim1] << vSize[nDim1];
+		glRasterPos3f( 0, mid[nDim1],  min[nDim2] - 20.0f  / m_fScale );
+		dimensions << dimStrings[nDim1] << size[nDim1];
 		GlobalOpenGL().drawString( dimensions.c_str() );
 		dimensions.clear();
 
-		glRasterPos3f( 0, vMaxBounds[nDim1] + 16.0f  / m_fScale, Betwixt( vMinBounds[nDim2], vMaxBounds[nDim2] ) );
-		dimensions << g_pDimStrings[nDim2] << vSize[nDim2];
+		glRasterPos3f( 0, max[nDim1] + 16.0f  / m_fScale, mid[nDim2] );
+		dimensions << dimStrings[nDim2] << size[nDim2];
 		GlobalOpenGL().drawString( dimensions.c_str() );
 		dimensions.clear();
 
-		glRasterPos3f( 0, vMinBounds[nDim1] + 4.0f, vMaxBounds[nDim2] + 8 / m_fScale );
-		dimensions << "(" << g_pOrgStrings[2][0] << vMinBounds[nDim1] << "  " << g_pOrgStrings[2][1] << vMaxBounds[nDim2] << ")";
+		glRasterPos3f( 0, min[nDim1] + 4.0f, max[nDim2] + 8 / m_fScale );
+		dimensions << "(" << orgStrings[2][0] << min[nDim1] << "  " << orgStrings[2][1] << max[nDim2] << ")";
 		GlobalOpenGL().drawString( dimensions.c_str() );
 	}
 }
@@ -2349,9 +2344,7 @@ void XYWnd::XY_Draw(){
 
 	// size info
 	if ( g_xywindow_globals_private.m_bSizePaint && GlobalSelectionSystem().countSelected() != 0 ) {
-		Vector3 min, max;
-		Select_GetBounds( min, max );
-		PaintSizeInfo( nDim1, nDim2, min, max );
+		PaintSizeInfo( nDim1, nDim2 );
 	}
 
 	if ( g_bCrossHairs ) {

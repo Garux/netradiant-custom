@@ -199,7 +199,7 @@ VIEWTYPE m_viewType;
 void OriginalButtonUp( guint32 nFlags, int point, int pointy );
 void OriginalButtonDown( guint32 nFlags, int point, int pointy );
 
-void PaintSizeInfo( int nDim1, int nDim2, Vector3& vMinBounds, Vector3& vMaxBounds );
+void PaintSizeInfo( int nDim1, int nDim2 );
 
 int m_entityCreate_x, m_entityCreate_y;
 bool m_entityCreate;
