@@ -2096,7 +2096,8 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show C_oordinates", "ShowCoordinates" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Window Outline", "ShowWindowOutline" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Axes", "ShowAxes" );
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Workzone", "ShowWorkzone" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Show 2D Workzone", "ShowWorkzone2d" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Show 3D Workzone", "ShowWorkzone3d" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Renderer Stats", "ShowStats" );
 	}
 

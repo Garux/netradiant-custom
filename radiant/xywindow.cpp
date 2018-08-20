@@ -90,7 +90,7 @@ struct xywindow_globals_private_t
 	bool show_outline;
 	bool show_axis;
 
-	bool d_show_work;
+	bool show_workzone;
 
 	bool show_blocks;
 	int blockSize;
@@ -109,7 +109,7 @@ struct xywindow_globals_private_t
 		show_outline( true ),
 		show_axis( true ),
 
-		d_show_work( false ),
+		show_workzone( false ),
 
 		show_blocks( false ),
 
@@ -1752,7 +1752,7 @@ void XYWnd::XY_DrawGrid( void ) {
 
 	// show current work zone?
 	// the work zone is used to place dropped points and brushes
-	if ( g_xywindow_globals_private.d_show_work ) {
+	if ( g_xywindow_globals_private.show_workzone ) {
 		glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
 		glBegin( GL_LINES );
 		glVertex2f( xb, Select_getWorkZone().d_work_min[nDim2] );
@@ -2777,10 +2777,10 @@ void ShowAxesToggle(){
 }
 
 
-BoolExportCaller g_show_workzone_caller( g_xywindow_globals_private.d_show_work );
+BoolExportCaller g_show_workzone_caller( g_xywindow_globals_private.show_workzone );
 ToggleItem g_show_workzone( g_show_workzone_caller );
 void ShowWorkzoneToggle(){
-	g_xywindow_globals_private.d_show_work ^= 1;
+	g_xywindow_globals_private.show_workzone ^= 1;
 	g_show_workzone.update();
 	XY_UpdateAllWindows();
 }
@@ -2877,7 +2877,7 @@ void XYShow_registerCommands(){
 	GlobalToggles_insert( "ShowCoordinates", FreeCaller<ShowCoordinatesToggle>(), ToggleItem::AddCallbackCaller( g_show_coordinates ) );
 	GlobalToggles_insert( "ShowWindowOutline", FreeCaller<ShowOutlineToggle>(), ToggleItem::AddCallbackCaller( g_show_outline ) );
 	GlobalToggles_insert( "ShowAxes", FreeCaller<ShowAxesToggle>(), ToggleItem::AddCallbackCaller( g_show_axes ) );
-	GlobalToggles_insert( "ShowWorkzone", FreeCaller<ShowWorkzoneToggle>(), ToggleItem::AddCallbackCaller( g_show_workzone ) );
+	GlobalToggles_insert( "ShowWorkzone2d", FreeCaller<ShowWorkzoneToggle>(), ToggleItem::AddCallbackCaller( g_show_workzone ) );
 }
 
 void XYWnd_registerShortcuts(){
@@ -2940,7 +2940,7 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "SI_ShowCoords", BoolImportStringCaller( g_xywindow_globals_private.show_coordinates ), BoolExportStringCaller( g_xywindow_globals_private.show_coordinates ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowOutlines", BoolImportStringCaller( g_xywindow_globals_private.show_outline ), BoolExportStringCaller( g_xywindow_globals_private.show_outline ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowAxis", BoolImportStringCaller( g_xywindow_globals_private.show_axis ), BoolExportStringCaller( g_xywindow_globals_private.show_axis ) );
-	GlobalPreferenceSystem().registerPreference( "ShowWorkzone", BoolImportStringCaller( g_xywindow_globals_private.d_show_work ), BoolExportStringCaller( g_xywindow_globals_private.d_show_work ) );
+	GlobalPreferenceSystem().registerPreference( "ShowWorkzone2d", BoolImportStringCaller( g_xywindow_globals_private.show_workzone ), BoolExportStringCaller( g_xywindow_globals_private.show_workzone ) );
 
 	GlobalPreferenceSystem().registerPreference( "SI_AxisColors0", Vector3ImportStringCaller( g_xywindow_globals.AxisColorX ), Vector3ExportStringCaller( g_xywindow_globals.AxisColorX ) );
 	GlobalPreferenceSystem().registerPreference( "SI_AxisColors1", Vector3ImportStringCaller( g_xywindow_globals.AxisColorY ), Vector3ExportStringCaller( g_xywindow_globals.AxisColorY ) );

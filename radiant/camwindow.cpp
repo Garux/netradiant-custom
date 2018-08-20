@@ -85,6 +85,7 @@ struct camwindow_globals_private_t
 	bool m_bFaceWire;
 	bool m_bFaceFill;
 	int m_MSAA;
+	bool m_bShowWorkzone;
 
 	camwindow_globals_private_t() :
 		m_nMoveSpeed( 500 ),
@@ -98,7 +99,8 @@ struct camwindow_globals_private_t
 		m_strafeMode( 3 ),
 		m_bFaceWire( true ),
 		m_bFaceFill( true ),
-		m_MSAA( 8 ){
+		m_MSAA( 8 ),
+		m_bShowWorkzone( true ){
 	}
 
 };
@@ -1681,6 +1683,16 @@ void ShowStatsToggle(){
 	UpdateAllWindows();
 }
 
+BoolExportCaller g_show_workzone3d_caller( g_camwindow_globals_private.m_bShowWorkzone );
+ToggleItem g_show_workzone3d( g_show_workzone3d_caller );
+void ShowWorkzone3dToggle(){
+	g_camwindow_globals_private.m_bShowWorkzone ^= 1;
+	g_show_workzone3d.update();
+	if ( g_camwnd != 0 ) {
+		CamWnd_Update( *g_camwnd );
+	}
+}
+
 #include "stream/stringstream.h"
 
 void CamWnd::Cam_Draw(){
@@ -1791,6 +1803,68 @@ void CamWnd::Cam_Draw(){
 		Scene_Render( renderer, m_view );
 
 		renderer.render( m_Camera.modelview, m_Camera.projection );
+	}
+
+	/* workzone */
+	if( g_camwindow_globals_private.m_bShowWorkzone && GlobalSelectionSystem().countSelected() != 0 ){
+		glEnable( GL_BLEND );
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		glShadeModel( GL_SMOOTH );
+
+		glEnable( GL_DEPTH_TEST );
+		glDepthFunc( GL_LESS );
+		glDepthMask( GL_TRUE );
+
+		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		glDisableClientState( GL_NORMAL_ARRAY );
+		glDisableClientState( GL_COLOR_ARRAY );
+
+		glDisable( GL_TEXTURE_2D );
+		glDisable( GL_LIGHTING );
+		glDisable( GL_COLOR_MATERIAL );
+
+		glDisable( GL_LINE_STIPPLE );
+		glLineWidth( 1 );
+#if 0
+		const Vector4 color0( g_camwindow_globals.color_selbrushes3d, 0 );
+		const Vector4 color1( g_camwindow_globals.color_selbrushes3d, 1 );
+#else
+		const Vector4 color0( 1, 1, 1, 0 );
+		const Vector4 color1( 1, 1, 1, 1 );
+#endif
+		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+
+		glBegin( GL_LINES );
+		for( std::size_t i = 0; i < 3; ++i ){
+			const std::size_t i2 = ( i + 1 ) % 3;
+			const std::size_t i3 = ( i + 2 ) % 3;
+			const Vector3 normal = g_vector3_axes[i];
+			const float size = 1024;
+			std::vector<Vector3> points;
+			points.reserve( 4 );
+			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
+			if( bounds.extents[i2] != 0 ){
+				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
+			}
+			if( bounds.extents[i3] != 0 ){
+				points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+				if( bounds.extents[i2] != 0 ){
+					points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+				}
+			}
+			for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++j ){
+				glColor4fv( vector4_to_array( color0 ) );
+				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] + size ) ) );
+				glColor4fv( vector4_to_array( color1 ) );
+				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
+				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
+				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
+				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
+				glColor4fv( vector4_to_array( color0 ) );
+				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] + size ) ) );
+			}
+		}
+		glEnd();
 	}
 
 	// prepare for 2d stuff
@@ -2324,8 +2398,10 @@ void CamWnd_Construct(){
 	GlobalShortcuts_insert( "CameraFreeFocus", Accelerator( GDK_Tab ) );
 
 	GlobalToggles_insert( "ShowStats", FreeCaller<ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
+	GlobalToggles_insert( "ShowWorkzone3d", FreeCaller<ShowWorkzone3dToggle>(), ToggleItem::AddCallbackCaller( g_show_workzone3d ) );
 
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
+	GlobalPreferenceSystem().registerPreference( "ShowWorkzone3d", BoolImportStringCaller( g_camwindow_globals_private.m_bShowWorkzone ), BoolExportStringCaller( g_camwindow_globals_private.m_bShowWorkzone ) );
 	GlobalPreferenceSystem().registerPreference( "CamMoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamMoveTimeToMaxSpeed", IntImportStringCaller( g_camwindow_globals_private.m_time_toMaxSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_time_toMaxSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "ScrollMoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
