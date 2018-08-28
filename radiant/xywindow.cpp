@@ -96,7 +96,7 @@ struct xywindow_globals_private_t
 	int blockSize;
 
 	bool m_bChaseMouse;
-	bool m_bSizePaint;
+	bool m_bShowSize;
 
 	int m_MSAA;
 
@@ -114,7 +114,7 @@ struct xywindow_globals_private_t
 		show_blocks( false ),
 
 		m_bChaseMouse( true ),
-		m_bSizePaint( true ),
+		m_bShowSize( true ),
 		m_MSAA( 8 ){
 	}
 
@@ -2343,7 +2343,7 @@ void XYWnd::XY_Draw(){
 
 
 	// size info
-	if ( g_xywindow_globals_private.m_bSizePaint && GlobalSelectionSystem().countSelected() != 0 ) {
+	if ( g_xywindow_globals_private.m_bShowSize && GlobalSelectionSystem().countSelected() != 0 ) {
 		PaintSizeInfo( nDim1, nDim2 );
 	}
 
@@ -2811,10 +2811,10 @@ void Texdef_ToggleMoveLock(){
 }
 */
 
-BoolExportCaller g_show_size_caller( g_xywindow_globals_private.m_bSizePaint );
+BoolExportCaller g_show_size_caller( g_xywindow_globals_private.m_bShowSize );
 ToggleItem g_show_size_item( g_show_size_caller );
 void ToggleShowSizeInfo(){
-	g_xywindow_globals_private.m_bSizePaint = !g_xywindow_globals_private.m_bSizePaint;
+	g_xywindow_globals_private.m_bShowSize = !g_xywindow_globals_private.m_bShowSize;
 	g_show_size_item.update();
 	XY_UpdateAllWindows();
 }
@@ -2865,7 +2865,7 @@ typedef FreeCaller1<const IntImportCallback&, MSAAExport> MSAAExportCaller;
 
 
 void XYShow_registerCommands(){
-	GlobalToggles_insert( "ToggleSizePaint", FreeCaller<ToggleShowSizeInfo>(), ToggleItem::AddCallbackCaller( g_show_size_item ), Accelerator( 'J' ) );
+	GlobalToggles_insert( "ShowSize2d", FreeCaller<ToggleShowSizeInfo>(), ToggleItem::AddCallbackCaller( g_show_size_item ), Accelerator( 'J' ) );
 	GlobalToggles_insert( "ToggleCrosshairs", FreeCaller<ToggleShowCrosshair>(), ToggleItem::AddCallbackCaller( g_show_crosshair_item ), Accelerator( 'X', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalToggles_insert( "ToggleGrid", FreeCaller<ToggleShowGrid>(), ToggleItem::AddCallbackCaller( g_show_grid_item ), Accelerator( '0' ) );
 
@@ -2882,14 +2882,14 @@ void XYShow_registerCommands(){
 
 void XYWnd_registerShortcuts(){
 	command_connect_accelerator( "ToggleCrosshairs" );
-	command_connect_accelerator( "ToggleSizePaint" );
+	command_connect_accelerator( "ShowSize2d" );
 }
 
 
 
 void Orthographic_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Solid selection boxes ( no stipple )", g_xywindow_globals.m_bNoStipple );
-	//page.appendCheckBox( "", "Display size info", g_xywindow_globals_private.m_bSizePaint );
+	//page.appendCheckBox( "", "Display size info", g_xywindow_globals_private.m_bShowSize );
 	page.appendCheckBox( "", "Chase mouse during drags", g_xywindow_globals_private.m_bChaseMouse );
 	page.appendCheckBox( "", "Zoom In to Mouse pointer", g_xywindow_globals.m_bZoomInToPointer );
 
@@ -2934,7 +2934,7 @@ void XYWindow_Construct(){
 	GlobalPreferenceSystem().registerPreference( "XYMSAA", IntImportStringCaller( g_xywindow_globals_private.m_MSAA ), IntExportStringCaller( g_xywindow_globals_private.m_MSAA ) );
 	GlobalPreferenceSystem().registerPreference( "2DZoomInToPointer", BoolImportStringCaller( g_xywindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_xywindow_globals.m_bZoomInToPointer ) );
 	GlobalPreferenceSystem().registerPreference( "ChaseMouse", BoolImportStringCaller( g_xywindow_globals_private.m_bChaseMouse ), BoolExportStringCaller( g_xywindow_globals_private.m_bChaseMouse ) );
-	GlobalPreferenceSystem().registerPreference( "SizePainting", BoolImportStringCaller( g_xywindow_globals_private.m_bSizePaint ), BoolExportStringCaller( g_xywindow_globals_private.m_bSizePaint ) );
+	GlobalPreferenceSystem().registerPreference( "ShowSize2d", BoolImportStringCaller( g_xywindow_globals_private.m_bShowSize ), BoolExportStringCaller( g_xywindow_globals_private.m_bShowSize ) );
 	GlobalPreferenceSystem().registerPreference( "ShowCrosshair", BoolImportStringCaller( g_bCrossHairs ), BoolExportStringCaller( g_bCrossHairs ) );
 	GlobalPreferenceSystem().registerPreference( "NoStipple", BoolImportStringCaller( g_xywindow_globals.m_bNoStipple ), BoolExportStringCaller( g_xywindow_globals.m_bNoStipple ) );
 	GlobalPreferenceSystem().registerPreference( "SI_ShowCoords", BoolImportStringCaller( g_xywindow_globals_private.show_coordinates ), BoolExportStringCaller( g_xywindow_globals_private.show_coordinates ) );

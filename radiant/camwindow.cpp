@@ -86,6 +86,7 @@ struct camwindow_globals_private_t
 	bool m_bFaceFill;
 	int m_MSAA;
 	bool m_bShowWorkzone;
+	bool m_bShowSize;
 
 	camwindow_globals_private_t() :
 		m_nMoveSpeed( 500 ),
@@ -100,7 +101,8 @@ struct camwindow_globals_private_t
 		m_bFaceWire( true ),
 		m_bFaceFill( true ),
 		m_MSAA( 8 ),
-		m_bShowWorkzone( true ){
+		m_bShowWorkzone( true ),
+		m_bShowSize( true ){
 	}
 
 };
@@ -708,6 +710,143 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 	}
 }
 
+#include "stream/stringstream.h"
+
+#define cam_draw_size_use_tex
+class CamDrawSize
+{
+	GLuint _texs[3];
+	int _widths[3];
+	int _heights[3];
+	Vector3 _extents;
+public:
+	CamDrawSize() : _extents( -99.9f, -99.9f, -99.9f ){
+		_texs[0] = _texs[1] = _texs[2] = 0;
+	}
+	~CamDrawSize(){
+		for( std::size_t i = 0; i < 3; ++i )
+			freeTex( _texs[i] );
+	}
+	void render( const AABB& bounds, const View view ){
+		setState();
+
+		Vector4 points[3] = { Vector4( bounds.origin - g_vector3_axes[1] * bounds.extents - g_vector3_axes[2] * bounds.extents, 1 ),
+								Vector4( bounds.origin - g_vector3_axes[0] * bounds.extents - g_vector3_axes[2] * bounds.extents, 1 ),
+								Vector4( bounds.origin - g_vector3_axes[0] * bounds.extents - g_vector3_axes[1] * bounds.extents, 1 ),
+								};
+		for( std::size_t i = 0; i < 3; ++i ){
+			matrix4_transform_vector4( view.GetViewMatrix(), points[i] );
+			points[i].x() /= points[i].w();
+			points[i].y() /= points[i].w();
+			points[i].z() /= points[i].w();
+			matrix4_transform_vector4( view.GetViewport(), points[i] );
+		}
+
+		for( std::size_t i = 0; i < 3; ++i ){
+			if( points[i].w() > 0.005f ){
+#ifdef cam_draw_size_use_tex
+				updateTex( i, bounds.extents[i] );
+				if( _texs[i] > 0 ) {
+					glBindTexture( GL_TEXTURE_2D, _texs[i] );
+
+					//Here we draw the texturemaped quads.
+					//The bitmap that we got from FreeType was not
+					//oriented quite like we would like it to be,
+					//so we need to link the texture to the quad
+					//so that the result will be properly aligned.
+					glBegin( GL_QUADS );
+					const float xoffset0 = 0;
+					const float xoffset1 = 1.f / 3.f;
+					glTexCoord2f( xoffset0, 1 );
+					glVertex2f( points[i].x(), points[i].y() );
+					glTexCoord2f( xoffset0, 0 );
+					glVertex2f( points[i].x(), points[i].y() + _heights[i] + .01f );
+					glTexCoord2f( xoffset1, 0 );
+					glVertex2f( points[i].x() + _widths[i] + .01f, points[i].y() + _heights[i] + .01f );
+					glTexCoord2f( xoffset1, 1 );
+					glVertex2f( points[i].x() + _widths[i] + .01f, points[i].y() );
+					glEnd();
+
+					glBindTexture( GL_TEXTURE_2D, 0 );
+				}
+#else
+				StringOutputStream stream( 16 );
+				stream << ( bounds.extents[i] * 2 );
+
+				glColor3fv( vector3_to_array( g_vector3_identity ) );
+				glRasterPos2fv( vector4_to_array( points[i] + Vector4( 1, -1, 0, 0 ) ) );
+				GlobalOpenGL().drawString( stream.c_str() );
+
+				glColor3fv( vector3_to_array( getColor( i ) ) );
+				glRasterPos2fv( vector4_to_array( points[i] ) );
+				GlobalOpenGL().drawString( stream.c_str() );
+#endif
+			}
+		}
+	}
+private:
+	const Vector3 getColor( const std::size_t i ) const {
+		switch ( i )
+		{
+		case 0:
+			return g_xywindow_globals.AxisColorX;
+		case 1:
+			return g_xywindow_globals.AxisColorY;
+		default:
+			return Vector3( g_xywindow_globals.AxisColorZ.x(), 0.7f, g_xywindow_globals.AxisColorZ.z() ); //hack to make default blue visible better
+		}
+	}
+	void updateTex( const std::size_t i, const float extent ){
+		if( extent != _extents[i] ){
+			freeTex( _texs[i] );
+			_extents[i] = extent;
+		}
+		if( 0 == _texs[i] ){
+			glGenTextures( 1, &_texs[i] );
+			if( _texs[i] > 0 ){
+				StringOutputStream stream( 16 );
+				stream << ( extent * 2 );
+				BasicVector3<unsigned int> colour = getColor( i ) * 255.f;
+				GlobalOpenGL().m_font->renderString( stream.c_str(), _texs[i], colour.data(), _widths[i], _heights[i] );
+			}
+		}
+	}
+	void freeTex( GLuint& tex ){
+		if( tex > 0 ){
+			glDeleteTextures( 1, &tex );
+			tex = 0;
+		}
+	}
+	void setState() const {
+#ifdef cam_draw_size_use_tex
+		glEnable( GL_BLEND );
+#else
+		glDisable( GL_BLEND );
+#endif
+		glDisable( GL_DEPTH_TEST );
+
+		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		glDisableClientState( GL_NORMAL_ARRAY );
+		glDisableClientState( GL_COLOR_ARRAY );
+#ifdef cam_draw_size_use_tex
+		glEnable( GL_TEXTURE_2D );
+		glDisable( GL_CULL_FACE );
+		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+		if ( GlobalOpenGL().GL_1_3() ) {
+			glActiveTexture( GL_TEXTURE0 );
+			glClientActiveTexture( GL_TEXTURE0 );
+		}
+		glShadeModel( GL_FLAT );
+		glColor4f( 1, 1, 1, 1 );
+#else
+		glDisable( GL_TEXTURE_2D );
+#endif
+		glDisable( GL_LIGHTING );
+		glDisable( GL_COLOR_MATERIAL );
+	}
+};
+
 
 
 
@@ -730,6 +869,8 @@ static Shader* m_state_wire;
 static Shader* m_state_facewire;
 
 FreezePointer m_freezePointer;
+
+CamDrawSize m_draw_size;
 
 public:
 FBO* m_fbo;
@@ -1693,7 +1834,15 @@ void ShowWorkzone3dToggle(){
 	}
 }
 
-#include "stream/stringstream.h"
+BoolExportCaller g_show_size3d_caller( g_camwindow_globals_private.m_bShowSize );
+ToggleItem g_show_size3d( g_show_size3d_caller );
+void ShowSize3dToggle(){
+	g_camwindow_globals_private.m_bShowSize ^= 1;
+	g_show_size3d.update();
+	if ( g_camwnd != 0 ) {
+		CamWnd_Update( *g_camwnd );
+	}
+}
 
 void CamWnd::Cam_Draw(){
 //		globalOutputStream() << "Cam_Draw()\n";
@@ -1867,6 +2016,20 @@ void CamWnd::Cam_Draw(){
 		glEnd();
 	}
 
+	/* size */
+	if( g_camwindow_globals_private.m_bShowSize && GlobalSelectionSystem().countSelected() != 0 ){
+		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+		if( bounds.extents.x() != 0 || bounds.extents.y() != 0 || bounds.extents.z() != 0 ){
+			glMatrixMode( GL_PROJECTION );
+			glLoadIdentity();
+			glOrtho( 0, m_Camera.width, 0, m_Camera.height, -100, 100 );
+			glTranslated( m_Camera.width / 2.0, m_Camera.height / 2.0, 0 );
+			glMatrixMode( GL_MODELVIEW );
+			glLoadIdentity();
+			m_draw_size.render( bounds, m_view );
+		}
+	}
+
 	// prepare for 2d stuff
 	glColor4f( 1, 1, 1, 1 );
 	glDisable( GL_BLEND );
@@ -1891,7 +2054,6 @@ void CamWnd::Cam_Draw(){
 	glDisable( GL_LIGHTING );
 	glDisable( GL_COLOR_MATERIAL );
 	glDisable( GL_DEPTH_TEST );
-	glColor3f( 1.f, 1.f, 1.f );
 	glLineWidth( 1 );
 
 	// draw the crosshair
@@ -2399,9 +2561,11 @@ void CamWnd_Construct(){
 
 	GlobalToggles_insert( "ShowStats", FreeCaller<ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
 	GlobalToggles_insert( "ShowWorkzone3d", FreeCaller<ShowWorkzone3dToggle>(), ToggleItem::AddCallbackCaller( g_show_workzone3d ) );
+	GlobalToggles_insert( "ShowSize3d", FreeCaller<ShowSize3dToggle>(), ToggleItem::AddCallbackCaller( g_show_size3d ) );
 
 	GlobalPreferenceSystem().registerPreference( "ShowStats", BoolImportStringCaller( g_camwindow_globals.m_showStats ), BoolExportStringCaller( g_camwindow_globals.m_showStats ) );
 	GlobalPreferenceSystem().registerPreference( "ShowWorkzone3d", BoolImportStringCaller( g_camwindow_globals_private.m_bShowWorkzone ), BoolExportStringCaller( g_camwindow_globals_private.m_bShowWorkzone ) );
+	GlobalPreferenceSystem().registerPreference( "ShowSize3d", BoolImportStringCaller( g_camwindow_globals_private.m_bShowSize ), BoolExportStringCaller( g_camwindow_globals_private.m_bShowSize ) );
 	GlobalPreferenceSystem().registerPreference( "CamMoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nMoveSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "CamMoveTimeToMaxSpeed", IntImportStringCaller( g_camwindow_globals_private.m_time_toMaxSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_time_toMaxSpeed ) );
 	GlobalPreferenceSystem().registerPreference( "ScrollMoveSpeed", IntImportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ), IntExportStringCaller( g_camwindow_globals_private.m_nScrollMoveSpeed ) );

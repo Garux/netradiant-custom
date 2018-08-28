@@ -2089,7 +2089,8 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 
 		menu_separator( menu_in_menu );
 
-		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Size Info", "ToggleSizePaint" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Show 2D Size Info", "ShowSize2d" );
+		create_check_menu_item_with_mnemonic( menu_in_menu, "Show 3D Size Info", "ShowSize3d" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Crosshair", "ToggleCrosshairs" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Grid", "ToggleGrid" );
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Show Blocks", "ShowBlocks" );
