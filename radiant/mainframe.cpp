@@ -2249,7 +2249,7 @@ GtkMenuItem* create_misc_menu(){
 	create_menu_item_with_mnemonic( menu, "Map Info...", "MapInfo" );
 	// http://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=394
 //  create_menu_item_with_mnemonic(menu, "_Print XY View", FreeCaller<WXY_Print>());
-	create_menu_item_with_mnemonic( menu, "_Background image...", FreeCaller<WXY_BackgroundSelect>() );
+	create_menu_item_with_mnemonic( menu, "Set 2D _Background image...", FreeCaller<WXY_SetBackgroundImage>() );
 	create_menu_item_with_mnemonic( menu, "Fullscreen", "Fullscreen" );
 	create_menu_item_with_mnemonic( menu, "Maximize view", "MaximizeView" );
 	return misc_menu_item;

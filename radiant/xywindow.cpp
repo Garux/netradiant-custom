@@ -625,13 +625,6 @@ XYWnd::XYWnd() :
 	m_fScale = 1;
 	m_viewType = XY;
 
-	m_backgroundActivated = false;
-	m_alpha = 1.0f;
-	m_xmin = 0.0f;
-	m_ymin = 0.0f;
-	m_xmax = 0.0f;
-	m_ymax = 0.0f;
-
 	m_entityCreate = false;
 
 	m_mnuDrop = 0;
@@ -1263,73 +1256,127 @@ void XYWnd::XY_SnapToGrid( Vector3& point ){
 	}
 }
 
-void XYWnd::XY_LoadBackgroundImage( const char *name ){
-	const char* relative = path_make_relative( name, GlobalFileSystem().findRoot( name ) );
-	if ( relative == name ) {
-		globalWarningStream() << "WARNING: could not extract the relative path, using full path instead\n";
+
+void BackgroundImage::render( const VIEWTYPE viewtype ){
+	if( viewtype == _viewtype && _tex > 0 ){
+//		glPushAttrib( GL_ALL_ATTRIB_BITS ); //bug with intel
+
+		if ( GlobalOpenGL().GL_1_3() ) {
+			glActiveTexture( GL_TEXTURE0 );
+			glClientActiveTexture( GL_TEXTURE0 );
+		}
+		glEnable( GL_TEXTURE_2D );
+		glEnable( GL_BLEND );
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//		glPolygonMode( GL_FRONT, GL_FILL );
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+		glDisable( GL_CULL_FACE );
+		glDisable( GL_DEPTH_TEST );
+
+		glBindTexture( GL_TEXTURE_2D, _tex );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+
+		glBegin( GL_QUADS );
+
+		glColor4f( 1, 1, 1, _alpha );
+		glTexCoord2f( 0, 1 );
+		glVertex2f( _xmin, _ymin );
+
+		glTexCoord2f( 1, 1 );
+		glVertex2f( _xmax, _ymin );
+
+		glTexCoord2f( 1, 0 );
+		glVertex2f( _xmax, _ymax );
+
+		glTexCoord2f( 0, 0 );
+		glVertex2f( _xmin, _ymax );
+
+		glEnd();
+		glBindTexture( GL_TEXTURE_2D, 0 );
+
+//		glPopAttrib();
 	}
-
-	char fileNameWithoutExt[512];
-	strncpy( fileNameWithoutExt, relative, sizeof( fileNameWithoutExt ) - 1 );
-	fileNameWithoutExt[512 - 1] = '\0';
-	fileNameWithoutExt[strlen( fileNameWithoutExt ) - 4] = '\0';
-
-	Image *image = QERApp_LoadImage( 0, fileNameWithoutExt );
-	if ( !image ) {
-		globalErrorStream() << "Could not load texture " << fileNameWithoutExt << "\n";
-		return;
-	}
-	g_pParentWnd->ActiveXY()->m_tex = (qtexture_t*)malloc( sizeof( qtexture_t ) );
-	LoadTextureRGBA( g_pParentWnd->ActiveXY()->XYWnd::m_tex, image->getRGBAPixels(), image->getWidth(), image->getHeight() );
-	globalOutputStream() << "Loaded background texture " << relative << "\n";
-	g_pParentWnd->ActiveXY()->m_backgroundActivated = true;
-
-	int m_ix, m_iy;
-	switch ( g_pParentWnd->ActiveXY()->m_viewType )
-	{
-	case XY:
-		m_ix = 0;
-		m_iy = 1;
-		break;
-	case XZ:
-		m_ix = 0;
-		m_iy = 2;
-		break;
-	default: //case YZ:
-		m_ix = 1;
-		m_iy = 2;
-		break;
-	}
-
-	Vector3 min, max;
-	Select_GetBounds( min, max );
-	g_pParentWnd->ActiveXY()->m_xmin = min[m_ix];
-	g_pParentWnd->ActiveXY()->m_ymin = min[m_iy];
-	g_pParentWnd->ActiveXY()->m_xmax = max[m_ix];
-	g_pParentWnd->ActiveXY()->m_ymax = max[m_iy];
 }
 
-void XYWnd::XY_DisableBackground( void ){
-	g_pParentWnd->ActiveXY()->m_backgroundActivated = false;
-	if ( g_pParentWnd->ActiveXY()->m_tex ) {
-		free( g_pParentWnd->ActiveXY()->m_tex );
+#include "qe3.h"
+#include "os/file.h"
+const char* BackgroundImage::background_image_dialog(){
+	StringOutputStream buffer( 1024 );
+
+	buffer << g_qeglobals.m_userGamePath.c_str() << "textures/";
+
+	if ( !file_readable( buffer.c_str() ) ) {
+		// just go to fsmain
+		buffer.clear();
+		buffer << g_qeglobals.m_userGamePath.c_str() << "/";
 	}
-	g_pParentWnd->ActiveXY()->m_tex = NULL;
+
+	const char *filename = file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, "Background Image", buffer.c_str(), NULL );
+	if ( filename != 0 ) {
+		// use VFS to get the correct relative path
+		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );
+		if ( relative == filename ) {
+			globalWarningStream() << "WARNING: could not extract the relative path, using full path instead\n";
+		}
+		return relative;
+	}
+	return 0;
 }
 
-void WXY_BackgroundSelect( void ){
-	bool brushesSelected = Scene_countSelectedBrushes( GlobalSceneGraph() ) != 0;
-	if ( !brushesSelected ) {
-		gtk_MessageBox( 0, "You have to select some brushes to get the bounding box for.\n",
+void BackgroundImage::free_tex(){
+	if( _tex > 0 ){
+		glDeleteTextures( 1, &_tex );
+		_tex = 0;
+	}
+}
+
+void BackgroundImage::set( const VIEWTYPE viewtype ){
+	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+	const int nDim1 = ( viewtype == YZ ) ? 1 : 0;
+	const int nDim2 = ( viewtype == XY ) ? 1 : 2;
+	if( !( bounds.extents[nDim1] > 0 && bounds.extents[nDim2] > 0 ) ){
+		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Select some objects to get the bounding box for image.\n",
 						"No selection", eMB_OK, eMB_ICONERROR );
-		return;
 	}
+	else{
+		free_tex();
+		const char *filename = background_image_dialog();
+		if( filename ){
+			StringOutputStream filename_noext( 1024 );
+			const char* ext = path_get_extension( filename );
+			if( string_empty( ext ) )
+				filename_noext << filename;
+			else
+				filename_noext << StringRange( filename, ext - 1 );
 
-	const char *filename = file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, "Background Image", NULL, NULL );
-	g_pParentWnd->ActiveXY()->XY_DisableBackground();
-	if ( filename ) {
-		g_pParentWnd->ActiveXY()->XY_LoadBackgroundImage( filename );
+			Image *image = QERApp_LoadImage( 0, filename_noext.c_str() );
+			if ( !image ) {
+				globalErrorStream() << "Could not load texture " << filename_noext.c_str() << "\n";
+			}
+			else{
+				qtexture_t* qtex = (qtexture_t*)malloc( sizeof( qtexture_t ) ); /* srs hack :E */
+				LoadTextureRGBA( qtex, image->getRGBAPixels(), image->getWidth(), image->getHeight() );
+				if( qtex->texture_number > 0 ){
+					globalOutputStream() << "Loaded background texture " << filename << "\n";
+					_tex = qtex->texture_number;
+					_viewtype = viewtype;
+
+					_xmin = bounds.origin[nDim1] - bounds.extents[nDim1];
+					_ymin = bounds.origin[nDim2] - bounds.extents[nDim2];
+					_xmax = bounds.origin[nDim1] + bounds.extents[nDim1];
+					_ymax = bounds.origin[nDim2] + bounds.extents[nDim2];
+				}
+				image->release();
+				free( qtex );
+			}
+		}
 	}
+}
+
+void WXY_SetBackgroundImage(){
+	g_pParentWnd->ActiveXY()->setBackgroundImage();
 }
 
 /*
@@ -1496,40 +1543,6 @@ void XYWnd::RenderActive( void ){
 			glwidget_make_current( m_gl_widget );
 		}
 	}
-}
-
-void XYWnd::XY_DrawBackground( void ){
-	glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-	glEnable( GL_TEXTURE_2D );
-	glEnable( GL_BLEND );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-
-	glPolygonMode( GL_FRONT, GL_FILL );
-
-	glBindTexture( GL_TEXTURE_2D, m_tex->texture_number );
-	glBegin( GL_QUADS );
-
-	glColor4f( 1.0, 1.0, 1.0, m_alpha );
-	glTexCoord2f( 0.0, 1.0 );
-	glVertex2f( m_xmin, m_ymin );
-
-	glTexCoord2f( 1.0, 1.0 );
-	glVertex2f( m_xmax, m_ymin );
-
-	glTexCoord2f( 1.0, 0.0 );
-	glVertex2f( m_xmax, m_ymax );
-
-	glTexCoord2f( 0.0, 0.0 );
-	glVertex2f( m_xmin, m_ymax );
-
-	glEnd();
-	glBindTexture( GL_TEXTURE_2D, 0 );
-
-	glPopAttrib();
 }
 
 void XYWnd::XY_DrawGrid( void ) {
@@ -2285,9 +2298,8 @@ void XYWnd::XY_Draw(){
 	glDisable( GL_COLOR_MATERIAL );
 	glDisable( GL_DEPTH_TEST );
 
-	if ( m_backgroundActivated ) {
-		XY_DrawBackground();
-	}
+	m_backgroundImage.render( m_viewType );
+
 	XY_DrawGrid();
 
 	if ( g_xywindow_globals_private.show_blocks ) {

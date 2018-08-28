@@ -58,6 +58,25 @@ inline const char* ViewType_getTitle( VIEWTYPE viewtype ){
 	return "";
 }
 
+class BackgroundImage
+{
+	GLuint _tex;
+	const float _alpha;
+	float _xmin, _ymin, _xmax, _ymax;
+	VIEWTYPE _viewtype;
+public:
+	BackgroundImage() : _tex( 0 ), _alpha( 1 ){
+	}
+	~BackgroundImage(){
+		free_tex();
+	}
+	void set( const VIEWTYPE viewtype );
+	void render( const VIEWTYPE viewtype );
+private:
+	const char* background_image_dialog();
+	void free_tex();
+};
+
 #include "timer.h"
 class FBO;
 
@@ -107,9 +126,6 @@ void DrawCameraIcon( const Vector3& origin, const Vector3& angles );
 void XY_DrawBlockGrid();
 void XY_DrawAxis();
 void XY_DrawGrid();
-void XY_DrawBackground();
-void XY_LoadBackgroundImage( const char *name );
-void XY_DisableBackground();
 
 void XY_MouseUp( int x, int y, unsigned int buttons );
 void XY_MouseDown( int x, int y, unsigned int buttons );
@@ -170,12 +186,13 @@ Matrix4 m_modelview;
 
 int m_nWidth;
 int m_nHeight;
-// background image stuff
-qtexture_t *m_tex;
-bool m_backgroundActivated;
-float m_alpha;   // vertex alpha
-float m_xmin, m_ymin, m_xmax, m_ymax;
+
+void setBackgroundImage(){
+	m_backgroundImage.set( m_viewType );
+}
 private:
+BackgroundImage m_backgroundImage;
+
 float m_fScale;
 Vector3 m_vOrigin;
 
@@ -302,7 +319,7 @@ void XYWindow_Construct();
 void XYWindow_Destroy();
 
 void WXY_Print();
-void WXY_BackgroundSelect();
+void WXY_SetBackgroundImage();
 
 void XYShow_registerCommands();
 void XYWnd_registerShortcuts();
