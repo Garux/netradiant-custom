@@ -1378,8 +1378,6 @@ public:
 	}
 	void save(){
 		glBindTexture( GL_TEXTURE_2D, _tex );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, 0, 0, _width, _height, 0 );
 		//glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_nWidth, m_nHeight );
 		glBindTexture( GL_TEXTURE_2D, 0 );
@@ -1406,12 +1404,8 @@ public:
 		glEnable( GL_TEXTURE_2D );
 		glDisable( GL_BLEND );
 
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-
 		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		glBindTexture( GL_TEXTURE_2D, _tex );
-
 
 		glColor4f( 1.f, 1.f, 1.f, 1.f );
 		glBegin( GL_QUADS );
@@ -1430,6 +1424,13 @@ public:
 protected:
 	void construct() {
 		glGenTextures( 1, &_tex );
+		glEnable( GL_TEXTURE_2D );
+		glBindTexture( GL_TEXTURE_2D, _tex );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glBindTexture( GL_TEXTURE_2D, 0 );
 		_constructed = true;
 	}
 private:

@@ -30,7 +30,6 @@
 #include "gtkutil/xorrectangle.h"
 #include "view.h"
 #include "map.h"
-#include "texturelib.h"
 
 #include "qerplugin.h"
 
