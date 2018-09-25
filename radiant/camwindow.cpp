@@ -848,6 +848,106 @@ private:
 	}
 };
 
+#include "grid.h"
+class RenderableCamWorkzone : public OpenGLRenderable
+{
+public:
+void render( RenderStateFlags state ) const {
+	glEnableClientState( GL_EDGE_FLAG_ARRAY );
+
+	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+
+	for( std::size_t i = 0; i < 3; ++i ){
+		const std::size_t i2 = ( i + 1 ) % 3;
+		const std::size_t i3 = ( i + 2 ) % 3;
+//		const Vector3 normal = g_vector3_axes[i];
+		const float offset = 1024;
+		std::vector<Vector3> points;
+		points.reserve( 4 );
+		points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
+		if( bounds.extents[i2] != 0 ){
+			points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
+		}
+		if( bounds.extents[i3] != 0 ){
+			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+			if( bounds.extents[i2] != 0 ){
+				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+			}
+		}
+
+		const float grid = GetGridSize();
+		const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
+
+		Array<Vector3> verticesarr( approx_count );
+		Array<GLboolean> edgearr( approx_count );
+		Array<Vector4> colorarr0( approx_count );
+		Array<Vector4> colorarr1( approx_count );
+
+		float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
+//		const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
+		const bool start0 = float_snapped( coord, grid * 2 ) == coord;
+		std::size_t count = 0;
+
+		for( ; count < approx_count - 4; count += 4 ){
+			verticesarr[count][i] =
+			verticesarr[count + 1][i] = coord;
+			const float alpha = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
+			colorarr0[count] = colorarr0[count + 1] = Vector4( 1, 0, 0, alpha );
+			colorarr1[count] = colorarr1[count + 1] = Vector4( 1, 1, 1, alpha );
+			coord += grid;
+			verticesarr[count + 2][i] =
+			verticesarr[count + 3][i] = coord;
+			const float alpha2 = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
+			colorarr0[count + 2] = colorarr0[count + 3] = Vector4( 1, 0, 0, alpha2 );
+			colorarr1[count + 2] = colorarr1[count + 3] = Vector4( 1, 1, 1, alpha2 );
+			coord += grid;
+			edgearr[count] =
+			edgearr[count + 2] = GL_FALSE;
+			edgearr[count + 1] =
+			edgearr[count + 3] = GL_TRUE;
+		}
+
+		if( points.size() == 1 ){
+			points.push_back( points[0] + g_vector3_axes[i2] * 8 );
+			for( std::size_t k = 0; k < count; k += 4 ){
+				edgearr[k + 1] = GL_FALSE;
+			}
+		}
+
+		glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), verticesarr.data()->data() );
+		glEdgeFlagPointer( sizeof( GLboolean ), edgearr.data() );
+		for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++++j ){
+			const std::vector<Vector3>::const_iterator jj = j + 1;
+			for( std::size_t k = 0; k < count; k += 4 ){
+				verticesarr[k][i2] = ( *j )[i2];
+				verticesarr[k][i3] = ( *j )[i3];
+				verticesarr[k + 1][i2] = ( *jj )[i2];
+				verticesarr[k + 1][i3] = ( *jj )[i3];
+				verticesarr[k + 2][i2] = ( *jj )[i2];
+				verticesarr[k + 2][i3] = ( *jj )[i3];
+				verticesarr[k + 3][i2] = ( *j )[i2];
+				verticesarr[k + 3][i3] = ( *j )[i3];
+			}
+
+			glPolygonOffset( -2, 2 );
+			glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr0.data()->data() );
+			glDrawArrays( GL_QUADS, start0? 0 : 2, GLsizei( count - ( start0? 4 : 2 ) ) );
+
+			glPolygonOffset( 1, -1 );
+			glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr1.data()->data() );
+			glDrawArrays( GL_QUADS, start0? 2 : 0, GLsizei( count - ( start0? 2 : 4 ) ) );
+		}
+	}
+
+	glDisableClientState( GL_EDGE_FLAG_ARRAY );
+}
+
+void render( Renderer& renderer, Shader* shader ) const {
+	renderer.SetState( shader, Renderer::eFullMaterials );
+	renderer.addRenderable( *this, g_matrix4_identity );
+}
+};
+
 
 
 
@@ -868,6 +968,7 @@ static Shader* m_state_select0;
 static Shader* m_state_select1;
 static Shader* m_state_wire;
 static Shader* m_state_facewire;
+static Shader* m_state_workzone;
 
 FreezePointer m_freezePointer;
 
@@ -914,6 +1015,7 @@ void queue_draw(){
 void draw();
 
 static void captureStates(){
+	m_state_workzone = GlobalShaderCache().capture( "$CAM_WORKZONE" );
 	m_state_facewire = GlobalShaderCache().capture( "$CAM_FACEWIRE" );
 	m_state_wire = GlobalShaderCache().capture( "$CAM_WIRE" );
 	m_state_select0 = GlobalShaderCache().capture( "$CAM_OVERLAY" );
@@ -924,6 +1026,7 @@ static void releaseStates(){
 	GlobalShaderCache().release( "$CAM_OVERLAY" );
 	GlobalShaderCache().release( "$CAM_WIRE" );
 	GlobalShaderCache().release( "$CAM_FACEWIRE" );
+	GlobalShaderCache().release( "$CAM_WORKZONE" );
 }
 
 camera_t& getCamera(){
@@ -957,6 +1060,7 @@ Shader* CamWnd::m_state_select0 = 0;
 Shader* CamWnd::m_state_select1 = 0;
 Shader* CamWnd::m_state_wire = 0;
 Shader* CamWnd::m_state_facewire = 0;
+Shader* CamWnd::m_state_workzone = 0;
 
 CamWnd* NewCamWnd(){
 	return new CamWnd;
@@ -1845,7 +1949,6 @@ void ShowSize3dToggle(){
 	}
 }
 
-#include "grid.h"
 void CamWnd::Cam_Draw(){
 //		globalOutputStream() << "Cam_Draw()\n";
 	fbo_get()->start();
@@ -1953,330 +2056,12 @@ void CamWnd::Cam_Draw(){
 
 		Scene_Render( renderer, m_view );
 
+		RenderableCamWorkzone workzone;
+		if( g_camwindow_globals_private.m_bShowWorkzone && GlobalSelectionSystem().countSelected() != 0 ){
+			workzone.render( renderer, m_state_workzone );
+		}
+
 		renderer.render( m_Camera.modelview, m_Camera.projection );
-	}
-
-	/* workzone */
-	if( g_camwindow_globals_private.m_bShowWorkzone && GlobalSelectionSystem().countSelected() != 0 ){
-#if 0
-		glEnable( GL_BLEND );
-		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		glShadeModel( GL_SMOOTH );
-
-		glEnable( GL_DEPTH_TEST );
-		glDepthFunc( GL_LESS );
-		glDepthMask( GL_TRUE );
-
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glDisableClientState( GL_NORMAL_ARRAY );
-		glDisableClientState( GL_COLOR_ARRAY );
-
-		glDisable( GL_TEXTURE_2D );
-		glDisable( GL_LIGHTING );
-		glDisable( GL_COLOR_MATERIAL );
-
-		glDisable( GL_LINE_STIPPLE );
-		glLineWidth( 1 );
-#if 0
-		const Vector4 color0( g_camwindow_globals.color_selbrushes3d, 0 );
-		const Vector4 color1( g_camwindow_globals.color_selbrushes3d, 1 );
-#else
-		const Vector4 color0( 1, 1, 1, 0 );
-		const Vector4 color1( 1, 1, 1, 1 );
-#endif
-		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
-
-		glBegin( GL_LINES );
-		for( std::size_t i = 0; i < 3; ++i ){
-			const std::size_t i2 = ( i + 1 ) % 3;
-			const std::size_t i3 = ( i + 2 ) % 3;
-			const Vector3 normal = g_vector3_axes[i];
-			const float size = 1024;
-			std::vector<Vector3> points;
-			points.reserve( 4 );
-			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			if( bounds.extents[i2] != 0 ){
-				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			}
-			if( bounds.extents[i3] != 0 ){
-				points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				if( bounds.extents[i2] != 0 ){
-					points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				}
-			}
-			for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++j ){
-				glColor4fv( vector4_to_array( color0 ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] + size ) ) );
-				glColor4fv( vector4_to_array( color1 ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
-				glColor4fv( vector4_to_array( color0 ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] + size ) ) );
-			}
-		}
-		glEnd();
-#else
-		glEnable( GL_BLEND );
-		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		glShadeModel( GL_SMOOTH );
-
-		glEnable( GL_DEPTH_TEST );
-//		glDepthFunc( GL_LESS );
-		glDepthFunc( GL_LEQUAL );
-		glDepthMask( GL_TRUE );
-
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glDisableClientState( GL_NORMAL_ARRAY );
-		glEnableClientState( GL_COLOR_ARRAY );
-		glEnableClientState( GL_EDGE_FLAG_ARRAY );
-		glEnableClientState( GL_VERTEX_ARRAY );
-
-		glDisable( GL_TEXTURE_2D );
-		glDisable( GL_LIGHTING );
-		glDisable( GL_COLOR_MATERIAL );
-
-		glDisable( GL_LINE_STIPPLE );
-		glLineWidth( 1 );
-
-		glEnable( GL_POLYGON_OFFSET_LINE );
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-		glDisable( GL_CULL_FACE );
-
-//		glMatrixMode( GL_PROJECTION );
-//		Matrix4 ma( m_Camera.projection );
-//		ma[10] += 4.8e-5f; /* lengyel */
-//		glLoadMatrixf( reinterpret_cast<const float*>( &ma ) );
-
-		const Vector4 color0( 0, 1, 0, 0 );
-		const Vector4 color1( 0, 1, 0, 1 );
-
-		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
-	#if 0
-		glBegin( GL_LINES );
-		for( std::size_t i = 0; i < 3; ++i ){
-			const std::size_t i2 = ( i + 1 ) % 3;
-			const std::size_t i3 = ( i + 2 ) % 3;
-			const Vector3 normal = g_vector3_axes[i];
-			const float size = 1024;
-			std::vector<Vector3> points;
-			points.reserve( 4 );
-			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			if( bounds.extents[i2] != 0 ){
-				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			}
-			if( bounds.extents[i3] != 0 ){
-				points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				if( bounds.extents[i2] != 0 ){
-					points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				}
-			}
-			for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++j ){
-				glColor4fv( vector4_to_array( color0 ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] + size ) ) );
-				glColor4fv( vector4_to_array( color1 ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
-				glColor4fv( vector4_to_array( color0 ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] + size ) ) );
-			}
-		}
-		glEnd();
-		#endif
-
-		#if 0
-		glNormal3f( 0, 0, 1 );
-		glBegin( GL_POLYGON );
-		glColor4fv( vector4_to_array( color1 ) );
-		glEdgeFlag(	GL_TRUE );
-		glVertex3fv( vector3_to_array( bounds.origin + bounds.extents * Vector3( 5, 1, 1 ) ) );
-		glEdgeFlag(	GL_FALSE );
-		glVertex3fv( vector3_to_array( bounds.origin + bounds.extents * Vector3( 10, 1, 1 ) ) );
-		glEdgeFlag(	GL_TRUE );
-		glVertex3fv( vector3_to_array( bounds.origin + bounds.extents * Vector3( 10, -1, 1 ) ) );
-		glEdgeFlag(	GL_FALSE );
-		glVertex3fv( vector3_to_array( bounds.origin + bounds.extents * Vector3( 5, -1, 1 ) ) );
-		glEdgeFlag(	GL_TRUE );
-		glVertex3fv( vector3_to_array( bounds.origin + bounds.extents * Vector3( -1, -1, 1 ) ) );
-		glEdgeFlag(	GL_FALSE );
-		glVertex3fv( vector3_to_array( bounds.origin + bounds.extents * Vector3( -1, 1, 1 ) ) );
-		glEdgeFlag(	GL_TRUE );
-		glEnd();
-		#endif
-
-		#if 0
-		Vector3 verts[4] = { bounds.origin + bounds.extents * Vector3( 5, 1, 1 ),
-							bounds.origin + bounds.extents * Vector3( 5, -1, 1 ),
-							bounds.origin + bounds.extents * Vector3( -1, -1, 1 ),
-							bounds.origin + bounds.extents * Vector3( -1, 1, 1 ) };
-		Vector4 colours[4] = { color1, color0, color1, color0 };
-		glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), verts[0].data() );
-		glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colours[0].data() );
-		glDrawArrays( GL_POLYGON, 0, 4 );
-		#endif // 0
-
-		#if 0
-		for( std::size_t i = 0; i < 3; ++i ){
-			const std::size_t i2 = ( i + 1 ) % 3;
-			const std::size_t i3 = ( i + 2 ) % 3;
-			const Vector3 normal = g_vector3_axes[i];
-			const float offset = 256;
-			std::vector<Vector3> points;
-			points.reserve( 4 );
-			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			if( bounds.extents[i2] != 0 ){
-				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			}
-			if( bounds.extents[i3] != 0 ){
-				points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				if( bounds.extents[i2] != 0 ){
-					points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				}
-			}
-
-			const float grid = GetGridSize();
-			const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 2 / grid + 4;
-
-			Array<Vector3> verticesarr( approx_count );
-			Array<GLboolean> edgearr0( approx_count );
-			Array<GLboolean> edgearr1( approx_count );
-			Array<Vector4> colorarr0( approx_count );
-			Array<Vector4> colorarr1( approx_count );
-
-			float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
-			const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
-			GLboolean flag = float_snapped( coord, grid * 2 ) == coord? GL_TRUE : GL_FALSE;
-			std::size_t count = 0;
-
-			for( ; coord < coord_end; coord += grid ){
-				verticesarr[count][i] = coord;
-				colorarr0[count] = Vector4( 1, 0, 0, 1 );
-				colorarr1[count] = Vector4( 1, 1, 1, 1 );
-				edgearr0[count] = flag;
-				flag = !flag;
-				edgearr1[count] = flag;
-				++count;
-			}
-			edgearr0[count - 1] =
-			edgearr1[count - 1] =
-			edgearr0[count] =
-			edgearr1[count] = GL_FALSE;
-			++count;
-
-			glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), verticesarr.data()->data() );
-			for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++j ){
-				for( std::size_t k = 0; k < count - 1; ++k ){
-					verticesarr[k][i2] = ( *j )[i2];
-					verticesarr[k][i3] = ( *j )[i3];
-				}
-				verticesarr[count - 1] = verticesarr[count - 2] + g_vector3_axes[i2] * 512 + g_vector3_axes[i3] * 512;
-
-				glPolygonOffset( -2, 2 );
-				glEdgeFlagPointer( sizeof( GLboolean ), edgearr0.data() );
-				glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr0.data()->data() );
-				glDrawArrays( GL_POLYGON, 0, GLsizei( count ) );
-
-				glPolygonOffset( 1, -1 );
-				glEdgeFlagPointer( sizeof( GLboolean ), edgearr1.data() );
-				glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr1.data()->data() );
-				glDrawArrays( GL_POLYGON, 0, GLsizei( count ) );
-			}
-		}
-		#endif
-
-		#if 1
-		for( std::size_t i = 0; i < 3; ++i ){
-			const std::size_t i2 = ( i + 1 ) % 3;
-			const std::size_t i3 = ( i + 2 ) % 3;
-//			const Vector3 normal = g_vector3_axes[i];
-			const float offset = 1024;
-			std::vector<Vector3> points;
-			points.reserve( 4 );
-			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			if( bounds.extents[i2] != 0 ){
-				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			}
-			if( bounds.extents[i3] != 0 ){
-				points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				if( bounds.extents[i2] != 0 ){
-					points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				}
-			}
-
-			const float grid = GetGridSize();
-			const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
-
-			Array<Vector3> verticesarr( approx_count );
-			Array<GLboolean> edgearr( approx_count );
-			Array<Vector4> colorarr0( approx_count );
-			Array<Vector4> colorarr1( approx_count );
-
-			float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
-//			const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
-			const bool start0 = float_snapped( coord, grid * 2 ) == coord;
-			std::size_t count = 0;
-
-			for( ; count < approx_count - 4; count += 4 ){
-				verticesarr[count][i] =
-				verticesarr[count + 1][i] = coord;
-				const float alpha = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
-				colorarr0[count] = colorarr0[count + 1] = Vector4( 1, 0, 0, alpha );
-				colorarr1[count] = colorarr1[count + 1] = Vector4( 1, 1, 1, alpha );
-				coord += grid;
-				verticesarr[count + 2][i] =
-				verticesarr[count + 3][i] = coord;
-				const float alpha2 = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
-				colorarr0[count + 2] = colorarr0[count + 3] = Vector4( 1, 0, 0, alpha2 );
-				colorarr1[count + 2] = colorarr1[count + 3] = Vector4( 1, 1, 1, alpha2 );
-				coord += grid;
-				edgearr[count] =
-				edgearr[count + 2] = GL_FALSE;
-				edgearr[count + 1] =
-				edgearr[count + 3] = GL_TRUE;
-			}
-
-			if( points.size() == 1 ){
-				points.push_back( points[0] + g_vector3_axes[i2] * 8 );
-				for( std::size_t k = 0; k < count; k += 4 ){
-					edgearr[k + 1] = GL_FALSE;
-				}
-			}
-
-			glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), verticesarr.data()->data() );
-			glEdgeFlagPointer( sizeof( GLboolean ), edgearr.data() );
-			for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++++j ){
-				const std::vector<Vector3>::const_iterator jj = j + 1;
-				for( std::size_t k = 0; k < count; k += 4 ){
-					verticesarr[k][i2] = ( *j )[i2];
-					verticesarr[k][i3] = ( *j )[i3];
-					verticesarr[k + 1][i2] = ( *jj )[i2];
-					verticesarr[k + 1][i3] = ( *jj )[i3];
-					verticesarr[k + 2][i2] = ( *jj )[i2];
-					verticesarr[k + 2][i3] = ( *jj )[i3];
-					verticesarr[k + 3][i2] = ( *j )[i2];
-					verticesarr[k + 3][i3] = ( *j )[i3];
-				}
-
-				glPolygonOffset( -2, 2 );
-				glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr0.data()->data() );
-				glDrawArrays( GL_QUADS, start0? 0 : 2, GLsizei( count - ( start0? 4 : 2 ) ) );
-
-				glPolygonOffset( 1, -1 );
-				glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr1.data()->data() );
-				glDrawArrays( GL_QUADS, start0? 2 : 0, GLsizei( count - ( start0? 2 : 4 ) ) );
-			}
-		}
-		#endif
-
-
-		glShadeModel( GL_FLAT );
-		glDisableClientState( GL_EDGE_FLAG_ARRAY );
-		glDisable( GL_POLYGON_OFFSET_LINE );
-
-#endif
 	}
 
 	/* size */
