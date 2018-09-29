@@ -334,7 +334,8 @@ static picoModel_t *_md2_load( PM_PARAMS_LOAD ){
 	index_DUP_LUT_t *p_index_LUT_DUPS;
 	md2Triangle_t   *p_md2Triangle;
 
-	char skinname[ MD2_MAX_SKINNAME ];
+	char skinname[ MD2_MAX_SKINNAME + 1 ];
+	skinname[ MD2_MAX_SKINNAME] = '\0';
 	md2_t           *md2;
 	md2St_t         *texCoord;
 	md2Frame_t      *frame;

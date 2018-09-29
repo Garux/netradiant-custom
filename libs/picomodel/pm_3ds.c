@@ -728,8 +728,8 @@ static picoModel_t *_3ds_load( PM_PARAMS_LOAD ){
 		return NULL;
 	}
 	/* get model's base name (eg. jeep from c:\models\jeep.3ds) */
-	memset( basename,0,sizeof( basename ) );
-	strncpy( basename,_pico_nopath( fileName ),sizeof( basename ) );
+	memset( basename, 0, sizeof( basename ) );
+	strncpy( basename, _pico_nopath( fileName ), sizeof( basename ) - 1 );
 	_pico_setfext( basename, NULL );
 
 	/* initialize persistant vars (formerly static) */

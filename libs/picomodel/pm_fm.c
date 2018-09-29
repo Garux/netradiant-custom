@@ -201,7 +201,8 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD ){
 
 	fm_vert_normal_t    *vert;
 
-	char skinname[FM_SKINPATHSIZE];
+	char skinname[FM_SKINPATHSIZE + 1];
+	skinname[FM_SKINPATHSIZE] = '\0';
 	fm_t fm;
 	fm_header_t     *fm_head;
 	fm_st_t         *texCoord;

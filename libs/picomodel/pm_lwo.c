@@ -103,7 +103,8 @@ static picoModel_t *_lwo_load( PM_PARAMS_LOAD ){
 	lwPolygon       *pol;
 	lwPolVert       *v;
 	lwVMapPt        *vm;
-	char name[ 256 ];
+	char name[256];
+	name[255] = '\0';
 	int i, j, k, numverts;
 
 	picoModel_t     *picoModel;
@@ -234,7 +235,7 @@ static picoModel_t *_lwo_load( PM_PARAMS_LOAD ){
 		}
 
 		/* detox and set shader name */
-		strncpy( name, surface->name, sizeof( name ) );
+		strncpy( name, surface->name, sizeof( name ) - 1 );
 		_pico_first_token( name );
 		_pico_setfext( name, NULL );
 		_pico_unixify( name );

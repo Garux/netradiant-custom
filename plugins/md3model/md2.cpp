@@ -41,7 +41,6 @@ typedef unsigned char byte;
    ========================================================================
  */
 #define MD2_NUMVERTEXNORMALS 162
-#define MD2_MAX_SKINNAME    64
 
 const unsigned char MD2_IDENT[4] = { 'I', 'D', 'P', '2', };
 #define MD2_VERSION 8
@@ -234,7 +233,8 @@ void MD2Surface_read( Model& model, const byte* buffer, ArchiveFile& file ){
 
 	char skinname[MD2_MAX_SKINNAME];
 	char skinnameRelative[MD2_MAX_SKINNAME];
-	char path[MD2_MAX_SKINNAME];
+	char path[MD2_MAX_SKINNAME + 1];
+	path[MD2_MAX_SKINNAME] = '\0';
 	int i = MD2_MAX_SKINNAME;
 	PointerInputStream inputStream( buffer + header.ofs_skins );
 	inputStream.read( reinterpret_cast<byte*>( skinnameRelative ), MD2_MAX_SKINNAME );
