@@ -377,7 +377,7 @@ static picoModel_t *_fm_load( PM_PARAMS_LOAD ){
 #endif
 
 	// detox Skin name
-	_pico_setfext( skinname, "" );
+	_pico_setfext( skinname, NULL );
 	_pico_unixify( skinname );
 
 	/* create new pico model */

@@ -232,9 +232,12 @@ static int _obj_mtl_load( picoModel_t *model ){
 		return 0;
 	}
 
-	/* helper */
+	/* helpers */
+	#define _obj_mtl_print_ok _pico_printf( PICO_NORMAL, "PICO: loading %s...OK\n", fileName )
+	#define _obj_mtl_print_fail _pico_printf( PICO_WARNING, "PICO: loading %s...FAIL\n", fileName )
 	#define _obj_mtl_error_return \
 	{ \
+		_obj_mtl_print_fail; \
 		_pico_free_parser( p );	\
 		_pico_free_file( mtlBuffer ); \
 		_pico_free( fileName );	\
@@ -254,9 +257,11 @@ static int _obj_mtl_load( picoModel_t *model ){
 
 	/* check result */
 	if ( mtlBufSize == 0 ) {
+		_obj_mtl_print_fail;
 		return 1;                       /* file is empty: no error */
 	}
 	if ( mtlBufSize  < 0 ) {
+		_obj_mtl_print_fail;
 		return 0;                       /* load failed: error */
 
 	}
@@ -273,7 +278,6 @@ static int _obj_mtl_load( picoModel_t *model ){
 		if ( _pico_parse( p,1 ) == NULL ) {
 			break;
 		}
-#if 1
 
 		/* skip empty lines */
 		if ( p->token == NULL || !strlen( p->token ) ) {
@@ -313,7 +317,6 @@ static int _obj_mtl_load( picoModel_t *model ){
 		/* diffuse map name */
 		else if ( !_pico_stricmp( p->token,"map_kd" ) ) {
 			char *mapName;
-			picoShader_t *shader;
 
 			/* pointer to current shader must be valid */
 			if ( curShader == NULL ) {
@@ -328,13 +331,8 @@ static int _obj_mtl_load( picoModel_t *model ){
 				_pico_printf( PICO_ERROR,"Missing material map name in MTL, line %d.",p->curLine );
 				_obj_mtl_error_return;
 			}
-			/* create a new pico shader */
-			shader = PicoNewShader( model );
-			if ( shader == NULL ) {
-				_obj_mtl_error_return;
-			}
 			/* set shader map name */
-			PicoSetShaderMapName( shader,mapName );
+			PicoSetShaderMapName( curShader, mapName );
 		}
 		/* dissolve factor (pseudo transparency 0..1) */
 		/* where 0 means 100% transparent and 1 means opaque */
@@ -486,12 +484,12 @@ static int _obj_mtl_load( picoModel_t *model ){
 			/* set specular color */
 			PicoSetShaderSpecularColor( curShader,color );
 		}
-#endif
 		/* skip rest of line */
 		_pico_parse_skip_rest( p );
 	}
 
 	/* free parser, file buffer, and file name */
+	_obj_mtl_print_ok;
 	_pico_free_parser( p );
 	_pico_free_file( mtlBuffer );
 	_pico_free( fileName );
@@ -567,10 +565,8 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 	PicoSetModelName( model,fileName );
 	PicoSetModelFileName( model,fileName );
 
-	/* try loading the materials; we don't handle the result */
-#if 1
+	/* try loading the materials */
 	_obj_mtl_load( model );
-#endif
 
 	/* parse obj line by line */
 	while ( 1 )
@@ -908,7 +904,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 			{
 				shader = PicoFindShader( model, name, 1 );
 				if ( shader == NULL ) {
-					_pico_printf( PICO_WARNING,"Undefined material name in OBJ, line %d. Making a default shader.",p->curLine );
+					_pico_printf( PICO_WARNING, "Undefined material name \"%s\" in OBJ, line %d. Making a default shader.", name, p->curLine );
 
 					/* create a new pico shader */
 					shader = PicoNewShader( model );
@@ -927,6 +923,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 		/* skip unparsed rest of line and continue */
 		_pico_parse_skip_rest( p );
 	}
+
 	/* free memory used by temporary vertexdata */
 	FreeObjVertexData( vertexData );
 

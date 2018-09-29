@@ -694,6 +694,60 @@ int _pico_getline( char *buf, int bufsize, char *dest, int destsize ){
 	return pos;
 }
 
+/* expecting fileName to be relative vfs model path */
+void _pico_deduce_shadername( const char* fileName, const char* srcName, picoShader_t* shader ){
+	if( srcName == NULL || fileName == NULL )
+		return;
+	char name[strlen( srcName ) + 1];
+	strcpy( name, srcName );
+	_pico_unixify( name );
+	_pico_setfext( name, NULL );
+
+	char path[strlen( fileName ) + strlen( name ) + 1];
+	_pico_nofname( fileName, path, strlen( fileName ) + strlen( name ) + 1 );
+	_pico_unixify( path );
+
+	if( !strchr( name , '/' ) ){ /* texture is likely in the folder, where model is */
+		strcat( path, name );
+	}
+	else if( name[0] == '/' || ( name[0] != '\0' && name[1] == ':' ) || strstr( name, ".." ) ){ /* absolute path or with .. */
+		const char* p = name;
+		for (; *p != '\0'; ++p )
+			if ( _pico_strnicmp( p, "/models/", 8 ) == 0 || _pico_strnicmp( p, "/textures/", 10 ) == 0 )
+				break;
+		if( *p != '\0' ){
+			strcpy( path, p + 1 );
+		}
+		else{
+			p = _pico_nopath( name );
+			strcat( path, p );
+		}
+	}
+	else{
+		PicoSetShaderName( shader, name );
+		return;
+	}
+
+	_pico_printf( PICO_NORMAL, "PICO: substituting shader name: %s -> %s", srcName, path );
+	PicoSetShaderName( shader, path );
+}
+
+/* deduce shadernames from bitmap or shadername paths */
+void _pico_deduce_shadernames( picoModel_t *model ){
+	for ( int i = 0; i < model->numShaders; ++i ){
+		/* skip null shaders */
+		if ( model->shader[i] == NULL )
+			continue;
+
+		const char* mapname = model->shader[i]->mapName;
+		const char* shadername = model->shader[i]->name;
+		if( mapname && *mapname )
+			_pico_deduce_shadername( model->fileName, mapname, model->shader[i] );
+		else if( shadername && *shadername )
+			_pico_deduce_shadername( model->fileName, shadername, model->shader[i] );
+	}
+}
+
 /* _pico_parse_skip_white:
  *  skips white spaces in current pico parser, sets *hasLFs
  *  to 1 if linefeeds were skipped, and either returns the
