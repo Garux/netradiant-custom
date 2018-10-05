@@ -1509,6 +1509,16 @@ Face& getFace() const {
 void testSelect( SelectionTest& test, SelectionIntersection& best ){
 	test.TestPoint( getEdge(), best );
 }
+Vector3 bestPlaneIndirect( const SelectionTest& test ) const {
+	const Winding& winding = getFace().getWinding();
+	Vector3 points[2];
+	points[0] = winding[m_faceVertex.getVertex()].vertex;
+	points[1] = winding[Winding_next( winding, m_faceVertex.getVertex() )].vertex;
+	for( std::size_t i = 0; i < 2; ++i ){
+		points[i] = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( points[i], 1 ) ) );
+	}
+	return line_closest_point( Line( points[0], points[1] ), g_vector3_identity );
+}
 };
 
 class SelectableVertex
@@ -3042,6 +3052,28 @@ void testSelect( Selector& selector, SelectionTest& test ){
 		Selector_add( selector, *this, best );
 	}
 }
+void bestPlaneIndirect( const SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ) const {
+	const Vector3 intersection_new = m_edge->bestPlaneIndirect( test );
+	const float dist_new = vector3_length_squared( intersection_new );
+	if( dist_new < dist ){
+		FaceVertexId faceVertex = m_edge->m_faceVertex;
+		const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
+		if( ( vector3_dot( plane1.normal(), viewer ) - plane1.dist() ) <= 0 ){
+			plane = plane1;
+			intersection = intersection_new;
+			dist = dist_new;
+		}
+		else{
+			faceVertex = next_edge( m_edge->m_faces, faceVertex );
+			const Plane3& plane2 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
+			if( ( vector3_dot( plane2.normal(), viewer ) - plane2.dist() ) <= 0 ){
+				plane = plane2;
+				intersection = intersection_new;
+				dist = dist_new;
+			}
+		}
+	}
+}
 };
 
 class VertexInstance : public Selectable
@@ -3586,6 +3618,31 @@ void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPla
 	{
 		( *i ).selectReversedPlane( selector, selectedPlanes );
 	}
+}
+
+void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ){
+	test.BeginMesh( localToWorld() );
+	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+	{
+		SelectionIntersection intersection_new;
+		( *i ).testSelect( test, intersection_new );
+		if( SelectionIntersection_closer( intersection_new, intersection ) ){
+			intersection = intersection_new;
+			plane = ( *i ).getFace().plane3();
+		}
+	}
+}
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ){
+	test.BeginMesh( localToWorld() );
+	for ( EdgeInstances::iterator i = m_edgeInstances.begin(); i != m_edgeInstances.end(); ++i )
+	{
+		( *i ).bestPlaneIndirect( test, plane, intersection, dist, viewer );
+	}
+}
+void selectByPlane( const Plane3& plane ){
+	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+		if( plane3_equal( plane, ( *i ).getFace().plane3() ) || plane3_equal( plane, plane3_flipped( ( *i ).getFace().plane3() ) ) )
+			( *i ).setSelected( SelectionSystem::eFace, true );
 }
 
 

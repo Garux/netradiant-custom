@@ -1617,6 +1617,18 @@ void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPla
 	m_dragPlanes.selectReversedPlanes( m_patch.localAABB(), selector, selectedPlanes );
 }
 
+void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ){
+	test.BeginMesh( localToWorld() );
+	m_dragPlanes.bestPlaneDirect( m_patch.localAABB(), test, plane, intersection );
+}
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ){
+	test.BeginMesh( localToWorld() );
+	m_dragPlanes.bestPlaneIndirect( m_patch.localAABB(), test, plane, intersection, dist, viewer );
+}
+void selectByPlane( const Plane3& plane ){
+	m_dragPlanes.selectByPlane( m_patch.localAABB(), plane );
+}
+
 
 void snapComponents( float snap ){
 	if ( selectedVertices() ) {

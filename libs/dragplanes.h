@@ -159,6 +159,143 @@ void selectReversedPlanes( const AABB& aabb, Selector& selector, const SelectedP
 		if ( selectedPlanes.contains( plane3_flipped( planes[i] ) ) )
 			Selector_add( selector, m_selectables[i] );
 }
+
+void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, SelectionIntersection& intersection, const Matrix4& rotation = g_matrix4_identity ){
+	AABB aabb_ = aabb;
+	for( std::size_t i = 0; i < 3; ++i ) /* make sides of flat patches more selectable */
+		if( aabb_.extents[i] < 1 )
+			aabb_.extents[i] = 4;
+
+	Vector3 corners[8];
+	aabb_corners_oriented( aabb_, rotation, corners );
+
+	Plane3 planes[6];
+	aabb_planes_oriented( aabb_, rotation, planes );
+
+	const std::size_t indices[24] = {
+		2, 1, 5, 6, //+x //right
+		3, 7, 4, 0, //-x //left
+		1, 0, 4, 5, //+y //front
+		3, 2, 6, 7, //-y //back
+		0, 1, 2, 3, //+z //top
+		7, 6, 5, 4, //-z //bottom
+	};
+
+	for ( std::size_t i = 0; i < 6; ++i ){
+		const std::size_t index = i * 4;
+		SelectionIntersection intersection_new;
+		test.TestQuads( VertexPointer( reinterpret_cast<VertexPointer::pointer>( corners ), sizeof( Vector3 ) ), IndexPointer( &indices[index], 4 ), intersection_new );
+		if( SelectionIntersection_closer( intersection_new, intersection ) ){
+			intersection = intersection_new;
+			plane = planes[i];
+		}
+	}
+	m_bounds = aabb;
+}
+void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer, const Matrix4& rotation = g_matrix4_identity ){
+	Vector3 corners[8];
+	aabb_corners_oriented( aabb, rotation, corners );
+
+	Plane3 planes[6];
+	aabb_planes_oriented( aabb, rotation, planes );
+/*
+	const std::size_t indices[24] = {
+		2, 1, 5, 6, //+x //right
+		3, 7, 4, 0, //-x //left
+		1, 0, 4, 5, //+y //front
+		3, 2, 6, 7, //-y //back
+		0, 1, 2, 3, //+z //top
+		7, 6, 5, 4, //-z //bottom
+	};
+*/
+/*
+
+        0 ----- 1
+        /|    /|
+       / |   / |
+      /  |  /  |
+    3 ----- 2  |
+     |  4|_|___|5
+     |  /  |   /
+     | /   |  /
+     |/    | /
+    7|_____|/6
+
+ */
+
+	const std::size_t edges[24] = {
+		0, 1,
+		1, 2,
+		2, 3,
+		3, 0,
+		4, 5,
+		5, 6,
+		6, 7,
+		7, 4,
+		0, 4,
+		1, 5,
+		2, 6,
+		3, 7,
+	};
+
+	const std::size_t adjacent_planes[24] = {
+		4, 2,
+		4, 0,
+		4, 3,
+		4, 1,
+		5, 2,
+		5, 0,
+		5, 3,
+		5, 1,
+		1, 2,
+		2, 0,
+		0, 3,
+		3, 1,
+	};
+
+	for( std::size_t i = 0; i < 8; ++i ){
+		corners[i] = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( corners[i], 1 ) ) );
+	}
+
+	for ( std::size_t i = 0; i < 24; ++++i ){
+		const Vector3 intersection_new = line_closest_point( Line( corners[edges[i]], corners[edges[i + 1]] ), g_vector3_identity );
+		const float dist_new = vector3_length_squared( intersection_new );
+		if( dist_new < dist ){
+			const Plane3& plane1 = planes[adjacent_planes[i]];
+			const Plane3& plane2 = planes[adjacent_planes[i + 1]];
+			if( ( vector3_dot( plane1.normal(), viewer ) - plane1.dist() ) <= 0 ){
+				if( aabb.extents[( ( adjacent_planes[i] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
+					plane = plane2;
+				else
+					plane = plane1;
+				intersection = intersection_new;
+				dist = dist_new;
+			}
+			else{
+				if( ( vector3_dot( plane2.normal(), viewer ) - plane2.dist() ) <= 0 ){
+					if( aabb.extents[( ( adjacent_planes[i + 1] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
+						plane = plane1;
+					else
+						plane = plane2;
+					intersection = intersection_new;
+					dist = dist_new;
+				}
+			}
+		}
+	}
+	m_bounds = aabb;
+}
+void selectByPlane( const AABB& aabb, const Plane3& plane, const Matrix4& rotation = g_matrix4_identity ){
+	Plane3 planes[6];
+	aabb_planes_oriented( aabb, rotation, planes );
+
+	for ( std::size_t i = 0; i < 6; ++i ){
+		if( plane3_equal( plane, planes[i] ) || plane3_equal( plane, plane3_flipped( planes[i] ) ) ){
+			m_selectables[i].setSelected( true );
+		}
+	}
+}
+
 AABB evaluateResize( const Vector3& translation ) const {
 	Vector3 min = m_bounds.origin - m_bounds.extents;
 	Vector3 max = m_bounds.origin + m_bounds.extents;
