@@ -165,6 +165,8 @@ struct camera_t
 	bool m_strafe; // true when in strafemode toggled by the ctrl-key
 	bool m_strafe_forward; // true when in strafemode by ctrl-key and shift is pressed for forward strafing
 	bool m_strafe_forward_invert; //silly option to invert forward strafing to support old fegs
+	bool m_orbit;
+	Vector3 m_orbit_center;
 	int m_focus_offset;
 
 	unsigned int movementflags; // movement flags
@@ -315,6 +317,7 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 	else // free rotation
 	{
 		const float dtime = 0.0333333f;
+		Vector3 angles0( camera.angles );
 
 		if ( g_camwindow_globals_private.m_bCamInverseMouse ) {
 			camera.angles[CAMERA_PITCH] -= dy * dtime * g_camwindow_globals_private.m_angleSpeed;
@@ -337,6 +340,29 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 		}
 		else if ( camera.angles[CAMERA_YAW] <= 0 ) {
 			camera.angles[CAMERA_YAW] += 360;
+		}
+
+		if( camera.m_orbit ){
+#if 0
+			const Vector3 radangles( euler_degrees_to_radians( camera.angles ) );
+			const Vector3 viewdir(	cos( radangles[1] ) * cos( radangles[0] ),
+									sin( radangles[1] ) * cos( radangles[0] ),
+									sin( radangles[0] )
+									);
+			const float len = vector3_length( camera.origin - camera.m_orbit_center );
+			camera.origin = camera.m_orbit_center - viewdir * len;
+#else
+			Matrix4 rot0 = matrix4_rotation_for_euler_xyz_degrees( Vector3( 0, -angles0[CAMERA_PITCH], angles0[CAMERA_YAW] ) );
+			matrix4_affine_invert( rot0 );
+			Matrix4 rot1 = matrix4_rotation_for_euler_xyz_degrees( Vector3( 0, -camera.angles[CAMERA_PITCH], camera.angles[CAMERA_YAW] ) );
+			matrix4_multiply_by_matrix4( rot1, rot0 );
+
+			Matrix4 mat = matrix4_translation_for_vec3( camera.m_orbit_center );
+			matrix4_multiply_by_matrix4( mat, rot1 );
+			matrix4_translate_by_vec3( mat, -camera.m_orbit_center );
+
+			camera.origin = matrix4_transformed_point( mat, camera.origin );
+#endif
 		}
 	}
 
@@ -680,6 +706,12 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 	camera_t* cam = reinterpret_cast<camera_t*>( data );
 
 	cam->m_mouseMove.motion_delta( x, y, state );
+
+	cam->m_orbit = ( state & GDK_MOD1_MASK ) && ( state & GDK_BUTTON3_MASK );
+	if( cam->m_orbit ){
+		cam->m_strafe = false;
+		return;
+	}
 
 	cam->m_strafe_forward_invert = false;
 
@@ -1161,13 +1193,33 @@ bool context_menu_try( CamWnd* camwnd ){
 	//doesn't work if cam redraw > 200msec (3x click works): gtk_widget_queue_draw proceeds after timer.start()
 }
 
+void camera_set_orbit_center( camera_t& cam, Vector2 xy ){
+	xy.x() = ( ( 2.0f * xy.x() ) / cam.width ) - 1.0f; // window_to_normalised_device
+	xy.y() = ( ( 2.0f * ( cam.height - 1 - xy.y() ) ) / cam.height ) - 1.0f;
+
+	const Vector2 epsilon( 8.f / cam.width, 8.f / cam.height ); //device epsilon
+
+	Scene_Intersect( *cam.m_view, xy.data(), epsilon.data(), cam.m_orbit_center );
+}
+
+inline bool ORBIT_EVENT( GdkEventButton* event ){
+	return event->button == 3 && modifiers_for_state( event->state ) == c_modifierAlt;
+}
+inline bool M2_EVENT( GdkEventButton* event ){
+	return event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone;
+}
+
 gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+	const bool m2    = M2_EVENT( event );
+	const bool m2alt = ORBIT_EVENT( event );
+	if ( ( m2 || m2alt ) && event->type == GDK_BUTTON_PRESS ) {
 		camwnd->m_bFreeMove_entering = true;
-		if( context_menu_try( camwnd ) ){
+		if( m2 && context_menu_try( camwnd ) ){
 			context_menu();
 		}
 		else{
+			if( m2alt )
+				camera_set_orbit_center( camwnd->getCamera(), Vector2( event->x, event->y ) );
 			camwnd->EnableFreeMove();
 			camwnd->m_rightClickTimer.start();
 			camwnd->m_rightClickMove = 0;
@@ -1178,14 +1230,17 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 }
 
 gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+	const bool m2    = M2_EVENT( event );
+	const bool m2alt = ORBIT_EVENT( event );
+	if ( ( m2 || m2alt ) && event->type == GDK_BUTTON_PRESS ) {
 		camwnd->m_bFreeMove_entering = false;
-		const bool doubleclicked = context_menu_try( camwnd );
-		if( doubleclicked ){
+		if( m2 && context_menu_try( camwnd ) ){
 			camwnd->DisableFreeMove();
 			context_menu();
 		}
 		else{
+			if( m2alt )
+				camera_set_orbit_center( camwnd->getCamera(), Vector2( event->x, event->y ) );
 			camwnd->m_rightClickTimer.start();
 			camwnd->m_rightClickMove = 0;
 		}
@@ -1195,7 +1250,9 @@ gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event
 }
 
 gboolean disable_freelook_button_release( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_RELEASE && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+	const bool m2    = M2_EVENT( event );
+	const bool m2alt = ORBIT_EVENT( event );
+	if ( ( m2 || m2alt ) && event->type == GDK_BUTTON_RELEASE ) {
 		if( ( ( camwnd->m_rightClickTimer.elapsed_msec() < 300 && camwnd->m_rightClickMove < 56 ) == !camwnd->m_bFreeMove_entering ) ){
 			camwnd->DisableFreeMove();
 			return TRUE;
@@ -1237,7 +1294,8 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 gboolean selection_button_press( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		gtk_widget_grab_focus( widget );
-		observer->onMouseDown( WindowVector( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
+		if( !ORBIT_EVENT( event ) )
+			observer->onMouseDown( WindowVector( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
@@ -1260,7 +1318,8 @@ inline WindowVector windowvector_for_widget_centre( GtkWidget* widget ){
 
 gboolean selection_button_press_freemove( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
-		observer->onMouseDown( windowvector_for_widget_centre( widget ), button_for_button( event->button ), modifiers_for_state( event->state ) );
+		if( !ORBIT_EVENT( event ) )
+			observer->onMouseDown( windowvector_for_widget_centre( widget ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }

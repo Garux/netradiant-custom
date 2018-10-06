@@ -5341,6 +5341,26 @@ void RadiantSelectionSystem::Scene_TestSelect( Selector& selector, SelectionTest
 	}
 }
 
+
+void Scene_Intersect( const View& view, const float device_point[2], const float device_epsilon[2], Vector3& intersection ){
+	View scissored( view );
+	ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, device_epsilon ) );
+	SelectionVolume test( scissored );
+
+	BestPointSelector bestPointSelector;
+	Scene_TestSelect_Primitive( bestPointSelector, test, scissored );
+
+	test.BeginMesh( g_matrix4_identity, true );
+	if( bestPointSelector.isSelected() ){
+		intersection = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestPointSelector.best().depth(), 1 ) ) );
+	}
+	else{
+		const Vector3 near = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, -1, 1 ) ) );
+		const Vector3 far = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, 1, 1 ) ) );
+		intersection = vector3_normalised( far - near ) * 256.f + near;
+	}
+}
+
 class FreezeTransforms : public scene::Graph::Walker
 {
 public:

@@ -40,4 +40,9 @@ virtual void incMouseMove( const WindowVector& delta ) = 0;
 
 SelectionSystemWindowObserver* NewWindowObserver();
 
+template<typename Element> class BasicVector3;
+typedef BasicVector3<float> Vector3;
+
+void Scene_Intersect( const View& view, const float device_point[2], const float device_epsilon[2], Vector3& intersection );
+
 #endif
