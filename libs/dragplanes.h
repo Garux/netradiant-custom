@@ -172,7 +172,7 @@ void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Sele
 	Plane3 planes[6];
 	aabb_planes_oriented( aabb_, rotation, planes );
 
-	const std::size_t indices[24] = {
+	const IndexPointer::index_type indices[24] = {
 		2, 1, 5, 6, //+x //right
 		3, 7, 4, 0, //-x //left
 		1, 0, 4, 5, //+y //front
