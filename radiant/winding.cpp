@@ -183,6 +183,10 @@ brushsplit_t Winding_ClassifyPlane( const Winding& winding, const Plane3& plane 
 	return split;
 }
 
+void WindingVertex_ClassifyPlane( const Vector3& vertex, const Plane3& plane, brushsplit_t& split ){
+	++split.counts[Winding_ClassifyDistance( plane3_distance_to_point( plane, vertex ), ON_EPSILON )];
+}
+
 
 #define DEBUG_EPSILON ON_EPSILON
 const double DEBUG_EPSILON_SQUARED = DEBUG_EPSILON * DEBUG_EPSILON;

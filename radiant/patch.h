@@ -1554,6 +1554,14 @@ const AABB& getSelectedComponentsBounds() const {
 
 	return m_aabb_component;
 }
+void gatherSelectedComponents( const Vector3Callback& callback ) const {
+	for ( PatchControlInstances::const_iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+	{
+		if ( ( *i ).m_selectable.isSelected() ) {
+			callback( ( *i ).m_ctrl->m_vertex );
+		}
+	}
+}
 
 void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
 	test.BeginMesh( localToWorld() );

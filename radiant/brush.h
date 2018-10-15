@@ -2670,6 +2670,27 @@ void iterate_selected( AABB& aabb ) const {
 	SelectedComponents_foreach( AABBExtendByPoint( aabb ) );
 }
 
+void gatherSelectedComponents( const Vector3Callback& callback ) const {
+	const Winding& winding = getFace().getWinding();
+	if( isSelected() )
+		for ( std::size_t i = 0; i != winding.numpoints; ++i )
+			callback( winding[i].vertex );
+	for ( VertexSelection::const_iterator i = m_vertexSelection.begin(); i != m_vertexSelection.end(); ++i ){
+		std::size_t index = Winding_FindAdjacent( winding, *i );
+		if ( index != c_brush_maxFaces ) {
+			callback( winding[index].vertex );
+		}
+	}
+	for ( VertexSelection::const_iterator i = m_edgeSelection.begin(); i != m_edgeSelection.end(); ++i ){
+		std::size_t index = Winding_FindAdjacent( winding, *i );
+		if ( index != c_brush_maxFaces ) {
+			std::size_t adjacent = Winding_next( winding, index );
+			callback( winding[index].vertex );
+			callback( winding[adjacent].vertex );
+		}
+	}
+}
+
 class RenderablePointVectorPushBack
 {
 RenderablePointVector& m_points;
@@ -3693,6 +3714,12 @@ const AABB& getSelectedComponentsBounds() const {
 	}
 
 	return m_aabb_component;
+}
+void gatherSelectedComponents( const Vector3Callback& callback ) const {
+	for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+	{
+		( *i ).gatherSelectedComponents( callback );
+	}
 }
 
 void snapComponents( float snap ){

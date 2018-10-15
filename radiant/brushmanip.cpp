@@ -1566,6 +1566,7 @@ void Brush_constructMenu( GtkMenu* menu ){
 		}
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Subtract", "CSGSubtract" );
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Merge", "CSGMerge" );
+		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Wrap Merge", "CSGWrapMerge" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Make _Room", "CSGroom" );
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Tool", "CSGTool" );
 	}

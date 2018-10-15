@@ -2459,7 +2459,7 @@ void Select_constructToolbar( GtkToolbar* toolbar ){
 
 void CSG_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_button( toolbar, "CSG Subtract (SHIFT + U)", "selection_csgsubtract.png", "CSGSubtract" );
-	toolbar_append_button( toolbar, "CSG Merge (CTRL + U)", "selection_csgmerge.png", "CSGMerge" );
+	toolbar_append_button( toolbar, "CSG Wrap Merge (CTRL + U)", "selection_csgmerge.png", "CSGWrapMerge" );
 	toolbar_append_button( toolbar, "Room", "selection_makeroom.png", "CSGroom" );
 	toolbar_append_button( toolbar, "CSG Tool", "ellipsis.png", "CSGTool" );
 }
@@ -3564,7 +3564,8 @@ void MainFrame_Construct(){
 
 
 	GlobalCommands_insert( "CSGSubtract", FreeCaller<CSG_Subtract>(), Accelerator( 'U', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "CSGMerge", FreeCaller<CSG_Merge>(), Accelerator( 'U', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "CSGMerge", FreeCaller<CSG_Merge>() );
+	GlobalCommands_insert( "CSGWrapMerge", FreeCaller<CSG_WrapMerge>(), Accelerator( 'U', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "CSGroom", FreeCaller<CSG_MakeRoom>() );
 	GlobalCommands_insert( "CSGTool", FreeCaller<CSG_Tool>() );
 

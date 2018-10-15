@@ -560,6 +560,8 @@ const AABB& getSelectedComponentsBounds() const {
 	m_curveCatmullRom.forEachSelected( ControlPointAddBounds( m_aabb_component ) );
 	return m_aabb_component;
 }
+void gatherSelectedComponents( const Vector3Callback& callback ) const {
+}
 
 void snapComponents( float snap ){
 	if ( m_curveNURBS.isSelected() ) {

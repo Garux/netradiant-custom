@@ -264,6 +264,7 @@ struct brushsplit_t
 };
 
 brushsplit_t Winding_ClassifyPlane( const Winding& w, const Plane3& plane );
+void WindingVertex_ClassifyPlane( const Vector3& vertex, const Plane3& plane, brushsplit_t& split );
 
 bool Winding_PlanesConcave( const Winding& w1, const Winding& w2, const Plane3& plane1, const Plane3& plane2 );
 bool Winding_TestPlane( const Winding& w, const Plane3& plane, bool flipped );

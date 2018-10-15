@@ -911,6 +911,24 @@ bool Brush_merge( Brush& brush, const brush_vector_t& in, bool onlyshape ){
 	return true;
 }
 
+scene::Path ultimate_group_path(){
+	if ( GlobalSelectionSystem().countSelected() != 0 ) {
+		scene::Path path = GlobalSelectionSystem().ultimateSelected().path();
+		scene::Node& node = path.top();
+		if( Node_isPrimitive( node ) ){
+			path.pop();
+			return path;
+		}
+		if ( Node_isEntity( node ) && node_is_group( node ) ){
+			return path;
+		}
+	}
+	scene::Path path;
+	path.push( makeReference( GlobalSceneGraph().root() ) );
+	path.push( makeReference( Map_FindOrInsertWorldspawn( g_map ) ) );
+	return path;
+}
+
 void CSG_Merge( void ){
 	brush_vector_t selected_brushes;
 
@@ -931,8 +949,6 @@ void CSG_Merge( void ){
 
 	UndoableCommand undo( "brushMerge" );
 
-	scene::Path merged_path = GlobalSelectionSystem().ultimateSelected().path();
-
 	NodeSmartReference node( ( new BrushNode() )->node() );
 	Brush* brush = Node_getBrush( node );
 	// if the new brush would not be convex
@@ -943,17 +959,215 @@ void CSG_Merge( void ){
 	{
 		ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after merge" );
 
+		scene::Path path = ultimate_group_path();
+
 		// free the original brushes
-		GlobalSceneGraph().traverse( BrushDeleteSelected( merged_path.parent().get_pointer() ) );
+		GlobalSceneGraph().traverse( BrushDeleteSelected( path.top().get_pointer() ) );
 
-		merged_path.pop();
-		Node_getTraversable( merged_path.top() )->insert( node );
-		merged_path.push( makeReference( node.get() ) );
+		Node_getTraversable( path.top() )->insert( node );
+		path.push( makeReference( node.get() ) );
 
-		selectPath( merged_path, true );
+		selectPath( path, true );
 
 		globalOutputStream() << "CSG Merge: Succeeded.\n";
 		SceneChangeNotify();
+	}
+}
+
+
+
+class MergeVertices
+{
+	typedef std::vector<Vector3> Vertices;
+	Vertices m_vertices;
+public:
+	typedef Vertices::const_iterator const_iterator;
+	void insert( const Vector3& vertex ){
+		for( const_iterator i = begin(); i != end(); ++i )
+			if( Edge_isDegenerate( vertex, *i ) )
+				return;
+		m_vertices.push_back( vertex );
+	}
+	const_iterator begin() const {
+		return m_vertices.begin();
+	}
+	const_iterator end() const {
+		return m_vertices.end();
+	}
+	std::size_t size() const {
+		return m_vertices.size();
+	}
+	brushsplit_t classify_plane( const Plane3& plane ) const {
+		brushsplit_t split;
+		for( const_iterator i = begin(); i != end(); ++i ){
+			WindingVertex_ClassifyPlane( ( *i ), plane, split );
+			if( ( split.counts[ePlaneFront] != 0 ) && ( split.counts[ePlaneBack] != 0 ) )
+				break;
+		}
+		return split;
+	}
+};
+
+class Scene_gatherSelectedComponents : public scene::Graph::Walker
+{
+MergeVertices& m_mergeVertices;
+void call( const Vector3& value ) const {
+	m_mergeVertices.insert( value );
+}
+typedef ConstMemberCaller1<Scene_gatherSelectedComponents, const Vector3&, &Scene_gatherSelectedComponents::call> Caller;
+const Vector3Callback m_callback;
+public:
+Scene_gatherSelectedComponents( MergeVertices& mergeVertices )
+	: m_mergeVertices( mergeVertices ), m_callback( Vector3Callback( Scene_gatherSelectedComponents::Caller( *this ) ) ){
+}
+bool pre( const scene::Path& path, scene::Instance& instance ) const {
+	if ( path.top().get().visible() ) {
+		ComponentEditable* componentEditable = Instance_getComponentEditable( instance );
+		if ( componentEditable ) {
+			componentEditable->gatherSelectedComponents( m_callback );
+		}
+		return true;
+	}
+	return false;
+}
+};
+
+class MergePlane
+{
+public:
+	Plane3 m_plane;
+	const Face* m_face;
+	Vector3 m_v1;
+	Vector3 m_v2;
+	Vector3 m_v3;
+	MergePlane( const Plane3& plane, const Face* face ) : m_plane( plane ), m_face( face ){
+	}
+	MergePlane( const Plane3& plane, const Vector3& v1, const Vector3& v2, const Vector3& v3 ) : m_plane( plane ), m_face( 0 ), m_v1( v1 ), m_v2( v2 ), m_v3( v3 ){
+	}
+};
+
+class MergePlanes
+{
+	typedef std::vector<MergePlane> Planes;
+	Planes m_planes;
+public:
+	typedef Planes::const_iterator const_iterator;
+	void insert( const MergePlane& plane ){
+		for( const_iterator i = begin(); i != end(); ++i )
+			if( plane3_equal( plane.m_plane, i->m_plane ) )
+				return;
+		m_planes.push_back( plane );
+	}
+	const_iterator begin() const {
+		return m_planes.begin();
+	}
+	const_iterator end() const {
+		return m_planes.end();
+	}
+	std::size_t size() const {
+		return m_planes.size();
+	}
+};
+
+void CSG_WrapMerge(){
+	const bool primit = ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive );
+	brush_vector_t selected_brushes;
+	if( primit )
+		GlobalSceneGraph().traverse( BrushGatherSelected( selected_brushes ) );
+
+	if ( !GlobalSelectionSystem().countSelected() && !GlobalSelectionSystem().countSelectedComponents() ) {
+		globalWarningStream() << "CSG Wrap Merge: No brushes or components selected.\n";
+		return;
+	}
+
+	MergeVertices mergeVertices;
+	/* gather unique vertices */
+	for ( brush_vector_t::const_iterator b = selected_brushes.begin(); b != selected_brushes.end(); ++b )
+		for ( Brush::const_iterator f = ( *b )->begin(); f != ( *b )->end(); ++f )
+			if ( ( *f )->contributes() ){
+				const Winding& winding = ( *f )->getWinding();
+				for ( std::size_t w = 0; w != winding.numpoints; ++w )
+					mergeVertices.insert( winding[w].vertex );
+			}
+
+	GlobalSceneGraph().traverse( Scene_gatherSelectedComponents( mergeVertices ) );
+
+//globalOutputStream() << mergeVertices.size() << " mergeVertices.size()\n";
+	if( mergeVertices.size() < 4 ){
+		globalWarningStream() << "CSG Wrap Merge: Too few vertices: " << mergeVertices.size() << ".\n";
+		return;
+	}
+
+	MergePlanes mergePlanes;
+	/* gather unique && worthy planes */
+	for ( brush_vector_t::const_iterator b = selected_brushes.begin(); b != selected_brushes.end(); ++b )
+		for ( Brush::const_iterator f = ( *b )->begin(); f != ( *b )->end(); ++f ){
+			const Face& face = *( *f );
+			if ( face.contributes() ){
+				const brushsplit_t split = mergeVertices.classify_plane( face.getPlane().plane3() );
+				if( ( split.counts[ePlaneFront] == 0 ) != ( split.counts[ePlaneBack] == 0 ) )
+					mergePlanes.insert( MergePlane( face.getPlane().plane3(), &face ) );
+			}
+		}
+	/* bruteforce new planes */
+	for( MergeVertices::const_iterator i = mergeVertices.begin() + 0; i != mergeVertices.end() - 2; ++i )
+		for( MergeVertices::const_iterator j = i + 1; j != mergeVertices.end() - 1; ++j )
+			for( MergeVertices::const_iterator k = j + 1; k != mergeVertices.end() - 0; ++k ){
+				const Plane3 plane = plane3_for_points( *i, *j, *k );
+				if( plane3_valid( plane ) ){
+					const brushsplit_t split = mergeVertices.classify_plane( plane );
+					if( ( split.counts[ePlaneFront] == 0 ) != ( split.counts[ePlaneBack] == 0 ) ){
+						if( split.counts[ePlaneFront] != 0 )
+							mergePlanes.insert( MergePlane( plane3_flipped( plane ), *i, *j, *k ) );
+						else
+							mergePlanes.insert( MergePlane( plane, *i, *k, *j ) );
+					}
+				}
+			}
+
+//globalOutputStream() << mergePlanes.size() << " mergePlanes.size()\n";
+	if( mergePlanes.size() < 4 ){
+		globalWarningStream() << "CSG Wrap Merge: Too few planes: " << mergePlanes.size() << ".\n";
+		return;
+	}
+
+	UndoableCommand undo( "brushWrapMerge" );
+
+	NodeSmartReference node( ( new BrushNode() )->node() );
+	Brush* brush = Node_getBrush( node );
+
+	{
+		const char* shader = TextureBrowser_GetSelectedShader();
+		TextureProjection projection;
+		TexDef_Construct_Default( projection );
+		for( MergePlanes::const_iterator i = mergePlanes.begin(); i != mergePlanes.end(); ++i ){
+			if( i->m_face )
+				brush->addFace( *( i->m_face ) );
+			else
+				brush->addPlane( i->m_v1, i->m_v2, i->m_v3, shader, projection );
+//			globalOutputStream() << i->m_plane.normal() << " " << i->m_plane.dist() << " i->m_plane\n";
+		}
+		brush->removeEmptyFaces();
+	}
+
+	// if the new brush would not be convex
+	if ( !brush->hasContributingFaces() ) {
+		globalWarningStream() << "CSG Wrap Merge: Failed - result would not be convex.\n";
+	}
+	else
+	{
+		ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after merge" );
+
+		scene::Path path = ultimate_group_path();
+
+		// free the original brushes
+		if( primit )
+			GlobalSceneGraph().traverse( BrushDeleteSelected( path.top().get_pointer() ) );
+
+		Node_getTraversable( path.top() )->insert( node );
+		path.push( makeReference( node.get() ) );
+
+		selectPath( path, true );
 	}
 }
 
