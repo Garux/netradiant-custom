@@ -677,8 +677,14 @@ void Redo(){
 }
 
 void deleteSelection(){
-	UndoableCommand undo( "deleteSelected" );
-	Select_Delete();
+	if( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && GlobalSelectionSystem().countSelectedComponents() != 0 ){
+		UndoableCommand undo( "deleteSelectedComponents" );
+		CSG_DeleteComponents();
+	}
+	else{
+		UndoableCommand undo( "deleteSelected" );
+		Select_Delete();
+	}
 }
 
 void Map_ExportSelected( TextOutputStream& ostream ){

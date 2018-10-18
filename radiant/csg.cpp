@@ -983,10 +983,14 @@ class MergeVertices
 public:
 	typedef Vertices::const_iterator const_iterator;
 	void insert( const Vector3& vertex ){
+		if( !contains( vertex ) )
+			m_vertices.push_back( vertex );
+	}
+	bool contains( const Vector3& vertex ) const {
 		for( const_iterator i = begin(); i != end(); ++i )
 			if( Edge_isDegenerate( vertex, *i ) )
-				return;
-		m_vertices.push_back( vertex );
+				return true;
+		return false;
 	}
 	const_iterator begin() const {
 		return m_vertices.begin();
@@ -1001,7 +1005,7 @@ public:
 		brushsplit_t split;
 		for( const_iterator i = begin(); i != end(); ++i ){
 			WindingVertex_ClassifyPlane( ( *i ), plane, split );
-			if( ( split.counts[ePlaneFront] != 0 ) && ( split.counts[ePlaneBack] != 0 ) )
+			if( ( split.counts[ePlaneFront] != 0 ) && ( split.counts[ePlaneBack] != 0 ) ) // optimized to break, if plane is inside
 				break;
 		}
 		return split;
@@ -1156,8 +1160,6 @@ void CSG_WrapMerge(){
 	}
 	else
 	{
-		ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after merge" );
-
 		scene::Path path = ultimate_group_path();
 
 		// free the original brushes
@@ -1168,6 +1170,114 @@ void CSG_WrapMerge(){
 		path.push( makeReference( node.get() ) );
 
 		selectPath( path, true );
+	}
+}
+
+
+
+class find_instance_to_DeleteComponents : public SelectionSystem::Visitor
+{
+public:
+	mutable scene::Instance* m_instance;
+	find_instance_to_DeleteComponents()
+		: m_instance( 0 ) {
+	}
+	void visit( scene::Instance& instance ) const {
+		if( Instance_getBrush( instance ) ){
+			//Instance_isSelectedComponents()
+			ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
+			if( componentSelectionTestable != 0 && componentSelectionTestable->isSelectedComponents() )
+				m_instance = &instance;
+		}
+	}
+};
+/* deletes one brush components */
+void CSG_DeleteComponents(){
+	find_instance_to_DeleteComponents find_instance;
+	GlobalSelectionSystem().foreachSelected( find_instance );
+	scene::Instance* instance = find_instance.m_instance;
+	if( instance ){
+		MergeVertices deleteVertices;
+		{
+			Scene_gatherSelectedComponents get_deleteVertices( deleteVertices );
+			get_deleteVertices.pre( instance->path(), *instance );
+		}
+		Brush* brush = Node_getBrush( instance->path().top() );
+		/* gather vertices to keep */
+		MergeVertices mergeVertices;
+		for ( Brush::const_iterator f = brush->begin(); f != brush->end(); ++f )
+			if ( ( *f )->contributes() ){
+				const Winding& winding = ( *f )->getWinding();
+				for ( std::size_t w = 0; w != winding.numpoints; ++w )
+					if( !deleteVertices.contains( winding[w].vertex ) )
+						mergeVertices.insert( winding[w].vertex );
+			}
+		if( mergeVertices.size() < 4 ){
+			globalWarningStream() << "CSG_DeleteComponents: Too few vertices left: " << mergeVertices.size() << ".\n";
+			return;
+		}
+		/* gather original planes */
+		MergePlanes mergePlanes;
+		for ( Brush::const_iterator f = brush->begin(); f != brush->end(); ++f ){
+			const Face& face = *( *f );
+			if ( face.contributes() ){
+				mergePlanes.insert( MergePlane( face.getPlane().plane3(), &face ) );
+			}
+		}
+
+		/* bruteforce new planes */
+		for( MergeVertices::const_iterator i = mergeVertices.begin() + 0; i != mergeVertices.end() - 2; ++i )
+			for( MergeVertices::const_iterator j = i + 1; j != mergeVertices.end() - 1; ++j )
+				for( MergeVertices::const_iterator k = j + 1; k != mergeVertices.end() - 0; ++k ){
+					const Plane3 plane = plane3_for_points( *i, *j, *k );
+					if( plane3_valid( plane ) ){
+						const brushsplit_t split = mergeVertices.classify_plane( plane );
+						if( ( split.counts[ePlaneFront] == 0 ) != ( split.counts[ePlaneBack] == 0 ) ){
+							if( split.counts[ePlaneFront] != 0 )
+								mergePlanes.insert( MergePlane( plane3_flipped( plane ), *i, *j, *k ) );
+							else
+								mergePlanes.insert( MergePlane( plane, *i, *k, *j ) );
+						}
+					}
+				}
+		if( mergePlanes.size() < 4 ){
+			globalWarningStream() << "CSG_DeleteComponents: Too few planes left: " << mergePlanes.size() << ".\n";
+			return;
+		}
+
+		NodeSmartReference node( ( new BrushNode() )->node() );
+		brush = Node_getBrush( node );
+
+		{
+			const char* shader = TextureBrowser_GetSelectedShader();
+			TextureProjection projection;
+			TexDef_Construct_Default( projection );
+			for( MergePlanes::const_iterator i = mergePlanes.begin(); i != mergePlanes.end(); ++i ){
+				if( i->m_face )
+					brush->addFace( *( i->m_face ) );
+				else
+					brush->addPlane( i->m_v1, i->m_v2, i->m_v3, shader, projection );
+			}
+			brush->removeEmptyFaces();
+		}
+
+		// if the new brush would not be convex
+		if ( !brush->hasContributingFaces() ) {
+			globalWarningStream() << "CSG_DeleteComponents: Failed - result would not be convex.\n";
+		}
+		else
+		{
+			scene::Path path = instance->path();
+			path.pop();
+
+			Node_getTraversable( path.top() )->insert( node );
+			path.push( makeReference( node.get() ) );
+
+			selectPath( path, true ); //b4 original deletion, so component mode will stay enabled
+
+			// free the original brush
+			Path_deleteTop( instance->path() );
+		}
 	}
 }
 
