@@ -33,10 +33,9 @@
 
 GdkCursor* g_clipper_cursor;
 
-ClipperPoints g_clipper_points( g_vector3_identity, g_vector3_identity, g_vector3_identity );
+ClipperPoints g_clipper_points;
 bool g_clipper_flipped = false;
 bool g_clipper_quick = false;
-bool g_clipper_doubleclicked = false;
 
 /* preferences */
 bool g_clipper_caulk = true;
@@ -55,28 +54,27 @@ void ClipperModeQuick(){
 }
 
 
-bool Clipper_ok(){
-	return GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eClip && plane3_valid( plane3_for_points( g_clipper_points._points ) );
+bool Clipper_ok_plane(){
+	return GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eClip && g_clipper_points._count > 1 && plane3_valid( plane3_for_points( g_clipper_points._points ) );
 }
 
-ClipperPoints Clipper_getPlanePoints(){
-	return g_clipper_flipped? ClipperPoints( g_clipper_points[0], g_clipper_points[2], g_clipper_points[1] ) : g_clipper_points;
+bool Clipper_ok(){
+	return GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eClip && g_clipper_points._count > 0;
 }
 
 void Clipper_update(){
-	Scene_BrushSetClipPlane( GlobalSceneGraph(), Clipper_getPlanePoints() );
+	Scene_BrushSetClipPlane( GlobalSceneGraph(), g_clipper_points, g_clipper_flipped );
 	SceneChangeNotify();
 }
 
 void Clipper_setPlanePoints( const ClipperPoints& points ){
 	g_clipper_points = points;
-//	g_clipper_doubleclicked = false; //assuming, that new point was set... dragging in fact calls this too >_<
 	Clipper_update();
 }
 
 #include "gtkutil/idledraw.h"
 void Clipper_BoundsChanged(){
-	if ( Clipper_ok() )
+	if ( Clipper_ok_plane() )
 		Clipper_update();
 }
 
@@ -118,7 +116,7 @@ void Clipper_modeChanged( bool isClipper ){
 
 
 void Clipper_do( bool split ){
-	Scene_BrushSplitByPlane( GlobalSceneGraph(), Clipper_getPlanePoints(), g_clipper_caulk, split );
+	Scene_BrushSplitByPlane( GlobalSceneGraph(), g_clipper_points, g_clipper_flipped, g_clipper_caulk, split );
 	if( g_clipper_resetPoints ){
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eClip ); /* reset points this way */
 		if( g_clipper_resetFlip )
@@ -144,7 +142,7 @@ void Clipper_doSplit(){
 }
 
 void Clipper_doFlip(){
-	if( Clipper_ok() ){
+	if( Clipper_ok_plane() ){
 		g_clipper_flipped = !g_clipper_flipped;
 		Clipper_update();
 	}
@@ -152,13 +150,17 @@ void Clipper_doFlip(){
 
 #include "timer.h"
 Timer g_clipper_timer;
-void Clipper_tryDoubleclick(){
-	g_clipper_doubleclicked = g_clipper_timer.elapsed_msec() < 200 && Clipper_ok();
+bool g_clipper_doubleclicked = false;
+std::size_t g_clipper_doubleclicked_point = 0; //monitor clicking the same point twice
+
+void Clipper_tryDoubleclick(){	//onMouseDown
+	g_clipper_doubleclicked = g_clipper_timer.elapsed_msec() < 200;
 	g_clipper_timer.start();
+	g_clipper_doubleclicked_point = g_clipper_points._count;
 }
 
-void Clipper_tryDoubleclickedCut(){
-	if( g_clipper_doubleclicked ){
+void Clipper_tryDoubleclickedCut(){	//onMouseUp
+	if( g_clipper_doubleclicked && g_clipper_doubleclicked_point == g_clipper_points._count ){
 		g_clipper_doubleclicked = false;
 		return g_clipper_doubleclicked_split? Clipper_doSplit() : Clipper_doClip();
 	}

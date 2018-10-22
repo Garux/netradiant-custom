@@ -4047,19 +4047,34 @@ public:
 		}
 	}
 	void updatePlane(){
-		if( m_points[0].m_set && m_points[1].m_set ){
-			if( !m_points[2].m_set ){
-				if( m_view->fill() ){ //3d
-					viewdir_fixup();
-					m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
-					viewdir_make_cut_worthy( plane3_for_points( m_points[0].m_point, m_points[2].m_point, m_points[1].m_point ) );
-				}
+		std::size_t npoints = 0;
+		for(; npoints < 3; )
+			if( m_points[npoints].m_set )
+				++npoints;
+			else
+				break;
+
+		switch ( npoints )
+		{
+		case 1:
+			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[0].m_point, m_points[0].m_point, npoints ) );
+			break;
+		case 2:
+		{
+			if( m_view->fill() ){ //3d
+				viewdir_fixup();
 				m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
+				viewdir_make_cut_worthy( plane3_for_points( m_points[0].m_point, m_points[1].m_point, m_points[2].m_point ) );
 			}
-			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[2].m_point, m_points[1].m_point ) ); /* points order corresponds the plane, we want to insert */
+			m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
 		}
-		else{
-			Clipper_setPlanePoints( ClipperPoints( g_vector3_identity, g_vector3_identity, g_vector3_identity ) );
+		case 3:
+			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[1].m_point, m_points[2].m_point, npoints ) );
+			break;
+
+		default:
+			Clipper_setPlanePoints( ClipperPoints() );
+			break;
 		}
 	}
 	std::size_t newPointIndex( bool viewfill ) const {

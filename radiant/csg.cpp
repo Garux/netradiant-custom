@@ -744,14 +744,17 @@ void CSG_Subtract(){
 #include "clippertool.h"
 class BrushSplitByPlaneSelected : public scene::Graph::Walker
 {
-const Plane3 m_plane;
 const ClipperPoints m_points;
+const Plane3 m_plane;
 const char* m_shader;
 const TextureProjection& m_projection;
 const bool m_split; /* split or clip */
 public:
-BrushSplitByPlaneSelected( const ClipperPoints& points, const char* shader, const TextureProjection& projection, bool split )
-	: m_plane( plane3_for_points( points._points ) ), m_points( points ), m_shader( shader ), m_projection( projection ), m_split( split ){
+mutable bool m_gj;
+BrushSplitByPlaneSelected( const ClipperPoints& points, bool flip, const char* shader, const TextureProjection& projection, bool split )
+	: m_points( flip? ClipperPoints( points[0], points[2], points[1], points._count ) : points ),
+		m_plane( plane3_for_points( m_points[0], m_points[1], m_points[2] ) ),
+		m_shader( shader ), m_projection( projection ), m_split( split ), m_gj( false ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	return true;
@@ -764,11 +767,12 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 			const brushsplit_t split = Brush_classifyPlane( *brush, m_plane );
 			if ( split.counts[ePlaneBack] && split.counts[ePlaneFront] ) {
 				// the plane intersects this brush
+				m_gj = true;
 				if ( m_split ) {
 					NodeSmartReference node( ( new BrushNode() )->node() );
 					Brush* fragment = Node_getBrush( node );
 					fragment->copy( *brush );
-					fragment->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection ); /* flip plane points */
+					fragment->addPlane( m_points[0], m_points[1], m_points[2], m_shader, m_projection );
 					fragment->removeEmptyFaces();
 					ASSERT_MESSAGE( !fragment->empty(), "brush left with no faces after split" );
 
@@ -780,7 +784,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 					}
 				}
 
-				brush->addPlane( m_points[0], m_points[1], m_points[2], m_shader, m_projection );
+				brush->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection );
 				brush->removeEmptyFaces();
 				ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after split" );
 			}
@@ -788,6 +792,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 			// the plane does not intersect this brush
 			if ( !m_split && split.counts[ePlaneFront] != 0 ) {
 				// the brush is "behind" the plane
+				m_gj = true;
 				Path_deleteTop( path );
 			}
 		}
@@ -795,12 +800,18 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool caulk, bool split ){
+void CSG_WrapMerge( const ClipperPoints& clipperPoints );
+
+void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool flip, bool caulk, bool split ){
 	const char* shader = caulk? GetCaulkShader() : TextureBrowser_GetSelectedShader();
 	TextureProjection projection;
 	TexDef_Construct_Default( projection );
-	graph.traverse( BrushSplitByPlaneSelected( points, shader, projection, split ) );
-	SceneChangeNotify();
+	BrushSplitByPlaneSelected dosplit( points, flip, shader, projection, split );
+	if( points._count > 1 && plane3_valid( plane3_for_points( points._points ) ) )
+		graph.traverse( dosplit );
+	if( !dosplit.m_gj ){
+		CSG_WrapMerge( points );
+	}
 }
 
 
@@ -808,8 +819,8 @@ class BrushInstanceSetClipPlane : public scene::Graph::Walker
 {
 const Plane3 m_plane;
 public:
-BrushInstanceSetClipPlane( const ClipperPoints& points )
-	: m_plane( plane3_for_points( points._points ) ){
+BrushInstanceSetClipPlane( const ClipperPoints& points, bool flip )
+	: m_plane( points._count < 2? Plane3( 0, 0, 0, 0 ) : flip? plane3_for_points( points[0], points[2], points[1] ) : plane3_for_points( points[0], points[1], points[2] ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	BrushInstance* brush = Instance_getBrush( instance );
@@ -823,8 +834,8 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points ){
-	graph.traverse( BrushInstanceSetClipPlane( points ) );
+void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points, bool flip ){
+	graph.traverse( BrushInstanceSetClipPlane( points, flip ) );
 }
 
 /*
@@ -970,7 +981,6 @@ void CSG_Merge( void ){
 		selectPath( path, true );
 
 		globalOutputStream() << "CSG Merge: Succeeded.\n";
-		SceneChangeNotify();
 	}
 }
 
@@ -1073,7 +1083,7 @@ public:
 	}
 };
 
-void CSG_WrapMerge(){
+void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 	const bool primit = ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive );
 	brush_vector_t selected_brushes;
 	if( primit )
@@ -1095,6 +1105,9 @@ void CSG_WrapMerge(){
 			}
 
 	GlobalSceneGraph().traverse( Scene_gatherSelectedComponents( mergeVertices ) );
+
+	for( std::size_t i = 0; i < clipperPoints._count; ++i )
+		mergeVertices.insert( clipperPoints[i] );
 
 //globalOutputStream() << mergeVertices.size() << " mergeVertices.size()\n";
 	if( mergeVertices.size() < 4 ){
@@ -1135,8 +1148,6 @@ void CSG_WrapMerge(){
 		return;
 	}
 
-	UndoableCommand undo( "brushWrapMerge" );
-
 	NodeSmartReference node( ( new BrushNode() )->node() );
 	Brush* brush = Node_getBrush( node );
 
@@ -1171,6 +1182,11 @@ void CSG_WrapMerge(){
 
 		selectPath( path, true );
 	}
+}
+
+void CSG_WrapMerge(){
+	UndoableCommand undo( "brushWrapMerge" );
+	CSG_WrapMerge( ClipperPoints() );
 }
 
 

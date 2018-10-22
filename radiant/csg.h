@@ -36,7 +36,7 @@ class Graph;
 
 class ClipperPoints;
 
-void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points );
-void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool caulk, bool split );
+void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points, bool flip );
+void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool flip, bool caulk, bool split );
 
 #endif
