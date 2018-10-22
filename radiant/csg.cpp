@@ -463,6 +463,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 				m_eraseParent = true;
 				//globalOutputStream() << "Empty node?!.\n";
 			}
+			return;
 		}
 	}
 	if( m_eraseParent && !Node_isPrimitive( path.top() ) && path.size() > 1 ){
