@@ -6010,12 +6010,12 @@ static mz_bool mz_zip_writer_write_zeros(mz_zip_archive *pZip, mz_uint64 cur_fil
 mz_bool mz_zip_writer_add_mem_ex(mz_zip_archive *pZip, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags,
                                  mz_uint64 uncomp_size, mz_uint32 uncomp_crc32)
 {
-    return mz_zip_writer_add_mem_ex_v2(pZip, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, uncomp_size, uncomp_crc32, NULL, NULL, 0, NULL, 0);
+    return mz_zip_writer_add_mem_ex_v2(pZip, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, uncomp_size, uncomp_crc32, NULL, NULL, 0, NULL, 0, NULL);
 }
 
 mz_bool mz_zip_writer_add_mem_ex_v2(mz_zip_archive *pZip, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size,
                                     mz_uint level_and_flags, mz_uint64 uncomp_size, mz_uint32 uncomp_crc32, MZ_TIME_T *last_modified,
-                                    const char *user_extra_data, mz_uint user_extra_data_len, const char *user_extra_data_central, mz_uint user_extra_data_central_len)
+                                    const char *user_extra_data, mz_uint user_extra_data_len, const char *user_extra_data_central, mz_uint user_extra_data_central_len, mz_uint32* dosDate)
 {
     mz_uint16 method = 0, dos_time = 0, dos_date = 0;
     mz_uint level, ext_attributes = 0, num_alignment_padding_bytes;
@@ -6073,7 +6073,13 @@ mz_bool mz_zip_writer_add_mem_ex_v2(mz_zip_archive *pZip, const char *pArchive_n
         return mz_zip_set_error(pZip, MZ_ZIP_INVALID_FILENAME);
 
 #ifndef MINIZ_NO_TIME
-    if (last_modified != NULL)
+	if( dosDate != NULL ){
+		dos_time = ( mz_uint16 )( *dosDate );
+		dos_date = ( mz_uint16 )( *dosDate >> 16 );
+//		MZ_TIME_T timeee = mz_zip_dos_to_time_t( *dosDate, *dosDate >> 16 );
+//		mz_zip_time_t_to_dos_time( timeee, &dos_time, &dos_date );
+	}
+    else if (last_modified != NULL)
     {
         mz_zip_time_t_to_dos_time(*last_modified, &dos_time, &dos_date);
     }
@@ -6109,8 +6115,8 @@ mz_bool mz_zip_writer_add_mem_ex_v2(mz_zip_archive *pZip, const char *pArchive_n
     if (!pState->m_zip64)
     {
         /* Bail early if the archive would obviously become too large */
-        if ((pZip->m_archive_size + num_alignment_padding_bytes + MZ_ZIP_LOCAL_DIR_HEADER_SIZE + archive_name_size 
-			+ MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + archive_name_size + comment_size + user_extra_data_len + 
+        if ((pZip->m_archive_size + num_alignment_padding_bytes + MZ_ZIP_LOCAL_DIR_HEADER_SIZE + archive_name_size
+			+ MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + archive_name_size + comment_size + user_extra_data_len +
 			pState->m_central_dir.m_size + MZ_ZIP_END_OF_CENTRAL_DIR_HEADER_SIZE + user_extra_data_central_len
 			+ MZ_ZIP_DATA_DESCRIPTER_SIZE32) > 0xFFFFFFFF)
         {
@@ -6368,7 +6374,7 @@ mz_bool mz_zip_writer_add_cfile(mz_zip_archive *pZip, const char *pArchive_name,
     if (!pState->m_zip64)
     {
         /* Bail early if the archive would obviously become too large */
-        if ((pZip->m_archive_size + num_alignment_padding_bytes + MZ_ZIP_LOCAL_DIR_HEADER_SIZE + archive_name_size + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE 
+        if ((pZip->m_archive_size + num_alignment_padding_bytes + MZ_ZIP_LOCAL_DIR_HEADER_SIZE + archive_name_size + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE
 			+ archive_name_size + comment_size + user_extra_data_len + pState->m_central_dir.m_size + MZ_ZIP_END_OF_CENTRAL_DIR_HEADER_SIZE + 1024
 			+ MZ_ZIP_DATA_DESCRIPTER_SIZE32 + user_extra_data_central_len) > 0xFFFFFFFF)
         {
@@ -7193,12 +7199,7 @@ mz_bool mz_zip_writer_end(mz_zip_archive *pZip)
 }
 
 #ifndef MINIZ_NO_STDIO
-mz_bool mz_zip_add_mem_to_archive_file_in_place(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags)
-{
-    return mz_zip_add_mem_to_archive_file_in_place_v2(pZip_filename, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, NULL);
-}
-
-mz_bool mz_zip_add_mem_to_archive_file_in_place_v2(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags, mz_zip_error *pErr)
+mz_bool mz_zip_add_mem_to_archive_file_in_place_implementation(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags, mz_uint32* dosDate, mz_zip_error *pErr)
 {
     mz_bool status, created_new_archive = MZ_FALSE;
     mz_zip_archive zip_archive;
@@ -7258,7 +7259,7 @@ mz_bool mz_zip_add_mem_to_archive_file_in_place_v2(const char *pZip_filename, co
         }
     }
 
-    status = mz_zip_writer_add_mem_ex(&zip_archive, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, 0, 0);
+    status = mz_zip_writer_add_mem_ex_v2(&zip_archive, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, 0, 0, NULL, NULL, 0, NULL, 0, dosDate);
     actual_err = zip_archive.m_last_error;
 
     /* Always finalize, even if adding failed for some reason, so we have a valid central directory. (This may not always succeed, but we can try.) */
@@ -7290,6 +7291,21 @@ mz_bool mz_zip_add_mem_to_archive_file_in_place_v2(const char *pZip_filename, co
 
     return status;
 }
+
+mz_bool mz_zip_add_mem_to_archive_file_in_place(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags)
+{
+    return mz_zip_add_mem_to_archive_file_in_place_implementation(pZip_filename, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, NULL, NULL);
+}
+
+mz_bool mz_zip_add_mem_to_archive_file_in_place_v2(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags, mz_zip_error *pErr){
+	return mz_zip_add_mem_to_archive_file_in_place_implementation(pZip_filename, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, NULL, pErr);
+}
+
+mz_bool mz_zip_add_mem_to_archive_file_in_place_with_time(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags, mz_uint32 dosDate){
+	return mz_zip_add_mem_to_archive_file_in_place_implementation(pZip_filename, pArchive_name, pBuf, buf_size, pComment, comment_size, level_and_flags, &dosDate, NULL);
+}
+
+
 
 void *mz_zip_extract_archive_file_to_heap_v2(const char *pZip_filename, const char *pArchive_name, const char *pComment, size_t *pSize, mz_uint flags, mz_zip_error *pErr)
 {

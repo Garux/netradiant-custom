@@ -116,7 +116,7 @@
 
 
 
-/* Defines to completely disable specific portions of miniz.c: 
+/* Defines to completely disable specific portions of miniz.c:
    If all macros here are defined the only functionality remaining will be CRC-32, adler-32, tinfl, and tdefl. */
 
 /* Define MINIZ_NO_STDIO to disable all usage and any functions which rely on stdio for file I/O. */
@@ -139,7 +139,7 @@
 /* Define MINIZ_NO_ZLIB_COMPATIBLE_NAME to disable zlib names, to prevent conflicts against stock zlib. */
 /*#define MINIZ_NO_ZLIB_COMPATIBLE_NAMES */
 
-/* Define MINIZ_NO_MALLOC to disable all calls to malloc, free, and realloc. 
+/* Define MINIZ_NO_MALLOC to disable all calls to malloc, free, and realloc.
    Note if MINIZ_NO_MALLOC is defined then the user must always provide custom user alloc/free/realloc
    callbacks to the zlib and archive API's, and a few stand-alone helper API's which don't provide custom user
    functions (such as tdefl_compress_mem_to_heap() and tinfl_decompress_mem_to_heap()) won't work. */
@@ -1267,7 +1267,7 @@ mz_bool mz_zip_writer_add_mem_ex(mz_zip_archive *pZip, const char *pArchive_name
 
 mz_bool mz_zip_writer_add_mem_ex_v2(mz_zip_archive *pZip, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags,
                                     mz_uint64 uncomp_size, mz_uint32 uncomp_crc32, MZ_TIME_T *last_modified, const char *user_extra_data_local, mz_uint user_extra_data_local_len,
-                                    const char *user_extra_data_central, mz_uint user_extra_data_central_len);
+                                    const char *user_extra_data_central, mz_uint user_extra_data_central_len, mz_uint32* dosDate);
 
 #ifndef MINIZ_NO_STDIO
 /* Adds the contents of a disk file to an archive. This function also records the disk file's modified time into the archive. */
@@ -1305,6 +1305,7 @@ mz_bool mz_zip_writer_end(mz_zip_archive *pZip);
 /* TODO: Perhaps add an option to leave the existing central dir in place in case the add dies? We could then truncate the file (so the old central dir would be at the end) if something goes wrong. */
 mz_bool mz_zip_add_mem_to_archive_file_in_place(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags);
 mz_bool mz_zip_add_mem_to_archive_file_in_place_v2(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags, mz_zip_error *pErr);
+mz_bool mz_zip_add_mem_to_archive_file_in_place_with_time(const char *pZip_filename, const char *pArchive_name, const void *pBuf, size_t buf_size, const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags, mz_uint32 dosDate);
 
 /* Reads a single file from an archive into a heap block. */
 /* If pComment is not NULL, only the file with the specified comment will be extracted. */
