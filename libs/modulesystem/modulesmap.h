@@ -115,9 +115,12 @@ ModulesRef( const char* names ){
 				}
 				Module* module = globalModuleServer().findModule( typename Type::Name(), typename Type::Version(), name );
 				if ( module == 0 ) {
-					globalModuleServer().setError( true );
 					globalErrorStream() << "ModulesRef::initialise: type=" << makeQuoted( typename Type::Name() ) << " version=" << makeQuoted( typename Type::Version() ) << " name=" << makeQuoted( name ) << " - not found\n";
-					break;
+					// do not fail on missing image or model plugin, they can be optional
+					if ( !string_equal( typename Type::Name(), "image" ) && !string_equal( typename Type::Name(), "model" ) ){
+						globalModuleServer().setError( true );
+						break;
+					}
 				}
 				else
 				{
