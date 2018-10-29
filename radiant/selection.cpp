@@ -3973,12 +3973,13 @@ class ClipManipulator : public Manipulator, public ManipulatorSelectionChangeabl
 	Matrix4& m_pivot2world;
 	ClipperPoint m_points[3];
 	TranslateFree m_drag2d;
+	TranslateFreeXY_Z m_dragXY_Z;
 	const AABB& m_bounds;
 	Vector3 m_viewdir;
 public:
 	static Shader* m_state;
 
-	ClipManipulator( Matrix4& pivot2world, const AABB& bounds ) : m_pivot2world( pivot2world ), m_drag2d( *this ), m_bounds( bounds ){
+	ClipManipulator( Matrix4& pivot2world, const AABB& bounds ) : m_pivot2world( pivot2world ), m_drag2d( *this ), m_dragXY_Z( *this ), m_bounds( bounds ){
 		m_points[0].m_name = '1';
 		m_points[1].m_name = '2';
 		m_points[2].m_name = '3';
@@ -4207,7 +4208,7 @@ public:
 		updatePlane();
 	}
 	/* Translatable */
-	void translate( const Vector3& translation ){ //in 2d
+	void translate( const Vector3& translation ){ //in 2d and ( 3d + m_dragXY_Z )
 		for( std::size_t i = 0; i < 3; ++i )
 			if( m_points[i].isSelected() ){
 				m_points[i].m_point = m_points[i].m_pointNonTransformed + translation;
@@ -4217,8 +4218,13 @@ public:
 	}
 	/* Manipulatable */
 	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+		m_dragXY_Z.set0( transform_origin );
+		m_dragXY_Z.Construct( device2manip, x, y, AABB( transform_origin, g_vector3_identity ), transform_origin );
 	}
 	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){ //in 3d
+		if( snap || snapbbox || alt )
+			return m_dragXY_Z.Transform( manip2object, device2manip, x, y, snap, snapbbox, alt );
+
 		View scissored( *m_view );
 		const float device_point[2] = { x, y };
 		ConstructSelectionTest( scissored, SelectionBoxForPoint( device_point, m_device_epsilon ) );
