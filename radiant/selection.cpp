@@ -525,7 +525,7 @@ TranslateFreeXY_Z( Translatable& translatable )
 	: m_translatable( translatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	m_axisZ = m_viewdependent? vector3_max_abs_component_index( m_view->getViewDir() ) : 2;
+	m_axisZ = ( m_viewdependent || !m_view->fill() )? vector3_max_abs_component_index( m_view->getViewDir() ) : 2;
 	if( m_0 == g_vector3_identity ) /* special value to indicate missing good point to start with, i.e. while dragging components by clicking anywhere; m_startXY, m_startZ != m_0 in this case */
 		m_0 = transform_origin;
 	m_planeXY = Plane3( g_vector3_axes[m_axisZ], m_0[m_axisZ] );
@@ -543,7 +543,7 @@ void Construct( const Matrix4& device2manip, const float x, const float y, const
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
 	Vector3 current;
-	if( alt )
+	if( alt && m_view->fill() )
 		current = ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_startZ ) * g_vector3_axes[m_axisZ];
 	else{
 		current = point_on_plane( m_planeXY, m_view->GetViewMatrix(), x, y ) - m_startXY;
@@ -2202,7 +2202,7 @@ class SkewManipulator : public Manipulator
 	};
 
 	SkewAxis m_skew;
-	TranslateFree m_translateFree;
+	TranslateFreeXY_Z m_translateFreeXY_Z;
 	ScaleAxis m_scaleAxis;
 	ScaleFree m_scaleFree;
 	RotateAxis_radiused m_rotateAxis;
@@ -2243,7 +2243,7 @@ public:
 	static Shader* m_state_point;
 	SkewManipulator( Skewable& skewable, Translatable& translatable, Scalable& scalable, Rotatable& rotatable, const AABB& bounds, Matrix4& pivot2world, const bool& pivotIsCustom, const std::size_t segments = 2 ) :
 		m_skew( skewable ),
-		m_translateFree( translatable ),
+		m_translateFreeXY_Z( translatable ),
 		m_scaleAxis( scalable ),
 		m_scaleFree( scalable ),
 		m_rotateAxis( rotatable ),
@@ -2458,6 +2458,8 @@ public:
 				SelectionIntersection best;
 				AABB_BestPoint( local2view, eClipCullCW, AABB( Vector3( 0, 0, 0 ), Vector3( 1, 1, 1 ) ), best );
 				selector.addSelectable( best, &m_selectable_translateFree );
+				if( !selector.failed() )
+					m_translateFreeXY_Z.set0( vector4_projected( matrix4_transformed_vector4( matrix4_full_inverse( view.GetViewMatrix() ), Vector4( 0, 0, selector.begin()->first.depth(), 1 ) ) ) );
 			}
 		}
 
@@ -2573,7 +2575,7 @@ public:
 				return &m_scaleAxis;
 			}
 		}
-		return &m_translateFree;
+		return &m_translateFreeXY_Z;
 	}
 
 	void setSelected( bool select ) {
