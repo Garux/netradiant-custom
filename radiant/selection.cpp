@@ -452,13 +452,7 @@ TranslateAxis2( Translatable& translatable )
 	: m_translatable( translatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	if( m_0 == g_vector3_identity ) /* special value to indicate missing good point to start with */
-		m_0 = transform_origin;
-#if 0
-	Vector3 xydir( m_view->getViewDir() );
-#else
 	Vector3 xydir( m_view->getViewer() - m_0 );
-#endif
 	xydir[m_axisZ] = 0;
 	vector3_normalise( xydir );
 	m_planeZ = Plane3( xydir, vector3_dot( xydir, m_0 ) );
@@ -532,7 +526,7 @@ TranslateFreeXY_Z( Translatable& translatable )
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
 	m_axisZ = m_viewdependent? vector3_max_abs_component_index( m_view->getViewDir() ) : 2;
-	if( m_0 == g_vector3_identity ) /* special value to indicate missing good point to start with */
+	if( m_0 == g_vector3_identity ) /* special value to indicate missing good point to start with, i.e. while dragging components by clicking anywhere; m_startXY, m_startZ != m_0 in this case */
 		m_0 = transform_origin;
 	m_planeXY = Plane3( g_vector3_axes[m_axisZ], m_0[m_axisZ] );
 #if 0
@@ -749,8 +743,10 @@ virtual void skew( const Skew& skew ) = 0;
 class SkewAxis : public Manipulatable
 {
 private:
-Vector3 m_start;
-Vector3 m_axis_which;
+Vector3 m_0;
+Plane3 m_planeZ;
+
+int m_axis_which;
 int m_axis_by;
 int m_axis_by_sign;
 Skewable& m_skewable;
@@ -763,26 +759,27 @@ SkewAxis( Skewable& skewable )
 	: m_skewable( skewable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_axis( m_start, m_axis_which, device2manip, x, y );
+	Vector3 xydir( m_view->getViewer() - m_0 );
+	xydir[m_axis_which] = 0;
+//	xydir *= g_vector3_axes[vector3_max_abs_component_index( xydir )];
+	vector3_normalise( xydir );
+	m_planeZ = Plane3( xydir, vector3_dot( xydir, m_0 ) );
+
 	m_bounds = bounds;
 	m_axis_by_extent = bounds.origin[m_axis_by] + bounds.extents[m_axis_by] * m_axis_by_sign - transform_origin[m_axis_by];
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_axis( current, m_axis_which, device2manip, x, y );
-	current = vector3_scaled( m_axis_which, distance_for_axis( m_start, current, m_axis_which ) );
-
-	translation_local2object( current, current, manip2object );
-	vector3_snap( current, GetSnapGridSize() );
-
-	const int axis_which_index = m_axis_which[0] > 0? 0 : m_axis_which[1] > 0? 1 : 2;
+	const Vector3 current = point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_0;
 //	globalOutputStream() << m_axis_which << " by axis " << m_axis_by << "\n";
-	m_skewable.skew( Skew( m_axis_by * 4 + axis_which_index, m_axis_by_extent != 0.f? current[axis_which_index] / m_axis_by_extent : 0 ) );
+	m_skewable.skew( Skew( m_axis_by * 4 + m_axis_which, m_axis_by_extent != 0.f? float_snapped( current[m_axis_which], GetSnapGridSize() ) / m_axis_by_extent : 0 ) );
 }
-void SetAxes( const Vector3& axis_which, int axis_by, int axis_by_sign ){
+void SetAxes( int axis_which, int axis_by, int axis_by_sign ){
 	m_axis_which = axis_which;
 	m_axis_by = axis_by;
 	m_axis_by_sign = axis_by_sign;
+}
+void set0( const Vector3& start ){
+	m_0 = start;
 }
 };
 
@@ -2445,6 +2442,7 @@ public:
 
 			if( !selector.failed() ) {
 				( *selector.begin() ).second->setSelected( true );
+				m_skew.set0( vector4_projected( matrix4_transformed_vector4( matrix4_full_inverse( view.GetViewMatrix() ), Vector4( 0, 0, selector.begin()->first.depth(), 1 ) ) ) );
 				if( !m_pivotIsCustom )
 					for ( int i = 0; i < 3; ++i )
 						for ( int j = 0; j < 2; ++j )
@@ -2552,7 +2550,7 @@ public:
 			for ( int j = 0; j < 2; ++j )
 				for ( int k = 0; k < 2; ++k )
 					if( m_selectables[i][j][k].isSelected() ){
-						m_skew.SetAxes( g_vector3_axes[i], ( i + j + 1 ) % 3, k? 1 : -1 );
+						m_skew.SetAxes( i, ( i + j + 1 ) % 3, k? 1 : -1 );
 						return &m_skew;
 					}
 					else if( m_selectables_rotate[i][j][k].isSelected() ){
