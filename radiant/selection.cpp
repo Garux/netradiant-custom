@@ -3754,7 +3754,6 @@ class DragManipulator : public Manipulator
 {
 TranslateFree m_freeResize;
 TranslateAxis2 m_axisResize;
-TranslateFree m_freeDrag;
 TranslateFreeXY_Z m_freeDragXY_Z;
 ResizeTranslatable m_resize;
 DragTranslatable m_drag;
@@ -3766,7 +3765,7 @@ bool m_newBrush;
 
 public:
 
-DragManipulator() : m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDrag( m_drag ), m_freeDragXY_Z( m_drag ), m_dragSelected( false ), m_selected( false ), m_selected2( false ), m_newBrush( false ){
+DragManipulator() : m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( m_drag ), m_dragSelected( false ), m_selected( false ), m_selected2( false ), m_newBrush( false ){
 }
 
 Manipulatable* GetManipulatable(){
@@ -3776,10 +3775,8 @@ Manipulatable* GetManipulatable(){
 		return &m_freeResize;
 	else if( m_selected2 )
 		return &m_axisResize;
-	else if( Manipulatable::m_view->fill() )
-		return &m_freeDragXY_Z;
 	else
-		return &m_freeDrag;
+		return &m_freeDragXY_Z;
 }
 
 void testSelect( const View& view, const Matrix4& pivot2world ){
@@ -3972,14 +3969,13 @@ class ClipManipulator : public Manipulator, public ManipulatorSelectionChangeabl
 	};
 	Matrix4& m_pivot2world;
 	ClipperPoint m_points[3];
-	TranslateFree m_drag2d;
 	TranslateFreeXY_Z m_dragXY_Z;
 	const AABB& m_bounds;
 	Vector3 m_viewdir;
 public:
 	static Shader* m_state;
 
-	ClipManipulator( Matrix4& pivot2world, const AABB& bounds ) : m_pivot2world( pivot2world ), m_drag2d( *this ), m_dragXY_Z( *this ), m_bounds( bounds ){
+	ClipManipulator( Matrix4& pivot2world, const AABB& bounds ) : m_pivot2world( pivot2world ), m_dragXY_Z( *this ), m_bounds( bounds ){
 		m_points[0].m_name = '1';
 		m_points[1].m_name = '2';
 		m_points[2].m_name = '3';
@@ -4221,8 +4217,8 @@ public:
 		m_dragXY_Z.set0( transform_origin );
 		m_dragXY_Z.Construct( device2manip, x, y, AABB( transform_origin, g_vector3_identity ), transform_origin );
 	}
-	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){ //in 3d
-		if( snap || snapbbox || alt )
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
+		if( snap || snapbbox || alt || !m_view->fill() )
 			return m_dragXY_Z.Transform( manip2object, device2manip, x, y, snap, snapbbox, alt );
 
 		View scissored( *m_view );
@@ -4240,10 +4236,7 @@ public:
 	}
 
 	Manipulatable* GetManipulatable() {
-		if( m_view->fill() )
-			return this;
-		else
-			return &m_drag2d;
+		return this;
 	}
 
 	void setSelected( bool select ) {
