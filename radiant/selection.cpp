@@ -125,10 +125,10 @@ void ray_intersect_ray( const Ray& ray, const Ray& other, Vector3& intersection 
 const Vector3 g_origin( 0, 0, 0 );
 const float g_radius = 64;
 
-void point_on_sphere( Vector3& point, const Matrix4& device2object, const float x, const float y, const Vector3& origin = g_origin, const float radius = g_radius ){
+void point_on_sphere( Vector3& point, const Matrix4& device2object, const float x, const float y, const float radius = g_radius ){
 	Ray ray;
 	ray_for_device_point( ray, device2object, x, y );
-	sphere_intersect_ray( origin, radius, ray, point );
+	sphere_intersect_ray( g_origin, radius, ray, point );
 }
 
 void point_on_axis( Vector3& point, const Vector3& axis, const Matrix4& device2object, const float x, const float y ){
@@ -240,23 +240,13 @@ void Construct( const Matrix4& device2manip, const float x, const float y, const
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
 	Vector3 current;
 	point_on_sphere( current, device2manip, x, y );
-
-	if( snap ){
-		Vector3 axis( 0, 0, 0 );
-		for( std::size_t i = 0; i < 3; ++i ){
-			if( current[i] == 0.f ){
-				axis[i] = 1.f;
-				break;
-			}
-		}
-		if( vector3_length_squared( axis ) != 0 ){
-			constrain_to_axis( current, axis );
-			m_rotatable.rotate( quaternion_for_axisangle( axis, float_snapped( angle_for_axis( m_start, current, axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
-			return;
-		}
-	}
-
 	vector3_normalise( current );
+
+	if( snap )
+		for( std::size_t i = 0; i < 3; ++i )
+			if( current[i] == 0.f )
+				return m_rotatable.rotate( quaternion_for_axisangle( g_vector3_axes[i], float_snapped( angle_for_axis( m_start, current, g_vector3_axes[i] ), static_cast<float>( c_pi / 12.0 ) ) ) );
+
 	m_rotatable.rotate( quaternion_for_unit_vectors( m_start, current ) );
 //	m_rotatable.rotate( quaternion_for_sphere_vectors( m_start, current ) ); //wrong math, 2x more sensitive
 }
@@ -266,53 +256,41 @@ class RotateAxis : public Manipulatable
 {
 Vector3 m_axis;
 Vector3 m_start;
+float m_radius;
+bool m_plane_way;
+Plane3 m_plane;
+Vector3 m_origin;
 Rotatable& m_rotatable;
 public:
 RotateAxis( Rotatable& rotatable )
-	: m_rotatable( rotatable ){
+	: m_radius( g_radius ), m_rotatable( rotatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_sphere( m_start, device2manip, x, y );
-	constrain_to_axis( m_start, m_axis );
-}
-/// \brief Converts current position to a normalised vector orthogonal to axis.
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_sphere( current, device2manip, x, y );
-	constrain_to_axis( current, m_axis );
+	const float dot = vector3_dot( m_axis, m_view->fill()? vector3_normalised( m_view->getViewer() - transform_origin ) : m_view->getViewDir() );
+	m_plane_way = fabs( dot ) > 0.1;
 
-	if( snap ){
-		m_rotatable.rotate( quaternion_for_axisangle( m_axis, float_snapped( angle_for_axis( m_start, current, m_axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
+	if( m_plane_way ){
+		m_origin = transform_origin;
+		m_plane = Plane3( m_axis, vector3_dot( m_axis, m_origin ) );
+		m_start = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y ) - m_origin;
+		vector3_normalise( m_start );
 	}
 	else{
-		m_rotatable.rotate( quaternion_for_axisangle( m_axis, angle_for_axis( m_start, current, m_axis ) ) );
+		point_on_sphere( m_start, device2manip, x, y, m_radius );
+		constrain_to_axis( m_start, m_axis );
 	}
-}
-
-void SetAxis( const Vector3& axis ){
-	m_axis = axis;
-}
-};
-
-class RotateAxis_radiused : public Manipulatable
-{
-Vector3 m_axis;
-Vector3 m_start;
-float m_radius;
-Rotatable& m_rotatable;
-public:
-RotateAxis_radiused( Rotatable& rotatable )
-	: m_rotatable( rotatable ){
-}
-void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_sphere( m_start, device2manip, x, y, g_origin, m_radius );
-	constrain_to_axis( m_start, m_axis );
 }
 /// \brief Converts current position to a normalised vector orthogonal to axis.
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
 	Vector3 current;
-	point_on_sphere( current, device2manip, x, y, g_origin, m_radius );
-	constrain_to_axis( current, m_axis );
+	if( m_plane_way ){
+		current = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y ) - m_origin;
+		vector3_normalise( current );
+	}
+	else{
+		point_on_sphere( current, device2manip, x, y, m_radius );
+		constrain_to_axis( current, m_axis );
+	}
 
 	if( snap ){
 		m_rotatable.rotate( quaternion_for_axisangle( m_axis, float_snapped( angle_for_axis( m_start, current, m_axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
@@ -329,47 +307,8 @@ void SetRadius( const float radius ){
 	m_radius = radius;
 }
 };
-#if 0
-class RotateAxis_centered : public Manipulatable
-{
-Vector3 m_axis;
-Vector3 m_start;
-Vector3 m_sphere_origin;
-Rotatable& m_rotatable;
-public:
-RotateAxis_centered( Rotatable& rotatable )
-	: m_rotatable( rotatable ){
-}
-void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	//point_for_device_point( m_sphere_origin, device2manip, x, y, 0 );
-	m_sphere_origin = vector4_to_vector3( matrix4_transformed_vector4( device2manip, Vector4( x, y, 0, 1 ) ) );
-	point_on_sphere( m_start, device2manip, x, y, m_sphere_origin );
-	m_start -= m_sphere_origin;
-	globalOutputStream() << m_sphere_origin << "\n";
-	constrain_to_axis( m_start, m_axis );
-}
-/// \brief Converts current position to a normalised vector orthogonal to axis.
-void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_sphere( current, device2manip, x, y, m_sphere_origin );
-	current -= m_sphere_origin;
-	globalOutputStream() << current << "\n";
-	constrain_to_axis( current, m_axis );
-	globalOutputStream() << current << "\n";
 
-	if( snap ){
-		m_rotatable.rotate( quaternion_for_axisangle( m_axis, float_snapped( angle_for_axis( m_start, current, m_axis ), static_cast<float>( c_pi / 12.0 ) ) ) );
-	}
-	else{
-		m_rotatable.rotate( quaternion_for_axisangle( m_axis, angle_for_axis( m_start, current, m_axis ) ) );
-	}
-}
 
-void SetAxis( const Vector3& axis ){
-	m_axis = axis;
-}
-};
-#endif
 /// \brief snaps changed axes of \p move so that \p bounds stick to closest grid lines.
 void aabb_snap_translation( Vector3& move, const AABB& bounds ){
 	const Vector3 maxs( bounds.origin + bounds.extents );
@@ -2205,7 +2144,7 @@ class SkewManipulator : public Manipulator
 	TranslateFreeXY_Z m_translateFreeXY_Z;
 	ScaleAxis m_scaleAxis;
 	ScaleFree m_scaleFree;
-	RotateAxis_radiused m_rotateAxis;
+	RotateAxis m_rotateAxis;
 	AABB m_bounds_draw;
 	const AABB& m_bounds;
 	Matrix4& m_pivot2world;
