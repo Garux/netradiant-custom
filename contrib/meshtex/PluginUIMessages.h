@@ -44,7 +44,9 @@
 #define DIALOG_MULTIMESHES_ERROR "Must select only one patch mesh for this function."
 #define DIALOG_NOMESHES_MSG "No valid patch meshes selected."
 #define DIALOG_ABOUT_MSG PLUGIN_NAME " " PLUGIN_VERSION "\n\n" PLUGIN_DESCRIPTION "\n\n" PLUGIN_AUTHOR " (" PLUGIN_AUTHOR_EMAIL ")"
-#define DIALOG_HELP_MSG "The Set S/T Scale, Get Info, and General Function dialogs will affect patch meshes that are selected when OK or Apply is clicked. For the other menu options, select the mesh(es) before selecting the option."
+#define DIALOG_HELP_MSG "The Set S/T Scale, Get Info, and General Function dialogs will affect patch meshes that are selected when OK or Apply is clicked. " \
+                        "For the other menu options, select the mesh(es) before selecting the option.\n\n" \
+                        "http://neogeographica.com/site/pages/tools/meshtex.html"
 //@}
 
 /// @name Get Info
