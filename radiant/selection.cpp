@@ -4508,8 +4508,10 @@ EComponentMode ComponentMode() const {
 	return m_componentmode;
 }
 void SetManipulatorMode( EManipulatorMode mode ){
-	if( ( mode == eClip ) != ( ManipulatorMode() == eClip ) ){
-		Clipper_modeChanged( mode == eClip );
+	if( ( mode == eClip ) || ( ManipulatorMode() == eClip ) ){
+		m_clip_manipulator.reset();
+		if( ( mode == eClip ) != ( ManipulatorMode() == eClip ) )
+			Clipper_modeChanged( mode == eClip );
 	}
 
 	m_pivotIsCustom = false;
@@ -4521,12 +4523,7 @@ void SetManipulatorMode( EManipulatorMode mode ){
 	case eScale: m_manipulator = &m_scale_manipulator; break;
 	case eSkew: m_manipulator = &m_skew_manipulator; break;
 	case eDrag: m_manipulator = &m_drag_manipulator; break;
-	case eClip:
-		{
-			m_manipulator = &m_clip_manipulator;
-			m_clip_manipulator.reset();
-			break;
-		}
+	case eClip: m_manipulator = &m_clip_manipulator; break;
 	}
 	pivotChanged();
 }

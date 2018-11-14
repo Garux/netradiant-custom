@@ -72,6 +72,10 @@ void Clipper_setPlanePoints( const ClipperPoints& points ){
 	Clipper_update();
 }
 
+const ClipperPoints& Clipper_getPlanePoints(){
+	return g_clipper_points;
+}
+
 #include "gtkutil/idledraw.h"
 void Clipper_BoundsChanged(){
 	if ( Clipper_ok_plane() )

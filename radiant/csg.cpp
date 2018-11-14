@@ -1225,7 +1225,7 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 
 void CSG_WrapMerge(){
 	UndoableCommand undo( "brushWrapMerge" );
-	CSG_WrapMerge( ClipperPoints() );
+	CSG_WrapMerge( Clipper_getPlanePoints() );
 }
 
 
