@@ -1567,6 +1567,7 @@ void ClipperMode(){
 		g_currentToolModeSupportsComponentEditing = false;
 
 		SelectionSystem_DefaultMode();
+		ComponentModeChanged();
 
 		Sys_Status( c_ClipperMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eClip );
