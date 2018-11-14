@@ -39,7 +39,7 @@ typedef struct {
 typedef struct {
 	int planeNum;
 	int children[2];            // negative numbers are -(leafs+1), not nodes
-	int mins[3];                // for frustom culling
+	int mins[3];                // for frustum culling
 	int maxs[3];
 } dnode_t;
 

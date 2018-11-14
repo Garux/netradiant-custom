@@ -260,7 +260,7 @@ void Cmd_Colormap( void ){
 			*lump_p++ = BestColor( red,green,blue, 1, 254 );
 		}
 
-		// fullbrights allways stay the same
+		// fullbrights always stay the same
 		for ( ; c < 256 ; c++ )
 			*lump_p++ = c;
 	}

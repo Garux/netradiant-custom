@@ -102,7 +102,7 @@ void construct(){
 
 	m_frustum = frustum_from_viewproj( m_viewproj );
 	m_viewer = viewer_from_viewproj( m_viewproj );
-	m_viewdir = vector3_normalised( fill()? Vector3( -m_modelview[2], -m_modelview[6], -m_modelview[10] ) :  Vector3( m_modelview[2], m_modelview[6], m_modelview[10] ) );
+	m_viewdir = vector3_normalised( fill()? Vector3( -m_modelview[2], -m_modelview[6], -m_modelview[10] ) : Vector3( m_modelview[2], m_modelview[6], m_modelview[10] ) );
 }
 public:
 View( bool fill = false ) :

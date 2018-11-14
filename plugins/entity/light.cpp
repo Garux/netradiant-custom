@@ -1867,6 +1867,25 @@ void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPla
 	}
 }
 
+void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ){
+	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+		test.BeginMesh( localToWorld() );
+		m_dragPlanes.bestPlaneDirect( m_contained.aabb(), test, plane, intersection, rotation() );
+	}
+}
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ){
+	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+		test.BeginMesh( localToWorld() );
+		m_dragPlanes.bestPlaneIndirect( m_contained.aabb(), test, plane, intersection, dist, viewer, rotation() );
+	}
+}
+void selectByPlane( const Plane3& plane ){
+	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+		m_dragPlanes.selectByPlane( m_contained.aabb(), plane, rotation() );
+	}
+}
+
+
 bool isSelectedComponents() const {
 	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 		return m_dragPlanes.isSelected();

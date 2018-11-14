@@ -402,7 +402,7 @@ typedef struct {
 	int contentFlags;
 } dshader_t;
 
-// planes x^1 is allways the opposite of plane x
+// planes x^1 is always the opposite of plane x
 
 typedef struct {
 	float normal[3];
@@ -412,7 +412,7 @@ typedef struct {
 typedef struct {
 	int planeNum;
 	int children[2];            // negative numbers are -(leafs+1), not nodes
-	int mins[3];                // for frustom culling
+	int mins[3];                // for frustum culling
 	int maxs[3];
 } dnode_t;
 

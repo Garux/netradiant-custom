@@ -1191,9 +1191,14 @@ struct RotateDialog
 static gboolean rotatedlg_apply( GtkWidget *widget, RotateDialog* rotateDialog ){
 	Vector3 eulerXYZ;
 
-	gtk_spin_button_update ( rotateDialog->x );
-	gtk_spin_button_update ( rotateDialog->y );
-	gtk_spin_button_update ( rotateDialog->z );
+	/* only update in scenario of enter pressed to also allow extra precision of values after execution by buttons */
+	if( gtk_widget_has_focus( GTK_WIDGET( rotateDialog->x ) ) )
+		gtk_spin_button_update( rotateDialog->x );
+	else if( gtk_widget_has_focus( GTK_WIDGET( rotateDialog->y ) ) )
+		gtk_spin_button_update( rotateDialog->y );
+	else if( gtk_widget_has_focus( GTK_WIDGET( rotateDialog->z ) ) )
+		gtk_spin_button_update( rotateDialog->z );
+
 	eulerXYZ[0] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->x ) );
 	eulerXYZ[1] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->y ) );
 	eulerXYZ[2] = static_cast<float>( gtk_spin_button_get_value( rotateDialog->z ) );
@@ -1209,9 +1214,9 @@ static gboolean rotatedlg_apply( GtkWidget *widget, RotateDialog* rotateDialog )
 static gboolean rotatedlg_cancel( GtkWidget *widget, RotateDialog* rotateDialog ){
 	gtk_widget_hide( GTK_WIDGET( rotateDialog->window ) );
 
-	gtk_spin_button_set_value( rotateDialog->x, 0.0f ); // reset to 0 on close
-	gtk_spin_button_set_value( rotateDialog->y, 0.0f );
-	gtk_spin_button_set_value( rotateDialog->z, 0.0f );
+	gtk_spin_button_set_value( rotateDialog->x, 0.0 ); // reset to 0 on close
+	gtk_spin_button_set_value( rotateDialog->y, 0.0 );
+	gtk_spin_button_set_value( rotateDialog->z, 0.0 );
 
 	return TRUE;
 }

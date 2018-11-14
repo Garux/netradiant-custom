@@ -1554,6 +1554,14 @@ const AABB& getSelectedComponentsBounds() const {
 
 	return m_aabb_component;
 }
+void gatherSelectedComponents( const Vector3Callback& callback ) const {
+	for ( PatchControlInstances::const_iterator i = m_ctrl_instances.begin(); i != m_ctrl_instances.end(); ++i )
+	{
+		if ( ( *i ).m_selectable.isSelected() ) {
+			callback( ( *i ).m_ctrl->m_vertex );
+		}
+	}
+}
 
 void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
 	test.BeginMesh( localToWorld() );
@@ -1615,6 +1623,18 @@ void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback&
 }
 void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ){
 	m_dragPlanes.selectReversedPlanes( m_patch.localAABB(), selector, selectedPlanes );
+}
+
+void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ){
+	test.BeginMesh( localToWorld() );
+	m_dragPlanes.bestPlaneDirect( m_patch.localAABB(), test, plane, intersection );
+}
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ){
+	test.BeginMesh( localToWorld() );
+	m_dragPlanes.bestPlaneIndirect( m_patch.localAABB(), test, plane, intersection, dist, viewer );
+}
+void selectByPlane( const Plane3& plane ){
+	m_dragPlanes.selectByPlane( m_patch.localAABB(), plane );
 }
 
 

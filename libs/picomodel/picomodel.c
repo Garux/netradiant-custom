@@ -180,6 +180,8 @@ picoModel_t *PicoModuleLoadModel( const picoModule_t* pm, const char* fileName, 
 			}
 		}
 
+		_pico_deduce_shadernames( model );
+
 		return model;
 	}
 
@@ -491,16 +493,13 @@ void PicoFreeShader( picoShader_t *shader ){
  */
 
 picoShader_t *PicoFindShader( picoModel_t *model, char *name, int caseSensitive ){
-	int i;
-
-
 	/* sanity checks */
 	if ( model == NULL || name == NULL ) { /* sea: null name fix */
 		return NULL;
 	}
 
 	/* walk list */
-	for ( i = 0; i < model->numShaders; i++ )
+	for ( int i = 0; i < model->numShaders; i++ )
 	{
 		/* skip null shaders or shaders with null names */
 		if ( model->shader[ i ] == NULL ||

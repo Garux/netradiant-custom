@@ -334,7 +334,8 @@ static picoModel_t *_md2_load( PM_PARAMS_LOAD ){
 	index_DUP_LUT_t *p_index_LUT_DUPS;
 	md2Triangle_t   *p_md2Triangle;
 
-	char skinname[ MD2_MAX_SKINNAME ];
+	char skinname[ MD2_MAX_SKINNAME + 1 ];
+	skinname[ MD2_MAX_SKINNAME] = '\0';
 	md2_t           *md2;
 	md2St_t         *texCoord;
 	md2Frame_t      *frame;
@@ -432,7 +433,7 @@ static picoModel_t *_md2_load( PM_PARAMS_LOAD ){
 	_pico_printf( PICO_VERBOSE,"Skins: %d  Verts: %d  STs: %d  Triangles: %d  Frames: %d\nSkin Name \"%s\"\n", md2->numSkins, md2->numXYZ, md2->numST, md2->numTris, md2->numFrames, &skinname );
 
 	// detox Skin name
-	_pico_setfext( skinname, "" );
+	_pico_setfext( skinname, NULL );
 	_pico_unixify( skinname );
 
 	/* create new pico model */

@@ -1163,6 +1163,9 @@ filter_brush_all_faces g_filter_brush_fullclip( &g_filter_face_fullclip );
 filter_face_shader g_filter_face_botclip( "textures/common/botclip" );
 filter_brush_all_faces g_filter_brush_botclip( &g_filter_face_botclip );
 
+filter_face_shader g_filter_face_donotenter( "textures/common/donotenter" );
+filter_brush_all_faces g_filter_brush_donotenter( &g_filter_face_donotenter );
+
 filter_face_shader_prefix g_filter_face_caulk( "textures/common/caulk" );
 filter_brush_all_faces g_filter_brush_caulk( &g_filter_face_caulk );
 
@@ -1219,6 +1222,7 @@ void BrushFilters_construct(){
 	add_brush_filter( g_filter_brush_fullclip, EXCLUDE_CLIP );
 	add_brush_filter( g_filter_brush_commonclip, EXCLUDE_CLIP );
 	add_brush_filter( g_filter_brush_botclip, EXCLUDE_BOTCLIP );
+	add_brush_filter( g_filter_brush_donotenter, EXCLUDE_BOTCLIP );
 	add_brush_filter( g_filter_brush_caulk, EXCLUDE_CAULK );
 	add_brush_filter( g_filter_brush_caulk_ja, EXCLUDE_CAULK );
 	add_face_filter( g_filter_face_caulk, EXCLUDE_CAULK );
@@ -1566,6 +1570,7 @@ void Brush_constructMenu( GtkMenu* menu ){
 		}
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Subtract", "CSGSubtract" );
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Merge", "CSGMerge" );
+		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Wrap Merge", "CSGWrapMerge" );
 		create_menu_item_with_mnemonic( menu_in_menu, "Make _Room", "CSGroom" );
 		create_menu_item_with_mnemonic( menu_in_menu, "CSG _Tool", "CSGTool" );
 	}

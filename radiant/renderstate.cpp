@@ -2287,6 +2287,11 @@ void OpenGLShader::construct( const char* name ){
 			hiddenLine.m_depthfunc = GL_GREATER;
 			hiddenLine.m_linestipple_factor = 2;
 		}
+		else if ( string_equal( name + 1, "CAM_WORKZONE" ) ) {
+			state.m_state = RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_BLEND | RENDER_COLOURARRAY | RENDER_OFFSETLINE | RENDER_SMOOTH;
+			state.m_sort = OpenGLState::eSortOverlayFirst + 3;
+			state.m_depthfunc = GL_LEQUAL;
+		}
 		else if ( string_equal( name + 1, "XY_OVERLAY" ) ) {
 			state.m_colour[0] = g_xywindow_globals.color_selbrushes[0];
 			state.m_colour[1] = g_xywindow_globals.color_selbrushes[1];

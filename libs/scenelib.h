@@ -49,12 +49,15 @@ virtual void setSelectedComponents( bool select, SelectionSystem::EComponentMode
 virtual void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ) = 0;
 };
 
+typedef Callback1<const Vector3&> Vector3Callback;
+
 class ComponentEditable
 {
 public:
 STRING_CONSTANT( Name, "ComponentEditable" );
 
 virtual const AABB& getSelectedComponentsBounds() const = 0;
+virtual void gatherSelectedComponents( const Vector3Callback& callback ) const = 0;
 };
 
 class ComponentSnappable
@@ -931,8 +934,6 @@ public:
 virtual void increment() = 0;
 virtual void decrement() = 0;
 };
-
-#include "generic/callback.h"
 
 class SimpleCounter : public Counter
 {

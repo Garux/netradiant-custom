@@ -165,6 +165,8 @@ struct camera_t
 	bool m_strafe; // true when in strafemode toggled by the ctrl-key
 	bool m_strafe_forward; // true when in strafemode by ctrl-key and shift is pressed for forward strafing
 	bool m_strafe_forward_invert; //silly option to invert forward strafing to support old fegs
+	bool m_orbit;
+	Vector3 m_orbit_center;
 	int m_focus_offset;
 
 	unsigned int movementflags; // movement flags
@@ -315,6 +317,7 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 	else // free rotation
 	{
 		const float dtime = 0.0333333f;
+		Vector3 angles0( camera.angles );
 
 		if ( g_camwindow_globals_private.m_bCamInverseMouse ) {
 			camera.angles[CAMERA_PITCH] -= dy * dtime * g_camwindow_globals_private.m_angleSpeed;
@@ -337,6 +340,29 @@ void Camera_FreeMove( camera_t& camera, int dx, int dy ){
 		}
 		else if ( camera.angles[CAMERA_YAW] <= 0 ) {
 			camera.angles[CAMERA_YAW] += 360;
+		}
+
+		if( camera.m_orbit ){
+#if 0
+			const Vector3 radangles( euler_degrees_to_radians( camera.angles ) );
+			const Vector3 viewdir(	cos( radangles[1] ) * cos( radangles[0] ),
+									sin( radangles[1] ) * cos( radangles[0] ),
+									sin( radangles[0] )
+									);
+			const float len = vector3_length( camera.origin - camera.m_orbit_center );
+			camera.origin = camera.m_orbit_center - viewdir * len;
+#else
+			Matrix4 rot0 = matrix4_rotation_for_euler_xyz_degrees( Vector3( 0, -angles0[CAMERA_PITCH], angles0[CAMERA_YAW] ) );
+			matrix4_affine_invert( rot0 );
+			Matrix4 rot1 = matrix4_rotation_for_euler_xyz_degrees( Vector3( 0, -camera.angles[CAMERA_PITCH], camera.angles[CAMERA_YAW] ) );
+			matrix4_multiply_by_matrix4( rot1, rot0 );
+
+			Matrix4 mat = matrix4_translation_for_vec3( camera.m_orbit_center );
+			matrix4_multiply_by_matrix4( mat, rot1 );
+			matrix4_translate_by_vec3( mat, -camera.m_orbit_center );
+
+			camera.origin = matrix4_transformed_point( mat, camera.origin );
+#endif
 		}
 	}
 
@@ -681,6 +707,12 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 
 	cam->m_mouseMove.motion_delta( x, y, state );
 
+	cam->m_orbit = ( state & GDK_MOD1_MASK ) && ( state & GDK_BUTTON3_MASK );
+	if( cam->m_orbit ){
+		cam->m_strafe = false;
+		return;
+	}
+
 	cam->m_strafe_forward_invert = false;
 
 	switch ( g_camwindow_globals_private.m_strafeMode )
@@ -820,6 +852,7 @@ private:
 	void setState() const {
 #ifdef cam_draw_size_use_tex
 		glEnable( GL_BLEND );
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 #else
 		glDisable( GL_BLEND );
 #endif
@@ -847,6 +880,106 @@ private:
 	}
 };
 
+#include "grid.h"
+class RenderableCamWorkzone : public OpenGLRenderable
+{
+public:
+void render( RenderStateFlags state ) const {
+	glEnableClientState( GL_EDGE_FLAG_ARRAY );
+
+	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+
+	for( std::size_t i = 0; i < 3; ++i ){
+		const std::size_t i2 = ( i + 1 ) % 3;
+		const std::size_t i3 = ( i + 2 ) % 3;
+//		const Vector3 normal = g_vector3_axes[i];
+		const float offset = 1024;
+		std::vector<Vector3> points;
+		points.reserve( 4 );
+		points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
+		if( bounds.extents[i2] != 0 ){
+			points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
+		}
+		if( bounds.extents[i3] != 0 ){
+			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+			if( bounds.extents[i2] != 0 ){
+				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
+			}
+		}
+
+		const float grid = GetGridSize();
+		const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
+
+		Array<Vector3> verticesarr( approx_count );
+		Array<GLboolean> edgearr( approx_count );
+		Array<Vector4> colorarr0( approx_count );
+		Array<Vector4> colorarr1( approx_count );
+
+		float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
+//		const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
+		const bool start0 = float_snapped( coord, grid * 2 ) == coord;
+		std::size_t count = 0;
+
+		for( ; count < approx_count - 4; count += 4 ){
+			verticesarr[count][i] =
+			verticesarr[count + 1][i] = coord;
+			const float alpha = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
+			colorarr0[count] = colorarr0[count + 1] = Vector4( 1, 0, 0, alpha );
+			colorarr1[count] = colorarr1[count + 1] = Vector4( 1, 1, 1, alpha );
+			coord += grid;
+			verticesarr[count + 2][i] =
+			verticesarr[count + 3][i] = coord;
+			const float alpha2 = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
+			colorarr0[count + 2] = colorarr0[count + 3] = Vector4( 1, 0, 0, alpha2 );
+			colorarr1[count + 2] = colorarr1[count + 3] = Vector4( 1, 1, 1, alpha2 );
+			coord += grid;
+			edgearr[count] =
+			edgearr[count + 2] = GL_FALSE;
+			edgearr[count + 1] =
+			edgearr[count + 3] = GL_TRUE;
+		}
+
+		if( points.size() == 1 ){
+			points.push_back( points[0] + g_vector3_axes[i2] * 8 );
+			for( std::size_t k = 0; k < count; k += 4 ){
+				edgearr[k + 1] = GL_FALSE;
+			}
+		}
+
+		glVertexPointer( 3, GL_FLOAT, sizeof( Vector3 ), verticesarr.data()->data() );
+		glEdgeFlagPointer( sizeof( GLboolean ), edgearr.data() );
+		for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++++j ){
+			const std::vector<Vector3>::const_iterator jj = j + 1;
+			for( std::size_t k = 0; k < count; k += 4 ){
+				verticesarr[k][i2] = ( *j )[i2];
+				verticesarr[k][i3] = ( *j )[i3];
+				verticesarr[k + 1][i2] = ( *jj )[i2];
+				verticesarr[k + 1][i3] = ( *jj )[i3];
+				verticesarr[k + 2][i2] = ( *jj )[i2];
+				verticesarr[k + 2][i3] = ( *jj )[i3];
+				verticesarr[k + 3][i2] = ( *j )[i2];
+				verticesarr[k + 3][i3] = ( *j )[i3];
+			}
+
+			glPolygonOffset( -2, 2 );
+			glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr0.data()->data() );
+			glDrawArrays( GL_QUADS, start0? 0 : 2, GLsizei( count - ( start0? 4 : 2 ) ) );
+
+			glPolygonOffset( 1, -1 );
+			glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr1.data()->data() );
+			glDrawArrays( GL_QUADS, start0? 2 : 0, GLsizei( count - ( start0? 2 : 4 ) ) );
+		}
+	}
+
+	glDisableClientState( GL_EDGE_FLAG_ARRAY );
+}
+
+void render( Renderer& renderer, Shader* shader ) const {
+	renderer.SetState( shader, Renderer::eFullMaterials );
+	renderer.addRenderable( *this, g_matrix4_identity );
+}
+};
+
 
 
 
@@ -867,6 +1000,7 @@ static Shader* m_state_select0;
 static Shader* m_state_select1;
 static Shader* m_state_wire;
 static Shader* m_state_facewire;
+static Shader* m_state_workzone;
 
 FreezePointer m_freezePointer;
 
@@ -913,6 +1047,7 @@ void queue_draw(){
 void draw();
 
 static void captureStates(){
+	m_state_workzone = GlobalShaderCache().capture( "$CAM_WORKZONE" );
 	m_state_facewire = GlobalShaderCache().capture( "$CAM_FACEWIRE" );
 	m_state_wire = GlobalShaderCache().capture( "$CAM_WIRE" );
 	m_state_select0 = GlobalShaderCache().capture( "$CAM_OVERLAY" );
@@ -923,6 +1058,7 @@ static void releaseStates(){
 	GlobalShaderCache().release( "$CAM_OVERLAY" );
 	GlobalShaderCache().release( "$CAM_WIRE" );
 	GlobalShaderCache().release( "$CAM_FACEWIRE" );
+	GlobalShaderCache().release( "$CAM_WORKZONE" );
 }
 
 camera_t& getCamera(){
@@ -956,6 +1092,7 @@ Shader* CamWnd::m_state_select0 = 0;
 Shader* CamWnd::m_state_select1 = 0;
 Shader* CamWnd::m_state_wire = 0;
 Shader* CamWnd::m_state_facewire = 0;
+Shader* CamWnd::m_state_workzone = 0;
 
 CamWnd* NewCamWnd(){
 	return new CamWnd;
@@ -1056,13 +1193,33 @@ bool context_menu_try( CamWnd* camwnd ){
 	//doesn't work if cam redraw > 200msec (3x click works): gtk_widget_queue_draw proceeds after timer.start()
 }
 
+void camera_set_orbit_center( camera_t& cam, Vector2 xy ){
+	xy.x() = ( ( 2.0f * xy.x() ) / cam.width ) - 1.0f; // window_to_normalised_device
+	xy.y() = ( ( 2.0f * ( cam.height - 1 - xy.y() ) ) / cam.height ) - 1.0f;
+
+	const Vector2 epsilon( 8.f / cam.width, 8.f / cam.height ); //device epsilon
+
+	Scene_Intersect( *cam.m_view, xy.data(), epsilon.data(), cam.m_orbit_center );
+}
+
+inline bool ORBIT_EVENT( GdkEventButton* event ){
+	return event->button == 3 && modifiers_for_state( event->state ) == c_modifierAlt;
+}
+inline bool M2_EVENT( GdkEventButton* event ){
+	return event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone;
+}
+
 gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+	const bool m2    = M2_EVENT( event );
+	const bool m2alt = ORBIT_EVENT( event );
+	if ( ( m2 || m2alt ) && event->type == GDK_BUTTON_PRESS ) {
 		camwnd->m_bFreeMove_entering = true;
-		if( context_menu_try( camwnd ) ){
+		if( m2 && context_menu_try( camwnd ) ){
 			context_menu();
 		}
 		else{
+			if( m2alt )
+				camera_set_orbit_center( camwnd->getCamera(), Vector2( event->x, event->y ) );
 			camwnd->EnableFreeMove();
 			camwnd->m_rightClickTimer.start();
 			camwnd->m_rightClickMove = 0;
@@ -1073,14 +1230,17 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 }
 
 gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+	const bool m2    = M2_EVENT( event );
+	const bool m2alt = ORBIT_EVENT( event );
+	if ( ( m2 || m2alt ) && event->type == GDK_BUTTON_PRESS ) {
 		camwnd->m_bFreeMove_entering = false;
-		const bool doubleclicked = context_menu_try( camwnd );
-		if( doubleclicked ){
+		if( m2 && context_menu_try( camwnd ) ){
 			camwnd->DisableFreeMove();
 			context_menu();
 		}
 		else{
+			if( m2alt )
+				camera_set_orbit_center( camwnd->getCamera(), Vector2( event->x, event->y ) );
 			camwnd->m_rightClickTimer.start();
 			camwnd->m_rightClickMove = 0;
 		}
@@ -1090,7 +1250,9 @@ gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event
 }
 
 gboolean disable_freelook_button_release( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
-	if ( event->type == GDK_BUTTON_RELEASE && event->button == 3 && modifiers_for_state( event->state ) == c_modifierNone ) {
+	const bool m2    = M2_EVENT( event );
+	const bool m2alt = ORBIT_EVENT( event );
+	if ( ( m2 || m2alt ) && event->type == GDK_BUTTON_RELEASE ) {
 		if( ( ( camwnd->m_rightClickTimer.elapsed_msec() < 300 && camwnd->m_rightClickMove < 56 ) == !camwnd->m_bFreeMove_entering ) ){
 			camwnd->DisableFreeMove();
 			return TRUE;
@@ -1132,7 +1294,8 @@ void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 gboolean selection_button_press( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
 		gtk_widget_grab_focus( widget );
-		observer->onMouseDown( WindowVector( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
+		if( !ORBIT_EVENT( event ) )
+			observer->onMouseDown( WindowVector( event->x, event->y ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
@@ -1155,7 +1318,8 @@ inline WindowVector windowvector_for_widget_centre( GtkWidget* widget ){
 
 gboolean selection_button_press_freemove( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){
 	if ( event->type == GDK_BUTTON_PRESS ) {
-		observer->onMouseDown( windowvector_for_widget_centre( widget ), button_for_button( event->button ), modifiers_for_state( event->state ) );
+		if( !ORBIT_EVENT( event ) )
+			observer->onMouseDown( windowvector_for_widget_centre( widget ), button_for_button( event->button ), modifiers_for_state( event->state ) );
 	}
 	return FALSE;
 }
@@ -1951,69 +2115,12 @@ void CamWnd::Cam_Draw(){
 
 		Scene_Render( renderer, m_view );
 
-		renderer.render( m_Camera.modelview, m_Camera.projection );
-	}
-
-	/* workzone */
-	if( g_camwindow_globals_private.m_bShowWorkzone && GlobalSelectionSystem().countSelected() != 0 ){
-		glEnable( GL_BLEND );
-		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		glShadeModel( GL_SMOOTH );
-
-		glEnable( GL_DEPTH_TEST );
-		glDepthFunc( GL_LESS );
-		glDepthMask( GL_TRUE );
-
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glDisableClientState( GL_NORMAL_ARRAY );
-		glDisableClientState( GL_COLOR_ARRAY );
-
-		glDisable( GL_TEXTURE_2D );
-		glDisable( GL_LIGHTING );
-		glDisable( GL_COLOR_MATERIAL );
-
-		glDisable( GL_LINE_STIPPLE );
-		glLineWidth( 1 );
-#if 0
-		const Vector4 color0( g_camwindow_globals.color_selbrushes3d, 0 );
-		const Vector4 color1( g_camwindow_globals.color_selbrushes3d, 1 );
-#else
-		const Vector4 color0( 1, 1, 1, 0 );
-		const Vector4 color1( 1, 1, 1, 1 );
-#endif
-		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
-
-		glBegin( GL_LINES );
-		for( std::size_t i = 0; i < 3; ++i ){
-			const std::size_t i2 = ( i + 1 ) % 3;
-			const std::size_t i3 = ( i + 2 ) % 3;
-			const Vector3 normal = g_vector3_axes[i];
-			const float size = 1024;
-			std::vector<Vector3> points;
-			points.reserve( 4 );
-			points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			if( bounds.extents[i2] != 0 ){
-				points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents + g_vector3_axes[i3] * bounds.extents );
-			}
-			if( bounds.extents[i3] != 0 ){
-				points.push_back( bounds.origin + g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				if( bounds.extents[i2] != 0 ){
-					points.push_back( bounds.origin - g_vector3_axes[i2] * bounds.extents - g_vector3_axes[i3] * bounds.extents );
-				}
-			}
-			for( std::vector<Vector3>::const_iterator j = points.begin(); j != points.end(); ++j ){
-				glColor4fv( vector4_to_array( color0 ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] + size ) ) );
-				glColor4fv( vector4_to_array( color1 ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j + normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] ) ) );
-				glColor4fv( vector4_to_array( color0 ) );
-				glVertex3fv( vector3_to_array( *j - normal * ( bounds.extents[i] + size ) ) );
-			}
+		RenderableCamWorkzone workzone;
+		if( g_camwindow_globals_private.m_bShowWorkzone && GlobalSelectionSystem().countSelected() != 0 ){
+			workzone.render( renderer, m_state_workzone );
 		}
-		glEnd();
+
+		renderer.render( m_Camera.modelview, m_Camera.projection );
 	}
 
 	/* size */

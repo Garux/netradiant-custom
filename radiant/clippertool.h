@@ -28,10 +28,15 @@ class ClipperPoints
 {
 public:
 	Vector3 _points[3];
-	ClipperPoints( const Vector3& p0, const Vector3& p1, const Vector3& p2 ){
+	std::size_t _count;
+	ClipperPoints( const Vector3& p0, const Vector3& p1, const Vector3& p2, std::size_t count ){
 		_points[0] = p0;
 		_points[1] = p1;
 		_points[2] = p2;
+		_count = count;
+	}
+	ClipperPoints() : _count( 0 ){
+		_points[0] = _points[1] = _points[2] = Vector3( 0, 0, 0 );
 	}
 	const Vector3& operator[]( std::size_t i ) const {
 		return _points[i];

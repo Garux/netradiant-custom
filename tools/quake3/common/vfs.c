@@ -260,8 +260,7 @@ void vfsListShaderFiles( char* list, int *num ){
 	char path[NAME_MAX];
 /* search in dirs */
 	for ( i = 0; i < g_numDirs; i++ ){
-		strncpy( path, g_strDirs[ i ], NAME_MAX );
-		strcat( path, "scripts/" );
+		snprintf( path, NAME_MAX, "%sscripts/", g_strDirs[ i ] );
 
 		dir = g_dir_open( path, 0, NULL );
 
@@ -558,9 +557,6 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 		// we need to end the buffer with a 0
 		( (char*) ( bufferptr ) )[file->size] = 0;
 
-		mz_uint16 DOS_time = (mz_uint16)(((file->zipinfo.cur_file_info.tmu_date.tm_hour) << 11) + ((file->zipinfo.cur_file_info.tmu_date.tm_min) << 5) + ((file->zipinfo.cur_file_info.tmu_date.tm_sec) >> 1));
-		mz_uint16 DOS_date = (mz_uint16)(((file->zipinfo.cur_file_info.tmu_date.tm_year - 1980) << 9) + ((file->zipinfo.cur_file_info.tmu_date.tm_mon + 1) << 5) + file->zipinfo.cur_file_info.tmu_date.tm_mday);
-
 		i = unzReadCurrentFile( file->zipfile, bufferptr, file->size );
 		unzCloseCurrentFile( file->zipfile );
 		if ( i < 0 ) {
@@ -568,7 +564,7 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 		}
 		else{
 			mz_bool success = MZ_TRUE;
-			success &= mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, bufferptr, i, 0, 0, compLevel, DOS_time, DOS_date );
+			success &= mz_zip_add_mem_to_archive_file_in_place_with_time( packname, filename, bufferptr, i, 0, 0, compLevel, file->zipinfo.cur_file_info.dosDate );
 				if ( !success ){
 					Error( "Failed creating zip archive \"%s\"!\n", packname );
 				}

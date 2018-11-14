@@ -25,6 +25,8 @@
 void CSG_MakeRoom();
 void CSG_Subtract();
 void CSG_Merge();
+void CSG_WrapMerge();
+void CSG_DeleteComponents();
 void CSG_Tool();
 
 namespace scene
@@ -34,7 +36,7 @@ class Graph;
 
 class ClipperPoints;
 
-void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points );
-void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool caulk, bool split );
+void Scene_BrushSetClipPlane( scene::Graph& graph, const ClipperPoints& points, bool flip );
+void Scene_BrushSplitByPlane( scene::Graph& graph, const ClipperPoints& points, bool flip, bool caulk, bool split );
 
 #endif

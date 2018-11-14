@@ -502,7 +502,7 @@ static picoModel_t *_terrain_load( PM_PARAMS_LOAD ){
 	}
 
 	/* detox and set shader name */
-	_pico_setfext( shader, "" );
+	_pico_setfext( shader, NULL );
 	_pico_unixify( shader );
 	PicoSetShaderName( picoShader, shader );
 	_pico_free( shader );
