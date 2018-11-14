@@ -493,13 +493,15 @@ void PicoFreeShader( picoShader_t *shader ){
  */
 
 picoShader_t *PicoFindShader( picoModel_t *model, char *name, int caseSensitive ){
+	int i;
+	
 	/* sanity checks */
 	if ( model == NULL || name == NULL ) { /* sea: null name fix */
 		return NULL;
 	}
 
 	/* walk list */
-	for ( int i = 0; i < model->numShaders; i++ )
+	for ( i = 0; i < model->numShaders; i++ )
 	{
 		/* skip null shaders or shaders with null names */
 		if ( model->shader[ i ] == NULL ||
