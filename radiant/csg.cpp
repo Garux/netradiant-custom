@@ -1089,49 +1089,50 @@ public:
 
 #include "convhull_3d.h"
 void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlanes ){
-#if 0
-	/* bruteforce new planes */
-	for( MergeVertices::const_iterator i = mergeVertices.begin() + 0; i != mergeVertices.end() - 2; ++i )
-		for( MergeVertices::const_iterator j = i + 1; j != mergeVertices.end() - 1; ++j )
-			for( MergeVertices::const_iterator k = j + 1; k != mergeVertices.end() - 0; ++k ){
-				const Plane3 plane = plane3_for_points( *i, *j, *k );
-				if( plane3_valid( plane ) ){
-					const brushsplit_t split = mergeVertices.classify_plane( plane );
-					if( ( split.counts[ePlaneFront] == 0 ) != ( split.counts[ePlaneBack] == 0 ) ){
-						if( split.counts[ePlaneFront] != 0 )
-							mergePlanes.insert( MergePlane( plane3_flipped( plane ), *i, *j, *k ) );
-						else
-							mergePlanes.insert( MergePlane( plane, *i, *k, *j ) );
+	if( mergeVertices.size() < 130 ){ // use reliable path, when possible, as convhull_3d.h is not too much.
+		/* bruteforce new planes */
+		for( MergeVertices::const_iterator i = mergeVertices.begin() + 0; i != mergeVertices.end() - 2; ++i )
+			for( MergeVertices::const_iterator j = i + 1; j != mergeVertices.end() - 1; ++j )
+				for( MergeVertices::const_iterator k = j + 1; k != mergeVertices.end() - 0; ++k ){
+					const Plane3 plane = plane3_for_points( *i, *j, *k );
+					if( plane3_valid( plane ) ){
+						const brushsplit_t split = mergeVertices.classify_plane( plane );
+						if( ( split.counts[ePlaneFront] == 0 ) != ( split.counts[ePlaneBack] == 0 ) ){
+							if( split.counts[ePlaneFront] != 0 )
+								mergePlanes.insert( MergePlane( plane3_flipped( plane ), *i, *j, *k ) );
+							else
+								mergePlanes.insert( MergePlane( plane, *i, *k, *j ) );
+						}
 					}
 				}
+	}
+	else{
+		const int nVertices = mergeVertices.size();
+		ch_vertex* vertices = ( ch_vertex* )malloc( mergeVertices.size() * sizeof( ch_vertex ) );
+		for( std::size_t i = 0; i < mergeVertices.size(); ++i ){
+			vertices[i].x = static_cast<CH_FLOAT>( mergeVertices[i].x() );
+			vertices[i].y = static_cast<CH_FLOAT>( mergeVertices[i].y() );
+			vertices[i].z = static_cast<CH_FLOAT>( mergeVertices[i].z() );
+		}
+		int* faceIndices = NULL;
+		int nFaces;
+		convhull_3d_build( vertices, nVertices, &faceIndices, &nFaces );
+		/* Where 'faceIndices' is a flat 2D matrix [nFaces x 3] */
+		for( int i = 0; i < nFaces; ++i ){
+			Vector3 p[3];
+			for( int j = 0; j < 3; ++j ){
+//				p[j] = Vector3( vertices[faceIndices[i * 3 + j]].x, vertices[faceIndices[i * 3 + j]].y, vertices[faceIndices[i * 3 + j]].z );
+				p[j] = mergeVertices[faceIndices[i * 3 + j]];
 			}
-#else
-	const int nVertices = mergeVertices.size();
-	ch_vertex* vertices = ( ch_vertex* )malloc( mergeVertices.size() * sizeof( ch_vertex ) );
-	for( std::size_t i = 0; i < mergeVertices.size(); ++i ){
-		vertices[i].x = static_cast<double>( mergeVertices[i].x() );
-		vertices[i].y = static_cast<double>( mergeVertices[i].y() );
-		vertices[i].z = static_cast<double>( mergeVertices[i].z() );
-	}
-	int* faceIndices = NULL;
-	int nFaces;
-	convhull_3d_build( vertices, nVertices, &faceIndices, &nFaces );
-	/* Where 'faceIndices' is a flat 2D matrix [nFaces x 3] */
-	for( int i = 0; i < nFaces; ++i ){
-		Vector3 p[3];
-		for( int j = 0; j < 3; ++j ){
-//			p[j] = Vector3( vertices[faceIndices[i * 3 + j]].x, vertices[faceIndices[i * 3 + j]].y, vertices[faceIndices[i * 3 + j]].z );
-			p[j] = mergeVertices[faceIndices[i * 3 + j]];
+			const Plane3 plane = plane3_for_points( p[0], p[1], p[2] );
+			if( plane3_valid( plane ) ){
+				mergePlanes.insert( MergePlane( plane, p[0], p[2], p[1] ) );
+			}
 		}
-		const Plane3 plane = plane3_for_points( p[0], p[1], p[2] );
-		if( plane3_valid( plane ) ){
-			mergePlanes.insert( MergePlane( plane, p[0], p[2], p[1] ) );
-		}
-	}
 
-	free( vertices );
-	free( faceIndices );
-#endif
+		free( vertices );
+		free( faceIndices );
+	}
 }
 
 void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
