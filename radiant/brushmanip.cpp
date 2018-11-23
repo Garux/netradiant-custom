@@ -688,30 +688,27 @@ void operator()( Face& face ) const {
 }
 };
 
-class FaceFindShader
+class FaceSelectByShader
 {
-const char* m_find;
+const char* m_name;
 public:
-FaceFindShader( const char* find ) : m_find( find ){
+FaceSelectByShader( const char* name )
+	: m_name( name ){
 }
-void operator()( FaceInstance& faceinst ) const {
-	if ( shader_equal( faceinst.getFace().GetShader(), m_find ) ) {
-		faceinst.setSelected( SelectionSystem::eFace, true );
+void operator()( FaceInstance& face ) const {
+	if ( shader_equal( face.getFace().GetShader(), m_name ) ) {
+		face.setSelected( SelectionSystem::eFace, true );
 	}
 }
 };
 
 void Scene_BrushFacesSelectByShader( scene::Graph& graph, const char* name ){
-	Scene_ForEachBrush_ForEachFaceInstance( graph, FaceFindShader( name ) );
-}
-
-bool DoingSearch( const char *repl ){
-	return ( repl == NULL || ( strcmp( "textures/", repl ) == 0 ) );
+	Scene_ForEachBrush_ForEachFaceInstance( graph, FaceSelectByShader( name ) );
 }
 
 void Scene_BrushFindReplaceShader( scene::Graph& graph, const char* find, const char* replace ){
-	if ( DoingSearch( replace ) ) {
-		Scene_ForEachBrush_ForEachFaceInstance( graph, FaceFindShader( find ) );
+	if ( !replace ) {
+		Scene_ForEachBrush_ForEachFaceInstance( graph, FaceSelectByShader( find ) );
 	}
 	else
 	{
@@ -720,9 +717,9 @@ void Scene_BrushFindReplaceShader( scene::Graph& graph, const char* find, const 
 }
 
 void Scene_BrushFindReplaceShader_Selected( scene::Graph& graph, const char* find, const char* replace ){
-	if ( DoingSearch( replace ) ) {
+	if ( !replace ) {
 		Scene_ForEachSelectedBrush_ForEachFaceInstance( graph,
-														FaceFindShader( find ) );
+														FaceSelectByShader( find ) );
 	}
 	else
 	{
@@ -734,8 +731,9 @@ void Scene_BrushFindReplaceShader_Selected( scene::Graph& graph, const char* fin
 // TODO: find for components
 // d1223m: dont even know what they are...
 void Scene_BrushFindReplaceShader_Component_Selected( scene::Graph& graph, const char* find, const char* replace ){
-	if ( DoingSearch( replace ) ) {
-
+	if ( !replace ) {
+		Scene_ForEachSelectedBrush_ForEachFaceInstance( graph,
+														FaceSelectByShader( find ) );
 	}
 	else
 	{
@@ -896,21 +894,6 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 void Scene_BrushSelectByShader( scene::Graph& graph, const char* name ){
 	graph.traverse( BrushSelectByShaderWalker( name ) );
 }
-
-class FaceSelectByShader
-{
-const char* m_name;
-public:
-FaceSelectByShader( const char* name )
-	: m_name( name ){
-}
-void operator()( FaceInstance& face ) const {
-	printf( "checking %s = %s\n", face.getFace().GetShader(), m_name );
-	if ( shader_equal( face.getFace().GetShader(), m_name ) ) {
-		face.setSelected( SelectionSystem::eFace, true );
-	}
-}
-};
 
 void Scene_BrushSelectByShader_Component( scene::Graph& graph, const char* name ){
 	Scene_ForEachSelectedBrush_ForEachFaceInstance( graph, FaceSelectByShader( name ) );

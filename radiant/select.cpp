@@ -705,6 +705,9 @@ void FindReplaceTextures( const char* pFind, const char* pReplace, bool bSelecte
 	command << "textureFindReplace -find " << pFind << " -replace " << pReplace;
 	UndoableCommand undo( command.c_str() );
 
+	if( shader_equal( pReplace, "textures/" ) )
+		pReplace = 0; //do search
+
 	if ( bSelected ) {
 		if ( GlobalSelectionSystem().Mode() != SelectionSystem::eComponent ) {
 			Scene_BrushFindReplaceShader_Selected( GlobalSceneGraph(), pFind, pReplace );
