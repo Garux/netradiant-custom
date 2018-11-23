@@ -456,7 +456,8 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0
 			 && Instance_getSelectable( instance )->isSelected()
-			 && path.size() > 1 ) {
+			 && path.size() > 1
+			 && path.top().get_pointer() != m_keepNode ) {
 			scene::Node& parent = path.parent();
 			Path_deleteTop( path );
 			if( Node_getTraversable( parent )->empty() ){
@@ -1136,15 +1137,15 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 }
 
 void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
-	const bool primit = ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive );
-	brush_vector_t selected_brushes;
-	if( primit )
-		GlobalSceneGraph().traverse( BrushGatherSelected( selected_brushes ) );
-
 	if ( !GlobalSelectionSystem().countSelected() && !GlobalSelectionSystem().countSelectedComponents() ) {
 		globalWarningStream() << "CSG Wrap Merge: No brushes or components selected.\n";
 		return;
 	}
+
+	const bool primit = ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive );
+	brush_vector_t selected_brushes;
+	if( primit )
+		GlobalSceneGraph().traverse( BrushGatherSelected( selected_brushes ) );
 
 	MergeVertices mergeVertices;
 	/* gather unique vertices */
@@ -1188,7 +1189,13 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 	}
 
 	NodeSmartReference node( ( new BrushNode() )->node() );
-	Brush* brush = Node_getBrush( node );
+	Brush* brush = GlobalSelectionSystem().countSelected() > 0? Node_getBrush( GlobalSelectionSystem().ultimateSelected().path().top() ) : 0;
+	const bool oldbrush = brush && primit;
+	if( oldbrush )
+		brush->clear();
+	else{
+		brush = Node_getBrush( node );
+	}
 
 	{
 		const char* shader = TextureBrowser_GetSelectedShader();
@@ -1210,16 +1217,21 @@ void CSG_WrapMerge( const ClipperPoints& clipperPoints ){
 	}
 	else
 	{
-		scene::Path path = ultimate_group_path();
+		if( oldbrush ){
+			GlobalSceneGraph().traverse( BrushDeleteSelected( GlobalSelectionSystem().ultimateSelected().path().top().get_pointer() ) );
+		}
+		else{
+			scene::Path path = ultimate_group_path();
 
-		// free the original brushes
-		if( primit )
-			GlobalSceneGraph().traverse( BrushDeleteSelected( path.top().get_pointer() ) );
+			// free the original brushes
+			if( primit )
+				GlobalSceneGraph().traverse( BrushDeleteSelected( path.top().get_pointer() ) );
 
-		Node_getTraversable( path.top() )->insert( node );
-		path.push( makeReference( node.get() ) );
+			Node_getTraversable( path.top() )->insert( node );
+			path.push( makeReference( node.get() ) );
 
-		selectPath( path, true );
+			selectPath( path, true );
+		}
 	}
 }
 
@@ -1287,17 +1299,17 @@ void CSG_DeleteComponents(){
 			return;
 		}
 
-		NodeSmartReference node( ( new BrushNode() )->node() );
-		brush = Node_getBrush( node );
-
 		{
+			ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( *instance );
+			componentSelectionTestable->setSelectedComponents( false, SelectionSystem::eVertex );
+			componentSelectionTestable->setSelectedComponents( false, SelectionSystem::eEdge );
+			componentSelectionTestable->setSelectedComponents( false, SelectionSystem::eFace );
+
 			const char* shader = TextureBrowser_GetSelectedShader();
 			TextureProjection projection;
 			TexDef_Construct_Default( projection );
 			for( MergePlanes::const_iterator i = mergePlanes.begin(); i != mergePlanes.end(); ++i ){
-				if( i->m_face )
-					brush->addFace( *( i->m_face ) );
-				else
+				if( !i->m_face )
 					brush->addPlane( i->m_v1, i->m_v2, i->m_v3, shader, projection );
 			}
 			brush->removeEmptyFaces();
@@ -1306,19 +1318,6 @@ void CSG_DeleteComponents(){
 		// if the new brush would not be convex
 		if ( !brush->hasContributingFaces() ) {
 			globalWarningStream() << "CSG_DeleteComponents: Failed - result would not be convex.\n";
-		}
-		else
-		{
-			scene::Path path = instance->path();
-			path.pop();
-
-			Node_getTraversable( path.top() )->insert( node );
-			path.push( makeReference( node.get() ) );
-
-			selectPath( path, true ); //b4 original deletion, so component mode will stay enabled
-
-			// free the original brush
-			Path_deleteTop( instance->path() );
 		}
 	}
 }
