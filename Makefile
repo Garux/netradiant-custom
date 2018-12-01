@@ -114,7 +114,7 @@ CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fn
 CPPFLAGS_COMMON =
 LDFLAGS_COMMON =
 LIBS_COMMON =
-CXXFLAGS_COMMON = -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
+CXXFLAGS_COMMON = -std=c++11 -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
 
 ifeq ($(BUILD),debug)
 ifeq ($(findstring $(CFLAGS),-g),)
@@ -743,6 +743,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	libl_net.$(A) \
 	libmathlib.$(A) \
 	libprofile.$(A) \
+	libquickhull.$(A) \
 	libxmllib.$(A) \
 	$(if $(findstring $(OS),Win32),icons/radiant.o,) \
 
@@ -792,6 +793,10 @@ libxmllib.$(A): \
 	libs/xml/xmlparser.o \
 	libs/xml/xmltextags.o \
 	libs/xml/xmlwriter.o \
+
+libquickhull.$(A): CPPFLAGS_EXTRA := -Ilibs
+libquickhull.$(A): \
+	libs/quickhull/QuickHull.o \
 
 $(INSTALLDIR)/modules/archivezip.$(DLL): LIBS_EXTRA := $(LIBS_ZLIB)
 $(INSTALLDIR)/modules/archivezip.$(DLL): CPPFLAGS_EXTRA := $(CPPFLAGS_ZLIB) -Ilibs -Iinclude

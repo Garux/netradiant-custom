@@ -1088,8 +1088,32 @@ public:
 	}
 };
 
-#include "convhull_3d.h"
+//#include "convhull_3d.h"
+#include "quickhull/QuickHull.hpp"
 void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlanes ){
+#if 1
+	quickhull::QuickHull<double> quickhull;
+	std::vector<quickhull::Vector3<double>> pointCloud;
+	pointCloud.reserve( mergeVertices.size() );
+	for( std::size_t i = 0; i < mergeVertices.size(); ++i ){
+		pointCloud.push_back( quickhull::Vector3<double>( static_cast<double>( mergeVertices[i].x() ),
+														static_cast<double>( mergeVertices[i].y() ),
+														static_cast<double>( mergeVertices[i].z() ) ) );
+	}
+	auto hull = quickhull.getConvexHull( pointCloud, false, true, 0.0001 );
+	const auto& indexBuffer = hull.getIndexBuffer();
+	const size_t triangleCount = indexBuffer.size() / 3;
+	for( size_t i = 0; i < triangleCount; ++i ) {
+		Vector3 p[3];
+		for( size_t j = 0; j < 3; ++j ){
+			p[j] = mergeVertices[indexBuffer[i * 3 + j]];
+		}
+		const Plane3 plane = plane3_for_points( p[0], p[1], p[2] );
+		if( plane3_valid( plane ) ){
+			mergePlanes.insert( MergePlane( plane, p[0], p[2], p[1] ) );
+		}
+	}
+#else
 	if( mergeVertices.size() < 130 ){ // use reliable path, when possible, as convhull_3d.h is not too much.
 		/* bruteforce new planes */
 		for( MergeVertices::const_iterator i = mergeVertices.begin() + 0; i != mergeVertices.end() - 2; ++i )
@@ -1134,6 +1158,7 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 		free( vertices );
 		free( faceIndices );
 	}
+#endif
 }
 
 void CSG_WrapMerge( const ClipperPoints& clipperPoints ){

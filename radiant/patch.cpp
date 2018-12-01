@@ -19,6 +19,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#define _USE_MATH_DEFINES
+
 #include "patch.h"
 
 #include <glib.h>
