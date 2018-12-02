@@ -82,8 +82,11 @@ struct Skew{
 	}
 	Skew( std::size_t index_, float amount_ ) : index( index_ ), amount( amount_ ){
 	}
-	bool operator!= ( const Skew& other ){
+	bool operator!= ( const Skew& other ) const {
 		return index != other.index || amount != other.amount;
+	}
+	bool operator== ( const Skew& other ) const {
+		return index == other.index && amount == other.amount;
 	}
 };
 
@@ -142,6 +145,7 @@ Callback m_changed;
 Callback m_apply;
 TransformModifierType m_type;
 public:
+bool m_transformFrozen = true;
 
 TransformModifier( const Callback& changed, const Callback& apply ) :
 	m_translation( c_translation_identity ),
@@ -175,17 +179,16 @@ void setSkew( const Skew& value ){
 	m_changed();
 }
 void freezeTransform(){
-	if ( m_translation != c_translation_identity
-		 || m_rotation != c_rotation_identity
-		 || m_scale != c_scale_identity
-		 || m_skew != c_skew_identity ) {
+	if ( !isIdentity() ) {
 		m_apply();
 		m_translation = c_translation_identity;
 		m_rotation = c_rotation_identity;
 		m_scale = c_scale_identity;
 		m_skew = c_skew_identity;
+		m_transformFrozen = true;
 		m_changed();
 	}
+	m_transformFrozen = true;
 }
 const Translation& getTranslation() const {
 	return m_translation;
@@ -201,6 +204,12 @@ const Skew& getSkew() const {
 }
 Matrix4 calculateTransform() const {
 	return matrix4_transform_for_components( getTranslation(), getRotation(), getScale(), getSkew() );
+}
+bool isIdentity() const {
+	return m_translation == c_translation_identity
+		 && m_rotation == c_rotation_identity
+		 && m_scale == c_scale_identity
+		 && m_skew == c_skew_identity;
 }
 };
 
