@@ -84,12 +84,15 @@ ObservedSelectable ObservedSelectables6x::* const ObservedSelectables6x::array[6
 
 class DragPlanes
 {
-std::vector<ObservedSelectable> m_selectables;
+ObservedSelectable m_selectables[6];
 public:
 AABB m_bounds;
-DragPlanes( const SelectionChangeCallback& onchanged ){
-	for ( std::size_t i = 0; i < 6; ++i )
-		m_selectables.push_back( ObservedSelectable( onchanged ) );
+DragPlanes( const SelectionChangeCallback& onchanged ) : m_selectables{ ObservedSelectable( onchanged ),
+																		ObservedSelectable( onchanged ),
+																		ObservedSelectable( onchanged ),
+																		ObservedSelectable( onchanged ),
+																		ObservedSelectable( onchanged ),
+																		ObservedSelectable( onchanged ) }{
 }
 bool isSelected() const {
 	for ( std::size_t i = 0; i < 6; ++i )
