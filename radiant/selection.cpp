@@ -207,9 +207,19 @@ public:
 virtual void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ) = 0;
 virtual void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ) = 0;
 static const View* m_view;
+static float m_device_point[2];
 static float m_device_epsilon[2];
+static void assign_static( const View& view, const float device_point[2], const float device_epsilon[2] ){
+	m_view = &view;
+	m_device_point[0] = device_point[0];
+	m_device_point[1] = device_point[1];
+	m_device_epsilon[0] = device_epsilon[0];
+	m_device_epsilon[1] = device_epsilon[1];
+
+}
 };
-const View* Manipulatable::m_view;
+const View* Manipulatable::m_view = 0;
+float Manipulatable::m_device_point[2];
 float Manipulatable::m_device_epsilon[2];
 
 void transform_local2object( Matrix4& object, const Matrix4& local, const Matrix4& local2object ){
@@ -4191,6 +4201,95 @@ Shader* ClipManipulator::m_state;
 
 
 
+class BuildManipulator : public Manipulator, public Manipulatable
+{
+	struct RenderableLine : public OpenGLRenderable {
+		PointVertex m_line[2];
+
+		RenderableLine() {
+		}
+		void render( RenderStateFlags state ) const {
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_line[0].colour );
+			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_line[0].vertex );
+			glDrawArrays( GL_LINES, 0, 2 );
+		}
+		void setColour( const Colour4b& colour ) {
+			m_line[0].colour = colour;
+			m_line[1].colour = colour;
+		}
+	};
+	struct RenderablePoint : public OpenGLRenderable
+	{
+		PointVertex m_point;
+		RenderablePoint():
+			m_point( vertex3f_identity ) {
+		}
+		void render( RenderStateFlags state ) const {
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
+			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
+			glDrawArrays( GL_POINTS, 0, 1 );
+		}
+		void setColour( const Colour4b & colour ) {
+			m_point.colour = colour;
+		}
+	};
+	bool m_isSelected;
+	bool m_isInitialised;
+	RenderablePoint m_point;
+	RenderableLine m_line;
+	RenderableLine m_midline;
+public:
+	static Shader* m_state_point;
+	static Shader* m_state_line;
+
+	BuildManipulator() : m_isSelected( false ), m_isInitialised( false ) {
+		m_point.setColour( g_colour_selected );
+		m_line.setColour( g_colour_selected );
+		m_midline.setColour( g_colour_screen );
+	}
+	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ) {
+		renderer.SetState( m_state_point, Renderer::eWireframeOnly );
+		renderer.SetState( m_state_point, Renderer::eFullMaterials );
+		renderer.addRenderable( m_point, g_matrix4_identity );
+		renderer.SetState( m_state_line, Renderer::eWireframeOnly );
+		renderer.SetState( m_state_line, Renderer::eFullMaterials );
+		renderer.addRenderable( m_line, g_matrix4_identity );
+		renderer.addRenderable( m_midline, g_matrix4_identity );
+	}
+	void initialise(){
+	}
+	void highlight( const View& view ){
+		SceneChangeNotify();
+	}
+
+	void testSelect( const View& view, const Matrix4& pivot2world ) {
+		m_isSelected = true;
+	}
+	/* Manipulatable */
+	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+		//do things with undo
+	}
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
+	}
+
+	Manipulatable* GetManipulatable() {
+		m_isSelected = false; //don't handle the manipulator move part void MoveSelected()
+		return this;
+	}
+
+	void setSelected( bool select ) {
+		m_isSelected = select;
+	}
+	bool isSelected() const {
+		return m_isSelected;
+	}
+};
+Shader* BuildManipulator::m_state_point;
+Shader* BuildManipulator::m_state_line;
+
+
+
+
 class TransformOriginTranslatable
 {
 public:
@@ -4422,6 +4521,7 @@ ScaleManipulator m_scale_manipulator;
 SkewManipulator m_skew_manipulator;
 DragManipulator m_drag_manipulator;
 ClipManipulator m_clip_manipulator;
+BuildManipulator m_build_manipulator;
 mutable TransformOriginManipulator m_transformOrigin_manipulator;
 
 typedef SelectionList<scene::Instance> selection_t;
@@ -4524,6 +4624,11 @@ void SetManipulatorMode( EManipulatorMode mode ){
 	case eSkew: m_manipulator = &m_skew_manipulator; break;
 	case eDrag: m_manipulator = &m_drag_manipulator; break;
 	case eClip: m_manipulator = &m_clip_manipulator; break;
+	case eBuild:
+		{
+			m_build_manipulator.initialise();
+			m_manipulator = &m_build_manipulator; break;
+		}
 	}
 	pivotChanged();
 }
@@ -4629,13 +4734,11 @@ void startMove(){
 bool SelectManipulator( const View& view, const float device_point[2], const float device_epsilon[2] ){
 	bool movingOrigin = false;
 
-	if ( !nothingSelected() || ManipulatorMode() == eDrag || ManipulatorMode() == eClip ) {
+	if ( !nothingSelected() || ManipulatorMode() == eDrag || ManipulatorMode() == eClip || ManipulatorMode() == eBuild ) {
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
-		Manipulatable::m_view = &view; //this b4 m_manipulator calls!
-		Manipulatable::m_device_epsilon[0] = device_epsilon[0];
-		Manipulatable::m_device_epsilon[1] = device_epsilon[1];
+		Manipulatable::assign_static( view, device_point, device_epsilon ); //this b4 m_manipulator calls!
 
 		m_transformOrigin_manipulator.setSelected( false );
 		m_manipulator->setSelected( false );
@@ -4681,7 +4784,9 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 }
 
 void HighlightManipulator( const View& view, const float device_point[2], const float device_epsilon[2] ){
-	if ( ( !nothingSelected() && transformOrigin_isTranslatable() ) || ManipulatorMode() == eClip ) {
+	Manipulatable::assign_static( view, device_point, device_epsilon ); //this b4 m_manipulator calls!
+
+	if ( ( !nothingSelected() && transformOrigin_isTranslatable() ) || ManipulatorMode() == eClip || ManipulatorMode() == eBuild ) {
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
@@ -4700,6 +4805,9 @@ void HighlightManipulator( const View& view, const float device_point[2], const 
 		}
 		else if( ManipulatorMode() == eClip ){
 			m_clip_manipulator.testSelect_points( scissored );
+		}
+		else if( ManipulatorMode() == eBuild ){
+			m_build_manipulator.highlight( scissored );
 		}
 	}
 }
@@ -5125,12 +5233,14 @@ static void constructStatic(){
 	m_state = GlobalShaderCache().capture( "$POINT" );
 	TranslateManipulator::m_state_wire =
 	RotateManipulator::m_state_outer =
-	SkewManipulator::m_state_wire = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
+	SkewManipulator::m_state_wire =
+	BuildManipulator::m_state_line = GlobalShaderCache().capture( "$WIRE_OVERLAY" );
 	TranslateManipulator::m_state_fill =
 	SkewManipulator::m_state_fill = GlobalShaderCache().capture( "$FLATSHADE_OVERLAY" );
 	TransformOriginManipulator::m_state =
 	ClipManipulator::m_state =
-	SkewManipulator::m_state_point = GlobalShaderCache().capture( "$BIGPOINT" );
+	SkewManipulator::m_state_point =
+	BuildManipulator::m_state_point = GlobalShaderCache().capture( "$BIGPOINT" );
 }
 
 static void destroyStatic(){
@@ -5575,7 +5685,7 @@ AABB RadiantSelectionSystem::getSelectionAABB() const {
 
 void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
 	//if(view->TestPoint(m_object_pivot))
-	if ( !nothingSelected() || ManipulatorMode() == eClip ) {
+	if ( !nothingSelected() || ManipulatorMode() == eClip || ManipulatorMode() == eBuild ) {
 		renderer.Highlight( Renderer::ePrimitive, false );
 		renderer.Highlight( Renderer::eFace, false );
 
@@ -6057,7 +6167,8 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 			&& !m_selector.m_mouseMovedWhilePressed
 			&& !m_manipulator.m_moving_transformOrigin
 			&& !( getSelectionSystem().Mode() == SelectionSystem::eComponent && getSelectionSystem().ManipulatorMode() == SelectionSystem::eDrag )
-			&& getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip ){
+			&& getSelectionSystem().ManipulatorMode() != SelectionSystem::eClip
+			&& getSelectionSystem().ManipulatorMode() != SelectionSystem::eBuild ){
 		m_selector.testSelect_simpleM1( device( position ) );
 	}
 	if( getSelectionSystem().ManipulatorMode() == SelectionSystem::eClip )

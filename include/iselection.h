@@ -90,6 +90,7 @@ enum EManipulatorMode
 	eSkew,
 	eDrag,
 	eClip,
+	eBuild,
 };
 
 virtual void SetMode( EMode mode ) = 0;

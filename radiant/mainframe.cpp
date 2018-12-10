@@ -1429,6 +1429,10 @@ void ClipperToolExport( const BoolImportCallback& importCallback ){
 	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eClip );
 }
 
+void BuildToolExport( const BoolImportCallback& importCallback ){
+	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eBuild );
+}
+
 FreeCaller1<const BoolImportCallback&, TranslateToolExport> g_translatemode_button_caller;
 BoolExportCallback g_translatemode_button_callback( g_translatemode_button_caller );
 ToggleItem g_translatemode_button( g_translatemode_button_callback );
@@ -1453,6 +1457,10 @@ FreeCaller1<const BoolImportCallback&, ClipperToolExport> g_clipper_button_calle
 BoolExportCallback g_clipper_button_callback( g_clipper_button_caller );
 ToggleItem g_clipper_button( g_clipper_button_callback );
 
+FreeCaller1<const BoolImportCallback&, BuildToolExport> g_build_button_caller;
+BoolExportCallback g_build_button_callback( g_build_button_caller );
+ToggleItem g_build_button( g_build_button_callback );
+
 void ToolChanged(){
 	g_translatemode_button.update();
 	g_rotatemode_button.update();
@@ -1460,6 +1468,7 @@ void ToolChanged(){
 	g_skewmode_button.update();
 	g_dragmode_button.update();
 	g_clipper_button.update();
+	g_build_button.update();
 }
 
 const char* const c_ResizeMode_status = "QE4 Drag Tool: move and resize objects";
@@ -1556,7 +1565,6 @@ void SkewMode(){
 
 const char* const c_ClipperMode_status = "Clipper Tool: apply clip planes to brushes";
 
-
 void ClipperMode(){
 	if ( g_currentToolMode == ClipperMode && g_defaultToolMode != ClipperMode ) {
 		g_defaultToolMode();
@@ -1571,6 +1579,28 @@ void ClipperMode(){
 
 		Sys_Status( c_ClipperMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eClip );
+		ToolChanged();
+		ModeChangeNotify();
+	}
+}
+
+
+const char* const c_BuildMode_status = "Build Tool: extrude, build chains, clone";
+
+void BuildMode(){
+	if ( g_currentToolMode == BuildMode && g_defaultToolMode != BuildMode ) {
+		g_defaultToolMode();
+	}
+	else
+	{
+		g_currentToolMode = BuildMode;
+		g_currentToolModeSupportsComponentEditing = false;
+
+		SelectionSystem_DefaultMode();
+		ComponentModeChanged();
+
+		Sys_Status( c_BuildMode_status );
+		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eBuild );
 		ToolChanged();
 		ModeChangeNotify();
 	}
@@ -2347,22 +2377,27 @@ void PatchInspector_registerShortcuts(){
 }
 
 void Patch_registerShortcuts(){
-//	command_connect_accelerator( "InvertCurveTextureX" );
-//	command_connect_accelerator( "InvertCurveTextureY" );
-//	command_connect_accelerator( "PatchInsertInsertColumn" );
-//	command_connect_accelerator( "PatchInsertInsertRow" );
-//	command_connect_accelerator( "PatchDeleteLastColumn" );
-//	command_connect_accelerator( "PatchDeleteLastRow" );
-//	command_connect_accelerator( "NaturalizePatch" );
-	//command_connect_accelerator("CapCurrentCurve");
+	command_connect_accelerator( "InvertCurveTextureX" );
+	command_connect_accelerator( "InvertCurveTextureY" );
+	command_connect_accelerator( "PatchInsertInsertColumn" );
+	command_connect_accelerator( "PatchInsertInsertRow" );
+	command_connect_accelerator( "PatchDeleteLastColumn" );
+	command_connect_accelerator( "PatchDeleteLastRow" );
+	command_connect_accelerator( "NaturalizePatch" );
+	command_connect_accelerator( "CapCurrentCurve" );
 }
 
 void Manipulators_registerShortcuts(){
 	toggle_add_accelerator( "MouseRotate" );
 	toggle_add_accelerator( "MouseTranslate" );
 	toggle_add_accelerator( "MouseScale" );
+	toggle_add_accelerator( "MouseTransform" );
 	toggle_add_accelerator( "MouseDrag" );
 	toggle_add_accelerator( "ToggleClipper" );
+	toggle_add_accelerator( "MouseBuild" );
+
+	command_connect_accelerator( "MouseRotateOrScale" );
+	command_connect_accelerator( "MouseDragOrTransform" );
 }
 
 void TexdefNudge_registerShortcuts(){
@@ -2379,14 +2414,12 @@ void TexdefNudge_registerShortcuts(){
 }
 
 void SelectNudge_registerShortcuts(){
-	//command_connect_accelerator( "MoveSelectionDOWN" );
-	//command_connect_accelerator( "MoveSelectionUP" );
-	//command_connect_accelerator("SelectNudgeLeft");
-	//command_connect_accelerator("SelectNudgeRight");
-	//command_connect_accelerator("SelectNudgeUp");
-	//command_connect_accelerator("SelectNudgeDown");
-	command_connect_accelerator( "UnSelectSelection2" );
-	command_connect_accelerator( "DeleteSelection2" );
+	command_connect_accelerator( "MoveSelectionDOWN" );
+	command_connect_accelerator( "MoveSelectionUP" );
+	command_connect_accelerator( "SelectNudgeLeft" );
+	command_connect_accelerator( "SelectNudgeRight" );
+	command_connect_accelerator( "SelectNudgeUp" );
+	command_connect_accelerator( "SelectNudgeDown" );
 }
 
 void SnapToGrid_registerShortcuts(){
@@ -2413,21 +2446,22 @@ void TexBro_registerShortcuts(){
 
 void Misc_registerShortcuts(){
 	command_connect_accelerator( "RefreshReferences" ); //refresh models
-	command_connect_accelerator( "MouseRotateOrScale" );
-	command_connect_accelerator( "MouseDragOrTransform" );
+	command_connect_accelerator( "UnSelectSelection2" );
+	command_connect_accelerator( "DeleteSelection2" );
+
 }
 
 
 void register_shortcuts(){
 //	PatchInspector_registerShortcuts();
-	//Patch_registerShortcuts();
+//	Patch_registerShortcuts();
 	Grid_registerShortcuts();
 //	XYWnd_registerShortcuts();
 	CamWnd_registerShortcuts();
 	Manipulators_registerShortcuts();
 	SurfaceInspector_registerShortcuts();
 	TexdefNudge_registerShortcuts();
-	SelectNudge_registerShortcuts();
+//	SelectNudge_registerShortcuts();
 //	SnapToGrid_registerShortcuts();
 //	SelectByType_registerShortcuts();
 	TexBro_registerShortcuts();
@@ -2477,11 +2511,6 @@ void ComponentModes_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "Select Faces (F)", "modify_faces.png", "DragFaces" );
 }
 
-void Clipper_constructToolbar( GtkToolbar* toolbar ){
-
-	toolbar_append_toggle_button( toolbar, "Clipper (X)", "select_clipper.png", "ToggleClipper" );
-}
-
 void XYWnd_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_button( toolbar, "Change views (CTRL + TAB)", "view_change.png", "NextView" );
 }
@@ -2492,8 +2521,8 @@ void Manipulators_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "Scale", "select_mousescale.png", "MouseScale" );
 	toolbar_append_toggle_button( toolbar, "Transform (Q)", "select_mousetransform.png", "MouseTransform" );
 	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.png", "MouseDrag" );
-
-	Clipper_constructToolbar( toolbar );
+	toolbar_append_toggle_button( toolbar, "Clipper (X)", "select_clipper.png", "ToggleClipper" );
+//	toolbar_append_toggle_button( toolbar, "Build (B)", "select_mouserotate.png", "MouseBuild" );
 }
 
 GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
@@ -3543,6 +3572,7 @@ void MainFrame_Construct(){
 	GlobalToggles_insert( "MouseScale", FreeCaller<ScaleMode>(), ToggleItem::AddCallbackCaller( g_scalemode_button ) );
 	GlobalToggles_insert( "MouseTransform", FreeCaller<SkewMode>(), ToggleItem::AddCallbackCaller( g_skewmode_button ) );
 	GlobalToggles_insert( "MouseDrag", FreeCaller<DragMode>(), ToggleItem::AddCallbackCaller( g_dragmode_button ) );
+	GlobalToggles_insert( "MouseBuild", FreeCaller<BuildMode>(), ToggleItem::AddCallbackCaller( g_build_button ), Accelerator( 'B' ) );
 	GlobalCommands_insert( "MouseRotateOrScale", FreeCaller<ToggleRotateScaleModes>() );
 	GlobalCommands_insert( "MouseDragOrTransform", FreeCaller<ToggleDragSkewModes>(), Accelerator( 'Q' ) );
 
