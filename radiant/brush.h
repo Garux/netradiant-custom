@@ -1551,6 +1551,7 @@ virtual void vertex_clear() = 0;
 virtual void vertex_push_back( SelectableVertex& vertex ) = 0;
 
 virtual void vertex_select( const Vector3& vertex ) = 0;
+virtual void vertex_snap( const float snap ) = 0;
 
 virtual void DEBUG_verify() const = 0;
 };
@@ -1854,10 +1855,14 @@ void transform( const Matrix4& matrix ){
 	}
 }
 void snapto( float snap ){
-	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+	for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )
 	{
-		( *i )->snapto( snap );
+		( *i )->vertex_snap( snap );
 	}
+//	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
+//	{
+//		( *i )->snapto( snap );
+//	}
 }
 void revertTransform(){
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
@@ -1900,6 +1905,8 @@ void vertexModeFree(){
 }
 
 void vertexModeTransform( const Matrix4& matrix );
+void vertexModeBuildHull( bool allTransformed = false );
+void vertexModeSnap( const float snap, bool all );
 
 /// \brief Returns the absolute index of the \p faceVertex.
 std::size_t absoluteIndex( FaceVertexId faceVertex ){
@@ -3400,6 +3407,20 @@ void vertex_select( const Vector3& vertex ){
 		m_vertexInstances[0].setSelected( true ); //select at least something to prevent transform interruption after removing all selected vertices during vertexModeTransform
 }
 
+void vertex_snap( const float snap, bool all ){
+	m_brush.vertexModeInit();
+	for ( const auto& i : m_vertexInstances ){
+		i.gather( m_brush.m_vertexModeVertices );
+	}
+	m_brush.vertexModeSnap( snap, all );
+	m_brush.evaluateBRep();
+	m_brush.vertexModeFree();
+}
+
+void vertex_snap( const float snap ){
+	vertex_snap( snap, true );
+}
+
 void DEBUG_verify() const {
 	ASSERT_MESSAGE( m_faceInstances.size() == m_brush.DEBUG_size(), "FATAL: mismatch" );
 }
@@ -3768,10 +3789,15 @@ void gatherSelectedComponents( const Vector3Callback& callback ) const {
 }
 
 void snapComponents( float snap ){
-	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
-	{
-		( *i ).snapComponents( snap );
+	for ( const auto& fi : m_faceInstances ){
+		if( fi.selectedComponents( SelectionSystem::eVertex ) ){
+			vertex_snap( snap, false );
+			return;
+		}
 	}
+
+	for ( auto& fi : m_faceInstances )
+		fi.snapComponents( snap );
 }
 void evaluateTransform(){
 	if( m_transform.m_transformFrozen )

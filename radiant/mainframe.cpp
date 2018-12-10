@@ -1701,7 +1701,7 @@ void Selection_SnapToGrid(){
 	command << "snapSelected -grid " << GetGridSize();
 	UndoableCommand undo( command.c_str() );
 
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
+	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent && GlobalSelectionSystem().countSelectedComponents() ) {
 		Scene_SnapToGrid_Component_Selected( GlobalSceneGraph(), GetGridSize() );
 	}
 	else

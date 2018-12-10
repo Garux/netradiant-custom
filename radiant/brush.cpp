@@ -462,13 +462,11 @@ const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, con
 }
 
 #include "quickhull/QuickHull.hpp"
-void Brush::vertexModeTransform( const Matrix4& matrix ){
+void Brush::vertexModeBuildHull( bool allTransformed ){
 	quickhull::QuickHull<double> quickhull;
 	std::vector<quickhull::Vector3<double>> pointCloud;
 	pointCloud.reserve( m_vertexModeVertices.size() );
 	for( auto& i : m_vertexModeVertices ){
-		if( i.m_selected )
-			i.m_vertexTransformed = matrix4_transformed_point( matrix, i.m_vertex );
 		pointCloud.push_back( quickhull::Vector3<double>( static_cast<double>( i.m_vertexTransformed.x() ),
 														static_cast<double>( i.m_vertexTransformed.y() ),
 														static_cast<double>( i.m_vertexTransformed.z() ) ) );
@@ -479,7 +477,7 @@ void Brush::vertexModeTransform( const Matrix4& matrix ){
 	VertexModePlanes vertexModePlanes;
 	for( size_t i = 0; i < triangleCount; ++i ) {
 		const Brush::VertexModeVertex* v[3];
-		bool transformed = false;
+		bool transformed = allTransformed;
 		for( size_t j = 0; j < 3; ++j ){
 			v[j] = &m_vertexModeVertices[indexBuffer[i * 3 + j]];
 			transformed |= v[j]->m_selected;
@@ -533,4 +531,18 @@ void Brush::vertexModeTransform( const Matrix4& matrix ){
 			}
 		}
 	}
+}
+
+
+void Brush::vertexModeTransform( const Matrix4& matrix ){
+	for( auto& i : m_vertexModeVertices )
+		if( i.m_selected )
+			i.m_vertexTransformed = matrix4_transformed_point( matrix, i.m_vertex );
+	vertexModeBuildHull();
+}
+void Brush::vertexModeSnap( const float snap, bool all ){
+	for( auto& i : m_vertexModeVertices )
+		if( all || i.m_selected )
+			vector3_snap( i.m_vertexTransformed, snap );
+	vertexModeBuildHull( all );
 }
