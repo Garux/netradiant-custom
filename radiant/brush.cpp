@@ -106,7 +106,6 @@ inline bool Brush_isBounded( const Brush& brush ){
 }
 
 void Brush::buildBRep(){
-	globalOutputStream() << " buildBRep() \n";
 	const bool _vertexModeOn = m_vertexModeOn;
 
 	bool degenerate = buildWindings();
@@ -122,7 +121,6 @@ void Brush::buildBRep(){
 	}
 
 	if ( degenerate || faces_size < 4 || faceVerticesCount != ( faceVerticesCount >> 1 ) << 1 ) { // sum of vertices for each face of a valid polyhedron is always even
-			globalOutputStream() << degenerate << " degenerate\n";
 		m_uniqueVertexPoints.resize( 0 );
 
 		vertex_clear();
@@ -309,8 +307,7 @@ void Brush::buildBRep(){
 				m_faceCentroidPoints[i] = pointvertex_for_windingpoint( m_faces[i]->centroid(), colour_vertex );
 			}
 		}
-globalOutputStream() << _vertexModeOn << " _vertexModeOn\n";
-globalOutputStream() << m_vertexModeOn << " m_vertexModeOn\n";
+
 		//  :faceleg:     start  move  end
 		// m_vertexModeOn   1     1     0
 		//  _vertexModeOn   0     1     1
@@ -466,8 +463,6 @@ const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, con
 
 #include "quickhull/QuickHull.hpp"
 void Brush::vertexModeTransform( const Matrix4& matrix ){
-	globalOutputStream() << " vertexModeTransform\n";
-
 	quickhull::QuickHull<double> quickhull;
 	std::vector<quickhull::Vector3<double>> pointCloud;
 	pointCloud.reserve( m_vertexModeVertices.size() );
@@ -537,6 +532,5 @@ void Brush::vertexModeTransform( const Matrix4& matrix ){
 				addFace( face );
 			}
 		}
-		globalOutputStream() << m_faces.size() << " m_faces.size()\n";
 	}
 }

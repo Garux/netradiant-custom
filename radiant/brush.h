@@ -1802,7 +1802,6 @@ void transformChanged(){
 	//m_transformChanged = true;
 	planeChanged();
 	m_transformChanged = true; //experimental fix of cyclic dependency
-	globalOutputStream() << m_planeChanged << " m_planeChanged\n";
 }
 typedef MemberCaller<Brush, &Brush::transformChanged> TransformChangedCaller;
 
@@ -1861,14 +1860,12 @@ void snapto( float snap ){
 	}
 }
 void revertTransform(){
-	globalOutputStream() << " revertTransform\n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->revertTransform();
 	}
 }
 void freezeTransform(){
-	globalOutputStream() << " freezeTransform\n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->freezeTransform();
@@ -1892,14 +1889,12 @@ VertexModeVertices m_vertexModeVertices;
 bool m_vertexModeOn{false};
 
 void vertexModeInit(){
-	globalOutputStream() << "  vertexModeInit(){\n";
 	m_vertexModeOn = true;
 	m_vertexModeVertices.clear();
 	undoSave();
 }
 
 void vertexModeFree(){
-	globalOutputStream() << "  vertexModeFree(){\n";
 	m_vertexModeOn = false;
 //	m_vertexModeVertices.clear(); //keep, as it is required by buildBRep() after this call
 }
@@ -3779,7 +3774,6 @@ void snapComponents( float snap ){
 	}
 }
 void evaluateTransform(){
-	globalOutputStream() << " evaluateTransform\n";
 	if( m_transform.m_transformFrozen )
 		m_brush.vertexModeFree();
 	if( m_transform.m_transformFrozen && !m_transform.isIdentity() ){ /* new transform */
