@@ -519,8 +519,6 @@ void Brush::vertexModeBuildHull( bool allTransformed ){
 					projection.m_brushprimit_texdef.removeScale( face.getShader().width(), face.getShader().height() );
 
 					addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), projection );
-
-					Brush_textureChanged();
 				}
 				else{
 					addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), face.getTexdef().normalised() );
