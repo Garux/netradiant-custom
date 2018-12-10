@@ -83,10 +83,10 @@ struct Skew{
 	Skew( std::size_t index_, float amount_ ) : index( index_ ), amount( amount_ ){
 	}
 	bool operator!= ( const Skew& other ) const {
-		return index != other.index || amount != other.amount;
+		return !( *this == other );
 	}
 	bool operator== ( const Skew& other ) const {
-		return index == other.index && amount == other.amount;
+		return ( amount == 0 && other.amount == 0 ) || ( index == other.index && amount == other.amount );
 	}
 };
 

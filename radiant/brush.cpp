@@ -106,6 +106,9 @@ inline bool Brush_isBounded( const Brush& brush ){
 }
 
 void Brush::buildBRep(){
+	globalOutputStream() << " buildBRep() \n";
+	const bool _vertexModeOn = m_vertexModeOn;
+
 	bool degenerate = buildWindings();
 
 	std::size_t faces_size = 0;
@@ -119,6 +122,7 @@ void Brush::buildBRep(){
 	}
 
 	if ( degenerate || faces_size < 4 || faceVerticesCount != ( faceVerticesCount >> 1 ) << 1 ) { // sum of vertices for each face of a valid polyhedron is always even
+			globalOutputStream() << degenerate << " degenerate\n";
 		m_uniqueVertexPoints.resize( 0 );
 
 		vertex_clear();
@@ -305,6 +309,18 @@ void Brush::buildBRep(){
 				m_faceCentroidPoints[i] = pointvertex_for_windingpoint( m_faces[i]->centroid(), colour_vertex );
 			}
 		}
+globalOutputStream() << _vertexModeOn << " _vertexModeOn\n";
+globalOutputStream() << m_vertexModeOn << " m_vertexModeOn\n";
+		//  :faceleg:     start  move  end
+		// m_vertexModeOn   1     1     0
+		//  _vertexModeOn   0     1     1
+		if( _vertexModeOn || m_vertexModeOn ){
+			if( !( !m_vertexModeOn && _vertexModeOn && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) ) //don't select in the end of g_bTmpComponentMode
+				for( const auto& i : m_vertexModeVertices )
+					if( i.m_selected )
+						for ( Observers::iterator o = m_observers.begin(); o != m_observers.end(); ++o )
+							( *o )->vertex_select( i.m_vertexTransformed );
+		}
 	}
 }
 
@@ -386,4 +402,141 @@ bool brush_filtered( Brush& brush ){
 		}
 	}
 	return false;
+}
+
+
+class VertexModePlane
+{
+public:
+	Plane3 m_plane;
+	const Face* m_face;
+	const Brush::VertexModeVertex* const m_v[3];
+	bool m_transformed;
+	VertexModePlane( const Plane3& plane, const Face* face,
+					const Brush::VertexModeVertex* v1, const Brush::VertexModeVertex* v2, const Brush::VertexModeVertex* v3,
+					bool transformed ) : m_plane( plane ), m_face( face ), m_v{ v1, v2, v3 }, m_transformed( transformed ){
+	}
+};
+
+class VertexModePlanes
+{
+	typedef std::vector<VertexModePlane> Planes;
+	Planes m_planes;
+public:
+	typedef Planes::const_iterator const_iterator;
+	typedef Planes::iterator iterator;
+	void push_back( const VertexModePlane& plane ){
+		m_planes.push_back( plane );
+	}
+	iterator find( const Plane3& plane ){
+		iterator i = begin();
+		for( ; i != end(); ++i )
+			if( plane3_equal( plane, i->m_plane ) )
+				break;
+		return i;
+	}
+	const_iterator begin() const {
+		return m_planes.begin();
+	}
+	const_iterator end() const {
+		return m_planes.end();
+	}
+	iterator begin() {
+		return m_planes.begin();
+	}
+	iterator end() {
+		return m_planes.end();
+	}
+	std::size_t size() const {
+		return m_planes.size();
+	}
+};
+
+const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, const Brush::VertexModeVertex& v2, const Brush::VertexModeVertex& v3 ){
+	const Face* face = 0;
+	for( const auto& i : v1.m_faces ){
+		if( std::find( v2.m_faces.begin(), v2.m_faces.end(), i ) != v2.m_faces.end()
+			&& std::find( v3.m_faces.begin(), v3.m_faces.end(), i ) != v3.m_faces.end() ){
+			face = i;
+			break;
+		}
+	}
+	return face;
+}
+
+#include "quickhull/QuickHull.hpp"
+void Brush::vertexModeTransform( const Matrix4& matrix ){
+	globalOutputStream() << " vertexModeTransform\n";
+
+	quickhull::QuickHull<double> quickhull;
+	std::vector<quickhull::Vector3<double>> pointCloud;
+	pointCloud.reserve( m_vertexModeVertices.size() );
+	for( auto& i : m_vertexModeVertices ){
+		if( i.m_selected )
+			i.m_vertexTransformed = matrix4_transformed_point( matrix, i.m_vertex );
+		pointCloud.push_back( quickhull::Vector3<double>( static_cast<double>( i.m_vertexTransformed.x() ),
+														static_cast<double>( i.m_vertexTransformed.y() ),
+														static_cast<double>( i.m_vertexTransformed.z() ) ) );
+	}
+	auto hull = quickhull.getConvexHull( pointCloud, false, true, 0.0001 );
+	const auto& indexBuffer = hull.getIndexBuffer();
+	const size_t triangleCount = indexBuffer.size() / 3;
+	VertexModePlanes vertexModePlanes;
+	for( size_t i = 0; i < triangleCount; ++i ) {
+		const Brush::VertexModeVertex* v[3];
+		bool transformed = false;
+		for( size_t j = 0; j < 3; ++j ){
+			v[j] = &m_vertexModeVertices[indexBuffer[i * 3 + j]];
+			transformed |= v[j]->m_selected;
+		}
+		const Plane3 plane = plane3_for_points( v[0]->m_vertexTransformed, v[1]->m_vertexTransformed, v[2]->m_vertexTransformed );
+		if( plane3_valid( plane ) ){
+			VertexModePlanes::iterator it = vertexModePlanes.find( plane );
+			if( it == vertexModePlanes.end() ){ //not found, add new plane
+				const Face* face = vertex_mode_find_common_face( *v[0], *v[1], *v[2] );
+				if( !face ){ //no common face, use some
+					face = v[0]->m_faces[0];
+					transformed = true;
+				}
+				if( vector3_dot( plane.normal(), face->getPlane().plane3().normal() ) < 0 ){ //likely reversed plane
+					transformed = true;
+				}
+				vertexModePlanes.push_back( VertexModePlane( plane, face, v[0], v[2], v[1], transformed ) );
+			}
+			else{
+				it->m_transformed |= transformed;
+			}
+		}
+	}
+
+	if( vertexModePlanes.size() >=4 ){ //avoid obvious transform to degenerate
+		clear();
+		for( const auto& i : vertexModePlanes ){
+			const Face& face = *i.m_face;
+			if( i.m_transformed ){
+				if( g_brush_textureVertexlock_enabled ){
+					Matrix4 local2tex;
+					Texdef_Construct_local2tex( face.getTexdef().m_projection, face.getShader().width(), face.getShader().height(), face.getPlane().plane3().normal(), local2tex );
+					const DoubleVector3 st[3]{ matrix4_transformed_point( local2tex, i.m_v[0]->m_vertex ),
+												matrix4_transformed_point( local2tex, i.m_v[1]->m_vertex ),
+												matrix4_transformed_point( local2tex, i.m_v[2]->m_vertex ) };
+					const DoubleVector3 points[3]{ i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed };
+					TextureProjection projection;
+					Texdef_from_ST( projection, points, st, face.getShader().width(), face.getShader().height() );
+					projection.m_brushprimit_texdef.removeScale( face.getShader().width(), face.getShader().height() );
+
+					addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), projection );
+
+					Brush_textureChanged();
+				}
+				else{
+					addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), face.getTexdef().normalised() );
+				}
+			}
+			else{
+				addFace( face );
+			}
+		}
+		globalOutputStream() << m_faces.size() << " m_faces.size()\n";
+	}
 }

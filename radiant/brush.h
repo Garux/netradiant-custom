@@ -1550,6 +1550,8 @@ virtual void edge_push_back( SelectableEdge& edge ) = 0;
 virtual void vertex_clear() = 0;
 virtual void vertex_push_back( SelectableVertex& vertex ) = 0;
 
+virtual void vertex_select( const Vector3& vertex ) = 0;
+
 virtual void DEBUG_verify() const = 0;
 };
 
@@ -1800,6 +1802,7 @@ void transformChanged(){
 	//m_transformChanged = true;
 	planeChanged();
 	m_transformChanged = true; //experimental fix of cyclic dependency
+	globalOutputStream() << m_planeChanged << " m_planeChanged\n";
 }
 typedef MemberCaller<Brush, &Brush::transformChanged> TransformChangedCaller;
 
@@ -1858,17 +1861,50 @@ void snapto( float snap ){
 	}
 }
 void revertTransform(){
+	globalOutputStream() << " revertTransform\n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->revertTransform();
 	}
 }
 void freezeTransform(){
+	globalOutputStream() << " freezeTransform\n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->freezeTransform();
 	}
 }
+
+	class VertexModeVertex
+	{
+	public:
+		const Vector3 m_vertex;
+		Vector3 m_vertexTransformed;
+		const bool m_selected;
+		std::vector<Face*> m_faces;
+		VertexModeVertex( const Vector3& vertex, const bool selected ) : m_vertex( vertex ), m_vertexTransformed( vertex ), m_selected( selected ) {
+		}
+	};
+	typedef std::vector<VertexModeVertex> VertexModeVertices;
+
+
+VertexModeVertices m_vertexModeVertices;
+bool m_vertexModeOn{false};
+
+void vertexModeInit(){
+	globalOutputStream() << "  vertexModeInit(){\n";
+	m_vertexModeOn = true;
+	m_vertexModeVertices.clear();
+	undoSave();
+}
+
+void vertexModeFree(){
+	globalOutputStream() << "  vertexModeFree(){\n";
+	m_vertexModeOn = false;
+//	m_vertexModeVertices.clear(); //keep, as it is required by buildBRep() after this call
+}
+
+void vertexModeTransform( const Matrix4& matrix );
 
 /// \brief Returns the absolute index of the \p faceVertex.
 std::size_t absoluteIndex( FaceVertexId faceVertex ){
@@ -2373,6 +2409,9 @@ bool buildWindings(){
 
 	{
 		m_aabb_local = AABB();
+
+		if( m_faces.size() )
+			m_faces[0]->plane3(); //force evaluateTransform() first, as m_faces is changed during vertexModeTransform
 
 		for ( std::size_t i = 0; i < m_faces.size(); ++i )
 		{
@@ -3145,6 +3184,21 @@ void selectVerticesOnFaces( const FaceInstances_ptrs& faceinstances ){
 	}
 	while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
 }
+void gather( Brush::VertexModeVertices& vertexModeVertices ) const {
+	vertexModeVertices.push_back( Brush::VertexModeVertex( m_vertex->getFace().getWinding()[m_vertex->m_faceVertex.getVertex()].vertex, isSelected() ) );
+	FaceVertexId faceVertex = m_vertex->m_faceVertex;
+	do
+	{
+		vertexModeVertices.back().m_faces.push_back( &m_faceInstances[faceVertex.getFace()].getFace() );
+		faceVertex = next_vertex( m_vertex->m_faces, faceVertex );
+	}
+	while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
+}
+void vertex_select( const Vector3& vertex ){
+	if( vector3_length_squared( vertex - m_vertex->getFace().getWinding()[m_vertex->m_faceVertex.getVertex()].vertex ) < ( 0.1 * 0.1 ) ){
+		setSelected( true );
+	}
+}
 };
 
 class BrushInstanceVisitor
@@ -3339,6 +3393,16 @@ void vertex_clear(){
 }
 void vertex_push_back( SelectableVertex& vertex ){
 	m_vertexInstances.push_back( VertexInstance( m_faceInstances, vertex ) );
+}
+
+void vertex_select( const Vector3& vertex ){
+	for( auto& i : m_vertexInstances )
+		i.vertex_select( vertex );
+	for ( const auto& i : m_faceInstances )
+		if( i.selectedComponents( SelectionSystem::eVertex ) ) //got something selected, okay
+			return;
+	if( !m_vertexInstances.empty() )
+		m_vertexInstances[0].setSelected( true ); //select at least something to prevent transform interruption after removing all selected vertices during vertexModeTransform
 }
 
 void DEBUG_verify() const {
@@ -3715,10 +3779,25 @@ void snapComponents( float snap ){
 	}
 }
 void evaluateTransform(){
-	if( m_transform.m_transformFrozen && !m_transform.isIdentity() ){
+	globalOutputStream() << " evaluateTransform\n";
+	if( m_transform.m_transformFrozen )
+		m_brush.vertexModeFree();
+	if( m_transform.m_transformFrozen && !m_transform.isIdentity() ){ /* new transform */
 		m_transform.m_transformFrozen = false;
 		for( auto& i : m_faceInstances )
 			i.getFace().cacheCentroid();
+
+		if( m_transform.getType() == TRANSFORM_COMPONENT ){
+			for ( const auto& i : m_faceInstances ){
+				if( i.selectedComponents( SelectionSystem::eVertex ) ){
+					m_brush.vertexModeInit();
+					for ( const auto& i : m_vertexInstances ){
+						i.gather( m_brush.m_vertexModeVertices );
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	const Matrix4 matrix( m_transform.calculateTransform() );
@@ -3728,12 +3807,17 @@ void evaluateTransform(){
 	}
 	else
 	{
-		const bool tmp = g_brush_texturelock_enabled;
-		/* do not want texture projection transformation while resizing brush */
-		if( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eDrag && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive )
-			g_brush_texturelock_enabled = false;
-		transformComponents( matrix );
-		g_brush_texturelock_enabled = tmp;
+		if( m_brush.m_vertexModeOn ){
+			m_brush.vertexModeTransform( matrix );
+		}
+		else{
+			const bool tmp = g_brush_texturelock_enabled;
+			/* do not want texture projection transformation while resizing brush */
+			if( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eDrag && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive )
+				g_brush_texturelock_enabled = false;
+			transformComponents( matrix );
+			g_brush_texturelock_enabled = tmp;
+		}
 	}
 }
 void applyTransform(){
