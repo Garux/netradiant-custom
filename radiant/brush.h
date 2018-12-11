@@ -1883,7 +1883,7 @@ void freezeTransform(){
 		const Vector3 m_vertex;
 		Vector3 m_vertexTransformed;
 		const bool m_selected;
-		std::vector<Face*> m_faces;
+		std::vector<const Face*> m_faces;
 		VertexModeVertex( const Vector3& vertex, const bool selected ) : m_vertex( vertex ), m_vertexTransformed( vertex ), m_selected( selected ) {
 		}
 	};
@@ -3785,6 +3785,24 @@ void gatherSelectedComponents( const Vector3Callback& callback ) const {
 	for ( FaceInstances::const_iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
 	{
 		( *i ).gatherSelectedComponents( callback );
+	}
+}
+
+void insert_vertices( const Brush::VertexModeVertices& vertexModeVertices ){
+	if( !m_vertexInstances.empty() ){
+		m_brush.vertexModeInit();
+		for ( const auto& i : m_vertexInstances ){
+			i.gather( m_brush.m_vertexModeVertices );
+		}
+		for ( const auto& i : vertexModeVertices ){
+			m_brush.m_vertexModeVertices.push_back( i );
+			if( i.m_faces.empty() )
+				m_brush.m_vertexModeVertices.back().m_faces.push_back( m_brush.m_vertexModeVertices[0].m_faces[0] );
+		}
+		m_transform.m_transformFrozen = false;
+		m_transform.setType( TRANSFORM_COMPONENT );
+		m_brush.transformChanged();
+		m_brush.evaluateBRep();
 	}
 }
 

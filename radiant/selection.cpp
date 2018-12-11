@@ -3696,6 +3696,204 @@ const SelectionIntersection& best() const {
 };
 
 
+
+
+
+class ClipperSelector : public Selector {
+	SelectionIntersection m_bestIntersection;
+	Face* m_face;
+public:
+	ClipperSelector() : m_bestIntersection( SelectionIntersection() ), m_face( 0 ) {
+	}
+
+	void pushSelectable( Selectable& selectable ) {
+	}
+	void popSelectable() {
+	}
+	void addIntersection( const SelectionIntersection& intersection ) {
+		if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
+			m_bestIntersection = intersection;
+			m_face = 0;
+		}
+	}
+
+	void addIntersection( const SelectionIntersection& intersection, Face* face ) {
+		if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
+			m_bestIntersection = intersection;
+			m_face = face;
+		}
+	}
+	bool isSelected() {
+		return m_bestIntersection.valid();
+	}
+	const SelectionIntersection& best() {
+		return m_bestIntersection;
+	}
+	const Face* face() {
+		return m_face;
+	}
+};
+
+class testselect_scene_4clipper : public scene::Graph::Walker {
+	ClipperSelector& m_clipperSelector;
+	SelectionTest& m_test;
+public:
+	testselect_scene_4clipper( ClipperSelector& clipperSelector, SelectionTest& test ) : m_clipperSelector( clipperSelector ), m_test( test ) {
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		BrushInstance* brush = Instance_getBrush( instance );
+		if( brush != 0 ) {
+			m_test.BeginMesh( brush->localToWorld() );
+			for( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i ) {
+				Face* face = *i;
+				if( !face->isFiltered() ) {
+					SelectionIntersection intersection;
+					face->testSelect( m_test, intersection );
+					m_clipperSelector.addIntersection( intersection, face );
+				}
+			}
+		}
+		else {
+			SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance );
+			if( selectionTestable ) {
+				selectionTestable->testSelect( m_clipperSelector, m_test );
+			}
+		}
+		return true;
+	}
+};
+
+class testselect_scene_4clipper_selected : public scene::Graph::Walker {
+	ClipperSelector& m_clipperSelector;
+	SelectionTest& m_test;
+public:
+	testselect_scene_4clipper_selected( ClipperSelector& clipperSelector, SelectionTest& test ) : m_clipperSelector( clipperSelector ), m_test( test ) {
+	}
+	bool pre( const scene::Path& path, scene::Instance& instance ) const {
+		BrushInstance* brush = Instance_getBrush( instance );
+		if( brush != 0 && brush->isSelected() ) {
+			m_test.BeginMesh( brush->localToWorld() );
+			for( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i ) {
+				Face* face = *i;
+				if( !face->isFiltered() ) {
+					SelectionIntersection intersection;
+					face->testSelect( m_test, intersection );
+					m_clipperSelector.addIntersection( intersection, face );
+				}
+			}
+		}
+		return true;
+	}
+};
+
+Vector3 testSelected_scene_snapped_point( const SelectionVolume& test, ClipperSelector& clipperSelector ){
+	Vector3 point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, clipperSelector.best().depth(), 1 ) ) );
+	if( clipperSelector.face() ){
+		const Face& face = *clipperSelector.face();
+		float bestDist = FLT_MAX;
+		Vector3 wannabePoint;
+		for ( Winding::const_iterator prev = face.getWinding().end() - 1, curr = face.getWinding().begin(); curr != face.getWinding().end(); prev = curr, ++curr ){
+			{ /* try vertices */
+				const float dist = vector3_length_squared( ( *curr ).vertex - point );
+				if( dist < bestDist ){
+					wannabePoint = ( *curr ).vertex;
+					bestDist = dist;
+				}
+			}
+			{ /* try edges */
+				Vector3 edgePoint = segment_closest_point_to_point( Segment3D( ( *prev ).vertex, ( *curr ).vertex ), point );
+				if( edgePoint != ( *prev ).vertex && edgePoint != ( *curr ).vertex ){
+					const Vector3 edgedir = vector3_normalised( ( *curr ).vertex - ( *prev ).vertex );
+					const std::size_t maxi = vector3_max_abs_component_index( edgedir );
+					// ( *prev ).vertex[maxi] + edgedir[maxi] * coef = float_snapped( point[maxi], GetSnapGridSize() )
+					const float coef = ( float_snapped( point[maxi], GetSnapGridSize() ) - ( *prev ).vertex[maxi] ) / edgedir[maxi];
+					edgePoint = ( *prev ).vertex + edgedir * coef;
+					const float dist = vector3_length_squared( edgePoint - point );
+					if( dist < bestDist ){
+						wannabePoint = edgePoint;
+						bestDist = dist;
+					}
+				}
+			}
+		}
+		if( clipperSelector.best().distance() == 0.f ){ /* try plane, if pointing inside of polygon */
+			const std::size_t maxi = vector3_max_abs_component_index( face.plane3().normal() );
+			Vector3 planePoint( vector3_snapped( point, GetSnapGridSize() ) );
+			// face.plane3().normal().dot( point snapped ) = face.plane3().dist()
+			planePoint[maxi] = ( face.plane3().dist()
+									- face.plane3().normal()[( maxi + 1 ) % 3] * planePoint[( maxi + 1 ) % 3]
+									- face.plane3().normal()[( maxi + 2 ) % 3] * planePoint[( maxi + 2 ) % 3] ) / face.plane3().normal()[maxi];
+			const float dist = vector3_length_squared( planePoint - point );
+			if( dist < bestDist ){
+				wannabePoint = planePoint;
+				bestDist = dist;
+			}
+		}
+		point = wannabePoint;
+	}
+	else{
+		vector3_snap( point, GetSnapGridSize() );
+	}
+	return point;
+}
+
+class Scene_insert_brush_vertices
+{
+	const Brush::VertexModeVertices& m_vertexModeVertices;
+public:
+	Scene_insert_brush_vertices( const Brush::VertexModeVertices& vertexModeVertices ) : m_vertexModeVertices( vertexModeVertices ) {
+	}
+	void operator()( BrushInstance& brush ) const {
+		brush.insert_vertices( m_vertexModeVertices );
+	}
+};
+
+bool scene_insert_brush_vertices( const View& view, TranslateFreeXY_Z& freeDragXY_Z ){
+	SelectionVolume test( view );
+	ClipperSelector clipperSelector;
+	if( view.fill() )
+		Scene_forEachVisible( GlobalSceneGraph(), view, testselect_scene_4clipper( clipperSelector, test ) );
+	else
+		Scene_forEachVisible( GlobalSceneGraph(), view, testselect_scene_4clipper_selected( clipperSelector, test ) );
+	test.BeginMesh( g_matrix4_identity, true );
+	if( clipperSelector.isSelected() ){
+		freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, clipperSelector.best().depth(), 1 ) ) ) );
+		Vector3 point = testSelected_scene_snapped_point( test, clipperSelector );
+		if( !view.fill() ){
+			point -= view.getViewDir() * GetGridSize();
+		}
+		Brush::VertexModeVertices vertexModeVertices;
+		vertexModeVertices.push_back( Brush::VertexModeVertex( point, true ) );
+		if( clipperSelector.face() )
+			vertexModeVertices.back().m_faces.push_back( clipperSelector.face() );
+
+		UndoableCommand undo( "InsertBrushVertices" );
+		Scene_forEachSelectedBrush( Scene_insert_brush_vertices( vertexModeVertices ) );
+		return true;
+	}
+	else if( !view.fill() ){ //+two points
+		freeDragXY_Z.set0( g_vector3_identity );
+		const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
+		if( aabb_valid( bounds ) ){
+			Vector3 xy = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, 0, 1 ) ) );
+			vector3_snap( xy, GetSnapGridSize() );
+			Vector3 a( xy ), b( xy );
+			const std::size_t max = vector3_max_abs_component_index( view.getViewDir() );
+			a[max] = bounds.origin[max] + bounds.extents[max];
+			b[max] = bounds.origin[max] - bounds.extents[max];
+			Brush::VertexModeVertices vertexModeVertices;
+			vertexModeVertices.push_back( Brush::VertexModeVertex( a, true ) );
+			vertexModeVertices.push_back( Brush::VertexModeVertex( b, true ) );
+
+			UndoableCommand undo( "InsertBrushVertices" );
+			Scene_forEachSelectedBrush( Scene_insert_brush_vertices( vertexModeVertices ) );
+			return true;
+		}
+	}
+	return false;
+}
+
+
 bool g_bAltResize_AltSelect = false; //AltDragManipulatorResize + select primitives in component modes
 bool g_bTmpComponentMode = false;
 
@@ -3777,13 +3975,18 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				selector.addSelectable( SelectionIntersection( 0, 0 ), ( *i ) );
 				m_dragSelected = true;
 			}
-			if( GlobalSelectionSystem().countSelectedComponents() != 0 ){ /* even if hit nothing, but got selected */
-				m_dragSelected = true;
-				m_freeDragXY_Z.set0( g_vector3_identity );
-			}
 			if( bestSelector.bestIntersection().valid() ){
 				test.BeginMesh( g_matrix4_identity, true );
 				m_freeDragXY_Z.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, bestSelector.bestIntersection().depth(), 1 ) ) ) );
+			}
+			else{
+				if( GlobalSelectionSystem().countSelectedComponents() != 0 ){ /* even if hit nothing, but got selected */
+					m_dragSelected = true;
+					m_freeDragXY_Z.set0( g_vector3_identity );
+				}
+				else if( GlobalSelectionSystem().ComponentMode() == SelectionSystem::eVertex ){
+					m_dragSelected = scene_insert_brush_vertices( view, m_freeDragXY_Z );
+				}
 			}
 		}
 
@@ -3822,71 +4025,6 @@ bool isSelected() const {
 };
 
 
-
-
-class ClipperSelector : public Selector {
-	SelectionIntersection m_bestIntersection;
-	Face* m_face;
-public:
-	ClipperSelector() : m_bestIntersection( SelectionIntersection() ), m_face( 0 ) {
-	}
-
-	void pushSelectable( Selectable& selectable ) {
-	}
-	void popSelectable() {
-	}
-	void addIntersection( const SelectionIntersection& intersection ) {
-		if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
-			m_bestIntersection = intersection;
-			m_face = 0;
-		}
-	}
-
-	void addIntersection( const SelectionIntersection& intersection, Face* face ) {
-		if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
-			m_bestIntersection = intersection;
-			m_face = face;
-		}
-	}
-	bool isSelected() {
-		return m_bestIntersection.valid();
-	}
-	const SelectionIntersection& best() {
-		return m_bestIntersection;
-	}
-	const Face* face() {
-		return m_face;
-	}
-};
-
-class testselect_scene_4clipper : public scene::Graph::Walker {
-	ClipperSelector& m_clipperSelector;
-	SelectionTest& m_test;
-public:
-	testselect_scene_4clipper( ClipperSelector& clipperSelector, SelectionTest& test ) : m_clipperSelector( clipperSelector ), m_test( test ) {
-	}
-	bool pre( const scene::Path& path, scene::Instance& instance ) const {
-		BrushInstance* brush = Instance_getBrush( instance );
-		if( brush != 0 ) {
-			m_test.BeginMesh( brush->localToWorld() );
-			for( Brush::const_iterator i = brush->getBrush().begin(); i != brush->getBrush().end(); ++i ) {
-				Face* face = *i;
-				if( !face->isFiltered() ) {
-					SelectionIntersection intersection;
-					face->testSelect( m_test, intersection );
-					m_clipperSelector.addIntersection( intersection, face );
-				}
-			}
-		}
-		else {
-			SelectionTestable* selectionTestable = Instance_getSelectionTestable( instance );
-			if( selectionTestable ) {
-				selectionTestable->testSelect( m_clipperSelector, m_test );
-			}
-		}
-		return true;
-	}
-};
 
 #include "clippertool.h"
 
@@ -4053,53 +4191,7 @@ public:
 		Scene_forEachVisible( GlobalSceneGraph(), view, testselect_scene_4clipper( clipperSelector, test ) );
 		test.BeginMesh( g_matrix4_identity, true );
 		if( clipperSelector.isSelected() ){
-			point = vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( 0, 0, clipperSelector.best().depth(), 1 ) ) );
-			if( clipperSelector.face() ){
-				const Face& face = *clipperSelector.face();
-				float bestDist = FLT_MAX;
-				Vector3 wannabePoint;
-				for ( Winding::const_iterator prev = face.getWinding().end() - 1, curr = face.getWinding().begin(); curr != face.getWinding().end(); prev = curr, ++curr ){
-					{ /* try vertices */
-						const float dist = vector3_length_squared( ( *curr ).vertex - point );
-						if( dist < bestDist ){
-							wannabePoint = ( *curr ).vertex;
-							bestDist = dist;
-						}
-					}
-					{ /* try edges */
-						Vector3 edgePoint = segment_closest_point_to_point( Segment3D( ( *prev ).vertex, ( *curr ).vertex ), point );
-						if( edgePoint != ( *prev ).vertex && edgePoint != ( *curr ).vertex ){
-							const Vector3 edgedir = vector3_normalised( ( *curr ).vertex - ( *prev ).vertex );
-							const std::size_t maxi = vector3_max_abs_component_index( edgedir );
-							// ( *prev ).vertex[maxi] + edgedir[maxi] * coef = float_snapped( point[maxi], GetSnapGridSize() )
-							const float coef = ( float_snapped( point[maxi], GetSnapGridSize() ) - ( *prev ).vertex[maxi] ) / edgedir[maxi];
-							edgePoint = ( *prev ).vertex + edgedir * coef;
-							const float dist = vector3_length_squared( edgePoint - point );
-							if( dist < bestDist ){
-								wannabePoint = edgePoint;
-								bestDist = dist;
-							}
-						}
-					}
-				}
-				if( clipperSelector.best().distance() == 0.f ){ /* try plane, if pointing inside of polygon */
-					const std::size_t maxi = vector3_max_abs_component_index( face.plane3().normal() );
-					Vector3 planePoint( vector3_snapped( point, GetSnapGridSize() ) );
-					// face.plane3().normal().dot( point snapped ) = face.plane3().dist()
-					planePoint[maxi] = ( face.plane3().dist()
-											- face.plane3().normal()[( maxi + 1 ) % 3] * planePoint[( maxi + 1 ) % 3]
-											- face.plane3().normal()[( maxi + 2 ) % 3] * planePoint[( maxi + 2 ) % 3] ) / face.plane3().normal()[maxi];
-					const float dist = vector3_length_squared( planePoint - point );
-					if( dist < bestDist ){
-						wannabePoint = planePoint;
-						bestDist = dist;
-					}
-				}
-				point = wannabePoint;
-			}
-			else{
-				vector3_snap( point, GetSnapGridSize() );
-			}
+			point = testSelected_scene_snapped_point( test, clipperSelector );
 			return true;
 		}
 		return false;
