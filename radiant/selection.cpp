@@ -3985,7 +3985,8 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 					m_freeDragXY_Z.set0( g_vector3_identity );
 				}
 				else if( GlobalSelectionSystem().ComponentMode() == SelectionSystem::eVertex ){
-					m_dragSelected = scene_insert_brush_vertices( view, m_freeDragXY_Z );
+					m_dragSelected = g_bTmpComponentMode = scene_insert_brush_vertices( view, m_freeDragXY_Z ); //hack: indicating not a tmp mode
+					return;
 				}
 			}
 		}
@@ -5529,6 +5530,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 };
 
 void RadiantSelectionSystem::freezeTransforms(){
+	globalOutputStream() << " RadiantSelectionSystem::freezeTransforms() \n";
 	GlobalSceneGraph().traverse( FreezeTransforms() );
 }
 

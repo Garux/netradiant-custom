@@ -106,7 +106,9 @@ inline bool Brush_isBounded( const Brush& brush ){
 }
 
 void Brush::buildBRep(){
-	const bool _vertexModeOn = m_vertexModeOn;
+	globalOutputStream() << "  buildBRep start\n";
+
+	m_BRep_evaluation = true;
 
 	bool degenerate = buildWindings();
 
@@ -308,17 +310,16 @@ void Brush::buildBRep(){
 			}
 		}
 
-		//  :faceleg:     start  move  end
-		// m_vertexModeOn   1     1     0
-		//  _vertexModeOn   0     1     1
-		if( _vertexModeOn || m_vertexModeOn ){
-			if( !( !m_vertexModeOn && _vertexModeOn && GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ) ) //don't select in the end of g_bTmpComponentMode
-				for( const auto& i : m_vertexModeVertices )
-					if( i.m_selected )
-						for ( Observers::iterator o = m_observers.begin(); o != m_observers.end(); ++o )
-							( *o )->vertex_select( i.m_vertexTransformed );
+		if( m_vertexModeOn ){
+			for( const auto& i : m_vertexModeVertices )
+				if( i.m_selected )
+					for ( Observers::iterator o = m_observers.begin(); o != m_observers.end(); ++o )
+						( *o )->vertex_select( i.m_vertexTransformed );
 		}
+		globalOutputStream() << m_vertexModeOn << " m_vertexModeOn\n";
 	}
+	m_BRep_evaluation = false;
+	globalOutputStream() << "  buildBRep end\n";
 }
 
 
@@ -462,7 +463,8 @@ const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, con
 }
 
 #include "quickhull/QuickHull.hpp"
-void Brush::vertexModeBuildHull( bool allTransformed ){
+void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
+	globalOutputStream() << "  vertexModeBuildHull\n";
 	quickhull::QuickHull<double> quickhull;
 	std::vector<quickhull::Vector3<double>> pointCloud;
 	pointCloud.reserve( m_vertexModeVertices.size() );
@@ -507,6 +509,7 @@ void Brush::vertexModeBuildHull( bool allTransformed ){
 		for( const auto& i : vertexModePlanes ){
 			const Face& face = *i.m_face;
 			if( i.m_transformed ){
+				TextureProjection projection( face.getTexdef().m_projection );
 				if( g_brush_textureVertexlock_enabled ){
 					Matrix4 local2tex;
 					Texdef_Construct_local2tex( face.getTexdef().m_projection, face.getShader().width(), face.getShader().height(), face.getPlane().plane3().normal(), local2tex );
@@ -514,14 +517,12 @@ void Brush::vertexModeBuildHull( bool allTransformed ){
 												matrix4_transformed_point( local2tex, i.m_v[1]->m_vertex ),
 												matrix4_transformed_point( local2tex, i.m_v[2]->m_vertex ) };
 					const DoubleVector3 points[3]{ i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed };
-					TextureProjection projection;
 					Texdef_from_ST( projection, points, st, face.getShader().width(), face.getShader().height() );
-					projection.m_brushprimit_texdef.removeScale( face.getShader().width(), face.getShader().height() );
-
-					addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), projection );
 				}
-				else{
-					addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), face.getTexdef().normalised() );
+				Face* newFace = addPlane( i.m_v[0]->m_vertexTransformed, i.m_v[1]->m_vertexTransformed, i.m_v[2]->m_vertexTransformed, face.GetShader(), TextureProjection() );
+				if( newFace ){
+					newFace->getTexdef().m_projection = projection; //set TextureProjection later, addPlane() resets Valve220 basis
+					newFace->revertTexdef();
 				}
 			}
 			else{

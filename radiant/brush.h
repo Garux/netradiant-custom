@@ -1609,6 +1609,7 @@ Callback m_boundsChanged;
 
 mutable bool m_planeChanged;   // b-rep evaluation required
 mutable bool m_transformChanged;   // transform evaluation required
+bool m_BRep_evaluation = false; //mutex for invalidation
 // ----
 
 public:
@@ -1776,12 +1777,13 @@ void updateFiltered(){
 
 // observer
 void planeChanged(){
-	/* m_planeChanged vs m_transformChanged relationship is important
-	b4 (w/o one) cycling dependency occured:
+//	globalOutputStream() << "  planeChanged\n";
+	/* m_BRep_evaluation mutex prevents cyclic dependency:
 	transformModifier.set ; transformChanged() ; planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
 	sceneRender() ; localAABB ; evaluateBRep ; buildBRep() ; evaluateTransform ; !!!problem starts here!!!! planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
 	sceneRender() ; localAABB ; evaluateBRep ; buildBRep() ; */
-	if( !m_transformChanged ){
+	if( !m_BRep_evaluation ){
+								globalOutputStream() << "  planeChangedOK\n";
 		m_planeChanged = true;
 		aabbChanged();
 		m_lightsChanged();
@@ -1789,7 +1791,7 @@ void planeChanged(){
 }
 void shaderChanged(){
 	updateFiltered();
-	planeChanged();
+	planeChanged(); ///isn't too much for shader changed only?
 }
 
 void evaluateBRep() const {
@@ -1800,18 +1802,18 @@ void evaluateBRep() const {
 }
 
 void transformChanged(){
-	//m_transformChanged = true;
+	globalOutputStream() << "  transformChanged()\n";
 	planeChanged();
-	m_transformChanged = true; //experimental fix of cyclic dependency
+	m_transformChanged = true;
 }
 typedef MemberCaller<Brush, &Brush::transformChanged> TransformChangedCaller;
 
 void evaluateTransform(){
 	if ( m_transformChanged ) {
-		//m_transformChanged = false;
+			globalOutputStream() << "  Brush::evaluateTransform()\n";
 		revertTransform();
 		m_evaluateTransform();
-		m_transformChanged = false; //experimental fix of cyclic dependency
+		m_transformChanged = false;
 	}
 }
 const Matrix4& localToParent() const {
@@ -1865,16 +1867,19 @@ void snapto( float snap ){
 //	}
 }
 void revertTransform(){
+	globalOutputStream() << " revertTransform \n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->revertTransform();
 	}
 }
 void freezeTransform(){
+	globalOutputStream() << "  freezeTransform\n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->freezeTransform();
 	}
+	m_transformChanged = false;
 }
 
 	class VertexModeVertex
@@ -1894,12 +1899,14 @@ VertexModeVertices m_vertexModeVertices;
 bool m_vertexModeOn{false};
 
 void vertexModeInit(){
+	globalOutputStream() << " vertexModeInit\n";
 	m_vertexModeOn = true;
 	m_vertexModeVertices.clear();
 	undoSave();
 }
 
 void vertexModeFree(){
+	globalOutputStream() << "  vMF\n";
 	m_vertexModeOn = false;
 //	m_vertexModeVertices.clear(); //keep, as it is required by buildBRep() after this call
 }
@@ -3187,7 +3194,7 @@ void selectVerticesOnFaces( const FaceInstances_ptrs& faceinstances ){
 	while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
 }
 void gather( Brush::VertexModeVertices& vertexModeVertices ) const {
-	vertexModeVertices.push_back( Brush::VertexModeVertex( m_vertex->getFace().getWinding()[m_vertex->m_faceVertex.getVertex()].vertex, isSelected() ) );
+	vertexModeVertices.emplace_back( m_vertex->getFace().getWinding()[m_vertex->m_faceVertex.getVertex()].vertex, isSelected() );
 	FaceVertexId faceVertex = m_vertex->m_faceVertex;
 	do
 	{
@@ -3268,7 +3275,7 @@ static Shader* m_state_selpoint;
 
 const LightList* m_lightList;
 
-TransformModifier m_transform;
+BrushTransformModifier m_transform;
 
 BrushInstance( const BrushInstance& other ); // NOT COPYABLE
 BrushInstance& operator=( const BrushInstance& other ); // NOT ASSIGNABLE
@@ -3409,12 +3416,14 @@ void vertex_select( const Vector3& vertex ){
 
 void vertex_snap( const float snap, bool all ){
 	m_brush.vertexModeInit();
+	m_brush.m_vertexModeVertices.reserve( m_vertexInstances.size() );
 	for ( const auto& i : m_vertexInstances ){
 		i.gather( m_brush.m_vertexModeVertices );
 	}
 	m_brush.vertexModeSnap( snap, all );
 	m_brush.evaluateBRep();
 	m_brush.vertexModeFree();
+	m_brush.freezeTransform();
 }
 
 void vertex_snap( const float snap ){
@@ -3791,6 +3800,7 @@ void gatherSelectedComponents( const Vector3Callback& callback ) const {
 void insert_vertices( const Brush::VertexModeVertices& vertexModeVertices ){
 	if( !m_vertexInstances.empty() ){
 		m_brush.vertexModeInit();
+		m_brush.m_vertexModeVertices.reserve( m_vertexInstances.size() + 2 );
 		for ( const auto& i : m_vertexInstances ){
 			i.gather( m_brush.m_vertexModeVertices );
 		}
@@ -3806,6 +3816,35 @@ void insert_vertices( const Brush::VertexModeVertices& vertexModeVertices ){
 	}
 }
 
+void remove_vertices(){
+	if( !m_vertexInstances.empty() ){
+		m_brush.vertexModeInit();
+		Brush::VertexModeVertices v;
+		v.reserve( m_vertexInstances.size() );
+		for ( const auto& i : m_vertexInstances ){
+			i.gather( v );
+			if( v.back().m_selected )
+				v.pop_back();
+		}
+		std::vector<bool> ok( v.size(), true );
+		gatherSelectedComponents( [&]( const Vector3 & value ) {
+			for( std::size_t i = 0; i < v.size(); ++i )
+				if( vector3_length_squared( v[i].m_vertex - value ) < 0.05 * 0.05 )
+					ok[i] = false;
+		} );
+
+		m_brush.m_vertexModeVertices.reserve( v.size() );
+		for( std::size_t i = 0; i < v.size(); ++i ){
+			if( ok[i] )
+				m_brush.m_vertexModeVertices.push_back( v[i] );
+		}
+		m_brush.vertexModeBuildHull();
+		m_brush.evaluateBRep();
+		m_brush.vertexModeFree();
+		m_brush.freezeTransform();
+	}
+}
+
 void snapComponents( float snap ){
 	for ( const auto& fi : m_faceInstances ){
 		if( fi.selectedComponents( SelectionSystem::eVertex ) ){
@@ -3818,8 +3857,9 @@ void snapComponents( float snap ){
 		fi.snapComponents( snap );
 }
 void evaluateTransform(){
-	if( m_transform.m_transformFrozen )
-		m_brush.vertexModeFree();
+	globalOutputStream() << " evaluateTransform\n";
+	if( m_transform.m_transformFrozen && m_transform.isIdentity() )
+		return;
 	if( m_transform.m_transformFrozen && !m_transform.isIdentity() ){ /* new transform */
 		m_transform.m_transformFrozen = false;
 		for( auto& i : m_faceInstances )
@@ -3829,6 +3869,7 @@ void evaluateTransform(){
 			for ( const auto& i : m_faceInstances ){
 				if( i.selectedComponents( SelectionSystem::eVertex ) ){
 					m_brush.vertexModeInit();
+					m_brush.m_vertexModeVertices.reserve( m_vertexInstances.size() );
 					for ( const auto& i : m_vertexInstances ){
 						i.gather( m_brush.m_vertexModeVertices );
 					}
@@ -3839,6 +3880,7 @@ void evaluateTransform(){
 	}
 
 	const Matrix4 matrix( m_transform.calculateTransform() );
+	globalOutputStream() << matrix << " matrix\n";
 
 	if ( m_transform.getType() == TRANSFORM_PRIMITIVE ) {
 		m_brush.transform( matrix );
@@ -3859,9 +3901,17 @@ void evaluateTransform(){
 	}
 }
 void applyTransform(){
-	m_brush.revertTransform();
-	evaluateTransform();
-	m_brush.freezeTransform();
+	if( !m_transform.isIdentity() ){
+				globalOutputStream() << "     applyTransform\n";
+		if( m_transform.m_transformFrozen ){ //not yet unfrozen by evaluateTransform(), so evaluate
+//			m_brush.revertTransform();
+//			evaluateTransform();
+			m_brush.evaluateBRep();
+		}
+		m_brush.freezeTransform();
+		m_transform.setIdentity();
+	}
+	m_brush.vertexModeFree();
 }
 typedef MemberCaller<BrushInstance, &BrushInstance::applyTransform> ApplyTransformCaller;
 

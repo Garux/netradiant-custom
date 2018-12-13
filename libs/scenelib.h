@@ -49,7 +49,7 @@ virtual void setSelectedComponents( bool select, SelectionSystem::EComponentMode
 virtual void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ) = 0;
 };
 
-typedef Callback1<const Vector3&> Vector3Callback;
+typedef std::function<void( const Vector3& )> Vector3Callback;
 
 class ComponentEditable
 {

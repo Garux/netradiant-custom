@@ -1030,14 +1030,10 @@ public:
 class Scene_gatherSelectedComponents : public scene::Graph::Walker
 {
 MergeVertices& m_mergeVertices;
-void call( const Vector3& value ) const {
-	m_mergeVertices.insert( value );
-}
-typedef ConstMemberCaller1<Scene_gatherSelectedComponents, const Vector3&, &Scene_gatherSelectedComponents::call> Caller;
 const Vector3Callback m_callback;
 public:
 Scene_gatherSelectedComponents( MergeVertices& mergeVertices )
-	: m_mergeVertices( mergeVertices ), m_callback( Vector3Callback( Scene_gatherSelectedComponents::Caller( *this ) ) ){
+	: m_mergeVertices( mergeVertices ), m_callback( [this]( const Vector3& value ){ m_mergeVertices.insert( value ); } ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
@@ -1266,7 +1262,7 @@ void CSG_WrapMerge(){
 }
 
 
-
+#if 0
 class find_instance_to_DeleteComponents : public SelectionSystem::Visitor
 {
 public:
@@ -1346,6 +1342,12 @@ void CSG_DeleteComponents(){
 		}
 	}
 }
+#else
+
+void CSG_DeleteComponents(){
+	Scene_forEachSelectedBrush( []( BrushInstance& brush ){ brush.remove_vertices(); } );
+}
+#endif
 
 
 
