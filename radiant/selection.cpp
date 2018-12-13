@@ -5530,7 +5530,6 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 };
 
 void RadiantSelectionSystem::freezeTransforms(){
-	globalOutputStream() << " RadiantSelectionSystem::freezeTransforms() \n";
 	GlobalSceneGraph().traverse( FreezeTransforms() );
 }
 

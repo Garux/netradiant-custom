@@ -1777,13 +1777,11 @@ void updateFiltered(){
 
 // observer
 void planeChanged(){
-//	globalOutputStream() << "  planeChanged\n";
 	/* m_BRep_evaluation mutex prevents cyclic dependency:
 	transformModifier.set ; transformChanged() ; planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
 	sceneRender() ; localAABB ; evaluateBRep ; buildBRep() ; evaluateTransform ; !!!problem starts here!!!! planeChanged() ; pivotChanged() ; sceneChangeNotify() ;
 	sceneRender() ; localAABB ; evaluateBRep ; buildBRep() ; */
 	if( !m_BRep_evaluation ){
-								globalOutputStream() << "  planeChangedOK\n";
 		m_planeChanged = true;
 		aabbChanged();
 		m_lightsChanged();
@@ -1802,7 +1800,6 @@ void evaluateBRep() const {
 }
 
 void transformChanged(){
-	globalOutputStream() << "  transformChanged()\n";
 	planeChanged();
 	m_transformChanged = true;
 }
@@ -1810,7 +1807,6 @@ typedef MemberCaller<Brush, &Brush::transformChanged> TransformChangedCaller;
 
 void evaluateTransform(){
 	if ( m_transformChanged ) {
-			globalOutputStream() << "  Brush::evaluateTransform()\n";
 		revertTransform();
 		m_evaluateTransform();
 		m_transformChanged = false;
@@ -1867,14 +1863,12 @@ void snapto( float snap ){
 //	}
 }
 void revertTransform(){
-	globalOutputStream() << " revertTransform \n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->revertTransform();
 	}
 }
 void freezeTransform(){
-	globalOutputStream() << "  freezeTransform\n";
 	for ( Faces::iterator i = m_faces.begin(); i != m_faces.end(); ++i )
 	{
 		( *i )->freezeTransform();
@@ -1899,16 +1893,14 @@ VertexModeVertices m_vertexModeVertices;
 bool m_vertexModeOn{false};
 
 void vertexModeInit(){
-	globalOutputStream() << " vertexModeInit\n";
 	m_vertexModeOn = true;
 	m_vertexModeVertices.clear();
 	undoSave();
 }
 
 void vertexModeFree(){
-	globalOutputStream() << "  vMF\n";
 	m_vertexModeOn = false;
-//	m_vertexModeVertices.clear(); //keep, as it is required by buildBRep() after this call
+//	m_vertexModeVertices.clear(); //keep, as it may be required by buildBRep() after this call
 }
 
 void vertexModeTransform( const Matrix4& matrix );
@@ -3857,7 +3849,6 @@ void snapComponents( float snap ){
 		fi.snapComponents( snap );
 }
 void evaluateTransform(){
-	globalOutputStream() << " evaluateTransform\n";
 	if( m_transform.m_transformFrozen && m_transform.isIdentity() )
 		return;
 	if( m_transform.m_transformFrozen && !m_transform.isIdentity() ){ /* new transform */
@@ -3880,7 +3871,6 @@ void evaluateTransform(){
 	}
 
 	const Matrix4 matrix( m_transform.calculateTransform() );
-	globalOutputStream() << matrix << " matrix\n";
 
 	if ( m_transform.getType() == TRANSFORM_PRIMITIVE ) {
 		m_brush.transform( matrix );
@@ -3902,7 +3892,6 @@ void evaluateTransform(){
 }
 void applyTransform(){
 	if( !m_transform.isIdentity() ){
-				globalOutputStream() << "     applyTransform\n";
 		if( m_transform.m_transformFrozen ){ //not yet unfrozen by evaluateTransform(), so evaluate
 //			m_brush.revertTransform();
 //			evaluateTransform();

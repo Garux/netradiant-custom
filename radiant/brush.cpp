@@ -106,8 +106,6 @@ inline bool Brush_isBounded( const Brush& brush ){
 }
 
 void Brush::buildBRep(){
-	globalOutputStream() << "  buildBRep start\n";
-
 	m_BRep_evaluation = true;
 
 	bool degenerate = buildWindings();
@@ -316,10 +314,8 @@ void Brush::buildBRep(){
 					for ( Observers::iterator o = m_observers.begin(); o != m_observers.end(); ++o )
 						( *o )->vertex_select( i.m_vertexTransformed );
 		}
-		globalOutputStream() << m_vertexModeOn << " m_vertexModeOn\n";
 	}
 	m_BRep_evaluation = false;
-	globalOutputStream() << "  buildBRep end\n";
 }
 
 
@@ -464,7 +460,6 @@ const Face* vertex_mode_find_common_face( const Brush::VertexModeVertex& v1, con
 
 #include "quickhull/QuickHull.hpp"
 void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
-	globalOutputStream() << "  vertexModeBuildHull\n";
 	quickhull::QuickHull<double> quickhull;
 	std::vector<quickhull::Vector3<double>> pointCloud;
 	pointCloud.reserve( m_vertexModeVertices.size() );
