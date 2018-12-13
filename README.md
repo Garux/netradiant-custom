@@ -26,73 +26,73 @@ Development is focused on smoothing and tweaking editing process.
 #### Random feature highlights
 
 * WASD camera binds
-* fully supported editing in 3D view (brush and entity creation, all manipulating tools)
-* uniform merge algorithm, merging selected brushes, components and clipper points
-* free and robust vertex editing, also providing abilities to remove and insert vertices
-* left mouse button click tunnel selector, paint selector
-* numerous mouse shortcuts (see help->General->Mouse Shortcuts)
-* focus camera on selected (Tab)
-* snapped modes of manipulators
-* draggable renderable transform origin for manipulators
-* quick vertices drag / brush faces shear
-* shader editor
-* texture painting by drag
-* seamless brush face to face texture paste
-* keyboard shortcuts are customizable
-* GUI themes, fonts are customizable
-* meshTex plugin
-* patch thicken
-* all patch prefabs are created aligned to active projection
-* filters toolbar with extra functions on right mouse button click
-* viewports zoom in to pointer
+* Fully supported editing in 3D view (brush and entity creation, all manipulating tools)
+* Uniform merge algorithm, merging selected brushes, components and clipper points
+* Free and robust vertex editing, also providing abilities to remove and insert vertices
+* Left mouse button click tunnel selector, paint selector
+* Numerous mouse shortcuts (see help->General->Mouse Shortcuts)
+* Focus camera on selected (Tab)
+* Snapped modes of manipulators
+* Draggable renderable transform origin for manipulators
+* Quick vertices drag / brush faces shear shortcut
+* Simple shader editor
+* Texture painting by drag
+* Seamless brush face to face texture paste
+* Customizable keyboard shortcuts
+* Customizable GUI themes, fonts
+* MeshTex plugin
+* Patch thicken
+* All patch prefabs are created aligned to active projection
+* Filters toolbar with extra functions on right mouse button click
+* Viewports zoom in to mouse pointer
 * \'all Supported formats\' default option in open dialogs
-* opening *.map, sent via cmd line (can assign *.map files in OS to be opened with radiant)
-* texture browser: show alpha transparency option
-* texture browser: gtk search in directories and tags trees
-* texture browser: search in currently shown textures
+* Opening *.map, sent via cmd line (can assign *.map files in OS to be opened with radiant)
+* Texture browser: show alpha transparency option
+* Texture browser: gtk search in directories and tags trees
+* Texture browser: search in currently shown textures
 * CSG Tool (aka shell modifier)
-* working region compilations (build a map with region enabled = compile regioned part only)
+* Working region compilations (build a map with region enabled = compile regioned part only)
 * QE tool in a component mode: perform drag w/o hitting any handle too
-* map info dialog: + Total patches, Ingame entities, Group entities, Ingame group entities counts
-* connected entities walker
-* build->customize: list available build variables
+* Map info dialog: + Total patches, Ingame entities, Group entities, Ingame group entities counts
+* Connected entities selector/walker
+* Build->customize: list available build variables
 * 50x faster light radius rendering
-* light power is adjustable by mouse drag
-* anisotropic textures filtering
-* optional MSAA in viewports
-* new very fast entity names rendering system
-* support \'stupid quake bug\'
-* arbitrary texture projections for brushes and curves
-* fully working texture lock, supporting any affine transformation
-* texture locking during vertex and edge manipulations
-* brush resize (QE tool): reduce selected faces amount to most wanted ones
-* support brush formats, as toggleable preference: Axial projection, Brush primitives, Valve 220
-* autodetect brush type on map opening
-* automatic AP, BP and Valve220 brush types conversion on map Import and Paste
-* new bbox styled manipulator, allowing any affine transform (move, rotate, scale, skew)
-* incredible number of fixes and options
+* Light power is adjustable by mouse drag
+* Anisotropic textures filtering
+* Optional MSAA in viewports
+* New very fast entity names rendering system
+* Support \'stupid quake bug\'
+* Arbitrary texture projections for brushes and curves
+* Fully working texture lock, supporting any affine transformation
+* Texture locking during vertex and edge manipulations
+* Brush resize (QE tool): reduce selected faces amount to most wanted ones
+* Support brush formats, as toggleable preference: Axial projection, Brush primitives, Valve 220
+* Autodetect brush type on map opening
+* Automatic AP, BP and Valve220 brush types conversion on map Import and Paste
+* New bbox styled manipulator, allowing any affine transform (move, rotate, scale, skew)
+* Incredible number of fixes and options
 
 
 #### Q3Map2:
 
-* allowed samples+filter, makes sense
+* Allowed simultaneous samples+filter use, makes sense
 * -vertexscale
 * -novertex works, (0..1) sets globally
-* fixed _clone _ins _instance (_clonename) functionality
+* Fixed _clone _ins _instance (_clonename) functionality
 * -nolm - no lightmaps
 * -bouncecolorratio 0..1 (ratio of colorizing light sample by texture)
 * q3map_remapshader remaps anything fine, on all stages
-* fixed model autoclip, added 20 new modes
-* automatic map packager (complete Q3 support)
+* Fixed model autoclip, added 20 new modes
+* Automatic map packager (complete Q3 support)
 * -brightness 0..alot, def 1: mimics q3map_lightmapBrightness, but globally + affects vertexlight
 * -contrast -255..255, def 0: lighting contrast
-* report full / full pk3 path on file syntax errors
-* new area lights backsplash algorithm (utilizing area lights instead of point ones)
+* Report full / full pk3 path on file syntax errors
+* New area lights backsplash algorithm (utilizing area lights instead of point ones)
 * -backsplash (float)scale (float)distance: adjust area lights globally (real area lights have no backsplash)
-* new slightly less careful, but much faster lightmaps packing algorithm (allocating... process)
+* New slightly less careful, but much faster lightmaps packing algorithm (allocating... process)
 * Valve220 mapformat autodetection and support
-* correct .obj and .mtl loading
-* guessing model shaders paths
+* Correct .obj and .mtl loading
+* Guessing model shaders paths
 
 ###### see changelog-custom.txt for more
 
