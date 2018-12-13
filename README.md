@@ -26,7 +26,9 @@ Development is focused on smoothing and tweaking editing process.
 #### Random feature highlights
 
 * WASD camera binds
-* Clipper tool, brush and entity creation, working in camera
+* fully supported editing in 3D view (brush and entity creation, all manipulating tools)
+* uniform merge algorithm, merging selected brushes, components and clipper points
+* free and robust vertex editing, also providing abilities to remove and insert vertices
 * left mouse button click tunnel selector, paint selector
 * numerous mouse shortcuts (see help->General->Mouse Shortcuts)
 * focus camera on selected (Tab)
@@ -89,6 +91,8 @@ Development is focused on smoothing and tweaking editing process.
 * -backsplash (float)scale (float)distance: adjust area lights globally (real area lights have no backsplash)
 * new slightly less careful, but much faster lightmaps packing algorithm (allocating... process)
 * Valve220 mapformat autodetection and support
+* correct .obj and .mtl loading
+* guessing model shaders paths
 
 ###### see changelog-custom.txt for more
 
