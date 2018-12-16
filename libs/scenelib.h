@@ -36,6 +36,8 @@
 #include "container/stack.h"
 #include "typesystem.h"
 
+#include <functional>
+
 class Selector;
 class SelectionTest;
 
