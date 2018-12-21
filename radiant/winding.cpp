@@ -188,22 +188,19 @@ void WindingVertex_ClassifyPlane( const Vector3& vertex, const Plane3& plane, br
 }
 
 
-#define DEBUG_EPSILON ON_EPSILON
-const double DEBUG_EPSILON_SQUARED = DEBUG_EPSILON * DEBUG_EPSILON;
-
-#define WINDING_DEBUG 0
+const double ON_EPSILON_CLIP = 1.0 / ( 1 << 12 );
 
 /// \brief Clip \p winding which lies on \p plane by \p clipPlane, resulting in \p clipped.
 /// If \p winding is completely in front of the plane, \p clipped will be identical to \p winding.
 /// If \p winding is completely in back of the plane, \p clipped will be empty.
 /// If \p winding intersects the plane, the edge of \p clipped which lies on \p clipPlane will store the value of \p adjacent.
 void Winding_Clip( const FixedWinding& winding, const Plane3& plane, const Plane3& clipPlane, std::size_t adjacent, FixedWinding& clipped ){
-	PlaneClassification classification = Winding_ClassifyDistance( plane3_distance_to_point( clipPlane, winding.back().vertex ), ON_EPSILON );
+	PlaneClassification classification = Winding_ClassifyDistance( plane3_distance_to_point( clipPlane, winding.back().vertex ), ON_EPSILON_CLIP );
 	PlaneClassification nextClassification;
 	// for each edge
 	for ( std::size_t next = 0, i = winding.size() - 1; next != winding.size(); i = next, ++next, classification = nextClassification )
 	{
-		nextClassification = Winding_ClassifyDistance( plane3_distance_to_point( clipPlane, winding[next].vertex ), ON_EPSILON );
+		nextClassification = Winding_ClassifyDistance( plane3_distance_to_point( clipPlane, winding[next].vertex ), ON_EPSILON_CLIP );
 		const FixedWindingVertex& vertex = winding[i];
 
 		// if first vertex of edge is ON
