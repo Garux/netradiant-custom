@@ -716,6 +716,21 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						//Sys_Printf( "pts pln (%6.7f %6.7f %6.7f %6.7f)\n", plane[0], plane[1], plane[2], plane[3] );
 					}
 
+					/* sanity check */
+					{
+						vec3_t d1, d2, normaL;
+						VectorSubtract( points[1], points[0], d1 );
+						VectorSubtract( points[2], points[0], d2 );
+						CrossProduct( d2, d1, normaL );
+						/* https://en.wikipedia.org/wiki/Cross_product#Geometric_meaning
+						   cross( a, b ).length = a.length b.length sin( angle ) */
+						const double lengthsSquared = ( d1[0] * d1[0] + d1[1] * d1[1] + d1[2] * d1[2] ) * ( d2[0] * d2[0] + d2[1] * d2[1] + d2[2] * d2[2] );
+						if ( lengthsSquared == 0 || fabs( ( normaL[0] * normaL[0] + normaL[1] * normaL[1] + normaL[2] * normaL[2] ) / lengthsSquared ) < 1e-8 ) {
+							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+							continue;
+						}
+					}
+
 
 					if ( spf == 4352 ){	//PYRAMIDAL_CLIP+AXIAL_BACKPLANE
 
