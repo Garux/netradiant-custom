@@ -3410,12 +3410,15 @@ void vertex_push_back( SelectableVertex& vertex ){
 }
 
 void vertex_select(){
-	bool selected = false;
+	bool src_selected = false;
+	bool dst_selected = false;
 	for( const auto& v : m_brush.m_vertexModeVertices )
-		if( v.m_selected )
+		if( v.m_selected ){
+			src_selected = true;
 			for( auto& i : m_vertexInstances )
-				selected |= i.vertex_select( v.m_vertexTransformed );
-	if( !selected && !m_vertexInstances.empty() )
+				dst_selected |= i.vertex_select( v.m_vertexTransformed );
+		}
+	if( src_selected && !dst_selected && !m_vertexInstances.empty() )
 		m_vertexInstances[0].setSelected( true ); //select at least something to prevent transform interruption after removing all selected vertices during vertexModeTransform
 }
 
