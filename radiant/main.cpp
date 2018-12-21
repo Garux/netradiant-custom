@@ -559,6 +559,30 @@ void add_local_rc_files(){
 #endif
 }
 
+#ifdef WIN32
+/* as in windows packages we are using local font file for entity names to avoid long parsing of all system fonts by fontconfig,
+   let's also write local.conf with absolute path to local fonts/ dir, as fonts.conf has no opportunity to get it, when pwd != radiant/
+   ( when starting radiant by opening .map, associated to one, for example ) */
+void fontconfig_workaround(){
+	StringOutputStream path( 1024 );
+	path << AppPath_get() << "etc/fonts/local.conf";
+
+	TextFileOutputStream file( path.c_str() );
+	if ( !file.failed() ) {
+			file << "<?xml version=\"1.0\"?>\n\
+<!DOCTYPE fontconfig SYSTEM \"fonts.dtd\">\n\
+<fontconfig>\n\
+	<its:rules xmlns:its=\"http://www.w3.org/2005/11/its\" version=\"1.0\">\n\
+		<its:translateRule translate=\"no\" selector=\"/fontconfig/*[not(self::description)]\"/>\n\
+	</its:rules>\n\
+\n\
+	<description>Load font from local dir</description>\n\
+		<dir>" << AppPath_get() << "etc/fonts</dir>\n\
+</fontconfig>\n";
+	}
+}
+#endif
+
 int main( int argc, char* argv[] ){
 	crt_init();
 
@@ -612,6 +636,10 @@ int main( int argc, char* argv[] ){
 	paths_init();
 
 	add_local_rc_files();
+
+#ifdef WIN32
+	fontconfig_workaround();
+#endif
 
 	if ( !check_version() ) {
 		return EXIT_FAILURE;
