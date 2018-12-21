@@ -687,12 +687,12 @@ int FloodEntities( tree_t *tree ){
 
 		/* get origin */
 		GetVectorForKey( e, "origin", origin );
-
+#if 0 //allow maps with only point entity@( 0, 0, 0 ); assuming that entities, containing no primitives are point ones
 		/* as a special case, allow origin-less entities */
 		if ( VectorCompare( origin, vec3_origin ) ) {
 			continue;
 		}
-
+#endif
 		/* also allow bmodel entities outside, as they could be on a moving path that will go into the map */
 		if ( e->brushes != NULL || e->patches != NULL ) {
 			continue;
@@ -747,7 +747,7 @@ int FloodEntities( tree_t *tree ){
 			inside = qtrue;
 		}
 		if ( !r ) {
-			Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: Entity in solid\n", e->mapEntityNum, 0 );
+			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e->mapEntityNum, ValueForKey( e, "classname" ) );
 		}
 		else if ( tree->outside_node.occupied ) {
 			if ( !tripped || tree->outside_node.occupied < tripcount ) {
