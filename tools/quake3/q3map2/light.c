@@ -2109,7 +2109,6 @@ void LightWorld( qboolean fastAllocate ){
 int LightMain( int argc, char **argv ){
 	int i;
 	float f;
-	char mapSource[ 1024 ];
 	const char  *value;
 	int lightmapMergeSize = 0;
 	qboolean lightSamplesInsist = qfalse;
@@ -2996,9 +2995,12 @@ int LightMain( int argc, char **argv ){
 	strcpy( source, ExpandArg( argv[ i ] ) );
 	StripExtension( source );
 	DefaultExtension( source, ".bsp" );
-	strcpy( mapSource, ExpandArg( argv[ i ] ) );
-	StripExtension( mapSource );
-	DefaultExtension( mapSource, ".map" );
+
+	strcpy( name, ExpandArg( argv[ i ] ) );
+	if ( strcmp( name + strlen( name ) - 4, ".reg" ) ) { /* not .reg */
+		StripExtension( name );
+		DefaultExtension( name, ".map" );
+	}
 
 	/* ydnar: set default sample size */
 	SetDefaultSampleSize( sampleSize );
@@ -3025,7 +3027,7 @@ int LightMain( int argc, char **argv ){
 	/* load map file */
 	value = ValueForKey( &entities[ 0 ], "_keepLights" );
 	if ( value[ 0 ] != '1' ) {
-		LoadMapFile( mapSource, qtrue, qfalse );
+		LoadMapFile( name, qtrue, qfalse );
 	}
 
 	/* set the entity/model origins and init yDrawVerts */
