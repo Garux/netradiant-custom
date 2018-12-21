@@ -67,7 +67,7 @@ run:
 Switch into the install folder, and run NetRadiant.app
 
 
-Win32 (unsing MSYS2)(recommended)
+Win32 (using MSYS2)(recommended)
 ==================
 
 environment:
@@ -92,7 +92,7 @@ run:
 - in the "install" directory, double click netradiant.exe
 
 
-Win32 (unsing MinGW)
+Win32 (using MinGW)
 ==================
 
 environment:
