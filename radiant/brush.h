@@ -1553,7 +1553,7 @@ virtual void edge_push_back( SelectableEdge& edge ) = 0;
 virtual void vertex_clear() = 0;
 virtual void vertex_push_back( SelectableVertex& vertex ) = 0;
 
-virtual void vertex_select( const Vector3& vertex ) = 0;
+virtual void vertex_select() = 0;
 virtual void vertex_snap( const float snap ) = 0;
 
 virtual void DEBUG_verify() const = 0;
@@ -3206,10 +3206,12 @@ void gather( Brush::VertexModeVertices& vertexModeVertices ) const {
 	}
 	while ( faceVertex.getFace() != m_vertex->m_faceVertex.getFace() );
 }
-void vertex_select( const Vector3& vertex ){
+bool vertex_select( const Vector3& vertex ){
 	if( vector3_length_squared( vertex - m_vertex->getFace().getWinding()[m_vertex->m_faceVertex.getVertex()].vertex ) < ( 0.1 * 0.1 ) ){
 		setSelected( true );
+		return true;
 	}
+	return false;
 }
 };
 
@@ -3407,13 +3409,13 @@ void vertex_push_back( SelectableVertex& vertex ){
 	m_vertexInstances.push_back( VertexInstance( m_faceInstances, vertex ) );
 }
 
-void vertex_select( const Vector3& vertex ){
-	for( auto& i : m_vertexInstances )
-		i.vertex_select( vertex );
-	for ( const auto& i : m_faceInstances )
-		if( i.selectedComponents( SelectionSystem::eVertex ) ) //got something selected, okay
-			return;
-	if( !m_vertexInstances.empty() )
+void vertex_select(){
+	bool selected = false;
+	for( const auto& v : m_brush.m_vertexModeVertices )
+		if( v.m_selected )
+			for( auto& i : m_vertexInstances )
+				selected |= i.vertex_select( v.m_vertexTransformed );
+	if( !selected && !m_vertexInstances.empty() )
 		m_vertexInstances[0].setSelected( true ); //select at least something to prevent transform interruption after removing all selected vertices during vertexModeTransform
 }
 

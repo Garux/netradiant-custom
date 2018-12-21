@@ -309,10 +309,8 @@ void Brush::buildBRep(){
 		}
 
 		if( m_vertexModeOn ){
-			for( const auto& i : m_vertexModeVertices )
-				if( i.m_selected )
-					for ( Observers::iterator o = m_observers.begin(); o != m_observers.end(); ++o )
-						( *o )->vertex_select( i.m_vertexTransformed );
+			for ( Observers::iterator o = m_observers.begin(); o != m_observers.end(); ++o )
+				( *o )->vertex_select();
 		}
 	}
 	m_BRep_evaluation = false;
