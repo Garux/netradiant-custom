@@ -996,12 +996,6 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 	return window;
 }
 
-namespace
-{
-CopiedString g_buildMenu;
-CopiedString g_lastExecutedBuild;
-}
-
 void LoadBuildMenu();
 
 void DoBuildMenu(){
@@ -1038,8 +1032,9 @@ void DoBuildMenu(){
 #include "gtkutil/menu.h"
 #include "mainframe.h"
 #include "preferences.h"
-
 typedef struct _GtkMenuItem GtkMenuItem;
+
+CopiedString g_lastExecutedBuild;
 
 class BuildMenuItem
 {
@@ -1089,8 +1084,30 @@ void Build_refreshMenu( GtkMenu* menu ){
 }
 
 
+namespace
+{
+#include "os/path.h"
+
+CopiedString g_buildMenu;
+
+const char* g_buildMenuFullPah(){
+	if( path_is_absolute( g_buildMenu.c_str() ) )
+		return g_buildMenu.c_str();
+
+	static StringOutputStream buffer( 256 );
+	buffer.clear();
+	buffer << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << "/" << g_buildMenu.c_str();
+	return buffer.c_str();
+}
+}
+
 void LoadBuildMenu(){
-	if ( string_empty( g_buildMenu.c_str() ) || !build_commands_parse( g_buildMenu.c_str() ) ) {
+	if ( g_buildMenu.empty() || !build_commands_parse( g_buildMenuFullPah() ) ) {
+		if( !string_equal_nocase( g_buildMenu.c_str(), "build_menu.xml" ) ){
+			g_buildMenu = "build_menu.xml";
+			if( build_commands_parse( g_buildMenuFullPah() ) )
+				return;
+		}
 		{
 			StringOutputStream buffer( 256 );
 			buffer << GameToolsPath_get() << "default_build_menu.xml";
@@ -1098,19 +1115,13 @@ void LoadBuildMenu(){
 			bool success = build_commands_parse( buffer.c_str() );
 			ASSERT_MESSAGE( success, "failed to parse default build commands: " << buffer.c_str() );
 		}
-		{
-			StringOutputStream buffer( 256 );
-			buffer << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << "/build_menu.xml";
-
-			g_buildMenu = buffer.c_str();
-		}
 	}
 }
 
 void SaveBuildMenu(){
 	if ( g_build_changed ) {
 		g_build_changed = false;
-		build_commands_write( g_buildMenu.c_str() );
+		build_commands_write( g_buildMenuFullPah() );
 	}
 }
 
