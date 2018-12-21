@@ -994,7 +994,7 @@ void releaseShader(){
 }
 
 void check_shader(){
-	if ( !shader_valid( GetShader() ) ) {
+	if ( !texdef_name_valid( GetShader() ) ) {
 		globalErrorStream() << "patch has invalid texture name: '" << GetShader() << "'\n";
 	}
 }

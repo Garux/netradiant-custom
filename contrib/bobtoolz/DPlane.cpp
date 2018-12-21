@@ -55,6 +55,8 @@ DPlane::DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const _QERFac
 	else{
 		FillDefaultTexture( &texInfo, points[0], points[1], points[2], "textures/common/caulk" );
 	}
+
+	m_shader = texInfo.m_shader;
 }
 
 DPlane::~DPlane(){
@@ -262,6 +264,7 @@ DPlane::DPlane( const vec3_t va, const vec3_t vb, const vec3_t vc, const char* t
 	m_bChkOk = true;
 
 	FillDefaultTexture( &texInfo, points[0], points[1], points[2], textureName );
+	m_shader = texInfo.m_shader;
 	if ( bDetail ) {
 		texInfo.contents |= FACE_DETAIL;
 	}
