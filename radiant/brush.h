@@ -72,6 +72,7 @@ const unsigned int BRUSH_DETAIL_MASK = ( 1 << BRUSH_DETAIL_FLAG );
 #define BRUSH_CONNECTIVITY_DEBUG 0
 #define BRUSH_DEGENERATE_DEBUG 0
 
+#define Update_move_planepts_vertex 0
 
 inline bool texdef_sane( const texdef_t& texdef ){
 	return fabs( texdef.shift[0] ) < ( 1 << 16 )
@@ -1138,16 +1139,18 @@ void freezeTransform(){
 }
 
 void update_move_planepts_vertex( std::size_t index, PlanePoints planePoints ){
-	std::size_t numpoints = getWinding().numpoints;
-	ASSERT_MESSAGE( index < numpoints, "update_move_planepts_vertex: invalid index" );
+	if( contributes() ){
+		std::size_t numpoints = getWinding().numpoints;
+		ASSERT_MESSAGE( index < numpoints, "update_move_planepts_vertex: invalid index" );
 
-	std::size_t opposite = Winding_Opposite( getWinding(), index );
-	std::size_t adjacent = Winding_wrap( getWinding(), opposite + numpoints - 1 );
-	planePoints[0] = getWinding()[opposite].vertex;
-	planePoints[1] = getWinding()[index].vertex;
-	planePoints[2] = getWinding()[adjacent].vertex;
-	// winding points are very inaccurate, so they must be quantised before using them to generate the face-plane
-	planepts_quantise( planePoints, GRID_MIN );
+		std::size_t opposite = Winding_Opposite( getWinding(), index );
+		std::size_t adjacent = Winding_wrap( getWinding(), opposite + numpoints - 1 );
+		planePoints[0] = getWinding()[opposite].vertex;
+		planePoints[1] = getWinding()[index].vertex;
+		planePoints[2] = getWinding()[adjacent].vertex;
+		// winding points are very inaccurate, so they must be quantised before using them to generate the face-plane
+//		planepts_quantise( planePoints, GRID_MIN );
+	}
 }
 
 void snapto( float snap ){
@@ -2142,7 +2145,7 @@ void windingForClipPlane( Winding& winding, const Plane3& plane ) const {
 			}
 
 			if( buffer[swap].points.empty() ){
-				//globalErrorStream() << "windingForClipPlane: about to feed empty winding\n";
+				//globalErrorStream() << "windingForClipPlane: about to feed empty winding to Winding_Clip\n";
 				break;
 			}
 
@@ -2855,36 +2858,41 @@ void snapComponents( float snap ){
 		m_face->freezeTransform();
 	}
 }
+#if Update_move_planepts_vertex
 void update_move_planepts_vertex( std::size_t index ){
 	m_face->update_move_planepts_vertex( index, m_face->m_move_planepts );
 }
 void update_move_planepts_vertex2( std::size_t index, std::size_t other ){
-	const std::size_t numpoints = m_face->getWinding().numpoints;
-	ASSERT_MESSAGE( index < numpoints, "select_vertex: invalid index" );
+	if( m_face->contributes() ){
+		const std::size_t numpoints = m_face->getWinding().numpoints;
+		ASSERT_MESSAGE( index < numpoints, "select_vertex: invalid index" );
 
-	const std::size_t opposite = Winding_Opposite( m_face->getWinding(), index, other );
+		const std::size_t opposite = Winding_Opposite( m_face->getWinding(), index, other );
 
-	if ( triangle_reversed( index, other, opposite ) ) {
-		std::swap( index, other );
+		if ( triangle_reversed( index, other, opposite ) ) {
+			std::swap( index, other );
+		}
+
+		///! this actually happens with ON_EPSILON 1.0 / ( 1 << 8 )
+		ASSERT_MESSAGE(
+			triangles_same_winding(
+				m_face->getWinding()[opposite].vertex,
+				m_face->getWinding()[index].vertex,
+				m_face->getWinding()[other].vertex,
+				m_face->getWinding()[0].vertex,
+				m_face->getWinding()[1].vertex,
+				m_face->getWinding()[2].vertex
+				),
+			"update_move_planepts_vertex2: error"
+			);
+
+		m_face->m_move_planepts[0] = m_face->getWinding()[opposite].vertex;
+		m_face->m_move_planepts[1] = m_face->getWinding()[index].vertex;
+		m_face->m_move_planepts[2] = m_face->getWinding()[other].vertex;
+		planepts_quantise( m_face->m_move_planepts, GRID_MIN ); // winding points are very inaccurate
 	}
-
-	ASSERT_MESSAGE(
-		triangles_same_winding(
-			m_face->getWinding()[opposite].vertex,
-			m_face->getWinding()[index].vertex,
-			m_face->getWinding()[other].vertex,
-			m_face->getWinding()[0].vertex,
-			m_face->getWinding()[1].vertex,
-			m_face->getWinding()[2].vertex
-			),
-		"update_move_planepts_vertex2: error"
-		);
-
-	m_face->m_move_planepts[0] = m_face->getWinding()[opposite].vertex;
-	m_face->m_move_planepts[1] = m_face->getWinding()[index].vertex;
-	m_face->m_move_planepts[2] = m_face->getWinding()[other].vertex;
-	planepts_quantise( m_face->m_move_planepts, GRID_MIN ); // winding points are very inaccurate
 }
+#endif
 void update_selection_vertex(){
 	if ( m_vertexSelection.size() == 0 ) {
 		m_selectableVertices.setSelected( false );
@@ -2892,7 +2900,7 @@ void update_selection_vertex(){
 	else
 	{
 		m_selectableVertices.setSelected( true );
-
+#if Update_move_planepts_vertex
 		if ( m_vertexSelection.size() == 1 ) {
 			std::size_t index = Winding_FindAdjacent( getFace().getWinding(), *m_vertexSelection.begin() );
 
@@ -2909,6 +2917,7 @@ void update_selection_vertex(){
 				update_move_planepts_vertex2( index, other );
 			}
 		}
+#endif
 	}
 }
 void select_vertex( std::size_t index, bool select ){
@@ -2929,15 +2938,17 @@ bool selected_vertex( std::size_t index ) const {
 }
 
 void update_move_planepts_edge( std::size_t index ){
-	std::size_t numpoints = m_face->getWinding().numpoints;
-	ASSERT_MESSAGE( index < numpoints, "select_edge: invalid index" );
+	if( m_face->contributes() ){
+		std::size_t numpoints = m_face->getWinding().numpoints;
+		ASSERT_MESSAGE( index < numpoints, "select_edge: invalid index" );
 
-	std::size_t adjacent = Winding_next( m_face->getWinding(), index );
-	std::size_t opposite = Winding_Opposite( m_face->getWinding(), index );
-	m_face->m_move_planepts[0] = m_face->getWinding()[index].vertex;
-	m_face->m_move_planepts[1] = m_face->getWinding()[adjacent].vertex;
-	m_face->m_move_planepts[2] = m_face->getWinding()[opposite].vertex;
-	planepts_quantise( m_face->m_move_planepts, GRID_MIN ); // winding points are very inaccurate
+		std::size_t adjacent = Winding_next( m_face->getWinding(), index );
+		std::size_t opposite = Winding_Opposite( m_face->getWinding(), index );
+		m_face->m_move_planepts[0] = m_face->getWinding()[index].vertex;
+		m_face->m_move_planepts[1] = m_face->getWinding()[adjacent].vertex;
+		m_face->m_move_planepts[2] = m_face->getWinding()[opposite].vertex;
+//		planepts_quantise( m_face->m_move_planepts, GRID_MIN ); // winding points are very inaccurate
+	}
 }
 void update_selection_edge(){
 	if ( m_edgeSelection.size() == 0 ) {
