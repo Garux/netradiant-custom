@@ -544,7 +544,7 @@ void CWatchBSP::DoEBeginStep(){
 		}
 	}
 	m_eState = EBeginStep;
-	s_routine_id = gtk_timeout_add( 8, watchbsp_routine, this );
+	s_routine_id = gtk_timeout_add( 25, watchbsp_routine, this );
 }
 
 
