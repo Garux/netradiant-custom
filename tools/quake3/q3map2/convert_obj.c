@@ -98,13 +98,13 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
 		v = i + ds->firstVert;
 		dv = &bspDrawVerts[ v ];
 		fprintf( f, "# vertex %d\r\n", i + objVertexCount + 1 );
-		fprintf( f, "v %f %f %f\r\n", dv->xyz[ 0 ], dv->xyz[ 1 ], dv->xyz[ 2 ] );
-		fprintf( f, "vn %f %f %f\r\n", dv->normal[ 0 ], dv->normal[ 1 ], dv->normal[ 2 ] );
+		fprintf( f, "v %f %f %f\r\n", dv->xyz[ 0 ], dv->xyz[ 2 ], -dv->xyz[ 1 ] );
+		fprintf( f, "vn %f %f %f\r\n", dv->normal[ 0 ], dv->normal[ 2 ], -dv->normal[ 1 ] );
 		if ( lightmapsAsTexcoord ) {
-			fprintf( f, "vt %f %f\r\n", dv->lightmap[0][0], 1.0 - dv->lightmap[0][1] );
+			fprintf( f, "vt %f %f\r\n", dv->lightmap[0][0], -dv->lightmap[0][1] );
 		}
 		else{
-			fprintf( f, "vt %f %f\r\n", dv->st[ 0 ], 1.0 - dv->st[ 1 ] );
+			fprintf( f, "vt %f %f\r\n", dv->st[ 0 ], -dv->st[ 1 ] );
 		}
 	}
 

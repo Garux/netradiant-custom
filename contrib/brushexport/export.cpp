@@ -178,7 +178,11 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 
 	std::string mtlFile = objFile.substr( 0, objFile.length() - 4 ) + ".mtl";
 
-	std::set<std::string> materials;
+	typedef std::pair<std::string, Colour3> Material;
+	auto materials_comparator = []( const Material& ma1, const Material& ma2 ) {
+		return ma1.first < ma2.first;
+	};
+	auto materials  = std::set<Material, decltype( materials_comparator )>( materials_comparator );
 
 	TextFileOutputStream out( objFile.c_str() );
 
@@ -218,7 +222,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 		// material
 		if ( expmat && mode == COLLAPSE_ALL ) {
 			out << "usemtl material" << "\n\n";
-			materials.insert( "material" );
+			materials.insert( std::make_pair( std::string( "material" ), Colour3( 0.5, 0.5, 0.5 ) ) );
 		}
 
 		for ( std::list<const Face*>::const_iterator it( git->faces.begin() ); it != end; ++it )
@@ -226,8 +230,12 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			const Winding& w( ( *it )->getWinding() );
 
 			// vertices
-			for ( size_t i = 0; i < w.numpoints; ++i )
-				out << "v " << FloatFormat( w[i].vertex.x(), 1, 6 ) << " " << FloatFormat( w[i].vertex.z(), 1, 6 ) << " " << FloatFormat( w[i].vertex.y(), 1, 6 ) << "\n";
+			size_t i = w.numpoints;
+			do{
+				--i;
+				out << "v " << FloatFormat( w[i].vertex.x(), 1, 6 ) << " " << FloatFormat( w[i].vertex.z(), 1, 6 ) << " " << FloatFormat( -w[i].vertex.y(), 1, 6 ) << "\n";
+			}
+			while( i != 0 );
 		}
 		out << "\n";
 
@@ -236,8 +244,12 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			const Winding& w( ( *it )->getWinding() );
 
 			// texcoords
-			for ( size_t i = 0; i < w.numpoints; ++i )
-				out << "vt " << FloatFormat( w[i].texcoord.x(), 1, 6 ) << " " << FloatFormat( w[i].texcoord.y(), 1, 6 ) << "\n";
+			size_t i = w.numpoints;
+			do{
+				--i;
+				out << "vt " << FloatFormat( w[i].texcoord.x(), 1, 6 ) << " " << FloatFormat( -w[i].texcoord.y(), 1, 6 ) << "\n";
+			}
+			while( i != 0 );
 		}
 
 		for ( std::list<const Face*>::const_iterator it( git->faces.begin() ); it != end; ++it )
@@ -247,18 +259,24 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			// faces
 			StringOutputStream faceLine( 256 );
 			faceLine << "\nf";
-			for ( size_t i = 0; i < w.numpoints; ++i, ++vertex_count )
-			{
-				faceLine << " " << vertex_count + 1 << "/" << vertex_count + 1;
+
+			size_t i = w.numpoints;
+			do{
+				--i;
+				++vertex_count;
+				faceLine << " " << vertex_count << "/" << vertex_count;
 			}
+			while( i != 0 );
 
 			if ( mode != COLLAPSE_ALL ) {
-				materials.insert( ( *it )->getShader().getShader() );
+				materials.insert( std::make_pair( std::string( ( *it )->getShader().getShader() ), ( *it )->getShader().state()->getTexture().color ) );
 				brushMaterials.insert( String_Pair( ( *it )->getShader().getShader(), faceLine.c_str() ) );
 			}
 			else {
 				out << faceLine.c_str();
 			}
+
+
 		}
 
 		if ( mode != COLLAPSE_ALL ) {
@@ -297,14 +315,19 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 
 		outMtl << "# Wavefront material file exported with NetRadiants brushexport plugin.\n";
 		outMtl << "# Material Count: " << (const Unsigned)materials.size() << "\n\n";
-		for ( std::set<std::string>::const_iterator it( materials.begin() ); it != materials.end(); ++it )
+		for ( std::set<std::pair<std::string, Colour3>>::const_iterator it( materials.begin() ); it != materials.end(); ++it )
 		{
-			if ( limNames && it->size() > MAX_MATERIAL_NAME ) {
-				outMtl << "newmtl " << it->substr( it->size() - MAX_MATERIAL_NAME, it->size() ).c_str() << "\n";
+			const std::string& str = it->first;
+			const Colour3& clr = it->second;
+			if ( limNames && str.size() > MAX_MATERIAL_NAME ) {
+				outMtl << "newmtl " << str.substr( str.size() - MAX_MATERIAL_NAME, str.size() ).c_str() << "\n";
 			}
 			else {
-				outMtl << "newmtl " << it->c_str() << "\n";
+				outMtl << "newmtl " << str.c_str() << "\n";
 			}
+			outMtl << "Kd " << clr.x() << " " << clr.y() << " " << clr.z() << "\n";
+			outMtl << "map_Kd " << str.c_str() << "\n";
+
 		}
 	}
 
@@ -320,7 +343,8 @@ ForEachFace( ExportData& _exporter )
 {}
 
 void visit( Face& face ) const {
-	exporter.AddBrushFace( face );
+	if( face.contributes() )
+		exporter.AddBrushFace( face );
 }
 
 private:

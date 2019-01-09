@@ -779,17 +779,15 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 					}
 				}
 				/* fix useless back references */
-				/* todo: check if this works as it is supposed to */
-
 				/* assign new indices */
 				if ( iv [ i ] < 0 ) {
-					iv [ i ] = ( numVerts   - iv [ i ] );
+					iv [ i ] = ( numVerts   + iv [ i ] + 1 );
 				}
 				if ( ivt[ i ] < 0 ) {
-					ivt[ i ] = ( numUVs     - ivt[ i ] );
+					ivt[ i ] = ( numUVs     + ivt[ i ] + 1 );
 				}
 				if ( ivn[ i ] < 0 ) {
-					ivn[ i ] = ( numNormals - ivn[ i ] );
+					ivn[ i ] = ( numNormals + ivn[ i ] + 1 );
 				}
 
 				/* validate indices */
@@ -806,9 +804,9 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 					}
 
 					/* get vertex data */
-					verts[ i ][ 0 ] = vertexData[ iv[ i ] - 1 ].v[ 0 ];
-					verts[ i ][ 1 ] = vertexData[ iv[ i ] - 1 ].v[ 1 ];
-					verts[ i ][ 2 ] = vertexData[ iv[ i ] - 1 ].v[ 2 ];
+					verts[ i ][ 0 ] =  vertexData[ iv[ i ] - 1 ].v[ 0 ];
+					verts[ i ][ 1 ] = -vertexData[ iv[ i ] - 1 ].v[ 2 ];
+					verts[ i ][ 2 ] =  vertexData[ iv[ i ] - 1 ].v[ 1 ];
 				}
 				/* set vertex normal */
 				if ( has_vn ) {
@@ -818,9 +816,9 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 					}
 
 					/* get normal data */
-					normals[ i ][ 0 ] = vertexData[ ivn[ i ] - 1 ].vn[ 0 ];
-					normals[ i ][ 1 ] = vertexData[ ivn[ i ] - 1 ].vn[ 1 ];
-					normals[ i ][ 2 ] = vertexData[ ivn[ i ] - 1 ].vn[ 2 ];
+					normals[ i ][ 0 ] =  vertexData[ ivn[ i ] - 1 ].vn[ 0 ];
+					normals[ i ][ 1 ] = -vertexData[ ivn[ i ] - 1 ].vn[ 2 ];
+					normals[ i ][ 2 ] =  vertexData[ ivn[ i ] - 1 ].vn[ 1 ];
 				}
 				/* set texture coordinate */
 				if ( has_vt ) {
@@ -830,9 +828,8 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 					}
 
 					/* get uv coord data */
-					coords[ i ][ 0 ] = vertexData[ ivt[ i ] - 1 ].vt[ 0 ];
-					coords[ i ][ 1 ] = vertexData[ ivt[ i ] - 1 ].vt[ 1 ];
-					coords[ i ][ 1 ] = -coords[ i ][ 1 ];
+					coords[ i ][ 0 ] =  vertexData[ ivt[ i ] - 1 ].vt[ 0 ];
+					coords[ i ][ 1 ] = -vertexData[ ivt[ i ] - 1 ].vt[ 1 ];
 				}
 #ifdef DEBUG_PM_OBJ_EX
 				printf( "(%4d",iv[ i ] );
@@ -852,10 +849,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 			/* read the actual data we need to assign all the crap */
 			/* to our current pico surface */
 			if ( has_v ) {
-				int max = 3;
-				if ( have_quad ) {
-					max = 4;
-				}
+				const int max = have_quad? 4 : 3;
 
 				/* assign all surface information */
 				for ( i = 0; i < max; i++ )

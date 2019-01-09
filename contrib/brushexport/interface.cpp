@@ -89,6 +89,7 @@ create_w_plugplug2( void ){
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_nocollapse, FALSE, FALSE, 0 );
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_nocollapse ), r_collapse_group );
 	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_nocollapse ) );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( r_nocollapse ), TRUE );
 
 	vbox3 = gtk_vbox_new( FALSE, 0 );
 	gtk_widget_set_name( vbox3, "vbox3" );
