@@ -693,15 +693,14 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 			/* coders. tho the wavefront obj standard defines exactly two */
 			/* ways of storing face information. so, i really won't support */
 			/* such stupid extravaganza here! */
+			const int numPointsMax = 128;
+			picoVec3_t verts  [ numPointsMax ];
+			picoVec3_t normals[ numPointsMax ];
+			picoVec2_t coords [ numPointsMax ];
 
-			picoVec3_t verts  [ 4 ];
-			picoVec3_t normals[ 4 ];
-			picoVec2_t coords [ 4 ];
-
-			int iv [ 4 ], has_v;
-			int ivt[ 4 ], has_vt = 0;
-			int ivn[ 4 ], has_vn = 0;
-			int have_quad = 0;
+			int iv [ numPointsMax ], has_v;
+			int ivt[ numPointsMax ], has_vt = 0;
+			int ivn[ numPointsMax ], has_vn = 0;
 			int slashcount = 0;
 			int doubleslash = 0;
 			int i;
@@ -724,7 +723,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 			/* vertices (cause we only support triangles) into 'i*[]' */
 			/* store the actual vertex/uv/normal data in three arrays */
 			/* called 'verts','coords' and 'normals'. */
-			for ( i = 0; i < 4; i++ )
+			for ( i = 0; i < numPointsMax; i++ )
 			{
 				char *str;
 
@@ -732,18 +731,13 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 				/* formats are handled below) */
 				str = _pico_parse( p,0 );
 				if ( str == NULL ) {
-					/* just break for quads */
-					if ( i == 3 ) {
+					/* got nuff points */
+					if ( i >= 3 ) {
 						break;
 					}
 
 					/* error otherwise */
 					_obj_error_return( "Face parse error" );
-				}
-				/* if this is the fourth index string we're */
-				/* parsing we assume that we have a quad */
-				if ( i == 3 ) {
-					have_quad = 1;
 				}
 
 				/* get slash count once */
@@ -849,33 +843,27 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 			/* read the actual data we need to assign all the crap */
 			/* to our current pico surface */
 			if ( has_v ) {
-				const int max = have_quad? 4 : 3;
+				const int numPoints = i;
 
 				/* assign all surface information */
-				for ( i = 0; i < max; i++ )
+				for ( i = 0; i < numPoints; i++ )
 				{
 					/*if( has_v  )*/ PicoSetSurfaceXYZ( curSurface,  ( curVertex + i ), verts  [ i ] );
-					/*if( has_vt )*/ PicoSetSurfaceST( curSurface,0,( curVertex + i ), coords [ i ] );
+					/*if( has_vt )*/ PicoSetSurfaceST( curSurface, 0, ( curVertex + i ), coords [ i ] );
 					/*if( has_vn )*/ PicoSetSurfaceNormal( curSurface,  ( curVertex + i ), normals[ i ] );
 					if( curSurface && curSurface->shader )
 						PicoSetSurfaceColor( curSurface, 0, ( curVertex + i ), curSurface->shader->diffuseColor );
 				}
-				/* add our triangle (A B C) */
-				PicoSetSurfaceIndex( curSurface,( curFace * 3 + 2 ),(picoIndex_t)( curVertex + 0 ) );
-				PicoSetSurfaceIndex( curSurface,( curFace * 3 + 1 ),(picoIndex_t)( curVertex + 1 ) );
-				PicoSetSurfaceIndex( curSurface,( curFace * 3 + 0 ),(picoIndex_t)( curVertex + 2 ) );
-				curFace++;
-
-				/* if we don't have a simple triangle, but a quad... */
-				if ( have_quad ) {
-					/* we have to add another triangle (2nd half of quad which is A C D) */
+				/* add triangles */
+				for ( i = 1; i < numPoints - 1; ++i )
+				{
 					PicoSetSurfaceIndex( curSurface,( curFace * 3 + 2 ),(picoIndex_t)( curVertex + 0 ) );
-					PicoSetSurfaceIndex( curSurface,( curFace * 3 + 1 ),(picoIndex_t)( curVertex + 2 ) );
-					PicoSetSurfaceIndex( curSurface,( curFace * 3 + 0 ),(picoIndex_t)( curVertex + 3 ) );
+					PicoSetSurfaceIndex( curSurface,( curFace * 3 + 1 ),(picoIndex_t)( curVertex + i ) );
+					PicoSetSurfaceIndex( curSurface,( curFace * 3 + 0 ),(picoIndex_t)( curVertex + i + 1 ) );
 					curFace++;
 				}
 				/* increase vertex count */
-				curVertex += max;
+				curVertex += numPoints;
 			}
 		}
 		else if ( !_pico_stricmp( p->token,"usemtl" ) ) {
