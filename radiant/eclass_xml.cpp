@@ -193,6 +193,8 @@ class AttributeImporter : public TreeXMLImporter
 {
 StringOutputStream& m_comment;
 
+EntityClassAttribute* m_attribute;
+
 public:
 AttributeImporter( StringOutputStream& comment, EntityClass* entityClass, const XMLElement& element ) : m_comment( comment ){
 	const char* type = element.name();
@@ -203,11 +205,14 @@ AttributeImporter( StringOutputStream& comment, EntityClass* entityClass, const 
 	ASSERT_MESSAGE( !string_empty( key ), "key attribute not specified" );
 	ASSERT_MESSAGE( !string_empty( name ), "name attribute not specified" );
 
+	m_attribute = &EntityClass_insertAttribute( *entityClass, key, EntityClassAttribute( type, name, value ) ).second;
+
 	if ( string_equal( type, "flag" ) ) {
 		std::size_t bit = atoi( element.attribute( "bit" ) );
 		ASSERT_MESSAGE( bit < MAX_FLAGS, "invalid flag bit" );
 		ASSERT_MESSAGE( string_empty( entityClass->flagnames[bit] ), "non-unique flag bit" );
 		strcpy( entityClass->flagnames[bit], key );
+		entityClass->flagAttributes[bit] = m_attribute;
 	}
 	else if( entityClass->fixedsize && string_equal( type, "model" ) ){
 		entityClass->miscmodel_is = true;
@@ -219,8 +224,6 @@ AttributeImporter( StringOutputStream& comment, EntityClass* entityClass, const 
 
 	m_comment << key;
 	m_comment << " : ";
-
-	EntityClass_insertAttribute( *entityClass, key, EntityClassAttribute( type, name, value ) );
 }
 ~AttributeImporter(){
 }
@@ -232,6 +235,7 @@ void popElement( const char* elementName ){
 	ERROR_MESSAGE( PARSE_ERROR( elementName, "attribute" ) );
 }
 std::size_t write( const char* data, std::size_t length ){
+	m_attribute->m_description = StringRange( data, data + length );
 	return m_comment.write( data, length );
 }
 };

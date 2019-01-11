@@ -125,6 +125,7 @@ Shader* m_state_blend;
 
 CopiedString m_comments;
 char flagnames[MAX_FLAGS][32];
+const EntityClassAttribute* flagAttributes[MAX_FLAGS];
 
 CopiedString m_modelpath;
 CopiedString m_skin;
@@ -261,6 +262,7 @@ inline EntityClass* Eclass_Alloc(){
 	e->m_miscmodel_key = "model";
 	e->has_angles = false;
 	memset( e->flagnames, 0, MAX_FLAGS * 32 );
+	memset( e->flagAttributes, 0, MAX_FLAGS * sizeof( EntityClassAttribute* ) );
 
 	e->maxs = Vector3( -1,-1,-1 );
 	e->mins = Vector3( 1, 1, 1 );

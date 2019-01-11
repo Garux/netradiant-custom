@@ -993,6 +993,16 @@ void SetComment( EntityClass* eclass ){
 	}
 }
 
+void EntityAttribute_setTooltip( GtkWidget* widget, const char* name, const char* description ){
+	StringOutputStream stream( 256 );
+	if( string_not_empty( name ) )
+		stream << "<b>      " << name << "</b>   ";
+	if( string_not_empty( description ) )
+		stream << "\n" << description;
+	if( !stream.empty() )
+		gtk_widget_set_tooltip_markup( widget, stream.c_str() );
+}
+
 void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 	if ( eclass == g_current_flags ) {
 		return;
@@ -1043,6 +1053,10 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 			gtk_widget_unref( widget );
 
 			gtk_label_set_text( GTK_LABEL( GTK_BIN( widget )->child ), str.c_str() );
+
+			if( const EntityClassAttribute* attribute = eclass->flagAttributes[i] ){
+				EntityAttribute_setTooltip( widget, attribute->m_name.c_str(), attribute->m_description.c_str() );
+			}
 		}
 	}
 }
@@ -1068,8 +1082,10 @@ void EntityClassList_selectEntityClass( EntityClass* eclass ){
 	}
 }
 
-void EntityInspector_appendAttribute( const char* name, EntityAttribute& attribute ){
-	GtkTable* row = DialogRow_new( name, attribute.getWidget() );
+void EntityInspector_appendAttribute( const EntityClassAttributePair& attributePair, EntityAttribute& attribute ){
+	const char* keyname = attributePair.first.c_str(); //EntityClassAttributePair_getName( attributePair );
+	GtkTable* row = DialogRow_new( keyname, attribute.getWidget() );
+	EntityAttribute_setTooltip( GTK_WIDGET( row ), attributePair.second.m_name.c_str(), attributePair.second.m_description.c_str() );
 	DialogVBox_packRow( g_attributeBox, GTK_WIDGET( row ) );
 }
 
@@ -1139,7 +1155,7 @@ void EntityInspector_setEntityClass( EntityClass *eclass ){
 			EntityAttribute* attribute = GlobalEntityAttributeFactory::instance().create( ( *i ).second.m_type.c_str(), ( *i ).first.c_str() );
 			if ( attribute != 0 ) {
 				g_entityAttributes.push_back( attribute );
-				EntityInspector_appendAttribute( EntityClassAttributePair_getName( *i ), *g_entityAttributes.back() );
+				EntityInspector_appendAttribute( *i, *g_entityAttributes.back() );
 			}
 		}
 	}
