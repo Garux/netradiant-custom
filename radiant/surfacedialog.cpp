@@ -205,7 +205,7 @@ SurfaceInspector() :
 	m_rotateIncrement( g_si_globals.rotate ){
 	m_fitVertical = 1;
 	m_fitHorizontal = 1;
-	m_positionTracker.setPosition( c_default_window_pos );
+	m_positionTracker.setPosition( WindowPosition( -1, -1, 300, 400 ) );
 }
 
 void constructWindow( GtkWindow* main_window ){

@@ -83,6 +83,7 @@ EntityList() :
 	m_selection_disabled( false ),
 	m_search_from_start( false ),
 	m_search_focus_node( 0 ){
+		m_positionTracker.setPosition( WindowPosition( -1, -1, 350, 500 ) );
 }
 
 bool visible() const {
@@ -561,8 +562,6 @@ void EntityList_Construct(){
 	graph_tree_model_insert( scene_graph_get_tree_model(), StaticNullSelectedInstance::instance() );
 
 	g_EntityList = new EntityList;
-
-	getEntityList().m_positionTracker.setPosition( c_default_window_pos );
 
 	GlobalPreferenceSystem().registerPreference( "EntityInfoDlg", WindowPositionTrackerImportStringCaller( getEntityList().m_positionTracker ), WindowPositionTrackerExportStringCaller( getEntityList().m_positionTracker ) );
 	GlobalPreferenceSystem().registerPreference( "EntListSearchFromStart", BoolImportStringCaller( getEntityList().m_search_from_start ), BoolExportStringCaller( getEntityList().m_search_from_start ) );

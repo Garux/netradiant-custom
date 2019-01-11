@@ -825,9 +825,9 @@ namespace
 GtkWidget* g_entity_split0 = 0;
 GtkWidget* g_entity_split1 = 0;
 GtkWidget* g_entity_split2 = 0;
-int g_entitysplit0_position;
-int g_entitysplit1_position;
-int g_entitysplit2_position;
+int g_entitysplit0_position = 255;
+int g_entitysplit1_position = 231;
+int g_entitysplit2_position = 57;
 
 bool g_entityInspector_windowConstructed = false;
 

@@ -136,9 +136,9 @@ struct layout_globals_t
 		m_position( -1, -1, 962, 480 ),
 
 		nXYHeight( 377 ),
-		nXYWidth( 600 ),
-		nCamWidth( 300 ),
-		nCamHeight( 230 ),
+		nXYWidth( 480 ),
+		nCamWidth( 480 ),
+		nCamHeight( 250 ),
 		nState( 0 ){
 	}
 };

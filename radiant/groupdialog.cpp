@@ -96,7 +96,7 @@ static gboolean switch_page( GtkNotebook *notebook, GtkNotebookPage *page, guint
 }
 
 GroupDlg::GroupDlg() : m_window( 0 ){
-	m_position_tracker.setPosition( c_default_window_pos );
+	m_position_tracker.setPosition( WindowPosition( -1, -1, 444, 777 ) );
 }
 
 void GroupDlg::Create( GtkWindow* parent ){
