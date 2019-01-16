@@ -498,6 +498,7 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 	}
 
 	if( vertexModePlanes.size() >=4 ){ //avoid obvious transform to degenerate
+		const bool isdetail = isDetail();
 		clear();
 		for( const auto& i : vertexModePlanes ){
 			const Face& face = *i.m_face;
@@ -516,6 +517,7 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 				if( newFace ){
 					newFace->getTexdef().m_projection = projection; //set TextureProjection later, addPlane() resets Valve220 basis
 					newFace->revertTexdef();
+					newFace->setDetail( isdetail );
 				}
 			}
 			else{
