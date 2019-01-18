@@ -1383,6 +1383,14 @@ void Selection_Deselect(){
 	}
 }
 
+void Scene_Clone_Selected(){
+	Scene_Clone_Selected( GlobalSceneGraph(), false );
+}
+
+void RepeatTransforms(){
+	GlobalSelectionSystem().repeatTransforms( FreeCaller<Scene_Clone_Selected>() );
+}
+
 
 void Selection_NudgeUp(){
 	UndoableCommand undo( "nudgeSelectedUp" );
@@ -2231,6 +2239,7 @@ GtkMenuItem* create_selection_menu(){
 	menu_separator( menu );
 	create_menu_item_with_mnemonic( menu, "Arbitrary rotation...", "ArbitraryRotation" );
 	create_menu_item_with_mnemonic( menu, "Arbitrary scale...", "ArbitraryScale" );
+	create_menu_item_with_mnemonic( menu, "Repeat Transforms", "RepeatTransforms" );
 
 	return selection_menu_item;
 }
@@ -3531,6 +3540,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "DeleteSelection2", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
 	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( 'Z' ) );
+	GlobalCommands_insert( "RepeatTransforms", FreeCaller<RepeatTransforms>(), Accelerator( 'R', (GdkModifierType)GDK_CONTROL_MASK ) );
 //	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
 	GlobalCommands_insert( "UnSelectSelection2", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
 	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( 'C' ) );

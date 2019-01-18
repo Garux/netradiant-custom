@@ -127,6 +127,7 @@ virtual void NudgeManipulator( const Vector3& nudge, const Vector3& view ) = 0;
 virtual void translateSelected( const Vector3& translation ) = 0;
 virtual void rotateSelected( const Quaternion& rotation, bool snapOrigin = false ) = 0;
 virtual void scaleSelected( const Vector3& scaling, bool snapOrigin = false ) = 0;
+virtual void repeatTransforms( const Callback& clone ) = 0;
 
 virtual void pivotChanged() const = 0;
 virtual void setCustomTransformOrigin( const Vector3& origin, const bool set[3] ) const = 0;

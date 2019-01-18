@@ -2852,18 +2852,6 @@ void translate( const Vector3& translation ){
 }
 };
 
-class DragTranslatable : public Translatable
-{
-void translate( const Vector3& translation ){
-	if ( GlobalSelectionSystem().Mode() == SelectionSystem::eComponent ) {
-		Scene_Translate_Component_Selected( GlobalSceneGraph(), translation );
-	}
-	else
-	{
-		Scene_Translate_Selected( GlobalSceneGraph(), translation );
-	}
-}
-};
 
 class SelectionVolume : public SelectionTest
 {
@@ -3468,6 +3456,87 @@ void Scene_Skew_Selected( scene::Graph& graph, const Skew& skew, const Vector3& 
 }
 
 
+class RepeatableTransforms
+{
+public:
+Translation m_translation;
+Rotation m_rotation;
+Scale m_scale;
+Skew m_skew;
+/* next aren't used; TODO: think if unique origin per transform is needed, and how to implement this correctly for entities, having transform keys */
+Vector3 m_rotationOrigin;
+Vector3 m_scaleOrigin;
+Vector3 m_skewOrigin;
+
+bool m_rotationOriginSet;
+bool m_scaleOriginSet;
+bool m_skewOriginSet;
+
+RepeatableTransforms(){
+	setIdentity();
+}
+
+bool isIdentity() const {
+	return m_translation == c_translation_identity
+		 && m_rotation == c_rotation_identity
+		 && m_scale == c_scale_identity
+		 && m_skew == c_skew_identity;
+}
+void setIdentity(){
+	m_translation 	= c_translation_identity;
+	m_rotation 		= c_quaternion_identity;
+	m_scale 		= c_scale_identity;
+	m_skew 			= c_skew_identity;
+
+	m_rotationOrigin =
+	m_scaleOrigin 	=
+	m_skewOrigin 	= g_vector3_identity;
+
+	m_rotationOriginSet =
+	m_scaleOriginSet 	=
+	m_skewOriginSet 	= false;
+}
+};
+
+class transform_selected : public SelectionSystem::Visitor
+{
+const RepeatableTransforms& m_transforms;
+const Vector3& m_world_pivot;
+public:
+transform_selected( const RepeatableTransforms& transforms, const Vector3& world_pivot )
+	: m_transforms( transforms ), m_world_pivot( world_pivot ){
+}
+void visit( scene::Instance& instance ) const {
+	TransformNode* transformNode = Node_getTransformNode( instance.path().top() );
+	if ( transformNode != 0 ) {
+		Transformable* transform = Instance_getTransformable( instance );
+		if ( transform != 0 ) {
+			transform->setType( TRANSFORM_PRIMITIVE );
+			transform->setRotation( m_transforms.m_rotation );
+			transform->setScale( m_transforms.m_scale );
+			transform->setSkew( m_transforms.m_skew );
+			{
+				Editable* editable = Node_getEditable( instance.path().top() );
+				const Matrix4& localPivot = editable != 0 ? editable->getLocalPivot() : g_matrix4_identity;
+
+				const Matrix4 local_transform = matrix4_transform_for_components( c_translation_identity, m_transforms.m_rotation, m_transforms.m_scale, m_transforms.m_skew );
+				Vector3 parent_translation;
+				translation_for_pivoted_matrix_transform(
+					parent_translation,
+					local_transform,
+					m_world_pivot,
+					matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( matrix4_get_translation_vec3( instance.localToWorld() ) ), localPivot ),
+					matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( matrix4_get_translation_vec3( transformNode->localToParent() ) ), localPivot )
+					);
+
+				transform->setTranslation( parent_translation + m_transforms.m_translation );
+			}
+		}
+	}
+}
+};
+
+
 class translate_component_selected : public SelectionSystem::Visitor
 {
 const Vector3& m_translate;
@@ -3570,6 +3639,31 @@ void Scene_Skew_Component_Selected( scene::Graph& graph, const Skew& skew, const
 		GlobalSelectionSystem().foreachSelectedComponent( skew_component_selected( skew, world_pivot ) );
 	}
 }
+
+
+class transform_component_selected : public SelectionSystem::Visitor
+{
+const RepeatableTransforms& m_transforms;
+const Vector3& m_world_pivot;
+public:
+transform_component_selected( const RepeatableTransforms& transforms, const Vector3& world_pivot )
+	: m_transforms( transforms ), m_world_pivot( world_pivot ){
+}
+void visit( scene::Instance& instance ) const {
+	Transformable* transform = Instance_getTransformable( instance );
+	if ( transform != 0 ) {
+		const Matrix4 local_transform = matrix4_transform_for_components( c_translation_identity, m_transforms.m_rotation, m_transforms.m_scale, m_transforms.m_skew );
+		Vector3 parent_translation;
+		translation_for_pivoted_matrix_transform( parent_translation, local_transform, m_world_pivot, instance.localToWorld(), Node_getTransformNode( instance.path().top() )->localToParent() );
+
+		transform->setType( TRANSFORM_COMPONENT );
+		transform->setRotation( m_transforms.m_rotation );
+		transform->setScale( m_transforms.m_scale );
+		transform->setSkew( m_transforms.m_skew );
+		transform->setTranslation( parent_translation + m_transforms.m_translation );
+	}
+}
+};
 
 
 class BooleanSelector : public Selector
@@ -3903,7 +3997,6 @@ TranslateFree m_freeResize;
 TranslateAxis2 m_axisResize;
 TranslateFreeXY_Z m_freeDragXY_Z;
 ResizeTranslatable m_resize;
-DragTranslatable m_drag;
 DragNewBrush m_dragNewBrush;
 bool m_dragSelected; //drag selected primitives or components
 bool m_selected; //components selected temporally for drag
@@ -3912,7 +4005,7 @@ bool m_newBrush;
 
 public:
 
-DragManipulator() : m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( m_drag ), m_dragSelected( false ), m_selected( false ), m_selected2( false ), m_newBrush( false ){
+DragManipulator( Translatable& translatable ) : m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( translatable ), m_dragSelected( false ), m_selected( false ), m_selected2( false ), m_newBrush( false ){
 }
 
 Manipulatable* GetManipulatable(){
@@ -4660,6 +4753,7 @@ RadiantSelectionSystem() :
 	m_rotate_manipulator( *this, 8, 64 ),
 	m_scale_manipulator( *this, 0, 64 ),
 	m_skew_manipulator( *this, *this, *this, *this, m_bounds, m_pivot2world, m_pivotIsCustom ),
+	m_drag_manipulator( *this ),
 	m_clip_manipulator( m_pivot2world, m_bounds ),
 	m_transformOrigin_manipulator( *this, m_pivotIsCustom ),
 	m_pivotChanged( false ),
@@ -4716,7 +4810,7 @@ void SetManipulatorMode( EManipulatorMode mode ){
 	case eScale: m_manipulator = &m_scale_manipulator; break;
 	case eSkew: m_manipulator = &m_skew_manipulator; break;
 	case eDrag: m_manipulator = &m_drag_manipulator; break;
-	case eClip: m_manipulator = &m_clip_manipulator; break;
+	case eClip: m_manipulator = &m_clip_manipulator; m_repeatableTransforms.setIdentity(); break;
 	case eBuild:
 		{
 			m_build_manipulator.initialise();
@@ -5156,6 +5250,7 @@ void translate( const Vector3& translation ){
 		//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
 
 		m_translation = translation;
+		m_repeatableTransforms.m_translation = translation;
 
 		m_pivot2world = m_pivot2world_start;
 		matrix4_translate_by_vec3( m_pivot2world, translation );
@@ -5179,6 +5274,9 @@ void rotate( const Quaternion& rotation ){
 		//ASSERT_MESSAGE(!m_pivotChanged, "pivot is invalid");
 
 		m_rotation = rotation;
+		m_repeatableTransforms.m_rotation = rotation;
+		if( ( m_repeatableTransforms.m_rotationOriginSet = m_pivotIsCustom ) )
+			m_repeatableTransforms.m_rotationOrigin = vector4_to_vector3( m_pivot2world.t() );
 
 		if ( Mode() == eComponent ) {
 			Scene_Rotate_Component_Selected( GlobalSceneGraph(), m_rotation, vector4_to_vector3( m_pivot2world.t() ) );
@@ -5204,6 +5302,9 @@ void outputRotation( TextOutputStream& ostream ){
 void scale( const Vector3& scaling ){
 	if ( !nothingSelected() ) {
 		m_scale = scaling;
+		m_repeatableTransforms.m_scale = scaling;
+		if( ( m_repeatableTransforms.m_scaleOriginSet = m_pivotIsCustom ) )
+			m_repeatableTransforms.m_scaleOrigin = vector4_to_vector3( m_pivot2world.t() );
 
 		if ( Mode() == eComponent ) {
 			Scene_Scale_Component_Selected( GlobalSceneGraph(), m_scale, vector4_to_vector3( m_pivot2world.t() ) );
@@ -5229,6 +5330,9 @@ void outputScale( TextOutputStream& ostream ){
 void skew( const Skew& skew ){
 	if ( !nothingSelected() ) {
 		m_skew = skew;
+		m_repeatableTransforms.m_skew = skew;
+		if( ( m_repeatableTransforms.m_skewOriginSet = m_pivotIsCustom ) )
+			m_repeatableTransforms.m_skewOrigin = vector4_to_vector3( m_pivot2world.t() );
 
 		if ( Mode() == eComponent ) {
 			Scene_Skew_Component_Selected( GlobalSceneGraph(), m_skew, vector4_to_vector3( m_pivot2world.t() ) );
@@ -5243,11 +5347,8 @@ void skew( const Skew& skew ){
 }
 
 void rotateSelected( const Quaternion& rotation, bool snapOrigin = false ){
-	if( snapOrigin && !m_pivotIsCustom ){
-		m_pivot2world.tx() = float_snapped( m_pivot2world.tx(), GetSnapGridSize() );
-		m_pivot2world.ty() = float_snapped( m_pivot2world.ty(), GetSnapGridSize() );
-		m_pivot2world.tz() = float_snapped( m_pivot2world.tz(), GetSnapGridSize() );
-	}
+	if( snapOrigin && !m_pivotIsCustom )
+		vector3_snap( vector4_to_vector3( m_pivot2world.t() ), GetSnapGridSize() );
 	startMove();
 	rotate( rotation );
 	freezeTransforms();
@@ -5258,14 +5359,30 @@ void translateSelected( const Vector3& translation ){
 	freezeTransforms();
 }
 void scaleSelected( const Vector3& scaling, bool snapOrigin = false ){
-	if( snapOrigin && !m_pivotIsCustom ){
-		m_pivot2world.tx() = float_snapped( m_pivot2world.tx(), GetSnapGridSize() );
-		m_pivot2world.ty() = float_snapped( m_pivot2world.ty(), GetSnapGridSize() );
-		m_pivot2world.tz() = float_snapped( m_pivot2world.tz(), GetSnapGridSize() );
-	}
+	if( snapOrigin && !m_pivotIsCustom )
+		vector3_snap( vector4_to_vector3( m_pivot2world.t() ), GetSnapGridSize() );
 	startMove();
 	scale( scaling );
 	freezeTransforms();
+}
+
+RepeatableTransforms m_repeatableTransforms;
+
+void repeatTransforms( const Callback& clone ){
+	if ( countSelected() != 0 && !m_repeatableTransforms.isIdentity() ) {
+		startMove();
+		UndoableCommand undo( "repeatTransforms" );
+		if( Mode() == ePrimitive )
+			clone();
+		if ( Mode() == eComponent ) {
+			GlobalSelectionSystem().foreachSelectedComponent( transform_component_selected( m_repeatableTransforms, vector4_to_vector3( m_pivot2world.t() ) ) );
+		}
+		else
+		{
+			GlobalSelectionSystem().foreachSelected( transform_selected( m_repeatableTransforms, vector4_to_vector3( m_pivot2world.t() ) ) );
+		}
+		freezeTransforms();
+	}
 }
 
 bool transformOrigin_isTranslatable() const{
