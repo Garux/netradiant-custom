@@ -568,7 +568,7 @@ typedef struct game_s
 	float lightmapGamma;                                /* default lightmap gamma */
 	qboolean lightmapsRGB;                              /* default lightmap sRGB mode */
 	qboolean texturesRGB;                               /* default texture sRGB mode */
-	qboolean colorsRGB;                             /* default color sRGB mode */
+	qboolean colorsRGB;                                 /* default color sRGB mode */
 	float lightmapExposure;                             /* default lightmap exposure */
 	float lightmapCompensate;                           /* default lightmap compensate value */
 	float gridScale;                                    /* vortex: default lightgrid scale (affects both directional and ambient spectres) */
@@ -741,7 +741,7 @@ typedef struct shaderInfo_s
 	qb_t indexed;                                       /* ydnar: attempt to use indexmap (terrain alphamap style) */
 	qb_t forceMeta;                                     /* ydnar: force metasurface path */
 	qb_t noClip;                                        /* ydnar: don't clip into bsp, preserve original face winding */
-	qb_t noFast;                                        /* ydnar: supress fast lighting for surfaces with this shader */
+	qb_t noFast;                                        /* ydnar: suppress fast lighting for surfaces with this shader */
 	qb_t invert;                                        /* ydnar: reverse facing */
 	qb_t nonplanar;                                     /* ydnar: for nonplanar meta surface merging */
 	qb_t tcGen;                                         /* ydnar: has explicit texcoord generation */
@@ -766,7 +766,7 @@ typedef struct shaderInfo_s
 	qb_t forceSunlight;                                 /* force sun light at this surface even tho we might not calculate shadows in vertex lighting */
 	qb_t notjunc;                                       /* don't use this surface for tjunction fixing */
 	qb_t fogParms;                                      /* ydnar: has fogparms */
-	qb_t noFog;                                         /* ydnar: supress fogging */
+	qb_t noFog;                                         /* ydnar: suppress fogging */
 	qb_t clipModel;                                     /* ydnar: solid model hack */
 	qb_t noVertexLight;                                 /* ydnar: leave vertex color alone */
 	qb_t noDirty;                                       /* jal: do not apply the dirty pass to this surface */
@@ -868,7 +868,7 @@ typedef struct side_s
 	int compileFlags;                       /* from shaderInfo */
 	int value;                              /* from shaderInfo */
 
-	qboolean visible;                       /* choose visble planes first */
+	qboolean visible;                       /* choose visible planes first */
 	qboolean bevel;                         /* don't ever use for bsp splitting, and don't bother making windings for it */
 	qboolean culled;                        /* ydnar: face culling */
 }
@@ -1953,11 +1953,11 @@ Q_EXTERN game_t games[]
 	{
 								#include "game_quake3.h"
 	,
-								#include "game_quakelive.h" /* most be after game_quake3.h as they share defines! */
+								#include "game_quakelive.h" /* must be after game_quake3.h as they share defines! */
 	,
-								#include "game_nexuiz.h" /* most be after game_quake3.h as they share defines! */
+								#include "game_nexuiz.h" /* must be after game_quake3.h as they share defines! */
 	,
-								#include "game_xonotic.h" /* most be after game_quake3.h as they share defines! */
+								#include "game_xonotic.h" /* must be after game_quake3.h as they share defines! */
 	,
 								#include "game_tremulous.h" /*LinuxManMikeC: must be after game_quake3.h, depends on #define's set in it */
 	,
@@ -1967,7 +1967,7 @@ Q_EXTERN game_t games[]
 	,
 								#include "game_wolf.h"
 	,
-								#include "game_wolfet.h" /* most be after game_wolf.h as they share defines! */
+								#include "game_wolfet.h" /* must be after game_wolf.h as they share defines! */
 	,
 								#include "game_etut.h"
 	,
@@ -1975,9 +1975,9 @@ Q_EXTERN game_t games[]
 	,
 								#include "game_sof2.h"
 	,
-								#include "game_jk2.h"   /* most be after game_sof2.h as they share defines! */
+								#include "game_jk2.h"   /* must be after game_sof2.h as they share defines! */
 	,
-								#include "game_ja.h"    /* most be after game_jk2.h as they share defines! */
+								#include "game_ja.h"    /* must be after game_jk2.h as they share defines! */
 	,
 								#include "game_qfusion.h"   /* qfusion game */
 	,

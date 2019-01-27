@@ -97,7 +97,7 @@ qboolean PortalPassable( portal_t *p ){
 		Error( "Portal_EntityFlood: not a leaf" );
 	}
 
-	/* ydnar: added antiportal to supress portal generation for visibility blocking */
+	/* ydnar: added antiportal to suppress portal generation for visibility blocking */
 	if ( p->compileFlags & C_ANTIPORTAL ) {
 		return qfalse;
 	}
