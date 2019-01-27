@@ -167,7 +167,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	( Q_SURF_BEVELSMASK | Q_SURF_SNOWSTEPS | Q_SURF_WOODSTEPS )
 }
 
 

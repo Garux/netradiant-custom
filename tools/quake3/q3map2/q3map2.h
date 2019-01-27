@@ -591,6 +591,7 @@ typedef struct game_s
 	qboolean lumpSwap;                                  /* cod-style len/ofs order */
 	bspFunc load, write;                                /* load/write function pointers */
 	surfaceParm_t surfaceParms[ 128 ];                  /* surfaceparm array */
+	int brushBevelsSurfaceFlagsMask;                    /* apply only these surfaceflags to bevels to reduce extra bsp shaders amount; applying them to get correct physics at walkable brush edges and vertices */
 }
 game_t;
 

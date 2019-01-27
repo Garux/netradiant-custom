@@ -165,7 +165,9 @@ game_t struct
 
 		/* null */
 		{ NULL,	                0,                      0,                         0,                               0,                          0,                              0 }
-	}
+	},
+
+	Q_SURF_BEVELSMASK
 }
 
 /* end marker */

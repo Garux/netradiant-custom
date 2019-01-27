@@ -90,6 +90,7 @@
 
 /* ydnar flags */
 #define Q_SURF_VERTEXLIT            ( Q_SURF_POINTLIGHT | Q_SURF_NOLIGHTMAP )
+#define Q_SURF_BEVELSMASK           ( Q_SURF_NODAMAGE | Q_SURF_SLICK | Q_SURF_FLESH | Q_SURF_METALSTEPS | Q_SURF_NOSTEPS | Q_SURF_DUST | Q_SURF_NOOB )
 
 
 
@@ -204,7 +205,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	Q_SURF_BEVELSMASK
 }
 
 

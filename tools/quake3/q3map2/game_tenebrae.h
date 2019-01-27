@@ -89,6 +89,7 @@
 
 /* ydnar flags */
 #define T_SURF_VERTEXLIT            ( T_SURF_POINTLIGHT | T_SURF_NOLIGHTMAP )
+#define T_SURF_BEVELSMASK           ( T_SURF_NODAMAGE | T_SURF_SLICK | T_SURF_FLESH | T_SURF_METALSTEPS | T_SURF_NOSTEPS | T_SURF_DUST )
 
 
 
@@ -201,7 +202,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	T_SURF_BEVELSMASK
 }
 
 

@@ -79,6 +79,8 @@
 
 #define S_SURF_PATCH                0x80000000  /* mark this face as a patch(editor only) */
 
+#define S_SURF_BEVELSMASK           ( S_SURF_SLICK | S_SURF_METALSTEPS | S_SURF_NODAMAGE | S_SURF_NOSTEPS | S_SURF_NOMISCENTS ) /* compiler utility */
+
 /* materials */
 #define S_MAT_BITS                  5
 #define S_MAT_MASK                  0x1f        /* mask to get the material type */
@@ -267,7 +269,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	S_SURF_BEVELSMASK
 }
 
 

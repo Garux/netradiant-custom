@@ -90,6 +90,7 @@
 
 /* ydnar flags */
 #define E_SURF_VERTEXLIT            ( E_SURF_POINTLIGHT | E_SURF_NOLIGHTMAP )
+#define E_SURF_BEVELSMASK           ( E_SURF_NODAMAGE | E_SURF_SLICK | E_SURF_FLESH | E_SURF_METALSTEPS | E_SURF_NOSTEPS )
 
 
 
@@ -203,7 +204,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	E_SURF_BEVELSMASK
 }
 
 

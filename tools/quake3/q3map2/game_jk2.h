@@ -192,7 +192,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	S_SURF_BEVELSMASK
 }
 
 

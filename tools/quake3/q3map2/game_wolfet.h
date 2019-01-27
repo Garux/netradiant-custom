@@ -186,7 +186,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	W_SURF_BEVELSMASK
 }
 
 

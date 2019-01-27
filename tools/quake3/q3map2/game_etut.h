@@ -89,6 +89,7 @@
 
 /* ydnar flags */
 #define U_SURF_VERTEXLIT            ( U_SURF_POINTLIGHT | U_SURF_NOLIGHTMAP )
+#define U_SURF_BEVELSMASK           ( U_SURF_NODAMAGE | U_SURF_SLICK | U_SURF_FLESH | U_SURF_METALSTEPS | U_SURF_NOSTEPS | U_SURF_DUST )
 
 /* materials */
 #define U_MAT_MASK                  0xFFF00000  /* mask to get the material type */
@@ -273,7 +274,9 @@
 
 		/* null */
 		{ NULL, 0, 0, 0, 0, 0, 0 }
-	}
+	},
+
+	U_SURF_BEVELSMASK
 }
 
 

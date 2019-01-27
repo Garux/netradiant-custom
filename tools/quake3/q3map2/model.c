@@ -812,6 +812,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						/* set up brush sides */
 						buildBrush->numsides = 4;
 						buildBrush->sides[ 0 ].shaderInfo = si;
+						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
 						for ( j = 1; j < buildBrush->numsides; j++ ) {
 							if ( debugClip ) {
 								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
@@ -960,6 +961,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						/* set up brush sides */
 						buildBrush->numsides = 5;
 						buildBrush->sides[ 0 ].shaderInfo = si;
+						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
 						for ( j = 1; j < buildBrush->numsides; j++ ) {
 							if ( debugClip ) {
 								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
@@ -1018,6 +1020,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						/* set up brush sides */
 						buildBrush->numsides = 5;
 						buildBrush->sides[ 0 ].shaderInfo = si;
+						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
 						for ( j = 1; j < buildBrush->numsides; j++ ) {
 							if ( debugClip ) {
 								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
@@ -1106,6 +1109,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						/* set up brush sides */
 						buildBrush->numsides = 5;
 						buildBrush->sides[ 0 ].shaderInfo = si;
+						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
 						for ( j = 1; j < buildBrush->numsides; j++ ) {
 							if ( debugClip ) {
 								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
@@ -1173,6 +1177,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						/* set up brush sides */
 						buildBrush->numsides = 5;
 						buildBrush->sides[ 0 ].shaderInfo = si;
+						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
 						for ( j = 1; j < buildBrush->numsides; j++ ) {
 							if ( debugClip ) {
 								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
@@ -1237,6 +1242,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 							/* set up brush sides */
 							buildBrush->numsides = 4;
 							buildBrush->sides[ 0 ].shaderInfo = si;
+							buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
 							for ( j = 1; j < buildBrush->numsides; j++ ) {
 								if ( debugClip ) {
 									buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
@@ -1304,6 +1310,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 						/* set up brush sides */
 						buildBrush->numsides = 5;
 						buildBrush->sides[ 0 ].shaderInfo = si;
+						buildBrush->sides[ 0 ].surfaceFlags = si->surfaceFlags;
 						for ( j = 1; j < buildBrush->numsides; j++ ) {
 							if ( debugClip ) {
 								buildBrush->sides[ 0 ].shaderInfo = ShaderInfoForShader( "debugclip2" );
