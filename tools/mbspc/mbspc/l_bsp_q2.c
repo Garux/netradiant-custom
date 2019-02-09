@@ -898,7 +898,7 @@ void Q2_LoadBSPFile(char *filename, int offset, int length)
 	Q2_SwapBSPFile (false);
 
 	Q2_FixTextureReferences();
-} //end of the function Q2_LoadBSPFile
+}
 
 
 /*
@@ -1091,7 +1091,7 @@ UnparseEntities
 Generates the dentdata string from all the entities
 ================
 */
-void Q2_UnparseEntities (void)
+char *Q2_UnparseEntities(int *size)
 {
 	char	*buf, *end;
 	epair_t	*ep;
@@ -1127,8 +1127,13 @@ void Q2_UnparseEntities (void)
 		end += 2;
 
 		if (end > buf + MAX_MAP_ENTSTRING)
+		{
 			Error ("Entity text too long");
+			return NULL;
+		}
 	}
 	entdatasize = end - buf + 1;
+	*size = entdatasize;
+	return buf;
 } //end of the function Q2_UnparseEntities
 

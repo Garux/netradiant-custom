@@ -584,7 +584,7 @@ Q1_UnparseEntities
 Generates the dentdata string from all the entities
 ================
 */
-void Q1_UnparseEntities (void)
+char *Q1_UnparseEntities(int *size)
 {
 	char *buf, *end;
 	epair_t *ep;
@@ -614,7 +614,12 @@ void Q1_UnparseEntities (void)
 		end += 2;
 
 		if (end > buf + Q1_MAX_MAP_ENTSTRING)
+		{
 			Error ("Entity text too long");
+			return NULL;
+		}
 	}
 	q1_entdatasize = end - buf + 1;
+	*size = q1_entdatasize;
+	return buf;
 } //end of the function Q1_UnparseEntities

@@ -20,31 +20,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-//#ifndef BOTLIB
-//#define BOTLIB
-//#endif //BOTLIB
+#if 0                           // ML081030 removed ********
 
-#ifdef BOTLIB
-#include "q_shared.h"
-#include "qfiles.h"
-#include "botlib.h"
+// #ifdef BOTLIB
+#include "../qcommon/q_shared.h"
+#include "../qcommon/qfiles.h"
+#include "../botlib/botlib.h"
 #include "l_log.h"
-#include "l_libvar.h"
-#include "l_memory.h"
-//#include "l_utils.h"
-#include "be_interface.h"
-#else //BOTLIB
+#include "../botlib/l_libvar.h"
+#include "../botlib/l_memory.h"
+#include "../botlib/be_interface.h"
+// #else //BOTLIB
+
+#endif // *************************
+
 #include "qbsp.h"
 #include "l_mem.h"
-#endif //BOTLIB
+#if 0                           // ML081030 removed *********
 
 #ifdef BOTLIB
-//========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//========================================================================
 void Vector2Angles(vec3_t value1, vec3_t angles)
 {
 	float	forward;
@@ -71,12 +65,8 @@ void Vector2Angles(vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0;
 } //end of the function Vector2Angles
 #endif //BOTLIB
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
+
+#endif // ***************************************
 void ConvertPath(char *path)
 {
 	while(*path)
@@ -85,12 +75,6 @@ void ConvertPath(char *path)
 		path++;
 	} //end while
 } //end of the function ConvertPath
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
 void AppendPathSeperator(char *path, int length)
 {
 	int pathlen = strlen(path);
@@ -102,14 +86,11 @@ void AppendPathSeperator(char *path, int length)
 	} //end if
 } //end of the function AppenPathSeperator
 
-#if 0
+#if 0                           // Was alreqady removed in original **********
+
 //===========================================================================
 // returns pointer to file handle
 // sets offset to and length of 'filename' in the pak file
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
 //===========================================================================
 qboolean FindFileInPak(char *pakfile, char *filename, foundfile_t *file)
 {
@@ -170,10 +151,6 @@ qboolean FindFileInPak(char *pakfile, char *filename, foundfile_t *file)
 // find a Quake2 file
 // returns full path in 'filename'
 // sets offset and length of the file
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
 //===========================================================================
 qboolean FindQuakeFile2(char *basedir, char *gamedir, char *filename, foundfile_t *file)
 {
@@ -237,12 +214,7 @@ qboolean FindQuakeFile2(char *basedir, char *gamedir, char *filename, foundfile_
 	file->length = 0;
 	return false;
 } //end of the function FindQuakeFile2
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
+
 #ifdef BOTLIB
 qboolean FindQuakeFile(char *filename, foundfile_t *file)
 {
@@ -256,4 +228,4 @@ qboolean FindQuakeFile(char *basedir, char *gamedir, char *filename, foundfile_t
 } //end of the function FindQuakeFile
 #endif //BOTLIB
 
-#endif
+#endif // ***************************************************

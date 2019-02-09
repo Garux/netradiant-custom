@@ -94,5 +94,4 @@ void Q2_LoadBSPFileTexinfo(char *filename);	// just for qdata
 void Q2_WriteBSPFile(char *filename);
 void Q2_PrintBSPFileSizes(void);
 void Q2_ParseEntities(void);
-void Q2_UnparseEntities(void);
-
+char *Q2_UnparseEntities(int *size);

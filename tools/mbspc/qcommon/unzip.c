@@ -7,7 +7,8 @@
  *
  *****************************************************************************/
 
-#include "../client/client.h"
+#include "q_shared.h"
+#include "qcommon.h"
 #include "unzip.h"
 
 /* unzip.h -- IO for uncompress .zip files using zlib 
@@ -235,7 +236,7 @@ typedef Byte    *voidp;
 #define Z_DEFLATED   8
 /* The deflate compression method (the only one supported in this version) */
 
-#define Z_NULL  0  /* for initializing zalloc, zfree, opaque */
+#define Z_NULL  (void *)0	/* for initializing zalloc, zfree, opaque */
 
 #define zlib_version zlibVersion()
 /* for compatibility with versions < 1.0.2 */
@@ -1113,24 +1114,6 @@ static int unzlocal_getShort (FILE* fin, uLong *pX)
 	*pX = LittleShort( v);
 	return UNZ_OK;
 
-/*
-    uLong x ;
-    int i;
-    int err;
-
-    err = unzlocal_getByte(fin,&i);
-    x = (uLong)i;
-    
-    if (err==UNZ_OK)
-        err = unzlocal_getByte(fin,&i);
-    x += ((uLong)i)<<8;
-   
-    if (err==UNZ_OK)
-        *pX = x;
-    else
-        *pX = 0;
-    return err;
-*/
 }
 
 static int unzlocal_getLong (FILE *fin, uLong *pX)
@@ -1142,32 +1125,6 @@ static int unzlocal_getLong (FILE *fin, uLong *pX)
 	*pX = LittleLong( v);
 	return UNZ_OK;
 
-/*
-    uLong x ;
-    int i;
-    int err;
-
-    err = unzlocal_getByte(fin,&i);
-    x = (uLong)i;
-    
-    if (err==UNZ_OK)
-        err = unzlocal_getByte(fin,&i);
-    x += ((uLong)i)<<8;
-
-    if (err==UNZ_OK)
-        err = unzlocal_getByte(fin,&i);
-    x += ((uLong)i)<<16;
-
-    if (err==UNZ_OK)
-        err = unzlocal_getByte(fin,&i);
-    x += ((uLong)i)<<24;
-   
-    if (err==UNZ_OK)
-        *pX = x;
-    else
-        *pX = 0;
-    return err;
-*/
 }
 
 
@@ -2042,30 +1999,17 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 		else
 		{
 			uLong uTotalOutBefore,uTotalOutAfter;
-			const Byte *bufBefore;
 			uLong uOutThis;
 			int flush=Z_SYNC_FLUSH;
 
 			uTotalOutBefore = pfile_in_zip_read_info->stream.total_out;
-			bufBefore = pfile_in_zip_read_info->stream.next_out;
 
-			/*
-			if ((pfile_in_zip_read_info->rest_read_uncompressed ==
-			         pfile_in_zip_read_info->stream.avail_out) &&
-				(pfile_in_zip_read_info->rest_read_compressed == 0))
-				flush = Z_FINISH;
-			*/
 			err=inflate(&pfile_in_zip_read_info->stream,flush);
 
 			uTotalOutAfter = pfile_in_zip_read_info->stream.total_out;
 			uOutThis = uTotalOutAfter-uTotalOutBefore;
 			
-//			pfile_in_zip_read_info->crc32 = 
-//                crc32(pfile_in_zip_read_info->crc32,bufBefore,
-//                        (uInt)(uOutThis));
-
-			pfile_in_zip_read_info->rest_read_uncompressed -=
-                uOutThis;
+			pfile_in_zip_read_info->rest_read_uncompressed -= uOutThis;
 
 			iRead += (uInt)(uTotalOutAfter - uTotalOutBefore);
             
@@ -2925,8 +2869,6 @@ int inflate_flush(inflate_blocks_statef *s, z_streamp z, int r)
  * For conditions of distribution and use, see copyright notice in zlib.h 
  */
 
-static const char inflate_copyright[] =
-   " inflate 1.1.3 Copyright 1995-1998 Mark Adler ";
 /*
   If you use the zlib library in a product, an acknowledgment is welcome
   in the documentation of your product. If for some reason you cannot
@@ -3034,7 +2976,7 @@ static int huft_build(uInt *b, uInt n, uInt s, const uInt *d, const uInt *e, inf
   uInt mask;                    /* (1 << w) - 1, to avoid cc -O bug on HP */
   register uInt *p;            /* pointer into c[], b[], or v[] */
   inflate_huft *q;              /* points to current table */
-  struct inflate_huft_s r;      /* table entry for structure assignment */
+  struct inflate_huft_s r = { {{0, 0}} };      /* table entry for structure assignment */
   inflate_huft *u[BMAX];        /* table stack */
   register int w;               /* bits before this table == (l * h) */
   uInt x[BMAX+1];               /* bit offsets, then code stack */
@@ -4050,7 +3992,7 @@ int inflateInit2_(z_streamp z, int w, const char *version, int stream_size)
 
   /* create inflate_blocks state */
   if ((z->state->blocks =
-      inflate_blocks_new(z, z->state->nowrap ? Z_NULL : adler32, (uInt)1 << w))
+      inflate_blocks_new(z, z->state->nowrap ? ((check_func) 0) : adler32, (uInt)1 << w))
       == Z_NULL)
   {
     inflateEnd(z);

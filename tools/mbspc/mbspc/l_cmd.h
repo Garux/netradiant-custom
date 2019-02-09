@@ -28,15 +28,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef __CMDLIB__
 #define __CMDLIB__
 
-#ifdef _WIN32
-#pragma warning(disable : 4244)     // MIPS
-#pragma warning(disable : 4136)     // X86
-#pragma warning(disable : 4051)     // ALPHA
-
-#pragma warning(disable : 4018)     // signed/unsigned mismatch
-#pragma warning(disable : 4305)     // truncate from double to float
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

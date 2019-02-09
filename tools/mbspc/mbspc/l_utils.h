@@ -61,13 +61,17 @@ typedef struct foundfile_s
 	char filename[MAX_PATH];		//screw LCC, array must be at end of struct
 } foundfile_t;
 
-void Vector2Angles(vec3_t value1, vec3_t angles);
+// ML081030 removed
+// void Vector2Angles (vec3_t value1, vec3_t angles);
+
 //set the correct path seperators
 void ConvertPath(char *path);
 //append a path seperator to the given path not exceeding the length
 void AppendPathSeperator(char *path, int length);
 //find a file in a pak file
 qboolean FindFileInPak(char *pakfile, char *filename, foundfile_t *file);
+#if 0                           // ML081030 removed ********************
+
 //find a quake file
 #ifdef BOTLIB
 qboolean FindQuakeFile(char *filename, foundfile_t *file);
@@ -75,5 +79,4 @@ qboolean FindQuakeFile(char *filename, foundfile_t *file);
 qboolean FindQuakeFile(char *basedir, char *gamedir, char *filename, foundfile_t *file);
 #endif //BOTLIB
 
-
-
+#endif // *************************************

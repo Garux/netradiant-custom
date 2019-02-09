@@ -105,13 +105,13 @@ void RunThreadsOnIndividual (int workcnt, qboolean showpacifier, void(*func)(int
 
 //===================================================================
 //
-// WIN32
+// Win32
 //
 //===================================================================
 
-#if defined(WIN32) || defined(_WIN32)
+#if defined _WIN32              // ******************************************************
 
-#define USED
+#define MULTI_THREAD
 
 #include <windows.h>
 
@@ -119,7 +119,7 @@ typedef struct thread_s
 {
 	HANDLE handle;
 	int threadid;
-	int id;
+	DWORD id;
 	struct thread_s *next;
 } thread_t;
 
@@ -261,7 +261,8 @@ void ThreadSemaphoreIncrease(int count)
 //===========================================================================
 void RunThreadsOn(int workcnt, qboolean showpacifier, void(*func)(int))
 {
-	int		threadid[MAX_THREADS];
+//  int threadid[MAX_THREADS];
+	DWORD threadid[MAX_THREADS];  // ML081030 modified
 	HANDLE	threadhandle[MAX_THREADS];
 	int		i;
 	int		start, end;
@@ -436,324 +437,10 @@ int GetNumThreads(void)
 	return currentnumthreads;
 } //end of the function GetNumThreads
 
-#endif
+#endif // _WIN32 ***********************************************************
 
 
-//===================================================================
-//
-// OSF1
-//
-//===================================================================
 
-#if defined(__osf__)
-
-#define	USED
-
-#include <pthread.h>
-
-typedef struct thread_s
-{
-	pthread_t thread;
-	int threadid;
-	int id;
-	struct thread_s *next;
-} thread_t;
-
-thread_t *firstthread;
-thread_t *lastthread;
-int currentnumthreads;
-int currentthreadid;
-
-int numthreads = 1;
-pthread_mutex_t my_mutex;
-pthread_attr_t	attrib;
-static int enter;
-static int numwaitingthreads = 0;
-
-
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadSetDefault(void)
-{
-	if (numthreads == -1)	// not set manually
-	{
-		numthreads = 1;
-	} //end if
-	qprintf("%i threads\n", numthreads);
-} //end of the function ThreadSetDefault
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadLock(void)
-{
-	if (!threaded)
-	{
-		Error("ThreadLock: !threaded");
-		return;
-	} //end if
-	if (my_mutex)
-	{
-		pthread_mutex_lock(my_mutex);
-	} //end if
-	if (enter)
-		Error("Recursive ThreadLock\n");
-	enter = 1;
-} //end of the function ThreadLock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadUnlock(void)
-{
-	if (!threaded)
-	{
-		Error("ThreadUnlock: !threaded");
-		return;
-	} //end if
-	if (!enter)
-		Error("ThreadUnlock without lock\n");
-	enter = 0;
-	if (my_mutex)
-	{
-		pthread_mutex_unlock(my_mutex);
-	} //end if
-} //end of the function ThreadUnlock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadSetupLock(void)
-{
-	pthread_mutexattr_t mattrib;
-
-	Log_Print("pthread multi-threading\n");
-
-	if (!my_mutex)
-	{
-		my_mutex = GetMemory(sizeof(*my_mutex));
-		if (pthread_mutexattr_create (&mattrib) == -1)
-			Error ("pthread_mutex_attr_create failed");
-		if (pthread_mutexattr_setkind_np (&mattrib, MUTEX_FAST_NP) == -1)
-			Error ("pthread_mutexattr_setkind_np failed");
-		if (pthread_mutex_init (my_mutex, mattrib) == -1)
-			Error ("pthread_mutex_init failed");
-	}
-
-	if (pthread_attr_create (&attrib) == -1)
-		Error ("pthread_attr_create failed");
-	if (pthread_attr_setstacksize (&attrib, 0x100000) == -1)
-		Error ("pthread_attr_setstacksize failed");
-
-	threaded = true;
-	currentnumthreads = 0;
-	currentthreadid = 0;
-} //end of the function ThreadInitLock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadShutdownLock(void)
-{
-	threaded = false;
-} //end of the function ThreadShutdownLock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void RunThreadsOn(int workcnt, qboolean showpacifier, void(*func)(int))
-{
-	int		i;
-	pthread_t	work_threads[MAX_THREADS];
-	pthread_addr_t	status;
-	pthread_attr_t	attrib;
-	pthread_mutexattr_t	mattrib;
-	int		start, end;
-
-	Log_Print("pthread multi-threading\n");
-
-	start = I_FloatTime ();
-	dispatch = 0;
-	workcount = workcnt;
-	oldf = -1;
-	pacifier = showpacifier;
-	threaded = true;
-
-	if (numthreads < 1 || numthreads > MAX_THREADS) numthreads = 1;
-
-	if (pacifier)
-		setbuf (stdout, NULL);
-
-	if (!my_mutex)
-	{
-		my_mutex = GetMemory(sizeof(*my_mutex));
-		if (pthread_mutexattr_create (&mattrib) == -1)
-			Error ("pthread_mutex_attr_create failed");
-		if (pthread_mutexattr_setkind_np (&mattrib, MUTEX_FAST_NP) == -1)
-			Error ("pthread_mutexattr_setkind_np failed");
-		if (pthread_mutex_init (my_mutex, mattrib) == -1)
-			Error ("pthread_mutex_init failed");
-	}
-
-	if (pthread_attr_create (&attrib) == -1)
-		Error ("pthread_attr_create failed");
-	if (pthread_attr_setstacksize (&attrib, 0x100000) == -1)
-		Error ("pthread_attr_setstacksize failed");
-	
-	for (i=0 ; i<numthreads ; i++)
-	{
-  		if (pthread_create(&work_threads[i], attrib
-		, (pthread_startroutine_t)func, (pthread_addr_t)i) == -1)
-			Error ("pthread_create failed");
-	}
-		
-	for (i=0 ; i<numthreads ; i++)
-	{
-		if (pthread_join (work_threads[i], &status) == -1)
-			Error ("pthread_join failed");
-	}
-
-	threaded = false;
-
-	end = I_FloatTime ();
-	if (pacifier)
-		printf (" (%i)\n", end-start);
-} //end of the function RunThreadsOn
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void AddThread(void (*func)(int))
-{
-	thread_t *thread;
-
-	if (numthreads == 1)
-	{
-		if (currentnumthreads >= numthreads) return;
-		currentnumthreads++;
-		func(-1);
-		currentnumthreads--;
-	} //end if
-	else
-	{
-		ThreadLock();
-		if (currentnumthreads >= numthreads)
-		{
-			ThreadUnlock();
-			return;
-		} //end if
-		//allocate new thread
-		thread = GetMemory(sizeof(thread_t));
-		if (!thread) Error("can't allocate memory for thread\n");
-		//
-		thread->threadid = currentthreadid;
-
-		if (pthread_create(&thread->thread, attrib, (pthread_startroutine_t)func, (pthread_addr_t)thread->threadid) == -1)
-			Error ("pthread_create failed");
-
-		//add the thread to the end of the list
-		thread->next = NULL;
-		if (lastthread) lastthread->next = thread;
-		else firstthread = thread;
-		lastthread = thread;
-		//
-#ifdef THREAD_DEBUG
-		qprintf("added thread with id %d\n", thread->threadid);
-#endif //THREAD_DEBUG
-		//
-		currentnumthreads++;
-		currentthreadid++;
-		//
-		ThreadUnlock();
-	} //end else
-} //end of the function AddThread
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void RemoveThread(int threadid)
-{
-	thread_t *thread, *last;
-
-	//if a single thread
-	if (threadid == -1) return;
-	//
-	ThreadLock();
-	last = NULL;
-	for (thread = firstthread; thread; thread = thread->next)
-	{
-		if (thread->threadid == threadid)
-		{
-			if (last) last->next = thread->next;
-			else firstthread = thread->next;
-			if (!thread->next) lastthread = last;
-			//
-			FreeMemory(thread);
-			currentnumthreads--;
-#ifdef THREAD_DEBUG
-			qprintf("removed thread with id %d\n", threadid);
-#endif //THREAD_DEBUG
-			break;
-		} //end if
-		last = thread;
-	} //end if
-	if (!thread) Error("couldn't find thread with id %d", threadid);
-	ThreadUnlock();
-} //end of the function RemoveThread
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void WaitForAllThreadsFinished(void)
-{
-	pthread_t *thread;
-	pthread_addr_t	status;
-
-	ThreadLock();
-	while(firstthread)
-	{
-		thread = &firstthread->thread;
-		ThreadUnlock();
-
-		if (pthread_join(*thread, &status) == -1)
-			Error("pthread_join failed");
-
-		ThreadLock();
-	} //end while
-	ThreadUnlock();
-} //end of the function WaitForAllThreadsFinished
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int GetNumThreads(void)
-{
-	return currentnumthreads;
-} //end of the function GetNumThreads
-
-#endif
 
 //===================================================================
 //
@@ -763,7 +450,7 @@ int GetNumThreads(void)
 
 #if defined(LINUX)
 
-#define	USED
+#define	MULTI_THREAD
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -1080,269 +767,7 @@ int GetNumThreads(void)
 #endif //LINUX
 
 
-//===================================================================
-//
-// IRIX
-//
-//===================================================================
 
-#ifdef _MIPS_ISA 
-
-#define	USED
-
-#include <task.h>
-#include <abi_mutex.h>
-#include <sys/types.h>
-#include <sys/prctl.h>
-
-typedef struct thread_s
-{
-	int threadid;
-	int id;
-	struct thread_s *next;
-} thread_t;
-
-thread_t *firstthread;
-thread_t *lastthread;
-int currentnumthreads;
-int currentthreadid;
-
-int numthreads = 1;
-static int enter;
-static int numwaitingthreads = 0;
-
-abilock_t		lck;
-
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadSetDefault (void)
-{
-	if (numthreads == -1)
-		numthreads = prctl(PR_MAXPPROCS);
-	printf ("%i threads\n", numthreads);
-//@@
-	usconfig (CONF_INITUSERS, numthreads);
-} //end of the function ThreadSetDefault
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadLock (void)
-{
-	spin_lock (&lck);
-} //end of the function ThreadLock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadUnlock (void)
-{
-	release_lock(&lck);
-} //end of the function ThreadUnlock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadSetupLock(void)
-{
-	init_lock (&lck);
-
-	Log_Print("IRIX multi-threading\n");
-
-	threaded = true;
-	currentnumthreads = 0;
-	currentthreadid = 0;
-} //end of the function ThreadInitLock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void ThreadShutdownLock(void)
-{
-	threaded = false;
-} //end of the function ThreadShutdownLock
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
-{
-	int		i;
-	int		pid[MAX_THREADS];
-	int		start, end;
-
-	start = I_FloatTime ();
-	dispatch = 0;
-	workcount = workcnt;
-	oldf = -1;
-	pacifier = showpacifier;
-	threaded = true;
-
-	if (numthreads < 1 || numthreads > MAX_THREADS) numthreads = 1;
-
-	if (pacifier)
-		setbuf (stdout, NULL);
-
-	init_lock (&lck);
-
-	for (i=0 ; i<numthreads-1 ; i++)
-	{
-		pid[i] = sprocsp ( (void (*)(void *, size_t))func, PR_SALL, (void *)i
-			, NULL, 0x100000);
-//		pid[i] = sprocsp ( (void (*)(void *, size_t))func, PR_SALL, (void *)i
-//			, NULL, 0x80000);
-		if (pid[i] == -1)
-		{
-			perror ("sproc");
-			Error ("sproc failed");
-		}
-	}
-		
-	func(i);
-			
-	for (i=0 ; i<numthreads-1 ; i++)
-		wait (NULL);
-
-	threaded = false;
-
-	end = I_FloatTime ();
-	if (pacifier)
-		printf (" (%i)\n", end-start);
-} //end of the function RunThreadsOn
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void AddThread(void (*func)(int))
-{
-	thread_t *thread;
-
-	if (numthreads == 1)
-	{
-		if (currentnumthreads >= numthreads) return;
-		currentnumthreads++;
-		func(-1);
-		currentnumthreads--;
-	} //end if
-	else
-	{
-		ThreadLock();
-		if (currentnumthreads >= numthreads)
-		{
-			ThreadUnlock();
-			return;
-		} //end if
-		//allocate new thread
-		thread = GetMemory(sizeof(thread_t));
-		if (!thread) Error("can't allocate memory for thread\n");
-		//
-		thread->threadid = currentthreadid;
-
-		thread->id = sprocsp ( (void (*)(void *, size_t))func, PR_SALL, (void *)thread->threadid, NULL, 0x100000);
-		if (thread->id == -1)
-		{
-			perror ("sproc");
-			Error ("sproc failed");
-		}
-
-		//add the thread to the end of the list
-		thread->next = NULL;
-		if (lastthread) lastthread->next = thread;
-		else firstthread = thread;
-		lastthread = thread;
-		//
-#ifdef THREAD_DEBUG
-		qprintf("added thread with id %d\n", thread->threadid);
-#endif //THREAD_DEBUG
-		//
-		currentnumthreads++;
-		currentthreadid++;
-		//
-		ThreadUnlock();
-	} //end else
-} //end of the function AddThread
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void RemoveThread(int threadid)
-{
-	thread_t *thread, *last;
-
-	//if a single thread
-	if (threadid == -1) return;
-	//
-	ThreadLock();
-	last = NULL;
-	for (thread = firstthread; thread; thread = thread->next)
-	{
-		if (thread->threadid == threadid)
-		{
-			if (last) last->next = thread->next;
-			else firstthread = thread->next;
-			if (!thread->next) lastthread = last;
-			//
-			FreeMemory(thread);
-			currentnumthreads--;
-#ifdef THREAD_DEBUG
-			qprintf("removed thread with id %d\n", threadid);
-#endif //THREAD_DEBUG
-			break;
-		} //end if
-		last = thread;
-	} //end if
-	if (!thread) Error("couldn't find thread with id %d", threadid);
-	ThreadUnlock();
-} //end of the function RemoveThread
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-void WaitForAllThreadsFinished(void)
-{
-	ThreadLock();
-	while(firstthread)
-	{
-		ThreadUnlock();
-
-		//wait (NULL);
-
-		ThreadLock();
-	} //end while
-	ThreadUnlock();
-} //end of the function WaitForAllThreadsFinished
-//===========================================================================
-//
-// Parameter:				-
-// Returns:					-
-// Changes Globals:		-
-//===========================================================================
-int GetNumThreads(void)
-{
-	return currentnumthreads;
-} //end of the function GetNumThreads
-
-#endif //_MIPS_ISA
 
 
 //=======================================================================
@@ -1351,7 +776,7 @@ int GetNumThreads(void)
 //
 //=======================================================================
 
-#ifndef USED
+#if ! defined MULTI_THREAD
 
 int numthreads = 1;
 int currentnumthreads = 0;
@@ -1507,4 +932,4 @@ int GetNumThreads(void)
 	return currentnumthreads;
 } //end of the function GetNumThreads
 
-#endif //USED
+#endif // MULTI_THREAD

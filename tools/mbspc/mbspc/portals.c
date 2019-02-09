@@ -408,8 +408,8 @@ void MakeNodePortal (node_t *node)
 	portal_t	*new_portal, *p;
 	winding_t	*w;
 	vec3_t		normal;
-	float		dist;
-	int			side;
+	float		dist = 0.f;
+	int			side = 0;
 
 	w = BaseWindingForNode (node);
 
@@ -482,7 +482,7 @@ void SplitNodePortals (node_t *node)
 {
 	portal_t	*p, *next_portal, *new_portal;
 	node_t *f, *b, *other_node;
-	int side;
+	int side = 0;
 	plane_t *plane;
 	winding_t *frontwinding, *backwinding;
 
@@ -1110,7 +1110,7 @@ void SetAreaPortalAreas_r (node_t *node)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-/*
+#if 0  // _ML_ removed
 void EmitAreaPortals(node_t *headnode)
 {
 	int				i, j;
@@ -1150,7 +1150,8 @@ void EmitAreaPortals(node_t *headnode)
 	Log_Print("%5i numareas\n", numareas);
 	Log_Print("%5i numareaportals\n", numareaportals);
 } //end of the function EmitAreaPortals
-*/
+#endif
+
 //===========================================================================
 // Mark each leaf with an area, bounded by CONTENTS_AREAPORTAL
 //

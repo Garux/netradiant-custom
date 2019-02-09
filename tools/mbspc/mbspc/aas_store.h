@@ -35,8 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define AAS_MAX_PORTALINDEXSIZE				65536
 #define AAS_MAX_CLUSTERS					65536
 
-#define BSPCINCLUDE
-#include "../game/be_aas.h"
+#include "../botlib/be_aas.h"
 #include "../botlib/be_aas_def.h"
 
 /*

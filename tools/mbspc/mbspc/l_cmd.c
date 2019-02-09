@@ -22,21 +22,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // cmdlib.c
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "l_cmd.h"
 #include "l_log.h"
 #include "l_mem.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #ifndef SIN
 #define SIN
 #endif //SIN
 
-#if defined(WIN32) || defined(_WIN32)
-#include <direct.h>
-#else
-#include <unistd.h>
-#endif
 
 #ifdef NeXT
 #include <libc.h>
@@ -320,7 +316,7 @@ char *ExpandArg (char *path)
 char *ExpandPath (char *path)
 {
 	static char full[1024];
-	if (!qdir)
+	if (qdir[0] == 0)
 		Error ("ExpandPath called without qdir set");
 	if (path[0] == '/' || path[0] == '\\' || path[1] == ':')
 		return path;
@@ -386,11 +382,11 @@ double I_FloatTime (void)
 
 void Q_getwd (char *out)
 {
+	getcwd(out, 256);
+
 #if defined(WIN32) || defined(_WIN32)
-   getcwd (out, 256);
    strcat (out, "\\");
 #else
-   getwd(out);
    strcat(out, "/");
 #endif
 }

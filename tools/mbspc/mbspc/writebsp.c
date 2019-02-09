@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 int		c_nofaces;
 int		c_facenodes;
 
-
+int GetEdge2(int v1, int v2, face_t * f);
 /*
 =========================================================
 
@@ -293,8 +293,7 @@ int EmitDrawNode_r (node_t *node)
 }
 
 //=========================================================
-
-
+#if 0 // _ML_ removed
 /*
 ============
 WriteBSP
@@ -317,6 +316,7 @@ void WriteBSP (node_t *headnode)
 	qprintf ("%5i nodes without faces\n", c_nofaces);
 	qprintf ("%5i faces\n", numfaces-oldfaces);
 }
+#endif
 
 //===========================================================
 
@@ -506,24 +506,11 @@ EndBSPFile
 */
 void EndBSPFile (void)
 {
-#if 0
-	char	path[1024];
 	int		len;
-	byte	*buf;
-#endif
-
 
 	EmitBrushes ();
 	EmitPlanes ();
-	Q2_UnparseEntities ();
-
-	// load the pop
-#if 0
-	sprintf (path, "%s/pics/pop.lmp", gamedir);
-	len = LoadFile (path, &buf);
-	memcpy (dpop, buf, sizeof(dpop));
-	FreeMemory(buf);
-#endif
+	Q2_UnparseEntities(&len);
 }
 
 

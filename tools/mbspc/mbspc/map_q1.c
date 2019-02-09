@@ -275,11 +275,11 @@ int Q1_SolidTree_r(int nodenum)
 			case Q1_CONTENTS_SOLID:
 #ifdef HLCONTENTS
 			case Q1_CONTENTS_CLIP:
-#endif HLCONTENTS
+#endif /* HLCONTENTS */
 			case Q1_CONTENTS_SKY:
 #ifdef HLCONTENTS
 			case Q1_CONTENTS_TRANSLUCENT:
-#endif HLCONTENTS
+#endif /* HLCONTENTS */
 			{
 				return true;
 			} //end case
@@ -295,7 +295,7 @@ int Q1_SolidTree_r(int nodenum)
 			case Q1_CONTENTS_CURRENT_270:
 			case Q1_CONTENTS_CURRENT_UP:
 			case Q1_CONTENTS_CURRENT_DOWN:
-#endif HLCONTENTS
+#endif /* HLCONTENTS */
 			default:
 			{
 				return false;
@@ -339,11 +339,11 @@ bspbrush_t *Q1_CreateBrushes_r(bspbrush_t *brush, int nodenum)
 			case Q1_CONTENTS_SOLID:
 #ifdef HLCONTENTS
 			case Q1_CONTENTS_CLIP:
-#endif HLCONTENTS
+#endif /* HLCONTENTS */
 			case Q1_CONTENTS_SKY:
 #ifdef HLCONTENTS
 			case Q1_CONTENTS_TRANSLUCENT:
-#endif HLCONTENTS
+#endif /* HLCONTENTS */
 			{
 				brush->side = CONTENTS_SOLID;
 				return brush;
@@ -376,7 +376,7 @@ bspbrush_t *Q1_CreateBrushes_r(bspbrush_t *brush, int nodenum)
 				Error("Q1_CreateBrushes_r: found contents %d in Half-Life BSP", leaf->contents);
 				return NULL;
 			} //end case
-#endif HLCONTENTS
+#endif /* HLCONTENTS */
 			default:
 			{
 				Error("Q1_CreateBrushes_r: unknown contents %d in Half-Life BSP", leaf->contents);
@@ -562,7 +562,7 @@ void Q1_FacePlane(q1_dface_t *face, vec3_t normal, float *dist)
 //===========================================================================
 bspbrush_t *Q1_MergeBrushes(bspbrush_t *brushlist, int modelnum)
 {
-	int nummerges, merged;
+	int nummerges = 0, merged;
 	bspbrush_t *b1, *b2, *tail, *newbrush, *newbrushlist;
 	bspbrush_t *lastb2;
 
@@ -757,7 +757,7 @@ bspbrush_t *Q1_SplitBrushWithFace(bspbrush_t *brush, q1_dface_t *face)
 bspbrush_t *Q1_TextureBrushes(bspbrush_t *brushlist, int modelnum)
 {
 	float area, largestarea;
-	int i, n, texinfonum, sn, numbrushes, ofs;
+	int i, n, texinfonum, sn, numbrushes = 0, ofs;
 	int bestfacenum, sidenodenum;
 	side_t *side;
 	q1_dmiptexlump_t *miptexlump;
@@ -1080,7 +1080,7 @@ void Q1_BSPBrushToMapBrush(bspbrush_t *bspbrush, entity_t *mapent)
 void Q1_CreateMapBrushes(entity_t *mapent, int modelnum)
 {
 	bspbrush_t *brushlist, *brush, *nextbrush;
-	int i;
+	int i = 0;
 
 	//create brushes from the model BSP tree
 	brushlist = Q1_CreateBrushesFromBSP(modelnum);
@@ -1096,7 +1096,7 @@ void Q1_CreateMapBrushes(entity_t *mapent, int modelnum)
 	} //end if
 	//
 	if (!modelnum) qprintf("converting brushes to map brushes\n");
-	if (!modelnum) qprintf("%5d brushes", i = 0);
+	if (!modelnum) qprintf("%5d brushes", i );
 	for (brush = brushlist; brush; brush = nextbrush)
 	{
 		nextbrush = brush->next;

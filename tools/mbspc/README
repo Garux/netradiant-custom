@@ -1,0 +1,38 @@
+MBSPC - modified BSPC utility
+*****************************
+
+Copyright (C) 2012 Laszlo Menczel (laszlo.menczel@gmail.com)
+
+Original version: Copyright (C) id Software
+
+This is an enhanced version of the BSPC utility. It is based on version
+2.1h of the source code.
+
+Restored features:
+
+1. Restored the capability of decompiling a BSP file to an editable MAP
+file
+
+3. Restored the capability of updating the entity list in a BSP file
+using entity definitions from a text file.
+
+New features:
+
+1. When MBSPC is used for converting BSP files to MAP files, the correct
+texture name is written for every brush side (but see Note 1.).
+  
+2. Added a new switch '-entlist'. This will produce a list of entity
+definitions from a BSP file in an editable ASCII text file.
+
+3. Added a new switch '-texinfo'. If you specify this switch, MBSPC writes
+a simple ASCII text file (extension '.txi') containing the list of textures
+and models (i.e. all shaders) used by in the BSP file specified.
+
+Note 1.
+-------
+This new feature works only with Q3A BSP files (at present).
+
+Texture alignment info (shift, scale, rotation) is not written to the
+MAP file produced. It is not trivial to obtain this info from the BSP, and
+I did not need it when I coded this modification, sorry. If you need this
+functionality, add the necessary code.

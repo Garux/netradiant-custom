@@ -528,7 +528,7 @@ tmp_node_t *AAS_LadderSubdivideArea_r(tmp_node_t *tmpnode)
 	tmp_area_t *tmparea, *frontarea, *backarea;
 	tmp_face_t *face1;
 	tmp_node_t *tmpnode1, *tmpnode2;
-	vec3_t lowestpoint, normal = {0, 0, 1};
+	vec3_t lowestpoint = {0, 0, 0}, normal = {0, 0, 1};
 	plane_t *plane;
 	winding_t *w;
 

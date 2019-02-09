@@ -79,3 +79,4 @@ extern	char			q3_dbrushsidetextured[Q3_MAX_MAP_BRUSHSIDES];
 void Q3_LoadBSPFile(struct quakefile_s *qf);
 void Q3_FreeMaxBSP(void);
 void Q3_ParseEntities (void);
+char *Q3_UnparseEntities(int *size);

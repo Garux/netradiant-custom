@@ -20,6 +20,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+// ML090131 added
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
 #include "qbsp.h"
 #include "l_bsp_hl.h"
 #include "l_bsp_q1.h"
@@ -645,6 +650,39 @@ int BrushExists(mapbrush_t *brush)
 	return false;
 } //end of the function BrushExists
 //===========================================================================
+
+q3_dshader_t *
+get_shader_ptr(int bidx, int sidx)
+{
+	q3_dbrush_t *dbrush;
+	q3_dbrushside_t *dside;
+
+	if (bidx < 0 || bidx >= q3_numbrushes)
+	{
+		logprintf("Brush index out of range");
+		return NULL;
+	}
+
+	dbrush = &q3_dbrushes[bidx];
+	sidx += dbrush->firstSide;
+
+	if (sidx < 0 || sidx >= q3_numbrushsides)
+	{
+		logprintf("Brush side index out of range");
+		return NULL;
+	}
+
+	dside = &q3_dbrushsides[sidx];
+
+	if (dside->shaderNum < 0 || dside->shaderNum >= q3_numShaders)
+	{
+		logprintf("Shader index out of range");
+		return NULL;
+	}
+
+	return &q3_dshaders[dside->shaderNum];
+}
+//===========================================================================
 //
 // Parameter:				-
 // Returns:					-
@@ -726,7 +764,7 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 					} //end else
 					else if (loadedmaptype == MAPTYPE_QUAKE3)
 					{
-						if (fprintf(fp, "e1u1/clip 0 0 0 1 1") < 0) return false;
+						if (fprintf(fp, "common/clip 0 0 0 1 1 1 0 0") < 0) return false;
 					} //end else if
 					else
 					{
@@ -772,9 +810,37 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 			} //end if
 			else if (loadedmaptype == MAPTYPE_QUAKE3)
 			{
-				//always use the same texture
-				if (fprintf(fp, "e2u3/floor1_2 0 0 0 1 1 1 0 0") < 0) return false;
-			} //end else if
+				char texbuf[256], *cp;
+				q3_dshader_t *dshader;
+
+				dshader = get_shader_ptr(brush->brushnum, sn);
+
+				if (dshader == NULL)
+				{
+					if (fprintf(fp, "***unknown*** 0 0 0 1 1 1 0 0") < 0)
+						return false;
+				}
+				else
+				{
+					strcpy(texbuf, dshader->shader);
+					cp = &texbuf[0];
+					while (*cp != '/' && *cp != 0)
+						cp++;
+
+					if (*cp == '/')
+					{
+						cp++;
+						if (fprintf(fp, "%s 0 0 0 1 1 1 0 0", cp) < 0)
+							return false;
+					}
+					else
+					{
+						if (fprintf(fp, "***unknown*** 0 0 0 1 1 1 0 0") < 0)
+							return false;
+					}
+				}
+			}
+
 			else
 			{
 				//*
@@ -830,7 +896,7 @@ qboolean WriteMapBrush(FILE *fp, mapbrush_t *brush, vec3_t origin)
 				//write the extra brush side info
 				if (loadedmaptype == MAPTYPE_QUAKE2)
 				{
-					if (fprintf(fp, " %ld %ld %ld", s->contents, ti->flags, ti->value) < 0) return false;
+					if (fprintf(fp, " %d %d %d", s->contents, ti->flags, ti->value) < 0) return false;
 				} //end if
 				//*/
 			} //end else
@@ -908,7 +974,7 @@ qboolean WriteOriginBrush(FILE *fp, vec3_t origin)
 mapbrush_t *GetAreaPortalBrush(entity_t *mapent)
 {
 	int portalnum, bn;
-	mapbrush_t *brush;
+	mapbrush_t *brush = NULL;
 
 	//the area portal number
 	portalnum = mapent->areaportalnum;
@@ -1217,7 +1283,9 @@ int LoadMapFromBSP(struct quakefile_s *qf)
 	{
 		ResetMapLoading();
 		Q3_LoadMapFromBSP(qf);
-		Q3_FreeMaxBSP();
+		// ML081105 removed: need data for texture info
+		// Q3_FreeMaxBSP();
+
 	} //end if
 	//Quake2 BSP file
 	else if (idheader.ident == Q2_BSPHEADER && idheader.version == Q2_BSPVERSION)
@@ -1265,3 +1333,128 @@ int LoadMapFromBSP(struct quakefile_s *qf)
 	//
 	return true;
 } //end of the function LoadMapFromBSP
+
+//=========================================================
+// ML090131 added: function for writing texture information
+
+static char *tex, **tex_p;
+
+void WriteTexinfo(char *name)
+{
+	FILE *f;
+	int i, swapped;
+	char *cp;
+
+	if (loadedmaptype != MAPTYPE_QUAKE3)
+	{
+		Log_Print("Texture info extraction is implemented only for Q3A.\n");
+		return;
+	}
+
+	if (name == NULL || name[0] == 0)
+	{
+		Log_Print("WriteTexinfo: Bad file name.\n");
+		return;
+	}
+
+	/********************************/
+	/* allocate string buffer array */
+	/********************************/
+
+	tex = (char *) malloc(q3_numShaders * MAX_QPATH);
+	if (tex == NULL)
+	{
+		Log_Print("WriteTexinfo: memory allocation error\n");
+		return;
+	}
+
+	tex_p = (char **) malloc(q3_numShaders * sizeof(char *));
+	if (tex_p == NULL)
+	{
+		free(tex);
+		Log_Print("WriteTexinfo: memory allocation error\n");
+		return;
+	}
+
+	for (i = 0; i < q3_numShaders; i++)
+		tex_p[i] = tex + i * MAX_QPATH;
+
+	/****************************/
+	/* copy & sort shader names */
+	/****************************/
+
+	for (i = 0; i < q3_numShaders; i++)
+		strncpy(tex_p[i], q3_dshaders[i].shader, MAX_QPATH - 1);
+
+	do
+	{
+		swapped = 0;
+		for (i = 0; i < q3_numShaders - 1; i++)
+			if (strcmp(tex_p[i], tex_p[i + 1]) > 0)
+			{
+				cp = tex_p[i];
+				tex_p[i] = tex_p[i + 1];
+				tex_p[i + 1] = cp;
+				swapped = 1;
+			}
+	} while (swapped);
+
+	/**********************/
+	/* create output file */
+	/**********************/
+
+	f = fopen(name, "wt");
+	if (f == NULL)
+	{
+		Log_Print("WriteTexinfo: Cannot open '%s'\n", name);
+		free(tex);
+		free(tex_p);
+		return;
+	}
+
+	/*******************/
+	/* write info file */
+	/*******************/
+
+	for (i = 0; i < q3_numShaders; i++)
+		if (fprintf(f, "%s\n", tex_p[i]) < 0)
+		{
+			fclose(f);
+			unlink(name);
+			Log_Print("WriteTexinfo: I/O error when writing '%s'\n", name);
+			free(tex);
+			free(tex_p);
+			return;
+		}
+
+	fclose(f);
+	Log_Print("WriteTexinfo: %d texture names to '%s'\n", i, name);
+	free(tex);
+	free(tex_p);
+}
+//=========================================================
+
+void WriteEntList(char *fname, char *ent_str, int size)
+{
+	FILE *f;
+	int i;
+
+	if (fname == NULL || fname[0] == 0)
+	{
+		Log_Print("WriteEntList: Bad file name.\n");
+		return;
+	}
+
+	f = fopen(fname, "wt");
+	if (f == NULL)
+	{
+		Log_Print("WriteEntList: Cannot open '%s'\n", fname);
+		return;
+	}
+
+	for (i = 0; i < size; i++)
+		fputc((int) ent_str[i], f);
+
+	fputc('\n', f);
+	fclose(f);
+}

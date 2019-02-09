@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "qbsp.h"
 
@@ -212,4 +213,23 @@ void Log_Flush(void)
 {
 	if (logfile.fp) fflush(logfile.fp);
 } //end of the function Log_Flush
+//================================================================================
+
+void logprintf(char *fmt, ...)
+{
+	FILE *f;
+	char buf[1024];
+	va_list arglist;
+
+	f = fopen("mbspc.log", "at");
+	if (f != NULL)
+	{
+		va_start(arglist, fmt);
+		vsprintf(buf, fmt, arglist);
+		buf[1023] = '\0';
+
+		fprintf(f, "%s\n", buf);
+		fclose(f);
+	}
+}
 

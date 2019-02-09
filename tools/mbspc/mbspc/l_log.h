@@ -40,3 +40,5 @@ void Log_Flush(void);
 #ifdef WINBSPC
 void WinBSPCPrint(char *str);
 #endif //WINBSPC
+
+void logprintf(char *fmt, ...);

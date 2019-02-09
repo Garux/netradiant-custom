@@ -767,6 +767,7 @@ static qboolean CM_ValidateFacet( facet_t *facet ) {
 	w = BaseWindingForPlane( plane,  plane[3] );
 	for ( j = 0 ; j < facet->numBorders && w ; j++ ) {
 		if ( facet->borderPlanes[j] == -1 ) {
+			FreeWinding(w);
 			return qfalse;
 		}
 		Vector4Copy( planes[ facet->borderPlanes[j] ].plane, plane );
@@ -980,7 +981,7 @@ CM_PatchCollideFromGrid
 static void CM_PatchCollideFromGrid( cGrid_t *grid, patchCollide_t *pf ) {
 	int				i, j;
 	float			*p1, *p2, *p3;
-	MAC_STATIC int				gridPlanes[MAX_GRID_SIZE][MAX_GRID_SIZE][2];
+	int gridPlanes[MAX_GRID_SIZE][MAX_GRID_SIZE][2];
 	facet_t			*facet;
 	int				borders[4];
 	int				noAdjust[4];
@@ -1147,12 +1148,12 @@ Points is packed as concatenated rows.
 */
 struct patchCollide_s	*CM_GeneratePatchCollide( int width, int height, vec3_t *points ) {
 	patchCollide_t	*pf;
-	MAC_STATIC cGrid_t			grid;
+	cGrid_t grid;
 	int				i, j;
 
 	if ( width <= 2 || height <= 2 || !points ) {
 		Com_Error( ERR_DROP, "CM_GeneratePatchFacets: bad parameters: (%i, %i, %p)",
-			width, height, points );
+			width, height, (void *) points );
 	}
 
 	if ( !(width & 1) || !(height & 1) ) {
@@ -1379,11 +1380,17 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 	float offset, enterFrac, leaveFrac, t;
 	patchPlane_t *planes;
 	facet_t	*facet;
-	float plane[4], bestplane[4];
+	float plane[4] = { 0, 0, 0, 0 }, bestplane[4] = { 0, 0, 0, 0 };
 	vec3_t startp, endp;
 #ifndef BSPC
 	static cvar_t *cv;
 #endif //BSPC
+
+	if (!CM_BoundsIntersect(tw->bounds[0], tw->bounds[1],
+				pc->bounds[0], pc->bounds[1]))
+	{
+		return;
+	}
 
 	if (tw->isPoint) {
 		CM_TracePointThroughPatchCollide( tw, pc );

@@ -29,56 +29,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-//#define SCREWUP
-//#define BOTLIB
-//#define MEQCC
-//#define BSPC
+#include "../mbspc/qbsp.h"
 
-#ifdef SCREWUP
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
-#include <stdarg.h>
-#include "l_memory.h"
-#include "l_script.h"
-
-typedef enum {qfalse, qtrue}	qboolean;
-
-#endif //SCREWUP
-
-#ifdef BOTLIB
-//include files for usage in the bot library
-#include "../game/q_shared.h"
-#include "../game/botlib.h"
-#include "be_interface.h"
-#include "l_script.h"
-#include "l_memory.h"
 #include "l_log.h"
-#include "l_libvar.h"
-#endif //BOTLIB
-
-#ifdef MEQCC
-//include files for usage in MrElusive's QuakeC Compiler
-#include "qcc.h"
-#include "l_script.h"
-#include "l_memory.h"
-#include "l_log.h"
+#include "../mbspc/l_mem.h"
 
 #define qtrue	true
 #define qfalse	false
-#endif //MEQCC
-
-#ifdef BSPC
-//include files for usage in the BSP Converter
-#include "../bspc/qbsp.h"
-#include "../bspc/l_log.h"
-#include "../bspc/l_mem.h"
-
-#define qtrue	true
-#define qfalse	false
-#endif //BSPC
-
 
 #define PUNCTABLE
 
@@ -160,11 +117,7 @@ punctuation_t default_punctuations[] =
 	{NULL, 0}
 };
 
-#ifdef BSPC
 char basefolder[MAX_PATH];
-#else
-char basefolder[MAX_QPATH];
-#endif
 
 //===========================================================================
 //
@@ -236,17 +189,10 @@ void QDECL ScriptError(script_t *script, char *str, ...)
 	if (script->flags & SCFL_NOERRORS) return;
 
 	va_start(ap, str);
-	vsprintf(text, str, ap);
+	Q_vsnprintf(text, sizeof(text), str, ap);
 	va_end(ap);
-#ifdef BOTLIB
-	botimport.Print(PRT_ERROR, "file %s, line %d: %s\n", script->filename, script->line, text);
-#endif //BOTLIB
-#ifdef MEQCC
-	printf("error: file %s, line %d: %s\n", script->filename, script->line, text);
-#endif //MEQCC
-#ifdef BSPC
+
 	Log_Print("error: file %s, line %d: %s\n", script->filename, script->line, text);
-#endif //BSPC
 } //end of the function ScriptError
 //===========================================================================
 //
@@ -262,17 +208,9 @@ void QDECL ScriptWarning(script_t *script, char *str, ...)
 	if (script->flags & SCFL_NOWARNINGS) return;
 
 	va_start(ap, str);
-	vsprintf(text, str, ap);
+	Q_vsnprintf(text, sizeof(text), str, ap);
 	va_end(ap);
-#ifdef BOTLIB
-	botimport.Print(PRT_WARNING, "file %s, line %d: %s\n", script->filename, script->line, text);
-#endif //BOTLIB
-#ifdef MEQCC
-	printf("warning: file %s, line %d: %s\n", script->filename, script->line, text);
-#endif //MEQCC
-#ifdef BSPC
 	Log_Print("warning: file %s, line %d: %s\n", script->filename, script->line, text);
-#endif //BSPC
 } //end of the function ScriptWarning
 //===========================================================================
 //
@@ -554,7 +492,7 @@ int PS_ReadName(script_t *script, token_t *token)
 // Changes Globals:		-
 //============================================================================
 void NumberValue(char *string, int subtype, unsigned long int *intvalue,
-															long double *floatvalue)
+															float *floatvalue)
 {
 	unsigned long int dotfound = 0;
 
@@ -573,13 +511,13 @@ void NumberValue(char *string, int subtype, unsigned long int *intvalue,
 			} //end if
 			if (dotfound)
 			{
-				*floatvalue = *floatvalue + (long double) (*string - '0') /
-																	(long double) dotfound;
+				*floatvalue = *floatvalue + (float) (*string - '0') /
+																	(float) dotfound;
 				dotfound *= 10;
 			} //end if
 			else
 			{
-				*floatvalue = *floatvalue * 10.0 + (long double) (*string - '0');
+				*floatvalue = *floatvalue * 10.0 + (float) (*string - '0');
 			} //end else
 			string++;
 		} //end while
@@ -631,7 +569,7 @@ int PS_ReadNumber(script_t *script, token_t *token)
 	int octal, dot;
 	char c;
 //	unsigned long int intvalue = 0;
-//	long double floatvalue = 0;
+//	double floatvalue = 0;
 
 	token->type = TT_NUMBER;
 	//check for a hexadecimal number
@@ -1148,10 +1086,10 @@ void StripSingleQuotes(char *string)
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-long double ReadSignedFloat(script_t *script)
+float ReadSignedFloat(script_t *script)
 {
 	token_t token;
-	long double sign = 1;
+	float sign = 1;
 
 	PS_ExpectAnyToken(script, &token);
 	if (!strcmp(token.string, "-"))
@@ -1319,9 +1257,9 @@ script_t *LoadScriptFile(const char *filename)
 
 #ifdef BOTLIB
 	if (strlen(basefolder))
-		Com_sprintf(pathname, sizeof(pathname), "%s/%s", basefolder, filename);
+		sprintf( pathname, "%s/%s", basefolder, filename );
 	else
-		Com_sprintf(pathname, sizeof(pathname), "%s", filename);
+		sprintf( pathname, "%s", filename );
 	length = botimport.FS_FOpenFile( pathname, &fp, FS_READ );
 	if (!fp) return NULL;
 #else
@@ -1363,8 +1301,6 @@ script_t *LoadScriptFile(const char *filename)
 	} //end if
 	fclose(fp);
 #endif
-	//
-	script->length = COM_Compress(script->buffer);
 
 	return script;
 } //end of the function LoadScriptFile
@@ -1425,9 +1361,5 @@ void FreeScript(script_t *script)
 //============================================================================
 void PS_SetBaseFolder(char *path)
 {
-#ifdef BSPC
 	sprintf(basefolder, path);
-#else
-	Com_sprintf(basefolder, sizeof(basefolder), path);
-#endif
 } //end of the function PS_SetBaseFolder

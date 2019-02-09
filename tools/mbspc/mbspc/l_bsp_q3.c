@@ -259,7 +259,9 @@ void Q3_CreatePlanarSurfacePlanes(void)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-/*
+
+#if 0                           // ******************
+
 void Q3_SurfacePlane(q3_dsurface_t *surface, vec3_t normal, float *dist)
 {
 	//take the plane information from the lightmap vector
@@ -269,7 +271,9 @@ void Q3_SurfacePlane(q3_dsurface_t *surface, vec3_t normal, float *dist)
 	Q3_PlaneFromPoints(q3_drawVerts[surface->firstVert].xyz,
 						q3_drawVerts[surface->firstVert+1].xyz,
 						q3_drawVerts[surface->firstVert+2].xyz, normal, dist);
-} //end of the function Q3_SurfacePlane*/
+} //end of the function Q3_SurfacePlane
+
+#endif // ******************
 //===========================================================================
 // returns the amount the face and the winding overlap
 //
@@ -325,7 +329,7 @@ winding_t *Q3_BrushSideWinding(q3_dbrush_t *brush, q3_dbrushside_t *baseside)
 	q3_dplane_t *baseplane, *plane;
 	winding_t *w;
 	q3_dbrushside_t *side;
-	
+
 	//create a winding for the brush side with the given planenumber
 	baseplane = &q3_dplanes[baseside->planeNum];
 	w = BaseWindingForPlane(baseplane->normal, baseplane->dist);
@@ -473,8 +477,8 @@ Byte swaps all data in a bsp file.
 */
 void Q3_SwapBSPFile( void ) {
 	int				i;
-	
-	// models	
+
+	// models
 	Q3_SwapBlock( (int *)q3_dmodels, q3_nummodels * sizeof( q3_dmodels[0] ) );
 
 	// shaders (don't swap the name)
@@ -485,7 +489,7 @@ void Q3_SwapBSPFile( void ) {
 
 	// planes
 	Q3_SwapBlock( (int *)q3_dplanes, q3_numplanes * sizeof( q3_dplanes[0] ) );
-	
+
 	// nodes
 	Q3_SwapBlock( (int *)q3_dnodes, q3_numnodes * sizeof( q3_dnodes[0] ) );
 
@@ -546,7 +550,7 @@ int Q3_CopyLump( q3_dheader_t	*header, int lump, void **dest, int size ) {
 
 	length = header->lumps[lump].filelen;
 	ofs = header->lumps[lump].fileofs;
-	
+
 	if ( length % size ) {
 		Error ("Q3_LoadBSPFile: odd lump size");
 	}
@@ -629,13 +633,13 @@ void	Q3_LoadBSPFile(struct quakefile_s *qf)
 	CountTriangles();
 
 	FreeMemory( header );		// everything has been copied out
-		
+
 	// swap everything
 	Q3_SwapBSPFile();
 
 	Q3_FindVisibleBrushSides();
 
-	//Q3_PrintBSPFileSizes();
+	Q3_PrintBSPFileSizes();
 }
 
 
@@ -650,7 +654,7 @@ void Q3_AddLump( FILE *bspfile, q3_dheader_t *header, int lumpnum, void *data, i
 	q3_lump_t *lump;
 
 	lump = &header->lumps[lumpnum];
-	
+
 	lump->fileofs = LittleLong( ftell(bspfile) );
 	lump->filelen = LittleLong( len );
 	SafeWrite( bspfile, data, (len+3)&~3 );
@@ -670,12 +674,12 @@ void	Q3_WriteBSPFile( char *filename )
 
 	header = &outheader;
 	memset( header, 0, sizeof(q3_dheader_t) );
-	
+
 	Q3_SwapBSPFile();
 
 	header->ident = LittleLong( Q3_BSP_IDENT );
 	header->version = LittleLong( Q3_BSP_VERSION );
-	
+
 	bspfile = SafeOpenWrite( filename );
 	SafeWrite( bspfile, header, sizeof(q3_dheader_t) );	// overwritten later
 
@@ -696,10 +700,10 @@ void	Q3_WriteBSPFile( char *filename )
 	Q3_AddLump( bspfile, header, Q3_LUMP_ENTITIES, q3_dentdata, q3_entdatasize );
 	Q3_AddLump( bspfile, header, Q3_LUMP_FOGS, q3_dfogs, q3_numFogs * sizeof(q3_dfog_t) );
 	Q3_AddLump( bspfile, header, Q3_LUMP_DRAWINDEXES, q3_drawIndexes, q3_numDrawIndexes * sizeof(q3_drawIndexes[0]) );
-	
+
 	fseek (bspfile, 0, SEEK_SET);
 	SafeWrite (bspfile, header, sizeof(q3_dheader_t));
-	fclose (bspfile);	
+	fclose (bspfile);
 }
 
 //============================================================================
@@ -786,26 +790,26 @@ Q3_UnparseEntities
 Generates the q3_dentdata string from all the entities
 ================
 */
-void Q3_UnparseEntities (void)
+char *Q3_UnparseEntities(int *size)
 {
 	char *buf, *end;
 	epair_t *ep;
 	char line[2048];
 	int i;
-	
+
 	buf = q3_dentdata;
 	end = buf;
 	*end = 0;
-	
+
 	for (i=0 ; i<num_entities ; i++)
 	{
 		ep = entities[i].epairs;
 		if (!ep)
 			continue;	// ent got removed
-		
+
 		strcat (end,"{\n");
 		end += 2;
-				
+
 		for (ep = entities[i].epairs ; ep ; ep=ep->next)
 		{
 			sprintf (line, "\"%s\" \"%s\"\n", ep->key, ep->value);
@@ -819,6 +823,9 @@ void Q3_UnparseEntities (void)
 			Error ("Entity text too long");
 	}
 	q3_entdatasize = end - buf + 1;
+	q3_entdatasize = end - buf + 1;
+	*size = q3_entdatasize;
+	return buf;
 } //end of the function Q3_UnparseEntities
 
 

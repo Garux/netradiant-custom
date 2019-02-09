@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#ifdef AASINTERN
 //loads the given BSP file
 int AAS_LoadBSPFile(void);
 //dump the loaded BSP data
@@ -53,7 +52,6 @@ qboolean AAS_EntityCollision(int entnum,
 //for debugging
 void AAS_PrintFreeBSPLinks(char *str);
 //
-#endif //AASINTERN
 
 #define MAX_EPAIRKEY		128
 

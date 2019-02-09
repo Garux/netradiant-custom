@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "aas_map.h"			//AAS_CreateMapBrushes
 #include "l_bsp_q3.h"
 #include "../qcommon/cm_patch.h"
-#include "../game/surfaceflags.h"
+#include "../qcommon/surfaceflags.h"
 
 #define NODESTACKSIZE		1024
 
@@ -390,10 +390,6 @@ qboolean Q3_ParseBSPEntity(int entnum)
 {
 	entity_t *mapent;
 	char *model;
-	int startbrush, startsides;
-
-	startbrush = nummapbrushes;
-	startsides = nummapbrushsides;
 
 	mapent = &entities[entnum];//num_entities];
 	mapent->firstbrush = nummapbrushes;
@@ -609,7 +605,6 @@ void AAS_ExpandMapBrush(mapbrush_t *brush, vec3_t mins, vec3_t maxs);
 void Q3_LoadMapFromBSP(struct quakefile_s *qf)
 {
 	int i;
-	vec3_t mins = {-1,-1,-1}, maxs = {1, 1, 1};
 
 	Log_Print("-- Q3_LoadMapFromBSP --\n");
 	//loaded map type

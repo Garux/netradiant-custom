@@ -29,19 +29,26 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "l_memory.h"
 #include "l_script.h"
 #include "l_precomp.h"
 #include "l_struct.h"
 #include "l_libvar.h"
 #include "aasfile.h"
-#include "../game/botlib.h"
-#include "../game/be_aas.h"
+#include "botlib.h"
+#include "be_aas.h"
 #include "be_aas_funcs.h"
 #include "be_aas_def.h"
+#include "be_aas_bsp.h"
+#include "be_aas_sample.h"
+#include "be_aas_move.h"
+
+void AAS_DebugLine(vec3_t start, vec3_t end, int color);
+void AAS_ClearShownDebugLines(void);
 
 extern botlib_import_t botimport;
+extern aas_t aasworld;
 
 aas_settings_t aassettings;
 
@@ -389,9 +396,6 @@ void AAS_Accelerate(vec3_t velocity, float frametime, vec3_t wishdir, float wish
 //===========================================================================
 void AAS_AirControl(vec3_t start, vec3_t end, vec3_t velocity, vec3_t cmdmove)
 {
-	vec3_t dir;
-
-	VectorSubtract(end, start, dir);
 } //end of the function AAS_AirControl
 //===========================================================================
 // applies ground friction to the given velocity
@@ -518,7 +522,7 @@ int AAS_ClientMovementPrediction(struct aas_clientmove_s *move,
 	float phys_maxstep, phys_maxsteepness, phys_jumpvel, friction;
 	float gravity, delta, maxvel, wishspeed, accelerate;
 	//float velchange, newvel;
-	int n, i, j, pc, step, swimming, ax, crouch, event, jump_frame, areanum;
+	int n, i, j, pc, step, swimming, crouch, event, jump_frame, areanum;
 	int areas[20], numareas;
 	vec3_t points[20];
 	vec3_t org, end, feet, start, stepend, lastorg, wishdir;
@@ -574,7 +578,6 @@ int AAS_ClientMovementPrediction(struct aas_clientmove_s *move,
 		//apply command movement
 		if (n < cmdframes)
 		{
-			ax = 0;
 			maxvel = phys_maxwalkvelocity;
 			accelerate = phys_airaccelerate;
 			VectorCopy(cmdmove, wishdir);
@@ -598,13 +601,11 @@ int AAS_ClientMovementPrediction(struct aas_clientmove_s *move,
 				{
 					accelerate = phys_walkaccelerate;
 				} //end else
-				ax = 2;
 			} //end if
 			if (swimming)
 			{
 				maxvel = phys_maxswimvelocity;
 				accelerate = phys_swimaccelerate;
-				ax = 3;
 			} //end if
 			else
 			{

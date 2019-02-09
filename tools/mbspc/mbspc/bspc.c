@@ -375,12 +375,12 @@ void CreateAASFilesForAllBSPFiles(char *quakepath)
 	WIN32_FIND_DATA filedata;
 	HWND handle;
 	struct _stat statbuf;
+	int done;
 #else
 	glob_t globbuf;
 	struct stat statbuf;
 	int j;
 #endif
-	int done;
 	char filter[_MAX_PATH], bspfilter[_MAX_PATH], aasfilter[_MAX_PATH];
 	char aasfile[_MAX_PATH], buf[_MAX_PATH], foldername[_MAX_PATH];
 	quakefile_t *qf, *qf2, *files, *bspfiles, *aasfiles;
@@ -500,14 +500,19 @@ quakefile_t *GetArgumentFiles(int argc, char *argv[], int *i, char *ext)
 #define COMP_CLUSTER		4
 #define COMP_AASOPTIMIZE	5
 #define COMP_AASINFO		6
+// ML090131 added
+#define COMP_TEXINFO		7
+#define COMP_ENTLIST		8
 
 int main (int argc, char **argv)
 {
 	int i, comp = 0;
 	char outputpath[MAX_PATH] = "";
 	char filename[MAX_PATH] = "unknown";
-	quakefile_t *qfiles, *qf;
+	quakefile_t *qfiles = NULL, *qf;
 	double start_time;
+	char *ent_str;
+	int ent_str_size;
 
 	myargc = argc;
 	myargv = argv;
@@ -635,11 +640,13 @@ int main (int argc, char **argv)
 			freetree = true;
 			Log_Print("freetree = true\n");
 		} //end else if
+#if 0
 		else if (!stricmp(argv[i], "-grapplereach"))
 		{
 			calcgrapplereach = true;
 			Log_Print("grapplereach = true\n");
 		} //end else if
+#endif
 		else if (!stricmp(argv[i], "-nobrushmerge"))
 		{
 			nobrushmerge = true;
@@ -677,6 +684,28 @@ int main (int argc, char **argv)
 			if (!LoadCfgFile(argv[++i]))
 				exit(0);
 		} //end else if
+		else if (!stricmp(argv[i], "-texinfo"))
+		{
+			if (i + 1 >= argc)
+			{
+				i = 0;
+				break;
+			}
+			comp = COMP_TEXINFO;
+			qfiles = GetArgumentFiles(argc, argv, &i, "bsp");
+		}                           //end else if
+
+		else if (!stricmp(argv[i], "-entlist"))
+		{
+			if (i + 1 >= argc)
+			{
+				i = 0;
+				break;
+			}
+			comp = COMP_ENTLIST;
+			qfiles = GetArgumentFiles(argc, argv, &i, "bsp");
+		}                           //end else if
+
 		else if (!stricmp(argv[i], "-bsp2map"))
 		{
 			if (i + 1 >= argc) {i = 0; break;}
@@ -731,6 +760,95 @@ int main (int argc, char **argv)
 	{
 		switch(comp)
 		{
+		// ML090131 added: extract BSP texture info
+		case COMP_TEXINFO:
+			{
+				if (!qfiles)
+					Log_Print("no files found\n");
+
+				for (qf = qfiles; qf; qf = qf->next)
+				{
+					//copy the output path
+					strcpy(filename, outputpath);
+
+					//append the bsp file base
+					AppendPathSeperator(filename, MAX_PATH);
+					ExtractFileBase(qf->origname, &filename[strlen(filename)]);
+
+					//append .txi
+					strcat(filename, ".txi");
+					Log_Print("texinfo: %s to %s\n", qf->origname, filename);
+
+					if (qf->type != QFILETYPE_BSP)
+						Warning("%s is probably not a BSP file\n", qf->origname);
+
+					if (! LoadMapFromBSP(qf))
+						return 1;
+
+					//write the texture info file
+					WriteTexinfo(filename);
+				}                       //end for
+				break;
+			}                         //end case
+
+		case COMP_ENTLIST:
+			{
+				if (!qfiles)
+					Log_Print("no files found\n");
+
+				for (qf = qfiles; qf; qf = qf->next)
+				{
+					//copy the output path
+					strcpy(filename, outputpath);
+
+					//append the bsp file base
+					AppendPathSeperator(filename, MAX_PATH);
+					ExtractFileBase(qf->origname, &filename[strlen(filename)]);
+
+					//append .ent
+					strcat(filename, ".ent");
+					Log_Print("entlist: %s to %s\n", qf->origname, filename);
+
+					if (qf->type != QFILETYPE_BSP)
+					{
+						Warning("%s is probably not a BSP file\n", qf->origname);
+						return 1;
+					}
+
+					if (! LoadMapFromBSP(qf))
+						return 1;
+
+					//write the entity list
+					switch (loadedmaptype)
+					{
+				case MAPTYPE_QUAKE1:
+					ent_str = Q1_UnparseEntities(&ent_str_size);
+					break;
+
+				case MAPTYPE_QUAKE2:
+					ent_str = Q2_UnparseEntities(&ent_str_size);
+					break;
+
+				case MAPTYPE_QUAKE3:
+					ent_str = Q3_UnparseEntities(&ent_str_size);
+					break;
+
+							default:
+								Error("Entity listing is not implemented for this BSP type\n", qf->origname);
+					return 1;
+					 }
+
+					 if (ent_str == NULL || ent_str_size == 0)
+					 {
+				 Error("Could not parse entity string\n");
+				 return 1;
+			 }
+
+					 WriteEntList(filename, ent_str, ent_str_size);
+				}
+				break;
+			}
+
 			case COMP_BSP2MAP:
 			{
 				if (!qfiles) Log_Print("no files found\n");
@@ -745,8 +863,8 @@ int main (int argc, char **argv)
 					strcat(filename, ".map");
 					//
 					Log_Print("bsp2map: %s to %s\n", qf->origname, filename);
-					if (qf->type != QFILETYPE_BSP) Warning("%s is probably not a BSP file\n", qf->origname);
-					//
+					if (qf->type != QFILETYPE_BSP)
+						Warning("%s is probably not a BSP file\n", qf->origname);
 					LoadMapFromBSP(qf);
 					//write the map file
 					WriteMapFile(filename);
@@ -923,6 +1041,7 @@ int main (int argc, char **argv)
 					} //end if
 					AAS_ShowTotals();
 				} //end for
+				break;
 			} //end case
 			default:
 			{
@@ -943,7 +1062,7 @@ int main (int argc, char **argv)
 #endif
 			"\n"
 			"Switches:\n"
-			//"   bsp2map  <[pakfilter/]filter.bsp>    = convert BSP to MAP\n"
+			"   bsp2map  <[pakfilter/]filter.bsp>    = convert BSP to MAP\n"
 			//"   aasall   <quake3folder>              = create AAS files for all BSPs\n"
 			"   bsp2aas  <[pakfilter/]filter.bsp>    = convert BSP to AAS\n"
 			"   reach    <filter.bsp>                = compute reachability & clusters\n"

@@ -654,7 +654,6 @@ qboolean AAS_FindPlane(vec3_t normal, float dist, int *planenum)
 qboolean AAS_FindHashedPlane(vec3_t normal, float dist, int *planenum)
 {
 	int i, p;
-	aas_plane_t *plane;
 	int hash, h;
 
 	hash = (int)fabs(dist) / 8;
@@ -666,7 +665,6 @@ qboolean AAS_FindHashedPlane(vec3_t normal, float dist, int *planenum)
 		h = (hash+i)&(PLANE_HASH_SIZE-1);
 		for (p = aas_hashplanes[h]; p >= 0; p = aas_planechain[p])
 		{
-			plane = &aasworld.planes[p];
 			if (AAS_PlaneEqual(normal, dist, p))
 			{
 				*planenum = p;
@@ -908,7 +906,7 @@ int AAS_StoreArea(tmp_area_t *tmparea)
 	aas_face_t *aasface;
 	aas_faceindex_t aasfacenum;
 	vec3_t facecenter;
-	winding_t *w;
+	winding_t *w = NULL;
 
 	//when the area is merged go to the merged area
 	//FIXME: this isn't necessary anymore because the tree

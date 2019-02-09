@@ -506,7 +506,7 @@ bspbrush_t *HL_CreateBrushesFromBSP(int modelnum)
 //===========================================================================
 bspbrush_t *HL_MergeBrushes(bspbrush_t *brushlist, int modelnum)
 {
-	int nummerges, merged;
+	int nummerges = 0, merged;
 	bspbrush_t *b1, *b2, *tail, *newbrush, *newbrushlist;
 	bspbrush_t *lastb2;
 
@@ -701,7 +701,7 @@ bspbrush_t *HL_SplitBrushWithFace(bspbrush_t *brush, hl_dface_t *face)
 bspbrush_t *HL_TextureBrushes(bspbrush_t *brushlist, int modelnum)
 {
 	float area, largestarea;
-	int i, n, texinfonum, sn, numbrushes, ofs;
+	int i, n, texinfonum, sn, numbrushes = 0, ofs;
 	int bestfacenum, sidenodenum;
 	side_t *side;
 	hl_dmiptexlump_t *miptexlump;
@@ -1022,7 +1022,7 @@ void HL_BSPBrushToMapBrush(bspbrush_t *bspbrush, entity_t *mapent)
 void HL_CreateMapBrushes(entity_t *mapent, int modelnum)
 {
 	bspbrush_t *brushlist, *brush, *nextbrush;
-	int i;
+	int i = 0;
 
 	//create brushes from the model BSP tree
 	brushlist = HL_CreateBrushesFromBSP(modelnum);
@@ -1038,7 +1038,7 @@ void HL_CreateMapBrushes(entity_t *mapent, int modelnum)
 	} //end if
 	//
 	if (!modelnum) qprintf("converting brushes to map brushes\n");
-	if (!modelnum) qprintf("%5d brushes", i = 0);
+	if (!modelnum) qprintf("%5d brushes", i );
 	for (brush = brushlist; brush; brush = nextbrush)
 	{
 		nextbrush = brush->next;

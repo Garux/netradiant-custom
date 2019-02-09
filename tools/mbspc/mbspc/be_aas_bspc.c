@@ -20,23 +20,29 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include "../game/q_shared.h"
-#include "../bspc/l_log.h"
-#include "../bspc/l_qfiles.h"
+#include "../qcommon/q_shared.h"
+#include "l_log.h"
+#include "l_qfiles.h"
 #include "../botlib/l_memory.h"
 #include "../botlib/l_script.h"
 #include "../botlib/l_precomp.h"
 #include "../botlib/l_struct.h"
 #include "../botlib/aasfile.h"
-#include "../game/botlib.h"
-#include "../game/be_aas.h"
+#include "../botlib/botlib.h"
+#include "../botlib/be_aas.h"
 #include "../botlib/be_aas_def.h"
+#include "../botlib/be_aas_bsp.h"
+#include "../botlib/be_aas_move.h"
+#include "../botlib/be_aas_sample.h"
+#include "../botlib/be_aas_cluster.h"
+#include "../botlib/be_aas_reach.h"
 #include "../qcommon/cm_public.h"
 
 //#define BSPC
 
 extern botlib_import_t botimport;
 extern	qboolean capsule_collision;
+extern aas_t aasworld;
 
 botlib_import_t botimport;
 clipHandle_t worldmodel;
@@ -217,6 +223,8 @@ void Com_DPrintf(char *fmt, ...)
 int COM_Compress( char *data_p ) {
 	return strlen(data_p);
 }
+#if 0                           // ML081030 removed *************
+
 //===========================================================================
 //
 // Parameter:			-
@@ -235,6 +243,8 @@ void Com_Memset (void* dest, const int val, const size_t count) {
 void Com_Memcpy (void* dest, const void* src, const size_t count) {
 	memcpy(dest, src, count);
 }
+#endif // ********************************
+
 //===========================================================================
 //
 // Parameter:				-

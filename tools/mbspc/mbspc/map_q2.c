@@ -494,7 +494,6 @@ qboolean	Q2_ParseMapEntity(script_t *script)
 	epair_t *e;
 	side_t *s;
 	int i, j;
-	int startbrush, startsides;
 	vec_t newdist;
 	mapbrush_t *b;
 	token_t token;
@@ -507,8 +506,6 @@ qboolean	Q2_ParseMapEntity(script_t *script)
 	if (num_entities == MAX_MAP_ENTITIES)
 		Error ("num_entities == MAX_MAP_ENTITIES");
 
-	startbrush = nummapbrushes;
-	startsides = nummapbrushsides;
 
 	mapent = &entities[num_entities];
 	num_entities++;
@@ -994,10 +991,6 @@ qboolean Q2_ParseBSPEntity(int entnum)
 {
 	entity_t	*mapent;
 	char *model;
-	int startbrush, startsides;
-
-	startbrush = nummapbrushes;
-	startsides = nummapbrushsides;
 
 	mapent = &entities[entnum];//num_entities];
 	mapent->firstbrush = nummapbrushes;

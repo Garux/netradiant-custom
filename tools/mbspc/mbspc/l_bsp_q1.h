@@ -270,6 +270,6 @@ void Q1_LoadBSPFile(char *filename, int offset, int length);
 void Q1_WriteBSPFile(char *filename);
 void Q1_PrintBSPFileSizes(void);
 void Q1_ParseEntities(void);
-void Q1_UnparseEntities(void);
+char *Q1_UnparseEntities(int *size);
 
 #endif

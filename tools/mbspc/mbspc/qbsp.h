@@ -22,6 +22,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #if defined(WIN32) || defined(_WIN32)
+// _ML_ added
+  #undef QDECL
+  #define QDECL __cdecl
+// _ML_ added end
 #include <io.h>
 #endif
 #include <malloc.h>
@@ -37,7 +41,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "l_log.h"
 #include "l_qfiles.h"
 
-#define BSPC_VERSION		"2.1h"
+// _ML_ added
+#define Com_Memset  memset
+#define Com_Memcpy  memcpy
+#define Q_vsnprintf vsnprintf
+#define Com_sprintf sprintf
+#if defined __linux__
+  #define stricmp strcasecmp
+#endif
+// _ML_ added end
+
+#define BSPC_VERSION		"2.2"  // _ML_ modified
 
 #define ME
 #define DEBUG
@@ -228,6 +242,33 @@ extern	vec_t microvolume;
 
 extern	char outbase[32];
 extern	char source[1024];
+// _ML_ added
+extern dvertex_t *dvertexes;
+extern dedge_t *dedges;
+extern texinfo_t texinfo[];
+extern dleaf_t *dleafs;
+extern dplane_t *dplanes;
+extern dmodel_t *dmodels;
+extern dface_t *dfaces;
+extern dnode_t *dnodes;
+extern dbrush_t *dbrushes;
+extern dbrushside_t *dbrushsides;
+extern unsigned short *dleaffaces;
+extern unsigned short *dleafbrushes;
+extern int *dsurfedges;
+extern int numvertexes;
+extern int numedges;
+extern int nummodels;
+extern int numfaces;
+extern int numnodes;
+extern int numbrushes;
+extern int numbrushsides;
+extern int numleaffaces;
+extern int numleafbrushes;
+extern int numsurfedges;
+extern int numleafs;
+extern int numplanes;
+// _ML_ added end
 
 //=============================================================================
 // map.c
@@ -312,6 +353,9 @@ void ResetMapLoading(void);
 void PrintMapInfo(void);
 //writes a map file (type depending on loaded map type)
 void WriteMapFile(char *filename);
+// ML310109 added prototype
+void WriteTexinfo(char *filename);
+void WriteEntList(char *filename, char *entstring, int size);
 
 //=============================================================================
 // map_q2.c
@@ -475,3 +519,12 @@ void Tree_Print_r(node_t *node, int depth);
 void Tree_FreePortals_r(node_t *node);
 void Tree_PruneNodes_r(node_t *node);
 void Tree_PruneNodes(node_t *node);
+// ML081030 added
+
+void AAS_InitBotImport(void);
+void AAS_InitClustering(void);
+void AAS_ShowTotals(void);
+
+char *Q1_UnparseEntities(int *size);
+char *Q2_UnparseEntities(int *size);
+char *Q3_UnparseEntities(int *size);

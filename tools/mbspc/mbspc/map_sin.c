@@ -443,7 +443,6 @@ qboolean	Sin_ParseMapEntity (void)
 	epair_t		*e;
 	side_t		*s;
 	int			i, j;
-	int			startbrush, startsides;
 	vec_t		newdist;
 	mapbrush_t	*b;
 
@@ -456,8 +455,6 @@ qboolean	Sin_ParseMapEntity (void)
 	if (num_entities == MAX_MAP_ENTITIES)
 		Error ("num_entities == MAX_MAP_ENTITIES");
 
-	startbrush = nummapbrushes;
-	startsides = nummapbrushsides;
 
 	mapent = &entities[num_entities];
 	num_entities++;
@@ -1103,10 +1100,6 @@ qboolean Sin_ParseBSPEntity(int entnum)
 {
 	entity_t	*mapent;
 	char *model;
-	int startbrush, startsides;
-
-	startbrush = nummapbrushes;
-	startsides = nummapbrushsides;
 
 	mapent = &entities[entnum];//num_entities];
 	mapent->firstbrush = nummapbrushes;
