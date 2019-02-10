@@ -130,7 +130,7 @@ typedef struct md3Tag_s {
 */
 
 typedef struct {
-	int		ident;				// 
+	int		ident;				//
 
 	char	name[MAX_QPATH];	// polyset name
 
@@ -177,7 +177,7 @@ typedef struct {
 	int			flags;
 
 	int			numFrames;
-	int			numTags;			
+	int			numTags;
 	int			numSurfaces;
 
 	int			numSkins;
@@ -216,26 +216,26 @@ typedef struct {
 // there shouldn't be any problem with increasing these values at the
 // expense of more memory allocation in the utilities
 #define	Q3_MAX_MAP_MODELS		0x400
-#define	Q3_MAX_MAP_BRUSHES		0x8000
-#define	Q3_MAX_MAP_ENTITIES	0x800
-#define	Q3_MAX_MAP_ENTSTRING	0x10000
-#define	Q3_MAX_MAP_SHADERS		0x400
+#define	Q3_MAX_MAP_BRUSHES		0x10000		//******		was		0x8000		#SpaKK - to align with Q3Map2	#
+#define	Q3_MAX_MAP_ENTITIES		0x1000		//******		was		0x800		#SpaKK			''				#
+#define	Q3_MAX_MAP_ENTSTRING	0x80000		//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_SHADERS		0x800		//******		was		0x400		#SpaKK			''				#
 
 #define	Q3_MAX_MAP_AREAS		0x100	// MAX_MAP_AREA_BYTES in q_shared must match!
-#define	Q3_MAX_MAP_FOGS		0x100
-#define	Q3_MAX_MAP_PLANES		0x10000
-#define	Q3_MAX_MAP_NODES		0x10000
-#define	Q3_MAX_MAP_BRUSHSIDES	0x10000
-#define	Q3_MAX_MAP_LEAFS		0x10000
-#define	Q3_MAX_MAP_LEAFFACES	0x10000
-#define	Q3_MAX_MAP_LEAFBRUSHES	0x10000
-#define	Q3_MAX_MAP_PORTALS		0x10000
-#define	Q3_MAX_MAP_LIGHTING	0x400000
-#define	Q3_MAX_MAP_LIGHTGRID	0x400000
+#define	Q3_MAX_MAP_FOGS			0x100		//******		want	30			#SpaKK			''				#
+#define	Q3_MAX_MAP_PLANES		0x100000	//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_NODES		0x20000		//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_BRUSHSIDES	0x100000	//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_LEAFS		0x20000		//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_LEAFFACES	0x100000	//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_LEAFBRUSHES	0x40000		//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_PORTALS		0x20000		//******		was		0x10000		#SpaKK			''				#
+#define	Q3_MAX_MAP_LIGHTING		0x800000	//******		was		0x400000	#SpaKK			''				#
+#define	Q3_MAX_MAP_LIGHTGRID	0x100000	//******		was		0x400000	#SpaKK			''				#
 #define	Q3_MAX_MAP_VISIBILITY	0x200000
 
 #define	Q3_MAX_MAP_DRAW_SURFS	0x20000
-#define	Q3_MAX_MAP_DRAW_VERTS	0x80000
+#define	Q3_MAX_MAP_DRAW_VERTS	0x100000	//******		was		0x80000		#SpaKK			''				#
 #define	Q3_MAX_MAP_DRAW_INDEXES	0x80000
 
 

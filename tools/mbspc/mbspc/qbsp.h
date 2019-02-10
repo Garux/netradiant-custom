@@ -274,8 +274,8 @@ extern int numplanes;
 // map.c
 //=============================================================================
 
-#define MAX_MAPFILE_PLANES			256000
-#define MAX_MAPFILE_BRUSHES			65535
+#define MAX_MAPFILE_PLANES			512000  				//******	 (	orig....	256000	#SpaKK#		)
+#define MAX_MAPFILE_BRUSHES			128000					//******	 (	orig....	65535	#SpaKK#		)
 #define MAX_MAPFILE_BRUSHSIDES		(MAX_MAPFILE_BRUSHES*8)
 #define MAX_MAPFILE_TEXINFO			8192
 
