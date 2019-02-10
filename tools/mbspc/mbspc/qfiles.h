@@ -100,7 +100,7 @@ typedef struct
 	short	t;
 } dstvert_t;
 
-typedef struct 
+typedef struct
 {
 	short	index_xyz[3];
 	short	index_st[3];
@@ -156,7 +156,7 @@ typedef struct
 	int			ofs_st;			// byte offset from start for stverts
 	int			ofs_tris;		// offset for dtriangles
 	int			ofs_frames;		// offset for first frame
-	int			ofs_glcmds;	
+	int			ofs_glcmds;
 	int			ofs_end;		// end of file
 
 } dmdl_t;
@@ -285,7 +285,7 @@ typedef struct
 typedef struct
 {
 	int			ident;
-	int			version;	
+	int			version;
 	lump_t		lumps[HEADER_LUMPS];
 } dheader_t;
 
@@ -396,7 +396,7 @@ typedef struct
 
 typedef struct texinfo_s
 {
-	float		vecs[2][8];		// [s/t][xyz offset]
+	float		vecs[2][4];		// [s/t][xyz offset]
 	int			flags;			// miptex flags + overrides
 	int			value;			// light emission, etc
 	char		texture[32];	// texture name (textures/*.wal)
@@ -418,7 +418,7 @@ typedef struct
 	short		side;
 
 	int			firstedge;		// we must support > 64k edges
-	short		numedges;	
+	short		numedges;
 	short		texinfo;
 
 // lighting info

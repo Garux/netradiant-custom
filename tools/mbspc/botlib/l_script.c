@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "l_log.h"
 #include "../mbspc/l_mem.h"
-#include "l_cmd.h"
+#include "../mbspc/l_cmd.h"
 
 #define qtrue	true
 #define qfalse	false

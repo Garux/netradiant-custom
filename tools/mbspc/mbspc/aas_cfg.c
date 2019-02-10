@@ -19,9 +19,9 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
+#include <float.h>
 
 #include "qbsp.h"
-#include "float.h"
 #include "../botlib/aasfile.h"
 #include "aas_store.h"
 #include "aas_cfg.h"

@@ -91,7 +91,7 @@ typedef struct
 
 typedef struct
 {
-	int			version;	
+	int			version;
 	hl_lump_t	lumps[HL_HEADER_LUMPS];
 } hl_dheader_t;
 
@@ -193,7 +193,7 @@ typedef struct
 	short		side;
 
 	int		firstedge;		// we must support > 64k edges
-	short		numedges;	
+	short		numedges;
 	short		texinfo;
 
 // lighting info
@@ -306,7 +306,6 @@ int HL_CompressVis(byte *vis, byte *dest);
 
 void HL_LoadBSPFile(char *filename, int offset, int length);
 void HL_WriteBSPFile(char *filename);
-void HL_PrintBSPFileSizes(void);
 void HL_PrintBSPFileSizes(void);
 void HL_ParseEntities(void);
 void HL_UnparseEntities(void);
