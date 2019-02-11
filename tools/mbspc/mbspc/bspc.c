@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 extern	int use_nodequeue;		//brushbsp.c
 extern	int calcgrapplereach;	//be_aas_reach.c
+extern	qboolean g_bsp2map220;	//map.c
 
 float			subdivide_size = 240;
 char			source[1024];
@@ -706,8 +707,9 @@ int main (int argc, char **argv)
 			qfiles = GetArgumentFiles(argc, argv, &i, "bsp");
 		}                           //end else if
 
-		else if (!stricmp(argv[i], "-bsp2map"))
+		else if (!stricmp(argv[i], "-bsp2map") || !stricmp(argv[i], "-bsp2map220"))
 		{
+			g_bsp2map220 = !stricmp(argv[i], "-bsp2map220");
 			if (i + 1 >= argc) {i = 0; break;}
 			comp = COMP_BSP2MAP;
 			qfiles = GetArgumentFiles(argc, argv, &i, "bsp");
