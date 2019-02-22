@@ -64,16 +64,7 @@ typedef struct index_LUT_s
 {
 	short Vert;
 	short ST;
-	struct  index_LUT_s *next;
-
 } index_LUT_t;
-
-typedef struct index_DUP_LUT_s
-{
-	short ST;
-	short OldVert;
-
-} index_DUP_LUT_t;
 
 typedef struct
 {
@@ -329,9 +320,8 @@ static int _md2_canload( PM_PARAMS_CANLOAD ){
 
 
 static picoModel_t *_md2_load( PM_PARAMS_LOAD ){
-	int i, j, dups, dup_index;
-	index_LUT_t     *p_index_LUT, *p_index_LUT2, *p_index_LUT3;
-	index_DUP_LUT_t *p_index_LUT_DUPS;
+	int i, j, k, dups;
+	index_LUT_t     *p_index_LUT;
 	md2Triangle_t   *p_md2Triangle;
 
 	char skinname[ MD2_MAX_SKINNAME + 1 ];
@@ -481,8 +471,9 @@ static picoModel_t *_md2_load( PM_PARAMS_LOAD ){
 	{
 		p_index_LUT[i].Vert = -1;
 		p_index_LUT[i].ST = -1;
-		p_index_LUT[i].next = NULL;
 	}
+
+	index_LUT_t* p_index_LUT_dups = _pico_alloc( sizeof( index_LUT_t ) * md2->numTris * 3 ); //overallocating
 
 	// Fill in Look Up Table, and allocate/fill Linked List from vert array as needed for dup STs per Vert.
 	dups = 0;
@@ -491,75 +482,34 @@ static picoModel_t *_md2_load( PM_PARAMS_LOAD ){
 		p_md2Triangle = (md2Triangle_t *) ( bb + md2->ofsTris + ( sizeof( md2Triangle_t ) * i ) );
 		for ( j = 0; j < 3; j++ )
 		{
-			if ( p_index_LUT[p_md2Triangle->index_xyz[j]].ST == -1 ) { // No Main Entry
-				p_index_LUT[p_md2Triangle->index_xyz[j]].ST = p_md2Triangle->index_st[j];
+			const short iXYZ = p_md2Triangle->index_xyz[j];
+			const short iST = p_md2Triangle->index_st[j];
+			if ( p_index_LUT[iXYZ].ST == -1 ) { // No Main Entry
+				p_index_LUT[iXYZ].ST = iST;
+				p_index_LUT[iXYZ].Vert = iXYZ;
 			}
 
-			else if ( p_md2Triangle->index_st[j] == p_index_LUT[p_md2Triangle->index_xyz[j]].ST ) { // Equal to Main Entry
+			else if ( iST == p_index_LUT[iXYZ].ST && iXYZ == p_index_LUT[iXYZ].Vert ) { // Equal to Main Entry
 				continue;
 			}
 
-			else if ( ( p_index_LUT[p_md2Triangle->index_xyz[j]].next == NULL ) ) { // Not equal to Main entry, and no LL entry
-				// Add first entry of LL from Main
-				p_index_LUT2 = (index_LUT_t *)_pico_alloc( sizeof( index_LUT_t ) );
-				if ( p_index_LUT2 == NULL ) {
-					_pico_printf( PICO_ERROR," Couldn't allocate memory!\n" );
-				}
-				p_index_LUT[p_md2Triangle->index_xyz[j]].next = (index_LUT_t *)p_index_LUT2;
-				p_index_LUT2->Vert = dups;
-				p_index_LUT2->ST = p_md2Triangle->index_st[j];
-				p_index_LUT2->next = NULL;
-				p_md2Triangle->index_xyz[j] = dups + md2->numXYZ; // Make change in Tri hunk
-				dups++;
-			}
-			else // Try to find in LL from Main Entry
-			{
-				p_index_LUT3 = p_index_LUT2 = p_index_LUT[p_md2Triangle->index_xyz[j]].next;
-				while ( ( p_index_LUT2 != NULL ) && ( p_md2Triangle->index_xyz[j] != p_index_LUT2->Vert ) ) // Walk down LL
-				{
-					p_index_LUT3 = p_index_LUT2;
-					p_index_LUT2 = p_index_LUT2->next;
-				}
-				p_index_LUT2 = p_index_LUT3;
-
-				if ( p_md2Triangle->index_st[j] == p_index_LUT2->ST ) { // Found it
-					p_md2Triangle->index_xyz[j] = p_index_LUT2->Vert + md2->numXYZ; // Make change in Tri hunk
-					continue;
-				}
-
-				if ( p_index_LUT2->next == NULL ) { // Didn't find it. Add entry to LL.
-					// Add the Entry
-					p_index_LUT3 = (index_LUT_t *)_pico_alloc( sizeof( index_LUT_t ) );
-					if ( p_index_LUT3 == NULL ) {
-						_pico_printf( PICO_ERROR," Couldn't allocate memory!\n" );
+			else{
+				for( k = 0; k < dups; k++ ){ //search in dups
+					if( iST == p_index_LUT_dups[k].ST && iXYZ == p_index_LUT_dups[k].Vert ){
+						p_md2Triangle->index_xyz[j] = k + md2->numXYZ; // Make change in Tri hunk
+						p_md2Triangle->index_st[j] = k + md2->numXYZ; // Make change in Tri hunk
+						break;
 					}
-					p_index_LUT2->next = (index_LUT_t *)p_index_LUT3;
-					p_index_LUT3->Vert = p_md2Triangle->index_xyz[j];
-					p_index_LUT3->ST = p_md2Triangle->index_st[j];
-					p_index_LUT3->next = NULL;
+				}
+
+				if( k == dups ){ //add new
+					p_index_LUT_dups[dups].ST = iST;
+					p_index_LUT_dups[dups].Vert = iXYZ;
 					p_md2Triangle->index_xyz[j] = dups + md2->numXYZ; // Make change in Tri hunk
-					dups++;
+					p_md2Triangle->index_st[j] = dups + md2->numXYZ; // Make change in Tri hunk
+					++dups;
 				}
 			}
-		}
-	}
-
-	// malloc and build array for Dup STs
-	p_index_LUT_DUPS = (index_DUP_LUT_t *)_pico_alloc( sizeof( index_DUP_LUT_t ) * dups );
-	if ( p_index_LUT_DUPS == NULL ) {
-		_pico_printf( PICO_ERROR," Couldn't allocate memory!\n" );
-	}
-
-	dup_index = 0;
-	for ( i = 0; i < md2->numXYZ; i++ )
-	{
-		p_index_LUT2 = p_index_LUT[i].next;
-		while ( p_index_LUT2 != NULL )
-		{
-			p_index_LUT_DUPS[p_index_LUT2->Vert].OldVert = i;
-			p_index_LUT_DUPS[p_index_LUT2->Vert].ST = p_index_LUT2->ST;
-			dup_index++;
-			p_index_LUT2 = p_index_LUT2->next;
 		}
 	}
 
@@ -597,53 +547,35 @@ static picoModel_t *_md2_load( PM_PARAMS_LOAD ){
 		PicoSetSurfaceColor( picoSurface, 0, i, picoColor_white );
 	}
 
-	if ( dups ) {
-		for ( i = 0; i < dups; i++ )
-		{
-			j = p_index_LUT_DUPS[i].OldVert;
-			/* set vertex origin */
-			xyz[ 0 ] = frame->verts[j].v[0] * frame->scale[0] + frame->translate[0];
-			xyz[ 1 ] = frame->verts[j].v[1] * frame->scale[1] + frame->translate[1];
-			xyz[ 2 ] = frame->verts[j].v[2] * frame->scale[2] + frame->translate[2];
-			PicoSetSurfaceXYZ( picoSurface, i + md2->numXYZ, xyz );
-
-			/* set normal */
-			normal[ 0 ] = md2_normals[frame->verts[j].lightnormalindex][0];
-			normal[ 1 ] = md2_normals[frame->verts[j].lightnormalindex][1];
-			normal[ 2 ] = md2_normals[frame->verts[j].lightnormalindex][2];
-			PicoSetSurfaceNormal( picoSurface, i + md2->numXYZ, normal );
-
-			/* set st coords */
-			st[ 0 ] =  ( ( texCoord[p_index_LUT_DUPS[i].ST].s ) / ( (float)md2->skinWidth ) );
-			st[ 1 ] =  ( texCoord[p_index_LUT_DUPS[i].ST].t / ( (float)md2->skinHeight ) );
-			PicoSetSurfaceST( picoSurface, 0, i + md2->numXYZ, st );
-
-			/* set color */
-			PicoSetSurfaceColor( picoSurface, 0, i + md2->numXYZ, picoColor_white );
-		}
-	}
-
-	// Free up malloc'ed LL entries
-	for ( i = 0; i < md2->numXYZ; i++ )
+	for ( i = 0; i < dups; i++ )
 	{
-		if ( p_index_LUT[i].next != NULL ) {
-			p_index_LUT2 = p_index_LUT[i].next;
-			do {
-				p_index_LUT3 = p_index_LUT2->next;
-				_pico_free( p_index_LUT2 );
-				p_index_LUT2 = p_index_LUT3;
-				dups--;
-			} while ( p_index_LUT2 != NULL );
-		}
-	}
+		const int surfN = i + md2->numXYZ;
+		vertex = &frame->verts[p_index_LUT_dups[i].Vert];
+		/* set vertex origin */
+		xyz[ 0 ] = vertex->v[0] * frame->scale[0] + frame->translate[0];
+		xyz[ 1 ] = vertex->v[1] * frame->scale[1] + frame->translate[1];
+		xyz[ 2 ] = vertex->v[2] * frame->scale[2] + frame->translate[2];
+		PicoSetSurfaceXYZ( picoSurface, surfN, xyz );
 
-	if ( dups ) {
-		_pico_printf( PICO_WARNING, " Not all LL mallocs freed\n" );
+		/* set normal */
+		normal[ 0 ] = md2_normals[vertex->lightnormalindex][0];
+		normal[ 1 ] = md2_normals[vertex->lightnormalindex][1];
+		normal[ 2 ] = md2_normals[vertex->lightnormalindex][2];
+		PicoSetSurfaceNormal( picoSurface, surfN, normal );
+
+		j = p_index_LUT_dups[i].ST;
+		/* set st coords */
+		st[ 0 ] =  ( ( texCoord[j].s ) / ( (float)md2->skinWidth ) );
+		st[ 1 ] =  ( texCoord[j].t / ( (float)md2->skinHeight ) );
+		PicoSetSurfaceST( picoSurface, 0, surfN, st );
+
+		/* set color */
+		PicoSetSurfaceColor( picoSurface, 0, surfN, picoColor_white );
 	}
 
 	// Free malloc'ed LUTs
 	_pico_free( p_index_LUT );
-	_pico_free( p_index_LUT_DUPS );
+	_pico_free( p_index_LUT_dups );
 
 	/* return the new pico model */
 	_pico_free( bb0 );
