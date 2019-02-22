@@ -256,7 +256,8 @@ void MD2Surface_read( Model& model, const byte* buffer, ArchiveFile& file ){
 	}
 	else
 	{
-		strcpy( skinname, skinnameRelative );
+		strncpy( skinname, skinnameRelative, MD2_MAX_SKINNAME - 1 );
+		skinname[MD2_MAX_SKINNAME - 1] = '\0';
 	}
 	surface.setShader( skinname );
 	surface.updateAABB();
