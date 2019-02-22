@@ -3512,7 +3512,9 @@ void StoreSurfaceLightmaps( qboolean fastAllocate ){
 
 			/* store it */
 			//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
-			ds->shaderNum = EmitShader( csi->shader, &bspShaders[ ds->shaderNum ].contentFlags, &bspShaders[ ds->shaderNum ].surfaceFlags );
+			int cont = bspShaders[ ds->shaderNum ].contentFlags;
+			int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
+			ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
 			//%	Sys_Printf( ")\n" );
 		}
 
@@ -3530,13 +3532,17 @@ void StoreSurfaceLightmaps( qboolean fastAllocate ){
 
 			/* store it */
 			//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
-			ds->shaderNum = EmitShader( csi->shader, &bspShaders[ ds->shaderNum ].contentFlags, &bspShaders[ ds->shaderNum ].surfaceFlags );
+			int cont = bspShaders[ ds->shaderNum ].contentFlags;
+			int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
+			ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
 			//%	Sys_Printf( ")\n" );
 		}
 
 		/* use the normal plain-jane shader */
 		else{
-			ds->shaderNum = EmitShader( info->si->shader, &bspShaders[ ds->shaderNum ].contentFlags, &bspShaders[ ds->shaderNum ].surfaceFlags );
+			int cont = bspShaders[ ds->shaderNum ].contentFlags;
+			int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
+			ds->shaderNum = EmitShader( info->si->shader, &cont, &surf );
 		}
 	}
 
