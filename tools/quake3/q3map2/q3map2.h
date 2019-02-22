@@ -1006,6 +1006,9 @@ typedef enum
 }
 surfaceType_t;
 
+#ifndef MAIN_C
+extern
+#endif
 char            *surfaceTypes[ NUM_SURFACE_TYPES ]
 #ifndef MAIN_C
 ;
@@ -2020,7 +2023,6 @@ Q_EXTERN float jitters[ MAX_JITTERS ];
 Q_EXTERN qboolean doingBSP Q_ASSIGN( qfalse );
 
 /* commandline arguments */
-Q_EXTERN qboolean verbose;
 Q_EXTERN qboolean verboseEntities Q_ASSIGN( qfalse );
 Q_EXTERN qboolean force Q_ASSIGN( qfalse );
 Q_EXTERN qboolean infoMode Q_ASSIGN( qfalse );
@@ -2213,8 +2215,6 @@ Q_EXTERN leaf_t             *faceleafs;
 Q_EXTERN int numfaces;
 
 Q_EXTERN int c_portaltest, c_portalpass, c_portalcheck;
-Q_EXTERN int c_portalskip, c_leafskip;
-Q_EXTERN int c_vistest, c_mighttest;
 Q_EXTERN int c_chains;
 
 Q_EXTERN byte               *vismap, *vismap_p, *vismap_end;

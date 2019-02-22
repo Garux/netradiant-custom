@@ -75,7 +75,7 @@ extern "C"
 #define PICO_IOEOF  1
 #define PICO_IOERR  2
 
-const picoColor_t picoColor_white;
+extern const picoColor_t picoColor_white;
 
 /* types */
 typedef struct picoParser_s
