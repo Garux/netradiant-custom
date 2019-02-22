@@ -4245,7 +4245,7 @@ public:
 				viewdir_make_cut_worthy( plane3_for_points( m_points[0].m_point, m_points[1].m_point, m_points[2].m_point ) );
 			}
 			m_points[2].m_point = m_points[0].m_point + m_viewdir * vector3_length( m_points[0].m_point - m_points[1].m_point );
-		}
+		} // fall through
 		case 3:
 			Clipper_setPlanePoints( ClipperPoints( m_points[0].m_point, m_points[1].m_point, m_points[2].m_point, npoints ) );
 			break;

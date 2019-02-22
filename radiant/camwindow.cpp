@@ -729,7 +729,7 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 		cam->m_strafe_forward = true;
 		break;
 	case 4:
-		cam->m_strafe_forward_invert = true;
+		cam->m_strafe_forward_invert = true; // fall through
 	default: /* 3 & 4 */
 		cam->m_strafe = ( state & GDK_CONTROL_MASK ) || ( state & GDK_BUTTON3_MASK ) || ( state & GDK_SHIFT_MASK );
 		cam->m_strafe_forward = ( state & GDK_SHIFT_MASK ) != 0;

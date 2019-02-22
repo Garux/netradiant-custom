@@ -278,6 +278,7 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 		case eBrushTypeQuake3:
 		case eBrushTypeQuake3Valve220:
 			tokeniser.ungetToken(); // (
+									// fall through
 		case eBrushTypeQuake3BP:
 			return GlobalBrushCreator().createBrush();
 		default:
@@ -355,6 +356,7 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 		case eBrushTypeQuake:
 		case eBrushTypeValve220:
 			tokeniser.ungetToken(); // (
+									// fall through
 		case eBrushTypeQuake3BP:
 			return GlobalBrushCreator().createBrush();
 		default:
@@ -473,6 +475,7 @@ scene::Node& parsePrimitive( Tokeniser& tokeniser ) const {
 		case eBrushTypeQuake2:
 		case eBrushTypeQuake3Valve220:
 			tokeniser.ungetToken(); // (
+									// fall through
 		case eBrushTypeQuake3BP:
 			return GlobalBrushCreator().createBrush();
 		default:
