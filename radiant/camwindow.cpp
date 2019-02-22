@@ -883,6 +883,10 @@ private:
 #include "grid.h"
 class RenderableCamWorkzone : public OpenGLRenderable
 {
+	mutable Array<Vector3> m_verticesarr[3];
+	mutable Array<GLboolean> m_edgearr[3];
+	mutable Array<Vector4> m_colorarr0[3];
+	mutable Array<Vector4> m_colorarr1[3];
 public:
 void render( RenderStateFlags state ) const {
 	glEnableClientState( GL_EDGE_FLAG_ARRAY );
@@ -910,10 +914,16 @@ void render( RenderStateFlags state ) const {
 		const float grid = GetGridSize();
 		const std::size_t approx_count = ( std::max( 0.f, bounds.extents[i] ) + offset ) * 4 / grid + 8;
 
-		Array<Vector3> verticesarr( approx_count );
-		Array<GLboolean> edgearr( approx_count );
-		Array<Vector4> colorarr0( approx_count );
-		Array<Vector4> colorarr1( approx_count );
+		Array<Vector3>& verticesarr( m_verticesarr[i] );
+		Array<GLboolean>& edgearr( m_edgearr[i] );
+		Array<Vector4>& colorarr0( m_colorarr0[i] );
+		Array<Vector4>& colorarr1( m_colorarr1[i] );
+		if( verticesarr.size() < approx_count ){
+			verticesarr.resize( approx_count );
+			edgearr.resize( approx_count );
+			colorarr0.resize( approx_count );
+			colorarr1.resize( approx_count );
+		}
 
 		float coord = float_snapped( bounds.origin[i] - std::max( 0.f, bounds.extents[i] ) - offset, grid );
 //		const float coord_end = float_snapped( bounds.origin[i] + std::max( 0.f, bounds.extents[i] ) + offset, grid ) + 0.1f;
@@ -1005,6 +1015,7 @@ static Shader* m_state_workzone;
 FreezePointer m_freezePointer;
 
 CamDrawSize m_draw_size;
+RenderableCamWorkzone m_draw_workzone;
 
 public:
 FBO* m_fbo;
@@ -2115,9 +2126,8 @@ void CamWnd::Cam_Draw(){
 
 		Scene_Render( renderer, m_view );
 
-		RenderableCamWorkzone workzone;
 		if( g_camwindow_globals_private.m_bShowWorkzone && GlobalSelectionSystem().countSelected() != 0 ){
-			workzone.render( renderer, m_state_workzone );
+			m_draw_workzone.render( renderer, m_state_workzone );
 		}
 
 		renderer.render( m_Camera.modelview, m_Camera.projection );
