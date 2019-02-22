@@ -849,7 +849,8 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 	}
 
 	/* strip off extension */
-	strcpy( shader, shaderName );
+	strncpy( shader, shaderName, MAX_QPATH - 1 );
+	shader[MAX_QPATH - 1] = '\0';
 	StripExtension( shader );
 
 	/* search for it */
