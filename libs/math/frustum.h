@@ -96,6 +96,8 @@ typedef Vector4* iterator;
 typedef const Vector4* const_iterator;
 
 static std::size_t apply( const_iterator first, const_iterator last, iterator out ){
+	if( first == last ) /* prevent buffer underflow in compare( *i ); isn't actually required, for technical correctness only */
+		return 0;
 	const_iterator next = first, i = last - 1;
 	iterator tmp( out );
 	bool b0 = ClipPlane::compare( *i );
