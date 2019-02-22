@@ -121,10 +121,10 @@ bool QGL_ExtensionSupported( const char* extension ){
 #if EXTENSIONS_ENABLED
 	const GLubyte *extensions = 0;
 	const GLubyte *start;
-	GLubyte *where, *terminator;
+	const GLubyte *where, *terminator;
 
 	// Extension names should not have spaces.
-	where = (GLubyte *) strchr( extension, ' ' );
+	where = (const GLubyte *) strchr( extension, ' ' );
 	if ( where || *extension == '\0' ) {
 		return false;
 	}
@@ -140,7 +140,7 @@ bool QGL_ExtensionSupported( const char* extension ){
 	// OpenGL extensions string. Don't be fooled by sub-strings, etc.
 	for ( start = extensions; ; )
 	{
-		where = (GLubyte *) strstr( (const char *) start, extension );
+		where = (const GLubyte *) strstr( (const char *) start, extension );
 		if ( !where ) {
 			break;
 		}
