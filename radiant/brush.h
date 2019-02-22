@@ -87,8 +87,9 @@ inline void Winding_DrawWireframe( const Winding& winding ){
 inline void Winding_Draw( const Winding& winding, const Vector3& normal, RenderStateFlags state ){
 	glVertexPointer( 3, GL_FLOAT, sizeof( WindingVertex ), &winding.points.data()->vertex );
 
+	Vector3 normals[c_brush_maxFaces];
+
 	if ( ( state & RENDER_BUMP ) != 0 ) {
-		Vector3 normals[c_brush_maxFaces];
 		typedef Vector3* Vector3Iter;
 		for ( Vector3Iter i = normals, end = normals + winding.numpoints; i != end; ++i )
 		{
@@ -111,7 +112,6 @@ inline void Winding_Draw( const Winding& winding, const Vector3& normal, RenderS
 	else
 	{
 		if ( state & RENDER_LIGHTING ) {
-			Vector3 normals[c_brush_maxFaces];
 			typedef Vector3* Vector3Iter;
 			for ( Vector3Iter i = normals, last = normals + winding.numpoints; i != last; ++i )
 			{
