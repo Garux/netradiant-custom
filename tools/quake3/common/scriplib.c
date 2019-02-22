@@ -224,11 +224,8 @@ qboolean GetToken( qboolean crossline ){
 // skip space
 //
 skipspace:
-	while ( *script->script_p <= 32 )
+	while ( script->script_p < script->end_p && *script->script_p <= 32 )
 	{
-		if ( script->script_p >= script->end_p ) {
-			return EndOfScript( crossline );
-		}
 		if ( *script->script_p++ == '\n' ) {
 			if ( !crossline ) {
 				Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
