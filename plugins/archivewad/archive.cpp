@@ -38,7 +38,7 @@
 
 #include "wad.h"
 
-class WadArchive : public Archive
+class WadArchive final : public Archive
 {
 class wad_record_t
 {

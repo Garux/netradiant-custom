@@ -50,7 +50,7 @@ inline void buffer_findreplace( char* buffer, char find, char replace ){
 
 #include "pak.h"
 
-class PakArchive : public Archive
+class PakArchive final : public Archive
 {
 class PakRecord
 {

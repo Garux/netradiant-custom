@@ -40,7 +40,7 @@
 #include "vfspk3.h"
 
 
-class DirectoryArchive : public Archive
+class DirectoryArchive final : public Archive
 {
 CopiedString m_root;
 public:

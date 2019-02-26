@@ -377,7 +377,7 @@ hash_t operator()( const TextureKey& key ) const {
 
 #define DEBUG_TEXTURES 0
 
-class TexturesMap : public TexturesCache
+class TexturesMap final : public TexturesCache
 {
 class TextureConstructor
 {

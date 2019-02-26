@@ -76,7 +76,7 @@ IGL2DWindow* Highlight();
 void DropHighlight() { }
 };
 
-class CPointMsg : public ISAXHandler, public IGL2DWindow
+class CPointMsg final : public ISAXHandler, public IGL2DWindow
 {
 enum { POINT_MESSAGE, POINT_POINT } EPointState;
 StringOutputStream message;
@@ -109,7 +109,7 @@ void DecRef() {
 void Draw2D( VIEWTYPE vt );
 };
 
-class CWindingMsg : public ISAXHandler, public IGL2DWindow
+class CWindingMsg final : public ISAXHandler, public IGL2DWindow
 {
 enum { WINDING_MESSAGE, WINDING_WINDING } EPointState;
 StringOutputStream message;

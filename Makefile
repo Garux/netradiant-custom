@@ -114,7 +114,7 @@ CFLAGS_COMMON = -MMD -W -Wall -Wcast-align -Wcast-qual -Wno-unused-parameter -fn
 CPPFLAGS_COMMON =
 LDFLAGS_COMMON =
 LIBS_COMMON =
-CXXFLAGS_COMMON = -std=c++11 -Wno-non-virtual-dtor -Wreorder -fno-exceptions -fno-rtti
+CXXFLAGS_COMMON = -std=c++11 -Wreorder -fno-exceptions -fno-rtti
 
 ifeq ($(BUILD),debug)
 ifeq ($(findstring $(CFLAGS),-g),)

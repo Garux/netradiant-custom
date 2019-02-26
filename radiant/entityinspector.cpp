@@ -126,7 +126,7 @@ virtual void update() = 0;
 virtual void release() = 0;
 };
 
-class BooleanAttribute : public EntityAttribute
+class BooleanAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 GtkCheckButton* m_check;
@@ -191,6 +191,7 @@ StringAttribute( const char* key ) :
 	m_entry = entry;
 	m_nonModal.connect( m_entry );
 }
+virtual ~StringAttribute() = default;
 GtkWidget* getWidget() const {
 	return GTK_WIDGET( m_entry );
 }
@@ -236,7 +237,7 @@ TextureAttribute( const char* key ) : StringAttribute( key ){
 };
 
 
-class ColorAttribute : public EntityAttribute
+class ColorAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 BrowsedPathEntry m_entry;
@@ -280,7 +281,7 @@ typedef MemberCaller1<ColorAttribute, const BrowsedPathEntry::SetPathCallback&, 
 };
 
 
-class ModelAttribute : public EntityAttribute
+class ModelAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 BrowsedPathEntry m_entry;
@@ -343,7 +344,7 @@ const char* browse_sound( GtkWidget* parent ){
 	return filename;
 }
 
-class SoundAttribute : public EntityAttribute
+class SoundAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 BrowsedPathEntry m_entry;
@@ -408,7 +409,7 @@ public:
 	}
 };
 
-class AngleAttribute : public EntityAttribute
+class AngleAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 GtkEntry* m_entry;
@@ -468,7 +469,7 @@ typedef const char* String;
 const String buttons[] = { "up", "down", "yaw" };
 }
 
-class DirectionAttribute : public EntityAttribute
+class DirectionAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 GtkEntry* m_entry;
@@ -572,7 +573,7 @@ AnglesEntry() : m_roll( 0 ), m_pitch( 0 ), m_yaw( 0 ){
 }
 };
 
-class AnglesAttribute : public EntityAttribute
+class AnglesAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 AnglesEntry m_angles;
@@ -670,7 +671,7 @@ Vector3Entry() : m_x( 0 ), m_y( 0 ), m_z( 0 ){
 }
 };
 
-class Vector3Attribute : public EntityAttribute
+class Vector3Attribute final : public EntityAttribute
 {
 CopiedString m_key;
 Vector3Entry m_vector3;
@@ -770,7 +771,7 @@ void setActive( GtkComboBox* combo, int value ){
 }
 };
 
-class ListAttribute : public EntityAttribute
+class ListAttribute final : public EntityAttribute
 {
 CopiedString m_key;
 GtkComboBox* m_combo;

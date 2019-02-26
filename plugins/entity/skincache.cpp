@@ -177,7 +177,7 @@ void unrealise(){
 GlobalSkins g_skins;
 
 
-class Doom3ModelSkinCacheElement : public ModelSkin
+class Doom3ModelSkinCacheElement final : public ModelSkin
 {
 ModuleObservers m_observers;
 Doom3ModelSkin* m_skin;
@@ -219,7 +219,7 @@ void forEachRemap( const SkinRemapCallback& callback ) const {
 }
 };
 
-class Doom3ModelSkinCache : public ModelSkinCache, public ModuleObserver
+class Doom3ModelSkinCache final : public ModelSkinCache, public ModuleObserver
 {
 class CreateDoom3ModelSkin
 {

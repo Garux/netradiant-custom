@@ -61,7 +61,7 @@ PatchCreator& getPatchDef2Doom3(){
 }
 };
 
-class MapXMLAPI : public TypeSystemRef, public MapFormat
+class MapXMLAPI final : public TypeSystemRef, public MapFormat
 {
 public:
 typedef MapFormat Type;

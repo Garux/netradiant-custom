@@ -65,7 +65,7 @@ TypeId getTypeId( const char* name ){
 }
 };
 
-class CompiledGraph : public scene::Graph, public scene::Instantiable::Observer
+class CompiledGraph final : public scene::Graph, public scene::Instantiable::Observer
 {
 typedef std::map<PathConstReference, scene::Instance*> InstanceMap;
 

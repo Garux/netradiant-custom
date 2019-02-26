@@ -67,7 +67,7 @@ PatchCreator& getPatchDef2Doom3(){
 }
 };
 
-class MapDoom3API : public TypeSystemRef, public MapFormat, public PrimitiveParser
+class MapDoom3API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
 MapDoom3Dependencies& m_dependencies;
 public:
@@ -138,7 +138,7 @@ MapDoom3Module;
 MapDoom3Module g_MapDoom3Module;
 
 
-class MapQuake4API : public TypeSystemRef, public MapFormat, public PrimitiveParser
+class MapQuake4API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
 MapDoom3Dependencies& m_dependencies;
 public:
@@ -226,7 +226,7 @@ MapDependencies() :
 }
 };
 
-class MapQ3API : public TypeSystemRef, public MapFormat, public PrimitiveParser
+class MapQ3API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
 mutable bool m_formatDetected;
 public:
@@ -308,7 +308,7 @@ typedef SingletonModule<MapQ3API, MapDependencies> MapQ3Module;
 MapQ3Module g_MapQ3Module;
 
 
-class MapQ1API : public TypeSystemRef, public MapFormat, public PrimitiveParser
+class MapQ1API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
 mutable bool m_formatDetected;
 public:
@@ -385,7 +385,7 @@ typedef SingletonModule<MapQ1API, MapDependencies> MapQ1Module;
 MapQ1Module g_MapQ1Module;
 
 
-class MapHalfLifeAPI : public TypeSystemRef, public MapFormat, public PrimitiveParser
+class MapHalfLifeAPI final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
 public:
 typedef MapFormat Type;
@@ -428,7 +428,7 @@ typedef SingletonModule<MapHalfLifeAPI, MapDependencies> MapHalfLifeModule;
 MapHalfLifeModule g_MapHalfLifeModule;
 
 
-class MapQ2API : public TypeSystemRef, public MapFormat, public PrimitiveParser
+class MapQ2API final : public TypeSystemRef, public MapFormat, public PrimitiveParser
 {
 mutable bool m_formatDetected;
 public:
@@ -632,7 +632,7 @@ void VMF_Read( scene::Node& root, Tokeniser& tokeniser, EntityCreator& entityTab
 	globalOutputStream() << g_vmf_brushes << " brushes\n";
 }
 
-class MapVMFAPI : public TypeSystemRef, public MapFormat
+class MapVMFAPI final : public TypeSystemRef, public MapFormat
 {
 public:
 typedef MapFormat Type;

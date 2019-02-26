@@ -4667,7 +4667,7 @@ public:
 
 
 // RadiantSelectionSystem
-class RadiantSelectionSystem :
+class RadiantSelectionSystem final :
 	public SelectionSystem,
 	public Translatable,
 	public Rotatable,
@@ -6271,7 +6271,7 @@ void highlight( DeviceVector position ){
 
 
 
-class RadiantWindowObserver : public SelectionSystemWindowObserver
+class RadiantWindowObserver final : public SelectionSystemWindowObserver
 {
 DeviceVector m_epsilon;
 ModifierFlags m_state;

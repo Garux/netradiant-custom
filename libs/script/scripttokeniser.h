@@ -24,7 +24,7 @@
 
 #include "iscriplib.h"
 
-class ScriptTokeniser : public Tokeniser
+class ScriptTokeniser final : public Tokeniser
 {
 enum CharType
 {

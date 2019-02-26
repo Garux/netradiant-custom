@@ -246,7 +246,7 @@ typedef ImportExport<GtkComboBox, int, IntComboImport, IntComboExport> IntComboI
 
 
 template<typename FirstArgument>
-class CallbackDialogData : public DLG_DATA
+class CallbackDialogData final : public DLG_DATA
 {
 public:
 typedef Callback1<FirstArgument> ImportCallback;

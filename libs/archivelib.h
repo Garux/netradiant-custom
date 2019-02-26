@@ -157,7 +157,7 @@ TextInputStream& getInputStream(){
 };
 
 /// \brief An ArchiveFile which is stored as a single file on disk.
-class DirectoryArchiveFile : public ArchiveFile
+class DirectoryArchiveFile final : public ArchiveFile
 {
 CopiedString m_name;
 FileInputStream m_istream;
@@ -196,7 +196,7 @@ InputStream& getInputStream(){
 };
 
 /// \brief An ArchiveTextFile which is stored as a single file on disk.
-class DirectoryArchiveTextFile : public ArchiveTextFile
+class DirectoryArchiveTextFile final : public ArchiveTextFile
 {
 CopiedString m_name;
 TextFileInputStream m_inputStream;

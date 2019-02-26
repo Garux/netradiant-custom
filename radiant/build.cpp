@@ -176,7 +176,7 @@ virtual XMLElementParser& pushElement( const XMLElement& element ) = 0;
 virtual void popElement( const char* name ) = 0;
 };
 
-class VariableStringXMLConstructor : public XMLElementParser
+class VariableStringXMLConstructor final : public XMLElementParser
 {
 StringBuffer m_buffer;
 VariableString& m_variableString;
@@ -198,7 +198,7 @@ void popElement( const char* name ){
 }
 };
 
-class ConditionalXMLConstructor : public XMLElementParser
+class ConditionalXMLConstructor final : public XMLElementParser
 {
 StringBuffer m_buffer;
 Conditional& m_conditional;
@@ -220,7 +220,7 @@ void popElement( const char* name ){
 }
 };
 
-class ToolXMLConstructor : public XMLElementParser
+class ToolXMLConstructor final : public XMLElementParser
 {
 StringBuffer m_buffer;
 Tool& m_tool;
@@ -266,7 +266,7 @@ void flush(){
 typedef VariableString BuildCommand;
 typedef std::list<BuildCommand> Build;
 
-class BuildXMLConstructor : public XMLElementParser
+class BuildXMLConstructor final : public XMLElementParser
 {
 VariableStringXMLConstructor* m_variableString;
 Build& m_build;

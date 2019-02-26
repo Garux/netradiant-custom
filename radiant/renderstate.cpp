@@ -935,7 +935,7 @@ std::size_t count() const {
 }
 };
 
-class OpenGLShader : public Shader
+class OpenGLShader final : public Shader
 {
 typedef std::list<OpenGLStateBucket*> Passes;
 Passes m_passes;
@@ -1140,7 +1140,7 @@ inline void setFogState( const OpenGLFogState& state ){
 #define DEBUG_SHADERS 0
 void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned int globalstate );
 
-class OpenGLShaderCache : public ShaderCache, public TexturesCacheObserver, public ModuleObserver
+class OpenGLShaderCache final : public ShaderCache, public TexturesCacheObserver, public ModuleObserver
 {
 class CreateOpenGLShader
 {

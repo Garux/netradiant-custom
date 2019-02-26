@@ -72,7 +72,7 @@ inline void parseTextureName( CopiedString& name, const char* token ){
 }
 
 // generic renderable triangle surface
-class Surface :
+class Surface final :
 	public OpenGLRenderable
 {
 public:

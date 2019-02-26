@@ -65,7 +65,7 @@ void forEachLight( const RendererLightCallback& callback ) const {
 }
 };
 
-class PicoSurface :
+class PicoSurface final :
 	public OpenGLRenderable
 {
 AABB m_aabb_local;

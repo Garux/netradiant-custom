@@ -308,7 +308,7 @@ void render( RenderStateFlags state ) const {
 ///
 /// - Notifies observers when value changes - value changes to "" on destruction.
 /// - Provides undo support through the global undo system.
-class KeyValue : public EntityKeyValue
+class KeyValue final : public EntityKeyValue
 {
 typedef UnsortedSet<KeyObserver> KeyObservers;
 

@@ -24,7 +24,7 @@
 
 #include "iscriplib.h"
 
-class SimpleTokenWriter : public TokenWriter
+class SimpleTokenWriter final : public TokenWriter
 {
 public:
 SimpleTokenWriter( TextOutputStream& ostream )

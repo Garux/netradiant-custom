@@ -32,7 +32,7 @@
 #include "archivelib.h"
 #include "zlibstream.h"
 
-class DeflatedArchiveFile : public ArchiveFile
+class DeflatedArchiveFile final : public ArchiveFile
 {
 CopiedString m_name;
 FileInputStream m_istream;
@@ -61,7 +61,7 @@ InputStream& getInputStream(){
 }
 };
 
-class DeflatedArchiveTextFile : public ArchiveTextFile
+class DeflatedArchiveTextFile final : public ArchiveTextFile
 {
 CopiedString m_name;
 FileInputStream m_istream;
@@ -91,7 +91,7 @@ TextInputStream& getInputStream(){
 #include "fs_filesystem.h"
 
 
-class ZipArchive : public Archive
+class ZipArchive final : public Archive
 {
 class ZipRecord
 {
