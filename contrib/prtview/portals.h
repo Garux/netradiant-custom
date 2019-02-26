@@ -65,15 +65,16 @@ typedef guint32 PackedColour;
 
 
 class CPortals {
+enum ePrtFormat{
+	PRT1,
+	PRT2,
+	PRT1AM
+} format;
+
 public:
 
 CPortals();
 ~CPortals();
-
-protected:
-
-
-public:
 
 void Load();     // use filename in fn
 void Purge();

@@ -176,31 +176,64 @@ void CPortals::Load(){
 		return;
 	}
 
-	if ( !fgets( buf, LINE_BUF, in ) ) {
+	#define GETLINE \
+	if ( !fgets( buf, LINE_BUF, in ) ) { \
+		fclose( in ); \
+		node_count = 0; \
+		globalErrorStream() << "  ERROR - File ended prematurely.\n"; \
+		return; \
+	}
+
+	GETLINE;
+
+	if ( strncmp( "PRT1-AM", buf, 7 ) == 0 ) {
+		format = PRT1AM;
+	}
+	else if ( strncmp( "PRT1", buf, 4 ) == 0 ) {
+		format = PRT1;
+	}
+	else if ( strncmp( "PRT2", buf, 4 ) == 0 ) {
+		format = PRT2;
+	}
+	else {
 		fclose( in );
 
-		globalErrorStream() << "  ERROR - File ended prematurely.\n";
+		globalErrorStream() << "  ERROR - File header indicates wrong file type (should be \"PRT1\" or \"PRT2\" or \"PRT1-AM\").\n";
 
 		return;
 	}
 
-	if ( strncmp( "PRT1", buf, 4 ) != 0 ) {
-		fclose( in );
+	switch ( format )
+	{
+	case PRT1:
+	{
+		GETLINE; //leafs count https://github.com/kduske/TrenchBroom/issues/1157 //clusters in q3
+		sscanf( buf, "%u", &node_count );
+		GETLINE; //portals count
+		sscanf( buf, "%u", &portal_count );
+	}
+	break;
+	case PRT2:
+	{
+		GETLINE; //leafs count
+		sscanf( buf, "%u", &node_count );
+		GETLINE; //clusters count
+		GETLINE; //portals count
+		sscanf( buf, "%u", &portal_count );
 
-		globalErrorStream() << "  ERROR - File header indicates wrong file type (should be \"PRT1\").\n";
-
-		return;
+	}
+	break;
+	case PRT1AM:
+	{
+		GETLINE; //clusters count
+		GETLINE; //portals count
+		sscanf( buf, "%u", &portal_count );
+		GETLINE; //leafs count
+		sscanf( buf, "%u", &node_count );
+	}
+	break;
 	}
 
-	if ( !fgets( buf, LINE_BUF, in ) ) {
-		fclose( in );
-
-		globalErrorStream() << "  ERROR - File ended prematurely.\n";
-
-		return;
-	}
-
-	sscanf( buf, "%u", &node_count );
 /*
     if(node_count > 0xFFFF)
     {
@@ -213,18 +246,6 @@ void CPortals::Load(){
         return;
     }
  */
-
-	if ( !fgets( buf, LINE_BUF, in ) ) {
-		fclose( in );
-
-		node_count = 0;
-
-		globalErrorStream() << "  ERROR - File ended prematurely.\n";
-
-		return;
-	}
-
-	sscanf( buf, "%u", &portal_count );
 
 	if ( portal_count > 0xFFFF ) {
 		fclose( in );
@@ -253,7 +274,6 @@ void CPortals::Load(){
 	portal_sort = new int[portal_count];
 
 	unsigned int n;
-	bool first = true;
 	unsigned test_vals_1, test_vals_2;
 
 	hint_flags = false;
@@ -271,19 +291,17 @@ void CPortals::Load(){
 		}
 
 		if ( !portal[n].Build( buf ) ) {
-			if ( first && sscanf( buf, "%d %d", &test_vals_1, &test_vals_2 ) == 1 ) { // skip additional counts of later data, not needed
+			if ( 0 == n && sscanf( buf, "%d %d", &test_vals_1, &test_vals_2 ) == 1 ) { // skip additional counts of later data, not needed
 				// We can count on hint flags being in the file
 				hint_flags = true;
 				continue;
 			}
 
-			first = false;
-
 			fclose( in );
 
-			Purge();
-
 			globalErrorStream() << "  ERROR - Information for portal number " << n + 1 << " of " << portal_count << " is not formatted correctly.\n";
+
+			Purge();
 
 			return;
 		}
@@ -293,7 +311,7 @@ void CPortals::Load(){
 
 	fclose( in );
 
-	globalOutputStream() << "  " << node_count << " portals read in.\n";
+	globalOutputStream() << "  " << portal_count << " portals read in.\n";
 }
 
 #include "math/matrix.h"
