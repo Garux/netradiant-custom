@@ -89,6 +89,11 @@ static void change_clicked( GtkWidget *widget, gpointer data ){
 
 	g_object_set_data( G_OBJECT( file_sel ), "loop", &loop );
 	g_object_set_data( G_OBJECT( file_sel ), "filename", &filename );
+#ifdef WIN32 // wants backslashes to get correct WD from path; returns backslashes anyway
+	for( char* c = portals.fn; *c; ++c )
+		if( '/' == *c )
+			*c = '\\';
+#endif
 	gtk_file_selection_set_filename( GTK_FILE_SELECTION( file_sel ), portals.fn );
 
 	gtk_grab_add( file_sel );
@@ -130,7 +135,7 @@ int DoLoadPortalFileDialog(){
 
 	entry = gtk_entry_new();
 	gtk_widget_show( entry );
-	gtk_entry_set_editable( GTK_ENTRY( entry ), FALSE );
+//	gtk_entry_set_editable( GTK_ENTRY( entry ), FALSE );
 	gtk_box_pack_start( GTK_BOX( vbox ), entry, FALSE, FALSE, 0 );
 
 	hbox = gtk_hbox_new( FALSE, 5 );
@@ -188,6 +193,8 @@ int DoLoadPortalFileDialog(){
 		gtk_main_iteration();
 
 	if ( ret == IDOK ) {
+		strcpy( portals.fn, gtk_entry_get_text( GTK_ENTRY( entry ) ) );
+
 		portals.Purge();
 
 		portals.show_3d = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( check3d ) ) ? true : false;
