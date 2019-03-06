@@ -2445,6 +2445,9 @@ void SurfaceInspector_registerShortcuts(){
 	command_connect_accelerator( "FitTextureHeight" );
 	command_connect_accelerator( "FitTextureWidthOnly" );
 	command_connect_accelerator( "FitTextureHeightOnly" );
+	command_connect_accelerator( "TextureProjectAxial" );
+	command_connect_accelerator( "TextureProjectOrtho" );
+	command_connect_accelerator( "TextureProjectCam" );
 }
 
 void TexBro_registerShortcuts(){

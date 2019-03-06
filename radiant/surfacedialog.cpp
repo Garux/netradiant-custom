@@ -457,15 +457,26 @@ enum EProjectTexture
 	eProjectCam = 2,
 };
 
-void SurfaceInspector_ProjectTexture( EProjectTexture type ){
-	UndoableCommand undo( "textureProject" );
+void SurfaceInspector_ProjectTexture( GtkWidget* widget, EProjectTexture type ){
+	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE )
+		globalWarningStream() << "function doesn't work for *brushes*, having Axial Projection type\n"; //works for patches
 
 	texdef_t texdef;
-	texdef.shift[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hshiftIncrement.m_spin ) );
-	texdef.shift[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vshiftIncrement.m_spin ) );
-	texdef.scale[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
-	texdef.scale[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
-	texdef.rotate = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_rotateIncrement.m_spin ) );
+	if( widget ){ //gui buttons
+		getSurfaceInspector().exportData();
+		texdef.shift[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hshiftIncrement.m_spin ) );
+		texdef.shift[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vshiftIncrement.m_spin ) );
+		texdef.scale[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
+		texdef.scale[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
+		texdef.rotate = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_rotateIncrement.m_spin ) );
+	}
+	else{ //bind
+		texdef.scale[0] = texdef.scale[1] = Texdef_getDefaultTextureScale();
+	}
+
+	StringOutputStream str( 32 );
+	str << "textureProject" << ( type == eProjectAxial? "Axial" : type == eProjectOrtho? "Ortho" : "Cam" );
+	UndoableCommand undo( str.c_str() );
 
 	Vector3 direction;
 
@@ -483,6 +494,16 @@ void SurfaceInspector_ProjectTexture( EProjectTexture type ){
 	}
 
 	Select_ProjectTexture( texdef, &direction );
+}
+
+void SurfaceInspector_ProjectTexture_eProjectAxial(){
+	SurfaceInspector_ProjectTexture( 0, eProjectAxial );
+}
+void SurfaceInspector_ProjectTexture_eProjectOrtho(){
+	SurfaceInspector_ProjectTexture( 0, eProjectOrtho );
+}
+void SurfaceInspector_ProjectTexture_eProjectCam(){
+	SurfaceInspector_ProjectTexture( 0, eProjectCam );
 }
 
 void SurfaceInspector_ResetTexture(){
@@ -533,11 +554,7 @@ static void OnBtnReset( GtkWidget *widget, gpointer data ){
 }
 
 static void OnBtnProject( GtkWidget *widget, EProjectTexture type ){
-	if ( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_QUAKE ) {
-		globalWarningStream() << "function doesn't work for *brushes*, having Axial Projection type\n"; //works for patches
-	}
-	getSurfaceInspector().exportData();
-	SurfaceInspector_ProjectTexture( type );
+	SurfaceInspector_ProjectTexture( widget, type );
 }
 
 
@@ -1823,6 +1840,9 @@ void SurfaceInspector_registerCommands(){
 	GlobalCommands_insert( "FitTextureHeight", FreeCaller<SurfaceInspector_FaceFitHeight>() );
 	GlobalCommands_insert( "FitTextureWidthOnly", FreeCaller<SurfaceInspector_FaceFitWidthOnly>() );
 	GlobalCommands_insert( "FitTextureHeightOnly", FreeCaller<SurfaceInspector_FaceFitHeightOnly>() );
+	GlobalCommands_insert( "TextureProjectAxial", FreeCaller<SurfaceInspector_ProjectTexture_eProjectAxial>() );
+	GlobalCommands_insert( "TextureProjectOrtho", FreeCaller<SurfaceInspector_ProjectTexture_eProjectOrtho>() );
+	GlobalCommands_insert( "TextureProjectCam", FreeCaller<SurfaceInspector_ProjectTexture_eProjectCam>() );
 	GlobalCommands_insert( "SurfaceInspector", FreeCaller<SurfaceInspector_toggleShown>(), Accelerator( 'S' ) );
 
 //	GlobalCommands_insert( "FaceCopyTexture", FreeCaller<SelectedFaces_copyTexture>() );
