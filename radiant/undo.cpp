@@ -57,7 +57,7 @@ DebugScopeTimer( const char* operation )
 
 class RadiantUndoSystem : public UndoSystem
 {
-INTEGER_CONSTANT( MAX_UNDO_LEVELS, 1024 );
+INTEGER_CONSTANT( MAX_UNDO_LEVELS, 4096 );
 
 class Snapshot
 {
@@ -238,7 +238,7 @@ typedef std::set<UndoTracker*> Trackers;
 Trackers m_trackers;
 public:
 RadiantUndoSystem()
-	: m_undo_levels( 64 ){
+	: m_undo_levels( 512 ){
 }
 ~RadiantUndoSystem(){
 	clear();
@@ -399,7 +399,7 @@ typedef ConstReferenceCaller1<RadiantUndoSystem, const IntImportCallback&, UndoL
 
 
 void Undo_constructPreferences( RadiantUndoSystem& undo, PreferencesPage& page ){
-	page.appendSpinner( "Undo Queue Size", 64, 0, 1024, IntImportCallback( UndoLevelsImportCaller( undo ) ), IntExportCallback( UndoLevelsExportCaller( undo ) ) );
+	page.appendSpinner( "Undo Queue Size", 512, 0, 4096, IntImportCallback( UndoLevelsImportCaller( undo ) ), IntExportCallback( UndoLevelsExportCaller( undo ) ) );
 }
 void Undo_constructPage( RadiantUndoSystem& undo, PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Undo", "Undo Queue Settings" ) );
