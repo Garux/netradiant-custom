@@ -1861,6 +1861,7 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 			glClientActiveTexture( GL_TEXTURE0 );
 		}
 		glEnable( GL_TEXTURE_2D );
+		glColor4fv( vector4_to_array( self.m_colour ) );
 
 		glEnable( GL_BLEND );	///RENDER_BLEND
 		//glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
