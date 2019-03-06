@@ -42,7 +42,9 @@ inline bool FaceTexdef_importTokens( FaceTexdef& texdef, Tokeniser& tokeniser ){
 	RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, texdef.m_projection.m_texdef.scale[0] ) );
 	RETURN_FALSE_IF_FAIL( Tokeniser_getFloat( tokeniser, texdef.m_projection.m_texdef.scale[1] ) );
 
-	ASSERT_MESSAGE( texdef_sane( texdef.m_projection.m_texdef ), "FaceTexdef_importTokens: bad texdef" );
+	if( !texdef_sane( texdef.m_projection.m_texdef ) )
+		globalWarningStream() << "FaceTexdef_importTokens: bad texdef\n";
+
 	return true;
 }
 
@@ -87,7 +89,9 @@ inline bool FaceTexdef_Valve220_importTokens( FaceTexdef& texdef, Tokeniser& tok
 
 	texdef.m_projection.m_texdef.rotate = -texdef.m_projection.m_texdef.rotate;
 
-	ASSERT_MESSAGE( texdef_sane( texdef.m_projection.m_texdef ), "FaceTexdef_importTokens: bad texdef" );
+	if( !texdef_sane( texdef.m_projection.m_texdef ) )
+		globalWarningStream() << "FaceTexdef_Valve220_importTokens: bad texdef\n";
+
 	return true;
 }
 
@@ -351,7 +355,8 @@ inline void FaceTexdef_BP_exportTokens( const FaceTexdef& faceTexdef, TokenWrite
 }
 
 inline void FaceTexdef_exportTokens( const FaceTexdef& faceTexdef, TokenWriter& writer ){
-	ASSERT_MESSAGE( texdef_sane( faceTexdef.m_projection.m_texdef ), "FaceTexdef_exportTokens: bad texdef" );
+	if( !texdef_sane( faceTexdef.m_projection.m_texdef ) )
+		globalWarningStream() << "FaceTexdef_exportTokens: bad texdef\n";
 	// write texdef
 	writer.writeFloat( faceTexdef.m_projection.m_texdef.shift[0] );
 	writer.writeFloat( faceTexdef.m_projection.m_texdef.shift[1] );
@@ -360,8 +365,9 @@ inline void FaceTexdef_exportTokens( const FaceTexdef& faceTexdef, TokenWriter& 
 	writer.writeFloat( faceTexdef.m_projection.m_texdef.scale[1] );
 }
 
-inline void FaceTexdef_HalfLife_exportTokens( const FaceTexdef& faceTexdef, TokenWriter& writer ){
-	ASSERT_MESSAGE( texdef_sane( faceTexdef.m_projection.m_texdef ), "FaceTexdef_exportTokens: bad texdef" );
+inline void FaceTexdef_Valve220_exportTokens( const FaceTexdef& faceTexdef, TokenWriter& writer ){
+	if( !texdef_sane( faceTexdef.m_projection.m_texdef ) )
+		globalWarningStream() << "FaceTexdef_Valve220_exportTokens: bad texdef\n";
 	// write texdef
 	writer.writeToken( "[" );
 	writer.writeFloat( faceTexdef.m_projection.m_basis_s.x() );
@@ -508,7 +514,7 @@ Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
 void exportTokens( TokenWriter& writer ) const {
 	FacePlane_exportTokens( m_face.getPlane(), writer );
 	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceTexdef_HalfLife_exportTokens( m_face.getTexdef(), writer );
+	FaceTexdef_Valve220_exportTokens( m_face.getTexdef(), writer );
 	writer.nextLine();
 }
 };
@@ -522,7 +528,7 @@ Quake3Valve220FaceTokenExporter( const Face& face ) : m_face( face ){
 void exportTokens( TokenWriter& writer ) const {
 	FacePlane_exportTokens( m_face.getPlane(), writer );
 	FaceShader_exportTokens( m_face.getShader(), writer );
-	FaceTexdef_HalfLife_exportTokens( m_face.getTexdef(), writer );
+	FaceTexdef_Valve220_exportTokens( m_face.getTexdef(), writer );
 	FaceShader_ContentsFlagsValue_exportTokens( m_face.getShader(), writer );
 	writer.nextLine();
 }
