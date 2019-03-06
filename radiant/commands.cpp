@@ -293,6 +293,7 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	const char *commandName = g_value_get_string( &val );;
 	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find( commandName );
 	if ( thisShortcutIterator == g_shortcuts.end() ) {
+		globalErrorStream() << "commandName " << makeQuoted( commandName ) << " not found in g_shortcuts.\n";
 		gtk_list_store_set( GTK_LIST_STORE( dialog.m_model ), &dialog.m_command_iter, 2, false, -1 );
 		gtk_widget_set_sensitive( GTK_WIDGET( dialog.m_list ), true );
 		return true;
@@ -310,7 +311,8 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	GtkTreeModel *model;
 public:
 	bool allow;
-	VerifyAcceleratorNotTaken( const char *name, const Accelerator &accelerator, GtkWidget *w, GtkTreeModel *m ) : commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
+	VerifyAcceleratorNotTaken( const char *name, const Accelerator &accelerator, GtkWidget *w, GtkTreeModel *m ) :
+								commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
 	}
 	void visit( const char* name, Accelerator& accelerator ){
 		if ( !strcmp( name, commandName ) ) {
@@ -570,13 +572,14 @@ void visit( const char* name, Accelerator& accelerator ){
 	char value[1024];
 	if ( read_var( m_filename, "Commands", name, value ) ) {
 		if ( string_empty( value ) ) {
-			accelerator.key = 0;
-			accelerator.modifiers = (GdkModifierType)0;
+			accelerator = accelerator_null();
 			return;
 		}
 
-		gtk_accelerator_parse( value, &accelerator.key, &accelerator.modifiers );
-		accelerator = accelerator; // fix modifiers
+		guint key;
+		GdkModifierType modifiers;
+		gtk_accelerator_parse( value, &key, &modifiers );
+		accelerator = Accelerator( key, modifiers );
 
 		if ( accelerator.key != 0 ) {
 			++m_count;

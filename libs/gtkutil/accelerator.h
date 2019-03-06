@@ -34,35 +34,35 @@
 struct Accelerator
 {
 	Accelerator( guint _key )
-		: key( gdk_keyval_to_upper( _key ) ), modifiers( ( GdkModifierType ) 0 ){
+		: key( gdk_keyval_to_lower( _key ) ), modifiers( ( GdkModifierType ) 0 ){
 	}
 	Accelerator( guint _key, GdkModifierType _modifiers )
-		: key( gdk_keyval_to_upper( _key ) ), modifiers( ( GdkModifierType )( _modifiers & ALLOWED_MODIFIERS ) ){
+		: key( gdk_keyval_to_lower( _key ) ), modifiers( ( GdkModifierType )( _modifiers & ALLOWED_MODIFIERS ) ){
 	}
 	Accelerator( const Accelerator &src )
-		: key( gdk_keyval_to_upper( src.key ) ), modifiers( ( GdkModifierType )( src.modifiers & ALLOWED_MODIFIERS ) ){
+		: key( src.key ), modifiers( src.modifiers ){
 	}
 	bool operator<( const Accelerator& other ) const {
 		guint k1 = key;
 		guint k2 = other.key;
-		int mod1 = modifiers & ALLOWED_MODIFIERS;
-		int mod2 = other.modifiers & ALLOWED_MODIFIERS;
+		int mod1 = modifiers;
+		int mod2 = other.modifiers;
 		return k1 < k2 || ( !( k2 < k1 ) && mod1 < mod2 );
 	}
 	bool operator==( const Accelerator& other ) const {
 		guint k1 = key;
 		guint k2 = other.key;
-		int mod1 = modifiers & ALLOWED_MODIFIERS;
-		int mod2 = other.modifiers & ALLOWED_MODIFIERS;
+		int mod1 = modifiers;
+		int mod2 = other.modifiers;
 		return k1 == k2 && mod1 == mod2;
 	}
 	Accelerator &operator=( const Accelerator& other ){
 		key = other.key;
-		modifiers = (GdkModifierType) ( other.modifiers & ALLOWED_MODIFIERS );
+		modifiers = other.modifiers;
 		return *this;
 	}
-	guint key;
-	GdkModifierType modifiers;
+	guint key;	//!this only gdk_keyval_to_lower
+	GdkModifierType modifiers;	//!this only &= ALLOWED_MODIFIERS
 };
 
 inline Accelerator accelerator_null(){
