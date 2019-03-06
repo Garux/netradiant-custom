@@ -4,8 +4,8 @@
 
 #include "visfind.h"
 #include "dialogs/dialogs-gtk.h"
-#include "DWinding.h"
 #include "bsploader.h"
+#include "DVisDrawer.h"
 
 #include <list>
 
@@ -127,9 +127,7 @@ int bsp_countclusters_mask( byte *bitvector, byte *maskvector, int length ){
 	return( c );
 }
 
-void AddCluster( std::list<DWinding*> *pointlist, dleaf_t    *cl, bool* repeatlist, vec3_t clr ){
-	DWinding*   w;
-
+void AddCluster( DMetaSurfaces* pointlist, dleaf_t    *cl, bool* repeatlist, const vec3_t clr ){
 	int* leafsurf = &dleafsurfaces[cl->firstLeafSurface];
 	for ( int k = 0; k < cl->numLeafSurfaces; k++, leafsurf++ )
 	{
@@ -147,20 +145,15 @@ void AddCluster( std::list<DWinding*> *pointlist, dleaf_t    *cl, bool* repeatli
 			DoMessageBox( "Warning", "Warning", eMB_OK );
 		}
 
-		w = new DWinding();
-		w->AllocWinding( surf->numVerts );
+		DMetaSurf* meta = new DMetaSurf( surf->numVerts, surf->numIndexes );
 
-		for ( int l = 0; l < surf->numVerts; l++, vert++ )
-		{
-			( w->p[l] )[0] = vert->xyz[0];
-			( w->p[l] )[1] = vert->xyz[1];
-			( w->p[l] )[2] = vert->xyz[2];
+		for ( int l = 0; l < surf->numIndexes; ++l )
+			meta->indices[l] = drawVertsIndices[ surf->firstIndex + l ];
+		for ( int l = 0; l < surf->numVerts; ++l, ++vert )
+			VectorCopy( vert->xyz, meta->verts[l] );
+		VectorCopy( clr, meta->colour );
 
-			w->clr[0] = clr[0];
-			w->clr[1] = clr[1];
-			w->clr[2] = clr[2];
-		}
-		pointlist->push_back( w );
+		pointlist->push_back( meta );
 
 		repeatlist[*leafsurf] = true;
 	}
@@ -171,22 +164,14 @@ void AddCluster( std::list<DWinding*> *pointlist, dleaf_t    *cl, bool* repeatli
    CreateTrace
    =============
  */
-std::list<DWinding*> *CreateTrace( dleaf_t *leaf, int c, vis_header *header, byte *visdata, byte *seen ){
+DMetaSurfaces *CreateTrace( dleaf_t *leaf, int c, vis_header *header, byte *visdata, byte *seen ){
 	byte        *vis;
 	int i, j, clusterNum;
-	std::list<DWinding*> *pointlist = new std::list<DWinding*>;
+	DMetaSurfaces* pointlist = new DMetaSurfaces;
 	bool*   repeatlist = new bool[numDrawSurfaces];
 	dleaf_t     *cl;
 
-	vec3_t clrRnd[5] =  {
-		{0.f, 0.f, 1.f},
-		{0.f, 1.f, 1.f},
-		{1.f, 0.f, 0.f},
-		{1.f, 0.f, 1.f},
-		{1.f, 1.f, 0.f},
-	};
-
-	vec3_t clrGreen =   {0.f, 1.f, 0.f};
+	const vec3_t clrGreen =   {0.f, 1.f, 0.f};
 
 	memset( repeatlist, 0, sizeof( bool ) * numDrawSurfaces );
 
@@ -203,7 +188,16 @@ std::list<DWinding*> *CreateTrace( dleaf_t *leaf, int c, vis_header *header, byt
 			cl = &( dleafs[bsp_leafnumforcluster( clusterNum )] );
 
 			if ( ( *( vis + i ) & ( 1 << j ) ) && ( *( seen + i ) & ( 1 << j ) ) && ( leaf->area == cl->area ) ) {
-				AddCluster( pointlist, cl, repeatlist, clrRnd[rand() % 5] );
+				vec3_t clr;
+				do {
+					VectorSet( clr,
+								( rand() % 256 ) / 255.f,
+								( rand() % 256 ) / 255.f,
+								( rand() % 256 ) / 255.f );
+				}while( ( clr[0] + clr[2] < clr[1] * 1.5f ) ||	//too green
+						( clr[0] < .3 && clr[1] < .3 && clr[2] < .3 ) ); //too dark
+
+				AddCluster( pointlist, cl, repeatlist, clr );
 			}
 			clusterNum++;
 		}
@@ -221,7 +215,7 @@ std::list<DWinding*> *CreateTrace( dleaf_t *leaf, int c, vis_header *header, byt
    setup for CreateTrace
    =============
  */
-std::list<DWinding*> *TraceCluster( int leafnum ){
+DMetaSurfaces* TraceCluster( int leafnum ){
 	byte seen[( MAX_MAP_LEAFS / 8 ) + 1];
 	vis_header      *vheader;
 	byte            *visdata;
@@ -238,14 +232,26 @@ std::list<DWinding*> *TraceCluster( int leafnum ){
 	return CreateTrace( leaf, leaf->cluster, vheader, visdata, seen );
 }
 
-std::list<DWinding *>* BuildTrace( char* filename, vec3_t v_origin ){
+DMetaSurfaces* BuildTrace( char* filename, vec3_t v_origin ){
 	if ( !LoadBSPFile( filename ) ) {
 		return NULL;
 	}
 
+	if( numVisBytes == 0 ){
+		FreeBSPData();
+		globalErrorStream() << "bobToolz VisAnalyse: Bsp has no visibility data!\n";
+		return 0;
+	}
+
 	int leafnum = bsp_leafnumfororigin( v_origin );
 
-	std::list<DWinding*> *pointlist = TraceCluster( leafnum );
+	if( dleafs[leafnum].cluster == -1 ){
+		FreeBSPData();
+		globalErrorStream() << "bobToolz VisAnalyse: Point of interest is in the void!\n";
+		return 0;
+	}
+
+	DMetaSurfaces* pointlist = TraceCluster( leafnum );
 
 	FreeBSPData();
 

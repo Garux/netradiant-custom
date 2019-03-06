@@ -30,7 +30,6 @@
 #include "str.h"
 
 #include "DPoint.h"
-#include "DWinding.h"
 
 #include "misc.h"
 #include "funchandlers.h"
@@ -50,6 +49,8 @@ DVisDrawer::~DVisDrawer(){
 	GlobalShaderCache().detachRenderable( *this );
 	destroyShaders();
 
+	ClearPoints();
+
 	g_VisView = NULL;
 }
 
@@ -62,13 +63,15 @@ const char* g_state_wireframe = "$bobtoolz/visdrawer/wireframe";
 void DVisDrawer::constructShaders(){
 	OpenGLState state;
 	GlobalOpenGLStateLibrary().getDefaultState( state );
+	state.m_sort = OpenGLState::eSortOverlayFirst;
 	state.m_state = RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_COLOURCHANGE;
 	state.m_linewidth = 1;
 
 	GlobalOpenGLStateLibrary().insert( g_state_wireframe, state );
 
 	GlobalOpenGLStateLibrary().getDefaultState( state );
-	state.m_state = RENDER_FILL | RENDER_BLEND | RENDER_COLOURWRITE | RENDER_COLOURCHANGE | RENDER_SMOOTH | RENDER_DEPTHWRITE;
+	state.m_depthfunc = GL_LEQUAL;
+	state.m_state = RENDER_FILL | RENDER_BLEND | RENDER_COLOURWRITE | RENDER_COLOURCHANGE | RENDER_DEPTHTEST;
 
 	GlobalOpenGLStateLibrary().insert( g_state_solid, state );
 
@@ -84,21 +87,15 @@ void DVisDrawer::destroyShaders(){
 }
 
 void DVisDrawer::render( RenderStateFlags state ) const {
-	//bleh
-	std::list<DWinding *>::const_iterator l = m_list->begin();
-
-	for (; l != m_list->end(); l++ )
-	{
-		DWinding* w = *l;
-
-		glColor4f( w->clr[0], w->clr[1], w->clr[2], 0.5f );
-
-		glBegin( GL_POLYGON );
-		for ( int i = 0; i < w->numpoints; i++ ) {
-			glVertex3f( ( w->p[i] )[0], ( w->p[i] )[1], ( w->p[i] )[2] );
-		}
-		glEnd();
+	glEnable( GL_POLYGON_OFFSET_FILL );
+	for( const auto surf : *m_list ){
+		const DMetaSurf& s = *surf;
+		glColor4f( s.colour[0], s.colour[1], s.colour[2], 0.5f );
+		glVertexPointer( 3, GL_FLOAT, sizeof( vec3_t ), s.verts );
+		glDrawElements( GL_TRIANGLES, GLsizei( s.indicesN ), GL_UNSIGNED_INT, s.indices );
 	}
+	glDisable( GL_POLYGON_OFFSET_FILL );
+	glColor4f( 1, 1, 1, 1 );
 }
 
 void DVisDrawer::renderWireframe( Renderer& renderer, const VolumeTest& volume ) const {
@@ -122,17 +119,17 @@ void DVisDrawer::renderSolid( Renderer& renderer, const VolumeTest& volume ) con
 	renderer.addRenderable( *this, g_matrix4_identity );
 }
 
-void DVisDrawer::SetList( std::list<DWinding*> *pointList ){
-	if ( m_list ) {
-		ClearPoints();
-	}
-
+void DVisDrawer::SetList( DMetaSurfaces* pointList ){
+	ClearPoints();
 	m_list = pointList;
 }
 
 void DVisDrawer::ClearPoints(){
-	std::list<DWinding *>::const_iterator deadPoint = m_list->begin();
-	for (; deadPoint != m_list->end(); deadPoint++ )
-		delete *deadPoint;
-	m_list->clear();
+	if ( m_list ) {
+		for ( auto deadPoint : *m_list )
+			delete deadPoint;
+		m_list->clear();
+		delete m_list;
+		m_list = 0;
+	}
 }

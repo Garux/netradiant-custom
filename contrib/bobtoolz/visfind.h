@@ -2,6 +2,7 @@
 #include <list>
 #include "mathlib.h"
 
-class DWinding;
+class DMetaSurf;
+typedef std::list<DMetaSurf*> DMetaSurfaces;
 
-std::list<DWinding*> *BuildTrace( char* filename, vec3_t v_origin );
+DMetaSurfaces* BuildTrace( char* filename, vec3_t v_origin );

@@ -24,7 +24,7 @@ Files Contained In This Package:
 
 Readme.txt		--- This file.
 Changelog.txt		--- Version information.
-bobToolz.dll		--- The plugin itsself.
+bobToolz.dll		--- The plugin itself.
 bt/*.txt		--- A few text files required by the plugin.
 
 

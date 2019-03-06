@@ -8,21 +8,23 @@ int numleafs;
 int numleafsurfaces;
 int numVisBytes;
 int numDrawVerts;
+int numDrawVertsIndices;
 int numDrawSurfaces;
 int numbrushes;
 int numbrushsides;
 int numleafbrushes;
 
-byte                *visBytes =           NULL;
-dnode_t           *dnodes =             NULL;
-dplane_t          *dplanes =              NULL;
-dleaf_t           *dleafs =             NULL;
+byte          *visBytes =         NULL;
+dnode_t       *dnodes =           NULL;
+dplane_t      *dplanes =          NULL;
+dleaf_t       *dleafs =           NULL;
 qdrawVert_t   *drawVerts =        NULL;
-dsurface_t    *drawSurfaces =       NULL;
-int                 *dleafsurfaces =    NULL;
-dbrush_t          *dbrushes =             NULL;
-dbrushside_t    *dbrushsides =      NULL;
-int                 *dleafbrushes =     NULL;
+int           *drawVertsIndices = NULL;
+dsurface_t    *drawSurfaces =     NULL;
+int           *dleafsurfaces =    NULL;
+dbrush_t      *dbrushes =         NULL;
+dbrushside_t  *dbrushsides =      NULL;
+int           *dleafbrushes =     NULL;
 
 #define BSP_IDENT   ( ( 'P' << 24 ) + ( 'S' << 16 ) + ( 'B' << 8 ) + 'I' )
 #define Q3_BSP_VERSION          46
@@ -159,7 +161,7 @@ void SwapBSPFile( void ) {
 	}
 
 	// drawindexes
-//	SwapBlock( (int *)drawIndexes, numDrawIndexes * sizeof( drawIndexes[0] ) );
+	SwapBlock( (int *)drawVertsIndices, numDrawVertsIndices * sizeof( drawVertsIndices[0] ) );
 
 	// drawsurfs
 	SwapBlock( (int *)drawSurfaces, numDrawSurfaces * sizeof( drawSurfaces[0] ) );
@@ -218,18 +220,19 @@ bool    LoadBSPFile( const char *filename ) {
 		return false;
 	}
 
-	numbrushsides =     CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushsides,   sizeof( dbrushside_t ) );
-	numbrushes =        CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushes,      sizeof( dbrush_t ) );
-	numplanes =         CopyLump( header, LUMP_PLANES,          (void**)&dplanes,       sizeof( dplane_t ) );
-	numleafs =          CopyLump( header, LUMP_LEAFS,           (void**)&dleafs,        sizeof( dleaf_t ) );
-	numnodes =          CopyLump( header, LUMP_NODES,           (void**)&dnodes,        sizeof( dnode_t ) );
-	numDrawVerts =      CopyLump( header, LUMP_DRAWVERTS,       (void**)&drawVerts,     sizeof( qdrawVert_t ) );
-	numDrawSurfaces =   CopyLump( header, LUMP_SURFACES,        (void**)&drawSurfaces,  sizeof( dsurface_t ) );
-	numleafsurfaces =   CopyLump( header, LUMP_LEAFSURFACES,    (void**)&dleafsurfaces, sizeof( int ) );
-	numVisBytes =       CopyLump( header, LUMP_VISIBILITY,      (void**)&visBytes,      1 );
-	numleafbrushes =    CopyLump( header, LUMP_LEAFBRUSHES,     (void**)&dleafbrushes,  sizeof( int ) );
+	numbrushsides =       CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushsides,      sizeof( dbrushside_t ) );
+	numbrushes =          CopyLump( header, LUMP_BRUSHES,         (void**)&dbrushes,         sizeof( dbrush_t ) );
+	numplanes =           CopyLump( header, LUMP_PLANES,          (void**)&dplanes,          sizeof( dplane_t ) );
+	numleafs =            CopyLump( header, LUMP_LEAFS,           (void**)&dleafs,           sizeof( dleaf_t ) );
+	numnodes =            CopyLump( header, LUMP_NODES,           (void**)&dnodes,           sizeof( dnode_t ) );
+	numDrawVerts =        CopyLump( header, LUMP_DRAWVERTS,       (void**)&drawVerts,        sizeof( qdrawVert_t ) );
+	numDrawVertsIndices = CopyLump( header, LUMP_DRAWINDEXES,     (void**)&drawVertsIndices, sizeof( int ) );
+	numDrawSurfaces =     CopyLump( header, LUMP_SURFACES,        (void**)&drawSurfaces,     sizeof( dsurface_t ) );
+	numleafsurfaces =     CopyLump( header, LUMP_LEAFSURFACES,    (void**)&dleafsurfaces,    sizeof( int ) );
+	numVisBytes =         CopyLump( header, LUMP_VISIBILITY,      (void**)&visBytes,         1 );
+	numleafbrushes =      CopyLump( header, LUMP_LEAFBRUSHES,     (void**)&dleafbrushes,     sizeof( int ) );
 
-	delete header;      // everything has been copied out
+	delete[] header;      // everything has been copied out
 
 	// swap everything
 	SwapBSPFile();
@@ -238,34 +241,16 @@ bool    LoadBSPFile( const char *filename ) {
 }
 
 void FreeBSPData(){
-	if ( visBytes ) {
-		delete visBytes;
-	}
-	if ( dnodes ) {
-		delete dnodes;
-	}
-	if ( dplanes ) {
-		delete dplanes;
-	}
-	if ( dleafs ) {
-		delete dleafs;
-	}
-	if ( drawVerts ) {
-		delete drawVerts;
-	}
-	if ( drawSurfaces ) {
-		delete drawSurfaces;
-	}
-	if ( dleafsurfaces ) {
-		delete dleafsurfaces;
-	}
-	if ( dleafbrushes ) {
-		delete dleafbrushes;
-	}
-	if ( dbrushes ) {
-		delete dbrushes;
-	}
-	if ( dbrushsides ) {
-		delete dbrushsides;
-	}
+	#define DEL( a ) delete[] a; a = 0;
+	DEL( visBytes );
+	DEL( dnodes );
+	DEL( dplanes );
+	DEL( dleafs );
+	DEL( drawVerts );
+	DEL( drawVertsIndices );
+	DEL( drawSurfaces );
+	DEL( dleafsurfaces );
+	DEL( dleafbrushes );
+	DEL( dbrushes );
+	DEL( dbrushsides );
 }

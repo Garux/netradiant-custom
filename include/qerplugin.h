@@ -149,6 +149,9 @@ struct _QERFuncTable_1
 	void ( *XYWindowMouseDown_disconnect )( MouseEventHandlerId id );
 	VIEWTYPE ( *XYWindow_getViewType )();
 	Vector3 ( *XYWindow_windowToWorld )( const WindowVector& position );
+
+	Vector3 ( *Camera_getOrigin )();
+
 	const char* ( *TextureBrowser_getSelectedShader )( );
 
 	// GTK+ functions

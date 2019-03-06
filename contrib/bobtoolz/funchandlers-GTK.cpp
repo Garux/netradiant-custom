@@ -588,40 +588,6 @@ void DoSplitPatchRows() {
 }
 
 void DoVisAnalyse(){
-	char filename[1024];
-
-	if ( GlobalSelectionSystem().countSelected() == 0 ) {
-		globalErrorStream() << "bobToolz VisAnalyse: Invalid number of objects selected, choose 1 only.\n";
-		if ( g_VisView ) {
-			delete g_VisView;
-			return;
-		}
-	}
-
-	// ensure we have something selected
-	if ( GlobalSelectionSystem().countSelected() != 1 ) {
-		//DoMessageBox("Invalid number of objects selected, choose 1 only", "Error", eMB_OK);
-		globalErrorStream() << "bobToolz VisAnalyse: Invalid number of objects selected, choose 1 only.\n";
-		return;
-	}
-
-	scene::Instance& brush = GlobalSelectionSystem().ultimateSelected();
-	//ensure we have a brush selected
-	if ( !Node_isBrush( brush.path().top() ) ) {
-		//DoMessageBox("No brush selected, select ONLY one brush", "Error", eMB_OK);
-		globalErrorStream() << "bobToolz VisAnalyse: No brush selected, select ONLY 1 brush.\n";
-		return;
-	}
-	DBrush orgBrush;
-	orgBrush.LoadFromBrush( brush, false );
-
-	orgBrush.BuildBounds();
-	vec3_t origin;
-	origin[0] = ( orgBrush.bbox_max[0] + orgBrush.bbox_min[0] ) / 2.f;
-	origin[1] = ( orgBrush.bbox_max[1] + orgBrush.bbox_min[1] ) / 2.f;
-	origin[2] = ( orgBrush.bbox_max[2] + orgBrush.bbox_min[2] ) / 2.f;
-
-
 	const char* rad_filename = GlobalRadiant().getMapName();
 	if ( !rad_filename ) {
 		//DoMessageBox("An ERROR occurred while trying\n to get the map filename", "Error", eMB_OK);
@@ -629,18 +595,31 @@ void DoVisAnalyse(){
 		return;
 	}
 
+	char filename[1024];
 	strcpy( filename, rad_filename );
 
 	char* ext = strrchr( filename, '.' ) + 1;
 	strcpy( ext, "bsp" ); // rename the extension
 
-	std::list<DWinding*> *pointList = BuildTrace( filename, origin );
+	vec3_t origin;
+	if ( GlobalSelectionSystem().countSelected() == 0 ) {
+		memcpy( origin, GlobalRadiant().Camera_getOrigin().data(), 3 * sizeof ( ( ( Vector3* ) ( 0 ) ) -> x() ) );
+	}
+	else{
+		memcpy( origin, GlobalSelectionSystem().getBoundsSelected().origin.data(), 3 * sizeof ( ( ( Vector3* ) ( 0 ) ) -> x() ) );
+	}
+
+	DMetaSurfaces* pointList = BuildTrace( filename, origin );
+
+	if( pointList && pointList->size() )
+		globalOutputStream() << "bobToolz VisAnalyse: " << pointList->size() << " drawsurfaces loaded\n";
 
 	if ( !g_VisView ) {
 		g_VisView = new DVisDrawer;
 	}
 
 	g_VisView->SetList( pointList );
+	SceneChangeNotify();
 }
 
 void DoTrainPathPlot() {

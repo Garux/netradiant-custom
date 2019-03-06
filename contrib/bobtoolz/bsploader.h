@@ -108,7 +108,7 @@ typedef enum {
 
 #define MAX_MAP_VISIBILITY  0x200000
 #define MAX_MAP_NODES       0x20000
-#define MAX_MAP_PLANES      0x20000
+#define MAX_MAP_PLANES      0x100000
 #define MAX_MAP_LEAFS       0x20000
 
 extern int numVisBytes;
@@ -116,6 +116,7 @@ extern int numleafs;
 extern int numplanes;
 extern int numnodes;
 extern int numDrawVerts;
+extern int numDrawVertsIndices;
 extern int numDrawSurfaces;
 extern int numleafsurfaces;
 extern int numbrushes;
@@ -127,6 +128,7 @@ extern dplane_t        *dplanes;
 extern dleaf_t         *dleafs;
 extern byte            *visBytes;
 extern qdrawVert_t     *drawVerts;
+extern int             *drawVertsIndices;
 extern dsurface_t      *drawSurfaces;
 extern int             *dleafsurfaces;
 extern dbrush_t        *dbrushes;

@@ -32,8 +32,28 @@
 #include <list>
 #include "renderable.h"
 #include "irender.h"
+#include "mathlib.h"
 
-#include "DWinding.h"
+class DMetaSurf
+{
+public:
+	DMetaSurf() = delete;
+	DMetaSurf( int numverts, int numindices ){
+		verts = new vec3_t[numverts];
+		indices = new unsigned int[numindices];
+		indicesN = numindices;
+	}
+	~DMetaSurf(){
+		delete[] verts;
+		delete[] indices;
+	}
+	vec3_t* verts;
+	unsigned int* indices;
+	int indicesN;
+	vec3_t colour;
+};
+
+typedef std::list<DMetaSurf*> DMetaSurfaces;
 
 class DVisDrawer : public Renderable, public OpenGLRenderable
 {
@@ -44,11 +64,11 @@ DVisDrawer();
 virtual ~DVisDrawer();
 
 protected:
-std::list<DWinding*>* m_list;
+DMetaSurfaces* m_list;
 int refCount;
 public:
 void ClearPoints();
-void SetList( std::list<DWinding*>* pointList );
+void SetList( DMetaSurfaces* pointList );
 
 void render( RenderStateFlags state ) const;
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const;
