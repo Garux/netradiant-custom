@@ -38,6 +38,9 @@
 
 #include "modulesystem.h"
 
+#include "stream/stringstream.h"
+#include "commands.h"
+
 #include <list>
 
 /* plugin manager --------------------------------------- */
@@ -47,7 +50,20 @@ CopiedString m_menu_name;
 const _QERPluginTable *mpTable;
 std::list<CopiedString> m_CommandStrings;
 std::list<CopiedString> m_CommandTitleStrings;
-std::list<std::size_t> m_CommandIDs;
+
+std::list<CopiedString> m_globalCommandNames;
+class PluginCaller
+{
+	CPluginSlot* slot;
+	const char* name;
+public:
+	PluginCaller( CPluginSlot* slot_, const char* name_ ) : slot( slot_ ), name( name_ ){
+	}
+	void operator()(){
+		slot->Dispatch( name );
+	}
+};
+std::list<PluginCaller> m_callbacks;
 
 public:
 /*!
@@ -64,9 +80,7 @@ const char* getMenuName();
 std::size_t getCommandCount();
 const char* getCommand( std::size_t n );
 const char* getCommandTitle( std::size_t n );
-void addMenuID( std::size_t n );
-bool ownsCommandID( std::size_t n );
-
+const char* getGlobalCommand( std::size_t n );
 };
 
 CPluginSlot::CPluginSlot( GtkWidget* main_window, const char* name, const _QERPluginTable& table ){
@@ -79,23 +93,50 @@ CPluginSlot::CPluginSlot( GtkWidget* main_window, const char* name, const _QERPl
 	StringTokeniser commandTokeniser( commands, ",;" );
 	StringTokeniser titleTokeniser( titles, ",;" );
 
-	const char* cmdToken = commandTokeniser.getToken();
-	const char *titleToken = titleTokeniser.getToken();
-	while ( !string_empty( cmdToken ) )
-	{
-		if ( string_empty( titleToken ) ) {
-			m_CommandStrings.push_back( cmdToken );
+	while ( 1 ) {
+		const char* cmdToken = commandTokeniser.getToken();
+		const char *titleToken = titleTokeniser.getToken();
+		if( string_empty( cmdToken ) )
+			break;
+		m_CommandStrings.push_back( cmdToken );
+		if ( string_empty( titleToken ) )
 			m_CommandTitleStrings.push_back( cmdToken );
-			cmdToken = commandTokeniser.getToken();
-			titleToken = "";
-		}
 		else
-		{
-			m_CommandStrings.push_back( cmdToken );
 			m_CommandTitleStrings.push_back( titleToken );
-			cmdToken = commandTokeniser.getToken();
-			titleToken = titleTokeniser.getToken();
+
+		m_callbacks.emplace_back( PluginCaller( this, m_CommandStrings.back().c_str() ) );
+		StringOutputStream str( 64 );
+		{
+			if( !string_equal_nocase_n( cmdToken, getMenuName(), string_length( getMenuName() ) ) ){ //plugin name is not part of command name
+				str << getMenuName() << "::";
+			}
+			/* remove spaces + camelcasify */
+			const char* p = cmdToken;
+			bool wasspace = false;
+			while( *p ){
+				if( *p == ' ' ){
+					wasspace = true;
+				}
+				else if( wasspace ){
+					wasspace = false;
+					str << static_cast<char>( std::toupper( *p ) );
+				}
+				else{
+					str << *p;
+				}
+				++p;
+			}
+			/* del trailing periods */
+			char* pp = &( *( str.end() - 1 ) );
+			while( *pp == '.' ){
+				*pp = '\0';
+				--pp;
+			}
+			*str.c_str() = std::tolower( *str.c_str() ); //put to the end of the list this way
 		}
+		m_globalCommandNames.emplace_back( str.c_str() );
+		if ( !plugin_menu_special( cmdToken ) ) //ain't special
+			GlobalCommands_insert( str.c_str(), makeCallback( m_callbacks.back() ) );
 	}
 	mpTable->m_pfnQERPlug_Init( 0, (void*)main_window );
 }
@@ -122,18 +163,11 @@ const char* CPluginSlot::getCommandTitle( std::size_t n ){
 	return ( *i ).c_str();
 }
 
-void CPluginSlot::addMenuID( std::size_t n ){
-	m_CommandIDs.push_back( n );
-}
-
-bool CPluginSlot::ownsCommandID( std::size_t n ){
-	for ( std::list<std::size_t>::iterator i = m_CommandIDs.begin(); i != m_CommandIDs.end(); ++i )
-	{
-		if ( *i == n ) {
-			return true;
-		}
-	}
-	return false;
+const char* CPluginSlot::getGlobalCommand( std::size_t n ){
+	std::list<CopiedString>::iterator i = m_globalCommandNames.begin();
+	while ( n-- != 0 )
+		++i;
+	return ( *i ).c_str();
 }
 
 void CPluginSlot::Dispatch( const char *p ){
@@ -154,7 +188,6 @@ void AddPluginSlot( GtkWidget* main_window, const char* name, const _QERPluginTa
 }
 
 void PopulateMenu( PluginsVisitor& menu );
-bool Dispatch( std::size_t n, const char* p );
 };
 
 CPluginSlots::~CPluginSlots(){
@@ -172,19 +205,6 @@ void CPluginSlots::PopulateMenu( PluginsVisitor& menu ){
 	{
 		menu.visit( *( *iPlug ) );
 	}
-}
-
-bool CPluginSlots::Dispatch( std::size_t n, const char* p ){
-	std::list<CPluginSlot *>::iterator iPlug;
-	for ( iPlug = mSlots.begin(); iPlug != mSlots.end(); ++iPlug )
-	{
-		CPluginSlot *pPlug = *iPlug;
-		if ( pPlug->ownsCommandID( n ) ) {
-			pPlug->Dispatch( p );
-			return true;
-		}
-	}
-	return false;
 }
 
 CPluginSlots g_plugin_slots;
@@ -208,16 +228,10 @@ public:
 }
 
 
-#include "pluginmanager.h"
-
 CPlugInManager g_PlugInMgr;
 
 CPlugInManager& GetPlugInMgr(){
 	return g_PlugInMgr;
-}
-
-void CPlugInManager::Dispatch( std::size_t n, const char * p ){
-	g_plugin_slots.Dispatch( n, p );
 }
 
 void CPlugInManager::Init( GtkWidget* main_window ){

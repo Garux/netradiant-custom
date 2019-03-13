@@ -2948,6 +2948,20 @@ gboolean toolbar_redirect_scroll( GtkWidget* widget, GdkEventScroll* event, gpoi
 }
 
 
+void user_shortcuts_init(){
+	StringOutputStream path( 256 );
+	path << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << '/';
+	LoadCommandMap( path.c_str() );
+	SaveCommandMap( path.c_str() );
+}
+
+void user_shortcuts_save(){
+	StringOutputStream path( 256 );
+	path << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << '/';
+	SaveCommandMap( path.c_str() );
+}
+
+
 void MainFrame::Create(){
 	GtkWindow* window = GTK_WINDOW( gtk_window_new( GTK_WINDOW_TOPLEVEL ) );
 
@@ -2976,8 +2990,10 @@ void MainFrame::Create(){
 #endif
 
 	g_MainWindowActive.connect( window );
-
+	/* GlobalCommands_insert plugins commands */
 	GetPlugInMgr().Init( GTK_WIDGET( window ) );
+	/* then load shortcuts cfg */
+	user_shortcuts_init();
 
 	GtkWidget* vbox = gtk_vbox_new( FALSE, 0 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
@@ -3360,6 +3376,8 @@ void MainFrame::Shutdown(){
 
 	// destroying group-dialog last because it may contain texture-browser
 	GroupDialog_destroyWindow();
+
+	user_shortcuts_save();
 }
 
 void MainFrame::RedrawStatusText(){

@@ -41,8 +41,7 @@ virtual const char* getMenuName() = 0;
 virtual std::size_t getCommandCount() = 0;
 virtual const char* getCommand( std::size_t ) = 0;
 virtual const char* getCommandTitle( std::size_t ) = 0;
-virtual void addMenuID( std::size_t ) = 0;
-virtual bool ownsCommandID( std::size_t n ) = 0;
+virtual const char* getGlobalCommand( std::size_t ) = 0;
 };
 
 class PluginsVisitor
@@ -54,12 +53,26 @@ virtual void visit( IPlugIn& plugin ) = 0;
 class CPlugInManager
 {
 public:
-void Dispatch( std::size_t n, const char *p );
 void Init( GtkWidget* main_window );
 void constructMenu( PluginsVisitor& menu );
 void Shutdown();
 };
 
 CPlugInManager& GetPlugInMgr();
+
+inline bool plugin_submenu_in( const char* text ){
+	return text[0] == '>' && text[1] == '\0';
+}
+inline bool plugin_submenu_out( const char* text ){
+	return text[0] == '<' && text[1] == '\0';
+}
+inline bool plugin_menu_separator( const char* text ){
+	return text[0] == '-' && text[1] == '\0';
+}
+inline bool plugin_menu_special( const char* text ){
+	return plugin_menu_separator( text )
+			|| plugin_submenu_in( text )
+			|| plugin_submenu_out( text );
+}
 
 #endif

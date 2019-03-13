@@ -531,19 +531,6 @@ void remove_local_pid(){
 	remove( g_pidGameFile.c_str() );
 }
 
-void user_shortcuts_init(){
-	StringOutputStream path( 256 );
-	path << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << '/';
-	LoadCommandMap( path.c_str() );
-	SaveCommandMap( path.c_str() );
-}
-
-void user_shortcuts_save(){
-	StringOutputStream path( 256 );
-	path << SettingsPath_get() << g_pGameDescription->mGameFile.c_str() << '/';
-	SaveCommandMap( path.c_str() );
-}
-
 void add_local_rc_files(){
 	{
 		StringOutputStream path( 512 );
@@ -675,7 +662,7 @@ int main( int argc, char* argv[] ){
 
 	global_accel_init();
 
-	user_shortcuts_init();
+//	user_shortcuts_init();
 
 	g_pParentWnd = 0;
 	g_pParentWnd = new MainFrame();
@@ -710,7 +697,7 @@ int main( int argc, char* argv[] ){
 
 	delete g_pParentWnd;
 
-	user_shortcuts_save();
+//	user_shortcuts_save();
 
 	global_accel_destroy();
 
