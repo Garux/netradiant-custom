@@ -64,10 +64,10 @@ const char* getName(){
 	return "Brush export Plugin";
 }
 const char* getCommandList(){
-	return "Export selected as Wavefront Object;About";
+	return "Export .obj;About";
 }
 const char* getCommandTitleList(){
-	return "";
+	return "Export selected as Wavefront Object;About";
 }
 
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
@@ -77,7 +77,7 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 										 eMB_OK,
 										 eMB_ICONDEFAULT );
 	}
-	else if ( string_equal( command, "Export selected as Wavefront Object" ) ) {
+	else if ( string_equal( command, "Export .obj" ) ) {
 		if ( IsWindowOpen() ) {
 			DestroyWindow();
 		}

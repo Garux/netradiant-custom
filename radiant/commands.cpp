@@ -482,7 +482,7 @@ public:
 					if ( !m_commandList.failed() ) {
 						int l = strlen( name );
 						m_commandList << name;
-						while ( l++ < 25 )
+						while ( l++ < 32 )
 							m_commandList << ' ';
 						m_commandList << modifiers.c_str() << '\n';
 					}
