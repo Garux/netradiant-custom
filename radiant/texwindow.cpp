@@ -1020,7 +1020,7 @@ void TextureBrowser_trackingDelta( int x, int y, unsigned int state, void* data 
 		const int scale = ( state & GDK_SHIFT_MASK )? 4 : 1;
 		const int originy = TextureBrowser_getOriginY( textureBrowser ) + y * scale;
 		TextureBrowser_setOriginY( textureBrowser, originy );
-		textureBrowser.m_move_amount += y;
+		textureBrowser.m_move_amount += std::abs( y );
 	}
 }
 
@@ -1433,7 +1433,7 @@ gboolean TextureBrowser_button_release( GtkWidget* widget, GdkEventButton* event
 	if ( event->type == GDK_BUTTON_RELEASE ) {
 		if ( event->button == 3 ) {
 			TextureBrowser_Tracking_MouseUp( *textureBrowser );
-			if ( GlobalTextureBrowser().m_tags && std::abs( textureBrowser->m_move_amount ) < 16 ) {
+			if ( GlobalTextureBrowser().m_tags && textureBrowser->m_move_amount < 16 ) {
 				textureBrowser->m_rmbSelected = true;
 				TextureBrowser_Selection_MouseDown( *textureBrowser, event->state, textureBrowser->m_move_start.x(), textureBrowser->m_move_start.y(), false );
 
