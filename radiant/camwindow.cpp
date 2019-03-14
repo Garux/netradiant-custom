@@ -165,9 +165,11 @@ struct camera_t
 	bool m_strafe; // true when in strafemode toggled by the ctrl-key
 	bool m_strafe_forward; // true when in strafemode by ctrl-key and shift is pressed for forward strafing
 	bool m_strafe_forward_invert; //silly option to invert forward strafing to support old fegs
-	bool m_orbit;
+	bool m_orbit = false;
 	Vector3 m_orbit_center;
-	int m_focus_offset;
+	Vector3 m_orbit_initial_pos;
+	int m_orbit_offset = 0;
+	int m_focus_offset = 0;
 
 	unsigned int movementflags; // movement flags
 	Timer m_keycontrol_timer;
@@ -198,7 +200,6 @@ struct camera_t
 		origin( 0, 0, 0 ),
 		angles( 0, 0, 0 ),
 		color( 0, 0, 0 ),
-		m_focus_offset( 0 ),
 		movementflags( 0 ),
 		m_keymove_handler( 0 ),
 		m_keymove_speed_current( 0.f ),
@@ -1204,13 +1205,17 @@ bool context_menu_try( CamWnd* camwnd ){
 	//doesn't work if cam redraw > 200msec (3x click works): gtk_widget_queue_draw proceeds after timer.start()
 }
 
-void camera_set_orbit_center( camera_t& cam, Vector2 xy ){
+void camera_orbit_init( camera_t& cam, Vector2 xy ){
 	xy.x() = ( ( 2.0f * xy.x() ) / cam.width ) - 1.0f; // window_to_normalised_device
 	xy.y() = ( ( 2.0f * ( cam.height - 1 - xy.y() ) ) / cam.height ) - 1.0f;
 
 	const Vector2 epsilon( 8.f / cam.width, 8.f / cam.height ); //device epsilon
 
 	Scene_Intersect( *cam.m_view, xy.data(), epsilon.data(), cam.m_orbit_center );
+
+	cam.m_orbit_initial_pos = cam.origin;
+	cam.m_orbit_offset = 0;
+	cam.m_orbit = true;
 }
 
 inline bool ORBIT_EVENT( GdkEventButton* event ){
@@ -1230,7 +1235,7 @@ gboolean enable_freelook_button_press( GtkWidget* widget, GdkEventButton* event,
 		}
 		else{
 			if( m2alt )
-				camera_set_orbit_center( camwnd->getCamera(), Vector2( event->x, event->y ) );
+				camera_orbit_init( camwnd->getCamera(), Vector2( event->x, event->y ) );
 			camwnd->EnableFreeMove();
 			camwnd->m_rightClickTimer.start();
 			camwnd->m_rightClickMove = 0;
@@ -1251,7 +1256,7 @@ gboolean disable_freelook_button_press( GtkWidget* widget, GdkEventButton* event
 		}
 		else{
 			if( m2alt )
-				camera_set_orbit_center( camwnd->getCamera(), Vector2( event->x, event->y ) );
+				camera_orbit_init( camwnd->getCamera(), Vector2( event->x, event->y ) );
 			camwnd->m_rightClickTimer.start();
 			camwnd->m_rightClickMove = 0;
 		}
@@ -1264,6 +1269,7 @@ gboolean disable_freelook_button_release( GtkWidget* widget, GdkEventButton* eve
 	const bool m2    = M2_EVENT( event );
 	const bool m2alt = ORBIT_EVENT( event );
 	if ( ( m2 || m2alt ) && event->type == GDK_BUTTON_RELEASE ) {
+		camwnd->getCamera().m_orbit = false;
 		if( ( ( camwnd->m_rightClickTimer.elapsed_msec() < 300 && camwnd->m_rightClickMove < 56 ) == !camwnd->m_bFreeMove_entering ) ){
 			camwnd->DisableFreeMove();
 			return TRUE;
@@ -1350,33 +1356,58 @@ void CamWnd::selection_motion_freemove( const MotionDeltaValues& delta ){
 typedef MemberCaller1<CamWnd, const MotionDeltaValues&, &CamWnd::selection_motion_freemove> CamWnd_selection_motion_freemove;
 
 
+void camera_orbit_scroll( camera_t& camera ){
+	Vector3 viewvector = vector3_normalised( camera.m_orbit_center - Camera_getOrigin( camera ) );
+	if( vector3_dot( viewvector, -camera.vpn ) < 0 )
+		vector3_negate( viewvector );
+	float offset = vector3_length( camera.m_orbit_center - camera.m_orbit_initial_pos );
+	const int off = camera.m_orbit_offset;
+	if( off < 0 || off > 16 ){
+		offset -= offset * off / 8 * pow( 2.0f, static_cast<float>( off < 0 ? -off : off - 16 ) / 8.f );
+	}
+	else if( off == 8 ){
+		offset = std::min( 8.f, offset / 16.f ); //prevent zero offset, resulting in NAN viewvector in the next scroll step
+	}
+	else{
+		offset -= offset * off / 8;
+	}
+	Camera_setOrigin( camera, camera.m_orbit_center - viewvector * offset );
+}
+
 gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* camwnd ){
 	//gtk_window_set_focus( camwnd->m_parent, camwnd->m_gl_widget );
 	gtk_widget_grab_focus( camwnd->m_gl_widget );
 	if( !gtk_window_is_active( camwnd->m_parent ) )
 		gtk_window_present( camwnd->m_parent );
 
+	camera_t& cam = camwnd->getCamera();
+
 	if ( event->direction == GDK_SCROLL_UP ) {
-		if ( camwnd->getCamera().movementflags & MOVE_FOCUS ) {
-			++camwnd->getCamera().m_focus_offset;
+		if ( cam.movementflags & MOVE_FOCUS ) {
+			++cam.m_focus_offset;
+			return FALSE;
+		}
+		else if( cam.m_orbit ){
+			++cam.m_orbit_offset;
+			camera_orbit_scroll( cam );
 			return FALSE;
 		}
 
-		Camera_Freemove_updateAxes( camwnd->getCamera() );
+		Camera_Freemove_updateAxes( cam );
 		if( camwnd->m_bFreeMove || !g_camwindow_globals.m_bZoomInToPointer ){
-			Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) + camwnd->getCamera().forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
+			Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) + cam.forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
 		}
 		else{
-			//Matrix4 maa = matrix4_multiplied_by_matrix4( camwnd->getCamera().projection, camwnd->getCamera().modelview );
-			Matrix4 maa = camwnd->getCamera().m_view->GetViewMatrix();
+			//Matrix4 maa = matrix4_multiplied_by_matrix4( cam.projection, cam.modelview );
+			Matrix4 maa = cam.m_view->GetViewMatrix();
 			matrix4_affine_invert( maa );
 
 			float x = static_cast<float>( event->x );
 			float y = static_cast<float>( event->y );
 			Vector3 normalized;
 
-			normalized[0] = 2.0f * ( x ) / static_cast<float>( camwnd->getCamera().width ) - 1.0f;
-			normalized[1] = 2.0f * ( y )/ static_cast<float>( camwnd->getCamera().height ) - 1.0f;
+			normalized[0] = 2.0f * ( x ) / static_cast<float>( cam.width ) - 1.0f;
+			normalized[1] = 2.0f * ( y )/ static_cast<float>( cam.height ) - 1.0f;
 			normalized[1] *= -1.f;
 			normalized[2] = 0.f;
 
@@ -1391,13 +1422,18 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 		}
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
-		if ( camwnd->getCamera().movementflags & MOVE_FOCUS ) {
-			--camwnd->getCamera().m_focus_offset;
+		if ( cam.movementflags & MOVE_FOCUS ) {
+			--cam.m_focus_offset;
+			return FALSE;
+		}
+		else if( cam.m_orbit ){
+			--cam.m_orbit_offset;
+			camera_orbit_scroll( cam );
 			return FALSE;
 		}
 
-		Camera_Freemove_updateAxes( camwnd->getCamera() );
-		Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) - camwnd->getCamera().forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
+		Camera_Freemove_updateAxes( cam );
+		Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) - cam.forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
 	}
 
 	return FALSE;
@@ -2294,11 +2330,13 @@ Vector3 Camera_getFocusPos( camera_t& camera ){
 			}
 		}
 	}
-	if( camera.m_focus_offset < 0 || camera.m_focus_offset > 16 ){
-		offset -= offset * camera.m_focus_offset / 8 * pow( 2.0f, static_cast<float>( camera.m_focus_offset < 0 ? -camera.m_focus_offset : camera.m_focus_offset - 16 ) / 8.f );
+
+	const int off = camera.m_focus_offset;
+	if( off < 0 || off > 16 ){
+		offset -= offset * off / 8 * pow( 2.0f, static_cast<float>( off < 0 ? -off : off - 16 ) / 8.f );
 	}
 	else{
-		offset -= offset * camera.m_focus_offset / 8;
+		offset -= offset * off / 8;
 	}
 	return ( aabb.origin - viewvector * offset );
 }
