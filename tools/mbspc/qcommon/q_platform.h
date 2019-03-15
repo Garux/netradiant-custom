@@ -97,7 +97,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ID_INLINE __inline
 #define PATH_SEP '\\'
 
-#if defined( __WIN64__ ) 
+#if defined( __WIN64__ )
 #define ARCH_STRING "x86_64"
 #elif defined _M_ALPHA
 #define ARCH_STRING "AXP"
@@ -180,8 +180,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define PATH_SEP '/'
 
-#if !defined(ARCH_STRING)
-# error ARCH_STRING should be defined by the Makefile
+#if defined __i386__
+#define ARCH_STRING "i386"
+#elif defined __x86_64__
+#define ARCH_STRING "x86_64"
 #endif
 
 #if defined __x86_64__
