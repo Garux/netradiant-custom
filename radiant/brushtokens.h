@@ -654,8 +654,7 @@ void exportTokens( TokenWriter& writer ) const {
 		writer.writeToken( "{" );
 		writer.nextLine();
 	}
-
-	if ( Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
+	else if ( Brush::m_type == eBrushTypeDoom3 || Brush::m_type == eBrushTypeQuake4 ) {
 		writer.writeToken( "brushDef3" );
 		writer.nextLine();
 		writer.writeToken( "{" );
