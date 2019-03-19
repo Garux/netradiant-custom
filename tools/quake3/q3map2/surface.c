@@ -1631,6 +1631,8 @@ qboolean SideInBrush( side_t *side, brush_t *b ){
 		if ( s == SIDE_FRONT || s == SIDE_CROSS ) {
 			return qfalse;
 		}
+		if( s == SIDE_ON && b->sides[ i ].culled && DotProduct( ( mapplanes[ side->planenum ].normal ), ( plane->normal ) ) > 0 ) /* don't cull by freshly culled with matching plane */
+			return qfalse;
 	}
 
 	/* don't cull autosprite or polygonoffset surfaces */
@@ -1827,6 +1829,8 @@ void CullSides( entity_t *e ){
 						side2->culled = qtrue;
 						g_numCoinFaces++;
 					}
+
+					// TODO ? this culls only one of face-to-face windings; SideInBrush culls both tho; is this needed at all or should be improved?
 				}
 			}
 		}
