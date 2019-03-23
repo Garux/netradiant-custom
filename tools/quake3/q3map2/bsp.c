@@ -38,6 +38,56 @@
 
 
 
+qboolean g_autocaulk = qfalse;
+
+static void autocaulk_write(){
+	char filename[1024];
+
+	Sys_FPrintf( SYS_VRB, "--- autocaulk_write ---\n" );
+	sprintf( filename, "%s.caulk", source );
+	Sys_Printf( "writing %s\n", filename );
+
+	FILE* file = fopen( filename, "w" );
+	if ( !file ) {
+		Error( "Error opening %s", filename );
+	}
+
+	int fslime = 16;
+	ApplySurfaceParm( "slime", &fslime, NULL, NULL );
+	int flava = 8;
+	ApplySurfaceParm( "lava", &flava, NULL, NULL );
+
+	for ( brush_t* b = entities[0].brushes; b; b = b->next ) {
+		fprintf( file, "%i ", b->brushNum );
+		shaderInfo_t* contentShader = b->contentShader;
+		for( int i = 0; i < b->numsides; ++i ){
+			if( b->sides[i].visibleHull || ( b->sides[i].compileFlags & C_NODRAW ) ){
+				fprintf( file, "-" );
+			}
+			else if( contentShader->compileFlags & C_LIQUID ){
+				if( contentShader->contentFlags & flava )
+					fprintf( file, "l" );
+				else if( contentShader->contentFlags & fslime )
+					fprintf( file, "s" );
+				else
+					fprintf( file, "w" );
+			}
+			else if( b->compileFlags & C_TRANSLUCENT ){
+				if( contentShader->compileFlags & C_SOLID )
+					fprintf( file, "N" );
+				else
+					fprintf( file, "n" );
+			}
+			else{
+				fprintf( file, "c" );
+			}
+		}
+		fprintf( file, "\n" );
+	}
+
+	fclose( file );
+}
+
 /* -------------------------------------------------------------------------------
 
    functions
@@ -374,6 +424,11 @@ void ProcessWorldModel( void ){
 		tree = FaceBSP( faces );
 		MakeTreePortals( tree );
 		FilterStructuralBrushesIntoTree( e, tree );
+
+		if( g_autocaulk == qtrue ){
+			autocaulk_write();
+			exit( 0 );
+		}
 
 		/* ydnar: flood again for skybox */
 		if ( skyboxPresent ) {
@@ -1003,6 +1058,10 @@ int BSPMain( int argc, char **argv ){
 			Sys_Printf( "No oBs!\n" );
 			noob = qtrue;
 		}
+		else if ( !strcmp( argv[ i ], "-autocaulk" ) ) {
+			Sys_Printf( "\trunning in autocaulk mode\n" );
+			g_autocaulk = qtrue;
+		}
 		else
 		{
 			Sys_Warning( "Unknown option \"%s\"\n", argv[ i ] );
@@ -1049,10 +1108,10 @@ int BSPMain( int argc, char **argv ){
 
 	/* load original file from temp spot in case it was renamed by the editor on the way in */
 	if ( strlen( tempSource ) > 0 ) {
-		LoadMapFile( tempSource, qfalse, qfalse );
+		LoadMapFile( tempSource, qfalse, g_autocaulk );
 	}
 	else{
-		LoadMapFile( name, qfalse, qfalse );
+		LoadMapFile( name, qfalse, g_autocaulk );
 	}
 
 	/* div0: inject command line parameters */

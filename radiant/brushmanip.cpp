@@ -1578,6 +1578,7 @@ void Brush_constructMenu( GtkMenu* menu ){
 	create_menu_item_with_mnemonic( menu, "Reset Texture", "TextureReset/Cap" );
 	create_menu_item_with_mnemonic( menu, "Copy Face Texture", "Copy" );
 	create_menu_item_with_mnemonic( menu, "Paste Face Texture", "Paste" );
+	create_menu_item_with_mnemonic( menu, "AutoCaulk Selected", "AutoCaulkSelected" );
 
 	command_connect_accelerator( "Brush3Sided" );
 	command_connect_accelerator( "Brush4Sided" );
