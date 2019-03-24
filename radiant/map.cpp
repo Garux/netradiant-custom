@@ -1537,11 +1537,6 @@ void Scene_Exclude_All( bool exclude ){
 	GlobalSceneGraph().traverse( ExcludeAllWalker( exclude ) );
 }
 
-bool Instance_isSelected( const scene::Instance& instance ){
-	const Selectable* selectable = Instance_getSelectable( instance );
-	return selectable != 0 && selectable->isSelected();
-}
-
 class ExcludeSelectedWalker : public scene::Graph::Walker
 {
 bool m_exclude;
@@ -1562,25 +1557,19 @@ void Scene_Exclude_Selected( bool exclude ){
 
 class ExcludeRegionedWalker : public scene::Graph::Walker
 {
-bool m_exclude;
+const bool m_exclude;
+const AABB m_region = aabb_for_minmax( g_region_mins, g_region_maxs );
 public:
 ExcludeRegionedWalker( bool exclude )
 	: m_exclude( exclude ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if( !path.top().get().isRoot() ) /* don't touch model node: disabling one will disable all its instances! */
-		exclude_node(
-			path.top(),
-			!(
-				(
-					aabb_intersects_aabb(
-						instance.worldAABB(),
-						aabb_for_minmax( g_region_mins, g_region_maxs )
-						) != 0
-				) ^ m_exclude
-				)
-			);
-
+	if( !path.top().get().isRoot() ){ /* don't touch model node: disabling one will disable all its instances! */
+		const bool exclude = m_exclude == aabb_intersects_aabb( instance.worldAABB(), m_region );
+		exclude_node( path.top(), exclude );
+		if( exclude )
+			Instance_setSelected( instance, false );
+	}
 	return true;
 }
 };
@@ -1614,12 +1603,9 @@ void Map_ApplyRegion(){
 	g_region_item.update();
 
 	Scene_Exclude_Region( false );
-	/* newly created brushes have to visible! */
+	/* newly created brushes have to be visible! */
 	if( scene::Node* w = Map_FindWorldspawn( g_map ) )
 		exclude_node( *w, false );
-
-	if( GlobalSelectionSystem().countSelected() != 0 )
-		GlobalSelectionSystem().setSelectedAll( false );
 }
 
 
@@ -1638,7 +1624,7 @@ void Map_RegionSelectedBrushes(){
 		Select_GetBounds( g_region_mins, g_region_maxs );
 
 		Scene_Exclude_Selected( false );
-		/* newly created brushes have to visible! */
+		/* newly created brushes have to be visible! */
 		if( scene::Node* w = Map_FindWorldspawn( g_map ) )
 			exclude_node( *w, false );
 
@@ -1669,8 +1655,6 @@ void Map_RegionBounds( const AABB& bounds ){
 	g_region_mins = vector3_subtracted( bounds.origin, bounds.extents );
 	g_region_maxs = vector3_added( bounds.origin, bounds.extents );
 
-//	deleteSelection();
-
 	Map_ApplyRegion();
 }
 
@@ -1684,10 +1668,11 @@ void Map_RegionBrush( void ){
 		scene::Instance& instance = GlobalSelectionSystem().ultimateSelected();
 		Map_RegionBounds( instance.worldAABB() );
 
-		if( Selectable* selectable = Instance_getSelectable( instance ) ){
-			selectable->setSelected( true );
-			deleteSelection();
+		if( GlobalSelectionSystem().countSelected() != 1 ){
+			GlobalSelectionSystem().setSelectedAll( false );
+			Instance_setSelected( instance, true );
 		}
+		deleteSelection();
 	}
 	else{
 		globalErrorStream() << "Nothing is selected!\n";
@@ -2079,17 +2064,17 @@ void RegionOff(){
 }
 
 void RegionXY(){
-	VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
-	int nDim1 = ( viewtype == YZ ) ? 1 : 0;
-	int nDim2 = ( viewtype == XY ) ? 1 : 2;
-	int nDim = static_cast<int>( viewtype );
-	XYWnd* wnd = g_pParentWnd->ActiveXY();
+	const VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
+	const int nDim1 = ( viewtype == YZ ) ? 1 : 0;
+	const int nDim2 = ( viewtype == XY ) ? 1 : 2;
+	const int nDim = static_cast<int>( viewtype );
+	const XYWnd& wnd = *( g_pParentWnd->ActiveXY() );
 	Vector3 min, max;
-	min[nDim1] = wnd->GetOrigin()[nDim1] - 0.5f * wnd->Width() / wnd->Scale();
-	min[nDim2] = wnd->GetOrigin()[nDim2] - 0.5f * wnd->Height() / wnd->Scale();
+	min[nDim1] = wnd.GetOrigin()[nDim1] - 0.5f * wnd.Width() / wnd.Scale();
+	min[nDim2] = wnd.GetOrigin()[nDim2] - 0.5f * wnd.Height() / wnd.Scale();
 	min[nDim] = g_MinWorldCoord + 64;
-	max[nDim1] = wnd->GetOrigin()[nDim1] + 0.5f * wnd->Width() / wnd->Scale();
-	max[nDim2] = wnd->GetOrigin()[nDim2] + 0.5f * wnd->Height() / wnd->Scale();
+	max[nDim1] = wnd.GetOrigin()[nDim1] + 0.5f * wnd.Width() / wnd.Scale();
+	max[nDim2] = wnd.GetOrigin()[nDim2] + 0.5f * wnd.Height() / wnd.Scale();
 	max[nDim] = g_MaxWorldCoord - 64;
 
 	Map_RegionXY( min, max );

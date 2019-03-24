@@ -866,12 +866,9 @@ inline void Instance_setSelected( scene::Instance& instance, bool selected ){
 	}
 }
 
-inline bool Instance_isSelected( scene::Instance& instance ){
-	Selectable* selectable = Instance_getSelectable( instance );
-	if ( selectable != 0 ) {
-		return selectable->isSelected();
-	}
-	return false;
+inline bool Instance_isSelected( const scene::Instance& instance ){
+	const Selectable* selectable = Instance_getSelectable( instance );
+	return selectable != 0 && selectable->isSelected();
 }
 
 inline scene::Instance& findInstance( const scene::Path& path ){

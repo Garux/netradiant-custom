@@ -687,7 +687,7 @@ void XYWnd::releaseStates(){
 	GlobalShaderCache().release( "$XY_OVERLAY" );
 }
 
-const Vector3& XYWnd::GetOrigin(){
+const Vector3& XYWnd::GetOrigin() const {
 	return m_vOrigin;
 }
 

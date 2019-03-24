@@ -114,7 +114,7 @@ static void recaptureStates(){
 }
 
 void PositionView( const Vector3& position );
-const Vector3& GetOrigin();
+const Vector3& GetOrigin() const;
 void SetOrigin( const Vector3& origin );
 void Scroll( int x, int y );
 
@@ -244,13 +244,13 @@ VIEWTYPE GetViewType(){
 	return m_viewType;
 }
 void SetScale( float f );
-float Scale(){
+float Scale() const {
 	return m_fScale;
 }
-int Width(){
+int Width() const {
 	return m_nWidth;
 }
-int Height(){
+int Height() const {
 	return m_nHeight;
 }
 
