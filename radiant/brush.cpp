@@ -466,7 +466,7 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 														static_cast<double>( i.m_vertexTransformed.y() ),
 														static_cast<double>( i.m_vertexTransformed.z() ) ) );
 	}
-	auto hull = quickhull.getConvexHull( pointCloud, false, true, 0.0001 );
+	auto hull = quickhull.getConvexHull( pointCloud, false, true );
 	const auto& indexBuffer = hull.getIndexBuffer();
 	const size_t triangleCount = indexBuffer.size() / 3;
 	VertexModePlanes vertexModePlanes;

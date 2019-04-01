@@ -1115,7 +1115,7 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 															static_cast<double>( mergeVertices[i].y() ),
 															static_cast<double>( mergeVertices[i].z() ) ) );
 		}
-		auto hull = quickhull.getConvexHull( pointCloud, false, true, 0.0001 );
+		auto hull = quickhull.getConvexHull( pointCloud, false, true );
 		const auto& indexBuffer = hull.getIndexBuffer();
 		const size_t triangleCount = indexBuffer.size() / 3;
 		for( size_t i = 0; i < triangleCount; ++i ) {
