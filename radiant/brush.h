@@ -1307,6 +1307,9 @@ const Plane3& plane3() const {
 	m_observer->evaluateTransform();
 	return m_planeTransformed.plane3();
 }
+const Plane3& plane3_() const {
+	return m_planeTransformed.plane3();
+}
 FacePlane& getPlane(){
 	return m_plane;
 }
@@ -2230,6 +2233,74 @@ void copy( const Brush& other ){
 		addFace( *( *i ) );
 	}
 	planeChanged();
+}
+
+/// for the only use to quickly check, if about to be transformed brush makes sense
+bool contributes() const {
+	/* plane_unique() ripoff, calling no evaluation */
+	auto plane_unique_ = [this]( std::size_t index ) -> bool {
+		// duplicate plane
+		for ( std::size_t i = 0; i < m_faces.size(); ++i )
+		{
+			if ( index != i && !plane3_inside( m_faces[index]->plane3_(), m_faces[i]->plane3_(), index < i ) ) {
+				return false;
+			}
+		}
+		return true;
+	};
+
+	/* windingForClipPlane() ripoff, calling no evaluation */
+	auto windingForClipPlane_ = [this, &plane_unique_]( const Plane3& plane ) -> bool {
+		FixedWinding buffer[2];
+		bool swap = false;
+
+		// get a poly that covers an effectively infinite area
+		Winding_createInfinite( buffer[swap], plane, m_maxWorldCoord );
+
+		// chop the poly by all of the other faces
+		for ( std::size_t i = 0; i < m_faces.size(); ++i )
+		{
+			const Face& clip = *m_faces[i];
+
+			if ( plane3_equal( clip.plane3_(), plane )
+				|| !plane3_valid( clip.plane3_() ) || !plane_unique_( i )
+				|| plane3_opposing( plane, clip.plane3_() ) ) {
+				continue;
+			}
+
+			if( buffer[swap].points.empty() ){
+				break;
+			}
+
+			buffer[!swap].clear();
+
+			{
+				// flip the plane, because we want to keep the back side
+				Plane3 clipPlane( vector3_negated( clip.plane3_().normal() ), -clip.plane3_().dist() );
+				Winding_Clip( buffer[swap], plane, clipPlane, i, buffer[!swap] );
+			}
+			swap = !swap;
+		}
+
+		return buffer[swap].size() > 2;
+	};
+
+
+	std::size_t contributing = 0;
+
+	for ( std::size_t i = 0; i < m_faces.size(); ++i )
+	{
+		Face& f = *m_faces[i];
+
+		if ( plane3_valid( f.plane3_() ) && plane_unique_( i ) ) {
+			if( windingForClipPlane_( f.plane3_() ) ){
+				++contributing;
+				if( contributing > 3 )
+					return true;
+			}
+		}
+	}
+	return false;
 }
 
 private:
@@ -3782,12 +3853,8 @@ void selectVerticesOnTestedFaces( SelectionTest& test ){
 }
 
 
-void transformComponents( const Matrix4& matrix ){
-	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
-	{
-		( *i ).transformComponents( matrix );
-	}
-}
+void transformComponents( const Matrix4& matrix );
+
 const AABB& getSelectedComponentsBounds() const {
 	m_aabb_component = AABB();
 

@@ -540,3 +540,49 @@ void Brush::vertexModeSnap( const float snap, bool all ){
 			vector3_snap( i.m_vertexTransformed, snap );
 	vertexModeBuildHull( all );
 }
+
+#include "grid.h"
+void BrushInstance::transformComponents( const Matrix4& matrix ){
+	auto transform = [this]( const Matrix4& matrix ){
+		for ( auto& fi : m_faceInstances )
+			fi.transformComponents( matrix );
+	};
+
+	transform( matrix );
+
+	const Vector3 translation = matrix4_get_translation_vec3( matrix );
+	if( translation != g_vector3_identity ){ //has translation
+		Matrix4 ma( matrix );
+		Vector3& tra = vector4_to_vector3( ma.t() );
+		tra = g_vector3_identity;
+		if( g_matrix4_identity == ma ){ //only translation
+			for ( const auto& fi : m_faceInstances ){
+				if( fi.isSelected() ){ //has faces selected
+					if( !m_brush.contributes() ){ //do binary search of worthy transform
+						for( std::size_t axis = 0; axis < 3; ++axis ){
+							const float grid = translation[axis] < 0? -GetGridSize() : GetGridSize();
+							int maxI = static_cast<int>( translation[axis] / grid + .5f );
+							int minI = 0;
+							while( maxI > minI ){
+								const int curI = minI + ( maxI - minI + 1 ) / 2;
+								tra[axis] = curI * grid;
+								m_brush.revertTransform();
+								transform( ma );
+								if( m_brush.contributes() ){
+									minI = curI;
+								}
+								else{
+									maxI = curI - 1;
+								}
+							}
+							tra[axis] = minI * grid;
+						}
+						m_brush.revertTransform();
+						transform( ma );
+					}
+					break;
+				}
+			}
+		}
+	}
+}
