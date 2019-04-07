@@ -90,7 +90,7 @@ void gray_to_texture( const int x_max, const int y_max, const unsigned char *in,
 
 
 // generic string printing with call lists
-class GLFontCallList : public GLFont
+class GLFontCallList final : public GLFont
 {
 GLuint m_displayList;
 int m_pixelHeight;
@@ -102,10 +102,12 @@ public:
 GLFontCallList( GLuint displayList, int asc, int desc, int pixelHeight, PangoFontMap *fontmap, PangoContext *ft2_context ) :
 	 m_displayList( displayList ), m_pixelHeight( pixelHeight ), m_pixelAscent( asc ), m_pixelDescent( desc ), m_fontmap( fontmap ), m_ft2_context( ft2_context ){
 }
-virtual ~GLFontCallList(){
+~GLFontCallList(){
 	glDeleteLists( m_displayList, 256 );
-	g_object_unref( G_OBJECT( m_ft2_context ) );
-	g_object_unref( G_OBJECT( m_fontmap ) );
+	if( m_ft2_context )
+		g_object_unref( G_OBJECT( m_ft2_context ) );
+	if( m_fontmap )
+		g_object_unref( G_OBJECT( m_fontmap ) );
 }
 void printString( const char *s ){
 	GlobalOpenGL().m_glListBase( m_displayList );
@@ -113,6 +115,10 @@ void printString( const char *s ){
 }
 
 void renderString( const char *s, const GLuint& tex, const unsigned int colour[3], int& wid, int& hei ){
+	if( !m_ft2_context || m_pixelHeight == 0 ){
+		wid = hei = 0;
+		return;
+	}
 
 	PangoLayout *layout;
 	PangoRectangle log_rect;
@@ -362,13 +368,13 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 	}
 	g_object_unref( G_OBJECT( layout ) );
 }
-virtual int getPixelAscent() const {
+int getPixelAscent() const {
 	return m_pixelAscent;
 }
-virtual int getPixelDescent() const {
+int getPixelDescent() const {
 	return m_pixelDescent;
 }
-virtual int getPixelHeight() const {
+int getPixelHeight() const {
 	return m_pixelHeight;
 }
 };
@@ -741,6 +747,9 @@ GLFont *glfont_create( const char* font_string ){
 		font_descent = PANGO_PIXELS_CEIL( font_descent_pango_units );
 		font_height = font_ascent + font_descent;
 	}
+
+	ASSERT_MESSAGE( font != 0, "font for OpenGL rendering was not created" );
+
 	return new GLFontCallList( font_list_base, font_ascent, font_descent, font_height, fontmap, ft2_context );
 }
 
