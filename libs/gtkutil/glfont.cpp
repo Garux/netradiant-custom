@@ -672,49 +672,42 @@ GLFont *glfont_create( const char* font_string ){
 #include <pango/pango-utils.h>
 #include <gtk/gtkglwidget.h>
 
+PangoFont* tryFont( const char* font_string, PangoFontDescription*& font_desc, GLuint font_list_base ){
+	pango_font_description_free( font_desc );
+	font_desc = pango_font_description_from_string( font_string );
+	return gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+}
+
 GLFont *glfont_create( const char* font_string ){
 	GLuint font_list_base = glGenLists( 256 );
 	int font_height = 0, font_ascent = 0, font_descent = 0;
+	PangoFontDescription* font_desc = 0;
+	PangoFont* font = 0;
 
-	PangoFontDescription* font_desc = pango_font_description_from_string( font_string );
-	//PangoFontDescription* font_desc = pango_font_description_from_string( "arial 7" );
-
-	PangoFont* font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+	do
+	{
+		if( *font_string != '\0' )
+			if( ( font = tryFont( font_string, font_desc, font_list_base ) ) )
+				break;
+#ifdef WIN32
+		if( ( font = tryFont( "arial 8", font_desc, font_list_base ) ) )
+			break;
+		if( ( font = tryFont( "fixed 8", font_desc, font_list_base ) ) )
+			break;
+		if( ( font = tryFont( "courier new 8", font_desc, font_list_base ) ) )
+			break;
+#endif
+		GtkSettings *settings = gtk_settings_get_default();
+		gchar *fontname;
+		g_object_get( settings, "gtk-font-name", &fontname, NULL );
+		if( ( font = tryFont( fontname, font_desc, font_list_base ) ) )
+			break;
+	} while ( 0 );
 
 	PangoFontMap *fontmap = 0;
 	PangoContext *ft2_context = 0;
 
-	if ( font == 0 ) {
-		pango_font_description_free( font_desc );
-		font_desc = pango_font_description_from_string( "arial 8" );
-		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
-	}
-
-	if ( font == 0 ) {
-		pango_font_description_free( font_desc );
-		font_desc = pango_font_description_from_string( "fixed 8" );
-		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
-	}
-
-	if ( font == 0 ) {
-		pango_font_description_free( font_desc );
-		font_desc = pango_font_description_from_string( "courier new 8" );
-		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
-	}
-
-	if ( font == 0 ) {
-		pango_font_description_free( font_desc );
-
-		GtkSettings *settings = gtk_settings_get_default();
-		gchar *fontname;
-		g_object_get( settings, "gtk-font-name", &fontname, NULL );
-
-		font_desc = pango_font_description_from_string( fontname );
-		font = gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
-	}
-
 	if ( font != 0 ) {
-
 		fontmap = pango_ft2_font_map_new();
 		pango_ft2_font_map_set_resolution( PANGO_FT2_FONT_MAP( fontmap ), 72, 72 );
 		ft2_context = pango_font_map_create_context( fontmap );
@@ -739,7 +732,6 @@ GLFont *glfont_create( const char* font_string ){
 		pango_font_description_set_size( font_desc, fontsize );
 		pango_context_set_font_description( ft2_context, font_desc );
 
-		pango_font_description_free( font_desc );
 //		g_object_unref( G_OBJECT( ft2_context ) );
 //		g_object_unref( G_OBJECT( fontmap ) );
 
@@ -747,6 +739,8 @@ GLFont *glfont_create( const char* font_string ){
 		font_descent = PANGO_PIXELS_CEIL( font_descent_pango_units );
 		font_height = font_ascent + font_descent;
 	}
+
+	pango_font_description_free( font_desc );
 
 	ASSERT_MESSAGE( font != 0, "font for OpenGL rendering was not created" );
 

@@ -3433,7 +3433,7 @@ void GridStatus_changed(){
 	}
 }
 
-CopiedString g_strOpenGLFont = "arial 8";
+CopiedString g_strOpenGLFont = "";
 
 void OpenGLFont_select(){
 	CopiedString newfont;
