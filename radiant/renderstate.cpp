@@ -2195,7 +2195,18 @@ void OpenGLShader::construct( const char* name ){
 		else if ( string_equal( name + 1, "POINT" ) ) {
 			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
 			state.m_sort = OpenGLState::eSortControlFirst;
-			state.m_pointsize = 4;
+			state.m_pointsize = 6;
+		}
+		else if ( string_equal( name + 1, "DEEPPOINT" ) ) {
+			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
+			state.m_sort = OpenGLState::eSortControlFirst;
+			state.m_pointsize = 6;
+
+			OpenGLState& hiddenLine = appendDefaultPass(); // glBeginQuery glEndQuery
+			hiddenLine.m_state = RENDER_DEPTHTEST;
+			hiddenLine.m_sort = OpenGLState::eSortControlFirst - 1;
+			hiddenLine.m_pointsize = 6;
+			hiddenLine.m_depthfunc = GL_LEQUAL;
 		}
 		else if ( string_equal( name + 1, "SELPOINT" ) ) {
 			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;

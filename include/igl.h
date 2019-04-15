@@ -2657,7 +2657,7 @@ struct OpenGLBinding
 	void ( QGL_DLLEXPORT *m_glGetBufferSubData )( GLenum target, GLintptr offset, GLsizeiptr size, GLvoid* data );
 	void ( QGL_DLLEXPORT *m_glGetQueryObjectiv )( GLuint id, GLenum pname, GLint* params );
 	void ( QGL_DLLEXPORT *m_glGetQueryObjectuiv )( GLuint id, GLenum pname, GLuint* params );
-	void ( QGL_DLLEXPORT *m_glGetQueryiv )( GLenum target, GLenum pname, GLint params );
+	void ( QGL_DLLEXPORT *m_glGetQueryiv )( GLenum target, GLenum pname, GLint* params );
 	GLboolean ( QGL_DLLEXPORT *m_glIsBuffer )( GLuint buffer );
 	GLboolean ( QGL_DLLEXPORT *m_glIsQuery )( GLuint id );
 	GLvoid* ( QGL_DLLEXPORT * m_glMapBuffer )( GLenum target, GLenum access );

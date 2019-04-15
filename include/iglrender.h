@@ -66,7 +66,7 @@ enum ESort
 	eSortOverlayFirst = 1028,
 	eSortOverlayLast = 2047,
 	eSortText = 2048,
-	eSortControlFirst = 2049,
+	eSortControlFirst = 2050,
 	eSortControlLast = 3071,
 	eSortGUI0 = 3072,
 	eSortGUI1 = 3073,

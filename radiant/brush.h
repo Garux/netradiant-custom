@@ -257,6 +257,13 @@ inline PointVertex pointvertex_for_windingpoint( const Vector3& point, const Col
 			   );
 }
 
+inline DepthTestedPointVertex depthtested_pointvertex_for_windingpoint( const Vector3& point, const Colour4b& colour ){
+	return DepthTestedPointVertex(
+			   vertex3f_for_vector3( point ),
+			   colour
+			   );
+}
+
 inline bool check_plane_is_integer( const PlanePoints& planePoints ){
 	return !float_is_integer( planePoints[0][0] )
 		   || !float_is_integer( planePoints[0][1] )
@@ -1409,8 +1416,7 @@ class RenderableWireframe : public OpenGLRenderable
 public:
 void render( RenderStateFlags state ) const {
 #if 1
-	glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices->colour );
-	glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices->vertex );
+	glVertexPointer( 3, GL_FLOAT, sizeof( DepthTestedPointVertex ), &m_vertices->vertex );
 	glDrawElements( GL_LINES, GLsizei( m_size << 1 ), RenderIndexTypeID, m_faceVertex.data() );
 #else
 	glBegin( GL_LINES );
@@ -1425,7 +1431,7 @@ void render( RenderStateFlags state ) const {
 
 Array<EdgeRenderIndices> m_faceVertex;
 std::size_t m_size;
-const PointVertex* m_vertices;
+const DepthTestedPointVertex* m_vertices;
 };
 
 class Brush;
@@ -1592,17 +1598,18 @@ Faces m_faces;
 
 // cached data compiled from state
 Array<PointVertex> m_faceCentroidPoints;
-RenderablePointArray m_render_faces;
+RenderablePointArray<PointVertex> m_render_faces;
 
-Array<PointVertex> m_uniqueVertexPoints;
+mutable Array<DepthTestedPointVertex> m_uniqueVertexPoints;
 typedef std::vector<SelectableVertex> SelectableVertices;
 SelectableVertices m_select_vertices;
-RenderablePointArray m_render_vertices;
+RenderablePointArray<DepthTestedPointVertex> m_render_vertices;
+RenderableDepthTestedPointArray m_render_deepvertices;
 
 Array<PointVertex> m_uniqueEdgePoints;
 typedef std::vector<SelectableEdge> SelectableEdges;
 SelectableEdges m_select_edges;
-RenderablePointArray m_render_edges;
+RenderablePointArray<PointVertex> m_render_edges;
 
 Array<EdgeRenderIndices> m_edge_indices;
 Array<EdgeFaces> m_edge_faces;
@@ -1625,6 +1632,7 @@ Callback m_lightsChanged;
 
 // static data
 static Shader* m_state_point;
+static Shader* m_state_deeppoint;
 // ----
 
 static EBrushType m_type;
@@ -1636,6 +1644,7 @@ Brush( scene::Node& node, const Callback& evaluateTransform, const Callback& bou
 	m_map( 0 ),
 	m_render_faces( m_faceCentroidPoints, GL_POINTS ),
 	m_render_vertices( m_uniqueVertexPoints, GL_POINTS ),
+	m_render_deepvertices( m_uniqueVertexPoints, GL_POINTS ),
 	m_render_edges( m_uniqueEdgePoints, GL_POINTS ),
 	m_evaluateTransform( evaluateTransform ),
 	m_boundsChanged( boundsChanged ),
@@ -1649,6 +1658,7 @@ Brush( const Brush& other, scene::Node& node, const Callback& evaluateTransform,
 	m_map( 0 ),
 	m_render_faces( m_faceCentroidPoints, GL_POINTS ),
 	m_render_vertices( m_uniqueVertexPoints, GL_POINTS ),
+	m_render_deepvertices( m_uniqueVertexPoints, GL_POINTS ),
 	m_render_edges( m_uniqueEdgePoints, GL_POINTS ),
 	m_evaluateTransform( evaluateTransform ),
 	m_boundsChanged( boundsChanged ),
@@ -1671,6 +1681,7 @@ Brush( const Brush& other ) :
 	m_map( 0 ),
 	m_render_faces( m_faceCentroidPoints, GL_POINTS ),
 	m_render_vertices( m_uniqueVertexPoints, GL_POINTS ),
+	m_render_deepvertices( m_uniqueVertexPoints, GL_POINTS ),
 	m_render_edges( m_uniqueEdgePoints, GL_POINTS ),
 	m_planeChanged( false ),
 	m_transformChanged( false ){
@@ -1837,7 +1848,22 @@ void renderComponents( SelectionSystem::EComponentMode mode, Renderer& renderer,
 	switch ( mode )
 	{
 	case SelectionSystem::eVertex:
-		renderer.addRenderable( m_render_vertices, localToWorld );
+		{
+			if( GlobalOpenGL().GL_1_5() ){
+				if( volume.fill() ){
+					renderer.SetState( m_state_deeppoint, Renderer::eFullMaterials );
+					renderer.addRenderable( m_render_deepvertices, localToWorld );
+				}
+				else{
+					for( auto& p : m_uniqueVertexPoints )
+						p.colour = colour_vertex;
+					renderer.addRenderable( m_render_vertices, localToWorld );
+				}
+			}
+			else{
+				renderer.addRenderable( m_render_vertices, localToWorld );
+			}
+		}
 		break;
 	case SelectionSystem::eEdge:
 		renderer.addRenderable( m_render_edges, localToWorld );
@@ -2004,9 +2030,11 @@ static void constructStatic( EBrushType type ){
 	g_bp_globals.m_texdefTypeId = BrushType_getTexdefType( type );
 
 	m_state_point = GlobalShaderCache().capture( "$POINT" );
+	m_state_deeppoint = GlobalShaderCache().capture( "$DEEPPOINT" );
 }
 static void destroyStatic(){
 	GlobalShaderCache().release( "$POINT" );
+	GlobalShaderCache().release( "$DEEPPOINT" );
 }
 
 std::size_t DEBUG_size(){
@@ -2798,7 +2826,6 @@ public:
 RenderablePointVectorPushBack( RenderablePointVector& points ) : m_points( points ){
 }
 void operator()( const Vector3& point ) const {
-	const Colour4b colour_selected( 0, 0, 255, 255 );
 	m_points.push_back( pointvertex_for_windingpoint( point, colour_selected ) );
 }
 };
@@ -3342,7 +3369,7 @@ mutable RenderableWireframe m_render_wireframe;
 mutable RenderablePointVector m_render_selected;
 mutable AABB m_aabb_component;
 mutable Array<PointVertex> m_faceCentroidPointsCulled;
-RenderablePointArray m_render_faces_wireframe;
+RenderablePointArray<PointVertex> m_render_faces_wireframe;
 mutable bool m_viewChanged;   // requires re-evaluation of view-dependent cached data
 
 BrushClipPlane m_clipPlane;

@@ -41,6 +41,7 @@ bool g_brush_textureVertexlock_enabled = false;
 EBrushType Brush::m_type;
 double Brush::m_maxWorldCoord = 0;
 Shader* Brush::m_state_point;
+Shader* Brush::m_state_deeppoint;
 Shader* BrushClipPlane::m_state = 0;
 Shader* BrushInstance::m_state_selpoint;
 Counter* BrushInstance::m_counter = 0;
@@ -256,7 +257,7 @@ void Brush::buildBRep(){
 						FaceVertexId faceVertex = faceVertices[ProximalVertexArray_index( vertexRings, uniqueVertices[i] )];
 
 						const Winding& winding = m_faces[faceVertex.getFace()]->getWinding();
-						m_uniqueVertexPoints[i] = pointvertex_for_windingpoint( winding[faceVertex.getVertex()].vertex, colour_vertex );
+						m_uniqueVertexPoints[i] = depthtested_pointvertex_for_windingpoint( winding[faceVertex.getVertex()].vertex, colour_vertex );
 					}
 				}
 			}
