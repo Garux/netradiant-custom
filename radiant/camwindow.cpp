@@ -886,8 +886,8 @@ class RenderableCamWorkzone : public OpenGLRenderable
 {
 	mutable Array<Vector3> m_verticesarr[3];
 	mutable Array<GLboolean> m_edgearr[3];
-	mutable Array<Vector4> m_colorarr0[3];
-	mutable Array<Vector4> m_colorarr1[3];
+	mutable Array<Colour4b> m_colorarr0[3];
+	mutable Array<Colour4b> m_colorarr1[3];
 public:
 void render( RenderStateFlags state ) const {
 	glEnableClientState( GL_EDGE_FLAG_ARRAY );
@@ -917,8 +917,8 @@ void render( RenderStateFlags state ) const {
 
 		Array<Vector3>& verticesarr( m_verticesarr[i] );
 		Array<GLboolean>& edgearr( m_edgearr[i] );
-		Array<Vector4>& colorarr0( m_colorarr0[i] );
-		Array<Vector4>& colorarr1( m_colorarr1[i] );
+		Array<Colour4b>& colorarr0( m_colorarr0[i] );
+		Array<Colour4b>& colorarr1( m_colorarr1[i] );
 		if( verticesarr.size() < approx_count ){
 			verticesarr.resize( approx_count );
 			edgearr.resize( approx_count );
@@ -935,14 +935,14 @@ void render( RenderStateFlags state ) const {
 			verticesarr[count][i] =
 			verticesarr[count + 1][i] = coord;
 			const float alpha = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
-			colorarr0[count] = colorarr0[count + 1] = Vector4( 1, 0, 0, alpha );
-			colorarr1[count] = colorarr1[count + 1] = Vector4( 1, 1, 1, alpha );
+			colorarr0[count] = colorarr0[count + 1] = Colour4b( 255, 0, 0, alpha * 255 );
+			colorarr1[count] = colorarr1[count + 1] = Colour4b( 255, 255, 255, alpha * 255 );
 			coord += grid;
 			verticesarr[count + 2][i] =
 			verticesarr[count + 3][i] = coord;
 			const float alpha2 = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
-			colorarr0[count + 2] = colorarr0[count + 3] = Vector4( 1, 0, 0, alpha2 );
-			colorarr1[count + 2] = colorarr1[count + 3] = Vector4( 1, 1, 1, alpha2 );
+			colorarr0[count + 2] = colorarr0[count + 3] = Colour4b( 255, 0, 0, alpha2 * 255 );
+			colorarr1[count + 2] = colorarr1[count + 3] = Colour4b( 255, 255, 255, alpha2 * 255 );
 			coord += grid;
 			edgearr[count] =
 			edgearr[count + 2] = GL_FALSE;
@@ -973,11 +973,11 @@ void render( RenderStateFlags state ) const {
 			}
 
 			glPolygonOffset( -2, 2 );
-			glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr0.data()->data() );
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( Colour4b ), colorarr0.data() );
 			glDrawArrays( GL_QUADS, start0? 0 : 2, GLsizei( count - ( start0? 4 : 2 ) ) );
 
 			glPolygonOffset( 1, -1 );
-			glColorPointer( 4, GL_FLOAT, sizeof( Vector4 ), colorarr1.data()->data() );
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( Colour4b ), colorarr1.data() );
 			glDrawArrays( GL_QUADS, start0? 2 : 0, GLsizei( count - ( start0? 2 : 4 ) ) );
 		}
 	}
