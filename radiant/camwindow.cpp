@@ -856,13 +856,13 @@ void render( RenderStateFlags state ) const {
 		for( ; count < approx_count - 4; count += 4 ){
 			verticesarr[count][i] =
 			verticesarr[count + 1][i] = coord;
-			const float alpha = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
+			const float alpha = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
 			colorarr0[count] = colorarr0[count + 1] = Colour4b( 255, 0, 0, alpha * 255 );
 			colorarr1[count] = colorarr1[count + 1] = Colour4b( 255, 255, 255, alpha * 255 );
 			coord += grid;
 			verticesarr[count + 2][i] =
 			verticesarr[count + 3][i] = coord;
-			const float alpha2 = std::min( 1.f, static_cast<float>( ( offset + bounds.extents[i] - fabs( coord - bounds.origin[i] ) ) / offset ) );
+			const float alpha2 = std::max( 0.f, std::min( 1.f, ( offset + bounds.extents[i] - std::fabs( coord - bounds.origin[i] ) ) / offset ) );
 			colorarr0[count + 2] = colorarr0[count + 3] = Colour4b( 255, 0, 0, alpha2 * 255 );
 			colorarr1[count + 2] = colorarr1[count + 3] = Colour4b( 255, 255, 255, alpha2 * 255 );
 			coord += grid;
