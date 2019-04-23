@@ -87,6 +87,15 @@ void image_decode( PointerInputStream& istream, PixelDecoder& decode, RGBAImage&
 	}
 }
 
+void image_fix_fully_transparent_alpha( RGBAImage& image ){
+	const RGBAPixel* end = image.pixels + ( image.height * image.width );
+	for( RGBAPixel* pixel = image.pixels; pixel != end; ++pixel )
+		if( pixel->alpha != 0 )
+			return;
+	for( RGBAPixel* pixel = image.pixels; pixel != end; ++pixel )
+		pixel->alpha = 0xff;
+}
+
 inline void istream_read_gray( PointerInputStream& istream, RGBAPixel& pixel ){
 	istream.read( &pixel.blue, 1 );
 	pixel.red = pixel.green = pixel.blue;
@@ -147,6 +156,7 @@ template<typename Flip>
 void targa_decode_rgba( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
 	TargaDecodeRGBAPixel decode;
 	image_decode( istream, decode, image, flip );
+	image_fix_fully_transparent_alpha( image );
 }
 
 typedef byte TargaPacket;
@@ -271,6 +281,7 @@ template<typename Flip>
 void targa_decode_rle_rgba( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
 	TargaDecodeRGBAPixelRLE decode;
 	image_decode( istream, decode, image, flip );
+	image_fix_fully_transparent_alpha( image );
 }
 
 struct TargaHeader
