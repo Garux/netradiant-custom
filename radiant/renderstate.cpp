@@ -1314,7 +1314,7 @@ void render( RenderStateFlags globalstate, const Matrix4& modelview, const Matri
 	}
 	debug_string( "end rendering" );
 
-	OpenGLState reset = current; /* popmatrix and reset stuff after RENDER_TEXT */
+	OpenGLState reset = current; /* popmatrix after RENDER_TEXT */
 	reset.m_state = current.m_state & ~RENDER_TEXT;
 	OpenGLState_apply( reset, current, globalstate );
 }
@@ -1617,7 +1617,10 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 	count_state();
 
 	if ( self.m_state & RENDER_OVERRIDE ) {
-		globalstate |= RENDER_FILL | RENDER_DEPTHWRITE;
+		globalstate |= RENDER_FILL;
+	}
+	if ( self.m_state & RENDER_TEXT ) {
+		globalstate |= RENDER_TEXTURE | RENDER_BLEND | RENDER_FILL | RENDER_TEXT;
 	}
 
 	const unsigned int state = self.m_state & globalstate;
@@ -1625,18 +1628,22 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 
 	GlobalOpenGL_debugAssertNoErrors();
 
-	if ( delta & ~state & RENDER_TEXT ) { /* disabling in the beginning, so wont override other states */
-		if ( GlobalOpenGL().GL_1_3() ) {	///~RENDER_TEXTURE
-			glActiveTexture( GL_TEXTURE0 );
-			glClientActiveTexture( GL_TEXTURE0 );
-		}
-		glDisable( GL_TEXTURE_2D );
-		glBindTexture( GL_TEXTURE_2D, 0 );
+	if ( delta & state & RENDER_TEXT ) {
+		glMatrixMode( GL_PROJECTION );
+		glPushMatrix();
+		glLoadIdentity();
+		GLint viewprt[4];
+		glGetIntegerv( GL_VIEWPORT, viewprt );
+			//globalOutputStream() << viewprt[2] << " " << viewprt[3] << "\n";
+		glOrtho( 0, viewprt[2], 0, viewprt[3], -100, 100 );
+		glTranslated( double( viewprt[2] ) / 2.0, double( viewprt[3] ) / 2.0, 0 );
+		glMatrixMode( GL_MODELVIEW );
+		glPushMatrix();
+		glLoadIdentity();
 
-		glDisable( GL_BLEND );	///~RENDER_BLEND
-
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); ///~RENDER_FILL
-
+		GlobalOpenGL_debugAssertNoErrors();
+	}
+	else if ( delta & ~state & RENDER_TEXT ) {
 		glMatrixMode( GL_PROJECTION );
 		glPopMatrix();
 		glMatrixMode( GL_MODELVIEW );
@@ -1733,8 +1740,8 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 		if ( GlobalOpenGL().GL_1_3() ) {
 			glActiveTexture( GL_TEXTURE0 );
 		}
-		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
-		//glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE ); //uses actual alpha channel, = invis, if qer_trans + empty alpha channel
+//		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+//		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE ); //uses actual alpha channel, = invis, if qer_trans + empty alpha channel
 		GlobalOpenGL_debugAssertNoErrors();
 	}
 	else if ( delta & ~state & RENDER_BLEND ) {
@@ -1742,7 +1749,7 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 		if ( GlobalOpenGL().GL_1_3() ) {
 			glActiveTexture( GL_TEXTURE0 );
 		}
-		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		GlobalOpenGL_debugAssertNoErrors();
 	}
 
@@ -1853,35 +1860,6 @@ void OpenGLState_apply( const OpenGLState& self, OpenGLState& current, unsigned 
 		GlobalOpenGL_debugAssertNoErrors();
 		current.m_alphafunc = self.m_alphafunc;
 		current.m_alpharef = self.m_alpharef;
-	}
-
-	if ( delta & state & RENDER_TEXT ) { /* enabling in the end, so other states can't affect */
-		if ( GlobalOpenGL().GL_1_3() ) {	///RENDER_TEXTURE
-			glActiveTexture( GL_TEXTURE0 );
-			glClientActiveTexture( GL_TEXTURE0 );
-		}
-		glEnable( GL_TEXTURE_2D );
-		glColor4fv( vector4_to_array( self.m_colour ) );
-
-		glEnable( GL_BLEND );	///RENDER_BLEND
-		//glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
-		glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE ); //uses actual alpha channel, = invis, if qer_trans + empty alpha channel
-
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ); ///RENDER_FILL
-
-		glMatrixMode( GL_PROJECTION );
-		glPushMatrix();
-		glLoadIdentity();
-		GLint viewprt[4];
-		glGetIntegerv( GL_VIEWPORT, viewprt );
-			//globalOutputStream() << viewprt[2] << " " << viewprt[3] << "\n";
-		glOrtho( 0, viewprt[2], 0, viewprt[3], -100, 100 );
-		glTranslated( double( viewprt[2] ) / 2.0, double( viewprt[3] ) / 2.0, 0 );
-		glMatrixMode( GL_MODELVIEW );
-		glPushMatrix();
-		glLoadIdentity();
-
-		GlobalOpenGL_debugAssertNoErrors();
 	}
 
 	{
@@ -2182,15 +2160,8 @@ void OpenGLShader::construct( const char* name ){
 		}
 	}
 		if ( string_equal( name + 1, "TEXT" ) ) {
-			state.m_colour[0] = 1.f;
-			state.m_colour[1] = 1.f;
-			state.m_colour[2] = 1.f;
-			state.m_colour[3] = 1.f;
-			state.m_state = RENDER_CULLFACE | RENDER_COLOURWRITE /*| RENDER_DEPTHTEST | RENDER_DEPTHWRITE*/ /*| RENDER_FILL | RENDER_TEXTURE | RENDER_BLEND */| RENDER_TEXT;
+			state.m_state = RENDER_CULLFACE | RENDER_COLOURWRITE | RENDER_FILL | RENDER_TEXTURE | RENDER_BLEND | RENDER_TEXT;
 			state.m_sort = OpenGLState::eSortText;
-			state.m_blend_src = GL_SRC_ALPHA;
-			state.m_blend_dst = GL_ONE_MINUS_SRC_ALPHA;
-			//state.m_depthfunc = GL_LEQUAL;
 		}
 		else if ( string_equal( name + 1, "POINT" ) ) {
 			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
@@ -2214,7 +2185,7 @@ void OpenGLShader::construct( const char* name ){
 			state.m_pointsize = 4;
 		}
 		else if ( string_equal( name + 1, "BIGPOINT" ) ) {
-			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_OVERRIDE;
+			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE;
 			state.m_sort = OpenGLState::eSortGUI1 + 1;
 			state.m_pointsize = 6;
 		}
@@ -2351,15 +2322,15 @@ void OpenGLShader::construct( const char* name ){
 #endif // 0
 		else if ( string_equal( name + 1, "WIRE_OVERLAY" ) ) {
 #if 0
-			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST | RENDER_OVERRIDE;
+			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST;
 			state.m_sort = OpenGLState::eSortOverlayFirst;
 #else
-			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST | RENDER_OVERRIDE;
+			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST;
 			state.m_sort = OpenGLState::eSortGUI1;
 			state.m_depthfunc = GL_LEQUAL;
 
 			OpenGLState& hiddenLine = appendDefaultPass();
-			hiddenLine.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST | RENDER_OVERRIDE | RENDER_LINESTIPPLE;
+			hiddenLine.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST | RENDER_LINESTIPPLE;
 			hiddenLine.m_sort = OpenGLState::eSortGUI0;
 			hiddenLine.m_depthfunc = GL_GREATER;
 #endif

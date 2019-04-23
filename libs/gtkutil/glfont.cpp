@@ -26,16 +26,16 @@
 #include <pango/pango-utils.h>
 
 
-void gray_to_texture( const int x_max, const int y_max, const unsigned char *in, unsigned char *out, const unsigned int fontColorR, const unsigned int fontColorG, const unsigned int fontColorB ){ /* normal with shadow */
-	int x, y, bitmapIter = 0;
+void gray_to_texture( const unsigned int x_max, const unsigned int y_max, const unsigned char *in, unsigned char *out, const unsigned char fontColorR, const unsigned char fontColorG, const unsigned char fontColorB ){ /* normal with shadow */
+	unsigned int x, y, bitmapIter = 0;
 
-	const unsigned int backgroundColorR = 0;
-	const unsigned int backgroundColorG = 0;
-	const unsigned int backgroundColorB = 0;
+	const unsigned char backgroundColorR = 0;
+	const unsigned char backgroundColorG = 0;
+	const unsigned char backgroundColorB = 0;
 
 	for( y = 0; y < y_max; y++ ) {
 		for( x = 0; x < x_max; x++ ) {
-			int iter = ( y * x_max + x ) * 4;
+			const unsigned int iter = ( y * x_max + x ) * 4;
 			if( x == 0 || y == 0 || x == 1 || y == 1 ) {
 				out[iter] = fontColorB;
 				out[iter + 1] = fontColorG;
@@ -62,7 +62,7 @@ void gray_to_texture( const int x_max, const int y_max, const unsigned char *in,
 	bitmapIter = 0;
 	for( y = 0; y < y_max; y++ ) {
 		for( x = 0; x < x_max; x++ ) {
-			int iter = ( y * x_max + x ) * 4;
+			const unsigned int iter = ( y * x_max + x ) * 4;
 			if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 				continue;
 			}
@@ -75,8 +75,8 @@ void gray_to_texture( const int x_max, const int y_max, const unsigned char *in,
 				}
 				else{
 					/* Calculate alpha (opacity). */
-					float opacityFont = in[bitmapIter] / 255.f;
-					float opacityBack = out[iter + 3] / 255.f;
+					const float opacityFont = in[bitmapIter] / 255.f;
+					const float opacityBack = out[iter + 3] / 255.f;
 					out[iter] = fontColorB * opacityFont + ( 1 - opacityFont ) * backgroundColorB;
 					out[iter + 1] = fontColorG * opacityFont + ( 1 - opacityFont ) * backgroundColorG;
 					out[iter + 2] = fontColorR * opacityFont + ( 1 - opacityFont ) * backgroundColorR;
@@ -114,7 +114,7 @@ void printString( const char *s ){
 	GlobalOpenGL().m_glCallLists( GLsizei( strlen( s ) ), GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>( s ) );
 }
 
-void renderString( const char *s, const GLuint& tex, const unsigned int colour[3], int& wid, int& hei ){
+void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& wid, unsigned int& hei ){
 	if( !m_ft2_context || m_pixelHeight == 0 ){
 		wid = hei = 0;
 		return;
@@ -132,7 +132,7 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 	if ( log_rect.width > 0 && log_rect.height > 0 ) {
 		hei = bitmap.rows = PANGO_PIXELS_CEIL( log_rect.height );//m_pixelAscent + m_pixelDescent;
 		wid = bitmap.width = PANGO_PIXELS_CEIL( log_rect.width );
-//			globalOutputStream() << width << " " << height << " rendering\n";
+//			globalOutputStream() << wid << " " << hei << " rendering\n";
 		bitmap.pitch = bitmap.width;
 		unsigned char *boo = (unsigned char *) malloc( bitmap.rows * bitmap.width );
 		memset( boo, 0, bitmap.rows * bitmap.width );
@@ -181,22 +181,21 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 
 #if 0
 		if( withfond ){ /* with background rectangle */
-			int x_max = wid;
-			int y_max = hei;
-			int x, y, bitmapIter = 0;
+			const unsigned int x_max = wid;
+			const unsigned int y_max = hei;
+			unsigned int x, y, bitmapIter = 0;
 
-			unsigned int fontColorR = 255;
-			unsigned int fontColorG = 255;
-			unsigned int fontColorB = 0;
+			const unsigned char fontColorR = 255;
+			const unsigned char fontColorG = 255;
+			const unsigned char fontColorB = 0;
 
-			unsigned int backgroundColorR = 64;
-			unsigned int backgroundColorG = 64;
-			unsigned int backgroundColorB = 64;
-			float opacity;
+			const unsigned char backgroundColorR = 64;
+			const unsigned char backgroundColorG = 64;
+			const unsigned char backgroundColorB = 64;
 
 			for( y = 0; y < y_max; y++ ) {
 				for( x = 0; x < x_max; x++ ) {
-					int iter = ( y * x_max + x ) * 4;
+					const unsigned int iter = ( y * x_max + x ) * 4;
 					if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 						buf[iter] = backgroundColorB;
 						buf[iter + 1] = backgroundColorG;
@@ -213,7 +212,7 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 					}
 					else {
 						/* Calculate alpha (opacity). */
-						opacity = bitmap.buffer[bitmapIter] / 255.f;
+						const float opacity = bitmap.buffer[bitmapIter] / 255.f;
 						buf[iter] = fontColorB * opacity + ( 1 - opacity ) * backgroundColorB;
 						buf[iter + 1] = fontColorG * opacity + ( 1 - opacity ) * backgroundColorG;
 						buf[iter + 2] = fontColorR * opacity + ( 1 - opacity ) * backgroundColorR;
@@ -224,25 +223,25 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 			}
 		}
 #elif 0
-	if( 1 ){ /* normal with shadow */
-			int x_max = wid;
-			int y_max = hei;
-			int x, y, bitmapIter = 0;
+		if( 1 ){ /* normal with shadow */
+			const unsigned int x_max = wid;
+			const unsigned int y_max = hei;
+			unsigned int x, y, bitmapIter = 0;
 
-//			unsigned int fontColorR = 255;
-//			unsigned int fontColorG = 255;
-//			unsigned int fontColorB = 0;
-			unsigned int fontColorR = colour[0];
-			unsigned int fontColorG = colour[1];
-			unsigned int fontColorB = colour[2];
+//			unsigned char fontColorR = 255;
+//			unsigned char fontColorG = 255;
+//			unsigned char fontColorB = 0;
+			unsigned char fontColorR = colour[0];
+			unsigned char fontColorG = colour[1];
+			unsigned char fontColorB = colour[2];
 
-			unsigned int backgroundColorR = 0;
-			unsigned int backgroundColorG = 0;
-			unsigned int backgroundColorB = 0;
+			unsigned char backgroundColorR = 0;
+			unsigned char backgroundColorG = 0;
+			unsigned char backgroundColorB = 0;
 
 			for( y = 0; y < y_max; y++ ) {
 				for( x = 0; x < x_max; x++ ) {
-					int iter = ( y * x_max + x ) * 4;
+					const unsigned int iter = ( y * x_max + x ) * 4;
 					if( x == 0 || y == 0 || x == 1 || y == 1 ) {
 						buf[iter] = fontColorB;
 						buf[iter + 1] = fontColorG;
@@ -269,7 +268,7 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 			bitmapIter = 0;
 			for( y = 0; y < y_max; y++ ) {
 				for( x = 0; x < x_max; x++ ) {
-					int iter = ( y * x_max + x ) * 4;
+					const unsigned int iter = ( y * x_max + x ) * 4;
 					if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 						continue;
 					}
@@ -282,8 +281,8 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 						}
 						else{
 							/* Calculate alpha (opacity). */
-							float opacityFont = bitmap.buffer[bitmapIter] / 255.f;
-							float opacityBack = buf[iter + 3] / 255.f;
+							const float opacityFont = bitmap.buffer[bitmapIter] / 255.f;
+							const float opacityBack = buf[iter + 3] / 255.f;
 							buf[iter] = fontColorB * opacityFont + ( 1 - opacityFont ) * backgroundColorB;
 							buf[iter + 1] = fontColorG * opacityFont + ( 1 - opacityFont ) * backgroundColorG;
 							buf[iter + 2] = fontColorR * opacityFont + ( 1 - opacityFont ) * backgroundColorR;
@@ -295,20 +294,20 @@ void renderString( const char *s, const GLuint& tex, const unsigned int colour[3
 			}
 		}
 		else{ /* normal */
-			int x_max = wid;
-			int y_max = hei;
-			int x, y, bitmapIter = 0;
+			const unsigned int x_max = wid;
+			const unsigned int y_max = hei;
+			unsigned int x, y, bitmapIter = 0;
 
-//			unsigned int fontColorR = 0;
-//			unsigned int fontColorG = 255;
-//			unsigned int fontColorB = 0;
-			unsigned int fontColorR = colour[0];
-			unsigned int fontColorG = colour[1];
-			unsigned int fontColorB = colour[2];
+//			unsigned char fontColorR = 0;
+//			unsigned char fontColorG = 255;
+//			unsigned char fontColorB = 0;
+			unsigned char fontColorR = colour[0];
+			unsigned char fontColorG = colour[1];
+			unsigned char fontColorB = colour[2];
 
 			for( y = 0; y < y_max; y++ ) {
 				for( x = 0; x < x_max; x++ ) {
-					int iter = ( y * x_max + x ) * 4;
+					const unsigned int iter = ( y * x_max + x ) * 4;
 					if( x == 0 || y == 0 || x == ( x_max - 1 ) || y == ( y_max - 1 ) ) {
 						buf[iter] = fontColorB;
 						buf[iter + 1] = fontColorG;

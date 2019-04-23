@@ -31,7 +31,7 @@ virtual int getPixelHeight() const = 0;
 virtual int getPixelAscent() const = 0;
 virtual int getPixelDescent() const = 0;
 virtual void printString( const char *s ) = 0;
-virtual void renderString( const char *s, const GLuint& tex, const unsigned int colour[3], int& wid, int& hei ) = 0;
+virtual void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& wid, unsigned int& hei ) = 0;
 virtual ~GLFont(){
 }
 };

@@ -1256,6 +1256,68 @@ inline void ArbitraryMeshTriangle_sumTangents( ArbitraryMeshVertex& a, Arbitrary
 	reinterpret_cast<Vector3&>( c.bitangent ) += t;
 }
 
+
+class RenderTextLabel
+{
+	unsigned int width;
+	unsigned int height;
+public:
+	GLuint tex = 0;
+	Vector2 screenPos;
+	~RenderTextLabel(){
+		texFree();
+	}
+	void texAlloc( const char* text, const Vector3& color01 ){
+		glGenTextures( 1, &tex );
+		if( tex > 0 ){
+			const BasicVector3<unsigned char> colour = color01 * 255.f;
+			GlobalOpenGL().m_font->renderString( text, tex, colour.data(), width, height );
+		}
+	}
+	void texFree(){
+		if( tex > 0 ){
+			glDeleteTextures( 1, &tex );
+			tex = 0;
+		}
+	}
+	void render( unsigned int subTex ) const {
+		if( tex > 0 ){
+			glBindTexture( GL_TEXTURE_2D, tex );
+			//Here we draw the texturemaped quads.
+			//The bitmap that we got from FreeType was not
+			//oriented quite like we would like it to be,
+			//so we need to link the texture to the quad
+			//so that the result will be properly aligned.
+#if 0
+			const float verts[4][2] = { { screenPos.x(), screenPos.y() },
+										{ screenPos.x(), screenPos.y() + height + .01f },
+										{ screenPos.x() + width + .01f, screenPos.y() + height + .01f },
+										{ screenPos.x() + width + .01f, screenPos.y() } };
+			const float coords[4][2] = { { subTex / 3.f, 1 },
+										{ subTex / 3.f, 0 },
+										{ ( subTex + 1 ) / 3.f, 0 },
+										{ ( subTex + 1 ) / 3.f, 1 } };
+			glVertexPointer( 2, GL_FLOAT, 0, verts );
+			glTexCoordPointer( 2, GL_FLOAT, 0, coords );
+			glDrawArrays( GL_QUADS, 0, 4 );
+#else // this is faster :0
+			glBegin( GL_QUADS );
+			glTexCoord2f( subTex / 3.f, 1 );
+			glVertex2f( screenPos.x(), screenPos.y() );
+			glTexCoord2f( subTex / 3.f, 0 );
+			glVertex2f( screenPos.x(), screenPos.y() + height + .01f );
+			glTexCoord2f( ( subTex + 1 ) / 3.f, 0 );
+			glVertex2f( screenPos.x() + width + .01f, screenPos.y() + height + .01f );
+			glTexCoord2f( ( subTex + 1 ) / 3.f, 1 );
+			glVertex2f( screenPos.x() + width + .01f, screenPos.y() );
+			glEnd();
+#endif
+		}
+	}
+};
+
+
+
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 // check FBO completeness

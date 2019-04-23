@@ -92,6 +92,7 @@ typedef MemberCaller1<NamedEntity, const char*, &NamedEntity::identifierChanged>
 
 #include "renderable.h"
 #include "cullable.h"
+#include "render.h"
 
 class RenderableNamedEntity : public OpenGLRenderable {
 	enum ENameMode{
@@ -103,80 +104,27 @@ class RenderableNamedEntity : public OpenGLRenderable {
 
 	NamedEntity& m_named;
 	const Vector3& m_position;
-	GLuint m_tex;
-	int m_width;
-	int m_height;
-	mutable float m_screenPos[2];
-	const char* m_exclude;
+	mutable RenderTextLabel m_label;
+	const char* const m_exclude;
 public:
 	typedef Static<Shader*, RenderableNamedEntity> StaticShader;
 	static Shader* getShader() {
 		return StaticShader::instance();
 	}
 	RenderableNamedEntity( NamedEntity& named, const Vector3& position, const char* exclude = 0 )
-		: m_named( named ), m_position( position ), m_tex( 0 ), m_exclude( exclude ) {
-		construct_textures( m_named.name() );
+		: m_named( named ), m_position( position ), m_exclude( exclude ) {
+		identifierChanged( m_named.name() );
 		m_named.attach( IdentifierChangedCaller( *this ) );
 	}
 	bool excluded_not() const {
-		return m_tex > 0;
-	}
-private:
-	void construct_textures( const char* name ){
-		if( m_exclude && string_equal( m_exclude, name ) )
-			return;
-		glGenTextures( 1, &m_tex );
-		if( m_tex > 0 ) {
-			unsigned int colour[3];
-			colour[0] = static_cast<unsigned int>( m_named.color()[0] * 255.f );
-			colour[1] = static_cast<unsigned int>( m_named.color()[1] * 255.f );
-			colour[2] = static_cast<unsigned int>( m_named.color()[2] * 255.f );
-			GlobalOpenGL().m_font->renderString( name, m_tex, colour, m_width, m_height );
-		}
-	}
-	void delete_textures(){
-		glDeleteTextures( 1, &m_tex );
-		m_tex = 0;
-	}
-	void setMode( bool selected, bool childSelected ) const{
-		if( selected ){
-			m_nameMode = eNameSelected;
-		}
-		else if( childSelected ){
-			m_nameMode = eNameChildSelected;
-		}
-		else{
-			m_nameMode = eNameNormal;
-		}
+		return m_label.tex > 0;
 	}
 public:
 	void render( RenderStateFlags state ) const {
-		if( m_tex > 0 ){
-			glBindTexture( GL_TEXTURE_2D, m_tex );
-
-			//Here we draw the texturemaped quads.
-			//The bitmap that we got from FreeType was not
-			//oriented quite like we would like it to be,
-			//so we need to link the texture to the quad
-			//so that the result will be properly aligned.
-			glBegin( GL_QUADS );
-			float xoffset0 = m_nameMode / 3.f;
-			float xoffset1 = ( m_nameMode + 1 ) / 3.f;
-			glTexCoord2f( xoffset0, 1 );
-			glVertex2f( m_screenPos[0], m_screenPos[1] );
-			glTexCoord2f( xoffset0, 0 );
-			glVertex2f( m_screenPos[0], m_screenPos[1] + m_height + .01f );
-			glTexCoord2f( xoffset1, 0 );
-			glVertex2f( m_screenPos[0] + m_width + .01f, m_screenPos[1] + m_height + .01f );
-			glTexCoord2f( xoffset1, 1 );
-			glVertex2f( m_screenPos[0] + m_width + .01f, m_screenPos[1] );
-			glEnd();
-
-			glBindTexture( GL_TEXTURE_2D, 0 );
-		}
+		m_label.render( m_nameMode );
 	}
-	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected = false ) const{
-		setMode( selected, childSelected );
+	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected = false ) const {
+		m_nameMode = selected? eNameSelected : childSelected? eNameChildSelected : eNameNormal;
 
 		if( volume.fill() ){
 			const Matrix4& viewproj = volume.GetViewMatrix();
@@ -192,16 +140,16 @@ public:
 		matrix4_multiply_by_matrix4( object2screen, localToWorld );
 		matrix4_transform_vector4( object2screen, position );
 //			globalOutputStream() << position << " Projection\n";
-		position[0] /= position[3];
-		position[1] /= position[3];
-		position[2] /= position[3];
+		position.x() /= position.w();
+		position.y() /= position.w();
+//		position.z() /= position.w();
 //			globalOutputStream() << position << " Projection division\n";
 		matrix4_transform_vector4( volume.GetViewport(), position );
 //			globalOutputStream() << position << " Viewport\n";
 //			globalOutputStream() << volume.GetViewport()[0] << " " << volume.GetViewport()[5] << " Viewport size\n";
-		m_screenPos[0] = position[0];
-		m_screenPos[1] = position[1];
-//			globalOutputStream() << m_screenPos[0] << " " << m_screenPos[1] << "\n";
+		m_label.screenPos.x() = position.x();
+		m_label.screenPos.y() = position.y();
+//			globalOutputStream() << m_label.screenPos << "\n";
 
 		renderer.PushState();
 
@@ -216,11 +164,12 @@ public:
 	}
 	~RenderableNamedEntity(){
 		m_named.detach( IdentifierChangedCaller( *this ) );
-		delete_textures();
 	}
 	void identifierChanged( const char* value ){
-		delete_textures();
-		construct_textures( value );
+		m_label.texFree();
+		if( m_exclude && string_equal( m_exclude, value ) )
+			return;
+		m_label.texAlloc( value, m_named.color() );
 	}
 	typedef MemberCaller1<RenderableNamedEntity, const char*, &RenderableNamedEntity::identifierChanged> IdentifierChangedCaller;
 };

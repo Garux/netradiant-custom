@@ -748,19 +748,12 @@ void Camera_motionDelta( int x, int y, unsigned int state, void* data ){
 #define cam_draw_size_use_tex
 class CamDrawSize
 {
-	GLuint _texs[3];
-	int _widths[3];
-	int _heights[3];
 	Vector3 _extents;
+	RenderTextLabel m_labels[3];
 public:
 	CamDrawSize() : _extents( -99.9f, -99.9f, -99.9f ){
-		_texs[0] = _texs[1] = _texs[2] = 0;
 	}
-	~CamDrawSize(){
-		for( std::size_t i = 0; i < 3; ++i )
-			freeTex( _texs[i] );
-	}
-	void render( const AABB& bounds, const View view ){
+	void render( const AABB& bounds, const View& view ){
 		setState();
 
 		Vector4 points[3] = { Vector4( bounds.origin - g_vector3_axes[1] * bounds.extents - g_vector3_axes[2] * bounds.extents, 1 ),
@@ -771,7 +764,7 @@ public:
 			matrix4_transform_vector4( view.GetViewMatrix(), points[i] );
 			points[i].x() /= points[i].w();
 			points[i].y() /= points[i].w();
-			points[i].z() /= points[i].w();
+//			points[i].z() /= points[i].w();
 			matrix4_transform_vector4( view.GetViewport(), points[i] );
 		}
 
@@ -779,29 +772,10 @@ public:
 			if( points[i].w() > 0.005f ){
 #ifdef cam_draw_size_use_tex
 				updateTex( i, bounds.extents[i] );
-				if( _texs[i] > 0 ) {
-					glBindTexture( GL_TEXTURE_2D, _texs[i] );
-
-					//Here we draw the texturemaped quads.
-					//The bitmap that we got from FreeType was not
-					//oriented quite like we would like it to be,
-					//so we need to link the texture to the quad
-					//so that the result will be properly aligned.
-					glBegin( GL_QUADS );
-					const float xoffset0 = 0;
-					const float xoffset1 = 1.f / 3.f;
-					glTexCoord2f( xoffset0, 1 );
-					glVertex2f( points[i].x(), points[i].y() );
-					glTexCoord2f( xoffset0, 0 );
-					glVertex2f( points[i].x(), points[i].y() + _heights[i] + .01f );
-					glTexCoord2f( xoffset1, 0 );
-					glVertex2f( points[i].x() + _widths[i] + .01f, points[i].y() + _heights[i] + .01f );
-					glTexCoord2f( xoffset1, 1 );
-					glVertex2f( points[i].x() + _widths[i] + .01f, points[i].y() );
-					glEnd();
-
-					glBindTexture( GL_TEXTURE_2D, 0 );
-				}
+				m_labels[i].screenPos.x() = points[i].x();
+				m_labels[i].screenPos.y() = points[i].y();
+				m_labels[i].render( 0 );
+				glBindTexture( GL_TEXTURE_2D, 0 );
 #else
 				StringOutputStream stream( 16 );
 				stream << ( bounds.extents[i] * 2 );
@@ -831,23 +805,11 @@ private:
 	}
 	void updateTex( const std::size_t i, const float extent ){
 		if( extent != _extents[i] ){
-			freeTex( _texs[i] );
 			_extents[i] = extent;
-		}
-		if( 0 == _texs[i] ){
-			glGenTextures( 1, &_texs[i] );
-			if( _texs[i] > 0 ){
-				StringOutputStream stream( 16 );
-				stream << ( extent * 2 );
-				BasicVector3<unsigned int> colour = getColor( i ) * 255.f;
-				GlobalOpenGL().m_font->renderString( stream.c_str(), _texs[i], colour.data(), _widths[i], _heights[i] );
-			}
-		}
-	}
-	void freeTex( GLuint& tex ){
-		if( tex > 0 ){
-			glDeleteTextures( 1, &tex );
-			tex = 0;
+			m_labels[i].texFree();
+			StringOutputStream stream( 16 );
+			stream << ( extent * 2 );
+			m_labels[i].texAlloc( stream.c_str(), getColor( i ) );
 		}
 	}
 	void setState() const {
@@ -859,7 +821,7 @@ private:
 #endif
 		glDisable( GL_DEPTH_TEST );
 
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
 		glDisableClientState( GL_NORMAL_ARRAY );
 		glDisableClientState( GL_COLOR_ARRAY );
 #ifdef cam_draw_size_use_tex
@@ -2114,7 +2076,7 @@ void CamWnd::Cam_Draw(){
 	}
 
 
-	unsigned int globalstate = RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_ALPHATEST | RENDER_BLEND | RENDER_CULLFACE | RENDER_COLOURARRAY | RENDER_OFFSETLINE | RENDER_POLYGONSMOOTH | RENDER_LINESMOOTH | RENDER_FOG | RENDER_COLOURCHANGE | RENDER_TEXT;
+	unsigned int globalstate = RENDER_DEPTHTEST | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_ALPHATEST | RENDER_BLEND | RENDER_CULLFACE | RENDER_COLOURARRAY | RENDER_OFFSETLINE | RENDER_POLYGONSMOOTH | RENDER_LINESMOOTH | RENDER_FOG | RENDER_COLOURCHANGE;
 	switch ( m_Camera.draw_mode )
 	{
 	case cd_wire:
