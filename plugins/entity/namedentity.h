@@ -94,14 +94,13 @@ typedef MemberCaller1<NamedEntity, const char*, &NamedEntity::identifierChanged>
 #include "cullable.h"
 #include "render.h"
 
-class RenderableNamedEntity : public OpenGLRenderable {
+class RenderableNamedEntity
+{
 	enum ENameMode{
 		eNameNormal = 0,
 		eNameSelected = 1,
 		eNameChildSelected = 2,
 	};
-	mutable ENameMode m_nameMode;
-
 	NamedEntity& m_named;
 	const Vector3& m_position;
 	mutable RenderTextLabel m_label;
@@ -120,18 +119,15 @@ public:
 		return m_label.tex > 0;
 	}
 public:
-	void render( RenderStateFlags state ) const {
-		m_label.render( m_nameMode );
-	}
 	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& localToWorld, bool selected, bool childSelected = false ) const {
-		m_nameMode = selected? eNameSelected : childSelected? eNameChildSelected : eNameNormal;
+		m_label.subTex = selected? eNameSelected : childSelected? eNameChildSelected : eNameNormal;
 
 		if( volume.fill() ){
 			const Matrix4& viewproj = volume.GetViewMatrix();
 			const Vector3 pos_in_world = matrix4_transformed_point( localToWorld, m_position );
 			if( viewproj[3] * pos_in_world[0] + viewproj[7] * pos_in_world[1] + viewproj[11] * pos_in_world[2] + viewproj[15] < 0.005f ) //w < 0: behind nearplane
 				return;
-			if( m_nameMode == eNameNormal && vector3_length_squared( pos_in_world - volume.getViewer() ) > static_cast<float>( g_showNamesDist ) * static_cast<float>( g_showNamesDist ) )
+			if( m_label.subTex == eNameNormal && vector3_length_squared( pos_in_world - volume.getViewer() ) > static_cast<float>( g_showNamesDist ) * static_cast<float>( g_showNamesDist ) )
 				return;
 		}
 
@@ -158,7 +154,7 @@ public:
 		renderer.SetState( getShader(), Renderer::eWireframeOnly );
 		renderer.SetState( getShader(), Renderer::eFullMaterials );
 
-		renderer.addRenderable( *this, g_matrix4_identity );
+		renderer.addRenderable( m_label, g_matrix4_identity );
 
 		renderer.PopState();
 	}

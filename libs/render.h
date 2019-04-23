@@ -1257,12 +1257,13 @@ inline void ArbitraryMeshTriangle_sumTangents( ArbitraryMeshVertex& a, Arbitrary
 }
 
 
-class RenderTextLabel
+class RenderTextLabel : public OpenGLRenderable
 {
 	unsigned int width;
 	unsigned int height;
 public:
 	GLuint tex = 0;
+	unsigned int subTex = 0;
 	Vector2 screenPos;
 	~RenderTextLabel(){
 		texFree();
@@ -1280,7 +1281,7 @@ public:
 			tex = 0;
 		}
 	}
-	void render( unsigned int subTex ) const {
+	void render( RenderStateFlags state ) const {
 		if( tex > 0 ){
 			glBindTexture( GL_TEXTURE_2D, tex );
 			//Here we draw the texturemaped quads.
