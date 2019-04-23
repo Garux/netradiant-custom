@@ -699,8 +699,8 @@ GLFont *glfont_create( const char* font_string ){
 		GtkSettings *settings = gtk_settings_get_default();
 		gchar *fontname;
 		g_object_get( settings, "gtk-font-name", &fontname, NULL );
-		if( ( font = tryFont( fontname, font_desc, font_list_base ) ) )
-			break;
+		font = tryFont( fontname, font_desc, font_list_base );
+		g_free( fontname );
 	} while ( 0 );
 
 	PangoFontMap *fontmap = 0;
