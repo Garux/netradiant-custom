@@ -1557,7 +1557,7 @@ void Face_setTexture( Face& face, const char* shader, const FaceTexture& clipboa
 		face.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
 	}
 	else if( mode == ePasteSeamless ){
-		DoubleLine line = plane3_intersect_plane3( clipboard.m_plane, face.getPlane().plane3() );
+		DoubleRay line = plane3_intersect_plane3( clipboard.m_plane, face.getPlane().plane3() );
 		if( vector3_length_squared( line.direction ) == 0 ){
 			face.ProjectTexture( clipboard.m_projection, clipboard.m_plane.normal() );
 			return;

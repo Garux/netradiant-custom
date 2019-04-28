@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "math/vector.h"
+#include "math/line.h"
 #include "container/array.h"
 
 enum ProjectionAxis
@@ -148,21 +149,14 @@ struct Winding
 	}
 };
 
-class DoubleLine
-{
-public:
-DoubleVector3 origin;
-DoubleVector3 direction;
-};
-
 class FixedWindingVertex
 {
 public:
 DoubleVector3 vertex;
-DoubleLine edge;
+DoubleRay edge;
 std::size_t adjacent;
 
-FixedWindingVertex( const DoubleVector3& vertex_, const DoubleLine& edge_, std::size_t adjacent_ )
+FixedWindingVertex( const DoubleVector3& vertex_, const DoubleRay& edge_, std::size_t adjacent_ )
 	: vertex( vertex_ ), edge( edge_ ), adjacent( adjacent_ ){
 }
 };
@@ -234,8 +228,6 @@ inline std::size_t Winding_next( const Winding& winding, std::size_t i ){
 }
 
 
-class Plane3;
-
 void Winding_createInfinite( FixedWinding& w, const Plane3& plane, double infinity );
 
 const double ON_EPSILON = 1.0 / ( 1 << 8 );
@@ -284,7 +276,5 @@ inline void Winding_printConnectivity( Winding& winding ){
 		globalOutputStream() << "vertex: " << Unsigned( vertexIndex ) << " adjacent: " << Unsigned( ( *i ).adjacent ) << "\n";
 	}
 }
-
-DoubleLine plane3_intersect_plane3( const Plane3& plane, const Plane3& other );
 
 #endif

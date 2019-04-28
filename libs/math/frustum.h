@@ -363,6 +363,51 @@ inline std::size_t matrix4_clip_line( const Matrix4& self, const Vector3& p0, co
 	return homogenous_clip_line( clipped );
 }
 
+inline std::size_t matrix4_clip_line_by_nearplane( const Matrix4& self, Line& line ){
+	Vector4 points[2] = { matrix4_transformed_vector4( self, Vector4( line.start, 1 ) ), matrix4_transformed_vector4( self, Vector4( line.end, 1 ) ) };
+	const Vector4& p0 = points[0];
+	const Vector4& p1 = points[1];
+
+	// early out
+	{
+		const bool passed0 = CLIP_Z_GT_W( p0 );
+		const bool passed1 = CLIP_Z_GT_W( p1 );
+
+		if ( passed0 && passed1 ) { // both points passed all planes
+			line.start = vector4_projected( p0 );
+			line.end = vector4_projected( p1 );
+			return 2;
+		}
+
+		if ( !passed0 && !passed1 ) { // both points failed any one plane
+			return 0;
+		}
+	}
+
+	{
+		const bool index = CLIP_Z_GT_W( p0 );
+		if ( index ^ CLIP_Z_GT_W( p1 ) ) {
+			Vector4 clip( vector4_subtracted( p1, p0 ) );
+
+			double scale = ( p0[2] + p0[3] ) / ( -clip[3] - clip[2] );
+
+			clip[0] = static_cast<float>( p0[0] + scale * clip[0] );
+			clip[1] = static_cast<float>( p0[1] + scale * clip[1] );
+			clip[2] = static_cast<float>( p0[2] + scale * clip[2] );
+			clip[3] = static_cast<float>( p0[3] + scale * clip[3] );
+
+			points[index] = clip;
+		}
+		else if ( index == 0 ) {
+			return 0;
+		}
+	}
+
+	line.start = vector4_projected( p0 );
+	line.end = vector4_projected( p1 );
+	return 2;
+}
+
 
 
 

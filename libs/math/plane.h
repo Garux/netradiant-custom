@@ -138,5 +138,10 @@ inline Plane3 plane3_for_points( const BasicVector3<Element> planepts[3] ){
 	return plane3_for_points( planepts[2], planepts[1], planepts[0] );
 }
 
+template<typename T>
+inline double plane3_distance_to_point( const Plane3& plane, const BasicVector3<T>& point ){
+	return vector3_dot( point, plane.normal() ) - plane.dist();
+}
+
 
 #endif

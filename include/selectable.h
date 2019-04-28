@@ -300,7 +300,7 @@ virtual void selectPlanes( Selector& selector, SelectionTest& test, const PlaneC
 virtual void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ) = 0;
 
 virtual void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) = 0;
-virtual void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ) = 0;
+virtual void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) = 0;
 virtual void selectByPlane( const Plane3& plane ) = 0;
 };
 

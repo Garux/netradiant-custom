@@ -1629,9 +1629,9 @@ void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection&
 	test.BeginMesh( localToWorld() );
 	m_dragPlanes.bestPlaneDirect( m_patch.localAABB(), test, plane, intersection );
 }
-void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ){
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ){
 	test.BeginMesh( localToWorld() );
-	m_dragPlanes.bestPlaneIndirect( m_patch.localAABB(), test, plane, intersection, dist, viewer );
+	m_dragPlanes.bestPlaneIndirect( m_patch.localAABB(), test, plane, intersection, dist );
 }
 void selectByPlane( const Plane3& plane ){
 	m_dragPlanes.selectByPlane( m_patch.localAABB(), plane );

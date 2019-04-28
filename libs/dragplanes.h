@@ -195,7 +195,7 @@ void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Sele
 	}
 	m_bounds = aabb;
 }
-void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer, const Matrix4& rotation = g_matrix4_identity ){
+void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Matrix4& rotation = g_matrix4_identity ){
 	Vector3 corners[8];
 	aabb_corners_oriented( aabb, rotation, corners );
 
@@ -256,32 +256,31 @@ void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Ve
 		3, 1,
 	};
 
-	for( std::size_t i = 0; i < 8; ++i ){
-		corners[i] = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( corners[i], 1 ) ) );
-	}
-
 	for ( std::size_t i = 0; i < 24; ++++i ){
-		const Vector3 intersection_new = line_closest_point( Line( corners[edges[i]], corners[edges[i + 1]] ), g_vector3_identity );
-		const float dist_new = vector3_length_squared( intersection_new );
-		if( dist_new < dist ){
-			const Plane3& plane1 = planes[adjacent_planes[i]];
-			const Plane3& plane2 = planes[adjacent_planes[i + 1]];
-			if( ( vector3_dot( plane1.normal(), viewer ) - plane1.dist() ) <= 0 ){
-				if( aabb.extents[( ( adjacent_planes[i] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
-					plane = plane2;
-				else
-					plane = plane1;
-				intersection = intersection_new;
-				dist = dist_new;
-			}
-			else{
-				if( ( vector3_dot( plane2.normal(), viewer ) - plane2.dist() ) <= 0 ){
-					if( aabb.extents[( ( adjacent_planes[i + 1] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
-						plane = plane1;
-					else
+		Line line( corners[edges[i]], corners[edges[i + 1]] );
+		if( matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
+			const Vector3 intersection_new = line_closest_point( line, g_vector3_identity );
+			const float dist_new = vector3_length_squared( intersection_new );
+			if( dist_new < dist ){
+				const Plane3& plane1 = planes[adjacent_planes[i]];
+				const Plane3& plane2 = planes[adjacent_planes[i + 1]];
+				if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
+					if( aabb.extents[( ( adjacent_planes[i] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
 						plane = plane2;
+					else
+						plane = plane1;
 					intersection = intersection_new;
 					dist = dist_new;
+				}
+				else{
+					if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
+						if( aabb.extents[( ( adjacent_planes[i + 1] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
+							plane = plane1;
+						else
+							plane = plane2;
+						intersection = intersection_new;
+						dist = dist_new;
+					}
 				}
 			}
 		}

@@ -1507,16 +1507,6 @@ Face& getFace() const {
 void testSelect( SelectionTest& test, SelectionIntersection& best ){
 	test.TestPoint( getEdge(), best );
 }
-Vector3 bestPlaneIndirect( const SelectionTest& test ) const {
-	const Winding& winding = getFace().getWinding();
-	Vector3 points[2];
-	points[0] = winding[m_faceVertex.getVertex()].vertex;
-	points[1] = winding[Winding_next( winding, m_faceVertex.getVertex() )].vertex;
-	for( std::size_t i = 0; i < 2; ++i ){
-		points[i] = vector4_projected( matrix4_transformed_vector4( test.getVolume().GetViewMatrix(), Vector4( points[i], 1 ) ) );
-	}
-	return line_closest_point( Line( points[0], points[1] ), g_vector3_identity );
-}
 };
 
 class SelectableVertex
@@ -3208,24 +3198,29 @@ void testSelect( Selector& selector, SelectionTest& test ){
 		Selector_add( selector, *this, best );
 	}
 }
-void bestPlaneIndirect( const SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ) const {
-	const Vector3 intersection_new = m_edge->bestPlaneIndirect( test );
-	const float dist_new = vector3_length_squared( intersection_new );
-	if( dist_new < dist ){
-		FaceVertexId faceVertex = m_edge->m_faceVertex;
-		const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
-		if( ( vector3_dot( plane1.normal(), viewer ) - plane1.dist() ) <= 0 ){
-			plane = plane1;
-			intersection = intersection_new;
-			dist = dist_new;
-		}
-		else{
-			faceVertex = next_edge( m_edge->m_faces, faceVertex );
-			const Plane3& plane2 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
-			if( ( vector3_dot( plane2.normal(), viewer ) - plane2.dist() ) <= 0 ){
-				plane = plane2;
+
+void bestPlaneIndirect( const SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const {
+	const Winding& winding = m_edge->getFace().getWinding();
+	FaceVertexId faceVertex = m_edge->m_faceVertex;
+	Line line( winding[faceVertex.getVertex()].vertex, winding[Winding_next( winding, faceVertex.getVertex() )].vertex );
+	if( matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
+		const Vector3 intersection_new = line_closest_point( line, g_vector3_identity );
+		const float dist_new = vector3_length_squared( intersection_new );
+		if( dist_new < dist ){
+			const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
+			if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
+				plane = plane1;
 				intersection = intersection_new;
 				dist = dist_new;
+			}
+			else{
+				faceVertex = next_edge( m_edge->m_faces, faceVertex );
+				const Plane3& plane2 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
+				if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
+					plane = plane2;
+					intersection = intersection_new;
+					dist = dist_new;
+				}
 			}
 		}
 	}
@@ -3834,11 +3829,11 @@ void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection&
 		}
 	}
 }
-void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ){
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ){
 	test.BeginMesh( localToWorld() );
 	for ( EdgeInstances::iterator i = m_edgeInstances.begin(); i != m_edgeInstances.end(); ++i )
 	{
-		( *i ).bestPlaneIndirect( test, plane, intersection, dist, viewer );
+		( *i ).bestPlaneIndirect( test, plane, intersection, dist );
 	}
 }
 void selectByPlane( const Plane3& plane ){

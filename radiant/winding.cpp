@@ -26,66 +26,6 @@
 #include "math/line.h"
 
 
-inline double plane3_distance_to_point( const Plane3& plane, const DoubleVector3& point ){
-	return vector3_dot( point, plane.normal() ) - plane.dist();
-}
-
-inline double plane3_distance_to_point( const Plane3& plane, const Vector3& point ){
-	return vector3_dot( point, plane.normal() ) - plane.dist();
-}
-
-/// \brief Returns the point at which \p line intersects \p plane, or an undefined value if there is no intersection.
-inline DoubleVector3 line_intersect_plane( const DoubleLine& line, const Plane3& plane ){
-	return line.origin + vector3_scaled(
-			   line.direction,
-			   -plane3_distance_to_point( plane, line.origin )
-			   / vector3_dot( line.direction, plane.normal() )
-			   );
-}
-
-inline bool float_is_largest_absolute( double axis, double other ){
-	return fabs( axis ) > fabs( other );
-}
-
-/// \brief Returns the index of the component of \p v that has the largest absolute value.
-inline int vector3_largest_absolute_component_index( const DoubleVector3& v ){
-	return ( float_is_largest_absolute( v[1], v[0] ) )
-		   ? ( float_is_largest_absolute( v[1], v[2] ) )
-		   ? 1
-		   : 2
-		   : ( float_is_largest_absolute( v[0], v[2] ) )
-		   ? 0
-		   : 2;
-}
-
-/// \brief Returns the infinite line that is the intersection of \p plane and \p other.
-DoubleLine plane3_intersect_plane3( const Plane3& plane, const Plane3& other ){
-	DoubleLine line;
-	line.direction = vector3_cross( plane.normal(), other.normal() );
-	switch ( vector3_largest_absolute_component_index( line.direction ) )
-	{
-	case 0:
-		line.origin.x() = 0;
-		line.origin.y() = ( -other.dist() * plane.normal().z() - -plane.dist() * other.normal().z() ) / line.direction.x();
-		line.origin.z() = ( -plane.dist() * other.normal().y() - -other.dist() * plane.normal().y() ) / line.direction.x();
-		break;
-	case 1:
-		line.origin.x() = ( -plane.dist() * other.normal().z() - -other.dist() * plane.normal().z() ) / line.direction.y();
-		line.origin.y() = 0;
-		line.origin.z() = ( -other.dist() * plane.normal().x() - -plane.dist() * other.normal().x() ) / line.direction.y();
-		break;
-	case 2:
-		line.origin.x() = ( -other.dist() * plane.normal().y() - -plane.dist() * other.normal().y() ) / line.direction.z();
-		line.origin.y() = ( -plane.dist() * other.normal().x() - -other.dist() * plane.normal().x() ) / line.direction.z();
-		line.origin.z() = 0;
-		break;
-	default:
-		break;
-	}
-
-	return line;
-}
-
 #if 0
 #include "math/aabb.h"
 void windingTestInfinity(){
@@ -158,7 +98,7 @@ void windingTestInfinity(){
 		for( ; i < winding.size(); ++i ){
 			for( std::size_t j = 0; j < 6; ++j ){
 				if( vector3_dot( winding[i].edge.direction, worldplanes[j].normal() ) != 0 ){
-					const DoubleVector3 v = line_intersect_plane( winding[i].edge, worldplanes[j] );
+					const DoubleVector3 v = ray_intersect_plane( winding[i].edge, worldplanes[j] );
 					if( aabb_intersects_point( world, v ) ){
 //						globalWarningStream() << "   INFINITE POINT INSIDE WORLD\n";
 						++windingTestInfinity_FAIL;
@@ -226,7 +166,7 @@ void Winding_createInfinite( FixedWinding& winding, const Plane3& plane, double 
 
 	// project a really big  axis aligned box onto the plane
 
-	DoubleLine r1, r2, r3, r4;
+	DoubleRay r1, r2, r3, r4;
 	r1.origin = vector3_added( vector3_subtracted( org, vright ), vup );
 	r1.direction = vector3_normalised( vright );
 	winding.push_back( FixedWindingVertex( r1.origin, r1, c_brush_maxFaces ) );
@@ -258,7 +198,7 @@ void Winding_createInfinite( FixedWinding& winding, const Plane3& plane, double 
 
 	// project a really big  axis aligned box onto the plane
 
-	DoubleLine ray;
+	DoubleRay ray;
 	ray.origin = org - vright + vup;
 	ray.direction = vector3_normalised( vright0 );
 	winding.push_back( FixedWindingVertex( ray.origin, ray, c_brush_maxFaces ) );
@@ -368,7 +308,7 @@ void Winding_Clip( const FixedWinding& winding, const Plane3& plane, const Plane
 		else
 		{
 			// append intersection point of line and plane to output winding
-			DoubleVector3 mid( line_intersect_plane( vertex.edge, clipPlane ) );
+			DoubleVector3 mid( ray_intersect_plane( vertex.edge, clipPlane ) );
 
 			if ( classification == ePlaneFront ) {
 				// this edge lies on the clip plane

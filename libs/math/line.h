@@ -91,20 +91,25 @@ inline unsigned int segment_classify_plane( const Segment& segment, const Plane3
 }
 
 
-class Ray
+template<typename T>
+class BasicRay
 {
 public:
-Vector3 origin, direction;
+BasicVector3<T> origin, direction;
 
-Ray(){
+BasicRay(){
 }
-Ray( const Vector3& origin_, const Vector3& direction_ ) :
+BasicRay( const BasicVector3<T>& origin_, const BasicVector3<T>& direction_ ) :
 	origin( origin_ ), direction( direction_ ){
 }
 };
 
-inline Ray ray_for_points( const Vector3& origin, const Vector3& p2 ){
-	return Ray( origin, vector3_normalised( vector3_subtracted( p2, origin ) ) );
+typedef BasicRay<float> Ray;
+typedef BasicRay<double> DoubleRay;
+
+template<typename T>
+inline BasicRay<T> ray_for_points( const BasicVector3<T>& origin, const BasicVector3<T>& p2 ){
+	return BasicRay<T>( origin, vector3_normalised( vector3_subtracted( p2, origin ) ) );
 }
 
 inline void ray_transform( Ray& ray, const Matrix4& matrix ){
@@ -132,7 +137,45 @@ inline double ray_squared_distance_to_point( const Ray& ray, const Vector3& poin
 }
 
 inline double ray_distance_to_plane( const Ray& ray, const Plane3& plane ){
-	return -( vector3_dot( plane.normal(), ray.origin ) - plane.dist() ) / vector3_dot( ray.direction, plane.normal() );
+	return -plane3_distance_to_point( plane, ray.origin ) / vector3_dot( ray.direction, plane.normal() );
+}
+
+/// \brief Returns the point at which \p ray intersects \p plane, or an undefined value if there is no intersection.
+template<typename T>
+inline BasicVector3<T> ray_intersect_plane( const BasicRay<T>& ray, const Plane3& plane ){
+	return ray.origin + vector3_scaled(
+			   ray.direction,
+			   -plane3_distance_to_point( plane, ray.origin )
+			   / vector3_dot( ray.direction, plane.normal() )
+			   );
+}
+
+/// \brief Returns the infinite line that is the intersection of \p plane and \p other.
+inline DoubleRay plane3_intersect_plane3( const Plane3& plane, const Plane3& other ){
+	DoubleRay line;
+	line.direction = vector3_cross( plane.normal(), other.normal() );
+	switch ( vector3_max_abs_component_index( line.direction ) )
+	{
+	case 0:
+		line.origin.x() = 0;
+		line.origin.y() = ( -other.dist() * plane.normal().z() - -plane.dist() * other.normal().z() ) / line.direction.x();
+		line.origin.z() = ( -plane.dist() * other.normal().y() - -other.dist() * plane.normal().y() ) / line.direction.x();
+		break;
+	case 1:
+		line.origin.x() = ( -plane.dist() * other.normal().z() - -other.dist() * plane.normal().z() ) / line.direction.y();
+		line.origin.y() = 0;
+		line.origin.z() = ( -other.dist() * plane.normal().x() - -plane.dist() * other.normal().x() ) / line.direction.y();
+		break;
+	case 2:
+		line.origin.x() = ( -other.dist() * plane.normal().y() - -plane.dist() * other.normal().y() ) / line.direction.z();
+		line.origin.y() = ( -plane.dist() * other.normal().x() - -other.dist() * plane.normal().x() ) / line.direction.z();
+		line.origin.z() = 0;
+		break;
+	default:
+		break;
+	}
+
+	return line;
 }
 
 #endif

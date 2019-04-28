@@ -69,94 +69,75 @@ struct Pivot2World
 };
 
 
-void point_for_device_point( Vector3& point, const Matrix4& device2object, const float x, const float y, const float z ){
+inline Vector3 point_for_device_point( const Matrix4& device2object, const float x, const float y, const float z ){
 	// transform from normalised device coords to object coords
-	point = vector4_projected( matrix4_transformed_vector4( device2object, Vector4( x, y, z, 1 ) ) );
+	return vector4_projected( matrix4_transformed_vector4( device2object, Vector4( x, y, z, 1 ) ) );
 }
 
-void ray_for_device_point( Ray& ray, const Matrix4& device2object, const float x, const float y ){
-	// point at x, y, zNear
-	point_for_device_point( ray.origin, device2object, x, y, -1 );
-
-	// point at x, y, zFar
-	//point_for_device_point( ray.direction, device2object, x, y, 1 ); //sometimes is inaccurate up to negative ray direction
-	point_for_device_point( ray.direction, device2object, x, y, 0 );
-
-	// construct ray
-	vector3_subtract( ray.direction, ray.origin );
-	vector3_normalise( ray.direction );
+inline Ray ray_for_device_point( const Matrix4& device2object, const float x, const float y ){
+	return ray_for_points( point_for_device_point( device2object, x, y, -1 ),	// point at x, y, zNear
+						 point_for_device_point( device2object, x, y, 0 )		// point at x, y, zFar
+						 //point_for_device_point( device2object, x, y, 1 ) //sometimes is inaccurate up to negative ray direction
+						);
 }
 
-bool sphere_intersect_ray( const Vector3& origin, float radius, const Ray& ray, Vector3& intersection ){
-	intersection = vector3_subtracted( origin, ray.origin );
+inline Vector3 sphere_intersect_ray( const Vector3& origin, float radius, const Ray& ray ){
+	const Vector3 intersection = vector3_subtracted( origin, ray.origin );
 	const double a = vector3_dot( intersection, ray.direction );
 	const double d = radius * radius - ( vector3_dot( intersection, intersection ) - a * a );
 
 	if ( d > 0 ) {
-		intersection = vector3_added( ray.origin, vector3_scaled( ray.direction, a - sqrt( d ) ) );
-		return true;
+		return vector3_added( ray.origin, vector3_scaled( ray.direction, a - sqrt( d ) ) );
+//		return true;
 	}
 	else
 	{
-		intersection = vector3_added( ray.origin, vector3_scaled( ray.direction, a ) );
-		return false;
+		return vector3_added( ray.origin, vector3_scaled( ray.direction, a ) );
+//		return false;
 	}
 }
 
-void ray_intersect_ray( const Ray& ray, const Ray& other, Vector3& intersection ){
-	intersection = vector3_subtracted( ray.origin, other.origin );
+inline Vector3 ray_intersect_ray( const Ray& ray, const Ray& other ){
+	const Vector3 intersection = vector3_subtracted( ray.origin, other.origin );
 	//float a = 1;//vector3_dot(ray.direction, ray.direction);        // always >= 0
-	double dot = vector3_dot( ray.direction, other.direction );
+	const double dot = vector3_dot( ray.direction, other.direction );
 	//float c = 1;//vector3_dot(other.direction, other.direction);        // always >= 0
-	double d = vector3_dot( ray.direction, intersection );
-	double e = vector3_dot( other.direction, intersection );
-	double D = 1 - dot * dot; //a*c - dot*dot;       // always >= 0
+	const double d = vector3_dot( ray.direction, intersection );
+	const double e = vector3_dot( other.direction, intersection );
+	const double D = 1 - dot * dot; //a*c - dot*dot;       // always >= 0
 
 	if ( D < 0.000001 ) {
 		// the lines are almost parallel
-		intersection = vector3_added( other.origin, vector3_scaled( other.direction, e ) );
+		return vector3_added( other.origin, vector3_scaled( other.direction, e ) );
 	}
 	else
 	{
-		intersection = vector3_added( other.origin, vector3_scaled( other.direction, ( e - dot * d ) / D ) );
+		return vector3_added( other.origin, vector3_scaled( other.direction, ( e - dot * d ) / D ) );
 	}
 }
 
 const Vector3 g_origin( 0, 0, 0 );
 const float g_radius = 64;
 
-void point_on_sphere( Vector3& point, const Matrix4& device2object, const float x, const float y, const float radius = g_radius ){
-	Ray ray;
-	ray_for_device_point( ray, device2object, x, y );
-	sphere_intersect_ray( g_origin, radius, ray, point );
+inline Vector3 point_on_sphere( const Matrix4& device2object, const float x, const float y, const float radius = g_radius ){
+	return sphere_intersect_ray( g_origin,
+								radius,
+								ray_for_device_point( device2object, x, y ) );
 }
 
-void point_on_axis( Vector3& point, const Vector3& axis, const Matrix4& device2object, const float x, const float y ){
-	Ray ray;
-	ray_for_device_point( ray, device2object, x, y );
-	ray_intersect_ray( ray, Ray( Vector3( 0, 0, 0 ), axis ), point );
+inline Vector3 point_on_axis( const Vector3& axis, const Matrix4& device2object, const float x, const float y ){
+	return ray_intersect_ray( ray_for_device_point( device2object, x, y ),
+								Ray( Vector3( 0, 0, 0 ), axis ) );
 }
 
-void point_on_plane( Vector3& point, const Matrix4& device2object, const float x, const float y ){
-	Matrix4 object2device( matrix4_full_inverse( device2object ) );
-	point = vector4_projected( matrix4_transformed_vector4( device2object, Vector4( x, y, object2device[14] / object2device[15], 1 ) ) );
+inline Vector3 point_on_plane( const Matrix4& device2object, const float x, const float y ){
+	const Matrix4 object2device( matrix4_full_inverse( device2object ) );
+	return vector4_projected( matrix4_transformed_vector4( device2object, Vector4( x, y, object2device[14] / object2device[15], 1 ) ) );
 }
 
-inline double plane3_distance_to_point( const Plane3& plane, const Vector3& point ){
-	return vector3_dot( point, plane.normal() ) - plane.dist();
-}
-
-inline Vector3 ray_intersect_plane( const Ray& ray, const Plane3& plane ){
-	return ray.origin + vector3_scaled(
-			   ray.direction,
-			   -plane3_distance_to_point( plane, ray.origin )
-			   / vector3_dot( ray.direction, plane.normal() )
-			   );
-}
-Vector3 point_on_plane( const Plane3& plane, const Matrix4& object2device, const float x, const float y ){
-	Ray ray;
-	ray_for_device_point( ray, matrix4_full_inverse( object2device ), x, y );
-	return ray_intersect_plane( ray, plane );
+inline Vector3 point_on_plane( const Plane3& plane, const Matrix4& object2device, const float x, const float y ){
+	return ray_intersect_plane( ray_for_device_point( matrix4_full_inverse( object2device ), x, y ),
+								plane );
 }
 
 //! a and b are unit vectors .. returns angle in radians
@@ -188,7 +169,7 @@ inline void constrain_to_axis( Vector3& vec, const Vector3& axis ){
 }
 
 //! a and b are unit vectors .. a and b must be orthogonal to axis .. returns angle in radians
-float angle_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis ){
+inline float angle_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis ){
 	if ( vector3_dot( axis, vector3_cross( a, b ) ) > 0.0 ) {
 		return angle_between( a, b );
 	}
@@ -197,7 +178,7 @@ float angle_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis ){
 	}
 }
 
-float distance_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis ){
+inline float distance_for_axis( const Vector3& a, const Vector3& b, const Vector3& axis ){
 	return static_cast<float>( vector3_dot( b, axis ) - vector3_dot( a, axis ) );
 }
 
@@ -244,12 +225,11 @@ RotateFree( Rotatable& rotatable )
 	: m_rotatable( rotatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_sphere( m_start, device2manip, x, y );
+	m_start = point_on_sphere( device2manip, x, y );
 	vector3_normalise( m_start );
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_sphere( current, device2manip, x, y );
+	Vector3 current = point_on_sphere( device2manip, x, y );
 	vector3_normalise( current );
 
 	if( snap )
@@ -286,7 +266,7 @@ void Construct( const Matrix4& device2manip, const float x, const float y, const
 		vector3_normalise( m_start );
 	}
 	else{
-		point_on_sphere( m_start, device2manip, x, y, m_radius );
+		m_start = point_on_sphere( device2manip, x, y, m_radius );
 		constrain_to_axis( m_start, m_axis );
 	}
 }
@@ -298,7 +278,7 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 		vector3_normalise( current );
 	}
 	else{
-		point_on_sphere( current, device2manip, x, y, m_radius );
+		current = point_on_sphere( device2manip, x, y, m_radius );
 		constrain_to_axis( current, m_axis );
 	}
 
@@ -365,12 +345,11 @@ TranslateAxis( Translatable& translatable )
 	: m_translatable( translatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_axis( m_start, m_axis, device2manip, x, y );
+	m_start = point_on_axis( m_axis, device2manip, x, y );
 	m_bounds = bounds;
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_axis( current, m_axis, device2manip, x, y );
+	Vector3 current = point_on_axis( m_axis, device2manip, x, y );
 	current = vector3_scaled( m_axis, distance_for_axis( m_start, current, m_axis ) );
 
 	translation_local2object( current, current, manip2object );
@@ -435,12 +414,11 @@ TranslateFree( Translatable& translatable )
 	: m_translatable( translatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_plane( m_start, device2manip, x, y );
+	m_start = point_on_plane( device2manip, x, y );
 	m_bounds = bounds;
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_plane( current, device2manip, x, y );
+	Vector3 current = point_on_plane( device2manip, x, y );
 	current = vector3_subtracted( current, m_start );
 
 	if( snap )
@@ -537,7 +515,7 @@ ScaleAxis( Scalable& scalable )
 	: m_scalable( scalable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_axis( m_start, m_axis, device2manip, x, y );
+	m_start = point_on_axis( m_axis, device2manip, x, y );
 
 	m_choosen_extent = Vector3(
 					std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], - bounds.origin[0] + bounds.extents[0] + transform_origin[0] ),
@@ -548,8 +526,7 @@ void Construct( const Matrix4& device2manip, const float x, const float y, const
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
 	//globalOutputStream() << "manip2object: " << manip2object << "  device2manip: " << device2manip << "  x: " << x << "  y:" << y <<"\n";
-	Vector3 current;
-	point_on_axis( current, m_axis, device2manip, x, y );
+	Vector3 current = point_on_axis( m_axis, device2manip, x, y );
 	Vector3 delta = vector3_subtracted( current, m_start );
 
 	translation_local2object( delta, delta, manip2object );
@@ -611,7 +588,7 @@ ScaleFree( Scalable& scalable )
 	: m_scalable( scalable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_plane( m_start, device2manip, x, y );
+	m_start = point_on_plane( device2manip, x, y );
 
 	m_choosen_extent = Vector3(
 					std::max( bounds.origin[0] + bounds.extents[0] - transform_origin[0], -( bounds.origin[0] - bounds.extents[0] - transform_origin[0] ) ),
@@ -621,8 +598,7 @@ void Construct( const Matrix4& device2manip, const float x, const float y, const
 	m_bounds = bounds;
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_plane( current, device2manip, x, y );
+	Vector3 current = point_on_plane( device2manip, x, y );
 	Vector3 delta = vector3_subtracted( current, m_start );
 
 	translation_local2object( delta, delta, manip2object );
@@ -866,64 +842,6 @@ Shader* g_state_clipped;
 RenderableClippedPrimitive g_render_clipped;
 #endif
 
-
-#if 0
-// dist_Point_to_Line(): get the distance of a point to a line.
-//    Input:  a Point P and a Line L (in any dimension)
-//    Return: the shortest distance from P to L
-float
-dist_Point_to_Line( Point P, Line L ){
-	Vector v = L.P1 - L.P0;
-	Vector w = P - L.P0;
-
-	double c1 = dot( w,v );
-	double c2 = dot( v,v );
-	double b = c1 / c2;
-
-	Point Pb = L.P0 + b * v;
-	return d( P, Pb );
-}
-#endif
-
-class Segment3D
-{
-typedef Vector3 point_type;
-public:
-Segment3D( const point_type& _p0, const point_type& _p1 )
-	: p0( _p0 ), p1( _p1 ){
-}
-
-point_type p0, p1;
-};
-
-typedef Vector3 Point3D;
-
-inline double vector3_distance_squared( const Point3D& a, const Point3D& b ){
-	return vector3_length_squared( b - a );
-}
-
-// get the distance of a point to a segment.
-Point3D segment_closest_point_to_point( const Segment3D& segment, const Point3D& point ){
-	Vector3 v = segment.p1 - segment.p0;
-	Vector3 w = point - segment.p0;
-
-	double c1 = vector3_dot( w,v );
-	if ( c1 <= 0 ) {
-		return segment.p0;
-	}
-
-	double c2 = vector3_dot( v,v );
-	if ( c2 <= c1 ) {
-		return segment.p1;
-	}
-
-	return Point3D( segment.p0 + v * ( c1 / c2 ) );
-}
-
-double segment_dist_to_point_3d( const Segment3D& segment, const Point3D& point ){
-	return vector3_distance_squared( point, segment_closest_point_to_point( segment, point ) );
-}
-
 typedef Vector3 point_t;
 typedef const Vector3* point_iterator_t;
 
@@ -985,8 +903,7 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 	}
 
 	if ( count == 2 ) {
-		Segment3D segment( normalised[0], normalised[1] );
-		Point3D point = segment_closest_point_to_point( segment, Vector3( 0, 0, 0 ) );
+		const Vector3 point = line_closest_point( Line( normalised[0], normalised[1] ), Vector3( 0, 0, 0 ) );
 		assign_if_closer( best, SelectionIntersection( point.z(), 0 ) );
 	}
 	else if ( count > 2 && !point_test_polygon_2d( Vector3( 0, 0, 0 ), normalised, normalised + count ) ) {
@@ -996,11 +913,10 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 			plane = &plaine;
 		}
 //globalOutputStream() << plane.a << " " << plane.b << " " << plane.c << " " << "\n";
-		point_iterator_t end = normalised + count;
+		const point_iterator_t end = normalised + count;
 		for ( point_iterator_t previous = end - 1, current = normalised; current != end; previous = current, ++current )
 		{
-			Segment3D segment( *previous, *current );
-			Point3D point = segment_closest_point_to_point( segment, Vector3( 0, 0, 0 ) );
+			Vector3 point = line_closest_point( Line( *previous, *current ), Vector3( 0, 0, 0 ) );
 			float depth = point.z();
 			point.z() = 0;
 			float distance = static_cast<float>( vector3_length_squared( point ) );
@@ -2722,11 +2638,10 @@ class PlaneSelectable_bestPlaneIndirect : public scene::Graph::Walker
 SelectionTest& m_test;
 Plane3& m_plane;
 Vector3& m_intersection;
-const Vector3& m_viewer;
 mutable float m_dist;
 public:
-PlaneSelectable_bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, const Vector3& viewer )
-	: m_test( test ), m_plane( plane ), m_intersection( intersection ), m_viewer( viewer ), m_dist( FLT_MAX ){
+PlaneSelectable_bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection )
+	: m_test( test ), m_plane( plane ), m_intersection( intersection ), m_dist( FLT_MAX ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if ( path.top().get().visible() ) {
@@ -2734,7 +2649,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( selectable != 0 && selectable->isSelected() ) {
 			PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
 			if ( planeSelectable != 0 ) {
-				planeSelectable->bestPlaneIndirect( m_test, m_plane, m_intersection, m_dist, m_viewer );
+				planeSelectable->bestPlaneIndirect( m_test, m_plane, m_intersection, m_dist );
 			}
 		}
 	}
@@ -2763,7 +2678,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-bool Scene_forEachPlaneSelectable_selectPlanes2( scene::Graph& graph, SelectionTest& test, const Vector3& viewer, TranslateAxis2& translateAxis ){
+bool Scene_forEachPlaneSelectable_selectPlanes2( scene::Graph& graph, SelectionTest& test, TranslateAxis2& translateAxis ){
 	Plane3 plane( 0, 0, 0, 0 );
 	graph.traverse( PlaneSelectable_bestPlaneDirect( test, plane ) );
 	if( plane3_valid( plane ) ){
@@ -2772,7 +2687,7 @@ bool Scene_forEachPlaneSelectable_selectPlanes2( scene::Graph& graph, SelectionT
 	}
 	else{
 		Vector3 intersection;
-		graph.traverse( PlaneSelectable_bestPlaneIndirect( test, plane, intersection, viewer ) );
+		graph.traverse( PlaneSelectable_bestPlaneIndirect( test, plane, intersection ) );
 		if( plane3_valid( plane ) ){
 			test.BeginMesh( g_matrix4_identity );
 			/* may introduce some screen space offset in manipulatable to handle far-from-edge clicks perfectly; thought clicking not so far isn't too nasty, right? */
@@ -3895,7 +3810,7 @@ Vector3 testSelected_scene_snapped_point( const SelectionVolume& test, ClipperSe
 				}
 			}
 			{ /* try edges */
-				Vector3 edgePoint = segment_closest_point_to_point( Segment3D( ( *prev ).vertex, ( *curr ).vertex ), point );
+				Vector3 edgePoint = line_closest_point( Line( ( *prev ).vertex, ( *curr ).vertex ), point );
 				if( edgePoint != ( *prev ).vertex && edgePoint != ( *curr ).vertex ){
 					const Vector3 edgedir = vector3_normalised( ( *curr ).vertex - ( *prev ).vertex );
 					const std::size_t maxi = vector3_max_abs_component_index( edgedir );
@@ -4026,7 +3941,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 	if( GlobalSelectionSystem().countSelected() != 0 ){
 		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
 			if( g_bAltResize_AltSelect && view.fill() ){
-				m_selected2 = Scene_forEachPlaneSelectable_selectPlanes2( GlobalSceneGraph(), test, Manipulatable::m_view->getViewer(), m_axisResize );
+				m_selected2 = Scene_forEachPlaneSelectable_selectPlanes2( GlobalSceneGraph(), test, m_axisResize );
 			}
 			else{
 				BooleanSelector booleanSelector;
@@ -4492,11 +4407,10 @@ TransformOriginTranslate( TransformOriginTranslatable& transformOriginTranslatab
 	: m_transformOriginTranslatable( transformOriginTranslatable ){
 }
 void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
-	point_on_plane( m_start, device2manip, x, y );
+	m_start = point_on_plane( device2manip, x, y );
 }
 void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapbbox, const bool alt ){
-	Vector3 current;
-	point_on_plane( current, device2manip, x, y );
+	Vector3 current = point_on_plane( device2manip, x, y );
 	current = vector3_subtracted( current, m_start );
 
 	if( snap ){

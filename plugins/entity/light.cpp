@@ -1873,10 +1873,10 @@ void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection&
 		m_dragPlanes.bestPlaneDirect( m_contained.aabb(), test, plane, intersection, rotation() );
 	}
 }
-void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Vector3& viewer ){
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ){
 	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 		test.BeginMesh( localToWorld() );
-		m_dragPlanes.bestPlaneIndirect( m_contained.aabb(), test, plane, intersection, dist, viewer, rotation() );
+		m_dragPlanes.bestPlaneIndirect( m_contained.aabb(), test, plane, intersection, dist, rotation() );
 	}
 }
 void selectByPlane( const Plane3& plane ){
