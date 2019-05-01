@@ -125,17 +125,27 @@ inline bool plane3_valid( const Plane3& self ){
 	return float_equal_epsilon( vector3_dot( self.normal(), self.normal() ), 1.0, 0.01 );
 }
 
+	/*
+	* The order of points, when looking from outside the face:
+	*
+	* 1
+	* |
+	* |
+	* |
+	* |
+	* 0-----------2
+	*/
 template<typename Element>
 inline Plane3 plane3_for_points( const BasicVector3<Element>& p0, const BasicVector3<Element>& p1, const BasicVector3<Element>& p2 ){
 	Plane3 self;
-	self.normal() = vector3_normalised( vector3_cross( vector3_subtracted( p1, p0 ), vector3_subtracted( p2, p0 ) ) );
+	self.normal() = vector3_normalised( vector3_cross( vector3_subtracted( p2, p0 ), vector3_subtracted( p1, p0 ) ) );
 	self.dist() = vector3_dot( p0, self.normal() );
 	return self;
 }
 
 template<typename Element>
 inline Plane3 plane3_for_points( const BasicVector3<Element> planepts[3] ){
-	return plane3_for_points( planepts[2], planepts[1], planepts[0] );
+	return plane3_for_points( planepts[0], planepts[1], planepts[2] );
 }
 
 template<typename T>

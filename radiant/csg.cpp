@@ -747,7 +747,7 @@ void CSG_Subtract(){
 class BrushSplitByPlaneSelected : public scene::Graph::Walker
 {
 const ClipperPoints m_points;
-const Plane3 m_plane;
+const Plane3 m_plane; /* plane to insert */
 const char* m_shader;
 const TextureProjection& m_projection;
 const bool m_split; /* split or clip */
@@ -774,7 +774,7 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 					NodeSmartReference node( ( new BrushNode() )->node() );
 					Brush* fragment = Node_getBrush( node );
 					fragment->copy( *brush );
-					fragment->addPlane( m_points[0], m_points[1], m_points[2], m_shader, m_projection );
+					fragment->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection );
 					fragment->removeEmptyFaces();
 					ASSERT_MESSAGE( !fragment->empty(), "brush left with no faces after split" );
 
@@ -786,13 +786,13 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 					}
 				}
 
-				brush->addPlane( m_points[0], m_points[2], m_points[1], m_shader, m_projection );
+				brush->addPlane( m_points[0], m_points[1], m_points[2], m_shader, m_projection );
 				brush->removeEmptyFaces();
 				ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after split" );
 			}
 			else
 			// the plane does not intersect this brush
-			if ( !m_split && split.counts[ePlaneFront] != 0 ) {
+			if ( !m_split && split.counts[ePlaneBack] != 0 ) {
 				// the brush is "behind" the plane
 				m_gj = true;
 				Path_deleteTop( path );
@@ -1097,9 +1097,9 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 						const brushsplit_t split = mergeVertices.classify_plane( plane );
 						if( ( split.counts[ePlaneFront] == 0 ) != ( split.counts[ePlaneBack] == 0 ) ){
 							if( split.counts[ePlaneFront] != 0 )
-								mergePlanes.insert( MergePlane( plane3_flipped( plane ), *i, *j, *k ) );
+								mergePlanes.insert( MergePlane( plane3_flipped( plane ), *i, *k, *j ) );
 							else
-								mergePlanes.insert( MergePlane( plane, *i, *k, *j ) );
+								mergePlanes.insert( MergePlane( plane, *i, *j, *k ) );
 						}
 					}
 				}
@@ -1115,7 +1115,7 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 															static_cast<double>( mergeVertices[i].y() ),
 															static_cast<double>( mergeVertices[i].z() ) ) );
 		}
-		auto hull = quickhull.getConvexHull( pointCloud, false, true );
+		auto hull = quickhull.getConvexHull( pointCloud, true, true );
 		const auto& indexBuffer = hull.getIndexBuffer();
 		const size_t triangleCount = indexBuffer.size() / 3;
 		for( size_t i = 0; i < triangleCount; ++i ) {
@@ -1125,7 +1125,7 @@ void CSG_build_hull( const MergeVertices& mergeVertices, MergePlanes& mergePlane
 			}
 			const Plane3 plane = plane3_for_points( p[0], p[1], p[2] );
 			if( plane3_valid( plane ) ){
-				mergePlanes.insert( MergePlane( plane, p[0], p[2], p[1] ) );
+				mergePlanes.insert( MergePlane( plane, p[0], p[1], p[2] ) );
 			}
 		}
 	}

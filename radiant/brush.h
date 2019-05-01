@@ -831,7 +831,7 @@ void copy( const Vector3& p0, const Vector3& p1, const Vector3& p2 ){
 	}
 	else
 	{
-		m_planeCached = plane3_for_points( p2, p1, p0 );
+		m_planeCached = plane3_for_points( p0, p1, p2 );
 		updateSource();
 	}
 }

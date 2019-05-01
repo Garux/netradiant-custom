@@ -74,8 +74,8 @@ inline indexremap_t indexremap_for_projectionaxis( const ProjectionAxis axis ){
 
 enum PlaneClassification
 {
-	ePlaneFront = 0,
-	ePlaneBack = 1,
+	ePlaneFront = 0, //! in front of plane ---->| *
+	ePlaneBack = 1,  //! behind the  plane -*-->|
 	ePlaneOn = 2,
 };
 

@@ -467,7 +467,7 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 														static_cast<double>( i.m_vertexTransformed.y() ),
 														static_cast<double>( i.m_vertexTransformed.z() ) ) );
 	}
-	auto hull = quickhull.getConvexHull( pointCloud, false, true );
+	auto hull = quickhull.getConvexHull( pointCloud, true, true );
 	const auto& indexBuffer = hull.getIndexBuffer();
 	const size_t triangleCount = indexBuffer.size() / 3;
 	VertexModePlanes vertexModePlanes;
@@ -490,7 +490,7 @@ void Brush::vertexModeBuildHull( bool allTransformed /*= false*/ ){
 				if( vector3_dot( plane.normal(), face->getPlane().plane3().normal() ) < 0 ){ //likely reversed plane
 					transformed = true;
 				}
-				vertexModePlanes.push_back( VertexModePlane( plane, face, v[0], v[2], v[1], transformed ) );
+				vertexModePlanes.push_back( VertexModePlane( plane, face, v[0], v[1], v[2], transformed ) );
 			}
 			else{
 				it->m_transformed |= transformed;
