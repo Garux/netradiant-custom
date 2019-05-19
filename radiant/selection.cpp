@@ -904,7 +904,7 @@ void BestPoint( std::size_t count, Vector4 clipped[9], SelectionIntersection& be
 
 	if ( count == 2 ) {
 		const Vector3 point = line_closest_point( Line( normalised[0], normalised[1] ), Vector3( 0, 0, 0 ) );
-		assign_if_closer( best, SelectionIntersection( point.z(), 0 ) );
+		assign_if_closer( best, SelectionIntersection( point.z(), vector3_length_squared( Vector3( point.x(), point.y(), 0 ) ) ) );
 	}
 	else if ( count > 2 && !point_test_polygon_2d( Vector3( 0, 0, 0 ), normalised, normalised + count ) ) {
 		Plane3 plaine;
@@ -4391,6 +4391,1245 @@ Shader* BuildManipulator::m_state_line;
 
 
 
+class UVManipulator : public Manipulator, public Manipulatable
+{
+	struct RenderablePoint : public OpenGLRenderable
+	{
+		PointVertex m_point;
+		RenderablePoint():
+			m_point( vertex3f_identity ) {
+		}
+		void render( RenderStateFlags state ) const {
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_point.colour );
+			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_point.vertex );
+			glDrawArrays( GL_POINTS, 0, 1 );
+		}
+		void setColour( const Colour4b & colour ) {
+			m_point.colour = colour;
+		}
+	};
+	struct RenderableLines : public OpenGLRenderable
+	{
+		std::vector<PointVertex> m_lines;
+		RenderableLines(){
+		}
+		void render( RenderStateFlags state ) const {
+			if( m_lines.size() != 0 ){
+				glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_lines[0].colour );
+				glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_lines[0].vertex );
+				glDrawArrays( GL_LINES, 0, m_lines.size() );
+			}
+		}
+	};
+	struct RenderableCircle : public OpenGLRenderable
+	{
+		Array<PointVertex> m_vertices;
+
+		RenderableCircle( std::size_t size ) : m_vertices( size ){
+		}
+		void render( RenderStateFlags state ) const {
+			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( PointVertex ), &m_vertices.data()->colour );
+			glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+			glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
+		}
+		void setColour( const Colour4b& colour ){
+			for ( Array<PointVertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i )
+			{
+				( *i ).colour = colour;
+			}
+		}
+	};
+	class UVSelector : public Selector {
+		SelectionIntersection m_bestIntersection;
+	public:
+		PointVertex* m_pointVertex;
+		UVSelector() : m_bestIntersection( SelectionIntersection() ) {
+		}
+		void pushSelectable( Selectable& selectable ) {
+		}
+		void popSelectable() {
+			m_bestIntersection = SelectionIntersection();
+		}
+		void addIntersection( const SelectionIntersection& intersection ) {
+			if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
+				m_bestIntersection = intersection;
+			}
+		}
+		void addIntersection( const SelectionIntersection& intersection, PointVertex* pointVertex ) {
+			if( SelectionIntersection_closer( intersection, m_bestIntersection ) ) {
+				m_bestIntersection = intersection;
+				m_pointVertex = pointVertex;
+			}
+		}
+		bool isSelected() {
+			return m_bestIntersection.valid();
+		}
+	};
+	const Colour4b m_cWhite{ 255, 255, 255, 255 };
+	const Colour4b m_cGray{ 255, 255, 255, 125 };
+	const Colour4b m_cGrayer{ 100, 100, 100, 150 };
+	const Colour4b m_cRed{ 255, 0, 0, 255 };
+	const Colour4b m_cGreen{ 0, 255, 0, 255 };
+
+	enum EUVSelection{
+		eNone,
+		ePivot,
+		eGridU,
+		eGridV,
+		eCircle,
+		ePivotU,
+		ePivotV,
+		eU,
+		eV,
+		eUV,
+		eSkewU,
+		eSkewV,
+		eTex,
+	} m_selection;
+	PointVertex* m_selectedU = 0; // must nullify this on m_Ulines, m_Vlines change
+	PointVertex* m_selectedV = 0;
+	bool m_isSelected = false;
+
+	Face* m_face = 0;
+	Plane3 m_plane;
+	std::size_t m_width, m_height;
+	TextureProjection m_projection;
+
+	Matrix4 m_local2tex; //real projection
+	Matrix4 m_tex2local; //real unprojection aka projection space basis aka texture axes
+	Matrix4 m_faceLocal2tex; //x,y projected to the face for z = const
+	Matrix4 m_faceTex2local;
+	Vector3 m_origin;
+
+	RenderablePivot m_pivot;
+	Matrix4 m_pivot2world0; // original
+	Matrix4 m_pivot2world; // transformed during transformation
+	RenderablePoint m_pivotPoint;
+	RenderableLines m_pivotLines;
+	Matrix4 m_pivotLines2world;
+	/* lines in uv space */
+	RenderableLines m_Ulines;
+	RenderableLines m_Vlines;
+	Matrix4 m_lines2world; // line * ( transform during transformation ) * m_faceTex2local = world
+
+	unsigned int m_gridU = 1; // n - 1 of U directed sub lines, 1-16
+	unsigned int m_gridV = 1;
+	RenderablePoint m_gridPointU; // control of U grid lines density, rendered on V axis
+	RenderablePoint m_gridPointV;
+	Vector2 m_gridSign; // orientation of controls relative to origin
+
+	RenderableCircle m_circle;
+	Matrix4 m_circle2world;
+
+public:
+	static Shader* m_state_line;
+	static Shader* m_state_point;
+	UVManipulator() : m_pivot( 32 ), m_circle( 8 << 3 ) {
+		draw_circle( 8, 1, m_circle.m_vertices.data(), RemapXYZ() );
+		m_circle.setColour( m_cGray );
+		m_pivotPoint.setColour( m_cWhite );
+		m_gridPointU.setColour( m_cWhite );
+		m_gridPointV.setColour( m_cWhite );
+		m_pivotLines.m_lines.resize( 4, PointVertex( vertex3f_identity, m_cWhite ) );
+	}
+
+private:
+
+	bool UpdateFaceData( bool updateOrigin, bool updateLines = true ) {
+		//!? todo fewer outer quads for large textures
+		//!? todo auto subdivisions num, based on tex size and world scale
+		//! todo update on undo/redo, when face stays the same, but transformed
+		//! todo update on nudgeSelectedLeft and the rest, qe tool move w/o projection change or with tex lock off
+		//+ todo put default origin to winding's UV aabb corner
+		//+ todo disable 3d workzone in this manipulator mode
+		m_plane = m_face->getPlane().plane3();
+		m_width = m_face->getShader().width();
+		m_height = m_face->getShader().height();
+//		m_face->GetTexdef( m_projection );
+		m_projection = m_face->getTexdef().m_projection;
+
+		const Winding& winding = m_face->getWinding();
+
+		Texdef_Construct_local2tex( m_projection, m_width, m_height, m_plane.normal(), m_local2tex );
+		m_tex2local = matrix4_affine_inverse( m_local2tex );
+//		globalOutputStream() << m_local2tex << " m_local2tex\n";
+//		globalOutputStream() << m_tex2local << " m_tex2local\n";
+		/* error checking */
+		if( !std::isfinite( m_local2tex[0] ) //nan
+			|| fabs( vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.z() ) ) ) < 1e-6 //projected along face
+			|| vector3_length_squared( vector4_to_vector3( m_tex2local.x() ) ) < .01 //srsly scaled down, limit at max 10 textures per world unit
+			|| vector3_length_squared( vector4_to_vector3( m_tex2local.y() ) ) < .01 ){
+			m_selectedU = m_selectedV = 0;
+			m_Ulines.m_lines.clear();
+			m_Vlines.m_lines.clear();
+			return false;
+		}
+
+		m_faceTex2local = m_tex2local;
+		vector4_to_vector3( m_faceTex2local.x() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( m_tex2local.x() ), vector4_to_vector3( m_tex2local.z() ) );
+		vector4_to_vector3( m_faceTex2local.y() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( m_tex2local.y() ), vector4_to_vector3( m_tex2local.z() ) );
+		m_faceTex2local = matrix4_multiplied_by_matrix4( // adjust to have UV's z = 0: move the plane along m_tex2local.z() so that plane.dist() = 0
+							matrix4_translation_for_vec3(
+								vector4_to_vector3( m_tex2local.z() ) * ( m_plane.dist() - vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.t() ) ) )
+								/ vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.z() ) )
+							),
+							m_faceTex2local );
+		m_faceLocal2tex = matrix4_affine_inverse( m_faceTex2local );
+
+		Vector2 min( FLT_MAX, FLT_MAX );
+		Vector2 max( -FLT_MAX, -FLT_MAX );
+		for( const auto& v : winding ){
+			const Vector3 p = matrix4_transformed_point( m_faceLocal2tex, v.vertex );
+			min.x() = std::min( min.x(), p.x() );
+			max.x() = std::max( max.x(), p.x() );
+			min.y() = std::min( min.y(), p.y() );
+			max.y() = std::max( max.y(), p.y() );
+		}
+
+		if( updateOrigin )
+			m_origin =  matrix4_transformed_point( m_faceTex2local, Vector3( min.x(), min.y(), 0 ) ); //winding.points[0].vertex;
+
+		m_pivot2world = m_tex2local;
+		vector3_normalise( vector4_to_vector3( m_pivot2world.x() ) );
+		vector3_normalise( vector4_to_vector3( m_pivot2world.y() ) );
+		vector4_to_vector3( m_pivot2world.t() ) = m_origin;
+		m_pivot2world0 = m_pivot2world;
+
+		{
+			float bestDist = 0;
+			for( const auto& v : winding ){
+				const float dist = vector3_length_squared( v.vertex - m_origin );
+				if( dist > bestDist ){
+					bestDist = dist;
+				}
+			}
+			bestDist = sqrt( bestDist );
+			m_circle2world = g_matrix4_identity;
+			//! todo gcc 7 declines this template use w/o cast, wth
+			ComputeAxisBase( static_cast<Vector3>( m_plane.normal() ), vector4_to_vector3( m_circle2world.x() ), vector4_to_vector3( m_circle2world.y() ) );
+			vector4_to_vector3( m_circle2world.x() ) *= bestDist;
+			vector4_to_vector3( m_circle2world.y() ) *= bestDist;
+			vector4_to_vector3( m_circle2world.z() ) = m_plane.normal();
+			vector4_to_vector3( m_circle2world.t() ) = m_origin;
+		}
+
+		min -= Vector2( 5, 5 );
+		max += Vector2( 5, 5 );
+		min.x() = float_to_integer( min.x() );
+		min.y() = float_to_integer( min.y() );
+		max.x() = float_to_integer( max.x() );
+		max.y() = float_to_integer( max.y() );
+
+		m_selectedU = m_selectedV = 0;
+		m_lines2world = m_faceTex2local;
+		m_pivotLines2world = m_faceTex2local;
+		if( updateLines ){
+			const int imax = float_to_integer( max.y() - min.y() ) + 1;
+			m_Ulines.m_lines.clear();
+			m_Ulines.m_lines.reserve( ( imax + ( m_gridU - 1 ) * ( imax - 1 ) ) * 2 );
+			for( int i = 0; i < imax; ++i ){
+				if( i != 0 ){
+					for( std::size_t j = m_gridU - 1; j != 0; --j ){ //subgrid lines
+						m_Ulines.m_lines.emplace_back( Vertex3f( min.x(), min.y() + i - static_cast<float>( j ) / m_gridU, 0 ), m_cGrayer );
+						m_Ulines.m_lines.emplace_back( Vertex3f( max.x(), min.y() + i - static_cast<float>( j ) / m_gridU, 0 ), m_cGrayer );
+					}
+				}
+				m_Ulines.m_lines.emplace_back( Vertex3f( min.x(), min.y() + i, 0 ), m_cGray );
+				m_Ulines.m_lines.emplace_back( Vertex3f( max.x(), min.y() + i, 0 ), m_cGray );
+			}
+		}
+		if( updateLines ){
+			const int imax = float_to_integer( max.x() - min.x() ) + 1;
+			m_Vlines.m_lines.clear();
+			m_Vlines.m_lines.reserve( ( imax + ( m_gridV - 1 ) * ( imax - 1 ) ) * 2 );
+			for( int i = 0; i < imax; ++i ){
+				if( i != 0 ){
+					for( std::size_t j = m_gridV - 1; j != 0; --j ){
+						m_Vlines.m_lines.emplace_back( Vertex3f( min.x() + i - static_cast<float>( j ) / m_gridV, min.y(), 0 ), m_cGrayer );
+						m_Vlines.m_lines.emplace_back( Vertex3f( min.x() + i - static_cast<float>( j ) / m_gridV, max.y(), 0 ), m_cGrayer );
+					}
+				}
+				m_Vlines.m_lines.emplace_back( Vertex3f( min.x() + i, min.y(), 0 ), m_cGray );
+				m_Vlines.m_lines.emplace_back( Vertex3f( min.x() + i, max.y(), 0 ), m_cGray );
+			}
+		}
+		{
+			const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+			{ // u pivot line
+				m_pivotLines.m_lines[0].vertex = Vertex3f( min.x(), uv_origin.y(), 0 );
+				m_pivotLines.m_lines[1].vertex = Vertex3f( max.x(), uv_origin.y(), 0 );
+			}
+			{ // v pivot line
+				m_pivotLines.m_lines[2].vertex = Vertex3f( uv_origin.x(), min.y(), 0 );
+				m_pivotLines.m_lines[3].vertex = Vertex3f( uv_origin.x(), max.y(), 0 );
+			}
+			// grid grain controls, on the polygon side of origin
+			m_gridSign.x() = max.y() - uv_origin.y() >=  uv_origin.y() - min.y()? 1 : -1;
+			m_gridSign.y() = max.x() - uv_origin.x() >=  uv_origin.x() - min.x()? 1 : -1;
+			m_gridPointU.m_point.vertex = Vertex3f( uv_origin.x(), float_to_integer( uv_origin.y() + m_gridSign.x() * .25 ) + m_gridSign.x() * ( 1 - 1.0 / std::max( float( m_gridU ), 1.8f ) ), 0 );
+			m_gridPointV.m_point.vertex = Vertex3f( float_to_integer( uv_origin.x() + m_gridSign.y() * .25 ) + m_gridSign.y() * ( 1 - 1.0 / std::max( float( m_gridV ), 1.8f ) ), uv_origin.y(), 0 );
+		}
+		return true;
+	}
+	bool UpdateData() {
+		if( !g_SelectedFaceInstances.empty() ){
+			Face* face = &g_SelectedFaceInstances.last().getFace();
+			if( m_face != face ){
+				m_face = face;
+				return UpdateFaceData( true );
+			}
+			else if( memcmp( &m_projection, &m_face->getTexdef().m_projection, sizeof( TextureProjection ) ) != 0
+					|| m_width != m_face->getShader().width()
+					|| m_height != m_face->getShader().height() ) {
+				return UpdateFaceData( false );
+			}
+			return true;
+		}
+		return false;
+
+	}
+public:
+	void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ) {
+		if( volume.fill() && UpdateData() ){
+			renderer.SetState( m_state_line, Renderer::eFullMaterials );
+			renderer.addRenderable( m_Ulines, m_lines2world );
+			renderer.addRenderable( m_Vlines, m_lines2world );
+			renderer.addRenderable( m_pivotLines, m_pivotLines2world );
+			//fix pivot position for better visibility
+			m_pivot.render( renderer, volume, matrix4_multiplied_by_matrix4( matrix4_translation_for_vec3( vector3_normalised( volume.getViewer() - m_origin ) ), m_pivot2world ) );
+
+			renderer.addRenderable( m_circle, m_circle2world );
+
+			renderer.SetState( m_state_point, Renderer::eFullMaterials );
+			renderer.addRenderable( m_pivotPoint, m_pivot2world );
+			renderer.addRenderable( m_gridPointU, m_pivotLines2world );
+			renderer.addRenderable( m_gridPointV, m_pivotLines2world );
+		}
+	}
+	void testSelect( const View& view, const Matrix4& pivot2world ) {
+		//!? todo fix: eUV selection possibility may be blocked by the circle
+		if( !view.fill() || !UpdateData() ){
+			m_isSelected = false;
+			return;
+		}
+
+		EUVSelection selection = eNone;
+
+		UVSelector selector;
+		{ // try pivot point
+			const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_pivot2world ) );
+			SelectionIntersection best;
+			Point_BestPoint( local2view, m_pivotPoint.m_point.vertex, best );
+			selector.addIntersection( best );
+			if( selector.isSelected() ){
+				selection = ePivot;
+			}
+		}
+
+		if( !selector.isSelected() ){ // try grid points
+			const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_faceTex2local ) );
+			SelectionIntersection best;
+			Point_BestPoint( local2view, m_gridPointU.m_point.vertex, best );
+			selector.addIntersection( best );
+			if( selector.isSelected() ){
+				selection = eGridU;
+			}
+			else{
+				Point_BestPoint( local2view, m_gridPointV.m_point.vertex, best );
+				selector.addIntersection( best );
+				if( selector.isSelected() ){
+					selection = eGridV;
+				}
+			}
+		}
+
+		if( !selector.isSelected() ){ // try circle
+			const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_circle2world ) );
+			SelectionIntersection best;
+			LineLoop_BestPoint( local2view, m_circle.m_vertices.data(), m_circle.m_vertices.size(), best );
+			selector.addIntersection( best );
+			if( selector.isSelected() ){
+				selection = eCircle;
+			}
+		}
+
+		if( !selector.isSelected() ){ // try pivot lines
+			const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_faceTex2local ) );
+			SelectionIntersection best;
+			Line_BestPoint( local2view, &m_pivotLines.m_lines[0], best );
+			selector.addIntersection( best );
+			if( selector.isSelected() ){
+				selection = ePivotU;
+			}
+			else{
+				Line_BestPoint( local2view, &m_pivotLines.m_lines[2], best );
+				selector.addIntersection( best );
+				if( selector.isSelected() ){
+					selection = ePivotV;
+				}
+			}
+		}
+
+		PointVertex* selectedU = 0;
+		PointVertex* selectedV = 0;
+		if( !selector.isSelected() ){ // try UV lines
+#if 1
+/*
+            -|------
+             |
+             |
+V line center| - -  tex U center - -
+             |         tex
+             |          V
+      -cross-|-----U line center-----|
+             |
+*/
+			// special fuckage with the grid for better distinguishing of user's intentions
+			// better picking of tex, only line for skew or scale with dense grid
+			const Matrix4 screen2world( matrix4_full_inverse( view.GetViewMatrix() ) );
+			const DoubleRay ray = ray_for_points( vector4_projected( matrix4_transformed_vector4( screen2world, BasicVector4<double>( 0, 0, -1, 1 ) ) ),
+												vector4_projected( matrix4_transformed_vector4( screen2world, BasicVector4<double>( 0, 0, 1, 1 ) ) ) );
+			const DoubleVector3 hit = ray_intersect_plane( ray, m_plane );
+			const Vector3 uvhit = matrix4_transformed_point( m_faceLocal2tex, hit );
+			if( fabs( vector3_dot( ray.direction, m_plane.normal() ) ) > 1e-6
+				&& !m_Ulines.m_lines.empty()
+				&& !m_Vlines.m_lines.empty()
+				&& matrix4_transformed_vector4( view.GetViewMatrix(), Vector4( hit, 1 ) ).w() > 0 ){
+				PointVertex* closestU = &m_Ulines.m_lines[std::min( m_Ulines.m_lines.size() - 2,
+														static_cast<std::size_t>( float_to_integer( std::max( 0.f, uvhit.y() - m_Ulines.m_lines.front().vertex.y() ) * m_gridU ) * 2 ) )];
+				PointVertex* closestV = &m_Vlines.m_lines[std::min( m_Vlines.m_lines.size() - 2,
+														static_cast<std::size_t>( float_to_integer( std::max( 0.f, uvhit.x() - m_Vlines.m_lines.front().vertex.x() ) * m_gridV ) * 2 ) )];
+				const Vector2 sign( uvhit.y() > closestU->vertex.y()? 1 : -1, uvhit.x() > closestV->vertex.x()? 1 : -1 ); //hit in positive or negative part of lines u, v
+				const PointVertex pCross( Vertex3f( closestV->vertex.x(), closestU->vertex.y(), 0 ) );
+				const PointVertex pUcenter( Vertex3f( closestV->vertex.x() + sign.y() / ( m_gridV * 2 ), closestU->vertex.y(), 0 ) );
+				const PointVertex pVcenter( Vertex3f( closestV->vertex.x(), closestU->vertex.y() + sign.x() / ( m_gridU * 2 ), 0 ) );
+
+				PointVertex pTexUcenter[2]{ *closestU, *( closestU + 1 ) };
+				pTexUcenter[0].vertex.y() = pTexUcenter[1].vertex.y() = pVcenter.vertex.y();
+				PointVertex pTexVcenter[2]{ *closestV, *( closestV + 1 ) };
+				pTexVcenter[0].vertex.x() = pTexVcenter[1].vertex.x() = pUcenter.vertex.x();
+
+				SelectionIntersection iCross, iUcenter, iVcenter, iTexUcenter, iTexVcenter, iU, iV, iNull;
+
+				const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_faceTex2local ) );
+#if defined( DEBUG_SELECTION )
+				g_render_clipped.construct( view.GetViewMatrix() );
+#endif
+				Line_BestPoint( local2view, closestU, iU );
+				Line_BestPoint( local2view, closestV, iV );
+				Line_BestPoint( local2view, pTexUcenter, iTexUcenter );
+				Line_BestPoint( local2view, pTexVcenter, iTexVcenter );
+				const bool uselected = iU < iNull;
+				const bool vselected = iV < iNull;
+				if( !uselected && !vselected ){ //no lines hit, definitely tex
+					selection = eTex;
+				}
+				else if( ( !uselected || iTexUcenter < iU ) && ( !vselected || iTexVcenter < iV ) ){ //yes lines, but tex ones are closer
+					selection = eTex;
+				}
+				else if( uselected != vselected ){ //only line selected
+					if( uselected ){
+						selection = g_bAltResize_AltSelect? eSkewU : eU;
+						selectedU = closestU;
+					}
+					else{
+						selection = g_bAltResize_AltSelect? eSkewV : eV;
+						selectedV = closestV;
+					}
+				}
+				else{ //two lines hit
+					if( g_bAltResize_AltSelect ){ //pick only line for skew
+						if( iU < iV ){
+							selection = eSkewU;
+							selectedU = closestU;
+						}
+						else{
+							selection = eSkewV;
+							selectedV = closestV;
+						}
+					}
+					else{
+						Point_BestPoint( local2view, pUcenter, iUcenter );
+						Point_BestPoint( local2view, pVcenter, iVcenter );
+						Point_BestPoint( local2view, pCross, iCross );
+						const bool ucenter = iUcenter < iNull;
+						const bool vcenter = iVcenter < iNull;
+						if( !ucenter && !vcenter ){ // no centers, definitely two lines
+							selection = eUV;
+							selectedU = closestU;
+							selectedV = closestV;
+						}
+						else if( iCross < iUcenter && iCross < iVcenter ){ // some center(s), cross is closer = two lines
+							selection = eUV;
+							selectedU = closestU;
+							selectedV = closestV;
+						}
+						else{ // some center(s), pick closest line
+							if( iUcenter < iVcenter ){
+								selection = eU;
+								selectedU = closestU;
+							}
+							else{
+								selection = eV;
+								selectedV = closestV;
+							}
+						}
+					}
+				}
+			}
+#else
+			const Matrix4 local2view( matrix4_multiplied_by_matrix4( view.GetViewMatrix(), m_faceTex2local ) );
+			{
+				SelectionIntersection best;
+				for( std::vector<PointVertex>::iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
+					Line_BestPoint( local2view, &( *i ), best );
+					selector.addIntersection( best, &( *i ) );
+				}
+				if( selector.isSelected() ){
+					selection = g_bAltResize_AltSelect? eSkewU : eU;
+					selectedU = selector.m_pointVertex;
+				}
+			}
+			{
+				selector.popSelectable();
+				SelectionIntersection best;
+				for( std::vector<PointVertex>::iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
+					Line_BestPoint( local2view, &( *i ), best );
+					selector.addIntersection( best, &( *i ) );
+				}
+				if( selector.isSelected() ){
+					selection = g_bAltResize_AltSelect? eSkewV : eV;
+					selectedV = selector.m_pointVertex;
+				}
+			}
+			if( selectedU && selectedV ){
+				selection = eUV;
+				if( g_bAltResize_AltSelect ){
+					selection = eSkewU;
+					selectedV = 0;
+				}
+			}
+#endif
+		}
+
+		applySelection( selection, selectedU, selectedV );
+	}
+private:
+	void applySelection( EUVSelection selection, PointVertex* selectedU, PointVertex* selectedV ){
+		if( m_selection != selection
+			|| m_selectedU != selectedU
+			|| m_selectedV != selectedV ){
+			if( m_selection != selection ){
+				switch ( m_selection )
+				{
+				case ePivot:
+					m_pivotPoint.m_point.colour = m_cWhite;
+					break;
+				case eGridU:
+					m_gridPointU.m_point.colour = m_cWhite;
+					break;
+				case eGridV:
+					m_gridPointV.m_point.colour = m_cWhite;
+					break;
+				case eCircle:
+					m_circle.setColour( m_cGray );
+					break;
+				case ePivotU:
+					m_pivotLines.m_lines[0].colour = m_cWhite;
+					m_pivotLines.m_lines[1].colour = m_cWhite;
+					break;
+				case ePivotV:
+					m_pivotLines.m_lines[2].colour = m_cWhite;
+					m_pivotLines.m_lines[3].colour = m_cWhite;
+					break;
+				default:
+					break;
+				}
+				switch ( selection )
+				{
+				case ePivot:
+					m_pivotPoint.m_point.colour = m_cRed;
+					break;
+				case eGridU:
+					m_gridPointU.m_point.colour = m_cRed;
+					break;
+				case eGridV:
+					m_gridPointV.m_point.colour = m_cRed;
+					break;
+				case eCircle:
+					m_circle.setColour( g_colour_selected );
+					break;
+				case ePivotU:
+					m_pivotLines.m_lines[0].colour = m_cRed;
+					m_pivotLines.m_lines[1].colour = m_cRed;
+					break;
+				case ePivotV:
+					m_pivotLines.m_lines[2].colour = m_cRed;
+					m_pivotLines.m_lines[3].colour = m_cRed;
+					break;
+				default:
+					break;
+				}
+			}
+
+			const Colour4b colour_selected = g_bAltResize_AltSelect? m_cGreen : g_colour_selected;
+			if( m_selectedU != selectedU || m_selection != selection ){ // selected line changed or not, but scale<->skew modes exchanged
+				if( m_selectedU )
+					m_selectedU->colour =
+					( m_selectedU + 1 )->colour = ( ( m_selectedU - &m_Ulines.m_lines[0] ) / 2 ) % m_gridU == 0? m_cGray : m_cGrayer;
+				if( selectedU )
+					selectedU->colour =
+					( selectedU + 1 )->colour = colour_selected;
+			}
+			if( m_selectedV != selectedV || m_selection != selection ){
+				if( m_selectedV )
+					m_selectedV->colour =
+					( m_selectedV + 1 )->colour = ( ( m_selectedV - &m_Vlines.m_lines[0] ) / 2 ) % m_gridV == 0? m_cGray : m_cGrayer;
+				if( selectedV )
+					selectedV->colour =
+					( selectedV + 1 )->colour = colour_selected;
+			}
+
+			m_selection = selection;
+			m_selectedU = selectedU;
+			m_selectedV = selectedV;
+			SceneChangeNotify();
+		}
+		m_isSelected = ( selection != eNone );
+	}
+	/* Manipulatable */
+	Vector3 m_start;
+public:
+	void Construct( const Matrix4& device2manip, const float x, const float y, const AABB& bounds, const Vector3& transform_origin ){
+		m_start = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y );
+	}
+	//!? todo change snap dist measurement from world to screenspace
+	//! fix meaningless undo on grid/origin change, then click tex or lines
+	void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const float x, const float y, const bool snap, const bool snapHard, const bool alt ){
+		Vector3 current = point_on_plane( m_plane, m_view->GetViewMatrix(), x, y );
+		switch ( m_selection )
+		{
+		case ePivot:
+			{
+				const Vector3 uv_origin_start = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+				const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, current );
+				float bestDistU = FLT_MAX;
+				float bestDistV = FLT_MAX;
+				float snapToU = 0;
+				float snapToV = 0;
+				for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
+					const float dist = fabs( ( *i ).vertex.y() - uv_origin.y() );
+					if( dist < bestDistU ){
+						bestDistU = dist;
+						snapToU = ( *i ).vertex.y();
+					}
+				}
+				for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
+					const float dist = fabs( ( *i ).vertex.x() - uv_origin.x() );
+					if( dist < bestDistV ){
+						bestDistV = dist;
+						snapToV = ( *i ).vertex.x();
+					}
+				}
+				for( const auto& v : m_face->getWinding() ){
+					const Vector3 p = matrix4_transformed_point( m_faceLocal2tex, v.vertex );
+					const float distU = fabs( p.y() - uv_origin.y() );
+					if( distU < bestDistU ){
+						bestDistU = distU;
+						snapToU = p.y();
+					}
+					const float distV = fabs( p.x() - uv_origin.x() );
+					if( distV < bestDistV ){
+						bestDistV = distV;
+						snapToV = p.x();
+					}
+				}
+				Vector3 result( uv_origin_start );
+				if( bestDistU * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+					result.y() = snapToU;
+				}
+				else{
+					result.y() = uv_origin.y();
+				}
+				if( bestDistV * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+					result.x() = snapToV;
+				}
+				else{
+					result.x() = uv_origin.x();
+				}
+				m_origin = matrix4_transformed_point( m_faceTex2local, result );
+				UpdateFaceData( false, false );
+				SceneChangeNotify();
+			}
+			break;
+		case ePivotU:
+			{
+				const Vector3 uv_origin_start = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+				const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, current );
+				float bestDist = FLT_MAX;
+				float snapTo = 0;
+				for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
+					const float dist = fabs( ( *i ).vertex.y() - uv_origin.y() );
+					if( dist < bestDist ){
+						bestDist = dist;
+						snapTo = ( *i ).vertex.y();
+					}
+				}
+				for( const auto& v : m_face->getWinding() ){
+					const Vector3 p = matrix4_transformed_point( m_faceLocal2tex, v.vertex );
+					const float dist = fabs( p.y() - uv_origin.y() );
+					if( dist < bestDist ){
+						bestDist = dist;
+						snapTo = p.y();
+					}
+				}
+				Vector3 result( uv_origin_start );
+				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+					result.y() = snapTo;
+				}
+				else{
+					result.y() = uv_origin.y();
+				}
+				m_origin = matrix4_transformed_point( m_faceTex2local, result );
+				UpdateFaceData( false, false );
+				SceneChangeNotify();
+			}
+			break;
+		case ePivotV:
+			{
+				const Vector3 uv_origin_start = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+				const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, current );
+				float bestDist = FLT_MAX;
+				float snapTo = 0;
+				for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
+					const float dist = fabs( ( *i ).vertex.x() - uv_origin.x() );
+					if( dist < bestDist ){
+						bestDist = dist;
+						snapTo = ( *i ).vertex.x();
+					}
+				}
+				for( const auto& v : m_face->getWinding() ){
+					const Vector3 p = matrix4_transformed_point( m_faceLocal2tex, v.vertex );
+					const float dist = fabs( p.x() - uv_origin.x() );
+					if( dist < bestDist ){
+						bestDist = dist;
+						snapTo = p.x();
+					}
+				}
+				Vector3 result( uv_origin_start );
+				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+					result.x() = snapTo;
+				}
+				else{
+					result.x() = uv_origin.x();
+				}
+				m_origin = matrix4_transformed_point( m_faceTex2local, result );
+				UpdateFaceData( false, false );
+				SceneChangeNotify();
+			}
+			break;
+		case eGridU:
+			{
+				const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+				const Vector3 uv_current = matrix4_transformed_point( m_faceLocal2tex, current );
+
+				const float dist = std::max( ( float_to_integer( uv_origin.y() + m_gridSign.x() * .25 ) + m_gridSign.x() - uv_current.y() ) * m_gridSign.x(), .01f );
+				unsigned int grid = std::max( 1, std::min( 16, int( 1 / dist ) ) );
+
+				if( snapHard ){ // http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+					grid--;
+					grid |= grid >> 1;
+					grid |= grid >> 2;
+					grid |= grid >> 4;
+					grid |= grid >> 8;
+					grid |= grid >> 16;
+					grid++;
+				}
+
+				if( m_gridU != grid || ( snap && m_gridV != grid ) ){
+					m_gridU = grid;
+					if( snap )
+						m_gridV = grid;
+					UpdateFaceData( false );
+					SceneChangeNotify();
+				}
+			}
+			break;
+		case eGridV:
+			{
+				const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+				const Vector3 uv_current = matrix4_transformed_point( m_faceLocal2tex, current );
+
+				const float dist = std::max( ( float_to_integer( uv_origin.x() + m_gridSign.y() * .25 ) + m_gridSign.y() - uv_current.x() ) * m_gridSign.y(), .01f );
+				unsigned int grid = std::max( 1, std::min( 16, int( 1 / dist ) ) );
+
+				if( snapHard ){ // http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+					grid--;
+					grid |= grid >> 1;
+					grid |= grid >> 2;
+					grid |= grid >> 4;
+					grid |= grid >> 8;
+					grid |= grid >> 16;
+					grid++;
+				}
+
+				if( m_gridV != grid || ( snap && m_gridU != grid ) ){
+					m_gridV = grid;
+					if( snap )
+						m_gridU = grid;
+					UpdateFaceData( false );
+					SceneChangeNotify();
+				}
+			}
+			break;
+		case eCircle:
+			{
+				Vector3 from = m_start - m_origin;
+				constrain_to_axis( from, vector4_to_vector3( m_tex2local.z() ) );
+				Vector3 to = current - m_origin;
+				constrain_to_axis( to, vector4_to_vector3( m_tex2local.z() ) );
+				Matrix4 rot = g_matrix4_identity;
+				if( snap ){
+					matrix4_pivoted_rotate_by_axisangle( rot,
+														vector4_to_vector3( m_tex2local.z() ),
+														float_snapped( angle_for_axis( from, to, vector4_to_vector3( m_tex2local.z() ) ), static_cast<float>( c_pi / 12.0 ) ),
+														m_origin );
+				}
+				else{
+					matrix4_pivoted_rotate_by_axisangle( rot,
+														vector4_to_vector3( m_tex2local.z() ),
+														angle_for_axis( from, to, vector4_to_vector3( m_tex2local.z() ) ),
+														m_origin );
+				}
+				{ // snap
+					const Winding& winding = m_face->getWinding();
+					const Vector3 uvec = vector3_normalised( matrix4_transformed_direction( rot, vector4_to_vector3( m_tex2local.x() ) ) );
+					const Vector3 vvec = vector3_normalised( matrix4_transformed_direction( rot, vector4_to_vector3( m_tex2local.y() ) ) );
+					float bestDot = 0;
+					Vector3 bestTo;
+					bool V = false;
+					for( Winding::const_iterator next = winding.begin(), i = winding.end() - 1; next != winding.end(); i = next, ++next ){
+						Vector3 vec( ( *next ).vertex - ( *i ).vertex );
+						constrain_to_axis( vec, vector4_to_vector3( m_tex2local.z() ) );
+						const float dotU = fabs( vector3_dot( uvec, vec ) );
+						if( dotU > bestDot ){
+							bestDot = dotU;
+							bestTo = vector3_dot( uvec, vec ) > 0? vec : -vec;
+							V = false;
+						}
+						const float dotV = fabs( vector3_dot( vvec, vec ) );
+						if( dotV > bestDot ){
+							bestDot = dotV;
+							bestTo = vector3_dot( vvec, vec ) > 0? vec : -vec;
+							V = true;
+						}
+					}
+					if( bestDot > 0.9994f || snapHard ){
+						const Vector3 bestFrom = vector3_normalised( vector4_to_vector3( V? m_tex2local.y() : m_tex2local.x() ) );
+						rot = g_matrix4_identity;
+						matrix4_pivoted_rotate_by_axisangle( rot,
+															vector4_to_vector3( m_tex2local.z() ),
+															angle_for_axis( bestFrom, bestTo, vector4_to_vector3( m_tex2local.z() ) ),
+															m_origin );
+					}
+				}
+
+				Matrix4 faceTex2local = matrix4_multiplied_by_matrix4( rot, m_tex2local );
+				vector4_to_vector3( faceTex2local.x() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( faceTex2local.x() ), vector4_to_vector3( m_tex2local.z() ) );
+				vector4_to_vector3( faceTex2local.y() ) = plane3_project_point( Plane3( m_plane.normal(), 0 ), vector4_to_vector3( faceTex2local.y() ), vector4_to_vector3( m_tex2local.z() ) );
+				faceTex2local = matrix4_multiplied_by_matrix4( // adjust to have UV's z = 0: move the plane along m_tex2local.z() so that plane.dist() = 0
+							matrix4_translation_for_vec3(
+								vector4_to_vector3( m_tex2local.z() ) * ( m_plane.dist() - vector3_dot( m_plane.normal(), vector4_to_vector3( faceTex2local.t() ) ) )
+								/ vector3_dot( m_plane.normal(), vector4_to_vector3( m_tex2local.z() ) )
+							),
+							faceTex2local );
+				m_lines2world = m_pivotLines2world = faceTex2local;
+
+				m_pivot2world = matrix4_multiplied_by_matrix4( rot, m_pivot2world0 );
+
+				m_face->transform_texdef( rot, m_origin ); //! todo make SI update after Brush_textureChanged(); same problem after brush moved with tex lock
+				SceneChangeNotify();
+			}
+			break;
+		case eU:
+			{
+				const Vector3 uv_origin = matrix4_transformed_point( m_local2tex, m_origin );
+				const Vector3 uv_start = m_selectedU->vertex;
+				const Vector3 uv_current = m_selectedU->vertex + matrix4_transformed_point( m_local2tex, current ) - matrix4_transformed_point( m_local2tex, m_start );
+				float bestDist = FLT_MAX;
+				float snapTo = 0;
+				for( const auto& v : m_face->getWinding() ){
+					const Vector3 p = matrix4_transformed_point( m_local2tex, v.vertex );
+					const float dist = fabs( p.y() - uv_current.y() );
+					if( dist < bestDist ){
+						bestDist = dist;
+						snapTo = p.y();
+					}
+				}
+				Vector3 result( 1, uv_current.y(), 1 );
+				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+					result.y() = snapTo;
+				}
+				result.y() = ( result.y() - uv_origin.y() ) / ( uv_start.y() - uv_origin.y() );
+
+				if( snap )
+					result.x() = fabs( result.y() );
+
+				/* prevent scaling to 0, limit at max 10 textures per world unit */
+				if( vector3_length_squared( vector4_to_vector3( m_tex2local.y() ) * result.y() ) < .01 )
+					return;
+
+				Matrix4 scale = g_matrix4_identity;
+				matrix4_pivoted_scale_by_vec3( scale, result, uv_origin );
+				// transform_local2object
+				scale = matrix4_multiplied_by_matrix4(
+						matrix4_multiplied_by_matrix4( m_tex2local, scale ),
+						m_local2tex
+						);
+				{
+					Matrix4 linescale = g_matrix4_identity;
+					matrix4_pivoted_scale_by_vec3( linescale, result, matrix4_transformed_point( m_faceLocal2tex, m_origin ) );
+					m_lines2world = m_pivotLines2world = matrix4_multiplied_by_matrix4( m_faceTex2local, linescale );
+
+					m_pivot2world = matrix4_multiplied_by_matrix4( m_pivot2world0, matrix4_scale_for_vec3( result ) );
+				}
+				m_face->transform_texdef( scale, m_origin );
+				SceneChangeNotify();
+			}
+			break;
+		case eV:
+			{
+				const Vector3 uv_origin = matrix4_transformed_point( m_local2tex, m_origin );
+				const Vector3 uv_start = m_selectedV->vertex;
+				const Vector3 uv_current = m_selectedV->vertex + matrix4_transformed_point( m_local2tex, current ) - matrix4_transformed_point( m_local2tex, m_start );
+				float bestDist = FLT_MAX;
+				float snapTo = 0;
+				for( const auto& v : m_face->getWinding() ){
+					const Vector3 p = matrix4_transformed_point( m_local2tex, v.vertex );
+					const float dist = fabs( p.x() - uv_current.x() );
+					if( dist < bestDist ){
+						bestDist = dist;
+						snapTo = p.x();
+					}
+				}
+				Vector3 result( uv_current.x(), 1, 1 );
+				if( bestDist * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+					result.x() = snapTo;
+				}
+				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
+
+				if( snap )
+					result.y() = fabs( result.x() );
+
+				/* prevent scaling to 0, limit at max 10 textures per world unit */
+				if( vector3_length_squared( vector4_to_vector3( m_tex2local.x() ) * result.x() ) < .01 )
+					return;
+
+				Matrix4 scale = g_matrix4_identity;
+				matrix4_pivoted_scale_by_vec3( scale, result, uv_origin );
+				// transform_local2object
+				scale = matrix4_multiplied_by_matrix4(
+						matrix4_multiplied_by_matrix4( m_tex2local, scale ),
+						m_local2tex
+						);
+				{
+					Matrix4 linescale = g_matrix4_identity;
+					matrix4_pivoted_scale_by_vec3( linescale, result, matrix4_transformed_point( m_faceLocal2tex, m_origin ) );
+					m_lines2world = m_pivotLines2world = matrix4_multiplied_by_matrix4( m_faceTex2local, linescale );
+
+					m_pivot2world = matrix4_multiplied_by_matrix4( m_pivot2world0, matrix4_scale_for_vec3( result ) );
+				}
+				m_face->transform_texdef( scale, m_origin );
+				SceneChangeNotify();
+			}
+			break;
+		case eUV:
+			{
+				const Vector3 uv_origin = matrix4_transformed_point( m_local2tex, m_origin );
+				const Vector3 uv_start{ m_selectedV->vertex.x(), m_selectedU->vertex.y(), 0 } ;
+				const Vector3 uv_current{ ( m_selectedV->vertex + matrix4_transformed_point( m_local2tex, current ) - matrix4_transformed_point( m_local2tex, m_start ) ).x(),
+											( m_selectedU->vertex + matrix4_transformed_point( m_local2tex, current ) - matrix4_transformed_point( m_local2tex, m_start ) ).y(),
+											0 };
+				float bestDistU = FLT_MAX;
+				float snapToU = 0;
+				float bestDistV = FLT_MAX;
+				float snapToV = 0;
+				for( const auto& v : m_face->getWinding() ){
+					const Vector3 p = matrix4_transformed_point( m_local2tex, v.vertex );
+					const float distU = fabs( p.y() - uv_current.y() );
+					if( distU < bestDistU ){
+						bestDistU = distU;
+						snapToU = p.y();
+					}
+					const float distV = fabs( p.x() - uv_current.x() );
+					if( distV < bestDistV ){
+						bestDistV = distV;
+						snapToV = p.x();
+					}
+				}
+
+				Vector3 result( uv_current.x(), uv_current.y(), 1 );
+				if( bestDistU * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+					result.y() = snapToU;
+				}
+				result.y() = ( result.y() - uv_origin.y() ) / ( uv_start.y() - uv_origin.y() );
+
+				if( bestDistV * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+					result.x() = snapToV;
+				}
+				result.x() = ( result.x() - uv_origin.x() ) / ( uv_start.x() - uv_origin.x() );
+
+				if( snap ){
+					const std::size_t best = fabs( result.x() ) > fabs( result.y() )? 0 : 1;
+					result[( best + 1 ) % 2] = std::copysign( result[best], result[( best + 1 ) % 2] );
+				}
+
+				/* prevent scaling to 0, limit at max 10 textures per world unit */
+				if( vector3_length_squared( vector4_to_vector3( m_tex2local.x() ) * result.x() ) < .01 ||
+					vector3_length_squared( vector4_to_vector3( m_tex2local.y() ) * result.y() ) < .01 )
+					return;
+
+				Matrix4 scale = g_matrix4_identity;
+				matrix4_pivoted_scale_by_vec3( scale, result, uv_origin );
+				// transform_local2object
+				scale = matrix4_multiplied_by_matrix4(
+						matrix4_multiplied_by_matrix4( m_tex2local, scale ),
+						m_local2tex
+						);
+				{
+					Matrix4 linescale = g_matrix4_identity;
+					matrix4_pivoted_scale_by_vec3( linescale, result, matrix4_transformed_point( m_faceLocal2tex, m_origin ) );
+					m_lines2world = m_pivotLines2world = matrix4_multiplied_by_matrix4( m_faceTex2local, linescale );
+
+					m_pivot2world = matrix4_multiplied_by_matrix4( m_pivot2world0, matrix4_scale_for_vec3( result ) );
+				}
+				m_face->transform_texdef( scale, m_origin );
+				SceneChangeNotify();
+			}
+			break;
+		case eSkewU:
+			{
+				const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+				const Vector3 uv_move = matrix4_transformed_point( m_faceLocal2tex, current ) - matrix4_transformed_point( m_faceLocal2tex, m_start );
+				Matrix4 skew( g_matrix4_identity );
+				skew[4] = uv_move.x() / ( m_selectedU->vertex - uv_origin ).y();
+
+				Matrix4 scale = matrix4_scale_for_vec3( // scale snap measurement space so that x/y = 1
+									Vector3( vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) / vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ),
+												1, 1 ) );
+				const Vector3 skewed = vector3_normalised( matrix4_transformed_direction( matrix4_multiplied_by_matrix4( scale, skew ), g_vector3_axis_y ) );
+				matrix4_multiply_by_matrix4( scale, m_faceLocal2tex );
+				float bestDot = 0;
+				Vector3 bestTo;
+				const Winding& winding = m_face->getWinding();
+				for( Winding::const_iterator next = winding.begin(), i = winding.end() - 1; next != winding.end(); i = next, ++next ){
+					const Vector3 vec( vector3_normalised( matrix4_transformed_point( scale, ( *next ).vertex ) -
+															matrix4_transformed_point( scale, ( *i ).vertex ) ) );
+					const float dot = fabs( vector3_dot( skewed, vec ) );
+					if( dot > bestDot
+						&& fabs( vector3_dot( vec, g_vector3_axis_x ) ) < 0.99999 ){ // don't snap so, that one axis = the other
+						bestDot = dot;
+						const Vector3 vecTo( vector3_normalised( matrix4_transformed_point( m_faceLocal2tex, ( *next ).vertex ) -
+																matrix4_transformed_point( m_faceLocal2tex, ( *i ).vertex ) ) );
+						bestTo = vector3_dot( skewed, vec ) > 0? vecTo : -vecTo;
+					}
+				}
+				if( bestDot > 0.9994f || snapHard ){
+					skew[4] = bestTo.x() / bestTo.y();
+				}
+
+				{
+					Matrix4 mat( g_matrix4_identity );
+					matrix4_translate_by_vec3( mat, uv_origin );
+					matrix4_multiply_by_matrix4( mat, skew );
+					matrix4_translate_by_vec3( mat, -uv_origin );
+					skew = mat;
+				}
+
+				m_lines2world = m_pivotLines2world = matrix4_multiplied_by_matrix4( m_faceTex2local, skew );
+				// transform_local2object
+				m_pivot2world = matrix4_multiplied_by_matrix4(
+						matrix4_multiplied_by_matrix4( m_tex2local, skew ),
+						m_local2tex
+						);
+				matrix4_multiply_by_matrix4( m_pivot2world, m_pivot2world0 );
+
+				// transform_local2object
+				skew = matrix4_multiplied_by_matrix4(
+						matrix4_multiplied_by_matrix4( m_faceTex2local, skew ),
+						m_faceLocal2tex
+						);
+				m_face->transform_texdef( skew, m_origin );
+				SceneChangeNotify();
+			}
+			break;
+		case eSkewV:
+			{
+				const Vector3 uv_origin = matrix4_transformed_point( m_faceLocal2tex, m_origin );
+				const Vector3 uv_move = matrix4_transformed_point( m_faceLocal2tex, current ) - matrix4_transformed_point( m_faceLocal2tex, m_start );
+				Matrix4 skew( g_matrix4_identity );
+				skew[1] = uv_move.y() / ( m_selectedV->vertex - uv_origin ).x();
+
+				Matrix4 scale = matrix4_scale_for_vec3( // scale snap measurement space so that x/y = 1
+									Vector3( vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) / vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ),
+												1, 1 ) );
+				const Vector3 skewed = vector3_normalised( matrix4_transformed_direction( matrix4_multiplied_by_matrix4( scale, skew ), g_vector3_axis_x ) );
+				matrix4_multiply_by_matrix4( scale, m_faceLocal2tex );
+				float bestDot = 0;
+				Vector3 bestTo;
+				const Winding& winding = m_face->getWinding();
+				for( Winding::const_iterator next = winding.begin(), i = winding.end() - 1; next != winding.end(); i = next, ++next ){
+					const Vector3 vec( vector3_normalised( matrix4_transformed_point( scale, ( *next ).vertex ) -
+															matrix4_transformed_point( scale, ( *i ).vertex ) ) );
+					const float dot = fabs( vector3_dot( skewed, vec ) );
+					if( dot > bestDot
+						&& fabs( vector3_dot( vec, g_vector3_axis_y ) ) < 0.99999 ){ // don't snap so, that one axis = the other
+						bestDot = dot;
+						const Vector3 vecTo( vector3_normalised( matrix4_transformed_point( m_faceLocal2tex, ( *next ).vertex ) -
+																matrix4_transformed_point( m_faceLocal2tex, ( *i ).vertex ) ) );
+						bestTo = vector3_dot( skewed, vec ) > 0? vecTo : -vecTo;
+					}
+				}
+				if( bestDot > 0.9994f || snapHard ){
+					skew[1] = bestTo.y() / bestTo.x();
+				}
+
+				{
+					Matrix4 mat( g_matrix4_identity );
+					matrix4_translate_by_vec3( mat, uv_origin );
+					matrix4_multiply_by_matrix4( mat, skew );
+					matrix4_translate_by_vec3( mat, -uv_origin );
+					skew = mat;
+				}
+
+				m_lines2world = m_pivotLines2world = matrix4_multiplied_by_matrix4( m_faceTex2local, skew );
+				// transform_local2object
+				m_pivot2world = matrix4_multiplied_by_matrix4(
+						matrix4_multiplied_by_matrix4( m_tex2local, skew ),
+						m_local2tex
+						);
+				matrix4_multiply_by_matrix4( m_pivot2world, m_pivot2world0 );
+
+				// transform_local2object
+				skew = matrix4_multiplied_by_matrix4(
+						matrix4_multiplied_by_matrix4( m_faceTex2local, skew ),
+						m_faceLocal2tex
+						);
+				m_face->transform_texdef( skew, m_origin );
+				SceneChangeNotify();
+			}
+			break;
+		case eTex:
+			{
+				const Vector3 uvstart = matrix4_transformed_point( m_faceLocal2tex, m_start );
+				const Vector3 uvcurrent = matrix4_transformed_point( m_faceLocal2tex, current );
+				const Vector3 uvmove = uvcurrent - uvstart;
+				float bestDistU = FLT_MAX;
+				float bestDistV = FLT_MAX;
+				float snapMoveU = 0;
+				float snapMoveV = 0;
+				const Winding& winding = m_face->getWinding();
+				// snap uvmove
+				for( const auto& v : winding ){
+					const Vector3 p = matrix4_transformed_point( m_faceLocal2tex, v.vertex );
+					for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
+						const float dist = p.y() - ( ( *i ).vertex.y() + uvmove.y() );
+						if( fabs( dist ) < bestDistU ){
+							bestDistU = fabs( dist );
+							snapMoveU = uvmove.y() + dist;
+						}
+					}
+					for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
+						const float dist = p.x() - ( ( *i ).vertex.x() + uvmove.x() );
+						if( fabs( dist ) < bestDistV ){
+							bestDistV = fabs( dist );
+							snapMoveV = uvmove.x() + dist;
+						}
+					}
+				}
+				{
+					const Vector3 p = matrix4_transformed_point( m_faceLocal2tex, m_origin ); // uvorigin
+					for( std::vector<PointVertex>::const_iterator i = m_Ulines.m_lines.begin(); i != m_Ulines.m_lines.end(); ++++i ){
+						const float dist = p.y() - ( ( *i ).vertex.y() + uvmove.y() );
+						if( fabs( dist ) < bestDistU ){
+							bestDistU = fabs( dist );
+							snapMoveU = uvmove.y() + dist;
+						}
+					}
+					for( std::vector<PointVertex>::const_iterator i = m_Vlines.m_lines.begin(); i != m_Vlines.m_lines.end(); ++++i ){
+						const float dist = p.x() - ( ( *i ).vertex.x() + uvmove.x() );
+						if( fabs( dist ) < bestDistV ){
+							bestDistV = fabs( dist );
+							snapMoveV = uvmove.x() + dist;
+						}
+					}
+				}
+
+				Vector3 result( uvmove );
+				if( bestDistU * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) < 3 || snapHard ){
+					result.y() = snapMoveU;
+				}
+				if( bestDistV * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) < 3 || snapHard ){
+					result.x() = snapMoveV;
+				}
+
+				if( snap ){
+					auto& smaller = fabs( uvmove.x() * vector3_length( vector4_to_vector3( m_faceTex2local.x() ) ) ) <
+									fabs( uvmove.y() * vector3_length( vector4_to_vector3( m_faceTex2local.y() ) ) )? result.x() : result.y();
+					smaller = 0;
+				}
+
+				// translation_local2object
+				result = matrix4_get_translation_vec3(
+					matrix4_multiplied_by_matrix4(
+						matrix4_translated_by_vec3( m_faceTex2local, result ),
+						m_faceLocal2tex
+						)
+					);
+
+				const Matrix4 translation = matrix4_translation_for_vec3( result );
+
+				m_lines2world = matrix4_multiplied_by_matrix4( translation, m_faceTex2local );
+
+				m_face->transform_texdef( translation );
+				SceneChangeNotify();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	void freezeTransform(){
+		if( m_face &&
+			( m_selection == eCircle
+			|| m_selection == eU
+			|| m_selection == eV
+			|| m_selection == eUV
+			|| m_selection == eSkewU
+			|| m_selection == eSkewV
+			|| m_selection == eTex ) )
+			m_face->freezeTransform();
+	}
+
+	Manipulatable* GetManipulatable() {
+		return this;
+	}
+
+	void setSelected( bool select ) {
+		m_isSelected = select;
+	}
+	bool isSelected() const {
+		return m_isSelected;
+	}
+};
+
+Shader* UVManipulator::m_state_line;
+Shader* UVManipulator::m_state_point;
+
+
+
+
 class TransformOriginTranslatable
 {
 public:
@@ -4622,6 +5861,7 @@ SkewManipulator m_skew_manipulator;
 DragManipulator m_drag_manipulator;
 ClipManipulator m_clip_manipulator;
 BuildManipulator m_build_manipulator;
+UVManipulator m_uv_manipulator;
 mutable TransformOriginManipulator m_transformOrigin_manipulator;
 
 typedef SelectionList<scene::Instance> selection_t;
@@ -4730,6 +5970,7 @@ void SetManipulatorMode( EManipulatorMode mode ){
 			m_build_manipulator.initialise();
 			m_manipulator = &m_build_manipulator; break;
 		}
+	case eUV: m_manipulator = &m_uv_manipulator; break;
 	}
 	pivotChanged();
 }
@@ -4835,7 +6076,7 @@ void startMove(){
 bool SelectManipulator( const View& view, const float device_point[2], const float device_epsilon[2] ){
 	bool movingOrigin = false;
 
-	if ( !nothingSelected() || ManipulatorMode() == eDrag || ManipulatorMode() == eClip || ManipulatorMode() == eBuild ) {
+	if ( !nothingSelected() || ManipulatorMode() == eDrag || ManipulatorMode() == eClip || ManipulatorMode() == eBuild || ManipulatorMode() == eUV ) {
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
@@ -4887,7 +6128,7 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 void HighlightManipulator( const View& view, const float device_point[2], const float device_epsilon[2] ){
 	Manipulatable::assign_static( view, device_point, device_epsilon ); //this b4 m_manipulator calls!
 
-	if ( ( !nothingSelected() && transformOrigin_isTranslatable() ) || ManipulatorMode() == eClip || ManipulatorMode() == eBuild ) {
+	if ( ( !nothingSelected() && transformOrigin_isTranslatable() ) || ManipulatorMode() == eClip || ManipulatorMode() == eBuild || ManipulatorMode() == eUV ) {
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
@@ -4909,6 +6150,9 @@ void HighlightManipulator( const View& view, const float device_point[2], const 
 		}
 		else if( ManipulatorMode() == eBuild ){
 			m_build_manipulator.highlight( scissored );
+		}
+		else if( ManipulatorMode() == eUV ){
+			m_manipulator->testSelect( scissored, GetPivot2World() );
 		}
 	}
 }
@@ -5364,13 +6608,18 @@ static void constructStatic(){
 	TransformOriginManipulator::m_state =
 	ClipManipulator::m_state =
 	SkewManipulator::m_state_point =
-	BuildManipulator::m_state_point = GlobalShaderCache().capture( "$BIGPOINT" );
+	BuildManipulator::m_state_point =
+	UVManipulator::m_state_point = GlobalShaderCache().capture( "$BIGPOINT" );
+	RenderablePivot::StaticShader::instance() = GlobalShaderCache().capture( "$PIVOT" );
+	UVManipulator::m_state_line = GlobalShaderCache().capture( "$BLENDLINE" );
 }
 
 static void destroyStatic(){
   #if defined( DEBUG_SELECTION )
 	GlobalShaderCache().release( "$DEBUG_CLIPPED" );
   #endif
+	GlobalShaderCache().release( "$BLENDLINE" );
+	GlobalShaderCache().release( "$PIVOT" );
 	GlobalShaderCache().release( "$BIGPOINT" );
 	GlobalShaderCache().release( "$FLATSHADE_OVERLAY" );
 	GlobalShaderCache().release( "$WIRE_OVERLAY" );
@@ -5574,7 +6823,10 @@ bool RadiantSelectionSystem::endMove(){
 		return true;
 	}
 
-	freezeTransforms();
+	if ( ManipulatorMode() == eUV )
+		m_uv_manipulator.freezeTransform();
+	else
+		freezeTransforms();
 
 //	if ( Mode() == ePrimitive && ManipulatorMode() == eDrag ) {
 //		g_bTmpComponentMode = false;
@@ -5611,6 +6863,9 @@ bool RadiantSelectionSystem::endMove(){
 		}
 		else if ( ManipulatorMode() == eDrag ) {
 			command << "dragTool";
+		}
+		else if ( ManipulatorMode() == eUV ) {
+			command << "UVTool";
 		}
 
 		GlobalUndoSystem().finish( command.c_str() );
@@ -5809,7 +7064,7 @@ AABB RadiantSelectionSystem::getSelectionAABB() const {
 
 void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
 	//if(view->TestPoint(m_object_pivot))
-	if ( !nothingSelected() || ManipulatorMode() == eClip || ManipulatorMode() == eBuild ) {
+	if ( !nothingSelected() || ManipulatorMode() == eClip || ManipulatorMode() == eBuild || ManipulatorMode() == eUV ) {
 		renderer.Highlight( Renderer::ePrimitive, false );
 		renderer.Highlight( Renderer::eFace, false );
 
@@ -6135,6 +7390,7 @@ DeviceVector getEpsilon(){
 	case SelectionSystem::eClip:
 		return m_epsilon / g_SELECT_EPSILON * ( g_SELECT_EPSILON + 4 );
 	case SelectionSystem::eDrag:
+	case SelectionSystem::eUV:
 		return m_epsilon;
 	default: //getSelectionSystem().transformOrigin_isTranslatable()
 		return m_epsilon / g_SELECT_EPSILON * 8;
@@ -6308,10 +7564,12 @@ void onMouseUp( const WindowVector& position, ButtonIdentifier button, ModifierF
 void onModifierDown( ModifierFlags type ){
 	m_state = bitfield_enable( m_state, type );
 	m_selector.setState( m_state );
+	g_bAltResize_AltSelect = ( m_state == c_modifierAlt );
 }
 void onModifierUp( ModifierFlags type ){
 	m_state = bitfield_disable( m_state, type );
 	m_selector.setState( m_state );
+	g_bAltResize_AltSelect = ( m_state == c_modifierAlt );
 }
 DeviceVector device( WindowVector window ) const {
 	return window_to_normalised_device( window, m_width, m_height );

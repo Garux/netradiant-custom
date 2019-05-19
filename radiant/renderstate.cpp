@@ -2201,6 +2201,11 @@ void OpenGLShader::construct( const char* name ){
 			hiddenLine.m_linewidth = 2;
 			hiddenLine.m_depthfunc = GL_GREATER;
 		}
+		else if ( string_equal( name + 1, "BLENDLINE" ) ) {
+			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_BLEND;
+			state.m_sort = OpenGLState::eSortGUI0 - 1;
+			state.m_linewidth = 1;
+		}
 		else if ( string_equal( name + 1, "LATTICE" ) ) {
 			state.m_colour[0] = 1;
 			state.m_colour[1] = 0.5;

@@ -1099,6 +1099,14 @@ void texdef_from_points(){
 	Brush_textureChanged();
 }
 
+void transform_texdef( const Matrix4& matrix, const Vector3& invariant = g_vector3_identity ){
+	revertTexdef();
+//	Texdef_transformLocked( m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix, static_cast<Vector3>( m_plane.plane3().normal() * m_plane.plane3().dist() ) );
+	Texdef_transform( m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix, invariant );
+	EmitTextureCoordinates();
+	Brush_textureChanged();
+}
+
 void transform( const Matrix4& matrix, bool mirror ){
 	if ( g_brush_texturelock_enabled ) {
 		Texdef_transformLocked( m_texdefTransformed, m_shader.width(), m_shader.height(), m_plane.plane3(), matrix, contributes() ? m_centroid_cached : static_cast<Vector3>( m_plane.plane3().normal() * m_plane.plane3().dist() ) );

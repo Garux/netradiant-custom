@@ -153,5 +153,16 @@ inline double plane3_distance_to_point( const Plane3& plane, const BasicVector3<
 	return vector3_dot( point, plane.normal() ) - plane.dist();
 }
 
+template<typename T, typename U>
+inline BasicVector3<T> plane3_project_point( const Plane3& plane, const BasicVector3<T>& point, const BasicVector3<U>& direction ){
+	const double f = vector3_dot( plane.normal(), direction );
+	const double d = ( vector3_dot( plane.normal() * plane.dist() - point, plane.normal() ) ) / f;
+	return point + direction * d;
+}
+
+template<typename T>
+inline BasicVector3<T> plane3_project_point( const Plane3& plane, const BasicVector3<T>& point ){
+	return ( point - plane.normal() * vector3_dot( point, plane.normal() ) + plane.normal() * plane.dist() );
+}
 
 #endif

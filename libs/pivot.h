@@ -240,17 +240,17 @@ static Shader* getShader(){
 	return StaticShader::instance();
 }
 
-RenderablePivot(){
+RenderablePivot( std::size_t size = 16 ){
 	m_vertices.reserve( 6 );
 
 	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_x ) );
-	m_vertices.push_back( PointVertex( Vertex3f( 16, 0, 0 ), g_colour_x ) );
+	m_vertices.push_back( PointVertex( Vertex3f( size, 0, 0 ), g_colour_x ) );
 
 	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_y ) );
-	m_vertices.push_back( PointVertex( Vertex3f( 0, 16, 0 ), g_colour_y ) );
+	m_vertices.push_back( PointVertex( Vertex3f( 0, size, 0 ), g_colour_y ) );
 
 	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 0 ), g_colour_z ) );
-	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, 16 ), g_colour_z ) );
+	m_vertices.push_back( PointVertex( Vertex3f( 0, 0, size ), g_colour_z ) );
 }
 
 void render( RenderStateFlags state ) const {

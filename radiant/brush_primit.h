@@ -111,7 +111,8 @@ void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::si
 void ShiftScaleRotate_fromFace( texdef_t& shiftScaleRotate, const TextureProjection& projection );
 void ShiftScaleRotate_toFace( const texdef_t& shiftScaleRotate, TextureProjection& projection );
 
-void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& transform, const Vector3 centroid = Vector3( 0, 0, 0 ) );
+void Texdef_transformLocked( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& transform, const Vector3& invariant = g_vector3_identity );
+void Texdef_transform( TextureProjection& projection, std::size_t width, std::size_t height, const Plane3& plane, const Matrix4& transform, const Vector3& invariant = g_vector3_identity );
 void Texdef_normalise( TextureProjection& projection, float width, float height );
 
 enum TexdefTypeId
@@ -131,7 +132,7 @@ extern float g_texdef_default_scale;
 
 void Texdef_Convert( TexdefTypeId in, TexdefTypeId out, const Plane3& plane, TextureProjection& projection, std::size_t width, std::size_t height );
 void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3], const DoubleVector3 st[3], std::size_t width, std::size_t height );
-template <typename Element>
-void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<Element>& texS, BasicVector3<Element>& texT );
+template <typename Element, typename OtherElement>
+void ComputeAxisBase( const BasicVector3<Element>& normal, BasicVector3<OtherElement>& texS, BasicVector3<OtherElement>& texT );
 
 #endif

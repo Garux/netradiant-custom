@@ -1441,6 +1441,10 @@ void BuildToolExport( const BoolImportCallback& importCallback ){
 	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eBuild );
 }
 
+void UVToolExport( const BoolImportCallback& importCallback ){
+	importCallback( GlobalSelectionSystem().ManipulatorMode() == SelectionSystem::eUV );
+}
+
 FreeCaller1<const BoolImportCallback&, TranslateToolExport> g_translatemode_button_caller;
 BoolExportCallback g_translatemode_button_callback( g_translatemode_button_caller );
 ToggleItem g_translatemode_button( g_translatemode_button_callback );
@@ -1469,6 +1473,10 @@ FreeCaller1<const BoolImportCallback&, BuildToolExport> g_build_button_caller;
 BoolExportCallback g_build_button_callback( g_build_button_caller );
 ToggleItem g_build_button( g_build_button_callback );
 
+FreeCaller1<const BoolImportCallback&, UVToolExport> g_uv_button_caller;
+BoolExportCallback g_uv_button_callback( g_uv_button_caller );
+ToggleItem g_uv_button( g_uv_button_callback );
+
 void ToolChanged(){
 	g_translatemode_button.update();
 	g_rotatemode_button.update();
@@ -1477,6 +1485,7 @@ void ToolChanged(){
 	g_dragmode_button.update();
 	g_clipper_button.update();
 	g_build_button.update();
+	g_uv_button.update();
 }
 
 const char* const c_ResizeMode_status = "QE4 Drag Tool: move and resize objects";
@@ -1609,6 +1618,28 @@ void BuildMode(){
 
 		Sys_Status( c_BuildMode_status );
 		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eBuild );
+		ToolChanged();
+		ModeChangeNotify();
+	}
+}
+
+
+const char* const c_UVMode_status = "UV Tool: edit texture alignment";
+
+void UVMode(){
+	if ( g_currentToolMode == UVMode && g_defaultToolMode != UVMode ) {
+		g_defaultToolMode();
+	}
+	else
+	{
+		g_currentToolMode = UVMode;
+		g_currentToolModeSupportsComponentEditing = false;
+
+		SelectionSystem_DefaultMode();
+		ComponentModeChanged();
+
+		Sys_Status( c_UVMode_status );
+		GlobalSelectionSystem().SetManipulatorMode( SelectionSystem::eUV );
 		ToolChanged();
 		ModeChangeNotify();
 	}
@@ -2404,6 +2435,7 @@ void Manipulators_registerShortcuts(){
 	toggle_add_accelerator( "MouseDrag" );
 	toggle_add_accelerator( "ToggleClipper" );
 	toggle_add_accelerator( "MouseBuild" );
+	toggle_add_accelerator( "MouseUV" );
 
 	command_connect_accelerator( "MouseRotateOrScale" );
 	command_connect_accelerator( "MouseDragOrTransform" );
@@ -2535,6 +2567,7 @@ void Manipulators_constructToolbar( GtkToolbar* toolbar ){
 	toolbar_append_toggle_button( toolbar, "Resize (Q)", "select_mouseresize.png", "MouseDrag" );
 	toolbar_append_toggle_button( toolbar, "Clipper (X)", "select_clipper.png", "ToggleClipper" );
 //	toolbar_append_toggle_button( toolbar, "Build (B)", "select_mouserotate.png", "MouseBuild" );
+	toolbar_append_toggle_button( toolbar, "UV Tool (G)", "select_mouseuv.png", "MouseUV" );
 }
 
 GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
@@ -3604,6 +3637,7 @@ void MainFrame_Construct(){
 	GlobalToggles_insert( "MouseTransform", FreeCaller<SkewMode>(), ToggleItem::AddCallbackCaller( g_skewmode_button ) );
 	GlobalToggles_insert( "MouseDrag", FreeCaller<DragMode>(), ToggleItem::AddCallbackCaller( g_dragmode_button ) );
 	GlobalToggles_insert( "MouseBuild", FreeCaller<BuildMode>(), ToggleItem::AddCallbackCaller( g_build_button ), Accelerator( 'B' ) );
+	GlobalToggles_insert( "MouseUV", FreeCaller<UVMode>(), ToggleItem::AddCallbackCaller( g_uv_button ), Accelerator( Accelerator( 'G' ) ) );
 	GlobalCommands_insert( "MouseRotateOrScale", FreeCaller<ToggleRotateScaleModes>() );
 	GlobalCommands_insert( "MouseDragOrTransform", FreeCaller<ToggleDragSkewModes>(), Accelerator( 'Q' ) );
 
