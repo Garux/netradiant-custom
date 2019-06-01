@@ -1416,11 +1416,11 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 			selector.addSelectable( best, &m_selectable_screen );
 		}
 
-		{
-			SelectionIntersection best;
-			Circle_BestPoint( local2view, eClipCullCW, m_circle_sphere.m_vertices.data(), m_circle_sphere.m_vertices.size(), best );
-			selector.addSelectable( best, &m_selectable_sphere );
-		}
+//		{
+//			SelectionIntersection best;
+//			Circle_BestPoint( local2view, eClipCullCW, m_circle_sphere.m_vertices.data(), m_circle_sphere.m_vertices.size(), best );
+//			selector.addSelectable( best, &m_selectable_sphere );
+//		}
 	}
 
 	m_axis_screen = m_pivot.m_axis_screen;

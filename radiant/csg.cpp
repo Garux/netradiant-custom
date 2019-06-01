@@ -791,9 +791,8 @@ void post( const scene::Path& path, scene::Instance& instance ) const {
 				ASSERT_MESSAGE( !brush->empty(), "brush left with no faces after split" );
 			}
 			else
-			// the plane does not intersect this brush
-			if ( !m_split && split.counts[ePlaneBack] != 0 ) {
-				// the brush is "behind" the plane
+			// the plane does not intersect this brush and the brush is in front of the plane
+			if ( !m_split && split.counts[ePlaneFront] != 0 ) {
 				m_gj = true;
 				Path_deleteTop( path );
 			}
