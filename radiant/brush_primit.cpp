@@ -1581,7 +1581,7 @@ double Det3x3( double a00, double a01, double a02,
 		+   a02 * ( a10 * a21 - a11 * a20 );
 }
 
-void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const DoubleVector3 st[3], const DoubleVector3& normal ){
+void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const DoubleVector3 st[3], const DoubleVector3& normal, const bool normalize = true ){
 	double xyI[2], xyJ[2], xyK[2];
 	double stI[2], stJ[2], stK[2];
 	double D, D0, D1, D2;
@@ -1627,7 +1627,7 @@ void BP_from_ST( brushprimit_texdef_t& bp, const DoubleVector3 points[3], const 
 				);
 			bp.coords[i][0] = D0 / D;
 			bp.coords[i][1] = D1 / D;
-			bp.coords[i][2] = fmod( D2 / D, 1.0 );
+			bp.coords[i][2] = normalize? fmod( D2 / D, 1.0 ) : ( D2 / D );
 		}
 //			globalOutputStream() << "BP out: ( " << bp.coords[0][0] << " " << bp.coords[0][1] << " " << bp.coords[0][2] << " ) ( " << bp.coords[1][0] << " " << bp.coords[1][1] << " " << bp.coords[1][2] << " )\n";
 	}
@@ -2169,6 +2169,22 @@ void Texdef_from_ST( TextureProjection& projection, const DoubleVector3 points[3
 	}
 	else if( g_bp_globals.m_texdefTypeId == TEXDEFTYPEID_VALVE ){
 		Valve220_from_BP( projection, plane, width, height );
+	}
+}
+
+void Texdef_Construct_local2tex_from_ST( const DoubleVector3 points[3], const DoubleVector3 st[3], Matrix4& local2tex ){
+	const Plane3 plane( plane3_for_points( points ) );
+	brushprimit_texdef_t bp;
+	BP_from_ST( bp, points, st, plane.normal(), false );
+
+	BPTexdef_toTransform( bp, local2tex );
+	{
+		// Texdef_basisForNormal
+		Matrix4 basis = g_matrix4_identity;
+		ComputeAxisBase( plane.normal(), vector4_to_vector3( basis.x() ), vector4_to_vector3( basis.y() ) );
+		vector4_to_vector3( basis.z() ) = plane.normal();
+		matrix4_transpose( basis );
+		matrix4_multiply_by_matrix4( local2tex, basis );
 	}
 }
 

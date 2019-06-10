@@ -604,42 +604,52 @@ void Patch::SetTextureRepeat( float s, float t ){
    }
  */
 
-Vector3 Patch::Calculate_AvgNormal(){
-	Vector3 wDir( 0, 0, 0 ), hDir( 0, 0, 0 );
-	for ( std::size_t i = 0; i < m_height; ++i ){
-		wDir += ctrlAt( i, m_width - 1 ).m_vertex - ctrlAt( i, 0 ).m_vertex;
+void Patch::Calculate_AvgAxes( Vector3& wDir, Vector3& hDir ) const {
+	wDir = hDir = g_vector3_identity;
+	for ( std::size_t r = 0; r < m_height; ++r ){
+		wDir += ctrlAt( r, m_width - 1 ).m_vertex - ctrlAt( r, 0 ).m_vertex;
 	}
-	for ( std::size_t i = 0; i < m_width; ++i ){
-		hDir += ctrlAt( m_height - 1, i ).m_vertex - ctrlAt( 0, i ).m_vertex;
+	for ( std::size_t c = 0; c < m_width; ++c ){
+		hDir += ctrlAt( m_height - 1, c ).m_vertex - ctrlAt( 0, c ).m_vertex;
 	}
-	/* fallback */
-	if ( vector3_equal_epsilon( wDir, g_vector3_identity, 1e-3f ) || vector3_equal_epsilon( hDir, g_vector3_identity, 1e-3f ) ) {
-		for ( std::size_t i = 0; i < m_height; ++i ){
-			for ( std::size_t j = 0; j < m_width - 1; ++j ){
-				wDir = ctrlAt( i, j + 1 ).m_vertex - ctrlAt( i, j ).m_vertex;
-				if ( !vector3_equal_epsilon( wDir, g_vector3_identity, 1e-3f ) )
-					goto break1;
-			}
-		}
-break1:
-		for ( std::size_t i = 0; i < m_width; ++i ){
-			for ( std::size_t j = 0; j < m_height; ++j ){
-				hDir = ctrlAt( j + 1, i ).m_vertex - ctrlAt( j, i ).m_vertex;
-				if ( !vector3_equal_epsilon( hDir, g_vector3_identity, 1e-3f ) )
-					goto break2;
+	/* fallback to longest hord */
+	if ( vector3_equal_epsilon( wDir, g_vector3_identity, 1.f ) ){
+		float bestLength = 0;
+		for ( std::size_t r = 0; r < m_height; ++r ){
+			for ( std::size_t c = 0; c < m_width - 1; ++c ){
+				const Vector3 dir = ctrlAt( r, c + 1 ).m_vertex - ctrlAt( r, c ).m_vertex;
+				const float length = vector3_length( dir );
+				if ( length - bestLength > 1 ){
+					bestLength = length;
+					wDir = dir;
+				}
 			}
 		}
 	}
-break2:
+	if( vector3_equal_epsilon( hDir, g_vector3_identity, 1.f ) ){
+		float bestLength = 0;
+		for ( std::size_t c = 0; c < m_width; ++c ){
+			for ( std::size_t r = 0; r < m_height - 1; ++r ){
+				const Vector3 dir = ctrlAt( r + 1, c ).m_vertex - ctrlAt( r, c ).m_vertex;
+				const float length = vector3_length( dir );
+				if ( length - bestLength > 1 ){
+					bestLength = length;
+					hDir = dir;
+				}
+			}
+		}
+	}
 
-	Vector3 normal( vector3_cross( wDir, hDir ) );
-	if ( vector3_equal( normal, g_vector3_identity ) ) {
-		normal = Vector3( 0, 0, 1 );
+	if ( vector3_equal_epsilon( vector3_cross( wDir, hDir ), g_vector3_identity, 0.1f ) ) {
+		wDir = g_vector3_axis_x;
+		hDir = g_vector3_axis_y;
 	}
-	else{
-		vector3_normalise( normal );
-	}
-	return normal;
+}
+
+Vector3 Patch::Calculate_AvgNormal() const {
+	Vector3 wDir, hDir;
+	Calculate_AvgAxes( wDir, hDir );
+	return vector3_normalised( vector3_cross( wDir, hDir ) );
 }
 
 inline int texture_axis( const Vector3& normal ){
@@ -693,16 +703,16 @@ void Patch::NaturalTexture(){
 	undoSave();
 
 	{
-		float fSize = (float)m_state->getTexture().width * Texdef_getDefaultTextureScale();
+		const double texSize = (double)m_state->getTexture().width * Texdef_getDefaultTextureScale();
 
 		double texBest = 0;
 		double tex = 0;
 		PatchControl* pWidth = m_ctrl.data();
-		for ( std::size_t w = 0; w < m_width; w++, pWidth++ )
+		for ( std::size_t w = 0; w < m_width; ++w, ++pWidth )
 		{
 			{
 				PatchControl* pHeight = pWidth;
-				for ( std::size_t h = 0; h < m_height; h++, pHeight += m_width )
+				for ( std::size_t h = 0; h < m_height; ++h, pHeight += m_width )
 					pHeight->m_texcoord[0] = static_cast<float>( tex );
 			}
 
@@ -711,12 +721,11 @@ void Patch::NaturalTexture(){
 			}
 
 			{
-				PatchControl* pHeight = pWidth;
-				for ( std::size_t h = 0; h < m_height; h++, pHeight += m_width )
+				const PatchControl* pHeight = pWidth;
+				for ( std::size_t h = 0; h < m_height; ++h, pHeight += m_width )
 				{
-					Vector3 v( vector3_subtracted( pHeight->m_vertex, ( pHeight + 1 )->m_vertex ) );
-					double length = tex + ( vector3_length( v ) / fSize );
-					if ( fabs( length ) > texBest ) {
+					const double length = tex + ( vector3_length( pHeight->m_vertex - ( pHeight + 1 )->m_vertex ) / texSize );
+					if ( fabs( length ) > fabs( texBest ) ) { // comparing abs values supports possible negative Texdef_getDefaultTextureScale()
 						texBest = length;
 					}
 				}
@@ -727,16 +736,16 @@ void Patch::NaturalTexture(){
 	}
 
 	{
-		float fSize = -(float)m_state->getTexture().height * Texdef_getDefaultTextureScale();
+		const double texSize = -(double)m_state->getTexture().height * Texdef_getDefaultTextureScale();
 
 		double texBest = 0;
 		double tex = 0;
 		PatchControl* pHeight = m_ctrl.data();
-		for ( std::size_t h = 0; h < m_height; h++, pHeight += m_width )
+		for ( std::size_t h = 0; h < m_height; ++h, pHeight += m_width )
 		{
 			{
 				PatchControl* pWidth = pHeight;
-				for ( std::size_t w = 0; w < m_width; w++, pWidth++ )
+				for ( std::size_t w = 0; w < m_width; ++w, ++pWidth )
 					pWidth->m_texcoord[1] = static_cast<float>( tex );
 			}
 
@@ -745,12 +754,11 @@ void Patch::NaturalTexture(){
 			}
 
 			{
-				PatchControl* pWidth = pHeight;
-				for ( std::size_t w = 0; w < m_width; w++, pWidth++ )
+				const PatchControl* pWidth = pHeight;
+				for ( std::size_t w = 0; w < m_width; ++w, ++pWidth )
 				{
-					Vector3 v( vector3_subtracted( pWidth->m_vertex, ( pWidth + m_width )->m_vertex ) );
-					double length = tex + ( vector3_length( v ) / fSize );
-					if ( fabs( length ) > texBest ) {
+					const double length = tex + ( vector3_length( pWidth->m_vertex - ( pWidth + m_width )->m_vertex ) / texSize );
+					if ( fabs( length ) > fabs( texBest ) ) {
 						texBest = length;
 					}
 				}

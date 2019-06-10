@@ -59,6 +59,12 @@ BasicVector3( const BasicVector3<OtherElement>& other ){
 	y() = static_cast<Element>( other.y() );
 	z() = static_cast<Element>( other.z() );
 }
+template<typename OtherElement>
+explicit BasicVector3( const BasicVector2<OtherElement>& vec2 ){
+	x() = static_cast<Element>( vec2.x() );
+	y() = static_cast<Element>( vec2.y() );
+	z() = 0;
+}
 BasicVector3( const Element& x_, const Element& y_, const Element& z_ ){
 	x() = x_;
 	y() = y_;

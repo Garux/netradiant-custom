@@ -106,6 +106,7 @@ void Texdef_ProjectTexture( TextureProjection& projection, std::size_t width, st
 void Texdef_FitTexture( TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, const Winding& w, float s_repeat, float t_repeat, bool only_dimension );
 void Texdef_Construct_local2tex( const TextureProjection& projection, std::size_t width, std::size_t height, const Vector3& normal, Matrix4& local2tex );
 void Texdef_Construct_local2tex4projection( const texdef_t& texdef, std::size_t width, std::size_t height, const Vector3& normal, const Vector3* direction, Matrix4& local2tex );
+void Texdef_Construct_local2tex_from_ST( const DoubleVector3 points[3], const DoubleVector3 st[3], Matrix4& local2tex );
 void Texdef_EmitTextureCoordinates( const TextureProjection& projection, std::size_t width, std::size_t height, Winding& w, const Vector3& normal, const Matrix4& localToWorld );
 
 void ShiftScaleRotate_fromFace( texdef_t& shiftScaleRotate, const TextureProjection& projection );

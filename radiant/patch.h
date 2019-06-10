@@ -930,7 +930,8 @@ void RotateTexture( float angle );
 void SetTextureRepeat( float s, float t ); // call with s=1 t=1 for FIT
 void CapTexture();
 void NaturalTexture();
-Vector3 Calculate_AvgNormal();
+Vector3 Calculate_AvgNormal() const;
+void Calculate_AvgAxes( Vector3& wDir, Vector3& hDir ) const;
 void ProjectTexture( TextureProjection projection, const Vector3& normal );
 void ProjectTexture( const texdef_t& texdef, const Vector3* direction );
 void createThickenedOpposite(const Patch& sourcePatch, const float thickness, const int axis, bool& no12, bool& no34 );
