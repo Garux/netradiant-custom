@@ -701,6 +701,14 @@ GLFont *glfont_create( const char* font_string ){
 		g_object_get( settings, "gtk-font-name", &fontname, NULL );
 		font = tryFont( fontname, font_desc, font_list_base );
 		g_free( fontname );
+
+		if( !font ){
+			const char* guessFonts[] = { "serif 8", "sans 8", "clean 8", "courier 8", "helvetica 8", "arial 8", "dejavu sans 8" };
+			for( const auto str : guessFonts ){
+				if( ( font = tryFont( str, font_desc, font_list_base ) ) )
+					break;
+			}
+		}
 	} while ( 0 );
 
 	PangoFontMap *fontmap = 0;
@@ -730,6 +738,8 @@ GLFont *glfont_create( const char* font_string ){
 		fontsize /= 2; //*15/11 is equal to bitmap callLists size
 		pango_font_description_set_size( font_desc, fontsize );
 		pango_context_set_font_description( ft2_context, font_desc );
+
+//		globalOutputStream() << pango_font_description_get_family( font_desc ) << " " << pango_font_description_get_size( font_desc ) << "\n";
 
 //		g_object_unref( G_OBJECT( ft2_context ) );
 //		g_object_unref( G_OBJECT( fontmap ) );
