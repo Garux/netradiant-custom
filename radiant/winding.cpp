@@ -368,10 +368,10 @@ void Winding_Centroid( const Winding& winding, const Plane3& plane, Vector3& cen
 	const indexremap_t remap = indexremap_for_projectionaxis( axis );
 	for ( std::size_t i = winding.numpoints - 1, j = 0; j < winding.numpoints; i = j, ++j )
 	{
-		const double ai = winding[i].vertex[remap.x] * winding[j].vertex[remap.y] - winding[j].vertex[remap.x] * winding[i].vertex[remap.y];
+		const double ai = static_cast<double>( winding[i].vertex[remap.x] ) * winding[j].vertex[remap.y] - static_cast<double>( winding[j].vertex[remap.x] ) * winding[i].vertex[remap.y];
 		area2 += ai;
-		x_sum += ( winding[j].vertex[remap.x] + winding[i].vertex[remap.x] ) * ai;
-		y_sum += ( winding[j].vertex[remap.y] + winding[i].vertex[remap.y] ) * ai;
+		x_sum += ( static_cast<double>( winding[j].vertex[remap.x] ) + winding[i].vertex[remap.x] ) * ai;
+		y_sum += ( static_cast<double>( winding[j].vertex[remap.y] ) + winding[i].vertex[remap.y] ) * ai;
 	}
 
 	centroid[remap.x] = static_cast<float>( x_sum / ( 3 * area2 ) );
