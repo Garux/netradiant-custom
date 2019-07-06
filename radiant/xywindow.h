@@ -87,9 +87,11 @@ guint m_exposeHandler;
 
 DeferredDraw m_deferredDraw;
 DeferredMotion m_deferred_motion;
-public:
+
 FBO* m_fbo;
+public:
 FBO* fbo_get();
+
 GtkWindow* m_parent;
 XYWnd();
 ~XYWnd();
@@ -101,7 +103,6 @@ GtkWidget* GetWidget(){
 	return m_gl_widget;
 }
 
-public:
 SelectionSystemWindowObserver* m_window_observer;
 XORRectangle m_XORRectangle;
 WindowPositionTracker m_positionTracker;

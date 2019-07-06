@@ -202,12 +202,12 @@ static picoModel_t *_ms3d_load( PM_PARAMS_LOAD ){
 	picoModel_t    *model;
 	unsigned char  *bufptr, *bufptr0;
 	int shaderRefs[ MS3D_MAX_GROUPS ];
-	int numGroups;
-	int numMaterials;
+	int numGroups = 0;
+	int numMaterials = 0;
 //	unsigned char  *ptrToGroups;
-	int numVerts;
+	int numVerts = 0;
 	unsigned char  *ptrToVerts;
-	int numTris;
+	int numTris = 0;
 	unsigned char  *ptrToTris;
 	int i,k,m;
 

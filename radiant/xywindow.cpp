@@ -602,10 +602,10 @@ XYWnd::XYWnd() :
 	m_gl_widget( glwidget_new( FALSE ) ),
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
 	m_deferred_motion( xywnd_motion, this ),
+	m_fbo( 0 ),
 	m_parent( 0 ),
 	m_window_observer( NewWindowObserver() ),
-	m_chasemouse_handler( 0 ),
-	m_fbo( 0 )
+	m_chasemouse_handler( 0 )
 {
 	m_bActive = false;
 	m_buttonstate = 0;

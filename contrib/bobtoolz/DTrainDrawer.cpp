@@ -205,7 +205,7 @@ void operator()( scene::Instance& instance ) const {
 				AddSplineControl( control, pSP );
 
 				for ( int j = 2;; j++ ) {
-					char buffer[16];
+					char buffer[32];
 					sprintf( buffer, "control%i", j );
 
 					e.SpawnString( buffer, NULL, &control );
