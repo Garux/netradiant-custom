@@ -29,6 +29,8 @@ Development is focused on smoothing and tweaking editing process.
 * Fully supported editing in 3D view (brush and entity creation, all manipulating tools)
 * Uniform merge algorithm, merging selected brushes, components and clipper points
 * Free and robust vertex editing, also providing abilities to remove and insert vertices
+* UV Tool (edits texture alignment of selected face or patch)
+* Autocaulk
 * Left mouse button click tunnel selector, paint selector
 * Numerous mouse shortcuts (see help->General->Mouse Shortcuts)
 * Focus camera on selected (Tab)
