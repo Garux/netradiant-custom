@@ -176,7 +176,7 @@ static void ProcessAdvertisements( void ) {
 static void SetCloneModelNumbers( void ){
 	int i, j;
 	int models;
-	char modelValue[ 10 ];
+	char modelValue[ 16 ];
 	const char  *value, *value2, *value3;
 
 

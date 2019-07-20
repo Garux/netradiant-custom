@@ -261,7 +261,7 @@ int EmitDrawNode_r( node_t *node ){
 void SetModelNumbers( void ){
 	int i;
 	int models;
-	char value[10];
+	char value[16];
 
 	models = 1;
 	for ( i = 1 ; i < numEntities ; i++ ) {

@@ -1759,7 +1759,7 @@ void CullSides( entity_t *e ){
 					{
 						if ( VectorCompare( w1->p[ 0 ], w2->p[ k ] ) ) {
 							first = k;
-							k = numPoints;
+							break;
 						}
 					}
 					if ( first == -1 ) {

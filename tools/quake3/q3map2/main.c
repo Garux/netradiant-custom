@@ -3459,7 +3459,7 @@ skipEXrefile:
  */
 void PseudoCompileBSP( qboolean need_tree ){
 	int models;
-	char modelValue[10];
+	char modelValue[16];
 	entity_t *entity;
 	face_t *faces;
 	tree_t *tree;
