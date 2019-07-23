@@ -766,6 +766,11 @@ int BSPMain( int argc, char **argv ){
 	char path[ 1024 ], tempSource[ 1024 ];
 	qboolean onlyents = qfalse;
 
+	if ( argc >= 2 && !strcmp( argv[ 1 ], "-bsp" ) ) {
+		Sys_Printf( "-bsp argument unnecessary\n" );
+		argv++;
+		argc--;
+	}
 
 	/* note it */
 	Sys_Printf( "--- BSP ---\n" );
@@ -1050,9 +1055,6 @@ int BSPMain( int argc, char **argv ){
 		else if ( !strcmp( argv[ i ], "-maxarea" ) ) {
 			Sys_Printf( "Max Area face surface generation enabled\n" );
 			maxAreaFaceSurface = qtrue;
-		}
-		else if ( !strcmp( argv[ i ], "-bsp" ) ) {
-			Sys_Printf( "-bsp argument unnecessary\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-noob" ) ) {
 			Sys_Printf( "No oBs!\n" );

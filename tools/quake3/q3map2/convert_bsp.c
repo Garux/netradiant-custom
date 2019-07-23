@@ -152,7 +152,7 @@ int AnalyzeBSP( int argc, char **argv ){
 
 
 	/* arg checking */
-	if ( argc < 1 ) {
+	if ( argc < 2 ) {
 		Sys_Printf( "Usage: q3map -analyze [-lumpswap] [-v] <mapname>\n" );
 		return 0;
 	}
@@ -933,7 +933,7 @@ int ConvertBSPMain( int argc, char **argv ){
 	force_map = qfalse;
 
 	/* arg checking */
-	if ( argc < 1 ) {
+	if ( argc < 2 ) {
 		Sys_Printf( "Usage: q3map -convert [-format <ase|obj|map_bp|map>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
 		return 0;
 	}
