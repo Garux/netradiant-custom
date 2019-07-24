@@ -86,14 +86,16 @@ int main( int argc, char **argv ){
 		/* -help */
 		if ( !strcmp( argv[ i ], "-h" ) || !strcmp( argv[ i ], "--help" )
 			|| !strcmp( argv[ i ], "-help" ) ) {
-			HelpMain( argv[i+1] );
+			HelpMain( ( i + 1 < argc ) ? argv[ i + 1 ] : NULL );
 			return 0;
 		}
 
 		/* -connect */
 		if ( !strcmp( argv[ i ], "-connect" ) ) {
-			argv[ i ] = NULL;
-			i++;
+			if ( ++i >= argc || !argv[ i ] ) {
+				Error( "Out of arguments: No address specified after %s", argv[ i - 1 ] );
+			}
+			argv[ i - 1 ] = NULL;
 			Broadcast_Setup( argv[ i ] );
 			argv[ i ] = NULL;
 		}
@@ -114,8 +116,10 @@ int main( int argc, char **argv ){
 
 		/* patch subdivisions */
 		else if ( !strcmp( argv[ i ], "-subdivisions" ) ) {
-			argv[ i ] = NULL;
-			i++;
+			if ( ++i >= argc || !argv[ i ] ) {
+				Error( "Out of arguments: No value specified after %s", argv[ i - 1 ] );
+			}
+			argv[ i - 1 ] = NULL;
 			patchSubdivisions = atoi( argv[ i ] );
 			argv[ i ] = NULL;
 			if ( patchSubdivisions <= 0 ) {
@@ -125,8 +129,10 @@ int main( int argc, char **argv ){
 
 		/* threads */
 		else if ( !strcmp( argv[ i ], "-threads" ) ) {
-			argv[ i ] = NULL;
-			i++;
+			if ( ++i >= argc || !argv[ i ] ) {
+				Error( "Out of arguments: No value specified after %s", argv[ i - 1 ] );
+			}
+			argv[ i - 1 ] = NULL;
 			numthreads = atoi( argv[ i ] );
 			argv[ i ] = NULL;
 		}

@@ -412,7 +412,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -game */
 		if ( strcmp( argv[ i ], "-game" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No game specified after %s", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
@@ -425,7 +425,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -fs_forbiddenpath */
 		else if ( strcmp( argv[ i ], "-fs_forbiddenpath" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
@@ -439,7 +439,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -fs_basepath */
 		else if ( strcmp( argv[ i ], "-fs_basepath" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
@@ -449,7 +449,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -fs_game */
 		else if ( strcmp( argv[ i ], "-fs_game" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
@@ -459,7 +459,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -fs_home */
 		else if ( strcmp( argv[ i ], "-fs_home" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
@@ -469,7 +469,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -fs_homebase */
 		else if ( strcmp( argv[ i ], "-fs_homebase" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
@@ -479,7 +479,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -fs_homepath - sets both of them */
 		else if ( strcmp( argv[ i ], "-fs_homepath" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
@@ -490,7 +490,7 @@ void InitPaths( int *argc, char **argv ){
 
 		/* -fs_pakpath */
 		else if ( strcmp( argv[ i ], "-fs_pakpath" ) == 0 ) {
-			if ( ++i >= *argc ) {
+			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
 			argv[ i - 1 ] = NULL;
