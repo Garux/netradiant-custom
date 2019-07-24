@@ -1148,7 +1148,7 @@ int VisMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ], "-v" ) ) {
 			debugCluster = qtrue;
-			Sys_Printf( "Extra verbous mode enabled\n" );
+			Sys_Printf( "Extra verbose mode enabled\n" );
 		}
 		else if ( !strcmp( argv[i], "-tmpin" ) ) {
 			strcpy( inbase, "/tmp" );
