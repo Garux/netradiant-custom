@@ -2426,13 +2426,7 @@ int LightMain( int argc, char **argv ){
 		/* Lighting contrast */
 		else if( !strcmp( argv[ i ], "-contrast" ) ){
 			f = atof( argv[ i + 1 ] );
-			lightmapContrast = f;
-			if( lightmapContrast > 255 ){
-				lightmapContrast = 255;
-			}
-			else if( lightmapContrast < -255 ){
-				lightmapContrast = -255;
-			}
+			lightmapContrast = f > 255? 255 : f < -255? -255 : f;
 			Sys_Printf( "Lighting contrast set to %f\n", lightmapContrast );
 			i++;
 			/* change to factor in range of 0 to 129.5 */

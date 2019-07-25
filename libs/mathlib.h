@@ -80,6 +80,7 @@ extern const vec3_t g_vec3_axis_z;
 #define VectorNegate( a,b ) ( ( b )[0] = -( a )[0],( b )[1] = -( a )[1],( b )[2] = -( a )[2] )
 #define CrossProduct( a,b,c ) ( ( c )[0] = ( a )[1] * ( b )[2] - ( a )[2] * ( b )[1],( c )[1] = ( a )[2] * ( b )[0] - ( a )[0] * ( b )[2],( c )[2] = ( a )[0] * ( b )[1] - ( a )[1] * ( b )[0] )
 #define VectorClear( x ) ( ( x )[0] = ( x )[1] = ( x )[2] = 0 )
+#define VectorMax( x ) (   ( ( x )[0] > ( x )[1] ) ? ( ( ( x )[0] > ( x )[2] ) ? ( x )[0] : ( x )[2] ) : ( ( ( x )[1] > ( x )[2] ) ? ( x )[1] : ( x )[2] )   )
 
 #define FLOAT_SNAP( f,snap ) ( (float)( floor( ( f ) / ( snap ) + 0.5 ) * ( snap ) ) )
 #define FLOAT_TO_INTEGER( f ) ( (float)( floor( ( f ) + 0.5 ) ) )

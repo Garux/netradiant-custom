@@ -77,13 +77,7 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 
 	if ( lightmapExposure == 0 ) {
 		/* clamp with color normalization */
-		max = sample[ 0 ];
-		if ( sample[ 1 ] > max ) {
-			max = sample[ 1 ];
-		}
-		if ( sample[ 2 ] > max ) {
-			max = sample[ 2 ];
-		}
+		max = VectorMax( sample );
 		if ( max > 255.0f ) {
 			VectorScale( sample, ( 255.0f / max ), sample );
 		}
@@ -93,13 +87,7 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 		inv = 1.f / lightmapExposure;
 		//Exposure
 
-		max = sample[ 0 ];
-		if ( sample[ 1 ] > max ) {
-			max = sample[ 1 ];
-		}
-		if ( sample[ 2 ] > max ) {
-			max = sample[ 2 ];
-		}
+		max = VectorMax( sample );
 
 		dif = ( 1 -  exp( -max * inv ) )  *  255;
 
@@ -129,12 +117,10 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 				sample[i] = 0;
 			}
 		}
-		if ( ( sample[0] > 255 ) || ( sample[1] > 255 ) || ( sample[2] > 255 ) ) {
-			max = sample[0] > sample[1] ? sample[0] : sample[1];
-			max = max > sample[2] ? max : sample[2];
-			sample[0] = sample[0] * 255 / max;
-			sample[1] = sample[1] * 255 / max;
-			sample[2] = sample[2] * 255 / max;
+		/* clamp with color normalization */
+		max = VectorMax( sample );
+		if ( max > 255.0f ) {
+			VectorScale( sample, ( 255.0f / max ), sample );
 		}
 	}
 
