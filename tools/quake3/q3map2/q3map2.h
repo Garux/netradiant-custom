@@ -2393,6 +2393,7 @@ Q_EXTERN int defaultLightSubdivide Q_ASSIGN( 999 );
 
 Q_EXTERN vec3_t ambientColor;
 Q_EXTERN vec3_t minLight, minVertexLight, minGridLight;
+Q_EXTERN float maxLight Q_ASSIGN( 255.f );
 
 Q_EXTERN int                *entitySurface;
 Q_EXTERN vec3_t             *surfaceOrigin;

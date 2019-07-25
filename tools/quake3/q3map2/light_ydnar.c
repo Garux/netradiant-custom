@@ -78,8 +78,8 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 	if ( lightmapExposure == 0 ) {
 		/* clamp with color normalization */
 		max = VectorMax( sample );
-		if ( max > 255.0f ) {
-			VectorScale( sample, ( 255.0f / max ), sample );
+		if ( max > maxLight ) {
+			VectorScale( sample, ( maxLight / max ), sample );
 		}
 	}
 	else

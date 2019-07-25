@@ -1957,6 +1957,13 @@ void LightWorld( qboolean fastAllocate ){
 		}
 	}
 
+	/* maxlight */
+	value = ValueForKey( &entities[ 0 ], "_maxlight" );
+	if ( value[ 0 ] != '\0' ) {
+		f = atof( value );
+		maxLight = f > 255? 255 : f < 0? 0 : f;
+	}
+
 	/* create world lights */
 	Sys_FPrintf( SYS_VRB, "--- CreateLights ---\n" );
 	CreateEntityLights();
