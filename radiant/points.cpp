@@ -179,6 +179,22 @@ void Pointfile_Delete( void ){
 	file_remove( name.c_str() );
 }
 
+
+void Pointfile_UpdateViews( CPointfile::const_iterator i ){
+	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
+	Camera_setOrigin( camwnd, *i );
+	g_pParentWnd->forEachXYWnd( [i]( XYWnd* xywnd ){
+		xywnd->SetOrigin( *i );
+	} );
+	{
+		Vector3 dir( vector3_normalised( vector3_subtracted( *( ++i ), Camera_getOrigin( camwnd ) ) ) );
+		Vector3 angles( Camera_getAngles( camwnd ) );
+		angles[CAMERA_YAW] = static_cast<float>( radians_to_degrees( atan2( dir[1], dir[0] ) ) );
+		angles[CAMERA_PITCH] = static_cast<float>( radians_to_degrees( asin( dir[2] ) ) );
+		Camera_setAngles( camwnd, angles );
+	}
+}
+
 // advance camera to next point
 void Pointfile_Next( void ){
 	if ( !s_pointfile.shown() ) {
@@ -190,19 +206,7 @@ void Pointfile_Next( void ){
 		return;
 	}
 
-	CPointfile::const_iterator i = ++s_check_point;
-
-
-	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
-	Camera_setOrigin( camwnd, *i );
-	g_pParentWnd->ActiveXY()->SetOrigin( *i );
-	{
-		Vector3 dir( vector3_normalised( vector3_subtracted( *( ++i ), Camera_getOrigin( camwnd ) ) ) );
-		Vector3 angles( Camera_getAngles( camwnd ) );
-		angles[CAMERA_YAW] = static_cast<float>( radians_to_degrees( atan2( dir[1], dir[0] ) ) );
-		angles[CAMERA_PITCH] = static_cast<float>( radians_to_degrees( asin( dir[2] ) ) );
-		Camera_setAngles( camwnd, angles );
-	}
+	Pointfile_UpdateViews( ++s_check_point );
 }
 
 // advance camera to previous point
@@ -216,18 +220,7 @@ void Pointfile_Prev( void ){
 		return;
 	}
 
-	CPointfile::const_iterator i = --s_check_point;
-
-	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
-	Camera_setOrigin( camwnd, *i );
-	g_pParentWnd->ActiveXY()->SetOrigin( *i );
-	{
-		Vector3 dir( vector3_normalised( vector3_subtracted( *( ++i ), Camera_getOrigin( camwnd ) ) ) );
-		Vector3 angles( Camera_getAngles( camwnd ) );
-		angles[CAMERA_YAW] = static_cast<float>( radians_to_degrees( atan2( dir[1], dir[0] ) ) );
-		angles[CAMERA_PITCH] = static_cast<float>( radians_to_degrees( asin( dir[2] ) ) );
-		Camera_setAngles( camwnd, angles );
-	}
+	Pointfile_UpdateViews( --s_check_point );
 }
 
 int LoadFile( const char *filename, void **bufferptr ){

@@ -489,8 +489,9 @@ void FocusViews( const Vector3& point, float angle ){
 	angles[CAMERA_YAW] = angle;
 	Camera_setAngles( camwnd, angles );
 
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
-	xywnd->SetOrigin( point );
+	g_pParentWnd->forEachXYWnd( [&point]( XYWnd* xywnd ){
+		xywnd->SetOrigin( point );
+	} );
 }
 
 #include "stringio.h"
@@ -2154,7 +2155,9 @@ void SelectBrush( int entitynum, int brushnum ){
 		Selectable* selectable = Instance_getSelectable( *instance );
 		ASSERT_MESSAGE( selectable != 0, "SelectBrush: path not selectable" );
 		selectable->setSelected( true );
-		g_pParentWnd->GetXYWnd()->SetOrigin( instance->worldAABB().origin );
+		g_pParentWnd->forEachXYWnd( [instance]( XYWnd* xywnd ){
+			xywnd->SetOrigin( instance->worldAABB().origin );
+		} );
 	}
 }
 
