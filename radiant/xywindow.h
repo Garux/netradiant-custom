@@ -77,6 +77,7 @@ private:
 };
 
 #include "timer.h"
+#include "gtkutil/idledraw.h"
 class FBO;
 
 class XYWnd
@@ -86,6 +87,7 @@ guint m_sizeHandler;
 guint m_exposeHandler;
 
 DeferredDraw m_deferredDraw;
+IdleDraw m_deferredOverlayDraw;
 DeferredMotion m_deferred_motion;
 
 FBO* m_fbo;
@@ -120,8 +122,10 @@ void SetOrigin( const Vector3& origin );
 void Scroll( int x, int y );
 
 void XY_Draw();
-bool XY_Draw_Overlay_start();
-void XY_Draw_Overlay_finish();
+bool overlayStart();
+void overlayFinish();
+void overlayDraw();
+void overlayUpdate();
 void DrawCameraIcon( const Vector3& origin, const Vector3& angles );
 void XY_DrawBlockGrid();
 void XY_DrawAxis();
@@ -153,16 +157,13 @@ void ZoomOut();
 void ZoomInWithMouse( int pointx, int pointy );
 void FocusOnBounds( AABB& bounds );
 
-void RenderActive();
 void SetActive( bool b ){
 	m_bActive = b;
-	RenderActive();
+	overlayUpdate();
 };
 bool Active(){
 	return m_bActive;
 };
-void UpdateCameraIcon();
-void UpdateCameraIcon_();
 
 void SetCustomPivotOrigin( int pointx, int pointy );
 

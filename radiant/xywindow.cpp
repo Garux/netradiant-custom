@@ -481,12 +481,18 @@ bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
 // XYWnd class
 Shader* XYWnd::m_state_selected = 0;
 
-bool XYWnd::XY_Draw_Overlay_start(){
+//! todo get rid of this completely; is needed for smooth navigation in camera (swapbuffers in overlay update for camera icon takes odd time in certain environments)
+#if (defined _M_IX86 || defined __i386__)
+#define OVERLAY_GL_FRONT_DRAW_HACK
+#endif
+bool XYWnd::overlayStart(){
 	if ( GTK_WIDGET_VISIBLE( m_gl_widget ) ) {
 		if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
 			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 				GlobalOpenGL_debugAssertNoErrors();
+#ifdef OVERLAY_GL_FRONT_DRAW_HACK
 				glDrawBuffer( GL_FRONT );
+#endif
 				fbo_get()->blit();
 				return true;
 			}
@@ -494,17 +500,115 @@ bool XYWnd::XY_Draw_Overlay_start(){
 	}
 	return false;
 }
-void XYWnd::XY_Draw_Overlay_finish(){
+void XYWnd::overlayFinish(){
+#ifdef OVERLAY_GL_FRONT_DRAW_HACK
 	glDrawBuffer( GL_BACK );
+#endif
 	GlobalOpenGL_debugAssertNoErrors();
+#ifdef OVERLAY_GL_FRONT_DRAW_HACK
 	glwidget_make_current( m_gl_widget );
+#else
+	glwidget_swap_buffers( m_gl_widget );
+#endif
+}
+void XYWnd::overlayUpdate(){
+	m_deferredOverlayDraw.queueDraw();
+}
+void XYWnd::overlayDraw(){
+	glViewport( 0, 0, m_nWidth, m_nHeight );
+
+	glDisable( GL_LINE_STIPPLE );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	glDisableClientState( GL_NORMAL_ARRAY );
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisable( GL_TEXTURE_2D );
+	glDisable( GL_LIGHTING );
+	glDisable( GL_COLOR_MATERIAL );
+	glDisable( GL_DEPTH_TEST );
+	glDisable( GL_TEXTURE_1D );
+
+//	glDisable( GL_BLEND );
+	glLineWidth( 1 );
+
+	if ( g_xywindow_globals_private.show_outline && Active() ) {
+		glMatrixMode( GL_PROJECTION );
+		glLoadIdentity();
+		glOrtho( 0, m_nWidth, 0, m_nHeight, 0, 1 );
+
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity();
+
+		// four view mode doesn't colorize
+		glColor3fv( vector3_to_array( ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit )? g_xywindow_globals.color_viewname
+																							: m_viewType == YZ? g_xywindow_globals.AxisColorX
+																							: m_viewType == XZ? g_xywindow_globals.AxisColorY
+																							: g_xywindow_globals.AxisColorZ ) );
+		glBegin( GL_LINE_LOOP );
+		glVertex2f( 0.5, 0.5 );
+		glVertex2f( m_nWidth - 0.5, 0.5 );
+		glVertex2f( m_nWidth - 0.5, m_nHeight - 0.5 );
+		glVertex2f( 0.5, m_nHeight - 0.5 );
+		glEnd();
+	}
+
+	{
+		int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
+		int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+
+		glMatrixMode( GL_PROJECTION );
+		glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
+
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity();
+		glScalef( m_fScale, m_fScale, 1 );
+		glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
+		DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
+	}
+
+	if ( g_bCrossHairs ) {
+		glMatrixMode( GL_PROJECTION );
+		glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
+
+		glMatrixMode( GL_MODELVIEW );
+		glLoadMatrixf( reinterpret_cast<const float*>( &m_modelview ) );
+
+		glColor4f( 0.2f, 0.9f, 0.2f, 0.8f );
+		glBegin( GL_LINES );
+		if ( m_viewType == XY ) {
+			glVertex2f( 2.0f * g_MinWorldCoord, m_mousePosition[1] );
+			glVertex2f( 2.0f * g_MaxWorldCoord, m_mousePosition[1] );
+			glVertex2f( m_mousePosition[0], 2.0f * g_MinWorldCoord );
+			glVertex2f( m_mousePosition[0], 2.0f * g_MaxWorldCoord );
+		}
+		else if ( m_viewType == YZ ) {
+			glVertex3f( m_mousePosition[0], 2.0f * g_MinWorldCoord, m_mousePosition[2] );
+			glVertex3f( m_mousePosition[0], 2.0f * g_MaxWorldCoord, m_mousePosition[2] );
+			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MinWorldCoord );
+			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MaxWorldCoord );
+		}
+		else
+		{
+			glVertex3f( 2.0f * g_MinWorldCoord, m_mousePosition[1], m_mousePosition[2] );
+			glVertex3f( 2.0f * g_MaxWorldCoord, m_mousePosition[1], m_mousePosition[2] );
+			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MinWorldCoord );
+			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MaxWorldCoord );
+		}
+		glEnd();
+	}
 }
 
 void xy_update_xor_rectangle( XYWnd& self, rect_t area ){
-	if ( self.XY_Draw_Overlay_start() ) {
-		self.UpdateCameraIcon_();
+	if ( self.overlayStart() ) {
+		self.overlayDraw();
 		self.m_XORRectangle.set( area, self.Width(), self.Height() );
-		self.XY_Draw_Overlay_finish();
+		self.overlayFinish();
+	}
+}
+
+void xy_update_overlay( XYWnd& self ){
+	if ( self.overlayStart() ) {
+		self.overlayDraw();
+		self.overlayFinish();
 	}
 }
 
@@ -595,12 +699,13 @@ gboolean xywnd_expose( GtkWidget* widget, GdkEventExpose* event, XYWnd* xywnd ){
 
 
 void XYWnd_CameraMoved( XYWnd& xywnd ){
-	xywnd.UpdateCameraIcon();
+	xywnd.overlayUpdate();
 }
 
 XYWnd::XYWnd() :
 	m_gl_widget( glwidget_new( FALSE ) ),
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
+	m_deferredOverlayDraw( ReferenceCaller<XYWnd, xy_update_overlay>( *this ) ),
 	m_deferred_motion( xywnd_motion, this ),
 	m_fbo( 0 ),
 	m_parent( 0 ),
@@ -1143,6 +1248,11 @@ void XYWnd::XY_MouseUp( int x, int y, unsigned int buttons ){
 }
 
 void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
+	{
+		m_mousePosition[0] = m_mousePosition[1] = m_mousePosition[2] = 0.0;
+		XY_ToPoint( x, y, m_mousePosition );
+		XY_SnapToGrid( m_mousePosition );
+	}
 	// rbutton = drag xy origin
 	if ( m_move_started ) {
 	}
@@ -1174,10 +1284,6 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 		m_window_observer->onMouseMotion( WindowVector( x, y ), modifiers_for_flags( buttons ) );
 
 		{
-			m_mousePosition[0] = m_mousePosition[1] = m_mousePosition[2] = 0.0;
-			XY_ToPoint( x, y, m_mousePosition );
-			XY_SnapToGrid( m_mousePosition );
-
 			StringOutputStream status( 64 );
 			status << "x:: " << FloatFormat( m_mousePosition[0], 6, 1 )
 				<< "  y:: " << FloatFormat( m_mousePosition[1], 6, 1 )
@@ -1185,8 +1291,9 @@ void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
 			g_pParentWnd->SetStatusText( c_status_position, status.c_str() );
 		}
 
-		if ( g_bCrossHairs ) {
-			XYWnd_Update( *this );
+		if ( g_bCrossHairs && button_for_flags( buttons ) == c_buttonInvalid ) { // don't update with a button pressed, observer calls update itself
+//			XYWnd_Update( *this );
+			overlayUpdate();
 		}
 	}
 }
@@ -1399,151 +1506,49 @@ double two_to_the_power( int power ){
 }
 
 void XYWnd::XY_DrawAxis( void ){
-	if ( g_xywindow_globals_private.show_axis ) {
-		const char g_AxisName[3] = { 'X', 'Y', 'Z' };
-		const int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-		const int nDim2 = ( m_viewType == XY ) ? 1 : 2;
-		const float w = ( m_nWidth / 2 / m_fScale );
-		const float h = ( m_nHeight / 2 / m_fScale );
+	const char g_AxisName[3] = { 'X', 'Y', 'Z' };
+	const int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
+	const int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	const float w = ( m_nWidth / 2 / m_fScale );
+	const float h = ( m_nHeight / 2 / m_fScale );
 
-		Vector3 colourX = ( m_viewType == YZ ) ? g_xywindow_globals.AxisColorY : g_xywindow_globals.AxisColorX;
-		Vector3 colourY = ( m_viewType == XY ) ? g_xywindow_globals.AxisColorY : g_xywindow_globals.AxisColorZ;
+	Vector3 colourX = ( m_viewType == YZ ) ? g_xywindow_globals.AxisColorY : g_xywindow_globals.AxisColorX;
+	Vector3 colourY = ( m_viewType == XY ) ? g_xywindow_globals.AxisColorY : g_xywindow_globals.AxisColorZ;
 #if 0 //gray for nonActive
-		if( !Active() ){
-			float grayX = vector3_dot( colourX, Vector3( 0.2989, 0.5870, 0.1140 ) );
-			float grayY = vector3_dot( colourY, Vector3( 0.2989, 0.5870, 0.1140 ) );
-			colourX[0] = colourX[1] = colourX[2] = grayX;
-			colourY[0] = colourY[1] = colourY[2] = grayY;
-		}
-#endif
-		// draw two lines with corresponding axis colors to highlight current view
-		// horizontal line: nDim1 color
-		glLineWidth( 2 );
-		glBegin( GL_LINES );
-		glColor3fv( vector3_to_array( colourX ) );
-		glVertex2f( m_vOrigin[nDim1] - w + 40 / m_fScale, m_vOrigin[nDim2] + h - 45 / m_fScale );
-		glVertex2f( m_vOrigin[nDim1] - w + 65 / m_fScale, m_vOrigin[nDim2] + h - 45 / m_fScale );
-		glVertex2f( 0, 0 );
-		glVertex2f( 32 / m_fScale, 0 );
-		glColor3fv( vector3_to_array( colourY ) );
-		glVertex2f( m_vOrigin[nDim1] - w + 40 / m_fScale, m_vOrigin[nDim2] + h - 45 / m_fScale );
-		glVertex2f( m_vOrigin[nDim1] - w + 40 / m_fScale, m_vOrigin[nDim2] + h - 20 / m_fScale );
-		glVertex2f( 0, 0 );
-		glVertex2f( 0, 32 / m_fScale );
-		glEnd();
-		glLineWidth( 1 );
-		// now print axis symbols
-		glColor3fv( vector3_to_array( colourX ) );
-		glRasterPos2f( m_vOrigin[nDim1] - w + 55 / m_fScale, m_vOrigin[nDim2] + h - 55 / m_fScale );
-		GlobalOpenGL().drawChar( g_AxisName[nDim1] );
-		glRasterPos2f( 28 / m_fScale, -10 / m_fScale );
-		GlobalOpenGL().drawChar( g_AxisName[nDim1] );
-		glColor3fv( vector3_to_array( colourY ) );
-		glRasterPos2f( m_vOrigin[nDim1] - w + 25 / m_fScale, m_vOrigin[nDim2] + h - 30 / m_fScale );
-		GlobalOpenGL().drawChar( g_AxisName[nDim2] );
-		glRasterPos2f( -10 / m_fScale, 28 / m_fScale );
-		GlobalOpenGL().drawChar( g_AxisName[nDim2] );
+	if( !Active() ){
+		float grayX = vector3_dot( colourX, Vector3( 0.2989, 0.5870, 0.1140 ) );
+		float grayY = vector3_dot( colourY, Vector3( 0.2989, 0.5870, 0.1140 ) );
+		colourX[0] = colourX[1] = colourX[2] = grayX;
+		colourY[0] = colourY[1] = colourY[2] = grayY;
 	}
-}
-
-void XYWnd::RenderActive( void ){
-	if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
-		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
-			GlobalOpenGL_debugAssertNoErrors();
-			glDrawBuffer( GL_FRONT );
-
-			if ( g_xywindow_globals_private.show_outline ) {
-				glMatrixMode( GL_PROJECTION );
-				glLoadIdentity();
-				glOrtho( 0, m_nWidth, 0, m_nHeight, 0, 1 );
-
-				glMatrixMode( GL_MODELVIEW );
-				glLoadIdentity();
-
-				if( !Active() ){ //sorta erase
-					glColor3fv( vector3_to_array( g_xywindow_globals.color_gridmajor ) );
-				}
-				// four view mode doesn't colorize
-				else if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit ) {
-					glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
-				}
-				else
-				{
-					switch ( m_viewType )
-					{
-					case YZ:
-						glColor3fv( vector3_to_array( g_xywindow_globals.AxisColorX ) );
-						break;
-					case XZ:
-						glColor3fv( vector3_to_array( g_xywindow_globals.AxisColorY ) );
-						break;
-					case XY:
-						glColor3fv( vector3_to_array( g_xywindow_globals.AxisColorZ ) );
-						break;
-					}
-				}
-				glBegin( GL_LINE_LOOP );
-				glVertex2f( 0.5, 0.5 );
-				glVertex2f( m_nWidth - 0.5, 1 );
-				glVertex2f( m_nWidth - 0.5, m_nHeight - 0.5 );
-				glVertex2f( 0.5, m_nHeight - 0.5 );
-				glEnd();
-			}
-#if 0 //gray for nonActive
-			// we do this part (the old way) only if show_axis is disabled
-			if ( !g_xywindow_globals_private.show_axis ) {
-				glMatrixMode( GL_PROJECTION );
-				glLoadIdentity();
-				glOrtho( 0, m_nWidth, 0, m_nHeight, 0, 1 );
-
-				glMatrixMode( GL_MODELVIEW );
-				glLoadIdentity();
-
-				if ( Active() ) {
-					glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
-				}
-				else{
-					glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridtext, 1.0f ) ) );
-				}
-
-				glDisable( GL_BLEND );
-				glRasterPos2f( 35, m_nHeight - 20 );
-
-				GlobalOpenGL().drawString( ViewType_getTitle( m_viewType ) );
-			}
-			else{
-				// clear
-				glViewport( 0, 0, m_nWidth, m_nHeight );
-				// set up viewpoint
-				glMatrixMode( GL_PROJECTION );
-				glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
-
-				glMatrixMode( GL_MODELVIEW );
-				glLoadIdentity();
-				glScalef( m_fScale, m_fScale, 1 );
-				int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-				int nDim2 = ( m_viewType == XY ) ? 1 : 2;
-				glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
-
-				glDisable( GL_LINE_STIPPLE );
-				glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-				glDisableClientState( GL_NORMAL_ARRAY );
-				glDisableClientState( GL_COLOR_ARRAY );
-				glDisable( GL_TEXTURE_2D );
-				glDisable( GL_LIGHTING );
-				glDisable( GL_COLOR_MATERIAL );
-				glDisable( GL_DEPTH_TEST );
-				glDisable( GL_TEXTURE_1D );
-				glDisable( GL_BLEND );
-
-				XYWnd::XY_DrawAxis();
-			}
 #endif
-			glDrawBuffer( GL_BACK );
-			GlobalOpenGL_debugAssertNoErrors();
-			glwidget_make_current( m_gl_widget );
-		}
-	}
+	// draw two lines with corresponding axis colors to highlight current view
+	// horizontal line: nDim1 color
+	glLineWidth( 2 );
+	glBegin( GL_LINES );
+	glColor3fv( vector3_to_array( colourX ) );
+	glVertex2f( m_vOrigin[nDim1] - w + 40 / m_fScale, m_vOrigin[nDim2] + h - 45 / m_fScale );
+	glVertex2f( m_vOrigin[nDim1] - w + 65 / m_fScale, m_vOrigin[nDim2] + h - 45 / m_fScale );
+	glVertex2f( 0, 0 );
+	glVertex2f( 32 / m_fScale, 0 );
+	glColor3fv( vector3_to_array( colourY ) );
+	glVertex2f( m_vOrigin[nDim1] - w + 40 / m_fScale, m_vOrigin[nDim2] + h - 45 / m_fScale );
+	glVertex2f( m_vOrigin[nDim1] - w + 40 / m_fScale, m_vOrigin[nDim2] + h - 20 / m_fScale );
+	glVertex2f( 0, 0 );
+	glVertex2f( 0, 32 / m_fScale );
+	glEnd();
+	glLineWidth( 1 );
+	// now print axis symbols
+	glColor3fv( vector3_to_array( colourX ) );
+	glRasterPos2f( m_vOrigin[nDim1] - w + 55 / m_fScale, m_vOrigin[nDim2] + h - 55 / m_fScale );
+	GlobalOpenGL().drawChar( g_AxisName[nDim1] );
+	glRasterPos2f( 28 / m_fScale, -10 / m_fScale );
+	GlobalOpenGL().drawChar( g_AxisName[nDim1] );
+	glColor3fv( vector3_to_array( colourY ) );
+	glRasterPos2f( m_vOrigin[nDim1] - w + 25 / m_fScale, m_vOrigin[nDim2] + h - 30 / m_fScale );
+	GlobalOpenGL().drawChar( g_AxisName[nDim2] );
+	glRasterPos2f( -10 / m_fScale, 28 / m_fScale );
+	GlobalOpenGL().drawChar( g_AxisName[nDim2] );
 }
 
 void XYWnd::XY_DrawGrid( void ) {
@@ -1748,21 +1753,15 @@ void XYWnd::XY_DrawGrid( void ) {
 		}
 
 	}
-	// we do this part (the old way) only if show_axis is disabled
-	if ( !g_xywindow_globals_private.show_axis ) {
-		if ( Active() ) {
-			glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
-		}
-		else{
-			glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridtext, 1.0f ) ) );
-		}
 
+	if ( g_xywindow_globals_private.show_axis ){
+		XY_DrawAxis();
+	}
+	else{
+		glColor3fv( vector3_to_array( Active()? g_xywindow_globals.color_viewname : g_xywindow_globals.color_gridtext ) );
 		glRasterPos2f( m_vOrigin[nDim1] - w + 35 / m_fScale, m_vOrigin[nDim2] + h - 20 / m_fScale );
-
 		GlobalOpenGL().drawString( ViewType_getTitle( m_viewType ) );
 	}
-
-	XYWnd::XY_DrawAxis();
 
 	// show current work zone?
 	// the work zone is used to place dropped points and brushes
@@ -1919,40 +1918,6 @@ void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
 	glVertex3f( x + static_cast<float>( fov * cos( a - c_pi / 4 ) ), y + static_cast<float>( fov * sin( a - c_pi / 4 ) ), 0 );
 	glEnd();
 
-}
-
-void XYWnd::UpdateCameraIcon_(){
-	glViewport( 0, 0, m_nWidth, m_nHeight );
-
-	glMatrixMode( GL_PROJECTION );
-	glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
-
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity();
-
-	glScalef( m_fScale, m_fScale, 1 );
-	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
-	glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
-
-	glDisable( GL_LINE_STIPPLE );
-	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	glDisableClientState( GL_NORMAL_ARRAY );
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisable( GL_TEXTURE_2D );
-	glDisable( GL_LIGHTING );
-	glDisable( GL_COLOR_MATERIAL );
-	glDisable( GL_DEPTH_TEST );
-	glDisable( GL_TEXTURE_1D );
-
-	DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
-}
-
-void XYWnd::UpdateCameraIcon(){
-	if ( XY_Draw_Overlay_start() ) {
-		UpdateCameraIcon_();
-		XY_Draw_Overlay_finish();
-	}
 }
 
 
@@ -2360,31 +2325,6 @@ void XYWnd::XY_Draw(){
 		PaintSizeInfo( nDim1, nDim2 );
 	}
 
-	if ( g_bCrossHairs ) {
-		glColor4f( 0.2f, 0.9f, 0.2f, 0.8f );
-		glBegin( GL_LINES );
-		if ( m_viewType == XY ) {
-			glVertex2f( 2.0f * g_MinWorldCoord, m_mousePosition[1] );
-			glVertex2f( 2.0f * g_MaxWorldCoord, m_mousePosition[1] );
-			glVertex2f( m_mousePosition[0], 2.0f * g_MinWorldCoord );
-			glVertex2f( m_mousePosition[0], 2.0f * g_MaxWorldCoord );
-		}
-		else if ( m_viewType == YZ ) {
-			glVertex3f( m_mousePosition[0], 2.0f * g_MinWorldCoord, m_mousePosition[2] );
-			glVertex3f( m_mousePosition[0], 2.0f * g_MaxWorldCoord, m_mousePosition[2] );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MinWorldCoord );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MaxWorldCoord );
-		}
-		else
-		{
-			glVertex3f( 2.0f * g_MinWorldCoord, m_mousePosition[1], m_mousePosition[2] );
-			glVertex3f( 2.0f * g_MaxWorldCoord, m_mousePosition[1], m_mousePosition[2] );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MinWorldCoord );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MaxWorldCoord );
-		}
-		glEnd();
-	}
-
 	GlobalOpenGL_debugAssertNoErrors();
 
 	{
@@ -2395,44 +2335,6 @@ void XYWnd::XY_Draw(){
 
 		Feedback_draw2D( m_viewType );
 	}
-
-	if ( g_xywindow_globals_private.show_outline ) {
-		if ( Active() ) {
-			glMatrixMode( GL_PROJECTION );
-			glLoadIdentity();
-			glOrtho( 0, m_nWidth, 0, m_nHeight, 0, 1 );
-
-			glMatrixMode( GL_MODELVIEW );
-			glLoadIdentity();
-
-			// four view mode doesn't colorize
-			if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit ) {
-				glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
-			}
-			else
-			{
-				switch ( m_viewType )
-				{
-				case YZ:
-					glColor3fv( vector3_to_array( g_xywindow_globals.AxisColorX ) );
-					break;
-				case XZ:
-					glColor3fv( vector3_to_array( g_xywindow_globals.AxisColorY ) );
-					break;
-				case XY:
-					glColor3fv( vector3_to_array( g_xywindow_globals.AxisColorZ ) );
-					break;
-				}
-			}
-			glBegin( GL_LINE_LOOP );
-			glVertex2f( 0.5, 0.5 );
-			glVertex2f( m_nWidth - 0.5, 1 );
-			glVertex2f( m_nWidth - 0.5, m_nHeight - 0.5 );
-			glVertex2f( 0.5, m_nHeight - 0.5 );
-			glEnd();
-		}
-	}
-
 
 	if( g_camwindow_globals.m_showStats ){
 		glMatrixMode( GL_PROJECTION );
@@ -2457,17 +2359,7 @@ void XYWnd::XY_Draw(){
 
 	fbo_get()->save();
 
-	{
-		// reset modelview
-		glMatrixMode( GL_PROJECTION );
-		glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
-
-		glMatrixMode( GL_MODELVIEW );
-		glLoadIdentity();
-		glScalef( m_fScale, m_fScale, 1 );
-		glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
-		DrawCameraIcon( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
-	}
+	overlayDraw(); //outline camera crosshair rectangle
 
 	GlobalOpenGL_debugAssertNoErrors();
 
