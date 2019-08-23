@@ -97,13 +97,9 @@ void Clipper_modeChanged( bool isClipper ){
 	GdkCursor* cursor = isClipper? g_clipper_cursor : 0;
 
 	if( g_pParentWnd ){
-		XYWnd* xywnd;
-		if( ( xywnd = g_pParentWnd->GetXYWnd() ) )
+		g_pParentWnd->forEachXYWnd( [&cursor]( XYWnd* xywnd ){
 			gdk_window_set_cursor( xywnd->GetWidget()->window, cursor );
-		if( ( xywnd = g_pParentWnd->GetXZWnd() ) )
-			gdk_window_set_cursor( xywnd->GetWidget()->window, cursor );
-		if( ( xywnd = g_pParentWnd->GetYZWnd() ) )
-			gdk_window_set_cursor( xywnd->GetWidget()->window, cursor );
+		} );
 		if( g_pParentWnd->GetCamWnd() )
 			if( !isClipper || gdk_pointer_is_grabbed() == FALSE ) /* prevent cursor change `GDK_BLANK_CURSOR->g_clipper_cursor` during freelook */
 				gdk_window_set_cursor( CamWnd_getWidget( *g_pParentWnd->GetCamWnd() )->window, cursor );

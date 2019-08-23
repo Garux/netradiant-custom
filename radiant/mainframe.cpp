@@ -728,14 +728,7 @@ void Paste(){
 
 void TranslateToCamera(){
 	CamWnd& camwnd = *g_pParentWnd->GetCamWnd();
-	// Work out the delta
-	Vector3 mid;
-	Select_GetMid( mid );
-	//Vector3 delta = vector3_subtracted( vector3_snapped( Camera_getOrigin( camwnd ), GetSnapGridSize() ), mid );
-	Vector3 delta = vector3_snapped( vector3_subtracted( Camera_getOrigin( camwnd ), mid ), GetSnapGridSize() );
-
-	// Move to camera
-	GlobalSelectionSystem().translateSelected( delta );
+	GlobalSelectionSystem().translateSelected( vector3_snapped( Camera_getOrigin( camwnd ) - GlobalSelectionSystem().getBoundsSelected().origin, GetSnapGridSize() ) );
 }
 
 void PasteToCamera(){
@@ -1945,33 +1938,11 @@ void GlobalCamera_UpdateWindow(){
 	}
 }
 
-void XY_UpdateWindow( MainFrame& mainframe ){
-	if ( mainframe.GetXYWnd() != 0 ) {
-		XYWnd_Update( *mainframe.GetXYWnd() );
-	}
-}
-
-void XZ_UpdateWindow( MainFrame& mainframe ){
-	if ( mainframe.GetXZWnd() != 0 ) {
-		XYWnd_Update( *mainframe.GetXZWnd() );
-	}
-}
-
-void YZ_UpdateWindow( MainFrame& mainframe ){
-	if ( mainframe.GetYZWnd() != 0 ) {
-		XYWnd_Update( *mainframe.GetYZWnd() );
-	}
-}
-
-void XY_UpdateAllWindows( MainFrame& mainframe ){
-	XY_UpdateWindow( mainframe );
-	XZ_UpdateWindow( mainframe );
-	YZ_UpdateWindow( mainframe );
-}
-
 void XY_UpdateAllWindows(){
 	if ( g_pParentWnd != 0 ) {
-		XY_UpdateAllWindows( *g_pParentWnd );
+		g_pParentWnd->forEachXYWnd( []( XYWnd* xywnd ){
+			XYWnd_Update( *xywnd );
+		} );
 	}
 }
 
@@ -3321,7 +3292,7 @@ void MainFrame::Create(){
 	SetActiveXY( m_pXYWnd );
 
 	AddGridChangeCallback( SetGridStatusCaller( *this ) );
-	AddGridChangeCallback( ReferenceCaller<MainFrame, XY_UpdateAllWindows>( *this ) );
+	AddGridChangeCallback( FreeCaller<XY_UpdateAllWindows>() );
 
 	g_defaultToolMode = DragMode;
 	g_defaultToolMode();

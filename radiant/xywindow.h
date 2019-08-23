@@ -155,7 +155,7 @@ guint m_zoom_focusOut;
 void ZoomIn();
 void ZoomOut();
 void ZoomInWithMouse( int pointx, int pointy );
-void FocusOnBounds( AABB& bounds );
+void FocusOnBounds( const AABB& bounds );
 
 void SetActive( bool b ){
 	m_bActive = b;

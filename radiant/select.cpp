@@ -539,10 +539,6 @@ void Select_GetBounds( Vector3& mins, Vector3& maxs ){
 	mins = vector3_subtracted( bounds.origin, bounds.extents );
 }
 
-void Select_GetMid( Vector3& mid ){
-	mid = vector3_snapped( GlobalSelectionSystem().getBoundsSelected().origin );
-}
-
 
 void Select_FlipAxis( int axis ){
 	Vector3 flip( 1, 1, 1 );

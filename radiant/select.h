@@ -25,7 +25,6 @@
 #include "math/vector.h"
 
 void Select_GetBounds( Vector3& mins, Vector3& maxs );
-void Select_GetMid( Vector3& mid );
 
 void Select_Delete();
 void Select_Invert();
@@ -33,13 +32,6 @@ void Select_Inside();
 void Select_Touching();
 void Scene_ExpandSelectionToPrimitives();
 void Scene_ExpandSelectionToEntities();
-
-//void Selection_Flipx();
-//void Selection_Flipy();
-//void Selection_Flipz();
-//void Selection_Rotatex();
-//void Selection_Rotatey();
-//void Selection_Rotatez();
 
 
 void Selection_MoveDown();

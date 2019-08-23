@@ -292,7 +292,7 @@ void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
 	}
 }
 
-void XYWnd::FocusOnBounds( AABB& bounds ){
+void XYWnd::FocusOnBounds( const AABB& bounds ){
 	SetOrigin( bounds.origin );
 	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
 	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
@@ -2393,150 +2393,63 @@ void XYWnd::OnEntityCreate( const char* item ){
 
 
 
-void GetCenterPosition( Vector3& position ){
-	if ( GlobalSelectionSystem().countSelected() != 0 ) {
-		Select_GetMid( position );
-	}
-	else
-	{
-		position = Camera_getOrigin( *g_pParentWnd->GetCamWnd() );
-	}
+inline AABB GetCenterBbox(){
+	return ( GlobalSelectionSystem().countSelected() != 0 )?
+			GlobalSelectionSystem().getBoundsSelected() :
+			AABB( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Vector3( 128.f, 128.f, 128.f ) );
 }
 
 void XYWnd_Centralize( XYWnd* xywnd ){
-	Vector3 position;
-	GetCenterPosition( position );
-	xywnd->PositionView( position );
-}
-
-void XY_Split_Centralize(){
-	Vector3 position;
-	GetCenterPosition( position );
-	if ( g_pParentWnd->GetXYWnd() ) {
-		g_pParentWnd->GetXYWnd()->PositionView( position );
-	}
-	if ( g_pParentWnd->GetXZWnd() ) {
-		g_pParentWnd->GetXZWnd()->PositionView( position );
-	}
-	if ( g_pParentWnd->GetYZWnd() ) {
-		g_pParentWnd->GetYZWnd()->PositionView( position );
-	}
+	xywnd->PositionView( GetCenterBbox().origin );
 }
 
 void XY_Centralize(){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating ) {
-		// centralize all
-		XY_Split_Centralize();
-		return;
-	}
-
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
-	XYWnd_Centralize( xywnd );
-}
-
-
-
-void GetSelectionBbox( AABB& bounds ){
-	if ( GlobalSelectionSystem().countSelected() != 0 ) {
-		bounds = GlobalSelectionSystem().getBoundsSelected();
-	}
-	else
-	{
-		bounds = AABB( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ), Vector3( 128.f, 128.f, 128.f ) );
-	}
-}
-
-void XYWnd_Focus( XYWnd* xywnd ){
-	AABB bounds;
-	GetSelectionBbox( bounds );
-	xywnd->FocusOnBounds( bounds );
-}
-
-void XY_Split_Focus(){
-	AABB bounds;
-	GetSelectionBbox( bounds );
-	if ( g_pParentWnd->GetXYWnd() ) {
-		g_pParentWnd->GetXYWnd()->FocusOnBounds( bounds );
-	}
-	if ( g_pParentWnd->GetXZWnd() ) {
-		g_pParentWnd->GetXZWnd()->FocusOnBounds( bounds );
-	}
-	if ( g_pParentWnd->GetYZWnd() ) {
-		g_pParentWnd->GetYZWnd()->FocusOnBounds( bounds );
-	}
+	const Vector3 position( GetCenterBbox().origin );
+	g_pParentWnd->forEachXYWnd( [&position]( XYWnd* xywnd ){
+		xywnd->PositionView( position );
+	} );
 }
 
 void XY_Focus(){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit || g_pParentWnd->CurrentStyle() == MainFrame::eFloating ) {
-		// focus all
-		XY_Split_Focus();
-		return;
-	}
-
-	XYWnd* xywnd = g_pParentWnd->GetXYWnd();
-	XYWnd_Focus( xywnd );
+	const AABB bounds( GetCenterBbox() );
+	g_pParentWnd->forEachXYWnd( [&bounds]( XYWnd* xywnd ){
+		xywnd->FocusOnBounds( bounds );
+	} );
 }
 
 
 
-void XY_TopFrontSide( VIEWTYPE viewtype ){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit ) {
-		// cannot do this in a split window
-		// do something else that the user may want here
-		XY_Split_Centralize();
-		return;
+void XY_SetViewType( VIEWTYPE viewtype ){
+	if ( g_pParentWnd->CurrentStyle() != MainFrame::eSplit ) { // do not want this in a split window
+		XYWnd* xywnd = g_pParentWnd->ActiveXY();
+		xywnd->SetViewType( viewtype );
+		XYWnd_Centralize( xywnd );
 	}
-	XYWnd* xywnd = g_pParentWnd->CurrentStyle() == MainFrame::eFloating ? g_pParentWnd->ActiveXY() : g_pParentWnd->GetXYWnd();
-	xywnd->SetViewType( viewtype );
-	XYWnd_Centralize( xywnd );
+	else{
+		XY_Centralize(); // do something else that the user may want here
+	}
 }
 
 void XY_Top(){
-	XY_TopFrontSide( XY );
+	XY_SetViewType( XY );
 }
 
 void XY_Front(){
-	XY_TopFrontSide( XZ );
+	XY_SetViewType( XZ );
 }
 
 void XY_Side(){
-	XY_TopFrontSide( YZ );
+	XY_SetViewType( YZ );
 }
 
-void XY_NextView( XYWnd* xywnd ){
-	if ( xywnd->GetViewType() == XY ) {
-		xywnd->SetViewType( XZ );
-	}
-	else if ( xywnd->GetViewType() ==  XZ ) {
-		xywnd->SetViewType( YZ );
-	}
-	else{
-		xywnd->SetViewType( XY );
-	}
-	XYWnd_Centralize( xywnd );
-}
-
-void XY_Next(){
-	if ( g_pParentWnd->CurrentStyle() == MainFrame::eSplit ) {
-		// cannot do this in a split window
-		// do something else that the user may want here
-		XY_Split_Centralize();
-		return;
-	}
-	XYWnd* xywnd = g_pParentWnd->CurrentStyle() == MainFrame::eFloating ? g_pParentWnd->ActiveXY() : g_pParentWnd->GetXYWnd();
-	XY_NextView( xywnd );
+void XY_NextView(){
+	XY_SetViewType( static_cast<VIEWTYPE>( ( g_pParentWnd->ActiveXY()->GetViewType() + 2 ) % 3 ) );
 }
 
 void XY_Zoom100(){
-	if ( g_pParentWnd->GetXYWnd() ) {
-		g_pParentWnd->GetXYWnd()->SetScale( 1 );
-	}
-	if ( g_pParentWnd->GetXZWnd() ) {
-		g_pParentWnd->GetXZWnd()->SetScale( 1 );
-	}
-	if ( g_pParentWnd->GetYZWnd() ) {
-		g_pParentWnd->GetYZWnd()->SetScale( 1 );
-	}
+	g_pParentWnd->forEachXYWnd( []( XYWnd* xywnd ){
+		xywnd->SetScale( 1 );
+	} );
 }
 
 void XY_ZoomIn(){
@@ -2737,15 +2650,9 @@ void ToggleShowGrid(){
 
 void MSAAImport( int value ){
 	g_xywindow_globals_private.m_MSAA = value ? 1 << value : value;
-	if ( g_pParentWnd->GetXYWnd() ) {
-		g_pParentWnd->GetXYWnd()->fbo_get()->reset( g_pParentWnd->GetXYWnd()->Width(), g_pParentWnd->GetXYWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
-	}
-	if ( g_pParentWnd->GetXZWnd() ) {
-		g_pParentWnd->GetXZWnd()->fbo_get()->reset( g_pParentWnd->GetXZWnd()->Width(), g_pParentWnd->GetXZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
-	}
-	if ( g_pParentWnd->GetYZWnd() ) {
-		g_pParentWnd->GetYZWnd()->fbo_get()->reset( g_pParentWnd->GetYZWnd()->Width(), g_pParentWnd->GetYZWnd()->Height(), g_xywindow_globals_private.m_MSAA, false );
-	}
+	g_pParentWnd->forEachXYWnd( []( XYWnd* xywnd ){
+		xywnd->fbo_get()->reset( xywnd->Width(), xywnd->Height(), g_xywindow_globals_private.m_MSAA, false );
+	} );
 }
 typedef FreeCaller1<int, MSAAImport> MSAAImportCaller;
 
@@ -2821,7 +2728,7 @@ void XYWindow_Construct(){
 	GlobalToggles_insert( "ToggleView", ToggleShown::ToggleCaller( g_xy_top_shown ), ToggleItem::AddCallbackCaller( g_xy_top_shown.m_item ) );
 	GlobalToggles_insert( "ToggleSideView", ToggleShown::ToggleCaller( g_yz_side_shown ), ToggleItem::AddCallbackCaller( g_yz_side_shown.m_item ) );
 	GlobalToggles_insert( "ToggleFrontView", ToggleShown::ToggleCaller( g_xz_front_shown ), ToggleItem::AddCallbackCaller( g_xz_front_shown.m_item ) );
-	GlobalCommands_insert( "NextView", FreeCaller<XY_Next>(), Accelerator( GDK_Tab, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "NextView", FreeCaller<XY_NextView>(), Accelerator( GDK_Tab, (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "ZoomIn", FreeCaller<XY_ZoomIn>(), Accelerator( GDK_Delete ) );
 	GlobalCommands_insert( "ZoomOut", FreeCaller<XY_ZoomOut>(), Accelerator( GDK_Insert ) );
 	GlobalCommands_insert( "ViewTop", FreeCaller<XY_Top>(), Accelerator( GDK_KP_7 ) );

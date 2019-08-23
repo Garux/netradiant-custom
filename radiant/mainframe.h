@@ -123,6 +123,13 @@ CamWnd* GetCamWnd(){
 	return m_pCamWnd;
 }
 
+template<typename Functor>
+void forEachXYWnd( const Functor& functor ){
+	for( XYWnd* xywnd : { GetXYWnd(), GetXZWnd(), GetYZWnd() } )
+		if( xywnd )
+			functor( xywnd );
+}
+
 EViewStyle CurrentStyle(){
 	return m_nCurrentStyle;
 }
