@@ -240,42 +240,26 @@ inline unsigned int buttons_for_state( guint state ){
 
 
 void XYWnd::SetScale( float f ){
-	m_fScale = f;
-	updateProjection();
-	updateModelview();
-	XYWnd_Update( *this );
+	const float max_scale = 64.f;
+	const float min_scale = std::min( Width(), Height() ) / ( 1.1f * ( g_MaxWorldCoord - g_MinWorldCoord ) );
+	f = std::min( max_scale, std::max( min_scale, f ) );
+	if( !float_equal_epsilon( m_fScale, f, float_mid( m_fScale, f ) * 1e-5f ) ){
+		m_fScale = f;
+		updateProjection();
+		updateModelview();
+		XYWnd_Update( *this );
+	}
 }
 
 void XYWnd::ZoomIn(){
-	float max_scale = 64;
-	float scale = Scale() * 5.0f / 4.0f;
-	if ( scale > max_scale ) {
-		if ( Scale() != max_scale ) {
-			SetScale( max_scale );
-		}
-	}
-	else
-	{
-		SetScale( scale );
-	}
+	SetScale( Scale() * 5.0f / 4.0f );
 }
-
 
 // NOTE: the zoom out factor is 4/5, we could think about customizing it
 //  we don't go below a zoom factor corresponding to 10% of the max world size
 //  (this has to be computed against the window size)
 void XYWnd::ZoomOut(){
-	float min_scale = std::min( Width(), Height() ) / ( 1.1f * ( g_MaxWorldCoord - g_MinWorldCoord ) );
-	float scale = Scale() * 4.0f / 5.0f;
-	if ( scale < min_scale ) {
-		if ( Scale() != min_scale ) {
-			SetScale( min_scale );
-		}
-	}
-	else
-	{
-		SetScale( scale );
-	}
+	SetScale( Scale() * 4.0f / 5.0f );
 }
 
 void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
@@ -2456,9 +2440,6 @@ void XY_ZoomIn(){
 	g_pParentWnd->ActiveXY()->ZoomIn();
 }
 
-// NOTE: the zoom out factor is 4/5, we could think about customizing it
-//  we don't go below a zoom factor corresponding to 10% of the max world size
-//  (this has to be computed against the window size)
 void XY_ZoomOut(){
 	g_pParentWnd->ActiveXY()->ZoomOut();
 }
