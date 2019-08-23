@@ -138,8 +138,7 @@ void NewBrushDrag_Begin( int x, int y );
 void NewBrushDrag( int x, int y, bool square, bool cube );
 void NewBrushDrag_End( int x, int y );
 
-void XY_ToPoint( int x, int y, Vector3& point );
-void XY_SnapToGrid( Vector3& point );
+Vector3 XY_ToPoint( int x, int y, bool snap = false ) const;
 
 void Move_Begin();
 void Move_End();
@@ -153,7 +152,7 @@ guint m_zoom_focusOut;
 
 void ZoomIn();
 void ZoomOut();
-void ZoomInWithMouse( int pointx, int pointy );
+void ZoomInWithMouse( int x, int y );
 void FocusOnBounds( const AABB& bounds );
 
 void SetActive( bool b ){
@@ -164,7 +163,7 @@ bool Active(){
 	return m_bActive;
 };
 
-void SetCustomPivotOrigin( int pointx, int pointy );
+void SetCustomPivotOrigin( int x, int y ) const;
 
 void SetViewType( VIEWTYPE n );
 bool m_bActive;
@@ -177,7 +176,7 @@ int m_chasemouse_delta_x, m_chasemouse_delta_y;
 
 guint m_chasemouse_handler;
 void ChaseMouse();
-bool chaseMouseMotion( int pointx, int pointy );
+bool chaseMouseMotion( int x, int y );
 
 void updateModelview();
 void updateProjection();
@@ -213,9 +212,6 @@ Vector3 m_mousePosition;
 
 VIEWTYPE m_viewType;
 
-void OriginalButtonUp( guint32 nFlags, int point, int pointy );
-void OriginalButtonDown( guint32 nFlags, int point, int pointy );
-
 void PaintSizeInfo( int nDim1, int nDim2 );
 
 int m_entityCreate_x, m_entityCreate_y;
@@ -241,7 +237,7 @@ void EntityCreate_MouseMove( int x, int y );
 void EntityCreate_MouseUp( int x, int y );
 
 void OnEntityCreate( const char* item );
-VIEWTYPE GetViewType(){
+VIEWTYPE GetViewType() const {
 	return m_viewType;
 }
 void SetScale( float f );

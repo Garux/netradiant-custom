@@ -262,15 +262,15 @@ void XYWnd::ZoomOut(){
 	SetScale( Scale() * 4.0f / 5.0f );
 }
 
-void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
+void XYWnd::ZoomInWithMouse( int x, int y ){
 	const float old_scale = Scale();
 	ZoomIn();
 	if ( g_xywindow_globals.m_bZoomInToPointer && old_scale != Scale() ) {
 		const float scale_diff = 1.0 / old_scale - 1.0 / Scale();
 		NDIM1NDIM2( m_viewType )
 		Vector3 origin = GetOrigin();
-		origin[nDim1] += scale_diff * ( pointx - 0.5 * Width() );
-		origin[nDim2] -= scale_diff * ( pointy - 0.5 * Height() );
+		origin[nDim1] += scale_diff * ( x - 0.5 * Width() );
+		origin[nDim2] -= scale_diff * ( y - 0.5 * Height() );
 		SetOrigin( origin );
 	}
 }
@@ -402,31 +402,31 @@ gboolean xywnd_chasemouse( gpointer data ){
 	return TRUE;
 }
 
-bool XYWnd::chaseMouseMotion( int pointx, int pointy ){
+bool XYWnd::chaseMouseMotion( const int x, const int y ){
 	m_chasemouse_delta_x = 0;
 	m_chasemouse_delta_y = 0;
 
 	if ( g_xywindow_globals_private.m_bChaseMouse && getButtonState() == RAD_LBUTTON ) {
 		const int epsilon = 16;
 
-		if ( pointx < epsilon ) {
-			m_chasemouse_delta_x = std::max( pointx, 0 ) - epsilon;
+		if ( x < epsilon ) {
+			m_chasemouse_delta_x = std::max( x, 0 ) - epsilon;
 		}
-		else if ( ( pointx - m_nWidth ) > -epsilon ) {
-			m_chasemouse_delta_x = std::min( ( pointx - m_nWidth ), 0 ) + epsilon;
+		else if ( ( x - m_nWidth ) > -epsilon ) {
+			m_chasemouse_delta_x = std::min( ( x - m_nWidth ), 0 ) + epsilon;
 		}
 
-		if ( pointy < epsilon ) {
-			m_chasemouse_delta_y = std::max( pointy, 0 ) - epsilon;
+		if ( y < epsilon ) {
+			m_chasemouse_delta_y = std::max( y, 0 ) - epsilon;
 		}
-		else if ( ( pointy - m_nHeight ) > -epsilon ) {
-			m_chasemouse_delta_y = std::min( ( pointy - m_nHeight ), 0 ) + epsilon;
+		else if ( ( y - m_nHeight ) > -epsilon ) {
+			m_chasemouse_delta_y = std::min( ( y - m_nHeight ), 0 ) + epsilon;
 		}
 
 		if ( m_chasemouse_delta_y != 0 || m_chasemouse_delta_x != 0 ) {
-			//globalOutputStream() << "chasemouse motion: x=" << pointx << " y=" << pointy << "... ";
-			m_chasemouse_current_x = pointx;
-			m_chasemouse_current_y = pointy;
+			//globalOutputStream() << "chasemouse motion: x=" << x << " y=" << y << "... ";
+			m_chasemouse_current_x = x;
+			m_chasemouse_current_y = y;
 			if ( m_chasemouse_handler == 0 ) {
 				//globalOutputStream() << "chasemouse timer start... ";
 				g_chasemouse_timer.start();
@@ -548,26 +548,16 @@ void XYWnd::overlayDraw(){
 		glMatrixMode( GL_MODELVIEW );
 		glLoadMatrixf( reinterpret_cast<const float*>( &m_modelview ) );
 
+		NDIM1NDIM2( m_viewType )
+		Vector3 v( g_vector3_identity );
 		glColor4f( 0.2f, 0.9f, 0.2f, 0.8f );
 		glBegin( GL_LINES );
-		if ( m_viewType == XY ) {
-			glVertex2f( 2.0f * g_MinWorldCoord, m_mousePosition[1] );
-			glVertex2f( 2.0f * g_MaxWorldCoord, m_mousePosition[1] );
-			glVertex2f( m_mousePosition[0], 2.0f * g_MinWorldCoord );
-			glVertex2f( m_mousePosition[0], 2.0f * g_MaxWorldCoord );
-		}
-		else if ( m_viewType == YZ ) {
-			glVertex3f( m_mousePosition[0], 2.0f * g_MinWorldCoord, m_mousePosition[2] );
-			glVertex3f( m_mousePosition[0], 2.0f * g_MaxWorldCoord, m_mousePosition[2] );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MinWorldCoord );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MaxWorldCoord );
-		}
-		else
-		{
-			glVertex3f( 2.0f * g_MinWorldCoord, m_mousePosition[1], m_mousePosition[2] );
-			glVertex3f( 2.0f * g_MaxWorldCoord, m_mousePosition[1], m_mousePosition[2] );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MinWorldCoord );
-			glVertex3f( m_mousePosition[0], m_mousePosition[1], 2.0f * g_MaxWorldCoord );
+		for( int i = 0, dim1 = nDim1, dim2 = nDim2; i < 2; ++i, std::swap( dim1, dim2 ) ){
+			v[dim1] = m_mousePosition[dim1];
+			v[dim2] = 2.0f * g_MinWorldCoord;
+			glVertex3fv( vector3_to_array( v ) );
+			v[dim2] = 2.0f * g_MaxWorldCoord;
+			glVertex3fv( vector3_to_array( v ) );
 		}
 		glEnd();
 	}
@@ -792,13 +782,10 @@ FBO* XYWnd::fbo_get(){
 	return m_fbo = m_fbo? m_fbo : GlobalOpenGL().support_ARB_framebuffer_object? new FBO : new FBO_fallback;
 }
 
-void XYWnd::SetCustomPivotOrigin( int pointx, int pointy ){
-	Vector3 point;
-	XY_ToPoint( pointx, pointy, point );
+void XYWnd::SetCustomPivotOrigin( int x, int y ) const {
 	bool set[3] = { true, true, true };
 	set[GetViewType()] = false;
-
-	GlobalSelectionSystem().setCustomTransformOrigin( point, set );
+	GlobalSelectionSystem().setCustomTransformOrigin( XY_ToPoint( x, y ), set );
 	SceneChangeNotify();
 }
 
@@ -807,9 +794,8 @@ unsigned int MoveCamera_buttons(){
 }
 
 void XYWnd_PositionCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
-	Vector3 origin( Camera_getOrigin( camwnd ) );
-	xywnd->XY_ToPoint( x, y, origin );
-	xywnd->XY_SnapToGrid( origin );
+	Vector3 origin = xywnd->XY_ToPoint( x, y, true );
+	origin[xywnd->GetViewType()] = Camera_getOrigin( camwnd )[xywnd->GetViewType()];
 	Camera_setOrigin( camwnd, origin );
 }
 
@@ -819,11 +805,7 @@ unsigned int OrientCamera_buttons(){
 
 void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 	//globalOutputStream() << Camera_getAngles( camwnd ) << "  b4\n";
-	Vector3 point = g_vector3_identity;
-	xywnd->XY_ToPoint( x, y, point );
-	//xywnd->XY_SnapToGrid( point );
-	vector3_subtract( point, Camera_getOrigin( camwnd ) );
-
+	const Vector3 point = xywnd->XY_ToPoint( x, y ) - Camera_getOrigin( camwnd );
 	const VIEWTYPE viewtype = xywnd->GetViewType();
 	NDIM1NDIM2( viewtype )
 	const int nAngle = ( viewtype == XY ) ? CAMERA_YAW : CAMERA_PITCH;
@@ -831,7 +813,7 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 		Vector3 angles( Camera_getAngles( camwnd ) );
 		angles[nAngle] = static_cast<float>( radians_to_degrees( atan2( point[nDim2], point[nDim1] ) ) );
 		if( angles[CAMERA_YAW] < 0 )
-			angles[CAMERA_YAW] = angles[CAMERA_YAW] + 360;
+			angles[CAMERA_YAW] += 360;
 		if ( nAngle == CAMERA_PITCH ){
 			if( fabs( angles[CAMERA_PITCH] ) > 90 ){
 				angles[CAMERA_PITCH] = ( angles[CAMERA_PITCH] > 0 ) ? ( -angles[CAMERA_PITCH] + 180 ) : ( -angles[CAMERA_PITCH] - 180 );
@@ -888,11 +870,8 @@ void XYWnd::NewBrushDrag_End( int x, int y ){
 }
 
 void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
-	Vector3 mins, maxs;
-	XY_ToPoint( m_nNewBrushPressx, m_nNewBrushPressy, mins );
-	XY_SnapToGrid( mins );
-	XY_ToPoint( x, y, maxs );
-	XY_SnapToGrid( maxs );
+	Vector3 mins = XY_ToPoint( m_nNewBrushPressx, m_nNewBrushPressy, true );
+	Vector3 maxs = XY_ToPoint( x, y, true );
 
 	const int nDim = GetViewType();
 
@@ -1212,11 +1191,8 @@ void XYWnd::XY_MouseUp( int x, int y, unsigned int buttons ){
 }
 
 void XYWnd::XY_MouseMoved( int x, int y, unsigned int buttons ){
-	{
-		m_mousePosition[0] = m_mousePosition[1] = m_mousePosition[2] = 0.0;
-		XY_ToPoint( x, y, m_mousePosition );
-		XY_SnapToGrid( m_mousePosition );
-	}
+	m_mousePosition = XY_ToPoint( x, y, true );
+
 	// rbutton = drag xy origin
 	if ( m_move_started ) {
 	}
@@ -1290,19 +1266,14 @@ inline float normalised_to_world( float normalised, float world_origin, float no
 }
 
 
-// TTimo: watch it, this doesn't init one of the 3 coords
-void XYWnd::XY_ToPoint( int x, int y, Vector3& point ){
+Vector3 XYWnd::XY_ToPoint( int x, int y, bool snap /* = false */ ) const {
+	Vector3 point( g_vector3_identity );
 	const float normalised2world_scale_x = m_nWidth / 2 / m_fScale;
 	const float normalised2world_scale_y = m_nHeight / 2 / m_fScale;
 	NDIM1NDIM2( m_viewType )
 	point[nDim1] = normalised_to_world( screen_normalised( x, m_nWidth ), m_vOrigin[nDim1], normalised2world_scale_x );
 	point[nDim2] = normalised_to_world( -screen_normalised( y, m_nHeight ), m_vOrigin[nDim2], normalised2world_scale_y );
-}
-
-void XYWnd::XY_SnapToGrid( Vector3& point ){
-	NDIM1NDIM2( m_viewType )
-	point[nDim1] = float_snapped( point[nDim1], GetSnapGridSize() );
-	point[nDim2] = float_snapped( point[nDim2], GetSnapGridSize() );
+	return snap? vector3_snapped( point, GetSnapGridSize() ) : point;
 }
 
 
@@ -1444,10 +1415,6 @@ void WXY_SetBackgroundImage(){
    ==============
  */
 
-double two_to_the_power( int power ){
-	return pow( 2.0f, power );
-}
-
 void XYWnd::XY_DrawAxis( void ){
 	const char g_AxisName[3] = { 'X', 'Y', 'Z' };
 	NDIM1NDIM2( m_viewType )
@@ -1510,7 +1477,7 @@ void XYWnd::XY_DrawGrid( void ) {
 	int power = minor_power;
 	while ( ( power % 3 ) != 0 || ( step * m_fScale ) <= 32.0f ) { // make sure major grid spacing is at least 32 pixels on the screen
 		++power;
-		step = float(two_to_the_power( power ) );
+		step = pow( 2.0f, power );
 	}
 	mask = ( 1 << ( power - minor_power ) ) - 1;
 	while ( ( stepx * m_fScale ) <= 32.0f ) // text step x must be at least 32
@@ -1818,29 +1785,18 @@ void XYWnd::XY_DrawBlockGrid(){
 }
 
 void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
-	float x, y, fov, box;
-	double a;
-
-	fov = 48 / m_fScale;
-	box = 16 / m_fScale;
 //	globalOutputStream() << "pitch " << angles[CAMERA_PITCH] << "   yaw " << angles[CAMERA_YAW] << "\n";
+	const float fov = 48 / m_fScale;
+	const float box = 16 / m_fScale;
 
-	if ( m_viewType == XY ) {
-		x = origin[0];
-		y = origin[1];
-		a = degrees_to_radians( angles[CAMERA_YAW] );
-	}
-	else if ( m_viewType == YZ ) {
-		x = origin[1];
-		y = origin[2];
-		a = degrees_to_radians( ( angles[CAMERA_YAW] > 180 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
-	}
-	else
-	{
-		x = origin[0];
-		y = origin[2];
-		a = degrees_to_radians( ( angles[CAMERA_YAW] < 270 && angles[CAMERA_YAW] > 90 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
-	}
+	NDIM1NDIM2( m_viewType )
+	const float x = origin[nDim1];
+	const float y = origin[nDim2];
+	const double a = ( m_viewType == XY )?
+						degrees_to_radians( angles[CAMERA_YAW] )
+						: ( m_viewType == YZ )?
+						degrees_to_radians( ( angles[CAMERA_YAW] > 180 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] )
+						: degrees_to_radians( ( angles[CAMERA_YAW] < 270 && angles[CAMERA_YAW] > 90 ) ? ( 180.0f - angles[CAMERA_PITCH] ) : angles[CAMERA_PITCH] );
 
 	glColor3f( 0.0, 0.0, 1.0 );
 	glBegin( GL_LINE_STRIP );
@@ -1861,8 +1817,6 @@ void XYWnd::DrawCameraIcon( const Vector3& origin, const Vector3& angles ){
 }
 
 
-// can be greatly simplified but per usual i am in a hurry
-// which is not an excuse, just a fact
 void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
 	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
 	if ( bounds.extents == g_vector3_identity ) {
@@ -1875,130 +1829,56 @@ void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
 	const Vector3 size = bounds.extents * 2;
 
 	const char* dimStrings[] = {"x:", "y:", "z:"};
-	typedef const char* OrgStrings[2];
-	const OrgStrings orgStrings[] = { { "x:", "y:", }, { "x:", "z:", }, { "y:", "z:", } };
 
-	glColor3f( g_xywindow_globals.color_selbrushes[0] * .65f,
-			   g_xywindow_globals.color_selbrushes[1] * .65f,
-			   g_xywindow_globals.color_selbrushes[2] * .65f );
+	glColor3fv( vector3_to_array( g_xywindow_globals.color_selbrushes * .65f ) );
 
 	StringOutputStream dimensions( 16 );
 
-	if ( m_viewType == XY ) {
-		glBegin( GL_LINES );
+	Vector3 v( g_vector3_identity );
 
-		glVertex3f( min[nDim1], min[nDim2] - 6.0f  / m_fScale, 0.0f );
-		glVertex3f( min[nDim1], min[nDim2] - 10.0f / m_fScale, 0.0f );
+	glBegin( GL_LINE_STRIP );
+	v[nDim1] = min[nDim1];
+	v[nDim2] = min[nDim2] - 6.f / m_fScale;
+	glVertex3fv( vector3_to_array( v ) );
+	v[nDim2] = min[nDim2] - 10.f / m_fScale;
+	glVertex3fv( vector3_to_array( v ) );
+	v[nDim1] = max[nDim1];
+	glVertex3fv( vector3_to_array( v ) );
+	v[nDim2] = min[nDim2] - 6.f / m_fScale;
+	glVertex3fv( vector3_to_array( v ) );
+	glEnd();
 
-		glVertex3f( min[nDim1], min[nDim2] - 10.0f  / m_fScale, 0.0f );
-		glVertex3f( max[nDim1], min[nDim2] - 10.0f  / m_fScale, 0.0f );
+	glBegin( GL_LINE_STRIP );
+	v[nDim2] = max[nDim2];
+	v[nDim1] = max[nDim1] + 6.f / m_fScale;
+	glVertex3fv( vector3_to_array( v ) );
+	v[nDim1] = max[nDim1] + 10.f / m_fScale;
+	glVertex3fv( vector3_to_array( v ) );
+	v[nDim2] = min[nDim2];
+	glVertex3fv( vector3_to_array( v ) );
+	v[nDim1] = max[nDim1] + 6.f / m_fScale;
+	glVertex3fv( vector3_to_array( v ) );
+	glEnd();
 
-		glVertex3f( max[nDim1], min[nDim2] - 6.0f  / m_fScale, 0.0f );
-		glVertex3f( max[nDim1], min[nDim2] - 10.0f / m_fScale, 0.0f );
+	v[nDim1] = mid[nDim1];
+	v[nDim2] = min[nDim2] - 20.f / m_fScale;
+	glRasterPos3fv( vector3_to_array( v ) );
+	dimensions << dimStrings[nDim1] << size[nDim1];
+	GlobalOpenGL().drawString( dimensions.c_str() );
+	dimensions.clear();
 
+	v[nDim1] = max[nDim1] + 16.f / m_fScale;
+	v[nDim2] = mid[nDim2];
+	glRasterPos3fv( vector3_to_array( v ) );
+	dimensions << dimStrings[nDim2] << size[nDim2];
+	GlobalOpenGL().drawString( dimensions.c_str() );
+	dimensions.clear();
 
-		glVertex3f( max[nDim1] + 6.0f  / m_fScale, min[nDim2], 0.0f );
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, min[nDim2], 0.0f );
-
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, min[nDim2], 0.0f );
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, max[nDim2], 0.0f );
-
-		glVertex3f( max[nDim1] + 6.0f  / m_fScale, max[nDim2], 0.0f );
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, max[nDim2], 0.0f );
-
-		glEnd();
-
-		glRasterPos3f( mid[nDim1], min[nDim2] - 20.0f  / m_fScale, 0.0f );
-		dimensions << dimStrings[nDim1] << size[nDim1];
-		GlobalOpenGL().drawString( dimensions.c_str() );
-		dimensions.clear();
-
-		glRasterPos3f( max[nDim1] + 16.0f  / m_fScale, mid[nDim2], 0.0f );
-		dimensions << dimStrings[nDim2] << size[nDim2];
-		GlobalOpenGL().drawString( dimensions.c_str() );
-		dimensions.clear();
-
-		glRasterPos3f( min[nDim1] + 4, max[nDim2] + 8 / m_fScale, 0.0f );
-		dimensions << "(" << orgStrings[0][0] << min[nDim1] << "  " << orgStrings[0][1] << max[nDim2] << ")";
-		GlobalOpenGL().drawString( dimensions.c_str() );
-	}
-	else if ( m_viewType == XZ ) {
-		glBegin( GL_LINES );
-
-		glVertex3f( min[nDim1], 0, min[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( min[nDim1], 0, min[nDim2] - 10.0f / m_fScale );
-
-		glVertex3f( min[nDim1], 0,min[nDim2] - 10.0f  / m_fScale );
-		glVertex3f( max[nDim1], 0,min[nDim2] - 10.0f  / m_fScale );
-
-		glVertex3f( max[nDim1], 0,min[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( max[nDim1], 0,min[nDim2] - 10.0f / m_fScale );
-
-
-		glVertex3f( max[nDim1] + 6.0f  / m_fScale, 0,min[nDim2] );
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,min[nDim2] );
-
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,min[nDim2] );
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,max[nDim2] );
-
-		glVertex3f( max[nDim1] + 6.0f  / m_fScale, 0,max[nDim2] );
-		glVertex3f( max[nDim1] + 10.0f  / m_fScale, 0,max[nDim2] );
-
-		glEnd();
-
-		glRasterPos3f( mid[nDim1], 0, min[nDim2] - 20.0f  / m_fScale );
-		dimensions << dimStrings[nDim1] << size[nDim1];
-		GlobalOpenGL().drawString( dimensions.c_str() );
-		dimensions.clear();
-
-		glRasterPos3f( max[nDim1] + 16.0f  / m_fScale, 0, mid[nDim2] );
-		dimensions << dimStrings[nDim2] << size[nDim2];
-		GlobalOpenGL().drawString( dimensions.c_str() );
-		dimensions.clear();
-
-		glRasterPos3f( min[nDim1] + 4, 0, max[nDim2] + 8 / m_fScale );
-		dimensions << "(" << orgStrings[1][0] << min[nDim1] << "  " << orgStrings[1][1] << max[nDim2] << ")";
-		GlobalOpenGL().drawString( dimensions.c_str() );
-	}
-	else
-	{
-		glBegin( GL_LINES );
-
-		glVertex3f( 0, min[nDim1], min[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( 0, min[nDim1], min[nDim2] - 10.0f / m_fScale );
-
-		glVertex3f( 0, min[nDim1], min[nDim2] - 10.0f  / m_fScale );
-		glVertex3f( 0, max[nDim1], min[nDim2] - 10.0f  / m_fScale );
-
-		glVertex3f( 0, max[nDim1], min[nDim2] - 6.0f  / m_fScale );
-		glVertex3f( 0, max[nDim1], min[nDim2] - 10.0f / m_fScale );
-
-
-		glVertex3f( 0, max[nDim1] + 6.0f  / m_fScale, min[nDim2] );
-		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, min[nDim2] );
-
-		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, min[nDim2] );
-		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, max[nDim2] );
-
-		glVertex3f( 0, max[nDim1] + 6.0f  / m_fScale, max[nDim2] );
-		glVertex3f( 0, max[nDim1] + 10.0f  / m_fScale, max[nDim2] );
-
-		glEnd();
-
-		glRasterPos3f( 0, mid[nDim1],  min[nDim2] - 20.0f  / m_fScale );
-		dimensions << dimStrings[nDim1] << size[nDim1];
-		GlobalOpenGL().drawString( dimensions.c_str() );
-		dimensions.clear();
-
-		glRasterPos3f( 0, max[nDim1] + 16.0f  / m_fScale, mid[nDim2] );
-		dimensions << dimStrings[nDim2] << size[nDim2];
-		GlobalOpenGL().drawString( dimensions.c_str() );
-		dimensions.clear();
-
-		glRasterPos3f( 0, min[nDim1] + 4.0f, max[nDim2] + 8 / m_fScale );
-		dimensions << "(" << orgStrings[2][0] << min[nDim1] << "  " << orgStrings[2][1] << max[nDim2] << ")";
-		GlobalOpenGL().drawString( dimensions.c_str() );
-	}
+	v[nDim1] = min[nDim1] + 4.f;
+	v[nDim2] = max[nDim2] + 8.f / m_fScale;
+	glRasterPos3fv( vector3_to_array( v ) );
+	dimensions << "(" << dimStrings[nDim1] << min[nDim1] << "  " << dimStrings[nDim2] << max[nDim2] << ")";
+	GlobalOpenGL().drawString( dimensions.c_str() );
 }
 
 class XYRenderer : public Renderer
@@ -2305,11 +2185,9 @@ void XYWnd::XY_Draw(){
 }
 
 void XYWnd_MouseToPoint( XYWnd* xywnd, int x, int y, Vector3& point ){
-	xywnd->XY_ToPoint( x, y, point );
-	xywnd->XY_SnapToGrid( point );
-
+	point = xywnd->XY_ToPoint( x, y, true );
 	const int nDim = xywnd->GetViewType();
-	float fWorkMid = float_mid( Select_getWorkZone().d_work_min[nDim], Select_getWorkZone().d_work_max[nDim] );
+	const float fWorkMid = float_mid( Select_getWorkZone().d_work_min[nDim], Select_getWorkZone().d_work_max[nDim] );
 	point[nDim] = float_snapped( fWorkMid, GetGridSize() );
 }
 

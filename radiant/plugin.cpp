@@ -104,9 +104,7 @@ VIEWTYPE XYWindow_getViewType(){
 }
 
 Vector3 XYWindow_windowToWorld( const WindowVector& position ){
-	Vector3 result( 0, 0, 0 );
-	g_pParentWnd->GetXYWnd()->XY_ToPoint( static_cast<int>( position.x() ), static_cast<int>( position.y() ), result );
-	return result;
+	return g_pParentWnd->GetXYWnd()->XY_ToPoint( static_cast<int>( position.x() ), static_cast<int>( position.y() ) );
 }
 
 Vector3 Camera_getOrigin(){
