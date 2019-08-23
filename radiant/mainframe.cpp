@@ -3167,6 +3167,7 @@ void MainFrame::Create(){
 			}
 
 			CamWnd_setParent( *m_pCamWnd, window );
+			CamWnd_Shown_Construct( window );
 			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
 			g_object_set_data( G_OBJECT( window ), "glwidget", CamWnd_getWidget( *m_pCamWnd ) );
 

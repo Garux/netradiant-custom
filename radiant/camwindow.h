@@ -38,6 +38,7 @@ void CamWnd_Update( CamWnd& camwnd );
 
 GtkWidget* CamWnd_getWidget( CamWnd& camwnd );
 void CamWnd_setParent( CamWnd& camwnd, GtkWindow* parent );
+void CamWnd_Shown_Construct( GtkWindow* parent );
 
 void GlobalCamera_setCamWnd( CamWnd& camwnd );
 
