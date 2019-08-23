@@ -116,7 +116,6 @@ static void recaptureStates(){
 	captureStates();
 }
 
-void PositionView( const Vector3& position );
 const Vector3& GetOrigin() const;
 void SetOrigin( const Vector3& origin );
 void Scroll( int x, int y );

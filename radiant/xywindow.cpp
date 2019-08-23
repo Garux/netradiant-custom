@@ -263,10 +263,10 @@ void XYWnd::ZoomOut(){
 }
 
 void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
-	float old_scale = Scale();
+	const float old_scale = Scale();
 	ZoomIn();
-	if ( g_xywindow_globals.m_bZoomInToPointer ) {
-		float scale_diff = 1.0 / old_scale - 1.0 / Scale();
+	if ( g_xywindow_globals.m_bZoomInToPointer && old_scale != Scale() ) {
+		const float scale_diff = 1.0 / old_scale - 1.0 / Scale();
 		int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
 		int nDim2 = ( m_viewType == XY ) ? 1 : 2;
 		Vector3 origin = GetOrigin();
@@ -776,17 +776,20 @@ const Vector3& XYWnd::GetOrigin() const {
 }
 
 void XYWnd::SetOrigin( const Vector3& origin ){
-	m_vOrigin = origin;
+	for( std::size_t i = 0; i < 3; ++i )
+		m_vOrigin[i] = std::min( g_MaxWorldCoord, std::max( g_MinWorldCoord, origin[i] ) );
 	updateModelview();
+	XYWnd_Update( *this );
 }
 
 void XYWnd::Scroll( int x, int y ){
 	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
 	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+
 	m_vOrigin[nDim1] += x / m_fScale;
 	m_vOrigin[nDim2] += y / m_fScale;
-	updateModelview();
-	queueDraw();
+
+	SetOrigin( m_vOrigin );
 }
 
 FBO* XYWnd::fbo_get(){
@@ -1144,19 +1147,6 @@ void XYWnd::Zoom_End(){
 	m_zoom_started = false;
 	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), false );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_zoom_focusOut );
-}
-
-// makes sure the selected brush or camera is in view
-void XYWnd::PositionView( const Vector3& position ){
-	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
-
-	m_vOrigin[nDim1] = position[nDim1];
-	m_vOrigin[nDim2] = position[nDim2];
-
-	updateModelview();
-
-	XYWnd_Update( *this );
 }
 
 void XYWnd::SetViewType( VIEWTYPE viewType ){
@@ -2384,13 +2374,13 @@ inline AABB GetCenterBbox(){
 }
 
 void XYWnd_Centralize( XYWnd* xywnd ){
-	xywnd->PositionView( GetCenterBbox().origin );
+	xywnd->SetOrigin( GetCenterBbox().origin );
 }
 
 void XY_Centralize(){
 	const Vector3 position( GetCenterBbox().origin );
 	g_pParentWnd->forEachXYWnd( [&position]( XYWnd* xywnd ){
-		xywnd->PositionView( position );
+		xywnd->SetOrigin( position );
 	} );
 }
 

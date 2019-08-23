@@ -2154,7 +2154,7 @@ void SelectBrush( int entitynum, int brushnum ){
 		Selectable* selectable = Instance_getSelectable( *instance );
 		ASSERT_MESSAGE( selectable != 0, "SelectBrush: path not selectable" );
 		selectable->setSelected( true );
-		g_pParentWnd->GetXYWnd()->PositionView( instance->worldAABB().origin );
+		g_pParentWnd->GetXYWnd()->SetOrigin( instance->worldAABB().origin );
 	}
 }
 
