@@ -265,7 +265,7 @@ void XYWnd::ZoomIn(){
 //  we don't go below a zoom factor corresponding to 10% of the max world size
 //  (this has to be computed against the window size)
 void XYWnd::ZoomOut(){
-	float min_scale = MIN( Width(), Height() ) / ( 1.1f * ( g_MaxWorldCoord - g_MinWorldCoord ) );
+	float min_scale = std::min( Width(), Height() ) / ( 1.1f * ( g_MaxWorldCoord - g_MinWorldCoord ) );
 	float scale = Scale() * 4.0f / 5.0f;
 	if ( scale < min_scale ) {
 		if ( Scale() != min_scale ) {
@@ -296,13 +296,8 @@ void XYWnd::FocusOnBounds( AABB& bounds ){
 	SetOrigin( bounds.origin );
 	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
 	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
-	if( bounds.extents[ nDim1 ] < 128.f )
-		bounds.extents[ nDim1 ] = 128.f;
-	if( bounds.extents[ nDim2 ] < 128.f )
-		bounds.extents[ nDim2 ] = 128.f;
-	float scale1 = Width() / ( 3.f * bounds.extents[ nDim1 ] );
-	float scale2 = Height() / ( 3.f * bounds.extents[ nDim2 ] );
-	SetScale( MIN( scale1, scale2 ) );
+	SetScale( std::min( Width() / ( 3.f * std::max( 128.f, bounds.extents[ nDim1 ] ) ),
+						Height() / ( 3.f * std::max( 128.f, bounds.extents[ nDim2 ] ) ) ) );
 
 }
 
