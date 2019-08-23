@@ -38,17 +38,7 @@
 #include "funchandlers.h"
 
 SignalHandlerResult DTreePlanter::mouseDown( const WindowVector& position, ButtonIdentifier button, ModifierFlags modifiers ){
-	if ( button != c_buttonLeft ) {
-		return SIGNAL_CONTINUE_EMISSION;
-	}
-	VIEWTYPE vt = GlobalRadiant().XYWindow_getViewType();
-
-	switch ( vt ) {
-	case XY:
-		break;
-	case YZ:
-	case XZ:
-	default:
+	if ( button != c_buttonLeft || GlobalRadiant().XYWindow_getViewType() != XY ) {
 		return SIGNAL_CONTINUE_EMISSION;
 	}
 

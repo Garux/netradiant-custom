@@ -111,6 +111,9 @@ enum VIEWTYPE
 	XY = 2
 };
 
+#define NDIM1NDIM2( viewtype ) const int nDim1 = ( viewtype == YZ ) ? 1 : 0, \
+										nDim2 = ( viewtype == XY ) ? 1 : 2;
+
 // the radiant core API
 struct _QERFuncTable_1
 {

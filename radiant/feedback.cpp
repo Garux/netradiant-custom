@@ -132,8 +132,7 @@ void CPointMsg::DropHighlight(){
 }
 
 void CPointMsg::Draw2D( VIEWTYPE vt ){
-	int nDim1 = ( vt == YZ ) ? 1 : 0;
-	int nDim2 = ( vt == XY ) ? 1 : 2;
+	NDIM1NDIM2( vt )
 	glPointSize( 4 );
 	glColor3f( 1.0f,0.0f,0.0f );
 	glBegin( GL_POINTS );
@@ -205,8 +204,7 @@ void CWindingMsg::DropHighlight(){
 void CWindingMsg::Draw2D( VIEWTYPE vt ){
 	int i;
 
-	int nDim1 = ( vt == YZ ) ? 1 : 0;
-	int nDim2 = ( vt == XY ) ? 1 : 2;
+	NDIM1NDIM2( vt )
 	glColor3f( 1.0f,0.f,0.0f );
 
 	glPointSize( 4 );

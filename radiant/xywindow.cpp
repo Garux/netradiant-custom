@@ -267,8 +267,7 @@ void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
 	ZoomIn();
 	if ( g_xywindow_globals.m_bZoomInToPointer && old_scale != Scale() ) {
 		const float scale_diff = 1.0 / old_scale - 1.0 / Scale();
-		int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-		int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+		NDIM1NDIM2( m_viewType )
 		Vector3 origin = GetOrigin();
 		origin[nDim1] += scale_diff * ( pointx - 0.5 * Width() );
 		origin[nDim2] -= scale_diff * ( pointy - 0.5 * Height() );
@@ -278,8 +277,7 @@ void XYWnd::ZoomInWithMouse( int pointx, int pointy ){
 
 void XYWnd::FocusOnBounds( const AABB& bounds ){
 	SetOrigin( bounds.origin );
-	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	NDIM1NDIM2( m_viewType )
 	SetScale( std::min( Width() / ( 3.f * std::max( 128.f, bounds.extents[ nDim1 ] ) ),
 						Height() / ( 3.f * std::max( 128.f, bounds.extents[ nDim2 ] ) ) ) );
 
@@ -531,8 +529,7 @@ void XYWnd::overlayDraw(){
 	}
 
 	{
-		int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-		int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+		NDIM1NDIM2( m_viewType )
 
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixf( reinterpret_cast<const float*>( &m_projection ) );
@@ -783,8 +780,7 @@ void XYWnd::SetOrigin( const Vector3& origin ){
 }
 
 void XYWnd::Scroll( int x, int y ){
-	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	NDIM1NDIM2( m_viewType )
 
 	m_vOrigin[nDim1] += x / m_fScale;
 	m_vOrigin[nDim2] += y / m_fScale;
@@ -799,10 +795,8 @@ FBO* XYWnd::fbo_get(){
 void XYWnd::SetCustomPivotOrigin( int pointx, int pointy ){
 	Vector3 point;
 	XY_ToPoint( pointx, pointy, point );
-	VIEWTYPE viewtype = GetViewType();
-	const int nDim = ( viewtype == YZ ) ? 0 : ( ( viewtype == XZ ) ? 1 : 2 );
 	bool set[3] = { true, true, true };
-	set[nDim] = false;
+	set[GetViewType()] = false;
 
 	GlobalSelectionSystem().setCustomTransformOrigin( point, set );
 	SceneChangeNotify();
@@ -830,18 +824,18 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 	//xywnd->XY_SnapToGrid( point );
 	vector3_subtract( point, Camera_getOrigin( camwnd ) );
 
-	int n1 = ( xywnd->GetViewType() == XY ) ? 1 : 2;
-	int n2 = ( xywnd->GetViewType() == YZ ) ? 1 : 0;
-	int nAngle = ( xywnd->GetViewType() == XY ) ? CAMERA_YAW : CAMERA_PITCH;
-	if ( point[n1] || point[n2] ) {
+	const VIEWTYPE viewtype = xywnd->GetViewType();
+	NDIM1NDIM2( viewtype )
+	const int nAngle = ( viewtype == XY ) ? CAMERA_YAW : CAMERA_PITCH;
+	if ( point[nDim2] || point[nDim1] ) {
 		Vector3 angles( Camera_getAngles( camwnd ) );
-		angles[nAngle] = static_cast<float>( radians_to_degrees( atan2( point[n1], point[n2] ) ) );
+		angles[nAngle] = static_cast<float>( radians_to_degrees( atan2( point[nDim2], point[nDim1] ) ) );
 		if( angles[CAMERA_YAW] < 0 )
 			angles[CAMERA_YAW] = angles[CAMERA_YAW] + 360;
 		if ( nAngle == CAMERA_PITCH ){
 			if( fabs( angles[CAMERA_PITCH] ) > 90 ){
 				angles[CAMERA_PITCH] = ( angles[CAMERA_PITCH] > 0 ) ? ( -angles[CAMERA_PITCH] + 180 ) : ( -angles[CAMERA_PITCH] - 180 );
-				if( xywnd->GetViewType() == YZ ){
+				if( viewtype == YZ ){
 					if( angles[CAMERA_YAW] < 180 ){
 						angles[CAMERA_YAW] = 360 - angles[CAMERA_YAW];
 					}
@@ -851,7 +845,7 @@ void XYWnd_OrientCamera( XYWnd* xywnd, int x, int y, CamWnd& camwnd ){
 				}
 			}
 			else{
-				if( xywnd->GetViewType() == YZ ){
+				if( viewtype == YZ ){
 					if( angles[CAMERA_YAW] > 180 ){
 						angles[CAMERA_YAW] = 360 - angles[CAMERA_YAW];
 					}
@@ -900,7 +894,7 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 	XY_ToPoint( x, y, maxs );
 	XY_SnapToGrid( maxs );
 
-	const int nDim = ( m_viewType == XY ) ? 2 : ( m_viewType == YZ ) ? 0 : 1;
+	const int nDim = GetViewType();
 
 	mins[nDim] = float_snapped( Select_getWorkZone().d_work_min[nDim], GetSnapGridSize() );
 	maxs[nDim] = float_snapped( Select_getWorkZone().d_work_max[nDim], GetSnapGridSize() );
@@ -910,11 +904,12 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 	}
 
 	if( square || cube ){
-		const float squaresize = std::max( fabs( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ), fabs( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) );
-		maxs[(nDim + 1) % 3] = ( maxs[(nDim + 1) % 3] - mins[(nDim + 1) % 3] ) > 0.f ? ( mins[(nDim + 1) % 3] + squaresize ) : ( mins[(nDim + 1) % 3] - squaresize );
-		maxs[(nDim + 2) % 3] = ( maxs[(nDim + 2) % 3] - mins[(nDim + 2) % 3] ) > 0.f ? ( mins[(nDim + 2) % 3] + squaresize ) : ( mins[(nDim + 2) % 3] - squaresize );
+		NDIM1NDIM2( nDim )
+		const float squaresize = std::max( fabs( maxs[nDim1] - mins[nDim1] ), fabs( maxs[nDim2] - mins[nDim2] ) );
+		for( auto i : { nDim1, nDim2 } )
+			maxs[i] = mins[i] + std::copysign( squaresize, maxs[i] - mins[i] );
 		if( cube ){
-			maxs[nDim] = ( maxs[nDim] - mins[nDim] ) > 0.f ? ( mins[nDim] + squaresize ) : ( mins[nDim] - squaresize );
+			maxs[nDim] = mins[nDim] + squaresize;
 		}
 	}
 
@@ -1297,37 +1292,17 @@ inline float normalised_to_world( float normalised, float world_origin, float no
 
 // TTimo: watch it, this doesn't init one of the 3 coords
 void XYWnd::XY_ToPoint( int x, int y, Vector3& point ){
-	float normalised2world_scale_x = m_nWidth / 2 / m_fScale;
-	float normalised2world_scale_y = m_nHeight / 2 / m_fScale;
-	if ( m_viewType == XY ) {
-		point[0] = normalised_to_world( screen_normalised( x, m_nWidth ), m_vOrigin[0], normalised2world_scale_x );
-		point[1] = normalised_to_world( -screen_normalised( y, m_nHeight ), m_vOrigin[1], normalised2world_scale_y );
-	}
-	else if ( m_viewType == YZ ) {
-		point[1] = normalised_to_world( screen_normalised( x, m_nWidth ), m_vOrigin[1], normalised2world_scale_x );
-		point[2] = normalised_to_world( -screen_normalised( y, m_nHeight ), m_vOrigin[2], normalised2world_scale_y );
-	}
-	else
-	{
-		point[0] = normalised_to_world( screen_normalised( x, m_nWidth ), m_vOrigin[0], normalised2world_scale_x );
-		point[2] = normalised_to_world( -screen_normalised( y, m_nHeight ), m_vOrigin[2], normalised2world_scale_y );
-	}
+	const float normalised2world_scale_x = m_nWidth / 2 / m_fScale;
+	const float normalised2world_scale_y = m_nHeight / 2 / m_fScale;
+	NDIM1NDIM2( m_viewType )
+	point[nDim1] = normalised_to_world( screen_normalised( x, m_nWidth ), m_vOrigin[nDim1], normalised2world_scale_x );
+	point[nDim2] = normalised_to_world( -screen_normalised( y, m_nHeight ), m_vOrigin[nDim2], normalised2world_scale_y );
 }
 
 void XYWnd::XY_SnapToGrid( Vector3& point ){
-	if ( m_viewType == XY ) {
-		point[0] = float_snapped( point[0], GetSnapGridSize() );
-		point[1] = float_snapped( point[1], GetSnapGridSize() );
-	}
-	else if ( m_viewType == YZ ) {
-		point[1] = float_snapped( point[1], GetSnapGridSize() );
-		point[2] = float_snapped( point[2], GetSnapGridSize() );
-	}
-	else
-	{
-		point[0] = float_snapped( point[0], GetSnapGridSize() );
-		point[2] = float_snapped( point[2], GetSnapGridSize() );
-	}
+	NDIM1NDIM2( m_viewType )
+	point[nDim1] = float_snapped( point[nDim1], GetSnapGridSize() );
+	point[nDim2] = float_snapped( point[nDim2], GetSnapGridSize() );
 }
 
 
@@ -1411,8 +1386,7 @@ void LoadTextureRGBA( qtexture_t* q, unsigned char* pPixels, int nWidth, int nHe
 
 void BackgroundImage::set( const VIEWTYPE viewtype ){
 	const AABB bounds = GlobalSelectionSystem().getBoundsSelected();
-	const int nDim1 = ( viewtype == YZ ) ? 1 : 0;
-	const int nDim2 = ( viewtype == XY ) ? 1 : 2;
+	NDIM1NDIM2( viewtype )
 	if( !( bounds.extents[nDim1] > 0 && bounds.extents[nDim2] > 0 ) ){
 		gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), "Select some objects to get the bounding box for image.\n",
 						"No selection", eMB_OK, eMB_ICONERROR );
@@ -1476,8 +1450,7 @@ double two_to_the_power( int power ){
 
 void XYWnd::XY_DrawAxis( void ){
 	const char g_AxisName[3] = { 'X', 'Y', 'Z' };
-	const int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	const int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	NDIM1NDIM2( m_viewType )
 	const float w = ( m_nWidth / 2 / m_fScale );
 	const float h = ( m_nHeight / 2 / m_fScale );
 
@@ -1556,8 +1529,7 @@ void XYWnd::XY_DrawGrid( void ) {
 	w = ( m_nWidth / 2 / m_fScale );
 	h = ( m_nHeight / 2 / m_fScale );
 
-	const int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	const int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	NDIM1NDIM2( m_viewType )
 
 	xb = m_vOrigin[nDim1] - w;
 	if ( xb < g_region_mins[nDim1] ) {
@@ -1780,8 +1752,7 @@ void XYWnd::XY_DrawBlockGrid(){
 	w = ( m_nWidth / 2 / m_fScale );
 	h = ( m_nHeight / 2 / m_fScale );
 
-	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	NDIM1NDIM2( m_viewType )
 
 	xb = m_vOrigin[nDim1] - w;
 	if ( xb < g_region_mins[nDim1] ) {
@@ -2117,8 +2088,7 @@ void XYWnd::updateProjection(){
 
 // note: modelview matrix must have a uniform scale, otherwise strange things happen when rendering the rotation manipulator.
 void XYWnd::updateModelview(){
-	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	NDIM1NDIM2( m_viewType )
 
 	// translation
 	m_modelview[12] = -m_vOrigin[nDim1] * m_fScale;
@@ -2219,8 +2189,7 @@ void XYWnd::XY_Draw(){
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 	glScalef( m_fScale, m_fScale, 1 );
-	int nDim1 = ( m_viewType == YZ ) ? 1 : 0;
-	int nDim2 = ( m_viewType == XY ) ? 1 : 2;
+	NDIM1NDIM2( m_viewType )
 	glTranslatef( -m_vOrigin[nDim1], -m_vOrigin[nDim2], 0 );
 
 	glDisable( GL_LINE_STIPPLE );
@@ -2339,7 +2308,7 @@ void XYWnd_MouseToPoint( XYWnd* xywnd, int x, int y, Vector3& point ){
 	xywnd->XY_ToPoint( x, y, point );
 	xywnd->XY_SnapToGrid( point );
 
-	int nDim = ( xywnd->GetViewType() == XY ) ? 2 : ( xywnd->GetViewType() == YZ ) ? 0 : 1;
+	const int nDim = xywnd->GetViewType();
 	float fWorkMid = float_mid( Select_getWorkZone().d_work_min[nDim], Select_getWorkZone().d_work_max[nDim] );
 	point[nDim] = float_snapped( fWorkMid, GetGridSize() );
 }
@@ -2348,19 +2317,9 @@ void XYWnd::OnEntityCreate( const char* item ){
 	Vector3 point;
 	XYWnd_MouseToPoint( this, m_entityCreate_x, m_entityCreate_y, point );
 
-	Vector3 offset( 0, 0, 0 );
-	float offset_for_multiple = ( GetSnapGridSize() < 8.f ? 8.f : GetSnapGridSize() ) * g_entityCreationOffset;
-	switch ( m_viewType )
-	{
-	case XY:
-	case XZ:
-		offset[0] = 1.f;
-		break;
-	default: //case YZ:
-		offset[1] = 1.f;
-		break;
-	}
-	point += offset * offset_for_multiple;
+	const float offset = std::max( 8.f, GetSnapGridSize() ) * g_entityCreationOffset;
+	NDIM1NDIM2( m_viewType )
+	point += g_vector3_axes[nDim1] * offset;
 
 	Entity_createFromSelection( item, point );
 }

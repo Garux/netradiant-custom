@@ -2065,10 +2065,8 @@ void RegionOff(){
 }
 
 void RegionXY(){
-	const VIEWTYPE viewtype = GlobalXYWnd_getCurrentViewType();
-	const int nDim1 = ( viewtype == YZ ) ? 1 : 0;
-	const int nDim2 = ( viewtype == XY ) ? 1 : 2;
-	const int nDim = static_cast<int>( viewtype );
+	const int nDim = GlobalXYWnd_getCurrentViewType();
+	NDIM1NDIM2( nDim );
 	const XYWnd& wnd = *( g_pParentWnd->ActiveXY() );
 	Vector3 min, max;
 	min[nDim1] = wnd.GetOrigin()[nDim1] - 0.5f * wnd.Width() / wnd.Scale();

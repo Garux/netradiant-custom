@@ -1352,15 +1352,7 @@ CSGToolDialog g_csgtool_dialog;
 #if 0
 DoubleVector3 getExclusion(){
 	if( gtk_toggle_button_get_active( g_csgtool_dialog.radProj ) ){
-		if( GlobalXYWnd_getCurrentViewType() == YZ ){
-			return DoubleVector3( 1, 0, 0 );
-		}
-		else if( GlobalXYWnd_getCurrentViewType() == XZ ){
-			return DoubleVector3( 0, 1, 0 );
-		}
-		else if( GlobalXYWnd_getCurrentViewType() == XY ){
-			return DoubleVector3( 0, 0, 1 );
-		}
+		return DoubleVector3( g_vector3_axes[GlobalXYWnd_getCurrentViewType()] );
 	}
 	if( gtk_toggle_button_get_active( g_csgtool_dialog.radCam ) ){
 		Vector3 angles( Camera_getAngles( *g_pParentWnd->GetCamWnd() ) );
@@ -1424,7 +1416,7 @@ void CSGdlg_getSettings( HollowSettings& settings, const CSGToolDialog& dialog )
 	settings.m_offset = static_cast<float>( gtk_spin_button_get_value( dialog.spin ) );
 	settings.m_exclusionAxis = g_vector3_identity;
 	if( gtk_toggle_button_get_active( dialog.radProj ) ){
-		settings.m_exclusionAxis[ static_cast<int>( GlobalXYWnd_getCurrentViewType() ) ] = 1;
+		settings.m_exclusionAxis = g_vector3_axes[GlobalXYWnd_getCurrentViewType()];
 	}
 	else if( gtk_toggle_button_get_active( dialog.radCam ) ){
 		settings.m_exclusionAxis = Camera_getViewVector( *g_pParentWnd->GetCamWnd() );

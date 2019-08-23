@@ -395,19 +395,6 @@ void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t s
 
 } //namespace icosahedron
 
-int GetViewAxis(){
-	switch ( GlobalXYWnd_getCurrentViewType() )
-	{
-	case XY:
-		return 2;
-	case XZ:
-		return 1;
-	case YZ:
-		return 0;
-	}
-	return 2;
-}
-
 void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
 	switch ( type )
 	{
@@ -420,7 +407,7 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 	break;
 	case eBrushPrism:
 	{
-		int axis = GetViewAxis();
+		const int axis = GlobalXYWnd_getCurrentViewType();
 		StringOutputStream command;
 		command << c_brushPrism_name << " -sides " << Unsigned( sides ) << " -axis " << axis;
 		UndoableCommand undo( command.c_str() );
@@ -1483,7 +1470,7 @@ BrushPrefab( EBrushPrefab type )
 	: m_type( type ){
 }
 void set(){
-	DoSides( m_type, GetViewAxis() );
+	DoSides( m_type, GlobalXYWnd_getCurrentViewType() );
 }
 typedef MemberCaller<BrushPrefab, &BrushPrefab::set> SetCaller;
 };
