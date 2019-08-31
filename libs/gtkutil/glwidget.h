@@ -25,7 +25,7 @@
 typedef struct _GtkWidget GtkWidget;
 typedef int gint;
 typedef gint gboolean;
-
+#define NV_DRIVER_GAMMA_BUG 1 //! todo remove as soon, as driver will be fixed
 GtkWidget* glwidget_new( gboolean zbuffer );
 void glwidget_swap_buffers( GtkWidget* widget );
 gboolean glwidget_make_current( GtkWidget* widget );

@@ -58,12 +58,10 @@
 #include "gtkutil/filechooser.h"
 #include "gtkmisc.h"
 #include "select.h"
-#include "csg.h"
 #include "brushmanip.h"
 #include "selection.h"
 #include "entity.h"
 #include "camwindow.h"
-#include "texwindow.h"
 #include "mainframe.h"
 #include "preferences.h"
 #include "commands.h"
@@ -641,7 +639,11 @@ gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xy
 }
 
 gboolean xywnd_size_allocate( GtkWidget* widget, GtkAllocation* allocation, XYWnd* xywnd ){
+#if NV_DRIVER_GAMMA_BUG
+	xywnd->fbo_get()->reset( allocation->width, allocation->height, g_xywindow_globals_private.m_MSAA, true );
+#else
 	xywnd->fbo_get()->reset( allocation->width, allocation->height, g_xywindow_globals_private.m_MSAA, false );
+#endif
 	xywnd->m_nWidth = allocation->width;
 	xywnd->m_nHeight = allocation->height;
 	xywnd->updateProjection();
@@ -669,7 +671,11 @@ void XYWnd_CameraMoved( XYWnd& xywnd ){
 }
 
 XYWnd::XYWnd() :
+#if NV_DRIVER_GAMMA_BUG
+	m_gl_widget( glwidget_new( TRUE ) ),
+#else
 	m_gl_widget( glwidget_new( FALSE ) ),
+#endif
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
 	m_deferredOverlayDraw( ReferenceCaller<XYWnd, xy_update_overlay>( *this ) ),
 	m_deferred_motion( xywnd_motion, this ),
@@ -2459,7 +2465,11 @@ void ToggleShowGrid(){
 void MSAAImport( int value ){
 	g_xywindow_globals_private.m_MSAA = value ? 1 << value : value;
 	g_pParentWnd->forEachXYWnd( []( XYWnd* xywnd ){
+#if NV_DRIVER_GAMMA_BUG
+		xywnd->fbo_get()->reset( xywnd->Width(), xywnd->Height(), g_xywindow_globals_private.m_MSAA, true );
+#else
 		xywnd->fbo_get()->reset( xywnd->Width(), xywnd->Height(), g_xywindow_globals_private.m_MSAA, false );
+#endif
 	} );
 }
 typedef FreeCaller1<int, MSAAImport> MSAAImportCaller;

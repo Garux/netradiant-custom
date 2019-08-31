@@ -2197,7 +2197,11 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		widget_set_visible( g_TextureBrowser.m_texture_scroll, g_TextureBrowser.m_showTextureScrollbar );
 	}
 	{ // gl_widget
+#if NV_DRIVER_GAMMA_BUG
+		g_TextureBrowser.m_gl_widget = glwidget_new( TRUE );
+#else
 		g_TextureBrowser.m_gl_widget = glwidget_new( FALSE );
+#endif
 		gtk_widget_ref( g_TextureBrowser.m_gl_widget );
 
 		gtk_widget_set_events( g_TextureBrowser.m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
