@@ -157,8 +157,11 @@ void gamedetect(){
 
 namespace
 {
+// directories
 CopiedString home_path;
 CopiedString app_path;
+// executable file path
+CopiedString app_filepath;
 }
 
 const char* environment_get_home_path(){
@@ -167,6 +170,10 @@ const char* environment_get_home_path(){
 
 const char* environment_get_app_path(){
 	return app_path.c_str();
+}
+
+const char* environment_get_app_filepath(){
+	return app_filepath.c_str();
 }
 
 bool portable_app_setup(){
@@ -208,32 +215,20 @@ const char* LINK_NAME =
 #endif
 ;
 
-/// brief Returns the filename of the executable belonging to the current process, or 0 if not found.
+/// brief Returns the filename of the executable belonging to the current process, or empty string, if not found.
 const char* getexename( char *buf ){
 	/* Now read the symbolic link */
-	int ret = readlink( LINK_NAME, buf, PATH_MAX );
+	const int ret = readlink( LINK_NAME, buf, PATH_MAX );
 
 	if ( ret == -1 ) {
 		globalWarningStream() << "getexename: falling back to argv[0]: " << makeQuoted( g_argv[0] );
-		const char* path = realpath( g_argv[0], buf );
-		if ( path == 0 ) {
-			/* In case of an error, leave the handling up to the caller */
-			return "";
-		}
+		if( realpath( g_argv[0], buf ) == 0 )
+			*buf = '\0'; /* In case of an error, leave the handling up to the caller */
 	}
-
-	/* Ensure proper NUL termination */
-	buf[ret] = 0;
-
-	/* delete the program name */
-	*( strrchr( buf, '/' ) ) = '\0';
-
-	// NOTE: we build app path with a trailing '/'
-	// it's a general convention in Radiant to have the slash at the end of directories
-	if ( buf[strlen( buf ) - 1] != '/' ) {
-		strcat( buf, "/" );
+	else{
+		/* Ensure proper NUL termination */
+		buf[ret] = 0;
 	}
-
 	return buf;
 }
 
@@ -252,8 +247,11 @@ void environment_init( int argc, char* argv[] ){
 
 	{
 		char real[PATH_MAX];
-		app_path = getexename( real );
-		ASSERT_MESSAGE( !string_empty( app_path.c_str() ), "failed to deduce app path" );
+		app_filepath = getexename( real );
+		ASSERT_MESSAGE( !string_empty( app_filepath.c_str() ), "failed to deduce app path" );
+		// NOTE: we build app path with a trailing '/'
+		// it's a general convention in Radiant to have the slash at the end of directories
+		app_path = StringRange( real, path_get_filename_start( real ) );
 	}
 
 	if ( !portable_app_setup() ) {
@@ -277,17 +275,11 @@ void environment_init( int argc, char* argv[] ){
 		// get path to the editor
 		char filename[MAX_PATH + 1];
 		GetModuleFileName( 0, filename, MAX_PATH );
-		char* last_separator = strrchr( filename, '\\' );
-		if ( last_separator != 0 ) {
-			*( last_separator + 1 ) = '\0';
-		}
-		else
-		{
-			filename[0] = '\0';
-		}
-		StringOutputStream app( 256 );
-		app << PathCleaned( filename );
-		app_path = app.c_str();
+
+		StringOutputStream stream( 256 );
+		stream << PathCleaned( filename );
+		app_filepath = stream.c_str();
+		app_path = StringRange( stream.c_str(), path_get_filename_start( stream.c_str() ) );
 	}
 
 	if ( !portable_app_setup() ) {

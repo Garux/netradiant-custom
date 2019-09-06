@@ -135,7 +135,7 @@ EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const cha
 		}
 
 		{
-			GtkButton* button = create_modal_dialog_button( "OK", cancel_button );
+			GtkButton* button = create_modal_dialog_button( "Cancel", cancel_button );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 			gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
 			gtk_widget_show( GTK_WIDGET( button ) );

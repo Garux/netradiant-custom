@@ -207,6 +207,8 @@ const char* GameToolsPath_get();
 void Radiant_Initialise();
 void Radiant_Shutdown();
 
+void Radiant_Restart();
+
 void SaveMapAs();
 
 

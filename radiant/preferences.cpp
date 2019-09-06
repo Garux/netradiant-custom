@@ -270,13 +270,12 @@ void CGameDialog::DoGameDialog(){
 void CGameDialog::GameFileImport( int value ){
 	m_nComboSelect = value;
 	// use value to set m_sGameFile
-	std::list<CGameDescription *>::iterator iGame = mGames.begin();
-	int i;
-	for ( i = 0; i < value; i++ )
-	{
-		++iGame;
+	std::list<CGameDescription *>::const_iterator iGame = std::next( mGames.begin(), value );
+
+	if ( ( *iGame )->mGameFile != m_sGameFile ) {
+		m_sGameFile = ( *iGame )->mGameFile;
+		PreferencesDialog_restartRequired( "Selected Game" );
 	}
-	m_sGameFile = ( *iGame )->mGameFile;
 }
 
 void CGameDialog::GameFileExport( const IntImportCallback& importCallback ) const {
@@ -955,13 +954,14 @@ void PreferencesDialog_showDialog(){
 	if ( g_Preferences.DoModal() == eIDOK ) {
 		if ( !g_restart_required.empty() ) {
 			StringOutputStream message( 256 );
-			message << "Preference changes require a restart:\n";
-			for ( std::vector<const char*>::iterator i = g_restart_required.begin(); i != g_restart_required.end(); ++i )
-			{
-				message << ( *i ) << '\n';
-			}
-			gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), message.c_str() );
+			message << "Preference changes require a restart:\n\n";
+			for ( const auto i : g_restart_required )
+				message << i << '\n';
 			g_restart_required.clear();
+			message << "\nRestart now?";
+
+			if( gtk_MessageBox( GTK_WIDGET( MainFrame_getWindow() ), message.c_str(), "Restart is required", eMB_YESNO, eMB_ICONQUESTION ) == eIDYES )
+				Radiant_Restart();
 		}
 	}
 }

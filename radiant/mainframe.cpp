@@ -665,6 +665,31 @@ void Exit(){
 	}
 }
 
+#include "environment.h"
+
+#ifdef WIN32
+#include <process.h>
+#else
+#include <spawn.h>
+#endif
+void Radiant_Restart(){
+	ConfirmModified( "Restart Radiant" ); // user can choose to not save, it's ok
+
+	char *argv[] = { string_clone( environment_get_app_filepath() ),
+						Map_Unnamed( g_map )? NULL : string_clone( Map_Name( g_map ) ),
+						NULL };
+#ifdef WIN32
+	const int status = !_spawnv( P_NOWAIT, argv[0], argv );
+#else
+	const int status = posix_spawn( NULL, argv[0], NULL, NULL, argv, environ );
+#endif
+
+	// quit if radiant successfully started
+	if ( status == 0 ) {
+		gtk_main_quit();
+	}
+}
+
 
 void Undo(){
 	GlobalUndoSystem().undo();
