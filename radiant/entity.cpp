@@ -651,11 +651,9 @@ typedef ReferenceCaller1<EntityCreator, const IntImportCallback&, ShowNamesRatio
 
 
 void ShowTargetNamesImport( EntityCreator& self, bool value ){
-	const bool oldvalue = self.getShowTargetNames();
+	if( self.getShowTargetNames() != value )
+		PreferencesDialog_restartRequired( "Entity Names = Targetnames" ); // technically map reloading or entities recreation do update too, as it's not LatchedValue
 	self.setShowTargetNames( value );
-	if( oldvalue != value ){
-		PreferencesDialog_restartRequired( "Entity Names = Targetnames" );
-	}
 }
 typedef ReferenceCaller1<EntityCreator, bool, ShowTargetNamesImport> ShowTargetNamesImportCaller;
 

@@ -36,7 +36,6 @@
 
 #include "clippertool.h"
 
-LatchedBool g_useAlternativeTextureProjection( false, "Use alternative texture-projection (\"brush primitives\")" );
 bool g_multipleBrushTypes = false;
 EBrushType g_brushTypes[3];
 int g_brushType;

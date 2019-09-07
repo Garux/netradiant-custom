@@ -150,7 +150,7 @@ void CGameDescription::Dump(){
 	}
 }
 
-CGameDescription *g_pGameDescription; ///< shortcut to g_GamesDialog.m_pCurrentDescription
+CGameDescription *g_pGameDescription;
 
 
 #include "warnings.h"
@@ -224,7 +224,7 @@ typedef FreeCaller1<const char*, LogConsole_importString> LogConsoleImportString
 
 
 void RegisterGlobalPreferences( PreferenceSystem& preferences ){
-	preferences.registerPreference( "gamefile", CopiedStringImportStringCaller( g_GamesDialog.m_sGameFile ), CopiedStringExportStringCaller( g_GamesDialog.m_sGameFile ) );
+	preferences.registerPreference( "gamefile", makeCopiedStringStringImportCallback( LatchedAssignCaller( g_GamesDialog.m_sGameFile ) ), CopiedStringExportStringCaller( g_GamesDialog.m_sGameFile.m_latched ) );
 	preferences.registerPreference( "gamePrompt", BoolImportStringCaller( g_GamesDialog.m_bGamePrompt ), BoolExportStringCaller( g_GamesDialog.m_bGamePrompt ) );
 	preferences.registerPreference( "log console", LogConsoleImportStringCaller(), BoolExportStringCaller( g_Console_enableLogging ) );
 }
@@ -267,15 +267,24 @@ void CGameDialog::DoGameDialog(){
 	SavePrefs();
 }
 
+CGameDescription* CGameDialog::GameDescriptionForComboItem(){
+	return ( m_nComboSelect >= 0 && m_nComboSelect < mGames.size() )?
+			*std::next( mGames.begin(), m_nComboSelect )
+			: 0; // not found
+}
+
+void CGameDialog::GameFileAssign( int value ){
+	m_nComboSelect = value;
+	// use value to set m_sGameFile
+	if( CGameDescription* iGame = GameDescriptionForComboItem() )
+		m_sGameFile.assign( iGame->mGameFile );
+}
+
 void CGameDialog::GameFileImport( int value ){
 	m_nComboSelect = value;
 	// use value to set m_sGameFile
-	std::list<CGameDescription *>::const_iterator iGame = std::next( mGames.begin(), value );
-
-	if ( ( *iGame )->mGameFile != m_sGameFile ) {
-		m_sGameFile = ( *iGame )->mGameFile;
-		PreferencesDialog_restartRequired( "Selected Game" );
-	}
+	if( CGameDescription* iGame = GameDescriptionForComboItem() )
+		m_sGameFile.import( iGame->mGameFile );
 }
 
 void CGameDialog::GameFileExport( const IntImportCallback& importCallback ) const {
@@ -284,7 +293,7 @@ void CGameDialog::GameFileExport( const IntImportCallback& importCallback ) cons
 	int i = 0;
 	for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame )
 	{
-		if ( ( *iGame )->mGameFile == m_sGameFile ) {
+		if ( ( *iGame )->mGameFile == m_sGameFile.m_latched ) {
 			m_nComboSelect = i;
 			break;
 		}
@@ -293,15 +302,7 @@ void CGameDialog::GameFileExport( const IntImportCallback& importCallback ) cons
 	importCallback( m_nComboSelect );
 }
 
-void CGameDialog_GameFileImport( CGameDialog& self, int value ){
-	self.GameFileImport( value );
-}
-
-void CGameDialog_GameFileExport( CGameDialog& self, const IntImportCallback& importCallback ){
-	self.GameFileExport( importCallback );
-}
-
-void CGameDialog::CreateGlobalFrame( PreferencesPage& page ){
+void CGameDialog::CreateGlobalFrame( PreferencesPage& page, bool global ){
 	std::vector<const char*> games;
 	games.reserve( mGames.size() );
 	for ( std::list<CGameDescription *>::iterator i = mGames.begin(); i != mGames.end(); ++i )
@@ -311,8 +312,10 @@ void CGameDialog::CreateGlobalFrame( PreferencesPage& page ){
 	page.appendCombo(
 		"Select the game",
 		StringArrayRange( &( *games.begin() ), &( *games.end() ) ),
-		ReferenceCaller1<CGameDialog, int, CGameDialog_GameFileImport>( *this ),
-		ReferenceCaller1<CGameDialog, const IntImportCallback&, CGameDialog_GameFileExport>( *this )
+		global?
+			IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileAssign>( *this ) ):
+			IntImportCallback( MemberCaller1<CGameDialog, int, &CGameDialog::GameFileImport>( *this ) ),
+		ConstMemberCaller1<CGameDialog, const IntImportCallback&, &CGameDialog::GameFileExport>( *this )
 		);
 	page.appendCheckBox( "Startup", "Show Global Preferences", m_bGamePrompt );
 }
@@ -326,7 +329,7 @@ GtkWindow* CGameDialog::BuildDialog(){
 	{
 		PreferencesPage preferencesPage( *this, GTK_WIDGET( vbox2 ) );
 		Global_constructPreferences( preferencesPage );
-		CreateGlobalFrame( preferencesPage );
+		CreateGlobalFrame( preferencesPage, true );
 	}
 
 	return create_simple_modal_dialog_window( "Global Preferences", m_modal, GTK_WIDGET( frame ) );
@@ -349,7 +352,7 @@ void operator()( const char* name ) const {
 
 	xmlDocPtr pDoc = xmlParseFile( strPath.c_str() );
 	if ( pDoc ) {
-		mGames.push_front( new CGameDescription( pDoc, name ) );
+		mGames.push_back( new CGameDescription( pDoc, name ) );
 		xmlFreeDoc( pDoc );
 	}
 	else
@@ -378,18 +381,6 @@ void CGameDialog::ScanForGames(){
 	Directory_forEach( path, LoadGameFile( mGames, path ) );
 }
 
-CGameDescription* CGameDialog::GameDescriptionForComboItem(){
-	std::list<CGameDescription *>::iterator iGame;
-	int i = 0;
-	for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame,i++ )
-	{
-		if ( i == m_nComboSelect ) {
-			return ( *iGame );
-		}
-	}
-	return 0; // not found
-}
-
 void CGameDialog::InitGlobalPrefPath(){
 	g_Preferences.m_global_rc_path = g_string_new( SettingsPath_get() );
 }
@@ -412,17 +403,9 @@ void CGameDialog::Init(){
 	}
 	else
 	{
-		std::list<CGameDescription *>::iterator iGame, iPrevGame;
-		for ( iGame = mGames.begin(), iPrevGame = mGames.end(); iGame != mGames.end(); iPrevGame = iGame, ++iGame )
-		{
-			if ( iPrevGame != mGames.end() ) {
-				if ( strcmp( ( *iGame )->getRequiredKeyValue( "name" ), ( *iPrevGame )->getRequiredKeyValue( "name" ) ) < 0 ) {
-					CGameDescription *h = *iGame;
-					*iGame = *iPrevGame;
-					*iPrevGame = h;
-				}
-			}
-		}
+		mGames.sort( []( const CGameDescription* one, const CGameDescription* another ){
+			return one->mGameFile < another->mGameFile;
+		} );
 	}
 
 	CGameDescription* currentGameDescription = 0;
@@ -432,7 +415,7 @@ void CGameDialog::Init(){
 		std::list<CGameDescription *>::iterator iGame;
 		for ( iGame = mGames.begin(); iGame != mGames.end(); ++iGame )
 		{
-			if ( ( *iGame )->mGameFile == m_sGameFile ) {
+			if ( ( *iGame )->mGameFile == m_sGameFile.m_value ) {
 				currentGameDescription = ( *iGame );
 				break;
 			}
@@ -792,7 +775,7 @@ GtkWindow* PrefsDlg::BuildDialog(){
 							{
 								GtkWidget* game = PreferencePages_addPage( m_notebook, "Game" );
 								PreferencesPage preferencesPage( *this, getVBox( game ) );
-								g_GamesDialog.CreateGlobalFrame( preferencesPage );
+								g_GamesDialog.CreateGlobalFrame( preferencesPage, false );
 
 								PreferenceTree_appendPage( store, &group, "Game", game );
 							}
@@ -910,7 +893,7 @@ void Preferences_Load(){
 
 	globalOutputStream() << "loading local preferences from " << g_Preferences.m_inipath->str << "\n";
 
-	if ( !Preferences_Load( g_preferences, g_Preferences.m_inipath->str, g_GamesDialog.m_sGameFile.c_str() ) ) {
+	if ( !Preferences_Load( g_preferences, g_Preferences.m_inipath->str, g_GamesDialog.m_sGameFile.m_value.c_str() ) ) {
 		globalWarningStream() << "failed to load local preferences from " << g_Preferences.m_inipath->str << "\n";
 	}
 }

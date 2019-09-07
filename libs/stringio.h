@@ -378,6 +378,36 @@ static void thunk( void* environment, FirstArgument firstArgument ){
 };
 
 
+class CopiedStringFromString
+{
+CopiedString m_value;
+public:
+CopiedStringFromString( const char* string ){
+	CopiedString_importString( m_value, string );
+}
+operator CopiedString() const
+{
+	return m_value;
+}
+};
+
+inline void CopiedString_toString( const StringImportCallback& self, CopiedString value ){
+	CopiedString_exportString( value, self );
+}
+typedef ConstReferenceCaller1<StringImportCallback, CopiedString, CopiedString_toString> CopiedStringToString;
+
+
+template<typename Caller>
+inline StringImportCallback makeCopiedStringStringImportCallback( const Caller& caller ){
+	return StringImportCallback( caller.getEnvironment(), ImportConvert1<StringImportCallback::first_argument_type, Caller, CopiedStringFromString>::thunk );
+}
+
+template<typename Caller>
+inline StringExportCallback makeCopiedStringStringExportCallback( const Caller& caller ){
+	return StringExportCallback( caller.getEnvironment(), ImportConvert1<StringExportCallback::first_argument_type, Caller, CopiedStringToString>::thunk );
+}
+
+
 class BoolFromString
 {
 bool m_value;

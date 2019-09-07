@@ -3510,40 +3510,40 @@ void Layout_constructPreferences( PreferencesPage& page ){
 		page.appendRadioIcons(
 			"Window Layout",
 			STRING_ARRAY_RANGE( layouts ),
-			LatchedIntImportCaller( g_Layout_viewStyle ),
+			LatchedImportCaller( g_Layout_viewStyle ),
 			IntExportCaller( g_Layout_viewStyle.m_latched )
 			);
 	}
 	page.appendCheckBox(
 		"", "Detachable Menus",
-		LatchedBoolImportCaller( g_Layout_enableDetachableMenus ),
+		LatchedImportCaller( g_Layout_enableDetachableMenus ),
 		BoolExportCaller( g_Layout_enableDetachableMenus.m_latched )
 		);
 	page.appendCheckBox(
 		"", "Main Toolbar",
-		LatchedBoolImportCaller( g_Layout_enableMainToolbar ),
+		LatchedImportCaller( g_Layout_enableMainToolbar ),
 		BoolExportCaller( g_Layout_enableMainToolbar.m_latched )
 		);
 	if ( !string_empty( g_pGameDescription->getKeyValue( "no_patch" ) ) ) {
 		page.appendCheckBox(
 			"", "Patch Toolbar",
-			LatchedBoolImportCaller( g_Layout_enablePatchToolbar ),
+			LatchedImportCaller( g_Layout_enablePatchToolbar ),
 			BoolExportCaller( g_Layout_enablePatchToolbar.m_latched )
 			);
 	}
 	page.appendCheckBox(
 		"", "Plugin Toolbar",
-		LatchedBoolImportCaller( g_Layout_enablePluginToolbar ),
+		LatchedImportCaller( g_Layout_enablePluginToolbar ),
 		BoolExportCaller( g_Layout_enablePluginToolbar.m_latched )
 		);
 	page.appendCheckBox(
 		"", "Filter Toolbar",
-		LatchedBoolImportCaller( g_Layout_enableFilterToolbar ),
+		LatchedImportCaller( g_Layout_enableFilterToolbar ),
 		BoolExportCaller( g_Layout_enableFilterToolbar.m_latched )
 		);
 	page.appendCheckBox(
 		"", "Single Scrollable Toolbar",
-		LatchedBoolImportCaller( g_Layout_SingleToolbar ),
+		LatchedImportCaller( g_Layout_SingleToolbar ),
 		BoolExportCaller( g_Layout_SingleToolbar.m_latched )
 		);
 }
@@ -3699,13 +3699,13 @@ void MainFrame_Construct(){
 	typedef FreeCaller1<const Selectable&, ComponentMode_SelectionChanged> ComponentModeSelectionChangedCaller;
 	GlobalSelectionSystem().addSelectionChangeCallback( ComponentModeSelectionChangedCaller() );
 
-	GlobalPreferenceSystem().registerPreference( "DetachableMenus", BoolImportStringCaller( g_Layout_enableDetachableMenus.m_latched ), BoolExportStringCaller( g_Layout_enableDetachableMenus.m_latched ) );
-	GlobalPreferenceSystem().registerPreference( "MainToolBar", BoolImportStringCaller( g_Layout_enableMainToolbar.m_latched ), BoolExportStringCaller( g_Layout_enableMainToolbar.m_latched ) );
-	GlobalPreferenceSystem().registerPreference( "PatchToolBar", BoolImportStringCaller( g_Layout_enablePatchToolbar.m_latched ), BoolExportStringCaller( g_Layout_enablePatchToolbar.m_latched ) );
-	GlobalPreferenceSystem().registerPreference( "PluginToolBar", BoolImportStringCaller( g_Layout_enablePluginToolbar.m_latched ), BoolExportStringCaller( g_Layout_enablePluginToolbar.m_latched ) );
-	GlobalPreferenceSystem().registerPreference( "FilterToolBar", BoolImportStringCaller( g_Layout_enableFilterToolbar.m_latched ), BoolExportStringCaller( g_Layout_enableFilterToolbar.m_latched ) );
-	GlobalPreferenceSystem().registerPreference( "SingleToolBar", BoolImportStringCaller( g_Layout_SingleToolbar.m_latched ), BoolExportStringCaller( g_Layout_SingleToolbar.m_latched ) );
-	GlobalPreferenceSystem().registerPreference( "QE4StyleWindows", IntImportStringCaller( g_Layout_viewStyle.m_latched ), IntExportStringCaller( g_Layout_viewStyle.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "DetachableMenus", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_enableDetachableMenus ) ), BoolExportStringCaller( g_Layout_enableDetachableMenus.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "MainToolBar", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_enableMainToolbar ) ), BoolExportStringCaller( g_Layout_enableMainToolbar.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "PatchToolBar", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_enablePatchToolbar ) ), BoolExportStringCaller( g_Layout_enablePatchToolbar.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "PluginToolBar", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_enablePluginToolbar ) ), BoolExportStringCaller( g_Layout_enablePluginToolbar.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "FilterToolBar", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_enableFilterToolbar ) ), BoolExportStringCaller( g_Layout_enableFilterToolbar.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "SingleToolBar", makeBoolStringImportCallback( LatchedAssignCaller( g_Layout_SingleToolbar ) ), BoolExportStringCaller( g_Layout_SingleToolbar.m_latched ) );
+	GlobalPreferenceSystem().registerPreference( "QE4StyleWindows", makeIntStringImportCallback( LatchedAssignCaller( g_Layout_viewStyle ) ), IntExportStringCaller( g_Layout_viewStyle.m_latched ) );
 	GlobalPreferenceSystem().registerPreference( "XYHeight", IntImportStringCaller( g_layout_globals.nXYHeight ), IntExportStringCaller( g_layout_globals.nXYHeight ) );
 	GlobalPreferenceSystem().registerPreference( "XYWidth", IntImportStringCaller( g_layout_globals.nXYWidth ), IntExportStringCaller( g_layout_globals.nXYWidth ) );
 	GlobalPreferenceSystem().registerPreference( "CamWidth", IntImportStringCaller( g_layout_globals.nCamWidth ), IntExportStringCaller( g_layout_globals.nCamWidth ) );
@@ -3746,15 +3746,6 @@ void MainFrame_Construct(){
 		g_strEnginePath = path.c_str();
 	}
 
-
-
-	g_Layout_viewStyle.useLatched();
-	g_Layout_enableDetachableMenus.useLatched();
-	g_Layout_enableMainToolbar.useLatched();
-	g_Layout_enablePatchToolbar.useLatched();
-	g_Layout_enablePluginToolbar.useLatched();
-	g_Layout_enableFilterToolbar.useLatched();
-	g_Layout_SingleToolbar.useLatched();
 
 	Layout_registerPreferencesPage();
 	Paths_registerPreferencesPage();

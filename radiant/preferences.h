@@ -137,12 +137,12 @@ Value m_value;
 Value m_latched;
 const char* m_description;
 
-LatchedValue( Value value, const char* description ) : m_latched( value ), m_description( description ){
+LatchedValue( Value value, const char* description ) : m_value( value ), m_latched( value ), m_description( description ){
 }
-void useLatched(){
-	m_value = m_latched;
+void assign( Value value ){ // assign during initialization
+	m_value = m_latched = value;
 }
-void import( Value value ){
+void import( Value value ){ // import during runtime
 	m_latched = value;
 	if ( m_latched != m_value ) {
 		PreferencesDialog_restartRequired( m_description );
@@ -151,10 +151,17 @@ void import( Value value ){
 };
 
 typedef LatchedValue<bool> LatchedBool;
-typedef MemberCaller1<LatchedBool, bool, &LatchedBool::import> LatchedBoolImportCaller;
-
 typedef LatchedValue<int> LatchedInt;
-typedef MemberCaller1<LatchedInt, int, &LatchedInt::import> LatchedIntImportCaller;
+
+template<typename T, typename R = MemberCaller1<LatchedValue<T>, T, &LatchedValue<T>::assign>>
+inline R LatchedAssignCaller( LatchedValue<T>& latchedValue ){
+	return R( latchedValue );
+}
+
+template<typename T, typename R = MemberCaller1<LatchedValue<T>, T, &LatchedValue<T>::import>>
+inline R LatchedImportCaller( LatchedValue<T>& latchedValue ){
+	return R( latchedValue );
+}
 
 /*!
    holds information for a given game
@@ -203,9 +210,6 @@ void Dump();
 extern CGameDescription *g_pGameDescription;
 
 typedef struct _GtkWidget GtkWidget;
-class PrefsDlg;
-
-class PreferencesPage;
 
 class StringOutputStream;
 
@@ -231,7 +235,7 @@ public:
    what game has been selected
    this is the name of the .game file
  */
-CopiedString m_sGameFile;
+LatchedValue<CopiedString> m_sGameFile;
 /*!
    prompt which game to load on startup
  */
@@ -249,7 +253,7 @@ bool m_bForceLogConsole;
 std::list<CGameDescription*> mGames;
 
 CGameDialog() :
-	m_sGameFile( "" ),
+	m_sGameFile( "", "Selected Game" ),
 	m_bGamePrompt( false ),
 	m_bForceLogConsole( false ){
 }
@@ -279,6 +283,7 @@ void DoGameDialog();
  */
 GtkWindow* BuildDialog();
 
+void GameFileAssign( int value );
 void GameFileImport( int value );
 void GameFileExport( const IntImportCallback& importCallback ) const;
 
@@ -289,7 +294,8 @@ void GameFileExport( const IntImportCallback& importCallback ) const;
    for prefs, we hook the frame in the main notebook
    build the frame on-demand (only once)
  */
-void CreateGlobalFrame( PreferencesPage& page );
+/// \brief \p global controls if to use LatchedValue assignment callback (global settings dialog) or import (preferences dialog).
+void CreateGlobalFrame( PreferencesPage& page, bool global );
 
 /*!
    global preferences subsystem
@@ -328,10 +334,6 @@ extern CGameDialog g_GamesDialog;
 
 class PrefsDlg : public Dialog
 {
-public:
-protected:
-std::list<CGameDescription *> mGames;
-
 public:
 
 GtkWidget *m_notebook;
