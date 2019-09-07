@@ -653,6 +653,13 @@ void build_commands_write( const char* filename ){
 
 void Build_refreshMenu( GtkMenu* menu );
 
+#define LAST_ITER_STRING "..."
+inline void last_iter_append( GtkListStore* store ){
+	GtkTreeIter lastIter;
+	gtk_list_store_append( store, &lastIter );
+	gtk_list_store_set( store, &lastIter, 0, LAST_ITER_STRING, -1 );
+}
+
 
 void BSPCommandList_Construct( GtkListStore* store, Project& project ){
 	gtk_list_store_clear( store );
@@ -666,8 +673,7 @@ void BSPCommandList_Construct( GtkListStore* store, Project& project ){
 		gtk_list_store_set( store, &buildIter, 0, const_cast<char*>( buildName ), -1 );
 	}
 
-	GtkTreeIter lastIter;
-	gtk_list_store_append( store, &lastIter );
+	last_iter_append( store );
 }
 
 class ProjectList
@@ -704,13 +710,12 @@ gboolean project_cell_edited( GtkCellRendererText* cell, gchar* path_string, gch
 			gtk_list_store_set( projectList->m_store, &iter, 0, new_text, -1 );
 		}
 	}
-	else if ( !string_empty( new_text ) ) {
+	else if ( !string_empty( new_text ) && !string_equal( new_text, LAST_ITER_STRING ) ) {
 		projectList->m_changed = true;
 		project.push_back( Project::value_type( new_text, Build() ) );
 
 		gtk_list_store_set( projectList->m_store, &iter, 0, new_text, -1 );
-		GtkTreeIter lastIter;
-		gtk_list_store_append( projectList->m_store, &lastIter );
+		last_iter_append( projectList->m_store );
 		//make command field activatable
 		g_signal_emit_by_name( G_OBJECT( gtk_tree_view_get_selection( GTK_TREE_VIEW( projectList->m_buildView ) ) ), "changed" );
 	}
@@ -771,8 +776,7 @@ gboolean project_selection_changed( GtkTreeSelection* selection, GtkListStore* s
 				gtk_list_store_append( store, &commandIter );
 				gtk_list_store_set( store, &commandIter, 0, const_cast<char*>( ( *i ).c_str() ), -1 );
 			}
-			GtkTreeIter lastIter;
-			gtk_list_store_append( store, &lastIter );
+			last_iter_append( store );
 		}
 		else
 		{
@@ -807,14 +811,13 @@ gboolean commands_cell_edited( GtkCellRendererText* cell, gchar* path_string, gc
 
 		gtk_list_store_set( store, &iter, 0, new_text, -1 );
 	}
-	else if ( !string_empty( new_text ) ) {
+	else if ( !string_empty( new_text ) && !string_equal( new_text, LAST_ITER_STRING ) ) {
 		g_build_changed = true;
 		build.push_back( Build::value_type( VariableString( new_text ) ) );
 
 		gtk_list_store_set( store, &iter, 0, new_text, -1 );
 
-		GtkTreeIter lastIter;
-		gtk_list_store_append( store, &lastIter );
+		last_iter_append( store );
 	}
 
 	gtk_tree_path_free( path );
