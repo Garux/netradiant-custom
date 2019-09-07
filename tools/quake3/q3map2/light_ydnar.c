@@ -446,7 +446,6 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 	vec4_t sideplane, hostplane;
 	vec3_t origintwo;
 	int j, next;
-	float e;
 	float           *nudge;
 	static float nudges[][ 2 ] =
 	{
@@ -571,15 +570,11 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 				PlaneFromPoints( sideplane,cverts[i],cverts[ next ], temp );
 
 				//planetest sample point
-				e = DotProduct( origin,sideplane );
-				e = e - sideplane[3];
-				if ( e > 0 ) {
+				const float e = DotProduct( origin, sideplane ) - sideplane[3];
+				if ( e > -LUXEL_EPSILON ) {
 					//we're bad.
-					//VectorClear(origin);
 					//Move the sample point back inside triangle bounds
-					origin[0] -= sideplane[0] * ( e + 1 );
-					origin[1] -= sideplane[1] * ( e + 1 );
-					origin[2] -= sideplane[2] * ( e + 1 );
+					VectorMA( origin, ( -e - 1 ), sideplane, origin );
 #ifdef DEBUG_27_1
 					VectorClear( origin );
 #endif
@@ -628,9 +623,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 
 	VectorCopy( origin,origintwo );
 	if ( lightmapExtraVisClusterNudge ) {
-		origintwo[0] += vecs[2][0];
-		origintwo[1] += vecs[2][1];
-		origintwo[2] += vecs[2][2];
+		VectorAdd( origintwo, vecs[2], origintwo );
 	}
 
 	/* get cluster */
