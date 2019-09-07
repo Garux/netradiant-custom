@@ -330,7 +330,7 @@ const char* browse_sound( GtkWidget* parent ){
 	if ( !file_readable( buffer.c_str() ) ) {
 		// just go to fsmain
 		buffer.clear();
-		buffer << g_qeglobals.m_userGamePath.c_str() << "/";
+		buffer << g_qeglobals.m_userGamePath.c_str();
 	}
 
 	const char* filename = file_dialog( parent, TRUE, "Open Wav File", buffer.c_str(), "sound" );
