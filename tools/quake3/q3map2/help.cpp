@@ -224,6 +224,7 @@ static void HelpLight()
 		{"-lomem", "Low memory but slower lighting mode"},
 		{"-lowquality", "Low quality floodlight (appears to currently break floodlight)"},
 		{"-minsamplesize <N>", "Sets minimum lightmap resolution in luxels/qu"},
+		{"-nobouncestore", "Do not store BSP, lightmap and shader files between bounces"},
 		{"-nocollapse", "Do not collapse identical lightmaps"},
 		{"-nodeluxe, -nodeluxemap", "Disable deluxemapping"},
 		{"-nofastpoint", "Disable fast point light calculation"},

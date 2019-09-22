@@ -1785,7 +1785,7 @@ static void SetupGrid(){
    does what it says...
  */
 
-static void LightWorld( bool fastAllocate ){
+static void LightWorld( bool fastAllocate, bool bounceStore ){
 	Vector3 color;
 	float f;
 	int b, bt;
@@ -1917,10 +1917,12 @@ static void LightWorld( bool fastAllocate ){
 	while ( bounce > 0 )
 	{
 		/* store off the bsp between bounces */
-		StoreSurfaceLightmaps( fastAllocate );
-		UnparseEntities();
-		Sys_Printf( "Writing %s\n", source );
-		WriteBSPFile( source );
+		StoreSurfaceLightmaps( fastAllocate, bounceStore );
+		if( bounceStore ){
+			UnparseEntities();
+			Sys_Printf( "Writing %s\n", source );
+			WriteBSPFile( source );
+		}
 
 		/* note it */
 		Sys_Printf( "\n--- Radiosity (bounce %d of %d) ---\n", b, bt );
@@ -1939,7 +1941,10 @@ static void LightWorld( bool fastAllocate ){
 		SetupEnvelopes( false, fastbounce );
 		if ( lights.empty() ) {
 			Sys_Printf( "No diffuse light to calculate, ending radiosity.\n" );
-			return;
+			if( bounceStore ){ // already stored, just quit
+				return;
+			}
+			break; // break to StoreSurfaceLightmaps
 		}
 
 		/* add to lightgrid */
@@ -1982,8 +1987,9 @@ static void LightWorld( bool fastAllocate ){
 		bounce--;
 		b++;
 	}
+
 	/* ydnar: store off lightmaps */
-	StoreSurfaceLightmaps( fastAllocate );
+	StoreSurfaceLightmaps( fastAllocate, true );
 }
 
 
@@ -1998,6 +2004,7 @@ int LightMain( Args& args ){
 	int lightmapMergeSize = 0;
 	bool lightSamplesInsist = false;
 	bool fastAllocate = true;
+	bool bounceStore = true;
 
 
 	/* note it */
@@ -2445,6 +2452,11 @@ int LightMain( Args& args ){
 			Sys_Printf( "Storing bounced light (radiosity) only\n" );
 		}
 
+		while ( args.takeArg( "-nobouncestore" ) ) {
+			bounceStore = false;
+			Sys_Printf( "Not storing BSP, lightmap and shader files between bounces\n" );
+		}
+
 		while ( args.takeArg( "-nocollapse" ) ) {
 			noCollapse = true;
 			Sys_Printf( "Identical lightmap collapsing disabled\n" );
@@ -2814,7 +2826,7 @@ int LightMain( Args& args ){
 	SetupTraceNodes();
 
 	/* light the world */
-	LightWorld( fastAllocate );
+	LightWorld( fastAllocate, bounceStore );
 
 	/* write out the bsp */
 	UnparseEntities();

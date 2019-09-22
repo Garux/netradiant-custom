@@ -1649,7 +1649,7 @@ int                         ImportLightmapsMain( Args& args );
 
 void                        SetupSurfaceLightmaps();
 void                        StitchSurfaceLightmaps();
-void                        StoreSurfaceLightmaps( bool fastAllocate );
+void                        StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal );
 
 
 /* exportents.c */

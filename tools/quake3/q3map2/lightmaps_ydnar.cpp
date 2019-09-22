@@ -2336,7 +2336,7 @@ static void FillOutLightmap( outLightmap_t *olm ){
    stores the surface lightmaps into the bsp as byte rgb triplets
  */
 
-void StoreSurfaceLightmaps( bool fastAllocate ){
+void StoreSurfaceLightmaps( bool fastAllocate, bool storeForReal ){
 	int i, j, k, x, y, lx, ly, sx, sy, mappedSamples;
 	int style, lightmapNum, lightmapNum2;
 	float               samples, occludedSamples;
@@ -2816,7 +2816,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	   collapse non-unique lightmaps
 	   ----------------------------------------------------------------- */
 
-	if ( !noCollapse && !deluxemap ) {
+	if ( storeForReal && !noCollapse && !deluxemap ) {
 		/* note it */
 		Sys_Printf( "collapsing..." );
 
@@ -2890,481 +2890,491 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	   sort raw lightmaps by shader
 	   ----------------------------------------------------------------- */
 
-	/* note it */
-	Sys_Printf( "sorting..." );
+	if ( storeForReal ) {
+		/* note it */
+		Sys_Printf( "sorting..." );
 
-	timer.start();
+		timer.start();
 
-	/* allocate a new sorted list */
-	if ( sortLightmaps == NULL ) {
-		sortLightmaps = safe_malloc( numRawLightmaps * sizeof( int ) );
+		/* allocate a new sorted list */
+		if ( sortLightmaps == NULL ) {
+			sortLightmaps = safe_malloc( numRawLightmaps * sizeof( int ) );
+		}
+
+		/* fill it out and sort it */
+		for ( i = 0; i < numRawLightmaps; i++ )
+			sortLightmaps[ i ] = i;
+		std::sort( sortLightmaps, sortLightmaps + numRawLightmaps, CompareRawLightmap() );
+
+		Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 	}
-
-	/* fill it out and sort it */
-	for ( i = 0; i < numRawLightmaps; i++ )
-		sortLightmaps[ i ] = i;
-	std::sort( sortLightmaps, sortLightmaps + numRawLightmaps, CompareRawLightmap() );
-
-	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
 
 	/* -----------------------------------------------------------------
 	   allocate output lightmaps
 	   ----------------------------------------------------------------- */
 
-	/* note it */
-	Sys_Printf( "allocating..." );
+	if ( storeForReal ) {
+		/* note it */
+		Sys_Printf( "allocating..." );
 
-	timer.start();
+		timer.start();
 
-	/* kill all existing output lightmaps */
-	if ( outLightmaps != NULL ) {
-		for ( i = 0; i < numOutLightmaps; i++ )
-		{
-			free( outLightmaps[ i ].lightBits );
-			free( outLightmaps[ i ].bspLightBytes );
-		}
-		free( outLightmaps );
-		outLightmaps = NULL;
-	}
-
-	numLightmapShaders = 0;
-	numOutLightmaps = 0;
-	numBSPLightmaps = 0;
-	numExtLightmaps = 0;
-
-	/* find output lightmap */
-	for ( i = 0; i < numRawLightmaps; i++ )
-	{
-		lm = &rawLightmaps[ sortLightmaps[ i ] ];
-		FindOutLightmaps( lm, fastAllocate );
-	}
-
-	/* set output numbers in twinned lightmaps */
-	for ( i = 0; i < numRawLightmaps; i++ )
-	{
-		/* get lightmap */
-		lm = &rawLightmaps[ sortLightmaps[ i ] ];
-
-		/* walk lightmaps */
-		for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-		{
-			/* get twin */
-			lm2 = lm->twins[ lightmapNum ];
-			if ( lm2 == NULL ) {
-				continue;
+		/* kill all existing output lightmaps */
+		if ( outLightmaps != NULL ) {
+			for ( i = 0; i < numOutLightmaps; i++ )
+			{
+				free( outLightmaps[ i ].lightBits );
+				free( outLightmaps[ i ].bspLightBytes );
 			}
-			lightmapNum2 = lm->twinNums[ lightmapNum ];
-
-			/* find output lightmap from twin */
-			lm->outLightmapNums[ lightmapNum ] = lm2->outLightmapNums[ lightmapNum2 ];
-			lm->lightmapX[ lightmapNum ] = lm2->lightmapX[ lightmapNum2 ];
-			lm->lightmapY[ lightmapNum ] = lm2->lightmapY[ lightmapNum2 ];
+			free( outLightmaps );
+			outLightmaps = NULL;
 		}
-	}
 
-	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
+		numLightmapShaders = 0;
+		numOutLightmaps = 0;
+		numBSPLightmaps = 0;
+		numExtLightmaps = 0;
+
+		/* find output lightmap */
+		for ( i = 0; i < numRawLightmaps; i++ )
+		{
+			lm = &rawLightmaps[ sortLightmaps[ i ] ];
+			FindOutLightmaps( lm, fastAllocate );
+		}
+
+		/* set output numbers in twinned lightmaps */
+		for ( i = 0; i < numRawLightmaps; i++ )
+		{
+			/* get lightmap */
+			lm = &rawLightmaps[ sortLightmaps[ i ] ];
+
+			/* walk lightmaps */
+			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+			{
+				/* get twin */
+				lm2 = lm->twins[ lightmapNum ];
+				if ( lm2 == NULL ) {
+					continue;
+				}
+				lightmapNum2 = lm->twinNums[ lightmapNum ];
+
+				/* find output lightmap from twin */
+				lm->outLightmapNums[ lightmapNum ] = lm2->outLightmapNums[ lightmapNum2 ];
+				lm->lightmapX[ lightmapNum ] = lm2->lightmapX[ lightmapNum2 ];
+				lm->lightmapY[ lightmapNum ] = lm2->lightmapY[ lightmapNum2 ];
+			}
+		}
+
+		Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
+	}
 
 	/* -----------------------------------------------------------------
 	   store output lightmaps
 	   ----------------------------------------------------------------- */
 
-	/* note it */
-	Sys_Printf( "storing..." );
+	if ( storeForReal ) {
+		/* note it */
+		Sys_Printf( "storing..." );
 
-	timer.start();
+		timer.start();
 
-	/* count the bsp lightmaps and allocate space */
-	const size_t gameLmSize = g_game->lightmapSize * g_game->lightmapSize * sizeof( Vector3b );
-	if ( numBSPLightmaps == 0 || externalLightmaps ) {
-		bspLightBytes.clear();
-	}
-	else
-	{
-		bspLightBytes = decltype( bspLightBytes )( numBSPLightmaps * gameLmSize, 0 );
-	}
-
-	/* walk the list of output lightmaps */
-	for ( i = 0; i < numOutLightmaps; i++ )
-	{
-		/* get output lightmap */
-		olm = &outLightmaps[ i ];
-
-		/* fill output lightmap */
-		if ( lightmapFill ) {
-			FillOutLightmap( olm );
+		/* count the bsp lightmaps and allocate space */
+		const size_t gameLmSize = g_game->lightmapSize * g_game->lightmapSize * sizeof( Vector3b );
+		if ( numBSPLightmaps == 0 || externalLightmaps ) {
+			bspLightBytes.clear();
 		}
-		else if( lightmapPink ){
-			for ( x = 0; x < olm->customHeight * olm->customWidth; ++x ){
-				if ( !bit_is_enabled( olm->lightBits, x ) ) { /* not filled */
-					olm->bspLightBytes[x] = { 255, 0, 255 };
+		else
+		{
+			bspLightBytes = decltype( bspLightBytes )( numBSPLightmaps * gameLmSize, 0 );
+		}
+
+		/* walk the list of output lightmaps */
+		for ( i = 0; i < numOutLightmaps; i++ )
+		{
+			/* get output lightmap */
+			olm = &outLightmaps[ i ];
+
+			/* fill output lightmap */
+			if ( lightmapFill ) {
+				FillOutLightmap( olm );
+			}
+			else if( lightmapPink ){
+				for ( x = 0; x < olm->customHeight * olm->customWidth; ++x ){
+					if ( !bit_is_enabled( olm->lightBits, x ) ) { /* not filled */
+						olm->bspLightBytes[x] = { 255, 0, 255 };
+					}
 				}
 			}
-		}
 
-		/* is this a valid bsp lightmap? */
-		if ( olm->lightmapNum >= 0 && !externalLightmaps ) {
-			/* copy lighting data */
-			lb = bspLightBytes.data() + ( olm->lightmapNum * gameLmSize );
-			memcpy( lb, olm->bspLightBytes, gameLmSize );
+			/* is this a valid bsp lightmap? */
+			if ( olm->lightmapNum >= 0 && !externalLightmaps ) {
+				/* copy lighting data */
+				lb = bspLightBytes.data() + ( olm->lightmapNum * gameLmSize );
+				memcpy( lb, olm->bspLightBytes, gameLmSize );
 
-			/* copy direction data */
-			if ( deluxemap ) {
-				lb = bspLightBytes.data() + ( ( olm->lightmapNum + 1 ) * gameLmSize );
-				memcpy( lb, olm->bspDirBytes, gameLmSize );
+				/* copy direction data */
+				if ( deluxemap ) {
+					lb = bspLightBytes.data() + ( ( olm->lightmapNum + 1 ) * gameLmSize );
+					memcpy( lb, olm->bspDirBytes, gameLmSize );
+				}
 			}
-		}
 
-		/* external lightmap? */
-		if ( olm->lightmapNum < 0 || olm->extLightmapNum >= 0 || externalLightmaps ) {
-			/* make a directory for the lightmaps */
-			Q_mkdir( dirname );
+			/* external lightmap? */
+			if ( olm->lightmapNum < 0 || olm->extLightmapNum >= 0 || externalLightmaps ) {
+				/* make a directory for the lightmaps */
+				Q_mkdir( dirname );
 
-			/* set external lightmap number */
-			olm->extLightmapNum = numExtLightmaps;
+				/* set external lightmap number */
+				olm->extLightmapNum = numExtLightmaps;
 
-			/* write lightmap */
-			sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, numExtLightmaps );
-			Sys_FPrintf( SYS_VRB, "\nwriting %s", filename );
-			WriteTGA24( filename, olm->bspLightBytes->data(), olm->customWidth, olm->customHeight, true );
-			numExtLightmaps++;
-
-			/* write deluxemap */
-			if ( deluxemap ) {
+				/* write lightmap */
 				sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, numExtLightmaps );
 				Sys_FPrintf( SYS_VRB, "\nwriting %s", filename );
-				WriteTGA24( filename, olm->bspDirBytes->data(), olm->customWidth, olm->customHeight, true );
+				WriteTGA24( filename, olm->bspLightBytes->data(), olm->customWidth, olm->customHeight, true );
 				numExtLightmaps++;
 
-				if ( debugDeluxemap ) {
-					olm->extLightmapNum++;
+				/* write deluxemap */
+				if ( deluxemap ) {
+					sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, numExtLightmaps );
+					Sys_FPrintf( SYS_VRB, "\nwriting %s", filename );
+					WriteTGA24( filename, olm->bspDirBytes->data(), olm->customWidth, olm->customHeight, true );
+					numExtLightmaps++;
+
+					if ( debugDeluxemap ) {
+						olm->extLightmapNum++;
+					}
 				}
 			}
 		}
-	}
 
-	if ( numExtLightmaps > 0 ) {
-		Sys_Printf( "\n" );
-	}
-
-	/* delete unused external lightmaps */
-	for ( i = numExtLightmaps; i; i++ )
-	{
-		/* determine if file exists */
-		sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, i );
-		if ( !FileExists( filename ) ) {
-			break;
+		if ( numExtLightmaps > 0 ) {
+			Sys_Printf( "\n" );
 		}
 
-		/* delete it */
-		remove( filename );
-	}
+		/* delete unused external lightmaps */
+		for ( i = numExtLightmaps; i; i++ )
+		{
+			/* determine if file exists */
+			sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, i );
+			if ( !FileExists( filename ) ) {
+				break;
+			}
 
-	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
+			/* delete it */
+			remove( filename );
+		}
+
+		Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
+	}
 
 	/* -----------------------------------------------------------------
 	   project the lightmaps onto the bsp surfaces
 	   ----------------------------------------------------------------- */
 
-	/* note it */
-	Sys_Printf( "projecting..." );
+	if ( storeForReal ) {
+		/* note it */
+		Sys_Printf( "projecting..." );
 
-	timer.start();
+		timer.start();
 
-	/* walk the list of surfaces */
-	for ( size_t i = 0; i < bspDrawSurfaces.size(); ++i )
-	{
-		/* get the surface and info */
-		ds = &bspDrawSurfaces[ i ];
-		info = &surfaceInfos[ i ];
-		lm = info->lm;
-		olm = NULL;
-
-		/* handle surfaces with identical parent */
-		if ( info->parentSurfaceNum >= 0 ) {
-			/* preserve original data and get parent */
-			parent = &bspDrawSurfaces[ info->parentSurfaceNum ];
-			memcpy( &dsTemp, ds, sizeof( *ds ) );
-
-			/* overwrite child with parent data */
-			memcpy( ds, parent, sizeof( *ds ) );
-
-			/* restore key parts */
-			ds->fogNum = dsTemp.fogNum;
-			ds->firstVert = dsTemp.firstVert;
-			ds->firstIndex = dsTemp.firstIndex;
-			memcpy( ds->lightmapVecs, dsTemp.lightmapVecs, sizeof( dsTemp.lightmapVecs ) );
-
-			/* set vertex data */
-			dv = &bspDrawVerts[ ds->firstVert ];
-			dvParent = &bspDrawVerts[ parent->firstVert ];
-			for ( j = 0; j < ds->numVerts; j++ )
-			{
-				memcpy( dv[ j ].lightmap, dvParent[ j ].lightmap, sizeof( dv[ j ].lightmap ) );
-				memcpy( dv[ j ].color, dvParent[ j ].color, sizeof( dv[ j ].color ) );
-			}
-
-			/* skip the rest */
-			continue;
-		}
-
-		/* handle vertex lit or approximated surfaces */
-		else if ( lm == NULL || lm->outLightmapNums[ 0 ] < 0 ) {
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-			{
-				ds->lightmapNum[ lightmapNum ] = -3;
-				ds->lightmapStyles[ lightmapNum ] = ds->vertexStyles[ lightmapNum ];
-			}
-		}
-
-		/* handle lightmapped surfaces */
-		else
+		/* walk the list of surfaces */
+		for ( size_t i = 0; i < bspDrawSurfaces.size(); ++i )
 		{
-			/* walk lightmaps */
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-			{
-				/* set style */
-				ds->lightmapStyles[ lightmapNum ] = lm->styles[ lightmapNum ];
+			/* get the surface and info */
+			ds = &bspDrawSurfaces[ i ];
+			info = &surfaceInfos[ i ];
+			lm = info->lm;
+			olm = NULL;
 
-				/* handle unused style */
-				if ( lm->styles[ lightmapNum ] == LS_NONE || lm->outLightmapNums[ lightmapNum ] < 0 ) {
-					ds->lightmapNum[ lightmapNum ] = -3;
-					continue;
-				}
+			/* handle surfaces with identical parent */
+			if ( info->parentSurfaceNum >= 0 ) {
+				/* preserve original data and get parent */
+				parent = &bspDrawSurfaces[ info->parentSurfaceNum ];
+				memcpy( &dsTemp, ds, sizeof( *ds ) );
 
-				/* get output lightmap */
-				olm = &outLightmaps[ lm->outLightmapNums[ lightmapNum ] ];
+				/* overwrite child with parent data */
+				memcpy( ds, parent, sizeof( *ds ) );
 
-				/* set bsp lightmap number */
-				ds->lightmapNum[ lightmapNum ] = olm->lightmapNum;
+				/* restore key parts */
+				ds->fogNum = dsTemp.fogNum;
+				ds->firstVert = dsTemp.firstVert;
+				ds->firstIndex = dsTemp.firstIndex;
+				memcpy( ds->lightmapVecs, dsTemp.lightmapVecs, sizeof( dsTemp.lightmapVecs ) );
 
-				/* deluxemap debugging makes the deluxemap visible */
-				if ( deluxemap && debugDeluxemap && lightmapNum == 0 ) {
-					ds->lightmapNum[ lightmapNum ]++;
-				}
-
-				/* calc lightmap origin in texture space */
-				lmx = (float) lm->lightmapX[ lightmapNum ] / (float) olm->customWidth;
-				lmy = (float) lm->lightmapY[ lightmapNum ] / (float) olm->customHeight;
-
-				/* calc lightmap st coords */
+				/* set vertex data */
 				dv = &bspDrawVerts[ ds->firstVert ];
-				ydv = &yDrawVerts[ ds->firstVert ];
+				dvParent = &bspDrawVerts[ parent->firstVert ];
 				for ( j = 0; j < ds->numVerts; j++ )
 				{
-					if ( lm->solid[ lightmapNum ] ) {
-						dv[ j ].lightmap[ lightmapNum ][ 0 ] = lmx + ( 0.5f / (float) olm->customWidth );
-						dv[ j ].lightmap[ lightmapNum ][ 1 ] = lmy + ( 0.5f / (float) olm->customWidth );
+					memcpy( dv[ j ].lightmap, dvParent[ j ].lightmap, sizeof( dv[ j ].lightmap ) );
+					memcpy( dv[ j ].color, dvParent[ j ].color, sizeof( dv[ j ].color ) );
+				}
+
+				/* skip the rest */
+				continue;
+			}
+
+			/* handle vertex lit or approximated surfaces */
+			else if ( lm == NULL || lm->outLightmapNums[ 0 ] < 0 ) {
+				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+				{
+					ds->lightmapNum[ lightmapNum ] = -3;
+					ds->lightmapStyles[ lightmapNum ] = ds->vertexStyles[ lightmapNum ];
+				}
+			}
+
+			/* handle lightmapped surfaces */
+			else
+			{
+				/* walk lightmaps */
+				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+				{
+					/* set style */
+					ds->lightmapStyles[ lightmapNum ] = lm->styles[ lightmapNum ];
+
+					/* handle unused style */
+					if ( lm->styles[ lightmapNum ] == LS_NONE || lm->outLightmapNums[ lightmapNum ] < 0 ) {
+						ds->lightmapNum[ lightmapNum ] = -3;
+						continue;
+					}
+
+					/* get output lightmap */
+					olm = &outLightmaps[ lm->outLightmapNums[ lightmapNum ] ];
+
+					/* set bsp lightmap number */
+					ds->lightmapNum[ lightmapNum ] = olm->lightmapNum;
+
+					/* deluxemap debugging makes the deluxemap visible */
+					if ( deluxemap && debugDeluxemap && lightmapNum == 0 ) {
+						ds->lightmapNum[ lightmapNum ]++;
+					}
+
+					/* calc lightmap origin in texture space */
+					lmx = (float) lm->lightmapX[ lightmapNum ] / (float) olm->customWidth;
+					lmy = (float) lm->lightmapY[ lightmapNum ] / (float) olm->customHeight;
+
+					/* calc lightmap st coords */
+					dv = &bspDrawVerts[ ds->firstVert ];
+					ydv = &yDrawVerts[ ds->firstVert ];
+					for ( j = 0; j < ds->numVerts; j++ )
+					{
+						if ( lm->solid[ lightmapNum ] ) {
+							dv[ j ].lightmap[ lightmapNum ][ 0 ] = lmx + ( 0.5f / (float) olm->customWidth );
+							dv[ j ].lightmap[ lightmapNum ][ 1 ] = lmy + ( 0.5f / (float) olm->customWidth );
+						}
+						else
+						{
+							dv[ j ].lightmap[ lightmapNum ][ 0 ] = lmx + ( ydv[ j ].lightmap[ 0 ][ 0 ] / ( superSample * olm->customWidth ) );
+							dv[ j ].lightmap[ lightmapNum ][ 1 ] = lmy + ( ydv[ j ].lightmap[ 0 ][ 1 ] / ( superSample * olm->customHeight ) );
+						}
+					}
+				}
+			}
+
+			/* store vertex colors */
+			dv = &bspDrawVerts[ ds->firstVert ];
+			for ( j = 0; j < ds->numVerts; j++ )
+			{
+				/* walk lightmaps */
+				for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+				{
+					Vector3 color;
+					/* handle unused style */
+					if ( ds->vertexStyles[ lightmapNum ] == LS_NONE ) {
+						color.set( 0 );
 					}
 					else
 					{
-						dv[ j ].lightmap[ lightmapNum ][ 0 ] = lmx + ( ydv[ j ].lightmap[ 0 ][ 0 ] / ( superSample * olm->customWidth ) );
-						dv[ j ].lightmap[ lightmapNum ][ 1 ] = lmy + ( ydv[ j ].lightmap[ 0 ][ 1 ] / ( superSample * olm->customHeight ) );
+						/* get vertex color */
+						color = getVertexLuxel( lightmapNum, ds->firstVert + j );
+
+						/* set minimum light */
+						if ( lightmapNum == 0 ) {
+							for ( k = 0; k < 3; k++ )
+								value_maximize( color[ k ], minVertexLight[ k ] );
+						}
+					}
+
+					/* store to bytes */
+					if ( !info->si->noVertexLight ) {
+						dv[ j ].color[ lightmapNum ].rgb() = ColorToBytes( color, info->si->vertexScale );
 					}
 				}
 			}
-		}
 
-		/* store vertex colors */
-		dv = &bspDrawVerts[ ds->firstVert ];
-		for ( j = 0; j < ds->numVerts; j++ )
-		{
-			/* walk lightmaps */
-			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-			{
-				Vector3 color;
-				/* handle unused style */
-				if ( ds->vertexStyles[ lightmapNum ] == LS_NONE ) {
-					color.set( 0 );
-				}
-				else
+			/* surfaces with styled lightmaps and a style marker get a custom generated shader (fixme: make this work with external lightmaps) */
+			if ( olm != NULL && lm != NULL && lm->styles[ 1 ] != LS_NONE && g_game->load != LoadRBSPFile ) { //%	info->si->styleMarker > 0 )
+				char key[ 32 ], styleStage[ 512 ], styleStages[ 4096 ], rgbGen[ 128 ], alphaGen[ 128 ];
+
+
+				/* setup */
+				sprintf( styleStages, "\n\t// Q3Map2 custom lightstyle stage(s)\n" );
+				dv = &bspDrawVerts[ ds->firstVert ];
+
+				/* depthFunc equal? */
+				const bool dfEqual = ( info->si->styleMarker == 2 || info->si->implicitMap == EImplicitMap::Masked );
+
+				/* generate stages for styled lightmaps */
+				for ( lightmapNum = 1; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
 				{
-					/* get vertex color */
-					color = getVertexLuxel( lightmapNum, ds->firstVert + j );
-
-					/* set minimum light */
-					if ( lightmapNum == 0 ) {
-						for ( k = 0; k < 3; k++ )
-							value_maximize( color[ k ], minVertexLight[ k ] );
+					/* early out */
+					style = lm->styles[ lightmapNum ];
+					if ( style == LS_NONE || lm->outLightmapNums[ lightmapNum ] < 0 ) {
+						continue;
 					}
-				}
 
-				/* store to bytes */
-				if ( !info->si->noVertexLight ) {
-					dv[ j ].color[ lightmapNum ].rgb() = ColorToBytes( color, info->si->vertexScale );
-				}
-			}
-		}
+					/* get output lightmap */
+					olm = &outLightmaps[ lm->outLightmapNums[ lightmapNum ] ];
 
-		/* surfaces with styled lightmaps and a style marker get a custom generated shader (fixme: make this work with external lightmaps) */
-		if ( olm != NULL && lm != NULL && lm->styles[ 1 ] != LS_NONE && g_game->load != LoadRBSPFile ) { //%	info->si->styleMarker > 0 )
-			char key[ 32 ], styleStage[ 512 ], styleStages[ 4096 ], rgbGen[ 128 ], alphaGen[ 128 ];
-
-
-			/* setup */
-			sprintf( styleStages, "\n\t// Q3Map2 custom lightstyle stage(s)\n" );
-			dv = &bspDrawVerts[ ds->firstVert ];
-
-			/* depthFunc equal? */
-			const bool dfEqual = ( info->si->styleMarker == 2 || info->si->implicitMap == EImplicitMap::Masked );
-
-			/* generate stages for styled lightmaps */
-			for ( lightmapNum = 1; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-			{
-				/* early out */
-				style = lm->styles[ lightmapNum ];
-				if ( style == LS_NONE || lm->outLightmapNums[ lightmapNum ] < 0 ) {
-					continue;
-				}
-
-				/* get output lightmap */
-				olm = &outLightmaps[ lm->outLightmapNums[ lightmapNum ] ];
-
-				/* lightmap name */
-				if ( lm->outLightmapNums[ lightmapNum ] == lm->outLightmapNums[ 0 ] ) {
-					strcpy( lightmapName, "$lightmap" );
-				}
-				else{
-					sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP, mapName.c_str(), olm->extLightmapNum );
-				}
-
-				/* get rgbgen string */
-				if ( rgbGenValues[ style ] == NULL ) {
-					sprintf( key, "_style%drgbgen", style );
-					rgbGenValues[ style ] = entities[ 0 ].valueForKey( key );
-					if ( strEmpty( rgbGenValues[ style ] ) ) {
-						rgbGenValues[ style ] = "wave noise 0.5 1 0 5.37";
+					/* lightmap name */
+					if ( lm->outLightmapNums[ lightmapNum ] == lm->outLightmapNums[ 0 ] ) {
+						strcpy( lightmapName, "$lightmap" );
 					}
-				}
-				strClear( rgbGen );
-				if ( !strEmpty( rgbGenValues[ style ] ) ) {
-					sprintf( rgbGen, "\t\trgbGen %s // style %d\n", rgbGenValues[ style ], style );
-				}
-				else{
+					else{
+						sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP, mapName.c_str(), olm->extLightmapNum );
+					}
+
+					/* get rgbgen string */
+					if ( rgbGenValues[ style ] == NULL ) {
+						sprintf( key, "_style%drgbgen", style );
+						rgbGenValues[ style ] = entities[ 0 ].valueForKey( key );
+						if ( strEmpty( rgbGenValues[ style ] ) ) {
+							rgbGenValues[ style ] = "wave noise 0.5 1 0 5.37";
+						}
+					}
 					strClear( rgbGen );
+					if ( !strEmpty( rgbGenValues[ style ] ) ) {
+						sprintf( rgbGen, "\t\trgbGen %s // style %d\n", rgbGenValues[ style ], style );
+					}
+					else{
+						strClear( rgbGen );
+					}
+
+					/* get alphagen string */
+					if ( alphaGenValues[ style ] == NULL ) {
+						sprintf( key, "_style%dalphagen", style );
+						alphaGenValues[ style ] = entities[ 0 ].valueForKey( key );
+					}
+					if ( !strEmpty( alphaGenValues[ style ] ) ) {
+						sprintf( alphaGen, "\t\talphaGen %s // style %d\n", alphaGenValues[ style ], style );
+					}
+					else{
+						strClear( alphaGen );
+					}
+
+					/* calculate st offset */
+					const Vector2 lmxy = dv[ 0 ].lightmap[ lightmapNum ] - dv[ 0 ].lightmap[ 0 ];
+
+					/* create additional stage */
+					if ( lmxy.x() == 0.0f && lmxy.y() == 0.0f ) {
+						sprintf( styleStage, "\t{\n"
+						                     "\t\tmap %s\n"                                      /* lightmap */
+						                     "\t\tblendFunc GL_SRC_ALPHA GL_ONE\n"
+						                     "%s"                                                /* depthFunc equal */
+						                     "%s"                                                /* rgbGen */
+						                     "%s"                                                /* alphaGen */
+						                     "\t\ttcGen lightmap\n"
+						                     "\t}\n",
+						         lightmapName,
+						         ( dfEqual ? "\t\tdepthFunc equal\n" : "" ),
+						         rgbGen,
+						         alphaGen );
+					}
+					else
+					{
+						sprintf( styleStage, "\t{\n"
+						                     "\t\tmap %s\n"                                      /* lightmap */
+						                     "\t\tblendFunc GL_SRC_ALPHA GL_ONE\n"
+						                     "%s"                                                /* depthFunc equal */
+						                     "%s"                                                /* rgbGen */
+						                     "%s"                                                /* alphaGen */
+						                     "\t\ttcGen lightmap\n"
+						                     "\t\ttcMod transform 1 0 0 1 %1.5f %1.5f\n"         /* st offset */
+						                     "\t}\n",
+						         lightmapName,
+						         ( dfEqual ? "\t\tdepthFunc equal\n" : "" ),
+						         rgbGen,
+						         alphaGen,
+						         lmxy.x(), lmxy.y() );
+
+					}
+
+					/* concatenate */
+					strcat( styleStages, styleStage );
 				}
 
-				/* get alphagen string */
-				if ( alphaGenValues[ style ] == NULL ) {
-					sprintf( key, "_style%dalphagen", style );
-					alphaGenValues[ style ] = entities[ 0 ].valueForKey( key );
-				}
-				if ( !strEmpty( alphaGenValues[ style ] ) ) {
-					sprintf( alphaGen, "\t\talphaGen %s // style %d\n", alphaGenValues[ style ], style );
+				/* create custom shader */
+				if ( info->si->styleMarker == 2 ) {
+					csi = CustomShader( info->si, "q3map_styleMarker2", styleStages );
 				}
 				else{
-					strClear( alphaGen );
+					csi = CustomShader( info->si, "q3map_styleMarker", styleStages );
 				}
 
-				/* calculate st offset */
-				const Vector2 lmxy = dv[ 0 ].lightmap[ lightmapNum ] - dv[ 0 ].lightmap[ 0 ];
+				/* emit remap command */
+				//%	EmitVertexRemapShader( csi->shader, info->si->shader );
 
-				/* create additional stage */
-				if ( lmxy.x() == 0.0f && lmxy.y() == 0.0f ) {
-					sprintf( styleStage, "\t{\n"
-					                     "\t\tmap %s\n"                                      /* lightmap */
-					                     "\t\tblendFunc GL_SRC_ALPHA GL_ONE\n"
-					                     "%s"                                                /* depthFunc equal */
-					                     "%s"                                                /* rgbGen */
-					                     "%s"                                                /* alphaGen */
-					                     "\t\ttcGen lightmap\n"
-					                     "\t}\n",
-					         lightmapName,
-					         ( dfEqual ? "\t\tdepthFunc equal\n" : "" ),
-					         rgbGen,
-					         alphaGen );
-				}
-				else
-				{
-					sprintf( styleStage, "\t{\n"
-					                     "\t\tmap %s\n"                                      /* lightmap */
-					                     "\t\tblendFunc GL_SRC_ALPHA GL_ONE\n"
-					                     "%s"                                                /* depthFunc equal */
-					                     "%s"                                                /* rgbGen */
-					                     "%s"                                                /* alphaGen */
-					                     "\t\ttcGen lightmap\n"
-					                     "\t\ttcMod transform 1 0 0 1 %1.5f %1.5f\n"         /* st offset */
-					                     "\t}\n",
-					         lightmapName,
-					         ( dfEqual ? "\t\tdepthFunc equal\n" : "" ),
-					         rgbGen,
-					         alphaGen,
-					         lmxy.x(), lmxy.y() );
-
-				}
-
-				/* concatenate */
-				strcat( styleStages, styleStage );
+				/* store it */
+				//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
+				int cont = bspShaders[ ds->shaderNum ].contentFlags;
+				int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
+				ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
+				//%	Sys_Printf( ")\n" );
 			}
 
-			/* create custom shader */
-			if ( info->si->styleMarker == 2 ) {
-				csi = CustomShader( info->si, "q3map_styleMarker2", styleStages );
+			/* devise a custom shader for this surface (fixme: make this work with light styles) */
+			else if ( olm != NULL && lm != NULL && !externalLightmaps &&
+			          ( olm->customWidth != g_game->lightmapSize || olm->customHeight != g_game->lightmapSize ) ) {
+				/* get output lightmap */
+				olm = &outLightmaps[ lm->outLightmapNums[ 0 ] ];
+
+				/* do some name mangling */
+				sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP "\n\t\ttcgen lightmap", mapName.c_str(), olm->extLightmapNum );
+
+				/* create custom shader */
+				csi = CustomShader( info->si, "$lightmap", lightmapName );
+
+				/* store it */
+				//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
+				int cont = bspShaders[ ds->shaderNum ].contentFlags;
+				int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
+				ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
+				//%	Sys_Printf( ")\n" );
 			}
+
+			/* use the normal plain-jane shader */
 			else{
-				csi = CustomShader( info->si, "q3map_styleMarker", styleStages );
-			}
-
-			/* emit remap command */
-			//%	EmitVertexRemapShader( csi->shader, info->si->shader );
-
-			/* store it */
-			//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
-			int cont = bspShaders[ ds->shaderNum ].contentFlags;
-			int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
-			ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
-			//%	Sys_Printf( ")\n" );
-		}
-
-		/* devise a custom shader for this surface (fixme: make this work with light styles) */
-		else if ( olm != NULL && lm != NULL && !externalLightmaps &&
-		          ( olm->customWidth != g_game->lightmapSize || olm->customHeight != g_game->lightmapSize ) ) {
-			/* get output lightmap */
-			olm = &outLightmaps[ lm->outLightmapNums[ 0 ] ];
-
-			/* do some name mangling */
-			sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP "\n\t\ttcgen lightmap", mapName.c_str(), olm->extLightmapNum );
-
-			/* create custom shader */
-			csi = CustomShader( info->si, "$lightmap", lightmapName );
-
-			/* store it */
-			//%	Sys_Printf( "Emitting: %s (%d", csi->shader, strlen( csi->shader ) );
-			int cont = bspShaders[ ds->shaderNum ].contentFlags;
-			int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
-			ds->shaderNum = EmitShader( csi->shader, &cont, &surf );
-			//%	Sys_Printf( ")\n" );
-		}
-
-		/* use the normal plain-jane shader */
-		else{
-			int cont = bspShaders[ ds->shaderNum ].contentFlags;
+				int cont = bspShaders[ ds->shaderNum ].contentFlags;
 			int surf = bspShaders[ ds->shaderNum ].surfaceFlags;
 			ds->shaderNum = EmitShader( info->si->shader, &cont, &surf );
+			}
 		}
-	}
 
-	Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
+		Sys_Printf( "%d.", int( timer.elapsed_sec() ) );
+	}
 
 	/* finish */
 	Sys_Printf( "done.\n" );
 
-	/* calc num stored */
-	numStored = bspLightBytes.size() / 3;
-	efficiency = ( numStored <= 0 )
-	             ? 0
-	             : (float) numUsed / (float) numStored;
+	if ( storeForReal ) {
+		/* calc num stored */
+		numStored = bspLightBytes.size() / 3;
+		efficiency = ( numStored <= 0 )
+	                 ? 0
+	                 : (float) numUsed / (float) numStored;
 
-	/* print stats */
-	Sys_Printf( "%9d luxels used\n", numUsed );
-	Sys_Printf( "%9d luxels stored (%3.2f percent efficiency)\n", numStored, efficiency * 100.0f );
-	Sys_Printf( "%9d solid surface lightmaps\n", numSolidLightmaps );
-	Sys_Printf( "%9d identical surface lightmaps, using %d luxels\n", numTwins, numTwinLuxels );
-	Sys_Printf( "%9d vertex forced surfaces\n", numSurfsVertexForced );
-	Sys_Printf( "%9d vertex approximated surfaces\n", numSurfsVertexApproximated );
-	Sys_Printf( "%9d BSP lightmaps\n", numBSPLightmaps );
-	Sys_Printf( "%9d total lightmaps\n", numOutLightmaps );
-	Sys_Printf( "%9d unique lightmap/shader combinations\n", numLightmapShaders );
+		/* print stats */
+		Sys_Printf( "%9d luxels used\n", numUsed );
+		Sys_Printf( "%9d luxels stored (%3.2f percent efficiency)\n", numStored, efficiency * 100.0f );
+		Sys_Printf( "%9d solid surface lightmaps\n", numSolidLightmaps );
+		Sys_Printf( "%9d identical surface lightmaps, using %d luxels\n", numTwins, numTwinLuxels );
+		Sys_Printf( "%9d vertex forced surfaces\n", numSurfsVertexForced );
+		Sys_Printf( "%9d vertex approximated surfaces\n", numSurfsVertexApproximated );
+		Sys_Printf( "%9d BSP lightmaps\n", numBSPLightmaps );
+		Sys_Printf( "%9d total lightmaps\n", numOutLightmaps );
+		Sys_Printf( "%9d unique lightmap/shader combinations\n", numLightmapShaders );
 
-	/* write map shader file */
-	WriteMapShaderFile();
+		/* write map shader file */
+		WriteMapShaderFile();
+	}
 }
