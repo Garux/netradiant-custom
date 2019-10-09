@@ -69,6 +69,10 @@ inline Accelerator accelerator_null(){
 	return Accelerator( 0, (GdkModifierType)0 );
 }
 
+typedef struct _GdkEventKey GdkEventKey;
+Accelerator accelerator_for_event_key( const GdkEventKey* event );
+
+
 const char* global_keys_find( unsigned int key );
 unsigned int global_keys_find( const char* name );
 

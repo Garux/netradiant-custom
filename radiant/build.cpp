@@ -649,6 +649,7 @@ void build_commands_write( const char* filename ){
 #include "gtkutil/dialog.h"
 #include "gtkutil/closure.h"
 #include "gtkutil/window.h"
+#include "gtkutil/accelerator.h"
 #include "gtkdlgs.h"
 
 void Build_refreshMenu( GtkMenu* menu );
@@ -727,10 +728,26 @@ gboolean project_cell_edited( GtkCellRendererText* cell, gchar* path_string, gch
 	return FALSE;
 }
 
+
+BuildPair g_buildpair_copied;
+BuildCommand g_buildcommand_copied;
+
+inline bool event_is_del( const GdkEventKey* event ){
+	return accelerator_for_event_key( event ) == Accelerator( GDK_Delete );
+}
+inline bool event_is_copy( const GdkEventKey* event ){
+	return ( accelerator_for_event_key( event ) == Accelerator( 'C', GDK_CONTROL_MASK ) )
+		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_Insert, GDK_CONTROL_MASK ) );
+}
+inline bool event_is_paste( const GdkEventKey* event ){
+	return ( accelerator_for_event_key( event ) == Accelerator( 'V', GDK_CONTROL_MASK ) )
+		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_Insert, GDK_SHIFT_MASK ) );
+}
+
 gboolean project_key_press( GtkWidget* widget, GdkEventKey* event, ProjectList* projectList ){
 	Project& project = projectList->m_project;
 
-	if ( event->keyval == GDK_Delete ) {
+	if ( event_is_del( event ) || event_is_copy( event ) || event_is_paste( event ) ) {
 		GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( widget ) );
 		GtkTreeIter iter;
 		GtkTreeModel* model;
@@ -739,12 +756,24 @@ gboolean project_key_press( GtkWidget* widget, GdkEventKey* event, ProjectList* 
 			Project::iterator x = Project_find( project, gtk_tree_path_get_indices( path )[0] );
 			gtk_tree_path_free( path );
 
-			if ( x != project.end() ) {
+			if ( event_is_del( event ) && x != project.end() ) {
 				projectList->m_changed = true;
 				project.erase( x );
 				Build_refreshMenu( g_bsp_menu );
 
 				gtk_list_store_remove( projectList->m_store, &iter );
+			}
+			else if ( event_is_copy( event ) && x != project.end() ) {
+				g_buildpair_copied = ( *x );
+			}
+			else if ( event_is_paste( event ) && string_not_empty( g_buildpair_copied.first.c_str() ) ) {
+				projectList->m_changed = true;
+				project.insert( x, g_buildpair_copied );
+				Build_refreshMenu( g_bsp_menu );
+
+				GtkTreeIter newIter;
+				gtk_list_store_insert_before( projectList->m_store, &newIter, &iter );
+				gtk_list_store_set( projectList->m_store, &newIter, 0, g_buildpair_copied.first.c_str(), -1 );
 			}
 		}
 	}
@@ -833,7 +862,7 @@ gboolean commands_key_press( GtkWidget* widget, GdkEventKey* event, GtkListStore
 	}
 	Build& build = *g_current_build;
 
-	if ( event->keyval == GDK_Delete ) {
+	if ( event_is_del( event ) || event_is_copy( event ) || event_is_paste( event ) ) {
 		GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( widget ) );
 		GtkTreeIter iter;
 		GtkTreeModel* model;
@@ -842,11 +871,22 @@ gboolean commands_key_press( GtkWidget* widget, GdkEventKey* event, GtkListStore
 			Build::iterator i = Build_find( build, gtk_tree_path_get_indices( path )[0] );
 			gtk_tree_path_free( path );
 
-			if ( i != build.end() ) {
+			if ( event_is_del( event ) && i != build.end() ) {
 				g_build_changed = true;
 				build.erase( i );
 
 				gtk_list_store_remove( store, &iter );
+			}
+			else if ( event_is_copy( event ) && i != build.end() ) {
+				g_buildcommand_copied = ( *i );
+			}
+			else if ( event_is_paste( event ) ) {
+				g_build_changed = true;
+				build.insert( i, g_buildcommand_copied );
+
+				GtkTreeIter newIter;
+				gtk_list_store_insert_before( store, &newIter, &iter );
+				gtk_list_store_set( store, &newIter, 0, g_buildcommand_copied.c_str(), -1 );
 			}
 		}
 	}

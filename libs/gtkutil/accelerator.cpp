@@ -115,6 +115,10 @@ Accelerator accelerator_for_event_key( guint keyval, guint state ){
 	return Accelerator( keyval, (GdkModifierType)( state & gtk_accelerator_get_default_mod_mask() ) );
 }
 
+Accelerator accelerator_for_event_key( const GdkEventKey* event ){
+	return accelerator_for_event_key( event->keyval, event->state );
+}
+
 bool AcceleratorMap_activate( const AcceleratorMap& acceleratorMap, const Accelerator& accelerator ){
 	AcceleratorMap::const_iterator i = acceleratorMap.find( accelerator );
 	if ( i != acceleratorMap.end() ) {
