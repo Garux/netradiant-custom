@@ -677,6 +677,13 @@ void BSPCommandList_Construct( GtkListStore* store, Project& project ){
 	last_iter_append( store );
 }
 
+static void project_cell_editing_started( GtkCellRenderer* cell, GtkCellEditable* editable, const gchar* path, gpointer data ) {
+	ASSERT_MESSAGE( GTK_IS_ENTRY( editable ) == TRUE, "editable is not GtkEntry" );
+	GtkEntry* entry = GTK_ENTRY( editable );
+	if( string_equal( LAST_ITER_STRING, gtk_entry_get_text( entry ) ) )
+		gtk_entry_set_text( entry, "" );
+}
+
 class ProjectList
 {
 public:
@@ -940,6 +947,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 					GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 					object_set_boolean_property( G_OBJECT( renderer ), "editable", TRUE );
 					g_signal_connect( renderer, "edited", G_CALLBACK( project_cell_edited ), &projectList );
+					g_signal_connect( renderer, "editing-started", G_CALLBACK( project_cell_editing_started ), 0 );
 
 					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, NULL );
 					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
@@ -981,6 +989,7 @@ GtkWindow* BuildMenuDialog_construct( ModalDialog& modal, ProjectList& projectLi
 					//g_object_set( G_OBJECT( renderer ), "ellipsize", PANGO_ELLIPSIZE_MIDDLE, NULL );
 					object_set_int_property( G_OBJECT( renderer ), "wrap-width", 640 );
 					g_signal_connect( renderer, "edited", G_CALLBACK( commands_cell_edited ), store );
+					g_signal_connect( renderer, "editing-started", G_CALLBACK( project_cell_editing_started ), 0 );
 
 					GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes( "", renderer, "text", 0, NULL );
 					gtk_tree_view_append_column( GTK_TREE_VIEW( view ), column );
