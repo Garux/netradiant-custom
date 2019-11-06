@@ -91,12 +91,14 @@ void ViewShader( const char *pFile, const char *pName, bool external_editor ){
 		else{
 			//globalErrorStream() << "Validated successfully" << "\n";
 			nOffset = nStart;
+#ifdef WIN32
 			//fix cr+lf
 			for ( const char* i = strLook.c_str(); i < substr ; i++ ){
 				if ( (strncmp( i, "\r\n", 2 ) == 0) ){
 				nOffset--;
 				}
 			}
+#endif
 		}
 		/*// we have found something, maybe it's a commented out shader name?
 		char *strCheck = new char[string_length( strLook.c_str() ) + 1];
@@ -113,6 +115,7 @@ void ViewShader( const char *pFile, const char *pName, bool external_editor ){
 		nOffset = nStart;
 		break;*/
 	}
+#ifdef WIN32
 	//fix up length
 	const char* b = strLook.c_str() + strlen( strLook.c_str() ) - 1;
 	for ( const char* i = strLook.c_str(); i < b; i++ ){
@@ -120,6 +123,7 @@ void ViewShader( const char *pFile, const char *pName, bool external_editor ){
 		length--;
 		}
 	}
+#endif
 	// now close the file
 	vfsFreeFile( pBuff );
 
