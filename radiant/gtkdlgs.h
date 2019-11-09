@@ -38,7 +38,7 @@ EMessageBoxReturn DoLightIntensityDlg( int *intensity );
 EMessageBoxReturn DoShaderTagDlg( CopiedString *tag, const char* title );
 EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, const char* title );
 EMessageBoxReturn DoTextureLayout( float *fx, float *fy );
-void DoTextEditor( const char* filename, int cursorpos, int length, bool external_editor );
+void DoShaderView( const char *shaderFileName, const char *shaderName, bool external_editor );
 
 void DoProjectSettings();
 

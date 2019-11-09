@@ -746,164 +746,126 @@ EMessageBoxReturn DoTextureLayout( float *fx, float *fy ){
 	return ret;
 }
 
-// =============================================================================
-// Text Editor dialog
 
-// master window widget
-static GtkWidget *text_editor = 0;
-static GtkWidget *text_widget; // slave, text widget from the gtk editor
-static GtkTextBuffer* text_buffer_;
+class TextEditor
+{
+	GtkWidget *m_window = 0;
+	GtkWidget *m_textView; // slave, text widget from the gtk editor
+	GtkTextBuffer* m_textBuffer;
+	GtkWidget *m_button; // save button
+	CopiedString m_filename;
 
-static gint editor_delete( GtkWidget *widget, gpointer data ){
-/*	if ( gtk_MessageBox( widget, "Close the shader editor ?", "Radiant", eMB_YESNO, eMB_ICONQUESTION ) == eIDNO ) {
-		return TRUE;
+	void construct(){
+		GtkWidget *vbox, *hbox, *scr;
+
+		m_window = GTK_WIDGET( create_dialog_window( MainFrame_getWindow(), "", G_CALLBACK( gtk_widget_hide_on_delete ), 0, 400, 600 ) );
+
+		vbox = gtk_vbox_new( FALSE, 5 );
+		gtk_widget_show( vbox );
+		gtk_container_add( GTK_CONTAINER( m_window ), GTK_WIDGET( vbox ) );
+		gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
+
+		scr = gtk_scrolled_window_new( 0, 0 );
+		gtk_widget_show( scr );
+		gtk_box_pack_start( GTK_BOX( vbox ), scr, TRUE, TRUE, 0 );
+		gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
+		gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
+
+		m_textView = gtk_text_view_new();
+		gtk_container_add( GTK_CONTAINER( scr ), m_textView );
+		gtk_widget_show( m_textView );
+
+		m_textBuffer = gtk_text_view_get_buffer( GTK_TEXT_VIEW( m_textView ) );
+		g_signal_connect( G_OBJECT( m_textBuffer ), "modified-changed",
+						G_CALLBACK( modified_changed ), this );
+
+		hbox = gtk_hbox_new( FALSE, 5 );
+		gtk_widget_show( hbox );
+		gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, TRUE, 0 );
+
+		m_button = gtk_button_new_with_label( "Close" );
+		gtk_widget_show( m_button );
+		gtk_box_pack_end( GTK_BOX( hbox ), m_button, FALSE, FALSE, 0 );
+		g_signal_connect( G_OBJECT( m_button ), "clicked",
+						G_CALLBACK( editor_close ), this );
+		gtk_widget_set_usize( m_button, 60, -2 );
+
+		m_button = gtk_button_new_with_label( "Save" );
+		gtk_widget_show( m_button );
+		gtk_box_pack_end( GTK_BOX( hbox ), m_button, FALSE, FALSE, 0 );
+		g_signal_connect( G_OBJECT( m_button ), "clicked",
+						G_CALLBACK( editor_save ), this );
+		gtk_widget_set_usize( m_button, 60, -2 );
 	}
-*/
-	gtk_widget_hide( text_editor );
-
-	return TRUE;
-}
-
-static void editor_save( GtkWidget *widget, gpointer data ){
-	FILE *f = fopen( (char*)g_object_get_data( G_OBJECT( data ), "filename" ), "w" );
-	//gpointer text = g_object_get_data( G_OBJECT( data ), "text" );
-
-	if ( f == 0 ) {
-		gtk_MessageBox( GTK_WIDGET( data ), "Error saving file !" );
-		return;
+	static void editor_close( GtkWidget *widget, TextEditor* self ){
+		gtk_widget_hide( self->m_window );
 	}
+	static void editor_save( GtkWidget *widget, TextEditor* self ){
+		FILE *f = fopen( self->m_filename.c_str(), "wb" ); //write in binary mode to preserve line feeds
 
-	/* Obtain iters for the start and end of points of the buffer */
-	GtkTextIter start;
-	GtkTextIter end;
-	gtk_text_buffer_get_start_iter (text_buffer_, &start);
-	gtk_text_buffer_get_end_iter (text_buffer_, &end);
-
-	/* Get the entire buffer text. */
-	char *str = gtk_text_buffer_get_text (text_buffer_, &start, &end, FALSE);
-
-	//char *str = gtk_editable_get_chars( GTK_EDITABLE( text ), 0, -1 );
-	fwrite( str, 1, strlen( str ), f );
-	fclose( f );
-	g_free (str);
-}
-
-static void editor_close( GtkWidget *widget, gpointer data ){
-/*	if ( gtk_MessageBox( text_editor, "Close the shader editor ?", "Radiant", eMB_YESNO, eMB_ICONQUESTION ) == eIDNO ) {
-		return;
-	}
-*/
-	gtk_widget_hide( text_editor );
-}
-
-static void CreateGtkTextEditor(){
-	GtkWidget *dlg;
-	GtkWidget *vbox, *hbox, *button, *scr, *text;
-
-	GtkWindow* dlg_wnd = create_dialog_window( MainFrame_getWindow(), "", G_CALLBACK( editor_delete ), 0, 400, 600 );
-	dlg = GTK_WIDGET( dlg_wnd );
-
-	vbox = gtk_vbox_new( FALSE, 5 );
-	gtk_widget_show( vbox );
-	gtk_container_add( GTK_CONTAINER( dlg ), GTK_WIDGET( vbox ) );
-	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
-
-	scr = gtk_scrolled_window_new( 0, 0 );
-	gtk_widget_show( scr );
-	gtk_box_pack_start( GTK_BOX( vbox ), scr, TRUE, TRUE, 0 );
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scr ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scr ), GTK_SHADOW_IN );
-
-	text = gtk_text_view_new();
-	gtk_container_add( GTK_CONTAINER( scr ), text );
-	gtk_widget_show( text );
-	g_object_set_data( G_OBJECT( dlg ), "text", text );
-	gtk_text_view_set_editable( GTK_TEXT_VIEW( text ), TRUE );
-
-	hbox = gtk_hbox_new( FALSE, 5 );
-	gtk_widget_show( hbox );
-	gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, TRUE, 0 );
-
-	button = gtk_button_new_with_label( "Close" );
-	gtk_widget_show( button );
-	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
-	g_signal_connect( G_OBJECT( button ), "clicked",
-					  G_CALLBACK( editor_close ), dlg );
-	gtk_widget_set_usize( button, 60, -2 );
-
-	button = gtk_button_new_with_label( "Save" );
-	gtk_widget_show( button );
-	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
-	g_signal_connect( G_OBJECT( button ), "clicked",
-					  G_CALLBACK( editor_save ), dlg );
-	gtk_widget_set_usize( button, 60, -2 );
-
-	text_editor = dlg;
-	text_widget = text;
-}
-
-static void DoGtkTextEditor( const char* filename, guint cursorpos, int length ){
-	if ( !text_editor ) {
-		CreateGtkTextEditor(); // build it the first time we need it
-
-	}
-	// Load file
-	FILE *f = fopen( filename, "r" );
-
-	if ( f == 0 ) {
-		globalWarningStream() << "Unable to load file " << filename << " in shader editor.\n";
-		gtk_widget_hide( text_editor );
-	}
-	else
-	{
-		fseek( f, 0, SEEK_END );
-		int len = ftell( f );
-		void *buf = malloc( len );
-		void *old_filename;
-
-		rewind( f );
-		fread( buf, 1, len, f );
-
-		gtk_window_set_title( GTK_WINDOW( text_editor ), filename );
-
-		GtkTextBuffer* text_buffer = gtk_text_view_get_buffer( GTK_TEXT_VIEW( text_widget ) );
-		gtk_text_buffer_set_text( text_buffer, (char*)buf, length );
-
-		old_filename = g_object_get_data( G_OBJECT( text_editor ), "filename" );
-		if ( old_filename ) {
-			free( old_filename );
+		if ( f == 0 ) {
+			gtk_MessageBox( self->m_window, "Error saving file !" );
+			return;
 		}
-		g_object_set_data( G_OBJECT( text_editor ), "filename", strdup( filename ) );
+
+		/* Obtain iters for the start and end of points of the buffer */
+		GtkTextIter start, end;
+		gtk_text_buffer_get_bounds( self->m_textBuffer, &start, &end );
+
+		/* Get the entire buffer text. */
+		char *str = gtk_text_buffer_get_text( self->m_textBuffer, &start, &end, FALSE );
+
+		fwrite( str, 1, strlen( str ), f );
+		fclose( f );
+		g_free ( str );
+
+		gtk_text_buffer_set_modified( self->m_textBuffer, FALSE );
+	}
+	static void modified_changed( GtkTextBuffer *textbuffer, TextEditor* self ){
+		const gboolean modified = gtk_text_buffer_get_modified( textbuffer );
+		gtk_widget_set_sensitive( self->m_button, modified );
+
+		StringOutputStream str( 256 );
+		str << ( modified? "*" : "" ) << self->m_filename.c_str();
+		gtk_window_set_title( GTK_WINDOW( self->m_window ), str.c_str() );
+	}
+
+public:
+	void DoGtkTextEditor( const char* text, std::size_t size, std::size_t offset, const char* filename, const bool editable ){
+		if ( !m_window ) {
+			construct(); // build it the first time we need it
+		}
+
+		m_filename = filename;
+
+		gtk_text_buffer_set_text( m_textBuffer, text, size );
+		gtk_text_buffer_set_modified( m_textBuffer, FALSE );
+
+		gtk_text_view_set_editable( GTK_TEXT_VIEW( m_textView ), editable );
 
 		// trying to show later
-		gtk_widget_show( text_editor );
-		gtk_window_present( GTK_WINDOW( text_editor ) );
+		gtk_widget_show( m_window );
+		gtk_window_present( GTK_WINDOW( m_window ) );
 
-//#ifdef WIN32
+	//#ifdef WIN32
 		process_gui();
-//#endif
+	//#endif
 
-		// only move the cursor if it's not exceeding the size..
-		// NOTE: this is erroneous, cursorpos is the offset in bytes, not in characters
-		// len is the max size in bytes, not in characters either, but the character count is below that limit..
-		// thinking .. the difference between character count and byte count would be only because of CR/LF?
 		{
 			GtkTextIter text_iter;
-			// character offset, not byte offset
-			gtk_text_buffer_get_iter_at_offset( text_buffer, &text_iter, cursorpos );
-			gtk_text_buffer_place_cursor( text_buffer, &text_iter );
-			gtk_text_view_scroll_to_iter( GTK_TEXT_VIEW( text_widget ), &text_iter, 0, TRUE, 0, 0);
+			gtk_text_buffer_get_iter_at_offset( m_textBuffer, &text_iter, offset );
+			gtk_text_buffer_place_cursor( m_textBuffer, &text_iter );
+			gtk_text_view_scroll_to_iter( GTK_TEXT_VIEW( m_textView ), &text_iter, 0, TRUE, 0, 0);
 		}
 
-//#ifdef WIN32
-		gtk_widget_queue_draw( text_widget );
-//#endif
-
-		text_buffer_ = text_buffer;
-		free( buf );
-		fclose( f );
+	//#ifdef WIN32
+		gtk_widget_queue_draw( m_textView );
+	//#endif
 	}
-}
+};
+
+static TextEditor g_textEditor;
+
 
 // =============================================================================
 // Light Intensity dialog
@@ -1106,76 +1068,102 @@ EMessageBoxReturn DoShaderInfoDlg( const char* name, const char* filename, const
 
 
 
+CopiedString g_TextEditor_editorCommand( "" );
+
+#include "ifilesystem.h"
+#include "iarchive.h"
+#include "idatastream.h"
 #ifdef WIN32
 #include <gdk/gdkwin32.h>
 #endif
 
-CopiedString g_TextEditor_editorCommand( "" );
+void DoShaderView( const char *shaderFileName, const char *shaderName, bool external_editor ){
+	const char* pathRoot = GlobalFileSystem().findFile( shaderFileName );
+	const bool pathEmpty = string_empty( pathRoot );
+	const bool pathIsDir = !pathEmpty && file_is_directory( pathRoot );
 
-void DoTextEditor( const char* filename, int cursorpos, int length, bool external_editor ){
-	//StringOutputStream paths[4]( 256 );
-	StringOutputStream paths[4] = { StringOutputStream(256) };
-	StringOutputStream* goodpath = 0;
+	StringOutputStream pathFull( 256 );
+	pathFull << pathRoot << ( pathIsDir? "" : "::" ) << shaderFileName;
 
-	const char* gamename = GlobalRadiant().getGameName();
-	const char* basegame = GlobalRadiant().getRequiredGameDescriptionKeyValue( "basegame" );
-	const char* enginePath = GlobalRadiant().getEnginePath();
-	const char* homeEnginePath = g_qeglobals.m_userEnginePath.c_str();
-
-	paths[0] << homeEnginePath << gamename << '/' << filename;
-	paths[1] << enginePath << gamename << '/' << filename;
-	paths[2] << homeEnginePath << basegame << '/' << filename;
-	paths[3] << enginePath << basegame << '/' << filename;
-
-	for ( std::size_t i = 0; i < 4; ++i ){
-		if ( file_exists( paths[i].c_str() ) ){
-			goodpath = &paths[i];
-			break;
-		}
+	if( pathEmpty ){
+		globalErrorStream() << "Failed to load shader file " << shaderFileName << "\n";
 	}
-
-	if( goodpath ){
-		globalOutputStream() << "opening file '" << goodpath->c_str() << "' (line " << cursorpos << " info ignored)\n";
-		if( external_editor ){
-			if( g_TextEditor_editorCommand.empty() ){
+	else if( external_editor && pathIsDir ){
+		if( g_TextEditor_editorCommand.empty() ){
 #ifdef WIN32
-				ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), 0, goodpath->c_str(), 0, 0, SW_SHOWNORMAL );
-//				SHELLEXECUTEINFO ShExecInfo;
-//				ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-//				ShExecInfo.fMask = 0;
-//				ShExecInfo.hwnd = (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window );
-//				ShExecInfo.lpVerb = NULL;
-//				ShExecInfo.lpFile = goodpath->c_str();
-//				ShExecInfo.lpParameters = NULL;
-//				ShExecInfo.lpDirectory = NULL;
-//				ShExecInfo.nShow = SW_SHOWNORMAL;
-//				ShExecInfo.hInstApp = NULL;
-//				ShellExecuteEx(&ShExecInfo);
+			ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), 0, pathFull.c_str(), 0, 0, SW_SHOWNORMAL );
 #else
-				globalWarningStream() << "Failed to open '" << goodpath->c_str() << "'\nSet Shader Editor Command in preferences\n";
+			globalWarningStream() << "Failed to open '" << pathFull.c_str() << "'\nSet Shader Editor Command in preferences\n";
 #endif
-			}
-			else{
-				StringOutputStream strEditCommand( 256 );
-				strEditCommand << g_TextEditor_editorCommand.c_str() << " \"" << goodpath->c_str() << "\"";
-
-				globalOutputStream() << "Launching: " << strEditCommand.c_str() << "\n";
-				// note: linux does not return false if the command failed so it will assume success
-				if ( Q_Exec( 0, const_cast<char*>( strEditCommand.c_str() ), 0, true, false ) == false ) {
-					globalErrorStream() << "Failed to execute " << strEditCommand.c_str() << "\n";
-				}
-				else
-				{
-					// the command (appeared) to run successfully, no need to do anything more
-					return;
-				}
-			}
 		}
 		else{
-			DoGtkTextEditor( goodpath->c_str(), cursorpos, length );
+			StringOutputStream command( 256 );
+			command << g_TextEditor_editorCommand.c_str() << " \"" << pathFull.c_str() << "\"";
+			globalOutputStream() << "Launching: " << command.c_str() << "\n";
+			// note: linux does not return false if the command failed so it will assume success
+			if ( !Q_Exec( 0, const_cast<char*>( command.c_str() ), 0, true, false ) )
+				globalErrorStream() << "Failed to execute " << command.c_str() << "\n";
 		}
 	}
-	else{
-		globalWarningStream() << "Failed to open '" << filename << "'\nOne sits in .pk3 most likely!\n";
+	else if( ArchiveFile* file = GlobalFileSystem().openFile( shaderFileName ) ){
+		const std::size_t size = file->size();
+		char* text = ( char* )malloc( size + 1 );
+		file->getInputStream().read( ( InputStream::byte_type* )text, size );
+		text[size] = 0;
+		file->release();
+
+		// look for the shader declaration
+		std::size_t offset = 0;
+		bool startOK = false;
+		bool endOK = false;
+		while ( !startOK || !endOK ){
+			const char* found = string_in_string_nocase( text + offset, shaderName );
+			if ( found == 0 ) {
+				break;
+			}
+			else{
+				offset = found - text;
+				//validate found one...
+				startOK = endOK = false;
+				if ( offset == 0 ){
+					startOK = true;
+				}
+				else{
+					for ( const char* i = found - 1; i >= text; --i ){
+						if( *i == '\t' || *i == ' ' ){
+							startOK = true;
+							continue;
+						}
+						else if( *i == '\n' || *i == '\r' || *i == '}' ){
+							startOK = true;
+							break;
+						}
+						else{
+							startOK = false;
+							break;
+						}
+					}
+				}
+				for ( const char* i = found + strlen( shaderName ); i < text + size; ++i ){
+					if( *i == '\t' || *i == ' ' ){
+						endOK = true;
+						continue;
+					}
+					else if( *i == '\n' || *i == '\r' || *i == '{' || string_equal_nocase_n( i, ":q3map", 6 ) ){
+						endOK = true;
+						break;
+					}
+					else{
+						endOK = false;
+						break;
+					}
+				}
+				if( !startOK || !endOK ){
+					++offset;
+				}
+			}
+		}
+		g_textEditor.DoGtkTextEditor( text, size, offset, pathFull.c_str(), pathIsDir );
+		free( text );
 	}
 }

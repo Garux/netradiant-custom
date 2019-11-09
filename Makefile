@@ -727,7 +727,6 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/selection.o \
 	radiant/select.o \
 	radiant/server.o \
-	radiant/shaders.o \
 	radiant/sockets.o \
 	radiant/stacktrace.o \
 	radiant/surfacedialog.o \

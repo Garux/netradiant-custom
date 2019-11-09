@@ -86,7 +86,6 @@
 #include "patchdialog.h"
 #include "groupdialog.h"
 #include "preferences.h"
-#include "shaders.h"
 #include "commands.h"
 
 void TextureBrowser_queueDraw( TextureBrowser& textureBrowser );
@@ -1052,7 +1051,7 @@ void TextureBrowser_Selection_MouseUp( TextureBrowser& textureBrowser, guint32 f
 				globalWarningStream() << shader->getName() << " is not a shader, it's a texture.\n";
 			}
 			else{
-				ViewShader( shader->getShaderFileName(), shader->getName(), ( flags & GDK_CONTROL_MASK ) != 0 );
+				DoShaderView( shader->getShaderFileName(), shader->getName(), ( flags & GDK_CONTROL_MASK ) != 0 );
 			}
 		}
 	}
