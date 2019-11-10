@@ -147,14 +147,16 @@ inline bool string_equal_prefix_nocase( const char* string, const char* prefix )
 
 /// \brief Returns true if the ending of \p string is equal to \p suffix.
 /// O(n)
-inline bool string_equal_suffix( const char* string, const char* suffix){
-	const char *s = string + string_length( string ) - string_length( suffix );
-	return string_equal_n( s , suffix, string_length( suffix ) );
+inline bool string_equal_suffix( const char* string, const char* suffix ){
+	const std::size_t stringLength = string_length( string );
+	const std::size_t suffixLength = string_length( suffix );
+	return ( suffixLength > stringLength )? false : string_equal_n( string + stringLength - suffixLength, suffix, suffixLength );
 }
 
-inline bool string_equal_suffix_nocase( const char* string, const char* suffix){
-	const char *s = string + string_length( string ) - string_length( suffix );
-	return string_equal_nocase_n( s , suffix, string_length( suffix ) );
+inline bool string_equal_suffix_nocase( const char* string, const char* suffix ){
+	const std::size_t stringLength = string_length( string );
+	const std::size_t suffixLength = string_length( suffix );
+	return ( suffixLength > stringLength )? false : string_equal_nocase_n( string + stringLength - suffixLength, suffix, suffixLength );
 }
 
 /// \brief Copies \p other into \p string and returns \p string.
