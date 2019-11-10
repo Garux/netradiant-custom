@@ -214,7 +214,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	int i, j, s, k, numSurfaces;
 	m4x4_t identity, nTransform;
 	picoModel_t         *model;
-	picoShader_t        *shader;
 	picoSurface_t       *surface;
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
@@ -351,12 +350,8 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		}
 
 		/* get shader name */
-		shader = PicoGetSurfaceShader( surface );
-		if ( shader == NULL ) {
+		if ( !( picoShaderName = PicoGetShaderName( PicoGetSurfaceShader( surface ) ) ) ) {
 			picoShaderName = "";
-		}
-		else{
-			picoShaderName = PicoGetShaderName( shader );
 		}
 
 		/* handle .skin file */
@@ -1513,7 +1508,22 @@ void AddTriangleModels( entity_t *e ){
 				/* split the string */
 				split = strchr( remap->from, ';' );
 				if ( split == NULL ) {
-					Sys_Warning( "Shader _remap key found in misc_model without a ; character\n" );
+					Sys_Warning( "Shader _remap key found in misc_model without a ; character: '%s'\n", remap->from );
+				}
+				else if( split == remap->from ){
+					Sys_Warning( "_remap FROM is empty in '%s'\n", remap->from );
+					split = NULL;
+				}
+				else if( *( split + 1 ) == '\0' ){
+					Sys_Warning( "_remap TO is empty in '%s'\n", remap->from );
+					split = NULL;
+				}
+				else if( strlen( split + 1 ) >= sizeof( remap->to ) ){
+					Sys_Warning( "_remap TO is too long in '%s'\n", remap->from );
+					split = NULL;
+				}
+
+				if ( split == NULL ) {
 					free( remap );
 					remap = remap2;
 					continue;
