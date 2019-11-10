@@ -223,7 +223,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	picoVec_t           *xyz, *normal, *st;
 	byte                *color;
 	picoIndex_t         *indexes;
-	remap_t             *rm, *glob;
+	remap_t             *rm, *rmto, *glob;
 	skinfile_t          *sf, *sf2;
 	char skinfilename[ MAX_QPATH ];
 	char                *skinfilecontent;
@@ -372,22 +372,28 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		}
 
 		/* handle shader remapping */
-		glob = NULL;
+		glob = rmto = NULL;
 		for ( rm = remap; rm != NULL; rm = rm->next )
 		{
 			if ( rm->from[ 0 ] == '*' && rm->from[ 1 ] == '\0' ) {
 				glob = rm;
 			}
-			else if ( !Q_stricmp( picoShaderName, rm->from ) ) {
-				Sys_FPrintf( SYS_VRB, "Remapping %s to %s\n", picoShaderName, rm->to );
-				picoShaderName = rm->to;
-				glob = NULL;
-				break;
+			else{
+				const size_t shaderLen = strlen( picoShaderName );
+				const size_t suffixLen = strlen( rm->from );
+				if( shaderLen >= suffixLen && !Q_strncasecmp( picoShaderName + shaderLen - suffixLen, rm->from, suffixLen ) ){
+					rmto = rm;
+					if( shaderLen == suffixLen ) // exact match priority
+						break;
+				}
 			}
 		}
-
-		if ( glob != NULL ) {
-			Sys_FPrintf( SYS_VRB, "Globbing %s to %s\n", picoShaderName, glob->to );
+		if( rmto ){
+			Sys_FPrintf( SYS_VRB, "Remapping '%s' to '%s'\n", picoShaderName, rmto->to );
+			picoShaderName = rmto->to;
+		}
+		else if ( glob ) {
+			Sys_FPrintf( SYS_VRB, "Globbing '%s' to '%s'\n", picoShaderName, glob->to );
 			picoShaderName = glob->to;
 		}
 
