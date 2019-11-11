@@ -2939,6 +2939,9 @@ int LightMain( int argc, char **argv ){
 			lightmapFill = qtrue;
 			Sys_Printf( "Filling lightmap colors from surrounding pixels to improve JPEG compression\n" );
 		}
+		else if ( !strcmp( argv[ i ], "-fillpink" ) ) {
+			lightmapPink = qtrue;
+		}
 		/* unhandled args */
 		else
 		{

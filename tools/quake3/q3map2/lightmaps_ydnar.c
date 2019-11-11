@@ -3195,6 +3195,13 @@ void StoreSurfaceLightmaps( qboolean fastAllocate ){
 		if ( lightmapFill ) {
 			FillOutLightmap( olm );
 		}
+		else if( lightmapPink ){
+			for ( x = 0; x < olm->customHeight * olm->customWidth; ++x ){
+				if ( ( olm->lightBits[x >> 3] & ( 1 << ( x & 7 ) ) ) == 0 ) { /* not filled */
+					VectorSet( olm->bspLightBytes + x * 3, 255, 0, 255 );
+				}
+			}
+		}
 
 		/* is this a valid bsp lightmap? */
 		if ( olm->lightmapNum >= 0 && !externalLightmaps ) {
