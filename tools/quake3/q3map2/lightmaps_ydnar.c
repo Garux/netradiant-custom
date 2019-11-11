@@ -60,28 +60,29 @@
  */
 
 void WriteTGA24( char *filename, byte *data, int width, int height, qboolean flip ){
-	int i, c;
-	byte    *buffer, *in;
+	int i;
+	const int headSz = 18;
+	const int sz = width * height * 3 + headSz;
+	byte    *buffer, *pix, *in;
 	FILE    *file;
 
-
 	/* allocate a buffer and set it up */
-	buffer = safe_malloc( width * height * 3 + 18 );
-	memset( buffer, 0, 18 );
-	buffer[ 2 ] = 2;
+	buffer = safe_malloc( sz );
+	pix = buffer + headSz;
+	memset( buffer, 0, headSz );
+	buffer[ 2 ] = 2;		// uncompressed type
 	buffer[ 12 ] = width & 255;
 	buffer[ 13 ] = width >> 8;
 	buffer[ 14 ] = height & 255;
 	buffer[ 15 ] = height >> 8;
-	buffer[ 16 ] = 24;
+	buffer[ 16 ] = 24;	// pixel size
 
 	/* swap rgb to bgr */
-	c = ( width * height * 3 ) + 18;
-	for ( i = 18; i < c; i += 3 )
+	for ( i = 0; i < sz - headSz; i += 3 )
 	{
-		buffer[ i ] = data[ i - 18 + 2 ];       /* blue */
-		buffer[ i + 1 ] = data[ i - 18 + 1 ];   /* green */
-		buffer[ i + 2 ] = data[ i - 18 + 0 ];   /* red */
+		pix[ i + 0 ] = data[ i + 2 ];   /* blue */
+		pix[ i + 1 ] = data[ i + 1 ];   /* green */
+		pix[ i + 2 ] = data[ i + 0 ];   /* red */
 	}
 
 	/* write it and free the buffer */
@@ -92,12 +93,12 @@ void WriteTGA24( char *filename, byte *data, int width, int height, qboolean fli
 
 	/* flip vertically? */
 	if ( flip ) {
-		fwrite( buffer, 1, 18, file );
-		for ( in = buffer + ( ( height - 1 ) * width * 3 ) + 18; in >= buffer; in -= ( width * 3 ) )
+		fwrite( buffer, 1, headSz, file );
+		for ( in = pix + ( ( height - 1 ) * width * 3 ); in >= pix; in -= ( width * 3 ) )
 			fwrite( in, 1, ( width * 3 ), file );
 	}
 	else{
-		fwrite( buffer, 1, c, file );
+		fwrite( buffer, 1, sz, file );
 	}
 
 	/* close the file */
