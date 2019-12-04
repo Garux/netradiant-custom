@@ -198,9 +198,9 @@ static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum ){
 	fprintf( f, "newmtl lm_%04d\r\n", lightmapNum );
 	if ( lightmapNum >= 0 ) {
 		/* blender hates this, so let's not do it
-		    fprintf( f, "map_Kd %s\\lm_%04d.tga\r\n", base, lightmapNum );
+		    fprintf( f, "map_Kd %s\\" EXTERNAL_LIGHTMAP "\r\n", base, lightmapNum );
 		 */
-		fprintf( f, "map_Kd %s/lm_%04d.tga\r\n", base, lightmapNum );
+		fprintf( f, "map_Kd %s/" EXTERNAL_LIGHTMAP "\r\n", base, lightmapNum );
 	}
 }
 
@@ -263,14 +263,11 @@ int ConvertBSPToOBJ( char *bspName ){
 		for ( ; ; lightmapCount++ )
 		{
 			char buf[1024];
-			FILE *tmp;
-			snprintf( buf, sizeof( buf ), "%s/lm_%04d.tga", dirname, lightmapCount );
+			snprintf( buf, sizeof( buf ), "%s/" EXTERNAL_LIGHTMAP, dirname, lightmapCount );
 			buf[sizeof( buf ) - 1] = 0;
-			tmp = fopen( buf, "rb" );
-			if ( !tmp ) {
+			if ( !FileExists( buf ) ) {
 				break;
 			}
-			fclose( tmp );
 		}
 		lastLightmap = lightmapCount - 1;
 	}

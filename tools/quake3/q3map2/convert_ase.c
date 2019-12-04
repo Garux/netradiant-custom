@@ -315,7 +315,7 @@ static void ConvertLightmap( FILE *f, const char *base, int lightmapNum ){
 		fprintf( f, "\t\t\t*MAP_SUBNO\t1\r\n" );
 		fprintf( f, "\t\t\t*MAP_AMOUNT\t1.0\r\n" );
 		fprintf( f, "\t\t\t*MAP_TYPE\tScreen\r\n" );
-		fprintf( f, "\t\t\t*BITMAP\t\"%s\\lm_%04d.tga\"\r\n", base, lightmapNum );
+		fprintf( f, "\t\t\t*BITMAP\t\"%s\\" EXTERNAL_LIGHTMAP "\"\r\n", base, lightmapNum );
 		fprintf( f, "\t\t\t*BITMAP_FILTER\tPyramidal\r\n" );
 		fprintf( f, "\t\t}\r\n" );
 	}
@@ -382,14 +382,11 @@ int ConvertBSPToASE( char *bspName ){
 		for ( ; ; lightmapCount++ )
 		{
 			char buf[1024];
-			FILE *tmp;
-			snprintf( buf, sizeof( buf ), "%s/lm_%04d.tga", dirname, lightmapCount );
+			snprintf( buf, sizeof( buf ), "%s/" EXTERNAL_LIGHTMAP, dirname, lightmapCount );
 			buf[sizeof( buf ) - 1] = 0;
-			tmp = fopen( buf, "rb" );
-			if ( !tmp ) {
+			if ( !FileExists( buf ) ) {
 				break;
 			}
-			fclose( tmp );
 		}
 		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", lightmapCount );
 		for ( i = 0; i < lightmapCount; i++ )
