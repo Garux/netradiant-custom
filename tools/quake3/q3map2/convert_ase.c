@@ -140,7 +140,12 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 	{
 		v = i + ds->firstVert;
 		dv = &bspDrawVerts[ v ];
-		fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv->st[ 0 ], ( 1.0 - dv->st[ 1 ] ), 1.0f );
+		if ( lightmapsAsTexcoord ) {
+			fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv->lightmap[0][0], ( 1.0 - dv->lightmap[0][1] ), 1.0f ); // dv->lightmap[0][1] internal, ( 1.0 - dv->lightmap[0][1] ) external
+		}
+		else{
+			fprintf( f, "\t\t\t*MESH_TVERT\t%d\t%f\t%f\t%f\r\n", i, dv->st[ 0 ], ( 1.0 - dv->st[ 1 ] ), 1.0f );
+		}
 	}
 	fprintf( f, "\t\t}\r\n" );
 
