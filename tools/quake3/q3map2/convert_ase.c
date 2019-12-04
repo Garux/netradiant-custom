@@ -315,7 +315,10 @@ static void ConvertLightmap( FILE *f, const char *base, int lightmapNum ){
 		fprintf( f, "\t\t\t*MAP_SUBNO\t1\r\n" );
 		fprintf( f, "\t\t\t*MAP_AMOUNT\t1.0\r\n" );
 		fprintf( f, "\t\t\t*MAP_TYPE\tScreen\r\n" );
-		fprintf( f, "\t\t\t*BITMAP\t\"%s\\" EXTERNAL_LIGHTMAP "\"\r\n", base, lightmapNum );
+		if( shadersAsBitmap )
+			fprintf( f, "\t\t\t*BITMAP\t\"maps\\%s\\" EXTERNAL_LIGHTMAP "\"\r\n", base, lightmapNum );
+		else
+			fprintf( f, "\t\t\t*BITMAP\t\"%s\\" EXTERNAL_LIGHTMAP "\"\r\n", base, lightmapNum );
 		fprintf( f, "\t\t\t*BITMAP_FILTER\tPyramidal\r\n" );
 		fprintf( f, "\t\t}\r\n" );
 	}

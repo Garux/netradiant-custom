@@ -200,7 +200,10 @@ static void ConvertLightmapToMTL( FILE *f, const char *base, int lightmapNum ){
 		/* blender hates this, so let's not do it
 		    fprintf( f, "map_Kd %s\\" EXTERNAL_LIGHTMAP "\r\n", base, lightmapNum );
 		 */
-		fprintf( f, "map_Kd %s/" EXTERNAL_LIGHTMAP "\r\n", base, lightmapNum );
+		if( shadersAsBitmap )
+			fprintf( f, "map_Kd maps/%s/" EXTERNAL_LIGHTMAP "\r\n", base, lightmapNum );
+		else
+			fprintf( f, "map_Kd %s/" EXTERNAL_LIGHTMAP "\r\n", base, lightmapNum );
 	}
 }
 
