@@ -2563,7 +2563,8 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Storing all lightmaps externally\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-lightmapsize" ) ) {
+		else if ( !strcmp( argv[ i ], "-lightmapsize" )
+				|| !strcmp( argv[ i ], "-extlmhacksize" ) ) {
 			lmCustomSize = atoi( argv[ i + 1 ] );
 
 			/* must be a power of 2 and greater than 2 */
@@ -2576,7 +2577,9 @@ int LightMain( int argc, char **argv ){
 
 			/* enable external lightmaps */
 			if ( lmCustomSize != game->lightmapSize ) {
-				externalLightmaps = qtrue;
+				/* -lightmapsize might just require -external for native external lms, but it has already been used in existing batches alone,
+				so brand new switch here for external lms, referenced by shaders hack/behavior */
+				externalLightmaps = ( qboolean )strcmp( argv[ i - 1 ], "-extlmhacksize" );
 				Sys_Printf( "Storing all lightmaps externally\n" );
 			}
 		}

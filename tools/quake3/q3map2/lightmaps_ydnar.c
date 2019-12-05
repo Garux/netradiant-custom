@@ -3533,7 +3533,7 @@ void StoreSurfaceLightmaps( qboolean fastAllocate ){
 			olm = &outLightmaps[ lm->outLightmapNums[ 0 ] ];
 
 			/* do some name mangling */
-			sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP, mapName, olm->extLightmapNum );
+			sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP "\n\t\ttcgen lightmap", mapName, olm->extLightmapNum );
 
 			/* create custom shader */
 			csi = CustomShader( info->si, "$lightmap", lightmapName );
