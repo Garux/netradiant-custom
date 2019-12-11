@@ -55,8 +55,6 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 	if ( scale <= 0.0f ) {
 		scale = 1.0f;
 	}
-	/* globally */
-	scale *= lightmapBrightness;
 
 	/* make a local copy */
 	VectorScale( color, scale, sample );

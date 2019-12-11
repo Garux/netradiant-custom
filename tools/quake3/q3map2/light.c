@@ -2422,11 +2422,10 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		/* Lighting brightness */
+		/* Lightmaps brightness */
 		else if( !strcmp( argv[ i ], "-brightness" ) ){
-			f = atof( argv[ i + 1 ] );
-			lightmapBrightness = f;
-			Sys_Printf( "Lighting brightness set to %f\n", lightmapBrightness );
+			lightmapBrightness = atof( argv[ i + 1 ] );
+			Sys_Printf( "Scaling lightmaps brightness by %f\n", lightmapBrightness );
 			i++;
 		}
 
