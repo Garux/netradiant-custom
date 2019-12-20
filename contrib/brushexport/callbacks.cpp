@@ -11,7 +11,6 @@
 void DestroyWindow();
 
 //! TODO add tooltip for ignore: shader name after last slash, case sensitive // or make insensitive
-//! TODO console print on success
 //! TODO make togglebuttons inactive on !exportmat
 //! TODO add ignore mat on ENTER, del on del
 //! TODO add entry with path to save to (to resave faster)

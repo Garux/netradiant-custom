@@ -382,5 +382,10 @@ bool ExportSelection( const std::set<std::string>& ignorelist, collapsemode m, b
 	ForEachSelected vis( exporter );
 	GlobalSelectionSystem().foreachSelected( vis );
 
-	return exporter.WriteToFile( path, m );
+	if( exporter.WriteToFile( path, m ) ){
+		globalOutputStream() << "brushexport::ExportSelection " << path.c_str() << "\n";
+		return true;
+	}
+
+	return false;
 }
