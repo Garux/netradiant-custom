@@ -11,7 +11,6 @@
 void DestroyWindow();
 
 //! TODO add tooltip for ignore: shader name after last slash, case sensitive // or make insensitive
-//! TODO make togglebuttons inactive on !exportmat
 //! TODO add ignore mat on ENTER, del on del
 //! TODO add entry with path to save to (to resave faster)
 //! TODO ignore case in mat name comparison		materials_comparator
@@ -79,27 +78,20 @@ void OnExportClicked( GtkButton* button, gpointer user_data ){
 		}
 	}
 
+	GtkWidget* toggle;
 	// export materials?
-	GtkWidget* toggle = lookup_widget( GTK_WIDGET( button ), "t_exportmaterials" );
-	ASSERT_NOTNULL( toggle );
-
+	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_exportmaterials" ) ) );
 	const bool exportmat = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
 
 	// limit material names?
-	toggle = lookup_widget( GTK_WIDGET( button ), "t_limitmatnames" );
-	ASSERT_NOTNULL( toggle );
-
-	const bool limitMatNames = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) ) && exportmat;
+	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_limitmatnames" ) ) );
+	const bool limitMatNames = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
 
 	// create objects instead of groups?
-	toggle = lookup_widget( GTK_WIDGET( button ), "t_objects" );
-	ASSERT_NOTNULL( toggle );
+	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_objects" ) ) );
+	const bool objects = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
 
-	const bool objects = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) ) && exportmat;
-
-	toggle = lookup_widget( GTK_WIDGET( button ), "t_weld" );
-	ASSERT_NOTNULL( toggle );
-
+	ASSERT_NOTNULL( ( toggle = lookup_widget( GTK_WIDGET( button ), "t_weld" ) ) );
 	const bool weld = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
 
 	// export
@@ -128,20 +120,6 @@ void OnRemoveMaterial( GtkButton* button, gpointer user_data ){
 	GtkTreeIter iter;
 	if ( gtk_tree_selection_get_selected( sel, 0, &iter ) ) {
 		gtk_list_store_remove( list, &iter );
-	}
-}
-
-void OnExportMatClicked( GtkButton* button, gpointer user_data ){
-	GtkWidget* toggleLimit = lookup_widget( GTK_WIDGET( button ), "t_limitmatnames" );
-	GtkWidget* toggleObject = lookup_widget( GTK_WIDGET( button ), "t_objects" );
-
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( button ) ) ) {
-		gtk_widget_set_sensitive( GTK_WIDGET( toggleLimit ), TRUE );
-		gtk_widget_set_sensitive( GTK_WIDGET( toggleObject ), TRUE );
-	}
-	else {
-		gtk_widget_set_sensitive( GTK_WIDGET( toggleLimit ), FALSE );
-		gtk_widget_set_sensitive( GTK_WIDGET( toggleObject ), FALSE );
 	}
 }
 

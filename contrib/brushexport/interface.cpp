@@ -159,7 +159,6 @@ create_w_plugplug2( void ){
 	g_signal_connect( ( gpointer )b_export, "clicked", G_CALLBACK( OnExportClicked ), NULL );
 	g_signal_connect( ( gpointer )b_addmaterial, "clicked", G_CALLBACK( OnAddMaterial ), NULL );
 	g_signal_connect( ( gpointer )b_removematerial, "clicked", G_CALLBACK( OnRemoveMaterial ), NULL );
-	g_signal_connect( ( gpointer )t_exportmaterials, "clicked", G_CALLBACK( OnExportMatClicked ), NULL );
 
 	/* Store pointers to all widgets, for use by lookup_widget(). */
 	GLADE_HOOKUP_OBJECT_NO_REF( w_plugplug2, w_plugplug2, "w_plugplug2" );
