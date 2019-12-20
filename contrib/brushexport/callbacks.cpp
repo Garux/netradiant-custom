@@ -10,7 +10,13 @@
 // stuff from interface.cpp
 void DestroyWindow();
 
-
+//! TODO add tooltip for ignore: shader name after last slash, case sensitive // or make insensitive
+//! TODO console print on success
+//! TODO make togglebuttons inactive on !exportmat
+//! TODO add ignore mat on ENTER, del on del
+//! TODO add entry with path to save to (to resave faster)
+//! TODO tooltip for weld //inside groups
+//! TODO ignore case in mat name comparison		materials_comparator
 namespace callbacks {
 
 void OnDestroy( GtkWidget* w, gpointer data ){
@@ -39,15 +45,17 @@ void OnExportClicked( GtkButton* button, gpointer user_data ){
 	{
 		gchar* data;
 		gtk_tree_model_get( GTK_TREE_MODEL( list ), &iter, 0, &data, -1 );
+#ifdef _DEBUG
 		globalOutputStream() << data << "\n";
+#endif
 		ignore.insert( std::string( data ) );
 		g_free( data );
 		valid = gtk_tree_model_iter_next( GTK_TREE_MODEL( list ), &iter );
 	}
-
-	for ( std::set<std::string>::iterator it( ignore.begin() ); it != ignore.end(); ++it )
-		globalOutputStream() << it->c_str() << "\n";
-
+#ifdef _DEBUG
+	for ( const std::string& str : ignore )
+		globalOutputStream() << str.c_str() << "\n";
+#endif
 	// collapse mode
 	collapsemode mode = COLLAPSE_NONE;
 
@@ -77,34 +85,27 @@ void OnExportClicked( GtkButton* button, gpointer user_data ){
 	GtkWidget* toggle = lookup_widget( GTK_WIDGET( button ), "t_exportmaterials" );
 	ASSERT_NOTNULL( toggle );
 
-	bool exportmat = FALSE;
-
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) ) ) {
-		exportmat = TRUE;
-	}
+	const bool exportmat = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
 
 	// limit material names?
 	toggle = lookup_widget( GTK_WIDGET( button ), "t_limitmatnames" );
 	ASSERT_NOTNULL( toggle );
 
-	bool limitMatNames = FALSE;
-
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) ) && exportmat ) {
-		limitMatNames = TRUE;
-	}
+	const bool limitMatNames = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) ) && exportmat;
 
 	// create objects instead of groups?
 	toggle = lookup_widget( GTK_WIDGET( button ), "t_objects" );
 	ASSERT_NOTNULL( toggle );
 
-	bool objects = FALSE;
+	const bool objects = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) ) && exportmat;
 
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) )  && exportmat ) {
-		objects = TRUE;
-	}
+	toggle = lookup_widget( GTK_WIDGET( button ), "t_weld" );
+	ASSERT_NOTNULL( toggle );
+
+	const bool weld = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
 
 	// export
-	ExportSelection( ignore, mode, exportmat, path, limitMatNames, objects );
+	ExportSelection( ignore, mode, exportmat, path, limitMatNames, objects, weld );
 }
 
 void OnAddMaterial( GtkButton* button, gpointer user_data ){

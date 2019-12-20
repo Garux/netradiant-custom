@@ -22,7 +22,7 @@
 class ExportData
 {
 public:
-ExportData( const std::set<std::string>& ignorelist, collapsemode mode, bool limNames, bool objs );
+ExportData( const std::set<std::string>& ignorelist, collapsemode mode );
 virtual ~ExportData( void );
 
 virtual void BeginBrush( Brush& b );
@@ -49,11 +49,11 @@ private:
 void GetShaderNameFromShaderPath( const char* path, std::string& name );
 
 group* current;
-collapsemode mode;
+const collapsemode mode;
 const std::set<std::string>& ignorelist;
 };
 
-ExportData::ExportData( const std::set<std::string>& _ignorelist, collapsemode _mode, bool _limNames, bool _objs )
+ExportData::ExportData( const std::set<std::string>& _ignorelist, collapsemode _mode )
 	:   mode( _mode ),
 	ignorelist( _ignorelist ){
 	current = 0;
@@ -136,7 +136,7 @@ void ExportData::GetShaderNameFromShaderPath( const char* path, std::string& nam
 
 	size_t last_slash = tmp.find_last_of( "/" );
 
-	if ( last_slash != std::string::npos && last_slash == ( tmp.length() - 1 ) ) {
+	if ( last_slash == std::string::npos || last_slash == ( tmp.length() - 1 ) ) {
 		name = path;
 	}
 	else{
@@ -154,16 +154,18 @@ void ExportData::GetShaderNameFromShaderPath( const char* path, std::string& nam
 class ExportDataAsWavefront : public ExportData
 {
 private:
-bool expmat;
-bool limNames;
-bool objs;
+const bool expmat;
+const bool limNames;
+const bool objs;
+const bool weld;
 
 public:
-ExportDataAsWavefront( const std::set<std::string>& _ignorelist, collapsemode _mode, bool _expmat, bool _limNames, bool _objs )
-	: ExportData( _ignorelist, _mode, _limNames, _objs ){
-	expmat = _expmat;
-	limNames = _limNames;
-	objs = _objs;
+ExportDataAsWavefront( const std::set<std::string>& _ignorelist, collapsemode _mode, bool _expmat, bool _limNames, bool _objs, bool _weld )
+	: ExportData( _ignorelist, _mode ),
+	expmat( _expmat ),
+	limNames( _limNames ),
+	objs( _objs ),
+	weld( _weld ){
 }
 
 bool WriteToFile( const std::string& path, collapsemode mode ) const;
@@ -178,11 +180,10 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 
 	std::string mtlFile = objFile.substr( 0, objFile.length() - 4 ) + ".mtl";
 
-	typedef std::pair<std::string, Colour3> Material;
-	auto materials_comparator = []( const Material& ma1, const Material& ma2 ) {
-		return ma1.first < ma2.first;
+	auto materials_comparator = []( const std::string& lhs, const std::string& rhs ) {
+		return lhs < rhs;
 	};
-	auto materials  = std::set<Material, decltype( materials_comparator )>( materials_comparator );
+	auto materials = std::map<std::string, Colour3, decltype( materials_comparator )>( materials_comparator );
 
 	TextFileOutputStream out( objFile.c_str() );
 
@@ -200,15 +201,13 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 	}
 
 	unsigned int vertex_count = 0;
+	unsigned int texcoord_count = 0;
 
-	const std::list<ExportData::group>::const_iterator gend( groups.end() );
-	for ( std::list<ExportData::group>::const_iterator git( groups.begin() ); git != gend; ++git )
+	for ( const ExportData::group& group : groups )
 	{
-		typedef std::multimap<std::string, std::string> bm;
-		bm brushMaterials;
-		typedef std::pair<std::string, std::string> String_Pair;
+		std::multimap<std::string, std::string> brushMaterials;
 
-		const std::list<const Face*>::const_iterator end( git->faces.end() );
+		std::vector<Vector3> vertices; // unique vertices list for welding
 
 		// submesh starts here
 		if ( objs ) {
@@ -217,31 +216,59 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 		else {
 			out << "\ng ";
 		}
-		out << git->name.c_str() << "\n";
+		out << group.name.c_str() << "\n";
 
 		// material
 		if ( expmat && mode == COLLAPSE_ALL ) {
 			out << "usemtl material" << "\n\n";
-			materials.insert( std::make_pair( std::string( "material" ), Colour3( 0.5, 0.5, 0.5 ) ) );
+			materials.emplace( "material", Colour3( 0.5, 0.5, 0.5 ) );
 		}
 
-		for ( std::list<const Face*>::const_iterator it( git->faces.begin() ); it != end; ++it )
+		for ( const Face* face : group.faces )
 		{
-			const Winding& w( ( *it )->getWinding() );
+			const Winding& w( face->getWinding() );
 
-			// vertices
+			// faces
+			StringOutputStream faceLine( 256 );
+			faceLine << "\nf";
+
 			size_t i = w.numpoints;
 			do{
 				--i;
-				out << "v " << FloatFormat( w[i].vertex.x(), 1, 6 ) << " " << FloatFormat( w[i].vertex.z(), 1, 6 ) << " " << FloatFormat( -w[i].vertex.y(), 1, 6 ) << "\n";
+				++texcoord_count;
+				std::size_t vertexN = 0; // vertex index to use, 0 is special value = no vertex to weld to found
+				const Vector3& vertex = w[i].vertex;
+				if( weld ){
+					auto found = std::find_if( vertices.begin(), vertices.end(), [&vertex]( const Vector3& othervertex ){
+										return Edge_isDegenerate( vertex, othervertex );
+									} );
+					if( found == vertices.end() ){ // unique vertex, add to the list
+						vertices.emplace_back( vertex );
+					}
+					else{
+						vertexN = vertex_count - std::distance( found, vertices.end() ) + 1; // reuse existing index
+					}
+				}
+				// write vertices
+				if( vertexN == 0 ){
+					vertexN = ++vertex_count;
+					out << "v " << FloatFormat( vertex.x(), 1, 6 ) << " " << FloatFormat( vertex.z(), 1, 6 ) << " " << FloatFormat( -vertex.y(), 1, 6 ) << "\n";
+				}
+				faceLine << " " << vertexN << "/" << texcoord_count; // store faces
 			}
 			while( i != 0 );
+
+			if ( mode != COLLAPSE_ALL )
+				materials.emplace( face->getShader().getShader(), face->getShader().state()->getTexture().color );
+
+			brushMaterials.emplace( face->getShader().getShader(), faceLine.c_str() );
 		}
+
 		out << "\n";
 
-		for ( std::list<const Face*>::const_iterator it( git->faces.begin() ); it != end; ++it )
+		for ( const Face* face : group.faces )
 		{
-			const Winding& w( ( *it )->getWinding() );
+			const Winding& w( face->getWinding() );
 
 			// texcoords
 			size_t i = w.numpoints;
@@ -252,54 +279,24 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 			while( i != 0 );
 		}
 
-		for ( std::list<const Face*>::const_iterator it( git->faces.begin() ); it != end; ++it )
 		{
-			const Winding& w( ( *it )->getWinding() );
-
-			// faces
-			StringOutputStream faceLine( 256 );
-			faceLine << "\nf";
-
-			size_t i = w.numpoints;
-			do{
-				--i;
-				++vertex_count;
-				faceLine << " " << vertex_count << "/" << vertex_count;
-			}
-			while( i != 0 );
-
-			if ( mode != COLLAPSE_ALL ) {
-				materials.insert( std::make_pair( std::string( ( *it )->getShader().getShader() ), ( *it )->getShader().state()->getTexture().color ) );
-				brushMaterials.insert( String_Pair( ( *it )->getShader().getShader(), faceLine.c_str() ) );
-			}
-			else {
-				out << faceLine.c_str();
-			}
-
-
-		}
-
-		if ( mode != COLLAPSE_ALL ) {
 			std::string lastMat;
-			std::string mat;
-			std::string faces;
-
-			for ( bm::iterator iter = brushMaterials.begin(); iter != brushMaterials.end(); iter++ )
+			for ( const auto& stringpair : brushMaterials )
 			{
-				mat = ( *iter ).first.c_str();
-				faces = ( *iter ).second.c_str();
+				const std::string& mat = stringpair.first;
+				const std::string& faces = stringpair.second;
 
-				if ( mat != lastMat ) {
+				if ( mode != COLLAPSE_ALL && mat != lastMat ) {
 					if ( limNames && mat.size() > MAX_MATERIAL_NAME ) {
 						out << "\nusemtl " << mat.substr( mat.size() - MAX_MATERIAL_NAME, mat.size() ).c_str();
 					}
 					else {
 						out << "\nusemtl " << mat.c_str();
 					}
+					lastMat = mat;
 				}
-
+				// write faces
 				out << faces.c_str();
-				lastMat = mat;
 			}
 		}
 
@@ -315,10 +312,10 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 
 		outMtl << "# Wavefront material file exported with NetRadiants brushexport plugin.\n";
 		outMtl << "# Material Count: " << (const Unsigned)materials.size() << "\n\n";
-		for ( std::set<std::pair<std::string, Colour3>>::const_iterator it( materials.begin() ); it != materials.end(); ++it )
+		for ( const auto& material : materials )
 		{
-			const std::string& str = it->first;
-			const Colour3& clr = it->second;
+			const std::string& str = material.first;
+			const Colour3& clr = material.second;
 			if ( limNames && str.size() > MAX_MATERIAL_NAME ) {
 				outMtl << "newmtl " << str.substr( str.size() - MAX_MATERIAL_NAME, str.size() ).c_str() << "\n";
 			}
@@ -374,8 +371,13 @@ private:
 ExportData& exporter;
 };
 
-bool ExportSelection( const std::set<std::string>& ignorelist, collapsemode m, bool exmat, const std::string& path, bool limNames, bool objs ){
-	ExportDataAsWavefront exporter( ignorelist, m, exmat, limNames, objs );
+bool ExportSelection( const std::set<std::string>& ignorelist, collapsemode m, bool exmat, const std::string& path, bool limNames, bool objs, bool weld ){
+	ExportDataAsWavefront exporter( ignorelist, m, exmat, limNames, objs, weld );
+
+	if( GlobalSelectionSystem().countSelected() == 0 ){
+		globalErrorStream() << "Nothing is selected.\n";
+		return false;
+	}
 
 	ForEachSelected vis( exporter );
 	GlobalSelectionSystem().foreachSelected( vis );

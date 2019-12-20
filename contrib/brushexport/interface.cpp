@@ -38,36 +38,32 @@ create_w_plugplug2( void ){
 	GtkWidget *t_exportmaterials;
 	GtkWidget *t_limitmatnames;
 	GtkWidget *t_objects;
+	GtkWidget *t_weld;
 	GtkTooltips *tooltips;
 
 	tooltips = gtk_tooltips_new();
 
 	w_plugplug2 = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-	gtk_widget_set_name( w_plugplug2, "w_plugplug2" );
 	gtk_window_set_title( GTK_WINDOW( w_plugplug2 ), "BrushExport-Plugin 3.0 by namespace" );
 	gtk_window_set_position( GTK_WINDOW( w_plugplug2 ), GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_window_set_transient_for( GTK_WINDOW( w_plugplug2 ), GTK_WINDOW( g_pRadiantWnd ) );
 	gtk_window_set_destroy_with_parent( GTK_WINDOW( w_plugplug2 ), TRUE );
 
 	vbox1 = gtk_vbox_new( FALSE, 0 );
-	gtk_widget_set_name( vbox1, "vbox1" );
 	gtk_widget_show( vbox1 );
 	gtk_container_add( GTK_CONTAINER( w_plugplug2 ), vbox1 );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox1 ), 5 );
 
 	hbox2 = gtk_hbox_new( TRUE, 5 );
-	gtk_widget_set_name( hbox2, "hbox2" );
 	gtk_widget_show( hbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox1 ), hbox2, FALSE, FALSE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( hbox2 ), 5 );
 
 	vbox4 = gtk_vbox_new( TRUE, 0 );
-	gtk_widget_set_name( vbox4, "vbox4" );
 	gtk_widget_show( vbox4 );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox4, TRUE, FALSE, 0 );
 
 	r_collapse = gtk_radio_button_new_with_mnemonic( NULL, "Collapse mesh" );
-	gtk_widget_set_name( r_collapse, "r_collapse" );
 	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_collapse, "Collapse all brushes into a single group", "Collapse all brushes into a single group" );
 	gtk_widget_show( r_collapse );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapse, FALSE, FALSE, 0 );
@@ -75,7 +71,6 @@ create_w_plugplug2( void ){
 	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_collapse ) );
 
 	r_collapsebymaterial = gtk_radio_button_new_with_mnemonic( NULL, "Collapse by material" );
-	gtk_widget_set_name( r_collapsebymaterial, "r_collapsebymaterial" );
 	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_collapsebymaterial, "Collapse into groups by material", "Collapse into groups by material" );
 	gtk_widget_show( r_collapsebymaterial );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapsebymaterial, FALSE, FALSE, 0 );
@@ -83,7 +78,6 @@ create_w_plugplug2( void ){
 	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_collapsebymaterial ) );
 
 	r_nocollapse = gtk_radio_button_new_with_mnemonic( NULL, "Don't collapse" );
-	gtk_widget_set_name( r_nocollapse, "r_nocollapse" );
 	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_nocollapse, "Every brush is stored in its own group", "Every brush is stored in its own group" );
 	gtk_widget_show( r_nocollapse );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_nocollapse, FALSE, FALSE, 0 );
@@ -92,80 +86,71 @@ create_w_plugplug2( void ){
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( r_nocollapse ), TRUE );
 
 	vbox3 = gtk_vbox_new( FALSE, 0 );
-	gtk_widget_set_name( vbox3, "vbox3" );
 	gtk_widget_show( vbox3 );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox3, FALSE, FALSE, 0 );
 
 	b_export = gtk_button_new_from_stock( "gtk-save" );
-	gtk_widget_set_name( b_export, "b_export" );
 	gtk_widget_show( b_export );
 	gtk_box_pack_start( GTK_BOX( vbox3 ), b_export, TRUE, FALSE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( b_export ), 5 );
 
 	b_close = gtk_button_new_from_stock( "gtk-cancel" );
-	gtk_widget_set_name( b_close, "b_close" );
 	gtk_widget_show( b_close );
 	gtk_box_pack_start( GTK_BOX( vbox3 ), b_close, TRUE, FALSE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( b_close ), 5 );
 
 	vbox2 = gtk_vbox_new( FALSE, 5 );
-	gtk_widget_set_name( vbox2, "vbox2" );
 	gtk_widget_show( vbox2 );
 	gtk_box_pack_start( GTK_BOX( vbox1 ), vbox2, TRUE, TRUE, 0 );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox2 ), 2 );
 
 	label1 = gtk_label_new( "Ignored materials:" );
-	gtk_widget_set_name( label1, "label1" );
 	gtk_widget_show( label1 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), label1, FALSE, FALSE, 0 );
 
 	scrolledwindow1 = gtk_scrolled_window_new( NULL, NULL );
-	gtk_widget_set_name( scrolledwindow1, "scrolledwindow1" );
 	gtk_widget_show( scrolledwindow1 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), scrolledwindow1, TRUE, TRUE, 0 );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow1 ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW( scrolledwindow1 ), GTK_SHADOW_IN );
 
 	t_materialist = gtk_tree_view_new();
-	gtk_widget_set_name( t_materialist, "t_materialist" );
 	gtk_widget_show( t_materialist );
 	gtk_container_add( GTK_CONTAINER( scrolledwindow1 ), t_materialist );
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( t_materialist ), FALSE );
 	gtk_tree_view_set_enable_search( GTK_TREE_VIEW( t_materialist ), FALSE );
 
 	ed_materialname = gtk_entry_new();
-	gtk_widget_set_name( ed_materialname, "ed_materialname" );
 	gtk_widget_show( ed_materialname );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), ed_materialname, FALSE, FALSE, 0 );
 
 	hbox1 = gtk_hbox_new( TRUE, 0 );
-	gtk_widget_set_name( hbox1, "hbox1" );
 	gtk_widget_show( hbox1 );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox1, FALSE, FALSE, 0 );
 
 	b_addmaterial = gtk_button_new_from_stock( "gtk-add" );
-	gtk_widget_set_name( b_addmaterial, "b_addmaterial" );
 	gtk_widget_show( b_addmaterial );
 	gtk_box_pack_start( GTK_BOX( hbox1 ), b_addmaterial, FALSE, FALSE, 0 );
 
 	b_removematerial = gtk_button_new_from_stock( "gtk-remove" );
-	gtk_widget_set_name( b_removematerial, "b_removematerial" );
 	gtk_widget_show( b_removematerial );
 	gtk_box_pack_start( GTK_BOX( hbox1 ), b_removematerial, FALSE, FALSE, 0 );
 
 	t_limitmatnames = gtk_check_button_new_with_mnemonic( "Use short material names (max. 20 chars)" );
-	gtk_widget_set_name( t_limitmatnames, "t_limitmatnames" );
 	gtk_widget_show( t_limitmatnames );
 	gtk_box_pack_end( GTK_BOX( vbox2 ), t_limitmatnames, FALSE, FALSE, 0 );
 
 	t_objects = gtk_check_button_new_with_mnemonic( "Create (o)bjects instead of (g)roups" );
-	gtk_widget_set_name( t_objects, "t_objects" );
 	gtk_widget_show( t_objects );
 	gtk_box_pack_end( GTK_BOX( vbox2 ), t_objects, FALSE, FALSE, 0 );
 
+	t_weld = gtk_check_button_new_with_mnemonic( "Weld vertices" );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( t_weld ), TRUE );
+	gtk_widget_show( t_weld );
+	gtk_box_pack_end( GTK_BOX( vbox2 ), t_weld, FALSE, FALSE, 0 );
+
 	t_exportmaterials = gtk_check_button_new_with_mnemonic( "Create material information (.mtl file)" );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( t_exportmaterials ), true );
-	gtk_widget_set_name( t_exportmaterials, "t_exportmaterials" );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( t_exportmaterials ), TRUE );
 	gtk_widget_show( t_exportmaterials );
 	gtk_box_pack_end( GTK_BOX( vbox2 ), t_exportmaterials, FALSE, FALSE, 10 );
 
@@ -200,6 +185,7 @@ create_w_plugplug2( void ){
 	GLADE_HOOKUP_OBJECT( w_plugplug2, t_exportmaterials, "t_exportmaterials" );
 	GLADE_HOOKUP_OBJECT( w_plugplug2, t_limitmatnames, "t_limitmatnames" );
 	GLADE_HOOKUP_OBJECT( w_plugplug2, t_objects, "t_objects" );
+	GLADE_HOOKUP_OBJECT( w_plugplug2, t_weld, "t_weld" );
 
 	return w_plugplug2;
 }
