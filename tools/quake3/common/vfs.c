@@ -86,20 +86,6 @@ static void vfsAddSlash( char *str ){
 	}
 }
 
-static void vfsFixDOSName( char *src ){
-	if ( src == NULL ) {
-		return;
-	}
-
-	while ( *src )
-	{
-		if ( *src == '\\' ) {
-			*src = '/';
-		}
-		src++;
-	}
-}
-
 //!\todo Define globally or use heap-allocated string.
 #define NAME_MAX 255
 
@@ -138,7 +124,7 @@ static void vfsInitPakFile( const char *filename ){
 		file = (VFS_PAKFILE*)safe_malloc( sizeof( VFS_PAKFILE ) );
 		g_pakFiles = g_slist_append( g_pakFiles, file );
 
-		vfsFixDOSName( filename_inzip );
+		FixDOSName( filename_inzip );
 		g_strdown( filename_inzip );
 
 		file->name = strdup( filename_inzip );
@@ -192,7 +178,7 @@ void vfsInitDirectory( const char *path ){
 
 	strncpy( g_strDirs[g_numDirs], path, PATH_MAX );
 	g_strDirs[g_numDirs][PATH_MAX] = 0;
-	vfsFixDOSName( g_strDirs[g_numDirs] );
+	FixDOSName( g_strDirs[g_numDirs] );
 	vfsAddSlash( g_strDirs[g_numDirs] );
 	g_numDirs++;
 
@@ -230,7 +216,7 @@ void vfsInitDirectory( const char *path ){
 						}
 						snprintf( g_strDirs[g_numDirs], PATH_MAX, "%s/%s", path, name );
 						g_strDirs[g_numDirs][PATH_MAX] = '\0';
-						vfsFixDOSName( g_strDirs[g_numDirs] );
+						FixDOSName( g_strDirs[g_numDirs] );
 						vfsAddSlash( g_strDirs[g_numDirs] );
 						++g_numDirs;
 					}
@@ -340,7 +326,7 @@ int vfsGetFileCount( const char *filename ){
 	GSList *lst;
 
 	strcpy( fixed, filename );
-	vfsFixDOSName( fixed );
+	FixDOSName( fixed );
 	g_strdown( fixed );
 
 	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
@@ -405,7 +391,7 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 
 	*bufferptr = NULL;
 	strcpy( fixed, filename );
-	vfsFixDOSName( fixed );
+	FixDOSName( fixed );
 	g_strdown( fixed );
 
 	for ( i = 0; i < g_numDirs; i++ )
@@ -499,7 +485,7 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 
 	byte *bufferptr = NULL;
 	strcpy( fixed, filename );
-	vfsFixDOSName( fixed );
+	FixDOSName( fixed );
 	g_strdown( fixed );
 
 	for ( i = 0; i < g_numDirs; i++ )

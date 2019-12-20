@@ -120,6 +120,12 @@ void    DefaultPath( char *path, const char *basepath );
 void    StripFilename( char *path );
 void    StripExtension( char *path );
 
+static inline void FixDOSName( char *src ){
+	for ( ; *src; ++src )
+		if ( *src == '\\' )
+			*src = '/';
+}
+
 void    ExtractFilePath( const char *path, char *dest );
 void    ExtractFileBase( const char *path, char *dest );
 void    ExtractFileExtension( const char *path, char *dest );

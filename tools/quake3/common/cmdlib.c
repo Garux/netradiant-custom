@@ -171,8 +171,6 @@ void SetQdirFromPath( const char *path ){
 	len = strlen( BASEDIRNAME );
 	for ( c = path + strlen( path ) - 1 ; c != path ; c-- )
 	{
-		int i;
-
 		if ( !Q_strncasecmp( c, BASEDIRNAME, len ) ) {
 			//
 			//strncpy (qdir, path, c+len+2-path);
@@ -188,26 +186,14 @@ void SetQdirFromPath( const char *path ){
 			}
 			strncpy( qdir, path, c + len + count - path );
 			Sys_Printf( "qdir: %s\n", qdir );
-			for ( i = 0; i < (int) strlen( qdir ); i++ )
-			{
-				if ( qdir[i] == '\\' ) {
-					qdir[i] = '/';
-				}
-			}
+			FixDOSName( qdir );
 
 			c += len + count;
 			while ( *c )
 			{
 				if ( *c == '/' || *c == '\\' ) {
 					strncpy( gamedir, path, c + 1 - path );
-
-					for ( i = 0; i < (int) strlen( gamedir ); i++ )
-					{
-						if ( gamedir[i] == '\\' ) {
-							gamedir[i] = '/';
-						}
-					}
-
+					FixDOSName( gamedir );
 					Sys_Printf( "gamedir: %s\n", gamedir );
 
 					if ( !writedir[0] ) {
@@ -290,8 +276,6 @@ double I_FloatTime( void ){
 }
 
 void Q_getwd( char *out ){
-	int i = 0;
-
 #ifdef WIN32
 	_getcwd( out, 256 );
 	strcat( out, "\\" );
@@ -302,13 +286,7 @@ void Q_getwd( char *out ){
 	}
 	strcat( out, "/" );
 #endif
-	while ( out[i] != 0 )
-	{
-		if ( out[i] == '\\' ) {
-			out[i] = '/';
-		}
-		i++;
-	}
+	FixDOSName( out );
 }
 
 

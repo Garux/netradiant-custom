@@ -209,23 +209,6 @@ void LokiInitPaths( char *argv0 ){
 
 
 /*
-   CleanPath() - ydnar
-   cleans a dos path \ -> /
- */
-
-void CleanPath( char *path ){
-	while ( *path )
-	{
-		if ( *path == '\\' ) {
-			*path = '/';
-		}
-		path++;
-	}
-}
-
-
-
-/*
    GetGame() - ydnar
    gets the game_t based on a -game argument
    returns NULL if no match found
@@ -282,7 +265,7 @@ void AddBasePath( char *path ){
 	/* add it to the list */
 	basePaths[ numBasePaths ] = safe_malloc( strlen( path ) + 1 );
 	strcpy( basePaths[ numBasePaths ], path );
-	CleanPath( basePaths[ numBasePaths ] );
+	FixDOSName( basePaths[ numBasePaths ] );
 	if ( EnginePath[0] == '\0' ) strcpy( EnginePath, basePaths[ numBasePaths ] );
 	numBasePaths++;
 }
@@ -339,7 +322,7 @@ void AddHomeBasePath( char *path ){
 	/* add it to the list */
 	basePaths[ 0 ] = safe_malloc( strlen( temp ) + 1 );
 	strcpy( basePaths[ 0 ], temp );
-	CleanPath( basePaths[ 0 ] );
+	FixDOSName( basePaths[ 0 ] );
 	numBasePaths++;
 }
 
@@ -361,7 +344,7 @@ void AddGamePath( char *path ){
 	/* add it to the list */
 	gamePaths[ numGamePaths ] = safe_malloc( strlen( path ) + 1 );
 	strcpy( gamePaths[ numGamePaths ], path );
-	CleanPath( gamePaths[ numGamePaths ] );
+	FixDOSName( gamePaths[ numGamePaths ] );
 	numGamePaths++;
 
 	/* don't add it if it's already there */
@@ -392,7 +375,7 @@ void AddPakPath( char *path ){
 	/* add it to the list */
 	pakPaths[ numPakPaths ] = safe_malloc( strlen( path ) + 1 );
 	strcpy( pakPaths[ numPakPaths ], path );
-	CleanPath( pakPaths[ numPakPaths ] );
+	FixDOSName( pakPaths[ numPakPaths ] );
 	numPakPaths++;
 }
 
@@ -542,7 +525,7 @@ void InitPaths( int *argc, char **argv ){
 		{
 			/* extract the arg */
 			strcpy( temp, argv[ i ] );
-			CleanPath( temp );
+			FixDOSName( temp );
 			len = strlen( temp );
 			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", game->magic, temp, i );
 

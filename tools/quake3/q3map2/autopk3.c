@@ -31,20 +31,6 @@
 #include "autopk3.h"
 
 
-void FixDOSName( char *src ){
-	if ( src == NULL ) {
-		return;
-	}
-
-	while ( *src )
-	{
-		if ( *src == '\\' ) {
-			*src = '/';
-		}
-		src++;
-	}
-}
-
 /*
 	Check if newcoming texture is unique and not excluded
 */
