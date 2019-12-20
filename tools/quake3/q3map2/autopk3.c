@@ -212,7 +212,7 @@ char g_q3map2path[1024];
  */
 
 int pk3BSPMain( int argc, char **argv ){
-	int i;
+	int i, compLevel = 10;
 	qboolean dbg = qfalse, png = qfalse, packFAIL = qfalse;
 
 	/* process arguments */
@@ -222,6 +222,13 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ],  "-png" ) ) {
 			png = qtrue;
+		}
+		else if ( !strcmp( argv[ i ],  "-complevel" ) ) {
+			compLevel = atoi( argv[ i + 1 ] );
+			i++;
+			if ( compLevel < -1 ) compLevel = -1;
+			if ( compLevel > 10 ) compLevel = 10;
+			Sys_Printf( "Compression level set to %i\n", compLevel );
 		}
 	}
 
@@ -668,7 +675,7 @@ int pk3BSPMain( int argc, char **argv ){
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
 	for ( i = 0; i < pk3Textures->n; ++i ){
-		if( !packTexture( pk3Textures->s[i], packname, 10, png ) ){
+		if( !packTexture( pk3Textures->s[i], packname, compLevel, png ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
 			packFAIL = qtrue;
 		}
@@ -678,7 +685,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < pk3Shaders->n; ++i ){
 		if ( pk3Shaders->s[i][0] != '\0' ){
-			if( !packTexture( pk3Shaders->s[i], packname, 10, png ) ){
+			if( !packTexture( pk3Shaders->s[i], packname, compLevel, png ) ){
 				if ( i == pk3Shaders->n - 1 ){ //levelshot typically
 					Sys_Printf( "  ~fail  %s\n", pk3Shaders->s[i] );
 				}
@@ -695,7 +702,7 @@ int pk3BSPMain( int argc, char **argv ){
 	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
 		if ( pk3Shaderfiles->s[i][0] != '\0' ){
 			sprintf( str, "%s/%s", game->shaderPath, pk3Shaderfiles->s[i] );
-			if ( !packResource( str, packname, 10 ) ){
+			if ( !packResource( str, packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
 				packFAIL = qtrue;
 			}
@@ -706,7 +713,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < pk3Sounds->n; ++i ){
 		if ( pk3Sounds->s[i][0] != '\0' ){
-			if ( !packResource( pk3Sounds->s[i], packname, 10 ) ){
+			if ( !packResource( pk3Sounds->s[i], packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
 				packFAIL = qtrue;
 			}
@@ -716,7 +723,7 @@ int pk3BSPMain( int argc, char **argv ){
 	Sys_Printf( "\n\tVideos....\n" );
 
 	for ( i = 0; i < pk3Videos->n; ++i ){
-		if ( !packResource( pk3Videos->s[i], packname, 10 ) ){
+		if ( !packResource( pk3Videos->s[i], packname, compLevel ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
 			packFAIL = qtrue;
 		}
@@ -725,8 +732,8 @@ int pk3BSPMain( int argc, char **argv ){
 	Sys_Printf( "\n\t.bsp and stuff\n" );
 
 	sprintf( str, "maps/%s.bsp", nameOFmap );
-	//if ( vfsPackFile( str, packname, 10 ) ){
-	if ( vfsPackFile_Absolute_Path( source, str, packname, 10 ) ){
+	//if ( vfsPackFile( str, packname, compLevel ) ){
+	if ( vfsPackFile_Absolute_Path( source, str, packname, compLevel ) ){
 		Sys_Printf( "++%s\n", str );
 	}
 	else{
@@ -735,15 +742,15 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	sprintf( str, "maps/%s.aas", nameOFmap );
-	if ( !packResource( str, packname, 10 ) )
+	if ( !packResource( str, packname, compLevel ) )
 		Sys_Printf( "  ~fail  %s\n", str );
 
 	sprintf( str, "scripts/%s.arena", nameOFmap );
-	if ( !packResource( str, packname, 10 ) )
+	if ( !packResource( str, packname, compLevel ) )
 		Sys_Printf( "  ~fail  %s\n", str );
 
 	sprintf( str, "scripts/%s.defi", nameOFmap );
-	if ( !packResource( str, packname, 10 ) )
+	if ( !packResource( str, packname, compLevel ) )
 		Sys_Printf( "  ~fail  %s\n", str );
 
 	if ( !packFAIL ){
