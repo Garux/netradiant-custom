@@ -183,6 +183,26 @@ static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExS
 }
 
 
+static qboolean packResource( const char* resname, const char* packname, const int compLevel ){
+	const qboolean ret = vfsPackFile( resname, packname, compLevel );
+	if ( ret )
+		Sys_Printf( "++%s\n", resname );
+	return ret;
+}
+static qboolean packTexture( const char* texname, const char* packname, const int compLevel, const qboolean png ){
+	const char* extensions[4] = { ".png", ".tga", ".jpg", 0 };
+	for ( const char** ext = extensions + !png; *ext; ++ext ){
+		char str[MAX_QPATH * 2];
+		sprintf( str, "%s%s", texname, *ext );
+		if( packResource( str, packname, compLevel ) ){
+			return qtrue;
+		}
+	}
+	return qfalse;
+}
+
+
+
 
 char g_q3map2path[1024];
 
@@ -648,55 +668,24 @@ int pk3BSPMain( int argc, char **argv ){
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
 	for ( i = 0; i < pk3Textures->n; ++i ){
-		if ( png ){
-			sprintf( str, "%s.png", pk3Textures->s[i] );
-			if ( vfsPackFile( str, packname, 10 ) ){
-				Sys_Printf( "++%s\n", str );
-				continue;
-			}
+		if( !packTexture( pk3Textures->s[i], packname, 10, png ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
+			packFAIL = qtrue;
 		}
-		sprintf( str, "%s.tga", pk3Textures->s[i] );
-		if ( vfsPackFile( str, packname, 10 ) ){
-			Sys_Printf( "++%s\n", str );
-			continue;
-		}
-		sprintf( str, "%s.jpg", pk3Textures->s[i] );
-		if ( vfsPackFile( str, packname, 10 ) ){
-			Sys_Printf( "++%s\n", str );
-			continue;
-		}
-		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
-		packFAIL = qtrue;
 	}
 
 	Sys_Printf( "\n\tPure textures....\n" );
 
 	for ( i = 0; i < pk3Shaders->n; ++i ){
 		if ( pk3Shaders->s[i][0] != '\0' ){
-			if ( png ){
-				sprintf( str, "%s.png", pk3Shaders->s[i] );
-				if ( vfsPackFile( str, packname, 10 ) ){
-					Sys_Printf( "++%s\n", str );
-					continue;
+			if( !packTexture( pk3Shaders->s[i], packname, 10, png ) ){
+				if ( i == pk3Shaders->n - 1 ){ //levelshot typically
+					Sys_Printf( "  ~fail  %s\n", pk3Shaders->s[i] );
 				}
-			}
-			sprintf( str, "%s.tga", pk3Shaders->s[i] );
-			if ( vfsPackFile( str, packname, 10 ) ){
-				Sys_Printf( "++%s\n", str );
-				continue;
-			}
-			sprintf( str, "%s.jpg", pk3Shaders->s[i] );
-			if ( vfsPackFile( str, packname, 10 ) ){
-				Sys_Printf( "++%s\n", str );
-				continue;
-			}
-
-			if ( i == pk3Shaders->n - 1 ){ //levelshot typically
-				Sys_Printf( "  ~fail  %s\n", pk3Shaders->s[i] );
-			}
-			else{
-				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
-				packFAIL = qtrue;
+				else{
+					Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
+					packFAIL = qtrue;
+				}
 			}
 		}
 	}
@@ -706,12 +695,10 @@ int pk3BSPMain( int argc, char **argv ){
 	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
 		if ( pk3Shaderfiles->s[i][0] != '\0' ){
 			sprintf( str, "%s/%s", game->shaderPath, pk3Shaderfiles->s[i] );
-			if ( vfsPackFile( str, packname, 10 ) ){
-				Sys_Printf( "++%s\n", str );
-				continue;
+			if ( !packResource( str, packname, 10 ) ){
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
+				packFAIL = qtrue;
 			}
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
-			packFAIL = qtrue;
 		}
 	}
 
@@ -719,24 +706,20 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < pk3Sounds->n; ++i ){
 		if ( pk3Sounds->s[i][0] != '\0' ){
-			if ( vfsPackFile( pk3Sounds->s[i], packname, 10 ) ){
-				Sys_Printf( "++%s\n", pk3Sounds->s[i] );
-				continue;
+			if ( !packResource( pk3Sounds->s[i], packname, 10 ) ){
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
+				packFAIL = qtrue;
 			}
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
-			packFAIL = qtrue;
 		}
 	}
 
 	Sys_Printf( "\n\tVideos....\n" );
 
 	for ( i = 0; i < pk3Videos->n; ++i ){
-		if ( vfsPackFile( pk3Videos->s[i], packname, 10 ) ){
-			Sys_Printf( "++%s\n", pk3Videos->s[i] );
-			continue;
+		if ( !packResource( pk3Videos->s[i], packname, 10 ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
+			packFAIL = qtrue;
 		}
-		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
-		packFAIL = qtrue;
 	}
 
 	Sys_Printf( "\n\t.bsp and stuff\n" );
@@ -752,28 +735,16 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	sprintf( str, "maps/%s.aas", nameOFmap );
-	if ( vfsPackFile( str, packname, 10 ) ){
-		Sys_Printf( "++%s\n", str );
-	}
-	else{
+	if ( !packResource( str, packname, 10 ) )
 		Sys_Printf( "  ~fail  %s\n", str );
-	}
 
 	sprintf( str, "scripts/%s.arena", nameOFmap );
-	if ( vfsPackFile( str, packname, 10 ) ){
-		Sys_Printf( "++%s\n", str );
-	}
-	else{
+	if ( !packResource( str, packname, 10 ) )
 		Sys_Printf( "  ~fail  %s\n", str );
-	}
 
 	sprintf( str, "scripts/%s.defi", nameOFmap );
-	if ( vfsPackFile( str, packname, 10 ) ){
-		Sys_Printf( "++%s\n", str );
-	}
-	else{
+	if ( !packResource( str, packname, 10 ) )
 		Sys_Printf( "  ~fail  %s\n", str );
-	}
 
 	if ( !packFAIL ){
 		Sys_Printf( "\nSaved to %s\n", packname );
@@ -1482,48 +1453,18 @@ int repackBSPMain( int argc, char **argv ){
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
 	for ( i = 0; i < pk3Textures->n; ++i ){
-		if ( png ){
-			sprintf( str, "%s.png", pk3Textures->s[i] );
-			if ( vfsPackFile( str, packname, compLevel ) ){
-				Sys_Printf( "++%s\n", str );
-				continue;
-			}
+		if( !packTexture( pk3Textures->s[i], packname, compLevel, png ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
 		}
-		sprintf( str, "%s.tga", pk3Textures->s[i] );
-		if ( vfsPackFile( str, packname, compLevel ) ){
-			Sys_Printf( "++%s\n", str );
-			continue;
-		}
-		sprintf( str, "%s.jpg", pk3Textures->s[i] );
-		if ( vfsPackFile( str, packname, compLevel ) ){
-			Sys_Printf( "++%s\n", str );
-			continue;
-		}
-		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
 	}
 
 	Sys_Printf( "\n\tPure textures....\n" );
 
 	for ( i = 0; i < pk3Shaders->n; ++i ){
 		if ( pk3Shaders->s[i][0] != '\0' ){
-			if ( png ){
-				sprintf( str, "%s.png", pk3Shaders->s[i] );
-				if ( vfsPackFile( str, packname, compLevel ) ){
-					Sys_Printf( "++%s\n", str );
-					continue;
-				}
+			if( !packTexture( pk3Shaders->s[i], packname, compLevel, png ) ){
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
 			}
-			sprintf( str, "%s.tga", pk3Shaders->s[i] );
-			if ( vfsPackFile( str, packname, compLevel ) ){
-				Sys_Printf( "++%s\n", str );
-				continue;
-			}
-			sprintf( str, "%s.jpg", pk3Shaders->s[i] );
-			if ( vfsPackFile( str, packname, compLevel ) ){
-				Sys_Printf( "++%s\n", str );
-				continue;
-			}
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
 		}
 	}
 
@@ -1531,22 +1472,18 @@ int repackBSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < pk3Sounds->n; ++i ){
 		if ( pk3Sounds->s[i][0] != '\0' ){
-			if ( vfsPackFile( pk3Sounds->s[i], packname, compLevel ) ){
-				Sys_Printf( "++%s\n", pk3Sounds->s[i] );
-				continue;
+			if ( !packResource( pk3Sounds->s[i], packname, compLevel ) ){
+				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
 			}
-			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
 		}
 	}
 
 	Sys_Printf( "\n\tVideos....\n" );
 
 	for ( i = 0; i < pk3Videos->n; ++i ){
-		if ( vfsPackFile( pk3Videos->s[i], packname, compLevel ) ){
-			Sys_Printf( "++%s\n", pk3Videos->s[i] );
-			continue;
+		if ( !packResource( pk3Videos->s[i], packname, compLevel ) ){
+			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
 		}
-		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
 	}
 
 	Sys_Printf( "\nSaved to %s\n", packname );
