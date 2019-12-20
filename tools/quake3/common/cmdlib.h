@@ -76,8 +76,18 @@ extern int myargc;
 extern char **myargv;
 
 char *strlower( char *in );
-int Q_strncasecmp( const char *s1, const char *s2, int n );
-int Q_stricmp( const char *s1, const char *s2 );
+#ifdef WIN32
+	#define Q_stricmp           stricmp
+	#define Q_strncasecmp       strnicmp
+#else
+	#define Q_stricmp           strcasecmp
+	#define Q_strncasecmp       strncasecmp
+#endif
+/* strlcpy, strlcat versions */
+size_t strcpyQ( char* dest, const char* src, const size_t dest_size );
+size_t strcatQ( char* dest, const char* src, const size_t dest_size );
+size_t strncatQ( char* dest, const char* src, const size_t dest_size, const size_t src_len );
+
 void Q_getwd( char *out );
 
 int Q_filelength( FILE *f );
@@ -126,8 +136,8 @@ static inline void FixDOSName( char *src ){
 			*src = '/';
 }
 
-void    ExtractFilePath( const char *path, char *dest );
-void    ExtractFileBase( const char *path, char *dest );
+void    ExtractFilePath( const char *path, char *dest );		// file directory with trailing slash
+void    ExtractFileBase( const char *path, char *dest );		// file name w/o extension
 void    ExtractFileExtension( const char *path, char *dest );
 
 int     ParseNum( const char *str );

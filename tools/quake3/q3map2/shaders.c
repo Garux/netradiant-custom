@@ -311,10 +311,6 @@ qboolean ApplySurfaceParm( char *name, int *contentFlags, int *surfaceFlags, int
  */
 
 void BeginMapShaderFile( const char *mapFile ){
-	char base[ 1024 ];
-	int len;
-
-
 	/* dummy check */
 	mapName[ 0 ] = '\0';
 	mapShaderFile[ 0 ] = '\0';
@@ -322,22 +318,13 @@ void BeginMapShaderFile( const char *mapFile ){
 		return;
 	}
 
-	/* copy map name */
-	strcpy( base, mapFile );
-	StripExtension( base );
-
 	/* extract map name */
-	len = strlen( base ) - 1;
-	while ( len > 0 && base[ len ] != '/' && base[ len ] != '\\' )
-		len--;
-	strcpy( mapName, &base[ len + 1 ] );
-	base[ len ] = '\0';
-	if ( len <= 0 ) {
-		return;
-	}
+	ExtractFileBase( mapFile, mapName );
+	char path[ 1024 ];
+	ExtractFilePath( mapFile, path );
 
 	/* append ../scripts/q3map2_<mapname>.shader */
-	sprintf( mapShaderFile, "%s/../%s/q3map2_%s.shader", base, game->shaderPath, mapName );
+	sprintf( mapShaderFile, "%s../%s/q3map2_%s.shader", path, game->shaderPath, mapName );
 	Sys_FPrintf( SYS_VRB, "Map has shader script %s\n", mapShaderFile );
 
 	/* remove it */

@@ -130,7 +130,7 @@ void LokiInitPaths( char *argv0 ){
 	path = getenv( "PATH" );
 
 	/* do some path divining */
-	Q_strncpyz( temp, argv0, sizeof( temp ) );
+	strcpyQ( temp, argv0, sizeof( temp ) );
 	if ( strrchr( temp, '/' ) ) {
 		argv0 = strrchr( argv0, '/' ) + 1;
 	}
@@ -171,20 +171,17 @@ void LokiInitPaths( char *argv0 ){
 
 			/* found home dir candidate */
 			if ( *path == '~' ) {
-				Q_strncpyz( temp, home, sizeof( temp ) );
+				strcpyQ( temp, home, sizeof( temp ) );
 				path++;
 			}
 
 
 			/* concatenate */
 			if ( last > ( path + 1 ) ) {
-				// +1 hack: Q_strncat calls Q_strncpyz that expects a len including '\0'
-				// so that extraneous char will be rewritten by '\0', so it's ok.
-				// Also, in this case this extraneous char is always ':' or '\0', so it's ok.
-				Q_strncat( temp, sizeof( temp ), path, ( last - path + 1) );
-				Q_strcat( temp, sizeof( temp ), "/" );
+				strncatQ( temp, path, sizeof( temp ), ( last - path ) );
+				strcatQ( temp, "/", sizeof( temp ) );
 			}
-			Q_strcat( temp, sizeof( temp ), argv0 );
+			strcatQ( temp, argv0, sizeof( temp ) );
 
 			/* verify the path */
 			if ( access( temp, X_OK ) == 0 ) {

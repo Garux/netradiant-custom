@@ -99,16 +99,6 @@
 	#define MAC_STATIC
 #endif
 
-#if 1
-	#ifdef WIN32
-		#define Q_stricmp           stricmp
-		#define Q_strncasecmp       strnicmp
-	#else
-		#define Q_stricmp           strcasecmp
-		#define Q_strncasecmp       strncasecmp
-	#endif
-#endif
-
 /* macro version */
 #define VectorMA( a, s, b, c )  ( ( c )[ 0 ] = ( a )[ 0 ] + ( s ) * ( b )[ 0 ], ( c )[ 1 ] = ( a )[ 1 ] + ( s ) * ( b )[ 1 ], ( c )[ 2 ] = ( a )[ 2 ] + ( s ) * ( b )[ 2 ] )
 
@@ -1518,11 +1508,9 @@ surfaceInfo_t;
 
    ------------------------------------------------------------------------------- */
 
-/* main.c */
-vec_t                       Random( void );
-char                        *Q_strncpyz( char *dst, const char *src, size_t len );
-char                        *Q_strcat( char *dst, size_t dlen, const char *src );
-char                        *Q_strncat( char *dst, size_t dlen, const char *src, size_t slen );
+static inline vec_t Random( void ){ /* returns a pseudorandom number between 0 and 1 */
+	return (vec_t) rand() / RAND_MAX;
+}
 
 /* help.c */
 void                        HelpMain(const char* arg);

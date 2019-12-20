@@ -427,55 +427,6 @@ skipwhite:
 	return data;
 }
 
-int Q_strncasecmp( const char *s1, const char *s2, int n ){
-	int c1, c2;
-
-	do
-	{
-		c1 = *s1++;
-		c2 = *s2++;
-
-		if ( !n-- ) {
-			return 0;       // strings are equal until end point
-
-		}
-		if ( c1 != c2 ) {
-			if ( c1 >= 'a' && c1 <= 'z' ) {
-				c1 -= ( 'a' - 'A' );
-			}
-			if ( c2 >= 'a' && c2 <= 'z' ) {
-				c2 -= ( 'a' - 'A' );
-			}
-			if ( c1 != c2 ) {
-				return -1;      // strings not equal
-			}
-		}
-	} while ( c1 );
-
-	return 0;       // strings are equal
-}
-
-int Q_stricmp( const char *s1, const char *s2 ){
-	return Q_strncasecmp( s1, s2, 99999 );
-}
-
-// NOTE TTimo when switching to Multithread DLL (Release/Debug) in the config
-//   started getting warnings about that function, prolly a duplicate with the runtime function
-//   maybe we still need to have it in linux builds
-/*
-   char *strupr (char *start)
-   {
-    char	*in;
-    in = start;
-    while (*in)
-    {
-   *in = toupper(*in);
-        in++;
-    }
-    return start;
-   }
- */
-
 char *strlower( char *start ){
 	char    *in;
 	in = start;
@@ -485,6 +436,41 @@ char *strlower( char *start ){
 		in++;
 	}
 	return start;
+}
+
+/*
+ * Copy src to string dst of size size. At most size-1 characters
+ * will be copied. Always NUL terminates (unless size == 0).
+ * Returns strlen(src); if retval >= size, truncation occurred.
+ */
+size_t strcpyQ( char* dest, const char* src, const size_t dest_size ) {
+	const size_t src_len = strlen( src );
+	if( src_len < dest_size )
+		memcpy( dest, src, src_len + 1 );
+	else if( dest_size != 0 ){
+		memcpy( dest, src, dest_size - 1 );
+		dest[dest_size - 1] = '\0';
+	}
+	return src_len;
+}
+
+size_t strcatQ( char* dest, const char* src, const size_t dest_size ) {
+	const size_t dest_len = strlen( dest );
+	return dest_len + strcpyQ( dest + dest_len, src, dest_size > dest_len? dest_size - dest_len : 0 );
+}
+
+size_t strncatQ( char* dest, const char* src, const size_t dest_size, const size_t src_len ) {
+	const size_t dest_len = strlen( dest );
+	const size_t ds_len = dest_len + src_len;
+	if( ds_len < dest_size ){
+		memcpy( dest + dest_len, src, src_len );
+		dest[ds_len] = '\0';
+	}
+	else if( dest_len < dest_size ){
+		memcpy( dest + dest_len, src, dest_size - dest_len - 1 );
+		dest[dest_size - 1] = '\0';
+	}
+	return ds_len;
 }
 
 
@@ -754,11 +740,9 @@ void    StripExtension( char *path ){
  */
 // FIXME: should include the slash, otherwise
 // backing to an empty path will be wrong when appending a slash
+// hm: includes the slash rn
 void ExtractFilePath( const char *path, char *dest ){
-	const char    *src;
-
-	src = path + strlen( path ) - 1;
-
+	const char *src = path + strlen( path );
 //
 // back up until a \ or the start
 //
@@ -770,28 +754,23 @@ void ExtractFilePath( const char *path, char *dest ){
 }
 
 void ExtractFileBase( const char *path, char *dest ){
-	const char    *src;
-
-	src = path + strlen( path ) - 1;
-
+	const char *src = path + strlen( path );
+	const char *end = src;
 //
 // back up until a \ or the start
 //
-	while ( src != path && *( src - 1 ) != '/' && *( src - 1 ) != '\\' )
+	while ( src != path && *( src - 1 ) != '/' && *( src - 1 ) != '\\' ){
 		src--;
-
-	while ( *src && *src != '.' )
-	{
-		*dest++ = *src++;
+		if( *end != '.' && *src == '.' )
+			end = src;
 	}
-	*dest = 0;
+
+	memcpy( dest, src, end - src );
+	dest[end - src] = 0;
 }
 
 void ExtractFileExtension( const char *path, char *dest ){
-	const char    *src;
-
-	src = path + strlen( path ) - 1;
-
+	const char *src = path + strlen( path );
 //
 // back up until a . or the start
 //
@@ -802,7 +781,7 @@ void ExtractFileExtension( const char *path, char *dest ){
 		return;
 	}
 
-	strcpy( dest,src );
+	strcpy( dest, src );
 }
 
 

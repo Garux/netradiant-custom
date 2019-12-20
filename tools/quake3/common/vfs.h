@@ -55,7 +55,7 @@ void vfsInitDirectory( const char *path );
 void vfsShutdown();
 int vfsGetFileCount( const char *filename );
 int vfsLoadFile( const char *filename, void **buffer, int index );
-void vfsListShaderFiles( char* list, int *num );
+void vfsListShaderFiles( char* list, const size_t stride, int *num );
 qboolean vfsPackFile( const char *filename, const char *packname, const int compLevel );
 qboolean vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel );
 
