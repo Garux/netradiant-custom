@@ -1540,6 +1540,7 @@ int                         BSPMain( int argc, char **argv );
 int                         MiniMapBSPMain( int argc, char **argv );
 
 /* convert_bsp.c */
+int                         FixAAS( int argc, char **argv );
 int                         AnalyzeBSP( int argc, char **argv );
 int                         BSPInfo( int count, char **fileNames );
 int                         ScaleBSPMain( int argc, char **argv );
