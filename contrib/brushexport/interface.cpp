@@ -39,9 +39,6 @@ create_w_plugplug2( void ){
 	GtkWidget *t_limitmatnames;
 	GtkWidget *t_objects;
 	GtkWidget *t_weld;
-	GtkTooltips *tooltips;
-
-	tooltips = gtk_tooltips_new();
 
 	w_plugplug2 = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	gtk_window_set_title( GTK_WINDOW( w_plugplug2 ), "BrushExport-Plugin 3.0 by namespace" );
@@ -64,21 +61,21 @@ create_w_plugplug2( void ){
 	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox4, TRUE, FALSE, 0 );
 
 	r_collapse = gtk_radio_button_new_with_mnemonic( NULL, "Collapse mesh" );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_collapse, "Collapse all brushes into a single group", "Collapse all brushes into a single group" );
+	gtk_widget_set_tooltip_text( r_collapse, "Collapse all brushes into a single group" );
 	gtk_widget_show( r_collapse );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapse, FALSE, FALSE, 0 );
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_collapse ), r_collapse_group );
 	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_collapse ) );
 
 	r_collapsebymaterial = gtk_radio_button_new_with_mnemonic( NULL, "Collapse by material" );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_collapsebymaterial, "Collapse into groups by material", "Collapse into groups by material" );
+	gtk_widget_set_tooltip_text( r_collapsebymaterial, "Collapse into groups by material" );
 	gtk_widget_show( r_collapsebymaterial );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapsebymaterial, FALSE, FALSE, 0 );
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_collapsebymaterial ), r_collapse_group );
 	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_collapsebymaterial ) );
 
 	r_nocollapse = gtk_radio_button_new_with_mnemonic( NULL, "Don't collapse" );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), r_nocollapse, "Every brush is stored in its own group", "Every brush is stored in its own group" );
+	gtk_widget_set_tooltip_text( r_nocollapse, "Every brush is stored in its own group" );
 	gtk_widget_show( r_nocollapse );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_nocollapse, FALSE, FALSE, 0 );
 	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_nocollapse ), r_collapse_group );
@@ -145,6 +142,7 @@ create_w_plugplug2( void ){
 	gtk_box_pack_end( GTK_BOX( vbox2 ), t_objects, FALSE, FALSE, 0 );
 
 	t_weld = gtk_check_button_new_with_mnemonic( "Weld vertices" );
+	gtk_widget_set_tooltip_text( t_weld, "inside groups/objects" );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( t_weld ), TRUE );
 	gtk_widget_show( t_weld );
 	gtk_box_pack_end( GTK_BOX( vbox2 ), t_weld, FALSE, FALSE, 0 );

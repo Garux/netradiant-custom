@@ -14,7 +14,6 @@ void DestroyWindow();
 //! TODO make togglebuttons inactive on !exportmat
 //! TODO add ignore mat on ENTER, del on del
 //! TODO add entry with path to save to (to resave faster)
-//! TODO tooltip for weld //inside groups
 //! TODO ignore case in mat name comparison		materials_comparator
 namespace callbacks {
 
