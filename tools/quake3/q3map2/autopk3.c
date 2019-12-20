@@ -868,12 +868,12 @@ int repackBSPMain( int argc, char **argv ){
 
 
 	int bspListN = 0;
-	char* bspList = (char *)calloc( 8192*1024, sizeof( char ) );
+	char (*bspList)[1024] = safe_malloc( 8192 * sizeof( bspList[0] ) );
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
 	if ( strlen( source ) >= 4 && !Q_stricmp( source + strlen( source ) - 4, ".bsp" ) ){
-		strcpy( bspList, source );
+		strcpy( bspList[bspListN], source );
 		bspListN++;
 	}
 	else{
@@ -895,7 +895,7 @@ int repackBSPMain( int argc, char **argv ){
 			if ( !GetToken( qtrue ) ) {
 				break;
 			}
-			strcpy( bspList + bspListN * 1024 , token );
+			strcpy( bspList[bspListN], token );
 			bspListN++;
 		}
 
@@ -920,7 +920,7 @@ int repackBSPMain( int argc, char **argv ){
 		int pk3SoundsNold = pk3Sounds->n;
 		int pk3ShadersNold = pk3Shaders->n;
 
-		strcpy( source, bspList + j*1024 );
+		strcpy( source, bspList[j] );
 		StripExtension( source );
 		DefaultExtension( source, ".bsp" );
 
