@@ -31,7 +31,7 @@
 #include "autopk3.h"
 
 
-typedef struct
+typedef struct StrList_s
 {
 	int n;
 	int max;
@@ -67,6 +67,11 @@ static inline int StrList_find( const StrList* list, const char* string ){
 			return i + 1;
 	}
 	return 0;
+}
+
+void pushStringCallback( StrList* list, const char* string ){
+	if( !StrList_find( list, string ) )
+		StrList_append( list, string );
 }
 
 
@@ -324,7 +329,7 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 	}
 
-	vfsListShaderFiles( &pk3Shaderfiles->s[0][0], sizeof( pk3Shaderfiles->s[0] ), &pk3Shaderfiles->n );
+	vfsListShaderFiles( pk3Shaderfiles, pushStringCallback );
 
 	if( dbg ){
 		Sys_Printf( "\n\tSchroider fileses.....%i\n", pk3Shaderfiles->n );
@@ -1125,7 +1130,7 @@ int repackBSPMain( int argc, char **argv ){
 
 
 
-	vfsListShaderFiles( &pk3Shaderfiles->s[0][0], sizeof( pk3Shaderfiles->s[0] ), &pk3Shaderfiles->n );
+	vfsListShaderFiles( pk3Shaderfiles, pushStringCallback );
 
 	if( dbg ){
 		Sys_Printf( "\n\tSchroider fileses.....%i\n", pk3Shaderfiles->n );

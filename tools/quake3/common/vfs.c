@@ -238,7 +238,7 @@ void vfsInitDirectory( const char *path ){
 
 
 // lists all .shader files
-void vfsListShaderFiles( char* list, const size_t stride, int *num ){
+void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, const char* string ) ){
 	//char filename[PATH_MAX];
 	char *dirlist;
 	GDir *dir;
@@ -264,13 +264,7 @@ void vfsListShaderFiles( char* list, const size_t stride, int *num ){
 					continue;
 				}
 
-				for ( k = 0; k < *num; k++ ){
-					if ( !Q_stricmp( list + stride * k, dirlist ) )
-						goto shISdouplicate;
-				}
-				strcpy( list + stride * ( *num ), dirlist );
-				( *num )++;
-shISdouplicate:
+				pushStringCallback( list, dirlist );
 				g_free( dirlist );
 			}
 			g_dir_close( dir );
@@ -291,14 +285,7 @@ shISdouplicate:
 		//name + ext this time
 		ext = strrchr( file->name, '/' );
 		ext++;
-
-		for ( k = 0; k < *num; k++ ){
-			if ( !Q_stricmp( list + stride * k, ext ) )
-				goto shISdouplicate2;
-		}
-		strcpy( list + stride * ( *num ) , ext );
-		( *num )++;
-shISdouplicate2:
+		pushStringCallback( list, ext );
 		continue;
 	}
 }
