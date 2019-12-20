@@ -246,7 +246,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 		/* handle { } section */
 		if ( !GetToken( qtrue ) )
 			break;
-		if ( *token != '{' )
+		if ( strcmp( token, "{" ) )
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 					shaderfile, scriptline, token, g_strLoadedFileLocation );
 		while ( 1 )
@@ -254,17 +254,17 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 			/* get the next token */
 			if ( !GetToken( qtrue ) )
 				break;
-			if ( *token == '}' )
+			if ( !strcmp( token, "}" ) )
 				break;
 			/* parse stage directives */
-			if ( *token == '{' ) {
+			if ( !strcmp( token, "{" ) ) {
 				while ( 1 )
 				{
 					if ( !GetToken( qtrue ) )
 						break;
-					if ( *token == '}' )
+					if ( !strcmp( token, "}" ) )
 						break;
-					if ( *token == '{' )
+					if ( !strcmp( token, "{" ) )
 						Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", shaderfile, scriptline );
 
 					/* digest any images */
