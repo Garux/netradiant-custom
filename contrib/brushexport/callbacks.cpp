@@ -5,13 +5,14 @@
 
 #include "qerplugin.h"
 #include "debugging/debugging.h"
+#include "os/path.h"
 #include "support.h"
 #include "export.h"
 
 // stuff from interface.cpp
 void DestroyWindow();
 
-//! TODO add tooltip for ignore: shader name after last slash, case sensitive // or make insensitive
+//! TODO ignore: make case insensitive
 //! TODO hide window on close
 namespace callbacks {
 
@@ -115,7 +116,7 @@ void OnAddMaterial( GtkButton* button, gpointer user_data ){
 	GtkEntry* edit = GTK_ENTRY( lookup_widget( GTK_WIDGET( button ), "ed_materialname" ) );
 	ASSERT_NOTNULL( edit );
 
-	const gchar* name = gtk_entry_get_text( edit );
+	const gchar* name = path_get_filename_start( gtk_entry_get_text( edit ) );
 	if ( g_utf8_strlen( name, -1 ) > 0 ) {
 		GtkListStore* list = GTK_LIST_STORE( gtk_tree_view_get_model( GTK_TREE_VIEW( lookup_widget( GTK_WIDGET( button ), "t_materialist" ) ) ) );
 		GtkTreeIter iter;
