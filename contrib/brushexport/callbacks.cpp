@@ -12,7 +12,6 @@ void DestroyWindow();
 
 //! TODO add tooltip for ignore: shader name after last slash, case sensitive // or make insensitive
 //! TODO add ignore mat on ENTER, del on del
-//! TODO add entry with path to save to (to resave faster)
 //! TODO ignore case in mat name comparison		materials_comparator
 namespace callbacks {
 
@@ -20,15 +19,29 @@ void OnDestroy( GtkWidget* w, gpointer data ){
 	DestroyWindow();
 }
 
-void OnExportClicked( GtkButton* button, gpointer user_data ){
+static std::string s_export_path;
+
+void OnExportClicked( GtkButton* button, gpointer choose_path ){
 	GtkWidget* window = lookup_widget( GTK_WIDGET( button ), "w_plugplug2" );
 	ASSERT_NOTNULL( window );
-	const char* cpath = GlobalRadiant().m_pfnFileDialog( window, false, "Save as Obj", 0, 0, false, false, true );
-	if ( !cpath ) {
+	if( choose_path ){
+		const char* cpath = GlobalRadiant().m_pfnFileDialog( window, false, "Save as Obj", 0, 0, false, false, true );
+		if ( !cpath ) {
+			return;
+		}
+		s_export_path = cpath;
+		// enable button to reexport with the selected name
+		GtkWidget* b_export = lookup_widget( GTK_WIDGET( button ), "b_export" );
+		ASSERT_NOTNULL( b_export );
+		gtk_widget_set_sensitive( b_export, TRUE );
+		// add tooltip
+		std::string tip( "ReExport to " );
+		tip.append( s_export_path );
+		gtk_widget_set_tooltip_text( b_export, tip.c_str() );
+	}
+	else if( s_export_path.empty() ){
 		return;
 	}
-
-	std::string path( cpath );
 
 	// get ignore list from ui
 	std::set<std::string> ignore;
@@ -95,7 +108,7 @@ void OnExportClicked( GtkButton* button, gpointer user_data ){
 	const bool weld = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
 
 	// export
-	ExportSelection( ignore, mode, exportmat, path, limitMatNames, objects, weld );
+	ExportSelection( ignore, mode, exportmat, s_export_path, limitMatNames, objects, weld );
 }
 
 void OnAddMaterial( GtkButton* button, gpointer user_data ){
