@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <set>
 
 #include "qerplugin.h"
@@ -11,8 +12,7 @@
 void DestroyWindow();
 
 //! TODO add tooltip for ignore: shader name after last slash, case sensitive // or make insensitive
-//! TODO add ignore mat on ENTER, del on del
-//! TODO ignore case in mat name comparison		materials_comparator
+//! TODO hide window on close
 namespace callbacks {
 
 void OnDestroy( GtkWidget* w, gpointer data ){
@@ -134,6 +134,12 @@ void OnRemoveMaterial( GtkButton* button, gpointer user_data ){
 	if ( gtk_tree_selection_get_selected( sel, 0, &iter ) ) {
 		gtk_list_store_remove( list, &iter );
 	}
+}
+
+gboolean OnRemoveMaterialKb( GtkWidget* widget, GdkEventKey* event, gpointer user_data ){
+	if( event->keyval == GDK_Delete )
+		OnRemoveMaterial( reinterpret_cast<GtkButton*>( widget ), NULL );
+	return FALSE;
 }
 
 } // callbacks

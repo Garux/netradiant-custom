@@ -182,6 +182,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 
 	auto materials_comparator = []( const std::string& lhs, const std::string& rhs ) {
 		return lhs < rhs;
+//		return string_less_nocase( lhs.c_str(), rhs.c_str() ); // can't squash varying cases just here, as usemtl is case sensitive in blender
 	};
 	auto materials = std::map<std::string, Colour3, decltype( materials_comparator )>( materials_comparator );
 

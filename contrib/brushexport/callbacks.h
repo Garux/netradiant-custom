@@ -7,5 +7,6 @@ void OnDestroy( GtkWidget *, gpointer );
 void OnExportClicked( GtkButton *, gpointer );
 void OnAddMaterial( GtkButton *, gpointer );
 void OnRemoveMaterial( GtkButton *, gpointer );
+gboolean OnRemoveMaterialKb( GtkWidget *, GdkEventKey *, gpointer );
 
 } // callbacks
