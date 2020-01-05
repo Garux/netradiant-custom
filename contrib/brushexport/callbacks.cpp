@@ -28,9 +28,7 @@ void OnExportClicked( GtkButton* button, gpointer choose_path ){
 		ASSERT_NOTNULL( b_export );
 		gtk_widget_set_sensitive( b_export, TRUE );
 		// add tooltip
-		std::string tip( "ReExport to " );
-		tip.append( s_export_path );
-		gtk_widget_set_tooltip_text( b_export, tip.c_str() );
+		gtk_widget_set_tooltip_text( b_export, ( std::string( "ReExport to " ) + s_export_path ).c_str() );
 	}
 	else if( s_export_path.empty() ){
 		return;

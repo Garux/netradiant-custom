@@ -372,11 +372,15 @@ private:
 ExportData& exporter;
 };
 
+#include "plugin.h"
+#include "qerplugin.h"
+
 bool ExportSelection( const StringSetWithLambda& ignorelist, collapsemode m, bool exmat, const std::string& path, bool limNames, bool objs, bool weld ){
 	ExportDataAsWavefront exporter( ignorelist, m, exmat, limNames, objs, weld );
 
 	if( GlobalSelectionSystem().countSelected() == 0 ){
 		globalErrorStream() << "Nothing is selected.\n";
+		GlobalRadiant().m_pfnMessageBox( g_pRadiantWnd, "Nothing is selected.", "brushexport", eMB_OK, eMB_ICONERROR );
 		return false;
 	}
 
