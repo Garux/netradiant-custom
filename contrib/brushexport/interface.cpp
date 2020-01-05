@@ -152,8 +152,8 @@ create_w_plugplug2( void ){
 	gtk_box_pack_end( GTK_BOX( vbox2 ), t_exportmaterials, FALSE, FALSE, 0 );
 
 	using namespace callbacks;
-	g_signal_connect( G_OBJECT( w_plugplug2 ), "destroy", G_CALLBACK( OnDestroy ), NULL );
-	g_signal_connect_swapped( G_OBJECT( b_close ), "clicked", G_CALLBACK( OnDestroy ), NULL );
+	g_signal_connect( G_OBJECT( w_plugplug2 ), "delete_event", G_CALLBACK( gtk_widget_hide_on_delete ), NULL );
+	g_signal_connect_swapped( G_OBJECT( b_close ), "clicked", G_CALLBACK( gtk_widget_hide ), w_plugplug2 );
 
 	g_signal_connect( G_OBJECT( b_export ), "clicked", G_CALLBACK( OnExportClicked ), NULL );
 	g_signal_connect( G_OBJECT( b_exportAs ), "clicked", G_CALLBACK( OnExportClicked ), gpointer( 1 ) );
@@ -187,24 +187,17 @@ create_w_plugplug2( void ){
 	GLADE_HOOKUP_OBJECT( w_plugplug2, t_objects, "t_objects" );
 	GLADE_HOOKUP_OBJECT( w_plugplug2, t_weld, "t_weld" );
 
+	gtk_widget_show_all( w_plugplug2 );
+
 	return w_plugplug2;
 }
 
 // global main window, is 0 when not created
 GtkWidget* g_brushexp_window = 0;
 
-// spawn plugin window (and make sure it got destroyed first or never created)
+// spawn or unhide plugin window
 void CreateWindow( void ){
-	ASSERT_NOTNULL( !g_brushexp_window );
-	gtk_widget_show_all( g_brushexp_window = create_w_plugplug2() );
-}
-
-void DestroyWindow( void ){
-	ASSERT_NOTNULL( g_brushexp_window );
-	gtk_widget_destroy( g_brushexp_window );
-	g_brushexp_window = 0;
-}
-
-bool IsWindowOpen( void ){
-	return g_brushexp_window != 0;
+	if( !g_brushexp_window )
+		g_brushexp_window = create_w_plugplug2();
+	gtk_widget_show( g_brushexp_window );
 }

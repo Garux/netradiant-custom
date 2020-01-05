@@ -45,8 +45,6 @@
 #include "typesystem.h"
 
 void CreateWindow( void );
-void DestroyWindow( void );
-bool IsWindowOpen( void );
 
 GtkWidget *g_pRadiantWnd = NULL;
 
@@ -78,9 +76,6 @@ void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush 
 										 eMB_ICONDEFAULT );
 	}
 	else if ( string_equal( command, "Export .obj" ) ) {
-		if ( IsWindowOpen() ) {
-			DestroyWindow();
-		}
 		CreateWindow();
 	}
 }

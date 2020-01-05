@@ -9,15 +9,8 @@
 #include "support.h"
 #include "export.h"
 
-// stuff from interface.cpp
-void DestroyWindow();
 
-//! TODO hide window on close
 namespace callbacks {
-
-void OnDestroy( GtkWidget* w, gpointer data ){
-	DestroyWindow();
-}
 
 static std::string s_export_path;
 
