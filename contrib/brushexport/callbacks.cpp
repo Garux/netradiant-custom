@@ -12,7 +12,6 @@
 // stuff from interface.cpp
 void DestroyWindow();
 
-//! TODO ignore: make case insensitive
 //! TODO hide window on close
 namespace callbacks {
 
@@ -45,7 +44,10 @@ void OnExportClicked( GtkButton* button, gpointer choose_path ){
 	}
 
 	// get ignore list from ui
-	std::set<std::string> ignore;
+	StringSetWithLambda ignore
+		( []( const std::string& lhs, const std::string& rhs )->bool{
+			return string_less_nocase( lhs.c_str(), rhs.c_str() );
+		} );
 
 	GtkTreeView* view = GTK_TREE_VIEW( lookup_widget( GTK_WIDGET( button ), "t_materialist" ) );
 	GtkListStore* list = GTK_LIST_STORE( gtk_tree_view_get_model( view ) );

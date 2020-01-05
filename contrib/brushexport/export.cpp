@@ -22,7 +22,7 @@
 class ExportData
 {
 public:
-ExportData( const std::set<std::string>& ignorelist, collapsemode mode );
+ExportData( const StringSetWithLambda& ignorelist, collapsemode mode );
 virtual ~ExportData( void );
 
 virtual void BeginBrush( Brush& b );
@@ -50,10 +50,10 @@ void GetShaderNameFromShaderPath( const char* path, std::string& name );
 
 group* current;
 const collapsemode mode;
-const std::set<std::string>& ignorelist;
+const StringSetWithLambda& ignorelist;
 };
 
-ExportData::ExportData( const std::set<std::string>& _ignorelist, collapsemode _mode )
+ExportData::ExportData( const StringSetWithLambda& _ignorelist, collapsemode _mode )
 	:   mode( _mode ),
 	ignorelist( _ignorelist ){
 	current = 0;
@@ -160,7 +160,7 @@ const bool objs;
 const bool weld;
 
 public:
-ExportDataAsWavefront( const std::set<std::string>& _ignorelist, collapsemode _mode, bool _expmat, bool _limNames, bool _objs, bool _weld )
+ExportDataAsWavefront( const StringSetWithLambda& _ignorelist, collapsemode _mode, bool _expmat, bool _limNames, bool _objs, bool _weld )
 	: ExportData( _ignorelist, _mode ),
 	expmat( _expmat ),
 	limNames( _limNames ),
@@ -372,7 +372,7 @@ private:
 ExportData& exporter;
 };
 
-bool ExportSelection( const std::set<std::string>& ignorelist, collapsemode m, bool exmat, const std::string& path, bool limNames, bool objs, bool weld ){
+bool ExportSelection( const StringSetWithLambda& ignorelist, collapsemode m, bool exmat, const std::string& path, bool limNames, bool objs, bool weld ){
 	ExportDataAsWavefront exporter( ignorelist, m, exmat, limNames, objs, weld );
 
 	if( GlobalSelectionSystem().countSelected() == 0 ){
