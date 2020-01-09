@@ -837,8 +837,10 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 	}
 
 	/* strip off extension */
-	strncpy( shader, shaderName, MAX_QPATH - 1 );
-	shader[MAX_QPATH - 1] = '\0';
+	// actual shader name length limit depends on game engine and name use manner (plain texture/custom shader)
+	// so this check may be not enough/too much, depending on the use case
+	if( strcpyQ( shader, shaderName, MAX_QPATH ) >= MAX_QPATH )
+		Error( "Shader name too long: %s", shaderName );
 	StripExtension( shader );
 
 	/* search for it */
