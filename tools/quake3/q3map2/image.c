@@ -242,10 +242,8 @@ static void ImageInit( void ){
 		memset( images, 0, sizeof( images ) );
 
 		/* generate *bogus image */
-		images[ 0 ].name = safe_malloc( strlen( DEFAULT_IMAGE ) + 1 );
-		strcpy( images[ 0 ].name, DEFAULT_IMAGE );
-		images[ 0 ].filename = safe_malloc( strlen( DEFAULT_IMAGE ) + 1 );
-		strcpy( images[ 0 ].filename, DEFAULT_IMAGE );
+		images[ 0 ].name = copystring( DEFAULT_IMAGE );
+		images[ 0 ].filename = copystring( DEFAULT_IMAGE );
 		images[ 0 ].width = 64;
 		images[ 0 ].height = 64;
 		images[ 0 ].refCount = 1;
@@ -375,8 +373,7 @@ image_t *ImageLoad( const char *filename ){
 	}
 
 	/* set it up */
-	image->name = safe_malloc( strlen( name ) + 1 );
-	strcpy( image->name, name );
+	image->name = copystring( name );
 
 	/* attempt to load tga */
 	StripExtension( name );
@@ -447,8 +444,7 @@ image_t *ImageLoad( const char *filename ){
 	}
 
 	/* set filename */
-	image->filename = safe_malloc( strlen( name ) + 1 );
-	strcpy( image->filename, name );
+	image->filename = copystring( name );
 
 	/* set count */
 	image->refCount = 1;

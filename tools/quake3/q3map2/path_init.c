@@ -260,10 +260,10 @@ void AddBasePath( char *path ){
 	}
 
 	/* add it to the list */
-	basePaths[ numBasePaths ] = safe_malloc( strlen( path ) + 1 );
-	strcpy( basePaths[ numBasePaths ], path );
+	basePaths[ numBasePaths ] = copystring( path );
 	FixDOSName( basePaths[ numBasePaths ] );
-	if ( EnginePath[0] == '\0' ) strcpy( EnginePath, basePaths[ numBasePaths ] );
+	if ( EnginePath[0] == '\0' )
+		strcpy( EnginePath, basePaths[ numBasePaths ] );
 	numBasePaths++;
 }
 
@@ -317,8 +317,7 @@ void AddHomeBasePath( char *path ){
 		basePaths[ i + 1 ] = basePaths[ i ];
 
 	/* add it to the list */
-	basePaths[ 0 ] = safe_malloc( strlen( temp ) + 1 );
-	strcpy( basePaths[ 0 ], temp );
+	basePaths[ 0 ] = copystring( temp );
 	FixDOSName( basePaths[ 0 ] );
 	numBasePaths++;
 }
@@ -339,8 +338,7 @@ void AddGamePath( char *path ){
 	}
 
 	/* add it to the list */
-	gamePaths[ numGamePaths ] = safe_malloc( strlen( path ) + 1 );
-	strcpy( gamePaths[ numGamePaths ], path );
+	gamePaths[ numGamePaths ] = copystring( path );
 	FixDOSName( gamePaths[ numGamePaths ] );
 	numGamePaths++;
 
@@ -370,8 +368,7 @@ void AddPakPath( char *path ){
 	}
 
 	/* add it to the list */
-	pakPaths[ numPakPaths ] = safe_malloc( strlen( path ) + 1 );
-	strcpy( pakPaths[ numPakPaths ], path );
+	pakPaths[ numPakPaths ] = copystring( path );
 	FixDOSName( pakPaths[ numPakPaths ] );
 	numPakPaths++;
 }

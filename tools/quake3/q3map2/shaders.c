@@ -561,8 +561,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, char *find, char *replace ){
 	csi->custom = qtrue;
 
 	/* store new shader text */
-	csi->shaderText = safe_malloc( strlen( shaderText ) + 1 );
-	strcpy( csi->shaderText, shaderText );  /* LEAK! */
+	csi->shaderText = copystring( shaderText );  /* LEAK! */
 
 	/* return it */
 	return csi;
@@ -980,8 +979,7 @@ static void ParseShaderFile( const char *filename ){
 		/* copy shader text to the shaderinfo */
 		if ( si != NULL && shaderText[ 0 ] != '\0' ) {
 			strcat( shaderText, "\n" );
-			si->shaderText = safe_malloc( strlen( shaderText ) + 1 );
-			strcpy( si->shaderText, shaderText );
+			si->shaderText = copystring( shaderText );
 			//%	if( VectorLength( si->vecs[ 0 ] ) )
 			//%		Sys_Printf( "%s\n", shaderText );
 		}
@@ -1169,8 +1167,7 @@ static void ParseShaderFile( const char *filename ){
 			else if ( !Q_stricmp( token, "damageShader" ) ) {
 				GetTokenAppend( shaderText, qfalse );
 				if ( token[ 0 ] != '\0' ) {
-					si->damageShader = safe_malloc( strlen( token ) + 1 );
-					strcpy( si->damageShader, token );
+					si->damageShader = copystring( token );
 				}
 				GetTokenAppend( shaderText, qfalse );   /* don't do anything with health */
 			}
@@ -1610,8 +1607,7 @@ static void ParseShaderFile( const char *filename ){
 				else if ( !Q_stricmp( token, "q3map_flare" ) || !Q_stricmp( token, "q3map_flareShader" ) ) {
 					GetTokenAppend( shaderText, qfalse );
 					if ( token[ 0 ] != '\0' ) {
-						si->flareShader = safe_malloc( strlen( token ) + 1 );
-						strcpy( si->flareShader, token );
+						si->flareShader = copystring( token );
 					}
 				}
 
@@ -1619,8 +1615,7 @@ static void ParseShaderFile( const char *filename ){
 				else if ( !Q_stricmp( token, "q3map_backShader" ) ) {
 					GetTokenAppend( shaderText, qfalse );
 					if ( token[ 0 ] != '\0' ) {
-						si->backShader = safe_malloc( strlen( token ) + 1 );
-						strcpy( si->backShader, token );
+						si->backShader = copystring( token );
 					}
 				}
 
@@ -1628,8 +1623,7 @@ static void ParseShaderFile( const char *filename ){
 				else if ( !Q_stricmp( token, "q3map_cloneShader" ) ) {
 					GetTokenAppend( shaderText, qfalse );
 					if ( token[ 0 ] != '\0' ) {
-						si->cloneShader = safe_malloc( strlen( token ) + 1 );
-						strcpy( si->cloneShader, token );
+						si->cloneShader = copystring( token );
 					}
 				}
 
@@ -1637,8 +1631,7 @@ static void ParseShaderFile( const char *filename ){
 				else if ( !Q_stricmp( token, "q3map_remapShader" ) ) {
 					GetTokenAppend( shaderText, qfalse );
 					if ( token[ 0 ] != '\0' ) {
-						si->remapShader = safe_malloc( strlen( token ) + 1 );
-						strcpy( si->remapShader, token );
+						si->remapShader = copystring( token );
 					}
 				}
 
@@ -1646,9 +1639,7 @@ static void ParseShaderFile( const char *filename ){
 				else if ( !Q_stricmp( token, "q3map_deprecateShader" ) ) {
 					GetTokenAppend( shaderText, qfalse );
 					if ( token[ 0 ] != '\0' ) {
-
-						si->deprecateShader = safe_malloc( strlen( token ) + 1 );
-						strcpy( si->deprecateShader, token );
+						si->deprecateShader = copystring( token );
 					}
 				}
 
@@ -2031,8 +2022,7 @@ static void ParseCustomInfoParms( void ){
 			break;
 		}
 
-		custSurfaceParms[ numCustSurfaceParms ].name = safe_malloc( MAX_OS_PATH );
-		strcpy( custSurfaceParms[ numCustSurfaceParms ].name, token );
+		custSurfaceParms[ numCustSurfaceParms ].name = copystring( token );
 		GetToken( qfalse );
 		sscanf( token, "%x", &custSurfaceParms[ numCustSurfaceParms ].contentFlags );
 		numCustSurfaceParms++;
@@ -2057,8 +2047,7 @@ static void ParseCustomInfoParms( void ){
 			break;
 		}
 
-		custSurfaceParms[ numCustSurfaceParms ].name = safe_malloc( MAX_OS_PATH );
-		strcpy( custSurfaceParms[ numCustSurfaceParms ].name, token );
+		custSurfaceParms[ numCustSurfaceParms ].name = copystring( token );
 		GetToken( qfalse );
 		sscanf( token, "%x", &custSurfaceParms[ numCustSurfaceParms ].surfaceFlags );
 		numCustSurfaceParms++;
@@ -2122,9 +2111,7 @@ void LoadShaderInfo( void ){
 
 			/* new shader file */
 			if ( j == numShaderFiles ) {
-				shaderFiles[ numShaderFiles ] = safe_malloc( MAX_OS_PATH );
-				strcpy( shaderFiles[ numShaderFiles ], token );
-				numShaderFiles++;
+				shaderFiles[ numShaderFiles++ ] = copystring( token );
 			}
 		}
 	}

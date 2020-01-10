@@ -238,11 +238,9 @@ char *ExpandPath( const char *path ){
 	return full;
 }
 
-char *copystring( const char *s ){
-	char    *b;
-	b = safe_malloc( strlen( s ) + 1 );
-	strcpy( b, s );
-	return b;
+char *copystring( const char *src ){
+	const size_t size = strlen( src ) + 1;
+	return memcpy( safe_malloc( size ), src, size );
 }
 
 

@@ -155,7 +155,7 @@ char *COM_Parse( char *data );
 extern char com_token[1024];
 extern qboolean com_eof;
 
-char *copystring( const char *s );
+char *copystring( const char *src );	// version of strdup() with safe_malloc()
 
 
 void CRC_Init( unsigned short *crcvalue );
