@@ -2131,7 +2131,6 @@ Q_EXTERN fog_t mapFogs[ MAX_MAP_FOGS ];
 
 Q_EXTERN entity_t           *mapEnt;
 Q_EXTERN brush_t            *buildBrush;
-Q_EXTERN int numActiveBrushes;
 Q_EXTERN brushType_t g_brushType;
 
 Q_EXTERN int numStrippedLights Q_ASSIGN( 0 );
@@ -2211,9 +2210,6 @@ Q_EXTERN vportal_t          *faces;
 Q_EXTERN leaf_t             *faceleafs;
 
 Q_EXTERN int numfaces;
-
-Q_EXTERN int c_portaltest, c_portalpass, c_portalcheck;
-Q_EXTERN int c_chains;
 
 Q_EXTERN byte               *vismap, *vismap_p, *vismap_end;
 
@@ -2384,9 +2380,6 @@ Q_EXTERN int totalTraces;
 
 Q_EXTERN FILE               *dumpFile;
 
-Q_EXTERN int c_visible, c_occluded;
-Q_EXTERN int c_subsampled;                  /* ydnar */
-
 Q_EXTERN int defaultLightSubdivide Q_ASSIGN( 999 );
 
 Q_EXTERN vec3_t ambientColor;
@@ -2398,11 +2391,6 @@ Q_EXTERN vec3_t             *surfaceOrigin;
 
 Q_EXTERN vec3_t sunDirection;
 Q_EXTERN vec3_t sunLight;
-
-/* tracing */
-Q_EXTERN int c_totalTrace;
-Q_EXTERN int c_cullTrace, c_testTrace;
-Q_EXTERN int c_testFacets;
 
 /* ydnar: light optimization */
 Q_EXTERN float subdivideThreshold Q_ASSIGN( DEFAULT_SUBDIVIDE_THRESHOLD );

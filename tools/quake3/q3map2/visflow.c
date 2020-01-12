@@ -71,11 +71,6 @@ int CountBits( byte *bits, int numbits ){
 	return c;
 }
 
-int c_fullskip;
-
-int c_chop, c_nochop;
-
-int active;
 
 void CheckStack( leaf_t *leaf, threaddata_t *thread ){
 	pstack_t    *p, *p2;
@@ -508,8 +503,6 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		VectorSubtract( vec3_origin, p->plane.normal, backplane.normal );
 		backplane.dist = -p->plane.dist;
 
-//		c_portalcheck++;
-
 		stack.portal = p;
 		stack.next = NULL;
 		stack.freewindings[0] = 1;
@@ -898,8 +891,6 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		stack.portalplane = p->plane;
 		VectorSubtract( vec3_origin, p->plane.normal, backplane.normal );
 		backplane.dist = -p->plane.dist;
-
-//		c_portalcheck++;
 
 		stack.portal = p;
 		stack.next = NULL;
@@ -1525,7 +1516,6 @@ void PassageMemory( void ){
    ===============================================================================
  */
 
-int c_flood, c_vis;
 
 
 /*
@@ -1668,7 +1658,6 @@ void BasePortalVis( int portalnum ){
 
 	p->nummightsee = CountBits( p->portalflood, numportals * 2 );
 //	Sys_Printf ("portal %i: %i mightsee\n", portalnum, p->nummightsee);
-	c_flood += p->nummightsee;
 }
 
 
@@ -1754,5 +1743,4 @@ void BetterPortalVis( int portalnum ){
 
 	// build leaf vis information
 	p->nummightsee = CountBits( p->portalvis, numportals * 2 );
-	c_vis += p->nummightsee;
 }

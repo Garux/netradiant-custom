@@ -90,9 +90,6 @@ int CountBrushList( brush_t *brushes ){
  */
 
 brush_t *AllocBrush( int numSides ){
-	if ( numthreads == 1 ) {
-		numActiveBrushes++;
-	}
 	return safe_calloc( offsetof( brush_t, sides[numSides] ) );
 }
 
@@ -125,9 +122,6 @@ void FreeBrush( brush_t *b ){
 
 	/* free it */
 	free( b );
-	if ( numthreads == 1 ) {
-		numActiveBrushes--;
-	}
 }
 
 

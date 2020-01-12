@@ -36,15 +36,9 @@ int allocatedSurfsOnShader;
 
 int allocated[ LIGHTMAP_WIDTH ];
 
-int numLightmaps = 1;
-int c_exactLightmap = 0;
-int c_planarPatch = 0;
-int c_nonplanarLightmap = 0;
-
 
 void PrepareNewLightmap( void ) {
 	memset( allocated, 0, sizeof( allocated ) );
-	numLightmaps++;
 }
 
 /*

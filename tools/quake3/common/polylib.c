@@ -29,15 +29,6 @@
 #include "qfiles.h"
 
 
-extern int numthreads;
-
-// counters are only bumped when running single threaded,
-// because they are an awefull coherence problem
-int c_active_windings;
-int c_peak_windings;
-int c_winding_allocs;
-int c_winding_points;
-
 #define BOGUS_RANGE WORLD_SIZE
 
 void pw( winding_t *w ){
@@ -56,15 +47,6 @@ winding_t   *AllocWinding( int points ){
 	if ( points >= MAX_POINTS_ON_WINDING ) {
 		Error( "AllocWinding failed: MAX_POINTS_ON_WINDING exceeded" );
 	}
-
-	if ( numthreads == 1 ) {
-		c_winding_allocs++;
-		c_winding_points += points;
-		c_active_windings++;
-		if ( c_active_windings > c_peak_windings ) {
-			c_peak_windings = c_active_windings;
-		}
-	}
 	return safe_calloc( offsetof( winding_t, p[points] ) );
 }
 
@@ -76,16 +58,6 @@ winding_t   *AllocWinding( int points ){
 winding_accu_t *AllocWindingAccu( int points ){
 	if ( points >= MAX_POINTS_ON_WINDING ) {
 		Error( "AllocWindingAccu failed: MAX_POINTS_ON_WINDING exceeded" );
-	}
-
-	if ( numthreads == 1 ) {
-		// At the time of this writing, these statistics were not used in any way.
-		c_winding_allocs++;
-		c_winding_points += points;
-		c_active_windings++;
-		if ( c_active_windings > c_peak_windings ) {
-			c_peak_windings = c_active_windings;
-		}
 	}
 	return safe_calloc( offsetof( winding_accu_t, p[points] ) );
 }
@@ -105,9 +77,6 @@ void FreeWinding( winding_t *w ){
 	}
 	*(unsigned *)w = 0xdeaddead;
 
-	if ( numthreads == 1 ) {
-		c_active_windings--;
-	}
 	free( w );
 }
 
@@ -126,9 +95,6 @@ void FreeWindingAccu( winding_accu_t *w ){
 	}
 	*( (unsigned *) w ) = 0xdeaddead;
 
-	if ( numthreads == 1 ) {
-		c_active_windings--;
-	}
 	free( w );
 }
 
@@ -137,8 +103,6 @@ void FreeWindingAccu( winding_accu_t *w ){
    RemoveColinearPoints
    ============
  */
-int c_removed;
-
 void    RemoveColinearPoints( winding_t *w ){
 	int i, j, k;
 	vec3_t v1, v2;
@@ -164,9 +128,6 @@ void    RemoveColinearPoints( winding_t *w ){
 		return;
 	}
 
-	if ( numthreads == 1 ) {
-		c_removed += w->numpoints - nump;
-	}
 	w->numpoints = nump;
 	memcpy( w->p, p, nump * sizeof( p[0] ) );
 }
