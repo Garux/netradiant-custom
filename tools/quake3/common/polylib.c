@@ -449,17 +449,10 @@ winding_t *BaseWindingForPlane( vec3_t normal, vec_t dist ){
    ==================
  */
 winding_t   *CopyWinding( winding_t *w ){
-	size_t size;
-	winding_t   *c;
-
 	if ( !w ) {
 		Error( "CopyWinding: winding is NULL" );
 	}
-
-	c = AllocWinding( w->numpoints );
-	size = offsetof( winding_t, p ) + sizeof( *w->p ) * w->numpoints;
-	memcpy( c, w, size );
-	return c;
+	return memcpy( AllocWinding( w->numpoints ), w, offsetof( winding_t, p[w->numpoints] ) );
 }
 
 /*

@@ -157,21 +157,15 @@ void FreeBrushList( brush_t *brushes ){
  */
 
 brush_t *CopyBrush( brush_t *brush ){
-	brush_t     *newBrush;
-	size_t size;
-	int i;
-
-
 	/* copy brush */
-	size = offsetof( brush_t, sides ) + sizeof( *brush->sides ) * brush->numsides;
-	newBrush = AllocBrush( brush->numsides );
-	memcpy( newBrush, brush, size );
+	brush_t *newBrush = AllocBrush( brush->numsides );
+	memcpy( newBrush, brush, offsetof( brush_t, sides[brush->numsides] ) );
 
 	/* ydnar: nuke linked list */
 	newBrush->next = NULL;
 
 	/* copy sides */
-	for ( i = 0; i < brush->numsides; i++ )
+	for ( int i = 0; i < brush->numsides; i++ )
 	{
 		if ( brush->sides[ i ].winding != NULL ) {
 			newBrush->sides[ i ].winding = CopyWinding( brush->sides[ i ].winding );
