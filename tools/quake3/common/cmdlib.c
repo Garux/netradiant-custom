@@ -52,24 +52,34 @@
 
 #ifdef SAFE_MALLOC
 void *safe_malloc( size_t size ){
-	void *p;
-
-	p = malloc( size );
+	void *p = malloc( size );
 	if ( !p ) {
 		Error( "safe_malloc failed on allocation of %i bytes", size );
 	}
-
 	return p;
 }
 
-void *safe_malloc_info( size_t size, char* info ){
-	void *p;
-
-	p = malloc( size );
+void *safe_malloc_info( size_t size, const char* info ){
+	void *p = malloc( size );
 	if ( !p ) {
 		Error( "%s: safe_malloc failed on allocation of %i bytes", info, size );
 	}
+	return p;
+}
 
+void *safe_calloc( size_t size ){
+	void *p = calloc( 1, size );
+	if ( !p ) {
+		Error( "safe_calloc failed on allocation of %i bytes", size );
+	}
+	return p;
+}
+
+void *safe_calloc_info( size_t size, const char* info ){
+	void *p = calloc( 1, size );
+	if ( !p ) {
+		Error( "%s: safe_calloc failed on allocation of %i bytes", info, size );
+	}
 	return p;
 }
 #endif
@@ -619,8 +629,7 @@ int    LoadFileBlock( const char *filename, void **bufferptr ){
 	if ( nBlock > 0 ) {
 		nAllocSize += MEM_BLOCKSIZE - nBlock;
 	}
-	buffer = safe_malloc( nAllocSize + 1 );
-	memset( buffer, 0, nAllocSize + 1 );
+	buffer = safe_calloc( nAllocSize + 1 );
 	SafeRead( f, buffer, length );
 	fclose( f );
 

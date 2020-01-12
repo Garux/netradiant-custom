@@ -449,12 +449,10 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 
 		/* set particulars */
 		ds->numVerts = PicoGetSurfaceNumVertexes( surface );
-		ds->verts = safe_malloc( ds->numVerts * sizeof( ds->verts[ 0 ] ) );
-		memset( ds->verts, 0, ds->numVerts * sizeof( ds->verts[ 0 ] ) );
+		ds->verts = safe_calloc( ds->numVerts * sizeof( ds->verts[ 0 ] ) );
 
 		ds->numIndexes = PicoGetSurfaceNumIndexes( surface );
-		ds->indexes = safe_malloc( ds->numIndexes * sizeof( ds->indexes[ 0 ] ) );
-		memset( ds->indexes, 0, ds->numIndexes * sizeof( ds->indexes[ 0 ] ) );
+		ds->indexes = safe_calloc( ds->numIndexes * sizeof( ds->indexes[ 0 ] ) );
 
 		/* copy vertexes */
 		for ( i = 0; i < ds->numVerts; i++ )

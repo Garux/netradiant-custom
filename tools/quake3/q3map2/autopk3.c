@@ -40,10 +40,7 @@ typedef struct StrList_s
 StrList;
 
 static inline StrList* StrList_allocate( size_t strNum ){
-	StrList* ret;
-	const size_t size = sizeof( StrList ) + sizeof( ret->s[0] ) * strNum;
-	ret = safe_malloc( size );
-	memset( ret, 0, size );
+	StrList* ret = safe_calloc( offsetof( StrList, s[strNum] ) );
 	memcpy( ret,
 			&( StrList const ){ .n = 0, .max = strNum },
 			sizeof( StrList ) );
@@ -198,10 +195,7 @@ typedef struct
 StrBuf;
 
 static inline StrBuf* StrBuf_allocate( size_t strLen ){
-	StrBuf* ret;
-	const size_t size = sizeof( StrBuf ) + sizeof( ret->s[0] ) * strLen;
-	ret = safe_malloc( size );
-	memset( ret, 0, size );
+	StrBuf* ret = safe_calloc( offsetof( StrBuf, s[strLen] ) );
 	memcpy( ret,
 			&( StrBuf const ){ .strlen = 0, .max = strLen },
 			sizeof( StrBuf ) );

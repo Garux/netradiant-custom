@@ -255,8 +255,7 @@ void LoadLBM( const char *filename, byte **picture, byte **palette ){
 			break;
 
 		case CMAPID:
-			cmapbuffer = safe_malloc( 768 );
-			memset( cmapbuffer, 0, 768 );
+			cmapbuffer = safe_calloc( 768 );
 			memcpy( cmapbuffer, LBM_P, chunklength );
 			break;
 

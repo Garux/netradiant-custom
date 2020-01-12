@@ -96,8 +96,7 @@ static void CopyLightGridLumps( rbspHeader_t *header ){
 	numBSPGridPoints = GetLumpElements( (bspHeader_t*) header, LUMP_LIGHTARRAY, sizeof( *inArray ) );
 
 	/* allocate buffer */
-	bspGridPoints = safe_malloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
-	memset( bspGridPoints, 0, numBSPGridPoints * sizeof( *bspGridPoints ) );
+	bspGridPoints = safe_calloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
 
 	/* copy */
 	inArray = GetLump( (bspHeader_t*) header, LUMP_LIGHTARRAY );

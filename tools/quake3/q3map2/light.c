@@ -107,8 +107,7 @@ static void CreateSunLight( sun_t *sun ){
 
 		/* create a light */
 		numSunLights++;
-		light = safe_malloc( sizeof( *light ) );
-		memset( light, 0, sizeof( *light ) );
+		light = safe_calloc( sizeof( *light ) );
 		light->next = lights;
 		lights = light;
 
@@ -254,8 +253,7 @@ void CreateEntityLights( void ){
 
 		/* create a light */
 		numPointLights++;
-		light = safe_malloc( sizeof( *light ) );
-		memset( light, 0, sizeof( *light ) );
+		light = safe_calloc( sizeof( *light ) );
 		light->next = lights;
 		lights = light;
 
@@ -592,8 +590,7 @@ void CreateSurfaceLights( void ){
 			VectorScale( origin, 0.5f, origin );
 
 			/* create a light */
-			light = safe_malloc( sizeof( *light ) );
-			memset( light, 0, sizeof( *light ) );
+			light = safe_calloc( sizeof( *light ) );
 			light->next = lights;
 			lights = light;
 
@@ -1857,14 +1854,12 @@ void SetupGrid( void ){
 	numBSPGridPoints = numRawGridPoints;
 
 	/* allocate lightgrid */
-	rawGridPoints = safe_malloc( numRawGridPoints * sizeof( *rawGridPoints ) );
-	memset( rawGridPoints, 0, numRawGridPoints * sizeof( *rawGridPoints ) );
+	rawGridPoints = safe_calloc( numRawGridPoints * sizeof( *rawGridPoints ) );
 
 	if ( bspGridPoints != NULL ) {
 		free( bspGridPoints );
 	}
-	bspGridPoints = safe_malloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
-	memset( bspGridPoints, 0, numBSPGridPoints * sizeof( *bspGridPoints ) );
+	bspGridPoints = safe_calloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
 
 	/* clear lightgrid */
 	for ( i = 0; i < numRawGridPoints; i++ )

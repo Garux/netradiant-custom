@@ -234,9 +234,6 @@ static void LoadPNGBuffer( byte *buffer, int size, byte **pixels, int *width, in
  */
 
 static void ImageInit( void ){
-	int i;
-
-
 	if ( numImages <= 0 ) {
 		/* clear images (fixme: this could theoretically leak) */
 		memset( images, 0, sizeof( images ) );
@@ -248,8 +245,7 @@ static void ImageInit( void ){
 		images[ 0 ].height = 64;
 		images[ 0 ].refCount = 1;
 		images[ 0 ].pixels = safe_malloc( 64 * 64 * 4 );
-		for ( i = 0; i < ( 64 * 64 * 4 ); i++ )
-			images[ 0 ].pixels[ i ] = 255;
+		memset( images[ 0 ].pixels, 255, 64 * 64 * 4 );
 	}
 }
 

@@ -153,7 +153,7 @@ void ColorToBytes( const float *color, byte *colorBytes, float scale ){
 #define EQUAL_NORMAL_EPSILON    0.01
 
 void SmoothNormals( void ){
-	int i, j, k, f, cs, numVerts, numVotes, fOld, start;
+	int i, j, k, f, numVerts, numVotes, fOld, start;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle, dot, testAngle;
 	bspDrawSurface_t    *ds;
 	shaderInfo_t        *si;
@@ -165,13 +165,10 @@ void SmoothNormals( void ){
 
 
 	/* allocate shade angle table */
-	shadeAngles = safe_malloc( numBSPDrawVerts * sizeof( float ) );
-	memset( shadeAngles, 0, numBSPDrawVerts * sizeof( float ) );
+	shadeAngles = safe_calloc( numBSPDrawVerts * sizeof( float ) );
 
 	/* allocate smoothed table */
-	cs = ( numBSPDrawVerts / 8 ) + 1;
-	smoothed = safe_malloc( cs );
-	memset( smoothed, 0, cs );
+	smoothed = safe_calloc( ( numBSPDrawVerts / 8 ) + 1 );
 
 	/* set default shade angle */
 	defaultShadeAngle = DEG2RAD( shadeAngleDegrees );
@@ -2407,8 +2404,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 			if ( lm->superLuxels[ lightmapNum ] == NULL ) {
 				/* allocate sampling lightmap storage */
 				size = lm->sw * lm->sh * SUPER_LUXEL_SIZE * sizeof( float );
-				lm->superLuxels[ lightmapNum ] = safe_malloc( size );
-				memset( lm->superLuxels[ lightmapNum ], 0, size );
+				lm->superLuxels[ lightmapNum ] = safe_calloc( size );
 			}
 
 			/* set style */

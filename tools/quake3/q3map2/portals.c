@@ -53,8 +53,6 @@ int c_boundary_sides;
    ===========
  */
 portal_t *AllocPortal( void ){
-	portal_t    *p;
-
 	if ( numthreads == 1 ) {
 		c_active_portals++;
 	}
@@ -62,10 +60,7 @@ portal_t *AllocPortal( void ){
 		c_peak_portals = c_active_portals;
 	}
 
-	p = safe_malloc( sizeof( portal_t ) );
-	memset( p, 0, sizeof( portal_t ) );
-
-	return p;
+	return safe_calloc( sizeof( portal_t ) );
 }
 
 void FreePortal( portal_t *p ){

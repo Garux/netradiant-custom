@@ -348,8 +348,7 @@ void ParsePatch( qboolean onlyLights ){
 	}
 
 	/* allocate patch mesh */
-	pm = safe_malloc( sizeof( *pm ) );
-	memset( pm, 0, sizeof( *pm ) );
+	pm = safe_calloc( sizeof( *pm ) );
 
 	/* ydnar: add entity/brush numbering */
 	pm->entityNum = mapEnt->mapEntityNum;
@@ -446,8 +445,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 	if ( !patchCount ) {
 		return;
 	}
-	bordering = safe_malloc( patchCount * patchCount );
-	memset( bordering, 0, patchCount * patchCount );
+	bordering = safe_calloc( patchCount * patchCount );
 
 	// build the bordering matrix
 	for ( k = 0 ; k < patchCount ; k++ ) {

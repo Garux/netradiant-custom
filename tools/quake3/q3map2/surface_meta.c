@@ -638,7 +638,8 @@ void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
  */
 
 void FanFaceSurface( mapDrawSurface_t *ds ){
-	int i, j, k, a, b, c, color[ MAX_LIGHTMAPS ][ 4 ];
+	int i, j, k, a, b, c;
+	int color[ MAX_LIGHTMAPS ][ 4 ] = {0};
 	bspDrawVert_t   *verts, *centroid, *dv;
 	double iv;
 
@@ -657,7 +658,6 @@ void FanFaceSurface( mapDrawSurface_t *ds ){
 
 	/* add up the drawverts to create a centroid */
 	centroid = &verts[ 0 ];
-	memset( color, 0,  4 * MAX_LIGHTMAPS * sizeof( int ) );
 	for ( i = 1, dv = &verts[ 1 ]; i < ( ds->numVerts + 1 ); i++, dv++ )
 	{
 		VectorAdd( centroid->xyz, dv->xyz, centroid->xyz );
@@ -1180,7 +1180,7 @@ void FixMetaTJunctions( void ){
 #define EQUAL_NORMAL_EPSILON    0.01
 
 void SmoothMetaTriangles( void ){
-	int i, j, k, f, fOld, start, cs, numVerts, numVotes, numSmoothed;
+	int i, j, k, f, fOld, start, numVerts, numVotes, numSmoothed;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle, dot, testAngle;
 	metaTriangle_t  *tri;
 	float           *shadeAngles;
@@ -1193,13 +1193,10 @@ void SmoothMetaTriangles( void ){
 	Sys_FPrintf( SYS_VRB, "--- SmoothMetaTriangles ---\n" );
 
 	/* allocate shade angle table */
-	shadeAngles = safe_malloc( numMetaVerts * sizeof( float ) );
-	memset( shadeAngles, 0, numMetaVerts * sizeof( float ) );
+	shadeAngles = safe_calloc( numMetaVerts * sizeof( float ) );
 
 	/* allocate smoothed table */
-	cs = ( numMetaVerts / 8 ) + 1;
-	smoothed = safe_malloc( cs );
-	memset( smoothed, 0, cs );
+	smoothed = safe_calloc( ( numMetaVerts / 8 ) + 1 );
 
 	/* set default shade angle */
 	defaultShadeAngle = DEG2RAD( npDegrees );
@@ -1705,9 +1702,6 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		ClearBounds( ds->mins, ds->maxs );
 
 		/* clear verts/indexes */
-//		memset( verts, 0, sizeof( verts ) );
-//		memset( indexes, 0, sizeof( indexes ) );
-		//is more correct, but upper works ok too
 		memset( verts, 0, sizeof( *verts ) * maxSurfaceVerts );
 		memset( indexes, 0, sizeof( *indexes ) * maxSurfaceIndexes );
 

@@ -66,9 +66,14 @@
 #define SAFE_MALLOC
 #ifdef SAFE_MALLOC
 void *safe_malloc( size_t size );
-void *safe_malloc_info( size_t size, char* info );
+void *safe_malloc_info( size_t size, const char* info );
+void *safe_calloc( size_t size );
+void *safe_calloc_info( size_t size, const char* info );
 #else
-#define safe_malloc( a ) malloc( a )
+#define safe_malloc( size ) malloc( size )
+#define safe_malloc_info( size, info ) malloc( size )
+#define safe_calloc( size ) calloc( 1, size )
+#define safe_calloc_info( size, info ) calloc( 1, size )
 #endif /* SAFE_MALLOC */
 
 // set these before calling CheckParm

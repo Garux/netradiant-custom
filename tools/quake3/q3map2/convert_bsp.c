@@ -833,8 +833,7 @@ void PseudoCompileBSP( qboolean need_tree ){
 	int i;
 
 	SetDrawSurfacesBuffer();
-	mapDrawSurfs = safe_malloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
-	memset( mapDrawSurfs, 0, sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
+	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
 	numMapDrawSurfs = 0;
 
 	BeginBSPFile();

@@ -957,8 +957,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	ds->sampleSize = b->lightmapSampleSize;
 	ds->lightmapScale = b->lightmapScale;
 	ds->numVerts = w->numpoints;
-	ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
-	memset( ds->verts, 0, ds->numVerts * sizeof( *ds->verts ) );
+	ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 
 	/* compute s/t coordinates from brush primitive texture matrix (compute axis base) */
 	ComputeAxisBase( mapplanes[ s->planenum ].normal, texX, texY );
@@ -3025,8 +3024,7 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
 			VectorCopy( p->plane.normal, ds->lightmapVecs[ 2 ] );
 			ds->fogNum = -1;
 			ds->numVerts = w->numpoints;
-			ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
-			memset( ds->verts, 0, ds->numVerts * sizeof( *ds->verts ) );
+			ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 
 			/* walk the winding */
 			for ( i = 0; i < ds->numVerts; i++ )
@@ -3117,11 +3115,9 @@ void MakeFogHullSurfs( entity_t *e, tree_t *tree, char *shader ){
 	ds->shaderInfo = si;
 	ds->fogNum = -1;
 	ds->numVerts = 8;
-	ds->verts = safe_malloc( ds->numVerts * sizeof( *ds->verts ) );
-	memset( ds->verts, 0, ds->numVerts * sizeof( *ds->verts ) );
+	ds->verts = safe_calloc( ds->numVerts * sizeof( *ds->verts ) );
 	ds->numIndexes = 36;
-	ds->indexes = safe_malloc( ds->numIndexes * sizeof( *ds->indexes ) );
-	memset( ds->indexes, 0, ds->numIndexes * sizeof( *ds->indexes ) );
+	ds->indexes = safe_calloc( ds->numIndexes * sizeof( *ds->indexes ) );
 
 	/* set verts */
 	VectorSet( ds->verts[ 0 ].xyz, fogMins[ 0 ], fogMins[ 1 ], fogMins[ 2 ] );

@@ -53,9 +53,6 @@ void pw( winding_t *w ){
    =============
  */
 winding_t   *AllocWinding( int points ){
-	winding_t   *w;
-	int s;
-
 	if ( points >= MAX_POINTS_ON_WINDING ) {
 		Error( "AllocWinding failed: MAX_POINTS_ON_WINDING exceeded" );
 	}
@@ -68,10 +65,7 @@ winding_t   *AllocWinding( int points ){
 			c_peak_windings = c_active_windings;
 		}
 	}
-	s = sizeof( *w ) + points * sizeof( *w->p );
-	w = safe_malloc( s );
-	memset( w, 0, s );
-	return w;
+	return safe_calloc( offsetof( winding_t, p[points] ) );
 }
 
 /*
@@ -80,9 +74,6 @@ winding_t   *AllocWinding( int points ){
    =============
  */
 winding_accu_t *AllocWindingAccu( int points ){
-	winding_accu_t  *w;
-	int s;
-
 	if ( points >= MAX_POINTS_ON_WINDING ) {
 		Error( "AllocWindingAccu failed: MAX_POINTS_ON_WINDING exceeded" );
 	}
@@ -96,10 +87,7 @@ winding_accu_t *AllocWindingAccu( int points ){
 			c_peak_windings = c_active_windings;
 		}
 	}
-	s = sizeof( *w ) + points * sizeof( *w->p );
-	w = safe_malloc( s );
-	memset( w, 0, s );
-	return w;
+	return safe_calloc( offsetof( winding_accu_t, p[points] ) );
 }
 
 /*

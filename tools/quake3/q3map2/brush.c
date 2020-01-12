@@ -90,18 +90,10 @@ int CountBrushList( brush_t *brushes ){
  */
 
 brush_t *AllocBrush( int numSides ){
-	brush_t     *bb;
-	size_t c;
-
-	c = sizeof( *bb ) + sizeof( *bb->sides ) * numSides;
-	bb = safe_malloc( c );
-	memset( bb, 0, c );
 	if ( numthreads == 1 ) {
 		numActiveBrushes++;
 	}
-
-	/* return it */
-	return bb;
+	return safe_calloc( offsetof( brush_t, sides[numSides] ) );
 }
 
 
@@ -128,7 +120,7 @@ void FreeBrush( brush_t *b ){
 		}
 
 	/* ydnar: overwrite it */
-	memset( b, 0xFE, offsetof( brush_t, sides ) + sizeof( *b->sides ) * b->numsides );
+	memset( b, 0xFE, offsetof( brush_t, sides[b->numsides] ) );
 	*( (unsigned int*) b ) = 0xFEFEFEFE;
 
 	/* free it */
@@ -819,12 +811,8 @@ void FilterStructuralBrushesIntoTree( entity_t *e, tree_t *tree ) {
    ================
  */
 tree_t *AllocTree( void ){
-	tree_t  *tree;
-
-	tree = safe_malloc( sizeof( *tree ) );
-	memset( tree, 0, sizeof( *tree ) );
+	tree_t *tree = safe_calloc( sizeof( *tree ) );
 	ClearBounds( tree->mins, tree->maxs );
-
 	return tree;
 }
 
@@ -834,12 +822,7 @@ tree_t *AllocTree( void ){
    ================
  */
 node_t *AllocNode( void ){
-	node_t  *node;
-
-	node = safe_malloc( sizeof( *node ) );
-	memset( node, 0, sizeof( *node ) );
-
-	return node;
+	return safe_calloc( sizeof( node_t ) );
 }
 
 

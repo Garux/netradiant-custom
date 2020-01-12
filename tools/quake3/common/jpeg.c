@@ -358,8 +358,7 @@ int LoadJPGBuff( void *src_buffer, int src_size, unsigned char **pic, int *width
 	size = cinfo.output_width * cinfo.output_height * 4;
 	*width = cinfo.output_width;
 	*height = cinfo.output_height;
-	*pic = (unsigned char*)( malloc( size + 1 ) );
-	memset( *pic, 0, size + 1 );
+	*pic = calloc( 1, size + 1 );
 
 	buffer = ( *cinfo.mem->alloc_sarray )( ( j_common_ptr ) & cinfo, JPOOL_IMAGE, row_stride, 1 );
 

@@ -777,8 +777,7 @@ int BSPMain( int argc, char **argv ){
 
 	doingBSP = qtrue;
 	SetDrawSurfacesBuffer();
-	mapDrawSurfs = safe_malloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
-	memset( mapDrawSurfs, 0, sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
+	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
 	numMapDrawSurfs = 0;
 
 	tempSource[ 0 ] = '\0';

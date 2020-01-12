@@ -91,12 +91,10 @@ void SetDrawVerts( int n ){
 		free( bspDrawVerts );
 	}
 
-	numBSPDrawVerts = n;
-	numBSPDrawVertsBuffer = numBSPDrawVerts;
+	numBSPDrawVerts =
+	numBSPDrawVertsBuffer = n;
 
-	bspDrawVerts = safe_malloc_info( sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer, "IncDrawVerts" );
-
-	memset( bspDrawVerts, 0, n * sizeof( bspDrawVert_t ) );
+	bspDrawVerts = safe_calloc_info( sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer, "IncDrawVerts" );
 }
 
 int numBSPDrawSurfacesBuffer = 0;
@@ -107,9 +105,7 @@ void SetDrawSurfacesBuffer(){
 
 	numBSPDrawSurfacesBuffer = MAX_MAP_DRAW_SURFS;
 
-	bspDrawSurfaces = safe_malloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
-
-	memset( bspDrawSurfaces, 0, MAX_MAP_DRAW_SURFS * sizeof( bspDrawSurface_t ) );
+	bspDrawSurfaces = safe_calloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
 }
 
 void SetDrawSurfaces( int n ){
@@ -117,12 +113,10 @@ void SetDrawSurfaces( int n ){
 		free( bspDrawSurfaces );
 	}
 
-	numBSPDrawSurfaces = n;
-	numBSPDrawSurfacesBuffer = numBSPDrawSurfaces;
+	numBSPDrawSurfaces =
+	numBSPDrawSurfacesBuffer = n;
 
-	bspDrawSurfaces = safe_malloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
-
-	memset( bspDrawSurfaces, 0, n * sizeof( bspDrawSurface_t ) );
+	bspDrawSurfaces = safe_calloc_info( sizeof( bspDrawSurface_t ) * numBSPDrawSurfacesBuffer, "IncDrawSurfaces" );
 }
 
 void BSPFilesCleanup(){
@@ -538,12 +532,8 @@ void StripTrailing( char *e ){
  */
 
 epair_t *ParseEPair( void ){
-	epair_t     *e;
-
-
 	/* allocate and clear new epair */
-	e = safe_malloc( sizeof( epair_t ) );
-	memset( e, 0, sizeof( epair_t ) );
+	epair_t *e = safe_calloc( sizeof( epair_t ) );
 
 	/* handle key */
 	if ( strlen( token ) >= ( MAX_KEY - 1 ) ) {
