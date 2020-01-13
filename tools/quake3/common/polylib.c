@@ -422,19 +422,11 @@ winding_t   *CopyWinding( const winding_t *w ){
    ==================
  */
 winding_accu_t *CopyWindingAccuIncreaseSizeAndFreeOld( winding_accu_t *w ){
-	int i;
-	winding_accu_t  *c;
-
 	if ( !w ) {
 		Error( "CopyWindingAccuIncreaseSizeAndFreeOld: winding is NULL" );
 	}
 
-	c = AllocWindingAccu( w->numpoints + 1 );
-	c->numpoints = w->numpoints;
-	for ( i = 0; i < c->numpoints; i++ )
-	{
-		VectorCopyAccu( w->p[i], c->p[i] );
-	}
+	winding_accu_t *c = memcpy( AllocWindingAccu( w->numpoints + 1 ), w, offsetof( winding_accu_t, p[w->numpoints] ) );
 	FreeWindingAccu( w );
 	return c;
 }
@@ -613,7 +605,6 @@ void    ClipWindingEpsilon( winding_t *in, vec3_t normal, vec_t dist,
    =============
  */
 void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, vec_t crudeEpsilon ){
-	vec_accu_t fineEpsilon;
 	winding_accu_t  *in;
 	int counts[3];
 	int i, j;
@@ -658,10 +649,7 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 	// 64-bit land inside of the epsilon for all numbers we're dealing with.
 
 	static const vec_accu_t smallestEpsilonAllowed = ( (vec_accu_t) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
-	if ( crudeEpsilon < smallestEpsilonAllowed ) {
-		fineEpsilon = smallestEpsilonAllowed;
-	}
-	else{fineEpsilon = (vec_accu_t) crudeEpsilon; }
+	const vec_accu_t fineEpsilon = ( crudeEpsilon < smallestEpsilonAllowed )? smallestEpsilonAllowed : (vec_accu_t) crudeEpsilon;
 
 	in = *inout;
 	counts[0] = counts[1] = counts[2] = 0;
