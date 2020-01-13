@@ -1555,7 +1555,7 @@ int                         CountBrushList( brush_t *brushes );
 brush_t                     *AllocBrush( int numsides );
 void                        FreeBrush( brush_t *brushes );
 void                        FreeBrushList( brush_t *brushes );
-brush_t                     *CopyBrush( brush_t *brush );
+brush_t                     *CopyBrush( const brush_t *brush );
 qboolean                    BoundBrush( brush_t *brush );
 qboolean                    CreateBrushWindings( brush_t *brush );
 brush_t                     *BrushFromBounds( vec3_t mins, vec3_t maxs );

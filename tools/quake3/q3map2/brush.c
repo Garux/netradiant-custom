@@ -150,7 +150,7 @@ void FreeBrushList( brush_t *brushes ){
    duplicates the brush, sides, and windings
  */
 
-brush_t *CopyBrush( brush_t *brush ){
+brush_t *CopyBrush( const brush_t *brush ){
 	/* copy brush */
 	brush_t *newBrush = AllocBrush( brush->numsides );
 	memcpy( newBrush, brush, offsetof( brush_t, sides[brush->numsides] ) );

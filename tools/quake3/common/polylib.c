@@ -409,7 +409,7 @@ winding_t *BaseWindingForPlane( vec3_t normal, vec_t dist ){
    CopyWinding
    ==================
  */
-winding_t   *CopyWinding( winding_t *w ){
+winding_t   *CopyWinding( const winding_t *w ){
 	if ( !w ) {
 		Error( "CopyWinding: winding is NULL" );
 	}
@@ -444,7 +444,7 @@ winding_accu_t *CopyWindingAccuIncreaseSizeAndFreeOld( winding_accu_t *w ){
    CopyWindingAccuToRegular
    ==================
  */
-winding_t   *CopyWindingAccuToRegular( winding_accu_t *w ){
+winding_t   *CopyWindingAccuToRegular( const winding_accu_t *w ){
 	int i;
 	winding_t   *c;
 
