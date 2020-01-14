@@ -835,6 +835,17 @@ void copy( const Vector3& p0, const Vector3& p1, const Vector3& p2 ){
 		updateSource();
 	}
 }
+void copy( const PlanePoints planepoints ){
+	if ( !isDoom3Plane() ) {
+		planepts_assign( m_planepts, planepoints );
+		MakePlane();
+	}
+	else
+	{
+		m_planeCached = plane3_for_points( planepoints );
+		updateSource();
+	}
+}
 };
 
 inline void Winding_testSelect( Winding& winding, SelectionTest& test, SelectionIntersection& best, const DoubleVector3 planepoints[3] ){
@@ -1136,7 +1147,7 @@ void transform( const Matrix4& matrix, bool mirror ){
 }
 
 void assign_planepts( const PlanePoints planepts ){
-	m_planeTransformed.copy( planepts[0], planepts[1], planepts[2] );
+	m_planeTransformed.copy( planepts );
 	m_observer->planeChanged();
 }
 
@@ -3215,16 +3226,33 @@ void bestPlaneIndirect( const SelectionTest& test, Plane3& plane, Vector3& inter
 		const Vector3 intersection_new = line_closest_point( line, g_vector3_identity );
 		const float dist_new = vector3_length_squared( intersection_new );
 		if( dist_new < dist ){
-			const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
-			if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
-				plane = plane1;
-				intersection = intersection_new;
-				dist = dist_new;
+			if( test.getVolume().fill() ){
+				const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
+				if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
+					plane = plane1;
+					intersection = intersection_new;
+					dist = dist_new;
+				}
+				else{
+					faceVertex = next_edge( m_edge->m_faces, faceVertex );
+					const Plane3& plane2 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
+					if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
+						plane = plane2;
+						intersection = intersection_new;
+						dist = dist_new;
+					}
+				}
 			}
 			else{
+				const Plane3& plane1 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
 				faceVertex = next_edge( m_edge->m_faces, faceVertex );
 				const Plane3& plane2 = m_faceInstances[faceVertex.getFace()].getFace().plane3();
-				if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
+				if( fabs( vector3_dot( plane1.normal(), test.getVolume().getViewDir() ) ) < fabs( vector3_dot( plane2.normal(), test.getVolume().getViewDir() ) ) ){
+					plane = plane1;
+					intersection = intersection_new;
+					dist = dist_new;
+				}
+				else{
 					plane = plane2;
 					intersection = intersection_new;
 					dist = dist_new;
