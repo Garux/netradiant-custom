@@ -330,14 +330,16 @@ int CopyLump_Allocate( bspHeader_t *header, int lump, void **dest, int size, int
 void AddLump( FILE *file, bspHeader_t *header, int lumpNum, const void *data, int length ){
 	bspLump_t   *lump;
 
-
 	/* add lump to bsp file header */
 	lump = &header->lumps[ lumpNum ];
 	lump->offset = LittleLong( ftell( file ) );
 	lump->length = LittleLong( length );
 
 	/* write lump to file */
-	SafeWrite( file, data, ( length + 3 ) & ~3 );
+	SafeWrite( file, data, length );
+
+	/* write padding zeros */
+	SafeWrite( file, (const byte[3]){ 0, 0, 0 }, ( ( length + 3 ) & ~3 ) - length );
 }
 
 
