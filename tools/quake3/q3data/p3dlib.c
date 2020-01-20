@@ -21,18 +21,15 @@
 
 #include "p3dlib.h"
 
-#ifdef WIN32
-#include <io.h>
-#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "../common/cmdlib.h"
+
 #define MAX_POLYSETS 64
 
 #if defined ( __linux__ ) || defined ( __APPLE__ )
-#define _strcmpi Q_stricmp
-#define filelength Q_filelength
 #define strlwr strlower
 #endif
 typedef struct
@@ -67,7 +64,7 @@ int P3DLoad( const char *filename ){
 
 	memset( &p3d, 0, sizeof( p3d ) );
 
-	p3d.len = filelength( fileno( fp ) );
+	p3d.len = Q_filelength( fp );
 
 	p3d.curpos = p3d.buffer = malloc( p3d.len );
 
@@ -102,7 +99,7 @@ int CharIsTokenDelimiter( int ch ){
 int P3DSkipToToken( const char *name ){
 	while ( P3DGetToken( 0 ) )
 	{
-		if ( !_strcmpi( s_token, name ) ) {
+		if ( !Q_stricmp( s_token, name ) ) {
 			return 1;
 		}
 	}
@@ -167,14 +164,14 @@ int P3DSkipToTokenInBlock( const char *name ){
 
 	while ( P3DGetToken( 0 ) )
 	{
-		if ( !_strcmpi( s_token, "}" ) ) {
+		if ( !Q_stricmp( s_token, "}" ) ) {
 			iLevel--;
 		}
-		else if ( !_strcmpi( s_token, "{" ) ) {
+		else if ( !Q_stricmp( s_token, "{" ) ) {
 			iLevel++;
 		}
 
-		if ( !_strcmpi( s_token, name ) ) {
+		if ( !Q_stricmp( s_token, name ) ) {
 			return 1;
 		}
 
@@ -201,7 +198,7 @@ int P3DProcess(){
 	// skip to the first Obj declaration
 	while ( P3DGetToken( 0 ) )
 	{
-		if ( !_strcmpi( s_token, "Obj" ) ) {
+		if ( !Q_stricmp( s_token, "Obj" ) ) {
 			int j = 0, k = 0;
 
 			if ( P3DSkipToToken( "Text" ) ) {
@@ -310,7 +307,7 @@ void SkinFromP3D( const char *file ){
 		// corresponds to and append the shader to it
 		for ( i = 0; i < g_data.model.numSurfaces; i++ )
 		{
-			if ( !_strcmpi( g_data.surfData[i].header.name, psetName ) ) {
+			if ( !Q_stricmp( g_data.surfData[i].header.name, psetName ) ) {
 				char *p;
 
 				if ( strstr( associatedShader, gamedir + 1 ) ) {

@@ -20,14 +20,7 @@
  */
 
 #include <assert.h>
-#ifdef WIN32
-#include <io.h>
-#endif
 #include "md3lib.h"
-
-#if defined ( __linux__ ) || defined ( __APPLE__ )
-#define filelength Q_filelength
-#endif
 
 /*
 ** MD3_ComputeTagFromTri
@@ -142,15 +135,15 @@ void MD3_Dump( const char *filename ){
 	FILE *fp;
 	void *_buffer;
 	void *buffer;
-	long fileSize;
+	int fileSize;
 	int i;
 
 	if ( ( fp = fopen( filename, "rb" ) ) == 0 ) {
 		Error( "Unable to open '%s'\n", filename );
 	}
 
-	fileSize = filelength( fileno( fp ) );
-	_buffer = malloc( filelength( fileno( fp ) ) );
+	fileSize = Q_filelength( fp );
+	_buffer = malloc( fileSize );
 	fread( _buffer, fileSize, 1, fp );
 	fclose( fp );
 

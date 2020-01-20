@@ -19,9 +19,6 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef WIN32
-#include <io.h>
-#endif
 #include "q3data.h"
 #include "md3lib.h"
 
@@ -39,10 +36,6 @@ qboolean g_skipmodel;           // set true when a cd is not g_only
 char *moddir = NULL;
 // some old defined that was in cmdlib lost during merge
 char writedir[1024];
-
-#if defined ( __linux__ ) || defined ( __APPLE__ )
-#define strlwr strlower
-#endif
 
 /*
    =======================================================
@@ -170,7 +163,7 @@ void FindShaderFiles( char *filename ){
 			}
 			linebuffer[i] = 0;
 
-			strlwr( linebuffer );
+			strlower( linebuffer );
 
 			// see if the line specifies an opaque map or blendmap
 			if ( strstr( linebuffer, "opaquemap" ) == linebuffer ||
