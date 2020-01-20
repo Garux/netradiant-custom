@@ -114,14 +114,13 @@ static void vfsInitPakFile( const char *filename ){
 	{
 		char filename_inzip[NAME_MAX];
 		unz_file_info file_info;
-		VFS_PAKFILE* file;
 
 		err = unzGetCurrentFileInfo( uf, &file_info, filename_inzip, sizeof( filename_inzip ), NULL, 0, NULL, 0 );
 		if ( err != UNZ_OK ) {
 			break;
 		}
 
-		file = (VFS_PAKFILE*)safe_malloc( sizeof( VFS_PAKFILE ) );
+		VFS_PAKFILE* file = safe_malloc( sizeof( VFS_PAKFILE ) );
 		g_pakFiles = g_slist_append( g_pakFiles, file );
 
 		FixDOSName( filename_inzip );
@@ -242,10 +241,9 @@ void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, 
 	//char filename[PATH_MAX];
 	char *dirlist;
 	GDir *dir;
-	int i, k;
 	char path[NAME_MAX];
 /* search in dirs */
-	for ( i = 0; i < g_numDirs; i++ ){
+	for ( int i = 0; i < g_numDirs; i++ ){
 		snprintf( path, NAME_MAX, "%sscripts/", g_strDirs[ i ] );
 
 		dir = g_dir_open( path, 0, NULL );
@@ -530,7 +528,7 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 
 		bufferptr = safe_malloc( file->size + 1 );
 		// we need to end the buffer with a 0
-		( (char*) ( bufferptr ) )[file->size] = 0;
+		bufferptr[file->size] = 0;
 
 		i = unzReadCurrentFile( file->zipfile, bufferptr, file->size );
 		unzCloseCurrentFile( file->zipfile );
