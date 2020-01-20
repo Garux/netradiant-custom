@@ -1856,9 +1856,7 @@ void SetupGrid( void ){
 	/* allocate lightgrid */
 	rawGridPoints = safe_calloc( numRawGridPoints * sizeof( *rawGridPoints ) );
 
-	if ( bspGridPoints != NULL ) {
-		free( bspGridPoints );
-	}
+	free( bspGridPoints );
 	bspGridPoints = safe_calloc( numBSPGridPoints * sizeof( *bspGridPoints ) );
 
 	/* clear lightgrid */

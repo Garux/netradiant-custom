@@ -267,13 +267,9 @@ void ImageFree( image_t *image ){
 
 	/* free? */
 	if ( image->refCount <= 0 ) {
-		if ( image->name != NULL ) {
-			free( image->name );
-		}
+		free( image->name );
 		image->name = NULL;
-		if ( image->filename != NULL ) {
-			free( image->filename );
-		}
+		free( image->filename );
 		image->filename = NULL;
 		free( image->pixels );
 		image->width = 0;

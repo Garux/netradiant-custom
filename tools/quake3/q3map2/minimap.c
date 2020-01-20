@@ -522,9 +522,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 			minimap.samples = atoi( argv[i + 1] );
 			i++;
 			Sys_Printf( "Samples set to %i\n", minimap.samples );
-			if ( minimap.sample_offsets ) {
-				free( minimap.sample_offsets );
-			}
+			free( minimap.sample_offsets );
 			minimap.sample_offsets = malloc( 2 * sizeof( *minimap.sample_offsets ) * minimap.samples );
 			MiniMapMakeSampleOffsets();
 		}
@@ -532,9 +530,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 			minimap.samples = atoi( argv[i + 1] );
 			i++;
 			Sys_Printf( "Random samples set to %i\n", minimap.samples );
-			if ( minimap.sample_offsets ) {
-				free( minimap.sample_offsets );
-			}
+			free( minimap.sample_offsets );
 			minimap.sample_offsets = NULL;
 		}
 		else if ( !strcmp( argv[ i ],  "-border" ) ) {

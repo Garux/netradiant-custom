@@ -86,9 +86,7 @@ int numFogs;
 dfog_t dfogs[MAX_MAP_FOGS];
 
 void SetLightBytes( int n ){
-	if ( lightBytes != 0 ) {
-		free( lightBytes );
-	}
+	free( lightBytes );
 
 	numLightBytes = n;
 
@@ -100,9 +98,7 @@ void SetLightBytes( int n ){
 }
 
 void SetGridPoints( int n ){
-	if ( gridData != 0 ) {
-		free( gridData );
-	}
+	free( gridData );
 
 	numGridPoints = n;
 
@@ -141,9 +137,7 @@ void IncDrawVerts(){
 }
 
 void SetDrawVerts( int n ){
-	if ( drawVerts != 0 ) {
-		free( drawVerts );
-	}
+	free( drawVerts );
 
 	numDrawVerts =
 	numDrawVertsBuffer = n;
@@ -152,9 +146,7 @@ void SetDrawVerts( int n ){
 }
 
 void SetDrawSurfacesBuffer(){
-	if ( drawSurfaces != 0 ) {
-		free( drawSurfaces );
-	}
+	free( drawSurfaces );
 
 	numDrawSurfacesBuffer = MAX_MAP_DRAW_SURFS;
 
@@ -162,9 +154,7 @@ void SetDrawSurfacesBuffer(){
 }
 
 void SetDrawSurfaces( int n ){
-	if ( drawSurfaces != 0 ) {
-		free( drawSurfaces );
-	}
+	free( drawSurfaces );
 
 	numDrawSurfaces =
 	numDrawSurfacesBuffer = n;
@@ -173,18 +163,10 @@ void SetDrawSurfaces( int n ){
 }
 
 void BspFilesCleanup(){
-	if ( drawVerts != 0 ) {
-		free( drawVerts );
-	}
-	if ( drawSurfaces != 0 ) {
-		free( drawSurfaces );
-	}
-	if ( lightBytes != 0 ) {
-		free( lightBytes );
-	}
-	if ( gridData != 0 ) {
-		free( gridData );
-	}
+	free( drawVerts );
+	free( drawSurfaces );
+	free( lightBytes );
+	free( gridData );
 }
 
 //=============================================================================

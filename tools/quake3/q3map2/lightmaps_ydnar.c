@@ -3155,9 +3155,7 @@ void StoreSurfaceLightmaps( qboolean fastAllocate ){
 	timer_start = I_FloatTime();
 
 	/* count the bsp lightmaps and allocate space */
-	if ( bspLightBytes != NULL ) {
-		free( bspLightBytes );
-	}
+	free( bspLightBytes );
 	if ( numBSPLightmaps == 0 || externalLightmaps ) {
 		numBSPLightBytes = 0;
 		bspLightBytes = NULL;

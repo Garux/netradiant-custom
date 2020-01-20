@@ -830,9 +830,7 @@ static int TriangulateTraceNode_r( int nodeNum ){
 	/* empty node? */
 	if ( node->numItems == 0 ) {
 		node->maxItems = 0;
-		if ( node->items != NULL ) {
-			free( node->items );
-		}
+		free( node->items );
 		return node->numItems;
 	}
 
@@ -873,9 +871,7 @@ static int TriangulateTraceNode_r( int nodeNum ){
 	}
 
 	/* free windings */
-	if ( windings != NULL ) {
-		free( windings );
-	}
+	free( windings );
 
 	/* return item count */
 	return node->numItems;

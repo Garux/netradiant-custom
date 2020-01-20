@@ -277,14 +277,10 @@ void ClearSurface( mapDrawSurface_t *ds ){
 	ds->planar = qfalse;
 	ds->planeNum = -1;
 	ds->numVerts = 0;
-	if ( ds->verts != NULL ) {
-		free( ds->verts );
-	}
+	free( ds->verts );
 	ds->verts = NULL;
 	ds->numIndexes = 0;
-	if ( ds->indexes != NULL ) {
-		free( ds->indexes );
-	}
+	free( ds->indexes );
 	ds->indexes = NULL;
 	numClearedSurfaces++;
 }

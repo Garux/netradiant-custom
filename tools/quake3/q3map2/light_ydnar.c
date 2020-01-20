@@ -3863,9 +3863,7 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag ){
 				/* delete the light */
 				numCulledLights++;
 				*owner = light->next;
-				if ( light->w != NULL ) {
-					free( light->w );
-				}
+				free( light->w );
 				free( light );
 				continue;
 			}
@@ -4049,9 +4047,7 @@ void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int nu
 
 
 void FreeTraceLights( trace_t *trace ){
-	if ( trace->lights != NULL ) {
-		free( trace->lights );
-	}
+	free( trace->lights );
 }
 
 
