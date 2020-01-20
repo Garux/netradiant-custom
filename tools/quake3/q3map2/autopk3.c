@@ -898,7 +898,8 @@ int repackBSPMain( int argc, char **argv ){
 
 
 	int bspListN = 0;
-	char (*bspList)[1024] = safe_malloc( 8192 * sizeof( bspList[0] ) );
+	const int bspListSize = 8192;
+	char (*bspList)[1024] = safe_malloc( bspListSize * sizeof( bspList[0] ) );
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
@@ -925,6 +926,8 @@ int repackBSPMain( int argc, char **argv ){
 			if ( !GetToken( qtrue ) ) {
 				break;
 			}
+			if( bspListSize == bspListN )
+				Error( "bspList overflow" );
 			strcpy( bspList[bspListN], token );
 			bspListN++;
 		}
