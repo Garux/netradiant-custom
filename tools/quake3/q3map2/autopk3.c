@@ -1035,12 +1035,12 @@ int repackBSPMain( int argc, char **argv ){
 			//numBSPDrawVerts = 0;
 			Sys_Printf( "freed BSPDrawVerts\n" );
 		}
-*/		if ( bspDrawSurfaces != 0 ) {
-			free( bspDrawSurfaces );
-			bspDrawSurfaces = NULL;
-			//numBSPDrawSurfaces = 0;
-			//Sys_Printf( "freed bspDrawSurfaces\n" );
+		if ( bspDrawSurfaces != 0 ) {
+			Sys_Printf( "freed bspDrawSurfaces\n" );
 		}
+*/		free( bspDrawSurfaces );
+		bspDrawSurfaces = NULL;
+		numBSPDrawSurfaces = 0;
 /*		if ( bspLightBytes != 0 ) {
 			free( bspLightBytes );
 			bspLightBytes = NULL;
@@ -1068,11 +1068,10 @@ int repackBSPMain( int argc, char **argv ){
 			//allocatedBSPBrushes = 0;
 		}
 */		if ( entities != 0 ) {
-			epair_t *ep2free;
 			for ( i = 0; i < numBSPEntities && i < numEntities; ++i ){
 				ep = entities[i].epairs;
 				while( ep != NULL){
-					ep2free = ep;
+					epair_t *ep2free = ep;
 					ep = ep->next;
 					free( ep2free );
 				}
@@ -1091,20 +1090,20 @@ int repackBSPMain( int argc, char **argv ){
 			//numBSPModels = 0;
 			//allocatedBSPModels = 0;
 		}
-*/		if ( bspShaders != 0 ) {
-			free( bspShaders );
-			bspShaders = NULL;
-			//Sys_Printf( "freed bspShaders\n" );
-			//numBSPShaders = 0;
-			//allocatedBSPShaders = 0;
+		if ( bspShaders != 0 ) {
+			Sys_Printf( "freed bspShaders\n" );
 		}
-		if ( bspEntData != 0 ) {
-			free( bspEntData );
-			bspEntData = NULL;
-			//Sys_Printf( "freed bspEntData\n" );
-			//bspEntDataSize = 0;
-			//allocatedBSPEntData = 0;
+*/		free( bspShaders );
+		bspShaders = NULL;
+		numBSPShaders = 0;
+		allocatedBSPShaders = 0;
+/*		if ( bspEntData != 0 ) {
+			Sys_Printf( "freed bspEntData\n" );
 		}
+*/		free( bspEntData );
+		bspEntData = NULL;
+		bspEntDataSize = 0;
+		allocatedBSPEntData = 0;
 /*		if ( bspNodes != 0 ) {
 			free( bspNodes );
 			bspNodes = NULL;
