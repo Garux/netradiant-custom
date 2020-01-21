@@ -346,23 +346,17 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 	// filename is a full path
 	if ( index == -1 ) {
 		strcpy( g_strLoadedFileLocation, filename );
-		long len;
-		FILE *f;
 
-		f = fopen( filename, "rb" );
+		FILE *f = fopen( filename, "rb" );
 		if ( f == NULL ) {
 			return -1;
 		}
 
 		fseek( f, 0, SEEK_END );
-		len = ftell( f );
+		const long len = ftell( f );
 		rewind( f );
 
 		*bufferptr = safe_malloc( len + 1 );
-		if ( *bufferptr == NULL ) {
-			fclose( f );
-			return -1;
-		}
 
 		if ( fread( *bufferptr, 1, len, f ) != (size_t) len ) {
 			fclose( f );
@@ -389,23 +383,16 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 			if ( count == index ) {
 				strcpy( g_strLoadedFileLocation, tmp );
 
-				long len;
-				FILE *f;
-
-				f = fopen( tmp, "rb" );
+				FILE *f = fopen( tmp, "rb" );
 				if ( f == NULL ) {
 					return -1;
 				}
 
 				fseek( f, 0, SEEK_END );
-				len = ftell( f );
+				const long len = ftell( f );
 				rewind( f );
 
 				*bufferptr = safe_malloc( len + 1 );
-				if ( *bufferptr == NULL ) {
-					fclose( f );
-					return -1;
-				}
 
 				if ( fread( *bufferptr, 1, len, f ) != (size_t) len ) {
 					fclose( f );
