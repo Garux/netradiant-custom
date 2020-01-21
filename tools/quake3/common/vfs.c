@@ -419,9 +419,7 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 		}
 
 		if ( count == index ) {
-			strcpy( g_strLoadedFileLocation, file->unzFilePath );
-			strcat( g_strLoadedFileLocation, " :: " );
-			strcat( g_strLoadedFileLocation, filename );
+			snprintf( g_strLoadedFileLocation, sizeof( g_strLoadedFileLocation ), "%s :: %s", file->unzFilePath, filename );
 
 			memcpy( file->zipfile, &file->zipinfo, sizeof( unz_s ) );
 
