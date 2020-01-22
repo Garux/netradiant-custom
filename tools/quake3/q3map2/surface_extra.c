@@ -72,23 +72,11 @@ surfaceExtra_t seDefault = { NULL, NULL, -1, 0, WORLDSPAWN_CAST_SHADOWS, WORLDSP
  */
 
 static surfaceExtra_t *AllocSurfaceExtra( void ){
-	surfaceExtra_t  *se;
-
-
 	/* enough space? */
-	if ( numSurfaceExtras >= maxSurfaceExtras ) {
-		/* reallocate more room */
-		maxSurfaceExtras += GROW_SURFACE_EXTRAS;
-		se = safe_malloc( maxSurfaceExtras * sizeof( surfaceExtra_t ) );
-		if ( surfaceExtras != NULL ) {
-			memcpy( se, surfaceExtras, numSurfaceExtras * sizeof( surfaceExtra_t ) );
-			free( surfaceExtras );
-		}
-		surfaceExtras = se;
-	}
+	AUTOEXPAND_BY_REALLOC_ADD( surfaceExtras, numSurfaceExtras, maxSurfaceExtras, GROW_SURFACE_EXTRAS );
 
 	/* add another */
-	se = &surfaceExtras[ numSurfaceExtras ];
+	surfaceExtra_t *se = &surfaceExtras[ numSurfaceExtras ];
 	numSurfaceExtras++;
 	memcpy( se, &seDefault, sizeof( surfaceExtra_t ) );
 

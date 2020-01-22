@@ -2576,6 +2576,19 @@ Q_EXTERN bspAdvertisement_t bspAds[ MAX_MAP_ADVERTISEMENTS ];
 
 #define AUTOEXPAND_BY_REALLOC_BSP( suffix, def ) AUTOEXPAND_BY_REALLOC( bsp ## suffix, numBSP ## suffix, allocatedBSP ## suffix, def )
 
+#define AUTOEXPAND_BY_REALLOC_ADD( ptr, used, allocated, add ) \
+	do \
+	{ \
+		if ( used >= allocated )	\
+		{ \
+			allocated += add; \
+			ptr = realloc( ptr, sizeof( *ptr ) * allocated ); \
+			if ( !ptr ) { \
+				Error( # ptr " out of memory" ); } \
+		} \
+	} \
+	while ( 0 )
+
 #define Image_LinearFloatFromsRGBFloat( c ) ( ( ( c ) <= 0.04045f ) ? ( c ) * ( 1.0f / 12.92f ) : (float)pow( ( ( c ) + 0.055f ) * ( 1.0f / 1.055f ), 2.4f ) )
 #define Image_sRGBFloatFromLinearFloat( c ) ( ( ( c ) < 0.0031308f ) ? ( c ) * 12.92f : 1.055f * (float)pow( ( c ), 1.0f / 2.4f ) - 0.055f )
 

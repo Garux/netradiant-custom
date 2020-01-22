@@ -81,8 +81,7 @@ void ClearMetaTriangles( void ){
 
 static int FindMetaVertex( bspDrawVert_t *src ){
 	int i;
-	bspDrawVert_t   *v, *temp;
-
+	bspDrawVert_t   *v;
 
 	/* try to find an existing drawvert */
 	for ( i = firstSearchMetaVert, v = &metaVerts[ i ]; i < numMetaVerts; i++, v++ )
@@ -93,16 +92,7 @@ static int FindMetaVertex( bspDrawVert_t *src ){
 	}
 
 	/* enough space? */
-	if ( numMetaVerts >= maxMetaVerts ) {
-		/* reallocate more room */
-		maxMetaVerts += GROW_META_VERTS;
-		temp = safe_malloc( maxMetaVerts * sizeof( bspDrawVert_t ) );
-		if ( metaVerts != NULL ) {
-			memcpy( temp, metaVerts, numMetaVerts * sizeof( bspDrawVert_t ) );
-			free( metaVerts );
-		}
-		metaVerts = temp;
-	}
+	AUTOEXPAND_BY_REALLOC_ADD( metaVerts, numMetaVerts, maxMetaVerts, GROW_META_VERTS );
 
 	/* add the triangle */
 	memcpy( &metaVerts[ numMetaVerts ], src, sizeof( bspDrawVert_t ) );
@@ -120,20 +110,8 @@ static int FindMetaVertex( bspDrawVert_t *src ){
  */
 
 static int AddMetaTriangle( void ){
-	metaTriangle_t  *temp;
-
-
 	/* enough space? */
-	if ( numMetaTriangles >= maxMetaTriangles ) {
-		/* reallocate more room */
-		maxMetaTriangles += GROW_META_TRIANGLES;
-		temp = safe_malloc( maxMetaTriangles * sizeof( metaTriangle_t ) );
-		if ( metaTriangles != NULL ) {
-			memcpy( temp, metaTriangles, numMetaTriangles * sizeof( metaTriangle_t ) );
-			free( metaTriangles );
-		}
-		metaTriangles = temp;
-	}
+	AUTOEXPAND_BY_REALLOC_ADD( metaTriangles, numMetaTriangles, maxMetaTriangles, GROW_META_TRIANGLES );
 
 	/* increment and return */
 	numMetaTriangles++;

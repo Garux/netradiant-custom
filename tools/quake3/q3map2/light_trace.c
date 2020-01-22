@@ -135,8 +135,6 @@ traceNode_t                     *traceNodes = NULL;
 
 static int AddTraceInfo( traceInfo_t *ti ){
 	int num;
-	void    *temp;
-
 
 	/* find an existing info */
 	for ( num = firstTraceInfo; num < numTraceInfos; num++ )
@@ -150,16 +148,7 @@ static int AddTraceInfo( traceInfo_t *ti ){
 	}
 
 	/* enough space? */
-	if ( numTraceInfos >= maxTraceInfos ) {
-		/* allocate more room */
-		maxTraceInfos += GROW_TRACE_INFOS;
-		temp = safe_malloc( maxTraceInfos * sizeof( *traceInfos ) );
-		if ( traceInfos != NULL ) {
-			memcpy( temp, traceInfos, numTraceInfos * sizeof( *traceInfos ) );
-			free( traceInfos );
-		}
-		traceInfos = (traceInfo_t*) temp;
-	}
+	AUTOEXPAND_BY_REALLOC_ADD( traceInfos, numTraceInfos, maxTraceInfos, GROW_TRACE_INFOS );
 
 	/* add the info */
 	memcpy( &traceInfos[ num ], ti, sizeof( *traceInfos ) );
@@ -179,20 +168,8 @@ static int AddTraceInfo( traceInfo_t *ti ){
  */
 
 static int AllocTraceNode( void ){
-	traceNode_t *temp;
-
-
 	/* enough space? */
-	if ( numTraceNodes >= maxTraceNodes ) {
-		/* reallocate more room */
-		maxTraceNodes += GROW_TRACE_NODES;
-		temp = safe_malloc( maxTraceNodes * sizeof( traceNode_t ) );
-		if ( traceNodes != NULL ) {
-			memcpy( temp, traceNodes, numTraceNodes * sizeof( traceNode_t ) );
-			free( traceNodes );
-		}
-		traceNodes = temp;
-	}
+	AUTOEXPAND_BY_REALLOC_ADD( traceNodes, numTraceNodes, maxTraceNodes, GROW_TRACE_NODES );
 
 	/* add the node */
 	memset( &traceNodes[ numTraceNodes ], 0, sizeof( traceNode_t ) );
@@ -216,8 +193,6 @@ static int AllocTraceNode( void ){
 
 static int AddTraceWinding( traceWinding_t *tw ){
 	int num;
-	void    *temp;
-
 
 	/* check for a dead winding */
 	if ( deadWinding >= 0 && deadWinding < numTraceWindings ) {
@@ -229,16 +204,7 @@ static int AddTraceWinding( traceWinding_t *tw ){
 		num = numTraceWindings;
 
 		/* enough space? */
-		if ( numTraceWindings >= maxTraceWindings ) {
-			/* allocate more room */
-			maxTraceWindings += GROW_TRACE_WINDINGS;
-			temp = safe_malloc( maxTraceWindings * sizeof( *traceWindings ) );
-			if ( traceWindings != NULL ) {
-				memcpy( temp, traceWindings, numTraceWindings * sizeof( *traceWindings ) );
-				free( traceWindings );
-			}
-			traceWindings = (traceWinding_t*) temp;
-		}
+		AUTOEXPAND_BY_REALLOC_ADD( traceWindings, numTraceWindings, maxTraceWindings, GROW_TRACE_WINDINGS );
 	}
 
 	/* add the winding */
@@ -261,8 +227,6 @@ static int AddTraceWinding( traceWinding_t *tw ){
 
 static int AddTraceTriangle( traceTriangle_t *tt ){
 	int num;
-	void    *temp;
-
 
 	/* check for a dead triangle */
 	if ( deadTriangle >= 0 && deadTriangle < numTraceTriangles ) {
@@ -274,16 +238,7 @@ static int AddTraceTriangle( traceTriangle_t *tt ){
 		num = numTraceTriangles;
 
 		/* enough space? */
-		if ( numTraceTriangles >= maxTraceTriangles ) {
-			/* allocate more room */
-			maxTraceTriangles += GROW_TRACE_TRIANGLES;
-			temp = safe_malloc( maxTraceTriangles * sizeof( *traceTriangles ) );
-			if ( traceTriangles != NULL ) {
-				memcpy( temp, traceTriangles, numTraceTriangles * sizeof( *traceTriangles ) );
-				free( traceTriangles );
-			}
-			traceTriangles = (traceTriangle_t*) temp;
-		}
+		AUTOEXPAND_BY_REALLOC_ADD( traceTriangles, numTraceTriangles, maxTraceTriangles, GROW_TRACE_TRIANGLES );
 	}
 
 	/* find vectors for two edges sharing the first vert */
@@ -309,9 +264,6 @@ static int AddTraceTriangle( traceTriangle_t *tt ){
  */
 
 static int AddItemToTraceNode( traceNode_t *node, int num ){
-	void            *temp;
-
-
 	/* dummy check */
 	if ( num < 0 ) {
 		return -1;
@@ -329,12 +281,10 @@ static int AddItemToTraceNode( traceNode_t *node, int num ){
 		if ( node->maxItems <= 0 ) {
 			node->maxItems = GROW_NODE_ITEMS;
 		}
-		temp = safe_malloc( node->maxItems * sizeof( *node->items ) );
-		if ( node->items != NULL ) {
-			memcpy( temp, node->items, node->numItems * sizeof( *node->items ) );
-			free( node->items );
+		node->items = realloc( node->items, node->maxItems * sizeof( *node->items ) );
+		if ( !node->items ) {
+			Error( "node->items out of memory" );
 		}
-		node->items = (int*) temp;
 	}
 
 	/* add the poly */
