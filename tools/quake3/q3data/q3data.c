@@ -126,9 +126,7 @@ void FindShaderFiles( char *filename ){
 	s_shaderFiles.num = 0;
 
 	strcpy( stripped, filename );
-	if ( strrchr( stripped, '.' ) ) {
-		*strrchr( stripped, '.' ) = 0;
-	}
+	StripExtension( stripped );
 	strcat( stripped, ".shader" );
 
 	if ( FileExists( stripped ) ) {
@@ -219,9 +217,7 @@ void FindShaderFiles( char *filename ){
 	}
 	else
 	{
-		if ( strrchr( stripped, '.' ) ) {
-			*strrchr( stripped, '.' ) = 0;
-		}
+		StripExtension( stripped );
 
 		// look for diffuse maps
 		for ( i = 0; i < 3; i++ )

@@ -453,7 +453,7 @@ void FinishModel( int type ){
 
 	if ( type == TYPE_PLAYER ) {
 		sprintf( name, "%s%s", writedir, g_modelname );
-		*strrchr( name, '.' ) = 0;
+		StripExtension( name );
 		strcat( name, "_default.skin" );
 
 		defaultSkinHandle = fopen( name, "wt" );
@@ -1350,9 +1350,7 @@ void Cmd_3DSConvert(){
 
 	sprintf( file, "%s%s", gamedir, token );
 	strcpy( g_modelname, token );
-	if ( strrchr( g_modelname, '.' ) ) {
-		*strrchr( g_modelname, '.' ) = 0;
-	}
+	StripExtension( g_modelname );
 	strcat( g_modelname, ".md3" );
 
 	if ( FileTime( file ) == -1 ) {
@@ -1619,9 +1617,7 @@ static void WriteMD3( const char *_filename, ObjectAnimationFrame_t oanims[], in
 	char filename[1024];
 
 	strcpy( filename, _filename );
-	if ( strchr( filename, '.' ) ) {
-		*strchr( filename, '.' ) = 0;
-	}
+	StripExtension( filename );
 	strcat( filename, ".md3" );
 }
 
@@ -1864,10 +1860,8 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		}
 
 		strcpy( outfilename, filename );
-		if ( strrchr( outfilename, '.' ) ) {
-			*( strrchr( outfilename, '.' ) + 1 ) = 0;
-		}
-		strcat( outfilename, "md3" );
+		StripExtension( outfilename );
+		strcat( outfilename, ".md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, type );
 
 		// free memory
@@ -2021,10 +2015,8 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 
 		strcpy( outfilename, filename );
-		if ( strrchr( outfilename, '.' ) ) {
-			*( strrchr( outfilename, '.' ) + 1 ) = 0;
-		}
-		strcat( outfilename, "md3" );
+		StripExtension( outfilename );
+		strcat( outfilename, ".md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, type );
 
 		// free memory
@@ -2045,9 +2037,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 
 		strcpy( outfilename, filename );
-		if ( strrchr( outfilename, '.' ) ) {
-			*strrchr( outfilename, '.' ) = 0;
-		}
+		StripExtension( outfilename );
 		strcat( outfilename, "_flash.md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, TYPE_ITEM );
 
@@ -2070,9 +2060,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 
 		strcpy( outfilename, filename );
-		if ( strrchr( outfilename, '.' ) ) {
-			*strrchr( outfilename, '.' ) = 0;
-		}
+		StripExtension( outfilename );
 		strcat( outfilename, "_hand.md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, TYPE_HAND );
 

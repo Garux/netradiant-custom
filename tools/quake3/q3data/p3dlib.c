@@ -203,8 +203,6 @@ int P3DProcess(){
 
 			if ( P3DSkipToToken( "Text" ) ) {
 				if ( P3DSkipToTokenInBlock( "TMap" ) ) {
-					char *p;
-
 					if ( !P3DSkipToToken( "Path" ) ) {
 						return 0;
 					}
@@ -228,19 +226,7 @@ int P3DProcess(){
 					}
 					p3d.shaders[p3d.numPairs][k] = 0;
 
-					//
-					// strip off any explicit extensions
-					//
-					if ( ( p = strrchr( p3d.shaders[p3d.numPairs], '/' ) ) != 0 ) {
-						while ( *p )
-						{
-							if ( *p == '.' ) {
-								*p = 0;
-								break;
-							}
-							p++;
-						}
-					}
+					StripExtension( p3d.shaders[p3d.numPairs] );
 
 					//
 					// skip to the end of the Object and grab its name
