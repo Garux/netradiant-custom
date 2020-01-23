@@ -126,6 +126,12 @@ void gamedetect(){
 		{
 			// TODO add more games to this
 
+			if ( gamedetect_check_game( "q3.game", "baseq3/pak0.pk3", NULL, buf, p - buf ) ) {
+				return;
+			}
+			if ( gamedetect_check_game( "q1.game", "id1/pak0.pak", NULL, buf, p - buf ) ) {
+				return;
+			}
 			// try to detect Nexuiz installs
 #if defined( WIN32 )
 			if ( gamedetect_check_game( "nexuiz.game", "data/common-spog.pk3", "nexuiz.exe", buf, p - buf ) )
