@@ -739,6 +739,11 @@ void path_add_slash( char *path ){
 		strcat( end, "/" );
 }
 
+/// \brief Appends or replaces .EXT part of \p path with \p extension.
+void path_set_extension( char *path, const char *extension ){
+	strcpy( path_get_filename_base_end( path ), extension );
+}
+
 //
 // if path doesnt have a .EXT, append extension
 // (extension should include the .)

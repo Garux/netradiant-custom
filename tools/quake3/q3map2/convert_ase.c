@@ -355,8 +355,7 @@ int ConvertBSPToASE( char *bspName ){
 	strcpy( dirname, bspName );
 	StripExtension( dirname );
 	strcpy( name, bspName );
-	StripExtension( name );
-	strcat( name, ".ase" );
+	path_set_extension( name, ".ase" );
 	Sys_Printf( "writing %s\n", name );
 
 	ExtractFileBase( bspName, base );

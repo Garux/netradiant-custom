@@ -480,8 +480,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 
 	/* load the BSP first */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
+	path_set_extension( source, ".bsp" );
 	Sys_Printf( "Loading %s\n", source );
 	//BeginMapShaderFile( source ); //do not delete q3map2_*.shader on minimap generation
 	LoadShaderInfo();

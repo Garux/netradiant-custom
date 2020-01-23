@@ -319,12 +319,10 @@ int ConvertBSPToOBJ( char *bspName ){
 	strcpy( dirname, bspName );
 	StripExtension( dirname );
 	strcpy( name, bspName );
-	StripExtension( name );
-	strcat( name, ".obj" );
+	path_set_extension( name, ".obj" );
 	Sys_Printf( "writing %s\n", name );
 	strcpy( mtlname, bspName );
-	StripExtension( mtlname );
-	strcat( mtlname, ".mtl" );
+	path_set_extension( mtlname, ".mtl" );
 	Sys_Printf( "writing %s\n", mtlname );
 
 	ExtractFileBase( bspName, base );

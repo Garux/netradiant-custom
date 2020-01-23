@@ -126,8 +126,7 @@ void FindShaderFiles( char *filename ){
 	s_shaderFiles.num = 0;
 
 	strcpy( stripped, filename );
-	StripExtension( stripped );
-	strcat( stripped, ".shader" );
+	path_set_extension( stripped, ".shader" );
 
 	if ( FileExists( stripped ) ) {
 		char *p;

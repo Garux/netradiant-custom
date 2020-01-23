@@ -2992,13 +2992,11 @@ int LightMain( int argc, char **argv ){
 
 	/* clean up map name */
 	strcpy( source, ExpandArg( argv[ i ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
+	path_set_extension( source, ".bsp" );
 
 	strcpy( name, ExpandArg( argv[ i ] ) );
-	if ( strcmp( name + strlen( name ) - 4, ".reg" ) ) { /* not .reg */
-		StripExtension( name );
-		DefaultExtension( name, ".map" );
+	if ( Q_stricmp( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
+		path_set_extension( name, ".map" );
 	}
 
 	/* ydnar: set default sample size */

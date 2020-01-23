@@ -1854,7 +1854,7 @@ int                         ExportEntitiesMain( int argc, char **argv );
 
 /* image.c */
 void                        ImageFree( image_t *image );
-image_t                     *ImageFind( const char *filename );
+image_t                     *ImageFind( const char *name );
 image_t                     *ImageLoad( const char *filename );
 
 

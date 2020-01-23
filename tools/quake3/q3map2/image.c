@@ -283,27 +283,20 @@ void ImageFree( image_t *image ){
 /*
    ImageFind()
    finds an existing rgba image and returns a pointer to the image_t struct or NULL if not found
+   name is name without extension, as in images[ i ].name
  */
 
-image_t *ImageFind( const char *filename ){
-	int i;
-	char name[ 1024 ];
-
-
+image_t *ImageFind( const char *name ){
 	/* init */
 	ImageInit();
 
 	/* dummy check */
-	if ( filename == NULL || filename[ 0 ] == '\0' ) {
+	if ( name == NULL || name[ 0 ] == '\0' ) {
 		return NULL;
 	}
 
-	/* strip file extension off name */
-	strcpy( name, filename );
-	StripExtension( name );
-
 	/* search list */
-	for ( i = 0; i < MAX_IMAGES; i++ )
+	for ( int i = 0; i < MAX_IMAGES; ++i )
 	{
 		if ( images[ i ].name != NULL && !strcmp( name, images[ i ].name ) ) {
 			return &images[ i ];
@@ -322,7 +315,6 @@ image_t *ImageFind( const char *filename ){
  */
 
 image_t *ImageLoad( const char *filename ){
-	int i;
 	image_t     *image;
 	char name[ 1024 ];
 	int size;
@@ -349,12 +341,12 @@ image_t *ImageLoad( const char *filename ){
 		return image;
 	}
 
-	/* none found, so find first non-null image */
-	image = NULL;
-	for ( i = 0; i < MAX_IMAGES; i++ )
+	/* none found, so find first empty image slot */
+	for ( int i = 0; i < MAX_IMAGES; ++i )
 	{
 		if ( images[ i ].name == NULL ) {
 			image = &images[ i ];
+			image->name = copystring( name ); /* set it up */
 			break;
 		}
 	}
@@ -364,31 +356,25 @@ image_t *ImageLoad( const char *filename ){
 		Error( "MAX_IMAGES (%d) exceeded, there are too many image files referenced by the map.", MAX_IMAGES );
 	}
 
-	/* set it up */
-	image->name = copystring( name );
-
 	/* attempt to load tga */
-	StripExtension( name );
-	strcat( name, ".tga" );
-	size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
+	strcat( name, ".tga" ); // StripExtension( name ); already
+	size = vfsLoadFile( name, (void**) &buffer, 0 );
 	if ( size > 0 ) {
 		LoadTGABuffer( buffer, buffer + size, &image->pixels, &image->width, &image->height );
 	}
 	else
 	{
 		/* attempt to load png */
-		StripExtension( name );
-		strcat( name, ".png" );
-		size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
+		path_set_extension( name, ".png" );
+		size = vfsLoadFile( name, (void**) &buffer, 0 );
 		if ( size > 0 ) {
 			LoadPNGBuffer( buffer, size, &image->pixels, &image->width, &image->height );
 		}
 		else
 		{
 			/* attempt to load jpg */
-			StripExtension( name );
-			strcat( name, ".jpg" );
-			size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
+			path_set_extension( name, ".jpg" );
+			size = vfsLoadFile( name, (void**) &buffer, 0 );
 			if ( size > 0 ) {
 				if ( LoadJPGBuff( buffer, size, &image->pixels, &image->width, &image->height ) == -1 && image->pixels != NULL ) {
 					// On error, LoadJPGBuff might store a pointer to the error message in image->pixels
@@ -399,9 +385,8 @@ image_t *ImageLoad( const char *filename ){
 			else
 			{
 				/* attempt to load dds */
-				StripExtension( name );
-				strcat( name, ".dds" );
-				size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
+				path_set_extension( name, ".dds" );
+				size = vfsLoadFile( name, (void**) &buffer, 0 );
 				if ( size > 0 ) {
 					LoadDDSBuffer( buffer, size, &image->pixels, &image->width, &image->height );
 
@@ -412,8 +397,7 @@ image_t *ImageLoad( const char *filename ){
 						DDSGetInfo( (ddsBuffer_t*) buffer, NULL, NULL, &pf );
 						Sys_Printf( "pf = %d\n", pf );
 						if ( image->width > 0 ) {
-							StripExtension( name );
-							strcat( name, "_converted.tga" );
+							path_set_extension( name, "_converted.tga" );
 							WriteTGA( "C:\\games\\quake3\\baseq3\\textures\\rad\\dds_converted.tga", image->pixels, image->width, image->height );
 						}
 					}
@@ -443,8 +427,7 @@ image_t *ImageLoad( const char *filename ){
 	numImages++;
 
 	if ( alphaHack ) {
-		StripExtension( name );
-		strcat( name, "_alpha.jpg" );
+		path_set_extension( name, "_alpha.jpg" );
 		size = vfsLoadFile( (const char*) name, (void**) &buffer, 0 );
 		if ( size > 0 ) {
 			unsigned char *pixels;
@@ -456,8 +439,7 @@ image_t *ImageLoad( const char *filename ){
 				}
 			} else {
 				if ( width == image->width && height == image->height ) {
-					int i;
-					for ( i = 0; i < width * height; ++i )
+					for ( int i = 0; i < width * height; ++i )
 						image->pixels[4 * i + 3] = pixels[4 * i + 2];  // copy alpha from blue channel
 				}
 				free( pixels );

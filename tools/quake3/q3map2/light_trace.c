@@ -1303,8 +1303,7 @@ void SetupTraceNodes( void ){
 
 		/* open the file */
 		strcpy( filename, source );
-		StripExtension( filename );
-		strcat( filename, ".lin" );
+		path_set_extension( filename, ".lin" );
 		Sys_Printf( "Opening light trace file %s...\n", filename );
 		file = fopen( filename, "w" );
 		if ( file == NULL ) {

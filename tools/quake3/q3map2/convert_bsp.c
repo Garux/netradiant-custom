@@ -60,8 +60,7 @@ int FixAAS( int argc, char **argv ){
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
+	path_set_extension( source, ".bsp" );
 
 	/* note it */
 	Sys_Printf( "--- FixAAS ---\n" );
@@ -80,8 +79,7 @@ int FixAAS( int argc, char **argv ){
 	{
 		/* mangle name */
 		strcpy( aas, source );
-		StripExtension( aas );
-		strcat( aas, *ext );
+		path_set_extension( aas, *ext );
 		Sys_Printf( "Trying %s\n", aas );
 		ext++;
 
@@ -293,10 +291,7 @@ int BSPInfo( int count, char **fileNames ){
 
 		/* mangle filename and get size */
 		strcpy( source, fileNames[ i ] );
-		if ( !Q_stricmp( path_get_extension( source ), "map" ) ) {
-			StripExtension( source );
-		}
-		DefaultExtension( source, ".bsp" );
+		path_set_extension( source, ".bsp" );
 		f = fopen( source, "rb" );
 		if ( f ) {
 			size = Q_filelength( f );
@@ -450,8 +445,7 @@ int ScaleBSPMain( int argc, char **argv ){
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
+	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */
 	Sys_Printf( "Loading %s\n", source );
@@ -637,8 +631,7 @@ int ScaleBSPMain( int argc, char **argv ){
 
 	/* write the bsp */
 	UnparseEntities();
-	StripExtension( source );
-	DefaultExtension( source, "_s.bsp" );
+	path_set_extension( source, "_s.bsp" );
 	Sys_Printf( "Writing %s\n", source );
 	WriteBSPFile( source );
 
@@ -692,8 +685,7 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
+	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */
 	Sys_Printf( "Loading %s\n", source );
@@ -806,8 +798,7 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	/* write the bsp */
 	UnparseEntities();
-	StripExtension( source );
-	DefaultExtension( source, "_sh.bsp" );
+	path_set_extension( source, "_sh.bsp" );
 	Sys_Printf( "Writing %s\n", source );
 	WriteBSPFile( source );
 
@@ -1017,16 +1008,14 @@ int ConvertBSPMain( int argc, char **argv ){
 		if ( !map_allowed ) {
 			Sys_Warning( "the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
 		}
-		StripExtension( source );
-		DefaultExtension( source, ".map" );
+		path_set_extension( source, ".map" );
 		Sys_Printf( "Loading %s\n", source );
 		LoadMapFile( source, qfalse, convertGame == NULL );
 		PseudoCompileBSP( convertGame != NULL );
 	}
 	else
 	{
-		StripExtension( source );
-		DefaultExtension( source, ".bsp" );
+		path_set_extension( source, ".bsp" );
 		Sys_Printf( "Loading %s\n", source );
 		LoadBSPFile( source );
 		ParseEntities();
@@ -1038,8 +1027,7 @@ int ConvertBSPMain( int argc, char **argv ){
 		game = convertGame;
 
 		/* write bsp */
-		StripExtension( source );
-		DefaultExtension( source, "_c.bsp" );
+		path_set_extension( source, "_c.bsp" );
 		Sys_Printf( "Writing %s\n", source );
 		WriteBSPFile( source );
 

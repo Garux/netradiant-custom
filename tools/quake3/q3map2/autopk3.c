@@ -79,9 +79,9 @@ static inline void tex2list( StrList* texlist, StrList* EXtex, StrList* rEXtex )
 	if ( token[0] == '\0')
 		return;
 	//StripExtension( token );
-	char* dot = token - 4 + strlen( token );
-	if( dot >= token && ( !Q_stricmp( dot, ".tga" ) || !Q_stricmp( dot, ".jpg" ) || !Q_stricmp( dot, ".png" ) ) ){ //? might want to also warn on png in non png run
-		*dot = '\0';
+	char* dot = path_get_filename_base_end( token );
+	if( !Q_stricmp( dot, ".tga" ) || !Q_stricmp( dot, ".jpg" ) || !Q_stricmp( dot, ".png" ) ){ //? might want to also warn on png in non png run
+		strclear( dot );
 	}
 	else{
 		Sys_FPrintf( SYS_WRN, "WARNING4: %s : weird or missing extension in shader image path\n", token );
@@ -107,7 +107,7 @@ static inline void res2list( StrList* list, const char* res ){
 	while ( path_separator( *res ) ){ // kill prepended slashes
 		++res;
 	}
-	if ( *res == '\0') // empty
+	if ( strempty( res ) )
 		return;
 	if( !StrList_find( list, res ) )
 		StrList_append( list, res );
@@ -269,8 +269,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	StripExtension( source );
-	DefaultExtension( source, ".bsp" );
+	path_set_extension( source, ".bsp" );
 
 	/* load the bsp */
 	Sys_Printf( "Loading %s\n", source );
@@ -903,7 +902,7 @@ int repackBSPMain( int argc, char **argv ){
 
 	/* do some path mangling */
 	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-	if ( strlen( source ) >= 4 && !Q_stricmp( source + strlen( source ) - 4, ".bsp" ) ){
+	if ( !Q_stricmp( path_get_filename_base_end( source ), ".bsp" ) ){
 		strcpy( bspList[bspListN], source );
 		bspListN++;
 	}
@@ -954,8 +953,7 @@ int repackBSPMain( int argc, char **argv ){
 		int pk3ShadersNold = pk3Shaders->n;
 
 		strcpy( source, bspList[j] );
-		StripExtension( source );
-		DefaultExtension( source, ".bsp" );
+		path_set_extension( source, ".bsp" );
 
 		/* load the bsp */
 		Sys_Printf( "\nLoading %s\n", source );

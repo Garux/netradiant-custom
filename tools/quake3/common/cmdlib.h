@@ -155,6 +155,7 @@ char* path_get_filename_start( const char* path );
 char* path_get_filename_base_end( const char* path );
 char* path_get_extension( const char* path );
 void path_add_slash( char *path );
+void path_set_extension( char *path, const char *extension );
 void    DefaultExtension( char *path, const char *extension );
 void    DefaultPath( char *path, const char *basepath );
 void    StripFilename( char *path );

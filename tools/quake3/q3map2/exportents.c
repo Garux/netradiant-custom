@@ -59,8 +59,7 @@ void ExportEntities( void ){
 
         /* do some path mangling */
         strcpy( filename, source );
-        StripExtension( filename );
-        strcat( filename, ".ent" );
+        path_set_extension( filename, ".ent" );
 
         /* sanity check */
         if ( bspEntData == NULL || bspEntDataSize == 0 ) {
@@ -97,8 +96,7 @@ int ExportEntitiesMain( int argc, char **argv ){
 
         /* do some path mangling */
         strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-        StripExtension( source );
-        DefaultExtension( source, ".bsp" );
+        path_set_extension( source, ".bsp" );
 
         /* load the bsp */
         Sys_Printf( "Loading %s\n", source );

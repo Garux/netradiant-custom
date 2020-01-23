@@ -400,12 +400,11 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		/* shader renaming for sof2 */
 		if ( renameModelShaders ) {
 			strcpy( shaderName, picoShaderName );
-			StripExtension( shaderName );
 			if ( spawnFlags & 1 ) {
-				strcat( shaderName, "_RMG_BSP" );
+				path_set_extension( shaderName, "_RMG_BSP" );
 			}
 			else{
-				strcat( shaderName, "_BSP" );
+				path_set_extension( shaderName, "_BSP" );
 			}
 			si = ShaderInfoForShader( shaderName );
 		}

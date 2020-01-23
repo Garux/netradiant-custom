@@ -1018,8 +1018,7 @@ int ConvertBSPToMap_Ext( char *bspName, qboolean brushPrimitives ){
 
 	/* create the bsp filename from the bsp name */
 	strcpy( name, bspName );
-	StripExtension( name );
-	strcat( name, "_converted.map" );
+	path_set_extension( name, "_converted.map" );
 	Sys_Printf( "writing %s\n", name );
 
 	/* open it */

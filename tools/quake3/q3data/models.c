@@ -453,8 +453,7 @@ void FinishModel( int type ){
 
 	if ( type == TYPE_PLAYER ) {
 		sprintf( name, "%s%s", writedir, g_modelname );
-		StripExtension( name );
-		strcat( name, "_default.skin" );
+		path_set_extension( name, "_default.skin" );
 
 		defaultSkinHandle = fopen( name, "wt" );
 		for ( i = 0; i < g_data.model.numSurfaces; i++ )
@@ -1285,8 +1284,7 @@ void Cmd_Modelname( void ){
 
 	GetToken( qfalse );
 	strcpy( g_modelname, token );
-	StripExtension( g_modelname );
-	strcat( g_modelname, ".md3" );
+	path_set_extension( g_modelname, ".md3" );
 	strcpy( g_data.model.name, g_modelname );
 }
 
@@ -1340,8 +1338,7 @@ void Cmd_3DSConvert(){
 
 	sprintf( file, "%s%s", gamedir, token );
 	strcpy( g_modelname, token );
-	StripExtension( g_modelname );
-	strcat( g_modelname, ".md3" );
+	path_set_extension( g_modelname, ".md3" );
 
 	if ( FileTime( file ) == -1 ) {
 		Error( "%s doesn't exist", file );
@@ -1371,8 +1368,7 @@ void Cmd_ASEConvert( qboolean grabAnims ){
 	sprintf( filename, "%s%s", gamedir, token );
 
 	strcpy( g_modelname, token );
-	StripExtension( g_modelname );
-	strcat( g_modelname, ".md3" );
+	path_set_extension( g_modelname, ".md3" );
 	strcpy( g_data.model.name, g_modelname );
 
 	if ( !strstr( filename, ".ase" ) && !strstr( filename, ".ASE" ) ) {
@@ -1842,8 +1838,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		}
 
 		strcpy( outfilename, filename );
-		StripExtension( outfilename );
-		strcat( outfilename, ".md3" );
+		path_set_extension( outfilename, ".md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, type );
 
 		// free memory
@@ -1991,8 +1986,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 
 		strcpy( outfilename, filename );
-		StripExtension( outfilename );
-		strcat( outfilename, ".md3" );
+		path_set_extension( outfilename, ".md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, type );
 
 		// free memory
@@ -2013,8 +2007,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 
 		strcpy( outfilename, filename );
-		StripExtension( outfilename );
-		strcat( outfilename, "_flash.md3" );
+		path_set_extension( outfilename, "_flash.md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, TYPE_ITEM );
 
 		// free memory
@@ -2036,8 +2029,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 
 		strcpy( outfilename, filename );
-		StripExtension( outfilename );
-		strcat( outfilename, "_hand.md3" );
+		path_set_extension( outfilename, "_hand.md3" );
 		BuildAnimationFromOAFs( outfilename, objectAnimationFrames, numFrames, TYPE_HAND );
 
 		// free memory

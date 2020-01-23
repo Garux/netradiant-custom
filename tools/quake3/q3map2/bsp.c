@@ -1091,11 +1091,11 @@ int BSPMain( int argc, char **argv ){
 
 	/* expand mapname */
 	strcpy( name, ExpandArg( argv[ i ] ) );
-	if ( strcmp( name + strlen( name ) - 4, ".reg" ) ) {
+	if ( Q_stricmp( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
 		/* if we are doing a full map, delete the last saved region map */
 		sprintf( path, "%s.reg", source );
 		remove( path );
-		DefaultExtension( name, ".map" );   /* might be .reg */
+		path_set_extension( name, ".map" );   /* might be .reg */
 	}
 
 	/* if onlyents, just grab the entites and resave */
