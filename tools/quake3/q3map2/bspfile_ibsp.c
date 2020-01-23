@@ -90,24 +90,17 @@ ibspBrushSide_t;
 
 
 static void CopyBrushSidesLump( ibspHeader_t *header ){
-	int i;
-	ibspBrushSide_t *in;
-	bspBrushSide_t  *out;
-
-
+	const ibspBrushSide_t *in = GetLump( (bspHeader_t*) header, LUMP_BRUSHSIDES );
 	/* get count */
 	numBSPBrushSides = GetLumpElements( (bspHeader_t*) header, LUMP_BRUSHSIDES, sizeof( *in ) );
-
 	/* copy */
-	in = GetLump( (bspHeader_t*) header, LUMP_BRUSHSIDES );
-	for ( i = 0; i < numBSPBrushSides; i++ )
+	AUTOEXPAND_BY_REALLOC_BSP( BrushSides, 1024 );
+	for ( int i = 0; i < numBSPBrushSides; ++i, ++in )
 	{
-		AUTOEXPAND_BY_REALLOC( bspBrushSides, i, allocatedBSPBrushSides, 1024 );
-		out = &bspBrushSides[i];
+		bspBrushSide_t *out = &bspBrushSides[i];
 		out->planeNum = in->planeNum;
 		out->shaderNum = in->shaderNum;
 		out->surfaceNum = -1;
-		in++;
 	}
 }
 
