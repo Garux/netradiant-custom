@@ -1661,7 +1661,7 @@ void LoadEntityIndexMap( entity_t *e ){
 		/* get each value */
 		for ( i = 0; i < 256 && !strEmpty( search ); i++ )
 		{
-			space = strstr( search, " " );
+			space = strchr( search, ' ' );
 			if ( space != NULL ) {
 				strClear( space );
 			}

@@ -110,7 +110,7 @@ const char  *FindFrameFile( const char *frame ){
 	char suffix[32];
 	const char  *s;
 
-	if ( strstr( frame, "." ) ) {
+	if ( strchr( frame, '.' ) ) {
 		return frame;       // allready in dot format
 
 	}

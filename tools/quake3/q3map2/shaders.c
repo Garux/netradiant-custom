@@ -524,7 +524,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, char *find, char *replace ){
 	}
 
 	/* do some bad find-replace */
-	s = strstr( srcShaderText, find );
+	s = strIstr( srcShaderText, find );
 	if ( s == NULL ) {
 		//%	strcpy( shaderText, srcShaderText );
 		return si;  /* testing just using the existing shader if this fails */
@@ -998,7 +998,7 @@ static void ParseShaderFile( const char *filename ){
 		strcpy( si->shader, token );
 
 		/* ignore ":q3map" suffix */
-		suffix = strstr( si->shader, ":q3map" );
+		suffix = strIstr( si->shader, ":q3map" );
 		if ( suffix != NULL ) {
 			strClear( suffix );
 		}
