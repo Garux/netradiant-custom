@@ -144,8 +144,8 @@ void vfsInitDirectory( const char *path ){
 	for ( j = 0; j < g_numForbiddenDirs; ++j )
 	{
 		char* dbuf = strdup( path );
-		if ( !strempty( dbuf ) && path_separator( dbuf[strlen( dbuf ) - 1] ) ) // del trailing slash
-			strclear( &dbuf[strlen( dbuf ) - 1] );
+		if ( !strEmpty( dbuf ) && path_separator( dbuf[strlen( dbuf ) - 1] ) ) // del trailing slash
+			strClear( &dbuf[strlen( dbuf ) - 1] );
 		if ( matchpattern( path_get_filename_start( dbuf ), g_strForbiddenDirs[j], TRUE ) ) {
 			free( dbuf );
 			return;

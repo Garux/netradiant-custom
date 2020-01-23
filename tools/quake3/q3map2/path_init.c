@@ -123,7 +123,7 @@ void LokiInitPaths( char *argv0 ){
 
 	/* do some path divining */
 	strcpyQ( temp, argv0, sizeof( temp ) );
-	if ( strempty( path_get_last_separator( temp ) ) && path ) {
+	if ( strEmpty( path_get_last_separator( temp ) ) && path ) {
 
 		/*
 		   This code has a special behavior when q3map2 is a symbolic link.
@@ -147,10 +147,10 @@ void LokiInitPaths( char *argv0 ){
 		last = path;
 
 		/* go through each : segment of path */
-		while ( !strempty( last ) && found == qfalse )
+		while ( !strEmpty( last ) && found == qfalse )
 		{
 			/* null out temp */
-			strclear( temp );
+			strClear( temp );
 
 			/* find next chunk */
 			last = strchr( path, ':' );
@@ -186,8 +186,8 @@ void LokiInitPaths( char *argv0 ){
 		   if "q3map2" is "/opt/radiant/tools/q3map2",
 		   installPath is "/opt/radiant"
 		*/
-		strclear( path_get_last_separator( installPath ) );
-		strclear( path_get_last_separator( installPath ) );
+		strClear( path_get_last_separator( installPath ) );
+		strClear( path_get_last_separator( installPath ) );
 	}
 	#endif
 }
@@ -510,12 +510,12 @@ void InitPaths( int *argc, char **argv ){
 			FixDOSName( temp );
 			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", game->magic, temp, i );
 			/* check for the game's magic word */
-			char* found = stristr( temp, game->magic );
+			char* found = strIstr( temp, game->magic );
 			if( found ){
 				/* now find the next slash and nuke everything after it */
 				found = strchr( found, '/' );
 				if( found )
-					strclear( found );
+					strClear( found );
 				/* add this as a base path */
 				AddBasePath( temp );
 			}

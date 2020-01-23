@@ -431,14 +431,14 @@ static void ASE_KeyMAP_DIFFUSE( const char *token ){
 		FixDOSName( bitmap );
 
 		/* remove filename from path */
-		strclear( path_get_last_separator( filename ) );
+		strClear( path_get_last_separator( filename ) );
 
 		/* replaces a relative path with a full path */
 		if ( !strncmp( bitmap, "../", 3 ) ) {
 			while ( !strncmp( bitmap, "../", 3 ) )
 			{
 				/* remove last item from path */
-				strclear( path_get_last_separator( filename ) );
+				strClear( path_get_last_separator( filename ) );
 				memmove( bitmap, &bitmap[3], sizeof( bitmap ) - 3 );
 			}
 			strcat( filename, "/" );

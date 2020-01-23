@@ -81,7 +81,7 @@ static inline void tex2list( StrList* texlist, StrList* EXtex, StrList* rEXtex )
 	//StripExtension( token );
 	char* dot = path_get_filename_base_end( token );
 	if( !Q_stricmp( dot, ".tga" ) || !Q_stricmp( dot, ".jpg" ) || !Q_stricmp( dot, ".png" ) ){ //? might want to also warn on png in non png run
-		strclear( dot );
+		strClear( dot );
 	}
 	else{
 		Sys_FPrintf( SYS_WRN, "WARNING4: %s : weird or missing extension in shader image path\n", token );
@@ -107,7 +107,7 @@ static inline void res2list( StrList* list, const char* res ){
 	while ( path_separator( *res ) ){ // kill prepended slashes
 		++res;
 	}
-	if ( strempty( res ) )
+	if ( strEmpty( res ) )
 		return;
 	if( !StrList_find( list, res ) )
 		StrList_append( list, res );

@@ -184,7 +184,7 @@ void SetQdirFromPath( const char *path ){
 			// so we need to add up how much to the next separator
 			sep = c + len;
 			count = 1;
-			while ( !strempty( sep ) && !path_separator( *sep ) )
+			while ( !strEmpty( sep ) && !path_separator( *sep ) )
 			{
 				sep++;
 				count++;
@@ -201,7 +201,7 @@ void SetQdirFromPath( const char *path ){
 					FixDOSName( gamedir );
 					Sys_Printf( "gamedir: %s\n", gamedir );
 
-					if ( strempty( writedir ) ) {
+					if ( strEmpty( writedir ) ) {
 						strcpy( writedir, gamedir );
 					}
 					else{
@@ -279,7 +279,7 @@ void Q_getwd( char *out ){
 #else
 	// Gef: Changed from getwd() to getcwd() to avoid potential buffer overflow
 	if ( !getcwd( out, 256 ) ) {
-		strclear( out );
+		strClear( out );
 	}
 #endif
 	path_add_slash( out );
@@ -305,7 +305,7 @@ void Q_mkdir( const char *path ){
 		if ( errno == ENOENT ) {
 			p = path_get_last_separator( path );
 		}
-		if ( !strempty( p ) ) {
+		if ( !strEmpty( p ) ) {
 			strcpyQ( parentbuf, path, p - path + 1 );
 			if ( ( p - path ) < (ptrdiff_t) sizeof( parentbuf ) ) {
 				Sys_Printf( "mkdir: %s: creating parent %s first\n", path, parentbuf );
@@ -419,7 +419,7 @@ skipwhite:
 
 //http://stackoverflow.com/questions/27303062/strstr-function-like-that-ignores-upper-or-lower-case
 //chux: Somewhat tricky to match the corner cases of strstr() with inputs like "x","", "","x", "",""
-char *stristr( const char* haystack, const char* needle ) {
+char *strIstr( const char* haystack, const char* needle ) {
 	do {
 		const char* h = haystack;
 		const char* n = needle;
@@ -750,7 +750,7 @@ void path_set_extension( char *path, const char *extension ){
 //
 void DefaultExtension( char *path, const char *extension ){
 	char* ext = path_get_filename_base_end( path );
-	if( strempty( ext ) )
+	if( strEmpty( ext ) )
 		strcpy( ext, extension );
 }
 
@@ -765,11 +765,11 @@ void DefaultPath( char *path, const char *basepath ){
 
 
 void    StripFilename( char *path ){
-	strclear( path_get_filename_start( path ) );
+	strClear( path_get_filename_start( path ) );
 }
 
 void    StripExtension( char *path ){
-	strclear( path_get_filename_base_end( path ) );
+	strClear( path_get_filename_base_end( path ) );
 }
 
 

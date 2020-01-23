@@ -80,10 +80,10 @@ void *safe_calloc_info( size_t size, const char* info );
 extern int myargc;
 extern char **myargv;
 
-static inline qboolean strempty( const char* string ){
+static inline qboolean strEmpty( const char* string ){
 	return *string == '\0';
 }
-static inline void strclear( char* string ){
+static inline void strClear( char* string ){
 	*string = '\0';
 }
 static inline char *strlower( char *string ){
@@ -95,7 +95,7 @@ static inline char *copystring( const char *src ){	// version of strdup() with s
 	const size_t size = strlen( src ) + 1;
 	return memcpy( safe_malloc( size ), src, size );
 }
-char* stristr( const char* haystack, const char* needle );
+char* strIstr( const char* haystack, const char* needle );
 #ifdef WIN32
 	#define Q_stricmp           stricmp
 	#define Q_strncasecmp       strnicmp
