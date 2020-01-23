@@ -73,9 +73,6 @@ void *safe_calloc_info( size_t size, const char* info );
 #define safe_calloc_info( size, info ) calloc( 1, size )
 #endif /* SAFE_MALLOC */
 
-// set these before calling CheckParm
-extern int myargc;
-extern char **myargv;
 
 static inline bool strEmpty( const char* string ){
 	return *string == '\0';
@@ -115,7 +112,6 @@ void    Q_mkdir( const char *path );
 extern char qdir[1024];
 extern char gamedir[1024];
 extern char writedir[1024];
-extern char    *moddirparam;
 void SetQdirFromPath( const char *path );
 char *ExpandArg( const char *path );    // from cmd line
 char *ExpandPath( const char *path );   // from scripts
@@ -129,7 +125,6 @@ void    Error( const char *error, ... )
 __attribute__( ( noreturn ) )
 #endif
 ;
-int     CheckParm( const char *check );
 
 FILE    *SafeOpenWrite( const char *filename );
 FILE    *SafeOpenRead( const char *filename );
@@ -178,21 +173,12 @@ float   BigFloat( float l );
 float   LittleFloat( float l );
 
 
-char *COM_Parse( char *data );
-
-extern char com_token[1024];
-extern bool com_eof;
-
-
 void CRC_Init( unsigned short *crcvalue );
 void CRC_ProcessByte( unsigned short *crcvalue, byte data );
 unsigned short CRC_Value( unsigned short crcvalue );
 
 void    CreatePath( const char *path );
 void    QCopyFile( const char *from, const char *to );
-
-extern bool archive;
-extern char archivedir[1024];
 
 // sleep for the given amount of milliseconds
 void Sys_Sleep( int n );

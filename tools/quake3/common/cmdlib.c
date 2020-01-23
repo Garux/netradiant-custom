@@ -80,16 +80,6 @@ void *safe_calloc_info( size_t size, const char* info ){
 }
 #endif
 
-// set these before calling CheckParm
-int myargc;
-char **myargv;
-
-char com_token[1024];
-bool com_eof;
-
-bool archive;
-char archivedir[1024];
-
 
 /*
    ===================
@@ -335,84 +325,6 @@ int FileTime( const char *path ){
 
 
 
-/*
-   ==============
-   COM_Parse
-
-   Parse a token out of a string
-   ==============
- */
-char *COM_Parse( char *data ){
-	int c;
-	int len;
-
-	len = 0;
-	com_token[0] = 0;
-
-	if ( !data ) {
-		return NULL;
-	}
-
-// skip whitespace
-skipwhite:
-	while ( ( c = *data ) <= ' ' )
-	{
-		if ( c == 0 ) {
-			com_eof = true;
-			return NULL;            // end of file;
-		}
-		data++;
-	}
-
-// skip // comments
-	if ( c == '/' && data[1] == '/' ) {
-		while ( *data && *data != '\n' )
-			data++;
-		goto skipwhite;
-	}
-
-
-// handle quoted strings specially
-	if ( c == '\"' ) {
-		data++;
-		do
-		{
-			c = *data++;
-			if ( c == '\"' ) {
-				com_token[len] = 0;
-				return data;
-			}
-			com_token[len] = c;
-			len++;
-		} while ( 1 );
-	}
-
-// parse single characters
-	if ( c == '{' || c == '}' || c == ')' || c == '(' || c == '\'' || c == ':' ) {
-		com_token[len] = c;
-		len++;
-		com_token[len] = 0;
-		return data + 1;
-	}
-
-// parse a regular word
-	do
-	{
-		com_token[len] = c;
-		data++;
-		len++;
-		c = *data;
-		if ( c == '{' || c == '}' || c == ')' || c == '(' || c == '\'' || c == ':' ) {
-			break;
-		}
-	} while ( c > 32 );
-
-	com_token[len] = 0;
-	return data;
-}
-
-
-
 //http://stackoverflow.com/questions/27303062/strstr-function-like-that-ignores-upper-or-lower-case
 //chux: Somewhat tricky to match the corner cases of strstr() with inputs like "x","", "","x", "",""
 char *strIstr( const char* haystack, const char* needle ) {
@@ -473,29 +385,6 @@ size_t strncatQ( char* dest, const char* src, const size_t dest_size, const size
 
    =============================================================================
  */
-
-
-/*
-   =================
-   CheckParm
-
-   Checks for the given parameter in the program's command line arguments
-   Returns the argument number (1 to argc-1) or 0 if not present
-   =================
- */
-int CheckParm( const char *check ){
-	int i;
-
-	for ( i = 1; i < myargc; i++ )
-	{
-		if ( !Q_stricmp( check, myargv[i] ) ) {
-			return i;
-		}
-	}
-
-	return 0;
-}
-
 
 
 /*

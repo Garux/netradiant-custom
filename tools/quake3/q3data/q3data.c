@@ -34,8 +34,6 @@ bool g_skipmodel;           // set true when a cd is not g_only
 
 // bogus externs for some TA hacks (common/ using them against q3map)
 char *moddir = NULL;
-// some old defined that was in cmdlib lost during merge
-char writedir[1024];
 
 /*
    =======================================================
@@ -548,7 +546,7 @@ void ParseScript( void ){
    ==============
  */
 int main( int argc, char **argv ){
-	static int i;           // VC4.2 compiler bug if auto...
+	int i;           // VC4.2 compiler bug if auto...
 	char path[1024];
 
 	// using GtkRadiant's versioning next to Id's versioning
@@ -559,13 +557,7 @@ int main( int argc, char **argv ){
 
 	for ( i = 1 ; i < argc ; i++ )
 	{
-		if ( !strcmp( argv[i], "-archive" ) ) {
-			archive = true;
-			strcpy( archivedir, argv[i + 1] );
-			printf( "Archiving source to: %s\n", archivedir );
-			i++;
-		}
-		else if ( !strcmp( argv[i], "-release" ) ) {
+		if ( !strcmp( argv[i], "-release" ) ) {
 			g_release = true;
 			strcpy( g_releasedir, argv[i + 1] );
 			printf( "Copy output to: %s\n", g_releasedir );
@@ -622,7 +614,7 @@ int main( int argc, char **argv ){
 	}
 
 	if ( i == argc ) {
-		Error( "usage: q3data [-archive <directory>] [-dump <file.md3>] [-release <directory>] [-only <model>] [-3dsconvert <file.3ds>] [-verbose] [file.qdt]" );
+		Error( "usage: q3data [-dump <file.md3>] [-release <directory>] [-only <model>] [-3dsconvert <file.3ds>] [-verbose] [file.qdt]" );
 	}
 
 	for ( ; i < argc ; i++ )
