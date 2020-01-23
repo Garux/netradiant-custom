@@ -174,10 +174,10 @@ static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum ){
 	}
 
 	/* blender hates this, so let's not do it
-	   for( c = filename; *c != '\0'; c++ )
-	    if( *c == '/' )
-	   *c = '\\';
-	 */
+	for( c = filename; *c != '\0'; c++ )
+		if( *c == '/' )
+			*c = '\\';
+	*/
 
 	/* print shader info */
 	fprintf( f, "newmtl %s\r\n", shader->shader );

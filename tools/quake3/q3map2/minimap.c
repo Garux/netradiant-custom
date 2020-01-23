@@ -436,19 +436,19 @@ void MiniMapMakeSampleOffsets(){
 
 void MergeRelativePath( char *out, const char *absolute, const char *relative ){
 	const char *endpos = absolute + strlen( absolute );
-	while ( endpos != absolute && ( endpos[-1] == '/' || endpos[-1] == '\\' ) )
+	while ( endpos != absolute && path_separator( endpos[-1] ) )
 		--endpos;
-	while ( relative[0] == '.' && relative[1] == '.' && ( relative[2] == '/' || relative[2] == '\\' ) )
+	while ( !strncmp( relative, "../", 3 ) || !strncmp( relative, "..\\", 3 ) )
 	{
 		relative += 3;
 		while ( endpos != absolute )
 		{
 			--endpos;
-			if ( *endpos == '/' || *endpos == '\\' ) {
+			if ( path_separator( *endpos ) ) {
 				break;
 			}
 		}
-		while ( endpos != absolute && ( endpos[-1] == '/' || endpos[-1] == '\\' ) )
+		while ( endpos != absolute && path_separator( endpos[-1] ) )
 			--endpos;
 	}
 	memcpy( out, absolute, endpos - absolute );

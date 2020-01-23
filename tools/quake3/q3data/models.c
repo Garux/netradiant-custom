@@ -653,9 +653,7 @@ static void BuildBaseFrame( const char *filename, ObjectAnimationFrame_t *pOAF )
             strcpy( shaderName, filename );
         }
 
-        if ( strrchr( shaderName, '/' ) )
-   *( strrchr( shaderName, '/' ) + 1 ) = 0;
-
+        StripFilename( shaderName );
 
         strcpy( shaderName, pOAF->surfaces[i]->materialname );
  */
@@ -724,22 +722,18 @@ static void BuildBaseFrame( const char *filename, ObjectAnimationFrame_t *pOAF )
 }
 
 static int LoadModelFile( const char *filename, polyset_t **psets, int *numpolysets ){
-	int time1;
 	char file1[1024];
-	const char          *frameFile;
 
 	printf( "---------------------\n" );
-	if ( filename[1] != ':' ) {
-		frameFile = filename;
-		sprintf( file1, "%s/%s", g_cddir, frameFile );
+	if ( !path_is_absolute( filename ) ) {
+		sprintf( file1, "%s/%s", g_cddir, filename );
 	}
 	else
 	{
 		strcpy( file1, filename );
 	}
 
-	time1 = FileTime( file1 );
-	if ( time1 == -1 ) {
+	if ( FileTime( file1 ) == -1 ) {
 		Error( "%s doesn't exist", file1 );
 	}
 
@@ -1176,8 +1170,7 @@ void SkinFrom3DS( const char *filename ){
             strcpy( name, filename );
         }
 
-        if ( strrchr( name, '/' ) )
-   *( strrchr( name, '/' ) + 1 ) = 0;
+        StripFilename( name );
  */
 		strcpy( name, psets[i].materialname );
 		strcpy( g_data.surfData[i].shaders[g_data.surfData[i].header.numShaders].name, name );
@@ -1902,9 +1895,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numSurfaces = GetSurfaceAnimations( surfaceAnimations, "u_", -1, -1, g_data.maxUpperFrames );
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 		strcpy( outfilename, filename );
-		if ( strrchr( outfilename, '/' ) ) {
-			*( strrchr( outfilename, '/' ) + 1 ) = 0;
-		}
+		StripFilename( outfilename );
 
 		if ( g_data.currentLod == 0 ) {
 			strcat( outfilename, "upper.md3" );
@@ -1936,9 +1927,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numSurfaces = GetSurfaceAnimations( surfaceAnimations, "l_", g_data.lowerSkipFrameStart, g_data.lowerSkipFrameEnd, -1 );
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 		strcpy( outfilename, filename );
-		if ( strrchr( outfilename, '/' ) ) {
-			*( strrchr( outfilename, '/' ) + 1 ) = 0;
-		}
+		StripFilename( outfilename );
 
 		if ( g_data.currentLod == 0 ) {
 			strcat( outfilename, "lower.md3" );
@@ -1969,9 +1958,7 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		numSurfaces = GetSurfaceAnimations( surfaceAnimations, "h_", -1, -1, g_data.maxHeadFrames );
 		numFrames = SurfaceOrderToFrameOrder( surfaceAnimations, objectAnimationFrames, numSurfaces );
 		strcpy( outfilename, filename );
-		if ( strrchr( outfilename, '/' ) ) {
-			*( strrchr( outfilename, '/' ) + 1 ) = 0;
-		}
+		StripFilename( outfilename );
 
 		if ( g_data.currentLod == 0 ) {
 			strcat( outfilename, "head.md3" );

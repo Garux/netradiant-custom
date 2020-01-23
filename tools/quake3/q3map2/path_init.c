@@ -101,20 +101,12 @@ char *LokiGetHomeDir( void ){
  */
 
 void LokiInitPaths( char *argv0 ){
-	char        *home;
-
 	if ( !homePath ) {
 		/* get home dir */
-		home = LokiGetHomeDir();
-		if ( home == NULL ) {
-			home = ".";
+		homePath = LokiGetHomeDir();
+		if ( homePath == NULL ) {
+			homePath = ".";
 		}
-
-		/* set home path */
-		homePath = home;
-	}
-	else{
-		home = homePath;
 	}
 
 	#ifndef Q_UNIX
@@ -131,10 +123,7 @@ void LokiInitPaths( char *argv0 ){
 
 	/* do some path divining */
 	strcpyQ( temp, argv0, sizeof( temp ) );
-	if ( strrchr( temp, '/' ) ) {
-		argv0 = strrchr( argv0, '/' ) + 1;
-	}
-	else if ( path ) {
+	if ( strempty( path_get_last_separator( temp ) ) && path ) {
 
 		/*
 		   This code has a special behavior when q3map2 is a symbolic link.
@@ -158,10 +147,10 @@ void LokiInitPaths( char *argv0 ){
 		last = path;
 
 		/* go through each : segment of path */
-		while ( last[ 0 ] != '\0' && found == qfalse )
+		while ( !strempty( last ) && found == qfalse )
 		{
 			/* null out temp */
-			temp[ 0 ] = '\0';
+			strclear( temp );
 
 			/* find next chunk */
 			last = strchr( path, ':' );
@@ -171,7 +160,7 @@ void LokiInitPaths( char *argv0 ){
 
 			/* found home dir candidate */
 			if ( *path == '~' ) {
-				strcpyQ( temp, home, sizeof( temp ) );
+				strcpyQ( temp, homePath, sizeof( temp ) );
 				path++;
 			}
 
@@ -197,8 +186,8 @@ void LokiInitPaths( char *argv0 ){
 		   if "q3map2" is "/opt/radiant/tools/q3map2",
 		   installPath is "/opt/radiant"
 		*/
-		*( strrchr( installPath, '/' ) ) = '\0';
-		*( strrchr( installPath, '/' ) ) = '\0';
+		strclear( path_get_last_separator( installPath ) );
+		strclear( path_get_last_separator( installPath ) );
 	}
 	#endif
 }
@@ -382,7 +371,7 @@ void AddPakPath( char *path ){
  */
 
 void InitPaths( int *argc, char **argv ){
-	int i, j, k, len, len2;
+	int i, j, k;
 	char temp[ MAX_OS_PATH ];
 
 
@@ -514,28 +503,21 @@ void InitPaths( int *argc, char **argv ){
 	/* if there is no base path set, figure it out */
 	if ( numBasePaths == 0 ) {
 		/* this is another crappy replacement for SetQdirFromPath() */
-		len2 = strlen( game->magic );
 		for ( i = 0; i < *argc && numBasePaths == 0; i++ )
 		{
 			/* extract the arg */
 			strcpy( temp, argv[ i ] );
 			FixDOSName( temp );
-			len = strlen( temp );
 			Sys_FPrintf( SYS_VRB, "Searching for \"%s\" in \"%s\" (%d)...\n", game->magic, temp, i );
-
-			/* this is slow, but only done once */
-			for ( j = 0; j < ( len - len2 ); j++ )
-			{
-				/* check for the game's magic word */
-				if ( Q_strncasecmp( &temp[ j ], game->magic, len2 ) == 0 ) {
-					/* now find the next slash and nuke everything after it */
-					while ( temp[ ++j ] != '/' && temp[ j ] != '\0' ) ;
-					temp[ j ] = '\0';
-
-					/* add this as a base path */
-					AddBasePath( temp );
-					break;
-				}
+			/* check for the game's magic word */
+			char* found = stristr( temp, game->magic );
+			if( found ){
+				/* now find the next slash and nuke everything after it */
+				found = strchr( found, '/' );
+				if( found )
+					strclear( found );
+				/* add this as a base path */
+				AddBasePath( temp );
 			}
 		}
 

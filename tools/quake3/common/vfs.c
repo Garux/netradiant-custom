@@ -77,15 +77,6 @@ char g_strLoadedFileLocation[1024];
 // =============================================================================
 // Static functions
 
-static void vfsAddSlash( char *str ){
-	int n = strlen( str );
-	if ( n > 0 ) {
-		if ( str[n - 1] != '\\' && str[n - 1] != '/' ) {
-			strcat( str, "/" );
-		}
-	}
-}
-
 //!\todo Define globally or use heap-allocated string.
 #define NAME_MAX 255
 
@@ -152,20 +143,14 @@ void vfsInitDirectory( const char *path ){
 
 	for ( j = 0; j < g_numForbiddenDirs; ++j )
 	{
-		char* dbuf = g_strdup( path );
-		if ( *dbuf && dbuf[strlen( dbuf ) - 1] == '/' ) {
-			dbuf[strlen( dbuf ) - 1] = 0;
+		char* dbuf = strdup( path );
+		if ( !strempty( dbuf ) && path_separator( dbuf[strlen( dbuf ) - 1] ) ) // del trailing slash
+			strclear( &dbuf[strlen( dbuf ) - 1] );
+		if ( matchpattern( path_get_filename_start( dbuf ), g_strForbiddenDirs[j], TRUE ) ) {
+			free( dbuf );
+			return;
 		}
-		const char *p = strrchr( dbuf, '/' );
-		p = ( p ? ( p + 1 ) : dbuf );
-		if ( matchpattern( p, g_strForbiddenDirs[j], TRUE ) ) {
-			g_free( dbuf );
-			break;
-		}
-		g_free( dbuf );
-	}
-	if ( j < g_numForbiddenDirs ) {
-		return;
+		free( dbuf );
 	}
 
 	if ( g_numDirs == VFS_MAXDIRS ) {
@@ -177,7 +162,7 @@ void vfsInitDirectory( const char *path ){
 	strncpy( g_strDirs[g_numDirs], path, PATH_MAX );
 	g_strDirs[g_numDirs][PATH_MAX] = 0;
 	FixDOSName( g_strDirs[g_numDirs] );
-	vfsAddSlash( g_strDirs[g_numDirs] );
+	path_add_slash( g_strDirs[g_numDirs] );
 	g_numDirs++;
 
 	if ( g_bUsePak ) {
@@ -209,7 +194,7 @@ void vfsInitDirectory( const char *path ){
 					}
 					snprintf( g_strDirs[g_numDirs], PATH_MAX, "%s/%s", path, name );
 					FixDOSName( g_strDirs[g_numDirs] );
-					vfsAddSlash( g_strDirs[g_numDirs] );
+					path_add_slash( g_strDirs[g_numDirs] );
 					++g_numDirs;
 				}
 			}

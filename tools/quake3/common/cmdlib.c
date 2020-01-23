@@ -48,7 +48,6 @@
 #endif
 
 #define BASEDIRNAME "quake"     // assumed to have a 2 or 3 following
-#define PATHSEPERATOR   '/'
 
 #ifdef SAFE_MALLOC
 // FIXME switch to -std=c99 or above to use proper %zu format specifier for size_t
@@ -166,16 +165,11 @@ char gamedir[1024];
 char writedir[1024];
 
 void SetQdirFromPath( const char *path ){
-	char temp[1024];
 	const char  *c;
 	const char *sep;
 	int len, count;
 
-	if ( !( path[0] == '/' || path[0] == '\\' || path[1] == ':' ) ) { // path is partial
-		Q_getwd( temp );
-		strcat( temp, path );
-		path = temp;
-	}
+	path = ExpandArg( path );
 
 	// search for "quake2" in path
 
@@ -190,7 +184,7 @@ void SetQdirFromPath( const char *path ){
 			// so we need to add up how much to the next separator
 			sep = c + len;
 			count = 1;
-			while ( *sep && *sep != '/' && *sep != '\\' )
+			while ( !strempty( sep ) && !path_separator( *sep ) )
 			{
 				sep++;
 				count++;
@@ -202,17 +196,16 @@ void SetQdirFromPath( const char *path ){
 			c += len + count;
 			while ( *c )
 			{
-				if ( *c == '/' || *c == '\\' ) {
+				if ( path_separator( *c ) ) {
 					strncpy( gamedir, path, c + 1 - path );
 					FixDOSName( gamedir );
 					Sys_Printf( "gamedir: %s\n", gamedir );
 
-					if ( !writedir[0] ) {
+					if ( strempty( writedir ) ) {
 						strcpy( writedir, gamedir );
 					}
-					else if ( writedir[strlen( writedir ) - 1] != '/' ) {
-						writedir[strlen( writedir )] = '/';
-						writedir[strlen( writedir ) + 1] = 0;
+					else{
+						path_add_slash( writedir );
 					}
 
 					return;
@@ -229,29 +222,25 @@ void SetQdirFromPath( const char *path ){
 char *ExpandArg( const char *path ){
 	static char full[1024];
 
-	if ( path[0] != '/' && path[0] != '\\' && path[1] != ':' ) {
-		Q_getwd( full );
-		strcat( full, path );
+	if ( path_is_absolute( path ) ) {
+		strcpy( full, path );
 	}
 	else{
-		strcpy( full, path );
+		Q_getwd( full );
+		strcat( full, path );
 	}
 	return full;
 }
 
 char *ExpandPath( const char *path ){
 	static char full[1024];
-	if ( path[0] == '/' || path[0] == '\\' || path[1] == ':' ) {
+	if ( path_is_absolute( path ) ) {
 		strcpy( full, path );
-		return full;
 	}
-	sprintf( full, "%s%s", qdir, path );
+	else{
+		sprintf( full, "%s%s", qdir, path );
+	}
 	return full;
-}
-
-char *copystring( const char *src ){
-	const size_t size = strlen( src ) + 1;
-	return memcpy( safe_malloc( size ), src, size );
 }
 
 
@@ -287,14 +276,13 @@ double I_FloatTime( void ){
 void Q_getwd( char *out ){
 #ifdef WIN32
 	_getcwd( out, 256 );
-	strcat( out, "\\" );
 #else
 	// Gef: Changed from getwd() to getcwd() to avoid potential buffer overflow
 	if ( !getcwd( out, 256 ) ) {
-		*out = 0;
+		strclear( out );
 	}
-	strcat( out, "/" );
 #endif
+	path_add_slash( out );
 	FixDOSName( out );
 }
 
@@ -306,29 +294,20 @@ void Q_mkdir( const char *path ){
 	while ( retry-- )
 	{
 #ifdef WIN32
-		const char *q = NULL;
 		if ( _mkdir( path ) != -1 ) {
 			return;
-		}
-		if ( errno == ENOENT ) {
-			p = strrchr( path, '/' );
-			q = strrchr( path, '\\' );
-			if ( q && ( !p || q < p ) ) {
-				p = q;
-			}
 		}
 #else
 		if ( mkdir( path, 0777 ) != -1 ) {
 			return;
 		}
-		if ( errno == ENOENT ) {
-			p = strrchr( path, '/' );
-		}
 #endif
-		if ( p ) {
-			strncpy( parentbuf, path, sizeof( parentbuf ) );
-			if ( (int) ( p - path ) < (int) sizeof( parentbuf ) ) {
-				parentbuf[p - path] = 0;
+		if ( errno == ENOENT ) {
+			p = path_get_last_separator( path );
+		}
+		if ( !strempty( p ) ) {
+			strcpyQ( parentbuf, path, p - path + 1 );
+			if ( ( p - path ) < (ptrdiff_t) sizeof( parentbuf ) ) {
 				Sys_Printf( "mkdir: %s: creating parent %s first\n", path, parentbuf );
 				Q_mkdir( parentbuf );
 				continue;
@@ -337,7 +316,7 @@ void Q_mkdir( const char *path ){
 		break;
 	}
 	if ( errno != EEXIST ) {
-		Error( "mkdir %s: %s",path, strerror( errno ) );
+		Error( "mkdir %s: %s", path, strerror( errno ) );
 	}
 }
 
@@ -436,15 +415,23 @@ skipwhite:
 	return data;
 }
 
-char *strlower( char *start ){
-	char    *in;
-	in = start;
-	while ( *in )
-	{
-		*in = tolower( *in );
-		in++;
-	}
-	return start;
+
+
+//http://stackoverflow.com/questions/27303062/strstr-function-like-that-ignores-upper-or-lower-case
+//chux: Somewhat tricky to match the corner cases of strstr() with inputs like "x","", "","x", "",""
+char *stristr( const char* haystack, const char* needle ) {
+	do {
+		const char* h = haystack;
+		const char* n = needle;
+		while ( tolower( (unsigned char)*h ) == tolower( (unsigned char)*n ) && *n ) {
+			h++;
+			n++;
+		}
+		if ( *n == 0 ) {
+			return (char *)haystack;
+		}
+	} while ( *haystack++ );
+	return 0;
 }
 
 /*
@@ -698,15 +685,23 @@ qboolean path_is_absolute( const char* path ){
 #endif
 }
 
-static inline qboolean path_separator( const char c ){
-	return c == '/' || c == '\\';
+/// \brief Returns a pointer to the last slash or to terminating null character if not found.
+char* path_get_last_separator( const char* path ){
+	const char *end = path + strlen( path );
+	const char *src = end;
+
+	while ( src != path ){
+		if( path_separator( *--src ) )
+			return src;
+	}
+	return end;
 }
 
 /// \brief Returns a pointer to the first character of the filename component of \p path.
 char* path_get_filename_start( const char* path ){
 	const char *src = path + strlen( path );
 
-	while ( src != path && !path_separator( *( src - 1 ) ) ){
+	while ( src != path && !path_separator( src[-1] ) ){
 		--src;
 	}
 	return src;
@@ -717,10 +712,9 @@ char* path_get_filename_base_end( const char* path ){
 	const char *end = path + strlen( path );
 	const char *src = end;
 
-	while ( src != path && !path_separator( *src ) ){
+	while ( src != path && !path_separator( *--src ) ){
 		if( *src == '.' )
 			return src;
-		--src;
 	}
 	return end;
 }
@@ -731,12 +725,18 @@ char* path_get_extension( const char* path ){
 	const char *end = path + strlen( path );
 	const char *src = end;
 
-	while ( src != path && !path_separator( *src ) ){
+	while ( src != path && !path_separator( *--src ) ){
 		if( *src == '.' )
 			return src + 1;
-		--src;
 	}
 	return end;
+}
+
+/// \brief Appends trailing slash, unless \p path is empty or already has slash.
+void path_add_slash( char *path ){
+	char* end = path + strlen( path );
+	if ( end != path && !path_separator( end[-1] ) )
+		strcat( end, "/" );
 }
 
 //
@@ -1012,7 +1012,6 @@ unsigned short CRC_Value( unsigned short crcvalue ){
  */
 void    CreatePath( const char *path ){
 	const char  *ofs;
-	char c;
 	char dir[1024];
 
 #ifdef _WIN32
@@ -1030,8 +1029,7 @@ void    CreatePath( const char *path ){
 
 	for ( ofs = path + 1 ; *ofs ; ofs++ )
 	{
-		c = *ofs;
-		if ( c == '/' || c == '\\' ) { // create the directory
+		if ( path_separator( *ofs ) ) { // create the directory
 			memcpy( dir, path, ofs - path );
 			dir[ ofs - path ] = 0;
 			Q_mkdir( dir );

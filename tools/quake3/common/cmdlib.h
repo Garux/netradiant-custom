@@ -86,7 +86,16 @@ static inline qboolean strempty( const char* string ){
 static inline void strclear( char* string ){
 	*string = '\0';
 }
-char *strlower( char *in );
+static inline char *strlower( char *string ){
+	for( char *in = string; *in; ++in )
+		*in = tolower( *in );
+	return string;
+}
+static inline char *copystring( const char *src ){	// version of strdup() with safe_malloc()
+	const size_t size = strlen( src ) + 1;
+	return memcpy( safe_malloc( size ), src, size );
+}
+char* stristr( const char* haystack, const char* needle );
 #ifdef WIN32
 	#define Q_stricmp           stricmp
 	#define Q_strncasecmp       strnicmp
@@ -136,10 +145,16 @@ int     TryLoadFile( const char *filename, void **bufferptr );
 void    SaveFile( const char *filename, const void *buffer, int count );
 qboolean    FileExists( const char *filename );
 
+
+static inline qboolean path_separator( const char c ){
+	return c == '/' || c == '\\';
+}
 qboolean path_is_absolute( const char* path );
+char* path_get_last_separator( const char* path );
 char* path_get_filename_start( const char* path );
 char* path_get_filename_base_end( const char* path );
 char* path_get_extension( const char* path );
+void path_add_slash( char *path );
 void    DefaultExtension( char *path, const char *extension );
 void    DefaultPath( char *path, const char *basepath );
 void    StripFilename( char *path );
@@ -169,8 +184,6 @@ char *COM_Parse( char *data );
 
 extern char com_token[1024];
 extern qboolean com_eof;
-
-char *copystring( const char *src );	// version of strdup() with safe_malloc()
 
 
 void CRC_Init( unsigned short *crcvalue );

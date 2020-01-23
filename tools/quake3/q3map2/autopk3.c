@@ -104,7 +104,7 @@ static inline void tex2list( StrList* texlist, StrList* EXtex, StrList* rEXtex )
 	Check if newcoming res is unique
 */
 static inline void res2list( StrList* list, const char* res ){
-	while ( *res == '\\' || *res == '/' ){ // kill prepended slashes
+	while ( path_separator( *res ) ){ // kill prepended slashes
 		++res;
 	}
 	if ( *res == '\0') // empty

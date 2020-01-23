@@ -29,9 +29,6 @@
 
 #define MAX_POLYSETS 64
 
-#if defined ( __linux__ ) || defined ( __APPLE__ )
-#define strlwr strlower
-#endif
 typedef struct
 {
 	long len;

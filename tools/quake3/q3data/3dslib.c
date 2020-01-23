@@ -586,9 +586,7 @@ void _3DS_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets,
 		strcpy( pPSET[i].name, _3ds.editChunk.pNamedObjects[i].name );
 
 		strcpy( matnamebuf, filename );
-		if ( strrchr( matnamebuf, '/' ) ) {
-			*( strrchr( matnamebuf, '/' ) + 1 ) = 0;
-		}
+		StripFilename( matnamebuf );
 		strcat( matnamebuf, pTO->pMeshMaterialGroups[0].name );
 
 		if ( strstr( matnamebuf, gamedir ) ) {

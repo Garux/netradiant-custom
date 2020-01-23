@@ -413,7 +413,6 @@ static void ASE_SkipRestOfLine( void ){
 static void ASE_KeyMAP_DIFFUSE( const char *token ){
 	char bitmap[1024];
 	char filename[1024];
-	int i = 0;
 
 	strcpy( filename, gl_filename );
 
@@ -429,36 +428,18 @@ static void ASE_KeyMAP_DIFFUSE( const char *token ){
 		}
 
 		/* convert backslash to slash */
-		while ( bitmap[i] )
-		{
-			if ( bitmap[i] == '\\' ) {
-				bitmap[i] = '/';
-			}
-			i++;
-		}
+		FixDOSName( bitmap );
 
 		/* remove filename from path */
-		for ( i = strlen( filename ); i > 0; i-- )
-		{
-			if ( filename[i] == '/' ) {
-				filename[i] = '\0';
-				break;
-			}
-		}
+		strclear( path_get_last_separator( filename ) );
 
 		/* replaces a relative path with a full path */
-		if ( bitmap[0] == '.' && bitmap[1] == '.' && bitmap[2] == '/' ) {
-			while ( bitmap[0] == '.' && bitmap[1] == '.' && bitmap[2] == '/' )
+		if ( !strncmp( bitmap, "../", 3 ) ) {
+			while ( !strncmp( bitmap, "../", 3 ) )
 			{
 				/* remove last item from path */
-				for ( i = strlen( filename ); i > 0; i-- )
-				{
-					if ( filename[i] == '/' ) {
-						filename[i] = '\0';
-						break;
-					}
-				}
-				strcpy( bitmap, &bitmap[3] );
+				strclear( path_get_last_separator( filename ) );
+				memmove( bitmap, &bitmap[3], sizeof( bitmap ) - 3 );
 			}
 			strcat( filename, "/" );
 			strcat( filename, bitmap );
@@ -467,7 +448,7 @@ static void ASE_KeyMAP_DIFFUSE( const char *token ){
 
 		if ( strstr( bitmap, gamedir ) ) {
 			strcpy( ase.materials[ase.numMaterials].name, strstr( bitmap, gamedir ) + strlen( gamedir ) );
-			Sys_Printf( "material name: \'%s\'\n", strstr( bitmap, gamedir ) + strlen( gamedir ) );
+			Sys_Printf( "material name: \'%s\'\n", ase.materials[ase.numMaterials].name );
 		}
 		else
 		{

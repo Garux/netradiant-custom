@@ -45,7 +45,7 @@ void Cmd_Grab( void ){
 
 	GetToken( qfalse );
 
-	if ( token[0] == '/' || token[0] == '\\' ) {
+	if ( path_separator( token[0] ) ) {
 		sprintf( savename, "%s%s.pcx", writedir, token + 1 );
 	}
 	else{
@@ -53,7 +53,7 @@ void Cmd_Grab( void ){
 	}
 
 	if ( g_release ) {
-		if ( token[0] == '/' || token[0] == '\\' ) {
+		if ( path_separator( token[0] ) ) {
 			sprintf( dest, "%s.pcx", token + 1 );
 		}
 		else{
