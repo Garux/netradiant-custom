@@ -1534,7 +1534,7 @@ void SetEntityBounds( entity_t *e ){
 void LoadEntityIndexMap( entity_t *e ){
 	int i, size, numLayers, w, h;
 	const char      *value, *indexMapFilename, *shader;
-	char ext[ MAX_QPATH ], offset[ 4096 ], *search, *space;
+	char offset[ 4096 ], *search, *space;
 	byte            *pixels;
 	unsigned int    *pixels32;
 	indexMap_t      *im;
@@ -1589,11 +1589,8 @@ void LoadEntityIndexMap( entity_t *e ){
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  mapEnt->mapEntityNum, ValueForKey( e, "classname" ), indexMapFilename );
 
-	/* get index map file extension */
-	ExtractFileExtension( indexMapFilename, ext );
-
 	/* handle tga image */
-	if ( !Q_stricmp( ext, "tga" ) ) {
+	if ( !Q_stricmp( path_get_extension( indexMapFilename ), "tga" ) ) {
 		/* load it */
 		Load32BitImage( indexMapFilename, &pixels32, &w, &h );
 

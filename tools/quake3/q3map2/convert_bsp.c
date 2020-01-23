@@ -272,7 +272,7 @@ int AnalyzeBSP( int argc, char **argv ){
 
 int BSPInfo( int count, char **fileNames ){
 	int i;
-	char source[ 1024 ], ext[ 64 ];
+	char source[ 1024 ];
 	int size;
 	FILE        *f;
 
@@ -293,8 +293,7 @@ int BSPInfo( int count, char **fileNames ){
 
 		/* mangle filename and get size */
 		strcpy( source, fileNames[ i ] );
-		ExtractFileExtension( source, ext );
-		if ( !Q_stricmp( ext, "map" ) ) {
+		if ( !Q_stricmp( path_get_extension( source ), "map" ) ) {
 			StripExtension( source );
 		}
 		DefaultExtension( source, ".bsp" );
@@ -920,7 +919,6 @@ int ConvertBSPMain( int argc, char **argv ){
 	int i;
 	int ( *convertFunc )( char * );
 	game_t  *convertGame;
-	char ext[1024];
 	qboolean map_allowed, force_bsp, force_map;
 
 
@@ -1010,13 +1008,12 @@ int ConvertBSPMain( int argc, char **argv ){
 
 	/* clean up map name */
 	strcpy( source, ExpandArg( argv[i] ) );
-	ExtractFileExtension( source, ext );
 
 	if ( !map_allowed && !force_map ) {
 		force_bsp = qtrue;
 	}
 
-	if ( force_map || ( !force_bsp && !Q_stricmp( ext, "map" ) && map_allowed ) ) {
+	if ( force_map || ( !force_bsp && !Q_stricmp( path_get_extension( source ), "map" ) && map_allowed ) ) {
 		if ( !map_allowed ) {
 			Sys_Warning( "the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
 		}
