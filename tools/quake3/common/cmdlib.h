@@ -80,6 +80,12 @@ void *safe_calloc_info( size_t size, const char* info );
 extern int myargc;
 extern char **myargv;
 
+static inline qboolean strempty( const char* string ){
+	return *string == '\0';
+}
+static inline void strclear( char* string ){
+	*string = '\0';
+}
 char *strlower( char *in );
 #ifdef WIN32
 	#define Q_stricmp           stricmp
@@ -130,6 +136,10 @@ int     TryLoadFile( const char *filename, void **bufferptr );
 void    SaveFile( const char *filename, const void *buffer, int count );
 qboolean    FileExists( const char *filename );
 
+qboolean path_is_absolute( const char* path );
+char* path_get_filename_start( const char* path );
+char* path_get_filename_base_end( const char* path );
+char* path_get_extension( const char* path );
 void    DefaultExtension( char *path, const char *extension );
 void    DefaultPath( char *path, const char *basepath );
 void    StripFilename( char *path );

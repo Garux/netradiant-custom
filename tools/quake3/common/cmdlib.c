@@ -682,24 +682,71 @@ void    SaveFile( const char *filename, const void *buffer, int count ){
 }
 
 
+/*
+   ====================
+   Extract file parts
+   ====================
+ */
 
-void DefaultExtension( char *path, const char *extension ){
-	char    *src;
+/// \brief Returns true if \p path is a fully qualified file-system path.
+qboolean path_is_absolute( const char* path ){
+#if defined( WIN32 )
+	return path[0] == '/'
+		   || ( path[0] != '\0' && path[1] == ':' ); // local drive
+#elif defined( POSIX )
+	return path[0] == '/';
+#endif
+}
+
+static inline qboolean path_separator( const char c ){
+	return c == '/' || c == '\\';
+}
+
+/// \brief Returns a pointer to the first character of the filename component of \p path.
+char* path_get_filename_start( const char* path ){
+	const char *src = path + strlen( path );
+
+	while ( src != path && !path_separator( *( src - 1 ) ) ){
+		--src;
+	}
+	return src;
+}
+
+/// \brief Returns a pointer to the character after the end of the filename component of \p path - either the extension separator or the terminating null character.
+char* path_get_filename_base_end( const char* path ){
+	const char *end = path + strlen( path );
+	const char *src = end;
+
+	while ( src != path && !path_separator( *src ) ){
+		if( *src == '.' )
+			return src;
+		--src;
+	}
+	return end;
+}
+
+
+/// \brief Returns a pointer to the first character of the file extension of \p path, or to terminating null character if not found.
+char* path_get_extension( const char* path ){
+	const char *end = path + strlen( path );
+	const char *src = end;
+
+	while ( src != path && !path_separator( *src ) ){
+		if( *src == '.' )
+			return src + 1;
+		--src;
+	}
+	return end;
+}
+
 //
 // if path doesnt have a .EXT, append extension
 // (extension should include the .)
 //
-	src = path + strlen( path ) - 1;
-
-	while ( *src != '/' && *src != '\\' && src != path )
-	{
-		if ( *src == '.' ) {
-			return;                 // it has an extension
-		}
-		src--;
-	}
-
-	strcat( path, extension );
+void DefaultExtension( char *path, const char *extension ){
+	char* ext = path_get_filename_base_end( path );
+	if( strempty( ext ) )
+		strcpy( ext, extension );
 }
 
 
@@ -716,80 +763,28 @@ void DefaultPath( char *path, const char *basepath ){
 
 
 void    StripFilename( char *path ){
-	int length;
-
-	length = strlen( path ) - 1;
-	while ( length > 0 && path[length] != '/' && path[ length ] != '\\' )
-		length--;
-	path[length] = 0;
+	strclear( path_get_filename_start( path ) );
 }
 
 void    StripExtension( char *path ){
-	int length;
-
-	length = strlen( path ) - 1;
-	while ( length > 0 && path[length] != '.' )
-	{
-		length--;
-		if ( path[length] == '/' || path[ length ] == '\\' ) {
-			return;     // no extension
-		}
-	}
-	if ( length ) {
-		path[length] = 0;
-	}
+	strclear( path_get_filename_base_end( path ) );
 }
 
 
-/*
-   ====================
-   Extract file parts
-   ====================
- */
-// FIXME: should include the slash, otherwise
+// NOTE: includes the slash, otherwise
 // backing to an empty path will be wrong when appending a slash
-// hm: includes the slash rn
 void ExtractFilePath( const char *path, char *dest ){
-	const char *src = path + strlen( path );
-//
-// back up until a \ or the start
-//
-	while ( src != path && *( src - 1 ) != '\\' && *( src - 1 ) != '/' )
-		src--;
-
-	memcpy( dest, path, src - path );
-	dest[src - path] = 0;
+	strcpyQ( dest, path, path_get_filename_start( path ) - path + 1 ); // +1 for '\0'
 }
 
 void ExtractFileBase( const char *path, char *dest ){
-	const char *src = path + strlen( path );
-	const char *end = src;
-//
-// back up until a \ or the start
-//
-	while ( src != path && *( src - 1 ) != '/' && *( src - 1 ) != '\\' ){
-		src--;
-		if( *end != '.' && *src == '.' )
-			end = src;
-	}
-
-	memcpy( dest, src, end - src );
-	dest[end - src] = 0;
+	const char* start = path_get_filename_start( path );
+	const char* end = path_get_filename_base_end( start );
+	strcpyQ( dest, start, end - start + 1 ); // +1 for '\0'
 }
 
 void ExtractFileExtension( const char *path, char *dest ){
-	const char *src = path + strlen( path );
-//
-// back up until a . or the start
-//
-	while ( src != path && *( src - 1 ) != '.' )
-		src--;
-	if ( src == path ) {
-		*dest = 0;  // no extension
-		return;
-	}
-
-	strcpy( dest, src );
+	strcpy( dest, path_get_extension( path ) );
 }
 
 
