@@ -36,9 +36,6 @@
 #include "l_net.h"
 #include "l_net_wins.h"
 
-#define GetMemory malloc
-#define FreeMemory free
-
 #ifdef _DEBUG
 void WinPrint( const char *str, ... ){
 	va_list argptr;
@@ -48,7 +45,7 @@ void WinPrint( const char *str, ... ){
 	vsprintf( text, str, argptr );
 	va_end( argptr );
 
-	printf( text );
+	printf( "%s", text );
 }
 #else
 void WinPrint( const char *str, ... ){
@@ -178,11 +175,7 @@ int Net_Receive( socket_t *sock, netmessage_t *msg ){
 // Changes Globals:		-
 //===========================================================================
 socket_t *Net_AllocSocket( void ){
-	socket_t *sock;
-
-	sock = (socket_t *) GetMemory( sizeof( socket_t ) );
-	memset( sock, 0, sizeof( socket_t ) );
-	return sock;
+	return calloc( 1, sizeof( socket_t ) );
 } //end of the function Net_AllocSocket
 //===========================================================================
 //
@@ -191,7 +184,7 @@ socket_t *Net_AllocSocket( void ){
 // Changes Globals:		-
 //===========================================================================
 void Net_FreeSocket( socket_t *sock ){
-	FreeMemory( sock );
+	free( sock );
 } //end of the function Net_FreeSocket
 //===========================================================================
 //

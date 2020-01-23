@@ -566,46 +566,27 @@ int WINS_Broadcast( int socket, byte *buf, int len ){
 // Changes Globals:		-
 //===========================================================================
 bool WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
-	int ret, written;
-	ret = 0;
+	int ret = 0, written = 0;
 
-	if ( addr ) {
-		written = 0;
-		while ( written < len )
-		{
-			ret = sendto( socket, &buf[written], len - written, 0, (struct sockaddr *)addr, sizeof( struct sockaddr_s ) );
-			if ( ret == SOCKET_ERROR ) {
-				if ( WSAGetLastError() != EAGAIN ) {
-					return false;
-				}
-				//++timo FIXME: what is this used for?
-//				Sleep(1000);
-			} //end if
-			else
-			{
-				written += ret;
-			}
-		}
-	} //end if
-	else
+	while ( written < len )
 	{
-		written = 0;
-		while ( written < len )
-		{
+		if ( addr )
+			ret = sendto( socket, &buf[written], len - written, 0, (struct sockaddr *)addr, sizeof( struct sockaddr_s ) );
+		else
 			ret = send( socket, buf, len, 0 );
-			if ( ret == SOCKET_ERROR ) {
-				if ( WSAGetLastError() != EAGAIN ) {
-					return false;
-				}
-				//++timo FIXME: what is this used for?
-//				Sleep(1000);
-			} //end if
-			else
-			{
-				written += ret;
+
+		if ( ret == SOCKET_ERROR ) {
+			if ( WSAGetLastError() != EAGAIN ) {
+				return false;
 			}
+			//++timo FIXME: what is this used for?
+//			Sleep(1000);
 		}
-	} //end else
+		else
+		{
+			written += ret;
+		}
+	}
 	if ( ret == SOCKET_ERROR ) {
 		WinPrint( "WINS_Write: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 	} //end if

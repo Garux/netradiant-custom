@@ -506,14 +506,14 @@ int WINS_CheckNewConnections( void ){
 //===========================================================================
 int WINS_Read( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 	int addrlen = sizeof( struct sockaddr_s );
-	int ret, errno;
+	int ret, error;
 
 	if ( addr ) {
 		ret = recvfrom( socket, buf, len, 0, (struct sockaddr *)addr, &addrlen );
 		if ( ret == -1 ) {
-			errno = WSAGetLastError();
+			error = WSAGetLastError();
 
-			if ( errno == WSAEWOULDBLOCK || errno == WSAECONNREFUSED ) {
+			if ( error == WSAEWOULDBLOCK || error == WSAECONNREFUSED ) {
 				return 0;
 			}
 		} //end if
@@ -522,9 +522,9 @@ int WINS_Read( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 	{
 		ret = recv( socket, buf, len, 0 );
 		if ( ret == SOCKET_ERROR ) {
-			errno = WSAGetLastError();
+			error = WSAGetLastError();
 
-			if ( errno == WSAEWOULDBLOCK || errno == WSAECONNREFUSED ) {
+			if ( error == WSAEWOULDBLOCK || error == WSAECONNREFUSED ) {
 				return 0;
 			}
 		} //end if
@@ -581,43 +581,26 @@ int WINS_Broadcast( int socket, byte *buf, int len ){
 // Changes Globals:		-
 //===========================================================================
 bool WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
-	int ret, written;
+	int ret = 0, written = 0;
 
-	if ( addr ) {
-		written = 0;
-		while ( written < len )
-		{
-			ret = sendto( socket, &buf[written], len - written, 0, (struct sockaddr *)addr, sizeof( struct sockaddr_s ) );
-			if ( ret == SOCKET_ERROR ) {
-				if ( WSAGetLastError() != WSAEWOULDBLOCK ) {
-					return false;
-				}
-				Sleep( 1000 );
-			} //end if
-			else
-			{
-				written += ret;
-			}
-		}
-	} //end if
-	else
+	while ( written < len )
 	{
-		written = 0;
-		while ( written < len )
-		{
+		if ( addr )
+			ret = sendto( socket, &buf[written], len - written, 0, (struct sockaddr *)addr, sizeof( struct sockaddr_s ) );
+		else
 			ret = send( socket, buf, len, 0 );
-			if ( ret == SOCKET_ERROR ) {
-				if ( WSAGetLastError() != WSAEWOULDBLOCK ) {
-					return false;
-				}
-				Sleep( 1000 );
-			} //end if
-			else
-			{
-				written += ret;
+
+		if ( ret == SOCKET_ERROR ) {
+			if ( WSAGetLastError() != WSAEWOULDBLOCK ) {
+				return false;
 			}
+			Sleep( 1000 );
+		} //end if
+		else
+		{
+			written += ret;
 		}
-	} //end else
+	}
 	if ( ret == SOCKET_ERROR ) {
 		WinPrint( "WINS_Write: %s\n", WINS_ErrorMessage( WSAGetLastError() ) );
 	} //end if
