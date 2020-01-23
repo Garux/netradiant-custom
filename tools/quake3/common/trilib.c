@@ -36,12 +36,6 @@
 #define FLOAT_END   -FLOAT_START
 #define MAGIC       123322
 
-//#define NOISY 1
-
-#if defined ( __linux__ ) || defined ( __APPLE__ )
-#define strlwr strlower
-#endif
-
 typedef struct {
 	float v[3];
 } vector;
@@ -154,7 +148,7 @@ void TRI_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets )
 				else{
 					strcpy( pPSET[pset].name, "(unnamed)" );
 				}
-				strlwr( pPSET[pset].name );
+				strLower( pPSET[pset].name );
 
 //				indent();
 //				fprintf( stdout, "OBJECT START: %s\n", name );
@@ -176,7 +170,7 @@ void TRI_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets )
                         strncpy( pPSET[pset].texname, tex, sizeof( pPSET[pset].texname ) - 1 );
                     else
                         strcpy( pPSET[pset].texname, "(unnamed)" );
-                    strlwr( pPSET[pset].texname );
+                    strLower( pPSET[pset].texname );
  */
 
 //					indent();
@@ -206,7 +200,7 @@ void TRI_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets )
 					strcpy( pPSET[pset].name, "(unnamed)" );
 				}
 
-				strlwr( pPSET[pset].name );
+				strLower( pPSET[pset].name );
 
 //				indent();
 //				fprintf( stdout, "OBJECT END: %s\n", name );

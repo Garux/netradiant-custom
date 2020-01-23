@@ -160,7 +160,7 @@ void FindShaderFiles( char *filename ){
 			}
 			linebuffer[i] = 0;
 
-			strlower( linebuffer );
+			strLower( linebuffer );
 
 			// see if the line specifies an opaque map or blendmap
 			if ( strstr( linebuffer, "opaquemap" ) == linebuffer ||

@@ -86,7 +86,7 @@ static inline qboolean strEmpty( const char* string ){
 static inline void strClear( char* string ){
 	*string = '\0';
 }
-static inline char *strlower( char *string ){
+static inline char *strLower( char *string ){
 	for( char *in = string; *in; ++in )
 		*in = tolower( *in );
 	return string;
