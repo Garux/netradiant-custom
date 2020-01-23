@@ -507,17 +507,17 @@ int MiniMapBSPMain( int argc, char **argv ){
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); i++ )
 	{
-		if ( !strcmp( argv[ i ],  "-size" ) ) {
+		if ( strEqual( argv[ i ],  "-size" ) ) {
 			minimap.width = minimap.height = atoi( argv[i + 1] );
 			i++;
 			Sys_Printf( "Image size set to %i\n", minimap.width );
 		}
-		else if ( !strcmp( argv[ i ],  "-sharpen" ) ) {
+		else if ( strEqual( argv[ i ],  "-sharpen" ) ) {
 			minimapSharpen = atof( argv[i + 1] );
 			i++;
 			Sys_Printf( "Sharpening coefficient set to %f\n", minimapSharpen );
 		}
-		else if ( !strcmp( argv[ i ],  "-samples" ) ) {
+		else if ( strEqual( argv[ i ],  "-samples" ) ) {
 			minimap.samples = atoi( argv[i + 1] );
 			i++;
 			Sys_Printf( "Samples set to %i\n", minimap.samples );
@@ -525,32 +525,32 @@ int MiniMapBSPMain( int argc, char **argv ){
 			minimap.sample_offsets = malloc( 2 * sizeof( *minimap.sample_offsets ) * minimap.samples );
 			MiniMapMakeSampleOffsets();
 		}
-		else if ( !strcmp( argv[ i ],  "-random" ) ) {
+		else if ( strEqual( argv[ i ],  "-random" ) ) {
 			minimap.samples = atoi( argv[i + 1] );
 			i++;
 			Sys_Printf( "Random samples set to %i\n", minimap.samples );
 			free( minimap.sample_offsets );
 			minimap.sample_offsets = NULL;
 		}
-		else if ( !strcmp( argv[ i ],  "-border" ) ) {
+		else if ( strEqual( argv[ i ],  "-border" ) ) {
 			border = atof( argv[i + 1] );
 			i++;
 			Sys_Printf( "Border set to %f\n", border );
 		}
-		else if ( !strcmp( argv[ i ],  "-keepaspect" ) ) {
+		else if ( strEqual( argv[ i ],  "-keepaspect" ) ) {
 			keepaspect = true;
 			Sys_Printf( "Keeping aspect ratio by letterboxing\n", border );
 		}
-		else if ( !strcmp( argv[ i ],  "-nokeepaspect" ) ) {
+		else if ( strEqual( argv[ i ],  "-nokeepaspect" ) ) {
 			keepaspect = false;
 			Sys_Printf( "Not keeping aspect ratio\n", border );
 		}
-		else if ( !strcmp( argv[ i ],  "-o" ) ) {
+		else if ( strEqual( argv[ i ],  "-o" ) ) {
 			strcpy( minimapFilename, argv[i + 1] );
 			i++;
 			Sys_Printf( "Output file name set to %s\n", minimapFilename );
 		}
-		else if ( !strcmp( argv[ i ],  "-minmax" ) && i < ( argc - 7 ) ) {
+		else if ( strEqual( argv[ i ],  "-minmax" ) && i < ( argc - 7 ) ) {
 			mins[0] = atof( argv[i + 1] );
 			mins[1] = atof( argv[i + 2] );
 			mins[2] = atof( argv[i + 3] );
@@ -560,38 +560,38 @@ int MiniMapBSPMain( int argc, char **argv ){
 			i += 6;
 			Sys_Printf( "Map mins/maxs overridden\n" );
 		}
-		else if ( !strcmp( argv[ i ],  "-gray" ) ) {
+		else if ( strEqual( argv[ i ],  "-gray" ) ) {
 			mode = MINIMAP_MODE_GRAY;
 			Sys_Printf( "Writing as white-on-black image\n" );
 		}
-		else if ( !strcmp( argv[ i ],  "-black" ) ) {
+		else if ( strEqual( argv[ i ],  "-black" ) ) {
 			mode = MINIMAP_MODE_BLACK;
 			Sys_Printf( "Writing as black alpha image\n" );
 		}
-		else if ( !strcmp( argv[ i ],  "-white" ) ) {
+		else if ( strEqual( argv[ i ],  "-white" ) ) {
 			mode = MINIMAP_MODE_WHITE;
 			Sys_Printf( "Writing as white alpha image\n" );
 		}
-		else if ( !strcmp( argv[ i ],  "-boost" ) && i < ( argc - 2 ) ) {
+		else if ( strEqual( argv[ i ],  "-boost" ) && i < ( argc - 2 ) ) {
 			minimap.boost = atof( argv[i + 1] );
 			i++;
 			Sys_Printf( "Contrast boost set to %f\n", minimap.boost );
 		}
-		else if ( !strcmp( argv[ i ],  "-brightness" ) && i < ( argc - 2 ) ) {
+		else if ( strEqual( argv[ i ],  "-brightness" ) && i < ( argc - 2 ) ) {
 			minimap.brightness = atof( argv[i + 1] );
 			i++;
 			Sys_Printf( "Brightness set to %f\n", minimap.brightness );
 		}
-		else if ( !strcmp( argv[ i ],  "-contrast" ) && i < ( argc - 2 ) ) {
+		else if ( strEqual( argv[ i ],  "-contrast" ) && i < ( argc - 2 ) ) {
 			minimap.contrast = atof( argv[i + 1] );
 			i++;
 			Sys_Printf( "Contrast set to %f\n", minimap.contrast );
 		}
-		else if ( !strcmp( argv[ i ],  "-autolevel" ) ) {
+		else if ( strEqual( argv[ i ],  "-autolevel" ) ) {
 			autolevel = true;
 			Sys_Printf( "Auto level enabled\n", border );
 		}
-		else if ( !strcmp( argv[ i ],  "-noautolevel" ) ) {
+		else if ( strEqual( argv[ i ],  "-noautolevel" ) ) {
 			autolevel = false;
 			Sys_Printf( "Auto level disabled\n", border );
 		}

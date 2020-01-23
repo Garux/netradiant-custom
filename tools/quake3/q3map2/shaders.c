@@ -762,7 +762,7 @@ static void LoadShaderImages( shaderInfo_t *si ){
 		/* otherwise, use default image */
 		if ( si->shaderImage == NULL ) {
 			si->shaderImage = ImageLoad( DEFAULT_IMAGE );
-			if ( warnImage && strcmp( si->shader, "noshader" ) ) {
+			if ( warnImage && !strEqual( si->shader, "noshader" ) ) {
 				Sys_Warning( "Couldn't find image for shader %s\n", si->shader );
 			}
 		}
@@ -818,7 +818,7 @@ static void LoadShaderImages( shaderInfo_t *si ){
 #define MAX_SHADER_DEPRECATION_DEPTH 16
 
 shaderInfo_t *ShaderInfoForShaderNull( const char *shaderName ){
-	if ( !strcmp( shaderName, "noshader" ) ) {
+	if ( strEqual( shaderName, "noshader" ) ) {
 		return NULL;
 	}
 	return ShaderInfoForShader( shaderName );
@@ -937,7 +937,7 @@ void Parse1DMatrixAppend( char *buffer, int x, vec_t *m ){
 	int i;
 
 
-	if ( !GetTokenAppend( buffer, true ) || strcmp( token, "(" ) ) {
+	if ( !GetTokenAppend( buffer, true ) || !strEqual( token, "(" ) ) {
 		Error( "Parse1DMatrixAppend(): line %d: ( not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
 	for ( i = 0; i < x; i++ )
@@ -947,7 +947,7 @@ void Parse1DMatrixAppend( char *buffer, int x, vec_t *m ){
 		}
 		m[ i ] = atof( token );
 	}
-	if ( !GetTokenAppend( buffer, true ) || strcmp( token, ")" ) ) {
+	if ( !GetTokenAppend( buffer, true ) || !strEqual( token, ")" ) ) {
 		Error( "Parse1DMatrixAppend(): line %d: ) not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
 }
@@ -1007,7 +1007,7 @@ static void ParseShaderFile( const char *filename ){
 		if ( !GetTokenAppend( shaderText, true ) ) {
 			break;
 		}
-		if ( strcmp( token, "{" ) ) {
+		if ( !strEqual( token, "{" ) ) {
 			if ( si != NULL ) {
 				Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s\nLast known shader: %s\nFile location be: %s\n",
 					   filename, scriptline, token, si->shader, g_strLoadedFileLocation );
@@ -1024,7 +1024,7 @@ static void ParseShaderFile( const char *filename ){
 			if ( !GetTokenAppend( shaderText, true ) ) {
 				break;
 			}
-			if ( !strcmp( token, "}" ) ) {
+			if ( strEqual( token, "}" ) ) {
 				break;
 			}
 
@@ -1034,14 +1034,14 @@ static void ParseShaderFile( const char *filename ){
 			   ----------------------------------------------------------------- */
 
 			/* parse stage directives */
-			if ( !strcmp( token, "{" ) ) {
+			if ( strEqual( token, "{" ) ) {
 				si->hasPasses = true;
 				while ( 1 )
 				{
 					if ( !GetTokenAppend( shaderText, true ) ) {
 						break;
 					}
-					if ( !strcmp( token, "}" ) ) {
+					if ( strEqual( token, "}" ) ) {
 						break;
 					}
 
@@ -2009,7 +2009,7 @@ static void ParseCustomInfoParms( void ){
 			break;
 		}
 
-		if ( !strcmp( token, "}" ) ) {
+		if ( strEqual( token, "}" ) ) {
 			parsedContent = true;
 			break;
 		}
@@ -2034,7 +2034,7 @@ static void ParseCustomInfoParms( void ){
 			break;
 		}
 
-		if ( !strcmp( token, "}" ) ) {
+		if ( strEqual( token, "}" ) ) {
 			parsedSurface = true;
 			break;
 		}
@@ -2092,7 +2092,7 @@ void LoadShaderInfo( void ){
 		{
 			/* check for duplicate entries */
 			for ( j = 0; j < numShaderFiles; j++ )
-				if ( !strcmp( shaderFiles[ j ], token ) ) {
+				if ( strEqual( shaderFiles[ j ], token ) ) {
 					break;
 				}
 

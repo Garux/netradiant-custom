@@ -178,7 +178,7 @@ bool EndOfScript( bool crossline ){
 		Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
 
-	if ( !strcmp( script->filename, "memory buffer" ) ) {
+	if ( strEqual( script->filename, "memory buffer" ) ) {
 		endofscript = true;
 		return false;
 	}
@@ -313,7 +313,7 @@ skipspace:
 
 	*token_p = 0;
 
-	if ( !strcmp( token, "$include" ) ) {
+	if ( strEqual( token, "$include" ) ) {
 		GetToken( false );
 		AddScriptToStack( token, 0 );
 		return GetToken( crossline );
@@ -359,7 +359,7 @@ bool TokenAvailable( void ) {
 void MatchToken( char *match ) {
 	GetToken( true );
 
-	if ( strcmp( token, match ) ) {
+	if ( !strEqual( token, match ) ) {
 		Error( "MatchToken( \"%s\" ) failed at line %i in file %s", match, scriptline, script->filename );
 	}
 }

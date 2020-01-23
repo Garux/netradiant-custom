@@ -359,7 +359,7 @@ void LoadSurfaceExtraFile( const char *path ){
 		}
 
 		/* handle { } section */
-		if ( !GetToken( true ) || strcmp( token, "{" ) ) {
+		if ( !GetToken( true ) || !strEqual( token, "{" ) ) {
 			Error( "ReadSurfaceExtraFile(): %s, line %d: { not found", srfPath, scriptline );
 		}
 		while ( 1 )
@@ -367,7 +367,7 @@ void LoadSurfaceExtraFile( const char *path ){
 			if ( !GetToken( true ) ) {
 				break;
 			}
-			if ( !strcmp( token, "}" ) ) {
+			if ( strEqual( token, "}" ) ) {
 				break;
 			}
 

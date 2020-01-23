@@ -497,7 +497,7 @@ void LoadIBSPFile( const char *filename ){
 	CopyLightGridLumps( header );
 
 	/* advertisements */
-	if ( header->version == 47 && !strcmp( game->arg, "quakelive" ) ) { // quake live's bsp version minus wolf, et, etut
+	if ( header->version == 47 && strEqual( game->arg, "quakelive" ) ) { // quake live's bsp version minus wolf, et, etut
 		numBSPAds = CopyLump( (bspHeader_t*) header, LUMP_ADVERTISEMENTS, bspAds, sizeof( bspAdvertisement_t ) );
 	}
 	else{

@@ -528,7 +528,7 @@ bool    ParseEntity( void ) {
 		return false;
 	}
 
-	if ( strcmp( token, "{" ) ) {
+	if ( !strEqual( token, "{" ) ) {
 		Error( "ParseEntity: { not found" );
 	}
 	if ( num_entities == MAX_MAP_ENTITIES ) {
@@ -541,7 +541,7 @@ bool    ParseEntity( void ) {
 		if ( !GetToken( true ) ) {
 			Error( "ParseEntity: EOF without closing brace" );
 		}
-		if ( !strcmp( token, "}" ) ) {
+		if ( strEqual( token, "}" ) ) {
 			break;
 		}
 		e = ParseEpair();
@@ -631,7 +631,7 @@ void    SetKeyValue( entity_t *ent, const char *key, const char *value ) {
 	epair_t *ep;
 
 	for ( ep = ent->epairs ; ep ; ep = ep->next ) {
-		if ( !strcmp( ep->key, key ) ) {
+		if ( strEqual( ep->key, key ) ) {
 			free( ep->value );
 			ep->value = copystring( value );
 			return;
@@ -648,7 +648,7 @@ const char  *ValueForKey( const entity_t *ent, const char *key ) {
 	epair_t *ep;
 
 	for ( ep = ent->epairs ; ep ; ep = ep->next ) {
-		if ( !strcmp( ep->key, key ) ) {
+		if ( strEqual( ep->key, key ) ) {
 			return ep->value;
 		}
 	}

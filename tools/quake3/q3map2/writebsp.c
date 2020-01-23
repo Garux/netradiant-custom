@@ -341,7 +341,7 @@ void SetLightStyles( void ){
 
 		/* find this targetname */
 		for ( j = 0; j < numStyles; j++ )
-			if ( lightStyles[ j ] == style && !strcmp( lightTargets[ j ], t ) ) {
+			if ( lightStyles[ j ] == style && strEqual( lightTargets[ j ], t ) ) {
 				break;
 			}
 

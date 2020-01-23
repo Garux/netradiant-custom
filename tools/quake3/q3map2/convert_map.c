@@ -76,7 +76,7 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 		if ( s->surfaceType != MST_PLANAR && s->surfaceType != MST_TRIANGLE_SOUP ) {
 			continue;
 		}
-		if ( strcmp( buildSide->shaderInfo->shader, bspShaders[s->shaderNum].shader ) ) {
+		if ( !strEqual( buildSide->shaderInfo->shader, bspShaders[s->shaderNum].shader ) ) {
 			continue;
 		}
 		for ( t = 0; t + 3 <= s->numIndexes; t += 3 )
@@ -714,8 +714,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 		{
 			//vec3_t vecs[ 2 ];
 			if ( strncmp( buildSide->shaderInfo->shader, "textures/common/", 16 ) ) {
-				if ( strcmp( buildSide->shaderInfo->shader, "noshader" ) ) {
-					if ( strcmp( buildSide->shaderInfo->shader, "default" ) ) {
+				if ( !strEqual( buildSide->shaderInfo->shader, "noshader" ) ) {
+					if ( !strEqual( buildSide->shaderInfo->shader, "default" ) ) {
 						//fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader );
 						texture = "common/WTF";
 					}

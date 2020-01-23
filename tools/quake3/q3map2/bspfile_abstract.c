@@ -558,7 +558,7 @@ bool ParseEntity( void ){
 	if ( !GetToken( true ) ) {
 		return false;
 	}
-	if ( strcmp( token, "{" ) ) {
+	if ( !strEqual( token, "{" ) ) {
 		Error( "ParseEntity: { not found" );
 	}
 	AUTOEXPAND_BY_REALLOC( entities, numEntities, allocatedEntities, 32 );
@@ -887,7 +887,7 @@ entity_t *FindTargetEntity( const char *target ){
 	for ( i = 0; i < numEntities; i++ )
 	{
 		n = ValueForKey( &entities[ i ], "targetname" );
-		if ( !strcmp( n, target ) ) {
+		if ( strEqual( n, target ) ) {
 			return &entities[ i ];
 		}
 	}

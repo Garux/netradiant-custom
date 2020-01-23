@@ -107,7 +107,7 @@ picoModel_t *FindModel( const char *name, int frame ){
 	for ( i = 0; i < MAX_MODELS; i++ )
 	{
 		if ( picoModels[ i ] != NULL &&
-			 !strcmp( PicoGetModelName( picoModels[ i ] ), name ) &&
+			 strEqual( PicoGetModelName( picoModels[ i ] ), name ) &&
 			 PicoGetModelFrameNum( picoModels[ i ] ) == frame ) {
 			return picoModels[ i ];
 		}
@@ -1395,9 +1395,9 @@ void AddTriangleModels( entity_t *e ){
 	/* get lightmap scale */
 	/* vortex: added _ls key (short name of lightmapscale) */
 	baseLightmapScale = 0.0f;
-	if ( strcmp( "", ValueForKey( e, "lightmapscale" ) ) ||
-		 strcmp( "", ValueForKey( e, "_lightmapscale" ) ) ||
-		 strcmp( "", ValueForKey( e, "_ls" ) ) ) {
+	if ( !strEmpty( ValueForKey( e, "lightmapscale" ) ) ||
+		 !strEmpty( ValueForKey( e, "_lightmapscale" ) ) ||
+		 !strEmpty( ValueForKey( e, "_ls" ) ) ) {
 		baseLightmapScale = FloatForKey( e, "lightmapscale" );
 		if ( baseLightmapScale <= 0.0f ) {
 			baseLightmapScale = FloatForKey( e, "_lightmapscale" );
@@ -1427,7 +1427,7 @@ void AddTriangleModels( entity_t *e ){
 
 		/* ydnar: added support for md3 models on non-worldspawn models */
 		target = ValueForKey( e2, "target" );
-		if ( strcmp( target, targetName ) ) {
+		if ( !strEqual( target, targetName ) ) {
 			continue;
 		}
 
@@ -1441,10 +1441,10 @@ void AddTriangleModels( entity_t *e ){
 
 		/* get model frame */
 		frame = 0;
-		if ( strcmp( "", ValueForKey( e2, "_frame" ) ) ) {
+		if ( !strEmpty( ValueForKey( e2, "_frame" ) ) ) {
 			frame = IntForKey( e2, "_frame" );
 		}
-		else if ( strcmp( "", ValueForKey( e2, "frame" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "frame" ) ) ) {
 			frame = IntForKey( e2, "frame" );
 		}
 
@@ -1556,13 +1556,13 @@ void AddTriangleModels( entity_t *e ){
 
 		/* jal : entity based _samplesize */
 		lightmapSampleSize = 0;
-		if ( strcmp( "", ValueForKey( e2, "_lightmapsamplesize" ) ) ) {
+		if ( !strEmpty( ValueForKey( e2, "_lightmapsamplesize" ) ) ) {
 			lightmapSampleSize = IntForKey( e2, "_lightmapsamplesize" );
 		}
-		else if ( strcmp( "", ValueForKey( e2, "_samplesize" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "_samplesize" ) ) ) {
 			lightmapSampleSize = IntForKey( e2, "_samplesize" );
 		}
-		else if ( strcmp( "", ValueForKey( e2, "_ss" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "_ss" ) ) ) {
 			lightmapSampleSize = IntForKey( e2, "_ss" );
 		}
 
@@ -1577,9 +1577,9 @@ void AddTriangleModels( entity_t *e ){
 		/* get lightmap scale */
 		/* vortex: added _ls key (short name of lightmapscale) */
 		lightmapScale = 0.0f;
-		if ( strcmp( "", ValueForKey( e2, "lightmapscale" ) ) ||
-			 strcmp( "", ValueForKey( e2, "_lightmapscale" ) ) ||
-			 strcmp( "", ValueForKey( e2, "_ls" ) ) ) {
+		if ( !strEmpty( ValueForKey( e2, "lightmapscale" ) ) ||
+			 !strEmpty( ValueForKey( e2, "_lightmapscale" ) ) ||
+			 !strEmpty( ValueForKey( e2, "_ls" ) ) ) {
 			lightmapScale = FloatForKey( e2, "lightmapscale" );
 			if ( lightmapScale <= 0.0f ) {
 				lightmapScale = FloatForKey( e2, "_lightmapscale" );
@@ -1597,20 +1597,20 @@ void AddTriangleModels( entity_t *e ){
 
 		/* jal : entity based _shadeangle */
 		shadeAngle = 0.0f;
-		if ( strcmp( "", ValueForKey( e2, "_shadeangle" ) ) ) {
+		if ( !strEmpty( ValueForKey( e2, "_shadeangle" ) ) ) {
 			shadeAngle = FloatForKey( e2, "_shadeangle" );
 		}
 		/* vortex' aliases */
-		else if ( strcmp( "", ValueForKey( e2, "_smoothnormals" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "_smoothnormals" ) ) ) {
 			shadeAngle = FloatForKey( e2, "_smoothnormals" );
 		}
-		else if ( strcmp( "", ValueForKey( e2, "_sn" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "_sn" ) ) ) {
 			shadeAngle = FloatForKey( e2, "_sn" );
 		}
-		else if ( strcmp( "", ValueForKey( e2, "_sa" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "_sa" ) ) ) {
 			shadeAngle = FloatForKey( e2, "_sa" );
 		}
-		else if ( strcmp( "", ValueForKey( e2, "_smooth" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "_smooth" ) ) ) {
 			shadeAngle = FloatForKey( e2, "_smooth" );
 		}
 
@@ -1623,15 +1623,15 @@ void AddTriangleModels( entity_t *e ){
 		}
 
 		skin = 0;
-		if ( strcmp( "", ValueForKey( e2, "_skin" ) ) ) {
+		if ( !strEmpty( ValueForKey( e2, "_skin" ) ) ) {
 			skin = IntForKey( e2, "_skin" );
 		}
-		else if ( strcmp( "", ValueForKey( e2, "skin" ) ) ) {
+		else if ( !strEmpty( ValueForKey( e2, "skin" ) ) ) {
 			skin = IntForKey( e2, "skin" );
 		}
 
 		clipDepth = clipDepthGlobal;
-		if ( strcmp( "", ValueForKey( e2, "_clipdepth" ) ) ) {
+		if ( !strEmpty( ValueForKey( e2, "_clipdepth" ) ) ) {
 			clipDepth = FloatForKey( e2, "_clipdepth" );
 			Sys_Printf( "misc_model has autoclip depth of %.3f\n", clipDepth );
 		}

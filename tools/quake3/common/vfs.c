@@ -269,7 +269,7 @@ int vfsGetFileCount( const char *filename ){
 	{
 		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
 
-		if ( strcmp( file->name, fixed ) == 0 ) {
+		if ( strEqual( file->name, fixed ) ) {
 			count++;
 		}
 	}
@@ -363,7 +363,7 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 	{
 		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
 
-		if ( strcmp( file->name, fixed ) != 0 ) {
+		if ( !strEqual( file->name, fixed ) ) {
 			continue;
 		}
 
@@ -450,7 +450,7 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 	{
 		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
 
-		if ( strcmp( file->name, fixed ) != 0 ) {
+		if ( !strEqual( file->name, fixed ) ) {
 			continue;
 		}
 

@@ -246,7 +246,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 		/* handle { } section */
 		if ( !GetToken( true ) )
 			break;
-		if ( strcmp( token, "{" ) )
+		if ( !strEqual( token, "{" ) )
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 					shaderfile, scriptline, token, g_strLoadedFileLocation );
 		while ( 1 )
@@ -254,17 +254,17 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 			/* get the next token */
 			if ( !GetToken( true ) )
 				break;
-			if ( !strcmp( token, "}" ) )
+			if ( strEqual( token, "}" ) )
 				break;
 			/* parse stage directives */
-			if ( !strcmp( token, "{" ) ) {
+			if ( strEqual( token, "{" ) ) {
 				while ( 1 )
 				{
 					if ( !GetToken( true ) )
 						break;
-					if ( !strcmp( token, "}" ) )
+					if ( strEqual( token, "}" ) )
 						break;
-					if ( !strcmp( token, "{" ) )
+					if ( strEqual( token, "{" ) )
 						Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", shaderfile, scriptline );
 
 					/* digest any images */
@@ -278,7 +278,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 							if( sscanf( token + strlen( token ) - ( strlen( EXTERNAL_LIGHTMAP ) + 1 ), "/" EXTERNAL_LIGHTMAP "%n", &lmindex, &okcount )
 													&& okcount == ( strlen( EXTERNAL_LIGHTMAP ) + 1 ) ){
 								for ( int i = 0; i < numBSPShaders; ++i ){ // find bspShaders[i]<->lmindex pair
-									if( !strcmp( bspShaders[i].shader, shadername ) ){
+									if( strEqual( bspShaders[i].shader, shadername ) ){
 										lmIndices[i] = lmindex;
 										break;
 									}

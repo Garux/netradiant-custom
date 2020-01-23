@@ -349,10 +349,10 @@ static void ASE_ParseBracedBlock( void ( *parser )( const char *token ) ){
 
 	while ( ASE_GetToken( false ) )
 	{
-		if ( !strcmp( s_token, "{" ) ) {
+		if ( strEqual( s_token, "{" ) ) {
 			indent++;
 		}
-		else if ( !strcmp( s_token, "}" ) ) {
+		else if ( strEqual( s_token, "}" ) ) {
 			--indent;
 			if ( indent == 0 ) {
 				break;
@@ -375,10 +375,10 @@ static void ASE_SkipEnclosingBraces( void ){
 
 	while ( ASE_GetToken( false ) )
 	{
-		if ( !strcmp( s_token, "{" ) ) {
+		if ( strEqual( s_token, "{" ) ) {
 			indent++;
 		}
-		else if ( !strcmp( s_token, "}" ) ) {
+		else if ( strEqual( s_token, "}" ) ) {
 			indent--;
 			if ( indent == 0 ) {
 				break;
@@ -400,7 +400,7 @@ static void ASE_KeyMAP_DIFFUSE( const char *token ){
 
 	strcpy( filename, gl_filename );
 
-	if ( !strcmp( token, "*BITMAP" ) ) {
+	if ( strEqual( token, "*BITMAP" ) ) {
 		ASE_GetToken( false );
 
 		// the purpose of this whole chunk of code below is to extract the relative path
@@ -446,7 +446,7 @@ static void ASE_KeyMAP_DIFFUSE( const char *token ){
 }
 
 static void ASE_KeyMATERIAL( const char *token ){
-	if ( !strcmp( token, "*MAP_DIFFUSE" ) ) {
+	if ( strEqual( token, "*MAP_DIFFUSE" ) ) {
 		ASE_ParseBracedBlock( ASE_KeyMAP_DIFFUSE );
 	}
 	else
@@ -455,7 +455,7 @@ static void ASE_KeyMATERIAL( const char *token ){
 }
 
 static void ASE_KeyMATERIAL_LIST( const char *token ){
-	if ( !strcmp( token, "*MATERIAL_COUNT" ) ) {
+	if ( strEqual( token, "*MATERIAL_COUNT" ) ) {
 		ASE_GetToken( false );
 		VERBOSE( ( "..num materials: %s\n", s_token ) );
 		if ( atoi( s_token ) > MAX_ASE_MATERIALS ) {
@@ -463,7 +463,7 @@ static void ASE_KeyMATERIAL_LIST( const char *token ){
 		}
 		ase.numMaterials = 0;
 	}
-	else if ( !strcmp( token, "*MATERIAL" ) ) {
+	else if ( strEqual( token, "*MATERIAL" ) ) {
 		VERBOSE( ( "..material %d ", ase.numMaterials ) );
 		ASE_ParseBracedBlock( ASE_KeyMATERIAL );
 		ase.numMaterials++;
@@ -473,7 +473,7 @@ static void ASE_KeyMATERIAL_LIST( const char *token ){
 static void ASE_KeyMESH_VERTEX_LIST( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
-	if ( !strcmp( token, "*MESH_VERTEX" ) ) {
+	if ( strEqual( token, "*MESH_VERTEX" ) ) {
 		ASE_GetToken( false );     // skip number
 
 		ASE_GetToken( false );
@@ -500,7 +500,7 @@ static void ASE_KeyMESH_VERTEX_LIST( const char *token ){
 static void ASE_KeyMESH_FACE_LIST( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
-	if ( !strcmp( token, "*MESH_FACE" ) ) {
+	if ( strEqual( token, "*MESH_FACE" ) ) {
 		ASE_GetToken( false ); // skip face number
 
 		ASE_GetToken( false ); // skip label
@@ -540,7 +540,7 @@ static void ASE_KeyMESH_FACE_LIST( const char *token ){
 static void ASE_KeyTFACE_LIST( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
-	if ( !strcmp( token, "*MESH_TFACE" ) ) {
+	if ( strEqual( token, "*MESH_TFACE" ) ) {
 		int a, b, c;
 
 		ASE_GetToken( false );
@@ -567,7 +567,7 @@ static void ASE_KeyTFACE_LIST( const char *token ){
 static void ASE_KeyMESH_TVERTLIST( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
-	if ( !strcmp( token, "*MESH_TVERT" ) ) {
+	if ( strEqual( token, "*MESH_TVERT" ) ) {
 		char u[80], v[80], w[80];
 
 		ASE_GetToken( false );
@@ -599,63 +599,63 @@ static void ASE_KeyMESH_TVERTLIST( const char *token ){
 static void ASE_KeyMESH( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
-	if ( !strcmp( token, "*TIMEVALUE" ) ) {
+	if ( strEqual( token, "*TIMEVALUE" ) ) {
 		ASE_GetToken( false );
 
 		pMesh->timeValue = atoi( s_token );
 		VERBOSE( ( ".....timevalue: %d\n", pMesh->timeValue ) );
 	}
-	else if ( !strcmp( token, "*MESH_NUMVERTEX" ) ) {
+	else if ( strEqual( token, "*MESH_NUMVERTEX" ) ) {
 		ASE_GetToken( false );
 
 		pMesh->numVertexes = atoi( s_token );
 		VERBOSE( ( ".....TIMEVALUE: %d\n", pMesh->timeValue ) );
 		VERBOSE( ( ".....num vertexes: %d\n", pMesh->numVertexes ) );
 	}
-	else if ( !strcmp( token, "*MESH_NUMFACES" ) ) {
+	else if ( strEqual( token, "*MESH_NUMFACES" ) ) {
 		ASE_GetToken( false );
 
 		pMesh->numFaces = atoi( s_token );
 		VERBOSE( ( ".....num faces: %d\n", pMesh->numFaces ) );
 	}
-	else if ( !strcmp( token, "*MESH_NUMTVFACES" ) ) {
+	else if ( strEqual( token, "*MESH_NUMTVFACES" ) ) {
 		ASE_GetToken( false );
 
 		if ( atoi( s_token ) != pMesh->numFaces ) {
 			Error( "MESH_NUMTVFACES != MESH_NUMFACES" );
 		}
 	}
-	else if ( !strcmp( token, "*MESH_NUMTVERTEX" ) ) {
+	else if ( strEqual( token, "*MESH_NUMTVERTEX" ) ) {
 		ASE_GetToken( false );
 
 		pMesh->numTVertexes = atoi( s_token );
 		VERBOSE( ( ".....num tvertexes: %d\n", pMesh->numTVertexes ) );
 	}
-	else if ( !strcmp( token, "*MESH_VERTEX_LIST" ) ) {
+	else if ( strEqual( token, "*MESH_VERTEX_LIST" ) ) {
 		pMesh->vertexes = calloc( sizeof( aseVertex_t ) * pMesh->numVertexes, 1 );
 		pMesh->currentVertex = 0;
 		VERBOSE( ( ".....parsing MESH_VERTEX_LIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyMESH_VERTEX_LIST );
 	}
-	else if ( !strcmp( token, "*MESH_TVERTLIST" ) ) {
+	else if ( strEqual( token, "*MESH_TVERTLIST" ) ) {
 		pMesh->currentVertex = 0;
 		pMesh->tvertexes = calloc( sizeof( aseTVertex_t ) * pMesh->numTVertexes, 1 );
 		VERBOSE( ( ".....parsing MESH_TVERTLIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyMESH_TVERTLIST );
 	}
-	else if ( !strcmp( token, "*MESH_FACE_LIST" ) ) {
+	else if ( strEqual( token, "*MESH_FACE_LIST" ) ) {
 		pMesh->faces = calloc( sizeof( aseFace_t ) * pMesh->numFaces, 1 );
 		pMesh->currentFace = 0;
 		VERBOSE( ( ".....parsing MESH_FACE_LIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyMESH_FACE_LIST );
 	}
-	else if ( !strcmp( token, "*MESH_TFACELIST" ) ) {
+	else if ( strEqual( token, "*MESH_TFACELIST" ) ) {
 		pMesh->tfaces = calloc( sizeof( aseFace_t ) * pMesh->numFaces, 1 );
 		pMesh->currentFace = 0;
 		VERBOSE( ( ".....parsing MESH_TFACE_LIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyTFACE_LIST );
 	}
-	else if ( !strcmp( token, "*MESH_NORMALS" ) ) {
+	else if ( strEqual( token, "*MESH_NORMALS" ) ) {
 		ASE_ParseBracedBlock( 0 );
 	}
 }
@@ -664,7 +664,7 @@ static void ASE_KeyMESH_ANIMATION( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
 	// loads a single animation frame
-	if ( !strcmp( token, "*MESH" ) ) {
+	if ( strEqual( token, "*MESH" ) ) {
 		VERBOSE( ( "...found MESH\n" ) );
 		assert( pMesh->faces == 0 );
 		assert( pMesh->vertexes == 0 );
@@ -684,7 +684,7 @@ static void ASE_KeyMESH_ANIMATION( const char *token ){
 }
 
 static void ASE_KeyGEOMOBJECT( const char *token ){
-	if ( !strcmp( token, "*NODE_NAME" ) ) {
+	if ( strEqual( token, "*NODE_NAME" ) ) {
 		char *name = ase.objects[ase.currentObject].name;
 
 		ASE_GetToken( true );
@@ -705,16 +705,16 @@ static void ASE_KeyGEOMOBJECT( const char *token ){
 			}
 		}
 	}
-	else if ( !strcmp( token, "*NODE_PARENT" ) ) {
+	else if ( strEqual( token, "*NODE_PARENT" ) ) {
 		ASE_SkipRestOfLine();
 	}
 	// ignore unused data blocks
-	else if ( !strcmp( token, "*NODE_TM" ) ||
-			  !strcmp( token, "*TM_ANIMATION" ) ) {
+	else if ( strEqual( token, "*NODE_TM" ) ||
+			  strEqual( token, "*TM_ANIMATION" ) ) {
 		ASE_ParseBracedBlock( 0 );
 	}
 	// ignore regular meshes that aren't part of animation
-	else if ( !strcmp( token, "*MESH" ) && !ase.grabAnims ) {
+	else if ( strEqual( token, "*MESH" ) && !ase.grabAnims ) {
 /*
         if ( strstr( ase.objects[ase.currentObject].name, "tag_" ) == ase.objects[ase.currentObject].name )
         {
@@ -739,13 +739,13 @@ static void ASE_KeyGEOMOBJECT( const char *token ){
  */
 	}
 	// according to spec these are obsolete
-	else if ( !strcmp( token, "*MATERIAL_REF" ) ) {
+	else if ( strEqual( token, "*MATERIAL_REF" ) ) {
 		ASE_GetToken( false );
 
 		ase.objects[ase.currentObject].materialRef = atoi( s_token );
 	}
 	// loads a sequence of animation frames
-	else if ( !strcmp( token, "*MESH_ANIMATION" ) ) {
+	else if ( strEqual( token, "*MESH_ANIMATION" ) ) {
 		if ( ase.grabAnims ) {
 			VERBOSE( ( "..found MESH_ANIMATION\n" ) );
 
@@ -762,9 +762,9 @@ static void ASE_KeyGEOMOBJECT( const char *token ){
 		}
 	}
 	// skip unused info
-	else if ( !strcmp( token, "*PROP_MOTIONBLUR" ) ||
-			  !strcmp( token, "*PROP_CASTSHADOW" ) ||
-			  !strcmp( token, "*PROP_RECVSHADOW" ) ) {
+	else if ( strEqual( token, "*PROP_MOTIONBLUR" ) ||
+			  strEqual( token, "*PROP_CASTSHADOW" ) ||
+			  strEqual( token, "*PROP_RECVSHADOW" ) ) {
 		ASE_SkipRestOfLine();
 	}
 }
@@ -809,19 +809,19 @@ static void CollapseObjects( void ){
 static void ASE_Process( void ){
 	while ( ASE_GetToken( false ) )
 	{
-		if ( !strcmp( s_token, "*3DSMAX_ASCIIEXPORT" ) ||
-			 !strcmp( s_token, "*COMMENT" ) ) {
+		if ( strEqual( s_token, "*3DSMAX_ASCIIEXPORT" ) ||
+			 strEqual( s_token, "*COMMENT" ) ) {
 			ASE_SkipRestOfLine();
 		}
-		else if ( !strcmp( s_token, "*SCENE" ) ) {
+		else if ( strEqual( s_token, "*SCENE" ) ) {
 			ASE_SkipEnclosingBraces();
 		}
-		else if ( !strcmp( s_token, "*MATERIAL_LIST" ) ) {
+		else if ( strEqual( s_token, "*MATERIAL_LIST" ) ) {
 			VERBOSE( ( "MATERIAL_LIST\n" ) );
 
 			ASE_ParseBracedBlock( ASE_KeyMATERIAL_LIST );
 		}
-		else if ( !strcmp( s_token, "*GEOMOBJECT" ) ) {
+		else if ( strEqual( s_token, "*GEOMOBJECT" ) ) {
 			VERBOSE( ( "GEOMOBJECT" ) );
 
 			ASE_ParseBracedBlock( ASE_KeyGEOMOBJECT );

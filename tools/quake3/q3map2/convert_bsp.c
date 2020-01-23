@@ -159,7 +159,7 @@ int AnalyzeBSP( int argc, char **argv ){
 	for ( i = 1; i < ( argc - 1 ); i++ )
 	{
 		/* -format map|ase|... */
-		if ( !strcmp( argv[ i ],  "-lumpswap" ) ) {
+		if ( strEqual( argv[ i ], "-lumpswap" ) ) {
 			Sys_Printf( "Swapped lump structs enabled\n" );
 			lumpSwap = true;
 		}
@@ -413,10 +413,10 @@ int ScaleBSPMain( int argc, char **argv ){
 	texscale = false;
 	for ( i = 1; i < argc - 2; ++i )
 	{
-		if ( !strcmp( argv[i], "-tex" ) ) {
+		if ( strEqual( argv[i], "-tex" ) ) {
 			texscale = true;
 		}
-		else if ( !strcmp( argv[i], "-spawn_ref" ) ) {
+		else if ( strEqual( argv[i], "-spawn_ref" ) ) {
 			spawn_ref = atof( argv[i + 1] );
 			++i;
 		}
@@ -661,9 +661,9 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	for ( i = 1; i < argc - 2; ++i )
 	{
-		if ( !strcmp( argv[i], "-tex" ) ) {
+		if ( strEqual( argv[i], "-tex" ) ) {
 		}
-		else if ( !strcmp( argv[i], "-spawn_ref" ) ) {
+		else if ( strEqual( argv[i], "-spawn_ref" ) ) {
 			spawn_ref = atof( argv[i + 1] );
 			++i;
 		}
@@ -930,7 +930,7 @@ int ConvertBSPMain( int argc, char **argv ){
 	for ( i = 1; i < ( argc - 1 ); i++ )
 	{
 		/* -format map|ase|... */
-		if ( !strcmp( argv[ i ],  "-format" ) ) {
+		if ( strEqual( argv[ i ], "-format" ) ) {
 			i++;
 			if ( !Q_stricmp( argv[ i ], "ase" ) ) {
 				convertFunc = ConvertBSPToASE;
@@ -957,40 +957,40 @@ int ConvertBSPMain( int argc, char **argv ){
 				}
 			}
 		}
-		else if ( !strcmp( argv[ i ],  "-ne" ) ) {
+		else if ( strEqual( argv[ i ], "-ne" ) ) {
 			normalEpsilon = atof( argv[ i + 1 ] );
 			i++;
 			Sys_Printf( "Normal epsilon set to %f\n", normalEpsilon );
 		}
-		else if ( !strcmp( argv[ i ],  "-de" ) ) {
+		else if ( strEqual( argv[ i ], "-de" ) ) {
 			distanceEpsilon = atof( argv[ i + 1 ] );
 			i++;
 			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
 		}
-		else if ( !strcmp( argv[ i ],  "-shaderasbitmap" ) || !strcmp( argv[ i ],  "-shadersasbitmap" ) ) {
+		else if ( strEqual( argv[ i ], "-shaderasbitmap" ) || strEqual( argv[ i ], "-shadersasbitmap" ) ) {
 			shadersAsBitmap = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-lightmapastexcoord" ) || !strcmp( argv[ i ],  "-lightmapsastexcoord" ) ) {
+		else if ( strEqual( argv[ i ], "-lightmapastexcoord" ) || strEqual( argv[ i ], "-lightmapsastexcoord" ) ) {
 			lightmapsAsTexcoord = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-deluxemapastexcoord" ) || !strcmp( argv[ i ],  "-deluxemapsastexcoord" ) ) {
+		else if ( strEqual( argv[ i ], "-deluxemapastexcoord" ) || strEqual( argv[ i ], "-deluxemapsastexcoord" ) ) {
 			lightmapsAsTexcoord = true;
 			deluxemap = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-readbsp" ) ) {
+		else if ( strEqual( argv[ i ], "-readbsp" ) ) {
 			force_bsp = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-readmap" ) ) {
+		else if ( strEqual( argv[ i ], "-readmap" ) ) {
 			force_map = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-meta" ) ) {
+		else if ( strEqual( argv[ i ], "-meta" ) ) {
 			meta = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-patchmeta" ) ) {
+		else if ( strEqual( argv[ i ], "-patchmeta" ) ) {
 			meta = true;
 			patchMeta = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-fast" ) ) {
+		else if ( strEqual( argv[ i ], "-fast" ) ) {
 			fast = true;
 		}
 	}

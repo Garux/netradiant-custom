@@ -901,7 +901,7 @@ void LoadPortals( char *name ){
 	int leafnums[2];
 	visPlane_t plane;
 
-	if ( !strcmp( name, "-" ) ) {
+	if ( strEqual( name, "-" ) ) {
 		f = stdin;
 	}
 	else
@@ -915,7 +915,7 @@ void LoadPortals( char *name ){
 	if ( fscanf( f, "%79s\n%i\n%i\n%i\n", magic, &portalclusters, &numportals, &numfaces ) != 4 ) {
 		Error( "LoadPortals: failed to read header" );
 	}
-	if ( strcmp( magic,PORTALFILE ) ) {
+	if ( !strEqual( magic, PORTALFILE ) ) {
 		Error( "LoadPortals: not a portal file" );
 	}
 
@@ -1104,48 +1104,48 @@ int VisMain( int argc, char **argv ){
 	/* process arguments */
 	for ( i = 1 ; i < ( argc - 1 ) ; i++ )
 	{
-		if ( !strcmp( argv[i], "-fast" ) ) {
+		if ( strEqual( argv[i], "-fast" ) ) {
 			Sys_Printf( "fastvis = true\n" );
 			fastvis = true;
 		}
-		else if ( !strcmp( argv[i], "-merge" ) ) {
+		else if ( strEqual( argv[i], "-merge" ) ) {
 			Sys_Printf( "merge = true\n" );
 			mergevis = true;
 		}
-		else if ( !strcmp( argv[i], "-mergeportals" ) ) {
+		else if ( strEqual( argv[i], "-mergeportals" ) ) {
 			Sys_Printf( "mergeportals = true\n" );
 			mergevisportals = true;
 		}
-		else if ( !strcmp( argv[i], "-nopassage" ) ) {
+		else if ( strEqual( argv[i], "-nopassage" ) ) {
 			Sys_Printf( "nopassage = true\n" );
 			noPassageVis = true;
 		}
-		else if ( !strcmp( argv[i], "-passageOnly" ) ) {
+		else if ( strEqual( argv[i], "-passageOnly" ) ) {
 			Sys_Printf( "passageOnly = true\n" );
 			passageVisOnly = true;
 		}
-		else if ( !strcmp( argv[i], "-nosort" ) ) {
+		else if ( strEqual( argv[i], "-nosort" ) ) {
 			Sys_Printf( "nosort = true\n" );
 			nosort = true;
 		}
-		else if ( !strcmp( argv[i], "-saveprt" ) ) {
+		else if ( strEqual( argv[i], "-saveprt" ) ) {
 			Sys_Printf( "saveprt = true\n" );
 			saveprt = true;
 		}
-		else if ( !strcmp( argv[ i ], "-v" ) ) {
+		else if ( strEqual( argv[ i ], "-v" ) ) {
 			debugCluster = true;
 			Sys_Printf( "Extra verbose mode enabled\n" );
 		}
-		else if ( !strcmp( argv[i], "-tmpin" ) ) {
+		else if ( strEqual( argv[i], "-tmpin" ) ) {
 			strcpy( inbase, "/tmp" );
 		}
-		else if ( !strcmp( argv[i], "-tmpout" ) ) {
+		else if ( strEqual( argv[i], "-tmpout" ) ) {
 			strcpy( outbase, "/tmp" );
 		}
 
 
 		/* ydnar: -hint to merge all but hint portals */
-		else if ( !strcmp( argv[ i ], "-hint" ) ) {
+		else if ( strEqual( argv[ i ], "-hint" ) ) {
 			Sys_Printf( "hint = true\n" );
 			hint = true;
 			mergevis = true;

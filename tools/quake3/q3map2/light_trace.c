@@ -1190,10 +1190,10 @@ static void PopulateTraceNodes( void ){
 		/* external model */
 		default:
 			frame = 0;
-			if ( strcmp( "", ValueForKey( e, "_frame" ) ) ) {
+			if ( !strEmpty( ValueForKey( e, "_frame" ) ) ) {
 				frame = IntForKey( e, "_frame" );
 			}
-			else if ( strcmp( "", ValueForKey( e, "frame" ) ) ) {
+			else if ( !strEmpty( ValueForKey( e, "frame" ) ) ) {
 				frame = IntForKey( e, "frame" );
 			}
 			model = LoadModel( value, frame );

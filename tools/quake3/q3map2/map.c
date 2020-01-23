@@ -1105,7 +1105,7 @@ static void ParseRawBrush( bool onlyLights ){
 		if ( !GetToken( true ) ) {
 			break;
 		}
-		if ( !strcmp( token, "}" ) ) {
+		if ( strEqual( token, "}" ) ) {
 			break;
 		}
 
@@ -1113,7 +1113,7 @@ static void ParseRawBrush( bool onlyLights ){
 		if ( g_brushType == BPRIMIT_BP ) {
 			while ( 1 )
 			{
-				if ( strcmp( token, "(" ) ) {
+				if ( !strEqual( token, "(" ) ) {
 					GetToken( false );
 				}
 				else{
@@ -1151,7 +1151,7 @@ static void ParseRawBrush( bool onlyLights ){
 		/* AP or 220? */
 		if ( g_brushType == BPRIMIT_UNDEFINED ){
 			GetToken( false );
-			if ( !strcmp( token, "[" ) ){
+			if ( strEqual( token, "[" ) ){
 				g_brushType = BPRIMIT_VALVE220;
 				Sys_FPrintf( SYS_VRB, "detected brushType = VALVE 220\n" );
 			}
@@ -1715,7 +1715,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* conformance check */
-	if ( strcmp( token, "{" ) ) {
+	if ( !strEqual( token, "{" ) ) {
 		Sys_Warning( "ParseEntity: { not found, found %s on line %d - last entity was at: <%4.2f, %4.2f, %4.2f>...\n"
 					"Continuing to process map, but resulting BSP may be invalid.\n",
 					token, scriptline, entities[ numEntities ].origin[ 0 ], entities[ numEntities ].origin[ 1 ], entities[ numEntities ].origin[ 2 ] );
@@ -1745,26 +1745,26 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 			return false;
 		}
 
-		if ( !strcmp( token, "}" ) ) {
+		if ( strEqual( token, "}" ) ) {
 			break;
 		}
 
-		if ( !strcmp( token, "{" ) ) {
+		if ( strEqual( token, "{" ) ) {
 			/* parse a brush or patch */
 			if ( !GetToken( true ) ) {
 				break;
 			}
 
 			/* check */
-			if ( !strcmp( token, "patchDef2" ) ) {
+			if ( strEqual( token, "patchDef2" ) ) {
 				numMapPatches++;
 				ParsePatch( onlyLights );
 			}
-			else if ( !strcmp( token, "terrainDef" ) ) {
+			else if ( strEqual( token, "terrainDef" ) ) {
 				//% ParseTerrain();
 				Sys_Warning( "Terrain entity parsing not supported in this build.\n" ); /* ydnar */
 			}
-			else if ( !strcmp( token, "brushDef" ) ) {
+			else if ( strEqual( token, "brushDef" ) ) {
 				if ( g_brushType == BPRIMIT_UNDEFINED ) {
 					Sys_FPrintf( SYS_VRB, "detected brushType = BRUSH PRIMITIVES\n" );
 					g_brushType = BPRIMIT_BP;
@@ -1825,9 +1825,9 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	/* vortex: added _ls key (short name of lightmapscale) */
 	/* ydnar: get lightmap scaling value for this entity */
 	lightmapScale = 0.0f;
-	if ( strcmp( "", ValueForKey( mapEnt, "lightmapscale" ) ) ||
-		 strcmp( "", ValueForKey( mapEnt, "_lightmapscale" ) ) ||
-		 strcmp( "", ValueForKey( mapEnt, "_ls" ) ) ) {
+	if ( !strEmpty( ValueForKey( mapEnt, "lightmapscale" ) ) ||
+		 !strEmpty( ValueForKey( mapEnt, "_lightmapscale" ) ) ||
+		 !strEmpty( ValueForKey( mapEnt, "_ls" ) ) ) {
 		/* get lightmap scale from entity */
 		lightmapScale = FloatForKey( mapEnt, "lightmapscale" );
 		if ( lightmapScale <= 0.0f ) {
@@ -1850,7 +1850,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 		value = ValueForKey( &entities[ 0 ], "_celshader" );
 	}
 	if ( value[ 0 ] != '\0' ) {
-		if ( strcmp( value, "none" ) ) {
+		if ( !strEqual( value, "none" ) ) {
 			sprintf( shader, "textures/%s", value );
 			celShader = ShaderInfoForShader( shader );
 			Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader );
@@ -1866,20 +1866,20 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* jal : entity based _shadeangle */
 	shadeAngle = 0.0f;
-	if ( strcmp( "", ValueForKey( mapEnt, "_shadeangle" ) ) ) {
+	if ( !strEmpty( ValueForKey( mapEnt, "_shadeangle" ) ) ) {
 		shadeAngle = FloatForKey( mapEnt, "_shadeangle" );
 	}
 	/* vortex' aliases */
-	else if ( strcmp( "", ValueForKey( mapEnt, "_smoothnormals" ) ) ) {
+	else if ( !strEmpty( ValueForKey( mapEnt, "_smoothnormals" ) ) ) {
 		shadeAngle = FloatForKey( mapEnt, "_smoothnormals" );
 	}
-	else if ( strcmp( "", ValueForKey( mapEnt, "_sn" ) ) ) {
+	else if ( !strEmpty( ValueForKey( mapEnt, "_sn" ) ) ) {
 		shadeAngle = FloatForKey( mapEnt, "_sn" );
 	}
-	else if ( strcmp( "", ValueForKey( mapEnt, "_sa" ) ) ) {
+	else if ( !strEmpty( ValueForKey( mapEnt, "_sa" ) ) ) {
 		shadeAngle = FloatForKey( mapEnt, "_sa" );
 	}
-	else if ( strcmp( "", ValueForKey( mapEnt, "_smooth" ) ) ) {
+	else if ( !strEmpty( ValueForKey( mapEnt, "_smooth" ) ) ) {
 		shadeAngle = FloatForKey( mapEnt, "_smooth" );
 	}
 
@@ -1893,13 +1893,13 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* jal : entity based _samplesize */
 	lightmapSampleSize = 0;
-	if ( strcmp( "", ValueForKey( mapEnt, "_lightmapsamplesize" ) ) ) {
+	if ( !strEmpty( ValueForKey( mapEnt, "_lightmapsamplesize" ) ) ) {
 		lightmapSampleSize = IntForKey( mapEnt, "_lightmapsamplesize" );
 	}
-	else if ( strcmp( "", ValueForKey( mapEnt, "_samplesize" ) ) ) {
+	else if ( !strEmpty( ValueForKey( mapEnt, "_samplesize" ) ) ) {
 		lightmapSampleSize = IntForKey( mapEnt, "_samplesize" );
 	}
-	else if ( strcmp( "", ValueForKey( mapEnt, "_ss" ) ) ) {
+	else if ( !strEmpty( ValueForKey( mapEnt, "_ss" ) ) ) {
 		lightmapSampleSize = IntForKey( mapEnt, "_ss" );
 	}
 

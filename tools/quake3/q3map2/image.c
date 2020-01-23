@@ -298,7 +298,7 @@ image_t *ImageFind( const char *name ){
 	/* search list */
 	for ( int i = 0; i < MAX_IMAGES; ++i )
 	{
-		if ( images[ i ].name != NULL && !strcmp( name, images[ i ].name ) ) {
+		if ( images[ i ].name != NULL && strEqual( name, images[ i ].name ) ) {
 			return &images[ i ];
 		}
 	}

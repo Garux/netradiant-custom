@@ -114,7 +114,7 @@ static inline void res2list( StrList* list, const char* res ){
 }
 
 static inline void parseEXblock( StrList* list, const char *exName ){
-	if ( !GetToken( true ) || strcmp( token, "{" ) ) {
+	if ( !GetToken( true ) || !strEqual( token, "{" ) ) {
 		Error( "ReadExclusionsFile: %s, line %d: { not found", exName, scriptline );
 	}
 	while ( 1 )
@@ -122,10 +122,10 @@ static inline void parseEXblock( StrList* list, const char *exName ){
 		if ( !GetToken( true ) ) {
 			break;
 		}
-		if ( !strcmp( token, "}" ) ) {
+		if ( strEqual( token, "}" ) ) {
 			break;
 		}
-		if ( !strcmp( token, "{" ) ) {
+		if ( strEqual( token, "{" ) ) {
 			Error( "ReadExclusionsFile: %s, line %d: brace, opening twice in a row.", exName, scriptline );
 		}
 
@@ -252,13 +252,13 @@ int pk3BSPMain( int argc, char **argv ){
 
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); ++i ){
-		if ( !strcmp( argv[ i ],  "-dbg" ) ) {
+		if ( strEqual( argv[ i ],  "-dbg" ) ) {
 			dbg = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-png" ) ) {
+		else if ( strEqual( argv[ i ],  "-png" ) ) {
 			png = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-complevel" ) ) {
+		else if ( strEqual( argv[ i ],  "-complevel" ) ) {
 			compLevel = atoi( argv[ i + 1 ] );
 			i++;
 			if ( compLevel < -1 ) compLevel = -1;
@@ -463,7 +463,7 @@ int pk3BSPMain( int argc, char **argv ){
 			if ( !GetToken( true ) ) {
 				break;
 			}
-			if ( strcmp( token, "{" ) ) {
+			if ( !strEqual( token, "{" ) ) {
 					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 						scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
@@ -474,17 +474,17 @@ int pk3BSPMain( int argc, char **argv ){
 				if ( !GetToken( true ) ) {
 					break;
 				}
-				if ( !strcmp( token, "}" ) ) {
+				if ( strEqual( token, "}" ) ) {
 					break;
 				}
 				/* parse stage directives */
-				if ( !strcmp( token, "{" ) ) {
+				if ( strEqual( token, "{" ) ) {
 					while ( 1 )
 					{
 						if ( !GetToken( true ) ) {
 							break;
 						}
-						if ( !strcmp( token, "}" ) ) {
+						if ( strEqual( token, "}" ) ) {
 							break;
 						}
 					}
@@ -514,7 +514,7 @@ int pk3BSPMain( int argc, char **argv ){
 			if ( !GetToken( true ) ) {
 				break;
 			}
-			if ( strcmp( token, "{" ) ) {
+			if ( !strEqual( token, "{" ) ) {
 					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 						scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
@@ -526,7 +526,7 @@ int pk3BSPMain( int argc, char **argv ){
 				if ( !GetToken( true ) ) {
 					break;
 				}
-				if ( !strcmp( token, "}" ) ) {
+				if ( strEqual( token, "}" ) ) {
 					break;
 				}
 
@@ -536,16 +536,16 @@ int pk3BSPMain( int argc, char **argv ){
 				----------------------------------------------------------------- */
 
 				/* parse stage directives */
-				if ( !strcmp( token, "{" ) ) {
+				if ( strEqual( token, "{" ) ) {
 					while ( 1 )
 					{
 						if ( !GetToken( true ) ) {
 							break;
 						}
-						if ( !strcmp( token, "}" ) ) {
+						if ( strEqual( token, "}" ) ) {
 							break;
 						}
-						if ( !strcmp( token, "{" ) ) {
+						if ( strEqual( token, "{" ) ) {
 							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile, scriptline );
 						}
 						if ( !Q_stricmp( token, "mapComp" ) || !Q_stricmp( token, "mapNoComp" ) || !Q_stricmp( token, "animmapcomp" ) || !Q_stricmp( token, "animmapnocomp" ) ){
@@ -812,13 +812,13 @@ int repackBSPMain( int argc, char **argv ){
 
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); ++i ){
-		if ( !strcmp( argv[ i ],  "-dbg" ) ) {
+		if ( strEqual( argv[ i ],  "-dbg" ) ) {
 			dbg = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-png" ) ) {
+		else if ( strEqual( argv[ i ],  "-png" ) ) {
 			png = true;
 		}
-		else if ( !strcmp( argv[ i ],  "-complevel" ) ) {
+		else if ( strEqual( argv[ i ],  "-complevel" ) ) {
 			compLevel = atoi( argv[ i + 1 ] );
 			i++;
 			if ( compLevel < -1 ) compLevel = -1;
@@ -1232,7 +1232,7 @@ int repackBSPMain( int argc, char **argv ){
 			if ( !GetToken( true ) ) {
 				break;
 			}
-			if ( strcmp( token, "{" ) ) {
+			if ( !strEqual( token, "{" ) ) {
 					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 						scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
@@ -1246,12 +1246,12 @@ int repackBSPMain( int argc, char **argv ){
 				if ( !GetToken( true ) ) {
 					break;
 				}
-				if ( !strcmp( token, "}" ) ) {
+				if ( strEqual( token, "}" ) ) {
 					StrBuf_cat( shaderText, "\n}\n\n" );
 					break;
 				}
 				/* parse stage directives */
-				if ( !strcmp( token, "{" ) ) {
+				if ( strEqual( token, "{" ) ) {
 					bool tokenready = false;
 					StrBuf_cat( shaderText, "\n\t{" );
 					while ( 1 )
@@ -1264,11 +1264,11 @@ int repackBSPMain( int argc, char **argv ){
 						if ( !GetToken( true ) ) {
 							break;
 						}
-						if ( !strcmp( token, "}" ) ) {
+						if ( strEqual( token, "}" ) ) {
 							StrBuf_cat( shaderText, "\n\t}" );
 							break;
 						}
-						if ( !strcmp( token, "{" ) ) {
+						if ( strEqual( token, "{" ) ) {
 							StrBuf_cat( shaderText, "\n\t{" );
 							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile, scriptline );
 						}

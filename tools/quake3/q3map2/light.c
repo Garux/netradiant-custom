@@ -2211,7 +2211,7 @@ int LightMain( int argc, char **argv ){
 	for ( i = 1; i < ( argc - 1 ); i++ )
 	{
 		/* lightsource scaling */
-		if ( !strcmp( argv[ i ], "-point" ) || !strcmp( argv[ i ], "-pointscale" ) ) {
+		if ( strEqual( argv[ i ], "-point" ) || strEqual( argv[ i ], "-pointscale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
 			spotScale *= f;
@@ -2220,42 +2220,42 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-spherical" ) || !strcmp( argv[ i ], "-sphericalscale" ) ) {
+		else if ( strEqual( argv[ i ], "-spherical" ) || strEqual( argv[ i ], "-sphericalscale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
 			Sys_Printf( "Spherical point (entity) light scaled by %f to %f\n", f, pointScale );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-spot" ) || !strcmp( argv[ i ], "-spotscale" ) ) {
+		else if ( strEqual( argv[ i ], "-spot" ) || strEqual( argv[ i ], "-spotscale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			spotScale *= f;
 			Sys_Printf( "Spot point (entity) light scaled by %f to %f\n", f, spotScale );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-area" ) || !strcmp( argv[ i ], "-areascale" ) ) {
+		else if ( strEqual( argv[ i ], "-area" ) || strEqual( argv[ i ], "-areascale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			areaScale *= f;
 			Sys_Printf( "Area (shader) light scaled by %f to %f\n", f, areaScale );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-sky" ) || !strcmp( argv[ i ], "-skyscale" ) ) {
+		else if ( strEqual( argv[ i ], "-sky" ) || strEqual( argv[ i ], "-skyscale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			skyScale *= f;
 			Sys_Printf( "Sky/sun light scaled by %f to %f\n", f, skyScale );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-vertexscale" ) ) {
+		else if ( strEqual( argv[ i ], "-vertexscale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			vertexglobalscale *= f;
 			Sys_Printf( "Vertexlight scaled by %f to %f\n", f, vertexglobalscale );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-backsplash" ) && i < ( argc - 3 ) ) {
+		else if ( strEqual( argv[ i ], "-backsplash" ) && i < ( argc - 3 ) ) {
 			f = atof( argv[ i + 1 ] );
 			g_backsplashFractionScale = f;
 			Sys_Printf( "Area lights backsplash fraction scaled by %f\n", f, g_backsplashFractionScale );
@@ -2267,12 +2267,12 @@ int LightMain( int argc, char **argv ){
 			i+=2;
 		}
 
-		else if ( !strcmp( argv[ i ], "-nolm" ) ) {
+		else if ( strEqual( argv[ i ], "-nolm" ) ) {
 			nolm = true;
 			Sys_Printf( "No lightmaps yo\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-bouncecolorratio" ) ) {
+		else if ( strEqual( argv[ i ], "-bouncecolorratio" ) ) {
 			f = atof( argv[ i + 1 ] );
 			bounceColorRatio *= f;
 			if ( bounceColorRatio > 1 ) {
@@ -2285,14 +2285,14 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-bouncescale" ) ) {
+		else if ( strEqual( argv[ i ], "-bouncescale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			bounceScale *= f;
 			Sys_Printf( "Bounce (radiosity) light scaled by %f to %f\n", f, bounceScale );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-scale" ) ) {
+		else if ( strEqual( argv[ i ], "-scale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			pointScale *= f;
 			spotScale *= f;
@@ -2303,21 +2303,21 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-gridscale" ) ) {
+		else if ( strEqual( argv[ i ], "-gridscale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			Sys_Printf( "Grid lightning scaled by %f\n", f );
 			gridScale *= f;
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-gridambientscale" ) ) {
+		else if ( strEqual( argv[ i ], "-gridambientscale" ) ) {
 			f = atof( argv[ i + 1 ] );
 			Sys_Printf( "Grid ambient lightning scaled by %f\n", f );
 			gridAmbientScale *= f;
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-griddirectionality" ) ) {
+		else if ( strEqual( argv[ i ], "-griddirectionality" ) ) {
 			f = atof( argv[ i + 1 ] );
 			if ( f > 1 ) {
 				f = 1;
@@ -2330,7 +2330,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-gridambientdirectionality" ) ) {
+		else if ( strEqual( argv[ i ], "-gridambientdirectionality" ) ) {
 			f = atof( argv[ i + 1 ] );
 			if ( f < -1 ) {
 				f = -1;
@@ -2343,44 +2343,44 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-gamma" ) ) {
+		else if ( strEqual( argv[ i ], "-gamma" ) ) {
 			f = atof( argv[ i + 1 ] );
 			lightmapGamma = f;
 			Sys_Printf( "Lighting gamma set to %f\n", lightmapGamma );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-sRGBlight" ) ) {
+		else if ( strEqual( argv[ i ], "-sRGBlight" ) ) {
 			lightmapsRGB = true;
 			Sys_Printf( "Lighting is in sRGB\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nosRGBlight" ) ) {
+		else if ( strEqual( argv[ i ], "-nosRGBlight" ) ) {
 			lightmapsRGB = false;
 			Sys_Printf( "Lighting is linear\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-sRGBtex" ) ) {
+		else if ( strEqual( argv[ i ], "-sRGBtex" ) ) {
 			texturesRGB = true;
 			Sys_Printf( "Textures are in sRGB\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nosRGBtex" ) ) {
+		else if ( strEqual( argv[ i ], "-nosRGBtex" ) ) {
 			texturesRGB = false;
 			Sys_Printf( "Textures are linear\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-sRGBcolor" ) ) {
+		else if ( strEqual( argv[ i ], "-sRGBcolor" ) ) {
 			colorsRGB = true;
 			Sys_Printf( "Colors are in sRGB\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nosRGBcolor" ) ) {
+		else if ( strEqual( argv[ i ], "-nosRGBcolor" ) ) {
 			colorsRGB = false;
 			Sys_Printf( "Colors are linear\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-sRGB" ) ) {
+		else if ( strEqual( argv[ i ], "-sRGB" ) ) {
 			lightmapsRGB = true;
 			Sys_Printf( "Lighting is in sRGB\n" );
 			texturesRGB = true;
@@ -2389,7 +2389,7 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Colors are in sRGB\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nosRGB" ) ) {
+		else if ( strEqual( argv[ i ], "-nosRGB" ) ) {
 			lightmapsRGB = false;
 			Sys_Printf( "Lighting is linear\n" );
 			texturesRGB = false;
@@ -2398,14 +2398,14 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Colors are linear\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-exposure" ) ) {
+		else if ( strEqual( argv[ i ], "-exposure" ) ) {
 			f = atof( argv[ i + 1 ] );
 			lightmapExposure = f;
 			Sys_Printf( "Lighting exposure set to %f\n", lightmapExposure );
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-compensate" ) ) {
+		else if ( strEqual( argv[ i ], "-compensate" ) ) {
 			f = atof( argv[ i + 1 ] );
 			if ( f <= 0.0f ) {
 				f = 1.0f;
@@ -2416,14 +2416,14 @@ int LightMain( int argc, char **argv ){
 		}
 
 		/* Lightmaps brightness */
-		else if( !strcmp( argv[ i ], "-brightness" ) ){
+		else if( strEqual( argv[ i ], "-brightness" ) ){
 			lightmapBrightness = atof( argv[ i + 1 ] );
 			Sys_Printf( "Scaling lightmaps brightness by %f\n", lightmapBrightness );
 			i++;
 		}
 
 		/* Lighting contrast */
-		else if( !strcmp( argv[ i ], "-contrast" ) ){
+		else if( strEqual( argv[ i ], "-contrast" ) ){
 			f = atof( argv[ i + 1 ] );
 			lightmapContrast = f > 255? 255 : f < -255? -255 : f;
 			Sys_Printf( "Lighting contrast set to %f\n", lightmapContrast );
@@ -2433,7 +2433,7 @@ int LightMain( int argc, char **argv ){
 		}
 
 		/* ydnar switches */
-		else if ( !strcmp( argv[ i ], "-bounce" ) ) {
+		else if ( strEqual( argv[ i ], "-bounce" ) ) {
 			bounce = atoi( argv[ i + 1 ] );
 			if ( bounce < 0 ) {
 				bounce = 0;
@@ -2444,7 +2444,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-supersample" ) || !strcmp( argv[ i ], "-super" ) ) {
+		else if ( strEqual( argv[ i ], "-supersample" ) || strEqual( argv[ i ], "-super" ) ) {
 			superSample = atoi( argv[ i + 1 ] );
 			if ( superSample < 1 ) {
 				superSample = 1;
@@ -2455,12 +2455,12 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-randomsamples" ) ) {
+		else if ( strEqual( argv[ i ], "-randomsamples" ) ) {
 			lightRandomSamples = true;
 			Sys_Printf( "Random sampling enabled\n", lightRandomSamples );
 		}
 
-		else if ( !strcmp( argv[ i ], "-samples" ) ) {
+		else if ( strEqual( argv[ i ], "-samples" ) ) {
 			lightSamplesInsist = ( *argv[i + 1] == '+' );
 			lightSamples = atoi( argv[ i + 1 ] );
 			if ( lightSamples < 1 ) {
@@ -2472,7 +2472,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-samplessearchboxsize" ) ) {
+		else if ( strEqual( argv[ i ], "-samplessearchboxsize" ) ) {
 			lightSamplesSearchBoxSize = atoi( argv[ i + 1 ] );
 //			lightSamplesSearchBoxSize = MAX( MIN( lightSamplesSearchBoxSize, 4 ), 1 );
 			lightSamplesSearchBoxSize = lightSamplesSearchBoxSize < 1 ? 1
@@ -2483,17 +2483,17 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-filter" ) ) {
+		else if ( strEqual( argv[ i ], "-filter" ) ) {
 			filter = true;
 			Sys_Printf( "Lightmap filtering enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-dark" ) ) {
+		else if ( strEqual( argv[ i ], "-dark" ) ) {
 			dark = true;
 			Sys_Printf( "Dark lightmap seams enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-shadeangle" ) ) {
+		else if ( strEqual( argv[ i ], "-shadeangle" ) ) {
 			shadeAngleDegrees = atof( argv[ i + 1 ] );
 			if ( shadeAngleDegrees < 0.0f ) {
 				shadeAngleDegrees = 0.0f;
@@ -2505,7 +2505,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-thresh" ) ) {
+		else if ( strEqual( argv[ i ], "-thresh" ) ) {
 			subdivideThreshold = atof( argv[ i + 1 ] );
 			if ( subdivideThreshold < 0 ) {
 				subdivideThreshold = DEFAULT_SUBDIVIDE_THRESHOLD;
@@ -2516,7 +2516,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 
-		else if ( !strcmp( argv[ i ], "-approx" ) ) {
+		else if ( strEqual( argv[ i ], "-approx" ) ) {
 			approximateTolerance = atoi( argv[ i + 1 ] );
 			if ( approximateTolerance < 0 ) {
 				approximateTolerance = 0;
@@ -2526,11 +2526,11 @@ int LightMain( int argc, char **argv ){
 			}
 			i++;
 		}
-		else if ( !strcmp( argv[ i ], "-deluxe" ) || !strcmp( argv[ i ], "-deluxemap" ) ) {
+		else if ( strEqual( argv[ i ], "-deluxe" ) || strEqual( argv[ i ], "-deluxemap" ) ) {
 			deluxemap = true;
 			Sys_Printf( "Generating deluxemaps for average light direction\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-deluxemode" ) ) {
+		else if ( strEqual( argv[ i ], "-deluxemode" ) ) {
 			deluxemode = atoi( argv[ i + 1 ] );
 			if ( deluxemode == 0 || deluxemode > 1 || deluxemode < 0 ) {
 				Sys_Printf( "Generating modelspace deluxemaps\n" );
@@ -2541,17 +2541,17 @@ int LightMain( int argc, char **argv ){
 			}
 			i++;
 		}
-		else if ( !strcmp( argv[ i ], "-nodeluxe" ) || !strcmp( argv[ i ], "-nodeluxemap" ) ) {
+		else if ( strEqual( argv[ i ], "-nodeluxe" ) || strEqual( argv[ i ], "-nodeluxemap" ) ) {
 			deluxemap = false;
 			Sys_Printf( "Disabling generating of deluxemaps for average light direction\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-external" ) ) {
+		else if ( strEqual( argv[ i ], "-external" ) ) {
 			externalLightmaps = true;
 			Sys_Printf( "Storing all lightmaps externally\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-lightmapsize" )
-				|| !strcmp( argv[ i ], "-extlmhacksize" ) ) {
+		else if ( strEqual( argv[ i ], "-lightmapsize" )
+				|| strEqual( argv[ i ], "-extlmhacksize" ) ) {
 			lmCustomSize = atoi( argv[ i + 1 ] );
 
 			/* must be a power of 2 and greater than 2 */
@@ -2566,19 +2566,19 @@ int LightMain( int argc, char **argv ){
 			if ( lmCustomSize != game->lightmapSize ) {
 				/* -lightmapsize might just require -external for native external lms, but it has already been used in existing batches alone,
 				so brand new switch here for external lms, referenced by shaders hack/behavior */
-				externalLightmaps = strcmp( argv[ i - 1 ], "-extlmhacksize" );
+				externalLightmaps = !strEqual( argv[ i - 1 ], "-extlmhacksize" );
 				Sys_Printf( "Storing all lightmaps externally\n" );
 			}
 		}
 
-		else if ( !strcmp( argv[ i ], "-rawlightmapsizelimit" ) ) {
+		else if ( strEqual( argv[ i ], "-rawlightmapsizelimit" ) ) {
 			lmLimitSize = atoi( argv[ i + 1 ] );
 
 			i++;
 			Sys_Printf( "Raw lightmap size limit set to %d x %d pixels\n", lmLimitSize, lmLimitSize );
 		}
 
-		else if ( !strcmp( argv[ i ], "-lightmapdir" ) ) {
+		else if ( strEqual( argv[ i ], "-lightmapdir" ) ) {
 			lmCustomDir = argv[i + 1];
 			i++;
 			Sys_Printf( "Lightmap directory set to %s\n", lmCustomDir );
@@ -2587,24 +2587,24 @@ int LightMain( int argc, char **argv ){
 		}
 
 		/* ydnar: add this to suppress warnings */
-		else if ( !strcmp( argv[ i ],  "-custinfoparms" ) ) {
+		else if ( strEqual( argv[ i ],  "-custinfoparms" ) ) {
 			Sys_Printf( "Custom info parms enabled\n" );
 			useCustomInfoParms = true;
 		}
 
-		else if ( !strcmp( argv[ i ], "-wolf" ) ) {
+		else if ( strEqual( argv[ i ], "-wolf" ) ) {
 			/* -game should already be set */
 			wolfLight = true;
 			Sys_Printf( "Enabling Wolf lighting model (linear default)\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-q3" ) ) {
+		else if ( strEqual( argv[ i ], "-q3" ) ) {
 			/* -game should already be set */
 			wolfLight = false;
 			Sys_Printf( "Enabling Quake 3 lighting model (nonlinear default)\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-extradist" ) ) {
+		else if ( strEqual( argv[ i ], "-extradist" ) ) {
 			extraDist = atof( argv[ i + 1 ] );
 			if ( extraDist < 0 ) {
 				extraDist = 0;
@@ -2613,68 +2613,68 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Default extra radius set to %f units\n", extraDist );
 		}
 
-		else if ( !strcmp( argv[ i ], "-sunonly" ) ) {
+		else if ( strEqual( argv[ i ], "-sunonly" ) ) {
 			sunOnly = true;
 			Sys_Printf( "Only computing sunlight\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-bounceonly" ) ) {
+		else if ( strEqual( argv[ i ], "-bounceonly" ) ) {
 			bounceOnly = true;
 			Sys_Printf( "Storing bounced light (radiosity) only\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nocollapse" ) ) {
+		else if ( strEqual( argv[ i ], "-nocollapse" ) ) {
 			noCollapse = true;
 			Sys_Printf( "Identical lightmap collapsing disabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nolightmapsearch" ) ) {
+		else if ( strEqual( argv[ i ], "-nolightmapsearch" ) ) {
 			lightmapSearchBlockSize = 1;
 			Sys_Printf( "No lightmap searching - all lightmaps will be sequential\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-lightmapsearchpower" ) ) {
+		else if ( strEqual( argv[ i ], "-lightmapsearchpower" ) ) {
 			lightmapMergeSize = ( game->lightmapSize << atoi( argv[i + 1] ) );
 			++i;
 			Sys_Printf( "Restricted lightmap searching enabled - optimize for lightmap merge power %d (size %d)\n", atoi( argv[i] ), lightmapMergeSize );
 		}
 
-		else if ( !strcmp( argv[ i ], "-lightmapsearchblocksize" ) ) {
+		else if ( strEqual( argv[ i ], "-lightmapsearchblocksize" ) ) {
 			lightmapSearchBlockSize = atoi( argv[i + 1] );
 			++i;
 			Sys_Printf( "Restricted lightmap searching enabled - block size set to %d\n", lightmapSearchBlockSize );
 		}
 
-		else if ( !strcmp( argv[ i ], "-shade" ) ) {
+		else if ( strEqual( argv[ i ], "-shade" ) ) {
 			shade = true;
 			Sys_Printf( "Phong shading enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-bouncegrid" ) ) {
+		else if ( strEqual( argv[ i ], "-bouncegrid" ) ) {
 			bouncegrid = true;
 			if ( bounce > 0 ) {
 				Sys_Printf( "Grid lighting with radiosity enabled\n" );
 			}
 		}
 
-		else if ( !strcmp( argv[ i ], "-smooth" ) ) {
+		else if ( strEqual( argv[ i ], "-smooth" ) ) {
 			lightSamples = EXTRA_SCALE;
 			Sys_Printf( "The -smooth argument is deprecated, use \"-samples 2\" instead\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-nofastpoint" ) ) {
+		else if ( strEqual( argv[ i ], "-nofastpoint" ) ) {
 			fastpoint = false;
 			Sys_Printf( "Automatic fast mode for point lights disabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-fast" ) ) {
+		else if ( strEqual( argv[ i ], "-fast" ) ) {
 			fast = true;
 			fastgrid = true;
 			fastbounce = true;
 			Sys_Printf( "Fast mode enabled for all area lights\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-faster" ) ) {
+		else if ( strEqual( argv[ i ], "-faster" ) ) {
 			faster = true;
 			fast = true;
 			fastgrid = true;
@@ -2682,105 +2682,105 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Faster mode enabled\n" );
 		}
 
-//		else if ( !strcmp( argv[ i ], "-fastallocate" ) ) {
+//		else if ( strEqual( argv[ i ], "-fastallocate" ) ) {
 //			fastAllocate = true;
 //			Sys_Printf( "Fast allocation mode enabled\n" );
 //		}
-		else if ( !strcmp( argv[ i ], "-slowallocate" ) ) {
+		else if ( strEqual( argv[ i ], "-slowallocate" ) ) {
 			fastAllocate = false;
 			Sys_Printf( "Slow allocation mode enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-fastgrid" ) ) {
+		else if ( strEqual( argv[ i ], "-fastgrid" ) ) {
 			fastgrid = true;
 			Sys_Printf( "Fast grid lighting enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-fastbounce" ) ) {
+		else if ( strEqual( argv[ i ], "-fastbounce" ) ) {
 			fastbounce = true;
 			Sys_Printf( "Fast bounce mode enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-cheap" ) ) {
+		else if ( strEqual( argv[ i ], "-cheap" ) ) {
 			cheap = true;
 			cheapgrid = true;
 			Sys_Printf( "Cheap mode enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-cheapgrid" ) ) {
+		else if ( strEqual( argv[ i ], "-cheapgrid" ) ) {
 			cheapgrid = true;
 			Sys_Printf( "Cheap grid mode enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-normalmap" ) ) {
+		else if ( strEqual( argv[ i ], "-normalmap" ) ) {
 			normalmap = true;
 			Sys_Printf( "Storing normal map instead of lightmap\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-trisoup" ) ) {
+		else if ( strEqual( argv[ i ], "-trisoup" ) ) {
 			trisoup = true;
 			Sys_Printf( "Converting brush faces to triangle soup\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-debug" ) ) {
+		else if ( strEqual( argv[ i ], "-debug" ) ) {
 			debug = true;
 			Sys_Printf( "Lightmap debugging enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-debugsurfaces" ) || !strcmp( argv[ i ], "-debugsurface" ) ) {
+		else if ( strEqual( argv[ i ], "-debugsurfaces" ) || strEqual( argv[ i ], "-debugsurface" ) ) {
 			debugSurfaces = true;
 			Sys_Printf( "Lightmap surface debugging enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-debugunused" ) ) {
+		else if ( strEqual( argv[ i ], "-debugunused" ) ) {
 			debugUnused = true;
 			Sys_Printf( "Unused luxel debugging enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-debugaxis" ) ) {
+		else if ( strEqual( argv[ i ], "-debugaxis" ) ) {
 			debugAxis = true;
 			Sys_Printf( "Lightmap axis debugging enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-debugcluster" ) ) {
+		else if ( strEqual( argv[ i ], "-debugcluster" ) ) {
 			debugCluster = true;
 			Sys_Printf( "Luxel cluster debugging enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-debugorigin" ) ) {
+		else if ( strEqual( argv[ i ], "-debugorigin" ) ) {
 			debugOrigin = true;
 			Sys_Printf( "Luxel origin debugging enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-debugdeluxe" ) ) {
+		else if ( strEqual( argv[ i ], "-debugdeluxe" ) ) {
 			deluxemap = true;
 			debugDeluxemap = true;
 			Sys_Printf( "Deluxemap debugging enabled\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-export" ) ) {
+		else if ( strEqual( argv[ i ], "-export" ) ) {
 			exportLightmaps = true;
 			Sys_Printf( "Exporting lightmaps\n" );
 		}
 
-		else if ( !strcmp( argv[ i ], "-notrace" ) ) {
+		else if ( strEqual( argv[ i ], "-notrace" ) ) {
 			noTrace = true;
 			Sys_Printf( "Shadow occlusion disabled\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-patchshadows" ) ) {
+		else if ( strEqual( argv[ i ], "-patchshadows" ) ) {
 			patchShadows = true;
 			Sys_Printf( "Patch shadow casting enabled\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-extra" ) ) {
+		else if ( strEqual( argv[ i ], "-extra" ) ) {
 			superSample = EXTRA_SCALE;      /* ydnar */
 			Sys_Printf( "The -extra argument is deprecated, use \"-super 2\" instead\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-extrawide" ) ) {
+		else if ( strEqual( argv[ i ], "-extrawide" ) ) {
 			superSample = EXTRAWIDE_SCALE;  /* ydnar */
 			filter = true;                  /* ydnar */
 			Sys_Printf( "The -extrawide argument is deprecated, use \"-filter [-super 2]\" instead\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-samplesize" ) ) {
+		else if ( strEqual( argv[ i ], "-samplesize" ) ) {
 			sampleSize = atoi( argv[ i + 1 ] );
 			if ( sampleSize < 1 ) {
 				sampleSize = 1;
@@ -2788,7 +2788,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 			Sys_Printf( "Default lightmap sample size set to %dx%d units\n", sampleSize, sampleSize );
 		}
-		else if ( !strcmp( argv[ i ], "-minsamplesize" ) ) {
+		else if ( strEqual( argv[ i ], "-minsamplesize" ) ) {
 			minSampleSize = atoi( argv[ i + 1 ] );
 			if ( minSampleSize < 1 ) {
 				minSampleSize = 1;
@@ -2796,16 +2796,16 @@ int LightMain( int argc, char **argv ){
 			i++;
 			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
 		}
-		else if ( !strcmp( argv[ i ],  "-samplescale" ) ) {
+		else if ( strEqual( argv[ i ],  "-samplescale" ) ) {
 			sampleScale = atoi( argv[ i + 1 ] );
 			i++;
 			Sys_Printf( "Lightmaps sample scale set to %d\n", sampleScale );
 		}
-		else if ( !strcmp( argv[ i ],  "-debugsamplesize" ) ) {
+		else if ( strEqual( argv[ i ],  "-debugsamplesize" ) ) {
 			debugSampleSize = 1;
 			Sys_Printf( "debugging Lightmaps SampleSize\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-novertex" ) ) {
+		else if ( strEqual( argv[ i ], "-novertex" ) ) {
 			noVertexLighting = 1;
 			if ( ( atof( argv[ i + 1 ] ) != 0 ) && ( atof( argv[ i + 1 ] )) < 1 ) {
 				noVertexLighting = ( atof( argv[ i + 1 ] ) );
@@ -2816,27 +2816,27 @@ int LightMain( int argc, char **argv ){
 				Sys_Printf( "Disabling vertex lighting\n" );
 			}
 		}
-		else if ( !strcmp( argv[ i ], "-nogrid" ) ) {
+		else if ( strEqual( argv[ i ], "-nogrid" ) ) {
 			noGridLighting = true;
 			Sys_Printf( "Disabling grid lighting\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-border" ) ) {
+		else if ( strEqual( argv[ i ], "-border" ) ) {
 			lightmapBorder = true;
 			Sys_Printf( "Adding debug border to lightmaps\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-nosurf" ) ) {
+		else if ( strEqual( argv[ i ], "-nosurf" ) ) {
 			noSurfaces = true;
 			Sys_Printf( "Not tracing against surfaces\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-dump" ) ) {
+		else if ( strEqual( argv[ i ], "-dump" ) ) {
 			dump = true;
 			Sys_Printf( "Dumping radiosity lights into numbered prefabs\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-lomem" ) ) {
+		else if ( strEqual( argv[ i ], "-lomem" ) ) {
 			loMem = true;
 			Sys_Printf( "Enabling low-memory (potentially slower) lighting mode\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-lightanglehl" ) ) {
+		else if ( strEqual( argv[ i ], "-lightanglehl" ) ) {
 			if ( ( atoi( argv[ i + 1 ] ) != 0 ) != lightAngleHL ) {
 				lightAngleHL = ( atoi( argv[ i + 1 ] ) != 0 );
 				if ( lightAngleHL ) {
@@ -2848,41 +2848,41 @@ int LightMain( int argc, char **argv ){
 				i++;
 			}
 		}
-		else if ( !strcmp( argv[ i ], "-nostyle" ) || !strcmp( argv[ i ], "-nostyles" ) ) {
+		else if ( strEqual( argv[ i ], "-nostyle" ) || strEqual( argv[ i ], "-nostyles" ) ) {
 			noStyles = true;
 			Sys_Printf( "Disabling lightstyles\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-style" ) || !strcmp( argv[ i ], "-styles" ) ) {
+		else if ( strEqual( argv[ i ], "-style" ) || strEqual( argv[ i ], "-styles" ) ) {
 			noStyles = false;
 			Sys_Printf( "Enabling lightstyles\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-cpma" ) ) {
+		else if ( strEqual( argv[ i ], "-cpma" ) ) {
 			cpmaHack = true;
 			Sys_Printf( "Enabling Challenge Pro Mode Asstacular Vertex Lighting Mode (tm)\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-floodlight" ) ) {
+		else if ( strEqual( argv[ i ], "-floodlight" ) ) {
 			floodlighty = true;
 			Sys_Printf( "FloodLighting enabled\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-debugnormals" ) ) {
+		else if ( strEqual( argv[ i ], "-debugnormals" ) ) {
 			debugnormals = true;
 			Sys_Printf( "DebugNormals enabled\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-lowquality" ) ) {
+		else if ( strEqual( argv[ i ], "-lowquality" ) ) {
 			floodlight_lowquality = true;
 			Sys_Printf( "Low Quality FloodLighting enabled\n" );
 		}
 
 		/* r7: dirtmapping */
-		else if ( !strcmp( argv[ i ], "-dirty" ) ) {
+		else if ( strEqual( argv[ i ], "-dirty" ) ) {
 			dirty = true;
 			Sys_Printf( "Dirtmapping enabled\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-dirtdebug" ) || !strcmp( argv[ i ], "-debugdirt" ) ) {
+		else if ( strEqual( argv[ i ], "-dirtdebug" ) || strEqual( argv[ i ], "-debugdirt" ) ) {
 			dirtDebug = true;
 			Sys_Printf( "Dirtmap debugging enabled\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-dirtmode" ) ) {
+		else if ( strEqual( argv[ i ], "-dirtmode" ) ) {
 			dirtMode = atoi( argv[ i + 1 ] );
 			if ( dirtMode != 0 && dirtMode != 1 ) {
 				dirtMode = 0;
@@ -2895,7 +2895,7 @@ int LightMain( int argc, char **argv ){
 			}
 			i++;
 		}
-		else if ( !strcmp( argv[ i ], "-dirtdepth" ) ) {
+		else if ( strEqual( argv[ i ], "-dirtdepth" ) ) {
 			dirtDepth = atof( argv[ i + 1 ] );
 			if ( dirtDepth <= 0.0f ) {
 				dirtDepth = 128.0f;
@@ -2903,7 +2903,7 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Dirtmapping depth set to %.1f\n", dirtDepth );
 			i++;
 		}
-		else if ( !strcmp( argv[ i ], "-dirtscale" ) ) {
+		else if ( strEqual( argv[ i ], "-dirtscale" ) ) {
 			dirtScale = atof( argv[ i + 1 ] );
 			if ( dirtScale <= 0.0f ) {
 				dirtScale = 1.0f;
@@ -2911,7 +2911,7 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Dirtmapping scale set to %.1f\n", dirtScale );
 			i++;
 		}
-		else if ( !strcmp( argv[ i ], "-dirtgain" ) ) {
+		else if ( strEqual( argv[ i ], "-dirtgain" ) ) {
 			dirtGain = atof( argv[ i + 1 ] );
 			if ( dirtGain <= 0.0f ) {
 				dirtGain = 1.0f;
@@ -2919,17 +2919,17 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "Dirtmapping gain set to %.1f\n", dirtGain );
 			i++;
 		}
-		else if ( !strcmp( argv[ i ], "-trianglecheck" ) ) {
+		else if ( strEqual( argv[ i ], "-trianglecheck" ) ) {
 			lightmapTriangleCheck = true;
 		}
-		else if ( !strcmp( argv[ i ], "-extravisnudge" ) ) {
+		else if ( strEqual( argv[ i ], "-extravisnudge" ) ) {
 			lightmapExtraVisClusterNudge = true;
 		}
-		else if ( !strcmp( argv[ i ], "-fill" ) ) {
+		else if ( strEqual( argv[ i ], "-fill" ) ) {
 			lightmapFill = true;
 			Sys_Printf( "Filling lightmap colors from surrounding pixels to improve JPEG compression\n" );
 		}
-		else if ( !strcmp( argv[ i ], "-fillpink" ) ) {
+		else if ( strEqual( argv[ i ], "-fillpink" ) ) {
 			lightmapPink = true;
 		}
 		/* unhandled args */
