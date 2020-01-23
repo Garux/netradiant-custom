@@ -358,9 +358,9 @@ I_FloatTime
 double I_FloatTime (void)
 {
 	time_t	t;
-	
+
 	time (&t);
-	
+
 	return t;
 #if 0
 // more precise, less portable
@@ -369,13 +369,13 @@ double I_FloatTime (void)
 	static int		secbase;
 
 	gettimeofday(&tp, &tzp);
-	
+
 	if (!secbase)
 	{
 		secbase = tp.tv_sec;
 		return tp.tv_usec/1000000.0;
 	}
-	
+
 	return (tp.tv_sec - secbase) + tp.tv_usec/1000000.0;
 #endif
 }
@@ -391,7 +391,9 @@ void Q_getwd (char *out)
 #endif
 }
 
-
+#ifdef WIN32
+#include <direct.h>
+#endif
 void Q_mkdir (char *path)
 {
 #ifdef WIN32
@@ -415,10 +417,10 @@ returns -1 if not present
 int	FileTime (char *path)
 {
 	struct	stat	buf;
-	
+
 	if (stat (path,&buf) == -1)
 		return -1;
-	
+
 	return buf.st_mtime;
 }
 
@@ -435,13 +437,13 @@ char *COM_Parse (char *data)
 {
 	int		c;
 	int		len;
-	
+
 	len = 0;
 	com_token[0] = 0;
-	
+
 	if (!data)
 		return NULL;
-		
+
 // skip whitespace
 skipwhite:
 	while ( (c = *data) <= ' ')
@@ -453,7 +455,7 @@ skipwhite:
 		}
 		data++;
 	}
-	
+
 // skip // comments
 	if (c=='/' && data[1] == '/')
 	{
@@ -461,7 +463,7 @@ skipwhite:
 			data++;
 		goto skipwhite;
 	}
-	
+
 
 // handle quoted strings specially
 	if (c == '\"')
@@ -499,7 +501,7 @@ skipwhite:
 	if (c=='{' || c=='}'|| c==')'|| c=='(' || c=='\'' || c==':')
 			break;
 	} while (c>32);
-	
+
 	com_token[len] = 0;
 	return data;
 }
@@ -508,7 +510,7 @@ skipwhite:
 int Q_strncasecmp (char *s1, char *s2, int n)
 {
 	int		c1, c2;
-	
+
 	do
 	{
 		c1 = *s1++;
@@ -516,7 +518,7 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 
 		if (!n--)
 			return 0;		// strings are equal until end point
-		
+
 		if (c1 != c2)
 		{
 			if (c1 >= 'a' && c1 <= 'z')
@@ -527,7 +529,7 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 				return -1;		// strings not equal
 		}
 	} while (c1);
-	
+
 	return 0;		// strings are equal
 }
 
@@ -935,13 +937,13 @@ int    BigLong (int l)
 float	LittleFloat (float l)
 {
 	union {byte b[4]; float f;} in, out;
-	
+
 	in.f = l;
 	out.b[0] = in.b[3];
 	out.b[1] = in.b[2];
 	out.b[2] = in.b[1];
 	out.b[3] = in.b[0];
-	
+
 	return out.f;
 }
 
@@ -1024,13 +1026,13 @@ int    LittleLong (int l)
 float	BigFloat (float l)
 {
 	union {byte b[4]; float f;} in, out;
-	
+
 	in.f = l;
 	out.b[0] = in.b[3];
 	out.b[1] = in.b[2];
 	out.b[2] = in.b[1];
 	out.b[3] = in.b[0];
-	
+
 	return out.f;
 }
 

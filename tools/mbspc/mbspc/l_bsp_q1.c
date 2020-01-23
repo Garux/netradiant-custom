@@ -231,8 +231,8 @@ void Q1_SwapBSPFile (qboolean todisk)
 	q1_dmodel_t *d;
 	q1_dmiptexlump_t *mtl;
 
-	
-// models	
+
+// models
 	for (i=0 ; i<q1_nummodels ; i++)
 	{
 		d = &q1_dmodels[i];
@@ -243,7 +243,7 @@ void Q1_SwapBSPFile (qboolean todisk)
 		d->visleafs = LittleLong (d->visleafs);
 		d->firstface = LittleLong (d->firstface);
 		d->numfaces = LittleLong (d->numfaces);
-		
+
 		for (j=0 ; j<3 ; j++)
 		{
 			d->mins[j] = LittleFloat(d->mins[j]);
@@ -260,10 +260,10 @@ void Q1_SwapBSPFile (qboolean todisk)
 		for (j=0 ; j<3 ; j++)
 			q1_dvertexes[i].point[j] = LittleFloat(q1_dvertexes[i].point[j]);
 	}
-		
+
 //
 // planes
-//	
+//
 	for (i=0 ; i<q1_numplanes ; i++)
 	{
 		for (j=0 ; j<3 ; j++)
@@ -271,10 +271,10 @@ void Q1_SwapBSPFile (qboolean todisk)
 		q1_dplanes[i].dist = LittleFloat(q1_dplanes[i].dist);
 		q1_dplanes[i].type = LittleLong(q1_dplanes[i].type);
 	}
-	
+
 //
 // texinfos
-//	
+//
 	for (i=0 ; i<q1_numtexinfo ; i++)
 	{
 		for (j=0 ; j<2 ; j++)
@@ -287,7 +287,7 @@ void Q1_SwapBSPFile (qboolean todisk)
 		q1_texinfo[i].miptex = LittleLong(q1_texinfo[i].miptex);
 		q1_texinfo[i].flags = LittleLong(q1_texinfo[i].flags);
 	}
-	
+
 //
 // faces
 //
@@ -359,7 +359,7 @@ void Q1_SwapBSPFile (qboolean todisk)
 		for (i=0 ; i<c ; i++)
 			mtl->dataofs[i] = LittleLong(mtl->dataofs[i]);
 	}
-	
+
 //
 // marksurfaces
 //
@@ -392,7 +392,7 @@ int Q1_CopyLump (int lump, void *dest, int size, int maxsize)
 
 	length = q1_header->lumps[lump].filelen;
 	ofs = q1_header->lumps[lump].fileofs;
-	
+
 	if (length % size) {
 		Error ("LoadBSPFile: odd lump size");
 	}
@@ -421,19 +421,17 @@ Q1_LoadBSPFile
 */
 void	Q1_LoadBSPFile(char *filename, int offset, int length)
 {
-	int			i;
-	
 //
 // load the file header
 //
 	q1_fileLength = LoadFile(filename, (void **)&q1_header, offset, length);
 
 // swap the header
-	for (i=0 ; i< sizeof(q1_dheader_t)/4 ; i++)
+	for (size_t i=0 ; i< sizeof(q1_dheader_t)/4 ; i++)
 		((int *)q1_header)[i] = LittleLong ( ((int *)q1_header)[i]);
 
 	if (q1_header->version != Q1_BSPVERSION)
-		Error ("%s is version %i, not %i", filename, i, Q1_BSPVERSION);
+		Error ("%s is version %i, not %i", filename, q1_header->version, Q1_BSPVERSION);
 
 	q1_nummodels = Q1_CopyLump (Q1_LUMP_MODELS, q1_dmodels, sizeof(q1_dmodel_t), Q1_MAX_MAP_MODELS );
 	q1_numvertexes = Q1_CopyLump (Q1_LUMP_VERTEXES, q1_dvertexes, sizeof(q1_dvertex_t), Q1_MAX_MAP_VERTS );
@@ -453,10 +451,10 @@ void	Q1_LoadBSPFile(char *filename, int offset, int length)
 	q1_entdatasize = Q1_CopyLump (Q1_LUMP_ENTITIES, q1_dentdata, 1, Q1_MAX_MAP_ENTSTRING );
 
 	FreeMemory(q1_header);		// everything has been copied out
-		
+
 //
 // swap everything
-//	
+//
 	Q1_SwapBSPFile (false);
 }
 
@@ -470,7 +468,7 @@ void Q1_AddLump (int lumpnum, void *data, int len)
 	q1_lump_t *lump;
 
 	lump = &q1_header->lumps[lumpnum];
-	
+
 	lump->fileofs = LittleLong(ftell(q1_wadfile));
 	lump->filelen = LittleLong(len);
 	SafeWrite(q1_wadfile, data, (len+3)&~3);
@@ -484,14 +482,14 @@ Swaps the bsp file in place, so it should not be referenced again
 =============
 */
 void	Q1_WriteBSPFile (char *filename)
-{		
+{
 	q1_header = &q1_outheader;
 	memset (q1_header, 0, sizeof(q1_dheader_t));
-	
+
 	Q1_SwapBSPFile (true);
 
 	q1_header->version = LittleLong (Q1_BSPVERSION);
-	
+
 	q1_wadfile = SafeOpenWrite (filename);
 	SafeWrite (q1_wadfile, q1_header, sizeof(q1_dheader_t));	// overwritten later
 
@@ -511,10 +509,10 @@ void	Q1_WriteBSPFile (char *filename)
 	Q1_AddLump (Q1_LUMP_VISIBILITY, q1_dvisdata, q1_visdatasize);
 	Q1_AddLump (Q1_LUMP_ENTITIES, q1_dentdata, q1_entdatasize);
 	Q1_AddLump (Q1_LUMP_TEXTURES, q1_dtexdata, q1_texdatasize);
-	
+
 	fseek (q1_wadfile, 0, SEEK_SET);
 	SafeWrite (q1_wadfile, q1_header, sizeof(q1_dheader_t));
-	fclose (q1_wadfile);	
+	fclose (q1_wadfile);
 }
 
 //============================================================================
@@ -595,20 +593,20 @@ char *Q1_UnparseEntities(int *size)
 	epair_t *ep;
 	char line[2048];
 	int i;
-	
+
 	buf = q1_dentdata;
 	end = buf;
 	*end = 0;
-	
+
 	for (i=0 ; i<num_entities ; i++)
 	{
 		ep = entities[i].epairs;
 		if (!ep)
 			continue;	// ent got removed
-		
+
 		strcat (end,"{\n");
 		end += 2;
-				
+
 		for (ep = entities[i].epairs ; ep ; ep=ep->next)
 		{
 			sprintf (line, "\"%s\" \"%s\"\n", ep->key, ep->value);

@@ -36,7 +36,7 @@
 patch_t     *face_patches[MAX_MAP_FACES];
 entity_t    *face_entity[MAX_MAP_FACES];
 patch_t patches[MAX_PATCHES];
-unsigned num_patches;
+int num_patches;
 
 vec3_t radiosity[MAX_PATCHES];          // light leaving a patch
 vec3_t illumination[MAX_PATCHES];       // light arriving at a patch
@@ -201,7 +201,7 @@ void MakeTransfers( int i ){
 	float total;
 	dplane_t plane;
 	vec3_t origin;
-	float transfers[MAX_PATCHES], *all_transfers;
+	float transfers[MAX_PATCHES];
 	int s;
 	int itotal;
 	byte pvs[( MAX_MAP_LEAFS + 7 ) / 8];
@@ -220,7 +220,6 @@ void MakeTransfers( int i ){
 	// find out which patch2s will collect light
 	// from patch
 
-	all_transfers = transfers;
 	patch->numtransfers = 0;
 	for ( j = 0, patch2 = patches ; j < num_patches ; j++, patch2++ )
 	{

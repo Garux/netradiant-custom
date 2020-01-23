@@ -246,7 +246,6 @@ quakefile_t *FindQuakeFilesInZip(char *zipfile, char *filter)
 	unz_global_info gi;
 	char			filename_inzip[MAX_PATH];
 	unz_file_info	file_info;
-	int				i;
 	quakefile_t		*qfiles, *lastqf, *qf;
 
 	uf = unzOpen(zipfile);
@@ -258,7 +257,7 @@ quakefile_t *FindQuakeFilesInZip(char *zipfile, char *filter)
 
 	qfiles = NULL;
 	lastqf = NULL;
-	for (i = 0; i < gi.number_entry; i++)
+	for (size_t i = 0; i < gi.number_entry; i++)
 	{
 		err = unzGetCurrentFileInfo(uf, &file_info, filename_inzip, sizeof(filename_inzip), NULL,0,NULL,0);
 		if (err != UNZ_OK) break;

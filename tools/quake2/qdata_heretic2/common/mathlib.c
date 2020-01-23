@@ -94,9 +94,6 @@ void _VectorScale( vec3_t v, vec_t scale, vec3_t out ){
 	out[2] = v[2] * scale;
 }
 
-#pragma optimize("g", off)  // went back to turning optimization off,
-                            // the bug_fix thing stopped working
-
 vec_t VectorNormalize( vec3_t in, vec3_t out ){
 	vec_t length, ilength;
 
@@ -135,8 +132,6 @@ vec_t ColorNormalize( vec3_t in, vec3_t out ){
 
 	return max;
 }
-
-#pragma optimize("", on)
 
 void VectorInverse( vec3_t v ){
 	v[0] = -v[0];

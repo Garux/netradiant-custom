@@ -160,7 +160,6 @@ void ThreadUnlock( void ){
    =============
  */
 void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
-	int threadid[MAX_THREADS];
 	HANDLE threadhandle[MAX_THREADS];
 	int i;
 	int start, end;
@@ -194,7 +193,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 				(LPTHREAD_START_ROUTINE)func,   // LPTHREAD_START_ROUTINE lpStartAddr,
 				(LPVOID)i,  // LPVOID lpvThreadParm,
 				0,          //   DWORD fdwCreate,
-				&threadid[i] );
+				NULL );
 		}
 
 		for ( i = 0 ; i < numthreads ; i++ )

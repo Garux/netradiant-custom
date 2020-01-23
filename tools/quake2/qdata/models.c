@@ -128,14 +128,11 @@ void H_printf( char *fmt, ... ){
    ============
  */
 void WriteModelFile( FILE *modelouthandle ){
-	int i;
 	dmdl_t modeltemp;
-	int j, k;
 	frame_t         *in;
 	daliasframe_t   *out;
 	byte buffer[MAX_VERTS * 4 + 128];
 	float v;
-	int c_on, c_off;
 
 	model.ident = IDALIASHEADER;
 	model.version = ALIAS_VERSION;
@@ -151,7 +148,7 @@ void WriteModelFile( FILE *modelouthandle ){
 	//
 	// write out the model header
 	//
-	for ( i = 0 ; i < sizeof( dmdl_t ) / 4 ; i++ )
+	for ( size_t i = 0 ; i < sizeof( dmdl_t ) / 4 ; i++ )
 		( (int *)&modeltemp )[i] = LittleLong( ( (int *)&model )[i] );
 
 	SafeWrite( modelouthandle, &modeltemp, sizeof( modeltemp ) );
@@ -164,8 +161,7 @@ void WriteModelFile( FILE *modelouthandle ){
 	//
 	// write out the texture coordinates
 	//
-	c_on = c_off = 0;
-	for ( i = 0 ; i < model.num_st ; i++ )
+	for ( int i = 0 ; i < model.num_st ; i++ )
 	{
 		base_st[i].s = LittleShort( base_st[i].s );
 		base_st[i].t = LittleShort( base_st[i].t );
@@ -176,12 +172,11 @@ void WriteModelFile( FILE *modelouthandle ){
 	//
 	// write out the triangles
 	//
-	for ( i = 0 ; i < model.num_tris ; i++ )
+	for ( int i = 0 ; i < model.num_tris ; i++ )
 	{
-		int j;
 		dtriangle_t tri;
 
-		for ( j = 0 ; j < 3 ; j++ )
+		for ( int j = 0 ; j < 3 ; j++ )
 		{
 			tri.index_xyz[j] = LittleShort( triangles[i].index_xyz[j] );
 			tri.index_st[j] = LittleShort( triangles[i].index_st[j] );
@@ -193,24 +188,24 @@ void WriteModelFile( FILE *modelouthandle ){
 	//
 	// write out the frames
 	//
-	for ( i = 0 ; i < model.num_frames ; i++ )
+	for ( int i = 0 ; i < model.num_frames ; i++ )
 	{
 		in = &g_frames[i];
 		out = (daliasframe_t *)buffer;
 
 		strcpy( out->name, in->name );
-		for ( j = 0 ; j < 3 ; j++ )
+		for ( int j = 0 ; j < 3 ; j++ )
 		{
 			out->scale[j] = ( in->maxs[j] - in->mins[j] ) / 255;
 			out->translate[j] = in->mins[j];
 		}
 
-		for ( j = 0 ; j < model.num_xyz ; j++ )
+		for ( int j = 0 ; j < model.num_xyz ; j++ )
 		{
 			// all of these are byte values, so no need to deal with endianness
 			out->verts[j].lightnormalindex = in->v[j].lightnormalindex;
 
-			for ( k = 0 ; k < 3 ; k++ )
+			for ( int k = 0 ; k < 3 ; k++ )
 			{
 				// scale to byte values & min/max check
 				v = Q_rint( ( in->v[j].v[k] - out->translate[k] ) / out->scale[k] );
@@ -226,7 +221,7 @@ void WriteModelFile( FILE *modelouthandle ){
 			}
 		}
 
-		for ( j = 0 ; j < 3 ; j++ )
+		for ( int j = 0 ; j < 3 ; j++ )
 		{
 			out->scale[j] = LittleFloat( out->scale[j] );
 			out->translate[j] = LittleFloat( out->translate[j] );

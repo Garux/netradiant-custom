@@ -216,8 +216,9 @@ void SwapBSPFile( qboolean todisk ){
 //
 	for ( i = 0 ; i < numtexinfo ; i++ )
 	{
-		for ( j = 0 ; j < 8 ; j++ )
-			texinfo[i].vecs[0][j] = LittleFloat( texinfo[i].vecs[0][j] );
+		for ( j = 0 ; j < 2 ; j++ )
+			for ( int k = 0 ; k < 4 ; k++ )
+				texinfo[i].vecs[j][k] = LittleFloat( texinfo[i].vecs[j][k] );
 		texinfo[i].flags = LittleLong( texinfo[i].flags );
 		texinfo[i].value = LittleLong( texinfo[i].value );
 		texinfo[i].nexttexinfo = LittleLong( texinfo[i].nexttexinfo );
@@ -379,15 +380,13 @@ int CopyLump( int lump, void *dest, int size ){
    =============
  */
 void    LoadBSPFile( char *filename ){
-	int i;
-
 //
 // load the file header
 //
 	LoadFile( filename, (void **)&header );
 
 // swap the header
-	for ( i = 0 ; i < sizeof( dheader_t ) / 4 ; i++ )
+	for ( size_t i = 0 ; i < sizeof( dheader_t ) / 4 ; i++ )
 		( (int *)header )[i] = LittleLong( ( (int *)header )[i] );
 
 	if ( header->ident != IDBSPHEADER ) {
@@ -436,7 +435,6 @@ void    LoadBSPFile( char *filename ){
    =============
  */
 void    LoadBSPFileTexinfo( char *filename ){
-	int i;
 	FILE        *f;
 	int length, ofs;
 
@@ -446,7 +444,7 @@ void    LoadBSPFileTexinfo( char *filename ){
 	fread( header, sizeof( dheader_t ), 1, f );
 
 // swap the header
-	for ( i = 0 ; i < sizeof( dheader_t ) / 4 ; i++ )
+	for ( size_t i = 0 ; i < sizeof( dheader_t ) / 4 ; i++ )
 		( (int *)header )[i] = LittleLong( ( (int *)header )[i] );
 
 	if ( header->ident != IDBSPHEADER ) {

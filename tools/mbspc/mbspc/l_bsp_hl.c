@@ -247,7 +247,7 @@ int FastChecksum(void *buffer, int bytes)
 	int	checksum = 0, i;
 	char *buf;
 
-//	while( bytes-- )  
+//	while( bytes-- )
 //		checksum = (checksum << 4) ^ *((char *)buffer)++;
 	buf = (char *) buffer;
 
@@ -268,10 +268,10 @@ int HL_CompressVis(byte *vis, byte *dest)
 	int		rep;
 	int		visrow;
 	byte	*dest_p;
-	
+
 	dest_p = dest;
 	visrow = (hl_numleafs + 7)>>3;
-	
+
 	for (j=0 ; j<visrow ; j++)
 	{
 		*dest_p++ = vis[j];
@@ -287,7 +287,7 @@ int HL_CompressVis(byte *vis, byte *dest)
 		*dest_p++ = rep;
 		j--;
 	}
-	
+
 	return dest_p - dest;
 }
 
@@ -303,7 +303,7 @@ void HL_DecompressVis (byte *in, byte *decompressed)
 	byte	*out;
 	int		row;
 
-	row = (hl_numleafs+7)>>3;	
+	row = (hl_numleafs+7)>>3;
 	out = decompressed;
 
 	do
@@ -313,7 +313,7 @@ void HL_DecompressVis (byte *in, byte *decompressed)
 			*out++ = *in++;
 			continue;
 		}
-	
+
 		c = in[1];
 		in += 2;
 		while (c)
@@ -339,8 +339,8 @@ void HL_SwapBSPFile (qboolean todisk)
 	hl_dmodel_t *d;
 	hl_dmiptexlump_t *mtl;
 
-	
-// models	
+
+// models
 	for (i = 0; i < hl_nummodels; i++)
 	{
 		d = &hl_dmodels[i];
@@ -351,7 +351,7 @@ void HL_SwapBSPFile (qboolean todisk)
 		d->visleafs = LittleLong(d->visleafs);
 		d->firstface = LittleLong(d->firstface);
 		d->numfaces = LittleLong(d->numfaces);
-		
+
 		for (j = 0; j < 3; j++)
 		{
 			d->mins[j] = LittleFloat(d->mins[j]);
@@ -368,10 +368,10 @@ void HL_SwapBSPFile (qboolean todisk)
 		for (j = 0; j < 3; j++)
 			hl_dvertexes[i].point[j] = LittleFloat (hl_dvertexes[i].point[j]);
 	}
-		
+
 //
 // planes
-//	
+//
 	for (i=0 ; i<hl_numplanes ; i++)
 	{
 		for (j=0 ; j<3 ; j++)
@@ -379,10 +379,10 @@ void HL_SwapBSPFile (qboolean todisk)
 		hl_dplanes[i].dist = LittleFloat (hl_dplanes[i].dist);
 		hl_dplanes[i].type = LittleLong (hl_dplanes[i].type);
 	}
-	
+
 //
 // texinfos
-//	
+//
 	for (i=0 ; i<hl_numtexinfo ; i++)
 	{
 		for (j=0 ; j<2 ; j++)
@@ -395,7 +395,7 @@ void HL_SwapBSPFile (qboolean todisk)
 		hl_texinfo[i].miptex = LittleLong (hl_texinfo[i].miptex);
 		hl_texinfo[i].flags = LittleLong (hl_texinfo[i].flags);
 	}
-	
+
 //
 // faces
 //
@@ -467,7 +467,7 @@ void HL_SwapBSPFile (qboolean todisk)
 		for (i=0 ; i<c ; i++)
 			mtl->dataofs[i] = LittleLong(mtl->dataofs[i]);
 	}
-	
+
 //
 // marksurfaces
 //
@@ -500,7 +500,7 @@ int HL_CopyLump (int lump, void *dest, int size, int maxsize)
 
 	length = hl_header->lumps[lump].filelen;
 	ofs = hl_header->lumps[lump].fileofs;
-	
+
 	if (length % size) {
 		Error ("LoadBSPFile: odd lump size");
 	}
@@ -529,15 +529,13 @@ HL_LoadBSPFile
 */
 void	HL_LoadBSPFile (char *filename, int offset, int length)
 {
-	int			i;
-	
 //
 // load the file header
 //
 	hl_fileLength = LoadFile (filename, (void **)&hl_header, offset, length);
 
 // swap the header
-	for (i=0 ; i< sizeof(hl_dheader_t)/4 ; i++)
+	for (size_t i=0 ; i< sizeof(hl_dheader_t)/4 ; i++)
 		((int *)hl_header)[i] = LittleLong ( ((int *)hl_header)[i]);
 
 	if (hl_header->version != HL_BSPVERSION)
@@ -561,10 +559,10 @@ void	HL_LoadBSPFile (char *filename, int offset, int length)
 	hl_entdatasize = HL_CopyLump (HL_LUMP_ENTITIES, hl_dentdata, 1, HL_MAX_MAP_ENTSTRING );
 
 	FreeMemory(hl_header);		// everything has been copied out
-		
+
 //
 // swap everything
-//	
+//
 	HL_SwapBSPFile (false);
 
 	hl_dmodels_checksum = FastChecksum( hl_dmodels, hl_nummodels*sizeof(hl_dmodels[0]) );
@@ -595,7 +593,7 @@ void HL_AddLump (int lumpnum, void *data, int len)
 	hl_lump_t *lump;
 
 	lump = &hl_header->lumps[lumpnum];
-	
+
 	lump->fileofs = LittleLong( ftell(wadfile) );
 	lump->filelen = LittleLong(len);
 	SafeWrite (wadfile, data, (len+3)&~3);
@@ -609,14 +607,14 @@ Swaps the bsp file in place, so it should not be referenced again
 =============
 */
 void HL_WriteBSPFile (char *filename)
-{		
+{
 	hl_header = &outheader;
 	memset (hl_header, 0, sizeof(hl_dheader_t));
-	
+
 	HL_SwapBSPFile (true);
 
 	hl_header->version = LittleLong (HL_BSPVERSION);
-	
+
 	wadfile = SafeOpenWrite (filename);
 	SafeWrite (wadfile, hl_header, sizeof(hl_dheader_t));	// overwritten later
 
@@ -636,10 +634,10 @@ void HL_WriteBSPFile (char *filename)
 	HL_AddLump (HL_LUMP_VISIBILITY, hl_dvisdata, hl_visdatasize);
 	HL_AddLump (HL_LUMP_ENTITIES, hl_dentdata, hl_entdatasize);
 	HL_AddLump (HL_LUMP_TEXTURES, hl_dtexdata, hl_texdatasize);
-	
+
 	fseek (wadfile, 0, SEEK_SET);
 	SafeWrite (wadfile, hl_header, sizeof(hl_dheader_t));
-	fclose (wadfile);	
+	fclose (wadfile);
 }
 
 //============================================================================
@@ -651,7 +649,7 @@ int ArrayUsage( char *szItem, int items, int maxitems, int itemsize )
 {
 	float	percentage = maxitems ? items * 100.0 / maxitems : 0.0;
 
-   qprintf("%-12s  %7i/%-7i  %7i/%-7i  (%4.1f%%)", 
+   qprintf("%-12s  %7i/%-7i  %7i/%-7i  (%4.1f%%)",
 				szItem, items, maxitems, items * itemsize, maxitems * itemsize, percentage );
 	if ( percentage > 80.0 )
 		qprintf( "VERY FULL!\n" );
@@ -668,7 +666,7 @@ int GlobUsage( char *szItem, int itemstorage, int maxstorage )
 {
 	float	percentage = maxstorage ? itemstorage * 100.0 / maxstorage : 0.0;
 
-	qprintf("%-12s     [variable]    %7i/%-7i  (%4.1f%%)", 
+	qprintf("%-12s     [variable]    %7i/%-7i  (%4.1f%%)",
 				szItem, itemstorage, maxstorage, percentage );
 	if ( percentage > 80.0 )
 		qprintf( "VERY FULL!\n" );
@@ -726,10 +724,10 @@ ParseEpair
 epair_t *ParseEpair (void)
 {
 	epair_t	*e;
-	
+
 	e = malloc (sizeof(epair_t));
 	memset (e, 0, sizeof(epair_t));
-	
+
 	if (strlen(token) >= MAX_KEY-1)
 		Error ("ParseEpar: token too long");
 	e->key = copystring(token);
@@ -757,7 +755,7 @@ qboolean	ParseEntity (void)
 
 	if (strcmp (token, "{") )
 		Error ("ParseEntity: { not found");
-	
+
 	if (num_entities == HL_MAX_MAP_ENTITIES)
 		Error ("num_entities == HL_MAX_MAP_ENTITIES");
 
@@ -774,7 +772,7 @@ qboolean	ParseEntity (void)
 		e->next = mapent->epairs;
 		mapent->epairs = e;
 	} while (1);
-	
+
 	return true;
 } //*/
 
@@ -815,20 +813,20 @@ void HL_UnparseEntities (void)
 	epair_t *ep;
 	char line[2048];
 	int i;
-	
+
 	buf = hl_dentdata;
 	end = buf;
 	*end = 0;
-	
+
 	for (i=0 ; i<num_entities ; i++)
 	{
 		ep = entities[i].epairs;
 		if (!ep)
 			continue;	// ent got removed
-		
+
 		strcat (end,"{\n");
 		end += 2;
-				
+
 		for (ep = entities[i].epairs ; ep ; ep=ep->next)
 		{
 			sprintf (line, "\"%s\" \"%s\"\n", ep->key, ep->value);
@@ -849,7 +847,7 @@ void HL_UnparseEntities (void)
 void 	SetKeyValue (entity_t *ent, char *key, char *value)
 {
 	epair_t	*ep;
-	
+
 	for (ep=ent->epairs ; ep ; ep=ep->next)
 		if (!strcmp (ep->key, key) )
 		{
@@ -867,7 +865,7 @@ void 	SetKeyValue (entity_t *ent, char *key, char *value)
 char 	*ValueForKey (entity_t *ent, char *key)
 {
 	epair_t	*ep;
-	
+
 	for (ep=ent->epairs ; ep ; ep=ep->next)
 		if (!strcmp (ep->key, key) )
 			return ep->value;
@@ -877,7 +875,7 @@ char 	*ValueForKey (entity_t *ent, char *key)
 vec_t	FloatForKey (entity_t *ent, char *key)
 {
 	char	*k;
-	
+
 	k = ValueForKey (ent, key);
 	return atof(k);
 }

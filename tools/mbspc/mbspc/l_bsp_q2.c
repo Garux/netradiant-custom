@@ -431,7 +431,7 @@ winding_t *Q2_BrushSideWinding(dbrush_t *brush, dbrushside_t *baseside)
 	dplane_t *baseplane, *plane;
 	winding_t *w;
 	dbrushside_t *side;
-	
+
 	//create a winding for the brush side with the given planenumber
 	baseplane = &dplanes[baseside->planenum];
 	w = BaseWindingForPlane(baseplane->normal, baseplane->dist);
@@ -571,11 +571,11 @@ int Q2_CompressVis (byte *vis, byte *dest)
 	int		rep;
 	int		visrow;
 	byte	*dest_p;
-	
+
 	dest_p = dest;
 //	visrow = (r_numvisleafs + 7)>>3;
 	visrow = (dvis->numclusters + 7)>>3;
-	
+
 	for (j=0 ; j<visrow ; j++)
 	{
 		*dest_p++ = vis[j];
@@ -591,7 +591,7 @@ int Q2_CompressVis (byte *vis, byte *dest)
 		*dest_p++ = rep;
 		j--;
 	}
-	
+
 	return dest_p - dest;
 }
 
@@ -607,8 +607,8 @@ void Q2_DecompressVis (byte *in, byte *decompressed)
 	byte	*out;
 	int		row;
 
-//	row = (r_numvisleafs+7)>>3;	
-	row = (dvis->numclusters+7)>>3;	
+//	row = (r_numvisleafs+7)>>3;
+	row = (dvis->numclusters+7)>>3;
 	out = decompressed;
 
 	do
@@ -618,7 +618,7 @@ void Q2_DecompressVis (byte *in, byte *decompressed)
 			*out++ = *in++;
 			continue;
 		}
-	
+
 		c = in[1];
 		if (!c)
 			Error ("DecompressVis: 0 repeat");
@@ -645,8 +645,8 @@ void Q2_SwapBSPFile (qboolean todisk)
 	int				i, j, k;
 	dmodel_t		*d;
 
-	
-// models	
+
+// models
 	for (i=0 ; i<nummodels ; i++)
 	{
 		d = &dmodels[i];
@@ -654,7 +654,7 @@ void Q2_SwapBSPFile (qboolean todisk)
 		d->firstface = LittleLong (d->firstface);
 		d->numfaces = LittleLong (d->numfaces);
 		d->headnode = LittleLong (d->headnode);
-		
+
 		for (j=0 ; j<3 ; j++)
 		{
 			d->mins[j] = LittleFloat(d->mins[j]);
@@ -671,10 +671,10 @@ void Q2_SwapBSPFile (qboolean todisk)
 		for (j=0 ; j<3 ; j++)
 			dvertexes[i].point[j] = LittleFloat (dvertexes[i].point[j]);
 	}
-		
+
 //
 // planes
-//	
+//
 	for (i=0 ; i<numplanes ; i++)
 	{
 		for (j=0 ; j<3 ; j++)
@@ -682,10 +682,10 @@ void Q2_SwapBSPFile (qboolean todisk)
 		dplanes[i].dist = LittleFloat (dplanes[i].dist);
 		dplanes[i].type = LittleLong (dplanes[i].type);
 	}
-	
+
 //
 // texinfos
-//	
+//
 	for (i=0 ; i<numtexinfo ; i++)
 	{
 		for (j=0 ; j<2 ; j++)
@@ -699,7 +699,7 @@ void Q2_SwapBSPFile (qboolean todisk)
 		texinfo[i].value = LittleLong (texinfo[i].value);
 		texinfo[i].nexttexinfo = LittleLong (texinfo[i].nexttexinfo);
 	}
-	
+
 //
 // faces
 //
@@ -838,7 +838,7 @@ int Q2_CopyLump (int lump, void *dest, int size, int maxsize)
 
 	length = header->lumps[lump].filelen;
 	ofs = header->lumps[lump].fileofs;
-	
+
 	if (length % size)
 		Error ("LoadBSPFile: odd lump size");
 
@@ -857,15 +857,13 @@ LoadBSPFile
 */
 void Q2_LoadBSPFile(char *filename, int offset, int length)
 {
-	int			i;
-	
 //
 // load the file header
 //
 	LoadFile (filename, (void **)&header, offset, length);
 
 // swap the header
-	for (i=0 ; i< sizeof(dheader_t)/4 ; i++)
+	for (size_t i=0 ; i< sizeof(dheader_t)/4 ; i++)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
 
 	if (header->ident != IDBSPHEADER)
@@ -896,10 +894,10 @@ void Q2_LoadBSPFile(char *filename, int offset, int length)
 	Q2_CopyLump (LUMP_POP, dpop, 1, MAX_MAP_DPOP);
 
 	FreeMemory(header);		// everything has been copied out
-		
+
 //
 // swap everything
-//	
+//
 	Q2_SwapBSPFile (false);
 
 	Q2_FixTextureReferences();
@@ -915,7 +913,6 @@ Only loads the texinfo lump, so qdata can scan for textures
 */
 void	Q2_LoadBSPFileTexinfo (char *filename)
 {
-	int			i;
 	FILE		*f;
 	int		length, ofs;
 
@@ -925,7 +922,7 @@ void	Q2_LoadBSPFileTexinfo (char *filename)
 	fread (header, sizeof(dheader_t), 1, f);
 
 // swap the header
-	for (i=0 ; i< sizeof(dheader_t)/4 ; i++)
+	for (size_t i=0 ; i< sizeof(dheader_t)/4 ; i++)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
 
 	if (header->ident != IDBSPHEADER)
@@ -944,7 +941,7 @@ void	Q2_LoadBSPFileTexinfo (char *filename)
 	numtexinfo = length / sizeof(texinfo_t);
 
 	FreeMemory(header);		// everything has been copied out
-		
+
 	Q2_SwapBSPFile (false);
 } //end of the function Q2_LoadBSPFileTexinfo
 
@@ -959,7 +956,7 @@ void Q2_AddLump (int lumpnum, void *data, int len)
 	lump_t *lump;
 
 	lump = &header->lumps[lumpnum];
-	
+
 	lump->fileofs = LittleLong( ftell(wadfile) );
 	lump->filelen = LittleLong(len);
 	SafeWrite (wadfile, data, (len+3)&~3);
@@ -973,15 +970,15 @@ Swaps the bsp file in place, so it should not be referenced again
 =============
 */
 void	Q2_WriteBSPFile (char *filename)
-{		
+{
 	header = &outheader;
 	memset (header, 0, sizeof(dheader_t));
-	
+
 	Q2_SwapBSPFile (true);
 
 	header->ident = LittleLong (IDBSPHEADER);
 	header->version = LittleLong (BSPVERSION);
-	
+
 	wadfile = SafeOpenWrite (filename);
 	SafeWrite (wadfile, header, sizeof(dheader_t));	// overwritten later
 
@@ -1005,10 +1002,10 @@ void	Q2_WriteBSPFile (char *filename)
 	Q2_AddLump (LUMP_VISIBILITY, dvisdata, visdatasize);
 	Q2_AddLump (LUMP_ENTITIES, dentdata, entdatasize);
 	Q2_AddLump (LUMP_POP, dpop, sizeof(dpop));
-	
+
 	fseek (wadfile, 0, SEEK_SET);
 	SafeWrite (wadfile, header, sizeof(dheader_t));
-	fclose (wadfile);	
+	fclose (wadfile);
 } //end of the function Q2_WriteBSPFile
 
 //============================================================================
@@ -1107,23 +1104,23 @@ char *Q2_UnparseEntities(int *size)
 	buf = dentdata;
 	end = buf;
 	*end = 0;
-	
+
 	for (i=0 ; i<num_entities ; i++)
 	{
 		ep = entities[i].epairs;
 		if (!ep)
 			continue;	// ent got removed
-		
+
 		strcat (end,"{\n");
 		end += 2;
-				
+
 		for (ep = entities[i].epairs ; ep ; ep=ep->next)
 		{
 			strcpy (key, ep->key);
 			StripTrailing (key);
 			strcpy (value, ep->value);
 			StripTrailing (value);
-				
+
 			sprintf (line, "\"%s\" \"%s\"\n", key, value);
 			strcat (end, line);
 			end += strlen(line);

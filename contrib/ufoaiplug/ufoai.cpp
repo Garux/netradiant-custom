@@ -76,7 +76,7 @@ const char* getCommandTitleList(){
 	return "";
 }
 void dispatch( const char* command, float* vMin, float* vMax, bool bSingleBrush ){
-	char *message = NULL;
+	const char *message = NULL;
 	if ( string_equal( command, "About" ) ) {
 		GlobalRadiant().m_pfnMessageBox( GTK_WIDGET( g_mainwnd ),
 										 "UFO:AI Plugin (http://ufoai.sf.net)\nBuild: " __DATE__ "\nRadiant version: " RADIANT_VERSION "\nPlugin version: " PLUGIN_VERSION "\nAuthor: Martin Gerhardy (tlh2000/mattn)\n", "About",

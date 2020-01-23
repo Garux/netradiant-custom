@@ -130,7 +130,7 @@ void get_team_count( const char *classname, int *count, int *team ){
 /**
  * @brief Some default values to worldspawn like maxlevel and so on
  */
-void assign_default_values_to_worldspawn( bool override, char **returnMsg ){
+void assign_default_values_to_worldspawn( bool override, const char **returnMsg ){
 	static char message[1024];
 	Entity* worldspawn;
 	int teams = 0;
@@ -190,7 +190,7 @@ int check_entity_flags( const char *classname, const char *flag ){
  * @brief Will check e.g. the map entities for valid values
  * @todo: check for maxlevel
  */
-void check_map_values( char **returnMsg ){
+void check_map_values( const char **returnMsg ){
 	static char message[1024];
 	int count = 0;
 	int teams = 0;

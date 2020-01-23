@@ -241,7 +241,7 @@ int SaveScript( char *name ){
 	int i, j;
 	glxy_t buff;
 
-	if ( fp = fopen( name, "wb" ) ) {
+	if ( ( fp = fopen( name, "wb" ) ) ) {
 		for ( j = 0; j < filenum; j++ )
 		{
 			for ( i = 0; i < filenum; i++ )
@@ -281,7 +281,7 @@ int     GetScriptInfo( char *name ){
 
 	printf( "Opening script file %s.\n", name );
 
-	if ( fp = fopen( name, "r" ) ) {
+	if ( ( fp = fopen( name, "r" ) ) ) {
 		while ( fgets( buffer, 256, fp ) )
 		{
 			if ( strncmp( buffer, "//", 2 ) && strncmp( buffer, "\n", 1 ) ) {

@@ -170,7 +170,6 @@ void WriteCommonModelFile( FILE *modelouthandle, PartialAliasFrame_t *outFrames 
 	daliasframe_t   *out;
 	byte buffer[MAX_VERTS * 4 + 128];
 	float v;
-	int c_on, c_off;
 
 	model.version = ALIAS_VERSION;
 	model.framesize = (int)&( (daliasframe_t *)0 )->verts[model.num_xyz];
@@ -184,7 +183,7 @@ void WriteCommonModelFile( FILE *modelouthandle, PartialAliasFrame_t *outFrames 
 	//
 	// write out the model header
 	//
-	for ( i = 0 ; i < sizeof( dmdl_t ) / 4 ; i++ )
+	for ( i = 0 ; i < (int)sizeof( dmdl_t ) / 4 ; i++ )
 		( (int *)&modeltemp )[i] = LittleLong( ( (int *)&model )[i] );
 
 	SafeWrite( modelouthandle, &modeltemp, sizeof( modeltemp ) );
@@ -197,7 +196,6 @@ void WriteCommonModelFile( FILE *modelouthandle, PartialAliasFrame_t *outFrames 
 	//
 	// write out the texture coordinates
 	//
-	c_on = c_off = 0;
 	for ( i = 0 ; i < model.num_st ; i++ )
 	{
 		base_st[i].s = LittleShort( base_st[i].s );

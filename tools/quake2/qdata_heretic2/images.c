@@ -257,7 +257,7 @@ void GL_MipMap8P( byte *out, byte *in, int width, int height, palette_t *palette
 
 
 miptex_t *CreateMip( byte *data, unsigned width, unsigned height, byte *palette, int *FinalSize, qboolean mip ){
-	int scaled_width, scaled_height;
+	unsigned scaled_width, scaled_height;
 	int i,j,r,g,b;
 	byte intensitytable[256];
 	byte scaled[256 * 256];
@@ -265,7 +265,7 @@ miptex_t *CreateMip( byte *data, unsigned width, unsigned height, byte *palette,
 	int miplevel;
 	miptex_t    *mp;
 	byte        *pos;
-	int size;
+	unsigned size;
 
 	for ( i = 0 ; i < 256 ; i++ )
 	{
@@ -422,13 +422,13 @@ void GL_MipMap( byte *out, byte *in, int width, int height ){
 }
 
 miptex32_t *CreateMip32( unsigned *data, unsigned width, unsigned height, int *FinalSize, qboolean mip ){
-	int scaled_width, scaled_height;
+	unsigned scaled_width, scaled_height;
 	unsigned scaled[MAX_IMAGE_SIZE * MAX_IMAGE_SIZE];
 	unsigned out[MAX_IMAGE_SIZE * MAX_IMAGE_SIZE];
 	int miplevel;
 	miptex32_t      *mp;
 	byte            *pos;
-	int size;
+	unsigned size;
 	paletteRGBA_t   *test;
 
 	for ( scaled_width = 1 ; scaled_width < width ; scaled_width <<= 1 )
@@ -872,11 +872,9 @@ byte AveragePixels( int count ){
 	int pix;
 	int bestcolor;
 	byte    *pal;
-	int fullbright;
 
 	vis = 0;
 	r = g = b = 0;
-	fullbright = 0;
 	for ( i = 0 ; i < count ; i++ )
 	{
 		pix = pixdata[i];

@@ -53,7 +53,7 @@ extern char        *g_outputDir;
  */
 void FinishSprite( void ){
 	FILE    *spriteouthandle;
-	int i, curframe;
+	int i;
 	dsprite_t spritetemp;
 	char savename[1024];
 
@@ -95,8 +95,6 @@ void FinishSprite( void ){
 //
 // write out the frames
 //
-	curframe = 0;
-
 	for ( i = 0 ; i < sprite.numframes ; i++ )
 	{
 		frames[i].width = LittleLong( frames[i].width );

@@ -171,7 +171,6 @@ static void LoadHRCJointList( char *fileName, QDataJoint_t *jointList, int skelT
 	vec3_t curTranslation[MAX_STACK], curRotation[MAX_STACK], curScale[MAX_STACK];
 	int curCorrespondingJoint[MAX_STACK];
 	int currentStack = 0, stackSize;
-	int baseJoint;
 	float cx, sx, cy, sy, cz, sz;
 	float rx, ry, rz;
 	float x2, y2, z2;
@@ -337,8 +336,6 @@ static void LoadHRCJointList( char *fileName, QDataJoint_t *jointList, int skelT
 		jointList[i].placement.up[1] += jointList[i].placement.origin[1];
 		jointList[i].placement.up[2] += jointList[i].placement.origin[2];
 	}
-
-	baseJoint = NUM_JOINTS_RAVEN;
 
 	for ( i = stackSize /*NUM_JOINTS_RAVEN*/ - 1; i > 0; --i )
 	{

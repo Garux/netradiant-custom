@@ -503,7 +503,7 @@ void PC_PrintDefineHashTable(define_t **definehash)
 
 int PC_NameHash(char *name)
 {
-	int register hash, i;
+	int hash, i;
 
 	hash = 0;
 	for (i = 0; name[i] != '\0'; i++)
@@ -1023,7 +1023,7 @@ int PC_ReadLine(source_t *source, token_t *token)
 	do
 	{
 		if (!PC_ReadSourceToken(source, token)) return qfalse;
-		
+
 		if (token->linescrossed > crossline)
 		{
 			PC_UnreadSourceToken(source, token);
@@ -1697,7 +1697,7 @@ int PC_EvaluateTokens(source_t *source, token_t *tokens, signed long int *intval
 				AllocValue(v);
 #if DEFINEHASHING
 				if (PC_FindHashedDefine(source->definehash, t->string))
-#else			
+#else
 				if (PC_FindDefine(source->defines, t->string))
 #endif //DEFINEHASHING
 				{
@@ -1825,7 +1825,7 @@ int PC_EvaluateTokens(source_t *source, token_t *tokens, signed long int *intval
 							break;
 						} //end if
 					} //end case
-					
+
 					case P_MUL:
 					case P_DIV:
 					case P_MOD:

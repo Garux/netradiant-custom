@@ -490,7 +490,7 @@ void InitPaths( int *argc, char **argv ){
 	for ( i = 0, j = 0, k = 0; i < *argc && j < *argc; i++, j++ )
 	{
 		for ( ; j < *argc && argv[ j ] == NULL; j++ ) ;
-		argv[ i ] = argv[ j ];
+			argv[ i ] = argv[ j ];
 		if ( argv[ i ] != NULL ) {
 			k++;
 		}

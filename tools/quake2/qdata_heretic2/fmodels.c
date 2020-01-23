@@ -226,7 +226,6 @@ static void WriteModelFile( FILE *modelouthandle ){
 	fmaliasframe_t  *out;
 	byte buffer[MAX_FM_VERTS * 4 + 128];
 	float v;
-	int c_on, c_off;
 	IntListNode_t   *current, *toFree;
 	qboolean framesWritten = false;
 	size_t temp,size = 0;
@@ -256,7 +255,6 @@ static void WriteModelFile( FILE *modelouthandle ){
 	//
 	// write out the texture coordinates
 	//
-	c_on = c_off = 0;
 	for ( i = 0 ; i < fmheader.num_st ; i++ )
 	{
 		base_st[i].s = LittleShort( base_st[i].s );
@@ -1322,7 +1320,7 @@ static void BuildGlCmds( void ){
 	int best_st[1024];
 	int best_tris[1024];
 	int type;
-	int trans_check;
+	unsigned trans_check;
 	int bit,pos;
 
 	//

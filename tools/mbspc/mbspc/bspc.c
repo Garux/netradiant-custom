@@ -467,7 +467,7 @@ void CreateAASFilesForAllBSPFiles(char *quakepath)
 quakefile_t *GetArgumentFiles(int argc, char *argv[], int *i, char *ext)
 {
 	quakefile_t *qfiles, *lastqf, *qf;
-	int j;
+	size_t j;
 	char buf[1024];
 
 	qfiles = NULL;

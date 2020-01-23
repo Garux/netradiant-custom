@@ -334,7 +334,7 @@ winding_t *Sin_BrushSideWinding(sin_dbrush_t *brush, sin_dbrushside_t *baseside)
 	sin_dplane_t *baseplane, *plane;
 	sin_dbrushside_t *side;
 	winding_t *w;
-	
+
 	//create a winding for the brush side with the given planenumber
 	baseplane = &sin_dplanes[baseside->planenum];
 	w = BaseWindingForPlane(baseplane->normal, baseplane->dist);
@@ -471,11 +471,11 @@ int Sin_CompressVis (byte *vis, byte *dest)
 	int		rep;
 	int		visrow;
 	byte	*dest_p;
-	
+
 	dest_p = dest;
 //	visrow = (r_numvisleafs + 7)>>3;
 	visrow = (sin_dvis->numclusters + 7)>>3;
-	
+
 	for (j=0 ; j<visrow ; j++)
 	{
 		*dest_p++ = vis[j];
@@ -491,7 +491,7 @@ int Sin_CompressVis (byte *vis, byte *dest)
 		*dest_p++ = rep;
 		j--;
 	}
-	
+
 	return dest_p - dest;
 } //end of the function Sin_CompressVis
 
@@ -507,8 +507,8 @@ void Sin_DecompressVis (byte *in, byte *decompressed)
 	byte	*out;
 	int		row;
 
-//	row = (r_numvisleafs+7)>>3;	
-	row = (sin_dvis->numclusters+7)>>3;	
+//	row = (r_numvisleafs+7)>>3;
+	row = (sin_dvis->numclusters+7)>>3;
 	out = decompressed;
 
 	do
@@ -518,7 +518,7 @@ void Sin_DecompressVis (byte *in, byte *decompressed)
 			*out++ = *in++;
 			continue;
 		}
-	
+
 		c = in[1];
 		if (!c)
 			Error ("DecompressVis: 0 repeat");
@@ -545,8 +545,8 @@ void Sin_SwapBSPFile (qboolean todisk)
 	int				i, j, k;
 	sin_dmodel_t		*d;
 
-	
-// models	
+
+// models
 	for (i=0 ; i<sin_nummodels ; i++)
 	{
 		d = &sin_dmodels[i];
@@ -554,7 +554,7 @@ void Sin_SwapBSPFile (qboolean todisk)
 		d->firstface = LittleLong (d->firstface);
 		d->numfaces = LittleLong (d->numfaces);
 		d->headnode = LittleLong (d->headnode);
-		
+
 		for (j=0 ; j<3 ; j++)
 		{
 			d->mins[j] = LittleFloat(d->mins[j]);
@@ -571,10 +571,10 @@ void Sin_SwapBSPFile (qboolean todisk)
 		for (j=0 ; j<3 ; j++)
 			sin_dvertexes[i].point[j] = LittleFloat (sin_dvertexes[i].point[j]);
 	}
-		
+
 //
 // planes
-//	
+//
 	for (i=0 ; i<sin_numplanes ; i++)
 	{
 		for (j=0 ; j<3 ; j++)
@@ -582,10 +582,10 @@ void Sin_SwapBSPFile (qboolean todisk)
 		sin_dplanes[i].dist = LittleFloat (sin_dplanes[i].dist);
 		sin_dplanes[i].type = LittleLong (sin_dplanes[i].type);
 	}
-	
+
 //
 // sin_texinfos
-//	
+//
 	for (i = 0; i < sin_numtexinfo; i++)
 	{
 		for (j=0 ; j<2 ; j++)
@@ -596,13 +596,13 @@ void Sin_SwapBSPFile (qboolean todisk)
 			}
 		}
 #ifdef SIN
-      sin_texinfo[i].trans_mag = LittleFloat( sin_texinfo[i].trans_mag );     
-      sin_texinfo[i].trans_angle = LittleLong( sin_texinfo[i].trans_angle );     
-      sin_texinfo[i].animtime = LittleFloat( sin_texinfo[i].animtime );     
-      sin_texinfo[i].nonlit = LittleFloat( sin_texinfo[i].nonlit );     
-      sin_texinfo[i].translucence = LittleFloat( sin_texinfo[i].translucence );     
-      sin_texinfo[i].friction = LittleFloat( sin_texinfo[i].friction );     
-      sin_texinfo[i].restitution = LittleFloat( sin_texinfo[i].restitution );     
+      sin_texinfo[i].trans_mag = LittleFloat( sin_texinfo[i].trans_mag );
+      sin_texinfo[i].trans_angle = LittleLong( sin_texinfo[i].trans_angle );
+      sin_texinfo[i].animtime = LittleFloat( sin_texinfo[i].animtime );
+      sin_texinfo[i].nonlit = LittleFloat( sin_texinfo[i].nonlit );
+      sin_texinfo[i].translucence = LittleFloat( sin_texinfo[i].translucence );
+      sin_texinfo[i].friction = LittleFloat( sin_texinfo[i].friction );
+      sin_texinfo[i].restitution = LittleFloat( sin_texinfo[i].restitution );
 		sin_texinfo[i].flags = LittleUnsigned (sin_texinfo[i].flags);
 #else
 		sin_texinfo[i].value = LittleLong (sin_texinfo[i].value);
@@ -614,7 +614,7 @@ void Sin_SwapBSPFile (qboolean todisk)
 #ifdef SIN
 //
 // lightinfos
-//	
+//
 	for (i = 0; i < sin_numlightinfo; i++)
 	{
 		for (j=0 ; j<3 ; j++)
@@ -622,12 +622,12 @@ void Sin_SwapBSPFile (qboolean todisk)
 			sin_lightinfo[i].color[j] = LittleFloat (sin_lightinfo[i].color[j]);
          }
 		sin_lightinfo[i].value = LittleLong (sin_lightinfo[i].value);
-      sin_lightinfo[i].direct = LittleFloat( sin_lightinfo[i].direct );     
-      sin_lightinfo[i].directangle = LittleFloat( sin_lightinfo[i].directangle );     
-      sin_lightinfo[i].directstyle = LittleFloat( sin_lightinfo[i].directstyle );     
+      sin_lightinfo[i].direct = LittleFloat( sin_lightinfo[i].direct );
+      sin_lightinfo[i].directangle = LittleFloat( sin_lightinfo[i].directangle );
+      sin_lightinfo[i].directstyle = LittleFloat( sin_lightinfo[i].directstyle );
 	}
 #endif
-	
+
 //
 // faces
 //
@@ -794,13 +794,13 @@ int Sin_CopyLump (int lump, void *dest, int size, int maxsize)
 
 	length = header->lumps[lump].filelen;
 	ofs = header->lumps[lump].fileofs;
-	
+
 	if (length % size)
 		Error ("Sin_LoadBSPFile: odd lump size");
 
    if ((length/size) > maxsize)
       Error ("Sin_LoadBSPFile: exceeded max size for lump %d size %d > maxsize %d\n", lump, (length/size), maxsize );
-	
+
 	memcpy (dest, (byte *)header + ofs, length);
 
 	return length / size;
@@ -812,10 +812,10 @@ int Sin_CopyLump (int lump, void *dest, int size)
 
 	length = header->lumps[lump].filelen;
 	ofs = header->lumps[lump].fileofs;
-	
+
 	if (length % size)
 		Error ("Sin_LoadBSPFile: odd lump size");
-	
+
 	memcpy (dest, (byte *)header + ofs, length);
 
 	return length / size;
@@ -829,15 +829,13 @@ Sin_LoadBSPFile
 */
 void	Sin_LoadBSPFile(char *filename, int offset, int length)
 {
-	int			i;
-	
 //
 // load the file header
 //
 	LoadFile (filename, (void **)&header, offset, length);
 
 // swap the header
-	for (i=0 ; i< sizeof(sin_dheader_t)/4 ; i++)
+	for (size_t i=0 ; i< sizeof(sin_dheader_t)/4 ; i++)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
 
 	if (header->ident != SIN_BSPHEADER && header->ident != SINGAME_BSPHEADER)
@@ -893,10 +891,10 @@ void	Sin_LoadBSPFile(char *filename, int offset, int length)
 #endif
 
 	FreeMemory(header);		// everything has been copied out
-		
+
 //
 // swap everything
-//	
+//
 	Sin_SwapBSPFile (false);
 } //end of the function Sin_LoadBSPFile
 
@@ -909,7 +907,6 @@ Only loads the sin_texinfo lump, so qdata can scan for textures
 */
 void	Sin_LoadBSPFileTexinfo (char *filename)
 {
-	int			i;
 	FILE		*f;
 	int		length, ofs;
 
@@ -919,7 +916,7 @@ void	Sin_LoadBSPFileTexinfo (char *filename)
 	fread (header, sizeof(sin_dheader_t), 1, f);
 
 // swap the header
-	for (i=0 ; i< sizeof(sin_dheader_t)/4 ; i++)
+	for (size_t i=0 ; i< sizeof(sin_dheader_t)/4 ; i++)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
 
 	if (header->ident != SIN_BSPHEADER && header->ident != SINGAME_BSPHEADER)
@@ -938,7 +935,7 @@ void	Sin_LoadBSPFileTexinfo (char *filename)
 	sin_numtexinfo = length / sizeof(sin_texinfo_t);
 
 	FreeMemory(header);		// everything has been copied out
-		
+
 	Sin_SwapBSPFile (false);
 } //end of the function Sin_LoadBSPFilesTexinfo
 
@@ -960,7 +957,7 @@ void Sin_AddLump (int lumpnum, void *data, int len, int size, int maxsize)
 		Error ("Sin_WriteBSPFile: exceeded max size for lump %d size %d > maxsize %d\n", lumpnum, len, maxsize );
 
 	lump = &header->lumps[lumpnum];
-	
+
 	lump->fileofs = LittleLong( ftell(wadfile) );
 	lump->filelen = LittleLong(totallength);
 	SafeWrite (wadfile, data, (totallength+3)&~3);
@@ -971,7 +968,7 @@ void Sin_AddLump (int lumpnum, void *data, int len)
 	sin_lump_t *lump;
 
 	lump = &header->lumps[lumpnum];
-	
+
 	lump->fileofs = LittleLong( ftell(wadfile) );
 	lump->filelen = LittleLong(len);
 	SafeWrite (wadfile, data, (len+3)&~3);
@@ -985,15 +982,15 @@ Swaps the bsp file in place, so it should not be referenced again
 =============
 */
 void	Sin_WriteBSPFile (char *filename)
-{		
+{
 	header = &outheader;
 	memset (header, 0, sizeof(sin_dheader_t));
-	
+
 	Sin_SwapBSPFile (true);
 
 	header->ident = LittleLong (SIN_BSPHEADER);
 	header->version = LittleLong (SIN_BSPVERSION);
-	
+
 	wadfile = SafeOpenWrite (filename);
 	SafeWrite (wadfile, header, sizeof(sin_dheader_t));	// overwritten later
 
@@ -1041,10 +1038,10 @@ void	Sin_WriteBSPFile (char *filename)
 	Sin_AddLump (SIN_LUMP_ENTITIES, sin_dentdata, sin_entdatasize);
 	Sin_AddLump (SIN_LUMP_POP, sin_dpop, sizeof(sin_dpop));
 #endif
-	
+
 	fseek (wadfile, 0, SEEK_SET);
 	SafeWrite (wadfile, header, sizeof(sin_dheader_t));
-	fclose (wadfile);	
+	fclose (wadfile);
 }
 
 //============================================================================
@@ -1094,23 +1091,23 @@ void Sin_UnparseEntities (void)
 	buf = sin_dentdata;
 	end = buf;
 	*end = 0;
-	
+
 	for (i=0 ; i<num_entities ; i++)
 	{
 		ep = entities[i].epairs;
 		if (!ep)
 			continue;	// ent got removed
-		
+
 		strcat (end,"{\n");
 		end += 2;
-				
+
 		for (ep = entities[i].epairs ; ep ; ep=ep->next)
 		{
 			strcpy (key, ep->key);
 			StripTrailing (key);
 			strcpy (value, ep->value);
 			StripTrailing (value);
-				
+
 			sprintf (line, "\"%s\" \"%s\"\n", key, value);
 			strcat (end, line);
 			end += strlen(line);

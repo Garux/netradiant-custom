@@ -398,12 +398,12 @@ void ProcessWorldModel( void ){
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
 		polyline = LeakFile( tree );
-		leaknode = xmlNewNode( NULL, (xmlChar*)"message" );
-		xmlNodeAddContent( leaknode, (xmlChar*)"MAP LEAKED\n" );
+		leaknode = xmlNewNode( NULL, (const xmlChar*)"message" );
+		xmlNodeAddContent( leaknode, (const xmlChar*)"MAP LEAKED\n" );
 		xmlAddChild( leaknode, polyline );
 		level[0] = (int) '0' + SYS_ERR;
 		level[1] = 0;
-		xmlSetProp( leaknode, (xmlChar*)"level", (xmlChar*) &level );
+		xmlSetProp( leaknode, (xmlChar*)"level", (const xmlChar*)level );
 		xml_SendNode( leaknode );
 		if ( leaktest ) {
 			Sys_FPrintf( SYS_WRN, "--- MAP LEAKED, ABORTING LEAKTEST ---\n" );

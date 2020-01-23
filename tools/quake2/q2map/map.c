@@ -828,7 +828,6 @@ qboolean    ParseMapEntity( void ){
 	epair_t     *e;
 	side_t      *s;
 	int i, j;
-	int startbrush, startsides;
 	vec_t newdist;
 	mapbrush_t  *b;
 
@@ -843,9 +842,6 @@ qboolean    ParseMapEntity( void ){
 	if ( num_entities == MAX_MAP_ENTITIES ) {
 		Error( "num_entities == MAX_MAP_ENTITIES" );
 	}
-
-	startbrush = nummapbrushes;
-	startsides = nummapbrushsides;
 
 	mapent = &entities[num_entities];
 	num_entities++;

@@ -326,7 +326,7 @@ void AddPointToTriangulation( patch_t *patch, triangulation_t *trian ){
 void    LerpTriangle( triangulation_t *trian, triangle_t *t, vec3_t point, vec3_t color ){
 	patch_t     *p1, *p2, *p3;
 	vec3_t base, d1, d2;
-	float x, y, x1, y1, x2, y2;
+	float x, y, y1, x2;
 
 	p1 = trian->points[t->edges[0]->p0];
 	p2 = trian->points[t->edges[1]->p0];
@@ -339,11 +339,11 @@ void    LerpTriangle( triangulation_t *trian, triangle_t *t, vec3_t point, vec3_
 	x = DotProduct( point, t->edges[0]->normal ) - t->edges[0]->dist;
 	y = DotProduct( point, t->edges[2]->normal ) - t->edges[2]->dist;
 
-	x1 = 0;
+//	x1 = 0;
 	y1 = DotProduct( p2->origin, t->edges[2]->normal ) - t->edges[2]->dist;
 
 	x2 = DotProduct( p3->origin, t->edges[0]->normal ) - t->edges[0]->dist;
-	y2 = 0;
+//	y2 = 0;
 
 	if ( fabs( y1 ) < ON_EPSILON || fabs( x2 ) < ON_EPSILON ) {
 		VectorCopy( base, color );
@@ -787,7 +787,7 @@ void CreateDirectLights( void ){
 	//
 	// surfaces
 	//
-	for ( i = 0, p = patches ; i < (int) num_patches ; i++, p++ )
+	for ( i = 0, p = patches ; i < num_patches ; i++, p++ )
 	{
 		if ( p->totallight[0] < DIRECT_LIGHT
 			 && p->totallight[1] < DIRECT_LIGHT

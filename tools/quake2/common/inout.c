@@ -66,8 +66,8 @@ xmlNodePtr xml_NodeForVec( vec3_t v ){
 	char buf[1024];
 
 	sprintf( buf, "%f %f %f", v[0], v[1], v[2] );
-	ret = xmlNewNode( NULL, "point" );
-	xmlNodeAddContent( ret, buf );
+	ret = xmlNewNode( NULL, (const xmlChar*)"point" );
+	xmlNodeAddContent( ret, (const xmlChar*)buf );
 	return ret;
 }
 
@@ -76,8 +76,8 @@ void xml_SendNode( xmlNodePtr node ){
 	xmlBufferPtr xml_buf;
 	char xmlbuf[MAX_NETMESSAGE]; // we have to copy content from the xmlBufferPtr into an aux buffer .. that sucks ..
 	// this index loops through the node buffer
-	int pos = 0;
-	int size;
+	size_t pos = 0;
+	size_t size;
 
 	xmlAddChild( doc->children, node );
 
@@ -144,15 +144,15 @@ void xml_Select( char *msg, int entitynum, int brushnum, qboolean bError ){
 
 	// now build a proper "select" XML node
 	sprintf( buf, "Entity %i, Brush %i: %s", entitynum, brushnum, msg );
-	node = xmlNewNode( NULL, "select" );
-	xmlNodeAddContent( node, buf );
+	node = xmlNewNode( NULL, (const xmlChar*)"select" );
+	xmlNodeAddContent( node, (const xmlChar*)buf );
 	level[0] = (int)'0' + ( bError ? SYS_ERR : SYS_WRN )  ;
 	level[1] = 0;
-	xmlSetProp( node, "level", (char *)&level );
+	xmlSetProp( node, (const xmlChar*)"level", (const xmlChar*)level );
 	// a 'select' information
 	sprintf( buf, "%i %i", entitynum, brushnum );
-	select = xmlNewNode( NULL, "brush" );
-	xmlNodeAddContent( select, buf );
+	select = xmlNewNode( NULL, (const xmlChar*)"brush" );
+	xmlNodeAddContent( select, (const xmlChar*)buf );
 	xmlAddChild( node, select );
 	xml_SendNode( node );
 
@@ -171,15 +171,15 @@ void xml_Point( char *msg, vec3_t pt ){
 	char buf[1024];
 	char level[2];
 
-	node = xmlNewNode( NULL, "pointmsg" );
-	xmlNodeAddContent( node, msg );
+	node = xmlNewNode( NULL, (const xmlChar*)"pointmsg" );
+	xmlNodeAddContent( node, (const xmlChar*)msg );
 	level[0] = (int)'0' + SYS_ERR;
 	level[1] = 0;
-	xmlSetProp( node, "level", (char *)&level );
+	xmlSetProp( node, (const xmlChar*)"level", (const xmlChar*)level );
 	// a 'point' node
 	sprintf( buf, "%g %g %g", pt[0], pt[1], pt[2] );
-	point = xmlNewNode( NULL, "point" );
-	xmlNodeAddContent( point, buf );
+	point = xmlNewNode( NULL, (const xmlChar*)"point" );
+	xmlNodeAddContent( point, (const xmlChar*)buf );
 	xmlAddChild( node, point );
 	xml_SendNode( node );
 
@@ -195,11 +195,11 @@ void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die ){
 	char level[2];
 	int i;
 
-	node = xmlNewNode( NULL, "windingmsg" );
-	xmlNodeAddContent( node, msg );
+	node = xmlNewNode( NULL, (const xmlChar*)"windingmsg" );
+	xmlNodeAddContent( node, (const xmlChar*)msg );
 	level[0] = (int)'0' + SYS_ERR;
 	level[1] = 0;
-	xmlSetProp( node, "level", (char *)&level );
+	xmlSetProp( node, (const xmlChar*)"level", (const xmlChar*)level );
 	// a 'winding' node
 	sprintf( buf, "%i ", numpoints );
 	for ( i = 0; i < numpoints; i++ )
@@ -212,8 +212,8 @@ void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die ){
 		strcat( buf, smlbuf );
 	}
 
-	winding = xmlNewNode( NULL, "winding" );
-	xmlNodeAddContent( winding, buf );
+	winding = xmlNewNode( NULL, (const xmlChar*)"winding" );
+	xmlNodeAddContent( winding, (const xmlChar*)buf );
 	xmlAddChild( node, winding );
 	xml_SendNode( node );
 
@@ -235,7 +235,7 @@ void Broadcast_Setup( const char *dest ){
 	char sMsg[1024];
 
 	Net_Setup();
-	Net_StringToAddress( (char *)dest, &address );
+	Net_StringToAddress( dest, &address );
 	brdcst_socket = Net_Connect( &address, 0 );
 	if ( brdcst_socket ) {
 		// send in a header
@@ -277,15 +277,15 @@ void FPrintf( int flag, char *buf ){
 	 */
 	if ( !bGotXML ) {
 		// initialize
-		doc = xmlNewDoc( "1.0" );
-		doc->children = xmlNewDocRawNode( doc, NULL, "q3map_feedback", NULL );
+		doc = xmlNewDoc( (const xmlChar*)"1.0" );
+		doc->children = xmlNewDocRawNode( doc, NULL, (const xmlChar*)"q3map_feedback", NULL );
 		bGotXML = true;
 	}
-	node = xmlNewNode( NULL, "message" );
-	xmlNodeAddContent( node, buf );
+	node = xmlNewNode( NULL, (const xmlChar*)"message" );
+	xmlNodeAddContent( node, (const xmlChar*)buf );
 	level[0] = (int)'0' + flag;
 	level[1] = 0;
-	xmlSetProp( node, "level", (char *)&level );
+	xmlSetProp( node, (const xmlChar*)"level", (const xmlChar*)level );
 
 	xml_SendNode( node );
 }

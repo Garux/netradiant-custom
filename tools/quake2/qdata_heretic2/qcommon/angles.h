@@ -72,4 +72,6 @@
 #define SHORT_TO_ANGLE  ( 360.0 / 65536 )
 
 
+#ifdef _MSC_VER
 #pragma warning(disable : 4305)     // 'initializing' : truncation from 'const double ' to 'float '
+#endif

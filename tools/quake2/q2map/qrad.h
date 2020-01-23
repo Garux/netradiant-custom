@@ -115,7 +115,7 @@ extern patch_t     *face_patches[MAX_MAP_FACES];
 extern entity_t    *face_entity[MAX_MAP_FACES];
 extern vec3_t face_offset[MAX_MAP_FACES];           // for rotating bmodels
 extern patch_t patches[MAX_PATCHES];
-extern unsigned num_patches;
+extern int num_patches;
 
 extern int leafparents[MAX_MAP_LEAFS];
 extern int nodeparents[MAX_MAP_NODES];

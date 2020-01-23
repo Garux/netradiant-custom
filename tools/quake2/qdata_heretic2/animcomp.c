@@ -152,7 +152,7 @@ void AnimCompressDoit(){
 }
 
 void AnimCompressToBytes( float *trans,float *scale,char *mat,char *ccomp,unsigned char *cbase,float *cscale,float *coffset,float *bmin,float *bmax ){
-	int k,l,nv,j;
+	int k,l,j;
 	float maxdev;
 	float avedev;
 	float tmp;
@@ -160,8 +160,6 @@ void AnimCompressToBytes( float *trans,float *scale,char *mat,char *ccomp,unsign
 	float t,mx;
 	float *ans;
 
-
-	nv = MatWidth / 3;
 
 	trans[0] = 1E30f;
 	scale[0] = -1E30f;
