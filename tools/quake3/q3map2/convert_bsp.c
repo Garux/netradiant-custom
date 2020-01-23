@@ -54,7 +54,7 @@ int FixAAS( int argc, char **argv ){
 
 	/* arg checking */
 	if ( argc < 2 ) {
-		Sys_Printf( "Usage: q3map -fixaas [-v] <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 -fixaas [-v] <mapname>\n" );
 		return 0;
 	}
 
@@ -151,7 +151,7 @@ int AnalyzeBSP( int argc, char **argv ){
 
 	/* arg checking */
 	if ( argc < 2 ) {
-		Sys_Printf( "Usage: q3map -analyze [-lumpswap] [-v] <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 -analyze [-lumpswap] [-v] <mapname>\n" );
 		return 0;
 	}
 
@@ -406,7 +406,7 @@ int ScaleBSPMain( int argc, char **argv ){
 
 	/* arg checking */
 	if ( argc < 3 ) {
-		Sys_Printf( "Usage: q3map [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
 		return 0;
 	}
 
@@ -438,7 +438,7 @@ int ScaleBSPMain( int argc, char **argv ){
 	uniform = ( ( scale[0] == scale[1] ) && ( scale[1] == scale[2] ) );
 
 	if ( scale[0] == 0.0f || scale[1] == 0.0f || scale[2] == 0.0f ) {
-		Sys_Printf( "Usage: q3map [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
 		Sys_Printf( "Non-zero scale value required.\n" );
 		return 0;
 	}
@@ -655,7 +655,7 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	/* arg checking */
 	if ( argc < 3 ) {
-		Sys_Printf( "Usage: q3map [-v] -shift [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 [-v] -shift [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
 		return 0;
 	}
 
@@ -922,7 +922,7 @@ int ConvertBSPMain( int argc, char **argv ){
 
 	/* arg checking */
 	if ( argc < 2 ) {
-		Sys_Printf( "Usage: q3map -convert [-format <ase|obj|map_bp|map>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 -convert [-format <ase|obj|map_bp|map>] [-shadersasbitmap|-lightmapsastexcoord|-deluxemapsastexcoord] [-readbsp|-readmap [-meta|-patchmeta]] [-v] <mapname>\n" );
 		return 0;
 	}
 

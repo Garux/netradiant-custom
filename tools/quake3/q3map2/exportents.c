@@ -90,7 +90,7 @@ void ExportEntities( void ){
 int ExportEntitiesMain( int argc, char **argv ){
         /* arg checking */
         if ( argc < 2 ) {
-                Sys_Printf( "Usage: q3map -exportents [-v] <mapname>\n" );
+                Sys_Printf( "Usage: q3map2 -exportents [-v] <mapname>\n" );
                 return 0;
         }
 
