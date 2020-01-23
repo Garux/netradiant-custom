@@ -113,7 +113,7 @@ void ExpandWildcards( int *argc, char ***argv ){
 	int handle;
 	int i;
 	char filename[1024];
-	char filebase[1024];
+	char filepath[1024];
 	char    *path;
 
 	ex_argc = 0;
@@ -131,11 +131,11 @@ void ExpandWildcards( int *argc, char ***argv ){
 			return;
 		}
 
-		ExtractFilePath( path, filebase );
+		ExtractFilePath( path, filepath );
 
 		do
 		{
-			sprintf( filename, "%s%s", filebase, fileinfo.name );
+			sprintf( filename, "%s%s", filepath, fileinfo.name );
 			ex_argv[ex_argc++] = copystring( filename );
 		} while ( _findnext( handle, &fileinfo ) != -1 );
 
@@ -751,14 +751,11 @@ void DefaultExtension( char *path, const char *extension ){
 
 
 void DefaultPath( char *path, const char *basepath ){
-	char temp[128];
-
-	if ( path[ 0 ] == '/' || path[ 0 ] == '\\' ) {
-		return;                   // absolute path location
+	if( !path_is_absolute( path ) ){
+		char* temp = strdup( path );
+		sprintf( path, "%s%s", basepath, temp );
+		free( temp );
 	}
-	strcpy( temp,path );
-	strcpy( path,basepath );
-	strcat( path,temp );
 }
 
 

@@ -69,7 +69,7 @@ packheader_t pakheader;
    ==============
    ReleaseFile
 
-   Filename should be gamedir reletive.
+   Filename should be gamedir relative.
    Either copies the file to the release dir, or adds it to
    the pak file.
    ==============

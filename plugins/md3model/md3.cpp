@@ -31,7 +31,7 @@
 #include "ident.h"
 #include "md3normals.h"
 
-// the maximum size of game reletive pathnames
+// the maximum size of game relative pathnames
 #define MAX_QPATH       64
 
 /*

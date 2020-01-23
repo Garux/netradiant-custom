@@ -1010,7 +1010,7 @@ int ConvertBSPToMap_Ext( char *bspName, qboolean brushPrimitives ){
 	entity_t        *e;
 	vec3_t origin;
 	const char      *value;
-	char name[ 1024 ], base[ 1024 ];
+	char name[ 1024 ];
 
 
 	/* note it */
@@ -1021,9 +1021,6 @@ int ConvertBSPToMap_Ext( char *bspName, qboolean brushPrimitives ){
 	StripExtension( name );
 	strcat( name, "_converted.map" );
 	Sys_Printf( "writing %s\n", name );
-
-	ExtractFileBase( bspName, base );
-	strcat( base, ".bsp" );
 
 	/* open it */
 	f = fopen( name, "wb" );
