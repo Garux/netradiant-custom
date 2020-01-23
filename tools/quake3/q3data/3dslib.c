@@ -47,8 +47,8 @@ static int ReadString( FILE *fp, char *buffer ){
 	return bytesRead;
 }
 
-static int ReadChunkAndLength( FILE *fp, short *chunk, long *len ){
-	if ( fread( chunk, sizeof( short ), 1, fp ) != 1 ) {
+static int ReadChunkAndLength( FILE *fp, unsigned short *chunk, long *len ){
+	if ( fread( chunk, sizeof( *chunk ), 1, fp ) != 1 ) {
 		return 0;
 	}
 	if ( fread( len, sizeof( long ), 1, fp ) != 1 ) {
@@ -348,7 +348,6 @@ static void LoadNamedTriObject( FILE *fp, long thisChunkLen, _3DSTriObject_t *pT
 static void LoadNamedObject( FILE *fp, long thisChunkLen, _3DSNamedObject_t *pNO ){
 	long chunkLen;
 	unsigned short chunkID;
-	int i = 0;
 	long bytesRead = 0;
 	char name[100];
 	_3DSTriObject_t triObj[MAX_TRI_OBJECTS];

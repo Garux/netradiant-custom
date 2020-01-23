@@ -34,7 +34,6 @@ static int s_used[8192];        // same as MD3_MAX_TRIANGLES
 */
 static int FindNextTriangleInStripOrFan( int mesh[][3], int tri, int orientation, int numTris, int odd ){
 	int t;
-	int sum = 0;
 	int currentTri[3];
 	int side;
 	int a, b, c;
@@ -157,7 +156,6 @@ static int StripLength( int mesh[][3], int strip[][3], int tri, int orientation,
 static int BuildOptimizedList( int mesh[][3], int strip[][3], int numInputTris ){
 	int t;
 	int stripLen = 0;
-	int startTri = -1;
 	int bestTri = -1, bestLength = 0, bestOrientation = -1;
 	int matchedSides = 0;
 	int orientation = 0;

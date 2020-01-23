@@ -559,7 +559,6 @@ static void CopyTrianglesToBaseTriangles( triangle_t *ptri, int numtri, baseTria
 //	float		s_scale, t_scale;
 //	float		scale;
 //	vec3_t		mins, maxs;
-	float       *pbasevert;
 
 /*
     //
@@ -618,8 +617,6 @@ static void CopyTrianglesToBaseTriangles( triangle_t *ptri, int numtri, baseTria
 
 		for ( j = 0 ; j < 3 ; j++ )
 		{
-			pbasevert = ptri->verts[j];
-
 			VectorCopy( ptri->verts[j], bTri->v[j].xyz );
 			VectorCopy( ptri->normals[j], bTri->v[j].normal );
 
@@ -1611,14 +1608,6 @@ static int SurfaceOrderToFrameOrder( SurfaceAnimation_t sanims[], ObjectAnimatio
 	}
 
 	return numFrames;
-}
-
-static void WriteMD3( const char *_filename, ObjectAnimationFrame_t oanims[], int numFrames ){
-	char filename[1024];
-
-	strcpy( filename, _filename );
-	StripExtension( filename );
-	strcat( filename, ".md3" );
 }
 
 static void BuildAnimationFromOAFs( const char *filename, ObjectAnimationFrame_t oanims[], int numFrames, int type ){
