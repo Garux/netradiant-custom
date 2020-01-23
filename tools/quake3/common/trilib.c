@@ -61,9 +61,7 @@ typedef struct {
 
 
 static void ByteSwapTri( tf_triangle *tri ){
-	int i;
-
-	for ( i = 0 ; i < sizeof( tf_triangle ) / 4 ; i++ )
+	for ( size_t i = 0 ; i < sizeof( tf_triangle ) / 4 ; i++ )
 	{
 		( (int *)tri )[i] = BigLong( ( (int *)tri )[i] );
 	}
