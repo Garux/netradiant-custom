@@ -285,11 +285,11 @@ int     GetScriptInfo( char *name ){
 		while ( fgets( buffer, 256, fp ) )
 		{
 			if ( strncmp( buffer, "//", 2 ) && strncmp( buffer, "\n", 1 ) ) {
-				strupr( buffer );
+				strUpper( buffer );
 				strcpy( tempbuff, buffer );
 				if ( strcmp( strtok( tempbuff, delims ), "OUTPUT" ) == 0 ) {
 					strcpy( out.name, strtok( NULL, delims ) );
-					strlwr( out.name );
+					strLower( out.name );
 				}
 
 				strcpy( tempbuff, buffer );
@@ -316,7 +316,7 @@ int     GetScriptInfo( char *name ){
 				strcpy( tempbuff, buffer );
 				if ( strcmp( strtok( tempbuff, delims ), "OUTSCRIPT" ) == 0 ) {
 					strcpy( outscript, strtok( NULL, delims ) );
-					strlwr( outscript );
+					strLower( outscript );
 				}
 
 				strcpy( tempbuff, buffer );

@@ -599,7 +599,7 @@ int main( int argc, char **argv ){
 		else if ( !strcmp( argv[ i ], "-game" ) ) {
 			i++;
 			strncpy( game, argv[ i ], 64 );
-			strlower( game );
+			strLower( game );
 		}
 	}
 

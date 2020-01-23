@@ -148,18 +148,7 @@ void GetOneGroup( trigroup_t *tris, int grp, triangle_t* triangles );
 void ScaleTris( vec3_t min, vec3_t max, int Width, int Height, float* u, float* v, int verts );
 void NewDrawLine( int x1, int y1, int x2, int y2, unsigned char* picture, int width, int height );
 
-#ifndef _WIN32
 
-void strupr( char *string ){
-	int i;
-
-	for ( i = 0 ; i < strlen( string ); i++ )
-		toupper( string[i] );
-
-	return;
-}
-
-#endif
 //==============================================================
 
 /*
@@ -1098,7 +1087,7 @@ void FMFinishModel( void ){
 		for ( i = 0; i < fmheader.num_mesh_nodes; i++ )
 		{
 			strcpy( name, pmnodes[i].name );
-			strupr( name );
+			strUpper( name );
 			length = strlen( name );
 			for ( j = 0; j < length; j++ )
 			{

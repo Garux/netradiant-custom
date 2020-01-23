@@ -546,30 +546,6 @@ void Q_strncpyz( char *dest, const char *src, int destsize ) {
     dest[destsize-1] = 0;
 }
 
-char *strupr (char *start)
-{
-	char	*in;
-	in = start;
-	while (*in)
-	{
-		*in = toupper(*in);
-		in++;
-	}
-	return start;
-}
-
-char *strlower (char *start)
-{
-	char	*in;
-	in = start;
-	while (*in)
-	{
-		*in = tolower(*in); 
-		in++;
-	}
-	return start;
-}
-
 
 /*
 =============================================================================

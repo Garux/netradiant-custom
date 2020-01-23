@@ -83,7 +83,16 @@ void *safe_malloc_info( size_t size, char* info );
 extern int myargc;
 extern char **myargv;
 
-char *strlower( char *in );
+static inline char *strUpper( char *string ){
+	for( char *in = string; *in; ++in )
+		*in = toupper( *in );
+	return string;
+}
+static inline char *strLower( char *string ){
+	for( char *in = string; *in; ++in )
+		*in = tolower( *in );
+	return string;
+}
 int Q_strncasecmp( const char *s1, const char *s2, int n );
 int Q_stricmp( const char *s1, const char *s2 );
 int Q_strcasecmp( const char *s1, const char *s2 );

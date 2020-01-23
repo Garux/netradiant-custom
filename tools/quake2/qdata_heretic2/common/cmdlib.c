@@ -84,15 +84,6 @@ void *SafeMalloc( size_t n, char *desc ){
 	return p;
 }
 
-#if defined ( __linux__ ) || defined ( __APPLE__ )
-void strlwr( char *conv_str ){
-	int i;
-
-	for ( i = 0; i < strlen( conv_str ); i++ )
-		conv_str[i] = tolower( conv_str[i] );
-}
-#endif
-
 
 // set these before calling CheckParm
 int myargc;
@@ -504,34 +495,6 @@ int Q_stricmp( const char *s1, const char *s2 ){
 
 int Q_strcasecmp( const char *s1, const char *s2 ){
 	return Q_strncasecmp( s1, s2, 99999 );
-}
-
-// NOTE TTimo when switching to Multithread DLL (Release/Debug) in the config
-//   started getting warnings about that function, prolly a duplicate with the runtime function
-//   maybe we still need to have it in linux builds
-/*
-   char *strupr (char *start)
-   {
-    char	*in;
-    in = start;
-    while (*in)
-    {
-   *in = toupper(*in);
-        in++;
-    }
-    return start;
-   }
- */
-
-char *strlower( char *start ){
-	char    *in;
-	in = start;
-	while ( *in )
-	{
-		*in = tolower( *in );
-		in++;
-	}
-	return start;
 }
 
 
