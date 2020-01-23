@@ -169,7 +169,6 @@ void ThreadUnlock( void ){
    =============
  */
 void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
-	int threadid[MAX_THREADS];
 	HANDLE threadhandle[MAX_THREADS];
 	int i;
 	int start, end;
@@ -194,16 +193,16 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 		for ( i = 0 ; i < numthreads ; i++ )
 		{
 			threadhandle[i] = CreateThread(
-				NULL,   // LPSECURITY_ATTRIBUTES lpsa,
-			    //0,		// DWORD cbStack,
+				NULL,                         // LPSECURITY_ATTRIBUTES  lpThreadAttributes,
+				//0,                          // SIZE_T                 dwStackSize,
 
-			    /* ydnar: cranking stack size to eliminate radiosity crash with 1MB stack on win32 */
+				/* ydnar: cranking stack size to eliminate radiosity crash with 1MB stack on win32 */
 				( 4096 * 1024 ),
 
-				(LPTHREAD_START_ROUTINE)func,   // LPTHREAD_START_ROUTINE lpStartAddr,
-				(LPVOID)i,  // LPVOID lpvThreadParm,
-				0,          //   DWORD fdwCreate,
-				&threadid[i] );
+				(LPTHREAD_START_ROUTINE)func, // LPTHREAD_START_ROUTINE lpStartAddress,
+				(LPVOID)i,                    // LPVOID                 lpParameter,
+				0,                            // DWORD                  dwCreationFlags,
+				NULL );                       // LPDWORD                lpThreadId
 		}
 
 		for ( i = 0 ; i < numthreads ; i++ )
