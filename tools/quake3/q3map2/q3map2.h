@@ -144,9 +144,9 @@
 #define CASE_INSENSITIVE_EPAIRS 1
 
 #if CASE_INSENSITIVE_EPAIRS
-	#define EPAIR_STRCMP        Q_stricmp
+	#define EPAIR_EQUAL        striEqual
 #else
-	#define EPAIR_STRCMP        strcmp
+	#define EPAIR_EQUAL        strEqual
 #endif
 
 
