@@ -3411,16 +3411,16 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 				if ( rgbGenValues[ style ] == NULL ) {
 					sprintf( key, "_style%drgbgen", style );
 					rgbGenValues[ style ] = ValueForKey( &entities[ 0 ], key );
-					if ( rgbGenValues[ style ][ 0 ] == '\0' ) {
+					if ( strEmpty( rgbGenValues[ style ] ) ) {
 						rgbGenValues[ style ] = "wave noise 0.5 1 0 5.37";
 					}
 				}
-				rgbGen[ 0 ] = '\0';
-				if ( rgbGenValues[ style ][ 0 ] != '\0' ) {
+				strClear( rgbGen );
+				if ( !strEmpty( rgbGenValues[ style ] ) ) {
 					sprintf( rgbGen, "\t\trgbGen %s // style %d\n", rgbGenValues[ style ], style );
 				}
 				else{
-					rgbGen[ 0 ] = '\0';
+					strClear( rgbGen );
 				}
 
 				/* get alphagen string */
@@ -3428,11 +3428,11 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					sprintf( key, "_style%dalphagen", style );
 					alphaGenValues[ style ] = ValueForKey( &entities[ 0 ], key );
 				}
-				if ( alphaGenValues[ style ][ 0 ] != '\0' ) {
+				if ( !strEmpty( alphaGenValues[ style ] ) ) {
 					sprintf( alphaGen, "\t\talphaGen %s // style %d\n", alphaGenValues[ style ], style );
 				}
 				else{
-					alphaGen[ 0 ] = '\0';
+					strClear( alphaGen );
 				}
 
 				/* calculate st offset */

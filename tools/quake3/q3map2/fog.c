@@ -773,10 +773,10 @@ void CreateMapFogs( void ){
 
 	/* ydnar: global fog */
 	globalFog = ValueForKey( &entities[ 0 ], "_fog" );
-	if ( globalFog[ 0 ] == '\0' ) {
+	if ( strEmpty( globalFog ) ) {
 		globalFog = ValueForKey( &entities[ 0 ], "fog" );
 	}
-	if ( globalFog[ 0 ] != '\0' ) {
+	if ( !strEmpty( globalFog ) ) {
 		/* test limit */
 		if ( numMapFogs >= MAX_MAP_FOGS ) {
 			Error( "Exceeded MAX_MAP_FOGS (%d) trying to add global fog", MAX_MAP_FOGS );

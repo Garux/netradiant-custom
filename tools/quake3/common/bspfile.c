@@ -477,13 +477,11 @@ void PrintBSPFileSizes( void ) {
 int num_entities;
 entity_t entities[MAX_MAP_ENTITIES];
 
-void StripTrailing( char *e ) {
-	char    *s;
-
-	s = e + strlen( e ) - 1;
+void StripTrailing( char *e ){
+	char *s = e + strlen( e ) - 1;
 	while ( s >= e && *s <= 32 )
 	{
-		*s = 0;
+		strClear( s );
 		s--;
 	}
 }

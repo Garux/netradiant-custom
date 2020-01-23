@@ -974,7 +974,7 @@ static void ConvertEPairs( FILE *f, entity_t *e, bool skip_origin ){
 	for ( ep = e->epairs; ep != NULL; ep = ep->next )
 	{
 		/* ignore empty keys/values */
-		if ( ep->key[ 0 ] == '\0' || ep->value[ 0 ] == '\0' ) {
+		if ( strEmpty( ep->key ) || strEmpty( ep->value ) ) {
 			continue;
 		}
 
@@ -1063,7 +1063,7 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 
 			/* get entity origin */
 			value = ValueForKey( e, "origin" );
-			if ( value[ 0 ] == '\0' ) {
+			if ( strEmpty( value ) ) {
 				VectorClear( origin );
 			}
 			else{

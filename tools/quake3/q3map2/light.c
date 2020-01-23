@@ -247,7 +247,7 @@ void CreateEntityLights( void ){
 
 		/* lights with target names (and therefore styles) are only parsed from BSP */
 		target = ValueForKey( e, "targetname" );
-		if ( target[ 0 ] != '\0' && i >= numBSPEntities ) {
+		if ( !strEmpty( target ) && i >= numBSPEntities ) {
 			continue;
 		}
 
@@ -671,7 +671,7 @@ void SetEntityOrigins( void ){
 
 		/* get entity origin */
 		key = ValueForKey( e, "origin" );
-		if ( key[ 0 ] == '\0' ) {
+		if ( strEmpty( key ) ) {
 			continue;
 		}
 		GetVectorForKey( e, "origin", origin );
@@ -1809,7 +1809,7 @@ void SetupGrid( void ){
 
 	/* ydnar: set grid size */
 	value = ValueForKey( &entities[ 0 ], "gridsize" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		sscanf( value, "%f %f %f", &gridSize[ 0 ], &gridSize[ 1 ], &gridSize[ 2 ] );
 	}
 
@@ -1922,7 +1922,7 @@ void LightWorld( bool fastAllocate ){
 	/* minvertexlight */
 	minVertex = false;
 	value = ValueForKey( &entities[ 0 ], "_minvertexlight" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		minVertex = true;
 		f = atof( value );
 		VectorScale( color, f, minVertexLight );
@@ -1931,7 +1931,7 @@ void LightWorld( bool fastAllocate ){
 	/* mingridlight */
 	minGrid = false;
 	value = ValueForKey( &entities[ 0 ], "_mingridlight" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		minGrid = true;
 		f = atof( value );
 		VectorScale( color, f, minGridLight );
@@ -1939,7 +1939,7 @@ void LightWorld( bool fastAllocate ){
 
 	/* minlight */
 	value = ValueForKey( &entities[ 0 ], "_minlight" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		f = atof( value );
 		VectorScale( color, f, minLight );
 		if ( !minVertex ) {
@@ -1952,7 +1952,7 @@ void LightWorld( bool fastAllocate ){
 
 	/* maxlight */
 	value = ValueForKey( &entities[ 0 ], "_maxlight" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		f = atof( value );
 		maxLight = f > 255? 255 : f < 0? 0 : f;
 	}

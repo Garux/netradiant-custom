@@ -1483,9 +1483,6 @@ void SetEntityBounds( entity_t *e ){
 	brush_t *b;
 	parseMesh_t *p;
 	vec3_t mins, maxs;
-	const char  *value;
-
-
 
 
 	/* walk the entity's brushes/patches and determine bounds */
@@ -1502,12 +1499,10 @@ void SetEntityBounds( entity_t *e ){
 	}
 
 	/* try to find explicit min/max key */
-	value = ValueForKey( e, "min" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( ValueForKey( e, "min" ) ) ) {
 		GetVectorForKey( e, "min", mins );
 	}
-	value = ValueForKey( e, "max" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( ValueForKey( e, "max" ) ) ) {
 		GetVectorForKey( e, "max", maxs );
 	}
 
@@ -1549,20 +1544,20 @@ void LoadEntityIndexMap( entity_t *e ){
 
 	/* determine if there is an index map (support legacy "alphamap" key as well) */
 	value = ValueForKey( e, "_indexmap" );
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( e, "alphamap" );
 	}
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		return;
 	}
 	indexMapFilename = value;
 
 	/* get number of layers (support legacy "layers" key as well) */
 	value = ValueForKey( e, "_layers" );
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( e, "layers" );
 	}
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_layers\" or \"layers\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
@@ -1576,10 +1571,10 @@ void LoadEntityIndexMap( entity_t *e ){
 
 	/* get base shader name (support legacy "shader" key as well) */
 	value = ValueForKey( mapEnt, "_shader" );
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( e, "shader" );
 	}
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_shader\" or \"shader\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
@@ -1655,20 +1650,20 @@ void LoadEntityIndexMap( entity_t *e ){
 
 	/* get height offsets */
 	value = ValueForKey( mapEnt, "_offsets" );
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( e, "offsets" );
 	}
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		/* value is a space-seperated set of numbers */
 		strcpy( offset, value );
 		search = offset;
 
 		/* get each value */
-		for ( i = 0; i < 256 && *search != '\0'; i++ )
+		for ( i = 0; i < 256 && !strEmpty( search ); i++ )
 		{
 			space = strstr( search, " " );
 			if ( space != NULL ) {
-				*space = '\0';
+				strClear( space );
 			}
 			im->offsets[ i ] = atof( search );
 			if ( space == NULL ) {
@@ -1785,7 +1780,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 			ep = ParseEPair();
 
 			/* ydnar: 2002-07-06 fixed wolf bug with empty epairs */
-			if ( ep->key[ 0 ] != '\0' && ep->value[ 0 ] != '\0' ) {
+			if ( !strEmpty( ep->key ) && !strEmpty( ep->value ) ) {
 				ep->next = mapEnt->epairs;
 				mapEnt->epairs = ep;
 			}
@@ -1846,10 +1841,10 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* ydnar: get cel shader :) for this entity */
 	value = ValueForKey( mapEnt, "_celshader" );
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( &entities[ 0 ], "_celshader" );
 	}
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		if ( !strEqual( value, "none" ) ) {
 			sprintf( shader, "textures/%s", value );
 			celShader = ShaderInfoForShader( shader );

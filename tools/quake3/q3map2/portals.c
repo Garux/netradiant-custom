@@ -690,7 +690,7 @@ int FloodEntities( tree_t *tree ){
 			/* get scale */
 			VectorSet( scale, 64.0f, 64.0f, 64.0f );
 			value = ValueForKey( e, "_scale" );
-			if ( value[ 0 ] != '\0' ) {
+			if ( !strEmpty( value ) ) {
 				s = sscanf( value, "%f %f %f", &scale[ 0 ], &scale[ 1 ], &scale[ 2 ] );
 				if ( s == 1 ) {
 					scale[ 1 ] = scale[ 0 ];
@@ -702,7 +702,7 @@ int FloodEntities( tree_t *tree ){
 			VectorClear( angles );
 			angles[ 2 ] = FloatForKey( e, "angle" );
 			value = ValueForKey( e, "angles" );
-			if ( value[ 0 ] != '\0' ) {
+			if ( !strEmpty( value ) ) {
 				sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] );
 			}
 

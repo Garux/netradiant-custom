@@ -65,7 +65,7 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 		}
 		if ( !doingBSP ){
 			si = ShaderInfoForShader( shader );
-			if ( si->remapShader && si->remapShader[ 0 ] ) {
+			if ( !strEmptyOrNull( si->remapShader ) ) {
 				shader = si->remapShader;
 			}
 		}
@@ -97,7 +97,7 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 	}
 
 	/* recursively emit any damage shaders */
-	if ( si->damageShader != NULL && si->damageShader[ 0 ] != '\0' ) {
+	if ( !strEmptyOrNull( si->damageShader ) ) {
 		Sys_FPrintf( SYS_VRB, "Shader %s has damage shader %s\n", si->shader, si->damageShader );
 		EmitShader( si->damageShader, NULL, NULL );
 	}
@@ -313,7 +313,7 @@ void SetLightStyles( void ){
 			continue;
 		}
 		t = ValueForKey( e, "targetname" );
-		if ( t[ 0 ] == '\0' ) {
+		if ( strEmpty( t ) ) {
 			/* ydnar: strip the light from the BSP file */
 			if ( !keepLights ) {
 				ep = e->epairs;

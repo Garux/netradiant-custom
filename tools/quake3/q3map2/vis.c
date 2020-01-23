@@ -302,28 +302,24 @@ void CalcVis( void ){
 	/* ydnar: rr2do2's farplane code */
 	farPlaneDist = 0.0f;
 	value = ValueForKey( &entities[ 0 ], "_farplanedist" );     /* proper '_' prefixed key */
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( &entities[ 0 ], "fogclip" );       /* wolf compatibility */
 	}
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( &entities[ 0 ], "distancecull" );  /* sof2 compatibility */
 	}
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		farPlaneDist = atof( value );
 		farPlaneDistMode = value[strlen(value) - 1 ];
 		if ( farPlaneDist != 0.0f ) {
 			Sys_Printf( "farplane distance = %.1f\n", farPlaneDist );
+			if ( farPlaneDistMode == 'o' )
+				Sys_Printf( "farplane Origin2Origin mode on\n" );
+			else if ( farPlaneDistMode == 'r' )
+				Sys_Printf( "farplane Radius+Radius mode on\n" );
+			else if ( farPlaneDistMode == 'e' )
+				Sys_Printf( "farplane Exact distance mode on\n" );
 		}
-			if ( farPlaneDist != 0.0f && farPlaneDistMode == 'o' ) {
-			Sys_Printf( "farplane Origin2Origin mode on\n" );
-		}
-			if ( farPlaneDist != 0.0f && farPlaneDistMode == 'r' ) {
-			Sys_Printf( "farplane Radius+Radius mode on\n" );
-		}
-			if ( farPlaneDist != 0.0f && farPlaneDistMode == 'e' ) {
-			Sys_Printf( "farplane Exact distance mode on\n" );
-		}
-
 	}
 
 

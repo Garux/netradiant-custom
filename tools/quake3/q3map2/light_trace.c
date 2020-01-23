@@ -1147,7 +1147,7 @@ static void PopulateTraceNodes( void ){
 			scale[ 0 ] = scale[ 1 ] = scale[ 2 ] = temp;
 		}
 		value = ValueForKey( e, "modelscale_vec" );
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			sscanf( value, "%f %f %f", &scale[ 0 ], &scale[ 1 ], &scale[ 2 ] );
 		}
 
@@ -1155,7 +1155,7 @@ static void PopulateTraceNodes( void ){
 		angles[ 0 ] = angles[ 1 ] = angles[ 2 ] = 0.0f;
 		angles[ 2 ] = FloatForKey( e, "angle" );
 		value = ValueForKey( e, "angles" );
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] );
 		}
 

@@ -4133,7 +4133,7 @@ void SetupFloodLight( void ){
 	/* floodlight */
 	value = ValueForKey( &entities[ 0 ], "_floodlight" );
 
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		v1 = v2 = v3 = 0;
 		v4 = floodlightDistance;
 		v5 = floodlightIntensity;

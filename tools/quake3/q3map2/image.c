@@ -291,7 +291,7 @@ image_t *ImageFind( const char *name ){
 	ImageInit();
 
 	/* dummy check */
-	if ( name == NULL || name[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( name ) ) {
 		return NULL;
 	}
 
@@ -326,7 +326,7 @@ image_t *ImageLoad( const char *filename ){
 	ImageInit();
 
 	/* dummy check */
-	if ( filename == NULL || filename[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( filename ) ) {
 		return NULL;
 	}
 

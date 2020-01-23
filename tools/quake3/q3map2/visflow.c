@@ -1596,32 +1596,25 @@ void BasePortalVis( int portalnum ){
 		   }
 		 */
 
-		if( !p->sky && !tp->sky && farPlaneDist != 0.0f && farPlaneDistMode == 'o' )
-		{
-			VectorSubtract( p->origin, tp->origin, dir );
-			if( VectorLength( dir ) > farPlaneDist )
-				continue;
-		}
-
-		if( !p->sky && !tp->sky && farPlaneDist != 0.0f && farPlaneDistMode == 'e' )
-		{
-			VectorSubtract( p->origin, tp->origin, dir );
-			if( VectorLength( dir ) + p->radius + tp->radius > 2.0f * farPlaneDist )
-				continue;
-		}
-
-		if( !p->sky && !tp->sky && farPlaneDist != 0.0f && farPlaneDistMode == 'r' )
-		{
-			if( p->radius + tp->radius > farPlaneDist )
-				continue;
-		}
-
-		/* ydnar: this is known-to-be-working farplane code */
 		if ( !p->sky && !tp->sky && farPlaneDist != 0.0f ) {
 			VectorSubtract( p->origin, tp->origin, dir );
-			if ( VectorLength( dir ) - p->radius - tp->radius > farPlaneDist ) {
-				continue;
+			if( farPlaneDistMode == 'o' ){
+				if( VectorLength( dir ) > farPlaneDist )
+					continue;
 			}
+			else if( farPlaneDistMode == 'e' ){
+				if( VectorLength( dir ) + p->radius + tp->radius > 2.0f * farPlaneDist )
+					continue;
+			}
+			else if( farPlaneDistMode == 'r' ){
+				if( p->radius + tp->radius > farPlaneDist )
+					continue;
+			}
+			else{ /* ydnar: this is known-to-be-working farplane code */
+				if ( VectorLength( dir ) - p->radius - tp->radius > farPlaneDist )
+					continue;
+			}
+
 		}
 
 

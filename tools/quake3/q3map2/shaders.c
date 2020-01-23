@@ -312,9 +312,9 @@ bool ApplySurfaceParm( char *name, int *contentFlags, int *surfaceFlags, int *co
 
 void BeginMapShaderFile( const char *mapFile ){
 	/* dummy check */
-	mapName[ 0 ] = '\0';
-	mapShaderFile[ 0 ] = '\0';
-	if ( mapFile == NULL || mapFile[ 0 ] == '\0' ) {
+	strClear( mapName );
+	strClear( mapShaderFile );
+	if ( strEmptyOrNull( mapFile ) ) {
 		return;
 	}
 
@@ -348,7 +348,7 @@ void WriteMapShaderFile( void ){
 
 
 	/* dummy check */
-	if ( mapShaderFile[ 0 ] == '\0' ) {
+	if ( strEmpty( mapShaderFile ) ) {
 		return;
 	}
 
@@ -386,7 +386,7 @@ void WriteMapShaderFile( void ){
 	{
 		/* get the shader and print it */
 		si = &shaderInfo[ i ];
-		if ( !si->custom || si->shaderText == NULL || si->shaderText[ 0 ] == '\0' ) {
+		if ( !si->custom || strEmptyOrNull( si->shaderText ) ) {
 			continue;
 		}
 		num++;
@@ -580,8 +580,7 @@ void EmitVertexRemapShader( char *from, char *to ){
 
 
 	/* dummy check */
-	if ( from == NULL || from[ 0 ] == '\0' ||
-		 to == NULL || to[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( from ) || strEmptyOrNull( to ) ) {
 		return;
 	}
 
@@ -714,9 +713,10 @@ void FinishShader( shaderInfo_t *si ){
 			}
 		}
 	}
-		if (noob && !(si->compileFlags & C_OB)){
-			ApplySurfaceParm( "noob", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
-		}
+
+	if( noob && !( si->compileFlags & C_OB ) ){
+		ApplySurfaceParm( "noob", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
+	}
 
 	/* set to finished */
 	si->finished = true;
@@ -831,7 +831,7 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 	char shader[ MAX_QPATH ];
 
 	/* dummy check */
-	if ( shaderName == NULL || shaderName[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( shaderName ) ) {
 		Sys_Warning( "Null or empty shader name\n" );
 		shaderName = "missing";
 	}
@@ -902,7 +902,7 @@ bool GetTokenAppend( char *buffer, bool crossline ){
 
 	/* get the token */
 	r = GetToken( crossline );
-	if ( !r || buffer == NULL || token[ 0 ] == '\0' ) {
+	if ( !r || buffer == NULL || strEmpty( token ) ) {
 		return r;
 	}
 
@@ -969,7 +969,7 @@ static void ParseShaderFile( const char *filename ){
 
 	/* init */
 	si = NULL;
-	shaderText[ 0 ] = '\0';
+	strClear( shaderText );
 
 	/* load the shader */
 	LoadScriptFile( filename, 0 );
@@ -978,7 +978,7 @@ static void ParseShaderFile( const char *filename ){
 	while ( 1 )
 	{
 		/* copy shader text to the shaderinfo */
-		if ( si != NULL && shaderText[ 0 ] != '\0' ) {
+		if ( si != NULL && !strEmpty( shaderText ) ) {
 			strcat( shaderText, "\n" );
 			si->shaderText = copystring( shaderText );
 			//%	if( VectorLength( si->vecs[ 0 ] ) )
@@ -986,7 +986,7 @@ static void ParseShaderFile( const char *filename ){
 		}
 
 		/* ydnar: clear shader text buffer */
-		shaderText[ 0 ] = '\0';
+		strClear( shaderText );
 
 		/* test for end of file */
 		if ( !GetToken( true ) ) {
@@ -1000,7 +1000,7 @@ static void ParseShaderFile( const char *filename ){
 		/* ignore ":q3map" suffix */
 		suffix = strstr( si->shader, ":q3map" );
 		if ( suffix != NULL ) {
-			*suffix = '\0';
+			strClear( suffix );
 		}
 
 		/* handle { } section */
@@ -1046,7 +1046,7 @@ static void ParseShaderFile( const char *filename ){
 					}
 
 					/* only care about images if we don't have a editor/light image */
-					if ( si->editorImagePath[ 0 ] == '\0' && si->lightImagePath[ 0 ] == '\0' && si->implicitImagePath[ 0 ] == '\0' ) {
+					if ( strEmpty( si->editorImagePath ) && strEmpty( si->lightImagePath ) && strEmpty( si->implicitImagePath ) ) {
 						/* digest any images */
 						if ( striEqual( token, "map" ) ||
 							 striEqual( token, "clampMap" ) ||
@@ -1167,7 +1167,7 @@ static void ParseShaderFile( const char *filename ){
 			/* ydnar: damageShader <shader> <health> (sof2 mods) */
 			else if ( striEqual( token, "damageShader" ) ) {
 				GetTokenAppend( shaderText, false );
-				if ( token[ 0 ] != '\0' ) {
+				if ( !strEmpty( token ) ) {
 					si->damageShader = copystring( token );
 				}
 				GetTokenAppend( shaderText, false );   /* don't do anything with health */
@@ -1177,7 +1177,7 @@ static void ParseShaderFile( const char *filename ){
 			else if ( striEqual( token, "implicitMap" ) ) {
 				si->implicitMap = IM_OPAQUE;
 				GetTokenAppend( shaderText, false );
-				if ( token[ 0 ] == '-' && token[ 1 ] == '\0' ) {
+				if ( strEqual( token, "-" ) ) {
 					sprintf( si->implicitImagePath, "%s.tga", si->shader );
 				}
 				else{
@@ -1188,7 +1188,7 @@ static void ParseShaderFile( const char *filename ){
 			else if ( striEqual( token, "implicitMask" ) ) {
 				si->implicitMap = IM_MASKED;
 				GetTokenAppend( shaderText, false );
-				if ( token[ 0 ] == '-' && token[ 1 ] == '\0' ) {
+				if ( strEqual( token, "-" ) ) {
 					sprintf( si->implicitImagePath, "%s.tga", si->shader );
 				}
 				else{
@@ -1199,7 +1199,7 @@ static void ParseShaderFile( const char *filename ){
 			else if ( striEqual( token, "implicitBlend" ) ) {
 				si->implicitMap = IM_MASKED;
 				GetTokenAppend( shaderText, false );
-				if ( token[ 0 ] == '-' && token[ 1 ] == '\0' ) {
+				if ( strEqual( token, "-" ) ) {
 					sprintf( si->implicitImagePath, "%s.tga", si->shader );
 				}
 				else{
@@ -1239,11 +1239,11 @@ static void ParseShaderFile( const char *filename ){
 				GetTokenAppend( shaderText, false );
 
 				/* ignore bogus paths */
-				if ( !striEqual( token, "-" ) && !striEqual( token, "full" ) ) {
+				if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
 					strcpy( si->skyParmsImageBase, token );
 
 					/* use top image as sky light image */
-					if ( si->lightImagePath[ 0 ] == '\0' ) {
+					if ( strEmpty( si->lightImagePath ) ) {
 						sprintf( si->lightImagePath, "%s_up.tga", si->skyParmsImageBase );
 					}
 				}
@@ -1599,7 +1599,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_flare[Shader] <shader> */
 				else if ( striEqual( token, "q3map_flare" ) || striEqual( token, "q3map_flareShader" ) ) {
 					GetTokenAppend( shaderText, false );
-					if ( token[ 0 ] != '\0' ) {
+					if ( !strEmpty( token ) ) {
 						si->flareShader = copystring( token );
 					}
 				}
@@ -1607,7 +1607,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_backShader <shader> */
 				else if ( striEqual( token, "q3map_backShader" ) ) {
 					GetTokenAppend( shaderText, false );
-					if ( token[ 0 ] != '\0' ) {
+					if ( !strEmpty( token ) ) {
 						si->backShader = copystring( token );
 					}
 				}
@@ -1615,7 +1615,7 @@ static void ParseShaderFile( const char *filename ){
 				/* ydnar: q3map_cloneShader <shader> */
 				else if ( striEqual( token, "q3map_cloneShader" ) ) {
 					GetTokenAppend( shaderText, false );
-					if ( token[ 0 ] != '\0' ) {
+					if ( !strEmpty( token ) ) {
 						si->cloneShader = copystring( token );
 					}
 				}
@@ -1623,7 +1623,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_remapShader <shader> */
 				else if ( striEqual( token, "q3map_remapShader" ) ) {
 					GetTokenAppend( shaderText, false );
-					if ( token[ 0 ] != '\0' ) {
+					if ( !strEmpty( token ) ) {
 						si->remapShader = copystring( token );
 					}
 				}
@@ -1631,7 +1631,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_deprecateShader <shader> */
 				else if ( striEqual( token, "q3map_deprecateShader" ) ) {
 					GetTokenAppend( shaderText, false );
-					if ( token[ 0 ] != '\0' ) {
+					if ( !strEmpty( token ) ) {
 						si->deprecateShader = copystring( token );
 					}
 				}

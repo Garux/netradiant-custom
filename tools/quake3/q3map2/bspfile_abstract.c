@@ -499,13 +499,10 @@ void PrintBSPFileSizes( void ){
  */
 
 void StripTrailing( char *e ){
-	char    *s;
-
-
-	s = e + strlen( e ) - 1;
+	char *s = e + strlen( e ) - 1;
 	while ( s >= e && *s <= 32 )
 	{
-		*s = 0;
+		strClear( s );
 		s--;
 	}
 }
@@ -648,7 +645,7 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
 
 /*
    UnparseEntities()
-   generates the dentdata string from all the entities.
+   generates the entdata string from all the entities.
    this allows the utilities to add or remove key/value
    pairs to the data created by the map editor
  */
@@ -664,10 +661,8 @@ void UnparseEntities( void ){
 
 	/* setup */
 	AUTOEXPAND_BY_REALLOC( bspEntData, 0, allocatedBSPEntData, 1024 );
-	buf = bspEntData;
-	end = buf;
-	*end = 0;
-
+	strClear( bspEntData );
+	end = buf = bspEntData;
 
 	/* run through entity list */
 	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
@@ -910,16 +905,16 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 	/* get cast shadows */
 	if ( castShadows != NULL ) {
 		value = ValueForKey( ent, "_castShadows" );
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( ent, "_cs" );
 		}
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( ent2, "_castShadows" );
 		}
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( ent2, "_cs" );
 		}
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			*castShadows = atoi( value );
 		}
 	}
@@ -927,16 +922,16 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 	/* receive */
 	if ( recvShadows != NULL ) {
 		value = ValueForKey( ent, "_receiveShadows" );
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( ent, "_rs" );
 		}
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( ent2, "_receiveShadows" );
 		}
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( ent2, "_rs" );
 		}
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			*recvShadows = atoi( value );
 		}
 	}

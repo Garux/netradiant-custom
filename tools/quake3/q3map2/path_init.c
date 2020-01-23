@@ -79,15 +79,15 @@ char *LokiGetHomeDir( void ){
 	home = getenv( "HOME" );
 
 	/* look up home dir in password database */
-	if(!home)
+	if( home == NULL )
 	{
 		if ( getpwuid_r( getuid(), &pw, buf, sizeof( buf ), &pwp ) == 0 ) {
 			return pw.pw_dir;
 		}
 	}
-
-	snprintf( homeBuf, sizeof( homeBuf ), "%s/.", home );
-
+	else{
+		snprintf( homeBuf, sizeof( homeBuf ), "%s/.", home );
+	}
 	/* return it */
 	return homeBuf;
 	#endif
@@ -101,7 +101,7 @@ char *LokiGetHomeDir( void ){
  */
 
 void LokiInitPaths( char *argv0 ){
-	if ( !homePath ) {
+	if ( homePath == NULL ) {
 		/* get home dir */
 		homePath = LokiGetHomeDir();
 		if ( homePath == NULL ) {
@@ -123,7 +123,7 @@ void LokiInitPaths( char *argv0 ){
 
 	/* do some path divining */
 	strcpyQ( temp, argv0, sizeof( temp ) );
-	if ( strEmpty( path_get_last_separator( temp ) ) && path ) {
+	if ( strEmpty( path_get_last_separator( temp ) ) && path != NULL ) {
 
 		/*
 		   This code has a special behavior when q3map2 is a symbolic link.
@@ -205,7 +205,7 @@ game_t *GetGame( char *arg ){
 
 
 	/* dummy check */
-	if ( arg == NULL || arg[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( arg ) ) {
 		return NULL;
 	}
 
@@ -244,14 +244,14 @@ game_t *GetGame( char *arg ){
 
 void AddBasePath( char *path ){
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' || numBasePaths >= MAX_BASE_PATHS ) {
+	if ( strEmptyOrNull( path ) || numBasePaths >= MAX_BASE_PATHS ) {
 		return;
 	}
 
 	/* add it to the list */
 	basePaths[ numBasePaths ] = copystring( path );
 	FixDOSName( basePaths[ numBasePaths ] );
-	if ( EnginePath[0] == '\0' )
+	if ( strEmpty( EnginePath ) )
 		strcpy( EnginePath, basePaths[ numBasePaths ] );
 	numBasePaths++;
 }
@@ -266,29 +266,24 @@ void AddBasePath( char *path ){
 void AddHomeBasePath( char *path ){
 	int i;
 	char temp[ MAX_OS_PATH ];
-	int homePathLen;
 
-	if ( !homePath ) {
+	if ( homePath == NULL ) {
 		return;
 	}
 
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( path ) ) {
 		return;
 	}
 
 	/* strip leading dot, if homePath does not end in /. */
-	homePathLen = strlen( homePath );
 	if ( strEqual( path, "." ) ) {
 		/* -fs_homebase . means that -fs_home is to be used as is */
 		strcpy( temp, homePath );
 	}
-	else if ( homePathLen >= 2 && strEqual( homePath + homePathLen - 2, "/." ) ) {
-		/* remove trailing /. of homePath */
-		homePathLen -= 2;
-
-		/* concatenate home dir and path */
-		sprintf( temp, "%.*s/%s", homePathLen, homePath, path );
+	else if ( strEqualSuffix( homePath, "/." ) ) {
+		/* concatenate home dir and path */ /* remove trailing /. of homePath */
+		sprintf( temp, "%.*s/%s", (int)strlen( homePath ) - 2, homePath, path );
 	}
 	else
 	{
@@ -322,7 +317,7 @@ void AddGamePath( char *path ){
 	int i;
 
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' || numGamePaths >= MAX_GAME_PATHS ) {
+	if ( strEmptyOrNull( path ) || numGamePaths >= MAX_GAME_PATHS ) {
 		return;
 	}
 
@@ -352,7 +347,7 @@ void AddGamePath( char *path ){
 
 void AddPakPath( char *path ){
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' || numPakPaths >= MAX_PAK_PATHS ) {
+	if ( strEmptyOrNull( path ) || numPakPaths >= MAX_PAK_PATHS ) {
 		return;
 	}
 
@@ -386,7 +381,7 @@ void InitPaths( int *argc, char **argv ){
 	numBasePaths = 0;
 	numGamePaths = 0;
 
-	EnginePath[0] = '\0';
+	strClear( EnginePath );
 
 	/* parse through the arguments and extract those relevant to paths */
 	for ( i = 0; i < *argc; i++ )
@@ -533,7 +528,7 @@ void InitPaths( int *argc, char **argv ){
 	}
 
 	/* this only affects unix */
-	if ( homeBasePath ) {
+	if ( homeBasePath != NULL ) {
 		AddHomeBasePath( homeBasePath );
 	}
 	else{

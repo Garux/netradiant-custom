@@ -97,12 +97,12 @@ void FinishSurface( mapDrawSurface_t *ds ){
 	}
 
 	/* ydnar: rocking surface cloning (fur baby yeah!) */
-	if ( ds->shaderInfo->cloneShader != NULL && ds->shaderInfo->cloneShader[ 0 ] != '\0' ) {
+	if ( !strEmptyOrNull( ds->shaderInfo->cloneShader ) ) {
 		CloneSurface( ds, ShaderInfoForShader( ds->shaderInfo->cloneShader ) );
 	}
 
 	/* ydnar: q3map_backShader support */
-	if ( ds->shaderInfo->backShader != NULL && ds->shaderInfo->backShader[ 0 ] != '\0' ) {
+	if ( !strEmptyOrNull( ds->shaderInfo->backShader ) ) {
 		ds2 = CloneSurface( ds, ShaderInfoForShader( ds->shaderInfo->backShader ) );
 		ds2->backSide = true;
 	}
@@ -920,7 +920,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	}
 
 	/* ydnar: sky hack/fix for GL_CLAMP borders on ati cards */
-	if ( skyFixHack && si->skyParmsImageBase[ 0 ] != '\0' ) {
+	if ( skyFixHack && !strEmpty( si->skyParmsImageBase ) ) {
 		//%	Sys_FPrintf( SYS_VRB, "Enabling sky hack for shader %s using env %s\n", si->shader, si->skyParmsImageBase );
 		sprintf( tempShader, "%s_lf", si->skyParmsImageBase );
 		DrawSurfaceForShader( tempShader );
@@ -1249,7 +1249,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal,
 	ds->entityNum = entNum;
 
 	/* set it up */
-	if ( flareShader != NULL && flareShader[ 0 ] != '\0' ) {
+	if ( !strEmptyOrNull( flareShader ) ) {
 		ds->shaderInfo = ShaderInfoForShader( flareShader );
 	}
 	else{
@@ -3084,7 +3084,7 @@ void MakeFogHullSurfs( entity_t *e, tree_t *tree, char *shader ){
 
 
 	/* dummy check */
-	if ( shader == NULL || shader[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( shader ) ) {
 		return;
 	}
 
@@ -3273,7 +3273,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			}
 
 			/* insert the model */
-			InsertModel( (char *) model->model, 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
+			InsertModel( model->model, 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
 
 			/* return to sender */
 			return 1;
@@ -3615,7 +3615,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			}
 
 			/* create a flare surface if necessary */
-			if ( si->flareShader != NULL && si->flareShader[ 0 ] ) {
+			if ( !strEmptyOrNull( si->flareShader ) ) {
 				AddSurfaceFlare( ds, e->origin );
 			}
 
@@ -3643,7 +3643,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 		}
 
 		/* ydnar: remap shader */
-/*		if ( ds->shaderInfo->remapShader && ds->shaderInfo->remapShader[ 0 ] ) {
+/*		if ( !strEmptyOrNull( ds->shaderInfo->remapShader ) ) {
 			ds->shaderInfo = ShaderInfoForShader( ds->shaderInfo->remapShader );
 		}
 */

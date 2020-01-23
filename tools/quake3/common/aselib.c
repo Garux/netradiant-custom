@@ -334,12 +334,12 @@ static int ASE_GetToken( bool restOfLine ){
 
 		if ( ( CharIsTokenDelimiter( s_token[i - 1] ) && !restOfLine ) ||
 			 ( ( s_token[i - 1] == '\n' ) || ( s_token[i - 1] == '\r' ) ) ) {
-			s_token[i - 1] = 0;
+			s_token[i - 1] = '\0';
 			break;
 		}
 	}
 
-	s_token[i] = 0;
+	s_token[i] = '\0';
 
 	return 1;
 }
@@ -689,19 +689,19 @@ static void ASE_KeyGEOMOBJECT( const char *token ){
 
 		ASE_GetToken( true );
 		VERBOSE( ( " %s\n", s_token ) );
-		strcpy( ase.objects[ase.currentObject].name, s_token + 1 );
-		if ( strchr( ase.objects[ase.currentObject].name, '"' ) ) {
-			*strchr( ase.objects[ase.currentObject].name, '"' ) = 0;
+		strcpy( name, s_token + 1 );
+		if ( NULL != strchr( name, '"' ) ) {
+			strClear( strchr( name, '"' ) );
 		}
 
-		if ( strstr( name, "tag" ) == name ) {
+		if ( strEqualPrefix( name, "tag" ) ) {
 			while ( strchr( name, '_' ) != strrchr( name, '_' ) )
 			{
-				*strrchr( name, '_' ) = 0;
+				strClear( strrchr( name, '_' ) );
 			}
 			while ( strrchr( name, ' ' ) )
 			{
-				*strrchr( name, ' ' ) = 0;
+				strClear( strrchr( name, ' ' ) );
 			}
 		}
 	}

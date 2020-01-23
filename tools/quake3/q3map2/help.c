@@ -445,7 +445,7 @@ void HelpMain(const char* arg)
 		HelpMinimap,
 	};
 
-	if ( arg && strlen(arg) > 0 )
+	if ( !strEmptyOrNull( arg ) )
 	{
 		if ( arg[0] == '-' )
 			arg++;

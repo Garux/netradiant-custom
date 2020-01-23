@@ -191,13 +191,13 @@ static void SetCloneModelNumbers( void ){
 
 		/* is this a clone? */
 		value = ValueForKey( &entities[ i ], "_ins" );
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( &entities[ i ], "_instance" );
 		}
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( &entities[ i ], "_clone" );
 		}
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			continue;
 		}
 
@@ -219,13 +219,13 @@ static void SetCloneModelNumbers( void ){
 
 		/* is this a clone? */
 		value = ValueForKey( &entities[ i ], "_ins" );
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( &entities[ i ], "_instance" );
 		}
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( &entities[ i ], "_clone" );
 		}
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			continue;
 		}
 
@@ -234,7 +234,7 @@ static void SetCloneModelNumbers( void ){
 		{
 			/* is this a clone parent? */
 			value2 = ValueForKey( &entities[ j ], "_clonename" );
-			if ( value2[ 0 ] == '\0' ) {
+			if ( strEmpty( value2 ) ) {
 				continue;
 			}
 
@@ -242,7 +242,7 @@ static void SetCloneModelNumbers( void ){
 			if ( strEqual( value, value2 ) ) {
 				/* get the model num */
 				value3 = ValueForKey( &entities[ j ], "model" );
-				if ( value3[ 0 ] == '\0' ) {
+				if ( strEmpty( value3 ) ) {
 					Sys_Warning( "Cloned entity %s referenced entity without model\n", value2 );
 					continue;
 				}
@@ -328,13 +328,13 @@ void ProcessWorldModel( void ){
 
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
 	value = ValueForKey( &entities[ 0 ], "_blocksize" );
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( &entities[ 0 ], "blocksize" );
 	}
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( &entities[ 0 ], "chopsize" );  /* sof2 */
 	}
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		/* scan 3 numbers */
 		s = sscanf( value, "%d %d %d", &blockSize[ 0 ], &blockSize[ 1 ], &blockSize[ 2 ] );
 
@@ -348,7 +348,7 @@ void ProcessWorldModel( void ){
 
 	/* sof2: ignore leaks? */
 	value = ValueForKey( &entities[ 0 ], "_ignoreleaks" );  /* ydnar */
-	if ( value[ 0 ] == '\0' ) {
+	if ( strEmpty( value ) ) {
 		value = ValueForKey( &entities[ 0 ], "ignoreleaks" );
 	}
 	ignoreLeaks = ( value[ 0 ] == '1' );
@@ -483,7 +483,7 @@ void ProcessWorldModel( void ){
 
 	/* ydnar: fog hull */
 	value = ValueForKey( &entities[ 0 ], "_foghull" );
-	if ( value[ 0 ] != '\0' ) {
+	if ( !strEmpty( value ) ) {
 		sprintf( shader, "textures/%s", value );
 		MakeFogHullSurfs( e, tree, shader );
 	}
@@ -504,7 +504,7 @@ void ProcessWorldModel( void ){
 			/* get flare shader */
 			flareShader = ValueForKey( light, "_flareshader" );
 			value = ValueForKey( light, "_flare" );
-			if ( flareShader[ 0 ] != '\0' || value[ 0 ] != '\0' ) {
+			if ( !strEmpty( flareShader ) || !strEmpty( value ) ) {
 				/* get specifics */
 				GetVectorForKey( light, "origin", origin );
 				GetVectorForKey( light, "_color", color );
@@ -515,7 +515,7 @@ void ProcessWorldModel( void ){
 
 				/* handle directional spotlights */
 				value = ValueForKey( light, "target" );
-				if ( value[ 0 ] != '\0' ) {
+				if ( !strEmpty( value ) ) {
 					/* get target light */
 					target = FindTargetEntity( value );
 					if ( target != NULL ) {
@@ -770,8 +770,8 @@ int BSPMain( int argc, char **argv ){
 	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
 	numMapDrawSurfs = 0;
 
-	tempSource[ 0 ] = '\0';
-	globalCelShader[0] = 0;
+	strClear( tempSource );
+	strClear( globalCelShader );
 
 	/* set standard game flags */
 	maxSurfaceVerts = game->maxSurfaceVerts;
@@ -1098,7 +1098,7 @@ int BSPMain( int argc, char **argv ){
 	LoadShaderInfo();
 
 	/* load original file from temp spot in case it was renamed by the editor on the way in */
-	if ( strlen( tempSource ) > 0 ) {
+	if ( !strEmpty( tempSource ) ) {
 		LoadMapFile( tempSource, false, g_autocaulk );
 	}
 	else{
@@ -1127,7 +1127,7 @@ int BSPMain( int argc, char **argv ){
 	EndBSPFile( true );
 
 	/* remove temp map source file if appropriate */
-	if ( strlen( tempSource ) > 0 ) {
+	if ( !strEmpty( tempSource ) ) {
 		remove( tempSource );
 	}
 

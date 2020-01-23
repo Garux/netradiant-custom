@@ -207,7 +207,7 @@ void WriteSurfaceExtraFile( const char *path ){
 
 
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( path ) ) {
 		return;
 	}
 
@@ -316,7 +316,7 @@ void LoadSurfaceExtraFile( const char *path ){
 
 
 	/* dummy check */
-	if ( path == NULL || path[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( path ) ) {
 		return;
 	}
 

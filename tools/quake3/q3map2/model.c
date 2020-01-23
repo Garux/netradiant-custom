@@ -99,7 +99,7 @@ picoModel_t *FindModel( const char *name, int frame ){
 	}
 
 	/* dummy check */
-	if ( name == NULL || name[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( name ) ) {
 		return NULL;
 	}
 
@@ -135,7 +135,7 @@ picoModel_t *LoadModel( const char *name, int frame ){
 	}
 
 	/* dummy check */
-	if ( name == NULL || name[ 0 ] == '\0' ) {
+	if ( strEmptyOrNull( name ) ) {
 		return NULL;
 	}
 
@@ -262,21 +262,20 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	sf = NULL;
 	if ( skinfilesize >= 0 ) {
 		Sys_Printf( "Using skin %d of %s\n", skin, name );
-		int pos;
-		for ( skinfileptr = skinfilecontent; *skinfileptr; skinfileptr = skinfilenextptr )
+		for ( skinfileptr = skinfilecontent; !strEmpty( skinfileptr ); skinfileptr = skinfilenextptr )
 		{
 			// for fscanf
 			char format[64];
 
 			skinfilenextptr = strchr( skinfileptr, '\r' );
-			if ( skinfilenextptr ) {
-				*skinfilenextptr++ = 0;
+			if ( skinfilenextptr != NULL ) {
+				strClear( skinfilenextptr++ );
 			}
 			else
 			{
 				skinfilenextptr = strchr( skinfileptr, '\n' );
-				if ( skinfilenextptr ) {
-					*skinfilenextptr++ = 0;
+				if ( skinfilenextptr != NULL ) {
+					strClear( skinfilenextptr++ );
 				}
 				else{
 					skinfilenextptr = skinfileptr + strlen( skinfileptr );
@@ -293,7 +292,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 				continue;
 			}
 			sprintf( format, " %%%d[^,  ] ,%%%ds", (int)sizeof( sf->name ) - 1, (int)sizeof( sf->to ) - 1 );
-			if ( ( pos = sscanf( skinfileptr, format, sf->name, sf->to ) ) == 2 ) {
+			if ( sscanf( skinfileptr, format, sf->name, sf->to ) == 2 ) {
 				continue;
 			}
 
@@ -365,7 +364,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 					break;
 				}
 			}
-			if ( !picoShaderName ) {
+			if ( picoShaderName == NULL ) {
 				Sys_FPrintf( SYS_VRB, "Skin file: not mapping %s\n", surface->name );
 				continue;
 			}
@@ -375,20 +374,20 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		glob = rmto = NULL;
 		for ( rm = remap; rm != NULL; rm = rm->next )
 		{
-			if ( rm->from[ 0 ] == '*' && rm->from[ 1 ] == '\0' ) {
+			if ( strEqual( rm->from, "*" ) ) {
 				glob = rm;
 			}
 			else if( striEqualSuffix( picoShaderName, rm->from ) ){
 				rmto = rm;
-				if( strlen( picoShaderName ) == strlen( rm->from ) ) // exact match priority
+				if( striEqual( picoShaderName, rm->from ) ) // exact match priority
 					break;
 			}
 		}
-		if( rmto ){
+		if( rmto != NULL ){
 			Sys_FPrintf( SYS_VRB, "Remapping '%s' to '%s'\n", picoShaderName, rmto->to );
 			picoShaderName = rmto->to;
 		}
-		else if ( glob ) {
+		else if ( glob != NULL ) {
 			Sys_FPrintf( SYS_VRB, "Globbing '%s' to '%s'\n", picoShaderName, glob->to );
 			picoShaderName = glob->to;
 		}
@@ -1383,7 +1382,7 @@ void AddTriangleModels( entity_t *e ){
 		targetName = ValueForKey( e, "targetname" );
 
 		/* misc_model entities target non-worldspawn brush model entities */
-		if ( targetName[ 0 ] == '\0' ) {
+		if ( strEmpty( targetName ) ) {
 			return;
 		}
 	}
@@ -1429,7 +1428,7 @@ void AddTriangleModels( entity_t *e ){
 
 		/* get model name */
 		model = ValueForKey( e2, "model" );
-		if ( model[ 0 ] == '\0' ) {
+		if ( strEmpty( model ) ) {
 			Sys_Warning( "misc_model at %i %i %i without a model key\n",
 						(int) origin[ 0 ], (int) origin[ 1 ], (int) origin[ 2 ] );
 			continue;
@@ -1474,7 +1473,7 @@ void AddTriangleModels( entity_t *e ){
 			scale[ 0 ] = scale[ 1 ] = scale[ 2 ] = temp;
 		}
 		value = ValueForKey( e2, "modelscale_vec" );
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			sscanf( value, "%f %f %f", &scale[ 0 ], &scale[ 1 ], &scale[ 2 ] );
 		}
 
@@ -1482,7 +1481,7 @@ void AddTriangleModels( entity_t *e ){
 		angles[ 0 ] = angles[ 1 ] = angles[ 2 ] = 0.0f;
 		angles[ 2 ] = FloatForKey( e2, "angle" );
 		value = ValueForKey( e2, "angles" );
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] );
 		}
 
@@ -1495,8 +1494,7 @@ void AddTriangleModels( entity_t *e ){
 		for ( ep = e2->epairs; ep != NULL; ep = ep->next )
 		{
 			/* look for keys prefixed with "_remap" */
-			if ( ep->key != NULL && ep->value != NULL &&
-				 ep->key[ 0 ] != '\0' && ep->value[ 0 ] != '\0' &&
+			if ( !strEmptyOrNull( ep->key ) && !strEmptyOrNull( ep->value ) &&
 				 striEqualPrefix( ep->key, "_remap" ) ) {
 				/* create new remapping */
 				remap2 = remap;
@@ -1513,7 +1511,7 @@ void AddTriangleModels( entity_t *e ){
 					Sys_Warning( "_remap FROM is empty in '%s'\n", remap->from );
 					split = NULL;
 				}
-				else if( *( split + 1 ) == '\0' ){
+				else if( strEmpty( split + 1 ) ){
 					Sys_Warning( "_remap TO is empty in '%s'\n", remap->from );
 					split = NULL;
 				}
@@ -1529,7 +1527,7 @@ void AddTriangleModels( entity_t *e ){
 				}
 
 				/* store the split */
-				*split = '\0';
+				strClear( split );
 				strcpy( remap->to, ( split + 1 ) );
 
 				/* note it */
@@ -1539,10 +1537,10 @@ void AddTriangleModels( entity_t *e ){
 
 		/* ydnar: cel shader support */
 		value = ValueForKey( e2, "_celshader" );
-		if ( value[ 0 ] == '\0' ) {
+		if ( strEmpty( value ) ) {
 			value = ValueForKey( &entities[ 0 ], "_celshader" );
 		}
-		if ( value[ 0 ] != '\0' ) {
+		if ( !strEmpty( value ) ) {
 			sprintf( shader, "textures/%s", value );
 			celShader = ShaderInfoForShader( shader );
 		}

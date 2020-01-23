@@ -174,7 +174,7 @@ static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum ){
 	}
 
 	/* blender hates this, so let's not do it
-	for( c = filename; *c != '\0'; c++ )
+	for( c = filename; *c; c++ )
 		if( *c == '/' )
 			*c = '\\';
 	*/
@@ -376,7 +376,7 @@ int ConvertBSPToOBJ( char *bspName ){
 
 		/* get entity origin */
 		key = ValueForKey( e, "origin" );
-		if ( key[ 0 ] == '\0' ) {
+		if ( strEmpty( key ) ) {
 			VectorClear( origin );
 		}
 		else{
