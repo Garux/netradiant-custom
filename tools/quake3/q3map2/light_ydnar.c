@@ -250,7 +250,7 @@ void SmoothNormals( void ){
 			}
 
 			/* test vertexes */
-			if ( VectorCompare( yDrawVerts[ i ].xyz, yDrawVerts[ j ].xyz ) == qfalse ) {
+			if ( !VectorCompare( yDrawVerts[ i ].xyz, yDrawVerts[ j ].xyz ) ) {
 				continue;
 			}
 
@@ -333,7 +333,7 @@ void SmoothNormals( void ){
    calculates the st tangent vectors for normalmapping
  */
 
-static qboolean CalcTangentVectors( int numVerts, bspDrawVert_t **dv, vec3_t *stv, vec3_t *ttv ){
+static bool CalcTangentVectors( int numVerts, bspDrawVert_t **dv, vec3_t *stv, vec3_t *ttv ){
 	int i;
 	float bb, s, t;
 	vec3_t bary;
@@ -342,7 +342,7 @@ static qboolean CalcTangentVectors( int numVerts, bspDrawVert_t **dv, vec3_t *st
 	/* calculate barycentric basis for the triangle */
 	bb = ( dv[ 1 ]->st[ 0 ] - dv[ 0 ]->st[ 0 ] ) * ( dv[ 2 ]->st[ 1 ] - dv[ 0 ]->st[ 1 ] ) - ( dv[ 2 ]->st[ 0 ] - dv[ 0 ]->st[ 0 ] ) * ( dv[ 1 ]->st[ 1 ] - dv[ 0 ]->st[ 1 ] );
 	if ( fabs( bb ) < 0.00000001f ) {
-		return qfalse;
+		return false;
 	}
 
 	/* do each vertex */
@@ -382,7 +382,7 @@ static qboolean CalcTangentVectors( int numVerts, bspDrawVert_t **dv, vec3_t *st
 	}
 
 	/* return to caller */
-	return qtrue;
+	return true;
 }
 
 
@@ -402,7 +402,7 @@ static void PerturbNormal( bspDrawVert_t *dv, shaderInfo_t *si, vec3_t pNormal, 
 	VectorCopy( dv->normal, pNormal );
 
 	/* sample normalmap */
-	if ( RadSampleImage( si->normalImage->pixels, si->normalImage->width, si->normalImage->height, dv->st, bump ) == qfalse ) {
+	if ( !RadSampleImage( si->normalImage->pixels, si->normalImage->width, si->normalImage->height, dv->st, bump ) ) {
 		return;
 	}
 
@@ -628,7 +628,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 	luxel[ 1 ] = 0.0f;
 
 	/* point in solid? (except in dark mode) */
-	if ( pointCluster < 0 && dark == qfalse ) {
+	if ( pointCluster < 0 && !dark ) {
 		/* nudge the the location around */
 		nudge = nudges[ 0 ];
 		while ( nudge[ 0 ] > BOGUS_NUDGE && pointCluster < 0 )
@@ -651,7 +651,7 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 	}
 
 	/* as a last resort, if still in solid, try drawvert origin offset by normal (except in dark mode) */
-	if ( pointCluster < 0 && si != NULL && dark == qfalse ) {
+	if ( pointCluster < 0 && si != NULL && !dark ) {
 		VectorMA( dv->xyz, lightmapSampleOffset, dv->normal, nudged );
 		pointCluster = ClusterForPointExtFilter( nudged, LUXEL_EPSILON, numClusters, clusters );
 		if ( pointCluster >= 0 ) {
@@ -774,7 +774,7 @@ static void MapTriangle_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
    requires a cw ordered triangle
  */
 
-static qboolean MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 3 ], qboolean mapNonAxial ){
+static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 3 ], bool mapNonAxial ){
 	int i;
 	vec4_t plane;
 	vec3_t          *stv, *ttv, stvStatic[ 3 ], ttvStatic[ 3 ];
@@ -788,8 +788,8 @@ static qboolean MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert
 	}
 
 	/* otherwise make one from the points */
-	else if ( PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) == qfalse ) {
-		return qfalse;
+	else if ( !PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) ) {
+		return false;
 	}
 
 	/* check to see if we need to calculate texture->world tangent vectors */
@@ -816,7 +816,7 @@ static qboolean MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert
 	if ( mapNonAxial ) {
 		/* subdivide the triangle */
 		MapTriangle_r( lm, info, dv, plane, stv, ttv, worldverts );
-		return qtrue;
+		return true;
 	}
 
 	for ( i = 0; i < 3; i++ )
@@ -840,7 +840,7 @@ static qboolean MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert
 		}
 	}
 
-	return qtrue;
+	return true;
 }
 
 
@@ -946,7 +946,7 @@ static void MapQuad_r( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv
 
 #define QUAD_PLANAR_EPSILON     0.5f
 
-static qboolean MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 4 ] ){
+static bool MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv[ 4 ] ){
 	float dist;
 	vec4_t plane;
 	vec3_t          *stv, *ttv, stvStatic[ 4 ], ttvStatic[ 4 ];
@@ -959,14 +959,14 @@ static qboolean MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *
 	}
 
 	/* otherwise make one from the points */
-	else if ( PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) == qfalse ) {
-		return qfalse;
+	else if ( !PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) ) {
+		return false;
 	}
 
 	/* 4th point must fall on the plane */
 	dist = DotProduct( plane, dv[ 3 ]->xyz ) - plane[ 3 ];
 	if ( fabs( dist ) > QUAD_PLANAR_EPSILON ) {
-		return qfalse;
+		return false;
 	}
 
 	/* check to see if we need to calculate texture->world tangent vectors */
@@ -988,7 +988,7 @@ static qboolean MapQuad( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *
 
 	/* subdivide the quad */
 	MapQuad_r( lm, info, dv, plane, stv, ttv );
-	return qtrue;
+	return true;
 }
 
 
@@ -1565,7 +1565,7 @@ void DirtyRawLightmap( int rawLightmapNum ){
 	rawLightmap_t       *lm;
 	surfaceInfo_t       *info;
 	trace_t trace;
-	qboolean noDirty;
+	bool noDirty;
 
 
 	/* bail if this number exceeds the number of raw lightmaps */
@@ -1577,16 +1577,16 @@ void DirtyRawLightmap( int rawLightmapNum ){
 	lm = &rawLightmaps[ rawLightmapNum ];
 
 	/* setup trace */
-	trace.testOcclusion = qtrue;
-	trace.forceSunlight = qfalse;
+	trace.testOcclusion = true;
+	trace.forceSunlight = false;
 	trace.recvShadows = lm->recvShadows;
 	trace.numSurfaces = lm->numLightSurfaces;
 	trace.surfaces = &lightSurfaces[ lm->firstLightSurface ];
 	trace.inhibitRadius = 0.0f;
-	trace.testAll = qfalse;
+	trace.testAll = false;
 
 	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
-	trace.twoSided = qfalse;
+	trace.twoSided = false;
 	for ( i = 0; i < trace.numSurfaces; i++ )
 	{
 		/* get surface */
@@ -1594,12 +1594,12 @@ void DirtyRawLightmap( int rawLightmapNum ){
 
 		/* check twosidedness */
 		if ( info->si->twoSided ) {
-			trace.twoSided = qtrue;
+			trace.twoSided = true;
 			break;
 		}
 	}
 
-	noDirty = qfalse;
+	noDirty = false;
 	for ( i = 0; i < trace.numSurfaces; i++ )
 	{
 		/* get surface */
@@ -1607,7 +1607,7 @@ void DirtyRawLightmap( int rawLightmapNum ){
 
 		/* check twosidedness */
 		if ( info->si->noDirty ) {
-			noDirty = qtrue;
+			noDirty = true;
 			break;
 		}
 	}
@@ -1710,7 +1710,7 @@ void DirtyRawLightmap( int rawLightmapNum ){
    calculates the pvs cluster, origin, normal of a sub-luxel
  */
 
-static qboolean SubmapRawLuxel( rawLightmap_t *lm, int x, int y, float bx, float by, int *sampleCluster, vec3_t sampleOrigin, vec3_t sampleNormal ){
+static bool SubmapRawLuxel( rawLightmap_t *lm, int x, int y, float bx, float by, int *sampleCluster, vec3_t sampleOrigin, vec3_t sampleNormal ){
 	int i, *cluster, *cluster2;
 	float       *origin, *origin2, *normal; //%	, *normal2;
 	vec3_t originVecs[ 2 ];                 //%	, normalVecs[ 2 ];
@@ -1774,19 +1774,19 @@ static qboolean SubmapRawLuxel( rawLightmap_t *lm, int x, int y, float bx, float
 	/* get cluster */
 	*sampleCluster = ClusterForPointExtFilter( sampleOrigin, ( LUXEL_EPSILON * 2 ), lm->numLightClusters, lm->lightClusters );
 	if ( *sampleCluster < 0 ) {
-		return qfalse;
+		return false;
 	}
 
 	/* calculate new normal */
 	//%	VectorMA( normal, bx, normalVecs[ 0 ], sampleNormal );
 	//%	VectorMA( sampleNormal, by, normalVecs[ 1 ], sampleNormal );
 	//%	if( VectorNormalize( sampleNormal, sampleNormal ) <= 0.0f )
-	//%		return qfalse;
+	//%		return false;
 	normal = SUPER_NORMAL( x, y );
 	VectorCopy( normal, sampleNormal );
 
 	/* return ok */
-	return qtrue;
+	return true;
 }
 
 
@@ -1988,7 +1988,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 	size_t llSize, ldSize;
 	rawLightmap_t       *lm;
 	surfaceInfo_t       *info;
-	qboolean filterColor, filterDir;
+	bool filterColor, filterDir;
 	float brightness;
 	float               *origin, *normal, *dirt, *luxel, *luxel2, *deluxel, *deluxel2;
 	unsigned char           *flag;
@@ -2009,14 +2009,14 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 	/* setup trace */
 	trace.testOcclusion = !noTrace;
-	trace.forceSunlight = qfalse;
+	trace.forceSunlight = false;
 	trace.recvShadows = lm->recvShadows;
 	trace.numSurfaces = lm->numLightSurfaces;
 	trace.surfaces = &lightSurfaces[ lm->firstLightSurface ];
 	trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
 
 	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
-	trace.twoSided = qfalse;
+	trace.twoSided = false;
 	for ( i = 0; i < trace.numSurfaces; i++ )
 	{
 		/* get surface */
@@ -2024,7 +2024,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 		/* check twosidedness */
 		if ( info->si->twoSided ) {
-			trace.twoSided = qtrue;
+			trace.twoSided = true;
 			break;
 		}
 	}
@@ -2646,15 +2646,15 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				normal = SUPER_NORMAL( x, y );
 
 				/* determine if filtering is necessary */
-				filterColor = qfalse;
-				filterDir = qfalse;
+				filterColor = false;
+				filterDir = false;
 				if ( *cluster < 0 ||
 					 ( lm->splotchFix && ( luxel[ 0 ] <= ambientColor[ 0 ] || luxel[ 1 ] <= ambientColor[ 1 ] || luxel[ 2 ] <= ambientColor[ 2 ] ) ) ) {
-					filterColor = qtrue;
+					filterColor = true;
 				}
 
 				if ( deluxemap && lightmapNum == 0 && ( *cluster < 0 || filter ) ) {
-					filterDir = qtrue;
+					filterDir = true;
 				}
 
 				if ( !filterColor && !filterDir ) {
@@ -2804,7 +2804,7 @@ void IlluminateVertexes( int num ){
 	/* calculate vertex lighting for surfaces without lightmaps */
 	if ( lm == NULL || cpmaHack ) {
 		/* setup trace */
-		trace.testOcclusion = ( cpmaHack && lm != NULL ) ? qfalse : !noTrace;
+		trace.testOcclusion = ( cpmaHack && lm != NULL ) ? false : !noTrace;
 		trace.forceSunlight = info->si->forceSunlight;
 		trace.recvShadows = info->recvShadows;
 		trace.numSurfaces = 1;
@@ -3262,24 +3262,24 @@ void SetupBrushes( void ){
    determines if two clusters are visible to each other using the PVS
  */
 
-qboolean ClusterVisible( int a, int b ){
+bool ClusterVisible( int a, int b ){
 	int leafBytes;
 	byte        *pvs;
 
 
 	/* dummy check */
 	if ( a < 0 || b < 0 ) {
-		return qfalse;
+		return false;
 	}
 
 	/* early out */
 	if ( a == b ) {
-		return qtrue;
+		return true;
 	}
 
 	/* not vised? */
 	if ( numBSPVisBytes <= 8 ) {
-		return qtrue;
+		return true;
 	}
 
 	/* get pvs data */
@@ -3289,9 +3289,9 @@ qboolean ClusterVisible( int a, int b ){
 
 	/* check */
 	if ( ( pvs[ b >> 3 ] & ( 1 << ( b & 7 ) ) ) ) {
-		return qtrue;
+		return true;
 	}
-	return qfalse;
+	return false;
 }
 
 
@@ -3348,17 +3348,17 @@ int PointInLeafNum( vec3_t point ){
 
 /*
    ClusterVisibleToPoint() - ydnar
-   returns qtrue if point can "see" cluster
+   returns true if point can "see" cluster
  */
 
-qboolean ClusterVisibleToPoint( vec3_t point, int cluster ){
+bool ClusterVisibleToPoint( vec3_t point, int cluster ){
 	int pointCluster;
 
 
 	/* get leafNum for point */
 	pointCluster = ClusterForPoint( point );
 	if ( pointCluster < 0 ) {
-		return qfalse;
+		return false;
 	}
 
 	/* check pvs */
@@ -3396,7 +3396,7 @@ int ClusterForPoint( vec3_t point ){
 int ClusterForPointExt( vec3_t point, float epsilon ){
 	int i, j, b, leafNum, cluster;
 	float dot;
-	qboolean inside;
+	bool inside;
 	int             *brushes, numBSPBrushes;
 	bspLeaf_t       *leaf;
 	bspBrush_t      *brush;
@@ -3432,14 +3432,14 @@ int ClusterForPointExt( vec3_t point, float epsilon ){
 		}
 
 		/* check point against all planes */
-		inside = qtrue;
+		inside = true;
 		for ( j = 0; j < brush->numSides && inside; j++ )
 		{
 			plane = &bspPlanes[ bspBrushSides[ brush->firstSide + j ].planeNum ];
 			dot = DotProduct( point, plane->normal );
 			dot -= plane->dist;
 			if ( dot > epsilon ) {
-				inside = qfalse;
+				inside = false;
 			}
 		}
 
@@ -3495,7 +3495,7 @@ int ClusterForPointExtFilter( vec3_t point, float epsilon, int numClusters, int 
 int ShaderForPointInLeaf( vec3_t point, int leafNum, float epsilon, int wantContentFlags, int wantSurfaceFlags, int *contentFlags, int *surfaceFlags ){
 	int i, j;
 	float dot;
-	qboolean inside;
+	bool inside;
 	int             *brushes, numBSPBrushes;
 	bspLeaf_t           *leaf;
 	bspBrush_t      *brush;
@@ -3524,7 +3524,7 @@ int ShaderForPointInLeaf( vec3_t point, int leafNum, float epsilon, int wantCont
 		brush = &bspBrushes[ brushes[ i ] ];
 
 		/* check point against all planes */
-		inside = qtrue;
+		inside = true;
 		allSurfaceFlags = 0;
 		allContentFlags = 0;
 		for ( j = 0; j < brush->numSides && inside; j++ )
@@ -3534,7 +3534,7 @@ int ShaderForPointInLeaf( vec3_t point, int leafNum, float epsilon, int wantCont
 			dot = DotProduct( point, plane->normal );
 			dot -= plane->dist;
 			if ( dot > epsilon ) {
-				inside = qfalse;
+				inside = false;
 			}
 			else
 			{
@@ -3570,14 +3570,14 @@ int ShaderForPointInLeaf( vec3_t point, int leafNum, float epsilon, int wantCont
 /*
    ChopBounds()
    chops a bounding box by the plane defined by origin and normal
-   returns qfalse if the bounds is entirely clipped away
+   returns false if the bounds is entirely clipped away
 
    this is not exactly the fastest way to do this...
  */
 
-qboolean ChopBounds( vec3_t mins, vec3_t maxs, vec3_t origin, vec3_t normal ){
+bool ChopBounds( vec3_t mins, vec3_t maxs, vec3_t origin, vec3_t normal ){
 	/* FIXME: rewrite this so it doesn't use bloody brushes */
-	return qtrue;
+	return true;
 }
 
 
@@ -3591,7 +3591,7 @@ qboolean ChopBounds( vec3_t mins, vec3_t maxs, vec3_t origin, vec3_t normal ){
 #define LIGHT_EPSILON   0.125f
 #define LIGHT_NUDGE     2.0f
 
-void SetupEnvelopes( qboolean forGrid, qboolean fastFlag ){
+void SetupEnvelopes( bool forGrid, bool fastFlag ){
 	int i, x, y, z, x1, y1, z1;
 	light_t     *light, *light2, **owner;
 	bspLeaf_t   *leaf;
@@ -3786,7 +3786,7 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag ){
 						if ( leaf->cluster < 0 ) {
 							continue;
 						}
-						if ( ClusterVisible( light->cluster, leaf->cluster ) == qfalse ) { /* ydnar: thanks Arnout for exposing my stupid error (this never failed before) */
+						if ( !ClusterVisible( light->cluster, leaf->cluster ) ) { /* ydnar: thanks Arnout for exposing my stupid error (this never failed before) */
 							continue;
 						}
 
@@ -3893,7 +3893,7 @@ void SetupEnvelopes( qboolean forGrid, qboolean fastFlag ){
 
 		/* if any styled light is present, automatically set nocollapse */
 		if ( light->style != LS_NORMAL ) {
-			noCollapse = qtrue;
+			noCollapse = true;
 		}
 	}
 
@@ -3931,7 +3931,7 @@ void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int nu
 
 	/* potential pre-setup  */
 	if ( numLights == 0 ) {
-		SetupEnvelopes( qfalse, fast );
+		SetupEnvelopes( false, fast );
 	}
 
 	/* debug code */
@@ -4007,11 +4007,11 @@ void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int nu
 
 			/* check bounding box against light's pvs envelope (note: this code never eliminated any lights, so disabling it) */
 			#if 0
-			skip = qfalse;
+			bool skip = false;
 			for ( i = 0; i < 3; i++ )
 			{
 				if ( mins[ i ] > light->maxs[ i ] || maxs[ i ] < light->mins[ i ] ) {
-					skip = qtrue;
+					skip = true;
 				}
 			}
 			if ( skip ) {
@@ -4022,7 +4022,7 @@ void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int nu
 		}
 
 		/* planar surfaces (except twosided surfaces) have a couple more checks */
-		if ( length > 0.0f && trace->twoSided == qfalse ) {
+		if ( length > 0.0f && !trace->twoSided ) {
 			/* lights coplanar with a surface won't light it */
 			if ( !( light->flags & LIGHT_TWOSIDED ) && DotProduct( light->normal, normal ) > 0.999f ) {
 				lightsPlaneCulled++;
@@ -4163,7 +4163,7 @@ void SetupFloodLight( void ){
 		floodlightIntensity = v5;
 		floodlightDirectionScale = v6;
 
-		floodlighty = qtrue;
+		floodlighty = true;
 		Sys_Printf( "FloodLighting enabled via worldspawn _floodlight key.\n" );
 	}
 	else
@@ -4184,7 +4184,7 @@ void SetupFloodLight( void ){
    once again, kudos to the dirtmapping coder
  */
 
-float FloodLightForSample( trace_t *trace, float floodLightDistance, qboolean floodLightLowQuality ){
+float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodLightLowQuality ){
 	int i;
 	float d;
 	float contribution;
@@ -4228,7 +4228,7 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, qboolean fl
 	}
 
 	/* vortex: optimise floodLightLowQuality a bit */
-	if ( floodLightLowQuality == qtrue ) {
+	if ( floodLightLowQuality ) {
 		/* iterate through ordered vectors */
 		for ( i = 0; i < numFloodVectors; i++ )
 			if ( rand() % 10 != 0 ) {
@@ -4309,7 +4309,7 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, qboolean fl
  */
 
 // floodlight pass on a lightmap
-void FloodLightRawLightmapPass( rawLightmap_t *lm, vec3_t lmFloodLightRGB, float lmFloodLightIntensity, float lmFloodLightDistance, qboolean lmFloodLightLowQuality, float floodlightDirectionScale ){
+void FloodLightRawLightmapPass( rawLightmap_t *lm, vec3_t lmFloodLightRGB, float lmFloodLightIntensity, float lmFloodLightDistance, bool lmFloodLightLowQuality, float floodlightDirectionScale ){
 	int i, x, y, *cluster;
 	float               *origin, *normal, *floodlight, floodLightAmount;
 	surfaceInfo_t       *info;
@@ -4320,18 +4320,18 @@ void FloodLightRawLightmapPass( rawLightmap_t *lm, vec3_t lmFloodLightRGB, float
 	memset( &trace,0,sizeof( trace_t ) );
 
 	/* setup trace */
-	trace.testOcclusion = qtrue;
-	trace.forceSunlight = qfalse;
-	trace.twoSided = qtrue;
+	trace.testOcclusion = true;
+	trace.forceSunlight = false;
+	trace.twoSided = true;
 	trace.recvShadows = lm->recvShadows;
 	trace.numSurfaces = lm->numLightSurfaces;
 	trace.surfaces = &lightSurfaces[ lm->firstLightSurface ];
 	trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
-	trace.testAll = qfalse;
+	trace.testAll = false;
 	trace.distance = 1024;
 
 	/* twosided lighting (may or may not be a good idea for lightmapped stuff) */
-	//trace.twoSided = qfalse;
+	//trace.twoSided = false;
 	for ( i = 0; i < trace.numSurfaces; i++ )
 	{
 		/* get surface */
@@ -4339,7 +4339,7 @@ void FloodLightRawLightmapPass( rawLightmap_t *lm, vec3_t lmFloodLightRGB, float
 
 		/* check twosidedness */
 		if ( info->si->twoSided ) {
-			trace.twoSided = qtrue;
+			trace.twoSided = true;
 			break;
 		}
 	}
@@ -4455,7 +4455,7 @@ void FloodLightRawLightmap( int rawLightmapNum ){
 
 	/* custom pass */
 	if ( lm->floodlightIntensity ) {
-		FloodLightRawLightmapPass( lm, lm->floodlightRGB, lm->floodlightIntensity, lm->floodlightDistance, qfalse, lm->floodlightDirectionScale );
+		FloodLightRawLightmapPass( lm, lm->floodlightRGB, lm->floodlightIntensity, lm->floodlightDistance, false, lm->floodlightDirectionScale );
 		numSurfacesFloodlighten += 1;
 	}
 }
@@ -4463,7 +4463,7 @@ void FloodLightRawLightmap( int rawLightmapNum ){
 void FloodlightRawLightmaps(){
 	Sys_Printf( "--- FloodlightRawLightmap ---\n" );
 	numSurfacesFloodlighten = 0;
-	RunThreadsOnIndividual( numRawLightmaps, qtrue, FloodLightRawLightmap );
+	RunThreadsOnIndividual( numRawLightmaps, true, FloodLightRawLightmap );
 	Sys_Printf( "%9d custom lightmaps floodlighted\n", numSurfacesFloodlighten );
 }
 

@@ -289,7 +289,7 @@ void WriteSurfaceExtraFile( const char *path ){
 		}
 
 		/* lightmap axis vector */
-		if ( VectorCompare( se->lightmapAxis, seDefault.lightmapAxis ) == qfalse ) {
+		if ( !VectorCompare( se->lightmapAxis, seDefault.lightmapAxis ) ) {
 			fprintf( sf, "\tlightmapAxis ( %f %f %f )\n", se->lightmapAxis[ 0 ], se->lightmapAxis[ 1 ], se->lightmapAxis[ 2 ] );
 		}
 
@@ -337,7 +337,7 @@ void LoadSurfaceExtraFile( const char *path ){
 	while ( 1 )
 	{
 		/* test for end of file */
-		if ( !GetToken( qtrue ) ) {
+		if ( !GetToken( true ) ) {
 			break;
 		}
 
@@ -359,12 +359,12 @@ void LoadSurfaceExtraFile( const char *path ){
 		}
 
 		/* handle { } section */
-		if ( !GetToken( qtrue ) || strcmp( token, "{" ) ) {
+		if ( !GetToken( true ) || strcmp( token, "{" ) ) {
 			Error( "ReadSurfaceExtraFile(): %s, line %d: { not found", srfPath, scriptline );
 		}
 		while ( 1 )
 		{
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 			if ( !strcmp( token, "}" ) ) {
@@ -373,43 +373,43 @@ void LoadSurfaceExtraFile( const char *path ){
 
 			/* shader */
 			if ( !Q_stricmp( token, "shader" ) ) {
-				GetToken( qfalse );
+				GetToken( false );
 				se->si = ShaderInfoForShader( token );
 			}
 
 			/* parent surface number */
 			else if ( !Q_stricmp( token, "parent" ) ) {
-				GetToken( qfalse );
+				GetToken( false );
 				se->parentSurfaceNum = atoi( token );
 			}
 
 			/* entity number */
 			else if ( !Q_stricmp( token, "entity" ) ) {
-				GetToken( qfalse );
+				GetToken( false );
 				se->entityNum = atoi( token );
 			}
 
 			/* cast shadows */
 			else if ( !Q_stricmp( token, "castShadows" ) ) {
-				GetToken( qfalse );
+				GetToken( false );
 				se->castShadows = atoi( token );
 			}
 
 			/* recv shadows */
 			else if ( !Q_stricmp( token, "receiveShadows" ) ) {
-				GetToken( qfalse );
+				GetToken( false );
 				se->recvShadows = atoi( token );
 			}
 
 			/* lightmap sample size */
 			else if ( !Q_stricmp( token, "sampleSize" ) ) {
-				GetToken( qfalse );
+				GetToken( false );
 				se->sampleSize = atoi( token );
 			}
 
 			/* longest curve */
 			else if ( !Q_stricmp( token, "longestCurve" ) ) {
-				GetToken( qfalse );
+				GetToken( false );
 				se->longestCurve = atof( token );
 			}
 
@@ -420,7 +420,7 @@ void LoadSurfaceExtraFile( const char *path ){
 
 			/* ignore all other tokens on the line */
 			while ( TokenAvailable() )
-				GetToken( qfalse );
+				GetToken( false );
 		}
 	}
 

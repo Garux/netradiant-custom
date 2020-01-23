@@ -28,9 +28,6 @@
 /* dependencies */
 #include "q2map.h"
 
-#define qtrue true
-#define qfalse false
-
 char    *mapname;
 char game[64];
 extern qboolean verbose;
@@ -124,7 +121,7 @@ int BSPInfo(){
 	}
 
 	/* enable info mode */
-	//infoMode = qtrue;
+	//infoMode = true;
 
 
 	/* mangle filename and get size */
@@ -554,10 +551,10 @@ int main( int argc, char **argv ){
 	double start, end;
 	int alt_argc;
 	char**  alt_argv;
-	qboolean do_info = qfalse;
-	qboolean do_bsp = qfalse;
-	qboolean do_vis = qfalse;
-	qboolean do_rad = qfalse;
+	qboolean do_info = false;
+	qboolean do_bsp = false;
+	qboolean do_vis = false;
+	qboolean do_rad = false;
 
 
 	/* we want consistent 'randomness' */
@@ -588,7 +585,7 @@ int main( int argc, char **argv ){
 
 		/* verbose */
 		else if ( !strcmp( argv[ i ], "-v" ) ) {
-			verbose = qtrue;
+			verbose = true;
 		}
 
 		/* threads */
@@ -614,12 +611,12 @@ int main( int argc, char **argv ){
 	{
 		/* info */
 		if ( !strcmp( argv[ i ], "-info" ) ) {
-			do_info = qtrue;
+			do_info = true;
 		}
 
 		/* bsp */
 		if ( !strcmp( argv[ i ], "-bsp" ) ) {
-			do_bsp = qtrue;
+			do_bsp = true;
 			alt_argc = argc - i;
 			alt_argv = (char **) ( argv + i );
 			Check_BSP_Options( alt_argc, alt_argv );
@@ -627,7 +624,7 @@ int main( int argc, char **argv ){
 
 		/* vis */
 		if ( !strcmp( argv[ i ], "-vis" ) ) {
-			do_vis = qtrue;
+			do_vis = true;
 			alt_argc = argc - i;
 			alt_argv = (char **) ( argv + i );
 			Check_VIS_Options( alt_argc, alt_argv );
@@ -635,7 +632,7 @@ int main( int argc, char **argv ){
 
 		/* rad */
 		if ( !strcmp( argv[ i ], "-rad" ) ) {
-			do_rad = qtrue;
+			do_rad = true;
 			alt_argc = argc - i;
 			alt_argv = (char **) ( argv + i );
 			Check_RAD_Options( alt_argc, alt_argv );

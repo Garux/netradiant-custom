@@ -89,10 +89,10 @@ extern const vec3_t g_vec3_axis_z;
 
 #define Q_rint( in ) ( (vec_t)floor( in + 0.5 ) )
 
-qboolean VectorCompare( const vec3_t v1, const vec3_t v2 );
+bool VectorCompare( const vec3_t v1, const vec3_t v2 );
 
-qboolean VectorIsOnAxis( vec3_t v );
-qboolean VectorIsOnAxialPlane( vec3_t v );
+bool VectorIsOnAxis( vec3_t v );
+bool VectorIsOnAxialPlane( vec3_t v );
 
 vec_t VectorLength( const vec3_t v );
 
@@ -155,7 +155,7 @@ void VectorRotateOrigin( vec3_t vIn, vec3_t vRotation, vec3_t vOrigin, vec3_t ou
 
 // some function merged from tools mathlib code
 
-qboolean PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c );
+bool PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c );
 void NormalToLatLong( const vec3_t normal, byte bytes[2] );
 int PlaneTypeForNormal( vec3_t normal );
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees );
@@ -438,7 +438,7 @@ void ray_transform( ray_t* ray, const m4x4_t matrix );
 /*! distance from ray origin in ray direction to point. FLT_MAX if no intersection. */
 vec_t ray_intersect_point( const ray_t* ray, const vec3_t point, vec_t epsilon, vec_t divergence );
 /*! distance from ray origin in ray direction to triangle. FLT_MAX if no intersection. */
-vec_t ray_intersect_triangle( const ray_t* ray, qboolean bCullBack, const vec3_t vert0, const vec3_t vert1, const vec3_t vert2 );
+vec_t ray_intersect_triangle( const ray_t* ray, bool bCullBack, const vec3_t vert0, const vec3_t vert1, const vec3_t vert2 );
 /*! distance from ray origin in ray direction to plane. */
 vec_t ray_intersect_plane( const ray_t* ray, const vec3_t normal, vec_t dist );
 

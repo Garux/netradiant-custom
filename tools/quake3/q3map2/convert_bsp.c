@@ -128,7 +128,7 @@ int AnalyzeBSP( int argc, char **argv ){
 	void                    *lump;
 	float lumpFloat;
 	char lumpString[ 1024 ], source[ 1024 ];
-	qboolean lumpSwap = qfalse;
+	bool lumpSwap = false;
 	abspLumpTest_t          *lumpTest;
 	static abspLumpTest_t lumpTests[] =
 	{
@@ -161,7 +161,7 @@ int AnalyzeBSP( int argc, char **argv ){
 		/* -format map|ase|... */
 		if ( !strcmp( argv[ i ],  "-lumpswap" ) ) {
 			Sys_Printf( "Swapped lump structs enabled\n" );
-			lumpSwap = qtrue;
+			lumpSwap = true;
 		}
 	}
 
@@ -282,7 +282,7 @@ int BSPInfo( int count, char **fileNames ){
 	}
 
 	/* enable info mode */
-	infoMode = qtrue;
+	infoMode = true;
 
 	/* walk file list */
 	for ( i = 0; i < count; i++ )
@@ -399,7 +399,7 @@ int ScaleBSPMain( int argc, char **argv ){
 	vec3_t vec;
 	char str[ 1024 ];
 	int uniform, axis;
-	qboolean texscale;
+	bool texscale;
 	float *old_xyzst = NULL;
 	float spawn_ref = 0;
 
@@ -410,11 +410,11 @@ int ScaleBSPMain( int argc, char **argv ){
 		return 0;
 	}
 
-	texscale = qfalse;
+	texscale = false;
 	for ( i = 1; i < argc - 2; ++i )
 	{
 		if ( !strcmp( argv[i], "-tex" ) ) {
-			texscale = qtrue;
+			texscale = true;
 		}
 		else if ( !strcmp( argv[i], "-spawn_ref" ) ) {
 			spawn_ref = atof( argv[i + 1] );
@@ -811,7 +811,7 @@ int ShiftBSPMain( int argc, char **argv ){
    PseudoCompileBSP()
    a stripped down ProcessModels
  */
-void PseudoCompileBSP( qboolean need_tree ){
+void PseudoCompileBSP( bool need_tree ){
 	int models;
 	char modelValue[16];
 	entity_t *entity;
@@ -898,7 +898,7 @@ void PseudoCompileBSP( qboolean need_tree ){
 		EmitBrushes( entity->brushes, &entity->firstBrush, &entity->numBrushes );
 		EndModel( entity, node );
 	}
-	EndBSPFile( qfalse );
+	EndBSPFile( false );
 }
 
 /*
@@ -910,15 +910,15 @@ int ConvertBSPMain( int argc, char **argv ){
 	int i;
 	int ( *convertFunc )( char * );
 	game_t  *convertGame;
-	qboolean map_allowed, force_bsp, force_map;
+	bool map_allowed, force_bsp, force_map;
 
 
 	/* set default */
 	convertFunc = ConvertBSPToASE;
 	convertGame = NULL;
-	map_allowed = qfalse;
-	force_bsp = qfalse;
-	force_map = qfalse;
+	map_allowed = false;
+	force_bsp = false;
+	force_map = false;
 
 	/* arg checking */
 	if ( argc < 2 ) {
@@ -934,24 +934,24 @@ int ConvertBSPMain( int argc, char **argv ){
 			i++;
 			if ( !Q_stricmp( argv[ i ], "ase" ) ) {
 				convertFunc = ConvertBSPToASE;
-				map_allowed = qfalse;
+				map_allowed = false;
 			}
 			else if ( !Q_stricmp( argv[ i ], "obj" ) ) {
 				convertFunc = ConvertBSPToOBJ;
-				map_allowed = qfalse;
+				map_allowed = false;
 			}
 			else if ( !Q_stricmp( argv[ i ], "map_bp" ) ) {
 				convertFunc = ConvertBSPToMap_BP;
-				map_allowed = qtrue;
+				map_allowed = true;
 			}
 			else if ( !Q_stricmp( argv[ i ], "map" ) ) {
 				convertFunc = ConvertBSPToMap;
-				map_allowed = qtrue;
+				map_allowed = true;
 			}
 			else
 			{
 				convertGame = GetGame( argv[ i ] );
-				map_allowed = qfalse;
+				map_allowed = false;
 				if ( convertGame == NULL ) {
 					Sys_Printf( "Unknown conversion format \"%s\". Defaulting to ASE.\n", argv[ i ] );
 				}
@@ -968,30 +968,30 @@ int ConvertBSPMain( int argc, char **argv ){
 			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
 		}
 		else if ( !strcmp( argv[ i ],  "-shaderasbitmap" ) || !strcmp( argv[ i ],  "-shadersasbitmap" ) ) {
-			shadersAsBitmap = qtrue;
+			shadersAsBitmap = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-lightmapastexcoord" ) || !strcmp( argv[ i ],  "-lightmapsastexcoord" ) ) {
-			lightmapsAsTexcoord = qtrue;
+			lightmapsAsTexcoord = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-deluxemapastexcoord" ) || !strcmp( argv[ i ],  "-deluxemapsastexcoord" ) ) {
-			lightmapsAsTexcoord = qtrue;
-			deluxemap = qtrue;
+			lightmapsAsTexcoord = true;
+			deluxemap = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-readbsp" ) ) {
-			force_bsp = qtrue;
+			force_bsp = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-readmap" ) ) {
-			force_map = qtrue;
+			force_map = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-meta" ) ) {
-			meta = qtrue;
+			meta = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-patchmeta" ) ) {
-			meta = qtrue;
-			patchMeta = qtrue;
+			meta = true;
+			patchMeta = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-fast" ) ) {
-			fast = qtrue;
+			fast = true;
 		}
 	}
 
@@ -1001,7 +1001,7 @@ int ConvertBSPMain( int argc, char **argv ){
 	strcpy( source, ExpandArg( argv[i] ) );
 
 	if ( !map_allowed && !force_map ) {
-		force_bsp = qtrue;
+		force_bsp = true;
 	}
 
 	if ( force_map || ( !force_bsp && !Q_stricmp( path_get_extension( source ), "map" ) && map_allowed ) ) {
@@ -1010,7 +1010,7 @@ int ConvertBSPMain( int argc, char **argv ){
 		}
 		path_set_extension( source, ".map" );
 		Sys_Printf( "Loading %s\n", source );
-		LoadMapFile( source, qfalse, convertGame == NULL );
+		LoadMapFile( source, false, convertGame == NULL );
 		PseudoCompileBSP( convertGame != NULL );
 	}
 	else

@@ -249,7 +249,7 @@ void SplitMeshByPlane( mesh_t *in, vec3_t normal, float dist, mesh_t **front, me
    chops a patch up by a fog brush
  */
 
-qboolean ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
+bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	int i, j;
 	side_t      *s;
 	plane_t     *plane;
@@ -275,7 +275,7 @@ qboolean ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b 
 			for ( j = 0 ; j < numOutside ; j++ ) {
 				FreeMesh( outside[j] );
 			}
-			return qfalse;
+			return false;
 		}
 		m = back;
 
@@ -327,7 +327,7 @@ qboolean ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b 
 
 	/* free the source mesh and return */
 	FreeMesh( m );
-	return qtrue;
+	return true;
 }
 
 
@@ -355,7 +355,7 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
 			VectorCopy( ds->verts[i].xyz, p[i] );
 		}
 
-		xml_Winding( "WindingFromDrawSurf failed: MAX_POINTS_ON_WINDING exceeded", p, max, qtrue );
+		xml_Winding( "WindingFromDrawSurf failed: MAX_POINTS_ON_WINDING exceeded", p, max, true );
 	}
 
 	w = AllocWinding( ds->numVerts );
@@ -373,7 +373,7 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
    chops up a face drawsurface by a fog brush, with a potential fragment left inside
  */
 
-qboolean ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
+bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	int i, j;
 	side_t              *s;
 	plane_t             *plane;
@@ -386,7 +386,7 @@ qboolean ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b )
 
 	/* dummy check */
 	if ( ds->sideRef == NULL || ds->sideRef->side == NULL ) {
-		return qfalse;
+		return false;
 	}
 
 	/* initial setup */
@@ -402,7 +402,7 @@ qboolean ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b )
 
 		/* handle coplanar outfacing (don't fog) */
 		if ( ds->sideRef->side->planenum == s->planenum ) {
-			return qfalse;
+			return false;
 		}
 
 		/* handle coplanar infacing (keep inside) */
@@ -418,7 +418,7 @@ qboolean ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b )
 			/* nothing actually contained inside */
 			for ( j = 0; j < numOutside; j++ )
 				FreeWinding( outside[ j ] );
-			return qfalse;
+			return false;
 		}
 
 		if ( front != NULL ) {
@@ -451,7 +451,7 @@ qboolean ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b )
 	/* build a drawsurf for it */
 	newds = DrawSurfaceForSide( e, ds->mapBrush, s, w );
 	if ( newds == NULL ) {
-		return qfalse;
+		return false;
 	}
 
 	/* copy new to original */
@@ -462,7 +462,7 @@ qboolean ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b )
 	numMapDrawSurfs--;
 
 	/* return ok */
-	return qtrue;
+	return true;
 }
 
 
@@ -588,7 +588,7 @@ void FogDrawSurfaces( entity_t *e ){
 int FogForPoint( vec3_t point, float epsilon ){
 	int fogNum, i, j;
 	float dot;
-	qboolean inside;
+	bool inside;
 	brush_t         *brush;
 	plane_t         *plane;
 
@@ -609,14 +609,14 @@ int FogForPoint( vec3_t point, float epsilon ){
 		brush = mapFogs[ i ].brush;
 
 		/* check point against all planes */
-		inside = qtrue;
+		inside = true;
 		for ( j = 0; j < brush->numsides && inside; j++ )
 		{
 			plane = &mapplanes[ brush->sides[ j ].planenum ];   /* note usage of map planes here */
 			dot = DotProduct( point, plane->normal );
 			dot -= plane->dist;
 			if ( dot > epsilon ) {
-				inside = qfalse;
+				inside = false;
 			}
 		}
 
@@ -738,7 +738,7 @@ void CreateMapFogs( void ){
 		for ( brush = entity->brushes; brush != NULL; brush = brush->next )
 		{
 			/* ignore non-fog brushes */
-			if ( brush->contentShader->fogParms == qfalse ) {
+			if ( !brush->contentShader->fogParms ) {
 				continue;
 			}
 

@@ -217,9 +217,9 @@ void CalcPortalVis( void ){
 #ifdef MREDEBUG
 	Sys_Printf( "%6d portals out of %d", 0, numportals * 2 );
 	//get rid of the counter
-	RunThreadsOnIndividual( numportals * 2, qfalse, PortalFlow );
+	RunThreadsOnIndividual( numportals * 2, false, PortalFlow );
 #else
-	RunThreadsOnIndividual( numportals * 2, qtrue, PortalFlow );
+	RunThreadsOnIndividual( numportals * 2, true, PortalFlow );
 #endif
 
 }
@@ -234,17 +234,17 @@ void CalcPassageVis( void ){
 
 #ifdef MREDEBUG
 	_printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, CreatePassages );
+	RunThreadsOnIndividual( numportals * 2, false, CreatePassages );
 	_printf( "\n" );
 	_printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, PassageFlow );
+	RunThreadsOnIndividual( numportals * 2, false, PassageFlow );
 	_printf( "\n" );
 #else
 	Sys_Printf( "\n--- CreatePassages (%d) ---\n", numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qtrue, CreatePassages );
+	RunThreadsOnIndividual( numportals * 2, true, CreatePassages );
 
 	Sys_Printf( "\n--- PassageFlow (%d) ---\n", numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qtrue, PassageFlow );
+	RunThreadsOnIndividual( numportals * 2, true, PassageFlow );
 #endif
 }
 
@@ -258,17 +258,17 @@ void CalcPassagePortalVis( void ){
 
 #ifdef MREDEBUG
 	Sys_Printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, CreatePassages );
+	RunThreadsOnIndividual( numportals * 2, false, CreatePassages );
 	Sys_Printf( "\n" );
 	Sys_Printf( "%6d portals out of %d", 0, numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qfalse, PassagePortalFlow );
+	RunThreadsOnIndividual( numportals * 2, false, PassagePortalFlow );
 	Sys_Printf( "\n" );
 #else
 	Sys_Printf( "\n--- CreatePassages (%d) ---\n", numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qtrue, CreatePassages );
+	RunThreadsOnIndividual( numportals * 2, true, CreatePassages );
 
 	Sys_Printf( "\n--- PassagePortalFlow (%d) ---\n", numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qtrue, PassagePortalFlow );
+	RunThreadsOnIndividual( numportals * 2, true, PassagePortalFlow );
 #endif
 }
 
@@ -330,9 +330,9 @@ void CalcVis( void ){
 
 
 	Sys_Printf( "\n--- BasePortalVis (%d) ---\n", numportals * 2 );
-	RunThreadsOnIndividual( numportals * 2, qtrue, BasePortalVis );
+	RunThreadsOnIndividual( numportals * 2, true, BasePortalVis );
 
-//	RunThreadsOnIndividual (numportals*2, qtrue, BetterPortalVis);
+//	RunThreadsOnIndividual (numportals*2, true, BetterPortalVis);
 
 	SortPortals();
 
@@ -426,31 +426,31 @@ void SetPortalSphere( vportal_t *p ){
  */
 #define WCONVEX_EPSILON     0.2
 
-int Winding_PlanesConcave( fixedWinding_t *w1, fixedWinding_t *w2,
+static bool Winding_PlanesConcave( fixedWinding_t *w1, fixedWinding_t *w2,
 						   vec3_t normal1, vec3_t normal2,
 						   float dist1, float dist2 ){
 	int i;
 
 	if ( !w1 || !w2 ) {
-		return qfalse;
+		return false;
 	}
 
 	// check if one of the points of winding 1 is at the front of the plane of winding 2
 	for ( i = 0; i < w1->numpoints; i++ )
 	{
 		if ( DotProduct( normal2, w1->points[i] ) - dist2 > WCONVEX_EPSILON ) {
-			return qtrue;
+			return true;
 		}
 	}
 	// check if one of the points of winding 2 is at the front of the plane of winding 1
 	for ( i = 0; i < w2->numpoints; i++ )
 	{
 		if ( DotProduct( normal1, w2->points[i] ) - dist1 > WCONVEX_EPSILON ) {
-			return qtrue;
+			return true;
 		}
 	}
 
-	return qfalse;
+	return false;
 }
 
 /*
@@ -458,7 +458,7 @@ int Winding_PlanesConcave( fixedWinding_t *w1, fixedWinding_t *w2,
    TryMergeLeaves
    ============
  */
-int TryMergeLeaves( int l1num, int l2num ){
+static bool TryMergeLeaves( int l1num, int l2num ){
 	int i, j, k, n, numportals;
 	visPlane_t plane1, plane2;
 	leaf_t *l1, *l2;
@@ -493,7 +493,7 @@ int TryMergeLeaves( int l1num, int l2num ){
 					plane1 = p1->plane;
 					plane2 = p2->plane;
 					if ( Winding_PlanesConcave( p1->winding, p2->winding, plane1.normal, plane2.normal, plane1.dist, plane2.dist ) ) {
-						return qfalse;
+						return false;
 					}
 				}
 			}
@@ -516,7 +516,7 @@ int TryMergeLeaves( int l1num, int l2num ){
 		{
 			p1 = l1->portals[i];
 			if ( p1->leaf == l2num ) {
-				p1->removed = qtrue;
+				p1->removed = true;
 				continue;
 			}
 			portals[numportals++] = p1;
@@ -525,7 +525,7 @@ int TryMergeLeaves( int l1num, int l2num ){
 		{
 			p2 = l2->portals[j];
 			if ( p2->leaf == l1num ) {
-				p2->removed = qtrue;
+				p2->removed = true;
 				continue;
 			}
 			portals[numportals++] = p2;
@@ -537,7 +537,7 @@ int TryMergeLeaves( int l1num, int l2num ){
 		l2->numportals = numportals;
 		l1->merged = l2num;
 	}
-	return qtrue;
+	return true;
 }
 
 /*
@@ -582,7 +582,7 @@ void MergeLeaves( void ){
 			//if this leaf is merged already
 
 			/* ydnar: vmods: merge all non-hint portals */
-			if ( leaf->merged >= 0 && hint == qfalse ) {
+			if ( leaf->merged >= 0 && !hint ) {
 				continue;
 			}
 
@@ -623,7 +623,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t 
 	int i, j, k, l;
 	vec3_t normal, delta;
 	vec_t dot;
-	qboolean keep1, keep2;
+	bool keep1, keep2;
 
 
 	//
@@ -677,7 +677,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t 
 	if ( dot > CONTINUOUS_EPSILON ) {
 		return NULL;            // not a convex polygon
 	}
-	keep1 = (qboolean)( dot < -CONTINUOUS_EPSILON );
+	keep1 = ( dot < -CONTINUOUS_EPSILON );
 
 	back = f1->points[( i + 2 ) % f1->numpoints];
 	VectorSubtract( back, p2, delta );
@@ -690,7 +690,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t 
 	if ( dot > CONTINUOUS_EPSILON ) {
 		return NULL;            // not a convex polygon
 	}
-	keep2 = (qboolean)( dot < -CONTINUOUS_EPSILON );
+	keep2 = ( dot < -CONTINUOUS_EPSILON );
 
 	//
 	// build the new polygon
@@ -762,7 +762,7 @@ void MergeLeafPortals( void ){
 						}
 						p1->hint |= p2->hint;
 						SetPortalSphere( p1 );
-						p2->removed = qtrue;
+						p2->removed = true;
 						nummerges++;
 						i--;
 						break;
@@ -1106,34 +1106,34 @@ int VisMain( int argc, char **argv ){
 	{
 		if ( !strcmp( argv[i], "-fast" ) ) {
 			Sys_Printf( "fastvis = true\n" );
-			fastvis = qtrue;
+			fastvis = true;
 		}
 		else if ( !strcmp( argv[i], "-merge" ) ) {
 			Sys_Printf( "merge = true\n" );
-			mergevis = qtrue;
+			mergevis = true;
 		}
 		else if ( !strcmp( argv[i], "-mergeportals" ) ) {
 			Sys_Printf( "mergeportals = true\n" );
-			mergevisportals = qtrue;
+			mergevisportals = true;
 		}
 		else if ( !strcmp( argv[i], "-nopassage" ) ) {
 			Sys_Printf( "nopassage = true\n" );
-			noPassageVis = qtrue;
+			noPassageVis = true;
 		}
 		else if ( !strcmp( argv[i], "-passageOnly" ) ) {
 			Sys_Printf( "passageOnly = true\n" );
-			passageVisOnly = qtrue;
+			passageVisOnly = true;
 		}
 		else if ( !strcmp( argv[i], "-nosort" ) ) {
 			Sys_Printf( "nosort = true\n" );
-			nosort = qtrue;
+			nosort = true;
 		}
 		else if ( !strcmp( argv[i], "-saveprt" ) ) {
 			Sys_Printf( "saveprt = true\n" );
-			saveprt = qtrue;
+			saveprt = true;
 		}
 		else if ( !strcmp( argv[ i ], "-v" ) ) {
-			debugCluster = qtrue;
+			debugCluster = true;
 			Sys_Printf( "Extra verbose mode enabled\n" );
 		}
 		else if ( !strcmp( argv[i], "-tmpin" ) ) {
@@ -1147,8 +1147,8 @@ int VisMain( int argc, char **argv ){
 		/* ydnar: -hint to merge all but hint portals */
 		else if ( !strcmp( argv[ i ], "-hint" ) ) {
 			Sys_Printf( "hint = true\n" );
-			hint = qtrue;
-			mergevis = qtrue;
+			hint = true;
+			mergevis = true;
 		}
 
 		else

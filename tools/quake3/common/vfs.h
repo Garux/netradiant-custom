@@ -57,8 +57,8 @@ int vfsGetFileCount( const char *filename );
 int vfsLoadFile( const char *filename, void **buffer, int index );
 typedef struct StrList_s StrList;
 void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, const char* string ) );
-qboolean vfsPackFile( const char *filename, const char *packname, const int compLevel );
-qboolean vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel );
+bool vfsPackFile( const char *filename, const char *packname, const int compLevel );
+bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel );
 
 extern char g_strForbiddenDirs[VFS_MAXDIRS][PATH_MAX + 1];
 extern int g_numForbiddenDirs;

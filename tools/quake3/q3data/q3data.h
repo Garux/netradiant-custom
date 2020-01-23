@@ -42,7 +42,7 @@
 #include "aselib.h"
 #include "md3lib.h"
 
-void Cmd_ASEConvert( qboolean grabAnims );
+void Cmd_ASEConvert( bool grabAnims );
 void Cmd_3DSConvert( void );
 void Cmd_Modelname( void );
 void Cmd_SpriteBase( void );
@@ -82,13 +82,13 @@ void OrderMesh( int input[][3], int output[][3], int numTris );
 extern byte        *byteimage, *lbmpalette;
 extern int byteimagewidth, byteimageheight;
 
-extern qboolean g_release;              // don't grab, copy output data to new tree
+extern bool g_release;              // don't grab, copy output data to new tree
 extern char g_releasedir[1024];         // c:\quake2\baseq2, etc
-extern qboolean g_archive;              // don't grab, copy source data to new tree
-extern qboolean do3ds;
+extern bool g_archive;              // don't grab, copy source data to new tree
+extern bool do3ds;
 extern char g_only[256];                // if set, only grab this cd
-extern qboolean g_skipmodel;            // set true when a cd is not g_only
-extern qboolean g_verbose;
+extern bool g_skipmodel;            // set true when a cd is not g_only
+extern bool g_verbose;
 
 extern char        *trifileext;
 

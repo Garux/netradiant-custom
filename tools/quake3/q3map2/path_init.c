@@ -116,7 +116,7 @@ void LokiInitPaths( char *argv0 ){
 	char temp[ MAX_OS_PATH ];
 	char        *path;
 	char        *last;
-	qboolean found;
+	bool found;
 
 
 	path = getenv( "PATH" );
@@ -143,11 +143,11 @@ void LokiInitPaths( char *argv0 ){
 		   so it will use "/opt/radiant/" as installPath, which will be expanded later to "/opt/radiant/baseq3" to find paks.
 		*/
 
-		found = qfalse;
+		found = false;
 		last = path;
 
 		/* go through each : segment of path */
-		while ( !strEmpty( last ) && found == qfalse )
+		while ( !strEmpty( last ) && !found )
 		{
 			/* null out temp */
 			strClear( temp );
@@ -174,7 +174,7 @@ void LokiInitPaths( char *argv0 ){
 
 			/* verify the path */
 			if ( access( temp, X_OK ) == 0 ) {
-				found = qtrue;
+				found = true;
 			}
 			path = last + 1;
 		}

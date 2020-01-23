@@ -224,7 +224,7 @@ void CreateEntityLights( void ){
 	const char      *_color;
 	float intensity, scale, deviance, filterRadius;
 	int spawnflags, flags, numSamples;
-	qboolean junior;
+	bool junior;
 
 
 	/* go throught entity list and find lights */
@@ -236,10 +236,10 @@ void CreateEntityLights( void ){
 
 		/* ydnar: check for lightJunior */
 		if ( Q_strncasecmp( name, "lightJunior", 11 ) == 0 ) {
-			junior = qtrue;
+			junior = true;
 		}
 		else if ( Q_strncasecmp( name, "light", 5 ) == 0 ) {
-			junior = qfalse;
+			junior = false;
 		}
 		else{
 			continue;
@@ -261,7 +261,7 @@ void CreateEntityLights( void ){
 		spawnflags = IntForKey( e, "spawnflags" );
 
 		/* ydnar: quake 3+ light behavior */
-		if ( wolfLight == qfalse ) {
+		if ( !wolfLight ) {
 			/* set default flags */
 			flags = LIGHT_Q3A_DEFAULT;
 
@@ -775,9 +775,9 @@ int LightContributionToSample( trace_t *trace ){
 	float add;
 	float dist;
 	float addDeluxe = 0.0f, addDeluxeBounceScale = 0.25f;
-	qboolean angledDeluxe = qtrue;
+	bool angledDeluxe = true;
 	float colorBrightness;
-	qboolean doAddDeluxe = qtrue;
+	bool doAddDeluxe = true;
 
 	/* get light */
 	light = trace->light;
@@ -798,7 +798,7 @@ int LightContributionToSample( trace_t *trace ){
 	/* do some culling checks */
 	if ( light->type != EMIT_SUN ) {
 		/* MrE: if the light is behind the surface */
-		if ( trace->twoSided == qfalse ) {
+		if ( !trace->twoSided ) {
 			if ( DotProduct( light->origin, trace->normal ) - DotProduct( trace->origin, trace->normal ) < 0.0f ) {
 				return 0;
 			}
@@ -856,7 +856,7 @@ int LightContributionToSample( trace_t *trace ){
 				angle = -angle;
 
 				/* no deluxemap contribution from "other side" light */
-				doAddDeluxe = qfalse;
+				doAddDeluxe = false;
 			}
 
 			/* attenuate */
@@ -869,7 +869,7 @@ int LightContributionToSample( trace_t *trace ){
 				angle = -angle;
 
 				/* no deluxemap contribution from "other side" light */
-				doAddDeluxe = qfalse;
+				doAddDeluxe = false;
 			}
 
 			/* clamp the distance to prevent super hot spots */
@@ -909,7 +909,7 @@ int LightContributionToSample( trace_t *trace ){
 					}
 
 					/* no deluxemap contribution from "other side" light */
-					doAddDeluxe = qfalse;
+					doAddDeluxe = false;
 				}
 				else{
 					return 0;
@@ -919,7 +919,7 @@ int LightContributionToSample( trace_t *trace ){
 			/* also don't deluxe if the direction is on the wrong side */
 			if ( DotProduct( trace->normal, trace->direction ) < 0 ) {
 				/* no deluxemap contribution from "other side" light */
-				doAddDeluxe = qfalse;
+				doAddDeluxe = false;
 			}
 
 			/* ydnar: moved to here */
@@ -956,7 +956,7 @@ int LightContributionToSample( trace_t *trace ){
 				dot = -dot;
 
 				/* no deluxemap contribution from "other side" light */
-				doAddDeluxe = qfalse;
+				doAddDeluxe = false;
 			}
 
 			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
@@ -1079,7 +1079,7 @@ int LightContributionToSample( trace_t *trace ){
 				dot = -dot;
 
 				/* no deluxemap contribution from "other side" light */
-				doAddDeluxe = qfalse;
+				doAddDeluxe = false;
 			}
 
 			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
@@ -1137,7 +1137,7 @@ int LightContributionToSample( trace_t *trace ){
 		VectorScale( trace->direction, addDeluxe, trace->directionContribution );
 
 		/* setup trace */
-		trace->testAll = qtrue;
+		trace->testAll = true;
 		VectorScale( light->color, add, trace->color );
 
 		/* trace to point */
@@ -1195,7 +1195,7 @@ int LightContributionToSample( trace_t *trace ){
 	}
 
 	/* setup trace */
-	trace->testAll = qfalse;
+	trace->testAll = false;
 	VectorScale( light->color, add, trace->color );
 
 	/* raytrace */
@@ -1295,7 +1295,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], vec3_t colo
    note: this is similar to LightContributionToSample() but optimized for omnidirectional sampling
  */
 
-int LightContributionToPoint( trace_t *trace ){
+bool LightContributionToPoint( trace_t *trace ){
 	light_t     *light;
 	float add, dist;
 
@@ -1308,19 +1308,19 @@ int LightContributionToPoint( trace_t *trace ){
 
 	/* ydnar: early out */
 	if ( !( light->flags & LIGHT_GRID ) || light->envelope <= 0.0f ) {
-		return qfalse;
+		return false;
 	}
 
 	/* is this a sun? */
 	if ( light->type != EMIT_SUN ) {
 		/* sun only? */
 		if ( sunOnly ) {
-			return qfalse;
+			return false;
 		}
 
 		/* test pvs */
 		if ( !ClusterVisible( trace->cluster, light->cluster ) ) {
-			return qfalse;
+			return false;
 		}
 	}
 
@@ -1329,7 +1329,7 @@ int LightContributionToPoint( trace_t *trace ){
 		 trace->origin[ 1 ] > light->maxs[ 1 ] || trace->origin[ 1 ] < light->mins[ 1 ] ||
 		 trace->origin[ 2 ] > light->maxs[ 2 ] || trace->origin[ 2 ] < light->mins[ 2 ] ) {
 		gridBoundsCulled++;
-		return qfalse;
+		return false;
 	}
 
 	/* set light origin */
@@ -1346,7 +1346,7 @@ int LightContributionToPoint( trace_t *trace ){
 	/* test envelope */
 	if ( dist > light->envelope ) {
 		gridEnvelopeCulled++;
-		return qfalse;
+		return false;
 	}
 
 	/* ptpff approximation */
@@ -1370,7 +1370,7 @@ int LightContributionToPoint( trace_t *trace ){
 		/* see if the point is behind the light */
 		d = DotProduct( trace->origin, light->normal ) - light->dist;
 		if ( !( light->flags & LIGHT_TWOSIDED ) && d < -1.0f ) {
-			return qfalse;
+			return false;
 		}
 
 		/* nudge the point so that it is clearly forward of the light */
@@ -1385,14 +1385,14 @@ int LightContributionToPoint( trace_t *trace ){
 		/* calculate the contribution (ydnar 2002-10-21: [bug 642] bad normal calc) */
 		factor = PointToPolygonFormFactor( pushedOrigin, trace->direction, light->w );
 		if ( factor == 0.0f ) {
-			return qfalse;
+			return false;
 		}
 		else if ( factor < 0.0f ) {
 			if ( light->flags & LIGHT_TWOSIDED ) {
 				factor = -factor;
 			}
 			else{
-				return qfalse;
+				return false;
 			}
 		}
 
@@ -1428,7 +1428,7 @@ int LightContributionToPoint( trace_t *trace ){
 			/* do cone calculation */
 			distByNormal = -DotProduct( trace->displacement, light->normal );
 			if ( distByNormal < 0.0f ) {
-				return qfalse;
+				return false;
 			}
 			VectorMA( light->origin, distByNormal, light->normal, pointAtDist );
 			radiusAtDist = light->radiusByDist * distByNormal;
@@ -1437,7 +1437,7 @@ int LightContributionToPoint( trace_t *trace ){
 
 			/* outside the cone */
 			if ( sampleRadius >= radiusAtDist ) {
-				return qfalse;
+				return false;
 			}
 
 			/* attenuate */
@@ -1452,11 +1452,11 @@ int LightContributionToPoint( trace_t *trace ){
 		/* attenuate */
 		add = light->photons;
 		if ( add <= 0.0f ) {
-			return qfalse;
+			return false;
 		}
 
 		/* setup trace */
-		trace->testAll = qtrue;
+		trace->testAll = true;
 		VectorScale( light->color, add, trace->color );
 
 		/* trace to point */
@@ -1465,37 +1465,37 @@ int LightContributionToPoint( trace_t *trace ){
 			TraceLine( trace );
 			if ( !( trace->compileFlags & C_SKY ) || trace->opaque ) {
 				VectorClear( trace->color );
-				return -1;
+				return false;
 			}
 		}
 
 		/* return to sender */
-		return qtrue;
+		return true;
 	}
 
 	/* unknown light type */
 	else{
-		return qfalse;
+		return false;
 	}
 
 	/* ydnar: changed to a variable number */
 	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LIGHT_FAST_ACTUAL ) ) ) {
-		return qfalse;
+		return false;
 	}
 
 	/* setup trace */
-	trace->testAll = qfalse;
+	trace->testAll = false;
 	VectorScale( light->color, add, trace->color );
 
 	/* trace */
 	TraceLine( trace );
 	if ( trace->passSolid ) {
 		VectorClear( trace->color );
-		return qfalse;
+		return false;
 	}
 
 	/* we have a valid sample */
-	return qtrue;
+	return true;
 }
 
 
@@ -1580,7 +1580,7 @@ void TraceGrid( int num ){
 
 	/* setup trace */
 	trace.testOcclusion = !noTrace;
-	trace.forceSunlight = qfalse;
+	trace.forceSunlight = false;
 	trace.recvShadows = WORLDSPAWN_RECV_SHADOWS;
 	trace.numSurfaces = 0;
 	trace.surfaces = NULL;
@@ -1639,10 +1639,10 @@ void TraceGrid( int num ){
 		vec3_t dir = { 0, 0, 1 };
 		float ambientFrac = 0.25f;
 
-		trace.testOcclusion = qtrue;
-		trace.forceSunlight = qfalse;
+		trace.testOcclusion = true;
+		trace.forceSunlight = false;
 		trace.inhibitRadius = DEFAULT_INHIBIT_RADIUS;
-		trace.testAll = qtrue;
+		trace.testAll = true;
 
 		for ( k = 0; k < 2; k++ )
 		{
@@ -1883,11 +1883,11 @@ void SetupGrid( void ){
    does what it says...
  */
 
-void LightWorld( qboolean fastAllocate ){
+void LightWorld( bool fastAllocate ){
 	vec3_t color;
 	float f;
 	int b, bt;
-	qboolean minVertex, minGrid;
+	bool minVertex, minGrid;
 	const char  *value;
 
 
@@ -1920,19 +1920,19 @@ void LightWorld( qboolean fastAllocate ){
 	VectorScale( color, f, ambientColor );
 
 	/* minvertexlight */
-	minVertex = qfalse;
+	minVertex = false;
 	value = ValueForKey( &entities[ 0 ], "_minvertexlight" );
 	if ( value[ 0 ] != '\0' ) {
-		minVertex = qtrue;
+		minVertex = true;
 		f = atof( value );
 		VectorScale( color, f, minVertexLight );
 	}
 
 	/* mingridlight */
-	minGrid = qfalse;
+	minGrid = false;
 	value = ValueForKey( &entities[ 0 ], "_mingridlight" );
 	if ( value[ 0 ] != '\0' ) {
-		minGrid = qtrue;
+		minGrid = true;
 		f = atof( value );
 		VectorScale( color, f, minGridLight );
 	}
@@ -1942,10 +1942,10 @@ void LightWorld( qboolean fastAllocate ){
 	if ( value[ 0 ] != '\0' ) {
 		f = atof( value );
 		VectorScale( color, f, minLight );
-		if ( minVertex == qfalse ) {
+		if ( !minVertex ) {
 			VectorScale( color, f, minVertexLight );
 		}
-		if ( minGrid == qfalse ) {
+		if ( !minGrid ) {
 			VectorScale( color, f, minGridLight );
 		}
 	}
@@ -1969,12 +1969,12 @@ void LightWorld( qboolean fastAllocate ){
 	/* calculate lightgrid */
 	if ( !noGridLighting ) {
 		/* ydnar: set up light envelopes */
-		SetupEnvelopes( qtrue, fastgrid );
+		SetupEnvelopes( true, fastgrid );
 
 		Sys_Printf( "--- TraceGrid ---\n" );
-		inGrid = qtrue;
-		RunThreadsOnIndividual( numRawGridPoints, qtrue, TraceGrid );
-		inGrid = qfalse;
+		inGrid = true;
+		RunThreadsOnIndividual( numRawGridPoints, true, TraceGrid );
+		inGrid = false;
 		Sys_Printf( "%d x %d x %d = %d grid\n",
 					gridBounds[ 0 ], gridBounds[ 1 ], gridBounds[ 2 ], numBSPGridPoints );
 
@@ -1988,7 +1988,7 @@ void LightWorld( qboolean fastAllocate ){
 
 	/* map the world luxels */
 	Sys_Printf( "--- MapRawLightmap ---\n" );
-	RunThreadsOnIndividual( numRawLightmaps, qtrue, MapRawLightmap );
+	RunThreadsOnIndividual( numRawLightmaps, true, MapRawLightmap );
 	Sys_Printf( "%9d luxels\n", numLuxels );
 	Sys_Printf( "%9d luxels mapped\n", numLuxelsMapped );
 	Sys_Printf( "%9d luxels occluded\n", numLuxelsOccluded );
@@ -1996,14 +1996,14 @@ void LightWorld( qboolean fastAllocate ){
 	/* dirty them up */
 	if ( dirty ) {
 		Sys_Printf( "--- DirtyRawLightmap ---\n" );
-		RunThreadsOnIndividual( numRawLightmaps, qtrue, DirtyRawLightmap );
+		RunThreadsOnIndividual( numRawLightmaps, true, DirtyRawLightmap );
 	}
 
 	/* floodlight pass */
 	FloodlightRawLightmaps();
 
 	/* ydnar: set up light envelopes */
-	SetupEnvelopes( qfalse, fast );
+	SetupEnvelopes( false, fast );
 
 	/* light up my world */
 	lightsPlaneCulled = 0;
@@ -2012,13 +2012,13 @@ void LightWorld( qboolean fastAllocate ){
 	lightsClusterCulled = 0;
 
 	Sys_Printf( "--- IlluminateRawLightmap ---\n" );
-	RunThreadsOnIndividual( numRawLightmaps, qtrue, IlluminateRawLightmap );
+	RunThreadsOnIndividual( numRawLightmaps, true, IlluminateRawLightmap );
 	Sys_Printf( "%9d luxels illuminated\n", numLuxelsIlluminated );
 
 	StitchSurfaceLightmaps();
 
 	Sys_Printf( "--- IlluminateVertexes ---\n" );
-	RunThreadsOnIndividual( numBSPDrawSurfaces, qtrue, IlluminateVertexes );
+	RunThreadsOnIndividual( numBSPDrawSurfaces, true, IlluminateVertexes );
 	Sys_Printf( "%9d vertexes illuminated\n", numVertsIlluminated );
 
 	/* ydnar: emit statistics on light culling */
@@ -2042,16 +2042,16 @@ void LightWorld( qboolean fastAllocate ){
 		Sys_Printf( "\n--- Radiosity (bounce %d of %d) ---\n", b, bt );
 
 		/* flag bouncing */
-		bouncing = qtrue;
+		bouncing = true;
 		VectorClear( ambientColor );
-		floodlighty = qfalse;
+		floodlighty = false;
 
 		/* generate diffuse lights */
 		RadFreeLights();
 		RadCreateDiffuseLights();
 
 		/* setup light envelopes */
-		SetupEnvelopes( qfalse, fastbounce );
+		SetupEnvelopes( false, fastbounce );
 		if ( numLights == 0 ) {
 			Sys_Printf( "No diffuse light to calculate, ending radiosity.\n" );
 			break;
@@ -2063,9 +2063,9 @@ void LightWorld( qboolean fastAllocate ){
 			gridBoundsCulled = 0;
 
 			Sys_Printf( "--- BounceGrid ---\n" );
-			inGrid = qtrue;
-			RunThreadsOnIndividual( numRawGridPoints, qtrue, TraceGrid );
-			inGrid = qfalse;
+			inGrid = true;
+			RunThreadsOnIndividual( numRawGridPoints, true, TraceGrid );
+			inGrid = false;
 			Sys_FPrintf( SYS_VRB, "%9d grid points envelope culled\n", gridEnvelopeCulled );
 			Sys_FPrintf( SYS_VRB, "%9d grid points bounds culled\n", gridBoundsCulled );
 		}
@@ -2077,14 +2077,14 @@ void LightWorld( qboolean fastAllocate ){
 		lightsClusterCulled = 0;
 
 		Sys_Printf( "--- IlluminateRawLightmap ---\n" );
-		RunThreadsOnIndividual( numRawLightmaps, qtrue, IlluminateRawLightmap );
+		RunThreadsOnIndividual( numRawLightmaps, true, IlluminateRawLightmap );
 		Sys_Printf( "%9d luxels illuminated\n", numLuxelsIlluminated );
 		Sys_Printf( "%9d vertexes illuminated\n", numVertsIlluminated );
 
 		StitchSurfaceLightmaps();
 
 		Sys_Printf( "--- IlluminateVertexes ---\n" );
-		RunThreadsOnIndividual( numBSPDrawSurfaces, qtrue, IlluminateVertexes );
+		RunThreadsOnIndividual( numBSPDrawSurfaces, true, IlluminateVertexes );
 		Sys_Printf( "%9d vertexes illuminated\n", numVertsIlluminated );
 
 		/* ydnar: emit statistics on light culling */
@@ -2111,8 +2111,8 @@ int LightMain( int argc, char **argv ){
 	float f;
 	const char  *value;
 	int lightmapMergeSize = 0;
-	qboolean lightSamplesInsist = qfalse;
-	qboolean fastAllocate = qtrue;
+	bool lightSamplesInsist = false;
+	bool fastAllocate = true;
 
 
 	/* note it */
@@ -2121,7 +2121,7 @@ int LightMain( int argc, char **argv ){
 
 	/* set standard game flags */
 	wolfLight = game->wolfLight;
-	if ( wolfLight == qtrue ) {
+	if ( wolfLight ) {
 		Sys_Printf( " lightning model: wolf\n" );
 	}
 	else{
@@ -2176,7 +2176,7 @@ int LightMain( int argc, char **argv ){
 	}
 
 	noStyles = game->noStyles;
-	if ( noStyles == qtrue ) {
+	if ( noStyles ) {
 		Sys_Printf( " shader lightstyles hack: disabled\n" );
 	}
 	else{
@@ -2184,7 +2184,7 @@ int LightMain( int argc, char **argv ){
 	}
 
 	patchShadows = game->patchShadows;
-	if ( patchShadows == qtrue ) {
+	if ( patchShadows ) {
 		Sys_Printf( " patch shadows: enabled\n" );
 	}
 	else{
@@ -2193,7 +2193,7 @@ int LightMain( int argc, char **argv ){
 
 	deluxemap = game->deluxeMap;
 	deluxemode = game->deluxeMode;
-	if ( deluxemap == qtrue ) {
+	if ( deluxemap ) {
 		if ( deluxemode ) {
 			Sys_Printf( " deluxemapping: enabled with tangentspace deluxemaps\n" );
 		}
@@ -2268,7 +2268,7 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( !strcmp( argv[ i ], "-nolm" ) ) {
-			nolm = qtrue;
+			nolm = true;
 			Sys_Printf( "No lightmaps yo\n" );
 		}
 
@@ -2351,50 +2351,50 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( !strcmp( argv[ i ], "-sRGBlight" ) ) {
-			lightmapsRGB = qtrue;
+			lightmapsRGB = true;
 			Sys_Printf( "Lighting is in sRGB\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-nosRGBlight" ) ) {
-			lightmapsRGB = qfalse;
+			lightmapsRGB = false;
 			Sys_Printf( "Lighting is linear\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-sRGBtex" ) ) {
-			texturesRGB = qtrue;
+			texturesRGB = true;
 			Sys_Printf( "Textures are in sRGB\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-nosRGBtex" ) ) {
-			texturesRGB = qfalse;
+			texturesRGB = false;
 			Sys_Printf( "Textures are linear\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-sRGBcolor" ) ) {
-			colorsRGB = qtrue;
+			colorsRGB = true;
 			Sys_Printf( "Colors are in sRGB\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-nosRGBcolor" ) ) {
-			colorsRGB = qfalse;
+			colorsRGB = false;
 			Sys_Printf( "Colors are linear\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-sRGB" ) ) {
-			lightmapsRGB = qtrue;
+			lightmapsRGB = true;
 			Sys_Printf( "Lighting is in sRGB\n" );
-			texturesRGB = qtrue;
+			texturesRGB = true;
 			Sys_Printf( "Textures are in sRGB\n" );
-			colorsRGB = qtrue;
+			colorsRGB = true;
 			Sys_Printf( "Colors are in sRGB\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-nosRGB" ) ) {
-			lightmapsRGB = qfalse;
+			lightmapsRGB = false;
 			Sys_Printf( "Lighting is linear\n" );
-			texturesRGB = qfalse;
+			texturesRGB = false;
 			Sys_Printf( "Textures are linear\n" );
-			colorsRGB = qfalse;
+			colorsRGB = false;
 			Sys_Printf( "Colors are linear\n" );
 		}
 
@@ -2456,17 +2456,12 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( !strcmp( argv[ i ], "-randomsamples" ) ) {
-			lightRandomSamples = qtrue;
+			lightRandomSamples = true;
 			Sys_Printf( "Random sampling enabled\n", lightRandomSamples );
 		}
 
 		else if ( !strcmp( argv[ i ], "-samples" ) ) {
-			if ( *argv[i + 1] == '+' ) {
-				lightSamplesInsist = qtrue;
-			}
-			else{
-				lightSamplesInsist = qfalse;
-			}
+			lightSamplesInsist = ( *argv[i + 1] == '+' );
 			lightSamples = atoi( argv[ i + 1 ] );
 			if ( lightSamples < 1 ) {
 				lightSamples = 1;
@@ -2489,12 +2484,12 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( !strcmp( argv[ i ], "-filter" ) ) {
-			filter = qtrue;
+			filter = true;
 			Sys_Printf( "Lightmap filtering enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-dark" ) ) {
-			dark = qtrue;
+			dark = true;
 			Sys_Printf( "Dark lightmap seams enabled\n" );
 		}
 
@@ -2504,7 +2499,7 @@ int LightMain( int argc, char **argv ){
 				shadeAngleDegrees = 0.0f;
 			}
 			else if ( shadeAngleDegrees > 0.0f ) {
-				shade = qtrue;
+				shade = true;
 				Sys_Printf( "Phong shading enabled with a breaking angle of %f degrees\n", shadeAngleDegrees );
 			}
 			i++;
@@ -2532,7 +2527,7 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 		else if ( !strcmp( argv[ i ], "-deluxe" ) || !strcmp( argv[ i ], "-deluxemap" ) ) {
-			deluxemap = qtrue;
+			deluxemap = true;
 			Sys_Printf( "Generating deluxemaps for average light direction\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-deluxemode" ) ) {
@@ -2547,11 +2542,11 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 		else if ( !strcmp( argv[ i ], "-nodeluxe" ) || !strcmp( argv[ i ], "-nodeluxemap" ) ) {
-			deluxemap = qfalse;
+			deluxemap = false;
 			Sys_Printf( "Disabling generating of deluxemaps for average light direction\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-external" ) ) {
-			externalLightmaps = qtrue;
+			externalLightmaps = true;
 			Sys_Printf( "Storing all lightmaps externally\n" );
 		}
 
@@ -2571,7 +2566,7 @@ int LightMain( int argc, char **argv ){
 			if ( lmCustomSize != game->lightmapSize ) {
 				/* -lightmapsize might just require -external for native external lms, but it has already been used in existing batches alone,
 				so brand new switch here for external lms, referenced by shaders hack/behavior */
-				externalLightmaps = ( qboolean )strcmp( argv[ i - 1 ], "-extlmhacksize" );
+				externalLightmaps = strcmp( argv[ i - 1 ], "-extlmhacksize" );
 				Sys_Printf( "Storing all lightmaps externally\n" );
 			}
 		}
@@ -2587,25 +2582,25 @@ int LightMain( int argc, char **argv ){
 			lmCustomDir = argv[i + 1];
 			i++;
 			Sys_Printf( "Lightmap directory set to %s\n", lmCustomDir );
-			externalLightmaps = qtrue;
+			externalLightmaps = true;
 			Sys_Printf( "Storing all lightmaps externally\n" );
 		}
 
 		/* ydnar: add this to suppress warnings */
 		else if ( !strcmp( argv[ i ],  "-custinfoparms" ) ) {
 			Sys_Printf( "Custom info parms enabled\n" );
-			useCustomInfoParms = qtrue;
+			useCustomInfoParms = true;
 		}
 
 		else if ( !strcmp( argv[ i ], "-wolf" ) ) {
 			/* -game should already be set */
-			wolfLight = qtrue;
+			wolfLight = true;
 			Sys_Printf( "Enabling Wolf lighting model (linear default)\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-q3" ) ) {
 			/* -game should already be set */
-			wolfLight = qfalse;
+			wolfLight = false;
 			Sys_Printf( "Enabling Quake 3 lighting model (nonlinear default)\n" );
 		}
 
@@ -2619,17 +2614,17 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( !strcmp( argv[ i ], "-sunonly" ) ) {
-			sunOnly = qtrue;
+			sunOnly = true;
 			Sys_Printf( "Only computing sunlight\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-bounceonly" ) ) {
-			bounceOnly = qtrue;
+			bounceOnly = true;
 			Sys_Printf( "Storing bounced light (radiosity) only\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-nocollapse" ) ) {
-			noCollapse = qtrue;
+			noCollapse = true;
 			Sys_Printf( "Identical lightmap collapsing disabled\n" );
 		}
 
@@ -2651,12 +2646,12 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( !strcmp( argv[ i ], "-shade" ) ) {
-			shade = qtrue;
+			shade = true;
 			Sys_Printf( "Phong shading enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-bouncegrid" ) ) {
-			bouncegrid = qtrue;
+			bouncegrid = true;
 			if ( bounce > 0 ) {
 				Sys_Printf( "Grid lighting with radiosity enabled\n" );
 			}
@@ -2668,112 +2663,112 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( !strcmp( argv[ i ], "-nofastpoint" ) ) {
-			fastpoint = qfalse;
+			fastpoint = false;
 			Sys_Printf( "Automatic fast mode for point lights disabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-fast" ) ) {
-			fast = qtrue;
-			fastgrid = qtrue;
-			fastbounce = qtrue;
+			fast = true;
+			fastgrid = true;
+			fastbounce = true;
 			Sys_Printf( "Fast mode enabled for all area lights\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-faster" ) ) {
-			faster = qtrue;
-			fast = qtrue;
-			fastgrid = qtrue;
-			fastbounce = qtrue;
+			faster = true;
+			fast = true;
+			fastgrid = true;
+			fastbounce = true;
 			Sys_Printf( "Faster mode enabled\n" );
 		}
 
 //		else if ( !strcmp( argv[ i ], "-fastallocate" ) ) {
-//			fastAllocate = qtrue;
+//			fastAllocate = true;
 //			Sys_Printf( "Fast allocation mode enabled\n" );
 //		}
 		else if ( !strcmp( argv[ i ], "-slowallocate" ) ) {
-			fastAllocate = qfalse;
+			fastAllocate = false;
 			Sys_Printf( "Slow allocation mode enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-fastgrid" ) ) {
-			fastgrid = qtrue;
+			fastgrid = true;
 			Sys_Printf( "Fast grid lighting enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-fastbounce" ) ) {
-			fastbounce = qtrue;
+			fastbounce = true;
 			Sys_Printf( "Fast bounce mode enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-cheap" ) ) {
-			cheap = qtrue;
-			cheapgrid = qtrue;
+			cheap = true;
+			cheapgrid = true;
 			Sys_Printf( "Cheap mode enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-cheapgrid" ) ) {
-			cheapgrid = qtrue;
+			cheapgrid = true;
 			Sys_Printf( "Cheap grid mode enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-normalmap" ) ) {
-			normalmap = qtrue;
+			normalmap = true;
 			Sys_Printf( "Storing normal map instead of lightmap\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-trisoup" ) ) {
-			trisoup = qtrue;
+			trisoup = true;
 			Sys_Printf( "Converting brush faces to triangle soup\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-debug" ) ) {
-			debug = qtrue;
+			debug = true;
 			Sys_Printf( "Lightmap debugging enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-debugsurfaces" ) || !strcmp( argv[ i ], "-debugsurface" ) ) {
-			debugSurfaces = qtrue;
+			debugSurfaces = true;
 			Sys_Printf( "Lightmap surface debugging enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-debugunused" ) ) {
-			debugUnused = qtrue;
+			debugUnused = true;
 			Sys_Printf( "Unused luxel debugging enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-debugaxis" ) ) {
-			debugAxis = qtrue;
+			debugAxis = true;
 			Sys_Printf( "Lightmap axis debugging enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-debugcluster" ) ) {
-			debugCluster = qtrue;
+			debugCluster = true;
 			Sys_Printf( "Luxel cluster debugging enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-debugorigin" ) ) {
-			debugOrigin = qtrue;
+			debugOrigin = true;
 			Sys_Printf( "Luxel origin debugging enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-debugdeluxe" ) ) {
-			deluxemap = qtrue;
-			debugDeluxemap = qtrue;
+			deluxemap = true;
+			debugDeluxemap = true;
 			Sys_Printf( "Deluxemap debugging enabled\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-export" ) ) {
-			exportLightmaps = qtrue;
+			exportLightmaps = true;
 			Sys_Printf( "Exporting lightmaps\n" );
 		}
 
 		else if ( !strcmp( argv[ i ], "-notrace" ) ) {
-			noTrace = qtrue;
+			noTrace = true;
 			Sys_Printf( "Shadow occlusion disabled\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-patchshadows" ) ) {
-			patchShadows = qtrue;
+			patchShadows = true;
 			Sys_Printf( "Patch shadow casting enabled\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-extra" ) ) {
@@ -2782,7 +2777,7 @@ int LightMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ], "-extrawide" ) ) {
 			superSample = EXTRAWIDE_SCALE;  /* ydnar */
-			filter = qtrue;                 /* ydnar */
+			filter = true;                  /* ydnar */
 			Sys_Printf( "The -extrawide argument is deprecated, use \"-filter [-super 2]\" instead\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-samplesize" ) ) {
@@ -2822,23 +2817,23 @@ int LightMain( int argc, char **argv ){
 			}
 		}
 		else if ( !strcmp( argv[ i ], "-nogrid" ) ) {
-			noGridLighting = qtrue;
+			noGridLighting = true;
 			Sys_Printf( "Disabling grid lighting\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-border" ) ) {
-			lightmapBorder = qtrue;
+			lightmapBorder = true;
 			Sys_Printf( "Adding debug border to lightmaps\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-nosurf" ) ) {
-			noSurfaces = qtrue;
+			noSurfaces = true;
 			Sys_Printf( "Not tracing against surfaces\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-dump" ) ) {
-			dump = qtrue;
+			dump = true;
 			Sys_Printf( "Dumping radiosity lights into numbered prefabs\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-lomem" ) ) {
-			loMem = qtrue;
+			loMem = true;
 			Sys_Printf( "Enabling low-memory (potentially slower) lighting mode\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-lightanglehl" ) ) {
@@ -2854,37 +2849,37 @@ int LightMain( int argc, char **argv ){
 			}
 		}
 		else if ( !strcmp( argv[ i ], "-nostyle" ) || !strcmp( argv[ i ], "-nostyles" ) ) {
-			noStyles = qtrue;
+			noStyles = true;
 			Sys_Printf( "Disabling lightstyles\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-style" ) || !strcmp( argv[ i ], "-styles" ) ) {
-			noStyles = qfalse;
+			noStyles = false;
 			Sys_Printf( "Enabling lightstyles\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-cpma" ) ) {
-			cpmaHack = qtrue;
+			cpmaHack = true;
 			Sys_Printf( "Enabling Challenge Pro Mode Asstacular Vertex Lighting Mode (tm)\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-floodlight" ) ) {
-			floodlighty = qtrue;
+			floodlighty = true;
 			Sys_Printf( "FloodLighting enabled\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-debugnormals" ) ) {
-			debugnormals = qtrue;
+			debugnormals = true;
 			Sys_Printf( "DebugNormals enabled\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-lowquality" ) ) {
-			floodlight_lowquality = qtrue;
+			floodlight_lowquality = true;
 			Sys_Printf( "Low Quality FloodLighting enabled\n" );
 		}
 
 		/* r7: dirtmapping */
 		else if ( !strcmp( argv[ i ], "-dirty" ) ) {
-			dirty = qtrue;
+			dirty = true;
 			Sys_Printf( "Dirtmapping enabled\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-dirtdebug" ) || !strcmp( argv[ i ], "-debugdirt" ) ) {
-			dirtDebug = qtrue;
+			dirtDebug = true;
 			Sys_Printf( "Dirtmap debugging enabled\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-dirtmode" ) ) {
@@ -2925,17 +2920,17 @@ int LightMain( int argc, char **argv ){
 			i++;
 		}
 		else if ( !strcmp( argv[ i ], "-trianglecheck" ) ) {
-			lightmapTriangleCheck = qtrue;
+			lightmapTriangleCheck = true;
 		}
 		else if ( !strcmp( argv[ i ], "-extravisnudge" ) ) {
-			lightmapExtraVisClusterNudge = qtrue;
+			lightmapExtraVisClusterNudge = true;
 		}
 		else if ( !strcmp( argv[ i ], "-fill" ) ) {
-			lightmapFill = qtrue;
+			lightmapFill = true;
 			Sys_Printf( "Filling lightmap colors from surrounding pixels to improve JPEG compression\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-fillpink" ) ) {
-			lightmapPink = qtrue;
+			lightmapPink = true;
 		}
 		/* unhandled args */
 		else
@@ -3024,7 +3019,7 @@ int LightMain( int argc, char **argv ){
 	/* load map file */
 	value = ValueForKey( &entities[ 0 ], "_keepLights" );
 	if ( value[ 0 ] != '1' ) {
-		LoadMapFile( name, qtrue, qfalse );
+		LoadMapFile( name, true, false );
 	}
 
 	/* set the entity/model origins and init yDrawVerts */

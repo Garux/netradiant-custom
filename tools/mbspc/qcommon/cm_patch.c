@@ -131,11 +131,11 @@ static qboolean CM_PlaneFromPoints( vec4_t plane, vec3_t a, vec3_t b, vec3_t c )
 	VectorSubtract( c, a, d2 );
 	CrossProduct( d2, d1, plane );
 	if ( VectorNormalize( plane ) == 0 ) {
-		return qfalse;
+		return false;
 	}
 
 	plane[3] = DotProduct( a, plane );
-	return qtrue;
+	return true;
 }
 
 
@@ -175,7 +175,7 @@ static qboolean	CM_NeedsSubdivision( vec3_t a, vec3_t b, vec3_t c ) {
 	// see if the curve is far enough away from the linear mid
 	VectorSubtract( cmid, lmid, delta );
 	dist = VectorLength( delta );
-	
+
 	return dist >= SUBDIVIDE_DISTANCE;
 }
 
@@ -252,7 +252,7 @@ static void CM_TransposeGrid( cGrid_t *grid ) {
 ===================
 CM_SetGridWrapWidth
 
-If the left and right columns are exactly equal, set grid->wrapWidth qtrue
+If the left and right columns are exactly equal, set grid->wrapWidth true
 ===================
 */
 static void CM_SetGridWrapWidth( cGrid_t *grid ) {
@@ -271,9 +271,9 @@ static void CM_SetGridWrapWidth( cGrid_t *grid ) {
 		}
 	}
 	if ( i == grid->height ) {
-		grid->wrapWidth = qtrue;
+		grid->wrapWidth = true;
 	} else {
-		grid->wrapWidth = qfalse;
+		grid->wrapWidth = false;
 	}
 }
 
@@ -359,17 +359,17 @@ static qboolean CM_ComparePoints( float *a, float *b ) {
 
 	d = a[0] - b[0];
 	if ( d < -POINT_EPSILON || d > POINT_EPSILON ) {
-		return qfalse;
+		return false;
 	}
 	d = a[1] - b[1];
 	if ( d < -POINT_EPSILON || d > POINT_EPSILON ) {
-		return qfalse;
+		return false;
 	}
 	d = a[2] - b[2];
 	if ( d < -POINT_EPSILON || d > POINT_EPSILON ) {
-		return qfalse;
+		return false;
 	}
-	return qtrue;
+	return true;
 }
 
 /*
@@ -437,8 +437,8 @@ int CM_PlaneEqual(patchPlane_t *p, float plane[4], int *flipped) {
 	&& fabs(p->plane[2] - plane[2]) < NORMAL_EPSILON
 	&& fabs(p->plane[3] - plane[3]) < DIST_EPSILON )
 	{
-		*flipped = qfalse;
-		return qtrue;
+		*flipped = false;
+		return true;
 	}
 
 	VectorNegate(plane, invplane);
@@ -450,11 +450,11 @@ int CM_PlaneEqual(patchPlane_t *p, float plane[4], int *flipped) {
 	&& fabs(p->plane[2] - invplane[2]) < NORMAL_EPSILON
 	&& fabs(p->plane[3] - invplane[3]) < DIST_EPSILON )
 	{
-		*flipped = qtrue;
-		return qtrue;
+		*flipped = true;
+		return true;
 	}
 
-	return qfalse;
+	return false;
 }
 
 /*
@@ -505,7 +505,7 @@ int CM_FindPlane2(float plane[4], int *flipped) {
 
 	numPlanes++;
 
-	*flipped = qfalse;
+	*flipped = false;
 
 	return numPlanes-1;
 }
@@ -725,18 +725,18 @@ static void CM_SetBorderInward( facet_t *facet, cGrid_t *grid, int gridPlanes[MA
 		}
 
 		if ( front && !back ) {
-			facet->borderInward[k] = qtrue;
+			facet->borderInward[k] = true;
 		} else if ( back && !front ) {
-			facet->borderInward[k] = qfalse;
+			facet->borderInward[k] = false;
 		} else if ( !front && !back ) {
 			// flat side border
 			facet->borderPlanes[k] = -1;
 		} else {
 			// bisecting side border
 			Com_DPrintf( "WARNING: CM_SetBorderInward: mixed plane sides\n" );
-			facet->borderInward[k] = qfalse;
+			facet->borderInward[k] = false;
 			if ( !debugBlock ) {
-				debugBlock = qtrue;
+				debugBlock = true;
 				VectorCopy( grid->points[i][j], debugBlockPoints[0] );
 				VectorCopy( grid->points[i+1][j], debugBlockPoints[1] );
 				VectorCopy( grid->points[i+1][j+1], debugBlockPoints[2] );
@@ -760,7 +760,7 @@ static qboolean CM_ValidateFacet( facet_t *facet ) {
 	vec3_t		bounds[2];
 
 	if ( facet->surfacePlane == -1 ) {
-		return qfalse;
+		return false;
 	}
 
 	Vector4Copy( planes[ facet->surfacePlane ].plane, plane );
@@ -768,7 +768,7 @@ static qboolean CM_ValidateFacet( facet_t *facet ) {
 	for ( j = 0 ; j < facet->numBorders && w ; j++ ) {
 		if ( facet->borderPlanes[j] == -1 ) {
 			FreeWinding(w);
-			return qfalse;
+			return false;
 		}
 		Vector4Copy( planes[ facet->borderPlanes[j] ].plane, plane );
 		if ( !facet->borderInward[j] ) {
@@ -779,25 +779,25 @@ static qboolean CM_ValidateFacet( facet_t *facet ) {
 	}
 
 	if ( !w ) {
-		return qfalse;		// winding was completely chopped away
+		return false;		// winding was completely chopped away
 	}
 
 	// see if the facet is unreasonably large
 	WindingBounds( w, bounds[0], bounds[1] );
 	FreeWinding( w );
-	
+
 	for ( j = 0 ; j < 3 ; j++ ) {
 		if ( bounds[1][j] - bounds[0][j] > MAX_MAP_BOUNDS ) {
-			return qfalse;		// we must be missing a plane
+			return false;		// we must be missing a plane
 		}
 		if ( bounds[0][j] >= MAX_MAP_BOUNDS ) {
-			return qfalse;
+			return false;
 		}
 		if ( bounds[1][j] <= -MAX_MAP_BOUNDS ) {
-			return qfalse;
+			return false;
 		}
 	}
-	return qtrue;		// winding is fine
+	return true;		// winding is fine
 }
 
 /*
@@ -960,7 +960,7 @@ void CM_AddFacetBevels( facet_t *facet ) {
 	//add opposite plane
 	facet->borderPlanes[facet->numBorders] = facet->surfacePlane;
 	facet->borderNoAdjust[facet->numBorders] = 0;
-	facet->borderInward[facet->numBorders] = qtrue;
+	facet->borderInward[facet->numBorders] = true;
 	facet->numBorders++;
 #endif //BSPC
 
@@ -1007,13 +1007,13 @@ static void CM_PatchCollideFromGrid( cGrid_t *grid, patchCollide_t *pf ) {
 	// create the borders for each facet
 	for ( i = 0 ; i < grid->width - 1 ; i++ ) {
 		for ( j = 0 ; j < grid->height - 1 ; j++ ) {
-			 
+
 			borders[EN_TOP] = -1;
 			if ( j > 0 ) {
 				borders[EN_TOP] = gridPlanes[i][j-1][1];
 			} else if ( grid->wrapHeight ) {
 				borders[EN_TOP] = gridPlanes[i][grid->height-2][1];
-			} 
+			}
 			noAdjust[EN_TOP] = ( borders[EN_TOP] == gridPlanes[i][j][0] );
 			if ( borders[EN_TOP] == -1 || noAdjust[EN_TOP] ) {
 				borders[EN_TOP] = CM_EdgePlaneNum( grid, gridPlanes, i, j, 0 );
@@ -1167,8 +1167,8 @@ struct patchCollide_s	*CM_GeneratePatchCollide( int width, int height, vec3_t *p
 	// build a grid
 	grid.width = width;
 	grid.height = height;
-	grid.wrapWidth = qfalse;
-	grid.wrapHeight = qfalse;
+	grid.wrapWidth = false;
+	grid.wrapHeight = false;
 	for ( i = 0 ; i < width ; i++ ) {
 		for ( j = 0 ; j < height ; j++ ) {
 			VectorCopy( points[j*width + i], grid.points[i][j] );
@@ -1255,9 +1255,9 @@ void CM_TracePointThroughPatchCollide( traceWork_t *tw, const struct patchCollid
 		d1 = DotProduct( tw->start, planes->plane ) - planes->plane[3] + offset;
 		d2 = DotProduct( tw->end, planes->plane ) - planes->plane[3] + offset;
 		if ( d1 <= 0 ) {
-			frontFacing[i] = qfalse;
+			frontFacing[i] = false;
 		} else {
-			frontFacing[i] = qtrue;
+			frontFacing[i] = true;
 		}
 		if ( d1 == d2 ) {
 			intersection[i] = 99999;
@@ -1332,19 +1332,19 @@ CM_CheckFacetPlane
 int CM_CheckFacetPlane(float *plane, vec3_t start, vec3_t end, float *enterFrac, float *leaveFrac, int *hit) {
 	float d1, d2, f;
 
-	*hit = qfalse;
+	*hit = false;
 
 	d1 = DotProduct( start, plane ) - plane[3];
 	d2 = DotProduct( end, plane ) - plane[3];
 
 	// if completely in front of face, no intersection with the entire facet
 	if (d1 > 0 && ( d2 >= SURFACE_CLIP_EPSILON || d2 >= d1 )  ) {
-		return qfalse;
+		return false;
 	}
 
 	// if it doesn't cross the plane, the plane isn't relevent
 	if (d1 <= 0 && d2 <= 0 ) {
-		return qtrue;
+		return true;
 	}
 
 	// crosses face
@@ -1356,7 +1356,7 @@ int CM_CheckFacetPlane(float *plane, vec3_t start, vec3_t end, float *enterFrac,
 		//always favor previous plane hits and thus also the surface plane hit
 		if (f > *enterFrac) {
 			*enterFrac = f;
-			*hit = qtrue;
+			*hit = true;
 		}
 	} else {	// leave
 		f = (d1+SURFACE_CLIP_EPSILON) / (d1-d2);
@@ -1367,7 +1367,7 @@ int CM_CheckFacetPlane(float *plane, vec3_t start, vec3_t end, float *enterFrac,
 			*leaveFrac = f;
 		}
 	}
-	return qtrue;
+	return true;
 }
 
 /*
@@ -1526,7 +1526,7 @@ qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchColli
 	vec3_t startp;
 
 	if (tw->isPoint) {
-		return qfalse;
+		return false;
 	}
 	//
 	facet = pc->facets;
@@ -1595,9 +1595,9 @@ qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchColli
 			continue;
 		}
 		// inside this patch facet
-		return qtrue;
+		return true;
 	}
-	return qfalse;
+	return false;
 }
 
 /*
@@ -1669,7 +1669,7 @@ void CM_DrawDebugSurface( void (*drawPoly)(int color, int numPoints, float *poin
 			}
 			else {
 				planenum = facet->surfacePlane;
-				inward = qfalse;
+				inward = false;
 				//continue;
 			}
 
@@ -1701,7 +1701,7 @@ void CM_DrawDebugSurface( void (*drawPoly)(int color, int numPoints, float *poin
 				}
 				else {
 					curplanenum = facet->surfacePlane;
-					curinward = qfalse;
+					curinward = false;
 					//continue;
 				}
 				//

@@ -60,7 +60,7 @@ vec_t ray_intersect_point( const ray_t *ray, const vec3_t point, vec_t epsilon, 
 
 #define EPSILON 0.000001
 
-vec_t ray_intersect_triangle( const ray_t *ray, qboolean bCullBack, const vec3_t vert0, const vec3_t vert1, const vec3_t vert2 ){
+vec_t ray_intersect_triangle( const ray_t *ray, bool bCullBack, const vec3_t vert0, const vec3_t vert1, const vec3_t vert2 ){
 	float edge1[3], edge2[3], tvec[3], pvec[3], qvec[3];
 	float det,inv_det;
 	float u, v;
@@ -76,7 +76,7 @@ vec_t ray_intersect_triangle( const ray_t *ray, qboolean bCullBack, const vec3_t
 	/* if determinant is near zero, ray lies in plane of triangle */
 	det = DotProduct( edge1, pvec );
 
-	if ( bCullBack == qtrue ) {
+	if ( bCullBack == true ) {
 		if ( det < EPSILON ) {
 			return depth;
 		}

@@ -204,8 +204,8 @@ void MakeMeshNormals( mesh_t in ){
 	int x, y;
 	bspDrawVert_t   *dv;
 	vec3_t around[8], temp;
-	qboolean good[8];
-	qboolean wrapWidth, wrapHeight;
+	bool good[8];
+	bool wrapWidth, wrapHeight;
 	float len;
 	int neighbors[8][2] =
 	{
@@ -213,7 +213,7 @@ void MakeMeshNormals( mesh_t in ){
 	};
 
 
-	wrapWidth = qfalse;
+	wrapWidth = false;
 	for ( i = 0 ; i < in.height ; i++ ) {
 		VectorSubtract( in.verts[i * in.width].xyz,
 						in.verts[i * in.width + in.width - 1].xyz, delta );
@@ -223,10 +223,10 @@ void MakeMeshNormals( mesh_t in ){
 		}
 	}
 	if ( i == in.height ) {
-		wrapWidth = qtrue;
+		wrapWidth = true;
 	}
 
-	wrapHeight = qfalse;
+	wrapHeight = false;
 	for ( i = 0 ; i < in.width ; i++ ) {
 		VectorSubtract( in.verts[i].xyz,
 						in.verts[i + ( in.height - 1 ) * in.width].xyz, delta );
@@ -236,7 +236,7 @@ void MakeMeshNormals( mesh_t in ){
 		}
 	}
 	if ( i == in.width ) {
-		wrapHeight = qtrue;
+		wrapHeight = true;
 	}
 
 
@@ -247,7 +247,7 @@ void MakeMeshNormals( mesh_t in ){
 			VectorCopy( dv->xyz, base );
 			for ( k = 0 ; k < 8 ; k++ ) {
 				VectorClear( around[k] );
-				good[k] = qfalse;
+				good[k] = false;
 
 				for ( dist = 1 ; dist <= 3 ; dist++ ) {
 					x = i + neighbors[k][0] * dist;
@@ -277,7 +277,7 @@ void MakeMeshNormals( mesh_t in ){
 						continue;               // degenerate edge, get more dist
 					}
 					else {
-						good[k] = qtrue;
+						good[k] = true;
 						VectorCopy( temp, around[k] );
 						break;                  // good edge
 					}

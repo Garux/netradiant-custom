@@ -237,14 +237,14 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 	while ( 1 )
 	{
 		/* test for end of file */
-		if ( !GetToken( qtrue ) )
+		if ( !GetToken( true ) )
 			break;
 
 		char shadername[256];
 		strcpy( shadername, token );
 
 		/* handle { } section */
-		if ( !GetToken( qtrue ) )
+		if ( !GetToken( true ) )
 			break;
 		if ( strcmp( token, "{" ) )
 				Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
@@ -252,7 +252,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 		while ( 1 )
 		{
 			/* get the next token */
-			if ( !GetToken( qtrue ) )
+			if ( !GetToken( true ) )
 				break;
 			if ( !strcmp( token, "}" ) )
 				break;
@@ -260,7 +260,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 			if ( !strcmp( token, "{" ) ) {
 				while ( 1 )
 				{
-					if ( !GetToken( qtrue ) )
+					if ( !GetToken( true ) )
 						break;
 					if ( !strcmp( token, "}" ) )
 						break;
@@ -270,7 +270,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 					/* digest any images */
 					if ( !Q_stricmp( token, "map" ) ) {
 						/* get an image */
-						GetToken( qfalse );
+						GetToken( false );
 						if ( *token != '*' && *token != '$' ) {
 							// map maps/bake_test_1/lm_0004.tga
 							int lmindex;

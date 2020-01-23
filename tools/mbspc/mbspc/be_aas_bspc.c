@@ -278,7 +278,7 @@ void AAS_CalcReachAndClusters(struct quakefile_s *qf)
 	//
 	if (!qf->pakfile[0]) strcpy(qf->pakfile, qf->filename);
 	//load the map
-	CM_LoadMap((char *) qf, qfalse, &aasworld.bspchecksum);
+	CM_LoadMap((char *) qf, false, &aasworld.bspchecksum);
 	//get a handle to the world model
 	worldmodel = CM_InlineModel(0);		// 0 = world, 1 + are bmodels
 	//initialize bot import structure

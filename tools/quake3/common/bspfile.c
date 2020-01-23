@@ -500,7 +500,7 @@ epair_t *ParseEpair( void ) {
 		Error( "ParseEpar: token too long" );
 	}
 	e->key = copystring( token );
-	GetToken( qfalse );
+	GetToken( false );
 	if ( strlen( token ) >= MAX_VALUE - 1 ) {
 		Error( "ParseEpar: token too long" );
 	}
@@ -520,12 +520,12 @@ epair_t *ParseEpair( void ) {
    ParseEntity
    ================
  */
-qboolean    ParseEntity( void ) {
+bool    ParseEntity( void ) {
 	epair_t     *e;
 	entity_t    *mapent;
 
-	if ( !GetToken( qtrue ) ) {
-		return qfalse;
+	if ( !GetToken( true ) ) {
+		return false;
 	}
 
 	if ( strcmp( token, "{" ) ) {
@@ -538,7 +538,7 @@ qboolean    ParseEntity( void ) {
 	num_entities++;
 
 	do {
-		if ( !GetToken( qtrue ) ) {
+		if ( !GetToken( true ) ) {
 			Error( "ParseEntity: EOF without closing brace" );
 		}
 		if ( !strcmp( token, "}" ) ) {
@@ -549,7 +549,7 @@ qboolean    ParseEntity( void ) {
 		mapent->epairs = e;
 	} while ( 1 );
 
-	return qtrue;
+	return true;
 }
 
 /*

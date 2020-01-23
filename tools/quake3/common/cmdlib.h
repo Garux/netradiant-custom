@@ -77,7 +77,7 @@ void *safe_calloc_info( size_t size, const char* info );
 extern int myargc;
 extern char **myargv;
 
-static inline qboolean strEmpty( const char* string ){
+static inline bool strEmpty( const char* string ){
 	return *string == '\0';
 }
 static inline void strClear( char* string ){
@@ -140,13 +140,13 @@ int     LoadFile( const char *filename, void **bufferptr );
 int   LoadFileBlock( const char *filename, void **bufferptr );
 int     TryLoadFile( const char *filename, void **bufferptr );
 void    SaveFile( const char *filename, const void *buffer, int count );
-qboolean    FileExists( const char *filename );
+bool    FileExists( const char *filename );
 
 
-static inline qboolean path_separator( const char c ){
+static inline bool path_separator( const char c ){
 	return c == '/' || c == '\\';
 }
-qboolean path_is_absolute( const char* path );
+bool path_is_absolute( const char* path );
 char* path_get_last_separator( const char* path );
 char* path_get_filename_start( const char* path );
 char* path_get_filename_base_end( const char* path );
@@ -181,7 +181,7 @@ float   LittleFloat( float l );
 char *COM_Parse( char *data );
 
 extern char com_token[1024];
-extern qboolean com_eof;
+extern bool com_eof;
 
 
 void CRC_Init( unsigned short *crcvalue );
@@ -191,7 +191,7 @@ unsigned short CRC_Value( unsigned short crcvalue );
 void    CreatePath( const char *path );
 void    QCopyFile( const char *from, const char *to );
 
-extern qboolean archive;
+extern bool archive;
 extern char archivedir[1024];
 
 // sleep for the given amount of milliseconds

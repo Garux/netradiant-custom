@@ -94,7 +94,7 @@ void Fur( mapDrawSurface_t *ds ){
 		}
 
 		/* set it to fur */
-		fur->fur = qtrue;
+		fur->fur = true;
 
 		/* walk the verts */
 		for ( j = 0; j < fur->numVerts; j++ )

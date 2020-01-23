@@ -136,4 +136,4 @@ typedef struct
 
 #define _3DS_CHUNK_KEYFRAME_DATA            0xb000
 
-void _3DS_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets, qboolean verbose );
+void _3DS_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets, bool verbose );

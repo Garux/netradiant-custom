@@ -28,7 +28,7 @@
 // Tab Size:     3
 // Notes:
 //===========================================================================
-
+#include "bytebool.h"
 int  WINS_Init( void );
 void WINS_Shutdown( void );
 char *WINS_MyAddress( void );
@@ -40,7 +40,7 @@ int  WINS_CloseSocket( int socket );
 int  WINS_Connect( int socket, struct sockaddr_s *addr );
 int  WINS_CheckNewConnections( void );
 int  WINS_Read( int socket, byte *buf, int len, struct sockaddr_s *addr );
-int  WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr );
+bool WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr );
 int  WINS_Broadcast( int socket, byte *buf, int len );
 char *WINS_AddrToString( struct sockaddr_s *addr );
 int  WINS_StringToAddr( char *string, struct sockaddr_s *addr );

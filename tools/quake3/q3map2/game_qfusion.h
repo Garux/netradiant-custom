@@ -111,34 +111,34 @@
 	65535,              /* max lightmapped surface verts */
 	65535,              /* max surface verts */
 	393210,             /* max surface indexes */
-	qfalse,             /* flares */
+	false,              /* flares */
 	"flareshader",      /* default flare shader */
-	qfalse,             /* wolf lighting model? */
+	false,              /* wolf lighting model? */
 	512,                /* lightmap width/height */
 	1.0f,               /* lightmap gamma */
-	qtrue,              /* lightmap sRGB */
-	qtrue,              /* texture sRGB */
-	qtrue,              /* color sRGB */
+	true,               /* lightmap sRGB */
+	true,               /* texture sRGB */
+	true,               /* color sRGB */
 	0.0f,               /* lightmap exposure */
 	1.0f,               /* lightmap compensate */
 	1.0f,               /* lightgrid scale */
 	1.0f,               /* lightgrid ambient scale */
-	qtrue,              /* light angle attenuation uses half-lambert curve */
-	qtrue,              /* disable shader lightstyles hack */
-	qtrue,              /* keep light entities on bsp */
+	true,               /* light angle attenuation uses half-lambert curve */
+	true,               /* disable shader lightstyles hack */
+	true,               /* keep light entities on bsp */
 	4,                  /* default patchMeta subdivisions tolerance */
-	qtrue,              /* patch casting enabled */
-	qtrue,              /* compile deluxemaps */
+	true,               /* patch casting enabled */
+	true,               /* compile deluxemaps */
 	0,                  /* deluxemaps default mode */
 	512,                /* minimap size */
 	1.0f,               /* minimap sharpener */
 	1.0f / 66.0f,       /* minimap border */
-	qtrue,              /* minimap keep aspect */
+	true,               /* minimap keep aspect */
 	MINIMAP_MODE_GRAY,  /* minimap mode */
 	"../minimaps/%s.tga", /* minimap name format */
 	"FBSP",             /* bsp file prefix */
 	1,                  /* bsp file version */
-	qfalse,             /* cod-style lump len/ofs order */
+	false,              /* cod-style lump len/ofs order */
 	LoadRBSPFile,       /* bsp load function */
 	WriteRBSPFile,      /* bsp write function */
 

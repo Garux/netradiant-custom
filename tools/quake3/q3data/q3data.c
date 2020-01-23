@@ -24,13 +24,13 @@
 
 #include "vfs.h"
 
-qboolean g_verbose;
-qboolean g_stripify = qtrue;
-qboolean g_release;             // don't grab, copy output data to new tree
+bool g_verbose;
+bool g_stripify = true;
+bool g_release;             // don't grab, copy output data to new tree
 char g_releasedir[1024];        // c:\quake2\baseq2, etc
-qboolean g_archive;             // don't grab, copy source data to new tree
+bool g_archive;             // don't grab, copy source data to new tree
 char g_only[256];               // if set, only grab this cd
-qboolean g_skipmodel;           // set true when a cd is not g_only
+bool g_skipmodel;           // set true when a cd is not g_only
 
 // bogus externs for some TA hacks (common/ using them against q3map)
 char *moddir = NULL;
@@ -279,7 +279,7 @@ void ReleaseShader( char *filename ){
    ===============
  */
 void Cmd_File( void ){
-	GetToken( qfalse );
+	GetToken( false );
 	ReleaseFile( token );
 }
 
@@ -381,7 +381,7 @@ void PackDirectory_r( char *dir ){
    ===============
  */
 void Cmd_Dir( void ){
-	GetToken( qfalse );
+	GetToken( false );
 	PackDirectory_r( token );
 }
 
@@ -425,7 +425,7 @@ void Cmd_Maps( void ){
 
 	while ( TokenAvailable() )
 	{
-		GetToken( qfalse );
+		GetToken( false );
 		sprintf( map, "maps/%s.bsp", token );
 		ReleaseFile( map );
 
@@ -452,7 +452,7 @@ void ParseScript( void ){
 	{
 		do
 		{   // look for a line starting with a $ command
-			GetToken( qtrue );
+			GetToken( true );
 			if ( endofscript ) {
 				return;
 			}
@@ -460,7 +460,7 @@ void ParseScript( void ){
 				break;
 			}
 			while ( TokenAvailable() )
-				GetToken( qfalse );
+				GetToken( false );
 		} while ( 1 );
 
 		//
@@ -500,10 +500,10 @@ void ParseScript( void ){
 			Cmd_SpriteShader();
 		}
 		else if ( !strcmp( token, "$aseconvert" ) ) {
-			Cmd_ASEConvert( qfalse );
+			Cmd_ASEConvert( false );
 		}
 		else if ( !strcmp( token, "$aseanimconvert" ) ) {
-			Cmd_ASEConvert( qtrue );
+			Cmd_ASEConvert( true );
 		}
 
 		//
@@ -568,19 +568,19 @@ int main( int argc, char **argv ){
 	for ( i = 1 ; i < argc ; i++ )
 	{
 		if ( !strcmp( argv[i], "-archive" ) ) {
-			archive = qtrue;
+			archive = true;
 			strcpy( archivedir, argv[i + 1] );
 			printf( "Archiving source to: %s\n", archivedir );
 			i++;
 		}
 		else if ( !strcmp( argv[i], "-release" ) ) {
-			g_release = qtrue;
+			g_release = true;
 			strcpy( g_releasedir, argv[i + 1] );
 			printf( "Copy output to: %s\n", g_releasedir );
 			i++;
 		}
 		else if ( !strcmp( argv[i], "-nostrips" ) ) {
-			g_stripify = qfalse;
+			g_stripify = false;
 			printf( "Not optimizing for strips\n" );
 		}
 		else if ( !strcmp( argv[i], "-writedir" ) ) {
@@ -589,7 +589,7 @@ int main( int argc, char **argv ){
 			i++;
 		}
 		else if ( !strcmp( argv[i], "-verbose" ) ) {
-			g_verbose = qtrue;
+			g_verbose = true;
 		}
 		else if ( !strcmp( argv[i], "-dump" ) ) {
 			printf( "Dumping contents of: '%s'\n", argv[i + 1] );

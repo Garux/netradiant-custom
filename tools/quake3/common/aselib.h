@@ -24,7 +24,7 @@
 #include "mathlib.h"
 #include "polyset.h"
 
-void        ASE_Load( const char *filename, qboolean verbose, qboolean meshanims );
+void        ASE_Load( const char *filename, bool verbose, bool meshanims );
 int         ASE_GetNumSurfaces( void );
 polyset_t   *ASE_GetSurfaceAnimation( int ndx, int *numFrames, int skipFrameStart, int skipFrameEnd, int maxFrames );
 const char  *ASE_GetSurfaceName( int ndx );

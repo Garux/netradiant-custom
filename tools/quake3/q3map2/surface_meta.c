@@ -157,7 +157,7 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 	{
 		/* calculate a plane from the triangle's points (and bail if a plane can't be constructed) */
 		src->planeNum = -1;
-		if ( PlaneFromPoints( src->plane, a->xyz, b->xyz, c->xyz ) == qfalse ) {
+		if ( !PlaneFromPoints( src->plane, a->xyz, b->xyz, c->xyz ) ) {
 			return -1;
 		}
 	}
@@ -294,7 +294,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	int iterations, x, y, pw[ 5 ], r;
 	mapDrawSurface_t    *dsNew;
 	mesh_t src, *subdivided, *mesh;
-	int forcePatchMeta;
+	bool forcePatchMeta;
 	int patchQuality;
 	int patchSubdivision;
 
@@ -316,7 +316,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	}
 
 	/* try to early out */
-	if ( ds->numVerts == 0 || ds->type != SURFACE_PATCH || ( patchMeta == qfalse && !forcePatchMeta ) ) {
+	if ( ds->numVerts == 0 || ds->type != SURFACE_PATCH || ( !patchMeta && !forcePatchMeta ) ) {
 		return;
 	}
 	/* make a mesh from the drawsurf */
@@ -725,7 +725,7 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 	{
 		/* ydnar: find smallest coordinate */
 		least = 0;
-		if ( ds->shaderInfo != NULL && ds->shaderInfo->autosprite == qfalse ) {
+		if ( ds->shaderInfo != NULL && !ds->shaderInfo->autosprite ) {
 			for ( i = 0; i < ds->numVerts; i++ )
 			{
 				/* get points */
@@ -868,7 +868,7 @@ void MakeEntityMetaTriangles( entity_t *e ){
 		}
 
 		/* meta this surface? */
-		if ( meta == qfalse && ds->shaderInfo->forceMeta == qfalse ) {
+		if ( !meta && !ds->shaderInfo->forceMeta ) {
 			continue;
 		}
 
@@ -1255,7 +1255,7 @@ void SmoothMetaTriangles( void ){
 			}
 
 			/* test vertexes */
-			if ( VectorCompare( metaVerts[ i ].xyz, metaVerts[ j ].xyz ) == qfalse ) {
+			if ( !VectorCompare( metaVerts[ i ].xyz, metaVerts[ j ].xyz ) ) {
 				continue;
 			}
 
@@ -1345,10 +1345,10 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 		dv2 = &ds->verts[ i ];
 
 		/* compare xyz and normal */
-		if ( VectorCompare( dv1->xyz, dv2->xyz ) == qfalse ) {
+		if ( !VectorCompare( dv1->xyz, dv2->xyz ) ) {
 			continue;
 		}
-		if ( VectorCompare( dv1->normal, dv2->normal ) == qfalse ) {
+		if ( !VectorCompare( dv1->normal, dv2->normal ) ) {
 			continue;
 		}
 
@@ -1402,12 +1402,12 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 #define ADEQUATE_SCORE          ( metaAdequateScore >= 0 ? metaAdequateScore : DEFAULT_ADEQUATE_SCORE )
 #define GOOD_SCORE          ( metaGoodScore     >= 0 ? metaGoodScore     : DEFAULT_GOOD_SCORE )
 
-static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, qboolean testAdd ){
+static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, bool testAdd ){
 	vec3_t p;
 	int i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
 	float lmMax;
 	vec3_t mins, maxs;
-	qboolean inTexRange;
+	bool inTexRange;
 	mapDrawSurface_t old;
 
 
@@ -1428,15 +1428,15 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	}
 	#if 0
 	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
-	     //% VectorCompare( ds->lightmapAxis, tri->lightmapAxis ) == qfalse )
+	     //% !VectorCompare( ds->lightmapAxis, tri->lightmapAxis ) )
 		 DotProduct( ds->lightmapAxis, tri->plane ) < 0.25f ) {
 		return 0;
 	}
 	#endif
 
 	/* planar surfaces will only merge with triangles in the same plane */
-	if ( npDegrees == 0.0f && ds->shaderInfo->nonplanar == qfalse && ds->planeNum >= 0 ) {
-		if ( VectorCompare( mapplanes[ ds->planeNum ].normal, tri->plane ) == qfalse || mapplanes[ ds->planeNum ].dist != tri->plane[ 3 ] ) {
+	if ( npDegrees == 0.0f && !ds->shaderInfo->nonplanar && ds->planeNum >= 0 ) {
+		if ( !VectorCompare( mapplanes[ ds->planeNum ].normal, tri->plane ) || mapplanes[ ds->planeNum ].dist != tri->plane[ 3 ] ) {
 			return 0;
 		}
 		if ( tri->planeNum >= 0 && tri->planeNum != ds->planeNum ) {
@@ -1512,7 +1512,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	/* check lightmap bounds overflow (after at least 1 triangle has been added) */
 	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
 		 ds->numIndexes > 0 && VectorLength( ds->lightmapAxis ) > 0.0f &&
-		 ( VectorCompare( ds->mins, mins ) == qfalse || VectorCompare( ds->maxs, maxs ) == qfalse ) ) {
+		 ( !VectorCompare( ds->mins, mins ) || !VectorCompare( ds->maxs, maxs ) ) ) {
 		/* set maximum size before lightmap scaling (normally 2032 units) */
 		/* 2004-02-24: scale lightmap test size by 2 to catch larger brush faces */
 		/* 2004-04-11: reverting to actual lightmap size */
@@ -1531,7 +1531,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	oldTexRange[ 1 ] = ds->texRange[ 1 ];
 	inTexRange = CalcSurfaceTextureRange( ds );
 
-	if ( inTexRange == qfalse && ds->numIndexes > 0 ) {
+	if ( !inTexRange && ds->numIndexes > 0 ) {
 		memcpy( ds, &old, sizeof( *ds ) );
 		return UNSUITABLE_TRIANGLE;
 	}
@@ -1641,7 +1641,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 	mapDrawSurface_t    *ds;
 	bspDrawVert_t       *verts;
 	int                 *indexes;
-	qboolean added;
+	bool added;
 
 
 	/* allocate arrays */
@@ -1685,7 +1685,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 
 
 		/* add the first triangle */
-		if ( AddMetaTriangleToSurface( ds, seed, qfalse ) ) {
+		if ( AddMetaTriangleToSurface( ds, seed, false ) ) {
 			( *numAdded )++;
 		}
 
@@ -1694,7 +1694,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		   ----------------------------------------------------------------- */
 
 		/* progressively walk the list until no more triangles can be added */
-		added = qtrue;
+		added = true;
 		while ( added )
 		{
 			/* print pacifier */
@@ -1707,7 +1707,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 			/* reset best score */
 			best = -1;
 			bestScore = 0;
-			added = qfalse;
+			added = false;
 
 			/* walk the list of possible candidates for merging */
 			for ( j = i + 1, test = &possibles[ j ]; j < numPossibles; j++, test++ )
@@ -1718,33 +1718,33 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 				}
 
 				/* score this triangle */
-				score = AddMetaTriangleToSurface( ds, test, qtrue );
+				score = AddMetaTriangleToSurface( ds, test, true );
 				if ( score > bestScore ) {
 					best = j;
 					bestScore = score;
 
 					/* if we have a score over a certain threshold, just use it */
 					if ( bestScore >= GOOD_SCORE ) {
-						if ( AddMetaTriangleToSurface( ds, &possibles[ best ], qfalse ) ) {
+						if ( AddMetaTriangleToSurface( ds, &possibles[ best ], false ) ) {
 							( *numAdded )++;
 						}
 
 						/* reset */
 						best = -1;
 						bestScore = 0;
-						added = qtrue;
+						added = true;
 					}
 				}
 			}
 
 			/* add best candidate */
 			if ( best >= 0 && bestScore > ADEQUATE_SCORE ) {
-				if ( AddMetaTriangleToSurface( ds, &possibles[ best ], qfalse ) ) {
+				if ( AddMetaTriangleToSurface( ds, &possibles[ best ], false ) ) {
 					( *numAdded )++;
 				}
 
 				/* reset */
-				added = qtrue;
+				added = true;
 			}
 		}
 
@@ -1796,7 +1796,7 @@ static int CompareMetaTriangles( const void *a, const void *b ){
 
 	/* then plane */
 	#if 0
-	else if ( npDegrees == 0.0f && ( (const metaTriangle_t*) a )->si->nonplanar == qfalse &&
+	else if ( npDegrees == 0.0f && !( (const metaTriangle_t*) a )->si->nonplanar &&
 			  ( (const metaTriangle_t*) a )->planeNum >= 0 && ( (const metaTriangle_t*) a )->planeNum >= 0 ) {
 		if ( ( (const metaTriangle_t*) a )->plane[ 3 ] < ( (const metaTriangle_t*) b )->plane[ 3 ] ) {
 			return 1;

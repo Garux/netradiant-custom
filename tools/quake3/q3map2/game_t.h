@@ -27,7 +27,7 @@ typedef struct game_s
 	char        *gamePath;      /* main game data dir */
 	char        *homeBasePath;  /* home sub-dir on unix */
 	char        *magic;         /* magic word for figuring out base path */
-	qboolean wolfLight;         /* when true, lights work like wolf q3map  */
-	int bspVersion;             /* BSP version to use */
+	bool         wolfLight;     /* when true, lights work like wolf q3map  */
+	int          bspVersion;    /* BSP version to use */
 }
 game_t;

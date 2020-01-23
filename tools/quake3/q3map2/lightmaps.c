@@ -48,7 +48,7 @@ void PrepareNewLightmap( void ) {
    returns a texture number and the position inside it
    ===============
  */
-qboolean AllocLMBlock( int w, int h, int *x, int *y ){
+bool AllocLMBlock( int w, int h, int *x, int *y ){
 	int i, j;
 	int best, best2;
 
@@ -72,14 +72,14 @@ qboolean AllocLMBlock( int w, int h, int *x, int *y ){
 	}
 
 	if ( best + h > LIGHTMAP_HEIGHT ) {
-		return qfalse;
+		return false;
 	}
 
 	for ( i = 0 ; i < w ; i++ ) {
 		allocated[*x + i] = best + h;
 	}
 
-	return qtrue;
+	return true;
 }
 
 

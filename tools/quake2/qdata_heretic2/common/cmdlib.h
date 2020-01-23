@@ -50,12 +50,7 @@
 
 #endif
 
-#ifndef __BYTEBOOL__
-  #define __BYTEBOOL__
-//typedef enum {false, true} qboolean;
-//typedef unsigned char byte;
-  #include "q_typedef.h"
-#endif
+#include "q_typedef.h"
 
 #ifdef PATH_MAX
 #define MAX_OS_PATH     PATH_MAX

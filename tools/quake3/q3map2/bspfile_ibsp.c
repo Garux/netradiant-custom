@@ -452,10 +452,10 @@ void LoadIBSPFile( const char *filename ){
 	SwapBlock( (int*) ( (byte*) header + sizeof( int ) ), sizeof( *header ) - sizeof( int ) );
 
 	/* make sure it matches the format we're trying to load */
-	if ( force == qfalse && *( (int*) header->ident ) != *( (int*) game->bspIdent ) ) {
+	if ( !force && *( (int*) header->ident ) != *( (int*) game->bspIdent ) ) {
 		Error( "%s is not a %s file", filename, game->bspIdent );
 	}
-	if ( force == qfalse && header->version != game->bspVersion ) {
+	if ( !force && header->version != game->bspVersion ) {
 		Error( "%s is version %d, not %d", filename, header->version, game->bspVersion );
 	}
 
@@ -524,10 +524,10 @@ void PartialLoadIBSPFile( const char *filename ){
 	SwapBlock( (int*) ( (byte*) header + sizeof( int ) ), sizeof( *header ) - sizeof( int ) );
 
 	/* make sure it matches the format we're trying to load */
-	if ( force == qfalse && *( (int*) header->ident ) != *( (int*) game->bspIdent ) ) {
+	if ( !force && *( (int*) header->ident ) != *( (int*) game->bspIdent ) ) {
 		Error( "%s is not a %s file", filename, game->bspIdent );
 	}
-	if ( force == qfalse && header->version != game->bspVersion ) {
+	if ( !force && header->version != game->bspVersion ) {
 		Error( "%s is version %d, not %d", filename, header->version, game->bspVersion );
 	}
 

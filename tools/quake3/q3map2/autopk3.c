@@ -114,12 +114,12 @@ static inline void res2list( StrList* list, const char* res ){
 }
 
 static inline void parseEXblock( StrList* list, const char *exName ){
-	if ( !GetToken( qtrue ) || strcmp( token, "{" ) ) {
+	if ( !GetToken( true ) || strcmp( token, "{" ) ) {
 		Error( "ReadExclusionsFile: %s, line %d: { not found", exName, scriptline );
 	}
 	while ( 1 )
 	{
-		if ( !GetToken( qtrue ) ) {
+		if ( !GetToken( true ) ) {
 			break;
 		}
 		if ( !strcmp( token, "}" ) ) {
@@ -154,7 +154,7 @@ static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExS
 		while ( 1 )
 		{
 			/* test for end of file */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 
@@ -218,22 +218,22 @@ static inline void StrBuf_cpy( StrBuf* buf, const char* string ){
 
 
 
-static qboolean packResource( const char* resname, const char* packname, const int compLevel ){
-	const qboolean ret = vfsPackFile( resname, packname, compLevel );
+static bool packResource( const char* resname, const char* packname, const int compLevel ){
+	const bool ret = vfsPackFile( resname, packname, compLevel );
 	if ( ret )
 		Sys_Printf( "++%s\n", resname );
 	return ret;
 }
-static qboolean packTexture( const char* texname, const char* packname, const int compLevel, const qboolean png ){
+static bool packTexture( const char* texname, const char* packname, const int compLevel, const bool png ){
 	const char* extensions[4] = { ".png", ".tga", ".jpg", 0 };
 	for ( const char** ext = extensions + !png; *ext; ++ext ){
 		char str[MAX_QPATH * 2];
 		sprintf( str, "%s%s", texname, *ext );
 		if( packResource( str, packname, compLevel ) ){
-			return qtrue;
+			return true;
 		}
 	}
-	return qfalse;
+	return false;
 }
 
 
@@ -248,15 +248,15 @@ char g_q3map2path[1024];
 
 int pk3BSPMain( int argc, char **argv ){
 	int i, compLevel = 10;
-	qboolean dbg = qfalse, png = qfalse, packFAIL = qfalse;
+	bool dbg = false, png = false, packFAIL = false;
 
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); ++i ){
 		if ( !strcmp( argv[ i ],  "-dbg" ) ) {
-			dbg = qtrue;
+			dbg = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-png" ) ) {
-			png = qtrue;
+			png = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-complevel" ) ) {
 			compLevel = atoi( argv[ i + 1 ] );
@@ -282,13 +282,13 @@ int pk3BSPMain( int argc, char **argv ){
 	/* extract map name */
 	ExtractFileBase( source, nameOFmap );
 
-	qboolean drawsurfSHs[numBSPShaders];
+	bool drawsurfSHs[numBSPShaders];
 	memset( drawsurfSHs, 0, sizeof( drawsurfSHs ) );
 
 	for ( i = 0; i < numBSPDrawSurfaces; ++i ){
 		/* can't exclude nodraw patches here (they want shaders :0!) */
-		//if ( !( bspDrawSurfaces[i].surfaceType == 2 && bspDrawSurfaces[i].numIndexes == 0 ) ) drawsurfSHs[bspDrawSurfaces[i].shaderNum] = qtrue;
-		drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = qtrue;
+		//if ( !( bspDrawSurfaces[i].surfaceType == 2 && bspDrawSurfaces[i].numIndexes == 0 ) ) drawsurfSHs[bspDrawSurfaces[i].shaderNum] = true;
+		drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
 		//Sys_Printf( "%s\n", bspShaders[bspDrawSurfaces[i].shaderNum].shader );
 	}
 
@@ -418,10 +418,10 @@ int pk3BSPMain( int argc, char **argv ){
 
 	//Parse Shader Files
 	 /* hack */
-	endofscript = qtrue;
+	endofscript = true;
 
 	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
-		qboolean wantShader = qfalse, wantShaderFile = qfalse, ShaderFileExcluded = qfalse;
+		bool wantShader = false, wantShaderFile = false, ShaderFileExcluded = false;
 		int shader, found;
 		char* reasonShader = NULL;
 		char* reasonShaderFile = NULL;
@@ -435,7 +435,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 		/* do wanna le shader file? */
 		if( ( found = StrList_find( ExShaderfiles, pk3Shaderfiles->s[i] ) ) ){
-			ShaderFileExcluded = qtrue;
+			ShaderFileExcluded = true;
 			reasonShaderFile = ExShaderfiles->s[found - 1];
 		}
 		/* tokenize it */
@@ -443,24 +443,24 @@ int pk3BSPMain( int argc, char **argv ){
 		while ( !ShaderFileExcluded )
 		{
 			/* test for end of file */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 
 			/* does it contain restricted shaders/textures? */
 			if( ( found = StrList_find( ExShaders, token ) ) ){
-				ShaderFileExcluded = qtrue;
+				ShaderFileExcluded = true;
 				reasonShader = ExShaders->s[found - 1];
 				break;
 			}
 			else if( ( found = StrList_find( ExPureTextures, token ) ) ){
-				ShaderFileExcluded = qtrue;
+				ShaderFileExcluded = true;
 				reasonShader = ExPureTextures->s[found - 1];
 				break;
 			}
 
 			/* handle { } section */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 			if ( strcmp( token, "{" ) ) {
@@ -471,7 +471,7 @@ int pk3BSPMain( int argc, char **argv ){
 			while ( 1 )
 			{
 				/* get the next token */
-				if ( !GetToken( qtrue ) ) {
+				if ( !GetToken( true ) ) {
 					break;
 				}
 				if ( !strcmp( token, "}" ) ) {
@@ -481,7 +481,7 @@ int pk3BSPMain( int argc, char **argv ){
 				if ( !strcmp( token, "{" ) ) {
 					while ( 1 )
 					{
-						if ( !GetToken( qtrue ) ) {
+						if ( !GetToken( true ) ) {
 							break;
 						}
 						if ( !strcmp( token, "}" ) ) {
@@ -497,21 +497,21 @@ int pk3BSPMain( int argc, char **argv ){
 		while ( 1 )
 		{
 			/* test for end of file */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 			//dump shader names
 			if( dbg ) Sys_Printf( "%s\n", token );
 
 			/* do wanna le shader? */
-			wantShader = qfalse;
+			wantShader = false;
 			if( ( found = StrList_find( pk3Shaders, token ) ) ){
 				shader = found - 1;
-				wantShader = qtrue;
+				wantShader = true;
 			}
 
 			/* handle { } section */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 			if ( strcmp( token, "{" ) ) {
@@ -519,11 +519,11 @@ int pk3BSPMain( int argc, char **argv ){
 						scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
 
-			qboolean hasmap = qfalse;
+			bool hasmap = false;
 			while ( 1 )
 			{
 				/* get the next token */
-				if ( !GetToken( qtrue ) ) {
+				if ( !GetToken( true ) ) {
 					break;
 				}
 				if ( !strcmp( token, "}" ) ) {
@@ -539,7 +539,7 @@ int pk3BSPMain( int argc, char **argv ){
 				if ( !strcmp( token, "{" ) ) {
 					while ( 1 )
 					{
-						if ( !GetToken( qtrue ) ) {
+						if ( !GetToken( true ) ) {
 							break;
 						}
 						if ( !strcmp( token, "}" ) ) {
@@ -558,25 +558,25 @@ int pk3BSPMain( int argc, char **argv ){
 						/* digest any images */
 						if ( !Q_stricmp( token, "map" ) ||
 							!Q_stricmp( token, "clampMap" ) ) {
-							hasmap = qtrue;
+							hasmap = true;
 							/* get an image */
-							GetToken( qfalse );
+							GetToken( false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
 								tex2list( pk3Textures, ExTextures, NULL );
 							}
 						}
 						else if ( !Q_stricmp( token, "animMap" ) ||
 							!Q_stricmp( token, "clampAnimMap" ) ) {
-							hasmap = qtrue;
-							GetToken( qfalse );// skip num
+							hasmap = true;
+							GetToken( false );// skip num
 							while ( TokenAvailable() ){
-								GetToken( qfalse );
+								GetToken( false );
 								tex2list( pk3Textures, ExTextures, NULL );
 							}
 						}
 						else if ( !Q_stricmp( token, "videoMap" ) ){
-							hasmap = qtrue;
-							GetToken( qfalse );
+							hasmap = true;
+							GetToken( false );
 							FixDOSName( token );
 							if ( strchr( token, '/' ) == NULL ){
 								sprintf( str, "video/%s", token );
@@ -601,18 +601,18 @@ int pk3BSPMain( int argc, char **argv ){
 
 				/* match surfaceparm */
 				else if ( !Q_stricmp( token, "surfaceparm" ) ) {
-					GetToken( qfalse );
+					GetToken( false );
 					if ( !Q_stricmp( token, "nodraw" ) ) {
-						wantShader = qfalse;
+						wantShader = false;
 						pk3Shaders->s[shader][0] = '\0';
 					}
 				}
 
 				/* skyparms <outer image> <cloud height> <inner image> */
 				else if ( !Q_stricmp( token, "skyParms" ) ) {
-					hasmap = qtrue;
+					hasmap = true;
 					/* get image base */
-					GetToken( qfalse );
+					GetToken( false );
 
 					/* ignore bogus paths */
 					if ( Q_stricmp( token, "-" ) && Q_stricmp( token, "full" ) ) {
@@ -624,22 +624,22 @@ int pk3BSPMain( int argc, char **argv ){
 						}
 					}
 					/* skip rest of line */
-					GetToken( qfalse );
-					GetToken( qfalse );
+					GetToken( false );
+					GetToken( false );
 				}
 				else if ( !Q_stricmp( token, "fogparms" ) ){
-					hasmap = qtrue;
+					hasmap = true;
 				}
 			}
 
 			//exclude shader
 			if ( wantShader ){
 				if( StrList_find( ExShaders, pk3Shaders->s[shader] ) ){
-					wantShader = qfalse;
+					wantShader = false;
 					pk3Shaders->s[shader][0] = '\0';
 				}
 				if ( !hasmap ){
-					wantShader = qfalse;
+					wantShader = false;
 				}
 				if ( wantShader ){
 					if ( ShaderFileExcluded ){
@@ -652,7 +652,7 @@ int pk3BSPMain( int argc, char **argv ){
 						ExReasonShader[ shader ] = reasonShader;
 					}
 					else{
-						wantShaderFile = qtrue;
+						wantShaderFile = true;
 						pk3Shaders->s[shader][0] = '\0';
 					}
 				}
@@ -671,7 +671,7 @@ int pk3BSPMain( int argc, char **argv ){
 	for ( i = 0; i < pk3Shaders->n; ++i ){
 		if ( pk3Shaders->s[i][0] != '\0' && ( ExReasonShader[i] != NULL || ExReasonShaderFile[i] != NULL ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
-			packFAIL = qtrue;
+			packFAIL = true;
 			if ( ExReasonShader[i] != NULL ){
 				Sys_Printf( "     reason: is located in %s,\n     containing restricted shader %s\n", ExReasonShaderFile[i], ExReasonShader[i] );
 			}
@@ -711,7 +711,7 @@ int pk3BSPMain( int argc, char **argv ){
 	for ( i = 0; i < pk3Textures->n; ++i ){
 		if( !packTexture( pk3Textures->s[i], packname, compLevel, png ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
-			packFAIL = qtrue;
+			packFAIL = true;
 		}
 	}
 
@@ -725,7 +725,7 @@ int pk3BSPMain( int argc, char **argv ){
 				}
 				else{
 					Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
-					packFAIL = qtrue;
+					packFAIL = true;
 				}
 			}
 		}
@@ -738,7 +738,7 @@ int pk3BSPMain( int argc, char **argv ){
 			sprintf( str, "%s/%s", game->shaderPath, pk3Shaderfiles->s[i] );
 			if ( !packResource( str, packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
-				packFAIL = qtrue;
+				packFAIL = true;
 			}
 		}
 	}
@@ -749,7 +749,7 @@ int pk3BSPMain( int argc, char **argv ){
 		if ( pk3Sounds->s[i][0] != '\0' ){
 			if ( !packResource( pk3Sounds->s[i], packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
-				packFAIL = qtrue;
+				packFAIL = true;
 			}
 		}
 	}
@@ -759,7 +759,7 @@ int pk3BSPMain( int argc, char **argv ){
 	for ( i = 0; i < pk3Videos->n; ++i ){
 		if ( !packResource( pk3Videos->s[i], packname, compLevel ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
-			packFAIL = qtrue;
+			packFAIL = true;
 		}
 	}
 
@@ -772,7 +772,7 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 	else{
 		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", str );
-		packFAIL = qtrue;
+		packFAIL = true;
 	}
 
 	sprintf( str, "maps/%s.aas", nameOFmap );
@@ -807,16 +807,16 @@ int pk3BSPMain( int argc, char **argv ){
 
 int repackBSPMain( int argc, char **argv ){
 	int i, j, compLevel = 0;
-	qboolean dbg = qfalse, png = qfalse;
+	bool dbg = false, png = false;
 	char str[ 1024 ];
 
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); ++i ){
 		if ( !strcmp( argv[ i ],  "-dbg" ) ) {
-			dbg = qtrue;
+			dbg = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-png" ) ) {
-			png = qtrue;
+			png = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-complevel" ) ) {
 			compLevel = atoi( argv[ i + 1 ] );
@@ -922,7 +922,7 @@ int repackBSPMain( int argc, char **argv ){
 		while ( 1 )
 		{
 			/* test for end of file */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 			if( bspListSize == bspListN )
@@ -964,11 +964,11 @@ int repackBSPMain( int argc, char **argv ){
 		char nameOFmap[ 1024 ];
 		ExtractFileBase( source, nameOFmap );
 
-		qboolean drawsurfSHs[numBSPShaders];
+		bool drawsurfSHs[numBSPShaders];
 		memset( drawsurfSHs, 0, sizeof( drawsurfSHs ) );
 
 		for ( i = 0; i < numBSPDrawSurfaces; ++i ){
-			drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = qtrue;
+			drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
 		}
 
 		for ( i = 0; i < numBSPShaders; ++i ){
@@ -1187,10 +1187,10 @@ int repackBSPMain( int argc, char **argv ){
 	StrBuf* shaderText = StrBuf_allocate( 8192 );
 	StrBuf* allShaders = StrBuf_allocate( 16777216 );
 	 /* hack */
-	endofscript = qtrue;
+	endofscript = true;
 
 	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
-		qboolean wantShader = qfalse;
+		bool wantShader = false;
 		int shader, found;
 
 		/* load the shader */
@@ -1205,7 +1205,7 @@ int repackBSPMain( int argc, char **argv ){
 		{
 			int line = scriptline;
 			/* test for end of file */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 			//dump shader names
@@ -1219,17 +1219,17 @@ int repackBSPMain( int argc, char **argv ){
 			}
 
 			/* do wanna le shader? */
-			wantShader = qfalse;
+			wantShader = false;
 			if( ( found = StrList_find( pk3Shaders, token ) ) ){
 				shader = found - 1;
-				wantShader = qtrue;
+				wantShader = true;
 				if( StrList_find( rExTextures, token ) )
 					Sys_FPrintf( SYS_WRN, "WARNING3: %s : about to include shader for excluded texture\n", token );
 
 			}
 
 			/* handle { } section */
-			if ( !GetToken( qtrue ) ) {
+			if ( !GetToken( true ) ) {
 				break;
 			}
 			if ( strcmp( token, "{" ) ) {
@@ -1237,13 +1237,13 @@ int repackBSPMain( int argc, char **argv ){
 						scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
 			StrBuf_cat( shaderText, "\n{" );
-			qboolean hasmap = qfalse;
+			bool hasmap = false;
 
 			while ( 1 )
 			{
 				line = scriptline;
 				/* get the next token */
-				if ( !GetToken( qtrue ) ) {
+				if ( !GetToken( true ) ) {
 					break;
 				}
 				if ( !strcmp( token, "}" ) ) {
@@ -1252,16 +1252,16 @@ int repackBSPMain( int argc, char **argv ){
 				}
 				/* parse stage directives */
 				if ( !strcmp( token, "{" ) ) {
-					qboolean tokenready = qfalse;
+					bool tokenready = false;
 					StrBuf_cat( shaderText, "\n\t{" );
 					while ( 1 )
 					{
 						/* detour of TokenAvailable() '~' */
 						if ( tokenready )
-							tokenready = qfalse;
+							tokenready = false;
 						else
 							line = scriptline;
-						if ( !GetToken( qtrue ) ) {
+						if ( !GetToken( true ) ) {
 							break;
 						}
 						if ( !strcmp( token, "}" ) ) {
@@ -1280,10 +1280,10 @@ int repackBSPMain( int argc, char **argv ){
 						if ( !Q_stricmp( token, "map" ) ||
 							!Q_stricmp( token, "clampMap" ) ) {
 							StrBuf_cat2( shaderText, "\n\t\t", token );
-							hasmap = qtrue;
+							hasmap = true;
 
 							/* get an image */
-							GetToken( qfalse );
+							GetToken( false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
 								tex2list( pk3Textures, ExTextures, rExTextures );
 							}
@@ -1292,21 +1292,21 @@ int repackBSPMain( int argc, char **argv ){
 						else if ( !Q_stricmp( token, "animMap" ) ||
 							!Q_stricmp( token, "clampAnimMap" ) ) {
 							StrBuf_cat2( shaderText, "\n\t\t", token );
-							hasmap = qtrue;
+							hasmap = true;
 
-							GetToken( qfalse );// skip num
+							GetToken( false );// skip num
 							StrBuf_cat2( shaderText, " ", token );
 							while ( TokenAvailable() ){
-								GetToken( qfalse );
+								GetToken( false );
 								tex2list( pk3Textures, ExTextures, rExTextures );
 								StrBuf_cat2( shaderText, " ", token );
 							}
-							tokenready = qtrue;
+							tokenready = true;
 						}
 						else if ( !Q_stricmp( token, "videoMap" ) ){
 							StrBuf_cat2( shaderText, "\n\t\t", token );
-							hasmap = qtrue;
-							GetToken( qfalse );
+							hasmap = true;
+							GetToken( false );
 							StrBuf_cat2( shaderText, " ", token );
 							FixDOSName( token );
 							if ( strchr( token, '/' ) == NULL ){
@@ -1320,7 +1320,7 @@ int repackBSPMain( int argc, char **argv ){
 						}
 						else if ( !Q_stricmp( token, "mapComp" ) || !Q_stricmp( token, "mapNoComp" ) || !Q_stricmp( token, "animmapcomp" ) || !Q_stricmp( token, "animmapnocomp" ) ){
 							Sys_FPrintf( SYS_WRN, "WARNING7: %s : %s shader\n", pk3Shaders->s[shader], token );
-							hasmap = qtrue;
+							hasmap = true;
 							if ( line == scriptline ){
 								StrBuf_cat2( shaderText, " ", token );
 							}
@@ -1347,10 +1347,10 @@ int repackBSPMain( int argc, char **argv ){
 				/* match surfaceparm */
 				else if ( !Q_stricmp( token, "surfaceparm" ) ) {
 					StrBuf_cat( shaderText, "\n\tsurfaceparm " );
-					GetToken( qfalse );
+					GetToken( false );
 					StrBuf_cat( shaderText, token );
 					if ( !Q_stricmp( token, "nodraw" ) ) {
-						wantShader = qfalse;
+						wantShader = false;
 						pk3Shaders->s[shader][0] = '\0';
 					}
 				}
@@ -1358,9 +1358,9 @@ int repackBSPMain( int argc, char **argv ){
 				/* skyparms <outer image> <cloud height> <inner image> */
 				else if ( !Q_stricmp( token, "skyParms" ) ) {
 					StrBuf_cat( shaderText, "\n\tskyParms " );
-					hasmap = qtrue;
+					hasmap = true;
 					/* get image base */
-					GetToken( qfalse );
+					GetToken( false );
 					StrBuf_cat( shaderText, token );
 
 					/* ignore bogus paths */
@@ -1373,14 +1373,14 @@ int repackBSPMain( int argc, char **argv ){
 						}
 					}
 					/* skip rest of line */
-					GetToken( qfalse );
+					GetToken( false );
 					StrBuf_cat2( shaderText, " ", token );
-					GetToken( qfalse );
+					GetToken( false );
 					StrBuf_cat2( shaderText, " ", token );
 				}
 				else if ( !Q_strncasecmp( token, "implicit", 8 ) ){
 					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", pk3Shaders->s[shader], token );
-					hasmap = qtrue;
+					hasmap = true;
 					if ( line == scriptline ){
 						StrBuf_cat2( shaderText, " ", token );
 					}
@@ -1389,7 +1389,7 @@ int repackBSPMain( int argc, char **argv ){
 					}
 				}
 				else if ( !Q_stricmp( token, "fogparms" ) ){
-					hasmap = qtrue;
+					hasmap = true;
 					if ( line == scriptline ){
 						StrBuf_cat2( shaderText, " ", token );
 					}
@@ -1408,12 +1408,12 @@ int repackBSPMain( int argc, char **argv ){
 			//exclude shader
 			if ( wantShader ){
 				if( StrList_find( ExShaders, pk3Shaders->s[shader] ) ){
-					wantShader = qfalse;
+					wantShader = false;
 					pk3Shaders->s[shader][0] = '\0';
 				}
 				if ( wantShader && !hasmap ){
 					Sys_FPrintf( SYS_WRN, "WARNING8: %s : shader has no known maps\n", pk3Shaders->s[shader] );
-					wantShader = qfalse;
+					wantShader = false;
 					pk3Shaders->s[shader][0] = '\0';
 				}
 				if ( wantShader ){

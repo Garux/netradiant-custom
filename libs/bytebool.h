@@ -26,7 +26,9 @@
 // this header is not really meant for direct inclusion,
 // it is used by mathlib and cmdlib
 
-typedef enum { qfalse, qtrue } qboolean;
+#include <stdbool.h>
+typedef bool qboolean;
+//typedef enum { qfalse, qtrue } qboolean;
 typedef unsigned char byte;
 
 #endif

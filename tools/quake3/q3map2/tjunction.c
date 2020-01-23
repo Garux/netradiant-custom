@@ -137,7 +137,7 @@ void InsertPointOnEdge( vec3_t v, edgeLine_t *e ) {
    AddEdge
    ====================
  */
-int AddEdge( vec3_t v1, vec3_t v2, qboolean createNonAxial ) {
+int AddEdge( vec3_t v1, vec3_t v2, bool createNonAxial ) {
 	int i;
 	edgeLine_t  *e;
 	float d;
@@ -219,14 +219,11 @@ int AddEdge( vec3_t v1, vec3_t v2, qboolean createNonAxial ) {
  */
 
 void AddSurfaceEdges( mapDrawSurface_t *ds ){
-	int i;
-
-
-	for ( i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds->numVerts; i++ )
 	{
 		/* save the edge number in the lightmap field so we don't need to look it up again */
 		ds->verts[i].lightmap[ 0 ][ 0 ] =
-			AddEdge( ds->verts[ i ].xyz, ds->verts[ ( i + 1 ) % ds->numVerts ].xyz, qfalse );
+			AddEdge( ds->verts[ i ].xyz, ds->verts[ ( i + 1 ) % ds->numVerts ].xyz, false );
 	}
 }
 
@@ -237,7 +234,7 @@ void AddSurfaceEdges( mapDrawSurface_t *ds ){
    determines if an edge is colinear
  */
 
-qboolean ColinearEdge( vec3_t v1, vec3_t v2, vec3_t v3 ){
+bool ColinearEdge( vec3_t v1, vec3_t v2, vec3_t v3 ){
 	vec3_t midpoint, dir, offset, on;
 	float d;
 
@@ -245,7 +242,7 @@ qboolean ColinearEdge( vec3_t v1, vec3_t v2, vec3_t v3 ){
 	VectorSubtract( v3, v1, dir );
 	d = VectorNormalize( dir, dir );
 	if ( d == 0 ) {
-		return qfalse;  // degenerate
+		return false;  // degenerate
 	}
 
 	d = DotProduct( midpoint, dir );
@@ -254,10 +251,10 @@ qboolean ColinearEdge( vec3_t v1, vec3_t v2, vec3_t v3 ){
 	d = VectorLength( offset );
 
 	if ( d < 0.1 ) {
-		return qtrue;
+		return true;
 	}
 
-	return qfalse;
+	return false;
 }
 
 
@@ -281,7 +278,7 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 
 		// if v2 is the midpoint of v1 to v3, add an edge from v1 to v3
 		if ( ColinearEdge( v1, v2, v3 ) ) {
-			AddEdge( v1, v3, qfalse );
+			AddEdge( v1, v3, false );
 		}
 
 		v1 = ds->verts[ ( ds->patchHeight - 1 ) * ds->patchWidth + i ].xyz;
@@ -290,7 +287,7 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 
 		// if v2 is on the v1 to v3 line, add an edge from v1 to v3
 		if ( ColinearEdge( v1, v2, v3 ) ) {
-			AddEdge( v1, v3, qfalse );
+			AddEdge( v1, v3, false );
 		}
 	}
 
@@ -301,7 +298,7 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 
 		// if v2 is the midpoint of v1 to v3, add an edge from v1 to v3
 		if ( ColinearEdge( v1, v2, v3 ) ) {
-			AddEdge( v1, v3, qfalse );
+			AddEdge( v1, v3, false );
 		}
 
 		v1 = ds->verts[ ( ds->patchWidth - 1 ) + i * ds->patchWidth ].xyz;
@@ -310,7 +307,7 @@ void AddPatchEdges( mapDrawSurface_t *ds ) {
 
 		// if v2 is the midpoint of v1 to v3, add an edge from v1 to v3
 		if ( ColinearEdge( v1, v2, v3 ) ) {
-			AddEdge( v1, v3, qfalse );
+			AddEdge( v1, v3, false );
 		}
 	}
 
@@ -502,7 +499,7 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 /*
    FixBrokenSurface() - ydnar
    removes nearly coincident verts from a planar winding surface
-   returns qfalse if the surface is broken
+   returns false if the surface is broken
  */
 
 extern void SnapWeldVector( vec3_t a, vec3_t b, vec3_t out );
@@ -511,7 +508,7 @@ extern void SnapWeldVector( vec3_t a, vec3_t b, vec3_t out );
 
 int c_broken = 0;
 
-qboolean FixBrokenSurface( mapDrawSurface_t *ds ){
+bool FixBrokenSurface( mapDrawSurface_t *ds ){
 	bspDrawVert_t   *dv1, *dv2, avg;
 	int i, j, k;
 	float dist;
@@ -519,10 +516,10 @@ qboolean FixBrokenSurface( mapDrawSurface_t *ds ){
 
 	/* dummy check */
 	if ( ds == NULL ) {
-		return qfalse;
+		return false;
 	}
 	if ( ds->type != SURFACE_FACE ) {
-		return qfalse;
+		return false;
 	}
 
 	/* check all verts */
@@ -675,7 +672,7 @@ void FixTJunctions( entity_t *ent ){
 	for ( i = 0 ; i < numOriginalEdges ; i++ ) {
 		e = &originalEdges[i];
 		dv = e->dv[0]; // e might change during AddEdge
-		dv->lightmap[ 0 ][ 0 ] = AddEdge( e->dv[ 0 ]->xyz, e->dv[ 1 ]->xyz, qtrue );
+		dv->lightmap[ 0 ][ 0 ] = AddEdge( e->dv[ 0 ]->xyz, e->dv[ 1 ]->xyz, true );
 	}
 
 	Sys_FPrintf( SYS_VRB, "%9d axial edge lines\n", axialEdgeLines );
@@ -698,7 +695,7 @@ void FixTJunctions( entity_t *ent ){
 		/* handle brush faces */
 		case SURFACE_FACE:
 			FixSurfaceJunctions( ds );
-			if ( FixBrokenSurface( ds ) == qfalse ) {
+			if ( !FixBrokenSurface( ds ) ) {
 				c_broken++;
 				ClearSurface( ds );
 			}

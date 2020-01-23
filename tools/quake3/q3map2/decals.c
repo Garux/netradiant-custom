@@ -92,12 +92,12 @@ dvec_t DVectorNormalize( dvec3_t in, dvec3_t out ){
 /*
    MakeTextureMatrix()
    generates a texture projection matrix for a triangle
-   returns qfalse if a texture matrix cannot be created
+   returns false if a texture matrix cannot be created
  */
 
 #define Vector2Subtract( a,b,c )  ( ( c )[ 0 ] = ( a )[ 0 ] - ( b )[ 0 ], ( c )[ 1 ] = ( a )[ 1 ] - ( b )[ 1 ] )
 
-static qboolean MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c ){
+static bool MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c ){
 	int i, j;
 	double bb, s, t, d;
 	dvec3_t pa, pb, pc;
@@ -121,7 +121,7 @@ static qboolean MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspD
 		/* calculate barycentric basis for the triangle */
 		bb = ( b->st[ 0 ] - a->st[ 0 ] ) * ( c->st[ 1 ] - a->st[ 1 ] ) - ( c->st[ 0 ] - a->st[ 0 ] ) * ( b->st[ 1 ] - a->st[ 1 ] );
 		if ( fabs( bb ) < 0.00000001 ) {
-			return qfalse;
+			return false;
 		}
 
 		/* calculate texture origin */
@@ -254,25 +254,25 @@ static qboolean MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspD
 	if ( fabs( s - a->st[ 0 ] ) > 0.01 || fabs( t - a->st[ 1 ] ) > 0.01 ) {
 		Sys_Printf( "Bad texture matrix! (A) (%f, %f) != (%f, %f)\n",
 					s, t, a->st[ 0 ], a->st[ 1 ] );
-		//%	return qfalse;
+		//%	return false;
 	}
 	s = DotProduct( b->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ];
 	t = DotProduct( b->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ];
 	if ( fabs( s - b->st[ 0 ] ) > 0.01 || fabs( t - b->st[ 1 ] ) > 0.01 ) {
 		Sys_Printf( "Bad texture matrix! (B) (%f, %f) != (%f, %f)\n",
 					s, t, b->st[ 0 ], b->st[ 1 ] );
-		//%	return qfalse;
+		//%	return false;
 	}
 	s = DotProduct( c->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ];
 	t = DotProduct( c->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ];
 	if ( fabs( s - c->st[ 0 ] ) > 0.01 || fabs( t - c->st[ 1 ] ) > 0.01 ) {
 		Sys_Printf( "Bad texture matrix! (C) (%f, %f) != (%f, %f)\n",
 					s, t, c->st[ 0 ], c->st[ 1 ] );
-		//%	return qfalse;
+		//%	return false;
 	}
 
 	/* disco */
-	return qtrue;
+	return true;
 }
 
 

@@ -38,7 +38,7 @@
 
 
 
-qboolean g_autocaulk = qfalse;
+static bool g_autocaulk = false;
 
 static void autocaulk_write(){
 	char filename[1024];
@@ -320,7 +320,7 @@ void ProcessWorldModel( void ){
 	entity_t    *e;
 	tree_t      *tree;
 	face_t      *faces;
-	qboolean ignoreLeaks, leaked;
+	bool ignoreLeaks, leaked;
 	xmlNodePtr polyline, leaknode;
 	char level[ 2 ], shader[ 1024 ];
 	const char  *value;
@@ -351,12 +351,7 @@ void ProcessWorldModel( void ){
 	if ( value[ 0 ] == '\0' ) {
 		value = ValueForKey( &entities[ 0 ], "ignoreleaks" );
 	}
-	if ( value[ 0 ] == '1' ) {
-		ignoreLeaks = qtrue;
-	}
-	else{
-		ignoreLeaks = qfalse;
-	}
+	ignoreLeaks = ( value[ 0 ] == '1' );
 
 	/* begin worldspawn model */
 	BeginModel();
@@ -387,13 +382,8 @@ void ProcessWorldModel( void ){
 		}
 	}
 
-	if ( leakStatus == FLOODENTITIES_GOOD ) {
-		leaked = qfalse;
-	}
-	else
-	{
-		leaked = qtrue;
-
+	leaked = ( leakStatus != FLOODENTITIES_GOOD );
+	if( leaked ){
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
@@ -425,7 +415,7 @@ void ProcessWorldModel( void ){
 		MakeTreePortals( tree );
 		FilterStructuralBrushesIntoTree( e, tree );
 
-		if( g_autocaulk == qtrue ){
+		if( g_autocaulk ){
 			autocaulk_write();
 			exit( 0 );
 		}
@@ -654,7 +644,7 @@ void ProcessSubModel( void ){
  */
 
 void ProcessModels( void ){
-	qboolean oldVerbose;
+	bool oldVerbose;
 	entity_t    *entity;
 
 
@@ -734,7 +724,7 @@ void OnlyEnts( void ){
 	numEntities = 0;
 
 	LoadShaderInfo();
-	LoadMapFile( name, qfalse, qfalse );
+	LoadMapFile( name, false, false );
 	SetModelNumbers();
 	SetLightStyles();
 
@@ -764,7 +754,7 @@ void OnlyEnts( void ){
 int BSPMain( int argc, char **argv ){
 	int i;
 	char path[ 1024 ], tempSource[ 1024 ];
-	qboolean onlyents = qfalse;
+	bool onlyents = false;
 
 	if ( argc >= 2 && !strcmp( argv[ 1 ], "-bsp" ) ) {
 		Sys_Printf( "-bsp argument unnecessary\n" );
@@ -775,7 +765,7 @@ int BSPMain( int argc, char **argv ){
 	/* note it */
 	Sys_Printf( "--- BSP ---\n" );
 
-	doingBSP = qtrue;
+	doingBSP = true;
 	SetDrawSurfacesBuffer();
 	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
 	numMapDrawSurfs = 0;
@@ -795,7 +785,7 @@ int BSPMain( int argc, char **argv ){
 	{
 		if ( !strcmp( argv[ i ], "-onlyents" ) ) {
 			Sys_Printf( "Running entity-only compile\n" );
-			onlyents = qtrue;
+			onlyents = true;
 		}
 		else if ( !strcmp( argv[ i ], "-tempname" ) ) {
 			strcpy( tempSource, argv[ ++i ] );
@@ -805,47 +795,47 @@ int BSPMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ],  "-nowater" ) ) {
 			Sys_Printf( "Disabling water\n" );
-			nowater = qtrue;
+			nowater = true;
 		}
 		else if ( !strcmp( argv[ i ], "-keeplights" ) ) {
-			keepLights = qtrue;
+			keepLights = true;
 			Sys_Printf( "Leaving light entities on map after compile\n" );
 		}
 		else if ( !strcmp( argv[ i ],  "-nodetail" ) ) {
 			Sys_Printf( "Ignoring detail brushes\n" ) ;
-			nodetail = qtrue;
+			nodetail = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-fulldetail" ) ) {
 			Sys_Printf( "Turning detail brushes into structural brushes\n" );
-			fulldetail = qtrue;
+			fulldetail = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-nofog" ) ) {
 			Sys_Printf( "Fog volumes disabled\n" );
-			nofog = qtrue;
+			nofog = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-nosubdivide" ) ) {
 			Sys_Printf( "Disabling brush face subdivision\n" );
-			nosubdivide = qtrue;
+			nosubdivide = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-leaktest" ) ) {
 			Sys_Printf( "Leaktest enabled\n" );
-			leaktest = qtrue;
+			leaktest = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-verboseentities" ) ) {
 			Sys_Printf( "Verbose entities enabled\n" );
-			verboseEntities = qtrue;
+			verboseEntities = true;
 		}
 		else if ( !strcmp( argv[ i ], "-nocurves" ) ) {
 			Sys_Printf( "Ignoring curved surfaces (patches)\n" );
-			noCurveBrushes = qtrue;
+			noCurveBrushes = true;
 		}
 		else if ( !strcmp( argv[ i ], "-notjunc" ) ) {
 			Sys_Printf( "T-junction fixing disabled\n" );
-			notjunc = qtrue;
+			notjunc = true;
 		}
 		else if ( !strcmp( argv[ i ], "-fakemap" ) ) {
 			Sys_Printf( "Generating fakemap.map\n" );
-			fakemap = qtrue;
+			fakemap = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-samplesize" ) ) {
 			sampleSize = atoi( argv[ i + 1 ] );
@@ -865,13 +855,13 @@ int BSPMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ],  "-custinfoparms" ) ) {
 			Sys_Printf( "Custom info parms enabled\n" );
-			useCustomInfoParms = qtrue;
+			useCustomInfoParms = true;
 		}
 
 		/* sof2 args */
 		else if ( !strcmp( argv[ i ], "-rename" ) ) {
 			Sys_Printf( "Appending _bsp suffix to misc_model shaders (SOF2)\n" );
-			renameModelShaders = qtrue;
+			renameModelShaders = true;
 		}
 
 		/* ydnar args */
@@ -934,11 +924,11 @@ int BSPMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ], "-nohint" ) ) {
 			Sys_Printf( "Hint brushes disabled\n" );
-			noHint = qtrue;
+			noHint = true;
 		}
 		else if ( !strcmp( argv[ i ], "-flat" ) ) {
 			Sys_Printf( "Flatshading enabled\n" );
-			flat = qtrue;
+			flat = true;
 		}
 		else if ( !strcmp( argv[ i ], "-celshader" ) ) {
 			++i;
@@ -952,7 +942,7 @@ int BSPMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ], "-meta" ) ) {
 			Sys_Printf( "Creating meta surfaces from brush faces\n" );
-			meta = qtrue;
+			meta = true;
 		}
 		else if ( !strcmp( argv[ i ], "-metaadequatescore" ) ) {
 			metaAdequateScore = atoi( argv[ i + 1 ] );
@@ -986,35 +976,35 @@ int BSPMain( int argc, char **argv ){
 		}
 		else if ( !strcmp( argv[ i ], "-patchmeta" ) ) {
 			Sys_Printf( "Creating meta surfaces from patches\n" );
-			patchMeta = qtrue;
+			patchMeta = true;
 		}
 		else if ( !strcmp( argv[ i ], "-flares" ) ) {
 			Sys_Printf( "Flare surfaces enabled\n" );
-			emitFlares = qtrue;
+			emitFlares = true;
 		}
 		else if ( !strcmp( argv[ i ], "-noflares" ) ) {
 			Sys_Printf( "Flare surfaces disabled\n" );
-			emitFlares = qfalse;
+			emitFlares = false;
 		}
 		else if ( !strcmp( argv[ i ], "-skyfix" ) ) {
 			Sys_Printf( "GL_CLAMP sky fix/hack/workaround enabled\n" );
-			skyFixHack = qtrue;
+			skyFixHack = true;
 		}
 		else if ( !strcmp( argv[ i ], "-debugsurfaces" ) ) {
 			Sys_Printf( "emitting debug surfaces\n" );
-			debugSurfaces = qtrue;
+			debugSurfaces = true;
 		}
 		else if ( !strcmp( argv[ i ], "-debuginset" ) ) {
 			Sys_Printf( "Debug surface triangle insetting enabled\n" );
-			debugInset = qtrue;
+			debugInset = true;
 		}
 		else if ( !strcmp( argv[ i ], "-debugportals" ) ) {
 			Sys_Printf( "Debug portal surfaces enabled\n" );
-			debugPortals = qtrue;
+			debugPortals = true;
 		}
 		else if ( !strcmp( argv[ i ], "-debugclip" ) ) {
 			Sys_Printf( "Debug model clip enabled\n" );
-			debugClip = qtrue;
+			debugClip = true;
 		}
 		else if ( !strcmp( argv[ i ],  "-clipdepth" ) ) {
 			clipDepthGlobal = atof( argv[ i + 1 ] );
@@ -1022,46 +1012,46 @@ int BSPMain( int argc, char **argv ){
 			Sys_Printf( "Model autoclip thickness set to %.3f\n", clipDepthGlobal );
 		}
 		else if ( !strcmp( argv[ i ], "-sRGBtex" ) ) {
-			texturesRGB = qtrue;
+			texturesRGB = true;
 			Sys_Printf( "Textures are in sRGB\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-nosRGBtex" ) ) {
-			texturesRGB = qfalse;
+			texturesRGB = false;
 			Sys_Printf( "Textures are linear\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-sRGBcolor" ) ) {
-			colorsRGB = qtrue;
+			colorsRGB = true;
 			Sys_Printf( "Colors are in sRGB\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-nosRGBcolor" ) ) {
-			colorsRGB = qfalse;
+			colorsRGB = false;
 			Sys_Printf( "Colors are linear\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-nosRGB" ) ) {
-			texturesRGB = qfalse;
+			texturesRGB = false;
 			Sys_Printf( "Textures are linear\n" );
-			colorsRGB = qfalse;
+			colorsRGB = false;
 			Sys_Printf( "Colors are linear\n" );
 		}
 		else if ( !strcmp( argv[ i ], "-altsplit" ) ) {
 			Sys_Printf( "Alternate BSP splitting (by 27) enabled\n" );
-			bspAlternateSplitWeights = qtrue;
+			bspAlternateSplitWeights = true;
 		}
 		else if ( !strcmp( argv[ i ], "-deep" ) ) {
 			Sys_Printf( "Deep BSP tree generation enabled\n" );
-			deepBSP = qtrue;
+			deepBSP = true;
 		}
 		else if ( !strcmp( argv[ i ], "-maxarea" ) ) {
 			Sys_Printf( "Max Area face surface generation enabled\n" );
-			maxAreaFaceSurface = qtrue;
+			maxAreaFaceSurface = true;
 		}
 		else if ( !strcmp( argv[ i ], "-noob" ) ) {
 			Sys_Printf( "No oBs!\n" );
-			noob = qtrue;
+			noob = true;
 		}
 		else if ( !strcmp( argv[ i ], "-autocaulk" ) ) {
 			Sys_Printf( "\trunning in autocaulk mode\n" );
-			g_autocaulk = qtrue;
+			g_autocaulk = true;
 		}
 		else
 		{
@@ -1109,10 +1099,10 @@ int BSPMain( int argc, char **argv ){
 
 	/* load original file from temp spot in case it was renamed by the editor on the way in */
 	if ( strlen( tempSource ) > 0 ) {
-		LoadMapFile( tempSource, qfalse, g_autocaulk );
+		LoadMapFile( tempSource, false, g_autocaulk );
 	}
 	else{
-		LoadMapFile( name, qfalse, g_autocaulk );
+		LoadMapFile( name, false, g_autocaulk );
 	}
 
 	/* div0: inject command line parameters */
@@ -1134,7 +1124,7 @@ int BSPMain( int argc, char **argv ){
 	ProcessAdvertisements();
 
 	/* finish and write bsp */
-	EndBSPFile( qtrue );
+	EndBSPFile( true );
 
 	/* remove temp map source file if appropriate */
 	if ( strlen( tempSource ) > 0 ) {

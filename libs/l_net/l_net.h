@@ -39,11 +39,7 @@
 extern "C" {
 #endif
 
-#ifndef __BYTEBOOL__
-#define __BYTEBOOL__
-typedef enum { qfalse, qtrue } qboolean;
-typedef unsigned char byte;
-#endif
+#include "bytebool.h"
 
 typedef struct address_s
 {
@@ -61,7 +57,7 @@ typedef struct netmessage_s
 	unsigned char data[MAX_NETMESSAGE];
 	int size;
 	int read;
-	int readoverflow;
+	bool readoverflow;
 } netmessage_t;
 
 typedef struct socket_s
@@ -100,7 +96,7 @@ socket_t *Net_ListenSocket( int port );
 //accept new connections at the given socket
 socket_t *Net_Accept( socket_t *sock );
 //setup networking
-int Net_Setup( void );
+void Net_Setup( void );
 //shutdown networking
 void Net_Shutdown( void );
 //message handling

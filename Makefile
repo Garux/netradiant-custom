@@ -1111,7 +1111,7 @@ $(INSTALLDIR)/heretic2/h2data.$(EXE): \
 	libl_net.$(A) \
 	$(if $(findstring $(OS),Win32),icons/h2data.o,) \
 
-$(INSTALLDIR)/mbspc.$(EXE): CPPFLAGS_EXTRA := -Wstrict-prototypes -DNDEBUG -DBSPC -DBSPCINCLUDE
+$(INSTALLDIR)/mbspc.$(EXE): CPPFLAGS_EXTRA := -Wstrict-prototypes -DNDEBUG -DBSPC -DBSPCINCLUDE -Ilibs
 $(INSTALLDIR)/mbspc.$(EXE): \
 	tools/mbspc/botlib/be_aas_bspq3.o \
 	tools/mbspc/botlib/be_aas_cluster.o \

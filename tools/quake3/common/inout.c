@@ -48,7 +48,7 @@
 socket_t *brdcst_socket;
 netmessage_t msg;
 
-qboolean verbose = qfalse;
+bool verbose = false;
 
 // our main document
 // is streamed through the network to Radiant
@@ -140,7 +140,7 @@ void xml_SendNode( xmlNodePtr node ){
 	}
 }
 
-void xml_Select( char *msg, int entitynum, int brushnum, qboolean bError ){
+void xml_Select( char *msg, int entitynum, int brushnum, bool bError ){
 	xmlNodePtr node, select;
 	char buf[1024];
 	char level[2];
@@ -190,7 +190,7 @@ void xml_Point( char *msg, vec3_t pt ){
 }
 
 #define WINDING_BUFSIZE 2048
-void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die ){
+void xml_Winding( char *msg, vec3_t p[], int numpoints, bool die ){
 	xmlNodePtr node, winding;
 	char buf[WINDING_BUFSIZE];
 	char smlbuf[128];
@@ -232,8 +232,8 @@ void xml_Winding( char *msg, vec3_t p[], int numpoints, qboolean die ){
 void set_console_colour_for_flag( int flag ){
 #ifdef WIN32
 	static int curFlag = SYS_STD;
-	static qboolean ok = qtrue;
-	static qboolean initialized = qfalse;
+	static bool ok = true;
+	static bool initialized = false;
 	static HANDLE hConsole;
 	static WORD colour_saved;
 	if( !ok )
@@ -242,11 +242,11 @@ void set_console_colour_for_flag( int flag ){
 		hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
 		CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
 		if( hConsole == INVALID_HANDLE_VALUE || !GetConsoleScreenBufferInfo( hConsole, &consoleInfo ) ){
-			ok = qfalse;
+			ok = false;
 			return;
 		}
 		colour_saved = consoleInfo.wAttributes;
-		initialized = qtrue;
+		initialized = true;
 	}
 	if( curFlag != flag ){
 		curFlag = flag;
@@ -336,7 +336,7 @@ void xml_message_push( int flag, const char* characters, size_t length ){
 
 // all output ends up through here
 void FPrintf( int flag, char *buf ){
-	static qboolean bGotXML = qfalse;
+	static bool bGotXML = false;
 
 	set_console_colour_for_flag( flag & ~( SYS_NOXMLflag | SYS_VRBflag ) );
 	printf( "%s", buf );
@@ -358,7 +358,7 @@ void FPrintf( int flag, char *buf ){
 		// initialize
 		doc = xmlNewDoc( (const xmlChar*)"1.0" );
 		doc->children = xmlNewDocRawNode( doc, NULL, (const xmlChar*)"q3map_feedback", NULL );
-		bGotXML = qtrue;
+		bGotXML = true;
 	}
 	xml_message_push( flag & ~( SYS_NOXMLflag | SYS_VRBflag ), buf, strlen( buf ) );
 }
@@ -373,7 +373,7 @@ void Sys_FPrintf( int flag, const char *format, ... ){
 	char out_buffer[4096];
 	va_list argptr;
 
-	if ( ( flag & SYS_VRBflag ) && ( verbose == qfalse ) ) {
+	if ( ( flag & SYS_VRBflag ) && !verbose ) {
 		return;
 	}
 

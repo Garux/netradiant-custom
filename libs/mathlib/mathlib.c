@@ -35,7 +35,7 @@ const vec3_t g_vec3_axis_z = { 0, 0, 1, };
    VectorIsOnAxis
    ================
  */
-qboolean VectorIsOnAxis( vec3_t v ){
+bool VectorIsOnAxis( vec3_t v ){
 	int i, zeroComponentCount;
 
 	zeroComponentCount = 0;
@@ -48,10 +48,10 @@ qboolean VectorIsOnAxis( vec3_t v ){
 
 	if ( zeroComponentCount > 1 ) {
 		// The zero vector will be on axis.
-		return qtrue;
+		return true;
 	}
 
-	return qfalse;
+	return false;
 }
 
 /*
@@ -59,18 +59,18 @@ qboolean VectorIsOnAxis( vec3_t v ){
    VectorIsOnAxialPlane
    ================
  */
-qboolean VectorIsOnAxialPlane( vec3_t v ){
+bool VectorIsOnAxialPlane( vec3_t v ){
 	int i;
 
 	for ( i = 0; i < 3; i++ )
 	{
 		if ( v[i] == 0.0 ) {
 			// The zero vector will be on axial plane.
-			return qtrue;
+			return true;
 		}
 	}
 
-	return qfalse;
+	return false;
 }
 
 /*
@@ -108,15 +108,15 @@ vec_t VectorLength( const vec3_t v ){
 	return length;
 }
 
-qboolean VectorCompare( const vec3_t v1, const vec3_t v2 ){
+bool VectorCompare( const vec3_t v1, const vec3_t v2 ){
 	int i;
 
 	for ( i = 0 ; i < 3 ; i++ )
 		if ( fabs( v1[i] - v2[i] ) > EQUAL_EPSILON ) {
-			return qfalse;
+			return false;
 		}
 
-	return qtrue;
+	return true;
 }
 
 void VectorMA( const vec3_t va, vec_t scale, const vec3_t vb, vec3_t vc ){
@@ -429,18 +429,18 @@ void VectorToAngles( vec3_t vec, vec3_t angles ){
    The normal will point out of the clock for clockwise ordered points
    =====================
  */
-qboolean PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c ) {
+bool PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c ) {
 	vec3_t d1, d2;
 
 	VectorSubtract( b, a, d1 );
 	VectorSubtract( c, a, d2 );
 	CrossProduct( d2, d1, plane );
 	if ( VectorNormalize( plane, plane ) == 0 ) {
-		return qfalse;
+		return false;
 	}
 
 	plane[3] = DotProduct( a, plane );
-	return qtrue;
+	return true;
 }
 
 /*

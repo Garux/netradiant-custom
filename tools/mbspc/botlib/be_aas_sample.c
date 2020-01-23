@@ -416,7 +416,7 @@ qboolean AAS_AreaEntityCollision(int areanum, vec3_t start, vec3_t end,
 	Com_Memset(&bsptrace, 0, sizeof(bsp_trace_t)); //make compiler happy
 	//assume no collision
 	bsptrace.fraction = 1;
-	collision = qfalse;
+	collision = false;
 	for (link = aasworld.arealinkedentities[areanum]; link; link = link->next_ent)
 	{
 		//ignore the pass entity
@@ -425,7 +425,7 @@ qboolean AAS_AreaEntityCollision(int areanum, vec3_t start, vec3_t end,
 		if (AAS_EntityCollision(link->entnum, start, boxmins, boxmaxs, end,
 												CONTENTS_SOLID|CONTENTS_PLAYERCLIP, &bsptrace))
 		{
-			collision = qtrue;
+			collision = true;
 		} //end if
 	} //end for
 	if (collision)
@@ -435,9 +435,9 @@ qboolean AAS_AreaEntityCollision(int areanum, vec3_t start, vec3_t end,
 		VectorCopy(bsptrace.endpos, trace->endpos);
 		trace->area = 0;
 		trace->planenum = 0;
-		return qtrue;
+		return true;
 	} //end if
-	return qfalse;
+	return false;
 } //end of the function AAS_AreaEntityCollision
 //===========================================================================
 // recursive subdivision of the line by the BSP tree.
@@ -462,7 +462,7 @@ aas_trace_t AAS_TraceClientBBox(vec3_t start, vec3_t end, int presencetype,
 	Com_Memset(&trace, 0, sizeof(aas_trace_t));
 
 	if (!aasworld.loaded) return trace;
-	
+
 	tstack_p = tracestack;
 	//we start with the whole line on the stack
 	VectorCopy(start, tstack_p->start);
@@ -471,7 +471,7 @@ aas_trace_t AAS_TraceClientBBox(vec3_t start, vec3_t end, int presencetype,
 	//start with node 1 because node zero is a dummy for a solid leaf
 	tstack_p->nodenum = 1;		//starting at the root of the tree
 	tstack_p++;
-	
+
 	while (1)
 	{
 		//pop up the stack
@@ -482,7 +482,7 @@ aas_trace_t AAS_TraceClientBBox(vec3_t start, vec3_t end, int presencetype,
 		{
 			tstack_p++;
 			//nothing was hit
-			trace.startsolid = qfalse;
+			trace.startsolid = false;
 			trace.fraction = 1.0;
 			//endpos is the end of the line
 			VectorCopy(end, trace.endpos);
@@ -515,13 +515,13 @@ aas_trace_t AAS_TraceClientBBox(vec3_t start, vec3_t end, int presencetype,
 						tstack_p->start[1] == start[1] &&
 						tstack_p->start[2] == start[2])
 				{
-					trace.startsolid = qtrue;
+					trace.startsolid = true;
 					trace.fraction = 0.0;
 					VectorClear(v1);
 				} //end if
 				else
 				{
-					trace.startsolid = qfalse;
+					trace.startsolid = false;
 					VectorSubtract(end, start, v1);
 					VectorSubtract(tstack_p->start, start, v2);
 					trace.fraction = VectorLength(v2) / VectorNormalize(v1);
@@ -568,13 +568,13 @@ aas_trace_t AAS_TraceClientBBox(vec3_t start, vec3_t end, int presencetype,
 					tstack_p->start[1] == start[1] &&
 					tstack_p->start[2] == start[2])
 			{
-				trace.startsolid = qtrue;
+				trace.startsolid = true;
 				trace.fraction = 0.0;
 				VectorClear(v1);
 			} //end if
 			else
 			{
-				trace.startsolid = qfalse;
+				trace.startsolid = false;
 				VectorSubtract(end, start, v1);
 				VectorSubtract(tstack_p->start, start, v2);
 				trace.fraction = VectorLength(v2) / VectorNormalize(v1);
@@ -668,7 +668,7 @@ aas_trace_t AAS_TraceClientBBox(vec3_t start, vec3_t end, int presencetype,
 		{
 			tmpplanenum = tstack_p->planenum;
 			// bk010221 - new location of divide by zero (see above)
-			if ( front == back ) front -= 0.001f; // bk0101022 - hack/FPE 
+			if ( front == back ) front -= 0.001f; // bk0101022 - hack/FPE
                 	//calculate the hitpoint with the node (split point of the line)
 			//put the crosspoint TRACEPLANE_EPSILON pixels on the near side
 			if (front < 0) frac = (front + TRACEPLANE_EPSILON)/(front-back);
@@ -920,7 +920,7 @@ int AAS_TraceAreas(vec3_t start, vec3_t end, int *areas, vec3_t *points, int max
 // Parameter:				face		: face to test if the point is in it
 //								pnormal	: normal of the plane to use for the face
 //								point		: point to test if inside face boundaries
-// Returns:					qtrue if the point is within the face boundaries
+// Returns:					true if the point is within the face boundaries
 // Changes Globals:		-
 //===========================================================================
 qboolean AAS_InsideFace(aas_face_t *face, vec3_t pnormal, vec3_t point, float epsilon)
@@ -933,7 +933,7 @@ qboolean AAS_InsideFace(aas_face_t *face, vec3_t pnormal, vec3_t point, float ep
 	int lastvertex = 0;
 #endif //AAS_SAMPLE_DEBUG
 
-	if (!aasworld.loaded) return qfalse;
+	if (!aasworld.loaded) return false;
 
 	for (i = 0; i < face->numedges; i++)
 	{
@@ -963,11 +963,11 @@ qboolean AAS_InsideFace(aas_face_t *face, vec3_t pnormal, vec3_t point, float ep
 		//check on wich side of the above plane the point is
 		//this is done by checking the sign of the dot product of the
 		//vector orthogonal vector from above and the vector from the
-		//origin (first vertex of edge) to the point 
+		//origin (first vertex of edge) to the point
 		//if the dotproduct is smaller than zero the point is outside the face
-		if (DotProduct(pointvec, sepnormal) < -epsilon) return qfalse;
+		if (DotProduct(pointvec, sepnormal) < -epsilon) return false;
 	} //end for
-	return qtrue;
+	return true;
 } //end of the function AAS_InsideFace
 //===========================================================================
 //
@@ -984,7 +984,7 @@ qboolean AAS_PointInsideFace(int facenum, vec3_t point, float epsilon)
 	aas_plane_t *plane;
 	aas_face_t *face;
 
-	if (!aasworld.loaded) return qfalse;
+	if (!aasworld.loaded) return false;
 
 	face = &aasworld.faces[facenum];
 	plane = &aasworld.planes[face->planenum];
@@ -1004,9 +1004,9 @@ qboolean AAS_PointInsideFace(int facenum, vec3_t point, float epsilon)
 		//
 		CrossProduct(edgevec, plane->normal, sepnormal);
 		//
-		if (DotProduct(pointvec, sepnormal) < -epsilon) return qfalse;
+		if (DotProduct(pointvec, sepnormal) < -epsilon) return false;
 	} //end for
-	return qtrue;
+	return true;
 } //end of the function AAS_PointInsideFace
 //===========================================================================
 // returns the ground face the given point is above in the given area
@@ -1242,7 +1242,7 @@ aas_link_t *AAS_AASLinkEntity(vec3_t absmins, vec3_t absmaxs, int entnum)
 	//start with node 1 because node zero is a dummy used for solid leafs
 	lstack_p->nodenum = 1;		//starting at the root of the tree
 	lstack_p++;
-	
+
 	while (1)
 	{
 		//pop up the stack

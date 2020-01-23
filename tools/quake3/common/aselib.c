@@ -102,8 +102,8 @@ typedef struct
 	int len;
 
 	int currentObject;
-	qboolean verbose;
-	qboolean grabAnims;
+	bool verbose;
+	bool grabAnims;
 
 } ase_t;
 
@@ -117,7 +117,7 @@ static void ASE_FreeGeomObject( int ndx );
 /*
 ** ASE_Load
 */
-void ASE_Load( const char *filename, qboolean verbose, qboolean grabAnims ){
+void ASE_Load( const char *filename, bool verbose, bool grabAnims ){
 	FILE *fp = fopen( filename, "rb" );
 
 	if ( !fp ) {
@@ -307,7 +307,7 @@ static int CharIsTokenDelimiter( int ch ){
 	return 0;
 }
 
-static int ASE_GetToken( qboolean restOfLine ){
+static int ASE_GetToken( bool restOfLine ){
 	int i = 0;
 
 	if ( ase.buffer == 0 ) {
@@ -347,7 +347,7 @@ static int ASE_GetToken( qboolean restOfLine ){
 static void ASE_ParseBracedBlock( void ( *parser )( const char *token ) ){
 	int indent = 0;
 
-	while ( ASE_GetToken( qfalse ) )
+	while ( ASE_GetToken( false ) )
 	{
 		if ( !strcmp( s_token, "{" ) ) {
 			indent++;
@@ -373,7 +373,7 @@ static void ASE_ParseBracedBlock( void ( *parser )( const char *token ) ){
 static void ASE_SkipEnclosingBraces( void ){
 	int indent = 0;
 
-	while ( ASE_GetToken( qfalse ) )
+	while ( ASE_GetToken( false ) )
 	{
 		if ( !strcmp( s_token, "{" ) ) {
 			indent++;
@@ -391,7 +391,7 @@ static void ASE_SkipEnclosingBraces( void ){
 }
 
 static void ASE_SkipRestOfLine( void ){
-	ASE_GetToken( qtrue );
+	ASE_GetToken( true );
 }
 
 static void ASE_KeyMAP_DIFFUSE( const char *token ){
@@ -401,7 +401,7 @@ static void ASE_KeyMAP_DIFFUSE( const char *token ){
 	strcpy( filename, gl_filename );
 
 	if ( !strcmp( token, "*BITMAP" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
 		// the purpose of this whole chunk of code below is to extract the relative path
 		// from a full path in the ASE
@@ -456,7 +456,7 @@ static void ASE_KeyMATERIAL( const char *token ){
 
 static void ASE_KeyMATERIAL_LIST( const char *token ){
 	if ( !strcmp( token, "*MATERIAL_COUNT" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		VERBOSE( ( "..num materials: %s\n", s_token ) );
 		if ( atoi( s_token ) > MAX_ASE_MATERIALS ) {
 			Error( "Too many materials!" );
@@ -474,15 +474,15 @@ static void ASE_KeyMESH_VERTEX_LIST( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
 	if ( !strcmp( token, "*MESH_VERTEX" ) ) {
-		ASE_GetToken( qfalse );     // skip number
+		ASE_GetToken( false );     // skip number
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		pMesh->vertexes[pMesh->currentVertex].y = atof( s_token );
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		pMesh->vertexes[pMesh->currentVertex].x = -atof( s_token );
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		pMesh->vertexes[pMesh->currentVertex].z = atof( s_token );
 
 		pMesh->currentVertex++;
@@ -501,21 +501,21 @@ static void ASE_KeyMESH_FACE_LIST( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
 	if ( !strcmp( token, "*MESH_FACE" ) ) {
-		ASE_GetToken( qfalse ); // skip face number
+		ASE_GetToken( false ); // skip face number
 
-		ASE_GetToken( qfalse ); // skip label
-		ASE_GetToken( qfalse ); // first vertex
+		ASE_GetToken( false ); // skip label
+		ASE_GetToken( false ); // first vertex
 		pMesh->faces[pMesh->currentFace][0] = atoi( s_token );
 
-		ASE_GetToken( qfalse ); // skip label
-		ASE_GetToken( qfalse ); // second vertex
+		ASE_GetToken( false ); // skip label
+		ASE_GetToken( false ); // second vertex
 		pMesh->faces[pMesh->currentFace][2] = atoi( s_token );
 
-		ASE_GetToken( qfalse ); // skip label
-		ASE_GetToken( qfalse ); // third vertex
+		ASE_GetToken( false ); // skip label
+		ASE_GetToken( false ); // third vertex
 		pMesh->faces[pMesh->currentFace][1] = atoi( s_token );
 
-		ASE_GetToken( qtrue );
+		ASE_GetToken( true );
 
 /*
         if ( ( p = strstr( s_token, "*MESH_MTLID" ) ) != 0 )
@@ -543,13 +543,13 @@ static void ASE_KeyTFACE_LIST( const char *token ){
 	if ( !strcmp( token, "*MESH_TFACE" ) ) {
 		int a, b, c;
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		a = atoi( s_token );
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		c = atoi( s_token );
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		b = atoi( s_token );
 
 		pMesh->tfaces[pMesh->currentFace][0] = a;
@@ -570,15 +570,15 @@ static void ASE_KeyMESH_TVERTLIST( const char *token ){
 	if ( !strcmp( token, "*MESH_TVERT" ) ) {
 		char u[80], v[80], w[80];
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		strcpy( u, s_token );
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		strcpy( v, s_token );
 
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 		strcpy( w, s_token );
 
 		pMesh->tvertexes[pMesh->currentVertex].s = atof( u );
@@ -600,33 +600,33 @@ static void ASE_KeyMESH( const char *token ){
 	aseMesh_t *pMesh = ASE_GetCurrentMesh();
 
 	if ( !strcmp( token, "*TIMEVALUE" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
 		pMesh->timeValue = atoi( s_token );
 		VERBOSE( ( ".....timevalue: %d\n", pMesh->timeValue ) );
 	}
 	else if ( !strcmp( token, "*MESH_NUMVERTEX" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
 		pMesh->numVertexes = atoi( s_token );
 		VERBOSE( ( ".....TIMEVALUE: %d\n", pMesh->timeValue ) );
 		VERBOSE( ( ".....num vertexes: %d\n", pMesh->numVertexes ) );
 	}
 	else if ( !strcmp( token, "*MESH_NUMFACES" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
 		pMesh->numFaces = atoi( s_token );
 		VERBOSE( ( ".....num faces: %d\n", pMesh->numFaces ) );
 	}
 	else if ( !strcmp( token, "*MESH_NUMTVFACES" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
 		if ( atoi( s_token ) != pMesh->numFaces ) {
 			Error( "MESH_NUMTVFACES != MESH_NUMFACES" );
 		}
 	}
 	else if ( !strcmp( token, "*MESH_NUMTVERTEX" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
 		pMesh->numTVertexes = atoi( s_token );
 		VERBOSE( ( ".....num tvertexes: %d\n", pMesh->numTVertexes ) );
@@ -687,7 +687,7 @@ static void ASE_KeyGEOMOBJECT( const char *token ){
 	if ( !strcmp( token, "*NODE_NAME" ) ) {
 		char *name = ase.objects[ase.currentObject].name;
 
-		ASE_GetToken( qtrue );
+		ASE_GetToken( true );
 		VERBOSE( ( " %s\n", s_token ) );
 		strcpy( ase.objects[ase.currentObject].name, s_token + 1 );
 		if ( strchr( ase.objects[ase.currentObject].name, '"' ) ) {
@@ -740,7 +740,7 @@ static void ASE_KeyGEOMOBJECT( const char *token ){
 	}
 	// according to spec these are obsolete
 	else if ( !strcmp( token, "*MATERIAL_REF" ) ) {
-		ASE_GetToken( qfalse );
+		ASE_GetToken( false );
 
 		ase.objects[ase.currentObject].materialRef = atoi( s_token );
 	}
@@ -807,7 +807,7 @@ static void CollapseObjects( void ){
 ** ASE_Process
 */
 static void ASE_Process( void ){
-	while ( ASE_GetToken( qfalse ) )
+	while ( ASE_GetToken( false ) )
 	{
 		if ( !strcmp( s_token, "*3DSMAX_ASCIIEXPORT" ) ||
 			 !strcmp( s_token, "*COMMENT" ) ) {

@@ -545,7 +545,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			vec3_t points[ 4 ], cnt, bestNormal, nrm, Vnorm[3], Enorm[3];
 			vec4_t plane, reverse, p[3];
 			double normalEpsilon_save;
-			qboolean snpd;
+			bool snpd;
 			vec3_t min = { 999999, 999999, 999999 }, max = { -999999, -999999, -999999 };
 			vec3_t avgDirection = { 0, 0, 0 };
 			int axis;
@@ -633,12 +633,12 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 					buildBrush->contentShader = si;
 					buildBrush->compileFlags = si->compileFlags;
 					buildBrush->contentFlags = si->contentFlags;
-					buildBrush->detail = qtrue;
+					buildBrush->detail = true;
 
 					//snap points before using them for further calculations
 					//precision suffers a lot, when two of normal values are under .00025 (often no collision, knocking up effect in ioq3)
 					//also broken drawsurfs in case of normal brushes
-					snpd = qfalse;
+					snpd = false;
 					for ( j=0; j<3; j++ )
 					{
 						if ( fabs(plane[j]) < 0.00025 && fabs(plane[(j+1)%3]) < 0.00025 && ( plane[j] != 0.0 || plane[(j+1)%3] != 0.0 ) ){
@@ -646,7 +646,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 							VectorAdd( cnt, points[ 2 ], cnt );
 							VectorScale( cnt, 0.3333333333333f, cnt );
 							points[0][(j+2)%3]=points[1][(j+2)%3]=points[2][(j+2)%3]=cnt[(j+2)%3];
-							snpd = qtrue;
+							snpd = true;
 							break;
 						}
 					}
@@ -662,14 +662,14 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 								//Sys_Printf( "b4(%6.6f %6.6f %6.6f)(%6.6f %6.6f %6.6f)\n", points[j][0], points[j][1], points[j][2], points[(j+1)%3][0], points[(j+1)%3][1], points[(j+1)%3][2] );
 								points[j][k]=points[(j+1)%3][k] = ( points[j][k] + points[(j+1)%3][k] ) / 2.0;
 								//Sys_Printf( "sn(%6.6f %6.6f %6.6f)(%6.6f %6.6f %6.6f)\n", points[j][0], points[j][1], points[j][2], points[(j+1)%3][0], points[(j+1)%3][1], points[(j+1)%3][2] );
-								snpd = qtrue;
+								snpd = true;
 							}
 						}
 					}
 
 					if ( snpd ) {
 						PlaneFromPoints( plane, points[ 0 ], points[ 1 ], points[ 2 ] );
-						snpd = qfalse;
+						snpd = false;
 					}
 
 					//vector-is-close-to-be-on-axis check again, happens after previous code sometimes
@@ -690,7 +690,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 					{
 						if ( plane[j] != 0.0 && fabs(plane[j]) < 0.00005 ){
 							plane[j]=0.0;
-							snpd = qtrue;
+							snpd = true;
 						}
 					}
 
@@ -994,12 +994,12 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 							VectorNormalize( p[ j ], p[ j ] );
 							p[j][3] = DotProduct( points[j], p[j] );
 							//snap nearly axial side planes
-							snpd = qfalse;
+							snpd = false;
 							for ( k = 0; k < 3; k++ )
 							{
 								if ( fabs(p[j][k]) < 0.00025 && p[j][k] != 0.0 ){
 									p[j][k] = 0.0;
-									snpd = qtrue;
+									snpd = true;
 								}
 							}
 							if ( snpd ){
@@ -1080,13 +1080,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 							VectorNormalize( p[ j ], p[ j ] );
 							p[j][3] = DotProduct( points[j], p[j] );
 							//snap nearly axial side planes
-							snpd = qfalse;
+							snpd = false;
 							for ( k = 0; k < 3; k++ )
 							{
 								if ( fabs(p[j][k]) < 0.00025 && p[j][k] != 0.0 ){
 									//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
 									p[j][k] = 0.0;
-									snpd = qtrue;
+									snpd = true;
 								}
 							}
 							if ( snpd ){
@@ -1137,13 +1137,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 							VectorNormalize( p[ j ], p[ j ] );
 							p[j][3] = DotProduct( points[j], p[j] );
 							//snap nearly axial side planes
-							snpd = qfalse;
+							snpd = false;
 							for ( k = 0; k < 3; k++ )
 							{
 								if ( fabs(p[j][k]) < 0.00025 && p[j][k] != 0.0 ){
 									//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
 									p[j][k] = 0.0;
-									snpd = qtrue;
+									snpd = true;
 								}
 							}
 							if ( snpd ){

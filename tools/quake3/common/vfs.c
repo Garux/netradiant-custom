@@ -399,7 +399,7 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 
 
 
-qboolean vfsPackFile( const char *filename, const char *packname, const int compLevel ){
+bool vfsPackFile( const char *filename, const char *packname, const int compLevel ){
 	int i;
 	char tmp[NAME_MAX], fixed[NAME_MAX];
 	GSList *lst;
@@ -442,7 +442,7 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 				mz_zip_writer_end( &zip );
 			}
 
-			return qtrue;
+			return true;
 		}
 	}
 
@@ -457,7 +457,7 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 		memcpy( file->zipfile, &file->zipinfo, sizeof( unz_s ) );
 
 		if ( unzOpenCurrentFile( file->zipfile ) != UNZ_OK ) {
-			return qfalse;
+			return false;
 		}
 
 		bufferptr = safe_malloc( file->size + 1 );
@@ -467,7 +467,7 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 		i = unzReadCurrentFile( file->zipfile, bufferptr, file->size );
 		unzCloseCurrentFile( file->zipfile );
 		if ( i < 0 ) {
-			return qfalse;
+			return false;
 		}
 		else{
 			mz_bool success = MZ_TRUE;
@@ -476,14 +476,14 @@ qboolean vfsPackFile( const char *filename, const char *packname, const int comp
 					Error( "Failed creating zip archive \"%s\"!\n", packname );
 				}
 			free( bufferptr );
-			return qtrue;
+			return true;
 		}
 	}
 
-	return qfalse;
+	return false;
 }
 
-qboolean vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel ){
+bool vfsPackFile_Absolute_Path( const char *filepath, const char *filename, const char *packname, const int compLevel ){
 	char tmp[NAME_MAX];
 	strcpy( tmp, filepath );
 	if ( access( tmp, R_OK ) == 0 ) {
@@ -515,8 +515,8 @@ qboolean vfsPackFile_Absolute_Path( const char *filepath, const char *filename, 
 			mz_zip_writer_end( &zip );
 		}
 
-		return qtrue;
+		return true;
 	}
 
-	return qfalse;
+	return false;
 }

@@ -58,34 +58,34 @@
 	1048575,               /* max lightmapped surface verts */
 	1048575,               /* max surface verts */
 	1048575,               /* max surface indexes */
-	qfalse,                /* flares */
+	false,                 /* flares */
 	"flareshader",         /* default flare shader */
-	qfalse,                /* wolf lighting model? */
+	false,                 /* wolf lighting model? */
 	128,                   /* lightmap width/height */
 	1.0f,                  /* lightmap gamma */
-	qtrue,                 /* lightmap sRGB */
-	qtrue,                 /* texture sRGB */
-	qtrue,                 /* color sRGB */
+	true,                  /* lightmap sRGB */
+	true,                  /* texture sRGB */
+	true,                  /* color sRGB */
 	0.0f,                  /* lightmap exposure */
 	1.0f,                  /* lightmap compensate */
 	1.0f,                  /* lightgrid scale */
 	1.0f,                  /* lightgrid ambient scale */
-	qfalse,                /* light angle attenuation uses half-lambert curve */
-	qtrue,                 /* disable shader lightstyles hack */
-	qtrue,                 /* keep light entities on bsp */
+	false,                 /* light angle attenuation uses half-lambert curve */
+	true,                  /* disable shader lightstyles hack */
+	true,                  /* keep light entities on bsp */
 	4,                     /* default patchMeta subdivisions tolerance */
-	qtrue,                 /* patch casting enabled */
-	qtrue,                 /* compile deluxemaps */
+	true,                  /* patch casting enabled */
+	true,                  /* compile deluxemaps */
 	0,                     /* deluxemaps default mode */
 	512,                   /* minimap size */
 	1.0f,                  /* minimap sharpener */
 	1.0f / 66.0f,          /* minimap border */
-	qtrue,                 /* minimap keep aspect */
+	true,                  /* minimap keep aspect */
 	MINIMAP_MODE_GRAY,     /* minimap mode */
 	"../gfx/%s_mini.tga",  /* minimap name format */
 	"IBSP",                /* bsp file prefix */
 	46,                    /* bsp file version */
-	qfalse,                /* cod-style lump len/ofs order */
+	false,                 /* cod-style lump len/ofs order */
 	LoadIBSPFile,          /* bsp load function */
 	WriteIBSPFile,         /* bsp write function */
 

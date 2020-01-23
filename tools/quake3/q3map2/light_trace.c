@@ -73,7 +73,8 @@ traceVert_t;
 typedef struct traceInfo_s
 {
 	shaderInfo_t                *si;
-	int surfaceNum, castShadows, skipGrid;
+	int surfaceNum, castShadows;
+	bool skipGrid;
 }
 traceInfo_t;
 
@@ -872,7 +873,7 @@ static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform ){
 		}
 
 		/* patchshadows? */
-		if ( ds->surfaceType == MST_PATCH && patchShadows == qfalse ) {
+		if ( ds->surfaceType == MST_PATCH && !patchShadows ) {
 			continue;
 		}
 
@@ -1073,7 +1074,7 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, m4x4_t t
 		/* setup trace info */
 		ti.castShadows = castShadows;
 		ti.surfaceNum = -1;
-		ti.skipGrid = qtrue; // also ignore picomodels when skipping patches
+		ti.skipGrid = true; // also ignore picomodels when skipping patches
 
 		/* setup trace winding */
 		memset( &tw, 0, sizeof( tw ) );
@@ -1267,7 +1268,7 @@ void SetupTraceNodes( void ){
 	PopulateTraceNodes();
 
 	/* create the raytracing bsp */
-	if ( loMem == qfalse ) {
+	if ( !loMem ) {
 		SubdivideTraceNode_r( headNodeNum, 0 );
 		SubdivideTraceNode_r( skyboxNodeNum, 0 );
 	}
@@ -1345,7 +1346,7 @@ void SetupTraceNodes( void ){
 #define NEAR_SHADOW_EPSILON     1.5f    //%	1.25f
 #define SELF_SHADOW_EPSILON     0.5f
 
-qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
+bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	int i;
 	float tvec[ 3 ], pvec[ 3 ], qvec[ 3 ];
 	float det, invDet, depth;
@@ -1359,20 +1360,20 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	/* don't double-trace against sky */
 	si = ti->si;
 	if ( trace->compileFlags & si->compileFlags & C_SKY ) {
-		return qfalse;
+		return false;
 	}
 
 	/* receive shadows from worldspawn group only */
 	if ( trace->recvShadows == 1 ) {
 		if ( ti->castShadows != 1 ) {
-			return qfalse;
+			return false;
 		}
 	}
 
 	/* receive shadows from same group and worldspawn group */
 	else if ( trace->recvShadows > 1 ) {
 		if ( ti->castShadows != 1 && abs( ti->castShadows ) != abs( trace->recvShadows ) ) {
-			return qfalse;
+			return false;
 		}
 		//%	Sys_Printf( "%d:%d ", tt->castShadows, trace->recvShadows );
 	}
@@ -1381,14 +1382,14 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	else
 	{
 		if ( abs( ti->castShadows ) != abs( trace->recvShadows ) ) {
-			return qfalse;
+			return false;
 		}
 	}
 
 	/* skip patches when doing the grid (FIXME this is an ugly hack) */
 	if ( inGrid ) {
 		if ( ti->skipGrid ) {
-			return qfalse;
+			return false;
 		}
 	}
 
@@ -1400,7 +1401,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 
 	/* the non-culling branch */
 	if ( fabs( det ) < COPLANAR_EPSILON ) {
-		return qfalse;
+		return false;
 	}
 	invDet = 1.0f / det;
 
@@ -1410,7 +1411,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	/* calculate u parameter and test bounds */
 	u = DotProduct( tvec, pvec ) * invDet;
 	if ( u < -BARY_EPSILON || u > ( 1.0f + BARY_EPSILON ) ) {
-		return qfalse;
+		return false;
 	}
 
 	/* prepare to test v parameter */
@@ -1419,13 +1420,13 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	/* calculate v parameter and test bounds */
 	v = DotProduct( trace->direction, qvec ) * invDet;
 	if ( v < -BARY_EPSILON || ( u + v ) > ( 1.0f + BARY_EPSILON ) ) {
-		return qfalse;
+		return false;
 	}
 
 	/* calculate t (depth) */
 	depth = DotProduct( tt->edge2, qvec ) * invDet;
 	if ( depth <= trace->inhibitRadius || depth >= trace->distance ) {
-		return qfalse;
+		return false;
 	}
 
 	/* if hitpoint is really close to trace origin (sample point), then check for self-shadowing */
@@ -1434,7 +1435,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 		for ( i = 0; i < trace->numSurfaces; i++ )
 		{
 			if ( ti->surfaceNum == trace->surfaces[ i ] ) {
-				return qfalse;
+				return false;
 			}
 		}
 	}
@@ -1444,7 +1445,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 
 	/* don't trace against sky */
 	if ( si->compileFlags & C_SKY ) {
-		return qfalse;
+		return false;
 	}
 
 	/* most surfaces are completely opaque */
@@ -1452,8 +1453,8 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 		 si->lightImage == NULL || si->lightImage->pixels == NULL ) {
 		VectorMA( trace->origin, depth, trace->direction, trace->hit );
 		VectorClear( trace->color );
-		trace->opaque = qtrue;
-		return qtrue;
+		trace->opaque = true;
+		return true;
 	}
 
 	/* force subsampling because the lighting is texture dependent */
@@ -1462,7 +1463,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	/* try to avoid double shadows near triangle seams */
 	if ( u < -ASLF_EPSILON || u > ( 1.0f + ASLF_EPSILON ) ||
 		 v < -ASLF_EPSILON || ( u + v ) > ( 1.0f + ASLF_EPSILON ) ) {
-		return qfalse;
+		return false;
 	}
 
 	/* calculate w parameter */
@@ -1512,12 +1513,12 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	if ( trace->color[ 0 ] <= 0.001f && trace->color[ 1 ] <= 0.001f && trace->color[ 2 ] <= 0.001f ) {
 		VectorClear( trace->color );
 		VectorMA( trace->origin, depth, trace->direction, trace->hit );
-		trace->opaque = qtrue;
-		return qtrue;
+		trace->opaque = true;
+		return true;
 	}
 
 	/* continue tracing */
-	return qfalse;
+	return false;
 }
 
 
@@ -1527,7 +1528,7 @@ qboolean TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
    temporary hack
  */
 
-qboolean TraceWinding( traceWinding_t *tw, trace_t *trace ){
+bool TraceWinding( traceWinding_t *tw, trace_t *trace ){
 	int i;
 	traceTriangle_t tt;
 
@@ -1549,12 +1550,12 @@ qboolean TraceWinding( traceWinding_t *tw, trace_t *trace ){
 
 		/* trace it */
 		if ( TraceTriangle( &traceInfos[ tt.infoNum ], &tt, trace ) ) {
-			return qtrue;
+			return true;
 		}
 	}
 
 	/* done */
-	return qfalse;
+	return false;
 }
 
 
@@ -1562,7 +1563,7 @@ qboolean TraceWinding( traceWinding_t *tw, trace_t *trace ){
 
 /*
    TraceLine_r()
-   returns qtrue if something is hit and tracing can stop
+   returns true if something is hit and tracing can stop
 
    SmileTheory: made half-iterative
  */
@@ -1570,9 +1571,9 @@ qboolean TraceWinding( traceWinding_t *tw, trace_t *trace ){
 #define TRACELINE_R_HALF_ITERATIVE 1
 
 #if TRACELINE_R_HALF_ITERATIVE
-static qboolean TraceLine_r( int nodeNum, const vec3_t start, const vec3_t end, trace_t *trace )
+static bool TraceLine_r( int nodeNum, const vec3_t start, const vec3_t end, trace_t *trace )
 #else
-static qboolean TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, trace_t *trace )
+static bool TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, trace_t *trace )
 #endif
 {
 	traceNode_t     *node;
@@ -1590,8 +1591,8 @@ static qboolean TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end,
 		/* bogus node number means solid, end tracing unless testing all */
 		if ( nodeNum < 0 ) {
 			VectorCopy( origin, trace->hit );
-			trace->passSolid = qtrue;
-			return qtrue;
+			trace->passSolid = true;
+			return true;
 		}
 
 		/* get node */
@@ -1600,8 +1601,8 @@ static qboolean TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end,
 		/* solid? */
 		if ( node->type == TRACE_LEAF_SOLID ) {
 			VectorCopy( origin, trace->hit );
-			trace->passSolid = qtrue;
-			return qtrue;
+			trace->passSolid = true;
+			return true;
 		}
 
 		/* leafnode? */
@@ -1610,12 +1611,12 @@ static qboolean TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end,
 			if ( node->numItems > 0 && trace->numTestNodes < MAX_TRACE_TEST_NODES ) {
 				trace->testNodes[ trace->numTestNodes++ ] = nodeNum;
 			}
-			return qfalse;
+			return false;
 		}
 
 		/* ydnar 2003-09-07: don't test branches of the bsp with nothing in them when testall is enabled */
 		if ( trace->testAll && node->numItems == 0 ) {
-			return qfalse;
+			return false;
 		}
 
 		/* classify beginning and end points */
@@ -1678,7 +1679,7 @@ static qboolean TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end,
 
 		/* trace first side */
 		if ( TraceLine_r( node->children[ side ], origin, mid, trace ) ) {
-			return qtrue;
+			return true;
 		}
 
 		/* trace other side */
@@ -1706,8 +1707,8 @@ void TraceLine( trace_t *trace ){
 
 
 	/* setup output (note: this code assumes the input data is completely filled out) */
-	trace->passSolid = qfalse;
-	trace->opaque = qfalse;
+	trace->passSolid = false;
+	trace->opaque = false;
 	trace->compileFlags = 0;
 	trace->numTestNodes = 0;
 
@@ -1719,7 +1720,7 @@ void TraceLine( trace_t *trace ){
 	/* trace through nodes */
 	TraceLine_r( headNodeNum, trace->origin, trace->end, trace );
 	if ( trace->passSolid && !trace->testAll ) {
-		trace->opaque = qtrue;
+		trace->opaque = true;
 		return;
 	}
 

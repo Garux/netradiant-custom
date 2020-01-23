@@ -48,8 +48,8 @@ script_t    *script;
 int scriptline;
 
 char token[MAXTOKEN];
-qboolean endofscript;
-qboolean tokenready;                     // only qtrue if UnGetToken was just called
+bool endofscript;
+bool tokenready;                     // only true if UnGetToken was just called
 
 /*
    ==============
@@ -98,8 +98,8 @@ void LoadScriptFile( const char *filename, int index ){
 	script = scriptstack;
 	AddScriptToStack( filename, index );
 
-	endofscript = qfalse;
-	tokenready = qfalse;
+	endofscript = false;
+	tokenready = false;
 }
 /* &unload current; for autopacker */
 void SilentLoadScriptFile( const char *filename, int index ){
@@ -127,8 +127,8 @@ void SilentLoadScriptFile( const char *filename, int index ){
 	script->script_p = script->buffer;
 	script->end_p = script->buffer + size;
 
-	endofscript = qfalse;
-	tokenready = qfalse;
+	endofscript = false;
+	tokenready = false;
 }
 
 /*
@@ -149,8 +149,8 @@ void ParseFromMemory( char *buffer, int size ){
 	script->script_p = script->buffer;
 	script->end_p = script->buffer + size;
 
-	endofscript = qfalse;
-	tokenready = qfalse;
+	endofscript = false;
+	tokenready = false;
 }
 
 
@@ -161,26 +161,26 @@ void ParseFromMemory( char *buffer, int size ){
    Signals that the current token was not used, and should be reported
    for the next GetToken.  Note that
 
-   GetToken (qtrue);
+   GetToken (true);
    UnGetToken ();
-   GetToken (qfalse);
+   GetToken (false);
 
    could cross a line boundary.
    ==============
  */
 void UnGetToken( void ){
-	tokenready = qtrue;
+	tokenready = true;
 }
 
 
-qboolean EndOfScript( qboolean crossline ){
+bool EndOfScript( bool crossline ){
 	if ( !crossline ) {
 		Error( "Line %i is incomplete\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
 
 	if ( !strcmp( script->filename, "memory buffer" ) ) {
-		endofscript = qtrue;
-		return qfalse;
+		endofscript = true;
+		return false;
 	}
 
 	if ( script->buffer == NULL ) {
@@ -191,8 +191,8 @@ qboolean EndOfScript( qboolean crossline ){
 	}
 	script->buffer = NULL;
 	if ( script == scriptstack + 1 ) {
-		endofscript = qtrue;
-		return qfalse;
+		endofscript = true;
+		return false;
 	}
 	script--;
 	scriptline = script->line;
@@ -205,18 +205,18 @@ qboolean EndOfScript( qboolean crossline ){
    GetToken
    ==============
  */
-qboolean GetToken( qboolean crossline ){
+bool GetToken( bool crossline ){
 	char    *token_p;
 
 
 	/* ydnar: dummy testing */
 	if ( script == NULL || script->buffer == NULL ) {
-		return qfalse;
+		return false;
 	}
 
 	if ( tokenready ) {                       // is a token already waiting?
-		tokenready = qfalse;
-		return qtrue;
+		tokenready = false;
+		return true;
 	}
 
 	if ( ( script->script_p >= script->end_p ) || ( script->script_p == NULL ) ) {
@@ -314,12 +314,12 @@ skipspace:
 	*token_p = 0;
 
 	if ( !strcmp( token, "$include" ) ) {
-		GetToken( qfalse );
+		GetToken( false );
 		AddScriptToStack( token, 0 );
 		return GetToken( crossline );
 	}
 
-	return qtrue;
+	return true;
 }
 
 
@@ -327,31 +327,29 @@ skipspace:
    ==============
    TokenAvailable
 
-   Returns qtrue if there is another token on the line
+   Returns true if there is another token on the line
    ==============
  */
-qboolean TokenAvailable( void ) {
+bool TokenAvailable( void ) {
 	int oldLine;
-	qboolean r;
 
 	/* save */
 	oldLine = scriptline;
 
 	/* test */
-	r = GetToken( qtrue );
-	if ( !r ) {
-		return qfalse;
+	if ( !GetToken( true ) ) {
+		return false;
 	}
 	UnGetToken();
 	if ( oldLine == scriptline ) {
-		return qtrue;
+		return true;
 	}
 
 	/* restore */
 	//%	scriptline = oldLine;
 	//%	script->line = oldScriptLine;
 
-	return qfalse;
+	return false;
 }
 
 
@@ -359,7 +357,7 @@ qboolean TokenAvailable( void ) {
 
 
 void MatchToken( char *match ) {
-	GetToken( qtrue );
+	GetToken( true );
 
 	if ( strcmp( token, match ) ) {
 		Error( "MatchToken( \"%s\" ) failed at line %i in file %s", match, scriptline, script->filename );
@@ -373,7 +371,7 @@ void Parse1DMatrix( int x, vec_t *m ) {
 	MatchToken( "(" );
 
 	for ( i = 0 ; i < x ; i++ ) {
-		GetToken( qfalse );
+		GetToken( false );
 		m[i] = atof( token );
 	}
 

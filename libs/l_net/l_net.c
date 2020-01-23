@@ -39,9 +39,6 @@
 #define GetMemory malloc
 #define FreeMemory free
 
-#define qtrue   1
-#define qfalse  0
-
 #ifdef _DEBUG
 void WinPrint( const char *str, ... ){
 	va_list argptr;
@@ -326,12 +323,10 @@ void Net_MyAddress( address_t *address ){
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-int Net_Setup( void ){
+void Net_Setup( void ){
 	WINS_Init();
 	//
 	WinPrint( "my address is %s\n", WINS_MyAddress() );
-	//
-	return qtrue;
 } //end of the function Net_Setup
 //===========================================================================
 //
@@ -461,7 +456,7 @@ void NMSG_WriteString( netmessage_t *msg, char *string ){
 // Changes Globals:		-
 //===========================================================================
 void NMSG_ReadStart( netmessage_t *msg ){
-	msg->readoverflow = qfalse;
+	msg->readoverflow = false;
 	msg->read = 4;
 } //end of the function NMSG_ReadStart
 //===========================================================================
@@ -472,7 +467,7 @@ void NMSG_ReadStart( netmessage_t *msg ){
 //===========================================================================
 int NMSG_ReadChar( netmessage_t *msg ){
 	if ( msg->read + 1 > msg->size ) {
-		msg->readoverflow = qtrue;
+		msg->readoverflow = true;
 		WinPrint( "NMSG_ReadChar: read overflow\n" );
 		return 0;
 	} //end if
@@ -487,7 +482,7 @@ int NMSG_ReadChar( netmessage_t *msg ){
 //===========================================================================
 int NMSG_ReadByte( netmessage_t *msg ){
 	if ( msg->read + 1 > msg->size ) {
-		msg->readoverflow = qtrue;
+		msg->readoverflow = true;
 		WinPrint( "NMSG_ReadByte: read overflow\n" );
 		return 0;
 	} //end if
@@ -504,7 +499,7 @@ int NMSG_ReadShort( netmessage_t *msg ){
 	int c;
 
 	if ( msg->read + 2 > msg->size ) {
-		msg->readoverflow = qtrue;
+		msg->readoverflow = true;
 		WinPrint( "NMSG_ReadShort: read overflow\n" );
 		return 0;
 	} //end if
@@ -522,7 +517,7 @@ int NMSG_ReadLong( netmessage_t *msg ){
 	int c;
 
 	if ( msg->read + 4 > msg->size ) {
-		msg->readoverflow = qtrue;
+		msg->readoverflow = true;
 		WinPrint( "NMSG_ReadLong: read overflow\n" );
 		return 0;
 	} //end if
@@ -543,7 +538,7 @@ float NMSG_ReadFloat( netmessage_t *msg ){
 	int c;
 
 	if ( msg->read + 4 > msg->size ) {
-		msg->readoverflow = qtrue;
+		msg->readoverflow = true;
 		WinPrint( "NMSG_ReadLong: read overflow\n" );
 		return 0;
 	} //end if
@@ -568,7 +563,7 @@ char *NMSG_ReadString( netmessage_t *msg ){
 	do
 	{
 		if ( msg->read + 1 > msg->size ) {
-			msg->readoverflow = qtrue;
+			msg->readoverflow = true;
 			WinPrint( "NMSG_ReadString: read overflow\n" );
 			string[l] = 0;
 			return string;

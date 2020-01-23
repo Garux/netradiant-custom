@@ -217,7 +217,7 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, vec3_t a, vec
    creates a mapDrawSurface_t from the patch text
  */
 
-void ParsePatch( qboolean onlyLights ){
+void ParsePatch( bool onlyLights ){
 	vec_t info[ 5 ];
 	int i, j, k;
 	parseMesh_t     *pm;
@@ -227,14 +227,14 @@ void ParsePatch( qboolean onlyLights ){
 	bspDrawVert_t   *verts;
 	epair_t         *ep;
 	vec4_t delta, delta2, delta3;
-	qboolean degenerate;
+	bool degenerate;
 	float longestCurve;
 	int maxIterations;
 
 	MatchToken( "{" );
 
 	/* get texture */
-	GetToken( qtrue );
+	GetToken( true );
 	strcpy( texture, token );
 
 	Parse1DMatrix( 5, info );
@@ -268,7 +268,7 @@ void ParsePatch( qboolean onlyLights ){
 	MatchToken( ")" );
 
 	// if brush primitives format, we may have some epairs to ignore here
-	GetToken( qtrue );
+	GetToken( true );
 	if ( strcmp( token, "}" ) && ( g_brushType == BPRIMIT_BP || g_brushType == BPRIMIT_UNDEFINED ) ) {
 		ep = ParseEPair();
 		free( ep->key );
@@ -292,7 +292,7 @@ void ParsePatch( qboolean onlyLights ){
 	j = ( m.width * m.height );
 	VectorClear( delta );
 	delta[ 3 ] = 0;
-	degenerate = qtrue;
+	degenerate = true;
 
 	/* find first valid vector */
 	for ( i = 1; i < j && delta[ 3 ] == 0; i++ )
@@ -303,12 +303,12 @@ void ParsePatch( qboolean onlyLights ){
 
 	/* secondary degenerate test */
 	if ( delta[ 3 ] == 0 ) {
-		degenerate = qtrue;
+		degenerate = true;
 	}
 	else
 	{
 		/* if all vectors match this or are zero, then this is a degenerate patch */
-		for ( i = 1; i < j && degenerate == qtrue; i++ )
+		for ( i = 1; i < j && degenerate; i++ )
 		{
 			VectorSubtract( m.verts[ 0 ].xyz, m.verts[ i ].xyz, delta2 );
 			delta2[ 3 ] = VectorNormalize( delta2, delta2 );
@@ -319,8 +319,8 @@ void ParsePatch( qboolean onlyLights ){
 				VectorInverse( delta3 );
 
 				/* compare */
-				if ( VectorCompare( delta, delta2 ) == qfalse && VectorCompare( delta, delta3 ) == qfalse ) {
-					degenerate = qfalse;
+				if ( !VectorCompare( delta, delta2 ) && !VectorCompare( delta, delta3 ) ) {
+					degenerate = false;
 				}
 			}
 		}
@@ -328,7 +328,7 @@ void ParsePatch( qboolean onlyLights ){
 
 	/* warn and select degenerate patch */
 	if ( degenerate ) {
-		xml_Select( "degenerate patch", mapEnt->mapEntityNum, entitySourceBrushes, qfalse );
+		xml_Select( "degenerate patch", mapEnt->mapEntityNum, entitySourceBrushes, false );
 		free( m.verts );
 		return;
 	}
@@ -429,7 +429,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 
 	/* ydnar: mac os x fails with these if not static */
 	MAC_STATIC parseMesh_t  *meshes[ MAX_MAP_DRAW_SURFS ];
-	MAC_STATIC qb_t grouped[ MAX_MAP_DRAW_SURFS ];
+	MAC_STATIC bool grouped[ MAX_MAP_DRAW_SURFS ];
 	MAC_STATIC byte group[ MAX_MAP_DRAW_SURFS ];
 
 
@@ -507,7 +507,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 		for ( j = 0; j < patchCount; j++ )
 		{
 			if ( group[ j ] ) {
-				grouped[ j ] = qtrue;
+				grouped[ j ] = true;
 				check = meshes[ j ];
 				c1 = check->mesh.width * check->mesh.height;
 				v1 = check->mesh.verts;
@@ -520,7 +520,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 		//%	Sys_Printf( "Longest curve: %f Iterations: %d\n", scan->longestCurve, scan->maxIterations );
 
 		/* create drawsurf */
-		scan->grouped = qtrue;
+		scan->grouped = true;
 		ds = DrawSurfaceForMesh( e, scan, NULL );   /* ydnar */
 		VectorCopy( bounds[ 0 ], ds->bounds[ 0 ] );
 		VectorCopy( bounds[ 1 ], ds->bounds[ 1 ] );

@@ -104,7 +104,7 @@ void FinishSurface( mapDrawSurface_t *ds ){
 	/* ydnar: q3map_backShader support */
 	if ( ds->shaderInfo->backShader != NULL && ds->shaderInfo->backShader[ 0 ] != '\0' ) {
 		ds2 = CloneSurface( ds, ShaderInfoForShader( ds->shaderInfo->backShader ) );
-		ds2->backSide = qtrue;
+		ds2->backSide = true;
 	}
 }
 
@@ -185,7 +185,7 @@ mapDrawSurface_t *MakeCelSurface( mapDrawSurface_t *src, shaderInfo_t *si ){
 	}
 
 	/* do some fixups for celshading */
-	ds->planar = qfalse;
+	ds->planar = false;
 	ds->planeNum = -1;
 	ds->celShader = NULL; /* don't cel shade cels :P */
 
@@ -240,12 +240,12 @@ mapDrawSurface_t *MakeSkyboxSurface( mapDrawSurface_t *src ){
 
 /*
    IsTriangleDegenerate
-   returns qtrue if all three points are colinear, backwards, or the triangle is just plain bogus
+   returns true if all three points are colinear, backwards, or the triangle is just plain bogus
  */
 
 #define TINY_AREA   1.0f
 
-qboolean IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c ){
+bool IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c ){
 	vec3_t v1, v2, v3;
 	float d;
 
@@ -258,11 +258,11 @@ qboolean IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c ){
 
 	/* assume all very small or backwards triangles will cause problems */
 	if ( d < TINY_AREA ) {
-		return qtrue;
+		return true;
 	}
 
 	/* must be a good triangle */
-	return qfalse;
+	return false;
 }
 
 
@@ -274,7 +274,7 @@ qboolean IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c ){
 
 void ClearSurface( mapDrawSurface_t *ds ){
 	ds->type = SURFACE_BAD;
-	ds->planar = qfalse;
+	ds->planar = false;
 	ds->planeNum = -1;
 	ds->numVerts = 0;
 	free( ds->verts );
@@ -341,17 +341,17 @@ void TidyEntitySurfaces( entity_t *e ){
 
 /*
    CalcSurfaceTextureRange() - ydnar
-   calculates the clamped texture range for a given surface, returns qtrue if it's within [-texRange,texRange]
+   calculates the clamped texture range for a given surface, returns true if it's within [-texRange,texRange]
  */
 
-qboolean CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
+bool CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
 	int i, j, v, size[ 2 ];
 	float mins[ 2 ], maxs[ 2 ];
 
 
 	/* try to early out */
 	if ( ds->numVerts <= 0 ) {
-		return qtrue;
+		return true;
 	}
 
 	/* walk the verts and determine min/max st values */
@@ -403,19 +403,19 @@ qboolean CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
 
 	/* if range is zero, then assume unlimited precision */
 	if ( texRange == 0 ) {
-		return qtrue;
+		return true;
 	}
 
 	/* within range? */
 	for ( j = 0; j < 2; j++ )
 	{
 		if ( ds->texMins[ j ] < -texRange || ds->texMaxs[ j ] > texRange ) {
-			return qfalse;
+			return false;
 		}
 	}
 
 	/* within range */
-	return qtrue;
+	return true;
 }
 
 
@@ -425,14 +425,14 @@ qboolean CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
    gives closed lightmap axis for a plane normal
  */
 
-qboolean CalcLightmapAxis( vec3_t normal, vec3_t axis ){
+bool CalcLightmapAxis( vec3_t normal, vec3_t axis ){
 	vec3_t absolute;
 
 
 	/* test */
 	if ( normal[ 0 ] == 0.0f && normal[ 1 ] == 0.0f && normal[ 2 ] == 0.0f ) {
 		VectorClear( axis );
-		return qfalse;
+		return false;
 	}
 
 	/* get absolute normal */
@@ -468,7 +468,7 @@ qboolean CalcLightmapAxis( vec3_t normal, vec3_t axis ){
 	}
 
 	/* return ok */
-	return qtrue;
+	return true;
 }
 
 
@@ -549,13 +549,13 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 
 		/* test for bogus plane */
 		if ( VectorLength( plane ) <= 0.0f ) {
-			ds->planar = qfalse;
+			ds->planar = false;
 			ds->planeNum = -1;
 		}
 		else
 		{
 			/* determine if surface is planar */
-			ds->planar = qtrue;
+			ds->planar = true;
 
 			/* test each vert */
 			for ( i = 0; i < ds->numVerts; i++ )
@@ -568,7 +568,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 					//%		Sys_Warning( "Planar surface marked unplanar (%f > %f)\n", fabs( dist ), PLANAR_EPSILON );
 					//%		ds->verts[ i ].color[ 0 ][ 0 ] = ds->verts[ i ].color[ 0 ][ 2 ] = 0;
 					//%	}
-					ds->planar = qfalse;
+					ds->planar = false;
 					break;
 				}
 			}
@@ -594,7 +594,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		   ----------------------------------------------------------------- */
 
 		/* vertex lit surfaces don't need this information */
-		if ( si->compileFlags & C_VERTEXLIT || ds->type == SURFACE_TRIANGLES || nolm == qtrue ) {
+		if ( si->compileFlags & C_VERTEXLIT || ds->type == SURFACE_TRIANGLES || nolm ) {
 			VectorClear( ds->lightmapAxis );
 			//%	VectorClear( ds->lightmapVecs[ 2 ] );
 			ds->sampleSize = 0;
@@ -834,20 +834,20 @@ shaderInfo_t *GetIndexedShader( shaderInfo_t *parent, indexMap_t *im, int numPoi
 
 	/* inherit a few things from parent shader */
 	if ( parent->globalTexture ) {
-		si->globalTexture = qtrue;
+		si->globalTexture = true;
 	}
 	if ( parent->forceMeta ) {
-		si->forceMeta = qtrue;
+		si->forceMeta = true;
 	}
 	if ( parent->nonplanar ) {
-		si->nonplanar = qtrue;
+		si->nonplanar = true;
 	}
 	if ( si->shadeAngleDegrees == 0.0 ) {
 		si->shadeAngleDegrees = parent->shadeAngleDegrees;
 	}
-	if ( parent->tcGen && si->tcGen == qfalse ) {
+	if ( parent->tcGen && !si->tcGen ) {
 		/* set xy texture projection */
-		si->tcGen = qtrue;
+		si->tcGen = true;
 		VectorCopy( parent->vecs[ 0 ], si->vecs[ 0 ] );
 		VectorCopy( parent->vecs[ 1 ], si->vecs[ 1 ] );
 	}
@@ -879,7 +879,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	vec3_t texX, texY;
 	vec_t x, y;
 	vec3_t vTranslated;
-	qboolean indexed;
+	bool indexed;
 	byte shaderIndexes[ 256 ];
 	float offsets[ 256 ];
 	char tempShader[ MAX_QPATH ];
@@ -901,7 +901,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	/* ydnar: gs mods: check for indexed shader */
 	if ( si->indexed && b->im != NULL ) {
 		/* indexed */
-		indexed = qtrue;
+		indexed = true;
 
 		/* get shader indexes for each point */
 		for ( i = 0; i < w->numpoints; i++ )
@@ -916,7 +916,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 		si = GetIndexedShader( parent, b->im, w->numpoints, shaderIndexes );
 	}
 	else{
-		indexed = qfalse;
+		indexed = false;
 	}
 
 	/* ydnar: sky hack/fix for GL_CLAMP borders on ati cards */
@@ -942,7 +942,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	ds->castShadows = b->castShadows;
 	ds->recvShadows = b->recvShadows;
 
-	ds->planar = qtrue;
+	ds->planar = true;
 	ds->planeNum = s->planenum;
 	VectorCopy( mapplanes[ s->planenum ].normal, ds->lightmapVecs[ 2 ] );
 
@@ -1041,29 +1041,26 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 
 #define YDNAR_NORMAL_EPSILON 0.50f
 
-qboolean VectorCompareExt( vec3_t n1, vec3_t n2, float epsilon ){
-	int i;
-
-
+bool VectorCompareExt( vec3_t n1, vec3_t n2, float epsilon ){
 	/* test */
-	for ( i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 		if ( fabs( n1[ i ] - n2[ i ] ) > epsilon ) {
-			return qfalse;
+			return false;
 		}
-	return qtrue;
+	return true;
 }
 
 mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh ){
 	int i, k, numVerts;
 	vec4_t plane;
-	qboolean planar;
+	bool planar;
 	float dist;
 	mapDrawSurface_t    *ds;
 	shaderInfo_t        *si, *parent;
 	bspDrawVert_t       *dv;
 	vec3_t vTranslated;
 	mesh_t              *copy;
-	qboolean indexed;
+	bool indexed;
 	byte shaderIndexes[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
 	float offsets[ MAX_EXPANDED_AXIS * MAX_EXPANDED_AXIS ];
 
@@ -1111,7 +1108,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 	/* ydnar: gs mods: check for indexed shader */
 	if ( si->indexed && p->im != NULL ) {
 		/* indexed */
-		indexed = qtrue;
+		indexed = true;
 
 		/* get shader indexes for each point */
 		for ( i = 0; i < numVerts; i++ )
@@ -1125,7 +1122,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 		si = GetIndexedShader( parent, p->im, numVerts, shaderIndexes );
 	}
 	else{
-		indexed = qfalse;
+		indexed = false;
 	}
 
 
@@ -1154,7 +1151,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 	/* construct a plane from the first vert */
 	VectorCopy( mesh->verts[ 0 ].normal, plane );
 	plane[ 3 ] = DotProduct( mesh->verts[ 0 ].xyz, plane );
-	planar = qtrue;
+	planar = true;
 
 	/* spew forth errors */
 	if ( VectorLength( plane ) < 0.001f ) {
@@ -1165,14 +1162,14 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 	for ( i = 1; i < ds->numVerts && planar; i++ )
 	{
 		/* normal test */
-		if ( VectorCompare( plane, mesh->verts[ i ].normal ) == qfalse ) {
-			planar = qfalse;
+		if ( !VectorCompare( plane, mesh->verts[ i ].normal ) ) {
+			planar = false;
 		}
 
 		/* point-plane test */
 		dist = DotProduct( mesh->verts[ i ].xyz, plane ) - plane[ 3 ];
 		if ( fabs( dist ) > EQUAL_EPSILON ) {
-			planar = qfalse;
+			planar = false;
 		}
 	}
 
@@ -1243,7 +1240,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal,
 
 
 	/* emit flares? */
-	if ( emitFlares == qfalse ) {
+	if ( !emitFlares ) {
 		return NULL;
 	}
 
@@ -1468,7 +1465,7 @@ void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
 
 		/* do texture coordinate range check */
 		ClassifySurfaces( 1, ds );
-		if ( CalcSurfaceTextureRange( ds ) == qfalse ) {
+		if ( !CalcSurfaceTextureRange( ds ) ) {
 			/* calculate subdivisions texture range (this code is shit) */
 			range = ( ds->texRange[ 0 ] > ds->texRange[ 1 ] ? ds->texRange[ 0 ] : ds->texRange[ 1 ] );
 			size = ds->maxs[ 0 ] - ds->mins[ 0 ];
@@ -1579,15 +1576,15 @@ static int g_numHiddenFaces, g_numCoinFaces;
 
 #define CULL_EPSILON 0.1f
 
-qboolean CullVectorCompare( const vec3_t v1, const vec3_t v2 ){
+bool CullVectorCompare( const vec3_t v1, const vec3_t v2 ){
 	int i;
 
 
 	for ( i = 0; i < 3; i++ )
 		if ( fabs( v1[ i ] - v2[ i ] ) > CULL_EPSILON ) {
-			return qfalse;
+			return false;
 		}
-	return qtrue;
+	return true;
 }
 
 
@@ -1597,19 +1594,19 @@ qboolean CullVectorCompare( const vec3_t v1, const vec3_t v2 ){
    determines if a brushside lies inside another brush
  */
 
-qboolean SideInBrush( side_t *side, brush_t *b ){
+bool SideInBrush( side_t *side, brush_t *b ){
 	int i, s;
 	plane_t     *plane;
 
 
 	/* ignore sides w/o windings or shaders */
 	if ( side->winding == NULL || side->shaderInfo == NULL ) {
-		return qtrue;
+		return true;
 	}
 
 	/* ignore culled sides and translucent brushes */
-	if ( side->culled == qtrue || ( b->compileFlags & C_TRANSLUCENT ) ) {
-		return qfalse;
+	if ( side->culled || ( b->compileFlags & C_TRANSLUCENT ) ) {
+		return false;
 	}
 
 	/* side iterator */
@@ -1617,30 +1614,30 @@ qboolean SideInBrush( side_t *side, brush_t *b ){
 	{
 		/* fail if any sides are caulk */
 		if ( b->sides[ i ].compileFlags & C_NODRAW ) {
-			return qfalse;
+			return false;
 		}
 
 		/* check if side's winding is on or behind the plane */
 		plane = &mapplanes[ b->sides[ i ].planenum ];
 		s = WindingOnPlaneSide( side->winding, plane->normal, plane->dist );
 		if ( s == SIDE_FRONT || s == SIDE_CROSS ) {
-			return qfalse;
+			return false;
 		}
 		if( s == SIDE_ON && b->sides[ i ].culled && DotProduct( ( mapplanes[ side->planenum ].normal ), ( plane->normal ) ) > 0 ) /* don't cull by freshly culled with matching plane */
-			return qfalse;
+			return false;
 	}
 
 	/* don't cull autosprite or polygonoffset surfaces */
 	if ( side->shaderInfo ) {
 		if ( side->shaderInfo->autosprite || side->shaderInfo->polygonOffset ) {
-			return qfalse;
+			return false;
 		}
 	}
 
 	/* inside */
-	side->culled = qtrue;
+	side->culled = true;
 	g_numHiddenFaces++;
-	return qtrue;
+	return true;
 }
 
 
@@ -1729,7 +1726,7 @@ void CullSides( entity_t *e ){
 					if ( w1->numpoints != w2->numpoints ) {
 						continue;
 					}
-					if ( side1->culled == qtrue && side2->culled == qtrue ) {
+					if ( side1->culled && side2->culled ) {
 						continue;
 					}
 
@@ -1811,17 +1808,17 @@ void CullSides( entity_t *e ){
 
 					/* cull face 1 */
 					if ( !side2->culled && !( side2->compileFlags & C_TRANSLUCENT ) && !( side2->compileFlags & C_NODRAW ) ) {
-						side1->culled = qtrue;
+						side1->culled = true;
 						g_numCoinFaces++;
 					}
 
-					if ( side1->planenum == side2->planenum && side1->culled == qtrue ) {
+					if ( side1->planenum == side2->planenum && side1->culled ) {
 						continue;
 					}
 
 					/* cull face 2 */
 					if ( !side1->culled && !( side1->compileFlags & C_TRANSLUCENT ) && !( side1->compileFlags & C_NODRAW ) ) {
-						side2->culled = qtrue;
+						side2->culled = true;
 						g_numCoinFaces++;
 					}
 
@@ -1894,7 +1891,7 @@ void ClipSidesIntoTree( entity_t *e, tree_t *tree ){
 
 			/* don't create faces for non-visible sides */
 			/* ydnar: except indexed shaders, like common/terrain and nodraw fog surfaces */
-			if ( ( si->compileFlags & C_NODRAW ) && si->indexed == qfalse && !( si->compileFlags & C_FOG ) ) {
+			if ( ( si->compileFlags & C_NODRAW ) && !si->indexed && !( si->compileFlags & C_FOG ) ) {
 				continue;
 			}
 
@@ -1963,10 +1960,10 @@ int AddReferenceToLeaf( mapDrawSurface_t *ds, node_t *node ){
 
 	/* ydnar: sky/skybox surfaces */
 	if ( node->skybox ) {
-		ds->skybox = qtrue;
+		ds->skybox = true;
 	}
 	if ( ds->shaderInfo->compileFlags & C_SKY ) {
-		node->sky = qtrue;
+		node->sky = true;
 	}
 
 	/* return */
@@ -1980,7 +1977,7 @@ int AddReferenceToLeaf( mapDrawSurface_t *ds, node_t *node ){
    adds a reference to the specified drawsurface to every leaf in the tree
  */
 
-int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, qboolean skybox ){
+int AddReferenceToTree_r( mapDrawSurface_t *ds, node_t *node, bool skybox ){
 	int i, refs = 0;
 
 
@@ -2120,10 +2117,10 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 		 ( si->mins[ 0 ] != 0.0f || si->maxs[ 0 ] != 0.0f ||
 		   si->mins[ 1 ] != 0.0f || si->maxs[ 1 ] != 0.0f ||
 		   si->mins[ 2 ] != 0.0f || si->maxs[ 2 ] != 0.0f ) ) {
-		static qboolean warned = qfalse;
+		static bool warned = false;
 		if ( !warned ) {
 			Sys_Warning( "this map uses the deformVertexes move hack\n" );
-			warned = qtrue;
+			warned = true;
 		}
 
 		/* 'fatten' the winding by the shader mins/maxs (parsed from vertexDeform move) */
@@ -2548,7 +2545,7 @@ void EmitFlareSurface( mapDrawSurface_t *ds ){
 
 
 	/* ydnar: nuking useless flare drawsurfaces */
-	if ( emitFlares == qfalse && ds->type != SURFACE_SHADER ) {
+	if ( !emitFlares && ds->type != SURFACE_SHADER ) {
 		return;
 	}
 
@@ -2685,7 +2682,7 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	VectorCopy( ds->lightmapVecs[ 2 ], out->lightmapVecs[ 2 ] );
 
 	/* ydnar: gs mods: clear out the plane normal */
-	if ( ds->planar == qfalse ) {
+	if ( !ds->planar ) {
 		VectorClear( out->lightmapVecs[ 2 ] );
 	}
 
@@ -2859,7 +2856,7 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 
 	/* ydnar: gs mods: handle lightmapped terrain (force to planar type) */
 	//%	else if( VectorLength( ds->lightmapAxis ) <= 0.0f || ds->type == SURFACE_TRIANGLES || ds->type == SURFACE_FOGHULL || debugSurfaces )
-	else if ( ( VectorLength( ds->lightmapAxis ) <= 0.0f && ds->planar == qfalse ) ||
+	else if ( ( VectorLength( ds->lightmapAxis ) <= 0.0f && !ds->planar ) ||
 			  ds->type == SURFACE_TRIANGLES ||
 			  ds->type == SURFACE_FOGHULL ||
 			  ds->numVerts > maxLMSurfaceVerts ||
@@ -2933,7 +2930,7 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	VectorCopy( ds->lightmapVecs[ 2 ], out->lightmapVecs[ 2 ] );
 
 	/* ydnar: gs mods: clear out the plane normal */
-	if ( ds->planar == qfalse ) {
+	if ( !ds->planar ) {
 		VectorClear( out->lightmapVecs[ 2 ] );
 	}
 
@@ -3002,7 +2999,7 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
 		/* is this a valid portal for this leaf? */
 		if ( w && p->nodes[ 0 ] == node ) {
 			/* is this portal passable? */
-			if ( PortalPassable( p ) == qfalse ) {
+			if ( !PortalPassable( p ) ) {
 				continue;
 			}
 
@@ -3014,7 +3011,7 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
 			/* allocate a drawsurface */
 			ds = AllocDrawSurface( SURFACE_FACE );
 			ds->shaderInfo = si;
-			ds->planar = qtrue;
+			ds->planar = true;
 			ds->sideRef = AllocSideRef( p->side, NULL );
 			ds->planeNum = FindFloatPlane( p->plane.normal, p->plane.dist, 0, NULL );
 			VectorCopy( p->plane.normal, ds->lightmapVecs[ 2 ] );
@@ -3563,7 +3560,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 	vec3_t origin, mins, maxs;
 	int refs;
 	int numSurfs, numRefs, numSkyboxSurfaces;
-	qboolean sb;
+	bool sb;
 
 
 	/* note it */
@@ -3586,13 +3583,13 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 
 		/* ydnar: skybox surfaces are special */
 		if ( ds->skybox ) {
-			refs = AddReferenceToTree_r( ds, tree->headnode, qtrue );
-			ds->skybox = qfalse;
-			sb = qtrue;
+			refs = AddReferenceToTree_r( ds, tree->headnode, true );
+			ds->skybox = false;
+			sb = true;
 		}
 		else
 		{
-			sb = qfalse;
+			sb = false;
 
 			/* refs initially zero */
 			refs = 0;
@@ -3631,7 +3628,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			BiasSurfaceTextures( ds );
 
 			/* ydnar: globalizing of fog volume handling (eek a hack) */
-			if ( e != entities && si->noFog == qfalse ) {
+			if ( e != entities && !si->noFog ) {
 				/* find surface origin and offset by entity origin */
 				VectorAdd( ds->mins, ds->maxs, origin );
 				VectorScale( origin, 0.5f, origin );
@@ -3701,7 +3698,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 		/* handle foghull surfaces */
 		case SURFACE_FOGHULL:
 			if ( refs == 0 ) {
-				refs = AddReferenceToTree_r( ds, tree->headnode, qfalse );
+				refs = AddReferenceToTree_r( ds, tree->headnode, false );
 			}
 			if ( refs > 0 ) {
 				EmitTriangleSurface( ds );
@@ -3733,7 +3730,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 		/* maybe surface got marked as skybox again */
 		/* if we keep that flag, it will get scaled up AGAIN */
 		if ( sb ) {
-			ds->skybox = qfalse;
+			ds->skybox = false;
 		}
 
 		/* tot up the references */

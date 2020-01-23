@@ -99,7 +99,7 @@ void SetupShadows( void ){
 		for ( i = 0, leaf = dleafs; i < numleafs; i++, leaf++ )
 		{
 			/* in pvs? */
-			if ( ClusterVisible( light->cluster, leaf->cluster ) == qfalse ) {
+			if ( !ClusterVisible( light->cluster, leaf->cluster ) ) {
 				continue;
 			}
 

@@ -246,14 +246,14 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, visPlane_t
    flipclip should be set.
    ==============
  */
-fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass, fixedWinding_t *target, qboolean flipclip, pstack_t *stack ){
+fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass, fixedWinding_t *target, bool flipclip, pstack_t *stack ){
 	int i, j, k, l;
 	visPlane_t plane;
 	vec3_t v1, v2;
 	float d;
 	vec_t length;
 	int counts[3];
-	qboolean fliptest;
+	bool fliptest;
 
 	// check all combinations
 	for ( i = 0 ; i < source->numpoints ; i++ )
@@ -295,7 +295,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			// source portal
 			//
 #if 1
-			fliptest = qfalse;
+			fliptest = false;
 			for ( k = 0 ; k < source->numpoints ; k++ )
 			{
 				if ( k == i || k == l ) {
@@ -304,12 +304,12 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 				d = DotProduct( source->points[k], plane.normal ) - plane.dist;
 				if ( d < -ON_EPSILON ) { // source is on the negative side, so we want all
 					                    // pass and target on the positive side
-					fliptest = qfalse;
+					fliptest = false;
 					break;
 				}
 				else if ( d > ON_EPSILON ) { // source is on the positive side, so we want all
 					                        // pass and target on the negative side
-					fliptest = qtrue;
+					fliptest = true;
 					break;
 				}
 			}
@@ -593,10 +593,10 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		}
 		else
 		{
-			stack.pass = ClipToSeperators( prevstack->source, prevstack->pass, stack.pass, qfalse, &stack );
+			stack.pass = ClipToSeperators( prevstack->source, prevstack->pass, stack.pass, false, &stack );
 		}
 #else
-		stack.pass = ClipToSeperators( stack.source, prevstack->pass, stack.pass, qfalse, &stack );
+		stack.pass = ClipToSeperators( stack.source, prevstack->pass, stack.pass, false, &stack );
 #endif
 		if ( !stack.pass ) {
 			continue;
@@ -614,10 +614,10 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		}
 		else
 		{
-			stack.pass = ClipToSeperators( prevstack->pass, prevstack->source, stack.pass, qtrue, &stack );
+			stack.pass = ClipToSeperators( prevstack->pass, prevstack->source, stack.pass, true, &stack );
 		}
 #else
-		stack.pass = ClipToSeperators( prevstack->pass, stack.source, stack.pass, qtrue, &stack );
+		stack.pass = ClipToSeperators( prevstack->pass, stack.source, stack.pass, true, &stack );
 #endif
 		if ( !stack.pass ) {
 			continue;
@@ -982,10 +982,10 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		}
 		else
 		{
-			stack.pass = ClipToSeperators( prevstack->source, prevstack->pass, stack.pass, qfalse, &stack );
+			stack.pass = ClipToSeperators( prevstack->source, prevstack->pass, stack.pass, false, &stack );
 		}
 #else
-		stack.pass = ClipToSeperators( stack.source, prevstack->pass, stack.pass, qfalse, &stack );
+		stack.pass = ClipToSeperators( stack.source, prevstack->pass, stack.pass, false, &stack );
 #endif
 		if ( !stack.pass ) {
 			continue;
@@ -1003,10 +1003,10 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		}
 		else
 		{
-			stack.pass = ClipToSeperators( prevstack->pass, prevstack->source, stack.pass, qtrue, &stack );
+			stack.pass = ClipToSeperators( prevstack->pass, prevstack->source, stack.pass, true, &stack );
 		}
 #else
-		stack.pass = ClipToSeperators( prevstack->pass, stack.source, stack.pass, qtrue, &stack );
+		stack.pass = ClipToSeperators( prevstack->pass, stack.source, stack.pass, true, &stack );
 #endif
 		if ( !stack.pass ) {
 			continue;
@@ -1172,14 +1172,14 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, vis
    AddSeperators
    ===============
  */
-int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, qboolean flipclip, visPlane_t *seperators, int maxseperators ){
+int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, visPlane_t *seperators, int maxseperators ){
 	int i, j, k, l;
 	visPlane_t plane;
 	vec3_t v1, v2;
 	float d;
 	vec_t length;
 	int counts[3], numseperators;
-	qboolean fliptest;
+	bool fliptest;
 
 	numseperators = 0;
 	// check all combinations
@@ -1222,7 +1222,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, qboolean flipcl
 			// source portal
 			//
 #if 1
-			fliptest = qfalse;
+			fliptest = false;
 			for ( k = 0 ; k < source->numpoints ; k++ )
 			{
 				if ( k == i || k == l ) {
@@ -1231,12 +1231,12 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, qboolean flipcl
 				d = DotProduct( source->points[k], plane.normal ) - plane.dist;
 				if ( d < -ON_EPSILON ) { // source is on the negative side, so we want all
 					                    // pass and target on the positive side
-					fliptest = qfalse;
+					fliptest = false;
 					break;
 				}
 				else if ( d > ON_EPSILON ) { // source is on the positive side, so we want all
 					                        // pass and target on the negative side
-					fliptest = qtrue;
+					fliptest = true;
 					break;
 				}
 			}
@@ -1354,8 +1354,8 @@ void CreatePassages( int portalnum ){
 		}
 
 		passage = safe_calloc( sizeof( passage_t ) + portalbytes );
-		numseperators = AddSeperators( portal->winding, target->winding, qfalse, seperators, MAX_SEPERATORS * 2 );
-		numseperators += AddSeperators( target->winding, portal->winding, qtrue, &seperators[numseperators], MAX_SEPERATORS * 2 - numseperators );
+		numseperators = AddSeperators( portal->winding, target->winding, false, seperators, MAX_SEPERATORS * 2 );
+		numseperators += AddSeperators( target->winding, portal->winding, true, &seperators[numseperators], MAX_SEPERATORS * 2 - numseperators );
 
 		passage->next = NULL;
 		if ( lastpassage ) {

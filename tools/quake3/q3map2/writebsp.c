@@ -297,9 +297,9 @@ void SetLightStyles( void ){
 	}
 
 	/* ydnar: determine if we keep lights in the bsp */
-	if ( KeyExists( &entities[ 0 ], "_keepLights" ) == qtrue ) {
+	if ( KeyExists( &entities[ 0 ], "_keepLights" ) ) {
 		t = ValueForKey( &entities[ 0 ], "_keepLights" );
-		keepLights = ( t[ 0 ] == '1' ) ? qtrue : qfalse;
+		keepLights = ( t[ 0 ] == '1' );
 	}
 
 	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
@@ -315,7 +315,7 @@ void SetLightStyles( void ){
 		t = ValueForKey( e, "targetname" );
 		if ( t[ 0 ] == '\0' ) {
 			/* ydnar: strip the light from the BSP file */
-			if ( keepLights == qfalse ) {
+			if ( !keepLights ) {
 				ep = e->epairs;
 				while ( ep != NULL )
 				{
@@ -407,7 +407,7 @@ void BeginBSPFile( void ){
    finishes a new bsp and writes to disk
  */
 
-void EndBSPFile( qboolean do_write ){
+void EndBSPFile( bool do_write ){
 	char path[ 1024 ];
 
 

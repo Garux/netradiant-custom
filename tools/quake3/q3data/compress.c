@@ -151,7 +151,7 @@ cblock_t BWT( cblock_t in ){
 typedef struct hnode_s
 {
 	int count;
-	qboolean used;
+	bool used;
 	int children[2];
 } hnode_t;
 

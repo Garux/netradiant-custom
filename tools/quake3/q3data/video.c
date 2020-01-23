@@ -910,7 +910,7 @@ void Cmd_Video( void ){
 	unsigned long *compressed;
 	clock_t start, stop;
 
-	GetToken( qfalse );
+	GetToken( false );
 	strcpy( s_base, token );
 	if ( g_release ) {
 //		sprintf (savename, "video/%s.cin", token);
@@ -918,13 +918,13 @@ void Cmd_Video( void ){
 		return;
 	}
 
-	GetToken( qfalse );
+	GetToken( false );
 	strcpy( s_output_base, token );
 
-	GetToken( qfalse );
+	GetToken( false );
 	digits = atoi( token );
 
-	GetToken( qfalse );
+	GetToken( false );
 
 	if ( !strcmp( token, "btc" ) ) {
 		s_compression_method = BTC_COMPRESSION;
@@ -939,10 +939,10 @@ void Cmd_Video( void ){
 		Error( "Uknown compression method '%s'\n", token );
 	}
 
-	GetToken( qfalse );
+	GetToken( false );
 	s_resample_width = atoi( token );
 
-	GetToken( qfalse );
+	GetToken( false );
 	s_resample_height = atoi( token );
 
 	resampled = malloc( sizeof( unsigned char ) * 4 * s_resample_width * s_resample_height );
@@ -953,7 +953,7 @@ void Cmd_Video( void ){
 
 	// optionally skip frames
 	if ( TokenAvailable() ) {
-		GetToken( qfalse );
+		GetToken( false );
 		startframe = atoi( token );
 	}
 	else{

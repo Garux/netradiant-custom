@@ -319,7 +319,7 @@ image_t *ImageLoad( const char *filename ){
 	char name[ 1024 ];
 	int size;
 	byte        *buffer = NULL;
-	qboolean alphaHack = qfalse;
+	bool alphaHack = false;
 
 
 	/* init */
@@ -380,7 +380,7 @@ image_t *ImageLoad( const char *filename ){
 					// On error, LoadJPGBuff might store a pointer to the error message in image->pixels
 					Sys_Warning( "LoadJPGBuff %s %s\n", name, (unsigned char*) image->pixels );
 				}
-				alphaHack = qtrue;
+				alphaHack = true;
 			}
 			else
 			{

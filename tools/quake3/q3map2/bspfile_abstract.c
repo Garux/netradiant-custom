@@ -527,7 +527,7 @@ epair_t *ParseEPair( void ){
 	}
 
 	e->key = copystring( token );
-	GetToken( qfalse );
+	GetToken( false );
 
 	/* handle value */
 	if ( strlen( token ) >= MAX_VALUE - 1 ) {
@@ -550,13 +550,13 @@ epair_t *ParseEPair( void ){
    parses an entity's epairs
  */
 
-qboolean ParseEntity( void ){
+bool ParseEntity( void ){
 	epair_t     *e;
 
 
 	/* dummy check */
-	if ( !GetToken( qtrue ) ) {
-		return qfalse;
+	if ( !GetToken( true ) ) {
+		return false;
 	}
 	if ( strcmp( token, "{" ) ) {
 		Error( "ParseEntity: { not found" );
@@ -571,7 +571,7 @@ qboolean ParseEntity( void ){
 	/* parse */
 	while ( 1 )
 	{
-		if ( !GetToken( qtrue ) ) {
+		if ( !GetToken( true ) ) {
 			Error( "ParseEntity: EOF without closing brace" );
 		}
 		if ( !EPAIR_STRCMP( token, "}" ) ) {
@@ -583,7 +583,7 @@ qboolean ParseEntity( void ){
 	}
 
 	/* return to sender */
-	return qtrue;
+	return true;
 }
 
 
@@ -777,19 +777,19 @@ void SetKeyValue( entity_t *ent, const char *key, const char *value ){
    returns true if entity has this key
  */
 
-qboolean KeyExists( const entity_t *ent, const char *key ){
+bool KeyExists( const entity_t *ent, const char *key ){
 	epair_t *ep;
 
 	/* walk epair list */
 	for ( ep = ent->epairs; ep != NULL; ep = ep->next )
 	{
 		if ( !EPAIR_STRCMP( ep->key, key ) ) {
-			return qtrue;
+			return true;
 		}
 	}
 
 	/* no match */
-	return qfalse;
+	return false;
 }
 
 /*

@@ -36,9 +36,9 @@
 int dispatch;
 int workcount;
 int oldf;
-qboolean pacifier;
+bool pacifier;
 
-qboolean threaded;
+bool threaded;
 
 /*
    =============
@@ -100,7 +100,7 @@ void ThreadWorkerFunction( int threadnum ){
 	}
 }
 
-void RunThreadsOnIndividual( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
+void RunThreadsOnIndividual( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	if ( numthreads == -1 ) {
 		ThreadSetDefault();
 	}
@@ -168,7 +168,7 @@ void ThreadUnlock( void ){
    RunThreadsOn
    =============
  */
-void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
+void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	HANDLE threadhandle[MAX_THREADS];
 	int i;
 	int start, end;
@@ -178,7 +178,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 	workcount = workcnt;
 	oldf = -1;
 	pacifier = showpacifier;
-	threaded = qtrue;
+	threaded = true;
 
 	//
 	// run threads in parallel
@@ -210,7 +210,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 	}
 	DeleteCriticalSection( &crit );
 
-	threaded = qfalse;
+	threaded = false;
 	end = I_FloatTime();
 	if ( pacifier ) {
 		Sys_Printf( " (%i)\n", end - start );
@@ -262,7 +262,7 @@ void ThreadUnlock( void ){
    RunThreadsOn
    =============
  */
-void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
+void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	int i;
 	pthread_t work_threads[MAX_THREADS];
 	pthread_addr_t status;
@@ -275,7 +275,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 	workcount = workcnt;
 	oldf = -1;
 	pacifier = showpacifier;
-	threaded = qtrue;
+	threaded = true;
 
 	if ( pacifier ) {
 		setbuf( stdout, NULL );
@@ -316,7 +316,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 		}
 	}
 
-	threaded = qfalse;
+	threaded = false;
 
 	end = I_FloatTime();
 	if ( pacifier ) {
@@ -370,7 +370,7 @@ void ThreadUnlock( void ){
    RunThreadsOn
    =============
  */
-void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
+void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	int i;
 	int pid[MAX_THREADS];
 	int start, end;
@@ -380,7 +380,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 	workcount = workcnt;
 	oldf = -1;
 	pacifier = showpacifier;
-	threaded = qtrue;
+	threaded = true;
 
 	if ( pacifier ) {
 		setbuf( stdout, NULL );
@@ -403,7 +403,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 	for ( i = 0 ; i < numthreads - 1 ; i++ )
 		wait( NULL );
 
-	threaded = qfalse;
+	threaded = false;
 
 	end = I_FloatTime();
 	if ( pacifier ) {
@@ -530,7 +530,7 @@ void recursive_mutex_init( pthread_mutexattr_t attribs ){
    RunThreadsOn
    =============
  */
-void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
+void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	pthread_mutexattr_t mattrib;
 	pthread_attr_t attr;
 	pthread_t work_threads[MAX_THREADS];
@@ -558,7 +558,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 	}
 	else
 	{
-		threaded  = qtrue;
+		threaded  = true;
 
 		if ( pacifier ) {
 			setbuf( stdout, NULL );
@@ -586,7 +586,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
 			}
 		}
 		pthread_mutexattr_destroy( &mattrib );
-		threaded = qfalse;
+		threaded = false;
 	}
 
 	end = I_FloatTime();
@@ -624,7 +624,7 @@ void ThreadUnlock( void ){
    RunThreadsOn
    =============
  */
-void RunThreadsOn( int workcnt, qboolean showpacifier, void ( *func )( int ) ){
+void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 	int i;
 	int start, end;
 

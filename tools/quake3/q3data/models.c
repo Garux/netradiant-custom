@@ -153,7 +153,7 @@ void ClearModel( void ){
 	memset( &g_data.model, 0, sizeof( g_data.model ) );
 	VectorCopy( vec3_origin, g_data.adjust );
 	g_data.fixedwidth = g_data.fixedheight = 0;
-	g_skipmodel = qfalse;
+	g_skipmodel = false;
 }
 
 /*
@@ -509,7 +509,7 @@ void FinishModel( int type ){
 */
 static void OrderSurfaces( void ){
 	int s;
-	extern qboolean g_stripify;
+	extern bool g_stripify;
 
 	// go through each surface and find best strip/fans possible
 	for ( s = 0; s < g_data.model.numSurfaces; s++ )
@@ -763,7 +763,7 @@ static int LoadModelFile( const char *filename, polyset_t **psets, int *numpolys
 void Cmd_Base( void ){
 	char filename[1024];
 
-	GetToken( qfalse );
+	GetToken( false );
 	sprintf( filename, "%s/%s", g_cddir, token );
 	LoadBase( filename );
 }
@@ -776,7 +776,7 @@ static void LoadBase( const char *filename ){
 
 	// determine polyset splitting threshold
 	if ( TokenAvailable() ) {
-		GetToken( qfalse );
+		GetToken( false );
 		g_data.maxSurfaceTris = atoi( token );
 	}
 	else
@@ -818,13 +818,13 @@ void Cmd_SpriteBase( void ){
 
 	g_data.type = MD3_TYPE_SPRITE;
 
-	GetToken( qfalse );
+	GetToken( false );
 	xl = atof( token );
-	GetToken( qfalse );
+	GetToken( false );
 	yl = atof( token );
-	GetToken( qfalse );
+	GetToken( false );
 	width = atof( token );
-	GetToken( qfalse );
+	GetToken( false );
 	height = atof( token );
 
 //	if (g_skipmodel || g_release || g_archive)
@@ -917,7 +917,7 @@ void GrabFrame( const char *frame ){
 	float       *frameNormals;
 	const char  *framefile;
 	polyset_t       *psets;
-	qboolean parentTagExists = qfalse;
+	bool parentTagExists = false;
 	int numpolysets;
 	int numtags = 0;
 	int tagcount;
@@ -1005,7 +1005,7 @@ void GrabFrame( const char *frame ){
 					MD3_ComputeTagFromTri( &tagParent, tri );
 					strcpy( tagParent.name, psets[i].name );
 					g_data.tags[g_data.model.numFrames][numtags] = tagParent;
-					parentTagExists = qtrue;
+					parentTagExists = true;
 
 				}
 			}
@@ -1129,7 +1129,7 @@ void GrabFrame( const char *frame ){
 void Cmd_Frame( void ){
 	while ( TokenAvailable() )
 	{
-		GetToken( qfalse );
+		GetToken( false );
 		if ( g_skipmodel ) {
 			continue;
 		}
@@ -1185,7 +1185,7 @@ void Cmd_Skin( void ){
 	char skinfile[1024];
 
 	if ( g_data.type == MD3_TYPE_BASE3DS ) {
-		GetToken( qfalse );
+		GetToken( false );
 
 		sprintf( skinfile, "%s/%s", g_cddir, token );
 
@@ -1214,7 +1214,7 @@ void Cmd_Skin( void ){
 
  */
 void Cmd_SpriteShader(){
-	GetToken( qfalse );
+	GetToken( false );
 	strcpy( g_data.surfData[0].shaders[g_data.surfData[0].header.numShaders].name, token );
 	g_data.surfData[0].header.numShaders++;
 	g_data.model.numSkins++;
@@ -1229,13 +1229,13 @@ void Cmd_Origin( void ){
 	// rotate points into frame of reference so model points down the
 	// positive x axis
 	// FIXME: use alias native coordinate system
-	GetToken( qfalse );
+	GetToken( false );
 	g_data.adjust[1] = -atof( token );
 
-	GetToken( qfalse );
+	GetToken( false );
 	g_data.adjust[0] = atof( token );
 
-	GetToken( qfalse );
+	GetToken( false );
 	g_data.adjust[2] = -atof( token );
 }
 
@@ -1246,7 +1246,7 @@ void Cmd_Origin( void ){
    =================
  */
 void Cmd_ScaleUp( void ){
-	GetToken( qfalse );
+	GetToken( false );
 	g_data.scale_up = atof( token );
 	if ( g_skipmodel || g_release || g_archive ) {
 		return;
@@ -1265,9 +1265,9 @@ void Cmd_ScaleUp( void ){
    =================
  */
 void Cmd_Skinsize( void ){
-	GetToken( qfalse );
+	GetToken( false );
 	g_data.fixedwidth = atoi( token );
-	GetToken( qfalse );
+	GetToken( false );
 	g_data.fixedheight = atoi( token );
 }
 
@@ -1282,7 +1282,7 @@ void Cmd_Modelname( void ){
 	FinishModel( TYPE_UNKNOWN );
 	ClearModel();
 
-	GetToken( qfalse );
+	GetToken( false );
 	strcpy( g_modelname, token );
 	path_set_extension( g_modelname, ".md3" );
 	strcpy( g_data.model.name, g_modelname );
@@ -1298,7 +1298,7 @@ void Cmd_Cd( void ){
 		Error( "$cd command without a $modelname" );
 	}
 
-	GetToken( qfalse );
+	GetToken( false );
 
 	sprintf( g_cddir, "%s%s", gamedir, token );
 
@@ -1309,7 +1309,7 @@ void Cmd_Cd( void ){
 		return;
 	}
 	if ( strncmp( token, g_only, strlen( g_only ) ) ) {
-		g_skipmodel = qtrue;
+		g_skipmodel = true;
 		printf( "skipping %s\n", token );
 	}
 }
@@ -1334,7 +1334,7 @@ void Cmd_3DSConvert(){
 	FinishModel( TYPE_UNKNOWN );
 	ClearModel();
 
-	GetToken( qfalse );
+	GetToken( false );
 
 	sprintf( file, "%s%s", gamedir, token );
 	strcpy( g_modelname, token );
@@ -1345,26 +1345,26 @@ void Cmd_3DSConvert(){
 	}
 
 	if ( TokenAvailable() ) {
-		GetToken( qfalse );
+		GetToken( false );
 		g_data.scale_up = atof( token );
 	}
 
 	Convert3DStoMD3( file );
 }
 
-static void ConvertASE( const char *filename, int type, qboolean grabAnims );
+static void ConvertASE( const char *filename, int type, bool grabAnims );
 
 /*
 ** Cmd_ASEConvert
 */
-void Cmd_ASEConvert( qboolean grabAnims ){
+void Cmd_ASEConvert( bool grabAnims ){
 	char filename[1024];
 	int type = TYPE_ITEM;
 
 	FinishModel( TYPE_UNKNOWN );
 	ClearModel();
 
-	GetToken( qfalse );
+	GetToken( false );
 	sprintf( filename, "%s%s", gamedir, token );
 
 	strcpy( g_modelname, token );
@@ -1379,31 +1379,31 @@ void Cmd_ASEConvert( qboolean grabAnims ){
 
 	while ( TokenAvailable() )
 	{
-		GetToken( qfalse );
+		GetToken( false );
 		if ( !strcmp( token, "-origin" ) ) {
 			if ( !TokenAvailable() ) {
 				Error( "missing parameter for -origin" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.aseAdjust[1] = -atof( token );
 
 			if ( !TokenAvailable() ) {
 				Error( "missing parameter for -origin" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.aseAdjust[0] = atof( token );
 
 			if ( !TokenAvailable() ) {
 				Error( "missing parameter for -origin" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.aseAdjust[2] = -atof( token );
 		}
 		else if ( !strcmp( token, "-lod" ) ) {
 			if ( !TokenAvailable() ) {
 				Error( "No parameter for -lod" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.currentLod = atoi( token );
 			if ( g_data.currentLod > MD3_MAX_LODS - 1 ) {
 				Error( "-lod parameter too large! (%d)\n", g_data.currentLod );
@@ -1412,35 +1412,35 @@ void Cmd_ASEConvert( qboolean grabAnims ){
 			if ( !TokenAvailable() ) {
 				Error( "No second parameter for -lod" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.lodBias = atof( token );
 		}
 		else if ( !strcmp( token, "-maxtris" ) ) {
 			if ( !TokenAvailable() ) {
 				Error( "No parameter for -maxtris" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.maxSurfaceTris = atoi( token );
 		}
 		else if ( !strcmp( token, "-playerparms" ) ) {
 			if ( !TokenAvailable() ) {
 				Error( "missing skip start parameter for -playerparms" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.lowerSkipFrameStart = atoi( token );
 
 #if 0
 			if ( !TokenAvailable() ) {
 				Error( "missing skip end parameter for -playerparms" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.lowerSkipFrameEnd = atoi( token );
 #endif
 
 			if ( !TokenAvailable() ) {
 				Error( "missing upper parameter for -playerparms" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.maxUpperFrames = atoi( token );
 
 			g_data.lowerSkipFrameEnd = g_data.maxUpperFrames - 1;
@@ -1449,7 +1449,7 @@ void Cmd_ASEConvert( qboolean grabAnims ){
 			if ( !TokenAvailable() ) {
 				Error( "missing head parameter for -playerparms" );
 			}
-			GetToken( qfalse );
+			GetToken( false );
 			g_data.maxHeadFrames = atoi( token );
 #endif
 			g_data.maxHeadFrames = 1;
@@ -1479,8 +1479,8 @@ void Cmd_ASEConvert( qboolean grabAnims ){
 	}
 
 	if ( type == TYPE_WEAPON ) {
-		ConvertASE( filename, type, qfalse );
-		ConvertASE( filename, TYPE_HAND, qtrue );
+		ConvertASE( filename, type, false );
+		ConvertASE( filename, TYPE_HAND, true );
 	}
 	else
 	{
@@ -1620,7 +1620,7 @@ static void BuildAnimationFromOAFs( const char *filename, ObjectAnimationFrame_t
 	for ( f = 0; f < numFrames; f++ )
 	{
 		ObjectAnimationFrame_t *pOAF = &oanims[f];
-		qboolean parentTagExists = qfalse;
+		bool parentTagExists = false;
 		md3Tag_t tagParent;
 		int numtags = 0;
 		md3Frame_t      *fr;
@@ -1684,7 +1684,7 @@ static void BuildAnimationFromOAFs( const char *filename, ObjectAnimationFrame_t
 					MD3_ComputeTagFromTri( &tagParent, tri );
 					strcpy( tagParent.name, "tag_parent" );
 					g_data.tags[f][numtags] = tagParent;
-					parentTagExists = qtrue;
+					parentTagExists = true;
 				}
 				else
 				{
@@ -1808,7 +1808,7 @@ static void BuildAnimationFromOAFs( const char *filename, ObjectAnimationFrame_t
 	ClearModel();
 }
 
-static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
+static void ConvertASE( const char *filename, int type, bool grabAnims ){
 	int i, j;
 	int numSurfaces;
 	int numFrames = -1;
@@ -1855,9 +1855,9 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		}
 	}
 	else if ( type == TYPE_PLAYER ) {
-		qboolean tagTorso = qfalse;
-		qboolean tagHead = qfalse;
-		qboolean tagWeapon = qfalse;
+		bool tagTorso = false;
+		bool tagHead = false;
+		bool tagWeapon = false;
 
 		//
 		// verify that all necessary tags exist
@@ -1866,13 +1866,13 @@ static void ConvertASE( const char *filename, int type, qboolean grabAnims ){
 		for ( i = 0; i < numSurfaces; i++ )
 		{
 			if ( !strcmp( ASE_GetSurfaceName( i ), "tag_head" ) ) {
-				tagHead = qtrue;
+				tagHead = true;
 			}
 			if ( !strcmp( ASE_GetSurfaceName( i ), "tag_torso" ) ) {
-				tagTorso = qtrue;
+				tagTorso = true;
 			}
 			if ( !strcmp( ASE_GetSurfaceName( i ), "tag_weapon" ) ) {
-				tagWeapon = qtrue;
+				tagWeapon = true;
 			}
 		}
 

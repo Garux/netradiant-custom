@@ -35,13 +35,8 @@
 #include <string.h>
 #include "l_net.h"
 #include "l_net_wins.h"
-//#include <winsock.h>
-//#include "mpdosock.h"
 
 #define WinError WinPrint
-
-#define qtrue   1
-#define qfalse  0
 
 typedef struct tag_error_struct
 {
@@ -61,7 +56,6 @@ static int net_acceptsocket = -1;       // socket for fielding new connections
 static int net_controlsocket;
 static int net_hostport;                // udp port number for acceptsocket
 static int net_broadcastsocket = 0;
-//static qboolean ifbcastinit = qfalse;
 static struct sockaddr_s broadcastaddr;
 
 static unsigned long myAddr;
@@ -580,13 +574,13 @@ int WINS_Broadcast( int socket, byte *buf, int len ){
 	return WINS_Write( socket, buf, len, &broadcastaddr );
 } //end of the function WINS_Broadcast
 //===========================================================================
-// returns qtrue on success or qfalse on failure
+// returns true on success or false on failure
 //
 // Parameter:				-
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-int WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
+bool WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 	int ret, written;
 
 	if ( addr ) {
@@ -596,7 +590,7 @@ int WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 			ret = sendto( socket, &buf[written], len - written, 0, (struct sockaddr *)addr, sizeof( struct sockaddr_s ) );
 			if ( ret == SOCKET_ERROR ) {
 				if ( WSAGetLastError() != WSAEWOULDBLOCK ) {
-					return qfalse;
+					return false;
 				}
 				Sleep( 1000 );
 			} //end if
@@ -614,7 +608,7 @@ int WINS_Write( int socket, byte *buf, int len, struct sockaddr_s *addr ){
 			ret = send( socket, buf, len, 0 );
 			if ( ret == SOCKET_ERROR ) {
 				if ( WSAGetLastError() != WSAEWOULDBLOCK ) {
-					return qfalse;
+					return false;
 				}
 				Sleep( 1000 );
 			} //end if

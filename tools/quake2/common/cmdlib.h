@@ -44,11 +44,7 @@
 	#pragma intrinsic( memset, memcpy )
 #endif
 
-#ifndef __BYTEBOOL__
-  #define __BYTEBOOL__
-typedef enum {false, true} qboolean;
-typedef unsigned char byte;
-#endif
+#include "bytebool.h"
 
 #ifdef PATH_MAX
 #define MAX_OS_PATH     PATH_MAX

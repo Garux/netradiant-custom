@@ -89,9 +89,9 @@ int myargc;
 char **myargv;
 
 char com_token[1024];
-qboolean com_eof;
+bool com_eof;
 
-qboolean archive;
+bool archive;
 char archivedir[1024];
 
 
@@ -362,7 +362,7 @@ skipwhite:
 	while ( ( c = *data ) <= ' ' )
 	{
 		if ( c == 0 ) {
-			com_eof = qtrue;
+			com_eof = true;
 			return NULL;            // end of file;
 		}
 		data++;
@@ -564,15 +564,15 @@ void SafeWrite( FILE *f, const void *buffer, int count ){
    FileExists
    ==============
  */
-qboolean    FileExists( const char *filename ){
+bool    FileExists( const char *filename ){
 	FILE    *f;
 
 	f = fopen( filename, "r" );
 	if ( !f ) {
-		return qfalse;
+		return false;
 	}
 	fclose( f );
-	return qtrue;
+	return true;
 }
 
 /*
@@ -676,7 +676,7 @@ void    SaveFile( const char *filename, const void *buffer, int count ){
  */
 
 /// \brief Returns true if \p path is a fully qualified file-system path.
-qboolean path_is_absolute( const char* path ){
+bool path_is_absolute( const char* path ){
 #if defined( WIN32 )
 	return path[0] == '/'
 		   || ( path[0] != '\0' && path[1] == ':' ); // local drive

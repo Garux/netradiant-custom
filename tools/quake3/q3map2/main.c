@@ -101,14 +101,14 @@ int main( int argc, char **argv ){
 		/* verbose */
 		else if ( !strcmp( argv[ i ], "-v" ) ) {
 			if ( !verbose ) {
-				verbose = qtrue;
+				verbose = true;
 				argv[ i ] = NULL;
 			}
 		}
 
 		/* force */
 		else if ( !strcmp( argv[ i ], "-force" ) ) {
-			force = qtrue;
+			force = true;
 			argv[ i ] = NULL;
 		}
 
@@ -138,7 +138,7 @@ int main( int argc, char **argv ){
 		else if( !strcmp( argv[ i ], "-nocmdline" ) )
 		{
 			Sys_Printf( "noCmdLine\n" );
-			nocmdline = qtrue;
+			nocmdline = true;
 			argv[ i ] = NULL;
 		}
 

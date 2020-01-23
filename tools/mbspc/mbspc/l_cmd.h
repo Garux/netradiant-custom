@@ -36,11 +36,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <time.h>
 #include <stdarg.h>
 
-#ifndef __BYTEBOOL__
-#define __BYTEBOOL__
-typedef enum {false, true} qboolean;
-typedef unsigned char byte;
-#endif
+#include "bytebool.h"
 
 
 // set these before calling CheckParm

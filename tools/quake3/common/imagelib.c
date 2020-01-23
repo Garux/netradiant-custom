@@ -686,7 +686,7 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 	int bcPlanes;
 	int bcBitCount;
 	byte bcPalette[1024];
-	qboolean flipped;
+	bool flipped;
 	byte *in;
 	int len, pos = 0;
 
@@ -763,10 +763,10 @@ void LoadBMP( const char *filename, byte **pic, byte **palette, int *width, int 
 
 	if ( bcHeight < 0 ) {
 		bcHeight = -bcHeight;
-		flipped = qtrue;
+		flipped = true;
 	}
 	else {
-		flipped = qfalse;
+		flipped = false;
 	}
 
 	if ( width ) {

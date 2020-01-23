@@ -43,9 +43,6 @@
    exports a map brush
  */
 
-#define SNAP_FLOAT_TO_INT   4
-#define SNAP_INT_TO_FLOAT   ( 1.0 / SNAP_FLOAT_TO_INT )
-
 typedef vec_t vec2_t[2];
 
 static vec_t Det3x3( vec_t a00, vec_t a01, vec_t a02,
@@ -164,7 +161,7 @@ exwinding:
 }
 
 #define FRAC( x ) ( ( x ) - floor( x ) )
-static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushPrimitives ){
+static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, bool brushPrimitives ){
 	int originSize = 256;
 
 	char pattern[6][7][3] = {
@@ -224,7 +221,7 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, qboolean brushP
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qboolean brushPrimitives ){
+static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bool brushPrimitives ){
 	int i;
 	bspBrushSide_t  *side;
 	side_t          *buildSide;
@@ -245,11 +242,11 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 	}
 	buildBrush->numsides = 0;
 
-	qboolean modelclip = qfalse;
+	bool modelclip = false;
 	/* try to guess if thats model clip */
 	if ( force ){
 		int notNoShader = 0;
-		modelclip = qtrue;
+		modelclip = true;
 		for ( i = 0; i < brush->numSides; i++ )
 		{
 			/* get side */
@@ -265,7 +262,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 				notNoShader++;
 			}
 			if( notNoShader > 1 ){
-				modelclip = qfalse;
+				modelclip = false;
 				break;
 			}
 		}
@@ -373,7 +370,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qboolean brushPrimitives ){
+static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bool brushPrimitives ){
 	int i, j;
 	bspBrushSide_t  *side;
 	side_t          *buildSide;
@@ -395,11 +392,11 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 	}
 	buildBrush->numsides = 0;
 
-	qboolean modelclip = qfalse;
+	bool modelclip = false;
 	/* try to guess if thats model clip */
 	if ( force ){
 		int notNoShader = 0;
-		modelclip = qtrue;
+		modelclip = true;
 		for ( i = 0; i < brush->numSides; i++ )
 		{
 			/* get side */
@@ -415,7 +412,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, qb
 				notNoShader++;
 			}
 			if( notNoShader > 1 ){
-				modelclip = qfalse;
+				modelclip = false;
 				break;
 			}
 		}
@@ -907,7 +904,7 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, vec3_t origin 
    exports a bsp model to a map file
  */
 
-static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origin, qboolean brushPrimitives ){
+static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origin, bool brushPrimitives ){
 	int i, num;
 	bspBrush_t          *brush;
 	bspDrawSurface_t    *ds;
@@ -969,7 +966,7 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
    exports entity key/value pairs to a map file
  */
 
-static void ConvertEPairs( FILE *f, entity_t *e, qboolean skip_origin ){
+static void ConvertEPairs( FILE *f, entity_t *e, bool skip_origin ){
 	epair_t *ep;
 
 
@@ -1003,7 +1000,7 @@ static void ConvertEPairs( FILE *f, entity_t *e, qboolean skip_origin ){
    exports an quake map file from the bsp
  */
 
-int ConvertBSPToMap_Ext( char *bspName, qboolean brushPrimitives ){
+int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 	int i, modelNum;
 	FILE            *f;
 	bspModel_t      *model;
@@ -1089,9 +1086,9 @@ int ConvertBSPToMap_Ext( char *bspName, qboolean brushPrimitives ){
 }
 
 int ConvertBSPToMap( char *bspName ){
-	return ConvertBSPToMap_Ext( bspName, qfalse );
+	return ConvertBSPToMap_Ext( bspName, false );
 }
 
 int ConvertBSPToMap_BP( char *bspName ){
-	return ConvertBSPToMap_Ext( bspName, qtrue );
+	return ConvertBSPToMap_Ext( bspName, true );
 }

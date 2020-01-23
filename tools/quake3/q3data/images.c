@@ -27,7 +27,7 @@ int byteimagewidth, byteimageheight;
 
 char mip_prefix[1024];              // directory to dump the textures in
 
-qboolean colormap_issued;
+bool colormap_issued;
 byte colormap_palette[768];
 
 /*
@@ -43,7 +43,7 @@ void Cmd_Grab( void ){
 	char savename[1024];
 	char dest[1024];
 
-	GetToken( qfalse );
+	GetToken( false );
 
 	if ( path_separator( token[0] ) ) {
 		sprintf( savename, "%s%s.pcx", writedir, token + 1 );
@@ -64,13 +64,13 @@ void Cmd_Grab( void ){
 		return;
 	}
 
-	GetToken( qfalse );
+	GetToken( false );
 	xl = atoi( token );
-	GetToken( qfalse );
+	GetToken( false );
 	yl = atoi( token );
-	GetToken( qfalse );
+	GetToken( false );
 	w = atoi( token );
-	GetToken( qfalse );
+	GetToken( false );
 	h = atoi( token );
 
 	if ( xl < 0 || yl < 0 || w < 0 || h < 0 || xl + w > byteimagewidth || yl + h > byteimageheight ) {
@@ -105,7 +105,7 @@ void Cmd_Raw( void ){
 	char savename[1024];
 	char dest[1024];
 
-	GetToken( qfalse );
+	GetToken( false );
 
 	sprintf( savename, "%s%s.lmp", writedir, token );
 
@@ -115,13 +115,13 @@ void Cmd_Raw( void ){
 		return;
 	}
 
-	GetToken( qfalse );
+	GetToken( false );
 	xl = atoi( token );
-	GetToken( qfalse );
+	GetToken( false );
 	yl = atoi( token );
-	GetToken( qfalse );
+	GetToken( false );
 	w = atoi( token );
-	GetToken( qfalse );
+	GetToken( false );
 	h = atoi( token );
 
 	if ( xl < 0 || yl < 0 || w < 0 || h < 0 || xl + w > byteimagewidth || yl + h > byteimageheight ) {
@@ -213,7 +213,7 @@ void Cmd_Colormap( void ){
 	char savename[1024];
 	char dest[1024];
 
-	colormap_issued = qtrue;
+	colormap_issued = true;
 	if ( !g_release ) {
 		memcpy( colormap_palette, lbmpalette, 768 );
 	}
@@ -222,7 +222,7 @@ void Cmd_Colormap( void ){
 		return;
 	}
 
-	GetToken( qfalse );
+	GetToken( false );
 	sprintf( savename, "%spics/%s.pcx", writedir, token );
 
 	if ( g_release ) {
@@ -302,7 +302,7 @@ byte pixdata[256];
 int d_red, d_green, d_blue;
 
 byte palmap[32][32][32];
-qboolean palmap_built;
+bool palmap_built;
 
 /*
    =============
@@ -348,7 +348,7 @@ void BuildPalmap( void ){
 	if ( palmap_built ) {
 		return;
 	}
-	palmap_built = qtrue;
+	palmap_built = true;
 
 	for ( r = 4 ; r < 256 ; r += 8 )
 	{
@@ -443,7 +443,7 @@ void Cmd_Environment( void ){
 	byte image[256 * 256];
 	byte    *tga;
 
-	GetToken( qfalse );
+	GetToken( false );
 
 	if ( g_release ) {
 		for ( i = 0 ; i < 6 ; i++ )
