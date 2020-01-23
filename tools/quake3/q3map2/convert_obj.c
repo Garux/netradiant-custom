@@ -268,7 +268,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
 						Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", shaderfile, scriptline );
 
 					/* digest any images */
-					if ( !Q_stricmp( token, "map" ) ) {
+					if ( striEqual( token, "map" ) ) {
 						/* get an image */
 						GetToken( false );
 						if ( *token != '*' && *token != '$' ) {

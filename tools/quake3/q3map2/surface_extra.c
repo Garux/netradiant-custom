@@ -342,7 +342,7 @@ void LoadSurfaceExtraFile( const char *path ){
 		}
 
 		/* default? */
-		if ( !Q_stricmp( token, "default" ) ) {
+		if ( striEqual( token, "default" ) ) {
 			se = &seDefault;
 		}
 
@@ -372,49 +372,49 @@ void LoadSurfaceExtraFile( const char *path ){
 			}
 
 			/* shader */
-			if ( !Q_stricmp( token, "shader" ) ) {
+			if ( striEqual( token, "shader" ) ) {
 				GetToken( false );
 				se->si = ShaderInfoForShader( token );
 			}
 
 			/* parent surface number */
-			else if ( !Q_stricmp( token, "parent" ) ) {
+			else if ( striEqual( token, "parent" ) ) {
 				GetToken( false );
 				se->parentSurfaceNum = atoi( token );
 			}
 
 			/* entity number */
-			else if ( !Q_stricmp( token, "entity" ) ) {
+			else if ( striEqual( token, "entity" ) ) {
 				GetToken( false );
 				se->entityNum = atoi( token );
 			}
 
 			/* cast shadows */
-			else if ( !Q_stricmp( token, "castShadows" ) ) {
+			else if ( striEqual( token, "castShadows" ) ) {
 				GetToken( false );
 				se->castShadows = atoi( token );
 			}
 
 			/* recv shadows */
-			else if ( !Q_stricmp( token, "receiveShadows" ) ) {
+			else if ( striEqual( token, "receiveShadows" ) ) {
 				GetToken( false );
 				se->recvShadows = atoi( token );
 			}
 
 			/* lightmap sample size */
-			else if ( !Q_stricmp( token, "sampleSize" ) ) {
+			else if ( striEqual( token, "sampleSize" ) ) {
 				GetToken( false );
 				se->sampleSize = atoi( token );
 			}
 
 			/* longest curve */
-			else if ( !Q_stricmp( token, "longestCurve" ) ) {
+			else if ( striEqual( token, "longestCurve" ) ) {
 				GetToken( false );
 				se->longestCurve = atof( token );
 			}
 
 			/* lightmap axis vector */
-			else if ( !Q_stricmp( token, "lightmapAxis" ) ) {
+			else if ( striEqual( token, "lightmapAxis" ) ) {
 				Parse1DMatrix( 3, se->lightmapAxis );
 			}
 

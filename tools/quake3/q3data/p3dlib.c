@@ -96,7 +96,7 @@ int CharIsTokenDelimiter( int ch ){
 int P3DSkipToToken( const char *name ){
 	while ( P3DGetToken( 0 ) )
 	{
-		if ( !Q_stricmp( s_token, name ) ) {
+		if ( striEqual( s_token, name ) ) {
 			return 1;
 		}
 	}
@@ -161,14 +161,14 @@ int P3DSkipToTokenInBlock( const char *name ){
 
 	while ( P3DGetToken( 0 ) )
 	{
-		if ( !Q_stricmp( s_token, "}" ) ) {
+		if ( strEqual( s_token, "}" ) ) {
 			iLevel--;
 		}
-		else if ( !Q_stricmp( s_token, "{" ) ) {
+		else if ( strEqual( s_token, "{" ) ) {
 			iLevel++;
 		}
 
-		if ( !Q_stricmp( s_token, name ) ) {
+		if ( striEqual( s_token, name ) ) {
 			return 1;
 		}
 
@@ -195,7 +195,7 @@ int P3DProcess(){
 	// skip to the first Obj declaration
 	while ( P3DGetToken( 0 ) )
 	{
-		if ( !Q_stricmp( s_token, "Obj" ) ) {
+		if ( striEqual( s_token, "Obj" ) ) {
 			int j = 0, k = 0;
 
 			if ( P3DSkipToToken( "Text" ) ) {
@@ -290,7 +290,7 @@ void SkinFromP3D( const char *file ){
 		// corresponds to and append the shader to it
 		for ( i = 0; i < g_data.model.numSurfaces; i++ )
 		{
-			if ( !Q_stricmp( g_data.surfData[i].header.name, psetName ) ) {
+			if ( striEqual( g_data.surfData[i].header.name, psetName ) ) {
 				char *p;
 
 				if ( strstr( associatedShader, gamedir + 1 ) ) {

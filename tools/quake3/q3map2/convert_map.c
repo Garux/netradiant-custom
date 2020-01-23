@@ -258,7 +258,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 			}
 			shader = &bspShaders[ side->shaderNum ];
 			//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-			if( Q_stricmp( shader->shader, "noshader" ) ){
+			if( !striEqual( shader->shader, "noshader" ) ){
 				notNoShader++;
 			}
 			if( notNoShader > 1 ){
@@ -280,7 +280,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 		}
 		shader = &bspShaders[ side->shaderNum ];
 		//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-		if( !Q_stricmp( shader->shader, "default" ) || ( !Q_stricmp( shader->shader, "noshader" ) && !modelclip ) )
+		if( striEqual( shader->shader, "default" ) || ( striEqual( shader->shader, "noshader" ) && !modelclip ) )
 			continue;
 
 		/* add build side */
@@ -408,7 +408,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 			}
 			shader = &bspShaders[ side->shaderNum ];
 			//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-			if( Q_stricmp( shader->shader, "noshader" ) ){
+			if( !striEqual( shader->shader, "noshader" ) ){
 				notNoShader++;
 			}
 			if( notNoShader > 1 ){
@@ -430,7 +430,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 		}
 		shader = &bspShaders[ side->shaderNum ];
 		//"noshader" happens on modelclip and unwanted sides ( usually breaking complex brushes )
-		if( !Q_stricmp( shader->shader, "default" ) || ( !Q_stricmp( shader->shader, "noshader" ) && !modelclip ) )
+		if( striEqual( shader->shader, "default" ) || ( striEqual( shader->shader, "noshader" ) && !modelclip ) )
 			continue;
 
 		/* add build side */
@@ -772,7 +772,7 @@ for ( i = 0; i < brush->numSides; i++ )
 		continue;
 	}
 	shader = &bspShaders[ side->shaderNum ];
-	if ( !Q_stricmp( shader->shader, "default" ) || !Q_stricmp( shader->shader, "noshader" ) ) {
+	if ( striEqual( shader->shader, "default" ) || striEqual( shader->shader, "noshader" ) ) {
 		continue;
 	}
 
@@ -979,12 +979,12 @@ static void ConvertEPairs( FILE *f, entity_t *e, bool skip_origin ){
 		}
 
 		/* ignore model keys with * prefixed values */
-		if ( !Q_stricmp( ep->key, "model" ) && ep->value[ 0 ] == '*' ) {
+		if ( striEqual( ep->key, "model" ) && ep->value[ 0 ] == '*' ) {
 			continue;
 		}
 
 		/* ignore origin keys if skip_origin is set */
-		if ( skip_origin && !Q_stricmp( ep->key, "origin" ) ) {
+		if ( skip_origin && striEqual( ep->key, "origin" ) ) {
 			continue;
 		}
 

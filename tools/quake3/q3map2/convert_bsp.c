@@ -932,19 +932,19 @@ int ConvertBSPMain( int argc, char **argv ){
 		/* -format map|ase|... */
 		if ( strEqual( argv[ i ], "-format" ) ) {
 			i++;
-			if ( !Q_stricmp( argv[ i ], "ase" ) ) {
+			if ( striEqual( argv[ i ], "ase" ) ) {
 				convertFunc = ConvertBSPToASE;
 				map_allowed = false;
 			}
-			else if ( !Q_stricmp( argv[ i ], "obj" ) ) {
+			else if ( striEqual( argv[ i ], "obj" ) ) {
 				convertFunc = ConvertBSPToOBJ;
 				map_allowed = false;
 			}
-			else if ( !Q_stricmp( argv[ i ], "map_bp" ) ) {
+			else if ( striEqual( argv[ i ], "map_bp" ) ) {
 				convertFunc = ConvertBSPToMap_BP;
 				map_allowed = true;
 			}
-			else if ( !Q_stricmp( argv[ i ], "map" ) ) {
+			else if ( striEqual( argv[ i ], "map" ) ) {
 				convertFunc = ConvertBSPToMap;
 				map_allowed = true;
 			}
@@ -1004,7 +1004,7 @@ int ConvertBSPMain( int argc, char **argv ){
 		force_bsp = true;
 	}
 
-	if ( force_map || ( !force_bsp && !Q_stricmp( path_get_extension( source ), "map" ) && map_allowed ) ) {
+	if ( force_map || ( !force_bsp && striEqual( path_get_extension( source ), "map" ) && map_allowed ) ) {
 		if ( !map_allowed ) {
 			Sys_Warning( "the requested conversion should not be done from .map files. Compile a .bsp first.\n" );
 		}

@@ -687,9 +687,9 @@ void UnparseEntities( void ){
 		}
 		/* ydnar: certain entities get stripped from bsp file */
 		value2 = ValueForKey( &entities[ i ], "classname" );
-		if ( !Q_stricmp( value2, "misc_model" ) ||
-			 !Q_stricmp( value2, "_decal" ) ||
-			 !Q_stricmp( value2, "_skybox" ) ) {
+		if ( striEqual( value2, "misc_model" ) ||
+			 striEqual( value2, "_decal" ) ||
+			 striEqual( value2, "_skybox" ) ) {
 			continue;
 		}
 
@@ -943,9 +943,9 @@ void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castS
 
 	/* vortex: game-specific default entity keys */
 	value = ValueForKey( ent, "classname" );
-	if ( !Q_stricmp( game->magic, "dq" ) || !Q_stricmp( game->magic, "prophecy" ) ) {
+	if ( striEqual( game->magic, "dq" ) || striEqual( game->magic, "prophecy" ) ) {
 		/* vortex: deluxe quake default shadow flags */
-		if ( !Q_stricmp( value, "func_wall" ) ) {
+		if ( striEqual( value, "func_wall" ) ) {
 			if ( recvShadows != NULL ) {
 				*recvShadows = 1;
 			}

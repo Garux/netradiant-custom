@@ -70,7 +70,7 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 			}
 		}
 		/* compare name */
-		if ( !Q_stricmp( shader, bspShaders[ i ].shader ) ) {
+		if ( striEqual( shader, bspShaders[ i ].shader ) ) {
 			return i;
 		}
 	}

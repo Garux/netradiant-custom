@@ -1590,7 +1590,7 @@ void LoadEntityIndexMap( entity_t *e ){
 	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  mapEnt->mapEntityNum, ValueForKey( e, "classname" ), indexMapFilename );
 
 	/* handle tga image */
-	if ( !Q_stricmp( path_get_extension( indexMapFilename ), "tga" ) ) {
+	if ( striEqual( path_get_extension( indexMapFilename ), "tga" ) ) {
 		/* load it */
 		Load32BitImage( indexMapFilename, &pixels32, &w, &h );
 
@@ -1802,7 +1802,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* ydnar: determine if this is a func_group */
-	funcGroup = !Q_stricmp( "func_group", classname );
+	funcGroup = striEqual( "func_group", classname );
 
 	/* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
 	if ( funcGroup || mapEnt->mapEntityNum == 0 ) {
@@ -1946,7 +1946,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* group_info entities are just for editor grouping (fixme: leak!) */
-	if ( !noCollapseGroups && !Q_stricmp( "group_info", classname ) ) {
+	if ( !noCollapseGroups && striEqual( "group_info", classname ) ) {
 		numEntities--;
 		return true;
 	}

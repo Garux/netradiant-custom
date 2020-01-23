@@ -425,7 +425,7 @@ void ProcessDecals( void ){
 		/* get entity */
 		e = &entities[ i ];
 		value = ValueForKey( e, "classname" );
-		if ( Q_stricmp( value, "_decal" ) ) {
+		if ( !striEqual( value, "_decal" ) ) {
 			continue;
 		}
 

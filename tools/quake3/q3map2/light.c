@@ -2990,7 +2990,7 @@ int LightMain( int argc, char **argv ){
 	path_set_extension( source, ".bsp" );
 
 	strcpy( name, ExpandArg( argv[ i ] ) );
-	if ( Q_stricmp( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
+	if ( !striEqual( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
 		path_set_extension( name, ".map" );
 	}
 

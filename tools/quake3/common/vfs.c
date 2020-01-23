@@ -184,11 +184,11 @@ void vfsInitDirectory( const char *path ){
 
 				const char *ext = path_get_filename_base_end( name );
 
-				if ( !Q_stricmp( ext, ".pk3" ) ) {
+				if ( striEqual( ext, ".pk3" ) ) {
 					sprintf( filename, "%s/%s", path, name );
 					vfsInitPakFile( filename );
 				}
-				else if ( !Q_stricmp( ext, ".pk3dir" ) ) {
+				else if ( striEqual( ext, ".pk3dir" ) ) {
 					if ( g_numDirs == VFS_MAXDIRS ) {
 						continue;
 					}
@@ -218,7 +218,7 @@ void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, 
 			const char* name;
 			while ( ( name = g_dir_read_name( dir ) ) )
 			{
-				if ( !Q_stricmp( path_get_filename_base_end( name ), ".shader" ) ) {
+				if ( striEqual( path_get_filename_base_end( name ), ".shader" ) ) {
 					pushStringCallback( list, name );
 				}
 			}
@@ -231,7 +231,7 @@ void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, 
 	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
 	{
 		VFS_PAKFILE* file = (VFS_PAKFILE*)lst->data;
-		if ( !Q_stricmp( path_get_filename_base_end( file->name ), ".shader" ) ) {
+		if ( striEqual( path_get_filename_base_end( file->name ), ".shader" ) ) {
 			pushStringCallback( list, path_get_filename_start( file->name ) );
 		}
 	}

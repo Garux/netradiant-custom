@@ -386,7 +386,7 @@ void ReleaseTexture( char *name ){
 	char path[1024];
 
 	for ( i = 0 ; i < numrtex ; i++ )
-		if ( !Q_stricmp( name, rtex[i] ) ) {
+		if ( striEqual( name, rtex[i] ) ) {
 			return;
 		}
 

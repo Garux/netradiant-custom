@@ -680,7 +680,7 @@ int FloodEntities( tree_t *tree ){
 
 		/* handle skybox entities */
 		value = ValueForKey( e, "classname" );
-		if ( !Q_stricmp( value, "_skybox" ) ) {
+		if ( striEqual( value, "_skybox" ) ) {
 			skybox = true;
 			skyboxPresent = true;
 

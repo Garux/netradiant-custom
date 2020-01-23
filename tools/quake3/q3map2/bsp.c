@@ -114,7 +114,7 @@ static void ProcessAdvertisements( void ) {
 		/* is an advertisement? */
 		className = ValueForKey( &entities[ i ], "classname" );
 
-		if ( !Q_stricmp( "advertisement", className ) ) {
+		if ( striEqual( "advertisement", className ) ) {
 
 			modelKey = ValueForKey( &entities[ i ], "model" );
 
@@ -1081,7 +1081,7 @@ int BSPMain( int argc, char **argv ){
 
 	/* expand mapname */
 	strcpy( name, ExpandArg( argv[ i ] ) );
-	if ( Q_stricmp( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
+	if ( !striEqual( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
 		/* if we are doing a full map, delete the last saved region map */
 		sprintf( path, "%s.reg", source );
 		remove( path );

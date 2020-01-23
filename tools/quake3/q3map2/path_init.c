@@ -210,13 +210,13 @@ game_t *GetGame( char *arg ){
 	}
 
 	/* joke */
-	if ( !Q_stricmp( arg, "quake1" ) ||
-		 !Q_stricmp( arg, "quake2" ) ||
-		 !Q_stricmp( arg, "unreal" ) ||
-		 !Q_stricmp( arg, "ut2k3" ) ||
-		 !Q_stricmp( arg, "dn3d" ) ||
-		 !Q_stricmp( arg, "dnf" ) ||
-		 !Q_stricmp( arg, "hl" ) ) {
+	if ( striEqual( arg, "quake1" ) ||
+		 striEqual( arg, "quake2" ) ||
+		 striEqual( arg, "unreal" ) ||
+		 striEqual( arg, "ut2k3" ) ||
+		 striEqual( arg, "dn3d" ) ||
+		 striEqual( arg, "dnf" ) ||
+		 striEqual( arg, "hl" ) ) {
 		Sys_Printf( "April fools, silly rabbit!\n" );
 		exit( 0 );
 	}
@@ -225,7 +225,7 @@ game_t *GetGame( char *arg ){
 	i = 0;
 	while ( games[ i ].arg != NULL )
 	{
-		if ( Q_stricmp( arg, games[ i ].arg ) == 0 ) {
+		if ( striEqual( arg, games[ i ].arg ) ) {
 			return &games[ i ];
 		}
 		i++;

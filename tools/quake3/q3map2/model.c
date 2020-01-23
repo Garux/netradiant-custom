@@ -359,7 +359,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			picoShaderName = NULL;
 			for ( sf2 = sf; sf2 != NULL; sf2 = sf2->next )
 			{
-				if ( !Q_stricmp( surface->name, sf2->name ) ) {
+				if ( striEqual( surface->name, sf2->name ) ) {
 					Sys_FPrintf( SYS_VRB, "Skin file: mapping %s to %s\n", surface->name, sf2->to );
 					picoShaderName = sf2->to;
 					break;
@@ -1421,7 +1421,7 @@ void AddTriangleModels( entity_t *e ){
 		e2 = &entities[ num ];
 
 		/* convert misc_models into raw geometry */
-		if ( Q_stricmp( "misc_model", ValueForKey( e2, "classname" ) ) ) {
+		if ( !striEqual( "misc_model", ValueForKey( e2, "classname" ) ) ) {
 			continue;
 		}
 
