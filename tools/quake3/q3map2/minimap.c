@@ -438,7 +438,7 @@ void MergeRelativePath( char *out, const char *absolute, const char *relative ){
 	const char *endpos = absolute + strlen( absolute );
 	while ( endpos != absolute && path_separator( endpos[-1] ) )
 		--endpos;
-	while ( !strncmp( relative, "../", 3 ) || !strncmp( relative, "..\\", 3 ) )
+	while ( strEqualPrefix( relative, "../" ) || strEqualPrefix( relative, "..\\" ) )
 	{
 		relative += 3;
 		while ( endpos != absolute )

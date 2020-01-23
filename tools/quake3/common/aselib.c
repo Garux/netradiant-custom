@@ -418,8 +418,8 @@ static void ASE_KeyMAP_DIFFUSE( const char *token ){
 		strClear( path_get_last_separator( filename ) );
 
 		/* replaces a relative path with a full path */
-		if ( !strncmp( bitmap, "../", 3 ) ) {
-			while ( !strncmp( bitmap, "../", 3 ) )
+		if ( strEqualPrefix( bitmap, "../" ) ) {
+			while ( strEqualPrefix( bitmap, "../" ) )
 			{
 				/* remove last item from path */
 				strClear( path_get_last_separator( filename ) );

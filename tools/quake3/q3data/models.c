@@ -1308,7 +1308,7 @@ void Cmd_Cd( void ){
 	if ( !g_only[0] ) {
 		return;
 	}
-	if ( strncmp( token, g_only, strlen( g_only ) ) ) {
+	if ( !strEqualPrefix( token, g_only ) ) {
 		g_skipmodel = true;
 		printf( "skipping %s\n", token );
 	}

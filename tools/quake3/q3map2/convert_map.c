@@ -156,7 +156,7 @@ exwinding:
 			;
 		}
 	}
-	//if(strncmp(buildSide->shaderInfo->shader, "textures/common/", 16))
+	//if(!striEqualPrefix(buildSide->shaderInfo->shader, "textures/common/"))
 	//	fprintf(stderr, "brushside with %s: %d matches (%f area)\n", buildSide->shaderInfo->shader, matches, best);
 }
 
@@ -713,7 +713,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 		else
 		{
 			//vec3_t vecs[ 2 ];
-			if ( strncmp( buildSide->shaderInfo->shader, "textures/common/", 16 ) ) {
+			if ( !striEqualPrefix( buildSide->shaderInfo->shader, "textures/common/" ) ) {
 				if ( !strEqual( buildSide->shaderInfo->shader, "noshader" ) ) {
 					if ( !strEqual( buildSide->shaderInfo->shader, "default" ) ) {
 						//fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader );
