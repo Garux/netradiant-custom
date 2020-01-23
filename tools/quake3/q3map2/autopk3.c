@@ -309,8 +309,8 @@ int pk3BSPMain( int argc, char **argv ){
 	epair_t *ep;
 	for ( ep = entities[0].epairs; ep != NULL; ep = ep->next )
 	{
-		if ( !Q_strncasecmp( ep->key, "vertexremapshader", 17 ) ) {
-			sscanf( ep->value, "%*[^;] %*[;] %s", str );
+		if ( striEqualPrefix( ep->key, "vertexremapshader" ) ) {
+			sscanf( ep->value, "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
 			res2list( pk3Shaders, str );
 		}
 	}
@@ -588,7 +588,7 @@ int pk3BSPMain( int argc, char **argv ){
 						}
 					}
 				}
-				else if ( !Q_strncasecmp( token, "implicit", 8 ) ){
+				else if ( striEqualPrefix( token, "implicit" ) ){
 					Sys_FPrintf( SYS_WRN, "WARNING5: %s : line %d : unsupported %s shader\n", scriptFile, scriptline, token );
 				}
 				/* skip the shader */
@@ -981,8 +981,8 @@ int repackBSPMain( int argc, char **argv ){
 		epair_t *ep;
 		for ( ep = entities[0].epairs; ep != NULL; ep = ep->next )
 		{
-			if ( !Q_strncasecmp( ep->key, "vertexremapshader", 17 ) ) {
-				sscanf( ep->value, "%*[^;] %*[;] %s", str );
+			if ( striEqualPrefix( ep->key, "vertexremapshader" ) ) {
+				sscanf( ep->value, "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
 				res2list( pk3Shaders, str );
 			}
 		}
@@ -1378,7 +1378,7 @@ int repackBSPMain( int argc, char **argv ){
 					GetToken( false );
 					StrBuf_cat2( shaderText, " ", token );
 				}
-				else if ( !Q_strncasecmp( token, "implicit", 8 ) ){
+				else if ( striEqualPrefix( token, "implicit" ) ){
 					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", pk3Shaders->s[shader], token );
 					hasmap = true;
 					if ( line == scriptline ){

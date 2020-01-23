@@ -309,7 +309,7 @@ void SetLightStyles( void ){
 		e = &entities[ i ];
 
 		t = ValueForKey( e, "classname" );
-		if ( Q_strncasecmp( t, "light", 5 ) ) {
+		if ( !striEqualPrefix( t, "light" ) ) {
 			continue;
 		}
 		t = ValueForKey( e, "targetname" );

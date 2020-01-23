@@ -378,14 +378,10 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			if ( rm->from[ 0 ] == '*' && rm->from[ 1 ] == '\0' ) {
 				glob = rm;
 			}
-			else{
-				const size_t shaderLen = strlen( picoShaderName );
-				const size_t suffixLen = strlen( rm->from );
-				if( shaderLen >= suffixLen && !Q_strncasecmp( picoShaderName + shaderLen - suffixLen, rm->from, suffixLen ) ){
-					rmto = rm;
-					if( shaderLen == suffixLen ) // exact match priority
-						break;
-				}
+			else if( striEqualSuffix( picoShaderName, rm->from ) ){
+				rmto = rm;
+				if( strlen( picoShaderName ) == strlen( rm->from ) ) // exact match priority
+					break;
 			}
 		}
 		if( rmto ){
@@ -1501,7 +1497,7 @@ void AddTriangleModels( entity_t *e ){
 			/* look for keys prefixed with "_remap" */
 			if ( ep->key != NULL && ep->value != NULL &&
 				 ep->key[ 0 ] != '\0' && ep->value[ 0 ] != '\0' &&
-				 !Q_strncasecmp( ep->key, "_remap", 6 ) ) {
+				 striEqualPrefix( ep->key, "_remap" ) ) {
 				/* create new remapping */
 				remap2 = remap;
 				remap = safe_malloc( sizeof( *remap ) );

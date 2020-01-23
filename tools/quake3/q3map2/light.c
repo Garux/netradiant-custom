@@ -235,10 +235,10 @@ void CreateEntityLights( void ){
 		name = ValueForKey( e, "classname" );
 
 		/* ydnar: check for lightJunior */
-		if ( Q_strncasecmp( name, "lightJunior", 11 ) == 0 ) {
+		if ( striEqualPrefix( name, "lightJunior" ) ) {
 			junior = true;
 		}
-		else if ( Q_strncasecmp( name, "light", 5 ) == 0 ) {
+		else if ( striEqualPrefix( name, "light" ) ) {
 			junior = false;
 		}
 		else{

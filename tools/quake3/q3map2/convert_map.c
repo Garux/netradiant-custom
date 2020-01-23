@@ -321,7 +321,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 		}
 
 		/* get texture name */
-		if ( !Q_strncasecmp( buildSide->shaderInfo->shader, "textures/", 9 ) ) {
+		if ( striEqualPrefix( buildSide->shaderInfo->shader, "textures/" ) ) {
 			texture = buildSide->shaderInfo->shader + 9;
 		}
 		else{
@@ -484,7 +484,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 		GetBestSurfaceTriangleMatchForBrushside( buildSide, vert );
 
 		/* get texture name */
-		if ( !Q_strncasecmp( buildSide->shaderInfo->shader, "textures/", 9 ) ) {
+		if ( striEqualPrefix( buildSide->shaderInfo->shader, "textures/" ) ) {
 			texture = buildSide->shaderInfo->shader + 9;
 		}
 		else{
@@ -777,7 +777,7 @@ for ( i = 0; i < brush->numSides; i++ )
 	}
 
 	/* get texture name */
-	if ( !Q_strncasecmp( shader->shader, "textures/", 9 ) ) {
+	if ( striEqualPrefix( shader->shader, "textures/" ) ) {
 		texture = shader->shader + 9;
 	}
 	else{
@@ -852,7 +852,7 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, vec3_t origin 
 	shader = &bspShaders[ ds->shaderNum ];
 
 	/* get texture name */
-	if ( !Q_strncasecmp( shader->shader, "textures/", 9 ) ) {
+	if ( striEqualPrefix( shader->shader, "textures/" ) ) {
 		texture = shader->shader + 9;
 	}
 	else{

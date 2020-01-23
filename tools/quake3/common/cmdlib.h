@@ -95,10 +95,10 @@ static inline char *copystring( const char *src ){	// version of strdup() with s
 char* strIstr( const char* haystack, const char* needle );
 #ifdef WIN32
 	#define Q_stricmp           stricmp
-	#define Q_strncasecmp       strnicmp
+	#define Q_strnicmp          strnicmp
 #else
 	#define Q_stricmp           strcasecmp
-	#define Q_strncasecmp       strncasecmp
+	#define Q_strnicmp          strncasecmp
 #endif
 static inline bool strEqual( const char* string, const char* other ){
 	return strcmp( string, other ) == 0;
@@ -110,7 +110,7 @@ static inline bool striEqual( const char* string, const char* other ){
 	return Q_stricmp( string, other ) == 0;
 }
 static inline bool strniEqual( const char* string, const char* other, size_t n ){
-	return Q_strncasecmp( string, other, n ) == 0;
+	return Q_strnicmp( string, other, n ) == 0;
 }
 
 static inline bool strEqualPrefix( const char* string, const char* prefix ){

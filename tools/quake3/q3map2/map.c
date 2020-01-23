@@ -1796,7 +1796,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	classname = ValueForKey( mapEnt, "classname" );
 
 	/* ydnar: only lights? */
-	if ( onlyLights && Q_strncasecmp( classname, "light", 5 ) ) {
+	if ( onlyLights && !striEqualPrefix( classname, "light" ) ) {
 		numEntities--;
 		return true;
 	}

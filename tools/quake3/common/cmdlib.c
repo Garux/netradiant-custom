@@ -162,7 +162,7 @@ void SetQdirFromPath( const char *path ){
 	len = strlen( BASEDIRNAME );
 	for ( c = path + strlen( path ) - 1 ; c != path ; c-- )
 	{
-		if ( !Q_strncasecmp( c, BASEDIRNAME, len ) ) {
+		if ( strniEqual( c, BASEDIRNAME, len ) ) {
 			//
 			//strncpy (qdir, path, c+len+2-path);
 			// the +2 assumes a 2 or 3 following quake which is not the
