@@ -51,10 +51,11 @@
 #define PATHSEPERATOR   '/'
 
 #ifdef SAFE_MALLOC
+// FIXME switch to -std=c99 or above to use proper %zu format specifier for size_t
 void *safe_malloc( size_t size ){
 	void *p = malloc( size );
 	if ( !p ) {
-		Error( "safe_malloc failed on allocation of %i bytes", size );
+		Error( "safe_malloc failed on allocation of %lu bytes", (unsigned long)size );
 	}
 	return p;
 }
@@ -62,7 +63,7 @@ void *safe_malloc( size_t size ){
 void *safe_malloc_info( size_t size, const char* info ){
 	void *p = malloc( size );
 	if ( !p ) {
-		Error( "%s: safe_malloc failed on allocation of %i bytes", info, size );
+		Error( "%s: safe_malloc failed on allocation of %lu bytes", info, (unsigned long)size );
 	}
 	return p;
 }
@@ -70,7 +71,7 @@ void *safe_malloc_info( size_t size, const char* info ){
 void *safe_calloc( size_t size ){
 	void *p = calloc( 1, size );
 	if ( !p ) {
-		Error( "safe_calloc failed on allocation of %i bytes", size );
+		Error( "safe_calloc failed on allocation of %lu bytes", (unsigned long)size );
 	}
 	return p;
 }
@@ -78,7 +79,7 @@ void *safe_calloc( size_t size ){
 void *safe_calloc_info( size_t size, const char* info ){
 	void *p = calloc( 1, size );
 	if ( !p ) {
-		Error( "%s: safe_calloc failed on allocation of %i bytes", info, size );
+		Error( "%s: safe_calloc failed on allocation of %lu bytes", info, (unsigned long)size );
 	}
 	return p;
 }
