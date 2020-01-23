@@ -60,9 +60,6 @@
 #endif
 #define MEM_BLOCKSIZE 4096
 
-// the dec offsetof macro doesnt work very well...
-#define myoffsetof( type,identifier ) ( (size_t)& ( (type *)0 )->identifier )
-
 #define SAFE_MALLOC
 #ifdef SAFE_MALLOC
 void *safe_malloc( size_t size );
