@@ -36,10 +36,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef NeXT
-#include <libc.h>
-#endif
-
 #define BASEDIRNAME "h"
 #define PATHSEPERATOR   '/'
 

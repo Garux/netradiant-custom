@@ -33,11 +33,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SIN
 #endif //SIN
 
-
-#ifdef NeXT
-#include <libc.h>
-#endif
-
 #define	BASEDIRNAME	"quake2"
 #define PATHSEPERATOR   '/'
 

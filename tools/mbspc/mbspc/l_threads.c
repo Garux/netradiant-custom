@@ -626,7 +626,7 @@ void RunThreadsOn(int workcnt, qboolean showpacifier, void(*func)(int))
 		if (pthread_create(&work_threads[i], NULL, (void *)func, (void *)i) == -1)
 			Error ("pthread_create failed");
 	}
-		
+
 	for (i=0 ; i<numthreads ; i++)
 	{
 		if (pthread_join(work_threads[i], &pthread_return) == -1)
@@ -874,11 +874,7 @@ void RunThreadsOn(int workcnt, qboolean showpacifier, void(*func)(int))
 	workcount = workcnt;
 	oldf = -1;
 	pacifier = showpacifier;
-	start = I_FloatTime (); 
-#ifdef NeXT
-	if (pacifier)
-		setbuf (stdout, NULL);
-#endif
+	start = I_FloatTime ();
 	func(0);
 
 	end = I_FloatTime ();

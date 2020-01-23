@@ -36,10 +36,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef NeXT
-#include <libc.h>
-#endif
-
 #define BASEDIRNAME "quake"     // assumed to have a 2 or 3 following
 #define HERETIC2_BASEDIRNAME    "h"
 #define PATHSEPERATOR   '/'

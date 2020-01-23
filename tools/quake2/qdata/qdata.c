@@ -212,7 +212,7 @@ void Cmd_File( void ){
 
    ===============
  */
-#ifdef _WIN32
+#ifdef WIN32
 #include "io.h"
 void PackDirectory_r( char *dir ){
 	struct _finddata_t fileinfo;
@@ -248,11 +248,7 @@ void PackDirectory_r( char *dir ){
 #include <sys/dir.h>
 
 void PackDirectory_r( char *dir ){
-#ifdef NeXT
-	struct direct **namelist, *ent;
-#else
 	struct dirent **namelist, *ent;
-#endif
 	int count;
 	struct stat st;
 	int i;
