@@ -77,6 +77,9 @@ void *safe_calloc_info( size_t size, const char* info );
 static inline bool strEmpty( const char* string ){
 	return *string == '\0';
 }
+static inline bool strEmptyOrNull( const char* string ){
+	return string == NULL || *string == '\0';
+}
 static inline void strClear( char* string ){
 	*string = '\0';
 }
@@ -97,6 +100,35 @@ char* strIstr( const char* haystack, const char* needle );
 	#define Q_stricmp           strcasecmp
 	#define Q_strncasecmp       strncasecmp
 #endif
+static inline bool strEqual( const char* string, const char* other ){
+	return strcmp( string, other ) == 0;
+}
+static inline bool strnEqual( const char* string, const char* other, size_t n ){
+	return strncmp( string, other, n ) == 0;
+}
+static inline bool striEqual( const char* string, const char* other ){
+	return Q_stricmp( string, other ) == 0;
+}
+static inline bool strniEqual( const char* string, const char* other, size_t n ){
+	return Q_strncasecmp( string, other, n ) == 0;
+}
+
+static inline bool strEqualPrefix( const char* string, const char* prefix ){
+	return strnEqual( string, prefix, strlen( prefix ) );
+}
+static inline bool striEqualPrefix( const char* string, const char* prefix ){
+	return strniEqual( string, prefix, strlen( prefix ) );
+}
+static inline bool strEqualSuffix( const char* string, const char* suffix ){
+	const size_t stringLength = strlen( string );
+	const size_t suffixLength = strlen( suffix );
+	return ( suffixLength > stringLength )? false : strnEqual( string + stringLength - suffixLength, suffix, suffixLength );
+}
+static inline bool striEqualSuffix( const char* string, const char* suffix ){
+	const size_t stringLength = strlen( string );
+	const size_t suffixLength = strlen( suffix );
+	return ( suffixLength > stringLength )? false : strniEqual( string + stringLength - suffixLength, suffix, suffixLength );
+}
 /* strlcpy, strlcat versions */
 size_t strcpyQ( char* dest, const char* src, const size_t dest_size );
 size_t strcatQ( char* dest, const char* src, const size_t dest_size );
