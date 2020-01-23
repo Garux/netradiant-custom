@@ -717,7 +717,6 @@ void CreateMapFogs( void ){
 	brush_t     *brush;
 	fog_t       *fog;
 	vec3_t invFogDir;
-	const char  *globalFog;
 
 
 	/* skip? */
@@ -772,11 +771,8 @@ void CreateMapFogs( void ){
 	}
 
 	/* ydnar: global fog */
-	globalFog = ValueForKey( &entities[ 0 ], "_fog" );
-	if ( strEmpty( globalFog ) ) {
-		globalFog = ValueForKey( &entities[ 0 ], "fog" );
-	}
-	if ( !strEmpty( globalFog ) ) {
+	const char  *globalFog;
+	if ( ENT_READKV( &entities[ 0 ], "_fog", &globalFog ) || ENT_READKV( &entities[ 0 ], "fog", &globalFog ) ) {
 		/* test limit */
 		if ( numMapFogs >= MAX_MAP_FOGS ) {
 			Error( "Exceeded MAX_MAP_FOGS (%d) trying to add global fog", MAX_MAP_FOGS );

@@ -1109,16 +1109,13 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, m4x4_t t
  */
 
 static void PopulateTraceNodes( void ){
-	int i, m, frame, castShadows;
-	float temp;
-	entity_t        *e;
+	int i, m;
 	const char      *value;
 	picoModel_t     *model;
-	vec3_t origin, scale, angles;
-	m4x4_t transform;
 
 
 	/* add worldspawn triangles */
+	m4x4_t transform;
 	m4x4_identity( transform );
 	PopulateWithBSPModel( &bspModels[ 0 ], transform );
 
@@ -1126,10 +1123,10 @@ static void PopulateTraceNodes( void ){
 	for ( i = 1; i < numEntities; i++ )
 	{
 		/* get entity */
-		e = &entities[ i ];
+		entity_t *e = &entities[ i ];
 
 		/* get shadow flags */
-		castShadows = ENTITY_CAST_SHADOWS;
+		int castShadows = ENTITY_CAST_SHADOWS;
 		GetEntityShadowFlags( e, NULL, &castShadows, NULL );
 
 		/* early out? */
@@ -1138,26 +1135,20 @@ static void PopulateTraceNodes( void ){
 		}
 
 		/* get entity origin */
+		vec3_t origin;
 		GetVectorForKey( e, "origin", origin );
 
 		/* get scale */
-		scale[ 0 ] = scale[ 1 ] = scale[ 2 ] = 1.0f;
-		temp = FloatForKey( e, "modelscale" );
-		if ( temp != 0.0f ) {
-			scale[ 0 ] = scale[ 1 ] = scale[ 2 ] = temp;
-		}
-		value = ValueForKey( e, "modelscale_vec" );
-		if ( !strEmpty( value ) ) {
-			sscanf( value, "%f %f %f", &scale[ 0 ], &scale[ 1 ], &scale[ 2 ] );
-		}
+		vec3_t scale = { 1.f, 1.f, 1.f };
+		if( !ENT_READKV( e, "modelscale_vec", &scale ) )
+			if( ENT_READKV( e, "modelscale", &scale[0] ) )
+				scale[1] = scale[2] = scale[0];
 
-		/* get "angle" (yaw) or "angles" (pitch yaw roll) */
-		angles[ 0 ] = angles[ 1 ] = angles[ 2 ] = 0.0f;
-		angles[ 2 ] = FloatForKey( e, "angle" );
-		value = ValueForKey( e, "angles" );
-		if ( !strEmpty( value ) ) {
-			sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] );
-		}
+		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
+		vec3_t angles = { 0.f, 0.f, 0.f };
+		if ( !ENT_READKV( e, "angles", &value ) ||
+			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
+			ENT_READKV( e, "angle", &angles[ 2 ] );
 
 		/* set transform matrix (thanks spog) */
 		m4x4_identity( transform );
@@ -1189,18 +1180,15 @@ static void PopulateTraceNodes( void ){
 
 		/* external model */
 		default:
-			frame = 0;
-			if ( !strEmpty( ValueForKey( e, "_frame" ) ) ) {
-				frame = IntForKey( e, "_frame" );
+			{
+				int frame = 0;
+				ENT_READKV( e, "_frame", &frame ) || ENT_READKV( e, "frame", &frame );
+				model = LoadModel( value, frame );
+				if ( model == NULL ) {
+					continue;
+				}
+				PopulateWithPicoModel( castShadows, model, transform );
 			}
-			else if ( !strEmpty( ValueForKey( e, "frame" ) ) ) {
-				frame = IntForKey( e, "frame" );
-			}
-			model = LoadModel( value, frame );
-			if ( model == NULL ) {
-				continue;
-			}
-			PopulateWithPicoModel( castShadows, model, transform );
 			continue;
 		}
 
@@ -1225,8 +1213,7 @@ static void PopulateTraceNodes( void ){
 
 		/* external model */
 		default:
-			frame = IntForKey( e, "_frame2" );
-			model = LoadModel( value, frame );
+			model = LoadModel( value, IntForKey( e, "_frame2" ) );
 			if ( model == NULL ) {
 				continue;
 			}

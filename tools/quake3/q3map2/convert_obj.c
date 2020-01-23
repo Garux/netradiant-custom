@@ -306,7 +306,6 @@ int ConvertBSPToOBJ( char *bspName ){
 	bspShader_t     *shader;
 	bspModel_t      *model;
 	entity_t        *e;
-	vec3_t origin;
 	const char      *key;
 	char name[ 1024 ], base[ 1024 ], mtlname[ 1024 ], dirname[ 1024 ];
 	int lmIndices[ numBSPShaders ];
@@ -375,13 +374,8 @@ int ConvertBSPToOBJ( char *bspName ){
 		model = &bspModels[ modelNum ];
 
 		/* get entity origin */
-		key = ValueForKey( e, "origin" );
-		if ( strEmpty( key ) ) {
-			VectorClear( origin );
-		}
-		else{
-			GetVectorForKey( e, "origin", origin );
-		}
+		vec3_t origin = { 0.f, 0.f, 0.f };
+		ENT_READKV( e, "origin", &origin );
 
 		/* convert model */
 		ConvertModelToOBJ( f, model, modelNum, origin, lmIndices );

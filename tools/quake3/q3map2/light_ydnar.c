@@ -4103,8 +4103,6 @@ static int numFloodVectors = 0;
 void SetupFloodLight( void ){
 	int i, j;
 	float angle, elevation, angleStep, elevationStep;
-	const char  *value;
-	double v1,v2,v3,v4,v5,v6;
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SetupFloodLight ---\n" );
@@ -4131,9 +4129,9 @@ void SetupFloodLight( void ){
 	Sys_FPrintf( SYS_VRB, "%9d numFloodVectors\n", numFloodVectors );
 
 	/* floodlight */
-	value = ValueForKey( &entities[ 0 ], "_floodlight" );
-
-	if ( !strEmpty( value ) ) {
+	const char  *value;
+	if ( ENT_READKV( &entities[ 0 ], "_floodlight", &value ) ) {
+		double v1,v2,v3,v4,v5,v6;
 		v1 = v2 = v3 = 0;
 		v4 = floodlightDistance;
 		v5 = floodlightIntensity;

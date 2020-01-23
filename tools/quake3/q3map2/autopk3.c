@@ -314,8 +314,8 @@ int pk3BSPMain( int argc, char **argv ){
 			res2list( pk3Shaders, str );
 		}
 	}
-	strcpy( str, ValueForKey( &entities[0], "music" ) );
-	if ( !strEmpty( str ) ){
+
+	if ( ENT_READKV( &entities[0], "music", &str ) ){
 		FixDOSName( str );
 		DefaultExtension( str, ".wav" );
 		res2list( pk3Sounds, str );
@@ -323,18 +323,17 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < numBSPEntities && i < numEntities; ++i )
 	{
-		strcpy( str, ValueForKey( &entities[i], "noise" ) );
-		if ( !strEmpty( str ) && *str != '*' ){
+		if ( ENT_READKV( &entities[i], "noise", &str ) && str[0] != '*' ){
 			FixDOSName( str );
 			DefaultExtension( str, ".wav" );
 			res2list( pk3Sounds, str );
 		}
 
-		if ( striEqual( ValueForKey( &entities[i], "classname" ), "func_plat" ) ){
+		if ( ent_class_is( &entities[i], "func_plat" ) ){
 			res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
 			res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
 		}
-		if ( striEqual( ValueForKey( &entities[i], "classname" ), "target_push" ) ){
+		if ( ent_class_is( &entities[i], "target_push" ) ){
 			if ( !( IntForKey( &entities[i], "spawnflags") & 1 ) ){
 				res2list( pk3Sounds, "sound/misc/windfly.wav" );
 			}
@@ -986,8 +985,7 @@ int repackBSPMain( int argc, char **argv ){
 				res2list( pk3Shaders, str );
 			}
 		}
-		strcpy( str, ValueForKey( &entities[0], "music" ) );
-		if ( !strEmpty( str ) ){
+		if ( ENT_READKV( &entities[0], "music", &str ) ){
 			FixDOSName( str );
 			DefaultExtension( str, ".wav" );
 			res2list( pk3Sounds, str );
@@ -995,18 +993,17 @@ int repackBSPMain( int argc, char **argv ){
 
 		for ( i = 0; i < numBSPEntities && i < numEntities; ++i )
 		{
-			strcpy( str, ValueForKey( &entities[i], "noise" ) );
-			if ( !strEmpty( str ) && str[0] != '*' ){
+			if ( ENT_READKV( &entities[i], "noise", &str ) && str[0] != '*' ){
 				FixDOSName( str );
 				DefaultExtension( str, ".wav" );
 				res2list( pk3Sounds, str );
 			}
 
-			if ( striEqual( ValueForKey( &entities[i], "classname" ), "func_plat" ) ){
+			if ( ent_class_is( &entities[i], "func_plat" ) ){
 				res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
 				res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
 			}
-			if ( striEqual( ValueForKey( &entities[i], "classname" ), "target_push" ) ){
+			if ( ent_class_is( &entities[i], "target_push" ) ){
 				if ( !( IntForKey( &entities[i], "spawnflags") & 1 ) ){
 					res2list( pk3Sounds, "sound/misc/windfly.wav" );
 				}

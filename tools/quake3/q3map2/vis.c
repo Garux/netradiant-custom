@@ -295,22 +295,16 @@ void CalcFastVis( void ){
  */
 void CalcVis( void ){
 	int i, minvis, maxvis;
-	const char  *value;
 	double mu, sigma, totalvis, totalvis2;
 
 
 	/* ydnar: rr2do2's farplane code */
-	farPlaneDist = 0.0f;
-	value = ValueForKey( &entities[ 0 ], "_farplanedist" );     /* proper '_' prefixed key */
-	if ( strEmpty( value ) ) {
-		value = ValueForKey( &entities[ 0 ], "fogclip" );       /* wolf compatibility */
-	}
-	if ( strEmpty( value ) ) {
-		value = ValueForKey( &entities[ 0 ], "distancecull" );  /* sof2 compatibility */
-	}
-	if ( !strEmpty( value ) ) {
+	const char *value;
+	if( ENT_READKV( &entities[ 0 ], "_farplanedist", &value ) ||     /* proper '_' prefixed key */
+		ENT_READKV( &entities[ 0 ], "fogclip", &value ) ||           /* wolf compatibility */
+		ENT_READKV( &entities[ 0 ], "distancecull", &value ) ){      /* sof2 compatibility */
 		farPlaneDist = atof( value );
-		farPlaneDistMode = value[strlen(value) - 1 ];
+		farPlaneDistMode = value[strlen( value ) - 1 ];
 		if ( farPlaneDist != 0.0f ) {
 			Sys_Printf( "farplane distance = %.1f\n", farPlaneDist );
 			if ( farPlaneDistMode == 'o' )
@@ -321,9 +315,6 @@ void CalcVis( void ){
 				Sys_Printf( "farplane Exact distance mode on\n" );
 		}
 	}
-
-
-
 
 	Sys_Printf( "\n--- BasePortalVis (%d) ---\n", numportals * 2 );
 	RunThreadsOnIndividual( numportals * 2, true, BasePortalVis );

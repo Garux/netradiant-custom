@@ -2596,13 +2596,10 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	int i, j;
 	bspDrawSurface_t    *out;
 	int surfaceFlags, contentFlags;
-	int forcePatchMeta;
 
 	/* vortex: _patchMeta support */
-	forcePatchMeta = IntForKey( e, "_patchMeta" );
-	if ( !forcePatchMeta ) {
-		forcePatchMeta = IntForKey( e, "patchMeta" );
-	}
+	bool forcePatchMeta = false;
+	ENT_READKV( e, "_patchMeta", &forcePatchMeta ) || ENT_READKV( e, "patchMeta", &forcePatchMeta );
 
 	/* invert the surface if necessary */
 	if ( ds->backSide || ds->shaderInfo->invert ) {

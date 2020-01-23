@@ -283,8 +283,7 @@ void SetModelNumbers( void ){
  */
 
 void SetLightStyles( void ){
-	int i, j, style, numStyles;
-	const char  *t;
+	int i, j, numStyles;
 	entity_t    *e;
 	epair_t     *ep, *next;
 	char value[ 10 ];
@@ -297,10 +296,7 @@ void SetLightStyles( void ){
 	}
 
 	/* ydnar: determine if we keep lights in the bsp */
-	if ( KeyExists( &entities[ 0 ], "_keepLights" ) ) {
-		t = ValueForKey( &entities[ 0 ], "_keepLights" );
-		keepLights = ( t[ 0 ] == '1' );
-	}
+	ENT_READKV( &entities[ 0 ], "_keepLights", &keepLights );
 
 	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
 	numStyles = 0;
@@ -308,12 +304,11 @@ void SetLightStyles( void ){
 	{
 		e = &entities[ i ];
 
-		t = ValueForKey( e, "classname" );
-		if ( !striEqualPrefix( t, "light" ) ) {
+		if ( !ent_class_prefixed( e, "light" ) ) {
 			continue;
 		}
-		t = ValueForKey( e, "targetname" );
-		if ( strEmpty( t ) ) {
+		const char *t;
+		if ( !ENT_READKV( e, "targetname", &t ) ) {
 			/* ydnar: strip the light from the BSP file */
 			if ( !keepLights ) {
 				ep = e->epairs;
@@ -334,7 +329,7 @@ void SetLightStyles( void ){
 		}
 
 		/* get existing style */
-		style = IntForKey( e, "style" );
+		const int style = IntForKey( e, "style" );
 		if ( style < LS_NORMAL || style > LS_NONE ) {
 			Error( "Invalid lightstyle (%d) on entity %d", style, i );
 		}

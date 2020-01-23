@@ -460,15 +460,14 @@ int ScaleBSPMain( int argc, char **argv ){
 	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
 	{
 		/* scale origin */
-		GetVectorForKey( &entities[ i ], "origin", vec );
-		if ( ( vec[ 0 ] || vec[ 1 ] || vec[ 2 ] ) ) {
-			if ( striEqualPrefix( ValueForKey( &entities[i], "classname" ), "info_player_" ) ) {
+		if ( ENT_READKV( &entities[ i ], "origin", &vec ) ) {
+			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
 			vec[0] *= scale[0];
 			vec[1] *= scale[1];
 			vec[2] *= scale[2];
-			if ( striEqualPrefix( ValueForKey( &entities[i], "classname" ), "info_player_" ) ) {
+			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
@@ -487,16 +486,14 @@ int ScaleBSPMain( int argc, char **argv ){
 		}
 
 		/* scale door lip */
-		f = FloatForKey( &entities[ i ], "lip" );
-		if ( f ) {
+		if ( ENT_READKV( &entities[ i ], "lip", &f ) ) {
 			f *= scale[axis];
 			sprintf( str, "%f", f );
 			SetKeyValue( &entities[ i ], "lip", str );
 		}
 
 		/* scale plat height */
-		f = FloatForKey( &entities[ i ], "height" );
-		if ( f ) {
+		if ( ENT_READKV( &entities[ i ], "height", &f ) ) {
 			f *= scale[2];
 			sprintf( str, "%f", f );
 			SetKeyValue( &entities[ i ], "height", str );
@@ -616,8 +613,7 @@ int ScaleBSPMain( int argc, char **argv ){
 	}
 
 	/* scale gridsize */
-	GetVectorForKey( &entities[ 0 ], "gridsize", vec );
-	if ( ( vec[ 0 ] + vec[ 1 ] + vec[ 2 ] ) == 0.0f ) {
+	if ( !ENT_READKV( &entities[ 0 ], "gridsize", &vec ) ) {
 		VectorCopy( gridSize, vec );
 	}
 	vec[0] *= scale[0];
@@ -700,15 +696,14 @@ int ShiftBSPMain( int argc, char **argv ){
 	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
 	{
 		/* shift origin */
-		GetVectorForKey( &entities[ i ], "origin", vec );
-		if ( ( vec[ 0 ] || vec[ 1 ] || vec[ 2 ] ) ) {
-			if ( striEqualPrefix( ValueForKey( &entities[i], "classname" ), "info_player_" ) ) {
+		if ( ENT_READKV( &entities[ i ], "origin", &vec ) ) {
+			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
 			vec[0] += scale[0];
 			vec[1] += scale[1];
 			vec[2] += scale[2];
-			if ( striEqualPrefix( ValueForKey( &entities[i], "classname" ), "info_player_" ) ) {
+			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
@@ -783,8 +778,7 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	/* scale gridsize */
 	/*
-	GetVectorForKey( &entities[ 0 ], "gridsize", vec );
-	if ( ( vec[ 0 ] + vec[ 1 ] + vec[ 2 ] ) == 0.0f ) {
+	if ( !ENT_READKV( &entities[ 0 ], "gridsize", &vec ) ) {
 		VectorCopy( gridSize, vec );
 	}
 	vec[0] *= scale[0];

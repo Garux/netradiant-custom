@@ -413,7 +413,6 @@ void ProcessDecals( void ){
 	parseMesh_t         *p;
 	mesh_t              *mesh, *subdivided;
 	bspDrawVert_t       *dv[ 4 ];
-	const char          *value;
 
 
 	/* note it */
@@ -424,8 +423,7 @@ void ProcessDecals( void ){
 	{
 		/* get entity */
 		e = &entities[ i ];
-		value = ValueForKey( e, "classname" );
-		if ( !striEqual( value, "_decal" ) ) {
+		if ( !ent_class_is( e, "_decal" ) ) {
 			continue;
 		}
 
@@ -437,8 +435,7 @@ void ProcessDecals( void ){
 		}
 
 		/* find target */
-		value = ValueForKey( e, "target" );
-		e2 = FindTargetEntity( value );
+		e2 = FindTargetEntity( ValueForKey( e, "target" ) );
 
 		/* no target? */
 		if ( e2 == NULL ) {

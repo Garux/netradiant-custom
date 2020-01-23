@@ -644,8 +644,6 @@ bool PlaceOccupant( node_t *headnode, vec3_t origin, entity_t *occupant, bool sk
  */
 
 int FloodEntities( tree_t *tree ){
-	int i, s;
-	vec3_t origin, offset, scale, angles;
 	bool r, inside, skybox;
 	node_t      *headnode;
 	entity_t    *e, *tripped;
@@ -660,12 +658,13 @@ int FloodEntities( tree_t *tree ){
 
 	tripped = NULL;
 	c_floodedleafs = 0;
-	for ( i = 1; i < numEntities; i++ )
+	for ( int i = 1; i < numEntities; i++ )
 	{
 		/* get entity */
 		e = &entities[ i ];
 
 		/* get origin */
+		vec3_t origin;
 		GetVectorForKey( e, "origin", origin );
 #if 0 //allow maps with only point entity@( 0, 0, 0 ); assuming that entities, containing no primitives are point ones
 		/* as a special case, allow origin-less entities */
@@ -679,32 +678,25 @@ int FloodEntities( tree_t *tree ){
 		}
 
 		/* handle skybox entities */
-		value = ValueForKey( e, "classname" );
-		if ( striEqual( value, "_skybox" ) ) {
+		if ( ent_class_is( e, "_skybox" ) ) {
 			skybox = true;
 			skyboxPresent = true;
 
 			/* invert origin */
+			vec3_t offset;
 			VectorScale( origin, -1.0f, offset );
 
 			/* get scale */
-			VectorSet( scale, 64.0f, 64.0f, 64.0f );
-			value = ValueForKey( e, "_scale" );
-			if ( !strEmpty( value ) ) {
-				s = sscanf( value, "%f %f %f", &scale[ 0 ], &scale[ 1 ], &scale[ 2 ] );
-				if ( s == 1 ) {
-					scale[ 1 ] = scale[ 0 ];
-					scale[ 2 ] = scale[ 0 ];
-				}
-			}
+			vec3_t scale = { 64.0f, 64.0f, 64.0f };
+			if( !ENT_READKV( e, "_scale", &scale ) )
+				if( ENT_READKV( e, "_scale", &scale[0] ) )
+					scale[1] = scale[2] = scale[0];
 
-			/* get "angle" (yaw) or "angles" (pitch yaw roll) */
-			VectorClear( angles );
-			angles[ 2 ] = FloatForKey( e, "angle" );
-			value = ValueForKey( e, "angles" );
-			if ( !strEmpty( value ) ) {
-				sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] );
-			}
+			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
+			vec3_t angles = { 0.f, 0.f, 0.f };
+			if ( !ENT_READKV( e, "angles", &value ) ||
+				3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
+				ENT_READKV( e, "angle", &angles[ 2 ] );
 
 			/* set transform matrix (thanks spog) */
 			m4x4_identity( skyboxTransform );
@@ -727,7 +719,7 @@ int FloodEntities( tree_t *tree ){
 			inside = true;
 		}
 		if ( !r ) {
-			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e->mapEntityNum, ValueForKey( e, "classname" ) );
+			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e->mapEntityNum, ent_classname( e ) );
 		}
 		else if ( tree->outside_node.occupied ) {
 			if ( !tripped || tree->outside_node.occupied < tripcount ) {

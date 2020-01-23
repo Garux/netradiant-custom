@@ -342,8 +342,6 @@ int ConvertBSPToASE( char *bspName ){
 	bspShader_t     *shader;
 	bspModel_t      *model;
 	entity_t        *e;
-	vec3_t origin;
-	const char      *key;
 	char name[ 1024 ], base[ 1024 ], dirname[ 1024 ];
 	int lmIndices[ numBSPShaders ];
 
@@ -409,7 +407,7 @@ int ConvertBSPToASE( char *bspName ){
 		}
 		else
 		{
-			key = ValueForKey( e, "model" );
+			const char *key = ValueForKey( e, "model" );
 			if ( key[ 0 ] != '*' ) {
 				continue;
 			}
@@ -418,13 +416,8 @@ int ConvertBSPToASE( char *bspName ){
 		model = &bspModels[ modelNum ];
 
 		/* get entity origin */
-		key = ValueForKey( e, "origin" );
-		if ( strEmpty( key ) ) {
-			VectorClear( origin );
-		}
-		else{
-			GetVectorForKey( e, "origin", origin );
-		}
+		vec3_t origin;
+		GetVectorForKey( e, "origin", origin );
 
 		/* convert model */
 		ConvertModel( f, model, modelNum, origin, lmIndices );

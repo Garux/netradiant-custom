@@ -1902,11 +1902,33 @@ void                        ParseEntities( void );
 void                        UnparseEntities( void );
 void                        PrintEntity( const entity_t *ent );
 void                        SetKeyValue( entity_t *ent, const char *key, const char *value );
-bool                        KeyExists( const entity_t *ent, const char *key ); /* VorteX: check if key exists */
 const char                  *ValueForKey( const entity_t *ent, const char *key );
+bool                        BoolForKey( const entity_t *ent, const char *key );
 int                         IntForKey( const entity_t *ent, const char *key );
 vec_t                       FloatForKey( const entity_t *ent, const char *key );
 void                        GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec );
+/* entity: read key value generic macro
+   returns true on successful read
+   returns false and does not modify value otherwise */
+bool                        entity_read_bool( const entity_t *entity, const char *key, bool *bool_value );
+bool                        entity_read_int( const entity_t *entity, const char *key, int *int_value );
+bool                        entity_read_float( const entity_t *entity, const char *key, float *float_value ); // warning: float[3] may be passed here erroneously, if not written as &float[3]
+bool                        entity_read_vector3( const entity_t *entity, const char *key, float (*vector3_value)[3] );
+bool                        entity_read_string( const entity_t *entity, const char *key, char (*string_value)[] ); // explicit pointer to array to avoid erroneous mix of char* and char**
+bool                        entity_read_string_ptr( const entity_t *entity, const char *key, const char **string_ptr_value );
+#define ENT_READKV( entity, key, value_ptr ) _Generic( ( value_ptr ),             \
+													bool*: entity_read_bool,       \
+													int*: entity_read_int,          \
+													float*: entity_read_float,       \
+													float (*)[3]: entity_read_vector3,\
+													char (*)[]: entity_read_string,    \
+													const char**: entity_read_string_ptr\
+											)( entity, key, value_ptr )
+
+const char                  *ent_classname( const entity_t *entity );
+bool                        ent_class_is( const entity_t *entity, const char *classname );
+bool                        ent_class_prefixed( const entity_t *entity, const char *prefix );
+
 entity_t                    *FindTargetEntity( const char *target );
 void                        GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows );
 void                        InjectCommandLine( char **argv, int beginArgs, int endArgs );
@@ -2193,8 +2215,8 @@ Q_EXTERN bool hint;             /* ydnar */
 Q_EXTERN char inbase[ MAX_QPATH ];
 Q_EXTERN char globalCelShader[ MAX_QPATH ];
 
-Q_EXTERN float farPlaneDist;                /* rr2do2, rf, mre, ydnar all contributed to this one... */
-Q_EXTERN int farPlaneDistMode;
+Q_EXTERN float farPlaneDist Q_ASSIGN( 0.0f );                /* rr2do2, rf, mre, ydnar all contributed to this one... */
+Q_EXTERN int farPlaneDistMode Q_ASSIGN( 0 );
 
 Q_EXTERN int numportals;
 Q_EXTERN int portalclusters;

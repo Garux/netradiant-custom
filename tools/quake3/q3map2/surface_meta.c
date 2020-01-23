@@ -291,29 +291,13 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
  */
 
 void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
-	int iterations, x, y, pw[ 5 ], r;
+	int x, y, pw[ 5 ], r;
 	mapDrawSurface_t    *dsNew;
 	mesh_t src, *subdivided, *mesh;
-	bool forcePatchMeta;
-	int patchQuality;
-	int patchSubdivision;
 
 	/* vortex: _patchMeta, _patchQuality, _patchSubdivide support */
-	forcePatchMeta = IntForKey( e, "_patchMeta" );
-	if ( !forcePatchMeta ) {
-		forcePatchMeta = IntForKey( e, "patchMeta" );
-	}
-	patchQuality = IntForKey( e, "_patchQuality" );
-	if ( !patchQuality ) {
-		patchQuality = IntForKey( e, "patchQuality" );
-	}
-	if ( !patchQuality ) {
-		patchQuality = 1.0;
-	}
-	patchSubdivision = IntForKey( e, "_patchSubdivide" );
-	if ( !patchSubdivision ) {
-		patchSubdivision = IntForKey( e, "patchSubdivide" );
-	}
+	bool forcePatchMeta = false;
+	ENT_READKV( e, "_patchMeta", &forcePatchMeta ) || ENT_READKV( e, "patchMeta", &forcePatchMeta );
 
 	/* try to early out */
 	if ( ds->numVerts == 0 || ds->type != SURFACE_PATCH || ( !patchMeta && !forcePatchMeta ) ) {
@@ -324,11 +308,16 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	src.height = ds->patchHeight;
 	src.verts = ds->verts;
 	//%	subdivided = SubdivideMesh( src, 8, 999 );
-	if ( patchSubdivision ) {
+
+	int iterations;
+	int patchSubdivision;
+	if ( ENT_READKV( e, "_patchSubdivide", &patchSubdivision ) || ENT_READKV( e, "patchSubdivide", &patchSubdivision ) ) {
 		iterations = IterationsForCurve( ds->longestCurve, patchSubdivision );
 	}
 	else{
-		iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions / patchQuality );
+		int patchQuality = 0;
+		ENT_READKV( e, "_patchQuality", &patchQuality ) || ENT_READKV( e, "patchQuality", &patchQuality );
+		iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions / ( patchQuality == 0? 1 : patchQuality ) );
 	}
 
 	subdivided = SubdivideMesh2( src, iterations ); //%	ds->maxIterations

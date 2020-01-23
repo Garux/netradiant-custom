@@ -1005,7 +1005,6 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 	FILE            *f;
 	bspModel_t      *model;
 	entity_t        *e;
-	vec3_t origin;
 	const char      *value;
 	char name[ 1024 ];
 
@@ -1062,13 +1061,8 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 			model = &bspModels[ modelNum ];
 
 			/* get entity origin */
-			value = ValueForKey( e, "origin" );
-			if ( strEmpty( value ) ) {
-				VectorClear( origin );
-			}
-			else{
-				GetVectorForKey( e, "origin", origin );
-			}
+			vec3_t origin = { 0.f, 0.f, 0.f };
+			ENT_READKV( e, "origin", &origin );
 
 			/* convert model */
 			ConvertModel( f, model, modelNum, origin, brushPrimitives );

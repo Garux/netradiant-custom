@@ -101,7 +101,6 @@ static void autocaulk_write(){
 
 static void ProcessAdvertisements( void ) {
 	int i;
-	const char*         className;
 	const char*         modelKey;
 	int modelNum;
 	bspModel_t*         adModel;
@@ -112,9 +111,7 @@ static void ProcessAdvertisements( void ) {
 	for ( i = 0; i < numEntities; i++ ) {
 
 		/* is an advertisement? */
-		className = ValueForKey( &entities[ i ], "classname" );
-
-		if ( striEqual( "advertisement", className ) ) {
+		if ( ent_class_is( &entities[ i ], "advertisement" ) ) {
 
 			modelKey = ValueForKey( &entities[ i ], "model" );
 
@@ -190,16 +187,10 @@ static void SetCloneModelNumbers( void ){
 		}
 
 		/* is this a clone? */
-		value = ValueForKey( &entities[ i ], "_ins" );
-		if ( strEmpty( value ) ) {
-			value = ValueForKey( &entities[ i ], "_instance" );
-		}
-		if ( strEmpty( value ) ) {
-			value = ValueForKey( &entities[ i ], "_clone" );
-		}
-		if ( !strEmpty( value ) ) {
+		if( ENT_READKV( &entities[ i ], "_ins", &value ) ||
+			ENT_READKV( &entities[ i ], "_instance", &value ) ||
+			ENT_READKV( &entities[ i ], "_clone", &value ) )
 			continue;
-		}
 
 		/* add the model key */
 		sprintf( modelValue, "*%d", models );
@@ -217,32 +208,24 @@ static void SetCloneModelNumbers( void ){
 			continue;
 		}
 
-		/* is this a clone? */
-		value = ValueForKey( &entities[ i ], "_ins" );
-		if ( strEmpty( value ) ) {
-			value = ValueForKey( &entities[ i ], "_instance" );
-		}
-		if ( strEmpty( value ) ) {
-			value = ValueForKey( &entities[ i ], "_clone" );
-		}
-		if ( strEmpty( value ) ) {
+		/* isn't this a clone? */
+		if( !ENT_READKV( &entities[ i ], "_ins", &value ) &&
+			!ENT_READKV( &entities[ i ], "_instance", &value ) &&
+			!ENT_READKV( &entities[ i ], "_clone", &value ) )
 			continue;
-		}
 
 		/* find an entity with matching clone name */
 		for ( j = 0; j < numEntities; j++ )
 		{
 			/* is this a clone parent? */
-			value2 = ValueForKey( &entities[ j ], "_clonename" );
-			if ( strEmpty( value2 ) ) {
+			if ( !ENT_READKV( &entities[ j ], "_clonename", &value2 ) ) {
 				continue;
 			}
 
 			/* do they match? */
 			if ( strEqual( value, value2 ) ) {
 				/* get the model num */
-				value3 = ValueForKey( &entities[ j ], "model" );
-				if ( strEmpty( value3 ) ) {
+				if ( !ENT_READKV( &entities[ j ], "model", &value3 ) ) {
 					Sys_Warning( "Cloned entity %s referenced entity without model\n", value2 );
 					continue;
 				}
@@ -316,42 +299,32 @@ static void FixBrushSides( entity_t *e ){
  */
 
 void ProcessWorldModel( void ){
-	int i, s;
 	entity_t    *e;
 	tree_t      *tree;
 	face_t      *faces;
-	bool ignoreLeaks, leaked;
 	xmlNodePtr polyline, leaknode;
-	char level[ 2 ], shader[ 1024 ];
+	char level[ 2 ];
 	const char  *value;
 	int leakStatus;
 
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
-	value = ValueForKey( &entities[ 0 ], "_blocksize" );
-	if ( strEmpty( value ) ) {
-		value = ValueForKey( &entities[ 0 ], "blocksize" );
-	}
-	if ( strEmpty( value ) ) {
-		value = ValueForKey( &entities[ 0 ], "chopsize" );  /* sof2 */
-	}
-	if ( !strEmpty( value ) ) {
+	if( ENT_READKV( &entities[ 0 ], "_blocksize", &value ) ||
+		ENT_READKV( &entities[ 0 ], "blocksize", &value ) ||
+		ENT_READKV( &entities[ 0 ], "chopsize", &value ) ) {  /* sof2 */
 		/* scan 3 numbers */
-		s = sscanf( value, "%d %d %d", &blockSize[ 0 ], &blockSize[ 1 ], &blockSize[ 2 ] );
+		const int s = sscanf( value, "%d %d %d", &blockSize[ 0 ], &blockSize[ 1 ], &blockSize[ 2 ] );
 
 		/* handle legacy case */
-		if ( s == 1 ) {
-			blockSize[ 1 ] = blockSize[ 0 ];
-			blockSize[ 2 ] = blockSize[ 0 ];
+		if ( s == 1 || s == 2 ) {
+			blockSize[ 1 ] = blockSize[ 2 ] = blockSize[ 0 ];
 		}
 	}
 	Sys_Printf( "block size = { %d %d %d }\n", blockSize[ 0 ], blockSize[ 1 ], blockSize[ 2 ] );
 
 	/* sof2: ignore leaks? */
-	value = ValueForKey( &entities[ 0 ], "_ignoreleaks" );  /* ydnar */
-	if ( strEmpty( value ) ) {
-		value = ValueForKey( &entities[ 0 ], "ignoreleaks" );
-	}
-	ignoreLeaks = ( value[ 0 ] == '1' );
+	bool ignoreLeaks = false;
+	ENT_READKV( &entities[ 0 ], "_ignoreleaks", &ignoreLeaks ) ||
+	ENT_READKV( &entities[ 0 ], "ignoreleaks", &ignoreLeaks );
 
 	/* begin worldspawn model */
 	BeginModel();
@@ -382,7 +355,7 @@ void ProcessWorldModel( void ){
 		}
 	}
 
-	leaked = ( leakStatus != FLOODENTITIES_GOOD );
+	const bool leaked = ( leakStatus != FLOODENTITIES_GOOD );
 	if( leaked ){
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
@@ -482,25 +455,22 @@ void ProcessWorldModel( void ){
 	}
 
 	/* ydnar: fog hull */
-	value = ValueForKey( &entities[ 0 ], "_foghull" );
-	if ( !strEmpty( value ) ) {
+	if ( ENT_READKV( &entities[ 0 ], "_foghull", &value ) ) {
+		char shader[MAX_QPATH];
 		sprintf( shader, "textures/%s", value );
 		MakeFogHullSurfs( e, tree, shader );
 	}
 
 	/* ydnar: bug 645: do flares for lights */
-	for ( i = 0; i < numEntities && emitFlares; i++ )
+	for ( int i = 0; i < numEntities && emitFlares; i++ )
 	{
 		entity_t    *light, *target;
 		const char  *value, *flareShader;
 		vec3_t origin, targetOrigin, normal, color;
-		int lightStyle;
-
 
 		/* get light */
 		light = &entities[ i ];
-		value = ValueForKey( light, "classname" );
-		if ( strEqual( value, "light" ) ) {
+		if ( ent_class_is( light, "light" ) ) {
 			/* get flare shader */
 			flareShader = ValueForKey( light, "_flareshader" );
 			value = ValueForKey( light, "_flare" );
@@ -508,14 +478,11 @@ void ProcessWorldModel( void ){
 				/* get specifics */
 				GetVectorForKey( light, "origin", origin );
 				GetVectorForKey( light, "_color", color );
-				lightStyle = IntForKey( light, "_style" );
-				if ( lightStyle == 0 ) {
-					lightStyle = IntForKey( light, "style" );
-				}
+				int lightStyle = 0;
+				ENT_READKV( light, "_style", &lightStyle ) || ENT_READKV( light, "style", &lightStyle );
 
 				/* handle directional spotlights */
-				value = ValueForKey( light, "target" );
-				if ( !strEmpty( value ) ) {
+				if ( ENT_READKV( light, "target", &value ) ) {
 					/* get target light */
 					target = FindTargetEntity( value );
 					if ( target != NULL ) {
@@ -702,7 +669,6 @@ void OnlyEnts( void ){
 	char out[ 1024 ];
 
 	char save_cmdline[1024], save_version[1024], save_gridsize[1024];
-	const char *p;
 
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
@@ -711,15 +677,9 @@ void OnlyEnts( void ){
 	LoadBSPFile( out );
 
 	ParseEntities();
-	p = ValueForKey( &entities[0], "_q3map2_cmdline" );
-	strncpy( save_cmdline, p, sizeof( save_cmdline ) );
-	save_cmdline[sizeof( save_cmdline ) - 1] = 0;
-	p = ValueForKey( &entities[0], "_q3map2_version" );
-	strncpy( save_version, p, sizeof( save_version ) );
-	save_version[sizeof( save_version ) - 1] = 0;
-	p = ValueForKey( &entities[0], "gridsize" );
-	strncpy( save_gridsize, p, sizeof( save_gridsize ) );
-	save_gridsize[sizeof( save_gridsize ) - 1] = 0;
+	strcpyQ( save_cmdline, ValueForKey( &entities[0], "_q3map2_cmdline" ), sizeof( save_cmdline ) );
+	strcpyQ( save_version, ValueForKey( &entities[0], "_q3map2_version" ), sizeof( save_version ) );
+	strcpyQ( save_gridsize, ValueForKey( &entities[0], "gridsize" ), sizeof( save_gridsize ) );
 
 	numEntities = 0;
 
