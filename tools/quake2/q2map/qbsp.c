@@ -161,7 +161,6 @@ void ProcessWorldModel( void ){
 	entity_t    *e;
 	tree_t      *tree;
 	qboolean leaked;
-	qboolean optimize;
 	xmlNodePtr polyline, leaknode;
 	char level[ 2 ];
 
@@ -200,7 +199,7 @@ void ProcessWorldModel( void ){
 		block_yh = 3;
 	}
 
-	for ( optimize = false ; optimize <= true ; optimize++ )
+	for ( int optimize = 0; optimize <= 1; optimize++ )
 	{
 		Sys_FPrintf( SYS_VRB, "--------------------------------------------\n" );
 

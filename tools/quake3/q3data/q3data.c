@@ -327,7 +327,6 @@ void PackDirectory_r( char *dir ){
 	int count;
 	struct stat st;
 	int i;
-	int len;
 	char fullname[1024];
 	char dirstring[1024];
 	char        *name;

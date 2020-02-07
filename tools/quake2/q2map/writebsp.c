@@ -324,7 +324,7 @@ void WriteBSP( node_t *headnode ){
 void SetModelNumbers( void ){
 	int i;
 	int models;
-	char value[10];
+	char value[16];
 
 	models = 1;
 	for ( i = 1 ; i < num_entities ; i++ )
@@ -349,7 +349,7 @@ void SetLightStyles( void ){
 	char    *t;
 	entity_t    *e;
 	int i, j;
-	char value[10];
+	char value[16];
 	char lighttargets[MAX_SWITCHED_LIGHTS][64];
 
 

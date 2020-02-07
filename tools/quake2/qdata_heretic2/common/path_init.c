@@ -167,7 +167,7 @@ void LokiInitPaths( char *argv0 ){
 
 			/* verify the path */
 			if ( access( temp, X_OK ) == 0 ) {
-				found++;
+				found = true;
 			}
 			path = last + 1;
 		}
@@ -324,8 +324,9 @@ void InitPaths( int *argc, char **argv ){
 	/* remove processed arguments */
 	for ( i = 0, j = 0, k = 0; i < *argc && j < *argc; i++, j++ )
 	{
-		for ( ; j < *argc && argv[ j ] == NULL; j++ );
-			argv[ i ] = argv[ j ];
+		for ( ; j < *argc && argv[ j ] == NULL; j++ ){
+		}
+		argv[ i ] = argv[ j ];
 		if ( argv[ i ] != NULL ) {
 			k++;
 		}

@@ -132,10 +132,10 @@ void EmitLeaf (node_t *node)
 
 	//
 	// write bounding box info
-	//	
+	//
 	VectorCopy (node->mins, leaf_p->mins);
 	VectorCopy (node->maxs, leaf_p->maxs);
-	
+
 	//
 	// write the leafbrushes
 	//
@@ -165,7 +165,7 @@ void EmitLeaf (node_t *node)
 
 	leaf_p->firstleafface = numleaffaces;
 
-	for (p = node->portals ; p ; p = p->next[s])	
+	for (p = node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
 		f = p->face[s];
@@ -174,7 +174,7 @@ void EmitLeaf (node_t *node)
 
 		EmitMarkFace (leaf_p, f);
 	}
-	
+
 	leaf_p->numleaffaces = numleaffaces - leaf_p->firstleafface;
 }
 
@@ -244,7 +244,7 @@ int EmitDrawNode_r (node_t *node)
 		return -numleafs;
 	}
 
-	// emit a node	
+	// emit a node
 	if (numnodes == MAX_MAP_NODES)
 		Error ("MAX_MAP_NODES");
 	n = &dnodes[numnodes];
@@ -274,7 +274,7 @@ int EmitDrawNode_r (node_t *node)
 
 	//
 	// recursively output the other nodes
-	//	
+	//
 	for (i=0 ; i<2 ; i++)
 	{
 		if (node->children[i]->planenum == PLANENUM_LEAF)
@@ -284,7 +284,7 @@ int EmitDrawNode_r (node_t *node)
 		}
 		else
 		{
-			n->children[i] = numnodes;	
+			n->children[i] = numnodes;
 			EmitDrawNode_r (node->children[i]);
 		}
 	}
@@ -329,7 +329,7 @@ void SetModelNumbers (void)
 {
 	int		i;
 	int		models;
-	char	value[10];
+	char	value[16];
 
 	models = 1;
 	for (i=1 ; i<num_entities ; i++)
@@ -356,7 +356,7 @@ void SetLightStyles (void)
 	char	*t;
 	entity_t	*e;
 	int		i, j;
-	char	value[10];
+	char	value[16];
 	char	lighttargets[MAX_SWITCHED_LIGHTS][64];
 
 
@@ -374,7 +374,7 @@ void SetLightStyles (void)
 		t = ValueForKey (e, "targetname");
 		if (!t[0])
 			continue;
-		
+
 		// find this targetname
 		for (j=0 ; j<stylenum ; j++)
 			if (!strcmp (lighttargets[j], t))

@@ -414,7 +414,6 @@ quakefile_t *FindQuakeFilesWithPakFilter(char *pakfilter, char *filter)
 #else
 	glob_t globbuf;
 	struct stat statbuf;
-	int j;
 #endif
 	quakefile_t *qfiles, *lastqf, *qf;
 	char pakfile[_MAX_PATH], filename[_MAX_PATH], *str;
@@ -435,7 +434,7 @@ quakefile_t *FindQuakeFilesWithPakFilter(char *pakfilter, char *filter)
 			_stat(pakfile, &statbuf);
 #else
 		glob(pakfilter, 0, NULL, &globbuf);
-		for (j = 0; j < globbuf.gl_pathc; j++)
+		for (size_t j = 0; j < globbuf.gl_pathc; j++)
 		{
 			strcpy(pakfile, globbuf.gl_pathv[j]);
 			stat(pakfile, &statbuf);
@@ -499,7 +498,7 @@ quakefile_t *FindQuakeFilesWithPakFilter(char *pakfilter, char *filter)
 			strcat(filename, filedata.cFileName);
 #else
 		glob(filter, 0, NULL, &globbuf);
-		for (j = 0; j < globbuf.gl_pathc; j++)
+		for (size_t j = 0; j < globbuf.gl_pathc; j++)
 		{
 			strcpy(filename, globbuf.gl_pathv[j]);
 #endif

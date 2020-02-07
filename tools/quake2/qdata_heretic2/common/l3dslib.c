@@ -246,7 +246,7 @@ int ParseChunk( FILE *input ){
 			w--;
 			bytesread++;
 		} while ( temp[i - 1] );
-
+	// fall through
 	case MAIN3DS:
 	case OBJ_TRIMESH:
 	case EDIT3DS:

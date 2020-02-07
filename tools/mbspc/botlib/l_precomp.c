@@ -1823,7 +1823,7 @@ int PC_EvaluateTokens(source_t *source, token_t *tokens, signed long int *intval
 							break;
 						} //end if
 					} //end case
-
+						// fall through
 					case P_MUL:
 					case P_DIV:
 					case P_MOD:
