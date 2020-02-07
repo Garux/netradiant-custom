@@ -36,6 +36,7 @@
 #if defined ( __linux__ ) || defined ( __APPLE__ )
 #include <dirent.h>
 #include <unistd.h>
+#include <linux/limits.h>
 #else
 #include <wtypes.h>
 #include <io.h>

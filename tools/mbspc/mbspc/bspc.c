@@ -407,7 +407,7 @@ void CreateAASFilesForAllBSPFiles(char *quakepath)
 		stat(foldername, &statbuf);
 #endif
 		//if it is a folder
-		if (statbuf.st_mode & S_IFDIR)
+		if ( S_ISDIR( statbuf.st_mode ) != 0 )
 		{
 			//
 			AppendPathSeperator(foldername, sizeof(foldername));

@@ -441,7 +441,7 @@ quakefile_t *FindQuakeFilesWithPakFilter(char *pakfilter, char *filter)
 			stat(pakfile, &statbuf);
 #endif
 			//if the file with .pak or .pk3 is a folder
-			if (statbuf.st_mode & S_IFDIR)
+			if ( S_ISDIR( statbuf.st_mode ) != 0 )
 			{
 				strcpy(filename, pakfilter);
 				AppendPathSeperator(filename, _MAX_PATH);
