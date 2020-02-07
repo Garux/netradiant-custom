@@ -291,7 +291,7 @@ void Q_mkdir( const char *path ){
 		if ( errno == ENOENT ) {
 			p = path_get_last_separator( path );
 		}
-		if ( !strEmpty( p ) ) {
+		if ( !strEmptyOrNull( p ) ) {
 			strcpyQ( parentbuf, path, p - path + 1 );
 			if ( ( p - path ) < (ptrdiff_t) sizeof( parentbuf ) ) {
 				Sys_Printf( "mkdir: %s: creating parent %s first\n", path, parentbuf );
