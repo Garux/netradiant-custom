@@ -491,8 +491,8 @@ void HL_SwapBSPFile (qboolean todisk)
 } //end of the function HL_SwapBSPFile
 
 
-hl_dheader_t	*hl_header;
-int				hl_fileLength;
+static hl_dheader_t	*hl_header;
+static int				hl_fileLength;
 
 int HL_CopyLump (int lump, void *dest, int size, int maxsize)
 {
@@ -585,8 +585,8 @@ void	HL_LoadBSPFile (char *filename, int offset, int length)
 
 //============================================================================
 
-FILE		*wadfile;
-hl_dheader_t	outheader;
+static FILE		*wadfile;
+static hl_dheader_t	outheader;
 
 void HL_AddLump (int lumpnum, void *data, int len)
 {

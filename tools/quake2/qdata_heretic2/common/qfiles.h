@@ -611,7 +611,7 @@ enum
 	MATERIAL_WOOD,
 };
 
-materialtype_t  *materialtypes;
+extern materialtype_t  *materialtypes;
 
 void QFile_ReadMaterialTypes( char* filename );
 

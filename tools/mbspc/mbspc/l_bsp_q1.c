@@ -383,8 +383,8 @@ void Q1_SwapBSPFile (qboolean todisk)
 }
 
 
-q1_dheader_t *q1_header;
-int			q1_fileLength;
+static q1_dheader_t *q1_header;
+static int			q1_fileLength;
 
 int Q1_CopyLump (int lump, void *dest, int size, int maxsize)
 {
@@ -460,8 +460,8 @@ void	Q1_LoadBSPFile(char *filename, int offset, int length)
 
 //============================================================================
 
-FILE *q1_wadfile;
-q1_dheader_t q1_outheader;
+static FILE *q1_wadfile;
+static q1_dheader_t q1_outheader;
 
 void Q1_AddLump (int lumpnum, void *data, int len)
 {

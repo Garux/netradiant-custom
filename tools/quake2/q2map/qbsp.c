@@ -45,7 +45,7 @@ qboolean noopt;
 qboolean leaktest;
 qboolean verboseentities;
 
-char outbase[32];
+extern char outbase[32];
 
 int block_xl = -8, block_xh = 7, block_yl = -8, block_yh = 7;
 

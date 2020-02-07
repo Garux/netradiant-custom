@@ -22,12 +22,6 @@
 
 #include "qdata.h"
 
-byte            *byteimage, *lbmpalette;
-int byteimagewidth, byteimageheight;
-
-qboolean TrueColorImage;
-int longimagewidth, longimageheight;
-
 char book_prefix[1024];
 byte buffer[640 * 480];
 unsigned long bufferl[640 * 480];

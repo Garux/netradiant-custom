@@ -37,7 +37,7 @@ float *best;
 float *comp;
 float *tcomp;
 float *bestcomp;
-float *frames;
+static float *frames;
 float *base;
 
 int MatWidth;

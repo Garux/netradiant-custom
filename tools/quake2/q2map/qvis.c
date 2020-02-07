@@ -27,8 +27,8 @@
 int numportals;
 int portalclusters;
 
-char inbase[32];
-char outbase[32];
+extern char inbase[32];
+extern char outbase[32];
 
 portal_t    *portals;
 leaf_t      *leafs;

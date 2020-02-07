@@ -64,11 +64,11 @@ float maxlight = 196;
 
 float lightscale = 1.0;
 
-qboolean glview;
+extern qboolean glview;
 
 qboolean nopvs;
 
-char source[1024];
+extern char source[1024];
 
 float direct_scale =  0.4;
 float entity_scale =  1.0;

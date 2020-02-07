@@ -172,7 +172,7 @@ void MakeTnodes( dmodel_t *bm );
 void MakePatches( void );
 void SubdividePatches( void );
 void PairEdges( void );
-void ( *CalcTextureReflectivity )( void );
+extern void ( *CalcTextureReflectivity )( void );
 void CalcTextureReflectivity_Quake2( void );
 void CalcTextureReflectivity_Heretic2( void );
 

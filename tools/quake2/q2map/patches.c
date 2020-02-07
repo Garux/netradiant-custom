@@ -31,6 +31,8 @@ vec3_t texture_reflectivity[MAX_MAP_TEXINFO];
    ===================================================================
  */
 
+void ( *CalcTextureReflectivity )( void );
+
 /*
    ======================
    CalcTextureReflectivity_Quake2

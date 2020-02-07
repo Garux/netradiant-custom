@@ -22,13 +22,6 @@
 
 #include "qdata.h"
 
-byte            *byteimage, *lbmpalette;
-int byteimagewidth, byteimageheight;
-
-qboolean TrueColorImage;
-unsigned        *longimage;
-int longimagewidth, longimageheight;
-
 char pic_prefix[1024];
 extern char        *g_outputDir;
 

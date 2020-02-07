@@ -73,7 +73,7 @@ int new_num_verts[NUM_CLUSTERS + 1];
 
 //================================================================
 
-frame_t g_frames[MAX_FRAMES];
+static frame_t g_frames[MAX_FRAMES];
 //frame_t		*g_frames;
 
 static dmdl_t model;
