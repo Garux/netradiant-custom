@@ -1499,8 +1499,8 @@ void SetEntityBounds( entity_t *e ){
 	}
 
 	/* try to find explicit min/max key */
-	ENT_READKV( e, "min", &mins );
-	ENT_READKV( e, "max", &maxs );
+	ENT_READKV( &mins, e, "min" );
+	ENT_READKV( &maxs, e, "max" );
 
 	/* store the bounds */
 	for ( b = e->brushes; b; b = b->next )
@@ -1538,13 +1538,11 @@ void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* determine if there is an index map (support legacy "alphamap" key as well) */
-	if( !ENT_READKV( e, "_indexmap", &indexMapFilename ) &&
-		!ENT_READKV( e, "alphamap", &indexMapFilename ) )
+	if( !ENT_READKV( &indexMapFilename, e, "_indexmap", "alphamap" ) )
 		return;
 
 	/* get number of layers (support legacy "layers" key as well) */
-	if( !ENT_READKV( e, "_layers", &numLayers ) &&
-		!ENT_READKV( e, "layers", &numLayers ) ){
+	if( !ENT_READKV( &numLayers, e, "_layers", "layers" ) ){
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_layers\" or \"layers\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
@@ -1556,8 +1554,7 @@ void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* get base shader name (support legacy "shader" key as well) */
-	if( !ENT_READKV( mapEnt, "_shader", &shader ) &&
-		!ENT_READKV( mapEnt, "shader", &shader ) ){
+	if( !ENT_READKV( &shader, mapEnt, "_shader", "shader" ) ){
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_shader\" or \"shader\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
@@ -1632,8 +1629,7 @@ void LoadEntityIndexMap( entity_t *e ){
 
 	/* get height offsets */
 	char offset[ 4096 ];
-	if( ENT_READKV( mapEnt, "_offsets", &offset ) ||
-		ENT_READKV( mapEnt, "offsets", &offset ) ){
+	if( ENT_READKV( &offset, mapEnt, "_offsets", "offsets" ) ){
 		/* value is a space-separated set of numbers */
 		char *search = offset;
 		/* get each value */
@@ -1786,10 +1782,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	GetEntityShadowFlags( mapEnt, NULL, &castShadows, &recvShadows );
 
 	/* ydnar: get lightmap scaling value for this entity */
-	float lightmapScale = 0.0f;
-	ENT_READKV( mapEnt, "lightmapscale", &lightmapScale ) ||
-	ENT_READKV( mapEnt, "_lightmapscale", &lightmapScale ) ||
-	ENT_READKV( mapEnt, "_ls", &lightmapScale );
+	float lightmapScale = FloatForKey( mapEnt, "lightmapscale", "_lightmapscale", "_ls" );
 	if ( lightmapScale < 0.0f )
 		lightmapScale = 0.0f;
 	else if ( lightmapScale > 0.0f )
@@ -1798,8 +1791,8 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	/* ydnar: get cel shader :) for this entity */
 	shaderInfo_t *celShader;
 	const char *value;
-	if( ENT_READKV( mapEnt, "_celshader", &value ) ||
-		ENT_READKV( &entities[ 0 ], "_celshader", &value ) ){
+	if( ENT_READKV( &value, mapEnt, "_celshader" ) ||
+		ENT_READKV( &value, &entities[ 0 ], "_celshader" ) ){
 		char shader[ MAX_QPATH ];
 		sprintf( shader, "textures/%s", value );
 		celShader = ShaderInfoForShader( shader );
@@ -1810,22 +1803,15 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* jal : entity based _shadeangle */
-	float shadeAngle = 0.0f;
-	ENT_READKV( mapEnt, "_shadeangle", &shadeAngle ) ||
-	ENT_READKV( mapEnt, "_smoothnormals", &shadeAngle ) || /* vortex' aliases */
-	ENT_READKV( mapEnt, "_sn", &shadeAngle ) ||
-	ENT_READKV( mapEnt, "_sa", &shadeAngle ) ||
-	ENT_READKV( mapEnt, "_smooth", &shadeAngle );
+	float shadeAngle = FloatForKey( mapEnt, "_shadeangle",
+						"_smoothnormals", "_sn", "_sa", "_smooth" ); /* vortex' aliases */
 	if ( shadeAngle < 0.0f )
 		shadeAngle = 0.0f;
 	else if ( shadeAngle > 0.0f )
 		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt->mapEntityNum, classname, shadeAngle );
 
 	/* jal : entity based _samplesize */
-	int lightmapSampleSize = 0;
-	ENT_READKV( mapEnt, "_lightmapsamplesize", &lightmapSampleSize ) ||
-	ENT_READKV( mapEnt, "_samplesize", &lightmapSampleSize ) ||
-	ENT_READKV( mapEnt, "_ss", &lightmapSampleSize );
+	int lightmapSampleSize = IntForKey( mapEnt, "_lightmapsamplesize", "_samplesize", "_ss" );
 	if ( lightmapSampleSize < 0 )
 		lightmapSampleSize = 0;
 	else if ( lightmapSampleSize > 0 )

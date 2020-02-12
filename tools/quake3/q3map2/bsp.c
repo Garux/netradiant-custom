@@ -187,9 +187,7 @@ static void SetCloneModelNumbers( void ){
 		}
 
 		/* is this a clone? */
-		if( ENT_READKV( &entities[ i ], "_ins", &value ) ||
-			ENT_READKV( &entities[ i ], "_instance", &value ) ||
-			ENT_READKV( &entities[ i ], "_clone", &value ) )
+		if( ENT_READKV( &value, &entities[ i ], "_ins", "_instance", "_clone" ) )
 			continue;
 
 		/* add the model key */
@@ -209,23 +207,21 @@ static void SetCloneModelNumbers( void ){
 		}
 
 		/* isn't this a clone? */
-		if( !ENT_READKV( &entities[ i ], "_ins", &value ) &&
-			!ENT_READKV( &entities[ i ], "_instance", &value ) &&
-			!ENT_READKV( &entities[ i ], "_clone", &value ) )
+		if( !ENT_READKV( &value, &entities[ i ], "_ins", "_instance", "_clone" ) )
 			continue;
 
 		/* find an entity with matching clone name */
 		for ( j = 0; j < numEntities; j++ )
 		{
 			/* is this a clone parent? */
-			if ( !ENT_READKV( &entities[ j ], "_clonename", &value2 ) ) {
+			if ( !ENT_READKV( &value2, &entities[ j ], "_clonename" ) ) {
 				continue;
 			}
 
 			/* do they match? */
 			if ( strEqual( value, value2 ) ) {
 				/* get the model num */
-				if ( !ENT_READKV( &entities[ j ], "model", &value3 ) ) {
+				if ( !ENT_READKV( &value3, &entities[ j ], "model" ) ) {
 					Sys_Warning( "Cloned entity %s referenced entity without model\n", value2 );
 					continue;
 				}
@@ -308,9 +304,7 @@ void ProcessWorldModel( void ){
 	int leakStatus;
 
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
-	if( ENT_READKV( &entities[ 0 ], "_blocksize", &value ) ||
-		ENT_READKV( &entities[ 0 ], "blocksize", &value ) ||
-		ENT_READKV( &entities[ 0 ], "chopsize", &value ) ) {  /* sof2 */
+	if( ENT_READKV( &value, &entities[ 0 ], "_blocksize", "blocksize", "chopsize" ) ) {  /* "chopsize" : sof2 */
 		/* scan 3 numbers */
 		const int s = sscanf( value, "%d %d %d", &blockSize[ 0 ], &blockSize[ 1 ], &blockSize[ 2 ] );
 
@@ -322,9 +316,7 @@ void ProcessWorldModel( void ){
 	Sys_Printf( "block size = { %d %d %d }\n", blockSize[ 0 ], blockSize[ 1 ], blockSize[ 2 ] );
 
 	/* sof2: ignore leaks? */
-	bool ignoreLeaks = false;
-	ENT_READKV( &entities[ 0 ], "_ignoreleaks", &ignoreLeaks ) ||
-	ENT_READKV( &entities[ 0 ], "ignoreleaks", &ignoreLeaks );
+	const bool ignoreLeaks = BoolForKey( &entities[ 0 ], "_ignoreleaks", "ignoreleaks" );
 
 	/* begin worldspawn model */
 	BeginModel();
@@ -455,7 +447,7 @@ void ProcessWorldModel( void ){
 	}
 
 	/* ydnar: fog hull */
-	if ( ENT_READKV( &entities[ 0 ], "_foghull", &value ) ) {
+	if ( ENT_READKV( &value, &entities[ 0 ], "_foghull" ) ) {
 		char shader[MAX_QPATH];
 		sprintf( shader, "textures/%s", value );
 		MakeFogHullSurfs( e, tree, shader );
@@ -465,24 +457,21 @@ void ProcessWorldModel( void ){
 	for ( int i = 0; i < numEntities && emitFlares; i++ )
 	{
 		entity_t    *light, *target;
-		const char  *value, *flareShader;
 		vec3_t origin, targetOrigin, normal, color;
 
 		/* get light */
 		light = &entities[ i ];
 		if ( ent_class_is( light, "light" ) ) {
 			/* get flare shader */
-			flareShader = ValueForKey( light, "_flareshader" );
-			value = ValueForKey( light, "_flare" );
-			if ( !strEmpty( flareShader ) || !strEmpty( value ) ) {
+			const char *flareShader = NULL;
+			if ( ENT_READKV( &flareShader, light, "_flareshader" ) || BoolForKey( light, "_flare" ) ) {
 				/* get specifics */
 				GetVectorForKey( light, "origin", origin );
 				GetVectorForKey( light, "_color", color );
-				int lightStyle = 0;
-				ENT_READKV( light, "_style", &lightStyle ) || ENT_READKV( light, "style", &lightStyle );
+				const int lightStyle = IntForKey( light, "_style", "style" );
 
 				/* handle directional spotlights */
-				if ( ENT_READKV( light, "target", &value ) ) {
+				if ( ENT_READKV( &value, light, "target" ) ) {
 					/* get target light */
 					target = FindTargetEntity( value );
 					if ( target != NULL ) {

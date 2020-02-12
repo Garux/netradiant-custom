@@ -1140,15 +1140,15 @@ static void PopulateTraceNodes( void ){
 
 		/* get scale */
 		vec3_t scale = { 1.f, 1.f, 1.f };
-		if( !ENT_READKV( e, "modelscale_vec", &scale ) )
-			if( ENT_READKV( e, "modelscale", &scale[0] ) )
+		if( !ENT_READKV( &scale, e, "modelscale_vec" ) )
+			if( ENT_READKV( &scale[0], e, "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		vec3_t angles = { 0.f, 0.f, 0.f };
-		if ( !ENT_READKV( e, "angles", &value ) ||
+		if ( !ENT_READKV( &value, e, "angles" ) ||
 			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-			ENT_READKV( e, "angle", &angles[ 2 ] );
+			ENT_READKV( &angles[ 2 ], e, "angle" );
 
 		/* set transform matrix (thanks spog) */
 		m4x4_identity( transform );
@@ -1181,9 +1181,7 @@ static void PopulateTraceNodes( void ){
 		/* external model */
 		default:
 			{
-				int frame = 0;
-				ENT_READKV( e, "_frame", &frame ) || ENT_READKV( e, "frame", &frame );
-				model = LoadModel( value, frame );
+				model = LoadModel( value, IntForKey( e, "_frame", "frame" ) );
 				if ( model == NULL ) {
 					continue;
 				}

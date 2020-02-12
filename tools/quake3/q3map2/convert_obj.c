@@ -374,8 +374,8 @@ int ConvertBSPToOBJ( char *bspName ){
 		model = &bspModels[ modelNum ];
 
 		/* get entity origin */
-		vec3_t origin = { 0.f, 0.f, 0.f };
-		ENT_READKV( e, "origin", &origin );
+		vec3_t origin;
+		GetVectorForKey( e, "origin", origin );
 
 		/* convert model */
 		ConvertModelToOBJ( f, model, modelNum, origin, lmIndices );

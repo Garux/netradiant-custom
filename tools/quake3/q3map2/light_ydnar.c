@@ -4130,7 +4130,7 @@ void SetupFloodLight( void ){
 
 	/* floodlight */
 	const char  *value;
-	if ( ENT_READKV( &entities[ 0 ], "_floodlight", &value ) ) {
+	if ( ENT_READKV( &value, &entities[ 0 ], "_floodlight" ) ) {
 		double v1,v2,v3,v4,v5,v6;
 		v1 = v2 = v3 = 0;
 		v4 = floodlightDistance;

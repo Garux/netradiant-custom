@@ -300,9 +300,9 @@ void CalcVis( void ){
 
 	/* ydnar: rr2do2's farplane code */
 	const char *value;
-	if( ENT_READKV( &entities[ 0 ], "_farplanedist", &value ) ||     /* proper '_' prefixed key */
-		ENT_READKV( &entities[ 0 ], "fogclip", &value ) ||           /* wolf compatibility */
-		ENT_READKV( &entities[ 0 ], "distancecull", &value ) ){      /* sof2 compatibility */
+	if( ENT_READKV( &value, &entities[ 0 ], "_farplanedist",         /* proper '_' prefixed key */
+	                                        "fogclip",               /* wolf compatibility */
+	                                        "distancecull" ) ){      /* sof2 compatibility */
 		farPlaneDist = atof( value );
 		farPlaneDistMode = value[strlen( value ) - 1 ];
 		if ( farPlaneDist != 0.0f ) {

@@ -335,29 +335,26 @@ void CreateEntityLights( void ){
 
 		/* set origin */
 		GetVectorForKey( e, "origin", light->origin );
-		ENT_READKV( e, "_style", &light->style ) || ENT_READKV( e, "style", &light->style );
+		ENT_READKV( &light->style, e, "_style", "style" );
 		if ( light->style < LS_NORMAL || light->style >= LS_NONE ) {
 			Error( "Invalid lightstyle (%d) on entity %d", light->style, i );
 		}
 
 		/* set light intensity */
 		float intensity = 300.f;
-		ENT_READKV( e, "_light", &intensity ) || ENT_READKV( e, "light", &intensity );
+		ENT_READKV( &intensity, e, "_light", "light" );
 		if ( intensity == 0.0f ) {
 			intensity = 300.0f;
 		}
 
 		{ /* ydnar: set light scale (sof2) */
 			float scale;
-			if( ENT_READKV( e, "scale", &scale ) && scale != 0.f )
+			if( ENT_READKV( &scale, e, "scale" ) && scale != 0.f )
 				intensity *= scale;
 		}
 
 		/* ydnar: get deviance and samples */
-		float deviance = 0.f;
-		ENT_READKV( e, "_deviance", &deviance ) ||
-		ENT_READKV( e, "_deviation", &deviance ) ||
-		ENT_READKV( e, "_jitter", &deviance );
+		float deviance = FloatForKey( e, "_deviance", "_deviation", "_jitter" );
 		if ( deviance < 0.f )
 			deviance = 0.f;
 		int numSamples = IntForKey( e, "_samples" );
@@ -367,15 +364,12 @@ void CreateEntityLights( void ){
 		intensity /= numSamples;
 
 		{ /* ydnar: get filter radius */
-			float filterRadius = 0.f;
-			ENT_READKV( e, "_filterradius", &filterRadius ) ||
-			ENT_READKV( e, "_filteradius", &filterRadius ) ||
-			ENT_READKV( e, "_filter", &filterRadius );
+			const float filterRadius = FloatForKey( e, "_filterradius", "_filteradius", "_filter" );
 			light->filterRadius = filterRadius < 0.f? 0.f : filterRadius;
 		}
 
 		/* set light color */
-		if ( ENT_READKV( e, "_color", &light->color ) ) {
+		if ( ENT_READKV( &light->color, e, "_color" ) ) {
 			if ( colorsRGB ) {
 				light->color[0] = Image_LinearFloatFromsRGBFloat( light->color[0] );
 				light->color[1] = Image_LinearFloatFromsRGBFloat( light->color[1] );
@@ -390,7 +384,7 @@ void CreateEntityLights( void ){
 		}
 
 
-		if( !ENT_READKV( e, "_extradist", &light->extraDist ) )
+		if( !ENT_READKV( &light->extraDist, e, "_extradist" ) )
 			light->extraDist = extraDist;
 
 		light->photons = intensity;
@@ -402,7 +396,7 @@ void CreateEntityLights( void ){
 
 		/* lights with a target will be spotlights */
 		const char *target;
-		if ( ENT_READKV( e, "target", &target ) ) {
+		if ( ENT_READKV( &target, e, "target" ) ) {
 			/* get target */
 			e2 = FindTargetEntity( target );
 			if ( e2 == NULL ) {
@@ -636,7 +630,7 @@ void SetEntityOrigins( void ){
 
 		/* get entity origin */
 		vec3_t origin = { 0.f, 0.f, 0.f };
-		if ( !ENT_READKV( e, "origin", &origin ) ) {
+		if ( !ENT_READKV( &origin, e, "origin" ) ) {
 			continue;
 		}
 
@@ -1771,7 +1765,7 @@ void SetupGrid( void ){
 	}
 
 	/* ydnar: set grid size */
-	ENT_READKV( &entities[ 0 ], "gridsize", &gridSize );
+	ENT_READKV( &gridSize, &entities[ 0 ], "gridsize" );
 
 	/* quantize it */
 	VectorCopy( gridSize, oldGridSize );
@@ -1872,22 +1866,21 @@ void LightWorld( bool fastAllocate ){
 	}
 
 	/* ambient */
-	f = 0.f;
-	ENT_READKV( &entities[ 0 ], "_ambient", &f ) || ENT_READKV( &entities[ 0 ], "ambient", &f );
+	f = FloatForKey( &entities[ 0 ], "_ambient", "ambient" );
 	VectorScale( color, f, ambientColor );
 
 	/* minvertexlight */
-	if ( ( minVertex = ENT_READKV( &entities[ 0 ], "_minvertexlight", &f ) ) ) {
+	if ( ( minVertex = ENT_READKV( &f, &entities[ 0 ], "_minvertexlight" ) ) ) {
 		VectorScale( color, f, minVertexLight );
 	}
 
 	/* mingridlight */
-	if ( ( minGrid = ENT_READKV( &entities[ 0 ], "_mingridlight", &f ) ) ) {
+	if ( ( minGrid = ENT_READKV( &f, &entities[ 0 ], "_mingridlight" ) ) ) {
 		VectorScale( color, f, minGridLight );
 	}
 
 	/* minlight */
-	if ( ENT_READKV( &entities[ 0 ], "_minlight", &f ) ) {
+	if ( ENT_READKV( &f, &entities[ 0 ], "_minlight" ) ) {
 		VectorScale( color, f, minLight );
 		if ( !minVertex )
 			VectorScale( color, f, minVertexLight );
@@ -1896,7 +1889,7 @@ void LightWorld( bool fastAllocate ){
 	}
 
 	/* maxlight */
-	if ( ENT_READKV( &entities[ 0 ], "_maxlight", &f ) ) {
+	if ( ENT_READKV( &f, &entities[ 0 ], "_maxlight" ) ) {
 		maxLight = f > 255? 255 : f < 0? 0 : f;
 	}
 

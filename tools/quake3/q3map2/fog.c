@@ -772,7 +772,7 @@ void CreateMapFogs( void ){
 
 	/* ydnar: global fog */
 	const char  *globalFog;
-	if ( ENT_READKV( &entities[ 0 ], "_fog", &globalFog ) || ENT_READKV( &entities[ 0 ], "fog", &globalFog ) ) {
+	if ( ENT_READKV( &globalFog, &entities[ 0 ], "_fog", "fog" ) ) {
 		/* test limit */
 		if ( numMapFogs >= MAX_MAP_FOGS ) {
 			Error( "Exceeded MAX_MAP_FOGS (%d) trying to add global fog", MAX_MAP_FOGS );

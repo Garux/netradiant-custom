@@ -315,7 +315,7 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 	}
 
-	if ( ENT_READKV( &entities[0], "music", &str ) ){
+	if ( ENT_READKV( &str, &entities[0], "music" ) ){
 		FixDOSName( str );
 		DefaultExtension( str, ".wav" );
 		res2list( pk3Sounds, str );
@@ -323,7 +323,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < numBSPEntities && i < numEntities; ++i )
 	{
-		if ( ENT_READKV( &entities[i], "noise", &str ) && str[0] != '*' ){
+		if ( ENT_READKV( &str, &entities[i], "noise" ) && str[0] != '*' ){
 			FixDOSName( str );
 			DefaultExtension( str, ".wav" );
 			res2list( pk3Sounds, str );
@@ -985,7 +985,7 @@ int repackBSPMain( int argc, char **argv ){
 				res2list( pk3Shaders, str );
 			}
 		}
-		if ( ENT_READKV( &entities[0], "music", &str ) ){
+		if ( ENT_READKV( &str, &entities[0], "music" ) ){
 			FixDOSName( str );
 			DefaultExtension( str, ".wav" );
 			res2list( pk3Sounds, str );
@@ -993,7 +993,7 @@ int repackBSPMain( int argc, char **argv ){
 
 		for ( i = 0; i < numBSPEntities && i < numEntities; ++i )
 		{
-			if ( ENT_READKV( &entities[i], "noise", &str ) && str[0] != '*' ){
+			if ( ENT_READKV( &str, &entities[i], "noise" ) && str[0] != '*' ){
 				FixDOSName( str );
 				DefaultExtension( str, ".wav" );
 				res2list( pk3Sounds, str );

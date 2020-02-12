@@ -688,15 +688,15 @@ int FloodEntities( tree_t *tree ){
 
 			/* get scale */
 			vec3_t scale = { 64.0f, 64.0f, 64.0f };
-			if( !ENT_READKV( e, "_scale", &scale ) )
-				if( ENT_READKV( e, "_scale", &scale[0] ) )
+			if( !ENT_READKV( &scale, e, "_scale" ) )
+				if( ENT_READKV( &scale[0], e, "_scale" ) )
 					scale[1] = scale[2] = scale[0];
 
 			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 			vec3_t angles = { 0.f, 0.f, 0.f };
-			if ( !ENT_READKV( e, "angles", &value ) ||
+			if ( !ENT_READKV( &value, e, "angles" ) ||
 				3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-				ENT_READKV( e, "angle", &angles[ 2 ] );
+				ENT_READKV( &angles[ 2 ], e, "angle" );
 
 			/* set transform matrix (thanks spog) */
 			m4x4_identity( skyboxTransform );

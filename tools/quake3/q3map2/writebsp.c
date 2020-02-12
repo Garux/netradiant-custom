@@ -296,7 +296,7 @@ void SetLightStyles( void ){
 	}
 
 	/* ydnar: determine if we keep lights in the bsp */
-	ENT_READKV( &entities[ 0 ], "_keepLights", &keepLights );
+	ENT_READKV( &keepLights, &entities[ 0 ], "_keepLights" );
 
 	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
 	numStyles = 0;
@@ -308,7 +308,7 @@ void SetLightStyles( void ){
 			continue;
 		}
 		const char *t;
-		if ( !ENT_READKV( e, "targetname", &t ) ) {
+		if ( !ENT_READKV( &t, e, "targetname" ) ) {
 			/* ydnar: strip the light from the BSP file */
 			if ( !keepLights ) {
 				ep = e->epairs;

@@ -612,7 +612,7 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
 	if ( nocmdline ){
 		return;
 	}
-	if ( ENT_READKV( &entities[0], "_q3map2_cmdline", &inpos ) ) { // read previousCommandLine
+	if ( ENT_READKV( &inpos, &entities[0], "_q3map2_cmdline" ) ) { // read previousCommandLine
 		while ( outpos != sentinel && *inpos )
 			*outpos++ = *inpos++;
 		if ( outpos != sentinel ) {
@@ -785,8 +785,19 @@ const char *ValueForKey( const entity_t *ent, const char *key ){
 	return "";
 }
 
-bool BoolForKey( const entity_t *ent, const char *key ){
-	return ValueForKey( ent, key )[0] == '1';
+bool BoolForKey_impl( const entity_t *ent, ... ){
+	va_list argptr;
+	va_start( argptr, ent );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( ent, key );
+		if( !strEmpty( value ) ){
+			va_end( argptr );
+			return value[0] == '1';
+		}
+	}
+	va_end( argptr );
+	return false;
 }
 
 /*
@@ -794,8 +805,19 @@ bool BoolForKey( const entity_t *ent, const char *key ){
    gets the integer point value for an entity key
  */
 
-int IntForKey( const entity_t *ent, const char *key ){
-	return atoi( ValueForKey( ent, key ) );
+int IntForKey_impl( const entity_t *ent, ... ){
+	va_list argptr;
+	va_start( argptr, ent );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( ent, key );
+		if( !strEmpty( value ) ){
+			va_end( argptr );
+			return atoi( value );
+		}
+	}
+	va_end( argptr );
+	return 0;
 }
 
 
@@ -805,8 +827,19 @@ int IntForKey( const entity_t *ent, const char *key ){
    gets the floating point value for an entity key
  */
 
-vec_t FloatForKey( const entity_t *ent, const char *key ){
-	return atof( ValueForKey( ent, key ) );
+vec_t FloatForKey_impl( const entity_t *ent, ... ){
+	va_list argptr;
+	va_start( argptr, ent );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( ent, key );
+		if( !strEmpty( value ) ){
+			va_end( argptr );
+			return atof( value );
+		}
+	}
+	va_end( argptr );
+	return 0;
 }
 
 
@@ -829,57 +862,99 @@ void GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
 	}
 }
 
-bool entity_read_bool( const entity_t *entity, const char *key, bool *bool_value ){
-	const char *value = ValueForKey( entity, key );
-	if( !strEmpty( value ) ){
-		*bool_value = ( value[0] == '1' );
-		return true;
-	}
-	return false;
-}
-bool entity_read_int( const entity_t *entity, const char *key, int *int_value ){
-	const char *value = ValueForKey( entity, key );
-	if( !strEmpty( value ) ){
-		*int_value = atoi( value );
-		return true;
-	}
-	return false;
-}
-bool entity_read_float( const entity_t *entity, const char *key, float *float_value ){
-	const char *value = ValueForKey( entity, key );
-	if( !strEmpty( value ) ){
-		*float_value = atof( value );
-		return true;
-	}
-	return false;
-}
-bool entity_read_vector3( const entity_t *entity, const char *key, float (*vector3_value)[3] ){
-	const char *value = ValueForKey( entity, key );
-	if( !strEmpty( value ) ){
-		float v0, v1, v2;
-		if( 3 == sscanf( value, "%f %f %f", &v0, &v1, &v2 ) ){
-			(*vector3_value)[0] = v0;
-			(*vector3_value)[1] = v1;
-			(*vector3_value)[2] = v2;
+bool entity_read_bool( bool *bool_value, const entity_t *entity, ... ){
+	va_list argptr;
+	va_start( argptr, entity );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( entity, key );
+		if( !strEmpty( value ) ){
+			*bool_value = ( value[0] == '1' );
+			va_end( argptr );
 			return true;
 		}
 	}
+	va_end( argptr );
 	return false;
 }
-bool entity_read_string( const entity_t *entity, const char *key, char (*string_value)[] ){
-	const char *value = ValueForKey( entity, key );
-	if( !strEmpty( value ) ){
-		strcpy( *string_value, value );
-		return true;
+bool entity_read_int( int *int_value, const entity_t *entity, ... ){
+	va_list argptr;
+	va_start( argptr, entity );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( entity, key );
+		if( !strEmpty( value ) ){
+			*int_value = atoi( value );
+			va_end( argptr );
+			return true;
+		}
 	}
+	va_end( argptr );
 	return false;
 }
-bool entity_read_string_ptr( const entity_t *entity, const char *key, const char **string_ptr_value ){
-	const char *value = ValueForKey( entity, key );
-	if( !strEmpty( value ) ){
-		*string_ptr_value = value;
-		return true;
+bool entity_read_float( float *float_value, const entity_t *entity, ... ){
+	va_list argptr;
+	va_start( argptr, entity );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( entity, key );
+		if( !strEmpty( value ) ){
+			*float_value = atof( value );
+			va_end( argptr );
+			return true;
+		}
 	}
+	va_end( argptr );
+	return false;
+}
+bool entity_read_vector3( float (*vector3_value)[3], const entity_t *entity, ... ){
+	va_list argptr;
+	va_start( argptr, entity );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( entity, key );
+		if( !strEmpty( value ) ){
+			float v0, v1, v2;
+			if( 3 == sscanf( value, "%f %f %f", &v0, &v1, &v2 ) ){
+				(*vector3_value)[0] = v0;
+				(*vector3_value)[1] = v1;
+				(*vector3_value)[2] = v2;
+				va_end( argptr );
+				return true;
+			}
+		}
+	}
+	va_end( argptr );
+	return false;
+}
+bool entity_read_string( char (*string_value)[], const entity_t *entity, ... ){
+	va_list argptr;
+	va_start( argptr, entity );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( entity, key );
+		if( !strEmpty( value ) ){
+			strcpy( *string_value, value );
+			va_end( argptr );
+			return true;
+		}
+	}
+	va_end( argptr );
+	return false;
+}
+bool entity_read_string_ptr( const char **string_ptr_value, const entity_t *entity, ... ){
+	va_list argptr;
+	va_start( argptr, entity );
+	const char* key;
+	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
+		const char* value = ValueForKey( entity, key );
+		if( !strEmpty( value ) ){
+			*string_ptr_value = value;
+			va_end( argptr );
+			return true;
+		}
+	}
+	va_end( argptr );
 	return false;
 }
 
@@ -924,18 +999,14 @@ entity_t *FindTargetEntity( const char *target ){
 void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows ){
 	/* get cast shadows */
 	if ( castShadows != NULL ) {
-		ENT_READKV( ent, "_castShadows", castShadows ) ||
-		ENT_READKV( ent, "_cs", castShadows ) ||
-		ENT_READKV( ent2, "_castShadows", castShadows ) ||
-		ENT_READKV( ent2, "_cs", castShadows );
+		ENT_READKV( castShadows, ent, "_castShadows", "_cs" ) ||
+		ENT_READKV( castShadows, ent2, "_castShadows", "_cs" );
 	}
 
 	/* receive */
 	if ( recvShadows != NULL ) {
-		ENT_READKV( ent, "_receiveShadows", recvShadows ) ||
-		ENT_READKV( ent, "_rs", recvShadows ) ||
-		ENT_READKV( ent2, "_receiveShadows", recvShadows ) ||
-		ENT_READKV( ent2, "_rs", recvShadows );
+		ENT_READKV( recvShadows, ent, "_receiveShadows", "_rs" ) ||
+		ENT_READKV( recvShadows, ent2, "_receiveShadows", "_rs" );
 	}
 
 	/* vortex: game-specific default entity keys */

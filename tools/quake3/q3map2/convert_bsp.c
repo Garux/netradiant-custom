@@ -460,7 +460,7 @@ int ScaleBSPMain( int argc, char **argv ){
 	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
 	{
 		/* scale origin */
-		if ( ENT_READKV( &entities[ i ], "origin", &vec ) ) {
+		if ( ENT_READKV( &vec, &entities[ i ], "origin" ) ) {
 			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
@@ -486,14 +486,14 @@ int ScaleBSPMain( int argc, char **argv ){
 		}
 
 		/* scale door lip */
-		if ( ENT_READKV( &entities[ i ], "lip", &f ) ) {
+		if ( ENT_READKV( &f, &entities[ i ], "lip" ) ) {
 			f *= scale[axis];
 			sprintf( str, "%f", f );
 			SetKeyValue( &entities[ i ], "lip", str );
 		}
 
 		/* scale plat height */
-		if ( ENT_READKV( &entities[ i ], "height", &f ) ) {
+		if ( ENT_READKV( &f, &entities[ i ], "height" ) ) {
 			f *= scale[2];
 			sprintf( str, "%f", f );
 			SetKeyValue( &entities[ i ], "height", str );
@@ -613,7 +613,7 @@ int ScaleBSPMain( int argc, char **argv ){
 	}
 
 	/* scale gridsize */
-	if ( !ENT_READKV( &entities[ 0 ], "gridsize", &vec ) ) {
+	if ( !ENT_READKV( &vec, &entities[ 0 ], "gridsize" ) ) {
 		VectorCopy( gridSize, vec );
 	}
 	vec[0] *= scale[0];
@@ -696,7 +696,7 @@ int ShiftBSPMain( int argc, char **argv ){
 	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
 	{
 		/* shift origin */
-		if ( ENT_READKV( &entities[ i ], "origin", &vec ) ) {
+		if ( ENT_READKV( &vec, &entities[ i ], "origin" ) ) {
 			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
@@ -778,7 +778,7 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	/* scale gridsize */
 	/*
-	if ( !ENT_READKV( &entities[ 0 ], "gridsize", &vec ) ) {
+	if ( !ENT_READKV( &vec, &entities[ 0 ], "gridsize" ) ) {
 		VectorCopy( gridSize, vec );
 	}
 	vec[0] *= scale[0];
