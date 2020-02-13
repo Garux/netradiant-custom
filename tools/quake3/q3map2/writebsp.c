@@ -84,7 +84,7 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 	AUTOEXPAND_BY_REALLOC_BSP( Shaders, 1024 );
 
 	numBSPShaders++;
-	strcpy( bspShaders[ i ].shader, shader );
+	strncpy( bspShaders[ i ].shader, shader, sizeof( bspShaders[ i ].shader ) ); // copy and clear the rest of memory
 	bspShaders[ i ].surfaceFlags = si->surfaceFlags;
 	bspShaders[ i ].contentFlags = si->contentFlags;
 
