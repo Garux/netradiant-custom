@@ -1055,7 +1055,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 
 			gtk_label_set_text( GTK_LABEL( GTK_BIN( widget )->child ), str.c_str() );
 
-			if( const EntityClassAttribute* attribute = eclass->flagAttributes[i] ){
+			if( const EntityClassAttribute* attribute = eclass->flagAttributes[spawn_table[i]] ){
 				EntityAttribute_setTooltip( widget, attribute->m_name.c_str(), attribute->m_description.c_str() );
 			}
 		}
