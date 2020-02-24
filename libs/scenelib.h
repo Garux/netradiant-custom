@@ -871,6 +871,12 @@ inline bool Instance_isSelected( const scene::Instance& instance ){
 	return selectable != 0 && selectable->isSelected();
 }
 
+inline bool Instance_isSelectedComponents( scene::Instance& instance ){
+	ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
+	return componentSelectionTestable != 0
+		   && componentSelectionTestable->isSelectedComponents();
+}
+
 inline scene::Instance& findInstance( const scene::Path& path ){
 	scene::Instance* instance = GlobalSceneGraph().find( path );
 	ASSERT_MESSAGE( instance != 0, "findInstance: path not found in scene-graph" );

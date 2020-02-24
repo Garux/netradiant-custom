@@ -61,15 +61,12 @@ void Face_extrude( Face& face, const Brush& brush, brush_vector_t& out, float of
 #include "texwindow.h"
 #include "filterbar.h"
 
-typedef std::vector<DoubleVector3> doublevector_vector_t;
-
 enum EHollowType
 {
 	eDiag = 0,
 	eWrap = 1,
 	eExtrude = 2,
 	ePull = 3,
-//	eRoom = 4,
 };
 
 class HollowSettings
@@ -77,29 +74,66 @@ class HollowSettings
 public:
 	EHollowType m_hollowType;
 	float m_offset;
+	// true = exclude by axis strategy, false = m_excludeSelectedFaces by 'selected' property
+	bool m_excludeByAxis;
 	Vector3 m_exclusionAxis;
 	double m_mindot;
 	double m_maxdot;
+	// true = exclude selected faces, false = exclude unselected faces
+	bool m_excludeSelectedFaces;
+	std::vector<DoubleVector3> m_exclude_vec; // list of excluded normals per brush
+
 	bool m_caulk;
 	bool m_removeInner;
+	bool faceExcluded( const Face& face ) const {
+		if( m_excludeByAxis ){
+			const double dot = vector3_dot( face.getPlane().plane3().normal(), m_exclusionAxis );
+			return dot < m_mindot + 0.001 || dot > m_maxdot - 0.001;
+		}
+		else{
+			return std::find( m_exclude_vec.begin(), m_exclude_vec.end(), face.getPlane().plane3().normal() ) != m_exclude_vec.end();
+		}
+	}
+};
+
+
+class FaceExcludeByAxis {
+	HollowSettings& m_settings;
+public:
+	FaceExcludeByAxis( HollowSettings& settings ) : m_settings( settings ) {
+	}
+	void operator()( Face& face ) const {
+		double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
+		if( dot < m_settings.m_mindot ) {
+			m_settings.m_mindot = dot;
+		}
+		else if( dot > m_settings.m_maxdot ) {
+			m_settings.m_maxdot = dot;
+		}
+	}
+};
+
+class FaceExcludeSelected {
+	HollowSettings& m_settings;
+public:
+	FaceExcludeSelected( HollowSettings& settings ) : m_settings( settings ) {
+	}
+	void operator()( FaceInstance& face ) const {
+		if( m_settings.m_excludeSelectedFaces == face.isSelected() ) {
+			m_settings.m_exclude_vec.push_back( face.getFace().getPlane().plane3().normal() );
+		}
+	}
 };
 
 
 class CaulkFace {
 	const HollowSettings& m_settings;
-	const doublevector_vector_t& m_exclude_vec;
 public:
-	CaulkFace( const HollowSettings& settings, const doublevector_vector_t& exclude_vec ):
-		m_settings( settings ), m_exclude_vec( exclude_vec ) {
+	CaulkFace( const HollowSettings& settings ):
+		m_settings( settings ) {
 	}
 	void operator()( Face& face ) const {
-		double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
-		if( dot == 0 || ( dot > m_settings.m_mindot + 0.001 && dot < m_settings.m_maxdot - 0.001 ) ) {
-			for( doublevector_vector_t::const_iterator i = m_exclude_vec.begin(); i != m_exclude_vec.end(); ++i ) {
-				if( ( *i ) == face.getPlane().plane3().normal() ) {
-					return;
-				}
-			}
+		if( !m_settings.faceExcluded( face ) ) {
 			face.SetShader( GetCaulkShader() );
 		}
 	}
@@ -109,24 +143,14 @@ class FaceMakeBrush {
 	const Brush& m_brush;
 	brush_vector_t& m_out;
 	const HollowSettings& m_settings;
-	doublevector_vector_t& exclude_vec;
-
 public:
-	FaceMakeBrush( const Brush& brush, brush_vector_t& out, const HollowSettings& settings, doublevector_vector_t& exclude_vec )
+	FaceMakeBrush( const Brush& brush, brush_vector_t& out, const HollowSettings& settings )
 		: m_brush( brush ),
 		  m_out( out ),
-		  m_settings( settings ),
-		  exclude_vec( exclude_vec ) {
+		  m_settings( settings ) {
 	}
 	void operator()( Face& face ) const {
-		double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
-		if( dot == 0 || ( dot > m_settings.m_mindot + 0.001 && dot < m_settings.m_maxdot - 0.001 ) ) {
-			for( doublevector_vector_t::const_iterator i = exclude_vec.begin(); i != exclude_vec.end(); ++i ) {
-				if( ( *i ) == face.getPlane().plane3().normal() ) {
-					return;
-				}
-			}
-
+		if( !m_settings.faceExcluded( face ) ) {
 			if( m_settings.m_hollowType == ePull ) {
 				if( face.contributes() ) {
 					face.getPlane().offset( m_settings.m_offset );
@@ -136,7 +160,7 @@ public:
 					face.planeChanged();
 
 					if( m_settings.m_caulk ) {
-						Brush_forEachFace( *m_out.back(), CaulkFace( m_settings, exclude_vec ) );
+						Brush_forEachFace( *m_out.back(), CaulkFace( m_settings ) );
 					}
 					Face* newFace = m_out.back()->addFace( face );
 					if( newFace != 0 ) {
@@ -278,53 +302,17 @@ public:
 	}
 };
 
-class FaceExclude {
-	HollowSettings& m_settings;
+class FaceOffset {
+	const HollowSettings& m_settings;
 public:
-	FaceExclude( HollowSettings& settings )
+	FaceOffset( const HollowSettings& settings )
 		: m_settings( settings ) {
 	}
 	void operator()( Face& face ) const {
-		double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
-		if( dot < m_settings.m_mindot ) {
-			m_settings.m_mindot = dot;
-		}
-		else if( dot > m_settings.m_maxdot ) {
-			m_settings.m_maxdot = dot;
-		}
-	}
-};
-
-class FaceOffset {
-	const HollowSettings& m_settings;
-	const doublevector_vector_t& m_exclude_vec;
-public:
-	FaceOffset( const HollowSettings& settings, const doublevector_vector_t& exclude_vec )
-		: m_settings( settings ), m_exclude_vec( exclude_vec ) {
-	}
-	void operator()( Face& face ) const {
-		const double dot = vector3_dot( face.getPlane().plane3().normal(), m_settings.m_exclusionAxis );
-		if( dot == 0 || ( dot > m_settings.m_mindot + 0.001 && dot < m_settings.m_maxdot - 0.001 ) ) {
-			for( doublevector_vector_t::const_iterator i = m_exclude_vec.begin(); i != m_exclude_vec.end(); ++i ) {
-				if( ( *i ) == face.getPlane().plane3().normal() ) {
-					return;
-				}
-			}
+		if( !m_settings.faceExcluded( face ) ) {
 			face.undoSave();
 			face.getPlane().offset( m_settings.m_offset );
 			face.planeChanged();
-		}
-	}
-};
-
-class FaceExcludeSelected {
-	doublevector_vector_t& m_outvec;
-public:
-	FaceExcludeSelected( doublevector_vector_t& outvec ): m_outvec( outvec ) {
-	}
-	void operator()( FaceInstance& face ) const {
-		if( face.isSelected() ) {
-			m_outvec.push_back( face.getFace().getPlane().plane3().normal() );
 		}
 	}
 };
@@ -343,53 +331,52 @@ public:
 		if( path.top().get().visible() ) {
 			Brush* brush = Node_getBrush( path.top() );
 			if( brush != 0
-					&& Instance_getSelectable( instance )->isSelected()
-					&& path.size() > 1 ) {
+					&& ( Instance_isSelected( instance ) || Instance_isSelectedComponents( instance ) ) ) {
 				brush_vector_t out;
-				doublevector_vector_t exclude_vec;
+				m_settings.m_exclude_vec.clear();
 				m_settings.m_mindot = m_settings.m_maxdot = 0;
 
-				if( m_settings.m_exclusionAxis != g_vector3_identity ) {
-					Brush_forEachFace( *brush, FaceExclude( m_settings ) );
+				if( m_settings.m_excludeByAxis ) {
+					Brush_forEachFace( *brush, FaceExcludeByAxis( m_settings ) );
 				}
 				else {
-					Brush_ForEachFaceInstance( *Instance_getBrush( instance ), FaceExcludeSelected( exclude_vec ) );
+					Brush_ForEachFaceInstance( *Instance_getBrush( instance ), FaceExcludeSelected( m_settings ) );
 				}
 
 				if( m_settings.m_hollowType == ePull ) {
 					if( !m_settings.m_removeInner && m_settings.m_caulk ) {
-						Brush_forEachFace( *brush, CaulkFace( m_settings, exclude_vec ) );
+						Brush_forEachFace( *brush, CaulkFace( m_settings ) );
 					}
 					Brush* tmpbrush = new Brush( *brush );
 					tmpbrush->removeEmptyFaces();
-					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *tmpbrush, out, m_settings, exclude_vec ) );
+					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *tmpbrush, out, m_settings ) );
 					delete tmpbrush;
 				}
 				else if( m_settings.m_hollowType == eDiag ) {
 					Brush* tmpbrush = new Brush( *brush );
-					Brush_forEachFace( *tmpbrush, FaceOffset( m_settings, exclude_vec ) );
+					Brush_forEachFace( *tmpbrush, FaceOffset( m_settings ) );
 					tmpbrush->removeEmptyFaces();
-					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *brush, out, m_settings, exclude_vec ) );
+					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *brush, out, m_settings ) );
 					delete tmpbrush;
 					if( !m_settings.m_removeInner && m_settings.m_caulk ) {
-						Brush_forEachFace( *brush, CaulkFace( m_settings, exclude_vec ) );
+						Brush_forEachFace( *brush, CaulkFace( m_settings ) );
 					}
 				}
 				else {
-					Brush_forEachFace( *brush, FaceMakeBrush( *brush, out, m_settings, exclude_vec ) );
+					Brush_forEachFace( *brush, FaceMakeBrush( *brush, out, m_settings ) );
 				}
-				for( brush_vector_t::const_iterator i = out.begin(); i != out.end(); ++i ) {
-					( *i )->removeEmptyFaces();
-					if( ( *i )->hasContributingFaces() ) {
+				for( Brush* b : out ) {
+					b->removeEmptyFaces();
+					if( b->hasContributingFaces() ) {
 						NodeSmartReference node( ( new BrushNode() )->node() );
-						Node_getBrush( node )->copy( *( *i ) );
-						delete( *i );
+						Node_getBrush( node )->copy( *b );
 						Node_getTraversable( path.parent() )->insert( node );
 						//path.push( makeReference( node.get() ) );
 						//selectPath( path, true );
 						//Instance_getSelectable( *GlobalSceneGraph().find( path ) )->setSelected( true );
 						//Path_deleteTop( path );
 					}
+					delete b;
 				}
 			}
 		}
@@ -1245,9 +1232,7 @@ public:
 	}
 	void visit( scene::Instance& instance ) const {
 		if( Instance_getBrush( instance ) ){
-			//Instance_isSelectedComponents()
-			ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
-			if( componentSelectionTestable != 0 && componentSelectionTestable->isSelectedComponents() )
+			if( Instance_isSelectedComponents( instance ) )
 				m_instance = &instance;
 		}
 	}
@@ -1344,7 +1329,7 @@ struct CSGToolDialog
 {
 	GtkSpinButton* spin;
 	GtkWindow *window;
-	GtkToggleButton *radFaces, *radProj, *radCam, *caulk, *removeInner;
+	GtkToggleButton *radFaces, *radPlusFaces, *radProj, *radCam, *caulk, *removeInner;
 };
 
 CSGToolDialog g_csgtool_dialog;
@@ -1380,15 +1365,17 @@ public:
 		: m_settings( settings ) {
 	}
 	void operator()( BrushInstance& brush ) const {
-		m_settings.m_mindot = m_settings.m_maxdot = 0;
-		doublevector_vector_t exclude_vec;
-		if( m_settings.m_exclusionAxis != g_vector3_identity ) {
-			Brush_forEachFace( brush, FaceExclude( m_settings ) );
+		if( brush.isSelected() || brush.isSelectedComponents() ){
+			m_settings.m_mindot = m_settings.m_maxdot = 0;
+			m_settings.m_exclude_vec.clear();
+			if( m_settings.m_excludeByAxis ) {
+				Brush_forEachFace( brush, FaceExcludeByAxis( m_settings ) );
+			}
+			else {
+				Brush_ForEachFaceInstance( brush, FaceExcludeSelected( m_settings ) );
+			}
+			Brush_forEachFace( brush, FaceOffset( m_settings ) );
 		}
-		else {
-			Brush_ForEachFaceInstance( brush, FaceExcludeSelected( exclude_vec ) );
-		}
-		Brush_forEachFace( brush, FaceOffset( m_settings, exclude_vec ) );
 	}
 };
 
@@ -1399,11 +1386,12 @@ public:
  */
 void CSG_MakeRoom(){
 	HollowSettings settings;
+	settings.m_hollowType = ePull;
 	settings.m_offset = GetGridSize();
-	settings.m_exclusionAxis = g_vector3_identity;
+	settings.m_excludeByAxis = false;
+	settings.m_excludeSelectedFaces = true;
 	settings.m_caulk = true;
 	settings.m_removeInner = true;
-	settings.m_hollowType = ePull;
 
 	UndoableCommand undo( "makeRoom" );
 	GlobalSceneGraph().traverse( BrushHollowSelectedWalker( settings ) );
@@ -1414,12 +1402,17 @@ void CSG_MakeRoom(){
 void CSGdlg_getSettings( HollowSettings& settings, const CSGToolDialog& dialog ){
 	gtk_spin_button_update( dialog.spin );
 	settings.m_offset = static_cast<float>( gtk_spin_button_get_value( dialog.spin ) );
-	settings.m_exclusionAxis = g_vector3_identity;
 	if( gtk_toggle_button_get_active( dialog.radProj ) ){
+		settings.m_excludeByAxis = true;
 		settings.m_exclusionAxis = g_vector3_axes[GlobalXYWnd_getCurrentViewType()];
 	}
 	else if( gtk_toggle_button_get_active( dialog.radCam ) ){
+		settings.m_excludeByAxis = true;
 		settings.m_exclusionAxis = Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
+	}
+	else{
+		settings.m_excludeByAxis = false;
+		settings.m_excludeSelectedFaces = gtk_toggle_button_get_active( dialog.radFaces );
 	}
 	settings.m_caulk = gtk_toggle_button_get_active( dialog.caulk );
 	settings.m_removeInner = gtk_toggle_button_get_active( dialog.removeInner );
@@ -1464,9 +1457,8 @@ static gboolean CSGdlg_BrushShrink( GtkWidget *widget, CSGToolDialog* dialog ){
 	CSGdlg_getSettings( settings, *dialog );
 	settings.m_offset *= -1;
 	UndoableCommand undo( "Shrink brush" );
-//	GlobalSceneGraph().traverse( OffsetBrushFacesSelectedWalker( offset ) );
-	//Scene_ForEachSelectedBrush_ForEachFace( GlobalSceneGraph(), BrushFaceOffset( offset ) );
-	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
+//	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
+	Scene_forEachVisibleBrush( GlobalSceneGraph(), BrushFaceOffset( settings ) );
 	SceneChangeNotify();
 	return TRUE;
 }
@@ -1475,9 +1467,8 @@ static gboolean CSGdlg_BrushExpand( GtkWidget *widget, CSGToolDialog* dialog ){
 	HollowSettings settings;
 	CSGdlg_getSettings( settings, *dialog );
 	UndoableCommand undo( "Expand brush" );
-//	GlobalSceneGraph().traverse( OffsetBrushFacesSelectedWalker( offset ) );
-	//Scene_ForEachSelectedBrush_ForEachFace( GlobalSceneGraph(), BrushFaceOffset( offset ) );
-	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
+//	Scene_forEachSelectedBrush( BrushFaceOffset( settings ) );
+	Scene_forEachVisibleBrush( GlobalSceneGraph(), BrushFaceOffset( settings ) );
 	SceneChangeNotify();
 	return TRUE;
 }
@@ -1534,26 +1525,33 @@ void CSG_Tool(){
 					//radio button group for choosing the exclude axis
 					GtkWidget* radFaces = gtk_radio_button_new_with_label( NULL, "-faces" );
 					gtk_widget_set_tooltip_text( radFaces, "Exclude selected faces" );
+					GtkWidget* radPlusFaces = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radFaces), "+faces" );
+					gtk_widget_set_tooltip_text( radPlusFaces, "Only process selected faces" );
 					GtkWidget* radProj = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radFaces), "-proj" );
 					gtk_widget_set_tooltip_text( radProj, "Exclude faces, most orthogonal to active projection" );
 					GtkWidget* radCam = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radFaces), "-cam" );
 					gtk_widget_set_tooltip_text( radCam, "Exclude faces, most orthogonal to camera view" );
 
 					gtk_widget_show( radFaces );
+					gtk_widget_show( radPlusFaces );
 					gtk_widget_show( radProj );
 					gtk_widget_show( radCam );
 
 					gtk_table_attach( table, radFaces, 2, 3, 0, 1,
 									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									(GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_table_attach( table, radProj, 3, 4, 0, 1,
+					gtk_table_attach( table, radPlusFaces, 3, 4, 0, 1,
 									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									(GtkAttachOptions) ( 0 ), 0, 0 );
-					gtk_table_attach( table, radCam, 4, 5, 0, 1,
+					gtk_table_attach( table, radProj, 4, 5, 0, 1,
+									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
+									(GtkAttachOptions) ( 0 ), 0, 0 );
+					gtk_table_attach( table, radCam, 5, 6, 0, 1,
 									(GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									(GtkAttachOptions) ( 0 ), 0, 0 );
 
 					g_csgtool_dialog.radFaces = GTK_TOGGLE_BUTTON( radFaces );
+					g_csgtool_dialog.radPlusFaces = GTK_TOGGLE_BUTTON( radPlusFaces );
 					g_csgtool_dialog.radProj = GTK_TOGGLE_BUTTON( radProj );
 					g_csgtool_dialog.radCam = GTK_TOGGLE_BUTTON( radCam );
 				}

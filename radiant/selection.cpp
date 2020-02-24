@@ -3370,12 +3370,6 @@ void matrix4_assign_rotation_for_pivot( Matrix4& matrix, scene::Instance& instan
 #endif
 }
 
-inline bool Instance_isSelectedComponents( scene::Instance& instance ){
-	ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
-	return componentSelectionTestable != 0
-		   && componentSelectionTestable->isSelectedComponents();
-}
-
 class TranslateSelected : public SelectionSystem::Visitor
 {
 const Vector3& m_translate;
