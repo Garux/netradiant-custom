@@ -90,7 +90,7 @@ inline int GridDefault_forGridPower( GridPower gridPower ){
 	return gridPower + 3;
 }
 
-int g_grid_default = GridDefault_forGridPower( GRIDPOWER_8 );
+int g_grid_default = GridDefault_forGridPower( GRIDPOWER_16 );
 
 int g_grid_power = GridPower_forGridDefault( g_grid_default );
 
@@ -252,7 +252,7 @@ void Grid_registerPreferencesPage(){
 void Grid_construct(){
 	Grid_registerPreferencesPage();
 
-	g_grid_default = GridDefault_forGridPower( GRIDPOWER_8 );
+	g_grid_default = GridDefault_forGridPower( GRIDPOWER_16 );
 
 	GlobalPreferenceSystem().registerPreference( "GridDefault", IntImportStringCaller( g_grid_default ), IntExportStringCaller( g_grid_default ) );
 
