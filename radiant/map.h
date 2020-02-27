@@ -98,9 +98,8 @@ typedef BasicVector3<float> Vector3;
 extern Vector3 g_region_mins, g_region_maxs;
 extern bool g_region_active;
 
-// used to be #defines, multiple engine support suggests we should go towards dynamic
-extern float g_MaxWorldCoord;
-extern float g_MinWorldCoord;
+const float g_MaxWorldCoord = 64 * 1024;
+const float g_MinWorldCoord = -64 * 1024;
 
 void Map_LoadFile( const char* filename );
 bool Map_SaveFile( const char* filename );

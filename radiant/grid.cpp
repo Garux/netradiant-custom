@@ -191,6 +191,28 @@ void ToggleGridSnap(){
 	GridChangeNotify();
 }
 
+
+int g_maxGridCoordPower = 4;
+float g_maxGridCoord;
+float GetMaxGridCoord(){
+	return g_maxGridCoord;
+}
+
+void Region_defaultMinMax();
+void maxGridCoordPowerImport( int value ){
+	g_maxGridCoordPower = value;
+	g_maxGridCoord = pow( 2.0, std::min( 4, std::max( 0, g_maxGridCoordPower ) ) + 12 );
+	Region_defaultMinMax();
+	GridChangeNotify();
+}
+typedef FreeCaller1<int, maxGridCoordPowerImport> maxGridCoordPowerImportCaller;
+
+void maxGridCoordPowerExport( const IntImportCallback& importer ){
+	importer( std::min( 4, std::max( 0, g_maxGridCoordPower ) ) );
+}
+typedef FreeCaller1<const IntImportCallback&, maxGridCoordPowerExport> maxGridCoordPowerExportCaller;
+
+
 void Grid_registerCommands(){
 	GlobalCommands_insert( "GridDown", FreeCaller<GridPrev>(), Accelerator( '[' ) );
 	GlobalCommands_insert( "GridUp", FreeCaller<GridNext>(), Accelerator( ']' ) );
@@ -240,6 +262,16 @@ void Grid_constructPreferences( PreferencesPage& page ){
 		g_grid_default,
 		ARRAY_RANGE( g_gridnames )
 		);
+	{
+		const char* coords[] = { "4096", "8192", "16384", "32768", "65536" };
+
+		page.appendCombo(
+			"Max grid coordinate",
+			STRING_ARRAY_RANGE( coords ),
+			IntImportCallback( maxGridCoordPowerImportCaller() ),
+			IntExportCallback( maxGridCoordPowerExportCaller() )
+			);
+	}
 }
 void Grid_constructPage( PreferenceGroup& group ){
 	PreferencesPage page( group.createPage( "Grid", "Grid Settings" ) );
@@ -258,6 +290,9 @@ void Grid_construct(){
 
 	g_grid_power = GridPower_forGridDefault( g_grid_default );
 	g_gridsize = GridSize_forGridPower( g_grid_power );
+
+	GlobalPreferenceSystem().registerPreference( "GridMaxCoordPower", IntImportStringCaller( g_maxGridCoordPower ), IntExportStringCaller( g_maxGridCoordPower ) );
+	maxGridCoordPowerImport( g_maxGridCoordPower ); // call manually to also work, when no preference was loaded (1st start)
 }
 
 void Grid_destroy(){

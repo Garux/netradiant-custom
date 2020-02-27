@@ -239,7 +239,9 @@ inline unsigned int buttons_for_state( guint state ){
 
 void XYWnd::SetScale( float f ){
 	const float max_scale = 64.f;
-	const float min_scale = std::min( Width(), Height() ) / ( 1.1f * ( g_MaxWorldCoord - g_MinWorldCoord ) );
+	const float min_scale = std::min( Width(), Height() )
+							/ ( ( 1.1f + ( 1.f - GetMaxGridCoord() / g_MaxWorldCoord ) ) // adaptive min scale factor: from 2.0375 with 4096 grid to 1.1 with 64*1024
+							* 2.f * GetMaxGridCoord() );
 	f = std::min( max_scale, std::max( min_scale, f ) );
 	if( !float_equal_epsilon( m_fScale, f, float_mid( m_fScale, f ) * 1e-5f ) ){
 		m_fScale = f;
@@ -552,9 +554,9 @@ void XYWnd::overlayDraw(){
 		glBegin( GL_LINES );
 		for( int i = 0, dim1 = nDim1, dim2 = nDim2; i < 2; ++i, std::swap( dim1, dim2 ) ){
 			v[dim1] = m_mousePosition[dim1];
-			v[dim2] = 2.0f * g_MinWorldCoord;
+			v[dim2] = 2.0f * -GetMaxGridCoord();
 			glVertex3fv( vector3_to_array( v ) );
-			v[dim2] = 2.0f * g_MaxWorldCoord;
+			v[dim2] = 2.0f * GetMaxGridCoord();
 			glVertex3fv( vector3_to_array( v ) );
 		}
 		glEnd();
@@ -770,7 +772,7 @@ const Vector3& XYWnd::GetOrigin() const {
 
 void XYWnd::SetOrigin( const Vector3& origin ){
 	for( std::size_t i = 0; i < 3; ++i )
-		m_vOrigin[i] = std::min( g_MaxWorldCoord, std::max( g_MinWorldCoord, origin[i] ) );
+		m_vOrigin[i] = std::min( GetMaxGridCoord(), std::max( -GetMaxGridCoord(), origin[i] ) );
 	updateModelview();
 	XYWnd_Update( *this );
 }
@@ -1467,31 +1469,31 @@ void XYWnd::XY_DrawAxis( void ){
 }
 
 void XYWnd::XY_DrawGrid( void ) {
-	float x, y, xb, xe, yb, ye;
-	float w, h, a;
+	float x, y;
 	char text[32];
 	float step, minor_step, stepx, stepy;
 	step = minor_step = stepx = stepy = GetGridSize();
 
 	int minor_power = Grid_getPower();
-	int mask;
-
 	while ( ( minor_step * m_fScale ) <= 4.0f ) { // make sure minor grid spacing is at least 4 pixels on the screen
 		++minor_power;
 		minor_step *= 2;
 	}
+
 	int power = minor_power;
 	while ( ( power % 3 ) != 0 || ( step * m_fScale ) <= 32.0f ) { // make sure major grid spacing is at least 32 pixels on the screen
 		++power;
 		step = pow( 2.0f, power );
 	}
-	mask = ( 1 << ( power - minor_power ) ) - 1;
+
+	const int mask = ( 1 << ( power - minor_power ) ) - 1;
+
 	while ( ( stepx * m_fScale ) <= 32.0f ) // text step x must be at least 32
 		stepx *= 2;
 	while ( ( stepy * m_fScale ) <= 32.0f ) // text step y must be at least 32
 		stepy *= 2;
 
-	a = ( ( GetSnapGridSize() > 0.0f ) ? 1.0f : 0.3f );
+	const float a = ( ( GetSnapGridSize() > 0.0f ) ? 1.0f : 0.3f );
 
 	glDisable( GL_TEXTURE_2D );
 	glDisable( GL_TEXTURE_1D );
@@ -1499,34 +1501,15 @@ void XYWnd::XY_DrawGrid( void ) {
 	glDisable( GL_BLEND );
 	glLineWidth( 1 );
 
-	w = ( m_nWidth / 2 / m_fScale );
-	h = ( m_nHeight / 2 / m_fScale );
+	const float w = ( m_nWidth / 2 / m_fScale );
+	const float h = ( m_nHeight / 2 / m_fScale );
 
 	NDIM1NDIM2( m_viewType )
 
-	xb = m_vOrigin[nDim1] - w;
-	if ( xb < g_region_mins[nDim1] ) {
-		xb = g_region_mins[nDim1];
-	}
-	xb = step * floor( xb / step );
-
-	xe = m_vOrigin[nDim1] + w;
-	if ( xe > g_region_maxs[nDim1] ) {
-		xe = g_region_maxs[nDim1];
-	}
-	xe = step * ceil( xe / step );
-
-	yb = m_vOrigin[nDim2] - h;
-	if ( yb < g_region_mins[nDim2] ) {
-		yb = g_region_mins[nDim2];
-	}
-	yb = step * floor( yb / step );
-
-	ye = m_vOrigin[nDim2] + h;
-	if ( ye > g_region_maxs[nDim2] ) {
-		ye = g_region_maxs[nDim2];
-	}
-	ye = step * ceil( ye / step );
+	const float xb = step * floor( std::max( m_vOrigin[nDim1] - w, g_region_mins[nDim1] ) / step );
+	const float xe = step * ceil( std::min( m_vOrigin[nDim1] + w, g_region_maxs[nDim1] ) / step );
+	const float yb = step * floor( std::max( m_vOrigin[nDim2] - h, g_region_mins[nDim2] ) / step );
+	const float ye = step * ceil( std::min( m_vOrigin[nDim2] + h, g_region_maxs[nDim2] ) / step );
 
 #define COLORS_DIFFER( a,b ) \
 	( ( a )[0] != ( b )[0] || \
@@ -1582,31 +1565,10 @@ void XYWnd::XY_DrawGrid( void ) {
 		}
 
 		if( g_region_active ){
-			float xb_, xe_, yb_, ye_;
-
-			xb_ = m_vOrigin[nDim1] - w;
-			if ( xb_ < g_MinWorldCoord ) {
-				xb_ = g_MinWorldCoord;
-			}
-			xb_ = step * floor( xb_ / step );
-
-			xe_ = m_vOrigin[nDim1] + w;
-			if ( xe_ > g_MaxWorldCoord ) {
-				xe_ = g_MaxWorldCoord;
-			}
-			xe_ = step * ceil( xe_ / step );
-
-			yb_ = m_vOrigin[nDim2] - h;
-			if ( yb_ < g_MinWorldCoord ) {
-				yb_ = g_MinWorldCoord;
-			}
-			yb_ = step * floor( yb_ / step );
-
-			ye_ = m_vOrigin[nDim2] + h;
-			if ( ye_ > g_MaxWorldCoord ) {
-				ye_ = g_MaxWorldCoord;
-			}
-			ye_ = step * ceil( ye_ / step );
+			const float xb_ = step * floor( std::max( m_vOrigin[nDim1] - w, -GetMaxGridCoord() ) / step );
+			const float xe_ = step * ceil( std::min( m_vOrigin[nDim1] + w, GetMaxGridCoord() ) / step );
+			const float yb_ = step * floor( std::max( m_vOrigin[nDim2] - h, -GetMaxGridCoord() ) / step );
+			const float ye_ = step * ceil( std::min( m_vOrigin[nDim2] + h, GetMaxGridCoord() ) / step );
 
 			glEnable( GL_BLEND );
 			// draw minor blocks
@@ -1653,8 +1615,8 @@ void XYWnd::XY_DrawGrid( void ) {
 	// draw coordinate text if needed
 	if ( g_xywindow_globals_private.show_coordinates ) {
 		glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridtext, 1.0f ) ) );
-		float offx = m_vOrigin[nDim2] + h - ( 4 + GlobalOpenGL().m_font->getPixelAscent() ) / m_fScale;
-		float offy = m_vOrigin[nDim1] - w +  4                                            / m_fScale;
+		const float offx = m_vOrigin[nDim2] + h - ( 4 + GlobalOpenGL().m_font->getPixelAscent() ) / m_fScale;
+		const float offy = m_vOrigin[nDim1] - w +  4                                            / m_fScale;
 		for ( x = xb - fmod( xb, stepx ); x <= xe ; x += stepx ) {
 			glRasterPos2f( x, offx );
 			sprintf( text, "%g", x );
@@ -1713,8 +1675,7 @@ void XYWnd::XY_DrawBlockGrid(){
 		g_xywindow_globals_private.blockSize = 1024;
 	}
 
-	float x, y, xb, xe, yb, ye;
-	float w, h;
+	float x, y;
 	char text[32];
 
 	glDisable( GL_TEXTURE_2D );
@@ -1722,34 +1683,15 @@ void XYWnd::XY_DrawBlockGrid(){
 	glDisable( GL_DEPTH_TEST );
 	glDisable( GL_BLEND );
 
-	w = ( m_nWidth / 2 / m_fScale );
-	h = ( m_nHeight / 2 / m_fScale );
+	const float w = ( m_nWidth / 2 / m_fScale );
+	const float h = ( m_nHeight / 2 / m_fScale );
 
 	NDIM1NDIM2( m_viewType )
 
-	xb = m_vOrigin[nDim1] - w;
-	if ( xb < g_region_mins[nDim1] ) {
-		xb = g_region_mins[nDim1];
-	}
-	xb = static_cast<float>( g_xywindow_globals_private.blockSize * floor( xb / g_xywindow_globals_private.blockSize ) );
-
-	xe = m_vOrigin[nDim1] + w;
-	if ( xe > g_region_maxs[nDim1] ) {
-		xe = g_region_maxs[nDim1];
-	}
-	xe = static_cast<float>( g_xywindow_globals_private.blockSize * ceil( xe / g_xywindow_globals_private.blockSize ) );
-
-	yb = m_vOrigin[nDim2] - h;
-	if ( yb < g_region_mins[nDim2] ) {
-		yb = g_region_mins[nDim2];
-	}
-	yb = static_cast<float>( g_xywindow_globals_private.blockSize * floor( yb / g_xywindow_globals_private.blockSize ) );
-
-	ye = m_vOrigin[nDim2] + h;
-	if ( ye > g_region_maxs[nDim2] ) {
-		ye = g_region_maxs[nDim2];
-	}
-	ye = static_cast<float>( g_xywindow_globals_private.blockSize * ceil( ye / g_xywindow_globals_private.blockSize ) );
+	const float xb = g_xywindow_globals_private.blockSize * floor( std::max( m_vOrigin[nDim1] - w, g_region_mins[nDim1] ) / g_xywindow_globals_private.blockSize );
+	const float xe = g_xywindow_globals_private.blockSize * ceil( std::min( m_vOrigin[nDim1] + w, g_region_maxs[nDim1] ) / g_xywindow_globals_private.blockSize );
+	const float yb = g_xywindow_globals_private.blockSize * floor( std::max( m_vOrigin[nDim2] - h, g_region_mins[nDim2] ) / g_xywindow_globals_private.blockSize );
+	const float ye = g_xywindow_globals_private.blockSize * ceil( std::min( m_vOrigin[nDim2] + h, g_region_maxs[nDim2] ) / g_xywindow_globals_private.blockSize );
 
 	// draw major blocks
 
