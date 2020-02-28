@@ -640,13 +640,11 @@ int main (int argc, char **argv)
 			freetree = true;
 			Log_Print("freetree = true\n");
 		} //end else if
-#if 0
 		else if (!stricmp(argv[i], "-grapplereach"))
 		{
 			calcgrapplereach = true;
 			Log_Print("grapplereach = true\n");
 		} //end else if
-#endif
 		else if (!stricmp(argv[i], "-nobrushmerge"))
 		{
 			nobrushmerge = true;
@@ -719,11 +717,13 @@ int main (int argc, char **argv)
 			comp = COMP_BSP2AAS;
 			qfiles = GetArgumentFiles(argc, argv, &i, "bsp");
 		} //end else if
+#if 0 // is not functioning
 		else if (!stricmp(argv[i], "-aasall"))
 		{
 			if (i + 1 >= argc) {i = 0; break;}
 			CreateAASFilesForAllBSPFiles(argv[++i]);
 		} //end else if
+#endif
 		else if (!stricmp(argv[i], "-reach"))
 		{
 			if (i + 1 >= argc) {i = 0; break;}
@@ -1063,25 +1063,29 @@ int main (int argc, char **argv)
 #endif
 			"\n"
 			"Switches:\n"
-			"   bsp2map  <[pakfilter/]filter.bsp>    = convert BSP to MAP\n"
-			//"   aasall   <quake3folder>              = create AAS files for all BSPs\n"
-			"   bsp2aas  <[pakfilter/]filter.bsp>    = convert BSP to AAS\n"
-			"   reach    <filter.bsp>                = compute reachability & clusters\n"
-			"   cluster  <filter.aas>                = compute clusters\n"
-			"   aasopt   <filter.aas>                = optimize aas file\n"
-			"   aasinfo  <filter.aas>                = show AAS file info\n"
-			"   output   <output path>               = set output path\n"
-			"   threads  <X>                         = set number of threads to X\n"
-			"   cfg      <filename>                  = use this cfg file\n"
-			"   optimize                             = enable optimization\n"
-			"   noverbose                            = disable verbose output\n"
-			"   breadthfirst                         = breadth first bsp building\n"
-			"   nobrushmerge                         = don't merge brushes\n"
-			"   noliquids                            = don't write liquids to map\n"
-			"   freetree                             = free the bsp tree\n"
-			"   nocsg                                = disables brush chopping\n"
-			"   forcesidesvisible                    = force all sides to be visible\n"
-			"   grapplereach                         = calculate grapple reachabilities\n"
+			"   bsp2map     <[pakfilter/]filter.bsp>    = convert BSP to MAP\n"
+			"   bsp2map220  <[pakfilter/]filter.bsp>    = convert BSP to Valve 220 MAP\n"
+			//"   aasall      <quake3folder>              = create AAS files for all BSPs\n"
+			"   bsp2aas     <[pakfilter/]filter.bsp>    = convert BSP to AAS\n"
+			"   reach       <filter.bsp>                = compute reachability & clusters\n"
+			"   cluster     <filter.aas>                = compute clusters\n"
+			"   aasopt      <filter.aas>                = optimize aas file\n"
+			"   aasinfo     <filter.aas>                = show AAS file info\n"
+			"   entlist     <[pakfilter/]filter.bsp>    = extract entity list\n"
+			"   texinfo     <[pakfilter/]filter.bsp>    = extract texture list\n"
+			"   output      <output path>               = set output path\n"
+			"   threads     <X>                         = set number of threads to X\n"
+			"   cfg         <filename>                  = use this cfg file\n"
+			"   optimize                                = enable optimization\n"
+			"   noverbose                               = disable verbose output\n"
+			"   breadthfirst                            = breadth first bsp building\n"
+			"   capsule                                 = use spherical collision model\n"
+			"   nobrushmerge                            = don't merge brushes\n"
+			"   noliquids                               = don't write liquids to map\n"
+			"   freetree                                = free the bsp tree\n"
+			"   nocsg                                   = disables brush chopping\n"
+			"   forcesidesvisible                       = force all sides to be visible\n"
+			"   grapplereach                            = calculate grapple reachabilities\n"
 
 /*			"   glview     = output a GL view\n"
 			"   draw       = enables drawing\n"

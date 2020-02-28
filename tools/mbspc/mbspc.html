@@ -40,9 +40,6 @@ with MBSPC:
     convert BSP files to editable MAP format
   </li>
   <li>
-    update the entity list in a BSP file
-  </li>
-  <li>
     extract the entity list from a BSP file to a text file (new)
   </li>
   <li>
@@ -95,15 +92,15 @@ List of options recognized by MBSPC:
 <tt>
    option           argument        explanation                          output
    ---------------------------------------------------------------------------------------
-   entlist          file.bsp        extract entity list                  file.ent
-   onlyents         file.bsp        update entity list from file.ent(*)  file.bsp
-   texinfo          file.bsp        extract texture list                 file.txi
    bsp2map          file.bsp        create MAP from BSP                  file.map
    bsp2map220       file.bsp        create Valve 220 MAP from BSP        file.map
    bsp2aas          file.bsp        create AAS from BSP                  file.aas
    reach            file.bsp        compute reachability and clusters    file.aas
    cluster          file.aas        compute clusters                     file.aas
    aasopt           file.aas        optimize aas file                    file.aas
+   aasinfo          file.aas        show AAS file info
+   entlist          file.bsp        extract entity list                  file.ent
+   texinfo          file.bsp        extract texture list                 file.txi
    ---------------------------------------------------------------------------------------
    output           output-path     set output path
    threads          N               set number of threads to N
@@ -112,19 +109,15 @@ List of options recognized by MBSPC:
    ---------------------------------------------------------------------------------------
    optimize                         enable optimization
    breadthfirst                     breadth first bsp building
+   capsule                          use spherical collision model
    nobrushmerge                     don't merge brushes
    freetree                         free the bsp tree
    nocsg                            disables brush chopping
    noliquids                        don't write liquids to map
    forcesidesvisible                force all sides to be visible
+   grapplereach                     calculate grapple reachabilities
 </tt>
 </pre>
-
-<p>
-(*) The '.ent' file must exist! You can make one using the '-entlist'
-option. The '.ent' file can be edited by using a text editor (e.g. you
-may change entity types and coordinates) as long as the format of entity
-specifications remains valid.
 
 <p>
 Several metacharacter may be used in the paths of the input file:
@@ -158,8 +151,7 @@ with the name 'maps' outside the .pk3 file.
 
 <p>
 If an AAS file is already available for a BSP file and you ONLY change
-the entities inside this BSP file (using the map editor or MBSPC with the
-'-onlyents' option) then you only have to recalculate the reachabilities.
+the entities inside this BSP file then you only have to recalculate the reachabilities.
 This way you can move items, platforms etc. around without the need to
 recalculate the whole AAS file which can save quite some compile time.
 You can recalculate the reachabilities as follows:
