@@ -318,7 +318,7 @@ void Map2Bsp(char *mapfilename, char *outputfilename)
 // Returns:				-
 // Changes Globals:		-
 //===========================================================================
-void AASOuputFile(quakefile_t *qf, char *outputpath, char *filename)
+void OutputFile( const quakefile_t *qf, const char *outputpath, const char *extension, char *filename )
 {
 	char ext[MAX_PATH];
 
@@ -330,7 +330,7 @@ void AASOuputFile(quakefile_t *qf, char *outputpath, char *filename)
 		AppendPathSeperator(filename, MAX_PATH);
 		ExtractFileBase(qf->origname, &filename[strlen(filename)]);
 		//append .aas
-		strcat(filename, ".aas");
+		strcat(filename, extension);
 		return;
 	} //end if
 	//
@@ -350,17 +350,13 @@ void AASOuputFile(quakefile_t *qf, char *outputpath, char *filename)
 		AppendPathSeperator(filename, MAX_PATH);
 		ExtractFileBase(qf->origname, &filename[strlen(filename)]);
 		//append .aas
-		strcat(filename, ".aas");
+		strcat(filename, extension);
 	} //end if
 	else
 	{
 		strcpy(filename, qf->filename);
-		while(strlen(filename) &&
-				filename[strlen(filename)-1] != '.')
-		{
-			filename[strlen(filename)-1] = '\0';
-		} //end while
-		strcat(filename, "aas");
+		StripExtension(filename);
+		strcat(filename, extension);
 	} //end else
 } //end of the function AASOutputFile
 //===========================================================================
@@ -769,15 +765,7 @@ int main (int argc, char **argv)
 
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					//copy the output path
-					strcpy(filename, outputpath);
-
-					//append the bsp file base
-					AppendPathSeperator(filename, MAX_PATH);
-					ExtractFileBase(qf->origname, &filename[strlen(filename)]);
-
-					//append .txi
-					strcat(filename, ".txi");
+					OutputFile(qf, outputpath, ".txi", filename);
 					Log_Print("texinfo: %s to %s\n", qf->origname, filename);
 
 					if (qf->type != QFILETYPE_BSP)
@@ -799,15 +787,7 @@ int main (int argc, char **argv)
 
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					//copy the output path
-					strcpy(filename, outputpath);
-
-					//append the bsp file base
-					AppendPathSeperator(filename, MAX_PATH);
-					ExtractFileBase(qf->origname, &filename[strlen(filename)]);
-
-					//append .ent
-					strcat(filename, ".ent");
+					OutputFile(qf, outputpath, ".ent", filename);
 					Log_Print("entlist: %s to %s\n", qf->origname, filename);
 
 					if (qf->type != QFILETYPE_BSP)
@@ -822,30 +802,29 @@ int main (int argc, char **argv)
 					//write the entity list
 					switch (loadedmaptype)
 					{
-				case MAPTYPE_QUAKE1:
-					ent_str = Q1_UnparseEntities(&ent_str_size);
-					break;
+					case MAPTYPE_QUAKE1:
+						ent_str = Q1_UnparseEntities(&ent_str_size);
+						break;
 
-				case MAPTYPE_QUAKE2:
-					ent_str = Q2_UnparseEntities(&ent_str_size);
-					break;
+					case MAPTYPE_QUAKE2:
+						ent_str = Q2_UnparseEntities(&ent_str_size);
+						break;
 
-				case MAPTYPE_QUAKE3:
-					ent_str = Q3_UnparseEntities(&ent_str_size);
-					break;
+					case MAPTYPE_QUAKE3:
+						ent_str = Q3_UnparseEntities(&ent_str_size);
+						break;
 
-							default:
-								Error("Entity listing is not implemented for this BSP type\n", qf->origname);
-					return 1;
-					 }
+					default:
+						Error("Entity listing is not implemented for this BSP type\n", qf->origname);
+						return 1;
+					}
 
-					 if (ent_str == NULL || ent_str_size == 0)
-					 {
-				 Error("Could not parse entity string\n");
-				 return 1;
-			 }
+					if (ent_str == NULL || ent_str_size == 0){
+						Error("Could not parse entity string\n");
+						return 1;
+					}
 
-					 WriteEntList(filename, ent_str, ent_str_size);
+					WriteEntList(filename, ent_str, ent_str_size);
 				}
 				break;
 			}
@@ -855,14 +834,7 @@ int main (int argc, char **argv)
 				if (!qfiles) Log_Print("no files found\n");
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					//copy the output path
-					strcpy(filename, outputpath);
-					//append the bsp file base
-					AppendPathSeperator(filename, MAX_PATH);
-					ExtractFileBase(qf->origname, &filename[strlen(filename)]);
-					//append .map
-					strcat(filename, ".map");
-					//
+					OutputFile(qf, outputpath, "_decompiled.map", filename);
 					Log_Print("bsp2map: %s to %s\n", qf->origname, filename);
 					if (qf->type != QFILETYPE_BSP)
 						Warning("%s is probably not a BSP file\n", qf->origname);
@@ -877,7 +849,7 @@ int main (int argc, char **argv)
 				if (!qfiles) Log_Print("no files found\n");
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					AASOuputFile(qf, outputpath, filename);
+					OutputFile(qf, outputpath, ".aas", filename);
 					//
 					Log_Print("bsp2aas: %s to %s\n", qf->origname, filename);
 					if (qf->type != QFILETYPE_BSP) Warning("%s is probably not a BSP file\n", qf->origname);
@@ -906,7 +878,7 @@ int main (int argc, char **argv)
 				if (!qfiles) Log_Print("no files found\n");
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					AASOuputFile(qf, outputpath, filename);
+					OutputFile(qf, outputpath, ".aas", filename);
 					//
 					Log_Print("reach: %s to %s\n", qf->origname, filename);
 					if (qf->type != QFILETYPE_BSP) Warning("%s is probably not a BSP file\n", qf->origname);
@@ -952,7 +924,7 @@ int main (int argc, char **argv)
 				if (!qfiles) Log_Print("no files found\n");
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					AASOuputFile(qf, outputpath, filename);
+					OutputFile(qf, outputpath, ".aas", filename);
 					//
 					Log_Print("cluster: %s to %s\n", qf->origname, filename);
 					if (qf->type != QFILETYPE_BSP) Warning("%s is probably not a BSP file\n", qf->origname);
@@ -1002,7 +974,7 @@ int main (int argc, char **argv)
 				if (!qfiles) Log_Print("no files found\n");
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					AASOuputFile(qf, outputpath, filename);
+					OutputFile(qf, outputpath, ".aas", filename);
 					//
 					Log_Print("optimizing: %s to %s\n", qf->origname, filename);
 					if (qf->type != QFILETYPE_AAS) Warning("%s is probably not a AAS file\n", qf->origname);
@@ -1029,7 +1001,7 @@ int main (int argc, char **argv)
 				if (!qfiles) Log_Print("no files found\n");
 				for (qf = qfiles; qf; qf = qf->next)
 				{
-					AASOuputFile(qf, outputpath, filename);
+					OutputFile(qf, outputpath, ".aas", filename);
 					//
 					Log_Print("aas info for: %s\n", filename);
 					if (qf->type != QFILETYPE_AAS) Warning("%s is probably not a AAS file\n", qf->origname);

@@ -768,7 +768,7 @@ void    StripExtension (char *path)
 	while (length > 0 && path[length] != '.')
 	{
 		length--;
-		if (path[length] == '/')
+		if (path[length] == '/' || path[length] == '\\')
 			return;		// no extension
 	}
 	if (length)
@@ -799,9 +799,9 @@ void ExtractFilePath (char *path, char *dest)
 	dest[src-path] = 0;
 }
 
-void ExtractFileBase (char *path, char *dest)
+void ExtractFileBase (const char *path, char *dest)
 {
-	char    *src;
+	const char    *src;
 
 	src = path + strlen(path) - 1;
 
@@ -818,9 +818,9 @@ void ExtractFileBase (char *path, char *dest)
 	*dest = 0;
 }
 
-void ExtractFileExtension (char *path, char *dest)
+void ExtractFileExtension (const char *path, char *dest)
 {
-	char    *src;
+	const char    *src;
 
 	src = path + strlen(path) - 1;
 

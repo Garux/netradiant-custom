@@ -84,8 +84,8 @@ void 	StripFilename (char *path);
 void 	StripExtension (char *path);
 
 void 	ExtractFilePath (char *path, char *dest);
-void 	ExtractFileBase (char *path, char *dest);
-void	ExtractFileExtension (char *path, char *dest);
+void 	ExtractFileBase (const char *path, char *dest);
+void	ExtractFileExtension (const char *path, char *dest);
 
 int 	ParseNum (char *str);
 
