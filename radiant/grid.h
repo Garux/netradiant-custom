@@ -28,6 +28,8 @@ float GetSnapGridSize();
 float GetGridSize();
 int Grid_getPower();
 
+float GetMaxGridCoord();
+
 void AddGridChangeCallback( const SignalHandler& handler );
 
 void Grid_registerCommands();

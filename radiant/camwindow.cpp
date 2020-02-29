@@ -211,7 +211,7 @@ struct camera_t
 	}
 };
 
-float camera_t::fieldOfView = 110.0f;
+float camera_t::fieldOfView = 100.0f;
 const float camera_t::near_z = 1.f;
 camera_draw_mode camera_t::draw_mode = cd_texture;
 

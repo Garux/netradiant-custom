@@ -86,6 +86,7 @@
 #include "brushmodule.h"
 #include "brush.h"
 #include "patch.h"
+#include "grid.h"
 
 class NameObserver
 {
@@ -397,11 +398,6 @@ void Map_SetWorldspawn( Map& map, scene::Node* node ){
 	map.m_world_node.set( node );
 }
 
-
-// TTimo
-// need that in a variable, will have to tweak depending on the game
-float g_MaxWorldCoord = 64 * 1024;
-float g_MinWorldCoord = -64 * 1024;
 
 void AddRegionBrushes( void );
 void RemoveRegionBrushes( void );
@@ -1474,8 +1470,12 @@ bool g_region_active = false;
 BoolExportCaller g_region_caller( g_region_active );
 ToggleItem g_region_item( g_region_caller );
 
-Vector3 g_region_mins( g_MinWorldCoord, g_MinWorldCoord, g_MinWorldCoord );
-Vector3 g_region_maxs( g_MaxWorldCoord, g_MaxWorldCoord, g_MaxWorldCoord );
+Vector3 g_region_mins;
+Vector3 g_region_maxs;
+void Region_defaultMinMax(){
+	g_region_maxs[0] = g_region_maxs[1] = g_region_maxs[2] = GetMaxGridCoord();
+	g_region_mins[0] = g_region_mins[1] = g_region_mins[2] = -GetMaxGridCoord();
+}
 
 scene::Node* region_sides[6];
 scene::Node* region_startpoint = 0;
@@ -1590,8 +1590,7 @@ void Map_RegionOff(){
 	g_region_active = false;
 	g_region_item.update();
 
-	g_region_maxs[0] = g_region_maxs[1] = g_region_maxs[2] = g_MaxWorldCoord - 64;
-	g_region_mins[0] = g_region_mins[1] = g_region_mins[2] = g_MinWorldCoord + 64;
+	Region_defaultMinMax();
 
 	Scene_Exclude_All( false );
 }
