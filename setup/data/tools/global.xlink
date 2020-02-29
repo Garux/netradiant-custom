@@ -3,7 +3,7 @@
 <links>
 <!--item name="NetRadiant website" url="http://www.icculus.org/netradiant/"/-->
 <item name="Mouse Shortcuts" url="docs/Mouse Shortcuts.txt"/>
-<item name="q3map2 handbook (web)" url="http://en.wikibooks.org/wiki/Category:Q3Map2"/>
+<item name="q3map2 handbook (web)" url="https://en.wikibooks.org/wiki/Category:Book:Q3Map2"/>
 <item name="Shader Manual (web)" url="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html"/>
 <item name="Shader Manual (offline+fixed)" url="docs/shaderManual/contents.html"/>
 <item name="Additional map compiler features" url="docs/Additional_map_compiler_features.htm"/>
