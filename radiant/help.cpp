@@ -75,7 +75,7 @@ void process_xlink( const char* filename, const char *menu_name, const char *bas
 
 						xmlChar* prop = xmlGetProp( pNode, reinterpret_cast<const xmlChar*>( "url" ) );
 						ASSERT_NOTNULL( prop );
-						if ( strstr( reinterpret_cast<const char*>( prop ), "http://" ) ) {
+						if ( strstr( reinterpret_cast<const char*>( prop ), "http://" ) || strstr( reinterpret_cast<const char*>( prop ), "https://" ) ) {
 							// complete URL
 							url = reinterpret_cast<const char*>( prop );
 						}
