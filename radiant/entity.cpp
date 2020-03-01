@@ -585,18 +585,25 @@ void Entity_setColour(){
 	}
 }
 
-const char* misc_model_dialog( GtkWidget* parent ){
+const char* misc_model_dialog( GtkWidget* parent, const char* filepath ){
 	StringOutputStream buffer( 1024 );
 
-	buffer << g_qeglobals.m_userGamePath.c_str() << "models/";
+	if( !string_empty( filepath ) ){
+		const char* root = GlobalFileSystem().findFile( filepath );
+		if( !string_empty( root ) && file_is_directory( root ) )
+			buffer << root << filepath;
+	}
+	if( buffer.empty() ){
+		buffer << g_qeglobals.m_userGamePath.c_str() << "models/";
 
-	if ( !file_readable( buffer.c_str() ) ) {
-		// just go to fsmain
-		buffer.clear();
-		buffer << g_qeglobals.m_userGamePath.c_str();
+		if ( !file_readable( buffer.c_str() ) ) {
+			// just go to fsmain
+			buffer.clear();
+			buffer << g_qeglobals.m_userGamePath.c_str();
+		}
 	}
 
-	const char *filename = file_dialog( parent, TRUE, "Choose Model", buffer.c_str(), ModelLoader::Name() );
+	const char *filename = file_dialog( parent, true, "Choose Model", buffer.c_str(), ModelLoader::Name() );
 	if ( filename != 0 ) {
 		// use VFS to get the correct relative path
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );

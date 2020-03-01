@@ -176,14 +176,15 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 		{
 			*w++ = ( *r == '/' ) ? G_DIR_SEPARATOR : *r;
 		}
-		// remove separator from end of path if required
-		if ( *( w - 1 ) == G_DIR_SEPARATOR ) {
-			--w;
-		}
 		// terminate string
 		*w = '\0';
 
-		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER( dialog ), new_path.data() );
+		if( file_is_directory( new_path.data() ) ){ // folder path
+			gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER( dialog ), new_path.data() );
+		}
+		else{ // file path
+			gtk_file_chooser_set_filename( GTK_FILE_CHOOSER( dialog ), new_path.data() );
+		}
 	}
 
 	// we should add all important paths as shortcut folder...

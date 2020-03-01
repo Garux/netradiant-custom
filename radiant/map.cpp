@@ -1982,15 +1982,18 @@ const char* getMapsPath(){
 }
 
 const char* map_open( const char* title ){
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, title, getMapsPath(), MapFormat::Name(), true, false, false );
+	const char* path = Map_Unnamed( g_map )? getMapsPath() : g_map.m_name.c_str();
+	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, title, path, MapFormat::Name(), true, false, false );
 }
 
 const char* map_import( const char* title ){
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, title, getMapsPath(), MapFormat::Name(), false, true, false );
+	const char* path = Map_Unnamed( g_map )? getMapsPath() : g_map.m_name.c_str();
+	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, title, path, MapFormat::Name(), false, true, false );
 }
 
 const char* map_save( const char* title ){
-	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), FALSE, title, getMapsPath(), MapFormat::Name(), false, false, true );
+	const char* path = Map_Unnamed( g_map )? getMapsPath() : g_map.m_name.c_str();
+	return file_dialog( GTK_WIDGET( MainFrame_getWindow() ), false, title, path, MapFormat::Name(), false, false, true );
 }
 
 void OpenMap(){

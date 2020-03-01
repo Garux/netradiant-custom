@@ -164,7 +164,7 @@ bool OpenGLFont_dialog( GtkWidget *parent, const char* font, CopiedString &newfo
 }
 
 void button_clicked_entry_browse_file( GtkWidget* widget, GtkEntry* entry ){
-	const char *filename = file_dialog( gtk_widget_get_toplevel( widget ), TRUE, "Choose File", gtk_entry_get_text( entry ) );
+	const char *filename = file_dialog( gtk_widget_get_toplevel( widget ), true, "Choose File", gtk_entry_get_text( entry ) );
 
 	if ( filename != 0 ) {
 		gtk_entry_set_text( entry, filename );

@@ -174,7 +174,7 @@ bool WriteToFile( const std::string& path, collapsemode mode ) const;
 bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode mode ) const {
 	std::string objFile = path;
 
-	if ( path.compare( path.length() - 4, 4, ".obj" ) != 0 ) {
+	if ( !string_equal_suffix_nocase( objFile.c_str(), ".obj" ) ) {
 		objFile += ".obj";
 	}
 

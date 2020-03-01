@@ -1341,7 +1341,7 @@ const char* BackgroundImage::background_image_dialog(){
 		buffer << g_qeglobals.m_userGamePath.c_str();
 	}
 
-	const char *filename = file_dialog( GTK_WIDGET( MainFrame_getWindow() ), TRUE, "Background Image", buffer.c_str(), NULL );
+	const char *filename = file_dialog( GTK_WIDGET( MainFrame_getWindow() ), true, "Background Image", buffer.c_str() );
 	if ( filename != 0 ) {
 		// use VFS to get the correct relative path
 		const char* relative = path_make_relative( filename, GlobalFileSystem().findRoot( filename ) );

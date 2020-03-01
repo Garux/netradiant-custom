@@ -6,6 +6,8 @@
 #include "qerplugin.h"
 #include "debugging/debugging.h"
 #include "os/path.h"
+#include "os/file.h"
+#include "stream/stringstream.h"
 #include "support.h"
 #include "export.h"
 
@@ -18,11 +20,28 @@ void OnExportClicked( GtkButton* button, gpointer choose_path ){
 	GtkWidget* window = lookup_widget( GTK_WIDGET( button ), "w_plugplug2" );
 	ASSERT_NOTNULL( window );
 	if( choose_path ){
-		const char* cpath = GlobalRadiant().m_pfnFileDialog( window, false, "Save as Obj", 0, 0, false, false, true );
+		StringOutputStream buffer( 1024 );
+
+		if( !s_export_path.empty() ){
+			buffer << s_export_path.c_str();
+		}
+		if( buffer.empty() ){
+			buffer << GlobalRadiant().getEnginePath() << GlobalRadiant().getGameName() << "/models/";
+
+			if ( !file_readable( buffer.c_str() ) ) {
+				// just go to fsmain
+				buffer.clear();
+				buffer << GlobalRadiant().getEnginePath() << GlobalRadiant().getGameName();
+			}
+		}
+
+		const char* cpath = GlobalRadiant().m_pfnFileDialog( window, false, "Save as Obj", buffer.c_str(), 0, false, false, true );
 		if ( !cpath ) {
 			return;
 		}
 		s_export_path = cpath;
+		if( !string_equal_suffix_nocase( s_export_path.c_str(), ".obj" ) )
+			s_export_path += ".obj";
 		// enable button to reexport with the selected name
 		GtkWidget* b_export = lookup_widget( GTK_WIDGET( button ), "b_export" );
 		ASSERT_NOTNULL( b_export );
