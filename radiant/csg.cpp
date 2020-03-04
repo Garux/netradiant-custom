@@ -90,7 +90,7 @@ public:
 			const double dot = vector3_dot( face.getPlane().plane3().normal(), m_exclusionAxis );
 			return dot < m_mindot + 0.001 || dot > m_maxdot - 0.001;
 		}
-		else{
+		else{ // note: straight equality check: may explode, when used with modified faces (e.g. ePull tmpbrush offset faces forth and back) (works so far)
 			return std::find( m_exclude_vec.begin(), m_exclude_vec.end(), face.getPlane().plane3().normal() ) != m_exclude_vec.end();
 		}
 	}
@@ -213,84 +213,93 @@ public:
 					}
 				}
 			}
-			else if( m_settings.m_hollowType == eDiag ) {
-				if( face.contributes() ) {
-					m_out.push_back( new Brush( m_brush ) );
-					m_out.back()->clear();
+		}
+	}
+};
+/* brush0, brush2 are supposed to have same amount of faces in the same order */
+void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, brush_vector_t& m_out, const HollowSettings& m_settings ){
+	TextureProjection projection;
+	TexDef_Construct_Default( projection );
+	const char* shader = m_settings.m_caulk ? GetCaulkShader() : TextureBrowser_GetSelectedShader();
 
-					Face* newFace = m_out.back()->addFace( face );
-					if( newFace != 0 ) {
-						newFace->planeChanged();
+	for( Brush::const_iterator i0 = brush0.begin(); i0 != brush0.end(); ++i0 ){
+		const Face& face0 = *( *i0 );
+		Brush::const_iterator i2 = brush2.begin();
+		std::advance( i2, std::distance( brush0.begin(), i0 ) );
+		const Face& face2 = *( *i2 );
+		if( !m_settings.faceExcluded( face0 ) ) {
+			if( face0.contributes() ) {
+				m_out.push_back( new Brush( brush0 ) );
+				m_out.back()->clear();
+
+				if( Face* newFace = m_out.back()->addFace( face0 ) ) {
+					if( !m_settings.m_removeInner && m_settings.m_caulk ){
+						newFace->SetShader( shader );
 					}
-					newFace = m_out.back()->addFace( face );
+					newFace->flipWinding();
+				}
 
-					if( newFace != 0 ) {
-						if( !m_settings.m_removeInner && m_settings.m_caulk ){
-							newFace->SetShader( GetCaulkShader() );
-						}
-						newFace->flipWinding();
-						newFace->getPlane().offset( m_settings.m_offset );
-						newFace->planeChanged();
-					}
+				if( face2.contributes() ){ //sew two valid windings
+					m_out.back()->addFace( face2 );
 
-					const Winding& winding = face.getWinding();
-					TextureProjection projection;
-					TexDef_Construct_Default( projection );
-					for( std::size_t index = 0; index < winding.numpoints; ++index ){
-						const std::size_t next = Winding_next( winding, index );
-						Vector3 BestPoint;
-						float bestdist = 999999;
-
-						const Face* parallel_face = nullptr;
-						for( const Face* f : m_brush ) {
-							if( vector3_equal_epsilon( face.getPlane().plane3().normal(), f->getPlane().plane3().normal(), c_PLANE_NORMAL_EPSILON ) ){
-								parallel_face = f;
-								break;
-							}
-						}
-
-						if( parallel_face != nullptr ){
-							const Winding& winding2 = parallel_face->getWinding();
-							float bestdot = -1;
+					const auto addSidePlanes = [&m_out, shader, &projection]( const Winding& winding0, const Winding& winding2, const DoubleVector3 normal, const bool swap ){
+						for( std::size_t index0 = 0; index0 < winding0.numpoints; ++index0 ){
+							const std::size_t next = Winding_next( winding0, index0 );
+							Vector3 BestPoint;
+							double bestdot = -1;
 							for( std::size_t index2 = 0; index2 < winding2.numpoints; ++index2 ){
-								const float dot = vector3_dot(
+								const double dot = vector3_dot(
 												vector3_normalised(
 													vector3_cross(
-														winding[index].vertex - winding[next].vertex,
-														winding[index].vertex - winding2[index2].vertex
+														winding0[index0].vertex - winding0[next].vertex,
+														winding0[index0].vertex - winding2[index2].vertex
 													)
 												),
-												face.getPlane().plane3().normal()
+												normal
 											);
 								if( dot > bestdot ) {
 									bestdot = dot;
 									BestPoint = winding2[index2].vertex;
 								}
 							}
+							m_out.back()->addPlane( winding0[swap? next : index0].vertex,
+													winding0[swap? index0 : next].vertex,
+													BestPoint,
+													shader,
+													projection );
 						}
-						else{
-							for( const Face* f : m_brush ) {
-								const Winding& winding2 = f->getWinding();
-								for( std::size_t index2 = 0; index2 < winding2.numpoints; ++index2 ){
-									const float testdist = vector3_length( winding[index].vertex - winding2[index2].vertex );
-									if( testdist < bestdist ) {
-										bestdist = testdist;
-										BestPoint = winding2[index2].vertex;
-									}
+					};
+					//insert side planes from each winding perspective, as their form may change after brush expansion
+					addSidePlanes( face0.getWinding(), face2.getWinding(), face0.getPlane().plane3().normal(), false );
+					addSidePlanes( face2.getWinding(), face0.getWinding(), face0.getPlane().plane3().normal(), true );
+				}
+				else{ //one valid winding: this way may produce garbage with complex brushes, extruded partially, but does preferred result with simple ones
+					const Winding& winding0 = face0.getWinding();
+					for( std::size_t index0 = 0; index0 < winding0.numpoints; ++index0 ){
+						const std::size_t next = Winding_next( winding0, index0 );
+						Vector3 BestPoint;
+						double bestdist = 999999;
+						for( const Face* f : brush2 ) {
+							const Winding& winding2 = f->getWinding();
+							for( std::size_t index2 = 0; index2 < winding2.numpoints; ++index2 ){
+								const double testdist = vector3_length( winding0[index0].vertex - winding2[index2].vertex );
+								if( testdist < bestdist && plane3_distance_to_point( face0.getPlane().plane3(), winding2[index2].vertex ) > .05 ) {
+									bestdist = testdist;
+									BestPoint = winding2[index2].vertex;
 								}
 							}
 						}
-						m_out.back()->addPlane( winding[next].vertex,
-												winding[index].vertex,
+						m_out.back()->addPlane( winding0[index0].vertex,
+												winding0[next].vertex,
 												BestPoint,
-												m_settings.m_caulk ? GetCaulkShader() : TextureBrowser_GetSelectedShader(),
+												shader,
 												projection );
 					}
 				}
 			}
 		}
 	}
-};
+}
 
 class FaceOffset {
 	const HollowSettings& m_settings;
@@ -337,8 +346,8 @@ public:
 				else if( m_settings.m_hollowType == eDiag ) {
 					Brush* tmpbrush = new Brush( *brush );
 					Brush_forEachFace( *tmpbrush, FaceOffset( m_settings ) );
-					tmpbrush->removeEmptyFaces();
-					Brush_forEachFace( *tmpbrush, FaceMakeBrush( *brush, out, m_settings ) );
+					tmpbrush->evaluateBRep();
+					brush_extrudeDiag( *brush, *tmpbrush, out, m_settings );
 					delete tmpbrush;
 					if( !m_settings.m_removeInner && m_settings.m_caulk ) {
 						Brush_forEachFace( *brush, CaulkFace( m_settings ) );
