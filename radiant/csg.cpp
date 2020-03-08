@@ -216,7 +216,7 @@ public:
 		}
 	}
 };
-/* brush0, brush2 are supposed to have same amount of faces in the same order */
+/* brush0, brush2 are supposed to have same amount of faces in the same order; brush2 bigger than brush0 */
 void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, brush_vector_t& m_out, const HollowSettings& m_settings ){
 	TextureProjection projection;
 	TexDef_Construct_Default( projection );
