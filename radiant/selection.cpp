@@ -2929,82 +2929,61 @@ bool Scene_forEachPlaneSelectable_selectPlanes( scene::Graph& graph, Selector& s
 
 
 
-class PlaneSelectable_bestPlaneDirect : public scene::Graph::Walker
+template<typename Functor>
+class PlaneselectableVisibleSelectedVisitor : public SelectionSystem::Visitor
 {
-SelectionTest& m_test;
-Plane3& m_plane;
-mutable SelectionIntersection m_intersection;
+const Functor& m_functor;
 public:
-PlaneSelectable_bestPlaneDirect( SelectionTest& test, Plane3& plane )
-	: m_test( test ), m_plane( plane ), m_intersection(){
+PlaneselectableVisibleSelectedVisitor( const Functor& functor ) : m_functor( functor ){
 }
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
-		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-		if ( planeSelectable != 0 ) {
-			planeSelectable->bestPlaneDirect( m_test, m_plane, m_intersection );
-		}
+void visit( scene::Instance& instance ) const {
+	PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
+	if ( planeSelectable != 0
+		 && instance.path().top().get().visible() ) {
+		m_functor( *planeSelectable );
 	}
-	return true;
-}
-};
-class PlaneSelectable_bestPlaneIndirect : public scene::Graph::Walker
-{
-SelectionTest& m_test;
-Plane3& m_plane;
-Vector3& m_intersection;
-mutable float m_dist;
-public:
-PlaneSelectable_bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection )
-	: m_test( test ), m_plane( plane ), m_intersection( intersection ), m_dist( FLT_MAX ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
-		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-		if ( planeSelectable != 0 ) {
-			planeSelectable->bestPlaneIndirect( m_test, m_plane, m_intersection, m_dist );
-		}
-	}
-	return true;
 }
 };
 
-class PlaneSelectable_selectByPlane : public scene::Graph::Walker
-{
-const Plane3 m_plane;
-public:
-PlaneSelectable_selectByPlane( const Plane3& plane )
-	: m_plane( plane ){
+template<typename Functor>
+inline const Functor& Scene_forEachVisibleSelectedPlaneselectable( const Functor& functor ){
+	GlobalSelectionSystem().foreachSelected( PlaneselectableVisibleSelectedVisitor<Functor>( functor ) );
+	return functor;
 }
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() && Instance_isSelected( instance ) ) {
-		PlaneSelectable* planeSelectable = Instance_getPlaneSelectable( instance );
-		if ( planeSelectable != 0 ) {
-			planeSelectable->selectByPlane( m_plane );
-		}
-	}
-	return true;
-}
-};
 
-bool Scene_forEachPlaneSelectable_selectPlanes2( scene::Graph& graph, SelectionTest& test, TranslateAxis2& translateAxis ){
+bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateAxis2& translateAxis ){
 	Plane3 plane( 0, 0, 0, 0 );
-	graph.traverse( PlaneSelectable_bestPlaneDirect( test, plane ) );
-	if( plane3_valid( plane ) ){
-		translateAxis.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), 0, 0 ), plane );
+	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+
+	SelectionIntersection intersection;
+	auto bestPlaneDirect = [&test, &plane, &intersection]( PlaneSelectable& planeSelectable ){
+		planeSelectable.bestPlaneDirect( test, plane, intersection );
+	};
+	Scene_forEachVisibleSelectedPlaneselectable( bestPlaneDirect );
+	if( !plane3_valid( plane ) ){
+		float dist( FLT_MAX );
+		auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( PlaneSelectable& planeSelectable ){
+			planeSelectable.bestPlaneIndirect( test, plane, intersectionPoint, dist );
+		};
+		Scene_forEachVisibleSelectedPlaneselectable( bestPlaneIndirect );
 	}
-	else{
-		Vector3 intersection;
-		graph.traverse( PlaneSelectable_bestPlaneIndirect( test, plane, intersection ) );
-		if( plane3_valid( plane ) ){
+
+	if( plane3_valid( plane ) ){
+		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
+			translateAxis.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), 0, 0 ), plane );
+		}
+		else{ // indirect
 			test.BeginMesh( g_matrix4_identity );
 			/* may introduce some screen space offset in manipulatable to handle far-from-edge clicks perfectly; thought clicking not so far isn't too nasty, right? */
-			translateAxis.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( intersection, 1 ) ) ), plane );
+			translateAxis.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( intersectionPoint, 1 ) ) ), plane );
 		}
+
+		auto selectByPlane = [plane]( PlaneSelectable& planeSelectable ){
+			planeSelectable.selectByPlane( plane );
+		};
+		Scene_forEachVisibleSelectedPlaneselectable( selectByPlane );
 	}
-	if( plane3_valid( plane ) ){
-		graph.traverse( PlaneSelectable_selectByPlane( plane ) );
-	}
+
 	return plane3_valid( plane );
 }
 
@@ -4296,7 +4275,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
 			if( g_modifiers == c_modifierAlt ){
 				if( view.fill() ){
-					m_selected2 = Scene_forEachPlaneSelectable_selectPlanes2( GlobalSceneGraph(), test, m_axisResize );
+					m_selected2 = Scene_forEachPlaneSelectable_selectPlanes2( test, m_axisResize );
 				}
 				else{
 					m_selected = selection_selectVerticesOrFaceVertices( test );
