@@ -33,20 +33,26 @@
 #include <gtk/gtkbutton.h>
 #include "gtkmisc.h"
 
-typedef std::pair<Accelerator, int> ShortcutValue; // accelerator, isRegistered
+struct ShortcutValue{
+	Accelerator accelerator;
+	const Accelerator accelerator_default;
+	int type; // isRegistered
+	ShortcutValue( const Accelerator& a ) : accelerator( a ), accelerator_default( a ), type( 0 ){
+	}
+};
 typedef std::map<CopiedString, ShortcutValue> Shortcuts;
 
 void Shortcuts_foreach( Shortcuts& shortcuts, CommandVisitor& visitor ){
 	for ( Shortcuts::iterator i = shortcuts.begin(); i != shortcuts.end(); ++i )
 	{
-		visitor.visit( ( *i ).first.c_str(), ( *i ).second.first );
+		visitor.visit( ( *i ).first.c_str(), ( *i ).second.accelerator );
 	}
 }
 
 Shortcuts g_shortcuts;
 
 const Accelerator& GlobalShortcuts_insert( const char* name, const Accelerator& accelerator ){
-	return ( *g_shortcuts.insert( Shortcuts::value_type( name, ShortcutValue( accelerator, false ) ) ).first ).second.first;
+	return ( *g_shortcuts.insert( Shortcuts::value_type( name, ShortcutValue( accelerator ) ) ).first ).second.accelerator;
 }
 
 void GlobalShortcuts_foreach( CommandVisitor& visitor ){
@@ -56,14 +62,14 @@ void GlobalShortcuts_foreach( CommandVisitor& visitor ){
 void GlobalShortcuts_register( const char* name, int type ){
 	Shortcuts::iterator i = g_shortcuts.find( name );
 	if ( i != g_shortcuts.end() ) {
-		( *i ).second.second = type;
+		( *i ).second.type = type;
 	}
 }
 
 void GlobalShortcuts_reportUnregistered(){
 	for ( Shortcuts::iterator i = g_shortcuts.begin(); i != g_shortcuts.end(); ++i )
 	{
-		if ( ( *i ).second.first.key != 0 && !( *i ).second.second ) {
+		if ( ( *i ).second.accelerator.key != 0 && ( *i ).second.type == 0 ) {
 			globalWarningStream() << "shortcut not registered: " << ( *i ).first.c_str() << "\n";
 		}
 	}
@@ -118,7 +124,7 @@ const KeyEvent& GlobalKeyEvents_find( const char* name ){
 void disconnect_accelerator( const char *name ){
 	Shortcuts::iterator i = g_shortcuts.find( name );
 	if ( i != g_shortcuts.end() ) {
-		switch ( ( *i ).second.second )
+		switch ( ( *i ).second.type )
 		{
 		case 1:
 			// command
@@ -135,7 +141,7 @@ void disconnect_accelerator( const char *name ){
 void connect_accelerator( const char *name ){
 	Shortcuts::iterator i = g_shortcuts.find( name );
 	if ( i != g_shortcuts.end() ) {
-		switch ( ( *i ).second.second )
+		switch ( ( *i ).second.type )
 		{
 		case 1:
 			// command
@@ -209,7 +215,7 @@ void accelerator_clear_button_clicked( GtkButton *btn, gpointer dialogptr ){
 	if ( thisShortcutIterator == g_shortcuts.end() ) {
 		return;
 	}
-	thisShortcutIterator->second.first = accelerator_null();
+	thisShortcutIterator->second.accelerator = accelerator_null();
 
 	gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 1, "", -1 );
 
@@ -369,7 +375,7 @@ public:
 		// clear the ACTUAL accelerator first
 		disconnect_accelerator( commandName );
 
-		thisShortcutIterator->second.first = newAccel;
+		thisShortcutIterator->second.accelerator = newAccel;
 
 		// write into the cell
 		StringOutputStream modifiers;
@@ -398,9 +404,9 @@ public:
     Shortcuts::iterator i = g_shortcuts.find(name);
     if(i != g_shortcuts.end())
     {
-        accelerator_parse(i->second.first, new_text);
+        accelerator_parse(i->second.accelerator, new_text);
         StringOutputStream modifiers;
-        modifiers << i->second.first;
+        modifiers << i->second.accelerator;
         gtk_list_store_set(GTK_LIST_STORE(model), &row, 1, modifiers.c_str(), -1);
     }
    };
