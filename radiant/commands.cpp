@@ -36,18 +36,11 @@
 struct ShortcutValue{
 	Accelerator accelerator;
 	const Accelerator accelerator_default;
-	int type; // isRegistered
+	int type; // 0 = !isRegistered, 1 = command, 2 = toggle
 	ShortcutValue( const Accelerator& a ) : accelerator( a ), accelerator_default( a ), type( 0 ){
 	}
 };
 typedef std::map<CopiedString, ShortcutValue> Shortcuts;
-
-void Shortcuts_foreach( Shortcuts& shortcuts, CommandVisitor& visitor ){
-	for ( Shortcuts::iterator i = shortcuts.begin(); i != shortcuts.end(); ++i )
-	{
-		visitor.visit( ( *i ).first.c_str(), ( *i ).second.accelerator );
-	}
-}
 
 Shortcuts g_shortcuts;
 
@@ -55,8 +48,10 @@ const Accelerator& GlobalShortcuts_insert( const char* name, const Accelerator& 
 	return ( *g_shortcuts.insert( Shortcuts::value_type( name, ShortcutValue( accelerator ) ) ).first ).second.accelerator;
 }
 
-void GlobalShortcuts_foreach( CommandVisitor& visitor ){
-	Shortcuts_foreach( g_shortcuts, visitor );
+template<typename Functor>
+void GlobalShortcuts_foreach( Functor& functor ){
+	for ( auto& pair : g_shortcuts )
+		functor( pair.first.c_str(), pair.second.accelerator );
 }
 
 void GlobalShortcuts_register( const char* name, int type ){
@@ -67,12 +62,9 @@ void GlobalShortcuts_register( const char* name, int type ){
 }
 
 void GlobalShortcuts_reportUnregistered(){
-	for ( Shortcuts::iterator i = g_shortcuts.begin(); i != g_shortcuts.end(); ++i )
-	{
-		if ( ( *i ).second.accelerator.key != 0 && ( *i ).second.type == 0 ) {
-			globalWarningStream() << "shortcut not registered: " << ( *i ).first.c_str() << "\n";
-		}
-	}
+	for ( auto& pair : g_shortcuts )
+		if ( pair.second.accelerator.key != 0 && pair.second.type == 0 )
+			globalWarningStream() << "shortcut not registered: " << pair.first.c_str() << "\n";
 }
 
 typedef std::map<CopiedString, Command> Commands;
@@ -258,6 +250,59 @@ gboolean accelerator_tree_butt_press( GtkWidget* widget, GdkEventButton* event, 
 	return FALSE;
 }
 
+class VerifyAcceleratorNotTaken
+{
+	const char *commandName;
+	const Accelerator &newAccel;
+	GtkWidget *widget;
+	GtkTreeModel *model;
+public:
+	bool allow;
+	VerifyAcceleratorNotTaken( const char *name, const Accelerator &accelerator, GtkWidget *w, GtkTreeModel *m ) :
+								commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
+	}
+	void operator()( const char* name, Accelerator& accelerator ){
+		if ( !allow
+			|| accelerator.key == 0
+			|| !strcmp( name, commandName ) ) {
+			return;
+		}
+		if ( accelerator == newAccel ) {
+			StringOutputStream msg;
+			msg << "The command " << name << " is already assigned to the key " << accelerator << ".\n\n"
+				<< "Do you want to unassign " << name << " first?";
+			EMessageBoxReturn r = gtk_MessageBox( widget, msg.c_str(), "Key already used", eMB_YESNOCANCEL );
+			if ( r == eIDYES ) {
+				// clear the ACTUAL accelerator too!
+				disconnect_accelerator( name );
+				// delete the modifier
+				accelerator = accelerator_null();
+				// empty the cell of the key binds dialog
+				GtkTreeIter i;
+				if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL( model ), &i ) ) {
+					for (;; )
+					{
+						GValue val;
+						memset( &val, 0, sizeof( val ) );
+						gtk_tree_model_get_value( GTK_TREE_MODEL( model ), &i, 0, &val );
+						const char *thisName = g_value_get_string( &val );;
+						if ( !strcmp( thisName, name ) ) {
+							gtk_list_store_set( GTK_LIST_STORE( model ), &i, 1, "", -1 );
+						}
+						g_value_unset( &val );
+						if ( !gtk_tree_model_iter_next( GTK_TREE_MODEL( model ), &i ) ) {
+							break;
+						}
+					}
+				}
+			}
+			else if ( r == eIDCANCEL ) {
+				// aborted
+				allow = false;
+			}
+		}
+	}
+};
 gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gpointer dialogptr ){
 	command_list_dialog_t &dialog = *(command_list_dialog_t *) dialogptr;
 
@@ -306,66 +351,10 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	}
 
 	// 8. build an Accelerator
-	Accelerator newAccel( event->keyval, (GdkModifierType) event->state );
+	const Accelerator newAccel( accelerator_for_event_key( event ) );
 
 	// 8. verify the key is still free, show a dialog to ask what to do if not
-	class VerifyAcceleratorNotTaken : public CommandVisitor
-	{
-	const char *commandName;
-	const Accelerator &newAccel;
-	GtkWidget *widget;
-	GtkTreeModel *model;
-public:
-	bool allow;
-	VerifyAcceleratorNotTaken( const char *name, const Accelerator &accelerator, GtkWidget *w, GtkTreeModel *m ) :
-								commandName( name ), newAccel( accelerator ), widget( w ), model( m ), allow( true ){
-	}
-	void visit( const char* name, Accelerator& accelerator ){
-		if ( !strcmp( name, commandName ) ) {
-			return;
-		}
-		if ( !allow ) {
-			return;
-		}
-		if ( accelerator.key == 0 ) {
-			return;
-		}
-		if ( accelerator == newAccel ) {
-			StringOutputStream msg;
-			msg << "The command " << name << " is already assigned to the key " << accelerator << ".\n\n"
-				<< "Do you want to unassign " << name << " first?";
-			EMessageBoxReturn r = gtk_MessageBox( widget, msg.c_str(), "Key already used", eMB_YESNOCANCEL );
-			if ( r == eIDYES ) {
-				// clear the ACTUAL accelerator too!
-				disconnect_accelerator( name );
-				// delete the modifier
-				accelerator = accelerator_null();
-				// empty the cell of the key binds dialog
-				GtkTreeIter i;
-				if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL( model ), &i ) ) {
-					for (;; )
-					{
-						GValue val;
-						memset( &val, 0, sizeof( val ) );
-						gtk_tree_model_get_value( GTK_TREE_MODEL( model ), &i, 0, &val );
-						const char *thisName = g_value_get_string( &val );;
-						if ( !strcmp( thisName, name ) ) {
-							gtk_list_store_set( GTK_LIST_STORE( model ), &i, 1, "", -1 );
-						}
-						g_value_unset( &val );
-						if ( !gtk_tree_model_iter_next( GTK_TREE_MODEL( model ), &i ) ) {
-							break;
-						}
-					}
-				}
-			}
-			else if ( r == eIDCANCEL ) {
-				// aborted
-				allow = false;
-			}
-		}
-	}
-	} verify_visitor( commandName, newAccel, widget, dialog.m_model );
+	VerifyAcceleratorNotTaken verify_visitor( commandName, newAccel, widget, dialog.m_model );
 	GlobalShortcuts_foreach( verify_visitor );
 
 	gtk_list_store_set( GTK_LIST_STORE( dialog.m_model ), &dialog.m_command_iter, 2, false, -1 );
@@ -468,21 +457,16 @@ void DoCommandListDlg(){
 				StringOutputStream path( 256 );
 				path << SettingsPath_get() << "commandlist.txt";
 				globalOutputStream() << "Writing the command list to " << path.c_str() << "\n";
-				class BuildCommandList : public CommandVisitor
-				{
-				TextFileOutputStream m_commandList;
-				GtkListStore* m_store;
-public:
-				BuildCommandList( const char* filename, GtkListStore* store ) : m_commandList( filename ), m_store( store ){
-				}
-				void visit( const char* name, Accelerator& accelerator ){
+
+				TextFileOutputStream m_commandList( path.c_str() );
+				auto buildCommandList = [&m_commandList, store]( const char* name, const Accelerator& accelerator ){
 					StringOutputStream modifiers;
 					modifiers << accelerator;
 
 					{
 						GtkTreeIter iter;
-						gtk_list_store_append( m_store, &iter );
-						gtk_list_store_set( m_store, &iter, 0, name, 1, modifiers.c_str(), 2, false, 3, 800, -1 );
+						gtk_list_store_append( store, &iter );
+						gtk_list_store_set( store, &iter, 0, name, 1, modifiers.c_str(), 2, false, 3, 800, -1 );
 					}
 
 					if ( !m_commandList.failed() ) {
@@ -492,10 +476,8 @@ public:
 							m_commandList << ' ';
 						m_commandList << modifiers.c_str() << '\n';
 					}
-				}
-				} visitor( path.c_str(), store );
-
-				GlobalShortcuts_foreach( visitor );
+				};
+				GlobalShortcuts_foreach( buildCommandList );
 			}
 
 			g_object_unref( G_OBJECT( store ) );
@@ -541,21 +523,14 @@ void SaveCommandMap( const char* path ){
 		file << "number=" << COMMANDS_VERSION << "\n";
 		file << "\n";
 		file << "[Commands]\n";
-		class WriteCommandMap : public CommandVisitor
-		{
-		TextFileOutputStream& m_file;
-public:
-		WriteCommandMap( TextFileOutputStream& file ) : m_file( file ){
-		}
-		void visit( const char* name, Accelerator& accelerator ){
-			m_file << name << "=";
 
+		auto writeCommandMap = [&file]( const char* name, const Accelerator& accelerator ){
+			file << name << "=";
 			const char* key = gtk_accelerator_name( accelerator.key, accelerator.modifiers );
-			m_file << key;
-			m_file << "\n";
-		}
-		} visitor( file );
-		GlobalShortcuts_foreach( visitor );
+			file << key;
+			file << "\n";
+		};
+		GlobalShortcuts_foreach( writeCommandMap );
 	}
 }
 
@@ -567,14 +542,14 @@ const char* stringrange_find( const char* first, const char* last, char c ){
 	return p;
 }
 
-class ReadCommandMap : public CommandVisitor
+class ReadCommandMap
 {
 const char* m_filename;
 std::size_t m_count;
 public:
 ReadCommandMap( const char* filename ) : m_filename( filename ), m_count( 0 ){
 }
-void visit( const char* name, Accelerator& accelerator ){
+void operator()( const char* name, Accelerator& accelerator ){
 	char value[1024];
 	if ( read_var( m_filename, "Commands", name, value ) ) {
 		if ( string_empty( value ) ) {

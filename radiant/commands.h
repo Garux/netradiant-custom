@@ -29,12 +29,6 @@ const Accelerator& GlobalShortcuts_insert( const char* name, const Accelerator& 
 void GlobalShortcuts_register( const char* name, int type ); // 1 = command, 2 = toggle
 void GlobalShortcuts_reportUnregistered();
 
-class CommandVisitor
-{
-public:
-virtual void visit( const char* name, Accelerator& accelerator ) = 0;
-};
-
 void GlobalCommands_insert( const char* name, const Callback& callback, const Accelerator& accelerator = accelerator_null() );
 const Command& GlobalCommands_find( const char* name );
 
