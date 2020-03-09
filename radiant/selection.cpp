@@ -2987,48 +2987,10 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
-class Scene_forEachBrush_gatherExtrude : public scene::Graph::Walker, public BrushInstanceVisitor
-{
-const Plane3 m_plane;
-DragExtrudeFaces& m_extrudeFaces;
-mutable bool m_pushed;
-public:
-Scene_forEachBrush_gatherExtrude( const Plane3& plane, DragExtrudeFaces& extrudeFaces )
-	: m_plane( plane ), m_extrudeFaces( extrudeFaces ){
-}
-bool pre( const scene::Path& path, scene::Instance& instance ) const {
-	if ( path.top().get().visible() ) {
-		BrushInstance* brush = Instance_getBrush( instance );
-		if( brush != 0 && ( brush->isSelected() || brush->isSelectedComponents() ) ) {
-			m_pushed = false;
-			brush->forEachFaceInstance( *this );
-			if( m_pushed )
-				m_extrudeFaces.m_extrudeSources.back().m_brushInstance = brush;
-
-			brush->setSelectedComponents( false, SelectionSystem::eFace );
-			brush->setSelected( false );
-		}
-	}
-	return true;
-}
-void visit( FaceInstance& face ) const {
-	if( face.isSelected() || plane3_equal( m_plane, face.getFace().plane3() ) ){
-		if( !m_pushed ){
-			m_extrudeFaces.m_extrudeSources.emplace_back();
-			m_pushed = true;
-		}
-		m_extrudeFaces.m_extrudeSources.back().m_faces.emplace_back();
-		m_extrudeFaces.m_extrudeSources.back().m_faces.back().m_face = &face.getFace();
-		planepts_assign( m_extrudeFaces.m_extrudeSources.back().m_faces.back().m_planepoints, face.getFace().getPlane().getPlanePoints() );
-	}
-}
-};
-
 bool Scene_forEachPlaneSelectable_selectPlanes2( scene::Graph& graph, SelectionTest& test, TranslateAxis2& translateAxis ){
 	Plane3 plane( 0, 0, 0, 0 );
 	graph.traverse( PlaneSelectable_bestPlaneDirect( test, plane ) );
 	if( plane3_valid( plane ) ){
-		test.BeginMesh( g_matrix4_identity );
 		translateAxis.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), 0, 0 ), plane );
 	}
 	else{
@@ -3047,26 +3009,76 @@ bool Scene_forEachPlaneSelectable_selectPlanes2( scene::Graph& graph, SelectionT
 }
 
 
-bool Scene_forEachBrush_setupExtrude( scene::Graph& graph, SelectionTest& test, DragExtrudeFaces& extrudeFaces ){
+bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& extrudeFaces ){
 	Plane3 plane( 0, 0, 0, 0 );
-	graph.traverse( PlaneSelectable_bestPlaneDirect( test, plane ) );
-	if( plane3_valid( plane ) ){
-		test.BeginMesh( g_matrix4_identity );
-		extrudeFaces.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), 0, 0 ), plane );
-	}
-	else{
-		Vector3 intersection;
-		graph.traverse( PlaneSelectable_bestPlaneIndirect( test, plane, intersection ) );
-		if( plane3_valid( plane ) ){
-			test.BeginMesh( g_matrix4_identity );
-			/* may introduce some screen space offset in manipulatable to handle far-from-edge clicks perfectly; thought clicking not so far isn't too nasty, right? */
-			extrudeFaces.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( intersection, 1 ) ) ), plane );
+	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+
+	if( g_SelectedFaceInstances.empty() ){
+		SelectionIntersection intersection;
+		auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
+			brushInstance.bestPlaneDirect( test, plane, intersection );
+		};
+		Scene_forEachVisibleSelectedBrush( bestPlaneDirect );
+		if( !plane3_valid( plane ) ){
+			float dist( FLT_MAX );
+			auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
+				brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
+			};
+			Scene_forEachVisibleSelectedBrush( bestPlaneIndirect );
 		}
 	}
-	if( plane3_valid( plane ) ){
-		extrudeFaces.m_extrudeSources.clear();
-		graph.traverse( Scene_forEachBrush_gatherExtrude( plane, extrudeFaces ) );
+	else{
+		SelectionIntersection intersection;
+		auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
+			if( brushInstance.isSelected() || brushInstance.isSelectedComponents() )
+				brushInstance.bestPlaneDirect( test, plane, intersection );
+		};
+
+		Scene_forEachVisibleBrush( GlobalSceneGraph(), bestPlaneDirect );
+		if( !plane3_valid( plane ) ){
+			float dist( FLT_MAX );
+			auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
+				if( brushInstance.isSelected() || brushInstance.isSelectedComponents() )
+					brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
+			};
+			Scene_forEachVisibleBrush( GlobalSceneGraph(), bestPlaneIndirect );
+		}
 	}
+
+	if( plane3_valid( plane ) ){
+		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
+			extrudeFaces.set0( point_on_plane( plane, test.getVolume().GetViewMatrix(), 0, 0 ), plane );
+		}
+		else{ // indirect
+			test.BeginMesh( g_matrix4_identity );
+			/* may introduce some screen space offset in manipulatable to handle far-from-edge clicks perfectly; thought clicking not so far isn't too nasty, right? */
+			extrudeFaces.set0( vector4_projected( matrix4_transformed_vector4( test.getScreen2world(), Vector4( intersectionPoint, 1 ) ) ), plane );
+		}
+		extrudeFaces.m_extrudeSources.clear();
+		auto gatherExtrude = [plane, &extrudeFaces]( BrushInstance& brushInstance ){
+			if( brushInstance.isSelected() || brushInstance.isSelectedComponents() ){
+				bool m_pushed = false;
+				auto gatherFaceInstances = [plane, &extrudeFaces, &brushInstance, &m_pushed]( FaceInstance& face ){
+					if( face.isSelected() || plane3_equal( plane, face.getFace().plane3() ) ){
+						if( !m_pushed ){
+							extrudeFaces.m_extrudeSources.emplace_back();
+							extrudeFaces.m_extrudeSources.back().m_brushInstance = &brushInstance;
+							m_pushed = true;
+						}
+						extrudeFaces.m_extrudeSources.back().m_faces.emplace_back();
+						extrudeFaces.m_extrudeSources.back().m_faces.back().m_face = &face.getFace();
+						planepts_assign( extrudeFaces.m_extrudeSources.back().m_faces.back().m_planepoints, face.getFace().getPlane().getPlanePoints() );
+					}
+				};
+				Brush_ForEachFaceInstance( brushInstance, gatherFaceInstances );
+
+				brushInstance.setSelectedComponents( false, SelectionSystem::eFace );
+				brushInstance.setSelected( false );
+			}
+		};
+		Scene_forEachVisibleBrush( GlobalSceneGraph(), gatherExtrude );
+	}
+
 	return plane3_valid( plane );
 }
 
@@ -4277,7 +4289,10 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 	SelectionPool selector;
 	SelectionVolume test( view );
 
-	if( GlobalSelectionSystem().countSelected() != 0 ){
+	if( g_modifiers == ( c_modifierAlt | c_modifierControl ) && ( GlobalSelectionSystem().countSelected() != 0 || !g_SelectedFaceInstances.empty() ) ){ // extrude
+		m_extrudeFaces = Scene_forEachBrush_setupExtrude( test, m_dragExtrudeFaces );
+	}
+	else if( GlobalSelectionSystem().countSelected() != 0 ){
 		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
 			if( g_modifiers == c_modifierAlt ){
 				if( view.fill() ){
@@ -4286,9 +4301,6 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				else{
 					m_selected = selection_selectVerticesOrFaceVertices( test );
 				}
-			}
-			else if( g_modifiers == ( c_modifierAlt | c_modifierControl ) ){ // extrude
-				m_extrudeFaces = Scene_forEachBrush_setupExtrude( GlobalSceneGraph(), test, m_dragExtrudeFaces );
 			}
 			else{
 				BooleanSelector booleanSelector;

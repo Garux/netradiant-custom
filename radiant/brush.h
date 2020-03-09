@@ -4195,8 +4195,9 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 		if ( brush != 0 ) {
 			m_functor( *brush );
 		}
+		return true;
 	}
-	return true;
+	return false;
 }
 };
 
