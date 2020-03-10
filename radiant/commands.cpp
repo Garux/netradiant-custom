@@ -169,24 +169,33 @@ struct command_list_dialog_t : public ModalDialog
 		: m_close_button( *this, eIDCANCEL ), m_list( NULL ), m_command_iter(), m_model( NULL ), m_waiting_for_key( false ){
 	}
 	ModalDialogButton m_close_button;
-
 	GtkTreeView *m_list;
+	// waiting for new accelerator input state:
 	GtkTreeIter m_command_iter;
 	GtkTreeModel *m_model;
 	bool m_waiting_for_key;
+	void startWaitForKey( GtkTreeIter iter, GtkTreeModel *model ){
+		m_command_iter = iter;
+		m_model = model;
+		m_waiting_for_key = true; // grab keyboard input
+		gtk_list_store_set( GTK_LIST_STORE( m_model ), &m_command_iter, 2, TRUE, -1 ); // highlight the row
+	}
+	bool stopWaitForKey(){
+		if ( m_waiting_for_key ) {
+			m_waiting_for_key = false;
+			gtk_list_store_set( GTK_LIST_STORE( m_model ), &m_command_iter, 2, FALSE, -1 ); // unhighlight
+			m_model = NULL;
+			return true;
+		}
+		return false;
+	}
 };
 
 void accelerator_clear_button_clicked( GtkButton *btn, gpointer dialogptr ){
 	command_list_dialog_t &dialog = *(command_list_dialog_t *) dialogptr;
 
-	if ( dialog.m_waiting_for_key ) {
-		// just unhighlight, user wanted to cancel
-		dialog.m_waiting_for_key = false;
-		gtk_list_store_set( GTK_LIST_STORE( dialog.m_model ), &dialog.m_command_iter, 2, false, -1 );
-		gtk_widget_set_sensitive( GTK_WIDGET( dialog.m_list ), true );
-		dialog.m_model = NULL;
+	if ( dialog.stopWaitForKey() ) // just unhighlight, user wanted to cancel
 		return;
-	}
 
 	GtkTreeSelection *sel = gtk_tree_view_get_selection( dialog.m_list );
 	GtkTreeModel *model;
@@ -195,23 +204,20 @@ void accelerator_clear_button_clicked( GtkButton *btn, gpointer dialogptr ){
 		return;
 	}
 
-	GValue val;
-	memset( &val, 0, sizeof( val ) );
-	gtk_tree_model_get_value( GTK_TREE_MODEL( model ), &iter, 0, &val );
-	const char *commandName = g_value_get_string( &val );;
+	gchar* commandName = nullptr;
+	gtk_tree_model_get( model, &iter, 0, &commandName, -1 );
 
 	// clear the ACTUAL accelerator too!
 	disconnect_accelerator( commandName );
 
 	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find( commandName );
+	g_free( commandName );
 	if ( thisShortcutIterator == g_shortcuts.end() ) {
 		return;
 	}
 	thisShortcutIterator->second.accelerator = accelerator_null();
 
 	gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 1, "", -1 );
-
-	g_value_unset( &val );
 }
 
 void accelerator_edit_button_clicked( GtkButton *btn, gpointer dialogptr ){
@@ -224,22 +230,9 @@ void accelerator_edit_button_clicked( GtkButton *btn, gpointer dialogptr ){
 	if ( !gtk_tree_selection_get_selected( sel, &model, &iter ) ) {
 		return;
 	}
-	if ( dialog.m_waiting_for_key ) {
-		// unhighlight highlit
-		dialog.m_waiting_for_key = false;
-		gtk_list_store_set( GTK_LIST_STORE( dialog.m_model ), &dialog.m_command_iter, 2, false, -1 );
-	}
-	dialog.m_command_iter = iter;
-	dialog.m_model = model;
 
-	// 2. disallow changing the row
-	//gtk_widget_set_sensitive(GTK_WIDGET(dialog.m_list), false);
-
-	// 3. highlight the row
-	gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 2, true, -1 );
-
-	// 4. grab keyboard focus
-	dialog.m_waiting_for_key = true;
+	dialog.stopWaitForKey();
+	dialog.startWaitForKey( iter, model );
 }
 
 gboolean accelerator_tree_butt_press( GtkWidget* widget, GdkEventButton* event, gpointer dialogptr ){
@@ -279,18 +272,16 @@ public:
 				accelerator = accelerator_null();
 				// empty the cell of the key binds dialog
 				GtkTreeIter i;
-				if ( gtk_tree_model_get_iter_first( GTK_TREE_MODEL( model ), &i ) ) {
+				if ( gtk_tree_model_get_iter_first( model, &i ) ) {
 					for (;; )
 					{
-						GValue val;
-						memset( &val, 0, sizeof( val ) );
-						gtk_tree_model_get_value( GTK_TREE_MODEL( model ), &i, 0, &val );
-						const char *thisName = g_value_get_string( &val );;
+						gchar* thisName = nullptr;
+						gtk_tree_model_get( model, &i, 0, &thisName, -1 );
 						if ( !strcmp( thisName, name ) ) {
 							gtk_list_store_set( GTK_LIST_STORE( model ), &i, 1, "", -1 );
 						}
-						g_value_unset( &val );
-						if ( !gtk_tree_model_iter_next( GTK_TREE_MODEL( model ), &i ) ) {
+						g_free( thisName );
+						if ( !gtk_tree_model_iter_next( model, &i ) ) {
 							break;
 						}
 					}
@@ -307,12 +298,12 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	command_list_dialog_t &dialog = *(command_list_dialog_t *) dialogptr;
 
 	if ( !dialog.m_waiting_for_key ) {
-		return false;
+		return FALSE;
 	}
 
 #if 0
 	if ( event->is_modifier ) {
-		return false;
+		return FALSE;
 	}
 #else
 	switch ( event->keyval )
@@ -331,23 +322,20 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	case GDK_Super_R:
 	case GDK_Hyper_L:
 	case GDK_Hyper_R:
-		return false;
+		return FALSE;
 	}
 #endif
 
-	dialog.m_waiting_for_key = false;
-
 	// 7. find the name of the accelerator
-	GValue val;
-	memset( &val, 0, sizeof( val ) );
-	gtk_tree_model_get_value( GTK_TREE_MODEL( dialog.m_model ), &dialog.m_command_iter, 0, &val );
-	const char *commandName = g_value_get_string( &val );;
+	gchar* commandName = nullptr;
+	gtk_tree_model_get( dialog.m_model, &dialog.m_command_iter, 0, &commandName, -1 );
+
 	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find( commandName );
 	if ( thisShortcutIterator == g_shortcuts.end() ) {
 		globalErrorStream() << "commandName " << makeQuoted( commandName ) << " not found in g_shortcuts.\n";
-		gtk_list_store_set( GTK_LIST_STORE( dialog.m_model ), &dialog.m_command_iter, 2, false, -1 );
-		gtk_widget_set_sensitive( GTK_WIDGET( dialog.m_list ), true );
-		return true;
+		dialog.stopWaitForKey();
+		g_free( commandName );
+		return TRUE;
 	}
 
 	// 8. build an Accelerator
@@ -356,10 +344,6 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	// 8. verify the key is still free, show a dialog to ask what to do if not
 	VerifyAcceleratorNotTaken verify_visitor( commandName, newAccel, widget, dialog.m_model );
 	GlobalShortcuts_foreach( verify_visitor );
-
-	gtk_list_store_set( GTK_LIST_STORE( dialog.m_model ), &dialog.m_command_iter, 2, false, -1 );
-	gtk_widget_set_sensitive( GTK_WIDGET( dialog.m_list ), true );
-
 	if ( verify_visitor.allow ) {
 		// clear the ACTUAL accelerator first
 		disconnect_accelerator( commandName );
@@ -375,31 +359,11 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 		connect_accelerator( commandName );
 	}
 
-	g_value_unset( &val );
+	dialog.stopWaitForKey();
+	g_free( commandName );
 
-	dialog.m_model = NULL;
-
-	return true;
+	return TRUE;
 }
-
-/*
-    GtkTreeIter row;
-    GValue val;
-    if(!model) {g_error("Unable to get model from cell renderer");}
-    gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(model), &row, path_string);
-
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &row, 0, &val);
-    const char *name = g_value_get_string(&val);
-    Shortcuts::iterator i = g_shortcuts.find(name);
-    if(i != g_shortcuts.end())
-    {
-        accelerator_parse(i->second.accelerator, new_text);
-        StringOutputStream modifiers;
-        modifiers << i->second.accelerator;
-        gtk_list_store_set(GTK_LIST_STORE(model), &row, 1, modifiers.c_str(), -1);
-    }
-   };
- */
 
 static gboolean mid_search_func( GtkTreeModel* model, gint column, const gchar* key, GtkTreeIter* iter, gpointer search_data ) {
 	gchar* iter_string = 0;
@@ -408,6 +372,7 @@ static gboolean mid_search_func( GtkTreeModel* model, gint column, const gchar* 
 	g_free( iter_string );
 	return ret;
 }
+
 
 void DoCommandListDlg(){
 	command_list_dialog_t dialog;
@@ -431,7 +396,7 @@ void DoCommandListDlg(){
 			GtkWidget* view = gtk_tree_view_new_with_model( GTK_TREE_MODEL( store ) );
 			dialog.m_list = GTK_TREE_VIEW( view );
 
-			//gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), false ); // annoying
+			//gtk_tree_view_set_enable_search( GTK_TREE_VIEW( view ), FALSE ); // annoying
 			gtk_tree_view_set_search_column( dialog.m_list, 0 );
 			gtk_tree_view_set_search_equal_func( dialog.m_list, (GtkTreeViewSearchEqualFunc)mid_search_func, 0, 0 );
 
@@ -466,7 +431,7 @@ void DoCommandListDlg(){
 					{
 						GtkTreeIter iter;
 						gtk_list_store_append( store, &iter );
-						gtk_list_store_set( store, &iter, 0, name, 1, modifiers.c_str(), 2, false, 3, 800, -1 );
+						gtk_list_store_set( store, &iter, 0, name, 1, modifiers.c_str(), 2, FALSE, 3, 800, -1 );
 					}
 
 					if ( !m_commandList.failed() ) {
@@ -532,14 +497,6 @@ void SaveCommandMap( const char* path ){
 		};
 		GlobalShortcuts_foreach( writeCommandMap );
 	}
-}
-
-const char* stringrange_find( const char* first, const char* last, char c ){
-	const char* p = strchr( first, '+' );
-	if ( p == 0 ) {
-		return last;
-	}
-	return p;
 }
 
 class ReadCommandMap
