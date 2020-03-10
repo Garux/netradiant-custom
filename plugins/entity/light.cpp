@@ -1884,6 +1884,11 @@ void selectByPlane( const Plane3& plane ){
 		m_dragPlanes.selectByPlane( m_contained.aabb(), plane, rotation() );
 	}
 }
+void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const {
+	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
+		m_dragPlanes.gatherPolygonsByPlane( m_contained.aabb(), plane, polygons, rotation() );
+	}
+}
 
 
 bool isSelectedComponents() const {
@@ -1905,6 +1910,8 @@ void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ){
 	}
 }
 void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ){
+}
+void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const {
 }
 
 void selectedChangedComponent( const Selectable& selectable ){

@@ -2325,6 +2325,20 @@ void OpenGLShader::construct( const char* name ){
 			state.m_sort = OpenGLState::eSortTranslucent;
 		}
 #endif // 0
+		else if ( string_equal( name + 1, "PLANE_WIRE_OVERLAY" ) ) {
+			state.m_colour = Vector4( 1, 1, 0, 1 );
+			state.m_state = RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST | RENDER_OFFSETLINE;
+			state.m_sort = OpenGLState::eSortGUI1;
+			state.m_depthfunc = GL_LEQUAL;
+			state.m_linewidth = 2;
+
+			OpenGLState& hiddenLine = appendDefaultPass();
+			hiddenLine.m_colour = state.m_colour;
+			hiddenLine.m_state = RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST | RENDER_LINESTIPPLE;
+			hiddenLine.m_sort = OpenGLState::eSortGUI0;
+			hiddenLine.m_depthfunc = GL_GREATER;
+			hiddenLine.m_linestipple_factor = 2;
+		}
 		else if ( string_equal( name + 1, "WIRE_OVERLAY" ) ) {
 #if 0
 			state.m_state = RENDER_COLOURARRAY | RENDER_COLOURWRITE | RENDER_DEPTHWRITE | RENDER_DEPTHTEST;

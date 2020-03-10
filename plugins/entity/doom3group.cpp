@@ -544,6 +544,8 @@ void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSys
 		m_curveCatmullRom.testSelect( selector, test );
 	}
 }
+void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const {
+}
 
 void transformComponents( const Matrix4& matrix ){
 	if ( m_curveNURBS.isSelected() ) {

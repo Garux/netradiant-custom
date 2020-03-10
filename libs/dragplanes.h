@@ -227,28 +227,28 @@ void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Ve
  */
 
 	const std::size_t edges[24] = {
-		0, 1,
-		1, 2,
-		2, 3,
-		3, 0,
+		0, 1, // x
+		3, 2,
+		7, 6,
 		4, 5,
-		5, 6,
-		6, 7,
+		2, 1, // y
+		3, 0,
+		6, 5,
 		7, 4,
-		0, 4,
-		1, 5,
-		2, 6,
-		3, 7,
+		4, 0, // z
+		5, 1,
+		6, 2,
+		7, 3,
 	};
 
 	const std::size_t adjacent_planes[24] = {
 		4, 2,
-		4, 0,
 		4, 3,
-		4, 1,
-		5, 2,
-		5, 0,
 		5, 3,
+		5, 2,
+		4, 0,
+		4, 1,
+		5, 0,
 		5, 1,
 		1, 2,
 		2, 0,
@@ -256,31 +256,55 @@ void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Ve
 		3, 1,
 	};
 
+	float dot = 1;
+	const bool some_extent_zero = aabb.extents[0] == 0 || aabb.extents[1] == 0 || aabb.extents[2] == 0;
 	for ( std::size_t i = 0; i < 24; ++++i ){
 		Line line( corners[edges[i]], corners[edges[i + 1]] );
-		if( matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
+		if( aabb.extents[i / 8] != 0.f && matrix4_clip_line_by_nearplane( test.getVolume().GetViewMatrix(), line ) == 2 ){
 			const Vector3 intersection_new = line_closest_point( line, g_vector3_identity );
 			const float dist_new = vector3_length_squared( intersection_new );
-			if( dist_new < dist ){
+			const float dot_new = fabs( vector3_dot( vector3_normalised( intersection_new ), vector3_normalised( line.end - line.start ) ) );
+			//effective epsilon is rather big: optimized 32 bit build is using doubles implicitly (floats might be straightly checked for equality); same code in brush.h is cool with way smaller epsilon
+			if( dist - dist_new > 1e-2f // new dist noticeably smaller
+					|| ( float_equal_epsilon( dist_new, dist, 1e-2f ) && dot_new < dot ) ){ // or ambiguous case. Resolve it by dot comparison
 				const Plane3& plane1 = planes[adjacent_planes[i]];
 				const Plane3& plane2 = planes[adjacent_planes[i + 1]];
-				if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
-					if( aabb.extents[( ( adjacent_planes[i] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
-						plane = plane2;
-					else
-						plane = plane1;
-					intersection = intersection_new;
-					dist = dist_new;
-				}
-				else{
-					if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
-						if( aabb.extents[( ( adjacent_planes[i + 1] >> 1 ) << 1 ) / 2] == 0 ) /* select the other, if zero bound */
-							plane = plane1;
-						else
-							plane = plane2;
+
+				auto assign_plane = [&plane, &intersection, intersection_new, &dist, dist_new, &dot, dot_new]( const Plane3& plane_new ){
+						plane = plane_new;
 						intersection = intersection_new;
 						dist = dist_new;
+						dot = dot_new;
+				};
+
+				if( test.getVolume().fill() ){
+					if( plane3_distance_to_point( plane1, test.getVolume().getViewer() ) <= 0 ){
+						if( aabb.extents[adjacent_planes[i] / 2] == 0 ) /* select the other, if zero bound */
+							assign_plane( plane2 );
+						else
+							assign_plane( plane1 );
 					}
+					else if( plane3_distance_to_point( plane2, test.getVolume().getViewer() ) <= 0 ){
+						if( aabb.extents[adjacent_planes[i + 1] / 2] == 0 ) /* select the other, if zero bound */
+							assign_plane( plane1 );
+						else
+							assign_plane( plane2 );
+					}
+				}
+				else if( some_extent_zero || fabs( vector3_length_squared( line.end - line.start ) ) > 1e-3 ){
+					if( fabs( vector3_dot( plane1.normal(), test.getVolume().getViewDir() ) ) < fabs( vector3_dot( plane2.normal(), test.getVolume().getViewDir() ) ) ){
+						if( aabb.extents[adjacent_planes[i] / 2] == 0 ) /* select the other, if zero bound */
+							assign_plane( plane2 );
+						else
+							assign_plane( plane1 );
+					}
+					else{
+						if( aabb.extents[adjacent_planes[i + 1] / 2] == 0 ) /* select the other, if zero bound */
+							assign_plane( plane1 );
+						else
+							assign_plane( plane2 );
+					}
+
 				}
 			}
 		}
@@ -294,8 +318,37 @@ void selectByPlane( const AABB& aabb, const Plane3& plane, const Matrix4& rotati
 	for ( std::size_t i = 0; i < 6; ++i ){
 		if( plane3_equal( plane, planes[i] ) || plane3_equal( plane, plane3_flipped( planes[i] ) ) ){
 			m_selectables[i].setSelected( true );
+			return;
 		}
 	}
+}
+void gatherPolygonsByPlane( const AABB& aabb, const Plane3& plane, std::vector<std::vector<Vector3>>& polygons, const Matrix4& rotation = g_matrix4_identity ) const {
+	Vector3 corners[8];
+	aabb_corners_oriented( aabb, rotation, corners );
+
+	Plane3 planes[6];
+	aabb_planes_oriented( aabb, rotation, planes );
+
+	const std::size_t indices[24] = {
+		2, 1, 5, 6, //+x //right
+		3, 7, 4, 0, //-x //left
+		1, 0, 4, 5, //+y //front
+		3, 2, 6, 7, //-y //back
+		0, 1, 2, 3, //+z //top
+		7, 6, 5, 4, //-z //bottom
+	};
+
+	for ( std::size_t i = 0; i < 6; ++i ){
+		if( plane3_equal( plane, planes[i] ) || plane3_equal( plane, plane3_flipped( planes[i] ) ) ){
+			const std::size_t index = i * 4;
+			polygons.emplace_back( std::initializer_list<Vector3>( { corners[indices[index]],
+																	corners[indices[index + 1]],
+																	corners[indices[index + 2]],
+																	corners[indices[index + 3]] } ) );
+			return;
+		}
+	}
+
 }
 
 AABB evaluateResize( const Vector3& translation ) const {

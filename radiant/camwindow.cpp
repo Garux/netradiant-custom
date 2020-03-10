@@ -906,6 +906,7 @@ void render( RenderStateFlags state ) const {
 			glPolygonOffset( 1, -1 );
 			glColorPointer( 4, GL_UNSIGNED_BYTE, sizeof( Colour4b ), colorarr1.data() );
 			glDrawArrays( GL_QUADS, start0? 2 : 0, GLsizei( count - ( start0? 2 : 4 ) ) );
+			glPolygonOffset( -1, 1 ); // restore default
 		}
 	}
 

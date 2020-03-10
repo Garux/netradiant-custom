@@ -407,6 +407,9 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 	Vector3 current = g_vector3_axes[m_axisZ] * vector3_dot( m_planeSelected.normal(), ( point_on_plane( m_planeZ, m_view->GetViewMatrix(), x, y ) - m_startZ ) )
 						* ( m_planeSelected.normal()[m_axisZ] >= 0? 1 : -1 );
 
+	if( !std::isfinite( current[0] ) || !std::isfinite( current[1] ) || !std::isfinite( current[2] ) ) // catch INF case, is likely with top of the box in 2D
+		return;
+
 	if( snapbbox )
 		aabb_snap_translation( current, m_bounds );
 	else
@@ -2951,10 +2954,7 @@ inline const Functor& Scene_forEachVisibleSelectedPlaneselectable( const Functor
 	return functor;
 }
 
-bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateAxis2& translateAxis ){
-	Plane3 plane( 0, 0, 0, 0 );
-	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-
+void Scene_forEachPlaneSelectable_bestPlane( SelectionTest& test, Plane3& plane, Vector3& intersectionPoint ){
 	SelectionIntersection intersection;
 	auto bestPlaneDirect = [&test, &plane, &intersection]( PlaneSelectable& planeSelectable ){
 		planeSelectable.bestPlaneDirect( test, plane, intersection );
@@ -2967,6 +2967,12 @@ bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateA
 		};
 		Scene_forEachVisibleSelectedPlaneselectable( bestPlaneIndirect );
 	}
+}
+
+bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateAxis2& translateAxis ){
+	Plane3 plane( 0, 0, 0, 0 );
+	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+	Scene_forEachPlaneSelectable_bestPlane( test, plane, intersectionPoint );
 
 	if( plane3_valid( plane ) ){
 		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
@@ -2988,23 +2994,24 @@ bool Scene_forEachPlaneSelectable_selectPlanes2( SelectionTest& test, TranslateA
 }
 
 
-bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& extrudeFaces ){
-	Plane3 plane( 0, 0, 0, 0 );
-	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
-
-	if( g_SelectedFaceInstances.empty() ){
-		SelectionIntersection intersection;
-		auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
-			brushInstance.bestPlaneDirect( test, plane, intersection );
+void Scene_forEachSelectedBrush_bestPlane( SelectionTest& test, Plane3& plane, Vector3& intersectionPoint ){
+	SelectionIntersection intersection;
+	auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
+		brushInstance.bestPlaneDirect( test, plane, intersection );
+	};
+	Scene_forEachVisibleSelectedBrush( bestPlaneDirect );
+	if( !plane3_valid( plane ) ){
+		float dist( FLT_MAX );
+		auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
+			brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
 		};
-		Scene_forEachVisibleSelectedBrush( bestPlaneDirect );
-		if( !plane3_valid( plane ) ){
-			float dist( FLT_MAX );
-			auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
-				brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
-			};
-			Scene_forEachVisibleSelectedBrush( bestPlaneIndirect );
-		}
+		Scene_forEachVisibleSelectedBrush( bestPlaneIndirect );
+	}
+}
+
+void Scene_forEachBrush_bestPlane( SelectionTest& test, Plane3& plane, Vector3& intersectionPoint ){
+	if( g_SelectedFaceInstances.empty() ){
+		Scene_forEachSelectedBrush_bestPlane( test, plane, intersectionPoint );
 	}
 	else{
 		SelectionIntersection intersection;
@@ -3023,6 +3030,12 @@ bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& ext
 			Scene_forEachVisibleBrush( GlobalSceneGraph(), bestPlaneIndirect );
 		}
 	}
+}
+
+bool Scene_forEachBrush_setupExtrude( SelectionTest& test, DragExtrudeFaces& extrudeFaces ){
+	Plane3 plane( 0, 0, 0, 0 );
+	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+	Scene_forEachBrush_bestPlane( test, plane, intersectionPoint );
 
 	if( plane3_valid( plane ) ){
 		if( intersectionPoint == Vector3( FLT_MAX, FLT_MAX, FLT_MAX ) ){ // direct
@@ -4201,20 +4214,8 @@ bool selection_selectVerticesOrFaceVertices( SelectionTest& test ){
 	}
 	/* otherwise select vertices of brush faces, which lay on best plane */
 	Plane3 plane( 0, 0, 0, 0 );
-	SelectionIntersection intersection;
-	auto bestPlaneDirect = [&test, &plane, &intersection]( BrushInstance& brushInstance ){
-		brushInstance.bestPlaneDirect( test, plane, intersection );
-	};
-	Scene_forEachVisibleSelectedBrush( bestPlaneDirect );
-
-	if( !plane3_valid( plane ) ){
-		Vector3 intersectionPoint;
-		float dist( FLT_MAX );
-		auto bestPlaneIndirect = [&test, &plane, &intersectionPoint, &dist]( BrushInstance& brushInstance ){
-			brushInstance.bestPlaneIndirect( test, plane, intersectionPoint, dist );
-		};
-		Scene_forEachVisibleSelectedBrush( bestPlaneIndirect );
-	}
+	Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+	Scene_forEachSelectedBrush_bestPlane( test, plane, intersectionPoint );
 
 	if( plane3_valid( plane ) ){
 		auto selectVerticesOnPlane = [&plane]( BrushInstance& brushInstance ){
@@ -4224,6 +4225,29 @@ bool selection_selectVerticesOrFaceVertices( SelectionTest& test ){
 
 	}
 	return plane3_valid( plane );
+}
+
+
+template<typename Functor>
+class ComponentSelectionTestableVisibleSelectedVisitor : public SelectionSystem::Visitor
+{
+const Functor& m_functor;
+public:
+ComponentSelectionTestableVisibleSelectedVisitor( const Functor& functor ) : m_functor( functor ){
+}
+void visit( scene::Instance& instance ) const {
+	ComponentSelectionTestable* componentSelectionTestable = Instance_getComponentSelectionTestable( instance );
+	if ( componentSelectionTestable != 0
+		 && instance.path().top().get().visible() ) {
+		m_functor( *componentSelectionTestable );
+	}
+}
+};
+
+template<typename Functor>
+inline const Functor& Scene_forEachVisibleSelectedComponentSelectionTestable( const Functor& functor ){
+	GlobalSelectionSystem().foreachSelected( ComponentSelectionTestableVisibleSelectedVisitor<Functor>( functor ) );
+	return functor;
 }
 
 
@@ -4247,8 +4271,11 @@ bool m_extrudeFaces;
 
 public:
 
-DragManipulator( Translatable& translatable ) : m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( translatable ){
+static Shader* m_state_wire;
+
+DragManipulator( Translatable& translatable ) : m_freeResize( m_resize ), m_axisResize( m_resize ), m_freeDragXY_Z( translatable ), m_renderCircle( 2 << 3 ){
 	setSelected( false );
+	draw_circle( m_renderCircle.m_vertices.size() >> 3, 5, m_renderCircle.m_vertices.data(), RemapXYZ() );
 }
 
 Manipulatable* GetManipulatable(){
@@ -4268,16 +4295,18 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 	SelectionPool selector;
 	SelectionVolume test( view );
 
-	if( g_modifiers == ( c_modifierAlt | c_modifierControl ) && ( GlobalSelectionSystem().countSelected() != 0 || !g_SelectedFaceInstances.empty() ) ){ // extrude
+	if( g_modifiers == ( c_modifierAlt | c_modifierControl )
+		&& GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive
+		&& ( GlobalSelectionSystem().countSelected() != 0 || !g_SelectedFaceInstances.empty() ) ){ // extrude
 		m_extrudeFaces = Scene_forEachBrush_setupExtrude( test, m_dragExtrudeFaces );
 	}
 	else if( GlobalSelectionSystem().countSelected() != 0 ){
 		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
 			if( g_modifiers == c_modifierAlt ){
-				if( view.fill() ){
+				if( view.fill() ){ // alt resize
 					m_selected2 = Scene_forEachPlaneSelectable_selectPlanes2( test, m_axisResize );
 				}
-				else{
+				else{ // alt vertices drag
 					m_selected = selection_selectVerticesOrFaceVertices( test );
 				}
 			}
@@ -4295,7 +4324,7 @@ void testSelect( const View& view, const Matrix4& pivot2world ){
 				}
 			}
 		}
-		else{
+		else{ // components
 			BestSelector bestSelector;
 			Scene_TestSelect_Component_Selected( bestSelector, test, view, GlobalSelectionSystem().ComponentMode() ); /* drag components */
 			for ( Selectable* s : bestSelector.best() ){
@@ -4353,7 +4382,126 @@ void setSelected( bool select ){
 bool isSelected() const {
 	return m_dragSelected || m_selected || m_selected2 || m_newBrush || m_extrudeFaces;
 }
+
+void render( Renderer& renderer, const VolumeTest& volume, const Matrix4& pivot2world ){
+	if( !m_polygons.empty() ){
+		renderer.SetState( m_state_wire, Renderer::eWireframeOnly );
+		renderer.SetState( m_state_wire, Renderer::eFullMaterials );
+		if( m_polygons.back().size() == 1 ){
+			Pivot2World_viewplaneSpace( m_renderCircle.m_viewplaneSpace, matrix4_translation_for_vec3( m_polygons.back()[0] ), volume.GetModelview(), volume.GetProjection(), volume.GetViewport() );
+			renderer.addRenderable( m_renderCircle, m_renderCircle.m_viewplaneSpace );
+		}
+		else{
+			renderer.addRenderable( m_renderPoly, g_matrix4_identity );
+		}
+	}
+}
+void highlight( const View& view ){
+	SelectionVolume test( view );
+	std::vector<std::vector<Vector3>> polygons;
+	/* conditions structure respects one in testSelect() */
+	if( g_modifiers == ( c_modifierAlt | c_modifierControl )
+		&& GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive
+		&& ( GlobalSelectionSystem().countSelected() != 0 || !g_SelectedFaceInstances.empty() ) ){ // extrude
+		Plane3 plane( 0, 0, 0, 0 );
+		Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+		Scene_forEachBrush_bestPlane( test, plane, intersectionPoint );
+
+		if( plane3_valid( plane ) ){
+			auto gatherPolygonsByPlane = [plane, &polygons]( BrushInstance& brushInstance ){
+				if( brushInstance.isSelected() || brushInstance.isSelectedComponents() )
+					brushInstance.gatherPolygonsByPlane( plane, polygons, false );
+			};
+			Scene_forEachVisibleBrush( GlobalSceneGraph(), gatherPolygonsByPlane );
+		}
+	}
+	else if( GlobalSelectionSystem().countSelected() != 0 ){
+		if ( GlobalSelectionSystem().Mode() == SelectionSystem::ePrimitive ){
+			if( g_modifiers == c_modifierAlt ){
+				if( view.fill() ){ // alt resize
+					Plane3 plane( 0, 0, 0, 0 );
+					Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+					Scene_forEachPlaneSelectable_bestPlane( test, plane, intersectionPoint );
+
+					if( plane3_valid( plane ) ){
+						auto gatherPolygonsByPlane = [plane, &polygons]( PlaneSelectable& planeSelectable ){
+							planeSelectable.gatherPolygonsByPlane( plane, polygons );
+						};
+						Scene_forEachVisibleSelectedPlaneselectable( gatherPolygonsByPlane );
+					}
+
+				}
+				else{ // alt vertices drag
+					SelectionIntersection intersection;
+					const SelectionSystem::EComponentMode mode = SelectionSystem::eVertex;
+					auto gatherComponentsHighlight = [&polygons, &intersection, &test, mode]( const ComponentSelectionTestable& componentSelectionTestable ){
+						componentSelectionTestable.gatherComponentsHighlight( polygons, intersection, test, mode );
+					};
+					Scene_forEachVisibleSelectedComponentSelectionTestable( gatherComponentsHighlight );
+
+					if( polygons.empty() ){
+						Plane3 plane( 0, 0, 0, 0 );
+						Vector3 intersectionPoint( FLT_MAX, FLT_MAX, FLT_MAX );
+						Scene_forEachSelectedBrush_bestPlane( test, plane, intersectionPoint );
+
+						if( plane3_valid( plane ) ){
+							auto gatherPolygonsByPlane = [plane, &polygons]( BrushInstance& brushInstance ){
+								brushInstance.gatherPolygonsByPlane( plane, polygons );
+							};
+							Scene_forEachVisibleSelectedBrush( gatherPolygonsByPlane );
+						}
+					}
+				}
+			}
+		}
+		else{ // components
+			SelectionIntersection intersection;
+			const SelectionSystem::EComponentMode mode = GlobalSelectionSystem().ComponentMode();
+			auto gatherComponentsHighlight = [&polygons, &intersection, &test, mode]( const ComponentSelectionTestable& componentSelectionTestable ){
+				componentSelectionTestable.gatherComponentsHighlight( polygons, intersection, test, mode );
+			};
+			Scene_forEachVisibleSelectedComponentSelectionTestable( gatherComponentsHighlight );
+		}
+	}
+
+	if( m_polygons != polygons ){
+		m_polygons.swap( polygons );
+		SceneChangeNotify();
+	}
+}
+private:
+std::vector<std::vector<Vector3>> m_polygons;
+struct RenderablePoly: public OpenGLRenderable
+{
+	const std::vector<std::vector<Vector3>>& m_polygons;
+
+	RenderablePoly( const std::vector<std::vector<Vector3>>& polygons ) : m_polygons( polygons ){
+	}
+	void render( RenderStateFlags state ) const {
+		glPolygonOffset( -2, -2 );
+		for( const auto& poly : m_polygons ){
+			glVertexPointer( 3, GL_FLOAT, sizeof( m_polygons[0][0] ), poly[0].data() );
+			glDrawArrays( GL_POLYGON, 0, GLsizei( poly.size() ) );
+		}
+		glPolygonOffset( -1, 1 ); // restore default
+	}
 };
+RenderablePoly m_renderPoly{ m_polygons };
+struct RenderableCircle : public OpenGLRenderable
+{
+	Array<PointVertex> m_vertices;
+	Matrix4 m_viewplaneSpace;
+
+	RenderableCircle( std::size_t size ) : m_vertices( size ){
+	}
+	void render( RenderStateFlags state ) const {
+		glVertexPointer( 3, GL_FLOAT, sizeof( PointVertex ), &m_vertices.data()->vertex );
+		glDrawArrays( GL_LINE_LOOP, 0, GLsizei( m_vertices.size() ) );
+	}
+};
+RenderableCircle m_renderCircle;
+};
+Shader* DragManipulator::m_state_wire;
 
 
 
@@ -6874,7 +7022,11 @@ bool SelectManipulator( const View& view, const float device_point[2], const flo
 void HighlightManipulator( const View& view, const float device_point[2], const float device_epsilon[2] ){
 	Manipulatable::assign_static( view, device_point, device_epsilon ); //this b4 m_manipulator calls!
 
-	if ( ( !nothingSelected() && transformOrigin_isTranslatable() ) || ManipulatorMode() == eClip || ManipulatorMode() == eBuild || ManipulatorMode() == eUV ) {
+	if ( ( !nothingSelected() && transformOrigin_isTranslatable() )
+		|| ManipulatorMode() == eClip
+		|| ManipulatorMode() == eBuild
+		|| ManipulatorMode() == eUV
+		|| ManipulatorMode() == eDrag ) {
 #if defined ( DEBUG_SELECTION )
 		g_render_clipped.destroy();
 #endif
@@ -6899,6 +7051,9 @@ void HighlightManipulator( const View& view, const float device_point[2], const 
 		}
 		else if( ManipulatorMode() == eUV ){
 			m_manipulator->testSelect( scissored, GetPivot2World() );
+		}
+		else if( ManipulatorMode() == eDrag ){
+			m_drag_manipulator.highlight( scissored );
 		}
 	}
 }
@@ -7358,12 +7513,14 @@ static void constructStatic(){
 	UVManipulator::m_state_point = GlobalShaderCache().capture( "$BIGPOINT" );
 	RenderablePivot::StaticShader::instance() = GlobalShaderCache().capture( "$PIVOT" );
 	UVManipulator::m_state_line = GlobalShaderCache().capture( "$BLENDLINE" );
+	DragManipulator::m_state_wire = GlobalShaderCache().capture( "$PLANE_WIRE_OVERLAY" );
 }
 
 static void destroyStatic(){
   #if defined( DEBUG_SELECTION )
 	GlobalShaderCache().release( "$DEBUG_CLIPPED" );
   #endif
+	GlobalShaderCache().release( "$PLANE_WIRE_OVERLAY" );
 	GlobalShaderCache().release( "$BLENDLINE" );
 	GlobalShaderCache().release( "$PIVOT" );
 	GlobalShaderCache().release( "$BIGPOINT" );
@@ -7805,7 +7962,11 @@ AABB RadiantSelectionSystem::getSelectionAABB() const {
 
 void RadiantSelectionSystem::renderSolid( Renderer& renderer, const VolumeTest& volume ) const {
 	//if(view->TestPoint(m_object_pivot))
-	if ( !nothingSelected() || ManipulatorMode() == eClip || ManipulatorMode() == eBuild || ManipulatorMode() == eUV ) {
+	if ( !nothingSelected()
+		|| ManipulatorMode() == eClip
+		|| ManipulatorMode() == eBuild
+		|| ManipulatorMode() == eUV
+		|| ManipulatorMode() == eDrag ) {
 		renderer.Highlight( Renderer::ePrimitive, false );
 		renderer.Highlight( Renderer::eFace, false );
 

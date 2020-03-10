@@ -40,6 +40,7 @@
 
 class Selector;
 class SelectionTest;
+class SelectionIntersection;
 
 class ComponentSelectionTestable
 {
@@ -49,6 +50,7 @@ STRING_CONSTANT( Name, "ComponentSelectionTestable" );
 virtual bool isSelectedComponents() const = 0;
 virtual void setSelectedComponents( bool select, SelectionSystem::EComponentMode mode ) = 0;
 virtual void testSelectComponents( Selector& selector, SelectionTest& test, SelectionSystem::EComponentMode mode ) = 0;
+virtual void gatherComponentsHighlight( std::vector<std::vector<Vector3>>& polygons, SelectionIntersection& intersection, SelectionTest& test, SelectionSystem::EComponentMode mode ) const = 0;
 };
 
 typedef std::function<void( const Vector3& )> Vector3Callback;
