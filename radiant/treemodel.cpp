@@ -961,9 +961,7 @@ static gboolean graph_tree_model_iter_nth_child( GtkTreeModel *tree_model, GtkTr
 	ASSERT_MESSAGE( tree_model != 0, "RUNTIME ERROR" );
 	GraphTreeNode& node = ( parent == 0 ) ? *GRAPH_TREE_MODEL( tree_model )->m_graph : *( *graph_iterator_read_tree_iter( parent ) ).second;
 	if ( static_cast<std::size_t>( n ) < node.size() ) {
-		GraphTreeNode::iterator i = node.begin();
-		std::advance( i, n );
-		graph_iterator_write_tree_iter( i, iter );
+		graph_iterator_write_tree_iter( std::next( node.begin(), n ), iter );
 		return TRUE;
 	}
 

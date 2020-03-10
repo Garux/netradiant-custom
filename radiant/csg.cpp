@@ -224,9 +224,7 @@ void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, brush_vector_t
 
 	for( Brush::const_iterator i0 = brush0.begin(); i0 != brush0.end(); ++i0 ){
 		const Face& face0 = *( *i0 );
-		Brush::const_iterator i2 = brush2.begin();
-		std::advance( i2, std::distance( brush0.begin(), i0 ) );
-		const Face& face2 = *( *i2 );
+		const Face& face2 = *( *std::next( brush2.begin(), std::distance( brush0.begin(), i0 ) ) );
 		if( !m_settings.faceExcluded( face0 ) ) {
 			if( face0.contributes() ) {
 				m_out.push_back( new Brush( brush0 ) );

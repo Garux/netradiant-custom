@@ -865,9 +865,7 @@ void Construct( const Matrix4& device2manip, const float x, const float y, const
 
 			for( const WindingVertex& vertex : face->getWinding() ){
 				if( vertex.adjacent != c_brush_maxFaces ){
-					Brush::const_iterator faceIt = source.m_brushInstance->getBrush().begin();
-					std::advance( faceIt, vertex.adjacent );
-					f = brush->addFace( **faceIt );
+					f = brush->addFace( **std::next( source.m_brushInstance->getBrush().begin(), vertex.adjacent ) );
 
 					const DoubleVector3 cross = vector3_cross( f->plane3_().normal(), face->plane3_().normal() );
 					f->getPlane().copy( vertex.vertex, vertex.vertex + cross * 64, vertex.vertex + face->plane3_().normal() * 64 );
@@ -926,9 +924,7 @@ void Transform( const Matrix4& manip2object, const Matrix4& device2manip, const 
 
 					for( const WindingVertex& vertex : face->getWinding() ){
 						if( vertex.adjacent != c_brush_maxFaces ){
-							Brush::const_iterator faceIt = brush0.begin();
-							std::advance( faceIt, vertex.adjacent );
-							brush->addFace( **faceIt );
+							brush->addFace( **std::next( brush0.begin(), vertex.adjacent ) );
 						}
 					}
 				}
@@ -993,9 +989,7 @@ void offsetFaces( const ExtrudeSource& source, Brush& brush, const float offset 
 	for( Brush::const_iterator i0 = brush0.begin(); i0 != brush0.end(); ++i0 ){
 		const Face& face0 = *( *i0 );
 		if( !source.faceExcluded( &face0 ) ){
-			Brush::const_iterator i = brush.begin();
-			std::advance( i, std::distance( brush0.begin(), i0 ) );
-			Face& face = *( *i );
+			Face& face = *( *std::next( brush.begin(), std::distance( brush0.begin(), i0 ) ) );
 			face.getPlane().offset( offset );
 			face.planeChanged();
 		}
@@ -1009,9 +1003,7 @@ void brush_extrudeDiag( const Brush& brush0, const Brush& brush2, ExtrudeSource&
 
 	for( Brush::const_iterator i0 = brush0.begin(); i0 != brush0.end(); ++i0 ){
 		const Face& face0 = *( *i0 );
-		Brush::const_iterator i2 = brush2.begin();
-		std::advance( i2, std::distance( brush0.begin(), i0 ) );
-		const Face& face2 = *( *i2 );
+		const Face& face2 = *( *std::next( brush2.begin(), std::distance( brush0.begin(), i0 ) ) );
 
 		auto infaceoutbrush_iter = source.faceFind( &face0 ); // brush0 = source.m_brushInstance->getBrush()
 		if( infaceoutbrush_iter != source.m_faces.end() ) {
