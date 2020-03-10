@@ -227,12 +227,10 @@ void accelerator_edit_button_clicked( GtkButton *btn, gpointer dialogptr ){
 	GtkTreeSelection *sel = gtk_tree_view_get_selection( dialog.m_list );
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	if ( !gtk_tree_selection_get_selected( sel, &model, &iter ) ) {
-		return;
+	if ( gtk_tree_selection_get_selected( sel, &model, &iter ) ) {
+		dialog.stopWaitForKey();
+		dialog.startWaitForKey( iter, model );
 	}
-
-	dialog.stopWaitForKey();
-	dialog.startWaitForKey( iter, model );
 }
 
 gboolean accelerator_tree_butt_press( GtkWidget* widget, GdkEventButton* event, gpointer dialogptr ){
@@ -273,18 +271,14 @@ public:
 				// empty the cell of the key binds dialog
 				GtkTreeIter i;
 				if ( gtk_tree_model_get_iter_first( model, &i ) ) {
-					for (;; )
-					{
+					do{
 						gchar* thisName = nullptr;
 						gtk_tree_model_get( model, &i, 0, &thisName, -1 );
 						if ( !strcmp( thisName, name ) ) {
 							gtk_list_store_set( GTK_LIST_STORE( model ), &i, 1, "", -1 );
 						}
 						g_free( thisName );
-						if ( !gtk_tree_model_iter_next( model, &i ) ) {
-							break;
-						}
-					}
+					} while( gtk_tree_model_iter_next( model, &i ) );
 				}
 			}
 			else if ( r == eIDCANCEL ) {
@@ -377,6 +371,47 @@ void accelerator_reset_button_clicked( GtkButton *btn, gpointer dialogptr ){
 	GtkTreeIter iter;
 	if ( gtk_tree_selection_get_selected( sel, &model, &iter ) ) {
 		accelerator_alter( model, &iter, nullptr, gtk_widget_get_toplevel( GTK_WIDGET( btn ) ) );
+	}
+}
+
+void accelerator_reset_all_button_clicked( GtkButton *btn, gpointer dialogptr ){
+	command_list_dialog_t &dialog = *(command_list_dialog_t *) dialogptr;
+
+	if ( dialog.stopWaitForKey() ) // just unhighlight, user wanted to cancel
+		return;
+
+	for ( auto& pair : g_shortcuts ){ // at first disconnect all to avoid conflicts during connecting
+		if( !( pair.second.accelerator == pair.second.accelerator_default ) ){ // can just do this for all, but it breaks menu accelerator labels :b
+			// clear the ACTUAL accelerator
+			disconnect_accelerator( pair.first.c_str() );
+		}
+	}
+	for ( auto& pair : g_shortcuts ){
+		if( !( pair.second.accelerator == pair.second.accelerator_default ) ){
+			pair.second.accelerator = pair.second.accelerator_default;
+			// set the ACTUAL accelerator
+			connect_accelerator( pair.first.c_str() );
+		}
+	}
+	// update tree view
+	GtkTreeModel* model = gtk_tree_view_get_model( dialog.m_list );
+	if( model ){
+		GtkTreeIter i;
+		if ( gtk_tree_model_get_iter_first( model, &i ) ) {
+			do{
+				gchar* commandName = nullptr;
+				gtk_tree_model_get( model, &i, 0, &commandName, -1 );
+
+				Shortcuts::iterator thisShortcutIterator = g_shortcuts.find( commandName );
+				if ( thisShortcutIterator != g_shortcuts.end() ) {
+					// write into the cell
+					StringOutputStream modifiers;
+					modifiers << thisShortcutIterator->second.accelerator;
+					gtk_list_store_set( GTK_LIST_STORE( model ), &i, 1, modifiers.c_str(), -1 );
+				}
+				g_free( commandName );
+			} while( gtk_tree_model_iter_next( model, &i ) );
+		}
 	}
 }
 
@@ -475,6 +510,9 @@ void DoCommandListDlg(){
 
 		GtkButton* resetbutton = create_dialog_button( "Reset", (GCallback) accelerator_reset_button_clicked, &dialog );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( resetbutton ), FALSE, FALSE, 0 );
+
+		GtkButton* resetallbutton = create_dialog_button( "Reset All", (GCallback) accelerator_reset_all_button_clicked, &dialog );
+		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( resetallbutton ), FALSE, FALSE, 0 );
 
 		GtkWidget *spacer = gtk_image_new();
 		gtk_widget_show( spacer );
