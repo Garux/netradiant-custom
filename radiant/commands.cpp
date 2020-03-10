@@ -294,6 +294,41 @@ public:
 		}
 	}
 };
+static void accelerator_alter( GtkTreeModel *model, GtkTreeIter* iter, GdkEventKey *event, GtkWidget *parentWidget ){
+	// 7. find the name of the accelerator
+	gchar* commandName = nullptr;
+	gtk_tree_model_get( model, iter, 0, &commandName, -1 );
+
+	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find( commandName );
+	if ( thisShortcutIterator == g_shortcuts.end() ) {
+		globalErrorStream() << "commandName " << makeQuoted( commandName ) << " not found in g_shortcuts.\n";
+		g_free( commandName );
+		return;
+	}
+
+	// 8. build an Accelerator
+	const Accelerator newAccel( event? accelerator_for_event_key( event ) : thisShortcutIterator->second.accelerator_default );
+
+	// 8. verify the key is still free, show a dialog to ask what to do if not
+	VerifyAcceleratorNotTaken verify_visitor( commandName, newAccel, parentWidget, model );
+	GlobalShortcuts_foreach( verify_visitor );
+	if ( verify_visitor.allow ) {
+		// clear the ACTUAL accelerator first
+		disconnect_accelerator( commandName );
+
+		thisShortcutIterator->second.accelerator = newAccel;
+
+		// write into the cell
+		StringOutputStream modifiers;
+		modifiers << newAccel;
+		gtk_list_store_set( GTK_LIST_STORE( model ), iter, 1, modifiers.c_str(), -1 );
+
+		// set the ACTUAL accelerator too!
+		connect_accelerator( commandName );
+	}
+
+	g_free( commandName );
+}
 gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gpointer dialogptr ){
 	command_list_dialog_t &dialog = *(command_list_dialog_t *) dialogptr;
 
@@ -326,43 +361,23 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 	}
 #endif
 
-	// 7. find the name of the accelerator
-	gchar* commandName = nullptr;
-	gtk_tree_model_get( dialog.m_model, &dialog.m_command_iter, 0, &commandName, -1 );
-
-	Shortcuts::iterator thisShortcutIterator = g_shortcuts.find( commandName );
-	if ( thisShortcutIterator == g_shortcuts.end() ) {
-		globalErrorStream() << "commandName " << makeQuoted( commandName ) << " not found in g_shortcuts.\n";
-		dialog.stopWaitForKey();
-		g_free( commandName );
-		return TRUE;
-	}
-
-	// 8. build an Accelerator
-	const Accelerator newAccel( accelerator_for_event_key( event ) );
-
-	// 8. verify the key is still free, show a dialog to ask what to do if not
-	VerifyAcceleratorNotTaken verify_visitor( commandName, newAccel, widget, dialog.m_model );
-	GlobalShortcuts_foreach( verify_visitor );
-	if ( verify_visitor.allow ) {
-		// clear the ACTUAL accelerator first
-		disconnect_accelerator( commandName );
-
-		thisShortcutIterator->second.accelerator = newAccel;
-
-		// write into the cell
-		StringOutputStream modifiers;
-		modifiers << newAccel;
-		gtk_list_store_set( GTK_LIST_STORE( dialog.m_model ), &dialog.m_command_iter, 1, modifiers.c_str(), -1 );
-
-		// set the ACTUAL accelerator too!
-		connect_accelerator( commandName );
-	}
-
+	accelerator_alter( dialog.m_model, &dialog.m_command_iter, event, widget );
 	dialog.stopWaitForKey();
-	g_free( commandName );
-
 	return TRUE;
+}
+
+void accelerator_reset_button_clicked( GtkButton *btn, gpointer dialogptr ){
+	command_list_dialog_t &dialog = *(command_list_dialog_t *) dialogptr;
+
+	if ( dialog.stopWaitForKey() ) // just unhighlight, user wanted to cancel
+		return;
+
+	GtkTreeSelection *sel = gtk_tree_view_get_selection( dialog.m_list );
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	if ( gtk_tree_selection_get_selected( sel, &model, &iter ) ) {
+		accelerator_alter( model, &iter, nullptr, gtk_widget_get_toplevel( GTK_WIDGET( btn ) ) );
+	}
 }
 
 static gboolean mid_search_func( GtkTreeModel* model, gint column, const gchar* key, GtkTreeIter* iter, gpointer search_data ) {
@@ -457,6 +472,9 @@ void DoCommandListDlg(){
 
 		GtkButton* clearbutton = create_dialog_button( "Clear", (GCallback) accelerator_clear_button_clicked, &dialog );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( clearbutton ), FALSE, FALSE, 0 );
+
+		GtkButton* resetbutton = create_dialog_button( "Reset", (GCallback) accelerator_reset_button_clicked, &dialog );
+		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( resetbutton ), FALSE, FALSE, 0 );
 
 		GtkWidget *spacer = gtk_image_new();
 		gtk_widget_show( spacer );
