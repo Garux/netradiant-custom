@@ -1045,6 +1045,9 @@ static picoModel_t *_ase_load( PM_PARAMS_LOAD ){
 							if ( name == NULL ) {
 								_ase_error_return( "Missing material map bitmap name" );
 							}
+							else if( !_pico_stricmp( name, "none" ) ){ // standard empty bitmap name
+								name = "";
+							}
 							mapname = _pico_alloc( strlen( name ) + 1 );
 							strcpy( mapname, name );
 							/* skip rest and continue with next token */
