@@ -4484,6 +4484,9 @@ void FloodlightIlluminateLightmap( rawLightmap_t *lm ){
 			continue;
 		}
 
+		if( lm->styles[lightmapNum] != LS_NORMAL && lm->styles[lightmapNum] != LS_NONE ) // isStyleLight
+			continue;
+
 		/* apply floodlight to each luxel */
 		for ( y = 0; y < lm->sh; y++ )
 		{
