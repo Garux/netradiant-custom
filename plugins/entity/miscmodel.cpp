@@ -50,6 +50,87 @@
 
 #include "entity.h"
 
+#include "modelskinkey.h"
+
+#include "modelskin.h"
+class RemapKeysObserver : public Entity::Observer, public ModelSkin
+{
+	class RemapKey
+	{
+		const Callback& m_skinChangedCallback;
+		public:
+		CopiedString m_from;
+		CopiedString m_to;
+		RemapKey( const Callback& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
+		}
+		void remapKeyChanged( const char* value ){
+			const char* split = strchr( value, ';' );
+			if( split != nullptr ){
+				m_from = { value, split };
+				StringOutputStream stream( 64 );
+				stream << PathCleaned( split + 1 );
+				m_to = stream.c_str();
+			}
+			else{
+				m_from = "";
+				m_to = "";
+			}
+			m_skinChangedCallback();
+		}
+		typedef MemberCaller1<RemapKey, const char*, &RemapKey::remapKeyChanged> remapKeyChangedCaller;
+	};
+	typedef std::multimap<CopiedString, RemapKey> RemapKeys;
+	RemapKeys m_remapKeys;
+	const Callback m_skinChangedCallback;
+
+public:
+	RemapKeysObserver() = delete;
+	RemapKeysObserver( const RemapKeysObserver& ) = delete;
+	RemapKeysObserver operator=( const RemapKeysObserver& ) = delete;
+	RemapKeysObserver( const Callback& skinChangedCallback ) : m_skinChangedCallback( skinChangedCallback ){
+	}
+
+void insert( const char* key, EntityKeyValue& value ) override {
+	if( string_equal_prefix( key, "_remap" ) ){
+		value.attach( RemapKey::remapKeyChangedCaller( m_remapKeys.emplace( key, m_skinChangedCallback )->second ) );
+	}
+}
+void erase( const char* key, EntityKeyValue& value ) override {
+	if( string_equal_prefix( key, "_remap" ) ){
+		for( RemapKeys::iterator i = m_remapKeys.find( key ); i != m_remapKeys.end() && string_equal( ( *i ).first.c_str(), key ); ){
+			value.detach( RemapKey::remapKeyChangedCaller( i->second ) );
+			i = m_remapKeys.erase( i );
+		}
+	}
+}
+
+void attach( ModuleObserver& observer ) override {
+}
+void detach( ModuleObserver& observer ) override {
+}
+bool realised() const override {
+	return true;
+}
+const char* getRemap( const char* name ) const override { // this logic is supposed to respect one in q3map2
+	const char* to = "";
+	std::size_t fromlen = 0;
+	for( const auto& pair : m_remapKeys ){
+		const RemapKey& remapKey = pair.second;
+		if( remapKey.m_from == "*" && fromlen == 0 ){ // only globbing, if no respective match
+			to = remapKey.m_to.c_str();
+		}
+		else if( string_equal_suffix_nocase( name, remapKey.m_from.c_str() ) && strlen( remapKey.m_from.c_str() ) > fromlen ){ // longer match has priority
+			to = remapKey.m_to.c_str();
+			fromlen = strlen( remapKey.m_from.c_str() );
+		}
+	}
+	return to;
+}
+void forEachRemap( const SkinRemapCallback& callback ) const override {
+}
+};
+
+
 const char EXCLUDE_NAME[] = "misc_model";
 
 class MiscModel :
@@ -57,6 +138,7 @@ class MiscModel :
 {
 EntityKeyValues m_entity;
 KeyObserverMap m_keyObservers;
+RemapKeysObserver m_remapKeysObserver;
 MatrixTransform m_transform;
 
 OriginKey m_originKey;
@@ -114,10 +196,20 @@ void scaleChanged(){
 	updateTransform();
 }
 typedef MemberCaller<MiscModel, &MiscModel::scaleChanged> ScaleChangedCaller;
+
+void skinChanged(){
+	scene::Node* node = m_model.getNode();
+	if ( node != 0 ) {
+		Node_modelSkinChanged( *node );
+	}
+}
+typedef MemberCaller<MiscModel, &MiscModel::skinChanged> SkinChangedCaller;
+
 public:
 
 MiscModel( EntityClass* eclass, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
 	m_entity( eclass ),
+	m_remapKeysObserver( SkinChangedCaller( *this ) ),
 	m_originKey( OriginChangedCaller( *this ) ),
 	m_origin( ORIGINKEY_IDENTITY ),
 	m_anglesKey( AnglesChangedCaller( *this ) ),
@@ -134,6 +226,7 @@ MiscModel( EntityClass* eclass, scene::Node& node, const Callback& transformChan
 }
 MiscModel( const MiscModel& other, scene::Node& node, const Callback& transformChanged, const Callback& evaluateTransform ) :
 	m_entity( other.m_entity ),
+	m_remapKeysObserver( SkinChangedCaller( *this ) ),
 	m_originKey( OriginChangedCaller( *this ) ),
 	m_origin( ORIGINKEY_IDENTITY ),
 	m_anglesKey( AnglesChangedCaller( *this ) ),
@@ -155,10 +248,12 @@ void instanceAttach( const scene::Path& path ){
 		m_filter.instanceAttach();
 		m_entity.instanceAttach( path_find_mapfile( path.begin(), path.end() ) );
 		m_entity.attach( m_keyObservers );
+		m_entity.attach( m_remapKeysObserver );
 	}
 }
 void instanceDetach( const scene::Path& path ){
 	if ( --m_instanceCounter.m_count == 0 ) {
+		m_entity.detach( m_remapKeysObserver );
 		m_entity.detach( m_keyObservers );
 		m_entity.instanceDetach( path_find_mapfile( path.begin(), path.end() ) );
 		m_filter.instanceDetach();
@@ -183,6 +278,9 @@ Nameable& getNameable(){
 }
 TransformNode& getTransformNode(){
 	return m_transform;
+}
+ModelSkin& getModelSkin(){
+	return m_remapKeysObserver;
 }
 
 void attach( scene::Traversable::Observer* observer ){
@@ -328,6 +426,7 @@ TypeCasts(){
 	NodeContainedCast<MiscModelNode, Entity>::install( m_casts );
 	NodeContainedCast<MiscModelNode, Nameable>::install( m_casts );
 	NodeContainedCast<MiscModelNode, Namespaced>::install( m_casts );
+	NodeContainedCast<MiscModelNode, ModelSkin>::install( m_casts );
 }
 NodeTypeCastTable& get(){
 	return m_casts;
@@ -366,6 +465,9 @@ Nameable& get( NullType<Nameable>){
 }
 Namespaced& get( NullType<Namespaced>){
 	return m_contained.getNamespaced();
+}
+ModelSkin& get( NullType<ModelSkin>){
+	return m_contained.getModelSkin();
 }
 
 MiscModelNode( EntityClass* eclass ) :
