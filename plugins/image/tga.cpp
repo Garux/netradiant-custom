@@ -96,68 +96,83 @@ void image_fix_fully_transparent_alpha( RGBAImage& image ){
 		pixel->alpha = 0xff;
 }
 
-inline void istream_read_gray( PointerInputStream& istream, RGBAPixel& pixel ){
-	istream.read( &pixel.blue, 1 );
-	pixel.red = pixel.green = pixel.blue;
+template<std::size_t BYTES>
+inline void istream_read_pixel( PointerInputStream& istream, RGBAPixel& pixel );
+template<>
+inline void istream_read_pixel<1>( PointerInputStream& istream, RGBAPixel& pixel ){
+	pixel.red = pixel.green = pixel.blue = istream_read_byte( istream );
 	pixel.alpha = 0xff;
 }
-
-inline void istream_read_rgb( PointerInputStream& istream, RGBAPixel& pixel ){
+template<>
+inline void istream_read_pixel<3>( PointerInputStream& istream, RGBAPixel& pixel ){
 	istream.read( &pixel.blue, 1 );
 	istream.read( &pixel.green, 1 );
 	istream.read( &pixel.red, 1 );
 	pixel.alpha = 0xff;
 }
-
-inline void istream_read_rgba( PointerInputStream& istream, RGBAPixel& pixel ){
+template<>
+inline void istream_read_pixel<4>( PointerInputStream& istream, RGBAPixel& pixel ){
 	istream.read( &pixel.blue, 1 );
 	istream.read( &pixel.green, 1 );
 	istream.read( &pixel.red, 1 );
 	istream.read( &pixel.alpha, 1 );
 }
 
-class TargaDecodeGrayPixel
-{
-public:
-void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
-	istream_read_gray( istream, pixel );
+
+template<std::size_t BYTES>
+inline void istream_read_paletted( PointerInputStream& istream, RGBAPixel& pixel, const byte* colormap );
+template<>
+inline void istream_read_paletted<3>( PointerInputStream& istream, RGBAPixel& pixel, const byte* colormap ){
+	const byte* color = colormap + istream_read_byte( istream ) * 3;
+	pixel.blue = *color++;
+	pixel.green = *color++;
+	pixel.red = *color;
+	pixel.alpha = 0xff;
 }
+template<>
+inline void istream_read_paletted<4>( PointerInputStream& istream, RGBAPixel& pixel, const byte* colormap ){
+	const byte* color = colormap + istream_read_byte( istream ) * 4;
+	pixel.blue = *color++;
+	pixel.green = *color++;
+	pixel.red = *color++;
+	pixel.alpha = *color;
+}
+
+
+template<std::size_t BYTES>
+class TargaDecodePalettedPixel
+{
+	const byte* m_colormap;
+public:
+	TargaDecodePalettedPixel( const byte* colormap ) : m_colormap( colormap ){
+	}
+	void operator()( PointerInputStream& istream, RGBAPixel& pixel ) const {
+		istream_read_paletted<BYTES>( istream, pixel, m_colormap );
+	}
 };
 
-template<typename Flip>
-void targa_decode_grayscale( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
-	TargaDecodeGrayPixel decode;
+template<typename Flip, std::size_t BYTES>
+void targa_decode_paletted( PointerInputStream& istream, RGBAImage& image, const Flip& flip, const byte* colormap ){
+	TargaDecodePalettedPixel<BYTES> decode( colormap );
 	image_decode( istream, decode, image, flip );
 }
 
-class TargaDecodeRGBPixel
+
+template<std::size_t BYTES>
+class TargaDecodePixel
 {
 public:
-void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
-	istream_read_rgb( istream, pixel );
+void operator()( PointerInputStream& istream, RGBAPixel& pixel ) const {
+	istream_read_pixel<BYTES>( istream, pixel );
 }
 };
 
-template<typename Flip>
-void targa_decode_rgb( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
-	TargaDecodeRGBPixel decode;
+template<typename Flip, std::size_t BYTES>
+void targa_decode( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
+	TargaDecodePixel<BYTES> decode;
 	image_decode( istream, decode, image, flip );
 }
 
-class TargaDecodeRGBAPixel
-{
-public:
-void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
-	istream_read_rgba( istream, pixel );
-}
-};
-
-template<typename Flip>
-void targa_decode_rgba( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
-	TargaDecodeRGBAPixel decode;
-	image_decode( istream, decode, image, flip );
-	image_fix_fully_transparent_alpha( image );
-}
 
 typedef byte TargaPacket;
 typedef byte TargaPacketSize;
@@ -175,13 +190,15 @@ inline TargaPacketSize targa_packet_size( const TargaPacket& packet ){
 }
 
 
-class TargaDecodeGrayPixelRLE
+template<typename PixelReadFunctor>
+class TargaDecodePixelRLE
 {
 TargaPacketSize m_packetSize;
 RGBAPixel m_pixel;
 TargaPacket m_packet;
+const PixelReadFunctor& m_pixelRead;
 public:
-TargaDecodeGrayPixelRLE() : m_packetSize( 0 ){
+TargaDecodePixelRLE( const PixelReadFunctor& pixelRead ) : m_packetSize( 0 ), m_pixelRead( pixelRead ){
 }
 void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
 	if ( m_packetSize == 0 ) {
@@ -189,7 +206,7 @@ void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
 		m_packetSize = targa_packet_size( m_packet );
 
 		if ( targa_packet_is_rle( m_packet ) ) {
-			istream_read_gray( istream, m_pixel );
+			m_pixelRead( istream, m_pixel );
 		}
 	}
 
@@ -198,91 +215,27 @@ void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
 	}
 	else
 	{
-		istream_read_gray( istream, pixel );
+		m_pixelRead( istream, pixel );
 	}
 
 	--m_packetSize;
 }
 };
 
-template<typename Flip>
-void targa_decode_rle_grayscale( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
-	TargaDecodeGrayPixelRLE decode;
+template<typename Flip, std::size_t BYTES>
+void targa_decode_rle( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
+	const TargaDecodePixel<BYTES> pixelRead;
+	TargaDecodePixelRLE<TargaDecodePixel<BYTES>> decode( pixelRead );
 	image_decode( istream, decode, image, flip );
 }
 
-class TargaDecodeRGBPixelRLE
-{
-TargaPacketSize m_packetSize;
-RGBAPixel m_pixel;
-TargaPacket m_packet;
-public:
-TargaDecodeRGBPixelRLE() : m_packetSize( 0 ){
-}
-void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
-	if ( m_packetSize == 0 ) {
-		targa_packet_read_istream( m_packet, istream );
-		m_packetSize = targa_packet_size( m_packet );
-
-		if ( targa_packet_is_rle( m_packet ) ) {
-			istream_read_rgb( istream, m_pixel );
-		}
-	}
-
-	if ( targa_packet_is_rle( m_packet ) ) {
-		pixel = m_pixel;
-	}
-	else
-	{
-		istream_read_rgb( istream, pixel );
-	}
-
-	--m_packetSize;
-}
-};
-
-template<typename Flip>
-void targa_decode_rle_rgb( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
-	TargaDecodeRGBPixelRLE decode;
+template<typename Flip, std::size_t BYTES>
+void targa_decode_paletted_rle( PointerInputStream& istream, RGBAImage& image, const Flip& flip, const byte* colormap ){
+	const TargaDecodePalettedPixel<BYTES> pixelRead( colormap );
+	TargaDecodePixelRLE<TargaDecodePalettedPixel<BYTES>> decode( pixelRead );
 	image_decode( istream, decode, image, flip );
 }
 
-class TargaDecodeRGBAPixelRLE
-{
-TargaPacketSize m_packetSize;
-RGBAPixel m_pixel;
-TargaPacket m_packet;
-public:
-TargaDecodeRGBAPixelRLE() : m_packetSize( 0 ){
-}
-void operator()( PointerInputStream& istream, RGBAPixel& pixel ){
-	if ( m_packetSize == 0 ) {
-		targa_packet_read_istream( m_packet, istream );
-		m_packetSize = targa_packet_size( m_packet );
-
-		if ( targa_packet_is_rle( m_packet ) ) {
-			istream_read_rgba( istream, m_pixel );
-		}
-	}
-
-	if ( targa_packet_is_rle( m_packet ) ) {
-		pixel = m_pixel;
-	}
-	else
-	{
-		istream_read_rgba( istream, pixel );
-	}
-
-	--m_packetSize;
-}
-};
-
-template<typename Flip>
-void targa_decode_rle_rgba( PointerInputStream& istream, RGBAImage& image, const Flip& flip ){
-	TargaDecodeRGBAPixelRLE decode;
-	image_decode( istream, decode, image, flip );
-	image_fix_fully_transparent_alpha( image );
-}
 
 struct TargaHeader
 {
@@ -291,6 +244,16 @@ struct TargaHeader
 	unsigned char colormap_size;
 	unsigned short x_origin, y_origin, width, height;
 	unsigned char pixel_size, attributes;
+
+	byte *colormap = nullptr;
+	void colormap_read( PointerInputStream& istream ){
+		const std::size_t size = colormap_size / 8 * colormap_length;
+		colormap = new byte[size];
+		istream.read( colormap, size );
+	}
+	~TargaHeader(){
+		delete[] colormap;
+	}
 };
 
 inline void targa_header_read_istream( TargaHeader& targa_header, PointerInputStream& istream ){
@@ -311,24 +274,11 @@ inline void targa_header_read_istream( TargaHeader& targa_header, PointerInputSt
 	if ( targa_header.id_length != 0 ) {
 		istream.seek( targa_header.id_length ); // skip TARGA image comment
 	}
-}
 
-template<typename Type>
-class ScopeDelete
-{
-Type* m_value;
-ScopeDelete( const ScopeDelete& );
-ScopeDelete& operator=( const ScopeDelete& );
-public:
-ScopeDelete( Type* value ) : m_value( value ){
+	if( ( targa_header.image_type == 1 || targa_header.image_type == 9 ) && targa_header.colormap_type == 1 ){
+		targa_header.colormap_read( istream );
+	}
 }
-~ScopeDelete(){
-	delete m_value;
-}
-Type* get_pointer() const {
-	return m_value;
-}
-};
 
 template<typename Flip>
 Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStream& istream, const Flip& flip ){
@@ -338,13 +288,14 @@ Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStrea
 		switch ( targa_header.pixel_size )
 		{
 		case 8:
-			targa_decode_grayscale( istream, *image, flip );
+			targa_decode<Flip, 1>( istream, *image, flip );
 			break;
 		case 24:
-			targa_decode_rgb( istream, *image, flip );
+			targa_decode<Flip, 3>( istream, *image, flip );
 			break;
 		case 32:
-			targa_decode_rgba( istream, *image, flip );
+			targa_decode<Flip, 4>( istream, *image, flip );
+			image_fix_fully_transparent_alpha( *image );
 			break;
 		default:
 			globalErrorStream() << "LoadTGA: illegal pixel_size '" << targa_header.pixel_size << "'\n";
@@ -356,16 +307,49 @@ Image* Targa_decodeImageData( const TargaHeader& targa_header, PointerInputStrea
 		switch ( targa_header.pixel_size )
 		{
 		case 8:
-			targa_decode_rle_grayscale( istream, *image, flip );
+			targa_decode_rle<Flip, 1>( istream, *image, flip );
 			break;
 		case 24:
-			targa_decode_rle_rgb( istream, *image, flip );
+			targa_decode_rle<Flip, 3>( istream, *image, flip );
 			break;
 		case 32:
-			targa_decode_rle_rgba( istream, *image, flip );
+			targa_decode_rle<Flip, 4>( istream, *image, flip );
+			image_fix_fully_transparent_alpha( *image );
 			break;
 		default:
 			globalErrorStream() << "LoadTGA: illegal pixel_size '" << targa_header.pixel_size << "'\n";
+			image->release();
+			return 0;
+		}
+	}
+	else if ( targa_header.image_type == 1 ) {
+		switch ( targa_header.colormap_size )
+		{
+		case 24:
+			targa_decode_paletted<Flip, 3>( istream, *image, flip, targa_header.colormap );
+			break;
+		case 32:
+			targa_decode_paletted<Flip, 4>( istream, *image, flip, targa_header.colormap );
+			image_fix_fully_transparent_alpha( *image );
+			break;
+		default:
+			globalErrorStream() << "LoadTGA: illegal colormap_size '" << targa_header.colormap_size << "'\n";
+			image->release();
+			return 0;
+		}
+	}
+	else if ( targa_header.image_type == 9 ) {
+		switch ( targa_header.colormap_size )
+		{
+		case 24:
+			targa_decode_paletted_rle<Flip, 3>( istream, *image, flip, targa_header.colormap );
+			break;
+		case 32:
+			targa_decode_paletted_rle<Flip, 4>( istream, *image, flip, targa_header.colormap );
+			image_fix_fully_transparent_alpha( *image );
+			break;
+		default:
+			globalErrorStream() << "LoadTGA: illegal colormap_size '" << targa_header.colormap_size << "'\n";
 			image->release();
 			return 0;
 		}
@@ -383,19 +367,31 @@ Image* LoadTGABuff( const byte* buffer ){
 
 	targa_header_read_istream( targa_header, istream );
 
-	if ( targa_header.image_type != 2 && targa_header.image_type != 10 && targa_header.image_type != 3 && targa_header.image_type != 11 ) {
+	if ( targa_header.image_type != 1 &&
+		targa_header.image_type != 2 &&
+		targa_header.image_type != 3 &&
+		targa_header.image_type != 9 &&
+		targa_header.image_type != 10 &&
+		targa_header.image_type != 11 ) {
 		globalErrorStream() << "LoadTGA: TGA type " << targa_header.image_type << " not supported\n";
-		globalErrorStream() << "LoadTGA: Only type 2 (RGB), 3 (gray), 10 (RGB), and 11 (gray) TGA images supported\n";
+		globalErrorStream() << "LoadTGA: Only uncompressed types: 1 (paletted), 2 (RGB), 3 (gray) and compressed: 9 (paletted), 10 (RGB), 11 (gray) of TGA images supported\n";
 		return 0;
 	}
 
-	if ( targa_header.colormap_type != 0 ) {
-		globalErrorStream() << "LoadTGA: colormaps not supported\n";
-		return 0;
+	if ( targa_header.image_type == 1 || targa_header.image_type == 9 ) {
+		if( targa_header.colormap_type != 1 ){
+			globalErrorStream() << "LoadTGA: only type 1 colormaps are supported\n";
+			return 0;
+		}
+		else if( targa_header.colormap_index != 0 ){
+			globalErrorStream() << "LoadTGA: colormap_index not supported\n";
+			return 0;
+		}
 	}
 
 	if ( ( ( targa_header.image_type == 2 || targa_header.image_type == 10 ) && targa_header.pixel_size != 32 && targa_header.pixel_size != 24 ) ||
-	     ( ( targa_header.image_type == 3 || targa_header.image_type == 11 ) && targa_header.pixel_size != 8 ) ) {
+		( ( targa_header.image_type == 3 || targa_header.image_type == 11 ) && targa_header.pixel_size != 8 ) ||
+		( ( targa_header.image_type == 1 || targa_header.image_type == 9 ) && targa_header.pixel_size != 8 ) ) {
 		globalErrorStream() << "LoadTGA: Only 32, 24 or 8 bit images supported\n";
 		return 0;
 	}
