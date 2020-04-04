@@ -1287,6 +1287,7 @@ void TextureBrowser_MouseWheel( TextureBrowser& textureBrowser, bool bUp ){
 	TextureBrowser_setOriginY( textureBrowser, originy );
 }
 
+#include "xml/xmltextags.h"
 XmlTagBuilder TagBuilder;
 
 enum

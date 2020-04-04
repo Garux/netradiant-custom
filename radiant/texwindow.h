@@ -22,10 +22,8 @@
 #if !defined( INCLUDED_TEXWINDOW_H )
 #define INCLUDED_TEXWINDOW_H
 
-#include "math/vector.h"
 #include "generic/callbackfwd.h"
 #include "signal/signalfwd.h"
-#include "xml/xmltextags.h"
 
 typedef struct _GtkWidget GtkWidget;
 
@@ -53,6 +51,8 @@ extern GtkWidget* g_page_textures;
 void TextureBrowser_exportTitle( const StringImportCallback& importer );
 typedef FreeCaller1<const StringImportCallback&, TextureBrowser_exportTitle> TextureBrowserExportTitleCaller;
 
+template<typename Element> class BasicVector3;
+typedef BasicVector3<float> Vector3;
 const Vector3& TextureBrowser_getBackgroundColour( TextureBrowser& textureBrowser );
 void TextureBrowser_setBackgroundColour( TextureBrowser& textureBrowser, const Vector3& colour );
 
