@@ -37,8 +37,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../mbspc/l_mem.h"
 #include "l_precomp.h"
 
-#define Q_stricmp	stricmp
-
 
 #if defined(QUAKE) && !defined(BSPC)
 #include "l_utils.h"
@@ -174,7 +172,7 @@ void PC_PushScript(source_t *source, script_t *script)
 
 	for (s = source->scriptstack; s; s = s->next)
 	{
-		if (!Q_stricmp(s->filename, script->filename))
+		if (!stricmp(s->filename, script->filename))
 		{
 			SourceError(source, "%s recursively included", script->filename);
 			return;
