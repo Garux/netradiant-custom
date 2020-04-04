@@ -46,7 +46,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define Com_Memcpy  memcpy
 #define Q_vsnprintf vsnprintf
 #define Com_sprintf sprintf
-#if defined __linux__
+#if defined ( __linux__ ) || defined ( __APPLE__ )
   #define stricmp strcasecmp
 #endif
 // _ML_ added end
