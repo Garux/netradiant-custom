@@ -672,6 +672,11 @@ void Exit(){
 #else
 #include <spawn.h>
 #endif
+// Apple may not provide the environ global variable
+#if defined(__APPLE__) && !defined(environ)
+	#include <crt_externs.h>
+	#define environ (*_NSGetEnviron())
+#endif
 void Radiant_Restart(){
 	ConfirmModified( "Restart Radiant" ); // user can choose to not save, it's ok
 
