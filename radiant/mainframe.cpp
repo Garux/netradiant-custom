@@ -671,11 +671,10 @@ void Exit(){
 #include <process.h>
 #else
 #include <spawn.h>
-#endif
-// Apple may not provide the environ global variable
-#if defined(__APPLE__) && !defined(environ)
-	#include <crt_externs.h>
-	#define environ (*_NSGetEnviron())
+/* According to the Single Unix Specification, environ is not
+ * in any system header, although unistd.h often declares it.
+ */
+extern char **environ;
 #endif
 void Radiant_Restart(){
 	ConfirmModified( "Restart Radiant" ); // user can choose to not save, it's ok
