@@ -756,7 +756,13 @@ void calculateRadii(){
 
 	intensity *= m_scale;
 
-	if ( spawnflags_linear( m_flags ) ) {
+	if( intensity < 0 ){ // prevent NaN
+		m_radii_transformed[0] = m_radii[0] =
+		m_radii_transformed[1] = m_radii[1] =
+		m_radii_transformed[2] = m_radii[2] = 0; // indicate negative intensity
+
+	}
+	else if ( spawnflags_linear( m_flags ) ) {
 		m_radii_transformed[0] = m_radii[0] = light_radius_linear( intensity, 1.0f ) / m_fade;
 		m_radii_transformed[1] = m_radii[1] = light_radius_linear( intensity, 48.0f ) / m_fade;
 		m_radii_transformed[2] = m_radii[2] = light_radius_linear( intensity, 255.0f ) / m_fade;
@@ -807,12 +813,16 @@ void flagsChanged( const char* value ){
 }
 typedef MemberCaller1<LightRadii, const char*, &LightRadii::flagsChanged> FlagsChangedCaller;
 
-void calculateTransformedRadii( float radius ){
+void transformRadii( float offset ){
+	const float radius = m_radii[1] + offset;
+
 	float (&r)[3] = m_radii_transformed;
+
 	if ( spawnflags_linear( m_flags ) ) {
 		r[0] = radius + 47.0f / m_fade;
 		if( r[0] <= 1.f ){
-			r[0] = r[1] = r[2] = 1.f;
+			r[0] = 1.f;
+			r[1] = r[2] = 1.f - 47.0f / m_fade; // this is called once again after minimizing already minimal radii, so calculate correct r[1]
 			return;
 		}
 		r[1] = radius;
@@ -822,21 +832,22 @@ void calculateTransformedRadii( float radius ){
 	{
 		r[0] = radius * sqrt( 48.f );
 		if( r[0] <= 1.f ){
-			r[0] = r[1] = r[2] = 1.f;
+			r[0] = 1.f;
+			r[1] = r[2] = 0;
 			return;
 		}
 		r[1] = radius;
 		r[2] = r[0] / sqrt( 255.f );
 	}
-	//globalOutputStream() << r[0] << " " << r[1] << " " << r[2] << " \n";
+//	globalOutputStream() << r[0] << " " << r[1] << " " << r[2] << " m_radii_transformed\n";
 }
 float calculateIntensityFromRadii(){
-	float intensity;
-	if ( spawnflags_linear( m_flags ) )
-		intensity = ( m_radii_transformed[0] * m_fade + 1.f ) / ( fPointScale * fLinearScale );
+	if( m_radii_transformed[0] == 0 ) // negative intensity
+		return m_primaryIntensity != 0? m_primaryIntensity : m_secondaryIntensity;
+	else if ( spawnflags_linear( m_flags ) )
+		return ( m_radii_transformed[0] * m_fade + 1.f ) / ( fPointScale * fLinearScale ) / m_scale;
 	else
-		intensity = m_radii_transformed[0] * m_radii_transformed[0] * 1.f / fPointScale;
-	return intensity / m_scale;
+		return m_radii_transformed[0] * m_radii_transformed[0] * 1.f / fPointScale / m_scale;
 }
 };
 
@@ -1512,8 +1523,8 @@ void snapto( float snap ){
 		m_originKey.write( &m_entity );
 	}
 }
-void setLightRadii( float radius ){
-	m_radii.calculateTransformedRadii( radius );
+void transformLightRadii( float offset ){
+	m_radii.transformRadii( offset );
 }
 void setLightRadius( const AABB& aabb ){
 	m_aabb_light.origin = aabb.origin;
@@ -1767,10 +1778,6 @@ const Matrix4& projection() const {
 	return m_doom3Projection;
 }
 
-const LightRadii& getLightRadii() const {
-	return m_radii;
-}
-
 Shader* getShader() const {
 	return m_shader.get();
 }
@@ -1933,7 +1940,7 @@ void evaluateTransform(){
 			m_contained.setLightRadius( m_dragPlanes.evaluateResize( getTranslation(), rotation() ) );
 		}
 		else{
-			m_contained.setLightRadii( m_contained.getLightRadii().m_radii[1] + m_scaleRadius.evaluateResize( getTranslation() ) );
+			m_contained.transformLightRadii( m_scaleRadius.evaluateResize( getTranslation() ) );
 		}
 	}
 }
