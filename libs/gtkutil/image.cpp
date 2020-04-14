@@ -39,8 +39,11 @@ void BitmapsPath_set( const char* path ){
 }
 
 GdkPixbuf* pixbuf_new_from_file_with_mask( const char* filename ){
-	GdkPixbuf* rgb = gdk_pixbuf_new_from_file( filename, 0 );
+	GError *error = nullptr;
+	GdkPixbuf* rgb = gdk_pixbuf_new_from_file( filename, &error );
 	if ( rgb == 0 ) {
+		globalErrorStream() << "ERROR: gdk_pixbuf_new_from_file(): " << error->message << "\n";
+		g_error_free( error );
 		return 0;
 	}
 	else
