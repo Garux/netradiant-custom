@@ -1731,6 +1731,15 @@ void TraceGrid( int num ){
 		/* vortex: apply gridscale and gridambientscale here */
 		ColorToBytes( color, bgp->ambient[ i ], gridScale * gridAmbientScale );
 		ColorToBytes( gp->directed[ i ], bgp->directed[ i ], gridScale );
+		/*
+		 * HACK: if there's a non-zero directed component, this
+		 * lightgrid cell is useful. However, q3 skips grid
+		 * cells with zero ambient. So let's force ambient to be
+		 * nonzero unless directed is zero too.
+		 */
+		 if( bgp->ambient[i][0] + bgp->ambient[i][1] + bgp->ambient[i][2] == 0
+		&& bgp->directed[i][0] + bgp->directed[i][1] + bgp->directed[i][2] != 0 )
+			VectorSet( bgp->ambient[i], 1, 1, 1 );
 	}
 
 	/* debug code */
