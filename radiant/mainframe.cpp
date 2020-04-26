@@ -110,6 +110,7 @@
 #include "surfacedialog.h"
 #include "textures.h"
 #include "texwindow.h"
+#include "modelwindow.h"
 #include "url.h"
 #include "xywindow.h"
 #include "windowobservers.h"
@@ -1086,6 +1087,12 @@ GtkWidget* g_page_entity;
 
 void EntityInspector_ToggleShow(){
 	GroupDialog_showPage( g_page_entity );
+}
+
+GtkWidget* g_page_models;
+
+void ModelBrowser_ToggleShow(){
+	GroupDialog_showPage( g_page_models );
 }
 
 
@@ -2095,6 +2102,7 @@ GtkMenuItem* create_view_menu( MainFrame::EViewStyle style ){
 		create_menu_item_with_mnemonic( menu, "Console", "ToggleConsole" );
 		create_menu_item_with_mnemonic( menu, "Texture Browser", "ToggleTextures" );
 	}
+	create_menu_item_with_mnemonic( menu, "Model Browser", "ToggleModelBrowser" );
 	create_menu_item_with_mnemonic( menu, "Entity Inspector", "ToggleEntityInspector" );
 	create_menu_item_with_mnemonic( menu, "_Surface Inspector", "SurfaceInspector" );
 	create_menu_item_with_mnemonic( menu, "_Patch Inspector", "PatchInspector" );
@@ -3119,6 +3127,13 @@ void MainFrame::Create(){
 		g_page_console = GroupDialog_addPage( "Console", Console_constructWindow( GroupDialog_getWindow() ), RawStringExportCaller( "Console" ) );
 	}
 
+	{
+		GtkFrame* frame = create_framed_widget( ModelBrowser_constructWindow( GroupDialog_getWindow() ) );
+		g_page_models = GroupDialog_addPage( "Models", GTK_WIDGET( frame ), RawStringExportCaller( "Models" ) );
+		/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+		g_object_set_data( G_OBJECT( g_page_models ), "glwidget", ModelBrowser_getGLWidget() );
+	}
+
 #ifdef WIN32
 	if ( g_multimon_globals.m_bStartOnPrimMon ) {
 		PositionWindowOnPrimaryScreen( g_layout_globals.m_position );
@@ -3266,7 +3281,7 @@ void MainFrame::Create(){
 			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
 			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
 			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
-			g_object_set_data( G_OBJECT( GroupDialog_getWindow() ), "glwidget", TextureBrowser_getGLWidget() );
+			g_object_set_data( G_OBJECT( g_page_textures ), "glwidget", TextureBrowser_getGLWidget() );
 		}
 
 		m_vSplit = 0;
@@ -3305,7 +3320,7 @@ void MainFrame::Create(){
 			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
 			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
 			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
-			g_object_set_data( G_OBJECT( GroupDialog_getWindow() ), "glwidget", TextureBrowser_getGLWidget() );
+			g_object_set_data( G_OBJECT( g_page_textures ), "glwidget", TextureBrowser_getGLWidget() );
 		}
 	}
 
@@ -3392,6 +3407,7 @@ void MainFrame::Shutdown(){
 	delete m_pXZWnd;
 	m_pXZWnd = 0;
 
+	ModelBrowser_destroyWindow();
 	TextureBrowser_destroyWindow();
 
 	DeleteCamWnd( m_pCamWnd );
@@ -3605,6 +3621,7 @@ void MainFrame_Construct(){
 
 	GlobalCommands_insert( "ToggleConsole", FreeCaller<Console_ToggleShow>(), Accelerator( 'O' ) );
 	GlobalCommands_insert( "ToggleEntityInspector", FreeCaller<EntityInspector_ToggleShow>(), Accelerator( 'N' ) );
+	GlobalCommands_insert( "ToggleModelBrowser", FreeCaller<ModelBrowser_ToggleShow>(), Accelerator( '/' ) );
 	GlobalCommands_insert( "EntityList", FreeCaller<EntityList_toggleShown>(), Accelerator( 'L' ) );
 
 //	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', (GdkModifierType)GDK_SHIFT_MASK ) );

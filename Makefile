@@ -705,6 +705,7 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	radiant/mainframe.o \
 	radiant/main.o \
 	radiant/map.o \
+	radiant/modelwindow.o \
 	$(if $(findstring $(OS),Win32),radiant/multimon.o,) \
 	radiant/mru.o \
 	radiant/nullmodel.o \

@@ -91,6 +91,12 @@ GtkWidget* appendEntry( const char* name, const FloatImportCallback& importCallb
 GtkWidget* appendEntry( const char* name, float& data ){
 	return m_dialog.addEntry( m_vbox, name, data );
 }
+GtkWidget* appendEntry( const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
+	return m_dialog.addTextEntry( m_vbox, name, importCallback, exportCallback );
+}
+GtkWidget* appendEntry( const char* name, CopiedString& data ){
+	return m_dialog.addEntry( m_vbox, name, data );
+}
 GtkWidget* appendPathEntry( const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback ){
 	return m_dialog.addPathEntry( m_vbox, name, browse_directory, importCallback, exportCallback );
 }

@@ -92,6 +92,9 @@ static gboolean switch_page( GtkNotebook *notebook, GtkNotebookPage *page, guint
 	GroupDialog_updatePageTitle( GTK_WINDOW( data ), page_num );
 	g_current_page = page_num;
 
+	/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+	g_object_set_data( G_OBJECT( g_GroupDlg.m_window ), "glwidget", g_object_get_data( G_OBJECT( gtk_notebook_get_nth_page( notebook, page_num ) ), "glwidget" ) );
+
 	return FALSE;
 }
 

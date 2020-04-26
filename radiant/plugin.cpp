@@ -59,6 +59,7 @@
 #include "points.h"
 #include "gtkmisc.h"
 #include "texwindow.h"
+#include "modelwindow.h"
 #include "mainframe.h"
 #include "build.h"
 #include "mru.h"
@@ -246,6 +247,7 @@ Radiant(){
 	XYWindow_Construct();
 	BuildMonitor_Construct();
 	TextureBrowser_Construct();
+	ModelBrowser_Construct();
 	Entity_Construct();
 	Autosave_Construct();
 	EntityInspector_construct();
@@ -265,6 +267,7 @@ Radiant(){
 	EntityInspector_destroy();
 	Autosave_Destroy();
 	Entity_Destroy();
+	ModelBrowser_Destroy();
 	TextureBrowser_Destroy();
 	BuildMonitor_Destroy();
 	XYWindow_Destroy();

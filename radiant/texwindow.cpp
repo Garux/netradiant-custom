@@ -133,43 +133,6 @@ bool g_TextureBrowser_enableAlpha = false;
 bool g_TextureBrowser_filter_searchFromStart = false;
 }
 
-class DeferredAdjustment
-{
-gdouble m_value;
-guint m_handler;
-typedef void ( *ValueChangedFunction )( void* data, gdouble value );
-ValueChangedFunction m_function;
-void* m_data;
-
-static gboolean deferred_value_changed( gpointer data ){
-	reinterpret_cast<DeferredAdjustment*>( data )->m_function(
-		reinterpret_cast<DeferredAdjustment*>( data )->m_data,
-		reinterpret_cast<DeferredAdjustment*>( data )->m_value
-		);
-	reinterpret_cast<DeferredAdjustment*>( data )->m_handler = 0;
-	reinterpret_cast<DeferredAdjustment*>( data )->m_value = 0;
-	return FALSE;
-}
-public:
-DeferredAdjustment( ValueChangedFunction function, void* data ) : m_value( 0 ), m_handler( 0 ), m_function( function ), m_data( data ){
-}
-void flush(){
-	if ( m_handler != 0 ) {
-		g_source_remove( m_handler );
-		deferred_value_changed( this );
-	}
-}
-void value_changed( gdouble value ){
-	m_value = value;
-	if ( m_handler == 0 ) {
-		m_handler = g_idle_add( deferred_value_changed, this );
-	}
-}
-static void adjustment_value_changed( GtkAdjustment *adjustment, DeferredAdjustment* self ){
-	self->value_changed( adjustment->value );
-}
-};
-
 
 
 class TextureBrowser;

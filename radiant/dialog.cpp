@@ -642,6 +642,18 @@ GtkWidget* Dialog::addFloatEntry( GtkWidget* vbox, const char* name, const Float
 	return row.m_row;
 }
 
+GtkWidget* Dialog::addTextEntry( GtkWidget* vbox, const char* name, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
+	GtkEntry* entry = DialogEntry_new();
+	gtk_widget_set_size_request( GTK_WIDGET( entry ), -1, -1 ); // unset
+
+	AddTextEntryData( *entry, importViewer, exportViewer );
+
+	GtkTable* row = DialogRow_new( name, GTK_WIDGET( entry ) );
+	DialogVBox_packRow( GTK_VBOX( vbox ), GTK_WIDGET( row ) );
+
+	return GTK_WIDGET( row );
+}
+
 GtkWidget* Dialog::addPathEntry( GtkWidget* vbox, const char* name, bool browse_directory, const StringImportCallback& importViewer, const StringExportCallback& exportViewer ){
 	PathEntry pathEntry = PathEntry_new();
 	g_signal_connect( G_OBJECT( pathEntry.m_button ), "clicked", G_CALLBACK( browse_directory ? button_clicked_entry_browse_directory : button_clicked_entry_browse_file ), pathEntry.m_entry );

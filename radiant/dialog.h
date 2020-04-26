@@ -160,6 +160,10 @@ GtkWidget* addFloatEntry( GtkWidget* vbox, const char* name, const FloatImportCa
 GtkWidget* addEntry( GtkWidget* vbox, const char* name, float& data ){
 	return addFloatEntry( vbox, name, FloatImportCaller( data ), FloatExportCaller( data ) );
 }
+GtkWidget* addTextEntry( GtkWidget* vbox, const char* name, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
+GtkWidget* addEntry( GtkWidget* vbox, const char* name, CopiedString& data ){
+	return addTextEntry( vbox, name, StringImportCallback( StringImportCaller( data ) ), StringExportCallback( StringExportCaller( data ) ) );
+}
 GtkWidget* addPathEntry( GtkWidget* vbox, const char* name, bool browse_directory, const StringImportCallback& importCallback, const StringExportCallback& exportCallback );
 GtkWidget* addPathEntry( GtkWidget* vbox, const char* name, CopiedString& data, bool directory );
 GtkWidget* addSpinner( GtkWidget* vbox, const char* name, int& data, double value, double lower, double upper );

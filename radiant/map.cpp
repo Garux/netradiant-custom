@@ -409,6 +409,7 @@ void RemoveRegionBrushes( void );
    free all map elements, reinitialize the structures that depend on them
    ================
  */
+#include "modelwindow.h"
 void Map_Free(){
 	Map_RegionOff();
 	Select_ShowAllHidden();
@@ -418,6 +419,8 @@ void Map_Free(){
 	g_map.m_resource->detach( g_map );
 	GlobalReferenceCache().release( g_map.m_name.c_str() );
 	g_map.m_resource = 0;
+
+	ModelBrowser_flushReferences();
 
 	FlushReferences();
 
