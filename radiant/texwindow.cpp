@@ -68,6 +68,7 @@
 #include "gtkutil/widget.h"
 #include "gtkutil/glwidget.h"
 #include "gtkutil/messagebox.h"
+#include "gtkutil/toolbar.h"
 
 #include "error.h"
 #include "map.h"
@@ -87,8 +88,6 @@
 #include "groupdialog.h"
 #include "preferences.h"
 #include "commands.h"
-
-void TextureBrowser_queueDraw( TextureBrowser& textureBrowser );
 
 bool string_equal_start( const char* string, StringRange start ){
 	return string_equal_n( string, start.first, start.last - start.first );
@@ -134,10 +133,6 @@ bool g_TextureBrowser_filter_searchFromStart = false;
 }
 
 
-
-class TextureBrowser;
-
-typedef ReferenceCaller<TextureBrowser, TextureBrowser_queueDraw> TextureBrowserQueueDrawCaller;
 
 void TextureBrowser_scrollChanged( void* data, gdouble value );
 
@@ -259,11 +254,9 @@ bool m_hideNonShadersInCommon;
 static bool wads;
 // Return the display width of a texture in the texture browser
 void getTextureWH( qtexture_t* tex, int &W, int &H ){
-		// Don't use uniform size
-		W = (int)( tex->width * ( (float)m_textureScale / 100 ) );
-		H = (int)( tex->height * ( (float)m_textureScale / 100 ) );
-		if ( W < 1 ) W = 1;
-		if ( H < 1 ) H = 1;
+	// Don't use uniform size
+	W = std::max( std::size_t( 1 ), tex->width * m_textureScale / 100 );
+	H = std::max( std::size_t( 1 ), tex->height * m_textureScale / 100 );
 
 	if ( g_TextureBrowser_fixedSize ){
 		if	( W >= H ) {
@@ -328,6 +321,12 @@ void ( *TextureBrowser_textureSelected )( const char* shader );
 
 void TextureBrowser_updateScroll( TextureBrowser& textureBrowser );
 
+
+void TextureBrowser_queueDraw( TextureBrowser& textureBrowser ){
+	if ( textureBrowser.m_gl_widget != 0 ) {
+		gtk_widget_queue_draw( textureBrowser.m_gl_widget );
+	}
+}
 
 const char* TextureBrowser_getComonShadersName(){
 	const char* value = g_pGameDescription->getKeyValue( "common_shaders_name" );
@@ -611,8 +610,6 @@ Signal0 g_activeShadersChangedCallbacks;
 void TextureBrowser_addActiveShadersChangedCallback( const SignalHandler& handler ){
 	g_activeShadersChangedCallbacks.connectLast( handler );
 }
-
-void TextureBrowser_constructTreeStore();
 
 class ShadersObserver : public ModuleObserver
 {
@@ -989,14 +986,12 @@ void TextureBrowser_trackingDelta( int x, int y, unsigned int state, void* data 
 void TextureBrowser_Tracking_MouseUp( TextureBrowser& textureBrowser ){
 	if( textureBrowser.m_move_started ){
 		textureBrowser.m_move_started = false;
-		textureBrowser.m_freezePointer.unfreeze_pointer( textureBrowser.m_parent, false );
+		textureBrowser.m_freezePointer.unfreeze_pointer( false );
 	}
 }
 
 void TextureBrowser_Tracking_MouseDown( TextureBrowser& textureBrowser ){
-	if( textureBrowser.m_move_started ){
-		TextureBrowser_Tracking_MouseUp( textureBrowser );
-	}
+	TextureBrowser_Tracking_MouseUp( textureBrowser );
 	textureBrowser.m_move_started = true;
 	textureBrowser.m_move_amount = 0;
 	textureBrowser.m_freezePointer.freeze_pointer( textureBrowser.m_parent, textureBrowser.m_gl_widget, TextureBrowser_trackingDelta, &textureBrowser );
@@ -1197,12 +1192,6 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 	glBindTexture( GL_TEXTURE_2D, 0 );
 	glDisable( GL_BLEND );
 	//qglFinish();
-}
-
-void TextureBrowser_queueDraw( TextureBrowser& textureBrowser ){
-	if ( textureBrowser.m_gl_widget != 0 ) {
-		gtk_widget_queue_draw( textureBrowser.m_gl_widget );
-	}
 }
 
 
@@ -1728,7 +1717,7 @@ GtkMenuItem* TextureBrowser_constructViewMenu( GtkMenu* menu ){
 	return textures_menu_item;
 }
 
-void Popup_View_Menu( GtkWidget *widget, GtkMenu *menu ){
+void Popup_View_Menu( GtkMenu *menu ){
 	gtk_menu_popup( menu, NULL, NULL, NULL, NULL, 1, gtk_get_current_event_time() );
 }
 #if 0
@@ -2089,26 +2078,19 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 	GtkToolbar* toolbar;
 
 	{ // menu bar
-		GtkWidget* menu_view = gtk_menu_new();
-		TextureBrowser_constructViewMenu( GTK_MENU( menu_view ) );
-		gtk_menu_set_title( GTK_MENU( menu_view ), "View" );
+		GtkMenu* menu_view = GTK_MENU( gtk_menu_new() );
+		TextureBrowser_constructViewMenu( menu_view );
+		gtk_menu_set_title( menu_view, "View" );
 
 		toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( toolbar ), FALSE, FALSE, 0 );
 
 		//view menu button
-		GtkButton* button = GTK_BUTTON( gtk_button_new() );
-		button_set_icon( button, "texbro_view.png" );
-		gtk_widget_show( GTK_WIDGET( button ) );
-		gtk_button_set_relief( button, GTK_RELIEF_NONE );
-		gtk_widget_set_size_request( GTK_WIDGET( button ), 24, 24 );
-		GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
-		GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_DEFAULT );
-		gtk_toolbar_append_element( toolbar, GTK_TOOLBAR_CHILD_WIDGET, GTK_WIDGET( button ), "", "View", "", 0, 0, 0 );
-		g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( Popup_View_Menu ), menu_view );
+		GtkButton* button = toolbar_append_button( toolbar, "View", "texbro_view.png", PointerCaller<GtkMenu, Popup_View_Menu>( menu_view ) );
+		gtk_widget_set_size_request( GTK_WIDGET( button ), 24, 24 ); // 24 is minimal here for non scissored icon with any gtk theme
 
 		//show detached menu over floating tex bro
-		gtk_menu_attach_to_widget( GTK_MENU( menu_view ), GTK_WIDGET( button ), NULL );
+		gtk_menu_attach_to_widget( menu_view, GTK_WIDGET( button ), NULL );
 
 		button = toolbar_append_button( toolbar, "Find / Replace...", "texbro_gtk-find-and-replace.png", "FindReplaceTextures" );
 		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
@@ -2117,16 +2099,15 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
 		gtk_widget_show( GTK_WIDGET( toolbar ) );
 	}
-	{//filter entry
-		GtkWidget* entry = gtk_entry_new();
-		gtk_widget_set_size_request( GTK_WIDGET( entry ), 64, -1 );
-		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( entry ), FALSE, FALSE, 0 );
+	{ // filter entry
+		GtkWidget* entry = g_TextureBrowser.m_filter_entry = gtk_entry_new();
+		gtk_widget_set_size_request( entry, 64, -1 );
+		gtk_box_pack_start( GTK_BOX( vbox ), entry, FALSE, FALSE, 0 );
 		gtk_entry_set_icon_from_stock( GTK_ENTRY( entry ), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR );
 		gtk_entry_set_icon_sensitive( GTK_ENTRY( entry ), GTK_ENTRY_ICON_SECONDARY, FALSE );
 		TextureBrowser_filterSetModeIcon( GTK_ENTRY( entry ) );
 		gtk_entry_set_icon_tooltip_text( GTK_ENTRY( entry ), GTK_ENTRY_ICON_PRIMARY, "toggle match mode ( start / any position )" );
 		gtk_widget_show( entry );
-		g_TextureBrowser.m_filter_entry = entry;
 		g_signal_connect( G_OBJECT( entry ), "changed", G_CALLBACK( TextureBrowser_filterChanged ), &g_TextureBrowser );
 		g_signal_connect( G_OBJECT( entry ), "icon-press", G_CALLBACK( TextureBrowser_filterIconPress ), 0 );
 		g_signal_connect( G_OBJECT( entry ), "key_press_event", G_CALLBACK( TextureBrowser_filterKeypress ), 0 );
@@ -2134,52 +2115,51 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		g_signal_connect( G_OBJECT( entry ), "leave_notify_event", G_CALLBACK( TextureBrowser_filterEntryUnfocus ), 0 );
 	}
 	{ // Texture TreeView
-		g_TextureBrowser.m_scr_win_tree = gtk_scrolled_window_new( NULL, NULL );
-		gtk_container_set_border_width( GTK_CONTAINER( g_TextureBrowser.m_scr_win_tree ), 0 );
+		GtkWidget* w = g_TextureBrowser.m_scr_win_tree = gtk_scrolled_window_new( NULL, NULL );
+		gtk_container_set_border_width( GTK_CONTAINER( w ), 0 );
 
 		// vertical only scrolling for treeview
-		gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( g_TextureBrowser.m_scr_win_tree ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
+		gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( w ), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
 
-		gtk_widget_show( g_TextureBrowser.m_scr_win_tree );
+		gtk_widget_show( w );
 
 		TextureBrowser_createTreeViewTree();
 
-		//gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( g_TextureBrowser.m_scr_win_tree ), g_TextureBrowser.m_treeViewTree );
-		gtk_container_add( GTK_CONTAINER( g_TextureBrowser.m_scr_win_tree ), g_TextureBrowser.m_treeViewTree ); //GtkTreeView has native scrolling support; should not be used with the GtkViewport proxy.
-		gtk_widget_show( GTK_WIDGET( g_TextureBrowser.m_treeViewTree ) );
+		//gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( w ), g_TextureBrowser.m_treeViewTree );
+		gtk_container_add( GTK_CONTAINER( w ), g_TextureBrowser.m_treeViewTree ); //GtkTreeView has native scrolling support; should not be used with the GtkViewport proxy.
+		gtk_widget_show( g_TextureBrowser.m_treeViewTree );
 	}
 	{ // gl_widget scrollbar
-		GtkWidget* w = gtk_vscrollbar_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 0, 1, 1, 0 ) ) );
+		GtkWidget* w = g_TextureBrowser.m_texture_scroll = gtk_vscrollbar_new( GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 0, 1, 1, 0 ) ) );
 		gtk_table_attach( GTK_TABLE( table ), w, 2, 3, 1, 2, GTK_SHRINK, GTK_FILL, 0, 0 );
 		gtk_widget_show( w );
-		g_TextureBrowser.m_texture_scroll = w;
 
-		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( g_TextureBrowser.m_texture_scroll ) );
+		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( w ) );
 		g_signal_connect( G_OBJECT( vadjustment ), "value_changed", G_CALLBACK( TextureBrowser_verticalScroll ), &g_TextureBrowser );
 
-		widget_set_visible( g_TextureBrowser.m_texture_scroll, g_TextureBrowser.m_showTextureScrollbar );
+		widget_set_visible( w, g_TextureBrowser.m_showTextureScrollbar );
 	}
 	{ // gl_widget
 #if NV_DRIVER_GAMMA_BUG
-		g_TextureBrowser.m_gl_widget = glwidget_new( TRUE );
+		GtkWidget* w = g_TextureBrowser.m_gl_widget = glwidget_new( TRUE );
 #else
-		g_TextureBrowser.m_gl_widget = glwidget_new( FALSE );
+		GtkWidget* w = g_TextureBrowser.m_gl_widget = glwidget_new( FALSE );
 #endif
-		gtk_widget_ref( g_TextureBrowser.m_gl_widget );
+		gtk_widget_ref( w );
 
-		gtk_widget_set_events( g_TextureBrowser.m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
-		GTK_WIDGET_SET_FLAGS( g_TextureBrowser.m_gl_widget, GTK_CAN_FOCUS );
+		gtk_widget_set_events( w, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
+		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_FOCUS );
 
-		gtk_table_attach_defaults( GTK_TABLE( table ), g_TextureBrowser.m_gl_widget, 1, 2, 1, 2 );
-		gtk_widget_show( g_TextureBrowser.m_gl_widget );
+		gtk_table_attach_defaults( GTK_TABLE( table ), w, 1, 2, 1, 2 );
+		gtk_widget_show( w );
 
-		g_TextureBrowser.m_sizeHandler = g_signal_connect( G_OBJECT( g_TextureBrowser.m_gl_widget ), "size_allocate", G_CALLBACK( TextureBrowser_size_allocate ), &g_TextureBrowser );
-		g_TextureBrowser.m_exposeHandler = g_signal_connect( G_OBJECT( g_TextureBrowser.m_gl_widget ), "expose_event", G_CALLBACK( TextureBrowser_expose ), &g_TextureBrowser );
+		g_TextureBrowser.m_sizeHandler = g_signal_connect( G_OBJECT( w ), "size_allocate", G_CALLBACK( TextureBrowser_size_allocate ), &g_TextureBrowser );
+		g_TextureBrowser.m_exposeHandler = g_signal_connect( G_OBJECT( w ), "expose_event", G_CALLBACK( TextureBrowser_expose ), &g_TextureBrowser );
 
-		g_signal_connect( G_OBJECT( g_TextureBrowser.m_gl_widget ), "button_press_event", G_CALLBACK( TextureBrowser_button_press ), &g_TextureBrowser );
-		g_signal_connect( G_OBJECT( g_TextureBrowser.m_gl_widget ), "button_release_event", G_CALLBACK( TextureBrowser_button_release ), &g_TextureBrowser );
-		g_signal_connect( G_OBJECT( g_TextureBrowser.m_gl_widget ), "motion_notify_event", G_CALLBACK( TextureBrowser_motion ), &g_TextureBrowser );
-		g_signal_connect( G_OBJECT( g_TextureBrowser.m_gl_widget ), "scroll_event", G_CALLBACK( TextureBrowser_scroll ), &g_TextureBrowser );
+		g_signal_connect( G_OBJECT( w ), "button_press_event", G_CALLBACK( TextureBrowser_button_press ), &g_TextureBrowser );
+		g_signal_connect( G_OBJECT( w ), "button_release_event", G_CALLBACK( TextureBrowser_button_release ), &g_TextureBrowser );
+		g_signal_connect( G_OBJECT( w ), "motion_notify_event", G_CALLBACK( TextureBrowser_motion ), &g_TextureBrowser );
+		g_signal_connect( G_OBJECT( w ), "scroll_event", G_CALLBACK( TextureBrowser_scroll ), &g_TextureBrowser );
 	}
 
 	// tag stuff
@@ -2193,26 +2173,15 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 			TextureBrowser_buildTagList();
 		}
 		{ // tag menu bar
-			GtkWidget* menu_tags = gtk_menu_new();
-			gtk_menu_set_title( GTK_MENU( menu_tags ), "Tags" );
-			TextureBrowser_constructTagsMenu( GTK_MENU( menu_tags ) );
+			GtkMenu* menu_tags = GTK_MENU( gtk_menu_new() );
+			gtk_menu_set_title( menu_tags, "Tags" );
+			TextureBrowser_constructTagsMenu( menu_tags );
 
-			GtkButton* button = GTK_BUTTON( gtk_button_new() );
-			button_set_icon( button, "texbro_tags.png" );
-//			GtkWidget *label = gtk_label_new ( ">t" );
-//			gtk_container_add( GTK_CONTAINER( button ), label );
-//			gtk_widget_show( label );
-
-			gtk_widget_show( GTK_WIDGET( button ) );
-			gtk_button_set_relief( button, GTK_RELIEF_NONE );
+			GtkButton* button = toolbar_append_button( toolbar, "Tags", "texbro_tags.png", PointerCaller<GtkMenu, Popup_View_Menu>( menu_tags ) );
 			gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
-			GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
-			GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_DEFAULT );
-			gtk_toolbar_append_element( toolbar, GTK_TOOLBAR_CHILD_WIDGET, GTK_WIDGET( button ), "", "Tags", "", 0, 0, 0 );
-			g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( Popup_View_Menu ), menu_tags );
 
 			//show detached menu over floating tex bro and main wnd...
-			gtk_menu_attach_to_widget( GTK_MENU( menu_tags ), GTK_WIDGET( button ), NULL );
+			gtk_menu_attach_to_widget( menu_tags, GTK_WIDGET( button ), NULL );
 		}
 		{ // Tag TreeView
 			g_TextureBrowser.m_scr_win_tags = gtk_scrolled_window_new( NULL, NULL );

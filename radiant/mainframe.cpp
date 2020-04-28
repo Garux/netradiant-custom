@@ -3125,6 +3125,12 @@ void MainFrame::Create(){
 
 	if ( FloatingGroupDialog() ) {
 		g_page_console = GroupDialog_addPage( "Console", Console_constructWindow( GroupDialog_getWindow() ), RawStringExportCaller( "Console" ) );
+		{
+			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
+			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
+			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
+			g_object_set_data( G_OBJECT( g_page_textures ), "glwidget", TextureBrowser_getGLWidget() );
+		}
 	}
 
 	{
@@ -3146,49 +3152,47 @@ void MainFrame::Create(){
 	gtk_widget_show( GTK_WIDGET( window ) );
 
 	if ( CurrentStyle() == eRegular || CurrentStyle() == eRegularLeft ) {
+		GtkWidget* hsplit = gtk_hpaned_new();
+		m_hSplit = hsplit;
+		gtk_box_pack_start( GTK_BOX( vbox ), hsplit, TRUE, TRUE, 0 );
+		gtk_widget_show( hsplit );
 		{
-			GtkWidget* hsplit = gtk_hpaned_new();
-			m_hSplit = hsplit;
-			gtk_box_pack_start( GTK_BOX( vbox ), hsplit, TRUE, TRUE, 0 );
-			gtk_widget_show( hsplit );
+			GtkWidget* vsplit = gtk_vpaned_new();
+			gtk_widget_show( vsplit );
+			m_vSplit = vsplit;
+			GtkWidget* vsplit2 = gtk_vpaned_new();
+			gtk_widget_show( vsplit2 );
+			m_vSplit2 = vsplit2;
+			if ( CurrentStyle() == eRegular ){
+				gtk_paned_pack1( GTK_PANED( hsplit ), vsplit, TRUE, TRUE );
+				gtk_paned_pack2( GTK_PANED( hsplit ), vsplit2, TRUE, TRUE );
+			}
+			else{
+				gtk_paned_pack2( GTK_PANED( hsplit ), vsplit, TRUE, TRUE );
+				gtk_paned_pack1( GTK_PANED( hsplit ), vsplit2, TRUE, TRUE );
+			}
+			// console
+			GtkWidget* console_window = Console_constructWindow( window );
+			gtk_paned_pack2( GTK_PANED( vsplit ), console_window, TRUE, TRUE );
+
+			// xy
+			m_pXYWnd = new XYWnd();
+			m_pXYWnd->SetViewType( XY );
+			GtkWidget* xy_window = GTK_WIDGET( create_framed_widget( m_pXYWnd->GetWidget() ) );
+			gtk_paned_pack1( GTK_PANED( vsplit ), xy_window, TRUE, TRUE );
 			{
-				GtkWidget* vsplit = gtk_vpaned_new();
-				gtk_widget_show( vsplit );
-				m_vSplit = vsplit;
-				GtkWidget* vsplit2 = gtk_vpaned_new();
-				gtk_widget_show( vsplit2 );
-				m_vSplit2 = vsplit2;
-				if ( CurrentStyle() == eRegular ){
-					gtk_paned_pack1( GTK_PANED( hsplit ), vsplit, TRUE, TRUE );
-					gtk_paned_pack2( GTK_PANED( hsplit ), vsplit2, TRUE, TRUE );
-				}
-				else{
-					gtk_paned_pack2( GTK_PANED( hsplit ), vsplit, TRUE, TRUE );
-					gtk_paned_pack1( GTK_PANED( hsplit ), vsplit2, TRUE, TRUE );
-				}
-				// console
-				GtkWidget* console_window = Console_constructWindow( window );
-				gtk_paned_pack2( GTK_PANED( vsplit ), console_window, TRUE, TRUE );
+				// camera
+				m_pCamWnd = NewCamWnd();
+				GlobalCamera_setCamWnd( *m_pCamWnd );
+				CamWnd_setParent( *m_pCamWnd, window );
+				GtkFrame* camera_window = create_framed_widget( CamWnd_getWidget( *m_pCamWnd ) );
 
-				// xy
-				m_pXYWnd = new XYWnd();
-				m_pXYWnd->SetViewType( XY );
-				GtkWidget* xy_window = GTK_WIDGET( create_framed_widget( m_pXYWnd->GetWidget() ) );
-				gtk_paned_pack1( GTK_PANED( vsplit ), xy_window, TRUE, TRUE );
-				{
-					// camera
-					m_pCamWnd = NewCamWnd();
-					GlobalCamera_setCamWnd( *m_pCamWnd );
-					CamWnd_setParent( *m_pCamWnd, window );
-					GtkFrame* camera_window = create_framed_widget( CamWnd_getWidget( *m_pCamWnd ) );
+				gtk_paned_pack1( GTK_PANED( vsplit2 ), GTK_WIDGET( camera_window ), TRUE, TRUE );
 
-					gtk_paned_pack1( GTK_PANED( vsplit2 ), GTK_WIDGET( camera_window ), TRUE, TRUE );
+				// textures
+				GtkFrame* texture_window = create_framed_widget( TextureBrowser_constructWindow( window ) );
 
-					// textures
-					GtkFrame* texture_window = create_framed_widget( TextureBrowser_constructWindow( window ) );
-
-					gtk_paned_pack2( GTK_PANED( vsplit2 ), GTK_WIDGET( texture_window ), TRUE, TRUE );
-				}
+				gtk_paned_pack2( GTK_PANED( vsplit2 ), GTK_WIDGET( texture_window ), TRUE, TRUE );
 			}
 		}
 	}
@@ -3277,13 +3281,6 @@ void MainFrame::Create(){
 			g_floating_windows.push_back( GTK_WIDGET( window ) );
 		}
 
-		{
-			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
-			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
-			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
-			g_object_set_data( G_OBJECT( g_page_textures ), "glwidget", TextureBrowser_getGLWidget() );
-		}
-
 		m_vSplit = 0;
 		m_hSplit = 0;
 		m_vSplit2 = 0;
@@ -3315,13 +3312,6 @@ void MainFrame::Create(){
 
 		m_hSplit = create_split_views( camera, yz, xy, xz, m_vSplit, m_vSplit2 );
 		gtk_box_pack_start( GTK_BOX( vbox ), m_hSplit, TRUE, TRUE, 0 );
-
-		{
-			GtkFrame* frame = create_framed_widget( TextureBrowser_constructWindow( GroupDialog_getWindow() ) );
-			g_page_textures = GroupDialog_addPage( "Textures", GTK_WIDGET( frame ), TextureBrowserExportTitleCaller() );
-			/* workaround for gtk 2.24 issue: not displayed glwidget after toggle */
-			g_object_set_data( G_OBJECT( g_page_textures ), "glwidget", TextureBrowser_getGLWidget() );
-		}
 	}
 
 	EntityList_constructWindow( window );

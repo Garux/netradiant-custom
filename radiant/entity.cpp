@@ -432,6 +432,8 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	entitypath.push( makeReference( node.get() ) );
 	scene::Instance& instance = findInstance( entitypath );
 
+	Entity* entity = Node_getEntity( node );
+
 	if ( entityClass->fixedsize || ( isModel && !brushesSelected ) ) {
 		//Select_Delete();
 
@@ -449,7 +451,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 	else
 	{
 		if ( g_pGameDescription->mGameType == "doom3" ) {
-			Node_getEntity( node )->setKeyValue( "model", Node_getEntity( node )->getKeyValue( "name" ) );
+			entity->setKeyValue( "model", entity->getKeyValue( "name" ) );
 		}
 
 		Scene_parentSelectedBrushesToEntity( GlobalSceneGraph(), node );
@@ -470,7 +472,7 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 				g_iLastLightIntensity = intensity;
 				char buf[30];
 				sprintf( buf, "255 255 255 %d", intensity );
-				Node_getEntity( node )->setKeyValue( "_light", buf );
+				entity->setKeyValue( "_light", buf );
 			}
 		}
 	}
@@ -482,24 +484,24 @@ void Entity_createFromSelection( const char* name, const Vector3& origin ){
 				g_iLastLightIntensity = intensity;
 				char buf[10];
 				sprintf( buf, "%d", intensity );
-				Node_getEntity( node )->setKeyValue( "light", buf );
+				entity->setKeyValue( "light", buf );
 			}
 		}
 		else if ( brushesSelected ) { // use workzone to set light position/size for doom3 lights, if there are brushes selected
 			AABB bounds( Doom3Light_getBounds( workzone ) );
 			StringOutputStream key( 64 );
 			key << bounds.origin[0] << " " << bounds.origin[1] << " " << bounds.origin[2];
-			Node_getEntity( node )->setKeyValue( "origin", key.c_str() );
+			entity->setKeyValue( "origin", key.c_str() );
 			key.clear();
 			key << bounds.extents[0] << " " << bounds.extents[1] << " " << bounds.extents[2];
-			Node_getEntity( node )->setKeyValue( "light_radius", key.c_str() );
+			entity->setKeyValue( "light_radius", key.c_str() );
 		}
 	}
 
 	if ( isModel ) {
 		const char* model = misc_model_dialog( GTK_WIDGET( MainFrame_getWindow() ) );
 		if ( model != 0 ) {
-			Node_getEntity( node )->setKeyValue( entityClass->miscmodel_key() , model );
+			entity->setKeyValue( entityClass->miscmodel_key(), model );
 		}
 	}
 }

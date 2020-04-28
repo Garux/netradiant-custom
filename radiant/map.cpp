@@ -718,7 +718,7 @@ void Map_ImportSelected( TextInputStream& in, const MapFormat& format ){
 	EBrushType brush_type = GlobalBrushCreator().getFormat();
 	format.readGraph( node, in, GlobalEntityCreator() );
 	if ( brush_type != GlobalBrushCreator().getFormat() ) {
-		Node_getTraversable( *node.get_pointer() )->traverse( Convert_Brushes( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ), BrushType_getTexdefType( brush_type ) ) );
+		Node_getTraversable( node )->traverse( Convert_Brushes( BrushType_getTexdefType( GlobalBrushCreator().getFormat() ), BrushType_getTexdefType( brush_type ) ) );
 		GlobalBrushCreator().toggleFormat( brush_type );
 	}
 	Map_gatherNamespaced( node );

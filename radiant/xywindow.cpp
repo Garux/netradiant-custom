@@ -1077,7 +1077,7 @@ void XYWnd::Move_Begin(){
 
 void XYWnd::Move_End(){
 	m_move_started = false;
-	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), false );
+	g_xywnd_freezePointer.unfreeze_pointer( false );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_move_focusOut );
 }
 
@@ -1127,7 +1127,7 @@ void XYWnd::Zoom_Begin( int x, int y ){
 
 void XYWnd::Zoom_End(){
 	m_zoom_started = false;
-	g_xywnd_freezePointer.unfreeze_pointer( m_parent != 0 ? m_parent : MainFrame_getWindow(), false );
+	g_xywnd_freezePointer.unfreeze_pointer( false );
 	g_signal_handler_disconnect( G_OBJECT( m_gl_widget ), m_zoom_focusOut );
 }
 

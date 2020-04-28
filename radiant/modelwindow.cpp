@@ -620,7 +620,7 @@ public:
 	void tracking_MouseUp(){
 		if( m_move_started ){
 			m_move_started = false;
-			m_freezePointer.unfreeze_pointer( m_parent, false );
+			m_freezePointer.unfreeze_pointer( false );
 		}
 	}
 	void tracking_MouseDown(){
