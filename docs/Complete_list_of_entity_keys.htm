@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>NetRadiant - Complete list of entity keys - Alientrap Development</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<link href="application.css" media="all" rel="stylesheet" type="text/css" />
+<script src="prototype.js" type="text/javascript"></script>
+<script src="effects.js" type="text/javascript"></script>
+<script src="dragdrop.js" type="text/javascript"></script>
+<script src="controls.js" type="text/javascript"></script>
+<script src="application.js" type="text/javascript"></script>
+<link href="jstoolbar.css" media="screen" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1267352889);}
+    </style>
+<![endif]-->
+  <style type="text/css">
+.question { background-color:#FFEBC1; border:2px solid #FDBD3B; margin-bottom:12px; padding:0px 4px 8px 4px; }
+td.formatted_questions { text-align: left; white-space: normal}
+td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
+  </style>
+ <link href="stylesheet.css" media="screen" rel="stylesheet" type="text/css" /> 
+<!-- page specific tags -->
+
+  <link href="scm.css" media="screen" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="/login" class="login">Войти</a></li>
+<li><a href="/account/register" class="register">Регистрация</a></li></ul>    </div>
+    
+    <ul><li><a href="/" class="home">Домашняя страница</a></li>
+<li><a href="/projects" class="projects">Проекты</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Помощь</a></li></ul></div>
+      
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/netradiant" method="get">
+        <input name="wiki_pages" type="hidden" value="1" />
+        <a href="/search/index/netradiant" accesskey="4">Поиск</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
+        </form>
+        
+    </div>
+    
+    <h1>NetRadiant</h1>
+    
+    <div id="main-menu">
+        <ul><li><a href="/projects/netradiant" class="overview">Просмотр</a></li>
+<li><a href="/projects/netradiant/activity" class="activity">Активность</a></li>
+<li><a href="/projects/netradiant/issues" class="issues">Задачи</a></li>
+<li><a href="/projects/netradiant/news" class="news">Новости</a></li>
+<li><a href="/projects/netradiant/documents" class="documents">Документы</a></li>
+<li><a href="/projects/netradiant/wiki" class="wiki selected">Wiki</a></li>
+<li><a href="/projects/netradiant/boards" class="boards">Форумы</a></li>
+<li><a href="/projects/netradiant/files" class="files">Файлы</a></li>
+<li><a href="/projects/netradiant/repository" class="repository">Хранилище</a></li>
+<li><a href="/ezfaq/index/netradiant" class="ezfaq">FAQ</a></li></ul>
+    </div>
+</div>
+
+<div class="" id="main">
+    <div id="sidebar">        
+        
+  <h3>Wiki</h3>
+
+<a href="/projects/netradiant/wiki">Стартовая страница</a><br />
+<a href="/projects/netradiant/wiki/Page_index">Оглавление</a><br />
+<a href="/projects/netradiant/wiki/Date_index">История страниц</a><br />
+
+
+        
+    </div>
+    
+    <div id="content">
+				
+        <div class="contextual">
+
+
+<span id="watcher"></span>
+
+
+
+
+
+
+<a href="/projects/netradiant/wiki/Complete_list_of_entity_keys/history" class="icon icon-history">История</a>
+</div>
+
+
+
+
+
+<div class="wiki">
+  <h1 id="Complete-list-of-entity-keys">Complete list of entity keys<a href="#Complete-list-of-entity-keys" class="wiki-anchor">&para;</a></h1>
+
+
+	<ul>
+	<li>On all entities
+	<ul>
+	<li><strong><code>angle</code>:</strong> shorthand for just setting the yaw angle</li>
+		<li><strong><code>angles</code>:</strong> angles vector</li>
+		<li><strong><code>origin</code>:</strong> origin vector</li>
+		<li><strong><code>targetname</code>:</strong> name of the entity so it can be referenced by <strong><code>target</code></strong> keys.</li>
+	</ul>
+	</li>
+		<li>On brush entities, classname <strong><code>func_group</code></strong> and classname <strong><code>misc_model</code></strong>:
+	<ul>
+	<li><strong><code>_castShadows</code>, <code>_cs</code>:</strong> sets whether the entity casts shadows</li>
+		<li><strong><code>_celshader</code>:</strong> <a href="/projects/netradiant/wiki/CelShader" class="wiki-page new">CelShader</a> to use</li>
+		<li><strong><code>_lightmapsamplesize</code>, <code>_samplesize</code>:</strong> sample size to use for surfaces of this entity</li>
+		<li><strong><code>_receiveShadows</code>, <code>_rs</code>:</strong> sets whether the entity receives shadows</li>
+		<li><strong><code>_shadeangle</code>, <code>_smoothnormals</code>, <code>_sn</code>, <code>_smooth</code>:</strong> largest angle between faces to allow to treat them part of the same nonplanar surface</li>
+		<li><strong><code>lightmapscale</code>, <code>_lightmapscale</code>, <code>_ls</code>:</strong> scaling factor for the lightmap resolution</li>
+	</ul>
+	</li>
+		<li>On brush entities and on classname <strong><code>func_group</code></strong>:
+	<ul>
+	<li><strong><code>_indexmap</code>, <code>alphamap</code>:</strong> file name of index map image for terrain blending</li>
+		<li><strong><code>_layers</code>, <code>layers</code>:</strong> number of layers of the index map image (encoded as brightness levels)</li>
+		<li><strong><code>_offsets</code>, <code>offsets</code>:</strong> space separated list of z offsets</li>
+		<li><strong><code>_shader</code>, <code>shader</code>:</strong> shader name prefix of the index map (when this is set to <code>X</code>, the shader names that are generated will be like <code>textures/X_42</code> and <code>textures/X_23to42</code></li>
+	</ul>
+	</li>
+		<li>On brush entities
+	<ul>
+	<li><strong><code>_clone</code>, <code>_ins</code>, <code>_instance</code>:</strong> <strong><code>_clonename</code></strong> field value of a brush entity to clone brushes from (can be used to use the same brush model multiple times)</li>
+		<li><strong><code>_clonename</code>:</strong> see <strong><code>_clone</code></strong></li>
+		<li><strong><code>_patchMeta</code>, <code>patchMeta</code>:</strong> generate a triangle soup from patches in this entity</li>
+		<li><strong><code>_patchQuality</code>:</strong> quality multiplier for patches on this surface when <strong><code>_patchMeta</code></strong> is used</li>
+		<li><strong><code>_patchSubdivide</code>:</strong> absolute quality setting for patches on this surface when <strong><code>_patchMeta</code></strong> is used</li>
+		<li><strong><code>max</code>:</strong> override the <code>maxs</code> vector of this brush entity</li>
+		<li><strong><code>min</code>:</strong> override the <code>mins</code> vector of this brush entity</li>
+	</ul>
+	</li>
+		<li>On classname <strong><code>worldspawn</code></strong>
+	<ul>
+	<li><strong><code>_ambient</code>, <code>ambient</code>:</strong> amount of ambient light</li>
+		<li><strong><code>_blocksize</code>, <code>blocksize</code>, <code>chopsize</code>:</strong> block size for unconditional BSP subdivisions</li>
+		<li><strong><code>_farplanedist</code>, <code>fogclip</code>, <code>distancecull</code>:</strong> far plane distance for vis culling -- this must be the shortest distance at which nothing can be seen any more due to fog</li>
+		<li><strong><code>_floodlight</code>:</strong> a quintuple of values "r g b dist intensity" to set global floodlight parameters (good defaults are 240 240 255 1024 128)</li>
+		<li><strong><code>_fog</code>, <code>fog</code>:</strong> if set, the whole map is fogged using the given shader name</li>
+		<li><strong><code>_foghull</code>:</strong> must be set to a sky shader when <code>_fog</code> is used</li>
+		<li><strong><code>_ignoreleaks</code>, <code>ignoreleaks</code>:</strong> when set, no leak test is performed</li>
+		<li><strong><code>_keepLights</code>:</strong> if set, <strong><code>light</code></strong> entities are not stripped from the <code>BSP</code> file when compiling</li>
+		<li><strong><code>_mingridlight</code>:</strong> amount of minimum grid light</li>
+		<li><strong><code>_minlight</code>:</strong> amount of minimum light</li>
+		<li><strong><code>_minvertexlight</code>:</strong> amount of minimum vertex light</li>
+		<li><strong><code>_noshadersun</code>:</strong> if set, sun light from shaders is suppressed</li>
+		<li><strong><code>_q3map_cmdline</code>:</strong> written by q3map2; contains the command line the map was compiled with</li>
+		<li><strong><code>_q3map_version</code>:</strong> written by q3map2; contains the version of q3map2 the map was compiled with</li>
+		<li><strong><code>_style42alphagen</code>:</strong> |alphaGen|-like shader definition string for light style 442 (works the same way for all style numbers)</li>
+		<li><strong><code>_style42rgbgen</code>:</strong> |rgbGen|-like shader definition string for light style 42 (works the same way for all style numbers)</li>
+		<li><strong><code>gridsize</code>:</strong> resolution of the light grid</li>
+	</ul>
+	</li>
+		<li>On classname <strong><code>light</code></strong> and classname <strong><code>lightJunior</code></strong>
+	<ul>
+	<li>Note: <strong><code>lightJunior</code></strong> entities only affect the light grid.</li>
+		<li><strong><code>_anglescale</code>:</strong> scales angle attenuation</li>
+		<li><strong><code>_color</code>:</strong> color of the light</li>
+		<li><strong><code>_deviance</code>, <code>_deviation</code>, <code>_jitter</code>:</strong> position deviance of the samples of a regular light (distributes the light samples in a cube of side length 2*_deviance around the origin), or angle deviance of the sun light samples in radians</li>
+		<li><strong><code>_filterradius</code>, <code>_filteradius</code>, <code>_filter</code>:</strong> filter radius for this light, similar to -light -filter</li>
+		<li><strong><code>_samples</code>:</strong> number of samples to use to get soft shadows from a light</li>
+		<li><strong><code>_sun</code>:</strong> if 1, this light is an infinite sun light</li>
+		<li><strong><code>fade</code>:</strong> Fade factor of light attenuation of linear lights. Linear lights completely vanish at distance <strong><code>light</code></strong>/(<strong><code>fade</code></strong> * 8000), so if you want the light to vanish at distance X, specify <strong><code>light</code></strong>/(8000*X) here.</li>
+		<li><strong><code>light</code>:</strong> intensity factor (default: 300)</li>
+		<li><strong><code>radius</code>:</strong> radius of a spotlight at the target point (default: 64)</li>
+		<li><strong><code>scale</code>:</strong> intensity multiplier</li>
+		<li><strong><code>spawnflags</code>:</strong>  1 = linear attenuation (inverted in <code>-wolf</code> lighting mode)</li>
+		<li><strong><code>spawnflags</code>:</strong>  2 = no angle attenuation (inverted in <code>-wolf</code> lighting mode)</li>
+		<li><strong><code>spawnflags</code>:</strong> 32 = the light color is not normalized</li>
+		<li><strong><code>spawnflags</code>:</strong> 64 = force distance attenuation (why did vortex add this, this is always set...?)</li>
+		<li><strong><code>target</code>:</strong> target of a spotlight</li>
+		<li><strong><code>targetname</code>:</strong> when set, the light can be toggled in game by some engine provided way</li>
+	</ul>
+	</li>
+		<li>On classname <strong><code>light</code></strong>
+	<ul>
+	<li><strong><code>_flare</code>:</strong> when set, this light is a flare without a specified shader</li>
+		<li><strong><code>_flareshader</code>:</strong> shader for a flare surface generated by this light</li>
+		<li><strong><code>_style</code>, <code>style</code>:</strong> light style number</li>
+		<li><strong><code>spawnflags</code>:</strong> 16 = light does not affect the grid</li>
+	</ul>
+	</li>
+		<li>On classname <strong><code>advertisement</code></strong> (QuakeLive only)
+	<ul>
+	<li>Brushes/Patches: must be a single rectangular patch surface where the ad will be placed</li>
+		<li><strong><code>cellId</code>:</strong> identifier of the ad, must be used only once (??)</li>
+	</ul>
+	</li>
+		<li>On classname <strong><code>_decal</code></strong>
+	<ul>
+	<li>Brushes/Patches: must be a single rectangular patch surface</li>
+		<li><strong><code>target</code>:</strong> positional target to set the projection direction of the decal</li>
+	</ul>
+	</li>
+		<li>On classname <strong><code>misc_model</code></strong>
+	<ul>
+	<li><strong><code>_castShadows</code>, <code>_cs</code>:</strong> sets whether the entity casts shadows</li>
+		<li><strong><code>_frame2</code>:</strong> frame of second model to load</li>
+		<li><strong><code>_frame</code>:</strong> frame of model to load</li>
+		<li><strong><code>_receiveShadows</code>, <code>_rs</code>:</strong> sets whether the entity receives shadows</li>
+		<li><strong><code>_remapXXX</code>:</strong> <code>XXX</code> can be any string to allow multiple keys for this; contains a string of the form <code>from;to</code>, and any shader <code>from</code> in the model will be replaced by <code>to</code>; the special value <code>*</code> in <code>from</code> matches all shader names</li>
+		<li><strong><code>model2</code>:</strong> path name of second model to load</li>
+		<li><strong><code>model</code>:</strong> path name of model to load</li>
+		<li><strong><code>modelscale</code>:</strong> scaling factor for the model to include</li>
+		<li><strong><code>modelscale_vec</code>:</strong> non-uniform scaling vector for the model to include</li>
+		<li><strong><code>spawnflags</code>:</strong>  1 = in SoF2, append a <code>_RMG_BSP</code> suffix to shader names instead of <code>_BSP</code></li>
+		<li><strong><code>spawnflags</code>:</strong>  2 = generate clipping brushes from the model</li>
+		<li><strong><code>spawnflags</code>:</strong>  4 = force this model through meta surface merging</li>
+		<li><strong><code>spawnflags</code>:</strong>  8 = when generating clipping planes, perform extrusion using the original normals from the model instead of per-triangle best axial normals</li>
+		<li><strong><code>spawnflags</code>:</strong> 16 = when generating clipping planes, perform extrusion using only up or down pointing normals (ideal for terrain)</li>
+		<li><strong><code>spawnflags</code>:</strong> 24 = when generating clipping planes, perform extrusion by distance zero (needs engine changes to support zero-volume clipping brushes)</li>
+		<li><strong><code>spawnflags</code>:</strong> 32 = turn vertex color from the model into alpha (for terrain blending)</li>
+		<li><strong><code>spawnflags</code>:</strong> 64 = do not let picomodel do surface normal smoothing</li>
+	</ul>
+	</li>
+		<li>On classname <strong><code>_skybox</code></strong>
+	<ul>
+	<li>To be placed inside a small otherwise hidden room; surfaces in it are scaled up, and visible through skybox surfaces</li>
+		<li><strong><code>_scale</code>:</strong> scaling factor or vector for the portal sky (default: 64)</li>
+	</ul></li>
+	</ul>
+</div>
+
+
+
+
+
+
+<p class="other-formats">Экспортировать в
+	<span><a href="/projects/netradiant/wiki/Complete_list_of_entity_keys?format=html&amp;version" class="html" rel="nofollow">HTML</a></span>
+	<span><a href="/projects/netradiant/wiki/Complete_list_of_entity_keys?format=txt&amp;version" class="txt" rel="nofollow">TXT</a></span>
+</p>
+
+
+
+
+
+
+
+        
+				<div style="clear:both;"></div>
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display:none;"><span>Загрузка...</span></div>
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2010 Jean-Philippe Lang
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>NetRadiant - Complete list of shader keywords - Alientrap Development</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<link href="application.css" media="all" rel="stylesheet" type="text/css" />
+<script src="prototype.js" type="text/javascript"></script>
+<script src="effects.js" type="text/javascript"></script>
+<script src="dragdrop.js" type="text/javascript"></script>
+<script src="controls.js" type="text/javascript"></script>
+<script src="application.js" type="text/javascript"></script>
+<link href="jstoolbar.css" media="screen" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1267352889);}
+    </style>
+<![endif]-->
+  <style type="text/css">
+.question { background-color:#FFEBC1; border:2px solid #FDBD3B; margin-bottom:12px; padding:0px 4px 8px 4px; }
+td.formatted_questions { text-align: left; white-space: normal}
+td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
+  </style>
+ <link href="stylesheet.css" media="screen" rel="stylesheet" type="text/css" /> 
+<!-- page specific tags -->
+
+  <link href="scm.css" media="screen" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="/login" class="login">Войти</a></li>
+<li><a href="/account/register" class="register">Регистрация</a></li></ul>    </div>
+    
+    <ul><li><a href="/" class="home">Домашняя страница</a></li>
+<li><a href="/projects" class="projects">Проекты</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Помощь</a></li></ul></div>
+      
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/netradiant" method="get">
+        <input name="wiki_pages" type="hidden" value="1" />
+        <a href="/search/index/netradiant" accesskey="4">Поиск</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
+        </form>
+        
+    </div>
+    
+    <h1>NetRadiant</h1>
+    
+    <div id="main-menu">
+        <ul><li><a href="/projects/netradiant" class="overview">Просмотр</a></li>
+<li><a href="/projects/netradiant/activity" class="activity">Активность</a></li>
+<li><a href="/projects/netradiant/issues" class="issues">Задачи</a></li>
+<li><a href="/projects/netradiant/news" class="news">Новости</a></li>
+<li><a href="/projects/netradiant/documents" class="documents">Документы</a></li>
+<li><a href="/projects/netradiant/wiki" class="wiki selected">Wiki</a></li>
+<li><a href="/projects/netradiant/boards" class="boards">Форумы</a></li>
+<li><a href="/projects/netradiant/files" class="files">Файлы</a></li>
+<li><a href="/projects/netradiant/repository" class="repository">Хранилище</a></li>
+<li><a href="/ezfaq/index/netradiant" class="ezfaq">FAQ</a></li></ul>
+    </div>
+</div>
+
+<div class="" id="main">
+    <div id="sidebar">        
+        
+  <h3>Wiki</h3>
+
+<a href="/projects/netradiant/wiki">Стартовая страница</a><br />
+<a href="/projects/netradiant/wiki/Page_index">Оглавление</a><br />
+<a href="/projects/netradiant/wiki/Date_index">История страниц</a><br />
+
+
+        
+    </div>
+    
+    <div id="content">
+				
+        <div class="contextual">
+
+
+<span id="watcher"></span>
+
+
+
+
+
+
+<a href="/projects/netradiant/wiki/Complete_list_of_shader_keywords/history" class="icon icon-history">История</a>
+</div>
+
+
+
+
+
+<div class="wiki">
+  <h1 id="Complete-list-of-shader-keywords">Complete list of shader keywords<a href="#Complete-list-of-shader-keywords" class="wiki-anchor">&para;</a></h1>
+
+
+	<p>Note: You can append a <code>:q3map</code> suffix to a shader name to make q3map2 use the shader but the engine ignore it.</p>
+
+
+	<p>Note: This list does not contain all possible shader keywords, but just those that q3map2 uses for anything. More keywords are likely to be supported by your engine. Check the documentation or the source code of your engine on this.</p>
+
+
+	<h2 id="Inside-shader-stages">Inside shader stages<a href="#Inside-shader-stages" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>map</code> texture:</strong> loads a texture and displays it repeating</li>
+		<li><strong><code>clampMap</code> texture:</strong> loads a texture and displays it non-repeating</li>
+		<li><strong><code>animMap</code> fps texture texture...:</strong> loads an animation and displays it repeating</li>
+		<li><strong><code>clampAnimMap</code> fps texture texture...:</strong> loads an animation and displays it non-repeating</li>
+		<li><strong><code>mapComp</code> texture:</strong> ???</li>
+		<li><strong><code>mapNoComp</code> texture:</strong> ???</li>
+	</ul>
+
+
+	<h2 id="In-the-shader-preamble">In the shader preamble:<a href="#In-the-shader-preamble" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>cull none</code>, <code>cull disable</code>, <code>cull twosided</code>:</strong> treat the surface as two sided for lighting</li>
+		<li><strong><code>damageShader</code> shadername:</strong> sets the given shader as damage shader (for SoF2 mods)</li>
+		<li><strong><code>fogparms</code> ...:</strong> marks the brush as a fog volume; otherwise handled by the engine</li>
+		<li><strong><code>implicitBlend</code>:</strong> ???</li>
+		<li><strong><code>implicitMap</code>:</strong> ???</li>
+		<li><strong><code>implicitMask</code>:</strong> ???</li>
+		<li><strong><code>light</code> shadername:</strong> sets the given shader as flare shader</li>
+		<li><strong><code>polygonoffset</code>:</strong> enable polygon offset</li>
+		<li><strong><code>q3map_backShader</code> shadername:</strong> sets the given shader as shader for back faces</li>
+		<li><strong><code>q3map_backsplash</code> percent distance:</strong> configures light backsplash (self-surfacelight)</li>
+		<li><strong><code>q3map_baseShader</code> shadername:</strong> inherit parameters from a shader</li>
+		<li><strong><code>q3map_bounce</code> F, <code>q3map_bounceScale</code> F:</strong> scales the intensity of radiosity</li>
+		<li><strong><code>q3map_clipmodel</code>:</strong> ???</li>
+		<li><strong><code>q3map_cloneShader</code> shadername:</strong> ???</li>
+		<li><strong><code>q3map_colorGen</code>:</strong> FIXME later</li>
+		<li><strong><code>q3map_deprecateShader</code> shadername:</strong> ???</li>
+		<li><strong><code>q3map_flare</code> shadername, <code>q3map_flareShader</code> shadername:</strong> sets the given shader as flare shader</li>
+		<li><strong><code>q3map_floodLight</code> r g b dist intensity power:</strong> overrides the global floodlight parameters</li>
+		<li><strong><code>q3map_fogDir</code> ( x y z ):</strong> sets the direction a fog shader fades from transparent to opaque</li>
+		<li><strong><code>q3map_foliage</code> path scale density odds invertalpha:</strong> ???</li>
+		<li><strong><code>q3map_forceMeta</code>:</strong> forces brush faces and/or triangle models to go through the metasurface pipeline</li>
+		<li><strong><code>q3map_forceSunlight</code>:</strong> ???</li>
+		<li><strong><code>q3map_fur</code> layers offset fade:</strong> ???</li>
+		<li><strong><code>q3map_globaltexture</code>:</strong> ???</li>
+		<li><strong><code>q3map_indexed</code>:</strong> ???</li>
+		<li><strong><code>q3map_invert</code>:</strong> inverts the direction from which the face is visible</li>
+		<li><strong><code>q3map_lightRGB</code> r g b:</strong> overrides the light color of the texture</li>
+		<li><strong><code>q3map_lightStyle</code> N:</strong> sets the light style (SoF2, JK2)</li>
+		<li><strong><code>q3map_lightSubdivide</code> N:</strong> subdivision interval for <code>q3map_surfacelight</code></li>
+		<li><strong><code>q3map_lightmapAxis</code> axis:</strong> sets the lightmap axis to one of <code>x</code>, <code>y</code>, <code>z</code> (useful for terrain)</li>
+		<li><strong><code>q3map_lightmapBrightness</code> F, <code>q3map_lightmapGamma</code> F:</strong> overrides lightmap brightness</li>
+		<li><strong><code>q3map_lightmapFilterRadius</code> self other:</strong> ???</li>
+		<li><strong><code>q3map_lightmapMergable</code>:</strong> allows merging the lightmap with other surfaces on another plane</li>
+		<li><strong><code>q3map_lightmapSampleOffset</code> F:</strong> multiplies samplesize by a factor</li>
+		<li><strong><code>q3map_lightmapSampleSize</code> N:</strong> overrides samplesize</li>
+		<li><strong><code>q3map_lightmapSize</code> N:</strong> overrides the lightmap size (forces an external lightmap for this surface)</li>
+		<li><strong><code>q3map_material</code> materialname:</strong> ???</li>
+		<li><strong><code>q3map_noFast</code>:</strong> disable <code>-fast</code> style lighting for this surface</li>
+		<li><strong><code>q3map_noVertexLight</code>:</strong> turns off vertex lighting for this surface</li>
+		<li><strong><code>q3map_noVertexShadows</code>:</strong> ???</li>
+		<li><strong><code>q3map_noclip</code>:</strong> do not clip the surface by the BSP tree</li>
+		<li><strong><code>q3map_nofog</code>:</strong> ???</li>
+		<li><strong><code>q3map_nonplanar</code>:</strong> marks the surface as nonplanar for meta surface merging</li>
+		<li><strong><code>q3map_notjunc</code>:</strong> do not do t-junction elimination</li>
+		<li><strong><code>q3map_offset</code> F:</strong> ???</li>
+		<li><strong><code>q3map_onlyVertexLighting</code>:</strong> same as using <code>surfaceparm pointlight</code></li>
+		<li><strong><code>q3map_patchShadows</code>:</strong> force shadowing from patches using this shader</li>
+		<li><strong><code>q3map_remapShader</code> shadername:</strong> ???</li>
+		<li><strong><code>q3map_shadeAngle</code> F:</strong> sets the shading angle for nonplanar surfaces</li>
+		<li><strong><code>q3map_skyLight</code> value iterations:</strong> sets the amount of sky light from this surface</li>
+		<li><strong><code>q3map_splotchfix</code>:</strong> ???</li>
+		<li><strong><code>q3map_styleMarker2</code>:</strong> ???</li>
+		<li><strong><code>q3map_styleMarker</code>:</strong> ???</li>
+		<li><strong><code>q3map_sunext</code> r g b intensity degrees elevation deviance samples:</strong> sets an unsharp sun for the map</li>
+		<li><strong><code>q3map_sun</code> r g b intensity degrees elevation, <code>sun</code> r g b intensity degrees elevation:</strong> sets a sharp sun for the map</li>
+		<li><strong><code>q3map_surfacelight</code> F:</strong> sets the amount of surface light from this surface</li>
+		<li><strong><code>q3map_surfacemodel</code> path density minscale maxscale minangle maxangle oriented:</strong> randomly place models on the surface</li>
+		<li><strong><code>q3map_tcGen ivector</code> ( sx sy sz ) ( tx ty tz ):</strong> same as <code>q3map_tcGen vector</code> but with inverted values</li>
+		<li><strong><code>q3map_tcGen vector</code> ( sx sy sz ) ( tx ty tz ):</strong> overrides texcoords based on world coordinates (for terrain)</li>
+		<li><strong><code>q3map_tcMod rotate</code> a:</strong> rotates the texture</li>
+		<li><strong><code>q3map_tcMod scale</code> s t:</strong> multiplies texcoords by factors</li>
+		<li><strong><code>q3map_tcMod translate</code> s t:</strong> translates texcoords by a vector</li>
+		<li><strong><code>q3map_terrain</code>:</strong> ???</li>
+		<li><strong><code>q3map_textureSize</code> width height:</strong> overrides the texture size for texcoords</li>
+		<li><strong><code>q3map_vertexScale</code> F:</strong> scales vertex lighting amount by a factor</li>
+		<li><strong><code>q3map_vertexShadows</code>:</strong> ???</li>
+		<li><strong><code>qer_editorImage</code> texture:</strong> sets the texture to show for radiant</li>
+		<li><strong><code>qer_lightImage</code> texture:</strong> sets the image to take the light color from</li>
+		<li><strong><code>qer_normalImage</code> texture:</strong> sets the normal map for bump mapping</li>
+		<li><strong><code>skyparms</code> outerimage cloudheight innerimage:</strong> loads a skybox</li>
+		<li><strong><code>surfaceparm</code> alphashadow:</strong> use the alpha channel of the shader image as shadow mask</li>
+		<li><strong><code>surfaceparm</code> areaportal:</strong> ???</li>
+		<li><strong><code>surfaceparm</code> botclip:</strong> ???</li>
+		<li><strong><code>surfaceparm</code> clusterportal:</strong> ???</li>
+		<li><strong><code>surfaceparm</code> detail:</strong> ignore this surface for vis</li>
+		<li><strong><code>surfaceparm</code> donotenter:</strong> ???</li>
+		<li><strong><code>surfaceparm</code> fog:</strong> ???</li>
+		<li><strong><code>surfaceparm</code> hint:</strong> use this surface as a hint to generate BSP splits</li>
+		<li><strong><code>surfaceparm</code> lava:</strong> Stef hates this brush</li>
+		<li><strong><code>surfaceparm</code> lightfilter:</strong> use the color channel of the shader image as shadow mask</li>
+		<li><strong><code>surfaceparm</code> monsterclip:</strong> monsters can't go through this brush, but shots can</li>
+		<li><strong><code>surfaceparm</code> nodraw:</strong> do not generate draw surfaces</li>
+		<li><strong><code>surfaceparm</code> nodrop:</strong> items can't be dropped on this brush</li>
+		<li><strong><code>surfaceparm</code> nolightmap, <code>surfaceparm</code> pointlight:</strong> do not lightmap this surface</li>
+		<li><strong><code>surfaceparm</code> nomarks:</strong> this surface is stain free</li>
+		<li><strong><code>surfaceparm</code> nonsolid:</strong> do not make this surface solid</li>
+		<li><strong><code>surfaceparm</code> origin:</strong> the center of this brush shall be the origin of this brush model</li>
+		<li><strong><code>surfaceparm</code> playerclip:</strong> players can't go through this brush, but shots can</li>
+		<li><strong><code>surfaceparm</code> sky:</strong> this surface shows the skybox</li>
+		<li><strong><code>surfaceparm</code> slime:</strong> this brush contains more poisonous stuff than dihydrogene monoxide</li>
+		<li><strong><code>surfaceparm</code> structural:</strong> use this surface for vis</li>
+		<li><strong><code>surfaceparm</code> trans:</strong> cast no shadows</li>
+		<li><strong><code>surfaceparm</code> trigger:</strong> this is a trigger brush (translucent and solid)</li>
+		<li><strong><code>surfaceparm</code> water:</strong> this brush contains dihydrogene monoxide</li>
+		<li><strong><code>tessSize</code> F, <code>q3map_tessSize</code> F:</strong> subdivides the polygons to ensure no parts are larger than the given size</li>
+	</ul>
+</div>
+
+
+
+
+
+
+<p class="other-formats">Экспортировать в
+	<span><a href="/projects/netradiant/wiki/Complete_list_of_shader_keywords?format=html&amp;version=1" class="html" rel="nofollow">HTML</a></span>
+	<span><a href="/projects/netradiant/wiki/Complete_list_of_shader_keywords?format=txt&amp;version=1" class="txt" rel="nofollow">TXT</a></span>
+</p>
+
+
+
+
+
+
+
+        
+				<div style="clear:both;"></div>
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display:none;"><span>Загрузка...</span></div>
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2010 Jean-Philippe Lang
+</div>
+</div>
+
+</body>
+</html>

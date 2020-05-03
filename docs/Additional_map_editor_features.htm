@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>NetRadiant - Additional map editor features - Alientrap Development</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<link href="application.css" media="all" rel="stylesheet" type="text/css" />
+<script src="prototype.js" type="text/javascript"></script>
+<script src="effects.js" type="text/javascript"></script>
+<script src="dragdrop.js" type="text/javascript"></script>
+<script src="controls.js" type="text/javascript"></script>
+<script src="application.js" type="text/javascript"></script>
+<link href="jstoolbar.css" media="screen" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1267352889);}
+    </style>
+<![endif]-->
+  <style type="text/css">
+.question { background-color:#FFEBC1; border:2px solid #FDBD3B; margin-bottom:12px; padding:0px 4px 8px 4px; }
+td.formatted_questions { text-align: left; white-space: normal}
+td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
+  </style>
+ <link href="stylesheet.css" media="screen" rel="stylesheet" type="text/css" /> 
+<!-- page specific tags -->
+
+  <link href="scm.css" media="screen" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="/login" class="login">Войти</a></li>
+<li><a href="/account/register" class="register">Регистрация</a></li></ul>    </div>
+    
+    <ul><li><a href="/" class="home">Домашняя страница</a></li>
+<li><a href="/projects" class="projects">Проекты</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Помощь</a></li></ul></div>
+      
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/netradiant" method="get">
+        <input name="wiki_pages" type="hidden" value="1" />
+        <a href="/search/index/netradiant" accesskey="4">Поиск</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
+        </form>
+        
+    </div>
+    
+    <h1>NetRadiant</h1>
+    
+    <div id="main-menu">
+        <ul><li><a href="/projects/netradiant" class="overview">Просмотр</a></li>
+<li><a href="/projects/netradiant/activity" class="activity">Активность</a></li>
+<li><a href="/projects/netradiant/issues" class="issues">Задачи</a></li>
+<li><a href="/projects/netradiant/news" class="news">Новости</a></li>
+<li><a href="/projects/netradiant/documents" class="documents">Документы</a></li>
+<li><a href="/projects/netradiant/wiki" class="wiki selected">Wiki</a></li>
+<li><a href="/projects/netradiant/boards" class="boards">Форумы</a></li>
+<li><a href="/projects/netradiant/files" class="files">Файлы</a></li>
+<li><a href="/projects/netradiant/repository" class="repository">Хранилище</a></li>
+<li><a href="/ezfaq/index/netradiant" class="ezfaq">FAQ</a></li></ul>
+    </div>
+</div>
+
+<div class="" id="main">
+    <div id="sidebar">        
+        
+  <h3>Wiki</h3>
+
+<a href="/projects/netradiant/wiki">Стартовая страница</a><br />
+<a href="/projects/netradiant/wiki/Page_index">Оглавление</a><br />
+<a href="/projects/netradiant/wiki/Date_index">История страниц</a><br />
+
+
+        
+    </div>
+    
+    <div id="content">
+				
+        <div class="contextual">
+
+
+<span id="watcher"></span>
+
+
+
+
+
+
+<a href="/projects/netradiant/wiki/Additional_map_editor_features/history" class="icon icon-history">История</a>
+</div>
+
+
+
+
+
+<div class="wiki">
+  <h1 id="Additional-map-editor-features">Additional map editor features<a href="#Additional-map-editor-features" class="wiki-anchor">&para;</a></h1>
+
+
+	<p>The following features were added to the map editor:</p>
+
+
+	<h2 id="OBJ-model-format"><code>OBJ</code> model format<a href="#OBJ-model-format" class="wiki-anchor">&para;</a></h2>
+
+
+	<p><code>OBJ</code> files can be used as models, and texture information is taken from their associated <code>MTL</code> file.</p>
+
+
+	<p>In Blender, make sure "use material groups" is enabled when exporting.</p>
+
+
+	<h2 id="Expand-selection-to-whole-entities">Expand selection to whole entities<a href="#Expand-selection-to-whole-entities" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>Ctrl-Alt-E now selects the parent entity, too. Useful for duplicating the entity, as opposed to just its brushes.</p>
+
+
+	<h2 id="Targeting-lines">Targeting lines<a href="#Targeting-lines" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>Targeting lines are also shown for <code>target2</code>, <code>target3</code>, <code>target4</code> and <code>killtarget</code> keys to match usage in Nexuiz.</p>
+
+
+	<h2 id="Non-modal-Rotate-and-Scale-dialogs">Non-modal Rotate and Scale dialogs<a href="#Non-modal-Rotate-and-Scale-dialogs" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>Rotate and Scale dialogs are no longer modal, so you can keep the dialog open and e.g. change the selection and then apply another rotation.</p>
+
+
+	<h2 id="Four-pane-view-improvement">Four-pane view improvement<a href="#Four-pane-view-improvement" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>In the four-pane view, Ctrl-Tab now centers all three 2D views to the currently selected entity, so you do not need to hold Shift too.</p>
+
+
+	<h2 id="Strafe-mode">Strafe mode<a href="#Strafe-mode" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>The option "Strafe mode" can be changed to select the strafing behaviour: default mode "Both" matches GtkRadiant 1.5: Ctrl enables sideways strafing, Shift-Ctrl enables forward moving. The other modes allow to switch between one of these two behaviours permanently, so Shift-Ctrl can be used to select faces while moving around in the 3D view.</p>
+
+
+	<h2 id="Regrouping-entities">Regrouping entities<a href="#Regrouping-entities" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>When having a brush of an entity selected, this command removes that brush from the entity and puts it in worldspawn. When having a brush and an entity selected, it puts the brush into that entity (note: do this in the entity list or using the Ctrl-Alt-E bind "Expand selection to whole entities" to make sure that the entity, and not just one of its brushes, is selected). That way, you can insert/remove brushes from entities without having to retype all entity keys or redoing the brushwork.</p>
+
+
+	<h2 id="Clone-selection-change">Clone selection change<a href="#Clone-selection-change" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>"Clone selection" (space) no longer changes <code>targetname</code>/<code>target</code> of entities, so you can clone to create many entities to target one. If you want to change targetname/target when cloning like Radiant did before, use Shift+Space.</p>
+
+
+	<h2 id="The-clip-line">The clip line<a href="#The-clip-line" class="wiki-anchor">&para;</a></h2>
+
+
+	<p><div style="float:right"><img src="clipline-small.png" alt="" /></div></p>
+
+
+	<p>The clip tool shows an extra line pointing in the direction of what's getting erased when you hit Enter. That way, the mistake of accidentally deleting the wrong half when clipping can be avoided.</p>
+
+
+	<h2 class="clearbefore" id="Automatic-game-configuration">Automatic game configuration<a href="#Automatic-game-configuration" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>NetRadiant detects being inside a Q2World or Nexuiz install, and automatically configures its engine path to it. Other games can be easily added to the list.</p>
+
+
+	<h2 id="Editable-keyboard-shortcuts">Editable keyboard shortcuts<a href="#Editable-keyboard-shortcuts" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>The Help/Keyboard shortcuts dialog now allows changing the shortcuts, so you can e.g. enable previously unbound features.</p>
+
+
+	<h2 id="Portable-NetRadiant">Portable NetRadiant<a href="#Portable-NetRadiant" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>If you create a subdirectory called <code>settings</code> in your Radiant install, the install becomes "portable", that means it'll write its settings there, and not in a user-specific directory. Useful to take Radiant together with its settings with you on an USB stick.</p>
+
+
+	<p>Makes especially much sense in conjunction with automatic game configuration.</p>
+</div>
+
+
+<div class="attachments">
+
+<p><a href="/attachments/10/clipline-small.png" class="icon icon-attachment">clipline-small.png</a>
+  <span class="size">(1.8 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:13:56 -0400</span>
+  
+  </p>
+
+<p><a href="/attachments/11/clipline.png" class="icon icon-attachment">clipline.png</a>
+  <span class="size">(400.6 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:14:57 -0400</span>
+  
+  </p>
+
+</div>
+
+
+
+
+<p class="other-formats">Экспортировать в
+	<span><a href="/projects/netradiant/wiki/Additional_map_editor_features?format=html&amp;version=8" class="html" rel="nofollow">HTML</a></span>
+	<span><a href="/projects/netradiant/wiki/Additional_map_editor_features?format=txt&amp;version=8" class="txt" rel="nofollow">TXT</a></span>
+</p>
+
+
+
+
+
+
+
+        
+				<div style="clear:both;"></div>
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display:none;"><span>Загрузка...</span></div>
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2010 Jean-Philippe Lang
+</div>
+</div>
+
+</body>
+</html>

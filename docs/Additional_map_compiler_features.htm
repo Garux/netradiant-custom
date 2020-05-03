@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>NetRadiant - Additional map compiler features - Alientrap Development</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<link href="application.css" media="all" rel="stylesheet" type="text/css" />
+<script src="prototype.js" type="text/javascript"></script>
+<script src="effects.js" type="text/javascript"></script>
+<script src="dragdrop.js" type="text/javascript"></script>
+<script src="controls.js" type="text/javascript"></script>
+<script src="application.js" type="text/javascript"></script>
+<link href="jstoolbar.css" media="screen" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1267352889);}
+    </style>
+<![endif]-->
+  <style type="text/css">
+.question { background-color:#FFEBC1; border:2px solid #FDBD3B; margin-bottom:12px; padding:0px 4px 8px 4px; }
+td.formatted_questions { text-align: left; white-space: normal}
+td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
+  </style>
+ <link href="stylesheet.css" media="screen" rel="stylesheet" type="text/css" /> 
+<!-- page specific tags -->
+
+  <link href="scm.css" media="screen" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="/login" class="login">Войти</a></li>
+<li><a href="/account/register" class="register">Регистрация</a></li></ul>    </div>
+    
+    <ul><li><a href="/" class="home">Домашняя страница</a></li>
+<li><a href="/projects" class="projects">Проекты</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Помощь</a></li></ul></div>
+      
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/netradiant" method="get">
+        <input name="wiki_pages" type="hidden" value="1" />
+        <a href="/search/index/netradiant" accesskey="4">Поиск</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
+        </form>
+        
+    </div>
+    
+    <h1>NetRadiant</h1>
+    
+    <div id="main-menu">
+        <ul><li><a href="/projects/netradiant" class="overview">Просмотр</a></li>
+<li><a href="/projects/netradiant/activity" class="activity">Активность</a></li>
+<li><a href="/projects/netradiant/issues" class="issues">Задачи</a></li>
+<li><a href="/projects/netradiant/news" class="news">Новости</a></li>
+<li><a href="/projects/netradiant/documents" class="documents">Документы</a></li>
+<li><a href="/projects/netradiant/wiki" class="wiki selected">Wiki</a></li>
+<li><a href="/projects/netradiant/boards" class="boards">Форумы</a></li>
+<li><a href="/projects/netradiant/files" class="files">Файлы</a></li>
+<li><a href="/projects/netradiant/repository" class="repository">Хранилище</a></li>
+<li><a href="/ezfaq/index/netradiant" class="ezfaq">FAQ</a></li></ul>
+    </div>
+</div>
+
+<div class="" id="main">
+    <div id="sidebar">        
+        
+  <h3>Wiki</h3>
+
+<a href="/projects/netradiant/wiki">Стартовая страница</a><br />
+<a href="/projects/netradiant/wiki/Page_index">Оглавление</a><br />
+<a href="/projects/netradiant/wiki/Date_index">История страниц</a><br />
+
+
+        
+    </div>
+    
+    <div id="content">
+				
+        <div class="contextual">
+
+
+<span id="watcher"></span>
+
+
+
+
+
+
+<a href="/projects/netradiant/wiki/Additional_map_compiler_features/history" class="icon icon-history">История</a>
+</div>
+
+
+
+
+
+<div class="wiki">
+  <h1 id="Additional-map-compiler-features">Additional map compiler features<a href="#Additional-map-compiler-features" class="wiki-anchor">&para;</a></h1>
+
+
+	<p>The following features for use by mappers have been added in NetRadiant and thus are not documented elsewhere:</p>
+
+	<h2 id="Floodlighting">Floodlighting<a href="#Floodlighting" class="wiki-anchor">&para;</a></h2>
+
+
+	<p><div style="float:right"><img src="floodlight.jpg" alt="" /></div></p>
+
+
+	<p>A very quick and dirty way to light a map is adding the following key to <code>worldspawn</code>:</p>
+
+
+<pre>
+"_floodlight" "240 240 255 1024 128" 
+</pre><br />The parameters work as follow: the first three numbers select the color of the lighting. The fourth number sets a distance to trace, and the last number sets the intensity of the floodlight.
+
+	<p>This lighting is somewhat similar to <code>-dirty</code>, combined with use of the <code>ambient</code> key in <code>worldspawn</code>.</p>
+
+
+	<p>This feature was contributed by the Urban Terror team.</p>
+
+
+	<h2 id="Lightmap-exposure">Lightmap exposure<a href="#Lightmap-exposure" class="wiki-anchor">&para;</a></h2>
+
+
+	<p><div style="float:right"><img src="exposure.jpg" alt="" /></div></p>
+
+
+	<p>The q3map2 light compile parameter <code>-exposure</code> changes the handling of overbright pixels to look more realistic. Try values like <code>-exposure 200</code>! The higher the value, the darker the result gets.</p>
+
+
+	<p>It is most interesting if you intentionally put colored lights of a far too high light value in your map.</p>
+
+
+	<p>This feature was contributed by the Urban Terror team.</p>
+
+
+	<h2 class="clearbefore" id="dotProductScale">dotProductScale<a href="#dotProductScale" class="wiki-anchor">&para;</a></h2>
+
+
+	<table>
+		<tr>
+			<td> <img src="dotproduct-small.jpg" alt="" /> </td>
+			<td> <img src="/attachments/download/15" alt="" /> </td>
+			<td> <img src="/attachments/download/16" alt="" /> </td>
+			<td> <img src="/attachments/download/17" alt="" /> </td>
+		</tr>
+		<tr>
+			<td> dotProduct             </td>
+			<td> dotProduct2             </td>
+			<td> dotProductScale             </td>
+			<td> dotProduct2scale             </td>
+		</tr>
+	</table>
+
+
+
+
+	<p>The following shader parameters are added for use with terrain blending:</p>
+
+
+<pre>
+q3map_alphagen dotProduct2scale ( X Y Z MIN MAX )
+</pre>
+
+	<p>As with <code>dotProduct2</code>, <code>X Y Z</code> denote the normal on the plane to use for dotProduct terrain blending. The values <code>MIN</code> and <code>MAX</code> specify a range of squared cosine values, so that <code>MIN</code> is mapped to alpha value 0, <code>MAX</code> is mapped to alpha value 1, and everything in between is mapped linearily.</p>
+
+
+	<p>If you prefer working with angles, you can set <code>MIN</code> to the squared cosine of the most steep angle of the blending, and <code>MAX</code> to the squared cosine of the most flat angle of the blending. Example:</p>
+
+
+<pre>
+q3map_alphagen dotProduct2scale ( 0 0 1 0.250 0.933 )
+</pre>
+
+	<p>will set alpha value 0 for anything steeper than 60 degrees, and alpha value 1 for anything more flat than 15 degrees.</p>
+
+
+	<p>The same extension to <code>dotProduct</code> is called <code>dotProductScale</code>. Note that the <code>MIN</code> and <code>MAX</code> values are not squared there. You get a different curve with the same min/max angles by writing:</p>
+
+
+<pre>
+q3map_alphagen dotProductScale ( 0 0 1 0.500 0.966 )
+</pre>
+
+	<h2 id="Minimum-sample-size">Minimum sample size<a href="#Minimum-sample-size" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>The compiler option <code>-minsamplesize</code> in the BSP stage enforces a given minimum<br />sample size, even if shaders or <code>func_groups</code> set a lightmap scale. This allows<br />higher quality compiles of existing maps that use these features without having<br />to create extraordinarily large amounts of lightmaps, especially when using<br />external lightmaps.</p>
+
+
+	<h2 id="Converting-to-ASE-prefabs">Converting to ASE prefabs<a href="#Converting-to-ASE-prefabs" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>Use <code>-convert -format ase -shadersasbitmap</code> for this purpose. That way, the<br />created ASE files work as prefabs, and thus contain shader names, instead of<br />texture file names.  In a model editor, however, these ASE files will not show<br />up with textures, as modelling software does not support Q3 shaders.</p>
+
+
+	<h2 id="Zero-effort-cel-shading">Zero-effort cel shading<a href="#Zero-effort-cel-shading" class="wiki-anchor">&para;</a></h2>
+
+
+	<p>If you already have a cel shader (in Nexuiz, cel/black_ink), you can compile<br />the map using it easily by adding the option <code>-celshader cel/black_ink</code> to the<br />BSP stage.</p>
+
+
+	<h2 id="MiniMap-generator">MiniMap generator<a href="#MiniMap-generator" class="wiki-anchor">&para;</a></h2>
+
+
+	<p><div style="float:right"><img src="/attachments/download/18" alt="" /></div></p>
+
+
+This version of the map compiler can generate minimaps as used by Nexuiz.<br />The specs of the minimap's texture mapping are:
+	<ul>
+	<li>Let M be the rectangle of the world's mins/maxs coordinates.</li>
+		<li>If <code>keepaspect</code> is set: let S be the smallest square completely covering M whose center matches the one of M. Otherwise, let S be M.</li>
+		<li>Let S' be S scaled by factor <code>1/(1-2*border)</code> around the center of S.</li>
+		<li>The "mins" corner of S' corresponds to the top left corner of the image.</li>
+		<li>The "maxs" corner of S' corresponds to the bottom right corner of the image.</li>
+	</ul>
+</div>
+
+
+<div class="attachments">
+
+<p><a href="/attachments/12/floodlight.jpg" class="icon icon-attachment">floodlight.jpg</a>
+  <span class="size">(7 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:26:00 -0400</span>
+  
+  </p>
+
+<p><a href="/attachments/13/exposure.jpg" class="icon icon-attachment">exposure.jpg</a>
+  <span class="size">(27.8 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:26:31 -0400</span>
+  
+  </p>
+
+<p><a href="/attachments/14/dotproduct-small.jpg" class="icon icon-attachment">dotproduct-small.jpg</a>
+  <span class="size">(25.9 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:29:00 -0400</span>
+  
+  </p>
+
+<p><a href="/attachments/15/dotproduct2-small.jpg" class="icon icon-attachment">dotproduct2-small.jpg</a>
+  <span class="size">(24.2 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:29:36 -0400</span>
+  
+  </p>
+
+<p><a href="/attachments/16/dotproductscale-small.jpg" class="icon icon-attachment">dotproductscale-small.jpg</a>
+  <span class="size">(23.3 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:29:54 -0400</span>
+  
+  </p>
+
+<p><a href="/attachments/17/dotproduct2scale-small.jpg" class="icon icon-attachment">dotproduct2scale-small.jpg</a>
+  <span class="size">(22.8 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:30:08 -0400</span>
+  
+  </p>
+
+<p><a href="/attachments/18/minimap.jpg" class="icon icon-attachment">minimap.jpg</a>
+  <span class="size">(6.4 КБ)</span>
+  
+  
+    <span class="author">divVerent, Вт, 05 мая 2009, 13:30:30 -0400</span>
+  
+  </p>
+
+</div>
+
+
+
+
+<p class="other-formats">Экспортировать в
+	<span><a href="/projects/netradiant/wiki/Additional_map_compiler_features?format=html&amp;version=9" class="html" rel="nofollow">HTML</a></span>
+	<span><a href="/projects/netradiant/wiki/Additional_map_compiler_features?format=txt&amp;version=9" class="txt" rel="nofollow">TXT</a></span>
+</p>
+
+
+
+
+
+
+
+        
+				<div style="clear:both;"></div>
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display:none;"><span>Загрузка...</span></div>
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2010 Jean-Philippe Lang
+</div>
+</div>
+
+</body>
+</html>

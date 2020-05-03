@@ -1,0 +1,385 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>NetRadiant - Complete list of command line parameters - Alientrap Development</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<link href="application.css" media="all" rel="stylesheet" type="text/css" />
+<script src="prototype.js" type="text/javascript"></script>
+<script src="effects.js" type="text/javascript"></script>
+<script src="dragdrop.js" type="text/javascript"></script>
+<script src="controls.js" type="text/javascript"></script>
+<script src="application.js" type="text/javascript"></script>
+<link href="jstoolbar.css" media="screen" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1267352889);}
+    </style>
+<![endif]-->
+  <style type="text/css">
+.question { background-color:#FFEBC1; border:2px solid #FDBD3B; margin-bottom:12px; padding:0px 4px 8px 4px; }
+td.formatted_questions { text-align: left; white-space: normal}
+td.formatted_questions ol { margin-top: 0px; margin-bottom: 0px; }
+  </style>
+ <link href="stylesheet.css" media="screen" rel="stylesheet" type="text/css" /> 
+<!-- page specific tags -->
+
+  <link href="scm.css" media="screen" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="/login" class="login">Войти</a></li>
+<li><a href="/account/register" class="register">Регистрация</a></li></ul>    </div>
+    
+    <ul><li><a href="/" class="home">Домашняя страница</a></li>
+<li><a href="/projects" class="projects">Проекты</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Помощь</a></li></ul></div>
+      
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/netradiant" method="get">
+        <input name="wiki_pages" type="hidden" value="1" />
+        <a href="/search/index/netradiant" accesskey="4">Поиск</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
+        </form>
+        
+    </div>
+    
+    <h1>NetRadiant</h1>
+    
+    <div id="main-menu">
+        <ul><li><a href="/projects/netradiant" class="overview">Просмотр</a></li>
+<li><a href="/projects/netradiant/activity" class="activity">Активность</a></li>
+<li><a href="/projects/netradiant/issues" class="issues">Задачи</a></li>
+<li><a href="/projects/netradiant/news" class="news">Новости</a></li>
+<li><a href="/projects/netradiant/documents" class="documents">Документы</a></li>
+<li><a href="/projects/netradiant/wiki" class="wiki selected">Wiki</a></li>
+<li><a href="/projects/netradiant/boards" class="boards">Форумы</a></li>
+<li><a href="/projects/netradiant/files" class="files">Файлы</a></li>
+<li><a href="/projects/netradiant/repository" class="repository">Хранилище</a></li>
+<li><a href="/ezfaq/index/netradiant" class="ezfaq">FAQ</a></li></ul>
+    </div>
+</div>
+
+<div class="" id="main">
+    <div id="sidebar">        
+        
+  <h3>Wiki</h3>
+
+<a href="/projects/netradiant/wiki">Стартовая страница</a><br />
+<a href="/projects/netradiant/wiki/Page_index">Оглавление</a><br />
+<a href="/projects/netradiant/wiki/Date_index">История страниц</a><br />
+
+
+        
+    </div>
+    
+    <div id="content">
+				
+        <div class="contextual">
+
+
+<span id="watcher"></span>
+
+
+
+
+
+
+<a href="/projects/netradiant/wiki/Complete_list_of_command_line_parameters/history" class="icon icon-history">История</a>
+</div>
+
+
+
+
+
+<div class="wiki">
+  <h1 id="Complete-list-of-command-line-parameters">Complete list of command line parameters<a href="#Complete-list-of-command-line-parameters" class="wiki-anchor">&para;</a></h1>
+
+
+	<h2 id="Common-options">Common options<a href="#Common-options" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-connect</code> address:</strong> Talk to a NetRadiant instance using a specific XML based protocol</li>
+		<li><strong><code>-force</code>:</strong> Allow reading some broken/unsupported BSP files e.g. when decompiling, may also crash</li>
+		<li><strong><code>-fs_basepath</code> path:</strong> Sets the given path as main directory of the game (can be used more than once to look in multiple paths)</li>
+		<li><strong><code>-fs_game</code> gamename:</strong> Sets a different game directory name (default for Q3A: baseq3)</li>
+		<li><strong><code>-fs_homebase</code> dir:</strong> Specifies where the user home directory name is on Linux (default for Q3A: .q3a)</li>
+		<li><strong><code>-game</code> gamename:</strong> Load settings for the given game (default: quake3)</li>
+		<li><strong><code>-subdivisions</code> F:</strong> multiplier for patch subdivisions quality</li>
+		<li><strong><code>-threads</code> N:</strong> number of threads to use</li>
+		<li><strong><code>-v</code>:</strong> Verbose mode</li>
+	</ul>
+
+
+	<h2 id="BSP-stage">BSP stage<a href="#BSP-stage" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-bsp</code> ... filename.map:</strong> Switch that enters this stage</li>
+		<li><strong><code>-altsplit</code>:</strong> Alternate BSP tree splitting weights (should give more fps)</li>
+		<li><strong><code>-celshader</code> shadername:</strong> Sets a global cel shader name</li>
+		<li><strong><code>-custinfoparms</code>:</strong> Read scripts/custinfoparms.txt</li>
+		<li><strong><code>-debuginset</code>:</strong> Push all triangle vertexes towards the triangle center</li>
+		<li><strong><code>-debugportals</code>:</strong> Make BSP portals visible in the map</li>
+		<li><strong><code>-debugsurfaces</code>:</strong> Color the vertexes according to the index of the surface</li>
+		<li><strong><code>-deep</code>:</strong> Use detail brushes in the BSP tree, but at lowest priority (should give more fps)</li>
+		<li><strong><code>-de</code> F:</strong> Distance epsilon for plane snapping etc.</li>
+		<li><strong><code>-fakemap</code>:</strong> Write fakemap.map containing all world brushes</li>
+		<li><strong><code>-flares</code>:</strong> Turn on support for flares (TEST?)</li>
+		<li><strong><code>-flat</code>:</strong> Enable flat shading (good for combining with -celshader)</li>
+		<li><strong><code>-fulldetail</code>:</strong> Treat detail brushes as structural ones</li>
+		<li><strong><code>-leaktest</code>:</strong> Abort if a leak was found</li>
+		<li><strong><code>-meta</code>:</strong> Combine adjacent triangles of the same texture to surfaces (ALWAYS USE THIS)</li>
+		<li><strong><code>-minsamplesize</code> N:</strong> Sets minimum lightmap resolution in luxels/qu</li>
+		<li><strong><code>-mi</code> N:</strong> Sets the maximum number of indexes per surface</li>
+		<li><strong><code>-mv</code> N:</strong> Sets the maximum number of vertices of a lightmapped surface</li>
+		<li><strong><code>-ne</code> F:</strong> Normal epsilon for plane snapping etc.</li>
+		<li><strong><code>-nocurves</code>:</strong> Turn off support for patches</li>
+		<li><strong><code>-nodetail</code>:</strong> Leave out detail brushes</li>
+		<li><strong><code>-noflares</code>:</strong> Turn off support for flares</li>
+		<li><strong><code>-nofog</code>:</strong> Turn off support for fog volumes</li>
+		<li><strong><code>-nohint</code>:</strong> Turn off support for hint brushes</li>
+		<li><strong><code>-nosubdivide</code>:</strong> Turn off support for <code>q3map_tessSize</code> (breaks water vertex deforms)</li>
+		<li><strong><code>-notjunc</code>:</strong> Do not fix T-junctions (causes cracks between triangles, do not use)</li>
+		<li><strong><code>-nowater</code>:</strong> Turn off support for water, slime or lava (Stef, this is for you)</li>
+		<li><strong><code>-np</code> A:</strong> Force all surfaces to be nonplanar with a given shade angle</li>
+		<li><strong><code>-onlyents</code>:</strong> Only update entities in the BSP</li>
+		<li><strong><code>-patchmeta</code>:</strong> Turn patches into triangle meshes for display</li>
+		<li><strong><code>-rename</code>:</strong> Append "\_bsp" suffix to misc\_model shaders (needed for SoF2)</li>
+		<li><strong><code>-samplesize</code> N:</strong> Sets default lightmap resolution in luxels/qu</li>
+		<li><strong><code>-skyfix</code>:</strong> Turn sky box into six surfaces to work around ATI problems</li>
+		<li><strong><code>-snap</code> N:</strong> Snap brush bevel planes to the given number of units</li>
+		<li><strong><code>-tempname</code> filename.map:</strong> Read the MAP file from the given file name</li>
+		<li><strong><code>-texrange</code> N:</strong> Limit per-surface texture range to the given number of units, and subdivide surfaces like with <code>q3map_tessSize</code> if this is not met</li>
+		<li><strong><code>-tmpout</code>:</strong> Write the BSP file to /tmp</li>
+		<li><strong><code>-verboseentities</code>:</strong> Enable <code>-v</code> only for map entities, not for the world</li>
+	</ul>
+
+
+	<h2 id="VIS-stage">VIS stage<a href="#VIS-stage" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-vis</code> ... filename.map:</strong> Switch that enters this stage</li>
+		<li><strong><code>-fast</code>:</strong> Very fast and crude vis calculation</li>
+		<li><strong><code>-mergeportals</code>:</strong> The less crude half of <code>-merge</code>, makes vis sometimes much faster but doesn't hurt fps usually</li>
+		<li><strong><code>-merge</code>:</strong> Faster but still okay vis calculation</li>
+		<li><strong><code>-nopassage</code>:</strong> Just use PortalFlow vis (usually less fps)</li>
+		<li><strong><code>-nosort</code>:</strong> Do not sort the portals before calculating vis (usually slower)</li>
+		<li><strong><code>-passageOnly</code>:</strong> Just use PassageFlow vis (usually less fps)</li>
+		<li><strong><code>-saveprt</code>:</strong> Keep the PRT file after running vis (so you can run vis again)</li>
+		<li><strong><code>-tmpin</code>:</strong> Use /tmp folder for input</li>
+		<li><strong><code>-tmpout</code>:</strong> Use /tmp folder for output</li>
+	</ul>
+
+
+	<h2 id="LIGHT-stage">LIGHT stage<a href="#LIGHT-stage" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-light</code> ... filename.map:</strong> Switch that enters this stage</li>
+		<li><strong><code>-vlight</code> ... filename.map:</strong> Deprecated alias for <code>-light -fast</code> ... filename.map</li>
+		<li><strong><code>-approx</code> N:</strong> Vertex light approximation tolerance (never use in conjunction with deluxemapping)</li>
+		<li><strong><code>-areascale</code> F, <code>-area</code> F:</strong> Scaling factor for area lights (surfacelight)</li>
+		<li><strong><code>-border</code>:</strong> Add a red border to lightmaps for debugging</li>
+		<li><strong><code>-bouncegrid</code>:</strong> Also compute radiosity on the light grid</li>
+		<li><strong><code>-bounceonly</code>:</strong> Only compute radiosity</li>
+		<li><strong><code>-bouncescale</code> F:</strong> Scaling factor for radiosity</li>
+		<li><strong><code>-bounce</code> N:</strong> Number of bounces for radiosity</li>
+		<li><strong><code>-cheapgrid</code>:</strong> Use <code>-cheap</code> style lighting for radiosity</li>
+		<li><strong><code>-cheap</code>:</strong> Abort vertex light calculations when white is reached</li>
+		<li><strong><code>-compensate</code> F:</strong> Lightmap compensate (darkening factor applied after everything else)</li>
+		<li><strong><code>-cpma</code>:</strong> CPMA vertex lighting mode</li>
+		<li><strong><code>-custinfoparms</code>:</strong> Read scripts/custinfoparms.txt</li>
+		<li><strong><code>-dark</code>:</strong> Darken lightmap seams</li>
+		<li><strong><code>-debugaxis</code>:</strong> Color the lightmaps according to the lightmap axis</li>
+		<li><strong><code>-debugcluster</code>:</strong> Color the lightmaps according to the index of the cluster</li>
+		<li><strong><code>-debugdeluxe</code>:</strong> Show deluxemaps on the lightmap</li>
+		<li><strong><code>-debugnormals</code>:</strong> Color the lightmaps according to the direction of the surface normal</li>
+		<li><strong><code>-debugorigin</code>:</strong> Color the lightmaps according to the origin of the luxels</li>
+		<li><strong><code>-debugsurfaces</code>, <code>-debugsurface</code>:</strong> Color the lightmaps according to the index of the surface</li>
+		<li><strong><code>-debugunused</code>:</strong> This option does nothing</li>
+		<li><strong><code>-debug</code>:</strong> Mark the lightmaps according to the cluster: unmapped clusters get yellow, occluded ones get pink, flooded ones get blue overlay color, otherwise red</li>
+		<li><strong><code>-deluxemode 0</code>:</strong> Use modelspace deluxemaps (DarkPlaces)</li>
+		<li><strong><code>-deluxemode 1</code>:</strong> Use tangentspace deluxemaps</li>
+		<li><strong><code>-deluxe</code>, <code>-deluxemap</code>:</strong> Enable deluxemapping (light direction maps)</li>
+		<li><strong><code>-dirtdebug</code>, <code>-debugdirt</code>:</strong> Store the dirtmaps as lightmaps for debugging</li>
+		<li><strong><code>-dirtdepth</code>:</strong> Dirtmapping depth</li>
+		<li><strong><code>-dirtgain</code>:</strong> Dirtmapping exponent</li>
+		<li><strong><code>-dirtmode 0</code>:</strong> Ordered direction dirtmapping</li>
+		<li><strong><code>-dirtmode 1</code>:</strong> Randomized direction dirtmapping</li>
+		<li><strong><code>-dirtscale</code>:</strong> Dirtmapping scaling factor</li>
+		<li><strong><code>-dirty</code>:</strong> Enable dirtmapping</li>
+		<li><strong><code>-dump</code>:</strong> Dump radiosity from <code>-bounce</code> into numbered MAP file prefabs</li>
+		<li><strong><code>-export</code>:</strong> Export lightmaps when compile finished (like <code>-export</code> mode)</li>
+		<li><strong><code>-exposure</code> F:</strong> Lightmap exposure to better support overbright spots</li>
+		<li><strong><code>-external</code>:</strong> Force external lightmaps even if at size of internal lightmaps</li>
+		<li><strong><code>-extravisnudge</code>:</strong> Broken feature to nudge the luxel origin to a better vis cluster</li>
+		<li><strong><code>-extrawide</code>:</strong> Deprecated alias for <code>-super 2 -filter</code></li>
+		<li><strong><code>-extra</code>:</strong> Deprecated alias for <code>-super 2</code></li>
+		<li><strong><code>-fastbounce</code>:</strong> Use <code>-fast</code> style lighting for radiosity</li>
+		<li><strong><code>-faster</code>:</strong> Use a faster falloff curve for lighting; also implies <code>-fast</code></li>
+		<li><strong><code>-fastgrid</code>:</strong> Use <code>-fast</code> style lighting for the light grid</li>
+		<li><strong><code>-fast</code>:</strong> Ignore tiny light contributions</li>
+		<li><strong><code>-filter</code>:</strong> Lightmap filtering</li>
+		<li><strong><code>-floodlight</code>:</strong> Enable floodlight (zero-effort somewhat decent lighting)</li>
+		<li><strong><code>-gamma</code> F:</strong> Lightmap gamma</li>
+		<li><strong><code>-gridambientscale</code> F:</strong> Scaling factor for the light grid ambient components only</li>
+		<li><strong><code>-gridscale</code> F:</strong> Scaling factor for the light grid only</li>
+		<li><strong><code>-keeplights</code>:</strong> Keep light entities in the BSP file after compile</li>
+		<li><strong><code>-lightmapdir</code> directory:</strong> Directory to store external lightmaps (default: same as map name without extension)</li>
+		<li><strong><code>-lightmapsize</code> N:</strong> Size of lightmaps to generate (must be a power of two)</li>
+		<li><strong><code>-lomem</code>:</strong> Low memory but slower lighting mode</li>
+		<li><strong><code>-lowquality</code>:</strong> Low quality floodlight (appears to currently break floodlight)</li>
+		<li><strong><code>-minsamplesize</code> N:</strong> Sets minimum lightmap resolution in luxels/qu</li>
+		<li><strong><code>-nocollapse</code>:</strong> Do not collapse identical lightmaps</li>
+		<li><strong><code>-nodeluxe</code>, <code>-nodeluxemap</code>:</strong> Disable deluxemapping</li>
+		<li><strong><code>-nogrid</code>:</strong> Disable grid light calculation (makes all entities fullbright)</li>
+		<li><strong><code>-nolightmapsearch</code>:</strong> Do not optimize lightmap packing for GPU memory usage (as doing so costs fps)</li>
+		<li><strong><code>-normalmap</code>:</strong> Color the lightmaps according to the direction of the surface normal (TODO is this identical to <code>-debugnormals</code>?)</li>
+		<li><strong><code>-nostyle</code>, <code>-nostyles</code>:</strong> Disable support for light styles</li>
+		<li><strong><code>-nosurf</code>:</strong> Disable tracing against surfaces (only uses BSP nodes then)</li>
+		<li><strong><code>-notrace</code>:</strong> Disable shadow occlusion</li>
+		<li><strong><code>-novertex</code>:</strong> Disable vertex lighting</li>
+		<li><strong><code>-patchshadows</code>:</strong> Cast shadows from patches</li>
+		<li><strong><code>-pointscale</code> F, <code>-point</code> F:</strong> Scaling factor for point lights (light entities)</li>
+		<li><strong><code>-q3</code>:</strong> Use nonlinear falloff curve by default (like Q3A)</li>
+		<li><strong><code>-samplescale</code> F:</strong> Scales all lightmap resolutions</li>
+		<li><strong><code>-samplesize</code> N:</strong> Sets default lightmap resolution in luxels/qu</li>
+		<li><strong><code>-samples</code> N:</strong> Adaptive supersampling quality</li>
+		<li><strong><code>-scale</code> F:</strong> Scaling factor for all light types</li>
+		<li><strong><code>-shadeangle</code> A:</strong> Angle for phong shading</li>
+		<li><strong><code>-shade</code>:</strong> Enable phong shading at default shade angle</li>
+		<li><strong><code>-skyscale</code> F, <code>-sky</code> F:</strong> Scaling factor for sky and sun light</li>
+		<li><strong><code>-smooth</code>:</strong> Deprecated alias for <code>-samples 2</code></li>
+		<li><strong><code>-style</code>, <code>-styles</code>:</strong> Enable support for light styles</li>
+		<li><strong><code>-sunonly</code>:</strong> Only compute sun light</li>
+		<li><strong><code>-super</code> N, <code>-supersample</code> N:</strong> Ordered grid supersampling quality</li>
+		<li><strong><code>-thresh</code> F:</strong> Triangle subdivision threshold</li>
+		<li><strong><code>-trianglecheck</code>:</strong> Broken check that should ensure luxels apply to the right triangle</li>
+		<li><strong><code>-trisoup</code>:</strong> Convert brush faces to triangle soup</li>
+		<li><strong><code>-wolf</code>:</strong> Use linear falloff curve by default (like W:ET)</li>
+	</ul>
+
+
+	<h2 id="Analyzing-BSP-like-file-structure">Analyzing BSP-like file structure<a href="#Analyzing-BSP-like-file-structure" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-analyze</code> ... filename.bsp:</strong> Switch that enters this mode</li>
+		<li><strong><code>-lumpswap</code>:</strong> Swap byte order in the lumps</li>
+	</ul>
+
+
+	<h2 id="Converting-xx-Decompiling">Converting &#38; Decompiling<a href="#Converting-xx-Decompiling" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-convert</code> ... filename.bsp:</strong> Switch that enters this mode</li>
+		<li><strong><code>-de</code> number:</strong> Distance epsilon for the conversion</li>
+		<li><strong><code>-format</code> converter:</strong> Select the converter (available: map, ase, or game names)</li>
+		<li><strong><code>-ne</code> F:</strong> Normal epsilon for the conversion</li>
+		<li><strong><code>-shadersasbitmap</code>:</strong> (only for ase) use the shader names as *BITMAP key so they work as prefabs</li>
+	</ul>
+
+
+	<h2 id="Exporting-lightmaps">Exporting lightmaps<a href="#Exporting-lightmaps" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-export</code> filename.bsp:</strong> Copies lightmaps from the BSP to filename/lightmap_0000.tga ff</li>
+	</ul>
+
+
+	<h2 id="Fixing-AAS-checksum">Fixing AAS checksum<a href="#Fixing-AAS-checksum" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-fixaas</code> filename.bsp:</strong> Switch that enters this mode</li>
+	</ul>
+
+
+	<h2 id="Get-info-about-BSP-file">Get info about BSP file<a href="#Get-info-about-BSP-file" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-info</code> filename.bsp:</strong> Switch that enters this mode</li>
+	</ul>
+
+
+	<h2 id="Importing-lightmaps">Importing lightmaps<a href="#Importing-lightmaps" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-import</code> filename.bsp:</strong> Copies lightmaps from filename/lightmap_0000.tga ff into the BSP</li>
+	</ul>
+
+
+	<h2 id="MiniMap">MiniMap<a href="#MiniMap" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-minimap</code> ... filename.bsp:</strong> Creates a minimap of the BSP, by default writes to <code>../gfx/filename_mini.tga</code></li>
+		<li><strong><code>-black</code>:</strong> Write the minimap as a black-on-transparency RGBA32 image</li>
+		<li><strong><code>-boost</code> F:</strong> Sets the contrast boost value (higher values make a brighter image); contrast boost is somewhat similar to gamma, but continuous even at zero</li>
+		<li><strong><code>-border</code> F:</strong> Sets the amount of border pixels relative to the total image size</li>
+		<li><strong><code>-gray</code>:</strong> Write the minimap as a white-on-black GRAY8 image</li>
+		<li><strong><code>-keepaspect</code>:</strong> Ensure the aspect ratio is kept (the minimap is then letterboxed to keep aspect)</li>
+		<li><strong><code>-minmax</code> xmin ymin zmin xmax ymax zmax:</strong> Forces specific map dimensions (note: the minimap actually uses these dimensions, scaled to the target size while keeping aspect with centering, and 1/64 of border appended to all sides)</li>
+		<li><strong><code>-nokeepaspect</code>:</strong> Do not ensure the aspect ratio is kept (makes it easier to use the image in your code, but looks bad together with sharpening)</li>
+		<li><strong><code>-o</code> filename.tga:</strong> Sets the output file name</li>
+		<li><strong><code>-random</code> N:</strong> Sets the randomized supersampling count (cannot be combined with <code>-samples</code>)</li>
+		<li><strong><code>-samples</code> N:</strong> Sets the ordered supersampling count (cannot be combined with <code>-random</code>)</li>
+		<li><strong><code>-sharpen</code> F:</strong> Sets the sharpening coefficient</li>
+		<li><strong><code>-size</code> N:</strong> Sets the width and height of the output image</li>
+		<li><strong><code>-white</code>:</strong> Write the minimap as a white-on-transparency RGBA32 image</li>
+	</ul>
+
+
+	<h2 id="Scaling">Scaling<a href="#Scaling" class="wiki-anchor">&para;</a></h2>
+
+
+	<ul>
+	<li><strong><code>-scale</code> S filename.bsp:</strong> Scale uniformly</li>
+		<li><strong><code>-scale</code> SX SY SZ filename.bsp:</strong> Scale non-uniformly</li>
+		<li><strong><code>-scale -tex</code> S filename.bsp:</strong> Scale uniformly without texture lock</li>
+		<li><strong><code>-scale -tex</code> SX SY SZ filename.bsp:</strong> Scale non-uniformly without texture lock</li>
+	</ul>
+</div>
+
+
+
+
+
+
+<p class="other-formats">Экспортировать в
+	<span><a href="/projects/netradiant/wiki/Complete_list_of_command_line_parameters?format=html&amp;version=3" class="html" rel="nofollow">HTML</a></span>
+	<span><a href="/projects/netradiant/wiki/Complete_list_of_command_line_parameters?format=txt&amp;version=3" class="txt" rel="nofollow">TXT</a></span>
+</p>
+
+
+
+
+
+
+
+        
+				<div style="clear:both;"></div>
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display:none;"><span>Загрузка...</span></div>
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2010 Jean-Philippe Lang
+</div>
+</div>
+
+</body>
+</html>
