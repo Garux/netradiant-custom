@@ -40,19 +40,12 @@ void BitmapsPath_set( const char* path ){
 
 GdkPixbuf* pixbuf_new_from_file_with_mask( const char* filename ){
 	GError *error = nullptr;
-	GdkPixbuf* rgb = gdk_pixbuf_new_from_file( filename, &error );
-	if ( rgb == 0 ) {
+	GdkPixbuf* rgba = gdk_pixbuf_new_from_file( filename, &error );
+	if ( rgba == 0 ) {
 		globalErrorStream() << "ERROR: gdk_pixbuf_new_from_file(): " << error->message << "\n";
 		g_error_free( error );
-		return 0;
 	}
-	else
-	{
-		//GdkPixbuf* rgba = gdk_pixbuf_add_alpha( rgb, TRUE, 255, 0, 255 ); //pink to alpha
-		GdkPixbuf* rgba = gdk_pixbuf_add_alpha( rgb, FALSE, 255, 0, 255 ); //alpha
-		g_object_unref( rgb );
-		return rgba;
-	}
+	return rgba;
 }
 
 GtkImage* image_new_from_file_with_mask( const char* filename ){
