@@ -52,11 +52,10 @@ with MBSPC:
 
 <p>
 When MBSPC is used for converting BSP files to MAP files, the correct
-texture name is written for every brush side. However, texture alignment
-info (shift, scale, rotation) is not written to the MAP file. It is not
-trivial to obtain this info from the BSP, and I did not need it when I
-coded this modification, sorry. If you need this functionality, add the
-necessary code.
+texture name is written for every brush side. However, correct texture alignment
+info (shift, scale, rotation) is not written to the MAP file, when converting Quake 3 maps.
+As for Quake 1/2, SiN and Half-Life, alignment info is half right for regular map format (-bsp2map)
+and is correct, when using Valve 220 one (-bsp2map220).
 
 <p>
 <h3>Usage</h3>
@@ -100,6 +99,7 @@ List of options recognized by MBSPC:
    onlyents         file.bsp        update entity list from file.ent(*)  file.bsp
    texinfo          file.bsp        extract texture list                 file.txi
    bsp2map          file.bsp        create MAP from BSP                  file.map
+   bsp2map220       file.bsp        create Valve 220 MAP from BSP        file.map
    bsp2aas          file.bsp        create AAS from BSP                  file.aas
    reach            file.bsp        compute reachability and clusters    file.aas
    cluster          file.aas        compute clusters                     file.aas
@@ -141,7 +141,7 @@ Several metacharacter may be used in the paths of the input file:
 <p>
 .pk3 files are accessed as if they are normal folders. For instance
 use "d:\quake3\baseq3\pak0.pk3\maps/q3dm1.bsp" to access the
-map q3dm1.bsp from the pak0.pk3 file. 
+map q3dm1.bsp from the pak0.pk3 file.
 
 <p>
 Multiple files may be listed after the switches bsp2map, bsp2aas, reach,
