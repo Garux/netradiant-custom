@@ -67,7 +67,6 @@
 
 <h3>q3map_alphaMod dotproduct ( X Y Z )</h3>
 <p>Used to blend textures using alphaFunc or blendFunc in the shader's second pass, with the transparency depending on the surface's normal axis vector. This is achieved by taking the user specified vector ( X Y Z ) and applying a dotproduct calculation with the generated vertex normal vector to yield a normalized vertex alpha value. The dot product operation multiplies each element of one vector against the corresponding elements of a second vector, then adds them:</p>
-<p>Used to blend textures using alphaFunc or blendFunc in the shader's second pass, with the transparency depending on the surface's normal axis vector. This is achieved by taking the user specified vector ( X Y Z ) and applying a dotproduct calculation with the generated vertex normal vector to yield a normalized vertex alpha value. The dot product operation multiplies each element of one vector against the corresponding elements of a second vector, then adds them:</p>
 <pre>
 ( 0 0 1 ) dp ( 0 0 1 ) = 0 * 0 + 0 * 0 + 1 * 1 = 1
 ( 0 0 1 ) dp ( 0 0 0.5 ) = 0 * 0 + 0 * 0 + 1 * 0.5 = 0.5
@@ -82,33 +81,39 @@
 [ ( 0 0 1 ) dp ( 0 0 0.5 ) ]<sup>2</sup> = ( 0 * 0 + 0 * 0 + 1 * 0.5 )<sup>2</sup> = 0.25
 [ ( 0.5 0.5 1 ) dp ( 0 0.5 0.5 ) ]<sup>2</sup> = ( 0.5 * 0 + 0.5 * 0.5 + 1 * 0.5 )<sup>2</sup> = 0.5625
 </pre>
-<p>Example q3map_dotproduct shader for terrain:</p>
+<p>Example q3map_dotproduct2 shader for terrain:</p>
 <pre>
-textures/shaderlab_vector_1/rock_1_z_lodterrain
+textures/shaderlab_terrain/dirt_rock_grass
 {
 	//Used for radiosity lighting
-	q3map_lightImage textures/shaderlab_vector_1/rock_1.tga
+	q3map_lightImage textures/shaderlab_terrain/snow_1.tga
 
 	q3map_nonplanar
 	q3map_shadeAngle 179
-	q3map_tcGen ivector ( 512 0 0 ) ( 0 512 0 )
-	q3map_tcMod rotate 33
 	q3map_lightmapAxis z
 
-	// this means dot product squared, for faster falloff between vertical and horizontal planes
-	q3map_alphaMod dotproduct2 ( 0 0 0.95 )
+	q3map_tcGen ivector ( 2048 0 0 ) ( 0 2048 0 )
+	q3map_tcMod rotate 33
 
-	surfaceparm nonsolid
-	surfaceparm pointlight
+	// this means dot product squared, for faster falloff between vertical and horizontal planes
+	q3map_alphaMod dotproduct2 ( 0 0 0.825 )
 
 	{
-		map textures/shaderlab_vector_1/rock_1.tga
-		rgbGen vertex
+		map textures/shaderlab_terrain/rock_1.tga
+		rgbGen identity
 	}
 	{
-		map textures/slterra/sand_1.tga
+		map textures/shaderlab_terrain/snow_1.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		rgbGen vertex
+		alphaFunc GE128
+		rgbGen identity
+		alphaGen vertex
+		tcMod scale 7 7
+	}
+	{
+		map $lightmap
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
 	}
 }
 </pre>
@@ -159,7 +164,7 @@ textures/shaderlab_vector_1/rock_1_z_lodterrain
 <p>Automatically clips misc_model entities for player and weapon collision. This should only be used on large models such as terrain (not small decorative models - manually clip those). The shader's surfaceparms are inherited by the magic clip brush, so if you have surfaceparm nonsolid in your model's shader that uses q3map_clipModel, then the brush will also be non-solid. This can also be set on a per model basis with the entity key/value pair, spawnflags 2.</p>
 
 <h2 id="q3map_cloneShader">q3map_cloneShader shadername</h2>
-<p>A shader with this directive will inherit the target shader's properties and appearance. Be careful, this can lead to an infinite loop if a cloning shader references another cloning shader or itself.</p>
+<p>Clones surface and applies target shader's properties and appearance to clone. Be careful, this can lead to an infinite loop if a cloning shader references another cloning shader or itself.</p>
 
 <h2 id="q3map_colorGen">q3map_colorGen func</h2>
 <p>Currently takes a single function, const. This directive is used to set a surfaces vertex color values. q3map_colorGen operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage. Same as q3map_rgbGen.</p>

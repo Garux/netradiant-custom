@@ -265,7 +265,7 @@ textures/obsidian_video/intro
 <p>Colors will be (1.0, 1.0, 1.0) if running without overbright bits (NT, Linux, windowed modes), or (0.5, 0.5, 0.5) if running with overbright. Overbright allows a greater color range at the expense of a loss of precision. Additive and blended stages will get this by default.</p>
 
 <h3>rgbGen vertex</h3>
-<p>Colors are filled in directly by the data from the map or model files. User rgbGen vertex + alphaGen const or rgbGen exactVertex to disable surfaces from being affected by alphaMod volumes.
+<p>Colors are filled in directly by the data from the map or model files. Use rgbGen vertex + alphaGen const or rgbGen exactVertex to disable surfaces from being affected by alphaMod volumes.
 <blockquote>
 	<h4>Design Notes:</h4>
 	<p>rgbGen vertex  should be used when you want the RGB values to be computed for a static model (i.e. mapobject) in the world using precomputed static lighting from Q3BSP. This would be used on things like the gargoyles, the portal frame, skulls, and other decorative models put into the Quake III Arena world.</p>
@@ -275,7 +275,7 @@ textures/obsidian_video/intro
 <p>As rgbGen vertex, but inverted. This keyword would probably not be used by a level designer.</p>
 
 <h3>rgbGen exactVertex</h3>
-<p>Like vertex, except exactVertex ignores overbrightbits. Generally brighter under default settings.</p>
+<p>Like vertex, except vertex ignores overbrightbits. Engine uses this mode in default shaders for vertexlit surfaces. Generally brighter under default settings.</p>
 
 <h3>rgbGen fromVertex</h3>
 <p>(Pending)</p>
