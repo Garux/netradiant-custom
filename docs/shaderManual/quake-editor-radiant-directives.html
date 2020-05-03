@@ -1,0 +1,104 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="dir_qer">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>Radiant Editor Directives</h1>
+<p>These directives only affect the texture when it is seen in the Radiant editor. They have no effect on the surface in-game. They should be grouped with the surface parameters but ahead of them in sequence.</p>
+
+<h2 id="editorImage">qer_editorImage textureName</h2>
+<p>This directive creates a shader name in memory, but in the editor, it displays the TGA art image specified in qer_editorImage (in the shader below this is, textures/eerie/lavahell.tga).</p>
+<p>The editor maps a texture using the size attributes of the TGA file used for the editor image. When that editor image represents a shader, any texture used in any of the shader stages will be scaled up or down to the dimensions of the editor image. If a 128x128 pixel image is used to represent the shader in the editor, then a 256x256 image used in a later stage will be shrunk to fit. A 64x64 image would be stretched to fit. Be sure to check this on bouncy, acceleration, and power-up pads placed on surfaces other than 256 x 256. Use tcMod scale to change the size of the stretched texture. Remember that tcMod scale 0.5 0.5 will double your image, while tcMod scale 2 2 will halve it.</p>
+<pre>
+textures/liquids/lavahell2			//path and name of new texture
+{
+	qer_editorImage textures/eerie/lavahell.tga	//based on this
+	qer_nocarve			//cannot be cut by CSG subtract
+	surfaceparm noimpact			//projectiles do not hit it
+	surfaceparm lava			//has the game properties of lava
+	surfaceparm nolightmap		//environment lighting does not affect
+	q3map_surfacelight 3000		//light is emitted
+	tessSize 256			//relatively large triangles
+	cull disable				//no sides are removed
+	deformVertexes wave 100 sin 5 5 .5 0.02
+	fogparms 0.8519142 0.309723 0.0 128 128
+	{
+		maptextures/eerie/lavahell.tga	//base texture artwork
+		tcMod turb .25 0.2 1 0.02	//texture is subjected to turbulence
+		tcMod scroll 0.1 0.1		//the turbulence is scrolled
+	}
+}
+</pre>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>The base_light and gothic_light shaders contain numerous uses of this. It can be very useful for making different light styles (mostly to change the light brightness) without having to create a new piece of TGA art for each new shader.</p>
+</blockquote>
+
+<h2 id="noCarve">qer_noCarve</h2>
+<p>A brush marked with this instruction will not be affected by CSG subtract functions. It is especially useful for water and fog textures.</p>
+
+<h2 id="trans">qer_trans N.N</h2>
+<p>This directive defines the percentage of transparency that a brush will have when seen in the editor (no effect on game rendering at all). It can have a positive value between 0 and 1. The higher the value, the less transparent the texture. Example: qer_trans 0.2 means the brush is 20% opaque and nearly invisible.</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>On GtkRadiant 1.4 and earlier, if the shader uses qer_trans and a qer_editorImage with an alpha channel, the transparent areas of the editorImage will be 100% transparent. To keep the solid areas of the editorImage opaque, use a near 1 value for qer_trans (eg. 0.9999). This is useful for grates, windows, fences, etc. If using GtkRadiant 1.5 or later, use qer_alphaFunc for editorImage masking instead.</p>
+</blockquote>
+
+<h2 id="alphaFunc">qer_alphaFunc func N.N</h2>
+<p>This directive is only supported by GtkRadiant 1.5 based editors. This is used when you have an alpha channel in the editorImage that you want to appear as an alpha mask in the editor. qer_alphaFunc by itself does not get filtered with qer_trans. This is useful for grates, windows, fences, etc.</p>
+
+<p>Supported functions are: equal, greater, less, gequal, lequal.<br>Values: positive between 0 and 1.</p>
+
+<img src="qer_alphafunc.jpg" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_images/qer_alphafunc.jpg" alt="Grates using qer_alphaFunc" class="center" />
+
+</body>
+</html>

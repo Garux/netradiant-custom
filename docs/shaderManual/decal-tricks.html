@@ -1,0 +1,133 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="articles">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<div id="header"><!-- START HEADER -->
+
+<h1>Advanced Decal Tricks 101</h1>
+
+</div><!-- END HEADER -->
+<div id=content><!-- START CONTENT-->
+
+<h2>Multiplicative Decals</h2>
+
+<p>Instead of doing blended or additive decals, sometimes the best effect is actually a multiply:</p>
+
+<pre>
+blendFunc GL_DST_COLOR GL_ZERO
+</pre>
+
+<p>The source texture is white with yellow/blue (or whatever) arrow on it. Combined with polygonOffset and perhaps a sort key, this can be a great way to get a decal effect that works okay with bullet marks and player shadows.</p>
+
+<h2>Inverse Multiplicative Shadows</h2>
+
+<p>While the above trick works well 95% of the time, sometimes you need to use fog. In order for a multiplicative decal to face out properly in fog, it has to be inverted, and using an inverse blendFunc:</p>
+
+<pre>
+blendFunc GL_ZERO GL_ONE_MINUS_SRC_COLOR
+</pre>
+
+<p>The source image will be negative of the above image, (white = black, blue = yellow, etc). This is the trick that the player shadow mark shader use.</p>
+
+<img src="decal_geisha.jpg" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_images/decal_geisha.jpg" alt="Original and inverted texture" class="center" />
+
+<pre>
+textures/obsidian-blastburn_decals/p-geisha
+{
+	noPicMip
+	//draws polygons of this shader just above coplanar surface
+	polygonOffset
+	//prevents bounce from affecting this shader
+	q3map_bounceScale 0
+	surfaceparm detail
+	surfaceparm nomarks
+	surfaceparm nonsolid
+	{
+		map textures/obsidian-blastburn_decals/p-geisha.tga
+		//inverse multiplicative blend (TGA channels inverted)
+		blendFunc GL_ZERO GL_ONE_MINUS_SRC_COLOR
+	}
+}
+</pre>
+
+<h2>Using _decal Entities</h2>
+
+<p>Sometimes laying out perfect patch meshes aligned with geometry is too much of a pain in the ass. Enter _decal entities. Add the following to your entities.def (Enemy Territory mappers should already have it):</p>
+
+<pre>
+/*QUAKED _decal (0 1.0 0) ?
+-------- KEYS --------
+"target" : the name of the entity targetted at for projection
+-------- SPAWNFLAGS --------
+(none)
+-------- NOTES --------
+Compiler-only entity that specifies a decal to be projected. Should contain 1 or more patch meshes (curves) and target an info_null entity. The distance between the center of the _decal entity and the target is the axis and distance of projection.
+*/
+</pre>
+
+<p>Make a simple patch mesh (it can be bent, but the quads in Radiant must be rectangular), select it and use the right-click context menu to turn it into a _decal entity. Target an info_null below the _decal entity and compile. Everything between the decal patch and the info_null will have a decal projected onto it.</p>
+
+<img src="decal.jpg" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_images/decal.jpg" alt="_decal Entity" class="center" />
+
+<p>Make sure you compile with a recent (post-2.5) version of Q3Map2 with _decal support.</p>
+
+<p>It will project onto terrain, brushes, models, patches, whatever. To suppress decals on particular shaders, use surfaceparm nomarks.</p>
+
+<p>Happy decaling!</p>
+
+<p>-ydnar</p>
+
+</div><!-- END CONTENT-->
+
+</body>
+</html>

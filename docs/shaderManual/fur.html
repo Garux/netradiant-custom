@@ -1,0 +1,110 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="articles">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>Fur</h1>
+<p>"Fur" shaders allow a surface to replicate itself or another shader above its surface in multiple layers. Care should be taken when using fur shaders, they can quickly cause drops in performance.</p>
+
+<img src="fur.jpg" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_images/fur.jpg" width="400" height="300" alt="Tribble" class="center" />
+
+<h2>q3map_cloneShader</h2>
+<p><a href="file:///C:/Users/Emile/Desktop/Web%20Projects/docs/shader_manual_2.4_2010-04/q3map-global-directives.html#q3map_cloneShader">q3map_cloneShader</a> allows the base shader to inherit the target shader's properties and appearance. Beware not to reference another cloning shader or itself as this can lead to an infinite loop. For fur, the base shader is the texture applied to the polygon surface.</p>
+
+<pre>
+// base texture
+textures/fur/pink_base
+{
+	// points to the fur shader (see below)
+	q3map_cloneshader textures/fur/pink_fur
+	{
+		map $lightmap
+	}
+	{
+		map textures/fur/pink_base.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+	}
+}
+</pre>
+
+<h2>q3map_fur</h2>
+<p><a href="file:///C:/Users/Emile/Desktop/Web%20Projects/docs/shader_manual_2.4_2010-04/q3map-global-directives.html#q3map_fur">q3map_fur</a> generates additional surfaces above the base shader. The q3map_fur directive takes a few values: layers, offset and fade. Layers controls the number of surfaces generated (start with low values, high values will very quickly cause a reduction in performance). Offset controls the distance between layers. Fade controls how much each additional layer fades in addition to its previous layer. The fur shader shouldn't be applied to surface geometry as it is implicitly generated above the base shader.</p>
+
+<pre>
+// fur texture
+textures/fur/pink_fur
+{
+	q3map_lightimage textures/fur/pink_fur.q3map.tga
+
+	q3map_notjunc
+	q3map_nonplanar
+	q3map_bounce 0.0
+	q3map_shadeangle 120
+
+	// format: q3map_fur <layers> <offset> <fade>
+	q3map_fur 8 1.25 0.1
+
+	surfaceparm trans
+	surfaceparm pointlight
+	surfaceparm alphashadow
+	surfaceparm nonsolid
+	surfaceparm noimpact
+
+	nomipmaps
+	{
+		map textures/fur/pink_fur.tga
+		//alphaFunc GE128
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+</pre>

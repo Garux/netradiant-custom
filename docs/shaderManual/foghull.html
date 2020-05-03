@@ -1,0 +1,108 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="articles">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>Foghull</h1>
+<p>Most recent Quake III engine games are programmed with a feature known as distance clipping used to clip (cull) map geometry beyond a user set distance. At the time of Quake III Arena's release, distance clipping was not an available feature. The Q3Map2 foghull feature was designed to simulate true distance clipping for Quake III Arena and Team Arena games.</p>
+
+<h2>What is a Foghull?</h2>
+<p>Farplane distance clipping is a feature used to cull (remove) the drawing of polygons beyond a certain distance from the player in an attempt to improve performance. It is typically used on large, open terrain maps with little vis-blocking structures. Through the use of distance clipping a maximum vis distance is set, which provides the culling of rendered polygons. Fog is used to hide the effect of polygons appearing and disappearing by obscuring the maximum distance that the player can see.</p>
+
+<p>Since distance clipping is not a feature natively built into Quake III Arena, using distance culling would result in a hall of mirrors (HOM) effect where the culled geometry begins, since nothing is being drawn in the frame buffer. To compensate for this, the foghull feature uses a series of six skybox images that are drawn in place of the absent culled geometry, thus preventing the HOM effect.</p>
+
+<h2>Skybox Images</h2>
+<p>The skybox images used with the foghull feature should never be actually seen since the idea is to use the fog to obsure the maximum distance that the player can see. It only exists to prevent the HOM effect. To pull this off in a convincing manner, the skybox images should be six identical 8x8 pixel (to save on texture memory) textures each filled with a flat color matching the exact color of the fog. The six skybox images must be named in accordance to the skyParms farbox convention, using the _ft, _rt, _bk, _lf, _up, _dn suffixes.</p>
+
+<h2>Foghull Shaders</h2>
+<p>Two shaders are required when using the foghull feature, a fog volume shader and a skybox shader, both of which are simple, standard shaders.</p>
+
+<p>The color of the fog used must match the color used in the skybox images. Any decent image editing software will give you the three RGB color values of your skybox images, which must be normalized by dividing by 255. As with any other fog shader, the fogParms and surfaceparm fog keywords must be present.</p>
+
+<pre>
+textures/env/fog1024
+{
+	fogParms ( 0.8 0.8 0.8 ) 1024	//Normalized RGB, distance to opaque
+
+	surfaceparm fog		//Must be used
+	surfaceparm nolightmap
+	surfaceparm nonsolid
+	surfaceparm trans
+
+	qer_editorImage textures/sfx/fog_grey.tga
+	qer_trans 0.4
+}
+</pre>
+
+<p>The skyParms and surfaceparm sky keywords must be used to create the skybox "hull" of the map. The skyParms farbox value must point to the base name of the skybox images (sans suffix). Optional surface emitted sun lighting can be added using q3map_skylight with q3map_sun or q3map_sunExt (see Appendix I: Light Emitting Shaders).</p>
+
+<pre>
+textures/skies/foghullsky
+{
+	skyParms textures/skies/foghullsky 0 -	//farbox cloudheight nearbox
+
+	surfaceparm nolightmap
+	surfaceparm nonsolid
+	surfaceparm sky			//Must be used
+	surfaceparm trans
+}
+</pre>
+
+<h2>Entity Key Value Pairs</h2>
+<p>To activate the foghull feature, the _foghull and _farplanedist worldspawn entity key/value pairs must be set in the Entity Inspector (in Radiant, select any non-entity brush and press "N").</p>
+
+<p>The _foghull key's value works similar to that of terrain entities. It must point to the name of the skybox shader, minus the standard "textures/" prefix. For the skybox shader example above with the shader name "textures/skies/foghullsky", you would use a _foghull value of "skies/foghullsky".</p>
+
+<p>The _farplanedist value is simply the distance at which polygons will begin to get culled. One important note is that the _farplanedist value must be greater than the distance to opaque value set in the fog shader. In the above fog shader, the distance to opaque value was set to 1024 game units. The _farplanedist value must therefore be greater than 1024, otherwise the HOM effect will appear.</p>
+
+</body>
+</html>

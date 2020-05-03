@@ -1,0 +1,202 @@
+* { margin: 0; padding: 0; }
+
+.hide { display: none; }
+.invisible { visibility: hidden; }
+
+.center {
+	display: block;
+	clear: both;
+	margin: 1em auto 1em auto;
+}
+
+.right {
+	float: right;
+	padding-left: 32px;
+}
+
+.left {
+	float: left;
+	padding-right: 32px;
+}
+
+.clear {
+	clear: both;
+}
+
+html { background-color: #eee; }
+
+body {
+	font: 0.9em/1.5em Verdana, Lucida, Lucida Sans, Helvetica, Ariel, Sans-serif;
+	background-color: white;
+	width: 768px;
+	margin: 0 auto 0 auto;
+	padding: 1em 32px 4em 32px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 1em 0 1em 0;
+}
+
+h2 {
+	line-height: 32px;
+	text-indent: 38px;
+	background: transparent url("ql_32.png"/*tpa=http://robotrenegade.com/q3map2/docs/shader_manual/_images/ql_32.png*/) no-repeat;
+}
+
+*+h2 {
+	margin-top: 2em;
+}
+
+p { margin-bottom: 1em; }
+
+blockquote
+{
+	margin: 1em 32px 1em 32px;
+	padding: 0 1em 0 1em;
+	font-size: 0.9em;
+	line-height: normal;
+	color: #444;
+	background-color: #ffe;
+	border: 1px #ccc solid;
+	text-align: justify;
+}
+
+blockquote h4 { margin-top: 0.5em; }
+
+pre {
+	margin: 1em 0 1em 0;
+	padding: 0.5em 1em 0.5em 1em;
+	max-height: 25.2em;
+	overflow: auto;
+	background-color: #eee;
+	border: 1px solid #ccc;
+	font-size: 0.9em;
+	line-height: normal;
+}
+
+a { text-decoration: none; color: #29387b; background-color: transparent; }
+a:hover { text-decoration: underline; color: #349; background-color: transparent; }
+a img { border: 0; }
+
+ul+p { margin-top: 1em; }
+
+li { margin-left: 2em; }
+
+#contents li { list-style: none; }
+
+dl {
+	margin-bottom: 1em;
+	line-height: normal;
+}
+
+dt {
+	font-weight: bold;
+	margin-top: 0.5em;
+}
+
+dd {
+	border-left: 2px solid #000;
+	margin: 0 0 0 4em;
+	padding-left: 0.5em;
+}
+
+
+
+
+#nav {
+	z-index: 100;
+	position: fixed;
+	display: block;
+	width: 32px;
+	height: 32px;
+	top: 16px;
+	right: 0;
+	font-size: 8pt;
+}
+
+#navtop {
+	position: relative;
+	height: 8px;
+	width: 256px;
+	background: url("navtop.png"/*tpa=http://robotrenegade.com/q3map2/docs/shader_manual/_images/navtop.png*/) no-repeat;
+}
+
+#navlow {
+	position: relative;
+	top: 0;
+	height: 8px;
+	width: 256px;
+	background: url("navlow.png"/*tpa=http://robotrenegade.com/q3map2/docs/shader_manual/_images/navlow.png*/) no-repeat;
+}
+
+#navbutton {
+	display: block;
+	height: 32px;
+	width: 32px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	background: url("nav.png"/*tpa=http://robotrenegade.com/q3map2/docs/shader_manual/_images/nav.png*/) no-repeat;
+}
+
+#navbutton ul {
+	display: block;
+	position: fixed;
+	width: 256px;
+	top: 16px;
+	right: 0;
+	display: none;
+}
+
+/* Major */
+#navbutton ul li {
+	position: relative;
+	margin: 0;
+	padding: 0 0 1em 16px;
+	list-style: none;
+	line-height: 1.6em;
+	font-weight: bold;
+	border-left: 1px solid #ccc;
+	background-color: #fff;
+}
+
+/* Minor */
+#navbutton ul li ul {
+	position: relative;
+	top: 0;
+}
+
+#navbutton ul li ul li {
+	position: relative;
+	padding: 0 0 0 2em;
+	font-weight: normal;
+	font-size: 7pt;
+	border: none;
+}
+
+
+
+#navbutton:hover ul { display: block; }
+
+
+
+
+
+
+/* Index */
+#index { width: 600px; margin: 0 auto 0 auto; background-color: #eee; }
+
+#v-space { width: 600px; position: absolute; top: 15%; }
+
+#q3map2sm { height: 54px; border: 1px #ccc solid; background: white url("title.gif"/*tpa=http://robotrenegade.com/q3map2/docs/shader_manual/_images/title.gif*/) no-repeat 50%; }
+
+#screenie { height: 255px; margin: 0; padding: 0; background: transparent url("titleImage.jpg"/*tpa=http://robotrenegade.com/q3map2/docs/shader_manual/_images/titleImage.jpg*/) no-repeat; }
+#screenie a { display: block; width: 600px; height: 255px; margin: 0; text-indent: -1000em; }
+
+#footer { color: #999; clear: both; font: 8pt/1.5em verdana,arial,sans-serif; }
+#footer a, #footer a:link, #footer a:visited { color: #999; }
+#footer a:hover, #footer a:active { color: gray; }
+#footer #left { float: left; }
+#footer #right { float: right; }
+
+#q3map2logo { position: absolute; right: 8px; bottom: 8px; }

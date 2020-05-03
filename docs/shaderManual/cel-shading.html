@@ -1,0 +1,98 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="articles">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>Cel Shading</h1>
+
+<p>Cel shading is the technique used to make your maps render like cartoons, with black (or other color) solid outlines tracing hard edges.</p>
+
+In order for celshading to work properly, you must use -meta  when compiling the BSP.
+The funny little nonplanar/shadeangle/invert/offset nonsense in cel.shader is what makes it work properly.
+You'll know when it's working when it starts taking about 10-20x as long to make the BSP.
+
+<pre>
+// ink shader for maps
+// to use, add "cel" to shaderlist.txt
+// add a "_celshader" key to worldspawn entity with a value of "cel/ink"
+
+textures/cel/ink
+{
+    qer_editorimage gfx/colors/black.tga
+
+    q3map_notjunc
+    q3map_nonplanar
+    q3map_bounce 0.0
+    q3map_shadeangle 120
+    q3map_texturesize 1 1
+    q3map_invert                //inverts drawing surface for backfacing hull
+    q3map_offset -2.0           //offsets surface by the specified distance
+
+    surfaceparm nolightmap
+    surfaceparm trans
+    surfaceparm nonsolid
+    surfaceparm nomarks
+
+    sort 16
+
+    {
+        map gfx/colors/black.tga
+        rgbGen identity
+    }
+}
+</pre>
+
+
+
+
+</body>
+</html>

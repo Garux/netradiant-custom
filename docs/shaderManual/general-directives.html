@@ -1,0 +1,199 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="dir_general">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>General Directives</h1>
+<p>General shader directives are global and affect all stages. They are read by the game engine only and are ignored by Q3Map2.</p>
+
+<h2 id="skyParms">skyParms farbox cloudheight nearbox</h2>
+<p>Specifies how to use the surface as a sky, including an optional far box (stars, moon, etc), optional cloud layers with any shader attributes, and an optional near box (mountains in front of the clouds, etc).</p>
+<dl>
+	<dt>farbox</dt><dd>Specifies a set of files to use as an environment box behind all cloudlayers. Specify "-" for no farbox, or a file base name. A base name of "env/test" would look for files "env/test_rt.tga", "env/test_lf.tga", "env/test_ft.tga", "env/test_bk.tga", "env/test_up.tga", "env/test_dn.tga" to use as the right, left, front, back, up, and down sides.</dd>
+	<dt>cloudheight</dt><dd>Controls apparent curvature of the cloud layers - lower numbers mean more curvature (and thus more distortion at the horizons). Higher height values create "flatter" skies with less horizon distortion. Think of height as the radius of a sphere on which the clouds are mapped. Good ranges are 64 to 256. The default value is 128.</dd>
+	<dt>nearbox</dt><dd>Specified as farbox, to be alpha blended ontop of the clouds. This has not be tested in a long time, so it probably doesn't actually work. Set to "-" to ignore.</dd>
+</dl>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>If you are making a map where the sky is seen by looking up most of the time, use a lower cloudheight value. Under those circumstances the tighter curve looks more dynamic. If you are making a map where the sky is seen by looking out windows most of the time or has a map area that is open to the sky on one or more sides, use a higher height to make the clouds seem more natural.</p>
+	<p>It is possible to create a sky with up to 8 cloudlayers (I don't think this is a physical limit, more of a practical one - see below), but that also means 8 processing passes and a potentially large processing hit.</p>
+	<p>Be aware that the skybox does not wrap around the entire world. The "floor" or bottom face of the skybox is not drawn by the game. If a player in the game can see that face, they will see the "hall of mirrors" effect.</p>
+	<p>There's a bug in Quake 3 (but fixed in Enemy Territory) that causes a shader vertex overflow (SHADER_MAX_VERTEXES HIT IN FILLCLOUD SKY SIDE) if too many cloud layers are used in maps with a lot of visible sky. To compensate, either reduce the amount of visible sky or limit the shader to two cloud layers. Q3Map2 sky portals may be a good alternative if you feel a standard sky isn't interesting enough.</p>
+</blockquote>
+<p>Q3Map2 sky shaders work differently from the original and contain a number of improvements in terms of efficiency and visually. The example given below is an original Quake III Arena sky shader. While it is still operational, it is a little outdated and is being kept here for legacy purposes only. It is recommended that you take advantage of the new features of Q3Map2 skies by consulting Appendix: Light Emitting Shaders. Below is an example of a default (pre-Q3Map2) Quake 3 sky shader.</p>
+<pre>
+textures/skies/xtoxicsky_dm9
+{
+	qer_editorimage textures/skies/toxicsky.tga
+	surfaceparm noimpact
+	surfaceparm nolightmap
+	q3map_globaltexture
+	q3map_lightsubdivide 256
+	q3map_surfacelight 400
+	surfaceparm sky
+	q3map_sun 1 1 0.5 150 30 60
+	skyparms full 512 -
+	{
+		map textures/skies/inteldimclouds.tga
+		tcMod scale 3 2
+		tcMod scroll 0.1 0.1
+	}
+	{
+		map textures/skies/intelredclouds.tga
+		blendFunc add
+		tcMod scale 3 3
+		tcMod scroll 0.05 0.05
+	}
+}
+</pre>
+
+<h2 id="cull">cull side</h2>
+<p>Every surface of a polygon has two sides, a front and a back. Typically, we only see the front or "out" side. For example, a solid block you only show the front side. In many applications we see both. For example, in water, you can see both front and a back. The same is true for things like grates and screens.</p>
+<p>To "cull" means to remove. The value parameter determines the type of face culling to apply. The default value is cull back if this keyword is not specified. However for items that should be inverted then the value front should be used. To disable culling, the value disable or none should be used. Only one cull instruction can be set for the shader.</p>
+<dl>
+	<dt>front</dt><dd>The front or "outside" of the polygon is not drawn in the world. It is used if the keyword "cull" appears in the content instructions without a side value.</dd>
+	<dt>back</dt><dd>Cull back removes the back or "inside" of a polygon from being drawn in the world.</dd>
+	<dt>disable or none</dt><dd>Neither side of the polygon is removed. Both sides are drawn in the game. Very useful for making panels or barriers that have no depth, such as grates, screens, metal wire fences and so on and for liquid volumes that the player can see from within. Also used for energy fields, sprites, and weapon effects (e.g. plasma).</dd>
+</dl>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>For things like grates and screens, put the texture with the cull none property on one face only. On the other faces, use a non-drawing texture.</p>
+</blockquote>
+
+<h2 id="deformVertexes">deformVertexes type</h2>
+<p>This function performs a general deformation on the surface's vertexes, changing the actual shape of the surface before drawing the shader passes. You can stack multiple deformVertexes commands to modify positions in more complex ways, making an object move in two dimensions, for instance. There are 6 possible values for the type parameter, each of which will be described in more detail: wave, normal, bulge, move, autosprite, autosprite2. Depending on which of the 6 type parameters are used, different additional parameters will need to be used, including the generalized waveform functions (see Introduction: Key Concepts).</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>The div and amplitude parameters, when used in conjunction with liquid volumes like water should take into consideration how much the water will be moving. A large ocean area would have have massive swells (big div values) that rose and fell dramatically (big amplitude values). While a small, quiet pool may move very little.</p>
+</blockquote>
+
+<h3>deformVertexes wave div func base amplitude phase freq</h3>
+<p>Designed for water surfaces, modifying the values differently at each point. The div parameter is used to control the wave "spread" - a value equal to the q3map_tessSize of the surface is a good default value. It accepts the standard wave functions sin, triangle, square, sawtooth or inversesawtooth.</p>
+
+<h3>deformVertexes normal amplitude freq</h3>
+<p>This deformation affects the normals of a vertex without actually moving it, which will effect later shader options like lighting and especially environment mapping. If the shader stages don't use normals in any of their calculations, there will be no visible effect. Good values for amplitude ranges from 0.1 to 0.5 while values of 1.0 to 4.0 are good for frequency.</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>Putting values of 0.1 to 0.5 in Amplitude and 1.0 to 4.0 in the Frequency can produce some satisfying results. Some things that have been done with it: A small fluttering bat, falling leaves, rain, flags.</p>
+</blockquote>
+
+<h3>deformVertexes bulge div ampl freq</h3>
+<p>This forces a bulge to move along S texture direction. Designed for use on curved pipes. Div sets how frequently bulges are placed, the bigger value means more bulges. Amplitude parameter is the amount of bulge displacement measured in game units.</p>
+
+<h3>deformVertexes move x y z func base amplitude phase freq</h3>
+<p>The move parameter is used to make a brush, curve patch or model appear to move together as a unit. The x y z values are the distance and direction in game units the object appears to move relative to it's point of origin in the map. The func base amplitude phase freq values are the same as found in other waveform manipulations.</p>
+<p>The product of the function modifies the values x, y, and z. Therefore, if you have an amplitude of 5 and an x value of 2, the object will travel 10 units from its point of origin along the x axis. This results in a total of 20 units of motion along the x axis, since the amplitude is the variation both above and below the base.</p>
+<p>It must be noted that an object made with this shader does not actually change position, it only appears to.</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>If an object is made up of surfaces with different shaders, all must have matching deformVertexes move values or the object will appear to tear itself apart.</p>
+</blockquote>
+
+<h3>deformVertexes autosprite</h3>
+<p>This function can be used to make any given triangle quad (pair of triangles that form a square rectangle) automatically behave like a sprite without having to make it a separate entity. This means that the "sprite" on which the texture is placed will rotate to always appear at right angles to the player's view as a sprite would. Any four-sided brush side, flat patch, or pair of triangles in a model can have the autosprite effect on it. The brush face containing a texture with this shader keyword must be square.</p>
+
+<h3>deformVertexes autosprite2</h3>
+<p>Is a slightly modified "sprite" that only rotates around the middle of its longest axis. This allows you to make a pillar of fire that you can walk around, or an energy beam stretched across the room.</p>
+
+<h2 id="fogParms">fogParms ( r g b ) opacity</h2>
+<p>Fogparms describes how to render the fog on the surfaces. You must also specify "surfaceparm fog" to cause Q3Map2 to identify the surfaces inside the volume.</p>
+<dl>
+	<dt>r g b</dt><dd>These are normalized values. A good computer art program should give you the RGB values for a color. To obtain the values that define fog color for Quake III Arena, divide the desired color's red, green and blue values by 255 to obtain three normalized numbers within the 0.0 to 1.0 range.</dd>
+	<dt>opacity</dt><dd>This is the distance, in game units, until the fog becomes totally opaque, as measured from the point of view of the observer. By making the height of the fog brush shorter than the distance to opaque, the apparent density of the fog can be reduced (because it never reaches the depth at which full opacity occurs).</dd>
+</dl>
+<p>Fog volume brushes must obey the following rules:</p>
+<ul>
+	<li>The fog volume can only have one surface visible (from outside the fog).</li>
+	<li>Fog must be made of one brush. It cannot be made of adjacent brushes.</li>
+	<li>Fog brushes must be axial. This means that only square or rectangular brushes may contain fog, and those must have their edges drawn along the axes of the map grid (all 90 degree angles).</li>
+</ul>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>If a water texture contains a fog parameter, it must be treated as if it were a fog texture when in use.</p>
+	<p>If a room is to be filled completely with a fog volume,it can only be entered through one surface (and still have the fog function correctly).</p>
+	<p>Additional shader passes may be placed on a fog brush, as with other brushes.</p>
+</blockquote>
+
+<h2 id="noPicMip">noPicMip</h2>
+<p>This causes the texture to ignore user-set values for the r_picmip cvar command. The image will always be high resolution. Example: Used to keep images and text in the heads up display from blurring when user optimizes the game graphics.</p>
+
+<h2 id="noMipMaps">noMipMaps</h2>
+<p>This implies noPicMip, but also prevents the generation of any lower resolution mipmaps for use by the 3D card. This will cause the texture to alias when it gets smaller, but there are some cases where you would rather have this than a blurry image. Sometimes thin slivers of triangles force things to very low mipmap levels, which leave a few constant pixels on otherwise scrolling special effects.</p>
+
+<h2 id="polygonOffset">polygonOffset</h2>
+<p>Surfaces rendered with the polygonOffset keyword are rendered slightly off the polygon's surface. This is typically used for wall markings and "decals." The distance between the offset and the polygon is fixed. It is not a variable in Quake III Arena.</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>Use this for wall or floor markings, particularily for direction arrows for team games. Texture the brush with the decal shader on one face and the other faces with a nodraw shader. Then place the brush flush with the surface of the wall or floor.</p>
+	<p>When using a _decal entity for texture projection, polygonOffset must be used to prevent Z-fighting. If you experience problems with depth sorting, try using sort 6.</p>
+</blockquote>
+
+<h2 id="portal">portal</h2>
+<p>Specifies that this texture is the surface for a portal or mirror. In the game map, a portal entity must be placed directly in front of the texture (within 64 game units). All this does is set "sort portal", so it isn't needed if you specify that explicitly.</p>
+
+<h2 id="sort">sort value</h2>
+<p>Use this keyword to fine-tune the depth sorting of shaders as they are compared against other shaders in the game world. The basic concept is that if there is a question or a problem with shaders drawing in the wrong order against each other, this allows the designer to create a hierarchy of which shader draws in what order.</p>
+<p>The default behavior is to put all blended shaders in sort "additive" and all other shaders in sort "opaque", so you only need to specify this when you are trying to work around a sorting problem with multiple transparent surfaces in a scene.</p>
+<p>The value here can be either a numerical value or one of the keywords in the following list (listed in order of ascending priority):</p>
+<dl>
+	<dt>portal (1)</dt><dd>This surface is a portal, it draws over every other shader seen inside the portal, but before anything in the main view.</dd>
+	<dt>Sky (2)</dt><dd>Typically, the sky is the farthest surface in the game world. Drawing this after other opaque surfaces can be an optimization on some cards. This currently has the wrong value for this purpose, so it doesn't do much of anything.</dd>
+	<dt>Opaque (3)</dt><dd>This surface is opaque (rarely needed since this is the default with no blendfunc)</dd>
+	<dt>Banner (6)</dt><dd>Transparent, but very close to walls.</dd>
+	<dt>Underwater (8)</dt><dd>Draw behind normal transparent surfaces.</dd>
+	<dt>Additive (9)</dt><dd>Normal transparent surface (default for shaders with blendfunc's)</dd>
+	<dt>Nearest (16)</dt><dd>This shader should always sort closest to the viewer, e.g. muzzle flashes and blend blobs.</dd>
+</dl>
+
+
+</body>
+</html>

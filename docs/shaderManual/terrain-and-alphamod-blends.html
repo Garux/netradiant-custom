@@ -1,0 +1,122 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="articles">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>Terrain</h1>
+<p>Q3Map2 terrain has changed radically since Quake III: Team Arena first hit the shelves. Alphamapped terrain shaders are difficult to set up, limiting and lacks the ability for the mapper to fine tune the effect. The new terrain improvements in Q3Map2 have removed these difficulties, allowing the mapper to fully exploit terrain shaders for breathtaking outdoor scenes. This section will assume that you are already familiar with the method of setting up a standard alphamapped terrain as described in the Terrain Construction for Quake 3 Engine Games manual by Paul Jaquays, and will focus on the new enhanced features of Q3Map2 terrain.</p>
+
+<h2>General Changes</h2>
+<p>Q3Map2 terrain has changed dramatically in terms of not only visually, but also in terms of how it is processed by the compiler. To ensure compatibility, there needs to be a few changes. Foremost, make sure that all terrain shader files are listed in the shaderlist.txt file.</p>
+
+<p>Before using Q3Map2 alphamapped terrain, it must be noted that terrain is now handled completely different than before. Q3Map2 no longer looks for the word terrain in the shader name to determine whether or not it is an indexed shader. Instead it looks for q3map_indexed or q3map_terrain. For this reason, the alphamap terrain shaders have been slightly modified. If using Q3Map2 alphamaps, make sure that your "textures/common/terrain" and "textures/common/terrain2" shaders have been updated to the following:</p>
+
+<pre>
+textures/common/terrain
+{
+	q3map_terrain
+	surfaceparm nodraw
+	surfaceparm nolightmap
+	surfaceparm nomarks
+}
+
+textures/common/terrain2
+{
+	q3map_terrain
+	qer_editorimage textures/common/terrain.tga
+	surfaceparm dust
+	surfaceparm nodraw
+	surfaceparm nomarks
+	surfaceparm nolightmap
+}
+</pre>
+
+<h3>Base Shader</h3>
+<p>To simplify the terrain shader writing process, a base shader can be used as a template with subclassed shaders referencing it. This makes use of the q3map_baseShader directive. The base shader can consist of all q3map_* directives and must be processed before all other terrain shaders referencing it. The use of a base shader is recommend for all terrain shaders.</p>
+
+<h3>tcMod Functions</h3>
+<p>q3map_tcMod can be used on terrain shaders to minimize any obvious texture tiling, particularly q3map_tcMod rotate. In some situations q3map_tcMod scale or the stage driven tcMod scale may be used to scale the textures - though typically tcGen texture projection functions are usually the preferred method.</p>
+
+<h3>tcGen Functions</h3>
+<p>In most situations, terrain textures will need to be projected onto the terrain mesh. This is achieved by using either q3map_tcGen function or the stage specific tcGen. Any tcGen functions will overwrite any tcMod scale functions.</p>
+
+<h2>Lightmapped Terrain</h2>
+<p>The foremost improvement to Q3Map2 terrain is the ability to use lightmaps as a lighting system rather than basic vertex lighting. This allows terrain to not only cast detailed shadows onto itself, but also allows other map geometry to cast shadows onto the terrain as well. The additional rendering pass of the lightmap creates a slight performance hit as a price for the improved visuals. Several new q3map_* directives are typically used to tweak the terrain lightmap:</p>
+
+<h3>q3map_nonPlanar</h3>
+<p>Required on all terrain shaders, q3map_nonPlanar allows shadows to be cast across non-planar edges. This fixes a problem where lightmapped terrain would not light properly across uneven surfaces.</p>
+
+<h3>q3map_lightmapAxis</h3>
+<p>Optionally used, q3map_lightmapAxis can be used to specify the axis in which the lightmap is projected from. This is typically used on normal triangle-quad souped terrain and is set implicitly to "q3map_lightmapAxis z" with q3map_terrain. It is not recommended for terrain with caves or undersides.</p>
+
+<h3>q3map_shadeAngle</h3>
+<p>Most terrain artists will choose to enable triangle edge shadow smoothing to reduce the appearance of sharp shadow edges across the terrain mesh. q3map_shadeAngle specifies the triangle edge angle at which the light will be diffused. For best results, it is recommended that you start with low values and tweak the angle parameter in small increments until a satisfactory result is produced. Overly high values will wash out shadow details.</p>
+
+<h3>q3map_lightmapMergable</h3>
+<p>Setting q3map_lightmapMergable merges all terrain into one seamless lightmap, reducing the appearance of artifacts spanning across separate lightmap images.</p>
+
+<h3>q3map_lightmapSampleSize</h3>
+<p>Lightmapped terrain can be very memory intensive as Q3Map2 has to typically generate a large amount of lightmap data. q3map_lightmapSampleSize can be used to reduce the amount of lightmap memory used by limiting the resolution of the lightmap images. Similarly, it can also be used to increase the lightmap resolution at the cost of memory.</p>
+
+<h3>q3map_lightmapSampleOffset</h3>
+<p>If experiencing lightmap splotches over the surface of terrain lightmaps, q3map_lightmapSampleOffset can be used to fix this. For best results, start with small numbers (default 1.0) and slowly increase this value until the splotches disappear. Overly high values will cause unsatisfactory results.</p>
+
+
+<h2>AlphaMod Dotproduct Terrain</h2>
+<p>AlphaMod dotproduct terrain is a revolutionary way in which Q3Map2 terrain is blended. It removes the need for an alphamap and metashader and automatically determines the blending of terrain depending on the vertex normals of the terrain mesh. Equally important, this new system removes the need of a triangle-quad grid, allowing the designer to create a terrain mesh using any triangle shape or size.</p>
+
+
+<h2>AlphaMod Volume Terrain</h2>
+<p>Following the automatic generation of dotproduct blending, alphaMod volume terrain blending was developed to give direct control of the alpha blending back to the designer. Using this system the designer can modify the exact location and amount of blending to occur, directly from within the editor.</p>
+
+</body>
+</html>

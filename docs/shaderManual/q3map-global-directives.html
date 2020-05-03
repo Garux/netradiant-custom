@@ -1,0 +1,441 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="dir_q3map">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>Q3Map Global Directives</h1>
+<p>Q3Map2 global directives change the physical nature of the textures and the brushes that are marked with them. Changing any of these values will require the map to be re-compiled. These are global and affect the entire shader.</p>
+
+<h2 id="q3map_alphaGen">q3map_alphaGen func</h2>
+<p>Currently takes a single function, const. This directive is used to set a surfaces vertex alpha values. q3map_alphaGen operations are applied to an object's vertexes so the alphaGen vertex directive is required for each affected stage.</p>
+
+<h3>q3map_alphaGen const norm</h3>
+<p>Forces a fixed vertex alpha value to the entire shader surface, useful for controlling transparency or blending. Values are a normalized number.</p>
+
+<h2 id="q3map_alphaMod">q3map_alphaMod func</h2>
+<p>This is used for special vertex alpha blending effects on surfaces by altering the vertex alpha values depending on specific surface properties, such as the surfaces normal axis or the vertexes contained within its volume. q3map_alphaMod operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage.</p>
+
+<h3>q3map_alphaMod dotproduct ( X Y Z )</h3>
+<p>Used to blend textures using alphaFunc or blendFunc in the shader's second pass, with the transparency depending on the surface's normal axis vector. This is achieved by taking the user specified vector ( X Y Z ) and applying a dotproduct calculation with the generated vertex normal vector to yield a normalized vertex alpha value. The dot product operation multiplies each element of one vector against the corresponding elements of a second vector, then adds them:</p>
+<p>Used to blend textures using alphaFunc or blendFunc in the shader's second pass, with the transparency depending on the surface's normal axis vector. This is achieved by taking the user specified vector ( X Y Z ) and applying a dotproduct calculation with the generated vertex normal vector to yield a normalized vertex alpha value. The dot product operation multiplies each element of one vector against the corresponding elements of a second vector, then adds them:</p>
+<pre>
+( 0 0 1 ) dp ( 0 0 1 ) = 0 * 0 + 0 * 0 + 1 * 1 = 1
+( 0 0 1 ) dp ( 0 0 0.5 ) = 0 * 0 + 0 * 0 + 1 * 0.5 = 0.5
+( 0.5 0.5 1 ) dp ( 0 0.5 0.5 ) = 0.5 * 0 + 0.5 * 0.5 + 1 * 0.5 = 0.75
+</pre>
+<p>In a practical sense, you can think of the dotproduct vector ( 0 0 0.9 ) as meaning that all vertex normal vectors pointing straight up along the z-axis ( 0 0 1 ) will have a vertex alpha value of 90% opacity.</p>
+
+<h3>q3map_alphaMod dotproduct2 ( X Y Z )</h3>
+<p>This works in a similar way to dotproduct except it exaggerates the differences in vertex normals by squaring the final dot product value. With the same values as the above example, dotproduct2 would give the following:</p>
+<pre>
+[ ( 0 0 1 ) dp ( 0 0 1 ) ]<sup>2</sup> = ( 0 * 0 + 0 * 0 + 1 * 1 )<sup>2</sup> = 1
+[ ( 0 0 1 ) dp ( 0 0 0.5 ) ]<sup>2</sup> = ( 0 * 0 + 0 * 0 + 1 * 0.5 )<sup>2</sup> = 0.25
+[ ( 0.5 0.5 1 ) dp ( 0 0.5 0.5 ) ]<sup>2</sup> = ( 0.5 * 0 + 0.5 * 0.5 + 1 * 0.5 )<sup>2</sup> = 0.5625
+</pre>
+<p>Example q3map_dotproduct shader for terrain:</p>
+<pre>
+textures/shaderlab_vector_1/rock_1_z_lodterrain
+{
+	//Used for radiosity lighting
+	q3map_lightImage textures/shaderlab_vector_1/rock_1.tga
+
+	q3map_nonplanar
+	q3map_shadeAngle 179
+	q3map_tcGen ivector ( 512 0 0 ) ( 0 512 0 )
+	q3map_tcMod rotate 33
+	q3map_lightmapAxis z
+
+	// this means dot product squared, for faster falloff between vertical and horizontal planes
+	q3map_alphaMod dotproduct2 ( 0 0 0.95 )
+
+	surfaceparm nonsolid
+	surfaceparm pointlight
+
+	{
+		map textures/shaderlab_vector_1/rock_1.tga
+		rgbGen vertex
+	}
+	{
+		map textures/slterra/sand_1.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen vertex
+	}
+}
+</pre>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>Typical examples of use include snow covering the top faces of objects, or terrain with grass growing on horizontal planes blending into rocky cliffs on near vertical surfaces. It is an excellent way of automatically creating realistic alpha-blended terrain without the complicated steps of setting up an alpha map.</p>
+</blockquote>
+
+<h3>q3map_alphaMod scale norm</h3>
+<p>Used in conjunction with q3map_alphaMod volume. Scales the vertex alpha by the specified normalized number value.</p>
+
+<h3>q3map_alphaMod set norm</h3>
+<p>Used in conjunction with q3map_alphaMod volume. Sets the vertex alpha (regardless of any previous alpha values) to the specified normalized number value.</p>
+
+<h3>q3map_alphaMod volume</h3>
+<p>This was created as a way to explicitly set or modify the vertex alpha values of vertex points contained within a controlling brush volume marked with this shader directive. Applies all other q3map_alphaMod directives to each vertex inside a brush textured with this shader, allowing large faded scrolling fire shaders, waterfalls, marquees, explicit dotProduct terrain blending control, etc.
+</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>This is usually used in special alphaMod volume "common" shaders for use within the editor only. A brush textured with the alphaMod volume shader is used to overlap the vertexes of another brush or model using an alpha-blended shader, altering the vertex alpha values. Worldspawn alphaMod volume brushes will affect all surfaces it comes in contact with. You can func_group an alphaMod volume brush to its affecting brush to localize the blend to just that entity.</p>
+</blockquote>
+
+<h2 id="q3map_backShader">q3map_backShader shadername</h2>
+<p>This allows a brush to use a different shader when you are inside it looking out. By way of example, this would allow a water brush (or other) surfaces to have a different sort order or appearance when seen from the inside. q3map_backShader only works on brush faces. For this reason, it is often deprecated in favor of using q3map_cloneShader where the target shader contains q3map_invert. It can still be useful as a kind of shorthand.</p>
+
+<h2 id="q3map_backSplash">q3map_backSplash percentage distance</h2>
+
+<p>A surface light is lit by itself, often causing areas of higher light intensity than other areas. q3map_backSplash moves the light source away from the surface of the shader, allowing it to create smoother lighting over the face. By default, all shaders are assigned backsplash values, 5 for percentage, 23 units for distance.</p>
+
+<dl>
+	<dt>percentage</dt>
+		<dd>Specifies the intensity percentage of the light generated by q3map_surfacelight to be redirected back at the surface. Use a value of 0 or a negative value to disable back splash lights.</dd>
+    <dt>distance</dt>
+    	<dd>Distance of the back splash lights from the surface.</dd>
+</dl>
+
+<h2 id="q3map_baseShader">q3map_baseShader shadername</h2>
+<p>Allows shaders to be subclassed (Q3Map2 relevant portions only, such as surfaceparms, lighting, texture projection, etc). Subclassed shaders can reference the base shader by referring to the base shader's name. In order for q3map_baseShader to work correctly, the base shader must be specified before any shaders that subclass it. Some EasyGen terrain templates incorrectly specified the base shader after the terrain shaders that depended on it, resulting in some interesting errors.</p>
+<p>This is fundamentally the reverse of q3map_remapShader. Use q3map_baseShader when a single group of q3map_* directives is required for multiple base shaders. Use q3map_remapShader when similar shaders are used that require different groups of q3map_* directives.</p>
+
+<h2 id="q3map_bounce">q3map_bounce N.N</h2>
+<p>Deprecated! Use q3map_bounceScale instead.</p>
+
+<h2 id="q3map_bounceScale">q3map_bounceScale N.N</h2>
+<p>Takes positive decimal number values between 0 and 1.0 (or higher), to scale the amount of light reflected in radiosity passes. You can oversaturate it by using a number higher than 1.0, but this can lead to excessive compile times. Using 90 would probably make things positively glacial. 1.0 is a default, fudged number that looked OK with the maps that were tested. Tweaking it to 1.5 or 2.0 won't hurt anything per se, but it does give you finer control over how each shader re-emits light. The poorly worded q3map_bounce has been renamed to q3map_bounceScale. While its use has been deprecated, q3map_bounce still works.</p>
+
+<h2 id="q3map_clipModel">q3map_clipModel</h2>
+<p>Automatically clips misc_model entities for player and weapon collision. This should only be used on large models such as terrain (not small decorative models - manually clip those). The shader's surfaceparms are inherited by the magic clip brush, so if you have surfaceparm nonsolid in your model's shader that uses q3map_clipModel, then the brush will also be non-solid. This can also be set on a per model basis with the entity key/value pair, spawnflags 2.</p>
+
+<h2 id="q3map_cloneShader">q3map_cloneShader shadername</h2>
+<p>A shader with this directive will inherit the target shader's properties and appearance. Be careful, this can lead to an infinite loop if a cloning shader references another cloning shader or itself.</p>
+
+<h2 id="q3map_colorGen">q3map_colorGen func</h2>
+<p>Currently takes a single function, const. This directive is used to set a surfaces vertex color values. q3map_colorGen operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage. Same as q3map_rgbGen.</p>
+
+<h3>q3map_colorGen const ( R G B )</h3>
+<p>Forces a fixed vertex color value to the entire shader surface.</p>
+
+<h2 id="q3map_colorMod">q3map_colorMod func</h2>
+<p>Used to alter the vertex color values of vertexes contained within its volume. q3map_colorMod operations are applied to an object's vertexes so the rgbGen vertex directive is required for each affected stage. Possible uses include creating a neutral hued texture for a CTF middleground and then creating shader instances of the texture for red and blue bases. Same as q3map_rgbMod.</p>
+
+<h3>q3map_colorMod scale ( R G B )</h3>
+<p>Used in conjunction with q3map_colorMod volume. Scales the vertex color by the specified color values.</p>
+
+<h3>q3map_colorMod set ( R G B )</h3>
+<p>Used in conjunction with q3map_colorMod volume. Sets the vertex color to the specified color values.</p>
+
+<h3>q3map_colorMod volume</h3>
+<p>This was created as a way to explicitly set or modify the vertex color values of vertex points contained within a controlling brush volume marked with this shader directive. Applies all other q3map_colorMod directives to each vertex inside a brush textured with this shader to change the hue of the affected surface.</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>This is usually used in special colorMod volume "common" shaders for use within the editor only. A brush textured with the colorMod volume shader is used to overlap the vertexes of another brush or model, altering the vertex color values. Worldspawn colorMod volume brushes will affect all surfaces it comes in contact with. You can func_group a colorMod volume brush to its affecting brush to localize the hue to just that entity.</p>
+</blockquote>
+
+<h3>q3map_colorMod dotproduct ( X Y Z )</h3>
+<h3>q3map_colorMod dotproduct2 ( X Y Z )</h3>
+<p>These ones work just like q3map_alphaMod dotproduct, but are modifying vertex color values.
+</p>
+
+
+<h2 id="q3map_fogDir">q3map_fogDir X Y Z</h2>
+<p>Specifies the direction a fog shader fades from transparent to opaque. Values indicate a directional vector.</p>
+
+<h2 id="q3map_forceMeta">q3map_forceMeta</h2>
+<p>Forces model (MD3, ASE, etc.) surfaces to be broken down into their component triangles like brush faces and passed through the meta code on a per shader basis. This is required for lightmapped models. Setting spawnflags 4 on a misc_model will set q3map_forceMeta on all its surfaces.</p>
+
+<h2 id="q3map_forceSunlight">q3map_forceSunlight</h2>
+<p>Obsolete! By default, no sunlight is cast on vertex-lit .md3 models or vertex-lit terrain. Using this option, sunlight (overbright bits created by the q3map_sun option) will be cast on these surfaces. q3map_forceSunlight is now obsolete since suns are now first class light sources.</p>
+
+<h2 id="q3map_fur">q3map_fur layers offset fade</h2>
+<p>This is used for generating fur over a surface. This is typically used in conjunction with q3map_cloneShader in the surface (parent) shader and references the fur shader as the clone. A possible application of this is to create grass on alphablended terrain. Keep in mind that the use of a fur shader may cause a large hit to performance but when used sparingly, it can produce some interesting effects. (See Appendix: Fur)</p>
+
+<dl>
+	<dt>layers</dt><dd>This specifies the number of desired replicated fur layers generated.</dd>
+	<dt>offset</dt><dd>The distance (in game units) between subsequent layers.</dd>
+	<dt>fade</dt><dd>A normalized value indicating the fade falloff between subsequent layers.</dd>
+</dl>
+
+<h2 id="q3map_globalTexture">q3map_globalTexture</h2>
+<p>Use this shader in the global directive commands whenever the tcMod scale function is used in one of the later render stages. Many problems with getting shader effects to work across multiple adjacent brushes are a result of the way Q3Map2 optimizes texture precision. This option resolves that, but at the expense of some precision of the textures when they are far away from the origin of the map.</p>
+
+<h2 id="q3map_indexed">q3map_indexed</h2>
+<p>This is used for explicit terrain-style indexed mapping. It instructs Q3Map2 to look at the func_group terrain entity's _indexmap key for an image to pull index values from, and then to construct a shader name with the root based on the _shader key's value.</p>
+
+<h2 id="q3map_invert">q3map_invert</h2>
+<p>Inverts a surface normal. Works on brush faces, models and patches. Used in celshading to achieve the inverted backfacing hull. Can be used with a shader that is targeted by q3map_cloneshader for something similar to q3map_backShader.</p>
+
+<h2 id="q3map_lightImage">q3map_lightImage texturename</h2>
+<p>By default, surface lights use the average color of the source image to generate the color of the light. q3map_lightImage specifies an alternate image to be used for light color emission, radiosity color emission, light filtering and alpha shadows. You can even use a light image with a different alpha channel for blurrier alpha shadows. The light color is averaged from the referenced texture. The texture must be the same size as the base image map. q3map_lightImage should appear before qer_editorImage.</p>
+<p>The reason q3map_lightImage is specified for the light in the example below, is because the blend map is predominantly yellow, but the base image is not. The designer wanted the color of the light to be sampled from the blend map instead of the base image.
+<pre>
+textures/eerie/ironcrosslt2_10000
+{
+	// this TGA is the source for the color of the blended light
+	q3map_lightImage textures/gothic_light/ironcrosslt2.blend.tga
+
+	//editor TGA (used because the shader is used with several different light values)
+	qer_editorImage textures/gothic_light/ironcrosslt2.tga
+
+	//emitted light value of 10,000
+	q3map_surfacelight 10000
+
+	{
+		//source texture is affected by the lightmap
+		map $lightmap
+
+		// this command handles the overbright bits created by "sunlight" in the game
+		rgbGen identity
+	}
+	{
+		map textures/gothic_light/ironcrosslt2.tga
+		blendFunc filter
+		rgbGen identity
+	}
+	{
+		maptextures/gothic_light/ironcrosslt2.blend.tga
+		blendFunc add
+	}
+}
+</pre>
+
+<h2 id="q3map_lightmapAxis">q3map_lightmapAxis axis</h2>
+<p>Takes a single argument: either x, y or z as the direction from which the lightmap is projected from. The directive q3map_terrain has an implicit (read default) q3map_lightmapAxis defined as z. This directive is not recommended for things like caves or arches which have undersides.</p>
+
+<h2 id="q3map_lightmapBrightness">q3map_lightmapBrightness N.N</h2>
+<p>Lightmap brightness scaling. A value of 2.0 will be twice as bright (linearly) and a value of 0.5 will be half as bright.</p>
+
+<h2 id="q3map_lightmapFilterRadius">q3map_lightmapFilterRadius self other</h2>
+<p>This is usually used on light emitting shaders to approximate finer subdivided lighting. It adds a gaussian blur effect to the lightmaps of either the shader itself, or the surfaces affected by the shader, or both. The values for self and other are measured in world units of filtering (blurring) of lightmap data cast by any light sources.</p>
+<dl>
+	<dt>self</dt><dd>Amount of blur set for the shader itself to approximate for the surfacelight's finer subdivided lighting. It should be set to 0 for sky shaders since they don't have lightmaps.</dd>
+	<dt>other</dt><dd>Amount of blur set for other surfaces affected by this shader's emitted light. It should be set just high enough to eliminate the "stadium shadow" effect sometimes produced by q3map_skylight or to smooth out the lighting on surfacelights.</dd>
+</dl>
+<p>If using a value higher than 4 for the iterations parameter on q3map_skylight, you don't need q3map_lightmapFilterRadius as much, but at the expense of higher compile times. q3map_lightmapFilterRadius should be placed before any light related shader directives that you want it to affect. (see Appendix: Light Emitting Shaders)</p>
+
+<h2 id="q3map_lightmapGamma">q3map_lightmapGamma N.N</h2>
+<p>Deprecated! Use q3map_lightmapBrightness instead.</p>
+
+<h2 id="q3map_lightmapMergable">q3map_lightmapMergable</h2>
+<p>Allows surfaces like terrain to be mapped onto a single lightmap page for seamless terrain shadows. It will specify that the shaders using it can merge nonplanars together onto a single lightmap, so you can have a single 512x512 lightmap across a terrain entity. Note that most id Tech 3 engine games are limited to lightmap pages of 128x128. You may need to experiment with q3map_lightmapSize and the Q3Map2 -export general switch.</p>
+
+<h2 id="q3map_lightmapSampleOffset">q3map_lightmapSampleOffset distance</h2>
+<p>Takes a single parameter, defaulting to 1.0, which specifies how many units off a surface should Q3Map2 sample lighting from. Use larger values (2.0-8.0) if you're getting ugly splotches on lightmapped terrain. Try to use filtering to solve splotches if possible, leaving q3MaplightmapSampleOffset as a last resort.</p>
+
+<h2 id="q3map_lightmapSampleSize">q3map_lightmapSampleSize N</h2>
+<p>Surfaces using a shader with this option will have the pixel size of the lightmaps set to N world grid units. This option can be used to produce high-resolution shadows on certain surfaces. In addition, it can be used to reduce the size of lightmap data, where high-resolution shadows are not required, gaining memory and performance benefits. The default Quake III lightmap sample size is 16, smaller numbers increases lightmap resolution. In general, you should stick with power of 2 values.</p>
+
+<h2 id="q3map_lightmapSize">q3map_lightmapSize width height</h2>
+<p>Specifies the size of the lightmap page that surface lightmaps get packed on to. Used mainly in Enemy Territory for terrain lightmaps (512x512) in concert with the Q3Map2 switch -lightmapsize. Most idTech 3 games will only support internal lightmap pages of 128x128. Larger pages will result in lightmaps exported externally from the .bsp file.</p>
+
+<h2 id="q3map_lightRGB">q3map_lightRGB red green blue</h2>
+<p>This forces a specified color of light to be emitted from a surface or sky light, rather than sampling colors from a lightimage, editor image or the texture map. Three normalized color values of light are required for the red green blue parameters. This does not affect bounced light in radiosity or lightfilter.</p>
+
+<h2 id="q3map_lightStyle">q3map_lightStyle N</h2>
+<p>Used to set light styles on surface lights for lightmap flickering/waveform effects. N takes the form of a number between 1 and 31, that references the corresponding style number set in the worldspawn entity. Equivalent to setting "style" "N" on a light entity (see Appendix: Lightstyles).</p>
+
+<h2 id="q3map_lightSubdivide">q3map_lightSubdivide N</h2>
+<p>Used on surface lights (see q3map_surfacelight). Controls the distance between surface generated light sources for uniform lighting. It defaults to 120 game units, but can be made larger or smaller as needed (for light surfaces at the bottom of cracks, for example). This can be a dominant factor in processing time for Q3Map2 lighting. Can have an increasingly "darker" effect when used with -fast. Compensate by raising the surface light value. For sky shaders, use q3map_skylight instead (see Appendix: Light Emitting Shaders).</p>
+
+<h2 id="q3map_noClip">q3map_noClip</h2>
+<p>You might have noticed that terrain has been made to not clip or t-junction anymore. It was causing too many issues, so a new parameter was added: q3map_noClip. Normally, Q3Map2 clips all faces to the BSP, and then takes the minimum polygon that encompasses all visible fragments. q3map_noClip forces Q3Map2 to uses the original brush faces (This is implicit for autosprite(2) surfaces). Therefore, if you map tidy, you could theoretically use q3map_noClip on all your shaders. q3map_noClip and q3map_noTJunc, when used in combination, will preserve mesh geometry exactly as you make it.</p>
+
+<h2 id="q3map_noFast">q3map_noFast</h2>
+<p>When used on surfaces that emit light, this will disable -fast optimizations. This is useful for large areas of dim sky, where you want the dim light to reach all surfaces. This shader directive prevents fast from affecting dim sky surfaces. It is necessary, if you can't do a workaround with brighter skies or by using a larger q3map_lightSubdivide value.</p>
+
+<h2 id="q3map_noFog">q3map_noFog</h2>
+<p>Volumes marked with a shader containing this directive will not be affected by fog. For example, it can be used on sky shaders to prevent the fog from affecting it.</p>
+
+<h2 id="q3map_nonPlanar">q3map_nonPlanar</h2>
+<p>Instructs Q3Map2 to merge any adjacent triangles that don't lie in the same plane into a non-planar triangle soup. This allows shadows to be cast correctly across non-planar edges. It is typically used on lightmapped terrain shaders.</p>
+
+<h2 id="q3map_normalImage">q3map_normalImage texturename</h2>
+<p>Allow the use of a normal (height) map to simulate textured bumpmapping. This isn't real bumpmapping per se, but generates a static lightmap image that reflects the normal map and light source.</p>
+
+<h2 id="q3map_noTJunc">q3map_noTJunc</h2>
+<p>Read as "no T-Junc". With this option, surfaces modified by a shader are not used for T-junction fixing. q3map_noClip and q3map_noTJunc, used in combination will preserve mesh geometry exactly as you make it.</p>
+
+<h2 id="q3map_noVertexLight">q3map_noVertexLight</h2>
+<p>Suppresses Q3Map2 from overwriting the BSP-phase set vertex RGB values.</p>
+
+<h2 id="q3map_noVertexShadows">q3map_noVertexShadows</h2>
+<p>Obsolete! Vertex lighting code was rewritten a couple of times, rendering this directive irrelevant. Shaders that are used on misc_models or terrain were to use q3map_noVertexShadows to disable shadows being cast on the vertex lit surfaces. Casting shadows at small, misc_model objects often makes sense. However, having shadows on large, vertex lit terrain surfaces often looks bad. Shadows are not cast on forced_vertex_lit surfaces by default (shaders with pointlight).</p>
+
+<h2 id="q3map_offset">q3map_offset N.N</h2>
+<p>Offsets a surface along the vertex normals by N.N units. Used in celshading for those black edges.</p>
+
+<h2 id="q3map_patchShadows">q3map_patchShadows</h2>
+<p>Obsolete! When this option is used in conjunction with the original lighting algorithm (-light), surfaces with textures modified with this option will show shadows that are cast by curve patches. Curve patches do not cast shadows by default. You would usually force patches to cast shadows by using the -patchshadows Q3Map2 switch.</p>
+
+<h2 id="q3map_remapShader">q3map_remapShader shadername</h2>
+<p>Allows shaders to be subclassed. Subclassed shaders can reference the remap shader by referencing the remap shader's name. In order for this to work, the remap shader must be specified before any shaders that references it. Subclassed shaders must contain Q3Map2 and editor relevant portions only (q3map_*, surfaceparm and qer_* directives).</p>
+<p>This is fundamentally the reverse of q3map_baseShader. Use q3map_baseShader when a single group of q3map_* directives is required for multiple base shaders. Use q3map_remapShader when similar shaders are used that require different groups of q3map_* directives.</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>Since the subclassed shaders that are applied to geometry does not contain any texture stages, qer_editorImage is usually required in conjunction with q3map_remapShader.</p>
+</blockquote>
+
+<h2 id="q3map_rgbGen">q3map_rgbGen func</h2>
+<p>Same as q3map_colorGen</p>
+
+<h2 id="q3map_rgbMod">q3map_rgbMod func</h2>
+<p>Same as q3map_colorMod</p>
+
+<h2 id="q3map_shadeAngle">q3map_shadeAngle angle</h2>
+<p>Specifies the breaking angle for phong shading. This allows for smooth shadows between brush faces like patches. The angle parameter is the angle between adjacent faces at which smoothing will start to occur. Typical values are usually in the 120-179 range.</p>
+
+<h2 id="q3map_skylight">q3map_skylight amount iterations</h2>
+<p>This replaces q3map_surfacelight and q3map_lightSubdivide on sky surfaces for much faster and more uniform sky illumination. Amount is a brightness value, similar to what you would use in q3map_sun. Good values are between 50 and 200. Iterations is an exponential factor. 3 is the best value that balances speed and quality. Values of 4 and 5 are higher quality at the expense of higher compile time. Values below 3 are not too useful. See Appendix: Light Emitting Shaders.</p>
+
+<h2 id="q3map_splotchFix">q3map_splotchFix</h2>
+<p>This is used on lightmapped model shaders if splotched lighting artifacts appear. Any shadows at the ambient/dark level will be flooded from neighbouring luxels. This gets rid of shadow acne, but a surface must be more or less uniformly lit or this looks ugly. Try using q3map_lightmapSampleOffset first before using this as a last resort.</p>
+
+<h2 id="q3map_styleMarker">q3map_styleMarker</h2>
+<p>For use on shaders that accompany style lights. For any shaders that may be hit by a styled light, add q3map_styleMarker after the lightmap stage and before the texture stages so Q3Map2 can properly create the fake lightmap stages (see Appendix: Lightstyles).</p>
+
+<h2 id="q3map_styleMarker2">q3map_styleMarker2</h2>
+<p>Similar to q3map_styleMarker except it is used on masked textures where a depthFunc equal is required.</p>
+
+<h2 id="q3map_sun">q3map_sun red green blue intensity degrees elevation</h2>
+<p>This directive in a sky shader will create the illusion of light cast into a map by a single, infinitely distance parallel light source (sun, moon, hellish fire, etc.). This is only processed during the lighting phase of Q3Map2. While still perfectly usable, q3map_sun is now deprecated in favour of q3map_sunExt (see below).</p>
+
+<h2 id="q3map_sunExt">q3map_sunExt red green blue intensity degrees elevation deviance samples</h2>
+<p>Works like q3map_sun with the addition of two new parameters to create "light jittering" for penumbra (half-shadow) effects. This gives you much more realistic shadows from the sun, especially when trying to simulate a cloudy day or a wide sun. The penumbra effect can also be applied to entity lights (point, spot or sun) with the _deviance N (distance in world units for point/spot lights and degrees for suns) and _samples N (number of samples) key/value pairs.</p>
+<dl>
+	<dt>red green blue</dt><dd>Color is described by three normalized RGB values. Color will be normalized to a 0.0 to 1.0 range, so it doesn't matter what range you use.</dd>
+	<dt>intensity</dt><dd>The brightness of the generated light. A value of 100 is a fairly bright sun. The intensity of the light falls off with angle but not distance.</dd>
+	<dt>degrees</dt><dd>The angle relative to the directions of the map file. A setting of 0 degrees equals east. 90 is north, 180 is west and 270 is south. In the original version of Q3Map, non-axial values had a tendency to produce jagged shadows. With Q3Map2, this problem is avoided with new options like lightmap filtering, raytracing and penumbra effects.</dd>
+	<dt>elevation</dt><dd>The distance, measured in degrees from the horizon (z value of zero in the map file). An elevation of 0 is sunrise/sunset. An elevation of 90 is noon.</dd>
+	<dt>deviance</dt><dd>The number of degrees for the half-shadow. General values up to 2 or 3 are acceptable. The real sun has a solid angle of about half a degree.</dd>
+	<dt>samples</dt><dd>The number of random jitters distributed over the solid arc (~16).</dd>
+</dl>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>Sky shaders should probably still have a q3map_surfacelight or preferred q3map_skylight value. The "sun" gives a strong directional light, but doesn't necessarily give the fill light needed to soften and illuminate shadows. Skies with clouds should probably have a weaker q3map_sun value and a higher q3map_surfacelight or q3map_skylight value. Heavy clouds diffuse light and weaken shadows. The opposite is true of a cloudless or nearly cloudless sky. In such cases, the "sun" or "moon" will cast stronger shadows that have a greater degree of contrast. This is also why q3map_sunExt is preferred. It gives the designer greater control over shadow contrast with a penumbra effect.</p>
+	<h4>Design Notes:</h4>
+	<p>Not certain what color formula you want to use for the sun's light? Try this. Create a light entity. Use the Radiant editor's color selection tools to pick a color. The light's _color key's value will be the normalized RGB formula. Copy it from the value line in the editor (CTRL+c) and paste it into your shader.</p>
+</blockquote>
+
+<h2 id="q3map_surfaceLight">q3map_surfaceLight value</h2>
+<p>The texture gives off light equal to the value set for it. The relative surface area of the texture in the world affects the actual amount of light that appears to be radiated. To give off what appears to be the same amount of light, a smaller texture must be significantly brighter than a larger texture. Unless the q3map_lightImage or q3map_lightRGB directive is used to select a different source for the texture's light color information, the color of the light will be the averaged color of the texture. For sky shaders, use q3map_skylight instead for faster and more uniform sky illumination.</p>
+
+<h2 id="q3map_surfaceModel">q3map_surfaceModel modelpath density odds minscale maxscale minangle maxangle oriented</h2>
+<p>A surface with q3map_surfaceModel in its shader will randomly place a specified model across it's face. This is designed to place grass or tree models over terrain.</p>
+<dl>
+	<dt>modelpath</dt><dd>The path to the model file (any supported format).</dd>
+	<dt>density</dt><dd>The density of the models, in game units.</dd>
+	<dt>odds</dt><dd>The odds of the model appearing (normalized?).</dd>
+	<dt>minscale</dt><dd>The minimum scale of the model from its original size of 1.0.</dd>
+	<dt>maxscale</dt><dd>The maximum scale of the model from its original size of 1.0.</dd>
+	<dt>minangle</dt><dd>The model's minimum angle of rotation.</dd>
+	<dt>maxangle</dt><dd>The model's maximum angle of rotation.</dd>
+	<dt>oriented</dt><dd>This is a flag, either 0 or 1, and sets whether the model gets fitted to the orientation of the surface.</dd>
+</dl>
+
+<h2 id="q3map_tcGen">q3map_tcGen func</h2>
+<p>This currently supports two functions, vector and ivector. Both functions are used for texture projection and do the exact same thing. The only difference is in the math, ivector was designed to be more intuitive.</p>
+
+<h3>q3map_tcGen vector sVector tVector</h3>
+<p>Projects a texture Ns units by Nt units along a chosen axis. q3map_tcGen vector ( 1/256 0 0 ) ( 0 1/256 0 ) will project a texture every 256 units in x, and every 256 units in y, along the z-axis.</p>
+
+<h3>q3map_tcGen ivector 1.0/sVector 1.0/tVector</h3>
+<p>Projects a texture Ns units by Nt units along a chosen axis. q3map_tcGen ivector ( 256 0 0 ) ( 0 256 0 ) will project a texture every 256 units in x, and every 256 units in y, along the z-axis. Ivector means inverse vector, and this means you won't have to do the divide with a calculator. Inverse = 1.0/n, unless the value is 0, then the matrix value is set to 0. A bit of dodgy math, but it works.</p>
+
+<h2 id="q3map_tcMod">q3map_tcMod func</h2>
+<p>This works in a similar manner to the stage specific tcMod directive (see Stage Directives: tcMod), except in the compiler, so that modified texture coordinates are "baked" into the surface. This lets you set up less obvious texture tiling on natural and organic surfaces (especially terrain).</p>
+
+<h3>q3map_tcMod rotate degrees</h3>
+<p>Rotates the texture (around origin, not center) a specified number of degrees.</p>
+
+<h3>q3map_tcMod scale s-scale t-scale</h3>
+<p>Scales S (x) and T (y) texture co-ordinates. scale 2 2 would halve the size of the texture (doubling the texture co-ordinates).</p>
+
+<h3>q3map_tcMod translate or move or shift s-offset t-offset</h3>
+<p>Shifts texture co-ordinates by S, T amount. translate 0.5 0 would shift it one-half in S, and none in T.</p>
+
+<h2 id="q3map_terrain">q3map_terrain</h2>
+<p>Alphamap terrain shaders (typically textures/common/terrain and terrain2) must have the q3map_terrain directive. Terrain is handled completely differently from previous versions. Q3Map2 no longer looks for the word terrain in the shader name to determine whether or not it is an indexed shader. It looks for q3map_indexed, or q3map_terrain, which then sets off a bunch of stuff shoehorned into it, like: the lightmap axis, texture projection, etc.</p>
+<p>By default, q3map_terrain sets the following:</p>
+<pre>
+q3map_tcGen ivector ( 32 0 0 ) ( 0 32 0 )
+q3map_lightmapAxis z
+q3map_nonplanar
+q3map_shadeAngle 180 //(maybe 175?)
+q3map_indexed
+</pre>
+
+<h2 id="q3map_tessSize">q3map_tessSize amount</h2>
+<p>This controls the tessellation size (how finely a surface is chopped up in to triangles), in game units, of the surface. This is only applicable to solid brushes, not curves, and is generally only used on surfaces that are flagged with the deformVertexes directive. Abuse of this can create a huge number of triangles. This happens during Q3Map2 processing, so maps must be reprocessed for changes to take effect. The poorly named tessSize directive still works but has been deprecated in favour of q3map_tessSize for consistency.</p>
+<blockquote>
+	<h4>Design Notes:</h4>
+	<p>It can also be used on tessellating surfaces to make sure that tessellations are large and thus, less costly in terms of triangles created.</p>
+</blockquote>
+
+<h2 id="q3map_textureSize">q3map_textureSize X Y</h2>
+<p>Deprecated. Useful when you don't specify an editor or light image for a shader. Recent builds of Q3Map2 will find some referenced image in a shader and use that as a fallback. Historically, this was used for surface splitting for RTCW for PS2, to accommodate the hardware's limited texture range precision.</p>
+
+<h2 id="q3map_traceLight">q3map_traceLight</h2>
+<p>Obsolete! Surfaces using a shader with this option will always be lit with the original light algorithm. Patches will not cast shadows on this surface, unless the shader option q3map_patchShadows is also used.</p>
+
+<h2 id="q3map_vertexScale">q3map_vertexScale N.N</h2>
+<p>The light value, at the vertices of a surface using a shader with this option, is multiplied by the scale value. This is a way to lighten, or darken, a vertex_lit surface, in comparison to other lightmap_lit surfaces around it. Values must be normalized.</p>
+
+<h2 id="q3map_vertexShadows">q3map_vertexShadows</h2>
+<p>Obsolete! (See q3map_noVertexShadows) By default, no shadows are cast on vertex_lit_surfaces (see surfaceparm pointlight). In addition, when running Quake III Arena in vertex light, no shadows are cast upon any surface at all, since shadows are part of the lightmap. When using this shader directive, shadows will be cast on surfaces that are vertex lit. However, sharp shadow edges won't be seen on the surfaces, since light values are only calculated at the vertices.</p>
+
+<h2 id="q3map_vlight">q3map_vlight</h2>
+<p>Obsolete!</p>
+
+</body>
+</html>

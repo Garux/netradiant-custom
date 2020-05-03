@@ -1,0 +1,101 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="article_alpha_channel">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1>Alpha Channels</h1>
+
+<p>To use some blend modes of alphaFunc, you must add an alpha channel to your texture files. Photoshop can do this. Paintshop Pro has the ability to make an alpha channel but cannot work directly in to it. In Photoshop you want to set the type to Mask. Black has a value of 255. White has a value of 0. The darkness of a pixel's alpha value determines the transparency of the corresponding RGB value in the game world. Darker = more transparent.</p>
+
+<p>Care must be taken when reworking textures with alpha channels. Textures without alpha channels are saved as 24 bit images while textures with alpha channels are saved as 32 bit. If you save them out as 24 bit, the alpha channel is erased. Note: Adobe Photoshop will prompt you to save as 32, 24 or 16 bit. Choose wisely. If you save a texture as 32 bit and you don't actually have anything in the alpha channel, Quake III Arena may still be forced to use a lower quality texture format (when in 16 bit rendering) than if you had saved it as 24 bit.</p>
+
+<p>To create a texture that has "open" areas, make those areas black in the alpha channel and make white the areas that are to be opaque. Using gray shades can create varying degrees of opacity/transparency.</p>
+
+<pre>
+// Opaque texture with see-through holes knocked in in.
+textures/base_floor/pjgrate1
+{
+    surfaceparm metalsteps
+    cull none
+
+    // A GRATE OR GRILL THAT CAN BE SEEN FROM BOTH SIDES
+    {
+        map textures/base_floor/pjgrate1.tga
+        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+        alphaFunc GT0
+        depthWrite
+        rgbGen identity
+    }
+    {
+        map $lightmap
+        rgbGen identity
+        blendFunc GL_DST_COLOR GL_ZERO
+        depthFunc equal
+    }
+}
+</pre>
+
+<p>The alpha channel can also be used to merge a texture (including one that contains black) into another image so that the merged art appears to be and opaque decal on a solid surface (unaffected by the surface it appears to sit on), without actually using an alpha function. The following is a very simple example:</p>
+
+<img src="alphachannel01.jpg" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_images/alphachannel01.jpg" class="center" />
+
+<p>Start with a TGA file image. In this case, a pentagram on a plain white field (figure 1A). The color of the field surrrounding the image to be merged is not relevant to this process (although having a hard-edged break between the image to be isolated and the field makes the mask making process easier). Make an alpha channel. The area of the image to be merged with another image is masked off in white. The area to be masked out (notused) is pure black (figure 1B). The image to be merged into is greenfloor.tga (figure 1C).</p>
+
+<p>Make a qer_editorimage of greenfloor.tga. This is placed in the frame buffer as the map image for the texture. By using GL_SRC_ALPHA as the source part of the blend equation, the shader adds in only the non-black parts of the pentagram. Using GL_MINUS_ONE_SRC_ALPHA, the shader inverts the pentagram's alpha channel and adds in only the non-black parts of the green floor.</p>
+
+<p>In a like manner, the alpha channel can be used to blend the textures more evenly. A simple experiment involves using a linear gradiant in the alpha channel (white to black) and merging two textures so they appear to cross fade into each other.</p>
+
+<p>A more complicated experiment would be to take the pentagram in the first example and give it an aliased edge so that the pentagram appeared to fade or blend into the floor. </p>
+
+</body>
+</html>

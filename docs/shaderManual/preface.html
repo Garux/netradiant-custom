@@ -1,0 +1,103 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Q3Map2 Shader Manual</title>
+	<meta name="keywords" content="id software, quake, radiant, qeradiant, gtkradiant, q3map, q3map2, shader, manual, ydnar, obsidian" />
+	<meta name="description" content="Q3Map2 Shader Manual" />
+	<meta name="copyright" content="Obsidian &copy; 2010" />
+	<link rel="stylesheet" href="default.css" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/_css/default.css" type="text/css" media="all" title="Default styles" />
+</head>
+<body id="intro_preface">
+
+<div id="nav">
+	<div id="navbutton">
+		<ul>
+			<div id="navtop"></div>
+			<li><a href="index.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/index.html">Q3Map2 Shader Manual</a></li>
+			<li><a href="contents.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/contents.html">Full Contents</a></li>
+			<li>Introduction
+				<ul>
+					<li><a href="preface.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/preface.html">Preface</a></li>
+					<li><a href="shader-concepts.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/shader-concepts.html">Shader Concepts</a></li>
+				</ul>
+			</li>
+			<li>Directives
+				<ul>
+					<li><a href="general-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/general-directives.html">General Directives</a></li>
+					<li><a href="q3map-global-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-global-directives.html">Q3Map Global Directives</a></li>
+					<li><a href="q3map-surface-parameter-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/q3map-surface-parameter-directives.html">Q3Map Surface Parameter Directives</a></li>
+					<li><a href="quake-editor-radiant-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/quake-editor-radiant-directives.html">Quake Editor Radiant Directives</a></li>
+					<li><a href="stage-directives.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/stage-directives.html">Stage Directives</a></li>
+				</ul>
+			</li>
+			<li>Articles
+				<ul>
+					<li><a href="texture-creation.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/texture-creation.html">Texture Creation</a></li>
+					<li><a href="alpha-channels.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/alpha-channels.html">Alpha Channels</a></li>
+					<li><a href="light-emitting-shaders.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/light-emitting-shaders.html">Light Emitting Shaders</a></li>
+					<li><a href="lightstyles.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/lightstyles.html">Lightstyles</a></li>
+					<li><a href="cel-shading.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/cel-shading.html">Cel Shading</a></li>
+					<li><a href="decal-tricks.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/decal-tricks.html">Decal Tricks</a></li>
+					<li><a href="foghull.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/foghull.html">Foghull</a></li>
+					<li><a href="fur.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/fur.html">Fur</a></li>
+					<li><a href="terrain-and-alphamod-blends.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/terrain-and-alphamod-blends.html">Terrain and alphaMod Blends</a></li>
+					<li><a href="triggerable-shader-entities.html" tppabs="http://robotrenegade.com/q3map2/docs/shader_manual/triggerable-shader-entities.html">Triggerable Shader Entities</a></li>
+				</ul>
+			</li>
+			<div id="navlow"></div>
+		</ul>
+	</div>
+</div>
+
+<h1 id="q3map2edition">The Q3Map2 Edition</h1>
+<p>Q3Map2 is an updated version of the original Q3Map program used to compile .map files created in a level editor such as Radiant into .bsp files used by id Tech 3 games. Since it's introduction, ydnar has added so many new features and improved efficiency to the degree where Q3Map2 has become the standard compiling program for the level editing community as well as for many commercial games.</p>
+<p>The Q3Map2 Edition is built off of the original QeRadiant Shader Manual written by the staff at id Software, improving upon it by including new shader directives introduced by Q3Map2, while expanding on the original content.</p>
+<p>This is currently the second edition of the Q3Map2 Shader Manual. It has been rewritten and converted to W3C compliant XHTML 1.0 Strict specifications. It is currently an actively developed project so check back for updates.</p>
+
+<h2 id="usingthemanual">Using the Manual</h2>
+<p>(Pending)</p>
+
+<h2 id="credits">Credits</h2>
+
+<h3>Q3Map2 Edition</h3>
+<dl>
+	<dt>Author</dt>
+		<dd>Obsidian</dd>
+	<dt>Additional material</dt>
+		<dd>ydnar</dd>
+		<dd>TTimo</dd>
+</dl>
+
+<h3>QeRadiant Shader Manual, Revision #12</h3>
+<dl>
+	<dt>Author</dt>
+		<dd>Paul Jaquays</dd>
+		<dd>Brian Hook</dd>
+	<dt>Additional material</dt>
+		<dd>John Carmack</dd>
+		<dd>Christian Antkow</dd>
+		<dd>Kevin Cloud</dd>
+		<dd>Adrian Carmack</dd>
+	<dt>HTML conversion</dt>
+		<dd>John Hutton</dd>
+</dl>
+
+<h2 id="contact">Contact</h2>
+
+<h3>Support Forums</h3>
+<ul>
+	<li><a href="http://www.splashdamage.com/forums/forumdisplay.php?f=7" tppabs="http://www.splashdamage.com/forums/forumdisplay.php?f=7">SplashDamage</a></li>
+	<li><a href="http://www.quake3world.com/forum/viewforum.php?f=10" tppabs="http://www.quake3world.com/forum/viewforum.php?f=10">Quake3World</a></li>
+</ul>
+
+<h3>Shader Manual Development</h3>
+<p>The new official home for the Q3Map2 Shader Manual is now located at <a href="http://robotrenegade.com/" tppabs="http://robotrenegade.com/">robotrenegade</a>.</p>
+<p>Feel free to e-mail me (Obsidian) if you have any suggestions, comments or error corrections: obsidian-at-robotrenegade-dot-com</p>
+
+<h2 id="legal">Legal</h2>
+<p>Quake, Quake III Arena, Quake Live and logos are registered trademarks of id Software, Inc.</p>
+<p>Q3Map2 and the Q3Map2 Shader Manual is not an id Software product and is not officially supported. Do not contact them for support.</p>
+<p>The Q3Map2 Shader Manual is protected under a Attribution-Noncommerical-Share Alike <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" tppabs="http://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons license</a>. Some rights reserved.</p>
