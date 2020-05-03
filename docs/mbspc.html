@@ -1,0 +1,255 @@
+<!doctype html public "-//w3c//dtd html 3.2//en">
+
+<html>
+<head>
+  <title></title>
+  <meta name="keywords" content="">
+  <meta name="Generator" content="HTMLpad">
+</head>
+
+<body bgcolor="e2e2e2" text="000000" link="0000ff" vlink="800080" alink="ff0000">
+
+<font face="Arial,Helvetica,sans-serif" size="4">
+<center>
+<h2>MBSPC -- BSP converter and editing utility</h2>
+<h3>Copyright (C) 2004-2012 Laszlo Menczel (laszlo.menczel@gmail.com)</h3>
+</center>
+
+<p>
+This program is distributed under the terms of the GNU General Public
+License version 2 as published by the Free Software Foundation. A copy of
+it is in the file GPL.TXT. This program comes with ABSOLUTELY NO WARRANTY.
+
+<h3>Introduction</h3>
+
+<p>
+This program is based on version 2.1 of the BSPC utility (part of the
+toolkit created for the Quake series of games). Originally it used to be
+a MAP to BSP converter. For Quake 3 it is mainly used for the creation of AAS
+file from BSP files. An AAS file is a file containing area information
+used by the Quake III Arena bots to navigate and understand a map.
+
+<p>
+MBSPC is a modified (enhanced) version of this utility. I have (re)added
+some functions that were either not present originally or were removed
+from this version for some reason. So you can also do the following tricks
+with MBSPC:
+
+<ul>
+  <li>
+    convert BSP files to editable MAP format
+  </li>
+  <li>
+    update the entity list in a BSP file
+  </li>
+  <li>
+    extract the entity list from a BSP file to a text file (new)
+  </li>
+  <li>
+    create a list of the textures used in a BSP file (new, only for Q3A at present)
+  </li>
+</ul>
+
+<p>
+When MBSPC is used for converting BSP files to MAP files, the correct
+texture name is written for every brush side. However, texture alignment
+info (shift, scale, rotation) is not written to the MAP file. It is not
+trivial to obtain this info from the BSP, and I did not need it when I
+coded this modification, sorry. If you need this functionality, add the
+necessary code.
+
+<p>
+<h3>Usage</h3>
+
+<pre>
+<tt>
+  bspc -option [ -option ... ] input-file
+</tt>
+</pre>
+
+<p>
+At least one option must be given to specify the desired action. The
+rest of the option(s) within the brackets are optional. Examples:
+
+<pre>
+<tt>
+  mbspc -bsp2aas d:\quake3\baseq3\maps\mymap?.bsp
+  mbspc -bsp2aas d:\quake3\baseq3\pak0.pk3\maps/q3dm*.bsp
+  mbspc -bsp2map -output d:\tmp d:\quake3\baseq3\maps\q3dm1.bsp
+</tt>
+</pre>
+
+<h3>Options</h3>
+
+The first section in the table contains obligatory options, i.e. one of
+them must be specified so that MBSPC knows what to do. The second section
+contains optional parameters that modify the way the action is done. The
+third section contains options that are useful only if you want to use
+MBSPC for compiling a BSP from a MAP. These are kind of obsolete because for
+Quake 1/2/3 there are now better compilers (e.g. q3map2), so MBSPC should
+not be used for this purpose.
+
+<p>
+List of options recognized by MBSPC:
+
+<pre>
+<tt>
+   option           argument        explanation                          output
+   ---------------------------------------------------------------------------------------
+   entlist          file.bsp        extract entity list                  file.ent
+   onlyents         file.bsp        update entity list from file.ent(*)  file.bsp
+   texinfo          file.bsp        extract texture list                 file.txi
+   bsp2map          file.bsp        create MAP from BSP                  file.map
+   bsp2aas          file.bsp        create AAS from BSP                  file.aas
+   reach            file.bsp        compute reachability and clusters    file.aas
+   cluster          file.aas        compute clusters                     file.aas
+   aasopt           file.aas        optimize aas file                    file.aas
+   ---------------------------------------------------------------------------------------
+   output           output-path     set output path
+   threads          N               set number of threads to N
+   cfg              file            use configuration data in 'file'
+   noverbose                        disable verbose output
+   ---------------------------------------------------------------------------------------
+   optimize                         enable optimization
+   breadthfirst                     breadth first bsp building
+   nobrushmerge                     don't merge brushes
+   freetree                         free the bsp tree
+   nocsg                            disables brush chopping
+   noliquids                        don't write liquids to map
+   forcesidesvisible                force all sides to be visible
+</tt>
+</pre>
+
+<p>
+(*) The '.ent' file must exist! You can make one using the '-entlist'
+option. The '.ent' file can be edited by using a text editor (e.g. you
+may change entity types and coordinates) as long as the format of entity
+specifications remains valid.
+
+<p>
+Several metacharacter may be used in the paths of the input file:
+
+<pre>
+<tt>
+  *          match any string of zero or more characters
+  ?          match any single character
+  [abc...]   match any of the enclosed characters; a hyphen can
+             be used to specify a range (e.g. a-z, A-Z, 0-9)
+</tt>
+</pre>
+
+<p>
+.pk3 files are accessed as if they are normal folders. For instance
+use "d:\quake3\baseq3\pak0.pk3\maps/q3dm1.bsp" to access the
+map q3dm1.bsp from the pak0.pk3 file. 
+
+<p>
+Multiple files may be listed after the switches bsp2map, bsp2aas, reach,
+cluster and aasopt.
+
+<p>
+If a BSP file is being converted to an AAS file and no output path
+is entered on the command-line then the AAS file will automatically
+be stored in the same folder as the BSP file. However if the BSP file
+was stored in a .pk3 file then the AAS file will be stored in a folder
+with the name 'maps' outside the .pk3 file.
+
+<h3>How updating the entity lump affects the AAS file?</h3>
+
+<p>
+If an AAS file is already available for a BSP file and you ONLY change
+the entities inside this BSP file (using the map editor or MBSPC with the
+'-onlyents' option) then you only have to recalculate the reachabilities.
+This way you can move items, platforms etc. around without the need to
+recalculate the whole AAS file which can save quite some compile time.
+You can recalculate the reachabilities as follows:
+
+<pre>
+<tt>
+  bspc -reach file.bsp
+</tt>
+</pre>
+
+<p>
+where 'file.bsp' is the updated BSP file. 'file.aas' must exist and must
+be in the same folder as 'file.bsp' or in the output folder specified with
+the '-output' option.
+
+<p>
+<b>Note:</b> the option '-reach' does not work on optimized '.AAS' files.
+
+<p>
+Keep in mind that as soon as ANY geometry in the map changes the whole
+AAS file HAS to be recalculated in order to play with bots.
+
+<h3>Testing AAS files</h3>
+
+<p>
+One of the easiest ways to test the AAS file is to load the map in
+Quake3 in teamplay mode (type /set g_gametype 3 on the console before
+loading the map). Enter a team and add a bot to your team. Use the
+team order menu (by default bound to the key F3) to command the bot
+to follow you. Walk around the map and see if the bot is able to
+follow you everywhere.
+
+<p>
+Map bugs can sometimes cause certain places in the map to show up
+'solid' in the AAS file. The bots cannot travel through these 'solid'
+areas. To test for these 'solid' places set the cvar bot_testsolid
+to 1 on the console. (type /set bot_testsolid 1) The map has to be
+started with devmap instead of map before the cvar bot_testsolid can
+be set. When the cvar is set to 1 then either "empty area" or
+"SOLID area" will be printed on the screen while traveling through a map.
+
+<p>
+Several map bugs can cause these 'solid' places in the AAS file.
+
+<pre>
+<tt>
+- Sometimes microscopic brushes are left over after a brush CSG. Search
+  for such brushes in the problem area and delete them.
+
+- Tiny brush faces (not curves) can also cause problems. Due to vertex
+  snapping in the q3map tool those tiny brush faces can be snapped out
+  of existence. Such faces will not show up in Quake3 and you'll see
+  tiny peek holes or slits where you can view through the geometry.
+  Allign vertexes of and edges of adjacent brushes to remove and avoid
+  such tiny faces. Placing a clip brush in front of the face that is
+  snapped out of existence will also remove the 'solid' area but ofcourse
+  it's much better to remove the peek holes and slits.
+
+- Another cause could be a brush with a collapsed side. Check how many
+  sides a brush has and how many sides actually have a surface. Rebuild
+  brushes with collapsed sides.
+
+- All faces contained within liquid brushes using a shader without
+  "surfaceparm trans" set will be removed. Those contained surfaces will
+  not be visible and can cause the lava to appear "solid" in the aas file.
+</tt>
+</pre>
+
+<p>
+Clusters can be tested with the cvar bot_testclusters.
+(type "/set bot_testclusters 1" on the console)
+
+<p>
+Jumppads can also be tested. Type the following on the Quake3 console
+before loading your map:
+
+<pre>
+<tt>
+/set bot_maxdebugpolys 1024
+/set bot_visualizejumppads 1
+/set bot_forcereachability 1
+</tt>
+</pre>
+
+<p>
+Now load the map. A counter will be shown and goes from 0% to 100%.
+When the counter has reached 100% type /set r_debugSurface 2 on the
+console. For every jumppad the default arch of travel (without using
+air control) will be visualized.
+
+</font>
+</body>
+</html>
