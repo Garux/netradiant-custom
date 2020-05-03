@@ -1,0 +1,71 @@
+                           Mouse bindings list
+
+                           ** 2d+3d **
+                     m1             tunnel selector (cycles through matching)
+                     m1 drag        create brush, resize, move
+             shift + m1             select objects
+             shift + m1 drag        paint objects selection
+              ctrl + m1             select brush face
+              ctrl + m1 drag        paint faces selection
+             shift + m2             tunnel selector
+             shift + m2 drag        rectangular selector (select/deselect/toggle, complete depth, partial match)
+              ctrl + m2             tunnel face selector
+              ctrl + m2 drag        rectangular selector of brush faces
+               alt + m1             select objects in component modes
+        ctrl + alt + m1             extrude pointed/selected brush faces
+                drag m1 + shift     snapped modes of manipulators, clipper; new brush is quadratic
+                drag m1 + ctrl      snap bbox, while using move and scale manipulators; new brush is cube
+
+
+                            ** 2d **
+                     m2 drag        move pan
+                     m2             entities creation menu
+               alt + m2 drag        quick zoom in/out
+               alt + m1             quick face/vertex shear in QE tool mode
+              ctrl + m1             quick clipper mode
+                     m1 x2          on clipper point = do clip
+                     m3             change 3d camera sight direction
+              ctrl + m3             move 3d camera location
+             shift + m3             set transform origin in pivoted mode
+
+
+                            ** 3d **
+               alt + m1             alternative objects resizing
+                     m1 + alt       adjust height of brush, being created; move stuff vertically
+                     m2             enter/quit 3d mouselook mode, sideways + up/down strafes
+               alt + m2             orbit around clicked point
+                     m2 x2          entities creation menu
+                     m3             copy texture name, alignment, color, light power, color
+                                    focus on texture in texture browser, fill find/replace dialog entries
+               alt + m3/drag        paste texture name (to pointed and selected stuff)
+             shift + m3/drag        paste texture name, alignment, light power
+              ctrl + m3/drag        paste texture seamlessly between brush faces, light color
+      ctrl + shift + m3/drag        project texture from copied brush face, paste light power, color
+  alt + ctrl/shift/
+       /ctrl+shift + m3/drag        respective texture alignment paste w/o texture name
+              ctrl + mouse          sideways + up/down strafes
+      ctrl + shift + mouse          sideways + forward/back strafes
+
+
+                       **texture browser**
+                     m1             select texture + apply to selection
+             shift + m1             open shader in internal editor
+      ctrl + shift + m1             open shader in external editor
+                     m2             show tags frame
+                     m2 drag        scroll pan
+                drag m2 + shift     scroll pan 4x faster
+                     m1 x2          load directory, selected texture belongs to
+                     m2 x2          load common/ directory
+                     m3             select texture, don't apply to selection
+
+
+                    **entities creation menu**
+                     m1             create an entity
+                                    worldspawn = ungroup selected primitives
+                     m2             convert selected entities
+                                    worldspawn = ungroup selected entities
+              ctrl + m1/2           do things, keep menu opened
+
+
+
+            scroll:                 2d: zoom; 3d: move; tex bro: scroll
