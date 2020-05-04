@@ -32,10 +32,10 @@ all: install bundle
 		$(CONFDIR)/gtk-2.0/gdk-pixbuf.loaders
 
 -gtk-runtime-pango:
-	cp -r $(MACPORTS_PREFIX)/lib/pango $(LIBDIR)
-	find $(LIBDIR)/pango -type f ! -name "*.so" -delete
+	#cp -r $(MACPORTS_PREFIX)/lib/pango $(LIBDIR)
+	#find $(LIBDIR)/pango -type f ! -name "*.so" -delete
 	
-	pango-querymodules | sed $(PREFIX_SED_EXPR) > \
+	#pango-querymodules | sed $(PREFIX_SED_EXPR) > \
 		$(CONFDIR)/pango/pango.modules
 	
 -gtk-runtime: -gtk-runtime-gdk-pixbuf-2.0 -gtk-runtime-pango
@@ -71,7 +71,20 @@ bundle:
 		`find $(LIBDIR) -name "*.dylib" | xargs -I {} echo -x {}` \
 	-d $(LIBDIR) -of -p @executable_path/../lib
 	
+	find ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders -name "*.so" -exec install_name_tool -change /opt/local/lib/libgdk_pixbuf-2.0.0.dylib @executable_path/../lib/libgdk_pixbuf-2.0.0.dylib {} \;
+	find ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders -name "*.so" -exec install_name_tool -change /opt/local/lib/libglib-2.0.0.dylib @executable_path/../lib/libglib-2.0.0.dylib {} \;
+	find ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders -name "*.so" -exec install_name_tool -change /opt/local/lib/libgobject-2.0.0.dylib @executable_path/../lib/libgobject-2.0.0.dylib {} \;
+
+	install_name_tool -change /opt/local/lib/libgio-2.0.0.dylib @executable_path/../lib/libgio-2.0.0.dylib ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ico.so
+	install_name_tool -change /opt/local/lib/libjasper.4.dylib @executable_path/../lib/libjasper.4.dylib ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-jasper.so
+	install_name_tool -change /opt/local/lib/libjpeg.9.dylib @executable_path/../lib/libjpeg.9.dylib ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-jpeg.so
+	install_name_tool -change /opt/local/lib/libpng16.16.dylib @executable_path/../lib/libpng16.16.dylib ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so
+	install_name_tool -change /opt/local/lib/libintl.8.dylib @executable_path/../lib/libintl.8.dylib ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-qtif.so
+	install_name_tool -change /opt/local/lib/libtiff.5.dylib @executable_path/../lib/libtiff.5.dylib ${LIBDIR}/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-tiff.so
+
 	rm -f install
+
+	chmod +x $(TARGET)/NetRadiant.app/Contents/MacOS/radiant
 
 image:
 	find $(TARGET) -name .DS_Store -delete
