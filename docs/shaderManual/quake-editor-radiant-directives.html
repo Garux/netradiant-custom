@@ -62,7 +62,6 @@
 textures/liquids/lavahell2			//path and name of new texture
 {
 	qer_editorImage textures/eerie/lavahell.tga	//based on this
-	qer_nocarve			//cannot be cut by CSG subtract
 	surfaceparm noimpact			//projectiles do not hit it
 	surfaceparm lava			//has the game properties of lava
 	surfaceparm nolightmap		//environment lighting does not affect
@@ -83,8 +82,10 @@ textures/liquids/lavahell2			//path and name of new texture
 	<p>The base_light and gothic_light shaders contain numerous uses of this. It can be very useful for making different light styles (mostly to change the light brightness) without having to create a new piece of TGA art for each new shader.</p>
 </blockquote>
 
+<!-- only available in GtkRadiant 1.4/1.6
 <h2 id="noCarve">qer_noCarve</h2>
 <p>A brush marked with this instruction will not be affected by CSG subtract functions. It is especially useful for water and fog textures.</p>
+-->
 
 <h2 id="trans">qer_trans N.N</h2>
 <p>This directive defines the percentage of transparency that a brush will have when seen in the editor (no effect on game rendering at all). It can have a positive value between 0 and 1. The higher the value, the less transparent the texture. Example: qer_trans 0.2 means the brush is 20% opaque and nearly invisible.</p>
