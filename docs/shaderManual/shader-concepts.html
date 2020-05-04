@@ -140,7 +140,7 @@ textures/liquids/lava-example                   //Shader name
 <h3>Documenting With Comments</h3>
 <p>It is often useful to document parts of shaders, especially for testing purposes or when working with a development team of other designers. Comments added to shaders are ignored completely, making it useful for adding notes, or for temporarily removing directives for testing.</p>
 <p>
-Shaders use the same double forward slashes "//" convention common with many programming languages for commenting. All text after the "//" on the same line are ignored from the shader. Block comments such as &quot;/* , */&quot; from other programming languages do not work. See various shaders for examples.</p>
+Shaders use the same double forward slashes "//" convention common with many programming languages for commenting. All text after the "//" on the same line are ignored from the shader. Block comments such as &quot;/* , */&quot; from other programming languages work too. See various shaders for examples.</p>
 
 <h3>:q3map Suffix</h3>
 <p>The :q3map suffix can be added to the end of the shader name of "compile-time" shaders. This means that shaders with names marked with :q3map will be used by the compiler only and will be ignored by the game engine. This is especially useful if you want to add Q3Map2-relevant shader directives to basic lightmapped textures. This allows Quake 3  to generate the stages implicitly while Q3Map2 processes the Q3Map2-relevant sections of the shader. Consider the following shaders:</p>
