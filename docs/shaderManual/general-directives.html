@@ -97,12 +97,11 @@ textures/skies/xtoxicsky_dm9
 </pre>
 
 <h2 id="cull">cull side</h2>
-<p>Every surface of a polygon has two sides, a front and a back. Typically, we only see the front or "out" side. For example, a solid block you only show the front side. In many applications we see both. For example, in water, you can see both front and a back. The same is true for things like grates and screens.</p>
-<p>To "cull" means to remove. The value parameter determines the type of face culling to apply. The default value is cull back if this keyword is not specified. However for items that should be inverted then the value front should be used. To disable culling, the value disable or none should be used. Only one cull instruction can be set for the shader.</p>
+<p>Every surface of a polygon has two sides, a front and a back. Typically, we only see the front or "out" side. For example, a solid block only shows the front side. In many applications we see both. For example, in water, you can see both front and a back. The same is true for things like grates and screens.</p>
+<p>To "cull" means to remove, however naming is messy here, so value parameter may be understood as "which side to show" too. The default behavior is to draw front side if this keyword is not specified. Only one cull instruction can be set for the shader.</p>
 <dl>
-	<dt>front</dt><dd>The front or "outside" of the polygon is not drawn in the world. It is used if the keyword "cull" appears in the content instructions without a side value.</dd>
-	<dt>back</dt><dd>Cull back removes the back or "inside" of a polygon from being drawn in the world.</dd>
-	<dt>disable or none</dt><dd>Neither side of the polygon is removed. Both sides are drawn in the game. Very useful for making panels or barriers that have no depth, such as grates, screens, metal wire fences and so on and for liquid volumes that the player can see from within. Also used for energy fields, sprites, and weapon effects (e.g. plasma).</dd>
+	<dt>back or backside or backsided</dt><dd>Cull back shows the back or "inside" of a polygon, removes front side from being drawn in the world.</dd>
+	<dt>none or twosided or disable</dt><dd>Neither side of the polygon is removed. Both sides are drawn in the game. Very useful for making panels or barriers that have no depth, such as grates, screens, metal wire fences and so on and for liquid volumes that the player can see from within. Also used for energy fields, sprites, and weapon effects (e.g. plasma).</dd>
 </dl>
 <blockquote>
 	<h4>Design Notes:</h4>
