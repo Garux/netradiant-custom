@@ -808,7 +808,7 @@ void TextureBrowser_ShowDirectory( TextureBrowser& textureBrowser, const char* d
 	}
 
 	TextureBrowser_SetHideUnused( textureBrowser, false );
-
+	TextureBrowser_setOriginY( textureBrowser, 0 );
 	TextureBrowser_updateTitle();
 }
 
