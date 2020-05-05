@@ -1269,41 +1269,43 @@ void BuildStoreAvailableTags(   GtkListStore* storeAvailable,
 								TextureBrowser* textureBrowser ){
 	GtkTreeIter iterAssigned;
 	GtkTreeIter iterAvailable;
-	std::set<CopiedString>::const_iterator iterAll;
-	gchar* tag_assigned;
 
 	gtk_list_store_clear( storeAvailable );
 
 	bool row = gtk_tree_model_get_iter_first( GTK_TREE_MODEL( storeAssigned ), &iterAssigned ) != 0;
 
 	if ( !row ) { // does the shader have tags assigned?
-		for ( iterAll = allTags.begin(); iterAll != allTags.end(); ++iterAll )
+		for ( const CopiedString& tag : allTags )
 		{
 			gtk_list_store_append( storeAvailable, &iterAvailable );
-			gtk_list_store_set( storeAvailable, &iterAvailable, TAG_COLUMN, ( *iterAll ).c_str(), -1 );
+			gtk_list_store_set( storeAvailable, &iterAvailable, TAG_COLUMN, tag.c_str(), -1 );
 		}
 	}
 	else
 	{
 		while ( row ) // available tags = all tags - assigned tags
 		{
+			gchar* tag_assigned;
 			gtk_tree_model_get( GTK_TREE_MODEL( storeAssigned ), &iterAssigned, TAG_COLUMN, &tag_assigned, -1 );
 
-			for ( iterAll = allTags.begin(); iterAll != allTags.end(); ++iterAll )
+			for ( const CopiedString& tag : allTags )
 			{
-				if ( strcmp( (char*)tag_assigned, ( *iterAll ).c_str() ) != 0 ) {
+				if ( !string_equal( tag_assigned, tag.c_str() ) ) {
 					gtk_list_store_append( storeAvailable, &iterAvailable );
-					gtk_list_store_set( storeAvailable, &iterAvailable, TAG_COLUMN, ( *iterAll ).c_str(), -1 );
+					gtk_list_store_set( storeAvailable, &iterAvailable, TAG_COLUMN, tag.c_str(), -1 );
 				}
 				else
 				{
 					row = gtk_tree_model_iter_next( GTK_TREE_MODEL( storeAssigned ), &iterAssigned ) != 0;
 
 					if ( row ) {
+						g_free( tag_assigned );
 						gtk_tree_model_get( GTK_TREE_MODEL( storeAssigned ), &iterAssigned, TAG_COLUMN, &tag_assigned, -1 );
 					}
 				}
 			}
+
+			g_free( tag_assigned );
 		}
 	}
 }
@@ -1799,6 +1801,8 @@ void TextureBrowser_assignTags(){
 					gtk_list_store_remove( g_TextureBrowser.m_available_store, &iter );
 					gtk_list_store_append( g_TextureBrowser.m_assigned_store, &iter );
 					gtk_list_store_set( g_TextureBrowser.m_assigned_store, &iter, TAG_COLUMN, (char*)tag_assigned, -1 );
+
+					g_free( tag_assigned );
 				}
 			}
 		}
@@ -1814,7 +1818,6 @@ void TextureBrowser_assignTags(){
 void TextureBrowser_removeTags(){
 	GSList* selected = NULL;
 	GSList* node;
-	gchar* tag;
 
 	GtkTreeSelection* selection = gtk_tree_view_get_selection( GTK_TREE_VIEW( g_TextureBrowser.m_assigned_tree ) );
 
@@ -1829,9 +1832,11 @@ void TextureBrowser_removeTags(){
 				GtkTreeIter iter;
 
 				if ( gtk_tree_model_get_iter( GTK_TREE_MODEL( g_TextureBrowser.m_assigned_store ), &iter, path ) ) {
+					gchar* tag;
 					gtk_tree_model_get( GTK_TREE_MODEL( g_TextureBrowser.m_assigned_store ), &iter, TAG_COLUMN, &tag, -1 );
 					TagBuilder.DeleteShaderTag( g_TextureBrowser.shader.c_str(), tag );
 					gtk_list_store_remove( g_TextureBrowser.m_assigned_store, &iter );
+					g_free( tag );
 				}
 			}
 		}
@@ -1863,7 +1868,6 @@ void TextureBrowser_buildTagList(){
 void TextureBrowser_searchTags(){
 	GSList* selected = NULL;
 	GSList* node;
-	gchar* tag;
 	char buffer[256];
 	char tags_searched[256];
 
@@ -1883,10 +1887,12 @@ void TextureBrowser_searchTags(){
 				GtkTreeIter iter;
 
 				if ( gtk_tree_model_get_iter( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iter, path ) ) {
+					gchar* tag;
 					gtk_tree_model_get( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iter, TAG_COLUMN, &tag, -1 );
 
 					strcat( buffer, tag );
 					strcat( tags_searched, tag );
+					g_free( tag );
 					if ( node != g_slist_last( node ) ) {
 						strcat( buffer, "' and tag='" );
 						strcat( tags_searched, ", " );
@@ -2380,7 +2386,7 @@ void TextureBrowser_renameTag(){
 	   gtk_tree_selection_get_selected() doesn't work with GTK_SELECTION_MULTIPLE,
 	   we need to count the number of selected rows first and use
 	   gtk_tree_selection_selected_foreach() then to go through the list of selected
-	   rows (which always containins a single row).
+	   rows (which always contains a single row).
 	 */
 
 	GSList* selected = NULL;
@@ -2394,18 +2400,19 @@ void TextureBrowser_renameTag(){
 
 		if ( result == eIDOK && !newTag.empty() ) {
 			GtkTreeIter iterList;
-			gchar* rowTag;
 			gchar* oldTag = (char*)selected->data;
 
 			bool row = gtk_tree_model_get_iter_first( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iterList ) != 0;
 
 			while ( row )
 			{
+				gchar* rowTag;
 				gtk_tree_model_get( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iterList, TAG_COLUMN, &rowTag, -1 );
 
-				if ( strcmp( rowTag, oldTag ) == 0 ) {
+				if ( string_equal( rowTag, oldTag ) ) {
 					gtk_list_store_set( g_TextureBrowser.m_all_tags_list, &iterList, TAG_COLUMN, newTag.c_str(), -1 );
 				}
+				g_free( rowTag );
 				row = gtk_tree_model_iter_next( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iterList ) != 0;
 			}
 
@@ -2422,6 +2429,8 @@ void TextureBrowser_renameTag(){
 	{
 		gtk_MessageBox( GTK_WIDGET( g_TextureBrowser.m_parent ), "Select a single tag for renaming." );
 	}
+
+	g_slist_free_full( selected, g_free );
 }
 
 void TextureBrowser_deleteTag(){
@@ -2435,7 +2444,6 @@ void TextureBrowser_deleteTag(){
 
 		if ( result == eIDYES ) {
 			GtkTreeIter iterSelected;
-			gchar *rowTag;
 
 			gchar* tagSelected = (char*)selected->data;
 
@@ -2443,12 +2451,15 @@ void TextureBrowser_deleteTag(){
 
 			while ( row )
 			{
+				gchar *rowTag;
 				gtk_tree_model_get( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iterSelected, TAG_COLUMN, &rowTag, -1 );
 
-				if ( strcmp( rowTag, tagSelected ) == 0 ) {
+				if ( string_equal( rowTag, tagSelected ) ) {
 					gtk_list_store_remove( g_TextureBrowser.m_all_tags_list, &iterSelected );
+					g_free( rowTag );
 					break;
 				}
+				g_free( rowTag );
 				row = gtk_tree_model_iter_next( GTK_TREE_MODEL( g_TextureBrowser.m_all_tags_list ), &iterSelected ) != 0;
 			}
 
@@ -2462,6 +2473,8 @@ void TextureBrowser_deleteTag(){
 	else {
 		gtk_MessageBox( GTK_WIDGET( g_TextureBrowser.m_parent ), "Select a single tag for deletion." );
 	}
+
+	g_slist_free_full( selected, g_free );
 }
 
 void TextureBrowser_copyTag(){
