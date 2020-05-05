@@ -45,6 +45,7 @@
 
 #include "gtkutil/window.h"
 #include "stream/stringstream.h"
+#include "os/path.h"
 
 #include "commands.h"
 #include "dialog.h"
@@ -92,7 +93,7 @@ void FindTextureDialog_apply(){
 	StringOutputStream replace( 256 );
 
 	find << "textures/" << g_FindTextureDialog.m_strFind.c_str();
-	replace << "textures/" << g_FindTextureDialog.m_strReplace.c_str();
+	replace << "textures/" << PathCleaned( g_FindTextureDialog.m_strReplace.c_str() );
 	FindReplaceTextures( find.c_str(), replace.c_str(), g_FindTextureDialog.m_bSelectedOnly );
 }
 
