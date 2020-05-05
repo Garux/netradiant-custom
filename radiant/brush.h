@@ -3930,24 +3930,24 @@ void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPla
 	}
 }
 
-void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ){
+void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const {
 	test.BeginMesh( localToWorld() );
-	for ( FaceInstances::iterator i = m_faceInstances.begin(); i != m_faceInstances.end(); ++i )
+	for ( const FaceInstance& fi : m_faceInstances )
 	{
 		SelectionIntersection intersection_new;
-		( *i ).testSelect( test, intersection_new );
+		fi.testSelect( test, intersection_new );
 		if( SelectionIntersection_closer( intersection_new, intersection ) ){
 			intersection = intersection_new;
-			plane = ( *i ).getFace().plane3();
+			plane = fi.getFace().plane3();
 		}
 	}
 }
-void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ){
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const {
 	test.BeginMesh( localToWorld() );
 	float dot = 1;
-	for ( EdgeInstances::iterator i = m_edgeInstances.begin(); i != m_edgeInstances.end(); ++i )
+	for ( const EdgeInstance& ei : m_edgeInstances )
 	{
-		( *i ).bestPlaneIndirect( test, plane, intersection, dist, dot );
+		ei.bestPlaneIndirect( test, plane, intersection, dist, dot );
 	}
 }
 void selectByPlane( const Plane3& plane ){

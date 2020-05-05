@@ -299,8 +299,8 @@ STRING_CONSTANT( Name, "PlaneSelectable" );
 virtual void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) = 0;
 virtual void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPlanes ) = 0;
 
-virtual void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) = 0;
-virtual void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) = 0;
+virtual void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const = 0;
+virtual void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const = 0;
 virtual void selectByPlane( const Plane3& plane ) = 0;
 virtual void gatherPolygonsByPlane( const Plane3& plane, std::vector<std::vector<Vector3>>& polygons ) const = 0;
 };

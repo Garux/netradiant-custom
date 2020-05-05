@@ -86,7 +86,7 @@ class DragPlanes
 {
 ObservedSelectable m_selectables[6];
 public:
-AABB m_bounds;
+mutable AABB m_bounds;
 DragPlanes( const SelectionChangeCallback& onchanged ) : m_selectables{ ObservedSelectable( onchanged ),
 																		ObservedSelectable( onchanged ),
 																		ObservedSelectable( onchanged ),
@@ -163,7 +163,7 @@ void selectReversedPlanes( const AABB& aabb, Selector& selector, const SelectedP
 			Selector_add( selector, m_selectables[i] );
 }
 
-void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, SelectionIntersection& intersection, const Matrix4& rotation = g_matrix4_identity ){
+void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, SelectionIntersection& intersection, const Matrix4& rotation = g_matrix4_identity ) const {
 	AABB aabb_ = aabb;
 	for( std::size_t i = 0; i < 3; ++i ) /* make sides of flat patches more selectable */
 		if( aabb_.extents[i] < 1 )
@@ -195,7 +195,7 @@ void bestPlaneDirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Sele
 	}
 	m_bounds = aabb;
 }
-void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Matrix4& rotation = g_matrix4_identity ){
+void bestPlaneIndirect( const AABB& aabb, SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist, const Matrix4& rotation = g_matrix4_identity ) const {
 	Vector3 corners[8];
 	aabb_corners_oriented( aabb, rotation, corners );
 

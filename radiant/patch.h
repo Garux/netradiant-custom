@@ -1649,11 +1649,11 @@ void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPla
 	m_dragPlanes.selectReversedPlanes( m_patch.localAABB(), selector, selectedPlanes );
 }
 
-void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ){
+void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const {
 	test.BeginMesh( localToWorld() );
 	m_dragPlanes.bestPlaneDirect( m_patch.localAABB(), test, plane, intersection );
 }
-void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ){
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const {
 	test.BeginMesh( localToWorld() );
 	m_dragPlanes.bestPlaneIndirect( m_patch.localAABB(), test, plane, intersection, dist );
 }

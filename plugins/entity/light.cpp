@@ -1874,13 +1874,13 @@ void selectReversedPlanes( Selector& selector, const SelectedPlanes& selectedPla
 	}
 }
 
-void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ){
+void bestPlaneDirect( SelectionTest& test, Plane3& plane, SelectionIntersection& intersection ) const {
 	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 		test.BeginMesh( localToWorld() );
 		m_dragPlanes.bestPlaneDirect( m_contained.aabb(), test, plane, intersection, rotation() );
 	}
 }
-void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ){
+void bestPlaneIndirect( SelectionTest& test, Plane3& plane, Vector3& intersection, float& dist ) const {
 	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 		test.BeginMesh( localToWorld() );
 		m_dragPlanes.bestPlaneIndirect( m_contained.aabb(), test, plane, intersection, dist, rotation() );
