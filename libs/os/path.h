@@ -232,19 +232,21 @@ DirectoryCleaned( const char* path ) : m_path( path ){
 template<typename TextOutputStreamType>
 TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const DirectoryCleaned& path ){
 	const char* i = path.m_path;
-	for (; *i != '\0'; ++i )
-	{
-		if ( *i == '\\' ) {
+	if( !string_empty( i ) ){
+		for (; *i != '\0'; ++i )
+		{
+			if ( *i == '\\' ) {
+				ostream << '/';
+			}
+			else
+			{
+				ostream << *i;
+			}
+		}
+		--i;
+		if ( *i != '/' && *i != '\\' ) {
 			ostream << '/';
 		}
-		else
-		{
-			ostream << *i;
-		}
-	}
-	char c = *( i - 1 );
-	if ( c != '/' && c != '\\' && !string_empty( path.m_path ) ) {
-		ostream << '/';
 	}
 	return ostream;
 }

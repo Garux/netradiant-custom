@@ -1151,22 +1151,20 @@ public:
 	// parse string of format *pathToLoad/depth*path2ToLoad/depth*
 	// */depth* for root path
 	ModelFolders( const char* pathsString ){
-		char* str = strdup( pathsString );
-		for( char* s = str; *s; ++s )
-			if( *s == '\\' )
-				*s = '/';
+		StringOutputStream str( 128 );
+		str << PathCleaned( pathsString );
 
-		char* start = str;
+		const char* start = str.c_str();
 		while( 1 ){
 			while( *start == '*' )
 				++start;
-			char* end = start;
+			const char* end = start;
 			while( *end && *end != '*' )
 				++end;
 			if( start == end )
 				break;
-			char* slash = nullptr;
-			for( char* s = start; s != end; ++s )
+			const char* slash = nullptr;
+			for( const char* s = start; s != end; ++s )
 				if( *s == '/' )
 					slash = s;
 			if( slash != nullptr && end - slash > 1 ){
@@ -1178,7 +1176,6 @@ public:
 			start = end;
 		}
 
-		free( str );
 		if( m_modelFoldersMap.empty() )
 			m_modelFoldersMap.emplace( "models/", 99 );
 	}
@@ -1314,7 +1311,7 @@ GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
 		gtk_table_attach( GTK_TABLE( table ), w, 2, 3, 0, 1, GTK_SHRINK, GTK_FILL, 0, 0 );
 		gtk_widget_show( w );
 
-		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( g_ModelBrowser.m_gl_scroll ) );
+		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( w ) );
 		g_signal_connect( G_OBJECT( vadjustment ), "value_changed", G_CALLBACK( ModelBrowser_scrollbarScroll ), &g_ModelBrowser );
 	}
 	{ // gl_widget
