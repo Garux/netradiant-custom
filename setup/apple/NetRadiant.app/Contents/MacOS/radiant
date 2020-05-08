@@ -30,6 +30,6 @@ export PANGO_SYSCONFDIR="${resources}/etc"
 export PANGO_LIBDIR="${resources}/lib"
 
 cd "${resources}/install"
-./radiant &
+./radiant.x86_64 &
 
 set +x

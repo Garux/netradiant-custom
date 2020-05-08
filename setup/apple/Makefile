@@ -62,11 +62,11 @@ bundle:
 	test -L install || ln -s $(INSTALL)
 	
 	dylibbundler -b \
-		-x $(BINDIR)/radiant \
-		-x $(BINDIR)/q2map \
-		-x $(BINDIR)/q3data \
-		-x $(BINDIR)/q3map2 \
-		-x $(BINDIR)/qdata3 \
+		-x $(BINDIR)/radiant.x86_64 \
+		-x $(BINDIR)/q2map.x86_64 \
+		-x $(BINDIR)/q3data.x86_64 \
+		-x $(BINDIR)/q3map2.x86_64 \
+		-x $(BINDIR)/qdata3.x86_64 \
 		`find $(BINDIR)/modules -name "*.dylib" | xargs -I {} echo -x {}` \
 		`find $(LIBDIR) -name "*.dylib" | xargs -I {} echo -x {}` \
 	-d $(LIBDIR) -of -p @executable_path/../lib
