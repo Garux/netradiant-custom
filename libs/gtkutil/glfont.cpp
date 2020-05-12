@@ -669,12 +669,12 @@ GLFont *glfont_create( const char* font_string ){
 
 #include <pango/pangoft2.h>
 #include <pango/pango-utils.h>
-#include <gtk/gtkglwidget.h>
+#include <gtk/gtksettings.h>
 
-PangoFont* tryFont( const char* font_string, PangoFontDescription*& font_desc, GLuint font_list_base ){
+PangoFont* tryFont( const char* font_string, PangoFontMap *fontmap, PangoContext *context, PangoFontDescription*& font_desc ){
 	pango_font_description_free( font_desc );
 	font_desc = pango_font_description_from_string( font_string );
-	return gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+	return pango_font_map_load_font( fontmap, context, font_desc );
 }
 
 GLFont *glfont_create( const char* font_string ){
@@ -683,41 +683,39 @@ GLFont *glfont_create( const char* font_string ){
 	PangoFontDescription* font_desc = 0;
 	PangoFont* font = 0;
 
+	PangoFontMap *fontmap = pango_ft2_font_map_new();
+	pango_ft2_font_map_set_resolution( PANGO_FT2_FONT_MAP( fontmap ), 72, 72 );
+	PangoContext *ft2_context = pango_font_map_create_context( fontmap );
+
 	do
 	{
 		if( *font_string != '\0' )
-			if( ( font = tryFont( font_string, font_desc, font_list_base ) ) )
+			if( ( font = tryFont( font_string, fontmap, ft2_context, font_desc ) ) )
 				break;
 #ifdef WIN32
-		if( ( font = tryFont( "arial 8", font_desc, font_list_base ) ) )
+		if( ( font = tryFont( "arial 8", fontmap, ft2_context, font_desc ) ) )
 			break;
-		if( ( font = tryFont( "fixed 8", font_desc, font_list_base ) ) )
+		if( ( font = tryFont( "fixed 8", fontmap, ft2_context, font_desc ) ) )
 			break;
-		if( ( font = tryFont( "courier new 8", font_desc, font_list_base ) ) )
+		if( ( font = tryFont( "courier new 8", fontmap, ft2_context, font_desc ) ) )
 			break;
 #endif
 		GtkSettings *settings = gtk_settings_get_default();
 		gchar *fontname;
 		g_object_get( settings, "gtk-font-name", &fontname, NULL );
-		font = tryFont( fontname, font_desc, font_list_base );
+		font = tryFont( fontname, fontmap, ft2_context, font_desc );
 		g_free( fontname );
 
 		if( !font ){
 			const char* guessFonts[] = { "serif 8", "sans 8", "clean 8", "courier 8", "helvetica 8", "arial 8", "dejavu sans 8" };
 			for( const auto str : guessFonts ){
-				if( ( font = tryFont( str, font_desc, font_list_base ) ) )
+				if( ( font = tryFont( str, fontmap, ft2_context, font_desc ) ) )
 					break;
 			}
 		}
 	} while ( 0 );
 
-	PangoFontMap *fontmap = 0;
-	PangoContext *ft2_context = 0;
-
 	if ( font != 0 ) {
-		fontmap = pango_ft2_font_map_new();
-		pango_ft2_font_map_set_resolution( PANGO_FT2_FONT_MAP( fontmap ), 72, 72 );
-		ft2_context = pango_font_map_create_context( fontmap );
 		pango_context_set_font_description( ft2_context, font_desc );
 		PangoLayout *layout = pango_layout_new( ft2_context );
 
@@ -733,11 +731,11 @@ GLFont *glfont_create( const char* font_string ){
 		int font_descent_pango_units = log_rect.height - font_ascent_pango_units;
 
 		/* settings for render to tex; need to multiply size, so that bitmap callLists way size would be approximately = texture way */
-		gint fontsize = pango_font_description_get_size( font_desc );
-		fontsize *= 3;
-		fontsize /= 2; //*15/11 is equal to bitmap callLists size
-		pango_font_description_set_size( font_desc, fontsize );
-		pango_context_set_font_description( ft2_context, font_desc );
+//		gint fontsize = pango_font_description_get_size( font_desc );
+//		fontsize *= 3;
+//		fontsize /= 2; //*15/11 is equal to bitmap callLists size
+//		pango_font_description_set_size( font_desc, fontsize );
+//		pango_context_set_font_description( ft2_context, font_desc );
 
 //		globalOutputStream() << pango_font_description_get_family( font_desc ) << " " << pango_font_description_get_size( font_desc ) << "\n";
 
@@ -747,6 +745,74 @@ GLFont *glfont_create( const char* font_string ){
 		font_ascent = PANGO_PIXELS_CEIL( font_ascent_pango_units );
 		font_descent = PANGO_PIXELS_CEIL( font_descent_pango_units );
 		font_height = font_ascent + font_descent;
+	}
+	/* render displaylists */
+	if ( font != 0 ) {
+		PangoLayout *layout;
+		PangoRectangle log_rect;
+		FT_Bitmap bitmap;
+
+		layout = pango_layout_new( ft2_context );
+		pango_layout_set_width( layout, -1 );   // -1 no wrapping.  All text on one line.
+
+		GLint alignment;
+		glGetIntegerv( GL_UNPACK_ALIGNMENT, &alignment );
+		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+//		glPixelStorei( GL_UNPACK_SWAP_BYTES, GL_TRUE );
+//	glPixelStorei( GL_UNPACK_LSB_FIRST, GL_TRUE );
+
+		for( unsigned char c = 0; ; ++c ){
+			pango_layout_set_text( layout, reinterpret_cast<const char*>( &c ), 1 );
+			pango_layout_get_extents( layout, NULL, &log_rect );
+
+			if ( log_rect.width > 0 && log_rect.height > 0 ) {
+				bitmap.rows = PANGO_PIXELS_CEIL( log_rect.height );//m_pixelAscent + m_pixelDescent;
+				bitmap.width = PANGO_PIXELS_CEIL( log_rect.width );
+				bitmap.pitch = -bitmap.width;     // Rendering it "upside down" for OpenGL.
+				unsigned char *boo = (unsigned char *) malloc( bitmap.rows * bitmap.width );
+				memset( boo, 0, bitmap.rows * bitmap.width );
+//				bitmap.buffer = boo;
+				bitmap.buffer = boo + ( bitmap.rows - 1 ) * bitmap.width;   // See pitch above.
+//				bitmap.num_grays = 0xff;
+//				bitmap.pixel_mode = FT_PIXEL_MODE_GRAY;
+				bitmap.pixel_mode = FT_PIXEL_MODE_MONO;
+				pango_ft2_render_layout_subpixel( &bitmap, layout, -log_rect.x, 0 );
+				/* convert byte per pixel to bitmap */
+				unsigned char *buf = (unsigned char *) malloc( bitmap.rows * bitmap.width );
+				memset( buf, 0, bitmap.rows * bitmap.width );
+				unsigned char* writeByte = buf - 1;
+				for( unsigned int row = 0; row < bitmap.rows; ++row ){
+					unsigned char* readStart = boo + row * bitmap.width;
+					for( unsigned int col = 0; col < bitmap.width; ++col ){
+						if( ( col % 8 ) == 0 )
+							++writeByte;
+						if( *( readStart + col ) > 127 ){
+							*writeByte |= 1UL << ( 7 - ( col % 8 ) );
+							if( c == 57 ){
+								globalOutputStream() << *( readStart + col ) << " *( readStart + col )\n";
+							}
+						}
+					}
+				}
+
+
+				glNewList( font_list_base + c, GL_COMPILE );
+//				glBitmap( bitmap.width, bitmap.rows, 0, font_descent, bitmap.width, 0, buf );
+glDrawPixels(	bitmap.width, 	bitmap.rows, 	GL_RED, 	GL_UNSIGNED_BYTE, 	boo);
+glBitmap(0,0,0,0,bitmap.width,0,NULL);
+//glTranslatef( bitmap.width, 0, 0 );
+				glEndList();
+
+				free( boo );
+				free( buf );
+			}
+			if( c == 255 )
+				break;
+		}
+
+		glPixelStorei( GL_UNPACK_ALIGNMENT, alignment );
+
+		g_object_unref( G_OBJECT( layout ) );
 	}
 
 	pango_font_description_free( font_desc );
