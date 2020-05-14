@@ -4557,7 +4557,7 @@ public:
 			if( m_points[i].m_set ){
 				m_points[i].m_p.vertex = vertex3f_for_vector3( m_points[i].m_point );
 				renderer.addRenderable( m_points[i], g_matrix4_identity );
-				const Vector3 pos = vector4_projected( matrix4_transformed_vector4( proj, Vector4( m_points[i].m_point, 1 ) ) ) + Vector3( 3, 4, 0 );
+				const Vector3 pos = vector4_projected( matrix4_transformed_vector4( proj, Vector4( m_points[i].m_point, 1 ) ) ) + Vector3( 2, 0, 0 );
 				m_points[i].m_namePos = vector4_projected( matrix4_transformed_vector4( proj_inv, Vector4( pos, 1 ) ) );
 			}
 	}

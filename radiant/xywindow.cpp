@@ -1456,15 +1456,17 @@ void XYWnd::XY_DrawAxis( void ){
 	glEnd();
 	glLineWidth( 1 );
 	// now print axis symbols
+	const int fontHeight = GlobalOpenGL().m_font->getPixelHeight();
+	const float fontWidth = fontHeight * .55f;
 	glColor3fv( vector3_to_array( colourX ) );
-	glRasterPos2f( m_vOrigin[nDim1] - w + 55 / m_fScale, m_vOrigin[nDim2] + h - 55 / m_fScale );
+	glRasterPos2f( m_vOrigin[nDim1] - w + ( 65 - 3 - fontWidth ) / m_fScale, m_vOrigin[nDim2] + h - ( 45 + 3 + fontHeight ) / m_fScale );
 	GlobalOpenGL().drawChar( g_AxisName[nDim1] );
-	glRasterPos2f( 28 / m_fScale, -10 / m_fScale );
+	glRasterPos2f( ( 32 - fontWidth / 2 ) / m_fScale, -( 0 + 3 + fontHeight ) / m_fScale );
 	GlobalOpenGL().drawChar( g_AxisName[nDim1] );
 	glColor3fv( vector3_to_array( colourY ) );
-	glRasterPos2f( m_vOrigin[nDim1] - w + 25 / m_fScale, m_vOrigin[nDim2] + h - 30 / m_fScale );
+	glRasterPos2f( m_vOrigin[nDim1] - w + ( 40 - 4 - fontWidth ) / m_fScale, m_vOrigin[nDim2] + h - ( 20 + 3 + fontHeight ) / m_fScale );
 	GlobalOpenGL().drawChar( g_AxisName[nDim2] );
-	glRasterPos2f( -10 / m_fScale, 28 / m_fScale );
+	glRasterPos2f( ( 0 - 3 - fontWidth ) / m_fScale, ( 32 - fontHeight / 2 ) / m_fScale );
 	GlobalOpenGL().drawChar( g_AxisName[nDim2] );
 }
 
@@ -1615,15 +1617,16 @@ void XYWnd::XY_DrawGrid( void ) {
 	// draw coordinate text if needed
 	if ( g_xywindow_globals_private.show_coordinates ) {
 		glColor4fv( vector4_to_array( Vector4( g_xywindow_globals.color_gridtext, 1.0f ) ) );
-		const float offx = m_vOrigin[nDim2] + h - ( 4 + GlobalOpenGL().m_font->getPixelAscent() ) / m_fScale;
+		const float offx = m_vOrigin[nDim2] + h - ( 1 + GlobalOpenGL().m_font->getPixelHeight() ) / m_fScale;
 		const float offy = m_vOrigin[nDim1] - w +  4                                            / m_fScale;
+		const float fontDescent = ( GlobalOpenGL().m_font->getPixelDescent() - 1 ) / m_fScale;
 		for ( x = xb - fmod( xb, stepx ); x <= xe ; x += stepx ) {
 			glRasterPos2f( x, offx );
 			sprintf( text, "%g", x );
 			GlobalOpenGL().drawString( text );
 		}
 		for ( y = yb - fmod( yb, stepy ); y <= ye ; y += stepy ) {
-			glRasterPos2f( offy, y );
+			glRasterPos2f( offy, y - fontDescent );
 			sprintf( text, "%g", y );
 			GlobalOpenGL().drawString( text );
 		}
@@ -1635,7 +1638,7 @@ void XYWnd::XY_DrawGrid( void ) {
 	}
 	else{
 		glColor3fv( vector3_to_array( Active()? g_xywindow_globals.color_viewname : g_xywindow_globals.color_gridtext ) );
-		glRasterPos2f( m_vOrigin[nDim1] - w + 35 / m_fScale, m_vOrigin[nDim2] + h - 20 / m_fScale );
+		glRasterPos2f( m_vOrigin[nDim1] - w + 35 / m_fScale, m_vOrigin[nDim2] + h - ( GlobalOpenGL().m_font->getPixelHeight() * 2 ) / m_fScale );
 		GlobalOpenGL().drawString( ViewType_getTitle( m_viewType ) );
 	}
 
@@ -1808,22 +1811,24 @@ void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
 	glVertex3fv( vector3_to_array( v ) );
 	glEnd();
 
+	const int fontHeight = GlobalOpenGL().m_font->getPixelHeight();
+
 	v[nDim1] = mid[nDim1];
-	v[nDim2] = min[nDim2] - 20.f / m_fScale;
+	v[nDim2] = min[nDim2] - ( 10 + 2 + fontHeight ) / m_fScale;
 	glRasterPos3fv( vector3_to_array( v ) );
 	dimensions << dimStrings[nDim1] << size[nDim1];
 	GlobalOpenGL().drawString( dimensions.c_str() );
 	dimensions.clear();
 
 	v[nDim1] = max[nDim1] + 16.f / m_fScale;
-	v[nDim2] = mid[nDim2];
+	v[nDim2] = mid[nDim2] - fontHeight / m_fScale / 2;
 	glRasterPos3fv( vector3_to_array( v ) );
 	dimensions << dimStrings[nDim2] << size[nDim2];
 	GlobalOpenGL().drawString( dimensions.c_str() );
 	dimensions.clear();
 
 	v[nDim1] = min[nDim1] + 4.f;
-	v[nDim2] = max[nDim2] + 8.f / m_fScale;
+	v[nDim2] = max[nDim2] + 5.f / m_fScale;
 	glRasterPos3fv( vector3_to_array( v ) );
 	dimensions << "(" << dimStrings[nDim1] << min[nDim1] << "  " << dimStrings[nDim2] << max[nDim2] << ")";
 	GlobalOpenGL().drawString( dimensions.c_str() );
@@ -2112,13 +2117,10 @@ void XYWnd::XY_Draw(){
 
 		glColor3fv( vector3_to_array( g_xywindow_globals.color_viewname ) );
 
-		glRasterPos3f( 2.f, GlobalOpenGL().m_font->getPixelDescent() + 1.f, 0.0f );
+		glRasterPos3f( 2.f, 0.f, 0.0f );
 		extern const char* Renderer_GetStats();
-		GlobalOpenGL().drawString( Renderer_GetStats() );
-
-		//globalOutputStream() << m_render_time.elapsed_msec() << "\n";
 		StringOutputStream stream;
-		stream << " | f2f: " << m_render_time.elapsed_msec();
+		stream << Renderer_GetStats() << " | f2f: " << m_render_time.elapsed_msec();
 		GlobalOpenGL().drawString( stream.c_str() );
 		m_render_time.start();
 	}

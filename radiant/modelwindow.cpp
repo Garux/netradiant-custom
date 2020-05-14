@@ -467,6 +467,7 @@ class CellPos
 {
 	const int m_cellSize; //half size of model square (radius)
 	const int m_fontHeight;
+	const int m_fontDescent;
 	const int m_plusWidth; //pre offset on the left
 	const int m_plusHeight; //above text
 	const int m_cellsInRow;
@@ -475,8 +476,9 @@ class CellPos
 public:
 	CellPos( int width, int cellSize, int fontHeight )
 	: m_cellSize( cellSize ), m_fontHeight( fontHeight ),
+		m_fontDescent( GlobalOpenGL().m_font->getPixelDescent() ),
 		m_plusWidth( 8 ),
-		m_plusHeight( 4 ),
+		m_plusHeight( 0 ),
 		m_cellsInRow( std::max( 1, ( width - m_plusWidth ) / ( m_cellSize * 2 + m_plusWidth ) ) ){
 	}
 	void operator++(){
@@ -492,7 +494,7 @@ public:
 	}
 	Vector3 getTextPos( int index ) const {
 		const int x = ( index % m_cellsInRow ) * m_cellSize * 2 + ( index % m_cellsInRow + 1 ) * m_plusWidth;
-		const int z = ( index / m_cellsInRow ) * m_cellSize * 2 + ( index / m_cellsInRow + 1 ) * ( m_fontHeight + m_plusHeight ) - 1;
+		const int z = ( index / m_cellsInRow ) * m_cellSize * 2 + ( index / m_cellsInRow + 1 ) * ( m_fontHeight + m_plusHeight ) - 1 + m_fontDescent;
 		return Vector3( x, 0, -z );
 	}
 	Vector3 getTextPos() const {

@@ -421,7 +421,7 @@ int current_x, current_y, current_row;
 
 void Texture_StartPos( TextureLayout& layout ){
 	layout.current_x = 8;
-	layout.current_y = -8;
+	layout.current_y = -4;
 	layout.current_row = 0;
 }
 
@@ -432,7 +432,7 @@ void Texture_NextPos( TextureBrowser& textureBrowser, TextureLayout& layout, qte
 	textureBrowser.getTextureWH( q, nWidth, nHeight );
 	if ( layout.current_x + nWidth > textureBrowser.width - 8 && layout.current_row ) { // go to the next row unless the texture is the first on the row
 		layout.current_x = 8;
-		layout.current_y -= layout.current_row + TextureBrowser_fontHeight( textureBrowser ) + 5;//+4
+		layout.current_y -= layout.current_row + TextureBrowser_fontHeight( textureBrowser ) + 1;//+4
 		layout.current_row = 0;
 	}
 
@@ -1033,7 +1033,8 @@ void TextureBrowser_Selection_MouseUp( TextureBrowser& textureBrowser, guint32 f
  */
 void Texture_Draw( TextureBrowser& textureBrowser ){
 	const int fontHeight = TextureBrowser_fontHeight( textureBrowser );
-	int originy = TextureBrowser_getOriginY( textureBrowser );
+	const int fontDescent = GlobalOpenGL().m_font->getPixelDescent();
+	const int originy = TextureBrowser_getOriginY( textureBrowser );
 
 	glClearColor( textureBrowser.color_textureback[0],
 				  textureBrowser.color_textureback[1],
@@ -1173,10 +1174,10 @@ void Texture_Draw( TextureBrowser& textureBrowser ){
 			glEnd();
 
 			// draw the texture name
-			glDisable( GL_TEXTURE_2D );
+//			glDisable( GL_TEXTURE_2D );
 //			glColor3f( 1, 1, 1 ); //already set
 
-			glRasterPos2i( x, y - fontHeight + 3 );//+5
+			glRasterPos2i( x, y - fontHeight - fontDescent + 3 );//+5
 
 			// don't draw the directory name
 			const char* name = shader->getName();

@@ -93,25 +93,62 @@ void gray_to_texture( const unsigned int x_max, const unsigned int y_max, const 
 class GLFontCallList final : public GLFont
 {
 GLuint m_displayList;
+GLuint m_atlas;
 int m_pixelHeight;
 int m_pixelAscent;
 int m_pixelDescent;
 PangoFontMap *m_fontmap;
 PangoContext *m_ft2_context;
 public:
-GLFontCallList( GLuint displayList, int asc, int desc, int pixelHeight, PangoFontMap *fontmap, PangoContext *ft2_context ) :
-	 m_displayList( displayList ), m_pixelHeight( pixelHeight ), m_pixelAscent( asc ), m_pixelDescent( desc ), m_fontmap( fontmap ), m_ft2_context( ft2_context ){
+GLFontCallList( GLuint displayList, GLuint atlas, int asc, int desc, int pixelHeight, PangoFontMap *fontmap, PangoContext *ft2_context ) :
+	 m_displayList( displayList ), m_atlas( atlas ), m_pixelHeight( pixelHeight ), m_pixelAscent( asc ), m_pixelDescent( desc ), m_fontmap( fontmap ), m_ft2_context( ft2_context ){
 }
 ~GLFontCallList(){
-	glDeleteLists( m_displayList, 256 );
+	glDeleteLists( m_displayList, 128 );
+	glDeleteTextures( 1, &m_atlas );
 	if( m_ft2_context )
 		g_object_unref( G_OBJECT( m_ft2_context ) );
 	if( m_fontmap )
 		g_object_unref( G_OBJECT( m_fontmap ) );
 }
 void printString( const char *s ){
+	GLboolean rasterPosValid;
+	glGetBooleanv( GL_CURRENT_RASTER_POSITION_VALID, &rasterPosValid );
+	if( !rasterPosValid )
+		return;
+	GLfloat rasterPos[4];
+	glGetFloatv( GL_CURRENT_RASTER_POSITION, rasterPos );
+
+	GLint viewport[4];
+	glGetIntegerv( GL_VIEWPORT, viewport );
+	glMatrixMode( GL_PROJECTION );
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho( viewport[0], viewport[2], viewport[1], viewport[3], -1, 1 );
+
+	glMatrixMode( GL_MODELVIEW );
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef( rasterPos[0], rasterPos[1], 0 );
+
+	glPushAttrib( GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_POLYGON_BIT );
+	glDisable( GL_LIGHTING );
+	glEnable( GL_TEXTURE_2D );
+	glDisable( GL_DEPTH_TEST );
+	glEnable( GL_BLEND );
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+	glBindTexture( GL_TEXTURE_2D, m_atlas );
 	GlobalOpenGL().m_glListBase( m_displayList );
 	GlobalOpenGL().m_glCallLists( GLsizei( strlen( s ) ), GL_UNSIGNED_BYTE, reinterpret_cast<const GLubyte*>( s ) );
+
+	glPopAttrib();
+
+	glMatrixMode( GL_PROJECTION );
+	glPopMatrix();
+	glMatrixMode( GL_MODELVIEW ); //! must leave GL_MODELVIEW mode, as renderer relies on this during Renderer.render()
+	glPopMatrix();
 }
 
 void renderString( const char *s, const GLuint& tex, const unsigned char colour[3], unsigned int& wid, unsigned int& hei ){
@@ -669,55 +706,53 @@ GLFont *glfont_create( const char* font_string ){
 
 #include <pango/pangoft2.h>
 #include <pango/pango-utils.h>
-#include <gtk/gtkglwidget.h>
+#include <gtk/gtksettings.h>
 
-PangoFont* tryFont( const char* font_string, PangoFontDescription*& font_desc, GLuint font_list_base ){
+PangoFont* tryFont( const char* font_string, PangoFontMap *fontmap, PangoContext *context, PangoFontDescription*& font_desc ){
 	pango_font_description_free( font_desc );
 	font_desc = pango_font_description_from_string( font_string );
-	return gdk_gl_font_use_pango_font( font_desc, 0, 256, font_list_base );
+	return pango_font_map_load_font( fontmap, context, font_desc );
 }
 
 GLFont *glfont_create( const char* font_string ){
-	GLuint font_list_base = glGenLists( 256 );
+	GLuint font_list_base = glGenLists( 128 );
 	int font_height = 0, font_ascent = 0, font_descent = 0;
 	PangoFontDescription* font_desc = 0;
 	PangoFont* font = 0;
 
+	PangoFontMap *fontmap = pango_ft2_font_map_new();
+	pango_ft2_font_map_set_resolution( PANGO_FT2_FONT_MAP( fontmap ), 72, 72 );
+	PangoContext *ft2_context = pango_font_map_create_context( fontmap );
+
 	do
 	{
 		if( *font_string != '\0' )
-			if( ( font = tryFont( font_string, font_desc, font_list_base ) ) )
+			if( ( font = tryFont( font_string, fontmap, ft2_context, font_desc ) ) )
 				break;
 #ifdef WIN32
-		if( ( font = tryFont( "arial 8", font_desc, font_list_base ) ) )
+		if( ( font = tryFont( "arial 12", fontmap, ft2_context, font_desc ) ) )
 			break;
-		if( ( font = tryFont( "fixed 8", font_desc, font_list_base ) ) )
+		if( ( font = tryFont( "fixed 12", fontmap, ft2_context, font_desc ) ) )
 			break;
-		if( ( font = tryFont( "courier new 8", font_desc, font_list_base ) ) )
+		if( ( font = tryFont( "courier new 12", fontmap, ft2_context, font_desc ) ) )
 			break;
 #endif
 		GtkSettings *settings = gtk_settings_get_default();
 		gchar *fontname;
 		g_object_get( settings, "gtk-font-name", &fontname, NULL );
-		font = tryFont( fontname, font_desc, font_list_base );
+		font = tryFont( fontname, fontmap, ft2_context, font_desc );
 		g_free( fontname );
 
 		if( !font ){
-			const char* guessFonts[] = { "serif 8", "sans 8", "clean 8", "courier 8", "helvetica 8", "arial 8", "dejavu sans 8" };
+			const char* guessFonts[] = { "serif 12", "sans 12", "clean 12", "courier 12", "helvetica 12", "arial 12", "dejavu sans 12" };
 			for( const auto str : guessFonts ){
-				if( ( font = tryFont( str, font_desc, font_list_base ) ) )
+				if( ( font = tryFont( str, fontmap, ft2_context, font_desc ) ) )
 					break;
 			}
 		}
 	} while ( 0 );
 
-	PangoFontMap *fontmap = 0;
-	PangoContext *ft2_context = 0;
-
 	if ( font != 0 ) {
-		fontmap = pango_ft2_font_map_new();
-		pango_ft2_font_map_set_resolution( PANGO_FT2_FONT_MAP( fontmap ), 72, 72 );
-		ft2_context = pango_font_map_create_context( fontmap );
 		pango_context_set_font_description( ft2_context, font_desc );
 		PangoLayout *layout = pango_layout_new( ft2_context );
 
@@ -732,13 +767,6 @@ GLFont *glfont_create( const char* font_string ){
 		g_object_unref( G_OBJECT( layout ) );
 		int font_descent_pango_units = log_rect.height - font_ascent_pango_units;
 
-		/* settings for render to tex; need to multiply size, so that bitmap callLists way size would be approximately = texture way */
-		gint fontsize = pango_font_description_get_size( font_desc );
-		fontsize *= 3;
-		fontsize /= 2; //*15/11 is equal to bitmap callLists size
-		pango_font_description_set_size( font_desc, fontsize );
-		pango_context_set_font_description( ft2_context, font_desc );
-
 //		globalOutputStream() << pango_font_description_get_family( font_desc ) << " " << pango_font_description_get_size( font_desc ) << "\n";
 
 //		g_object_unref( G_OBJECT( ft2_context ) );
@@ -748,12 +776,103 @@ GLFont *glfont_create( const char* font_string ){
 		font_descent = PANGO_PIXELS_CEIL( font_descent_pango_units );
 		font_height = font_ascent + font_descent;
 	}
+	/* render displaylists */
+	GLuint atlas;
+	if ( font != 0 ) {
+		PangoLayout *layout;
+		PangoRectangle log_rect;
+		FT_Bitmap bitmap;
+
+		layout = pango_layout_new( ft2_context );
+		pango_layout_set_width( layout, -1 );   // -1 no wrapping.  All text on one line.
+
+		GLint alignment;
+		glGetIntegerv( GL_UNPACK_ALIGNMENT, &alignment );
+		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+
+		glGenTextures( 1, &atlas );
+		//Now we just setup some texture paramaters.
+		glBindTexture( GL_TEXTURE_2D, atlas );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0 );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0 );
+		//Here we actually create the texture itself
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, font_height * 12, font_height * 12, // riskily assuming, that height >= max width
+						0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 0 );
+
+
+		for( unsigned char c = 0; c < 128; ++c ){
+			pango_layout_set_text( layout, reinterpret_cast<const char*>( &c ), 1 );
+			pango_layout_get_extents( layout, NULL, &log_rect );
+
+			if ( log_rect.width > 0 && log_rect.height > 0 ) {
+				bitmap.rows = PANGO_PIXELS_CEIL( log_rect.height );
+				bitmap.width = PANGO_PIXELS_CEIL( log_rect.width );
+				bitmap.pitch = bitmap.width;
+				unsigned char *boo = (unsigned char *) malloc( bitmap.rows * bitmap.width );
+				memset( boo, 0, bitmap.rows * bitmap.width );
+				bitmap.buffer = boo;
+				bitmap.num_grays = 0xff;
+				bitmap.pixel_mode = FT_PIXEL_MODE_GRAY;
+				pango_ft2_render_layout_subpixel( &bitmap, layout, -log_rect.x, 0 );
+				/* convert grayscale byte per pixel to two bytes per pixel (white + alpha) */
+				unsigned char *buf = (unsigned char *) malloc( bitmap.rows * bitmap.width * 2 );
+				for( unsigned int i = 0; i < bitmap.rows * bitmap.width; ++i ){
+					buf[i * 2] = 255;
+					buf[i * 2 + 1] = boo[i];
+				}
+
+				glTexSubImage2D( GL_TEXTURE_2D,
+								0,
+								c % 12 * font_height,
+								c / 12 * font_height,
+								bitmap.width,
+								bitmap.rows,
+								GL_LUMINANCE_ALPHA,
+								GL_UNSIGNED_BYTE,
+								buf );
+
+				glNewList( font_list_base + c, GL_COMPILE );
+				glBegin( GL_QUADS );
+				const float x0 = 0;
+				const float x1 = bitmap.width + .01f;
+				const float y0 = 0;
+				const float y1 = bitmap.rows + .01f;
+				const float tx0 = ( c % 12 ) / 12.f;
+				const float tx1 = ( c % 12 + static_cast<float>( bitmap.width ) / font_height ) / 12.f;
+				const float ty0 = ( c / 12 ) / 12.f;
+				const float ty1 = ( c / 12 + static_cast<float>( bitmap.rows ) / font_height ) / 12.f;
+				glTexCoord2f( tx0, ty1 );
+				glVertex2f( x0, y0 );
+				glTexCoord2f( tx0, ty0 );
+				glVertex2f( x0, y1 );
+				glTexCoord2f( tx1, ty0 );
+				glVertex2f( x1, y1 );
+				glTexCoord2f( tx1, ty1 );
+				glVertex2f( x1, y0 );
+				glEnd();
+				glTranslatef( bitmap.width, 0, 0 );
+				glEndList();
+
+				free( boo );
+				free( buf );
+			}
+		}
+
+		glPixelStorei( GL_UNPACK_ALIGNMENT, alignment );
+
+		g_object_unref( G_OBJECT( layout ) );
+	}
 
 	pango_font_description_free( font_desc );
 
 	ASSERT_MESSAGE( font != 0, "font for OpenGL rendering was not created" );
 
-	return new GLFontCallList( font_list_base, font_ascent, font_descent, font_height, fontmap, ft2_context );
+	return new GLFontCallList( font_list_base, atlas, font_ascent, font_descent, font_height, fontmap, ft2_context );
 }
 
 
