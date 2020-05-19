@@ -118,8 +118,8 @@ EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const cha
 	if ( type == eMB_OK ) {
 		GtkButton* button = create_modal_dialog_button( "OK", ok_button );
 		gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
-		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
-		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
+		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
+		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
 		widget_make_default( GTK_WIDGET( button ) );
 		gtk_widget_show( GTK_WIDGET( button ) );
 
@@ -129,7 +129,7 @@ EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const cha
 		{
 			GtkButton* button = create_modal_dialog_button( "OK", ok_button );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
-			gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
+			gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
 			widget_make_default( GTK_WIDGET( button ) );
 			gtk_widget_show( GTK_WIDGET( button ) );
 		}
@@ -137,7 +137,7 @@ EMessageBoxReturn gtk_MessageBox( GtkWidget *parent, const char* text, const cha
 		{
 			GtkButton* button = create_modal_dialog_button( "Cancel", cancel_button );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
-			gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
+			gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
 			gtk_widget_show( GTK_WIDGET( button ) );
 		}
 

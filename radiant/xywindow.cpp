@@ -2490,15 +2490,15 @@ void XYWindow_Construct(){
 	GlobalToggles_insert( "ToggleView", ToggleShown::ToggleCaller( g_xy_top_shown ), ToggleItem::AddCallbackCaller( g_xy_top_shown.m_item ) );
 	GlobalToggles_insert( "ToggleSideView", ToggleShown::ToggleCaller( g_yz_side_shown ), ToggleItem::AddCallbackCaller( g_yz_side_shown.m_item ) );
 	GlobalToggles_insert( "ToggleFrontView", ToggleShown::ToggleCaller( g_xz_front_shown ), ToggleItem::AddCallbackCaller( g_xz_front_shown.m_item ) );
-	GlobalCommands_insert( "NextView", FreeCaller<XY_NextView>(), Accelerator( GDK_Tab, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "ZoomIn", FreeCaller<XY_ZoomIn>(), Accelerator( GDK_Delete ) );
-	GlobalCommands_insert( "ZoomOut", FreeCaller<XY_ZoomOut>(), Accelerator( GDK_Insert ) );
-	GlobalCommands_insert( "ViewTop", FreeCaller<XY_Top>(), Accelerator( GDK_KP_7 ) );
-	GlobalCommands_insert( "ViewFront", FreeCaller<XY_Front>(), Accelerator( GDK_KP_1 ) );
-	GlobalCommands_insert( "ViewSide", FreeCaller<XY_Side>(), Accelerator( GDK_KP_3 ) );
+	GlobalCommands_insert( "NextView", FreeCaller<XY_NextView>(), Accelerator( GDK_KEY_Tab, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "ZoomIn", FreeCaller<XY_ZoomIn>(), Accelerator( GDK_KEY_Delete ) );
+	GlobalCommands_insert( "ZoomOut", FreeCaller<XY_ZoomOut>(), Accelerator( GDK_KEY_Insert ) );
+	GlobalCommands_insert( "ViewTop", FreeCaller<XY_Top>(), Accelerator( GDK_KEY_KP_7 ) );
+	GlobalCommands_insert( "ViewFront", FreeCaller<XY_Front>(), Accelerator( GDK_KEY_KP_1 ) );
+	GlobalCommands_insert( "ViewSide", FreeCaller<XY_Side>(), Accelerator( GDK_KEY_KP_3 ) );
 	GlobalCommands_insert( "Zoom100", FreeCaller<XY_Zoom100>() );
-	GlobalCommands_insert( "CenterXYView", FreeCaller<XY_Centralize>(), Accelerator( GDK_Tab, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "XYFocusOnSelected", FreeCaller<XY_Focus>(), Accelerator( GDK_grave ) );
+	GlobalCommands_insert( "CenterXYView", FreeCaller<XY_Centralize>(), Accelerator( GDK_KEY_Tab, (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
+	GlobalCommands_insert( "XYFocusOnSelected", FreeCaller<XY_Focus>(), Accelerator( GDK_KEY_grave ) );
 
 	GlobalPreferenceSystem().registerPreference( "XYMSAA", IntImportStringCaller( g_xywindow_globals_private.m_MSAA ), IntExportStringCaller( g_xywindow_globals_private.m_MSAA ) );
 	GlobalPreferenceSystem().registerPreference( "2DZoomInToPointer", BoolImportStringCaller( g_xywindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_xywindow_globals.m_bZoomInToPointer ) );

@@ -740,15 +740,15 @@ BuildPair g_buildpair_copied;
 BuildCommand g_buildcommand_copied;
 
 inline bool event_is_del( const GdkEventKey* event ){
-	return accelerator_for_event_key( event ) == Accelerator( GDK_Delete );
+	return accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Delete );
 }
 inline bool event_is_copy( const GdkEventKey* event ){
 	return ( accelerator_for_event_key( event ) == Accelerator( 'C', GDK_CONTROL_MASK ) )
-		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_Insert, GDK_CONTROL_MASK ) );
+		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_CONTROL_MASK ) );
 }
 inline bool event_is_paste( const GdkEventKey* event ){
 	return ( accelerator_for_event_key( event ) == Accelerator( 'V', GDK_CONTROL_MASK ) )
-		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_Insert, GDK_SHIFT_MASK ) );
+		|| ( accelerator_for_event_key( event ) == Accelerator( GDK_KEY_Insert, GDK_SHIFT_MASK ) );
 }
 
 gboolean project_key_press( GtkWidget* widget, GdkEventKey* event, ProjectList* projectList ){

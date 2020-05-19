@@ -607,7 +607,7 @@ static gint expose( GtkWidget *widget, GdkEventExpose *event, gpointer data ){
 static gint keypress( GtkWidget* widget, GdkEventKey* event, gpointer data ){
 	unsigned int code = gdk_keyval_to_upper( event->keyval );
 
-	if ( code == GDK_Escape ) {
+	if ( code == GDK_KEY_Escape ) {
 		gtk_widget_destroy( g_pToolWnd );
 		g_pToolWnd = NULL;
 		return TRUE;
@@ -618,7 +618,7 @@ static gint keypress( GtkWidget* widget, GdkEventKey* event, gpointer data ){
 			return FALSE;
 		}
 
-		if ( code == GDK_Return ) {
+		if ( code == GDK_KEY_Return ) {
 			Textool_Validate();
 			return FALSE;
 		}

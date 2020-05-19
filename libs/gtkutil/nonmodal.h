@@ -36,7 +36,7 @@ typedef struct _GtkEntry GtkEntry;
 
 
 inline gboolean escape_clear_focus_widget( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	if ( event->keyval == GDK_Escape ) {
+	if ( event->keyval == GDK_KEY_Escape ) {
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), NULL );
 		return TRUE;
 	}
@@ -73,7 +73,7 @@ static gboolean changed( GtkEntry* entry, NonModalEntry* self ){
 }
 
 static gboolean enter( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
-	if ( event->keyval == GDK_Return ) {
+	if ( event->keyval == GDK_KEY_Return ) {
 		self->m_apply();
 		self->m_editing = false;
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
@@ -83,7 +83,7 @@ static gboolean enter( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self 
 }
 
 static gboolean escape( GtkEntry* entry, GdkEventKey* event, NonModalEntry* self ){
-	if ( event->keyval == GDK_Escape ) {
+	if ( event->keyval == GDK_KEY_Escape ) {
 		self->m_cancel();
 		self->m_editing = false;
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( entry ) ) ), NULL );
@@ -116,7 +116,7 @@ static gboolean changed( GtkSpinButton* spin, NonModalSpinner* self ){
 }
 
 static gboolean enter( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
-	if ( event->keyval == GDK_Return ) {
+	if ( event->keyval == GDK_KEY_Return ) {
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
 		return TRUE;
 	}
@@ -124,7 +124,7 @@ static gboolean enter( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner*
 }
 
 static gboolean escape( GtkSpinButton* spin, GdkEventKey* event, NonModalSpinner* self ){
-	if ( event->keyval == GDK_Escape ) {
+	if ( event->keyval == GDK_KEY_Escape ) {
 		self->m_cancel();
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( spin ) ) ), NULL );
 		return TRUE;

@@ -53,18 +53,18 @@ inline void WindowObservers_OnModifierUp( WindowObservers& observers, ModifierFl
 gboolean selection_modifier_key_press( GtkWidget* widget, GdkEventKey* event, WindowObservers& observers ){
 	switch ( event->keyval )
 	{
-	case GDK_Alt_L:
-	case GDK_Alt_R:
+	case GDK_KEY_Alt_L:
+	case GDK_KEY_Alt_R:
 		//globalOutputStream() << "Alt PRESSED\n";
 		WindowObservers_OnModifierDown( observers, c_modifierAlt );
 		break;
-	case GDK_Shift_L:
-	case GDK_Shift_R:
+	case GDK_KEY_Shift_L:
+	case GDK_KEY_Shift_R:
 		//globalOutputStream() << "Shift PRESSED\n";
 		WindowObservers_OnModifierDown( observers, c_modifierShift );
 		break;
-	case GDK_Control_L:
-	case GDK_Control_R:
+	case GDK_KEY_Control_L:
+	case GDK_KEY_Control_R:
 		//globalOutputStream() << "Control PRESSED\n";
 		WindowObservers_OnModifierDown( observers, c_modifierControl );
 		break;
@@ -75,18 +75,18 @@ gboolean selection_modifier_key_press( GtkWidget* widget, GdkEventKey* event, Wi
 gboolean selection_modifier_key_release( GtkWidget* widget, GdkEventKey* event, WindowObservers& observers ){
 	switch ( event->keyval )
 	{
-	case GDK_Alt_L:
-	case GDK_Alt_R:
+	case GDK_KEY_Alt_L:
+	case GDK_KEY_Alt_R:
 		//globalOutputStream() << "Alt RELEASED\n";
 		WindowObservers_OnModifierUp( observers, c_modifierAlt );
 		break;
-	case GDK_Shift_L:
-	case GDK_Shift_R:
+	case GDK_KEY_Shift_L:
+	case GDK_KEY_Shift_R:
 		//globalOutputStream() << "Shift RELEASED\n";
 		WindowObservers_OnModifierUp( observers, c_modifierShift );
 		break;
-	case GDK_Control_L:
-	case GDK_Control_R:
+	case GDK_KEY_Control_L:
+	case GDK_KEY_Control_R:
 		//globalOutputStream() << "Control RELEASED\n";
 		WindowObservers_OnModifierUp( observers, c_modifierControl );
 		break;

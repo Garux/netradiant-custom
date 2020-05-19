@@ -150,7 +150,7 @@ void OnRemoveMaterial( GtkButton* button, gpointer user_data ){
 }
 
 gboolean OnRemoveMaterialKb( GtkWidget* widget, GdkEventKey* event, gpointer user_data ){
-	if( event->keyval == GDK_Delete )
+	if( event->keyval == GDK_KEY_Delete )
 		OnRemoveMaterial( reinterpret_cast<GtkButton*>( widget ), NULL );
 	return FALSE;
 }

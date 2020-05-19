@@ -337,20 +337,20 @@ gboolean accelerator_window_key_press( GtkWidget *widget, GdkEventKey *event, gp
 #else
 	switch ( event->keyval )
 	{
-	case GDK_Shift_L:
-	case GDK_Shift_R:
-	case GDK_Control_L:
-	case GDK_Control_R:
-	case GDK_Caps_Lock:
-	case GDK_Shift_Lock:
-	case GDK_Meta_L:
-	case GDK_Meta_R:
-	case GDK_Alt_L:
-	case GDK_Alt_R:
-	case GDK_Super_L:
-	case GDK_Super_R:
-	case GDK_Hyper_L:
-	case GDK_Hyper_R:
+	case GDK_KEY_Shift_L:
+	case GDK_KEY_Shift_R:
+	case GDK_KEY_Control_L:
+	case GDK_KEY_Control_R:
+	case GDK_KEY_Caps_Lock:
+	case GDK_KEY_Shift_Lock:
+	case GDK_KEY_Meta_L:
+	case GDK_KEY_Meta_R:
+	case GDK_KEY_Alt_L:
+	case GDK_KEY_Alt_R:
+	case GDK_KEY_Super_L:
+	case GDK_KEY_Super_R:
+	case GDK_KEY_Hyper_L:
+	case GDK_KEY_Hyper_R:
 		return FALSE;
 	}
 #endif
@@ -522,8 +522,8 @@ void DoCommandListDlg(){
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 		widget_make_default( GTK_WIDGET( button ) );
 		gtk_widget_grab_default( GTK_WIDGET( button ) );
-		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
-		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
+		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
+		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
 	}
 
 	modal_dialog_show( window, dialog );

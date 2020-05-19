@@ -388,10 +388,10 @@ gboolean searchEntryScroll( GtkWidget* widget, GdkEventScroll* event, gpointer u
 	/* hijack internal gtk keypress function for handling scroll via synthesized event */
 	GdkEvent* eventmp = gdk_event_new( GDK_KEY_PRESS );
 	if ( event->direction == GDK_SCROLL_UP ) {
-		eventmp->key.keyval = GDK_Up;
+		eventmp->key.keyval = GDK_KEY_Up;
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
-		eventmp->key.keyval = GDK_Down;
+		eventmp->key.keyval = GDK_KEY_Down;
 	}
 	if( eventmp->key.keyval ){
 		eventmp->key.window = gtk_widget_get_window( widget );
@@ -407,7 +407,7 @@ gboolean searchEntryScroll( GtkWidget* widget, GdkEventScroll* event, gpointer u
 }
 
 static gboolean searchEntryKeypress( GtkEntry* widget, GdkEventKey* event, gpointer user_data ){
-	if ( event->keyval == GDK_Escape ) {
+	if ( event->keyval == GDK_KEY_Escape ) {
 		gtk_entry_set_text( GTK_ENTRY( widget ), "" );
 		return TRUE;
 	}

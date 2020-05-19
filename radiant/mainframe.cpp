@@ -3573,7 +3573,7 @@ void FocusAllViews(){
 #include "stringio.h"
 
 void MainFrame_Construct(){
-	GlobalCommands_insert( "OpenManual", FreeCaller<OpenHelpURL>(), Accelerator( GDK_F1 ) );
+	GlobalCommands_insert( "OpenManual", FreeCaller<OpenHelpURL>(), Accelerator( GDK_KEY_F1 ) );
 
 	GlobalCommands_insert( "NewMap", FreeCaller<NewMap>() );
 	GlobalCommands_insert( "OpenMap", FreeCaller<OpenMap>(), Accelerator( 'O', (GdkModifierType)GDK_CONTROL_MASK ) );
@@ -3593,13 +3593,13 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "Paste", FreeCaller<Paste>(), Accelerator( 'V', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PasteToCamera", FreeCaller<PasteToCamera>(), Accelerator( 'V', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "MoveToCamera", FreeCaller<MoveToCamera>(), Accelerator( 'V', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), Accelerator( GDK_space ) );
-	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_space, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "DeleteSelection2", FreeCaller<deleteSelection>(), Accelerator( GDK_BackSpace ) );
+	GlobalCommands_insert( "CloneSelection", FreeCaller<Selection_Clone>(), Accelerator( GDK_KEY_space ) );
+	GlobalCommands_insert( "CloneSelectionAndMakeUnique", FreeCaller<Selection_Clone_MakeUnique>(), Accelerator( GDK_KEY_space, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "DeleteSelection2", FreeCaller<deleteSelection>(), Accelerator( GDK_KEY_BackSpace ) );
 	GlobalCommands_insert( "DeleteSelection", FreeCaller<deleteSelection>(), Accelerator( 'Z' ) );
 	GlobalCommands_insert( "RepeatTransforms", FreeCaller<RepeatTransforms>(), Accelerator( 'R', (GdkModifierType)GDK_CONTROL_MASK ) );
 //	GlobalCommands_insert( "ParentSelection", FreeCaller<Scene_parentSelected>() );
-	GlobalCommands_insert( "UnSelectSelection2", FreeCaller<Selection_Deselect>(), Accelerator( GDK_Escape ) );
+	GlobalCommands_insert( "UnSelectSelection2", FreeCaller<Selection_Deselect>(), Accelerator( GDK_KEY_Escape ) );
 	GlobalCommands_insert( "UnSelectSelection", FreeCaller<Selection_Deselect>(), Accelerator( 'C' ) );
 	GlobalCommands_insert( "InvertSelection", FreeCaller<Select_Invert>(), Accelerator( 'I' ) );
 	GlobalCommands_insert( "SelectInside", FreeCaller<Select_Inside>() );
@@ -3626,7 +3626,7 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ArbitraryScale", FreeCaller<DoScaleDlg>(), Accelerator( 'S', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 
 	GlobalCommands_insert( "BuildMenuCustomize", FreeCaller<DoBuildMenu>() );
-	GlobalCommands_insert( "Build_runRecentExecutedBuild", FreeCaller<Build_runRecentExecutedBuild>(), Accelerator( GDK_F5 ) );
+	GlobalCommands_insert( "Build_runRecentExecutedBuild", FreeCaller<Build_runRecentExecutedBuild>(), Accelerator( GDK_KEY_F5 ) );
 
 	GlobalCommands_insert( "FindBrush", FreeCaller<DoFind>() );
 
@@ -3665,8 +3665,8 @@ void MainFrame_Construct(){
 	GlobalCommands_insert( "ChooseClipperColor", makeCallback( g_ColoursMenu.m_clipper ) );
 	GlobalCommands_insert( "ChooseOrthoViewNameColor", makeCallback( g_ColoursMenu.m_viewname ) );
 
-	GlobalCommands_insert( "Fullscreen", FreeCaller<MainFrame_toggleFullscreen>(), Accelerator( GDK_F11 ) );
-	GlobalCommands_insert( "MaximizeView", FreeCaller<Maximize_View>(), Accelerator( GDK_F12 ) );
+	GlobalCommands_insert( "Fullscreen", FreeCaller<MainFrame_toggleFullscreen>(), Accelerator( GDK_KEY_F11 ) );
+	GlobalCommands_insert( "MaximizeView", FreeCaller<Maximize_View>(), Accelerator( GDK_KEY_F12 ) );
 
 
 	GlobalCommands_insert( "CSGSubtract", FreeCaller<CSG_Subtract>(), Accelerator( 'U', (GdkModifierType)GDK_SHIFT_MASK ) );
@@ -3681,24 +3681,24 @@ void MainFrame_Construct(){
 
 	GlobalCommands_insert( "SelectAllOfType", FreeCaller<Select_AllOfType>(), Accelerator( 'A', (GdkModifierType)GDK_SHIFT_MASK ) );
 
-	GlobalCommands_insert( "TexRotateClock", FreeCaller<Texdef_RotateClockwise>(), Accelerator( GDK_Next, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "TexRotateCounter", FreeCaller<Texdef_RotateAntiClockwise>(), Accelerator( GDK_Prior, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "TexScaleUp", FreeCaller<Texdef_ScaleUp>(), Accelerator( GDK_Up, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "TexScaleDown", FreeCaller<Texdef_ScaleDown>(), Accelerator( GDK_Down, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "TexScaleLeft", FreeCaller<Texdef_ScaleLeft>(), Accelerator( GDK_Left, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "TexScaleRight", FreeCaller<Texdef_ScaleRight>(), Accelerator( GDK_Right, (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "TexShiftUp", FreeCaller<Texdef_ShiftUp>(), Accelerator( GDK_Up, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "TexShiftDown", FreeCaller<Texdef_ShiftDown>(), Accelerator( GDK_Down, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "TexShiftLeft", FreeCaller<Texdef_ShiftLeft>(), Accelerator( GDK_Left, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "TexShiftRight", FreeCaller<Texdef_ShiftRight>(), Accelerator( GDK_Right, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "TexRotateClock", FreeCaller<Texdef_RotateClockwise>(), Accelerator( GDK_KEY_Next, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "TexRotateCounter", FreeCaller<Texdef_RotateAntiClockwise>(), Accelerator( GDK_KEY_Prior, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "TexScaleUp", FreeCaller<Texdef_ScaleUp>(), Accelerator( GDK_KEY_Up, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "TexScaleDown", FreeCaller<Texdef_ScaleDown>(), Accelerator( GDK_KEY_Down, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "TexScaleLeft", FreeCaller<Texdef_ScaleLeft>(), Accelerator( GDK_KEY_Left, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "TexScaleRight", FreeCaller<Texdef_ScaleRight>(), Accelerator( GDK_KEY_Right, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "TexShiftUp", FreeCaller<Texdef_ShiftUp>(), Accelerator( GDK_KEY_Up, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "TexShiftDown", FreeCaller<Texdef_ShiftDown>(), Accelerator( GDK_KEY_Down, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "TexShiftLeft", FreeCaller<Texdef_ShiftLeft>(), Accelerator( GDK_KEY_Left, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "TexShiftRight", FreeCaller<Texdef_ShiftRight>(), Accelerator( GDK_KEY_Right, (GdkModifierType)GDK_SHIFT_MASK ) );
 
-	GlobalCommands_insert( "MoveSelectionDOWN", FreeCaller<Selection_MoveDown>(), Accelerator( GDK_KP_Subtract ) );
-	GlobalCommands_insert( "MoveSelectionUP", FreeCaller<Selection_MoveUp>(), Accelerator( GDK_KP_Add ) );
+	GlobalCommands_insert( "MoveSelectionDOWN", FreeCaller<Selection_MoveDown>(), Accelerator( GDK_KEY_KP_Subtract ) );
+	GlobalCommands_insert( "MoveSelectionUP", FreeCaller<Selection_MoveUp>(), Accelerator( GDK_KEY_KP_Add ) );
 
-	GlobalCommands_insert( "SelectNudgeLeft", FreeCaller<Selection_NudgeLeft>(), Accelerator( GDK_Left, (GdkModifierType)GDK_MOD1_MASK ) );
-	GlobalCommands_insert( "SelectNudgeRight", FreeCaller<Selection_NudgeRight>(), Accelerator( GDK_Right, (GdkModifierType)GDK_MOD1_MASK ) );
-	GlobalCommands_insert( "SelectNudgeUp", FreeCaller<Selection_NudgeUp>(), Accelerator( GDK_Up, (GdkModifierType)GDK_MOD1_MASK ) );
-	GlobalCommands_insert( "SelectNudgeDown", FreeCaller<Selection_NudgeDown>(), Accelerator( GDK_Down, (GdkModifierType)GDK_MOD1_MASK ) );
+	GlobalCommands_insert( "SelectNudgeLeft", FreeCaller<Selection_NudgeLeft>(), Accelerator( GDK_KEY_Left, (GdkModifierType)GDK_MOD1_MASK ) );
+	GlobalCommands_insert( "SelectNudgeRight", FreeCaller<Selection_NudgeRight>(), Accelerator( GDK_KEY_Right, (GdkModifierType)GDK_MOD1_MASK ) );
+	GlobalCommands_insert( "SelectNudgeUp", FreeCaller<Selection_NudgeUp>(), Accelerator( GDK_KEY_Up, (GdkModifierType)GDK_MOD1_MASK ) );
+	GlobalCommands_insert( "SelectNudgeDown", FreeCaller<Selection_NudgeDown>(), Accelerator( GDK_KEY_Down, (GdkModifierType)GDK_MOD1_MASK ) );
 
 	Patch_registerCommands();
 	XYShow_registerCommands();

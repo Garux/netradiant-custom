@@ -2552,34 +2552,34 @@ void CameraSpeed_decrease(){
 
 /// \brief Initialisation for things that have the same lifespan as this module.
 void CamWnd_Construct(){
-	GlobalCommands_insert( "CenterView", FreeCaller<GlobalCamera_ResetAngles>(), Accelerator( GDK_End ) );
-	GlobalCommands_insert( "CameraFocusOnSelected", FreeCaller<GlobalCamera_FocusOnSelected>(), Accelerator( GDK_Tab ) );
+	GlobalCommands_insert( "CenterView", FreeCaller<GlobalCamera_ResetAngles>(), Accelerator( GDK_KEY_End ) );
+	GlobalCommands_insert( "CameraFocusOnSelected", FreeCaller<GlobalCamera_FocusOnSelected>(), Accelerator( GDK_KEY_Tab ) );
 
 	GlobalToggles_insert( "ToggleCubicClip", FreeCaller<Camera_ToggleFarClip>(), ToggleItem::AddCallbackCaller( g_getfarclip_item ), Accelerator( '\\', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "CubicClipZoomIn", FreeCaller<Camera_CubeIn>(), Accelerator( '[', (GdkModifierType)GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "CubicClipZoomOut", FreeCaller<Camera_CubeOut>(), Accelerator( ']', (GdkModifierType)GDK_CONTROL_MASK ) );
 
-	GlobalCommands_insert( "UpFloor", FreeCaller<Camera_ChangeFloorUp>(), Accelerator( GDK_Prior ) );
-	GlobalCommands_insert( "DownFloor", FreeCaller<Camera_ChangeFloorDown>(), Accelerator( GDK_Next ) );
+	GlobalCommands_insert( "UpFloor", FreeCaller<Camera_ChangeFloorUp>(), Accelerator( GDK_KEY_Prior ) );
+	GlobalCommands_insert( "DownFloor", FreeCaller<Camera_ChangeFloorDown>(), Accelerator( GDK_KEY_Next ) );
 
 	GlobalToggles_insert( "ToggleCamera", ToggleShown::ToggleCaller( g_camera_shown ), ToggleItem::AddCallbackCaller( g_camera_shown.m_item ), Accelerator( 'C', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 //	GlobalCommands_insert( "LookThroughSelected", FreeCaller<GlobalCamera_LookThroughSelected>() );
 //	GlobalCommands_insert( "LookThroughCamera", FreeCaller<GlobalCamera_LookThroughCamera>() );
 
 	if ( g_pGameDescription->mGameType == "doom3" ) {
-		GlobalCommands_insert( "TogglePreview", FreeCaller<CamWnd_TogglePreview>(), Accelerator( GDK_F3 ) );
+		GlobalCommands_insert( "TogglePreview", FreeCaller<CamWnd_TogglePreview>(), Accelerator( GDK_KEY_F3 ) );
 	}
 
 	GlobalCommands_insert( "CameraModeNext", FreeCaller<CameraModeNext>(), Accelerator( '}', (GdkModifierType)GDK_SHIFT_MASK ) );
 	GlobalCommands_insert( "CameraModePrev", FreeCaller<CameraModePrev>(), Accelerator( '{', (GdkModifierType)GDK_SHIFT_MASK ) );
 
-	GlobalCommands_insert( "CameraSpeedInc", FreeCaller<CameraSpeed_increase>(), Accelerator( GDK_KP_Add, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "CameraSpeedDec", FreeCaller<CameraSpeed_decrease>(), Accelerator( GDK_KP_Subtract, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "CameraSpeedInc", FreeCaller<CameraSpeed_increase>(), Accelerator( GDK_KEY_KP_Add, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "CameraSpeedDec", FreeCaller<CameraSpeed_decrease>(), Accelerator( GDK_KEY_KP_Subtract, (GdkModifierType)GDK_SHIFT_MASK ) );
 
-	GlobalShortcuts_insert( "CameraForward", Accelerator( GDK_Up ) );
-	GlobalShortcuts_insert( "CameraBack", Accelerator( GDK_Down ) );
-	GlobalShortcuts_insert( "CameraLeft", Accelerator( GDK_Left ) );
-	GlobalShortcuts_insert( "CameraRight", Accelerator( GDK_Right ) );
+	GlobalShortcuts_insert( "CameraForward", Accelerator( GDK_KEY_Up ) );
+	GlobalShortcuts_insert( "CameraBack", Accelerator( GDK_KEY_Down ) );
+	GlobalShortcuts_insert( "CameraLeft", Accelerator( GDK_KEY_Left ) );
+	GlobalShortcuts_insert( "CameraRight", Accelerator( GDK_KEY_Right ) );
 	GlobalShortcuts_insert( "CameraStrafeRight", Accelerator( 'D' ) );
 	GlobalShortcuts_insert( "CameraStrafeLeft", Accelerator( 'A' ) );
 
@@ -2593,15 +2593,15 @@ void CamWnd_Construct(){
 	GlobalShortcuts_insert( "CameraFreeMoveLeft", Accelerator( 'A' ) );
 	GlobalShortcuts_insert( "CameraFreeMoveRight", Accelerator( 'D' ) );
 
-	GlobalShortcuts_insert( "CameraFreeMoveForward2", Accelerator( GDK_Up ) );
-	GlobalShortcuts_insert( "CameraFreeMoveBack2", Accelerator( GDK_Down ) );
-	GlobalShortcuts_insert( "CameraFreeMoveLeft2", Accelerator( GDK_Left ) );
-	GlobalShortcuts_insert( "CameraFreeMoveRight2", Accelerator( GDK_Right ) );
+	GlobalShortcuts_insert( "CameraFreeMoveForward2", Accelerator( GDK_KEY_Up ) );
+	GlobalShortcuts_insert( "CameraFreeMoveBack2", Accelerator( GDK_KEY_Down ) );
+	GlobalShortcuts_insert( "CameraFreeMoveLeft2", Accelerator( GDK_KEY_Left ) );
+	GlobalShortcuts_insert( "CameraFreeMoveRight2", Accelerator( GDK_KEY_Right ) );
 
 	GlobalShortcuts_insert( "CameraFreeMoveUp", accelerator_null() );
 	GlobalShortcuts_insert( "CameraFreeMoveDown", accelerator_null() );
 
-	GlobalShortcuts_insert( "CameraFreeFocus", Accelerator( GDK_Tab ) );
+	GlobalShortcuts_insert( "CameraFreeFocus", Accelerator( GDK_KEY_Tab ) );
 
 	GlobalToggles_insert( "ShowStats", FreeCaller<ShowStatsToggle>(), ToggleItem::AddCallbackCaller( g_show_stats ) );
 	GlobalToggles_insert( "ShowWorkzone3d", FreeCaller<ShowWorkzone3dToggle>(), ToggleItem::AddCallbackCaller( g_show_workzone3d ) );

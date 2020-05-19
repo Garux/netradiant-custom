@@ -1332,11 +1332,11 @@ void EntityInspector_clearKeyValue(){
 }
 
 static gint EntityProperties_keypress( GtkEntry* widget, GdkEventKey* event, gpointer data ){
-	if ( event->keyval == GDK_Delete ) {
+	if ( event->keyval == GDK_KEY_Delete ) {
 		EntityInspector_clearKeyValue();
 		return TRUE;
 	}
-	if ( event->keyval == GDK_Tab ) {
+	if ( event->keyval == GDK_KEY_Tab ) {
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityKeyEntry ) );
 		return TRUE;
 	}
@@ -1379,7 +1379,7 @@ static gint EntityClassList_button_press( GtkWidget *widget, GdkEventButton *eve
 }
 
 static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	if ( event->keyval == GDK_Return ) {
+	if ( event->keyval == GDK_KEY_Return ) {
 		EntityClassList_convertEntity();
 		return TRUE;
 	}
@@ -1448,7 +1448,7 @@ static void SpawnflagCheck_toggled( GtkWidget *widget, gpointer data ){
 }
 
 static gint EntityEntry_keypress( GtkEntry* widget, GdkEventKey* event, gpointer data ){
-	if ( event->keyval == GDK_Return ) {
+	if ( event->keyval == GDK_KEY_Return ) {
 		if ( widget == g_entityKeyEntry ) {
 			//gtk_entry_set_text( g_entityValueEntry, "" );
 			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityValueEntry ) );
@@ -1459,7 +1459,7 @@ static gint EntityEntry_keypress( GtkEntry* widget, GdkEventKey* event, gpointer
 		}
 		return TRUE;
 	}
-	if ( event->keyval == GDK_Tab ) {
+	if ( event->keyval == GDK_KEY_Tab ) {
 		if ( widget == g_entityKeyEntry ) {
 			gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityValueEntry ) );
 		}
@@ -1469,7 +1469,7 @@ static gint EntityEntry_keypress( GtkEntry* widget, GdkEventKey* event, gpointer
 		}
 		return TRUE;
 	}
-	if ( event->keyval == GDK_Escape ) {
+	if ( event->keyval == GDK_KEY_Escape ) {
 		//gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), NULL );
 		GroupDialog_showPage( g_page_entity );
 		return TRUE;
@@ -1487,14 +1487,14 @@ void EntityInspector_destroyWindow( GtkWidget* widget, gpointer data ){
 }
 
 static gint EntityInspector_hideWindowKB( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	//if ( event->keyval == GDK_Escape && GTK_WIDGET_VISIBLE( GTK_WIDGET( widget ) ) ) {
-	if ( event->keyval == GDK_Escape  ) {
+	//if ( event->keyval == GDK_KEY_Escape && GTK_WIDGET_VISIBLE( GTK_WIDGET( widget ) ) ) {
+	if ( event->keyval == GDK_KEY_Escape  ) {
 		//GroupDialog_showPage( g_page_entity );
 		gtk_widget_hide( GTK_WIDGET( GroupDialog_getWindow() ) );
 		return TRUE;
 	}
 	/* this doesn't work, if tab is bound (func is not called then) */
-	if ( event->keyval == GDK_Tab ) {
+	if ( event->keyval == GDK_KEY_Tab ) {
 		gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( GTK_WIDGET( widget ) ) ), GTK_WIDGET( g_entityKeyEntry ) );
 		return TRUE;
 	}

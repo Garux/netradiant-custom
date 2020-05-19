@@ -186,7 +186,7 @@ GtkWindow* create_simple_modal_dialog_window( const char* title, ModalDialog& di
 	GtkButton* button = create_dialog_button( "OK", G_CALLBACK( dialog_button_ok ), &dialog );
 	gtk_container_add( GTK_CONTAINER( alignment ), GTK_WIDGET( button ) );
 	gtk_widget_grab_default( GTK_WIDGET( button ) );
-	gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
+	gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
 
 	return window;
 }

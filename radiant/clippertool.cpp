@@ -196,9 +196,9 @@ void Clipper_registerPreferencesPage(){
 }
 
 void Clipper_registerCommands(){
-	GlobalCommands_insert( "ClipperClip", FreeCaller<Clipper_doClip>(), Accelerator( GDK_Return ) );
-	GlobalCommands_insert( "ClipperSplit", FreeCaller<Clipper_doSplit>(), Accelerator( GDK_Return, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "ClipperFlip", FreeCaller<Clipper_doFlip>(), Accelerator( GDK_Return, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "ClipperClip", FreeCaller<Clipper_doClip>(), Accelerator( GDK_KEY_Return ) );
+	GlobalCommands_insert( "ClipperSplit", FreeCaller<Clipper_doSplit>(), Accelerator( GDK_KEY_Return, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "ClipperFlip", FreeCaller<Clipper_doFlip>(), Accelerator( GDK_KEY_Return, (GdkModifierType)GDK_CONTROL_MASK ) );
 }
 
 SignalHandlerId ClipperTool_boundsChanged;

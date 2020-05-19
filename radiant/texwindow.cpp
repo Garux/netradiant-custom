@@ -2036,7 +2036,7 @@ void TextureBrowser_filterIconPress( GtkEntry* entry, gint position, GdkEventBut
 }
 
 static gboolean TextureBrowser_filterKeypress( GtkEntry* widget, GdkEventKey* event, gpointer user_data ){
-	if ( event->keyval == GDK_Escape ) {
+	if ( event->keyval == GDK_KEY_Escape ) {
 		gtk_entry_set_text( GTK_ENTRY( widget ), "" );
 		return TRUE;
 	}

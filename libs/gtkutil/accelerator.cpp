@@ -57,7 +57,7 @@ unsigned int global_keys_find( const char* name ){
 		return 0;
 	}
 	k = gdk_keyval_from_name( name );
-	if ( k == GDK_VoidSymbol ) {
+	if ( k == GDK_KEY_VoidSymbol ) {
 		return 0;
 	}
 	return k;
@@ -109,8 +109,8 @@ bool accelerator_map_erase( AcceleratorMap& acceleratorMap, Accelerator accelera
 }
 
 Accelerator accelerator_for_event_key( guint keyval, guint state ){
-	if ( keyval == GDK_ISO_Left_Tab ) {
-		keyval = GDK_Tab;
+	if ( keyval == GDK_KEY_ISO_Left_Tab ) {
+		keyval = GDK_KEY_Tab;
 	}
 	return Accelerator( keyval, (GdkModifierType)( state & gtk_accelerator_get_default_mod_mask() ) );
 }

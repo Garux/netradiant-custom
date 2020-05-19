@@ -1026,7 +1026,7 @@ void DoMapInfo(){
 
 					GtkAccelGroup *accel_group = gtk_accel_group_new();
 					gtk_window_add_accel_group( window, accel_group );
-					gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel_group, GDK_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE );
+					gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel_group, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE );
 				}
 			}
 		}
@@ -2287,12 +2287,12 @@ void DoFind(){
 				GtkButton* button = create_dialog_button( "Find", G_CALLBACK( dialog_button_ok ), &dialog );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 				widget_make_default( GTK_WIDGET( button ) );
-				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
+				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
 			}
 			{
 				GtkButton* button = create_dialog_button( "Close", G_CALLBACK( dialog_button_cancel ), &dialog );
 				gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
-				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
+				gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
 			}
 		}
 	}
@@ -2637,7 +2637,7 @@ void Map_Construct(){
 	GlobalCommands_insert( "RegionSetBrush", FreeCaller<RegionBrush>() );
 	//GlobalCommands_insert( "RegionSetSelection", FreeCaller<RegionSelected>(), Accelerator( 'R', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalToggles_insert( "RegionSetSelection", FreeCaller<RegionSelected>(), ToggleItem::AddCallbackCaller( g_region_item ), Accelerator( 'R', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
-	GlobalCommands_insert( "AutoCaulkSelected", FreeCaller<map_autocaulk_selected>(), Accelerator( GDK_F4 ) );
+	GlobalCommands_insert( "AutoCaulkSelected", FreeCaller<map_autocaulk_selected>(), Accelerator( GDK_KEY_F4 ) );
 
 	GlobalPreferenceSystem().registerPreference( "LastMap", CopiedStringImportStringCaller( g_strLastMap ), CopiedStringExportStringCaller( g_strLastMap ) );
 	GlobalPreferenceSystem().registerPreference( "LoadLastMap", BoolImportStringCaller( g_bLoadLastMap ), BoolExportStringCaller( g_bLoadLastMap ) );
