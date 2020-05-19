@@ -1216,7 +1216,9 @@ gboolean disable_freelook_button_release( GtkWidget* widget, GdkEventButton* eve
 #if 0
 gboolean mousecontrol_button_press( GtkWidget* widget, GdkEventButton* event, CamWnd* camwnd ){
 	if ( event->type == GDK_BUTTON_PRESS && event->button == 3 ) {
-		Cam_MouseControl( camwnd->getCamera(), event->x, widget->allocation.height - 1 - event->y );
+		GtkAllocation allocation;
+		gtk_widget_get_allocation( widget, &allocation );
+		Cam_MouseControl( camwnd->getCamera(), event->x, allocation.height - 1 - event->y );
 	}
 	return FALSE;
 }
@@ -1266,7 +1268,9 @@ void selection_motion( gdouble x, gdouble y, guint state, void* data ){
 }
 
 inline WindowVector windowvector_for_widget_centre( GtkWidget* widget ){
-	return WindowVector( static_cast<float>( widget->allocation.width / 2 ), static_cast<float>( widget->allocation.height / 2 ) );
+	GtkAllocation allocation;
+	gtk_widget_get_allocation( widget, &allocation );
+	return WindowVector( static_cast<float>( allocation.width / 2 ), static_cast<float>( allocation.height / 2 ) );
 }
 
 gboolean selection_button_press_freemove( GtkWidget* widget, GdkEventButton* event, WindowObserver* observer ){

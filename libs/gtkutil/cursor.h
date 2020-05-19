@@ -193,8 +193,10 @@ void freeze_pointer( GtkWindow* window, GtkWidget* widget, MotionDeltaFunction f
 
 	/* using center for tracking for max safety */
 	gdk_window_get_origin( gtk_widget_get_window( widget ), &center_x, &center_y );
-	center_y += widget->allocation.height / 2;
-	center_x += widget->allocation.width / 2;
+	GtkAllocation allocation;
+	gtk_widget_get_allocation( widget, &allocation );
+	center_y += allocation.height / 2;
+	center_x += allocation.width / 2;
 
 	Sys_SetCursorPos( window, center_x, center_y );
 

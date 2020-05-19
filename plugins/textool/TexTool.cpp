@@ -588,8 +588,10 @@ static gint expose( GtkWidget *widget, GdkEventExpose *event, gpointer data ){
 	}
 
 	if ( g_bTexViewReady ) {
-		g_2DView.m_rect.bottom = widget->allocation.height;
-		g_2DView.m_rect.right = widget->allocation.width;
+		GtkAllocation allocation;
+		gtk_widget_get_allocation( widget, &allocation );
+		g_2DView.m_rect.bottom = allocation.height;
+		g_2DView.m_rect.right = allocation.width;
 
 		if ( !g_QglTable.m_pfn_glwidget_make_current( g_pToolWidget ) ) {
 			Sys_Printf( "TexTool: glMakeCurrent failed\n" );

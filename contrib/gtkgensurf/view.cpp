@@ -101,7 +101,9 @@ void ShowPreview(){
 }
 
 static void draw_preview(){
-	int width = g_pPreviewWidget->allocation.width, height = g_pPreviewWidget->allocation.height;
+	GtkAllocation allocation;
+	gtk_widget_get_allocation( g_pPreviewWidget, &allocation );
+	int width = allocation.width, height = allocation.height;
 
 	g_GLTable.m_pfn_qglClearColor( 0, 0, 0, 1 );
 	g_GLTable.m_pfn_qglViewport( 0, 0, width, height );
@@ -181,7 +183,9 @@ static gint expose( GtkWidget *widget, GdkEventExpose *event, gpointer data ){
 }
 
 static void button_press( GtkWidget *widget, GdkEventButton *event, gpointer data ){
-	Point pt = { (long)event->x, widget->allocation.height - (long)event->y };
+	GtkAllocation allocation;
+	gtk_widget_get_allocation( widget, &allocation );
+	Point pt = { (long)event->x, allocation.height - (long)event->y };
 	bool Selected;
 	double x,y;
 	int i, j, k, ks;
@@ -290,7 +294,9 @@ static void button_press( GtkWidget *widget, GdkEventButton *event, gpointer dat
 }
 
 static void motion( GtkWidget *widget, GdkEventMotion *event, gpointer data ){
-	Point pt = { (long)event->x, widget->allocation.height - (long)event->y };
+	GtkAllocation allocation;
+	gtk_widget_get_allocation( widget, &allocation );
+	Point pt = { (long)event->x, allocation.height - (long)event->y };
 
 	if ( !VertexMode ) {
 		return;
