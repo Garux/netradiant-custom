@@ -314,7 +314,7 @@ static gint ci_pathlist_changed( GtkWidget *widget, gpointer data ){
 	}
 
 	// start edit mode
-	if ( g_pCameraInspectorWnd && GTK_WIDGET_VISIBLE( g_pCameraInspectorWnd ) ) {
+	if ( g_pCameraInspectorWnd && gtk_widget_get_visible( g_pCameraInspectorWnd ) ) {
 		DoStartEdit( GetCurrentCam() );
 	}
 
@@ -759,7 +759,7 @@ static gint ci_camlist_changed( GtkWidget *widget, gpointer data ){
 
 	// start edit mode
 	g_iActiveTarget = -1;
-	if ( g_pCameraInspectorWnd && GTK_WIDGET_VISIBLE( g_pCameraInspectorWnd ) ) {
+	if ( g_pCameraInspectorWnd && gtk_widget_get_visible( g_pCameraInspectorWnd ) ) {
 		DoStartEdit( GetCurrentCam() );
 	}
 

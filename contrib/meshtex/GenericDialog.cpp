@@ -98,7 +98,7 @@ void
 GenericDialog::Raise()
 {
    // Don't bother if not visible.
-   if (GTK_WIDGET_VISIBLE(_dialog))
+   if (gtk_widget_get_visible(_dialog))
    {
       gdk_window_raise(_dialog->window);
    }
@@ -116,7 +116,7 @@ GenericDialog::Show(const std::string& triggerCommand)
    // use of this information.
    _triggerCommand = triggerCommand;
    // Show the window if it is currently hidden.
-   if (!GTK_WIDGET_VISIBLE(_dialog))
+   if (!gtk_widget_get_visible(_dialog))
    {
       gtk_widget_show(_dialog);
    }
@@ -131,7 +131,7 @@ void
 GenericDialog::Hide()
 {
    // Bail out if the window is already invisible.
-   if (!GTK_WIDGET_VISIBLE(_dialog))
+   if (!gtk_widget_get_visible(_dialog))
    {
       return;
    }

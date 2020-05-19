@@ -1223,7 +1223,7 @@ gboolean mousecontrol_button_press( GtkWidget* widget, GdkEventButton* event, Ca
 #endif
 
 void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
-	if ( GTK_WIDGET_VISIBLE( self.m_gl_widget ) ) {
+	if ( gtk_widget_get_visible( self.m_gl_widget ) ) {
 		if ( glwidget_make_current( self.m_gl_widget ) != FALSE ) {
 			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 				GlobalOpenGL_debugAssertNoErrors();

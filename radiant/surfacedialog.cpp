@@ -218,7 +218,7 @@ void destroyWindow(){
 	Destroy();
 }
 bool visible() const {
-	return GTK_WIDGET_VISIBLE( const_cast<GtkWindow*>( GetWidget() ) );
+	return gtk_widget_get_visible( GTK_WIDGET( GetWidget() ) );
 }
 void queueDraw(){
 	if ( visible() ) {

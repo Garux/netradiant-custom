@@ -1911,7 +1911,7 @@ bool ScreenUpdates_Enabled(){
 }
 
 void ScreenUpdates_process(){
-	if ( redrawRequired() && GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	if ( redrawRequired() && gtk_widget_get_visible( GTK_WIDGET( g_wait.m_window ) ) ) {
 		process_gui();
 	}
 }
@@ -1936,7 +1936,7 @@ void ScreenUpdates_Disable( const char* message, const char* title ){
 			ScreenUpdates_process();
 		}
 	}
-	else if ( GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	else if ( gtk_widget_get_visible( GTK_WIDGET( g_wait.m_window ) ) ) {
 		gtk_label_set_text( g_wait.m_label, message );
 		ScreenUpdates_process();
 	}
@@ -1956,7 +1956,7 @@ void ScreenUpdates_Enable(){
 
 		//gtk_window_present(MainFrame_getWindow());
 	}
-	else if ( GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	else if ( gtk_widget_get_visible( GTK_WIDGET( g_wait.m_window ) ) ) {
 		gtk_label_set_text( g_wait.m_label, g_wait_stack.back().c_str() );
 		ScreenUpdates_process();
 	}
@@ -2743,7 +2743,7 @@ WindowFocusPrinter g_mainframeFocusPrinter( "mainframe" );
 class MainWindowActive
 {
 static gboolean notify( GtkWindow* window, gpointer dummy, MainWindowActive* self ){
-	if ( g_wait.m_window != 0 && gtk_window_is_active( window ) && !GTK_WIDGET_VISIBLE( g_wait.m_window ) ) {
+	if ( g_wait.m_window != 0 && gtk_window_is_active( window ) && !gtk_widget_get_visible( GTK_WIDGET( g_wait.m_window ) ) ) {
 		gtk_widget_show( GTK_WIDGET( g_wait.m_window ) );
 	}
 

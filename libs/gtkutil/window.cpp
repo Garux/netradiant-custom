@@ -39,7 +39,7 @@ inline void CHECK_RESTORE( GtkWidget* w ){
 }
 
 inline void CHECK_MINIMIZE( GtkWidget* w ){
-	g_object_set_data( G_OBJECT( w ), "was_mapped", gint_to_pointer( GTK_WIDGET_VISIBLE( w ) ) );
+	g_object_set_data( G_OBJECT( w ), "was_mapped", gint_to_pointer( gtk_widget_get_visible( w ) ) );
 	//gtk_widget_hide( w );	//fix for gtk 2.24 + the whole scheme isn't needed with gtk 2.16, 2.24; they do it all alone
 }
 

@@ -463,7 +463,7 @@ Shader* XYWnd::m_state_selected = 0;
 #define OVERLAY_GL_FRONT_DRAW_HACK
 #endif
 bool XYWnd::overlayStart(){
-	if ( GTK_WIDGET_VISIBLE( m_gl_widget ) ) {
+	if ( gtk_widget_get_visible( m_gl_widget ) ) {
 		if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
 			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 				GlobalOpenGL_debugAssertNoErrors();

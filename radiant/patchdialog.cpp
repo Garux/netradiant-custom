@@ -265,7 +265,7 @@ PatchInspector() :
 }
 
 bool visible(){
-	return GTK_WIDGET_VISIBLE( GetWidget() );
+	return gtk_widget_get_visible( GTK_WIDGET( GetWidget() ) );
 }
 
 //  void UpdateInfo();

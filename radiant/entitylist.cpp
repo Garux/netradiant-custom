@@ -87,7 +87,7 @@ EntityList() :
 }
 
 bool visible() const {
-	return GTK_WIDGET_VISIBLE( GTK_WIDGET( m_window ) );
+	return gtk_widget_get_visible( GTK_WIDGET( m_window ) );
 }
 };
 

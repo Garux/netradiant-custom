@@ -1487,7 +1487,7 @@ void EntityInspector_destroyWindow( GtkWidget* widget, gpointer data ){
 }
 
 static gint EntityInspector_hideWindowKB( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	//if ( event->keyval == GDK_KEY_Escape && GTK_WIDGET_VISIBLE( GTK_WIDGET( widget ) ) ) {
+	//if ( event->keyval == GDK_KEY_Escape && gtk_widget_get_visible( widget ) ) {
 	if ( event->keyval == GDK_KEY_Escape  ) {
 		//GroupDialog_showPage( g_page_entity );
 		gtk_widget_hide( GTK_WIDGET( GroupDialog_getWindow() ) );
