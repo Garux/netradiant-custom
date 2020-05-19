@@ -117,7 +117,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 		ret = IDOK;
@@ -127,7 +127,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -143,7 +143,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -166,7 +166,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDYES ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 

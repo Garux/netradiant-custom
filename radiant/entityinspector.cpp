@@ -1734,14 +1734,14 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Clear All" ) );
-						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_set_can_focus( GTK_WIDGET( button ), FALSE );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_clearAllKeyValues ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), TRUE, TRUE, 0 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Delete Key" ) );
-						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_set_can_focus( GTK_WIDGET( button ), FALSE );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_clearKeyValue ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), TRUE, TRUE, 0 );
@@ -1749,7 +1749,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "<" ) );
 						gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Select targeting entities" );
-						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_set_can_focus( GTK_WIDGET( button ), FALSE );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectTargeting ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), FALSE, FALSE, 0 );
@@ -1757,7 +1757,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( ">" ) );
 						gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Select targets" );
-						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_set_can_focus( GTK_WIDGET( button ), FALSE );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectTargets ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), FALSE, FALSE, 0 );
@@ -1765,7 +1765,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "<->" ) );
 						gtk_widget_set_tooltip_text( GTK_WIDGET( button ), "Select connected entities" );
-						GTK_WIDGET_UNSET_FLAGS( GTK_WIDGET( button ), GTK_CAN_FOCUS );
+						gtk_widget_set_can_focus( GTK_WIDGET( button ), FALSE );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectConnected ), 0 );
 						gtk_box_pack_start( hbox, GTK_WIDGET( button ), FALSE, FALSE, 0 );
@@ -1776,7 +1776,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 						gtk_widget_show( GTK_WIDGET( image ) );
 						gtk_container_add( GTK_CONTAINER( button ), GTK_WIDGET( image ) );
 						gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
-						GTK_WIDGET_UNSET_FLAGS( button, GTK_CAN_FOCUS );
+						gtk_widget_set_can_focus( button, FALSE );
 						gtk_box_pack_start( hbox, button, FALSE, FALSE, 0 );
 						gtk_widget_set_tooltip_text( button, "AutoFocus on Selection" );
 						gtk_widget_show( button );

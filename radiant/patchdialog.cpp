@@ -908,7 +908,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
 							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
@@ -929,7 +929,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
 							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
@@ -950,7 +950,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
 							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
@@ -971,7 +971,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
 							GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
@@ -992,7 +992,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
-							GTK_WIDGET_UNSET_FLAGS( spin, GTK_CAN_FOCUS );
+							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 					}
 					GtkHBox* hbox2 = GTK_HBOX( gtk_hbox_new( TRUE, 5 ) );

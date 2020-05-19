@@ -84,8 +84,8 @@ inline GtkToolbarChildType gtktoolbarchildtype_for_toolbarbuttontype( IToolbarBu
 void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, GtkSignalFunc handler, gpointer data ){
 	GtkWidget* widget = gtk_toolbar_append_element( toolbar, gtktoolbarchildtype_for_toolbarbuttontype( type ), 0, text, tooltip, "", GTK_WIDGET( new_plugin_image( icon ) ), handler, data );
 	if( type != IToolbarButton::eSpace ){
-		GTK_WIDGET_UNSET_FLAGS( widget, GTK_CAN_FOCUS );
-		GTK_WIDGET_UNSET_FLAGS( widget, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_focus( widget, FALSE );
+		gtk_widget_set_can_default( widget, FALSE );
 	}
 }
 

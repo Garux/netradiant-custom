@@ -1234,7 +1234,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				// --> Dunno, but this stuff may be necessary... (Looks like it!)
 				gtk_widget_ref( TexTool::g_textoolWin );
 				gtk_widget_set_events( TexTool::g_textoolWin, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK );
-				GTK_WIDGET_SET_FLAGS( TexTool::g_textoolWin, GTK_CAN_FOCUS );
+				gtk_widget_set_can_focus( TexTool::g_textoolWin, TRUE );
 				// <-- end stuff...
 				gtk_widget_show( TexTool::g_textoolWin );
 				gtk_widget_set_usize( TexTool::g_textoolWin, -1, 240 ); //Yeah!

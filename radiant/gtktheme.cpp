@@ -204,7 +204,7 @@ GtkWidget* create_rc_window() {
 	gtk_widget_set_name( main_themelist, "main_themelist" );
 	gtk_widget_show( main_themelist );
 	gtk_container_add( GTK_CONTAINER( scrolledwindow3 ), main_themelist );
-	GTK_WIDGET_SET_FLAGS( main_themelist, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( main_themelist, TRUE );
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( main_themelist ), FALSE );
 
 	label1234 = gtk_label_new( "<b>Theme</b>" );
@@ -318,13 +318,13 @@ GtkWidget* create_rc_window() {
 	gtk_widget_set_name( main_ok_button, "main_ok_button" );
 	gtk_widget_show( main_ok_button );
 	gtk_box_pack_end( GTK_BOX( hbox5 ), main_ok_button, TRUE, TRUE, 4 );
-	GTK_WIDGET_SET_FLAGS( main_ok_button, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( main_ok_button, TRUE );
 
 	main_cancel_button = gtk_button_new_from_stock( "gtk-cancel" );
 	gtk_widget_set_name( main_cancel_button, "main_cancel_button" );
 	gtk_widget_show( main_cancel_button );
 	gtk_box_pack_end( GTK_BOX( hbox5 ), main_cancel_button, TRUE, TRUE, 4 );
-	GTK_WIDGET_SET_FLAGS( main_cancel_button, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( main_cancel_button, TRUE );
 
 	main_reset_button = gtk_button_new();
 	gtk_widget_set_name( main_reset_button, "main_reset_button" );

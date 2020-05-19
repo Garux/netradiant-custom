@@ -250,7 +250,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 		ret = eIDOK;
@@ -260,7 +260,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -276,7 +276,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -299,7 +299,7 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 		gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 		gtk_signal_connect( GTK_OBJECT( w ), "clicked",
 							GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+		gtk_widget_set_can_default( w, TRUE );
 		gtk_widget_grab_default( w );
 		gtk_widget_show( w );
 
@@ -383,7 +383,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -538,7 +538,7 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -780,7 +780,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	w = gtk_button_new_with_label( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1025,7 +1025,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	w = gtk_button_new_with_label( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1188,7 +1188,7 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDYES ) );
 	gtk_widget_show( w );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 
 	w = gtk_button_new_with_label( "Disable" );
@@ -1278,7 +1278,7 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1559,7 +1559,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1846,7 +1846,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 
@@ -1984,7 +1984,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	w = gtk_button_new_with_label( "OK" );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 

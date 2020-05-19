@@ -172,7 +172,7 @@ typedef ReferenceCaller<GtkWidget, widget_queue_draw> WidgetQueueDrawCaller;
 
 
 inline void widget_make_default( GtkWidget* widget ){
-	GTK_WIDGET_SET_FLAGS( widget, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( widget, TRUE );
 	gtk_widget_grab_default( widget );
 }
 

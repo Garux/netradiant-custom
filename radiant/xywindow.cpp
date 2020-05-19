@@ -715,7 +715,7 @@ XYWnd::XYWnd() :
 	gtk_widget_ref( m_gl_widget );
 
 	gtk_widget_set_events( m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
-	GTK_WIDGET_SET_FLAGS( m_gl_widget, GTK_CAN_FOCUS );
+	gtk_widget_set_can_focus( m_gl_widget, TRUE );
 
 	m_sizeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "size_allocate", G_CALLBACK( xywnd_size_allocate ), this );
 	m_exposeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "expose_event", G_CALLBACK( xywnd_expose ), this );

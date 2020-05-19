@@ -134,7 +134,7 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 
 	w = gtk_button_new_with_label( "Cancel" );
@@ -416,7 +416,7 @@ static gint ci_rename( GtkWidget *widget, gpointer data ){
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 
 	w = gtk_button_new_with_label( "Cancel" );
@@ -563,7 +563,7 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 
 	w = gtk_button_new_with_label( "Cancel" );
@@ -906,7 +906,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( eIDOK ) );
 	gtk_widget_show( w );
 
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 
 	w = gtk_button_new_with_label( "Cancel" );
@@ -1359,7 +1359,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	w = gtk_button_new_with_label( "Close" );
 	gtk_box_pack_start( GTK_BOX( vbox ), w, FALSE, FALSE, 0 );
 	gtk_signal_connect( GTK_OBJECT( w ), "clicked", GTK_SIGNAL_FUNC( ci_close ), NULL );
-	GTK_WIDGET_SET_FLAGS( w, GTK_CAN_DEFAULT );
+	gtk_widget_set_can_default( w, TRUE );
 	gtk_widget_grab_default( w );
 	gtk_widget_show( w );
 

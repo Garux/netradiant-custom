@@ -2155,7 +2155,7 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		gtk_widget_ref( w );
 
 		gtk_widget_set_events( w, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
-		GTK_WIDGET_SET_FLAGS( w, GTK_CAN_FOCUS );
+		gtk_widget_set_can_focus( w, TRUE );
 
 		gtk_table_attach_defaults( GTK_TABLE( table ), w, 1, 2, 1, 2 );
 		gtk_widget_show( w );
