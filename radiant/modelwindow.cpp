@@ -565,12 +565,12 @@ private:
 	void updateScroll() const {
 		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( m_gl_scroll ) );
 
-		vadjustment->value = -m_originZ;
-		vadjustment->page_size = m_height;
-		vadjustment->page_increment = m_height / 2;
-		vadjustment->step_increment = 20;
-		vadjustment->lower = 0;
-		vadjustment->upper = totalHeight();
+		gtk_adjustment_set_value( vadjustment, -m_originZ );
+		gtk_adjustment_set_page_size( vadjustment, m_height );
+		gtk_adjustment_set_page_increment( vadjustment, m_height / 2 );
+		gtk_adjustment_set_step_increment( vadjustment, 20 );
+		gtk_adjustment_set_lower( vadjustment, 0 );
+		gtk_adjustment_set_upper( vadjustment, totalHeight() );
 
 		g_signal_emit_by_name( G_OBJECT( vadjustment ), "changed" );
 	}
@@ -996,7 +996,7 @@ void ModelBrowser_scrollChanged( void* data, gdouble value ){
 }
 
 static void ModelBrowser_scrollbarScroll( GtkAdjustment *adjustment, ModelBrowser* modelBrowser ){
-	modelBrowser->m_scrollAdjustment.value_changed( adjustment->value );
+	modelBrowser->m_scrollAdjustment.value_changed( gtk_adjustment_get_value( adjustment ) );
 }
 
 

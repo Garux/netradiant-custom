@@ -128,7 +128,7 @@ static void SetClipText( GtkWidget* label ){
 }
 
 static void OnScroll2d( GtkAdjustment *adj, gpointer data ){
-	portals.width_2d = static_cast<float>( adj->value );
+	portals.width_2d = static_cast<float>( gtk_adjustment_get_value( adj ) );
 	Set2DText( GTK_WIDGET( data ) );
 
 	Portals_shadersChanged();
@@ -136,21 +136,21 @@ static void OnScroll2d( GtkAdjustment *adj, gpointer data ){
 }
 
 static void OnScroll3d( GtkAdjustment *adj, gpointer data ){
-	portals.width_3d = static_cast<float>( adj->value );
+	portals.width_3d = static_cast<float>( gtk_adjustment_get_value( adj ) );
 	Set3DText( GTK_WIDGET( data ) );
 
 	SceneChangeNotify();
 }
 
 static void OnScrollTrans( GtkAdjustment *adj, gpointer data ){
-	portals.trans_3d = static_cast<float>( adj->value );
+	portals.trans_3d = static_cast<float>( gtk_adjustment_get_value( adj ) );
 	Set3DTransText( GTK_WIDGET( data ) );
 
 	SceneChangeNotify();
 }
 
 static void OnScrollClip( GtkAdjustment *adj, gpointer data ){
-	portals.clip_range = static_cast<float>( adj->value );
+	portals.clip_range = static_cast<float>( gtk_adjustment_get_value( adj ) );
 	SetClipText( GTK_WIDGET( data ) );
 
 	SceneChangeNotify();

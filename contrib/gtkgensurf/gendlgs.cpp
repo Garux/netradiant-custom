@@ -803,7 +803,7 @@ static void general_wave( GtkToggleButton *widget, gpointer data ){
 }
 
 static void general_random( GtkAdjustment *adj, gpointer data ){
-	int nPos = (int)adj->value;
+	int nPos = (int)gtk_adjustment_get_value( adj );
 
 	if ( RandomSeed != nPos ) {
 		RandomSeed = nPos;
@@ -831,7 +831,7 @@ static void extents_use_patches( GtkToggleButton *check, gpointer data ){
 }
 
 static void extents_nhnv_spin( GtkAdjustment *adj, int *data ){
-	int nPos = (int)adj->value;
+	int nPos = (int)gtk_adjustment_get_value( adj );
 
 	if ( *data != nPos ) {
 		if ( Game == QUAKE3 && UsePatches && ( nPos % 2 ) ) {
@@ -851,7 +851,7 @@ static void extents_nhnv_spin( GtkAdjustment *adj, int *data ){
 }
 
 static void extents_decimate( GtkAdjustment *adj, gpointer data ){
-	int nPos = (int)adj->value;
+	int nPos = (int)gtk_adjustment_get_value( adj );
 
 	Decimate = nPos;
 	UpdatePreview( true );
@@ -860,7 +860,7 @@ static void extents_decimate( GtkAdjustment *adj, gpointer data ){
 // Hydra : snap to grid begin
 /*static void extents_snaptogrid (GtkAdjustment *adj, gpointer data)
    {
-   int nPos = (int)adj->value;
+   int nPos = (int)gtk_adjustment_get_value( adj );
 
    SnapToGrid = nPos;
    UpdatePreview (true);
@@ -868,7 +868,7 @@ static void extents_decimate( GtkAdjustment *adj, gpointer data ){
 
 // ^Fishman - Modified version of Hydra's snap to grid code.
 static void extents_snaptogrid_spin( GtkAdjustment *adj, int *data ){
-	int nPos = (int)adj->value;
+	int nPos = (int)gtk_adjustment_get_value( adj );
 	SnapToGrid = nPos;
 	UpdatePreview( true );
 }
@@ -948,7 +948,7 @@ static gint fix_value_entryfocusout( GtkWidget* widget, GdkEventFocus *event, gp
 }
 
 static void fix_value_changed( GtkAdjustment *adj, gpointer data ){
-	int k, i = (int)adj->value;
+	int k, i = (int)gtk_adjustment_get_value( adj );
 
 	if ( xyz[Vertex[0].i][Vertex[0].j].fixed_value != i ) {
 		for ( k = 0; k < NumVerticesSelected; k++ )

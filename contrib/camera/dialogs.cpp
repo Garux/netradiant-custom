@@ -943,7 +943,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 				}
 
 				// Add the event
-				GetCurrentCam()->GetCam()->addEvent( static_cast<idCameraEvent::eventType>( type ), str, (long)( g_pTimeLine->value ) );
+				GetCurrentCam()->GetCam()->addEvent( static_cast<idCameraEvent::eventType>( type ), str, (long)( gtk_adjustment_get_value( g_pTimeLine ) ) );
 
 				// Refresh event list
 				RefreshEventList();
@@ -974,7 +974,7 @@ static gint ci_del( GtkWidget *widget, gpointer data ){
 static gint ci_timeline_changed( GtkAdjustment *adjustment ){
 	char buf[128];
 
-	sprintf( buf, "%.2f", adjustment->value / 1000.f );
+	sprintf( buf, "%.2f", gtk_adjustment_get_value( adjustment ) / 1000.f );
 	gtk_label_set_text( g_pCurrentTime, buf );
 
 	// FIXME: this will never work completely perfect. Startcamera calls buildcamera, which sets all events to 'nottriggered'.
@@ -986,7 +986,7 @@ static gint ci_timeline_changed( GtkAdjustment *adjustment ){
 
 		GetCurrentCam()->GetCam()->startCamera( 0 );
 
-		GetCurrentCam()->GetCam()->getCameraInfo( (long)( adjustment->value ), &origin[0], &dir[0], &fov );
+		GetCurrentCam()->GetCam()->getCameraInfo( (long)( gtk_adjustment_get_value( adjustment ) ), &origin[0], &dir[0], &fov );
 		VectorSet( angles, asin( dir[2] ) * 180 / 3.14159, atan2( dir[1], dir[0] ) * 180 / 3.14159, 0 );
 		g_CameraTable.m_pfnSetCamera( origin, angles );
 	}

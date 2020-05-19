@@ -358,7 +358,7 @@ static gint doublevariable_spinfocusout( GtkWidget* widget, GdkEventFocus* event
 }
 
 static void preview_spin( GtkAdjustment *adj, double *data ){
-	*data = DegreesToRadians( adj->value );
+	*data = DegreesToRadians( gtk_adjustment_get_value( adj ) );
 	UpdatePreview( false );
 }
 

@@ -1395,7 +1395,7 @@ void TextureBrowser_scrollChanged( void* data, gdouble value ){
 }
 
 static void TextureBrowser_verticalScroll( GtkAdjustment *adjustment, TextureBrowser* textureBrowser ){
-	textureBrowser->m_scrollAdjustment.value_changed( adjustment->value );
+	textureBrowser->m_scrollAdjustment.value_changed( gtk_adjustment_get_value( adjustment ) );
 }
 
 void TextureBrowser_updateScroll( TextureBrowser& textureBrowser ){
@@ -1406,12 +1406,12 @@ void TextureBrowser_updateScroll( TextureBrowser& textureBrowser ){
 
 		GtkAdjustment *vadjustment = gtk_range_get_adjustment( GTK_RANGE( textureBrowser.m_texture_scroll ) );
 
-		vadjustment->value = -TextureBrowser_getOriginY( textureBrowser );
-		vadjustment->page_size = textureBrowser.height;
-		vadjustment->page_increment = textureBrowser.height / 2;
-		vadjustment->step_increment = 20;
-		vadjustment->lower = 0;
-		vadjustment->upper = totalHeight;
+		gtk_adjustment_set_value( vadjustment, -TextureBrowser_getOriginY( textureBrowser ) );
+		gtk_adjustment_set_page_size( vadjustment, textureBrowser.height );
+		gtk_adjustment_set_page_increment( vadjustment, textureBrowser.height / 2 );
+		gtk_adjustment_set_step_increment( vadjustment, 20 );
+		gtk_adjustment_set_lower( vadjustment, 0 );
+		gtk_adjustment_set_upper( vadjustment, totalHeight );
 
 		g_signal_emit_by_name( G_OBJECT( vadjustment ), "changed" );
 	}

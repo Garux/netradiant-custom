@@ -269,7 +269,7 @@ void value_changed( gdouble value ){
 	}
 }
 static void adjustment_value_changed( GtkAdjustment *adjustment, DeferredAdjustment* self ){
-	self->value_changed( adjustment->value );
+	self->value_changed( gtk_adjustment_get_value( adjustment ) );
 }
 };
 

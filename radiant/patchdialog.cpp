@@ -462,14 +462,14 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 	td.scale[0] = td.scale[1] = 0;
 	td.shift[0] = td.shift[1] = 0;
 
-	if ( adj->value == 0 ) {
+	if ( gtk_adjustment_get_value( adj ) == 0 ) {
 		return;
 	}
 
 	if ( adj == g_object_get_data( G_OBJECT( g_PatchInspector.GetWidget() ), "hshift_adj" ) ) {
 		g_pi_globals.shift[0] = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( data ) ) ) );
 
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value( adj ) > 0 ) {
 			td.shift[0] = g_pi_globals.shift[0];
 		}
 		else{
@@ -479,7 +479,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 	else if ( adj == g_object_get_data( G_OBJECT( g_PatchInspector.GetWidget() ), "vshift_adj" ) ) {
 		g_pi_globals.shift[1] = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( data ) ) ) );
 
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value( adj ) > 0 ) {
 			td.shift[1] = g_pi_globals.shift[1];
 		}
 		else{
@@ -491,7 +491,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 		if ( g_pi_globals.scale[0] == 0.0f ) {
 			return;
 		}
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value( adj ) > 0 ) {
 			td.scale[0] = g_pi_globals.scale[0];
 		}
 		else{
@@ -503,7 +503,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 		if ( g_pi_globals.scale[1] == 0.0f ) {
 			return;
 		}
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value( adj ) > 0 ) {
 			td.scale[1] = g_pi_globals.scale[1];
 		}
 		else{
@@ -513,7 +513,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 	else if ( adj == g_object_get_data( G_OBJECT( g_PatchInspector.GetWidget() ), "rotate_adj" ) ) {
 		g_pi_globals.rotate = static_cast<float>( atof( gtk_entry_get_text( GTK_ENTRY( data ) ) ) );
 
-		if ( adj->value > 0 ) {
+		if ( gtk_adjustment_get_value( adj ) > 0 ) {
 			td.rotate = g_pi_globals.rotate;
 		}
 		else{
@@ -521,7 +521,7 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 		}
 	}
 
-	adj->value = 0;
+	gtk_adjustment_set_value( adj, 0 );
 
 	// will scale shift rotate the patch accordingly
 
