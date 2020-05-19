@@ -54,26 +54,24 @@ static gint dialog_delete_callback( GtkWidget *widget, GdkEvent* event, gpointer
 
 static int DoColor( PackedColour *c ){
 	GtkWidget* dlg;
-	double clr[4];
+	GdkColor clr = { 0, guint16( GetRValue( *c ) * ( 65535 / 255 ) ),
+						guint16( GetGValue( *c ) * ( 65535 / 255 ) ),
+						guint16( GetBValue( *c ) * ( 65535 / 255 ) ) };
 	int loop = 1, ret = IDCANCEL;
-
-	clr[0] = ( (double)GetRValue( *c ) ) / 255.0;
-	clr[1] = ( (double)GetGValue( *c ) ) / 255.0;
-	clr[2] = ( (double)GetBValue( *c ) ) / 255.0;
 
 	dlg = gtk_color_selection_dialog_new( "Choose Color" );
 	gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( g_pRadiantWnd ) );
 	gtk_window_set_position( GTK_WINDOW( dlg ),GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_window_set_modal( GTK_WINDOW( dlg ), TRUE );
-	gtk_color_selection_set_color( GTK_COLOR_SELECTION( GTK_COLOR_SELECTION_DIALOG( dlg )->colorsel ), clr );
-	gtk_signal_connect( GTK_OBJECT( dlg ), "delete_event",
-						GTK_SIGNAL_FUNC( dialog_delete_callback ), NULL );
-	gtk_signal_connect( GTK_OBJECT( dlg ), "destroy",
-						GTK_SIGNAL_FUNC( gtk_widget_destroy ), NULL );
-	gtk_signal_connect( GTK_OBJECT( GTK_COLOR_SELECTION_DIALOG( dlg )->ok_button ), "clicked",
-						GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
-	gtk_signal_connect( GTK_OBJECT( GTK_COLOR_SELECTION_DIALOG( dlg )->cancel_button ), "clicked",
-						GTK_SIGNAL_FUNC( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
+	gtk_color_selection_set_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection( GTK_COLOR_SELECTION_DIALOG( dlg ) ) ), &clr );
+	gtk_signal_connect( GTK_OBJECT( dlg ), "delete_event", G_CALLBACK( dialog_delete_callback ), NULL );
+	gtk_signal_connect( GTK_OBJECT( dlg ), "destroy", G_CALLBACK( gtk_widget_destroy ), NULL );
+
+	GtkWidget *ok_button, *cancel_button;
+	g_object_get( G_OBJECT( dlg ), "ok-button", &ok_button, "cancel-button", &cancel_button, nullptr );
+
+	gtk_signal_connect( GTK_OBJECT( ok_button ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
+	gtk_signal_connect( GTK_OBJECT( cancel_button ), "clicked", G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
 	g_object_set_data( G_OBJECT( dlg ), "loop", &loop );
 	g_object_set_data( G_OBJECT( dlg ), "ret", &ret );
 
@@ -83,13 +81,13 @@ static int DoColor( PackedColour *c ){
 	while ( loop )
 		gtk_main_iteration();
 
-	gtk_color_selection_get_color( GTK_COLOR_SELECTION( GTK_COLOR_SELECTION_DIALOG( dlg )->colorsel ), clr );
+	gtk_color_selection_get_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection( GTK_COLOR_SELECTION_DIALOG( dlg ) ) ), &clr );
 
 	gtk_grab_remove( dlg );
 	gtk_widget_destroy( dlg );
 
 	if ( ret == IDOK ) {
-		*c = RGB( clr[0] * 255, clr[1] * 255, clr[2] * 255 );
+		*c = RGB( clr.red / (65535 / 255), clr.green / (65535 / 255), clr.blue / (65535 / 255) );
 	}
 
 	return ret;
