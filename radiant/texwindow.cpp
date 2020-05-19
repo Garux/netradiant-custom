@@ -2752,7 +2752,7 @@ void TextureBrowser_Construct(){
 	GlobalCommands_insert( "PasteTag", FreeCaller<TextureBrowser_pasteTag>() );
 	GlobalCommands_insert( "RefreshShaders", FreeCaller<RefreshShaders>() );
 	GlobalToggles_insert( "ShowInUse", FreeCaller<TextureBrowser_ToggleHideUnused>(), ToggleItem::AddCallbackCaller( g_TextureBrowser.m_hideunused_item ), Accelerator( 'U' ) );
-	GlobalCommands_insert( "ShowAllTextures", FreeCaller<TextureBrowser_showAll>(), Accelerator( 'A', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "ShowAllTextures", FreeCaller<TextureBrowser_showAll>(), Accelerator( 'A', GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "ToggleTextures", FreeCaller<TextureBrowser_toggleShow>(), Accelerator( 'T' ) );
 	GlobalToggles_insert( "ToggleShowShaders", FreeCaller<TextureBrowser_ToggleShowShaders>(), ToggleItem::AddCallbackCaller( g_TextureBrowser.m_showshaders_item ) );
 	GlobalToggles_insert( "ToggleShowTextures", FreeCaller<TextureBrowser_ToggleShowTextures>(), ToggleItem::AddCallbackCaller( g_TextureBrowser.m_showtextures_item ) );

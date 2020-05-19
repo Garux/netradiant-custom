@@ -2555,9 +2555,9 @@ void CamWnd_Construct(){
 	GlobalCommands_insert( "CenterView", FreeCaller<GlobalCamera_ResetAngles>(), Accelerator( GDK_KEY_End ) );
 	GlobalCommands_insert( "CameraFocusOnSelected", FreeCaller<GlobalCamera_FocusOnSelected>(), Accelerator( GDK_KEY_Tab ) );
 
-	GlobalToggles_insert( "ToggleCubicClip", FreeCaller<Camera_ToggleFarClip>(), ToggleItem::AddCallbackCaller( g_getfarclip_item ), Accelerator( '\\', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "CubicClipZoomIn", FreeCaller<Camera_CubeIn>(), Accelerator( '[', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "CubicClipZoomOut", FreeCaller<Camera_CubeOut>(), Accelerator( ']', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalToggles_insert( "ToggleCubicClip", FreeCaller<Camera_ToggleFarClip>(), ToggleItem::AddCallbackCaller( g_getfarclip_item ), Accelerator( '\\', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "CubicClipZoomIn", FreeCaller<Camera_CubeIn>(), Accelerator( '[', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "CubicClipZoomOut", FreeCaller<Camera_CubeOut>(), Accelerator( ']', GDK_CONTROL_MASK ) );
 
 	GlobalCommands_insert( "UpFloor", FreeCaller<Camera_ChangeFloorUp>(), Accelerator( GDK_KEY_Prior ) );
 	GlobalCommands_insert( "DownFloor", FreeCaller<Camera_ChangeFloorDown>(), Accelerator( GDK_KEY_Next ) );
@@ -2570,11 +2570,11 @@ void CamWnd_Construct(){
 		GlobalCommands_insert( "TogglePreview", FreeCaller<CamWnd_TogglePreview>(), Accelerator( GDK_KEY_F3 ) );
 	}
 
-	GlobalCommands_insert( "CameraModeNext", FreeCaller<CameraModeNext>(), Accelerator( '}', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "CameraModePrev", FreeCaller<CameraModePrev>(), Accelerator( '{', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "CameraModeNext", FreeCaller<CameraModeNext>(), Accelerator( '}', GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "CameraModePrev", FreeCaller<CameraModePrev>(), Accelerator( '{', GDK_SHIFT_MASK ) );
 
-	GlobalCommands_insert( "CameraSpeedInc", FreeCaller<CameraSpeed_increase>(), Accelerator( GDK_KEY_KP_Add, (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "CameraSpeedDec", FreeCaller<CameraSpeed_decrease>(), Accelerator( GDK_KEY_KP_Subtract, (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "CameraSpeedInc", FreeCaller<CameraSpeed_increase>(), Accelerator( GDK_KEY_KP_Add, GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "CameraSpeedDec", FreeCaller<CameraSpeed_decrease>(), Accelerator( GDK_KEY_KP_Subtract, GDK_SHIFT_MASK ) );
 
 	GlobalShortcuts_insert( "CameraForward", Accelerator( GDK_KEY_Up ) );
 	GlobalShortcuts_insert( "CameraBack", Accelerator( GDK_KEY_Down ) );

@@ -544,11 +544,11 @@ static void OnSpinChanged( GtkAdjustment *adj, gpointer data ){
 }
 
 static gint OnDialogKey( GtkWidget* widget, GdkEventKey* event, gpointer data ){
-	if ( event->keyval == GDK_Return ) {
+	if ( event->keyval == GDK_KEY_Return ) {
 		OnApply( 0, 0 );
 		return TRUE;
 	}
-	else if ( event->keyval == GDK_Escape ) {
+	else if ( event->keyval == GDK_KEY_Escape ) {
 		g_PatchInspector.GetPatchInfo();
 		return TRUE;
 	}
@@ -1149,7 +1149,7 @@ void PatchInspector_SelectionChanged( const Selectable& selectable ){
 
 
 void PatchInspector_Construct(){
-	GlobalCommands_insert( "PatchInspector", FreeCaller<PatchInspector_toggleShown>(), Accelerator( 'S', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "PatchInspector", FreeCaller<PatchInspector_toggleShown>(), Accelerator( 'S', GDK_SHIFT_MASK ) );
 
 	GlobalPreferenceSystem().registerPreference( "PatchWnd", WindowPositionTrackerImportStringCaller( g_PatchInspector.m_position_tracker ), WindowPositionTrackerExportStringCaller( g_PatchInspector.m_position_tracker ) );
 	GlobalPreferenceSystem().registerPreference( "SI_PatchTexdef_Scale1", FloatImportStringCaller( g_pi_globals.scale[0] ), FloatExportStringCaller( g_pi_globals.scale[0] ) );

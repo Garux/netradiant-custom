@@ -1071,7 +1071,7 @@ void Selection_RotateAnticlockwise(){
 
 
 void Select_registerCommands(){
-	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "ShowHidden", FreeCaller<Select_ShowAllHidden>(), Accelerator( 'H', GDK_SHIFT_MASK ) );
 	GlobalToggles_insert( "HideSelected", FreeCaller<HideSelected>(), ToggleItem::AddCallbackCaller( g_hidden_item ), Accelerator( 'H' ) );
 
 	GlobalCommands_insert( "MirrorSelectionX", FreeCaller<Selection_Flipx>() );

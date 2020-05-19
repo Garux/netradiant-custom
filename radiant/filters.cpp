@@ -222,36 +222,36 @@ void ConstructFilters(){
 	GlobalCommands_insert( "InvertFilters", FreeCaller<InvertFilters>() );
 	GlobalCommands_insert( "ResetFilters", FreeCaller<ResetFilters>() );
 
-	add_filter_command( EXCLUDE_WORLD, "FilterWorldBrushes", Accelerator( '1', (GdkModifierType)GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_ENT, "FilterEntities", Accelerator( '2', (GdkModifierType)GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_WORLD, "FilterWorldBrushes", Accelerator( '1', GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_ENT, "FilterEntities", Accelerator( '2', GDK_MOD1_MASK ) );
 	if ( g_pGameDescription->mGameType == "doom3" ) {
-		add_filter_command( EXCLUDE_VISPORTALS, "FilterVisportals", Accelerator( '3', (GdkModifierType)GDK_MOD1_MASK ) );
+		add_filter_command( EXCLUDE_VISPORTALS, "FilterVisportals", Accelerator( '3', GDK_MOD1_MASK ) );
 	}
 	else
 	{
-		add_filter_command( EXCLUDE_AREAPORTALS, "FilterAreaportals", Accelerator( '3', (GdkModifierType)GDK_MOD1_MASK ) );
+		add_filter_command( EXCLUDE_AREAPORTALS, "FilterAreaportals", Accelerator( '3', GDK_MOD1_MASK ) );
 	}
-	add_filter_command( EXCLUDE_TRANSLUCENT, "FilterTranslucent", Accelerator( '4', (GdkModifierType)GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_LIQUIDS, "FilterLiquids", Accelerator( '5', (GdkModifierType)GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_CAULK, "FilterCaulk", Accelerator( '6', (GdkModifierType)GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_CLIP, "FilterClips", Accelerator( '7', (GdkModifierType)GDK_MOD1_MASK ) );
-	add_filter_command( EXCLUDE_PATHS, "FilterPaths", Accelerator( '8', (GdkModifierType)GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_TRANSLUCENT, "FilterTranslucent", Accelerator( '4', GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_LIQUIDS, "FilterLiquids", Accelerator( '5', GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_CAULK, "FilterCaulk", Accelerator( '6', GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_CLIP, "FilterClips", Accelerator( '7', GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_PATHS, "FilterPaths", Accelerator( '8', GDK_MOD1_MASK ) );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		add_filter_command( EXCLUDE_CLUSTERPORTALS, "FilterClusterportals", Accelerator( '9', (GdkModifierType)GDK_MOD1_MASK ) );
+		add_filter_command( EXCLUDE_CLUSTERPORTALS, "FilterClusterportals", Accelerator( '9', GDK_MOD1_MASK ) );
 	}
-	add_filter_command( EXCLUDE_LIGHTS, "FilterLights", Accelerator( '0', (GdkModifierType)GDK_MOD1_MASK ) );
+	add_filter_command( EXCLUDE_LIGHTS, "FilterLights", Accelerator( '0', GDK_MOD1_MASK ) );
 	add_filter_command( EXCLUDE_STRUCTURAL, "FilterStructural", Accelerator( 'D', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
 		add_filter_command( EXCLUDE_LIGHTGRID, "FilterLightgrid", accelerator_null() );
 	}
-	add_filter_command( EXCLUDE_CURVES, "FilterPatches", Accelerator( 'P', (GdkModifierType)GDK_CONTROL_MASK ) );
-	add_filter_command( EXCLUDE_DETAILS, "FilterDetails", Accelerator( 'D', (GdkModifierType)GDK_CONTROL_MASK ) );
-	add_filter_command( EXCLUDE_HINTSSKIPS, "FilterHintsSkips", Accelerator( 'H', (GdkModifierType)GDK_CONTROL_MASK ) );
-	add_filter_command( EXCLUDE_MODELS, "FilterModels", Accelerator( 'M', (GdkModifierType)GDK_SHIFT_MASK ) );
+	add_filter_command( EXCLUDE_CURVES, "FilterPatches", Accelerator( 'P', GDK_CONTROL_MASK ) );
+	add_filter_command( EXCLUDE_DETAILS, "FilterDetails", Accelerator( 'D', GDK_CONTROL_MASK ) );
+	add_filter_command( EXCLUDE_HINTSSKIPS, "FilterHintsSkips", Accelerator( 'H', GDK_CONTROL_MASK ) );
+	add_filter_command( EXCLUDE_MODELS, "FilterModels", Accelerator( 'M', GDK_SHIFT_MASK ) );
 	add_filter_command( EXCLUDE_TRIGGERS, "FilterTriggers", Accelerator( 'T', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	if ( g_pGameDescription->mGameType != "doom3" ) {
-		add_filter_command( EXCLUDE_BOTCLIP, "FilterBotClips", Accelerator( 'M', (GdkModifierType)GDK_MOD1_MASK ) );
-		add_filter_command( EXCLUDE_DECALS, "FilterDecals", Accelerator( 'D', (GdkModifierType)GDK_SHIFT_MASK ) );
+		add_filter_command( EXCLUDE_BOTCLIP, "FilterBotClips", Accelerator( 'M', GDK_MOD1_MASK ) );
+		add_filter_command( EXCLUDE_DECALS, "FilterDecals", Accelerator( 'D', GDK_SHIFT_MASK ) );
 	}
 	add_filter_command( EXCLUDE_FUNC_GROUPS, "FilterFuncGroups", accelerator_null() );
 

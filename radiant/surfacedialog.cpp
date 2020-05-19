@@ -1835,8 +1835,8 @@ void SurfaceInspector_registerPreferencesPage(){
 }
 
 void SurfaceInspector_registerCommands(){
-	GlobalCommands_insert( "TextureReset/Cap", FreeCaller<SurfaceInspector_ResetTexture>(), Accelerator( 'N', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), Accelerator( 'F', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "TextureReset/Cap", FreeCaller<SurfaceInspector_ResetTexture>(), Accelerator( 'N', GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "FitTexture", FreeCaller<SurfaceInspector_FitTexture>(), Accelerator( 'F', GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "FitTextureWidth", FreeCaller<SurfaceInspector_FaceFitWidth>() );
 	GlobalCommands_insert( "FitTextureHeight", FreeCaller<SurfaceInspector_FaceFitHeight>() );
 	GlobalCommands_insert( "FitTextureWidthOnly", FreeCaller<SurfaceInspector_FaceFitWidthOnly>() );

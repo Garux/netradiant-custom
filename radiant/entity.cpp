@@ -729,10 +729,10 @@ void Entity_registerShortcuts(){
 void Entity_Construct(){
 	GlobalCommands_insert( "EntityColorSet", FreeCaller<Entity_setColour>(), Accelerator( 'K' ) );
 	GlobalCommands_insert( "EntityColorNormalize", FreeCaller<Entity_normalizeColor>() );
-	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "EntitiesConnect", FreeCaller<Entity_connectSelected>(), Accelerator( 'K', GDK_CONTROL_MASK ) );
 	if ( g_pGameDescription->mGameType == "nexuiz" || g_pGameDescription->mGameType == "q1" )
-		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<Entity_moveSelectedPrimitivesToLast>(), Accelerator( 'M', (GdkModifierType)GDK_CONTROL_MASK ) );
+		GlobalCommands_insert( "EntitiesKillConnect", FreeCaller<Entity_killconnectSelected>(), Accelerator( 'K', GDK_SHIFT_MASK ) );
+	GlobalCommands_insert( "EntityMovePrimitivesToLast", FreeCaller<Entity_moveSelectedPrimitivesToLast>(), Accelerator( 'M', GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "EntityMovePrimitivesToFirst", FreeCaller<Entity_moveSelectedPrimitivesToFirst>() );
 	GlobalCommands_insert( "EntityUngroup", FreeCaller<Entity_ungroup>() );
 	GlobalCommands_insert( "EntityUngroupPrimitives", FreeCaller<Entity_ungroupSelectedPrimitives>() );

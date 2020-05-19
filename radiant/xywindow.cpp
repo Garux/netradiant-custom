@@ -2435,7 +2435,7 @@ typedef FreeCaller1<const IntImportCallback&, MSAAExport> MSAAExportCaller;
 
 void XYShow_registerCommands(){
 	GlobalToggles_insert( "ShowSize2d", FreeCaller<ToggleShowSizeInfo>(), ToggleItem::AddCallbackCaller( g_show_size_item ), Accelerator( 'J' ) );
-	GlobalToggles_insert( "ToggleCrosshairs", FreeCaller<ToggleShowCrosshair>(), ToggleItem::AddCallbackCaller( g_show_crosshair_item ), Accelerator( 'X', (GdkModifierType)GDK_SHIFT_MASK ) );
+	GlobalToggles_insert( "ToggleCrosshairs", FreeCaller<ToggleShowCrosshair>(), ToggleItem::AddCallbackCaller( g_show_crosshair_item ), Accelerator( 'X', GDK_SHIFT_MASK ) );
 	GlobalToggles_insert( "ToggleGrid", FreeCaller<ToggleShowGrid>(), ToggleItem::AddCallbackCaller( g_show_grid_item ), Accelerator( '0' ) );
 
 	GlobalToggles_insert( "ShowAngles", FreeCaller<ShowAnglesToggle>(), ToggleItem::AddCallbackCaller( g_show_angles ) );
@@ -2490,7 +2490,7 @@ void XYWindow_Construct(){
 	GlobalToggles_insert( "ToggleView", ToggleShown::ToggleCaller( g_xy_top_shown ), ToggleItem::AddCallbackCaller( g_xy_top_shown.m_item ) );
 	GlobalToggles_insert( "ToggleSideView", ToggleShown::ToggleCaller( g_yz_side_shown ), ToggleItem::AddCallbackCaller( g_yz_side_shown.m_item ) );
 	GlobalToggles_insert( "ToggleFrontView", ToggleShown::ToggleCaller( g_xz_front_shown ), ToggleItem::AddCallbackCaller( g_xz_front_shown.m_item ) );
-	GlobalCommands_insert( "NextView", FreeCaller<XY_NextView>(), Accelerator( GDK_KEY_Tab, (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "NextView", FreeCaller<XY_NextView>(), Accelerator( GDK_KEY_Tab, GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "ZoomIn", FreeCaller<XY_ZoomIn>(), Accelerator( GDK_KEY_Delete ) );
 	GlobalCommands_insert( "ZoomOut", FreeCaller<XY_ZoomOut>(), Accelerator( GDK_KEY_Insert ) );
 	GlobalCommands_insert( "ViewTop", FreeCaller<XY_Top>(), Accelerator( GDK_KEY_KP_7 ) );

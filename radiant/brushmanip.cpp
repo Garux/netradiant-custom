@@ -1505,8 +1505,8 @@ void Texdef_ToggleMoveVLock(){
 
 
 void Brush_registerCommands(){
-	GlobalToggles_insert( "TogTexLock", FreeCaller<Texdef_ToggleMoveLock>(), ToggleItem::AddCallbackCaller( g_texdef_movelock_item ), Accelerator( 'T', (GdkModifierType)GDK_SHIFT_MASK ) );
-	GlobalToggles_insert( "TogTexVertexLock", FreeCaller<Texdef_ToggleMoveVLock>(), ToggleItem::AddCallbackCaller( g_texdef_moveVlock_item ), accelerator_null() );
+	GlobalToggles_insert( "TogTexLock", FreeCaller<Texdef_ToggleMoveLock>(), ToggleItem::AddCallbackCaller( g_texdef_movelock_item ), Accelerator( 'T', GDK_SHIFT_MASK ) );
+	GlobalToggles_insert( "TogTexVertexLock", FreeCaller<Texdef_ToggleMoveVLock>(), ToggleItem::AddCallbackCaller( g_texdef_moveVlock_item ) );
 
 	GlobalCommands_insert( "BrushPrism", BrushPrefab::SetCaller( g_brushprism ) );
 	GlobalCommands_insert( "BrushCone", BrushPrefab::SetCaller( g_brushcone ) );
@@ -1514,16 +1514,16 @@ void Brush_registerCommands(){
 	GlobalCommands_insert( "BrushRock", BrushPrefab::SetCaller( g_brushrock ) );
 	GlobalCommands_insert( "BrushIcosahedron", BrushPrefab::SetCaller( g_brushicosahedron ) );
 
-	GlobalCommands_insert( "Brush3Sided", BrushMakeSided::SetCaller( g_brushmakesided3 ), Accelerator( '3', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush4Sided", BrushMakeSided::SetCaller( g_brushmakesided4 ), Accelerator( '4', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush5Sided", BrushMakeSided::SetCaller( g_brushmakesided5 ), Accelerator( '5', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush6Sided", BrushMakeSided::SetCaller( g_brushmakesided6 ), Accelerator( '6', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush7Sided", BrushMakeSided::SetCaller( g_brushmakesided7 ), Accelerator( '7', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush8Sided", BrushMakeSided::SetCaller( g_brushmakesided8 ), Accelerator( '8', (GdkModifierType)GDK_CONTROL_MASK ) );
-	GlobalCommands_insert( "Brush9Sided", BrushMakeSided::SetCaller( g_brushmakesided9 ), Accelerator( '9', (GdkModifierType)GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush3Sided", BrushMakeSided::SetCaller( g_brushmakesided3 ), Accelerator( '3', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush4Sided", BrushMakeSided::SetCaller( g_brushmakesided4 ), Accelerator( '4', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush5Sided", BrushMakeSided::SetCaller( g_brushmakesided5 ), Accelerator( '5', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush6Sided", BrushMakeSided::SetCaller( g_brushmakesided6 ), Accelerator( '6', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush7Sided", BrushMakeSided::SetCaller( g_brushmakesided7 ), Accelerator( '7', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush8Sided", BrushMakeSided::SetCaller( g_brushmakesided8 ), Accelerator( '8', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Brush9Sided", BrushMakeSided::SetCaller( g_brushmakesided9 ), Accelerator( '9', GDK_CONTROL_MASK ) );
 
-	GlobalCommands_insert( "MakeDetail", FreeCaller<Select_MakeDetail>(), Accelerator( 'D', (GdkModifierType)GDK_MOD1_MASK ) );
-	GlobalCommands_insert( "MakeStructural", FreeCaller<Select_MakeStructural>(), Accelerator( 'S', (GdkModifierType)GDK_MOD1_MASK ) );
+	GlobalCommands_insert( "MakeDetail", FreeCaller<Select_MakeDetail>(), Accelerator( 'D', GDK_MOD1_MASK ) );
+	GlobalCommands_insert( "MakeStructural", FreeCaller<Select_MakeStructural>(), Accelerator( 'S', GDK_MOD1_MASK ) );
 }
 
 void Brush_constructMenu( GtkMenu* menu ){
