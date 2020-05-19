@@ -182,8 +182,8 @@ void freeze_pointer( GtkWindow* window, GtkWidget* widget, MotionDeltaFunction f
 	//GdkGrabStatus status =
 	/* fixes cursor runaways during srsly quick drags in camera
 	drags with pressed buttons have no problem at all w/o this */
-	gdk_pointer_grab( GTK_WIDGET( window )->window, TRUE, mask, 0, cursor, GDK_CURRENT_TIME );
-	//gdk_window_set_cursor ( GTK_WIDGET( window )->window, cursor );
+	gdk_pointer_grab( gtk_widget_get_window( GTK_WIDGET( window ) ), TRUE, mask, 0, cursor, GDK_CURRENT_TIME );
+	//gdk_window_set_cursor ( gtk_widget_get_window( GTK_WIDGET( window ) ), cursor );
 	/* is needed to fix activating neighbor widgets, that happens, if using upper one */
 	gtk_grab_add( widget );
 
@@ -192,7 +192,7 @@ void freeze_pointer( GtkWindow* window, GtkWidget* widget, MotionDeltaFunction f
 	Sys_GetCursorPos( window, &recorded_x, &recorded_y );
 
 	/* using center for tracking for max safety */
-	gdk_window_get_origin( widget->window, &center_x, &center_y );
+	gdk_window_get_origin( gtk_widget_get_window( widget ), &center_x, &center_y );
 	center_y += widget->allocation.height / 2;
 	center_x += widget->allocation.width / 2;
 
@@ -224,7 +224,7 @@ void unfreeze_pointer( bool centerize ){
 	else{
 		Sys_SetCursorPos( m_window, recorded_x, recorded_y );
 	}
-//	gdk_window_set_cursor( GTK_WIDGET( m_window )->window, 0 );
+//	gdk_window_set_cursor( gtk_widget_get_window( GTK_WIDGET( m_window ) ), 0 );
 	gdk_pointer_ungrab( GDK_CURRENT_TIME );
 
 	gtk_grab_remove( m_widget );

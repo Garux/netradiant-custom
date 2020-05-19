@@ -308,7 +308,7 @@ static void motion( GtkWidget *widget, GdkEventMotion *event, gpointer data ){
 
 	if ( PtInRect( &rcGrid,pt ) ) {
 		GdkCursor *cursor = gdk_cursor_new( GDK_CROSS );
-		gdk_window_set_cursor( g_pWndPreview->window, cursor );
+		gdk_window_set_cursor( gtk_widget_get_window( g_pWndPreview ), cursor );
 		gdk_cursor_unref( cursor );
 
 		char Text[32];
@@ -334,7 +334,7 @@ static void motion( GtkWidget *widget, GdkEventMotion *event, gpointer data ){
 	}
 	else
 	{
-		gdk_window_set_cursor( g_pWndPreview->window, NULL );
+		gdk_window_set_cursor( gtk_widget_get_window( g_pWndPreview ), NULL );
 	}
 
 	g_UIGtkTable.m_pfn_glwidget_swap_buffers( g_pPreviewWidget );

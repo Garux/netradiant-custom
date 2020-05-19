@@ -100,7 +100,7 @@ GenericDialog::Raise()
    // Don't bother if not visible.
    if (gtk_widget_get_visible(_dialog))
    {
-      gdk_window_raise(_dialog->window);
+      gdk_window_raise(gtk_widget_get_window( _dialog ));
    }
 }
 
@@ -142,7 +142,7 @@ GenericDialog::Hide()
    {
       return;
    }
-   gdk_window_raise(_window->window);
+   gdk_window_raise(gtk_widget_get_window(_window));
 }
 
 /**

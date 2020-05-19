@@ -1833,7 +1833,7 @@ void EverySecondTimer_disable(){
 }
 
 gint window_realize_remove_decoration( GtkWidget* widget, gpointer data ){
-	gdk_window_set_decorations( widget->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
+	gdk_window_set_decorations( gtk_widget_get_window( widget ), (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
 	return FALSE;
 }
 
@@ -2832,9 +2832,9 @@ void MainFrame::SetActiveXY( XYWnd* p ){
 
 void MainFrame_toggleFullscreen(){
 	GtkWindow* wnd = MainFrame_getWindow();
-	if( gdk_window_get_state( GTK_WIDGET( wnd )->window ) & GDK_WINDOW_STATE_FULLSCREEN ){
+	if( gdk_window_get_state( gtk_widget_get_window( GTK_WIDGET( wnd ) ) ) & GDK_WINDOW_STATE_FULLSCREEN ){
 		//some portion of buttsex, because gtk_window_unfullscreen doesn't work correctly after calling some modal window
-		bool maximized = ( gdk_window_get_state( GTK_WIDGET( wnd )->window ) & GDK_WINDOW_STATE_MAXIMIZED );
+		bool maximized = ( gdk_window_get_state( gtk_widget_get_window( GTK_WIDGET( wnd ) ) ) & GDK_WINDOW_STATE_MAXIMIZED );
 		gtk_window_unfullscreen( wnd );
 		if( maximized ){
 			gtk_window_unmaximize( wnd );
@@ -2881,9 +2881,9 @@ private:
 		m_hSplitPos = gtk_paned_get_position( GTK_PANED( g_pParentWnd->m_hSplit ) );
 
 		int vSplitX, vSplitY, vSplit2X, vSplit2Y, hSplitX, hSplitY;
-		gdk_window_get_origin( g_pParentWnd->m_vSplit->window, &vSplitX, &vSplitY );
-		gdk_window_get_origin( g_pParentWnd->m_vSplit2->window, &vSplit2X, &vSplit2Y );
-		gdk_window_get_origin( g_pParentWnd->m_hSplit->window, &hSplitX, &hSplitY );
+		gdk_window_get_origin( gtk_widget_get_window( g_pParentWnd->m_vSplit ), &vSplitX, &vSplitY );
+		gdk_window_get_origin( gtk_widget_get_window( g_pParentWnd->m_vSplit2 ), &vSplit2X, &vSplit2Y );
+		gdk_window_get_origin( gtk_widget_get_window( g_pParentWnd->m_hSplit ), &hSplitX, &hSplitY );
 
 		vSplitY += m_vSplitPos;
 		vSplit2Y += m_vSplit2Pos;
@@ -3357,7 +3357,7 @@ void MainFrame::Create(){
 
 void MainFrame::SaveWindowInfo(){
 	//restore good state first
-	if( gdk_window_get_state( GTK_WIDGET( m_window )->window ) & GDK_WINDOW_STATE_ICONIFIED ){
+	if( gdk_window_get_state( gtk_widget_get_window( GTK_WIDGET( m_window ) ) ) & GDK_WINDOW_STATE_ICONIFIED ){
 		gtk_window_deiconify( m_window );
 	}
 	if( g_maximizeview.isMaximized() ){
@@ -3378,11 +3378,11 @@ void MainFrame::SaveWindowInfo(){
 		g_layout_globals.nCamHeight = gtk_paned_get_position( GTK_PANED( m_vSplit2 ) );
 	}
 
-	if( gdk_window_get_state( GTK_WIDGET( m_window )->window ) == 0 ){
+	if( gdk_window_get_state( gtk_widget_get_window( GTK_WIDGET( m_window ) ) ) == 0 ){
 		g_layout_globals.m_position = m_position_tracker.getPosition();
 	}
 
-	g_layout_globals.nState = gdk_window_get_state( GTK_WIDGET( m_window )->window );
+	g_layout_globals.nState = gdk_window_get_state( gtk_widget_get_window( GTK_WIDGET( m_window ) ) );
 }
 
 void MainFrame::Shutdown(){

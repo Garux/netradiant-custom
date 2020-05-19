@@ -28,7 +28,7 @@
 #include <gdk/gdkwin32.h>
 #include <shellapi.h>
 bool open_url( const char* url ){
-	return ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), "open", url, 0, 0, SW_SHOW ) > (HINSTANCE)32;
+	return ShellExecute( (HWND)GDK_WINDOW_HWND( gtk_widget_get_window( GTK_WIDGET( MainFrame_getWindow() ) ) ), "open", url, 0, 0, SW_SHOW ) > (HINSTANCE)32;
 }
 #endif
 

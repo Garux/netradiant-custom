@@ -1091,7 +1091,7 @@ void DoShaderView( const char *shaderFileName, const char *shaderName, bool exte
 	else if( external_editor && pathIsDir ){
 		if( g_TextEditor_editorCommand.empty() ){
 #ifdef WIN32
-			ShellExecute( (HWND)GDK_WINDOW_HWND( GTK_WIDGET( MainFrame_getWindow() )->window ), 0, pathFull.c_str(), 0, 0, SW_SHOWNORMAL );
+			ShellExecute( (HWND)GDK_WINDOW_HWND( gtk_widget_get_window( GTK_WIDGET( MainFrame_getWindow() ) ) ), 0, pathFull.c_str(), 0, 0, SW_SHOWNORMAL );
 #else
 			globalWarningStream() << "Failed to open '" << pathFull.c_str() << "'\nSet Shader Editor Command in preferences\n";
 #endif

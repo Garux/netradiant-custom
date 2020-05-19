@@ -123,7 +123,7 @@ void destroy_floating_window( GtkWindow* window ){
 }
 
 gint window_realize_remove_sysmenu( GtkWidget* widget, gpointer data ){
-	gdk_window_set_decorations( widget->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU ) );
+	gdk_window_set_decorations( gtk_widget_get_window( widget ), (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU ) );
 	return FALSE;
 }
 
@@ -150,7 +150,7 @@ GtkWindow* create_persistent_floating_window( const char* title, GtkWindow* main
 }
 
 gint window_realize_remove_minmax( GtkWidget* widget, gpointer data ){
-	gdk_window_set_decorations( widget->window, (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
+	gdk_window_set_decorations( gtk_widget_get_window( widget ), (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
 	return FALSE;
 }
 
