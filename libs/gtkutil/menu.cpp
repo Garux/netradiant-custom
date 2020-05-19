@@ -227,23 +227,13 @@ void accelerator_name( const Accelerator& accelerator, GString* gstring ){
 }
 
 void menu_item_set_accelerator( GtkMenuItem* item, Accelerator accelerator ){
-	GtkAccelLabel* accel_label = GTK_ACCEL_LABEL( gtk_bin_get_child( GTK_BIN( item ) ) );
-
-	g_free( accel_label->accel_string );
-	accel_label->accel_string = 0;
-
-	GString* gstring = g_string_new( accel_label->accel_string );
+	GString* gstring = g_string_new( nullptr );
 	g_string_append( gstring, "   " );
-
 	accelerator_name( accelerator, gstring );
 
+	GtkAccelLabel* accel_label = GTK_ACCEL_LABEL( gtk_bin_get_child( GTK_BIN( item ) ) );
 	g_free( accel_label->accel_string );
-	accel_label->accel_string = gstring->str;
-	g_string_free( gstring, FALSE );
-
-	if ( !accel_label->accel_string ) {
-		accel_label->accel_string = g_strdup( "" );
-	}
+	accel_label->accel_string = g_string_free( gstring, FALSE );
 
 	gtk_widget_queue_resize( GTK_WIDGET( accel_label ) );
 }

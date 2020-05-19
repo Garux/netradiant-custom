@@ -309,7 +309,7 @@ GenericPluginUI::WidgetControlCallback(GtkWidget *widget,
       for (; controllerIter != _widgetControlledByMap[controllee].end(); ++controllerIter)
       {
          // Dependence found; honor it.
-         if (!(GTK_TOGGLE_BUTTON(*controllerIter)->active))
+         if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(*controllerIter)))
          {
             sensitive = false;
             break;
@@ -320,7 +320,7 @@ GenericPluginUI::WidgetControlCallback(GtkWidget *widget,
       for (; controllerIter != _widgetAntiControlledByMap[controllee].end(); ++controllerIter)
       {
          // Anti-dependence found; honor it.
-         if (GTK_TOGGLE_BUTTON(*controllerIter)->active)
+         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(*controllerIter)))
          {
             sensitive = false;
             break;

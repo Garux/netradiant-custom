@@ -48,7 +48,7 @@
  * @param widgetName Name of the contained widget to enable/disable.
  */
 #define NamedToggleWidgetActive(widgetName) \
-   (GTK_TOGGLE_BUTTON(NamedWidget(widgetName))->active)
+   gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(NamedWidget(widgetName)))
 
 /**
  * Macro to read text from a widget inside the dialog, selected by name.

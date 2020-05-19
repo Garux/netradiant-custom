@@ -114,7 +114,7 @@ void queueDraw(){
 
 inline void spin_button_set_step( GtkSpinButton* spin, gfloat step ){
 #if 1
-	gtk_spin_button_get_adjustment( spin )->step_increment = step;
+	gtk_adjustment_set_step_increment( gtk_spin_button_get_adjustment( spin ), step );
 #else
 	GValue gvalue = GValue_default();
 	g_value_init( &gvalue, G_TYPE_DOUBLE );
@@ -1294,8 +1294,7 @@ void spin_button_set_value_no_signal( GtkSpinButton* spin, gdouble value ){
 }
 
 void spin_button_set_step_increment( GtkSpinButton* spin, gdouble value ){
-	GtkAdjustment* adjust = gtk_spin_button_get_adjustment( spin );
-	adjust->step_increment = value;
+	gtk_adjustment_set_step_increment( gtk_spin_button_get_adjustment( spin ), value );
 }
 
 void SurfaceInspector::Update(){

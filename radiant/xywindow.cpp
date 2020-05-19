@@ -917,7 +917,7 @@ void XYWnd::NewBrushDrag( int x, int y, bool square, bool cube ){
 int g_entityCreationOffset = 0;
 
 void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
-	const char* entity_name = gtk_label_get_text( GTK_LABEL( GTK_BIN( item )->child ) );
+	const char* entity_name = gtk_label_get_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( item ) ) ) );
 	if( g_bCamEntityMenu ){
 		const Vector3 viewvector = -Camera_getViewVector( *g_pParentWnd->GetCamWnd() );
 		const float offset_for_multiple = std::max( GetSnapGridSize(), 8.f ) * g_entityCreationOffset;
@@ -934,7 +934,7 @@ void entitycreate_activated( GtkMenuItem* item, gpointer user_data ){
 gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer user_data ) {
 	/* convert entities */
 	if ( event->button.button == 3 ) {
-		Scene_EntitySetClassname_Selected( gtk_label_get_text( GTK_LABEL( GTK_BIN( widget )->child ) ) );
+		Scene_EntitySetClassname_Selected( gtk_label_get_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( widget ) ) ) ) );
 		if( ( event->button.state & GDK_CONTROL_MASK ) == 0 ){
 			gtk_menu_popdown( XYWnd::m_mnuDrop );
 		}

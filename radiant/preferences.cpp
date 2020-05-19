@@ -608,7 +608,7 @@ void PreferencesDialog_addSettingsPage( const PreferenceGroupCallback& callback 
 }
 
 void Widget_updateDependency( GtkWidget* self, GtkWidget* toggleButton ){
-	gtk_widget_set_sensitive( self, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggleButton ) ) && GTK_WIDGET_IS_SENSITIVE( toggleButton ) );
+	gtk_widget_set_sensitive( self, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggleButton ) ) && gtk_widget_is_sensitive( toggleButton ) );
 }
 
 void ToggleButton_toggled_Widget_updateDependency( GtkWidget *toggleButton, GtkWidget* self ){

@@ -158,7 +158,7 @@ void MRU_Activate( std::size_t index ){
 			MRU_SetText( i, MRU_GetText( i + 1 ) );
 
 		if ( MRU_used == 0 ) {
-			gtk_label_set_text( GTK_LABEL( GTK_BIN( MRU_items[0] )->child ), "Recent Files" );
+			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( MRU_items[0] ) ) ), "Recent Files" );
 			gtk_widget_set_sensitive( GTK_WIDGET( MRU_items[0] ), FALSE );
 		}
 		else

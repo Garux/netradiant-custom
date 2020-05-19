@@ -1037,7 +1037,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 		for ( int i = 0; i < g_spawnflag_count; ++i )
 		{
 			GtkWidget* widget = GTK_WIDGET( g_entitySpawnflagsCheck[i] );
-			gtk_label_set_text( GTK_LABEL( GTK_BIN( widget )->child ), " " );
+			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( widget ) ) ), " " );
 			gtk_widget_hide( widget );
 			gtk_widget_ref( widget );
 			gtk_container_remove( GTK_CONTAINER( g_spawnflagsTable ), widget );
@@ -1060,7 +1060,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 							  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
 			gtk_widget_unref( widget );
 
-			gtk_label_set_text( GTK_LABEL( GTK_BIN( widget )->child ), str.c_str() );
+			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( widget ) ) ), str.c_str() );
 
 			if( const EntityClassAttribute* attribute = eclass->flagAttributes[spawn_table[i]] ){
 				EntityAttribute_setTooltip( widget, attribute->m_name.c_str(), attribute->m_description.c_str() );
@@ -1080,7 +1080,7 @@ void EntityClassList_selectEntityClass( EntityClass* eclass ){
 			GtkTreeView* view = g_entityClassList;
 			GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
 			gtk_tree_selection_select_path( gtk_tree_view_get_selection( view ), path );
-			if ( GTK_WIDGET_REALIZED( view ) ) {
+			if ( gtk_widget_get_realized( GTK_WIDGET( view ) ) ) {
 				gtk_tree_view_scroll_to_cell( view, path, 0, FALSE, 0, 0 );
 			}
 			gtk_tree_path_free( path );
@@ -1404,7 +1404,7 @@ static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpo
 			if ( toupper( text[0] ) == (int)code ) {
 				GtkTreePath* path = gtk_tree_model_get_path( model, &iter );
 				gtk_tree_selection_select_path( gtk_tree_view_get_selection( view ), path );
-				if ( GTK_WIDGET_REALIZED( view ) ) {
+				if ( gtk_widget_get_realized( GTK_WIDGET( view ) ) ) {
 					gtk_tree_view_scroll_to_cell( view, path, 0, FALSE, 0, 0 );
 				}
 				gtk_tree_path_free( path );
