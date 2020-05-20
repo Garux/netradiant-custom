@@ -23,8 +23,8 @@
 #define INCLUDED_GTKUTIL_CURSOR_H
 
 #include <glib.h>
-#include <gdk/gdkevents.h>
 #include <gtk/gtk.h>
+#include <gdk/gdk.h>
 
 #include "debugging/debugging.h"
 

@@ -22,7 +22,7 @@
 #include "windowobservers.h"
 
 #include <vector>
-#include <gdk/gdkevents.h>
+#include <gdk/gdk.h>
 #include "generic/bitfield.h"
 
 namespace

@@ -45,7 +45,7 @@ void MultiMonitor_constructPreferences( PreferencesPage& page ){
 #include "preferencesystem.h"
 #include "stringio.h"
 
-#include <gdk/gdkdisplay.h>
+#include <gdk/gdk.h>
 
 namespace
 {

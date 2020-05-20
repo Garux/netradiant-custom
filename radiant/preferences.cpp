@@ -78,8 +78,6 @@ void Mouse_registerPreferencesPage(){
    =========================================================
  */
 
-#include <map>
-
 inline const char* xmlAttr_getName( xmlAttrPtr attr ){
 	return reinterpret_cast<const char*>( attr->name );
 }

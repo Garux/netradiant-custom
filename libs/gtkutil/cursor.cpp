@@ -24,8 +24,7 @@
 #include "stream/textstream.h"
 
 #include <string.h>
-#include <gdk/gdkcursor.h>
-#include <gdk/gdkpixmap.h>
+#include <gdk/gdk.h>
 
 #if 0
 GdkCursor* create_blank_cursor(){
