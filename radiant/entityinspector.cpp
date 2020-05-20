@@ -33,24 +33,7 @@
 #include <map>
 #include <set>
 #include <gdk/gdkkeysyms.h>
-#include <gtk/gtktreemodel.h>
-#include <gtk/gtktreeview.h>
-#include <gtk/gtkcellrenderertext.h>
-#include <gtk/gtktreeselection.h>
-#include <gtk/gtkliststore.h>
-#include <gtk/gtktextview.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtktable.h>
-#include <gtk/gtktogglebutton.h>
-#include <gtk/gtkcheckbutton.h>
-#include <gtk/gtkhbox.h>
-#include <gtk/gtkvbox.h>
-#include <gtk/gtkvpaned.h>
-#include <gtk/gtkscrolledwindow.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtkcombobox.h>
-#include <gtk/gtkstock.h>
-
+#include <gtk/gtk.h>
 
 #include "os/path.h"
 #include "eclasslib.h"

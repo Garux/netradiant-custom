@@ -31,15 +31,7 @@
 
 #include "debugging/debugging.h"
 
-#include <gtk/gtkvbox.h>
-#include <gtk/gtkhbox.h>
-#include <gtk/gtkframe.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtktable.h>
-#include <gtk/gtkcombobox.h>
-#include <gtk/gtkbutton.h>
-#include <gtk/gtkspinbutton.h>
-#include <gtk/gtkcheckbutton.h>
+#include <gtk/gtk.h>
 
 #include "gtkutil/idledraw.h"
 #include "gtkutil/entry.h"

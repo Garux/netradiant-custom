@@ -25,20 +25,7 @@
 #include "generic/callback.h"
 #include "generic/arrayrange.h"
 #include "qerplugin.h"
-#include <gtk/gtkenums.h>
-
-typedef int gint;
-typedef gint gboolean;
-typedef struct _GdkEventAny GdkEventAny;
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkHBox GtkHBox;
-typedef struct _GtkVBox GtkVBox;
-typedef struct _GtkRadioButton GtkRadioButton;
-typedef struct _GtkFrame GtkFrame;
-typedef struct _GtkEntry GtkEntry;
-typedef struct _GtkButton GtkButton;
-typedef struct _GtkLabel GtkLabel;
-typedef struct _GtkTable GtkTable;
+#include <gtk/gtk.h>
 
 
 struct ModalDialog
@@ -58,15 +45,6 @@ struct ModalDialogButton
 	ModalDialog& m_dialog;
 	EMessageBoxReturn m_value;
 };
-
-typedef void ( *GCallback )( void );
-typedef void* gpointer;
-typedef struct _GtkWindow GtkWindow;
-typedef struct _GtkTable GtkTable;
-typedef struct _GtkButton GtkButton;
-typedef struct _GtkVBox GtkVBox;
-typedef struct _GtkHBox GtkHBox;
-typedef struct _GtkFrame GtkFrame;
 
 GtkWindow* create_fixedsize_modal_window( GtkWindow* parent, const char* title, int width, int height );
 
@@ -134,7 +112,6 @@ BrowsedPathEntry( const BrowseCallback& browse );
 
 GtkLabel* DialogLabel_new( const char* name );
 GtkTable* DialogRow_new( const char* name, GtkWidget* widget );
-typedef struct _GtkVBox GtkVBox;
 void DialogVBox_packRow( GtkVBox* vbox, GtkWidget* row );
 
 

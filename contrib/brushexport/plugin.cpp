@@ -24,7 +24,6 @@
 #include "qerplugin.h"
 
 #include <gtk/gtk.h>
-#include <gtk/gtktreeview.h>
 
 #include "debugging/debugging.h"
 #include "string/string.h"

@@ -22,7 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_CONTAINER_H )
 #define INCLUDED_GTKUTIL_CONTAINER_H
 
-#include <gtk/gtkcontainer.h>
+#include <gtk/gtk.h>
 
 inline GtkWidget* container_add_widget( GtkContainer* container, GtkWidget* widget ){
 	gtk_container_add( container, widget );

@@ -22,7 +22,7 @@
 #if !defined( INCLUDED_GTKUTIL_WINDOW_H )
 #define INCLUDED_GTKUTIL_WINDOW_H
 
-#include <gtk/gtkwindow.h>
+#include <gtk/gtk.h>
 
 #include "debugging/debugging.h"
 #include "generic/callback.h"
@@ -47,7 +47,6 @@ gboolean persistent_floating_window_delete( GtkWindow* floating, GdkEvent *event
 
 void window_remove_minmax( GtkWindow* window );
 
-typedef struct _GtkScrolledWindow GtkScrolledWindow;
 GtkScrolledWindow* create_scrolled_window( GtkPolicyType hscrollbar_policy, GtkPolicyType vscrollbar_policy, int border = 0 );
 
 

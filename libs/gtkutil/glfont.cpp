@@ -706,7 +706,7 @@ GLFont *glfont_create( const char* font_string ){
 
 #include <pango/pangoft2.h>
 #include <pango/pango-utils.h>
-#include <gtk/gtksettings.h>
+#include <gtk/gtk.h>
 
 PangoFont* tryFont( const char* font_string, PangoFontMap *fontmap, PangoContext *context, PangoFontDescription*& font_desc ){
 	pango_font_description_free( font_desc );

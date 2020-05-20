@@ -41,7 +41,7 @@
 
 #include <map>
 
-#include <gtk/gtktearoffmenuitem.h>
+#include <gtk/gtk.h>
 
 #include "stream/textfilestream.h"
 #include "cmdlib.h"

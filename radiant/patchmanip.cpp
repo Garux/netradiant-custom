@@ -972,13 +972,7 @@ void Patch_constructMenu( GtkMenu* menu ){
 }
 
 
-#include <gtk/gtkbox.h>
-#include <gtk/gtktable.h>
-#include <gtk/gtktogglebutton.h>
-#include <gtk/gtkradiobutton.h>
-#include <gtk/gtkcombobox.h>
-#include <gtk/gtkspinbutton.h>
-#include <gtk/gtklabel.h>
+#include <gtk/gtk.h>
 #include "gtkutil/dialog.h"
 #include "gtkutil/widget.h"
 

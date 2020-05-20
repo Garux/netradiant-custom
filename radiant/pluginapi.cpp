@@ -27,8 +27,6 @@
 #include "generic/callback.h"
 #include "math/vector.h"
 
-#include "gtkmisc.h"
-
 #include "camwindow.h"
 
 #include "mainframe.h"

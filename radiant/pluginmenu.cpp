@@ -23,8 +23,7 @@
 
 #include "stream/textstream.h"
 
-#include <gtk/gtkmenu.h>
-#include <gtk/gtkmenuitem.h>
+#include <gtk/gtk.h>
 
 #include "gtkutil/pointer.h"
 #include "gtkutil/menu.h"

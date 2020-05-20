@@ -25,11 +25,7 @@
 
 #include <list>
 #include <vector>
-#include <gtk/gtkwidget.h>
-#include <gtk/gtkwindow.h>
-#include <gtk/gtkfilechooser.h>
-#include <gtk/gtkfilechooserdialog.h>
-#include <gtk/gtkstock.h>
+#include <gtk/gtk.h>
 
 #include "string/string.h"
 #include "stream/stringstream.h"

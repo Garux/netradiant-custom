@@ -83,7 +83,7 @@ void clipboard_paste( ClipboardPasteFunc paste ){
 
 #else
 
-#include <gtk/gtkclipboard.h>
+#include <gtk/gtk.h>
 
 enum
 {

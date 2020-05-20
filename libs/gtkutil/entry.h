@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <gtk/gtkentry.h>
+#include <gtk/gtk.h>
 
 inline void entry_set_string( GtkEntry* entry, const char* string ){
 	gtk_entry_set_text( entry, string );

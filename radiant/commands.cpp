@@ -27,10 +27,9 @@
 #include <map>
 #include "string/string.h"
 #include "versionlib.h"
+#include <gtk/gtk.h>
 #include "gtkutil/accelerator.h"
 #include "gtkutil/messagebox.h"
-#include <gtk/gtktreeselection.h>
-#include <gtk/gtkbutton.h>
 #include "gtkmisc.h"
 
 struct ShortcutValue{
@@ -149,12 +148,6 @@ void connect_accelerator( const char *name ){
 
 
 #include <cctype>
-
-#include <gtk/gtkbox.h>
-#include <gtk/gtkliststore.h>
-#include <gtk/gtktreemodel.h>
-#include <gtk/gtktreeview.h>
-#include <gtk/gtkcellrenderertext.h>
 
 #include "gtkutil/dialog.h"
 #include "mainframe.h"

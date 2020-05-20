@@ -32,10 +32,7 @@
 
 #include <vector>
 
-#include <gtk/gtknotebook.h>
-#include <gtk/gtktextview.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtkscrolledwindow.h>
+#include <gtk/gtk.h>
 
 #include "gtkutil/widget.h"
 #include "gtkutil/accelerator.h"
@@ -46,7 +43,6 @@
 #include "commands.h"
 
 
-#include <gtk/gtkwidget.h>
 #include "gtkutil/window.h"
 
 class GroupDlg

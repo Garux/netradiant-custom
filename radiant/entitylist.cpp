@@ -23,13 +23,7 @@
 
 #include "iselection.h"
 
-#include <gtk/gtktreemodel.h>
-#include <gtk/gtktreeview.h>
-#include <gtk/gtktreeselection.h>
-#include <gtk/gtkcellrenderertext.h>
-#include <gtk/gtkcheckbutton.h>
-#include <gtk/gtkvbox.h>
-#include <gtk/gtkhbox.h>
+#include <gtk/gtk.h>
 
 #include "string/string.h"
 #include "scenelib.h"
@@ -295,7 +289,6 @@ gint graph_tree_model_compare_name( GtkTreeModel *model, GtkTreeIter *a, GtkTree
 }
 
 /* search */
-#include <gtk/gtkstock.h>
 static gboolean tree_view_search_equal_func( GtkTreeModel* model, gint column, const gchar* key, GtkTreeIter* iter, gpointer search_from_start ) {
 	scene::Node* node;
 	gtk_tree_model_get( model, iter, column, (gpointer*)&node, -1 );

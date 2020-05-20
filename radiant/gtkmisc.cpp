@@ -34,9 +34,7 @@
 
 #include "gtkmisc.h"
 
-#include <gtk/gtkcolorseldialog.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtkfontsel.h>
+#include <gtk/gtk.h>
 
 #include "math/vector.h"
 #include "os/path.h"
@@ -47,6 +45,13 @@
 #include "gtkutil/toolbar.h"
 #include "commands.h"
 
+
+void process_gui(){
+	while ( gtk_events_pending() )
+	{
+		gtk_main_iteration();
+	}
+}
 
 // =============================================================================
 // Misc stuff

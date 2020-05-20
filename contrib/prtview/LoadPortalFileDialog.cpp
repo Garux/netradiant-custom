@@ -23,7 +23,6 @@
 #include "LoadPortalFileDialog.h"
 
 #include <gtk/gtk.h>
-#include <gtkutil/pointer.h>
 #include "stream/stringstream.h"
 #include "convert.h"
 #include "gtkutil/pointer.h"

@@ -31,14 +31,7 @@
 #if !defined( INCLUDED_GTKMISC_H )
 #define INCLUDED_GTKMISC_H
 
-#include <gtk/gtkmain.h>
-
-inline void process_gui(){
-	while ( gtk_events_pending() )
-	{
-		gtk_main_iteration();
-	}
-}
+void process_gui();
 
 void command_connect_accelerator( const char* commandName );
 void command_disconnect_accelerator( const char* commandName );
@@ -63,7 +56,7 @@ GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, 
 // this DOES NOT set up the shortcut using command_connect_accelerator
 GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName );
 
-
+typedef struct _GtkWidget GtkWidget;
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
 bool color_dialog( GtkWidget *parent, Vector3& color, const char* title = "Choose Color" );

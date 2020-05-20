@@ -27,7 +27,7 @@
 
 #include "igl.h"
 
-#include <gtk/gtkdrawingarea.h>
+#include <gtk/gtk.h>
 #include <gtk/gtkglwidget.h>
 
 #include "pointer.h"

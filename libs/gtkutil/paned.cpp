@@ -21,8 +21,7 @@
 
 #include "paned.h"
 
-#include <gtk/gtkhpaned.h>
-#include <gtk/gtkvpaned.h>
+#include <gtk/gtk.h>
 
 #include "frame.h"
 

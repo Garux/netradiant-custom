@@ -24,15 +24,9 @@
 
 #include <glib.h>
 #include <gdk/gdkevents.h>
-#include <gtk/gtkwidget.h>
-#include <gtk/gtkwindow.h>
-#include <gtk/gtkmain.h>
+#include <gtk/gtk.h>
 
 #include "debugging/debugging.h"
-
-typedef struct _GdkCursor GdkCursor;
-typedef struct _GtkWidget GtkWidget;
-typedef struct _GtkWindow GtkWindow;
 
 #if 0
 GdkCursor* create_blank_cursor();

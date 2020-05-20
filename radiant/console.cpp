@@ -22,10 +22,7 @@
 #include "console.h"
 
 #include <time.h>
-#include <gtk/gtktextbuffer.h>
-#include <gtk/gtktextview.h>
-#include <gtk/gtkmenuitem.h>
-#include <gtk/gtkscrolledwindow.h>
+#include <gtk/gtk.h>
 
 #include "gtkutil/accelerator.h"
 #include "gtkutil/messagebox.h"
@@ -106,7 +103,6 @@ gboolean destroy_set_null( GtkWindow* widget, GtkWidget** p ){
 
 WidgetFocusPrinter g_consoleWidgetFocusPrinter( "console" );
 
-#include <gtk/gtkvbox.h>
 
 GtkWidget* Console_constructWindow( GtkWindow* toplevel ){
 	GtkWidget* scr = gtk_scrolled_window_new( 0, 0 );

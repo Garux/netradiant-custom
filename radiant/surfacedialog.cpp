@@ -35,15 +35,8 @@
 #include "iundo.h"
 #include "iselection.h"
 
-#include <gtk/gtkhbox.h>
-#include <gtk/gtkvbox.h>
-#include <gtk/gtkframe.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtktable.h>
-#include <gtk/gtkbutton.h>
-#include <gtk/gtkspinbutton.h>
+#include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <gtk/gtkcheckbutton.h> //Shamus: For Textool
 
 #include "signal/isignal.h"
 #include "generic/object.h"

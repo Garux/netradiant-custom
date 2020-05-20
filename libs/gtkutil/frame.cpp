@@ -21,7 +21,7 @@
 
 #include "frame.h"
 
-#include <gtk/gtkframe.h>
+#include <gtk/gtk.h>
 
 GtkFrame* create_framed_widget( GtkWidget* widget ){
 	GtkFrame* frame = GTK_FRAME( gtk_frame_new( 0 ) );

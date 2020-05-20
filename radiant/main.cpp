@@ -69,7 +69,7 @@
 
 #include "iundo.h"
 
-#include <gtk/gtkmain.h>
+#include <gtk/gtk.h>
 
 #include "cmdlib.h"
 #include "os/file.h"

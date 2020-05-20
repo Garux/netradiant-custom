@@ -19,7 +19,6 @@
 
 #include "AboutDialog.h"
 #include <gtk/gtk.h>
-#include <gtkutil/pointer.h>
 #include "version.h"
 #include "gtkutil/pointer.h"
 

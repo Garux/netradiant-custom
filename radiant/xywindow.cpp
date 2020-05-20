@@ -39,8 +39,7 @@
 #include "image.h"
 #include "gtkutil/messagebox.h"
 
-#include <gtk/gtklabel.h>
-#include <gtk/gtkmenuitem.h>
+#include <gtk/gtk.h>
 
 #include "generic/callback.h"
 #include "string/string.h"

@@ -1,5 +1,5 @@
 #include "filterbar.h"
-#include <gtk/gtktoolbar.h>
+#include <gtk/gtk.h>
 #include "gtkmisc.h"
 #include "gtkutil/widget.h"
 #include "stream/stringstream.h"

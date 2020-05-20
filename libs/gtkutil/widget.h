@@ -23,12 +23,10 @@
 #define INCLUDED_GTKUTIL_WIDGET_H
 
 #include <list>
-#include <gtk/gtkwidget.h>
+#include <gtk/gtk.h>
 #include "generic/callback.h"
 #include "warnings.h"
 #include "debugging/debugging.h"
-
-#include <gtk/gtkmain.h>
 
 inline bool widget_is_visible( GtkWidget* widget ){
 	//return GTK_WIDGET_VISIBLE( widget ) != FALSE;

@@ -41,11 +41,6 @@
 #include <vector>
 
 #include <gtk/gtk.h>
-#include <gtk/gtkrange.h>
-#include <gtk/gtkframe.h>
-#include <gtk/gtkhbox.h>
-#include <gtk/gtkvbox.h>
-#include <gtk/gtkvscrollbar.h>
 
 #include "signal/signal.h"
 #include "math/vector.h"

@@ -25,8 +25,7 @@
 
 #include <map>
 #include <set>
-#include <gtk/gtkwindow.h>
-#include <gtk/gtkaccelgroup.h>
+#include <gtk/gtk.h>
 
 #include "generic/callback.h"
 #include "generic/bitfield.h"
