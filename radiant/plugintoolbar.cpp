@@ -81,8 +81,8 @@ inline GtkToolbarChildType gtktoolbarchildtype_for_toolbarbuttontype( IToolbarBu
 	return (GtkToolbarChildType)0;
 }
 
-void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, GtkSignalFunc handler, gpointer data ){
-	GtkWidget* widget = gtk_toolbar_append_element( toolbar, gtktoolbarchildtype_for_toolbarbuttontype( type ), 0, text, tooltip, "", GTK_WIDGET( new_plugin_image( icon ) ), handler, data );
+void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, GCallback callback, gpointer data ){
+	GtkWidget* widget = gtk_toolbar_append_element( toolbar, gtktoolbarchildtype_for_toolbarbuttontype( type ), 0, text, tooltip, "", GTK_WIDGET( new_plugin_image( icon ) ), callback, data );
 	if( type != IToolbarButton::eSpace ){
 		gtk_widget_set_can_focus( widget, FALSE );
 		gtk_widget_set_can_default( widget, FALSE );
@@ -94,7 +94,7 @@ void ActivateToolbarButton( GtkWidget *widget, gpointer data ){
 }
 
 void PlugInToolbar_AddButton( GtkToolbar* toolbar, const IToolbarButton* button ){
-	toolbar_insert( toolbar, button->getImage(), button->getText(), button->getTooltip(), button->getType(), GTK_SIGNAL_FUNC( ActivateToolbarButton ), reinterpret_cast<gpointer>( const_cast<IToolbarButton*>( button ) ) );
+	toolbar_insert( toolbar, button->getImage(), button->getText(), button->getTooltip(), button->getType(), G_CALLBACK( ActivateToolbarButton ), reinterpret_cast<gpointer>( const_cast<IToolbarButton*>( button ) ) );
 }
 
 GtkToolbar* g_plugin_toolbar = 0;

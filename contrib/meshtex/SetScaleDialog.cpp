@@ -116,7 +116,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    // will only be active when it is checked.
 
    applybutton = gtk_check_button_new_with_label(DIALOG_SET_SCALE_S_ACTIVE_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "s_apply", applybutton);
+   g_object_set_data(G_OBJECT(_dialog), "s_apply", applybutton);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(applybutton), TRUE);
    gtk_widget_show(applybutton);
 
@@ -154,14 +154,14 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_widget_show(hbox);
 
    button = gtk_radio_button_new_with_label(NULL, DIALOG_SET_SCALE_TILES_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "s_tiling", button);
+   g_object_set_data(G_OBJECT(_dialog), "s_tiling", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_widget_show(button);
 
    UIInstance().RegisterWidgetDependence(applybutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "s_tiles", entry);
+   g_object_set_data(G_OBJECT(_dialog), "s_tiles", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 50, -2);
@@ -178,7 +178,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    button = gtk_radio_button_new_with_label(
       gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
                              DIALOG_SET_SCALE_NATURAL_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "s_natural", button);
+   g_object_set_data(G_OBJECT(_dialog), "s_natural", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
    gtk_widget_show(button);
@@ -186,7 +186,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(applybutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "s_scale", entry);
+   g_object_set_data(G_OBJECT(_dialog), "s_scale", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 50, -2);
@@ -228,7 +228,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(applybutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "col_num_align", entry);
+   g_object_set_data(G_OBJECT(_dialog), "col_num_align", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 25, -2);
@@ -240,7 +240,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    button = gtk_radio_button_new_with_label(
       gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "col_max_align", button);
+   g_object_set_data(G_OBJECT(_dialog), "col_max_align", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
    gtk_widget_show(button);
 
@@ -253,7 +253,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    // Widgets for specifying the reference row & usage.
 
    refbutton = gtk_check_button_new_with_label(DIALOG_SET_SCALE_S_REF_ROW_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "row_ref", refbutton);
+   g_object_set_data(G_OBJECT(_dialog), "row_ref", refbutton);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(refbutton), TRUE);
    gtk_widget_show(refbutton);
 
@@ -281,7 +281,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(refbutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "row_num_ref", entry);
+   g_object_set_data(G_OBJECT(_dialog), "row_num_ref", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 25, -2);
@@ -294,7 +294,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    button = gtk_radio_button_new_with_label(
       gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "row_max_ref", button);
+   g_object_set_data(G_OBJECT(_dialog), "row_max_ref", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
    gtk_widget_show(button);
 
@@ -306,7 +306,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_widget_show(hbox);
 
    button = gtk_check_button_new_with_label(DIALOG_SET_SCALE_REF_TOTAL_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "row_ref_total", button);
+   g_object_set_data(G_OBJECT(_dialog), "row_ref_total", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
    gtk_widget_show(button);
@@ -319,7 +319,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    // will only be active when it is checked.
 
    applybutton = gtk_check_button_new_with_label(DIALOG_SET_SCALE_T_ACTIVE_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "t_apply", applybutton);
+   g_object_set_data(G_OBJECT(_dialog), "t_apply", applybutton);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(applybutton), TRUE);
    gtk_widget_show(applybutton);
 
@@ -357,14 +357,14 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_widget_show(hbox);
 
    button = gtk_radio_button_new_with_label(NULL, DIALOG_SET_SCALE_TILES_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "t_tiling", button);
+   g_object_set_data(G_OBJECT(_dialog), "t_tiling", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_widget_show(button);
 
    UIInstance().RegisterWidgetDependence(applybutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "t_tiles", entry);
+   g_object_set_data(G_OBJECT(_dialog), "t_tiles", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 50, -2);
@@ -381,7 +381,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    button = gtk_radio_button_new_with_label(
       gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
                              DIALOG_SET_SCALE_NATURAL_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "t_natural", button);
+   g_object_set_data(G_OBJECT(_dialog), "t_natural", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
    gtk_widget_show(button);
@@ -389,7 +389,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(applybutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "t_scale", entry);
+   g_object_set_data(G_OBJECT(_dialog), "t_scale", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 50, -2);
@@ -431,7 +431,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(applybutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "row_num_align", entry);
+   g_object_set_data(G_OBJECT(_dialog), "row_num_align", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 25, -2);
@@ -443,7 +443,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    button = gtk_radio_button_new_with_label(
       gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "row_max_align", button);
+   g_object_set_data(G_OBJECT(_dialog), "row_max_align", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
    gtk_widget_show(button);
 
@@ -456,7 +456,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    // Widgets for specifying the reference column & usage.
 
    refbutton = gtk_check_button_new_with_label(DIALOG_SET_SCALE_T_REF_COL_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "col_ref", refbutton);
+   g_object_set_data(G_OBJECT(_dialog), "col_ref", refbutton);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(refbutton), TRUE);
    gtk_widget_show(refbutton);
 
@@ -484,7 +484,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(refbutton, button);
 
    entry = gtk_entry_new();
-   gtk_object_set_data(GTK_OBJECT(_dialog), "col_num_ref", entry);
+   g_object_set_data(G_OBJECT(_dialog), "col_num_ref", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
    gtk_widget_set_usize(entry, 25, -2);
@@ -497,7 +497,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    button = gtk_radio_button_new_with_label(
       gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "col_max_ref", button);
+   g_object_set_data(G_OBJECT(_dialog), "col_max_ref", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
    gtk_widget_show(button);
 
@@ -509,7 +509,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_widget_show(hbox);
 
    button = gtk_check_button_new_with_label(DIALOG_SET_SCALE_REF_TOTAL_OPT_LABEL);
-   gtk_object_set_data(GTK_OBJECT(_dialog), "col_ref_total", button);
+   g_object_set_data(G_OBJECT(_dialog), "col_ref_total", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
    gtk_widget_show(button);

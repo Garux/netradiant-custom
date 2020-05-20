@@ -1678,7 +1678,7 @@ GtkWidget* create_main_dialog(){
 	label = gtk_label_new( "Snap to grid:" );
 	gtk_widget_show( label );
 	gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, TRUE, 0 );
-	gtk_object_set_data( GTK_OBJECT( dlg ), "snap_text", label );
+	g_object_set_data( G_OBJECT( dlg ), "snap_text", label );
 
 	adj = gtk_adjustment_new( 8, 0, 256, 1, 10, 0 );
 	g_signal_connect( G_OBJECT( adj ), "value_changed", G_CALLBACK( extents_snaptogrid_spin ), &SP );
