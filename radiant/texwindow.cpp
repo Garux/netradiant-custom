@@ -1940,7 +1940,7 @@ void TextureBrowser_toggleSearchButton(){
 		gtk_widget_show_all( g_TextureBrowser.m_search_button );
 	}
 	else {
-		gtk_widget_hide_all( g_TextureBrowser.m_search_button );
+		gtk_widget_hide( g_TextureBrowser.m_search_button );
 	}
 }
 

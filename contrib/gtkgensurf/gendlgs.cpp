@@ -724,14 +724,14 @@ static void main_go( GtkWidget *widget, gpointer data ){
 	if ( NH < 1 || NH > MAX_ROWS ) {
 		sprintf( Text, "The number of divisions must be > 0 and no greater than %d.", MAX_ROWS );
 		g_FuncTable.m_pfnMessageBox( g_pWnd, Text, "GenSurf", eMB_OK, eMB_ICONWARNING );
-		gtk_notebook_set_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
+		gtk_notebook_set_current_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
 		return;
 	}
 
 	if ( NV < 1 || NV > MAX_ROWS ) {
 		sprintf( Text, "The number of divisions must be > 0 and no greater than %d.", MAX_ROWS );
 		g_FuncTable.m_pfnMessageBox( g_pWnd, Text, "GenSurf", eMB_OK, eMB_ICONWARNING );
-		gtk_notebook_set_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
+		gtk_notebook_set_current_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
 		return;
 	}
 
@@ -739,7 +739,7 @@ static void main_go( GtkWidget *widget, gpointer data ){
 		g_FuncTable.m_pfnMessageBox( g_pWnd, "The \"lower-left\" values must be less than "
 											 "the corresponding \"upper-right\" values in "
 											 "the \"Extent\" box.","GenSurf", eMB_OK, eMB_ICONWARNING );
-		gtk_notebook_set_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
+		gtk_notebook_set_current_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
 		return;
 	}
 
@@ -747,13 +747,13 @@ static void main_go( GtkWidget *widget, gpointer data ){
 		g_FuncTable.m_pfnMessageBox( g_pWnd,"The \"lower-left\" values must be less than "
 											"the corresponding \"upper-right\" values in "
 											"the \"Extent\" box.","GenSurf", eMB_OK, eMB_ICONWARNING );
-		gtk_notebook_set_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
+		gtk_notebook_set_current_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
 		return;
 	}
 
 	if ( !strlen( Texture[Game][0] ) ) {
 		g_FuncTable.m_pfnMessageBox( g_pWnd, "You must supply a texture name.", "GenSurf", eMB_OK, eMB_ICONWARNING );
-		gtk_notebook_set_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
+		gtk_notebook_set_current_page( GTK_NOTEBOOK( notebook ), EXTENTS_TAB );
 		return;
 	}
 

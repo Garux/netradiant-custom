@@ -826,7 +826,7 @@ GtkWindow* PrefsDlg::BuildDialog(){
 		}
 	}
 
-	gtk_notebook_set_page( GTK_NOTEBOOK( m_notebook ), 0 );
+	gtk_notebook_set_current_page( GTK_NOTEBOOK( m_notebook ), 0 );
 
 	return dialog;
 }

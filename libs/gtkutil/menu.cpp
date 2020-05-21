@@ -126,9 +126,9 @@ GtkCheckMenuItem* create_check_menu_item_with_mnemonic( GtkMenu* menu, const cha
 GtkRadioMenuItem* new_radio_menu_item_with_mnemonic( GSList** group, const char* mnemonic, const Callback& callback ){
 	GtkRadioMenuItem* item = GTK_RADIO_MENU_ITEM( gtk_radio_menu_item_new_with_mnemonic( *group, mnemonic ) );
 	if ( *group == 0 ) {
-		gtk_check_menu_item_set_state( GTK_CHECK_MENU_ITEM( item ), TRUE );
+		gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM( item ), TRUE );
 	}
-	*group = gtk_radio_menu_item_group( item );
+	*group = gtk_radio_menu_item_get_group( item );
 	gtk_widget_show( GTK_WIDGET( item ) );
 	check_menu_item_connect_callback( GTK_CHECK_MENU_ITEM( item ), callback );
 	return item;
