@@ -1796,7 +1796,7 @@ void Selection_SnapToGrid(){
 }
 
 
-static gint qe_every_second( gpointer data ){
+static gboolean qe_every_second( gpointer data ){
 	GdkModifierType mask;
 
 	gdk_window_get_pointer( 0, 0, 0, &mask );
@@ -1812,13 +1812,13 @@ guint s_qe_every_second_id = 0;
 
 void EverySecondTimer_enable(){
 	if ( s_qe_every_second_id == 0 ) {
-		s_qe_every_second_id = gtk_timeout_add( 1000, qe_every_second, 0 );
+		s_qe_every_second_id = g_timeout_add( 1000, qe_every_second, 0 );
 	}
 }
 
 void EverySecondTimer_disable(){
 	if ( s_qe_every_second_id != 0 ) {
-		gtk_timeout_remove( s_qe_every_second_id );
+		g_source_remove( s_qe_every_second_id );
 		s_qe_every_second_id = 0;
 	}
 }

@@ -471,7 +471,7 @@ static xmlSAXHandler saxParser = {
 
 
 guint s_routine_id = 0;
-static gint watchbsp_routine( gpointer data ){
+static gboolean watchbsp_routine( gpointer data ){
 	reinterpret_cast<CWatchBSP*>( data )->RoutineProcessing();
 	return TRUE;
 }
@@ -491,7 +491,7 @@ void CWatchBSP::Reset(){
 	}
 	m_eState = EIdle;
 	if ( s_routine_id != 0 ) {
-		gtk_timeout_remove( s_routine_id );
+		g_source_remove( s_routine_id );
 		s_routine_id = 0;
 	}
 }
@@ -544,7 +544,7 @@ void CWatchBSP::DoEBeginStep(){
 		}
 	}
 	m_eState = EBeginStep;
-	s_routine_id = gtk_timeout_add( 25, watchbsp_routine, this );
+	s_routine_id = g_timeout_add( 25, watchbsp_routine, this );
 }
 
 
