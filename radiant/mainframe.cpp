@@ -2566,11 +2566,7 @@ void Manipulators_constructToolbar( GtkToolbar* toolbar ){
 }
 
 GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
-	GtkToolbar* toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
-	gtk_orientable_set_orientation( GTK_ORIENTABLE( toolbar ), GTK_ORIENTATION_HORIZONTAL );
-	gtk_toolbar_set_style( toolbar, GTK_TOOLBAR_ICONS );
-//	gtk_toolbar_set_show_arrow( toolbar, TRUE );
-	gtk_widget_show( GTK_WIDGET( toolbar ) );
+	GtkToolbar* toolbar = toolbar_new();
 
 	File_constructToolbar( toolbar );
 	toolbar_append_space( toolbar );
@@ -2618,7 +2614,7 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	}
 
 	// TODO: call light inspector
-	//GtkButton* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector");
+	//GtkToolButton* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector");
 
 	toolbar_append_space( toolbar );
 	toolbar_append_button( toolbar, "Refresh Models", "refresh_models.png", "RefreshReferences" );

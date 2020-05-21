@@ -30,6 +30,7 @@
 #include "stream/stringstream.h"
 #include "gtkutil/image.h"
 #include "gtkutil/container.h"
+#include "gtkutil/toolbar.h"
 
 #include "mainframe.h"
 #include "plugin.h"
@@ -65,27 +66,34 @@ GtkImage* new_plugin_image( const char* filename ){
 	return image_new_missing();
 }
 
-inline GtkToolbarChildType gtktoolbarchildtype_for_toolbarbuttontype( IToolbarButton::EType type ){
+void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, GCallback callback, gpointer data ){
 	switch ( type )
 	{
 	case IToolbarButton::eSpace:
-		return GTK_TOOLBAR_CHILD_SPACE;
+		toolbar_append_space( toolbar );
+		return;
 	case IToolbarButton::eButton:
-		return GTK_TOOLBAR_CHILD_BUTTON;
+		{
+			GtkToolButton* button = GTK_TOOL_BUTTON( gtk_tool_button_new( GTK_WIDGET( new_plugin_image( icon ) ), text ) );
+			g_signal_connect( G_OBJECT( button ), "clicked", callback, data );
+			toolbar_append( toolbar, GTK_TOOL_ITEM( button ), tooltip );
+		}
+		return;
 	case IToolbarButton::eToggleButton:
-		return GTK_TOOLBAR_CHILD_TOGGLEBUTTON;
+		{
+			GtkToggleToolButton* button = GTK_TOGGLE_TOOL_BUTTON( gtk_toggle_tool_button_new() );
+			gtk_tool_button_set_icon_widget( GTK_TOOL_BUTTON( button ), GTK_WIDGET( new_plugin_image( icon ) ) );
+			gtk_tool_button_set_label( GTK_TOOL_BUTTON( button ), text );
+			g_signal_connect( G_OBJECT( button ), "toggled", callback, data );
+			toolbar_append( toolbar, GTK_TOOL_ITEM( button ), tooltip );
+		}
+		return;
 	case IToolbarButton::eRadioButton:
-		return GTK_TOOLBAR_CHILD_RADIOBUTTON;
-	}
-	ERROR_MESSAGE( "invalid toolbar button type" );
-	return (GtkToolbarChildType)0;
-}
-
-void toolbar_insert( GtkToolbar *toolbar, const char* icon, const char* text, const char* tooltip, IToolbarButton::EType type, GCallback callback, gpointer data ){
-	GtkWidget* widget = gtk_toolbar_append_element( toolbar, gtktoolbarchildtype_for_toolbarbuttontype( type ), 0, text, tooltip, "", GTK_WIDGET( new_plugin_image( icon ) ), callback, data );
-	if( type != IToolbarButton::eSpace ){
-		gtk_widget_set_can_focus( widget, FALSE );
-		gtk_widget_set_can_default( widget, FALSE );
+		ERROR_MESSAGE( "IToolbarButton::eRadioButton not implemented" );
+		return;
+	default:
+		ERROR_MESSAGE( "invalid toolbar button type" );
+		return;
 	}
 }
 
@@ -125,17 +133,7 @@ void PluginToolbar_clear(){
 }
 
 GtkToolbar* create_plugin_toolbar(){
-	GtkToolbar *toolbar;
-
-	toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
-	gtk_orientable_set_orientation( GTK_ORIENTABLE( toolbar ), GTK_ORIENTATION_HORIZONTAL );
-	gtk_toolbar_set_style( toolbar, GTK_TOOLBAR_ICONS );
-//	gtk_toolbar_set_show_arrow( toolbar, TRUE );
-	gtk_widget_show( GTK_WIDGET( toolbar ) );
-
-	g_plugin_toolbar = toolbar;
-
+	g_plugin_toolbar = toolbar_new();
 	PluginToolbar_populate();
-
-	return toolbar;
+	return g_plugin_toolbar;
 }

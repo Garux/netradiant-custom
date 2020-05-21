@@ -2082,22 +2082,21 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		TextureBrowser_constructViewMenu( menu_view );
 		gtk_menu_set_title( menu_view, "View" );
 
-		toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
+		toolbar = toolbar_new();
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( toolbar ), FALSE, FALSE, 0 );
 
 		//view menu button
-		GtkButton* button = toolbar_append_button( toolbar, "View", "texbro_view.png", PointerCaller<GtkMenu, Popup_View_Menu>( menu_view ) );
-		gtk_widget_set_size_request( GTK_WIDGET( button ), 24, 24 ); // 24 is minimal here for non scissored icon with any gtk theme
+		GtkToolButton* button = toolbar_append_button( toolbar, "View", "texbro_view.png", PointerCaller<GtkMenu, Popup_View_Menu>( menu_view ) );
+//		gtk_widget_set_size_request( GTK_WIDGET( button ), 24, 24 ); // 24 is minimal here for non scissored icon with any gtk theme
 
 		//show detached menu over floating tex bro
 		gtk_menu_attach_to_widget( menu_view, GTK_WIDGET( button ), NULL );
 
 		button = toolbar_append_button( toolbar, "Find / Replace...", "texbro_gtk-find-and-replace.png", "FindReplaceTextures" );
-		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
+//		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
 
 		button = toolbar_append_button( toolbar, "Flush & Reload Shaders", "texbro_refresh.png", "RefreshShaders" );
-		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
-		gtk_widget_show( GTK_WIDGET( toolbar ) );
+//		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
 	}
 	{ // filter entry
 		GtkWidget* entry = g_TextureBrowser.m_filter_entry = gtk_entry_new();
@@ -2177,8 +2176,8 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 			gtk_menu_set_title( menu_tags, "Tags" );
 			TextureBrowser_constructTagsMenu( menu_tags );
 
-			GtkButton* button = toolbar_append_button( toolbar, "Tags", "texbro_tags.png", PointerCaller<GtkMenu, Popup_View_Menu>( menu_tags ) );
-			gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
+			GtkToolButton* button = toolbar_append_button( toolbar, "Tags", "texbro_tags.png", PointerCaller<GtkMenu, Popup_View_Menu>( menu_tags ) );
+//			gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
 
 			//show detached menu over floating tex bro and main wnd...
 			gtk_menu_attach_to_widget( menu_tags, GTK_WIDGET( button ), NULL );

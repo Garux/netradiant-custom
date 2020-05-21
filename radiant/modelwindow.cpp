@@ -1273,12 +1273,11 @@ GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
 	gtk_widget_show( vbox );
 
 	{ // menu bar
-		GtkToolbar* toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
+		GtkToolbar* toolbar = toolbar_new();
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( toolbar ), FALSE, FALSE, 0 );
 
-		GtkButton* button = toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<ModelBrowser_constructTree>() );
-		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
-		gtk_widget_show( GTK_WIDGET( toolbar ) );
+		GtkToolButton* button = toolbar_append_button( toolbar, "Reload Model Folders Tree View", "texbro_refresh.png", FreeCaller<ModelBrowser_constructTree>() );
+//		gtk_widget_set_size_request( GTK_WIDGET( button ), 22, 22 );
 	}
 	{ // TreeView
 		GtkWidget* scr = gtk_scrolled_window_new( NULL, NULL );

@@ -213,13 +213,10 @@ gboolean Hide_button_press( GtkWidget *widget, GdkEventButton *event, gpointer d
 }
 
 GtkToolbar* create_filter_toolbar(){
-			GtkToolbar* toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
-			gtk_toolbar_set_style( toolbar, GTK_TOOLBAR_ICONS );
-//			gtk_toolbar_set_show_arrow( toolbar, TRUE );
-			gtk_widget_show( GTK_WIDGET( toolbar ) );
+			GtkToolbar* toolbar = toolbar_new();
 			g_signal_connect( G_OBJECT( toolbar ), "enter_notify_event", G_CALLBACK( ToggleActions0 ), 0 );
 
-			GtkToggleButton* button;
+			GtkToggleToolButton* button;
 
 			toolbar_append_toggle_button( toolbar, "World (ALT + 1)", "f-world.png", "FilterWorldBrushes" );
 

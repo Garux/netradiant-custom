@@ -92,11 +92,11 @@ GtkMenuItem* create_menu_item_with_mnemonic( GtkMenu* menu, const char *mnemonic
 	return create_menu_item_with_mnemonic( menu, mnemonic, command );
 }
 
-GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
+GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
 	return toolbar_append_button( toolbar, description, icon, GlobalCommands_find( commandName ) );
 }
 
-GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
+GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const char* commandName ){
 	return toolbar_append_toggle_button( toolbar, description, icon, GlobalToggles_find( commandName ) );
 }
 

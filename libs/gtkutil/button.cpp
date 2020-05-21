@@ -41,6 +41,9 @@ void button_connect_callback( GtkButton* button, const Callback& callback ){
 	g_signal_connect_closure( G_OBJECT( button ), "clicked", create_cclosure( G_CALLBACK( clicked_closure_callback ), callback ), FALSE );
 #endif
 }
+void button_connect_callback( GtkToolButton* button, const Callback& callback ){
+	g_signal_connect_swapped( G_OBJECT( button ), "clicked", G_CALLBACK( callback.getThunk() ), callback.getEnvironment() );
+}
 
 guint toggle_button_connect_callback( GtkToggleButton* button, const Callback& callback ){
 #if 1
@@ -48,6 +51,11 @@ guint toggle_button_connect_callback( GtkToggleButton* button, const Callback& c
 #else
 	guint handler = g_signal_connect_closure( G_OBJECT( button ), "toggled", create_cclosure( G_CALLBACK( clicked_closure_callback ), callback ), TRUE );
 #endif
+	g_object_set_data( G_OBJECT( button ), "handler", gint_to_pointer( handler ) );
+	return handler;
+}
+guint toggle_button_connect_callback( GtkToggleToolButton* button, const Callback& callback ){
+	guint handler = g_signal_connect_swapped( G_OBJECT( button ), "toggled", G_CALLBACK( callback.getThunk() ), callback.getEnvironment() );
 	g_object_set_data( G_OBJECT( button ), "handler", gint_to_pointer( handler ) );
 	return handler;
 }
@@ -67,6 +75,12 @@ void toggle_button_set_active_no_signal( GtkToggleButton* button, gboolean activ
 	//globalOutputStream() << " handler found: " << found << "\n";
 	g_signal_handler_block( G_OBJECT( button ), handler_id );
 	gtk_toggle_button_set_active( button, active );
+	g_signal_handler_unblock( G_OBJECT( button ), handler_id );
+}
+void toggle_button_set_active_no_signal( GtkToggleToolButton* button, gboolean active ){
+	guint handler_id = gpointer_to_int( g_object_get_data( G_OBJECT( button ), "handler" ) );
+	g_signal_handler_block( G_OBJECT( button ), handler_id );
+	gtk_toggle_tool_button_set_active( button, active );
 	g_signal_handler_unblock( G_OBJECT( button ), handler_id );
 }
 

@@ -24,16 +24,19 @@
 
 #include "generic/callbackfwd.h"
 
-typedef struct _GtkButton GtkButton;
-typedef struct _GtkToggleButton GtkToggleButton;
+typedef struct _GtkToolItem GtkToolItem;
+typedef struct _GtkToolButton GtkToolButton;
+typedef struct _GtkToggleToolButton GtkToggleToolButton;
 typedef struct _GtkToolbar GtkToolbar;
 class Command;
 class Toggle;
 
+GtkToolbar* toolbar_new();
 void toolbar_append_space( GtkToolbar* toolbar );
-GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
-GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Command& command );
-GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
-GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Toggle& toggle );
+void toolbar_append( GtkToolbar* toolbar, GtkToolItem* button, const char* description );
+GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
+GtkToolButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Command& command );
+GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
+GtkToggleToolButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Toggle& toggle );
 
 #endif
