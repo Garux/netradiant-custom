@@ -1068,7 +1068,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 
 	RefreshCamListCombo();
 
-	gtk_entry_set_editable( GTK_ENTRY( GTK_COMBO( g_pCamListCombo )->entry ), FALSE );
+	gtk_editable_set_editable( GTK_EDITABLE( GTK_COMBO( g_pCamListCombo )->entry ), FALSE );
 	g_signal_connect( G_OBJECT( GTK_COMBO( g_pCamListCombo )->entry ), "changed", G_CALLBACK( ci_camlist_changed ), NULL );
 
 	// -------------------------- //
@@ -1100,7 +1100,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 
 	RefreshPathListCombo();
 
-	gtk_entry_set_editable( GTK_ENTRY( GTK_COMBO( g_pPathListCombo )->entry ), FALSE );
+	gtk_editable_set_editable( GTK_EDITABLE( GTK_COMBO( g_pPathListCombo )->entry ), FALSE );
 	g_signal_connect( G_OBJECT( GTK_COMBO( g_pPathListCombo )->entry ), "changed", G_CALLBACK( ci_pathlist_changed ), NULL );
 
 	// -------------------------- //

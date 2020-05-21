@@ -807,7 +807,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 					}
 					{
 						GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-						//  gtk_entry_set_editable (GTK_ENTRY (entry), false);
+						//  gtk_editable_set_editable( GTK_EDITABLE( entry ), FALSE );
 						gtk_widget_show( GTK_WIDGET( entry ) );
 						gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( entry ), TRUE, TRUE, 0 );
 						AddDialogData( *entry, m_strName );

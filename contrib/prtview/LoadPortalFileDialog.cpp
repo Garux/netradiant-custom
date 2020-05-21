@@ -134,7 +134,7 @@ int DoLoadPortalFileDialog(){
 
 	entry = gtk_entry_new();
 	gtk_widget_show( entry );
-//	gtk_entry_set_editable( GTK_ENTRY( entry ), FALSE );
+//	gtk_editable_set_editable( GTK_EDITABLE( entry ), FALSE );
 	gtk_box_pack_start( GTK_BOX( vbox ), entry, FALSE, FALSE, 0 );
 
 	hbox = gtk_hbox_new( FALSE, 5 );
