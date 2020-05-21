@@ -408,8 +408,8 @@ void SurfaceInspector_GridChange(){
 // increment * scale = gridsize
 static void OnBtnMatchGrid( GtkWidget *widget, gpointer data ){
 	float hscale, vscale;
-	hscale = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
-	vscale = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
+	hscale = static_cast<float>( gtk_spin_button_get_value( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
+	vscale = static_cast<float>( gtk_spin_button_get_value( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
 
 	if ( hscale == 0.0f || vscale == 0.0f ) {
 		globalErrorStream() << "ERROR: unexpected scale == 0.0f\n";
@@ -458,11 +458,11 @@ void SurfaceInspector_ProjectTexture( GtkWidget* widget, EProjectTexture type ){
 	texdef_t texdef;
 	if( widget ){ //gui buttons
 		getSurfaceInspector().exportData();
-		texdef.shift[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hshiftIncrement.m_spin ) );
-		texdef.shift[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vshiftIncrement.m_spin ) );
-		texdef.scale[0] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
-		texdef.scale[1] = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
-		texdef.rotate = static_cast<float>( gtk_spin_button_get_value_as_float( getSurfaceInspector().m_rotateIncrement.m_spin ) );
+		texdef.shift[0] = static_cast<float>( gtk_spin_button_get_value( getSurfaceInspector().m_hshiftIncrement.m_spin ) );
+		texdef.shift[1] = static_cast<float>( gtk_spin_button_get_value( getSurfaceInspector().m_vshiftIncrement.m_spin ) );
+		texdef.scale[0] = static_cast<float>( gtk_spin_button_get_value( getSurfaceInspector().m_hscaleIncrement.m_spin ) );
+		texdef.scale[1] = static_cast<float>( gtk_spin_button_get_value( getSurfaceInspector().m_vscaleIncrement.m_spin ) );
+		texdef.rotate = static_cast<float>( gtk_spin_button_get_value( getSurfaceInspector().m_rotateIncrement.m_spin ) );
 	}
 	else{ //bind
 		texdef.scale[0] = texdef.scale[1] = Texdef_getDefaultTextureScale();
@@ -1390,11 +1390,11 @@ void SurfaceInspector::ApplyShader(){
 void SurfaceInspector::ApplyTexdef(){
 	texdef_t shiftScaleRotate;
 
-	shiftScaleRotate.shift[0] = static_cast<float>( gtk_spin_button_get_value_as_float( m_hshiftIncrement.m_spin ) );
-	shiftScaleRotate.shift[1] = static_cast<float>( gtk_spin_button_get_value_as_float( m_vshiftIncrement.m_spin ) );
-	shiftScaleRotate.scale[0] = static_cast<float>( gtk_spin_button_get_value_as_float( m_hscaleIncrement.m_spin ) );
-	shiftScaleRotate.scale[1] = static_cast<float>( gtk_spin_button_get_value_as_float( m_vscaleIncrement.m_spin ) );
-	shiftScaleRotate.rotate = static_cast<float>( gtk_spin_button_get_value_as_float( m_rotateIncrement.m_spin ) );
+	shiftScaleRotate.shift[0] = static_cast<float>( gtk_spin_button_get_value( m_hshiftIncrement.m_spin ) );
+	shiftScaleRotate.shift[1] = static_cast<float>( gtk_spin_button_get_value( m_vshiftIncrement.m_spin ) );
+	shiftScaleRotate.scale[0] = static_cast<float>( gtk_spin_button_get_value( m_hscaleIncrement.m_spin ) );
+	shiftScaleRotate.scale[1] = static_cast<float>( gtk_spin_button_get_value( m_vscaleIncrement.m_spin ) );
+	shiftScaleRotate.rotate = static_cast<float>( gtk_spin_button_get_value( m_rotateIncrement.m_spin ) );
 
 	TextureProjection projection;
 //Shamus: This is the other place that screws up, it seems, since it doesn't seem to do the
@@ -1407,7 +1407,7 @@ void SurfaceInspector::ApplyTexdef(){
 }
 #endif
 void SurfaceInspector::ApplyTexdef_HShift(){
-	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_hshiftIncrement.m_spin ) );
+	const float value = static_cast<float>( gtk_spin_button_get_value( m_hshiftIncrement.m_spin ) );
 	StringOutputStream command;
 	command << "textureProjectionSetSelected -hShift " << value;
 	UndoableCommand undo( command.c_str() );
@@ -1415,7 +1415,7 @@ void SurfaceInspector::ApplyTexdef_HShift(){
 }
 
 void SurfaceInspector::ApplyTexdef_VShift(){
-	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_vshiftIncrement.m_spin ) );
+	const float value = static_cast<float>( gtk_spin_button_get_value( m_vshiftIncrement.m_spin ) );
 	StringOutputStream command;
 	command << "textureProjectionSetSelected -vShift " << value;
 	UndoableCommand undo( command.c_str() );
@@ -1423,7 +1423,7 @@ void SurfaceInspector::ApplyTexdef_VShift(){
 }
 
 void SurfaceInspector::ApplyTexdef_HScale(){
-	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_hscaleIncrement.m_spin ) );
+	const float value = static_cast<float>( gtk_spin_button_get_value( m_hscaleIncrement.m_spin ) );
 	StringOutputStream command;
 	command << "textureProjectionSetSelected -hScale " << value;
 	UndoableCommand undo( command.c_str() );
@@ -1431,7 +1431,7 @@ void SurfaceInspector::ApplyTexdef_HScale(){
 }
 
 void SurfaceInspector::ApplyTexdef_VScale(){
-	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_vscaleIncrement.m_spin ) );
+	const float value = static_cast<float>( gtk_spin_button_get_value( m_vscaleIncrement.m_spin ) );
 	StringOutputStream command;
 	command << "textureProjectionSetSelected -vScale " << value;
 	UndoableCommand undo( command.c_str() );
@@ -1439,7 +1439,7 @@ void SurfaceInspector::ApplyTexdef_VScale(){
 }
 
 void SurfaceInspector::ApplyTexdef_Rotation(){
-	const float value = static_cast<float>( gtk_spin_button_get_value_as_float( m_rotateIncrement.m_spin ) );
+	const float value = static_cast<float>( gtk_spin_button_get_value( m_rotateIncrement.m_spin ) );
 	StringOutputStream command;
 	command << "textureProjectionSetSelected -rotation " << static_cast<float>( float_to_integer( value * 100.f ) ) / 100.f;;
 	UndoableCommand undo( command.c_str() );

@@ -194,7 +194,7 @@ void FloatSpinnerImport( GtkSpinButton& widget, float value ){
 	gtk_spin_button_set_value( &widget, value );
 }
 void FloatSpinnerExport( GtkSpinButton& widget, const FloatImportCallback& importCallback ){
-	importCallback( float(gtk_spin_button_get_value_as_float( &widget ) ) );
+	importCallback( static_cast<float>( gtk_spin_button_get_value( &widget ) ) );
 }
 typedef ImportExport<GtkSpinButton, float, FloatSpinnerImport, FloatSpinnerExport> FloatSpinnerImportExport;
 
