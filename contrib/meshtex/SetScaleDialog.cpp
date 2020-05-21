@@ -164,7 +164,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "s_tiles", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 50, -2);
+   gtk_widget_set_size_request(entry, 50, -1);
    gtk_widget_set_sensitive(entry, FALSE);
    gtk_widget_show(entry);
 
@@ -189,7 +189,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "s_scale", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 50, -2);
+   gtk_widget_set_size_request(entry, 50, -1);
    gtk_widget_set_sensitive(entry, TRUE);
    gtk_widget_show(entry);
 
@@ -231,7 +231,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "col_num_align", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 25, -2);
+   gtk_widget_set_size_request(entry, 25, -1);
    gtk_widget_show(entry);
 
    UIInstance().RegisterWidgetDependence(applybutton, entry);
@@ -284,7 +284,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "row_num_ref", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 25, -2);
+   gtk_widget_set_size_request(entry, 25, -1);
    gtk_widget_show(entry);
 
    UIInstance().RegisterWidgetDependence(applybutton, entry);
@@ -367,7 +367,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "t_tiles", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 50, -2);
+   gtk_widget_set_size_request(entry, 50, -1);
    gtk_widget_set_sensitive(entry, FALSE);
    gtk_widget_show(entry);
 
@@ -392,7 +392,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "t_scale", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "1");
    gtk_box_pack_end(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 50, -2);
+   gtk_widget_set_size_request(entry, 50, -1);
    gtk_widget_set_sensitive(entry, TRUE);
    gtk_widget_show(entry);
 
@@ -434,7 +434,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "row_num_align", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 25, -2);
+   gtk_widget_set_size_request(entry, 25, -1);
    gtk_widget_show(entry);
 
    UIInstance().RegisterWidgetDependence(applybutton, entry);
@@ -487,7 +487,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    g_object_set_data(G_OBJECT(_dialog), "col_num_ref", entry);
    gtk_entry_set_text(GTK_ENTRY(entry), "0");
    gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
-   gtk_widget_set_usize(entry, 25, -2);
+   gtk_widget_set_size_request(entry, 25, -1);
    gtk_widget_show(entry);
 
    UIInstance().RegisterWidgetDependence(applybutton, entry);
@@ -525,7 +525,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
 
    button = gtk_button_new_with_label(DIALOG_CANCEL_BUTTON);
    gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_widget_set_usize(button, 60, -2);
+   gtk_widget_set_size_request(button, 60, -1);
    gtk_widget_show(button);
 
    CreateCancelButtonCallback(button);
@@ -534,7 +534,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
 
    button = gtk_button_new_with_label(DIALOG_APPLY_BUTTON);
    gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 10);
-   gtk_widget_set_usize (button, 60, -2);
+   gtk_widget_set_size_request (button, 60, -1);
    gtk_widget_show(button);
 
    CreateApplyButtonCallback(button);
@@ -543,7 +543,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
 
    button = gtk_button_new_with_label(DIALOG_OK_BUTTON);
    gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-   gtk_widget_set_usize (button, 60, -2);
+   gtk_widget_set_size_request (button, 60, -1);
    gtk_widget_show(button);
 
    CreateOkButtonCallback(button);

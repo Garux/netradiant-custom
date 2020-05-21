@@ -153,7 +153,7 @@ int DoLoadPortalFileDialog(){
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( change_clicked ), entry );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 
 	hbox = gtk_hbox_new( FALSE, 5 );
 	gtk_widget_show( hbox );
@@ -164,14 +164,14 @@ int DoLoadPortalFileDialog(){
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
 						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDCANCEL ) );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 
 	button = gtk_button_new_with_label( "OK" );
 	gtk_widget_show( button );
 	gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
 						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 
 	strcpy( portals.fn, GlobalRadiant().getMapName() );
 	char* fn = strrchr( portals.fn, '.' );

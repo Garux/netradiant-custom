@@ -1488,7 +1488,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table2 ), entry, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "wavelength", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &WaveLength );
 
@@ -1497,7 +1497,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table2 ), entry, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "amplitude", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Amplitude );
 
@@ -1506,7 +1506,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table2 ), entry, 1, 2, 2, 3,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "roughness", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Roughness );
 
@@ -1517,7 +1517,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table2 ), spin, 1, 2, 3, 4,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( spin, 60, -2 );
+	gtk_widget_set_size_request( spin, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "random", spin );
 
 	vbox = gtk_vbox_new( FALSE, 5 );
@@ -1588,7 +1588,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "hmin", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Hll );
 
@@ -1597,7 +1597,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 3, 4, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "hmax", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Hur );
 
@@ -1606,7 +1606,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 2, 3,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "vmin", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Vll );
 
@@ -1615,7 +1615,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 3, 4, 2, 3,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "vmax", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Vur );
 
@@ -1651,7 +1651,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), spin, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( spin, 60, -2 );
+	gtk_widget_set_size_request( spin, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "nh", spin );
 
 	adj = gtk_adjustment_new( 8, 1, MAX_ROWS, 1, 10, 0 );
@@ -1661,7 +1661,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), spin, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( spin, 60, -2 );
+	gtk_widget_set_size_request( spin, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "nv", spin );
 
 	check = gtk_check_button_new_with_label( "Use Bezier patches" );
@@ -1681,7 +1681,7 @@ GtkWidget* create_main_dialog(){
 	spin = gtk_spin_button_new( GTK_ADJUSTMENT( adj ), 1, 0 );
 	gtk_widget_show( spin );
 	gtk_box_pack_start( GTK_BOX( vbox ), spin, FALSE, TRUE, 0 );
-	gtk_widget_set_usize( spin, 60, -2 );
+	gtk_widget_set_size_request( spin, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "sp", spin );
 	// ^Fishman - End of Snap to grid code.
 
@@ -1743,7 +1743,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "z01", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Z01 );
 
@@ -1752,7 +1752,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "z00", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Z00 );
 
@@ -1761,7 +1761,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 3, 4, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "z11", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Z11 );
 
@@ -1770,7 +1770,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 3, 4, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "z10", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &Z10 );
 
@@ -1826,14 +1826,14 @@ GtkWidget* create_main_dialog(){
 	button = gtk_button_new_with_label( "Browse..." );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), button, FALSE, FALSE, 0 );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "bmp_file_browse", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( bitmap_browse ), NULL );
 
 	button = gtk_button_new_with_label( "Reload" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), button, FALSE, FALSE, 0 );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "bmp_reload", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( bitmap_reload ), NULL );
 
@@ -1871,7 +1871,7 @@ GtkWidget* create_main_dialog(){
 	entry = gtk_entry_new();
 	gtk_widget_show( entry );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), entry, FALSE, FALSE, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "bmp_black", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &gbmp.black_value );
 
@@ -1884,7 +1884,7 @@ GtkWidget* create_main_dialog(){
 	entry = gtk_entry_new();
 	gtk_widget_show( entry );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), entry, FALSE, FALSE, 0 );
-	gtk_widget_set_usize( entry, 50, -2 );
+	gtk_widget_set_size_request( entry, 50, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "bmp_white", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( doublevariable_entryfocusout ), &gbmp.white_value );
 
@@ -1943,7 +1943,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), spin, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
 					  (GtkAttachOptions) ( GTK_EXPAND ), 0, 0 );
-	gtk_widget_set_usize( spin, 60, -2 );
+	gtk_widget_set_size_request( spin, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "fix_value", spin );
 	g_signal_connect( G_OBJECT( spin ), "focus_out_event", G_CALLBACK( fix_value_entryfocusout ), NULL );
 
@@ -1952,7 +1952,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "fix_range", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( fix_range_entryfocusout ), NULL );
 
@@ -1961,7 +1961,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 2, 3,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "fix_rate", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( fix_rate_entryfocusout ), NULL );
 
@@ -1970,7 +1970,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "fix_free", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( fix_free ), NULL );
 
@@ -1979,7 +1979,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), button, 2, 3, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "fix_freeall", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( fix_freeall ), NULL );
 
@@ -2024,7 +2024,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "texture1", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( texture_entryfocusout ), GINT_TO_POINTER( 0 ) );
 
@@ -2033,7 +2033,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "texture2", entry );
 	g_signal_connect( G_OBJECT( entry ), "focus_out_event", G_CALLBACK( texture_entryfocusout ), GINT_TO_POINTER( 1 ) );
 
@@ -2042,7 +2042,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 2, 3,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "texture3", entry );
 
 	hbox2 = gtk_hbox_new( FALSE, 5 );
@@ -2082,7 +2082,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 0, 1, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "texoffsetx", entry );
 
 	entry = gtk_entry_new();
@@ -2090,7 +2090,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "texoffsety", entry );
 
 	entry = gtk_entry_new();
@@ -2098,7 +2098,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 2, 3, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "texscalex", entry );
 
 	entry = gtk_entry_new();
@@ -2106,7 +2106,7 @@ GtkWidget* create_main_dialog(){
 	gtk_table_attach( GTK_TABLE( table ), entry, 3, 4, 1, 2,
 					  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 					  (GtkAttachOptions) ( GTK_FILL ), 0, 0 );
-	gtk_widget_set_usize( entry, 60, -2 );
+	gtk_widget_set_size_request( entry, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "texscaley", entry );
 
 
@@ -2137,7 +2137,7 @@ GtkWidget* create_main_dialog(){
 	button = gtk_button_new_with_label( "OK" );
 	gtk_widget_show( button );
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, TRUE, 0 );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 	g_object_set_data( G_OBJECT( dlg ), "go", button );
 	g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( main_go ), NULL );
 

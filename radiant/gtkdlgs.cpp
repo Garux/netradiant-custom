@@ -772,14 +772,14 @@ class TextEditor
 		gtk_box_pack_end( GTK_BOX( hbox ), m_button, FALSE, FALSE, 0 );
 		g_signal_connect( G_OBJECT( m_button ), "clicked",
 						G_CALLBACK( editor_close ), this );
-		gtk_widget_set_usize( m_button, 60, -2 );
+		gtk_widget_set_size_request( m_button, 60, -1 );
 
 		m_button = gtk_button_new_with_label( "Save" );
 		gtk_widget_show( m_button );
 		gtk_box_pack_end( GTK_BOX( hbox ), m_button, FALSE, FALSE, 0 );
 		g_signal_connect( G_OBJECT( m_button ), "clicked",
 						G_CALLBACK( editor_save ), this );
-		gtk_widget_set_usize( m_button, 60, -2 );
+		gtk_widget_set_size_request( m_button, 60, -1 );
 	}
 	static void editor_close( GtkWidget *widget, TextEditor* self ){
 		gtk_widget_hide( self->m_window );

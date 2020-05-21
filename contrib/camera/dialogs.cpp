@@ -1243,7 +1243,7 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_widget_show( hbox );
 
 	w = gtk_scrolled_window_new( NULL, NULL );
-	gtk_widget_set_usize( w, 0, 150 );
+	gtk_widget_set_size_request( w, 0, 150 );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( w ), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	gtk_box_pack_start( GTK_BOX( hbox ), w, TRUE, TRUE, 0 );
 	gtk_widget_show( w );

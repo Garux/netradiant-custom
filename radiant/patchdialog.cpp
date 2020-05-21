@@ -612,7 +612,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 								gtk_table_attach( table, GTK_WIDGET( combo ), 0, 1, 1, 2,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
 												  (GtkAttachOptions)( 0 ), 0, 0 );
-								gtk_widget_set_usize( GTK_WIDGET( combo ), 60, -1 );
+								gtk_widget_set_size_request( GTK_WIDGET( combo ), 60, -1 );
 								m_pRowCombo = combo;
 							}
 
@@ -625,7 +625,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 								gtk_table_attach( table, GTK_WIDGET( combo ), 1, 2, 1, 2,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
 												  (GtkAttachOptions)( 0 ), 0, 0 );
-								gtk_widget_set_usize( GTK_WIDGET( combo ), 60, -1 );
+								gtk_widget_set_size_request( GTK_WIDGET( combo ), 60, -1 );
 								m_pColCombo = combo;
 							}
 						}
@@ -851,7 +851,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFlipX ), 0 );
-							gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+							gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 						}
 						{
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Vertical Stretch Step" ) );
@@ -868,7 +868,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
 							g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFlipY ), 0 );
-							gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+							gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 						}
 						{
 							GtkLabel* label = GTK_LABEL( gtk_label_new( "Rotate Step" ) );
@@ -884,7 +884,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 0, 1,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							g_object_set_data( G_OBJECT( window ), "hshift_entry", entry );
 							// we fill in this data, if no patch is selected the widgets are unmodified when the inspector is raised
 							// so we need to have at least one initialisation somewhere
@@ -899,7 +899,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 0, 1,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 16, -1 );
 							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
@@ -908,7 +908,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 1, 2,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.shift[1] );
 
 							GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -8192, 8192, 1, 1, 0 ) );
@@ -920,7 +920,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 1, 2,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 16, -1 );
 							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
@@ -929,7 +929,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 2, 3,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.scale[0] );
 
 							GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -1000, 1000, 1, 1, 0 ) );
@@ -941,7 +941,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 2, 3,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 16, -1 );
 							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
@@ -950,7 +950,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 3, 4,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.scale[1] );
 
 							GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -1000, 1000, 1, 1, 0 ) );
@@ -962,7 +962,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 3, 4,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 16, -1 );
 							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 						{
@@ -971,7 +971,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( entry ), 0, 1, 4, 5,
 											  (GtkAttachOptions)( GTK_FILL ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( entry ), 50, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( entry ), 50, -1 );
 							entry_set_float( entry, g_pi_globals.rotate );
 
 							GtkAdjustment* adj = GTK_ADJUSTMENT( gtk_adjustment_new( 0, -1000, 1000, 1, 1, 0 ) ); // NOTE: Arnout - this really should be 360 but can't change it anymore as it could break existing maps
@@ -983,7 +983,7 @@ GtkWindow* PatchInspector::BuildDialog(){
 							gtk_table_attach( table, GTK_WIDGET( spin ), 1, 2, 4, 5,
 											  (GtkAttachOptions)( 0 ),
 											  (GtkAttachOptions)( 0 ), 0, 0 );
-							gtk_widget_set_usize( GTK_WIDGET( spin ), 16, -2 );
+							gtk_widget_set_size_request( GTK_WIDGET( spin ), 16, -1 );
 							gtk_widget_set_can_focus( GTK_WIDGET( spin ), FALSE );
 						}
 					}
@@ -995,28 +995,28 @@ GtkWindow* PatchInspector::BuildDialog(){
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchCap ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Set..." ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFit ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Natural" ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchNatural ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 					{
 						GtkButton* button = GTK_BUTTON( gtk_button_new_with_label( "Fit" ) );
 						gtk_widget_show( GTK_WIDGET( button ) );
 						gtk_box_pack_end( GTK_BOX( hbox2 ), GTK_WIDGET( button ), TRUE, FALSE, 0 );
 						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( OnBtnPatchFit11 ), 0 );
-						gtk_widget_set_usize( GTK_WIDGET( button ), 60, -1 );
+						gtk_widget_set_size_request( GTK_WIDGET( button ), 60, -1 );
 					}
 				}
 			}

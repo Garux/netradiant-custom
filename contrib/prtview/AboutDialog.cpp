@@ -87,7 +87,7 @@ void DoAboutDlg(){
 	gtk_box_pack_start( GTK_BOX( vbox ), button, FALSE, FALSE, 0 );
 	g_signal_connect( G_OBJECT( button ), "clicked",
 						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
-	gtk_widget_set_usize( button, 60, -2 );
+	gtk_widget_set_size_request( button, 60, -1 );
 
 	gtk_grab_add( dlg );
 	gtk_widget_show( dlg );
