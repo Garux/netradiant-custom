@@ -1055,7 +1055,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 void EntityClassList_selectEntityClass( EntityClass* eclass ){
 	GtkTreeModel* model = GTK_TREE_MODEL( g_entlist_store );
 	GtkTreeIter iter;
-	for ( gboolean good = gtk_tree_model_get_iter_first( model, &iter ); good != FALSE; good = gtk_tree_model_iter_next( model, &iter ) )
+	for ( gboolean good = gtk_tree_model_get_iter_first( model, &iter ); good; good = gtk_tree_model_iter_next( model, &iter ) )
 	{
 		char* text;
 		gtk_tree_model_get( model, &iter, 0, &text, -1 );
@@ -1259,7 +1259,7 @@ void EntityClassList_convertEntity(){
 
 	GtkTreeModel* model;
 	GtkTreeIter iter;
-	if ( gtk_tree_selection_get_selected( gtk_tree_view_get_selection( view ), &model, &iter ) == FALSE ) {
+	if ( !gtk_tree_selection_get_selected( gtk_tree_view_get_selection( view ), &model, &iter ) ) {
 		gtk_MessageBox( gtk_widget_get_toplevel( GTK_WIDGET( g_entityClassList ) ), "You must have a selected class to create an entity", "info" );
 		return;
 	}
@@ -1374,8 +1374,8 @@ static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpo
 		GtkTreeView* view = g_entityClassList;
 		GtkTreeModel* model;
 		GtkTreeIter iter;
-		if ( gtk_tree_selection_get_selected( gtk_tree_view_get_selection( view ), &model, &iter ) == FALSE
-			 || gtk_tree_model_iter_next( model, &iter ) == FALSE ) {
+		if ( !gtk_tree_selection_get_selected( gtk_tree_view_get_selection( view ), &model, &iter )
+			 || !gtk_tree_model_iter_next( model, &iter ) ) {
 			gtk_tree_model_get_iter_first( model, &iter );
 		}
 
@@ -1396,7 +1396,7 @@ static gint EntityClassList_keypress( GtkWidget* widget, GdkEventKey* event, gpo
 
 			g_free( text );
 
-			if ( gtk_tree_model_iter_next( model, &iter ) == FALSE ) {
+			if ( !gtk_tree_model_iter_next( model, &iter ) ) {
 				gtk_tree_model_get_iter_first( model, &iter );
 			}
 		}
@@ -1411,7 +1411,7 @@ static void EntityProperties_selection_changed( GtkTreeSelection* selection, gpo
 	// find out what type of entity we are trying to create
 	GtkTreeModel* model;
 	GtkTreeIter iter;
-	if ( gtk_tree_selection_get_selected( selection, &model, &iter ) == FALSE ) {
+	if ( !gtk_tree_selection_get_selected( selection, &model, &iter ) ) {
 		return;
 	}
 

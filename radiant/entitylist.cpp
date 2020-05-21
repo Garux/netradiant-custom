@@ -157,7 +157,7 @@ static gboolean entitylist_tree_select( GtkTreeSelection *selection, GtkTreeMode
 	Selectable* selectable = Instance_getSelectable( *instance );
 
 	if ( node == 0 ) {
-		if ( path_currently_selected != FALSE ) {
+		if ( path_currently_selected ) {
 			getEntityList().m_selection_disabled = true;
 			GlobalSelectionSystem().setSelectedAll( false );
 			getEntityList().m_selection_disabled = false;
@@ -165,7 +165,7 @@ static gboolean entitylist_tree_select( GtkTreeSelection *selection, GtkTreeMode
 	}
 	else if ( selectable != 0 ) {
 		getEntityList().m_selection_disabled = true;
-		selectable->setSelected( path_currently_selected == FALSE );
+		selectable->setSelected( !path_currently_selected );
 		getEntityList().m_selection_disabled = false;
 		if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( getEntityList().m_check ) ) ){
 			FocusAllViews();
@@ -263,7 +263,7 @@ void EntityList_SetShown( bool shown ){
 	widget_set_visible( GTK_WIDGET( getEntityList().m_window ), shown );
 	if( shown ){ /* expand map's root node for convenience */
 		GtkTreePath* path = gtk_tree_path_new_from_string( "1" );
-		if( gtk_tree_view_row_expanded( getEntityList().m_tree_view, path ) == FALSE )
+		if( !gtk_tree_view_row_expanded( getEntityList().m_tree_view, path ) )
 			gtk_tree_view_expand_row( getEntityList().m_tree_view, path, FALSE );
 		gtk_tree_path_free( path );
 	}

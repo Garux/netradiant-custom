@@ -137,7 +137,7 @@ void BoolToggleImport( GtkToggleButton& widget, bool value ){
 	gtk_toggle_button_set_active( &widget, value );
 }
 void BoolToggleExport( GtkToggleButton& widget, const BoolImportCallback& importCallback ){
-	importCallback( gtk_toggle_button_get_active( &widget ) != FALSE );
+	importCallback( gtk_toggle_button_get_active( &widget ) );
 }
 typedef ImportExport<GtkToggleButton, bool, BoolToggleImport, BoolToggleExport> BoolToggleImportExport;
 
@@ -509,7 +509,7 @@ void Dialog::addCombo( GtkWidget* vbox, const char* name, int& data, StringArray
 
 void addSlider_( GtkAdjustment* adj, GtkWidget* vbox, const char* name, gboolean draw_value, const char* low, const char* high, int digits ){
 #if 0
-	if ( draw_value == FALSE ) {
+	if ( !draw_value ) {
 		GtkWidget* hbox2 = gtk_hbox_new( FALSE, 0 );
 		gtk_widget_show( hbox2 );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox2 ), FALSE, FALSE, 0 );

@@ -1422,7 +1422,7 @@ gboolean TextureBrowser_size_allocate( GtkWidget* widget, GtkAllocation* allocat
 }
 
 gboolean TextureBrowser_expose( GtkWidget* widget, GdkEventExpose* event, TextureBrowser* textureBrowser ){
-	if ( glwidget_make_current( textureBrowser->m_gl_widget ) != FALSE ) {
+	if ( glwidget_make_current( textureBrowser->m_gl_widget ) ) {
 		GlobalOpenGL_debugAssertNoErrors();
 		TextureBrowser_evaluateHeight( *textureBrowser );
 		Texture_Draw( *textureBrowser );

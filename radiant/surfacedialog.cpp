@@ -2254,7 +2254,7 @@ gboolean expose( GtkWidget * win, GdkEventExpose * e, gpointer ){
 //This needs to go elsewhere...
 //	InitTextool();
 
-	if ( glwidget_make_current( win ) == FALSE ) {
+	if ( !glwidget_make_current( win ) ) {
 		globalOutputStream() << "    FAILED to make current! Oh, the agony! :-(\n";
 		return true;
 	}

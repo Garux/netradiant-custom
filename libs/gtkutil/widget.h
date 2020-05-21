@@ -29,8 +29,8 @@
 #include "debugging/debugging.h"
 
 inline bool widget_is_visible( GtkWidget* widget ){
-	//return GTK_WIDGET_VISIBLE( widget ) != FALSE;
-	return gtk_widget_get_visible( widget ) != FALSE;
+	//return GTK_WIDGET_VISIBLE( widget );
+	return gtk_widget_get_visible( widget );
 }
 
 inline void widget_set_visible( GtkWidget* widget, bool show ){

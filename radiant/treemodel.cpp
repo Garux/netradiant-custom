@@ -63,7 +63,7 @@ void graph_tree_model_delete( GraphTreeModel* model ){
 
 bool graph_tree_model_subtree_find_node( GraphTreeModel* model, GtkTreeIter* parent, const scene::Node& node, GtkTreeIter* iter ){
 	for ( gboolean success = gtk_tree_model_iter_children( GTK_TREE_MODEL( model ), iter, parent );
-		  success != FALSE;
+		  success;
 		  success = gtk_tree_model_iter_next( GTK_TREE_MODEL( model ), iter ) )
 	{
 		scene::Node* current;
@@ -531,7 +531,7 @@ static gboolean graph_tree_model_row_drop_possible( GtkTreeDragDest *drag_dest, 
 
 	GtkTreeModel *src_model = 0;
 	GtkTreePath *src_path = 0;
-	if ( gtk_tree_get_row_drag_data( selection_data, &src_model, &src_path ) != FALSE ) {
+	if ( gtk_tree_get_row_drag_data( selection_data, &src_model, &src_path ) ) {
 		/* can only drag to ourselves */
 		if ( src_model == GTK_TREE_MODEL( drag_dest ) ) {
 			/* Can't drop into ourself. */
@@ -1300,13 +1300,13 @@ TestGraphTreeModel(){
 		GtkTreeIter iter;
 		gtk_tree_model_get_iter_first( model, &iter );
 
-		ASSERT_MESSAGE( gtk_tree_model_iter_has_child( model, &iter ) == FALSE, "test failed!" );
+		ASSERT_MESSAGE( !gtk_tree_model_iter_has_child( model, &iter ), "test failed!" );
 
 		ASSERT_MESSAGE( gtk_tree_model_iter_n_children( model, &iter ) == 0, "test failed!" );
 
 		gtk_tree_model_iter_next( model, &iter );
 
-		ASSERT_MESSAGE( gtk_tree_model_iter_has_child( model, &iter ) != FALSE, "test failed!" );
+		ASSERT_MESSAGE( gtk_tree_model_iter_has_child( model, &iter ), "test failed!" );
 
 		ASSERT_MESSAGE( gtk_tree_model_iter_n_children( model, &iter ) == 2, "test failed!" );
 

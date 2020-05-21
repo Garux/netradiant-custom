@@ -964,7 +964,7 @@ gboolean ModelBrowser_size_allocate( GtkWidget* widget, GtkAllocation* allocatio
 }
 
 gboolean ModelBrowser_expose( GtkWidget* widget, GdkEventExpose* event, ModelBrowser* modelBrowser ){
-	if ( glwidget_make_current( modelBrowser->m_gl_widget ) != FALSE ) {
+	if ( glwidget_make_current( modelBrowser->m_gl_widget ) ) {
 		GlobalOpenGL_debugAssertNoErrors();
 		ModelBrowser_render();
 		GlobalOpenGL_debugAssertNoErrors();

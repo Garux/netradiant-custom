@@ -917,7 +917,7 @@ void PreferencesDialog_restartRequired( const char* staticName ){
 
 void PreferencesDialog_showDialog(){
 	//if ( ConfirmModified( "Edit Preferences" ) && g_Preferences.DoModal() == eIDOK ) {
-	if( gtk_widget_get_realized( g_Preferences.m_treeview ) == TRUE )
+	if( gtk_widget_get_realized( g_Preferences.m_treeview ) )
 		gtk_widget_grab_focus( g_Preferences.m_treeview );
 	if ( g_Preferences.DoModal() == eIDOK ) {
 		if ( !g_restart_required.empty() ) {

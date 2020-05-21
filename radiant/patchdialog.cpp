@@ -190,7 +190,7 @@ typedef MemberCaller<Subdivisions, &Subdivisions::cancel> CancelCaller;
 void apply(){
 	Scene_PatchSetFixedSubdivisions(
 		PatchFixedSubdivisions(
-			gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( m_enabled ) ) != FALSE,
+			gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( m_enabled ) ),
 			static_cast<std::size_t>( entry_get_int( m_horizontal ) ),
 			static_cast<std::size_t>( entry_get_int( m_vertical ) )
 			)

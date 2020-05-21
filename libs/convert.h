@@ -86,7 +86,7 @@ class CharacterSet
 const char* m_charSet;
 public:
 CharacterSet(){
-	if ( g_get_charset( &m_charSet ) != FALSE ) {
+	if ( g_get_charset( &m_charSet ) ) {
 		m_charSet = 0;
 	}
 }

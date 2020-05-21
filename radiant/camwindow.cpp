@@ -1226,7 +1226,7 @@ gboolean mousecontrol_button_press( GtkWidget* widget, GdkEventButton* event, Ca
 
 void camwnd_update_xor_rectangle( CamWnd& self, rect_t area ){
 	if ( gtk_widget_get_visible( self.m_gl_widget ) ) {
-		if ( glwidget_make_current( self.m_gl_widget ) != FALSE ) {
+		if ( glwidget_make_current( self.m_gl_widget ) ) {
 			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 				GlobalOpenGL_debugAssertNoErrors();
 
@@ -2177,7 +2177,7 @@ void CamWnd::draw(){
 	m_drawing = true;
 
 	//globalOutputStream() << "draw...\n";
-	if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
+	if ( glwidget_make_current( m_gl_widget ) ) {
 		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 			GlobalOpenGL_debugAssertNoErrors();
 			Cam_Draw();

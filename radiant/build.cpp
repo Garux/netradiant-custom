@@ -669,7 +669,7 @@ void BSPCommandList_Construct( GtkListStore* store, Project& project ){
 }
 
 static void project_cell_editing_started( GtkCellRenderer* cell, GtkCellEditable* editable, const gchar* path, gpointer data ) {
-	ASSERT_MESSAGE( GTK_IS_ENTRY( editable ) == TRUE, "editable is not GtkEntry" );
+	ASSERT_MESSAGE( GTK_IS_ENTRY( editable ), "editable is not GtkEntry" );
 	GtkEntry* entry = GTK_ENTRY( editable );
 	if( string_equal( LAST_ITER_STRING, gtk_entry_get_text( entry ) ) )
 		gtk_entry_set_text( entry, "" );

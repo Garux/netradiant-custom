@@ -101,7 +101,7 @@ void Clipper_modeChanged( bool isClipper ){
 			gdk_window_set_cursor( gtk_widget_get_window( xywnd->GetWidget() ), cursor );
 		} );
 		if( g_pParentWnd->GetCamWnd() )
-			if( !isClipper || gdk_pointer_is_grabbed() == FALSE ) /* prevent cursor change `GDK_BLANK_CURSOR->g_clipper_cursor` during freelook */
+			if( !isClipper || !gdk_pointer_is_grabbed() ) /* prevent cursor change `GDK_BLANK_CURSOR->g_clipper_cursor` during freelook */
 				gdk_window_set_cursor( gtk_widget_get_window( CamWnd_getWidget( *g_pParentWnd->GetCamWnd() ) ), cursor );
 	}
 

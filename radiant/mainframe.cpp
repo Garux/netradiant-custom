@@ -1916,7 +1916,7 @@ void ScreenUpdates_Disable( const char* message, const char* title ){
 		bool isActiveApp = MainFrame_isActiveApp();
 
 		g_wait = create_wait_dialog( title, message );
-		if( !XYWnd::m_mnuDrop || gtk_widget_get_visible( GTK_WIDGET( XYWnd::m_mnuDrop ) ) != TRUE ){
+		if( !XYWnd::m_mnuDrop || !gtk_widget_get_visible( GTK_WIDGET( XYWnd::m_mnuDrop ) ) ){
 			gtk_grab_add( GTK_WIDGET( g_wait.m_window ) );
 			//globalOutputStream() << "grab grab grab\n";
 		}

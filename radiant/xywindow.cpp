@@ -463,7 +463,7 @@ Shader* XYWnd::m_state_selected = 0;
 #endif
 bool XYWnd::overlayStart(){
 	if ( gtk_widget_get_visible( m_gl_widget ) ) {
-		if ( glwidget_make_current( m_gl_widget ) != FALSE ) {
+		if ( glwidget_make_current( m_gl_widget ) ) {
 			if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 				GlobalOpenGL_debugAssertNoErrors();
 #ifdef OVERLAY_GL_FRONT_DRAW_HACK
@@ -653,7 +653,7 @@ gboolean xywnd_size_allocate( GtkWidget* widget, GtkAllocation* allocation, XYWn
 }
 
 gboolean xywnd_expose( GtkWidget* widget, GdkEventExpose* event, XYWnd* xywnd ){
-	if ( glwidget_make_current( xywnd->GetWidget() ) != FALSE ) {
+	if ( glwidget_make_current( xywnd->GetWidget() ) ) {
 		if ( Map_Valid( g_map ) && ScreenUpdates_Enabled() ) {
 			GlobalOpenGL_debugAssertNoErrors();
 			xywnd->XY_Draw();
@@ -940,7 +940,7 @@ gboolean entitycreate_rightClicked( GtkWidget* widget, GdkEvent* event, gpointer
 		return TRUE;
 	}
 	/* create entities, don't close menu */
-	else if ( event->button.button == 1 && ( ( event->button.state & GDK_CONTROL_MASK ) != 0 || gtk_menu_get_tearoff_state( XYWnd::m_mnuDrop ) == TRUE ) ) {
+	else if ( event->button.button == 1 && ( ( event->button.state & GDK_CONTROL_MASK ) != 0 || gtk_menu_get_tearoff_state( XYWnd::m_mnuDrop ) ) ) {
 		entitycreate_activated( GTK_MENU_ITEM( widget ), 0 );
 		return TRUE;
 	}
@@ -952,7 +952,7 @@ gboolean entitycreate_rightUnClicked( GtkWidget* widget, GdkEvent* event, gpoint
 	if ( event->button.button == 3 ) {
 		return TRUE;
 	}
-	else if ( event->button.button == 1 && ( ( event->button.state & GDK_CONTROL_MASK ) != 0 || gtk_menu_get_tearoff_state( XYWnd::m_mnuDrop ) == TRUE ) ) {
+	else if ( event->button.button == 1 && ( ( event->button.state & GDK_CONTROL_MASK ) != 0 || gtk_menu_get_tearoff_state( XYWnd::m_mnuDrop ) ) ) {
 		return TRUE;
 	}
 	return FALSE;
