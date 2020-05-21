@@ -107,9 +107,9 @@ static void dialog_button_callback_settex( GtkWidget *widget, gpointer data ){
 	TwinWidget* tw = (TwinWidget*)data;
 
 	GtkEntry* entry = GTK_ENTRY( tw->one );
-	GtkCombo* combo = GTK_COMBO( tw->two );
+	GtkComboBox* combo = GTK_COMBO_BOX( tw->two );
 
-	const gchar* tex = gtk_entry_get_text( GTK_ENTRY( combo->entry ) );
+	const gchar* tex = gtk_entry_get_text( GTK_ENTRY( gtk_bin_get_child( GTK_BIN( combo ) ) ) );
 	gtk_entry_set_text( entry, tex );
 }
 
@@ -882,10 +882,10 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_widget_realize( window );
 
 	char buffer[256];
-	GList       *listMainTextures = NULL;
-	GList       *listTrimTextures = NULL;
-	LoadGList( GetFilename( buffer, "plugins/bt/door-tex.txt" ), &listMainTextures );
-	LoadGList( GetFilename( buffer, "plugins/bt/door-tex-trim.txt" ), &listTrimTextures );
+	GtkListStore *listMainTextures = gtk_list_store_new( 1, G_TYPE_STRING );
+	GtkListStore *listTrimTextures = gtk_list_store_new( 1, G_TYPE_STRING );
+	LoadListStore( GetFilename( buffer, "bt/door-tex.txt" ), listMainTextures );
+	LoadListStore( GetFilename( buffer, "bt/door-tex-trim.txt" ), listTrimTextures );
 
 	vbox = gtk_vbox_new( FALSE, 10 );
 	gtk_container_add( GTK_CONTAINER( window ), vbox );
@@ -961,10 +961,9 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 
 	// djbob: lists added
 
-	comboMain = gtk_combo_new();
+	comboMain = gtk_combo_box_new_with_model_and_entry( GTK_TREE_MODEL( listMainTextures ) );
+	gtk_combo_box_set_entry_text_column( GTK_COMBO_BOX( comboMain ), 0 );
 	gtk_box_pack_start( GTK_BOX( hbox ), comboMain, FALSE, FALSE, 0 );
-	gtk_combo_set_popdown_strings( GTK_COMBO( comboMain ), listMainTextures );
-	gtk_combo_set_use_arrows( GTK_COMBO( comboMain ), 1 );
 	gtk_widget_show( comboMain );
 
 	tw1.one = textFrontBackTex;
@@ -981,10 +980,9 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	comboTrim = gtk_combo_new();
+	comboTrim = gtk_combo_box_new_with_model_and_entry( GTK_TREE_MODEL( listTrimTextures ) );
+	gtk_combo_box_set_entry_text_column( GTK_COMBO_BOX( comboTrim ), 0 );
 	gtk_box_pack_start( GTK_BOX( hbox ), comboTrim, FALSE, FALSE, 0 );
-	gtk_combo_set_popdown_strings( GTK_COMBO( comboTrim ), listTrimTextures );
-	gtk_combo_set_use_arrows( GTK_COMBO( comboMain ), 1 );
 	gtk_widget_show( comboTrim );
 
 	tw2.one = textTrimTex;

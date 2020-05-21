@@ -19,7 +19,7 @@
 
 #include "lists.h"
 
-#include <glib.h>
+#include <gtk/gtk.h>
 
 #include "misc.h"
 
@@ -50,7 +50,7 @@ bool LoadExclusionList( char* filename, std::list<Str>* exclusionList ){
 	return FALSE;
 }
 
-bool LoadGList( char* filename, GList** loadlist ){
+bool LoadListStore( char* filename, GtkListStore* loadlist ){
 	FILE* eFile = fopen( filename, "r" );
 	if ( eFile ) {
 		char buffer[256];
@@ -61,9 +61,7 @@ bool LoadGList( char* filename, GList** loadlist ){
 			fscanf( eFile, "%s\n", buffer );
 
 			if ( strlen( buffer ) > 0 ) {
-				char* buffer2 = new char[strlen( buffer ) + 1];
-				strcpy( buffer2, buffer );
-				*loadlist = g_list_append( *loadlist, buffer2 );
+				gtk_list_store_insert_with_values( loadlist, NULL, -1, 0, buffer, -1 );
 			}
 			else{
 				cnt++;

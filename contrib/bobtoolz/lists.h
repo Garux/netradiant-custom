@@ -19,7 +19,7 @@
 
 #include <list>
 #include "str.h"
-typedef struct _GList GList;
+typedef struct _GtkListStore GtkListStore;
 
 bool LoadExclusionList( char* filename, std::list<Str>* exclusionList );
-bool LoadGList( char* filename, GList** loadlist );
+bool LoadListStore( char* filename, GtkListStore* loadlist );

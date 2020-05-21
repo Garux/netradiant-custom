@@ -24,14 +24,8 @@
    Copyright (C) 2002 Splash Damage Ltd.
  */
 
-struct TwinWidget {
-	GtkWidget* one;
-	GtkWidget* two;
-};
-
 void dialog_button_callback( GtkWidget *widget, gpointer data );
 gint dialog_delete_callback( GtkWidget *widget, GdkEvent* event, gpointer data );
-//void dialog_button_callback_settex (GtkWidget *widget, gpointer data);
 
 void RefreshCamListCombo( void );
 GtkWidget *CreateCameraInspectorDialog( void );
