@@ -36,7 +36,6 @@
 
 static GtkWidget *pDialogWnd;
 static GtkWidget *pNotebook;
-static GtkTooltips *pTooltips;
 
 class CBackgroundDialogPage
 {
@@ -218,7 +217,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( browse_callback ),
 					  ( gpointer ) this );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, FALSE, FALSE, 5 );
-	gtk_tooltips_set_tip( pTooltips, w, "Select a file", NULL );
+	gtk_widget_set_tooltip_text( w, "Select a file" );
 	gtk_widget_show( w );
 
 	w = gtk_button_new_with_label( "Reload" );
@@ -226,7 +225,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 					  ( gpointer ) this );
 	// TODO disable until we have file
 	// gtk_widget_set_sensitive(w,FALSE);
-	gtk_tooltips_set_tip( pTooltips, w, "Reload current file", NULL );
+	gtk_widget_set_tooltip_text( w, "Reload current file" );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, FALSE, FALSE, 5 );
 	gtk_widget_show( w );
 
@@ -251,7 +250,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	g_signal_connect( G_OBJECT( w ), "value-changed",
 					  G_CALLBACK( alpha_adjust_callback ), ( gpointer ) this );
 	gtk_box_pack_start( GTK_BOX( hbox ),w, TRUE, TRUE, 5 );
-	gtk_tooltips_set_tip( pTooltips, w, "Set image transparancy", NULL );
+	gtk_widget_set_tooltip_text( w, "Set image transparancy" );
 	gtk_widget_show( w );
 
 	gtk_widget_show( hbox );
@@ -269,7 +268,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 	gtk_box_pack_start( GTK_BOX( hbox ),w, TRUE, FALSE, 5 );
 	g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( size_sel_callback ),
 					  ( gpointer ) this );
-	gtk_tooltips_set_tip( pTooltips, w, "Set the size of the image to the bounding rectangle of all selected brushes and entities", NULL );
+	gtk_widget_set_tooltip_text( w, "Set the size of the image to the bounding rectangle of all selected brushes and entities" );
 	gtk_widget_show( w );
 
 	if ( m_vt == XY ) {
@@ -277,7 +276,7 @@ CBackgroundDialogPage::CBackgroundDialogPage( VIEWTYPE vt ){
 		gtk_box_pack_start( GTK_BOX( hbox ),w, TRUE, FALSE, 2 );
 		g_signal_connect( G_OBJECT( w ), "clicked", G_CALLBACK( size_mm_callback ),
 						  ( gpointer ) this );
-		gtk_tooltips_set_tip( pTooltips, w, "Set the size of the image using the mapcoordsmins and mapcoordsmaxs keys of the worldspawn entity", NULL );
+		gtk_widget_set_tooltip_text( w, "Set the size of the image using the mapcoordsmins and mapcoordsmaxs keys of the worldspawn entity" );
 		gtk_widget_show( w );
 	}
 
@@ -325,8 +324,6 @@ void InitBackgroundDialog(){
 	g_signal_connect( G_OBJECT( pDialogWnd ), "response",
 						G_CALLBACK( response_callback ), NULL );
 //  g_signal_connect( G_OBJECT (pDialogWnd), "expose_event", G_CALLBACK( ci_expose ), NULL );
-
-	pTooltips = gtk_tooltips_new();
 
 	pNotebook = gtk_notebook_new();
 	pPage = new CBackgroundDialogPage( XY );

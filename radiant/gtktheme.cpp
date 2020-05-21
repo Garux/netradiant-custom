@@ -148,9 +148,6 @@ GtkWidget* create_rc_window() {
 	GtkWidget* image1;
 	GtkWidget* label667;
 	GtkAccelGroup* accel_group;
-	GtkTooltips* tooltips;
-
-	tooltips = gtk_tooltips_new();
 
 	accel_group = gtk_accel_group_new();
 
@@ -401,8 +398,6 @@ GtkWidget* create_rc_window() {
 	GLADE_HOOKUP_OBJECT( main_window, hbox6, "hbox6" );
 	GLADE_HOOKUP_OBJECT( main_window, image1, "image1" );
 	GLADE_HOOKUP_OBJECT( main_window, label667, "label667" );
-
-	GLADE_HOOKUP_OBJECT_NO_REF( main_window, tooltips, "tooltips" );
 
 	gtk_widget_grab_default( main_themelist );
 	gtk_window_add_accel_group( GTK_WINDOW( main_window ), accel_group );

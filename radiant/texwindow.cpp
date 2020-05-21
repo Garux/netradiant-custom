@@ -1958,12 +1958,10 @@ void TextureBrowser_constructTagNotebook(){
 }
 
 void TextureBrowser_constructSearchButton(){
-	GtkTooltips* tooltips = gtk_tooltips_new();
-
 	GtkWidget* image = gtk_image_new_from_stock( GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR );
 	g_TextureBrowser.m_search_button = gtk_button_new();
 	g_signal_connect( G_OBJECT( g_TextureBrowser.m_search_button ), "clicked", G_CALLBACK( TextureBrowser_searchTags ), NULL );
-	gtk_tooltips_set_tip( GTK_TOOLTIPS( tooltips ), g_TextureBrowser.m_search_button, "Search with selected tags", "Search with selected tags" );
+	gtk_widget_set_tooltip_text( g_TextureBrowser.m_search_button, "Search with selected tags" );
 	gtk_container_add( GTK_CONTAINER( g_TextureBrowser.m_search_button ), image );
 }
 
