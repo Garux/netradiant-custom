@@ -2,6 +2,7 @@
 #include <gtk/gtk.h>
 #include "gtkmisc.h"
 #include "gtkutil/widget.h"
+#include "gtkutil/toolbar.h"
 #include "stream/stringstream.h"
 #include "select.h"
 #include "iundo.h"
@@ -232,7 +233,7 @@ GtkToolbar* create_filter_toolbar(){
 			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Func_Groups_button_press ), 0 );
 
 			toolbar_append_toggle_button( toolbar, "Patches (CTRL + P)", "patch_wireframe.png", "FilterPatches" );
-			gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+			toolbar_append_space( toolbar );
 
 //			if ( g_pGameDescription->mGameType == "doom3" ) {
 //				button = toolbar_append_toggle_button( toolbar, "Visportals (ALT + 3)\nRightClick: toggle tex\n\tnoDraw\n\tnoDrawNonSolid", "f-areaportal.png", "FilterVisportals" );
@@ -259,7 +260,7 @@ GtkToolbar* create_filter_toolbar(){
 			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Hint_button_press ), 0 );
 
 			//toolbar_append_toggle_button( toolbar, "Paths (ALT + 8)", "texture_lock.png", "FilterPaths" );
-			gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+			toolbar_append_space( toolbar );
 			toolbar_append_toggle_button( toolbar, "Entities (ALT + 2)", "f-entities.png", "FilterEntities" );
 			toolbar_append_toggle_button( toolbar, "Lights (ALT + 0)", "f-lights.png", "FilterLights" );
 			toolbar_append_toggle_button( toolbar, "Models (SHIFT + M)", "f-models.png", "FilterModels" );
@@ -268,12 +269,12 @@ GtkToolbar* create_filter_toolbar(){
 			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Trigger_button_press ), 0 );
 
 			//toolbar_append_toggle_button( toolbar, "Decals (SHIFT + D)", "f-decals.png", "FilterDecals" );
-			gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+			toolbar_append_space( toolbar );
 			//toolbar_append_button( toolbar, "InvertFilters", "f-invert.png", "InvertFilters" );
 
 			toolbar_append_button( toolbar, "ResetFilters", "f-reset.png", "ResetFilters" );
 
-			gtk_toolbar_append_space( GTK_TOOLBAR( toolbar ) );
+			toolbar_append_space( toolbar );
 			button = toolbar_append_toggle_button( toolbar, "Region Set Selection (CTRL + SHIFT + R)\nRightClick: Region Off", "f-region.png", "RegionSetSelection" );
 			g_signal_connect( G_OBJECT( button ), "button_press_event", G_CALLBACK( Region_button_press ), 0 );
 

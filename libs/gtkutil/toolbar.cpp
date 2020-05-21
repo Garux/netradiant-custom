@@ -31,6 +31,12 @@
 #include "pointer.h"
 
 
+void toolbar_append_space( GtkToolbar* toolbar ){
+	GtkToolItem* space = gtk_separator_tool_item_new();
+	gtk_widget_show( GTK_WIDGET( space ) );
+	gtk_toolbar_insert( toolbar, space, -1 );
+}
+
 void toolbar_append( GtkToolbar* toolbar, GtkButton* button, const char* description ){
 	gtk_widget_show( GTK_WIDGET( button ) );
 	gtk_button_set_relief( button, GTK_RELIEF_NONE );

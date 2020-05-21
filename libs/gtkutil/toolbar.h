@@ -30,6 +30,7 @@ typedef struct _GtkToolbar GtkToolbar;
 class Command;
 class Toggle;
 
+void toolbar_append_space( GtkToolbar* toolbar );
 GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );
 GtkButton* toolbar_append_button( GtkToolbar* toolbar, const char* description, const char* icon, const Command& command );
 GtkToggleButton* toolbar_append_toggle_button( GtkToolbar* toolbar, const char* description, const char* icon, const Callback& callback );

@@ -62,6 +62,7 @@
 #include "gtkutil/image.h"
 #include "gtkutil/menu.h"
 #include "gtkutil/paned.h"
+#include "gtkutil/toolbar.h"
 #include "gtkutil/widget.h"
 
 #include "autosave.h"
@@ -2570,46 +2571,45 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	gtk_toolbar_set_style( toolbar, GTK_TOOLBAR_ICONS );
 //	gtk_toolbar_set_show_arrow( toolbar, TRUE );
 	//gtk_orientable_set_orientation( GTK_ORIENTABLE( toolbar ), GTK_ORIENTATION_HORIZONTAL );
-	//toolbar_append_space( toolbar );
 	gtk_widget_show( GTK_WIDGET( toolbar ) );
 
 	File_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	UndoRedo_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	RotateFlip_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	Select_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	CSG_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	ComponentModes_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	if ( style != MainFrame::eSplit ) {
 		XYWnd_constructToolbar( toolbar );
-		gtk_toolbar_append_space( toolbar );
+		toolbar_append_space( toolbar );
 	}
 
 	CamWnd_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	Manipulators_constructToolbar( toolbar );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	if ( g_Layout_enablePatchToolbar.m_value ) {
 		Patch_constructToolbar( toolbar );
-		gtk_toolbar_append_space( toolbar );
+		toolbar_append_space( toolbar );
 	}
 
 	toolbar_append_toggle_button( toolbar, "Texture Lock (SHIFT + T)", "texture_lock.png", "TogTexLock" );
 	toolbar_append_toggle_button( toolbar, "Texture Vertex Lock", "texture_vertexlock.png", "TogTexVertexLock" );
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 
 	toolbar_append_button( toolbar, "Entities (N)", "entities.png", "ToggleEntityInspector" );
 	// disable the console and texture button in the regular layouts
@@ -2621,7 +2621,7 @@ GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	// TODO: call light inspector
 	//GtkButton* g_view_lightinspector_button = toolbar_append_button(toolbar, "Light Inspector", "lightinspector.png", "ToggleLightInspector");
 
-	gtk_toolbar_append_space( toolbar );
+	toolbar_append_space( toolbar );
 	toolbar_append_button( toolbar, "Refresh Models", "refresh_models.png", "RefreshReferences" );
 
 	return toolbar;
