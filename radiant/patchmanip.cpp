@@ -1285,55 +1285,46 @@ EMessageBoxReturn DoCapDlg( ECapDialog* type ){
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 				}
 
-				GSList* group = 0;
+				GtkRadioButton* group = 0;
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Bevel" );
+					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Bevel" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 0, 1,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
-
+					group = GTK_RADIO_BUTTON( button );
 					bevel = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Endcap" );
+					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Endcap" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 1, 2,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
-
 					endcap = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Inverted Bevel" );
+					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Inverted Bevel" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 2, 3,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
-
 					ibevel = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Inverted Endcap" );
+					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Inverted Endcap" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 3, 4,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
-
 					iendcap = button;
 				}
 				{
-					GtkWidget* button = gtk_radio_button_new_with_label( group, "Cylinder" );
+					GtkWidget* button = gtk_radio_button_new_with_label_from_widget( group, "Cylinder" );
 					gtk_widget_show( button );
 					gtk_table_attach( table, button, 1, 2, 4, 5,
 									  (GtkAttachOptions) ( GTK_FILL | GTK_EXPAND ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
-					group = gtk_radio_button_group( GTK_RADIO_BUTTON( button ) );
-
 					cylinder = button;
 				}
 			}
@@ -1447,7 +1438,7 @@ void DoPatchThickenDlg(){
 			}
 			{
 				// Create the radio button group for choosing the extrude axis
-				GtkWidget* _radNormals = gtk_radio_button_new_with_label( NULL, "Normal" );
+				GtkWidget* _radNormals = gtk_radio_button_new_with_label_from_widget( NULL, "Normal" );
 				GtkWidget* _radX = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_radNormals), "X" );
 				GtkWidget* _radY = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_radNormals), "Y" );
 				GtkWidget* _radZ = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(_radNormals), "Z" );

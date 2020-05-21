@@ -581,7 +581,6 @@ void Dialog::addRadioIcons( GtkWidget* vbox, const char* name, StringArrayRange 
 	gtk_table_set_row_spacings( GTK_TABLE( table ), 5 );
 	gtk_table_set_col_spacings( GTK_TABLE( table ), 5 );
 
-	GSList* group = 0;
 	GtkWidget* radio = 0;
 	for ( StringArrayRange::Iterator icon = icons.first; icon != icons.last; ++icon )
 	{
@@ -592,13 +591,11 @@ void Dialog::addRadioIcons( GtkWidget* vbox, const char* name, StringArrayRange 
 						  (GtkAttachOptions) ( 0 ),
 						  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-		radio = gtk_radio_button_new( group );
+		radio = gtk_radio_button_new_from_widget( GTK_RADIO_BUTTON( radio ) );
 		gtk_widget_show( radio );
 		gtk_table_attach( GTK_TABLE( table ), radio, pos, pos + 1, 1, 2,
 						  (GtkAttachOptions) ( 0 ),
 						  (GtkAttachOptions) ( 0 ), 0, 0 );
-
-		group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( radio ) );
 	}
 
 	AddIntRadioData( *GTK_RADIO_BUTTON( radio ), importViewer, exportViewer );

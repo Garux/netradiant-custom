@@ -21,7 +21,6 @@ create_w_plugplug2( void ){
 	GtkWidget *hbox2;
 	GtkWidget *vbox4;
 	GtkWidget *r_collapse;
-	GSList *r_collapse_group = NULL;
 	GtkWidget *r_collapsebymaterial;
 	GtkWidget *r_nocollapse;
 	GtkWidget *vbox3;
@@ -58,23 +57,17 @@ create_w_plugplug2( void ){
 	vbox4 = gtk_vbox_new( TRUE, 0 );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), vbox4, TRUE, FALSE, 0 );
 
-	r_collapse = gtk_radio_button_new_with_mnemonic( NULL, "Collapse mesh" );
+	r_collapse = gtk_radio_button_new_with_label_from_widget( NULL, "Collapse mesh" );
 	gtk_widget_set_tooltip_text( r_collapse, "Collapse all brushes into a single group" );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapse, FALSE, FALSE, 0 );
-	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_collapse ), r_collapse_group );
-	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_collapse ) );
 
-	r_collapsebymaterial = gtk_radio_button_new_with_mnemonic( NULL, "Collapse by material" );
+	r_collapsebymaterial = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( r_collapse ), "Collapse by material" );
 	gtk_widget_set_tooltip_text( r_collapsebymaterial, "Collapse into groups by material" );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_collapsebymaterial, FALSE, FALSE, 0 );
-	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_collapsebymaterial ), r_collapse_group );
-	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_collapsebymaterial ) );
 
-	r_nocollapse = gtk_radio_button_new_with_mnemonic( NULL, "Don't collapse" );
+	r_nocollapse = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( r_collapse ), "Don't collapse" );
 	gtk_widget_set_tooltip_text( r_nocollapse, "Every brush is stored in its own group" );
 	gtk_box_pack_start( GTK_BOX( vbox4 ), r_nocollapse, FALSE, FALSE, 0 );
-	gtk_radio_button_set_group( GTK_RADIO_BUTTON( r_nocollapse ), r_collapse_group );
-	r_collapse_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( r_nocollapse ) );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( r_nocollapse ), TRUE );
 
 	vbox3 = gtk_vbox_new( FALSE, 0 );

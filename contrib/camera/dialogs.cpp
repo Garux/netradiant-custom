@@ -26,8 +26,6 @@
 
 #include "camera.h"
 
-static GSList *g_pEditTypeRadio = NULL;
-static GtkWidget *g_pEditModeEditRadioButton = NULL;
 GtkWidget *g_pEditModeAddRadioButton = NULL;
 static GtkWidget *g_pSecondsEntry = NULL;
 static GtkWidget *g_pEventsList = NULL;
@@ -65,8 +63,6 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 	GtkWidget *fixed, *interpolated, *spline;
 	EMessageBoxReturn ret;
 	int loop = 1;
-	GSList *targetTypeRadio = NULL;
-//	char buf[128];
 
 	// create the window
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
@@ -102,20 +98,17 @@ static gint ci_new( GtkWidget *widget, gpointer data ){
 
 	// -------------------------- //
 
-	fixed = gtk_radio_button_new_with_label( targetTypeRadio, "Fixed" );
+	fixed = gtk_radio_button_new_with_label_from_widget( NULL, "Fixed" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), fixed, FALSE, FALSE, 3 );
 	gtk_widget_show( fixed );
-	targetTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( fixed ) );
 
-	interpolated = gtk_radio_button_new_with_label( targetTypeRadio, "Interpolated" );
+	interpolated = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( fixed ), "Interpolated" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), interpolated, FALSE, FALSE, 3 );
 	gtk_widget_show( interpolated );
-	targetTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( interpolated ) );
 
-	spline = gtk_radio_button_new_with_label( targetTypeRadio, "Spline" );
+	spline = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( fixed ), "Spline" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), spline, FALSE, FALSE, 3 );
 	gtk_widget_show( spline );
-	targetTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( spline ) );
 
 	// -------------------------- //
 
@@ -473,7 +466,6 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 	GtkWidget *fixed, *interpolated, *spline;
 	EMessageBoxReturn ret;
 	int loop = 1;
-	GSList *targetTypeRadio = NULL;
 	char buf[128];
 
 	if ( !GetCurrentCam() ) {
@@ -531,20 +523,17 @@ static gint ci_add_target( GtkWidget *widget, gpointer data ){
 
 	// -------------------------- //
 
-	fixed = gtk_radio_button_new_with_label( targetTypeRadio, "Fixed" );
+	fixed = gtk_radio_button_new_with_label_from_widget( NULL, "Fixed" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), fixed, FALSE, FALSE, 3 );
 	gtk_widget_show( fixed );
-	targetTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( fixed ) );
 
-	interpolated = gtk_radio_button_new_with_label( targetTypeRadio, "Interpolated" );
+	interpolated = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( fixed ), "Interpolated" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), interpolated, FALSE, FALSE, 3 );
 	gtk_widget_show( interpolated );
-	targetTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( interpolated ) );
 
-	spline = gtk_radio_button_new_with_label( targetTypeRadio, "Spline" );
+	spline = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( fixed ), "Spline" );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), spline, FALSE, FALSE, 3 );
 	gtk_widget_show( spline );
-	targetTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( spline ) );
 
 	// -------------------------- //
 
@@ -869,7 +858,7 @@ static gint ci_add( GtkWidget *widget, gpointer data ){
 		eventWidget[i] = gtk_radio_button_new_with_label( eventTypeRadio, camEventStr[i] );
 		gtk_box_pack_start( GTK_BOX( vbox2 ), eventWidget[i], FALSE, FALSE, 3 );
 		gtk_widget_show( eventWidget[i] );
-		eventTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( eventWidget[i] ) );
+		eventTypeRadio = gtk_radio_button_get_group( GTK_RADIO_BUTTON( eventWidget[i] ) );
 		if ( camEventFlags[i][1] == false ) {
 			gtk_widget_set_sensitive( eventWidget[i], FALSE );
 		}
@@ -1109,17 +1098,15 @@ GtkWidget *CreateCameraInspectorDialog( void ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	g_pEditModeEditRadioButton = gtk_radio_button_new_with_label( g_pEditTypeRadio, "Edit Points" );
-	gtk_box_pack_start( GTK_BOX( hbox ), g_pEditModeEditRadioButton, FALSE, FALSE, 3 );
-	gtk_widget_show( g_pEditModeEditRadioButton );
-	g_pEditTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( g_pEditModeEditRadioButton ) );
+	GtkWidget *EditModeEditRadioButton = gtk_radio_button_new_with_label_from_widget( NULL, "Edit Points" );
+	gtk_box_pack_start( GTK_BOX( hbox ), EditModeEditRadioButton, FALSE, FALSE, 3 );
+	gtk_widget_show( EditModeEditRadioButton );
 
-	g_signal_connect( G_OBJECT( g_pEditModeEditRadioButton ), "clicked", G_CALLBACK( ci_editmode_edit ), NULL );
+	g_signal_connect( G_OBJECT( EditModeEditRadioButton ), "clicked", G_CALLBACK( ci_editmode_edit ), NULL );
 
-	g_pEditModeAddRadioButton = gtk_radio_button_new_with_label( g_pEditTypeRadio, "Add Points" );
+	g_pEditModeAddRadioButton = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( EditModeEditRadioButton ), "Add Points" );
 	gtk_box_pack_start( GTK_BOX( hbox ), g_pEditModeAddRadioButton, FALSE, FALSE, 3 );
 	gtk_widget_show( g_pEditModeAddRadioButton );
-	g_pEditTypeRadio = gtk_radio_button_group( GTK_RADIO_BUTTON( g_pEditModeAddRadioButton ) );
 
 	g_signal_connect( G_OBJECT( g_pEditModeAddRadioButton ), "clicked", G_CALLBACK( ci_editmode_add ), NULL );
 

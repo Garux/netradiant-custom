@@ -153,7 +153,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_box_pack_end(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
    gtk_widget_show(hbox);
 
-   button = gtk_radio_button_new_with_label(NULL, DIALOG_SET_SCALE_TILES_OPT_LABEL);
+   button = gtk_radio_button_new_with_label_from_widget(NULL, DIALOG_SET_SCALE_TILES_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "s_tiling", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_widget_show(button);
@@ -175,8 +175,8 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_box_pack_end(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
    gtk_widget_show(hbox);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_SET_SCALE_NATURAL_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "s_natural", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
@@ -237,8 +237,8 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(applybutton, entry);
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "col_max_align", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
@@ -291,8 +291,8 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(refbutton, entry);
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "row_max_ref", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
@@ -356,7 +356,7 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_box_pack_end(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
    gtk_widget_show(hbox);
 
-   button = gtk_radio_button_new_with_label(NULL, DIALOG_SET_SCALE_TILES_OPT_LABEL);
+   button = gtk_radio_button_new_with_label_from_widget(NULL, DIALOG_SET_SCALE_TILES_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "t_tiling", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
    gtk_widget_show(button);
@@ -378,8 +378,8 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    gtk_box_pack_end(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
    gtk_widget_show(hbox);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_SET_SCALE_NATURAL_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "t_natural", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 5);
@@ -440,8 +440,8 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(applybutton, entry);
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "row_max_align", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
@@ -494,8 +494,8 @@ SetScaleDialog::SetScaleDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(refbutton, entry);
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_SET_SCALE_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "col_max_ref", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);

@@ -1347,7 +1347,6 @@ GtkWidget* create_main_dialog(){
 	GtkWidget *dlg, *vbox, *hbox, *hbox2, *button, *notebook, *frame, *table, *table2;
 	GtkWidget *check, *spin, *radio, *label, *entry, *scale;
 	GtkObject *adj;
-	GSList *group;
 	int i;
 	const char *games[] = { "Quake 2", "Half-Life", "SiN", "Heretic 2", "Kingpin", "Genesis3D", "Quake 3 Arena" };
 	const char *waveforms[] = { "Alternating hill/valley", "Cylindrical left-to-right", "Cylindrical top-to-bottom",
@@ -1395,12 +1394,11 @@ GtkWidget* create_main_dialog(){
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
-	for ( i = 0, group = NULL; i < NUMGAMES; i++ )
+	for ( i = 0, radio = NULL; i < NUMGAMES; i++ )
 	{
-		radio = gtk_radio_button_new_with_label( group, games[i] );
+		radio = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radio ), games[i] );
 		gtk_widget_show( radio );
 		gtk_box_pack_start( GTK_BOX( vbox ), radio, TRUE, TRUE, 0 );
-		group = gtk_radio_button_group( GTK_RADIO_BUTTON( radio ) );
 		game_radios[i] = radio;
 		g_signal_connect( G_OBJECT( radio ), "toggled", G_CALLBACK( general_game ), GINT_TO_POINTER( i ) );
 	}
@@ -1416,12 +1414,11 @@ GtkWidget* create_main_dialog(){
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
-	for ( i = 0, group = NULL; i < 5; i++ )
+	for ( i = 0, radio = NULL; i < 5; i++ )
 	{
-		radio = gtk_radio_button_new_with_label( group, waveforms[i] );
+		radio = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radio ), waveforms[i] );
 		gtk_widget_show( radio );
 		gtk_box_pack_start( GTK_BOX( vbox ), radio, TRUE, TRUE, 0 );
-		group = gtk_radio_button_group( GTK_RADIO_BUTTON( radio ) );
 		wave_radios[i] = radio;
 		g_signal_connect( G_OBJECT( radio ), "toggled", G_CALLBACK( general_wave ), GINT_TO_POINTER( i ) );
 	}
@@ -1437,12 +1434,11 @@ GtkWidget* create_main_dialog(){
 	gtk_container_add( GTK_CONTAINER( frame ), vbox );
 	gtk_container_set_border_width( GTK_CONTAINER( vbox ), 5 );
 
-	for ( i = 0, group = NULL; i < 6; i++ )
+	for ( i = 0, radio = NULL; i < 6; i++ )
 	{
-		radio = gtk_radio_button_new_with_label( group, orientations[i] );
+		radio = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radio ), orientations[i] );
 		gtk_widget_show( radio );
 		gtk_box_pack_start( GTK_BOX( vbox ), radio, TRUE, TRUE, 0 );
-		group = gtk_radio_button_group( GTK_RADIO_BUTTON( radio ) );
 		plane_radios[i] = radio;
 		g_signal_connect( G_OBJECT( radio ), "toggled", G_CALLBACK( general_plane ), GINT_TO_POINTER( i ) );
 	}

@@ -148,7 +148,7 @@ public:
 NonModalRadio( const Callback& changed ) : m_changed( changed ){
 }
 void connect( GtkRadioButton* radio ){
-	GSList* group = gtk_radio_button_group( radio );
+	GSList* group = gtk_radio_button_get_group( radio );
 	for (; group != 0; group = g_slist_next( group ) )
 	{
 		toggle_button_connect_callback( GTK_TOGGLE_BUTTON( group->data ), m_changed );

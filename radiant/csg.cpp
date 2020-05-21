@@ -1505,7 +1505,7 @@ void CSG_Tool(){
 				}
 				{
 					//radio button group for choosing the exclude axis
-					GtkWidget* radFaces = gtk_radio_button_new_with_label( NULL, "-faces" );
+					GtkWidget* radFaces = gtk_radio_button_new_with_label_from_widget( NULL, "-faces" );
 					gtk_widget_set_tooltip_text( radFaces, "Exclude selected faces" );
 					GtkWidget* radPlusFaces = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(radFaces), "+faces" );
 					gtk_widget_set_tooltip_text( radPlusFaces, "Only process selected faces" );

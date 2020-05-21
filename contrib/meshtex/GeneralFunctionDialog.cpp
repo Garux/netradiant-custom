@@ -127,15 +127,15 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
 
    // Mutually exclusive "Surface values" and "Control values" radio buttons.
 
-   button = gtk_radio_button_new_with_label(NULL,
+   button = gtk_radio_button_new_with_label_from_widget(NULL,
                                             DIALOG_GEN_FUNC_SURFACE_VALUES);
    g_object_set_data(G_OBJECT(_dialog), "surface", button);
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
    gtk_widget_show(button);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_GEN_FUNC_CONTROL_VALUES);
    g_object_set_data(G_OBJECT(_dialog), "control", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
@@ -385,8 +385,8 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
 
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_GEN_FUNC_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "col_max_align", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
@@ -434,8 +434,8 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(refbutton, entry);
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_GEN_FUNC_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "row_max_ref", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
@@ -493,8 +493,8 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
 
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_GEN_FUNC_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "row_max_align", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);
@@ -542,8 +542,8 @@ GeneralFunctionDialog::GeneralFunctionDialog(const std::string& key) :
    UIInstance().RegisterWidgetDependence(refbutton, entry);
    UIInstance().RegisterWidgetDependence(button, entry);
 
-   button = gtk_radio_button_new_with_label(
-      gtk_radio_button_group(GTK_RADIO_BUTTON(button)),
+   button = gtk_radio_button_new_with_label_from_widget(
+                             GTK_RADIO_BUTTON(button),
                              DIALOG_GEN_FUNC_MAX_OPT_LABEL);
    g_object_set_data(G_OBJECT(_dialog), "col_max_ref", button);
    gtk_box_pack_end(GTK_BOX(hbox), button, TRUE, FALSE, 5);

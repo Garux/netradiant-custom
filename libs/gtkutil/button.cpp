@@ -73,7 +73,7 @@ void toggle_button_set_active_no_signal( GtkToggleButton* button, gboolean activ
 
 void radio_button_print_state( GtkRadioButton* button ){
 	globalOutputStream() << "toggle button: ";
-	for ( GSList* radio = gtk_radio_button_group( button ); radio != 0; radio = g_slist_next( radio ) )
+	for ( GSList* radio = gtk_radio_button_get_group( button ); radio != 0; radio = g_slist_next( radio ) )
 	{
 		globalOutputStream() << gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio->data ) );
 	}
@@ -81,7 +81,7 @@ void radio_button_print_state( GtkRadioButton* button ){
 }
 
 GtkToggleButton* radio_button_get_nth( GtkRadioButton* radio, int index ){
-	GSList *group = gtk_radio_button_group( radio );
+	GSList *group = gtk_radio_button_get_group( radio );
 	return GTK_TOGGLE_BUTTON( g_slist_nth_data( group, g_slist_length( group ) - index - 1 ) );
 }
 
@@ -109,7 +109,7 @@ void radio_button_set_active_no_signal( GtkRadioButton* radio, int index ){
 
 int radio_button_get_active( GtkRadioButton* radio ){
 	//radio_button_print_state(radio);
-	GSList *group = gtk_radio_button_group( radio );
+	GSList *group = gtk_radio_button_get_group( radio );
 	int index = g_slist_length( group ) - 1;
 	for (; group != 0; group = g_slist_next( group ) )
 	{

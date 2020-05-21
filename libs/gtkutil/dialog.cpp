@@ -186,15 +186,12 @@ RadioHBox RadioHBox_new( StringArrayRange names ){
 	GtkHBox* hbox = GTK_HBOX( gtk_hbox_new( TRUE, 4 ) );
 	gtk_widget_show( GTK_WIDGET( hbox ) );
 
-	GSList* group = 0;
 	GtkRadioButton* radio = 0;
 	for ( StringArrayRange::Iterator i = names.first; i != names.last; ++i )
 	{
-		radio = GTK_RADIO_BUTTON( gtk_radio_button_new_with_label( group, *i ) );
+		radio = GTK_RADIO_BUTTON( gtk_radio_button_new_with_label_from_widget( radio, *i ) );
 		gtk_widget_show( GTK_WIDGET( radio ) );
 		gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( radio ), FALSE, FALSE, 0 );
-
-		group = gtk_radio_button_get_group( radio );
 	}
 
 	return RadioHBox( hbox, radio );

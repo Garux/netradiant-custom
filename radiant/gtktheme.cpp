@@ -128,7 +128,6 @@ GtkWidget* create_rc_window() {
 	GtkWidget* hbox8;
 	GtkWidget* vbox9;
 	GtkWidget* main_use_default_font_radio;
-	GSList* main_use_default_font_radio_group = NULL;
 	GtkWidget* main_use_custom_font_radio;
 	GtkWidget* alignment5;
 	GtkWidget* vbox10;
@@ -240,19 +239,15 @@ GtkWidget* create_rc_window() {
 	gtk_widget_show( vbox9 );
 	gtk_box_pack_start( GTK_BOX( hbox8 ), vbox9, TRUE, TRUE, 0 );
 
-	main_use_default_font_radio = gtk_radio_button_new_with_mnemonic( NULL, "Use theme default font" );
+	main_use_default_font_radio = gtk_radio_button_new_with_label_from_widget( NULL, "Use theme default font" );
 	gtk_widget_set_name( main_use_default_font_radio, "main_use_default_font_radio" );
 	gtk_widget_show( main_use_default_font_radio );
 	gtk_box_pack_start( GTK_BOX( vbox9 ), main_use_default_font_radio, FALSE, FALSE, 0 );
-	gtk_radio_button_set_group( GTK_RADIO_BUTTON( main_use_default_font_radio ), main_use_default_font_radio_group );
-	main_use_default_font_radio_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( main_use_default_font_radio ) );
 
-	main_use_custom_font_radio = gtk_radio_button_new_with_mnemonic( NULL, "Use custom font:" );
+	main_use_custom_font_radio = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( main_use_default_font_radio ), "Use custom font:" );
 	gtk_widget_set_name( main_use_custom_font_radio, "main_use_custom_font_radio" );
 	gtk_widget_show( main_use_custom_font_radio );
 	gtk_box_pack_start( GTK_BOX( vbox9 ), main_use_custom_font_radio, FALSE, FALSE, 0 );
-	gtk_radio_button_set_group( GTK_RADIO_BUTTON( main_use_custom_font_radio ), main_use_default_font_radio_group );
-	main_use_default_font_radio_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON( main_use_custom_font_radio ) );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( main_use_custom_font_radio ), TRUE );
 	//gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( main_use_custom_font_radio ), FALSE );
 

@@ -353,7 +353,7 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	// ---- vbox ----
 
 
-	radio1 = gtk_radio_button_new_with_label( NULL, "Use Whole Map" );
+	radio1 = gtk_radio_button_new_with_label_from_widget( NULL, "Use Whole Map" );
 	gtk_box_pack_start( GTK_BOX( vbox ), radio1, FALSE, FALSE, 2 );
 	gtk_widget_show( radio1 );
 
@@ -605,7 +605,6 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	GtkWidget   *radioNorth, *radioSouth, *radioEast, *radioWest;   // i'm guessing we can't just abuse 'w' for these if we're getting a value
 	GtkWidget   *radioOldStyle, *radioBobStyle, *radioCornerStyle;
 	GtkWidget   *checkUseDetail;
-	GSList      *radioDirection, *radioStyle;
 	EMessageBoxReturn ret;
 	int loop = 1;
 
@@ -680,25 +679,19 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	// djbob: actually it looks very nice :), slightly better than the way i did it
 	// edit: actually it doesn't work :P, you must pass the last radio item each time, ugh
 
-	radioNorth = gtk_radio_button_new_with_label( NULL, "North" );
+	radioNorth = gtk_radio_button_new_with_label_from_widget( NULL, "North" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioNorth, FALSE, FALSE, 3 );
 	gtk_widget_show( radioNorth );
 
-	radioDirection = gtk_radio_button_group( GTK_RADIO_BUTTON( radioNorth ) );
-
-	radioSouth = gtk_radio_button_new_with_label( radioDirection, "South" );
+	radioSouth = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNorth ), "South" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioSouth, FALSE, FALSE, 2 );
 	gtk_widget_show( radioSouth );
 
-	radioDirection = gtk_radio_button_group( GTK_RADIO_BUTTON( radioSouth ) );
-
-	radioEast = gtk_radio_button_new_with_label( radioDirection, "East" );
+	radioEast = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNorth ), "East" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioEast, FALSE, FALSE, 1 );
 	gtk_widget_show( radioEast );
 
-	radioDirection = gtk_radio_button_group( GTK_RADIO_BUTTON( radioEast ) );
-
-	radioWest = gtk_radio_button_new_with_label( radioDirection, "West" );
+	radioWest = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNorth ), "West" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioWest, FALSE, FALSE, 0 );
 	gtk_widget_show( radioWest );
 
@@ -718,19 +711,15 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	radioOldStyle = gtk_radio_button_new_with_label( NULL, "Original" );
+	radioOldStyle = gtk_radio_button_new_with_label_from_widget( NULL, "Original" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioOldStyle, FALSE, FALSE, 0 );
 	gtk_widget_show( radioOldStyle );
 
-	radioStyle = gtk_radio_button_group( GTK_RADIO_BUTTON( radioOldStyle ) );
-
-	radioBobStyle = gtk_radio_button_new_with_label( radioStyle, "Bob's Style" );
+	radioBobStyle = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioOldStyle ), "Bob's Style" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioBobStyle, FALSE, FALSE, 0 );
 	gtk_widget_show( radioBobStyle );
 
-	radioStyle = gtk_radio_button_group( GTK_RADIO_BUTTON( radioBobStyle ) );
-
-	radioCornerStyle = gtk_radio_button_new_with_label( radioStyle, "Corner Style" );
+	radioCornerStyle = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioOldStyle ), "Corner Style" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioCornerStyle, FALSE, FALSE, 0 );
 	gtk_widget_show( radioCornerStyle );
 
@@ -862,7 +851,6 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	GtkWidget   *comboMain, *comboTrim;
 	GtkWidget   *buttonSetMain, *buttonSetTrim;
 	GtkWidget   *radioNS, *radioEW;
-	GSList      *radioOrientation;
 	TwinWidget tw1, tw2;
 	EMessageBoxReturn ret;
 	int loop = 1;
@@ -1004,13 +992,11 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_widget_show( w );
 
 	// argh more radio buttons!
-	radioNS = gtk_radio_button_new_with_label( NULL, "North - South" );
+	radioNS = gtk_radio_button_new_with_label_from_widget( NULL, "North - South" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioNS, FALSE, FALSE, 0 );
 	gtk_widget_show( radioNS );
 
-	radioOrientation = gtk_radio_button_group( GTK_RADIO_BUTTON( radioNS ) );
-
-	radioEW = gtk_radio_button_new_with_label( radioOrientation, "East - West" );
+	radioEW = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( radioNS ), "East - West" );
 	gtk_box_pack_start( GTK_BOX( hbox ), radioEW, FALSE, FALSE, 0 );
 	gtk_widget_show( radioEW );
 
