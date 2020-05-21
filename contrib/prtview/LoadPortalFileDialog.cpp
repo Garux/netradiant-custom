@@ -54,60 +54,10 @@ static gint dialog_delete_callback( GtkWidget *widget, GdkEvent* event, gpointer
 	return TRUE;
 }
 
-static void file_sel_callback( GtkWidget *widget, gpointer data ){
-	GtkWidget *parent;
-	int *loop;
-	char **filename;
-
-	parent = gtk_widget_get_toplevel( widget );
-	loop = (int*)g_object_get_data( G_OBJECT( parent ), "loop" );
-	filename = (char**)g_object_get_data( G_OBJECT( parent ), "filename" );
-
-	*loop = 0;
-	if ( gpointer_to_int( data ) == IDOK ) {
-		*filename = g_strdup( gtk_file_selection_get_filename( GTK_FILE_SELECTION( parent ) ) );
-	}
-}
-
 static void change_clicked( GtkWidget *widget, gpointer data ){
-	GtkWidget* file_sel;
-	char* filename = NULL;
-	int loop = 1;
-
-	file_sel = gtk_file_selection_new( "Locate portal (.prt) file" );
-	gtk_window_set_transient_for( GTK_WINDOW( file_sel ), GTK_WINDOW( g_pRadiantWnd ) );
-	gtk_window_set_position( GTK_WINDOW( file_sel ),GTK_WIN_POS_CENTER_ON_PARENT );
-	gtk_window_set_modal( GTK_WINDOW( file_sel ), TRUE );
-	g_signal_connect( G_OBJECT( GTK_FILE_SELECTION( file_sel )->ok_button ), "clicked",
-						G_CALLBACK( file_sel_callback ), GINT_TO_POINTER( IDOK ) );
-	g_signal_connect( G_OBJECT( GTK_FILE_SELECTION( file_sel )->cancel_button ), "clicked",
-						G_CALLBACK( file_sel_callback ), GINT_TO_POINTER( IDCANCEL ) );
-	g_signal_connect( G_OBJECT( file_sel ), "delete_event",
-						G_CALLBACK( dialog_delete_callback ), NULL );
-	gtk_file_selection_hide_fileop_buttons( GTK_FILE_SELECTION( file_sel ) );
-
-	g_object_set_data( G_OBJECT( file_sel ), "loop", &loop );
-	g_object_set_data( G_OBJECT( file_sel ), "filename", &filename );
-#ifdef WIN32 // wants backslashes to get correct WD from path; returns backslashes anyway
-	for( char* c = portals.fn; *c; ++c )
-		if( '/' == *c )
-			*c = '\\';
-#endif
-	gtk_file_selection_set_filename( GTK_FILE_SELECTION( file_sel ), portals.fn );
-
-	gtk_grab_add( file_sel );
-	gtk_widget_show( file_sel );
-
-	while ( loop )
-		gtk_main_iteration();
-
-	gtk_grab_remove( file_sel );
-	gtk_widget_destroy( file_sel );
-
-	if ( filename != NULL ) {
+	if ( const char* filename = GlobalRadiant().m_pfnFileDialog( g_pRadiantWnd, true, "Locate portal (.prt) file", gtk_entry_get_text( GTK_ENTRY( data ) ), 0, true, false, false ) ) {
 		strcpy( portals.fn, filename );
 		gtk_entry_set_text( GTK_ENTRY( data ), filename );
-		g_free( filename );
 	}
 }
 
