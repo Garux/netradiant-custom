@@ -213,8 +213,8 @@ static void OnFog( GtkWidget *widget, gpointer data ){
 	SceneChangeNotify();
 }
 
-static void OnSelchangeZbuffer( GtkWidget *widget, gpointer data ){
-	portals.zbuffer = gpointer_to_int( data );
+static void OnSelchangeZbuffer( GtkComboBox *comboBox, gpointer data ){
+	portals.zbuffer = gtk_combo_box_get_active( comboBox );
 
 	Portals_shadersChanged();
 	SceneChangeNotify();
@@ -240,7 +240,7 @@ static void OnClip( GtkWidget *widget, gpointer data ){
 
 void DoConfigDialog(){
 	GtkWidget *dlg, *hbox, *vbox, *vbox2, *button, *table, *frame;
-	GtkWidget *lw3slider, *lw3label, *lw2slider, *lw2label, *zlist, *menu, *item;
+	GtkWidget *lw3slider, *lw3label, *lw2slider, *lw2label, *zlist;
 	GtkWidget *aa2check, *aa3check, *depthcheck, *linescheck, *polyscheck;
 	GtkWidget *transslider, *translabel, *clipslider, *cliplabel;
 	GtkWidget *show2check, *show3check, *portalcheck;
@@ -336,31 +336,15 @@ void DoConfigDialog(){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	g_signal_connect( G_OBJECT( polyscheck ), "toggled", G_CALLBACK( OnPoly ), NULL );
 
-	zlist = gtk_option_menu_new();
+	zlist = gtk_combo_box_text_new();
 	gtk_widget_show( zlist );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), zlist, TRUE, FALSE, 0 );
 
-	menu = gtk_menu_new();
-	gtk_widget_show( menu );
-	gtk_option_menu_set_menu( GTK_OPTION_MENU( zlist ), menu );
+	gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( zlist ), "Z-Buffer Test and Write (recommended for solid or no polygons)" );
+	gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( zlist ), "Z-Buffer Test Only (recommended for transparent polygons)" );
+	gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( zlist ), "Z-Buffer Off" );
 
-	item = gtk_menu_item_new_with_label( "Z-Buffer Test and Write (recommended for solid or no polygons)" );
-	gtk_widget_show( item );
-	g_signal_connect( G_OBJECT( item ), "activate",
-						G_CALLBACK( OnSelchangeZbuffer ), GINT_TO_POINTER( 0 ) );
-	gtk_menu_append( GTK_MENU( menu ), item );
-
-	item = gtk_menu_item_new_with_label( "Z-Buffer Test Only (recommended for transparent polygons)" );
-	gtk_widget_show( item );
-	g_signal_connect( G_OBJECT( item ), "activate",
-						G_CALLBACK( OnSelchangeZbuffer ), GINT_TO_POINTER( 1 ) );
-	gtk_menu_append( GTK_MENU( menu ), item );
-
-	item = gtk_menu_item_new_with_label( "Z-Buffer Off" );
-	gtk_widget_show( item );
-	g_signal_connect( G_OBJECT( item ), "activate",
-						G_CALLBACK( OnSelchangeZbuffer ), GINT_TO_POINTER( 2 ) );
-	gtk_menu_append( GTK_MENU( menu ), item );
+	g_signal_connect( G_OBJECT( zlist ), "changed", G_CALLBACK( OnSelchangeZbuffer ), nullptr );
 
 	table = gtk_table_new( 2, 2, FALSE );
 	gtk_widget_show( table );
@@ -483,7 +467,7 @@ void DoConfigDialog(){
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( polyscheck ), portals.polygons );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( linescheck ), portals.lines );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( aa3check ), portals.aa_3d );
-	gtk_option_menu_set_history( GTK_OPTION_MENU( zlist ), portals.zbuffer );
+	gtk_combo_box_set_active( GTK_COMBO_BOX( zlist ), portals.zbuffer );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( portalcheck ), portals.clip );
 
 	Set3DText( lw3label );
