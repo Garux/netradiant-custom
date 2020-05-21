@@ -1225,7 +1225,7 @@ GtkWindow* SurfaceInspector::BuildDialog(){
 				//Prolly should make this a member or global var, so the SI can draw on it...
 				TexTool::g_textoolWin = glwidget_new( FALSE );
 				// --> Dunno, but this stuff may be necessary... (Looks like it!)
-				gtk_widget_ref( TexTool::g_textoolWin );
+				g_object_ref( G_OBJECT( TexTool::g_textoolWin ) );
 				gtk_widget_set_events( TexTool::g_textoolWin, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK );
 				gtk_widget_set_can_focus( TexTool::g_textoolWin, TRUE );
 				// <-- end stuff...

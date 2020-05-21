@@ -2147,7 +2147,7 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 #else
 		GtkWidget* w = g_TextureBrowser.m_gl_widget = glwidget_new( FALSE );
 #endif
-		gtk_widget_ref( w );
+		g_object_ref( G_OBJECT( w ) );
 
 		gtk_widget_set_events( w, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
 		gtk_widget_set_can_focus( w, TRUE );
@@ -2328,7 +2328,7 @@ void TextureBrowser_destroyWindow(){
 	g_signal_handler_disconnect( G_OBJECT( g_TextureBrowser.m_gl_widget ), g_TextureBrowser.m_sizeHandler );
 	g_signal_handler_disconnect( G_OBJECT( g_TextureBrowser.m_gl_widget ), g_TextureBrowser.m_exposeHandler );
 
-	gtk_widget_unref( g_TextureBrowser.m_gl_widget );
+	g_object_unref( G_OBJECT( g_TextureBrowser.m_gl_widget ) );
 }
 
 const Vector3& TextureBrowser_getBackgroundColour( TextureBrowser& textureBrowser ){

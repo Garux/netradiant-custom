@@ -1318,7 +1318,7 @@ GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
 	}
 	{ // gl_widget
 		GtkWidget* w = g_ModelBrowser.m_gl_widget = glwidget_new( TRUE );
-		gtk_widget_ref( w );
+		g_object_ref( G_OBJECT( w ) );
 
 		gtk_widget_set_events( w, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
 		gtk_widget_set_can_focus( w, TRUE );
@@ -1344,7 +1344,7 @@ void ModelBrowser_destroyWindow(){
 	g_signal_handler_disconnect( G_OBJECT( g_ModelBrowser.m_gl_widget ), g_ModelBrowser.m_sizeHandler );
 	g_signal_handler_disconnect( G_OBJECT( g_ModelBrowser.m_gl_widget ), g_ModelBrowser.m_exposeHandler );
 
-	gtk_widget_unref( g_ModelBrowser.m_gl_widget );
+	g_object_unref( G_OBJECT( g_ModelBrowser.m_gl_widget ) );
 	g_ModelBrowser.m_gl_widget = nullptr;
 
 	delete g_ModelBrowser.m_fbo;

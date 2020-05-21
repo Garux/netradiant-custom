@@ -1022,7 +1022,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 			GtkWidget* widget = GTK_WIDGET( g_entitySpawnflagsCheck[i] );
 			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( widget ) ) ), " " );
 			gtk_widget_hide( widget );
-			gtk_widget_ref( widget );
+			g_object_ref( G_OBJECT( widget ) );
 			gtk_container_remove( GTK_CONTAINER( g_spawnflagsTable ), widget );
 		}
 	}
@@ -1041,7 +1041,7 @@ void SurfaceFlags_setEntityClass( EntityClass* eclass ){
 			gtk_table_attach( g_spawnflagsTable, widget, i % 4, i % 4 + 1, i / 4, i / 4 + 1,
 							  (GtkAttachOptions)( GTK_FILL ),
 							  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
-			gtk_widget_unref( widget );
+			g_object_unref( G_OBJECT( widget ) );
 
 			gtk_label_set_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( widget ) ) ), str.c_str() );
 
@@ -1612,7 +1612,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 					for ( int i = 0; i < MAX_FLAGS; i++ )
 					{
 						GtkCheckButton* check = GTK_CHECK_BUTTON( gtk_check_button_new_with_label( "" ) );
-						gtk_widget_ref( GTK_WIDGET( check ) );
+						g_object_ref( G_OBJECT( check ) );
 						g_object_set_data( G_OBJECT( check ), "handler", gint_to_pointer( g_signal_connect( G_OBJECT( check ), "toggled", G_CALLBACK( SpawnflagCheck_toggled ), 0 ) ) );
 						g_entitySpawnflagsCheck[i] = check;
 					}
