@@ -60,7 +60,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	g_signal_connect( G_OBJECT( window ), "destroy",
 						G_CALLBACK( gtk_widget_destroy ), NULL );
 	gtk_window_set_title( GTK_WINDOW( window ), lpCaption );
-	gtk_container_border_width( GTK_CONTAINER( window ), 10 );
+	gtk_container_set_border_width( GTK_CONTAINER( window ), 10 );
 	g_object_set_data( G_OBJECT( window ), "loop", &loop );
 	g_object_set_data( G_OBJECT( window ), "ret", &ret );
 	gtk_widget_realize( window );
