@@ -420,6 +420,12 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	return ret;
 }
 
+inline GtkWidget* entry_new_with_max_length( gint max ){
+	GtkWidget* entry = gtk_entry_new();
+	gtk_entry_set_max_length( GTK_ENTRY( entry ), max );
+	return entry;
+}
+
 EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	GtkWidget *window, *w, *vbox, *hbox, *vbox2, *hbox2;
 
@@ -470,8 +476,8 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- hbox2 ----
 
-	text1 = gtk_entry_new_with_max_length( 256 );
-	gtk_entry_set_text( (GtkEntry*)text1, "3" );
+	text1 = entry_new_with_max_length( 256 );
+	gtk_entry_set_text( GTK_ENTRY( text1 ), "3" );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), text1, FALSE, FALSE, 2 );
 	gtk_widget_show( text1 );
 
@@ -488,8 +494,8 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 
 	// ---- hbox2 ----
 
-	text2 = gtk_entry_new_with_max_length( 256 );
-	gtk_entry_set_text( (GtkEntry*)text2, "8" );
+	text2 = entry_new_with_max_length( 256 );
+	gtk_entry_set_text( GTK_ENTRY( text2 ), "8" );
 	gtk_box_pack_start( GTK_BOX( hbox2 ), text2, FALSE, FALSE, 2 );
 	gtk_widget_show( text2 );
 
@@ -571,12 +577,12 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 			rs->bInverse = gtk_toggle_button_get_active( (GtkToggleButton*)check2 ) ? true : false;
 			rs->bAlignTop = gtk_toggle_button_get_active( (GtkToggleButton*)check3 ) ? true : false;
 
-			if ( !ValidateTextIntRange( gtk_entry_get_text( (GtkEntry*)text1 ), 3, 32, "Number Of Sides", &rs->nSides ) ) {
+			if ( !ValidateTextIntRange( gtk_entry_get_text( GTK_ENTRY( text1 ) ), 3, 32, "Number Of Sides", &rs->nSides ) ) {
 				dialogError = TRUE;
 			}
 
 			if ( rs->bUseBorder ) {
-				if ( !ValidateTextIntRange( gtk_entry_get_text( (GtkEntry*)text2 ), 8, 256, "Border Width", &rs->nBorderWidth ) ) {
+				if ( !ValidateTextIntRange( gtk_entry_get_text( GTK_ENTRY( text2 ) ), 8, 256, "Border Width", &rs->nBorderWidth ) ) {
 					dialogError = TRUE;
 				}
 			}
@@ -644,7 +650,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	textStairHeight = gtk_entry_new_with_max_length( 256 );
+	textStairHeight = entry_new_with_max_length( 256 );
 	gtk_box_pack_start( GTK_BOX( hbox ), textStairHeight, FALSE, FALSE, 1 );
 	gtk_widget_show( textStairHeight );
 
@@ -745,7 +751,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	textMainTex = gtk_entry_new_with_max_length( 512 );
+	textMainTex = entry_new_with_max_length( 512 );
 	gtk_entry_set_text( GTK_ENTRY( textMainTex ), rs->mainTexture );
 	gtk_box_pack_start( GTK_BOX( hbox ), textMainTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textMainTex );
@@ -760,7 +766,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	textRiserTex = gtk_entry_new_with_max_length( 512 );
+	textRiserTex = entry_new_with_max_length( 512 );
 	gtk_box_pack_start( GTK_BOX( hbox ), textRiserTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textRiserTex );
 
@@ -808,8 +814,8 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 		if ( ret == eIDOK ) {
 			rs->bUseDetail = gtk_toggle_button_get_active( (GtkToggleButton*)checkUseDetail ) ? true : false;
 
-			strcpy( rs->riserTexture, gtk_entry_get_text( (GtkEntry*)textRiserTex ) );
-			strcpy( rs->mainTexture, gtk_entry_get_text( (GtkEntry*)textMainTex ) );
+			strcpy( rs->riserTexture, gtk_entry_get_text( GTK_ENTRY( textRiserTex ) ) );
+			strcpy( rs->mainTexture, gtk_entry_get_text( GTK_ENTRY( textMainTex ) ) );
 
 			if ( gtk_toggle_button_get_active( (GtkToggleButton*)radioNorth ) ) {
 				rs->direction = MOVE_NORTH;
@@ -824,7 +830,7 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 				rs->direction = MOVE_WEST;
 			}
 
-			if ( !ValidateTextInt( gtk_entry_get_text( (GtkEntry*)textStairHeight ), "Stair Height", &rs->stairHeight ) ) {
+			if ( !ValidateTextInt( gtk_entry_get_text( GTK_ENTRY( textStairHeight ) ), "Stair Height", &rs->stairHeight ) ) {
 				dialogError = TRUE;
 			}
 
@@ -891,7 +897,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	textFrontBackTex = gtk_entry_new_with_max_length( 512 );
+	textFrontBackTex = entry_new_with_max_length( 512 );
 	gtk_entry_set_text( GTK_ENTRY( textFrontBackTex ), rs->mainTexture );
 	gtk_box_pack_start( GTK_BOX( hbox ), textFrontBackTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textFrontBackTex );
@@ -906,7 +912,7 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	textTrimTex = gtk_entry_new_with_max_length( 512 );
+	textTrimTex = entry_new_with_max_length( 512 );
 	gtk_box_pack_start( GTK_BOX( hbox ), textTrimTex, FALSE, FALSE, 0 );
 	gtk_widget_show( textTrimTex );
 
@@ -1103,8 +1109,8 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	// ---- hbox ----
 
-	text1 = gtk_entry_new_with_max_length( 256 );
-	gtk_entry_set_text( (GtkEntry*)text1, "25" );
+	text1 = entry_new_with_max_length( 256 );
+	gtk_entry_set_text( GTK_ENTRY( text1 ), "25" );
 	gtk_box_pack_start( GTK_BOX( hbox ), text1, FALSE, FALSE, 2 );
 	gtk_widget_show( text1 );
 
@@ -1121,8 +1127,8 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	// ---- hbox ----
 
-	text2 = gtk_entry_new_with_max_length( 256 );
-	gtk_entry_set_text( (GtkEntry*)text2, "3" );
+	text2 = entry_new_with_max_length( 256 );
+	gtk_entry_set_text( GTK_ENTRY( text2 ), "3" );
 	gtk_box_pack_start( GTK_BOX( hbox ), text2, FALSE, FALSE, 2 );
 	gtk_widget_show( text2 );
 
@@ -1144,8 +1150,8 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	// ---- hbox ----
 
-	text3 = gtk_entry_new_with_max_length( 256 );
-	gtk_entry_set_text( (GtkEntry*)text3, "-800" );
+	text3 = entry_new_with_max_length( 256 );
+	gtk_entry_set_text( GTK_ENTRY( text3 ), "-800" );
 	gtk_box_pack_start( GTK_BOX( hbox ), text3, FALSE, FALSE, 2 );
 	gtk_widget_show( text3 );
 
@@ -1381,7 +1387,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	dlgTexReset.editTexOld = gtk_entry_new_with_max_length( 256 );
+	dlgTexReset.editTexOld = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editTexOld ), rs->textureName );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editTexOld, 2, 3, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1394,7 +1400,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	dlgTexReset.editTexNew = gtk_entry_new_with_max_length( 256 );
+	dlgTexReset.editTexNew = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editTexNew ), rs->textureName );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editTexNew, 2, 3, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1429,7 +1435,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	dlgTexReset.editScaleHor = gtk_entry_new_with_max_length( 256 );
+	dlgTexReset.editScaleHor = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editScaleHor ), "0.5" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editScaleHor, 2, 3, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1450,7 +1456,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	dlgTexReset.editScaleVert = gtk_entry_new_with_max_length( 256 );
+	dlgTexReset.editScaleVert = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editScaleVert ), "0.5" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editScaleVert, 2, 3, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1485,7 +1491,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	dlgTexReset.editShiftHor = gtk_entry_new_with_max_length( 256 );
+	dlgTexReset.editShiftHor = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editShiftHor ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editShiftHor, 2, 3, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1506,7 +1512,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	dlgTexReset.editShiftVert = gtk_entry_new_with_max_length( 256 );
+	dlgTexReset.editShiftVert = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editShiftVert ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editShiftVert, 2, 3, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1540,7 +1546,7 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	dlgTexReset.editRotation = gtk_entry_new_with_max_length( 256 );
+	dlgTexReset.editRotation = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( dlgTexReset.editRotation ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), dlgTexReset.editRotation, 2, 3, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1700,7 +1706,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	radiusX = gtk_entry_new_with_max_length( 256 );
+	radiusX = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( radiusX ), "100" );
 	gtk_table_attach( GTK_TABLE( table ), radiusX, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1715,7 +1721,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	radiusY = gtk_entry_new_with_max_length( 256 );
+	radiusY = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( radiusY ), "100" );
 	gtk_table_attach( GTK_TABLE( table ), radiusY, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1743,7 +1749,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	angleStart = gtk_entry_new_with_max_length( 256 );
+	angleStart = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( angleStart ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), angleStart, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1758,7 +1764,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	angleEnd = gtk_entry_new_with_max_length( 256 );
+	angleEnd = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( angleEnd ), "90" );
 	gtk_table_attach( GTK_TABLE( table ), angleEnd, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1785,7 +1791,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	heightStart = gtk_entry_new_with_max_length( 256 );
+	heightStart = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( heightStart ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), heightStart, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1800,7 +1806,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	heightEnd = gtk_entry_new_with_max_length( 256 );
+	heightEnd = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( heightEnd ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), heightEnd, 1, 2, 1, 2,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1828,7 +1834,7 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 					  (GtkAttachOptions) ( 0 ), 0, 0 );
 	gtk_widget_show( w );
 
-	numPoints = gtk_entry_new_with_max_length( 256 );
+	numPoints = entry_new_with_max_length( 256 );
 	gtk_entry_set_text( GTK_ENTRY( numPoints ), "0" );
 	gtk_table_attach( GTK_TABLE( table ), numPoints, 1, 2, 0, 1,
 					  (GtkAttachOptions) ( GTK_FILL ),
@@ -1958,7 +1964,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	textlinkNum = gtk_entry_new_with_max_length( 256 );
+	textlinkNum = entry_new_with_max_length( 256 );
 	gtk_box_pack_start( GTK_BOX( hbox ), textlinkNum, FALSE, FALSE, 1 );
 	gtk_widget_show( textlinkNum );
 
@@ -1972,7 +1978,7 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
 	gtk_widget_show( hbox );
 
-	textlinkName = gtk_entry_new_with_max_length( 256 );
+	textlinkName = entry_new_with_max_length( 256 );
 	gtk_box_pack_start( GTK_BOX( hbox ), textlinkName, FALSE, FALSE, 0 );
 	gtk_widget_show( textlinkName );
 
@@ -2009,8 +2015,8 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 		dialogError = FALSE;
 
 		if ( ret == eIDOK ) {
-			strcpy( rs->linkName, gtk_entry_get_text( (GtkEntry*)textlinkName ) );
-			if ( !ValidateTextInt( gtk_entry_get_text( (GtkEntry*)textlinkNum ), "Elements", &rs->linkNum ) ) {
+			strcpy( rs->linkName, gtk_entry_get_text( GTK_ENTRY( textlinkName ) ) );
+			if ( !ValidateTextInt( gtk_entry_get_text( GTK_ENTRY( textlinkNum ) ), "Elements", &rs->linkNum ) ) {
 				dialogError = TRUE;
 			}
 		}
