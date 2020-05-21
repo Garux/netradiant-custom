@@ -773,17 +773,17 @@ ListAttribute( const char* key, const ListAttributeType& type ) :
 	m_combo( 0 ),
 	m_nonModal( ApplyCaller( *this ) ),
 	m_type( type ){
-	GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+	GtkWidget* combo = gtk_combo_box_text_new();
 
 	for ( ListAttributeType::const_iterator i = type.begin(); i != type.end(); ++i )
 	{
-		gtk_combo_box_append_text( GTK_COMBO_BOX( combo ), ( *i ).first.c_str() );
+		gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( combo ), ( *i ).first.c_str() );
 	}
 
-	gtk_widget_show( GTK_WIDGET( combo ) );
-	m_nonModal.connect( combo );
+	gtk_widget_show( combo );
+	m_nonModal.connect( GTK_COMBO_BOX( combo ) );
 
-	m_combo = combo;
+	m_combo = GTK_COMBO_BOX( combo );
 }
 void release(){
 	delete this;

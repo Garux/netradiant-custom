@@ -227,8 +227,8 @@ float m_fZ;
    float	m_fVShift; */
 int m_nCol;
 int m_nRow;
-GtkComboBox *m_pRowCombo;
-GtkComboBox *m_pColCombo;
+GtkComboBoxText *m_pRowCombo;
+GtkComboBoxText *m_pColCombo;
 std::size_t m_countRows;
 std::size_t m_countCols;
 
@@ -604,29 +604,27 @@ GtkWindow* PatchInspector::BuildDialog(){
 												  (GtkAttachOptions)( 0 ), 0, 0 );
 							}
 							{
-								GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+								GtkComboBoxText* combo = m_pRowCombo = GTK_COMBO_BOX_TEXT( gtk_combo_box_text_new() );
 								g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( OnSelchangeComboColRow ), this );
-								AddDialogData( *combo, m_nRow );
+								AddDialogData( *GTK_COMBO_BOX( combo ), m_nRow );
 
 								gtk_widget_show( GTK_WIDGET( combo ) );
 								gtk_table_attach( table, GTK_WIDGET( combo ), 0, 1, 1, 2,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
 												  (GtkAttachOptions)( 0 ), 0, 0 );
 								gtk_widget_set_size_request( GTK_WIDGET( combo ), 60, -1 );
-								m_pRowCombo = combo;
 							}
 
 							{
-								GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+								GtkComboBoxText* combo = m_pColCombo = GTK_COMBO_BOX_TEXT( gtk_combo_box_text_new() );
 								g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( OnSelchangeComboColRow ), this );
-								AddDialogData( *combo, m_nCol );
+								AddDialogData( *GTK_COMBO_BOX( combo ), m_nCol );
 
 								gtk_widget_show( GTK_WIDGET( combo ) );
 								gtk_table_attach( table, GTK_WIDGET( combo ), 1, 2, 1, 2,
 												  (GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),
 												  (GtkAttachOptions)( 0 ), 0, 0 );
 								gtk_widget_set_size_request( GTK_WIDGET( combo ), 60, -1 );
-								m_pColCombo = combo;
 							}
 						}
 						GtkTable* table = GTK_TABLE( gtk_table_new( 5, 2, FALSE ) );
@@ -1059,11 +1057,11 @@ void PatchInspector::GetPatchInfo(){
 		m_bListenChanged = false;
 
 		{
-			gtk_combo_box_set_active( m_pRowCombo, 0 );
+			gtk_combo_box_set_active( GTK_COMBO_BOX( m_pRowCombo ), 0 );
 
 			for ( std::size_t i = 0; i < m_countRows; ++i )
 			{
-				gtk_combo_box_remove_text( m_pRowCombo, gint( m_countRows - i - 1 ) );
+				gtk_combo_box_text_remove( m_pRowCombo, gint( m_countRows - i - 1 ) );
 			}
 
 			m_countRows = m_Patch->getHeight();
@@ -1071,18 +1069,18 @@ void PatchInspector::GetPatchInfo(){
 			{
 				char buffer[16];
 				sprintf( buffer, "%u", Unsigned( i ) );
-				gtk_combo_box_append_text( m_pRowCombo, buffer );
+				gtk_combo_box_text_append_text( m_pRowCombo, buffer );
 			}
 
-			gtk_combo_box_set_active( m_pRowCombo, 0 );
+			gtk_combo_box_set_active( GTK_COMBO_BOX( m_pRowCombo ), 0 );
 		}
 
 		{
-			gtk_combo_box_set_active( m_pColCombo, 0 );
+			gtk_combo_box_set_active( GTK_COMBO_BOX( m_pColCombo ), 0 );
 
 			for ( std::size_t i = 0; i < m_countCols; ++i )
 			{
-				gtk_combo_box_remove_text( m_pColCombo, gint( m_countCols - i - 1 ) );
+				gtk_combo_box_text_remove( m_pColCombo, gint( m_countCols - i - 1 ) );
 			}
 
 			m_countCols = m_Patch->getWidth();
@@ -1090,10 +1088,10 @@ void PatchInspector::GetPatchInfo(){
 			{
 				char buffer[16];
 				sprintf( buffer, "%u", Unsigned( i ) );
-				gtk_combo_box_append_text( m_pColCombo, buffer );
+				gtk_combo_box_text_append_text( m_pColCombo, buffer );
 			}
 
-			gtk_combo_box_set_active( m_pColCombo, 0 );
+			gtk_combo_box_set_active( GTK_COMBO_BOX( m_pColCombo ), 0 );
 		}
 
 		m_bListenChanged = true;

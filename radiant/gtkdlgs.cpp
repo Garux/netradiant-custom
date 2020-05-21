@@ -155,23 +155,18 @@ inline void path_copy_clean( char* destination, const char* source ){
 
 struct GameCombo
 {
-	GtkComboBox* game_select;
+	GtkComboBoxText* game_select;
 	GtkEntry* fsgame_entry;
 };
 
 gboolean OnSelchangeComboWhatgame( GtkWidget *widget, GameCombo* combo ){
-	const char *gamename;
-	{
-		GtkTreeIter iter;
-		gtk_combo_box_get_active_iter( combo->game_select, &iter );
-		gtk_tree_model_get( gtk_combo_box_get_model( combo->game_select ), &iter, 0, (gpointer*)&gamename, -1 );
+	if( gchar* gamename = gtk_combo_box_text_get_active_text( combo->game_select ) ){
+		gamecombo_t gamecombo = gamecombo_for_gamename( gamename );
+
+		gtk_entry_set_text( combo->fsgame_entry, gamecombo.fs_game );
+		gtk_widget_set_sensitive( GTK_WIDGET( combo->fsgame_entry ), gamecombo.sensitive );
+		g_free( gamename );
 	}
-
-	gamecombo_t gamecombo = gamecombo_for_gamename( gamename );
-
-	gtk_entry_set_text( combo->fsgame_entry, gamecombo.fs_game );
-	gtk_widget_set_sensitive( GTK_WIDGET( combo->fsgame_entry ), gamecombo.sensitive );
-
 	return FALSE;
 }
 
@@ -240,20 +235,20 @@ GtkWindow* ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 					gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 				}
 				{
-					dialog.game_combo.game_select = GTK_COMBO_BOX( gtk_combo_box_new_text() );
+					GtkComboBoxText* combo = dialog.game_combo.game_select = GTK_COMBO_BOX_TEXT( gtk_combo_box_text_new() );
 
-					gtk_combo_box_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().basegame );
+					gtk_combo_box_text_append_text( combo, globalGameComboConfiguration().basegame );
 					if ( globalGameComboConfiguration().known[0] != '\0' ) {
-						gtk_combo_box_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().known );
+						gtk_combo_box_text_append_text( combo, globalGameComboConfiguration().known );
 					}
-					gtk_combo_box_append_text( dialog.game_combo.game_select, globalGameComboConfiguration().custom );
+					gtk_combo_box_text_append_text( combo, globalGameComboConfiguration().custom );
 
-					gtk_widget_show( GTK_WIDGET( dialog.game_combo.game_select ) );
-					gtk_table_attach( table2, GTK_WIDGET( dialog.game_combo.game_select ), 1, 2, 0, 1,
+					gtk_widget_show( GTK_WIDGET( combo ) );
+					gtk_table_attach( table2, GTK_WIDGET( combo ), 1, 2, 0, 1,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-					g_signal_connect( G_OBJECT( dialog.game_combo.game_select ), "changed", G_CALLBACK( OnSelchangeComboWhatgame ), &dialog.game_combo );
+					g_signal_connect( G_OBJECT( combo ), "changed", G_CALLBACK( OnSelchangeComboWhatgame ), &dialog.game_combo );
 				}
 
 				{
@@ -282,16 +277,16 @@ GtkWindow* ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 					gtk_misc_set_alignment( GTK_MISC( label ), 1, 0.5 );
 
-					GtkComboBox* combo = GTK_COMBO_BOX( gtk_combo_box_new_text() );
-					gtk_combo_box_append_text( combo, globalMappingMode().sp_mapping_mode );
-					gtk_combo_box_append_text( combo, globalMappingMode().mp_mapping_mode );
+					GtkComboBoxText* combo = GTK_COMBO_BOX_TEXT( gtk_combo_box_text_new() );
+					gtk_combo_box_text_append_text( combo, globalMappingMode().sp_mapping_mode );
+					gtk_combo_box_text_append_text( combo, globalMappingMode().mp_mapping_mode );
 
 					gtk_widget_show( GTK_WIDGET( combo ) );
 					gtk_table_attach( table2, GTK_WIDGET( combo ), 1, 2, 3, 4,
 									  (GtkAttachOptions) ( GTK_EXPAND | GTK_FILL ),
 									  (GtkAttachOptions) ( 0 ), 0, 0 );
 
-					dialog.gamemode_combo = combo;
+					dialog.gamemode_combo = GTK_COMBO_BOX( combo );
 				}
 			}
 		}
@@ -301,7 +296,7 @@ GtkWindow* ProjectSettingsDialog_construct( ProjectSettingsDialog& dialog, Modal
 	const char* dir = gamename_get();
 	gamecombo_t gamecombo = gamecombo_for_dir( dir );
 
-	gtk_combo_box_set_active( dialog.game_combo.game_select, gamecombo.game );
+	gtk_combo_box_set_active( GTK_COMBO_BOX( dialog.game_combo.game_select ), gamecombo.game );
 	gtk_entry_set_text( dialog.game_combo.fsgame_entry, gamecombo.fs_game );
 	gtk_widget_set_sensitive( GTK_WIDGET( dialog.game_combo.fsgame_entry ), gamecombo.sensitive );
 

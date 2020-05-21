@@ -486,11 +486,11 @@ void Dialog::addCombo( GtkWidget* vbox, const char* name, StringArrayRange value
 	GtkWidget* alignment = gtk_alignment_new( 0.0, 0.5, 0.0, 0.0 );
 	gtk_widget_show( alignment );
 	{
-		GtkWidget* combo = gtk_combo_box_new_text();
+		GtkWidget* combo = gtk_combo_box_text_new();
 
 		for ( StringArrayRange::Iterator i = values.first; i != values.last; ++i )
 		{
-			gtk_combo_box_append_text( GTK_COMBO_BOX( combo ), *i );
+			gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT( combo ), *i );
 		}
 
 		AddIntComboData( *GTK_COMBO_BOX( combo ), importViewer, exportViewer );
