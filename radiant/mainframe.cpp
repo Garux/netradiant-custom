@@ -2567,10 +2567,9 @@ void Manipulators_constructToolbar( GtkToolbar* toolbar ){
 
 GtkToolbar* create_main_toolbar( MainFrame::EViewStyle style ){
 	GtkToolbar* toolbar = GTK_TOOLBAR( gtk_toolbar_new() );
-	gtk_toolbar_set_orientation( toolbar, GTK_ORIENTATION_HORIZONTAL );
+	gtk_orientable_set_orientation( GTK_ORIENTABLE( toolbar ), GTK_ORIENTATION_HORIZONTAL );
 	gtk_toolbar_set_style( toolbar, GTK_TOOLBAR_ICONS );
 //	gtk_toolbar_set_show_arrow( toolbar, TRUE );
-	//gtk_orientable_set_orientation( GTK_ORIENTABLE( toolbar ), GTK_ORIENTATION_HORIZONTAL );
 	gtk_widget_show( GTK_WIDGET( toolbar ) );
 
 	File_constructToolbar( toolbar );
