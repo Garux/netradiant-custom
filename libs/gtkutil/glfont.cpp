@@ -809,7 +809,8 @@ GLFont *glfont_create( const char* font_string ){
 			pango_layout_set_text( layout, reinterpret_cast<const char*>( &c ), 1 );
 			pango_layout_get_extents( layout, NULL, &log_rect );
 
-			if ( log_rect.width > 0 && log_rect.height > 0 ) {
+			if ( log_rect.width > 0 && log_rect.height > 0
+				&& PANGO_PIXELS_CEIL( log_rect.width ) <= font_height ) { // ensure, that height >= width
 				bitmap.rows = PANGO_PIXELS_CEIL( log_rect.height );
 				bitmap.width = PANGO_PIXELS_CEIL( log_rect.width );
 				bitmap.pitch = bitmap.width;
@@ -864,6 +865,8 @@ GLFont *glfont_create( const char* font_string ){
 		}
 
 		glPixelStorei( GL_UNPACK_ALIGNMENT, alignment );
+
+		GlobalOpenGL_debugAssertNoErrors();
 
 		g_object_unref( G_OBJECT( layout ) );
 	}
