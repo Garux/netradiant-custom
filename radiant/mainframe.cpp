@@ -2995,7 +2995,7 @@ void MainFrame::Create(){
 	{
 		GdkPixbuf* pixbuf = pixbuf_new_from_file_with_mask( "bitmaps/icon.png" );
 		if ( pixbuf != 0 ) {
-			gtk_window_set_icon( window, pixbuf );
+			gtk_window_set_default_icon( pixbuf );
 			g_object_unref( pixbuf );
 		}
 	}
