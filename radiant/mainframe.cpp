@@ -2921,10 +2921,22 @@ GtkWindow* create_splash(){
 	gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( image ) );
 
 	if( gtk_image_get_storage_type( image ) == GTK_IMAGE_PIXBUF ){
-		GdkBitmap* mask;
-		GdkPixbuf* pix = gtk_image_get_pixbuf( image );
-		gdk_pixbuf_render_pixmap_and_mask( pix, NULL, &mask, 255 );
-		gtk_widget_shape_combine_mask ( GTK_WIDGET( window ), mask, 0, 0 );
+		GdkPixbuf *pixbuf = gtk_image_get_pixbuf( image );
+
+		cairo_surface_t *surface = cairo_image_surface_create( CAIRO_FORMAT_A1,
+											gdk_pixbuf_get_width( pixbuf ),
+											gdk_pixbuf_get_height( pixbuf ) );
+
+		cairo_t *cr = cairo_create( surface );
+		gdk_cairo_set_source_pixbuf( cr, pixbuf, 0, 0 );
+		cairo_paint( cr );
+		cairo_destroy( cr );
+
+		cairo_region_t *region = gdk_cairo_region_create_from_surface( surface );
+		gtk_widget_shape_combine_region( GTK_WIDGET( window ), region );
+		cairo_region_destroy(region);
+
+		cairo_surface_destroy(surface);
 	}
 
 	gtk_widget_set_size_request( GTK_WIDGET( window ), -1, -1 );
@@ -3475,7 +3487,7 @@ void GlobalGL_sharedContextCreated(){
 	globalOutputStream() << "GL_VENDOR: " << reinterpret_cast<const char*>( glGetString( GL_VENDOR ) ) << "\n";
 	globalOutputStream() << "GL_RENDERER: " << reinterpret_cast<const char*>( glGetString( GL_RENDERER ) ) << "\n";
 	globalOutputStream() << "GL_VERSION: " << reinterpret_cast<const char*>( glGetString( GL_VERSION ) ) << "\n";
-	globalOutputStream() << "GL_EXTENSIONS: " << reinterpret_cast<const char*>( glGetString( GL_EXTENSIONS ) ) << "\n";
+//	globalOutputStream() << "GL_EXTENSIONS: " << reinterpret_cast<const char*>( glGetString( GL_EXTENSIONS ) ) << "\n";
 
 	QGL_sharedContextCreated( GlobalOpenGL() );
 

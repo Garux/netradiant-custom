@@ -209,9 +209,9 @@ void error_redirect( const gchar *domain, GLogLevelFlags log_level, const gchar 
 	globalErrorStream() << buf << "\n";
 
 	// FIXME why are warnings is_fatal?
-#ifndef _DEBUG
+//#ifndef _DEBUG
 	if ( is_fatal )
-#endif
+//#endif
 	ERROR_MESSAGE( "GTK+ error: " << buf );
 }
 

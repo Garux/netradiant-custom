@@ -28,6 +28,110 @@
 #include "igl.h"
 
 #include <gtk/gtk.h>
+
+
+void ( *GLWidget_sharedContextCreated )() = 0;
+void ( *GLWidget_sharedContextDestroyed )() = 0;
+
+
+unsigned int g_context_count = 0;
+
+namespace
+{
+GtkWidget* g_shared = 0;
+}
+
+GdkGLContext* glwidget_context_created( GtkGLArea *area ){
+    GdkGLContext *context = gtk_gl_area_get_context( area );
+    ASSERT_NOTNULL( context );
+    gdk_gl_context_set_forward_compatible( context, FALSE );
+    return context;
+}
+
+void glwidget_context_realized( GtkWidget* widget, gpointer data ){
+	ASSERT_MESSAGE( gtk_gl_area_get_error( GTK_GL_AREA( widget ) ) == NULL, "gtk_gl_area_get_error( GTK_GL_AREA( widget ) ) != NULL" );
+	GdkGLContext *context = gtk_gl_area_get_context( GTK_GL_AREA( widget ) );
+    ASSERT_NOTNULL( context );
+    //gdk_gl_context_set_forward_compatible( context, FALSE );
+    globalOutputStream() << gdk_gl_context_get_forward_compatible( context ) << " gdk_gl_context_get_forward_compatible( context )\n";
+    globalOutputStream() << gdk_gl_context_get_use_es( context ) << " gdk_gl_context_get_use_es( context )\n";
+    globalOutputStream() << gdk_gl_context_is_legacy( context ) << " gdk_gl_context_is_legacy( context )\n";
+    //ASSERT_MESSAGE( gdk_gl_context_get_forward_compatible( context ), "!gdk_gl_context_get_forward_compatible( context )" ); //not
+    //ASSERT_MESSAGE( gdk_gl_context_get_use_es( context ), "!gdk_gl_context_get_use_es( context )" ); //doesn't
+    //ASSERT_MESSAGE( gdk_gl_context_is_legacy( context ), "!gdk_gl_context_is_legacy( context )" ); //is not
+	if ( ++g_context_count == 1 ) {
+		g_shared = widget;
+		g_object_ref( G_OBJECT( g_shared ) );
+
+		gtk_gl_area_make_current( GTK_GL_AREA( g_shared ) );
+		GlobalOpenGL().contextValid = true;
+
+		GLWidget_sharedContextCreated();
+	}
+}
+
+void glwidget_context_destroyed( GtkWidget* widget, gpointer data ){
+	if ( --g_context_count == 0 ) {
+		GlobalOpenGL().contextValid = false;
+
+		GLWidget_sharedContextDestroyed();
+
+		g_object_unref( G_OBJECT( g_shared ) );
+		g_shared = 0;
+	}
+}
+
+gboolean glwidget_enable_gl( GtkWidget* widget, GtkWidget* widget2, gpointer data ){
+/*	if ( widget2 == 0 && !gtk_widget_is_gl_capable( widget ) ) {
+		GdkGLConfig* glconfig = ( g_object_get_data( G_OBJECT( widget ), "zbuffer" ) ) ? glconfig_new_with_depth() : glconfig_new();
+		ASSERT_MESSAGE( glconfig != 0, "failed to create OpenGL config" );
+
+		gtk_widget_set_gl_capability( widget, glconfig, g_shared != 0 ? gtk_widget_get_gl_context( g_shared ) : 0,  TRUE, GDK_GL_RGBA_TYPE );
+
+		gtk_widget_realize( widget );
+		if ( g_shared == 0 ) {
+			g_shared = widget;
+		}
+
+		// free glconfig?
+	}*/
+	return FALSE;
+}
+
+GtkWidget* glwidget_new( gboolean zbuffer ){
+	GtkWidget* widget = gtk_gl_area_new();
+	gtk_gl_area_set_has_depth_buffer( GTK_GL_AREA( widget ), zbuffer );
+    gtk_gl_area_set_auto_render( GTK_GL_AREA( widget ), FALSE );
+///    gtk_gl_area_set_required_version( GTK_GL_AREA( widget ), 2, 0 );
+///	g_signal_connect( G_OBJECT( widget ), "hierarchy-changed", G_CALLBACK( glwidget_enable_gl ), 0 );
+
+//	g_signal_connect( G_OBJECT( widget ), "create-context", G_CALLBACK( glwidget_context_created ), 0 );
+	g_signal_connect( G_OBJECT( widget ), "realize", G_CALLBACK( glwidget_context_realized ), 0 );
+	g_signal_connect( G_OBJECT( widget ), "unrealize", G_CALLBACK( glwidget_context_destroyed ), 0 );
+
+	return widget;
+}
+
+void glwidget_destroy_context( GtkWidget *widget ){
+}
+
+void glwidget_create_context( GtkWidget *widget ){
+}
+
+void glwidget_swap_buffers( GtkWidget *widget ){
+//	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable( widget );
+//	gdk_gl_drawable_swap_buffers( gldrawable );
+}
+
+gboolean glwidget_make_current( GtkWidget *widget ){
+//	GdkGLContext *glcontext = gtk_widget_get_gl_context( widget );
+//	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable( widget );
+//	return gdk_gl_drawable_gl_begin( gldrawable, glcontext );
+	return FALSE;
+}
+
+
+#if 0
 #include <gtk/gtkglwidget.h>
 
 #include "pointer.h"
@@ -255,3 +359,5 @@ gboolean glwidget_make_current( GtkWidget *widget ){
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable( widget );
 	return gdk_gl_drawable_gl_begin( gldrawable, glcontext );
 }
+
+#endif

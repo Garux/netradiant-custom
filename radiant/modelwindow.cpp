@@ -582,7 +582,7 @@ public:
 	}
 	void queueDraw() const {
 		if ( m_gl_widget != nullptr )
-			gtk_widget_queue_draw( m_gl_widget );
+			gtk_gl_area_queue_render( GTK_GL_AREA( m_gl_widget ) );
 	}
 	bool m_originInvalid = true;
 	void validate(){
@@ -953,24 +953,20 @@ void ModelBrowser_render(){
 }
 
 
-gboolean ModelBrowser_size_allocate( GtkWidget* widget, GtkAllocation* allocation, ModelBrowser* modelBrowser ){
-	modelBrowser->fbo_get()->reset( allocation->width, allocation->height, modelBrowser->m_MSAA, true );
-	modelBrowser->m_width = allocation->width;
-	modelBrowser->m_height = allocation->height;
+void ModelBrowser_size_allocate( GtkGLArea* area, gint width, gint height, ModelBrowser* modelBrowser ){
+	modelBrowser->fbo_get()->reset( width, height, modelBrowser->m_MSAA, true );
+	modelBrowser->m_width = width;
+	modelBrowser->m_height = height;
 	modelBrowser->m_originInvalid = true;
 	modelBrowser->forEachModelInstance( models_set_transforms() );
-	modelBrowser->queueDraw();
-	return FALSE;
+//	modelBrowser->queueDraw();
 }
 
-gboolean ModelBrowser_expose( GtkWidget* widget, GdkEventExpose* event, ModelBrowser* modelBrowser ){
-	if ( glwidget_make_current( modelBrowser->m_gl_widget ) ) {
-		GlobalOpenGL_debugAssertNoErrors();
-		ModelBrowser_render();
-		GlobalOpenGL_debugAssertNoErrors();
-		glwidget_swap_buffers( modelBrowser->m_gl_widget );
-	}
-	return FALSE;
+gboolean ModelBrowser_expose( GtkGLArea* area, GdkGLContext* context, ModelBrowser* modelBrowser ){
+	GlobalOpenGL_debugAssertNoErrors();
+	ModelBrowser_render();
+	GlobalOpenGL_debugAssertNoErrors();
+	return TRUE;
 }
 
 
@@ -1325,8 +1321,8 @@ GtkWidget* ModelBrowser_constructWindow( GtkWindow* toplevel ){
 		gtk_table_attach_defaults( GTK_TABLE( table ), w, 1, 2, 0, 1 );
 		gtk_widget_show( w );
 
-		g_ModelBrowser.m_sizeHandler = g_signal_connect( G_OBJECT( w ), "size_allocate", G_CALLBACK( ModelBrowser_size_allocate ), &g_ModelBrowser );
-		g_ModelBrowser.m_exposeHandler = g_signal_connect( G_OBJECT( w ), "expose_event", G_CALLBACK( ModelBrowser_expose ), &g_ModelBrowser );
+		g_ModelBrowser.m_sizeHandler = g_signal_connect( G_OBJECT( w ), "resize", G_CALLBACK( ModelBrowser_size_allocate ), &g_ModelBrowser );
+		g_ModelBrowser.m_exposeHandler = g_signal_connect( G_OBJECT( w ), "render", G_CALLBACK( ModelBrowser_expose ), &g_ModelBrowser );
 
 		g_signal_connect( G_OBJECT( w ), "button_press_event", G_CALLBACK( ModelBrowser_button_press ), &g_ModelBrowser );
 		g_signal_connect( G_OBJECT( w ), "button_release_event", G_CALLBACK( ModelBrowser_button_release ), &g_ModelBrowser );

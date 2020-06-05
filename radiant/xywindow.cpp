@@ -673,7 +673,8 @@ void XYWnd_CameraMoved( XYWnd& xywnd ){
 
 XYWnd::XYWnd() :
 #if NV_DRIVER_GAMMA_BUG
-	m_gl_widget( glwidget_new( TRUE ) ),
+//	m_gl_widget( glwidget_new( TRUE ) ),
+	m_gl_widget( gtk_button_new_with_label( " hi ") ),
 #else
 	m_gl_widget( glwidget_new( FALSE ) ),
 #endif
@@ -716,8 +717,8 @@ XYWnd::XYWnd() :
 	gtk_widget_set_events( m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
 	gtk_widget_set_can_focus( m_gl_widget, TRUE );
 
-	m_sizeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "size_allocate", G_CALLBACK( xywnd_size_allocate ), this );
-	m_exposeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "expose_event", G_CALLBACK( xywnd_expose ), this );
+///	m_sizeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "size_allocate", G_CALLBACK( xywnd_size_allocate ), this );
+///	m_exposeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "expose_event", G_CALLBACK( xywnd_expose ), this );
 
 	g_signal_connect( G_OBJECT( m_gl_widget ), "button_press_event", G_CALLBACK( xywnd_button_press ), this );
 	g_signal_connect( G_OBJECT( m_gl_widget ), "button_release_event", G_CALLBACK( xywnd_button_release ), this );

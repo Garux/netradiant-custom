@@ -223,6 +223,7 @@ void accelerator_name( const Accelerator& accelerator, GString* gstring ){
 }
 
 void menu_item_set_accelerator( GtkMenuItem* item, Accelerator accelerator ){
+#if 0
 	GString* gstring = g_string_new( nullptr );
 	g_string_append( gstring, "   " );
 	accelerator_name( accelerator, gstring );
@@ -232,6 +233,7 @@ void menu_item_set_accelerator( GtkMenuItem* item, Accelerator accelerator ){
 	accel_label->accel_string = g_string_free( gstring, FALSE );
 
 	gtk_widget_queue_resize( GTK_WIDGET( accel_label ) );
+#endif
 }
 
 void menu_item_add_accelerator( GtkMenuItem* item, Accelerator accelerator ){

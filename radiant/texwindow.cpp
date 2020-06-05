@@ -2142,7 +2142,8 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 #if NV_DRIVER_GAMMA_BUG
 		GtkWidget* w = g_TextureBrowser.m_gl_widget = glwidget_new( TRUE );
 #else
-		GtkWidget* w = g_TextureBrowser.m_gl_widget = glwidget_new( FALSE );
+//		GtkWidget* w = g_TextureBrowser.m_gl_widget = glwidget_new( FALSE );
+		GtkWidget* w = g_TextureBrowser.m_gl_widget = gtk_button_new_with_label( " hi ");
 #endif
 		g_object_ref( G_OBJECT( w ) );
 
@@ -2152,8 +2153,8 @@ GtkWidget* TextureBrowser_constructWindow( GtkWindow* toplevel ){
 		gtk_table_attach_defaults( GTK_TABLE( table ), w, 1, 2, 1, 2 );
 		gtk_widget_show( w );
 
-		g_TextureBrowser.m_sizeHandler = g_signal_connect( G_OBJECT( w ), "size_allocate", G_CALLBACK( TextureBrowser_size_allocate ), &g_TextureBrowser );
-		g_TextureBrowser.m_exposeHandler = g_signal_connect( G_OBJECT( w ), "expose_event", G_CALLBACK( TextureBrowser_expose ), &g_TextureBrowser );
+///		g_TextureBrowser.m_sizeHandler = g_signal_connect( G_OBJECT( w ), "size_allocate", G_CALLBACK( TextureBrowser_size_allocate ), &g_TextureBrowser );
+///		g_TextureBrowser.m_exposeHandler = g_signal_connect( G_OBJECT( w ), "expose_event", G_CALLBACK( TextureBrowser_expose ), &g_TextureBrowser );
 
 		g_signal_connect( G_OBJECT( w ), "button_press_event", G_CALLBACK( TextureBrowser_button_press ), &g_TextureBrowser );
 		g_signal_connect( G_OBJECT( w ), "button_release_event", G_CALLBACK( TextureBrowser_button_release ), &g_TextureBrowser );

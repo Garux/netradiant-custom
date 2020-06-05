@@ -1676,7 +1676,8 @@ CamWnd::CamWnd() :
 	m_Camera( &m_view, CamWndQueueDraw( *this ), CamWnd_selection_motion_freemove( *this ) ),
 	m_cameraview( m_Camera, &m_view, ReferenceCaller<CamWnd, CamWnd_Update>( *this ) ),
 	m_fbo( 0 ),
-	m_gl_widget( glwidget_new( TRUE ) ),
+//	m_gl_widget( glwidget_new( TRUE ) ),
+	m_gl_widget( gtk_button_new_with_label( " hi ") ),
 	m_window_observer( NewWindowObserver() ),
 	m_deferredDraw( WidgetQueueDrawCaller( *m_gl_widget ) ),
 	m_deferred_motion( selection_motion, m_window_observer ),
@@ -1700,8 +1701,8 @@ CamWnd::CamWnd() :
 	gtk_widget_set_events( m_gl_widget, GDK_DESTROY | GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_SCROLL_MASK );
 	gtk_widget_set_can_focus( m_gl_widget, TRUE );
 
-	m_sizeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "size_allocate", G_CALLBACK( camera_size_allocate ), this );
-	m_exposeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "expose_event", G_CALLBACK( camera_expose ), this );
+///	m_sizeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "size_allocate", G_CALLBACK( camera_size_allocate ), this );
+///	m_exposeHandler = g_signal_connect( G_OBJECT( m_gl_widget ), "expose_event", G_CALLBACK( camera_expose ), this );
 
 	Map_addValidCallback( g_map, DeferredDrawOnMapValidChangedCaller( m_deferredDraw ) );
 

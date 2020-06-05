@@ -537,7 +537,7 @@ int QGL_Init( OpenGLBinding& table ){
 	qwglGetProcAddress           = wglGetProcAddress;
 #elif defined( XWINDOWS )
 	qglXGetProcAddressARB = (glXGetProcAddressARBProc)dlsym( RTLD_DEFAULT, "glXGetProcAddressARB" );
-	if ( ( qglXQueryExtension == 0 ) || ( qglXQueryExtension( GDK_DISPLAY(),0,0 ) != True ) ) {
+	if ( ( qglXQueryExtension == 0 ) || ( qglXQueryExtension( gdk_x11_get_default_xdisplay(),0,0 ) != True ) ) {
 		return 0;
 	}
 #else
@@ -1499,11 +1499,13 @@ void QGL_assertNoErrors( const char *file, int line ){
 	{
 		const char* errorString = reinterpret_cast<const char*>( qgluErrorString( error ) );
 		if ( error == GL_OUT_OF_MEMORY ) {
-			ERROR_MESSAGE( "OpenGL out of memory error at " << file << ":" << line << ": " << errorString );
+//			ERROR_MESSAGE( "OpenGL out of memory error at " << file << ":" << line << ": " << errorString );
+			globalErrorStream() << "OpenGL out of memory error at " << file << ":" << line << ": " << errorString << "\n";
 		}
 		else
 		{
-			ERROR_MESSAGE( "OpenGL error at " << file << ":" << line << ": " << errorString );
+//			ERROR_MESSAGE( "OpenGL error at " << file << ":" << line << ": " << errorString );
+			globalErrorStream() << "OpenGL error at " << file << ":" << line << ": " << errorString << "\n";
 		}
 		error = GlobalOpenGL().m_glGetError();
 	}
