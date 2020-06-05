@@ -245,7 +245,6 @@ void DoConfigDialog(){
 	GtkWidget *transslider, *translabel, *clipslider, *cliplabel;
 	GtkWidget *show2check, *show3check, *portalcheck;
 	int loop = 1, ret = IDCANCEL;
-	GtkObject *adj;
 
 	dlg = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	gtk_window_set_transient_for( GTK_WINDOW( dlg ), GTK_WINDOW( g_pRadiantWnd ) );
@@ -277,7 +276,7 @@ void DoConfigDialog(){
 	gtk_widget_show( hbox );
 	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox, TRUE, TRUE, 0 );
 
-	adj = gtk_adjustment_new( portals.width_3d, 2, 40, 1, 1, 0 );
+	auto *adj = gtk_adjustment_new( portals.width_3d, 2, 40, 1, 1, 0 );
 	lw3slider = gtk_hscale_new( GTK_ADJUSTMENT( adj ) );
 	gtk_widget_show( lw3slider );
 	gtk_box_pack_start( GTK_BOX( hbox ), lw3slider, TRUE, TRUE, 0 );
