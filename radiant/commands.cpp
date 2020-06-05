@@ -514,7 +514,6 @@ void DoCommandListDlg(){
 		GtkButton* button = create_modal_dialog_button( "Close", dialog.m_close_button );
 		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( button ), FALSE, FALSE, 0 );
 		widget_make_default( GTK_WIDGET( button ) );
-		gtk_widget_grab_default( GTK_WIDGET( button ) );
 		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Return, (GdkModifierType)0, (GtkAccelFlags)0 );
 		gtk_widget_add_accelerator( GTK_WIDGET( button ), "clicked", accel, GDK_KEY_Escape, (GdkModifierType)0, (GtkAccelFlags)0 );
 	}
