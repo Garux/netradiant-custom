@@ -170,7 +170,7 @@ inline const char* path_get_extension( const char* path ){
 /// \brief Returns true if \p extension is of the same type as \p other.
 /// O(n)
 inline bool extension_equal( const char* extension, const char* other ){
-	return path_equal( extension, other );
+	return string_equal_nocase( extension, other );
 }
 
 template<typename Functor>

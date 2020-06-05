@@ -223,7 +223,7 @@ const char* file_dialog_show( GtkWidget* parent, bool open, const char* title, c
 			else{ /* validate extension */
 				bool valid = false;
 				for ( std::size_t i = 0; i < masks.m_filters.size(); ++i )
-					if( string_length( masks.m_filters[i].c_str() ) >= 2 && string_equal_nocase( extension, masks.m_filters[i].c_str() + 2 ) )
+					if( string_length( masks.m_filters[i].c_str() ) >= 2 && extension_equal( extension, masks.m_filters[i].c_str() + 2 ) )
 						valid = true;
 				if( !valid ){
 					g_file_dialog_file[0] = '\0';

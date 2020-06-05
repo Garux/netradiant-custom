@@ -197,7 +197,7 @@ CopiedString g_openMapByCmd;
 
 void cmdMap(){
 	for ( int i = 1; i < g_argc; ++i )
-		if( string_equal_suffix_nocase( g_argv[i], ".map" ) ){
+		if( extension_equal( path_get_extension( g_argv[i] ), "map" ) ){
 			StringOutputStream stream( 256 );
 			stream << PathCleaned( g_argv[i] );
 			g_openMapByCmd = stream.c_str();
