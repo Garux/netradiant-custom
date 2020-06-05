@@ -89,13 +89,11 @@ void DoAboutDlg(){
 						G_CALLBACK( dialog_button_callback ), GINT_TO_POINTER( IDOK ) );
 	gtk_widget_set_size_request( button, 60, -1 );
 
-	gtk_grab_add( dlg );
 	gtk_widget_show( dlg );
 
 	while ( loop )
 		gtk_main_iteration();
 
-	gtk_grab_remove( dlg );
 	gtk_widget_destroy( dlg );
 }
 

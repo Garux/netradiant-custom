@@ -313,12 +313,10 @@ EMessageBoxReturn DoMessageBox( const char* lpText, const char* lpCaption, EMess
 
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	while ( loop )
 		gtk_main_iteration();
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -397,9 +395,9 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 
 	// ---- /vbox ----
 
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	while ( loop )
 		gtk_main_iteration();
@@ -414,7 +412,6 @@ EMessageBoxReturn DoIntersectBox( IntersectRS* rs ){
 	rs->bUseDetail = gtk_toggle_button_get_active( (GtkToggleButton*)check1 ) ? true : false;
 	rs->bDuplicateOnly = gtk_toggle_button_get_active( (GtkToggleButton*)check2 ) ? true : false;
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -561,7 +558,6 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	bool dialogError = TRUE;
 	while ( dialogError )
@@ -589,7 +585,6 @@ EMessageBoxReturn DoPolygonBox( PolygonRS* rs ){
 		}
 	}
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -787,9 +782,9 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 	ret = eIDCANCEL;
 
 // +djbob: need our "little" modal loop mars :P
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	bool dialogError = TRUE;
 	while ( dialogError )
@@ -835,7 +830,6 @@ EMessageBoxReturn DoBuildStairsBox( BuildStairsRS* rs ){
 		}
 	}
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -1028,9 +1022,9 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 	// ----------------- //
 
 //+djbob
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	while ( loop )
 		gtk_main_iteration();
@@ -1050,7 +1044,6 @@ EMessageBoxReturn DoDoorsBox( DoorRS* rs ){
 		rs->nOrientation = DIRECTION_EW;
 	}
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -1195,9 +1188,9 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 
 	// ----------------- //
 
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	bool dialogError = TRUE;
 	while ( dialogError )
@@ -1226,7 +1219,6 @@ EMessageBoxReturn DoPathPlotterBox( PathPlotterRS* rs ){
 		}
 	}
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -1287,14 +1279,13 @@ EMessageBoxReturn DoCTFColourChangeBox(){
 
 	// ---- /vbox ----
 
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	while ( loop )
 		gtk_main_iteration();
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -1570,7 +1561,6 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	Update_TextureReseter();
 
@@ -1627,7 +1617,6 @@ EMessageBoxReturn DoResetTextureBox( ResetTextureRS* rs ){
 		}
 	}
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -1849,10 +1838,9 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 	// ---- /hbox ----
 
 
-
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	bool dialogError = TRUE;
 	while ( dialogError )
@@ -1894,7 +1882,6 @@ EMessageBoxReturn DoTrainThingBox( TrainThingRS* rs ){
 		}
 	}
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;
@@ -1985,9 +1972,9 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 
 	ret = eIDCANCEL;
 
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	gtk_window_set_position( GTK_WINDOW( window ),GTK_WIN_POS_CENTER );
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	bool dialogError = TRUE;
 	while ( dialogError )
@@ -2006,7 +1993,6 @@ EMessageBoxReturn DoMakeChainBox( MakeChainRS* rs ){
 		}
 	}
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;

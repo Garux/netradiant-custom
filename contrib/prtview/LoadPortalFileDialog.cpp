@@ -135,7 +135,6 @@ int DoLoadPortalFileDialog(){
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( check2d ), portals.show_2d );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( check3d ), portals.show_3d );
 
-	gtk_grab_add( dlg );
 	gtk_widget_show( dlg );
 
 	while ( loop )
@@ -150,7 +149,6 @@ int DoLoadPortalFileDialog(){
 		portals.show_2d = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( check2d ) ) ? true : false;
 	}
 
-	gtk_grab_remove( dlg );
 	gtk_widget_destroy( dlg );
 
 	return ret;

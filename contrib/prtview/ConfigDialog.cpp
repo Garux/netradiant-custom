@@ -76,14 +76,12 @@ static int DoColor( PackedColour *c ){
 	g_object_set_data( G_OBJECT( dlg ), "ret", &ret );
 
 	gtk_widget_show( dlg );
-	gtk_grab_add( dlg );
 
 	while ( loop )
 		gtk_main_iteration();
 
 	gtk_color_selection_get_current_color( GTK_COLOR_SELECTION( gtk_color_selection_dialog_get_color_selection( GTK_COLOR_SELECTION_DIALOG( dlg ) ) ), &clr );
 
-	gtk_grab_remove( dlg );
 	gtk_widget_destroy( dlg );
 
 	if ( ret == IDOK ) {
@@ -473,12 +471,10 @@ void DoConfigDialog(){
 	Set3DTransText( translabel );
 	SetClipText( cliplabel );
 
-	gtk_grab_add( dlg );
 	gtk_widget_show( dlg );
 
 	while ( loop )
 		gtk_main_iteration();
 
-	gtk_grab_remove( dlg );
 	gtk_widget_destroy( dlg );
 }

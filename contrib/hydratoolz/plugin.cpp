@@ -85,6 +85,7 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	int mode = ( uType & MB_TYPEMASK ), ret, loop = 1;
 
 	window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	gtk_window_set_modal( GTK_WINDOW( window ), TRUE );
 	g_signal_connect( G_OBJECT( window ), "delete_event",
 						G_CALLBACK( dialog_delete_callback ), NULL );
 	g_signal_connect( G_OBJECT( window ), "destroy",
@@ -179,12 +180,10 @@ int DoMessageBox( const char* lpText, const char* lpCaption, guint32 uType ){
 	}
 
 	gtk_widget_show( window );
-	gtk_grab_add( window );
 
 	while ( loop )
 		gtk_main_iteration();
 
-	gtk_grab_remove( window );
 	gtk_widget_destroy( window );
 
 	return ret;

@@ -1823,9 +1823,8 @@ void EverySecondTimer_disable(){
 	}
 }
 
-gint window_realize_remove_decoration( GtkWidget* widget, gpointer data ){
+void window_realize_remove_decoration( GtkWidget* widget, gpointer data ){
 	gdk_window_set_decorations( gtk_widget_get_window( widget ), (GdkWMDecoration)( GDK_DECOR_ALL | GDK_DECOR_MENU | GDK_DECOR_MINIMIZE | GDK_DECOR_MAXIMIZE ) );
-	return FALSE;
 }
 
 class WaitDialog
@@ -1835,10 +1834,11 @@ GtkWindow* m_window;
 GtkLabel* m_label;
 };
 
-WaitDialog create_wait_dialog( const char* title, const char* text ){
+WaitDialog create_wait_dialog( const char* title, const char* text, bool modal ){
 	WaitDialog dialog;
 
 	dialog.m_window = create_floating_window( title, MainFrame_getWindow() );
+	gtk_window_set_modal( dialog.m_window, modal );
 	gtk_window_set_resizable( dialog.m_window, FALSE );
 	gtk_container_set_border_width( GTK_CONTAINER( dialog.m_window ), 0 );
 	gtk_window_set_position( dialog.m_window, GTK_WIN_POS_CENTER_ON_PARENT );
@@ -1916,11 +1916,8 @@ void ScreenUpdates_Disable( const char* message, const char* title ){
 
 		bool isActiveApp = MainFrame_isActiveApp();
 
-		g_wait = create_wait_dialog( title, message );
-		if( !XYWnd::m_mnuDrop || !gtk_widget_get_visible( GTK_WIDGET( XYWnd::m_mnuDrop ) ) ){
-			gtk_grab_add( GTK_WIDGET( g_wait.m_window ) );
-			//globalOutputStream() << "grab grab grab\n";
-		}
+		g_wait = create_wait_dialog( title, message,
+				!XYWnd::m_mnuDrop || !gtk_widget_get_visible( GTK_WIDGET( XYWnd::m_mnuDrop ) ) ); //hack: avoid hiding entity menu, clicked with ctrl, by tex/model loading popup
 
 		if ( isActiveApp ) {
 			gtk_widget_show( GTK_WIDGET( g_wait.m_window ) );
@@ -1941,7 +1938,6 @@ void ScreenUpdates_Enable(){
 		EverySecondTimer_enable();
 		//gtk_widget_set_sensitive(GTK_WIDGET(MainFrame_getWindow()), TRUE);
 
-		gtk_grab_remove( GTK_WIDGET( g_wait.m_window ) );
 		destroy_floating_window( g_wait.m_window );
 		g_wait.m_window = 0;
 
