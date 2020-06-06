@@ -100,6 +100,8 @@ static gint dialog_delete_callback( GtkWidget *widget, GdkEvent* event, gpointer
 	loop = (int*)g_object_get_data( G_OBJECT( widget ), "loop" );
 	*loop = 0;
 
+	*(EMessageBoxReturn*)g_object_get_data( G_OBJECT( widget ), "ret" ) = eIDCANCEL;
+
 	return TRUE;
 }
 
