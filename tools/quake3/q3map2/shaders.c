@@ -1955,10 +1955,10 @@ static void ParseShaderFile( const char *filename ){
 				}
 
 				/* ydnar: default to searching for q3map_<surfaceparm> */
-#if 0
+#if 1
 				else
 				{
-					Sys_FPrintf( SYS_VRB, "Attempting to match %s with a known surfaceparm\n", token );
+				//%	Sys_FPrintf( SYS_VRB, "Attempting to match %s with a known surfaceparm\n", token );
 					if ( !ApplySurfaceParm( &token[ 6 ], &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) ) {
 						Sys_Warning( "Unknown q3map_* directive \"%s\"\n", token );
 					}
