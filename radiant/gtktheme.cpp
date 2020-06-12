@@ -155,6 +155,7 @@ GtkWidget* create_rc_window() {
 	gtk_widget_set_name( main_window, "main_window" );
 	gtk_window_set_title( GTK_WINDOW( main_window ), "Gtk2 Theme Selector" );
 	gtk_window_set_transient_for( GTK_WINDOW( main_window ), MainFrame_getWindow() );
+	gtk_window_set_position( GTK_WINDOW( main_window ), GTK_WIN_POS_CENTER_ON_PARENT );
 	gtk_window_set_destroy_with_parent( GTK_WINDOW( main_window ), TRUE );
 
 	//gtk_window_set_keep_above ( GTK_WINDOW( main_window ), TRUE );
