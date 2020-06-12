@@ -396,6 +396,18 @@ bool filter( const Entity& entity ) const {
 
 filter_entity_world g_filter_entity_world;
 
+class filter_entity_point : public EntityFilter
+{
+public:
+bool filter( const Entity& entity ) const {
+	return !entity.isContainer()
+		&& !entity.getEntityClass().miscmodel_is
+		&& !string_equal_prefix( entity.getEntityClass().name(), "light" );
+}
+};
+
+filter_entity_point g_filter_entity_point;
+
 #include "qerplugin.h"
 
 void Entity_InitFilters(){
@@ -406,6 +418,7 @@ void Entity_InitFilters(){
 		add_entity_filter( g_filter_entity_not_func_detail, EXCLUDE_STRUCTURAL );
 	}
 	add_entity_filter( g_filter_entity_world, EXCLUDE_ENT, true );
+	add_entity_filter( g_filter_entity_point, EXCLUDE_POINT_ENT );
 	add_entity_filter( g_filter_entity_trigger, EXCLUDE_TRIGGERS );
 	add_entity_filter( g_filter_entity_misc_model, EXCLUDE_MODELS );
 	add_entity_filter( g_filter_entity_doom3model, EXCLUDE_MODELS );

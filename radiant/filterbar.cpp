@@ -152,6 +152,7 @@ GtkToolbar* create_filter_toolbar(){
 	//toolbar_append_toggle_button( toolbar, "Paths (ALT + 8)", "texture_lock.png", "FilterPaths" );
 	toolbar_append_space( toolbar );
 	toolbar_append_toggle_button( toolbar, "Entities (ALT + 2)", "f-entities.png", "FilterEntities" );
+	toolbar_append_toggle_button( toolbar, "Point Entities", "status_entiy.png", "FilterPointEntities" );
 	toolbar_append_toggle_button( toolbar, "Lights (ALT + 0)", "f-lights.png", "FilterLights" );
 	toolbar_append_toggle_button( toolbar, "Models (SHIFT + M)", "f-models.png", "FilterModels" );
 

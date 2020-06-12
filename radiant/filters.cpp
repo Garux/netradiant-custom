@@ -206,6 +206,7 @@ void Filters_constructMenu( GtkMenu* menu_in_menu ){
 		create_check_menu_item_with_mnemonic( menu_in_menu, "Decals", "FilterDecals" );
 	}
 	create_check_menu_item_with_mnemonic( menu_in_menu, "FuncGroups", "FilterFuncGroups" );
+	create_check_menu_item_with_mnemonic( menu_in_menu, "Point Entities", "FilterPointEntities" );
 	// filter manipulation
 	menu_separator( menu_in_menu );
 	create_menu_item_with_mnemonic( menu_in_menu, "Invert filters", "InvertFilters" );
@@ -254,6 +255,7 @@ void ConstructFilters(){
 		add_filter_command( EXCLUDE_DECALS, "FilterDecals", Accelerator( 'D', GDK_SHIFT_MASK ) );
 	}
 	add_filter_command( EXCLUDE_FUNC_GROUPS, "FilterFuncGroups", accelerator_null() );
+	add_filter_command( EXCLUDE_POINT_ENT, "FilterPointEntities", accelerator_null() );
 
 	PerformFiltering();
 }
