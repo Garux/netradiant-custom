@@ -59,18 +59,6 @@ void Global_constructPreferences( PreferencesPage& page ){
 void Interface_constructPreferences( PreferencesPage& page ){
 	page.appendPathEntry( "Shader Editor Command", g_TextEditor_editorCommand, false );
 }
-#if 0
-void Mouse_constructPreferences( PreferencesPage& page ){
-	page.appendCheckBox( "", "Zoom to mouse pointer", g_xywindow_globals.m_bZoomInToPointer );
-}
-void Mouse_constructPage( PreferenceGroup& group ){
-	PreferencesPage page( group.createPage( "Mouse", "Mouse Preferences" ) );
-	Mouse_constructPreferences( page );
-}
-void Mouse_registerPreferencesPage(){
-	PreferencesDialog_addInterfacePage( FreeCaller1<PreferenceGroup&, Mouse_constructPage>() );
-}
-#endif
 
 /*!
    =========================================================
@@ -667,7 +655,6 @@ PreferencesPage createPage( const char* treeName, const char* frameName ){
 
 GtkWindow* PrefsDlg::BuildDialog(){
 	PreferencesDialog_addInterfacePreferences( FreeCaller1<PreferencesPage&, Interface_constructPreferences>() );
-	//Mouse_registerPreferencesPage();
 
 	GtkWindow* dialog = create_floating_window( "NetRadiant Preferences", m_parent );
 

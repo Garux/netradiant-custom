@@ -153,6 +153,8 @@ guint m_zoom_focusOut;
 void ZoomIn();
 void ZoomOut();
 void ZoomInWithMouse( int x, int y );
+void ZoomOutWithMouse( int x, int y );
+void ZoomCompensateOrigin( int x, int y, float old_scale );
 void FocusOnBounds( const AABB& bounds );
 
 void SetActive( bool b ){
@@ -279,7 +281,6 @@ struct xywindow_globals_t
 	Vector3 AxisColorZ;
 
 	bool m_bNoStipple;
-	bool m_bZoomInToPointer;
 
 	xywindow_globals_t() :
 		color_gridback( 0.77f, 0.77f, 0.77f ),
@@ -295,8 +296,7 @@ struct xywindow_globals_t
 		AxisColorX( 1.f, 0.f, 0.f ),
 		AxisColorY( 0.f, 1.f, 0.f ),
 		AxisColorZ( 0.f, 0.f, 1.f ),
-		m_bNoStipple( true ),
-		m_bZoomInToPointer( true ){
+		m_bNoStipple( true ){
 	}
 
 };

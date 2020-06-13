@@ -95,6 +95,8 @@ struct xywindow_globals_private_t
 
 	int m_MSAA;
 
+	bool m_bZoomToPointer;
+
 	xywindow_globals_private_t() :
 		d_showgrid( true ),
 
@@ -110,7 +112,8 @@ struct xywindow_globals_private_t
 
 		m_bChaseMouse( true ),
 		m_bShowSize( true ),
-		m_MSAA( 8 ){
+		m_MSAA( 8 ),
+		m_bZoomToPointer( true ){
 	}
 
 };
@@ -264,7 +267,15 @@ void XYWnd::ZoomOut(){
 void XYWnd::ZoomInWithMouse( int x, int y ){
 	const float old_scale = Scale();
 	ZoomIn();
-	if ( g_xywindow_globals.m_bZoomInToPointer && old_scale != Scale() ) {
+	ZoomCompensateOrigin( x, y, old_scale );
+}
+void XYWnd::ZoomOutWithMouse( int x, int y ){
+	const float old_scale = Scale();
+	ZoomOut();
+	ZoomCompensateOrigin( x, y, old_scale );
+}
+void XYWnd::ZoomCompensateOrigin( int x, int y, float old_scale ){
+	if ( g_xywindow_globals_private.m_bZoomToPointer && old_scale != Scale() ) {
 		const float scale_diff = 1.0 / old_scale - 1.0 / Scale();
 		NDIM1NDIM2( m_viewType )
 		Vector3 origin = GetOrigin();
@@ -634,7 +645,7 @@ gboolean xywnd_wheel_scroll( GtkWidget* widget, GdkEventScroll* event, XYWnd* xy
 		xywnd->ZoomInWithMouse( (int)event->x, (int)event->y );
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
-		xywnd->ZoomOut();
+		xywnd->ZoomOutWithMouse( (int)event->x, (int)event->y );
 	}
 	return FALSE;
 }
@@ -1095,7 +1106,7 @@ void XYWnd_zoomDelta( int x, int y, unsigned int state, void* data ){
 		while ( abs( g_dragZoom ) > threshold )
 		{
 			if ( g_dragZoom > 0 ) {
-				reinterpret_cast<XYWnd*>( data )->ZoomOut();
+				reinterpret_cast<XYWnd*>( data )->ZoomOutWithMouse( g_zoom2x, g_zoom2y );
 				g_dragZoom -= threshold;
 			}
 			else
@@ -2459,7 +2470,7 @@ void Orthographic_constructPreferences( PreferencesPage& page ){
 	page.appendCheckBox( "", "Solid selection boxes ( no stipple )", g_xywindow_globals.m_bNoStipple );
 	//page.appendCheckBox( "", "Display size info", g_xywindow_globals_private.m_bShowSize );
 	page.appendCheckBox( "", "Chase mouse during drags", g_xywindow_globals_private.m_bChaseMouse );
-	page.appendCheckBox( "", "Zoom In to Mouse pointer", g_xywindow_globals.m_bZoomInToPointer );
+	page.appendCheckBox( "", "Zoom to Mouse pointer", g_xywindow_globals_private.m_bZoomToPointer );
 
 	if( GlobalOpenGL().support_ARB_framebuffer_object ){
 		const char* samples[] = { "0", "2", "4", "8", "16", "32" };
@@ -2500,7 +2511,7 @@ void XYWindow_Construct(){
 	GlobalCommands_insert( "XYFocusOnSelected", FreeCaller<XY_Focus>(), Accelerator( GDK_KEY_grave ) );
 
 	GlobalPreferenceSystem().registerPreference( "XYMSAA", IntImportStringCaller( g_xywindow_globals_private.m_MSAA ), IntExportStringCaller( g_xywindow_globals_private.m_MSAA ) );
-	GlobalPreferenceSystem().registerPreference( "2DZoomInToPointer", BoolImportStringCaller( g_xywindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_xywindow_globals.m_bZoomInToPointer ) );
+	GlobalPreferenceSystem().registerPreference( "2DZoomInToPointer", BoolImportStringCaller( g_xywindow_globals_private.m_bZoomToPointer ), BoolExportStringCaller( g_xywindow_globals_private.m_bZoomToPointer ) );
 	GlobalPreferenceSystem().registerPreference( "ChaseMouse", BoolImportStringCaller( g_xywindow_globals_private.m_bChaseMouse ), BoolExportStringCaller( g_xywindow_globals_private.m_bChaseMouse ) );
 	GlobalPreferenceSystem().registerPreference( "ShowSize2d", BoolImportStringCaller( g_xywindow_globals_private.m_bShowSize ), BoolExportStringCaller( g_xywindow_globals_private.m_bShowSize ) );
 	GlobalPreferenceSystem().registerPreference( "ShowCrosshair", BoolImportStringCaller( g_bCrossHairs ), BoolExportStringCaller( g_bCrossHairs ) );

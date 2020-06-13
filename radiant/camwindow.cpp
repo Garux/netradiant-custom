@@ -76,6 +76,7 @@ struct camwindow_globals_private_t
 	int m_nMoveSpeed;
 	int m_time_toMaxSpeed;
 	int m_nScrollMoveSpeed;
+	bool m_bZoomToPointer;
 	float m_strafeSpeed;
 	float m_angleSpeed;
 	bool m_bCamInverseMouse;
@@ -92,6 +93,7 @@ struct camwindow_globals_private_t
 		m_nMoveSpeed( 500 ),
 		m_time_toMaxSpeed( 200 ),
 		m_nScrollMoveSpeed( 100 ),
+		m_bZoomToPointer( true ),
 		m_strafeSpeed( 1.f ),
 		m_angleSpeed( 9.f ),
 		m_bCamInverseMouse( false ),
@@ -1314,6 +1316,49 @@ void camera_orbit_scroll( camera_t& camera ){
 	Camera_setOrigin( camera, camera.m_orbit_center - viewvector * offset );
 }
 
+/*
+two alt solutions:
+		const Matrix4 screen2world = matrix4_affine_inverse( cam.m_view->GetViewMatrix() );
+		Vector3 normalized;
+		normalized[0] = ( ( 2.0f * x ) / cam.width ) - 1.0f; // window_to_normalised_device
+		normalized[1] = ( ( 2.0f * ( cam.height - 1 - y ) ) / cam.height ) - 1.0f;
+		normalized[2] = 1.f;
+		normalized = vector4_projected( matrix4_transformed_vector4( screen2world, Vector4( normalized, 1 ) ) );
+
+		const Matrix4 screen2world = matrix4_full_inverse( cam.m_view->GetViewMatrix() );
+		Vector3 normalized;
+		normalized[0] = ( ( 2.0f * x ) / cam.width ) - 1.0f; // window_to_normalised_device
+		normalized[1] = ( ( 2.0f * ( cam.height - 1 - y ) ) / cam.height ) - 1.0f;
+		normalized[2] = -1.f;
+		normalized = vector4_projected( matrix4_transformed_vector4( screen2world, Vector4( normalized, 1 ) ) );
+*/
+static void camera_zoom( CamWnd& camwnd, float x, float y, float step ){
+	const camera_t& cam = camwnd.getCamera();
+	if( camwnd.m_bFreeMove || !g_camwindow_globals_private.m_bZoomToPointer ){
+		Camera_setOrigin( camwnd, Camera_getOrigin( camwnd ) + cam.forward * step );
+	}
+	else{
+		//const Matrix4 screen2world = matrix4_affine_inverse( matrix4_multiplied_by_matrix4( cam.projection, cam.modelview ) );
+		const Matrix4 screen2world = matrix4_affine_inverse( cam.m_view->GetViewMatrix() );
+
+		Vector3 normalized;
+
+		normalized[0] = 2.0f * x / static_cast<float>( cam.width ) - 1.0f;
+		normalized[1] = 2.0f * y / static_cast<float>( cam.height ) - 1.0f;
+		normalized[1] *= -1.f;
+		normalized[2] = 0.f;
+
+		normalized *= ( camera_t::near_z * 2.f );
+			//globalOutputStream() << normalized << " normalized    ";
+		matrix4_transform_point( screen2world, normalized );
+			//globalOutputStream() << normalized << "\n";
+		const Vector3 norm = vector3_normalised( normalized - Camera_getOrigin( camwnd ) );
+			//globalOutputStream() << normalized - Camera_getOrigin( *camwnd ) << "  normalized - Camera_getOrigin( *camwnd )\n";
+			//globalOutputStream() << norm << "  norm\n";
+		Camera_setOrigin( camwnd, Camera_getOrigin( camwnd ) + norm * step );
+	}
+}
+
 gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* camwnd ){
 	//gtk_window_set_focus( camwnd->m_parent, camwnd->m_gl_widget );
 	gtk_widget_grab_focus( camwnd->m_gl_widget );
@@ -1334,32 +1379,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 		}
 
 		Camera_Freemove_updateAxes( cam );
-		if( camwnd->m_bFreeMove || !g_camwindow_globals.m_bZoomInToPointer ){
-			Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) + cam.forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
-		}
-		else{
-			//Matrix4 maa = matrix4_multiplied_by_matrix4( cam.projection, cam.modelview );
-			Matrix4 maa = cam.m_view->GetViewMatrix();
-			matrix4_affine_invert( maa );
-
-			float x = static_cast<float>( event->x );
-			float y = static_cast<float>( event->y );
-			Vector3 normalized;
-
-			normalized[0] = 2.0f * ( x ) / static_cast<float>( cam.width ) - 1.0f;
-			normalized[1] = 2.0f * ( y )/ static_cast<float>( cam.height ) - 1.0f;
-			normalized[1] *= -1.f;
-			normalized[2] = 0.f;
-
-			normalized *= ( camera_t::near_z * 2.f );
-				//globalOutputStream() << normalized << " normalized    ";
-			matrix4_transform_point( maa, normalized );
-				//globalOutputStream() << normalized << "\n";
-			Vector3 norm = vector3_normalised( normalized - Camera_getOrigin( *camwnd ) );
-				//globalOutputStream() << normalized - Camera_getOrigin( *camwnd ) << "  normalized - Camera_getOrigin( *camwnd )\n";
-				//globalOutputStream() << norm << "  norm\n";
-			Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) + norm * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
-		}
+		camera_zoom( *camwnd, event->x, event->y, g_camwindow_globals_private.m_nScrollMoveSpeed );
 	}
 	else if ( event->direction == GDK_SCROLL_DOWN ) {
 		if ( cam.movementflags & MOVE_FOCUS ) {
@@ -1373,7 +1393,7 @@ gboolean wheelmove_scroll( GtkWidget* widget, GdkEventScroll* event, CamWnd* cam
 		}
 
 		Camera_Freemove_updateAxes( cam );
-		Camera_setOrigin( *camwnd, Camera_getOrigin( *camwnd ) - cam.forward * static_cast<float>( g_camwindow_globals_private.m_nScrollMoveSpeed ) );
+		camera_zoom( *camwnd, event->x, event->y, -g_camwindow_globals_private.m_nScrollMoveSpeed );
 	}
 
 	return FALSE;
@@ -2474,7 +2494,7 @@ void Camera_constructPreferences( PreferencesPage& page ){
 	page.appendSlider( "Strafe Speed", g_camwindow_globals_private.m_strafeSpeed, TRUE, 0, 0, 1, 0.1, 10, 0.1, 1 );
 	page.appendSlider( "Mouse Sensitivity", g_camwindow_globals_private.m_angleSpeed, TRUE, 0, 0, 9, 0.1, 180, 0.1, 1 );
 	page.appendCheckBox( "", "Invert mouse vertical axis", g_camwindow_globals_private.m_bCamInverseMouse );
-	page.appendCheckBox( "", "Zoom In to Mouse pointer", g_camwindow_globals.m_bZoomInToPointer );
+	page.appendCheckBox( "", "Zoom to Mouse pointer", g_camwindow_globals_private.m_bZoomToPointer );
 	page.appendCheckBox(
 		"", "Discrete movement",
 		FreeCaller1<bool, CamWnd_Move_Discrete_Import>(),
@@ -2630,7 +2650,7 @@ void CamWnd_Construct(){
 	GlobalPreferenceSystem().registerPreference( "StrafeMode", IntImportStringCaller( g_camwindow_globals_private.m_strafeMode ), IntExportStringCaller( g_camwindow_globals_private.m_strafeMode ) );
 	GlobalPreferenceSystem().registerPreference( "CameraFaceWire", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceWire ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceWire ) );
 	GlobalPreferenceSystem().registerPreference( "CameraFaceFill", BoolImportStringCaller( g_camwindow_globals_private.m_bFaceFill ), BoolExportStringCaller( g_camwindow_globals_private.m_bFaceFill ) );
-	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals.m_bZoomInToPointer ), BoolExportStringCaller( g_camwindow_globals.m_bZoomInToPointer ) );
+	GlobalPreferenceSystem().registerPreference( "3DZoomInToPointer", BoolImportStringCaller( g_camwindow_globals_private.m_bZoomToPointer ), BoolExportStringCaller( g_camwindow_globals_private.m_bZoomToPointer ) );
 	GlobalPreferenceSystem().registerPreference( "fieldOfView", FloatImportStringCaller( camera_t::fieldOfView ), FloatExportStringCaller( camera_t::fieldOfView ) );
 	GlobalPreferenceSystem().registerPreference( "CamVIS", makeBoolStringImportCallback( ToggleShownImportBoolCaller( g_camera_shown ) ), makeBoolStringExportCallback( ToggleShownExportBoolCaller( g_camera_shown ) ) );
 
