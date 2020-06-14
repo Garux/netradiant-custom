@@ -653,8 +653,8 @@ static shaderInfo_t *AllocShaderInfo( void ){
 	TCModIdentity( si->mod );
 
 	/* ydnar: lightmaps can now be > 128x128 in certain games or an externally generated tga */
-	si->lmCustomWidth = lmCustomSize;
-	si->lmCustomHeight = lmCustomSize;
+	si->lmCustomWidth = lmCustomSizeW;
+	si->lmCustomHeight = lmCustomSizeH;
 
 	/* return to sender */
 	return si;
@@ -1571,8 +1571,8 @@ static void ParseShaderFile( const char *filename ){
 						 ( ( si->lmCustomHeight - 1 ) & si->lmCustomHeight ) ) {
 						Sys_Warning( "Non power-of-two lightmap size specified (%d, %d)\n",
 									si->lmCustomWidth, si->lmCustomHeight );
-						si->lmCustomWidth = lmCustomSize;
-						si->lmCustomHeight = lmCustomSize;
+						si->lmCustomWidth = lmCustomSizeW;
+						si->lmCustomHeight = lmCustomSizeH;
 					}
 				}
 

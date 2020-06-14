@@ -2072,8 +2072,8 @@ int LightMain( int argc, char **argv ){
 		Sys_Printf( " lightning model: quake3\n" );
 	}
 
-	lmCustomSize = game->lightmapSize;
-	Sys_Printf( " lightmap size: %d x %d pixels\n", lmCustomSize, lmCustomSize );
+	lmCustomSizeW = lmCustomSizeH = game->lightmapSize;
+	Sys_Printf( " lightmap size: %d x %d pixels\n", lmCustomSizeW, lmCustomSizeH );
 
 	lightmapGamma = game->lightmapGamma;
 	Sys_Printf( " lightning gamma: %f\n", lightmapGamma );
@@ -2496,21 +2496,27 @@ int LightMain( int argc, char **argv ){
 
 		else if ( strEqual( argv[ i ], "-lightmapsize" )
 				|| strEqual( argv[ i ], "-extlmhacksize" ) ) {
-			lmCustomSize = atoi( argv[ i + 1 ] );
+			const bool extlmhack = strEqual( argv[ i ], "-extlmhacksize" );
 
-			/* must be a power of 2 and greater than 2 */
-			if ( ( ( lmCustomSize - 1 ) & lmCustomSize ) || lmCustomSize < 2 ) {
-				Sys_Warning( "Lightmap size must be a power of 2, greater or equal to 2 pixels.\n" );
-				lmCustomSize = game->lightmapSize;
+			lmCustomSizeW = lmCustomSizeH = atoi( argv[ i + 1 ] );
+			if( i + 2 < argc - 1 && argv[ i + 2 ][0] != '-' && 0 != atoi( argv[ i + 2 ] ) ){
+				lmCustomSizeH = atoi( argv[ i + 2 ] );
+				i++;
 			}
 			i++;
-			Sys_Printf( "Default lightmap size set to %d x %d pixels\n", lmCustomSize, lmCustomSize );
+			/* must be a power of 2 and greater than 2 */
+			if ( ( ( lmCustomSizeW - 1 ) & lmCustomSizeW ) || lmCustomSizeW < 2 ||
+				 ( ( lmCustomSizeH - 1 ) & lmCustomSizeH ) || lmCustomSizeH < 2 ) {
+				Sys_Warning( "Lightmap size must be a power of 2, greater or equal to 2 pixels.\n" );
+				lmCustomSizeW = lmCustomSizeH = game->lightmapSize;
+			}
+			Sys_Printf( "Default lightmap size set to %d x %d pixels\n", lmCustomSizeW, lmCustomSizeH );
 
 			/* enable external lightmaps */
-			if ( lmCustomSize != game->lightmapSize ) {
+			if ( lmCustomSizeW != game->lightmapSize || lmCustomSizeH != game->lightmapSize ) {
 				/* -lightmapsize might just require -external for native external lms, but it has already been used in existing batches alone,
 				so brand new switch here for external lms, referenced by shaders hack/behavior */
-				externalLightmaps = !strEqual( argv[ i - 1 ], "-extlmhacksize" );
+				externalLightmaps = !extlmhack;
 				Sys_Printf( "Storing all lightmaps externally\n" );
 			}
 		}
@@ -2921,7 +2927,7 @@ int LightMain( int argc, char **argv ){
 
 	/* fix up lightmap search power */
 	if ( lightmapMergeSize ) {
-		lightmapSearchBlockSize = ( lightmapMergeSize / lmCustomSize ) * ( lightmapMergeSize / lmCustomSize );
+		lightmapSearchBlockSize = ( lightmapMergeSize / lmCustomSizeW ) * ( lightmapMergeSize / lmCustomSizeW ); //? should use min or max( lmCustomSizeW, lmCustomSizeH )? :thinking:
 		if ( lightmapSearchBlockSize < 1 ) {
 			lightmapSearchBlockSize = 1;
 		}

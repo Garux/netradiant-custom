@@ -2300,7 +2300,8 @@ Q_EXTERN bool noCollapse Q_ASSIGN( false );
 Q_EXTERN int lightmapSearchBlockSize Q_ASSIGN( 0 );
 Q_EXTERN bool exportLightmaps Q_ASSIGN( false );
 Q_EXTERN bool externalLightmaps Q_ASSIGN( false );
-Q_EXTERN int lmCustomSize Q_ASSIGN( LIGHTMAP_WIDTH );
+Q_EXTERN int lmCustomSizeW Q_ASSIGN( LIGHTMAP_WIDTH );
+Q_EXTERN int lmCustomSizeH Q_ASSIGN( LIGHTMAP_WIDTH );
 Q_EXTERN char *             lmCustomDir Q_ASSIGN( NULL );
 Q_EXTERN int lmLimitSize Q_ASSIGN( 0 );
 
