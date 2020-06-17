@@ -4708,10 +4708,17 @@ public:
 		}
 		selectionChange( selector );
 	}
-	void reset(){
+	void reset( bool initFromFace ){
 		for( std::size_t i = 0; i < 3; ++i ){
 			m_points[i].m_set = false;
 			m_points[i].setSelected( false ); ///?
+		}
+		if( initFromFace && !g_SelectedFaceInstances.empty() ){
+			const Winding& w = g_SelectedFaceInstances.last().getFace().getWinding();
+			for( std::size_t i = 0; i < 3; ++i ){
+				m_points[i].m_set = true;
+				m_points[i].m_point = w[i].vertex;
+			}
 		}
 		updatePlane();
 	}
@@ -6836,7 +6843,7 @@ EComponentMode ComponentMode() const {
 }
 void SetManipulatorMode( EManipulatorMode mode ){
 	if( ( mode == eClip ) || ( ManipulatorMode() == eClip ) ){
-		m_clip_manipulator.reset();
+		m_clip_manipulator.reset( ( mode == eClip ) && ( ManipulatorMode() != eClip ) );
 		if( ( mode == eClip ) != ( ManipulatorMode() == eClip ) )
 			Clipper_modeChanged( mode == eClip );
 	}
