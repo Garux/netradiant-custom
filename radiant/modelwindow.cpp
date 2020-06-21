@@ -633,8 +633,11 @@ public:
 	}
 
 	void insert( scene::Instance* instance ) override {
-		if( instance->path().size() == 3 )
+		if( instance->path().size() == 3 ){
 			m_modelInstances.push_back( instance );
+			m_originZ = 0;
+			m_originInvalid = true;
+		}
 	}
 	void erase( scene::Instance* instance ) override { // just invalidate everything (also happens on resource flush and refresh) //FIXME: redraw on resource refresh
 		m_modelInstances.clear();
