@@ -127,6 +127,7 @@
 
 		{ "water",          W_CONT_WATER,               W_CONT_SOLID,               0,                          0,                          C_LIQUID | C_TRANSLUCENT,   C_SOLID },
 		{ "slag",           W_CONT_SLIME,               W_CONT_SOLID,               0,                          0,                          C_LIQUID | C_TRANSLUCENT,   C_SOLID },
+		{ "slime",          W_CONT_SLIME,               W_CONT_SOLID,               0,                          0,                          C_LIQUID | C_TRANSLUCENT,   C_SOLID }, // alias to support shaders of Q3 maps
 		{ "lava",           W_CONT_LAVA,                W_CONT_SOLID,               0,                          0,                          C_LIQUID | C_TRANSLUCENT,   C_SOLID },
 
 		{ "playerclip",     W_CONT_PLAYERCLIP,          W_CONT_SOLID,               0,                          0,                          C_DETAIL | C_TRANSLUCENT,   C_SOLID },
