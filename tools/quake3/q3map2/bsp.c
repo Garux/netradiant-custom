@@ -1034,7 +1034,9 @@ int BSPMain( int argc, char **argv ){
 		/* if we are doing a full map, delete the last saved region map */
 		sprintf( path, "%s.reg", source );
 		remove( path );
-		path_set_extension( name, ".map" );   /* might be .reg */
+		if ( !onlyents || !striEqual( path_get_filename_base_end( name ), ".ent" ) ) {
+			path_set_extension( name, ".map" );   /* .reg and .ent are ok too */
+		}
 	}
 
 	/* if onlyents, just grab the entites and resave */
