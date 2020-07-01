@@ -195,6 +195,9 @@ static void RadClipWindingEpsilon( radWinding_t *in, vec3_t normal, vec_t dist,
 
 
 
+float Modulo1IfNegative( float f ){
+	return f < 0.0f ? f - floor( f ) : f;
+}
 
 
 /*
@@ -204,9 +207,7 @@ static void RadClipWindingEpsilon( radWinding_t *in, vec3_t normal, vec_t dist,
  */
 
 bool RadSampleImage( byte *pixels, int width, int height, float st[ 2 ], float color[ 4 ] ){
-	float sto[ 2 ];
 	int x, y;
-
 
 	/* clear color first */
 	color[ 0 ] = color[ 1 ] = color[ 2 ] = color[ 3 ] = 255;
@@ -216,18 +217,10 @@ bool RadSampleImage( byte *pixels, int width, int height, float st[ 2 ], float c
 		return false;
 	}
 
-	/* bias st */
-	sto[ 0 ] = st[ 0 ];
-	while ( sto[ 0 ] < 0.0f )
-		sto[ 0 ] += 1.0f;
-	sto[ 1 ] = st[ 1 ];
-	while ( sto[ 1 ] < 0.0f )
-		sto[ 1 ] += 1.0f;
-
 	/* get offsets */
-	x = ( (float) width * sto[ 0 ] ) + 0.5f;
+	x = ( (float) width * Modulo1IfNegative( st[ 0 ] ) ) + 0.5f;
 	x %= width;
-	y = ( (float) height * sto[ 1 ] )  + 0.5f;
+	y = ( (float) height * Modulo1IfNegative( st[ 1 ] ) ) + 0.5f;
 	y %= height;
 
 	/* get pixel */
