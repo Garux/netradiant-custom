@@ -38,6 +38,7 @@ void Selection_MoveDown();
 void Selection_MoveUp();
 
 void Select_AllOfType();
+void Select_EntitiesByKeyValue( const char* key, const char* value );
 
 void Select_ConnectedEntities( bool targeting, bool targets, bool focus );
 void SelectConnectedEntities();

@@ -1503,6 +1503,19 @@ void EntityInspector_focusSelected( GtkButton *button, gpointer user_data ){
 	FocusAllViews();
 }
 
+void EntityInspector_selectByKey( GtkButton *button, gpointer user_data ){
+	Select_EntitiesByKeyValue( gtk_entry_get_text( g_entityKeyEntry ), nullptr );
+}
+
+void EntityInspector_selectByValue( GtkButton *button, gpointer user_data ){
+	Select_EntitiesByKeyValue( nullptr, gtk_entry_get_text( g_entityValueEntry ) );
+}
+
+void EntityInspector_selectByKeyValue( GtkButton *button, gpointer user_data ){
+	Select_EntitiesByKeyValue( gtk_entry_get_text( g_entityKeyEntry ), gtk_entry_get_text( g_entityValueEntry ) );
+}
+
+
 GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 	GtkWidget* vbox = gtk_vbox_new( FALSE, 2 );
 	gtk_widget_show( vbox );
@@ -1663,7 +1676,7 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 
 				{
 					// key/value entry
-					GtkTable* table = GTK_TABLE( gtk_table_new( 2, 2, FALSE ) );
+					GtkTable* table = GTK_TABLE( gtk_table_new( 2, 3, FALSE ) );
 					gtk_widget_show( GTK_WIDGET( table ) );
 					gtk_box_pack_start( GTK_BOX( vbox2 ), GTK_WIDGET( table ), FALSE, TRUE, 0 );
 					gtk_table_set_row_spacings( table, 3 );
@@ -1707,6 +1720,49 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 										  (GtkAttachOptions)( GTK_FILL ),
 										  (GtkAttachOptions)( 0 ), 0, 0 );
 						gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+					}
+
+					/* select by key/value buttons */
+					GtkTable* tab = GTK_TABLE( gtk_table_new( 2, 2, FALSE ) );
+					gtk_table_attach( table, GTK_WIDGET( tab ), 2, 3, 0, 2,
+									  (GtkAttachOptions)( GTK_FILL ),
+									  (GtkAttachOptions)( 0 ), 0, 0 );
+					table = tab;
+					gtk_widget_show( GTK_WIDGET( table ) );
+					gtk_table_set_row_spacings( table, 0 );
+					gtk_table_set_col_spacings( table, 0 );
+					{
+						GtkWidget* button = gtk_button_new();
+						gtk_button_set_image( GTK_BUTTON( button ), gtk_image_new_from_stock( GTK_STOCK_APPLY, GTK_ICON_SIZE_MENU ) );
+						gtk_widget_set_can_focus( button, FALSE );
+						gtk_widget_set_tooltip_text( button, "Select by key" );
+						gtk_widget_show( button );
+						gtk_table_attach( table, button, 0, 1, 0, 1,
+										  (GtkAttachOptions)( GTK_FILL ),
+										  (GtkAttachOptions)( 0 ), 0, 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectByKey ), 0 );
+					}
+					{
+						GtkWidget* button = gtk_button_new();
+						gtk_button_set_image( GTK_BUTTON( button ), gtk_image_new_from_stock( GTK_STOCK_APPLY, GTK_ICON_SIZE_MENU ) );
+						gtk_widget_set_can_focus( button, FALSE );
+						gtk_widget_set_tooltip_text( button, "Select by value" );
+						gtk_widget_show( button );
+						gtk_table_attach( table, button, 0, 1, 1, 2,
+										  (GtkAttachOptions)( GTK_FILL ),
+										  (GtkAttachOptions)( 0 ), 0, 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectByValue ), 0 );
+					}
+					{
+						GtkWidget* button = gtk_button_new();
+						gtk_button_set_image( GTK_BUTTON( button ), gtk_image_new_from_stock( GTK_STOCK_APPLY, GTK_ICON_SIZE_MENU ) );
+						gtk_widget_set_can_focus( button, FALSE );
+						gtk_widget_set_tooltip_text( button, "Select by key + value" );
+						gtk_widget_show( button );
+						gtk_table_attach( table, button, 1, 2, 0, 2,
+										  (GtkAttachOptions)( GTK_FILL ),
+										  (GtkAttachOptions)( GTK_FILL ), 0, 0 );
+						g_signal_connect( G_OBJECT( button ), "clicked", G_CALLBACK( EntityInspector_selectByKeyValue ), 0 );
 					}
 				}
 
@@ -1755,9 +1811,8 @@ GtkWidget* EntityInspector_constructWindow( GtkWindow* toplevel ){
 					}
 					{
 						GtkWidget* button = gtk_toggle_button_new();
-						GtkImage* image = GTK_IMAGE( gtk_image_new_from_stock( GTK_STOCK_ZOOM_IN, GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-						gtk_widget_show( GTK_WIDGET( image ) );
-						gtk_container_add( GTK_CONTAINER( button ), GTK_WIDGET( image ) );
+						GtkWidget* image = gtk_image_new_from_stock( GTK_STOCK_ZOOM_IN, GTK_ICON_SIZE_SMALL_TOOLBAR );
+						gtk_button_set_image( GTK_BUTTON( button ), image );
 						gtk_button_set_relief( GTK_BUTTON( button ), GTK_RELIEF_NONE );
 						gtk_widget_set_can_focus( button, FALSE );
 						gtk_box_pack_start( hbox, button, FALSE, FALSE, 0 );
@@ -1855,14 +1910,4 @@ void EntityInspector_construct(){
 
 void EntityInspector_destroy(){
 	GlobalEntityClassManager().detach( g_EntityInspector );
-}
-
-const char *EntityInspector_getCurrentKey(){
-	if ( !GroupDialog_isShown() ) {
-		return 0;
-	}
-	if ( GroupDialog_getPage() != g_page_entity ) {
-		return 0;
-	}
-	return gtk_entry_get_text( g_entityKeyEntry );
 }

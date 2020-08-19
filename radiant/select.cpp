@@ -725,14 +725,14 @@ bool propertyvalues_contain( const PropertyValues& propertyvalues, const char *s
 	return false;
 }
 
+template<typename EntityMatcher>
 class EntityFindByPropertyValueWalker : public scene::Graph::Walker
 {
-const PropertyValues& m_propertyvalues;
-const char *m_prop;
+const EntityMatcher& m_entityMatcher;
 const scene::Node* m_world;
 public:
-EntityFindByPropertyValueWalker( const char *prop, const PropertyValues& propertyvalues )
-	: m_propertyvalues( propertyvalues ), m_prop( prop ), m_world( Map_FindWorldspawn( g_map ) ){
+EntityFindByPropertyValueWalker( const EntityMatcher& entityMatcher )
+	: m_entityMatcher( entityMatcher ), m_world( Map_FindWorldspawn( g_map ) ){
 }
 bool pre( const scene::Path& path, scene::Instance& instance ) const {
 	if( !path.top().get().visible() ){
@@ -745,7 +745,7 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 
 	Entity* entity = Node_getEntity( path.top() );
 	if ( entity != 0 ){
-		if( propertyvalues_contain( m_propertyvalues, entity->getKeyValue( m_prop ) ) ) {
+		if( m_entityMatcher( entity ) ) {
 			Instance_getSelectable( instance )->setSelected( true );
 			return true;
 		}
@@ -760,8 +760,15 @@ bool pre( const scene::Path& path, scene::Instance& instance ) const {
 }
 };
 
+template<typename EntityMatcher>
+void Scene_EntitySelectByPropertyValues( scene::Graph& graph, const EntityMatcher& entityMatcher ){
+	graph.traverse( EntityFindByPropertyValueWalker<EntityMatcher>( entityMatcher ) );
+}
+
 void Scene_EntitySelectByPropertyValues( scene::Graph& graph, const char *prop, const PropertyValues& propertyvalues ){
-	graph.traverse( EntityFindByPropertyValueWalker( prop, propertyvalues ) );
+	Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), [prop, &propertyvalues]( const Entity* entity )->bool{
+		return propertyvalues_contain( propertyvalues, entity->getKeyValue( prop ) );
+	} );
 }
 
 class EntityGetSelectedPropertyValuesWalker : public scene::Graph::Walker
@@ -841,10 +848,7 @@ void Select_AllOfType(){
 	else
 	{
 		PropertyValues propertyvalues;
-		const char *prop = EntityInspector_getCurrentKey();
-		if ( !prop || !*prop ) {
-			prop = "classname";
-		}
+		const char *prop = "classname";
 		Scene_EntityGetPropertyValues( GlobalSceneGraph(), prop, propertyvalues );
 		GlobalSelectionSystem().setSelectedAll( false );
 		if ( !propertyvalues.empty() ) {
@@ -854,6 +858,45 @@ void Select_AllOfType(){
 		{
 			Scene_BrushSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
 			Scene_PatchSelectByShader( GlobalSceneGraph(), TextureBrowser_GetSelectedShader() );
+		}
+	}
+}
+
+void Select_EntitiesByKeyValue( const char* key, const char* value ){
+	GlobalSelectionSystem().setSelectedAll( false );
+	if( key != nullptr && value != nullptr ){
+		if( !string_empty( key ) && !string_empty( value ) ){
+			Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), [key, value]( const Entity* entity )->bool{
+				return string_equal_nocase( entity->getKeyValue( key ), value );
+			} );
+		}
+	}
+	else if( key != nullptr ){
+		if( !string_empty( key ) ){
+			Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), [key]( const Entity* entity )->bool{
+				return !string_empty( entity->getKeyValue( key ) );
+			} );
+		}
+	}
+	else if( value != nullptr ){
+		if( !string_empty( value ) ){
+			Scene_EntitySelectByPropertyValues( GlobalSceneGraph(), [value]( const Entity* entity )->bool{
+				class Visitor : public Entity::Visitor
+				{
+					const char* const m_value;
+				public:
+					bool m_found = false;
+					Visitor( const char* value ) : m_value( value ){
+					}
+					void visit( const char* key, const char* value ){
+						if ( string_equal_nocase( m_value, value ) ) {
+							m_found = true;
+						}
+					}
+				} visitor( value );
+				entity->forEachKeyValue( visitor );
+				return visitor.m_found;
+			} );
 		}
 	}
 }

@@ -27,6 +27,5 @@ typedef struct _GtkWindow GtkWindow;
 GtkWidget* EntityInspector_constructWindow( GtkWindow* parent );
 void EntityInspector_construct();
 void EntityInspector_destroy();
-const char *EntityInspector_getCurrentKey();
 
 #endif
