@@ -43,7 +43,7 @@ namespace
 FILE* g_hLogFile;
 }
 
-bool g_Console_enableLogging = false;
+bool g_Console_enableLogging = true;
 
 // called whenever we need to open/close/check the console log file
 void Sys_LogFile( bool enable ){
