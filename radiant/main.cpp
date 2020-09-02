@@ -88,6 +88,7 @@
 #include "environment.h"
 #include "referencecache.h"
 #include "stacktrace.h"
+#include "error.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -328,6 +329,10 @@ void streams_init(){
 
 void paths_init(){
 	const char* home = environment_get_home_path();
+
+	if( !g_str_is_ascii( home ) )
+		Error( "Home path is not ASCII: %s", home );
+
 	Q_mkdir( home );
 
 	{
@@ -339,6 +344,9 @@ void paths_init(){
 	Q_mkdir( g_strSettingsPath.c_str() );
 
 	g_strAppPath = environment_get_app_path();
+
+	if( !g_str_is_ascii( g_strAppPath.c_str() ) )
+		Error( "Radiant path is not ASCII: %s", g_strAppPath.c_str() );
 
 	// radiant is installed in the parent dir of "tools/"
 	// NOTE: this is not very easy for debugging
