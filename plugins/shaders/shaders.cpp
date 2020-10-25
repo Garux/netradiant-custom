@@ -1676,7 +1676,13 @@ void Shaders_Load(){
 			}
 
 			GlobalFileSystem().forEachArchive( AddShaderListFromArchiveCaller(), false, true );
-			DumpUnreferencedShaders();
+			if( l_shaderfiles != nullptr ){
+				DumpUnreferencedShaders();
+			}
+			else{
+				globalOutputStream() << "No shaderlist.txt found: loading all shaders\n";
+				GlobalFileSystem().forEachFile( path.c_str(), g_shadersExtension, AddShaderFileCaller(), 1 );
+			}
 		}
 		else
 		{
