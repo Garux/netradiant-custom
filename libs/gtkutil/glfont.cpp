@@ -801,8 +801,10 @@ GLFont *glfont_create( const char* font_string ){
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0 );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0 );
 		//Here we actually create the texture itself
+		void* empty = calloc( font_height * 12 * font_height * 12 * 2, sizeof( GLubyte ) );
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, font_height * 12, font_height * 12, // riskily assuming, that height >= max width
-						0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 0 );
+						0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, empty );
+		free( empty );
 
 
 		for( unsigned char c = 0; c < 128; ++c ){
@@ -840,9 +842,9 @@ GLFont *glfont_create( const char* font_string ){
 				glNewList( font_list_base + c, GL_COMPILE );
 				glBegin( GL_QUADS );
 				const float x0 = 0;
-				const float x1 = bitmap.width + .01f;
+				const float x1 = bitmap.width;
 				const float y0 = 0;
-				const float y1 = bitmap.rows + .01f;
+				const float y1 = bitmap.rows;
 				const float tx0 = ( c % 12 ) / 12.f;
 				const float tx1 = ( c % 12 + static_cast<float>( bitmap.width ) / font_height ) / 12.f;
 				const float ty0 = ( c / 12 ) / 12.f;
