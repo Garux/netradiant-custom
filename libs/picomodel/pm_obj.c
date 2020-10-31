@@ -851,8 +851,9 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 					/*if( has_v  )*/ PicoSetSurfaceXYZ( curSurface,  ( curVertex + i ), verts  [ i ] );
 					/*if( has_vt )*/ PicoSetSurfaceST( curSurface, 0, ( curVertex + i ), coords [ i ] );
 					/*if( has_vn )*/ PicoSetSurfaceNormal( curSurface,  ( curVertex + i ), normals[ i ] );
-					if( curSurface && curSurface->shader )
-						PicoSetSurfaceColor( curSurface, 0, ( curVertex + i ), curSurface->shader->diffuseColor );
+					PicoSetSurfaceColor( curSurface, 0, ( curVertex + i ), curSurface->shader != NULL?
+					                                                       curSurface->shader->diffuseColor
+					                                                       :picoColor_white );
 				}
 				/* add triangles */
 				for ( i = 1; i < numPoints - 1; ++i )
