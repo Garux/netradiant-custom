@@ -132,6 +132,8 @@ Image* LoadPNGBuff( unsigned char* fbuffer ){
 		png_set_filler( png_ptr, 0xff, PNG_FILLER_AFTER );
 	}
 
+	png_set_interlace_handling( png_ptr );
+
 	// read the sucker in one chunk
 	png_read_update_info( png_ptr, info_ptr );
 
