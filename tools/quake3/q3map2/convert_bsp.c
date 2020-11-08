@@ -33,6 +33,11 @@
 
 
 
+static void AAS_DData( unsigned char *data, int size ){
+	for ( int i = 0; i < size; i++ )
+		data[i] ^= (unsigned char) i * 119;
+}
+
 /*
    FixAAS()
    resets an aas checksum to match the given BSP
@@ -72,6 +77,7 @@ int FixAAS( int argc, char **argv ){
 	/* create bsp checksum */
 	Sys_Printf( "Creating checksum...\n" );
 	checksum = LittleLong( (int)Com_BlockChecksum( buffer, length ) ); // md4 checksum for a block of data
+	AAS_DData( (unsigned char *) &checksum, 4 );
 
 	/* write checksum to aas */
 	ext = exts;
@@ -88,7 +94,7 @@ int FixAAS( int argc, char **argv ){
 		if ( !file ) {
 			continue;
 		}
-		if ( fwrite( &checksum, 4, 1, file ) != 1 ) {
+		if ( fseek( file, 8, SEEK_SET ) != 0 || fwrite( &checksum, 4, 1, file ) != 1 ) {
 			Error( "Error writing checksum to %s", aas );
 		}
 		fclose( file );
