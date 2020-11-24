@@ -339,6 +339,10 @@ int pk3BSPMain( int argc, char **argv ){
 			}
 		}
 		res2list( pk3Shaders, ValueForKey( &entities[i], "targetShaderNewName" ) );
+
+		if ( ENT_READKV( &str, &entities[i], "model2" ) ){
+			Sys_Warning( "unhandled model2 key of %s: %s\n", ent_classname( &entities[i] ), str );
+		}
 	}
 
 	//levelshot
@@ -1009,6 +1013,10 @@ int repackBSPMain( int argc, char **argv ){
 				}
 			}
 			res2list( pk3Shaders, ValueForKey( &entities[i], "targetShaderNewName" ) );
+
+			if ( ENT_READKV( &str, &entities[i], "model2" ) ){
+				Sys_Warning( "unhandled model2 key of %s: %s\n", ent_classname( &entities[i] ), str );
+			}
 		}
 
 		//levelshot
