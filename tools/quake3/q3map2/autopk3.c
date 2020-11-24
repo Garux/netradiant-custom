@@ -1220,9 +1220,6 @@ int repackBSPMain( int argc, char **argv ){
 			if( ( found = StrList_find( pk3Shaders, token ) ) ){
 				shader = found - 1;
 				wantShader = true;
-				if( StrList_find( rExTextures, token ) )
-					Sys_FPrintf( SYS_WRN, "WARNING3: %s : about to include shader for excluded texture\n", token );
-
 			}
 
 			/* handle { } section */
@@ -1408,6 +1405,8 @@ int repackBSPMain( int argc, char **argv ){
 					wantShader = false;
 					strClear( pk3Shaders->s[shader] );
 				}
+				if( wantShader && StrList_find( rExTextures, pk3Shaders->s[shader] ) )
+					Sys_FPrintf( SYS_WRN, "WARNING3: %s : about to include shader for excluded texture\n", pk3Shaders->s[shader] );
 				if ( wantShader && !hasmap ){
 					Sys_FPrintf( SYS_WRN, "WARNING8: %s : shader has no known maps\n", pk3Shaders->s[shader] );
 					wantShader = false;
