@@ -345,6 +345,10 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 	}
 
+	for( i = 0; i < numBSPFogs; ++i ){
+		res2list( pk3Shaders, bspFogs[i].shader );
+	}
+
 	//levelshot
 	sprintf( str, "levelshots/%s", nameOFmap );
 	res2list( pk3Shaders, str );
@@ -1019,6 +1023,10 @@ int repackBSPMain( int argc, char **argv ){
 			}
 		}
 
+		for( i = 0; i < numBSPFogs; ++i ){
+			res2list( pk3Shaders, bspFogs[i].shader );
+		}
+
 		//levelshot
 		sprintf( str, "levelshots/%s", nameOFmap );
 		res2list( pk3Shaders, str );
@@ -1147,9 +1155,9 @@ int repackBSPMain( int argc, char **argv ){
 		}
 		if ( numBSPFogs != 0 ) {
 			Sys_Printf( "freed numBSPFogs\n" );
-			numBSPFogs = 0;
 		}
-		if ( numBSPAds != 0 ) {
+*/		numBSPFogs = 0;
+/*		if ( numBSPAds != 0 ) {
 			Sys_Printf( "freed numBSPAds\n" );
 			numBSPAds = 0;
 		}

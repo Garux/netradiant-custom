@@ -162,12 +162,12 @@ void SwapBSPFile( void ){
 	/* shaders (don't swap the name) */
 	for ( i = 0; i < numBSPShaders ; i++ )
 	{
-	if ( doingBSP ){
-		si = ShaderInfoForShader( bspShaders[ i ].shader );
-		if ( si->remapShader && si->remapShader[ 0 ] ) {
-			strcpy( bspShaders[ i ].shader, si->remapShader );
+		if ( doingBSP ){
+			si = ShaderInfoForShader( bspShaders[ i ].shader );
+			if ( si->remapShader && si->remapShader[ 0 ] ) {
+				strcpy( bspShaders[ i ].shader, si->remapShader );
+			}
 		}
-	}
 		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
 		bspShaders[ i ].surfaceFlags = LittleLong( bspShaders[ i ].surfaceFlags );
 	}
@@ -389,6 +389,13 @@ void PartialLoadBSPFile( const char *filename ){
 	/* drawsurfs */
 	/* note: rbsp files (and hence q3map2 abstract bsp) have byte lightstyles index arrays, this follows sof2map convention */
 	SwapBlock( (int*) bspDrawSurfaces, numBSPDrawSurfaces * sizeof( bspDrawSurfaces[ 0 ] ) );
+
+	/* fogs */
+	for ( i = 0; i < numBSPFogs; i++ )
+	{
+		bspFogs[ i ].brushNum = LittleLong( bspFogs[ i ].brushNum );
+		bspFogs[ i ].visibleSide = LittleLong( bspFogs[ i ].visibleSide );
+	}
 }
 
 /*

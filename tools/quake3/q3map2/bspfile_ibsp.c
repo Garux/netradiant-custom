@@ -536,6 +536,8 @@ void PartialLoadIBSPFile( const char *filename ){
 
 	CopyDrawSurfacesLump( header );
 
+	numBSPFogs = CopyLump( (bspHeader_t*) header, LUMP_FOGS, bspFogs, sizeof( bspFog_t ) ); // TODO fix overflow
+
 	bspEntDataSize = CopyLump_Allocate( (bspHeader_t*) header, LUMP_ENTITIES, (void **) &bspEntData, 1, &allocatedBSPEntData );
 
 	/* free the file buffer */
