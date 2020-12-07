@@ -814,7 +814,7 @@ int pk3BSPMain( int argc, char **argv ){
 
 int repackBSPMain( int argc, char **argv ){
 	int i, j, compLevel = 0;
-	bool dbg = false, png = false;
+	bool dbg = false, png = false, analyze = false;
 	char str[ 1024 ];
 
 	/* process arguments */
@@ -824,6 +824,9 @@ int repackBSPMain( int argc, char **argv ){
 		}
 		else if ( strEqual( argv[ i ],  "-png" ) ) {
 			png = true;
+		}
+		else if ( strEqual( argv[ i ],  "-analyze" ) ) { // only analyze bsps and exit
+			analyze = true;
 		}
 		else if ( strEqual( argv[ i ],  "-complevel" ) ) {
 			compLevel = atoi( argv[ i + 1 ] );
@@ -955,6 +958,11 @@ int repackBSPMain( int argc, char **argv ){
 
 
 	for( j = 0; j < bspListN; ++j ){
+
+		if( analyze ){
+			pk3Sounds->n = 0;
+			pk3Shaders->n = 0;
+		}
 
 		int pk3SoundsNold = pk3Sounds->n;
 		int pk3ShadersNold = pk3Shaders->n;
@@ -1170,6 +1178,9 @@ int repackBSPMain( int argc, char **argv ){
 			numBSPVisBytes = 0;
 		}
 */	}
+
+	if( analyze )
+		return 0;
 
 
 
