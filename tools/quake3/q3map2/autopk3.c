@@ -904,7 +904,7 @@ int repackBSPMain( int argc, char **argv ){
 
 
 	int bspListN = 0;
-	const int bspListSize = 8192;
+	const int bspListSize = 16384;
 	char (*bspList)[1024] = safe_malloc( bspListSize * sizeof( bspList[0] ) );
 
 	/* do some path mangling */
