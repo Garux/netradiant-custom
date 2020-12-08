@@ -286,8 +286,6 @@ int pk3BSPMain( int argc, char **argv ){
 	memset( drawsurfSHs, 0, sizeof( drawsurfSHs ) );
 
 	for ( i = 0; i < numBSPDrawSurfaces; ++i ){
-		/* can't exclude nodraw patches here (they want shaders :0!) */
-		//if ( !( bspDrawSurfaces[i].surfaceType == 2 && bspDrawSurfaces[i].numIndexes == 0 ) ) drawsurfSHs[bspDrawSurfaces[i].shaderNum] = true;
 		drawsurfSHs[ bspDrawSurfaces[i].shaderNum ] = true;
 		//Sys_Printf( "%s\n", bspShaders[bspDrawSurfaces[i].shaderNum].shader );
 	}
@@ -299,7 +297,7 @@ int pk3BSPMain( int argc, char **argv ){
 	StrList* pk3Videos = StrList_allocate( 1024 );
 
 	for ( i = 0; i < numBSPShaders; ++i ){
-		if ( drawsurfSHs[i] ){
+		if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & 0x80 /* Q_SURF_NORAW */ ) ){
 			res2list( pk3Shaders, bspShaders[i].shader );
 			//Sys_Printf( "%s\n", bspShaders[i].shader );
 		}
@@ -602,19 +600,6 @@ int pk3BSPMain( int argc, char **argv ){
 				else if ( !wantShader )
 					continue;
 
-				/* -----------------------------------------------------------------
-				surfaceparm * directives
-				----------------------------------------------------------------- */
-
-				/* match surfaceparm */
-				else if ( striEqual( token, "surfaceparm" ) ) {
-					GetToken( false );
-					if ( striEqual( token, "nodraw" ) ) {
-						wantShader = false;
-						strClear( pk3Shaders->s[shader] );
-					}
-				}
-
 				/* skyparms <outer image> <cloud height> <inner image> */
 				else if ( striEqual( token, "skyParms" ) ) {
 					hasmap = true;
@@ -645,7 +630,8 @@ int pk3BSPMain( int argc, char **argv ){
 					wantShader = false;
 					strClear( pk3Shaders->s[shader] );
 				}
-				if ( !hasmap ){
+				if ( wantShader && !hasmap ){
+					Sys_FPrintf( SYS_WRN, "WARNING8: %s : visible shader has no known maps\n", pk3Shaders->s[shader] );
 					wantShader = false;
 				}
 				if ( wantShader ){
@@ -987,7 +973,7 @@ int repackBSPMain( int argc, char **argv ){
 		}
 
 		for ( i = 0; i < numBSPShaders; ++i ){
-			if ( drawsurfSHs[i] ){
+			if ( drawsurfSHs[i] && !( bspShaders[i].surfaceFlags & 0x80 /* Q_SURF_NORAW */ ) ){
 				res2list( pk3Shaders, bspShaders[i].shader );
 			}
 		}
@@ -1361,21 +1347,6 @@ int repackBSPMain( int argc, char **argv ){
 				else if ( !wantShader )
 					continue;
 
-				/* -----------------------------------------------------------------
-				surfaceparm * directives
-				----------------------------------------------------------------- */
-
-				/* match surfaceparm */
-				else if ( striEqual( token, "surfaceparm" ) ) {
-					StrBuf_cat( shaderText, "\n\tsurfaceparm " );
-					GetToken( false );
-					StrBuf_cat( shaderText, token );
-					if ( striEqual( token, "nodraw" ) ) {
-						wantShader = false;
-						strClear( pk3Shaders->s[shader] );
-					}
-				}
-
 				/* skyparms <outer image> <cloud height> <inner image> */
 				else if ( striEqual( token, "skyParms" ) ) {
 					StrBuf_cat( shaderText, "\n\tskyParms " );
@@ -1435,9 +1406,8 @@ int repackBSPMain( int argc, char **argv ){
 				if( wantShader && StrList_find( rExTextures, pk3Shaders->s[shader] ) )
 					Sys_FPrintf( SYS_WRN, "WARNING3: %s : about to include shader for excluded texture\n", pk3Shaders->s[shader] );
 				if ( wantShader && !hasmap ){
-					Sys_FPrintf( SYS_WRN, "WARNING8: %s : shader has no known maps\n", pk3Shaders->s[shader] );
+					Sys_FPrintf( SYS_WRN, "WARNING8: %s : visible shader has no known maps\n", pk3Shaders->s[shader] );
 					wantShader = false;
-					strClear( pk3Shaders->s[shader] );
 				}
 				if ( wantShader ){
 					StrBuf_cat( allShaders, shaderText->s );
