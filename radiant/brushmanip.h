@@ -43,7 +43,7 @@ namespace scene
 class Graph;
 class Node;
 }
-void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::size_t sides, const char* shader );
+void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::size_t sides, bool option, const char* shader );
 class AABB;
 void Scene_BrushResize_Cuboid( scene::Node*& node, const AABB& bounds );
 void Brush_ConstructPlacehoderCuboid( scene::Node& node, const AABB& bounds );

@@ -366,8 +366,7 @@ void DoProjectSettings(){
 
 void DoSides( int type, int axis ){
 	ModalDialog dialog;
-	//GtkEntry* sides_entry;
-	GtkWidget* sides_spin;
+	GtkWidget* spin, *toggle;
 
 	GtkWindow* window = create_dialog_window( MainFrame_getWindow(), "Arbitrary sides", G_CALLBACK( dialog_delete_callback ), &dialog );
 
@@ -375,20 +374,21 @@ void DoSides( int type, int axis ){
 	gtk_window_add_accel_group( window, accel );
 
 	{
+		GtkVBox* vbox = create_dialog_vbox( 0, 0 );
+		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( vbox ) );
 		GtkHBox* hbox = create_dialog_hbox( 4, 4 );
-		gtk_container_add( GTK_CONTAINER( window ), GTK_WIDGET( hbox ) );
+		gtk_box_pack_start( GTK_BOX( vbox ), GTK_WIDGET( hbox ), FALSE, FALSE, 0 );
+
+		GtkLabel* label;
 		{
-			GtkLabel* label = GTK_LABEL( gtk_label_new( "Sides:" ) );
+			label = GTK_LABEL( gtk_label_new( "Sides:" ) );
 			gtk_widget_show( GTK_WIDGET( label ) );
 			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( label ), FALSE, FALSE, 0 );
 		}
-//		{
-//			GtkEntry* entry = GTK_ENTRY( gtk_entry_new() );
-//			gtk_widget_show( GTK_WIDGET( entry ) );
-//			gtk_box_pack_start( GTK_BOX( hbox ), GTK_WIDGET( entry ), FALSE, FALSE, 0 );
-//			sides_entry = entry;
-//			gtk_widget_grab_focus( GTK_WIDGET( entry ) );
-//		}
+		{
+			toggle = gtk_check_button_new_with_label( "Truncate" );
+			gtk_box_pack_end( GTK_BOX( vbox ), toggle, FALSE, FALSE, 0 );
+		}
 		{
 			GtkAdjustment* adj;
 			EBrushPrefab BrushPrefabType = (EBrushPrefab)type;
@@ -406,19 +406,19 @@ void DoSides( int type, int axis ){
 				break;
 			case eBrushIcosahedron :
 				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 2, 1, 10, 0 ) ); //possible with 3, but buggy
+				gtk_widget_show( toggle );
+				gtk_label_set_label( label, "Subdivisions" );
 				break;
 			default:
 				adj = GTK_ADJUSTMENT( gtk_adjustment_new( 8, 3, 31, 1, 10, 0 ) );
 				break;
 			}
 
-			GtkWidget* spin = gtk_spin_button_new( adj, 1, 0 );
+			spin = gtk_spin_button_new( adj, 1, 0 );
 			gtk_widget_show( spin );
 			gtk_box_pack_start( GTK_BOX( hbox ), spin, FALSE, FALSE, 0 );
 			gtk_widget_set_size_request( spin, 64, -1 );
 			gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( spin ), TRUE );
-
-			sides_spin = spin;
 		}
 		{
 			GtkVBox* vbox = create_dialog_vbox( 4 );
@@ -438,12 +438,10 @@ void DoSides( int type, int axis ){
 	}
 
 	if ( modal_dialog_show( window, dialog ) == eIDOK ) {
-//		const char *str = gtk_entry_get_text( sides_entry );
-
-//		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, atoi( str ), TextureBrowser_GetSelectedShader() );
-		gtk_spin_button_update ( GTK_SPIN_BUTTON( sides_spin ) );
-		int sides = static_cast<int>( gtk_spin_button_get_value( GTK_SPIN_BUTTON( sides_spin ) ) );
-		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, sides, TextureBrowser_GetSelectedShader() );
+		gtk_spin_button_update ( GTK_SPIN_BUTTON( spin ) );
+		const int sides = static_cast<int>( gtk_spin_button_get_value( GTK_SPIN_BUTTON( spin ) ) );
+		const bool option = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( toggle ) );
+		Scene_BrushConstructPrefab( GlobalSceneGraph(), (EBrushPrefab)type, sides, option, TextureBrowser_GetSelectedShader() );
 	}
 
 	gtk_widget_destroy( GTK_WIDGET( window ) );

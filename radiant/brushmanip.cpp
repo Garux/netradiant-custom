@@ -327,75 +327,94 @@ void Brush_ConstructRock( Brush& brush, const AABB& bounds, std::size_t sides, c
 	}
 }
 
+#include "quickhull/QuickHull.hpp"
 namespace icosahedron{
 
-#define X .525731112119133606
-#define Z .850650808352039932
-
-static float vdata[12][3] = {
+constexpr double X = .525731112119133606;
+constexpr double Z = .850650808352039932;
+// 12 vertices
+static const DoubleVector3 vdata[12] = {
 	{ -X, 0.0, Z}, {X, 0.0, Z}, { -X, 0.0, -Z}, {X, 0.0, -Z},
 	{0.0, Z, X}, {0.0, Z, -X}, {0.0, -Z, X}, {0.0, -Z, -X},
 	{Z, X, 0.0}, { -Z, X, 0.0}, {Z, -X, 0.0}, { -Z, -X, 0.0}
 };
-static unsigned int tindices[20][3] = {
+// 20 faces
+static constexpr unsigned int tindices[20][3] = {
 	{0, 4, 1}, {0, 9, 4}, {9, 5, 4}, {4, 5, 8}, {4, 8, 1},
 	{8, 10, 1}, {8, 3, 10}, {5, 3, 8}, {5, 2, 3}, {2, 7, 3},
 	{7, 10, 3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1, 6},
 	{6, 1, 10}, {9, 0, 11}, {9, 11, 2}, {9, 2, 5}, {7, 2, 11}
 };
 
-void normalize( float* a ) {
-	float d = sqrt( a[0] * a[0] + a[1] * a[1] + a[2] * a[2] );
-	a[0] /= d;
-	a[1] /= d;
-	a[2] /= d;
-}
-
-void drawtri( float* a, float* b, float* c, std::size_t subdivisions, Brush& brush, float radius, const Vector3& mid, const char* shader, const TextureProjection& projection ) {
-	if( subdivisions <= 0 ) {
-		brush.addPlane( Vector3( a[0], a[1], a[2] ) * radius + mid,
-						Vector3( b[0], b[1], b[2] ) * radius + mid,
-						Vector3( c[0], c[1], c[2] ) * radius + mid,
-						shader, projection );
+void drawtri( const DoubleVector3& a, const DoubleVector3& b, const DoubleVector3& c, std::size_t subdivisions, bool truncate, std::vector<quickhull::Vector3<double>>& pointCloud ) {
+	if( subdivisions == 0 ) {
+		const auto push = [&pointCloud]( const DoubleVector3& p ){
+			pointCloud.push_back( quickhull::Vector3<double>( p.x(), p.y(), p.z() ) );
+		};
+		if( truncate ){ // this is not quite correct after subdivision performed :thinking:
+			push( ( a * ( 2.0 / 3.0 ) ) + ( b * ( 1.0 / 3.0 ) ) );
+			push( ( a * ( 1.0 / 3.0 ) ) + ( b * ( 2.0 / 3.0 ) ) );
+			push( ( a * ( 2.0 / 3.0 ) ) + ( c * ( 1.0 / 3.0 ) ) );
+			push( ( a * ( 1.0 / 3.0 ) ) + ( c * ( 2.0 / 3.0 ) ) );
+			push( ( b * ( 2.0 / 3.0 ) ) + ( c * ( 1.0 / 3.0 ) ) );
+			push( ( b * ( 1.0 / 3.0 ) ) + ( c * ( 2.0 / 3.0 ) ) );
+		}
+		else{
+			push( a );
+			push( b );
+			push( c );
+		}
 	}
 	else{
-		float ab[3], ac[3], bc[3];
-		for( int i = 0; i < 3; i++ ) {
-			ab[i] = ( a[i] + b[i] ) / 2;
-			ac[i] = ( a[i] + c[i] ) / 2;
-			bc[i] = ( b[i] + c[i] ) / 2;
-		}
-		normalize( ab );
-		normalize( ac );
-		normalize( bc );
-		drawtri( a, ab, ac, subdivisions - 1, brush, radius, mid, shader, projection );
-		drawtri( b, bc, ab, subdivisions - 1, brush, radius, mid, shader, projection );
-		drawtri( c, ac, bc, subdivisions - 1, brush, radius, mid, shader, projection );
-		drawtri( ab, bc, ac, subdivisions - 1, brush, radius, mid, shader, projection ); //<--Comment this line and sphere looks really cool!
+		const DoubleVector3 ab = vector3_normalised( a + b );
+		const DoubleVector3 ac = vector3_normalised( a + c );
+		const DoubleVector3 bc = vector3_normalised( b + c );
+
+		drawtri( a, ab, ac, subdivisions - 1, truncate, pointCloud );
+		drawtri( b, bc, ab, subdivisions - 1, truncate, pointCloud );
+		drawtri( c, ac, bc, subdivisions - 1, truncate, pointCloud );
+		drawtri( ab, bc, ac, subdivisions - 1, truncate, pointCloud ); //<--Comment this line and sphere looks really cool!
 	}
 }
 
 
-void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t subdivisions, const char* shader, const TextureProjection& projection ){
-	if ( Unsigned( 20 * ( 4 << subdivisions ) ) > c_brush_maxFaces ) {
-		globalErrorStream() << "brushIcosahedron" << ": subdivisions " << Unsigned( subdivisions ) << ": wrong sides count requested\n";
-		return;
-	}
-
+void Brush_ConstructIcosahedron( Brush& brush, const AABB& bounds, std::size_t subdivisions, bool truncate, const char* shader, const TextureProjection& projection ){
 	brush.clear();
-	brush.reserve( 20 * ( 4 << subdivisions ) );
 
-	float radius = max_extent( bounds.extents );
+	const float radius = max_extent( bounds.extents );
 	const Vector3& mid = bounds.origin;
 
+	std::vector<quickhull::Vector3<double>> pointCloud;
+
 	for( int i = 0; i < 20; i++ ){
-		drawtri( vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], subdivisions, brush, radius, mid, shader, projection );
+		drawtri( vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], subdivisions, truncate, pointCloud );
+	}
+
+	quickhull::QuickHull<double> quickhull;
+	auto hull = quickhull.getConvexHull( pointCloud, true, true );
+	const auto& indexBuffer = hull.getIndexBuffer();
+	const size_t triangleCount = indexBuffer.size() / 3;
+	std::vector<Plane3> planes;
+	for( size_t i = 0; i < triangleCount; ++i ) {
+		DoubleVector3 p[3];
+		for( size_t j = 0; j < 3; ++j ){
+			p[j] = DoubleVector3( pointCloud[indexBuffer[i * 3 + j]].x,
+			                      pointCloud[indexBuffer[i * 3 + j]].y,
+			                      pointCloud[indexBuffer[i * 3 + j]].z );
+		}
+		const Plane3 plane = plane3_for_points( p );
+		if( plane3_valid( plane ) ){
+			if( std::find_if( planes.begin(), planes.end(), [&plane]( const Plane3& pla ){ return plane3_equal( plane, pla ); } ) == planes.end() ){
+				planes.push_back( plane );
+				brush.addPlane( p[0] * radius + mid, p[1] * radius + mid, p[2] * radius + mid, shader, projection );
+			}
+		}
 	}
 }
 
 } //namespace icosahedron
 
-void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds, std::size_t sides, const char* shader, const TextureProjection& projection ){
+void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds, std::size_t sides, bool option, const char* shader, const TextureProjection& projection ){
 	switch ( type )
 	{
 	case eBrushCuboid:
@@ -448,7 +467,7 @@ void Brush_ConstructPrefab( Brush& brush, EBrushPrefab type, const AABB& bounds,
 		command << "brushIcosahedron" << " -subdivisions " << Unsigned( sides );
 		UndoableCommand undo( command.c_str() );
 
-		icosahedron::Brush_ConstructIcosahedron( brush, bounds, sides, shader, projection );
+		icosahedron::Brush_ConstructIcosahedron( brush, bounds, sides, option, shader, projection );
 	}
 	break;
 	}
@@ -802,14 +821,14 @@ const TextureProjection& TextureTransform_getDefault(){
 	return g_defaultTextureProjection;
 }
 
-void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::size_t sides, const char* shader ){
+void Scene_BrushConstructPrefab( scene::Graph& graph, EBrushPrefab type, std::size_t sides, bool option, const char* shader ){
 	if ( GlobalSelectionSystem().countSelected() != 0 ) {
 		const scene::Path& path = GlobalSelectionSystem().ultimateSelected().path();
 
 		Brush* brush = Node_getBrush( path.top() );
 		if ( brush != 0 ) {
-			AABB bounds = brush->localAABB(); // copy bounds because the brush will be modified
-			Brush_ConstructPrefab( *brush, type, bounds, sides, shader, TextureTransform_getDefault() );
+			const AABB bounds = brush->localAABB(); // copy bounds because the brush will be modified
+			Brush_ConstructPrefab( *brush, type, bounds, sides, option, shader, TextureTransform_getDefault() );
 			SceneChangeNotify();
 		}
 	}
@@ -1447,7 +1466,7 @@ BrushMakeSided( std::size_t count )
 	: m_count( count ){
 }
 void set(){
-	Scene_BrushConstructPrefab( GlobalSceneGraph(), eBrushPrism, m_count, TextureBrowser_GetSelectedShader() );
+	Scene_BrushConstructPrefab( GlobalSceneGraph(), eBrushPrism, m_count, false, TextureBrowser_GetSelectedShader() );
 }
 typedef MemberCaller<BrushMakeSided, &BrushMakeSided::set> SetCaller;
 };
