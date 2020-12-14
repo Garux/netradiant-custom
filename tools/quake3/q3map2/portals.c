@@ -673,7 +673,7 @@ int FloodEntities( tree_t *tree ){
 		}
 #endif
 		/* also allow bmodel entities outside, as they could be on a moving path that will go into the map */
-		if ( e->brushes != NULL || e->patches != NULL ) {
+		if ( e->brushes != NULL || e->patches != NULL || ent_class_is( e, "_decal" ) ) { //_decal primitive is freed at this point
 			continue;
 		}
 
