@@ -671,8 +671,11 @@ extern char **environ;
 void Radiant_Restart(){
 	ConfirmModified( "Restart Radiant" ); // user can choose to not save, it's ok
 
+	StringOutputStream mapname;
+	mapname << "\"" << Map_Name( g_map ) << "\"";
+
 	char *argv[] = { string_clone( environment_get_app_filepath() ),
-						Map_Unnamed( g_map )? NULL : string_clone( Map_Name( g_map ) ),
+						Map_Unnamed( g_map )? NULL : string_clone( mapname.c_str() ),
 						NULL };
 #ifdef WIN32
 	const int status = !_spawnv( P_NOWAIT, argv[0], argv );
