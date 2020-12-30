@@ -396,7 +396,16 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 	return -1;
 }
 
-
+__int64 FileSize(const wchar_t* name)
+{
+    WIN32_FILE_ATTRIBUTE_DATA fad;
+    if (!GetFileAttributesEx(name, GetFileExInfoStandard, &fad))
+        return -1; // error condition, could call GetLastError to find out more
+    LARGE_INTEGER size;
+    size.HighPart = fad.nFileSizeHigh;
+    size.LowPart = fad.nFileSizeLow;
+    return size.QuadPart;
+}
 
 
 bool vfsPackFile( const char *filename, const char *packname, const int compLevel ){
@@ -408,6 +417,9 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 	strcpy( fixed, filename );
 	FixDOSName( fixed );
 	g_strdown( fixed );
+
+	if( FileSize( packname ) > 2100000000 )
+		strcat( (char*)packname, "+" );
 
 	for ( i = 0; i < g_numDirs; i++ )
 	{
