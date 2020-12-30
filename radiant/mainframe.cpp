@@ -3323,6 +3323,8 @@ void MainFrame::Create(){
 		gtk_window_fullscreen( window );
 	}
 
+	process_gui(); //window is maximized/fullscreened by window manager, which may be not instant
+
 	if ( !FloatingGroupDialog() ) {
 		gtk_paned_set_position( GTK_PANED( m_vSplit ), g_layout_globals.nXYHeight );
 
