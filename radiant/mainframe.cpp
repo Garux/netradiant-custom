@@ -3315,14 +3315,12 @@ void MainFrame::Create(){
 
 	EverySecondTimer_enable();
 
-	if ( g_layout_globals.nState & GDK_WINDOW_STATE_MAXIMIZED ||
-		g_layout_globals.nState & GDK_WINDOW_STATE_ICONIFIED ) {
-		gtk_window_maximize( window );
-	}
-	if ( g_layout_globals.nState & GDK_WINDOW_STATE_FULLSCREEN ) {
-		gtk_window_fullscreen( window );
-	}
+	m_windowMaximizer.connect( window, g_layout_globals.nState, MemberCaller<MainFrame, &MainFrame::SetWindowInfo>( *this ) );
 
+	//GlobalShortcuts_reportUnregistered();
+}
+
+void MainFrame::SetWindowInfo(){
 	if ( !FloatingGroupDialog() ) {
 		gtk_paned_set_position( GTK_PANED( m_vSplit ), g_layout_globals.nXYHeight );
 
@@ -3336,7 +3334,6 @@ void MainFrame::Create(){
 
 		gtk_paned_set_position( GTK_PANED( m_vSplit2 ), g_layout_globals.nCamHeight );
 	}
-	//GlobalShortcuts_reportUnregistered();
 }
 
 void MainFrame::SaveWindowInfo(){

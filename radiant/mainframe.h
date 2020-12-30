@@ -67,6 +67,7 @@ GtkWindow* m_window;
 private:
 
 void Create();
+void SetWindowInfo();
 void SaveWindowInfo();
 void Shutdown();
 
@@ -90,6 +91,7 @@ GtkWidget *m_statusLabel[c_status__count];
 
 EViewStyle m_nCurrentStyle;
 WindowPositionTracker m_position_tracker;
+WindowMaximizer m_windowMaximizer;
 
 IdleDraw m_idleRedrawStatusText;
 

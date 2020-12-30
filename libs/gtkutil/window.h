@@ -178,5 +178,41 @@ inline void WindowPositionTracker_exportString( const WindowPositionTracker& sel
 typedef ConstReferenceCaller1<WindowPositionTracker, const StringImportCallback&, WindowPositionTracker_exportString> WindowPositionTrackerExportStringCaller;
 
 
+class WindowMaximizer
+{
+	GtkWindow* m_window;
+	int m_state;
+	Callback m_onMaximized;
+public:
+	void connect( GtkWindow* window, int state, Callback&& onMaximized ){
+		if( state & ( GDK_WINDOW_STATE_MAXIMIZED | GDK_WINDOW_STATE_ICONIFIED | GDK_WINDOW_STATE_FULLSCREEN ) ){
+			m_window = window;
+			m_state = 0;
+			m_onMaximized = onMaximized;
+			g_signal_connect( G_OBJECT( window ), "window-state-event", G_CALLBACK( window_state_event ), this );
+			if ( state & GDK_WINDOW_STATE_MAXIMIZED ||
+				state & GDK_WINDOW_STATE_ICONIFIED ) {
+				gtk_window_maximize( window );
+				m_state |= GDK_WINDOW_STATE_MAXIMIZED;
+			}
+			if ( state & GDK_WINDOW_STATE_FULLSCREEN ) {
+				gtk_window_fullscreen( window );
+				m_state |= GDK_WINDOW_STATE_FULLSCREEN;
+			}
+		}
+		else{
+			onMaximized();
+		}
+	}
+	static gboolean window_state_event( GtkWidget* widget, GdkEvent* event, WindowMaximizer* self ){
+		if( ( ( (GdkEventWindowState*)event )->new_window_state & self->m_state ) == self->m_state ){
+			g_signal_handlers_disconnect_by_data( G_OBJECT( self->m_window ), self );
+			self->m_onMaximized();
+		}
+		return FALSE;
+	}
+};
+
+
 
 #endif
