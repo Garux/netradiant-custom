@@ -1861,10 +1861,6 @@ void LightWorld( bool fastAllocate ){
 		SmoothNormals();
 	}
 
-	/* determine the number of grid points */
-	Sys_Printf( "--- SetupGrid ---\n" );
-	SetupGrid();
-
 	/* find the optional minimum lighting values */
 	GetVectorForKey( &entities[ 0 ], "_color", color );
 	if ( colorsRGB ) {
@@ -1903,6 +1899,10 @@ void LightWorld( bool fastAllocate ){
 	if ( ENT_READKV( &f, &entities[ 0 ], "_maxlight" ) ) {
 		maxLight = f > 255? 255 : f < 0? 0 : f;
 	}
+
+	/* determine the number of grid points */
+	Sys_Printf( "--- SetupGrid ---\n" );
+	SetupGrid(); // uses ambientColor read above
 
 	/* create world lights */
 	Sys_FPrintf( SYS_VRB, "--- CreateLights ---\n" );
