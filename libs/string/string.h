@@ -344,6 +344,9 @@ String( const char* string )
 String( StringRange range )
 	: Buffer( range ){
 }
+String( const String& other )
+	: Buffer( other ){
+}
 
 String& operator=( const String& other ){
 	String temp( other );
