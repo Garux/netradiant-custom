@@ -705,6 +705,7 @@ FacePlane( const FacePlane& other ) : m_funcStaticOrigin( 0, 0, 0 ){
 		updateTranslated();
 	}
 }
+FacePlane& operator=( const FacePlane& ) = default;
 
 void MakePlane(){
 	if ( !isDoom3Plane() ) {
