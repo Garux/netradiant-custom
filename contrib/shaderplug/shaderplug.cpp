@@ -136,21 +136,21 @@ void GetAllShaders(){
 
 void GetArchiveList(){
 	GlobalFileSystem().forEachArchive( LoadArchiveFileCaller() );
-	globalOutputStream() << "Shaderplug: " << (const Unsigned)Shaderplug::archives.size() << " archives found.\n";
+	globalOutputStream() << "Shaderplug: " << (Unsigned)Shaderplug::archives.size() << " archives found.\n";
 }
 
 void CreateTagFile(){
 	const char* shader_type = GlobalRadiant().getGameDescriptionKeyValue( "shaders" );
 
 	GetAllShaders();
-	globalOutputStream() << "Shaderplug: " << (const Unsigned)shaders.size() << " shaders found.\n";
+	globalOutputStream() << "Shaderplug: " << (Unsigned)shaders.size() << " shaders found.\n";
 
 	if ( string_equal( shader_type, "quake3" ) ) {
 		GetTextures( "jpg" );
 		GetTextures( "tga" );
 		GetTextures( "png" );
 
-		globalOutputStream() << "Shaderplug: " << (const Unsigned)textures.size() << " textures found.\n";
+		globalOutputStream() << "Shaderplug: " << (Unsigned)textures.size() << " textures found.\n";
 	}
 
 	if ( shaders.size() || textures.size() != 0 ) {

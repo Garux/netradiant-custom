@@ -77,7 +77,7 @@ void ExportData::BeginBrush( Brush& b ){
 		current = &groups.back();
 
 		StringOutputStream str( 256 );
-		str << "Brush" << (const unsigned int)groups.size();
+		str << "Brush" << (unsigned int)groups.size();
 		current->name = str.c_str();
 	}
 }
@@ -312,7 +312,7 @@ bool ExportDataAsWavefront::WriteToFile( const std::string& path, collapsemode m
 		}
 
 		outMtl << "# Wavefront material file exported with NetRadiants brushexport plugin.\n";
-		outMtl << "# Material Count: " << (const Unsigned)materials.size() << "\n\n";
+		outMtl << "# Material Count: " << (Unsigned)materials.size() << "\n\n";
 		for ( const auto& material : materials )
 		{
 			const std::string& str = material.first;
