@@ -122,19 +122,22 @@ void ReadConfig( CScriptParser* pScriptParser ) {
 
 			GT; CT;
 
-			strncpy( m_trees[m_numModels++].name, pToken, MAX_QPATH );
+			strncpy( m_trees[m_numModels++].name, pToken, sizeof( m_trees[m_numModels].name ) - 1 );
+			m_trees[m_numModels].name[ sizeof( m_trees[m_numModels].name ) - 1 ] = '\0';
 		}
 		else if ( MT( "link" ) ) {
 			GT; CT;
 
-			strncpy( m_linkName, pToken, MAX_QPATH );
+			strncpy( m_linkName, pToken, sizeof( m_linkName ) - 1 );
+			m_linkName[ sizeof( m_linkName ) - 1 ] = '\0';
 
 			m_autoLink = true;
 		}
 		else if ( MT( "entity" ) ) {
 			GT; CT;
 
-			strncpy( m_entType, pToken, MAX_QPATH );
+			strncpy( m_entType, pToken, sizeof( m_entType ) - 1 );
+			m_entType[ sizeof( m_entType ) - 1 ] = '\0';
 		}
 		else if ( MT( "offset" ) ) {
 			GT; CT;
