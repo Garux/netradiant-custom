@@ -55,7 +55,6 @@ private:
 CopiedString m_savefilename;
 xmlDocPtr doc;
 xmlXPathContextPtr context;
-xmlNodeSetPtr nodePtr;
 
 xmlXPathObjectPtr XpathEval( const char* queryString ){
 	const xmlChar* expression = (const xmlChar*)queryString;

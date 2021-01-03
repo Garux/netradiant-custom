@@ -241,7 +241,7 @@ void CGameDialog::DoGameDialog(){
 }
 
 CGameDescription* CGameDialog::GameDescriptionForComboItem(){
-	return ( m_nComboSelect >= 0 && m_nComboSelect < mGames.size() )?
+	return ( m_nComboSelect >= 0 && m_nComboSelect < static_cast<int>( mGames.size() ) )?
 			*std::next( mGames.begin(), m_nComboSelect )
 			: 0; // not found
 }

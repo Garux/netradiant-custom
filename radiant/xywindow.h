@@ -201,8 +201,6 @@ Vector3 m_vOrigin;
 View m_view;
 static Shader* m_state_selected;
 
-int m_ptCursorX, m_ptCursorY;
-
 unsigned int m_buttonstate;
 
 int m_nNewBrushPressx;

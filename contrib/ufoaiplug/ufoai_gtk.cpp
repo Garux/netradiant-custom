@@ -28,13 +28,6 @@
  * GTK callback functions
  */
 
-class UFOAIGtk
-{
-GtkWindow* m_gtk_window;
-public:
-UFOAIGtk( void* gtk_window ) : m_gtk_window( ( GtkWindow* )gtk_window ){
-}
-};
 
 #if 0
 /**

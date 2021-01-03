@@ -317,9 +317,6 @@ public:
 
 class BrushHollowSelectedWalker : public scene::Graph::Walker {
 	HollowSettings& m_settings;
-
-	float offset;
-	EHollowType HollowType;
 public:
 	BrushHollowSelectedWalker( HollowSettings& settings )
 		: m_settings( settings ) {

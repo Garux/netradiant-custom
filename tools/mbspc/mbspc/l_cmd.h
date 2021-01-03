@@ -69,11 +69,11 @@ void Warning(char *warning, ...);
 int		CheckParm (char *check);
 
 FILE	*SafeOpenWrite (char *filename);
-FILE	*SafeOpenRead (char *filename);
+FILE	*SafeOpenRead (const char *filename);
 void	SafeRead (FILE *f, void *buffer, int count);
 void	SafeWrite (FILE *f, void *buffer, int count);
 
-int LoadFile (char *filename, void **bufferptr, int offset, int length);
+int LoadFile (const char *filename, void **bufferptr, int offset, int length);
 int TryLoadFile (char *filename, void **bufferptr);
 void SaveFile (char *filename, void *buffer, int count);
 qboolean	FileExists (char *filename);

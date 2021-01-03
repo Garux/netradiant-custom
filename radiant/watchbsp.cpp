@@ -105,7 +105,6 @@ std::size_t m_iCurrentStep;
 char    *m_sBSPName;
 // buffer we use in push mode to receive data directly from the network
 xmlParserInputBufferPtr m_xmlInputBuffer;
-xmlParserInputPtr m_xmlInput;
 xmlParserCtxtPtr m_xmlParserCtxt;
 // call this to switch the set listening mode
 bool SetupListening();

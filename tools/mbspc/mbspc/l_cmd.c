@@ -607,7 +607,7 @@ FILE *SafeOpenWrite (char *filename)
 	return f;
 }
 
-FILE *SafeOpenRead (char *filename)
+FILE *SafeOpenRead (const char *filename)
 {
 	FILE	*f;
 
@@ -655,7 +655,7 @@ qboolean	FileExists (char *filename)
 LoadFile
 ==============
 */
-int    LoadFile (char *filename, void **bufferptr, int offset, int length)
+int    LoadFile (const char *filename, void **bufferptr, int offset, int length)
 {
 	FILE	*f;
 	void    *buffer;
@@ -1189,7 +1189,7 @@ void FS_FreeFile(void *buf)
 
 int FS_ReadFileAndCache(const char *qpath, void **buffer)
 {
-	return LoadFile((char *) qpath, buffer, 0, 0);
+	return LoadFile(qpath, buffer, 0, 0);
 } //end of the function FS_ReadFileAndCache
 
 int FS_FOpenFileRead( const char *filename, FILE **file, qboolean uniqueFILE )
