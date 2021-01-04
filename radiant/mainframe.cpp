@@ -2484,6 +2484,7 @@ void TexBro_registerShortcuts(){
 
 void Misc_registerShortcuts(){
 	command_connect_accelerator( "RefreshReferences" ); //refresh models
+	command_connect_accelerator( "Redo2" );
 	command_connect_accelerator( "UnSelectSelection2" );
 	command_connect_accelerator( "DeleteSelection2" );
 
@@ -3575,6 +3576,7 @@ void MainFrame_Construct(){
 
 	GlobalCommands_insert( "Undo", FreeCaller<Undo>(), Accelerator( 'Z', GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "Redo", FreeCaller<Redo>(), Accelerator( 'Y', GDK_CONTROL_MASK ) );
+	GlobalCommands_insert( "Redo2", FreeCaller<Redo>(), Accelerator( 'Z', (GdkModifierType)( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) );
 	GlobalCommands_insert( "Copy", FreeCaller<Copy>(), Accelerator( 'C', GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "Paste", FreeCaller<Paste>(), Accelerator( 'V', GDK_CONTROL_MASK ) );
 	GlobalCommands_insert( "PasteToCamera", FreeCaller<PasteToCamera>(), Accelerator( 'V', GDK_SHIFT_MASK ) );
