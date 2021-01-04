@@ -792,6 +792,12 @@ static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *
 		return false;
 	}
 
+	/* this must not happen in the first place, but it does and spreads result of division by zero in MapSingleLuxel all over the map during -bounce */
+	if( lm->vecs != NULL && plane[lm->axisNum] == 0 ){
+		Sys_Warning( "plane[lm->axisNum] == 0\n" );
+		return false;
+	}
+
 	/* check to see if we need to calculate texture->world tangent vectors */
 	if ( info->si->normalImage != NULL && CalcTangentVectors( 3, dv, stvStatic, ttvStatic ) ) {
 		stv = stvStatic;
