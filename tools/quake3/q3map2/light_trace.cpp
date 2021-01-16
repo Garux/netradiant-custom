@@ -282,7 +282,7 @@ static int AddItemToTraceNode( traceNode_t *node, int num ){
 		if ( node->maxItems <= 0 ) {
 			node->maxItems = GROW_NODE_ITEMS;
 		}
-		node->items = realloc( node->items, node->maxItems * sizeof( *node->items ) );
+		node->items = void_ptr( realloc( node->items, node->maxItems * sizeof( *node->items ) ) );
 		if ( !node->items ) {
 			Error( "node->items out of memory" );
 		}

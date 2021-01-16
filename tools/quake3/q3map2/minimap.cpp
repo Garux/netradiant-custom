@@ -522,7 +522,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 			i++;
 			Sys_Printf( "Samples set to %i\n", minimap.samples );
 			free( minimap.sample_offsets );
-			minimap.sample_offsets = malloc( 2 * sizeof( *minimap.sample_offsets ) * minimap.samples );
+			minimap.sample_offsets = safe_malloc( 2 * sizeof( *minimap.sample_offsets ) * minimap.samples );
 			MiniMapMakeSampleOffsets();
 		}
 		else if ( strEqual( argv[ i ],  "-random" ) ) {

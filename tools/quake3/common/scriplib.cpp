@@ -81,7 +81,7 @@ void AddScriptToStack( const char *filename, int index ){
 			Sys_Printf( "entering %s\n", script->filename );
 		}
 
-		script->buffer = buffer;
+		script->buffer = void_ptr( buffer );
 		script->line = 1;
 		script->script_p = script->buffer;
 		script->end_p = script->buffer + size;
@@ -356,7 +356,7 @@ bool TokenAvailable( void ) {
 //=====================================================================
 
 
-void MatchToken( char *match ) {
+void MatchToken( const char *match ) {
 	GetToken( true );
 
 	if ( !strEqual( token, match ) ) {

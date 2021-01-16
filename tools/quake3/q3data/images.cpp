@@ -78,7 +78,7 @@ void Cmd_Grab( void ){
 	}
 
 	// crop it to the proper size
-	cropped = malloc( w * h );
+	cropped = safe_malloc( w * h );
 	for ( y = 0 ; y < h ; y++ )
 	{
 		memcpy( cropped + y * w, byteimage + ( y + yl ) * byteimagewidth + xl, w );
@@ -129,7 +129,7 @@ void Cmd_Raw( void ){
 	}
 
 	// crop it to the proper size
-	cropped = malloc( w * h );
+	cropped = safe_malloc( w * h );
 	for ( y = 0 ; y < h ; y++ )
 	{
 		memcpy( cropped + y * w, byteimage + ( y + yl ) * byteimagewidth + xl, w );
@@ -235,7 +235,7 @@ void Cmd_Colormap( void ){
 	levels = 64;
 	brights = 1;    // ignore 255 (transparent)
 
-	cropped = malloc( ( levels + 256 ) * 256 );
+	cropped = safe_malloc( ( levels + 256 ) * 256 );
 	lump_p = cropped;
 
 // shaded levels
@@ -430,7 +430,7 @@ byte AveragePixels( int count ){
  */
 
 // 3dstudio environment map suffixes
-char    *suf[6] = {"rt", "ft", "lf", "bk", "up", "dn"};
+const char    *suf[6] = {"rt", "ft", "lf", "bk", "up", "dn"};
 
 /*
    =================

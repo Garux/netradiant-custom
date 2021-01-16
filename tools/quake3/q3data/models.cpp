@@ -832,7 +832,7 @@ void Cmd_SpriteBase( void ){
 
 	printf( "---------------------\n" );
 
-	g_data.surfData[0].verts[0] = ( float * ) calloc( 1, sizeof( float ) * 6 * 4 );
+	g_data.surfData[0].verts[0] = safe_calloc( sizeof( float ) * 6 * 4 );
 
 	g_data.surfData[0].header.numVerts = 4;
 
@@ -1087,7 +1087,7 @@ void GrabFrame( const char *frame ){
 			if ( g_data.surfData[i].verts[g_data.model.numFrames] ) {
 				free( g_data.surfData[i].verts[g_data.model.numFrames] );
 			}
-			frameXyz = g_data.surfData[i].verts[g_data.model.numFrames] = calloc( 1, sizeof( float ) * 6 * g_data.surfData[i].header.numVerts );
+			frameXyz = g_data.surfData[i].verts[g_data.model.numFrames] = safe_calloc( sizeof( float ) * 6 * g_data.surfData[i].header.numVerts );
 			frameNormals = frameXyz + 3;
 
 			for ( t = 0; t < psets[i].numtriangles; t++ )
@@ -1773,7 +1773,7 @@ static void BuildAnimationFromOAFs( const char *filename, ObjectAnimationFrame_t
 				if ( g_data.surfData[i].verts[f] ) {
 					free( g_data.surfData[i].verts[f] );
 				}
-				frameXyz = g_data.surfData[i].verts[f] = calloc( 1, sizeof( float ) * 6 * g_data.surfData[i].header.numVerts );
+				frameXyz = g_data.surfData[i].verts[f] = safe_calloc( sizeof( float ) * 6 * g_data.surfData[i].header.numVerts );
 				frameNormals = frameXyz + 3;
 
 				for ( t = 0; t < pOAF->surfaces[i]->numtriangles; t++ )

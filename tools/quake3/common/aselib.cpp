@@ -214,7 +214,7 @@ polyset_t *ASE_GetSurfaceAnimation( int which, int *pNumFrames, int skipFrameSta
 
 	*pNumFrames = numFramesToKeep;
 
-	psets = calloc( sizeof( polyset_t ) * numFramesToKeep, 1 );
+	psets = safe_calloc( sizeof( polyset_t ) * numFramesToKeep );
 
 	for ( f = 0, i = 0; i < numFramesInAnimation; i++ )
 	{
@@ -230,7 +230,7 @@ polyset_t *ASE_GetSurfaceAnimation( int which, int *pNumFrames, int skipFrameSta
 		strcpy( psets[f].name, pObject->name );
 		strcpy( psets[f].materialname, ase.materials[pObject->materialRef].name );
 
-		psets[f].triangles = calloc( sizeof( triangle_t ) * pObject->anim.frames[i].numFaces, 1 );
+		psets[f].triangles = safe_calloc( sizeof( triangle_t ) * pObject->anim.frames[i].numFaces );
 		psets[f].numtriangles = pObject->anim.frames[i].numFaces;
 
 		for ( t = 0; t < pObject->anim.frames[i].numFaces; t++ )
@@ -632,25 +632,25 @@ static void ASE_KeyMESH( const char *token ){
 		VERBOSE( ( ".....num tvertexes: %d\n", pMesh->numTVertexes ) );
 	}
 	else if ( strEqual( token, "*MESH_VERTEX_LIST" ) ) {
-		pMesh->vertexes = calloc( sizeof( aseVertex_t ) * pMesh->numVertexes, 1 );
+		pMesh->vertexes = safe_calloc( sizeof( aseVertex_t ) * pMesh->numVertexes );
 		pMesh->currentVertex = 0;
 		VERBOSE( ( ".....parsing MESH_VERTEX_LIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyMESH_VERTEX_LIST );
 	}
 	else if ( strEqual( token, "*MESH_TVERTLIST" ) ) {
 		pMesh->currentVertex = 0;
-		pMesh->tvertexes = calloc( sizeof( aseTVertex_t ) * pMesh->numTVertexes, 1 );
+		pMesh->tvertexes = safe_calloc( sizeof( aseTVertex_t ) * pMesh->numTVertexes );
 		VERBOSE( ( ".....parsing MESH_TVERTLIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyMESH_TVERTLIST );
 	}
 	else if ( strEqual( token, "*MESH_FACE_LIST" ) ) {
-		pMesh->faces = calloc( sizeof( aseFace_t ) * pMesh->numFaces, 1 );
+		pMesh->faces = safe_calloc( sizeof( aseFace_t ) * pMesh->numFaces );
 		pMesh->currentFace = 0;
 		VERBOSE( ( ".....parsing MESH_FACE_LIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyMESH_FACE_LIST );
 	}
 	else if ( strEqual( token, "*MESH_TFACELIST" ) ) {
-		pMesh->tfaces = calloc( sizeof( aseFace_t ) * pMesh->numFaces, 1 );
+		pMesh->tfaces = safe_calloc( sizeof( aseFace_t ) * pMesh->numFaces );
 		pMesh->currentFace = 0;
 		VERBOSE( ( ".....parsing MESH_TFACE_LIST\n" ) );
 		ASE_ParseBracedBlock( ASE_KeyTFACE_LIST );

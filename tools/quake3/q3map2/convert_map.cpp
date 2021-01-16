@@ -164,7 +164,7 @@ exwinding:
 static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, bool brushPrimitives ){
 	int originSize = 256;
 
-	char pattern[6][7][3] = {
+	char pattern[6][7][4] = {
 		{ "+++", "+-+", "-++", "-  ", " + ", " - ", "-  " },
 		{ "+++", "-++", "++-", "-  ", "  +", "+  ", "  +" },
 		{ "+++", "++-", "+-+", " - ", "  +", " - ", "  +" },
@@ -375,7 +375,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 	bspBrushSide_t  *side;
 	side_t          *buildSide;
 	bspShader_t     *shader;
-	char            *texture;
+	const char      *texture;
 	plane_t         *buildPlane;
 	vec3_t pts[ 3 ];
 	bspDrawVert_t   *vert[3];

@@ -611,7 +611,7 @@ vec_t BrushVolume( brush_t *brush ){
    writes a map with the split bsp brushes
  */
 
-void WriteBSPBrushMap( char *name, brush_t *list ){
+void WriteBSPBrushMap( const char *name, brush_t *list ){
 	FILE        *f;
 	side_t      *s;
 	int i;

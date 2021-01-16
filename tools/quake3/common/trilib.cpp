@@ -120,8 +120,8 @@ void TRI_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets )
 		Error( "%s is not a Alias object separated triangle file, magic number is wrong.", filename );
 	}
 
-	pPSET = calloc( 1, POLYSET_MAXPOLYSETS * sizeof( polyset_t ) );
-	ptri = calloc( 1, POLYSET_MAXTRIANGLES * sizeof( triangle_t ) );
+	pPSET = safe_calloc( POLYSET_MAXPOLYSETS * sizeof( polyset_t ) );
+	ptri = safe_calloc( POLYSET_MAXTRIANGLES * sizeof( triangle_t ) );
 
 	*ppPSET = pPSET;
 

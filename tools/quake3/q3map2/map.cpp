@@ -1628,7 +1628,8 @@ void LoadEntityIndexMap( entity_t *e ){
 	im->pixels = pixels;
 
 	/* get height offsets */
-	char offset[ 4096 ];
+//	char offset[ 4096 ];
+	char offset[ 1024 ];
 	if( ENT_READKV( &offset, mapEnt, "_offsets", "offsets" ) ){
 		/* value is a space-separated set of numbers */
 		char *search = offset;

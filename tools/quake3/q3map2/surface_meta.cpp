@@ -388,7 +388,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 #define MAXAREA_MAXTRIES 8
 int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
-	int i, j, try;
+	int i, j;
 	double A, bestA = -1, V, bestV = -1;
 	vec3_t ab, ac, bc, cross;
 	bspDrawVert_t *buf;
@@ -458,9 +458,9 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 			Sys_FPrintf( SYS_WRN, "value was REALLY bad\n" );
 	 */
 
-	for ( try = 0; try < MAXAREA_MAXTRIES; ++try )
+	for ( int trai = 0; trai < MAXAREA_MAXTRIES; ++trai )
 	{
-		if ( try ) {
+		if ( trai ) {
 			bestR = rand() % cnt;
 			bestS = rand() % cnt;
 			bestT = rand() % cnt;
@@ -604,7 +604,7 @@ void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
 
 void FanFaceSurface( mapDrawSurface_t *ds ){
 	int i, j, k, a, b, c;
-	int color[ MAX_LIGHTMAPS ][ 4 ] = {0};
+	int color[ MAX_LIGHTMAPS ][ 4 ] = {{0}};
 	bspDrawVert_t   *verts, *centroid, *dv;
 	double iv;
 

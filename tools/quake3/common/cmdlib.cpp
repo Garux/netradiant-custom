@@ -47,7 +47,7 @@
 
 #ifdef SAFE_MALLOC
 // FIXME switch to -std=c99 or above to use proper %zu format specifier for size_t
-void *safe_malloc( size_t size ){
+void_ptr safe_malloc( size_t size ){
 	void *p = malloc( size );
 	if ( !p ) {
 		Error( "safe_malloc failed on allocation of %lu bytes", (unsigned long)size );
@@ -55,7 +55,7 @@ void *safe_malloc( size_t size ){
 	return p;
 }
 
-void *safe_malloc_info( size_t size, const char* info ){
+void_ptr safe_malloc_info( size_t size, const char* info ){
 	void *p = malloc( size );
 	if ( !p ) {
 		Error( "%s: safe_malloc failed on allocation of %lu bytes", info, (unsigned long)size );
@@ -63,7 +63,7 @@ void *safe_malloc_info( size_t size, const char* info ){
 	return p;
 }
 
-void *safe_calloc( size_t size ){
+void_ptr safe_calloc( size_t size ){
 	void *p = calloc( 1, size );
 	if ( !p ) {
 		Error( "safe_calloc failed on allocation of %lu bytes", (unsigned long)size );
@@ -71,7 +71,7 @@ void *safe_calloc( size_t size ){
 	return p;
 }
 
-void *safe_calloc_info( size_t size, const char* info ){
+void_ptr safe_calloc_info( size_t size, const char* info ){
 	void *p = calloc( 1, size );
 	if ( !p ) {
 		Error( "%s: safe_calloc failed on allocation of %lu bytes", info, (unsigned long)size );
@@ -327,7 +327,7 @@ int FileTime( const char *path ){
 
 //http://stackoverflow.com/questions/27303062/strstr-function-like-that-ignores-upper-or-lower-case
 //chux: Somewhat tricky to match the corner cases of strstr() with inputs like "x","", "","x", "",""
-char *strIstr( const char* haystack, const char* needle ) {
+const char *strIstr( const char* haystack, const char* needle ) {
 	do {
 		const char* h = haystack;
 		const char* n = needle;
@@ -340,6 +340,10 @@ char *strIstr( const char* haystack, const char* needle ) {
 		}
 	} while ( *haystack++ );
 	return NULL;
+}
+
+char *strIstr( char* haystack, const char* needle ) {
+	return const_cast<char*>( strIstr( const_cast<const char*>( haystack ), needle ) );
 }
 
 /*
@@ -571,7 +575,7 @@ bool path_is_absolute( const char* path ){
 }
 
 /// \brief Returns a pointer to the last slash or to terminating null character if not found.
-char* path_get_last_separator( const char* path ){
+const char* path_get_last_separator( const char* path ){
 	const char *end = path + strlen( path );
 	const char *src = end;
 
@@ -582,8 +586,12 @@ char* path_get_last_separator( const char* path ){
 	return end;
 }
 
+char* path_get_last_separator( char* path ){
+	return const_cast<char*>( path_get_last_separator( const_cast<const char*>( path ) ) );
+}
+
 /// \brief Returns a pointer to the first character of the filename component of \p path.
-char* path_get_filename_start( const char* path ){
+const char* path_get_filename_start( const char* path ){
 	const char *src = path + strlen( path );
 
 	while ( src != path && !path_separator( src[-1] ) ){
@@ -592,8 +600,12 @@ char* path_get_filename_start( const char* path ){
 	return src;
 }
 
+char* path_get_filename_start( char* path ){
+	return const_cast<char*>( path_get_filename_start( const_cast<const char*>( path ) ) );
+}
+
 /// \brief Returns a pointer to the character after the end of the filename component of \p path - either the extension separator or the terminating null character.
-char* path_get_filename_base_end( const char* path ){
+const char* path_get_filename_base_end( const char* path ){
 	const char *end = path + strlen( path );
 	const char *src = end;
 
@@ -604,9 +616,12 @@ char* path_get_filename_base_end( const char* path ){
 	return end;
 }
 
+char* path_get_filename_base_end( char* path ){
+	return const_cast<char*>( path_get_filename_base_end( const_cast<const char*>( path ) ) );
+}
 
 /// \brief Returns a pointer to the first character of the file extension of \p path, or to terminating null character if not found.
-char* path_get_extension( const char* path ){
+const char* path_get_extension( const char* path ){
 	const char *end = path + strlen( path );
 	const char *src = end;
 
@@ -615,6 +630,10 @@ char* path_get_extension( const char* path ){
 			return src + 1;
 	}
 	return end;
+}
+
+char* path_get_extension( char* path ){
+	return const_cast<char*>( path_get_extension( const_cast<const char*>( path ) ) );
 }
 
 /// \brief Appends trailing slash, unless \p path is empty or already has slash.

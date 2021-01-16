@@ -45,7 +45,7 @@ bool GetToken( bool crossline );
 void UnGetToken( void );
 bool TokenAvailable( void );
 
-void MatchToken( char *match );
+void MatchToken( const char *match );
 
 void Parse1DMatrix( int x, vec_t *m );
 void Parse2DMatrix( int y, int x, vec_t *m );

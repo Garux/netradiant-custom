@@ -65,7 +65,7 @@ mutex_t *MutexAlloc( void ){
 	}
 	crit = (CRITICAL_SECTION *) safe_malloc( sizeof( CRITICAL_SECTION ) );
 	InitializeCriticalSection( crit );
-	return (void *) crit;
+	return reinterpret_cast<mutex_t *>( crit );
 }
 
 #endif

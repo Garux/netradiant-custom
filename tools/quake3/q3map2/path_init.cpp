@@ -43,7 +43,7 @@
 #define MAX_GAME_PATHS  10
 #define MAX_PAK_PATHS  200
 
-char                    *homePath;
+const char              *homePath;
 char installPath[ MAX_OS_PATH ];
 
 int numBasePaths;
@@ -52,7 +52,7 @@ int numGamePaths;
 char                    *gamePaths[ MAX_GAME_PATHS ];
 int numPakPaths;
 char                    *pakPaths[ MAX_PAK_PATHS ];
-char                    *homeBasePath = NULL;
+const char              *homeBasePath = NULL;
 
 
 /*
@@ -263,7 +263,7 @@ void AddBasePath( char *path ){
    adds a base path to the beginning of the list, prefixed by ~/
  */
 
-void AddHomeBasePath( char *path ){
+void AddHomeBasePath( const char *path ){
 	int i;
 	char temp[ MAX_OS_PATH ];
 
@@ -313,7 +313,7 @@ void AddHomeBasePath( char *path ){
    adds a game path to the list
  */
 
-void AddGamePath( char *path ){
+void AddGamePath( const char *path ){
 	int i;
 
 	/* dummy check */

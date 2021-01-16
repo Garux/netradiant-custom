@@ -358,7 +358,7 @@ void ProcessWorldModel( void ){
 		xmlAddChild( leaknode, polyline );
 		level[0] = (int) '0' + SYS_ERR;
 		level[1] = 0;
-		xmlSetProp( leaknode, (xmlChar*)"level", (const xmlChar*)level );
+		xmlSetProp( leaknode, (const xmlChar*)"level", (const xmlChar*)level );
 		xml_SendNode( leaknode );
 		if ( leaktest ) {
 			Sys_FPrintf( SYS_WRN, "--- MAP LEAKED, ABORTING LEAKTEST ---\n" );

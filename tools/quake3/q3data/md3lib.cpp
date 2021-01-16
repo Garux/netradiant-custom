@@ -116,7 +116,7 @@ void MD3_Dump( const char *filename ){
 	}
 
 	fileSize = Q_filelength( fp );
-	_buffer = malloc( fileSize );
+	_buffer = safe_malloc( fileSize );
 	fread( _buffer, fileSize, 1, fp );
 	fclose( fp );
 

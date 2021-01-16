@@ -575,7 +575,7 @@ void RunThreadsOn( int workcnt, bool showpacifier, void ( *func )( int ) ){
 		for ( i = 0 ; i < numthreads ; i++ )
 		{
 			/* Default pthread attributes: joinable & non-realtime scheduling */
-			if ( pthread_create( &work_threads[i], &attr, (void*)func, (void*)(size_t)i ) != 0 ) {
+			if ( pthread_create( &work_threads[i], &attr, (void *(*)(void *)) func, (void*)(size_t)i ) != 0 ) {
 				Error( "pthread_create failed" );
 			}
 		}

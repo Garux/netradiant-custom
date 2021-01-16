@@ -42,6 +42,8 @@
 #include <jpeglib.h>
 #include <jerror.h>
 
+#include "cmdlib.h"
+
 /* Expanded data source object for stdio input */
 
 typedef struct {
@@ -358,7 +360,7 @@ int LoadJPGBuff( void *src_buffer, int src_size, unsigned char **pic, int *width
 	size = cinfo.output_width * cinfo.output_height * 4;
 	*width = cinfo.output_width;
 	*height = cinfo.output_height;
-	*pic = calloc( 1, size + 1 );
+	*pic = safe_calloc( size + 1 );
 
 	buffer = ( *cinfo.mem->alloc_sarray )( ( j_common_ptr ) & cinfo, JPOOL_IMAGE, row_stride, 1 );
 

@@ -86,7 +86,7 @@ int GetLittleLong( void ){
 	return val;
 }
 
-void FindNextChunk( char *name ){
+void FindNextChunk( const char *name ){
 	while ( 1 )
 	{
 		data_p = last_chunk;
@@ -112,7 +112,7 @@ void FindNextChunk( char *name ){
 	}
 }
 
-void FindChunk( char *name ){
+void FindChunk( const char *name ){
 	last_chunk = iff_data;
 	FindNextChunk( name );
 }
@@ -128,7 +128,7 @@ void DumpChunks( void ){
 		memcpy( str, data_p, 4 );
 		data_p += 4;
 		iff_chunk_len = GetLittleLong();
-		printf( "0x%x : %s (%d)\n", (int)( data_p - 4 ), str, iff_chunk_len );
+		printf( "0x%p : %s (%d)\n", data_p - 4, str, iff_chunk_len );
 		data_p += ( iff_chunk_len + 1 ) & ~1;
 	} while ( data_p < iff_end );
 }
@@ -248,7 +248,7 @@ void LoadSoundtrack( void ){
 		return;
 	}
 	len = Q_filelength( f );
-	s_soundtrack = malloc( len );
+	s_soundtrack = safe_malloc( len );
 	fread( s_soundtrack, 1, len, f );
 	fclose( f );
 
@@ -945,8 +945,8 @@ void Cmd_Video( void ){
 	GetToken( false );
 	s_resample_height = atoi( token );
 
-	resampled = malloc( sizeof( unsigned char ) * 4 * s_resample_width * s_resample_height );
-	compressed = malloc( sizeof( long ) * 2 * ( s_resample_width / 4 ) * ( s_resample_height / 4 ) );
+	resampled = safe_malloc( sizeof( unsigned char ) * 4 * s_resample_width * s_resample_height );
+	compressed = safe_malloc( sizeof( long ) * 2 * ( s_resample_width / 4 ) * ( s_resample_height / 4 ) );
 
 	printf( "Resample width: %d\n", s_resample_width );
 	printf( "Resample height: %d\n", s_resample_height );
@@ -1064,7 +1064,7 @@ void Cmd_Video( void ){
 				unsigned char *uncompressed;
 				char buffer[1000];
 
-				uncompressed = malloc( sizeof( unsigned char ) * 4 * s_resample_width * s_resample_height );
+				uncompressed = safe_malloc( sizeof( unsigned char ) * 4 * s_resample_width * s_resample_height );
 				BTCDecompressFrame( compressed, uncompressed );
 
 				for ( y = 0; y < s_resample_height / 2; y++ )

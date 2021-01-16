@@ -126,7 +126,7 @@ void IncDrawVerts(){
 			numDrawVertsBuffer = MAX_MAP_DRAW_VERTS;
 		}
 
-		drawVerts = realloc( drawVerts, sizeof( drawVert_t ) * numDrawVertsBuffer );
+		drawVerts = void_ptr( realloc( drawVerts, sizeof( drawVert_t ) * numDrawVertsBuffer ) );
 
 		if ( !drawVerts ) {
 			Error( "realloc() failed (IncDrawVerts)" );

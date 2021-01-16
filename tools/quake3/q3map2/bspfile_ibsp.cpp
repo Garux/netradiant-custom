@@ -452,7 +452,7 @@ void LoadIBSPFile( const char *filename ){
 	SwapBlock( (int*) ( (byte*) header + sizeof( int ) ), sizeof( *header ) - sizeof( int ) );
 
 	/* make sure it matches the format we're trying to load */
-	if ( !force && *( (int*) header->ident ) != *( (int*) game->bspIdent ) ) {
+	if ( !force && *( (int*) header->ident ) != *( (const int*) game->bspIdent ) ) {
 		Error( "%s is not a %s file", filename, game->bspIdent );
 	}
 	if ( !force && header->version != game->bspVersion ) {
@@ -524,7 +524,7 @@ void PartialLoadIBSPFile( const char *filename ){
 	SwapBlock( (int*) ( (byte*) header + sizeof( int ) ), sizeof( *header ) - sizeof( int ) );
 
 	/* make sure it matches the format we're trying to load */
-	if ( !force && *( (int*) header->ident ) != *( (int*) game->bspIdent ) ) {
+	if ( !force && *( (int*) header->ident ) != *( (const int*) game->bspIdent ) ) {
 		Error( "%s is not a %s file", filename, game->bspIdent );
 	}
 	if ( !force && header->version != game->bspVersion ) {
@@ -564,7 +564,7 @@ void WriteIBSPFile( const char *filename ){
 	//%	Swapfile();
 
 	/* set up header */
-	*( (int*) (bspHeader_t*) header->ident ) = *( (int*) game->bspIdent );
+	*( (int*) (bspHeader_t*) header->ident ) = *( (const int*) game->bspIdent );
 	header->version = LittleLong( game->bspVersion );
 
 	/* write initial header */

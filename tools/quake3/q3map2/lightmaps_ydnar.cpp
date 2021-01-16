@@ -223,7 +223,7 @@ int ImportLightmapsMain( int argc, char **argv ){
 		sprintf( filename, "%s/lightmap_%04d.tga", dirname, i );
 		Sys_Printf( "Loading %s\n", filename );
 		buffer = NULL;
-		len = vfsLoadFile( filename, (void*) &buffer, -1 );
+		len = vfsLoadFile( filename, (void**) &buffer, -1 );
 		if ( len < 0 ) {
 			Sys_Warning( "Unable to load image %s\n", filename );
 			continue;

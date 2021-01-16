@@ -63,7 +63,7 @@ int P3DLoad( const char *filename ){
 
 	p3d.len = Q_filelength( fp );
 
-	p3d.curpos = p3d.buffer = malloc( p3d.len );
+	p3d.curpos = p3d.buffer = safe_malloc( p3d.len );
 
 	if ( fread( p3d.buffer, p3d.len, 1, fp ) != 1 ) {
 		fclose( fp );

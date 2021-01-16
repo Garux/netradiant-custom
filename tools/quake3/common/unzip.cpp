@@ -2919,7 +2919,7 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
         case 3:                         /* illegal */
           DUMPBITS(3)
           s->mode = BAD;
-          z->msg = (char*)"invalid block type";
+          z->msg = "invalid block type";
           r = Z_DATA_ERROR;
           LEAVE
       }
@@ -2929,7 +2929,7 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
       if ((((~b) >> 16) & 0xffff) != (b & 0xffff))
       {
         s->mode = BAD;
-        z->msg = (char*)"invalid stored block lengths";
+        z->msg = "invalid stored block lengths";
         r = Z_DATA_ERROR;
         LEAVE
       }
@@ -2962,7 +2962,7 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
       if ((t & 0x1f) > 29 || ((t >> 5) & 0x1f) > 29)
       {
         s->mode = BAD;
-        z->msg = (char*)"too many length or distance symbols";
+        z->msg = "too many length or distance symbols";
         r = Z_DATA_ERROR;
         LEAVE
       }
@@ -3032,7 +3032,7 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
           {
             ZFREE(z, s->sub.trees.blens);
             s->mode = BAD;
-            z->msg = (char*)"invalid bit length repeat";
+            z->msg = "invalid bit length repeat";
             r = Z_DATA_ERROR;
             LEAVE
           }
@@ -3320,16 +3320,16 @@ static int huft_build(uInt *b, uInt n, uInt s, const uInt *d, const uInt *e, inf
   uInt f;                       /* i repeats in table every f entries */
   int g;                        /* maximum code length */
   int h;                        /* table level */
-  register uInt i;              /* counter, current code */
-  register uInt j;              /* counter */
-  register int k;               /* number of bits in current code */
+  uInt i;                       /* counter, current code */
+  uInt j;                       /* counter */
+  int k;                        /* number of bits in current code */
   int l;                        /* bits per table (returned in m) */
   uInt mask;                    /* (1 << w) - 1, to avoid cc -O bug on HP */
-  register uInt *p;            /* pointer into c[], b[], or v[] */
+  uInt *p;                     /* pointer into c[], b[], or v[] */
   inflate_huft *q;              /* points to current table */
   struct inflate_huft_s r;      /* table entry for structure assignment */
   inflate_huft *u[BMAX];        /* table stack */
-  register int w;               /* bits before this table == (l * h) */
+  int w;                        /* bits before this table == (l * h) */
   uInt x[BMAX+1];               /* bit offsets, then code stack */
   uInt *xp;                    /* pointer into x */
   int y;                        /* number of dummy codes added */
@@ -3515,10 +3515,10 @@ int inflate_trees_bits(uInt *c, uInt *bb, inflate_huft * *tb, inflate_huft *hp, 
   r = huft_build(c, 19, 19, (uInt*)Z_NULL, (uInt*)Z_NULL,
                  tb, bb, hp, &hn, v);
   if (r == Z_DATA_ERROR)
-    z->msg = (char*)"oversubscribed dynamic bit lengths tree";
+    z->msg = "oversubscribed dynamic bit lengths tree";
   else if (r == Z_BUF_ERROR || *bb == 0)
   {
-    z->msg = (char*)"incomplete dynamic bit lengths tree";
+    z->msg = "incomplete dynamic bit lengths tree";
     r = Z_DATA_ERROR;
   }
   ZFREE(z, v);
@@ -3551,10 +3551,10 @@ int inflate_trees_dynamic(uInt nl, uInt nd, uInt *c, uInt *bl, uInt *bd, inflate
   if (r != Z_OK || *bl == 0)
   {
     if (r == Z_DATA_ERROR)
-      z->msg = (char*)"oversubscribed literal/length tree";
+      z->msg = "oversubscribed literal/length tree";
     else if (r != Z_MEM_ERROR)
     {
-      z->msg = (char*)"incomplete literal/length tree";
+      z->msg = "incomplete literal/length tree";
       r = Z_DATA_ERROR;
     }
     ZFREE(z, v);
@@ -3566,18 +3566,18 @@ int inflate_trees_dynamic(uInt nl, uInt nd, uInt *c, uInt *bl, uInt *bd, inflate
   if (r != Z_OK || (*bd == 0 && nl > 257))
   {
     if (r == Z_DATA_ERROR)
-      z->msg = (char*)"oversubscribed distance tree";
+      z->msg = "oversubscribed distance tree";
     else if (r == Z_BUF_ERROR) {
 #ifdef PKZIP_BUG_WORKAROUND
       r = Z_OK;
     }
 #else
-      z->msg = (char*)"incomplete distance tree";
+      z->msg = "incomplete distance tree";
       r = Z_DATA_ERROR;
     }
     else if (r != Z_MEM_ERROR)
     {
-      z->msg = (char*)"empty distance tree with lengths";
+      z->msg = "empty distance tree with lengths";
       r = Z_DATA_ERROR;
     }
     ZFREE(z, v);
@@ -3867,7 +3867,7 @@ int inflate_fast(uInt bl, uInt bd, inflate_huft *tl, inflate_huft *td, inflate_b
           }
           else
           {
-            z->msg = (char*)"invalid distance code";
+            z->msg = "invalid distance code";
             UNGRAB
             UPDATE
             return Z_DATA_ERROR;
@@ -3898,7 +3898,7 @@ int inflate_fast(uInt bl, uInt bd, inflate_huft *tl, inflate_huft *td, inflate_b
       }
       else
       {
-        z->msg = (char*)"invalid literal/length code";
+        z->msg = "invalid literal/length code";
         UNGRAB
         UPDATE
         return Z_DATA_ERROR;
@@ -4055,7 +4055,7 @@ int inflate_codes(inflate_blocks_statef *s, z_streamp z, int r)
         break;
       }
       c->mode = BADCODE;        /* invalid code */
-      z->msg = (char*)"invalid literal/length code";
+      z->msg = "invalid literal/length code";
       r = Z_DATA_ERROR;
       LEAVE
     case LENEXT:        /* i: getting length extra (have base) */
@@ -4087,7 +4087,7 @@ int inflate_codes(inflate_blocks_statef *s, z_streamp z, int r)
         break;
       }
       c->mode = BADCODE;        /* invalid code */
-      z->msg = (char*)"invalid distance code";
+      z->msg = "invalid distance code";
       r = Z_DATA_ERROR;
       LEAVE
     case DISTEXT:       /* i: getting distance extra */
@@ -4396,14 +4396,14 @@ int inflate(z_streamp z, int f)
       if (((z->state->sub.method = iNEXTBYTE) & 0xf) != Z_DEFLATED)
       {
         z->state->mode = imBAD;
-        z->msg = (char*)"unknown compression method";
+        z->msg = "unknown compression method";
         z->state->sub.marker = 5;       /* can't try inflateSync */
         break;
       }
       if ((z->state->sub.method >> 4) + 8 > z->state->wbits)
       {
         z->state->mode = imBAD;
-        z->msg = (char*)"invalid window size";
+        z->msg = "invalid window size";
         z->state->sub.marker = 5;       /* can't try inflateSync */
         break;
       }
@@ -4414,7 +4414,7 @@ int inflate(z_streamp z, int f)
       if (((z->state->sub.method << 8) + b) % 31)
       {
         z->state->mode = imBAD;
-        z->msg = (char*)"incorrect header check";
+        z->msg = "incorrect header check";
         z->state->sub.marker = 5;       /* can't try inflateSync */
         break;
       }
@@ -4445,7 +4445,7 @@ int inflate(z_streamp z, int f)
       return Z_NEED_DICT;
     case imDICT0:
       z->state->mode = imBAD;
-      z->msg = (char*)"need dictionary";
+      z->msg = "need dictionary";
       z->state->sub.marker = 0;       /* can try inflateSync */
       return Z_STREAM_ERROR;
     case imBLOCKS:
@@ -4487,7 +4487,7 @@ int inflate(z_streamp z, int f)
       if (z->state->sub.check.was != z->state->sub.check.need)
       {
         z->state->mode = imBAD;
-        z->msg = (char*)"incorrect data check";
+        z->msg = "incorrect data check";
         z->state->sub.marker = 5;       /* can't try inflateSync */
         break;
       }

@@ -237,7 +237,7 @@ void TCModRotate( tcMod_t mod, float euler ){
    applies a named surfaceparm to the supplied flags
  */
 
-bool ApplySurfaceParm( char *name, int *contentFlags, int *surfaceFlags, int *compileFlags ){
+bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, int *compileFlags ){
 	int i, fake;
 	surfaceParm_t   *sp;
 
@@ -415,7 +415,7 @@ void WriteMapShaderFile( void ){
    sets up a custom map shader
  */
 
-shaderInfo_t *CustomShader( shaderInfo_t *si, char *find, char *replace ){
+shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 	shaderInfo_t    *csi;
 	char shader[ MAX_QPATH ];
 	char            *s;
@@ -1719,11 +1719,10 @@ static void ParseShaderFile( const char *filename ){
 						  striEqual( token, "q3map_rgbGen" ) || striEqual( token, "q3map_rgbMod" ) ||
 						  striEqual( token, "q3map_alphaGen" ) || striEqual( token, "q3map_alphaMod" ) ) {
 					colorMod_t  *cm, *cm2;
-					int alpha;
 
 
 					/* alphamods are colormod + 1 */
-					alpha = ( striEqual( token, "q3map_alphaGen" ) || striEqual( token, "q3map_alphaMod" ) ) ? 1 : 0;
+					const bool alpha = striEqual( token, "q3map_alphaGen" ) || striEqual( token, "q3map_alphaMod" );
 
 					/* allocate new colormod */
 					cm = safe_calloc( sizeof( *cm ) );
@@ -1779,25 +1778,25 @@ static void ParseShaderFile( const char *filename ){
 
 					/* dotProduct ( X Y Z ) */
 					else if ( striEqual( token, "dotProduct" ) ) {
-						cm->type = CM_COLOR_DOT_PRODUCT + alpha;
+						cm->type = alpha? CM_ALPHA_DOT_PRODUCT : CM_COLOR_DOT_PRODUCT;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 					}
 
 					/* dotProductScale ( X Y Z MIN MAX ) */
 					else if ( striEqual( token, "dotProductScale" ) ) {
-						cm->type = CM_COLOR_DOT_PRODUCT_SCALE + alpha;
+						cm->type = alpha? CM_ALPHA_DOT_PRODUCT_SCALE : CM_COLOR_DOT_PRODUCT_SCALE;
 						Parse1DMatrixAppend( shaderText, 5, cm->data );
 					}
 
 					/* dotProduct2 ( X Y Z ) */
 					else if ( striEqual( token, "dotProduct2" ) ) {
-						cm->type = CM_COLOR_DOT_PRODUCT_2 + alpha;
+						cm->type = alpha? CM_ALPHA_DOT_PRODUCT_2 : CM_COLOR_DOT_PRODUCT_2;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 					}
 
 					/* dotProduct2scale ( X Y Z MIN MAX ) */
 					else if ( striEqual( token, "dotProduct2scale" ) ) {
-						cm->type = CM_COLOR_DOT_PRODUCT_2_SCALE + alpha;
+						cm->type = alpha? CM_ALPHA_DOT_PRODUCT_2_SCALE : CM_COLOR_DOT_PRODUCT_2_SCALE;
 						Parse1DMatrixAppend( shaderText, 5, cm->data );
 					}
 

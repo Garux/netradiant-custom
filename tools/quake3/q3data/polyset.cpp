@@ -40,7 +40,7 @@ polyset_t *Polyset_SplitSets( polyset_t *psets, int numpolysets, int *pNumNewPol
 
 	printf( "Warning: creating %d polysets from input of %d polysets\n", numNewPolysets, numpolysets );
 
-	newpsets = calloc( sizeof( polyset_t ) * numNewPolysets, 1 );
+	newpsets = safe_calloc( sizeof( polyset_t ) * numNewPolysets );
 
 	for ( np = 0, op = 0; op < numpolysets; op++ )
 	{
@@ -129,9 +129,9 @@ polyset_t *Polyset_CollapseSets( polyset_t *psets, int numpolysets ){
 		sumtriangles += oldpsets[p].numtriangles;
 	}
 
-	psets = calloc( 1, sizeof( polyset_t ) );
+	psets = safe_calloc( sizeof( polyset_t ) );
 	psets[0].numtriangles = sumtriangles;
-	psets[0].triangles = malloc( MD3_MAX_TRIANGLES * sizeof( triangle_t ) );
+	psets[0].triangles = safe_malloc( MD3_MAX_TRIANGLES * sizeof( triangle_t ) );
 
 	// each call to "LoadPolysets" only allocates a single large chunk of
 	// triangle memory that is utilized by all the polysets loaded by

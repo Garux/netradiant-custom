@@ -47,8 +47,9 @@ int FixAAS( int argc, char **argv ){
 	int length, checksum;
 	void        *buffer;
 	FILE        *file;
-	char aas[ 1024 ], **ext;
-	char        *exts[] =
+	char aas[ 1024 ];
+	const char **ext;
+	const char  *exts[] =
 	{
 		".aas",
 		"_b0.aas",
@@ -123,7 +124,7 @@ abspHeader_t;
 typedef struct abspLumpTest_s
 {
 	int radix, minCount;
-	char            *name;
+	const char     *name;
 }
 abspLumpTest_t;
 

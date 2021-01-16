@@ -106,14 +106,14 @@ void FindShaderFiles( char *filename ){
 	char linebuffer[1024];
 	int len, i;
 	char *buf;
-	char *diffuseExtensions[] =
+	const char *diffuseExtensions[] =
 	{
 		".TGA",
 		".WAL",
 		".PCX",
 		0
 	};
-	char *otherExtensions[] =
+	const char *otherExtensions[] =
 	{
 		".specular.TGA",
 		".blend.TGA",

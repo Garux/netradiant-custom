@@ -62,10 +62,24 @@
 
 #define SAFE_MALLOC
 #ifdef SAFE_MALLOC
-void *safe_malloc( size_t size );
-void *safe_malloc_info( size_t size, const char* info );
-void *safe_calloc( size_t size );
-void *safe_calloc_info( size_t size, const char* info );
+
+class void_ptr
+{
+private:
+	void *ptr;
+public:
+	void_ptr() = delete;
+	void_ptr( void *p ) : ptr( p ) {}
+	template<typename T>
+	operator T*() const {
+		return static_cast<T*>( ptr );
+	}
+};
+
+void_ptr safe_malloc( size_t size );
+void_ptr safe_malloc_info( size_t size, const char* info );
+void_ptr safe_calloc( size_t size );
+void_ptr safe_calloc_info( size_t size, const char* info );
 #else
 #define safe_malloc( size ) malloc( size )
 #define safe_malloc_info( size, info ) malloc( size )
@@ -90,9 +104,10 @@ static inline char *strLower( char *string ){
 }
 static inline char *copystring( const char *src ){	// version of strdup() with safe_malloc()
 	const size_t size = strlen( src ) + 1;
-	return memcpy( safe_malloc( size ), src, size );
+	return void_ptr( memcpy( safe_malloc( size ), src, size ) );
 }
-char* strIstr( const char* haystack, const char* needle );
+const char* strIstr( const char* haystack, const char* needle );
+      char* strIstr(       char* haystack, const char* needle );
 #ifdef WIN32
 	#define Q_stricmp           stricmp
 	#define Q_strnicmp          strnicmp
@@ -174,10 +189,14 @@ static inline bool path_separator( const char c ){
 	return c == '/' || c == '\\';
 }
 bool path_is_absolute( const char* path );
-char* path_get_last_separator( const char* path );
-char* path_get_filename_start( const char* path );
-char* path_get_filename_base_end( const char* path );
-char* path_get_extension( const char* path );
+const char* path_get_last_separator( const char* path );
+      char* path_get_last_separator(       char* path );
+const char* path_get_filename_start( const char* path );
+      char* path_get_filename_start(       char* path );
+const char* path_get_filename_base_end( const char* path );
+      char* path_get_filename_base_end(       char* path );
+const char* path_get_extension( const char* path );
+      char* path_get_extension(        char* path );
 void path_add_slash( char *path );
 void path_set_extension( char *path, const char *extension );
 void    DefaultExtension( char *path, const char *extension );

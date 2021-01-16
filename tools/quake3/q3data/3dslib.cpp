@@ -209,7 +209,7 @@ static void LoadMeshMaterialGroup( FILE *fp, long thisChunkLen, _3DSMeshMaterial
 	ReadString( fp, mmg.name );
 
 	fread( &mmg.numFaces, sizeof( mmg.numFaces ), 1, fp );
-	mmg.pFaces = malloc( sizeof( mmg.pFaces[0] ) * mmg.numFaces );
+	mmg.pFaces = safe_malloc( sizeof( mmg.pFaces[0] ) * mmg.numFaces );
 	fread( mmg.pFaces, sizeof( mmg.pFaces[0] ), mmg.numFaces, fp );
 
 	if ( s_verbose ) {
@@ -256,7 +256,7 @@ static void LoadNamedTriObject( FILE *fp, long thisChunkLen, _3DSTriObject_t *pT
 			fread( &triObj.numFaces, sizeof( triObj.numFaces ), 1, fp );
 			assert( triObj.pFaces == 0 );
 
-			triObj.pFaces = malloc( sizeof( triObj.pFaces[0] ) * triObj.numFaces );
+			triObj.pFaces = safe_malloc( sizeof( triObj.pFaces[0] ) * triObj.numFaces );
 			fread( triObj.pFaces, sizeof( triObj.pFaces[0] ), triObj.numFaces, fp );
 			bytesRead += sizeof( triObj.numFaces ) + triObj.numFaces * sizeof( triObj.pFaces[0] ) + 6;
 
@@ -271,7 +271,7 @@ static void LoadNamedTriObject( FILE *fp, long thisChunkLen, _3DSTriObject_t *pT
 			break;
 		case _3DS_CHUNK_POINT_ARRAY:
 			fread( &triObj.numPoints, sizeof( triObj.numPoints ), 1, fp );
-			triObj.pPoints = malloc( sizeof( triObj.pPoints[0] ) * triObj.numPoints );
+			triObj.pPoints = safe_malloc( sizeof( triObj.pPoints[0] ) * triObj.numPoints );
 			fread( triObj.pPoints, sizeof( triObj.pPoints[0] ), triObj.numPoints, fp );
 			bytesRead += sizeof( triObj.numPoints ) + triObj.numPoints * sizeof( triObj.pPoints[0] ) + 6;
 
@@ -299,7 +299,7 @@ static void LoadNamedTriObject( FILE *fp, long thisChunkLen, _3DSTriObject_t *pT
 			break;
 		case _3DS_CHUNK_TEX_VERTS:
 			fread( &triObj.numTexVerts, sizeof( triObj.numTexVerts ), 1, fp );
-			triObj.pTexVerts = malloc( sizeof( triObj.pTexVerts[0] ) * triObj.numTexVerts );
+			triObj.pTexVerts = safe_malloc( sizeof( triObj.pTexVerts[0] ) * triObj.numTexVerts );
 			fread( triObj.pTexVerts, sizeof( triObj.pTexVerts[0] ), triObj.numTexVerts, fp );
 			bytesRead += sizeof( triObj.numTexVerts ) + sizeof( triObj.pTexVerts[0] ) * triObj.numTexVerts + 6;
 
@@ -335,7 +335,7 @@ static void LoadNamedTriObject( FILE *fp, long thisChunkLen, _3DSTriObject_t *pT
 		assert( pTO->numFaces == meshMaterialGroups[0].numFaces );
 	}
 
-	pTO->pMeshMaterialGroups = malloc( sizeof( _3DSMeshMaterialGroup_t ) * numMeshMaterialGroups );
+	pTO->pMeshMaterialGroups = safe_malloc( sizeof( _3DSMeshMaterialGroup_t ) * numMeshMaterialGroups );
 	memcpy( pTO->pMeshMaterialGroups, meshMaterialGroups, numMeshMaterialGroups * sizeof( meshMaterialGroups[0] ) );
 	pTO->numMeshMaterialGroups = numMeshMaterialGroups;
 
@@ -382,7 +382,7 @@ static void LoadNamedObject( FILE *fp, long thisChunkLen, _3DSNamedObject_t *pNO
 	}
 
 	strcpy( pNO->name, name );
-	pNO->pTriObjects = malloc( sizeof( _3DSTriObject_t ) * numTriObjects );
+	pNO->pTriObjects = safe_malloc( sizeof( _3DSTriObject_t ) * numTriObjects );
 	memcpy( pNO->pTriObjects, triObj, sizeof( triObj[0] ) * numTriObjects );
 	pNO->numTriObjects = numTriObjects;
 
@@ -441,8 +441,8 @@ static void LoadEditChunk( FILE *fp, long thisChunkLen, _3DSEditChunk_t *pEC ){
 
 	pEC->numNamedObjects = numNamedObjects;
 
-	pEC->pMaterials = malloc( sizeof( _3DSMaterial_t ) * numMaterials );
-	pEC->pNamedObjects = malloc( sizeof( _3DSNamedObject_t ) * numNamedObjects );
+	pEC->pMaterials = safe_malloc( sizeof( _3DSMaterial_t ) * numMaterials );
+	pEC->pNamedObjects = safe_malloc( sizeof( _3DSNamedObject_t ) * numNamedObjects );
 
 	memcpy( pEC->pMaterials, mat, numMaterials * sizeof( mat[0] ) );
 	memcpy( pEC->pNamedObjects, namedObjects, numNamedObjects * sizeof( namedObjects[0] ) );
@@ -570,8 +570,8 @@ void _3DS_LoadPolysets( const char *filename, polyset_t **ppPSET, int *numpsets,
 	numPolysets = _3ds.editChunk.numNamedObjects;
 
 	// allocate memory
-	pPSET = calloc( 1, numPolysets * sizeof( polyset_t ) );
-	triangles = ptri = calloc( 1, POLYSET_MAXTRIANGLES * sizeof( triangle_t ) );
+	pPSET = safe_calloc( numPolysets * sizeof( polyset_t ) );
+	triangles = ptri = safe_calloc( POLYSET_MAXTRIANGLES * sizeof( triangle_t ) );
 
 	// copy the data over
 	for ( i = 0; i < numPolysets; i++ )

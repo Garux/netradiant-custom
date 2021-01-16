@@ -41,9 +41,8 @@ StrList;
 
 static inline StrList* StrList_allocate( size_t strNum ){
 	StrList* ret = safe_calloc( offsetof( StrList, s[strNum] ) );
-	memcpy( ret,
-			&( StrList const ){ .n = 0, .max = strNum },
-			sizeof( StrList ) );
+	ret->n = 0;
+	ret->max = strNum;
 	return ret;
 }
 
@@ -196,9 +195,8 @@ StrBuf;
 
 static inline StrBuf* StrBuf_allocate( size_t strLen ){
 	StrBuf* ret = safe_calloc( offsetof( StrBuf, s[strLen] ) );
-	memcpy( ret,
-			&( StrBuf const ){ .strlen = 0, .max = strLen },
-			sizeof( StrBuf ) );
+	ret->strlen = 0;
+	ret->max = strLen;
 	return ret;
 }
 

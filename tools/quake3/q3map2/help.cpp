@@ -42,12 +42,12 @@ struct HelpOption
 void HelpOptions(const char* group_name, int indentation, int width, struct HelpOption* options, int count)
 {
 	indentation *= 2;
-	char* indent = malloc(indentation+1);
+	char* indent = safe_malloc(indentation+1);
 	memset(indent, ' ', indentation);
 	indent[indentation] = 0;
 	printf("%s%s:\n", indent, group_name);
 	indentation += 2;
-	indent = realloc(indent, indentation+1);
+	indent = void_ptr( realloc(indent, indentation+1) );
 	memset(indent, ' ', indentation);
 	indent[indentation] = 0;
 

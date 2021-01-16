@@ -413,7 +413,7 @@ winding_t   *CopyWinding( const winding_t *w ){
 	if ( !w ) {
 		Error( "CopyWinding: winding is NULL" );
 	}
-	return memcpy( AllocWinding( w->numpoints ), w, offsetof( winding_t, p[w->numpoints] ) );
+	return void_ptr( memcpy( AllocWinding( w->numpoints ), w, offsetof( winding_t, p[w->numpoints] ) ) );
 }
 
 /*
@@ -426,7 +426,7 @@ winding_accu_t *CopyWindingAccuIncreaseSizeAndFreeOld( winding_accu_t *w ){
 		Error( "CopyWindingAccuIncreaseSizeAndFreeOld: winding is NULL" );
 	}
 
-	winding_accu_t *c = memcpy( AllocWindingAccu( w->numpoints + 1 ), w, offsetof( winding_accu_t, p[w->numpoints] ) );
+	winding_accu_t *c = void_ptr( memcpy( AllocWindingAccu( w->numpoints + 1 ), w, offsetof( winding_accu_t, p[w->numpoints] ) ) );
 	FreeWindingAccu( w );
 	return c;
 }

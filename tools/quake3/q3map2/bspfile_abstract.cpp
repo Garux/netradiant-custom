@@ -73,7 +73,7 @@ void IncDrawVerts(){
 		numBSPDrawVertsBuffer *= 3; // multiply by 1.5
 		numBSPDrawVertsBuffer /= 2;
 
-		newBspDrawVerts = realloc( bspDrawVerts, sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer );
+		newBspDrawVerts = void_ptr( realloc( bspDrawVerts, sizeof( bspDrawVert_t ) * numBSPDrawVertsBuffer ) );
 
 		if ( !newBspDrawVerts ) {
 			free (bspDrawVerts);
@@ -276,7 +276,7 @@ int GetLumpElements( bspHeader_t *header, int lump, int size ){
    returns a pointer to the specified lump
  */
 
-void *GetLump( bspHeader_t *header, int lump ){
+void_ptr GetLump( bspHeader_t *header, int lump ){
 	return (void*)( (byte*) header + header->lumps[ lump ].offset );
 }
 
@@ -871,7 +871,7 @@ void GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
 	}
 }
 
-bool entity_read_bool( bool *bool_value, const entity_t *entity, ... ){
+bool entity_read_keyvalue( bool *bool_value, const entity_t *entity, ... ){
 	va_list argptr;
 	va_start( argptr, entity );
 	const char* key;
@@ -886,7 +886,7 @@ bool entity_read_bool( bool *bool_value, const entity_t *entity, ... ){
 	va_end( argptr );
 	return false;
 }
-bool entity_read_int( int *int_value, const entity_t *entity, ... ){
+bool entity_read_keyvalue( int *int_value, const entity_t *entity, ... ){
 	va_list argptr;
 	va_start( argptr, entity );
 	const char* key;
@@ -901,7 +901,7 @@ bool entity_read_int( int *int_value, const entity_t *entity, ... ){
 	va_end( argptr );
 	return false;
 }
-bool entity_read_float( float *float_value, const entity_t *entity, ... ){
+bool entity_read_keyvalue( float *float_value, const entity_t *entity, ... ){
 	va_list argptr;
 	va_start( argptr, entity );
 	const char* key;
@@ -916,7 +916,7 @@ bool entity_read_float( float *float_value, const entity_t *entity, ... ){
 	va_end( argptr );
 	return false;
 }
-bool entity_read_vector3( float (*vector3_value)[3], const entity_t *entity, ... ){
+bool entity_read_keyvalue( float (*vector3_value)[3], const entity_t *entity, ... ){
 	va_list argptr;
 	va_start( argptr, entity );
 	const char* key;
@@ -936,7 +936,7 @@ bool entity_read_vector3( float (*vector3_value)[3], const entity_t *entity, ...
 	va_end( argptr );
 	return false;
 }
-bool entity_read_string( char (*string_value)[], const entity_t *entity, ... ){
+bool entity_read_keyvalue( char (*string_value)[1024], const entity_t *entity, ... ){
 	va_list argptr;
 	va_start( argptr, entity );
 	const char* key;
@@ -951,7 +951,7 @@ bool entity_read_string( char (*string_value)[], const entity_t *entity, ... ){
 	va_end( argptr );
 	return false;
 }
-bool entity_read_string_ptr( const char **string_ptr_value, const entity_t *entity, ... ){
+bool entity_read_keyvalue( const char **string_ptr_value, const entity_t *entity, ... ){
 	va_list argptr;
 	va_start( argptr, entity );
 	const char* key;

@@ -524,7 +524,7 @@ typedef float tcMod_t[ 3 ][ 3 ];
 /* ydnar: for multiple game support */
 typedef struct surfaceParm_s
 {
-	char        *name;
+	const char  *name;
 	int contentFlags, contentFlagsClear;
 	int surfaceFlags, surfaceFlagsClear;
 	int compileFlags, compileFlagsClear;
@@ -541,16 +541,16 @@ miniMapMode_t;
 
 typedef struct game_s
 {
-	char                *arg;                           /* -game matches this */
-	char                *gamePath;                      /* main game data dir */
-	char                *homeBasePath;                  /* home sub-dir on unix */
-	char                *magic;                         /* magic word for figuring out base path */
-	char                *shaderPath;                    /* shader directory */
+	const char          *arg;                           /* -game matches this */
+	const char          *gamePath;                      /* main game data dir */
+	const char          *homeBasePath;                  /* home sub-dir on unix */
+	const char          *magic;                         /* magic word for figuring out base path */
+	const char          *shaderPath;                    /* shader directory */
 	int maxLMSurfaceVerts;                              /* default maximum meta surface verts */
 	int maxSurfaceVerts;                                /* default maximum surface verts */
 	int maxSurfaceIndexes;                              /* default maximum surface indexes (tris * 3) */
 	bool emitFlares;                                    /* when true, emit flare surfaces */
-	char                *flareShader;                   /* default flare shader (MUST BE SET) */
+	const char          *flareShader;                   /* default flare shader (MUST BE SET) */
 	bool wolfLight;                                     /* when true, lights work like wolf q3map  */
 	int lightmapSize;                                   /* bsp lightmap width/height */
 	float lightmapGamma;                                /* default lightmap gamma */
@@ -573,8 +573,8 @@ typedef struct game_s
 	float miniMapBorder;                                /* minimap border amount */
 	bool miniMapKeepAspect;                             /* minimap keep aspect ratio by letterboxing */
 	miniMapMode_t miniMapMode;                          /* minimap mode */
-	char                *miniMapNameFormat;             /* minimap name format */
-	char                *bspIdent;                      /* 4-letter bsp file prefix */
+	const char          *miniMapNameFormat;             /* minimap name format */
+	const char          *bspIdent;                      /* 4-letter bsp file prefix */
 	int bspVersion;                                     /* bsp version to use */
 	bool lumpSwap;                                      /* cod-style len/ofs order */
 	bspFunc load, write;                                /* load/write function pointers */
@@ -700,7 +700,7 @@ typedef struct shaderInfo_s
 	int compileFlags;
 	float value;                                        /* light value */
 
-	char                *flareShader;                   /* for light flares */
+	const char          *flareShader;                   /* for light flares */
 	char                *damageShader;                  /* ydnar: sof2 damage shader name */
 	char                *backShader;                    /* for surfaces that generate different front and back passes */
 	char                *cloneShader;                   /* ydnar: for cloning of a surface */
@@ -997,7 +997,7 @@ surfaceType_t;
 #ifndef MAIN_C
 extern
 #endif
-char            *surfaceTypes[ NUM_SURFACE_TYPES ]
+const char      *surfaceTypes[ NUM_SURFACE_TYPES ]
 #ifndef MAIN_C
 ;
 #else
@@ -1556,7 +1556,7 @@ bool                        BoundBrush( brush_t *brush );
 bool                        CreateBrushWindings( brush_t *brush );
 brush_t                     *BrushFromBounds( vec3_t mins, vec3_t maxs );
 vec_t                       BrushVolume( brush_t *brush );
-void                        WriteBSPBrushMap( char *name, brush_t *list );
+void                        WriteBSPBrushMap( const char *name, brush_t *list );
 
 void                        FilterDetailBrushesIntoTree( entity_t *e, tree_t *tree );
 void                        FilterStructuralBrushesIntoTree( entity_t *e, tree_t *tree );
@@ -1585,8 +1585,6 @@ mesh_t                      *SubdivideMeshQuads( mesh_t *in, float minLength, in
 mesh_t                      *RemoveLinearMeshColumnsRows( mesh_t *in );
 void                        MakeMeshNormals( mesh_t in );
 void                        PutMeshOnCurve( mesh_t in );
-
-void                        MakeNormalVectors( vec3_t forward, vec3_t right, vec3_t up );
 
 
 /* map.c */
@@ -1864,11 +1862,11 @@ void                        TCModTranslate( tcMod_t mod, float s, float t );
 void                        TCModScale( tcMod_t mod, float s, float t );
 void                        TCModRotate( tcMod_t mod, float euler );
 
-bool                        ApplySurfaceParm( char *name, int *contentFlags, int *surfaceFlags, int *compileFlags );
+bool                        ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, int *compileFlags );
 
 void                        BeginMapShaderFile( const char *mapFile );
 void                        WriteMapShaderFile( void );
-shaderInfo_t                *CustomShader( shaderInfo_t *si, char *find, char *replace );
+shaderInfo_t                *CustomShader( shaderInfo_t *si, const char *find, char *replace );
 void                        EmitVertexRemapShader( char *from, char *to );
 
 void                        LoadShaderInfo( void );
@@ -1887,7 +1885,7 @@ void                        BSPFilesCleanup();
 void                        SwapBlock( int *block, int size );
 
 int                         GetLumpElements( bspHeader_t *header, int lump, int size );
-void                        *GetLump( bspHeader_t *header, int lump );
+void_ptr                    GetLump( bspHeader_t *header, int lump );
 int                         CopyLump( bspHeader_t *header, int lump, void *dest, int size );
 int                         CopyLump_Allocate( bspHeader_t *header, int lump, void **dest, int size, int *allocationVariable );
 void                        AddLump( FILE *file, bspHeader_t *header, int lumpNum, const void *data, int length );
@@ -1913,20 +1911,13 @@ void                        GetVectorForKey( const entity_t *ent, const char *ke
 /* entity: read key value generic macro
    returns true on successful read
    returns false and does not modify value otherwise */
-bool                        entity_read_bool( bool *bool_value, const entity_t *entity, ... );
-bool                        entity_read_int( int *int_value, const entity_t *entity, ... );
-bool                        entity_read_float( float *float_value, const entity_t *entity, ... ); // warning: float[3] may be passed here erroneously, if not written as &float[3]
-bool                        entity_read_vector3( float (*vector3_value)[3], const entity_t *entity, ... );
-bool                        entity_read_string( char (*string_value)[], const entity_t *entity, ... ); // explicit pointer to array to avoid erroneous mix of char* and char**
-bool                        entity_read_string_ptr( const char **string_ptr_value, const entity_t *entity, ... );
-#define ENT_READKV( value_ptr, entity, keys... ) _Generic( ( value_ptr ),         \
-                                                    bool*: entity_read_bool,       \
-                                                    int*: entity_read_int,          \
-                                                    float*: entity_read_float,       \
-                                                    float (*)[3]: entity_read_vector3,\
-                                                    char (*)[]: entity_read_string,    \
-                                                    const char**: entity_read_string_ptr\
-                                                 )( value_ptr, entity, keys, NULL )
+bool                        entity_read_keyvalue( bool *bool_value, const entity_t *entity, ... );
+bool                        entity_read_keyvalue( int *int_value, const entity_t *entity, ... );
+bool                        entity_read_keyvalue( float *float_value, const entity_t *entity, ... ); // warning: float[3] may be passed here erroneously, if not written as &float[3]
+bool                        entity_read_keyvalue( float (*vector3_value)[3], const entity_t *entity, ... );
+bool                        entity_read_keyvalue( char (*string_value)[1024], const entity_t *entity, ... ); // explicit pointer to array to avoid erroneous mix of char* and char**
+bool                        entity_read_keyvalue( const char **string_ptr_value, const entity_t *entity, ... );
+#define ENT_READKV( value_ptr, entity, keys... ) entity_read_keyvalue( value_ptr, entity, keys, NULL )
 
 const char                  *ent_classname( const entity_t *entity );
 bool                        ent_class_is( const entity_t *entity, const char *classname );
@@ -2132,9 +2123,9 @@ Q_EXTERN char name[ 1024 ];
 Q_EXTERN char source[ 1024 ];
 Q_EXTERN char outbase[ 32 ];
 
-Q_EXTERN int sampleSize;                                    /* lightmap sample size in units */
-Q_EXTERN int minSampleSize;                                 /* minimum sample size to use at all */
-Q_EXTERN int sampleScale;                                   /* vortex: lightmap sample scale (ie quality)*/
+Q_EXTERN int sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );          /* lightmap sample size in units */
+Q_EXTERN int minSampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE );   /* minimum sample size to use at all */
+Q_EXTERN int sampleScale;                                                  /* vortex: lightmap sample scale (ie quality)*/
 
 Q_EXTERN int mapEntityNum Q_ASSIGN( 0 );
 
@@ -2258,8 +2249,8 @@ Q_EXTERN bool loMem Q_ASSIGN( false );
 Q_EXTERN bool noStyles Q_ASSIGN( false );
 Q_EXTERN bool keepLights Q_ASSIGN( false );
 
-Q_EXTERN int sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );
-Q_EXTERN int minSampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE );
+//Q_EXTERN int sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );
+//Q_EXTERN int minSampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE );
 Q_EXTERN float noVertexLighting Q_ASSIGN( 0.0f );
 Q_EXTERN bool nolm Q_ASSIGN( false );
 Q_EXTERN bool noGridLighting Q_ASSIGN( false );
@@ -2589,7 +2580,7 @@ Q_EXTERN bspAdvertisement_t bspAds[ MAX_MAP_ADVERTISEMENTS ];
 			{ \
 				Error( # ptr " over 2 GB" ); \
 			} \
-			ptr = realloc( ptr, sizeof( *ptr ) * allocated ); \
+			ptr = void_ptr( realloc( ptr, sizeof( *ptr ) * allocated ) ); \
 			if ( !ptr ) { \
 				Error( # ptr " out of memory" ); } \
 		} \
@@ -2604,7 +2595,7 @@ Q_EXTERN bspAdvertisement_t bspAds[ MAX_MAP_ADVERTISEMENTS ];
 		if ( used >= allocated )	\
 		{ \
 			allocated += add; \
-			ptr = realloc( ptr, sizeof( *ptr ) * allocated ); \
+			ptr = void_ptr( realloc( ptr, sizeof( *ptr ) * allocated ) ); \
 			if ( !ptr ) { \
 				Error( # ptr " out of memory" ); } \
 		} \
