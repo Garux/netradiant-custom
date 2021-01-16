@@ -65,7 +65,7 @@
 #define U_CONT_STRUCTURAL           0x10000000  /* brushes used for the bsp */
 #define U_CONT_TRANSLUCENT          0x20000000  /* don't consume surface fragments inside */
 #define U_CONT_TRIGGER              0x40000000
-#define U_CONT_NODROP               0x80000000  /* don't leave bodies or items (death fog, lava) */
+#define U_CONT_NODROP           int(0x80000000) /* don't leave bodies or items (death fog, lava) */
 
 #define U_SURF_NODAMAGE             0x1         /* never give falling damage */
 #define U_SURF_SLICK                0x2         /* effects game physics */
@@ -92,7 +92,7 @@
 #define U_SURF_BEVELSMASK           ( U_SURF_NODAMAGE | U_SURF_SLICK | U_SURF_FLESH | U_SURF_METALSTEPS | U_SURF_NOSTEPS | U_SURF_DUST )
 
 /* materials */
-#define U_MAT_MASK                  0xFFF00000  /* mask to get the material type */
+#define U_MAT_MASK              int(0xFFF00000) /* mask to get the material type */
 
 #define U_MAT_NONE                  0x00000000
 #define U_MAT_TIN                   0x00100000

@@ -66,7 +66,7 @@
 #define E_CONT_STRUCTURAL           0x10000000  /* brushes used for the bsp */
 #define E_CONT_TRANSLUCENT          0x20000000  /* don't consume surface fragments inside */
 #define E_CONT_TRIGGER              0x40000000
-#define E_CONT_NODROP               0x80000000  /* don't leave bodies or items (death fog, lava) */
+#define E_CONT_NODROP           int(0x80000000) /* don't leave bodies or items (death fog, lava) */
 
 #define E_SURF_NODAMAGE             0x1         /* never give falling damage */
 #define E_SURF_SLICK                0x2         /* effects game physics */

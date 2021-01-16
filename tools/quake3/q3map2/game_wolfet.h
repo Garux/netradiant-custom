@@ -42,7 +42,7 @@
 /* this file must be included *after* game_wolf.h because it shares defines! */
 
 #define W_SURF_SPLASH               0x00000040  /* enemy territory water splash surface */
-#define W_SURF_LANDMINE             0x80000000  /* enemy territory 'landminable' surface */
+#define W_SURF_LANDMINE         int(0x80000000) /* enemy territory 'landminable' surface */
 
 
 

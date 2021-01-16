@@ -63,7 +63,7 @@
 #define S_CONT_TELEPORTER           0x00080000
 #define S_CONT_ITEM                 0x00100000
 #define S_CONT_DETAIL               0x08000000  /* brushes not used for the bsp */
-#define S_CONT_TRANSLUCENT          0x80000000  /* don't consume surface fragments inside */
+#define S_CONT_TRANSLUCENT      int(0x80000000) /* don't consume surface fragments inside */
 
 #define S_SURF_SKY                  0x00002000  /* lighting from environment map */
 #define S_SURF_SLICK                0x00004000  /* affects game physics */
@@ -77,7 +77,7 @@
 #define S_SURF_NODLIGHT             0x00800000  /* don't dlight even if solid (solid lava, skies) */
 #define S_SURF_NOMISCENTS           0x01000000  /* no client models allowed on this surface */
 
-#define S_SURF_PATCH                0x80000000  /* mark this face as a patch(editor only) */
+#define S_SURF_PATCH            int(0x80000000) /* mark this face as a patch(editor only) */
 
 #define S_SURF_BEVELSMASK           ( S_SURF_SLICK | S_SURF_METALSTEPS | S_SURF_NODAMAGE | S_SURF_NOSTEPS | S_SURF_NOMISCENTS ) /* compiler utility */
 
