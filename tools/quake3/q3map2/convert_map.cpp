@@ -226,7 +226,7 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 	bspBrushSide_t  *side;
 	side_t          *buildSide;
 	bspShader_t     *shader;
-	char            *texture;
+	const char            *texture;
 	plane_t         *buildPlane;
 	vec3_t pts[ 3 ];
 

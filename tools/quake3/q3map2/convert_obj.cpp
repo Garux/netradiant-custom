@@ -170,7 +170,7 @@ static void ConvertShaderToMTL( FILE *f, bspShader_t *shader, int shaderNum ){
 		strcpy( filename, si->shaderImage->filename );
 	}
 	else{
-		sprintf( filename, "%s.tga", si->shader );
+		sprintf( filename, "%s.tga", si->shader.c_str() );
 	}
 
 	/* blender hates this, so let's not do it

@@ -2518,7 +2518,7 @@ void EmitDrawIndexes( mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 				if ( bspDrawIndexes[ numBSPDrawIndexes ] < 0 || bspDrawIndexes[ numBSPDrawIndexes ] >= ds->numVerts ) {
 					Sys_Warning( "%d %s has invalid index %d (%d)\n",
 								numBSPDrawSurfaces,
-								ds->shaderInfo->shader,
+								ds->shaderInfo->shader.c_str(),
 								bspDrawIndexes[ numBSPDrawIndexes ],
 								i );
 					bspDrawIndexes[ numBSPDrawIndexes ] = 0;
@@ -3747,7 +3747,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 					Sys_Printf( "\n" );
 					Sys_Warning( "Potentially bad %s surface (%d: %d, %d)\n     %s\n",
 								surfaceTypes[ ds->type ],
-								numBSPDrawSurfaces - 1, out->numVerts, out->numIndexes, si->shader );
+								numBSPDrawSurfaces - 1, out->numVerts, out->numIndexes, si->shader.c_str() );
 				}
 			}
 

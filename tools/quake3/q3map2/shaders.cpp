@@ -392,7 +392,7 @@ void WriteMapShaderFile( void ){
 		num++;
 
 		/* print it to the file */
-		fprintf( file, "%s%s\n", si->shader, si->shaderText );
+		fprintf( file, "%s%s\n", si->shader.c_str(), si->shaderText );
 		//Sys_Printf( "%s%s\n", si->shader, si->shaderText ); /* FIXME: remove debugging code */
 
 		Sys_FPrintf( SYS_VRB, "." );
@@ -515,7 +515,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 					   "\t\trgbGen identity\n"
 					   "\t}\n"
 					   "}\n",
-				 si->shader );
+				 si->shader.c_str() );
 	}
 
 	/* error check */
@@ -556,8 +556,8 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 	}
 
 	/* clone the existing shader and rename */
-	memcpy( csi, si, sizeof( shaderInfo_t ) );
-	strcpy( csi->shader, shader );
+	*csi = *si;
+	csi->shader = shader;
 	csi->custom = true;
 
 	/* store new shader text */
@@ -625,7 +625,8 @@ static shaderInfo_t *AllocShaderInfo( void ){
 	numShaderInfo++;
 
 	/* ydnar: clear to 0 first */
-	memset( si, 0, sizeof( shaderInfo_t ) );
+//	memset( si, 0, sizeof( shaderInfo_t ) );
+	new (si) shaderInfo_t{}; // placement new
 
 	/* set defaults */
 	ApplySurfaceParm( "default", &si->contentFlags, &si->surfaceFlags, &si->compileFlags );
@@ -763,7 +764,7 @@ static void LoadShaderImages( shaderInfo_t *si ){
 		if ( si->shaderImage == NULL ) {
 			si->shaderImage = ImageLoad( DEFAULT_IMAGE );
 			if ( warnImage && !strEqual( si->shader, "noshader" ) ) {
-				Sys_Warning( "Couldn't find image for shader %s\n", si->shader );
+				Sys_Warning( "Couldn't find image for shader %s\n", si->shader.c_str() );
 			}
 		}
 
@@ -774,7 +775,7 @@ static void LoadShaderImages( shaderInfo_t *si ){
 		si->normalImage = ImageLoad( si->normalImagePath );
 		if ( si->normalImage != NULL ) {
 			Sys_FPrintf( SYS_VRB, "Shader %s has\n"
-								  "    NM %s\n", si->shader, si->normalImagePath );
+								  "    NM %s\n", si->shader.c_str(), si->normalImagePath );
 		}
 	}
 
@@ -850,7 +851,7 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 		si = &shaderInfo[ i ];
 		if ( striEqual( shader, si->shader ) ) {
 			/* check if shader is deprecated */
-			if ( deprecationDepth < MAX_SHADER_DEPRECATION_DEPTH && si->deprecateShader && si->deprecateShader[ 0 ] ) {
+			if ( deprecationDepth < MAX_SHADER_DEPRECATION_DEPTH && !strEmptyOrNull( si->deprecateShader ) ) {
 				/* override name */
 				strcpy( shader, si->deprecateShader );
 				StripExtension( shader );
@@ -877,7 +878,7 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 
 	/* allocate a default shader */
 	si = AllocShaderInfo();
-	strcpy( si->shader, shader );
+	si->shader << shader;
 	LoadShaderImages( si );
 	FinishShader( si );
 
@@ -963,7 +964,7 @@ void Parse1DMatrixAppend( char *buffer, int x, vec_t *m ){
 static void ParseShaderFile( const char *filename ){
 	int i, val;
 	shaderInfo_t    *si;
-	char            *suffix, temp[ 1024 ];
+	char            temp[ 1024 ];
 	char shaderText[ 8192 ];            /* ydnar: fixme (make this bigger?) */
 
 
@@ -995,13 +996,12 @@ static void ParseShaderFile( const char *filename ){
 
 		/* shader name is initial token */
 		si = AllocShaderInfo();
-		strcpy( si->shader, token );
 
 		/* ignore ":q3map" suffix */
-		suffix = strIstr( si->shader, ":q3map" );
-		if ( suffix != NULL ) {
-			strClear( suffix );
-		}
+		if( striEqualSuffix( token, ":q3map" ) )
+			si->shader << StringRange( token, token + strlen( token ) - strlen( ":q3map" ) );
+		else
+			si->shader << token;
 
 		/* handle { } section */
 		if ( !GetTokenAppend( shaderText, true ) ) {
@@ -1010,7 +1010,7 @@ static void ParseShaderFile( const char *filename ){
 		if ( !strEqual( token, "{" ) ) {
 			if ( si != NULL ) {
 				Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s\nLast known shader: %s\nFile location be: %s\n",
-					   filename, scriptline, token, si->shader, g_strLoadedFileLocation );
+					   filename, scriptline, token, si->shader.c_str(), g_strLoadedFileLocation );
 			}
 			else{
 				Error( "ParseShaderFile(): %s, line %d: { not found!\nFound instead: %s\nFile location be: %s\n",
@@ -1178,7 +1178,7 @@ static void ParseShaderFile( const char *filename ){
 				si->implicitMap = IM_OPAQUE;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
-					sprintf( si->implicitImagePath, "%s.tga", si->shader );
+					sprintf( si->implicitImagePath, "%s.tga", si->shader.c_str() );
 				}
 				else{
 					strcpy( si->implicitImagePath, token );
@@ -1189,7 +1189,7 @@ static void ParseShaderFile( const char *filename ){
 				si->implicitMap = IM_MASKED;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
-					sprintf( si->implicitImagePath, "%s.tga", si->shader );
+					sprintf( si->implicitImagePath, "%s.tga", si->shader.c_str() );
 				}
 				else{
 					strcpy( si->implicitImagePath, token );
@@ -1200,7 +1200,7 @@ static void ParseShaderFile( const char *filename ){
 				si->implicitMap = IM_MASKED;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
-					sprintf( si->implicitImagePath, "%s.tga", si->shader );
+					sprintf( si->implicitImagePath, "%s.tga", si->shader.c_str() );
 				}
 				else{
 					strcpy( si->implicitImagePath, token );
@@ -1354,10 +1354,10 @@ static void ParseShaderFile( const char *filename ){
 						strcpy( temp, si->shader );
 
 						/* copy shader */
-						memcpy( si, si2, sizeof( *si ) );
+						*si = *si2;
 
 						/* restore name and set to unfinished */
-						strcpy( si->shader, temp );
+						si->shader = temp;
 						si->shaderWidth = 0;
 						si->shaderHeight = 0;
 						si->finished = false;

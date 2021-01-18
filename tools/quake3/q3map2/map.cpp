@@ -1797,7 +1797,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 		char shader[ MAX_QPATH ];
 		sprintf( shader, "textures/%s", value );
 		celShader = ShaderInfoForShader( shader );
-		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader );
+		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader.c_str() );
 	}
 	else{
 		celShader = !strEmpty( globalCelShader ) ? ShaderInfoForShader( globalCelShader ) : NULL;

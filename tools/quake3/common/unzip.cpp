@@ -2976,7 +2976,7 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
       DUMPBITS(14)
       s->sub.trees.index = 0;
       Tracev(("inflate:       table sizes ok\n"));
-      s->mode = BTREE;
+      s->mode = BTREE;  // fall through
     case BTREE:
       while (s->sub.trees.index < 4 + (s->sub.trees.table >> 10))
       {
@@ -2999,7 +2999,7 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
       }
       s->sub.trees.index = 0;
       Tracev(("inflate:       bits tree ok\n"));
-      s->mode = DTREE;
+      s->mode = DTREE;  // fall through
     case DTREE:
       while (t = s->sub.trees.table,
              s->sub.trees.index < 258 + (t & 0x1f) + ((t >> 5) & 0x1f))

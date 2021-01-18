@@ -98,7 +98,7 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 
 	/* recursively emit any damage shaders */
 	if ( !strEmptyOrNull( si->damageShader ) ) {
-		Sys_FPrintf( SYS_VRB, "Shader %s has damage shader %s\n", si->shader, si->damageShader );
+		Sys_FPrintf( SYS_VRB, "Shader %s has damage shader %s\n", si->shader.c_str(), si->damageShader );
 		EmitShader( si->damageShader, NULL, NULL );
 	}
 

@@ -84,6 +84,8 @@
 #include "png.h"
 #include "md4.h"
 
+#include "stringfixedsize.h"
+
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -694,7 +696,7 @@ implicitMap_t;
 
 typedef struct shaderInfo_s
 {
-	char shader[ MAX_QPATH ];
+	String64 shader;
 	int surfaceFlags;
 	int contentFlags;
 	int compileFlags;

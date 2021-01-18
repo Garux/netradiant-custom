@@ -270,7 +270,7 @@ static void ConvertShader( FILE *f, bspShader_t *shader, int shaderNum ){
 		strcpy( filename, si->shaderImage->filename );
 	}
 	else{
-		sprintf( filename, "%s.tga", si->shader );
+		sprintf( filename, "%s.tga", si->shader.c_str() );
 	}
 	for ( c = filename; *c; c++ )
 		if ( *c == '/' ) {

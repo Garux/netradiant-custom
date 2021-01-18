@@ -526,14 +526,14 @@ void CreateSurfaceLights( void ){
 
 		/* sunlight? */
 		if ( si->sun != NULL && !nss ) {
-			Sys_FPrintf( SYS_VRB, "Sun: %s\n", si->shader );
+			Sys_FPrintf( SYS_VRB, "Sun: %s\n", si->shader.c_str() );
 			CreateSunLight( si->sun );
 			si->sun = NULL; /* FIXME: leak! */
 		}
 
 		/* sky light? */
 		if ( si->skyLightValue > 0.0f ) {
-			Sys_FPrintf( SYS_VRB, "Sky: %s\n", si->shader );
+			Sys_FPrintf( SYS_VRB, "Sky: %s\n", si->shader.c_str() );
 			CreateSkyLights( si->color, si->skyLightValue, si->skyLightIterations, si->lightFilterRadius, si->lightStyle );
 			si->skyLightValue = 0.0f;   /* FIXME: hack! */
 		}
