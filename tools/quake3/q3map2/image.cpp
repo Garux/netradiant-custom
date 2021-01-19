@@ -312,6 +312,7 @@ image_t *ImageFind( const char *name ){
 /*
    ImageLoad()
    loads an rgba image and returns a pointer to the image_t struct or NULL if not found
+   expects extensionless path as input
  */
 
 image_t *ImageLoad( const char *filename ){
@@ -330,9 +331,7 @@ image_t *ImageLoad( const char *filename ){
 		return NULL;
 	}
 
-	/* strip file extension off name */
 	strcpy( name, filename );
-	StripExtension( name );
 
 	/* try to find existing image */
 	image = ImageFind( name );

@@ -767,12 +767,12 @@ typedef struct shaderInfo_s
 
 	String64 skyParmsImageBase;                         /* ydnar: for skies */
 
-	char editorImagePath[ MAX_QPATH ];                  /* use this image to generate texture coordinates */
-	char lightImagePath[ MAX_QPATH ];                   /* use this image to generate color / averageColor */
-	char normalImagePath[ MAX_QPATH ];                  /* ydnar: normalmap image for bumpmapping */
+	String64 editorImagePath;                           /* use this image to generate texture coordinates */
+	String64 lightImagePath;                            /* use this image to generate color / averageColor */
+	String64 normalImagePath;                           /* ydnar: normalmap image for bumpmapping */
 
 	implicitMap_t implicitMap;                          /* ydnar: enemy territory implicit shaders */
-	char implicitImagePath[ MAX_QPATH ];
+	String64 implicitImagePath;
 
 	image_t             *shaderImage;
 	image_t             *lightImage;

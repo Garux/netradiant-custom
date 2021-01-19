@@ -448,7 +448,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 					   "\t\trgbGen identity\n"
 					   "\t}\n"
 					   "}\n",
-				 si->implicitImagePath );
+				 si->implicitImagePath.c_str() );
 	}
 
 	/* et: implicitMask */
@@ -475,8 +475,8 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 					   "\t\trgbGen identity\n"
 					   "\t}\n"
 					   "}\n",
-				 si->implicitImagePath,
-				 si->implicitImagePath );
+				 si->implicitImagePath.c_str(),
+				 si->implicitImagePath.c_str() );
 	}
 
 	/* et: implicitBlend */
@@ -496,7 +496,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 					   "\t}\n"
 					   "\tq3map_styleMarker\n"
 					   "}\n",
-				 si->implicitImagePath );
+				 si->implicitImagePath.c_str() );
 	}
 
 	/* default shader text */
@@ -775,7 +775,7 @@ static void LoadShaderImages( shaderInfo_t *si ){
 		si->normalImage = ImageLoad( si->normalImagePath );
 		if ( si->normalImage != NULL ) {
 			Sys_FPrintf( SYS_VRB, "Shader %s has\n"
-								  "    NM %s\n", si->shader.c_str(), si->normalImagePath );
+								  "    NM %s\n", si->shader.c_str(), si->normalImagePath.c_str() );
 		}
 	}
 
@@ -1046,7 +1046,7 @@ static void ParseShaderFile( const char *filename ){
 					}
 
 					/* only care about images if we don't have a editor/light image */
-					if ( strEmpty( si->editorImagePath ) && strEmpty( si->lightImagePath ) && strEmpty( si->implicitImagePath ) ) {
+					if ( si->editorImagePath.empty() && si->lightImagePath.empty() && si->implicitImagePath.empty() ) {
 						/* digest any images */
 						if ( striEqual( token, "map" ) ||
 							 striEqual( token, "clampMap" ) ||
@@ -1062,8 +1062,8 @@ static void ParseShaderFile( const char *filename ){
 							/* get an image */
 							GetTokenAppend( shaderText, false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
-								strcpy( si->lightImagePath, token );
-								DefaultExtension( si->lightImagePath, ".tga" );
+								StripExtension( token );
+								si->lightImagePath = token;
 
 								/* debug code */
 								//%	Sys_FPrintf( SYS_VRB, "Deduced shader image: %s\n", si->lightImagePath );
@@ -1178,10 +1178,10 @@ static void ParseShaderFile( const char *filename ){
 				si->implicitMap = IM_OPAQUE;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
-					sprintf( si->implicitImagePath, "%s.tga", si->shader.c_str() );
+					si->implicitImagePath = si->shader;
 				}
 				else{
-					strcpy( si->implicitImagePath, token );
+					si->implicitImagePath = token;
 				}
 			}
 
@@ -1189,10 +1189,10 @@ static void ParseShaderFile( const char *filename ){
 				si->implicitMap = IM_MASKED;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
-					sprintf( si->implicitImagePath, "%s.tga", si->shader.c_str() );
+					si->implicitImagePath = si->shader;
 				}
 				else{
-					strcpy( si->implicitImagePath, token );
+					si->implicitImagePath = token;
 				}
 			}
 
@@ -1200,10 +1200,10 @@ static void ParseShaderFile( const char *filename ){
 				si->implicitMap = IM_MASKED;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
-					sprintf( si->implicitImagePath, "%s.tga", si->shader.c_str() );
+					si->implicitImagePath = si->shader;
 				}
 				else{
-					strcpy( si->implicitImagePath, token );
+					si->implicitImagePath = token;
 				}
 			}
 
@@ -1215,22 +1215,22 @@ static void ParseShaderFile( const char *filename ){
 			/* qer_editorimage <image> */
 			else if ( striEqual( token, "qer_editorImage" ) ) {
 				GetTokenAppend( shaderText, false );
-				strcpy( si->editorImagePath, token );
-				DefaultExtension( si->editorImagePath, ".tga" );
+				StripExtension( token );
+				si->editorImagePath = token;
 			}
 
 			/* ydnar: q3map_normalimage <image> (bumpmapping normal map) */
 			else if ( striEqual( token, "q3map_normalImage" ) ) {
 				GetTokenAppend( shaderText, false );
-				strcpy( si->normalImagePath, token );
-				DefaultExtension( si->normalImagePath, ".tga" );
+				StripExtension( token );
+				si->normalImagePath = token;
 			}
 
 			/* q3map_lightimage <image> */
 			else if ( striEqual( token, "q3map_lightImage" ) ) {
 				GetTokenAppend( shaderText, false );
-				strcpy( si->lightImagePath, token );
-				DefaultExtension( si->lightImagePath, ".tga" );
+				StripExtension( token );
+				si->lightImagePath = token;
 			}
 
 			/* ydnar: skyparms <outer image> <cloud height> <inner image> */
@@ -1243,8 +1243,8 @@ static void ParseShaderFile( const char *filename ){
 					si->skyParmsImageBase = token;
 
 					/* use top image as sky light image */
-					if ( strEmpty( si->lightImagePath ) ) {
-						sprintf( si->lightImagePath, "%s_up.tga", si->skyParmsImageBase.c_str() );
+					if ( si->lightImagePath.empty() ) {
+						si->lightImagePath( si->skyParmsImageBase, "_up" );
 					}
 				}
 
