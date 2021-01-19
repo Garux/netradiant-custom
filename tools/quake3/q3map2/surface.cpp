@@ -882,7 +882,6 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	bool indexed;
 	byte shaderIndexes[ 256 ];
 	float offsets[ 256 ];
-	char tempShader[ MAX_QPATH ];
 
 
 	/* ydnar: don't make a drawsurf for culled sides */
@@ -922,18 +921,8 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	/* ydnar: sky hack/fix for GL_CLAMP borders on ati cards */
 	if ( skyFixHack && !strEmpty( si->skyParmsImageBase ) ) {
 		//%	Sys_FPrintf( SYS_VRB, "Enabling sky hack for shader %s using env %s\n", si->shader, si->skyParmsImageBase );
-		sprintf( tempShader, "%s_lf", si->skyParmsImageBase );
-		DrawSurfaceForShader( tempShader );
-		sprintf( tempShader, "%s_rt", si->skyParmsImageBase );
-		DrawSurfaceForShader( tempShader );
-		sprintf( tempShader, "%s_ft", si->skyParmsImageBase );
-		DrawSurfaceForShader( tempShader );
-		sprintf( tempShader, "%s_bk", si->skyParmsImageBase );
-		DrawSurfaceForShader( tempShader );
-		sprintf( tempShader, "%s_up", si->skyParmsImageBase );
-		DrawSurfaceForShader( tempShader );
-		sprintf( tempShader, "%s_dn", si->skyParmsImageBase );
-		DrawSurfaceForShader( tempShader );
+		for( const auto suffix : { "_lf", "_rt", "_ft", "_bk", "_up", "_dn" } )
+			DrawSurfaceForShader( String64()( si->skyParmsImageBase, suffix ) );
 	}
 
 	/* ydnar: gs mods */
@@ -1284,7 +1273,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal,
    creates a bogus surface to forcing the game to load a shader
  */
 
-mapDrawSurface_t *DrawSurfaceForShader( char *shader ){
+mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
 	int i;
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;

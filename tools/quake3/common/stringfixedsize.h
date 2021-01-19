@@ -52,8 +52,14 @@ public:
 	}
 
 	StringFixedSize& operator=( const char* string ){
+		return (*this)( string );
+	}
+
+	template<typename ... Args>
+	StringFixedSize& operator()( const Args& ... args ){
 		clear();
-		write( string, strlen( string ) );
+		using expander = int[];
+		(void)expander{ 0, ( (void)( *this << args ), 0 ) ... };
 		return *this;
 	}
 

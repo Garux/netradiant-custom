@@ -765,7 +765,7 @@ typedef struct shaderInfo_s
 
 	float vertexScale;                                  /* vertex light scale */
 
-	char skyParmsImageBase[ MAX_QPATH ];                /* ydnar: for skies */
+	String64 skyParmsImageBase;                         /* ydnar: for skies */
 
 	char editorImagePath[ MAX_QPATH ];                  /* use this image to generate texture coordinates */
 	char lightImagePath[ MAX_QPATH ];                   /* use this image to generate color / averageColor */
@@ -1700,7 +1700,7 @@ void                        AddEntitySurfaceModels( entity_t *e );
 mapDrawSurface_t            *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, winding_t *w );
 mapDrawSurface_t            *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh );
 mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal, vec3_t color, const char *flareShader, int lightStyle );
-mapDrawSurface_t            *DrawSurfaceForShader( char *shader );
+mapDrawSurface_t            *DrawSurfaceForShader( const char *shader );
 void                        ClipSidesIntoTree( entity_t *e, tree_t *tree );
 void                        MakeDebugPortalSurfs( tree_t *tree );
 void                        MakeFogHullSurfs( entity_t *e, tree_t *tree, char *shader );

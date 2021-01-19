@@ -1240,11 +1240,11 @@ static void ParseShaderFile( const char *filename ){
 
 				/* ignore bogus paths */
 				if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
-					strcpy( si->skyParmsImageBase, token );
+					si->skyParmsImageBase = token;
 
 					/* use top image as sky light image */
 					if ( strEmpty( si->lightImagePath ) ) {
-						sprintf( si->lightImagePath, "%s_up.tga", si->skyParmsImageBase );
+						sprintf( si->lightImagePath, "%s_up.tga", si->skyParmsImageBase.c_str() );
 					}
 				}
 
