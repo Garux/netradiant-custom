@@ -787,7 +787,6 @@ byte GetShaderIndexForPoint( indexMap_t *im, vec3_t eMins, vec3_t eMaxs, vec3_t 
 shaderInfo_t *GetIndexedShader( shaderInfo_t *parent, indexMap_t *im, int numPoints, byte *shaderIndexes ){
 	int i;
 	byte minShaderIndex, maxShaderIndex;
-	char shader[ MAX_QPATH ];
 	shaderInfo_t    *si;
 
 
@@ -821,16 +820,10 @@ shaderInfo_t *GetIndexedShader( shaderInfo_t *parent, indexMap_t *im, int numPoi
 		}
 	}
 
-	/* make a shader name */
-	if ( minShaderIndex == maxShaderIndex ) {
-		sprintf( shader, "textures/%s_%d", im->shader, maxShaderIndex );
-	}
-	else{
-		sprintf( shader, "textures/%s_%dto%d", im->shader, minShaderIndex, maxShaderIndex );
-	}
-
 	/* get the shader */
-	si = ShaderInfoForShader( shader );
+	si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )?
+	                            String64()( "textures/", im->shader, '_', int(maxShaderIndex) ):
+	                            String64()( "textures/", im->shader, '_', int(minShaderIndex), "to", int(maxShaderIndex) ) );
 
 	/* inherit a few things from parent shader */
 	if ( parent->globalTexture ) {

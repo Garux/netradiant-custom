@@ -52,7 +52,7 @@ public:
 	}
 
 	StringFixedSize& operator=( const char* string ){
-		return (*this)( string );
+		return operator()( string );
 	}
 
 	template<typename ... Args>
