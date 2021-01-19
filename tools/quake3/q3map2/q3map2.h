@@ -2209,7 +2209,7 @@ Q_EXTERN bool nosort;
 Q_EXTERN bool saveprt;
 Q_EXTERN bool hint;             /* ydnar */
 Q_EXTERN char inbase[ MAX_QPATH ];
-Q_EXTERN char globalCelShader[ MAX_QPATH ];
+Q_EXTERN String64 globalCelShader;
 
 Q_EXTERN float farPlaneDist Q_ASSIGN( 0.0f );                /* rr2do2, rf, mre, ydnar all contributed to this one... */
 Q_EXTERN int farPlaneDistMode Q_ASSIGN( 0 );

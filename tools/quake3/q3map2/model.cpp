@@ -1479,12 +1479,10 @@ void AddTriangleModels( entity_t *eparent ){
 		shaderInfo_t *celShader;
 		if( ENT_READKV( &value, e, "_celshader" ) ||
 			ENT_READKV( &value, &entities[ 0 ], "_celshader" ) ){
-			char shader[ MAX_QPATH ];
-			sprintf( shader, "textures/%s", value );
-			celShader = ShaderInfoForShader( shader );
+			celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		}
 		else{
-			celShader = !strEmpty( globalCelShader ) ? ShaderInfoForShader( globalCelShader ) : NULL;
+			celShader = globalCelShader.empty() ? NULL : ShaderInfoForShader( globalCelShader );
 		}
 
 		/* jal : entity based _samplesize */

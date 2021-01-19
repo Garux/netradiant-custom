@@ -1794,13 +1794,11 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	const char *value;
 	if( ENT_READKV( &value, mapEnt, "_celshader" ) ||
 		ENT_READKV( &value, &entities[ 0 ], "_celshader" ) ){
-		char shader[ MAX_QPATH ];
-		sprintf( shader, "textures/%s", value );
-		celShader = ShaderInfoForShader( shader );
+		celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader.c_str() );
 	}
 	else{
-		celShader = !strEmpty( globalCelShader ) ? ShaderInfoForShader( globalCelShader ) : NULL;
+		celShader = globalCelShader.empty() ? NULL : ShaderInfoForShader( globalCelShader );
 	}
 
 	/* jal : entity based _shadeangle */

@@ -720,7 +720,6 @@ int BSPMain( int argc, char **argv ){
 	numMapDrawSurfs = 0;
 
 	strClear( tempSource );
-	strClear( globalCelShader );
 
 	/* set standard game flags */
 	maxSurfaceVerts = game->maxSurfaceVerts;
@@ -881,13 +880,13 @@ int BSPMain( int argc, char **argv ){
 		}
 		else if ( strEqual( argv[ i ], "-celshader" ) ) {
 			++i;
-			if ( argv[i][0] ) {
-				sprintf( globalCelShader, "textures/%s", argv[ i ] );
+			if ( !strEmpty( argv[ i ] ) ) {
+				globalCelShader( "textures/", argv[ i ] );
 			}
 			else{
-				*globalCelShader = 0;
+				globalCelShader.clear();
 			}
-			Sys_Printf( "Global cel shader set to \"%s\"\n", globalCelShader );
+			Sys_Printf( "Global cel shader set to \"%s\"\n", globalCelShader.c_str() );
 		}
 		else if ( strEqual( argv[ i ], "-meta" ) ) {
 			Sys_Printf( "Creating meta surfaces from brush faces\n" );
