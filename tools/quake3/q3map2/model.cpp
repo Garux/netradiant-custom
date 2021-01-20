@@ -224,7 +224,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	byte                *color;
 	picoIndex_t         *indexes;
 	skinfile_t          *sf, *sf2;
-	char skinfilename[ MAX_QPATH ];
 	char                *skinfilecontent;
 	int skinfilesize;
 	char                *skinfileptr, *skinfilenextptr;
@@ -246,14 +245,12 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	}
 
 	/* load skin file */
-	snprintf( skinfilename, sizeof( skinfilename ), "%s_%d.skin", name, skin );
-	skinfilename[sizeof( skinfilename ) - 1] = 0;
-	skinfilesize = vfsLoadFile( skinfilename, (void**) &skinfilecontent, 0 );
+	auto skinfilename = StringOutputStream(99)( StringRange( name, path_get_filename_base_end( name ) ), '_', skin, ".skin" );
+	skinfilesize = vfsLoadFile( skinfilename.c_str(), (void**) &skinfilecontent, 0 );
 	if ( skinfilesize < 0 && skin != 0 ) {
 		/* fallback to skin 0 if invalid */
-		snprintf( skinfilename, sizeof( skinfilename ), "%s_0.skin", name );
-		skinfilename[sizeof( skinfilename ) - 1] = 0;
-		skinfilesize = vfsLoadFile( skinfilename, (void**) &skinfilecontent, 0 );
+		skinfilename( StringRange( name, path_get_filename_base_end( name ) ), "_0.skin" );
+		skinfilesize = vfsLoadFile( skinfilename.c_str(), (void**) &skinfilecontent, 0 );
 		if ( skinfilesize >= 0 ) {
 			Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
 		}

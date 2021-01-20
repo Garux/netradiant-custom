@@ -112,6 +112,14 @@ std::size_t write( const char* buffer, std::size_t length ){
 	return length;
 }
 
+template<typename ... Args>
+StringOutputStream& operator()( const Args& ... args ){
+	clear();
+	using expander = int[];
+	(void)expander{ 0, ( (void)( *this << args ), 0 ) ... };
+	return *this;
+}
+
 iterator begin(){
 	return m_string.begin();
 }

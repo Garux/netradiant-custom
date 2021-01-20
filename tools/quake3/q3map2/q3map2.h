@@ -85,6 +85,7 @@
 #include "md4.h"
 
 #include "stringfixedsize.h"
+#include "stream/stringstream.h"
 
 #include <stddef.h>
 #include <stdlib.h>
