@@ -738,9 +738,6 @@ int BSPMain( int argc, char **argv ){
 		else if ( strEqual( argv[ i ], "-tempname" ) ) {
 			strcpy( tempSource, argv[ ++i ] );
 		}
-		else if ( strEqual( argv[ i ], "-tmpout" ) ) {
-			strcpy( outbase, "/tmp" );
-		}
 		else if ( strEqual( argv[ i ],  "-nowater" ) ) {
 			Sys_Printf( "Disabling water\n" );
 			nowater = true;

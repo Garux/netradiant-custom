@@ -136,7 +136,6 @@ void HelpBsp()
 		{"-sRGBtex", "Treat textures as sRGB colorspace"},
 		{"-tempname <filename.map>", "Read the MAP file from the given file name"},
 		{"-texrange <N>", "Limit per-surface texture range to the given number of units, and subdivide surfaces like with `q3map_tessSize` if this is not met"},
-		{"-tmpout", "Write the BSP file to /tmp"},
 		{"-verboseentities", "Enable `-v` only for map entities, not for the world"},
 	};
 	HelpOptions("BSP Stage", 0, 80, bsp, sizeof(bsp)/sizeof(struct HelpOption));
@@ -154,8 +153,6 @@ void HelpVis()
 		{"-passageOnly", "Just use PassageFlow vis (usually less fps)"},
 		{"-prtfile <filename.prt>", "Portal file to read"},
 		{"-saveprt", "Keep the Portal file after running vis (so you can run vis again)"},
-		{"-tmpin", "Use /tmp folder for input"},
-		{"-tmpout", "Use /tmp folder for output"},
 		{"-v -v", "Extra verbose mode for cluster debug"}, // q3map2 common takes first -v
 	};
 	HelpOptions("VIS Stage", 0, 80, vis, sizeof(vis)/sizeof(struct HelpOption));

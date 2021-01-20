@@ -2124,7 +2124,6 @@ Q_EXTERN char EnginePath[ 1024 ];
 
 Q_EXTERN char name[ 1024 ];
 Q_EXTERN char source[ 1024 ];
-Q_EXTERN char outbase[ 32 ];
 
 Q_EXTERN int sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );          /* lightmap sample size in units */
 Q_EXTERN int minSampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE );   /* minimum sample size to use at all */
@@ -2209,7 +2208,6 @@ Q_EXTERN bool mergevisportals;
 Q_EXTERN bool nosort;
 Q_EXTERN bool saveprt;
 Q_EXTERN bool hint;             /* ydnar */
-Q_EXTERN char inbase[ MAX_QPATH ];
 Q_EXTERN String64 globalCelShader;
 
 Q_EXTERN float farPlaneDist Q_ASSIGN( 0.0f );                /* rr2do2, rf, mre, ydnar all contributed to this one... */

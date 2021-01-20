@@ -1123,14 +1123,6 @@ int VisMain( int argc, char **argv ){
 			debugCluster = true;
 			Sys_Printf( "Extra verbose mode enabled\n" );
 		}
-		else if ( strEqual( argv[i], "-tmpin" ) ) {
-			strcpy( inbase, "/tmp" );
-		}
-		else if ( strEqual( argv[i], "-tmpout" ) ) {
-			strcpy( outbase, "/tmp" );
-		}
-
-
 		/* ydnar: -hint to merge all but hint portals */
 		else if ( strEqual( argv[ i ], "-hint" ) ) {
 			Sys_Printf( "hint = true\n" );
@@ -1150,13 +1142,13 @@ int VisMain( int argc, char **argv ){
 
 
 	/* load the bsp */
-	sprintf( source, "%s%s", inbase, ExpandArg( argv[ i ] ) );
+	strcpy( source, ExpandArg( argv[ i ] ) );
 	path_set_extension( source, ".bsp" );
 	Sys_Printf( "Loading %s\n", source );
 	LoadBSPFile( source );
 
 	/* load the portal file */
-	sprintf( portalfile, "%s%s", inbase, ExpandArg( argv[ i ] ) );
+	strcpy( portalfile, ExpandArg( argv[ i ] ) );
 	path_set_extension( portalfile, ".prt" );
 	Sys_Printf( "Loading %s\n", portalfile );
 	LoadPortals( portalfile );
