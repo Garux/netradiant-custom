@@ -210,7 +210,7 @@ picoModel_t *LoadModel( const char *name, int frame ){
    adds a picomodel into the bsp
  */
 
-void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
+void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
 	int i, j, s, k, numSurfaces;
 	m4x4_t identity, nTransform;
 	picoModel_t         *model;
@@ -223,7 +223,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 	picoVec_t           *xyz, *normal, *st;
 	byte                *color;
 	picoIndex_t         *indexes;
-	skinfile_t          *sf, *sf2;
 	char                *skinfilecontent;
 	int skinfilesize;
 	char                *skinfileptr, *skinfilenextptr;
@@ -255,7 +254,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );
 		}
 	}
-	sf = NULL;
+	std::list<remap_t> skins;
 	if ( skinfilesize >= 0 ) {
 		Sys_Printf( "Using skin %d of %s\n", skin, name );
 		for ( skinfileptr = skinfilecontent; !strEmpty( skinfileptr ); skinfileptr = skinfilenextptr )
@@ -279,23 +278,21 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 			}
 
 			/* create new item */
-			sf2 = sf;
-			sf = safe_malloc( sizeof( *sf ) );
-			sf->next = sf2;
+			remap_t skin;
 
-			sprintf( format, "replace %%%ds %%%ds", (int)sizeof( sf->name ) - 1, (int)sizeof( sf->to ) - 1 );
-			if ( sscanf( skinfileptr, format, sf->name, sf->to ) == 2 ) {
+			sprintf( format, "replace %%%ds %%%ds", (int)sizeof( skin.from ) - 1, (int)sizeof( skin.to ) - 1 );
+			if ( sscanf( skinfileptr, format, skin.from, skin.to ) == 2 ) {
+				skins.push_back( skin );
 				continue;
 			}
-			sprintf( format, " %%%d[^,  ] ,%%%ds", (int)sizeof( sf->name ) - 1, (int)sizeof( sf->to ) - 1 );
-			if ( sscanf( skinfileptr, format, sf->name, sf->to ) == 2 ) {
+			sprintf( format, " %%%d[^,  ] ,%%%ds", (int)sizeof( skin.from ) - 1, (int)sizeof( skin.to ) - 1 );
+			if ( sscanf( skinfileptr, format, skin.from, skin.to ) == 2 ) {
+				skins.push_back( skin );
 				continue;
 			}
 
-			/* invalid input line -> discard sf struct */
+			/* invalid input line -> discard skin struct */
 			Sys_Printf( "Discarding skin directive in %s: %s\n", skinfilename, skinfileptr );
-			free( sf );
-			sf = sf2;
 		}
 		free( skinfilecontent );
 	}
@@ -350,13 +347,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		}
 
 		/* handle .skin file */
-		if ( sf ) {
+		if ( !skins.empty() ) {
 			picoShaderName = NULL;
-			for ( sf2 = sf; sf2 != NULL; sf2 = sf2->next )
+			for( const auto& skin : skins )
 			{
-				if ( striEqual( surface->name, sf2->name ) ) {
-					Sys_FPrintf( SYS_VRB, "Skin file: mapping %s to %s\n", surface->name, sf2->to );
-					picoShaderName = sf2->to;
+				if ( striEqual( surface->name, skin.from ) ) {
+					Sys_FPrintf( SYS_VRB, "Skin file: mapping %s to %s\n", surface->name, skin.to );
+					picoShaderName = skin.to;
 					break;
 				}
 			}
@@ -367,17 +364,17 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap
 		}
 
 		/* handle shader remapping */
-		{
+		if( remaps != NULL ){
 			const char* to = NULL;
 			size_t fromlen = 0;
-			for ( remap_t *rm = remap; rm != NULL; rm = rm->next )
+			for( const auto& rm : *remaps )
 			{
-				if ( strEqual( rm->from, "*" ) && fromlen == 0 ) { // only globbing, if no respective match
-					to = rm->to;
+				if ( strEqual( rm.from, "*" ) && fromlen == 0 ) { // only globbing, if no respective match
+					to = rm.to;
 				}
-				else if( striEqualSuffix( picoShaderName, rm->from ) && strlen( rm->from ) > fromlen ){ // longer match has priority
-					to = rm->to;
-					fromlen = strlen( rm->from );
+				else if( striEqualSuffix( picoShaderName, rm.from ) && strlen( rm.from ) > fromlen ){ // longer match has priority
+					to = rm.to;
+					fromlen = strlen( rm.from );
 				}
 			}
 			if( to != NULL ){
@@ -1427,45 +1424,39 @@ void AddTriangleModels( entity_t *eparent ){
 		m4x4_pivoted_transform_by_vec3( transform, origin, angles, eXYZ, scale, vec3_origin );
 
 		/* get shader remappings */
-		remap_t *remap = NULL, *remap2;
+		std::list<remap_t> remaps;
 		for ( epair_t *ep = e->epairs; ep != NULL; ep = ep->next )
 		{
 			/* look for keys prefixed with "_remap" */
 			if ( !strEmptyOrNull( ep->key ) && !strEmptyOrNull( ep->value ) &&
 				 striEqualPrefix( ep->key, "_remap" ) ) {
 				/* create new remapping */
-				remap2 = remap;
-				remap = safe_malloc( sizeof( *remap ) );
-				remap->next = remap2;
-				strcpy( remap->from, ep->value );
+				remap_t remap;
+				strcpy( remap.from, ep->value );
 
 				/* split the string */
-				char *split = strchr( remap->from, ';' );
+				char *split = strchr( remap.from, ';' );
 				if ( split == NULL ) {
-					Sys_Warning( "Shader _remap key found in misc_model without a ; character: '%s'\n", remap->from );
+					Sys_Warning( "Shader _remap key found in misc_model without a ; character: '%s'\n", remap.from );
+					continue;
 				}
-				else if( split == remap->from ){
-					Sys_Warning( "_remap FROM is empty in '%s'\n", remap->from );
-					split = NULL;
+				else if( split == remap.from ){
+					Sys_Warning( "_remap FROM is empty in '%s'\n", remap.from );
+					continue;
 				}
 				else if( strEmpty( split + 1 ) ){
-					Sys_Warning( "_remap TO is empty in '%s'\n", remap->from );
-					split = NULL;
+					Sys_Warning( "_remap TO is empty in '%s'\n", remap.from );
+					continue;
 				}
-				else if( strlen( split + 1 ) >= sizeof( remap->to ) ){
-					Sys_Warning( "_remap TO is too long in '%s'\n", remap->from );
-					split = NULL;
-				}
-
-				if ( split == NULL ) {
-					free( remap );
-					remap = remap2;
+				else if( strlen( split + 1 ) >= sizeof( remap.to ) ){
+					Sys_Warning( "_remap TO is too long in '%s'\n", remap.from );
 					continue;
 				}
 
 				/* store the split */
 				strClear( split );
-				strcpy( remap->to, ( split + 1 ) );
+				strcpy( remap.to, ( split + 1 ) );
+				remaps.push_back( remap );
 
 				/* note it */
 				//%	Sys_FPrintf( SYS_VRB, "Remapping %s to %s\n", remap->from, remap->to );
@@ -1512,15 +1503,7 @@ void AddTriangleModels( entity_t *eparent ){
 
 
 		/* insert the model */
-		InsertModel( model, skin, frame, transform, remap, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
-
-		/* free shader remappings */
-		while ( remap != NULL )
-		{
-			remap2 = remap->next;
-			free( remap );
-			remap = remap2;
-		}
+		InsertModel( model, skin, frame, transform, &remaps, celShader, mapEntityNum, castShadows, recvShadows, spawnFlags, lightmapScale, lightmapSampleSize, shadeAngle, clipDepth );
 	}
 
 }

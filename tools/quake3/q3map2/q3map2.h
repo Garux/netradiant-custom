@@ -86,6 +86,7 @@
 
 #include "stringfixedsize.h"
 #include "stream/stringstream.h"
+#include <list>
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -638,19 +639,10 @@ foliageInstance_t;
 
 typedef struct remap_s
 {
-	struct remap_s      *next;
 	char from[ 1024 ];
 	char to[ MAX_QPATH ];
 }
 remap_t;
-
-typedef struct skinfile_s
-{
-	struct skinfile_s   *next;
-	char name[ 1024 ];
-	char to[ MAX_QPATH ];
-}
-skinfile_t;
 
 
 /* wingdi.h hack, it's the same: 0 */
@@ -1679,7 +1671,7 @@ void                        PicoPrintFunc( int level, const char *str );
 void                        PicoLoadFileFunc( const char *name, byte **buffer, int *bufSize );
 picoModel_t                 *FindModel( const char *name, int frame );
 picoModel_t                 *LoadModel( const char *name, int frame );
-void                        InsertModel( const char *name, int skin, int frame, m4x4_t transform, remap_t *remap, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
+void                        InsertModel( const char *name, int skin, int frame, m4x4_t transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth );
 void                        AddTriangleModels( entity_t *e );
 
 
