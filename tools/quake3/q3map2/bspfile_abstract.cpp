@@ -164,7 +164,7 @@ void SwapBSPFile( void ){
 	{
 		if ( doingBSP ){
 			si = ShaderInfoForShader( bspShaders[ i ].shader );
-			if ( si->remapShader && si->remapShader[ 0 ] ) {
+			if ( !strEmptyOrNull( si->remapShader ) ) {
 				strcpy( bspShaders[ i ].shader, si->remapShader );
 			}
 		}

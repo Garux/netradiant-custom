@@ -116,6 +116,8 @@
 #define Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX      1
 
 /* general */
+// actual shader name length limit depends on game engine and name use manner (plain texture/custom shader)
+// now checking it for strlen() < MAX_QPATH (so it's null terminated), though this check may be not enough/too much, depending on the use case
 #define MAX_QPATH               64
 
 #define MAX_IMAGES              512

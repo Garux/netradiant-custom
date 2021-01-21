@@ -829,7 +829,6 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 	int i;
 	int deprecationDepth;
 	shaderInfo_t    *si;
-	char shader[ MAX_QPATH ];
 
 	/* dummy check */
 	if ( strEmptyOrNull( shaderName ) ) {
@@ -838,11 +837,7 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 	}
 
 	/* strip off extension */
-	// actual shader name length limit depends on game engine and name use manner (plain texture/custom shader)
-	// so this check may be not enough/too much, depending on the use case
-	if( strcpyQ( shader, shaderName, MAX_QPATH ) >= MAX_QPATH )
-		Error( "Shader name too long: %s", shaderName );
-	StripExtension( shader );
+	auto shader = String64()( PathExtensionless( shaderName ) );
 
 	/* search for it */
 	deprecationDepth = 0;
@@ -853,12 +848,11 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 			/* check if shader is deprecated */
 			if ( deprecationDepth < MAX_SHADER_DEPRECATION_DEPTH && !strEmptyOrNull( si->deprecateShader ) ) {
 				/* override name */
-				strcpy( shader, si->deprecateShader );
-				StripExtension( shader );
+				shader( PathExtensionless( si->deprecateShader ) );
 				/* increase deprecation depth */
 				deprecationDepth++;
 				if ( deprecationDepth == MAX_SHADER_DEPRECATION_DEPTH ) {
-					Sys_Warning( "Max deprecation depth of %i is reached on shader '%s'\n", MAX_SHADER_DEPRECATION_DEPTH, shader );
+					Sys_Warning( "Max deprecation depth of %i is reached on shader '%s'\n", MAX_SHADER_DEPRECATION_DEPTH, shader.c_str() );
 				}
 				/* search again from beginning */
 				i = -1;
@@ -878,7 +872,7 @@ shaderInfo_t *ShaderInfoForShader( const char *shaderName ){
 
 	/* allocate a default shader */
 	si = AllocShaderInfo();
-	si->shader << shader;
+	si->shader = shader;
 	LoadShaderImages( si );
 	FinishShader( si );
 

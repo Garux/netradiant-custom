@@ -835,7 +835,7 @@ for ( i = 0; i < brush->numSides; i++ )
 static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, vec3_t origin ){
 	int x, y;
 	bspShader_t     *shader;
-	char            *texture;
+	const char      *texture;
 	bspDrawVert_t   *dv;
 	vec3_t xyz;
 
