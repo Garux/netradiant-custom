@@ -46,6 +46,8 @@
 #include <time.h>
 #include <stdarg.h>
 
+#include "os/path.h"
+
 #ifdef _MSC_VER
 
 #pragma intrinsic( memset, memcpy )
@@ -185,18 +187,8 @@ void    SaveFile( const char *filename, const void *buffer, int count );
 bool    FileExists( const char *filename );
 
 
-static inline bool path_separator( const char c ){
-	return c == '/' || c == '\\';
-}
-bool path_is_absolute( const char* path );
 const char* path_get_last_separator( const char* path );
       char* path_get_last_separator(       char* path );
-const char* path_get_filename_start( const char* path );
-      char* path_get_filename_start(       char* path );
-const char* path_get_filename_base_end( const char* path );
-      char* path_get_filename_base_end(       char* path );
-const char* path_get_extension( const char* path );
-      char* path_get_extension(        char* path );
 void path_add_slash( char *path );
 void path_set_extension( char *path, const char *extension );
 void    DefaultExtension( char *path, const char *extension );

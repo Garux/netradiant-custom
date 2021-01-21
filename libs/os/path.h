@@ -113,32 +113,38 @@ inline const char* path_remove_directory( const char* path ){
 	return "";
 }
 
+inline bool path_separator( const char c ){
+	return c == '/' || c == '\\';
+}
+
 /// \brief Returns a pointer to the first character of the filename component of \p path.
-/// O(n)
 inline const char* path_get_filename_start( const char* path ){
-	{
-		const char* last_forward_slash = strrchr( path, '/' );
-		if ( last_forward_slash != 0 ) {
-			return last_forward_slash + 1;
-		}
-	}
+	const char *src = path + string_length( path );
 
-	// not strictly necessary,since paths should not contain '\'
-	{
-		const char* last_backward_slash = strrchr( path, '\\' );
-		if ( last_backward_slash != 0 ) {
-			return last_backward_slash + 1;
-		}
+	while ( src != path && !path_separator( src[-1] ) ){
+		--src;
 	}
+	return src;
+}
 
-	return path;
+inline char* path_get_filename_start( char* path ){
+	return const_cast<char*>( path_get_filename_start( const_cast<const char*>( path ) ) );
 }
 
 /// \brief Returns a pointer to the character after the end of the filename component of \p path - either the extension separator or the terminating null character.
-/// O(n)
 inline const char* path_get_filename_base_end( const char* path ){
-	const char* last_period = strrchr( path_get_filename_start( path ), '.' );
-	return ( last_period != 0 ) ? last_period : path + string_length( path );
+	const char *end = path + string_length( path );
+	const char *src = end;
+
+	while ( src != path && !path_separator( *--src ) ){
+		if( *src == '.' )
+			return src;
+	}
+	return end;
+}
+
+inline char* path_get_filename_base_end( char* path ){
+	return const_cast<char*>( path_get_filename_base_end( const_cast<const char*>( path ) ) );
 }
 
 /// \brief Returns the length of the filename component (not including extension) of \p path.
@@ -157,14 +163,20 @@ inline const char* path_make_relative( const char* path, const char* base ){
 	return path;
 }
 
-/// \brief Returns a pointer to the first character of the file extension of \p path, or "" if not found.
-/// O(n)
+/// \brief Returns a pointer to the first character of the file extension of \p path, or to terminating null character if not found.
 inline const char* path_get_extension( const char* path ){
-	const char* last_period = strrchr( path_get_filename_start( path ), '.' );
-	if ( last_period != 0 ) {
-		return ++last_period;
+	const char *end = path + string_length( path );
+	const char *src = end;
+
+	while ( src != path && !path_separator( *--src ) ){
+		if( *src == '.' )
+			return src + 1;
 	}
-	return "";
+	return end;
+}
+
+inline char* path_get_extension( char* path ){
+	return const_cast<char*>( path_get_extension( const_cast<const char*>( path ) ) );
 }
 
 /// \brief Returns true if \p extension is of the same type as \p other.

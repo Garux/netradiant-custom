@@ -564,16 +564,6 @@ void    SaveFile( const char *filename, const void *buffer, int count ){
    ====================
  */
 
-/// \brief Returns true if \p path is a fully qualified file-system path.
-bool path_is_absolute( const char* path ){
-#if defined( WIN32 )
-	return path[0] == '/'
-		   || ( path[0] != '\0' && path[1] == ':' ); // local drive
-#elif defined( POSIX )
-	return path[0] == '/';
-#endif
-}
-
 /// \brief Returns a pointer to the last slash or to terminating null character if not found.
 const char* path_get_last_separator( const char* path ){
 	const char *end = path + strlen( path );
@@ -588,52 +578,6 @@ const char* path_get_last_separator( const char* path ){
 
 char* path_get_last_separator( char* path ){
 	return const_cast<char*>( path_get_last_separator( const_cast<const char*>( path ) ) );
-}
-
-/// \brief Returns a pointer to the first character of the filename component of \p path.
-const char* path_get_filename_start( const char* path ){
-	const char *src = path + strlen( path );
-
-	while ( src != path && !path_separator( src[-1] ) ){
-		--src;
-	}
-	return src;
-}
-
-char* path_get_filename_start( char* path ){
-	return const_cast<char*>( path_get_filename_start( const_cast<const char*>( path ) ) );
-}
-
-/// \brief Returns a pointer to the character after the end of the filename component of \p path - either the extension separator or the terminating null character.
-const char* path_get_filename_base_end( const char* path ){
-	const char *end = path + strlen( path );
-	const char *src = end;
-
-	while ( src != path && !path_separator( *--src ) ){
-		if( *src == '.' )
-			return src;
-	}
-	return end;
-}
-
-char* path_get_filename_base_end( char* path ){
-	return const_cast<char*>( path_get_filename_base_end( const_cast<const char*>( path ) ) );
-}
-
-/// \brief Returns a pointer to the first character of the file extension of \p path, or to terminating null character if not found.
-const char* path_get_extension( const char* path ){
-	const char *end = path + strlen( path );
-	const char *src = end;
-
-	while ( src != path && !path_separator( *--src ) ){
-		if( *src == '.' )
-			return src + 1;
-	}
-	return end;
-}
-
-char* path_get_extension( char* path ){
-	return const_cast<char*>( path_get_extension( const_cast<const char*>( path ) ) );
 }
 
 /// \brief Appends trailing slash, unless \p path is empty or already has slash.
