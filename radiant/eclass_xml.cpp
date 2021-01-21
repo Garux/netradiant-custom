@@ -293,9 +293,7 @@ ClassImporter( EntityClassCollector& collector, ListAttributeTypes& listTypes, c
 
 	const char* model = element.attribute( "model" );
 	if ( !string_empty( model ) ) {
-		StringOutputStream buffer( 256 );
-		buffer << PathCleaned( model );
-		m_eclass->m_modelpath = buffer.c_str();
+		m_eclass->m_modelpath = StringOutputStream( 256 )( PathCleaned( model ) ).c_str();
 	}
 
 	const char* type = element.name();

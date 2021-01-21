@@ -53,31 +53,24 @@ void Map_Snapshot(){
 	// 1. make sure the snapshot directory exists (create it if it doesn't)
 	// 2. find out what the lastest save is based on number
 	// 3. inc that and save the map
-	const char* path = Map_Name( g_map );
-	const char* name = path_get_filename_start( path );
-
-	StringOutputStream snapshotsDir( 256 );
-	snapshotsDir << StringRange( path, name ) << "snapshots";
+	const char* mapname = Map_Name( g_map );
+	const auto snapshotsDir = StringOutputStream( 256 )( PathFilenameless( mapname ), "snapshots" );
 
 	if ( file_exists( snapshotsDir.c_str() ) || Q_mkdir( snapshotsDir.c_str() ) ) {
 		std::size_t lSize = 0;
-		StringOutputStream strNewPath( 256 );
-		strNewPath << snapshotsDir.c_str() << '/' << name;
+		const auto strNewPath = StringOutputStream( 256 )( snapshotsDir.c_str(), '/', mapname );
+		const char* ext = path_get_filename_base_end( strNewPath.c_str() );
 
 		StringOutputStream snapshotFilename( 256 );
-
 		for ( int nCount = 0; ; ++nCount )
 		{
 			// The original map's filename is "<path>/<name>.<ext>"
 			// The snapshot's filename will be "<path>/snapshots/<name>.<count>.<ext>"
-			const char* end = path_get_filename_base_end( strNewPath.c_str() );
-			snapshotFilename << StringRange( strNewPath.c_str(), end ) << '.' << nCount << end;
+			snapshotFilename( StringRange( strNewPath.c_str(), ext ), '.', nCount, ext );
 
 			if ( !DoesFileExist( snapshotFilename.c_str(), lSize ) ) {
 				break;
 			}
-
-			snapshotFilename.clear();
 		}
 
 		// save in the next available slot
@@ -159,8 +152,7 @@ void QE_CheckAutoSave( void ){
 				{
 					const char* name = Map_Name( g_map );
 					const char* extension = path_get_filename_base_end( name );
-					StringOutputStream autosave( 256 );
-					autosave << StringRange( name, extension ) << ".autosave" << extension;
+					const auto autosave = StringOutputStream( 256 )( StringRange( name, extension ), ".autosave", extension );
 					Map_SaveFile( autosave.c_str() );
 				}
 			}

@@ -232,9 +232,7 @@ typedef CopiedString TextureExpression;
 //++timo FIXME: we need to put code somewhere to detect when two shaders that are case insensitive equal are present
 template<typename StringType>
 void parseTextureName( StringType& name, const char* token ){
-	StringOutputStream cleaned( 256 );
-	cleaned << PathCleaned( token );
-	name = CopiedString( StringRange( cleaned.c_str(), path_get_filename_base_end( cleaned.c_str() ) ) ).c_str(); // remove extension
+	name = StringOutputStream( 256 )( PathCleaned( PathExtensionless( token ) ) ).c_str(); // remove extension
 }
 
 bool Tokeniser_parseTextureName( Tokeniser& tokeniser, TextureExpression& name ){
@@ -1610,12 +1608,9 @@ void ShaderList_addFromArchive( const char *archivename ){
 		return;
 	}
 
-	StringOutputStream shaderlist( 256 );
-	shaderlist << DirectoryCleaned( shaderpath ) << "shaderlist.txt";
-
 	Archive *archive = GlobalFileSystem().getArchive( archivename, false );
 	if ( archive ) {
-		ArchiveTextFile *file = archive->openTextFile( shaderlist.c_str() );
+		ArchiveTextFile *file = archive->openTextFile( StringOutputStream( 64 )( DirectoryCleaned( shaderpath ), "shaderlist.txt" ).c_str() );
 		if ( file ) {
 			globalOutputStream() << "Found shaderlist.txt in " << archivename << "\n";
 			BuildShaderList( file->getInputStream() );
@@ -1658,8 +1653,7 @@ void Shaders_Load(){
 
 	const char* shaderPath = GlobalRadiant().getGameDescriptionKeyValue( "shaderpath" );
 	if ( !string_empty( shaderPath ) ) {
-		StringOutputStream path( 256 );
-		path << DirectoryCleaned( shaderPath );
+		const auto path = StringOutputStream( 64 )( DirectoryCleaned( shaderPath ) );
 
 		if ( g_useShaderList ) {
 			// preload shader files that have been listed in shaderlist.txt

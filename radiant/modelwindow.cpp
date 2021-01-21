@@ -1156,8 +1156,7 @@ public:
 	// parse string of format *pathToLoad/depth*path2ToLoad/depth*
 	// */depth* for root path
 	ModelFolders( const char* pathsString ){
-		StringOutputStream str( 128 );
-		str << PathCleaned( pathsString );
+		const auto str = StringOutputStream( 128 )( PathCleaned( pathsString ) );
 
 		const char* start = str.c_str();
 		while( 1 ){

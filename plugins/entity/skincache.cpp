@@ -38,9 +38,7 @@
 #include "stringio.h"
 
 void parseShaderName( CopiedString& name, const char* token ){
-	StringOutputStream cleaned( 256 );
-	cleaned << PathCleaned( token );
-	name = cleaned.c_str();
+	name = StringOutputStream( 256 )( PathCleaned( token ) ).c_str();
 }
 
 class Doom3ModelSkin

@@ -1373,8 +1373,7 @@ void SurfaceInspector::Update(){
    ===============
  */
 void SurfaceInspector::ApplyShader(){
-	StringOutputStream name( 256 );
-	name << GlobalTexturePrefix_get() << PathCleaned( gtk_entry_get_text( m_texture ) );
+	const auto name = StringOutputStream( 256 )( GlobalTexturePrefix_get(), PathCleaned( gtk_entry_get_text( m_texture ) ) );
 
 	// TTimo: detect and refuse invalid texture names (at least the ones with spaces)
 	if ( !texdef_name_valid( name.c_str() ) ) {

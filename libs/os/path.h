@@ -207,34 +207,36 @@ inline MatchFileExtension<Functor> matchFileExtension( const char* extension, co
 	return MatchFileExtension<Functor>( extension, functor );
 }
 
-class PathExtensionless
-{
-public:
-const char* m_path;
-PathExtensionless( const char* path ) : m_path( path ){
+/// \brief Returns portion of \p path without .ext part.
+inline StringRange PathExtensionless( const char *path ){
+	return StringRange( path, path_get_filename_base_end( path ) );
 }
-};
 
-/// \brief Writes \p path to \p ostream without .ext part.
-template<typename TextOutputStreamType>
-TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathExtensionless& path ){
-	ostream << StringRange( path.m_path, path_get_filename_base_end( path.m_path ) );
-	return ostream;
+/// \brief Returns portion of \p path without directory and .ext parts.
+inline StringRange PathFilename( const char *path ){
+	return StringRange( path_get_filename_start( path ), path_get_filename_base_end( path ) );
+}
+
+/// \brief Returns portion of \p path without filename part.
+inline StringRange PathFilenameless( const char *path ){
+	return StringRange( path, path_get_filename_start( path ) );
 }
 
 class PathCleaned
 {
 public:
 const char* m_path;
-PathCleaned( const char* path ) : m_path( path ){
+const char* m_end;
+PathCleaned( const char* path ) : m_path( path ), m_end( path + std::strlen( path ) ){
+}
+PathCleaned( const StringRange& range ) : m_path( range.first ), m_end( range.last ){
 }
 };
 
 /// \brief Writes \p path to \p ostream with dos-style separators replaced by unix-style separators.
 template<typename TextOutputStreamType>
 TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathCleaned& path ){
-	const char* i = path.m_path;
-	for (; *i != '\0'; ++i )
+	for ( const char* i = path.m_path; i != path.m_end; ++i )
 	{
 		if ( *i == '\\' ) {
 			ostream << '/';

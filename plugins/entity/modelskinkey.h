@@ -31,9 +31,7 @@
 #include "traverselib.h"
 
 inline void parseTextureName( CopiedString& name, const char* token ){
-	StringOutputStream cleaned( 256 );
-	cleaned << PathCleaned( token );
-	name = StringRange( cleaned.c_str(), path_get_filename_base_end( cleaned.c_str() ) ); // remove extension
+	name = StringOutputStream( 256 )( PathCleaned( PathExtensionless( token ) ) ).c_str(); // remove extension
 }
 
 class ModelSkinKey : public ModuleObserver

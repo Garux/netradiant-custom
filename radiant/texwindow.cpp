@@ -95,7 +95,7 @@ void TextureGroups_addWad( TextureGroups& groups, const char* archive ){
 #if 1
 		groups.insert( archive );
 #else
-		CopiedString archiveBaseName( path_get_filename_start( archive ), path_get_filename_base_end( archive ) );
+		CopiedString archiveBaseName( PathFilename( archive ) );
 		groups.insert( archiveBaseName );
 #endif
 	}
@@ -696,7 +696,7 @@ class LoadShaderVisitor : public Archive::Visitor
 {
 public:
 void visit( const char* name ){
-	IShader* shader = QERApp_Shader_ForName( CopiedString( StringRange( name, path_get_filename_base_end( name ) ) ).c_str() );
+	IShader* shader = QERApp_Shader_ForName( CopiedString( PathExtensionless( name ) ).c_str() );
 	shader->DecRef();
 }
 };

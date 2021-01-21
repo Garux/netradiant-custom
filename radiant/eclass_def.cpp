@@ -275,9 +275,7 @@ EntityClass *Eclass_InitFromText( const char *text ){
 	e->m_comments = text;
 
 	setSpecialLoad( e, "model=", e->m_modelpath );
-	StringOutputStream buffer( string_length( e->m_modelpath.c_str() ) );
-	buffer << PathCleaned( e->m_modelpath.c_str() );
-	e->m_modelpath = buffer.c_str();
+	e->m_modelpath = StringOutputStream( 256 )( PathCleaned( e->m_modelpath.c_str() ) ).c_str();
 
 	if ( !e->fixedsize ) {
 		EntityClass_insertAttribute( *e, "angle", EntityClassAttribute( "direction", "Direction" ) );

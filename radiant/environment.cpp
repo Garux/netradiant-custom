@@ -198,9 +198,7 @@ CopiedString g_openMapByCmd;
 void cmdMap(){
 	for ( int i = 1; i < g_argc; ++i )
 		if( extension_equal( path_get_extension( g_argv[i] ), "map" ) ){
-			StringOutputStream stream( 256 );
-			stream << PathCleaned( g_argv[i] );
-			g_openMapByCmd = stream.c_str();
+			g_openMapByCmd = StringOutputStream( 256 )( PathCleaned( g_argv[i] ) ).c_str();
 			return;
 		}
 }
@@ -257,14 +255,12 @@ void environment_init( int argc, char* argv[] ){
 		ASSERT_MESSAGE( !string_empty( app_filepath.c_str() ), "failed to deduce app path" );
 		// NOTE: we build app path with a trailing '/'
 		// it's a general convention in Radiant to have the slash at the end of directories
-		app_path = StringRange( real, path_get_filename_start( real ) );
+		app_path = PathFilenameless( real );
 	}
 
 	if ( !portable_app_setup() ) {
-		StringOutputStream home( 256 );
-		home << DirectoryCleaned( g_get_home_dir() ) << ".netradiant/";
-		Q_mkdir( home.c_str() );
-		home_path = home.c_str();
+		home_path = StringOutputStream( 256 )( DirectoryCleaned( g_get_home_dir() ), ".netradiant/" ).c_str();
+		Q_mkdir( home_path.c_str() );
 	}
 	gamedetect();
 	cmdMap();
@@ -282,10 +278,8 @@ void environment_init( int argc, char* argv[] ){
 		char filename[MAX_PATH + 1];
 		GetModuleFileName( 0, filename, MAX_PATH );
 
-		StringOutputStream stream( 256 );
-		stream << PathCleaned( filename );
-		app_filepath = stream.c_str();
-		app_path = StringRange( stream.c_str(), path_get_filename_start( stream.c_str() ) );
+		app_filepath = StringOutputStream( 256 )( PathCleaned( filename ) ).c_str();
+		app_path = PathFilenameless( app_filepath.c_str() );
 	}
 
 	if ( !portable_app_setup() ) {

@@ -184,9 +184,7 @@ void bsp_init(){
 	}
 
 	{
-		StringOutputStream name( 256 );
-		name << StringRange( path_get_filename_start( mapname ), path_get_filename_base_end( mapname ) );
-		build_set_variable( "MapName", name.c_str() );
+		build_set_variable( "MapName", StringOutputStream( 64 )( PathFilename( mapname ) ).c_str() );
 	}
 }
 
@@ -285,8 +283,7 @@ void RunBSP( const char* name ){
 	if ( g_WatchBSP_Enabled && monitor ) {
 		// grab the file name for engine running
 		const char* fullname = Map_Name( g_map );
-		StringOutputStream bspname( 64 );
-		bspname << StringRange( path_get_filename_start( fullname ), path_get_filename_base_end( fullname ) );
+		const auto bspname = StringOutputStream( 64 )( PathFilename( fullname ) );
 		BuildMonitor_Run( listener.array(), bspname.c_str() );
 	}
 	else

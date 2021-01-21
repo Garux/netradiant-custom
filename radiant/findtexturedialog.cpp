@@ -79,11 +79,8 @@ static bool g_bFindActive = true;
 namespace
 {
 void FindTextureDialog_apply(){
-	StringOutputStream find( 256 );
-	StringOutputStream replace( 256 );
-
-	find << "textures/" << g_FindTextureDialog.m_strFind.c_str();
-	replace << "textures/" << PathCleaned( g_FindTextureDialog.m_strReplace.c_str() );
+	const auto find = StringOutputStream( 256 )( "textures/", g_FindTextureDialog.m_strFind.c_str() );
+	const auto replace = StringOutputStream( 256 )( "textures/", PathCleaned( g_FindTextureDialog.m_strReplace.c_str() ) );
 	FindReplaceTextures( find.c_str(), replace.c_str(), g_FindTextureDialog.m_bSelectedOnly );
 }
 

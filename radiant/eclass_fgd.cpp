@@ -166,9 +166,7 @@ void EntityClassFGD_parseClass( Tokeniser& tokeniser, bool fixedsize, bool isBas
 		}
 		else if ( string_equal( property, "iconsprite" ) ) {
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );
-			StringOutputStream buffer( 256 );
-			buffer << PathCleaned( tokeniser.getToken() );
-			entityClass->m_modelpath = buffer.c_str();
+			entityClass->m_modelpath = StringOutputStream( 256 )( PathCleaned( tokeniser.getToken() ) ).c_str();
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, ")" ), PARSE_ERROR );
 		}
 		else if ( string_equal( property, "sprite" )
@@ -504,10 +502,7 @@ void EntityClassFGD_parse( TextInputStream& inputStream, const char* path ){
 		}
 		// hl2 below
 		else if ( string_equal( blockType, "@include" ) ) {
-			StringOutputStream includePath( 256 );
-			includePath << StringRange( path, path_get_filename_start( path ) );
-			includePath << tokeniser.getToken();
-			EntityClassFGD_loadFile( includePath.c_str() );
+			EntityClassFGD_loadFile( StringOutputStream( 256 )( PathFilenameless( path ), tokeniser.getToken() ).c_str() );
 		}
 		else if ( string_equal( blockType, "@mapsize" ) ) {
 			ASSERT_MESSAGE( EntityClassFGD_parseToken( tokeniser, "(" ), PARSE_ERROR );

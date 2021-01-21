@@ -332,8 +332,7 @@ void EnginePath_Unrealise(){
 }
 
 void setEnginePath( CopiedString& self, const char* value ){
-	StringOutputStream buffer( 256 );
-	buffer << DirectoryCleaned( value );
+	const auto buffer = StringOutputStream( 256 )( DirectoryCleaned( value ) );
 	if ( !path_equal( buffer.c_str(), self.c_str() ) ) {
 #if 0
 		while ( !ConfirmModified( "Paths Changed" ) )
@@ -3736,9 +3735,7 @@ void MainFrame_Construct(){
 #error "unknown platform"
 #endif
 		;
-		StringOutputStream path( 256 );
-		path << DirectoryCleaned( g_pGameDescription->getRequiredKeyValue( ENGINEPATH_ATTRIBUTE ) );
-		g_strEnginePath = path.c_str();
+		g_strEnginePath = StringOutputStream( 256 )( DirectoryCleaned( g_pGameDescription->getRequiredKeyValue( ENGINEPATH_ATTRIBUTE ) ) ).c_str();
 	}
 
 

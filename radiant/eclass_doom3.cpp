@@ -359,9 +359,7 @@ static bool EntityClass_parse( EntityClass& entityClass, Tokeniser& tokeniser ){
 			const char* token;
 			PARSE_RETURN_FALSE_IF_FAIL( EntityClassDoom3_parseString( tokeniser, token ) );
 			entityClass.fixedsize = true;
-			StringOutputStream buffer( 256 );
-			buffer << PathCleaned( token );
-			entityClass.m_modelpath = buffer.c_str();
+			entityClass.m_modelpath = StringOutputStream( 256 )( PathCleaned( token ) ).c_str();
 		}
 		else if ( string_equal( key, "editor_color" ) ) {
 			const char* value;
