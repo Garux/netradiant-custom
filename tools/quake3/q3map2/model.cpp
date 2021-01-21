@@ -244,11 +244,11 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 	}
 
 	/* load skin file */
-	auto skinfilename = StringOutputStream(99)( StringRange( name, path_get_filename_base_end( name ) ), '_', skin, ".skin" );
+	auto skinfilename = StringOutputStream(99)( PathExtensionless( name ), '_', skin, ".skin" );
 	skinfilesize = vfsLoadFile( skinfilename.c_str(), (void**) &skinfilecontent, 0 );
 	if ( skinfilesize < 0 && skin != 0 ) {
 		/* fallback to skin 0 if invalid */
-		skinfilename( StringRange( name, path_get_filename_base_end( name ) ), "_0.skin" );
+		skinfilename( PathExtensionless( name ), "_0.skin" );
 		skinfilesize = vfsLoadFile( skinfilename.c_str(), (void**) &skinfilecontent, 0 );
 		if ( skinfilesize >= 0 ) {
 			Sys_Printf( "Skin %d of %s does not exist, using 0 instead\n", skin, name );

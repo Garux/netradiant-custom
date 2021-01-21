@@ -173,15 +173,11 @@ void bsp_init(){
 
 	const char* mapname = Map_Name( g_map );
 	{
-		StringOutputStream name( 256 );
-		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".bsp";
-		build_set_variable( "BspFile", name.c_str() );
+		build_set_variable( "BspFile", StringOutputStream( 256 )( PathExtensionless( mapname ), ".bsp" ).c_str() );
 	}
 
 	if( g_region_active ){
-		StringOutputStream name( 256 );
-		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".reg";
-		build_set_variable( "MapFile", name.c_str() );
+		build_set_variable( "MapFile", StringOutputStream( 256 )( PathExtensionless( mapname ), ".reg" ).c_str() );
 	}
 	else{
 		build_set_variable( "MapFile", mapname );
@@ -272,9 +268,7 @@ void RunBSP( const char* name ){
 
 	if ( g_region_active ) {
 		const char* mapname = Map_Name( g_map );
-		StringOutputStream name( 256 );
-		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".reg";
-		Map_SaveRegion( name.c_str() );
+		Map_SaveRegion( StringOutputStream( 256 )( PathExtensionless( mapname ), ".reg" ).c_str() );
 	}
 
 	Pointfile_Delete();

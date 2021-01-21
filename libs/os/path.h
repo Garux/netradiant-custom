@@ -207,6 +207,21 @@ inline MatchFileExtension<Functor> matchFileExtension( const char* extension, co
 	return MatchFileExtension<Functor>( extension, functor );
 }
 
+class PathExtensionless
+{
+public:
+const char* m_path;
+PathExtensionless( const char* path ) : m_path( path ){
+}
+};
+
+/// \brief Writes \p path to \p ostream without .ext part.
+template<typename TextOutputStreamType>
+TextOutputStreamType& ostream_write( TextOutputStreamType& ostream, const PathExtensionless& path ){
+	ostream << StringRange( path.m_path, path_get_filename_base_end( path.m_path ) );
+	return ostream;
+}
+
 class PathCleaned
 {
 public:

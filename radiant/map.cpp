@@ -2351,7 +2351,7 @@ void map_autocaulk_selected(){
 	ScopeDisableScreenUpdates disableScreenUpdates( "processing", "autocaulk" );
 
 	StringOutputStream filename( 256 );
-	filename << StringRange( g_map.m_name.c_str(), path_get_filename_base_end( g_map.m_name.c_str() ) ) << "_ac.map";
+	filename << PathExtensionless( g_map.m_name.c_str() ) << "_ac.map";
 
 	{// write .map
 		const Vector3 spawn( Camera_getOrigin( *g_pParentWnd->GetCamWnd() ) );
@@ -2463,7 +2463,7 @@ void map_autocaulk_selected(){
 	CaulkMap map;
 	{ // load
 		filename.clear();
-		filename << StringRange( g_map.m_name.c_str(), path_get_filename_base_end( g_map.m_name.c_str() ) ) << "_ac.caulk";
+		filename << PathExtensionless( g_map.m_name.c_str() ) << "_ac.caulk";
 
 		TextFileInputStream file( filename.c_str() );
 		if( file.failed() ){

@@ -174,9 +174,7 @@ void CPointfile::GenerateDisplayList(){
 
 void Pointfile_Delete( void ){
 	const char* mapname = Map_Name( g_map );
-	StringOutputStream name( 256 );
-	name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".lin";
-	file_remove( name.c_str() );
+	file_remove( StringOutputStream( 256 )( PathExtensionless( mapname ), ".lin" ).c_str() );
 }
 
 
@@ -258,14 +256,14 @@ void Pointfile_Parse( CPointfile& pointfile ){
 
 	const char* mapname = Map_Name( g_map );
 	StringOutputStream name( 256 );
-	name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".lin";
+	name << PathExtensionless( mapname ) << ".lin";
 
 	size = LoadFile( name.c_str(), (void**)&data );
 	if ( size == -1 ) {
 		globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";
 		/* try .pts (q1) */
 		name.clear();
-		name << StringRange( mapname, path_get_filename_base_end( mapname ) ) << ".pts";
+		name << PathExtensionless( mapname ) << ".pts";
 		size = LoadFile( name.c_str(), (void**)&data );
 		if ( size == -1 ) {
 			globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";

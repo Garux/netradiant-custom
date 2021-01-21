@@ -740,8 +740,7 @@ void operator()( const char* name ) const {
 };
 
 void TextureDirectory_loadTexture( const char* directory, const char* texture ){
-	StringOutputStream name( 256 );
-	name << directory << StringRange( texture, path_get_filename_base_end( texture ) );
+	const auto name = StringOutputStream( 256 )( directory, PathExtensionless( texture ) );
 
 	if ( texture_name_ignore( name.c_str() ) ) {
 		return;

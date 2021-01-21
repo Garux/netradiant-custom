@@ -1384,7 +1384,7 @@ void BackgroundImage::set( const VIEWTYPE viewtype ){
 		free_tex();
 		const char *filename = background_image_dialog();
 		if( filename ){
-			const auto filename_noext = StringOutputStream( 256 )( StringRange( filename, path_get_filename_base_end( filename ) ) );
+			const auto filename_noext = StringOutputStream( 256 )( PathExtensionless( filename ) );
 			Image *image = QERApp_LoadImage( 0, filename_noext.c_str() );
 			if ( !image ) {
 				globalErrorStream() << "Could not load texture " << filename_noext.c_str() << "\n";
