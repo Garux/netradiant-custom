@@ -98,13 +98,6 @@
 
    ------------------------------------------------------------------------------- */
 
-#define MAC_STATIC_HACK         0
-#if defined( __APPLE__ ) && MAC_STATIC_HACK
-	#define MAC_STATIC          static
-#else
-	#define MAC_STATIC
-#endif
-
 /* macro version */
 #define VectorMA( a, s, b, c )  ( ( c )[ 0 ] = ( a )[ 0 ] + ( s ) * ( b )[ 0 ], ( c )[ 1 ] = ( a )[ 1 ] + ( s ) * ( b )[ 1 ], ( c )[ 2 ] = ( a )[ 2 ] + ( s ) * ( b )[ 2 ] )
 

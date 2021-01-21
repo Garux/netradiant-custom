@@ -424,10 +424,9 @@ void PatchMapDrawSurfs( entity_t *e ){
 	vec3_t bounds[ 2 ];
 	byte                    *bordering;
 
-	/* ydnar: mac os x fails with these if not static */
-	MAC_STATIC parseMesh_t  *meshes[ MAX_MAP_DRAW_SURFS ];
-	MAC_STATIC bool grouped[ MAX_MAP_DRAW_SURFS ];
-	MAC_STATIC byte group[ MAX_MAP_DRAW_SURFS ];
+	parseMesh_t  *meshes[ MAX_MAP_DRAW_SURFS ];
+	bool grouped[ MAX_MAP_DRAW_SURFS ];
+	byte group[ MAX_MAP_DRAW_SURFS ];
 
 
 	/* note it */
