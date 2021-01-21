@@ -219,7 +219,6 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 	mapDrawSurface_t    *ds;
 	bspDrawVert_t       *dv;
 	const char          *picoShaderName;
-	char shaderName[ MAX_QPATH ];
 	picoVec_t           *xyz, *normal, *st;
 	byte                *color;
 	picoIndex_t         *indexes;
@@ -385,12 +384,12 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 
 		/* shader renaming for sof2 */
 		if ( renameModelShaders ) {
-			strcpy( shaderName, picoShaderName );
+			auto shaderName = String64()( PathExtensionless( picoShaderName ) );
 			if ( spawnFlags & 1 ) {
-				path_set_extension( shaderName, "_RMG_BSP" );
+				shaderName << "_RMG_BSP";
 			}
 			else{
-				path_set_extension( shaderName, "_BSP" );
+				shaderName << "_BSP";
 			}
 			si = ShaderInfoForShader( shaderName );
 		}

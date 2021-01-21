@@ -1696,7 +1696,7 @@ mapDrawSurface_t            *DrawSurfaceForFlare( int entNum, vec3_t origin, vec
 mapDrawSurface_t            *DrawSurfaceForShader( const char *shader );
 void                        ClipSidesIntoTree( entity_t *e, tree_t *tree );
 void                        MakeDebugPortalSurfs( tree_t *tree );
-void                        MakeFogHullSurfs( entity_t *e, tree_t *tree, char *shader );
+void                        MakeFogHullSurfs( entity_t *e, tree_t *tree, const char *shader );
 void                        SubdivideFaceSurfaces( entity_t *e, tree_t *tree );
 void                        AddEntitySurfaceModels( entity_t *e );
 int                         AddSurfaceModels( mapDrawSurface_t *ds );

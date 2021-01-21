@@ -221,8 +221,6 @@ void ParsePatch( bool onlyLights ){
 	vec_t info[ 5 ];
 	int i, j, k;
 	parseMesh_t     *pm;
-	char texture[ MAX_QPATH ];
-	char shader[ MAX_QPATH ];
 	mesh_t m;
 	bspDrawVert_t   *verts;
 	epair_t         *ep;
@@ -233,9 +231,9 @@ void ParsePatch( bool onlyLights ){
 
 	MatchToken( "{" );
 
-	/* get texture */
+	/* get shader name */
 	GetToken( true );
-	strcpy( texture, token );
+	const auto shader = String64()( "textures/", token );
 
 	Parse1DMatrix( 5, info );
 	m.width = info[0];
@@ -355,7 +353,6 @@ void ParsePatch( bool onlyLights ){
 	pm->brushNum = entitySourceBrushes;
 
 	/* set shader */
-	sprintf( shader, "textures/%s", texture );
 	pm->shaderInfo = ShaderInfoForShader( shader );
 
 	/* set mesh */

@@ -448,8 +448,7 @@ void ProcessWorldModel( void ){
 
 	/* ydnar: fog hull */
 	if ( ENT_READKV( &value, &entities[ 0 ], "_foghull" ) ) {
-		char shader[MAX_QPATH];
-		sprintf( shader, "textures/%s", value );
+		const auto shader = String64()( "textures/", value );
 		MakeFogHullSurfs( e, tree, shader );
 	}
 

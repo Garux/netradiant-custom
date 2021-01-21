@@ -3046,7 +3046,7 @@ void MakeDebugPortalSurfs( tree_t *tree ){
    generates drawsurfaces for a foghull (this MUST use a sky shader)
  */
 
-void MakeFogHullSurfs( entity_t *e, tree_t *tree, char *shader ){
+void MakeFogHullSurfs( entity_t *e, tree_t *tree, const char *shader ){
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
 	vec3_t fogMins, fogMaxs;

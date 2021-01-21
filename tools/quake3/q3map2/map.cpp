@@ -1085,8 +1085,6 @@ static void ParseRawBrush( bool onlyLights ){
 	vec_t shift[ 2 ];
 	vec_t rotate = 0;
 	vec_t scale[ 2 ];
-	char name[ MAX_QPATH ];
-	char shader[ MAX_QPATH ];
 	int flags;
 
 
@@ -1146,7 +1144,7 @@ static void ParseRawBrush( bool onlyLights ){
 
 		/* read shader name */
 		GetToken( false );
-		strcpy( name, token );
+		const auto shader = String64()( "textures/", token );
 
 		/* AP or 220? */
 		if ( g_brushType == BPRIMIT_UNDEFINED ){
@@ -1199,7 +1197,6 @@ static void ParseRawBrush( bool onlyLights ){
 		}
 
 		/* set default flags and values */
-		sprintf( shader, "textures/%s", name );
 		if ( onlyLights ) {
 			si = &shaderInfo[ 0 ];
 		}
