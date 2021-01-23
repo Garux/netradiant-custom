@@ -428,7 +428,7 @@ void ProcessDecals( void ){
 		/* any patches? */
 		if ( e.patches == NULL ) {
 			Sys_Warning( "Decal entity without any patch meshes, ignoring.\n" );
-			e.epairs = NULL;   /* fixme: leak! */
+			e.epairs.clear();
 			continue;
 		}
 

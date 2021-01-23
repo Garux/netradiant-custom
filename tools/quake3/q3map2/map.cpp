@@ -1664,7 +1664,6 @@ void LoadEntityIndexMap( entity_t *e ){
  */
 
 static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
-	epair_t         *ep;
 	brush_t         *brush;
 	parseMesh_t     *patch;
 
@@ -1737,13 +1736,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 		else
 		{
 			/* parse a key / value pair */
-			ep = ParseEPair();
-
-			/* ydnar: 2002-07-06 fixed wolf bug with empty epairs */
-			if ( !strEmpty( ep->key ) && !strEmpty( ep->value ) ) {
-				ep->next = mapEnt->epairs;
-				mapEnt->epairs = ep;
-			}
+			ParseEPair( mapEnt->epairs );
 		}
 	}
 

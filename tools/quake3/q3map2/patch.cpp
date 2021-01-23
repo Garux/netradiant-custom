@@ -223,7 +223,6 @@ void ParsePatch( bool onlyLights ){
 	parseMesh_t     *pm;
 	mesh_t m;
 	bspDrawVert_t   *verts;
-	epair_t         *ep;
 	vec4_t delta, delta2, delta3;
 	bool degenerate;
 	float longestCurve;
@@ -268,10 +267,8 @@ void ParsePatch( bool onlyLights ){
 	// if brush primitives format, we may have some epairs to ignore here
 	GetToken( true );
 	if ( !strEqual( token, "}" ) && ( g_brushType == BPRIMIT_BP || g_brushType == BPRIMIT_UNDEFINED ) ) {
-		ep = ParseEPair();
-		free( ep->key );
-		free( ep->value );
-		free( ep );
+		std::list<epair_t> dummy;
+		ParseEPair( dummy );
 	}
 	else{
 		UnGetToken();

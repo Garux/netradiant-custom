@@ -967,29 +967,26 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
  */
 
 static void ConvertEPairs( FILE *f, entity_t *e, bool skip_origin ){
-	epair_t *ep;
-
-
 	/* walk epairs */
-	for ( ep = e->epairs; ep != NULL; ep = ep->next )
+	for ( const auto& ep : e->epairs )
 	{
 		/* ignore empty keys/values */
-		if ( strEmpty( ep->key ) || strEmpty( ep->value ) ) {
+		if ( ep.key.empty() || ep.value.empty() ) {
 			continue;
 		}
 
 		/* ignore model keys with * prefixed values */
-		if ( striEqual( ep->key, "model" ) && ep->value[ 0 ] == '*' ) {
+		if ( striEqual( ep.key.c_str(), "model" ) && ep.value.c_str()[ 0 ] == '*' ) {
 			continue;
 		}
 
 		/* ignore origin keys if skip_origin is set */
-		if ( skip_origin && striEqual( ep->key, "origin" ) ) {
+		if ( skip_origin && striEqual( ep.key.c_str(), "origin" ) ) {
 			continue;
 		}
 
 		/* emit the epair */
-		fprintf( f, "\t\"%s\" \"%s\"\n", ep->key, ep->value );
+		fprintf( f, "\t\"%s\" \"%s\"\n", ep.key.c_str(), ep.value.c_str() );
 	}
 }
 

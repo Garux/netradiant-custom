@@ -1424,14 +1424,13 @@ void AddTriangleModels( entity_t *eparent ){
 
 		/* get shader remappings */
 		std::list<remap_t> remaps;
-		for ( epair_t *ep = e->epairs; ep != NULL; ep = ep->next )
+		for ( const auto& ep : e->epairs )
 		{
 			/* look for keys prefixed with "_remap" */
-			if ( !strEmptyOrNull( ep->key ) && !strEmptyOrNull( ep->value ) &&
-				 striEqualPrefix( ep->key, "_remap" ) ) {
+			if ( striEqualPrefix( ep.key.c_str(), "_remap" ) ) {
 				/* create new remapping */
 				remap_t remap;
-				strcpy( remap.from, ep->value );
+				strcpy( remap.from, ep.value.c_str() );
 
 				/* split the string */
 				char *split = strchr( remap.from, ';' );

@@ -523,30 +523,20 @@ void StripTrailing( char *e ){
    parses a single quoted "key" "value" pair into an epair struct
  */
 
-epair_t *ParseEPair( void ){
-	/* allocate and clear new epair */
-	epair_t *e = safe_calloc( sizeof( epair_t ) );
-
+void ParseEPair( std::list<epair_t>& epairs ){
 	/* handle key */
-	if ( strlen( token ) >= ( MAX_KEY - 1 ) ) {
-		Error( "ParseEPair: token too long" );
-	}
-
-	e->key = copystring( token );
-	GetToken( false );
+	/* strip trailing spaces that sometimes get accidentally added in the editor */
+	StripTrailing( token );
+	epair_t ep;
+	ep.key = token;
 
 	/* handle value */
-	if ( strlen( token ) >= MAX_VALUE - 1 ) {
-		Error( "ParseEpar: token too long" );
-	}
-	e->value = copystring( token );
+	GetToken( false );
+	StripTrailing( token );
+	ep.value = token;
 
-	/* strip trailing spaces that sometimes get accidentally added in the editor */
-	StripTrailing( e->key );
-	StripTrailing( e->value );
-
-	/* return it */
-	return e;
+	if( !ep.key.empty() && !ep.value.empty() )
+		epairs.emplace_back( ep );
 }
 
 
@@ -557,9 +547,6 @@ epair_t *ParseEPair( void ){
  */
 
 bool ParseEntity( void ){
-	epair_t     *e;
-
-
 	/* dummy check */
 	if ( !GetToken( true ) ) {
 		return false;
@@ -581,9 +568,7 @@ bool ParseEntity( void ){
 		if ( strEqual( token, "}" ) ) {
 			break;
 		}
-		e = ParseEPair();
-		e->next = mapEnt->epairs;
-		mapEnt->epairs = e;
+		ParseEPair( mapEnt->epairs );
 	}
 
 	/* return to sender */
@@ -677,9 +662,8 @@ void UnparseEntities( void ){
 
 		entity_t *e = &entities[ i ];
 		/* get epair */
-		if ( e->epairs == NULL ) {
+		if ( e->epairs.empty() ) {
 			continue;   /* ent got removed */
-
 		}
 		/* ydnar: certain entities get stripped from bsp file */
 		const char *classname = ent_classname( e );
@@ -694,12 +678,12 @@ void UnparseEntities( void ){
 		end += 2;
 
 		/* walk epair list */
-		for ( epair_t *ep = e->epairs; ep != NULL; ep = ep->next )
+		for ( const auto& ep : e->epairs )
 		{
 			/* copy and clean */
-			strcpy( key, ep->key );
+			strcpy( key, ep.key.c_str() );
 			StripTrailing( key );
-			strcpy( value, ep->value );
+			strcpy( value, ep.value.c_str() );
 			StripTrailing( value );
 
 			/* add to buffer */
@@ -730,13 +714,9 @@ void UnparseEntities( void ){
  */
 
 void PrintEntity( const entity_t *ent ){
-	epair_t *ep;
-
-
 	Sys_Printf( "------- entity %p -------\n", ent );
-	for ( ep = ent->epairs; ep != NULL; ep = ep->next )
-		Sys_Printf( "%s = %s\n", ep->key, ep->value );
-
+	for ( const auto& ep : ent->epairs )
+		Sys_Printf( "%s = %s\n", ep.key.c_str(), ep.value.c_str() );
 }
 
 
@@ -747,25 +727,17 @@ void PrintEntity( const entity_t *ent ){
  */
 
 void SetKeyValue( entity_t *ent, const char *key, const char *value ){
-	epair_t *ep;
-
-
 	/* check for existing epair */
-	for ( ep = ent->epairs; ep != NULL; ep = ep->next )
+	for ( auto& ep : ent->epairs )
 	{
-		if ( EPAIR_EQUAL( ep->key, key ) ) {
-			free( ep->value );
-			ep->value = copystring( value );
+		if ( EPAIR_EQUAL( ep.key.c_str(), key ) ) {
+			ep.value = value;
 			return;
 		}
 	}
 
 	/* create new epair */
-	ep = safe_malloc( sizeof( *ep ) );
-	ep->next = ent->epairs;
-	ent->epairs = ep;
-	ep->key = copystring( key );
-	ep->value = copystring( value );
+	ent->epairs.emplace_back( epair_t{ key, value } );
 }
 
 
@@ -781,10 +753,10 @@ const char *ValueForKey( const entity_t *ent, const char *key ){
 	}
 
 	/* walk epair list */
-	for ( epair_t *ep = ent->epairs; ep != NULL; ep = ep->next )
+	for ( const auto& ep : ent->epairs )
 	{
-		if ( EPAIR_EQUAL( ep->key, key ) ) {
-			return ep->value;
+		if ( EPAIR_EQUAL( ep.key.c_str(), key ) ) {
+			return ep.value.c_str();
 		}
 	}
 

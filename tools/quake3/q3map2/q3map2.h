@@ -323,10 +323,6 @@ brushType_t;
 
 #define MAX_MAP_ADVERTISEMENTS  30
 
-/* key / value pair sizes in the entities lump */
-#define MAX_KEY                 32
-#define MAX_VALUE               1024
-
 /* the editor uses these predefined yaw angles to orient entities up or down */
 #define ANGLE_UP                -1
 #define ANGLE_DOWN              -2
@@ -1099,8 +1095,7 @@ metaTriangle_t;
 
 typedef struct epair_s
 {
-	struct epair_s      *next;
-	char                *key, *value;
+	CopiedString key, value;
 }
 epair_t;
 
@@ -1112,7 +1107,7 @@ typedef struct
 	parseMesh_t         *patches;
 	int mapEntityNum, firstDrawSurf;
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
-	epair_t             *epairs;
+	std::list<epair_t> epairs;
 	vec3_t originbrush_origin;
 }
 entity_t;
@@ -1885,7 +1880,7 @@ void                        PartialLoadBSPFile( const char *filename );
 void                        WriteBSPFile( const char *filename );
 void                        PrintBSPFileSizes( void );
 
-epair_t                     *ParseEPair( void );
+void                        ParseEPair( std::list<epair_t>& epairs );
 void                        ParseEntities( void );
 void                        UnparseEntities( void );
 void                        PrintEntity( const entity_t *ent );

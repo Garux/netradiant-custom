@@ -284,7 +284,6 @@ void SetModelNumbers( void ){
 void SetLightStyles( void ){
 	int j, numStyles;
 	entity_t    *e;
-	epair_t     *ep, *next;
 	char value[ 10 ];
 	char lightTargets[ MAX_SWITCHED_LIGHTS ][ 64 ];
 	int lightStyles[ MAX_SWITCHED_LIGHTS ];
@@ -310,16 +309,7 @@ void SetLightStyles( void ){
 		if ( !ENT_READKV( &t, e, "targetname" ) ) {
 			/* ydnar: strip the light from the BSP file */
 			if ( !keepLights ) {
-				ep = e->epairs;
-				while ( ep != NULL )
-				{
-					next = ep->next;
-					free( ep->key );
-					free( ep->value );
-					free( ep );
-					ep = next;
-				}
-				e->epairs = NULL;
+				e->epairs.clear();
 				numStrippedLights++;
 			}
 

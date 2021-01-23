@@ -302,11 +302,10 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	/* Ent keys */
-	epair_t *ep;
-	for ( ep = entities[0].epairs; ep != NULL; ep = ep->next )
+	for ( const auto& ep : entities[0].epairs )
 	{
-		if ( striEqualPrefix( ep->key, "vertexremapshader" ) ) {
-			sscanf( ep->value, "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
+		if ( striEqualPrefix( ep.key.c_str(), "vertexremapshader" ) ) {
+			sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
 			res2list( pk3Shaders, str );
 		}
 	}
@@ -977,11 +976,10 @@ int repackBSPMain( int argc, char **argv ){
 		}
 
 		/* Ent keys */
-		epair_t *ep;
-		for ( ep = entities[0].epairs; ep != NULL; ep = ep->next )
+		for ( const auto& ep : entities[0].epairs )
 		{
-			if ( striEqualPrefix( ep->key, "vertexremapshader" ) ) {
-				sscanf( ep->value, "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
+			if ( striEqualPrefix( ep.key.c_str(), "vertexremapshader" ) ) {
+				sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
 				res2list( pk3Shaders, str );
 			}
 		}
@@ -1074,14 +1072,6 @@ int repackBSPMain( int argc, char **argv ){
 			//allocatedBSPBrushes = 0;
 		}
 */		{
-			for ( const auto& e : entities ){
-				ep = e.epairs;
-				while( ep != NULL){
-					epair_t *ep2free = ep;
-					ep = ep->next;
-					free( ep2free );
-				}
-			}
 			entities.clear();
 			//Sys_Printf( "freed entities\n" );
 			numBSPEntities = 0;
