@@ -20,11 +20,11 @@
  */
 
 
-typedef struct
+struct winding_t
 {
 	int numpoints;
 	vec3_t p[];
-} winding_t;
+};
 
 #define MAX_POINTS_ON_WINDING   512
 
@@ -64,11 +64,11 @@ void pw( winding_t *w );
 // in q3map2 brush processing.
 ///////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct
+struct winding_accu_t
 {
 	int numpoints;
 	vec3_accu_t p[];
-} winding_accu_t;
+};
 
 winding_accu_t  *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist );
 void    ChopWindingInPlaceAccu( winding_accu_t **w, vec3_t normal, vec_t dist, vec_t epsilon );

@@ -35,12 +35,12 @@
    =============================================================================
  */
 
-typedef struct
+struct script_t
 {
 	char filename[1024];
 	char    *buffer,*script_p,*end_p;
 	int line;
-} script_t;
+};
 
 #define MAX_INCLUDES    8
 script_t scriptstack[MAX_INCLUDES];

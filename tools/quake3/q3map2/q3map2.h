@@ -338,62 +338,56 @@ brushType_t;
 typedef void ( *bspFunc )( const char * );
 
 
-typedef struct
+struct bspLump_t
 {
 	int offset, length;
-}
-bspLump_t;
+};
 
 
-typedef struct
+struct bspHeader_t
 {
 	char ident[ 4 ];
 	int version;
 
 	bspLump_t lumps[ 100 ];     /* theoretical maximum # of bsp lumps */
-}
-bspHeader_t;
+};
 
 
-typedef struct
+struct bspModel_t
 {
 	float mins[ 3 ], maxs[ 3 ];
 	int firstBSPSurface, numBSPSurfaces;
 	int firstBSPBrush, numBSPBrushes;
-}
-bspModel_t;
+};
 
 
-typedef struct
+struct bspShader_t
 {
 	char shader[ MAX_QPATH ];
 	int surfaceFlags;
 	int contentFlags;
-}
-bspShader_t;
+};
 
 
 /* planes x^1 is always the opposite of plane x */
 
-typedef struct
+struct bspPlane_t
 {
 	float normal[ 3 ];
 	float dist;
-}
-bspPlane_t;
+};
 
 
-typedef struct
+struct bspNode_t
 {
 	int planeNum;
 	int children[ 2 ];              /* negative numbers are -(leafs+1), not nodes */
 	int mins[ 3 ];                  /* for frustum culling */
 	int maxs[ 3 ];
-}
-bspNode_t;
+};
 
 
-typedef struct
+struct bspLeaf_t
 {
 	int cluster;                    /* -1 = opaque cluster (do I still store these?) */
 	int area;
@@ -406,46 +400,41 @@ typedef struct
 
 	int firstBSPLeafBrush;
 	int numBSPLeafBrushes;
-}
-bspLeaf_t;
+};
 
 
-typedef struct
+struct bspBrushSide_t
 {
 	int planeNum;                   /* positive plane side faces out of the leaf */
 	int shaderNum;
 	int surfaceNum;                 /* RBSP */
-}
-bspBrushSide_t;
+};
 
 
-typedef struct
+struct bspBrush_t
 {
 	int firstSide;
 	int numSides;
 	int shaderNum;                  /* the shader that determines the content flags */
-}
-bspBrush_t;
+};
 
 
-typedef struct
+struct bspFog_t
 {
 	char shader[ MAX_QPATH ];
 	int brushNum;
 	int visibleSide;                /* the brush side that ray tests need to clip against (-1 == none) */
-}
-bspFog_t;
+};
 
 
-typedef struct
+struct bspDrawVert_t
 {
 	vec3_t xyz;
 	float st[ 2 ];
 	float lightmap[ MAX_LIGHTMAPS ][ 2 ];       /* RBSP */
 	vec3_t normal;
 	byte color[ MAX_LIGHTMAPS ][ 4 ];           /* RBSP */
-}
-bspDrawVert_t;
+};
 
 
 typedef enum
@@ -460,17 +449,16 @@ typedef enum
 bspSurfaceType_t;
 
 
-typedef struct bspGridPoint_s
+struct bspGridPoint_t
 {
 	byte ambient[ MAX_LIGHTMAPS ][ 3 ];
 	byte directed[ MAX_LIGHTMAPS ][ 3 ];
 	byte styles[ MAX_LIGHTMAPS ];
 	byte latLong[ 2 ];
-}
-bspGridPoint_t;
+};
 
 
-typedef struct
+struct bspDrawSurface_t
 {
 	int shaderNum;
 	int fogNum;
@@ -493,17 +481,17 @@ typedef struct
 
 	int patchWidth;
 	int patchHeight;
-}
-bspDrawSurface_t;
+};
 
 
 /* advertisements */
-typedef struct {
+struct bspAdvertisement_t
+{
 	int cellId;
 	vec3_t normal;
 	vec3_t rect[4];
 	char model[ MAX_QPATH ];
-} bspAdvertisement_t;
+};
 
 
 /* -------------------------------------------------------------------------------
@@ -517,14 +505,13 @@ typedef float tcMod_t[ 3 ][ 3 ];
 
 
 /* ydnar: for multiple game support */
-typedef struct surfaceParm_s
+struct surfaceParm_t
 {
 	const char  *name;
 	int contentFlags, contentFlagsClear;
 	int surfaceFlags, surfaceFlagsClear;
 	int compileFlags, compileFlagsClear;
-}
-surfaceParm_t;
+};
 
 typedef enum
 {
@@ -534,7 +521,7 @@ typedef enum
 }
 miniMapMode_t;
 
-typedef struct game_s
+struct game_t
 {
 	const char          *arg;                           /* -game matches this */
 	const char          *gamePath;                      /* main game data dir */
@@ -575,65 +562,58 @@ typedef struct game_s
 	bspFunc load, write;                                /* load/write function pointers */
 	surfaceParm_t surfaceParms[ 128 ];                  /* surfaceparm array */
 	int brushBevelsSurfaceFlagsMask;                    /* apply only these surfaceflags to bevels to reduce extra bsp shaders amount; applying them to get correct physics at walkable brush edges and vertices */
-}
-game_t;
+};
 
 
-typedef struct image_s
+struct image_t
 {
 	char                *name, *filename;
 	int refCount;
 	int width, height;
 	byte                *pixels;
-}
-image_t;
+};
 
 
-typedef struct sun_s
+struct sun_t
 {
-	struct sun_s        *next;
+	sun_t        *next;
 	vec3_t direction, color;
 	float photons, deviance, filterRadius;
 	int numSamples, style;
-}
-sun_t;
+};
 
 
-typedef struct surfaceModel_s
+struct surfaceModel_t
 {
-	struct surfaceModel_s   *next;
+	surfaceModel_t   *next;
 	char model[ MAX_QPATH ];
 	float density, odds;
 	float minScale, maxScale;
 	float minAngle, maxAngle;
 	bool oriented;
-}
-surfaceModel_t;
+};
 
 
 /* ydnar/sd: foliage stuff for wolf et (engine-supported optimization of the above) */
-typedef struct foliage_s
+struct foliage_t
 {
-	struct foliage_s    *next;
+	foliage_t    *next;
 	char model[ MAX_QPATH ];
 	float scale, density, odds;
 	int inverseAlpha;
-}
-foliage_t;
+};
 
-typedef struct foliageInstance_s
+struct foliageInstance_t
 {
 	vec3_t xyz, normal;
-}
-foliageInstance_t;
+};
 
 
-typedef struct remap_s
+struct remap_t
 {
 	char from[ 1024 ];
 	char to[ MAX_QPATH ];
-}
-remap_t;
+};
 
 
 /* wingdi.h hack, it's the same: 0 */
@@ -659,13 +639,12 @@ typedef enum
 colorModType_t;
 
 
-typedef struct colorMod_s
+struct colorMod_t
 {
-	struct colorMod_s   *next;
+	colorMod_t   *next;
 	colorModType_t type;
 	vec_t data[ 16 ];
-}
-colorMod_t;
+};
 
 
 typedef enum
@@ -678,7 +657,7 @@ typedef enum
 implicitMap_t;
 
 
-typedef struct shaderInfo_s
+struct shaderInfo_t
 {
 	String64 shader;
 	int surfaceFlags;
@@ -789,8 +768,7 @@ typedef struct shaderInfo_s
 	char                *shaderText;                    /* ydnar */
 	bool custom;
 	bool finished;
-}
-shaderInfo_t;
+};
 
 
 
@@ -800,30 +778,28 @@ shaderInfo_t;
 
    ------------------------------------------------------------------------------- */
 
-typedef struct face_s
+struct face_t
 {
-	struct face_s       *next;
+	face_t              *next;
 	int planenum;
 	int priority;
 	//bool			checked;
 	int compileFlags;
 	winding_t           *w;
-}
-face_t;
+};
 
 
-typedef struct plane_s
+struct plane_t
 {
 	vec3_t normal;
 	vec_t dist;
 	int type;
 	int counter;
 	int hash_chain;
-}
-plane_t;
+};
 
 
-typedef struct side_s
+struct side_t
 {
 	int planenum;
 
@@ -845,34 +821,31 @@ typedef struct side_s
 	bool visible;                           /* choose visible planes first */
 	bool bevel;                             /* don't ever use for bsp splitting, and don't bother making windings for it */
 	bool culled;                            /* ydnar: face culling */
-}
-side_t;
+};
 
 
-typedef struct sideRef_s
+struct sideRef_t
 {
-	struct sideRef_s    *next;
+	sideRef_t           *next;
 	side_t              *side;
-}
-sideRef_t;
+};
 
 
 /* ydnar: generic index mapping for entities (natural extension of terrain texturing) */
-typedef struct indexMap_s
+struct indexMap_t
 {
 	int w, h, numLayers;
 	char name[ MAX_QPATH ], shader[ MAX_QPATH ];
 	float offsets[ 256 ];
 	byte                *pixels;
-}
-indexMap_t;
+};
 
 
-typedef struct brush_s
+struct brush_t
 {
-	struct brush_s      *next;
-	struct brush_s      *nextColorModBrush; /* ydnar: colorMod volume brushes go here */
-	struct brush_s      *original;          /* chopped up brushes will reference the originals */
+	brush_t             *next;
+	brush_t             *nextColorModBrush; /* ydnar: colorMod volume brushes go here */
+	brush_t             *original;          /* chopped up brushes will reference the originals */
 
 	int entityNum, brushNum;                /* editor numbering */
 	int outputNum;                          /* set when the brush is written to the file list */
@@ -902,30 +875,27 @@ typedef struct brush_s
 	int numsides;
 
 	side_t sides[];                         /* variably sized */
-}
-brush_t;
+};
 
 
-typedef struct fog_s
+struct fog_t
 {
 	shaderInfo_t        *si;
 	brush_t             *brush;
 	int visibleSide;                        /* the brush side that ray tests need to clip against (-1 == none) */
-}
-fog_t;
+};
 
 
-typedef struct
+struct mesh_t
 {
 	int width, height;
 	bspDrawVert_t       *verts;
-}
-mesh_t;
+};
 
 
-typedef struct parseMesh_s
+struct parseMesh_t
 {
-	struct parseMesh_s  *next;
+	parseMesh_t  *next;
 
 	int entityNum, brushNum;                    /* ydnar: editor numbering */
 
@@ -947,8 +917,7 @@ typedef struct parseMesh_s
 	bool grouped;
 	float longestCurve;
 	int maxIterations;
-}
-parseMesh_t;
+};
 
 
 /*
@@ -1005,7 +974,7 @@ const char      *surfaceTypes[ NUM_SURFACE_TYPES ]
 
 
 /* ydnar: this struct needs an overhaul (again, heh) */
-typedef struct mapDrawSurface_s
+struct mapDrawSurface_t
 {
 	surfaceType_t type;
 	bool planar;
@@ -1015,9 +984,9 @@ typedef struct mapDrawSurface_s
 	bool skybox;                            /* ydnar: yet another fun hack */
 	bool backSide;                          /* ydnar: q3map_backShader support */
 
-	struct mapDrawSurface_s *parent;        /* ydnar: for cloned (skybox) surfaces to share lighting data */
-	struct mapDrawSurface_s *clone;         /* ydnar: for cloned surfaces */
-	struct mapDrawSurface_s *cel;           /* ydnar: for cloned cel surfaces */
+	mapDrawSurface_t *parent;        /* ydnar: for cloned (skybox) surfaces to share lighting data */
+	mapDrawSurface_t *clone;         /* ydnar: for cloned surfaces */
+	mapDrawSurface_t *cel;           /* ydnar: for cloned cel surfaces */
 
 	shaderInfo_t        *shaderInfo;
 	shaderInfo_t        *celShader;
@@ -1067,20 +1036,18 @@ typedef struct mapDrawSurface_s
 	/* ydnar: editor/useful numbering */
 	int entityNum;
 	int surfaceNum;
-}
-mapDrawSurface_t;
+};
 
 
-typedef struct drawSurfRef_s
+struct drawSurfRef_t
 {
-	struct drawSurfRef_s    *nextRef;
+	drawSurfRef_t    *nextRef;
 	int outputNum;
-}
-drawSurfRef_t;
+};
 
 
 /* ydnar: metasurfaces are constructed from lists of metatriangles so they can be merged in the best way */
-typedef struct metaTriangle_s
+struct metaTriangle_t
 {
 	shaderInfo_t        *si;
 	side_t              *side;
@@ -1089,18 +1056,16 @@ typedef struct metaTriangle_s
 	vec4_t plane;
 	vec3_t lightmapAxis;
 	int indexes[ 3 ];
-}
-metaTriangle_t;
+};
 
 
-typedef struct epair_s
+struct epair_t
 {
 	CopiedString key, value;
-}
-epair_t;
+};
 
 
-typedef struct
+struct entity_t
 {
 	vec3_t origin;
 	brush_t             *brushes, *lastBrush, *colorModBrushes;
@@ -1109,21 +1074,20 @@ typedef struct
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
 	std::list<epair_t> epairs;
 	vec3_t originbrush_origin;
-}
-entity_t;
+};
 
 
-typedef struct node_s
+struct node_t
 {
 	/* both leafs and nodes */
 	int planenum;                       /* -1 = leaf node */
-	struct node_s       *parent;
+	node_t              *parent;
 	vec3_t mins, maxs;                  /* valid after portalization */
 	brush_t             *volume;        /* one for each leaf/node */
 
 	/* nodes only */
 	side_t              *side;          /* the side that created the node */
-	struct node_s       *children[ 2 ];
+	node_t              *children[ 2 ];
 	int compileFlags;                   /* ydnar: hint, antiportal */
 	int tinyportals;
 	vec3_t referencepoint;
@@ -1141,35 +1105,32 @@ typedef struct node_s
 	int occupied;                       /* 1 or greater can reach entity */
 	entity_t            *occupant;      /* for leak file testing */
 
-	struct portal_s     *portals;       /* also on nodes during construction */
+	struct portal_t     *portals;       /* also on nodes during construction */
 
 	bool has_structural_children;
-}
-node_t;
+};
 
 
-typedef struct portal_s
+struct portal_t
 {
 	plane_t plane;
 	node_t              *onnode;        /* NULL = outside box */
 	node_t              *nodes[ 2 ];    /* [ 0 ] = front side of plane */
-	struct portal_s     *next[ 2 ];
+	portal_t            *next[ 2 ];
 	winding_t           *winding;
 
 	bool sidefound;                     /* false if ->side hasn't been checked */
 	int compileFlags;                   /* from original face that caused the split */
 	side_t              *side;          /* NULL = non-visible */
-}
-portal_t;
+};
 
 
-typedef struct
+struct tree_t
 {
 	node_t              *headnode;
 	node_t outside_node;
 	vec3_t mins, maxs;
-}
-tree_t;
+};
 
 
 
@@ -1179,27 +1140,25 @@ tree_t;
 
    ------------------------------------------------------------------------------- */
 
-typedef struct
+struct visPlane_t
 {
 	vec3_t normal;
 	float dist;
-}
-visPlane_t;
+};
 
 
-typedef struct
+struct fixedWinding_t
 {
 	int numpoints;
 	vec3_t points[ MAX_POINTS_ON_FIXED_WINDING ];                   /* variable sized */
-}
-fixedWinding_t;
+};
 
 
-typedef struct passage_s
+struct passage_t
 {
-	struct passage_s    *next;
+	struct passage_t    *next;
 	byte cansee[ 1 ];                   /* all portals that can be seen through this passage */
-} passage_t;
+};
 
 
 typedef enum
@@ -1211,7 +1170,7 @@ typedef enum
 vstatus_t;
 
 
-typedef struct
+struct vportal_t
 {
 	int num;
 	bool hint;                          /* true if this portal was created from a hint splitter */
@@ -1232,23 +1191,21 @@ typedef struct
 	int nummightsee;                    /* bit count on portalflood for sort */
 	passage_t           *passages;      /* there are just as many passages as there */
 	                                    /* are portals in the leaf this portal leads */
-}
-vportal_t;
+};
 
 
-typedef struct leaf_s
+struct leaf_t
 {
 	int numportals;
 	int merged;
 	vportal_t           *portals[MAX_PORTALS_ON_LEAF];
-}
-leaf_t;
+};
 
 
-typedef struct pstack_s
+struct pstack_t
 {
 	byte mightsee[ MAX_PORTALS / 8 ];
-	struct pstack_s     *next;
+	pstack_t            *next;
 	leaf_t              *leaf;
 	vportal_t           *portal;        /* portal exiting */
 	fixedWinding_t      *source;
@@ -1263,17 +1220,15 @@ typedef struct pstack_s
 	visPlane_t seperators[ 2 ][ MAX_SEPERATORS ];
 	int numseperators[ 2 ];
 #endif
-}
-pstack_t;
+};
 
 
-typedef struct
+struct threaddata_t
 {
 	vportal_t           *base;
 	int c_chains;
 	pstack_t pstack_head;
-}
-threaddata_t;
+};
 
 
 
@@ -1284,9 +1239,9 @@ threaddata_t;
    ------------------------------------------------------------------------------- */
 
 /* ydnar: new light struct with flags */
-typedef struct light_s
+struct light_t
 {
-	struct light_s      *next;
+	light_t             *next;
 
 	int type;
 	int flags;                          /* ydnar: condensed all the booleans into one flags int */
@@ -1315,11 +1270,10 @@ typedef struct light_s
 
 	float falloffTolerance;                 /* ydnar: minimum attenuation threshold */
 	float filterRadius;                 /* ydnar: lightmap filter radius in world units, 0 == default */
-}
-light_t;
+};
 
 
-typedef struct
+struct trace_t
 {
 	/* constant input */
 	bool testOcclusion, forceSunlight, testAll;
@@ -1361,42 +1315,38 @@ typedef struct
 	/* working data */
 	int numTestNodes;
 	int testNodes[ MAX_TRACE_TEST_NODES ];
-}
-trace_t;
+};
 
 
 
 /* must be identical to bspDrawVert_t except for float color! */
-typedef struct
+struct radVert_t
 {
 	vec3_t xyz;
 	float st[ 2 ];
 	float lightmap[ MAX_LIGHTMAPS ][ 2 ];
 	vec3_t normal;
 	float color[ MAX_LIGHTMAPS ][ 4 ];
-}
-radVert_t;
+};
 
 
-typedef struct
+struct radWinding_t
 {
 	int numVerts;
 	radVert_t verts[ MAX_POINTS_ON_WINDING ];
-}
-radWinding_t;
+};
 
 
 /* crutch for poor local allocations in win32 smp */
-typedef struct
+struct clipWork_t
 {
 	vec_t dists[ MAX_POINTS_ON_WINDING + 4 ];
 	int sides[ MAX_POINTS_ON_WINDING + 4 ];
-}
-clipWork_t;
+};
 
 
 /* ydnar: new lightmap handling code */
-typedef struct outLightmap_s
+struct outLightmap_t
 {
 	int lightmapNum, extLightmapNum;
 	int customWidth, customHeight;
@@ -1407,11 +1357,10 @@ typedef struct outLightmap_s
 	byte                *lightBits;
 	byte                *bspLightBytes;
 	byte                *bspDirBytes;
-}
-outLightmap_t;
+};
 
 
-typedef struct rawLightmap_s
+struct rawLightmap_t
 {
 	bool finished, splotchFix, wrap[ 2 ];
 	int customWidth, customHeight;
@@ -1439,7 +1388,7 @@ typedef struct rawLightmap_s
 	vec3_t solidColor[ MAX_LIGHTMAPS ];
 
 	int numStyledTwins;
-	struct rawLightmap_s    *twins[ MAX_LIGHTMAPS ];
+	rawLightmap_t           *twins[ MAX_LIGHTMAPS ];
 
 	int outLightmapNums[ MAX_LIGHTMAPS ];
 	int twinNums[ MAX_LIGHTMAPS ];
@@ -1456,21 +1405,19 @@ typedef struct rawLightmap_s
 	float                   *superDeluxels; /* average light direction */
 	float                   *bspDeluxels;
 	float                   *superFloodLight;
-}
-rawLightmap_t;
+};
 
 
-typedef struct rawGridPoint_s
+struct rawGridPoint_t
 {
 	vec3_t ambient[ MAX_LIGHTMAPS ];
 	vec3_t directed[ MAX_LIGHTMAPS ];
 	vec3_t dir;
 	byte styles[ MAX_LIGHTMAPS ];
-}
-rawGridPoint_t;
+};
 
 
-typedef struct surfaceInfo_s
+struct surfaceInfo_t
 {
 	int modelindex;
 	shaderInfo_t        *si;
@@ -1482,8 +1429,7 @@ typedef struct surfaceInfo_s
 	vec3_t axis, mins, maxs;
 	bool hasLightmap, approximated;
 	int firstSurfaceCluster, numSurfaceClusters;
-}
-surfaceInfo_t;
+};
 
 /* -------------------------------------------------------------------------------
 

@@ -53,14 +53,14 @@
 #include "unzip.h"
 #include "miniz.h"
 
-typedef struct
+struct VFS_PAKFILE
 {
 	char* unzFilePath;
 	char*   name;
 	unz_s zipinfo;
 	unzFile zipfile;
 	guint32 size;
-} VFS_PAKFILE;
+};
 
 // =============================================================================
 // Global variables

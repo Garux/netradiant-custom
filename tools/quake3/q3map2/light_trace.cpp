@@ -63,38 +63,34 @@
 #define TRACE_LEAF              -1
 #define TRACE_LEAF_SOLID        -2
 
-typedef struct traceVert_s
+struct traceVert_t
 {
 	vec3_t xyz;
 	float st[ 2 ];
-}
-traceVert_t;
+};
 
-typedef struct traceInfo_s
+struct traceInfo_t
 {
 	shaderInfo_t                *si;
 	int surfaceNum, castShadows;
 	bool skipGrid;
-}
-traceInfo_t;
+};
 
-typedef struct traceWinding_s
+struct traceWinding_t
 {
 	vec4_t plane;
 	int infoNum, numVerts;
 	traceVert_t v[ MAX_TW_VERTS ];
-}
-traceWinding_t;
+};
 
-typedef struct traceTriangle_s
+struct traceTriangle_t
 {
 	vec3_t edge1, edge2;
 	int infoNum;
 	traceVert_t v[ 3 ];
-}
-traceTriangle_t;
+};
 
-typedef struct traceNode_s
+struct traceNode_t
 {
 	int type;
 	vec4_t plane;
@@ -102,8 +98,7 @@ typedef struct traceNode_s
 	int children[ 2 ];
 	int numItems, maxItems;
 	int                         *items;
-}
-traceNode_t;
+};
 
 
 int noDrawContentFlags, noDrawSurfaceFlags, noDrawCompileFlags;

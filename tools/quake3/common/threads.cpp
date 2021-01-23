@@ -450,13 +450,13 @@ void ThreadSetDefault( void ){
 
 #include <pthread.h>
 
-typedef struct pt_mutex_s
+struct pt_mutex_t
 {
 	pthread_t       *owner;
 	pthread_mutex_t a_mutex;
 	pthread_cond_t cond;
 	unsigned int lock;
-} pt_mutex_t;
+};
 
 pt_mutex_t global_lock;
 

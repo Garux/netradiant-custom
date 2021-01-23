@@ -39,13 +39,15 @@
 
 
 
-typedef struct edgePoint_s {
+struct edgePoint_t
+{
 	float intercept;
 	vec3_t xyz;
-	struct edgePoint_s  *prev, *next;
-} edgePoint_t;
+	struct edgePoint_t  *prev, *next;
+};
 
-typedef struct edgeLine_s {
+struct edgeLine_t
+{
 	vec3_t normal1;
 	float dist1;
 
@@ -56,12 +58,13 @@ typedef struct edgeLine_s {
 	vec3_t dir;
 
 	edgePoint_t *chain;     // unused element of doubly linked list
-} edgeLine_t;
+};
 
-typedef struct {
+struct originalEdge_t
+{
 	float length;
 	bspDrawVert_t   *dv[2];
-} originalEdge_t;
+};
 
 originalEdge_t  *originalEdges = NULL;
 int numOriginalEdges;

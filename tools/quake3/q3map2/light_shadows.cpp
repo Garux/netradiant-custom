@@ -32,12 +32,11 @@
 
    ------------------------------------------------------------------------------- */
 
-typedef struct shadowNode_s
+struct shadowNode_t
 {
 	vec4_t plane;
 	int children[ 2 ];
-}
-shadowNode_t;
+};
 
 int numShadowNodes;
 shadowNode_t    *shadowNodes;

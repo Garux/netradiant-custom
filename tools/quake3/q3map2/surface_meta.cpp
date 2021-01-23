@@ -915,15 +915,14 @@ void MakeEntityMetaTriangles( entity_t *e ){
    sets up an edge structure from a plane and 2 points that the edge ab falls lies in
  */
 
-typedef struct edge_s
+struct edge_t
 {
 	vec3_t origin;
 	vec4_t edge;
 	vec_t length, kingpinLength;
 	int kingpin;
 	vec4_t plane;
-}
-edge_t;
+};
 
 void CreateEdge( vec4_t plane, vec3_t a, vec3_t b, edge_t *edge ){
 	/* copy edge origin */

@@ -2048,12 +2048,11 @@ static void ParseCustomInfoParms( void ){
 
 #define MAX_SHADER_FILES    1024
 
-typedef struct StrList_s
+struct StrList
 {
 	int n;
 	char* s[MAX_SHADER_FILES];
-}
-StrList;
+};
 
 void pushShaderCallback( StrList* list, const char* string ){
 	char* shader = copystring( string );

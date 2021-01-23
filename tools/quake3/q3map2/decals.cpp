@@ -40,7 +40,7 @@
 
 #define MAX_PROJECTORS      1024
 
-typedef struct decalProjector_s
+struct decalProjector_t
 {
 	shaderInfo_t            *si;
 	vec3_t mins, maxs;
@@ -49,8 +49,7 @@ typedef struct decalProjector_s
 	int numPlanes;                      /* either 5 or 6, for quad or triangle projectors */
 	vec4_t planes[ 6 ];
 	vec4_t texMat[ 2 ];
-}
-decalProjector_t;
+};
 
 static int numProjectors = 0;
 static decalProjector_t projectors[ MAX_PROJECTORS ];

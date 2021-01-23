@@ -69,24 +69,22 @@
 
 
 /* types */
-typedef struct
+struct ibspHeader_t
 {
 	char ident[ 4 ];
 	int version;
 
 	bspLump_t lumps[ HEADER_LUMPS ];
-}
-ibspHeader_t;
+};
 
 
 
 /* brush sides */
-typedef struct
+struct ibspBrushSide_t
 {
 	int planeNum;
 	int shaderNum;
-}
-ibspBrushSide_t;
+};
 
 
 static void CopyBrushSidesLump( ibspHeader_t *header ){
@@ -136,7 +134,7 @@ static void AddBrushSidesLump( FILE *file, ibspHeader_t *header ){
 
 
 /* drawsurfaces */
-typedef struct ibspDrawSurface_s
+struct ibspDrawSurface_t
 {
 	int shaderNum;
 	int fogNum;
@@ -157,8 +155,7 @@ typedef struct ibspDrawSurface_s
 
 	int patchWidth;
 	int patchHeight;
-}
-ibspDrawSurface_t;
+};
 
 
 static void CopyDrawSurfacesLump( ibspHeader_t *header ){
@@ -267,15 +264,14 @@ static void AddDrawSurfacesLump( FILE *file, ibspHeader_t *header ){
 
 
 /* drawverts */
-typedef struct
+struct ibspDrawVert_t
 {
 	vec3_t xyz;
 	float st[ 2 ];
 	float lightmap[ 2 ];
 	vec3_t normal;
 	byte color[ 4 ];
-}
-ibspDrawVert_t;
+};
 
 
 static void CopyDrawVertsLump( ibspHeader_t *header ){
@@ -356,13 +352,12 @@ static void AddDrawVertsLump( FILE *file, ibspHeader_t *header ){
 
 
 /* light grid */
-typedef struct
+struct ibspGridPoint_t
 {
 	byte ambient[ 3 ];
 	byte directed[ 3 ];
 	byte latLong[ 2 ];
-}
-ibspGridPoint_t;
+};
 
 
 static void CopyLightGridLumps( ibspHeader_t *header ){

@@ -112,21 +112,19 @@ int FixAAS( int argc, char **argv ){
    analyzes a Quake engine BSP file
  */
 
-typedef struct abspHeader_s
+struct abspHeader_t
 {
 	char ident[ 4 ];
 	int version;
 
 	bspLump_t lumps[ 1 ];       /* unknown size */
-}
-abspHeader_t;
+};
 
-typedef struct abspLumpTest_s
+struct abspLumpTest_t
 {
 	int radix, minCount;
 	const char     *name;
-}
-abspLumpTest_t;
+};
 
 int AnalyzeBSP( int argc, char **argv ){
 	abspHeader_t            *header;

@@ -33,7 +33,7 @@
 
 /* minimap stuff */
 
-typedef struct minimap_s
+struct minimap_t
 {
 	bspModel_t *model;
 	int width;
@@ -46,8 +46,7 @@ typedef struct minimap_s
 	float *data1f;
 	float *sharpendata1f;
 	vec3_t mins, size;
-}
-minimap_t;
+};
 
 static minimap_t minimap;
 

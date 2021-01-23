@@ -31,13 +31,12 @@
 #include "autopk3.h"
 
 
-typedef struct StrList_s
+struct StrList
 {
 	int n;
 	int max;
 	char s[][MAX_QPATH];
-}
-StrList;
+};
 
 static inline StrList* StrList_allocate( size_t strNum ){
 	StrList* ret = safe_calloc( offsetof( StrList, s[strNum] ) );
@@ -185,13 +184,12 @@ static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExS
 
 
 
-typedef struct
+struct StrBuf
 {
 	int strlen;
 	int max;
 	char s[];
-}
-StrBuf;
+};
 
 static inline StrBuf* StrBuf_allocate( size_t strLen ){
 	StrBuf* ret = safe_calloc( offsetof( StrBuf, s[strLen] ) );

@@ -1464,14 +1464,13 @@ bool LightContributionToPoint( trace_t *trace ){
 
 #define MAX_CONTRIBUTIONS   32768
 
-typedef struct
+struct contribution_t
 {
 	vec3_t dir;
 	vec3_t color;
 	vec3_t ambient;
 	int style;
-}
-contribution_t;
+};
 
 void TraceGrid( int num ){
 	int i, j, x, y, z, mod, numCon, numStyles;

@@ -69,14 +69,13 @@
 
 
 /* types */
-typedef struct
+struct rbspHeader_t
 {
 	char ident[ 4 ];
 	int version;
 
 	bspLump_t lumps[ HEADER_LUMPS ];
-}
-rbspHeader_t;
+};
 
 
 

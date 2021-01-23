@@ -94,11 +94,11 @@ static void LoadDDSBuffer( byte *buffer, int size, byte **pixels, int *width, in
    note: this function is a total hack, as it reads/writes the png struct directly!
  */
 
-typedef struct pngBuffer_s
+struct pngBuffer_t
 {
 	byte    *buffer;
 	png_size_t size, offset;
-} pngBuffer_t;
+};
 
 void PNGReadData( png_struct *png, png_byte *buffer, png_size_t size ){
 	pngBuffer_t     *pb = (pngBuffer_t*) png_get_io_ptr( png );

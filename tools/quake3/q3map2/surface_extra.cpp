@@ -44,7 +44,7 @@
 
    ------------------------------------------------------------------------------- */
 
-typedef struct surfaceExtra_s
+struct surfaceExtra_t
 {
 	mapDrawSurface_t        *mds;
 	shaderInfo_t            *si;
@@ -54,8 +54,7 @@ typedef struct surfaceExtra_s
 	int sampleSize;
 	float longestCurve;
 	vec3_t lightmapAxis;
-}
-surfaceExtra_t;
+};
 
 #define GROW_SURFACE_EXTRAS 1024
 
