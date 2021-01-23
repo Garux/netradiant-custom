@@ -259,12 +259,11 @@ int EmitDrawNode_r( node_t *node ){
    ============
  */
 void SetModelNumbers( void ){
-	int i;
 	int models;
 	char value[16];
 
 	models = 1;
-	for ( i = 1 ; i < numEntities ; i++ ) {
+	for ( std::size_t i = 1; i < entities.size(); ++i ) {
 		if ( entities[i].brushes || entities[i].patches ) {
 			sprintf( value, "*%i", models );
 			models++;
@@ -283,7 +282,7 @@ void SetModelNumbers( void ){
  */
 
 void SetLightStyles( void ){
-	int i, j, numStyles;
+	int j, numStyles;
 	entity_t    *e;
 	epair_t     *ep, *next;
 	char value[ 10 ];
@@ -300,7 +299,7 @@ void SetLightStyles( void ){
 
 	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
 	numStyles = 0;
-	for ( i = 1; i < numEntities; i++ )
+	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		e = &entities[ i ];
 
@@ -331,7 +330,7 @@ void SetLightStyles( void ){
 		/* get existing style */
 		const int style = IntForKey( e, "style" );
 		if ( style < LS_NORMAL || style > LS_NONE ) {
-			Error( "Invalid lightstyle (%d) on entity %d", style, i );
+			Error( "Invalid lightstyle (%d) on entity %zu", style, i );
 		}
 
 		/* find this targetname */
@@ -410,7 +409,7 @@ void EndBSPFile( bool do_write ){
 
 	EmitPlanes();
 
-	numBSPEntities = numEntities;
+	numBSPEntities = entities.size();
 	UnparseEntities();
 
 	if ( do_write ) {

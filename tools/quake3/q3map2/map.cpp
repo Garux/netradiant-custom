@@ -878,7 +878,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 		Sys_Printf( "Entity %i (%s), Brush %i: origin brush detected\n",
 					mapEnt->mapEntityNum, ent_classname( mapEnt ), entitySourceBrushes );
 
-		if ( numEntities == 1 ) {
+		if ( entities.size() == 1 ) {
 			Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: origin brushes not allowed in world\n",
 						mapEnt->mapEntityNum, entitySourceBrushes );
 			return NULL;
@@ -887,7 +887,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 		VectorAdd( buildBrush->mins, buildBrush->maxs, origin );
 		VectorScale( origin, 0.5, origin );
 
-		MergeOrigin( &entities[ numEntities - 1 ], origin );
+		MergeOrigin( &entities.back(), origin );
 
 		/* don't keep this brush */
 		return NULL;
@@ -895,8 +895,8 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 
 	/* determine if the brush is an area portal */
 	if ( buildBrush->compileFlags & C_AREAPORTAL ) {
-		if ( numEntities != 1 ) {
-			Sys_FPrintf( SYS_WRN, "Entity %i (%s), Brush %i: areaportals only allowed in world\n", numEntities - 1, ent_classname( mapEnt ), entitySourceBrushes );
+		if ( entities.size() != 1 ) {
+			Sys_FPrintf( SYS_WRN, "Entity %zu (%s), Brush %i: areaportals only allowed in world\n", entities.size() - 1, ent_classname( mapEnt ), entitySourceBrushes );
 			return NULL;
 		}
 	}
@@ -1677,18 +1677,14 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	if ( !strEqual( token, "{" ) ) {
 		Sys_Warning( "ParseEntity: { not found, found %s on line %d - last entity was at: <%4.2f, %4.2f, %4.2f>...\n"
 					"Continuing to process map, but resulting BSP may be invalid.\n",
-					token, scriptline, entities[ numEntities ].origin[ 0 ], entities[ numEntities ].origin[ 1 ], entities[ numEntities ].origin[ 2 ] );
+					token, scriptline, entities.back().origin[ 0 ], entities.back().origin[ 1 ], entities.back().origin[ 2 ] );
 		return false;
 	}
 
-	/* range check */
-	AUTOEXPAND_BY_REALLOC( entities, numEntities, allocatedEntities, 32 );
-
 	/* setup */
 	entitySourceBrushes = 0;
-	mapEnt = &entities[ numEntities ];
-	numEntities++;
-	memset( mapEnt, 0, sizeof( *mapEnt ) );
+	entities.emplace_back();
+	mapEnt = &entities.back();
 
 	/* ydnar: true entity numbering */
 	mapEnt->mapEntityNum = numMapEntities;
@@ -1756,7 +1752,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* ydnar: only lights? */
 	if ( onlyLights && !striEqualPrefix( classname, "light" ) ) {
-		numEntities--;
+		entities.pop_back();
 		return true;
 	}
 
@@ -1849,14 +1845,14 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 
 	/* group_info entities are just for editor grouping (fixme: leak!) */
 	if ( !noCollapseGroups && striEqual( "group_info", classname ) ) {
-		numEntities--;
+		entities.pop_back();
 		return true;
 	}
 
 	/* group entities are just for editor convenience, toss all brushes into worldspawn */
 	if ( !noCollapseGroups && funcGroup ) {
 		MoveBrushesToWorld( mapEnt );
-		numEntities--;
+		entities.pop_back();
 		return true;
 	}
 
@@ -1890,10 +1886,10 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 
 	/* setup */
 	if ( onlyLights ) {
-		oldNumEntities = numEntities;
+		oldNumEntities = entities.size();
 	}
 	else{
-		numEntities = 0;
+		entities.clear();
 	}
 
 	/* initial setup */
@@ -1910,7 +1906,7 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 	/* light loading */
 	if ( onlyLights ) {
 		/* emit some statistics */
-		Sys_FPrintf( SYS_VRB, "%9d light entities\n", numEntities - oldNumEntities );
+		Sys_FPrintf( SYS_VRB, "%9zu light entities\n", entities.size() - oldNumEntities );
 	}
 	else
 	{
@@ -1934,7 +1930,7 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 		Sys_FPrintf( SYS_VRB, "%9d patches\n", numMapPatches );
 		Sys_FPrintf( SYS_VRB, "%9d boxbevels\n", c_boxbevels );
 		Sys_FPrintf( SYS_VRB, "%9d edgebevels\n", c_edgebevels );
-		Sys_FPrintf( SYS_VRB, "%9d entities\n", numEntities );
+		Sys_FPrintf( SYS_VRB, "%9zu entities\n", entities.size() );
 		Sys_FPrintf( SYS_VRB, "%9d planes\n", nummapplanes );
 		Sys_Printf( "%9d areaportals\n", c_areaportals );
 		Sys_Printf( "Size: %5.0f, %5.0f, %5.0f to %5.0f, %5.0f, %5.0f\n",

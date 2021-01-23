@@ -405,11 +405,11 @@ static int MakeDecalProjector( shaderInfo_t *si, vec4_t projection, float distan
 #define PLANAR_EPSILON  0.5f
 
 void ProcessDecals( void ){
-	int i, j, x, y, pw[ 5 ], r, iterations;
+	int j, x, y, pw[ 5 ], r, iterations;
 	float distance;
 	vec4_t projection, plane;
 	vec3_t origin, target, delta;
-	entity_t            *e, *e2;
+	entity_t            *e2;
 	parseMesh_t         *p;
 	mesh_t              *mesh, *subdivided;
 	bspDrawVert_t       *dv[ 4 ];
@@ -419,23 +419,21 @@ void ProcessDecals( void ){
 	Sys_FPrintf( SYS_VRB, "--- ProcessDecals ---\n" );
 
 	/* walk entity list */
-	for ( i = 0; i < numEntities; i++ )
+	for ( auto& e : entities )
 	{
-		/* get entity */
-		e = &entities[ i ];
-		if ( !ent_class_is( e, "_decal" ) ) {
+		if ( !ent_class_is( &e, "_decal" ) ) {
 			continue;
 		}
 
 		/* any patches? */
-		if ( e->patches == NULL ) {
+		if ( e.patches == NULL ) {
 			Sys_Warning( "Decal entity without any patch meshes, ignoring.\n" );
-			e->epairs = NULL;   /* fixme: leak! */
+			e.epairs = NULL;   /* fixme: leak! */
 			continue;
 		}
 
 		/* find target */
-		e2 = FindTargetEntity( ValueForKey( e, "target" ) );
+		e2 = FindTargetEntity( ValueForKey( &e, "target" ) );
 
 		/* no target? */
 		if ( e2 == NULL ) {
@@ -444,15 +442,15 @@ void ProcessDecals( void ){
 		}
 
 		/* walk entity patches */
-		for ( p = e->patches; p != NULL; p = e->patches )
+		for ( p = e.patches; p != NULL; p = e.patches )
 		{
 			/* setup projector */
-			if ( VectorCompare( e->origin, vec3_origin ) ) {
+			if ( VectorCompare( e.origin, vec3_origin ) ) {
 				VectorAdd( p->eMins, p->eMaxs, origin );
 				VectorScale( origin, 0.5f, origin );
 			}
 			else{
-				VectorCopy( e->origin, origin );
+				VectorCopy( e.origin, origin );
 			}
 
 			VectorCopy( e2->origin, target );
@@ -475,7 +473,7 @@ void ProcessDecals( void ){
 
 				/* offset by projector origin */
 				for ( j = 0; j < ( mesh->width * mesh->height ); j++ )
-					VectorAdd( mesh->verts[ j ].xyz, e->origin, mesh->verts[ j ].xyz );
+					VectorAdd( mesh->verts[ j ].xyz, e.origin, mesh->verts[ j ].xyz );
 
 				/* iterate through the mesh quads */
 				for ( y = 0; y < ( mesh->height - 1 ); y++ )
@@ -523,7 +521,7 @@ void ProcessDecals( void ){
 			}
 
 			/* remove patch from entity (fixme: leak!) */
-			e->patches = p->next;
+			e.patches = p->next;
 
 			/* push patch to worldspawn (enable this to debug projectors) */
 			#if 0

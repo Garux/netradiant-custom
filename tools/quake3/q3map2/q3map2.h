@@ -2483,10 +2483,8 @@ Q_EXTERN vec3_t gridSize
 
    ------------------------------------------------------------------------------- */
 
-Q_EXTERN int numEntities Q_ASSIGN( 0 );
-Q_EXTERN int numBSPEntities Q_ASSIGN( 0 );
-Q_EXTERN int allocatedEntities Q_ASSIGN( 0 );
-Q_EXTERN entity_t*          entities Q_ASSIGN( NULL );
+Q_EXTERN std::size_t numBSPEntities Q_ASSIGN( 0 );
+Q_EXTERN std::vector<entity_t> entities;
 
 Q_EXTERN int numBSPModels Q_ASSIGN( 0 );
 Q_EXTERN int allocatedBSPModels Q_ASSIGN( 0 );

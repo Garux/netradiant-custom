@@ -50,7 +50,7 @@
 void_ptr safe_malloc( size_t size ){
 	void *p = malloc( size );
 	if ( !p ) {
-		Error( "safe_malloc failed on allocation of %lu bytes", (unsigned long)size );
+		Error( "safe_malloc failed on allocation of %zu bytes", size );
 	}
 	return p;
 }
@@ -58,7 +58,7 @@ void_ptr safe_malloc( size_t size ){
 void_ptr safe_malloc_info( size_t size, const char* info ){
 	void *p = malloc( size );
 	if ( !p ) {
-		Error( "%s: safe_malloc failed on allocation of %lu bytes", info, (unsigned long)size );
+		Error( "%s: safe_malloc failed on allocation of %zu bytes", info, size );
 	}
 	return p;
 }
@@ -66,7 +66,7 @@ void_ptr safe_malloc_info( size_t size, const char* info ){
 void_ptr safe_calloc( size_t size ){
 	void *p = calloc( 1, size );
 	if ( !p ) {
-		Error( "safe_calloc failed on allocation of %lu bytes", (unsigned long)size );
+		Error( "safe_calloc failed on allocation of %zu bytes", size );
 	}
 	return p;
 }
@@ -74,7 +74,7 @@ void_ptr safe_calloc( size_t size ){
 void_ptr safe_calloc_info( size_t size, const char* info ){
 	void *p = calloc( 1, size );
 	if ( !p ) {
-		Error( "%s: safe_calloc failed on allocation of %lu bytes", info, (unsigned long)size );
+		Error( "%s: safe_calloc failed on allocation of %zu bytes", info, size );
 	}
 	return p;
 }

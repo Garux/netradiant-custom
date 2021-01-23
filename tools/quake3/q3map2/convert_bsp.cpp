@@ -461,13 +461,13 @@ int ScaleBSPMain( int argc, char **argv ){
 
 	/* note it */
 	Sys_Printf( "--- ScaleBSP ---\n" );
-	Sys_FPrintf( SYS_VRB, "%9d entities\n", numEntities );
+	Sys_FPrintf( SYS_VRB, "%9zu entities\n", entities.size() );
 
 	/* scale entity keys */
-	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
+	for ( auto& e : entities )
 	{
 		/* scale origin */
-		if ( ENT_READKV( &vec, &entities[ i ], "origin" ) ) {
+		if ( ENT_READKV( &vec, &e, "origin" ) ) {
 			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
@@ -478,10 +478,10 @@ int ScaleBSPMain( int argc, char **argv ){
 				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-			SetKeyValue( &entities[ i ], "origin", str );
+			SetKeyValue( &e, "origin", str );
 		}
 
-		a = FloatForKey( &entities[ i ], "angle" );
+		a = FloatForKey( &e, "angle" );
 		if ( a == -1 || a == -2 ) { // z scale
 			axis = 2;
 		}
@@ -493,17 +493,17 @@ int ScaleBSPMain( int argc, char **argv ){
 		}
 
 		/* scale door lip */
-		if ( ENT_READKV( &f, &entities[ i ], "lip" ) ) {
+		if ( ENT_READKV( &f, &e, "lip" ) ) {
 			f *= scale[axis];
 			sprintf( str, "%f", f );
-			SetKeyValue( &entities[ i ], "lip", str );
+			SetKeyValue( &e, "lip", str );
 		}
 
 		/* scale plat height */
-		if ( ENT_READKV( &f, &entities[ i ], "height" ) ) {
+		if ( ENT_READKV( &f, &e, "height" ) ) {
 			f *= scale[2];
 			sprintf( str, "%f", f );
-			SetKeyValue( &entities[ i ], "height", str );
+			SetKeyValue( &e, "height", str );
 		}
 
 		// TODO maybe allow a definition file for entities to specify which values are scaled how?
@@ -697,24 +697,24 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	/* note it */
 	Sys_Printf( "--- ShiftBSP ---\n" );
-	Sys_FPrintf( SYS_VRB, "%9d entities\n", numEntities );
+	Sys_FPrintf( SYS_VRB, "%9zu entities\n", entities.size() );
 
 	/* shift entity keys */
-	for ( i = 0; i < numBSPEntities && i < numEntities; i++ )
+	for ( auto& e : entities )
 	{
 		/* shift origin */
-		if ( ENT_READKV( &vec, &entities[ i ], "origin" ) ) {
-			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
+		if ( ENT_READKV( &vec, &e, "origin" ) ) {
+			if ( ent_class_prefixed( &e, "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
 			vec[0] += scale[0];
 			vec[1] += scale[1];
 			vec[2] += scale[2];
-			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
+			if ( ent_class_prefixed( &e, "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-			SetKeyValue( &entities[ i ], "origin", str );
+			SetKeyValue( &e, "origin", str );
 		}
 
 	}
@@ -821,7 +821,6 @@ void PseudoCompileBSP( bool need_tree ){
 	node_t *node;
 	brush_t *brush;
 	side_t *side;
-	int i;
 
 	SetDrawSurfacesBuffer();
 	mapDrawSurfs = safe_calloc( sizeof( mapDrawSurface_t ) * MAX_MAP_DRAW_SURFS );
@@ -829,15 +828,15 @@ void PseudoCompileBSP( bool need_tree ){
 
 	BeginBSPFile();
 	models = 1;
-	for ( mapEntityNum = 0; mapEntityNum < numEntities; mapEntityNum++ )
+	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity */
-		entity = &entities[ mapEntityNum ];
+		entity = &entities[ i ];
 		if ( entity->brushes == NULL && entity->patches == NULL ) {
 			continue;
 		}
 
-		if ( mapEntityNum != 0 ) {
+		if ( i != 0 ) {
 			sprintf( modelValue, "*%d", models++ );
 			SetKeyValue( entity, "model", modelValue );
 		}
@@ -851,7 +850,7 @@ void PseudoCompileBSP( bool need_tree ){
 		ClearMetaTriangles();
 		PatchMapDrawSurfs( entity );
 
-		if ( mapEntityNum == 0 && need_tree ) {
+		if ( i == 0 && need_tree ) {
 			faces = MakeStructuralBSPFaceList( entities[0].brushes );
 			tree = FaceBSP( faces );
 			node = tree->headnode;
@@ -868,10 +867,10 @@ void PseudoCompileBSP( bool need_tree ){
 		for ( brush = entity->brushes; brush; brush = brush->next )
 		{
 			/* walk the brush sides */
-			for ( i = 0; i < brush->numsides; i++ )
+			for ( int j = 0; j < brush->numsides; j++ )
 			{
 				/* get side */
-				side = &brush->sides[ i ];
+				side = &brush->sides[ j ];
 				if ( side->winding == NULL ) {
 					continue;
 				}

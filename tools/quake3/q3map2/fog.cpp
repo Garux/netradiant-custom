@@ -712,8 +712,7 @@ int FogForBounds( vec3_t mins, vec3_t maxs, float epsilon ){
  */
 
 void CreateMapFogs( void ){
-	int i, j;
-	entity_t    *entity;
+	int j;
 	brush_t     *brush;
 	fog_t       *fog;
 	vec3_t invFogDir;
@@ -728,13 +727,10 @@ void CreateMapFogs( void ){
 	Sys_FPrintf( SYS_VRB, "--- CreateMapFogs ---\n" );
 
 	/* walk entities */
-	for ( i = 0; i < numEntities; i++ )
+	for ( const auto& e : entities )
 	{
-		/* get entity */
-		entity = &entities[ i ];
-
 		/* walk entity brushes */
-		for ( brush = entity->brushes; brush != NULL; brush = brush->next )
+		for ( brush = e.brushes; brush != NULL; brush = brush->next )
 		{
 			/* ignore non-fog brushes */
 			if ( !brush->contentShader->fogParms ) {

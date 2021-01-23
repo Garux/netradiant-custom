@@ -1109,7 +1109,7 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, m4x4_t t
  */
 
 static void PopulateTraceNodes( void ){
-	int i, m;
+	int m;
 	const char      *value;
 	picoModel_t     *model;
 
@@ -1120,7 +1120,7 @@ static void PopulateTraceNodes( void ){
 	PopulateWithBSPModel( &bspModels[ 0 ], transform );
 
 	/* walk each entity list */
-	for ( i = 1; i < numEntities; i++ )
+	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* get entity */
 		entity_t *e = &entities[ i ];

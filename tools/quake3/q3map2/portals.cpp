@@ -658,7 +658,7 @@ int FloodEntities( tree_t *tree ){
 
 	tripped = NULL;
 	c_floodedleafs = 0;
-	for ( int i = 1; i < numEntities; i++ )
+	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* get entity */
 		e = &entities[ i ];

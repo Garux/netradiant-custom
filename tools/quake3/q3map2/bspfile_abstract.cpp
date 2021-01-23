@@ -436,7 +436,7 @@ void WriteBSPFile( const char *filename ){
 
 void PrintBSPFileSizes( void ){
 	/* parse entities first */
-	if ( numEntities <= 0 ) {
+	if ( entities.empty() ) {
 		ParseEntities();
 	}
 	int patchCount = 0;
@@ -461,8 +461,8 @@ void PrintBSPFileSizes( void ){
 				numBSPFogs, (int) ( numBSPFogs * sizeof( bspFog_t ) ) );
 	Sys_Printf( "%9d planes        %9d\n",
 				numBSPPlanes, (int) ( numBSPPlanes * sizeof( bspPlane_t ) ) );
-	Sys_Printf( "%9d entdata       %9d\n",
-				numEntities, bspEntDataSize );
+	Sys_Printf( "%9zu entdata       %9d\n",
+				entities.size(), bspEntDataSize );
 	Sys_Printf( "\n" );
 
 	Sys_Printf( "%9d nodes         %9d\n",
@@ -567,12 +567,10 @@ bool ParseEntity( void ){
 	if ( !strEqual( token, "{" ) ) {
 		Error( "ParseEntity: { not found" );
 	}
-	AUTOEXPAND_BY_REALLOC( entities, numEntities, allocatedEntities, 32 );
 
 	/* create new entity */
-	mapEnt = &entities[ numEntities ];
-	numEntities++;
-	memset( mapEnt, 0, sizeof( *mapEnt ) );
+	entities.emplace_back();
+	mapEnt = &entities.back();
 
 	/* parse */
 	while ( 1 )
@@ -600,12 +598,12 @@ bool ParseEntity( void ){
  */
 
 void ParseEntities( void ){
-	numEntities = 0;
+	entities.clear();
 	ParseFromMemory( bspEntData, bspEntDataSize );
 	while ( ParseEntity() ) ;
 
 	/* ydnar: set number of bsp entities in case a map is loaded on top */
-	numBSPEntities = numEntities;
+	numBSPEntities = entities.size();
 }
 
 /*
@@ -668,7 +666,7 @@ void UnparseEntities( void ){
 	end = buf = bspEntData;
 
 	/* run through entity list */
-	for ( int i = 0; i < numBSPEntities && i < numEntities; i++ )
+	for ( std::size_t i = 0; i < numBSPEntities && i < entities.size(); i++ )
 	{
 		{
 			int sz = end - buf;
@@ -986,10 +984,10 @@ bool ent_class_prefixed( const entity_t *entity, const char *prefix ){
 
 entity_t *FindTargetEntity( const char *target ){
 	/* walk entity list */
-	for ( int i = 0; i < numEntities; i++ )
+	for ( auto& e : entities )
 	{
-		if ( strEqual( ValueForKey( &entities[ i ], "targetname" ), target ) ) {
-			return &entities[ i ];
+		if ( strEqual( ValueForKey( &e, "targetname" ), target ) ) {
+			return &e;
 		}
 	}
 

@@ -317,27 +317,27 @@ int pk3BSPMain( int argc, char **argv ){
 		res2list( pk3Sounds, str );
 	}
 
-	for ( i = 0; i < numBSPEntities && i < numEntities; ++i )
+	for ( const auto& e : entities )
 	{
-		if ( ENT_READKV( &str, &entities[i], "noise" ) && str[0] != '*' ){
+		if ( ENT_READKV( &str, &e, "noise" ) && str[0] != '*' ){
 			FixDOSName( str );
 			DefaultExtension( str, ".wav" );
 			res2list( pk3Sounds, str );
 		}
 
-		if ( ent_class_is( &entities[i], "func_plat" ) ){
+		if ( ent_class_is( &e, "func_plat" ) ){
 			res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
 			res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
 		}
-		if ( ent_class_is( &entities[i], "target_push" ) ){
-			if ( !( IntForKey( &entities[i], "spawnflags") & 1 ) ){
+		if ( ent_class_is( &e, "target_push" ) ){
+			if ( !( IntForKey( &e, "spawnflags") & 1 ) ){
 				res2list( pk3Sounds, "sound/misc/windfly.wav" );
 			}
 		}
-		res2list( pk3Shaders, ValueForKey( &entities[i], "targetShaderNewName" ) );
+		res2list( pk3Shaders, ValueForKey( &e, "targetShaderNewName" ) );
 
-		if ( ENT_READKV( &str, &entities[i], "model2" ) ){
-			Sys_Warning( "unhandled model2 key of %s: %s\n", ent_classname( &entities[i] ), str );
+		if ( ENT_READKV( &str, &e, "model2" ) ){
+			Sys_Warning( "unhandled model2 key of %s: %s\n", ent_classname( &e ), str );
 		}
 	}
 
@@ -991,26 +991,26 @@ int repackBSPMain( int argc, char **argv ){
 			res2list( pk3Sounds, str );
 		}
 
-		for ( i = 0; i < numBSPEntities && i < numEntities; ++i )
+		for ( const auto& e : entities )
 		{
-			if ( ENT_READKV( &str, &entities[i], "noise" ) && str[0] != '*' ){
+			if ( ENT_READKV( &str, &e, "noise" ) && str[0] != '*' ){
 				FixDOSName( str );
 				DefaultExtension( str, ".wav" );
 				res2list( pk3Sounds, str );
 			}
 
-			if ( ent_class_is( &entities[i], "func_plat" ) ){
+			if ( ent_class_is( &e, "func_plat" ) ){
 				res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
 				res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
 			}
-			if ( ent_class_is( &entities[i], "target_push" ) ){
-				if ( !( IntForKey( &entities[i], "spawnflags") & 1 ) ){
+			if ( ent_class_is( &e, "target_push" ) ){
+				if ( !( IntForKey( &e, "spawnflags") & 1 ) ){
 					res2list( pk3Sounds, "sound/misc/windfly.wav" );
 				}
 			}
-			res2list( pk3Shaders, ValueForKey( &entities[i], "targetShaderNewName" ) );
+			res2list( pk3Shaders, ValueForKey( &e, "targetShaderNewName" ) );
 
-			if ( ENT_READKV( &str, &entities[i], "model2" ) ){
+			if ( ENT_READKV( &str, &e, "model2" ) ){
 				Sys_Warning( "unhandled model2 key of %s: %s\n", ent_classname( &entities[i] ), str );
 			}
 		}
@@ -1073,21 +1073,18 @@ int repackBSPMain( int argc, char **argv ){
 			//numBSPBrushes = 0;
 			//allocatedBSPBrushes = 0;
 		}
-*/		if ( entities != 0 ) {
-			for ( i = 0; i < numBSPEntities && i < numEntities; ++i ){
-				ep = entities[i].epairs;
+*/		{
+			for ( const auto& e : entities ){
+				ep = e.epairs;
 				while( ep != NULL){
 					epair_t *ep2free = ep;
 					ep = ep->next;
 					free( ep2free );
 				}
 			}
-			free( entities );
-			entities = NULL;
+			entities.clear();
 			//Sys_Printf( "freed entities\n" );
-			numEntities = 0;
 			numBSPEntities = 0;
-			allocatedEntities = 0;
 		}
 /*		if ( bspModels != 0 ) {
 			free( bspModels );

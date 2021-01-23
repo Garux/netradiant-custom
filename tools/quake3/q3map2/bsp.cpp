@@ -100,7 +100,6 @@ static void autocaulk_write(){
  */
 
 static void ProcessAdvertisements( void ) {
-	int i;
 	const char*         modelKey;
 	int modelNum;
 	bspModel_t*         adModel;
@@ -108,19 +107,19 @@ static void ProcessAdvertisements( void ) {
 
 	Sys_FPrintf( SYS_VRB, "--- ProcessAdvertisements ---\n" );
 
-	for ( i = 0; i < numEntities; i++ ) {
+	for ( const auto& e : entities ) {
 
 		/* is an advertisement? */
-		if ( ent_class_is( &entities[ i ], "advertisement" ) ) {
+		if ( ent_class_is( &e, "advertisement" ) ) {
 
-			modelKey = ValueForKey( &entities[ i ], "model" );
+			modelKey = ValueForKey( &e, "model" );
 
 			if ( strlen( modelKey ) > MAX_QPATH - 1 ) {
 				Error( "Model Key for entity exceeds ad struct string length." );
 			}
 			else {
 				if ( numBSPAds < MAX_MAP_ADVERTISEMENTS ) {
-					bspAds[numBSPAds].cellId = IntForKey( &entities[ i ], "cellId" );
+					bspAds[numBSPAds].cellId = IntForKey( &e, "cellId" );
 					strncpy( bspAds[numBSPAds].model, modelKey, sizeof( bspAds[numBSPAds].model ) );
 
 					modelKey++;
@@ -171,7 +170,6 @@ static void ProcessAdvertisements( void ) {
  */
 
 static void SetCloneModelNumbers( void ){
-	int i, j;
 	int models;
 	char modelValue[ 16 ];
 	const char  *value, *value2, *value3;
@@ -179,7 +177,7 @@ static void SetCloneModelNumbers( void ){
 
 	/* start with 1 (worldspawn is model 0) */
 	models = 1;
-	for ( i = 1; i < numEntities; i++ )
+	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
 		if ( entities[ i ].brushes == NULL && entities[ i ].patches == NULL ) {
@@ -199,7 +197,7 @@ static void SetCloneModelNumbers( void ){
 	}
 
 	/* fix up clones */
-	for ( i = 1; i < numEntities; i++ )
+	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* only entities with brushes or patches get a model number */
 		if ( entities[ i ].brushes == NULL && entities[ i ].patches == NULL ) {
@@ -211,7 +209,7 @@ static void SetCloneModelNumbers( void ){
 			continue;
 
 		/* find an entity with matching clone name */
-		for ( j = 0; j < numEntities; j++ )
+		for ( std::size_t j = 0; j < entities.size(); ++j )
 		{
 			/* is this a clone parent? */
 			if ( !ENT_READKV( &value2, &entities[ j ], "_clonename" ) ) {
@@ -453,45 +451,46 @@ void ProcessWorldModel( void ){
 	}
 
 	/* ydnar: bug 645: do flares for lights */
-	for ( int i = 0; i < numEntities && emitFlares; i++ )
-	{
-		entity_t    *light, *target;
-		vec3_t origin, targetOrigin, normal, color;
+	if( emitFlares ){
+		for ( const auto& light : entities )
+		{
+			entity_t    *target;
+			vec3_t origin, targetOrigin, normal, color;
 
-		/* get light */
-		light = &entities[ i ];
-		if ( ent_class_is( light, "light" ) ) {
-			/* get flare shader */
-			const char *flareShader = NULL;
-			if ( ENT_READKV( &flareShader, light, "_flareshader" ) || BoolForKey( light, "_flare" ) ) {
-				/* get specifics */
-				GetVectorForKey( light, "origin", origin );
-				GetVectorForKey( light, "_color", color );
-				const int lightStyle = IntForKey( light, "_style", "style" );
+			/* get light */
+			if ( ent_class_is( &light, "light" ) ) {
+				/* get flare shader */
+				const char *flareShader = NULL;
+				if ( ENT_READKV( &flareShader, &light, "_flareshader" ) || BoolForKey( &light, "_flare" ) ) {
+					/* get specifics */
+					GetVectorForKey( &light, "origin", origin );
+					GetVectorForKey( &light, "_color", color );
+					const int lightStyle = IntForKey( &light, "_style", "style" );
 
-				/* handle directional spotlights */
-				if ( ENT_READKV( &value, light, "target" ) ) {
-					/* get target light */
-					target = FindTargetEntity( value );
-					if ( target != NULL ) {
-						GetVectorForKey( target, "origin", targetOrigin );
-						VectorSubtract( targetOrigin, origin, normal );
-						VectorNormalize( normal, normal );
+					/* handle directional spotlights */
+					if ( ENT_READKV( &value, &light, "target" ) ) {
+						/* get target light */
+						target = FindTargetEntity( value );
+						if ( target != NULL ) {
+							GetVectorForKey( target, "origin", targetOrigin );
+							VectorSubtract( targetOrigin, origin, normal );
+							VectorNormalize( normal, normal );
+						}
 					}
-				}
-				else{
-					//%	VectorClear( normal );
-					VectorSet( normal, 0, 0, -1 );
-				}
+					else{
+						//%	VectorClear( normal );
+						VectorSet( normal, 0, 0, -1 );
+					}
 
-				if ( colorsRGB ) {
-					color[0] = Image_LinearFloatFromsRGBFloat( color[0] );
-					color[1] = Image_LinearFloatFromsRGBFloat( color[1] );
-					color[2] = Image_LinearFloatFromsRGBFloat( color[2] );
-				}
+					if ( colorsRGB ) {
+						color[0] = Image_LinearFloatFromsRGBFloat( color[0] );
+						color[1] = Image_LinearFloatFromsRGBFloat( color[1] );
+						color[2] = Image_LinearFloatFromsRGBFloat( color[2] );
+					}
 
-				/* create the flare surface (note shader defaults automatically) */
-				DrawSurfaceForFlare( mapEntityNum, origin, normal, color, flareShader, lightStyle );
+					/* create the flare surface (note shader defaults automatically) */
+					DrawSurfaceForFlare( mapEntityNum, origin, normal, color, flareShader, lightStyle );
+				}
 			}
 		}
 	}
@@ -613,17 +612,17 @@ void ProcessModels( void ){
 	CreateMapFogs();
 
 	/* walk entity list */
-	for ( mapEntityNum = 0; mapEntityNum < numEntities; mapEntityNum++ )
+	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity */
-		entity = &entities[ mapEntityNum ];
+		entity = &entities[ i ];
 		if ( entity->brushes == NULL && entity->patches == NULL ) {
 			continue;
 		}
 
 		/* process the model */
 		Sys_FPrintf( SYS_VRB, "############### model %i ###############\n", numBSPModels );
-		if ( mapEntityNum == 0 ) {
+		if ( i == 0 ) {
 			ProcessWorldModel();
 		}
 		else{
@@ -669,7 +668,7 @@ void OnlyEnts( void ){
 	strcpyQ( save_version, ValueForKey( &entities[0], "_q3map2_version" ), sizeof( save_version ) );
 	strcpyQ( save_gridsize, ValueForKey( &entities[0], "gridsize" ), sizeof( save_gridsize ) );
 
-	numEntities = 0;
+	entities.clear();
 
 	LoadShaderInfo();
 	LoadMapFile( name, false, false );
@@ -686,7 +685,7 @@ void OnlyEnts( void ){
 		SetKeyValue( &entities[0], "gridsize", save_gridsize );
 	}
 
-	numBSPEntities = numEntities;
+	numBSPEntities = entities.size();
 	UnparseEntities();
 
 	WriteBSPFile( out );

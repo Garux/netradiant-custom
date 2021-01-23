@@ -301,7 +301,7 @@ void Convert_ReferenceLightmaps( const char* base, int* lmIndices ){
  */
 
 int ConvertBSPToOBJ( char *bspName ){
-	int i, modelNum;
+	int modelNum;
 	FILE            *f, *fmtl;
 	bspShader_t     *shader;
 	bspModel_t      *model;
@@ -348,7 +348,7 @@ int ConvertBSPToOBJ( char *bspName ){
 	}
 	else
 	{
-		for ( i = 0; i < numBSPShaders; i++ )
+		for ( int i = 0; i < numBSPShaders; i++ )
 		{
 			shader = &bspShaders[ i ];
 			ConvertShaderToMTL( fmtl, shader, i );
@@ -356,7 +356,7 @@ int ConvertBSPToOBJ( char *bspName ){
 	}
 
 	/* walk entity list */
-	for ( i = 0; i < numEntities; i++ )
+	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity and model */
 		e = &entities[ i ];
@@ -382,7 +382,7 @@ int ConvertBSPToOBJ( char *bspName ){
 	}
 
 	if ( lightmapsAsTexcoord ) {
-		for ( i = firstLightmap; i <= lastLightmap; i++ )
+		for ( int i = firstLightmap; i <= lastLightmap; i++ )
 			ConvertLightmapToMTL( fmtl, base, i );
 	}
 

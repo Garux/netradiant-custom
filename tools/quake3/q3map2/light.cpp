@@ -215,13 +215,13 @@ static void CreateSkyLights( vec3_t color, float value, int iterations, float fi
  */
 
 void CreateEntityLights( void ){
-	int i, j;
+	int j;
 	light_t         *light, *light2;
-	entity_t        *e, *e2;
+	const entity_t  *e, *e2;
 
 
 	/* go throught entity list and find lights */
-	for ( i = 0; i < numEntities; i++ )
+	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity */
 		e = &entities[ i ];
@@ -337,7 +337,7 @@ void CreateEntityLights( void ){
 		GetVectorForKey( e, "origin", light->origin );
 		ENT_READKV( &light->style, e, "_style", "style" );
 		if ( light->style < LS_NORMAL || light->style >= LS_NONE ) {
-			Error( "Invalid lightstyle (%d) on entity %d", light->style, i );
+			Error( "Invalid lightstyle (%d) on entity %zu", light->style, i );
 		}
 
 		/* set light intensity */
@@ -604,8 +604,7 @@ void CreateSurfaceLights( void ){
  */
 
 void SetEntityOrigins( void ){
-	int i, j, k, f;
-	entity_t            *e;
+	int j, k, f;
 	const char          *key;
 	int modelnum;
 	bspModel_t          *dm;
@@ -617,11 +616,10 @@ void SetEntityOrigins( void ){
 	memcpy( yDrawVerts, bspDrawVerts, numBSPDrawVerts * sizeof( bspDrawVert_t ) );
 
 	/* set the entity origins */
-	for ( i = 0; i < numEntities; i++ )
+	for ( const auto& e : entities )
 	{
 		/* get entity and model */
-		e = &entities[ i ];
-		key = ValueForKey( e, "model" );
+		key = ValueForKey( &e, "model" );
 		if ( key[ 0 ] != '*' ) {
 			continue;
 		}
@@ -630,7 +628,7 @@ void SetEntityOrigins( void ){
 
 		/* get entity origin */
 		vec3_t origin = { 0.f, 0.f, 0.f };
-		if ( !ENT_READKV( &origin, e, "origin" ) ) {
+		if ( !ENT_READKV( &origin, &e, "origin" ) ) {
 			continue;
 		}
 

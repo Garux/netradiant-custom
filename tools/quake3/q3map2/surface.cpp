@@ -3606,7 +3606,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			BiasSurfaceTextures( ds );
 
 			/* ydnar: globalizing of fog volume handling (eek a hack) */
-			if ( e != entities && !si->noFog ) {
+			if ( e != &entities[0] && !si->noFog ) {
 				/* find surface origin and offset by entity origin */
 				VectorAdd( ds->mins, ds->maxs, origin );
 				VectorScale( origin, 0.5f, origin );

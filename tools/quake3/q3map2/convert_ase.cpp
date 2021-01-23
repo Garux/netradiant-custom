@@ -337,7 +337,7 @@ static void ConvertLightmap( FILE *f, const char *base, int lightmapNum ){
  */
 
 int ConvertBSPToASE( char *bspName ){
-	int i, modelNum;
+	int modelNum;
 	FILE            *f;
 	bspShader_t     *shader;
 	bspModel_t      *model;
@@ -382,14 +382,14 @@ int ConvertBSPToASE( char *bspName ){
 	if ( lightmapsAsTexcoord ) {
 		numLightmapsASE = Convert_CountLightmaps( dirname );
 		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", numLightmapsASE );
-		for ( i = 0; i < numLightmapsASE; i++ )
+		for ( int i = 0; i < numLightmapsASE; i++ )
 			ConvertLightmap( f, base, i );
 		Convert_ReferenceLightmaps( base, lmIndices );
 	}
 	else
 	{
 		fprintf( f, "\t*MATERIAL_COUNT\t%d\r\n", numBSPShaders );
-		for ( i = 0; i < numBSPShaders; i++ )
+		for ( int i = 0; i < numBSPShaders; i++ )
 		{
 			shader = &bspShaders[ i ];
 			ConvertShader( f, shader, i );
@@ -398,7 +398,7 @@ int ConvertBSPToASE( char *bspName ){
 	fprintf( f, "}\r\n" );
 
 	/* walk entity list */
-	for ( i = 0; i < numEntities; i++ )
+	for ( std::size_t i = 0; i < entities.size(); ++i )
 	{
 		/* get entity and model */
 		e = &entities[ i ];

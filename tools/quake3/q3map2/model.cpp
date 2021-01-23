@@ -1348,7 +1348,7 @@ void AddTriangleModels( entity_t *eparent ){
 
 	/* get current brush entity targetname */
 	const char *targetName;
-	if ( eparent == entities ) {
+	if ( eparent == &entities[0] ) {
 		targetName = "";
 	}
 	else{  /* misc_model entities target non-worldspawn brush model entities */
@@ -1358,10 +1358,10 @@ void AddTriangleModels( entity_t *eparent ){
 	}
 
 	/* walk the entity list */
-	for ( int num = 1; num < numEntities; num++ )
+	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* get entity */
-		entity_t *e = &entities[ num ];
+		entity_t *e = &entities[ i ];
 
 		/* convert misc_models into raw geometry */
 		if ( !ent_class_is( e, "misc_model" ) ) {
@@ -1384,7 +1384,7 @@ void AddTriangleModels( entity_t *eparent ){
 		const int frame = IntForKey( e, "_frame", "frame" );
 
 		int castShadows, recvShadows;
-		if ( eparent == entities ) {    /* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
+		if ( eparent == &entities[0] ) {    /* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
 			castShadows = WORLDSPAWN_CAST_SHADOWS;
 			recvShadows = WORLDSPAWN_RECV_SHADOWS;
 		}
