@@ -2036,7 +2036,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 	}
 
 	/* create a culled light list for this raw lightmap */
-	CreateTraceLightsForBounds( lm->mins, lm->maxs, lm->plane, lm->numLightClusters, lm->lightClusters, LIGHT_SURFACES, &trace );
+	CreateTraceLightsForBounds( lm->mins, lm->maxs, lm->plane, lm->numLightClusters, lm->lightClusters, LightFlags::Surfaces, &trace );
 
 	/* -----------------------------------------------------------------
 	   fill pass
@@ -2484,7 +2484,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 						luxel[ 3 ] = 1.0f;
 
 						/* handle negative light */
-						if ( trace.light->flags & LIGHT_NEGATIVE ) {
+						if ( trace.light->flags & LightFlags::Negative ) {
 							luxel[ 0 ] -= averageColor[ 0 ] / samples;
 							luxel[ 1 ] -= averageColor[ 1 ] / samples;
 							luxel[ 2 ] -= averageColor[ 2 ] / samples;
@@ -2517,7 +2517,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 						deluxel = SUPER_DELUXEL( x, y );
 
 						/* handle negative light */
-						if ( trace.light->flags & LIGHT_NEGATIVE ) {
+						if ( trace.light->flags & LightFlags::Negative ) {
 							VectorScale( averageColor, -1.0f, averageColor );
 						}
 
@@ -2525,7 +2525,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 						luxel[ 3 ] = 1.0f;
 
 						/* handle negative light */
-						if ( trace.light->flags & LIGHT_NEGATIVE ) {
+						if ( trace.light->flags & LightFlags::Negative ) {
 							VectorSubtract( luxel, lightLuxel, luxel );
 						}
 
@@ -3627,11 +3627,11 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 		if ( light->photons < 0.0f || light->add < 0.0f ) {
 			light->photons *= -1.0f;
 			light->add *= -1.0f;
-			light->flags |= LIGHT_NEGATIVE;
+			light->flags |= LightFlags::Negative;
 		}
 
 		/* sunlight? */
-		if ( light->type == EMIT_SUN ) {
+		if ( light->type == ELightType::Sun ) {
 			/* special cased */
 			light->cluster = 0;
 			light->envelope = MAX_WORLD_COORD * 8.0f;
@@ -3683,27 +3683,27 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 			if ( light->cluster >= 0 ) {
 				/* set light fast flag */
 				if ( fastFlag ) {
-					light->flags |= LIGHT_FAST_TEMP;
+					light->flags |= LightFlags::FastTemp;
 				}
 				else{
-					light->flags &= ~LIGHT_FAST_TEMP;
+					light->flags &= ~LightFlags::FastTemp;
 				}
-				if ( fastpoint && ( light->type != EMIT_AREA ) ) {
-					light->flags |= LIGHT_FAST_TEMP;
+				if ( fastpoint && ( light->type != ELightType::Area ) ) {
+					light->flags |= LightFlags::FastTemp;
 				}
 				if ( light->si && light->si->noFast ) {
-					light->flags &= ~( LIGHT_FAST | LIGHT_FAST_TEMP );
+					light->flags &= ~( LightFlags::Fast | LightFlags::FastTemp );
 				}
 
 				/* clear light envelope */
 				light->envelope = 0;
 
 				/* handle area lights */
-				if ( exactPointToPolygon && light->type == EMIT_AREA && light->w != NULL ) {
+				if ( exactPointToPolygon && light->type == ELightType::Area && light->w != NULL ) {
 					light->envelope = MAX_WORLD_COORD * 8.0f;
 
 					/* check for fast mode */
-					if ( ( light->flags & LIGHT_FAST ) || ( light->flags & LIGHT_FAST_TEMP ) ) {
+					if ( ( light->flags & LightFlags::Fast ) || ( light->flags & LightFlags::FastTemp ) ) {
 						/* ugly hack to calculate extent for area lights, but only done once */
 						VectorScale( light->normal, -1.0f, dir );
 						for ( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
@@ -3733,13 +3733,13 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 				/* other calcs */
 				if ( light->envelope <= 0.0f ) {
 					/* solve distance for non-distance lights */
-					if ( !( light->flags & LIGHT_ATTEN_DISTANCE ) ) {
+					if ( !( light->flags & LightFlags::AttenDistance ) ) {
 						light->envelope = MAX_WORLD_COORD * 8.0f;
 					}
 
-					else if ( ( light->flags & LIGHT_FAST ) || ( light->flags & LIGHT_FAST_TEMP ) ) {
+					else if ( ( light->flags & LightFlags::Fast ) || ( light->flags & LightFlags::FastTemp) ) {
 						/* solve distance for linear lights */
-						if ( ( light->flags & LIGHT_ATTEN_LINEAR ) ) {
+						if ( ( light->flags & LightFlags::AttenLinear ) ) {
 							light->envelope = ( ( intensity * linearScale ) - light->falloffTolerance ) / light->fade;
 						}
 
@@ -3766,7 +3766,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 					else
 					{
 						/* solve distance for linear lights */
-						if ( ( light->flags & LIGHT_ATTEN_LINEAR ) ) {
+						if ( ( light->flags & LightFlags::AttenLinear ) ) {
 							light->envelope = ( intensity * linearScale ) / light->fade;
 						}
 
@@ -3816,7 +3816,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 					}
 
 					/* chop the bounds by a plane for area lights and spotlights */
-					if ( light->type == EMIT_AREA || light->type == EMIT_SPOT ) {
+					if ( light->type == ELightType::Area || light->type == ELightType::Spot ) {
 						ChopBounds( mins, maxs, light->origin, light->normal );
 					}
 
@@ -3849,13 +3849,13 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 
 				/* add grid/surface only check */
 				if ( forGrid ) {
-					if ( !( light->flags & LIGHT_GRID ) ) {
+					if ( !( light->flags & LightFlags::Grid ) ) {
 						light->envelope = 0.0f;
 					}
 				}
 				else
 				{
-					if ( !( light->flags & LIGHT_SURFACES ) ) {
+					if ( !( light->flags & LightFlags::Surfaces ) ) {
 						light->envelope = 0.0f;
 					}
 				}
@@ -3928,7 +3928,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
    creates a list of lights that affect the given bounding box and pvs clusters (bsp leaves)
  */
 
-void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int numClusters, int *clusters, int flags, trace_t *trace ){
+void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int numClusters, int *clusters, LightFlags flags, trace_t *trace ){
 	int i;
 	light_t     *light;
 	vec3_t origin, dir, nullVector = { 0.0f, 0.0f, 0.0f };
@@ -3979,7 +3979,7 @@ void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int nu
 		}
 
 		/* sunlight skips all this nonsense */
-		if ( light->type != EMIT_SUN ) {
+		if ( light->type != ELightType::Sun ) {
 			/* sun only? */
 			if ( sunOnly ) {
 				continue;
@@ -4030,7 +4030,7 @@ void CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int nu
 		/* planar surfaces (except twosided surfaces) have a couple more checks */
 		if ( length > 0.0f && !trace->twoSided ) {
 			/* lights coplanar with a surface won't light it */
-			if ( !( light->flags & LIGHT_TWOSIDED ) && DotProduct( light->normal, normal ) > 0.999f ) {
+			if ( !( light->flags & LightFlags::Twosided ) && DotProduct( light->normal, normal ) > 0.999f ) {
 				lightsPlaneCulled++;
 				continue;
 			}
@@ -4093,7 +4093,7 @@ void CreateTraceLightsForSurface( int num, trace_t *trace ){
 	}
 
 	/* create the lights for the bounding box */
-	CreateTraceLightsForBounds( mins, maxs, normal, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ], LIGHT_SURFACES, trace );
+	CreateTraceLightsForBounds( mins, maxs, normal, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ], LightFlags::Surfaces, trace );
 }
 
 /////////////////////////////////////////////////////////////

@@ -970,7 +970,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 		}
 
 		/* brush primitive texturing */
-		else if ( g_brushType == BPRIMIT_BP ) {
+		else if ( g_brushType == EBrushType::Bp ) {
 			/* calculate texture s/t from brush primitive texture matrix */
 			x = DotProduct( vTranslated, texX );
 			y = DotProduct( vTranslated, texY );

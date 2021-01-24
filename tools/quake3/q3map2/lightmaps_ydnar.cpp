@@ -3385,7 +3385,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 			dv = &bspDrawVerts[ ds->firstVert ];
 
 			/* depthFunc equal? */
-			const bool dfEqual = ( info->si->styleMarker == 2 || info->si->implicitMap == IM_MASKED );
+			const bool dfEqual = ( info->si->styleMarker == 2 || info->si->implicitMap == EImplicitMap::Masked );
 
 			/* generate stages for styled lightmaps */
 			for ( lightmapNum = 1; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )

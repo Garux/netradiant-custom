@@ -86,6 +86,7 @@
 
 #include "stringfixedsize.h"
 #include "stream/stringstream.h"
+#include "bitflags.h"
 #include <list>
 
 #include <stddef.h>
@@ -199,13 +200,13 @@
 #define PSIDE_BOTH              ( PSIDE_FRONT | PSIDE_BACK )
 #define PSIDE_FACING            4
 
-typedef enum{
-	BPRIMIT_UNDEFINED = 0,
-	BPRIMIT_QUAKE,
-	BPRIMIT_BP,
-	BPRIMIT_VALVE220
-}
-brushType_t;
+enum class EBrushType
+{
+	Undefined,
+	Quake,
+	Bp,
+	Valve220
+};
 
 /* vis */
 #define VIS_HEADER_SIZE         8
@@ -221,29 +222,6 @@ brushType_t;
 
 
 /* light */
-#define EMIT_POINT              0
-#define EMIT_AREA               1
-#define EMIT_SPOT               2
-#define EMIT_SUN                3
-
-#define LIGHT_ATTEN_LINEAR      1
-#define LIGHT_ATTEN_ANGLE       2
-#define LIGHT_ATTEN_DISTANCE    4
-#define LIGHT_TWOSIDED          8
-#define LIGHT_GRID              16
-#define LIGHT_SURFACES          32
-#define LIGHT_DARK              64      /* probably never use this */
-#define LIGHT_FAST              256
-#define LIGHT_FAST_TEMP         512
-#define LIGHT_FAST_ACTUAL       ( LIGHT_FAST | LIGHT_FAST_TEMP )
-#define LIGHT_NEGATIVE          1024
-#define LIGHT_UNNORMALIZED      2048    /* vortex: do not normalize _color */
-
-#define LIGHT_SUN_DEFAULT       ( LIGHT_ATTEN_ANGLE | LIGHT_GRID | LIGHT_SURFACES )
-#define LIGHT_AREA_DEFAULT      ( LIGHT_ATTEN_ANGLE | LIGHT_ATTEN_DISTANCE | LIGHT_GRID | LIGHT_SURFACES )    /* q3a and wolf are the same */
-#define LIGHT_Q3A_DEFAULT       ( LIGHT_ATTEN_ANGLE | LIGHT_ATTEN_DISTANCE | LIGHT_GRID | LIGHT_SURFACES | LIGHT_FAST )
-#define LIGHT_WOLF_DEFAULT      ( LIGHT_ATTEN_LINEAR | LIGHT_ATTEN_DISTANCE | LIGHT_GRID | LIGHT_SURFACES | LIGHT_FAST )
-
 #define MAX_TRACE_TEST_NODES    256
 #define DEFAULT_INHIBIT_RADIUS  1.5f
 
@@ -513,13 +491,12 @@ struct surfaceParm_t
 	int compileFlags, compileFlagsClear;
 };
 
-typedef enum
+enum class EMiniMapMode
 {
-	MINIMAP_MODE_GRAY,
-	MINIMAP_MODE_BLACK,
-	MINIMAP_MODE_WHITE
-}
-miniMapMode_t;
+	Gray,
+	Black,
+	White
+};
 
 struct game_t
 {
@@ -554,7 +531,7 @@ struct game_t
 	float miniMapSharpen;                               /* minimap sharpening coefficient */
 	float miniMapBorder;                                /* minimap border amount */
 	bool miniMapKeepAspect;                             /* minimap keep aspect ratio by letterboxing */
-	miniMapMode_t miniMapMode;                          /* minimap mode */
+	EMiniMapMode miniMapMode;                           /* minimap mode */
 	const char          *miniMapNameFormat;             /* minimap name format */
 	const char          *bspIdent;                      /* 4-letter bsp file prefix */
 	int bspVersion;                                     /* bsp version to use */
@@ -616,45 +593,40 @@ struct remap_t
 };
 
 
-/* wingdi.h hack, it's the same: 0 */
-#undef CM_NONE
-
-typedef enum
+enum class EColorMod
 {
-	CM_NONE,
-	CM_VOLUME,
-	CM_COLOR_SET,
-	CM_ALPHA_SET,
-	CM_COLOR_SCALE,
-	CM_ALPHA_SCALE,
-	CM_COLOR_DOT_PRODUCT,
-	CM_ALPHA_DOT_PRODUCT,
-	CM_COLOR_DOT_PRODUCT_SCALE,
-	CM_ALPHA_DOT_PRODUCT_SCALE,
-	CM_COLOR_DOT_PRODUCT_2,
-	CM_ALPHA_DOT_PRODUCT_2,
-	CM_COLOR_DOT_PRODUCT_2_SCALE,
-	CM_ALPHA_DOT_PRODUCT_2_SCALE
-}
-colorModType_t;
+	None,
+	Volume,
+	ColorSet,
+	AlphaSet,
+	ColorScale,
+	AlphaScale,
+	ColorDotProduct,
+	AlphaDotProduct,
+	ColorDotProductScale,
+	AlphaDotProductScale,
+	ColorDotProduct2,
+	AlphaDotProduct2,
+	ColorDotProduct2Scale,
+	AlphaDotProduct2Scale
+};
 
 
 struct colorMod_t
 {
 	colorMod_t   *next;
-	colorModType_t type;
+	EColorMod type;
 	vec_t data[ 16 ];
 };
 
 
-typedef enum
+enum class EImplicitMap
 {
-	IM_NONE,
-	IM_OPAQUE,
-	IM_MASKED,
-	IM_BLEND
-}
-implicitMap_t;
+	None,
+	Opaque,
+	Masked,
+	Blend
+};
 
 
 struct shaderInfo_t
@@ -734,7 +706,7 @@ struct shaderInfo_t
 	String64 lightImagePath;                            /* use this image to generate color / averageColor */
 	String64 normalImagePath;                           /* ydnar: normalmap image for bumpmapping */
 
-	implicitMap_t implicitMap;                          /* ydnar: enemy territory implicit shaders */
+	EImplicitMap implicitMap;                           /* ydnar: enemy territory implicit shaders */
 	String64 implicitImagePath;
 
 	image_t             *shaderImage;
@@ -1238,13 +1210,42 @@ struct threaddata_t
 
    ------------------------------------------------------------------------------- */
 
+enum class ELightType
+{
+	Point,
+	Area,
+	Spot,
+	Sun
+};
+
+struct LightFlags : BitFlags<std::uint32_t, LightFlags>
+{
+	constexpr static BitFlags AttenLinear      {1 << 0};
+	constexpr static BitFlags AttenAngle       {1 << 1};
+	constexpr static BitFlags AttenDistance    {1 << 2};
+	constexpr static BitFlags Twosided         {1 << 3};
+	constexpr static BitFlags Grid             {1 << 4};
+	constexpr static BitFlags Surfaces         {1 << 5};
+	constexpr static BitFlags Dark             {1 << 6};      /* probably never use this */
+	constexpr static BitFlags Fast             {1 << 7};
+	constexpr static BitFlags FastTemp         {1 << 8};
+	constexpr static BitFlags FastActual       { Fast | FastTemp };
+	constexpr static BitFlags Negative         {1 << 9};
+	constexpr static BitFlags Unnormalized     {1 << 10};     /* vortex: do not normalize _color */
+
+	constexpr static BitFlags DefaultSun       { AttenAngle | Grid | Surfaces };
+	constexpr static BitFlags DefaultArea      { AttenAngle | AttenDistance | Grid | Surfaces };    /* q3a and wolf are the same */
+	constexpr static BitFlags DefaultQ3A       { AttenAngle | AttenDistance | Grid | Surfaces | Fast };
+	constexpr static BitFlags DefaultWolf      { AttenLinear | AttenDistance | Grid | Surfaces | Fast };
+};
+
 /* ydnar: new light struct with flags */
 struct light_t
 {
 	light_t             *next;
 
-	int type;
-	int flags;                          /* ydnar: condensed all the booleans into one flags int */
+	ELightType type;
+	LightFlags flags;                   /* ydnar: condensed all the booleans into one flags int */
 	shaderInfo_t        *si;
 
 	vec3_t origin;
@@ -1757,7 +1758,7 @@ int                         ClusterForPointExtFilter( vec3_t point, float epsilo
 int                         ShaderForPointInLeaf( vec3_t point, int leafNum, float epsilon, int wantContentFlags, int wantSurfaceFlags, int *contentFlags, int *surfaceFlags );
 void                        SetupEnvelopes( bool forGrid, bool fastFlag );
 void                        FreeTraceLights( trace_t *trace );
-void                        CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int numClusters, int *clusters, int flags, trace_t *trace );
+void                        CreateTraceLightsForBounds( vec3_t mins, vec3_t maxs, vec3_t normal, int numClusters, int *clusters, LightFlags flags, trace_t *trace );
 void                        CreateTraceLightsForSurface( int num, trace_t *trace );
 
 
@@ -2073,7 +2074,7 @@ Q_EXTERN fog_t mapFogs[ MAX_MAP_FOGS ];
 
 Q_EXTERN entity_t           *mapEnt;
 Q_EXTERN brush_t            *buildBrush;
-Q_EXTERN brushType_t g_brushType;
+Q_EXTERN EBrushType g_brushType Q_ASSIGN( EBrushType::Undefined );
 
 Q_EXTERN int numStrippedLights Q_ASSIGN( 0 );
 

@@ -467,7 +467,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 	float *q;
 	int x, y;
 	int i;
-	miniMapMode_t mode;
+	EMiniMapMode mode;
 	vec3_t mins, maxs;
 	bool keepaspect;
 
@@ -560,15 +560,15 @@ int MiniMapBSPMain( int argc, char **argv ){
 			Sys_Printf( "Map mins/maxs overridden\n" );
 		}
 		else if ( strEqual( argv[ i ],  "-gray" ) ) {
-			mode = MINIMAP_MODE_GRAY;
+			mode = EMiniMapMode::Gray;
 			Sys_Printf( "Writing as white-on-black image\n" );
 		}
 		else if ( strEqual( argv[ i ],  "-black" ) ) {
-			mode = MINIMAP_MODE_BLACK;
+			mode = EMiniMapMode::Black;
 			Sys_Printf( "Writing as black alpha image\n" );
 		}
 		else if ( strEqual( argv[ i ],  "-white" ) ) {
-			mode = MINIMAP_MODE_WHITE;
+			mode = EMiniMapMode::White;
 			Sys_Printf( "Writing as white alpha image\n" );
 		}
 		else if ( strEqual( argv[ i ],  "-boost" ) && i < ( argc - 2 ) ) {
@@ -701,7 +701,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 
 	switch ( mode )
 	{
-	case MINIMAP_MODE_GRAY:
+	case EMiniMapMode::Gray:
 		p = data4b;
 		for ( y = 0; y < minimap.height; ++y )
 			for ( x = 0; x < minimap.width; ++x )
@@ -720,7 +720,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 		Sys_Printf( " writing to %s...", minimapFilename );
 		WriteTGAGray( minimapFilename, data4b, minimap.width, minimap.height );
 		break;
-	case MINIMAP_MODE_BLACK:
+	case EMiniMapMode::Black:
 		p = data4b;
 		for ( y = 0; y < minimap.height; ++y )
 			for ( x = 0; x < minimap.width; ++x )
@@ -742,7 +742,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 		Sys_Printf( " writing to %s...", minimapFilename );
 		WriteTGA( minimapFilename, data4b, minimap.width, minimap.height );
 		break;
-	case MINIMAP_MODE_WHITE:
+	case EMiniMapMode::White:
 		p = data4b;
 		for ( y = 0; y < minimap.height; ++y )
 			for ( x = 0; x < minimap.width; ++x )

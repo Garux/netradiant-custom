@@ -112,8 +112,8 @@ static void CreateSunLight( sun_t *sun ){
 		lights = light;
 
 		/* initialize the light */
-		light->flags = LIGHT_SUN_DEFAULT;
-		light->type = EMIT_SUN;
+		light->flags = LightFlags::DefaultSun;
+		light->type = ELightType::Sun;
 		light->fade = 1.0f;
 		light->falloffTolerance = falloffTolerance;
 		light->filterRadius = sun->filterRadius / sun->numSamples;
@@ -251,21 +251,21 @@ void CreateEntityLights( void ){
 		/* handle spawnflags */
 		const int spawnflags = IntForKey( e, "spawnflags" );
 
-		int flags;
+		LightFlags flags;
 		/* ydnar: quake 3+ light behavior */
 		if ( !wolfLight ) {
 			/* set default flags */
-			flags = LIGHT_Q3A_DEFAULT;
+			flags = LightFlags::DefaultQ3A;
 
 			/* linear attenuation? */
 			if ( spawnflags & 1 ) {
-				flags |= LIGHT_ATTEN_LINEAR;
-				flags &= ~LIGHT_ATTEN_ANGLE;
+				flags |= LightFlags::AttenLinear;
+				flags &= ~LightFlags::AttenAngle;
 			}
 
 			/* no angle attenuate? */
 			if ( spawnflags & 2 ) {
-				flags &= ~LIGHT_ATTEN_ANGLE;
+				flags &= ~LightFlags::AttenAngle;
 			}
 		}
 
@@ -273,17 +273,17 @@ void CreateEntityLights( void ){
 		else
 		{
 			/* set default flags */
-			flags = LIGHT_WOLF_DEFAULT;
+			flags = LightFlags::DefaultWolf;
 
 			/* inverse distance squared attenuation? */
 			if ( spawnflags & 1 ) {
-				flags &= ~LIGHT_ATTEN_LINEAR;
-				flags |= LIGHT_ATTEN_ANGLE;
+				flags &= ~LightFlags::AttenLinear;
+				flags |= LightFlags::AttenAngle;
 			}
 
 			/* angle attenuate? */
 			if ( spawnflags & 2 ) {
-				flags |= LIGHT_ATTEN_ANGLE;
+				flags |= LightFlags::AttenAngle;
 			}
 		}
 
@@ -291,28 +291,28 @@ void CreateEntityLights( void ){
 
 		/* wolf dark light? */
 		if ( ( spawnflags & 4 ) || ( spawnflags & 8 ) ) {
-			flags |= LIGHT_DARK;
+			flags |= LightFlags::Dark;
 		}
 
 		/* nogrid? */
 		if ( spawnflags & 16 ) {
-			flags &= ~LIGHT_GRID;
+			flags &= ~LightFlags::Grid;
 		}
 
 		/* junior? */
 		if ( junior ) {
-			flags |= LIGHT_GRID;
-			flags &= ~LIGHT_SURFACES;
+			flags |= LightFlags::Grid;
+			flags &= ~LightFlags::Surfaces;
 		}
 
 		/* vortex: unnormalized? */
 		if ( spawnflags & 32 ) {
-			flags |= LIGHT_UNNORMALIZED;
+			flags |= LightFlags::Unnormalized;
 		}
 
 		/* vortex: distance atten? */
 		if ( spawnflags & 64 ) {
-			flags |= LIGHT_ATTEN_DISTANCE;
+			flags |= LightFlags::AttenDistance;
 		}
 
 		/* store the flags */
@@ -320,7 +320,7 @@ void CreateEntityLights( void ){
 
 		/* ydnar: set fade key (from wolf) */
 		light->fade = 1.0f;
-		if ( light->flags & LIGHT_ATTEN_LINEAR ) {
+		if ( light->flags & LightFlags::AttenLinear ) {
 			light->fade = FloatForKey( e, "fade" );
 			if ( light->fade == 0.0f ) {
 				light->fade = 1.0f;
@@ -330,7 +330,7 @@ void CreateEntityLights( void ){
 		/* ydnar: set angle scaling (from vlight) */
 		light->angleScale = FloatForKey( e, "_anglescale" );
 		if ( light->angleScale != 0.0f ) {
-			light->flags |= LIGHT_ATTEN_ANGLE;
+			light->flags |= LightFlags::AttenAngle;
 		}
 
 		/* set origin */
@@ -375,7 +375,7 @@ void CreateEntityLights( void ){
 				light->color[1] = Image_LinearFloatFromsRGBFloat( light->color[1] );
 				light->color[2] = Image_LinearFloatFromsRGBFloat( light->color[2] );
 			}
-			if ( !( light->flags & LIGHT_UNNORMALIZED ) ) {
+			if ( !( light->flags & LightFlags::Unnormalized ) ) {
 				ColorNormalize( light->color, light->color );
 			}
 		}
@@ -389,7 +389,7 @@ void CreateEntityLights( void ){
 
 		light->photons = intensity;
 
-		light->type = EMIT_POINT;
+		light->type = ELightType::Point;
 
 		/* set falloff threshold */
 		light->falloffTolerance = falloffTolerance / numSamples;
@@ -423,11 +423,11 @@ void CreateEntityLights( void ){
 					dist = 64;
 				}
 				light->radiusByDist = ( radius + 16 ) / dist;
-				light->type = EMIT_SPOT;
+				light->type = ELightType::Spot;
 
 				/* ydnar: wolf mods: spotlights always use nonlinear + angle attenuation */
-				light->flags &= ~LIGHT_ATTEN_LINEAR;
-				light->flags |= LIGHT_ATTEN_ANGLE;
+				light->flags &= ~LightFlags::AttenLinear;
+				light->flags |= LightFlags::AttenAngle;
 				light->fade = 1.0f;
 
 				/* ydnar: is this a sun? */
@@ -478,7 +478,7 @@ void CreateEntityLights( void ){
 			lights = light2;
 
 			/* add to counts */
-			if ( light->type == EMIT_SPOT ) {
+			if ( light->type == ELightType::Spot ) {
 				numSpotLights++;
 			}
 			else{
@@ -555,8 +555,8 @@ void CreateSurfaceLights( void ){
 			lights = light;
 
 			/* set it up */
-			light->flags = LIGHT_Q3A_DEFAULT;
-			light->type = EMIT_POINT;
+			light->flags = LightFlags::DefaultQ3A;
+			light->type = ELightType::Point;
 			light->photons = si->value * pointScale;
 			light->fade = 1.0f;
 			light->si = si;
@@ -747,12 +747,12 @@ int LightContributionToSample( trace_t *trace ){
 	colorBrightness = RGBTOGRAY( light->color ) * ( 1.0f / 255.0f );
 
 	/* ydnar: early out */
-	if ( !( light->flags & LIGHT_SURFACES ) || light->envelope <= 0.0f ) {
+	if ( !( light->flags & LightFlags::Surfaces ) || light->envelope <= 0.0f ) {
 		return 0;
 	}
 
 	/* do some culling checks */
-	if ( light->type != EMIT_SUN ) {
+	if ( light->type != ELightType::Sun ) {
 		/* MrE: if the light is behind the surface */
 		if ( !trace->twoSided ) {
 			if ( DotProduct( light->origin, trace->normal ) - DotProduct( trace->origin, trace->normal ) < 0.0f ) {
@@ -767,7 +767,7 @@ int LightContributionToSample( trace_t *trace ){
 	}
 
 	/* exact point to polygon form factor */
-	if ( light->type == EMIT_AREA ) {
+	if ( light->type == ELightType::Area ) {
 		float factor;
 		float d;
 		vec3_t pushedOrigin;
@@ -776,7 +776,7 @@ int LightContributionToSample( trace_t *trace ){
 		d = DotProduct( trace->origin, light->normal ) - light->dist;
 		if ( d < 3.0f ) {
 			/* sample point behind plane? */
-			if ( !( light->flags & LIGHT_TWOSIDED ) && d < -1.0f ) {
+			if ( !( light->flags & LightFlags::Twosided ) && d < -1.0f ) {
 				return 0;
 			}
 
@@ -821,7 +821,7 @@ int LightContributionToSample( trace_t *trace ){
 				return 0;
 			}
 			else if ( angle < 0.0f &&
-					  ( trace->twoSided || ( light->flags & LIGHT_TWOSIDED ) ) ) {
+					  ( trace->twoSided || ( light->flags & LightFlags::Twosided ) ) ) {
 				angle = -angle;
 
 				/* no deluxemap contribution from "other side" light */
@@ -854,7 +854,7 @@ int LightContributionToSample( trace_t *trace ){
 			}
 			else if ( factor < 0.0f ) {
 				/* twosided lighting */
-				if ( trace->twoSided || ( light->flags & LIGHT_TWOSIDED ) ) {
+				if ( trace->twoSided || ( light->flags & LightFlags::Twosided ) ) {
 					factor = -factor;
 
 					/* push light origin to other side of the plane */
@@ -888,7 +888,7 @@ int LightContributionToSample( trace_t *trace ){
 	}
 
 	/* point/spot lights */
-	else if ( light->type == EMIT_POINT || light->type == EMIT_SPOT ) {
+	else if ( light->type == ELightType::Point || light->type == ELightType::Spot ) {
 		/* get direction and distance */
 		VectorCopy( light->origin, trace->end );
 		dist = SetupTrace( trace );
@@ -903,7 +903,7 @@ int LightContributionToSample( trace_t *trace ){
 		}
 
 		/* angle attenuation */
-		if ( light->flags & LIGHT_ATTEN_ANGLE ) {
+		if ( light->flags & LightFlags::AttenAngle ) {
 			/* standard Lambert attenuation */
 			float dot = DotProduct( trace->normal, trace->direction );
 
@@ -943,7 +943,7 @@ int LightContributionToSample( trace_t *trace ){
 		}
 
 		/* attenuate */
-		if ( light->flags & LIGHT_ATTEN_LINEAR ) {
+		if ( light->flags & LightFlags::AttenLinear ) {
 			add = angle * light->photons * linearScale - ( dist * light->fade );
 			if ( add < 0.0f ) {
 				add = 0.0f;
@@ -984,7 +984,7 @@ int LightContributionToSample( trace_t *trace ){
 		}
 
 		/* handle spotlights */
-		if ( light->type == EMIT_SPOT ) {
+		if ( light->type == ELightType::Spot ) {
 			float distByNormal, radiusAtDist, sampleRadius;
 			vec3_t pointAtDist, distToSample;
 
@@ -1020,13 +1020,13 @@ int LightContributionToSample( trace_t *trace ){
 	}
 
 	/* ydnar: sunlight */
-	else if ( light->type == EMIT_SUN ) {
+	else if ( light->type == ELightType::Sun ) {
 		/* get origin and direction */
 		VectorAdd( trace->origin, light->origin, trace->end );
 		dist = SetupTrace( trace );
 
 		/* angle attenuation */
-		if ( light->flags & LIGHT_ATTEN_ANGLE ) {
+		if ( light->flags & LightFlags::AttenAngle ) {
 			/* standard Lambert attenuation */
 			float dot = DotProduct( trace->normal, trace->direction );
 
@@ -1120,7 +1120,7 @@ int LightContributionToSample( trace_t *trace ){
 	VectorScale( light->color, add, trace->colorNoShadow );
 
 	/* ydnar: changed to a variable number */
-	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LIGHT_FAST_ACTUAL ) ) ) {
+	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
 		return 0;
 	}
 
@@ -1223,7 +1223,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], vec3_t colo
 		}
 
 		/* handle negative light */
-		if ( trace->light->flags & LIGHT_NEGATIVE ) {
+		if ( trace->light->flags & LightFlags::Negative ) {
 			VectorScale( trace->color, -1.0f, trace->color );
 		}
 
@@ -1263,12 +1263,12 @@ bool LightContributionToPoint( trace_t *trace ){
 	VectorClear( trace->color );
 
 	/* ydnar: early out */
-	if ( !( light->flags & LIGHT_GRID ) || light->envelope <= 0.0f ) {
+	if ( !( light->flags & LightFlags::Grid ) || light->envelope <= 0.0f ) {
 		return false;
 	}
 
 	/* is this a sun? */
-	if ( light->type != EMIT_SUN ) {
+	if ( light->type != ELightType::Sun ) {
 		/* sun only? */
 		if ( sunOnly ) {
 			return false;
@@ -1289,7 +1289,7 @@ bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* set light origin */
-	if ( light->type == EMIT_SUN ) {
+	if ( light->type == ELightType::Sun ) {
 		VectorAdd( trace->origin, light->origin, trace->end );
 	}
 	else{
@@ -1306,7 +1306,7 @@ bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* ptpff approximation */
-	if ( light->type == EMIT_AREA && faster ) {
+	if ( light->type == ELightType::Area && faster ) {
 		/* clamp the distance to prevent super hot spots */
 		dist = sqrt( dist * dist + light->extraDist * light->extraDist );
 		if ( dist < 16.0f ) {
@@ -1318,14 +1318,14 @@ bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* exact point to polygon form factor */
-	else if ( light->type == EMIT_AREA ) {
+	else if ( light->type == ELightType::Area ) {
 		float factor, d;
 		vec3_t pushedOrigin;
 
 
 		/* see if the point is behind the light */
 		d = DotProduct( trace->origin, light->normal ) - light->dist;
-		if ( !( light->flags & LIGHT_TWOSIDED ) && d < -1.0f ) {
+		if ( !( light->flags & LightFlags::Twosided ) && d < -1.0f ) {
 			return false;
 		}
 
@@ -1344,7 +1344,7 @@ bool LightContributionToPoint( trace_t *trace ){
 			return false;
 		}
 		else if ( factor < 0.0f ) {
-			if ( light->flags & LIGHT_TWOSIDED ) {
+			if ( light->flags & LightFlags::Twosided ) {
 				factor = -factor;
 			}
 			else{
@@ -1357,7 +1357,7 @@ bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* point/spot lights */
-	else if ( light->type == EMIT_POINT || light->type == EMIT_SPOT ) {
+	else if ( light->type == ELightType::Point || light->type == ELightType::Spot ) {
 		/* clamp the distance to prevent super hot spots */
 		dist = sqrt( dist * dist + light->extraDist * light->extraDist );
 		if ( dist < 16.0f ) {
@@ -1365,7 +1365,7 @@ bool LightContributionToPoint( trace_t *trace ){
 		}
 
 		/* attenuate */
-		if ( light->flags & LIGHT_ATTEN_LINEAR ) {
+		if ( light->flags & LightFlags::AttenLinear ) {
 			add = light->photons * linearScale - ( dist * light->fade );
 			if ( add < 0.0f ) {
 				add = 0.0f;
@@ -1376,7 +1376,7 @@ bool LightContributionToPoint( trace_t *trace ){
 		}
 
 		/* handle spotlights */
-		if ( light->type == EMIT_SPOT ) {
+		if ( light->type == ELightType::Spot ) {
 			float distByNormal, radiusAtDist, sampleRadius;
 			vec3_t pointAtDist, distToSample;
 
@@ -1404,7 +1404,7 @@ bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* ydnar: sunlight */
-	else if ( light->type == EMIT_SUN ) {
+	else if ( light->type == ELightType::Sun ) {
 		/* attenuate */
 		add = light->photons;
 		if ( add <= 0.0f ) {
@@ -1435,7 +1435,7 @@ bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* ydnar: changed to a variable number */
-	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LIGHT_FAST_ACTUAL ) ) ) {
+	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
 		return false;
 	}
 
@@ -1559,7 +1559,7 @@ void TraceGrid( int num ){
 		}
 
 		/* handle negative light */
-		if ( trace.light->flags & LIGHT_NEGATIVE ) {
+		if ( trace.light->flags & LightFlags::Negative ) {
 			VectorScale( trace.color, -1.0f, trace.color );
 		}
 

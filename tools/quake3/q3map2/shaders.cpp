@@ -75,64 +75,64 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 			/* switch on type */
 			switch ( cm2->type )
 			{
-			case CM_COLOR_SET:
+			case EColorMod::ColorSet:
 				VectorClear( mult );
 				VectorScale( cm2->data, 255.0f, add );
 				break;
 
-			case CM_ALPHA_SET:
+			case EColorMod::AlphaSet:
 				mult[ 3 ] = 0.0f;
 				add[ 3 ] = cm2->data[ 0 ] * 255.0f;
 				break;
 
-			case CM_COLOR_SCALE:
+			case EColorMod::ColorScale:
 				VectorCopy( cm2->data, mult );
 				break;
 
-			case CM_ALPHA_SCALE:
+			case EColorMod::AlphaScale:
 				mult[ 3 ] = cm2->data[ 0 ];
 				break;
 
-			case CM_COLOR_DOT_PRODUCT:
+			case EColorMod::ColorDotProduct:
 				c = DotProduct( dv->normal, cm2->data );
 				VectorSet( mult, c, c, c );
 				break;
 
-			case CM_COLOR_DOT_PRODUCT_SCALE:
+			case EColorMod::ColorDotProductScale:
 				c = DotProduct( dv->normal, cm2->data );
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
 				VectorSet( mult, c, c, c );
 				break;
 
-			case CM_ALPHA_DOT_PRODUCT:
+			case EColorMod::AlphaDotProduct:
 				mult[ 3 ] = DotProduct( dv->normal, cm2->data );
 				break;
 
-			case CM_ALPHA_DOT_PRODUCT_SCALE:
+			case EColorMod::AlphaDotProductScale:
 				c = DotProduct( dv->normal, cm2->data );
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
 				mult[ 3 ] = c;
 				break;
 
-			case CM_COLOR_DOT_PRODUCT_2:
+			case EColorMod::ColorDotProduct2:
 				c = DotProduct( dv->normal, cm2->data );
 				c *= c;
 				VectorSet( mult, c, c, c );
 				break;
 
-			case CM_COLOR_DOT_PRODUCT_2_SCALE:
+			case EColorMod::ColorDotProduct2Scale:
 				c = DotProduct( dv->normal, cm2->data );
 				c *= c;
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
 				VectorSet( mult, c, c, c );
 				break;
 
-			case CM_ALPHA_DOT_PRODUCT_2:
+			case EColorMod::AlphaDotProduct2:
 				mult[ 3 ] = DotProduct( dv->normal, cm2->data );
 				mult[ 3 ] *= mult[ 3 ];
 				break;
 
-			case CM_ALPHA_DOT_PRODUCT_2_SCALE:
+			case EColorMod::AlphaDotProduct2Scale:
 				c = DotProduct( dv->normal, cm2->data );
 				c *= c;
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
@@ -433,7 +433,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 	srcShaderText = si->shaderText;
 
 	/* et: implicitMap */
-	if ( si->implicitMap == IM_OPAQUE ) {
+	if ( si->implicitMap == EImplicitMap::Opaque ) {
 		srcShaderText = temp;
 		sprintf( temp, "\n"
 					   "{ // Q3Map2 defaulted (implicitMap)\n"
@@ -452,7 +452,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 	}
 
 	/* et: implicitMask */
-	else if ( si->implicitMap == IM_MASKED ) {
+	else if ( si->implicitMap == EImplicitMap::Masked ) {
 		srcShaderText = temp;
 		sprintf( temp, "\n"
 					   "{ // Q3Map2 defaulted (implicitMask)\n"
@@ -480,7 +480,7 @@ shaderInfo_t *CustomShader( shaderInfo_t *si, const char *find, char *replace ){
 	}
 
 	/* et: implicitBlend */
-	else if ( si->implicitMap == IM_BLEND ) {
+	else if ( si->implicitMap == EImplicitMap::Blend ) {
 		srcShaderText = temp;
 		sprintf( temp, "\n"
 					   "{ // Q3Map2 defaulted (implicitBlend)\n"
@@ -1169,7 +1169,7 @@ static void ParseShaderFile( const char *filename ){
 
 			/* ydnar: enemy territory implicit shaders */
 			else if ( striEqual( token, "implicitMap" ) ) {
-				si->implicitMap = IM_OPAQUE;
+				si->implicitMap = EImplicitMap::Opaque;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
 					si->implicitImagePath = si->shader;
@@ -1180,7 +1180,7 @@ static void ParseShaderFile( const char *filename ){
 			}
 
 			else if ( striEqual( token, "implicitMask" ) ) {
-				si->implicitMap = IM_MASKED;
+				si->implicitMap = EImplicitMap::Masked;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
 					si->implicitImagePath = si->shader;
@@ -1191,7 +1191,7 @@ static void ParseShaderFile( const char *filename ){
 			}
 
 			else if ( striEqual( token, "implicitBlend" ) ) {
-				si->implicitMap = IM_MASKED;
+				si->implicitMap = EImplicitMap::Blend;
 				GetTokenAppend( shaderText, false );
 				if ( strEqual( token, "-" ) ) {
 					si->implicitImagePath = si->shader;
@@ -1741,14 +1741,14 @@ static void ParseShaderFile( const char *filename ){
 
 					/* alpha set|const A */
 					if ( alpha && ( striEqual( token, "set" ) || striEqual( token, "const" ) ) ) {
-						cm->type = CM_ALPHA_SET;
+						cm->type = EColorMod::AlphaSet;
 						GetTokenAppend( shaderText, false );
 						cm->data[ 0 ] = atof( token );
 					}
 
 					/* color|rgb set|const ( X Y Z ) */
 					else if ( striEqual( token, "set" ) || striEqual( token, "const" ) ) {
-						cm->type = CM_COLOR_SET;
+						cm->type = EColorMod::ColorSet;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 						if ( colorsRGB ) {
 							cm->data[0] = Image_LinearFloatFromsRGBFloat( cm->data[0] );
@@ -1759,45 +1759,45 @@ static void ParseShaderFile( const char *filename ){
 
 					/* alpha scale A */
 					else if ( alpha && striEqual( token, "scale" ) ) {
-						cm->type = CM_ALPHA_SCALE;
+						cm->type = EColorMod::AlphaScale;
 						GetTokenAppend( shaderText, false );
 						cm->data[ 0 ] = atof( token );
 					}
 
 					/* color|rgb scale ( X Y Z ) */
 					else if ( striEqual( token, "scale" ) ) {
-						cm->type = CM_COLOR_SCALE;
+						cm->type = EColorMod::ColorScale;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 					}
 
 					/* dotProduct ( X Y Z ) */
 					else if ( striEqual( token, "dotProduct" ) ) {
-						cm->type = alpha? CM_ALPHA_DOT_PRODUCT : CM_COLOR_DOT_PRODUCT;
+						cm->type = alpha? EColorMod::AlphaDotProduct : EColorMod::ColorDotProduct;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 					}
 
 					/* dotProductScale ( X Y Z MIN MAX ) */
 					else if ( striEqual( token, "dotProductScale" ) ) {
-						cm->type = alpha? CM_ALPHA_DOT_PRODUCT_SCALE : CM_COLOR_DOT_PRODUCT_SCALE;
+						cm->type = alpha? EColorMod::AlphaDotProductScale : EColorMod::ColorDotProductScale;
 						Parse1DMatrixAppend( shaderText, 5, cm->data );
 					}
 
 					/* dotProduct2 ( X Y Z ) */
 					else if ( striEqual( token, "dotProduct2" ) ) {
-						cm->type = alpha? CM_ALPHA_DOT_PRODUCT_2 : CM_COLOR_DOT_PRODUCT_2;
+						cm->type = alpha? EColorMod::AlphaDotProduct2 : EColorMod::ColorDotProduct2;
 						Parse1DMatrixAppend( shaderText, 3, cm->data );
 					}
 
 					/* dotProduct2scale ( X Y Z MIN MAX ) */
 					else if ( striEqual( token, "dotProduct2scale" ) ) {
-						cm->type = alpha? CM_ALPHA_DOT_PRODUCT_2_SCALE : CM_COLOR_DOT_PRODUCT_2_SCALE;
+						cm->type = alpha? EColorMod::AlphaDotProduct2Scale : EColorMod::ColorDotProduct2Scale;
 						Parse1DMatrixAppend( shaderText, 5, cm->data );
 					}
 
 					/* volume */
 					else if ( striEqual( token, "volume" ) ) {
 						/* special stub mode for flagging volume brushes */
-						cm->type = CM_VOLUME;
+						cm->type = EColorMod::Volume;
 					}
 
 					/* unknown */

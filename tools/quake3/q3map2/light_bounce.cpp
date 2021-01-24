@@ -540,8 +540,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	ThreadUnlock();
 
 	/* initialize the light */
-	light->flags = LIGHT_AREA_DEFAULT;
-	light->type = EMIT_AREA;
+	light->flags = LightFlags::DefaultArea;
+	light->type = ELightType::Area;
 	light->si = si;
 	light->fade = 1.0f;
 	light->w = w;
@@ -586,8 +586,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 
 			/* set it up */
-			splash->flags = LIGHT_Q3A_DEFAULT;
-			splash->type = EMIT_POINT;
+			splash->flags = LightFlags::DefaultQ3A;
+			splash->type = ELightType::Point;
 			splash->photons = light->photons * si->backsplashFraction;
 
 			splash->fade = 1.0f;
@@ -615,8 +615,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			ThreadUnlock();
 
 			/* set it up */
-			splash->flags = LIGHT_AREA_DEFAULT;
-			splash->type = EMIT_AREA;
+			splash->flags = LightFlags::DefaultArea;
+			splash->type = ELightType::Area;
 			splash->photons = light->photons * 7.0f * si->backsplashFraction;
 			splash->add = light->add * 7.0f * si->backsplashFraction;
 			splash->fade = 1.0f;
@@ -640,7 +640,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			VectorNegate( normal, splash->normal );
             splash->dist = DotProduct( splash->origin, splash->normal );
 
-//			splash->flags |= LIGHT_TWOSIDED;
+//			splash->flags |= LightFlags::Twosided;
 		}
 #endif
 
@@ -672,7 +672,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 
 	/* emit light from both sides? */
 	if ( si->compileFlags & C_FOG || si->twoSided ) {
-		light->flags |= LIGHT_TWOSIDED;
+		light->flags |= LightFlags::Twosided;
 	}
 
 	//%	Sys_Printf( "\nAL: C: (%6f, %6f, %6f) [%6f] N: (%6f, %6f, %6f) %s\n",

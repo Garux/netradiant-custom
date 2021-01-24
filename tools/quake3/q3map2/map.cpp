@@ -934,7 +934,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 	/* link colorMod volume brushes to the entity directly */
 	if ( b->contentShader != NULL &&
 		 b->contentShader->colorMod != NULL &&
-		 b->contentShader->colorMod->type == CM_VOLUME ) {
+		 b->contentShader->colorMod->type == EColorMod::Volume ) {
 		b->nextColorModBrush = mapEnt->colorModBrushes;
 		mapEnt->colorModBrushes = b;
 	}
@@ -1093,7 +1093,7 @@ static void ParseRawBrush( bool onlyLights ){
 	buildBrush->detail = false;
 
 	/* bp */
-	if ( g_brushType == BPRIMIT_BP ) {
+	if ( g_brushType == EBrushType::Bp ) {
 		MatchToken( "{" );
 	}
 
@@ -1108,7 +1108,7 @@ static void ParseRawBrush( bool onlyLights ){
 		}
 
 		/* ttimo : bp: here we may have to jump over brush epairs (only used in editor) */
-		if ( g_brushType == BPRIMIT_BP ) {
+		if ( g_brushType == EBrushType::Bp ) {
 			while ( 1 )
 			{
 				if ( !strEqual( token, "(" ) ) {
@@ -1138,7 +1138,7 @@ static void ParseRawBrush( bool onlyLights ){
 		Parse1DMatrix( 3, planePoints[ 2 ] );
 
 		/* bp: read the texture matrix */
-		if ( g_brushType == BPRIMIT_BP ) {
+		if ( g_brushType == EBrushType::Bp ) {
 			Parse2DMatrix( 2, 3, (float*) side->texMat );
 		}
 
@@ -1147,20 +1147,20 @@ static void ParseRawBrush( bool onlyLights ){
 		const auto shader = String64()( "textures/", token );
 
 		/* AP or 220? */
-		if ( g_brushType == BPRIMIT_UNDEFINED ){
+		if ( g_brushType == EBrushType::Undefined ){
 			GetToken( false );
 			if ( strEqual( token, "[" ) ){
-				g_brushType = BPRIMIT_VALVE220;
+				g_brushType = EBrushType::Valve220;
 				Sys_FPrintf( SYS_VRB, "detected brushType = VALVE 220\n" );
 			}
 			else{
-				g_brushType = BPRIMIT_QUAKE;
+				g_brushType = EBrushType::Quake;
 				Sys_FPrintf( SYS_VRB, "detected brushType = QUAKE (Axial Projection)\n" );
 			}
 			UnGetToken();
 		}
 
-		if ( g_brushType == BPRIMIT_QUAKE ) {
+		if ( g_brushType == EBrushType::Quake ) {
 			GetToken( false );
 			shift[ 0 ] = atof( token );
 			GetToken( false );
@@ -1172,7 +1172,7 @@ static void ParseRawBrush( bool onlyLights ){
 			GetToken( false );
 			scale[ 1 ] = atof( token );
 		}
-		else if ( g_brushType == BPRIMIT_VALVE220 ){
+		else if ( g_brushType == EBrushType::Valve220 ){
 			int axis, comp;
 			for ( axis = 0; axis < 2; ++axis ){
 				MatchToken( "[" );
@@ -1246,13 +1246,13 @@ static void ParseRawBrush( bool onlyLights ){
 		side->planenum = planenum;
 
 		/* bp: get the texture mapping for this texturedef / plane combination */
-		if ( g_brushType == BPRIMIT_QUAKE ) {
+		if ( g_brushType == EBrushType::Quake ) {
 			QuakeTextureVecs( &mapplanes[ planenum ], shift, rotate, scale, side->vecs );
 		}
 	}
 
 	/* bp */
-	if ( g_brushType == BPRIMIT_BP ) {
+	if ( g_brushType == EBrushType::Bp ) {
 		UnGetToken();
 		MatchToken( "}" );
 		MatchToken( "}" );
@@ -1719,9 +1719,9 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 				Sys_Warning( "Terrain entity parsing not supported in this build.\n" ); /* ydnar */
 			}
 			else if ( strEqual( token, "brushDef" ) ) {
-				if ( g_brushType == BPRIMIT_UNDEFINED ) {
+				if ( g_brushType == EBrushType::Undefined ) {
 					Sys_FPrintf( SYS_VRB, "detected brushType = BRUSH PRIMITIVES\n" );
-					g_brushType = BPRIMIT_BP;
+					g_brushType = EBrushType::Bp;
 				}
 				ParseBrush( onlyLights, noCollapseGroups );
 			}
@@ -1888,7 +1888,7 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 	/* initial setup */
 	numMapDrawSurfs = 0;
 	c_detail = 0;
-	g_brushType = BPRIMIT_UNDEFINED;
+	g_brushType = EBrushType::Undefined;
 
 	/* allocate a very large temporary brush for building the brushes as they are loaded */
 	buildBrush = AllocBrush( MAX_BUILD_SIDES );

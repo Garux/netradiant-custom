@@ -102,7 +102,7 @@
 	1.0f,               /* minimap sharpener */
 	0.0f,               /* minimap border */
 	true,               /* minimap keep aspect */
-	MINIMAP_MODE_GRAY,  /* minimap mode */
+	EMiniMapMode::Gray, /* minimap mode */
 	"%s.tga",           /* minimap name format */
 	"IBSP",             /* bsp file prefix */
 	46,                 /* bsp file version */
