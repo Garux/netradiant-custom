@@ -3692,7 +3692,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 					light->flags |= LightFlags::FastTemp;
 				}
 				if ( light->si && light->si->noFast ) {
-					light->flags &= ~( LightFlags::Fast | LightFlags::FastTemp );
+					light->flags &= ~( LightFlags::FastActual );
 				}
 
 				/* clear light envelope */
@@ -3703,7 +3703,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 					light->envelope = MAX_WORLD_COORD * 8.0f;
 
 					/* check for fast mode */
-					if ( ( light->flags & LightFlags::Fast ) || ( light->flags & LightFlags::FastTemp ) ) {
+					if ( light->flags & LightFlags::FastActual ) {
 						/* ugly hack to calculate extent for area lights, but only done once */
 						VectorScale( light->normal, -1.0f, dir );
 						for ( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
@@ -3737,7 +3737,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 						light->envelope = MAX_WORLD_COORD * 8.0f;
 					}
 
-					else if ( ( light->flags & LightFlags::Fast ) || ( light->flags & LightFlags::FastTemp) ) {
+					else if ( light->flags & LightFlags::FastActual ) {
 						/* solve distance for linear lights */
 						if ( ( light->flags & LightFlags::AttenLinear ) ) {
 							light->envelope = ( ( intensity * linearScale ) - light->falloffTolerance ) / light->fade;
