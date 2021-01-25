@@ -111,13 +111,14 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 					continue;
 				}
 			}
-			if ( abs( DotProduct( vert[0]->xyz, buildPlane->normal ) - buildPlane->dist ) >= distanceEpsilon ) {
+			// fixme? better distance epsilon
+			if ( abs( DotProduct( vert[0]->xyz, buildPlane->normal ) - buildPlane->dist ) > 1 ) {
 				continue;
 			}
-			if ( abs( DotProduct( vert[1]->xyz, buildPlane->normal ) - buildPlane->dist ) >= distanceEpsilon ) {
+			if ( abs( DotProduct( vert[1]->xyz, buildPlane->normal ) - buildPlane->dist ) > 1 ) {
 				continue;
 			}
-			if ( abs( DotProduct( vert[2]->xyz, buildPlane->normal ) - buildPlane->dist ) >= distanceEpsilon ) {
+			if ( abs( DotProduct( vert[2]->xyz, buildPlane->normal ) - buildPlane->dist ) > 1 ) {
 				continue;
 			}
 			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
