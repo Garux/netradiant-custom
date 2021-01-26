@@ -1625,23 +1625,21 @@ void LoadEntityIndexMap( entity_t *e ){
 	im->pixels = pixels;
 
 	/* get height offsets */
-//	char offset[ 4096 ];
-	char offset[ 1024 ];
+	const char *offset;
 	if( ENT_READKV( &offset, mapEnt, "_offsets", "offsets" ) ){
 		/* value is a space-separated set of numbers */
-		char *search = offset;
 		/* get each value */
-		for ( i = 0; i < 256 && !strEmpty( search ); i++ )
+		for ( i = 0; i < 256 && !strEmpty( offset ); i++ )
 		{
-			char *space = strchr( search, ' ' );
-			if ( space != NULL ) {
-				strClear( space );
+			const char *space = strchr( offset, ' ' );
+			if ( space == NULL ) {
+				space = offset + strlen( offset );
 			}
-			im->offsets[ i ] = atof( search );
+			im->offsets[ i ] = atof( String64()( StringRange( offset, space ) ) );
 			if ( space == NULL ) {
 				break;
 			}
-			search = space + 1;
+			offset = space + 1;
 		}
 	}
 

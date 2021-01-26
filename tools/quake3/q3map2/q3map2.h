@@ -1953,7 +1953,7 @@ Q_EXTERN int numVertexRemaps Q_ASSIGN( 0 );
 Q_EXTERN surfaceParm_t custSurfaceParms[ MAX_CUST_SURFACEPARMS ];
 Q_EXTERN int numCustSurfaceParms Q_ASSIGN( 0 );
 
-Q_EXTERN char mapName[ MAX_QPATH ];                 /* ydnar: per-map custom shaders for larger lightmaps */
+Q_EXTERN String64 mapName;                 /* ydnar: per-map custom shaders for larger lightmaps */
 Q_EXTERN char mapShaderFile[ 1024 ];
 Q_EXTERN bool warnImage Q_ASSIGN( true );
 

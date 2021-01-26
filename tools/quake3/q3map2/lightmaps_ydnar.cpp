@@ -3404,7 +3404,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					strcpy( lightmapName, "$lightmap" );
 				}
 				else{
-					sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP, mapName, olm->extLightmapNum );
+					sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP, mapName.c_str(), olm->extLightmapNum );
 				}
 
 				/* get rgbgen string */
@@ -3503,7 +3503,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 			olm = &outLightmaps[ lm->outLightmapNums[ 0 ] ];
 
 			/* do some name mangling */
-			sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP "\n\t\ttcgen lightmap", mapName, olm->extLightmapNum );
+			sprintf( lightmapName, "maps/%s/" EXTERNAL_LIGHTMAP "\n\t\ttcgen lightmap", mapName.c_str(), olm->extLightmapNum );
 
 			/* create custom shader */
 			csi = CustomShader( info->si, "$lightmap", lightmapName );
