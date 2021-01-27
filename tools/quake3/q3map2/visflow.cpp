@@ -477,7 +477,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		}
 
 		// if the portal can't see anything we haven't allready seen, skip it
-		if ( p->status == stat_done ) {
+		if ( p->status == EVStatus::Done ) {
 			test = (long *)p->portalvis;
 		}
 		else
@@ -653,11 +653,11 @@ void PortalFlow( int portalnum ){
 	p = sorted_portals[portalnum];
 
 	if ( p->removed ) {
-		p->status = stat_done;
+		p->status = EVStatus::Done;
 		return;
 	}
 
-	p->status = stat_working;
+	p->status = EVStatus::Working;
 
 	c_might = CountBits( p->portalflood, numportals * 2 );
 
@@ -673,7 +673,7 @@ void PortalFlow( int portalnum ){
 
 	RecursiveLeafFlow( p->leaf, &data, &data.pstack_head );
 
-	p->status = stat_done;
+	p->status = EVStatus::Done;
 
 	c_can = CountBits( p->portalvis, numportals * 2 );
 
@@ -727,7 +727,7 @@ void RecursivePassageFlow( vportal_t *portal, threaddata_t *thread, pstack_t *pr
 		cansee = (long *)passage->cansee;
 		might = (long *)stack.mightsee;
 		memcpy( might, prevmight, portalbytes );
-		if ( p->status == stat_done ) {
+		if ( p->status == EVStatus::Done ) {
 			portalvis = (long *) p->portalvis;
 		}
 		else{
@@ -778,11 +778,11 @@ void PassageFlow( int portalnum ){
 	p = sorted_portals[portalnum];
 
 	if ( p->removed ) {
-		p->status = stat_done;
+		p->status = EVStatus::Done;
 		return;
 	}
 
-	p->status = stat_working;
+	p->status = EVStatus::Working;
 
 //	c_might = CountBits (p->portalflood, numportals*2);
 
@@ -798,7 +798,7 @@ void PassageFlow( int portalnum ){
 
 	RecursivePassageFlow( p, &data, &data.pstack_head );
 
-	p->status = stat_done;
+	p->status = EVStatus::Done;
 
 	/*
 	   c_can = CountBits (p->portalvis, numportals*2);
@@ -862,7 +862,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		cansee = (long *)passage->cansee;
 		might = (long *)stack.mightsee;
 		memcpy( might, prevmight, portalbytes );
-		if ( p->status == stat_done ) {
+		if ( p->status == EVStatus::Done ) {
 			portalvis = (long *) p->portalvis;
 		}
 		else{
@@ -1040,11 +1040,11 @@ void PassagePortalFlow( int portalnum ){
 	p = sorted_portals[portalnum];
 
 	if ( p->removed ) {
-		p->status = stat_done;
+		p->status = EVStatus::Done;
 		return;
 	}
 
-	p->status = stat_working;
+	p->status = EVStatus::Working;
 
 //	c_might = CountBits (p->portalflood, numportals*2);
 
@@ -1060,7 +1060,7 @@ void PassagePortalFlow( int portalnum ){
 
 	RecursivePassagePortalFlow( p, &data, &data.pstack_head );
 
-	p->status = stat_done;
+	p->status = EVStatus::Done;
 
 	/*
 	   c_can = CountBits (p->portalvis, numportals*2);
@@ -1340,7 +1340,7 @@ void CreatePassages( int portalnum ){
 	portal = sorted_portals[portalnum];
 
 	if ( portal->removed ) {
-		portal->status = stat_done;
+		portal->status = EVStatus::Done;
 		return;
 	}
 

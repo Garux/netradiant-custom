@@ -180,7 +180,7 @@ void ClusterMerge( int leafnum ){
 			continue;
 		}
 
-		if ( p->status != stat_done ) {
+		if ( p->status != EVStatus::Done ) {
 			Error( "portal not done" );
 		}
 		for ( j = 0 ; j < portallongs ; j++ )
@@ -284,7 +284,7 @@ void CalcFastVis( void ){
 	for ( i = 0 ; i < numportals * 2 ; i++ )
 	{
 		portals[i].portalvis = portals[i].portalflood;
-		portals[i].status = stat_done;
+		portals[i].status = EVStatus::Done;
 	}
 }
 

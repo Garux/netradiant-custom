@@ -1133,13 +1133,12 @@ struct passage_t
 };
 
 
-typedef enum
+enum class EVStatus
 {
-	stat_none,
-	stat_working,
-	stat_done
-}
-vstatus_t;
+	None,
+	Working,
+	Done
+};
 
 
 struct vportal_t
@@ -1155,7 +1154,7 @@ struct vportal_t
 	float radius;
 
 	fixedWinding_t      *winding;
-	vstatus_t status;
+	EVStatus status;
 	byte                *portalfront;   /* [portals], preliminary */
 	byte                *portalflood;   /* [portals], intermediate */
 	byte                *portalvis;     /* [portals], final */
