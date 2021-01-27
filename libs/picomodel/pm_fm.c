@@ -36,9 +36,6 @@
    Nurail: Used pm_md3.c (Randy Reddig) as a template.
  */
 
-/* marker */
-#define PM_FM_C
-
 /* dependencies */
 #include "pm_fm.h"
 

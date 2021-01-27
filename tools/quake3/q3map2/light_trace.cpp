@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define LIGHT_TRACE_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

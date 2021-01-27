@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define BRUSH_PRIMIT_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

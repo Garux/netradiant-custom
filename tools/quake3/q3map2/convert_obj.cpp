@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define CONVERT_ASE_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

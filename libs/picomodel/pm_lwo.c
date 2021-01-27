@@ -32,9 +32,6 @@
 
    ----------------------------------------------------------------------------- */
 
-/* marker */
-#define PM_LWO_C
-
 /* dependencies */
 #include "picointernal.h"
 #include "lwo/lwo2.h"

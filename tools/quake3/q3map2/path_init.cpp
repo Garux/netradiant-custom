@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define PATH_INIT_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

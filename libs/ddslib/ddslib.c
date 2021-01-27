@@ -37,11 +37,6 @@
 
 
 
-/* marker */
-#define DDSLIB_C
-
-
-
 /* dependencies */
 #include "ddslib.h"
 

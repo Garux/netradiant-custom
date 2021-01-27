@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define BSPFILE_RBSP_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

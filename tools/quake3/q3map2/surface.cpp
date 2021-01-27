@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define SURFACE_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

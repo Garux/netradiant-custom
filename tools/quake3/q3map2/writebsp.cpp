@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define WRITEBSP_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

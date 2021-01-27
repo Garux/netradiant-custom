@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define LIGHTMAPS_YDNAR_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

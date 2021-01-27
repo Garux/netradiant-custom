@@ -34,11 +34,6 @@
 
 
 
-/* marker */
-#define PM_MDC_C
-
-
-
 /* dependencies */
 #include "picointernal.h"
 

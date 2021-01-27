@@ -343,9 +343,9 @@ int                         PicoRemapModel( picoModel_t *model, char *remapFile 
 
 void PicoAddTriangleToModel( picoModel_t *model, picoVec3_t** xyz, picoVec3_t** normals, int numSTs, picoVec2_t **st, int numColors, const picoColor_t **colors, picoShader_t* shader, const char *name, picoIndex_t* smoothingGroup );
 
-/* end marker */
 #ifdef __cplusplus
 }
 #endif
 
+/* end marker */
 #endif

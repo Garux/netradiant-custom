@@ -20,11 +20,6 @@
  */
 
 
-/* marker */
-#define MAIN_C
-
-
-
 /* dependencies */
 #include "q2map.h"
 

@@ -242,9 +242,9 @@ int                     DDSDecompress( ddsBuffer_t *dds, unsigned char *pixels )
 
 
 
-/* end marker */
 #ifdef __cplusplus
 }
 #endif
 
+/* end marker */
 #endif

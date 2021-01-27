@@ -201,9 +201,9 @@ long            _pico_memstream_tell( picoMemStream_t *s );
 #define         _pico_memstream_eof( _pico_memstream )      ( ( _pico_memstream )->flag & PICO_IOEOF )
 #define         _pico_memstream_error( _pico_memstream )    ( ( _pico_memstream )->flag & PICO_IOERR )
 
-/* end marker */
 #ifdef __cplusplus
 }
 #endif
 
+/* end marker */
 #endif

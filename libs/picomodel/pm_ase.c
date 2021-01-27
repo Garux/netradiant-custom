@@ -33,9 +33,6 @@
    ----------------------------------------------------------------------------- */
 
 
-/* marker */
-#define PM_ASE_C
-
 /* uncomment when debugging this module */
 //#define DEBUG_PM_ASE
 //#define DEBUG_PM_ASE_EX

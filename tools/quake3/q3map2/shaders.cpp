@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define SHADERS_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

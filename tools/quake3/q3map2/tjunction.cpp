@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define TJUNCTION_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

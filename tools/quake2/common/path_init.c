@@ -25,9 +25,6 @@
 
 
 
-/* marker */
-#define PATH_INIT_C
-
 #if defined( __linux__ ) || defined( __APPLE__ )
 	#define Q_UNIX
 #endif

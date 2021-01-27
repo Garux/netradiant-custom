@@ -34,11 +34,6 @@
 
 
 
-/* marker */
-#define PM_TERRAIN_C
-
-
-
 /* dependencies */
 #include "picointernal.h"
 

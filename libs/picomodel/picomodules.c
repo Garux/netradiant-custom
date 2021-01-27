@@ -34,11 +34,6 @@
 
 
 
-/* marker */
-#define PICOMODULES_C
-
-
-
 /* dependencies */
 #include "picointernal.h"
 

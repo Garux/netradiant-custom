@@ -34,9 +34,6 @@
 
 
 
-/* marker */
-#define PICOINTERNAL_C
-
 /* dependencies */
 #include <string.h>
 #include "picointernal.h"

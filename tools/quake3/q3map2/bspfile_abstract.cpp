@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define BSPFILE_ABSTRACT_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 

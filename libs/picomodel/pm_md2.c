@@ -37,9 +37,6 @@
  */
 
 
-/* marker */
-#define PM_MD2_C
-
 /* dependencies */
 #include "picointernal.h"
 

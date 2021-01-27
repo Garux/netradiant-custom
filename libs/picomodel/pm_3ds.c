@@ -34,9 +34,6 @@
 
 
 
-/* marker */
-#define PM_3DS_C
-
 /* dependencies */
 #include "picointernal.h"
 

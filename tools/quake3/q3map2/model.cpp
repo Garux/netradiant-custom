@@ -28,11 +28,6 @@
 
 
 
-/* marker */
-#define MODEL_C
-
-
-
 /* dependencies */
 #include "q3map2.h"
 
