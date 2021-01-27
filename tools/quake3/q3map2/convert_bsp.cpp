@@ -570,8 +570,7 @@ int ScaleBSPMain( int argc, char **argv ){
 		{
 			switch ( bspDrawSurfaces[i].surfaceType )
 			{
-			case SURFACE_FACE:
-			case SURFACE_META:
+			case MST_PLANAR:
 				if ( bspDrawSurfaces[i].numIndexes % 3 ) {
 					Error( "Not a triangulation!" );
 				}

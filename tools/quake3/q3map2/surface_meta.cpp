@@ -232,10 +232,10 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 
 
 	/* only handle certain types of surfaces */
-	if ( ds->type != SURFACE_FACE &&
-		 ds->type != SURFACE_META &&
-		 ds->type != SURFACE_FORCED_META &&
-		 ds->type != SURFACE_DECAL ) {
+	if ( ds->type != ESurfaceType::Face &&
+		 ds->type != ESurfaceType::Meta &&
+		 ds->type != ESurfaceType::ForcedMeta &&
+		 ds->type != ESurfaceType::Decal ) {
 		return;
 	}
 
@@ -243,7 +243,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 	firstSearchMetaVert = numMetaVerts;
 
 	/* only handle valid surfaces */
-	if ( ds->type != SURFACE_BAD && ds->numVerts >= 3 && ds->numIndexes >= 3 ) {
+	if ( ds->type != ESurfaceType::Bad && ds->numVerts >= 3 && ds->numIndexes >= 3 ) {
 		/* walk the indexes and create triangles */
 		for ( i = 0; i < ds->numIndexes; i += 3 )
 		{
@@ -279,7 +279,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 		numMetaSurfaces++;
 	}
 
-	/* clear the surface (free verts and indexes, sets it to SURFACE_BAD) */
+	/* clear the surface (free verts and indexes, sets it to ESurfaceType::Bad) */
 	ClearSurface( ds );
 }
 
@@ -299,7 +299,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	const bool forcePatchMeta = BoolForKey( e, "_patchMeta", "patchMeta" );
 
 	/* try to early out */
-	if ( ds->numVerts == 0 || ds->type != SURFACE_PATCH || ( !patchMeta && !forcePatchMeta ) ) {
+	if ( ds->numVerts == 0 || ds->type != ESurfaceType::Patch || ( !patchMeta && !forcePatchMeta ) ) {
 		return;
 	}
 	/* make a mesh from the drawsurf */
@@ -327,7 +327,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	//% MakeMeshNormals( mesh );
 
 	/* make a copy of the drawsurface */
-	dsNew = AllocDrawSurface( SURFACE_META );
+	dsNew = AllocDrawSurface( ESurfaceType::Meta );
 	memcpy( dsNew, ds, sizeof( *ds ) );
 
 	/* if the patch is nonsolid, then discard it */
@@ -339,7 +339,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	ds = dsNew;
 
 	/* basic transmogrification */
-	ds->type = SURFACE_META;
+	ds->type = ESurfaceType::Meta;
 	ds->numIndexes = 0;
 	ds->indexes = safe_malloc( mesh->width * mesh->height * 6 * sizeof( int ) );
 
@@ -562,7 +562,7 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
 	int n;
 	/* try to early out  */
-	if ( !ds->numVerts || ( ds->type != SURFACE_FACE && ds->type != SURFACE_DECAL ) ) {
+	if ( !ds->numVerts || ( ds->type != ESurfaceType::Face && ds->type != ESurfaceType::Decal ) ) {
 		return;
 	}
 
@@ -610,7 +610,7 @@ void FanFaceSurface( mapDrawSurface_t *ds ){
 
 
 	/* try to early out */
-	if ( !ds->numVerts || ( ds->type != SURFACE_FACE && ds->type != SURFACE_DECAL ) ) {
+	if ( !ds->numVerts || ( ds->type != ESurfaceType::Face && ds->type != ESurfaceType::Decal ) ) {
 		return;
 	}
 
@@ -699,7 +699,7 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 
 
 	/* try to early out  */
-	if ( !ds->numVerts || ( ds->type != SURFACE_FACE && ds->type != SURFACE_DECAL ) ) {
+	if ( !ds->numVerts || ( ds->type != ESurfaceType::Face && ds->type != ESurfaceType::Decal ) ) {
 		return;
 	}
 
@@ -862,8 +862,8 @@ void MakeEntityMetaTriangles( entity_t *e ){
 		/* switch on type */
 		switch ( ds->type )
 		{
-		case SURFACE_FACE:
-		case SURFACE_DECAL:
+		case ESurfaceType::Face:
+		case ESurfaceType::Decal:
 			if ( maxAreaFaceSurface ) {
 				MaxAreaFaceSurface( ds );
 			}
@@ -873,15 +873,15 @@ void MakeEntityMetaTriangles( entity_t *e ){
 			SurfaceToMetaTriangles( ds );
 			break;
 
-		case SURFACE_PATCH:
+		case ESurfaceType::Patch:
 			TriangulatePatchSurface( e, ds );
 			break;
 
-		case SURFACE_TRIANGLES:
+		case ESurfaceType::Triangles:
 			break;
 
-		case SURFACE_FORCED_META:
-		case SURFACE_META:
+		case ESurfaceType::ForcedMeta:
+		case ESurfaceType::Meta:
 			SurfaceToMetaTriangles( ds );
 			break;
 
@@ -1647,7 +1647,7 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		   ----------------------------------------------------------------- */
 
 		/* start a new drawsurface */
-		ds = AllocDrawSurface( SURFACE_META );
+		ds = AllocDrawSurface( ESurfaceType::Meta );
 		ds->entityNum = seed->entityNum;
 		ds->surfaceNum = seed->surfaceNum;
 		ds->castShadows = seed->castShadows;

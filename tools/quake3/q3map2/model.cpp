@@ -398,7 +398,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 		}
 
 		/* allocate a surface (ydnar: gs mods) */
-		ds = AllocDrawSurface( SURFACE_TRIANGLES );
+		ds = AllocDrawSurface( ESurfaceType::Triangles );
 		ds->entityNum = eNum;
 		ds->castShadows = castShadows;
 		ds->recvShadows = recvShadows;
@@ -408,11 +408,11 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 
 		/* force to meta? */
 		if ( ( si != NULL && si->forceMeta ) || ( spawnFlags & 4 ) ) { /* 3rd bit */
-			ds->type = SURFACE_FORCED_META;
+			ds->type = ESurfaceType::ForcedMeta;
 		}
 
 		/* fix the surface's normals (jal: conditioned by shader info) */
-		if ( !( spawnFlags & 64 ) && ( shadeAngle == 0.0f || ds->type != SURFACE_FORCED_META ) ) {
+		if ( !( spawnFlags & 64 ) && ( shadeAngle == 0.0f || ds->type != ESurfaceType::ForcedMeta ) ) {
 			PicoFixSurfaceNormals( surface );
 		}
 

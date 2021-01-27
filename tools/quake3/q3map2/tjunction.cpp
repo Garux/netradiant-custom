@@ -521,7 +521,7 @@ bool FixBrokenSurface( mapDrawSurface_t *ds ){
 	if ( ds == NULL ) {
 		return false;
 	}
-	if ( ds->type != SURFACE_FACE ) {
+	if ( ds->type != ESurfaceType::Face ) {
 		return false;
 	}
 
@@ -650,12 +650,12 @@ void FixTJunctions( entity_t *ent ){
 		switch ( ds->type )
 		{
 		/* handle brush faces */
-		case SURFACE_FACE:
+		case ESurfaceType::Face:
 			AddSurfaceEdges( ds );
 			break;
 
 		/* handle patches */
-		case SURFACE_PATCH:
+		case ESurfaceType::Patch:
 			AddPatchEdges( ds );
 			break;
 
@@ -688,7 +688,7 @@ void FixTJunctions( entity_t *ent ){
 		/* get surface and early out if possible */
 		ds = &mapDrawSurfs[ i ];
 		si = ds->shaderInfo;
-		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds->numVerts == 0 || ds->type != SURFACE_FACE ) {
+		if ( ( si->compileFlags & C_NODRAW ) || si->autosprite || si->notjunc || ds->numVerts == 0 || ds->type != ESurfaceType::Face ) {
 			continue;
 		}
 
@@ -696,7 +696,7 @@ void FixTJunctions( entity_t *ent ){
 		switch ( ds->type )
 		{
 		/* handle brush faces */
-		case SURFACE_FACE:
+		case ESurfaceType::Face:
 			FixSurfaceJunctions( ds );
 			if ( !FixBrokenSurface( ds ) ) {
 				c_broken++;

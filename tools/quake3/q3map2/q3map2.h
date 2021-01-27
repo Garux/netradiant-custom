@@ -415,7 +415,7 @@ struct bspDrawVert_t
 };
 
 
-typedef enum
+enum bspSurfaceType_t
 {
 	MST_BAD,
 	MST_PLANAR,
@@ -423,8 +423,7 @@ typedef enum
 	MST_TRIANGLE_SOUP,
 	MST_FLARE,
 	MST_FOLIAGE
-}
-bspSurfaceType_t;
+};
 
 
 struct bspGridPoint_t
@@ -900,55 +899,47 @@ struct parseMesh_t
     - planar patches
  */
 
-typedef enum
+enum class ESurfaceType
 {
 	/* ydnar: these match up exactly with bspSurfaceType_t */
-	SURFACE_BAD,
-	SURFACE_FACE,
-	SURFACE_PATCH,
-	SURFACE_TRIANGLES,
-	SURFACE_FLARE,
-	SURFACE_FOLIAGE,    /* wolf et */
+	Bad,
+	Face,
+	Patch,
+	Triangles,
+	Flare,
+	Foliage,    /* wolf et */
 
 	/* ydnar: compiler-relevant surface types */
-	SURFACE_FORCED_META,
-	SURFACE_META,
-	SURFACE_FOGHULL,
-	SURFACE_DECAL,
-	SURFACE_SHADER,
+	ForcedMeta,
+	Meta,
+	Foghull,
+	Decal,
+	Shader,  // this is used to define number of enum items
+};
 
-	NUM_SURFACE_TYPES
-}
-surfaceType_t;
-
-#ifndef MAIN_C
-extern
-#endif
-const char      *surfaceTypes[ NUM_SURFACE_TYPES ]
-#ifndef MAIN_C
-;
-#else
-	=
+constexpr const char *surfaceTypeName( ESurfaceType type ){
+	switch ( type )
 	{
-	"SURFACE_BAD",
-	"SURFACE_FACE",
-	"SURFACE_PATCH",
-	"SURFACE_TRIANGLES",
-	"SURFACE_FLARE",
-	"SURFACE_FOLIAGE",
-	"SURFACE_FORCED_META",
-	"SURFACE_META",
-	"SURFACE_FOGHULL",
-	"SURFACE_DECAL",
-	"SURFACE_SHADER"
-	};
-#endif
+	case ESurfaceType::Bad: return "ESurfaceType::Bad";
+	case ESurfaceType::Face:       return "ESurfaceType::Face";
+	case ESurfaceType::Patch:      return "ESurfaceType::Patch";
+	case ESurfaceType::Triangles:  return "ESurfaceType::Triangles";
+	case ESurfaceType::Flare:      return "ESurfaceType::Flare";
+	case ESurfaceType::Foliage:    return "ESurfaceType::Foliage";
+	case ESurfaceType::ForcedMeta: return "ESurfaceType::ForcedMeta";
+	case ESurfaceType::Meta:       return "ESurfaceType::Meta";
+	case ESurfaceType::Foghull:    return "ESurfaceType::Foghull";
+	case ESurfaceType::Decal:      return "ESurfaceType::Decal";
+	case ESurfaceType::Shader:     return "ESurfaceType::Shader";
+	}
+	return "SURFACE NAME ERROR";
+}
 
 
 /* ydnar: this struct needs an overhaul (again, heh) */
 struct mapDrawSurface_t
 {
-	surfaceType_t type;
+	ESurfaceType type;
 	bool planar;
 	int outputNum;                          /* ydnar: to match this sort of thing up */
 
@@ -1612,7 +1603,7 @@ void                        AddTriangleModels( entity_t *e );
 
 
 /* surface.c */
-mapDrawSurface_t            *AllocDrawSurface( surfaceType_t type );
+mapDrawSurface_t            *AllocDrawSurface( ESurfaceType type );
 void                        FinishSurface( mapDrawSurface_t *ds );
 void                        StripFaceSurface( mapDrawSurface_t *ds );
 void                        MaxAreaFaceSurface( mapDrawSurface_t *ds );
@@ -2082,7 +2073,7 @@ Q_EXTERN int numStrippedLights Q_ASSIGN( 0 );
 Q_EXTERN mapDrawSurface_t   *mapDrawSurfs Q_ASSIGN( NULL );
 Q_EXTERN int numMapDrawSurfs;
 
-Q_EXTERN int numSurfacesByType[ NUM_SURFACE_TYPES ];
+Q_EXTERN int numSurfacesByType[ static_cast<std::size_t>( ESurfaceType::Shader ) + 1 ];
 Q_EXTERN int numClearedSurfaces;
 Q_EXTERN int numStripSurfaces;
 Q_EXTERN int numMaxAreaSurfaces;

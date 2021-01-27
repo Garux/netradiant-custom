@@ -603,7 +603,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	numDecalSurfaces++;
 
 	/* make a new surface */
-	ds2 = AllocDrawSurface( SURFACE_DECAL );
+	ds2 = AllocDrawSurface( ESurfaceType::Decal );
 
 	/* set it up */
 	ds2->entityNum = ds->entityNum;
@@ -772,7 +772,7 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
 
 
 	/* triangle surfaces without shaders don't get marks by default */
-	if ( ds->type == SURFACE_TRIANGLES && ds->shaderInfo->shaderText == NULL ) {
+	if ( ds->type == ESurfaceType::Triangles && ds->shaderInfo->shaderText == NULL ) {
 		return;
 	}
 
@@ -866,17 +866,17 @@ void MakeEntityDecals( entity_t *e ){
 			/* switch on type */
 			switch ( ds->type )
 			{
-			case SURFACE_FACE:
+			case ESurfaceType::Face:
 				ProjectDecalOntoFace( &dp, ds );
 				break;
 
-			case SURFACE_PATCH:
+			case ESurfaceType::Patch:
 				ProjectDecalOntoPatch( &dp, ds );
 				break;
 
-			case SURFACE_TRIANGLES:
-			case SURFACE_FORCED_META:
-			case SURFACE_META:
+			case ESurfaceType::Triangles:
+			case ESurfaceType::ForcedMeta:
+			case ESurfaceType::Meta:
 				ProjectDecalOntoTriangles( &dp, ds );
 				break;
 

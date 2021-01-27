@@ -200,9 +200,9 @@ void Foliage( mapDrawSurface_t *src ){
 		/* map the surface onto the lightmap origin/cluster/normal buffers */
 		switch ( src->type )
 		{
-		case SURFACE_META:
-		case SURFACE_FORCED_META:
-		case SURFACE_TRIANGLES:
+		case ESurfaceType::Meta:
+		case ESurfaceType::ForcedMeta:
+		case ESurfaceType::Triangles:
 			/* get verts */
 			verts = src->verts;
 
@@ -216,7 +216,7 @@ void Foliage( mapDrawSurface_t *src ){
 			}
 			break;
 
-		case SURFACE_PATCH:
+		case ESurfaceType::Patch:
 			/* make a mesh from the drawsurf */
 			srcMesh.width = src->patchWidth;
 			srcMesh.height = src->patchHeight;
@@ -290,7 +290,7 @@ void Foliage( mapDrawSurface_t *src ){
 			ds = &mapDrawSurfs[ i ];
 
 			/* set up */
-			ds->type = SURFACE_FOLIAGE;
+			ds->type = ESurfaceType::Foliage;
 			ds->numFoliageInstances = numFoliageInstances;
 
 			/* a wee hack */

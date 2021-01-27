@@ -43,20 +43,12 @@
    ydnar: gs mods: changed to force an explicit type when allocating
  */
 
-mapDrawSurface_t *AllocDrawSurface( surfaceType_t type ){
-	mapDrawSurface_t    *ds;
-
-
-	/* ydnar: gs mods: only allocate valid types */
-	if ( type <= SURFACE_BAD || type >= NUM_SURFACE_TYPES ) {
-		Error( "AllocDrawSurface: Invalid surface type %d specified", type );
-	}
-
+mapDrawSurface_t *AllocDrawSurface( ESurfaceType type ){
 	/* bounds check */
 	if ( numMapDrawSurfs >= MAX_MAP_DRAW_SURFS ) {
 		Error( "MAX_MAP_DRAW_SURFS (%d) exceeded", MAX_MAP_DRAW_SURFS );
 	}
-	ds = &mapDrawSurfs[ numMapDrawSurfs ];
+	mapDrawSurface_t *ds = &mapDrawSurfs[ numMapDrawSurfs ];
 	numMapDrawSurfs++;
 
 	/* ydnar: do initial surface setup */
@@ -82,7 +74,7 @@ void FinishSurface( mapDrawSurface_t *ds ){
 
 
 	/* dummy check */
-	if ( ds == NULL || ds->shaderInfo == NULL || ds->type <= SURFACE_BAD || ds->type >= NUM_SURFACE_TYPES ) {
+	if ( ds == NULL || ds->shaderInfo == NULL ) {
 		return;
 	}
 
@@ -273,7 +265,7 @@ bool IsTriangleDegenerate( bspDrawVert_t *points, int a, int b, int c ){
  */
 
 void ClearSurface( mapDrawSurface_t *ds ){
-	ds->type = SURFACE_BAD;
+	ds->type = ESurfaceType::Bad;
 	ds->planar = false;
 	ds->planeNum = -1;
 	ds->numVerts = 0;
@@ -314,8 +306,8 @@ void TidyEntitySurfaces( entity_t *e ){
 			in = &mapDrawSurfs[ j ];
 
 			/* this surface ok? */
-			if ( in->type == SURFACE_FLARE || in->type == SURFACE_SHADER ||
-				 ( in->type != SURFACE_BAD && in->numVerts > 0 ) ) {
+			if ( in->type == ESurfaceType::Flare || in->type == ESurfaceType::Shader ||
+				 ( in->type != ESurfaceType::Bad && in->numVerts > 0 ) ) {
 				break;
 			}
 
@@ -500,7 +492,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 	for ( ; numSurfs > 0; numSurfs--, ds++ )
 	{
 		/* ignore bogus (or flare) surfaces */
-		if ( ds->type == SURFACE_BAD || ds->numVerts <= 0 ) {
+		if ( ds->type == ESurfaceType::Bad || ds->numVerts <= 0 ) {
 			continue;
 		}
 
@@ -511,9 +503,9 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		   force meta if vertex count is too high or shader requires it
 		   ----------------------------------------------------------------- */
 
-		if ( ds->type != SURFACE_PATCH && ds->type != SURFACE_FACE ) {
+		if ( ds->type != ESurfaceType::Patch && ds->type != ESurfaceType::Face ) {
 			if ( ds->numVerts > SHADER_MAX_VERTEXES ) {
-				ds->type = SURFACE_FORCED_META;
+				ds->type = ESurfaceType::ForcedMeta;
 			}
 		}
 
@@ -594,7 +586,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		   ----------------------------------------------------------------- */
 
 		/* vertex lit surfaces don't need this information */
-		if ( si->compileFlags & C_VERTEXLIT || ds->type == SURFACE_TRIANGLES || nolm ) {
+		if ( si->compileFlags & C_VERTEXLIT || ds->type == ESurfaceType::Triangles || nolm ) {
 			VectorClear( ds->lightmapAxis );
 			//%	VectorClear( ds->lightmapVecs[ 2 ] );
 			ds->sampleSize = 0;
@@ -605,7 +597,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		if ( si->lightmapAxis[ 0 ] || si->lightmapAxis[ 1 ] || si->lightmapAxis[ 2 ] ) {
 			VectorCopy( si->lightmapAxis, ds->lightmapAxis );
 		}
-		else if ( ds->type == SURFACE_FORCED_META ) {
+		else if ( ds->type == ESurfaceType::ForcedMeta ) {
 			VectorClear( ds->lightmapAxis );
 		}
 		else if ( ds->planar ) {
@@ -633,13 +625,13 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 
 			/* set axis if possible */
 			if ( bestAxis < 6 ) {
-				//% if( ds->type == SURFACE_PATCH )
+				//% if( ds->type == ESurfaceType::Patch )
 				//%     Sys_Printf( "Mapped axis %d onto patch\n", bestAxis );
 				VectorCopy( axii[ bestAxis ], ds->lightmapAxis );
 			}
 
 			/* debug code */
-			//% if( ds->type == SURFACE_PATCH )
+			//% if( ds->type == ESurfaceType::Patch )
 			//%     Sys_Printf( "Failed to map axis %d onto patch\n", bestAxis );
 		}
 
@@ -919,7 +911,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 	}
 
 	/* ydnar: gs mods */
-	ds = AllocDrawSurface( SURFACE_FACE );
+	ds = AllocDrawSurface( ESurfaceType::Face );
 	ds->entityNum = b->entityNum;
 	ds->castShadows = b->castShadows;
 	ds->recvShadows = b->recvShadows;
@@ -1109,7 +1101,7 @@ mapDrawSurface_t *DrawSurfaceForMesh( entity_t *e, parseMesh_t *p, mesh_t *mesh 
 
 
 	/* ydnar: gs mods */
-	ds = AllocDrawSurface( SURFACE_PATCH );
+	ds = AllocDrawSurface( ESurfaceType::Patch );
 	ds->entityNum = p->entityNum;
 	ds->castShadows = p->castShadows;
 	ds->recvShadows = p->recvShadows;
@@ -1227,7 +1219,7 @@ mapDrawSurface_t *DrawSurfaceForFlare( int entNum, vec3_t origin, vec3_t normal,
 	}
 
 	/* allocate drawsurface */
-	ds = AllocDrawSurface( SURFACE_FLARE );
+	ds = AllocDrawSurface( ESurfaceType::Flare );
 	ds->entityNum = entNum;
 
 	/* set it up */
@@ -1288,7 +1280,7 @@ mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
 	}
 
 	/* create a new surface */
-	ds = AllocDrawSurface( SURFACE_SHADER );
+	ds = AllocDrawSurface( ESurfaceType::Shader );
 	ds->entityNum = 0;
 	ds->shaderInfo = ShaderInfoForShader( shader );
 
@@ -1426,7 +1418,7 @@ void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
 		ds = &mapDrawSurfs[ i ];
 
 		/* only subdivide brush sides */
-		if ( ds->type != SURFACE_FACE || ds->mapBrush == NULL || ds->sideRef == NULL || ds->sideRef->side == NULL ) {
+		if ( ds->type != ESurfaceType::Face || ds->mapBrush == NULL || ds->sideRef == NULL || ds->sideRef->side == NULL ) {
 			continue;
 		}
 
@@ -2496,7 +2488,7 @@ void EmitDrawIndexes( mapDrawSurface_t *ds, bspDrawSurface_t *out ){
 			bspDrawIndexes[ numBSPDrawIndexes ] = ds->indexes[ i ];
 
 			/* validate the index */
-			if ( ds->type != SURFACE_PATCH ) {
+			if ( ds->type != ESurfaceType::Patch ) {
 				if ( bspDrawIndexes[ numBSPDrawIndexes ] < 0 || bspDrawIndexes[ numBSPDrawIndexes ] >= ds->numVerts ) {
 					Sys_Warning( "%d %s has invalid index %d (%d)\n",
 								numBSPDrawSurfaces,
@@ -2527,7 +2519,7 @@ void EmitFlareSurface( mapDrawSurface_t *ds ){
 
 
 	/* ydnar: nuking useless flare drawsurfaces */
-	if ( !emitFlares && ds->type != SURFACE_SHADER ) {
+	if ( !emitFlares && ds->type != ESurfaceType::Shader ) {
 		return;
 	}
 
@@ -2537,9 +2529,6 @@ void EmitFlareSurface( mapDrawSurface_t *ds ){
 	}
 
 	/* allocate a new surface */
-	if ( numBSPDrawSurfaces == MAX_MAP_DRAW_SURFS ) {
-		Error( "MAX_MAP_DRAW_SURFS" );
-	}
 	out = &bspDrawSurfaces[ numBSPDrawSurfaces ];
 	ds->outputNum = numBSPDrawSurfaces;
 	numBSPDrawSurfaces++;
@@ -2566,7 +2555,7 @@ void EmitFlareSurface( mapDrawSurface_t *ds ){
 	VectorCopy( ds->lightmapVecs[ 2 ], out->lightmapVecs[ 2 ] );    /* normal */
 
 	/* add to count */
-	numSurfacesByType[ ds->type ]++;
+	numSurfacesByType[ static_cast<std::size_t>( ds->type ) ]++;
 }
 
 /*
@@ -2669,7 +2658,7 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	EmitDrawIndexes( ds, out );
 
 	/* add to count */
-	numSurfacesByType[ ds->type ]++;
+	numSurfacesByType[ static_cast<std::size_t>( ds->type ) ]++;
 }
 
 /*
@@ -2828,15 +2817,15 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	memset( out, 0, sizeof( *out ) );
 
 	/* ydnar/sd: handle wolf et foliage surfaces */
-	if ( ds->type == SURFACE_FOLIAGE ) {
+	if ( ds->type == ESurfaceType::Foliage ) {
 		out->surfaceType = MST_FOLIAGE;
 	}
 
 	/* ydnar: gs mods: handle lightmapped terrain (force to planar type) */
-	//%	else if( VectorLength( ds->lightmapAxis ) <= 0.0f || ds->type == SURFACE_TRIANGLES || ds->type == SURFACE_FOGHULL || debugSurfaces )
+	//%	else if( VectorLength( ds->lightmapAxis ) <= 0.0f || ds->type == ESurfaceType::Triangles || ds->type == ESurfaceType::Foghull || debugSurfaces )
 	else if ( ( VectorLength( ds->lightmapAxis ) <= 0.0f && !ds->planar ) ||
-			  ds->type == SURFACE_TRIANGLES ||
-			  ds->type == SURFACE_FOGHULL ||
+			  ds->type == ESurfaceType::Triangles ||
+			  ds->type == ESurfaceType::Foghull ||
 			  ds->numVerts > maxLMSurfaceVerts ||
 			  debugSurfaces ) {
 		out->surfaceType = MST_TRIANGLE_SOUP;
@@ -2920,7 +2909,7 @@ void EmitTriangleSurface( mapDrawSurface_t *ds ){
 	EmitDrawIndexes( ds, out );
 
 	/* add to count */
-	numSurfacesByType[ ds->type ]++;
+	numSurfacesByType[ static_cast<std::size_t>( ds->type ) ]++;
 }
 
 
@@ -2987,7 +2976,7 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
 			}
 
 			/* allocate a drawsurface */
-			ds = AllocDrawSurface( SURFACE_FACE );
+			ds = AllocDrawSurface( ESurfaceType::Face );
 			ds->shaderInfo = si;
 			ds->planar = true;
 			ds->sideRef = AllocSideRef( p->side, NULL );
@@ -3082,7 +3071,7 @@ void MakeFogHullSurfs( entity_t *e, tree_t *tree, const char *shader ){
 	si = ShaderInfoForShader( shader );
 
 	/* allocate a drawsurface */
-	ds = AllocDrawSurface( SURFACE_FOGHULL );
+	ds = AllocDrawSurface( ESurfaceType::Foghull );
 	ds->shaderInfo = si;
 	ds->fogNum = -1;
 	ds->numVerts = 8;
@@ -3313,8 +3302,8 @@ int AddSurfaceModels( mapDrawSurface_t *ds ){
 		switch ( ds->type )
 		{
 		/* handle brush faces and decals */
-		case SURFACE_FACE:
-		case SURFACE_DECAL:
+		case ESurfaceType::Face:
+		case ESurfaceType::Decal:
 			/* calculate centroid */
 			memset( &centroid, 0, sizeof( centroid ) );
 			alpha = 0.0f;
@@ -3364,7 +3353,7 @@ int AddSurfaceModels( mapDrawSurface_t *ds ){
 			break;
 
 		/* handle patches */
-		case SURFACE_PATCH:
+		case ESurfaceType::Patch:
 			/* subdivide the surface */
 			src.width = ds->patchWidth;
 			src.height = ds->patchHeight;
@@ -3420,9 +3409,9 @@ int AddSurfaceModels( mapDrawSurface_t *ds ){
 			break;
 
 		/* handle triangle surfaces */
-		case SURFACE_TRIANGLES:
-		case SURFACE_FORCED_META:
-		case SURFACE_META:
+		case ESurfaceType::Triangles:
+		case ESurfaceType::ForcedMeta:
+		case ESurfaceType::Meta:
 			/* walk the triangle list */
 			for ( i = 0; i < ds->numIndexes; i += 3 )
 			{
@@ -3552,7 +3541,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 	{
 		/* get surface and try to early out */
 		ds = &mapDrawSurfs[ i ];
-		if ( ds->numVerts == 0 && ds->type != SURFACE_FLARE && ds->type != SURFACE_SHADER ) {
+		if ( ds->numVerts == 0 && ds->type != ESurfaceType::Flare && ds->type != ESurfaceType::Shader ) {
 			continue;
 		}
 
@@ -3598,7 +3587,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			}
 
 			/* ydnar: don't emit nodraw surfaces (like nodraw fog) */
-			if ( ( si->compileFlags & C_NODRAW ) && ds->type != SURFACE_PATCH ) {
+			if ( ( si->compileFlags & C_NODRAW ) && ds->type != ESurfaceType::Patch ) {
 				continue;
 			}
 
@@ -3629,8 +3618,8 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 		switch ( ds->type )
 		{
 		/* handle brush faces */
-		case SURFACE_FACE:
-		case SURFACE_DECAL:
+		case ESurfaceType::Face:
+		case ESurfaceType::Decal:
 			if ( refs == 0 ) {
 				refs = FilterFaceIntoTree( ds, tree );
 			}
@@ -3640,7 +3629,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			break;
 
 		/* handle patches */
-		case SURFACE_PATCH:
+		case ESurfaceType::Patch:
 			if ( refs == 0 ) {
 				refs = FilterPatchIntoTree( ds, tree );
 			}
@@ -3650,9 +3639,9 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			break;
 
 		/* handle triangle surfaces */
-		case SURFACE_TRIANGLES:
-		case SURFACE_FORCED_META:
-		case SURFACE_META:
+		case ESurfaceType::Triangles:
+		case ESurfaceType::ForcedMeta:
+		case ESurfaceType::Meta:
 			//%	Sys_FPrintf( SYS_VRB, "Surface %4d: [%1d] %4d verts %s\n", numSurfs, ds->planar, ds->numVerts, si->shader );
 			if ( refs == 0 ) {
 				refs = FilterTrianglesIntoTree( ds, tree );
@@ -3663,7 +3652,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			break;
 
 		/* handle foliage surfaces (splash damage/wolf et) */
-		case SURFACE_FOLIAGE:
+		case ESurfaceType::Foliage:
 			//%	Sys_FPrintf( SYS_VRB, "Surface %4d: [%d] %4d verts %s\n", numSurfs, ds->numFoliageInstances, ds->numVerts, si->shader );
 			if ( refs == 0 ) {
 				refs = FilterFoliageIntoTree( ds, tree );
@@ -3674,7 +3663,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			break;
 
 		/* handle foghull surfaces */
-		case SURFACE_FOGHULL:
+		case ESurfaceType::Foghull:
 			if ( refs == 0 ) {
 				refs = AddReferenceToTree_r( ds, tree->headnode, false );
 			}
@@ -3684,7 +3673,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			break;
 
 		/* handle flares */
-		case SURFACE_FLARE:
+		case ESurfaceType::Flare:
 			if ( refs == 0 ) {
 				refs = FilterFlareSurfIntoTree( ds, tree );
 			}
@@ -3694,7 +3683,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			break;
 
 		/* handle shader-only surfaces */
-		case SURFACE_SHADER:
+		case ESurfaceType::Shader:
 			refs = 1;
 			EmitFlareSurface( ds );
 			break;
@@ -3728,7 +3717,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 				if ( out->numVerts == 3 && out->numIndexes > 3 ) {
 					Sys_Printf( "\n" );
 					Sys_Warning( "Potentially bad %s surface (%d: %d, %d)\n     %s\n",
-								surfaceTypes[ ds->type ],
+								surfaceTypeName( ds->type ),
 								numBSPDrawSurfaces - 1, out->numVerts, out->numIndexes, si->shader.c_str() );
 				}
 			}
@@ -3749,8 +3738,8 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 	Sys_FPrintf( SYS_VRB, "%9d maxarea'd face surfaces\n", numMaxAreaSurfaces );
 	Sys_FPrintf( SYS_VRB, "%9d surface models generated\n", numSurfaceModels );
 	Sys_FPrintf( SYS_VRB, "%9d skybox surfaces generated\n", numSkyboxSurfaces );
-	for ( i = 0; i < NUM_SURFACE_TYPES; i++ )
-		Sys_FPrintf( SYS_VRB, "%9d %s surfaces\n", numSurfacesByType[ i ], surfaceTypes[ i ] );
+	for ( std::size_t i = 0; i < ARRAY_SIZE( numSurfacesByType ); i++ )
+		Sys_FPrintf( SYS_VRB, "%9d %s surfaces\n", numSurfacesByType[ i ], surfaceTypeName( static_cast<ESurfaceType>( i ) ) );
 
 	Sys_FPrintf( SYS_VRB, "%9d redundant indexes supressed, saving %d Kbytes\n", numRedundantIndexes, ( numRedundantIndexes * 4 / 1024 ) );
 }

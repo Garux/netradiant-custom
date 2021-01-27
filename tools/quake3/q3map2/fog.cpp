@@ -297,7 +297,7 @@ bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 		InvertMesh( outside[ i ] );
 
 		/* ydnar: do this the hacky right way */
-		newds = AllocDrawSurface( SURFACE_PATCH );
+		newds = AllocDrawSurface( ESurfaceType::Patch );
 		memcpy( newds, ds, sizeof( *ds ) );
 		newds->patchWidth = outside[ i ]->width;
 		newds->patchHeight = outside[ i ]->height;
@@ -541,19 +541,19 @@ void FogDrawSurfaces( entity_t *e ){
 				switch ( ds->type )
 				{
 				/* handle brush faces */
-				case SURFACE_FACE:
+				case ESurfaceType::Face:
 					fogged = ChopFaceSurfaceByBrush( e, ds, fog->brush );
 					break;
 
 				/* handle patches */
-				case SURFACE_PATCH:
+				case ESurfaceType::Patch:
 					fogged = ChopPatchSurfaceByBrush( e, ds, fog->brush );
 					break;
 
 				/* handle triangle surfaces (fixme: split triangle surfaces) */
-				case SURFACE_TRIANGLES:
-				case SURFACE_FORCED_META:
-				case SURFACE_META:
+				case ESurfaceType::Triangles:
+				case ESurfaceType::ForcedMeta:
+				case ESurfaceType::Meta:
 					fogged = 1;
 					break;
 
