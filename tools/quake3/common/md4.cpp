@@ -40,22 +40,18 @@ static struct mdfour *m;
 #define F( X,Y,Z ) ( ( (X)&( Y ) ) | ( ( ~( X ) ) & ( Z ) ) )
 #define G( X,Y,Z ) ( ( (X)&( Y ) ) | ( (X)&( Z ) ) | ( (Y)&( Z ) ) )
 #define H( X,Y,Z ) ( ( X ) ^ ( Y ) ^ ( Z ) )
-#ifdef LARGE_INT32
-#define lshift( x,s ) ( ( ( ( x ) << ( s ) ) & 0xFFFFFFFF ) | ( ( ( x ) >> ( 32 - ( s ) ) ) & 0xFFFFFFFF ) )
-#else
 #define lshift( x,s ) ( ( ( x ) << ( s ) ) | ( ( x ) >> ( 32 - ( s ) ) ) )
-#endif
 
 #define ROUND1( a,b,c,d,k,s ) a = lshift( a + F( b,c,d ) + X[k], s )
 #define ROUND2( a,b,c,d,k,s ) a = lshift( a + G( b,c,d ) + X[k] + 0x5A827999,s )
 #define ROUND3( a,b,c,d,k,s ) a = lshift( a + H( b,c,d ) + X[k] + 0x6ED9EBA1,s )
 
 /* this applies md4 to 64 byte chunks */
-static void mdfour64( uint32 *M ){
+static void mdfour64( std::uint32_t *M ){
 	int j;
-	uint32 AA, BB, CC, DD;
-	uint32 X[16];
-	uint32 A,B,C,D;
+	std::uint32_t AA, BB, CC, DD;
+	std::uint32_t X[16];
+	std::uint32_t A,B,C,D;
 
 	for ( j = 0; j < 16; j++ )
 		X[j] = M[j];
@@ -92,18 +88,13 @@ static void mdfour64( uint32 *M ){
 
 	A += AA; B += BB; C += CC; D += DD;
 
-#ifdef LARGE_INT32
-	A &= 0xFFFFFFFF; B &= 0xFFFFFFFF;
-	C &= 0xFFFFFFFF; D &= 0xFFFFFFFF;
-#endif
-
 	for ( j = 0; j < 16; j++ )
 		X[j] = 0;
 
 	m->A = A; m->B = B; m->C = C; m->D = D;
 }
 
-static void copy64( uint32 *M, unsigned char *in ){
+static void copy64( std::uint32_t *M, unsigned char *in ){
 	int i;
 
 	for ( i = 0; i < 16; i++ )
@@ -111,7 +102,7 @@ static void copy64( uint32 *M, unsigned char *in ){
 			   ( in[i * 4 + 1] << 8 ) | ( in[i * 4 + 0] << 0 );
 }
 
-static void copy4( unsigned char *out,uint32 x ){
+static void copy4( unsigned char *out, std::uint32_t x ){
 	out[0] = x & 0xFF;
 	out[1] = ( x >> 8 ) & 0xFF;
 	out[2] = ( x >> 16 ) & 0xFF;
@@ -129,8 +120,8 @@ void mdfour_begin( struct mdfour *md ){
 
 static void mdfour_tail( unsigned char *in, int n ){
 	unsigned char buf[128] = {0};
-	uint32 M[16];
-	uint32 b;
+	std::uint32_t M[16];
+	std::uint32_t b;
 
 	m->totalN += n;
 
@@ -156,7 +147,7 @@ static void mdfour_tail( unsigned char *in, int n ){
 }
 
 void mdfour_update( struct mdfour *md, unsigned char *in, int n ){
-	uint32 M[16];
+	std::uint32_t M[16];
 
 // start of edit by Forest 'LordHavoc' Hale
 // commented out to prevent crashing when length is 0
