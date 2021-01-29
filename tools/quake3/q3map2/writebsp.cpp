@@ -79,8 +79,8 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
 	AUTOEXPAND_BY_REALLOC_BSP( Shaders, 1024 );
 
 	numBSPShaders++;
-	// copy and clear the rest of memory // check for overflow by String64
-	strncpy( bspShaders[ i ].shader, String64()( shader ), sizeof( bspShaders[ i ].shader ) );
+	// copy and clear the rest of memory
+	strncpy( bspShaders[ i ].shader, si->shader, sizeof( bspShaders[ i ].shader ) );
 	bspShaders[ i ].surfaceFlags = si->surfaceFlags;
 	bspShaders[ i ].contentFlags = si->contentFlags;
 
@@ -497,8 +497,8 @@ void EmitFogs( void ){
 	for ( i = 0; i < numMapFogs; i++ )
 	{
 		/* set shader */
-		// copy and clear the rest of memory // check for overflow by String64
-		strncpy( bspFogs[ i ].shader, String64()( mapFogs[ i ].si->shader ), sizeof( bspFogs[ i ].shader ) );
+		// copy and clear the rest of memory
+		strncpy( bspFogs[ i ].shader, mapFogs[ i ].si->shader, sizeof( bspFogs[ i ].shader ) );
 
 		/* global fog doesn't have an associated brush */
 		if ( mapFogs[ i ].brush == NULL ) {

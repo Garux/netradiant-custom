@@ -161,7 +161,8 @@ void SwapBSPFile( void ){
 			si = ShaderInfoForShader( bspShaders[ i ].shader );
 			if ( !strEmptyOrNull( si->remapShader ) ) {
 				// copy and clear the rest of memory // check for overflow by String64
-				strncpy( bspShaders[ i ].shader, String64()( si->remapShader ), sizeof( bspShaders[ i ].shader ) );
+				const auto remap = String64()( si->remapShader );
+				strncpy( bspShaders[ i ].shader, remap, sizeof( bspShaders[ i ].shader ) );
 			}
 		}
 		bspShaders[ i ].contentFlags = LittleLong( bspShaders[ i ].contentFlags );
