@@ -689,7 +689,7 @@ void ClassifyEntitySurfaces( entity_t *e ){
    for shader-indexed surfaces (terrain), find a matching index from the indexmap
  */
 
-byte GetShaderIndexForPoint( indexMap_t *im, vec3_t eMins, vec3_t eMaxs, vec3_t point ){
+byte GetShaderIndexForPoint( const indexMap_t *im, const vec3_t eMins, const vec3_t eMaxs, const vec3_t point ){
 	int i, x, y;
 	float s, t;
 	vec3_t mins, maxs, size;
@@ -771,7 +771,7 @@ byte GetShaderIndexForPoint( indexMap_t *im, vec3_t eMins, vec3_t eMaxs, vec3_t 
    this combines a couple different functions from terrain.c
  */
 
-shaderInfo_t *GetIndexedShader( shaderInfo_t *parent, indexMap_t *im, int numPoints, byte *shaderIndexes ){
+shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
 	int i;
 	byte minShaderIndex, maxShaderIndex;
 	shaderInfo_t    *si;
@@ -809,8 +809,8 @@ shaderInfo_t *GetIndexedShader( shaderInfo_t *parent, indexMap_t *im, int numPoi
 
 	/* get the shader */
 	si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )?
-	                            String64()( "textures/", im->shader, '_', int(maxShaderIndex) ):
-	                            String64()( "textures/", im->shader, '_', int(minShaderIndex), "to", int(maxShaderIndex) ) );
+	                            String64()( "textures/", im->shader.c_str(), '_', int(maxShaderIndex) ):
+	                            String64()( "textures/", im->shader.c_str(), '_', int(minShaderIndex), "to", int(maxShaderIndex) ) );
 
 	/* inherit a few things from parent shader */
 	if ( parent->globalTexture ) {

@@ -806,7 +806,7 @@ struct sideRef_t
 struct indexMap_t
 {
 	int w, h, numLayers;
-	char name[ MAX_QPATH ], shader[ MAX_QPATH ];
+	String64 shader;
 	float offsets[ 256 ];
 	byte                *pixels;
 };

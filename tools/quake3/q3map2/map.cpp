@@ -1609,14 +1609,14 @@ void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* create a new index map */
-	im = safe_calloc( sizeof( *im ) );
+	im = safe_malloc( sizeof( *im ) );
+	new ( im ) indexMap_t{}; // placement new
 
 	/* set it up */
 	im->w = w;
 	im->h = h;
 	im->numLayers = numLayers;
-	strcpy( im->name, indexMapFilename );
-	strcpy( im->shader, shader );
+	im->shader = shader;
 	im->pixels = pixels;
 
 	/* get height offsets */
