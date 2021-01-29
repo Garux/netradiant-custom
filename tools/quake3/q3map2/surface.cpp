@@ -3571,7 +3571,7 @@ void FilterDrawsurfsIntoTree( entity_t *e, tree_t *tree ){
 			}
 
 			/* ydnar/sd: make foliage surfaces */
-			if ( si->foliage != NULL ) {
+			if ( !si->foliage.empty() ) {
 				Foliage( ds );
 			}
 

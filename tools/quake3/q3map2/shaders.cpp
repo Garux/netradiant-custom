@@ -1383,26 +1383,21 @@ static void ParseShaderFile( const char *filename ){
 
 				/* ydnar/sd: q3map_foliage <path to model> <scale> <density> <odds> <invert alpha (1 or 0)> */
 				else if ( striEqual( token, "q3map_foliage" ) ) {
-					foliage_t   *foliage;
-
-
 					/* allocate new foliage struct and attach it */
-					foliage = safe_calloc( sizeof( *foliage ) );
-					foliage->next = si->foliage;
-					si->foliage = foliage;
+					foliage_t& foliage = si->foliage.emplace_back();
 
 					/* get parameters */
 					GetTokenAppend( shaderText, false );
-					strcpy( foliage->model, token );
+					foliage.model = token;
 
 					GetTokenAppend( shaderText, false );
-					foliage->scale = atof( token );
+					foliage.scale = atof( token );
 					GetTokenAppend( shaderText, false );
-					foliage->density = atof( token );
+					foliage.density = atof( token );
 					GetTokenAppend( shaderText, false );
-					foliage->odds = atof( token );
+					foliage.odds = atof( token );
 					GetTokenAppend( shaderText, false );
-					foliage->inverseAlpha = atoi( token );
+					foliage.inverseAlpha = atoi( token );
 				}
 
 				/* ydnar: q3map_bounce <value> (fraction of light to re-emit during radiosity passes) */

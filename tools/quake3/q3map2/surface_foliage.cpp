@@ -45,7 +45,7 @@ static foliageInstance_t foliageInstances[ MAX_FOLIAGE_INSTANCES ];
    the desired density, then pseudo-randomly sets a point
  */
 
-static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage, bspDrawVert_t **tri ){
+static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& foliage, bspDrawVert_t **tri ){
 	bspDrawVert_t mid, *tri2[ 3 ];
 	int max;
 
@@ -110,18 +110,18 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage
 		}
 
 		/* is the triangle small enough? */
-		if ( maxDist <= ( foliage->density * foliage->density ) ) {
+		if ( maxDist <= ( foliage.density * foliage.density ) ) {
 			float alpha, odds, r;
 
 
 			/* get average alpha */
-			if ( foliage->inverseAlpha == 2 ) {
+			if ( foliage.inverseAlpha == 2 ) {
 				alpha = 1.0f;
 			}
 			else
 			{
 				alpha = ( (float) tri[ 0 ]->color[ 0 ][ 3 ] + (float) tri[ 1 ]->color[ 0 ][ 3 ] + (float) tri[ 2 ]->color[ 0 ][ 3 ] ) / 765.0f;
-				if ( foliage->inverseAlpha == 1 ) {
+				if ( foliage.inverseAlpha == 1 ) {
 					alpha = 1.0f - alpha;
 				}
 				if ( alpha < 0.75f ) {
@@ -130,7 +130,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, foliage_t *foliage
 			}
 
 			/* roll the dice */
-			odds = foliage->odds * alpha;
+			odds = foliage.odds * alpha;
 			r = Random();
 			if ( r > odds ) {
 				return;
@@ -173,7 +173,6 @@ void Foliage( mapDrawSurface_t *src ){
 	int i, j, k, x, y, pw[ 5 ], r, oldNumMapDrawSurfs;
 	mapDrawSurface_t    *ds;
 	shaderInfo_t        *si;
-	foliage_t           *foliage;
 	mesh_t srcMesh, *subdivided, *mesh;
 	bspDrawVert_t       *verts, *dv[ 3 ], *fi;
 	vec3_t scale;
@@ -182,12 +181,12 @@ void Foliage( mapDrawSurface_t *src ){
 
 	/* get shader */
 	si = src->shaderInfo;
-	if ( si == NULL || si->foliage == NULL ) {
+	if ( si == NULL || si->foliage.empty() ) {
 		return;
 	}
 
 	/* do every foliage */
-	for ( foliage = si->foliage; foliage != NULL; foliage = foliage->next )
+	for ( const auto& foliage : si->foliage )
 	{
 		/* zero out */
 		numFoliageInstances = 0;
@@ -272,11 +271,11 @@ void Foliage( mapDrawSurface_t *src ){
 		oldNumMapDrawSurfs = numMapDrawSurfs;
 
 		/* set transform matrix */
-		VectorSet( scale, foliage->scale, foliage->scale, foliage->scale );
+		VectorSet( scale, foliage.scale, foliage.scale, foliage.scale );
 		m4x4_scale_for_vec3( transform, scale );
 
 		/* add the model to the bsp */
-		InsertModel( foliage->model, 0, 0, transform, NULL, NULL, src->entityNum, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
+		InsertModel( foliage.model.c_str(), 0, 0, transform, NULL, NULL, src->entityNum, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
 
 		/* walk each new surface */
 		for ( i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )
