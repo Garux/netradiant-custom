@@ -561,8 +561,7 @@ struct sun_t
 
 struct surfaceModel_t
 {
-	surfaceModel_t   *next;
-	char model[ MAX_QPATH ];
+	CopiedString model;
 	float density, odds;
 	float minScale, maxScale;
 	float minAngle, maxAngle;
@@ -643,7 +642,7 @@ struct shaderInfo_t
 	char                *remapShader;                   /* ydnar: remap a shader in final stage */
 	char                *deprecateShader;               /* vortex: shader is deprecated and replaced by this on use */
 
-	surfaceModel_t      *surfaceModel;                  /* ydnar: for distribution of models */
+	std::list<surfaceModel_t> surfaceModels;            /* ydnar: for distribution of models */
 	foliage_t           *foliage;                       /* ydnar/splash damage: wolf et foliage */
 
 	float subdivisions;                                 /* from a "tesssize xxx" */

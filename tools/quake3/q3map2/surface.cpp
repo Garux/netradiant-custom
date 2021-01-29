@@ -3123,7 +3123,7 @@ void BiasSurfaceTextures( mapDrawSurface_t *ds ){
    adds models to a specified triangle, returns the number of models added
  */
 
-int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, bspDrawVert_t **tri ){
+int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& model, bspDrawVert_t **tri ){
 	bspDrawVert_t mid, *tri2[ 3 ];
 	int max, n, localNumSurfaceModels;
 
@@ -3160,25 +3160,25 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 		}
 
 		/* is the triangle small enough? */
-		if ( max < 0 || maxDist <= ( model->density * model->density ) ) {
+		if ( max < 0 || maxDist <= ( model.density * model.density ) ) {
 			float odds, r, angle;
 			vec3_t origin, normal, scale, axis[ 3 ], angles;
 			m4x4_t transform, temp;
 
 
 			/* roll the dice (model's odds scaled by vertex alpha) */
-			odds = model->odds * ( tri[ 0 ]->color[ 0 ][ 3 ] + tri[ 0 ]->color[ 0 ][ 3 ] + tri[ 0 ]->color[ 0 ][ 3 ] ) / 765.0f;
+			odds = model.odds * ( tri[ 0 ]->color[ 0 ][ 3 ] + tri[ 0 ]->color[ 0 ][ 3 ] + tri[ 0 ]->color[ 0 ][ 3 ] ) / 765.0f;
 			r = Random();
 			if ( r > odds ) {
 				return 0;
 			}
 
 			/* calculate scale */
-			r = model->minScale + Random() * ( model->maxScale - model->minScale );
+			r = model.minScale + Random() * ( model.maxScale - model.minScale );
 			VectorSet( scale, r, r, r );
 
 			/* calculate angle */
-			angle = model->minAngle + Random() * ( model->maxAngle - model->minAngle );
+			angle = model.minAngle + Random() * ( model.maxAngle - model.minAngle );
 
 			/* calculate average origin */
 			VectorCopy( tri[ 0 ]->xyz, origin );
@@ -3190,7 +3190,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			m4x4_identity( transform );
 
 			/* handle oriented models */
-			if ( model->oriented ) {
+			if ( model.oriented ) {
 				/* set angles */
 				VectorSet( angles, 0.0f, 0.0f, angle );
 
@@ -3235,7 +3235,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
 			}
 
 			/* insert the model */
-			InsertModel( model->model, 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
+			InsertModel( model.model.c_str(), 0, 0, transform, NULL, ds->celShader, ds->entityNum, ds->castShadows, ds->recvShadows, 0, ds->lightmapScale, 0, 0, clipDepthGlobal );
 
 			/* return to sender */
 			return 1;
@@ -3275,7 +3275,6 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, surfaceModel_t *model, b
  */
 
 int AddSurfaceModels( mapDrawSurface_t *ds ){
-	surfaceModel_t  *model;
 	int i, x, y, n, pw[ 5 ], r, localNumSurfaceModels, iterations;
 	mesh_t src, *mesh, *subdivided;
 	bspDrawVert_t centroid, *tri[ 3 ];
@@ -3283,7 +3282,7 @@ int AddSurfaceModels( mapDrawSurface_t *ds ){
 
 
 	/* dummy check */
-	if ( ds == NULL || ds->shaderInfo == NULL || ds->shaderInfo->surfaceModel == NULL ) {
+	if ( ds == NULL || ds->shaderInfo == NULL || ds->shaderInfo->surfaceModels.empty() ) {
 		return 0;
 	}
 
@@ -3291,7 +3290,7 @@ int AddSurfaceModels( mapDrawSurface_t *ds ){
 	localNumSurfaceModels = 0;
 
 	/* walk the model list */
-	for ( model = ds->shaderInfo->surfaceModel; model != NULL; model = model->next )
+	for ( const auto& model : ds->shaderInfo->surfaceModels )
 	{
 		/* switch on type */
 		switch ( ds->type )

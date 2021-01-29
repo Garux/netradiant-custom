@@ -1355,34 +1355,30 @@ static void ParseShaderFile( const char *filename ){
 
 				/* ydnar: q3map_surfacemodel <path to model> <density> <min scale> <max scale> <min angle> <max angle> <oriented (0 or 1)> */
 				else if ( striEqual( token, "q3map_surfacemodel" ) ) {
-					surfaceModel_t  *model;
-
 					/* allocate new model and attach it */
-					model = safe_calloc( sizeof( *model ) );
-					model->next = si->surfaceModel;
-					si->surfaceModel = model;
+					surfaceModel_t& model = si->surfaceModels.emplace_back();
 
 					/* get parameters */
 					GetTokenAppend( shaderText, false );
-					strcpy( model->model, token );
+					model.model = token;
 
 					GetTokenAppend( shaderText, false );
-					model->density = atof( token );
+					model.density = atof( token );
 					GetTokenAppend( shaderText, false );
-					model->odds = atof( token );
+					model.odds = atof( token );
 
 					GetTokenAppend( shaderText, false );
-					model->minScale = atof( token );
+					model.minScale = atof( token );
 					GetTokenAppend( shaderText, false );
-					model->maxScale = atof( token );
+					model.maxScale = atof( token );
 
 					GetTokenAppend( shaderText, false );
-					model->minAngle = atof( token );
+					model.minAngle = atof( token );
 					GetTokenAppend( shaderText, false );
-					model->maxAngle = atof( token );
+					model.maxAngle = atof( token );
 
 					GetTokenAppend( shaderText, false );
-					model->oriented = ( token[ 0 ] == '1' );
+					model.oriented = ( token[ 0 ] == '1' );
 				}
 
 				/* ydnar/sd: q3map_foliage <path to model> <scale> <density> <odds> <invert alpha (1 or 0)> */
