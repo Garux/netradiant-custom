@@ -56,10 +56,9 @@ public:
 	}
 
 	template<typename ... Args>
-	StringFixedSize& operator()( const Args& ... args ){
+	StringFixedSize& operator()( Args&& ... args ){
 		clear();
-		using expander = int[];
-		(void)expander{ 0, ( (void)( *this << args ), 0 ) ... };
+		( *this << ... << std::forward<Args>( args ) );
 		return *this;
 	}
 

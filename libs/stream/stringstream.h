@@ -113,10 +113,9 @@ std::size_t write( const char* buffer, std::size_t length ){
 }
 
 template<typename ... Args>
-StringOutputStream& operator()( const Args& ... args ){
+StringOutputStream& operator()( Args&& ... args ){
 	clear();
-	using expander = int[];
-	(void)expander{ 0, ( (void)( *this << args ), 0 ) ... };
+	( *this << ... << std::forward<Args>( args ) );
 	return *this;
 }
 
