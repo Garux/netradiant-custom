@@ -4,7 +4,7 @@ MAKEFILE_CONF      ?= Makefile.conf
 ## CONFIGURATION SETTINGS
 # user customizable stuf
 # you may override this in Makefile.conf or the environment
-BUILD              ?= debug
+BUILD              ?= release
 # or: release, or: debug, or: extradebug, or: extradebug_quicker, or: profile, or: native
 OS                 ?= $(shell uname)
 # or: Linux, Win32, Darwin
