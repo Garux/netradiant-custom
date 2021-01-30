@@ -402,7 +402,7 @@ int ConvertBSPToASE( char *bspName ){
 		}
 		else
 		{
-			const char *key = ValueForKey( e, "model" );
+			const char *key = e->valueForKey( "model" );
 			if ( key[ 0 ] != '*' ) {
 				continue;
 			}
@@ -412,7 +412,7 @@ int ConvertBSPToASE( char *bspName ){
 
 		/* get entity origin */
 		vec3_t origin;
-		GetVectorForKey( e, "origin", origin );
+		e->vectorForKey( "origin", origin );
 
 		/* convert model */
 		ConvertModel( f, model, modelNum, origin, lmIndices );

@@ -3405,7 +3405,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 				/* get rgbgen string */
 				if ( rgbGenValues[ style ] == NULL ) {
 					sprintf( key, "_style%drgbgen", style );
-					rgbGenValues[ style ] = ValueForKey( &entities[ 0 ], key );
+					rgbGenValues[ style ] = entities[ 0 ].valueForKey( key );
 					if ( strEmpty( rgbGenValues[ style ] ) ) {
 						rgbGenValues[ style ] = "wave noise 0.5 1 0 5.37";
 					}
@@ -3421,7 +3421,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 				/* get alphagen string */
 				if ( alphaGenValues[ style ] == NULL ) {
 					sprintf( key, "_style%dalphagen", style );
-					alphaGenValues[ style ] = ValueForKey( &entities[ 0 ], key );
+					alphaGenValues[ style ] = entities[ 0 ].valueForKey( key );
 				}
 				if ( !strEmpty( alphaGenValues[ style ] ) ) {
 					sprintf( alphaGen, "\t\talphaGen %s // style %d\n", alphaGenValues[ style ], style );

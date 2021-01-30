@@ -263,7 +263,7 @@ void SetModelNumbers( void ){
 		if ( entities[i].brushes || entities[i].patches ) {
 			sprintf( value, "*%i", models );
 			models++;
-			SetKeyValue( &entities[i], "model", value );
+			entities[i].setKeyValue( "model", value );
 		}
 	}
 
@@ -286,11 +286,11 @@ void SetLightStyles( void ){
 
 	/* -keeplights option: force lights to be kept and ignore what the map file says */
 	if ( keepLights ) {
-		SetKeyValue( &entities[0], "_keepLights", "1" );
+		entities[0].setKeyValue( "_keepLights", "1" );
 	}
 
 	/* ydnar: determine if we keep lights in the bsp */
-	ENT_READKV( &keepLights, &entities[ 0 ], "_keepLights" );
+	entities[ 0 ].read_keyvalue( keepLights, "_keepLights" );
 
 	/* any light that is controlled (has a targetname) must have a unique style number generated for it */
 	numStyles = 0;
@@ -298,11 +298,11 @@ void SetLightStyles( void ){
 	{
 		e = &entities[ i ];
 
-		if ( !ent_class_prefixed( e, "light" ) ) {
+		if ( !e->classname_prefixed( "light" ) ) {
 			continue;
 		}
 		const char *t;
-		if ( !ENT_READKV( &t, e, "targetname" ) ) {
+		if ( !e->read_keyvalue( t, "targetname" ) ) {
 			/* ydnar: strip the light from the BSP file */
 			if ( !keepLights ) {
 				e->epairs.clear();
@@ -314,7 +314,7 @@ void SetLightStyles( void ){
 		}
 
 		/* get existing style */
-		const int style = IntForKey( e, "style" );
+		const int style = e->intForKey( "style" );
 		if ( style < LS_NORMAL || style > LS_NONE ) {
 			Error( "Invalid lightstyle (%d) on entity %zu", style, i );
 		}
@@ -337,12 +337,12 @@ void SetLightStyles( void ){
 
 		/* set explicit style */
 		sprintf( value, "%d", 32 + j );
-		SetKeyValue( e, "style", value );
+		e->setKeyValue( "style", value );
 
 		/* set old style */
 		if ( style != LS_NORMAL ) {
 			sprintf( value, "%d", style );
-			SetKeyValue( e, "switch_style", value );
+			e->setKeyValue( "switch_style", value );
 		}
 	}
 

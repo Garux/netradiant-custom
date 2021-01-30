@@ -222,10 +222,10 @@ void CreateEntityLights( void ){
 		e = &entities[ i ];
 		/* ydnar: check for lightJunior */
 		bool junior;
-		if ( ent_class_is( e, "lightJunior" ) ) {
+		if ( e->classname_is( "lightJunior" ) ) {
 			junior = true;
 		}
-		else if ( ent_class_prefixed( e, "light" ) ) {
+		else if ( e->classname_prefixed( "light" ) ) {
 			junior = false;
 		}
 		else{
@@ -233,7 +233,7 @@ void CreateEntityLights( void ){
 		}
 
 		/* lights with target names (and therefore styles) are only parsed from BSP */
-		if ( !strEmpty( ValueForKey( e, "targetname" ) ) && i >= numBSPEntities ) {
+		if ( !strEmpty( e->valueForKey( "targetname" ) ) && i >= numBSPEntities ) {
 			continue;
 		}
 
@@ -244,7 +244,7 @@ void CreateEntityLights( void ){
 		lights = light;
 
 		/* handle spawnflags */
-		const int spawnflags = IntForKey( e, "spawnflags" );
+		const int spawnflags = e->intForKey( "spawnflags" );
 
 		LightFlags flags;
 		/* ydnar: quake 3+ light behavior */
@@ -316,55 +316,55 @@ void CreateEntityLights( void ){
 		/* ydnar: set fade key (from wolf) */
 		light->fade = 1.0f;
 		if ( light->flags & LightFlags::AttenLinear ) {
-			light->fade = FloatForKey( e, "fade" );
+			light->fade = e->floatForKey( "fade" );
 			if ( light->fade == 0.0f ) {
 				light->fade = 1.0f;
 			}
 		}
 
 		/* ydnar: set angle scaling (from vlight) */
-		light->angleScale = FloatForKey( e, "_anglescale" );
+		light->angleScale = e->floatForKey( "_anglescale" );
 		if ( light->angleScale != 0.0f ) {
 			light->flags |= LightFlags::AttenAngle;
 		}
 
 		/* set origin */
-		GetVectorForKey( e, "origin", light->origin );
-		ENT_READKV( &light->style, e, "_style", "style" );
+		e->vectorForKey( "origin", light->origin );
+		e->read_keyvalue( light->style, "_style", "style" );
 		if ( light->style < LS_NORMAL || light->style >= LS_NONE ) {
 			Error( "Invalid lightstyle (%d) on entity %zu", light->style, i );
 		}
 
 		/* set light intensity */
 		float intensity = 300.f;
-		ENT_READKV( &intensity, e, "_light", "light" );
+		e->read_keyvalue( intensity, "_light", "light" );
 		if ( intensity == 0.0f ) {
 			intensity = 300.0f;
 		}
 
 		{ /* ydnar: set light scale (sof2) */
 			float scale;
-			if( ENT_READKV( &scale, e, "scale" ) && scale != 0.f )
+			if( e->read_keyvalue( scale, "scale" ) && scale != 0.f )
 				intensity *= scale;
 		}
 
 		/* ydnar: get deviance and samples */
-		float deviance = FloatForKey( e, "_deviance", "_deviation", "_jitter" );
+		float deviance = e->floatForKey( "_deviance", "_deviation", "_jitter" );
 		if ( deviance < 0.f )
 			deviance = 0.f;
-		int numSamples = IntForKey( e, "_samples" );
+		int numSamples = e->intForKey( "_samples" );
 		if ( numSamples < 1 )
 			numSamples = 1;
 
 		intensity /= numSamples;
 
 		{ /* ydnar: get filter radius */
-			const float filterRadius = FloatForKey( e, "_filterradius", "_filteradius", "_filter" );
+			const float filterRadius = e->floatForKey( "_filterradius", "_filteradius", "_filter" );
 			light->filterRadius = filterRadius < 0.f? 0.f : filterRadius;
 		}
 
 		/* set light color */
-		if ( ENT_READKV( &light->color, e, "_color" ) ) {
+		if ( e->read_keyvalue( light->color, "_color" ) ) {
 			if ( colorsRGB ) {
 				light->color[0] = Image_LinearFloatFromsRGBFloat( light->color[0] );
 				light->color[1] = Image_LinearFloatFromsRGBFloat( light->color[1] );
@@ -379,7 +379,7 @@ void CreateEntityLights( void ){
 		}
 
 
-		if( !ENT_READKV( &light->extraDist, e, "_extradist" ) )
+		if( !e->read_keyvalue( light->extraDist, "_extradist" ) )
 			light->extraDist = extraDist;
 
 		light->photons = intensity;
@@ -391,7 +391,7 @@ void CreateEntityLights( void ){
 
 		/* lights with a target will be spotlights */
 		const char *target;
-		if ( ENT_READKV( &target, e, "target" ) ) {
+		if ( e->read_keyvalue( target, "target" ) ) {
 			/* get target */
 			e2 = FindTargetEntity( target );
 			if ( e2 == NULL ) {
@@ -407,10 +407,10 @@ void CreateEntityLights( void ){
 
 				/* make a spotlight */
 				vec3_t dest;
-				GetVectorForKey( e2, "origin", dest );
+				e2->vectorForKey( "origin", dest );
 				VectorSubtract( dest, light->origin, light->normal );
 				float dist = VectorNormalize( light->normal, light->normal );
-				float radius = FloatForKey( e, "radius" );
+				float radius = e->floatForKey( "radius" );
 				if ( !radius ) {
 					radius = 64;
 				}
@@ -426,7 +426,7 @@ void CreateEntityLights( void ){
 				light->fade = 1.0f;
 
 				/* ydnar: is this a sun? */
-				if ( BoolForKey( e, "_sun" ) ) {
+				if ( e->boolForKey( "_sun" ) ) {
 					/* not a spot light */
 					numSpotLights--;
 
@@ -509,7 +509,7 @@ void CreateSurfaceLights( void ){
 
 
 	/* get sun shader supressor */
-	const bool nss = BoolForKey( &entities[ 0 ], "_noshadersun" );
+	const bool nss = entities[ 0 ].boolForKey( "_noshadersun" );
 
 	/* walk the list of surfaces */
 	for ( i = 0; i < numBSPDrawSurfaces; i++ )
@@ -614,7 +614,7 @@ void SetEntityOrigins( void ){
 	for ( const auto& e : entities )
 	{
 		/* get entity and model */
-		key = ValueForKey( &e, "model" );
+		key = e.valueForKey( "model" );
 		if ( key[ 0 ] != '*' ) {
 			continue;
 		}
@@ -623,7 +623,7 @@ void SetEntityOrigins( void ){
 
 		/* get entity origin */
 		vec3_t origin = { 0.f, 0.f, 0.f };
-		if ( !ENT_READKV( &origin, &e, "origin" ) ) {
+		if ( !e.read_keyvalue( origin, "origin" ) ) {
 			continue;
 		}
 
@@ -1766,7 +1766,7 @@ void SetupGrid( void ){
 	}
 
 	/* ydnar: set grid size */
-	ENT_READKV( &gridSize, &entities[ 0 ], "gridsize" );
+	entities[ 0 ].read_keyvalue( gridSize, "gridsize" );
 
 	/* quantize it */
 	VectorCopy( gridSize, oldGridSize );
@@ -1801,7 +1801,7 @@ void SetupGrid( void ){
 	/* different? */
 	if ( !VectorCompare( gridSize, oldGridSize ) ) {
 		sprintf( temp, "%.0f %.0f %.0f", gridSize[ 0 ], gridSize[ 1 ], gridSize[ 2 ] );
-		SetKeyValue( &entities[ 0 ], "gridsize", (const char*) temp );
+		entities[ 0 ].setKeyValue( "gridsize", (const char*) temp );
 		Sys_FPrintf( SYS_VRB, "Storing adjusted grid size\n" );
 	}
 
@@ -1854,7 +1854,7 @@ void LightWorld( bool fastAllocate ){
 	}
 
 	/* find the optional minimum lighting values */
-	GetVectorForKey( &entities[ 0 ], "_color", color );
+	entities[ 0 ].vectorForKey( "_color", color );
 	if ( colorsRGB ) {
 		color[0] = Image_LinearFloatFromsRGBFloat( color[0] );
 		color[1] = Image_LinearFloatFromsRGBFloat( color[1] );
@@ -1865,21 +1865,21 @@ void LightWorld( bool fastAllocate ){
 	}
 
 	/* ambient */
-	f = FloatForKey( &entities[ 0 ], "_ambient", "ambient" );
+	f = entities[ 0 ].floatForKey( "_ambient", "ambient" );
 	VectorScale( color, f, ambientColor );
 
 	/* minvertexlight */
-	if ( ( minVertex = ENT_READKV( &f, &entities[ 0 ], "_minvertexlight" ) ) ) {
+	if ( ( minVertex = entities[ 0 ].read_keyvalue( f, "_minvertexlight" ) ) ) {
 		VectorScale( color, f, minVertexLight );
 	}
 
 	/* mingridlight */
-	if ( ( minGrid = ENT_READKV( &f, &entities[ 0 ], "_mingridlight" ) ) ) {
+	if ( ( minGrid = entities[ 0 ].read_keyvalue( f, "_mingridlight" ) ) ) {
 		VectorScale( color, f, minGridLight );
 	}
 
 	/* minlight */
-	if ( ENT_READKV( &f, &entities[ 0 ], "_minlight" ) ) {
+	if ( entities[ 0 ].read_keyvalue( f, "_minlight" ) ) {
 		VectorScale( color, f, minLight );
 		if ( !minVertex )
 			VectorScale( color, f, minVertexLight );
@@ -1888,7 +1888,7 @@ void LightWorld( bool fastAllocate ){
 	}
 
 	/* maxlight */
-	if ( ENT_READKV( &f, &entities[ 0 ], "_maxlight" ) ) {
+	if ( entities[ 0 ].read_keyvalue( f, "_maxlight" ) ) {
 		maxLight = f > 255? 255 : f < 0? 0 : f;
 	}
 
@@ -2961,7 +2961,7 @@ int LightMain( int argc, char **argv ){
 	InjectCommandLine( argv, 0, argc - 1 );
 
 	/* load map file */
-	if ( !BoolForKey( &entities[ 0 ], "_keepLights" ) ) {
+	if ( !entities[ 0 ].boolForKey( "_keepLights" ) ) {
 		LoadMapFile( name, true, false );
 	}
 

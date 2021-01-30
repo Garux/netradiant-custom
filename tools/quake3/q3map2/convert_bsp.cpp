@@ -465,21 +465,21 @@ int ScaleBSPMain( int argc, char **argv ){
 	for ( auto& e : entities )
 	{
 		/* scale origin */
-		if ( ENT_READKV( &vec, &e, "origin" ) ) {
-			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
+		if ( e.read_keyvalue( vec, "origin" ) ) {
+			if ( entities[i].classname_prefixed( "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
 			vec[0] *= scale[0];
 			vec[1] *= scale[1];
 			vec[2] *= scale[2];
-			if ( ent_class_prefixed( &entities[i], "info_player_" ) ) {
+			if ( entities[i].classname_prefixed( "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-			SetKeyValue( &e, "origin", str );
+			e.setKeyValue( "origin", str );
 		}
 
-		a = FloatForKey( &e, "angle" );
+		a = e.floatForKey( "angle" );
 		if ( a == -1 || a == -2 ) { // z scale
 			axis = 2;
 		}
@@ -491,17 +491,17 @@ int ScaleBSPMain( int argc, char **argv ){
 		}
 
 		/* scale door lip */
-		if ( ENT_READKV( &f, &e, "lip" ) ) {
+		if ( e.read_keyvalue( f, "lip" ) ) {
 			f *= scale[axis];
 			sprintf( str, "%f", f );
-			SetKeyValue( &e, "lip", str );
+			e.setKeyValue( "lip", str );
 		}
 
 		/* scale plat height */
-		if ( ENT_READKV( &f, &e, "height" ) ) {
+		if ( e.read_keyvalue( f, "height" ) ) {
 			f *= scale[2];
 			sprintf( str, "%f", f );
-			SetKeyValue( &e, "height", str );
+			e.setKeyValue( "height", str );
 		}
 
 		// TODO maybe allow a definition file for entities to specify which values are scaled how?
@@ -617,14 +617,14 @@ int ScaleBSPMain( int argc, char **argv ){
 	}
 
 	/* scale gridsize */
-	if ( !ENT_READKV( &vec, &entities[ 0 ], "gridsize" ) ) {
+	if ( !entities[ 0 ].read_keyvalue( vec, "gridsize" ) ) {
 		VectorCopy( gridSize, vec );
 	}
 	vec[0] *= scale[0];
 	vec[1] *= scale[1];
 	vec[2] *= scale[2];
 	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-	SetKeyValue( &entities[ 0 ], "gridsize", str );
+	entities[ 0 ].setKeyValue( "gridsize", str );
 
 	/* inject command line parameters */
 	InjectCommandLine( argv, 0, argc - 1 );
@@ -700,18 +700,18 @@ int ShiftBSPMain( int argc, char **argv ){
 	for ( auto& e : entities )
 	{
 		/* shift origin */
-		if ( ENT_READKV( &vec, &e, "origin" ) ) {
-			if ( ent_class_prefixed( &e, "info_player_" ) ) {
+		if ( e.read_keyvalue( vec, "origin" ) ) {
+			if ( e.classname_prefixed( "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
 			vec[0] += scale[0];
 			vec[1] += scale[1];
 			vec[2] += scale[2];
-			if ( ent_class_prefixed( &e, "info_player_" ) ) {
+			if ( e.classname_prefixed( "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-			SetKeyValue( &e, "origin", str );
+			e.setKeyValue( "origin", str );
 		}
 
 	}
@@ -782,14 +782,14 @@ int ShiftBSPMain( int argc, char **argv ){
 
 	/* scale gridsize */
 	/*
-	if ( !ENT_READKV( &vec, &entities[ 0 ], "gridsize" ) ) {
+	if ( !entities[ 0 ].read_keyvalue( vec, "gridsize" ) ) {
 		VectorCopy( gridSize, vec );
 	}
 	vec[0] *= scale[0];
 	vec[1] *= scale[1];
 	vec[2] *= scale[2];
 	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-	SetKeyValue( &entities[ 0 ], "gridsize", str );
+	entities[ 0 ].setKeyValue( "gridsize", str );
 */
 	/* inject command line parameters */
 	InjectCommandLine( argv, 0, argc - 1 );
@@ -835,7 +835,7 @@ void PseudoCompileBSP( bool need_tree ){
 
 		if ( i != 0 ) {
 			sprintf( modelValue, "*%d", models++ );
-			SetKeyValue( entity, "model", modelValue );
+			entity->setKeyValue( "model", modelValue );
 		}
 
 		/* process the model */

@@ -415,7 +415,7 @@ void ProcessDecals( void ){
 	/* walk entity list */
 	for ( auto& e : entities )
 	{
-		if ( !ent_class_is( &e, "_decal" ) ) {
+		if ( !e.classname_is( "_decal" ) ) {
 			continue;
 		}
 
@@ -427,7 +427,7 @@ void ProcessDecals( void ){
 		}
 
 		/* find target */
-		e2 = FindTargetEntity( ValueForKey( &e, "target" ) );
+		e2 = FindTargetEntity( e.valueForKey( "target" ) );
 
 		/* no target? */
 		if ( e2 == NULL ) {

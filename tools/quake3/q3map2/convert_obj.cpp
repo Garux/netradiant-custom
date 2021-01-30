@@ -360,7 +360,7 @@ int ConvertBSPToOBJ( char *bspName ){
 		}
 		else
 		{
-			key = ValueForKey( e, "model" );
+			key = e->valueForKey( "model" );
 			if ( key[ 0 ] != '*' ) {
 				continue;
 			}
@@ -370,7 +370,7 @@ int ConvertBSPToOBJ( char *bspName ){
 
 		/* get entity origin */
 		vec3_t origin;
-		GetVectorForKey( e, "origin", origin );
+		e->vectorForKey( "origin", origin );
 
 		/* convert model */
 		ConvertModelToOBJ( f, model, modelNum, origin, lmIndices );

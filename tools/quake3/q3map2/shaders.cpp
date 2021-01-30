@@ -592,7 +592,7 @@ void EmitVertexRemapShader( char *from, char *to ){
 			 digest[ 8 ], digest[ 9 ], digest[ 10 ], digest[ 11 ], digest[ 12 ], digest[ 13 ], digest[ 14 ] ); /* no: digest[ 15 ] */
 
 	/* add key/value pair to worldspawn */
-	SetKeyValue( &entities[ 0 ], key, value );
+	entities[ 0 ].setKeyValue( key, value );
 }
 
 

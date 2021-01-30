@@ -108,7 +108,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 		count++;
 	}
 	// add the occupant center
-	GetVectorForKey( node->occupant, "origin", mid );
+	node->occupant->vectorForKey( "origin", mid );
 
 	fprintf( linefile, "%f %f %f\n", mid[0], mid[1], mid[2] );
 	point = xml_NodeForVec( mid );

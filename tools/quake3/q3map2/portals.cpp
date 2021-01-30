@@ -660,7 +660,7 @@ int FloodEntities( tree_t *tree ){
 
 		/* get origin */
 		vec3_t origin;
-		GetVectorForKey( e, "origin", origin );
+		e->vectorForKey( "origin", origin );
 #if 0 //allow maps with only point entity@( 0, 0, 0 ); assuming that entities, containing no primitives are point ones
 		/* as a special case, allow origin-less entities */
 		if ( VectorCompare( origin, vec3_origin ) ) {
@@ -668,12 +668,12 @@ int FloodEntities( tree_t *tree ){
 		}
 #endif
 		/* also allow bmodel entities outside, as they could be on a moving path that will go into the map */
-		if ( e->brushes != NULL || e->patches != NULL || ent_class_is( e, "_decal" ) ) { //_decal primitive is freed at this point
+		if ( e->brushes != NULL || e->patches != NULL || e->classname_is( "_decal" ) ) { //_decal primitive is freed at this point
 			continue;
 		}
 
 		/* handle skybox entities */
-		if ( ent_class_is( e, "_skybox" ) ) {
+		if ( e->classname_is( "_skybox" ) ) {
 			skybox = true;
 			skyboxPresent = true;
 
@@ -683,15 +683,15 @@ int FloodEntities( tree_t *tree ){
 
 			/* get scale */
 			vec3_t scale = { 64.0f, 64.0f, 64.0f };
-			if( !ENT_READKV( &scale, e, "_scale" ) )
-				if( ENT_READKV( &scale[0], e, "_scale" ) )
+			if( !e->read_keyvalue( scale, "_scale" ) )
+				if( e->read_keyvalue( scale[0], "_scale" ) )
 					scale[1] = scale[2] = scale[0];
 
 			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 			vec3_t angles = { 0.f, 0.f, 0.f };
-			if ( !ENT_READKV( &value, e, "angles" ) ||
+			if ( !e->read_keyvalue( value, "angles" ) ||
 				3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-				ENT_READKV( &angles[ 2 ], e, "angle" );
+				e->read_keyvalue( angles[ 2 ], "angle" );
 
 			/* set transform matrix (thanks spog) */
 			m4x4_identity( skyboxTransform );
@@ -714,7 +714,7 @@ int FloodEntities( tree_t *tree ){
 			inside = true;
 		}
 		if ( !r ) {
-			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e->mapEntityNum, ent_classname( e ) );
+			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e->mapEntityNum, e->classname() );
 		}
 		else if ( tree->outside_node.occupied ) {
 			if ( !tripped || tree->outside_node.occupied < tripcount ) {

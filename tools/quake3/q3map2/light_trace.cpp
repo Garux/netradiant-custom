@@ -1126,19 +1126,19 @@ static void PopulateTraceNodes( void ){
 
 		/* get entity origin */
 		vec3_t origin;
-		GetVectorForKey( e, "origin", origin );
+		e->vectorForKey( "origin", origin );
 
 		/* get scale */
 		vec3_t scale = { 1.f, 1.f, 1.f };
-		if( !ENT_READKV( &scale, e, "modelscale_vec" ) )
-			if( ENT_READKV( &scale[0], e, "modelscale" ) )
+		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
+			if( e->read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		vec3_t angles = { 0.f, 0.f, 0.f };
-		if ( !ENT_READKV( &value, e, "angles" ) ||
+		if ( !e->read_keyvalue( value, "angles" ) ||
 			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-			ENT_READKV( &angles[ 2 ], e, "angle" );
+			e->read_keyvalue( angles[ 2 ], "angle" );
 
 		/* set transform matrix (thanks spog) */
 		m4x4_identity( transform );
@@ -1150,7 +1150,7 @@ static void PopulateTraceNodes( void ){
 		//%	m4x4_transpose( transform );
 
 		/* get model */
-		value = ValueForKey( e, "model" );
+		value = e->valueForKey( "model" );
 
 		/* switch on model type */
 		switch ( value[ 0 ] )
@@ -1171,7 +1171,7 @@ static void PopulateTraceNodes( void ){
 		/* external model */
 		default:
 			{
-				model = LoadModel( value, IntForKey( e, "_frame", "frame" ) );
+				model = LoadModel( value, e->intForKey( "_frame", "frame" ) );
 				if ( model == NULL ) {
 					continue;
 				}
@@ -1181,7 +1181,7 @@ static void PopulateTraceNodes( void ){
 		}
 
 		/* get model2 */
-		value = ValueForKey( e, "model2" );
+		value = e->valueForKey( "model2" );
 
 		/* switch on model type */
 		switch ( value[ 0 ] )
@@ -1201,7 +1201,7 @@ static void PopulateTraceNodes( void ){
 
 		/* external model */
 		default:
-			model = LoadModel( value, IntForKey( e, "_frame2" ) );
+			model = LoadModel( value, e->intForKey( "_frame2" ) );
 			if ( model == NULL ) {
 				continue;
 			}

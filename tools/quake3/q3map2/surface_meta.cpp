@@ -291,7 +291,7 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	mesh_t src, *subdivided, *mesh;
 
 	/* vortex: _patchMeta, _patchQuality, _patchSubdivide support */
-	const bool forcePatchMeta = BoolForKey( e, "_patchMeta", "patchMeta" );
+	const bool forcePatchMeta = e->boolForKey( "_patchMeta", "patchMeta" );
 
 	/* try to early out */
 	if ( ds->numVerts == 0 || ds->type != ESurfaceType::Patch || ( !patchMeta && !forcePatchMeta ) ) {
@@ -305,11 +305,11 @@ void TriangulatePatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 
 	int iterations;
 	int patchSubdivision;
-	if ( ENT_READKV( &patchSubdivision, e, "_patchSubdivide", "patchSubdivide" ) ) {
+	if ( e->read_keyvalue( patchSubdivision, "_patchSubdivide", "patchSubdivide" ) ) {
 		iterations = IterationsForCurve( ds->longestCurve, patchSubdivision );
 	}
 	else{
-		const int patchQuality = IntForKey( e, "_patchQuality", "patchQuality" );
+		const int patchQuality = e->intForKey( "_patchQuality", "patchQuality" );
 		iterations = IterationsForCurve( ds->longestCurve, patchSubdivisions / ( patchQuality == 0? 1 : patchQuality ) );
 	}
 

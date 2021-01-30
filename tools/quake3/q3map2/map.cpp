@@ -846,14 +846,14 @@ static void MergeOrigin( entity_t *ent, vec3_t origin ){
 	char string[128];
 
 	/* we have not parsed the brush completely yet... */
-	GetVectorForKey( ent, "origin", ent->origin );
+	ent->vectorForKey( "origin", ent->origin );
 
 	VectorMA( origin, -1, ent->originbrush_origin, adjustment );
 	VectorAdd( adjustment, ent->origin, ent->origin );
 	VectorCopy( origin, ent->originbrush_origin );
 
 	sprintf( string, "%f %f %f", ent->origin[0], ent->origin[1], ent->origin[2] );
-	SetKeyValue( ent, "origin", string );
+	ent->setKeyValue( "origin", string );
 }
 
 brush_t *FinishBrush( bool noCollapseGroups ){
@@ -871,7 +871,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 		vec3_t origin;
 
 		Sys_Printf( "Entity %i (%s), Brush %i: origin brush detected\n",
-					mapEnt->mapEntityNum, ent_classname( mapEnt ), entitySourceBrushes );
+					mapEnt->mapEntityNum, mapEnt->classname(), entitySourceBrushes );
 
 		if ( entities.size() == 1 ) {
 			Sys_FPrintf( SYS_WRN, "Entity %i, Brush %i: origin brushes not allowed in world\n",
@@ -891,7 +891,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 	/* determine if the brush is an area portal */
 	if ( buildBrush->compileFlags & C_AREAPORTAL ) {
 		if ( entities.size() != 1 ) {
-			Sys_FPrintf( SYS_WRN, "Entity %zu (%s), Brush %i: areaportals only allowed in world\n", entities.size() - 1, ent_classname( mapEnt ), entitySourceBrushes );
+			Sys_FPrintf( SYS_WRN, "Entity %zu (%s), Brush %i: areaportals only allowed in world\n", entities.size() - 1, mapEnt->classname(), entitySourceBrushes );
 			return NULL;
 		}
 	}
@@ -1491,8 +1491,8 @@ void SetEntityBounds( entity_t *e ){
 	}
 
 	/* try to find explicit min/max key */
-	ENT_READKV( &mins, e, "min" );
-	ENT_READKV( &maxs, e, "max" );
+	e->read_keyvalue( mins, "min" );
+	e->read_keyvalue( maxs, "max" );
 
 	/* store the bounds */
 	for ( b = e->brushes; b; b = b->next )
@@ -1530,11 +1530,11 @@ void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* determine if there is an index map (support legacy "alphamap" key as well) */
-	if( !ENT_READKV( &indexMapFilename, e, "_indexmap", "alphamap" ) )
+	if( !e->read_keyvalue( indexMapFilename, "_indexmap", "alphamap" ) )
 		return;
 
 	/* get number of layers (support legacy "layers" key as well) */
-	if( !ENT_READKV( &numLayers, e, "_layers", "layers" ) ){
+	if( !e->read_keyvalue( numLayers, "_layers", "layers" ) ){
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_layers\" or \"layers\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
@@ -1546,14 +1546,14 @@ void LoadEntityIndexMap( entity_t *e ){
 	}
 
 	/* get base shader name (support legacy "shader" key as well) */
-	if( !ENT_READKV( &shader, mapEnt, "_shader", "shader" ) ){
+	if( !mapEnt->read_keyvalue( shader, "_shader", "shader" ) ){
 		Sys_Warning( "Entity with index/alpha map \"%s\" has missing \"_shader\" or \"shader\" key\n", indexMapFilename );
 		Sys_Printf( "Entity will not be textured properly. Check your keys/values.\n" );
 		return;
 	}
 
 	/* note it */
-	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  mapEnt->mapEntityNum, ent_classname( e ), indexMapFilename );
+	Sys_FPrintf( SYS_VRB, "Entity %d (%s) has shader index map \"%s\"\n",  mapEnt->mapEntityNum, e->classname(), indexMapFilename );
 
 	/* handle tga image */
 	if ( striEqual( path_get_extension( indexMapFilename ), "tga" ) ) {
@@ -1621,7 +1621,7 @@ void LoadEntityIndexMap( entity_t *e ){
 
 	/* get height offsets */
 	const char *offset;
-	if( ENT_READKV( &offset, mapEnt, "_offsets", "offsets" ) ){
+	if( mapEnt->read_keyvalue( offset, "_offsets", "offsets" ) ){
 		/* value is a space-separated set of numbers */
 		/* get each value */
 		for ( i = 0; i < 256 && !strEmpty( offset ); i++ )
@@ -1734,7 +1734,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* ydnar: get classname */
-	const char *classname = ent_classname( mapEnt );
+	const char *classname = mapEnt->classname();
 
 	/* ydnar: only lights? */
 	if ( onlyLights && !striEqualPrefix( classname, "light" ) ) {
@@ -1762,7 +1762,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	GetEntityShadowFlags( mapEnt, NULL, &castShadows, &recvShadows );
 
 	/* ydnar: get lightmap scaling value for this entity */
-	float lightmapScale = FloatForKey( mapEnt, "lightmapscale", "_lightmapscale", "_ls" );
+	float lightmapScale = mapEnt->floatForKey( "lightmapscale", "_lightmapscale", "_ls" );
 	if ( lightmapScale < 0.0f )
 		lightmapScale = 0.0f;
 	else if ( lightmapScale > 0.0f )
@@ -1771,8 +1771,8 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	/* ydnar: get cel shader :) for this entity */
 	shaderInfo_t *celShader;
 	const char *value;
-	if( ENT_READKV( &value, mapEnt, "_celshader" ) ||
-		ENT_READKV( &value, &entities[ 0 ], "_celshader" ) ){
+	if( mapEnt->read_keyvalue( value, "_celshader" ) ||
+		entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
 		celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		Sys_Printf( "Entity %d (%s) has cel shader %s\n", mapEnt->mapEntityNum, classname, celShader->shader.c_str() );
 	}
@@ -1781,7 +1781,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* jal : entity based _shadeangle */
-	float shadeAngle = FloatForKey( mapEnt, "_shadeangle",
+	float shadeAngle = mapEnt->floatForKey( "_shadeangle",
 						"_smoothnormals", "_sn", "_sa", "_smooth" ); /* vortex' aliases */
 	if ( shadeAngle < 0.0f )
 		shadeAngle = 0.0f;
@@ -1789,7 +1789,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt->mapEntityNum, classname, shadeAngle );
 
 	/* jal : entity based _samplesize */
-	int lightmapSampleSize = IntForKey( mapEnt, "_lightmapsamplesize", "_samplesize", "_ss" );
+	int lightmapSampleSize = mapEnt->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" );
 	if ( lightmapSampleSize < 0 )
 		lightmapSampleSize = 0;
 	else if ( lightmapSampleSize > 0 )
@@ -1824,7 +1824,7 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	LoadEntityIndexMap( mapEnt );
 
 	/* get entity origin and adjust brushes */
-	GetVectorForKey( mapEnt, "origin", mapEnt->origin );
+	mapEnt->vectorForKey( "origin", mapEnt->origin );
 	if ( mapEnt->originbrush_origin[ 0 ] || mapEnt->originbrush_origin[ 1 ] || mapEnt->originbrush_origin[ 2 ] ) {
 		AdjustBrushesForOrigin( mapEnt );
 	}

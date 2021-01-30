@@ -1347,7 +1347,7 @@ void AddTriangleModels( entity_t *eparent ){
 		targetName = "";
 	}
 	else{  /* misc_model entities target non-worldspawn brush model entities */
-		if ( !ENT_READKV( &targetName, eparent, "targetname" ) ) {
+		if ( !eparent->read_keyvalue( targetName, "targetname" ) ) {
 			return;
 		}
 	}
@@ -1359,24 +1359,24 @@ void AddTriangleModels( entity_t *eparent ){
 		entity_t *e = &entities[ i ];
 
 		/* convert misc_models into raw geometry */
-		if ( !ent_class_is( e, "misc_model" ) ) {
+		if ( !e->classname_is( "misc_model" ) ) {
 			continue;
 		}
 
 		/* ydnar: added support for md3 models on non-worldspawn models */
-		if ( !strEqual( ValueForKey( e, "target" ), targetName ) ) {
+		if ( !strEqual( e->valueForKey( "target" ), targetName ) ) {
 			continue;
 		}
 
 		/* get model name */
 		const char *model;
-		if ( !ENT_READKV( &model, e, "model" ) ) {
+		if ( !e->read_keyvalue( model, "model" ) ) {
 			Sys_Warning( "entity#%d misc_model without a model key\n", e->mapEntityNum );
 			continue;
 		}
 
 		/* get model frame */
-		const int frame = IntForKey( e, "_frame", "frame" );
+		const int frame = e->intForKey( "_frame", "frame" );
 
 		int castShadows, recvShadows;
 		if ( eparent == &entities[0] ) {    /* worldspawn (and func_groups) default to cast/recv shadows in worldspawn group */
@@ -1392,25 +1392,25 @@ void AddTriangleModels( entity_t *eparent ){
 		GetEntityShadowFlags( e, eparent, &castShadows, &recvShadows );
 
 		/* get spawnflags */
-		const int spawnFlags = IntForKey( e, "spawnflags" );
+		const int spawnFlags = e->intForKey( "spawnflags" );
 
 		/* get origin */
 		vec3_t origin;
-		GetVectorForKey( e, "origin", origin );
+		e->vectorForKey( "origin", origin );
 		VectorSubtract( origin, eparent->origin, origin );    /* offset by parent */
 
 		/* get scale */
 		vec3_t scale = { 1.f, 1.f, 1.f };
-		if( !ENT_READKV( &scale, e, "modelscale_vec" ) )
-			if( ENT_READKV( &scale[0], e, "modelscale" ) )
+		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
+			if( e->read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		const char *value;
 		vec3_t angles = { 0.f, 0.f, 0.f };
-		if ( !ENT_READKV( &value, e, "angles" ) ||
+		if ( !e->read_keyvalue( value, "angles" ) ||
 			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-			ENT_READKV( &angles[ 2 ], e, "angle" );
+			e->read_keyvalue( angles[ 2 ], "angle" );
 
 		/* set transform matrix (thanks spog) */
 		m4x4_t transform;
@@ -1458,8 +1458,8 @@ void AddTriangleModels( entity_t *eparent ){
 
 		/* ydnar: cel shader support */
 		shaderInfo_t *celShader;
-		if( ENT_READKV( &value, e, "_celshader" ) ||
-			ENT_READKV( &value, &entities[ 0 ], "_celshader" ) ){
+		if( e->read_keyvalue( value, "_celshader" ) ||
+			entities[ 0 ].read_keyvalue( value, "_celshader" ) ){
 			celShader = ShaderInfoForShader( String64()( "textures/", value ) );
 		}
 		else{
@@ -1467,31 +1467,31 @@ void AddTriangleModels( entity_t *eparent ){
 		}
 
 		/* jal : entity based _samplesize */
-		int lightmapSampleSize = IntForKey( e, "_lightmapsamplesize", "_samplesize", "_ss" );
+		int lightmapSampleSize = e->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" );
 		if ( lightmapSampleSize < 0 )
 			lightmapSampleSize = 0;
 		if ( lightmapSampleSize > 0 )
 			Sys_Printf( "misc_model has lightmap sample size of %.d\n", lightmapSampleSize );
 
 		/* get lightmap scale */
-		float lightmapScale = FloatForKey( e, "lightmapscale", "_lightmapscale", "_ls" );
+		float lightmapScale = e->floatForKey( "lightmapscale", "_lightmapscale", "_ls" );
 		if ( lightmapScale < 0.0f )
 			lightmapScale = 0.0f;
 		else if ( lightmapScale > 0.0f )
 			Sys_Printf( "misc_model has lightmap scale of %.4f\n", lightmapScale );
 
 		/* jal : entity based _shadeangle */
-		float shadeAngle = FloatForKey( e, "_shadeangle",
+		float shadeAngle = e->floatForKey( "_shadeangle",
 							"_smoothnormals", "_sn", "_sa", "_smooth" ); /* vortex' aliases */
 		if ( shadeAngle < 0.0f )
 			shadeAngle = 0.0f;
 		else if ( shadeAngle > 0.0f )
 			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
 
-		const int skin = IntForKey( e, "_skin", "skin" );
+		const int skin = e->intForKey( "_skin", "skin" );
 
 		float clipDepth = clipDepthGlobal;
-		if ( ENT_READKV( &clipDepth, e, "_clipdepth" ) )
+		if ( e->read_keyvalue( clipDepth, "_clipdepth" ) )
 			Sys_Printf( "misc_model %s has autoclip depth of %.3f\n", model, clipDepth );
 
 

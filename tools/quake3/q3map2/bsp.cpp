@@ -105,16 +105,16 @@ static void ProcessAdvertisements( void ) {
 	for ( const auto& e : entities ) {
 
 		/* is an advertisement? */
-		if ( ent_class_is( &e, "advertisement" ) ) {
+		if ( e.classname_is( "advertisement" ) ) {
 
-			modelKey = ValueForKey( &e, "model" );
+			modelKey = e.valueForKey( "model" );
 
 			if ( strlen( modelKey ) > MAX_QPATH - 1 ) {
 				Error( "Model Key for entity exceeds ad struct string length." );
 			}
 			else {
 				if ( numBSPAds < MAX_MAP_ADVERTISEMENTS ) {
-					bspAds[numBSPAds].cellId = IntForKey( &e, "cellId" );
+					bspAds[numBSPAds].cellId = e.intForKey( "cellId" );
 					strncpy( bspAds[numBSPAds].model, modelKey, sizeof( bspAds[numBSPAds].model ) );
 
 					modelKey++;
@@ -180,12 +180,12 @@ static void SetCloneModelNumbers( void ){
 		}
 
 		/* is this a clone? */
-		if( ENT_READKV( &value, &entities[ i ], "_ins", "_instance", "_clone" ) )
+		if( entities[ i ].read_keyvalue( value, "_ins", "_instance", "_clone" ) )
 			continue;
 
 		/* add the model key */
 		sprintf( modelValue, "*%d", models );
-		SetKeyValue( &entities[ i ], "model", modelValue );
+		entities[ i ].setKeyValue( "model", modelValue );
 
 		/* increment model count */
 		models++;
@@ -200,21 +200,21 @@ static void SetCloneModelNumbers( void ){
 		}
 
 		/* isn't this a clone? */
-		if( !ENT_READKV( &value, &entities[ i ], "_ins", "_instance", "_clone" ) )
+		if( !entities[ i ].read_keyvalue( value, "_ins", "_instance", "_clone" ) )
 			continue;
 
 		/* find an entity with matching clone name */
 		for ( std::size_t j = 0; j < entities.size(); ++j )
 		{
 			/* is this a clone parent? */
-			if ( !ENT_READKV( &value2, &entities[ j ], "_clonename" ) ) {
+			if ( !entities[ j ].read_keyvalue( value2, "_clonename" ) ) {
 				continue;
 			}
 
 			/* do they match? */
 			if ( strEqual( value, value2 ) ) {
 				/* get the model num */
-				if ( !ENT_READKV( &value3, &entities[ j ], "model" ) ) {
+				if ( !entities[ j ].read_keyvalue( value3, "model" ) ) {
 					Sys_Warning( "Cloned entity %s referenced entity without model\n", value2 );
 					continue;
 				}
@@ -222,7 +222,7 @@ static void SetCloneModelNumbers( void ){
 
 				/* add the model key */
 				sprintf( modelValue, "*%d", models );
-				SetKeyValue( &entities[ i ], "model", modelValue );
+				entities[ i ].setKeyValue( "model", modelValue );
 
 				/* nuke the brushes/patches for this entity (fixme: leak!) */
 				entities[ i ].brushes = NULL;
@@ -297,7 +297,7 @@ void ProcessWorldModel( void ){
 	int leakStatus;
 
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
-	if( ENT_READKV( &value, &entities[ 0 ], "_blocksize", "blocksize", "chopsize" ) ) {  /* "chopsize" : sof2 */
+	if( entities[ 0 ].read_keyvalue( value, "_blocksize", "blocksize", "chopsize" ) ) {  /* "chopsize" : sof2 */
 		/* scan 3 numbers */
 		const int s = sscanf( value, "%d %d %d", &blockSize[ 0 ], &blockSize[ 1 ], &blockSize[ 2 ] );
 
@@ -309,7 +309,7 @@ void ProcessWorldModel( void ){
 	Sys_Printf( "block size = { %d %d %d }\n", blockSize[ 0 ], blockSize[ 1 ], blockSize[ 2 ] );
 
 	/* sof2: ignore leaks? */
-	const bool ignoreLeaks = BoolForKey( &entities[ 0 ], "_ignoreleaks", "ignoreleaks" );
+	const bool ignoreLeaks = entities[ 0 ].boolForKey( "_ignoreleaks", "ignoreleaks" );
 
 	/* begin worldspawn model */
 	BeginModel();
@@ -440,7 +440,7 @@ void ProcessWorldModel( void ){
 	}
 
 	/* ydnar: fog hull */
-	if ( ENT_READKV( &value, &entities[ 0 ], "_foghull" ) ) {
+	if ( entities[ 0 ].read_keyvalue( value, "_foghull" ) ) {
 		const auto shader = String64()( "textures/", value );
 		MakeFogHullSurfs( e, tree, shader );
 	}
@@ -453,21 +453,21 @@ void ProcessWorldModel( void ){
 			vec3_t origin, targetOrigin, normal, color;
 
 			/* get light */
-			if ( ent_class_is( &light, "light" ) ) {
+			if ( light.classname_is( "light" ) ) {
 				/* get flare shader */
 				const char *flareShader = NULL;
-				if ( ENT_READKV( &flareShader, &light, "_flareshader" ) || BoolForKey( &light, "_flare" ) ) {
+				if ( light.read_keyvalue( flareShader, "_flareshader" ) || light.boolForKey( "_flare" ) ) {
 					/* get specifics */
-					GetVectorForKey( &light, "origin", origin );
-					GetVectorForKey( &light, "_color", color );
-					const int lightStyle = IntForKey( &light, "_style", "style" );
+					light.vectorForKey( "origin", origin );
+					light.vectorForKey( "_color", color );
+					const int lightStyle = light.intForKey( "_style", "style" );
 
 					/* handle directional spotlights */
-					if ( ENT_READKV( &value, &light, "target" ) ) {
+					if ( light.read_keyvalue( value, "target" ) ) {
 						/* get target light */
 						target = FindTargetEntity( value );
 						if ( target != NULL ) {
-							GetVectorForKey( target, "origin", targetOrigin );
+							target->vectorForKey( "origin", targetOrigin );
 							VectorSubtract( targetOrigin, origin, normal );
 							VectorNormalize( normal, normal );
 						}
@@ -659,9 +659,9 @@ void OnlyEnts( void ){
 	LoadBSPFile( out );
 
 	ParseEntities();
-	strcpyQ( save_cmdline, ValueForKey( &entities[0], "_q3map2_cmdline" ), sizeof( save_cmdline ) );
-	strcpyQ( save_version, ValueForKey( &entities[0], "_q3map2_version" ), sizeof( save_version ) );
-	strcpyQ( save_gridsize, ValueForKey( &entities[0], "gridsize" ), sizeof( save_gridsize ) );
+	strcpyQ( save_cmdline, entities[ 0 ].valueForKey( "_q3map2_cmdline" ), sizeof( save_cmdline ) );
+	strcpyQ( save_version, entities[ 0 ].valueForKey( "_q3map2_version" ), sizeof( save_version ) );
+	strcpyQ( save_gridsize, entities[ 0 ].valueForKey( "gridsize" ), sizeof( save_gridsize ) );
 
 	entities.clear();
 
@@ -671,13 +671,13 @@ void OnlyEnts( void ){
 	SetLightStyles();
 
 	if ( *save_cmdline ) {
-		SetKeyValue( &entities[0], "_q3map2_cmdline", save_cmdline );
+		entities[0].setKeyValue( "_q3map2_cmdline", save_cmdline );
 	}
 	if ( *save_version ) {
-		SetKeyValue( &entities[0], "_q3map2_version", save_version );
+		entities[0].setKeyValue( "_q3map2_version", save_version );
 	}
 	if ( *save_gridsize ) {
-		SetKeyValue( &entities[0], "gridsize", save_gridsize );
+		entities[0].setKeyValue( "gridsize", save_gridsize );
 	}
 
 	numBSPEntities = entities.size();

@@ -2564,7 +2564,7 @@ void EmitPatchSurface( entity_t *e, mapDrawSurface_t *ds ){
 	int surfaceFlags, contentFlags;
 
 	/* vortex: _patchMeta support */
-	const bool forcePatchMeta = BoolForKey( e, "_patchMeta", "patchMeta" );
+	const bool forcePatchMeta = e->boolForKey( "_patchMeta", "patchMeta" );
 
 	/* invert the surface if necessary */
 	if ( ds->backSide || ds->shaderInfo->invert ) {

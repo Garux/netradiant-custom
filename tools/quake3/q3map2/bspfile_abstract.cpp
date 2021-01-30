@@ -601,7 +601,7 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
 	if ( nocmdline ){
 		return;
 	}
-	if ( ENT_READKV( &inpos, &entities[0], "_q3map2_cmdline" ) ) { // read previousCommandLine
+	if ( entities[ 0 ].read_keyvalue( inpos, "_q3map2_cmdline" ) ) { // read previousCommandLine
 		while ( outpos != sentinel && *inpos )
 			*outpos++ = *inpos++;
 		if ( outpos != sentinel ) {
@@ -625,8 +625,8 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
 	}
 
 	*outpos = 0;
-	SetKeyValue( &entities[0], "_q3map2_cmdline", newCommandLine );
-	SetKeyValue( &entities[0], "_q3map2_version", Q3MAP_VERSION );
+	entities[0].setKeyValue( "_q3map2_cmdline", newCommandLine );
+	entities[0].setKeyValue( "_q3map2_version", Q3MAP_VERSION );
 }
 
 /*
@@ -663,7 +663,7 @@ void UnparseEntities( void ){
 			continue;   /* ent got removed */
 		}
 		/* ydnar: certain entities get stripped from bsp file */
-		const char *classname = ent_classname( e );
+		const char *classname = e->classname();
 		if ( striEqual( classname, "misc_model" ) ||
 			 striEqual( classname, "_decal" ) ||
 			 striEqual( classname, "_skybox" ) ) {
@@ -719,13 +719,13 @@ void PrintEntity( const entity_t *ent ){
 
 
 /*
-   SetKeyValue()
+   setKeyValue()
    sets an epair in an entity
  */
 
-void SetKeyValue( entity_t *ent, const char *key, const char *value ){
+void entity_t::setKeyValue( const char *key, const char *value ){
 	/* check for existing epair */
-	for ( auto& ep : ent->epairs )
+	for ( auto& ep : epairs )
 	{
 		if ( EPAIR_EQUAL( ep.key.c_str(), key ) ) {
 			ep.value = value;
@@ -734,23 +734,18 @@ void SetKeyValue( entity_t *ent, const char *key, const char *value ){
 	}
 
 	/* create new epair */
-	ent->epairs.emplace_back( epair_t{ key, value } );
+	epairs.emplace_back( epair_t{ key, value } );
 }
 
 
 /*
-   ValueForKey()
+   valueForKey()
    gets the value for an entity key
  */
 
-const char *ValueForKey( const entity_t *ent, const char *key ){
-	/* dummy check */
-	if ( ent == NULL ) {
-		return "";
-	}
-
+const char *entity_t::valueForKey( const char *key ) const {
 	/* walk epair list */
-	for ( const auto& ep : ent->epairs )
+	for ( const auto& ep : epairs )
 	{
 		if ( EPAIR_EQUAL( ep.key.c_str(), key ) ) {
 			return ep.value.c_str();
@@ -761,188 +756,70 @@ const char *ValueForKey( const entity_t *ent, const char *key ){
 	return "";
 }
 
-bool BoolForKey_impl( const entity_t *ent, ... ){
-	va_list argptr;
-	va_start( argptr, ent );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( ent, key );
+bool entity_t::read_keyvalue_( bool &bool_value, std::initializer_list<const char*>&& keys ) const {
+	for( const char* key : keys ){
+		const char* value = valueForKey( key );
 		if( !strEmpty( value ) ){
-			va_end( argptr );
-			return value[0] == '1';
-		}
-	}
-	va_end( argptr );
-	return false;
-}
-
-/*
-   IntForKey()
-   gets the integer point value for an entity key
- */
-
-int IntForKey_impl( const entity_t *ent, ... ){
-	va_list argptr;
-	va_start( argptr, ent );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( ent, key );
-		if( !strEmpty( value ) ){
-			va_end( argptr );
-			return atoi( value );
-		}
-	}
-	va_end( argptr );
-	return 0;
-}
-
-
-
-/*
-   FloatForKey()
-   gets the floating point value for an entity key
- */
-
-vec_t FloatForKey_impl( const entity_t *ent, ... ){
-	va_list argptr;
-	va_start( argptr, ent );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( ent, key );
-		if( !strEmpty( value ) ){
-			va_end( argptr );
-			return atof( value );
-		}
-	}
-	va_end( argptr );
-	return 0;
-}
-
-
-
-/*
-   GetVectorForKey()
-   gets a 3-element vector value for an entity key
- */
-
-void GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec ){
-	/* scanf into doubles, then assign, so it is vec_t size independent */
-	double v1, v2, v3;
-	if( 3 == sscanf( ValueForKey( ent, key ), "%lf %lf %lf", &v1, &v2, &v3 ) ){
-		vec[ 0 ] = v1;
-		vec[ 1 ] = v2;
-		vec[ 2 ] = v3;
-	}
-	else{
-		VectorClear( vec );
-	}
-}
-
-bool entity_read_keyvalue( bool *bool_value, const entity_t *entity, ... ){
-	va_list argptr;
-	va_start( argptr, entity );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( entity, key );
-		if( !strEmpty( value ) ){
-			*bool_value = ( value[0] == '1' );
-			va_end( argptr );
+			bool_value = ( value[0] == '1' );
 			return true;
 		}
 	}
-	va_end( argptr );
 	return false;
 }
-bool entity_read_keyvalue( int *int_value, const entity_t *entity, ... ){
-	va_list argptr;
-	va_start( argptr, entity );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( entity, key );
+bool entity_t::read_keyvalue_( int &int_value, std::initializer_list<const char*>&& keys ) const {
+	for( const char* key : keys ){
+		const char* value = valueForKey( key );
 		if( !strEmpty( value ) ){
-			*int_value = atoi( value );
-			va_end( argptr );
+			int_value = atoi( value );
 			return true;
 		}
 	}
-	va_end( argptr );
 	return false;
 }
-bool entity_read_keyvalue( float *float_value, const entity_t *entity, ... ){
-	va_list argptr;
-	va_start( argptr, entity );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( entity, key );
+bool entity_t::read_keyvalue_( float &float_value, std::initializer_list<const char*>&& keys ) const {
+	for( const char* key : keys ){
+		const char* value = valueForKey( key );
 		if( !strEmpty( value ) ){
-			*float_value = atof( value );
-			va_end( argptr );
+			float_value = atof( value );
 			return true;
 		}
 	}
-	va_end( argptr );
 	return false;
 }
-bool entity_read_keyvalue( float (*vector3_value)[3], const entity_t *entity, ... ){
-	va_list argptr;
-	va_start( argptr, entity );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( entity, key );
+bool entity_t::read_keyvalue_( float (&vector3_value)[3], std::initializer_list<const char*>&& keys ) const {
+	for( const char* key : keys ){
+		const char* value = valueForKey( key );
 		if( !strEmpty( value ) ){
 			float v0, v1, v2;
 			if( 3 == sscanf( value, "%f %f %f", &v0, &v1, &v2 ) ){
-				(*vector3_value)[0] = v0;
-				(*vector3_value)[1] = v1;
-				(*vector3_value)[2] = v2;
-				va_end( argptr );
+				vector3_value[0] = v0;
+				vector3_value[1] = v1;
+				vector3_value[2] = v2;
 				return true;
 			}
 		}
 	}
-	va_end( argptr );
 	return false;
 }
-bool entity_read_keyvalue( char (*string_value)[1024], const entity_t *entity, ... ){
-	va_list argptr;
-	va_start( argptr, entity );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( entity, key );
+bool entity_t::read_keyvalue_( char (&string_value)[1024], std::initializer_list<const char*>&& keys ) const {
+	for( const char* key : keys ){
+		const char* value = valueForKey( key );
 		if( !strEmpty( value ) ){
-			strcpy( *string_value, value );
-			va_end( argptr );
+			strcpy( string_value, value );
 			return true;
 		}
 	}
-	va_end( argptr );
 	return false;
 }
-bool entity_read_keyvalue( const char **string_ptr_value, const entity_t *entity, ... ){
-	va_list argptr;
-	va_start( argptr, entity );
-	const char* key;
-	while( ( key = va_arg( argptr, const char* ) ) != NULL ){
-		const char* value = ValueForKey( entity, key );
+bool entity_t::read_keyvalue_( const char *&string_ptr_value, std::initializer_list<const char*>&& keys ) const {
+	for( const char* key : keys ){
+		const char* value = valueForKey( key );
 		if( !strEmpty( value ) ){
-			*string_ptr_value = value;
-			va_end( argptr );
+			string_ptr_value = value;
 			return true;
 		}
 	}
-	va_end( argptr );
 	return false;
-}
-
-
-const char *ent_classname( const entity_t *entity ){
-	return ValueForKey( entity, "classname" );
-}
-bool ent_class_is( const entity_t *entity, const char *classname ){
-	return striEqual( ent_classname( entity ), classname );
-}
-bool ent_class_prefixed( const entity_t *entity, const char *prefix ){
-	return striEqualPrefix( ent_classname( entity ), prefix );
 }
 
 
@@ -955,7 +832,7 @@ entity_t *FindTargetEntity( const char *target ){
 	/* walk entity list */
 	for ( auto& e : entities )
 	{
-		if ( strEqual( ValueForKey( &e, "targetname" ), target ) ) {
+		if ( strEqual( e.valueForKey( "targetname" ), target ) ) {
 			return &e;
 		}
 	}
@@ -975,20 +852,20 @@ entity_t *FindTargetEntity( const char *target ){
 void GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows ){
 	/* get cast shadows */
 	if ( castShadows != NULL ) {
-		ENT_READKV( castShadows, ent, "_castShadows", "_cs" ) ||
-		ENT_READKV( castShadows, ent2, "_castShadows", "_cs" );
+		( ent != NULL && ent->read_keyvalue( *castShadows, "_castShadows", "_cs" ) ) ||
+		( ent2 != NULL && ent2->read_keyvalue( *castShadows, "_castShadows", "_cs" ) );
 	}
 
 	/* receive */
 	if ( recvShadows != NULL ) {
-		ENT_READKV( recvShadows, ent, "_receiveShadows", "_rs" ) ||
-		ENT_READKV( recvShadows, ent2, "_receiveShadows", "_rs" );
+		( ent != NULL && ent->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) ) ||
+		( ent2 != NULL && ent2->read_keyvalue( *recvShadows, "_receiveShadows", "_rs" ) );
 	}
 
 	/* vortex: game-specific default entity keys */
 	if ( striEqual( game->magic, "dq" ) || striEqual( game->magic, "prophecy" ) ) {
 		/* vortex: deluxe quake default shadow flags */
-		if ( ent_class_is( ent, "func_wall" ) ) {
+		if ( ent->classname_is( "func_wall" ) ) {
 			if ( recvShadows != NULL ) {
 				*recvShadows = 1;
 			}

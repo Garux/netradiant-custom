@@ -1035,7 +1035,7 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 		}
 		else
 		{
-			value = ValueForKey( e, "model" );
+			value = e->valueForKey( "model" );
 			if ( value[ 0 ] == '*' ) {
 				modelNum = atoi( value + 1 );
 			}
@@ -1055,7 +1055,7 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 
 			/* get entity origin */
 			vec3_t origin;
-			GetVectorForKey( e, "origin", origin );
+			e->vectorForKey( "origin", origin );
 
 			/* convert model */
 			ConvertModel( f, model, modelNum, origin, brushPrimitives );

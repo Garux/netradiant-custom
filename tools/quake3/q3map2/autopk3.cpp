@@ -308,7 +308,7 @@ int pk3BSPMain( int argc, char **argv ){
 		}
 	}
 
-	if ( ENT_READKV( &str, &entities[0], "music" ) ){
+	if ( entities[ 0 ].read_keyvalue( str, "music" ) ){
 		FixDOSName( str );
 		DefaultExtension( str, ".wav" );
 		res2list( pk3Sounds, str );
@@ -316,25 +316,25 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( const auto& e : entities )
 	{
-		if ( ENT_READKV( &str, &e, "noise" ) && str[0] != '*' ){
+		if ( e.read_keyvalue( str, "noise" ) && str[0] != '*' ){
 			FixDOSName( str );
 			DefaultExtension( str, ".wav" );
 			res2list( pk3Sounds, str );
 		}
 
-		if ( ent_class_is( &e, "func_plat" ) ){
+		if ( e.classname_is( "func_plat" ) ){
 			res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
 			res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
 		}
-		if ( ent_class_is( &e, "target_push" ) ){
-			if ( !( IntForKey( &e, "spawnflags") & 1 ) ){
+		if ( e.classname_is( "target_push" ) ){
+			if ( !( e.intForKey( "spawnflags") & 1 ) ){
 				res2list( pk3Sounds, "sound/misc/windfly.wav" );
 			}
 		}
-		res2list( pk3Shaders, ValueForKey( &e, "targetShaderNewName" ) );
+		res2list( pk3Shaders, e.valueForKey( "targetShaderNewName" ) );
 
-		if ( ENT_READKV( &str, &e, "model2" ) ){
-			Sys_Warning( "unhandled model2 key of %s: %s\n", ent_classname( &e ), str );
+		if ( e.read_keyvalue( str, "model2" ) ){
+			Sys_Warning( "unhandled model2 key of %s: %s\n", e.classname(), str );
 		}
 	}
 
@@ -981,7 +981,7 @@ int repackBSPMain( int argc, char **argv ){
 				res2list( pk3Shaders, str );
 			}
 		}
-		if ( ENT_READKV( &str, &entities[0], "music" ) ){
+		if ( entities[ 0 ].read_keyvalue( str, "music" ) ){
 			FixDOSName( str );
 			DefaultExtension( str, ".wav" );
 			res2list( pk3Sounds, str );
@@ -989,25 +989,25 @@ int repackBSPMain( int argc, char **argv ){
 
 		for ( const auto& e : entities )
 		{
-			if ( ENT_READKV( &str, &e, "noise" ) && str[0] != '*' ){
+			if ( e.read_keyvalue( str, "noise" ) && str[0] != '*' ){
 				FixDOSName( str );
 				DefaultExtension( str, ".wav" );
 				res2list( pk3Sounds, str );
 			}
 
-			if ( ent_class_is( &e, "func_plat" ) ){
+			if ( e.classname_is( "func_plat" ) ){
 				res2list( pk3Sounds, "sound/movers/plats/pt1_strt.wav" );
 				res2list( pk3Sounds, "sound/movers/plats/pt1_end.wav" );
 			}
-			if ( ent_class_is( &e, "target_push" ) ){
-				if ( !( IntForKey( &e, "spawnflags") & 1 ) ){
+			if ( e.classname_is( "target_push" ) ){
+				if ( !( e.intForKey( "spawnflags") & 1 ) ){
 					res2list( pk3Sounds, "sound/misc/windfly.wav" );
 				}
 			}
-			res2list( pk3Shaders, ValueForKey( &e, "targetShaderNewName" ) );
+			res2list( pk3Shaders, e.valueForKey( "targetShaderNewName" ) );
 
-			if ( ENT_READKV( &str, &e, "model2" ) ){
-				Sys_Warning( "unhandled model2 key of %s: %s\n", ent_classname( &entities[i] ), str );
+			if ( e.read_keyvalue( str, "model2" ) ){
+				Sys_Warning( "unhandled model2 key of %s: %s\n", entities[i].classname(), str );
 			}
 		}
 

@@ -1035,6 +1035,57 @@ struct entity_t
 	int firstBrush, numBrushes;                     /* only valid during BSP compile */
 	std::list<epair_t> epairs;
 	vec3_t originbrush_origin;
+
+	void setKeyValue( const char *key, const char *value );
+	const char *valueForKey( const char *key ) const;
+
+	template<typename ... Keys>
+	bool boolForKey( Keys ... keys ) const {
+		bool bool_value = false;
+		read_keyvalue_( bool_value, { keys ... } );
+		return bool_value;
+	}
+	template<typename ... Keys>
+	int intForKey( Keys ... keys ) const {
+		int int_value = 0;
+		read_keyvalue_( int_value, { keys ... } );
+		return int_value;
+	}
+	template<typename ... Keys>
+	float floatForKey( Keys ... keys ) const {
+		float float_value = 0;
+		read_keyvalue_( float_value, { keys ... } );
+		return float_value;
+	}
+	void vectorForKey( const char *key, vec3_t& vec ) const {
+		if( !read_keyvalue_( vec, { key } ) )
+			VectorClear( vec );
+	}
+
+	const char *classname() const {
+		return valueForKey( "classname" );
+	}
+	bool classname_is( const char *name ) const {
+		return striEqual( classname(), name );
+	}
+	bool classname_prefixed( const char *prefix ) const {
+		return striEqualPrefix( classname(), prefix );
+	}
+
+		/* entity: read key value variadic template
+		returns true on successful read
+		returns false and does not modify value otherwise */
+	template<typename T, typename ... Keys>
+	bool read_keyvalue( T& value_ref, Keys ... keys ) const {
+		return read_keyvalue_( value_ref, { keys ... } );
+	}
+private:
+	bool read_keyvalue_( bool &bool_value, std::initializer_list<const char*>&& keys ) const;
+	bool read_keyvalue_( int &int_value, std::initializer_list<const char*>&& keys ) const;
+	bool read_keyvalue_( float &float_value, std::initializer_list<const char*>&& keys ) const;
+	bool read_keyvalue_( float (&vector3_value)[3], std::initializer_list<const char*>&& keys ) const;
+	bool read_keyvalue_( char (&string_value)[1024], std::initializer_list<const char*>&& keys ) const;
+	bool read_keyvalue_( const char *&string_ptr_value, std::initializer_list<const char*>&& keys ) const;
 };
 
 
@@ -1819,29 +1870,6 @@ void                        ParseEPair( std::list<epair_t>& epairs );
 void                        ParseEntities( void );
 void                        UnparseEntities( void );
 void                        PrintEntity( const entity_t *ent );
-void                        SetKeyValue( entity_t *ent, const char *key, const char *value );
-const char                  *ValueForKey( const entity_t *ent, const char *key );
-bool                        BoolForKey_impl( const entity_t *ent, ... );
-#define                     BoolForKey( entity, keys... ) BoolForKey_impl( entity, keys, NULL )
-int                         IntForKey_impl( const entity_t *ent, ... );
-#define                     IntForKey( entity, keys... ) IntForKey_impl( entity, keys, NULL )
-vec_t                       FloatForKey_impl( const entity_t *ent, ... );
-#define                     FloatForKey( entity, keys... ) FloatForKey_impl( entity, keys, NULL )
-void                        GetVectorForKey( const entity_t *ent, const char *key, vec3_t vec );
-/* entity: read key value generic macro
-   returns true on successful read
-   returns false and does not modify value otherwise */
-bool                        entity_read_keyvalue( bool *bool_value, const entity_t *entity, ... );
-bool                        entity_read_keyvalue( int *int_value, const entity_t *entity, ... );
-bool                        entity_read_keyvalue( float *float_value, const entity_t *entity, ... ); // warning: float[3] may be passed here erroneously, if not written as &float[3]
-bool                        entity_read_keyvalue( float (*vector3_value)[3], const entity_t *entity, ... );
-bool                        entity_read_keyvalue( char (*string_value)[1024], const entity_t *entity, ... ); // explicit pointer to array to avoid erroneous mix of char* and char**
-bool                        entity_read_keyvalue( const char **string_ptr_value, const entity_t *entity, ... );
-#define ENT_READKV( value_ptr, entity, keys... ) entity_read_keyvalue( value_ptr, entity, keys, NULL )
-
-const char                  *ent_classname( const entity_t *entity );
-bool                        ent_class_is( const entity_t *entity, const char *classname );
-bool                        ent_class_prefixed( const entity_t *entity, const char *prefix );
 
 entity_t                    *FindTargetEntity( const char *target );
 void                        GetEntityShadowFlags( const entity_t *ent, const entity_t *ent2, int *castShadows, int *recvShadows );

@@ -295,7 +295,7 @@ void CalcVis( void ){
 
 	/* ydnar: rr2do2's farplane code */
 	const char *value;
-	if( ENT_READKV( &value, &entities[ 0 ], "_farplanedist",         /* proper '_' prefixed key */
+	if( entities[ 0 ].read_keyvalue( value, "_farplanedist",         /* proper '_' prefixed key */
 	                                        "fogclip",               /* wolf compatibility */
 	                                        "distancecull" ) ){      /* sof2 compatibility */
 		farPlaneDist = atof( value );
