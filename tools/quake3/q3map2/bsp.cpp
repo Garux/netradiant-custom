@@ -607,17 +607,17 @@ void ProcessModels( void ){
 	CreateMapFogs();
 
 	/* walk entity list */
-	for ( std::size_t i = 0; i < entities.size(); ++i )
+	for ( mapEntityNum = 0; mapEntityNum < entities.size(); mapEntityNum++ )
 	{
 		/* get entity */
-		entity = &entities[ i ];
+		entity = &entities[ mapEntityNum ];
 		if ( entity->brushes == NULL && entity->patches == NULL ) {
 			continue;
 		}
 
 		/* process the model */
 		Sys_FPrintf( SYS_VRB, "############### model %i ###############\n", numBSPModels );
-		if ( i == 0 ) {
+		if ( mapEntityNum == 0 ) {
 			ProcessWorldModel();
 		}
 		else{

@@ -825,15 +825,15 @@ void PseudoCompileBSP( bool need_tree ){
 
 	BeginBSPFile();
 	models = 1;
-	for ( std::size_t i = 0; i < entities.size(); ++i )
+	for ( mapEntityNum = 0; mapEntityNum < entities.size(); mapEntityNum++ )
 	{
 		/* get entity */
-		entity = &entities[ i ];
+		entity = &entities[ mapEntityNum ];
 		if ( entity->brushes == NULL && entity->patches == NULL ) {
 			continue;
 		}
 
-		if ( i != 0 ) {
+		if ( mapEntityNum != 0 ) {
 			sprintf( modelValue, "*%d", models++ );
 			entity->setKeyValue( "model", modelValue );
 		}
@@ -847,7 +847,7 @@ void PseudoCompileBSP( bool need_tree ){
 		ClearMetaTriangles();
 		PatchMapDrawSurfs( entity );
 
-		if ( i == 0 && need_tree ) {
+		if ( mapEntityNum == 0 && need_tree ) {
 			faces = MakeStructuralBSPFaceList( entities[0].brushes );
 			tree = FaceBSP( faces );
 			node = tree->headnode;

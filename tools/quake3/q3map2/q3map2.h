@@ -2074,7 +2074,7 @@ Q_EXTERN int sampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_SAMPLE_SIZE );          /* li
 Q_EXTERN int minSampleSize Q_ASSIGN( DEFAULT_LIGHTMAP_MIN_SAMPLE_SIZE );   /* minimum sample size to use at all */
 Q_EXTERN int sampleScale;                                                  /* vortex: lightmap sample scale (ie quality)*/
 
-Q_EXTERN int mapEntityNum Q_ASSIGN( 0 );
+Q_EXTERN std::size_t mapEntityNum Q_ASSIGN( 0 );
 
 Q_EXTERN int entitySourceBrushes;
 
