@@ -441,8 +441,8 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 	for ( i = 0; i < 3; i++ )
 	{
 		if ( maxs[ i ] - mins[ i ] > subdivide ) {
-			radWinding_t front, back;
-
+			auto front = std::make_unique<radWinding_t>();
+			auto back = std::make_unique<radWinding_t>();
 
 			/* make axial plane */
 			VectorClear( normal );
@@ -450,11 +450,11 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			dist = ( maxs[ i ] + mins[ i ] ) * 0.5f;
 
 			/* clip the winding */
-			RadClipWindingEpsilon( rw, normal, dist, RADIOSITY_CLIP_EPSILON, &front, &back, cw );
+			RadClipWindingEpsilon( rw, normal, dist, RADIOSITY_CLIP_EPSILON, front.get(), back.get(), cw );
 
 			/* recurse */
-			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &front, cw );
-			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, &back, cw );
+			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, front.get(), cw );
+			RadSubdivideDiffuseLight( lightmapNum, ds, lm, si, scale, subdivide, back.get(), cw );
 			return;
 		}
 	}
