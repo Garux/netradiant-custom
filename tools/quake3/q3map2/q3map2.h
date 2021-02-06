@@ -1115,7 +1115,7 @@ struct node_t
 	drawSurfRef_t       *drawSurfReferences;
 
 	int occupied;                       /* 1 or greater can reach entity */
-	entity_t            *occupant;      /* for leak file testing */
+	const entity_t      *occupant;      /* for leak file testing */
 
 	struct portal_t     *portals;       /* also on nodes during construction */
 
@@ -2132,7 +2132,6 @@ Q_EXTERN byte debugColors[ 12 ][ 3 ]
 	};
 #endif
 
-Q_EXTERN bool skyboxPresent Q_ASSIGN( false );
 Q_EXTERN int skyboxArea Q_ASSIGN( -1 );
 Q_EXTERN m4x4_t skyboxTransform;
 

@@ -378,10 +378,9 @@ void ProcessWorldModel( void ){
 			exit( 0 );
 		}
 
-		/* ydnar: flood again for skybox */
-		if ( skyboxPresent ) {
-			FloodEntities( tree );
-		}
+		/* flood again to discard portals in the void (also required for _skybox) */
+		FloodEntities( tree );
+		FillOutside( tree->headnode );
 	}
 
 	/* save out information for visibility processing */

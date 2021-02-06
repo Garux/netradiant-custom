@@ -117,5 +117,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 
 	fclose( linefile );
 
+	xml_Select( "Entity leaked", node->occupant->mapEntityNum, 0, false );
+
 	return xml_node;
 }

@@ -547,47 +547,35 @@ void MakeTreePortals( tree_t *tree ){
 
 int c_floodedleafs;
 
-/*
-   =============
-   FloodPortals_r
-   =============
- */
+void FloodPortals( node_t *node, bool skybox ){
+	int dist = 1;
+	std::vector<node_t*> nodes{ node };
+	while( !nodes.empty() ){
+		std::vector<node_t*> nodes2;
+		for( node_t *n : nodes ){
+			if ( skybox ) {
+				n->skybox = skybox;
+			}
 
-void FloodPortals_r( node_t *node, int dist, bool skybox ){
-	int s;
-	portal_t    *p;
+			if ( n->opaque || ( n->occupied && n->occupied <= dist ) ) { // also reprocess occupied nodes for shorter leak line
+				continue;
+			}
 
+			if( !n->occupied ){
+				++c_floodedleafs;
+			}
 
-	if ( skybox ) {
-		node->skybox = skybox;
-	}
+			n->occupied = dist;
 
-	if ( node->opaque ) {
-		return;
-	}
-
-	if ( node->occupied ) {
-		if ( node->occupied > dist ) {
-			/* reduce distance! */
-			/* for better leak line */
-			/* note: node->occupied will also be true for all further nodes, then */
-			node->occupied = dist;
-			for ( p = node->portals; p; p = p->next[ s ] )
+			int s;
+			for ( portal_t *p = n->portals; p; p = p->next[ s ] )
 			{
-				s = ( p->nodes[ 1 ] == node );
-				FloodPortals_r( p->nodes[ !s ], dist + 1, skybox );
+				s = ( p->nodes[ 1 ] == n );
+				nodes2.push_back( p->nodes[ !s ] );
 			}
 		}
-		return;
-	}
-
-	c_floodedleafs++;
-	node->occupied = dist;
-
-	for ( p = node->portals; p; p = p->next[ s ] )
-	{
-		s = ( p->nodes[ 1 ] == node );
-		FloodPortals_r( p->nodes[ !s ], dist + 1, skybox );
+		nodes.swap( nodes2 );
+		++dist;
 	}
 }
 
@@ -599,7 +587,7 @@ void FloodPortals_r( node_t *node, int dist, bool skybox ){
    =============
  */
 
-bool PlaceOccupant( node_t *headnode, vec3_t origin, entity_t *occupant, bool skybox ){
+bool PlaceOccupant( node_t *headnode, vec3_t origin, const entity_t *occupant, bool skybox ){
 	vec_t d;
 	node_t  *node;
 	plane_t *plane;
@@ -625,7 +613,7 @@ bool PlaceOccupant( node_t *headnode, vec3_t origin, entity_t *occupant, bool sk
 	node->occupant = occupant;
 	node->skybox = skybox;
 
-	FloodPortals_r( node, 1, skybox );
+	FloodPortals( node, skybox );
 
 	return true;
 }
@@ -641,9 +629,7 @@ bool PlaceOccupant( node_t *headnode, vec3_t origin, entity_t *occupant, bool sk
 int FloodEntities( tree_t *tree ){
 	bool r, inside, skybox;
 	node_t      *headnode;
-	entity_t    *e, *tripped;
 	const char  *value;
-	int tripcount = INT_MIN;
 
 
 	headnode = tree->headnode;
@@ -651,31 +637,29 @@ int FloodEntities( tree_t *tree ){
 	inside = false;
 	tree->outside_node.occupied = 0;
 
-	tripped = NULL;
 	c_floodedleafs = 0;
 	for ( std::size_t i = 1; i < entities.size(); ++i )
 	{
 		/* get entity */
-		e = &entities[ i ];
+		const entity_t& e = entities[ i ];
 
 		/* get origin */
 		vec3_t origin;
-		e->vectorForKey( "origin", origin );
-#if 0 //allow maps with only point entity@( 0, 0, 0 ); assuming that entities, containing no primitives are point ones
+		e.vectorForKey( "origin", origin );
+#if 0 // 0 = allow maps with only point entity@( 0, 0, 0 ); assuming that entities, containing no primitives are point ones
 		/* as a special case, allow origin-less entities */
 		if ( VectorCompare( origin, vec3_origin ) ) {
 			continue;
 		}
 #endif
 		/* also allow bmodel entities outside, as they could be on a moving path that will go into the map */
-		if ( e->brushes != NULL || e->patches != NULL || e->classname_is( "_decal" ) ) { //_decal primitive is freed at this point
+		if ( e.brushes != NULL || e.patches != NULL || e.classname_is( "_decal" ) ) { //_decal primitive is freed at this point
 			continue;
 		}
 
 		/* handle skybox entities */
-		if ( e->classname_is( "_skybox" ) ) {
+		if ( e.classname_is( "_skybox" ) ) {
 			skybox = true;
-			skyboxPresent = true;
 
 			/* invert origin */
 			vec3_t offset;
@@ -683,15 +667,15 @@ int FloodEntities( tree_t *tree ){
 
 			/* get scale */
 			vec3_t scale = { 64.0f, 64.0f, 64.0f };
-			if( !e->read_keyvalue( scale, "_scale" ) )
-				if( e->read_keyvalue( scale[0], "_scale" ) )
+			if( !e.read_keyvalue( scale, "_scale" ) )
+				if( e.read_keyvalue( scale[0], "_scale" ) )
 					scale[1] = scale[2] = scale[0];
 
 			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 			vec3_t angles = { 0.f, 0.f, 0.f };
-			if ( !e->read_keyvalue( value, "angles" ) ||
+			if ( !e.read_keyvalue( value, "angles" ) ||
 				3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
-				e->read_keyvalue( angles[ 2 ], "angle" );
+				e.read_keyvalue( angles[ 2 ], "angle" );
 
 			/* set transform matrix (thanks spog) */
 			m4x4_identity( skyboxTransform );
@@ -709,23 +693,13 @@ int FloodEntities( tree_t *tree ){
 		//%		origin[ 2 ] += 4096;
 
 		/* find leaf */
-		r = PlaceOccupant( headnode, origin, e, skybox );
+		r = PlaceOccupant( headnode, origin, &e, skybox );
 		if ( r ) {
 			inside = true;
 		}
-		if ( !r ) {
-			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e->mapEntityNum, e->classname() );
+		else {
+			Sys_FPrintf( SYS_WRN, "Entity %i (%s): Entity in solid\n", e.mapEntityNum, e.classname() );
 		}
-		else if ( tree->outside_node.occupied ) {
-			if ( !tripped || tree->outside_node.occupied < tripcount ) {
-				tripped = e;
-				tripcount = tree->outside_node.occupied;
-			}
-		}
-	}
-
-	if ( tripped ) {
-		xml_Select( "Entity leaked", e->mapEntityNum, 0, false );
 	}
 
 	Sys_FPrintf( SYS_VRB, "%9d flooded leafs\n", c_floodedleafs );
