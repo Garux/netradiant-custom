@@ -47,7 +47,7 @@ static inline StrList* StrList_allocate( size_t strNum ){
 
 static inline void StrList_append( StrList* list, const char* string ){
 	if( list->n == list->max )
-		Error( "StrList overflow" );
+		Error( "StrList overflow on item = %s", string );
 
 	const size_t size = sizeof( list->s[0] );
 	if( strcpyQ( list->s[list->n], string, size ) >= size )
