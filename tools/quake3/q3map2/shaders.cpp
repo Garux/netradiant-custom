@@ -1051,8 +1051,7 @@ static void ParseShaderFile( const char *filename ){
 							/* get an image */
 							GetTokenAppend( shaderText, false );
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
-								StripExtension( token );
-								si->lightImagePath = token;
+								si->lightImagePath( PathExtensionless( token ) );
 
 								/* debug code */
 								//%	Sys_FPrintf( SYS_VRB, "Deduced shader image: %s\n", si->lightImagePath );
@@ -1204,22 +1203,19 @@ static void ParseShaderFile( const char *filename ){
 			/* qer_editorimage <image> */
 			else if ( striEqual( token, "qer_editorImage" ) ) {
 				GetTokenAppend( shaderText, false );
-				StripExtension( token );
-				si->editorImagePath = token;
+				si->editorImagePath( PathExtensionless( token ) );
 			}
 
 			/* ydnar: q3map_normalimage <image> (bumpmapping normal map) */
 			else if ( striEqual( token, "q3map_normalImage" ) ) {
 				GetTokenAppend( shaderText, false );
-				StripExtension( token );
-				si->normalImagePath = token;
+				si->normalImagePath( PathExtensionless( token ) );
 			}
 
 			/* q3map_lightimage <image> */
 			else if ( striEqual( token, "q3map_lightImage" ) ) {
 				GetTokenAppend( shaderText, false );
-				StripExtension( token );
-				si->lightImagePath = token;
+				si->lightImagePath( PathExtensionless( token ) );
 			}
 
 			/* ydnar: skyparms <outer image> <cloud height> <inner image> */
