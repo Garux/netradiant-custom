@@ -57,7 +57,6 @@
 xmlNodePtr LeakFile( tree_t *tree ){
 	vec3_t mid;
 	FILE    *linefile;
-	char filename[1024];
 	node_t  *node;
 	int count;
 	xmlNodePtr xml_node, point;
@@ -71,10 +70,10 @@ xmlNodePtr LeakFile( tree_t *tree ){
 	//
 	// write the points to the file
 	//
-	sprintf( filename, "%s.lin", source );
+	auto filename = StringOutputStream( 256 )( source, ".lin" );
 	linefile = fopen( filename, "w" );
 	if ( !linefile ) {
-		Error( "Couldn't open %s\n", filename );
+		Error( "Couldn't open %s\n", filename.c_str() );
 	}
 
 	xml_node = xmlNewNode( NULL, (const xmlChar*)"polyline" );

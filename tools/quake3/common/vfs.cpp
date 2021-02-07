@@ -53,6 +53,9 @@
 #include "unzip.h"
 #include "miniz.h"
 
+#include "stream/stringstream.h"
+#include "stream/textstream.h"
+
 struct VFS_PAKFILE
 {
 	char* unzFilePath;
@@ -115,7 +118,7 @@ static void vfsInitPakFile( const char *filename ){
 		g_pakFiles = g_slist_append( g_pakFiles, file );
 
 		FixDOSName( filename_inzip );
-		g_strdown( filename_inzip );
+		strLower( filename_inzip );
 
 		file->name = strdup( filename_inzip );
 		file->size = file_info.uncompressed_size;
@@ -206,13 +209,9 @@ void vfsInitDirectory( const char *path ){
 
 // lists all .shader files
 void vfsListShaderFiles( StrList* list, void pushStringCallback( StrList* list, const char* string ) ){
-	GDir *dir;
-	char path[NAME_MAX];
 /* search in dirs */
 	for ( int i = 0; i < g_numDirs; i++ ){
-		snprintf( path, NAME_MAX, "%sscripts/", g_strDirs[ i ] );
-
-		dir = g_dir_open( path, 0, NULL );
+		GDir *dir = g_dir_open( StringOutputStream( 256 )( g_strDirs[ i ], "scripts/" ), 0, NULL );
 
 		if ( dir != NULL ) {
 			const char* name;
@@ -263,7 +262,7 @@ int vfsGetFileCount( const char *filename ){
 
 	strcpy( fixed, filename );
 	FixDOSName( fixed );
-	g_strdown( fixed );
+	strLower( fixed );
 
 	for ( lst = g_pakFiles; lst != NULL; lst = g_slist_next( lst ) )
 	{
@@ -322,7 +321,7 @@ int vfsLoadFile( const char *filename, void **bufferptr, int index ){
 	*bufferptr = NULL;
 	strcpy( fixed, filename );
 	FixDOSName( fixed );
-	g_strdown( fixed );
+	strLower( fixed );
 
 	for ( i = 0; i < g_numDirs; i++ )
 	{
@@ -407,7 +406,7 @@ bool vfsPackFile( const char *filename, const char *packname, const int compLeve
 	byte *bufferptr = NULL;
 	strcpy( fixed, filename );
 	FixDOSName( fixed );
-	g_strdown( fixed );
+	strLower( fixed );
 
 	for ( i = 0; i < g_numDirs; i++ )
 	{

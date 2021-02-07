@@ -308,19 +308,17 @@ bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, i
 void BeginMapShaderFile( const char *mapFile ){
 	/* dummy check */
 	mapName.clear();
-	strClear( mapShaderFile );
+	mapShaderFile.clear();
 	if ( strEmptyOrNull( mapFile ) ) {
 		return;
 	}
 
 	/* extract map name */
-	mapName( StringRange( path_get_filename_start( mapFile ), path_get_filename_base_end( mapFile) ) );
-	char path[ 1024 ];
-	ExtractFilePath( mapFile, path );
+	mapName( PathFilename( mapFile ) );
 
 	/* append ../scripts/q3map2_<mapname>.shader */
-	sprintf( mapShaderFile, "%s../%s/q3map2_%s.shader", path, game->shaderPath, mapName.c_str() );
-	Sys_FPrintf( SYS_VRB, "Map has shader script %s\n", mapShaderFile );
+	mapShaderFile( PathFilenameless( mapFile ), "../", game->shaderPath, "/q3map2_", mapName.c_str(), ".shader" );
+	Sys_FPrintf( SYS_VRB, "Map has shader script %s\n", mapShaderFile.c_str() );
 
 	/* remove it */
 	remove( mapShaderFile );
@@ -343,7 +341,7 @@ void WriteMapShaderFile( void ){
 
 
 	/* dummy check */
-	if ( strEmpty( mapShaderFile ) ) {
+	if ( mapShaderFile.empty() ) {
 		return;
 	}
 
@@ -360,12 +358,12 @@ void WriteMapShaderFile( void ){
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- WriteMapShaderFile ---\n" );
-	Sys_FPrintf( SYS_VRB, "Writing %s", mapShaderFile );
+	Sys_FPrintf( SYS_VRB, "Writing %s", mapShaderFile.c_str() );
 
 	/* open shader file */
 	file = fopen( mapShaderFile, "w" );
 	if ( file == NULL ) {
-		Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile );
+		Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile.c_str() );
 		return;
 	}
 
@@ -953,7 +951,6 @@ void Parse1DMatrixAppend( char *buffer, int x, vec_t *m ){
 static void ParseShaderFile( const char *filename ){
 	int i, val;
 	shaderInfo_t    *si;
-	char            temp[ 1024 ];
 	char shaderText[ 8192 ];            /* ydnar: fixme (make this bigger?) */
 
 
@@ -1336,7 +1333,7 @@ static void ParseShaderFile( const char *filename ){
 					/* subclass it */
 					if ( si2 != NULL ) {
 						/* preserve name */
-						strcpy( temp, si->shader );
+						const String64 temp = si->shader;
 
 						/* copy shader */
 						*si = *si2;
@@ -1910,8 +1907,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_material (sof2) */
 				else if ( striEqual( token, "q3map_material" ) ) {
 					GetTokenAppend( shaderText, false );
-					sprintf( temp, "*mat_%s", token );
-					if ( !ApplySurfaceParm( temp, &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) ) {
+					if ( !ApplySurfaceParm( StringOutputStream( 64 )( "*mat_", token ), &si->contentFlags, &si->surfaceFlags, &si->compileFlags ) ) {
 						Sys_Warning( "Unknown material \"%s\"\n", token );
 					}
 				}

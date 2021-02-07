@@ -273,10 +273,11 @@ int pk3BSPMain( int argc, char **argv ){
 	ParseEntities();
 
 
-	char nameOFmap[ 1024 ], str[ 1024 ];
+	char str[ 1024 ];
+	StringOutputStream stream( 256 );
 
 	/* extract map name */
-	ExtractFileBase( source, nameOFmap );
+	const CopiedString nameOFmap( PathFilename( source ) );
 
 	bool drawsurfSHs[numBSPShaders];
 	memset( drawsurfSHs, 0, sizeof( drawsurfSHs ) );
@@ -303,8 +304,8 @@ int pk3BSPMain( int argc, char **argv ){
 	for ( const auto& ep : entities[0].epairs )
 	{
 		if ( striEqualPrefix( ep.key.c_str(), "vertexremapshader" ) ) {
-			sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
-			res2list( pk3Shaders, str );
+			if( 1 == sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ) ) // textures/remap/from;textures/remap/to
+				res2list( pk3Shaders, str );
 		}
 	}
 
@@ -343,8 +344,7 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	//levelshot
-	sprintf( str, "levelshots/%s", nameOFmap );
-	res2list( pk3Shaders, str );
+	res2list( pk3Shaders, stream( "levelshots/", nameOFmap.c_str() ) );
 
 
 	if( dbg ){
@@ -380,8 +380,7 @@ int pk3BSPMain( int argc, char **argv ){
 	char* ExReasonShaderFile[4096] = { NULL };
 
 	{
-		sprintf( str, "%s%s", game->arg, ".exclude" );
-		parseEXfile( str, ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
+		parseEXfile( stream( game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
 
 		for ( i = 0; i < ExTextures->n; ++i ){
 			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
@@ -579,8 +578,7 @@ int pk3BSPMain( int argc, char **argv ){
 							GetToken( false );
 							FixDOSName( token );
 							if ( strchr( token, '/' ) == NULL ){
-								sprintf( str, "video/%s", token );
-								strcpy( token, str );
+								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
 								!StrList_find( ExVideos, token ) )
@@ -686,10 +684,9 @@ int pk3BSPMain( int argc, char **argv ){
 	}
 
 	/* make a pack */
-	char packname[ 1024 ], packFailName[ 1024 ];
-	sprintf( packname, "%s/%s_autopacked.pk3", EnginePath, nameOFmap );
+	auto packname = StringOutputStream( 256 )( EnginePath, "/", nameOFmap.c_str(), "_autopacked.pk3" );
 	remove( packname );
-	sprintf( packFailName, "%s/%s_FAILEDpack.pk3", EnginePath, nameOFmap );
+	auto packFailName = StringOutputStream( 256 )( EnginePath, "/", nameOFmap.c_str(), "_FAILEDpack.pk3" );
 	remove( packFailName );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );
@@ -723,8 +720,8 @@ int pk3BSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < pk3Shaderfiles->n; ++i ){
 		if ( !strEmpty( pk3Shaderfiles->s[i] ) ){
-			sprintf( str, "%s/%s", game->shaderPath, pk3Shaderfiles->s[i] );
-			if ( !packResource( str, packname, compLevel ) ){
+			stream( game->shaderPath, "/", pk3Shaderfiles->s[i] );
+			if ( !packResource( stream, packname, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
 				packFAIL = true;
 			}
@@ -753,34 +750,34 @@ int pk3BSPMain( int argc, char **argv ){
 
 	Sys_Printf( "\n\t.bsp and stuff\n" );
 
-	sprintf( str, "maps/%s.bsp", nameOFmap );
-	//if ( vfsPackFile( str, packname, compLevel ) ){
-	if ( vfsPackFile_Absolute_Path( source, str, packname, compLevel ) ){
-		Sys_Printf( "++%s\n", str );
+	stream( "maps/", nameOFmap.c_str(), ".bsp" );
+	//if ( vfsPackFile( stream, packname, compLevel ) ){
+	if ( vfsPackFile_Absolute_Path( source, stream, packname, compLevel ) ){
+		Sys_Printf( "++%s\n", stream.c_str() );
 	}
 	else{
-		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", str );
+		Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", stream.c_str() );
 		packFAIL = true;
 	}
 
-	sprintf( str, "maps/%s.aas", nameOFmap );
-	if ( !packResource( str, packname, compLevel ) )
-		Sys_Printf( "  ~fail  %s\n", str );
+	stream( "maps/", nameOFmap.c_str(), ".aas" );
+	if ( !packResource( stream, packname, compLevel ) )
+		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 
-	sprintf( str, "scripts/%s.arena", nameOFmap );
-	if ( !packResource( str, packname, compLevel ) )
-		Sys_Printf( "  ~fail  %s\n", str );
+	stream( "scripts/", nameOFmap.c_str(), ".arena" );
+	if ( !packResource( stream, packname, compLevel ) )
+		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 
-	sprintf( str, "scripts/%s.defi", nameOFmap );
-	if ( !packResource( str, packname, compLevel ) )
-		Sys_Printf( "  ~fail  %s\n", str );
+	stream( "scripts/", nameOFmap.c_str(), ".defi" );
+	if ( !packResource( stream, packname, compLevel ) )
+		Sys_Printf( "  ~fail  %s\n", stream.c_str() );
 
 	if ( !packFAIL ){
-		Sys_Printf( "\nSaved to %s\n", packname );
+		Sys_Printf( "\nSaved to %s\n", packname.c_str() );
 	}
 	else{
 		rename( packname, packFailName );
-		Sys_Printf( "\nSaved to %s\n", packFailName );
+		Sys_Printf( "\nSaved to %s\n", packFailName.c_str() );
 	}
 	/* return to sender */
 	return 0;
@@ -797,7 +794,7 @@ int repackBSPMain( int argc, char **argv ){
 	int i, j, compLevel = 0;
 	bool dbg = false, png = false, analyze = false;
 	char str[ 1024 ];
-
+	StringOutputStream stream( 256 );
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); ++i ){
 		if ( strEqual( argv[ i ],  "-dbg" ) ) {
@@ -827,8 +824,7 @@ int repackBSPMain( int argc, char **argv ){
 	StrList* ExPureTextures = StrList_allocate( 4096 );
 
 	{
-		sprintf( str, "%s%s", game->arg, ".exclude" );
-		parseEXfile( str, ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
+		parseEXfile( stream( game->arg, ".exclude" ), ExTextures, ExShaders, ExShaderfiles, ExSounds, ExVideos );
 
 		for ( i = 0; i < ExTextures->n; ++i ){
 			if( !StrList_find( ExShaders, ExTextures->s[i] ) )
@@ -927,8 +923,7 @@ int repackBSPMain( int argc, char **argv ){
 	}
 
 	/* extract input file name */
-	char nameOFrepack[ 1024 ];
-	ExtractFileBase( source, nameOFrepack );
+	const CopiedString nameOFrepack( PathFilename( source ) );
 
 /* load bsps */
 	StrList* pk3Shaders = StrList_allocate( 65536 );
@@ -957,8 +952,7 @@ int repackBSPMain( int argc, char **argv ){
 		ParseEntities();
 
 		/* extract map name */
-		char nameOFmap[ 1024 ];
-		ExtractFileBase( source, nameOFmap );
+		const CopiedString nameOFmap( PathFilename( source ) );
 
 		bool drawsurfSHs[numBSPShaders];
 		memset( drawsurfSHs, 0, sizeof( drawsurfSHs ) );
@@ -977,8 +971,8 @@ int repackBSPMain( int argc, char **argv ){
 		for ( const auto& ep : entities[0].epairs )
 		{
 			if ( striEqualPrefix( ep.key.c_str(), "vertexremapshader" ) ) {
-				sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ); // textures/remap/from;textures/remap/to
-				res2list( pk3Shaders, str );
+				if( 1 == sscanf( ep.value.c_str(), "%*[^;] %*[;] %s", str ) ) // textures/remap/from;textures/remap/to
+					res2list( pk3Shaders, str );
 			}
 		}
 		if ( entities[ 0 ].read_keyvalue( str, "music" ) ){
@@ -1016,8 +1010,7 @@ int repackBSPMain( int argc, char **argv ){
 		}
 
 		//levelshot
-		sprintf( str, "levelshots/%s", nameOFmap );
-		res2list( pk3Shaders, str );
+		res2list( pk3Shaders, stream( "levelshots/", nameOFmap.c_str() ) );
 
 
 
@@ -1300,8 +1293,7 @@ int repackBSPMain( int argc, char **argv ){
 							StrBuf_cat2( shaderText, " ", token );
 							FixDOSName( token );
 							if ( strchr( token, '/' ) == NULL ){
-								sprintf( str, "video/%s", token );
-								strcpy( token, str );
+								strcpy( token, stream( "video/", token ) );
 							}
 							if( !StrList_find( pk3Videos, token ) &&
 								!StrList_find( ExVideos, token ) &&
@@ -1435,24 +1427,22 @@ int repackBSPMain( int argc, char **argv ){
 	}
 
 	/* write shader */
-	sprintf( str, "%s/%s_strippedBYrepacker.shader", EnginePath, nameOFrepack );
-	FILE *f;
-	f = fopen( str, "wb" );
+	stream( EnginePath, "/", nameOFrepack.c_str(), "_strippedBYrepacker.shader" );
+	FILE *f = fopen( stream, "wb" );
 	fwrite( allShaders->s, sizeof( char ), allShaders->strlen, f );
 	fclose( f );
-	Sys_Printf( "Shaders saved to %s\n", str );
+	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 
 	/* make a pack */
-	char packname[ 1024 ];
-	sprintf( packname, "%s/%s_repacked.pk3", EnginePath, nameOFrepack );
-	remove( packname );
+	stream( EnginePath, "/", nameOFrepack.c_str(), "_repacked.pk3" );
+	remove( stream );
 
 	Sys_Printf( "\n--- ZipZip ---\n" );
 
 	Sys_Printf( "\n\tShader referenced textures....\n" );
 
 	for ( i = 0; i < pk3Textures->n; ++i ){
-		if( !packTexture( pk3Textures->s[i], packname, compLevel, png ) ){
+		if( !packTexture( pk3Textures->s[i], stream, compLevel, png ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Textures->s[i] );
 		}
 	}
@@ -1461,7 +1451,7 @@ int repackBSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < pk3Shaders->n; ++i ){
 		if ( !strEmpty( pk3Shaders->s[i] ) ){
-			if( !packTexture( pk3Shaders->s[i], packname, compLevel, png ) ){
+			if( !packTexture( pk3Shaders->s[i], stream, compLevel, png ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Shaders->s[i] );
 			}
 		}
@@ -1471,7 +1461,7 @@ int repackBSPMain( int argc, char **argv ){
 
 	for ( i = 0; i < pk3Sounds->n; ++i ){
 		if ( !strEmpty( pk3Sounds->s[i] ) ){
-			if ( !packResource( pk3Sounds->s[i], packname, compLevel ) ){
+			if ( !packResource( pk3Sounds->s[i], stream, compLevel ) ){
 				Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Sounds->s[i] );
 			}
 		}
@@ -1480,12 +1470,12 @@ int repackBSPMain( int argc, char **argv ){
 	Sys_Printf( "\n\tVideos....\n" );
 
 	for ( i = 0; i < pk3Videos->n; ++i ){
-		if ( !packResource( pk3Videos->s[i], packname, compLevel ) ){
+		if ( !packResource( pk3Videos->s[i], stream, compLevel ) ){
 			Sys_FPrintf( SYS_WRN, "  !FAIL! %s\n", pk3Videos->s[i] );
 		}
 	}
 
-	Sys_Printf( "\nSaved to %s\n", packname );
+	Sys_Printf( "\nSaved to %s\n", stream.c_str() );
 
 	/* return to sender */
 	return 0;

@@ -388,9 +388,6 @@ void BeginBSPFile( void ){
  */
 
 void EndBSPFile( bool do_write ){
-	char path[ 1024 ];
-
-
 	Sys_FPrintf( SYS_VRB, "--- EndBSPFile ---\n" );
 
 	EmitPlanes();
@@ -403,8 +400,8 @@ void EndBSPFile( bool do_write ){
 		WriteSurfaceExtraFile( source );
 
 		/* write the bsp */
-		sprintf( path, "%s.bsp", source );
-		Sys_Printf( "Writing %s\n", path );
+		auto path = StringOutputStream( 256 )( source, ".bsp" );
+		Sys_Printf( "Writing %s\n", path.c_str() );
 		WriteBSPFile( path );
 	}
 }

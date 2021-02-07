@@ -36,15 +36,13 @@
 static bool g_autocaulk = false;
 
 static void autocaulk_write(){
-	char filename[1024];
-
 	Sys_FPrintf( SYS_VRB, "--- autocaulk_write ---\n" );
-	sprintf( filename, "%s.caulk", source );
-	Sys_Printf( "writing %s\n", filename );
+	auto filename = StringOutputStream( 256 )( source, ".caulk" );
+	Sys_Printf( "writing %s\n", filename.c_str() );
 
 	FILE* file = fopen( filename, "w" );
 	if ( !file ) {
-		Error( "Error opening %s", filename );
+		Error( "Error opening %s", filename.c_str() );
 	}
 
 	int fslime = 16;
@@ -644,14 +642,12 @@ void ProcessModels( void ){
  */
 
 void OnlyEnts( void ){
-	char out[ 1024 ];
-
 	char save_cmdline[1024], save_version[1024], save_gridsize[1024];
 
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
 
-	sprintf( out, "%s.bsp", source );
+	auto out = StringOutputStream( 256 )( source, ".bsp" );
 	LoadBSPFile( out );
 
 	ParseEntities();
@@ -691,7 +687,7 @@ void OnlyEnts( void ){
 
 int BSPMain( int argc, char **argv ){
 	int i;
-	char path[ 1024 ], tempSource[ 1024 ];
+	char tempSource[ 1024 ];
 	bool onlyents = false;
 
 	if ( argc >= 2 && strEqual( argv[ 1 ], "-bsp" ) ) {
@@ -1006,19 +1002,15 @@ int BSPMain( int argc, char **argv ){
 	SetDefaultSampleSize( sampleSize );
 
 	/* delete portal, line and surface files */
-	sprintf( path, "%s.prt", source );
-	remove( path );
-	sprintf( path, "%s.lin", source );
-	remove( path );
-	//%	sprintf( path, "%s.srf", source );	/* ydnar */
-	//%	remove( path );
+	remove( StringOutputStream( 256 )( source, ".prt" ) );
+	remove( StringOutputStream( 256 )( source, ".lin" ) );
+	//%	remove( StringOutputStream( 256 )( source, ".srf" ) );	/* ydnar */
 
 	/* expand mapname */
 	strcpy( name, ExpandArg( argv[ i ] ) );
 	if ( !striEqual( path_get_filename_base_end( name ), ".reg" ) ) { /* not .reg */
 		/* if we are doing a full map, delete the last saved region map */
-		sprintf( path, "%s.reg", source );
-		remove( path );
+		remove( StringOutputStream( 256 )( source, ".reg" ) );
 		if ( !onlyents || !striEqual( path_get_filename_base_end( name ), ".ent" ) ) {
 			path_set_extension( name, ".map" );   /* .reg and .ent are ok too */
 		}

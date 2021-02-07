@@ -119,6 +119,10 @@ StringOutputStream& operator()( Args&& ... args ){
 	return *this;
 }
 
+operator const char*() const {
+	return c_str();
+}
+
 iterator begin(){
 	return m_string.begin();
 }

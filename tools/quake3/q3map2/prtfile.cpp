@@ -367,16 +367,14 @@ void NumberClusters( tree_t *tree ) {
    ================
  */
 void WritePortalFile( tree_t *tree ){
-	char filename[1024];
-
 	Sys_FPrintf( SYS_VRB, "--- WritePortalFile ---\n" );
 
 	// write the file
-	sprintf( filename, "%s.prt", source );
-	Sys_Printf( "writing %s\n", filename );
+	auto filename = StringOutputStream( 256 )( source, ".prt" );
+	Sys_Printf( "writing %s\n", filename.c_str() );
 	pf = fopen( filename, "w" );
 	if ( !pf ) {
-		Error( "Error opening %s", filename );
+		Error( "Error opening %s", filename.c_str() );
 	}
 
 	fprintf( pf, "%s\n", PORTALFILE );
