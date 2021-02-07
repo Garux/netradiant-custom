@@ -642,8 +642,6 @@ void ProcessModels( void ){
  */
 
 void OnlyEnts( void ){
-	char save_cmdline[1024], save_version[1024], save_gridsize[1024];
-
 	/* note it */
 	Sys_Printf( "--- OnlyEnts ---\n" );
 
@@ -651,9 +649,9 @@ void OnlyEnts( void ){
 	LoadBSPFile( out );
 
 	ParseEntities();
-	strcpyQ( save_cmdline, entities[ 0 ].valueForKey( "_q3map2_cmdline" ), sizeof( save_cmdline ) );
-	strcpyQ( save_version, entities[ 0 ].valueForKey( "_q3map2_version" ), sizeof( save_version ) );
-	strcpyQ( save_gridsize, entities[ 0 ].valueForKey( "gridsize" ), sizeof( save_gridsize ) );
+	const CopiedString save_cmdline( entities[ 0 ].valueForKey( "_q3map2_cmdline" ) );
+	const CopiedString save_version( entities[ 0 ].valueForKey( "_q3map2_version" ) );
+	const CopiedString save_gridsize( entities[ 0 ].valueForKey( "gridsize" ) );
 
 	entities.clear();
 
@@ -662,14 +660,14 @@ void OnlyEnts( void ){
 	SetModelNumbers();
 	SetLightStyles();
 
-	if ( *save_cmdline ) {
-		entities[0].setKeyValue( "_q3map2_cmdline", save_cmdline );
+	if ( !save_cmdline.empty() ) {
+		entities[0].setKeyValue( "_q3map2_cmdline", save_cmdline.c_str() );
 	}
-	if ( *save_version ) {
-		entities[0].setKeyValue( "_q3map2_version", save_version );
+	if ( !save_version.empty() ) {
+		entities[0].setKeyValue( "_q3map2_version", save_version.c_str() );
 	}
-	if ( *save_gridsize ) {
-		entities[0].setKeyValue( "gridsize", save_gridsize );
+	if ( !save_gridsize.empty() ) {
+		entities[0].setKeyValue( "gridsize", save_gridsize.c_str() );
 	}
 
 	numBSPEntities = entities.size();
