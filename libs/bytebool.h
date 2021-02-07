@@ -25,8 +25,9 @@
 // defines boolean and byte types usable in both c and c++ code
 // this header is not really meant for direct inclusion,
 // it is used by mathlib and cmdlib
-
+#ifndef __cplusplus
 #include <stdbool.h>
+#endif
 typedef bool qboolean;
 //typedef enum { qfalse, qtrue } qboolean;
 typedef unsigned char byte;
