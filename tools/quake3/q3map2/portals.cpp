@@ -626,7 +626,7 @@ bool PlaceOccupant( node_t *headnode, vec3_t origin, const entity_t *occupant, b
    =============
  */
 
-int FloodEntities( tree_t *tree ){
+EFloodEntities FloodEntities( tree_t *tree ){
 	bool r, inside, skybox;
 	node_t      *headnode;
 	const char  *value;
@@ -706,14 +706,14 @@ int FloodEntities( tree_t *tree ){
 
 	if ( !inside ) {
 		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "no entities in open -- no filling\n" );
-		return FLOODENTITIES_EMPTY;
+		return EFloodEntities::Empty;
 	}
 	if ( tree->outside_node.occupied ) {
 		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "entity reached from outside -- leak detected\n" );
-		return FLOODENTITIES_LEAKED;
+		return EFloodEntities::Leaked;
 	}
 
-	return FLOODENTITIES_GOOD;
+	return EFloodEntities::Good;
 }
 
 /*

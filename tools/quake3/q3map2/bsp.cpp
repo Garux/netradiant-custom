@@ -294,7 +294,6 @@ void ProcessWorldModel( void ){
 	xmlNodePtr polyline, leaknode;
 	char level[ 2 ];
 	const char  *value;
-	int leakStatus;
 
 	/* sets integer blockSize from worldspawn "_blocksize" key if it exists */
 	if( entities[ 0 ].read_keyvalue( value, "_blocksize", "blocksize", "chopsize" ) ) {  /* "chopsize" : sof2 */
@@ -333,14 +332,12 @@ void ProcessWorldModel( void ){
 	FilterStructuralBrushesIntoTree( e, tree );
 
 	/* see if the bsp is completely enclosed */
-	leakStatus = FloodEntities( tree );
-	if ( ignoreLeaks ) {
-		if ( leakStatus == FLOODENTITIES_LEAKED ) {
-			leakStatus = FLOODENTITIES_GOOD;
-		}
+	EFloodEntities leakStatus = FloodEntities( tree );
+	if ( ignoreLeaks && leakStatus == EFloodEntities::Leaked ) {
+		leakStatus = EFloodEntities::Good;
 	}
 
-	const bool leaked = ( leakStatus != FLOODENTITIES_GOOD );
+	const bool leaked = ( leakStatus != EFloodEntities::Good );
 	if( leaked ){
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "**********************\n" );
 		Sys_FPrintf( SYS_NOXMLflag | SYS_ERR, "******* leaked *******\n" );
@@ -359,7 +356,7 @@ void ProcessWorldModel( void ){
 		}
 	}
 
-	if ( leakStatus != FLOODENTITIES_EMPTY ) { /* if no entities exist, this would accidentally the whole map, and that IS bad */
+	if ( leakStatus != EFloodEntities::Empty ) { /* if no entities exist, this would accidentally the whole map, and that IS bad */
 		/* rebuild a better bsp tree using only the sides that are visible from the inside */
 		FillOutside( tree->headnode );
 
