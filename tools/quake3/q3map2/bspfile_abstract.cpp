@@ -504,13 +504,12 @@ void PrintBSPFileSizes( void ){
    strips low byte chars off the end of a string
  */
 
-void StripTrailing( char *e ){
-	char *s = e + strlen( e ) - 1;
-	while ( s >= e && *s <= 32 )
-	{
-		strClear( s );
-		s--;
+StringRange StripTrailing( const char *string ){
+	const char *end = string + strlen( string );
+	while ( end != string && end[-1] <= 32 ){
+		--end;
 	}
+	return StringRange( string, end );
 }
 
 
@@ -523,14 +522,12 @@ void StripTrailing( char *e ){
 void ParseEPair( std::list<epair_t>& epairs ){
 	/* handle key */
 	/* strip trailing spaces that sometimes get accidentally added in the editor */
-	StripTrailing( token );
 	epair_t ep;
-	ep.key = token;
+	ep.key = StripTrailing( token );
 
 	/* handle value */
 	GetToken( false );
-	StripTrailing( token );
-	ep.value = token;
+	ep.value = StripTrailing( token );
 
 	if( !ep.key.empty() && !ep.value.empty() )
 		epairs.emplace_back( ep );
@@ -637,33 +634,18 @@ void InjectCommandLine( char **argv, int beginArgs, int endArgs ){
  */
 
 void UnparseEntities( void ){
-	char        *buf, *end;
-	char line[ 2048 ];
-	char key[ 1024 ], value[ 1024 ];
-
-
-	/* setup */
-	AUTOEXPAND_BY_REALLOC( bspEntData, 0, allocatedBSPEntData, 1024 );
-	strClear( bspEntData );
-	end = buf = bspEntData;
+	StringOutputStream data( 8192 );
 
 	/* run through entity list */
 	for ( std::size_t i = 0; i < numBSPEntities && i < entities.size(); i++ )
 	{
-		{
-			int sz = end - buf;
-			AUTOEXPAND_BY_REALLOC( bspEntData, sz + 65536, allocatedBSPEntData, 1024 );
-			buf = bspEntData;
-			end = buf + sz;
-		}
-
-		entity_t *e = &entities[ i ];
+		const entity_t& e = entities[ i ];
 		/* get epair */
-		if ( e->epairs.empty() ) {
+		if ( e.epairs.empty() ) {
 			continue;   /* ent got removed */
 		}
 		/* ydnar: certain entities get stripped from bsp file */
-		const char *classname = e->classname();
+		const char *classname = e.classname();
 		if ( striEqual( classname, "misc_model" ) ||
 			 striEqual( classname, "_decal" ) ||
 			 striEqual( classname, "_skybox" ) ) {
@@ -671,36 +653,23 @@ void UnparseEntities( void ){
 		}
 
 		/* add beginning brace */
-		strcat( end, "{\n" );
-		end += 2;
+		data << "{\n";
 
 		/* walk epair list */
-		for ( const auto& ep : e->epairs )
+		for ( const auto& ep : e.epairs )
 		{
 			/* copy and clean */
-			strcpy( key, ep.key.c_str() );
-			StripTrailing( key );
-			strcpy( value, ep.value.c_str() );
-			StripTrailing( value );
-
-			/* add to buffer */
-			sprintf( line, "\"%s\" \"%s\"\n", key, value );
-			strcat( end, line );
-			end += strlen( line );
+			data << '\"' << StripTrailing( ep.key.c_str() ) << "\" \"" << StripTrailing( ep.value.c_str() ) << "\"\n";
 		}
 
 		/* add trailing brace */
-		strcat( end, "}\n" );
-		end += 2;
-
-		/* check for overflow */
-		if ( end > buf + allocatedBSPEntData ) {
-			Error( "Entity text too long" );
-		}
+		data << "}\n";
 	}
 
-	/* set size */
-	bspEntDataSize = end - buf + 1;
+	/* save out */
+	bspEntDataSize = data.end() - data.begin() + 1;
+	AUTOEXPAND_BY_REALLOC( bspEntData, bspEntDataSize, allocatedBSPEntData, 1024 );
+	strcpy( bspEntData, data );
 }
 
 

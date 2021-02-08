@@ -918,7 +918,7 @@ enum class ESurfaceType
 constexpr const char *surfaceTypeName( ESurfaceType type ){
 	switch ( type )
 	{
-	case ESurfaceType::Bad: return "ESurfaceType::Bad";
+	case ESurfaceType::Bad:        return "ESurfaceType::Bad";
 	case ESurfaceType::Face:       return "ESurfaceType::Face";
 	case ESurfaceType::Patch:      return "ESurfaceType::Patch";
 	case ESurfaceType::Triangles:  return "ESurfaceType::Triangles";

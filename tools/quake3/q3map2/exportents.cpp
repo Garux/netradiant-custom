@@ -46,33 +46,33 @@
  */
 
 void ExportEntities( void ){
-        char filename[ 1024 ];
-        FILE *file;
+	char filename[ 1024 ];
+	FILE *file;
 
-        /* note it */
-        Sys_FPrintf( SYS_VRB, "--- ExportEntities ---\n" );
+	/* note it */
+	Sys_FPrintf( SYS_VRB, "--- ExportEntities ---\n" );
 
-        /* do some path mangling */
-        strcpy( filename, source );
-        path_set_extension( filename, ".ent" );
+	/* do some path mangling */
+	strcpy( filename, source );
+	path_set_extension( filename, ".ent" );
 
-        /* sanity check */
-        if ( bspEntData == NULL || bspEntDataSize == 0 ) {
-                Sys_Warning( "No BSP entity data. aborting...\n" );
-                return;
-        }
+	/* sanity check */
+	if ( bspEntData == NULL || bspEntDataSize == 0 ) {
+		Sys_Warning( "No BSP entity data. aborting...\n" );
+		return;
+	}
 
-        /* write it */
-        Sys_Printf( "Writing %s\n", filename );
-        Sys_FPrintf( SYS_VRB, "(%d bytes)\n", bspEntDataSize );
-        file = fopen( filename, "w" );
+	/* write it */
+	Sys_Printf( "Writing %s\n", filename );
+	Sys_FPrintf( SYS_VRB, "(%d bytes)\n", bspEntDataSize );
+	file = fopen( filename, "w" );
 
-        if ( file == NULL ) {
-                Error( "Unable to open %s for writing", filename );
-        }
+	if ( file == NULL ) {
+		Error( "Unable to open %s for writing", filename );
+	}
 
-        fprintf( file, "%s\n", bspEntData );
-        fclose( file );
+	fprintf( file, "%s\n", bspEntData );
+	fclose( file );
 }
 
 
@@ -83,23 +83,23 @@ void ExportEntities( void ){
  */
 
 int ExportEntitiesMain( int argc, char **argv ){
-        /* arg checking */
-        if ( argc < 2 ) {
-                Sys_Printf( "Usage: q3map2 -exportents [-v] <mapname>\n" );
-                return 0;
-        }
+	/* arg checking */
+	if ( argc < 2 ) {
+		Sys_Printf( "Usage: q3map2 -exportents [-v] <mapname>\n" );
+		return 0;
+	}
 
-        /* do some path mangling */
-        strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
-        path_set_extension( source, ".bsp" );
+	/* do some path mangling */
+	strcpy( source, ExpandArg( argv[ argc - 1 ] ) );
+	path_set_extension( source, ".bsp" );
 
-        /* load the bsp */
-        Sys_Printf( "Loading %s\n", source );
-        LoadBSPFile( source );
+	/* load the bsp */
+	Sys_Printf( "Loading %s\n", source );
+	LoadBSPFile( source );
 
-        /* export the lightmaps */
-        ExportEntities();
+	/* export entities */
+	ExportEntities();
 
-        /* return to sender */
-        return 0;
+	/* return to sender */
+	return 0;
 }
