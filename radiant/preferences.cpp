@@ -362,9 +362,8 @@ void CGameDialog::Reset(){
 	if ( !g_Preferences.m_global_rc_path ) {
 		InitGlobalPrefPath();
 	}
-	StringOutputStream strGlobalPref( 256 );
-	strGlobalPref << g_Preferences.m_global_rc_path->str << "global.pref";
-	file_remove( strGlobalPref.c_str() );
+
+	file_remove( StringOutputStream( 256 )( g_Preferences.m_global_rc_path->str, "global.pref" ) );
 }
 
 void CGameDialog::Init(){

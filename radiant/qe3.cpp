@@ -86,35 +86,28 @@ void QE_InitVFS(){
 	if( !string_empty( extrapath ) )
 		GlobalFileSystem().initDirectory( extrapath );
 
+	StringOutputStream str( 256 );
 	// if we have a mod dir
 	if ( !string_equal( gamename, basegame ) ) {
 		// ~/.<gameprefix>/<fs_game>
-		if ( userRoot && !string_equal( globalRoot, userRoot ) ) {
-			StringOutputStream userGamePath( 256 );
-			userGamePath << userRoot << gamename << '/';
-			GlobalFileSystem().initDirectory( userGamePath.c_str() );
+		if ( !string_equal( globalRoot, userRoot ) ) {
+			GlobalFileSystem().initDirectory( str( userRoot, gamename, '/' ) ); // userGamePath
 		}
 
 		// <fs_basepath>/<fs_game>
 		{
-			StringOutputStream globalGamePath( 256 );
-			globalGamePath << globalRoot << gamename << '/';
-			GlobalFileSystem().initDirectory( globalGamePath.c_str() );
+			GlobalFileSystem().initDirectory( str( globalRoot, gamename, '/' ) ); // globalGamePath
 		}
 	}
 
 	// ~/.<gameprefix>/<fs_main>
-	if ( userRoot && !string_equal( globalRoot, userRoot ) ) {
-		StringOutputStream userBasePath( 256 );
-		userBasePath << userRoot << basegame << '/';
-		GlobalFileSystem().initDirectory( userBasePath.c_str() );
+	if ( !string_equal( globalRoot, userRoot ) ) {
+		GlobalFileSystem().initDirectory( str( userRoot, basegame, '/' ) ); // userBasePath
 	}
 
 	// <fs_basepath>/<fs_main>
 	{
-		StringOutputStream globalBasePath( 256 );
-		globalBasePath << globalRoot << basegame << '/';
-		GlobalFileSystem().initDirectory( globalBasePath.c_str() );
+		GlobalFileSystem().initDirectory( str( globalRoot, basegame, '/' ) ); // globalBasePath
 	}
 }
 
@@ -172,19 +165,20 @@ void bsp_init(){
 	build_set_variable( "GameName", gamename_get() );
 
 	const char* mapname = Map_Name( g_map );
+	StringOutputStream stream( 256 );
 	{
-		build_set_variable( "BspFile", StringOutputStream( 256 )( PathExtensionless( mapname ), ".bsp" ).c_str() );
+		build_set_variable( "BspFile", stream( PathExtensionless( mapname ), ".bsp" ) );
 	}
 
 	if( g_region_active ){
-		build_set_variable( "MapFile", StringOutputStream( 256 )( PathExtensionless( mapname ), ".reg" ).c_str() );
+		build_set_variable( "MapFile", stream( PathExtensionless( mapname ), ".reg" ) );
 	}
 	else{
 		build_set_variable( "MapFile", mapname );
 	}
 
 	{
-		build_set_variable( "MapName", StringOutputStream( 64 )( PathFilename( mapname ) ).c_str() );
+		build_set_variable( "MapName", stream( PathFilename( mapname ) ) );
 	}
 }
 

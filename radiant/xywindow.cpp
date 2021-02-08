@@ -1820,22 +1820,17 @@ void XYWnd::PaintSizeInfo( const int nDim1, const int nDim2 ){
 	v[nDim1] = mid[nDim1];
 	v[nDim2] = min[nDim2] - ( 10 + 2 + fontHeight ) / m_fScale;
 	glRasterPos3fv( vector3_to_array( v ) );
-	dimensions << dimStrings[nDim1] << size[nDim1];
-	GlobalOpenGL().drawString( dimensions.c_str() );
-	dimensions.clear();
+	GlobalOpenGL().drawString( dimensions( dimStrings[nDim1], size[nDim1] ) );
 
 	v[nDim1] = max[nDim1] + 16.f / m_fScale;
 	v[nDim2] = mid[nDim2] - fontHeight / m_fScale / 2;
 	glRasterPos3fv( vector3_to_array( v ) );
-	dimensions << dimStrings[nDim2] << size[nDim2];
-	GlobalOpenGL().drawString( dimensions.c_str() );
-	dimensions.clear();
+	GlobalOpenGL().drawString( dimensions( dimStrings[nDim2], size[nDim2] ) );
 
 	v[nDim1] = min[nDim1] + 4.f;
 	v[nDim2] = max[nDim2] + 5.f / m_fScale;
 	glRasterPos3fv( vector3_to_array( v ) );
-	dimensions << "(" << dimStrings[nDim1] << min[nDim1] << "  " << dimStrings[nDim2] << max[nDim2] << ")";
-	GlobalOpenGL().drawString( dimensions.c_str() );
+	GlobalOpenGL().drawString( dimensions( "(", dimStrings[nDim1], min[nDim1], "  ", dimStrings[nDim2], max[nDim2], ")" ) );
 }
 
 class XYRenderer : public Renderer
@@ -2123,9 +2118,7 @@ void XYWnd::XY_Draw(){
 
 		glRasterPos3f( 2.f, 0.f, 0.0f );
 		extern const char* Renderer_GetStats();
-		StringOutputStream stream;
-		stream << Renderer_GetStats() << " | f2f: " << m_render_time.elapsed_msec();
-		GlobalOpenGL().drawString( stream.c_str() );
+		GlobalOpenGL().drawString( StringOutputStream( 64 )( Renderer_GetStats(), " | f2f: ", m_render_time.elapsed_msec() ) );
 		m_render_time.start();
 	}
 

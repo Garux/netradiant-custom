@@ -226,11 +226,8 @@ void create(){
 	// create shader
 	{
 		StringOutputStream filename( 256 );
-		filename << GlobalRadiant().getAppPath() << "gl/lighting_DBS_omni_vp.glsl";
-		createShader( m_program, filename.c_str(), GL_VERTEX_SHADER_ARB );
-		filename.clear();
-		filename << GlobalRadiant().getAppPath() << "gl/lighting_DBS_omni_fp.glsl";
-		createShader( m_program, filename.c_str(), GL_FRAGMENT_SHADER_ARB );
+		createShader( m_program, filename( GlobalRadiant().getAppPath(), "gl/lighting_DBS_omni_vp.glsl" ), GL_VERTEX_SHADER_ARB );
+		createShader( m_program, filename( GlobalRadiant().getAppPath(), "gl/lighting_DBS_omni_fp.glsl" ), GL_FRAGMENT_SHADER_ARB );
 	}
 
 	GLSLProgram_link( m_program );
@@ -335,11 +332,8 @@ void create(){
 	// create shader
 	{
 		StringOutputStream filename( 256 );
-		filename << GlobalRadiant().getAppPath() << "gl/zfill_vp.glsl";
-		createShader( m_program, filename.c_str(), GL_VERTEX_SHADER_ARB );
-		filename.clear();
-		filename << GlobalRadiant().getAppPath() << "gl/zfill_fp.glsl";
-		createShader( m_program, filename.c_str(), GL_FRAGMENT_SHADER_ARB );
+		createShader( m_program, filename( GlobalRadiant().getAppPath(), "gl/zfill_vp.glsl" ), GL_VERTEX_SHADER_ARB );
+		createShader( m_program, filename( GlobalRadiant().getAppPath(), "gl/zfill_fp.glsl" ), GL_FRAGMENT_SHADER_ARB );
 	}
 
 	GLSLProgram_link( m_program );
@@ -407,14 +401,11 @@ void create(){
 		glGenProgramsARB( 1, &m_vertex_program );
 		glBindProgramARB( GL_VERTEX_PROGRAM_ARB, m_vertex_program );
 		StringOutputStream filename( 256 );
-		filename << GlobalRadiant().getAppPath() << "gl/lighting_DBS_omni_vp.glp";
-		createProgram( filename.c_str(), GL_VERTEX_PROGRAM_ARB );
+		createProgram( filename( GlobalRadiant().getAppPath(), "gl/lighting_DBS_omni_vp.glp" ), GL_VERTEX_PROGRAM_ARB );
 
 		glGenProgramsARB( 1, &m_fragment_program );
 		glBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, m_fragment_program );
-		filename.clear();
-		filename << GlobalRadiant().getAppPath() << "gl/lighting_DBS_omni_fp.glp";
-		createProgram( filename.c_str(), GL_FRAGMENT_PROGRAM_ARB );
+		createProgram( filename( GlobalRadiant().getAppPath(), "gl/lighting_DBS_omni_fp.glp" ), GL_FRAGMENT_PROGRAM_ARB );
 	}
 
 	glDisable( GL_VERTEX_PROGRAM_ARB );
@@ -509,14 +500,11 @@ void create(){
 		glGenProgramsARB( 1, &m_vertex_program );
 		glBindProgramARB( GL_VERTEX_PROGRAM_ARB, m_vertex_program );
 		StringOutputStream filename( 256 );
-		filename << GlobalRadiant().getAppPath() << "gl/zfill_vp.glp";
-		createProgram( filename.c_str(), GL_VERTEX_PROGRAM_ARB );
+		createProgram( filename( GlobalRadiant().getAppPath(), "gl/zfill_vp.glp" ), GL_VERTEX_PROGRAM_ARB );
 
 		glGenProgramsARB( 1, &m_fragment_program );
 		glBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, m_fragment_program );
-		filename.clear();
-		filename << GlobalRadiant().getAppPath() << "gl/zfill_fp.glp";
-		createProgram( filename.c_str(), GL_FRAGMENT_PROGRAM_ARB );
+		createProgram( filename( GlobalRadiant().getAppPath(), "gl/zfill_fp.glp" ), GL_FRAGMENT_PROGRAM_ARB );
 	}
 
 	glDisable( GL_VERTEX_PROGRAM_ARB );

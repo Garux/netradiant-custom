@@ -661,34 +661,24 @@ typedef ReferenceCaller1<TextureBrowser, bool, TextureBrowser_importShowScrollba
    ==============
  */
 
-bool endswith( const char *haystack, const char *needle ){
-	size_t lh = strlen( haystack );
-	size_t ln = strlen( needle );
-	if ( lh < ln ) {
-		return false;
-	}
-	return !memcmp( haystack + ( lh - ln ), needle, ln );
-}
-
 bool texture_name_ignore( const char* name ){
-	StringOutputStream strTemp( string_length( name ) );
-	strTemp << LowerCase( name );
+	auto temp = StringOutputStream( 64 )( LowerCase( name ) );
 
 	return
-		endswith( strTemp.c_str(), ".specular" ) ||
-		endswith( strTemp.c_str(), ".glow" ) ||
-		endswith( strTemp.c_str(), ".bump" ) ||
-		endswith( strTemp.c_str(), ".diffuse" ) ||
-		endswith( strTemp.c_str(), ".blend" ) ||
-		endswith( strTemp.c_str(), ".alpha" ) ||
-		endswith( strTemp.c_str(), "_norm" ) ||
-		endswith( strTemp.c_str(), "_bump" ) ||
-		endswith( strTemp.c_str(), "_glow" ) ||
-		endswith( strTemp.c_str(), "_gloss" ) ||
-		endswith( strTemp.c_str(), "_pants" ) ||
-		endswith( strTemp.c_str(), "_shirt" ) ||
-		endswith( strTemp.c_str(), "_reflect" ) ||
-		endswith( strTemp.c_str(), "_alpha" ) ||
+		string_equal_suffix( temp, ".specular" ) ||
+		string_equal_suffix( temp, ".glow" ) ||
+		string_equal_suffix( temp, ".bump" ) ||
+		string_equal_suffix( temp, ".diffuse" ) ||
+		string_equal_suffix( temp, ".blend" ) ||
+		string_equal_suffix( temp, ".alpha" ) ||
+		string_equal_suffix( temp, "_norm" ) ||
+		string_equal_suffix( temp, "_bump" ) ||
+		string_equal_suffix( temp, "_glow" ) ||
+		string_equal_suffix( temp, "_gloss" ) ||
+		string_equal_suffix( temp, "_pants" ) ||
+		string_equal_suffix( temp, "_shirt" ) ||
+		string_equal_suffix( temp, "_reflect" ) ||
+		string_equal_suffix( temp, "_alpha" ) ||
 		0;
 }
 
@@ -1966,38 +1956,31 @@ void TextureBrowser_constructSearchButton(){
 
 void TextureBrowser_checkTagFile(){
 	const char SHADERTAG_FILE[] = "shadertags.xml";
-	CopiedString default_filename, rc_filename;
-	StringOutputStream stream( 256 );
 
-	stream << LocalRcPath_get();
-	stream << SHADERTAG_FILE;
-	rc_filename = stream.c_str();
+	auto rc_filename = StringOutputStream( 256 )( LocalRcPath_get(), SHADERTAG_FILE );
 
-	if ( file_exists( rc_filename.c_str() ) ) {
-		g_TextureBrowser.m_tags = TagBuilder.OpenXmlDoc( rc_filename.c_str() );
+	if ( file_exists( rc_filename ) ) {
+		g_TextureBrowser.m_tags = TagBuilder.OpenXmlDoc( rc_filename );
 
 		if ( g_TextureBrowser.m_tags ) {
-			globalOutputStream() << "Loading tag file " << rc_filename.c_str() << ".\n";
+			globalOutputStream() << "Loading tag file " << rc_filename << ".\n";
 		}
 	}
 	else
 	{
 		// load default tagfile
-		stream.clear();
-		stream << g_pGameDescription->mGameToolsPath.c_str();
-		stream << SHADERTAG_FILE;
-		default_filename = stream.c_str();
+		auto default_filename = StringOutputStream( 256 )( g_pGameDescription->mGameToolsPath.c_str(), SHADERTAG_FILE );
 
-		if ( file_exists( default_filename.c_str() ) ) {
-			g_TextureBrowser.m_tags = TagBuilder.OpenXmlDoc( default_filename.c_str(), rc_filename.c_str() );
+		if ( file_exists( default_filename ) ) {
+			g_TextureBrowser.m_tags = TagBuilder.OpenXmlDoc( default_filename, rc_filename );
 
 			if ( g_TextureBrowser.m_tags ) {
-				globalOutputStream() << "Loading default tag file " << default_filename.c_str() << ".\n";
+				globalOutputStream() << "Loading default tag file " << default_filename << ".\n";
 			}
 		}
 		else
 		{
-			globalWarningStream() << "Unable to find default tag file " << default_filename.c_str() << ". No tag support. Plugins -> ShaderPlug -> Create tag file: to start using texture tags\n";
+			globalWarningStream() << "Unable to find default tag file " << default_filename << ". No tag support. Plugins -> ShaderPlug -> Create tag file: to start using texture tags\n";
 		}
 	}
 }

@@ -256,15 +256,12 @@ void Pointfile_Parse( CPointfile& pointfile ){
 
 	const char* mapname = Map_Name( g_map );
 	StringOutputStream name( 256 );
-	name << PathExtensionless( mapname ) << ".lin";
 
-	size = LoadFile( name.c_str(), (void**)&data );
+	size = LoadFile( name( PathExtensionless( mapname ), ".lin" ), (void**)&data );
 	if ( size == -1 ) {
 		globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";
 		/* try .pts (q1) */
-		name.clear();
-		name << PathExtensionless( mapname ) << ".pts";
-		size = LoadFile( name.c_str(), (void**)&data );
+		size = LoadFile( name( PathExtensionless( mapname ), ".pts" ), (void**)&data );
 		if ( size == -1 ) {
 			globalErrorStream() << "Pointfile " << name.c_str() << " not found\n";
 			return;
