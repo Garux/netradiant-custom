@@ -372,10 +372,7 @@ void WritePortalFile( tree_t *tree ){
 	// write the file
 	auto filename = StringOutputStream( 256 )( source, ".prt" );
 	Sys_Printf( "writing %s\n", filename.c_str() );
-	pf = fopen( filename, "w" );
-	if ( !pf ) {
-		Error( "Error opening %s", filename.c_str() );
-	}
+	pf = SafeOpenWrite( filename, "wt" );
 
 	fprintf( pf, "%s\n", PORTALFILE );
 	fprintf( pf, "%i\n", num_visclusters );

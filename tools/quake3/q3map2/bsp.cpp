@@ -40,10 +40,7 @@ static void autocaulk_write(){
 	auto filename = StringOutputStream( 256 )( source, ".caulk" );
 	Sys_Printf( "writing %s\n", filename.c_str() );
 
-	FILE* file = fopen( filename, "w" );
-	if ( !file ) {
-		Error( "Error opening %s", filename.c_str() );
-	}
+	FILE* file = SafeOpenWrite( filename, "wt" );
 
 	int fslime = 16;
 	ApplySurfaceParm( "slime", &fslime, NULL, NULL );

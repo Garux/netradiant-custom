@@ -81,10 +81,7 @@ void WriteTGA24( char *filename, byte *data, int width, int height, bool flip ){
 	}
 
 	/* write it and free the buffer */
-	file = fopen( filename, "wb" );
-	if ( file == NULL ) {
-		Error( "Unable to open %s for writing", filename );
-	}
+	file = SafeOpenWrite( filename );
 
 	/* flip vertically? */
 	if ( flip ) {

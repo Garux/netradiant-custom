@@ -361,7 +361,7 @@ void WriteMapShaderFile( void ){
 	Sys_FPrintf( SYS_VRB, "Writing %s", mapShaderFile.c_str() );
 
 	/* open shader file */
-	file = fopen( mapShaderFile.c_str(), "w" );
+	file = fopen( mapShaderFile.c_str(), "wt" );
 	if ( file == NULL ) {
 		Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile.c_str() );
 		return;

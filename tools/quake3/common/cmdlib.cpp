@@ -409,25 +409,21 @@ int Q_filelength( FILE *f ){
 }
 
 
-FILE *SafeOpenWrite( const char *filename ){
-	FILE    *f;
-
-	f = fopen( filename, "wb" );
+FILE *SafeOpenWrite( const char *filename, const char *mode ){
+	FILE *f = fopen( filename, mode );
 
 	if ( !f ) {
-		Error( "Error opening %s: %s",filename,strerror( errno ) );
+		Error( "Error opening %s: %s", filename, strerror( errno ) );
 	}
 
 	return f;
 }
 
-FILE *SafeOpenRead( const char *filename ){
-	FILE    *f;
-
-	f = fopen( filename, "rb" );
+FILE *SafeOpenRead( const char *filename, const char *mode ){
+	FILE *f = fopen( filename, mode );
 
 	if ( !f ) {
-		Error( "Error opening %s: %s",filename,strerror( errno ) );
+		Error( "Error opening %s: %s", filename, strerror( errno ) );
 	}
 
 	return f;

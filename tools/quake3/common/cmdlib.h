@@ -175,8 +175,8 @@ __attribute__( ( noreturn ) )
 #endif
 ;
 
-FILE    *SafeOpenWrite( const char *filename );
-FILE    *SafeOpenRead( const char *filename );
+FILE    *SafeOpenWrite( const char *filename, const char *mode = "wb" );
+FILE    *SafeOpenRead( const char *filename, const char *mode = "rb" );
 void    SafeRead( FILE *f, void *buffer, int count );
 void    SafeWrite( FILE *f, const void *buffer, int count );
 

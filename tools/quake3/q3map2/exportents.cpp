@@ -46,15 +46,8 @@
  */
 
 void ExportEntities( void ){
-	char filename[ 1024 ];
-	FILE *file;
-
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- ExportEntities ---\n" );
-
-	/* do some path mangling */
-	strcpy( filename, source );
-	path_set_extension( filename, ".ent" );
 
 	/* sanity check */
 	if ( bspEntData == NULL || bspEntDataSize == 0 ) {
@@ -63,13 +56,10 @@ void ExportEntities( void ){
 	}
 
 	/* write it */
-	Sys_Printf( "Writing %s\n", filename );
+	auto filename = StringOutputStream( 256 )( PathExtensionless( source ), ".ent" );
+	Sys_Printf( "Writing %s\n", filename.c_str() );
 	Sys_FPrintf( SYS_VRB, "(%d bytes)\n", bspEntDataSize );
-	file = fopen( filename, "w" );
-
-	if ( file == NULL ) {
-		Error( "Unable to open %s for writing", filename );
-	}
+	FILE *file = SafeOpenWrite( filename, "wt" );
 
 	fprintf( file, "%s\n", bspEntData );
 	fclose( file );

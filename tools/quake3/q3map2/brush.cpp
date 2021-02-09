@@ -607,7 +607,6 @@ vec_t BrushVolume( brush_t *brush ){
  */
 
 void WriteBSPBrushMap( const char *name, brush_t *list ){
-	FILE        *f;
 	side_t      *s;
 	int i;
 	winding_t   *w;
@@ -617,10 +616,7 @@ void WriteBSPBrushMap( const char *name, brush_t *list ){
 	Sys_Printf( "Writing %s\n", name );
 
 	/* open the map file */
-	f = fopen( name, "wb" );
-	if ( f == NULL ) {
-		Error( "Can't write %s\b", name );
-	}
+	FILE *f = SafeOpenWrite( name );
 
 	fprintf( f, "{\n\"classname\" \"worldspawn\"\n" );
 

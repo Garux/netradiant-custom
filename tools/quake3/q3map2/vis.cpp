@@ -797,15 +797,11 @@ void WriteFloat( FILE *f, vec_t v );
 
 void WritePortals( char *filename ){
 	int i, j, num;
-	FILE *pf;
 	vportal_t *p;
 	fixedWinding_t *w;
 
 	// write the file
-	pf = fopen( filename, "w" );
-	if ( !pf ) {
-		Error( "Error opening %s", filename );
-	}
+	FILE *pf = SafeOpenWrite( filename, "wt" );
 
 	num = 0;
 	for ( j = 0; j < numportals * 2; j++ )
@@ -888,10 +884,7 @@ void LoadPortals( char *name ){
 	}
 	else
 	{
-		f = fopen( name, "r" );
-		if ( !f ) {
-			Error( "LoadPortals: couldn't read %s\n",name );
-		}
+		f = SafeOpenRead( name, "rt" );
 	}
 
 	if ( fscanf( f, "%79s\n%i\n%i\n%i\n", magic, &portalclusters, &numportals, &numfaces ) != 4 ) {

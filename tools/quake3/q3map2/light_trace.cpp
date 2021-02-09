@@ -1281,10 +1281,7 @@ void SetupTraceNodes( void ){
 		strcpy( filename, source );
 		path_set_extension( filename, ".lin" );
 		Sys_Printf( "Opening light trace file %s...\n", filename );
-		file = fopen( filename, "w" );
-		if ( file == NULL ) {
-			Error( "Error opening %s for writing", filename );
-		}
+		file = SafeOpenWrite( filename, "wt" );
 
 		/* walk node list */
 		for ( i = 0; i < numTraceWindings; i++ )

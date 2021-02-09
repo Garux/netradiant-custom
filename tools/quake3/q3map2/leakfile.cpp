@@ -71,10 +71,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 	// write the points to the file
 	//
 	auto filename = StringOutputStream( 256 )( source, ".lin" );
-	linefile = fopen( filename, "w" );
-	if ( !linefile ) {
-		Error( "Couldn't open %s\n", filename.c_str() );
-	}
+	linefile = SafeOpenWrite( filename, "wt" );
 
 	xml_node = xmlNewNode( NULL, (const xmlChar*)"polyline" );
 

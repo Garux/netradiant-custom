@@ -194,11 +194,8 @@ void GetSurfaceExtraLightmapAxis( int num, vec3_t lightmapAxis ){
  */
 
 void WriteSurfaceExtraFile( const char *path ){
-	char srfPath[ 1024 ];
-	FILE            *sf;
 	surfaceExtra_t  *se;
 	int i;
-
 
 	/* dummy check */
 	if ( strEmptyOrNull( path ) ) {
@@ -209,13 +206,9 @@ void WriteSurfaceExtraFile( const char *path ){
 	Sys_Printf( "--- WriteSurfaceExtraFile ---\n" );
 
 	/* open the file */
-	strcpy( srfPath, path );
-	path_set_extension( srfPath, ".srf" );
-	Sys_Printf( "Writing %s\n", srfPath );
-	sf = fopen( srfPath, "w" );
-	if ( sf == NULL ) {
-		Error( "Error opening %s for writing", srfPath );
-	}
+	auto srfPath = StringOutputStream( 256 )( PathExtensionless( path ), ".srf" );
+	Sys_Printf( "Writing %s\n", srfPath.c_str() );
+	FILE *sf = SafeOpenWrite( srfPath, "wt" );
 
 	/* lap through the extras list */
 	for ( i = -1; i < numSurfaceExtras; i++ )
