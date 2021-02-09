@@ -308,7 +308,7 @@ bool ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, i
 void BeginMapShaderFile( const char *mapFile ){
 	/* dummy check */
 	mapName.clear();
-	mapShaderFile.clear();
+	mapShaderFile = "";
 	if ( strEmptyOrNull( mapFile ) ) {
 		return;
 	}
@@ -317,11 +317,11 @@ void BeginMapShaderFile( const char *mapFile ){
 	mapName( PathFilename( mapFile ) );
 
 	/* append ../scripts/q3map2_<mapname>.shader */
-	mapShaderFile( PathFilenameless( mapFile ), "../", game->shaderPath, "/q3map2_", mapName.c_str(), ".shader" );
+	mapShaderFile = StringOutputStream( 256 )( PathFilenameless( mapFile ), "../", game->shaderPath, "/q3map2_", mapName.c_str(), ".shader" );
 	Sys_FPrintf( SYS_VRB, "Map has shader script %s\n", mapShaderFile.c_str() );
 
 	/* remove it */
-	remove( mapShaderFile );
+	remove( mapShaderFile.c_str() );
 
 	/* stop making warnings about missing images */
 	warnImage = false;
@@ -361,7 +361,7 @@ void WriteMapShaderFile( void ){
 	Sys_FPrintf( SYS_VRB, "Writing %s", mapShaderFile.c_str() );
 
 	/* open shader file */
-	file = fopen( mapShaderFile, "w" );
+	file = fopen( mapShaderFile.c_str(), "w" );
 	if ( file == NULL ) {
 		Sys_Warning( "Unable to open map shader file %s for writing\n", mapShaderFile.c_str() );
 		return;

@@ -184,36 +184,6 @@ static void parseEXfile( const char* filename, StrList* ExTextures, StrList* ExS
 
 
 
-struct StrBuf
-{
-	int strlen;
-	int max;
-	char s[];
-};
-
-static inline StrBuf* StrBuf_allocate( size_t strLen ){
-	StrBuf* ret = safe_calloc( offsetof( StrBuf, s[strLen] ) );
-	ret->strlen = 0;
-	ret->max = strLen;
-	return ret;
-}
-
-static inline void StrBuf_cat( StrBuf* buf, const char* string ){
-	buf->strlen += strcpyQ( buf->s + buf->strlen, string, buf->max - buf->strlen );
-	if( buf->strlen >= buf->max )
-		Error( "StrBuf overflow" );
-}
-static inline void StrBuf_cat2( StrBuf* buf, const char* string, const char* string2 ){
-	StrBuf_cat( buf, string );
-	StrBuf_cat( buf, string2 );
-}
-static inline void StrBuf_cpy( StrBuf* buf, const char* string ){
-	buf->strlen = 0;
-	StrBuf_cat( buf, string );
-}
-
-
-
 static bool packResource( const char* resname, const char* packname, const int compLevel ){
 	const bool ret = vfsPackFile( resname, packname, compLevel );
 	if ( ret )
@@ -1170,8 +1140,8 @@ int repackBSPMain( int argc, char **argv ){
 
 	//Parse Shader Files
 	Sys_Printf( "\t\nParsing shaders....\n\n" );
-	StrBuf* shaderText = StrBuf_allocate( 8192 );
-	StrBuf* allShaders = StrBuf_allocate( 16777216 );
+	StringOutputStream shaderText( 4096 );
+	StringOutputStream allShaders( 1048576 );
 	 /* hack */
 	endofscript = true;
 
@@ -1198,7 +1168,8 @@ int repackBSPMain( int argc, char **argv ){
 			if( dbg )
 				Sys_Printf( "%s\n", token );
 
-			StrBuf_cpy( shaderText, token );
+			shaderText.clear();
+			shaderText << token;
 
 			if ( strchr( token, '\\') != NULL  ){
 				Sys_FPrintf( SYS_WRN, "WARNING1: %s : %s : shader name with backslash\n", pk3Shaderfiles->s[i], token );
@@ -1219,7 +1190,7 @@ int repackBSPMain( int argc, char **argv ){
 					Error( "ParseShaderFile: %s, line %d: { not found!\nFound instead: %s\nFile location be: %s",
 						scriptFile, scriptline, token, g_strLoadedFileLocation );
 			}
-			StrBuf_cat( shaderText, "\n{" );
+			shaderText << "\n{";
 			bool hasmap = false;
 
 			while ( 1 )
@@ -1230,13 +1201,13 @@ int repackBSPMain( int argc, char **argv ){
 					break;
 				}
 				if ( strEqual( token, "}" ) ) {
-					StrBuf_cat( shaderText, "\n}\n\n" );
+					shaderText << "\n}\n\n";
 					break;
 				}
 				/* parse stage directives */
 				if ( strEqual( token, "{" ) ) {
 					bool tokenready = false;
-					StrBuf_cat( shaderText, "\n\t{" );
+					shaderText << "\n\t{";
 					while ( 1 )
 					{
 						/* detour of TokenAvailable() '~' */
@@ -1248,11 +1219,11 @@ int repackBSPMain( int argc, char **argv ){
 							break;
 						}
 						if ( strEqual( token, "}" ) ) {
-							StrBuf_cat( shaderText, "\n\t}" );
+							shaderText << "\n\t}";
 							break;
 						}
 						if ( strEqual( token, "{" ) ) {
-							StrBuf_cat( shaderText, "\n\t{" );
+							shaderText << "\n\t{";
 							Sys_FPrintf( SYS_WRN, "WARNING9: %s : line %d : opening brace inside shader stage\n", scriptFile, scriptline );
 						}
 						/* skip the shader */
@@ -1262,7 +1233,7 @@ int repackBSPMain( int argc, char **argv ){
 						/* digest any images */
 						if ( striEqual( token, "map" ) ||
 							striEqual( token, "clampMap" ) ) {
-							StrBuf_cat2( shaderText, "\n\t\t", token );
+							shaderText << "\n\t\t" << token;
 							hasmap = true;
 
 							/* get an image */
@@ -1270,27 +1241,27 @@ int repackBSPMain( int argc, char **argv ){
 							if ( token[ 0 ] != '*' && token[ 0 ] != '$' ) {
 								tex2list( pk3Textures, ExTextures, rExTextures );
 							}
-							StrBuf_cat2( shaderText, " ", token );
+							shaderText << " " << token;
 						}
 						else if ( striEqual( token, "animMap" ) ||
 							striEqual( token, "clampAnimMap" ) ) {
-							StrBuf_cat2( shaderText, "\n\t\t", token );
+							shaderText << "\n\t\t" << token;
 							hasmap = true;
 
 							GetToken( false );// skip num
-							StrBuf_cat2( shaderText, " ", token );
+							shaderText << " " << token;
 							while ( TokenAvailable() ){
 								GetToken( false );
 								tex2list( pk3Textures, ExTextures, rExTextures );
-								StrBuf_cat2( shaderText, " ", token );
+								shaderText << " " << token;
 							}
 							tokenready = true;
 						}
 						else if ( striEqual( token, "videoMap" ) ){
-							StrBuf_cat2( shaderText, "\n\t\t", token );
+							shaderText << "\n\t\t" << token;
 							hasmap = true;
 							GetToken( false );
-							StrBuf_cat2( shaderText, " ", token );
+							shaderText << " " << token;
 							FixDOSName( token );
 							if ( strchr( token, '/' ) == NULL ){
 								strcpy( token, stream( "video/", token ) );
@@ -1304,17 +1275,17 @@ int repackBSPMain( int argc, char **argv ){
 							Sys_FPrintf( SYS_WRN, "WARNING7: %s : %s shader\n", pk3Shaders->s[shader], token );
 							hasmap = true;
 							if ( line == scriptline ){
-								StrBuf_cat2( shaderText, " ", token );
+								shaderText << " " << token;
 							}
 							else{
-								StrBuf_cat2( shaderText, "\n\t\t", token );
+								shaderText << "\n\t\t" << token;
 							}
 						}
 						else if ( line == scriptline ){
-							StrBuf_cat2( shaderText, " ", token );
+							shaderText << " " << token;
 						}
 						else{
-							StrBuf_cat2( shaderText, "\n\t\t", token );
+							shaderText << "\n\t\t" << token;
 						}
 					}
 				}
@@ -1324,11 +1295,11 @@ int repackBSPMain( int argc, char **argv ){
 
 				/* skyparms <outer image> <cloud height> <inner image> */
 				else if ( striEqual( token, "skyParms" ) ) {
-					StrBuf_cat( shaderText, "\n\tskyParms " );
+					shaderText << "\n\tskyParms ";
 					hasmap = true;
 					/* get image base */
 					GetToken( false );
-					StrBuf_cat( shaderText, token );
+					shaderText << token;
 
 					/* ignore bogus paths */
 					if ( !strEqual( token, "-" ) && !striEqual( token, "full" ) ) {
@@ -1341,34 +1312,34 @@ int repackBSPMain( int argc, char **argv ){
 					}
 					/* skip rest of line */
 					GetToken( false );
-					StrBuf_cat2( shaderText, " ", token );
+					shaderText << " " << token;
 					GetToken( false );
-					StrBuf_cat2( shaderText, " ", token );
+					shaderText << " " << token;
 				}
 				else if ( striEqualPrefix( token, "implicit" ) ){
 					Sys_FPrintf( SYS_WRN, "WARNING5: %s : %s shader\n", pk3Shaders->s[shader], token );
 					hasmap = true;
 					if ( line == scriptline ){
-						StrBuf_cat2( shaderText, " ", token );
+						shaderText << " " << token;
 					}
 					else{
-						StrBuf_cat2( shaderText, "\n\t", token );
+						shaderText << "\n\t" << token;
 					}
 				}
 				else if ( striEqual( token, "fogparms" ) ){
 					hasmap = true;
 					if ( line == scriptline ){
-						StrBuf_cat2( shaderText, " ", token );
+						shaderText << " " << token;
 					}
 					else{
-						StrBuf_cat2( shaderText, "\n\t", token );
+						shaderText << "\n\t" << token;
 					}
 				}
 				else if ( line == scriptline ){
-					StrBuf_cat2( shaderText, " ", token );
+					shaderText << " " << token;
 				}
 				else{
-					StrBuf_cat2( shaderText, "\n\t", token );
+					shaderText << "\n\t" << token;
 				}
 			}
 
@@ -1385,7 +1356,7 @@ int repackBSPMain( int argc, char **argv ){
 					wantShader = false;
 				}
 				if ( wantShader ){
-					StrBuf_cat( allShaders, shaderText->s );
+					allShaders << shaderText;
 					strClear( pk3Shaders->s[shader] );
 				}
 			}
@@ -1429,7 +1400,7 @@ int repackBSPMain( int argc, char **argv ){
 	/* write shader */
 	stream( EnginePath, "/", nameOFrepack.c_str(), "_strippedBYrepacker.shader" );
 	FILE *f = fopen( stream, "wb" );
-	fwrite( allShaders->s, sizeof( char ), allShaders->strlen, f );
+	fwrite( allShaders, sizeof( char ), allShaders.end() - allShaders.begin(), f );
 	fclose( f );
 	Sys_Printf( "Shaders saved to %s\n", stream.c_str() );
 

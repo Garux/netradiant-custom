@@ -1973,7 +1973,7 @@ Q_EXTERN surfaceParm_t custSurfaceParms[ MAX_CUST_SURFACEPARMS ];
 Q_EXTERN int numCustSurfaceParms Q_ASSIGN( 0 );
 
 Q_EXTERN String64 mapName;                 /* ydnar: per-map custom shaders for larger lightmaps */
-Q_EXTERN StringOutputStream mapShaderFile;
+Q_EXTERN CopiedString mapShaderFile;
 Q_EXTERN bool warnImage Q_ASSIGN( true );
 
 /* ydnar: sinusoid samples */
