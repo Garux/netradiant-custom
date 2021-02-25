@@ -437,7 +437,7 @@ struct bspAdvertisement_t
    ------------------------------------------------------------------------------- */
 
 /* ydnar: for q3map_tcMod */
-typedef float tcMod_t[ 3 ][ 3 ];
+typedef Vector3 tcMod_t[ 3 ];
 
 
 /* ydnar: for multiple game support */
@@ -626,9 +626,9 @@ struct shaderInfo_t
 	bool invert;                                        /* ydnar: reverse facing */
 	bool nonplanar;                                     /* ydnar: for nonplanar meta surface merging */
 	bool tcGen;                                         /* ydnar: has explicit texcoord generation */
-	Vector3 vecs[ 2 ];                                   /* ydnar: explicit texture vectors for [0,1] texture space */
+	Vector3 vecs[ 2 ];                                  /* ydnar: explicit texture vectors for [0,1] texture space */
 	tcMod_t mod;                                        /* ydnar: q3map_tcMod matrix for djbob :) */
-	Vector3 lightmapAxis;                                /* ydnar: explicit lightmap axis projection */
+	Vector3 lightmapAxis = { 0, 0, 0 };                 /* ydnar: explicit lightmap axis projection */
 	colorMod_t          *colorMod;                      /* ydnar: q3map_rgb/color/alpha/Set/Mod support */
 
 	int furNumLayers;                                   /* ydnar: number of fur layers */
@@ -673,8 +673,8 @@ struct shaderInfo_t
 	int skyLightIterations;                             /* ydnar */
 	sun_t               *sun;                           /* ydnar */
 
-	Vector3 color;                                       /* normalized color */
-	Color4f averageColor;
+	Vector3 color = { 0, 0, 0 };                        /* normalized color */
+	Color4f averageColor = { 0, 0, 0, 0 };
 	byte lightStyle;
 
 	/* vortex: per-surface floodlight */
@@ -691,7 +691,7 @@ struct shaderInfo_t
 	int shaderWidth, shaderHeight;                      /* ydnar */
 	Vector2 stFlat;
 
-	Vector3 fogDir;                                      /* ydnar */
+	Vector3 fogDir = { 0, 0, 0 };                       /* ydnar */
 
 	char                *shaderText;                    /* ydnar */
 	bool custom;
@@ -744,7 +744,7 @@ struct side_t
 
 	int outputNum;                          /* set when the side is written to the file list */
 
-	Vector3 texMat[ 2 ];                 /* brush primitive texture matrix */
+	Vector3 texMat[ 2 ];                    /* brush primitive texture matrix */
 	Vector4 vecs[ 2 ];                      /* old-style texture coordinate mapping */
 
 	winding_t           *winding;
@@ -799,7 +799,7 @@ struct brush_t
 	/* ydnar: gs mods */
 	int lightmapSampleSize;                 /* jal : entity based _lightmapsamplesize */
 	float lightmapScale;
-	float shadeAngleDegrees;               /* jal : entity based _shadeangle */
+	float shadeAngleDegrees;                /* jal : entity based _shadeangle */
 	MinMax eMinmax;
 	indexMap_t          *im;
 
@@ -933,8 +933,8 @@ struct mapDrawSurface_t
 	int                 *indexes;
 
 	int planeNum;
-	Vector3 lightmapOrigin;                  /* also used for flares */
-	Vector3 lightmapVecs[ 3 ];               /* also used for flares */
+	Vector3 lightmapOrigin;                 /* also used for flares */
+	Vector3 lightmapVecs[ 3 ];              /* also used for flares */
 	int lightStyle;                         /* used for flares */
 
 	/* ydnar: per-surface (per-entity, actually) lightmap sample size scaling */
@@ -952,7 +952,7 @@ struct mapDrawSurface_t
 	int castShadows, recvShadows;
 
 	/* ydnar: texture coordinate range monitoring for hardware with limited texcoord precision (in texel space) */
-	float bias[ 2 ];
+	Vector2 bias;
 	int texMins[ 2 ], texMaxs[ 2 ], texRange[ 2 ];
 
 	/* ydnar: for patches */
@@ -1156,7 +1156,7 @@ struct vportal_t
 	visPlane_t plane;                   /* normal pointing into neighbor */
 	int leaf;                           /* neighbor */
 
-	Vector3 origin;                      /* for fast clip testing */
+	Vector3 origin;                     /* for fast clip testing */
 	float radius;
 
 	fixedWinding_t      *winding;
@@ -1307,9 +1307,9 @@ struct trace_t
 	float distance;
 
 	/* input and output */
-	Vector3 color;                       /* starts out at full color, may be reduced if transparent surfaces are crossed */
-	Vector3 colorNoShadow;               /* result color with no shadow casting */
-	Vector3 directionContribution;              /* result contribution to the deluxe map */
+	Vector3 color;                      /* starts out at full color, may be reduced if transparent surfaces are crossed */
+	Vector3 colorNoShadow;              /* result color with no shadow casting */
+	Vector3 directionContribution;      /* result contribution to the deluxe map */
 
 	/* output */
 	Vector3 hit;
@@ -1760,7 +1760,7 @@ int                         GetSurfaceExtraRecvShadows( int num );
 int                         GetSurfaceExtraSampleSize( int num );
 int                         GetSurfaceExtraMinSampleSize( int num );
 float                       GetSurfaceExtraLongestCurve( int num );
-void                        GetSurfaceExtraLightmapAxis( int num, Vector3& lightmapAxis );
+Vector3                     GetSurfaceExtraLightmapAxis( int num );
 
 void                        WriteSurfaceExtraFile( const char *path );
 void                        LoadSurfaceExtraFile( const char *path );
@@ -1870,12 +1870,12 @@ image_t                     *ImageLoad( const char *filename );
 /* shaders.c */
 void                        ColorMod( colorMod_t *am, int numVerts, bspDrawVert_t *drawVerts );
 
-void                        TCMod( tcMod_t mod, Vector2& st );
-void                        TCModIdentity( tcMod_t mod );
-void                        TCModMultiply( tcMod_t a, tcMod_t b, tcMod_t out );
-void                        TCModTranslate( tcMod_t mod, float s, float t );
-void                        TCModScale( tcMod_t mod, float s, float t );
-void                        TCModRotate( tcMod_t mod, float euler );
+void                        TCMod( const tcMod_t& mod, Vector2& st );
+void                        TCModIdentity( tcMod_t& mod );
+void                        TCModMultiply( const tcMod_t& a, const tcMod_t& b, tcMod_t& out );
+void                        TCModTranslate( tcMod_t& mod, float s, float t );
+void                        TCModScale( tcMod_t& mod, float s, float t );
+void                        TCModRotate( tcMod_t& mod, float euler );
 
 bool                        ApplySurfaceParm( const char *name, int *contentFlags, int *surfaceFlags, int *compileFlags );
 

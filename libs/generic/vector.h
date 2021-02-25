@@ -11,6 +11,11 @@ Element m_elements[2];
 public:
 BasicVector2(){
 }
+template<typename OtherElement>
+BasicVector2( const BasicVector2<OtherElement>& other ){
+	x() = static_cast<Element>( other.x() );
+	y() = static_cast<Element>( other.y() );
+}
 BasicVector2( const Element& x_, const Element& y_ ){
 	x() = x_;
 	y() = y_;

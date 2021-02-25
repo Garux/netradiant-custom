@@ -139,50 +139,42 @@ static surfaceExtra_t *GetSurfaceExtra( int num ){
 
 
 shaderInfo_t *GetSurfaceExtraShaderInfo( int num ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	return se->si;
+	return GetSurfaceExtra( num )->si;
 }
 
 
 int GetSurfaceExtraParentSurfaceNum( int num ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	return se->parentSurfaceNum;
+	return GetSurfaceExtra( num )->parentSurfaceNum;
 }
 
 
 int GetSurfaceExtraEntityNum( int num ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	return se->entityNum;
+	return GetSurfaceExtra( num )->entityNum;
 }
 
 
 int GetSurfaceExtraCastShadows( int num ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	return se->castShadows;
+	return GetSurfaceExtra( num )->castShadows;
 }
 
 
 int GetSurfaceExtraRecvShadows( int num ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	return se->recvShadows;
+	return GetSurfaceExtra( num )->recvShadows;
 }
 
 
 int GetSurfaceExtraSampleSize( int num ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	return se->sampleSize;
+	return GetSurfaceExtra( num )->sampleSize;
 }
 
 
 float GetSurfaceExtraLongestCurve( int num ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	return se->longestCurve;
+	return GetSurfaceExtra( num )->longestCurve;
 }
 
 
-void GetSurfaceExtraLightmapAxis( int num, Vector3& lightmapAxis ){
-	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	lightmapAxis = se->lightmapAxis;
+Vector3 GetSurfaceExtraLightmapAxis( int num ){
+	return GetSurfaceExtra( num )->lightmapAxis;
 }
 
 

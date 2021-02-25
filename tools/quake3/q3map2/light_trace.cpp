@@ -37,8 +37,6 @@
 
 
 
-#define Vector2Copy( a, b )     ( ( b )[ 0 ] = ( a )[ 0 ], ( b )[ 1 ] = ( a )[ 1 ] )
-
 #define MAX_NODE_ITEMS          5
 #define MAX_NODE_TRIANGLES      5
 #define MAX_TRACE_DEPTH         32

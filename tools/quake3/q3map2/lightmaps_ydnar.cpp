@@ -1028,7 +1028,7 @@ void SetupSurfaceLightmaps( void ){
 			info->sampleSize = GetSurfaceExtraSampleSize( num );
 			info->longestCurve = GetSurfaceExtraLongestCurve( num );
 			info->patchIterations = IterationsForCurve( info->longestCurve, patchSubdivisions );
-			GetSurfaceExtraLightmapAxis( num, info->axis );
+			info->axis = GetSurfaceExtraLightmapAxis( num );
 
 			/* mark parent */
 			if ( info->parentSurfaceNum >= 0 ) {

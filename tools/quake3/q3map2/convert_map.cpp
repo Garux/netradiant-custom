@@ -522,8 +522,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 			if ( brushPrimitives ) {
 				int i;
 				Vector3 texX, texY;
-				float xyI[2], xyJ[2], xyK[2];
-				float stI[2], stJ[2], stK[2];
+				Vector2 xyI, xyJ, xyK;
+				Vector2 stI, stJ, stK;
 				float D, D0, D1, D2;
 
 				ComputeAxisBase( buildPlane->normal(), texX, texY );
@@ -534,9 +534,9 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				xyJ[1] = vector3_dot( vert[1]->xyz, texY );
 				xyK[0] = vector3_dot( vert[2]->xyz, texX );
 				xyK[1] = vector3_dot( vert[2]->xyz, texY );
-				stI[0] = vert[0]->st[0]; stI[1] = vert[0]->st[1];
-				stJ[0] = vert[1]->st[0]; stJ[1] = vert[1]->st[1];
-				stK[0] = vert[2]->st[0]; stK[1] = vert[2]->st[1];
+				stI = vert[0]->st;
+				stJ = vert[1]->st;
+				stK = vert[2]->st;
 
 				//   - solve linear equations:
 				//     - (x, y) := xyz . (texX, texY)

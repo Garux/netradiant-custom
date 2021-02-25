@@ -163,29 +163,23 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
    routines for dealing with a 3x3 texture mod matrix
  */
 
-void TCMod( tcMod_t mod, Vector2& st ){
-	float old[ 2 ];
+void TCMod( const tcMod_t& mod, Vector2& st ){
+	const Vector2 old = st;
 
-
-	old[ 0 ] = st[ 0 ];
-	old[ 1 ] = st[ 1 ];
 	st[ 0 ] = ( mod[ 0 ][ 0 ] * old[ 0 ] ) + ( mod[ 0 ][ 1 ] * old[ 1 ] ) + mod[ 0 ][ 2 ];
 	st[ 1 ] = ( mod[ 1 ][ 0 ] * old[ 0 ] ) + ( mod[ 1 ][ 1 ] * old[ 1 ] ) + mod[ 1 ][ 2 ];
 }
 
 
-void TCModIdentity( tcMod_t mod ){
+void TCModIdentity( tcMod_t& mod ){
 	mod[ 0 ][ 0 ] = 1.0f;   mod[ 0 ][ 1 ] = 0.0f;   mod[ 0 ][ 2 ] = 0.0f;
 	mod[ 1 ][ 0 ] = 0.0f;   mod[ 1 ][ 1 ] = 1.0f;   mod[ 1 ][ 2 ] = 0.0f;
 	mod[ 2 ][ 0 ] = 0.0f;   mod[ 2 ][ 1 ] = 0.0f;   mod[ 2 ][ 2 ] = 1.0f;   /* this row is only used for multiples, not transformation */
 }
 
 
-void TCModMultiply( tcMod_t a, tcMod_t b, tcMod_t out ){
-	int i;
-
-
-	for ( i = 0; i < 3; i++ )
+void TCModMultiply( const tcMod_t& a, const tcMod_t& b, tcMod_t& out ){
+	for ( int i = 0; i < 3; i++ )
 	{
 		out[ i ][ 0 ] = ( a[ i ][ 0 ] * b[ 0 ][ 0 ] ) + ( a[ i ][ 1 ] * b[ 1 ][ 0 ] ) + ( a[ i ][ 2 ] * b[ 2 ][ 0 ] );
 		out[ i ][ 1 ] = ( a[ i ][ 0 ] * b[ 0 ][ 1 ] ) + ( a[ i ][ 1 ] * b[ 1 ][ 1 ] ) + ( a[ i ][ 2 ] * b[ 2 ][ 1 ] );
@@ -194,19 +188,19 @@ void TCModMultiply( tcMod_t a, tcMod_t b, tcMod_t out ){
 }
 
 
-void TCModTranslate( tcMod_t mod, float s, float t ){
+void TCModTranslate( tcMod_t& mod, float s, float t ){
 	mod[ 0 ][ 2 ] += s;
 	mod[ 1 ][ 2 ] += t;
 }
 
 
-void TCModScale( tcMod_t mod, float s, float t ){
+void TCModScale( tcMod_t& mod, float s, float t ){
 	mod[ 0 ][ 0 ] *= s;
 	mod[ 1 ][ 1 ] *= t;
 }
 
 
-void TCModRotate( tcMod_t mod, float euler ){
+void TCModRotate( tcMod_t& mod, float euler ){
 	tcMod_t old, temp;
 	float radians, sinv, cosv;
 
@@ -1235,7 +1229,6 @@ static void ParseShaderFile( const char *filename ){
 			   degree of 0 = from the east, 90 = north, etc.  altitude of 0 = sunrise/set, 90 = noon
 			   ydnar: sof2map has bareword 'sun' token, so we support that as well */
 			else if ( striEqual( token, "sun" ) /* sof2 */ || striEqual( token, "q3map_sun" ) || striEqual( token, "q3map_sunExt" ) ) {
-				float a, b;
 				sun_t       *sun;
 				/* ydnar: extended sun directive? */
 				const bool ext = striEqual( token, "q3map_sunext" );
@@ -1269,14 +1262,12 @@ static void ParseShaderFile( const char *filename ){
 
 				/* get sun angle/elevation */
 				GetTokenAppend( shaderText, false );
-				a = degrees_to_radians( atof( token ) );
+				const double a = degrees_to_radians( atof( token ) );
 
 				GetTokenAppend( shaderText, false );
-				b = degrees_to_radians( atof( token ) );
+				const double b = degrees_to_radians( atof( token ) );
 
-				sun->direction[ 0 ] = cos( a ) * cos( b );
-				sun->direction[ 1 ] = sin( a ) * cos( b );
-				sun->direction[ 2 ] = sin( b );
+				sun->direction = vector3_for_spherical( a, b );
 
 				/* get filter radius from shader */
 				sun->filterRadius = si->lightFilterRadius;

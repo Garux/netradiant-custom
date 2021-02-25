@@ -95,9 +95,7 @@ static void CreateSunLight( sun_t *sun ){
 			//%	Sys_Printf( "%d: Angle: %3.4lf Elevation: %3.3lf\n", sun->numSamples, radians_to_degrees( angle ), radians_to_degrees( elevation ) );
 
 			/* create new vector */
-			direction[ 0 ] = cos( angle ) * cos( elevation );
-			direction[ 1 ] = sin( angle ) * cos( elevation );
-			direction[ 2 ] = sin( elevation );
+			direction = vector3_for_spherical( angle, elevation );
 		}
 
 		/* create a light */
@@ -163,7 +161,6 @@ static void CreateSkyLights( const Vector3& color, float value, int iterations, 
 	/* setup */
 	elevationSteps = iterations - 1;
 	angleSteps = elevationSteps * 4;
-	angle = 0.0f;
 	elevationStep = degrees_to_radians( 90.0f / iterations );  /* skip elevation 0 */
 	angleStep = degrees_to_radians( 360.0f / angleSteps );
 
@@ -180,9 +177,7 @@ static void CreateSkyLights( const Vector3& color, float value, int iterations, 
 		for ( j = 0; j < angleSteps; j++ )
 		{
 			/* create sun */
-			sun.direction[ 0 ] = cos( angle ) * cos( elevation );
-			sun.direction[ 1 ] = sin( angle ) * cos( elevation );
-			sun.direction[ 2 ] = sin( elevation );
+			sun.direction = vector3_for_spherical( angle, elevation );
 			CreateSunLight( &sun );
 
 			/* move */

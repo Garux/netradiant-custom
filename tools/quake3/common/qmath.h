@@ -5,7 +5,6 @@
 #include "math/plane.h"
 
 
-#define VectorSet( v, a, b, c ) ( ( v )[0] = ( a ),( v )[1] = ( b ),( v )[2] = ( c ) )
 #define VectorCopy( a,b ) ( ( b )[0] = ( a )[0],( b )[1] = ( a )[1],( b )[2] = ( a )[2] )
 
 #define RGBTOGRAY( x ) ( (float)( ( x )[0] ) * 0.2989f + (float)( ( x )[1] ) * 0.5870f + (float)( ( x )[2] ) * 0.1140f )

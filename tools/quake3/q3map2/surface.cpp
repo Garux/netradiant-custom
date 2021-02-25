@@ -2884,8 +2884,7 @@ static void MakeDebugPortalSurfs_r( node_t *node, shaderInfo_t *si ){
 				/* set it */
 				dv->xyz = w->p[ i ];
 				dv->normal = p->plane.normal();
-				dv->st[ 0 ] = 0;
-				dv->st[ 1 ] = 0;
+				dv->st = { 0, 0 };
 				for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 				{
 					dv->color[ k ].rgb() = debugColors[ c % 12 ];
@@ -2985,9 +2984,6 @@ void MakeFogHullSurfs( entity_t *e, tree_t *tree, const char *shader ){
  */
 
 void BiasSurfaceTextures( mapDrawSurface_t *ds ){
-	int i;
-
-
 	/* calculate the surface texture bias */
 	CalcSurfaceTextureRange( ds );
 
@@ -2997,10 +2993,9 @@ void BiasSurfaceTextures( mapDrawSurface_t *ds ){
 	}
 
 	/* bias the texture coordinates */
-	for ( i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds->numVerts; i++ )
 	{
-		ds->verts[ i ].st[ 0 ] += ds->bias[ 0 ];
-		ds->verts[ i ].st[ 1 ] += ds->bias[ 1 ];
+		ds->verts[ i ].st += ds->bias;
 	}
 }
 

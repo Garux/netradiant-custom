@@ -549,7 +549,9 @@ void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
 	if ( ds->numVerts == 3 ) {
 		ds->numIndexes = 3;
 		ds->indexes = safe_malloc( ds->numIndexes * sizeof( int ) );
-		VectorSet( ds->indexes, 0, 1, 2 );
+		ds->indexes[0] = 0;
+		ds->indexes[1] = 1;
+		ds->indexes[2] = 2;
 		numMaxAreaSurfaces++;
 		return;
 	}
@@ -677,7 +679,9 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 	/* is this a simple triangle? */
 	if ( ds->numVerts == 3 ) {
 		numIndexes = 3;
-		VectorSet( indexes, 0, 1, 2 );
+		indexes[0] = 0;
+		indexes[1] = 1;
+		indexes[2] = 2;
 	}
 	else
 	{

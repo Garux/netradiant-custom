@@ -62,8 +62,6 @@ static Vector3 entityOrigin;
    returns false if a texture matrix cannot be created
  */
 
-#define Vector2Subtract( a,b,c )  ( ( c )[ 0 ] = ( a )[ 0 ] - ( b )[ 0 ], ( c )[ 1 ] = ( a )[ 1 ] - ( b )[ 1 ] )
-
 static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c ){
 	int i, j;
 	double bb, s, t;
@@ -151,7 +149,7 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 	{
 		int k;
 		DoubleVector3 deltas[ 3 ];
-		double texDeltas[ 3 ][ 2 ];
+		BasicVector2<double> texDeltas[ 3 ];
 		double delta, texDelta;
 
 
@@ -161,9 +159,9 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 		deltas[ 0 ] = pa - pb;
 		deltas[ 1 ] = pa - pc;
 		deltas[ 2 ] = pb - pc;
-		Vector2Subtract( a->st, b->st, texDeltas[ 0 ] );
-		Vector2Subtract( a->st, c->st, texDeltas[ 1 ] );
-		Vector2Subtract( b->st, c->st, texDeltas[ 2 ] );
+		texDeltas[ 0 ] = a->st - b->st;
+		texDeltas[ 1 ] = a->st - c->st;
+		texDeltas[ 2 ] = b->st - c->st;
 
 		/* walk st */
 		for ( i = 0; i < 2; i++ )

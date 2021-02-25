@@ -214,7 +214,6 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 	mapDrawSurface_t    *ds;
 	bspDrawVert_t       *dv;
 	const char          *picoShaderName;
-	picoVec_t           *xyz, *normal, *st;
 	byte                *color;
 	picoIndex_t         *indexes;
 	char                *skinfilecontent;
@@ -427,12 +426,10 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 			dv = &ds->verts[ i ];
 
 			/* xyz and normal */
-			xyz = PicoGetSurfaceXYZ( surface, i );
-			VectorCopy( xyz, dv->xyz );
+			dv->xyz = vector3_from_array( PicoGetSurfaceXYZ( surface, i ) );
 			matrix4_transform_point( transform, dv->xyz );
 
-			normal = PicoGetSurfaceNormal( surface, i );
-			VectorCopy( normal, dv->normal );
+			dv->normal = vector3_from_array( PicoGetSurfaceNormal( surface, i ) );
 			matrix4_transform_direction( nTransform, dv->normal );
 			VectorNormalize( dv->normal );
 
@@ -451,9 +448,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 			/* normal texture coordinates */
 			else
 			{
-				st = PicoGetSurfaceST( surface, 0, i );
-				dv->st[ 0 ] = st[ 0 ];
-				dv->st[ 1 ] = st[ 1 ];
+				dv->st = vector2_from_array( PicoGetSurfaceST( surface, 0, i ) );
 			}
 
 			/* set lightmap/color bits */
