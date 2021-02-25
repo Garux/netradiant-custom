@@ -38,7 +38,6 @@
 
 
 #define Vector2Copy( a, b )     ( ( b )[ 0 ] = ( a )[ 0 ], ( b )[ 1 ] = ( a )[ 1 ] )
-#define Vector4Copy( a, b )     ( ( b )[ 0 ] = ( a )[ 0 ], ( b )[ 1 ] = ( a )[ 1 ], ( b )[ 2 ] = ( a )[ 2 ], ( b )[ 3 ] = ( a )[ 3 ] )
 
 #define MAX_NODE_ITEMS          5
 #define MAX_NODE_TRIANGLES      5
@@ -60,8 +59,8 @@
 
 struct traceVert_t
 {
-	vec3_t xyz;
-	float st[ 2 ];
+	Vector3 xyz;
+	Vector2 st;
 };
 
 struct traceInfo_t
@@ -73,14 +72,14 @@ struct traceInfo_t
 
 struct traceWinding_t
 {
-	vec4_t plane;
+	Plane3f plane;
 	int infoNum, numVerts;
 	traceVert_t v[ MAX_TW_VERTS ];
 };
 
 struct traceTriangle_t
 {
-	vec3_t edge1, edge2;
+	Vector3 edge1, edge2;
 	int infoNum;
 	traceVert_t v[ 3 ];
 };
@@ -88,8 +87,8 @@ struct traceTriangle_t
 struct traceNode_t
 {
 	int type;
-	vec4_t plane;
-	vec3_t mins, maxs;
+	Plane3f plane;
+	MinMax minmax;
 	int children[ 2 ];
 	int numItems, maxItems;
 	int                         *items;
@@ -165,7 +164,7 @@ static int AllocTraceNode( void ){
 	/* add the node */
 	memset( &traceNodes[ numTraceNodes ], 0, sizeof( traceNode_t ) );
 	traceNodes[ numTraceNodes ].type = TRACE_LEAF;
-	ClearBounds( traceNodes[ numTraceNodes ].mins, traceNodes[ numTraceNodes ].maxs );
+	traceNodes[ numTraceNodes ].minmax.clear();
 
 	/* Sys_Printf("alloc node %d\n", numTraceNodes); */
 
@@ -233,8 +232,8 @@ static int AddTraceTriangle( traceTriangle_t *tt ){
 	}
 
 	/* find vectors for two edges sharing the first vert */
-	VectorSubtract( tt->v[ 1 ].xyz, tt->v[ 0 ].xyz, tt->edge1 );
-	VectorSubtract( tt->v[ 2 ].xyz, tt->v[ 0 ].xyz, tt->edge2 );
+	 tt->edge1 = tt->v[ 1 ].xyz - tt->v[ 0 ].xyz;
+	 tt->edge2 = tt->v[ 2 ].xyz - tt->v[ 0 ].xyz;
 
 	/* add the triangle */
 	memcpy( &traceTriangles[ num ], tt, sizeof( *traceTriangles ) );
@@ -302,28 +301,25 @@ static int AddItemToTraceNode( traceNode_t *node, int num ){
 
 static int SetupTraceNodes_r( int bspNodeNum ){
 	int i, nodeNum, bspLeafNum, newNode;
-	bspPlane_t      *plane;
-	bspNode_t       *bspNode;
 
 
 	/* get bsp node and plane */
-	bspNode = &bspNodes[ bspNodeNum ];
-	plane = &bspPlanes[ bspNode->planeNum ];
+	const bspNode_t& bspNode = bspNodes[ bspNodeNum ];
+	const bspPlane_t& plane = bspPlanes[ bspNode.planeNum ];
 
 	/* allocate a new trace node */
 	nodeNum = AllocTraceNode();
 
 	/* setup trace node */
-	traceNodes[ nodeNum ].type = PlaneTypeForNormal( plane->normal );
-	VectorCopy( plane->normal, traceNodes[ nodeNum ].plane );
-	traceNodes[ nodeNum ].plane[ 3 ] = plane->dist;
+	traceNodes[ nodeNum ].type = PlaneTypeForNormal( plane.normal() );
+	traceNodes[ nodeNum ].plane = plane;
 
 	/* setup children */
 	for ( i = 0; i < 2; i++ )
 	{
 		/* leafnode */
-		if ( bspNode->children[ i ] < 0 ) {
-			bspLeafNum = -bspNode->children[ i ] - 1;
+		if ( bspNode.children[ i ] < 0 ) {
+			bspLeafNum = -bspNode.children[ i ] - 1;
 
 			/* new code */
 			newNode = AllocTraceNode();
@@ -338,7 +334,7 @@ static int SetupTraceNodes_r( int bspNodeNum ){
 		/* normal node */
 		else
 		{
-			newNode = SetupTraceNodes_r( bspNode->children[ i ] );
+			newNode = SetupTraceNodes_r( bspNode.children[ i ] );
 			traceNodes[ nodeNum ].children[ i ] = newNode;
 		}
 
@@ -362,9 +358,10 @@ static int SetupTraceNodes_r( int bspNodeNum ){
 
 #define TW_ON_EPSILON   0.25f
 
-void ClipTraceWinding( traceWinding_t *tw, vec4_t plane, traceWinding_t *front, traceWinding_t *back ){
+void ClipTraceWinding( traceWinding_t *tw, const Plane3f& plane, traceWinding_t *front, traceWinding_t *back ){
 	int i, j, k;
-	int sides[ MAX_TW_VERTS ], counts[ 3 ] = { 0, 0, 0 };
+	EPlaneSide sides[ MAX_TW_VERTS ];
+	int counts[ 3 ] = { 0, 0, 0 };
 	float dists[ MAX_TW_VERTS ];
 	float frac;
 	traceVert_t     *a, *b, mid;
@@ -377,26 +374,26 @@ void ClipTraceWinding( traceWinding_t *tw, vec4_t plane, traceWinding_t *front, 
 	/* classify points */
 	for ( i = 0; i < tw->numVerts; i++ )
 	{
-		dists[ i ] = DotProduct( tw->v[ i ].xyz, plane ) - plane[ 3 ];
+		dists[ i ] = plane3_distance_to_point( plane, tw->v[ i ].xyz );
 		if ( dists[ i ] < -TW_ON_EPSILON ) {
-			sides[ i ] = SIDE_BACK;
+			sides[ i ] = eSideBack;
 		}
 		else if ( dists[ i ] > TW_ON_EPSILON ) {
-			sides[ i ] = SIDE_FRONT;
+			sides[ i ] = eSideFront;
 		}
 		else{
-			sides[ i ] = SIDE_ON;
+			sides[ i ] = eSideOn;
 		}
 		counts[ sides[ i ] ]++;
 	}
 
 	/* entirely on front? */
-	if ( counts[ SIDE_BACK ] == 0 ) {
+	if ( counts[ eSideBack ] == 0 ) {
 		memcpy( front, tw, sizeof( *front ) );
 	}
 
 	/* entirely on back? */
-	else if ( counts[ SIDE_FRONT ] == 0 ) {
+	else if ( counts[ eSideFront ] == 0 ) {
 		memcpy( back, tw, sizeof( *back ) );
 	}
 
@@ -422,21 +419,21 @@ void ClipTraceWinding( traceWinding_t *tw, vec4_t plane, traceWinding_t *front, 
 			/* handle points on the splitting plane */
 			switch ( sides[ i ] )
 			{
-			case SIDE_FRONT:
+			case eSideFront:
 				if ( front->numVerts >= MAX_TW_VERTS ) {
 					Error( "MAX_TW_VERTS (%d) exceeded", MAX_TW_VERTS );
 				}
 				front->v[ front->numVerts++ ] = *a;
 				break;
 
-			case SIDE_BACK:
+			case eSideBack:
 				if ( back->numVerts >= MAX_TW_VERTS ) {
 					Error( "MAX_TW_VERTS (%d) exceeded", MAX_TW_VERTS );
 				}
 				back->v[ back->numVerts++ ] = *a;
 				break;
 
-			case SIDE_ON:
+			case eSideOn:
 				if ( front->numVerts >= MAX_TW_VERTS || back->numVerts >= MAX_TW_VERTS ) {
 					Error( "MAX_TW_VERTS (%d) exceeded", MAX_TW_VERTS );
 				}
@@ -446,7 +443,7 @@ void ClipTraceWinding( traceWinding_t *tw, vec4_t plane, traceWinding_t *front, 
 			}
 
 			/* check next point to see if we need to split the edge */
-			if ( sides[ j ] == SIDE_ON || sides[ j ] == sides[ i ] ) {
+			if ( sides[ j ] == eSideOn || sides[ j ] == sides[ i ] ) {
 				continue;
 			}
 
@@ -460,19 +457,18 @@ void ClipTraceWinding( traceWinding_t *tw, vec4_t plane, traceWinding_t *front, 
 			for ( k = 0; k < 3; k++ )
 			{
 				/* minimize fp precision errors */
-				if ( plane[ k ] == 1.0f ) {
-					mid.xyz[ k ] = plane[ 3 ];
+				if ( plane.normal()[ k ] == 1.0f ) {
+					mid.xyz[ k ] = plane.dist();
 				}
-				else if ( plane[ k ] == -1.0f ) {
-					mid.xyz[ k ] = -plane[ 3 ];
+				else if ( plane.normal()[ k ] == -1.0f ) {
+					mid.xyz[ k ] = -plane.dist();
 				}
 				else{
 					mid.xyz[ k ] = a->xyz[ k ] + frac * ( b->xyz[ k ] - a->xyz[ k ] );
 				}
 			}
 			/* set texture coordinates */
-			mid.st[ 0 ] = a->st[ 0 ] + frac * ( b->st[ 0 ] - a->st[ 0 ] );
-			mid.st[ 1 ] = a->st[ 1 ] + frac * ( b->st[ 1 ] - a->st[ 1 ] );
+			mid.st = a->st + ( b->st - a->st ) * frac;
 
 			/* copy midpoint to front and back polygons */
 			front->v[ front->numVerts++ ] = mid;
@@ -490,7 +486,7 @@ void ClipTraceWinding( traceWinding_t *tw, vec4_t plane, traceWinding_t *front, 
 
 static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
 	int num;
-	vec4_t plane1, plane2, reverse;
+	Plane3f plane1, plane2, reverse;
 	traceNode_t     *node;
 	traceWinding_t front, back;
 
@@ -518,23 +514,22 @@ static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
 		}
 
 		/* get node plane */
-		Vector4Copy( node->plane, plane1 );
+		plane1 = node->plane;
 
 		/* get winding plane */
-		Vector4Copy( tw->plane, plane2 );
+		plane2 = tw->plane;
 
 		/* invert surface plane */
-		VectorSubtract( vec3_origin, plane2, reverse );
-		reverse[ 3 ] = -plane2[ 3 ];
+		reverse = plane3_flipped( plane2 );
 
 		/* front only */
-		if ( DotProduct( plane1, plane2 ) > 0.999f && fabs( plane1[ 3 ] - plane2[ 3 ] ) < 0.001f ) {
+		if ( vector3_dot( plane1.normal(), plane2.normal() ) > 0.999f && fabs( plane1.dist() - plane2.dist() ) < 0.001f ) {
 			FilterTraceWindingIntoNodes_r( tw, node->children[ 0 ] );
 			return;
 		}
 
 		/* back only */
-		if ( DotProduct( plane1, reverse ) > 0.999f && fabs( plane1[ 3 ] - reverse[ 3 ] ) < 0.001f ) {
+		if ( vector3_dot( plane1.normal(), reverse.normal() ) > 0.999f && fabs( plane1.dist() - reverse.dist() ) < 0.001f ) {
 			FilterTraceWindingIntoNodes_r( tw, node->children[ 1 ] );
 			return;
 		}
@@ -568,9 +563,7 @@ static void FilterTraceWindingIntoNodes_r( traceWinding_t *tw, int nodeNum ){
 
 static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	int i, j, count, num, frontNum, backNum, type;
-	vec3_t size;
 	float dist;
-	double average[ 3 ];
 	traceNode_t     *node, *frontNode, *backNode;
 	traceWinding_t  *tw, front, back;
 
@@ -602,8 +595,8 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	}
 
 	/* bound the node */
-	ClearBounds( node->mins, node->maxs );
-	VectorClear( average );
+	node->minmax.clear();
+	DoubleVector3 average( 0, 0, 0 );
 	count = 0;
 	for ( i = 0; i < node->numItems; i++ )
 	{
@@ -613,10 +606,8 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 		/* walk its verts */
 		for ( j = 0; j < tw->numVerts; j++ )
 		{
-			AddPointToBounds( tw->v[ j ].xyz, node->mins, node->maxs );
-			average[ 0 ] += tw->v[ j ].xyz[ 0 ];
-			average[ 1 ] += tw->v[ j ].xyz[ 1 ];
-			average[ 2 ] += tw->v[ j ].xyz[ 2 ];
+			node->minmax.extend( tw->v[ j ].xyz );
+			average += tw->v[ j ].xyz;
 			count++;
 		}
 	}
@@ -630,15 +621,15 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	}
 
 	/* the largest dimension of the bounding box will be the split axis */
-	VectorSubtract( node->maxs, node->mins, size );
+	const Vector3 size = node->minmax.maxs - node->minmax.mins;
 	if ( size[ 0 ] >= size[ 1 ] && size[ 0 ] >= size[ 2 ] ) {
-		type = PLANE_X;
+		type = ePlaneX;
 	}
 	else if ( size[ 1 ] >= size[ 0 ] && size[ 1 ] >= size[ 2 ] ) {
-		type = PLANE_Y;
+		type = ePlaneY;
 	}
 	else{
-		type = PLANE_Z;
+		type = ePlaneZ;
 	}
 
 	/* don't split small nodes */
@@ -657,8 +648,8 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	dist = floor( average[ type ] / count );
 
 	/* dummy check it */
-	if ( dist <= node->mins[ type ] || dist >= node->maxs[ type ] ) {
-		dist = floor( 0.5f * ( node->mins[ type ] + node->maxs[ type ] ) );
+	if ( dist <= node->minmax.mins[ type ] || dist >= node->minmax.maxs[ type ] ) {
+		dist = floor( 0.5f * ( node->minmax.mins[ type ] + node->minmax.maxs[ type ] ) );
 	}
 
 	/* allocate child nodes */
@@ -672,8 +663,8 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 
 	/* attach children */
 	node->type = type;
-	node->plane[ type ] = 1.0f;
-	node->plane[ 3 ] = dist;
+	node->plane.normal()[ type ] = 1.0f;
+	node->plane.dist() = dist;
 	node->children[ 0 ] = frontNum;
 	node->children[ 1 ] = backNum;
 
@@ -802,8 +793,8 @@ static int TriangulateTraceNode_r( int nodeNum ){
 			tt.v[ 2 ] = tw->v[ j + 1 ];
 
 			/* find vectors for two edges sharing the first vert */
-			VectorSubtract( tt.v[ 1 ].xyz, tt.v[ 0 ].xyz, tt.edge1 );
-			VectorSubtract( tt.v[ 2 ].xyz, tt.v[ 0 ].xyz, tt.edge2 );
+			tt.edge1 = tt.v[ 1 ].xyz - tt.v[ 0 ].xyz;
+			tt.edge2 = tt.v[ 2 ].xyz - tt.v[ 0 ].xyz;
 
 			/* add it to the node */
 			num = AddTraceTriangle( &tt );
@@ -831,7 +822,7 @@ static int TriangulateTraceNode_r( int nodeNum ){
    filters a bsp model's surfaces into the raytracing tree
  */
 
-static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform ){
+static void PopulateWithBSPModel( bspModel_t *model, const Matrix4& transform ){
 	int i, j, x, y, pw[ 5 ], r, nodeNum;
 	bspDrawSurface_t    *ds;
 	surfaceInfo_t       *info;
@@ -843,7 +834,7 @@ static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform ){
 
 
 	/* dummy check */
-	if ( model == NULL || transform == NULL ) {
+	if ( model == NULL ) {
 		return;
 	}
 
@@ -943,27 +934,27 @@ static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform ){
 					r = ( x + y ) & 1;
 
 					/* make first triangle */
-					VectorCopy( verts[ pw[ r + 0 ] ].xyz, tw.v[ 0 ].xyz );
-					Vector2Copy( verts[ pw[ r + 0 ] ].st, tw.v[ 0 ].st );
-					VectorCopy( verts[ pw[ r + 1 ] ].xyz, tw.v[ 1 ].xyz );
-					Vector2Copy( verts[ pw[ r + 1 ] ].st, tw.v[ 1 ].st );
-					VectorCopy( verts[ pw[ r + 2 ] ].xyz, tw.v[ 2 ].xyz );
-					Vector2Copy( verts[ pw[ r + 2 ] ].st, tw.v[ 2 ].st );
-					m4x4_transform_point( transform, tw.v[ 0 ].xyz );
-					m4x4_transform_point( transform, tw.v[ 1 ].xyz );
-					m4x4_transform_point( transform, tw.v[ 2 ].xyz );
+					tw.v[ 0 ].xyz = verts[ pw[ r + 0 ] ].xyz;
+					tw.v[ 0 ].st = verts[ pw[ r + 0 ] ].st;
+					tw.v[ 1 ].xyz = verts[ pw[ r + 1 ] ].xyz;
+					tw.v[ 1 ].st = verts[ pw[ r + 1 ] ].st;
+					tw.v[ 2 ].xyz = verts[ pw[ r + 2 ] ].xyz;
+					tw.v[ 2 ].st = verts[ pw[ r + 2 ] ].st;
+					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
+					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
+					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
 					FilterTraceWindingIntoNodes_r( &tw, nodeNum );
 
 					/* make second triangle */
-					VectorCopy( verts[ pw[ r + 0 ] ].xyz, tw.v[ 0 ].xyz );
-					Vector2Copy( verts[ pw[ r + 0 ] ].st, tw.v[ 0 ].st );
-					VectorCopy( verts[ pw[ r + 2 ] ].xyz, tw.v[ 1 ].xyz );
-					Vector2Copy( verts[ pw[ r + 2 ] ].st, tw.v[ 1 ].st );
-					VectorCopy( verts[ pw[ r + 3 ] ].xyz, tw.v[ 2 ].xyz );
-					Vector2Copy( verts[ pw[ r + 3 ] ].st, tw.v[ 2 ].st );
-					m4x4_transform_point( transform, tw.v[ 0 ].xyz );
-					m4x4_transform_point( transform, tw.v[ 1 ].xyz );
-					m4x4_transform_point( transform, tw.v[ 2 ].xyz );
+					tw.v[ 0 ].xyz = verts[ pw[ r + 0 ] ].xyz;
+					tw.v[ 0 ].st = verts[ pw[ r + 0 ] ].st;
+					tw.v[ 1 ].xyz = verts[ pw[ r + 2 ] ].xyz;
+					tw.v[ 1 ].st = verts[ pw[ r + 2 ] ].st;
+					tw.v[ 2 ].xyz = verts[ pw[ r + 3 ] ].xyz;
+					tw.v[ 2 ].st = verts[ pw[ r + 3 ] ].st;
+					matrix4_transform_point( transform, tw.v[ 0 ].xyz );
+					matrix4_transform_point( transform, tw.v[ 1 ].xyz );
+					matrix4_transform_point( transform, tw.v[ 2 ].xyz );
 					FilterTraceWindingIntoNodes_r( &tw, nodeNum );
 				}
 			}
@@ -982,15 +973,15 @@ static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform ){
 			/* walk the triangle list */
 			for ( j = 0; j < ds->numIndexes; j += 3 )
 			{
-				VectorCopy( verts[ indexes[ j ] ].xyz, tw.v[ 0 ].xyz );
-				Vector2Copy( verts[ indexes[ j ] ].st, tw.v[ 0 ].st );
-				VectorCopy( verts[ indexes[ j + 1 ] ].xyz, tw.v[ 1 ].xyz );
-				Vector2Copy( verts[ indexes[ j + 1 ] ].st, tw.v[ 1 ].st );
-				VectorCopy( verts[ indexes[ j + 2 ] ].xyz, tw.v[ 2 ].xyz );
-				Vector2Copy( verts[ indexes[ j + 2 ] ].st, tw.v[ 2 ].st );
-				m4x4_transform_point( transform, tw.v[ 0 ].xyz );
-				m4x4_transform_point( transform, tw.v[ 1 ].xyz );
-				m4x4_transform_point( transform, tw.v[ 2 ].xyz );
+				tw.v[ 0 ].xyz = verts[ indexes[ j ] ].xyz;
+				tw.v[ 0 ].st = verts[ indexes[ j ] ].st;
+				tw.v[ 1 ].xyz = verts[ indexes[ j + 1 ] ].xyz;
+				tw.v[ 1 ].st = verts[ indexes[ j + 1 ] ].st;
+				tw.v[ 2 ].xyz = verts[ indexes[ j + 2 ] ].xyz;
+				tw.v[ 2 ].st = verts[ indexes[ j + 2 ] ].st;
+				matrix4_transform_point( transform, tw.v[ 0 ].xyz );
+				matrix4_transform_point( transform, tw.v[ 1 ].xyz );
+				matrix4_transform_point( transform, tw.v[ 2 ].xyz );
 				FilterTraceWindingIntoNodes_r( &tw, nodeNum );
 			}
 			break;
@@ -1009,18 +1000,17 @@ static void PopulateWithBSPModel( bspModel_t *model, m4x4_t transform ){
    filters a picomodel's surfaces into the raytracing tree
  */
 
-static void PopulateWithPicoModel( int castShadows, picoModel_t *model, m4x4_t transform ){
+static void PopulateWithPicoModel( int castShadows, picoModel_t *model, const Matrix4& transform ){
 	int i, j, k, numSurfaces, numIndexes;
 	picoSurface_t       *surface;
 	picoShader_t        *shader;
-	picoVec_t           *xyz, *st;
 	picoIndex_t         *indexes;
 	traceInfo_t ti;
 	traceWinding_t tw;
 
 
 	/* dummy check */
-	if ( model == NULL || transform == NULL ) {
+	if ( model == NULL ) {
 		return;
 	}
 
@@ -1080,11 +1070,9 @@ static void PopulateWithPicoModel( int castShadows, picoModel_t *model, m4x4_t t
 		{
 			for ( k = 0; k < 3; k++ )
 			{
-				xyz = PicoGetSurfaceXYZ( surface, indexes[ k ] );
-				st = PicoGetSurfaceST( surface, 0, indexes[ k ] );
-				VectorCopy( xyz, tw.v[ k ].xyz );
-				Vector2Copy( st, tw.v[ k ].st );
-				m4x4_transform_point( transform, tw.v[ k ].xyz );
+				tw.v[ k ].xyz = vector3_from_array( PicoGetSurfaceXYZ( surface, indexes[ k ] ) );
+				tw.v[ k ].st = vector2_from_array( PicoGetSurfaceST( surface, 0, indexes[ k ] ) );
+				matrix4_transform_point( transform, tw.v[ k ].xyz );
 			}
 			FilterTraceWindingIntoNodes_r( &tw, headNodeNum );
 		}
@@ -1105,8 +1093,7 @@ static void PopulateTraceNodes( void ){
 
 
 	/* add worldspawn triangles */
-	m4x4_t transform;
-	m4x4_identity( transform );
+	Matrix4 transform( g_matrix4_identity );
 	PopulateWithBSPModel( &bspModels[ 0 ], transform );
 
 	/* walk each entity list */
@@ -1125,24 +1112,24 @@ static void PopulateTraceNodes( void ){
 		}
 
 		/* get entity origin */
-		vec3_t origin;
+		Vector3 origin;
 		e->vectorForKey( "origin", origin );
 
 		/* get scale */
-		vec3_t scale = { 1.f, 1.f, 1.f };
+		Vector3 scale = { 1.f, 1.f, 1.f };
 		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
 			if( e->read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
-		vec3_t angles = { 0.f, 0.f, 0.f };
+		Vector3 angles = { 0.f, 0.f, 0.f };
 		if ( !e->read_keyvalue( value, "angles" ) ||
 			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 			e->read_keyvalue( angles[ 2 ], "angle" );
 
 		/* set transform matrix (thanks spog) */
-		m4x4_identity( transform );
-		m4x4_pivoted_transform_by_vec3( transform, origin, angles, eXYZ, scale, vec3_origin );
+		transform = g_matrix4_identity;
+		matrix4_transform_by_euler_xyz_degrees( transform, origin, angles, scale );
 
 		/* hack: Stable-1_2 and trunk have differing row/column major matrix order
 		   this transpose is necessary with Stable-1_2
@@ -1320,7 +1307,7 @@ void SetupTraceNodes( void ){
 
 bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	int i;
-	float tvec[ 3 ], pvec[ 3 ], qvec[ 3 ];
+	Vector3 tvec, pvec, qvec;
 	float det, invDet, depth;
 	float u, v, w, s, t;
 	int is, it;
@@ -1366,10 +1353,10 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	}
 
 	/* begin calculating determinant - also used to calculate u parameter */
-	CrossProduct( trace->direction, tt->edge2, pvec );
+	pvec = vector3_cross( trace->direction, tt->edge2 );
 
 	/* if determinant is near zero, trace lies in plane of triangle */
-	det = DotProduct( tt->edge1, pvec );
+	det = vector3_dot( tt->edge1, pvec );
 
 	/* the non-culling branch */
 	if ( fabs( det ) < COPLANAR_EPSILON ) {
@@ -1378,25 +1365,25 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	invDet = 1.0f / det;
 
 	/* calculate distance from first vertex to ray origin */
-	VectorSubtract( trace->origin, tt->v[ 0 ].xyz, tvec );
+	tvec = trace->origin - tt->v[ 0 ].xyz;
 
 	/* calculate u parameter and test bounds */
-	u = DotProduct( tvec, pvec ) * invDet;
+	u = vector3_dot( tvec, pvec ) * invDet;
 	if ( u < -BARY_EPSILON || u > ( 1.0f + BARY_EPSILON ) ) {
 		return false;
 	}
 
 	/* prepare to test v parameter */
-	CrossProduct( tvec, tt->edge1, qvec );
+	qvec = vector3_cross( tvec, tt->edge1 );
 
 	/* calculate v parameter and test bounds */
-	v = DotProduct( trace->direction, qvec ) * invDet;
+	v = vector3_dot( trace->direction, qvec ) * invDet;
 	if ( v < -BARY_EPSILON || ( u + v ) > ( 1.0f + BARY_EPSILON ) ) {
 		return false;
 	}
 
 	/* calculate t (depth) */
-	depth = DotProduct( tt->edge2, qvec ) * invDet;
+	depth = vector3_dot( tt->edge2, qvec ) * invDet;
 	if ( depth <= trace->inhibitRadius || depth >= trace->distance ) {
 		return false;
 	}
@@ -1423,8 +1410,8 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	/* most surfaces are completely opaque */
 	if ( !( si->compileFlags & ( C_ALPHASHADOW | C_LIGHTFILTER ) ) ||
 		 si->lightImage == NULL || si->lightImage->pixels == NULL ) {
-		VectorMA( trace->origin, depth, trace->direction, trace->hit );
-		VectorClear( trace->color );
+		trace->hit = trace->origin + trace->direction * depth;
+		trace->color.set( 0 );
 		trace->opaque = true;
 		return true;
 	}
@@ -1483,8 +1470,8 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 
 	/* check filter for opaque */
 	if ( trace->color[ 0 ] <= 0.001f && trace->color[ 1 ] <= 0.001f && trace->color[ 2 ] <= 0.001f ) {
-		VectorClear( trace->color );
-		VectorMA( trace->origin, depth, trace->direction, trace->hit );
+		trace->color.set( 0 );
+		trace->hit = trace->origin + trace->direction * depth;
 		trace->opaque = true;
 		return true;
 	}
@@ -1517,8 +1504,8 @@ bool TraceWinding( traceWinding_t *tw, trace_t *trace ){
 		tt.v[ 2 ] = tw->v[ i + 1 ];
 
 		/* find vectors for two edges sharing the first vert */
-		VectorSubtract( tt.v[ 1 ].xyz, tt.v[ 0 ].xyz, tt.edge1 );
-		VectorSubtract( tt.v[ 2 ].xyz, tt.v[ 0 ].xyz, tt.edge2 );
+		tt.edge1 = tt.v[ 1 ].xyz - tt.v[ 0 ].xyz;
+		tt.edge2 = tt.v[ 2 ].xyz - tt.v[ 0 ].xyz;
 
 		/* trace it */
 		if ( TraceTriangle( &traceInfos[ tt.infoNum ], &tt, trace ) ) {
@@ -1543,26 +1530,25 @@ bool TraceWinding( traceWinding_t *tw, trace_t *trace ){
 #define TRACELINE_R_HALF_ITERATIVE 1
 
 #if TRACELINE_R_HALF_ITERATIVE
-static bool TraceLine_r( int nodeNum, const vec3_t start, const vec3_t end, trace_t *trace )
+static bool TraceLine_r( int nodeNum, const Vector3& start, const Vector3& end, trace_t *trace )
 #else
-static bool TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, trace_t *trace )
+static bool TraceLine_r( int nodeNum, const Vector3& origin, const Vector3& end, trace_t *trace )
 #endif
 {
 	traceNode_t     *node;
 	int side;
 	float front, back, frac;
-	vec3_t mid;
+	Vector3 mid;
 
 #if TRACELINE_R_HALF_ITERATIVE
-	vec3_t origin;
-	VectorCopy( start, origin );
+	Vector3 origin( start );
 
 	while ( 1 )
 #endif
 	{
 		/* bogus node number means solid, end tracing unless testing all */
 		if ( nodeNum < 0 ) {
-			VectorCopy( origin, trace->hit );
+			trace->hit = origin;
 			trace->passSolid = true;
 			return true;
 		}
@@ -1572,7 +1558,7 @@ static bool TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, tra
 
 		/* solid? */
 		if ( node->type == TRACE_LEAF_SOLID ) {
-			VectorCopy( origin, trace->hit );
+			trace->hit = origin;
 			trace->passSolid = true;
 			return true;
 		}
@@ -1594,24 +1580,24 @@ static bool TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, tra
 		/* classify beginning and end points */
 		switch ( node->type )
 		{
-		case PLANE_X:
-			front = origin[ 0 ] - node->plane[ 3 ];
-			back = end[ 0 ] - node->plane[ 3 ];
+		case ePlaneX:
+			front = origin[ 0 ] - node->plane.dist();
+			back = end[ 0 ] - node->plane.dist();
 			break;
 
-		case PLANE_Y:
-			front = origin[ 1 ] - node->plane[ 3 ];
-			back = end[ 1 ] - node->plane[ 3 ];
+		case ePlaneY:
+			front = origin[ 1 ] - node->plane.dist();
+			back = end[ 1 ] - node->plane.dist();
 			break;
 
-		case PLANE_Z:
-			front = origin[ 2 ] - node->plane[ 3 ];
-			back = end[ 2 ] - node->plane[ 3 ];
+		case ePlaneZ:
+			front = origin[ 2 ] - node->plane.dist();
+			back = end[ 2 ] - node->plane.dist();
 			break;
 
 		default:
-			front = DotProduct( origin, node->plane ) - node->plane[ 3 ];
-			back = DotProduct( end, node->plane ) - node->plane[ 3 ];
+			front = plane3_distance_to_point( node->plane, origin );
+			back = plane3_distance_to_point( node->plane, end );
 			break;
 		}
 
@@ -1640,14 +1626,12 @@ static bool TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, tra
 
 		/* calculate intercept point */
 		frac = front / ( front - back );
-		mid[ 0 ] = origin[ 0 ] + ( end[ 0 ] - origin[ 0 ] ) * frac;
-		mid[ 1 ] = origin[ 1 ] + ( end[ 1 ] - origin[ 1 ] ) * frac;
-		mid[ 2 ] = origin[ 2 ] + ( end[ 2 ] - origin[ 2 ] ) * frac;
+		mid = origin + ( end - origin ) * frac;
 
 		/* fixme: check inhibit radius, then solid nodes and ignore */
 
 		/* set trace hit here */
-		//%	VectorCopy( mid, trace->hit );
+		//%	trace->hit = mid;
 
 		/* trace first side */
 		if ( TraceLine_r( node->children[ side ], origin, mid, trace ) ) {
@@ -1657,7 +1641,7 @@ static bool TraceLine_r( int nodeNum, const vec3_t origin, const vec3_t end, tra
 		/* trace other side */
 #if TRACELINE_R_HALF_ITERATIVE
 		nodeNum = node->children[ !side ];
-		VectorCopy( mid, origin );
+		origin = mid;
 #else
 		return TraceLine_r( node->children[ !side ], mid, end, trace );
 #endif
@@ -1737,8 +1721,9 @@ void TraceLine( trace_t *trace ){
  */
 
 float SetupTrace( trace_t *trace ){
-	VectorSubtract( trace->end, trace->origin, trace->displacement );
-	trace->distance = VectorFastNormalize( trace->displacement, trace->direction );
-	VectorCopy( trace->origin, trace->hit );
+	trace->displacement = trace->end - trace->origin;
+	trace->direction = trace->displacement;
+	trace->distance = VectorFastNormalize( trace->direction );
+	trace->hit = trace->origin;
 	return trace->distance;
 }

@@ -289,19 +289,18 @@ inline void vector2_normalise( BasicVector2<Element>& self ){
 	self = vector2_normalised( self );
 }
 
+template<typename Element>
+inline BasicVector2<Element> vector2_mid( const BasicVector2<Element>& begin, const BasicVector2<Element>& end ){
+	return vector2_scaled( vector2_added( begin, end ), 0.5 );
+}
+
 const Vector3 g_vector3_identity( 0, 0, 0 );
 const Vector3 g_vector3_max = Vector3( FLT_MAX, FLT_MAX, FLT_MAX );
 const Vector3 g_vector3_axis_x( 1, 0, 0 );
 const Vector3 g_vector3_axis_y( 0, 1, 0 );
 const Vector3 g_vector3_axis_z( 0, 0, 1 );
 
-#ifdef __GNUC__
-#define VARIABLE_IS_NOT_USED __attribute__ ((unused))
-#else
-#define VARIABLE_IS_NOT_USED
-#endif
-
-const Vector3 VARIABLE_IS_NOT_USED g_vector3_axes[3] = { g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z };
+const Vector3 g_vector3_axes[3] = { g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z };
 
 template<typename Element, typename OtherElement>
 inline void vector3_swap( BasicVector3<Element>& self, BasicVector3<OtherElement>& other ){
@@ -560,20 +559,14 @@ inline Vector3 vector3_for_spherical( double theta, double phi ){
 
 template<typename Element>
 inline std::size_t vector3_max_abs_component_index( const BasicVector3<Element>& self ){
-	std::size_t maxi = 0;
-	for( std::size_t i = 1; i < 3; ++i )
-		if( fabs( self[i] ) > fabs( self[maxi] ) )
-			maxi = i;
-	return maxi;
+	const std::size_t maxi = ( fabs( self[1] ) > fabs( self[0] ) )? 1 : 0;
+	return ( fabs( self[2] ) > fabs( self[maxi] ) )? 2 : maxi;;
 }
 
 template<typename Element>
 inline std::size_t vector3_min_abs_component_index( const BasicVector3<Element>& self ){
-	std::size_t mini = 0;
-	for( std::size_t i = 1; i < 3; ++i )
-		if( fabs( self[i] ) < fabs( self[mini] ) )
-			mini = i;
-	return mini;
+	const std::size_t mini = ( fabs( self[1] ) < fabs( self[0] ) )? 1 : 0;
+	return ( fabs( self[2] ) < fabs( self[mini] ) )? 2 : mini;
 }
 
 

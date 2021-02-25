@@ -111,19 +111,12 @@ int EmitShader( const char *shader, int *contentFlags, int *surfaceFlags ){
  */
 
 void EmitPlanes( void ){
-	int i;
-	bspPlane_t  *bp;
-	plane_t     *mp;
-
-
 	/* walk plane list */
-	mp = mapplanes;
-	for ( i = 0; i < nummapplanes; i++, mp++ )
+	plane_t *mp = mapplanes;
+	for ( int i = 0; i < nummapplanes; i++, mp++ )
 	{
 		AUTOEXPAND_BY_REALLOC_BSP( Planes, 1024 );
-		bp = &bspPlanes[ numBSPPlanes ];
-		VectorCopy( mp->normal, bp->normal );
-		bp->dist = mp->dist;
+		bspPlanes[ numBSPPlanes ] = mp->plane;
 		numBSPPlanes++;
 	}
 
@@ -156,8 +149,8 @@ void EmitLeaf( node_t *node ){
 	leaf_p->area = node->area;
 
 	/* emit bounding box */
-	VectorCopy( node->mins, leaf_p->mins );
-	VectorCopy( node->maxs, leaf_p->maxs );
+	leaf_p->minmax.maxs = node->minmax.maxs;
+	leaf_p->minmax.mins = node->minmax.mins;
 
 	/* emit leaf brushes */
 	leaf_p->firstBSPLeafBrush = numBSPLeafBrushes;
@@ -218,8 +211,8 @@ int EmitDrawNode_r( node_t *node ){
 	n = &bspNodes[ n0 ];
 	numBSPNodes++;
 
-	VectorCopy( node->mins, n->mins );
-	VectorCopy( node->maxs, n->maxs );
+	n->minmax.mins = node->minmax.mins;
+	n->minmax.maxs = node->minmax.maxs;
 
 	if ( node->planenum & 1 ) {
 		Error( "WriteDrawNodes_r: odd planenum" );
@@ -534,66 +527,52 @@ void EmitFogs( void ){
  */
 
 void BeginModel( void ){
-	bspModel_t  *mod;
-	brush_t     *b;
-	entity_t    *e;
-	vec3_t mins, maxs;
-	vec3_t lgMins, lgMaxs;          /* ydnar: lightgrid mins/maxs */
-	parseMesh_t *p;
-	int i;
-
+	MinMax minmax;
+	MinMax lgMinmax;          /* ydnar: lightgrid mins/maxs */
 
 	/* test limits */
 	AUTOEXPAND_BY_REALLOC_BSP( Models, 256 );
 
 	/* get model and entity */
-	mod = &bspModels[ numBSPModels ];
-	e = &entities[ mapEntityNum ];
-
-	/* ydnar: lightgrid mins/maxs */
-	ClearBounds( lgMins, lgMaxs );
+	bspModel_t *mod = &bspModels[ numBSPModels ];
+	const entity_t& e = entities[ mapEntityNum ];
 
 	/* bound the brushes */
-	ClearBounds( mins, maxs );
-	for ( b = e->brushes; b; b = b->next )
+	for ( const brush_t *b = e.brushes; b; b = b->next )
 	{
 		/* ignore non-real brushes (origin, etc) */
 		if ( b->numsides == 0 ) {
 			continue;
 		}
-		AddPointToBounds( b->mins, mins, maxs );
-		AddPointToBounds( b->maxs, mins, maxs );
+		minmax.extend( b->minmax );
 
 		/* ydnar: lightgrid bounds */
 		if ( b->compileFlags & C_LIGHTGRID ) {
-			AddPointToBounds( b->mins, lgMins, lgMaxs );
-			AddPointToBounds( b->maxs, lgMins, lgMaxs );
+			lgMinmax.extend( b->minmax );
 		}
 	}
 
 	/* bound patches */
-	for ( p = e->patches; p; p = p->next )
+	for ( const parseMesh_t *p = e.patches; p; p = p->next )
 	{
-		for ( i = 0; i < ( p->mesh.width * p->mesh.height ); i++ )
-			AddPointToBounds( p->mesh.verts[i].xyz, mins, maxs );
+		for ( int i = 0; i < ( p->mesh.width * p->mesh.height ); i++ )
+			minmax.extend( p->mesh.verts[i].xyz );
 	}
 
 	/* ydnar: lightgrid mins/maxs */
-	if ( lgMins[ 0 ] < 99999 ) {
+	if ( lgMinmax.mins[ 0 ] < 99999 ) {
 		/* use lightgrid bounds */
-		VectorCopy( lgMins, mod->mins );
-		VectorCopy( lgMaxs, mod->maxs );
+		mod->minmax = lgMinmax;
 	}
 	else
 	{
 		/* use brush/patch bounds */
-		VectorCopy( mins, mod->mins );
-		VectorCopy( maxs, mod->maxs );
+		mod->minmax = minmax;
 	}
 
 	/* note size */
-	Sys_FPrintf( SYS_VRB, "BSP bounds: { %f %f %f } { %f %f %f }\n", mins[ 0 ], mins[ 1 ], mins[ 2 ], maxs[ 0 ], maxs[ 1 ], maxs[ 2 ] );
-	Sys_FPrintf( SYS_VRB, "Lightgrid bounds: { %f %f %f } { %f %f %f }\n", lgMins[ 0 ], lgMins[ 1 ], lgMins[ 2 ], lgMaxs[ 0 ], lgMaxs[ 1 ], lgMaxs[ 2 ] );
+	Sys_FPrintf( SYS_VRB, "BSP bounds: { %f %f %f } { %f %f %f }\n", minmax.mins[0], minmax.mins[1], minmax.mins[2], minmax.maxs[0], minmax.maxs[1], minmax.maxs[2] );
+	Sys_FPrintf( SYS_VRB, "Lightgrid bounds: { %f %f %f } { %f %f %f }\n", lgMinmax.mins[0], lgMinmax.mins[1], lgMinmax.mins[2], lgMinmax.maxs[0], lgMinmax.maxs[1], lgMinmax.maxs[2] );
 
 	/* set firsts */
 	mod->firstBSPSurface = numBSPDrawSurfaces;

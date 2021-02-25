@@ -41,7 +41,7 @@
 static void CreateSunLight( sun_t *sun ){
 	int i;
 	float photons, d, angle, elevation, da, de;
-	vec3_t direction;
+	Vector3 direction;
 	light_t     *light;
 
 
@@ -63,7 +63,7 @@ static void CreateSunLight( sun_t *sun ){
 	{
 		/* calculate sun direction */
 		if ( i == 0 ) {
-			VectorCopy( sun->direction, direction );
+			direction = sun->direction;
 		}
 		else
 		{
@@ -92,7 +92,7 @@ static void CreateSunLight( sun_t *sun ){
 			elevation += de;
 
 			/* debug code */
-			//%	Sys_Printf( "%d: Angle: %3.4f Elevation: %3.3f\n", sun->numSamples, (angle / Q_PI * 180.0f), (elevation / Q_PI * 180.0f) );
+			//%	Sys_Printf( "%d: Angle: %3.4lf Elevation: %3.3lf\n", sun->numSamples, radians_to_degrees( angle ), radians_to_degrees( elevation ) );
 
 			/* create new vector */
 			direction[ 0 ] = cos( angle ) * cos( elevation );
@@ -115,14 +115,14 @@ static void CreateSunLight( sun_t *sun ){
 		light->style = noStyles ? LS_NORMAL : sun->style;
 
 		/* set the light's position out to infinity */
-		VectorMA( vec3_origin, ( MAX_WORLD_COORD * 8.0f ), direction, light->origin );    /* MAX_WORLD_COORD * 2.0f */
+		light->origin = -direction * ( MAX_WORLD_COORD * 8.0f );    /* MAX_WORLD_COORD * 2.0f */
 
 		/* set the facing to be the inverse of the sun direction */
-		VectorScale( direction, -1.0, light->normal );
-		light->dist = DotProduct( light->origin, light->normal );
+		light->normal = -direction;
+		light->dist = vector3_dot( light->origin, light->normal );
 
 		/* set color and photons */
-		VectorCopy( sun->color, light->color );
+		light->color = sun->color;
 		light->photons = photons * skyScale;
 	}
 
@@ -139,7 +139,7 @@ static void CreateSunLight( sun_t *sun ){
    simulates sky light with multiple suns
  */
 
-static void CreateSkyLights( vec3_t color, float value, int iterations, float filterRadius, int style ){
+static void CreateSkyLights( const Vector3& color, float value, int iterations, float filterRadius, int style ){
 	int i, j, numSuns;
 	int angleSteps, elevationSteps;
 	float angle, elevation;
@@ -153,7 +153,7 @@ static void CreateSkyLights( vec3_t color, float value, int iterations, float fi
 	}
 
 	/* basic sun setup */
-	VectorCopy( color, sun.color );
+	sun.color = color;
 	sun.deviance = 0.0f;
 	sun.filterRadius = filterRadius;
 	sun.numSamples = 1;
@@ -164,8 +164,8 @@ static void CreateSkyLights( vec3_t color, float value, int iterations, float fi
 	elevationSteps = iterations - 1;
 	angleSteps = elevationSteps * 4;
 	angle = 0.0f;
-	elevationStep = DEG2RAD( 90.0f / iterations );  /* skip elevation 0 */
-	angleStep = DEG2RAD( 360.0f / angleSteps );
+	elevationStep = degrees_to_radians( 90.0f / iterations );  /* skip elevation 0 */
+	angleStep = degrees_to_radians( 360.0f / angleSteps );
 
 	/* calc individual sun brightness */
 	numSuns = angleSteps * elevationSteps + 1;
@@ -195,7 +195,7 @@ static void CreateSkyLights( vec3_t color, float value, int iterations, float fi
 	}
 
 	/* create vertical sun */
-	VectorSet( sun.direction, 0.0f, 0.0f, 1.0f );
+	sun.direction = g_vector3_axis_z;
 	CreateSunLight( &sun );
 
 	/* short circuit */
@@ -371,11 +371,11 @@ void CreateEntityLights( void ){
 				light->color[2] = Image_LinearFloatFromsRGBFloat( light->color[2] );
 			}
 			if ( !( light->flags & LightFlags::Unnormalized ) ) {
-				ColorNormalize( light->color, light->color );
+				ColorNormalize( light->color );
 			}
 		}
 		else{
-			VectorSet( light->color, 1.f, 1.f, 1.f );
+			light->color.set( 1 );
 		}
 
 
@@ -406,10 +406,10 @@ void CreateEntityLights( void ){
 				numSpotLights++;
 
 				/* make a spotlight */
-				vec3_t dest;
+				Vector3 dest;
 				e2->vectorForKey( "origin", dest );
-				VectorSubtract( dest, light->origin, light->normal );
-				float dist = VectorNormalize( light->normal, light->normal );
+				light->normal = dest - light->origin;
+				float dist = VectorNormalize( light->normal );
 				float radius = e->floatForKey( "radius" );
 				if ( !radius ) {
 					radius = 64;
@@ -435,10 +435,10 @@ void CreateEntityLights( void ){
 
 					/* make a sun */
 					sun_t sun;
-					VectorScale( light->normal, -1.0f, sun.direction );
-					VectorCopy( light->color, sun.color );
+					sun.direction = -light->normal;
+					sun.color = light->color;
 					sun.photons = intensity;
-					sun.deviance = deviance / 180.0f * Q_PI;
+					sun.deviance = degrees_to_radians( deviance );
 					sun.numSamples = numSamples;
 					sun.style = noStyles ? LS_NORMAL : light->style;
 					sun.next = NULL;
@@ -504,7 +504,6 @@ void CreateSurfaceLights( void ){
 	shaderInfo_t        *si;
 	light_t             *light;
 	float subdivide;
-	vec3_t origin;
 	clipWork_t cw;
 
 
@@ -540,10 +539,6 @@ void CreateSurfaceLights( void ){
 
 		/* autosprite shaders become point lights */
 		if ( si->autosprite ) {
-			/* create an average xyz */
-			VectorAdd( info->mins, info->maxs, origin );
-			VectorScale( origin, 0.5f, origin );
-
 			/* create a light */
 			light = safe_calloc( sizeof( *light ) );
 			light->next = lights;
@@ -555,8 +550,8 @@ void CreateSurfaceLights( void ){
 			light->photons = si->value * pointScale;
 			light->fade = 1.0f;
 			light->si = si;
-			VectorCopy( origin, light->origin );
-			VectorCopy( si->color, light->color );
+			light->origin = info->minmax.origin();
+			light->color = si->color;
 			light->falloffTolerance = falloffTolerance;
 			light->style = si->lightStyle;
 
@@ -622,7 +617,7 @@ void SetEntityOrigins( void ){
 		dm = &bspModels[ modelnum ];
 
 		/* get entity origin */
-		vec3_t origin = { 0.f, 0.f, 0.f };
+		Vector3 origin( 0, 0, 0 );
 		if ( !e.read_keyvalue( origin, "origin" ) ) {
 			continue;
 		}
@@ -637,7 +632,7 @@ void SetEntityOrigins( void ){
 			for ( k = 0; k < ds->numVerts; k++ )
 			{
 				f = ds->firstVert + k;
-				VectorAdd( origin, bspDrawVerts[ f ].xyz, yDrawVerts[ f ].xyz );
+				yDrawVerts[ f ].xyz = origin + bspDrawVerts[ f ].xyz;
 			}
 		}
 	}
@@ -656,10 +651,9 @@ void SetEntityOrigins( void ){
 
 #define ONE_OVER_2PI    0.159154942f    //% (1.0f / (2.0f * 3.141592657f))
 
-float PointToPolygonFormFactor( const vec3_t point, const vec3_t normal, const winding_t *w ){
-	vec3_t triVector, triNormal;
+float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, const winding_t *w ){
 	int i, j;
-	vec3_t dirs[ MAX_POINTS_ON_WINDING ];
+	Vector3 dirs[ MAX_POINTS_ON_WINDING ];
 	float total;
 	float dot, angle, facing;
 
@@ -667,12 +661,12 @@ float PointToPolygonFormFactor( const vec3_t point, const vec3_t normal, const w
 	/* this is expensive */
 	for ( i = 0; i < w->numpoints; i++ )
 	{
-		VectorSubtract( w->p[ i ], point, dirs[ i ] );
-		VectorFastNormalize( dirs[ i ], dirs[ i ] );
+		dirs[ i ] = w->p[ i ] - point;
+		VectorFastNormalize( dirs[ i ] );
 	}
 
 	/* duplicate first vertex to avoid mod operation */
-	VectorCopy( dirs[ 0 ], dirs[ i ] );
+	dirs[ i ] = dirs[ 0 ];
 
 	/* calculcate relative area */
 	total = 0.0f;
@@ -680,7 +674,7 @@ float PointToPolygonFormFactor( const vec3_t point, const vec3_t normal, const w
 	{
 		/* get a triangle */
 		j = i + 1;
-		dot = DotProduct( dirs[ i ], dirs[ j ] );
+		dot = vector3_dot( dirs[ i ], dirs[ j ] );
 
 		/* roundoff can cause slight creep, which gives an IND from acos */
 		if ( dot > 1.0f ) {
@@ -693,12 +687,12 @@ float PointToPolygonFormFactor( const vec3_t point, const vec3_t normal, const w
 		/* get the angle */
 		angle = acos( dot );
 
-		CrossProduct( dirs[ i ], dirs[ j ], triVector );
-		if ( VectorFastNormalize( triVector, triNormal ) < 0.0001f ) {
+		Vector3 triNormal = vector3_cross( dirs[ i ], dirs[ j ] );
+		if ( VectorFastNormalize( triNormal ) < 0.0001f ) {
 			continue;
 		}
 
-		facing = DotProduct( normal, triNormal );
+		facing = vector3_dot( normal, triNormal );
 		total += facing * angle;
 
 		/* ydnar: this was throwing too many errors with radiosity + crappy maps. ignoring it. */
@@ -735,9 +729,9 @@ int LightContributionToSample( trace_t *trace ){
 
 	/* clear color */
 	trace->forceSubsampling = 0.0f; /* to make sure */
-	VectorClear( trace->color );
-	VectorClear( trace->colorNoShadow );
-	VectorClear( trace->directionContribution );
+	trace->color.set( 0 );
+	trace->colorNoShadow.set( 0 );
+	trace->directionContribution.set( 0 );
 
 	colorBrightness = RGBTOGRAY( light->color ) * ( 1.0f / 255.0f );
 
@@ -750,7 +744,7 @@ int LightContributionToSample( trace_t *trace ){
 	if ( light->type != ELightType::Sun ) {
 		/* MrE: if the light is behind the surface */
 		if ( !trace->twoSided ) {
-			if ( DotProduct( light->origin, trace->normal ) - DotProduct( trace->origin, trace->normal ) < 0.0f ) {
+			if ( vector3_dot( light->origin, trace->normal ) - vector3_dot( trace->origin, trace->normal ) < 0.0f ) {
 				return 0;
 			}
 		}
@@ -765,10 +759,10 @@ int LightContributionToSample( trace_t *trace ){
 	if ( light->type == ELightType::Area ) {
 		float factor;
 		float d;
-		vec3_t pushedOrigin;
+		Vector3 pushedOrigin;
 
 		/* project sample point into light plane */
-		d = DotProduct( trace->origin, light->normal ) - light->dist;
+		d = vector3_dot( trace->origin, light->normal ) - light->dist;
 		if ( d < 3.0f ) {
 			/* sample point behind plane? */
 			if ( !( light->flags & LightFlags::Twosided ) && d < -1.0f ) {
@@ -776,7 +770,7 @@ int LightContributionToSample( trace_t *trace ){
 			}
 
 			/* sample plane coincident? */
-			if ( d > -3.0f && DotProduct( trace->normal, light->normal ) > 0.9f ) {
+			if ( d > -3.0f && vector3_dot( trace->normal, light->normal ) > 0.9f ) {
 				return 0;
 			}
 		}
@@ -784,14 +778,14 @@ int LightContributionToSample( trace_t *trace ){
 		/* nudge the point so that it is clearly forward of the light */
 		/* so that surfaces meeting a light emitter don't get black edges */
 		if ( d > -8.0f && d < 8.0f ) {
-			VectorMA( trace->origin, ( 8.0f - d ), light->normal, pushedOrigin );
+			pushedOrigin = trace->origin + light->normal * ( 8.0f - d );
 		}
 		else{
-			VectorCopy( trace->origin, pushedOrigin );
+			pushedOrigin = trace->origin;
 		}
 
 		/* get direction and distance */
-		VectorCopy( light->origin, trace->end );
+		trace->end = light->origin;
 		dist = SetupTrace( trace );
 		if ( dist >= light->envelope ) {
 			return 0;
@@ -800,7 +794,7 @@ int LightContributionToSample( trace_t *trace ){
 		/* ptpff approximation */
 		if ( faster ) {
 			/* angle attenuation */
-			angle = DotProduct( trace->normal, trace->direction );
+			angle = vector3_dot( trace->normal, trace->direction );
 
 			/* twosided lighting */
 			if ( trace->twoSided && angle < 0 ) {
@@ -811,7 +805,7 @@ int LightContributionToSample( trace_t *trace ){
 			}
 
 			/* attenuate */
-			angle *= -DotProduct( light->normal, trace->direction );
+			angle *= -vector3_dot( light->normal, trace->direction );
 			if ( angle == 0.0f ) {
 				return 0;
 			}
@@ -853,7 +847,7 @@ int LightContributionToSample( trace_t *trace ){
 					factor = -factor;
 
 					/* push light origin to other side of the plane */
-					VectorMA( light->origin, -2.0f, light->normal, trace->end );
+					trace->end = light->origin - light->normal * 2.f;
 					dist = SetupTrace( trace );
 					if ( dist >= light->envelope ) {
 						return 0;
@@ -868,7 +862,7 @@ int LightContributionToSample( trace_t *trace ){
 			}
 
 			/* also don't deluxe if the direction is on the wrong side */
-			if ( DotProduct( trace->normal, trace->direction ) < 0 ) {
+			if ( vector3_dot( trace->normal, trace->direction ) < 0 ) {
 				/* no deluxemap contribution from "other side" light */
 				doAddDeluxe = false;
 			}
@@ -885,7 +879,7 @@ int LightContributionToSample( trace_t *trace ){
 	/* point/spot lights */
 	else if ( light->type == ELightType::Point || light->type == ELightType::Spot ) {
 		/* get direction and distance */
-		VectorCopy( light->origin, trace->end );
+		trace->end = light->origin;
 		dist = SetupTrace( trace );
 		if ( dist >= light->envelope ) {
 			return 0;
@@ -900,7 +894,7 @@ int LightContributionToSample( trace_t *trace ){
 		/* angle attenuation */
 		if ( light->flags & LightFlags::AttenAngle ) {
 			/* standard Lambert attenuation */
-			float dot = DotProduct( trace->normal, trace->direction );
+			float dot = vector3_dot( trace->normal, trace->direction );
 
 			/* twosided lighting */
 			if ( trace->twoSided && dot < 0 ) {
@@ -980,18 +974,15 @@ int LightContributionToSample( trace_t *trace ){
 
 		/* handle spotlights */
 		if ( light->type == ELightType::Spot ) {
-			float distByNormal, radiusAtDist, sampleRadius;
-			vec3_t pointAtDist, distToSample;
-
 			/* do cone calculation */
-			distByNormal = -DotProduct( trace->displacement, light->normal );
+			const float distByNormal = -vector3_dot( trace->displacement, light->normal );
 			if ( distByNormal < 0.0f ) {
 				return 0;
 			}
-			VectorMA( light->origin, distByNormal, light->normal, pointAtDist );
-			radiusAtDist = light->radiusByDist * distByNormal;
-			VectorSubtract( trace->origin, pointAtDist, distToSample );
-			sampleRadius = VectorLength( distToSample );
+			const Vector3 pointAtDist = light->origin + light->normal * distByNormal;
+			const float radiusAtDist = light->radiusByDist * distByNormal;
+			const Vector3 distToSample = trace->origin - pointAtDist;
+			const float sampleRadius = vector3_length( distToSample );
 
 			/* outside the cone */
 			if ( sampleRadius >= radiusAtDist ) {
@@ -1017,13 +1008,13 @@ int LightContributionToSample( trace_t *trace ){
 	/* ydnar: sunlight */
 	else if ( light->type == ELightType::Sun ) {
 		/* get origin and direction */
-		VectorAdd( trace->origin, light->origin, trace->end );
+		trace->end = trace->origin + light->origin;
 		dist = SetupTrace( trace );
 
 		/* angle attenuation */
 		if ( light->flags & LightFlags::AttenAngle ) {
 			/* standard Lambert attenuation */
-			float dot = DotProduct( trace->normal, trace->direction );
+			float dot = vector3_dot( trace->normal, trace->direction );
 
 			/* twosided lighting */
 			if ( trace->twoSided && dot < 0 ) {
@@ -1074,7 +1065,7 @@ int LightContributionToSample( trace_t *trace ){
 		}
 
 		/* VorteX: set noShadow color */
-		VectorScale( light->color, add, trace->colorNoShadow );
+		trace->colorNoShadow = light->color * add;
 
 		addDeluxe *= colorBrightness;
 
@@ -1085,11 +1076,11 @@ int LightContributionToSample( trace_t *trace ){
 			}
 		}
 
-		VectorScale( trace->direction, addDeluxe, trace->directionContribution );
+		trace->directionContribution = trace->direction * addDeluxe;
 
 		/* setup trace */
 		trace->testAll = true;
-		VectorScale( light->color, add, trace->color );
+		trace->color = light->color * add;
 
 		/* trace to point */
 		if ( trace->testOcclusion && !trace->forceSunlight ) {
@@ -1097,8 +1088,8 @@ int LightContributionToSample( trace_t *trace ){
 			TraceLine( trace );
 			trace->forceSubsampling *= add;
 			if ( !( trace->compileFlags & C_SKY ) || trace->opaque ) {
-				VectorClear( trace->color );
-				VectorClear( trace->directionContribution );
+				trace->color.set( 0 );
+				trace->directionContribution.set( 0 );
 
 				return -1;
 			}
@@ -1112,7 +1103,7 @@ int LightContributionToSample( trace_t *trace ){
 	}
 
 	/* VorteX: set noShadow color */
-	VectorScale( light->color, add, trace->colorNoShadow );
+	trace->colorNoShadow = light->color * add;
 
 	/* ydnar: changed to a variable number */
 	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
@@ -1142,19 +1133,19 @@ int LightContributionToSample( trace_t *trace ){
 	}
 
 	if ( doAddDeluxe ) {
-		VectorScale( trace->direction, addDeluxe, trace->directionContribution );
+		trace->directionContribution = trace->direction * addDeluxe;
 	}
 
 	/* setup trace */
 	trace->testAll = false;
-	VectorScale( light->color, add, trace->color );
+	trace->color = light->color * add;
 
 	/* raytrace */
 	TraceLine( trace );
 	trace->forceSubsampling *= add;
 	if ( trace->passSolid || trace->opaque ) {
-		VectorClear( trace->color );
-		VectorClear( trace->directionContribution );
+		trace->color.set( 0 );
+		trace->directionContribution.set( 0 );
 
 		return -1;
 	}
@@ -1170,13 +1161,13 @@ int LightContributionToSample( trace_t *trace ){
    determines the amount of light reaching a sample (luxel or vertex)
  */
 
-void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], vec3_t colors[ MAX_LIGHTMAPS ] ){
+void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&colors)[ MAX_LIGHTMAPS ] ){
 	int i, lightmapNum;
 
 
 	/* clear colors */
 	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
-		VectorClear( colors[ lightmapNum ] );
+		colors[ lightmapNum ].set( 0 );
 
 	/* ydnar: normalmap */
 	if ( normalmap ) {
@@ -1188,7 +1179,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], vec3_t colo
 
 	/* ydnar: don't bounce ambient all the time */
 	if ( !bouncing ) {
-		VectorCopy( ambientColor, colors[ 0 ] );
+		colors[ 0 ] = ambientColor;
 	}
 
 	/* ydnar: trace to all the list of lights pre-stored in tw */
@@ -1219,14 +1210,14 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], vec3_t colo
 
 		/* handle negative light */
 		if ( trace->light->flags & LightFlags::Negative ) {
-			VectorScale( trace->color, -1.0f, trace->color );
+			vector3_negate( trace->color );
 		}
 
 		/* set style */
 		styles[ lightmapNum ] = trace->light->style;
 
 		/* add it */
-		VectorAdd( colors[ lightmapNum ], trace->color, colors[ lightmapNum ] );
+		colors[ lightmapNum ] += trace->color;
 
 		/* cheap mode */
 		if ( cheap &&
@@ -1255,7 +1246,7 @@ bool LightContributionToPoint( trace_t *trace ){
 	light = trace->light;
 
 	/* clear color */
-	VectorClear( trace->color );
+	trace->color.set( 0 );
 
 	/* ydnar: early out */
 	if ( !( light->flags & LightFlags::Grid ) || light->envelope <= 0.0f ) {
@@ -1276,19 +1267,17 @@ bool LightContributionToPoint( trace_t *trace ){
 	}
 
 	/* ydnar: check origin against light's pvs envelope */
-	if ( trace->origin[ 0 ] > light->maxs[ 0 ] || trace->origin[ 0 ] < light->mins[ 0 ] ||
-		 trace->origin[ 1 ] > light->maxs[ 1 ] || trace->origin[ 1 ] < light->mins[ 1 ] ||
-		 trace->origin[ 2 ] > light->maxs[ 2 ] || trace->origin[ 2 ] < light->mins[ 2 ] ) {
+	if ( !light->minmax.test( trace->origin ) ) {
 		gridBoundsCulled++;
 		return false;
 	}
 
 	/* set light origin */
 	if ( light->type == ELightType::Sun ) {
-		VectorAdd( trace->origin, light->origin, trace->end );
+		trace->end = trace->origin + light->origin;
 	}
 	else{
-		VectorCopy( light->origin, trace->end );
+		trace->end = light->origin;
 	}
 
 	/* set direction */
@@ -1315,11 +1304,11 @@ bool LightContributionToPoint( trace_t *trace ){
 	/* exact point to polygon form factor */
 	else if ( light->type == ELightType::Area ) {
 		float factor, d;
-		vec3_t pushedOrigin;
+		Vector3 pushedOrigin;
 
 
 		/* see if the point is behind the light */
-		d = DotProduct( trace->origin, light->normal ) - light->dist;
+		d = vector3_dot( trace->origin, light->normal ) - light->dist;
 		if ( !( light->flags & LightFlags::Twosided ) && d < -1.0f ) {
 			return false;
 		}
@@ -1327,10 +1316,10 @@ bool LightContributionToPoint( trace_t *trace ){
 		/* nudge the point so that it is clearly forward of the light */
 		/* so that surfaces meeting a light emiter don't get black edges */
 		if ( d > -8.0f && d < 8.0f ) {
-			VectorMA( trace->origin, ( 8.0f - d ), light->normal, pushedOrigin );
+			pushedOrigin = trace->origin + light->normal * ( 8.0f - d );
 		}
 		else{
-			VectorCopy( trace->origin, pushedOrigin );
+			pushedOrigin = trace->origin;
 		}
 
 		/* calculate the contribution (ydnar 2002-10-21: [bug 642] bad normal calc) */
@@ -1372,19 +1361,15 @@ bool LightContributionToPoint( trace_t *trace ){
 
 		/* handle spotlights */
 		if ( light->type == ELightType::Spot ) {
-			float distByNormal, radiusAtDist, sampleRadius;
-			vec3_t pointAtDist, distToSample;
-
-
 			/* do cone calculation */
-			distByNormal = -DotProduct( trace->displacement, light->normal );
+			const float distByNormal = -vector3_dot( trace->displacement, light->normal );
 			if ( distByNormal < 0.0f ) {
 				return false;
 			}
-			VectorMA( light->origin, distByNormal, light->normal, pointAtDist );
-			radiusAtDist = light->radiusByDist * distByNormal;
-			VectorSubtract( trace->origin, pointAtDist, distToSample );
-			sampleRadius = VectorLength( distToSample );
+			const Vector3 pointAtDist = light->origin + light->normal * distByNormal;
+			const float radiusAtDist = light->radiusByDist * distByNormal;
+			const Vector3 distToSample = trace->origin - pointAtDist;
+			const float sampleRadius = vector3_length( distToSample );
 
 			/* outside the cone */
 			if ( sampleRadius >= radiusAtDist ) {
@@ -1408,14 +1393,14 @@ bool LightContributionToPoint( trace_t *trace ){
 
 		/* setup trace */
 		trace->testAll = true;
-		VectorScale( light->color, add, trace->color );
+		trace->color = light->color * add;
 
 		/* trace to point */
 		if ( trace->testOcclusion && !trace->forceSunlight ) {
 			/* trace */
 			TraceLine( trace );
 			if ( !( trace->compileFlags & C_SKY ) || trace->opaque ) {
-				VectorClear( trace->color );
+				trace->color.set( 0 );
 				return false;
 			}
 		}
@@ -1436,12 +1421,12 @@ bool LightContributionToPoint( trace_t *trace ){
 
 	/* setup trace */
 	trace->testAll = false;
-	VectorScale( light->color, add, trace->color );
+	trace->color = light->color * add;
 
 	/* trace */
 	TraceLine( trace );
 	if ( trace->passSolid ) {
-		VectorClear( trace->color );
+		trace->color.set( 0 );
 		return false;
 	}
 
@@ -1461,16 +1446,16 @@ bool LightContributionToPoint( trace_t *trace ){
 
 struct contribution_t
 {
-	vec3_t dir;
-	vec3_t color;
-	vec3_t ambient;
+	Vector3 dir;
+	Vector3 color;
+	Vector3 ambient;
 	int style;
 };
 
 void TraceGrid( int num ){
 	int i, j, x, y, z, mod, numCon, numStyles;
 	float d, step;
-	vec3_t baseOrigin, cheapColor, color, thisdir;
+	Vector3 cheapColor, thisdir;
 	rawGridPoint_t          *gp;
 	bspGridPoint_t          *bgp;
 	contribution_t contributions[ MAX_CONTRIBUTIONS ];
@@ -1507,10 +1492,10 @@ void TraceGrid( int num ){
 	trace.cluster = ClusterForPointExt( trace.origin, GRID_EPSILON );
 	if ( trace.cluster < 0 ) {
 		/* try to nudge the origin around to find a valid point */
-		VectorCopy( trace.origin, baseOrigin );
+		const Vector3 baseOrigin( trace.origin );
 		for ( step = 0; ( step += 0.005 ) <= 1.0; )
 		{
-			VectorCopy( baseOrigin, trace.origin );
+			trace.origin = baseOrigin;
 			trace.origin[ 0 ] += step * ( Random() - 0.5 ) * gridSize[0];
 			trace.origin[ 1 ] += step * ( Random() - 0.5 ) * gridSize[1];
 			trace.origin[ 2 ] += step * ( Random() - 0.5 ) * gridSize[2];
@@ -1539,7 +1524,7 @@ void TraceGrid( int num ){
 
 	/* clear */
 	numCon = 0;
-	VectorClear( cheapColor );
+	cheapColor.set( 0 );
 
 	/* trace to all the lights, find the major light direction, and divide the
 	   total light between that along the direction and the remaining in the ambient */
@@ -1555,19 +1540,19 @@ void TraceGrid( int num ){
 
 		/* handle negative light */
 		if ( trace.light->flags & LightFlags::Negative ) {
-			VectorScale( trace.color, -1.0f, trace.color );
+			vector3_negate( trace.color );
 		}
 
 		/* add a contribution */
-		VectorCopy( trace.color, contributions[ numCon ].color );
-		VectorCopy( trace.direction, contributions[ numCon ].dir );
-		VectorClear( contributions[ numCon ].ambient );
+		contributions[ numCon ].color = trace.color;
+		contributions[ numCon ].dir = trace.direction;
+		contributions[ numCon ].ambient.set( 0 );
 		contributions[ numCon ].style = trace.light->style;
 		numCon++;
 
 		/* push average direction around */
-		addSize = VectorLength( trace.color );
-		VectorMA( gp->dir, addSize, trace.direction, gp->dir );
+		addSize = vector3_length( trace.color );
+		gp->dir += trace.direction * addSize;
 
 		/* stop after a while */
 		if ( numCon >= ( MAX_CONTRIBUTIONS - 1 ) ) {
@@ -1575,7 +1560,7 @@ void TraceGrid( int num ){
 		}
 
 		/* ydnar: cheap mode */
-		VectorAdd( cheapColor, trace.color, cheapColor );
+		cheapColor += trace.color;
 		if ( cheapgrid && cheapColor[ 0 ] >= 255.0f && cheapColor[ 1 ] >= 255.0f && cheapColor[ 2 ] >= 255.0f ) {
 			break;
 		}
@@ -1586,7 +1571,7 @@ void TraceGrid( int num ){
 	if ( floodlighty ) {
 		int k;
 		float addSize, f;
-		vec3_t dir = { 0, 0, 1 };
+		Vector3 dir = g_vector3_axis_z;
 		float ambientFrac = 0.25f;
 
 		trace.testOcclusion = true;
@@ -1597,37 +1582,27 @@ void TraceGrid( int num ){
 		for ( k = 0; k < 2; k++ )
 		{
 			if ( k == 0 ) { // upper hemisphere
-				trace.normal[0] = 0;
-				trace.normal[1] = 0;
-				trace.normal[2] = 1;
+				trace.normal = g_vector3_axis_z;
 			}
 			else //lower hemisphere
 			{
-				trace.normal[0] = 0;
-				trace.normal[1] = 0;
-				trace.normal[2] = -1;
+				trace.normal = -g_vector3_axis_z;
 			}
 
 			f = FloodLightForSample( &trace, floodlightDistance, floodlight_lowquality );
 
 			/* add a fraction as pure ambient, half as top-down direction */
-			contributions[ numCon ].color[0] = floodlightRGB[0] * floodlightIntensity * f * ( 1.0f - ambientFrac );
-			contributions[ numCon ].color[1] = floodlightRGB[1] * floodlightIntensity * f * ( 1.0f - ambientFrac );
-			contributions[ numCon ].color[2] = floodlightRGB[2] * floodlightIntensity * f * ( 1.0f - ambientFrac );
+			contributions[ numCon ].color = floodlightRGB * ( floodlightIntensity * f * ( 1.0f - ambientFrac ) );
 
-			contributions[ numCon ].ambient[0] = floodlightRGB[0] * floodlightIntensity * f * ambientFrac;
-			contributions[ numCon ].ambient[1] = floodlightRGB[1] * floodlightIntensity * f * ambientFrac;
-			contributions[ numCon ].ambient[2] = floodlightRGB[2] * floodlightIntensity * f * ambientFrac;
+			contributions[ numCon ].ambient = floodlightRGB * ( floodlightIntensity * f * ambientFrac );
 
-			contributions[ numCon ].dir[0] = dir[0];
-			contributions[ numCon ].dir[1] = dir[1];
-			contributions[ numCon ].dir[2] = dir[2];
+			contributions[ numCon ].dir = dir;
 
 			contributions[ numCon ].style = 0;
 
 			/* push average direction around */
-			addSize = VectorLength( contributions[ numCon ].color );
-			VectorMA( gp->dir, addSize, dir, gp->dir );
+			addSize = vector3_length( contributions[ numCon ].color );
+			gp->dir += dir * addSize;
 
 			numCon++;
 		}
@@ -1635,7 +1610,7 @@ void TraceGrid( int num ){
 	/////////////////////
 
 	/* normalize to get primary light direction */
-	VectorNormalize( gp->dir, thisdir );
+	thisdir = VectorNormalized( gp->dir );
 
 	/* now that we have identified the primary light direction,
 	   go back and separate all the light into directed and ambient */
@@ -1644,7 +1619,7 @@ void TraceGrid( int num ){
 	for ( i = 0; i < numCon; i++ )
 	{
 		/* get relative directed strength */
-		d = DotProduct( contributions[ i ].dir, thisdir );
+		d = vector3_dot( contributions[ i ].dir, thisdir );
 		/* we map 1 to gridDirectionality, and 0 to gridAmbientDirectionality */
 		d = gridAmbientDirectionality + d * ( gridDirectionality - gridAmbientDirectionality );
 		if ( d < 0.0f ) {
@@ -1676,7 +1651,7 @@ void TraceGrid( int num ){
 		}
 
 		/* add the directed color */
-		VectorMA( gp->directed[ j ], d, contributions[ i ].color, gp->directed[ j ] );
+		gp->directed[ j ] += contributions[ i ].color * d;
 
 		/* ambient light will be at 1/4 the value of directed light */
 		/* (ydnar: nuke this in favor of more dramatic lighting?) */
@@ -1684,9 +1659,9 @@ void TraceGrid( int num ){
 //		d = 0.25f;
 		/* (Hobbes: always setting it to .25 is hardly any better) */
 		d = 0.25f * ( 1.0f - d );
-		VectorMA( gp->ambient[ j ], d, contributions[ i ].color, gp->ambient[ j ] );
+		gp->ambient[ j ] += contributions[ i ].color * d;
 
-		VectorAdd( gp->ambient[ j ], contributions[ i ].ambient, gp->ambient[ j ] );
+		gp->ambient[ j ] += contributions[ i ].ambient;
 
 /*
  * div0:
@@ -1714,7 +1689,7 @@ void TraceGrid( int num ){
 #endif
 
 		/* set minimum light and copy off to bytes */
-		VectorCopy( gp->ambient[ i ], color );
+		Vector3 color = gp->ambient[ i ];
 		for ( j = 0; j < 3; j++ )
 			if ( color[ j ] < minGridLight[ j ] ) {
 				color[ j ] = minGridLight[ j ];
@@ -1731,7 +1706,7 @@ void TraceGrid( int num ){
 		 */
 		 if( bgp->ambient[i][0] + bgp->ambient[i][1] + bgp->ambient[i][2] == 0
 		&& bgp->directed[i][0] + bgp->directed[i][1] + bgp->directed[i][2] != 0 )
-			VectorSet( bgp->ambient[i], 1, 1, 1 );
+			bgp->ambient[i].set( 1 );
 	}
 
 	/* debug code */
@@ -1756,7 +1731,6 @@ void TraceGrid( int num ){
 
 void SetupGrid( void ){
 	int i, j;
-	vec3_t maxs, oldGridSize;
 	char temp[ 64 ];
 
 
@@ -1769,7 +1743,7 @@ void SetupGrid( void ){
 	entities[ 0 ].read_keyvalue( gridSize, "gridsize" );
 
 	/* quantize it */
-	VectorCopy( gridSize, oldGridSize );
+	const Vector3 oldGridSize = gridSize;
 	for ( i = 0; i < 3; i++ )
 		gridSize[ i ] = gridSize[ i ] >= 8.0f ? floor( gridSize[ i ] ) : 8.0f;
 
@@ -1781,9 +1755,9 @@ void SetupGrid( void ){
 		/* get world bounds */
 		for ( i = 0; i < 3; i++ )
 		{
-			gridMins[ i ] = gridSize[ i ] * ceil( bspModels[ 0 ].mins[ i ] / gridSize[ i ] );
-			maxs[ i ] = gridSize[ i ] * floor( bspModels[ 0 ].maxs[ i ] / gridSize[ i ] );
-			gridBounds[ i ] = ( maxs[ i ] - gridMins[ i ] ) / gridSize[ i ] + 1;
+			gridMins[ i ] = gridSize[ i ] * ceil( bspModels[ 0 ].minmax.mins[ i ] / gridSize[ i ] );
+			const float max = gridSize[ i ] * floor( bspModels[ 0 ].minmax.maxs[ i ] / gridSize[ i ] );
+			gridBounds[ i ] = ( max - gridMins[ i ] ) / gridSize[ i ] + 1;
 		}
 
 		/* set grid size */
@@ -1818,7 +1792,7 @@ void SetupGrid( void ){
 	for ( i = 0; i < numRawGridPoints; i++ )
 	{
 		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
-			VectorCopy( ambientColor, rawGridPoints[ i ].ambient[ j ] );
+			rawGridPoints[ i ].ambient[ j ] = ambientColor;
 
 		rawGridPoints[ i ].styles[ 0 ] = LS_NORMAL;
 		bspGridPoints[ i ].styles[ 0 ] = LS_NORMAL;
@@ -1841,7 +1815,7 @@ void SetupGrid( void ){
  */
 
 void LightWorld( bool fastAllocate ){
-	vec3_t color;
+	Vector3 color;
 	float f;
 	int b, bt;
 	bool minVertex, minGrid;
@@ -1860,31 +1834,31 @@ void LightWorld( bool fastAllocate ){
 		color[1] = Image_LinearFloatFromsRGBFloat( color[1] );
 		color[2] = Image_LinearFloatFromsRGBFloat( color[2] );
 	}
-	if ( VectorLength( color ) == 0.0f ) {
-		VectorSet( color, 1.0, 1.0, 1.0 );
+	if ( vector3_length( color ) == 0.0f ) {
+		color.set( 1 );
 	}
 
 	/* ambient */
 	f = entities[ 0 ].floatForKey( "_ambient", "ambient" );
-	VectorScale( color, f, ambientColor );
+	ambientColor = color * f;
 
 	/* minvertexlight */
 	if ( ( minVertex = entities[ 0 ].read_keyvalue( f, "_minvertexlight" ) ) ) {
-		VectorScale( color, f, minVertexLight );
+		minVertexLight = color * f;
 	}
 
 	/* mingridlight */
 	if ( ( minGrid = entities[ 0 ].read_keyvalue( f, "_mingridlight" ) ) ) {
-		VectorScale( color, f, minGridLight );
+		minGridLight = color * f;
 	}
 
 	/* minlight */
 	if ( entities[ 0 ].read_keyvalue( f, "_minlight" ) ) {
-		VectorScale( color, f, minLight );
+		minLight = color * f;
 		if ( !minVertex )
-			VectorScale( color, f, minVertexLight );
+			minVertexLight = color * f;
 		if ( !minGrid )
-			VectorScale( color, f, minGridLight );
+			minGridLight = color * f;
 	}
 
 	/* maxlight */
@@ -1982,7 +1956,7 @@ void LightWorld( bool fastAllocate ){
 
 		/* flag bouncing */
 		bouncing = true;
-		VectorClear( ambientColor );
+		ambientColor.set( 0 );
 		floodlighty = false;
 
 		/* generate diffuse lights */

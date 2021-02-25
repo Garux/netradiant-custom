@@ -44,7 +44,7 @@ int lastLightmap = -1;
 int objVertexCount = 0;
 int objLastShaderNum = -1;
 
-static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, vec3_t origin, const int* lmIndices ){
+static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
 	int i, v, a, b, c;
 	bspDrawVert_t   *dv;
 
@@ -127,7 +127,7 @@ static void ConvertSurfaceToOBJ( FILE *f, bspModel_t *model, int modelNum, bspDr
    exports a bsp model to an ase chunk
  */
 
-static void ConvertModelToOBJ( FILE *f, bspModel_t *model, int modelNum, vec3_t origin, const int* lmIndices ){
+static void ConvertModelToOBJ( FILE *f, bspModel_t *model, int modelNum, const Vector3& origin, const int* lmIndices ){
 	int i, s;
 	bspDrawSurface_t    *ds;
 
@@ -358,7 +358,7 @@ int ConvertBSPToOBJ( char *bspName ){
 		model = &bspModels[ modelNum ];
 
 		/* get entity origin */
-		vec3_t origin;
+		Vector3 origin;
 		e->vectorForKey( "origin", origin );
 
 		/* convert model */

@@ -179,7 +179,7 @@ bool BoundBrush( brush_t *brush ){
 	winding_t   *w;
 
 
-	ClearBounds( brush->mins, brush->maxs );
+	brush->minmax.clear();
 	for ( i = 0; i < brush->numsides; i++ )
 	{
 		w = brush->sides[ i ].winding;
@@ -187,12 +187,12 @@ bool BoundBrush( brush_t *brush ){
 			continue;
 		}
 		for ( j = 0; j < w->numpoints; j++ )
-			AddPointToBounds( w->p[ j ], brush->mins, brush->maxs );
+			brush->minmax.extend( w->p[ j ] );
 	}
 
 	for ( i = 0; i < 3; i++ )
 	{
-		if ( brush->mins[ i ] < MIN_WORLD_COORD || brush->maxs[ i ] > MAX_WORLD_COORD || brush->mins[i] >= brush->maxs[ i ] ) {
+		if ( brush->minmax.mins[ i ] < MIN_WORLD_COORD || brush->minmax.maxs[ i ] > MAX_WORLD_COORD || brush->minmax.mins[i] >= brush->minmax.maxs[ i ] ) {
 			return false;
 		}
 	}
@@ -205,28 +205,23 @@ bool BoundBrush( brush_t *brush ){
 
 /*
    SnapWeldVector() - ydnar
-   welds two vec3_t's into a third, taking into account nearest-to-integer
+   welds two Vector3's into a third, taking into account nearest-to-integer
    instead of averaging
  */
 
 #define SNAP_EPSILON    0.01
 
-void SnapWeldVector( vec3_t a, vec3_t b, vec3_t out ){
+void SnapWeldVector( const Vector3& a, const Vector3& b, Vector3& out ){
 	int i;
-	vec_t ai, bi, outi;
+	float ai, bi, outi;
 
-
-	/* dummy check */
-	if ( a == NULL || b == NULL || out == NULL ) {
-		return;
-	}
 
 	/* do each element */
 	for ( i = 0; i < 3; i++ )
 	{
 		/* round to integer */
-		ai = Q_rint( a[ i ] );
-		bi = Q_rint( b[ i ] );
+		ai = std::rint( a[ i ] );
+		bi = std::rint( b[ i ] );
 
 		/* prefer exact integer */
 		if ( ai == a[ i ] ) {
@@ -245,7 +240,7 @@ void SnapWeldVector( vec3_t a, vec3_t b, vec3_t out ){
 		}
 
 		/* snap */
-		outi = Q_rint( out[ i ] );
+		outi = std::rint( out[ i ] );
 		if ( fabs( outi - out[ i ] ) <= SNAP_EPSILON ) {
 			out[ i ] = outi;
 		}
@@ -260,7 +255,7 @@ void SnapWeldVector( vec3_t a, vec3_t b, vec3_t out ){
    instead of averaging.
    ==================
  */
-void SnapWeldVectorAccu( vec3_accu_t a, vec3_accu_t b, vec3_accu_t out ){
+void SnapWeldVectorAccu( const DoubleVector3& a, const DoubleVector3& b, DoubleVector3& out ){
 	// I'm just preserving what I think was the intended logic of the original
 	// SnapWeldVector().  I'm not actually sure where this function should even
 	// be used.  I'd like to know which kinds of problems this function addresses.
@@ -270,16 +265,12 @@ void SnapWeldVectorAccu( vec3_accu_t a, vec3_accu_t b, vec3_accu_t out ){
 	// be snapping to the nearest 1/8 unit instead?
 
 	int i;
-	vec_accu_t ai, bi, ad, bd;
-
-	if ( a == NULL || b == NULL || out == NULL ) {
-		Error( "SnapWeldVectorAccu: NULL argument" );
-	}
+	double ai, bi, ad, bd;
 
 	for ( i = 0; i < 3; i++ )
 	{
-		ai = Q_rintAccu( a[i] );
-		bi = Q_rintAccu( b[i] );
+		ai = std::rint( a[i] );
+		bi = std::rint( b[i] );
 		ad = fabs( ai - a[i] );
 		bd = fabs( bi - b[i] );
 
@@ -310,7 +301,7 @@ void SnapWeldVectorAccu( vec3_accu_t a, vec3_accu_t b, vec3_accu_t out ){
 bool FixWinding( winding_t *w ){
 	bool valid = true;
 	int i, j, k;
-	vec3_t vec;
+	Vector3 vec;
 	float dist;
 
 
@@ -331,22 +322,21 @@ bool FixWinding( winding_t *w ){
 		j = ( i + 1 ) % w->numpoints;
 
 		/* degenerate edge? */
-		VectorSubtract( w->p[ i ], w->p[ j ], vec );
-		dist = VectorLength( vec );
+		dist = vector3_length( w->p[ i ] - w->p[ j ] );
 		if ( dist < DEGENERATE_EPSILON ) {
 			valid = false;
 			//Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Degenerate winding edge found, fixing...\n" );
 
 			/* create an average point (ydnar 2002-01-26: using nearest-integer weld preference) */
 			SnapWeldVector( w->p[ i ], w->p[ j ], vec );
-			VectorCopy( vec, w->p[ i ] );
+			w->p[ i ] = vec;
 			//VectorAdd( w->p[ i ], w->p[ j ], vec );
 			//VectorScale( vec, 0.5, w->p[ i ] );
 
 			/* move the remaining verts */
 			for ( k = i + 2; k < w->numpoints; k++ )
 			{
-				VectorCopy( w->p[ k ], w->p[ k - 1 ] );
+				w->p[ k - 1 ] = w->p[ k ];
 			}
 			w->numpoints--;
 		}
@@ -375,8 +365,6 @@ bool FixWinding( winding_t *w ){
  */
 bool FixWindingAccu( winding_accu_t *w ){
 	int i, j, k;
-	vec3_accu_t vec;
-	vec_accu_t dist;
 	bool done, altered;
 
 	if ( w == NULL ) {
@@ -395,19 +383,18 @@ bool FixWindingAccu( winding_accu_t *w ){
 		{
 			j = ( ( ( i + 1 ) == w->numpoints ) ? 0 : ( i + 1 ) );
 
-			VectorSubtractAccu( w->p[i], w->p[j], vec );
-			dist = VectorLengthAccu( vec );
-			if ( dist < DEGENERATE_EPSILON ) {
+			DoubleVector3 vec = w->p[i] - w->p[j];
+			if ( vector3_length( vec ) < DEGENERATE_EPSILON ) {
 				// TODO: I think the "snap weld vector" was written before
 				// some of the math precision fixes, and its purpose was
 				// probably to address math accuracy issues.  We can think
 				// about changing the logic here.  Maybe once plane distance
 				// gets 64 bits, we can look at it then.
 				SnapWeldVectorAccu( w->p[i], w->p[j], vec );
-				VectorCopyAccu( vec, w->p[i] );
+				w->p[i] = vec;
 				for ( k = j + 1; k < w->numpoints; k++ )
 				{
-					VectorCopyAccu( w->p[k], w->p[k - 1] );
+					w->p[k - 1] = w->p[k];
 				}
 				w->numpoints--;
 				altered = true;
@@ -456,9 +443,9 @@ bool CreateBrushWindings( brush_t *brush ){
 
 		/* make huge winding */
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-		w = BaseWindingForPlaneAccu( plane->normal, plane->dist );
+		w = BaseWindingForPlaneAccu( plane->plane );
 #else
-		w = BaseWindingForPlane( plane->normal, plane->dist );
+		w = BaseWindingForPlane( plane->plane );
 #endif
 
 		/* walk the list of brush sides */
@@ -475,9 +462,9 @@ bool CreateBrushWindings( brush_t *brush ){
 			}
 			plane = &mapplanes[ brush->sides[ j ].planenum ^ 1 ];
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-			ChopWindingInPlaceAccu( &w, plane->normal, plane->dist, 0 );
+			ChopWindingInPlaceAccu( &w, plane->plane, 0 );
 #else
-			ChopWindingInPlace( &w, plane->normal, plane->dist, 0 ); // CLIP_EPSILON );
+			ChopWindingInPlace( &w, plane->plane, 0 ); // CLIP_EPSILON );
 #endif
 
 			/* ydnar: fix broken windings that would generate trifans */
@@ -523,24 +510,20 @@ bool CreateBrushWindings( brush_t *brush ){
    Creates a new axial brush
    ==================
  */
-brush_t *BrushFromBounds( vec3_t mins, vec3_t maxs ){
+brush_t *BrushFromBounds( const Vector3& mins, const Vector3& maxs ){
 	brush_t     *b;
 	int i;
-	vec3_t normal;
-	vec_t dist;
+	float dist;
 
 	b = AllocBrush( 6 );
 	b->numsides = 6;
 	for ( i = 0 ; i < 3 ; i++ )
 	{
-		VectorClear( normal );
-		normal[i] = 1;
 		dist = maxs[i];
-		b->sides[i].planenum = FindFloatPlane( normal, dist, 1, (vec3_t*) &maxs );
+		b->sides[i].planenum = FindFloatPlane( g_vector3_axes[i], dist, 1, &maxs );
 
-		normal[i] = -1;
 		dist = -mins[i];
-		b->sides[3 + i].planenum = FindFloatPlane( normal, dist, 1, (vec3_t*) &mins );
+		b->sides[3 + i].planenum = FindFloatPlane( -g_vector3_axes[i], dist, 1, &mins );
 	}
 
 	CreateBrushWindings( b );
@@ -554,12 +537,11 @@ brush_t *BrushFromBounds( vec3_t mins, vec3_t maxs ){
 
    ==================
  */
-vec_t BrushVolume( brush_t *brush ){
+float BrushVolume( brush_t *brush ){
 	int i;
 	winding_t   *w;
-	vec3_t corner;
-	vec_t d, area, volume;
-	plane_t     *plane;
+	Vector3 corner;
+	float volume;
 
 	if ( !brush ) {
 		return 0;
@@ -578,7 +560,7 @@ vec_t BrushVolume( brush_t *brush ){
 	if ( !w ) {
 		return 0;
 	}
-	VectorCopy( w->p[0], corner );
+	corner = w->p[0];
 
 	// make tetrahedrons to all other faces
 
@@ -589,10 +571,7 @@ vec_t BrushVolume( brush_t *brush ){
 		if ( !w ) {
 			continue;
 		}
-		plane = &mapplanes[brush->sides[i].planenum];
-		d = -( DotProduct( corner, plane->normal ) - plane->dist );
-		area = WindingArea( w );
-		volume += d * area;
+		volume += -plane3_distance_to_point( mapplanes[brush->sides[i].planenum].plane, corner ) * WindingArea( w );
 	}
 
 	volume /= 3;
@@ -627,7 +606,7 @@ void WriteBSPBrushMap( const char *name, brush_t *list ){
 		{
 			// TODO: See if we can use a smaller winding to prevent resolution loss.
 			// Is WriteBSPBrushMap() used only to decompile maps?
-			w = BaseWindingForPlane( mapplanes[s->planenum].normal, mapplanes[s->planenum].dist );
+			w = BaseWindingForPlane( mapplanes[s->planenum].plane );
 
 			fprintf( f, "( %i %i %i ) ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2] );
 			fprintf( f, "( %i %i %i ) ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2] );
@@ -791,7 +770,7 @@ void FilterStructuralBrushesIntoTree( entity_t *e, tree_t *tree ) {
  */
 tree_t *AllocTree( void ){
 	tree_t *tree = safe_calloc( sizeof( *tree ) );
-	ClearBounds( tree->mins, tree->maxs );
+	tree->minmax.clear();
 	return tree;
 }
 
@@ -821,17 +800,12 @@ bool WindingIsTiny( winding_t *w ){
     return false;
  */
 	int i, j;
-	vec_t len;
-	vec3_t delta;
-	int edges;
+	int edges = 0;
 
-	edges = 0;
 	for ( i = 0 ; i < w->numpoints ; i++ )
 	{
 		j = i == w->numpoints - 1 ? 0 : i + 1;
-		VectorSubtract( w->p[j], w->p[i], delta );
-		len = VectorLength( delta );
-		if ( len > EDGE_LENGTH ) {
+		if ( vector3_length( w->p[j] - w->p[i] ) > EDGE_LENGTH ) {
 			if ( ++edges == 3 ) {
 				return false;
 			}
@@ -872,7 +846,7 @@ bool WindingIsHuge( winding_t *w ){
 int BrushMostlyOnSide( brush_t *brush, plane_t *plane ){
 	int i, j;
 	winding_t   *w;
-	vec_t d, max;
+	float max;
 	int side;
 
 	max = 0;
@@ -885,7 +859,7 @@ int BrushMostlyOnSide( brush_t *brush, plane_t *plane ){
 		}
 		for ( j = 0 ; j < w->numpoints ; j++ )
 		{
-			d = DotProduct( w->p[j], plane->normal ) - plane->dist;
+			const double d = plane3_distance_to_point( plane->plane, w->p[j] );
 			if ( d > max ) {
 				max = d;
 				side = PSIDE_FRONT;
@@ -912,7 +886,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 	winding_t   *w, *cw[2], *midwinding;
 	plane_t     *plane, *plane2;
 	side_t      *s, *cs;
-	float d, d_front, d_back;
+	float d_front, d_back;
 
 
 	*front = NULL;
@@ -929,7 +903,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 		}
 		for ( j = 0 ; j < w->numpoints ; j++ )
 		{
-			d = DotProduct( w->p[j], plane->normal ) - plane->dist;
+			const double d = plane3_distance_to_point( plane->plane, w->p[j] );
 			if ( d > 0 && d > d_front ) {
 				d_front = d;
 			}
@@ -952,11 +926,11 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 	}
 
 	// create a new winding from the split plane
-	w = BaseWindingForPlane( plane->normal, plane->dist );
+	w = BaseWindingForPlane( plane->plane );
 	for ( i = 0 ; i < brush->numsides && w ; i++ )
 	{
 		plane2 = &mapplanes[brush->sides[i].planenum ^ 1];
-		ChopWindingInPlace( &w, plane2->normal, plane2->dist, 0 ); // PLANESIDE_EPSILON);
+		ChopWindingInPlace( &w, plane2->plane, 0 ); // PLANESIDE_EPSILON);
 	}
 
 	if ( !w || WindingIsTiny( w ) ) { // the brush isn't really split
@@ -998,7 +972,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 		if ( !w ) {
 			continue;
 		}
-		ClipWindingEpsilonStrict( w, plane->normal, plane->dist,
+		ClipWindingEpsilonStrict( w, plane->plane,
 								  0 /*PLANESIDE_EPSILON*/, &cw[0], &cw[1] ); /* strict, in parallel case we get the face back because it also is the midwinding */
 		for ( j = 0 ; j < 2 ; j++ )
 		{
@@ -1060,7 +1034,7 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 	}
 
 	{
-		vec_t v1;
+		float v1;
 		int i;
 
 

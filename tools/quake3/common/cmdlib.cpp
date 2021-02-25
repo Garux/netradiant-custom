@@ -29,7 +29,6 @@
 // replaced qprintf with Sys_Printf
 
 #include "cmdlib.h"
-#include "mathlib.h"
 #include "inout.h"
 #include <sys/types.h>
 #include <sys/stat.h>

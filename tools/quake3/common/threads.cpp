@@ -27,7 +27,6 @@
 #endif
 
 #include "cmdlib.h"
-#include "mathlib.h"
 #include "inout.h"
 #include "qthreads.h"
 

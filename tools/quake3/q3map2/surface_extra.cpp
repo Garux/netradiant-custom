@@ -48,7 +48,7 @@ struct surfaceExtra_t
 	int castShadows, recvShadows;
 	int sampleSize;
 	float longestCurve;
-	vec3_t lightmapAxis;
+	Vector3 lightmapAxis;
 };
 
 #define GROW_SURFACE_EXTRAS 1024
@@ -117,7 +117,7 @@ void SetSurfaceExtra( mapDrawSurface_t *ds, int num ){
 	se->recvShadows = ds->recvShadows;
 	se->sampleSize = ds->sampleSize;
 	se->longestCurve = ds->longestCurve;
-	VectorCopy( ds->lightmapAxis, se->lightmapAxis );
+	se->lightmapAxis = ds->lightmapAxis;
 
 	/* debug code */
 	//%	Sys_FPrintf( SYS_VRB, "SetSurfaceExtra(): entityNum = %d\n", ds->entityNum );
@@ -180,9 +180,9 @@ float GetSurfaceExtraLongestCurve( int num ){
 }
 
 
-void GetSurfaceExtraLightmapAxis( int num, vec3_t lightmapAxis ){
+void GetSurfaceExtraLightmapAxis( int num, Vector3& lightmapAxis ){
 	surfaceExtra_t  *se = GetSurfaceExtra( num );
-	VectorCopy( se->lightmapAxis, lightmapAxis );
+	lightmapAxis = se->lightmapAxis;
 }
 
 
@@ -402,7 +402,7 @@ void LoadSurfaceExtraFile( const char *path ){
 
 			/* lightmap axis vector */
 			else if ( striEqual( token, "lightmapAxis" ) ) {
-				Parse1DMatrix( 3, se->lightmapAxis );
+				Parse1DMatrix( 3, se->lightmapAxis.data() );
 			}
 
 			/* ignore all other tokens on the line */

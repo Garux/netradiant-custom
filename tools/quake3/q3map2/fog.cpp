@@ -63,7 +63,7 @@ mesh_t *DrawSurfToMesh( mapDrawSurface_t *ds ){
    chops a mesh by a plane
  */
 
-void SplitMeshByPlane( mesh_t *in, vec3_t normal, float dist, mesh_t **front, mesh_t **back ){
+void SplitMeshByPlane( mesh_t *in, const Plane3f& plane, mesh_t **front, mesh_t **back ){
 	int w, h, split;
 	float d[MAX_PATCH_SIZE][MAX_PATCH_SIZE];
 	bspDrawVert_t   *dv, *v1, *v2;
@@ -80,7 +80,7 @@ void SplitMeshByPlane( mesh_t *in, vec3_t normal, float dist, mesh_t **front, me
 		c_on = 0;
 		for ( h = 0 ; h < in->height ; h++ ) {
 			for ( w = 0 ; w < in->width ; w++, dv++ ) {
-				d[h][w] = DotProduct( dv->xyz, normal ) - dist;
+				d[h][w] = plane3_distance_to_point( plane, dv->xyz );
 				if ( d[h][w] > ON_EPSILON ) {
 					c_front++;
 				}
@@ -247,7 +247,6 @@ void SplitMeshByPlane( mesh_t *in, vec3_t normal, float dist, mesh_t **front, me
 bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	int i, j;
 	side_t      *s;
-	plane_t     *plane;
 	mesh_t      *outside[MAX_BRUSH_SIDES];
 	int numOutside;
 	mesh_t      *m, *front, *back;
@@ -261,9 +260,9 @@ bool ChopPatchSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 
 	for ( i = 4 ; i <= 5 ; i++ ) {
 		s = &b->sides[ i ];
-		plane = &mapplanes[ s->planenum ];
+		const plane_t& plane = mapplanes[ s->planenum ];
 
-		SplitMeshByPlane( m, plane->normal, plane->dist, &front, &back );
+		SplitMeshByPlane( m, plane.plane, &front, &back );
 
 		if ( !back ) {
 			// nothing actually contained inside
@@ -340,14 +339,14 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
 	// (actually send the whole draw surface would be cool?)
 	if ( ds->numVerts >= MAX_POINTS_ON_WINDING ) {
 		int max = ds->numVerts;
-		vec3_t p[256];
+		Vector3 p[256];
 
 		if ( max > 256 ) {
 			max = 256;
 		}
 
 		for ( i = 0 ; i < max ; i++ ) {
-			VectorCopy( ds->verts[i].xyz, p[i] );
+			p[i] = ds->verts[i].xyz;
 		}
 
 		xml_Winding( "WindingFromDrawSurf failed: MAX_POINTS_ON_WINDING exceeded", p, max, true );
@@ -356,7 +355,7 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
 	w = AllocWinding( ds->numVerts );
 	w->numpoints = ds->numVerts;
 	for ( i = 0 ; i < ds->numVerts ; i++ ) {
-		VectorCopy( ds->verts[i].xyz, w->p[i] );
+		w->p[i] = ds->verts[i].xyz;
 	}
 	return w;
 }
@@ -371,7 +370,6 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
 bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	int i, j;
 	side_t              *s;
-	plane_t             *plane;
 	winding_t           *w;
 	winding_t           *front, *back;
 	winding_t           *outside[ MAX_BRUSH_SIDES ];
@@ -393,7 +391,7 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 	{
 		/* get brush side and plane */
 		s = &b->sides[ i ];
-		plane = &mapplanes[ s->planenum ];
+		const plane_t& plane = mapplanes[ s->planenum ];
 
 		/* handle coplanar outfacing (don't fog) */
 		if ( ds->sideRef->side->planenum == s->planenum ) {
@@ -406,7 +404,7 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
 		}
 
 		/* general case */
-		ClipWindingEpsilonStrict( w, plane->normal, plane->dist, ON_EPSILON, &front, &back ); /* strict; if plane is "almost identical" to face, both ways to continue can be wrong, so we better not fog it */
+		ClipWindingEpsilonStrict( w, plane.plane, ON_EPSILON, &front, &back ); /* strict; if plane is "almost identical" to face, both ways to continue can be wrong, so we better not fog it */
 		FreeWinding( w );
 
 		if ( back == NULL ) {
@@ -468,10 +466,9 @@ bool ChopFaceSurfaceByBrush( entity_t *e, mapDrawSurface_t *ds, brush_t *b ){
  */
 
 void FogDrawSurfaces( entity_t *e ){
-	int i, j, k, fogNum;
+	int i, j, fogNum;
 	fog_t               *fog;
 	mapDrawSurface_t    *ds;
-	vec3_t mins, maxs;
 	int fogged, numFogged;
 	int numBaseDrawSurfs;
 
@@ -512,24 +509,13 @@ void FogDrawSurfaces( entity_t *e ){
 			else
 			{
 				/* find drawsurface bounds */
-				ClearBounds( mins, maxs );
+				MinMax minmax;
 				for ( j = 0; j < ds->numVerts; j++ )
-					AddPointToBounds( ds->verts[ j ].xyz, mins, maxs );
+					minmax.extend( ds->verts[ j ].xyz );
 
 				/* check against the fog brush */
-				for ( k = 0; k < 3; k++ )
-				{
-					if ( mins[ k ] > fog->brush->maxs[ k ] ) {
-						break;
-					}
-					if ( maxs[ k ] < fog->brush->mins[ k ] ) {
-						break;
-					}
-				}
-
-				/* no intersection? */
-				if ( k < 3 ) {
-					continue;
+				if( !minmax.test( fog->brush->minmax ) ){
+					continue; /* no intersection */
 				}
 
 				/* ydnar: gs mods: handle the various types of surfaces */
@@ -580,12 +566,10 @@ void FogDrawSurfaces( entity_t *e ){
    gets the fog number for a point in space
  */
 
-int FogForPoint( vec3_t point, float epsilon ){
+int FogForPoint( const Vector3& point, float epsilon ){
 	int fogNum, i, j;
-	float dot;
 	bool inside;
 	brush_t         *brush;
-	plane_t         *plane;
 
 
 	/* start with bogus fog num */
@@ -607,10 +591,7 @@ int FogForPoint( vec3_t point, float epsilon ){
 		inside = true;
 		for ( j = 0; j < brush->numsides && inside; j++ )
 		{
-			plane = &mapplanes[ brush->sides[ j ].planenum ];   /* note usage of map planes here */
-			dot = DotProduct( point, plane->normal );
-			dot -= plane->dist;
-			if ( dot > epsilon ) {
+			if ( plane3_distance_to_point( mapplanes[ brush->sides[ j ].planenum ].plane, point ) > epsilon ) {
 				inside = false;
 			}
 		}
@@ -633,18 +614,14 @@ int FogForPoint( vec3_t point, float epsilon ){
    gets the fog number for a bounding box
  */
 
-int FogForBounds( vec3_t mins, vec3_t maxs, float epsilon ){
-	int fogNum, i, j;
-	float highMin, lowMax, volume, bestVolume;
-	vec3_t fogMins, fogMaxs, overlap;
-	brush_t         *brush;
-
+int FogForBounds( const MinMax& minmax, float epsilon ){
+	int fogNum, i;
 
 	/* start with bogus fog num */
 	fogNum = defaultFogNum;
 
 	/* init */
-	bestVolume = 0.0f;
+	float bestVolume = 0.0f;
 
 	/* walk the list of fog volumes */
 	for ( i = 0; i < numMapFogs; i++ )
@@ -656,37 +633,21 @@ int FogForBounds( vec3_t mins, vec3_t maxs, float epsilon ){
 		}
 
 		/* get fog brush */
-		brush = mapFogs[ i ].brush;
+		brush_t *brush = mapFogs[ i ].brush;
 
 		/* get bounds */
-		fogMins[ 0 ] = brush->mins[ 0 ] - epsilon;
-		fogMins[ 1 ] = brush->mins[ 1 ] - epsilon;
-		fogMins[ 2 ] = brush->mins[ 2 ] - epsilon;
-		fogMaxs[ 0 ] = brush->maxs[ 0 ] + epsilon;
-		fogMaxs[ 1 ] = brush->maxs[ 1 ] + epsilon;
-		fogMaxs[ 2 ] = brush->maxs[ 2 ] + epsilon;
-
+		const MinMax fogMinmax( brush->minmax.mins - Vector3( epsilon, epsilon, epsilon ),
+		                        brush->minmax.maxs + Vector3( epsilon, epsilon, epsilon ) );
 		/* check against bounds */
-		for ( j = 0; j < 3; j++ )
-		{
-			if ( mins[ j ] > fogMaxs[ j ] || maxs[ j ] < fogMins[ j ] ) {
-				break;
-			}
-			highMin = mins[ j ] > fogMins[ j ] ? mins[ j ] : fogMins[ j ];
-			lowMax = maxs[ j ] < fogMaxs[ j ] ? maxs[ j ] : fogMaxs[ j ];
-			overlap[ j ] = lowMax - highMin;
-			if ( overlap[ j ] < 1.0f ) {
-				overlap[ j ] = 1.0f;
-			}
+		if( !minmax.test( fogMinmax ) ){
+			continue; /* no overlap */
 		}
-
-		/* no overlap */
-		if ( j < 3 ) {
-			continue;
-		}
+		const Vector3 overlap( std::max( 1.f, std::min( minmax.maxs[0], fogMinmax.maxs[0] ) - std::max( minmax.mins[0], fogMinmax.mins[0] ) ),
+		                       std::max( 1.f, std::min( minmax.maxs[1], fogMinmax.maxs[1] ) - std::max( minmax.mins[1], fogMinmax.mins[1] ) ),
+							   std::max( 1.f, std::min( minmax.maxs[2], fogMinmax.maxs[2] ) - std::max( minmax.mins[2], fogMinmax.mins[2] ) ) );
 
 		/* get volume */
-		volume = overlap[ 0 ] * overlap[ 1 ] * overlap[ 2 ];
+		const float volume = overlap[0] * overlap[1] * overlap[2];
 
 		/* test against best volume */
 		if ( volume > bestVolume ) {
@@ -710,7 +671,6 @@ void CreateMapFogs( void ){
 	int j;
 	brush_t     *brush;
 	fog_t       *fog;
-	vec3_t invFogDir;
 
 
 	/* skip? */
@@ -744,14 +704,14 @@ void CreateMapFogs( void ){
 			fog->visibleSide = -1;
 
 			/* if shader specifies an explicit direction, then find a matching brush side with an opposed normal */
-			if ( VectorLength( fog->si->fogDir ) ) {
+			if ( vector3_length( fog->si->fogDir ) ) {
 				/* flip it */
-				VectorScale( fog->si->fogDir, -1.0f, invFogDir );
+				const Vector3 invFogDir = -fog->si->fogDir;
 
 				/* find the brush side */
 				for ( j = 0; j < brush->numsides; j++ )
 				{
-					if ( VectorCompare( invFogDir, mapplanes[ brush->sides[ j ].planenum ].normal ) ) {
+					if ( VectorCompare( invFogDir, mapplanes[ brush->sides[ j ].planenum ].normal() ) ) {
 						fog->visibleSide = j;
 						//%	Sys_Printf( "Brush num: %d Side num: %d\n", fog->brushNum, fog->visibleSide );
 						break;

@@ -38,35 +38,24 @@
    returns an 50/50 interpolated vert
  */
 
-void LerpDrawVert( bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *out ){
-	int k;
+void LerpDrawVert( const bspDrawVert_t *a, const bspDrawVert_t *b, bspDrawVert_t *out ){
 
+	out->xyz = vector3_mid( a->xyz, b->xyz );
+	out->st = vector2_mid( a->st, b->st );
 
-	out->xyz[ 0 ] = 0.5 * ( a->xyz[ 0 ] + b->xyz[ 0 ] );
-	out->xyz[ 1 ] = 0.5 * ( a->xyz[ 1 ] + b->xyz[ 1 ] );
-	out->xyz[ 2 ] = 0.5 * ( a->xyz[ 2 ] + b->xyz[ 2 ] );
-
-	out->st[ 0 ] = 0.5 * ( a->st[ 0 ] + b->st[ 0 ] );
-	out->st[ 1 ] = 0.5 * ( a->st[ 1 ] + b->st[ 1 ] );
-
-	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+	for ( int k = 0; k < MAX_LIGHTMAPS; k++ )
 	{
-		out->lightmap[ k ][ 0 ] = 0.5f * ( a->lightmap[ k ][ 0 ] + b->lightmap[ k ][ 0 ] );
-		out->lightmap[ k ][ 1 ] = 0.5f * ( a->lightmap[ k ][ 1 ] + b->lightmap[ k ][ 1 ] );
-		out->color[ k ][ 0 ] = ( a->color[ k ][ 0 ] + b->color[ k ][ 0 ] ) >> 1;
-		out->color[ k ][ 1 ] = ( a->color[ k ][ 1 ] + b->color[ k ][ 1 ] ) >> 1;
-		out->color[ k ][ 2 ] = ( a->color[ k ][ 2 ] + b->color[ k ][ 2 ] ) >> 1;
-		out->color[ k ][ 3 ] = ( a->color[ k ][ 3 ] + b->color[ k ][ 3 ] ) >> 1;
+		out->lightmap[ k ] = vector2_mid( a->lightmap[ k ], b->lightmap[ k ] );
+		for( int i = 0; i < 4; ++i )
+			out->color[ k ][ i ] = ( a->color[ k ][ i ] + b->color[ k ][ i ] ) >> 1;
 	}
 
 	/* ydnar: added normal interpolation */
-	out->normal[ 0 ] = 0.5f * ( a->normal[ 0 ] + b->normal[ 0 ] );
-	out->normal[ 1 ] = 0.5f * ( a->normal[ 1 ] + b->normal[ 1 ] );
-	out->normal[ 2 ] = 0.5f * ( a->normal[ 2 ] + b->normal[ 2 ] );
+	out->normal = vector3_mid( a->normal, b->normal );
 
 	/* if the interpolant created a bogus normal, just copy the normal from a */
-	if ( VectorNormalize( out->normal, out->normal ) == 0 ) {
-		VectorCopy( a->normal, out->normal );
+	if ( VectorNormalize( out->normal ) == 0 ) {
+		out->normal = a->normal;
 	}
 }
 
@@ -78,33 +67,23 @@ void LerpDrawVert( bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *out ){
  */
 
 void LerpDrawVertAmount( bspDrawVert_t *a, bspDrawVert_t *b, float amount, bspDrawVert_t *out ){
-	int k;
 
+	out->xyz = a->xyz + ( b->xyz - a->xyz ) * amount;
 
-	out->xyz[ 0 ] = a->xyz[ 0 ] + amount * ( b->xyz[ 0 ] - a->xyz[ 0 ] );
-	out->xyz[ 1 ] = a->xyz[ 1 ] + amount * ( b->xyz[ 1 ] - a->xyz[ 1 ] );
-	out->xyz[ 2 ] = a->xyz[ 2 ] + amount * ( b->xyz[ 2 ] - a->xyz[ 2 ] );
+	out->st = a->st + ( b->st - a->st ) * amount;
 
-	out->st[ 0 ] = a->st[ 0 ] + amount * ( b->st[ 0 ] - a->st[ 0 ] );
-	out->st[ 1 ] = a->st[ 1 ] + amount * ( b->st[ 1 ] - a->st[ 1 ] );
-
-	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+	for ( int k = 0; k < MAX_LIGHTMAPS; k++ )
 	{
-		out->lightmap[ k ][ 0 ] = a->lightmap[ k ][ 0 ] + amount * ( b->lightmap[ k ][ 0 ] - a->lightmap[ k ][ 0 ] );
-		out->lightmap[ k ][ 1 ] = a->lightmap[ k ][ 1 ] + amount * ( b->lightmap[ k ][ 1 ] - a->lightmap[ k ][ 1 ] );
-		out->color[ k ][ 0 ] = a->color[ k ][ 0 ] + amount * ( b->color[ k ][ 0 ] - a->color[ k ][ 0 ] );
-		out->color[ k ][ 1 ] = a->color[ k ][ 1 ] + amount * ( b->color[ k ][ 1 ] - a->color[ k ][ 1 ] );
-		out->color[ k ][ 2 ] = a->color[ k ][ 2 ] + amount * ( b->color[ k ][ 2 ] - a->color[ k ][ 2 ] );
-		out->color[ k ][ 3 ] = a->color[ k ][ 3 ] + amount * ( b->color[ k ][ 3 ] - a->color[ k ][ 3 ] );
+		out->lightmap[ k ] = a->lightmap[ k ] + ( b->lightmap[ k ] - a->lightmap[ k ] ) * amount;
+		for( int i = 0; i < 4; ++i )
+			out->color[ k ][ i ] = a->color[ k ][ i ] + amount * ( b->color[ k ][ i ] - a->color[ k ][ i ] );
 	}
 
-	out->normal[ 0 ] = a->normal[ 0 ] + amount * ( b->normal[ 0 ] - a->normal[ 0 ] );
-	out->normal[ 1 ] = a->normal[ 1 ] + amount * ( b->normal[ 1 ] - a->normal[ 1 ] );
-	out->normal[ 2 ] = a->normal[ 2 ] + amount * ( b->normal[ 2 ] - a->normal[ 2 ] );
+	out->normal = a->normal + ( b->normal - a->normal ) * amount;
 
 	/* if the interpolant created a bogus normal, just copy the normal from a */
-	if ( VectorNormalize( out->normal, out->normal ) == 0 ) {
-		VectorCopy( a->normal, out->normal );
+	if ( VectorNormalize( out->normal ) == 0 ) {
+		out->normal = a->normal;
 	}
 }
 
@@ -191,17 +170,12 @@ void InvertMesh( mesh_t *in ) {
  */
 void MakeMeshNormals( mesh_t in ){
 	int i, j, k, dist;
-	vec3_t normal;
-	vec3_t sum;
 	int count;
-	vec3_t base;
-	vec3_t delta;
 	int x, y;
 	bspDrawVert_t   *dv;
-	vec3_t around[8], temp;
+	Vector3 around[8];
 	bool good[8];
 	bool wrapWidth, wrapHeight;
-	float len;
 	int neighbors[8][2] =
 	{
 		{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}
@@ -210,10 +184,7 @@ void MakeMeshNormals( mesh_t in ){
 
 	wrapWidth = false;
 	for ( i = 0 ; i < in.height ; i++ ) {
-		VectorSubtract( in.verts[i * in.width].xyz,
-						in.verts[i * in.width + in.width - 1].xyz, delta );
-		len = VectorLength( delta );
-		if ( len > 1.0 ) {
+		if ( vector3_length( in.verts[i * in.width].xyz - in.verts[i * in.width + in.width - 1].xyz ) > 1.0 ) {
 			break;
 		}
 	}
@@ -223,10 +194,7 @@ void MakeMeshNormals( mesh_t in ){
 
 	wrapHeight = false;
 	for ( i = 0 ; i < in.width ; i++ ) {
-		VectorSubtract( in.verts[i].xyz,
-						in.verts[i + ( in.height - 1 ) * in.width].xyz, delta );
-		len = VectorLength( delta );
-		if ( len > 1.0 ) {
+		if ( vector3_length( in.verts[i].xyz - in.verts[i + ( in.height - 1 ) * in.width].xyz ) > 1.0 ) {
 			break;
 		}
 	}
@@ -239,9 +207,9 @@ void MakeMeshNormals( mesh_t in ){
 		for ( j = 0 ; j < in.height ; j++ ) {
 			count = 0;
 			dv = &in.verts[j * in.width + i];
-			VectorCopy( dv->xyz, base );
+			const Vector3 base( dv->xyz );
 			for ( k = 0 ; k < 8 ; k++ ) {
-				VectorClear( around[k] );
+				around[k].set( 0 );
 				good[k] = false;
 
 				for ( dist = 1 ; dist <= 3 ; dist++ ) {
@@ -267,35 +235,35 @@ void MakeMeshNormals( mesh_t in ){
 					if ( x < 0 || x >= in.width || y < 0 || y >= in.height ) {
 						break;                  // edge of patch
 					}
-					VectorSubtract( in.verts[y * in.width + x].xyz, base, temp );
-					if ( VectorNormalize( temp, temp ) == 0 ) {
+					Vector3 temp = in.verts[y * in.width + x].xyz - base;
+					if ( VectorNormalize( temp ) == 0 ) {
 						continue;               // degenerate edge, get more dist
 					}
 					else {
 						good[k] = true;
-						VectorCopy( temp, around[k] );
+						around[k] = temp;
 						break;                  // good edge
 					}
 				}
 			}
 
-			VectorClear( sum );
+			Vector3 sum( 0, 0, 0 );
 			for ( k = 0 ; k < 8 ; k++ ) {
 				if ( !good[k] || !good[( k + 1 ) & 7] ) {
 					continue;   // didn't get two points
 				}
-				CrossProduct( around[( k + 1 ) & 7], around[k], normal );
-				if ( VectorNormalize( normal, normal ) == 0 ) {
+				Vector3 normal = vector3_cross( around[( k + 1 ) & 7], around[k] );
+				if ( VectorNormalize( normal ) == 0 ) {
 					continue;
 				}
-				VectorAdd( normal, sum, sum );
+				sum += normal;
 				count++;
 			}
 			if ( count == 0 ) {
 //Sys_Printf("bad normal\n");
 				count = 1;
 			}
-			VectorNormalize( sum, dv->normal );
+			dv->normal = VectorNormalized( sum );
 		}
 	}
 }
@@ -307,55 +275,40 @@ void MakeMeshNormals( mesh_t in ){
  */
 
 void PutMeshOnCurve( mesh_t in ) {
-	int i, j, l, m;
-	float prev, next;
+	int i, j, m;
 
 
 	// put all the aproximating points on the curve
 	for ( i = 0 ; i < in.width ; i++ ) {
 		for ( j = 1 ; j < in.height ; j += 2 ) {
-			for ( l = 0 ; l < 3 ; l++ ) {
-				prev = ( in.verts[j * in.width + i].xyz[l] + in.verts[( j + 1 ) * in.width + i].xyz[l] ) * 0.5;
-				next = ( in.verts[j * in.width + i].xyz[l] + in.verts[( j - 1 ) * in.width + i].xyz[l] ) * 0.5;
-				in.verts[j * in.width + i].xyz[l] = ( prev + next ) * 0.5;
-
-				/* ydnar: interpolating st coords */
-				if ( l < 2 ) {
-					prev = ( in.verts[j * in.width + i].st[l] + in.verts[( j + 1 ) * in.width + i].st[l] ) * 0.5;
-					next = ( in.verts[j * in.width + i].st[l] + in.verts[( j - 1 ) * in.width + i].st[l] ) * 0.5;
-					in.verts[j * in.width + i].st[l] = ( prev + next ) * 0.5;
-
-					for ( m = 0; m < MAX_LIGHTMAPS; m++ )
-					{
-						prev = ( in.verts[j * in.width + i].lightmap[ m ][l] + in.verts[( j + 1 ) * in.width + i].lightmap[ m ][l] ) * 0.5;
-						next = ( in.verts[j * in.width + i].lightmap[ m ][l] + in.verts[( j - 1 ) * in.width + i].lightmap[ m ][l] ) * 0.5;
-						in.verts[j * in.width + i].lightmap[ m ][l] = ( prev + next ) * 0.5;
-					}
-				}
+			const int idx = j * in.width + i;
+			const int idprev = ( j + 1 ) * in.width + i;
+			const int idnext = ( j - 1 ) * in.width + i;
+			in.verts[idx].xyz = vector3_mid( vector3_mid( in.verts[idx].xyz, in.verts[idprev].xyz ),
+			                                 vector3_mid( in.verts[idx].xyz, in.verts[idnext].xyz ) );
+			/* ydnar: interpolating st coords */
+			in.verts[idx].st = vector2_mid( vector2_mid( in.verts[idx].st, in.verts[idprev].st ),
+			                                vector2_mid( in.verts[idx].st, in.verts[idnext].st ) );
+			for ( m = 0; m < MAX_LIGHTMAPS; m++ )
+			{
+				in.verts[idx].lightmap[ m ] = vector2_mid( vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idprev].lightmap[ m ] ),
+				                                           vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idnext].lightmap[ m ] ) );
 			}
 		}
 	}
 
 	for ( j = 0 ; j < in.height ; j++ ) {
 		for ( i = 1 ; i < in.width ; i += 2 ) {
-			for ( l = 0 ; l < 3 ; l++ ) {
-				prev = ( in.verts[j * in.width + i].xyz[l] + in.verts[j * in.width + i + 1].xyz[l] ) * 0.5;
-				next = ( in.verts[j * in.width + i].xyz[l] + in.verts[j * in.width + i - 1].xyz[l] ) * 0.5;
-				in.verts[j * in.width + i].xyz[l] = ( prev + next ) * 0.5;
-
-				/* ydnar: interpolating st coords */
-				if ( l < 2 ) {
-					prev = ( in.verts[j * in.width + i].st[l] + in.verts[j * in.width + i + 1].st[l] ) * 0.5;
-					next = ( in.verts[j * in.width + i].st[l] + in.verts[j * in.width + i - 1].st[l] ) * 0.5;
-					in.verts[j * in.width + i].st[l] = ( prev + next ) * 0.5;
-
-					for ( m = 0; m < MAX_LIGHTMAPS; m++ )
-					{
-						prev = ( in.verts[j * in.width + i].lightmap[ m ][l] + in.verts[j * in.width + i + 1].lightmap[ m ][l] ) * 0.5;
-						next = ( in.verts[j * in.width + i].lightmap[ m ][l] + in.verts[j * in.width + i - 1].lightmap[ m ][l] ) * 0.5;
-						in.verts[j * in.width + i].lightmap[ m ][l] = ( prev + next ) * 0.5;
-					}
-				}
+			const int idx = j * in.width + i;
+			in.verts[idx].xyz = vector3_mid( vector3_mid( in.verts[idx].xyz, in.verts[idx + 1].xyz ),
+			                                 vector3_mid( in.verts[idx].xyz, in.verts[idx - 1].xyz ) );
+			/* ydnar: interpolating st coords */
+			in.verts[idx].st = vector2_mid( vector2_mid( in.verts[idx].st, in.verts[idx + 1].st ),
+			                                vector2_mid( in.verts[idx].st, in.verts[idx - 1].st ) );
+			for ( m = 0; m < MAX_LIGHTMAPS; m++ )
+			{
+				in.verts[idx].lightmap[ m ] = vector2_mid( vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idx + 1].lightmap[ m ] ),
+				                                           vector2_mid( in.verts[idx].lightmap[ m ], in.verts[idx - 1].lightmap[ m ] ) );
 			}
 		}
 	}
@@ -369,11 +322,9 @@ void PutMeshOnCurve( mesh_t in ) {
    =================
  */
 mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
-	int i, j, k, l;
+	int i, j, k;
 	bspDrawVert_t prev, next, mid;
-	vec3_t prevxyz, nextxyz, midxyz;
-	vec3_t delta;
-	float len;
+	Vector3 prevxyz, nextxyz, midxyz;
 	mesh_t out;
 
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
@@ -392,23 +343,18 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 	for ( j = 0 ; j + 2 < out.width ; j += 2 ) {
 		// check subdivided midpoints against control points
 		for ( i = 0 ; i < out.height ; i++ ) {
-			for ( l = 0 ; l < 3 ; l++ ) {
-				prevxyz[l] = expand[i][j + 1].xyz[l] - expand[i][j].xyz[l];
-				nextxyz[l] = expand[i][j + 2].xyz[l] - expand[i][j + 1].xyz[l];
-				midxyz[l] = ( expand[i][j].xyz[l] + expand[i][j + 1].xyz[l] * 2
-							  + expand[i][j + 2].xyz[l] ) * 0.25;
-			}
+			prevxyz = expand[i][j + 1].xyz - expand[i][j].xyz;
+			nextxyz = expand[i][j + 2].xyz - expand[i][j + 1].xyz;
+			midxyz = ( expand[i][j].xyz + expand[i][j + 1].xyz * 2 + expand[i][j + 2].xyz ) * 0.25;
 
 			// if the span length is too long, force a subdivision
-			if ( VectorLength( prevxyz ) > minLength
-				 || VectorLength( nextxyz ) > minLength ) {
+			if ( vector3_length( prevxyz ) > minLength
+				 || vector3_length( nextxyz ) > minLength ) {
 				break;
 			}
 
 			// see if this midpoint is off far enough to subdivide
-			VectorSubtract( expand[i][j + 1].xyz, midxyz, delta );
-			len = VectorLength( delta );
-			if ( len > maxError ) {
+			if ( vector3_length( expand[i][j + 1].xyz - midxyz ) > maxError ) {
 				break;
 			}
 		}
@@ -446,22 +392,17 @@ mesh_t *SubdivideMesh( mesh_t in, float maxError, float minLength ){
 	for ( j = 0 ; j + 2 < out.height ; j += 2 ) {
 		// check subdivided midpoints against control points
 		for ( i = 0 ; i < out.width ; i++ ) {
-			for ( l = 0 ; l < 3 ; l++ ) {
-				prevxyz[l] = expand[j + 1][i].xyz[l] - expand[j][i].xyz[l];
-				nextxyz[l] = expand[j + 2][i].xyz[l] - expand[j + 1][i].xyz[l];
-				midxyz[l] = ( expand[j][i].xyz[l] + expand[j + 1][i].xyz[l] * 2
-							  + expand[j + 2][i].xyz[l] ) * 0.25;
-			}
+			prevxyz = expand[j + 1][i].xyz - expand[j][i].xyz;
+			nextxyz = expand[j + 2][i].xyz - expand[j + 1][i].xyz;
+			midxyz = ( expand[j][i].xyz + expand[j + 1][i].xyz * 2 + expand[j + 2][i].xyz ) * 0.25;
 
 			// if the span length is too long, force a subdivision
-			if ( VectorLength( prevxyz ) > minLength
-				 || VectorLength( nextxyz ) > minLength ) {
+			if ( vector3_length( prevxyz ) > minLength
+				 || vector3_length( nextxyz ) > minLength ) {
 				break;
 			}
 			// see if this midpoint is off far enough to subdivide
-			VectorSubtract( expand[j + 1][i].xyz, midxyz, delta );
-			len = VectorLength( delta );
-			if ( len > maxError ) {
+			if ( vector3_length( expand[j + 1][i].xyz - midxyz ) > maxError ) {
 				break;
 			}
 		}
@@ -626,14 +567,11 @@ mesh_t *SubdivideMesh2( mesh_t in, int iterations ){
    ProjectPointOntoVector
    ================
  */
-void ProjectPointOntoVector( vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vProj ){
-	vec3_t pVec, vec;
-
-	VectorSubtract( point, vStart, pVec );
-	VectorSubtract( vEnd, vStart, vec );
-	VectorNormalize( vec, vec );
+Vector3 ProjectPointOntoVector( const Vector3& point, const Vector3& vStart, const Vector3& vEnd ){
+	const Vector3 pVec = point - vStart;
+	const Vector3 vec = VectorNormalized( vEnd - vStart );
 	// project onto the directional vector for this segment
-	VectorMA( vStart, DotProduct( pVec, vec ), vec, vProj );
+	return ( vStart + vec * vector3_dot( pVec, vec ) );
 }
 
 /*
@@ -644,7 +582,6 @@ void ProjectPointOntoVector( vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vP
 mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
 	int i, j, k;
 	float len, maxLength;
-	vec3_t proj, dir;
 	mesh_t out;
 
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
@@ -662,9 +599,7 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
 	for ( j = 1 ; j < out.width - 1; j++ ) {
 		maxLength = 0;
 		for ( i = 0 ; i < out.height ; i++ ) {
-			ProjectPointOntoVector( expand[i][j].xyz, expand[i][j - 1].xyz, expand[i][j + 1].xyz, proj );
-			VectorSubtract( expand[i][j].xyz, proj, dir );
-			len = VectorLength( dir );
+			len = vector3_length( expand[i][j].xyz - ProjectPointOntoVector( expand[i][j].xyz, expand[i][j - 1].xyz, expand[i][j + 1].xyz ) );
 			if ( len > maxLength ) {
 				maxLength = len;
 			}
@@ -682,9 +617,7 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
 	for ( j = 1 ; j < out.height - 1; j++ ) {
 		maxLength = 0;
 		for ( i = 0 ; i < out.width ; i++ ) {
-			ProjectPointOntoVector( expand[j][i].xyz, expand[j - 1][i].xyz, expand[j + 1][i].xyz, proj );
-			VectorSubtract( expand[j][i].xyz, proj, dir );
-			len = VectorLength( dir );
+			len = vector3_length( expand[j][i].xyz - ProjectPointOntoVector( expand[j][i].xyz, expand[j - 1][i].xyz, expand[j + 1][i].xyz ) );
 			if ( len > maxLength ) {
 				maxLength = len;
 			}
@@ -717,7 +650,6 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
  */
 mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *widthtable, int *heighttable ){
 	int i, j, k, w, h, maxsubdivisions, subdivisions;
-	vec3_t dir;
 	float length, maxLength, amount;
 	mesh_t out;
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
@@ -742,8 +674,7 @@ mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *width
 	for ( w = 0, j = 0 ; w < in->width - 1; w++, j += subdivisions + 1 ) {
 		maxLength = 0;
 		for ( i = 0 ; i < out.height ; i++ ) {
-			VectorSubtract( expand[i][j + 1].xyz, expand[i][j].xyz, dir );
-			length = VectorLength( dir );
+			length = vector3_length( expand[i][j + 1].xyz - expand[i][j].xyz );
 			if ( length > maxLength ) {
 				maxLength = length;
 			}
@@ -778,9 +709,8 @@ mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *width
 	for ( h = 0, j = 0 ; h < in->height - 1; h++, j += subdivisions + 1 ) {
 		maxLength = 0;
 		for ( i = 0 ; i < out.width ; i++ ) {
-			VectorSubtract( expand[j + 1][i].xyz, expand[j][i].xyz, dir );
-			length = VectorLength( dir );
-			if ( length  > maxLength ) {
+			length = vector3_length( expand[j + 1][i].xyz - expand[j][i].xyz );
+			if ( length > maxLength ) {
 				maxLength = length;
 			}
 		}

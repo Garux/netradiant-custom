@@ -34,15 +34,11 @@
 
 
 
-void PlaneFromWinding( fixedWinding_t *w, visPlane_t *plane ){
-	vec3_t v1, v2;
-
-// calc plane
-	VectorSubtract( w->points[2], w->points[1], v1 );
-	VectorSubtract( w->points[0], w->points[1], v2 );
-	CrossProduct( v2, v1, plane->normal );
-	VectorNormalize( plane->normal, plane->normal );
-	plane->dist = DotProduct( w->points[0], plane->normal );
+visPlane_t PlaneFromWinding( const fixedWinding_t *w ){
+	// calc plane
+	visPlane_t plane;
+	PlaneFromPoints( plane, w->points[0], w->points[1], w->points[2] );
+	return plane;
 }
 
 
@@ -70,7 +66,7 @@ void prl( leaf_t *l ){
 	{
 		p = l->portals[i];
 		pl = p->plane;
-		Sys_Printf( "portal %4i to leaf %4i : %7.1f : (%4.1f, %4.1f, %4.1f)\n",(int)( p - portals ),p->leaf,pl.dist, pl.normal[0], pl.normal[1], pl.normal[2] );
+		Sys_Printf( "portal %4i to leaf %4i : %7.1f : (%4.1f, %4.1f, %4.1f)\n",(int)( p - portals ),p->leaf,pl.dist(), pl.normal()[0], pl.normal()[1], pl.normal()[2] );
 	}
 }
 
@@ -374,30 +370,27 @@ void CalcVis( void ){
  */
 void SetPortalSphere( vportal_t *p ){
 	int i;
-	vec3_t total, dist;
+	Vector3 total( 0, 0, 0 );
 	fixedWinding_t  *w;
 	float r, bestr;
 
 	w = p->winding;
-	VectorCopy( vec3_origin, total );
 	for ( i = 0 ; i < w->numpoints ; i++ )
 	{
-		VectorAdd( total, w->points[i], total );
+		total += w->points[i];
 	}
 
-	for ( i = 0 ; i < 3 ; i++ )
-		total[i] /= w->numpoints;
+	total /= w->numpoints;
 
 	bestr = 0;
 	for ( i = 0 ; i < w->numpoints ; i++ )
 	{
-		VectorSubtract( w->points[i], total, dist );
-		r = VectorLength( dist );
+		r = vector3_length( w->points[i] - total );
 		if ( r > bestr ) {
 			bestr = r;
 		}
 	}
-	VectorCopy( total, p->origin );
+	p->origin = total;
 	p->radius = bestr;
 }
 
@@ -408,9 +401,8 @@ void SetPortalSphere( vportal_t *p ){
  */
 #define WCONVEX_EPSILON     0.2
 
-static bool Winding_PlanesConcave( fixedWinding_t *w1, fixedWinding_t *w2,
-						   vec3_t normal1, vec3_t normal2,
-						   float dist1, float dist2 ){
+static bool Winding_PlanesConcave( const fixedWinding_t *w1, const fixedWinding_t *w2,
+						   const Plane3f& plane1, const Plane3f& plane2 ){
 	int i;
 
 	if ( !w1 || !w2 ) {
@@ -420,14 +412,14 @@ static bool Winding_PlanesConcave( fixedWinding_t *w1, fixedWinding_t *w2,
 	// check if one of the points of winding 1 is at the front of the plane of winding 2
 	for ( i = 0; i < w1->numpoints; i++ )
 	{
-		if ( DotProduct( normal2, w1->points[i] ) - dist2 > WCONVEX_EPSILON ) {
+		if ( plane3_distance_to_point( plane2, w1->points[i] ) > WCONVEX_EPSILON ) {
 			return true;
 		}
 	}
 	// check if one of the points of winding 2 is at the front of the plane of winding 1
 	for ( i = 0; i < w2->numpoints; i++ )
 	{
-		if ( DotProduct( normal1, w2->points[i] ) - dist1 > WCONVEX_EPSILON ) {
+		if ( plane3_distance_to_point( plane1, w2->points[i] ) > WCONVEX_EPSILON ) {
 			return true;
 		}
 	}
@@ -442,7 +434,6 @@ static bool Winding_PlanesConcave( fixedWinding_t *w1, fixedWinding_t *w2,
  */
 static bool TryMergeLeaves( int l1num, int l2num ){
 	int i, j, k, n, numportals;
-	visPlane_t plane1, plane2;
 	leaf_t *l1, *l2;
 	vportal_t *p1, *p2;
 	vportal_t *portals[MAX_PORTALS_ON_LEAF];
@@ -464,7 +455,9 @@ static bool TryMergeLeaves( int l1num, int l2num ){
 				if ( n ) {
 					l2 = &leafs[l2num];
 				}
-				else{l2 = &faceleafs[l2num]; }
+				else{
+					l2 = &faceleafs[l2num];
+				}
 				for ( j = 0; j < l2->numportals; j++ )
 				{
 					p2 = l2->portals[j];
@@ -472,9 +465,7 @@ static bool TryMergeLeaves( int l1num, int l2num ){
 						continue;
 					}
 					//
-					plane1 = p1->plane;
-					plane2 = p2->plane;
-					if ( Winding_PlanesConcave( p1->winding, p2->winding, plane1.normal, plane2.normal, plane1.dist, plane2.dist ) ) {
+					if ( Winding_PlanesConcave( p1->winding, p2->winding, p1->plane, p2->plane ) ) {
 						return false;
 					}
 				}
@@ -599,12 +590,12 @@ void MergeLeaves( void ){
  */
 #define CONTINUOUS_EPSILON  0.005
 
-fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t planenormal ){
-	vec_t       *p1, *p2, *p3, *p4, *back;
+fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, const Vector3& planenormal ){
+	const Vector3       *p1, *p2, *p3, *p4, *back;
 	fixedWinding_t  *newf;
 	int i, j, k, l;
-	vec3_t normal, delta;
-	vec_t dot;
+	Vector3 normal;
+	float dot;
 	bool keep1, keep2;
 
 
@@ -616,18 +607,18 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t 
 
 	for ( i = 0; i < f1->numpoints; i++ )
 	{
-		p1 = f1->points[i];
-		p2 = f1->points[( i + 1 ) % f1->numpoints];
+		p1 = &f1->points[i];
+		p2 = &f1->points[( i + 1 ) % f1->numpoints];
 		for ( j = 0; j < f2->numpoints; j++ )
 		{
-			p3 = f2->points[j];
-			p4 = f2->points[( j + 1 ) % f2->numpoints];
+			p3 = &f2->points[j];
+			p4 = &f2->points[( j + 1 ) % f2->numpoints];
 			for ( k = 0; k < 3; k++ )
 			{
-				if ( fabs( p1[k] - p4[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
+				if ( fabs( (*p1)[k] - (*p4)[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
 					break;
 				}
-				if ( fabs( p2[k] - p3[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
+				if ( fabs( (*p2)[k] - (*p3)[k] ) > 0.1 ) { //EQUAL_EPSILON) //ME
 					break;
 				}
 			} //end for
@@ -648,27 +639,21 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t 
 	// check slope of connected lines
 	// if the slopes are colinear, the point can be removed
 	//
-	back = f1->points[( i + f1->numpoints - 1 ) % f1->numpoints];
-	VectorSubtract( p1, back, delta );
-	CrossProduct( planenormal, delta, normal );
-	VectorNormalize( normal, normal );
+	back = &f1->points[( i + f1->numpoints - 1 ) % f1->numpoints];
+	normal = VectorNormalized( vector3_cross( planenormal, *p1 - *back ) );
 
-	back = f2->points[( j + 2 ) % f2->numpoints];
-	VectorSubtract( back, p1, delta );
-	dot = DotProduct( delta, normal );
+	back = &f2->points[( j + 2 ) % f2->numpoints];
+	dot = vector3_dot( *back - *p1, normal );
 	if ( dot > CONTINUOUS_EPSILON ) {
 		return NULL;            // not a convex polygon
 	}
 	keep1 = ( dot < -CONTINUOUS_EPSILON );
 
-	back = f1->points[( i + 2 ) % f1->numpoints];
-	VectorSubtract( back, p2, delta );
-	CrossProduct( planenormal, delta, normal );
-	VectorNormalize( normal, normal );
+	back = &f1->points[( i + 2 ) % f1->numpoints];
+	normal = VectorNormalized( vector3_cross( planenormal, *back - *p2 ) );
 
-	back = f2->points[( j + f2->numpoints - 1 ) % f2->numpoints];
-	VectorSubtract( back, p2, delta );
-	dot = DotProduct( delta, normal );
+	back = &f2->points[( j + f2->numpoints - 1 ) % f2->numpoints];
+	dot = vector3_dot( *back - *p2, normal );
 	if ( dot > CONTINUOUS_EPSILON ) {
 		return NULL;            // not a convex polygon
 	}
@@ -686,7 +671,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t 
 			continue;
 		}
 
-		VectorCopy( f1->points[k], newf->points[newf->numpoints] );
+		newf->points[newf->numpoints] = f1->points[k];
 		newf->numpoints++;
 	}
 
@@ -696,7 +681,7 @@ fixedWinding_t *TryMergeWinding( fixedWinding_t *f1, fixedWinding_t *f2, vec3_t 
 		if ( l == ( j + 1 ) % f2->numpoints && !keep1 ) {
 			continue;
 		}
-		VectorCopy( f2->points[l], newf->points[newf->numpoints] );
+		newf->points[newf->numpoints] = f2->points[l];
 		newf->numpoints++;
 	}
 
@@ -735,7 +720,7 @@ void MergeLeafPortals( void ){
 					continue;
 				}
 				if ( p1->leaf == p2->leaf ) {
-					w = TryMergeWinding( p1->winding, p2->winding, p1->plane.normal );
+					w = TryMergeWinding( p1->winding, p2->winding, p1->plane.normal() );
 					if ( w ) {
 						free( p1->winding );    //% FreeWinding(p1->winding);
 						p1->winding = w;
@@ -793,7 +778,7 @@ int CountActivePortals( void ){
    WritePortals
    ============
  */
-void WriteFloat( FILE *f, vec_t v );
+void WriteFloat( FILE *f, float v );
 
 void WritePortals( char *filename ){
 	int i, j, num;
@@ -877,7 +862,6 @@ void LoadPortals( char *name ){
 	int numpoints;
 	fixedWinding_t  *w;
 	int leafnums[2];
-	visPlane_t plane;
 
 	if ( strEqual( name, "-" ) ) {
 		f = stdin;
@@ -963,7 +947,7 @@ void LoadPortals( char *name ){
 		}
 
 		// calc plane
-		PlaneFromWinding( w, &plane );
+		const visPlane_t plane = PlaneFromWinding( w );
 
 		// create forward portal
 		l = &leafs[leafnums[0]];
@@ -977,8 +961,7 @@ void LoadPortals( char *name ){
 		p->hint = ((flags & 1) != 0);
 		p->sky = ((flags & 2) != 0);
 		p->winding = w;
-		VectorSubtract( vec3_origin, plane.normal, p->plane.normal );
-		p->plane.dist = -plane.dist;
+		p->plane = plane3_flipped( plane );
 		p->leaf = leafnums[1];
 		SetPortalSphere( p );
 		p++;
@@ -997,7 +980,7 @@ void LoadPortals( char *name ){
 		p->winding->numpoints = w->numpoints;
 		for ( j = 0 ; j < w->numpoints ; j++ )
 		{
-			VectorCopy( w->points[w->numpoints - 1 - j], p->winding->points[j] );
+			p->winding->points[j] = w->points[w->numpoints - 1 - j];
 		}
 
 		p->plane = plane;
@@ -1038,7 +1021,7 @@ void LoadPortals( char *name ){
 		}
 
 		// calc plane
-		PlaneFromWinding( w, &plane );
+		const visPlane_t plane = PlaneFromWinding( w );
 
 		l = &faceleafs[leafnums[0]];
 		l->merged = -1;
@@ -1051,8 +1034,7 @@ void LoadPortals( char *name ){
 		p->num = i + 1;
 		p->winding = w;
 		// normal pointing out of the leaf
-		VectorSubtract( vec3_origin, plane.normal, p->plane.normal );
-		p->plane.dist = -plane.dist;
+		p->plane = plane3_flipped( plane );
 		p->leaf = -1;
 		SetPortalSphere( p );
 		p++;

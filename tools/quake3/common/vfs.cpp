@@ -47,7 +47,6 @@
 
 #include "cmdlib.h"
 #include "filematch.h"
-#include "mathlib.h"
 #include "inout.h"
 #include "vfs.h"
 #include "unzip.h"

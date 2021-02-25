@@ -55,7 +55,7 @@
    =============
  */
 xmlNodePtr LeakFile( tree_t *tree ){
-	vec3_t mid;
+	Vector3 mid;
 	FILE    *linefile;
 	node_t  *node;
 	int count;
@@ -97,7 +97,7 @@ xmlNodePtr LeakFile( tree_t *tree ){
 			}
 		}
 		node = nextnode;
-		WindingCenter( nextportal->winding, mid );
+		mid = WindingCenter( nextportal->winding );
 		fprintf( linefile, "%f %f %f\n", mid[0], mid[1], mid[2] );
 		point = xml_NodeForVec( mid );
 		xmlAddChild( xml_node, point );

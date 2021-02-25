@@ -45,29 +45,29 @@ struct minimap_t
 	float boost, brightness, contrast;
 	float *data1f;
 	float *sharpendata1f;
-	vec3_t mins, size;
+	Vector3 mins, size;
 };
 
 static minimap_t minimap;
 
-bool BrushIntersectionWithLine( bspBrush_t *brush, vec3_t start, vec3_t dir, float *t_in, float *t_out ){
+bool BrushIntersectionWithLine( bspBrush_t *brush, const Vector3& start, const Vector3& dir, float *t_in, float *t_out ){
 	int i;
 	bool in = false, out = false;
 	bspBrushSide_t *sides = &bspBrushSides[brush->firstSide];
 
 	for ( i = 0; i < brush->numSides; ++i )
 	{
-		bspPlane_t *p = &bspPlanes[sides[i].planeNum];
-		float sn = DotProduct( start, p->normal );
-		float dn = DotProduct( dir, p->normal );
+		const bspPlane_t& p = bspPlanes[sides[i].planeNum];
+		float sn = vector3_dot( start, p.normal() );
+		float dn = vector3_dot( dir, p.normal() );
 		if ( dn == 0 ) {
-			if ( sn > p->dist ) {
+			if ( sn > p.dist() ) {
 				return false; // outside!
 			}
 		}
 		else
 		{
-			float t = ( p->dist - sn ) / dn;
+			float t = ( p.dist() - sn ) / dn;
 			if ( dn < 0 ) {
 				if ( !in || t > *t_in ) {
 					*t_in = t;
@@ -95,7 +95,6 @@ bool BrushIntersectionWithLine( bspBrush_t *brush, vec3_t start, vec3_t dir, flo
 }
 
 static float MiniMapSample( float x, float y ){
-	vec3_t org, dir;
 	int i, bi;
 	float t0, t1;
 	float samp;
@@ -103,12 +102,8 @@ static float MiniMapSample( float x, float y ){
 	bspBrushSide_t *s;
 	int cnt;
 
-	org[0] = x;
-	org[1] = y;
-	org[2] = 0;
-	dir[0] = 0;
-	dir[1] = 0;
-	dir[2] = 1;
+	const Vector3 org( x, y, 0 );
+	const Vector3 dir( g_vector3_axis_z );
 
 	cnt = 0;
 	samp = 0;
@@ -120,16 +115,16 @@ static float MiniMapSample( float x, float y ){
 
 			// sort out mins/maxs of the brush
 			s = &bspBrushSides[b->firstSide];
-			if ( x < -bspPlanes[s[0].planeNum].dist ) {
+			if ( x < -bspPlanes[s[0].planeNum].dist() ) {
 				continue;
 			}
-			if ( x > +bspPlanes[s[1].planeNum].dist ) {
+			if ( x > +bspPlanes[s[1].planeNum].dist() ) {
 				continue;
 			}
-			if ( y < -bspPlanes[s[2].planeNum].dist ) {
+			if ( y < -bspPlanes[s[2].planeNum].dist() ) {
 				continue;
 			}
-			if ( y > +bspPlanes[s[3].planeNum].dist ) {
+			if ( y > +bspPlanes[s[3].planeNum].dist() ) {
 				continue;
 			}
 
@@ -281,16 +276,16 @@ static void MiniMapBrightnessContrast( int y ){
 	}
 }
 
-void MiniMapMakeMinsMaxs( vec3_t mins_in, vec3_t maxs_in, float border, bool keepaspect ){
-	vec3_t mins, maxs, extend;
-	VectorCopy( mins_in, mins );
-	VectorCopy( maxs_in, maxs );
+void MiniMapMakeMinsMaxs( const Vector3& mins_in, const Vector3& maxs_in, float border, bool keepaspect ){
+	Vector3 mins = mins_in;
+	Vector3 maxs = maxs_in;
+	Vector3 extend;
 
 	// line compatible to nexuiz mapinfo
 	Sys_Printf( "size %f %f %f %f %f %f\n", mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2] );
 
 	if ( keepaspect ) {
-		VectorSubtract( maxs, mins, extend );
+		extend = maxs - mins;
 		if ( extend[1] > extend[0] ) {
 			mins[0] -= ( extend[1] - extend[0] ) * 0.5;
 			maxs[0] += ( extend[1] - extend[0] ) * 0.5;
@@ -305,14 +300,13 @@ void MiniMapMakeMinsMaxs( vec3_t mins_in, vec3_t maxs_in, float border, bool kee
 	/* border: amount of black area around the image */
 	/* input: border, 1-2*border, border but we need border/(1-2*border) */
 
-	VectorSubtract( maxs, mins, extend );
-	VectorScale( extend, border / ( 1 - 2 * border ), extend );
+	extend = ( maxs - mins ) * ( border / ( 1 - 2 * border ) );
 
-	VectorSubtract( mins, extend, mins );
-	VectorAdd( maxs, extend, maxs );
+	mins -= extend;
+	maxs += extend;
 
-	VectorCopy( mins, minimap.mins );
-	VectorSubtract( maxs, mins, minimap.size );
+	minimap.mins = mins;
+	minimap.size = maxs - mins;
 
 	// line compatible to nexuiz mapinfo
 	Sys_Printf( "size_texcoords %f %f %f %f %f %f\n", mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2] );
@@ -468,7 +462,6 @@ int MiniMapBSPMain( int argc, char **argv ){
 	int x, y;
 	int i;
 	EMiniMapMode mode;
-	vec3_t mins, maxs;
 	bool keepaspect;
 
 	/* arg checking */
@@ -486,10 +479,10 @@ int MiniMapBSPMain( int argc, char **argv ){
 	LoadBSPFile( source );
 
 	minimap.model = &bspModels[0];
-	VectorCopy( minimap.model->mins, mins );
-	VectorCopy( minimap.model->maxs, maxs );
+	Vector3 mins = minimap.model->minmax.mins;
+	Vector3 maxs = minimap.model->minmax.maxs;
 
-	*minimapFilename = 0;
+	strClear( minimapFilename );
 	minimapSharpen = game->miniMapSharpen;
 	minimap.width = minimap.height = game->miniMapSize;
 	border = game->miniMapBorder;
@@ -598,7 +591,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 
 	MiniMapMakeMinsMaxs( mins, maxs, border, keepaspect );
 
-	if ( !*minimapFilename ) {
+	if ( strEmpty( minimapFilename ) ) {
 		ExtractFileBase( source, basename );
 		ExtractFilePath( source, path );
 		sprintf( relativeMinimapFilename, game->miniMapNameFormat, basename );

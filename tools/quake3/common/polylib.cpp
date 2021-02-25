@@ -23,11 +23,9 @@
 #include <stddef.h>
 
 #include "cmdlib.h"
-#include "mathlib.h"
 #include "inout.h"
 #include "polylib.h"
-#include "qfiles.h"
-
+#include "maxworld.h"
 
 #define BOGUS_RANGE WORLD_SIZE
 
@@ -105,21 +103,16 @@ void FreeWindingAccu( winding_accu_t *w ){
  */
 void    RemoveColinearPoints( winding_t *w ){
 	int i, j, k;
-	vec3_t v1, v2;
 	int nump;
-	vec3_t p[MAX_POINTS_ON_WINDING];
+	Vector3 p[MAX_POINTS_ON_WINDING];
 
 	nump = 0;
 	for ( i = 0 ; i < w->numpoints ; i++ )
 	{
 		j = ( i + 1 ) % w->numpoints;
 		k = ( i + w->numpoints - 1 ) % w->numpoints;
-		VectorSubtract( w->p[j], w->p[i], v1 );
-		VectorSubtract( w->p[i], w->p[k], v2 );
-		VectorNormalize( v1,v1 );
-		VectorNormalize( v2,v2 );
-		if ( DotProduct( v1, v2 ) < 0.999 ) {
-			VectorCopy( w->p[i], p[nump] );
+		if ( vector3_dot( VectorNormalized( w->p[j] - w->p[i] ), VectorNormalized( w->p[j] - w->p[k] ) ) < 0.999 ) {
+			p[nump] = w->p[i];
 			nump++;
 		}
 	}
@@ -137,15 +130,10 @@ void    RemoveColinearPoints( winding_t *w ){
    WindingPlane
    ============
  */
-void WindingPlane( winding_t *w, vec3_t normal, vec_t *dist ){
-	vec3_t v1, v2;
-
-	VectorSubtract( w->p[1], w->p[0], v1 );
-	VectorSubtract( w->p[2], w->p[0], v2 );
-	CrossProduct( v2, v1, normal );
-	VectorNormalize( normal, normal );
-	*dist = DotProduct( w->p[0], normal );
-
+Plane3f WindingPlane( const winding_t *w ){
+	Plane3f plane;
+	PlaneFromPoints( plane, w->p[0], w->p[1], w->p[2] );
+	return plane;
 }
 
 /*
@@ -153,42 +141,23 @@ void WindingPlane( winding_t *w, vec3_t normal, vec_t *dist ){
    WindingArea
    =============
  */
-vec_t   WindingArea( winding_t *w ){
-	int i;
-	vec3_t d1, d2, cross;
-	vec_t total;
+float   WindingArea( const winding_t *w ){
+	float total = 0;
 
-	total = 0;
-	for ( i = 2 ; i < w->numpoints ; i++ )
+	for ( int i = 2 ; i < w->numpoints ; i++ )
 	{
-		VectorSubtract( w->p[i - 1], w->p[0], d1 );
-		VectorSubtract( w->p[i], w->p[0], d2 );
-		CrossProduct( d1, d2, cross );
-		total += 0.5 * VectorLength( cross );
+		total += 0.5 * vector3_length( vector3_cross( w->p[i - 1] - w->p[0], w->p[i] - w->p[0] ) );
 	}
 	return total;
 }
 
-void    WindingBounds( winding_t *w, vec3_t mins, vec3_t maxs ){
-	vec_t v;
-	int i,j;
-
-	mins[0] = mins[1] = mins[2] = 99999;
-	maxs[0] = maxs[1] = maxs[2] = -99999;
-
-	for ( i = 0 ; i < w->numpoints ; i++ )
+MinMax WindingBounds( const winding_t *w ){
+	MinMax minmax;
+	for ( int i = 0 ; i < w->numpoints ; i++ )
 	{
-		for ( j = 0 ; j < 3 ; j++ )
-		{
-			v = w->p[i][j];
-			if ( v < mins[j] ) {
-				mins[j] = v;
-			}
-			if ( v > maxs[j] ) {
-				maxs[j] = v;
-			}
-		}
+		minmax.extend( w->p[i] );
 	}
+	return minmax;
 }
 
 /*
@@ -196,16 +165,13 @@ void    WindingBounds( winding_t *w, vec3_t mins, vec3_t maxs ){
    WindingCenter
    =============
  */
-void    WindingCenter( winding_t *w, vec3_t center ){
-	int i;
-	float scale;
+Vector3 WindingCenter( const winding_t *w ){
+	Vector3 center( 0, 0, 0 );
 
-	VectorCopy( vec3_origin, center );
-	for ( i = 0 ; i < w->numpoints ; i++ )
-		VectorAdd( w->p[i], center, center );
-
-	scale = 1.0 / w->numpoints;
-	VectorScale( center, scale, center );
+	for ( int i = 0 ; i < w->numpoints ; i++ )
+		center += w->p[i];
+	
+	return center / w->numpoints;
 }
 
 /*
@@ -213,7 +179,7 @@ void    WindingCenter( winding_t *w, vec3_t center ){
    BaseWindingForPlaneAccu
    =================
  */
-winding_accu_t *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist ){
+winding_accu_t *BaseWindingForPlaneAccu( const Plane3f& inplane ){
 	// The goal in this function is to replicate the behavior of the original BaseWindingForPlane()
 	// function (see below) but at the same time increasing accuracy substantially.
 
@@ -228,8 +194,9 @@ winding_accu_t *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist ){
 	// of 2) than the winding polygon in the original function.
 
 	int x, i;
-	vec_t max, v;
-	vec3_accu_t vright, vup, org, normalAccu;
+	float max, v;
+	DoubleVector3 vright, vup, org;
+	const Plane3 plane( inplane.normal(), inplane.dist() );
 	winding_accu_t  *w;
 
 	// One of the components of normal must have a magnitiude greater than this value,
@@ -239,7 +206,7 @@ winding_accu_t *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist ){
 
 	x = -1;
 	for ( i = 0; i < 3; i++ ) {
-		v = (vec_t) fabs( normal[i] );
+		v = fabs( plane.normal()[i] );
 		if ( v > max ) {
 			x = i;
 			max = v;
@@ -252,14 +219,14 @@ winding_accu_t *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist ){
 	switch ( x ) {
 	case 0:     // Fall through to next case.
 	case 1:
-		vright[0] = (vec_accu_t) -normal[1];
-		vright[1] = (vec_accu_t) normal[0];
+		vright[0] = -plane.normal()[1];
+		vright[1] = plane.normal()[0];
 		vright[2] = 0;
 		break;
 	case 2:
 		vright[0] = 0;
-		vright[1] = (vec_accu_t) -normal[2];
-		vright[2] = (vec_accu_t) normal[1];
+		vright[1] = -plane.normal()[2];
+		vright[2] = plane.normal()[1];
 		break;
 	}
 
@@ -276,19 +243,18 @@ winding_accu_t *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist ){
 	// We're relying on the fact that MAX_WORLD_COORD is a power of 2 to keep
 	// our calculation precise and relatively free of floating point error.
 	// [However, the code will still work fine if that's not the case.]
-	VectorScaleAccu( vright, ( (vec_accu_t) MAX_WORLD_COORD ) * 4.0, vright );
+	vright *= ( (double) MAX_WORLD_COORD ) * 4.0;
 
 	// At time time of this writing, MAX_WORLD_COORD was 65536 (2^16).  Therefore
 	// the length of vright at this point is at least 185364.  In comparison, a
 	// corner of the world at location (65536, 65536, 65536) is distance 113512
 	// away from the origin.
 
-	VectorCopyRegularToAccu( normal, normalAccu );
-	CrossProductAccu( normalAccu, vright, vup );
+	vup = vector3_cross( plane.normal(), vright );
 
 	// vup now has length equal to that of vright.
 
-	VectorScaleAccu( normalAccu, (vec_accu_t) dist, org );
+	org = plane.normal() * plane.dist();
 
 	// org is now a point on the plane defined by normal and dist.  Furthermore,
 	// org, vright, and vup are pairwise perpendicular.  Now, the 4 vectors
@@ -304,17 +270,10 @@ winding_accu_t *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist ){
 
 	w = AllocWindingAccu( 4 );
 
-	VectorSubtractAccu( org, vright, w->p[0] );
-	VectorAddAccu( w->p[0], vup, w->p[0] );
-
-	VectorAddAccu( org, vright, w->p[1] );
-	VectorAddAccu( w->p[1], vup, w->p[1] );
-
-	VectorAddAccu( org, vright, w->p[2] );
-	VectorSubtractAccu( w->p[2], vup, w->p[2] );
-
-	VectorSubtractAccu( org, vright, w->p[3] );
-	VectorSubtractAccu( w->p[3], vup, w->p[3] );
+	w->p[0] = org - vright + vup;
+	w->p[1] = org + vright + vup;
+	w->p[2] = org + vright - vup;
+	w->p[3] = org - vright - vup;
 
 	w->numpoints = 4;
 
@@ -336,10 +295,10 @@ winding_accu_t *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist ){
    error, and can lead to all sorts of disappearing triangle problems.
    =================
  */
-winding_t *BaseWindingForPlane( vec3_t normal, vec_t dist ){
+winding_t *BaseWindingForPlane( const Plane3f& plane ){
 	int i, x;
-	vec_t max, v;
-	vec3_t org, vright, vup;
+	float max, v;
+	Vector3 org, vright, vup;
 	winding_t   *w;
 
 // find the major axis
@@ -348,7 +307,7 @@ winding_t *BaseWindingForPlane( vec3_t normal, vec_t dist ){
 	x = -1;
 	for ( i = 0 ; i < 3; i++ )
 	{
-		v = fabs( normal[i] );
+		v = fabs( plane.normal()[i] );
 		if ( v > max ) {
 			x = i;
 			max = v;
@@ -358,7 +317,7 @@ winding_t *BaseWindingForPlane( vec3_t normal, vec_t dist ){
 		Error( "BaseWindingForPlane: no axis found" );
 	}
 
-	VectorCopy( vec3_origin, vup );
+	vup.set( 0 );
 	switch ( x )
 	{
 	case 0:
@@ -370,34 +329,26 @@ winding_t *BaseWindingForPlane( vec3_t normal, vec_t dist ){
 		break;
 	}
 
-	v = DotProduct( vup, normal );
-	VectorMA( vup, -v, normal, vup );
-	VectorNormalize( vup, vup );
+	vup -= plane.normal() * vector3_dot( vup, plane.normal() );
+	VectorNormalize( vup );
 
-	VectorScale( normal, dist, org );
+	org = plane.normal() * plane.dist();
 
-	CrossProduct( vup, normal, vright );
+	vright = vector3_cross( vup, plane.normal() );
 
 	// LordHavoc: this has to use *2 because otherwise some created points may
 	// be inside the world (think of a diagonal case), and any brush with such
 	// points should be removed, failure to detect such cases is disasterous
-	VectorScale( vup, MAX_WORLD_COORD * 2, vup );
-	VectorScale( vright, MAX_WORLD_COORD * 2, vright );
+	vup *= MAX_WORLD_COORD * 2;
+	vright *= MAX_WORLD_COORD * 2;
 
 	// project a really big	axis aligned box onto the plane
 	w = AllocWinding( 4 );
 
-	VectorSubtract( org, vright, w->p[0] );
-	VectorAdd( w->p[0], vup, w->p[0] );
-
-	VectorAdd( org, vright, w->p[1] );
-	VectorAdd( w->p[1], vup, w->p[1] );
-
-	VectorAdd( org, vright, w->p[2] );
-	VectorSubtract( w->p[2], vup, w->p[2] );
-
-	VectorSubtract( org, vright, w->p[3] );
-	VectorSubtract( w->p[3], vup, w->p[3] );
+	w->p[0] = org - vright + vup;
+	w->p[1] = org + vright + vup;
+	w->p[2] = org + vright - vup;
+	w->p[3] = org - vright - vup;
 
 	w->numpoints = 4;
 
@@ -448,7 +399,7 @@ winding_t   *CopyWindingAccuToRegular( const winding_accu_t *w ){
 	c->numpoints = w->numpoints;
 	for ( i = 0; i < c->numpoints; i++ )
 	{
-		VectorCopyAccuToRegular( w->p[i], c->p[i] );
+		c->p[i] = w->p[i];
 	}
 	return c;
 }
@@ -458,14 +409,14 @@ winding_t   *CopyWindingAccuToRegular( const winding_accu_t *w ){
    ReverseWinding
    ==================
  */
-winding_t   *ReverseWinding( winding_t *w ){
+winding_t   *ReverseWinding( const winding_t *w ){
 	int i;
 	winding_t   *c;
 
 	c = AllocWinding( w->numpoints );
 	for ( i = 0 ; i < w->numpoints ; i++ )
 	{
-		VectorCopy( w->p[w->numpoints - 1 - i], c->p[i] );
+		c->p[i] = w->p[w->numpoints - 1 - i];
 	}
 	c->numpoints = w->numpoints;
 	return c;
@@ -477,15 +428,12 @@ winding_t   *ReverseWinding( winding_t *w ){
    ClipWindingEpsilon
    =============
  */
-void    ClipWindingEpsilonStrict( winding_t *in, vec3_t normal, vec_t dist,
-								  vec_t epsilon, winding_t **front, winding_t **back ){
-	vec_t dists[MAX_POINTS_ON_WINDING + 4];
-	int sides[MAX_POINTS_ON_WINDING + 4];
+void    ClipWindingEpsilonStrict( winding_t *in, const Plane3f& plane,
+								  float epsilon, winding_t **front, winding_t **back ){
+	float dists[MAX_POINTS_ON_WINDING + 4];
+	EPlaneSide sides[MAX_POINTS_ON_WINDING + 4];
 	int counts[3];
-	static vec_t dot;           // VC 4.2 optimizer bug if not static
 	int i, j;
-	vec_t   *p1, *p2;
-	vec3_t mid;
 	winding_t   *f, *b;
 	int maxpts;
 
@@ -495,18 +443,16 @@ void    ClipWindingEpsilonStrict( winding_t *in, vec3_t normal, vec_t dist,
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
 
-		dot = DotProduct( in->p[i], normal );
-		dot -= dist;
-		dists[i] = dot;
-		if ( dot > epsilon ) {
-			sides[i] = SIDE_FRONT;
+		dists[i] = plane3_distance_to_point( plane, in->p[i] );
+		if ( dists[i] > epsilon ) {
+			sides[i] = eSideFront;
 		}
-		else if ( dot < -epsilon ) {
-			sides[i] = SIDE_BACK;
+		else if ( dists[i] < -epsilon ) {
+			sides[i] = eSideBack;
 		}
 		else
 		{
-			sides[i] = SIDE_ON;
+			sides[i] = eSideOn;
 		}
 		counts[sides[i]]++;
 	}
@@ -535,49 +481,49 @@ void    ClipWindingEpsilonStrict( winding_t *in, vec3_t normal, vec_t dist,
 
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
-		p1 = in->p[i];
+		const Vector3& p1 = in->p[i];
 
-		if ( sides[i] == SIDE_ON ) {
-			VectorCopy( p1, f->p[f->numpoints] );
+		if ( sides[i] == eSideOn ) {
+			f->p[f->numpoints] = p1;
 			f->numpoints++;
-			VectorCopy( p1, b->p[b->numpoints] );
+			b->p[b->numpoints] = p1;
 			b->numpoints++;
 			continue;
 		}
 
-		if ( sides[i] == SIDE_FRONT ) {
-			VectorCopy( p1, f->p[f->numpoints] );
+		if ( sides[i] == eSideFront ) {
+			f->p[f->numpoints] = p1;
 			f->numpoints++;
 		}
-		if ( sides[i] == SIDE_BACK ) {
-			VectorCopy( p1, b->p[b->numpoints] );
+		if ( sides[i] == eSideBack ) {
+			b->p[b->numpoints] = p1;
 			b->numpoints++;
 		}
 
-		if ( sides[i + 1] == SIDE_ON || sides[i + 1] == sides[i] ) {
+		if ( sides[i + 1] == eSideOn || sides[i + 1] == sides[i] ) {
 			continue;
 		}
 
 		// generate a split point
-		p2 = in->p[( i + 1 ) % in->numpoints];
-
-		dot = dists[i] / ( dists[i] - dists[i + 1] );
+		const Vector3& p2 = in->p[( i + 1 ) % in->numpoints];
+		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
+		Vector3 mid;
 		for ( j = 0 ; j < 3 ; j++ )
 		{   // avoid round off error when possible
-			if ( normal[j] == 1 ) {
-				mid[j] = dist;
+			if ( plane.normal()[j] == 1 ) {
+				mid[j] = plane.dist();
 			}
-			else if ( normal[j] == -1 ) {
-				mid[j] = -dist;
+			else if ( plane.normal()[j] == -1 ) {
+				mid[j] = -plane.dist();
 			}
 			else{
 				mid[j] = p1[j] + dot * ( p2[j] - p1[j] );
 			}
 		}
 
-		VectorCopy( mid, f->p[f->numpoints] );
+		f->p[f->numpoints] = mid;
 		f->numpoints++;
-		VectorCopy( mid, b->p[b->numpoints] );
+		b->p[b->numpoints] = mid;
 		b->numpoints++;
 	}
 
@@ -589,9 +535,9 @@ void    ClipWindingEpsilonStrict( winding_t *in, vec3_t normal, vec_t dist,
 	}
 }
 
-void    ClipWindingEpsilon( winding_t *in, vec3_t normal, vec_t dist,
-							vec_t epsilon, winding_t **front, winding_t **back ){
-	ClipWindingEpsilonStrict( in, normal, dist, epsilon, front, back );
+void    ClipWindingEpsilon( winding_t *in, const Plane3f& plane,
+							float epsilon, winding_t **front, winding_t **back ){
+	ClipWindingEpsilonStrict( in, plane, epsilon, front, back );
 	/* apparently most code expects that in the winding-on-plane case, the back winding is the original winding */
 	if ( !*front && !*back ) {
 		*back = CopyWinding( in );
@@ -599,22 +545,26 @@ void    ClipWindingEpsilon( winding_t *in, vec3_t normal, vec_t dist,
 }
 
 
+// Smallest positive value for vec_t such that 1.0 + VEC_SMALLEST_EPSILON_AROUND_ONE != 1.0.
+// In the case of 32 bit floats (which is almost certainly the case), it's 0.00000011921.
+// Don't forget that your epsilons should depend on the possible range of values,
+// because for example adding VEC_SMALLEST_EPSILON_AROUND_ONE to 1024.0 will have no effect.
+#define VEC_SMALLEST_EPSILON_AROUND_ONE FLT_EPSILON
+
 /*
    =============
    ChopWindingInPlaceAccu
    =============
  */
-void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, vec_t crudeEpsilon ){
+void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3f& plane, float crudeEpsilon ){
 	winding_accu_t  *in;
 	int counts[3];
 	int i, j;
-	vec_accu_t dists[MAX_POINTS_ON_WINDING + 1];
-	int sides[MAX_POINTS_ON_WINDING + 1];
+	double dists[MAX_POINTS_ON_WINDING + 1];
+	EPlaneSide sides[MAX_POINTS_ON_WINDING + 1];
 	int maxpts;
 	winding_accu_t  *f;
-	vec_accu_t  *p1, *p2;
-	vec_accu_t w;
-	vec3_accu_t mid, normalAccu;
+	double w;
 
 	// We require at least a very small epsilon.  It's a good idea for several reasons.
 	// First, we will be dividing by a potentially very small distance below.  We don't
@@ -634,12 +584,12 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 	// So this minimum epsilon is quite similar to casting the higher resolution numbers to
 	// the lower resolution and comparing them in the lower resolution mode.  We explicitly
 	// choose the minimum epsilon as something around the vec_t epsilon of one because we
-	// want the resolution of vec_accu_t to have a large resolution around the epsilon.
+	// want the resolution of double to have a large resolution around the epsilon.
 	// Some of that leftover resolution even goes away after we scale to points far away.
 
 	// Here is a further discussion regarding the choice of smallestEpsilonAllowed.
 	// In the 32 float world (we can assume vec_t is that), the "epsilon around 1.0" is
-	// 0.00000011921.  In the 64 bit float world (we can assume vec_accu_t is that), the
+	// 0.00000011921.  In the 64 bit float world (we can assume double is that), the
 	// "epsilon around 1.0" is 0.00000000000000022204.  (By the way these two epsilons
 	// are defined as VEC_SMALLEST_EPSILON_AROUND_ONE VEC_ACCU_SMALLEST_EPSILON_AROUND_ONE
 	// respectively.)  If you divide the first by the second, you get approximately
@@ -648,23 +598,24 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 	// VEC_SMALLEST_EPSILON_AROUND_ONE, you would be guaranteed at least 2000 "ticks" in
 	// 64-bit land inside of the epsilon for all numbers we're dealing with.
 
-	static const vec_accu_t smallestEpsilonAllowed = ( (vec_accu_t) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
-	const vec_accu_t fineEpsilon = ( crudeEpsilon < smallestEpsilonAllowed )? smallestEpsilonAllowed : (vec_accu_t) crudeEpsilon;
+	static const double smallestEpsilonAllowed = ( (double) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
+	const double fineEpsilon = ( crudeEpsilon < smallestEpsilonAllowed )? smallestEpsilonAllowed : (double) crudeEpsilon;
 
 	in = *inout;
 	counts[0] = counts[1] = counts[2] = 0;
-	VectorCopyRegularToAccu( normal, normalAccu );
 
 	for ( i = 0; i < in->numpoints; i++ )
 	{
-		dists[i] = DotProductAccu( in->p[i], normalAccu ) - dist;
+		dists[i] = plane3_distance_to_point( plane, in->p[i] );
 		if ( dists[i] > fineEpsilon ) {
-			sides[i] = SIDE_FRONT;
+			sides[i] = eSideFront;
 		}
 		else if ( dists[i] < -fineEpsilon ) {
-			sides[i] = SIDE_BACK;
+			sides[i] = eSideBack;
 		}
-		else{sides[i] = SIDE_ON; }
+		else{
+			sides[i] = eSideOn;
+		}
 		counts[sides[i]]++;
 	}
 	sides[i] = sides[0];
@@ -673,26 +624,26 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 	// I'm wondering if whatever code that handles duplicate planes is robust enough
 	// that we never get a case where two nearly equal planes result in 2 NULL windings
 	// due to the 'if' statement below.  TODO: Investigate this.
-	if ( !counts[SIDE_FRONT] ) {
+	if ( !counts[eSideFront] ) {
 		FreeWindingAccu( in );
 		*inout = NULL;
 		return;
 	}
-	if ( !counts[SIDE_BACK] ) {
+	if ( !counts[eSideBack] ) {
 		return; // Winding is unmodified.
 	}
 
 	// NOTE: The least number of points that a winding can have at this point is 2.
 	// In that case, one point is SIDE_FRONT and the other is SIDE_BACK.
 
-	maxpts = counts[SIDE_FRONT] + 2; // We dynamically expand if this is too small.
+	maxpts = counts[eSideFront] + 2; // We dynamically expand if this is too small.
 	f = AllocWindingAccu( maxpts );
 
 	for ( i = 0; i < in->numpoints; i++ )
 	{
-		p1 = in->p[i];
+		const DoubleVector3& p1 = in->p[i];
 
-		if ( sides[i] == SIDE_ON || sides[i] == SIDE_FRONT ) {
+		if ( sides[i] == eSideOn || sides[i] == eSideFront ) {
 			if ( f->numpoints >= MAX_POINTS_ON_WINDING ) {
 				Error( "ChopWindingInPlaceAccu: MAX_POINTS_ON_WINDING" );
 			}
@@ -701,31 +652,31 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 				f = CopyWindingAccuIncreaseSizeAndFreeOld( f );
 				maxpts++;
 			}
-			VectorCopyAccu( p1, f->p[f->numpoints] );
+			f->p[f->numpoints] = p1;
 			f->numpoints++;
-			if ( sides[i] == SIDE_ON ) {
+			if ( sides[i] == eSideOn ) {
 				continue;
 			}
 		}
-		if ( sides[i + 1] == SIDE_ON || sides[i + 1] == sides[i] ) {
+		if ( sides[i + 1] == eSideOn || sides[i + 1] == sides[i] ) {
 			continue;
 		}
 
 		// Generate a split point.
-		p2 = in->p[( ( i + 1 ) == in->numpoints ) ? 0 : ( i + 1 )];
+		const DoubleVector3& p2 = in->p[( ( i + 1 ) == in->numpoints ) ? 0 : ( i + 1 )];
 
 		// The divisor's absolute value is greater than the dividend's absolute value.
 		// w is in the range (0,1).
 		w = dists[i] / ( dists[i] - dists[i + 1] );
-
+		DoubleVector3 mid;
 		for ( j = 0; j < 3; j++ )
 		{
 			// Avoid round-off error when possible.  Check axis-aligned normal.
-			if ( normal[j] == 1 ) {
-				mid[j] = dist;
+			if ( plane.normal()[j] == 1 ) {
+				mid[j] = plane.dist();
 			}
-			else if ( normal[j] == -1 ) {
-				mid[j] = -dist;
+			else if ( plane.normal()[j] == -1 ) {
+				mid[j] = -plane.dist();
 			}
 			else{mid[j] = p1[j] + ( w * ( p2[j] - p1[j] ) ); }
 		}
@@ -737,7 +688,7 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
 			f = CopyWindingAccuIncreaseSizeAndFreeOld( f );
 			maxpts++;
 		}
-		VectorCopyAccu( mid, f->p[f->numpoints] );
+		f->p[f->numpoints] = mid;
 		f->numpoints++;
 	}
 
@@ -750,15 +701,12 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, vec3_t normal, vec_t dist, 
    ChopWindingInPlace
    =============
  */
-void ChopWindingInPlace( winding_t **inout, vec3_t normal, vec_t dist, vec_t epsilon ){
+void ChopWindingInPlace( winding_t **inout, const Plane3f& plane, float epsilon ){
 	winding_t   *in;
-	vec_t dists[MAX_POINTS_ON_WINDING + 4];
-	int sides[MAX_POINTS_ON_WINDING + 4];
+	float dists[MAX_POINTS_ON_WINDING + 4];
+	EPlaneSide sides[MAX_POINTS_ON_WINDING + 4];
 	int counts[3];
-	static vec_t dot;           // VC 4.2 optimizer bug if not static
 	int i, j;
-	vec_t   *p1, *p2;
-	vec3_t mid;
 	winding_t   *f;
 	int maxpts;
 
@@ -768,18 +716,16 @@ void ChopWindingInPlace( winding_t **inout, vec3_t normal, vec_t dist, vec_t eps
 // determine sides for each point
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
-		dot = DotProduct( in->p[i], normal );
-		dot -= dist;
-		dists[i] = dot;
-		if ( dot > epsilon ) {
-			sides[i] = SIDE_FRONT;
+		dists[i] = plane3_distance_to_point( plane, in->p[i] );
+		if ( dists[i] > epsilon ) {
+			sides[i] = eSideFront;
 		}
-		else if ( dot < -epsilon ) {
-			sides[i] = SIDE_BACK;
+		else if ( dists[i] < -epsilon ) {
+			sides[i] = eSideBack;
 		}
 		else
 		{
-			sides[i] = SIDE_ON;
+			sides[i] = eSideOn;
 		}
 		counts[sides[i]]++;
 	}
@@ -802,41 +748,42 @@ void ChopWindingInPlace( winding_t **inout, vec3_t normal, vec_t dist, vec_t eps
 
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
-		p1 = in->p[i];
+		const Vector3& p1 = in->p[i];
 
-		if ( sides[i] == SIDE_ON ) {
-			VectorCopy( p1, f->p[f->numpoints] );
+		if ( sides[i] == eSideOn ) {
+			f->p[f->numpoints] = p1;
 			f->numpoints++;
 			continue;
 		}
 
-		if ( sides[i] == SIDE_FRONT ) {
-			VectorCopy( p1, f->p[f->numpoints] );
+		if ( sides[i] == eSideFront ) {
+			f->p[f->numpoints] = p1;
 			f->numpoints++;
 		}
 
-		if ( sides[i + 1] == SIDE_ON || sides[i + 1] == sides[i] ) {
+		if ( sides[i + 1] == eSideOn || sides[i + 1] == sides[i] ) {
 			continue;
 		}
 
 		// generate a split point
-		p2 = in->p[( i + 1 ) % in->numpoints];
+		const Vector3& p2 = in->p[( i + 1 ) % in->numpoints];
 
-		dot = dists[i] / ( dists[i] - dists[i + 1] );
+		const double dot = dists[i] / ( dists[i] - dists[i + 1] );
+		Vector3 mid;
 		for ( j = 0 ; j < 3 ; j++ )
 		{   // avoid round off error when possible
-			if ( normal[j] == 1 ) {
-				mid[j] = dist;
+			if ( plane.normal()[j] == 1 ) {
+				mid[j] = plane.dist();
 			}
-			else if ( normal[j] == -1 ) {
-				mid[j] = -dist;
+			else if ( plane.normal()[j] == -1 ) {
+				mid[j] = -plane.dist();
 			}
 			else{
 				mid[j] = p1[j] + dot * ( p2[j] - p1[j] );
 			}
 		}
 
-		VectorCopy( mid, f->p[f->numpoints] );
+		f->p[f->numpoints] = mid;
 		f->numpoints++;
 	}
 
@@ -860,10 +807,10 @@ void ChopWindingInPlace( winding_t **inout, vec3_t normal, vec_t dist, vec_t eps
    of the cliping plane.  The original is freed.
    =================
  */
-winding_t   *ChopWinding( winding_t *in, vec3_t normal, vec_t dist ){
+winding_t   *ChopWinding( winding_t *in, const Plane3f& plane ){
 	winding_t   *f, *b;
 
-	ClipWindingEpsilon( in, normal, dist, ON_EPSILON, &f, &b );
+	ClipWindingEpsilon( in, plane, ON_EPSILON, &f, &b );
 	FreeWinding( in );
 	if ( b ) {
 		FreeWinding( b );
@@ -880,11 +827,9 @@ winding_t   *ChopWinding( winding_t *in, vec3_t normal, vec_t dist ){
  */
 void CheckWinding( winding_t *w ){
 	int i, j;
-	vec_t   *p1, *p2;
-	vec_t d, edgedist;
-	vec3_t dir, edgenormal, facenormal;
-	vec_t area;
-	vec_t facedist;
+	float d, edgedist;
+	Vector3 dir, edgenormal;
+	float area;
 
 	if ( w->numpoints < 3 ) {
 		Error( "CheckWinding: %i points",w->numpoints );
@@ -895,11 +840,11 @@ void CheckWinding( winding_t *w ){
 		Error( "CheckWinding: %f area", area );
 	}
 
-	WindingPlane( w, facenormal, &facedist );
+	const Plane3f faceplane = WindingPlane( w );
 
 	for ( i = 0 ; i < w->numpoints ; i++ )
 	{
-		p1 = w->p[i];
+		const Vector3& p1 = w->p[i];
 
 		for ( j = 0 ; j < 3 ; j++ )
 			if ( p1[j] > MAX_WORLD_COORD || p1[j] < MIN_WORLD_COORD ) {
@@ -909,23 +854,21 @@ void CheckWinding( winding_t *w ){
 		j = i + 1 == w->numpoints ? 0 : i + 1;
 
 		// check the point is on the face plane
-		d = DotProduct( p1, facenormal ) - facedist;
+		d = plane3_distance_to_point( faceplane, p1 );
 		if ( d < -ON_EPSILON || d > ON_EPSILON ) {
 			Error( "CheckWinding: point off plane" );
 		}
 
 		// check the edge isnt degenerate
-		p2 = w->p[j];
-		VectorSubtract( p2, p1, dir );
+		const Vector3& p2 = w->p[j];
+		dir = p2 - p1;
 
-		if ( VectorLength( dir ) < ON_EPSILON ) {
+		if ( vector3_length( dir ) < ON_EPSILON ) {
 			Error( "CheckWinding: degenerate edge" );
 		}
 
-		CrossProduct( facenormal, dir, edgenormal );
-		VectorNormalize( edgenormal, edgenormal );
-		edgedist = DotProduct( p1, edgenormal );
-		edgedist += ON_EPSILON;
+		edgenormal = VectorNormalized( vector3_cross( faceplane.normal(), dir ) );
+		edgedist = vector3_dot( p1, edgenormal ) + ON_EPSILON;
 
 		// all other points must be on front side
 		for ( j = 0 ; j < w->numpoints ; j++ )
@@ -933,7 +876,7 @@ void CheckWinding( winding_t *w ){
 			if ( j == i ) {
 				continue;
 			}
-			d = DotProduct( w->p[j], edgenormal );
+			d = vector3_dot( w->p[j], edgenormal );
 			if ( d > edgedist ) {
 				Error( "CheckWinding: non-convex" );
 			}
@@ -947,26 +890,22 @@ void CheckWinding( winding_t *w ){
    WindingOnPlaneSide
    ============
  */
-int     WindingOnPlaneSide( winding_t *w, vec3_t normal, vec_t dist ){
-	bool front, back;
-	int i;
-	vec_t d;
-
-	front = false;
-	back = false;
-	for ( i = 0 ; i < w->numpoints ; i++ )
+EPlaneSide     WindingOnPlaneSide( const winding_t *w, const Plane3f& plane ){
+	bool front = false;
+	bool back = false;
+	for ( int i = 0 ; i < w->numpoints ; i++ )
 	{
-		d = DotProduct( w->p[i], normal ) - dist;
+		const double d = plane3_distance_to_point( plane, w->p[i] );
 		if ( d < -ON_EPSILON ) {
 			if ( front ) {
-				return SIDE_CROSS;
+				return eSideCross;
 			}
 			back = true;
 			continue;
 		}
 		if ( d > ON_EPSILON ) {
 			if ( back ) {
-				return SIDE_CROSS;
+				return eSideCross;
 			}
 			front = true;
 			continue;
@@ -974,12 +913,12 @@ int     WindingOnPlaneSide( winding_t *w, vec3_t normal, vec_t dist ){
 	}
 
 	if ( back ) {
-		return SIDE_BACK;
+		return eSideBack;
 	}
 	if ( front ) {
-		return SIDE_FRONT;
+		return eSideFront;
 	}
-	return SIDE_ON;
+	return eSideOn;
 }
 
 
@@ -991,42 +930,36 @@ int     WindingOnPlaneSide( winding_t *w, vec3_t normal, vec_t dist ){
    =================
  */
 #define MAX_HULL_POINTS     128
-void    AddWindingToConvexHull( winding_t *w, winding_t **hull, vec3_t normal ) {
+void    AddWindingToConvexHull( winding_t *w, winding_t **hull, const Vector3& normal ) {
 	int i, j, k;
-	float       *p, *copy;
-	vec3_t dir;
-	float d;
 	int numHullPoints, numNew;
-	vec3_t hullPoints[MAX_HULL_POINTS];
-	vec3_t newHullPoints[MAX_HULL_POINTS];
-	vec3_t hullDirs[MAX_HULL_POINTS];
+	Vector3 hullPoints[MAX_HULL_POINTS];
+	Vector3 newHullPoints[MAX_HULL_POINTS];
+	Vector3 hullDirs[MAX_HULL_POINTS];
 	bool hullSide[MAX_HULL_POINTS];
 	bool outside;
 
-	if ( !*hull ) {
+	if ( *hull == nullptr ) {
 		*hull = CopyWinding( w );
 		return;
 	}
 
 	numHullPoints = ( *hull )->numpoints;
-	memcpy( hullPoints, ( *hull )->p, numHullPoints * sizeof( vec3_t ) );
+	memcpy( hullPoints, ( *hull )->p, numHullPoints * sizeof( Vector3 ) );
 
 	for ( i = 0 ; i < w->numpoints ; i++ ) {
-		p = w->p[i];
+		const Vector3 &p = w->p[i];
 
 		// calculate hull side vectors
 		for ( j = 0 ; j < numHullPoints ; j++ ) {
 			k = ( j + 1 ) % numHullPoints;
 
-			VectorSubtract( hullPoints[k], hullPoints[j], dir );
-			VectorNormalize( dir, dir );
-			CrossProduct( normal, dir, hullDirs[j] );
+			hullDirs[j] = vector3_cross( normal, VectorNormalized( hullPoints[k] - hullPoints[j] ) );
 		}
 
 		outside = false;
 		for ( j = 0 ; j < numHullPoints ; j++ ) {
-			VectorSubtract( p, hullPoints[j], dir );
-			d = DotProduct( dir, hullDirs[j] );
+			const double d = vector3_dot( p - hullPoints[j], hullDirs[j] );
 			if ( d >= ON_EPSILON ) {
 				outside = true;
 			}
@@ -1049,7 +982,7 @@ void    AddWindingToConvexHull( winding_t *w, winding_t **hull, vec3_t normal ) 
 		}
 
 		// insert the point here
-		VectorCopy( p, newHullPoints[0] );
+		newHullPoints[0] = p;
 		numNew = 1;
 
 		// copy over all points that aren't double fronts
@@ -1058,18 +991,17 @@ void    AddWindingToConvexHull( winding_t *w, winding_t **hull, vec3_t normal ) 
 			if ( hullSide[ ( j + k ) % numHullPoints ] && hullSide[ ( j + k + 1 ) % numHullPoints ] ) {
 				continue;
 			}
-			copy = hullPoints[ ( j + k + 1 ) % numHullPoints ];
-			VectorCopy( copy, newHullPoints[numNew] );
+			newHullPoints[numNew] = hullPoints[ ( j + k + 1 ) % numHullPoints ];
 			numNew++;
 		}
 
 		numHullPoints = numNew;
-		memcpy( hullPoints, newHullPoints, numHullPoints * sizeof( vec3_t ) );
+		memcpy( hullPoints, newHullPoints, numHullPoints * sizeof( Vector3 ) );
 	}
 
 	FreeWinding( *hull );
 	w = AllocWinding( numHullPoints );
 	w->numpoints = numHullPoints;
 	*hull = w;
-	memcpy( w->p, hullPoints, numHullPoints * sizeof( vec3_t ) );
+	memcpy( w->p, hullPoints, numHullPoints * sizeof( Vector3 ) );
 }

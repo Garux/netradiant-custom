@@ -145,8 +145,8 @@ struct ibspDrawSurface_t
 	int lightmapX, lightmapY;
 	int lightmapWidth, lightmapHeight;
 
-	vec3_t lightmapOrigin;
-	vec3_t lightmapVecs[ 3 ];
+	Vector3 lightmapOrigin;
+	Vector3 lightmapVecs[ 3 ];
 
 	int patchWidth;
 	int patchHeight;
@@ -194,10 +194,10 @@ static void CopyDrawSurfacesLump( ibspHeader_t *header ){
 		out->lightmapWidth = in->lightmapWidth;
 		out->lightmapHeight = in->lightmapHeight;
 
-		VectorCopy( in->lightmapOrigin, out->lightmapOrigin );
-		VectorCopy( in->lightmapVecs[ 0 ], out->lightmapVecs[ 0 ] );
-		VectorCopy( in->lightmapVecs[ 1 ], out->lightmapVecs[ 1 ] );
-		VectorCopy( in->lightmapVecs[ 2 ], out->lightmapVecs[ 2 ] );
+		out->lightmapOrigin = in->lightmapOrigin;
+		out->lightmapVecs[ 0 ] = in->lightmapVecs[ 0 ];
+		out->lightmapVecs[ 1 ] = in->lightmapVecs[ 1 ];
+		out->lightmapVecs[ 2 ] = in->lightmapVecs[ 2 ];
 
 		out->patchWidth = in->patchWidth;
 		out->patchHeight = in->patchHeight;
@@ -237,10 +237,10 @@ static void AddDrawSurfacesLump( FILE *file, ibspHeader_t *header ){
 		out->lightmapWidth = in->lightmapWidth;
 		out->lightmapHeight = in->lightmapHeight;
 
-		VectorCopy( in->lightmapOrigin, out->lightmapOrigin );
-		VectorCopy( in->lightmapVecs[ 0 ], out->lightmapVecs[ 0 ] );
-		VectorCopy( in->lightmapVecs[ 1 ], out->lightmapVecs[ 1 ] );
-		VectorCopy( in->lightmapVecs[ 2 ], out->lightmapVecs[ 2 ] );
+		out->lightmapOrigin = in->lightmapOrigin;
+		out->lightmapVecs[ 0 ] = in->lightmapVecs[ 0 ];
+		out->lightmapVecs[ 1 ] = in->lightmapVecs[ 1 ];
+		out->lightmapVecs[ 2 ] = in->lightmapVecs[ 2 ];
 
 		out->patchWidth = in->patchWidth;
 		out->patchHeight = in->patchHeight;
@@ -261,11 +261,11 @@ static void AddDrawSurfacesLump( FILE *file, ibspHeader_t *header ){
 /* drawverts */
 struct ibspDrawVert_t
 {
-	vec3_t xyz;
-	float st[ 2 ];
-	float lightmap[ 2 ];
-	vec3_t normal;
-	byte color[ 4 ];
+	Vector3 xyz;
+	Vector2 st;
+	Vector2 lightmap;
+	Vector3 normal;
+	Color4b color;
 };
 
 
@@ -284,20 +284,11 @@ static void CopyDrawVertsLump( ibspHeader_t *header ){
 	out = bspDrawVerts;
 	for ( i = 0; i < numBSPDrawVerts; i++ )
 	{
-		VectorCopy( in->xyz, out->xyz );
-		out->st[ 0 ] = in->st[ 0 ];
-		out->st[ 1 ] = in->st[ 1 ];
-
-		out->lightmap[ 0 ][ 0 ] = in->lightmap[ 0 ];
-		out->lightmap[ 0 ][ 1 ] = in->lightmap[ 1 ];
-
-		VectorCopy( in->normal, out->normal );
-
-		out->color[ 0 ][ 0 ] = in->color[ 0 ];
-		out->color[ 0 ][ 1 ] = in->color[ 1 ];
-		out->color[ 0 ][ 2 ] = in->color[ 2 ];
-		out->color[ 0 ][ 3 ] = in->color[ 3 ];
-
+		out->xyz = in->xyz;
+		out->st = in->st;
+		out->lightmap[ 0 ] = in->lightmap;
+		out->normal = in->normal;
+		out->color[ 0 ] = in->color;
 		in++;
 		out++;
 	}
@@ -319,20 +310,11 @@ static void AddDrawVertsLump( FILE *file, ibspHeader_t *header ){
 	out = buffer;
 	for ( i = 0; i < numBSPDrawVerts; i++ )
 	{
-		VectorCopy( in->xyz, out->xyz );
-		out->st[ 0 ] = in->st[ 0 ];
-		out->st[ 1 ] = in->st[ 1 ];
-
-		out->lightmap[ 0 ] = in->lightmap[ 0 ][ 0 ];
-		out->lightmap[ 1 ] = in->lightmap[ 0 ][ 1 ];
-
-		VectorCopy( in->normal, out->normal );
-
-		out->color[ 0 ] = in->color[ 0 ][ 0 ];
-		out->color[ 1 ] = in->color[ 0 ][ 1 ];
-		out->color[ 2 ] = in->color[ 0 ][ 2 ];
-		out->color[ 3 ] = in->color[ 0 ][ 3 ];
-
+		out->xyz = in->xyz;
+		out->st = in->st;
+		out->lightmap = in->lightmap[ 0 ];
+		out->normal = in->normal;
+		out->color = in->color[ 0 ];
 		in++;
 		out++;
 	}
@@ -349,8 +331,8 @@ static void AddDrawVertsLump( FILE *file, ibspHeader_t *header ){
 /* light grid */
 struct ibspGridPoint_t
 {
-	byte ambient[ 3 ];
-	byte directed[ 3 ];
+	Vector3b ambient;
+	Vector3b directed;
 	byte latLong[ 2 ];
 };
 
@@ -374,8 +356,8 @@ static void CopyLightGridLumps( ibspHeader_t *header ){
 	{
 		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
 		{
-			VectorCopy( in->ambient, out->ambient[ j ] );
-			VectorCopy( in->directed, out->directed[ j ] );
+			out->ambient[ j ] = in->ambient;
+			out->directed[ j ] = in->directed;
 			out->styles[ j ] = LS_NONE;
 		}
 
@@ -409,8 +391,8 @@ static void AddLightGridLumps( FILE *file, ibspHeader_t *header ){
 	out = buffer;
 	for ( i = 0; i < numBSPGridPoints; i++ )
 	{
-		VectorCopy( in->ambient[ 0 ], out->ambient );
-		VectorCopy( in->directed[ 0 ], out->directed );
+		out->ambient = in->ambient[ 0 ];
+		out->directed = in->directed[ 0 ];
 
 		out->latLong[ 0 ] = in->latLong[ 0 ];
 		out->latLong[ 1 ] = in->latLong[ 1 ];

@@ -175,10 +175,10 @@ void PrintPortal( portal_t *p ){
  */
 #define SIDESPACE   8
 void MakeHeadnodePortals( tree_t *tree ){
-	vec3_t bounds[2];
+	Vector3 bounds[2];
 	int i, j, n;
 	portal_t    *p, *portals[6];
-	plane_t bplanes[6], *pl;
+	plane_t bplanes[6];
 	node_t *node;
 
 	node = tree->headnode;
@@ -186,8 +186,8 @@ void MakeHeadnodePortals( tree_t *tree ){
 // pad with some space so there will never be null volume leafs
 	for ( i = 0 ; i < 3 ; i++ )
 	{
-		bounds[0][i] = tree->mins[i] - SIDESPACE;
-		bounds[1][i] = tree->maxs[i] + SIDESPACE;
+		bounds[0][i] = tree->minmax.mins[i] - SIDESPACE;
+		bounds[1][i] = tree->minmax.maxs[i] + SIDESPACE;
 		if ( bounds[0][i] >= bounds[1][i] ) {
 			Error( "Backwards tree volume" );
 		}
@@ -206,19 +206,19 @@ void MakeHeadnodePortals( tree_t *tree ){
 			p = AllocPortal();
 			portals[n] = p;
 
-			pl = &bplanes[n];
+			plane_t *pl = &bplanes[n];
 			memset( pl, 0, sizeof( *pl ) );
 			if ( j ) {
-				pl->normal[i] = -1;
-				pl->dist = -bounds[j][i];
+				pl->normal()[i] = -1;
+				pl->dist() = -bounds[j][i];
 			}
 			else
 			{
-				pl->normal[i] = 1;
-				pl->dist = bounds[j][i];
+				pl->normal()[i] = 1;
+				pl->dist() = bounds[j][i];
 			}
 			p->plane = *pl;
-			p->winding = BaseWindingForPlane( pl->normal, pl->dist );
+			p->winding = BaseWindingForPlane( pl->plane );
 			AddPortalToNodes( p, node, &tree->outside_node );
 		}
 
@@ -230,7 +230,7 @@ void MakeHeadnodePortals( tree_t *tree ){
 			if ( j == i ) {
 				continue;
 			}
-			ChopWindingInPlace( &portals[i]->winding, bplanes[j].normal, bplanes[j].dist, ON_EPSILON );
+			ChopWindingInPlace( &portals[i]->winding, bplanes[j].plane, ON_EPSILON );
 		}
 	}
 }
@@ -249,26 +249,20 @@ void MakeHeadnodePortals( tree_t *tree ){
 winding_t   *BaseWindingForNode( node_t *node ){
 	winding_t   *w;
 	node_t      *n;
-	plane_t     *plane;
-	vec3_t normal;
-	vec_t dist;
 
-	w = BaseWindingForPlane( mapplanes[node->planenum].normal
-							 , mapplanes[node->planenum].dist );
+	w = BaseWindingForPlane( mapplanes[node->planenum].plane );
 
 	// clip by all the parents
 	for ( n = node->parent ; n && w ; )
 	{
-		plane = &mapplanes[n->planenum];
+		const plane_t& plane = mapplanes[n->planenum];
 
 		if ( n->children[0] == node ) { // take front
-			ChopWindingInPlace( &w, plane->normal, plane->dist, BASE_WINDING_EPSILON );
+			ChopWindingInPlace( &w, plane.plane, BASE_WINDING_EPSILON );
 		}
 		else
 		{   // take back
-			VectorSubtract( vec3_origin, plane->normal, normal );
-			dist = -plane->dist;
-			ChopWindingInPlace( &w, normal, dist, BASE_WINDING_EPSILON );
+			ChopWindingInPlace( &w, plane3_flipped( plane.plane ), BASE_WINDING_EPSILON );
 		}
 		node = n;
 		n = n->parent;
@@ -290,8 +284,6 @@ winding_t   *BaseWindingForNode( node_t *node ){
 void MakeNodePortal( node_t *node ){
 	portal_t    *new_portal, *p;
 	winding_t   *w;
-	vec3_t normal;
-	float dist;
 	int side;
 
 	w = BaseWindingForNode( node );
@@ -301,19 +293,16 @@ void MakeNodePortal( node_t *node ){
 	{
 		if ( p->nodes[0] == node ) {
 			side = 0;
-			VectorCopy( p->plane.normal, normal );
-			dist = p->plane.dist;
+			ChopWindingInPlace( &w, p->plane.plane, CLIP_EPSILON );
 		}
 		else if ( p->nodes[1] == node ) {
 			side = 1;
-			VectorSubtract( vec3_origin, p->plane.normal, normal );
-			dist = -p->plane.dist;
+			ChopWindingInPlace( &w, plane3_flipped( p->plane.plane ), CLIP_EPSILON );
 		}
 		else{
 			Error( "CutNodePortals_r: mislinked portal" );
 		}
 
-		ChopWindingInPlace( &w, normal, dist, CLIP_EPSILON );
 	}
 
 	if ( !w ) {
@@ -357,10 +346,9 @@ void SplitNodePortals( node_t *node ){
 	portal_t    *p, *next_portal, *new_portal;
 	node_t      *f, *b, *other_node;
 	int side;
-	plane_t     *plane;
 	winding_t   *frontwinding, *backwinding;
 
-	plane = &mapplanes[node->planenum];
+	const plane_t& plane = mapplanes[node->planenum];
 	f = node->children[0];
 	b = node->children[1];
 
@@ -384,16 +372,16 @@ void SplitNodePortals( node_t *node ){
 //
 // cut the portal into two portals, one on each side of the cut plane
 //
-		ClipWindingEpsilon( p->winding, plane->normal, plane->dist,
+		ClipWindingEpsilon( p->winding, plane.plane,
 							SPLIT_WINDING_EPSILON, &frontwinding, &backwinding ); /* not strict, we want to always keep one of them even if coplanar */
 
 		if ( frontwinding && WindingIsTiny( frontwinding ) ) {
 			if ( !f->tinyportals ) {
-				VectorCopy( frontwinding->p[0], f->referencepoint );
+				f->referencepoint = frontwinding->p[0];
 			}
 			f->tinyportals++;
 			if ( !other_node->tinyportals ) {
-				VectorCopy( frontwinding->p[0], other_node->referencepoint );
+				other_node->referencepoint = frontwinding->p[0];
 			}
 			other_node->tinyportals++;
 
@@ -404,11 +392,11 @@ void SplitNodePortals( node_t *node ){
 
 		if ( backwinding && WindingIsTiny( backwinding ) ) {
 			if ( !b->tinyportals ) {
-				VectorCopy( backwinding->p[0], b->referencepoint );
+				b->referencepoint = backwinding->p[0];
 			}
 			b->tinyportals++;
 			if ( !other_node->tinyportals ) {
-				VectorCopy( backwinding->p[0], other_node->referencepoint );
+				other_node->referencepoint = backwinding->p[0];
 			}
 			other_node->tinyportals++;
 
@@ -475,12 +463,12 @@ void CalcNodeBounds( node_t *node ){
 	int i;
 
 	// calc mins/maxs for both leafs and nodes
-	ClearBounds( node->mins, node->maxs );
+	node->minmax.clear();
 	for ( p = node->portals ; p ; p = p->next[s] )
 	{
 		s = ( p->nodes[1] == node );
 		for ( i = 0 ; i < p->winding->numpoints ; i++ )
-			AddPointToBounds( p->winding->p[i], node->mins, node->maxs );
+			node->minmax.extend( p->winding->p[i] );
 	}
 }
 
@@ -493,7 +481,7 @@ void MakeTreePortals_r( node_t *node ){
 	int i;
 
 	CalcNodeBounds( node );
-	if ( node->mins[0] >= node->maxs[0] ) {
+	if ( node->minmax.mins[0] >= node->minmax.maxs[0] ) {
 		Sys_Warning( "node without a volume\n"
 						"node has %d tiny portals\n"
 						"node reference point %1.2f %1.2f %1.2f\n",
@@ -505,7 +493,7 @@ void MakeTreePortals_r( node_t *node ){
 
 	for ( i = 0 ; i < 3 ; i++ )
 	{
-		if ( node->mins[i] < MIN_WORLD_COORD || node->maxs[i] > MAX_WORLD_COORD ) {
+		if ( node->minmax.mins[i] < MIN_WORLD_COORD || node->minmax.maxs[i] > MAX_WORLD_COORD ) {
 			if ( node->portals && node->portals->winding ) {
 				xml_Winding( "WARNING: Node With Unbounded Volume", node->portals->winding->p, node->portals->winding->numpoints, false );
 			}
@@ -587,19 +575,14 @@ void FloodPortals( node_t *node, bool skybox ){
    =============
  */
 
-bool PlaceOccupant( node_t *headnode, vec3_t origin, const entity_t *occupant, bool skybox ){
-	vec_t d;
+bool PlaceOccupant( node_t *headnode, const Vector3& origin, const entity_t *occupant, bool skybox ){
 	node_t  *node;
-	plane_t *plane;
-
 
 	// find the leaf to start in
 	node = headnode;
 	while ( node->planenum != PLANENUM_LEAF )
 	{
-		plane = &mapplanes[ node->planenum ];
-		d = DotProduct( origin, plane->normal ) - plane->dist;
-		if ( d >= 0 ) {
+		if ( plane3_distance_to_point( mapplanes[ node->planenum ].plane, origin ) >= 0 ) {
 			node = node->children[ 0 ];
 		}
 		else{
@@ -644,11 +627,11 @@ EFloodEntities FloodEntities( tree_t *tree ){
 		const entity_t& e = entities[ i ];
 
 		/* get origin */
-		vec3_t origin;
+		Vector3 origin;
 		e.vectorForKey( "origin", origin );
 #if 0 // 0 = allow maps with only point entity@( 0, 0, 0 ); assuming that entities, containing no primitives are point ones
 		/* as a special case, allow origin-less entities */
-		if ( VectorCompare( origin, vec3_origin ) ) {
+		if ( VectorCompare( origin, g_vector3_identity ) ) {
 			continue;
 		}
 #endif
@@ -661,25 +644,21 @@ EFloodEntities FloodEntities( tree_t *tree ){
 		if ( e.classname_is( "_skybox" ) ) {
 			skybox = true;
 
-			/* invert origin */
-			vec3_t offset;
-			VectorScale( origin, -1.0f, offset );
-
 			/* get scale */
-			vec3_t scale = { 64.0f, 64.0f, 64.0f };
+			Vector3 scale( 64, 64, 64 );
 			if( !e.read_keyvalue( scale, "_scale" ) )
 				if( e.read_keyvalue( scale[0], "_scale" ) )
 					scale[1] = scale[2] = scale[0];
 
 			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
-			vec3_t angles = { 0.f, 0.f, 0.f };
+			Vector3 angles( 0, 0, 0 );
 			if ( !e.read_keyvalue( value, "angles" ) ||
 				3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 				e.read_keyvalue( angles[ 2 ], "angle" );
 
 			/* set transform matrix (thanks spog) */
-			m4x4_identity( skyboxTransform );
-			m4x4_pivoted_transform_by_vec3( skyboxTransform, offset, angles, eXYZ, scale, origin );
+			skyboxTransform = g_matrix4_identity;
+			matrix4_pivoted_transform_by_euler_xyz_degrees( skyboxTransform, -origin, angles, scale, origin );
 		}
 		else{
 			skybox = false;

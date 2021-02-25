@@ -38,12 +38,12 @@
 struct decalProjector_t
 {
 	shaderInfo_t            *si;
-	vec3_t mins, maxs;
-	vec3_t center;
+	MinMax minmax;
+	Vector3 center;
 	float radius, radius2;
 	int numPlanes;                      /* either 5 or 6, for quad or triangle projectors */
-	vec4_t planes[ 6 ];
-	vec4_t texMat[ 2 ];
+	Plane3f planes[ 6 ];
+	Vector4 texMat[ 2 ];
 };
 
 static int numProjectors = 0;
@@ -51,35 +51,8 @@ static decalProjector_t projectors[ MAX_PROJECTORS ];
 
 static int numDecalSurfaces = 0;
 
-static vec3_t entityOrigin;
+static Vector3 entityOrigin;
 
-
-
-/*
-   DVectorNormalize()
-   normalizes a vector, returns the length, operates using doubles
- */
-
-typedef double dvec_t;
-typedef dvec_t dvec3_t[ 3 ];
-
-dvec_t DVectorNormalize( dvec3_t in, dvec3_t out ){
-	dvec_t len, ilen;
-
-
-	len = (dvec_t) sqrt( in[ 0 ] * in[ 0 ] + in[ 1 ] * in[ 1 ] + in[ 2 ] * in[ 2 ] );
-	if ( len == 0.0 ) {
-		VectorClear( out );
-		return 0.0;
-	}
-
-	ilen = 1.0 / len;
-	out[ 0 ] = in[ 0 ] * ilen;
-	out[ 1 ] = in[ 1 ] * ilen;
-	out[ 2 ] = in[ 2 ] * ilen;
-
-	return len;
-}
 
 
 
@@ -91,21 +64,18 @@ dvec_t DVectorNormalize( dvec3_t in, dvec3_t out ){
 
 #define Vector2Subtract( a,b,c )  ( ( c )[ 0 ] = ( a )[ 0 ] - ( b )[ 0 ], ( c )[ 1 ] = ( a )[ 1 ] - ( b )[ 1 ] )
 
-static bool MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c ){
+static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c ){
 	int i, j;
-	double bb, s, t, d;
-	dvec3_t pa, pb, pc;
-	dvec3_t bary, xyz;
-	dvec3_t vecs[ 3 ], axis[ 3 ], lengths;
+	double bb, s, t;
+	DoubleVector3 pa, pb, pc;
+	DoubleVector3 bary, xyz;
+	DoubleVector3 vecs[ 3 ], axis[ 3 ], lengths;
 
 
 	/* project triangle onto plane of projection */
-	d = DotProduct( a->xyz, projection ) - projection[ 3 ];
-	VectorMA( a->xyz, -d, projection, pa );
-	d = DotProduct( b->xyz, projection ) - projection[ 3 ];
-	VectorMA( b->xyz, -d, projection, pb );
-	d = DotProduct( c->xyz, projection ) - projection[ 3 ];
-	VectorMA( c->xyz, -d, projection, pc );
+	pa = plane3_project_point( projection, a->xyz );
+	pb = plane3_project_point( projection, b->xyz );
+	pc = plane3_project_point( projection, c->xyz );
 
 	/* two methods */
 	#if 1
@@ -142,8 +112,8 @@ static bool MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawV
 		xyz[ 1 ] = bary[ 0 ] * pa[ 1 ] + bary[ 1 ] * pb[ 1 ] + bary[ 2 ] * pc[ 1 ];
 		xyz[ 2 ] = bary[ 0 ] * pa[ 2 ] + bary[ 1 ] * pb[ 2 ] + bary[ 2 ] * pc[ 2 ];
 
-		//%	VectorSubtract( xyz, origin, vecs[ 0 ] );
-		VectorSubtract( xyz, pa, vecs[ 0 ] );
+		//%	vecs[ 0 ] = xyz - origin;
+		vecs[ 0 ] = xyz - pa;
 
 		/* calculate t vector */
 		s = a->st[ 0 ] + 0.0;
@@ -156,29 +126,31 @@ static bool MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawV
 		xyz[ 1 ] = bary[ 0 ] * pa[ 1 ] + bary[ 1 ] * pb[ 1 ] + bary[ 2 ] * pc[ 1 ];
 		xyz[ 2 ] = bary[ 0 ] * pa[ 2 ] + bary[ 1 ] * pb[ 2 ] + bary[ 2 ] * pc[ 2 ];
 
-		//%	VectorSubtract( xyz, origin, vecs[ 1 ] );
-		VectorSubtract( xyz, pa, vecs[ 1 ] );
+		//%	vecs[ 1 ] = xyz - origin;
+		vecs[ 1 ] = xyz - pa;
 
 		/* calcuate r vector */
-		VectorScale( projection, -1.0, vecs[ 2 ] );
+		vecs[ 2 ] = -projection.normal();
 
 		/* calculate transform axis */
-		for ( i = 0; i < 3; i++ )
-			lengths[ i ] = DVectorNormalize( vecs[ i ], axis[ i ] );
+		for ( i = 0; i < 3; i++ ){
+			axis[ i ] = vecs[ i ];
+			lengths[ i ] = VectorNormalize( axis[ i ] );
+		}
 		for ( i = 0; i < 2; i++ )
 			for ( j = 0; j < 3; j++ )
-				dp->texMat[ i ][ j ] = lengths[ i ] > 0.0 ? ( axis[ i ][ j ] / lengths[ i ] ) : 0.0;
+				dp->texMat[ i ][ j ] = lengths[ i ] != 0.0 ? ( axis[ i ][ j ] / lengths[ i ] ) : 0.0;
 		//%	dp->texMat[ i ][ j ] = fabs( vecs[ i ][ j ] ) > 0.0 ? (1.0 / vecs[ i ][ j ]) : 0.0;
 		//%	dp->texMat[ i ][ j ] = axis[ i ][ j ] > 0.0 ? (1.0 / axis[ i ][ j ]) : 0.0;
 
 		/* calculalate translation component */
-		dp->texMat[ 0 ][ 3 ] = a->st[ 0 ] - DotProduct( a->xyz, dp->texMat[ 0 ] );
-		dp->texMat[ 1 ][ 3 ] = a->st[ 1 ] - DotProduct( a->xyz, dp->texMat[ 1 ] );
+		dp->texMat[ 0 ][ 3 ] = a->st[ 0 ] - vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() );
+		dp->texMat[ 1 ][ 3 ] = a->st[ 1 ] - vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() );
 	}
 	#else
 	{
 		int k;
-		dvec3_t origin, deltas[ 3 ];
+		DoubleVector3 deltas[ 3 ];
 		double texDeltas[ 3 ][ 2 ];
 		double delta, texDelta;
 
@@ -186,9 +158,9 @@ static bool MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawV
 		/* new code */
 
 		/* calculate deltas */
-		VectorSubtract( pa, pb, deltas[ 0 ] );
-		VectorSubtract( pa, pc, deltas[ 1 ] );
-		VectorSubtract( pb, pc, deltas[ 2 ] );
+		deltas[ 0 ] = pa - pb;
+		deltas[ 1 ] = pa - pc;
+		deltas[ 2 ] = pb - pc;
 		Vector2Subtract( a->st, b->st, texDeltas[ 0 ] );
 		Vector2Subtract( a->st, c->st, texDeltas[ 1 ] );
 		Vector2Subtract( b->st, c->st, texDeltas[ 2 ] );
@@ -223,42 +195,42 @@ static bool MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawV
 			}
 
 			/* set translation component */
-			dp->texMat[ i ][ 3 ] = a->st[ i ] - DotProduct( pa, dp->texMat[ i ] );
+			dp->texMat[ i ][ 3 ] = a->st[ i ] - vector3_dot( pa, dp->texMat[ i ].vec3() );
 		}
 	}
 	#endif
 
 	/* debug code */
 	#if 1
-	Sys_Printf( "Mat: [ %f %f %f %f ] [ %f %f %f %f ] Theta: %f (%f)\n",
+	Sys_Printf( "Mat: [ %f %f %f %f ] [ %f %f %f %f ] Theta: %lf (%lf)\n",
 				dp->texMat[ 0 ][ 0 ], dp->texMat[ 0 ][ 1 ], dp->texMat[ 0 ][ 2 ], dp->texMat[ 0 ][ 3 ],
 				dp->texMat[ 1 ][ 0 ], dp->texMat[ 1 ][ 1 ], dp->texMat[ 1 ][ 2 ], dp->texMat[ 1 ][ 3 ],
-				RAD2DEG( acos( DotProduct( dp->texMat[ 0 ], dp->texMat[ 1 ] ) ) ),
-				RAD2DEG( acos( DotProduct( axis[ 0 ], axis[ 1 ] ) ) ) );
+				radians_to_degrees( acos( vector3_dot( dp->texMat[ 0 ].vec3(), dp->texMat[ 1 ].vec3() ) ) ),
+				radians_to_degrees( acos( vector3_dot( axis[ 0 ], axis[ 1 ] ) ) ) );
 
 	Sys_Printf( "XYZ: %f %f %f ST: %f %f ST(t): %f %f\n",
 				a->xyz[ 0 ], a->xyz[ 1 ], a->xyz[ 2 ],
 				a->st[ 0 ], a->st[ 1 ],
-				DotProduct( a->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ], DotProduct( a->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ] );
+				vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ], vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ] );
 	#endif
 
 	/* test texture matrix */
-	s = DotProduct( a->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ];
-	t = DotProduct( a->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ];
+	s = vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
+	t = vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 	if ( fabs( s - a->st[ 0 ] ) > 0.01 || fabs( t - a->st[ 1 ] ) > 0.01 ) {
 		Sys_Printf( "Bad texture matrix! (A) (%f, %f) != (%f, %f)\n",
 					s, t, a->st[ 0 ], a->st[ 1 ] );
 		//%	return false;
 	}
-	s = DotProduct( b->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ];
-	t = DotProduct( b->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ];
+	s = vector3_dot( b->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
+	t = vector3_dot( b->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 	if ( fabs( s - b->st[ 0 ] ) > 0.01 || fabs( t - b->st[ 1 ] ) > 0.01 ) {
 		Sys_Printf( "Bad texture matrix! (B) (%f, %f) != (%f, %f)\n",
 					s, t, b->st[ 0 ], b->st[ 1 ] );
 		//%	return false;
 	}
-	s = DotProduct( c->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ];
-	t = DotProduct( c->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ];
+	s = vector3_dot( c->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
+	t = vector3_dot( c->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 	if ( fabs( s - c->st[ 0 ] ) > 0.01 || fabs( t - c->st[ 1 ] ) > 0.01 ) {
 		Sys_Printf( "Bad texture matrix! (C) (%f, %f) != (%f, %f)\n",
 					s, t, c->st[ 0 ], c->st[ 1 ] );
@@ -277,7 +249,7 @@ static bool MakeTextureMatrix( decalProjector_t *dp, vec4_t projection, bspDrawV
    note: non-normalized axes will screw up the plane transform
  */
 
-static void TransformDecalProjector( decalProjector_t *in, vec3_t axis[ 3 ], vec3_t origin, decalProjector_t *out ){
+static void TransformDecalProjector( decalProjector_t *in, Vector3 axis[ 3 ], const Vector3& origin, decalProjector_t *out ){
 	int i;
 
 
@@ -286,28 +258,28 @@ static void TransformDecalProjector( decalProjector_t *in, vec3_t axis[ 3 ], vec
 	out->numPlanes = in->numPlanes;
 
 	/* translate bounding box and sphere (note: rotated projector bounding box will be invalid!) */
-	VectorSubtract( in->mins, origin, out->mins );
-	VectorSubtract( in->maxs, origin, out->maxs );
-	VectorSubtract( in->center, origin, out->center );
+	out->minmax.mins = in->minmax.mins - origin;
+	out->minmax.maxs = in->minmax.maxs - origin;
+	out->center = in->center - origin;
 	out->radius = in->radius;
 	out->radius2 = in->radius2;
 
 	/* translate planes */
 	for ( i = 0; i < in->numPlanes; i++ )
 	{
-		out->planes[ i ][ 0 ] = DotProduct( in->planes[ i ], axis[ 0 ] );
-		out->planes[ i ][ 1 ] = DotProduct( in->planes[ i ], axis[ 1 ] );
-		out->planes[ i ][ 2 ] = DotProduct( in->planes[ i ], axis[ 2 ] );
-		out->planes[ i ][ 3 ] = in->planes[ i ][ 3 ] - DotProduct( out->planes[ i ], origin );
+		out->planes[ i ].a = vector3_dot( in->planes[ i ].normal(), axis[ 0 ] );
+		out->planes[ i ].b = vector3_dot( in->planes[ i ].normal(), axis[ 1 ] );
+		out->planes[ i ].c = vector3_dot( in->planes[ i ].normal(), axis[ 2 ] );
+		out->planes[ i ].d = in->planes[ i ].dist() - vector3_dot( out->planes[ i ].normal(), origin );
 	}
 
 	/* translate texture matrix */
 	for ( i = 0; i < 2; i++ )
 	{
-		out->texMat[ i ][ 0 ] = DotProduct( in->texMat[ i ], axis[ 0 ] );
-		out->texMat[ i ][ 1 ] = DotProduct( in->texMat[ i ], axis[ 1 ] );
-		out->texMat[ i ][ 2 ] = DotProduct( in->texMat[ i ], axis[ 2 ] );
-		out->texMat[ i ][ 3 ] = in->texMat[ i ][ 3 ] + DotProduct( out->texMat[ i ], origin );
+		out->texMat[ i ][ 0 ] = vector3_dot( in->texMat[ i ].vec3(), axis[ 0 ] );
+		out->texMat[ i ][ 1 ] = vector3_dot( in->texMat[ i ].vec3(), axis[ 1 ] );
+		out->texMat[ i ][ 2 ] = vector3_dot( in->texMat[ i ].vec3(), axis[ 2 ] );
+		out->texMat[ i ][ 3 ] = vector3_dot( out->texMat[ i ].vec3(), origin ) + in->texMat[ i ][ 3 ];
 	}
 }
 
@@ -318,10 +290,9 @@ static void TransformDecalProjector( decalProjector_t *in, vec3_t axis[ 3 ], vec
    creates a new decal projector from a triangle
  */
 
-static int MakeDecalProjector( shaderInfo_t *si, vec4_t projection, float distance, int numVerts, bspDrawVert_t **dv ){
+static int MakeDecalProjector( shaderInfo_t *si, const Plane3f& projection, float distance, int numVerts, bspDrawVert_t **dv ){
 	int i, j;
 	decalProjector_t    *dp;
-	vec3_t xyz;
 
 
 	/* dummy check */
@@ -349,19 +320,16 @@ static int MakeDecalProjector( shaderInfo_t *si, vec4_t projection, float distan
 	}
 
 	/* bound the projector */
-	ClearBounds( dp->mins, dp->maxs );
+	dp->minmax.clear();
 	for ( i = 0; i < numVerts; i++ )
 	{
-		AddPointToBounds( dv[ i ]->xyz, dp->mins, dp->maxs );
-		VectorMA( dv[ i ]->xyz, distance, projection, xyz );
-		AddPointToBounds( xyz, dp->mins, dp->maxs );
+		dp->minmax.extend( dv[ i ]->xyz );
+		dp->minmax.extend( dv[ i ]->xyz + projection.normal() * distance );
 	}
 
 	/* make bouding sphere */
-	VectorAdd( dp->mins, dp->maxs, dp->center );
-	VectorScale( dp->center, 0.5f, dp->center );
-	VectorSubtract( dp->maxs, dp->center, xyz );
-	dp->radius = VectorLength( xyz );
+	dp->center = dp->minmax.origin();
+	dp->radius = vector3_length( dp->minmax.maxs - dp->center );
 	dp->radius2 = dp->radius * dp->radius;
 
 	/* make the front plane */
@@ -370,16 +338,14 @@ static int MakeDecalProjector( shaderInfo_t *si, vec4_t projection, float distan
 	}
 
 	/* make the back plane */
-	VectorSubtract( vec3_origin, dp->planes[ 0 ], dp->planes[ 1 ] );
-	VectorMA( dv[ 0 ]->xyz, distance, projection, xyz );
-	dp->planes[ 1 ][ 3 ] = DotProduct( xyz, dp->planes[ 1 ] );
+	dp->planes[ 1 ].normal() = -dp->planes[ 0 ].normal();
+	dp->planes[ 1 ].dist() = vector3_dot( dv[ 0 ]->xyz + projection.normal() * distance, dp->planes[ 1 ].normal() );
 
 	/* make the side planes */
 	for ( i = 0; i < numVerts; i++ )
 	{
 		j = ( i + 1 ) % numVerts;
-		VectorMA( dv[ i ]->xyz, distance, projection, xyz );
-		if ( !PlaneFromPoints( dp->planes[ i + 2 ], dv[ j ]->xyz, dv[ i ]->xyz, xyz ) ) {
+		if ( !PlaneFromPoints( dp->planes[ i + 2 ], dv[ j ]->xyz, dv[ i ]->xyz, dv[ i ]->xyz + projection.normal() * distance ) ) {
 			return -1;
 		}
 	}
@@ -401,8 +367,7 @@ static int MakeDecalProjector( shaderInfo_t *si, vec4_t projection, float distan
 void ProcessDecals( void ){
 	int j, x, y, pw[ 5 ], r, iterations;
 	float distance;
-	vec4_t projection, plane;
-	vec3_t origin, target, delta;
+	Plane3f projection, plane;
 	entity_t            *e2;
 	parseMesh_t         *p;
 	mesh_t              *mesh, *subdivided;
@@ -439,20 +404,18 @@ void ProcessDecals( void ){
 		for ( p = e.patches; p != NULL; p = e.patches )
 		{
 			/* setup projector */
-			if ( VectorCompare( e.origin, vec3_origin ) ) {
-				VectorAdd( p->eMins, p->eMaxs, origin );
-				VectorScale( origin, 0.5f, origin );
+			Vector3 origin;
+			if ( VectorCompare( e.origin, g_vector3_identity ) ) {
+				origin = p->eMinmax.origin();
 			}
 			else{
-				VectorCopy( e.origin, origin );
+				origin = e.origin;
 			}
 
-			VectorCopy( e2->origin, target );
-			VectorSubtract( target, origin, delta );
-
 			/* setup projection plane */
-			distance = VectorNormalize( delta, projection );
-			projection[ 3 ] = DotProduct( origin, projection );
+			projection.normal() = e2->origin - origin;
+			distance = VectorNormalize( projection.normal() );
+			projection.dist() = vector3_dot( origin, projection.normal() );
 
 			/* create projectors */
 			if ( distance > 0.125f ) {
@@ -467,7 +430,7 @@ void ProcessDecals( void ){
 
 				/* offset by projector origin */
 				for ( j = 0; j < ( mesh->width * mesh->height ); j++ )
-					VectorAdd( mesh->verts[ j ].xyz, e.origin, mesh->verts[ j ].xyz );
+					mesh->verts[ j ].xyz += e.origin;
 
 				/* iterate through the mesh quads */
 				for ( y = 0; y < ( mesh->height - 1 ); y++ )
@@ -491,9 +454,8 @@ void ProcessDecals( void ){
 						dv[ 3 ] = &mesh->verts[ pw[ r + 3 ] ];
 
 						/* planar? (nuking this optimization as it doesn't work on non-rectangular quads) */
-						plane[ 0 ] = 0.0f;  /* stupid msvc */
 						if ( 0 && PlaneFromPoints( plane, dv[ 0 ]->xyz, dv[ 1 ]->xyz, dv[ 2 ]->xyz ) &&
-							 fabs( DotProduct( dv[ 1 ]->xyz, plane ) - plane[ 3 ] ) <= PLANAR_EPSILON ) {
+							 fabs( plane3_distance_to_point( plane, dv[ 1 ]->xyz ) ) <= PLANAR_EPSILON ) {
 							/* make a quad projector */
 							MakeDecalProjector( p->shaderInfo, projection, distance, 4, dv );
 						}
@@ -542,7 +504,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	winding_t           *front, *back;
 	mapDrawSurface_t    *ds2;
 	bspDrawVert_t       *dv;
-	vec4_t plane;
+	Plane3f plane;
 
 
 	/* dummy check */
@@ -553,7 +515,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 
 	/* offset by entity origin */
 	for ( i = 0; i < w->numpoints; i++ )
-		VectorAdd( w->p[ i ], entityOrigin, w->p[ i ] );
+		w->p[ i ] += entityOrigin;
 
 	/* make a plane from the winding */
 	if ( !PlaneFromPoints( plane, w->p[ 0 ], w->p[ 1 ], w->p[ 2 ] ) ) {
@@ -562,8 +524,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	}
 
 	/* backface check */
-	d = DotProduct( dp->planes[ 0 ], plane );
-	if ( d < -0.0001f ) {
+	if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
 		FreeWinding( w );
 		return;
 	}
@@ -572,7 +533,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 	for ( i = 0; i < dp->numPlanes; i++ )
 	{
 		/* chop winding by the plane */
-		ClipWindingEpsilonStrict( w, dp->planes[ i ], dp->planes[ i ][ 3 ], 0.0625f, &front, &back ); /* strict, if identical plane we don't want to keep it */
+		ClipWindingEpsilonStrict( w, dp->planes[ i ], 0.0625f, &front, &back ); /* strict, if identical plane we don't want to keep it */
 		FreeWinding( w );
 
 		/* lose the front fragment */
@@ -618,8 +579,8 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		dv = &ds2->verts[ i ];
 
 		/* set alpha */
-		d = DotProduct( w->p[ i ], dp->planes[ 0 ] ) - dp->planes[ 0 ][ 3 ];
-		d2 = DotProduct( w->p[ i ], dp->planes[ 1 ] ) - dp->planes[ 1 ][ 3 ];
+		d = plane3_distance_to_point( dp->planes[ 0 ], w->p[ i ] );
+		d2 = plane3_distance_to_point( dp->planes[ 1 ], w->p[ i ] );
 		alpha = 255.0f * d2 / ( d + d2 );
 		if ( alpha > 255 ) {
 			alpha = 255;
@@ -629,18 +590,15 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		}
 
 		/* set misc */
-		VectorSubtract( w->p[ i ], entityOrigin, dv->xyz );
-		VectorCopy( plane, dv->normal );
-		dv->st[ 0 ] = DotProduct( dv->xyz, dp->texMat[ 0 ] ) + dp->texMat[ 0 ][ 3 ];
-		dv->st[ 1 ] = DotProduct( dv->xyz, dp->texMat[ 1 ] ) + dp->texMat[ 1 ][ 3 ];
+		dv->xyz = w->p[ i ] - entityOrigin;
+		dv->normal = plane.normal();
+		dv->st[ 0 ] = vector3_dot( dv->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
+		dv->st[ 1 ] = vector3_dot( dv->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
 
 		/* set color */
 		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
 		{
-			dv->color[ j ][ 0 ] = 255;
-			dv->color[ j ][ 1 ] = 255;
-			dv->color[ j ][ 2 ] = 255;
-			dv->color[ j ][ 3 ] = alpha;
+			dv->color[ j ] = { 255, 255, 255, alpha };
 		}
 	}
 }
@@ -653,11 +611,6 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
  */
 
 static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
-	vec4_t plane;
-	float d;
-	winding_t   *w;
-
-
 	/* dummy check */
 	if ( ds->sideRef == NULL || ds->sideRef->side == NULL ) {
 		return;
@@ -665,16 +618,15 @@ static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
 
 	/* backface check */
 	if ( ds->planar ) {
-		VectorCopy( mapplanes[ ds->planeNum ].normal, plane );
-		plane[ 3 ] = mapplanes[ ds->planeNum ].dist + DotProduct( plane, entityOrigin );
-		d = DotProduct( dp->planes[ 0 ], plane );
-		if ( d < -0.0001f ) {
+		Plane3f plane = mapplanes[ ds->planeNum ].plane;
+		plane.dist() += vector3_dot( plane.normal(), entityOrigin );
+		if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
 			return;
 		}
 	}
 
 	/* generate decal */
-	w = WindingFromDrawSurf( ds );
+	winding_t *w = WindingFromDrawSurf( ds );
 	ProjectDecalOntoWinding( dp, ds, w );
 }
 
@@ -687,18 +639,15 @@ static void ProjectDecalOntoFace( decalProjector_t *dp, mapDrawSurface_t *ds ){
 
 static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
 	int x, y, pw[ 5 ], r, iterations;
-	vec4_t plane;
-	float d;
 	mesh_t src, *mesh, *subdivided;
 	winding_t   *w;
 
 
 	/* backface check */
 	if ( ds->planar ) {
-		VectorCopy( mapplanes[ ds->planeNum ].normal, plane );
-		plane[ 3 ] = mapplanes[ ds->planeNum ].dist + DotProduct( plane, entityOrigin );
-		d = DotProduct( dp->planes[ 0 ], plane );
-		if ( d < -0.0001f ) {
+		Plane3f plane = mapplanes[ ds->planeNum ].plane;
+		plane.dist() += vector3_dot( plane.normal(), entityOrigin );
+		if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
 			return;
 		}
 	}
@@ -733,17 +682,17 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
 			/* generate decal for first triangle */
 			w = AllocWinding( 3 );
 			w->numpoints = 3;
-			VectorCopy( mesh->verts[ pw[ r + 0 ] ].xyz, w->p[ 0 ] );
-			VectorCopy( mesh->verts[ pw[ r + 1 ] ].xyz, w->p[ 1 ] );
-			VectorCopy( mesh->verts[ pw[ r + 2 ] ].xyz, w->p[ 2 ] );
+			w->p[ 0 ] = mesh->verts[ pw[ r + 0 ] ].xyz;
+			w->p[ 1 ] = mesh->verts[ pw[ r + 1 ] ].xyz;
+			w->p[ 2 ] = mesh->verts[ pw[ r + 2 ] ].xyz;
 			ProjectDecalOntoWinding( dp, ds, w );
 
 			/* generate decal for second triangle */
 			w = AllocWinding( 3 );
 			w->numpoints = 3;
-			VectorCopy( mesh->verts[ pw[ r + 0 ] ].xyz, w->p[ 0 ] );
-			VectorCopy( mesh->verts[ pw[ r + 2 ] ].xyz, w->p[ 1 ] );
-			VectorCopy( mesh->verts[ pw[ r + 3 ] ].xyz, w->p[ 2 ] );
+			w->p[ 0 ] = mesh->verts[ pw[ r + 0 ] ].xyz;
+			w->p[ 1 ] = mesh->verts[ pw[ r + 2 ] ].xyz;
+			w->p[ 2 ] = mesh->verts[ pw[ r + 3 ] ].xyz;
 			ProjectDecalOntoWinding( dp, ds, w );
 		}
 	}
@@ -760,12 +709,7 @@ static void ProjectDecalOntoPatch( decalProjector_t *dp, mapDrawSurface_t *ds ){
  */
 
 static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *ds ){
-	int i;
-	vec4_t plane;
-	float d;
-	winding_t   *w;
-
-
+	
 	/* triangle surfaces without shaders don't get marks by default */
 	if ( ds->type == ESurfaceType::Triangles && ds->shaderInfo->shaderText == NULL ) {
 		return;
@@ -773,23 +717,22 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
 
 	/* backface check */
 	if ( ds->planar ) {
-		VectorCopy( mapplanes[ ds->planeNum ].normal, plane );
-		plane[ 3 ] = mapplanes[ ds->planeNum ].dist + DotProduct( plane, entityOrigin );
-		d = DotProduct( dp->planes[ 0 ], plane );
-		if ( d < -0.0001f ) {
+		Plane3f plane = mapplanes[ ds->planeNum ].plane;
+		plane.dist() += vector3_dot( plane.normal(), entityOrigin );
+		if ( vector3_dot( dp->planes[ 0 ].normal(), plane.normal() ) < -0.0001f ) {
 			return;
 		}
 	}
 
 	/* iterate through triangles */
-	for ( i = 0; i < ds->numIndexes; i += 3 )
+	for ( int i = 0; i < ds->numIndexes; i += 3 )
 	{
 		/* generate decal */
-		w = AllocWinding( 3 );
+		winding_t *w = AllocWinding( 3 );
 		w->numpoints = 3;
-		VectorCopy( ds->verts[ ds->indexes[ i ] ].xyz, w->p[ 0 ] );
-		VectorCopy( ds->verts[ ds->indexes[ i + 1 ] ].xyz, w->p[ 1 ] );
-		VectorCopy( ds->verts[ ds->indexes[ i + 2 ] ].xyz, w->p[ 2 ] );
+		w->p[ 0 ] = ds->verts[ ds->indexes[ i ] ].xyz;
+		w->p[ 1 ] = ds->verts[ ds->indexes[ i + 1 ] ].xyz;
+		w->p[ 2 ] = ds->verts[ ds->indexes[ i + 2 ] ].xyz;
 		ProjectDecalOntoWinding( dp, ds, w );
 	}
 }
@@ -805,17 +748,14 @@ void MakeEntityDecals( entity_t *e ){
 	int i, j, k, f, fOld, start;
 	decalProjector_t dp;
 	mapDrawSurface_t    *ds;
-	vec3_t identityAxis[ 3 ] = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
+	Vector3 identityAxis[ 3 ] = { g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z };
 
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- MakeEntityDecals ---\n" );
 
-	/* set entity origin */
-	VectorCopy( e->origin, entityOrigin );
-
 	/* transform projector instead of geometry */
-	VectorClear( entityOrigin );
+	entityOrigin.set( 0 );
 
 	/* init pacifier */
 	fOld = -1;
@@ -850,8 +790,8 @@ void MakeEntityDecals( entity_t *e ){
 
 			/* bounds check */
 			for ( k = 0; k < 3; k++ )
-				if ( ds->mins[ k ] >= ( dp.center[ k ] + dp.radius ) ||
-					 ds->maxs[ k ] <= ( dp.center[ k ] - dp.radius ) ) {
+				if ( ds->minmax.mins[ k ] >= ( dp.center[ k ] + dp.radius ) ||
+					 ds->minmax.maxs[ k ] <= ( dp.center[ k ] - dp.radius ) ) {
 					break;
 				}
 			if ( k < 3 ) {

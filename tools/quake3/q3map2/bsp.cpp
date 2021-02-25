@@ -125,7 +125,7 @@ static void ProcessAdvertisements( void ) {
 					// store the normal for use at run time.. all ad verts are assumed to
 					// have identical normals (because they should be a simple rectangle)
 					// so just use the first vert's normal
-					VectorCopy( bspDrawVerts[adSurface->firstVert].normal, bspAds[numBSPAds].normal );
+					bspAds[numBSPAds].normal = bspDrawVerts[adSurface->firstVert].normal;
 
 					// store the ad quad for quick use at run time
 					if ( adSurface->surfaceType == MST_PATCH ) {
@@ -133,10 +133,10 @@ static void ProcessAdvertisements( void ) {
 						int v1 = adSurface->firstVert + adSurface->numVerts - 1;
 						int v2 = adSurface->firstVert + adSurface->numVerts - adSurface->patchWidth;
 						int v3 = adSurface->firstVert;
-						VectorCopy( bspDrawVerts[v0].xyz, bspAds[numBSPAds].rect[0] );
-						VectorCopy( bspDrawVerts[v1].xyz, bspAds[numBSPAds].rect[1] );
-						VectorCopy( bspDrawVerts[v2].xyz, bspAds[numBSPAds].rect[2] );
-						VectorCopy( bspDrawVerts[v3].xyz, bspAds[numBSPAds].rect[3] );
+						bspAds[numBSPAds].rect[0] = bspDrawVerts[v0].xyz;
+						bspAds[numBSPAds].rect[1] = bspDrawVerts[v1].xyz;
+						bspAds[numBSPAds].rect[2] = bspDrawVerts[v2].xyz;
+						bspAds[numBSPAds].rect[3] = bspDrawVerts[v3].xyz;
 					}
 					else {
 						Error( "Ad cell %d has an unsupported Ad Surface type.", bspAds[numBSPAds].cellId );
@@ -441,7 +441,7 @@ void ProcessWorldModel( void ){
 		for ( const auto& light : entities )
 		{
 			entity_t    *target;
-			vec3_t origin, targetOrigin, normal, color;
+			Vector3 origin, targetOrigin, normal, color;
 
 			/* get light */
 			if ( light.classname_is( "light" ) ) {
@@ -459,13 +459,12 @@ void ProcessWorldModel( void ){
 						target = FindTargetEntity( value );
 						if ( target != NULL ) {
 							target->vectorForKey( "origin", targetOrigin );
-							VectorSubtract( targetOrigin, origin, normal );
-							VectorNormalize( normal, normal );
+							normal = VectorNormalized( targetOrigin - origin );
 						}
 					}
 					else{
-						//%	VectorClear( normal );
-						VectorSet( normal, 0, 0, -1 );
+						//%	normal.set( 0 );
+						normal = -g_vector3_axis_z;
 					}
 
 					if ( colorsRGB ) {

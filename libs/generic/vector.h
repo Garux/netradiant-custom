@@ -103,6 +103,11 @@ Element* data(){
 const Element* data() const {
 	return m_elements;
 }
+
+BasicVector3& set( const Element value ){
+	x() = y() = z() = value;
+	return *this;
+}
 };
 
 /// \brief A 4-element vector.
@@ -171,7 +176,24 @@ Element* data(){
 const Element* data() const {
 	return m_elements;
 }
+
+BasicVector3<Element>& vec3(){
+	return reinterpret_cast<BasicVector3<Element>&>( x() );
+}
+const BasicVector3<Element>& vec3() const {
+	return reinterpret_cast<const BasicVector3<Element>&>( x() );
+}
+
+BasicVector4& set( const Element value ){
+	x() = y() = z() = w() = value;
+	return *this;
+}
 };
+
+template<typename Element>
+inline BasicVector2<Element> vector2_from_array( const Element* array ){
+	return BasicVector2<Element>( array[0], array[1] );
+}
 
 template<typename Element>
 inline BasicVector3<Element> vector3_from_array( const Element* array ){

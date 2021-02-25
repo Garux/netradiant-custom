@@ -41,10 +41,9 @@
 
 int numLightmapsASE = 0;
 
-static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, vec3_t origin, const int* lmIndices ){
+static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSurface_t *ds, int surfaceNum, const Vector3& origin, const int* lmIndices ){
 	int i, v, face, a, b, c;
 	bspDrawVert_t   *dv;
-	vec3_t normal;
 	char name[ 1024 ];
 
 
@@ -102,10 +101,8 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
 		a = bspDrawIndexes[ i + ds->firstIndex ];
 		b = bspDrawIndexes[ i + ds->firstIndex + 1 ];
 		c = bspDrawIndexes[ i + ds->firstIndex + 2 ];
-		VectorCopy( bspDrawVerts[ a ].normal, normal );
-		VectorAdd( normal, bspDrawVerts[ b ].normal, normal );
-		VectorAdd( normal, bspDrawVerts[ c ].normal, normal );
-		if ( VectorNormalize( normal, normal ) ) {
+		Vector3 normal = bspDrawVerts[ a ].normal + bspDrawVerts[ b ].normal + bspDrawVerts[ c ].normal;
+		if ( VectorNormalize( normal ) != 0 ) {
 			fprintf( f, "\t\t\t*MESH_FACENORMAL\t%d\t%f\t%f\t%f\r\n", face, normal[ 0 ], normal[ 1 ], normal[ 2 ] );
 		}
 	}
@@ -188,7 +185,7 @@ static void ConvertSurface( FILE *f, bspModel_t *model, int modelNum, bspDrawSur
    exports a bsp model to an ase chunk
  */
 
-static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origin, const int* lmIndices ){
+static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector3& origin, const int* lmIndices ){
 	int i, s;
 	bspDrawSurface_t    *ds;
 
@@ -404,7 +401,7 @@ int ConvertBSPToASE( char *bspName ){
 		model = &bspModels[ modelNum ];
 
 		/* get entity origin */
-		vec3_t origin;
+		Vector3 origin;
 		e->vectorForKey( "origin", origin );
 
 		/* convert model */

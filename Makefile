@@ -540,7 +540,6 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	tools/quake3/common/miniz.o \
 	tools/quake3/q3map2/autopk3.o \
 	tools/quake3/q3map2/brush.o \
-	tools/quake3/q3map2/brush_primit.o \
 	tools/quake3/q3map2/bspfile_abstract.o \
 	tools/quake3/q3map2/bspfile_ibsp.o \
 	tools/quake3/q3map2/bspfile_rbsp.o \

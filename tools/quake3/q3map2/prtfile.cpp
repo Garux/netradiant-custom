@@ -50,9 +50,9 @@ int num_visclusters;                    // clusters the player can be in
 int num_visportals;
 int num_solidfaces;
 
-void WriteFloat( FILE *f, vec_t v ){
-	if ( fabs( v - Q_rint( v ) ) < 0.001 ) {
-		fprintf( f, "%i ", (int)Q_rint( v ) );
+void WriteFloat( FILE *f, float v ){
+	if ( fabs( v - std::rint( v ) ) < 0.001 ) {
+		fprintf( f, "%li ", std::lrint( v ) );
 	}
 	else{
 		fprintf( f, "%f ", v );
@@ -100,8 +100,6 @@ void WritePortalFile_r( node_t *node ){
 	int i, s, flags;
 	portal_t    *p;
 	winding_t   *w;
-	vec3_t normal;
-	vec_t dist;
 
 	// decision node
 	if ( node->planenum != PLANENUM_LEAF ) {
@@ -132,9 +130,7 @@ void WritePortalFile_r( node_t *node ){
 			// the changeover point between different axis.  interpret the
 			// plane the same way vis will, and flip the side orders if needed
 			// FIXME: is this still relevent?
-			WindingPlane( w, normal, &dist );
-
-			if ( DotProduct( p->plane.normal, normal ) < 0.99 ) { // backwards...
+			if ( vector3_dot( p->plane.normal(), WindingPlane( w ).normal() ) < 0.99 ) { // backwards...
 				fprintf( pf, "%i %i %i ", w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster );
 			}
 			else{

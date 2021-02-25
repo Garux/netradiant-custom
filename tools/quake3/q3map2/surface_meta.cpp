@@ -123,21 +123,15 @@ static int AddMetaTriangle( void ){
 
 int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, bspDrawVert_t *c, int planeNum ){
 	int triIndex;
-	vec3_t dir;
-
-
 
 	/* detect degenerate triangles fixme: do something proper here */
-	VectorSubtract( a->xyz, b->xyz, dir );
-	if ( VectorLength( dir ) < 0.125f ) {
+	if ( vector3_length( a->xyz - b->xyz ) < 0.125f ) {
 		return -1;
 	}
-	VectorSubtract( b->xyz, c->xyz, dir );
-	if ( VectorLength( dir ) < 0.125f ) {
+	if ( vector3_length( b->xyz - c->xyz ) < 0.125f ) {
 		return -1;
 	}
-	VectorSubtract( c->xyz, a->xyz, dir );
-	if ( VectorLength( dir ) < 0.125f ) {
+	if ( vector3_length( c->xyz - a->xyz ) < 0.125f ) {
 		return -1;
 	}
 
@@ -145,8 +139,7 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 	if ( planeNum >= 0 ) {
 		/* because of precision issues with small triangles, try to use the specified plane */
 		src->planeNum = planeNum;
-		VectorCopy( mapplanes[ planeNum ].normal, src->plane );
-		src->plane[ 3 ] = mapplanes[ planeNum ].dist;
+		src->plane = mapplanes[ planeNum ].plane; 
 	}
 	else
 	{
@@ -158,14 +151,14 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 	}
 
 	/* ydnar 2002-10-03: repair any bogus normals (busted ase import kludge) */
-	if ( VectorLength( a->normal ) <= 0.0f ) {
-		VectorCopy( src->plane, a->normal );
+	if ( vector3_length( a->normal ) == 0.0f ) {
+		a->normal = src->plane.normal();
 	}
-	if ( VectorLength( b->normal ) <= 0.0f ) {
-		VectorCopy( src->plane, b->normal );
+	if ( vector3_length( b->normal ) == 0.0f ) {
+		b->normal = src->plane.normal();
 	}
-	if ( VectorLength( c->normal ) <= 0.0f ) {
-		VectorCopy( src->plane, c->normal );
+	if ( vector3_length( c->normal ) == 0.0f ) {
+		c->normal = src->plane.normal();
 	}
 
 	/* ydnar 2002-10-04: set lightmap axis if not already set */
@@ -173,12 +166,12 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 		 src->lightmapAxis[ 0 ] == 0.0f && src->lightmapAxis[ 1 ] == 0.0f && src->lightmapAxis[ 2 ] == 0.0f ) {
 		/* the shader can specify an explicit lightmap axis */
 		if ( src->si->lightmapAxis[ 0 ] || src->si->lightmapAxis[ 1 ] || src->si->lightmapAxis[ 2 ] ) {
-			VectorCopy( src->si->lightmapAxis, src->lightmapAxis );
+			src->lightmapAxis = src->si->lightmapAxis;
 		}
 
 		/* new axis-finding code */
 		else{
-			CalcLightmapAxis( src->plane, src->lightmapAxis );
+			CalcLightmapAxis( src->plane.normal(), src->lightmapAxis );
 		}
 	}
 
@@ -261,7 +254,7 @@ static void SurfaceToMetaTriangles( mapDrawSurface_t *ds ){
 			src.fogNum = ds->fogNum;
 			src.sampleSize = ds->sampleSize;
 			src.shadeAngleDegrees = ds->shadeAngleDegrees;
-			VectorCopy( ds->lightmapAxis, src.lightmapAxis );
+			src.lightmapAxis = ds->lightmapAxis;
 
 			/* copy drawverts */
 			memcpy( &a, &ds->verts[ ds->indexes[ i ] ], sizeof( a ) );
@@ -385,7 +378,6 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 	int r, s, t, bestR = 0, bestS = 1, bestT = 2;
 	int i, j;
 	double A, bestA = -1, V, bestV = -1;
-	vec3_t ab, ac, bc, cross;
 	bspDrawVert_t *buf;
 	double shiftWidth;
 
@@ -397,16 +389,12 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 	A = 0;
 	for ( i = 1; i + 1 < cnt; ++i )
 	{
-		VectorSubtract( vert[i].xyz, vert[0].xyz, ab );
-		VectorSubtract( vert[i + 1].xyz, vert[0].xyz, ac );
-		CrossProduct( ab, ac, cross );
-		A += VectorLength( cross );
+		A += vector3_length( vector3_cross( vert[i].xyz - vert[0].xyz, vert[i + 1].xyz - vert[0].xyz ) );
 	}
 	V = 0;
 	for ( i = 0; i < cnt; ++i )
 	{
-		VectorSubtract( vert[( i + 1 ) % cnt].xyz, vert[i].xyz, ab );
-		V += VectorLength( ab );
+		V += vector3_length( vert[( i + 1 ) % cnt].xyz - vert[i].xyz );
 	}
 
 	/* calculate shift width from the area sensibly, assuming the polygon
@@ -429,13 +417,12 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 		for ( s = r + 1; s + 1 < cnt; ++s )
 			for ( t = s + 1; t < cnt; ++t )
 			{
-				VectorSubtract( vert[s].xyz, vert[r].xyz, ab );
-				VectorSubtract( vert[t].xyz, vert[r].xyz, ac );
-				VectorSubtract( vert[t].xyz, vert[s].xyz, bc );
-				CrossProduct( ab, ac, cross );
-				A = VectorLength( cross );
+				const Vector3 ab = vert[s].xyz - vert[r].xyz;
+				const Vector3 ac = vert[t].xyz - vert[r].xyz;
+				const Vector3 bc = vert[t].xyz - vert[s].xyz;
+				A = vector3_length( vector3_cross( ab, ac ) );
 
-				V = A - ( VectorLength( ab ) - VectorLength( ac ) - VectorLength( bc ) ) * shiftWidth;
+				V = A - ( vector3_length( ab ) - vector3_length( ac ) - vector3_length( bc ) ) * shiftWidth;
 				/* value = A - circumference * shiftWidth, i.e. we back out by shiftWidth units from each side, to prevent too acute triangles */
 				/* this kind of simulates "number of shiftWidth*shiftWidth fragments in the triangle not touched by an edge" */
 
@@ -483,10 +470,7 @@ int MaxAreaIndexes( bspDrawVert_t *vert, int cnt, int *indexes ){
 			}
 			// abc abc abc abc abc abc
 
-			VectorSubtract( vert[bestS].xyz, vert[bestR].xyz, ab );
-			VectorSubtract( vert[bestT].xyz, vert[bestR].xyz, ac );
-			CrossProduct( ab, ac, cross );
-			bestA = VectorLength( cross );
+			bestA = vector3_length( vector3_cross( vert[bestS].xyz - vert[bestR].xyz, vert[bestT].xyz - vert[bestR].xyz ) );
 		}
 
 		if ( bestA < TINY_AREA ) {
@@ -599,7 +583,9 @@ void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
 
 void FanFaceSurface( mapDrawSurface_t *ds ){
 	int i, j, k, a, b, c;
-	int color[ MAX_LIGHTMAPS ][ 4 ] = {{0}};
+	BasicVector4<int> color[ MAX_LIGHTMAPS ];
+	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+		color[k].set( 0 );
 	bspDrawVert_t   *verts, *centroid, *dv;
 	double iv;
 
@@ -620,37 +606,28 @@ void FanFaceSurface( mapDrawSurface_t *ds ){
 	centroid = &verts[ 0 ];
 	for ( i = 1, dv = &verts[ 1 ]; i < ( ds->numVerts + 1 ); i++, dv++ )
 	{
-		VectorAdd( centroid->xyz, dv->xyz, centroid->xyz );
-		VectorAdd( centroid->normal, dv->normal, centroid->normal );
-		for ( j = 0; j < 4; j++ )
-		{
-			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
-				color[ k ][ j ] += dv->color[ k ][ j ];
-			if ( j < 2 ) {
-				centroid->st[ j ] += dv->st[ j ];
-				for ( k = 0; k < MAX_LIGHTMAPS; k++ )
-					centroid->lightmap[ k ][ j ] += dv->lightmap[ k ][ j ];
-			}
+		centroid->xyz += dv->xyz;
+		centroid->normal += dv->normal;
+		centroid->st += dv->st;
+		for ( k = 0; k < MAX_LIGHTMAPS; k++ ){
+			color[ k ] += dv->color[ k ];
+			centroid->lightmap[ k ] += dv->lightmap[ k ];
 		}
 	}
 
 	/* average the centroid */
 	iv = 1.0f / ds->numVerts;
-	VectorScale( centroid->xyz, iv, centroid->xyz );
-	if ( VectorNormalize( centroid->normal, centroid->normal ) <= 0 ) {
-		VectorCopy( verts[ 1 ].normal, centroid->normal );
+	centroid->xyz *= iv;
+	if ( VectorNormalize( centroid->normal ) == 0 ) {
+		centroid->normal = verts[ 1 ].normal;
 	}
-	for ( j = 0; j < 4; j++ )
-	{
-		for ( k = 0; k < MAX_LIGHTMAPS; k++ )
+	centroid->st *= iv;
+	for ( k = 0; k < MAX_LIGHTMAPS; k++ ){
+		centroid->lightmap[ k ] *= iv;
+		for ( j = 0; j < 4; j++ )
 		{
 			color[ k ][ j ] /= ds->numVerts;
-			centroid->color[ k ][ j ] = ( color[ k ][ j ] < 255.0f ? color[ k ][ j ] : 255 );
-		}
-		if ( j < 2 ) {
-			centroid->st[ j ] *= iv;
-			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
-				centroid->lightmap[ k ][ j ] *= iv;
+			centroid->color[ k ][ j ] = ( color[ k ][ j ] < 255 ? color[ k ][ j ] : 255 );
 		}
 	}
 
@@ -690,7 +667,6 @@ void FanFaceSurface( mapDrawSurface_t *ds ){
 
 void StripFaceSurface( mapDrawSurface_t *ds ){
 	int i, r, least, rotate, numIndexes, ni, a, b, c, indexes[ MAX_INDEXES ];
-	vec_t       *v1, *v2;
 
 
 	/* try to early out  */
@@ -711,8 +687,8 @@ void StripFaceSurface( mapDrawSurface_t *ds ){
 			for ( i = 0; i < ds->numVerts; i++ )
 			{
 				/* get points */
-				v1 = ds->verts[ i ].xyz;
-				v2 = ds->verts[ least ].xyz;
+				const Vector3& v1 = ds->verts[ i ].xyz;
+				const Vector3& v2 = ds->verts[ least ].xyz;
 
 				/* compare */
 				if ( v1[ 0 ] < v2[ 0 ] ||
@@ -912,38 +888,30 @@ void MakeEntityMetaTriangles( entity_t *e ){
 
 struct edge_t
 {
-	vec3_t origin;
-	vec4_t edge;
-	vec_t length, kingpinLength;
+	Vector3 origin;
+	Plane3f edge;
+	float length, kingpinLength;
 	int kingpin;
-	vec4_t plane;
+	Plane3f plane;
 };
 
-void CreateEdge( vec4_t plane, vec3_t a, vec3_t b, edge_t *edge ){
+void CreateEdge( const Plane3f& plane, const Vector3& a, const Vector3& b, edge_t *edge ){
 	/* copy edge origin */
-	VectorCopy( a, edge->origin );
+	edge->origin = a;
 
 	/* create vector aligned with winding direction of edge */
-	VectorSubtract( b, a, edge->edge );
+	edge->edge.normal() = b - a;
 
-	if ( fabs( edge->edge[ 0 ] ) > fabs( edge->edge[ 1 ] ) && fabs( edge->edge[ 0 ] ) > fabs( edge->edge[ 2 ] ) ) {
-		edge->kingpin = 0;
-	}
-	else if ( fabs( edge->edge[ 1 ] ) > fabs( edge->edge[ 0 ] ) && fabs( edge->edge[ 1 ] ) > fabs( edge->edge[ 2 ] ) ) {
-		edge->kingpin = 1;
-	}
-	else{
-		edge->kingpin = 2;
-	}
-	edge->kingpinLength = edge->edge[ edge->kingpin ];
+	edge->kingpin = vector3_max_abs_component_index( edge->edge.normal() );
+	edge->kingpinLength = edge->edge.normal()[ edge->kingpin ];
 
-	VectorNormalize( edge->edge, edge->edge );
-	edge->edge[ 3 ] = DotProduct( a, edge->edge );
-	edge->length = DotProduct( b, edge->edge ) - edge->edge[ 3 ];
+	VectorNormalize( edge->edge.normal() );
+	edge->edge.dist() = vector3_dot( a, edge->edge.normal() );
+	edge->length = plane3_distance_to_point( edge->edge, b );
 
 	/* create perpendicular plane that edge lies in */
-	CrossProduct( plane, edge->edge, edge->plane );
-	edge->plane[ 3 ] = DotProduct( a, edge->plane );
+	edge->plane.normal() = vector3_cross( plane.normal(), edge->edge.normal() );
+	edge->plane.dist() = vector3_dot( a, edge->plane.normal() );
 }
 
 
@@ -962,9 +930,8 @@ void FixMetaTJunctions( void ){
 	metaTriangle_t  *tri, *newTri;
 	shaderInfo_t    *si;
 	bspDrawVert_t   *a, *b, *c, junc;
-	float dist, amount;
-	vec3_t pt;
-	vec4_t plane;
+	float amount;
+	Plane3f plane;
 	edge_t edges[ 3 ];
 
 
@@ -999,8 +966,7 @@ void FixMetaTJunctions( void ){
 		}
 
 		/* calculate planes */
-		VectorCopy( tri->plane, plane );
-		plane[ 3 ] = tri->plane[ 3 ];
+		plane = tri->plane;
 		CreateEdge( plane, metaVerts[ tri->indexes[ 0 ] ].xyz, metaVerts[ tri->indexes[ 1 ] ].xyz, &edges[ 0 ] );
 		CreateEdge( plane, metaVerts[ tri->indexes[ 1 ] ].xyz, metaVerts[ tri->indexes[ 2 ] ].xyz, &edges[ 1 ] );
 		CreateEdge( plane, metaVerts[ tri->indexes[ 2 ] ].xyz, metaVerts[ tri->indexes[ 0 ] ].xyz, &edges[ 2 ] );
@@ -1009,11 +975,10 @@ void FixMetaTJunctions( void ){
 		for ( j = 0; j < numMetaVerts; j++ )
 		{
 			/* get vert */
-			VectorCopy( metaVerts[ j ].xyz, pt );
+			const Vector3 pt = metaVerts[ j ].xyz;
 
 			/* determine if point lies in the triangle's plane */
-			dist = DotProduct( pt, plane ) - plane[ 3 ];
-			if ( fabs( dist ) > TJ_PLANE_EPSILON ) {
+			if ( fabs( plane3_distance_to_point( plane, pt ) ) > TJ_PLANE_EPSILON ) {
 				continue;
 			}
 
@@ -1039,8 +1004,7 @@ void FixMetaTJunctions( void ){
 				}
 
 				/* determine if point lies on the edge */
-				dist = DotProduct( pt, edges[ k ].plane ) - edges[ k ].plane[ 3 ];
-				if ( fabs( dist ) > TJ_EDGE_EPSILON ) {
+				if ( fabs( plane3_distance_to_point( edges[ k ].plane, pt ) ) > TJ_EDGE_EPSILON ) {
 					continue;
 				}
 
@@ -1051,7 +1015,7 @@ void FixMetaTJunctions( void ){
 				}
 
 				#if 0
-				dist = DotProduct( pt, edges[ k ].edge ) - edges[ k ].edge[ 3 ];
+				dist = plane3_distance_to_point( edges[ k ].edge, pt );
 				if ( dist <= -0.0f || dist >= edges[ k ].length ) {
 					continue;
 				}
@@ -1065,7 +1029,7 @@ void FixMetaTJunctions( void ){
 
 				/* make new vert */
 				LerpDrawVertAmount( a, b, amount, &junc );
-				VectorCopy( pt, junc.xyz );
+				junc.xyz = pt;
 
 				/* compare against existing verts */
 				if ( VectorCompare( junc.xyz, a->xyz ) || VectorCompare( junc.xyz, b->xyz ) || VectorCompare( junc.xyz, c->xyz ) ) {
@@ -1109,9 +1073,7 @@ void FixMetaTJunctions( void ){
 				CreateEdge( plane, metaVerts[ tri->indexes[ 2 ] ].xyz, metaVerts[ tri->indexes[ 0 ] ].xyz, &edges[ 2 ] );
 
 				/* debug code */
-				metaVerts[ vertIndex ].color[ 0 ][ 0 ] = 255;
-				metaVerts[ vertIndex ].color[ 0 ][ 1 ] = 204;
-				metaVerts[ vertIndex ].color[ 0 ][ 2 ] = 0;
+				metaVerts[ vertIndex ].color[ 0 ].rgb() = { 255, 204, 0 };
 
 				/* add to counter and end processing of this vert */
 				numTJuncs++;
@@ -1136,7 +1098,7 @@ void FixMetaTJunctions( void ){
 
 #define MAX_SAMPLES             256
 #define THETA_EPSILON           0.000001
-#define EQUAL_NORMAL_EPSILON    0.01
+#define EQUAL_NORMAL_EPSILON    0.01f
 
 void SmoothMetaTriangles( void ){
 	int i, j, k, f, fOld, start, numVerts, numVotes, numSmoothed;
@@ -1144,9 +1106,9 @@ void SmoothMetaTriangles( void ){
 	metaTriangle_t  *tri;
 	float           *shadeAngles;
 	byte            *smoothed;
-	vec3_t average, diff;
+	Vector3 average;
 	int indexes[ MAX_SAMPLES ];
-	vec3_t votes[ MAX_SAMPLES ];
+	Vector3 votes[ MAX_SAMPLES ];
 
 	/* note it */
 	Sys_FPrintf( SYS_VRB, "--- SmoothMetaTriangles ---\n" );
@@ -1158,7 +1120,7 @@ void SmoothMetaTriangles( void ){
 	smoothed = safe_calloc( ( numMetaVerts / 8 ) + 1 );
 
 	/* set default shade angle */
-	defaultShadeAngle = DEG2RAD( npDegrees );
+	defaultShadeAngle = degrees_to_radians( npDegrees );
 	maxShadeAngle = 0.0f;
 
 	/* run through every surface and flag verts belonging to non-lightmapped surfaces
@@ -1169,11 +1131,11 @@ void SmoothMetaTriangles( void ){
 
 		/* get shade angle from shader */
 		if ( tri->si->shadeAngleDegrees > 0.0f ) {
-			shadeAngle = DEG2RAD( tri->si->shadeAngleDegrees );
+			shadeAngle = degrees_to_radians( tri->si->shadeAngleDegrees );
 		}
 		/* get shade angle from entity */
 		else if ( tri->shadeAngleDegrees > 0.0f ) {
-			shadeAngle = DEG2RAD( tri->shadeAngleDegrees );
+			shadeAngle = degrees_to_radians( tri->shadeAngleDegrees );
 		}
 
 		if ( shadeAngle <= 0.0f ) {
@@ -1223,7 +1185,7 @@ void SmoothMetaTriangles( void ){
 		}
 
 		/* clear */
-		VectorClear( average );
+		average.set( 0 );
 		numVerts = 0;
 		numVotes = 0;
 
@@ -1244,7 +1206,7 @@ void SmoothMetaTriangles( void ){
 			shadeAngle = ( shadeAngles[ i ] < shadeAngles[ j ] ? shadeAngles[ i ] : shadeAngles[ j ] );
 
 			/* check shade angle */
-			dot = DotProduct( metaVerts[ i ].normal, metaVerts[ j ].normal );
+			dot = vector3_dot( metaVerts[ i ].normal, metaVerts[ j ].normal );
 			if ( dot > 1.0 ) {
 				dot = 1.0;
 			}
@@ -1265,18 +1227,15 @@ void SmoothMetaTriangles( void ){
 			/* see if this normal has already been voted */
 			for ( k = 0; k < numVotes; k++ )
 			{
-				VectorSubtract( metaVerts[ j ].normal, votes[ k ], diff );
-				if ( fabs( diff[ 0 ] ) < EQUAL_NORMAL_EPSILON &&
-					 fabs( diff[ 1 ] ) < EQUAL_NORMAL_EPSILON &&
-					 fabs( diff[ 2 ] ) < EQUAL_NORMAL_EPSILON ) {
+				if ( vector3_equal_epsilon( metaVerts[ j ].normal, votes[ k ], EQUAL_NORMAL_EPSILON ) ) {
 					break;
 				}
 			}
 
 			/* add a new vote? */
 			if ( k == numVotes && numVotes < MAX_SAMPLES ) {
-				VectorAdd( average, metaVerts[ j ].normal, average );
-				VectorCopy( metaVerts[ j ].normal, votes[ numVotes ] );
+				average += metaVerts[ j ].normal;
+				votes[ numVotes ] = metaVerts[ j ].normal;
 				numVotes++;
 			}
 		}
@@ -1287,10 +1246,10 @@ void SmoothMetaTriangles( void ){
 		}
 
 		/* average normal */
-		if ( VectorNormalize( average, average ) > 0 ) {
+		if ( VectorNormalize( average ) != 0 ) {
 			/* smooth */
 			for ( j = 0; j < numVerts; j++ )
-				VectorCopy( average, metaVerts[ indexes[ j ] ].normal );
+				metaVerts[ indexes[ j ] ].normal = average;
 			numSmoothed++;
 		}
 	}
@@ -1340,7 +1299,7 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 		if ( dv1->st[ 0 ] != dv2->st[ 0 ] || dv1->st[ 1 ] != dv2->st[ 1 ] ) {
 			continue;
 		}
-		if ( dv1->color[ 0 ][ 3 ] != dv2->color[ 0 ][ 3 ] ) {
+		if ( dv1->color[ 0 ].alpha() != dv2->color[ 0 ].alpha() ) {
 			continue;
 		}
 
@@ -1384,10 +1343,8 @@ int AddMetaVertToSurface( mapDrawSurface_t *ds, bspDrawVert_t *dv1, int *coincid
 #define GOOD_SCORE          ( metaGoodScore     >= 0 ? metaGoodScore     : DEFAULT_GOOD_SCORE )
 
 static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, bool testAdd ){
-	vec3_t p;
 	int i, score, coincident, ai, bi, ci, oldTexRange[ 2 ];
 	float lmMax;
-	vec3_t mins, maxs;
 	bool inTexRange;
 	mapDrawSurface_t old;
 
@@ -1410,14 +1367,14 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	#if 0
 	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
 	     //% !VectorCompare( ds->lightmapAxis, tri->lightmapAxis ) )
-		 DotProduct( ds->lightmapAxis, tri->plane ) < 0.25f ) {
+		 vector3_dot( ds->lightmapAxis, tri->plane.normal() ) < 0.25f ) {
 		return 0;
 	}
 	#endif
 
 	/* planar surfaces will only merge with triangles in the same plane */
 	if ( npDegrees == 0.0f && !ds->shaderInfo->nonplanar && ds->planeNum >= 0 ) {
-		if ( !VectorCompare( mapplanes[ ds->planeNum ].normal, tri->plane ) || mapplanes[ ds->planeNum ].dist != tri->plane[ 3 ] ) {
+		if ( !VectorCompare( mapplanes[ ds->planeNum ].normal(), tri->plane.normal() ) || mapplanes[ ds->planeNum ].dist() != tri->plane.dist() ) {
 			return 0;
 		}
 		if ( tri->planeNum >= 0 && tri->planeNum != ds->planeNum ) {
@@ -1429,21 +1386,15 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 	if ( metaMaxBBoxDistance >= 0 ) {
 		if ( ds->numIndexes > 0 ) {
-			VectorCopy( ds->mins, mins );
-			VectorCopy( ds->maxs, maxs );
-			mins[0] -= metaMaxBBoxDistance;
-			mins[1] -= metaMaxBBoxDistance;
-			mins[2] -= metaMaxBBoxDistance;
-			maxs[0] += metaMaxBBoxDistance;
-			maxs[1] += metaMaxBBoxDistance;
-			maxs[2] += metaMaxBBoxDistance;
+			const Vector3 mins = ds->minmax.mins - Vector3( metaMaxBBoxDistance, metaMaxBBoxDistance, metaMaxBBoxDistance );
+			const Vector3 maxs = ds->minmax.maxs + Vector3( metaMaxBBoxDistance, metaMaxBBoxDistance, metaMaxBBoxDistance );
 #define CHECK_1D( mins, v, maxs ) ( ( mins ) <= ( v ) && ( v ) <= ( maxs ) )
 #define CHECK_3D( mins, v, maxs ) ( CHECK_1D( ( mins )[0], ( v )[0], ( maxs )[0] ) && CHECK_1D( ( mins )[1], ( v )[1], ( maxs )[1] ) && CHECK_1D( ( mins )[2], ( v )[2], ( maxs )[2] ) )
-			VectorCopy( metaVerts[ tri->indexes[ 0 ] ].xyz, p );
+			Vector3 p = metaVerts[ tri->indexes[ 0 ] ].xyz;
 			if ( !CHECK_3D( mins, p, maxs ) ) {
-				VectorCopy( metaVerts[ tri->indexes[ 1 ] ].xyz, p );
+				p = metaVerts[ tri->indexes[ 1 ] ].xyz;
 				if ( !CHECK_3D( mins, p, maxs ) ) {
-					VectorCopy( metaVerts[ tri->indexes[ 2 ] ].xyz, p );
+					p = metaVerts[ tri->indexes[ 2 ] ].xyz;
 					if ( !CHECK_3D( mins, p, maxs ) ) {
 						return 0;
 					}
@@ -1462,7 +1413,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 		score += AXIS_SCORE;
 	}
 	else{
-		score += AXIS_SCORE * DotProduct( ds->lightmapAxis, tri->plane );
+		score += AXIS_SCORE * vector3_dot( ds->lightmapAxis, tri->plane.normal() );
 	}
 
 	/* preserve old drawsurface if this fails */
@@ -1484,23 +1435,22 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	score += ( coincident * VERT_SCORE );
 
 	/* add new vertex bounds to mins/maxs */
-	VectorCopy( ds->mins, mins );
-	VectorCopy( ds->maxs, maxs );
-	AddPointToBounds( metaVerts[ tri->indexes[ 0 ] ].xyz, mins, maxs );
-	AddPointToBounds( metaVerts[ tri->indexes[ 1 ] ].xyz, mins, maxs );
-	AddPointToBounds( metaVerts[ tri->indexes[ 2 ] ].xyz, mins, maxs );
+	MinMax minmax( ds->minmax );
+	minmax.extend( metaVerts[ tri->indexes[ 0 ] ].xyz );
+	minmax.extend( metaVerts[ tri->indexes[ 1 ] ].xyz );
+	minmax.extend( metaVerts[ tri->indexes[ 2 ] ].xyz );
 
 	/* check lightmap bounds overflow (after at least 1 triangle has been added) */
 	if ( !( ds->shaderInfo->compileFlags & C_VERTEXLIT ) &&
-		 ds->numIndexes > 0 && VectorLength( ds->lightmapAxis ) > 0.0f &&
-		 ( !VectorCompare( ds->mins, mins ) || !VectorCompare( ds->maxs, maxs ) ) ) {
+		 ds->numIndexes > 0 && vector3_length( ds->lightmapAxis ) != 0.0f &&
+		 ( !VectorCompare( ds->minmax.mins, minmax.mins ) || !VectorCompare( ds->minmax.maxs, minmax.maxs ) ) ) {
 		/* set maximum size before lightmap scaling (normally 2032 units) */
 		/* 2004-02-24: scale lightmap test size by 2 to catch larger brush faces */
 		/* 2004-04-11: reverting to actual lightmap size */
 		lmMax = ( ds->sampleSize * ( ds->shaderInfo->lmCustomWidth - 1 ) );
 		for ( i = 0; i < 3; i++ )
 		{
-			if ( ( maxs[ i ] - mins[ i ] ) > lmMax ) {
+			if ( ( minmax.maxs[ i ] - minmax.mins[ i ] ) > lmMax ) {
 				memcpy( ds, &old, sizeof( *ds ) );
 				return 0;
 			}
@@ -1595,8 +1545,7 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 	else
 	{
 		/* copy bounds back to surface */
-		VectorCopy( mins, ds->mins );
-		VectorCopy( maxs, ds->maxs );
+		ds->minmax = minmax;
 
 		/* mark triangle as used */
 		tri->si = NULL;
@@ -1655,10 +1604,10 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 		ds->shadeAngleDegrees = seed->shadeAngleDegrees;
 		ds->verts = verts;
 		ds->indexes = indexes;
-		VectorCopy( seed->lightmapAxis, ds->lightmapAxis );
+		ds->lightmapAxis = seed->lightmapAxis;
 		ds->sideRef = AllocSideRef( seed->side, NULL );
 
-		ClearBounds( ds->mins, ds->maxs );
+		ds->minmax.clear();
 
 		/* clear verts/indexes */
 		memset( verts, 0, sizeof( *verts ) * maxSurfaceVerts );
@@ -1756,8 +1705,6 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 
 static int CompareMetaTriangles( const void *a, const void *b ){
 	int i, j, av, bv;
-	vec3_t aMins, bMins;
-
 
 	/* shader first */
 	if ( ( (const metaTriangle_t*) a )->si < ( (const metaTriangle_t*) b )->si ) {
@@ -1809,8 +1756,8 @@ static int CompareMetaTriangles( const void *a, const void *b ){
 	/* then position in world */
 
 	/* find mins */
-	VectorSet( aMins, 999999, 999999, 999999 );
-	VectorSet( bMins, 999999, 999999, 999999 );
+	Vector3 aMins( 999999, 999999, 999999 );
+	Vector3 bMins( 999999, 999999, 999999 );
 	for ( i = 0; i < 3; i++ )
 	{
 		av = ( (const metaTriangle_t*) a )->indexes[ i ];

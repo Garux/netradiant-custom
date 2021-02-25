@@ -22,7 +22,6 @@
 // scriplib.c
 
 #include "cmdlib.h"
-#include "mathlib.h"
 #include "inout.h"
 #include "scriplib.h"
 #include "vfs.h"
@@ -365,7 +364,7 @@ void MatchToken( const char *match ) {
 }
 
 
-void Parse1DMatrix( int x, vec_t *m ) {
+void Parse1DMatrix( int x, float *m ) {
 	int i;
 
 	MatchToken( "(" );
@@ -378,7 +377,7 @@ void Parse1DMatrix( int x, vec_t *m ) {
 	MatchToken( ")" );
 }
 
-void Parse2DMatrix( int y, int x, vec_t *m ) {
+void Parse2DMatrix( int y, int x, float *m ) {
 	int i;
 
 	MatchToken( "(" );
@@ -390,7 +389,7 @@ void Parse2DMatrix( int y, int x, vec_t *m ) {
 	MatchToken( ")" );
 }
 
-void Parse3DMatrix( int z, int y, int x, vec_t *m ) {
+void Parse3DMatrix( int z, int y, int x, float *m ) {
 	int i;
 
 	MatchToken( "(" );
@@ -403,7 +402,7 @@ void Parse3DMatrix( int z, int y, int x, vec_t *m ) {
 }
 
 
-void Write1DMatrix( FILE *f, int x, vec_t *m ) {
+void Write1DMatrix( FILE *f, int x, float *m ) {
 	int i;
 
 	fprintf( f, "( " );
@@ -418,7 +417,7 @@ void Write1DMatrix( FILE *f, int x, vec_t *m ) {
 	fprintf( f, ")" );
 }
 
-void Write2DMatrix( FILE *f, int y, int x, vec_t *m ) {
+void Write2DMatrix( FILE *f, int y, int x, float *m ) {
 	int i;
 
 	fprintf( f, "( " );
@@ -430,7 +429,7 @@ void Write2DMatrix( FILE *f, int y, int x, vec_t *m ) {
 }
 
 
-void Write3DMatrix( FILE *f, int z, int y, int x, vec_t *m ) {
+void Write3DMatrix( FILE *f, int z, int y, int x, float *m ) {
 	int i;
 
 	fprintf( f, "(\n" );

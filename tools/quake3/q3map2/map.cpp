@@ -54,23 +54,20 @@ int c_structural;
    ydnar: replaced with variable epsilon for djbob
  */
 
-bool PlaneEqual( plane_t *p, vec3_t normal, vec_t dist ){
-	float ne, de;
-
-
+bool PlaneEqual( const plane_t *p, const Plane3f& plane ){
 	/* get local copies */
-	ne = normalEpsilon;
-	de = distanceEpsilon;
+	const float ne = normalEpsilon;
+	const float de = distanceEpsilon;
 
 	/* compare */
 	// We check equality of each component since we're using '<', not '<='
 	// (the epsilons may be zero).  We want to use '<' instead of '<=' to be
 	// consistent with the true meaning of "epsilon", and also because other
 	// parts of the code uses this inequality.
-	if ( ( p->dist == dist || fabs( p->dist - dist ) < de ) &&
-		 ( p->normal[0] == normal[0] || fabs( p->normal[0] - normal[0] ) < ne ) &&
-		 ( p->normal[1] == normal[1] || fabs( p->normal[1] - normal[1] ) < ne ) &&
-		 ( p->normal[2] == normal[2] || fabs( p->normal[2] - normal[2] ) < ne ) ) {
+	if ( ( p->dist() == plane.dist() || fabs( p->dist() - plane.dist() ) < de ) &&
+		 ( p->normal()[0] == plane.normal()[0] || fabs( p->normal()[0] - plane.normal()[0] ) < ne ) &&
+		 ( p->normal()[1] == plane.normal()[1] || fabs( p->normal()[1] - plane.normal()[1] ) < ne ) &&
+		 ( p->normal()[2] == plane.normal()[2] || fabs( p->normal()[2] - plane.normal()[2] ) < ne ) ) {
 		return true;
 	}
 
@@ -88,7 +85,7 @@ void AddPlaneToHash( plane_t *p ){
 	int hash;
 
 
-	hash = ( PLANE_HASHES - 1 ) & (int) fabs( p->dist );
+	hash = ( PLANE_HASHES - 1 ) & (int) fabs( p->dist() );
 
 	p->hash_chain = planehash[hash];
 	planehash[hash] = p - mapplanes + 1;
@@ -99,10 +96,9 @@ void AddPlaneToHash( plane_t *p ){
    CreateNewFloatPlane
    ================
  */
-int CreateNewFloatPlane( vec3_t normal, vec_t dist ){
-	plane_t *p, temp;
+int CreateNewFloatPlane( const Plane3f& plane ){
 
-	if ( VectorLength( normal ) < 0.5 ) {
+	if ( vector3_length( plane.normal() ) < 0.5 ) {
 		Sys_Printf( "FloatPlane: bad normal\n" );
 		return -1;
 	}
@@ -110,23 +106,18 @@ int CreateNewFloatPlane( vec3_t normal, vec_t dist ){
 	// create a new plane
 	AUTOEXPAND_BY_REALLOC( mapplanes, nummapplanes + 1, allocatedmapplanes, 1024 );
 
-	p = &mapplanes[nummapplanes];
-	VectorCopy( normal, p->normal );
-	p->dist = dist;
-	p->type = ( p + 1 )->type = PlaneTypeForNormal( p->normal );
-
-	VectorSubtract( vec3_origin, normal, ( p + 1 )->normal );
-	( p + 1 )->dist = -dist;
+	plane_t *p = &mapplanes[nummapplanes];
+	p->plane = plane;
+	( p + 1 )->plane = plane3_flipped( plane );
+	p->type = ( p + 1 )->type = PlaneTypeForNormal( p->normal() );
 
 	nummapplanes += 2;
 
 	// always put axial planes facing positive first
-	if ( p->type < 3 ) {
-		if ( p->normal[0] < 0 || p->normal[1] < 0 || p->normal[2] < 0 ) {
+	if ( p->type < ePlaneNonAxial ) {
+		if ( p->normal()[0] < 0 || p->normal()[1] < 0 || p->normal()[2] < 0 ) {
 			// flip order
-			temp = *p;
-			*p = *( p + 1 );
-			*( p + 1 ) = temp;
+			std::swap( *p, *( p + 1 ) );
 
 			AddPlaneToHash( p );
 			AddPlaneToHash( p + 1 );
@@ -147,7 +138,7 @@ int CreateNewFloatPlane( vec3_t normal, vec_t dist ){
    Returns true if and only if the normal was adjusted.
  */
 
-bool SnapNormal( vec3_t normal ){
+bool SnapNormal( Vector3& normal ){
 #if Q3MAP2_EXPERIMENTAL_SNAP_NORMAL_FIX
 	int i;
 	bool adjusted = false;
@@ -163,15 +154,15 @@ bool SnapNormal( vec3_t normal ){
 	//they cause precision errors
 
 
-	if ( ( normal[0] != 0.0 || normal[1] != 0.0 ) && fabs(normal[0]) < 0.00025 && fabs(normal[1]) < 0.00025){
+	if ( ( normal[0] != 0.0 || normal[1] != 0.0 ) && fabs( normal[0] ) < 0.00025 && fabs( normal[1] ) < 0.00025){
 		normal[0] = normal[1] = 0.0;
 		adjusted = true;
 	}
-	else if ( ( normal[0] != 0.0 || normal[2] != 0.0 ) && fabs(normal[0]) < 0.00025 && fabs(normal[2]) < 0.00025){
+	else if ( ( normal[0] != 0.0 || normal[2] != 0.0 ) && fabs( normal[0] ) < 0.00025 && fabs( normal[2] ) < 0.00025){
 		normal[0] = normal[2] = 0.0;
 		adjusted = true;
 	}
-	else if ( ( normal[2] != 0.0 || normal[1] != 0.0 ) && fabs(normal[2]) < 0.00025 && fabs(normal[1]) < 0.00025){
+	else if ( ( normal[2] != 0.0 || normal[1] != 0.0 ) && fabs( normal[2] ) < 0.00025 && fabs( normal[1] ) < 0.00025){
 		normal[2] = normal[1] = 0.0;
 		adjusted = true;
 	}
@@ -206,7 +197,7 @@ bool SnapNormal( vec3_t normal ){
 	}
 
 	if ( adjusted ) {
-		VectorNormalize( normal, normal );
+		VectorNormalize( normal );
 		return true;
 	}
 	return false;
@@ -249,12 +240,12 @@ bool SnapNormal( vec3_t normal ){
 	for ( i = 0; i < 3; i++ )
 	{
 		if ( fabs( normal[ i ] - 1 ) < normalEpsilon ) {
-			VectorClear( normal );
+			normal.set( 0 );
 			normal[ i ] = 1;
 			return true;
 		}
 		if ( fabs( normal[ i ] - -1 ) < normalEpsilon ) {
-			VectorClear( normal );
+			normal.set( 0 );
 			normal[ i ] = -1;
 			return true;
 		}
@@ -270,7 +261,7 @@ bool SnapNormal( vec3_t normal ){
    snaps a plane to normal/distance epsilons
  */
 
-void SnapPlane( vec3_t normal, vec_t *dist ){
+void SnapPlane( Plane3f& plane ){
 // SnapPlane disabled by LordHavoc because it often messes up collision
 // brushes made from triangles of embedded models, and it has little effect
 // on anything else (axial planes are usually derived from snapped points)
@@ -278,7 +269,7 @@ void SnapPlane( vec3_t normal, vec_t *dist ){
    SnapPlane reenabled by namespace because of multiple reports of
    q3map2-crashes which were triggered by this patch.
  */
-	SnapNormal( normal );
+	SnapNormal( plane.normal() );
 
 	// TODO: Rambetter has some serious comments here as well.  First off,
 	// in the case where a normal is non-axial, there is nothing special
@@ -301,8 +292,8 @@ void SnapPlane( vec3_t normal, vec_t *dist ){
 	// solve so that we can better engineer it (I'm not saying that SnapPlane()
 	// should be removed altogether).  Fix all this snapping code at some point!
 
-	if ( fabs( *dist - Q_rint( *dist ) ) < distanceEpsilon ) {
-		*dist = Q_rint( *dist );
+	if ( fabs( plane.dist() - std::rint( plane.dist() ) ) < distanceEpsilon ) {
+		plane.dist() = std::rint( plane.dist() );
 	}
 }
 
@@ -310,30 +301,26 @@ void SnapPlane( vec3_t normal, vec_t *dist ){
    SnapPlaneImproved()
    snaps a plane to normal/distance epsilons, improved code
  */
-void SnapPlaneImproved( vec3_t normal, vec_t *dist, int numPoints, const vec3_t *points ){
-	int i;
-	vec3_t center;
-	vec_t distNearestInt;
-
-	if ( SnapNormal( normal ) ) {
+void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
+	if ( SnapNormal( plane.normal() ) ) {
 		if ( numPoints > 0 ) {
 			// Adjust the dist so that the provided points don't drift away.
-			VectorClear( center );
-			for ( i = 0; i < numPoints; i++ )
+			Vector3 center( 0, 0, 0 );
+			for ( int i = 0; i < numPoints; i++ )
 			{
-				VectorAdd( center, points[i], center );
+				center += points[i];
 			}
-			for ( i = 0; i < 3; i++ ) { center[i] = center[i] / numPoints; }
-			*dist = DotProduct( normal, center );
+			center /= numPoints;
+			plane.dist() = vector3_dot( plane.normal(), center );
 		}
 	}
 
-	if ( VectorIsOnAxis( normal ) ) {
+	if ( VectorIsOnAxis( plane.normal() ) ) {
 		// Only snap distance if the normal is an axis.  Otherwise there
 		// is nothing "natural" about snapping the distance to an integer.
-		distNearestInt = Q_rint( *dist );
-		if ( -distanceEpsilon < *dist - distNearestInt && *dist - distNearestInt < distanceEpsilon ) {
-			*dist = distNearestInt;
+		const float distNearestInt = std::rint( plane.dist() );
+		if ( -distanceEpsilon < plane.dist() - distNearestInt && plane.dist() - distNearestInt < distanceEpsilon ) {
+			plane.dist() = distNearestInt;
 		}
 	}
 }
@@ -346,25 +333,22 @@ void SnapPlaneImproved( vec3_t normal, vec_t *dist, int numPoints, const vec3_t 
    must be within an epsilon distance of the plane
  */
 
-int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points ) // NOTE: this has a side effect on the normal. Good or bad?
+int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points ) // NOTE: this has a side effect on the normal. Good or bad?
 
 #ifdef USE_HASHING
 
 {
 	int i, j, hash, h;
 	int pidx;
-	plane_t *p;
-	vec_t d;
-	vec3_t normal;
+	Plane3f plane( inplane );
 
-	VectorCopy( innormal, normal );
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
-	SnapPlaneImproved( normal, &dist, numPoints, (const vec3_t *) points );
+	SnapPlaneImproved( plane, numPoints, points );
 #else
-	SnapPlane( normal, &dist );
+	SnapPlane( plane );
 #endif
 	/* hash the plane */
-	hash = ( PLANE_HASHES - 1 ) & (int) fabs( dist );
+	hash = ( PLANE_HASHES - 1 ) & (int) fabs( plane.dist() );
 
 	/* search the border bins as well */
 	for ( i = -1; i <= 1; i++ )
@@ -372,10 +356,10 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 		h = ( hash + i ) & ( PLANE_HASHES - 1 );
 		for ( pidx = planehash[ h ] - 1; pidx != -1; pidx = mapplanes[pidx].hash_chain - 1 )
 		{
-			p = &mapplanes[pidx];
+			plane_t *p = &mapplanes[pidx];
 
 			/* do standard plane compare */
-			if ( !PlaneEqual( p, normal, dist ) ) {
+			if ( !PlaneEqual( p, plane ) ) {
 				continue;
 			}
 
@@ -390,8 +374,7 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 				// very small when world coordinates extend to 2^16.  Making the
 				// dot product here in 64 bit land will not really help the situation
 				// because the error will already be carried in dist.
-				d = DotProduct( points[ j ], p->normal ) - p->dist;
-				d = fabs( d );
+				const double d = fabs( plane3_distance_to_point( p->plane, points[ j ] ) );
 				if ( d != 0.0 && d >= distanceEpsilon ) {
 					break; // Point is too far from plane.
 				}
@@ -405,25 +388,24 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 	}
 
 	/* none found, so create a new one */
-	return CreateNewFloatPlane( normal, dist );
+	return CreateNewFloatPlane( plane );
 }
 
 #else
 
 {
-	int i;
+	int i, j;
 	plane_t *p;
-	vec3_t normal;
+	Plane3f plane( innormal, dist );
 
-	VectorCopy( innormal, normal );
 #if Q3MAP2_EXPERIMENTAL_SNAP_PLANE_FIX
-	SnapPlaneImproved( normal, &dist, numPoints, (const vec3_t *) points );
+	SnapPlaneImproved( plane, numPoints, points );
 #else
-	SnapPlane( normal, &dist );
+	SnapPlane( plane );
 #endif
 	for ( i = 0, p = mapplanes; i < nummapplanes; i++, p++ )
 	{
-		if ( !PlaneEqual( p, normal, dist ) ) {
+		if ( !PlaneEqual( p, plane ) ) {
 			continue;
 		}
 
@@ -433,8 +415,7 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 		/* ydnar: test supplied points against this plane */
 		for ( j = 0; j < numPoints; j++ )
 		{
-			d = DotProduct( points[ j ], p->normal ) - p->dist;
-			if ( fabs( d ) > distanceEpsilon ) {
+			if ( fabs( plane3_distance_to_point( p->plane, points[ j ] ) ) > distanceEpsilon ) {
 				break;
 			}
 		}
@@ -448,7 +429,7 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
 		// is unmaintained because nobody sets USE_HASHING to off.
 	}
 
-	return CreateNewFloatPlane( normal, dist );
+	return CreateNewFloatPlane( plane );
 }
 
 #endif
@@ -460,44 +441,18 @@ int FindFloatPlane( vec3_t innormal, vec_t dist, int numPoints, vec3_t *points )
    takes 3 points and finds the plane they lie in
  */
 
-int MapPlaneFromPoints( vec3_t *p ){
+int MapPlaneFromPoints( Vector3 p[3] ){
 #if Q3MAP2_EXPERIMENTAL_HIGH_PRECISION_MATH_FIXES
-	vec3_accu_t paccu[3];
-	vec3_accu_t t1, t2, normalAccu;
-	vec3_t normal;
-	vec_t dist;
-
-	VectorCopyRegularToAccu( p[0], paccu[0] );
-	VectorCopyRegularToAccu( p[1], paccu[1] );
-	VectorCopyRegularToAccu( p[2], paccu[2] );
-
-	VectorSubtractAccu( paccu[0], paccu[1], t1 );
-	VectorSubtractAccu( paccu[2], paccu[1], t2 );
-	CrossProductAccu( t1, t2, normalAccu );
-	VectorNormalizeAccu( normalAccu, normalAccu );
+	Plane3 plane;
+	PlaneFromPoints( plane, DoubleVector3( p[0] ), DoubleVector3( p[1] ), DoubleVector3( p[2] ) );
 	// TODO: A 32 bit float for the plane distance isn't enough resolution
 	// if the plane is 2^16 units away from the origin (the "epsilon" approaches
 	// 0.01 in that case).
-	dist = (vec_t) DotProductAccu( paccu[0], normalAccu );
-	VectorCopyAccuToRegular( normalAccu, normal );
-
-	return FindFloatPlane( normal, dist, 3, p );
+	return FindFloatPlane( Plane3f( plane.normal(), plane.dist() ), 3, p );
 #else
-	vec3_t t1, t2, normal;
-	vec_t dist;
-
-
-	/* calc plane normal */
-	VectorSubtract( p[ 0 ], p[ 1 ], t1 );
-	VectorSubtract( p[ 2 ], p[ 1 ], t2 );
-	CrossProduct( t1, t2, normal );
-	VectorNormalize( normal, normal );
-
-	/* calc plane distance */
-	dist = DotProduct( p[ 0 ], normal );
-
-	/* store the plane */
-	return FindFloatPlane( normal, dist, 3, p );
+	Plane3f plane;
+	PlaneFromPoints( plane, p );
+	return FindFloatPlane( plane, 3, p );
 #endif
 }
 
@@ -628,9 +583,8 @@ void AddBrushBevels( void ){
 	side_t sidetemp;
 	side_t      *s, *s2;
 	winding_t   *w, *w2;
-	vec3_t normal;
-	float dist;
-	vec3_t vec, vec2;
+	Plane3f plane;
+	Vector3 vec, vec2;
 	float d, minBack;
 	int surfaceFlagsMask = game->brushBevelsSurfaceFlagsMask;
 
@@ -646,18 +600,18 @@ void AddBrushBevels( void ){
 				/* ydnar: testing disabling of mre code */
 				#if 0
 				if ( dir > 0 ) {
-					if ( mapplanes[s->planenum].normal[axis] >= 0.9999f ) {
+					if ( mapplanes[s->planenum].normal()[axis] >= 0.9999f ) {
 						break;
 					}
 				}
 				else {
-					if ( mapplanes[s->planenum].normal[axis] <= -0.9999f ) {
+					if ( mapplanes[s->planenum].normal()[axis] <= -0.9999f ) {
 						break;
 					}
 				}
 				#else
-				if ( ( dir > 0 && mapplanes[ s->planenum ].normal[ axis ] == 1.0f ) ||
-					 ( dir < 0 && mapplanes[ s->planenum ].normal[ axis ] == -1.0f ) ) {
+				if ( ( dir > 0 && mapplanes[ s->planenum ].normal()[ axis ] == 1.0f ) ||
+					 ( dir < 0 && mapplanes[ s->planenum ].normal()[ axis ] == -1.0f ) ) {
 					break;
 				}
 				#endif
@@ -670,30 +624,30 @@ void AddBrushBevels( void ){
 				}
 				memset( s, 0, sizeof( *s ) );
 				buildBrush->numsides++;
-				VectorClear( normal );
-				normal[axis] = dir;
+				plane.normal().set( 0 );
+				plane.normal()[axis] = dir;
 
 				if ( dir == 1 ) {
 					/* ydnar: adding bevel plane snapping for fewer bsp planes */
 					if ( bevelSnap > 0 ) {
-						dist = floor( buildBrush->maxs[ axis ] / bevelSnap ) * bevelSnap;
+						plane.dist() = floor( buildBrush->minmax.maxs[ axis ] / bevelSnap ) * bevelSnap;
 					}
 					else{
-						dist = buildBrush->maxs[ axis ];
+						plane.dist() = buildBrush->minmax.maxs[ axis ];
 					}
 				}
 				else
 				{
 					/* ydnar: adding bevel plane snapping for fewer bsp planes */
 					if ( bevelSnap > 0 ) {
-						dist = -ceil( buildBrush->mins[ axis ] / bevelSnap ) * bevelSnap;
+						plane.dist() = -ceil( buildBrush->minmax.mins[ axis ] / bevelSnap ) * bevelSnap;
 					}
 					else{
-						dist = -buildBrush->mins[ axis ];
+						plane.dist() = -buildBrush->minmax.mins[ axis ];
 					}
 				}
 
-				s->planenum = FindFloatPlane( normal, dist, 0, NULL );
+				s->planenum = FindFloatPlane( plane, 0, NULL );
 				s->contentFlags = buildBrush->sides[ 0 ].contentFlags;
 				/* handle bevel surfaceflags for topmost one only: assuming that only walkable ones are meaningful */
 				if( axis == 2 && dir == 1 ){
@@ -704,7 +658,7 @@ void AddBrushBevels( void ){
 							continue;
 						}
 						for ( k = 0; k < w->numpoints; k++ ) {
-							if ( fabs( dist - w->p[k][axis] ) < .1f ) {
+							if ( fabs( plane.dist() - w->p[k][axis] ) < .1f ) {
 								s->surfaceFlags |= ( s2->surfaceFlags & surfaceFlagsMask );
 								break;
 							}
@@ -740,8 +694,8 @@ void AddBrushBevels( void ){
 		}
 		for ( j = 0; j < w->numpoints; j++ ) {
 			k = ( j + 1 ) % w->numpoints;
-			VectorSubtract( w->p[j], w->p[k], vec );
-			if ( VectorNormalize( vec, vec ) < 0.5f ) {
+			vec = w->p[j] - w->p[k];
+			if ( VectorNormalize( vec ) < 0.5f ) {
 				continue;
 			}
 			SnapNormal( vec );
@@ -761,20 +715,20 @@ void AddBrushBevels( void ){
 			for ( axis = 0; axis < 3; axis++ ) {
 				for ( dir = -1; dir <= 1; dir += 2 ) {
 					// construct a plane
-					VectorClear( vec2 );
+					vec2.set( 0 );
 					vec2[axis] = dir;
-					CrossProduct( vec, vec2, normal );
-					if ( VectorNormalize( normal, normal ) < 0.5f ) {
+					plane.normal() = vector3_cross( vec, vec2 );
+					if ( VectorNormalize( plane.normal() ) < 0.5f ) {
 						continue;
 					}
-					dist = DotProduct( w->p[j], normal );
+					plane.dist() = vector3_dot( w->p[j], plane.normal() );
 
 					// if all the points on all the sides are
 					// behind this plane, it is a proper edge bevel
 					for ( k = 0; k < buildBrush->numsides; k++ ) {
 
 						// if this plane has allready been used, skip it
-						if ( PlaneEqual( &mapplanes[buildBrush->sides[k].planenum], normal, dist ) ) {
+						if ( PlaneEqual( &mapplanes[buildBrush->sides[k].planenum], plane ) ) {
 							if( buildBrush->sides[k].bevel ){ /* handle bevel surfaceflags */
 								buildBrush->sides[k].surfaceFlags |= ( s->surfaceFlags & surfaceFlagsMask );
 							}
@@ -787,7 +741,7 @@ void AddBrushBevels( void ){
 						}
 						minBack = 0.0f;
 						for ( l = 0; l < w2->numpoints; l++ ) {
-							d = DotProduct( w2->p[l], normal ) - dist;
+							d = plane3_distance_to_point( plane, w2->p[l] );
 							if ( d > 0.1f ) {
 								break;  // point in front
 							}
@@ -822,7 +776,7 @@ void AddBrushBevels( void ){
 					buildBrush->numsides++;
 					memset( s2, 0, sizeof( *s2 ) );
 
-					s2->planenum = FindFloatPlane( normal, dist, 1, &w->p[ j ] );
+					s2->planenum = FindFloatPlane( plane, 1, &w->p[ j ] );
 					s2->contentFlags = buildBrush->sides[0].contentFlags;
 					s2->surfaceFlags = ( s->surfaceFlags & surfaceFlagsMask ); /* handle bevel surfaceflags */
 					s2->bevel = true;
@@ -841,16 +795,14 @@ void AddBrushBevels( void ){
    and links it to the current entity
  */
 
-static void MergeOrigin( entity_t *ent, vec3_t origin ){
-	vec3_t adjustment;
+static void MergeOrigin( entity_t *ent, const Vector3& origin ){
 	char string[128];
 
 	/* we have not parsed the brush completely yet... */
 	ent->vectorForKey( "origin", ent->origin );
 
-	VectorMA( origin, -1, ent->originbrush_origin, adjustment );
-	VectorAdd( adjustment, ent->origin, ent->origin );
-	VectorCopy( origin, ent->originbrush_origin );
+	ent->origin += origin - ent->originbrush_origin;
+	ent->originbrush_origin = origin;
 
 	sprintf( string, "%f %f %f", ent->origin[0], ent->origin[1], ent->origin[2] );
 	ent->setKeyValue( "origin", string );
@@ -868,8 +820,6 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 	/* origin brushes are removed, but they set the rotation origin for the rest of the brushes in the entity.
 	   after the entire entity is parsed, the planenums and texinfos will be adjusted for the origin brush */
 	if ( buildBrush->compileFlags & C_ORIGIN ) {
-		vec3_t origin;
-
 		Sys_Printf( "Entity %i (%s), Brush %i: origin brush detected\n",
 					mapEnt->mapEntityNum, mapEnt->classname(), entitySourceBrushes );
 
@@ -879,10 +829,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
 			return NULL;
 		}
 
-		VectorAdd( buildBrush->mins, buildBrush->maxs, origin );
-		VectorScale( origin, 0.5, origin );
-
-		MergeOrigin( &entities.back(), origin );
+		MergeOrigin( &entities.back(), buildBrush->minmax.origin() );
 
 		/* don't keep this brush */
 		return NULL;
@@ -946,7 +893,7 @@ brush_t *FinishBrush( bool noCollapseGroups ){
    (must be identical in radiant!)
  */
 
-vec3_t baseaxis[18] =
+Vector3 baseaxis[18] =
 {
 	{0,0,1}, {1,0,0}, {0,-1,0},         // floor
 	{0,0,-1}, {1,0,0}, {0,-1,0},        // ceiling
@@ -956,25 +903,21 @@ vec3_t baseaxis[18] =
 	{0,-1,0}, {1,0,0}, {0,0,-1}         // north wall
 };
 
-void TextureAxisFromPlane( plane_t *pln, vec3_t xv, vec3_t yv ){
-	int bestaxis;
-	vec_t dot,best;
-	int i;
+void TextureAxisFromPlane( const plane_t *pln, Vector3& xv, Vector3& yv ){
+	float best = 0;
+	int bestaxis = 0;
 
-	best = 0;
-	bestaxis = 0;
-
-	for ( i = 0 ; i < 6 ; i++ )
+	for ( int i = 0 ; i < 6 ; i++ )
 	{
-		dot = DotProduct( pln->normal, baseaxis[i * 3] );
+		const float dot = vector3_dot( pln->normal(), baseaxis[i * 3] );
 		if ( dot > best + 0.0001f ) { /* ydnar: bug 637 fix, suggested by jmonroe */
 			best = dot;
 			bestaxis = i;
 		}
 	}
 
-	VectorCopy( baseaxis[bestaxis * 3 + 1], xv );
-	VectorCopy( baseaxis[bestaxis * 3 + 2], yv );
+	xv = baseaxis[bestaxis * 3 + 1];
+	yv = baseaxis[bestaxis * 3 + 2];
 }
 
 
@@ -984,12 +927,12 @@ void TextureAxisFromPlane( plane_t *pln, vec3_t xv, vec3_t yv ){
    creates world-to-texture mapping vecs for crappy quake plane arrangements
  */
 
-void QuakeTextureVecs( plane_t *plane, vec_t shift[ 2 ], vec_t rotate, vec_t scale[ 2 ], vec_t mappingVecs[ 2 ][ 4 ] ){
-	vec3_t vecs[2];
+void QuakeTextureVecs( const plane_t *plane, float shift[ 2 ], float rotate, float scale[ 2 ], Vector4 mappingVecs[ 2 ] ){
+	Vector3 vecs[2];
 	int sv, tv;
-	vec_t ang, sinv, cosv;
-	vec_t ns, nt;
-	int i, j;
+	float ang, sinv, cosv;
+	float ns, nt;
+	int i;
 
 
 	TextureAxisFromPlane( plane, vecs[0], vecs[1] );
@@ -1016,7 +959,7 @@ void QuakeTextureVecs( plane_t *plane, vec_t shift[ 2 ], vec_t rotate, vec_t sca
 	}
 	else
 	{
-		ang = rotate / 180 * Q_PI;
+		ang = degrees_to_radians( rotate );
 		sinv = sin( ang );
 		cosv = cos( ang );
 	}
@@ -1049,8 +992,7 @@ void QuakeTextureVecs( plane_t *plane, vec_t shift[ 2 ], vec_t rotate, vec_t sca
 	}
 
 	for ( i = 0 ; i < 2 ; i++ )
-		for ( j = 0 ; j < 3 ; j++ )
-			mappingVecs[i][j] = vecs[i][j] / scale[i];
+		mappingVecs[i].vec3() = vecs[i] / scale[i];
 
 	mappingVecs[0][3] = shift[0];
 	mappingVecs[1][3] = shift[1];
@@ -1074,12 +1016,12 @@ void QuakeTextureVecs( plane_t *plane, vec_t shift[ 2 ], vec_t rotate, vec_t sca
 
 static void ParseRawBrush( bool onlyLights ){
 	side_t          *side;
-	vec3_t planePoints[ 3 ];
+	Vector3 planePoints[ 3 ];
 	int planenum;
 	shaderInfo_t    *si;
-	vec_t shift[ 2 ];
-	vec_t rotate = 0;
-	vec_t scale[ 2 ];
+	float shift[ 2 ];
+	float rotate = 0;
+	float scale[ 2 ];
 	int flags;
 
 
@@ -1128,13 +1070,13 @@ static void ParseRawBrush( bool onlyLights ){
 		buildBrush->numsides++;
 
 		/* read the three point plane definition */
-		Parse1DMatrix( 3, planePoints[ 0 ] );
-		Parse1DMatrix( 3, planePoints[ 1 ] );
-		Parse1DMatrix( 3, planePoints[ 2 ] );
+		Parse1DMatrix( 3, planePoints[ 0 ].data() );
+		Parse1DMatrix( 3, planePoints[ 1 ].data() );
+		Parse1DMatrix( 3, planePoints[ 2 ].data() );
 
 		/* bp: read the texture matrix */
 		if ( g_brushType == EBrushType::Bp ) {
-			Parse2DMatrix( 2, 3, (float*) side->texMat );
+			Parse2DMatrix( 2, 3, side->texMat->data() );
 		}
 
 		/* read shader name */
@@ -1187,8 +1129,7 @@ static void ParseRawBrush( bool onlyLights ){
 			if ( !scale[0] ) scale[0] = 1.f;
 			if ( !scale[1] ) scale[1] = 1.f;
 			for ( axis = 0; axis < 2; ++axis )
-				for ( comp = 0; comp < 3; ++comp )
-					side->vecs[axis][comp] /= scale[axis];
+				side->vecs[axis].vec3() /= scale[axis];
 		}
 
 		/* set default flags and values */
@@ -1373,9 +1314,9 @@ void MoveBrushesToWorld( entity_t *ent ){
 	parseMesh_t *pm;
 
 	/* we need to undo the common/origin adjustment, and instead shift them by the entity key origin */
-	VectorScale( ent->origin, -1, ent->originbrush_origin );
+	ent->originbrush_origin = -ent->origin;
 	AdjustBrushesForOrigin( ent );
-	VectorClear( ent->originbrush_origin );
+	ent->originbrush_origin.set( 0 );
 
 	/* move brushes */
 	for ( b = ent->brushes; b != NULL; b = next )
@@ -1431,7 +1372,7 @@ void AdjustBrushesForOrigin( entity_t *ent ){
 
 	int i;
 	side_t      *s;
-	vec_t newdist;
+	float newdist;
 	brush_t     *b;
 	parseMesh_t *p;
 
@@ -1445,10 +1386,10 @@ void AdjustBrushesForOrigin( entity_t *ent ){
 			s = &b->sides[ i ];
 
 			/* offset side plane */
-			newdist = mapplanes[ s->planenum ].dist - DotProduct( mapplanes[ s->planenum ].normal, ent->originbrush_origin );
+			newdist = -plane3_distance_to_point( mapplanes[ s->planenum ].plane, ent->originbrush_origin );
 
 			/* find a new plane */
-			s->planenum = FindFloatPlane( mapplanes[ s->planenum ].normal, newdist, 0, NULL );
+			s->planenum = FindFloatPlane( mapplanes[ s->planenum ].normal(), newdist, 0, NULL );
 		}
 
 		/* rebuild brush windings (ydnar: just offsetting the winding above should be fine) */
@@ -1459,7 +1400,7 @@ void AdjustBrushesForOrigin( entity_t *ent ){
 	for ( p = ent->patches; p != NULL; p = p->next )
 	{
 		for ( i = 0; i < ( p->mesh.width * p->mesh.height ); i++ )
-			VectorSubtract( p->mesh.verts[ i ].xyz, ent->originbrush_origin, p->mesh.verts[ i ].xyz );
+			p->mesh.verts[ i ].xyz -= ent->originbrush_origin;
 	}
 }
 
@@ -1474,36 +1415,32 @@ void SetEntityBounds( entity_t *e ){
 	int i;
 	brush_t *b;
 	parseMesh_t *p;
-	vec3_t mins, maxs;
+	MinMax minmax;
 
 
 	/* walk the entity's brushes/patches and determine bounds */
-	ClearBounds( mins, maxs );
 	for ( b = e->brushes; b; b = b->next )
 	{
-		AddPointToBounds( b->mins, mins, maxs );
-		AddPointToBounds( b->maxs, mins, maxs );
+		minmax.extend( b->minmax );
 	}
 	for ( p = e->patches; p; p = p->next )
 	{
 		for ( i = 0; i < ( p->mesh.width * p->mesh.height ); i++ )
-			AddPointToBounds( p->mesh.verts[ i ].xyz, mins, maxs );
+			minmax.extend( p->mesh.verts[ i ].xyz );
 	}
 
 	/* try to find explicit min/max key */
-	e->read_keyvalue( mins, "min" );
-	e->read_keyvalue( maxs, "max" );
+	e->read_keyvalue( minmax.mins, "min" );
+	e->read_keyvalue( minmax.maxs, "max" );
 
 	/* store the bounds */
 	for ( b = e->brushes; b; b = b->next )
 	{
-		VectorCopy( mins, b->eMins );
-		VectorCopy( maxs, b->eMaxs );
+		b->eMinmax = minmax;
 	}
 	for ( p = e->patches; p; p = p->next )
 	{
-		VectorCopy( mins, p->eMins );
-		VectorCopy( maxs, p->eMaxs );
+		p->eMinmax = minmax;
 	}
 }
 
@@ -1897,11 +1834,10 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 	else
 	{
 		/* set map bounds */
-		ClearBounds( mapMins, mapMaxs );
+		g_mapMinmax.clear();
 		for ( b = entities[ 0 ].brushes; b; b = b->next )
 		{
-			AddPointToBounds( b->mins, mapMins, mapMaxs );
-			AddPointToBounds( b->maxs, mapMins, mapMaxs );
+			g_mapMinmax.extend( b->minmax );
 		}
 
 		/* get brush counts */
@@ -1920,8 +1856,8 @@ void LoadMapFile( char *filename, bool onlyLights, bool noCollapseGroups ){
 		Sys_FPrintf( SYS_VRB, "%9d planes\n", nummapplanes );
 		Sys_Printf( "%9d areaportals\n", c_areaportals );
 		Sys_Printf( "Size: %5.0f, %5.0f, %5.0f to %5.0f, %5.0f, %5.0f\n",
-					mapMins[ 0 ], mapMins[ 1 ], mapMins[ 2 ],
-					mapMaxs[ 0 ], mapMaxs[ 1 ], mapMaxs[ 2 ] );
+					g_mapMinmax.mins[0], g_mapMinmax.mins[1], g_mapMinmax.mins[2],
+					g_mapMinmax.maxs[0], g_mapMinmax.maxs[1], g_mapMinmax.maxs[2] );
 
 		/* write bogus map */
 		if ( fakemap ) {

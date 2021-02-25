@@ -30,6 +30,7 @@
 #include "inout.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "generic/vector.h"
 
 #ifdef WIN32
 #include <direct.h>
@@ -56,7 +57,7 @@ xmlDocPtr doc;
 xmlNodePtr tree;
 
 // some useful stuff
-xmlNodePtr xml_NodeForVec( vec3_t v ){
+xmlNodePtr xml_NodeForVec( const Vector3& v ){
 	xmlNodePtr ret;
 	char buf[1024];
 
@@ -166,7 +167,7 @@ void xml_Select( const char *msg, int entitynum, int brushnum, bool bError ){
 	}
 }
 
-void xml_Point( const char *msg, vec3_t pt ){
+void xml_Point( const char *msg, const Vector3& pt ){
 	xmlNodePtr node, point;
 	char buf[1024];
 	char level[2];
@@ -188,7 +189,7 @@ void xml_Point( const char *msg, vec3_t pt ){
 }
 
 #define WINDING_BUFSIZE 2048
-void xml_Winding( const char *msg, vec3_t p[], int numpoints, bool die ){
+void xml_Winding( const char *msg, const Vector3 p[], int numpoints, bool die ){
 	xmlNodePtr node, winding;
 	char buf[WINDING_BUFSIZE];
 	char smlbuf[128];

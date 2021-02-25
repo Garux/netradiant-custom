@@ -27,35 +27,40 @@
 
 #include "math/matrix.h"
 
-/// \brief A plane equation stored in double-precision floating-point.
-class Plane3
+template<typename T>
+class Plane3___
 {
 public:
-double a, b, c, d;
+T a, b, c, d;
 
-Plane3(){
+Plane3___(){
 }
-Plane3( double _a, double _b, double _c, double _d )
+Plane3___( double _a, double _b, double _c, double _d )
 	: a( _a ), b( _b ), c( _c ), d( _d ){
 }
 template<typename Element>
-Plane3( const BasicVector3<Element>& normal, double dist )
+Plane3___( const BasicVector3<Element>& normal, double dist )
 	: a( normal.x() ), b( normal.y() ), c( normal.z() ), d( dist ){
 }
 
-BasicVector3<double>& normal(){
-	return reinterpret_cast<BasicVector3<double>&>( *this );
+BasicVector3<T>& normal(){
+	return reinterpret_cast<BasicVector3<T>&>( *this );
 }
-const BasicVector3<double>& normal() const {
-	return reinterpret_cast<const BasicVector3<double>&>( *this );
+const BasicVector3<T>& normal() const {
+	return reinterpret_cast<const BasicVector3<T>&>( *this );
 }
-double& dist(){
+T& dist(){
 	return d;
 }
-const double& dist() const {
+const T& dist() const {
 	return d;
 }
 };
+
+/// \brief A plane equation stored in double-precision floating-point.
+using Plane3 = Plane3___<double>;
+/// \brief A plane equation stored in single-precision floating-point.
+using Plane3f = Plane3___<float>;
 
 inline Plane3 plane3_normalised( const Plane3& plane ){
 	double rmagnitude = 1.0 / sqrt( plane.a * plane.a + plane.b * plane.b + plane.c * plane.c );
@@ -105,8 +110,9 @@ inline Plane3 plane3_transformed_affine_full( const Plane3& plane, const Matrix4
 	return Plane3( normal, vector3_dot( normal, anchor ) );
 }
 
-inline Plane3 plane3_flipped( const Plane3& plane ){
-	return Plane3( vector3_negated( plane.normal() ), -plane.dist() );
+template<typename T>
+inline Plane3___<T> plane3_flipped( const Plane3___<T>& plane ){
+	return Plane3___<T>( vector3_negated( plane.normal() ), -plane.dist() );
 }
 
 const double c_PLANE_NORMAL_EPSILON = 0.0001f;
@@ -148,8 +154,8 @@ inline Plane3 plane3_for_points( const BasicVector3<Element> planepts[3] ){
 	return plane3_for_points( planepts[0], planepts[1], planepts[2] );
 }
 
-template<typename T>
-inline double plane3_distance_to_point( const Plane3& plane, const BasicVector3<T>& point ){
+template<typename P, typename V>
+inline double plane3_distance_to_point( const Plane3___<P>& plane, const BasicVector3<V>& point ){
 	return vector3_dot( point, plane.normal() ) - plane.dist();
 }
 
@@ -160,9 +166,9 @@ inline BasicVector3<T> plane3_project_point( const Plane3& plane, const BasicVec
 	return point + direction * d;
 }
 
-template<typename T>
-inline BasicVector3<T> plane3_project_point( const Plane3& plane, const BasicVector3<T>& point ){
-	return ( point - plane.normal() * vector3_dot( point, plane.normal() ) + plane.normal() * plane.dist() );
+template<typename P, typename V>
+inline BasicVector3<V> plane3_project_point( const Plane3___<P>& plane, const BasicVector3<V>& point ){
+	return point - plane.normal() * plane3_distance_to_point( plane, point );
 }
 
 #endif

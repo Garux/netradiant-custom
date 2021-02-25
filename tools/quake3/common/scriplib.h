@@ -24,9 +24,6 @@
 #ifndef __CMDLIB__
 #include "../common/cmdlib.h"
 #endif
-#ifndef __MATHLIB__
-#include "mathlib.h"
-#endif
 
 #define MAXTOKEN    1024
 
@@ -47,10 +44,10 @@ bool TokenAvailable( void );
 
 void MatchToken( const char *match );
 
-void Parse1DMatrix( int x, vec_t *m );
-void Parse2DMatrix( int y, int x, vec_t *m );
-void Parse3DMatrix( int z, int y, int x, vec_t *m );
+void Parse1DMatrix( int x, float *m );
+void Parse2DMatrix( int y, int x, float *m );
+void Parse3DMatrix( int z, int y, int x, float *m );
 
-void Write1DMatrix( FILE *f, int x, vec_t *m );
-void Write2DMatrix( FILE *f, int y, int x, vec_t *m );
-void Write3DMatrix( FILE *f, int z, int y, int x, vec_t *m );
+void Write1DMatrix( FILE *f, int x, float *m );
+void Write2DMatrix( FILE *f, int y, int x, float *m );
+void Write3DMatrix( FILE *f, int z, int y, int x, float *m );

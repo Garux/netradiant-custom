@@ -71,11 +71,8 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 	face_t      *check;
 	face_t      *bestSplit;
 	int splits, facing, front, back;
-	int side;
-	plane_t     *plane;
 	int value, bestValue;
 	int i;
-	vec3_t normal;
 	float dist;
 	int planenum;
 	float sizeBias;
@@ -96,11 +93,9 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 		if ( blockSize[ i ] <= 0 ) {
 			continue;
 		}
-		dist = blockSize[ i ] * ( floor( node->mins[ i ] / blockSize[ i ] ) + 1 );
-		if ( node->maxs[ i ] > dist ) {
-			VectorClear( normal );
-			normal[ i ] = 1;
-			planenum = FindFloatPlane( normal, dist, 0, NULL );
+		dist = blockSize[ i ] * ( floor( node->minmax.mins[ i ] / blockSize[ i ] ) + 1 );
+		if ( node->minmax.maxs[ i ] > dist ) {
+			planenum = FindFloatPlane( g_vector3_axes[i], dist, 0, NULL );
 			*splitPlaneNum = planenum;
 			return;
 		}
@@ -120,7 +115,7 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 		//if ( split->checked )
 		//	continue;
 
-		plane = &mapplanes[ split->planenum ];
+		const plane_t& plane = mapplanes[ split->planenum ];
 		splits = 0;
 		facing = 0;
 		front = 0;
@@ -131,14 +126,14 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 				//check->checked = true;	// won't need to test this plane again
 				continue;
 			}
-			side = WindingOnPlaneSide( check->w, plane->normal, plane->dist );
-			if ( side == SIDE_CROSS ) {
+			const EPlaneSide side = WindingOnPlaneSide( check->w, plane.plane );
+			if ( side == eSideCross ) {
 				splits++;
 			}
-			else if ( side == SIDE_FRONT ) {
+			else if ( side == eSideFront ) {
 				front++;
 			}
-			else if ( side == SIDE_BACK ) {
+			else if ( side == eSideBack ) {
 				back++;
 			}
 		}
@@ -151,7 +146,7 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 
 			//Base score = 20000 perfectly balanced
 			value = 20000 - ( abs( front - back ) );
-			value -= plane->counter; // If we've already used this plane sometime in the past try not to use it again
+			value -= plane.counter; // If we've already used this plane sometime in the past try not to use it again
 			value -= facing ;       // if we're going to have alot of other surfs use this plane, we want to get it in quickly.
 			value -= splits * 5;        //more splits = bad
 			value +=  sizeBias * 10; //We want a huge score bias based on plane size
@@ -159,7 +154,7 @@ static void SelectSplitPlaneNum( node_t *node, face_t *list, int *splitPlaneNum,
 		else
 		{
 			value =  5 * facing - 5 * splits; // - abs(front-back);
-			if ( plane->type < 3 ) {
+			if ( plane.type < ePlaneNonAxial ) {
 				value += 5;       // axial is better
 			}
 		}
@@ -231,8 +226,6 @@ int CountFaceList( face_t *list ){
 void BuildFaceTree_r( node_t *node, face_t *list ){
 	face_t      *split;
 	face_t      *next;
-	int side;
-	plane_t     *plane;
 	face_t      *newFace;
 	face_t      *childLists[2];
 	winding_t   *frontWinding, *backWinding;
@@ -261,7 +254,7 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 	node->planenum = splitPlaneNum;
 	node->compileFlags = compileFlags;
 	node->has_structural_children = !( compileFlags & C_DETAIL ) && !node->opaque;
-	plane = &mapplanes[ splitPlaneNum ];
+	const plane_t& plane = mapplanes[ splitPlaneNum ];
 	childLists[0] = NULL;
 	childLists[1] = NULL;
 
@@ -283,11 +276,11 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 #endif
 
 		/* determine which side the face falls on */
-		side = WindingOnPlaneSide( split->w, plane->normal, plane->dist );
+		const EPlaneSide side = WindingOnPlaneSide( split->w, plane.plane );
 
 		/* switch on side */
-		if ( side == SIDE_CROSS ) {
-			ClipWindingEpsilonStrict( split->w, plane->normal, plane->dist, CLIP_EPSILON * 2,
+		if ( side == eSideCross ) {
+			ClipWindingEpsilonStrict( split->w, plane.plane, CLIP_EPSILON * 2,
 									  &frontWinding, &backWinding ); /* strict; if no winding is left, we have a "virtually identical" plane and don't want to split by it */
 			if ( frontWinding ) {
 				newFace = AllocBspFace();
@@ -309,11 +302,11 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 			}
 			FreeBspFace( split );
 		}
-		else if ( side == SIDE_FRONT ) {
+		else if ( side == eSideFront ) {
 			split->next = childLists[0];
 			childLists[0] = split;
 		}
-		else if ( side == SIDE_BACK ) {
+		else if ( side == eSideBack ) {
 			split->next = childLists[1];
 			childLists[1] = split;
 		}
@@ -324,19 +317,18 @@ void BuildFaceTree_r( node_t *node, face_t *list ){
 	for ( i = 0 ; i < 2 ; i++ ) {
 		node->children[i] = AllocNode();
 		node->children[i]->parent = node;
-		VectorCopy( node->mins, node->children[i]->mins );
-		VectorCopy( node->maxs, node->children[i]->maxs );
+		node->children[i]->minmax = node->minmax;
 	}
 
 	for ( i = 0 ; i < 3 ; i++ ) {
-		if ( plane->normal[i] == 1 ) {
-			node->children[0]->mins[i] = plane->dist;
-			node->children[1]->maxs[i] = plane->dist;
+		if ( plane.normal()[i] == 1 ) {
+			node->children[0]->minmax.mins[i] = plane.dist();
+			node->children[1]->minmax.maxs[i] = plane.dist();
 			break;
 		}
-		if ( plane->normal[i] == -1 ) {
-			node->children[0]->maxs[i] = -plane->dist;
-			node->children[1]->mins[i] = -plane->dist;
+		if ( plane.normal()[i] == -1 ) {
+			node->children[0]->minmax.maxs[i] = -plane.dist();
+			node->children[1]->minmax.mins[i] = -plane.dist();
 			break;
 		}
 	}
@@ -386,7 +378,7 @@ tree_t *FaceBSP( face_t *list ) {
 		count++;
 		for ( i = 0; i < face->w->numpoints; i++ )
 		{
-			AddPointToBounds( face->w->p[ i ], tree->mins, tree->maxs );
+			tree->minmax.extend( face->w->p[ i ] );
 		}
 	}
 	Sys_FPrintf( SYS_VRB, "%9d faces\n", count );
@@ -397,8 +389,7 @@ tree_t *FaceBSP( face_t *list ) {
 	}
 
 	tree->headnode = AllocNode();
-	VectorCopy( tree->mins, tree->headnode->mins );
-	VectorCopy( tree->maxs, tree->headnode->maxs );
+	tree->headnode->minmax = tree->minmax;
 	c_faceLeafs = 0;
 
 	BuildFaceTree_r( tree->headnode, list );

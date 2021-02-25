@@ -38,11 +38,9 @@
    exports a map brush
  */
 
-typedef vec_t vec2_t[2];
-
-static vec_t Det3x3( vec_t a00, vec_t a01, vec_t a02,
-					 vec_t a10, vec_t a11, vec_t a12,
-					 vec_t a20, vec_t a21, vec_t a22 ){
+static float Det3x3( float a00, float a01, float a02,
+					 float a10, float a11, float a12,
+					 float a20, float a21, float a22 ){
 	return
 		a00 * ( a11 * a22 - a12 * a21 )
 		-   a01 * ( a10 * a22 - a12 * a20 )
@@ -53,10 +51,8 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 	bspDrawSurface_t *s;
 	int i;
 	int t;
-	vec_t best = 0;
-	vec_t thisarea;
-	vec3_t normdiff;
-	vec3_t v1v0, v2v0, norm;
+	float best = 0;
+	float thisarea;
 	bspDrawVert_t *vert[3];
 	winding_t *polygon;
 	plane_t *buildPlane = &mapplanes[buildSide->planenum];
@@ -80,16 +76,13 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 			vert[1] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 1]];
 			vert[2] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 2]];
 			if ( s->surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
-				VectorSubtract( vert[0]->normal, buildPlane->normal, normdiff );
-				if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				if ( vector3_length( vert[0]->normal - buildPlane->normal() ) >= normalEpsilon ) {
 					continue;
 				}
-				VectorSubtract( vert[1]->normal, buildPlane->normal, normdiff );
-				if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				if ( vector3_length( vert[1]->normal - buildPlane->normal() ) >= normalEpsilon ) {
 					continue;
 				}
-				VectorSubtract( vert[2]->normal, buildPlane->normal, normdiff );
-				if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				if ( vector3_length( vert[2]->normal - buildPlane->normal() ) >= normalEpsilon ) {
 					continue;
 				}
 			}
@@ -97,23 +90,20 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 			{
 				// this is more prone to roundoff errors, but with embedded
 				// models, there is no better way
-				VectorSubtract( vert[1]->xyz, vert[0]->xyz, v1v0 );
-				VectorSubtract( vert[2]->xyz, vert[0]->xyz, v2v0 );
-				CrossProduct( v2v0, v1v0, norm );
-				VectorNormalize( norm, norm );
-				VectorSubtract( norm, buildPlane->normal, normdiff );
-				if ( VectorLength( normdiff ) >= normalEpsilon ) {
+				Plane3f plane;
+				PlaneFromPoints( plane, vert[0]->xyz, vert[1]->xyz, vert[2]->xyz );
+				if ( vector3_length( plane.normal() - buildPlane->normal() ) >= normalEpsilon ) {
 					continue;
 				}
 			}
 			// fixme? better distance epsilon
-			if ( abs( DotProduct( vert[0]->xyz, buildPlane->normal ) - buildPlane->dist ) > 1 ) {
+			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[0]->xyz ) ) > 1 ) {
 				continue;
 			}
-			if ( abs( DotProduct( vert[1]->xyz, buildPlane->normal ) - buildPlane->dist ) > 1 ) {
+			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[1]->xyz ) ) > 1 ) {
 				continue;
 			}
-			if ( abs( DotProduct( vert[2]->xyz, buildPlane->normal ) - buildPlane->dist ) > 1 ) {
+			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[2]->xyz ) ) > 1 ) {
 				continue;
 			}
 			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...
@@ -123,16 +113,12 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				// 0: 1, 2
 				// 1: 2, 0
 				// 2; 0, 1
-				vec3_t *v1 = &vert[( i + 1 ) % 3]->xyz;
-				vec3_t *v2 = &vert[( i + 2 ) % 3]->xyz;
-				vec3_t triNormal;
-				vec_t triDist;
-				vec3_t sideDirection;
-				// we now need to generate triNormal and triDist so that they represent the plane spanned by normal and (v2 - v1).
-				VectorSubtract( *v2, *v1, sideDirection );
-				CrossProduct( sideDirection, buildPlane->normal, triNormal );
-				triDist = DotProduct( *v1, triNormal );
-				ChopWindingInPlace( &polygon, triNormal, triDist, distanceEpsilon );
+				const Vector3& v1 = vert[( i + 1 ) % 3]->xyz;
+				const Vector3& v2 = vert[( i + 2 ) % 3]->xyz;
+				// we now need to generate the plane spanned by normal and (v2 - v1).
+				Plane3f plane( vector3_cross( v2 - v1, buildPlane->normal() ), 0 );
+				plane.dist() = vector3_dot( v1, plane.normal() );
+				ChopWindingInPlace( &polygon, plane, distanceEpsilon );
 				if ( !polygon ) {
 					goto exwinding;
 				}
@@ -157,7 +143,7 @@ exwinding:
 }
 
 #define FRAC( x ) ( ( x ) - floor( x ) )
-static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, bool brushPrimitives ){
+static void ConvertOriginBrush( FILE *f, int num, const Vector3& origin, bool brushPrimitives ){
 	int originSize = 256;
 
 	char pattern[6][7][4] = {
@@ -217,14 +203,14 @@ static void ConvertOriginBrush( FILE *f, int num, vec3_t origin, bool brushPrimi
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bool brushPrimitives ){
+static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, const Vector3& origin, bool brushPrimitives ){
 	int i;
 	bspBrushSide_t  *side;
 	side_t          *buildSide;
 	bspShader_t     *shader;
 	const char            *texture;
 	plane_t         *buildPlane;
-	vec3_t pts[ 3 ];
+	Vector3 pts[ 3 ];
 
 
 	/* clear out build brush */
@@ -325,12 +311,11 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 		}
 
 		{
-			vec3_t vecs[ 2 ];
-			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
-			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );
-			VectorAdd( pts[ 0 ], origin, pts[ 0 ] );
-			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
-			VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
+			Vector3 vecs[ 2 ];
+			MakeNormalVectors( buildPlane->normal(), vecs[ 0 ], vecs[ 1 ] );
+			pts[ 0 ] = buildPlane->normal() * buildPlane->dist() + origin;
+			pts[ 1 ] = pts[ 0 ] + vecs[ 0 ] * 256.0f;
+			pts[ 2 ] = pts[ 0 ] + vecs[ 1 ] * 256.0f;
 		}
 
 		{
@@ -366,14 +351,14 @@ static void ConvertBrushFast( FILE *f, int num, bspBrush_t *brush, vec3_t origin
 	fprintf( f, "\t}\n\n" );
 }
 
-static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bool brushPrimitives ){
+static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& origin, bool brushPrimitives ){
 	int i, j;
 	bspBrushSide_t  *side;
 	side_t          *buildSide;
 	bspShader_t     *shader;
 	const char      *texture;
 	plane_t         *buildPlane;
-	vec3_t pts[ 3 ];
+	Vector3 pts[ 3 ];
 	bspDrawVert_t   *vert[3];
 
 
@@ -469,8 +454,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 
 		// st-texcoords -> texMat block
 		// start out with dummy
-		VectorSet( buildSide->texMat[0], 1 / 32.0, 0, 0 );
-		VectorSet( buildSide->texMat[1], 0, 1 / 32.0, 0 );
+		buildSide->texMat[0] = { 1 / 32.0, 0, 0 };
+		buildSide->texMat[1] = { 0, 1 / 32.0, 0 };
 
 		// find surface for this side (by brute force)
 		// surface format:
@@ -490,11 +475,11 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 		/* recheck and fix winding points, fails occur somehow */
 		int match = 0;
 		for ( j = 0; j < buildSide->winding->numpoints; j++ ){
-			if ( fabs( DotProduct( buildSide->winding->p[ j ], buildPlane->normal ) - buildPlane->dist ) >= distanceEpsilon ) {
+			if ( fabs( plane3_distance_to_point( buildPlane->plane, buildSide->winding->p[ j ] ) ) >= distanceEpsilon ) {
 				continue;
 			}
 			else{
-				VectorCopy( buildSide->winding->p[ j ], pts[ match ] );
+				pts[ match ] = buildSide->winding->p[ j ];
 				match++;
 				/* got 3 fine points? */
 				if( match > 2 )
@@ -504,9 +489,9 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 
 		if( match > 2 ){
 			//Sys_Printf( "pointsKK " );
-			vec4_t testplane;
-			if ( PlaneFromPoints( testplane, pts[0], pts[1], pts[2] ) ){
-				if( !PlaneEqual( buildPlane, testplane, testplane[3] ) ){
+			Plane3f testplane;
+			if ( PlaneFromPoints( testplane, pts ) ){
+				if( !PlaneEqual( buildPlane, testplane ) ){
 					//Sys_Printf( "1: %f %f %f %f\n2: %f %f %f %f\n", buildPlane->normal[0], buildPlane->normal[1], buildPlane->normal[2], buildPlane->dist, testplane[0], testplane[1], testplane[2], testplane[3] );
 					match--;
 					//Sys_Printf( "planentEQ " );
@@ -522,34 +507,33 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 			//Sys_Printf( "ok " );
 			/* offset by origin */
 			for ( j = 0; j < 3; j++ )
-				VectorAdd( pts[ j ], origin, pts[ j ] );
+				pts[ j ] += origin;
 		}
 		else{
-			vec3_t vecs[ 2 ];
-			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
-			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );
-			VectorAdd( pts[ 0 ], origin, pts[ 0 ] );
-			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
-			VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
+			Vector3 vecs[ 2 ];
+			MakeNormalVectors( buildPlane->normal(), vecs[ 0 ], vecs[ 1 ] );
+			pts[ 0 ] = buildPlane->normal() * buildPlane->dist() + origin;
+			pts[ 1 ] = pts[ 0 ] + vecs[ 0 ] * 256.0f;
+			pts[ 2 ] = pts[ 0 ] + vecs[ 1 ] * 256.0f;
 			//Sys_Printf( "not\n" );
 		}
 
 		if ( vert[0] && vert[1] && vert[2] ) {
 			if ( brushPrimitives ) {
 				int i;
-				vec3_t texX, texY;
-				vec2_t xyI, xyJ, xyK;
-				vec2_t stI, stJ, stK;
-				vec_t D, D0, D1, D2;
+				Vector3 texX, texY;
+				float xyI[2], xyJ[2], xyK[2];
+				float stI[2], stJ[2], stK[2];
+				float D, D0, D1, D2;
 
-				ComputeAxisBase( buildPlane->normal, texX, texY );
+				ComputeAxisBase( buildPlane->normal(), texX, texY );
 
-				xyI[0] = DotProduct( vert[0]->xyz, texX );
-				xyI[1] = DotProduct( vert[0]->xyz, texY );
-				xyJ[0] = DotProduct( vert[1]->xyz, texX );
-				xyJ[1] = DotProduct( vert[1]->xyz, texY );
-				xyK[0] = DotProduct( vert[2]->xyz, texX );
-				xyK[1] = DotProduct( vert[2]->xyz, texY );
+				xyI[0] = vector3_dot( vert[0]->xyz, texX );
+				xyI[1] = vector3_dot( vert[0]->xyz, texY );
+				xyJ[0] = vector3_dot( vert[1]->xyz, texX );
+				xyJ[1] = vector3_dot( vert[1]->xyz, texY );
+				xyK[0] = vector3_dot( vert[2]->xyz, texX );
+				xyK[1] = vector3_dot( vert[2]->xyz, texY );
 				stI[0] = vert[0]->st[0]; stI[1] = vert[0]->st[1];
 				stJ[0] = vert[1]->st[0]; stJ[1] = vert[1]->st[1];
 				stK[0] = vert[2]->st[0]; stK[1] = vert[2]->st[1];
@@ -581,12 +565,12 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 							xyJ[0], xyJ[1], stJ[i],
 							xyK[0], xyK[1], stK[i]
 							);
-						VectorSet( buildSide->texMat[i], D0 / D, D1 / D, D2 / D );
+						buildSide->texMat[i] = { D0 / D, D1 / D, D2 / D };
 					}
 				}
 				else{
 					fprintf( stderr, "degenerate triangle found when solving texMat equations for\n(%f %f %f) (%f %f %f) (%f %f %f)\n( %f %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n",
-							 buildPlane->normal[0], buildPlane->normal[1], buildPlane->normal[2],
+							 buildPlane->normal()[0], buildPlane->normal()[1], buildPlane->normal()[2],
 							 vert[0]->normal[0], vert[0]->normal[1], vert[0]->normal[2],
 							 texX[0], texX[1], texX[2], texY[0], texY[1], texY[2],
 							 vert[0]->xyz[0], vert[0]->xyz[1], vert[0]->xyz[2], xyI[0], xyI[1],
@@ -611,13 +595,13 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 			{
 				// invert QuakeTextureVecs
 				int i;
-				vec3_t vecs[2];
+				Vector3 vecs[2];
 				int sv, tv;
-				vec2_t stI, stJ, stK;
-				vec3_t sts[2];
-				vec2_t shift, scale;
-				vec_t rotate;
-				vec_t D, D0, D1, D2;
+				float stI[2], stJ[2], stK[2];
+				Vector3 sts[2];
+				float shift[2], scale[2];
+				float rotate;
+				float D, D0, D1, D2;
 
 				TextureAxisFromPlane( buildPlane, vecs[0], vecs[1] );
 				if ( vecs[0][0] ) {
@@ -666,18 +650,18 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 							vert[1]->xyz[sv], vert[1]->xyz[tv], stJ[i],
 							vert[2]->xyz[sv], vert[2]->xyz[tv], stK[i]
 							);
-						VectorSet( sts[i], D0 / D, D1 / D, D2 / D );
+						sts[i] = { D0 / D, D1 / D, D2 / D };
 						//Sys_Printf( "%.3f %.3f %.3f \n", sts[i][0], sts[i][1], sts[i][2] );
 					}
 				}
 				else{
 					fprintf( stderr, "degenerate triangle found when solving texDef equations\n" ); // FIXME add stuff here
-					VectorSet( sts[0], 2.f, 0.f, 0.f );
-					VectorSet( sts[1], 0.f, -2.f, 0.f );
+					sts[0] = { 2.f, 0.f, 0.f };
+					sts[1] = { 0.f, -2.f, 0.f };
 				}
 				// now we must solve:
 				//	// now we must invert:
-				//	ang = rotate / 180 * Q_PI;
+				//	ang = degrees_to_radians( rotate );
 				//	sinv = sin(ang);
 				//	cosv = cos(ang);
 				//	ns = cosv * vecs[0][sv];
@@ -690,7 +674,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 				//	vecsrotscaled[1][tv] = nt / scale[1];
 				scale[0] = 1.0 / sqrt( sts[0][0] * sts[0][0] + sts[0][1] * sts[0][1] );
 				scale[1] = 1.0 / sqrt( sts[1][0] * sts[1][0] + sts[1][1] * sts[1][1] );
-				rotate = atan2( sts[0][1] * vecs[0][sv] - sts[1][0] * vecs[1][tv], sts[0][0] * vecs[0][sv] + sts[1][1] * vecs[1][tv] ) * ( 180.0f / Q_PI );
+				rotate = radians_to_degrees( atan2( sts[0][1] * vecs[0][sv] - sts[1][0] * vecs[1][tv], sts[0][0] * vecs[0][sv] + sts[1][1] * vecs[1][tv] ) );
 				shift[0] = buildSide->shaderInfo->shaderWidth * FRAC( sts[0][2] / buildSide->shaderInfo->shaderWidth );
 				shift[1] = buildSide->shaderInfo->shaderHeight * FRAC( sts[1][2] / buildSide->shaderInfo->shaderHeight );
 
@@ -708,7 +692,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 		}
 		else
 		{
-			//vec3_t vecs[ 2 ];
 			if ( !striEqualPrefix( buildSide->shaderInfo->shader, "textures/common/" ) ) {
 				if ( !strEqual( buildSide->shaderInfo->shader, "noshader" ) ) {
 					if ( !strEqual( buildSide->shaderInfo->shader, "default" ) ) {
@@ -717,12 +700,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, vec3_t origin, bo
 					}
 				}
 			}
-/*
-			MakeNormalVectors( buildPlane->normal, vecs[ 0 ], vecs[ 1 ] );
-			VectorMA( vec3_origin, buildPlane->dist, buildPlane->normal, pts[ 0 ] );
-			VectorMA( pts[ 0 ], 256.0f, vecs[ 1 ], pts[ 2 ] );
-			VectorMA( pts[ 0 ], 256.0f, vecs[ 0 ], pts[ 1 ] );
-*/
+
 			if ( brushPrimitives ) {
 				fprintf( f, "\t\t( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( %.3f %.3f %.3f ) ( ( %.8f %.8f %.8f ) ( %.8f %.8f %.8f ) ) %s %d 0 0\n",
 						 pts[ 0 ][ 0 ], pts[ 0 ][ 1 ], pts[ 0 ][ 2 ],
@@ -828,12 +806,11 @@ for ( i = 0; i < brush->numSides; i++ )
 
  */
 
-static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, vec3_t origin ){
+static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, const Vector3& origin ){
 	int x, y;
 	bspShader_t     *shader;
 	const char      *texture;
 	bspDrawVert_t   *dv;
-	vec3_t xyz;
 
 
 	/* only patches */
@@ -877,7 +854,7 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, vec3_t origin 
 			dv = &bspDrawVerts[ ds->firstVert + ( y * ds->patchWidth ) + x ];
 
 			/* offset it */
-			VectorAdd( origin, dv->xyz, xyz );
+			const Vector3 xyz = dv->xyz + origin;
 
 			/* print vertex */
 			fprintf( f, " ( %f %f %f %f %f )", xyz[ 0 ], xyz[ 1 ], xyz[ 2 ], dv->st[ 0 ], dv->st[ 1 ] );
@@ -900,7 +877,7 @@ static void ConvertPatch( FILE *f, int num, bspDrawSurface_t *ds, vec3_t origin 
    exports a bsp model to a map file
  */
 
-static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origin, bool brushPrimitives ){
+static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector3& origin, bool brushPrimitives ){
 	int i, num;
 	bspBrush_t          *brush;
 	bspDrawSurface_t    *ds;
@@ -911,9 +888,8 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, vec3_t origi
 	AUTOEXPAND_BY_REALLOC( mapplanes, nummapplanes, allocatedmapplanes, 1024 );
 	for ( i = 0; i < numBSPPlanes; i++ )
 	{
-		VectorCopy( bspPlanes[ i ].normal, mapplanes[ i ].normal );
-		mapplanes[ i ].dist = bspPlanes[ i ].dist;
-		mapplanes[ i ].type = PlaneTypeForNormal( mapplanes[ i ].normal );
+		mapplanes[ i ].plane = bspPlanes[ i ];
+		mapplanes[ i ].type = PlaneTypeForNormal( mapplanes[ i ].normal() );
 		mapplanes[ i ].hash_chain = 0;
 	}
 
@@ -1048,7 +1024,7 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 			model = &bspModels[ modelNum ];
 
 			/* get entity origin */
-			vec3_t origin;
+			Vector3 origin;
 			e->vectorForKey( "origin", origin );
 
 			/* convert model */

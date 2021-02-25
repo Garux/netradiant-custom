@@ -40,51 +40,49 @@
 
 #define APPROX_SUBDIVISION  8
 
-static void ExpandLongestCurve( float *longestCurve, vec3_t a, vec3_t b, vec3_t c ){
+static void ExpandLongestCurve( float *longestCurve, const Vector3& a, const Vector3& b, const Vector3& c ){
 	int i;
 	float t, len;
-	vec3_t ab, bc, ac, pt, last, delta;
+	Vector3 ab, bc, ac, pt, last, delta;
 
 
 	/* calc vectors */
-	VectorSubtract( b, a, ab );
-	if ( VectorNormalize( ab, ab ) < 0.125f ) {
+	ab = b - a;
+	if ( VectorNormalize( ab ) < 0.125f ) {
 		return;
 	}
-	VectorSubtract( c, b, bc );
-	if ( VectorNormalize( bc, bc ) < 0.125f ) {
+	bc = c - b;
+	if ( VectorNormalize( bc ) < 0.125f ) {
 		return;
 	}
-	VectorSubtract( c, a, ac );
-	if ( VectorNormalize( ac, ac ) < 0.125f ) {
+	ac = c - a;
+	if ( VectorNormalize( ac ) < 0.125f ) {
 		return;
 	}
 
 	/* if all 3 vectors are the same direction, then this edge is linear, so we ignore it */
-	if ( DotProduct( ab, bc ) > 0.99f && DotProduct( ab, ac ) > 0.99f ) {
+	if ( vector3_dot( ab, bc ) > 0.99f && vector3_dot( ab, ac ) > 0.99f ) {
 		return;
 	}
 
 	/* recalculate vectors */
-	VectorSubtract( b, a, ab );
-	VectorSubtract( c, b, bc );
+	ab = b - a;
+	bc = c - b;
 
 	/* determine length */
-	VectorCopy( a, last );
+	last = a;
 	for ( i = 0, len = 0.0f, t = 0.0f; i < APPROX_SUBDIVISION; i++, t += ( 1.0f / APPROX_SUBDIVISION ) )
 	{
 		/* calculate delta */
-		delta[ 0 ] = ( ( 1.0f - t ) * ab[ 0 ] ) + ( t * bc[ 0 ] );
-		delta[ 1 ] = ( ( 1.0f - t ) * ab[ 1 ] ) + ( t * bc[ 1 ] );
-		delta[ 2 ] = ( ( 1.0f - t ) * ab[ 2 ] ) + ( t * bc[ 2 ] );
+		delta = ab * ( 1.0f - t ) + bc * t;
 
 		/* add to first point and calculate pt-pt delta */
-		VectorAdd( a, delta, pt );
-		VectorSubtract( pt, last, delta );
+		pt = a + delta;
+		delta = pt - last;
 
 		/* add it to length and store last point */
-		len += VectorLength( delta );
-		VectorCopy( pt, last );
+		len += vector3_length( delta );
+		last = pt;
 	}
 
 	/* longer? */
@@ -100,19 +98,18 @@ static void ExpandLongestCurve( float *longestCurve, vec3_t a, vec3_t b, vec3_t 
    determines how many iterations a quadratic curve needs to be subdivided with to fit the specified error
  */
 
-static void ExpandMaxIterations( int *maxIterations, int maxError, vec3_t a, vec3_t b, vec3_t c ){
+static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3& a, const Vector3& b, const Vector3& c ){
 	int i, j;
-	vec3_t prev, next, mid, delta, delta2;
-	float len, len2;
+	Vector3 prev, next, mid;
 	int numPoints, iterations;
-	vec3_t points[ MAX_EXPANDED_AXIS ];
+	Vector3 points[ MAX_EXPANDED_AXIS ];
 
 
 	/* initial setup */
 	numPoints = 3;
-	VectorCopy( a, points[ 0 ] );
-	VectorCopy( b, points[ 1 ] );
-	VectorCopy( c, points[ 2 ] );
+	points[ 0 ] = a;
+	points[ 1 ] = b;
+	points[ 2 ] = c;
 
 	/* subdivide */
 	for ( i = 0; i + 2 < numPoints; i += 2 )
@@ -123,17 +120,12 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, vec3_t a, vec
 		}
 
 		/* calculate new curve deltas */
-		for ( j = 0; j < 3; j++ )
-		{
-			prev[ j ] = points[ i + 1 ][ j ] - points[ i ][ j ];
-			next[ j ] = points[ i + 2 ][ j ] - points[ i + 1 ][ j ];
-			mid[ j ] = ( points[ i ][ j ] + points[ i + 1 ][ j ] * 2.0f + points[ i + 2 ][ j ] ) * 0.25f;
-		}
+		prev = points[ i + 1 ] - points[ i ];
+		next = points[ i + 2 ] - points[ i + 1 ];
+		mid = ( points[ i ] + points[ i + 1 ] * 2.0f + points[ i + 2 ] ) * 0.25f;
 
 		/* see if this midpoint is off far enough to subdivide */
-		VectorSubtract( points[ i + 1 ], mid, delta );
-		len = VectorLength( delta );
-		if ( len < maxError ) {
+		if ( vector3_length( points[ i + 1 ] - mid ) < maxError ) {
 			continue;
 		}
 
@@ -141,21 +133,18 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, vec3_t a, vec
 		numPoints += 2;
 
 		/* create new points */
-		for ( j = 0; j < 3; j++ )
-		{
-			prev[ j ] = 0.5f * ( points[ i ][ j ] + points[ i + 1 ][ j ] );
-			next[ j ] = 0.5f * ( points[ i + 1 ][ j ] + points[ i + 2 ][ j ] );
-			mid[ j ] = 0.5f * ( prev[ j ] + next[ j ] );
-		}
+		prev = ( points[ i ] + points[ i + 1 ] ) * 0.5f;
+		next = ( points[ i + 1 ] + points[ i + 2 ] ) * 0.5f;
+		mid = ( prev + next ) * 0.5f;
 
 		/* push points out */
 		for ( j = numPoints - 1; j > i + 3; j-- )
-			VectorCopy( points[ j - 2 ], points[ j ] );
+			points[ j ] = points[ j - 2 ];
 
 		/* insert new points */
-		VectorCopy( prev, points[ i + 1 ] );
-		VectorCopy( mid, points[ i + 2 ] );
-		VectorCopy( next, points[ i + 3 ] );
+		 points[ i + 1 ] = prev;
+		 points[ i + 2 ] = mid;
+		 points[ i + 3 ] = next;
 
 		/* back up and recheck this set again, it may need more subdivision */
 		i -= 2;
@@ -164,27 +153,24 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, vec3_t a, vec
 	/* put the line on the curve */
 	for ( i = 1; i < numPoints; i += 2 )
 	{
-		for ( j = 0; j < 3; j++ )
-		{
-			prev[ j ] = 0.5f * ( points[ i ][ j ] + points[ i + 1 ][ j ] );
-			next[ j ] = 0.5f * ( points[ i ][ j ] + points[ i - 1 ][ j ] );
-			points[ i ][ j ] = 0.5f * ( prev[ j ] + next[ j ] );
-		}
+		prev = ( points[ i ] + points[ i + 1 ] ) * 0.5f;
+		next = ( points[ i ] + points[ i - 1 ] ) * 0.5f;
+		points[ i ] = ( prev + next ) * 0.5f;
 	}
 
 	/* eliminate linear sections */
 	for ( i = 0; i + 2 < numPoints; i++ )
 	{
 		/* create vectors */
-		VectorSubtract( points[ i + 1 ], points[ i ], delta );
-		len = VectorNormalize( delta, delta );
-		VectorSubtract( points[ i + 2 ], points[ i + 1 ], delta2 );
-		len2 = VectorNormalize( delta2, delta2 );
+		Vector3 delta = points[ i + 1 ] - points[ i ];
+		const float len = VectorNormalize( delta );
+		Vector3 delta2 = points[ i + 2 ] - points[ i + 1 ];
+		const float len2 = VectorNormalize( delta2 );
 
 		/* if either edge is degenerate, then eliminate it */
-		if ( len < 0.0625f || len2 < 0.0625f || DotProduct( delta, delta2 ) >= 1.0f ) {
+		if ( len < 0.0625f || len2 < 0.0625f || vector3_dot( delta, delta2 ) >= 1.0f ) {
 			for ( j = i + 1; j + 1 < numPoints; j++ )
-				VectorCopy( points[ j + 1 ], points[ j ] );
+				points[ j ] = points[ j + 1 ];
 			numPoints--;
 			continue;
 		}
@@ -213,12 +199,11 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, vec3_t a, vec
  */
 
 void ParsePatch( bool onlyLights ){
-	vec_t info[ 5 ];
+	float info[ 5 ];
 	int i, j, k;
 	parseMesh_t     *pm;
 	mesh_t m;
 	bspDrawVert_t   *verts;
-	vec4_t delta, delta2, delta3;
 	bool degenerate;
 	float longestCurve;
 	int maxIterations;
@@ -244,15 +229,12 @@ void ParsePatch( bool onlyLights ){
 		MatchToken( "(" );
 		for ( i = 0; i < m.height ; i++ )
 		{
-			Parse1DMatrix( 5, verts[ i * m.width + j ].xyz );
+			Parse1DMatrix( 5, verts[ i * m.width + j ].xyz.data() );
 
 			/* ydnar: fix colors */
 			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 			{
-				verts[ i * m.width + j ].color[ k ][ 0 ] = 255;
-				verts[ i * m.width + j ].color[ k ][ 1 ] = 255;
-				verts[ i * m.width + j ].color[ k ][ 2 ] = 255;
-				verts[ i * m.width + j ].color[ k ][ 3 ] = 255;
+				verts[ i * m.width + j ].color[ k ].set( 255 );
 			}
 		}
 		MatchToken( ")" );
@@ -280,15 +262,14 @@ void ParsePatch( bool onlyLights ){
 
 	/* ydnar: delete and warn about degenerate patches */
 	j = ( m.width * m.height );
-	VectorClear( delta );
-	delta[ 3 ] = 0;
+	Vector4 delta( 0, 0, 0, 0 );
 	degenerate = true;
 
 	/* find first valid vector */
 	for ( i = 1; i < j && delta[ 3 ] == 0; i++ )
 	{
-		VectorSubtract( m.verts[ 0 ].xyz, m.verts[ i ].xyz, delta );
-		delta[ 3 ] = VectorNormalize( delta, delta );
+		delta.vec3() = m.verts[ 0 ].xyz - m.verts[ i ].xyz;
+		delta[ 3 ] = VectorNormalize( delta.vec3() );
 	}
 
 	/* secondary degenerate test */
@@ -300,16 +281,15 @@ void ParsePatch( bool onlyLights ){
 		/* if all vectors match this or are zero, then this is a degenerate patch */
 		for ( i = 1; i < j && degenerate; i++ )
 		{
-			VectorSubtract( m.verts[ 0 ].xyz, m.verts[ i ].xyz, delta2 );
-			delta2[ 3 ] = VectorNormalize( delta2, delta2 );
+			Vector4 delta2( m.verts[ 0 ].xyz - m.verts[ i ].xyz, 0 );
+			delta2[ 3 ] = VectorNormalize( delta2.vec3() );
 			if ( delta2[ 3 ] != 0 ) {
 				/* create inverse vector */
-				VectorCopy( delta2, delta3 );
-				delta3[ 3 ] = delta2[ 3 ];
-				VectorInverse( delta3 );
+				Vector4 delta3( delta2 );
+				vector3_negate( delta3.vec3() );
 
 				/* compare */
-				if ( !VectorCompare( delta, delta2 ) && !VectorCompare( delta, delta3 ) ) {
+				if ( !VectorCompare( delta.vec3(), delta2.vec3() ) && !VectorCompare( delta.vec3(), delta3.vec3() ) ) {
 					degenerate = false;
 				}
 			}
@@ -413,7 +393,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 	mapDrawSurface_t        *ds;
 	int patchCount, groupCount;
 	bspDrawVert_t           *v1, *v2;
-	vec3_t bounds[ 2 ];
+	MinMax bounds;
 	byte                    *bordering;
 
 	parseMesh_t  *meshes[ MAX_MAP_DRAW_SURFS ];
@@ -491,7 +471,8 @@ void PatchMapDrawSurfs( entity_t *e ){
 		GrowGroup_r( scan, i, patchCount, meshes, bordering, group );
 
 		/* bound them */
-		ClearBounds( bounds[ 0 ], bounds[ 1 ] );
+
+		bounds.clear();
 		for ( j = 0; j < patchCount; j++ )
 		{
 			if ( group[ j ] ) {
@@ -500,7 +481,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 				c1 = check->mesh.width * check->mesh.height;
 				v1 = check->mesh.verts;
 				for ( k = 0; k < c1; k++, v1++ )
-					AddPointToBounds( v1->xyz, bounds[ 0 ], bounds[ 1 ] );
+					bounds.extend( v1->xyz );
 			}
 		}
 
@@ -510,8 +491,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 		/* create drawsurf */
 		scan->grouped = true;
 		ds = DrawSurfaceForMesh( e, scan, NULL );   /* ydnar */
-		VectorCopy( bounds[ 0 ], ds->bounds[ 0 ] );
-		VectorCopy( bounds[ 1 ], ds->bounds[ 1 ] );
+		ds->bounds = bounds;
 	}
 
 	/* emit some statistics */

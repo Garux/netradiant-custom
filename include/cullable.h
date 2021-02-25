@@ -26,7 +26,8 @@
 
 template<typename Element> class BasicVector3;
 typedef BasicVector3<float> Vector3;
-class Plane3;
+template<typename T> class Plane3___;
+typedef Plane3___<double> Plane3;
 class Matrix4;
 class AABB;
 class Segment;

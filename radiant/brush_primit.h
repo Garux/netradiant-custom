@@ -90,7 +90,8 @@ float Texdef_getDefaultTextureScale();
 class texdef_t;
 struct Winding;
 class Matrix4;
-class Plane3;
+template<typename T> class Plane3___;
+typedef Plane3___<double> Plane3;
 
 void Normal_GetTransform( const Vector3& normal, Matrix4& transform );
 

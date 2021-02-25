@@ -19,11 +19,14 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#pragma once
+
+#include "qmath.h"
 
 struct winding_t
 {
 	int numpoints;
-	vec3_t p[];
+	Vector3 p[];
 };
 
 #define MAX_POINTS_ON_WINDING   512
@@ -33,27 +36,35 @@ struct winding_t
 #define ON_EPSILON  0.1
 #endif
 
+enum EPlaneSide
+{
+	eSideFront = 0, //! in front of plane ---->| *
+	eSideBack = 1,  //! behind the  plane -*-->|
+	eSideOn = 2,
+	eSideCross = 3,
+};
+
 winding_t   *AllocWinding( int points );
-vec_t   WindingArea( winding_t *w );
-void    WindingCenter( winding_t *w, vec3_t center );
-void    ClipWindingEpsilon( winding_t *in, vec3_t normal, vec_t dist,
-							vec_t epsilon, winding_t **front, winding_t **back );
-void    ClipWindingEpsilonStrict( winding_t *in, vec3_t normal, vec_t dist,
-								  vec_t epsilon, winding_t **front, winding_t **back );
-winding_t   *ChopWinding( winding_t *in, vec3_t normal, vec_t dist );
+float   WindingArea( const winding_t *w );
+Vector3 WindingCenter( const winding_t *w );
+void    ClipWindingEpsilon( winding_t *in, const Plane3f& plane,
+							float epsilon, winding_t **front, winding_t **back );
+void    ClipWindingEpsilonStrict( winding_t *in, const Plane3f& plane,
+								  float epsilon, winding_t **front, winding_t **back );
+winding_t   *ChopWinding( winding_t *in, const Plane3f& plane );
 winding_t   *CopyWinding( const winding_t *w );
-winding_t   *ReverseWinding( winding_t *w );
-winding_t   *BaseWindingForPlane( vec3_t normal, vec_t dist );
+winding_t   *ReverseWinding( const winding_t *w );
+winding_t   *BaseWindingForPlane( const Plane3f& plane );
 void    CheckWinding( winding_t *w );
-void    WindingPlane( winding_t *w, vec3_t normal, vec_t *dist );
+Plane3f WindingPlane( const winding_t *w );
 void    RemoveColinearPoints( winding_t *w );
-int     WindingOnPlaneSide( winding_t *w, vec3_t normal, vec_t dist );
+EPlaneSide     WindingOnPlaneSide( const winding_t *w, const Plane3f& plane );
 void    FreeWinding( winding_t *w );
-void    WindingBounds( winding_t *w, vec3_t mins, vec3_t maxs );
+MinMax  WindingBounds( const winding_t *w );
 
-void    AddWindingToConvexHull( winding_t *w, winding_t **hull, vec3_t normal );
+void    AddWindingToConvexHull( winding_t *w, winding_t **hull, const Vector3& normal );
 
-void    ChopWindingInPlace( winding_t **w, vec3_t normal, vec_t dist, vec_t epsilon );
+void    ChopWindingInPlace( winding_t **w, const Plane3f& plane, float epsilon );
 // frees the original if clipped
 
 void pw( winding_t *w );
@@ -67,10 +78,10 @@ void pw( winding_t *w );
 struct winding_accu_t
 {
 	int numpoints;
-	vec3_accu_t p[];
+	DoubleVector3 p[];
 };
 
-winding_accu_t  *BaseWindingForPlaneAccu( vec3_t normal, vec_t dist );
-void    ChopWindingInPlaceAccu( winding_accu_t **w, vec3_t normal, vec_t dist, vec_t epsilon );
+winding_accu_t  *BaseWindingForPlaneAccu( const Plane3f& plane );
+void    ChopWindingInPlaceAccu( winding_accu_t **w, const Plane3f& plane, float epsilon );
 winding_t   *CopyWindingAccuToRegular( const winding_accu_t *w );
 void    FreeWindingAccu( winding_accu_t *w );

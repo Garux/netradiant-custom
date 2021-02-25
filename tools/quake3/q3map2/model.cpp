@@ -205,9 +205,9 @@ picoModel_t *LoadModel( const char *name, int frame ){
    adds a picomodel into the bsp
  */
 
-void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
+void InsertModel( const char *name, int skin, int frame, const Matrix4& transform, const std::list<remap_t> *remaps, shaderInfo_t *celShader, int eNum, int castShadows, int recvShadows, int spawnFlags, float lightmapScale, int lightmapSampleSize, float shadeAngle, float clipDepth ){
 	int i, j, s, k, numSurfaces;
-	m4x4_t identity, nTransform;
+	const Matrix4 nTransform( matrix4_for_normal_transform( transform ) );
 	picoModel_t         *model;
 	picoSurface_t       *surface;
 	shaderInfo_t        *si;
@@ -291,23 +291,10 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 		free( skinfilecontent );
 	}
 
-	/* handle null matrix */
-	if ( transform == NULL ) {
-		m4x4_identity( identity );
-		transform = identity;
-	}
-
 	/* hack: Stable-1_2 and trunk have differing row/column major matrix order
 	   this transpose is necessary with Stable-1_2
 	   uncomment the following line with old m4x4_t (non 1.3/spog_branch) code */
 	//%	m4x4_transpose( transform );
-
-	/* create transform matrix for normals */
-	memcpy( nTransform, transform, sizeof( m4x4_t ) );
-	if ( m4x4_invert( nTransform ) ) {
-		Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Can't invert model transform matrix, using transpose instead\n" );
-	}
-	m4x4_transpose( nTransform );
 
 	/* fix bogus lightmap scale */
 	if ( lightmapScale <= 0.0f ) {
@@ -442,24 +429,23 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 			/* xyz and normal */
 			xyz = PicoGetSurfaceXYZ( surface, i );
 			VectorCopy( xyz, dv->xyz );
-			m4x4_transform_point( transform, dv->xyz );
+			matrix4_transform_point( transform, dv->xyz );
 
 			normal = PicoGetSurfaceNormal( surface, i );
 			VectorCopy( normal, dv->normal );
-			m4x4_transform_normal( nTransform, dv->normal );
-			VectorNormalize( dv->normal, dv->normal );
+			matrix4_transform_direction( nTransform, dv->normal );
+			VectorNormalize( dv->normal );
 
 			/* ydnar: tek-fu celshading support for flat shaded shit */
 			if ( flat ) {
-				dv->st[ 0 ] = si->stFlat[ 0 ];
-				dv->st[ 1 ] = si->stFlat[ 1 ];
+				dv->st = si->stFlat;
 			}
 
 			/* ydnar: gs mods: added support for explicit shader texcoord generation */
 			else if ( si->tcGen ) {
 				/* project the texture */
-				dv->st[ 0 ] = DotProduct( si->vecs[ 0 ], dv->xyz );
-				dv->st[ 1 ] = DotProduct( si->vecs[ 1 ], dv->xyz );
+				dv->st[ 0 ] = vector3_dot( si->vecs[ 0 ], dv->xyz );
+				dv->st[ 1 ] = vector3_dot( si->vecs[ 1 ], dv->xyz );
 			}
 
 			/* normal texture coordinates */
@@ -477,17 +463,11 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 				dv->lightmap[ j ][ 0 ] = 0.0f;
 				dv->lightmap[ j ][ 1 ] = 0.0f;
 				if ( spawnFlags & 32 ) { // spawnflag 32: model color -> alpha hack
-					dv->color[ j ][ 0 ] = 255.0f;
-					dv->color[ j ][ 1 ] = 255.0f;
-					dv->color[ j ][ 2 ] = 255.0f;
-					dv->color[ j ][ 3 ] = RGBTOGRAY( color );
+					dv->color[ j ] = { 255, 255, 255, RGBTOGRAY( color ) };
 				}
 				else
 				{
-					dv->color[ j ][ 0 ] = color[ 0 ];
-					dv->color[ j ][ 1 ] = color[ 1 ];
-					dv->color[ j ][ 2 ] = color[ 2 ];
-					dv->color[ j ][ 3 ] = color[ 3 ];
+					dv->color[ j ] = { color[0], color[1], color[2], color[3] };
 				}
 			}
 		}
@@ -522,12 +502,12 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 			( spf == 5632 ) ||	//EXTRUDE_DOWNWARDS+EXTRUDE_UPWARDS+AXIAL_BACKPLANE
 			( spf == 3072 ) ||	//EXTRUDE_UPWARDS+MAX_EXTRUDE
 			( spf == 5120 ) ){	//EXTRUDE_UPWARDS+AXIAL_BACKPLANE
-			vec3_t points[ 4 ], cnt, bestNormal, nrm, Vnorm[3], Enorm[3];
-			vec4_t plane, reverse, p[3];
+			Vector3 points[ 4 ], cnt, bestNormal, nrm, Vnorm[3], Enorm[3];
+			Plane3f plane, reverse, p[3];
 			double normalEpsilon_save;
 			bool snpd;
-			vec3_t min = { 999999, 999999, 999999 }, max = { -999999, -999999, -999999 };
-			vec3_t avgDirection = { 0, 0, 0 };
+			MinMax minmax;
+			Vector3 avgDirection( 0, 0, 0 );
 			int axis;
 			#define nonax_clip_dbg 0
 
@@ -549,41 +529,27 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 					for ( j = 0; j < 3; j++ )
 					{
 						dv = &ds->verts[ ds->indexes[ i + j ] ];
-						VectorCopy( dv->xyz, points[ j ] );
+						points[ j ] = dv->xyz;
 					}
-					if ( PlaneFromPoints( plane, points[ 0 ], points[ 1 ], points[ 2 ] ) ){
-						if ( spawnFlags & 16 ) VectorAdd( avgDirection, plane, avgDirection );	//calculate average mesh facing direction
+					if ( PlaneFromPoints( plane, points ) ){
+						if ( spawnFlags & 16 )
+							avgDirection += plane.normal();	//calculate average mesh facing direction
 
 						//get min/max
-						for ( k = 2; k > -1; k-- ){
-							if ( plane[k] > 0 ){
-								for ( j = 0; j < 3; j++ ){ if ( points[j][k] < min[k] ) min[k] = points[j][k]; }
-							}
-							else if ( plane[k] < 0 ){
-								for ( j = 0; j < 3; j++ ){ if ( points[j][k] > max[k] ) max[k] = points[j][k]; }
-							}
-							//if EXTRUDE_DOWNWARDS or EXTRUDE_UPWARDS
-							if ( ( spawnFlags & 512 ) || ( spawnFlags & 1024 ) ){
-								break;
-							}
+						for ( j = 0; j < 3; ++j ){
+							minmax.extend( points[j] );
 						}
 					}
 				}
 				//unify avg direction
 				if ( spawnFlags & 16 ){
-					for ( j = 0; j < 3; j++ ){
-						if ( fabs(avgDirection[j]) > fabs(avgDirection[(j+1)%3]) ){
-							avgDirection[(j+1)%3] = 0.0;
-							axis = j;
-						}
-						else {
-							avgDirection[j] = 0.0;
-						}
+					if ( vector3_length( avgDirection ) != 0 ){
+						axis = vector3_max_abs_component_index( avgDirection );
 					}
-					if ( VectorNormalize( avgDirection, avgDirection ) == 0 ){
+					else{
 						axis = 2;
-						VectorSet( avgDirection, 0, 0, 1 );
 					}
+					avgDirection = avgDirection[axis] >= 0? g_vector3_axes[axis] : -g_vector3_axes[axis];
 				}
 			}
 
@@ -600,11 +566,11 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 					dv = &ds->verts[ ds->indexes[ i + j ] ];
 
 					/* copy xyz */
-					VectorCopy( dv->xyz, points[ j ] );
+					points[ j ] = dv->xyz;
 				}
 
 				/* make plane for triangle */
-				if ( PlaneFromPoints( plane, points[ 0 ], points[ 1 ], points[ 2 ] ) ) {
+				if ( PlaneFromPoints( plane, points ) ) {
 
 					/* build a brush */
 					buildBrush = AllocBrush( 48 );
@@ -621,11 +587,10 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 					snpd = false;
 					for ( j=0; j<3; j++ )
 					{
-						if ( fabs(plane[j]) < 0.00025 && fabs(plane[(j+1)%3]) < 0.00025 && ( plane[j] != 0.0 || plane[(j+1)%3] != 0.0 ) ){
-							VectorAdd( points[ 0 ], points[ 1 ], cnt );
-							VectorAdd( cnt, points[ 2 ], cnt );
-							VectorScale( cnt, 0.3333333333333f, cnt );
-							points[0][(j+2)%3]=points[1][(j+2)%3]=points[2][(j+2)%3]=cnt[(j+2)%3];
+						if ( fabs( plane.normal()[j] ) < 0.00025 && fabs( plane.normal()[(j+1)%3] ) < 0.00025
+						&& ( plane.normal()[j] != 0.0 || plane.normal()[(j+1)%3] != 0.0 ) ){
+							cnt = ( points[0] + points[1] + points[2] ) / 3.0;
+							points[0][(j+2)%3] = points[1][(j+2)%3] = points[2][(j+2)%3] = cnt[(j+2)%3];
 							snpd = true;
 							break;
 						}
@@ -634,8 +599,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 					//snap pairs of points to prevent bad side planes
 					for ( j=0; j<3; j++ )
 					{
-						VectorSubtract( points[j], points[(j+1)%3], nrm );
-						VectorNormalize( nrm, nrm );
+						nrm = VectorNormalized( points[j] - points[(j+1)%3] );
 						for ( k=0; k<3; k++ )
 						{
 							if ( nrm[k] != 0.0 && fabs(nrm[k]) < 0.00025 ){
@@ -648,19 +612,18 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 					}
 
 					if ( snpd ) {
-						PlaneFromPoints( plane, points[ 0 ], points[ 1 ], points[ 2 ] );
+						PlaneFromPoints( plane, points );
 						snpd = false;
 					}
 
 					//vector-is-close-to-be-on-axis check again, happens after previous code sometimes
 					for ( j=0; j<3; j++ )
 					{
-						if ( fabs(plane[j]) < 0.00025 && fabs(plane[(j+1)%3]) < 0.00025 && ( plane[j] != 0.0 || plane[(j+1)%3] != 0.0 ) ){
-							VectorAdd( points[ 0 ], points[ 1 ], cnt );
-							VectorAdd( cnt, points[ 2 ], cnt );
-							VectorScale( cnt, 0.3333333333333f, cnt );
-							points[0][(j+2)%3]=points[1][(j+2)%3]=points[2][(j+2)%3]=cnt[(j+2)%3];
-							PlaneFromPoints( plane, points[ 0 ], points[ 1 ], points[ 2 ] );
+						if ( fabs( plane.normal()[j] ) < 0.00025 && fabs( plane.normal()[(j+1)%3] ) < 0.00025
+						&& ( plane.normal()[j] != 0.0 || plane.normal()[(j+1)%3] != 0.0 ) ){
+							cnt = ( points[0] + points[1] + points[2] ) / 3.0;
+							points[0][(j+2)%3] = points[1][(j+2)%3] = points[2][(j+2)%3] = cnt[(j+2)%3];
+							PlaneFromPoints( plane, points );
 							break;
 						}
 					}
@@ -668,25 +631,23 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 					//snap single snappable normal components
 					for ( j=0; j<3; j++ )
 					{
-						if ( plane[j] != 0.0 && fabs(plane[j]) < 0.00005 ){
-							plane[j]=0.0;
+						if ( plane.normal()[j] != 0.0 && fabs( plane.normal()[j] ) < 0.00005 ){
+							plane.normal()[j]=0.0;
 							snpd = true;
 						}
 					}
 
 					//adjust plane dist
 					if ( snpd ) {
-						VectorAdd( points[ 0 ], points[ 1 ], cnt );
-						VectorAdd( cnt, points[ 2 ], cnt );
-						VectorScale( cnt, 0.3333333333333f, cnt );
-						VectorNormalize( plane, plane );
-						plane[3] = DotProduct( plane, cnt );
+						cnt = ( points[0] + points[1] + points[2] ) / 3.0;
+						VectorNormalize( plane.normal() );
+						plane.dist() = vector3_dot( plane.normal(), cnt );
 
 						//project points to resulting plane to keep intersections precision
 						for ( j=0; j<3; j++ )
 						{
 							//Sys_Printf( "b4 %i (%6.7f %6.7f %6.7f)\n", j, points[j][0], points[j][1], points[j][2] );
-							VectorMA( points[j], plane[3] - DotProduct( plane, points[j]), plane, points[j] );
+							points[j] = plane3_project_point( plane, points[j] );
 							//Sys_Printf( "sn %i (%6.7f %6.7f %6.7f)\n", j, points[j][0], points[j][1], points[j][2] );
 						}
 						//Sys_Printf( "sn pln (%6.7f %6.7f %6.7f %6.7f)\n", plane[0], plane[1], plane[2], plane[3] );
@@ -696,15 +657,15 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 
 					/* sanity check */
 					{
-						vec3_t d1, d2, normaL;
-						VectorSubtract( points[1], points[0], d1 );
-						VectorSubtract( points[2], points[0], d2 );
-						CrossProduct( d2, d1, normaL );
+						const Vector3 d1 = points[1] - points[0];
+						const Vector3 d2 = points[2] - points[0];
+						const Vector3 normaL = vector3_cross( d2, d1 );
 						/* https://en.wikipedia.org/wiki/Cross_product#Geometric_meaning
 						   cross( a, b ).length = a.length b.length sin( angle ) */
-						const double lengthsSquared = ( d1[0] * d1[0] + d1[1] * d1[1] + d1[2] * d1[2] ) * ( d2[0] * d2[0] + d2[1] * d2[1] + d2[2] * d2[2] );
-						if ( lengthsSquared == 0 || fabs( ( normaL[0] * normaL[0] + normaL[1] * normaL[1] + normaL[2] * normaL[2] ) / lengthsSquared ) < 1e-8 ) {
-							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+						const double lengthsSquared = vector3_length_squared( d1 ) * vector3_length_squared( d2 );
+						if ( lengthsSquared == 0 || fabs( vector3_length_squared( normaL ) / lengthsSquared ) < 1e-8 ) {
+							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped: points on line\n",
+							points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 							continue;
 						}
 					}
@@ -714,13 +675,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 
 						for ( j=0; j<3; j++ )
 						{
-							if ( fabs(plane[j]) < 0.05 && fabs(plane[(j+1)%3]) < 0.05 ){ //no way, close to lay on two axises
+							if ( fabs( plane.normal()[j] ) < 0.05 && fabs( plane.normal()[(j+1)%3] ) < 0.05 ){ //no way, close to lay on two axes
 								goto default_CLIPMODEL;
 							}
 						}
 
 						// best axial normal
-						VectorCopy( plane, bestNormal );
+						bestNormal = plane.normal();
 						for ( j = 0; j < 3; j++ ){
 							if ( fabs(bestNormal[j]) > fabs(bestNormal[(j+1)%3]) ){
 								bestNormal[(j+1)%3] = 0.0;
@@ -730,7 +691,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								bestNormal[j] = 0.0;
 							}
 						}
-						VectorNormalize( bestNormal, bestNormal );
+						VectorNormalize( bestNormal );
 
 
 						float bestdist, currdist, bestangle, currangle, mindist = 999999;
@@ -738,13 +699,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 						for ( j = 0; j < 3; j++ ){//planes
 							bestdist = 999999;
 							bestangle = 1;
-							for ( k = 0; k < 3; k++ ){//axises
-								VectorSubtract( points[ (j+1)%3 ], points[ j ], nrm );
+							for ( k = 0; k < 3; k++ ){//axes
+								nrm = points[(j+1)%3] - points[j];
 								if ( k == axis ){
-									CrossProduct( bestNormal, nrm, reverse );
+									reverse.normal() = vector3_cross( bestNormal, nrm );
 								}
 								else{
-									VectorClear( Vnorm[0] );
+									Vnorm[0].set( 0 );
 									if ( (k+1)%3 == axis ){
 										if ( nrm[ (k+2)%3 ] == 0 ) continue;
 										Vnorm[0][ (k+2)%3 ] = nrm[ (k+2)%3 ];
@@ -753,20 +714,19 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 										if ( nrm[ (k+1)%3 ] == 0 ) continue;
 										Vnorm[0][ (k+1)%3 ] = nrm[ (k+1)%3 ];
 									}
-									CrossProduct( bestNormal, Vnorm[0], Enorm[0] );
-									CrossProduct( Enorm[0], nrm, reverse );
+									Enorm[0] = vector3_cross( bestNormal, Vnorm[0] );
+									reverse.normal() = vector3_cross( Enorm[0], nrm );
 								}
-								VectorNormalize( reverse, reverse );
-								reverse[3] = DotProduct( points[ j ], reverse );
+								VectorNormalize( reverse.normal() );
+								reverse.dist() = vector3_dot( points[ j ], reverse.normal() );
 								//check facing, thickness
-								currdist = reverse[3] - DotProduct( reverse, points[ (j+2)%3 ] );
-								currangle = DotProduct( reverse, plane );
+								currdist = reverse.dist() - vector3_dot( reverse.normal(), points[ (j+2)%3 ] );
+								currangle = vector3_dot( reverse.normal(), plane.normal() );
 								if ( ( ( currdist > 0.1 ) && ( currdist < bestdist ) && ( currangle < 0 ) ) ||
 									( ( currangle >= 0 ) && ( currangle <= bestangle ) ) ){
 									bestangle = currangle;
 									if ( currangle < 0 ) bestdist = currdist;
-									VectorCopy( reverse, p[j] );
-									p[j][3] = reverse[3];
+									p[j] = reverse;
 								}
 							}
 							//if ( bestdist == 999999 && bestangle == 1 ) Sys_Printf("default_CLIPMODEL\n");
@@ -800,12 +760,12 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
-						VectorCopy( points[0], points[3] ); // for cyclic usage
+						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], p[0][ 3 ], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], p[1][ 3 ], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], p[2][ 3 ], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
 					}
 
 
@@ -824,22 +784,21 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 						( spf == 5120 ) ){	//EXTRUDE_UPWARDS+AXIAL_BACKPLANE
 
 						if ( spawnFlags & 16 ){ //autodirection
-							VectorCopy( avgDirection, bestNormal );
+							bestNormal = avgDirection;
 						}
 						else{
 							axis = 2;
 							if ( ( spawnFlags & 1536 ) == 1536 ){ //up+down
-								VectorSet( bestNormal, 0, 0, ( plane[2] >= 0 ? 1 : -1 ) );
+								bestNormal = plane.normal()[2] >= 0? g_vector3_axis_z : -g_vector3_axis_z;
 							}
 							else if ( spawnFlags & 512 ){ //down
-								VectorSet( bestNormal, 0, 0, 1 );
-
+								bestNormal = g_vector3_axis_z;
 							}
 							else if ( spawnFlags & 1024 ){ //up
-								VectorSet( bestNormal, 0, 0, -1 );
+								bestNormal = -g_vector3_axis_z;
 							}
 							else{ // best axial normal
-								VectorCopy( plane, bestNormal );
+								bestNormal = plane.normal();
 								for ( j = 0; j < 3; j++ ){
 									if ( fabs(bestNormal[j]) > fabs(bestNormal[(j+1)%3]) ){
 										bestNormal[(j+1)%3] = 0.0;
@@ -849,11 +808,11 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 										bestNormal[j] = 0.0;
 									}
 								}
-								VectorNormalize( bestNormal, bestNormal );
+								VectorNormalize( bestNormal );
 							}
 						}
 
-						if ( DotProduct( plane, bestNormal ) < 0.05 ){
+						if ( vector3_dot( plane.normal(), bestNormal ) < 0.05 ){
 							goto default_CLIPMODEL;
 						}
 
@@ -861,69 +820,65 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 						/* make side planes */
 						for ( j = 0; j < 3; j++ )
 						{
-							VectorSubtract( points[(j+1)%3], points[ j ], nrm );
-							CrossProduct( bestNormal, nrm, p[ j ] );
-							VectorNormalize( p[ j ], p[ j ] );
-							p[j][3] = DotProduct( points[j], p[j] );
+							p[j].normal() = VectorNormalized( vector3_cross( bestNormal, points[(j+1)%3] - points[j] ) );
+							p[j].dist() = vector3_dot( points[j], p[j].normal() );
 						}
 
 						/* make back plane */
 						if ( spawnFlags & 2048 ){ //max extrude
-							VectorScale( bestNormal, -1.0f, reverse );
+							reverse.normal() = -bestNormal;
 							if ( bestNormal[axis] > 0 ){
-								reverse[3] = -min[axis] + clipDepth;
+								reverse.dist() = -minmax.mins[axis] + clipDepth;
 							}
 							else{
-								reverse[3] = max[axis] + clipDepth;
+								reverse.dist() = minmax.maxs[axis] + clipDepth;
 							}
 						}
 						else if ( spawnFlags & 4096 ){ //axial backplane
-							VectorScale( bestNormal, -1.0f, reverse );
-							reverse[3] = points[0][axis];
+							reverse.normal() = -bestNormal;
+							reverse.dist() = points[0][axis];
 							if ( bestNormal[axis] > 0 ){
 								for ( j = 1; j < 3; j++ ){
-									if ( points[j][axis] < reverse[3] ){
-										reverse[3] = points[j][axis];
+									if ( points[j][axis] < reverse.dist() ){
+										reverse.dist() = points[j][axis];
 									}
 								}
-								reverse[3] = -reverse[3] + clipDepth;
+								reverse.dist() = -reverse.dist() + clipDepth;
 							}
 							else{
 								for ( j = 1; j < 3; j++ ){
-									if ( points[j][axis] > reverse[3] ){
-										reverse[3] = points[j][axis];
+									if ( points[j][axis] > reverse.dist() ){
+										reverse.dist() = points[j][axis];
 									}
 								}
-								reverse[3] += clipDepth;
+								reverse.dist() += clipDepth;
 							}
-							if (limDepth != 0.0){
-								VectorCopy( points[0], cnt );
+							if ( limDepth != 0.0 ){
+								cnt = points[0];
 								if ( bestNormal[axis] > 0 ){
 									for ( j = 1; j < 3; j++ ){
 										if ( points[j][axis] > cnt[axis] ){
-											VectorCopy( points[j], cnt );
+											cnt = points[j];
 										}
 									}
 								}
 								else {
 									for ( j = 1; j < 3; j++ ){
 										if ( points[j][axis] < cnt[axis] ){
-											VectorCopy( points[j], cnt );
+											cnt = points[j];
 										}
 									}
 								}
-								VectorMA( cnt, reverse[3] - DotProduct( reverse, cnt ), reverse, cnt );
-								if ( ( plane[3] - DotProduct( plane, cnt ) ) > limDepth ){
-									VectorScale( plane, -1.0f, reverse );
-									reverse[ 3 ] = -plane[ 3 ];
-									reverse[3] += clipDepth;
+								cnt = plane3_project_point( reverse, cnt );
+								if ( -plane3_distance_to_point( plane, cnt ) > limDepth ){
+									reverse = plane3_flipped( plane );
+									reverse.dist() += clipDepth;
 								}
 							}
 						}
 						else{	//normal backplane
-							VectorScale( plane, -1.0f, reverse );
-							reverse[ 3 ] = -plane[ 3 ];
-							reverse[3] += clipDepth;
+							reverse = plane3_flipped( plane );
+							reverse.dist() += clipDepth;
 						}
 #if nonax_clip_dbg
 						for ( j = 0; j < 3; j++ )
@@ -949,13 +904,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
-						VectorCopy( points[0], points[3] ); // for cyclic usage
+						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], p[0][ 3 ], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], p[1][ 3 ], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], p[2][ 3 ], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, reverse[ 3 ], 0, NULL );
+						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -964,36 +919,31 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 						//45 degrees normals for side planes
 						for ( j = 0; j < 3; j++ )
 						{
-							VectorSubtract( points[(j+1)%3], points[ j ], nrm );
-							CrossProduct( plane, nrm, Enorm[ j ] );
-							VectorNormalize( Enorm[ j ], Enorm[ j ] );
-							VectorAdd( plane, Enorm[ j ], Enorm[ j ] );
-							VectorNormalize( Enorm[ j ], Enorm[ j ] );
+							nrm = points[(j+1)%3] - points[ j ];
+							Enorm[ j ] = VectorNormalized( vector3_cross( plane.normal(), nrm ) );
+							Enorm[ j ] += plane.normal();
+							VectorNormalize( Enorm[ j ] );
 							/* make side planes */
-							CrossProduct( Enorm[ j ], nrm, p[ j ] );
-							VectorNormalize( p[ j ], p[ j ] );
-							p[j][3] = DotProduct( points[j], p[j] );
+							p[j].normal() = VectorNormalized( vector3_cross( Enorm[ j ], nrm ) );
+							p[j].dist() = vector3_dot( points[j], p[j].normal() );
 							//snap nearly axial side planes
 							snpd = false;
 							for ( k = 0; k < 3; k++ )
 							{
-								if ( fabs(p[j][k]) < 0.00025 && p[j][k] != 0.0 ){
-									p[j][k] = 0.0;
+								if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
+									p[j].normal()[k] = 0.0;
 									snpd = true;
 								}
 							}
 							if ( snpd ){
-								VectorNormalize( p[j], p[j] );
-								VectorAdd( points[j], points[(j+1)%3], cnt );
-								VectorScale( cnt, 0.5f, cnt );
-								p[j][3] = DotProduct( cnt, p[j] );
+								VectorNormalize( p[j].normal() );
+								p[j].dist() = vector3_dot( ( points[j] + points[(j+1)%3] ) / 2.0, p[j].normal() );
 							}
 						}
 
 						/* make back plane */
-						VectorScale( plane, -1.0f, reverse );
-						reverse[ 3 ] = -plane[ 3 ];
-						reverse[3] += clipDepth;
+						reverse = plane3_flipped( plane );
+						reverse.dist() += clipDepth;
 
 						/* set up brush sides */
 						buildBrush->numsides = 5;
@@ -1008,13 +958,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
-						VectorCopy( points[0], points[3] ); // for cyclic usage
+						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], p[0][ 3 ], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], p[1][ 3 ], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], p[2][ 3 ], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, reverse[ 3 ], 0, NULL );
+						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1026,21 +976,18 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 							/* get vertex */
 							dv = &ds->verts[ ds->indexes[ i + j ] ];
 							/* copy normal */
-							VectorCopy( dv->normal, Vnorm[ j ] );
+							Vnorm[ j ] = dv->normal;
 						}
 
 						//avg normals for side planes
 						for ( j = 0; j < 3; j++ )
 						{
-							VectorAdd( Vnorm[ j ], Vnorm[ (j+1)%3 ], Enorm[ j ] );
-							VectorNormalize( Enorm[ j ], Enorm[ j ] );
+							Enorm[ j ] = VectorNormalized( Vnorm[ j ] + Vnorm[ (j+1)%3 ] );
 							//check fuer bad ones
-							VectorSubtract( points[(j+1)%3], points[ j ], cnt );
-							CrossProduct( plane, cnt, nrm );
-							VectorNormalize( nrm, nrm );
+							nrm = VectorNormalized( vector3_cross( plane.normal(), points[(j+1)%3] - points[ j ] ) );
 							//check for negative or outside direction
-							if ( DotProduct( Enorm[ j ], plane ) > 0.1 ){
-								if ( ( DotProduct( Enorm[ j ], nrm ) > -0.2 ) || ( spawnFlags & 256 ) ){
+							if ( vector3_dot( Enorm[ j ], plane.normal() ) > 0.1 ){
+								if ( ( vector3_dot( Enorm[ j ], nrm ) > -0.2 ) || ( spawnFlags & 256 ) ){
 									//ok++;
 									continue;
 								}
@@ -1048,41 +995,36 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 							//notok++;
 							//Sys_Printf( "faulty Enormal %i/%i\n", notok, ok );
 							//use 45 normal
-							VectorAdd( plane, nrm, Enorm[ j ] );
-							VectorNormalize( Enorm[ j ], Enorm[ j ] );
+							Enorm[ j ] = plane.normal() + nrm;
+							VectorNormalize( Enorm[ j ] );
 						}
 
 						/* make side planes */
 						for ( j = 0; j < 3; j++ )
 						{
-							VectorSubtract( points[(j+1)%3], points[ j ], nrm );
-							CrossProduct( Enorm[ j ], nrm, p[ j ] );
-							VectorNormalize( p[ j ], p[ j ] );
-							p[j][3] = DotProduct( points[j], p[j] );
+							p[j].normal() = VectorNormalized( vector3_cross( Enorm[ j ], points[(j+1)%3] - points[j] ) );
+							p[j].dist() = vector3_dot( points[j], p[j].normal() );
 							//snap nearly axial side planes
 							snpd = false;
 							for ( k = 0; k < 3; k++ )
 							{
-								if ( fabs(p[j][k]) < 0.00025 && p[j][k] != 0.0 ){
+								if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
 									//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
-									p[j][k] = 0.0;
+									p[j].normal()[k] = 0.0;
 									snpd = true;
 								}
 							}
 							if ( snpd ){
-								VectorNormalize( p[j], p[j] );
+								VectorNormalize( p[j].normal() );
 								//Sys_Printf( "nrm plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
-								VectorAdd( points[j], points[(j+1)%3], cnt );
-								VectorScale( cnt, 0.5f, cnt );
-								p[j][3] = DotProduct( cnt, p[j] );
+								p[j].dist() = vector3_dot( ( points[j] + points[(j+1)%3] ) / 2.0, p[j].normal() );
 								//Sys_Printf( "dst plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
 							}
 						}
 
 						/* make back plane */
-						VectorScale( plane, -1.0f, reverse );
-						reverse[ 3 ] = -plane[ 3 ];
-						reverse[3] += clipDepth;
+						reverse = plane3_flipped( plane );
+						reverse.dist() += clipDepth;
 
 						/* set up brush sides */
 						buildBrush->numsides = 5;
@@ -1097,13 +1039,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
-						VectorCopy( points[0], points[3] ); // for cyclic usage
+						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], p[0][ 3 ], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], p[1][ 3 ], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], p[2][ 3 ], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, reverse[ 3 ], 0, NULL );
+						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1112,34 +1054,30 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 						/* make side planes */
 						for ( j = 0; j < 3; j++ )
 						{
-							VectorSubtract( points[(j+1)%3], points[ j ], nrm );
-							CrossProduct( plane, nrm, p[ j ] );
-							VectorNormalize( p[ j ], p[ j ] );
-							p[j][3] = DotProduct( points[j], p[j] );
+							p[j].normal() = VectorNormalized( vector3_cross( plane.normal(), points[(j+1)%3] - points[j] ) );
+							p[j].dist() = vector3_dot( points[j], p[j].normal() );
 							//snap nearly axial side planes
 							snpd = false;
 							for ( k = 0; k < 3; k++ )
 							{
-								if ( fabs(p[j][k]) < 0.00025 && p[j][k] != 0.0 ){
+								if ( fabs( p[j].normal()[k] ) < 0.00025 && p[j].normal()[k] != 0.0 ){
 									//Sys_Printf( "init plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
-									p[j][k] = 0.0;
+									p[j].normal()[k] = 0.0;
 									snpd = true;
 								}
 							}
 							if ( snpd ){
-								VectorNormalize( p[j], p[j] );
+								VectorNormalize( p[j].normal() );
 								//Sys_Printf( "nrm plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
-								VectorAdd( points[j], points[(j+1)%3], cnt );
-								VectorScale( cnt, 0.5f, cnt );
-								p[j][3] = DotProduct( cnt, p[j] );
+								cnt = ( points[j] + points[(j+1)%3] ) / 2.0;
+								p[j].dist() = vector3_dot( cnt, p[j].normal() );
 								//Sys_Printf( "dst plane %6.8f %6.8f %6.8f %6.8f\n", p[j][0], p[j][1], p[j][2], p[j][3]);
 							}
 						}
 
 						/* make back plane */
-						VectorScale( plane, -1.0f, reverse );
-						reverse[ 3 ] = -plane[ 3 ];
-						reverse[3] += clipDepth;
+						reverse = plane3_flipped( plane );
+						reverse.dist() += clipDepth;
 #if nonax_clip_dbg
 						for ( j = 0; j < 3; j++ )
 						{
@@ -1165,25 +1103,23 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
-						VectorCopy( points[0], points[3] ); // for cyclic usage
+						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], p[0][ 3 ], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], p[1][ 3 ], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], p[2][ 3 ], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, reverse[ 3 ], 0, NULL );
+						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
 					else if ( spf == 256 ){	//PYRAMIDAL_CLIP
 
 						/* calculate center */
-						VectorAdd( points[ 0 ], points[ 1 ], cnt );
-						VectorAdd( cnt, points[ 2 ], cnt );
-						VectorScale( cnt, 0.3333333333333f, cnt );
+						cnt = ( points[0] + points[1] + points[2] ) / 3.0;
 
 						/* make back pyramid point */
-						VectorMA( cnt, -clipDepth, plane, cnt );
+						cnt -= plane.normal() * clipDepth;
 
 						/* make 3 more planes */
 						if( PlaneFromPoints( p[0], points[ 2 ], points[ 1 ], cnt ) &&
@@ -1191,16 +1127,16 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 							PlaneFromPoints( p[2], points[ 0 ], points[ 2 ], cnt ) ) {
 
 							//check for dangerous planes
-							while( (( p[0][0] != 0.0 || p[0][1] != 0.0 ) && fabs(p[0][0]) < 0.00025 && fabs(p[0][1]) < 0.00025) ||
-								(( p[0][0] != 0.0 || p[0][2] != 0.0 ) && fabs(p[0][0]) < 0.00025 && fabs(p[0][2]) < 0.00025) ||
-								(( p[0][2] != 0.0 || p[0][1] != 0.0 ) && fabs(p[0][2]) < 0.00025 && fabs(p[0][1]) < 0.00025) ||
-								(( p[1][0] != 0.0 || p[1][1] != 0.0 ) && fabs(p[1][0]) < 0.00025 && fabs(p[1][1]) < 0.00025) ||
-								(( p[1][0] != 0.0 || p[1][2] != 0.0 ) && fabs(p[1][0]) < 0.00025 && fabs(p[1][2]) < 0.00025) ||
-								(( p[1][2] != 0.0 || p[1][1] != 0.0 ) && fabs(p[1][2]) < 0.00025 && fabs(p[1][1]) < 0.00025) ||
-								(( p[2][0] != 0.0 || p[2][1] != 0.0 ) && fabs(p[2][0]) < 0.00025 && fabs(p[2][1]) < 0.00025) ||
-								(( p[2][0] != 0.0 || p[2][2] != 0.0 ) && fabs(p[2][0]) < 0.00025 && fabs(p[2][2]) < 0.00025) ||
-								(( p[2][2] != 0.0 || p[2][1] != 0.0 ) && fabs(p[2][2]) < 0.00025 && fabs(p[2][1]) < 0.00025) ) {
-								VectorMA( cnt, -0.1f, plane, cnt );
+							while( (( p[0].a != 0.0 || p[0].b != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
+								   (( p[0].a != 0.0 || p[0].c != 0.0 ) && fabs( p[0].a ) < 0.00025 && fabs( p[0].c ) < 0.00025) ||
+								   (( p[0].c != 0.0 || p[0].b != 0.0 ) && fabs( p[0].c ) < 0.00025 && fabs( p[0].b ) < 0.00025) ||
+								   (( p[1].a != 0.0 || p[1].b != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
+								   (( p[1].a != 0.0 || p[1].c != 0.0 ) && fabs( p[1].a ) < 0.00025 && fabs( p[1].c ) < 0.00025) ||
+								   (( p[1].c != 0.0 || p[1].b != 0.0 ) && fabs( p[1].c ) < 0.00025 && fabs( p[1].b ) < 0.00025) ||
+								   (( p[2].a != 0.0 || p[2].b != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].b ) < 0.00025) ||
+								   (( p[2].a != 0.0 || p[2].c != 0.0 ) && fabs( p[2].a ) < 0.00025 && fabs( p[2].c ) < 0.00025) ||
+								   (( p[2].c != 0.0 || p[2].b != 0.0 ) && fabs( p[2].c ) < 0.00025 && fabs( p[2].b ) < 0.00025) ) {
+								cnt -= plane.normal() * 0.1f;
 								//	Sys_Printf( "shifting pyramid point\n" );
 								PlaneFromPoints( p[0], points[ 2 ], points[ 1 ], cnt );
 								PlaneFromPoints( p[1], points[ 1 ], points[ 0 ], cnt );
@@ -1230,16 +1166,17 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 									buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 								}
 							}
-							VectorCopy( points[0], points[3] ); // for cyclic usage
+							points[3] = points[0]; // for cyclic usage
 
-							buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
-							buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], p[0][ 3 ], 2, &points[ 1 ] ); // p[0] contains points[1] and points[2]
-							buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], p[1][ 3 ], 2, &points[ 0 ] ); // p[1] contains points[0] and points[1]
-							buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], p[2][ 3 ], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+							buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+							buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 1 ] ); // p[0] contains points[1] and points[2]
+							buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 0 ] ); // p[1] contains points[0] and points[1]
+							buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
 						}
 						else
 						{
-							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+							Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
+							points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 							free( buildBrush );
 							continue;
 						}
@@ -1250,7 +1187,7 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 
 						default_CLIPMODEL:
 						// axial normal
-						VectorCopy( plane, bestNormal );
+						bestNormal = plane.normal();
 						for ( j = 0; j < 3; j++ ){
 							if ( fabs(bestNormal[j]) > fabs(bestNormal[(j+1)%3]) ){
 								bestNormal[(j+1)%3] = 0.0;
@@ -1259,21 +1196,18 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								bestNormal[j] = 0.0;
 							}
 						}
-						VectorNormalize( bestNormal, bestNormal );
+						VectorNormalize( bestNormal );
 
 						/* make side planes */
 						for ( j = 0; j < 3; j++ )
 						{
-							VectorSubtract( points[(j+1)%3], points[ j ], nrm );
-							CrossProduct( bestNormal, nrm, p[ j ] );
-							VectorNormalize( p[ j ], p[ j ] );
-							p[j][3] = DotProduct( points[j], p[j] );
+							p[j].normal() = VectorNormalized( vector3_cross( bestNormal, points[(j+1)%3] - points[j] ) );
+							p[j].dist() = vector3_dot( points[j], p[j].normal() );
 						}
 
 						/* make back plane */
-						VectorScale( plane, -1.0f, reverse );
-						reverse[ 3 ] = -plane[ 3 ];
-						reverse[3] += DotProduct( bestNormal, plane ) * clipDepth;
+						reverse = plane3_flipped( plane );
+						reverse.dist() += vector3_dot( bestNormal, plane.normal() ) * clipDepth;
 #if nonax_clip_dbg
 						for ( j = 0; j < 3; j++ )
 						{
@@ -1298,13 +1232,13 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 								buildBrush->sides[ j ].shaderInfo = NULL;  // don't emit these faces as draw surfaces, should make smaller BSPs; hope this works
 							}
 						}
-						VectorCopy( points[0], points[3] ); // for cyclic usage
+						points[3] = points[0]; // for cyclic usage
 
-						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, plane[ 3 ], 3, points );
-						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], p[0][ 3 ], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
-						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], p[1][ 3 ], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
-						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], p[2][ 3 ], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
-						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, reverse[ 3 ], 0, NULL );
+						buildBrush->sides[ 0 ].planenum = FindFloatPlane( plane, 3, points );
+						buildBrush->sides[ 1 ].planenum = FindFloatPlane( p[0], 2, &points[ 0 ] ); // p[0] contains points[0] and points[1]
+						buildBrush->sides[ 2 ].planenum = FindFloatPlane( p[1], 2, &points[ 1 ] ); // p[1] contains points[1] and points[2]
+						buildBrush->sides[ 3 ].planenum = FindFloatPlane( p[2], 2, &points[ 2 ] ); // p[2] contains points[2] and points[0] (copied to points[3]
+						buildBrush->sides[ 4 ].planenum = FindFloatPlane( reverse, 0, NULL );
 					}
 
 
@@ -1317,7 +1251,8 @@ void InsertModel( const char *name, int skin, int frame, m4x4_t transform, const
 						entities[ mapEntityNum ].numBrushes++;
 					}
 					else{
-						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n", points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
+						Sys_Warning( "triangle (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) of %s was not autoclipped\n",
+						points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], points[2][0], points[2][1], points[2][2], name );
 						free( buildBrush );
 					}
 				}
@@ -1395,27 +1330,26 @@ void AddTriangleModels( entity_t *eparent ){
 		const int spawnFlags = e->intForKey( "spawnflags" );
 
 		/* get origin */
-		vec3_t origin;
+		Vector3 origin;
 		e->vectorForKey( "origin", origin );
-		VectorSubtract( origin, eparent->origin, origin );    /* offset by parent */
+		origin -= eparent->origin;    /* offset by parent */
 
 		/* get scale */
-		vec3_t scale = { 1.f, 1.f, 1.f };
+		Vector3 scale( 1, 1, 1 );
 		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
 			if( e->read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		const char *value;
-		vec3_t angles = { 0.f, 0.f, 0.f };
+		Vector3 angles( 0, 0, 0 );
 		if ( !e->read_keyvalue( value, "angles" ) ||
 			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 			e->read_keyvalue( angles[ 2 ], "angle" );
 
 		/* set transform matrix (thanks spog) */
-		m4x4_t transform;
-		m4x4_identity( transform );
-		m4x4_pivoted_transform_by_vec3( transform, origin, angles, eXYZ, scale, vec3_origin );
+		Matrix4 transform( g_matrix4_identity );
+		matrix4_transform_by_euler_xyz_degrees( transform, origin, angles, scale );
 
 		/* get shader remappings */
 		std::list<remap_t> remaps;

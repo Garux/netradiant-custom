@@ -325,16 +325,16 @@ int BSPInfo( int count, char **fileNames ){
 }
 
 
-static void ExtrapolateTexcoords( const float *axyz, const float *ast, const float *bxyz, const float *bst, const float *cxyz, const float *cst, const float *axyz_new, float *ast_out, const float *bxyz_new, float *bst_out, const float *cxyz_new, float *cst_out ){
-	vec4_t scoeffs, tcoeffs;
-	float md;
-	m4x4_t solvematrix;
+static void ExtrapolateTexcoords( const float *axyz, const float *ast,
+                                  const float *bxyz, const float *bst,
+                                  const float *cxyz, const float *cst,
+                                  const Vector3& axyz_new, Vector2& ast_out,
+                                  const Vector3& bxyz_new, Vector2& bst_out,
+                                  const Vector3& cxyz_new, Vector2& cst_out ){
+	Vector4 scoeffs, tcoeffs;
+	Matrix4 solvematrix;
 
-	vec3_t norm;
-	vec3_t dab, dac;
-	VectorSubtract( bxyz, axyz, dab );
-	VectorSubtract( cxyz, axyz, dac );
-	CrossProduct( dab, dac, norm );
+	const Vector3 norm = vector3_cross( vector3_from_array( bxyz ) - vector3_from_array( axyz ), vector3_from_array( cxyz ) - vector3_from_array( axyz ) );
 
 	// assume:
 	//   s = f(x, y, z)
@@ -365,24 +365,24 @@ static void ExtrapolateTexcoords( const float *axyz, const float *ast, const flo
 	solvematrix[11] = norm[2];
 	solvematrix[15] = 0;
 
-	md = m4_det( solvematrix );
+	const double md = matrix4_determinant( solvematrix );
 	if ( md * md < 1e-10 ) {
 		Sys_Printf( "Cannot invert some matrix, some texcoords aren't extrapolated!" );
 		return;
 	}
 
-	m4x4_invert( solvematrix );
+	matrix4_full_invert( solvematrix );
 
 	scoeffs[0] = ast[0];
 	scoeffs[1] = bst[0];
 	scoeffs[2] = cst[0];
 	scoeffs[3] = 0;
-	m4x4_transform_vec4( solvematrix, scoeffs );
+	matrix4_transform_vector4( solvematrix, scoeffs );
 	tcoeffs[0] = ast[1];
 	tcoeffs[1] = bst[1];
 	tcoeffs[2] = cst[1];
 	tcoeffs[3] = 0;
-	m4x4_transform_vec4( solvematrix, tcoeffs );
+	matrix4_transform_vector4( solvematrix, tcoeffs );
 
 	ast_out[0] = scoeffs[0] * axyz_new[0] + scoeffs[1] * axyz_new[1] + scoeffs[2] * axyz_new[2] + scoeffs[3];
 	ast_out[1] = tcoeffs[0] * axyz_new[0] + tcoeffs[1] * axyz_new[1] + tcoeffs[2] * axyz_new[2] + tcoeffs[3];
@@ -400,8 +400,8 @@ static void ExtrapolateTexcoords( const float *axyz, const float *ast, const flo
 int ScaleBSPMain( int argc, char **argv ){
 	int i, j;
 	float f, a;
-	vec3_t scale;
-	vec3_t vec;
+	Vector3 scale;
+	Vector3 vec;
 	char str[ 1024 ];
 	int uniform, axis;
 	bool texscale;
@@ -469,9 +469,7 @@ int ScaleBSPMain( int argc, char **argv ){
 			if ( entities[i].classname_prefixed( "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
-			vec[0] *= scale[0];
-			vec[1] *= scale[1];
-			vec[2] *= scale[2];
+			vec *= scale;
 			if ( entities[i].classname_prefixed( "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
@@ -483,7 +481,7 @@ int ScaleBSPMain( int argc, char **argv ){
 		if ( a == -1 || a == -2 ) { // z scale
 			axis = 2;
 		}
-		else if ( fabs( sin( DEG2RAD( a ) ) ) < 0.707 ) {
+		else if ( fabs( sin( degrees_to_radians( a ) ) ) < 0.707 ) {
 			axis = 0;
 		}
 		else{
@@ -510,34 +508,22 @@ int ScaleBSPMain( int argc, char **argv ){
 	/* scale models */
 	for ( i = 0; i < numBSPModels; i++ )
 	{
-		bspModels[ i ].mins[0] *= scale[0];
-		bspModels[ i ].mins[1] *= scale[1];
-		bspModels[ i ].mins[2] *= scale[2];
-		bspModels[ i ].maxs[0] *= scale[0];
-		bspModels[ i ].maxs[1] *= scale[1];
-		bspModels[ i ].maxs[2] *= scale[2];
+		bspModels[ i ].minmax.mins *= scale;
+		bspModels[ i ].minmax.maxs *= scale;
 	}
 
 	/* scale nodes */
 	for ( i = 0; i < numBSPNodes; i++ )
 	{
-		bspNodes[ i ].mins[0] *= scale[0];
-		bspNodes[ i ].mins[1] *= scale[1];
-		bspNodes[ i ].mins[2] *= scale[2];
-		bspNodes[ i ].maxs[0] *= scale[0];
-		bspNodes[ i ].maxs[1] *= scale[1];
-		bspNodes[ i ].maxs[2] *= scale[2];
+		bspNodes[ i ].minmax.mins *= scale;
+		bspNodes[ i ].minmax.maxs *= scale;
 	}
 
 	/* scale leafs */
 	for ( i = 0; i < numBSPLeafs; i++ )
 	{
-		bspLeafs[ i ].mins[0] *= scale[0];
-		bspLeafs[ i ].mins[1] *= scale[1];
-		bspLeafs[ i ].mins[2] *= scale[2];
-		bspLeafs[ i ].maxs[0] *= scale[0];
-		bspLeafs[ i ].maxs[1] *= scale[1];
-		bspLeafs[ i ].maxs[2] *= scale[2];
+		bspLeafs[ i ].minmax.mins *= scale;
+		bspLeafs[ i ].minmax.maxs *= scale;
 	}
 
 	if ( texscale ) {
@@ -562,7 +548,7 @@ int ScaleBSPMain( int argc, char **argv ){
 		bspDrawVerts[i].normal[0] /= scale[0];
 		bspDrawVerts[i].normal[1] /= scale[1];
 		bspDrawVerts[i].normal[2] /= scale[2];
-		VectorNormalize( bspDrawVerts[i].normal, bspDrawVerts[i].normal );
+		VectorNormalize( bspDrawVerts[i].normal );
 	}
 
 	if ( texscale ) {
@@ -600,29 +586,25 @@ int ScaleBSPMain( int argc, char **argv ){
 	if ( uniform ) {
 		for ( i = 0; i < numBSPPlanes; i++ )
 		{
-			bspPlanes[ i ].dist *= scale[0];
+			bspPlanes[ i ].dist() *= scale[0];
 		}
 	}
 	else
 	{
 		for ( i = 0; i < numBSPPlanes; i++ )
 		{
-			bspPlanes[ i ].normal[0] /= scale[0];
-			bspPlanes[ i ].normal[1] /= scale[1];
-			bspPlanes[ i ].normal[2] /= scale[2];
-			f = 1 / VectorLength( bspPlanes[i].normal );
-			VectorScale( bspPlanes[i].normal, f, bspPlanes[i].normal );
-			bspPlanes[ i ].dist *= f;
+			bspPlanes[i].normal() /= scale;
+			const double len = vector3_length( bspPlanes[i].normal() );
+			bspPlanes[i].normal() /= len;
+			bspPlanes[i].dist() /= len;
 		}
 	}
 
 	/* scale gridsize */
 	if ( !entities[ 0 ].read_keyvalue( vec, "gridsize" ) ) {
-		VectorCopy( gridSize, vec );
+		vec = gridSize;
 	}
-	vec[0] *= scale[0];
-	vec[1] *= scale[1];
-	vec[2] *= scale[2];
+	vec *= scale;
 	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 	entities[ 0 ].setKeyValue( "gridsize", str );
 
@@ -647,8 +629,8 @@ int ScaleBSPMain( int argc, char **argv ){
 
 int ShiftBSPMain( int argc, char **argv ){
 	int i, j;
-	vec3_t scale;
-	vec3_t vec;
+	Vector3 scale;
+	Vector3 vec;
 	char str[ 1024 ];
 	float spawn_ref = 0;
 
@@ -704,9 +686,7 @@ int ShiftBSPMain( int argc, char **argv ){
 			if ( e.classname_prefixed( "info_player_" ) ) {
 				vec[2] += spawn_ref;
 			}
-			vec[0] += scale[0];
-			vec[1] += scale[1];
-			vec[2] += scale[2];
+			vec += scale;
 			if ( e.classname_prefixed( "info_player_" ) ) {
 				vec[2] -= spawn_ref;
 			}
@@ -719,65 +699,48 @@ int ShiftBSPMain( int argc, char **argv ){
 	/* shift models */
 	for ( i = 0; i < numBSPModels; i++ )
 	{
-		bspModels[ i ].mins[0] += scale[0];
-		bspModels[ i ].mins[1] += scale[1];
-		bspModels[ i ].mins[2] += scale[2];
-		bspModels[ i ].maxs[0] += scale[0];
-		bspModels[ i ].maxs[1] += scale[1];
-		bspModels[ i ].maxs[2] += scale[2];
+		bspModels[ i ].minmax.mins += scale;
+		bspModels[ i ].minmax.maxs += scale;
 	}
 
 	/* shift nodes */
 	for ( i = 0; i < numBSPNodes; i++ )
 	{
-		bspNodes[ i ].mins[0] += scale[0];
-		bspNodes[ i ].mins[1] += scale[1];
-		bspNodes[ i ].mins[2] += scale[2];
-		bspNodes[ i ].maxs[0] += scale[0];
-		bspNodes[ i ].maxs[1] += scale[1];
-		bspNodes[ i ].maxs[2] += scale[2];
+		bspNodes[ i ].minmax.mins += scale;
+		bspNodes[ i ].minmax.maxs += scale;
 	}
 
 	/* shift leafs */
 	for ( i = 0; i < numBSPLeafs; i++ )
 	{
-		bspLeafs[ i ].mins[0] += scale[0];
-		bspLeafs[ i ].mins[1] += scale[1];
-		bspLeafs[ i ].mins[2] += scale[2];
-		bspLeafs[ i ].maxs[0] += scale[0];
-		bspLeafs[ i ].maxs[1] += scale[1];
-		bspLeafs[ i ].maxs[2] += scale[2];
+		bspLeafs[ i ].minmax.mins += scale;
+		bspLeafs[ i ].minmax.maxs += scale;
 	}
 
 	/* shift drawverts */
 	for ( i = 0; i < numBSPDrawVerts; i++ )
 	{
-		bspDrawVerts[i].xyz[0] += scale[0];
-		bspDrawVerts[i].xyz[1] += scale[1];
-		bspDrawVerts[i].xyz[2] += scale[2];
+		bspDrawVerts[i].xyz += scale;
 	}
 
 	/* shift planes */
 
-	vec3_t point;
-
 	for ( i = 0; i < numBSPPlanes; i++ )
 	{
 		//find point on plane
+		Vector3 point;
 		for ( j=0; j<3; j++ ){
 			//point[j] = bspPlanes[ i ].dist * bspPlanes[ i ].normal[j];
-			if ( fabs( bspPlanes[ i ].normal[j] ) > 0.5 ){
-				point[j] = bspPlanes[ i ].dist / bspPlanes[ i ].normal[j];
+			if ( fabs( bspPlanes[ i ].normal()[j] ) > 0.5 ){
+				point[j] = bspPlanes[ i ].dist() / bspPlanes[ i ].normal()[j];
 				point[(j+1)%3] = point[(j+2)%3] = 0;
 				break;
 			}
 		}
 		//shift point
-		for ( j=0; j<3; j++ ){
-			point[j] += scale[j];
-		}
+		point += scale;
 		//calc new plane dist
-		bspPlanes[ i ].dist = DotProduct( point, bspPlanes[ i ].normal );
+		bspPlanes[ i ].dist() = vector3_dot( point, bspPlanes[ i ].normal() );
 	}
 
 	/* scale gridsize */

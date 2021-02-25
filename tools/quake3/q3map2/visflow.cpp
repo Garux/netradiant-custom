@@ -122,14 +122,13 @@ void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
 
    ==============
  */
-fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, visPlane_t *split ){
-	vec_t dists[128];
-	int sides[128];
+fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, const visPlane_t& split ){
+	float dists[128];
+	EPlaneSide sides[128];
 	int counts[3];
-	vec_t dot;
+	float dot;
 	int i, j;
-	vec_t   *p1, *p2;
-	vec3_t mid;
+	Vector3 mid;
 	fixedWinding_t  *neww;
 
 	counts[0] = counts[1] = counts[2] = 0;
@@ -137,18 +136,16 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, visPlane_t
 	// determine sides for each point
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
-		dot = DotProduct( in->points[i], split->normal );
-		dot -= split->dist;
-		dists[i] = dot;
-		if ( dot > ON_EPSILON ) {
-			sides[i] = SIDE_FRONT;
+		dists[i] = plane3_distance_to_point( split, in->points[i] );
+		if ( dists[i] > ON_EPSILON ) {
+			sides[i] = eSideFront;
 		}
-		else if ( dot < -ON_EPSILON ) {
-			sides[i] = SIDE_BACK;
+		else if ( dists[i] < -ON_EPSILON ) {
+			sides[i] = eSideBack;
 		}
 		else
 		{
-			sides[i] = SIDE_ON;
+			sides[i] = eSideOn;
 		}
 		counts[sides[i]]++;
 	}
@@ -171,25 +168,25 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, visPlane_t
 
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
-		p1 = in->points[i];
+		const Vector3& p1 = in->points[i];
 
 		if ( neww->numpoints == MAX_POINTS_ON_FIXED_WINDING ) {
 			FreeStackWinding( neww, stack );
 			return in;      // can't chop -- fall back to original
 		}
 
-		if ( sides[i] == SIDE_ON ) {
-			VectorCopy( p1, neww->points[neww->numpoints] );
+		if ( sides[i] == eSideOn ) {
+			neww->points[neww->numpoints] = p1;
 			neww->numpoints++;
 			continue;
 		}
 
-		if ( sides[i] == SIDE_FRONT ) {
-			VectorCopy( p1, neww->points[neww->numpoints] );
+		if ( sides[i] == eSideFront ) {
+			neww->points[neww->numpoints] = p1;
 			neww->numpoints++;
 		}
 
-		if ( sides[i + 1] == SIDE_ON || sides[i + 1] == sides[i] ) {
+		if ( sides[i + 1] == eSideOn || sides[i + 1] == sides[i] ) {
 			continue;
 		}
 
@@ -199,23 +196,23 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, visPlane_t
 		}
 
 		// generate a split point
-		p2 = in->points[( i + 1 ) % in->numpoints];
+		const Vector3& p2 = in->points[( i + 1 ) % in->numpoints];
 
 		dot = dists[i] / ( dists[i] - dists[i + 1] );
 		for ( j = 0 ; j < 3 ; j++ )
 		{   // avoid round off error when possible
-			if ( split->normal[j] == 1 ) {
-				mid[j] = split->dist;
+			if ( split.normal()[j] == 1 ) {
+				mid[j] = split.dist();
 			}
-			else if ( split->normal[j] == -1 ) {
-				mid[j] = -split->dist;
+			else if ( split.normal()[j] == -1 ) {
+				mid[j] = -split.dist();
 			}
 			else{
 				mid[j] = p1[j] + dot * ( p2[j] - p1[j] );
 			}
 		}
 
-		VectorCopy( mid, neww->points[neww->numpoints] );
+		neww->points[neww->numpoints] = mid;
 		neww->numpoints++;
 	}
 
@@ -243,10 +240,7 @@ fixedWinding_t  *VisChopWinding( fixedWinding_t *in, pstack_t *stack, visPlane_t
  */
 fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass, fixedWinding_t *target, bool flipclip, pstack_t *stack ){
 	int i, j, k, l;
-	visPlane_t plane;
-	vec3_t v1, v2;
 	float d;
-	vec_t length;
 	int counts[3];
 	bool fliptest;
 
@@ -254,36 +248,17 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 	for ( i = 0 ; i < source->numpoints ; i++ )
 	{
 		l = ( i + 1 ) % source->numpoints;
-		VectorSubtract( source->points[l], source->points[i], v1 );
 
 		// find a vertex of pass that makes a plane that puts all of the
 		// vertexes of pass on the front side and all of the vertexes of
 		// source on the back side
 		for ( j = 0 ; j < pass->numpoints ; j++ )
 		{
-			VectorSubtract( pass->points[j], source->points[i], v2 );
-
-			plane.normal[0] = v1[1] * v2[2] - v1[2] * v2[1];
-			plane.normal[1] = v1[2] * v2[0] - v1[0] * v2[2];
-			plane.normal[2] = v1[0] * v2[1] - v1[1] * v2[0];
-
+			visPlane_t plane;
 			// if points don't make a valid plane, skip it
-
-			length = plane.normal[0] * plane.normal[0]
-					 + plane.normal[1] * plane.normal[1]
-					 + plane.normal[2] * plane.normal[2];
-
-			if ( length < ON_EPSILON ) {
+			if ( !PlaneFromPoints( plane, source->points[i], pass->points[j], source->points[l] ) ) {
 				continue;
 			}
-
-			length = 1 / sqrt( length );
-
-			plane.normal[0] *= length;
-			plane.normal[1] *= length;
-			plane.normal[2] *= length;
-
-			plane.dist = DotProduct( pass->points[j], plane.normal );
 
 			//
 			// find out which side of the generated seperating plane has the
@@ -296,7 +271,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 				if ( k == i || k == l ) {
 					continue;
 				}
-				d = DotProduct( source->points[k], plane.normal ) - plane.dist;
+				d = plane3_distance_to_point( plane, source->points[k] );
 				if ( d < -ON_EPSILON ) { // source is on the negative side, so we want all
 					                    // pass and target on the positive side
 					fliptest = false;
@@ -318,8 +293,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			// flip the normal if the source portal is backwards
 			//
 			if ( fliptest ) {
-				VectorSubtract( vec3_origin, plane.normal, plane.normal );
-				plane.dist = -plane.dist;
+				plane = plane3_flipped( plane );
 			}
 #if 1
 			//
@@ -332,7 +306,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 				if ( k == j ) {
 					continue;
 				}
-				d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
+				d = plane3_distance_to_point( plane, pass->points[k] );
 				if ( d < -ON_EPSILON ) {
 					break;
 				}
@@ -352,12 +326,12 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			}
 #else
 			k = ( j + 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
+			d = plane3_distance_to_point( plane, pass->points[k] );
 			if ( d < -ON_EPSILON ) {
 				continue;
 			}
 			k = ( j + pass->numpoints - 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
+			d = plane3_distance_to_point( plane, pass->points[k] );
 			if ( d < -ON_EPSILON ) {
 				continue;
 			}
@@ -366,8 +340,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			// flip the normal if we want the back side
 			//
 			if ( flipclip ) {
-				VectorSubtract( vec3_origin, plane.normal, plane.normal );
-				plane.dist = -plane.dist;
+				plane = plane3_flipped( plane );
 			}
 
 #ifdef SEPERATORCACHE
@@ -377,7 +350,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			}
 #endif
 			//MrE: fast check first
-			d = DotProduct( stack->portal->origin, plane.normal ) - plane.dist;
+			d = plane3_distance_to_point( plane, stack->portal->origin );
 			//if completely at the back of the seperator plane
 			if ( d < -stack->portal->radius ) {
 				return NULL;
@@ -390,7 +363,7 @@ fixedWinding_t  *ClipToSeperators( fixedWinding_t *source, fixedWinding_t *pass,
 			//
 			// clip target by the seperating plane
 			//
-			target = VisChopWinding( target, stack, &plane );
+			target = VisChopWinding( target, stack, plane );
 			if ( !target ) {
 				return NULL;        // target is not visible
 
@@ -495,8 +468,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 
 		// get plane of portal, point normal into the neighbor leaf
 		stack.portalplane = p->plane;
-		VectorSubtract( vec3_origin, p->plane.normal, backplane.normal );
-		backplane.dist = -p->plane.dist;
+		backplane = plane3_flipped( p->plane );
 
 		stack.portal = p;
 		stack.next = NULL;
@@ -506,10 +478,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 
 #if 1
 		{
-			float d;
-
-			d = DotProduct( p->origin, thread->pstack_head.portalplane.normal );
-			d -= thread->pstack_head.portalplane.dist;
+			const float d = plane3_distance_to_point( thread->pstack_head.portalplane, p->origin );
 			if ( d < -p->radius ) {
 				continue;
 			}
@@ -518,7 +487,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 			}
 			else
 			{
-				stack.pass = VisChopWinding( p->winding, &stack, &thread->pstack_head.portalplane );
+				stack.pass = VisChopWinding( p->winding, &stack, thread->pstack_head.portalplane );
 				if ( !stack.pass ) {
 					continue;
 				}
@@ -534,10 +503,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 
 #if 1
 		{
-			float d;
-
-			d = DotProduct( thread->base->origin, p->plane.normal );
-			d -= p->plane.dist;
+			const float d = plane3_distance_to_point( p->plane, thread->base->origin );
 			//MrE: vis-bug fix
 			//if (d > p->radius)
 			if ( d > thread->base->radius ) {
@@ -550,7 +516,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 			}
 			else
 			{
-				stack.source = VisChopWinding( prevstack->source, &stack, &backplane );
+				stack.source = VisChopWinding( prevstack->source, &stack, backplane );
 				//FIXME: shouldn't we create a new source origin and radius for fast checks?
 				if ( !stack.source ) {
 					continue;
@@ -558,7 +524,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 			}
 		}
 #else
-		stack.source = VisChopWinding( prevstack->source, &stack, &backplane );
+		stack.source = VisChopWinding( prevstack->source, &stack, backplane );
 		if ( !stack.source ) {
 			continue;
 		}
@@ -577,7 +543,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		if ( stack.numseperators[0] ) {
 			for ( n = 0; n < stack.numseperators[0]; n++ )
 			{
-				stack.pass = VisChopWinding( stack.pass, &stack, &stack.seperators[0][n] );
+				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[0][n] );
 				if ( !stack.pass ) {
 					break;      // target is not visible
 				}
@@ -601,7 +567,7 @@ void RecursiveLeafFlow( int leafnum, threaddata_t *thread, pstack_t *prevstack )
 		if ( stack.numseperators[1] ) {
 			for ( n = 0; n < stack.numseperators[1]; n++ )
 			{
-				stack.pass = VisChopWinding( stack.pass, &stack, &stack.seperators[1][n] );
+				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[1][n] );
 				if ( !stack.pass ) {
 					break;      // target is not visible
 				}
@@ -884,8 +850,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 
 		// get plane of portal, point normal into the neighbor leaf
 		stack.portalplane = p->plane;
-		VectorSubtract( vec3_origin, p->plane.normal, backplane.normal );
-		backplane.dist = -p->plane.dist;
+		backplane = plane3_flipped( p->plane );
 
 		stack.portal = p;
 		stack.next = NULL;
@@ -895,10 +860,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 
 #if 1
 		{
-			float d;
-
-			d = DotProduct( p->origin, thread->pstack_head.portalplane.normal );
-			d -= thread->pstack_head.portalplane.dist;
+			const float d = plane3_distance_to_point( thread->pstack_head.portalplane, p->origin );
 			if ( d < -p->radius ) {
 				continue;
 			}
@@ -907,14 +869,14 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 			}
 			else
 			{
-				stack.pass = VisChopWinding( p->winding, &stack, &thread->pstack_head.portalplane );
+				stack.pass = VisChopWinding( p->winding, &stack, thread->pstack_head.portalplane );
 				if ( !stack.pass ) {
 					continue;
 				}
 			}
 		}
 #else
-		stack.pass = VisChopWinding( p->winding, &stack, &thread->pstack_head.portalplane );
+		stack.pass = VisChopWinding( p->winding, &stack, thread->pstack_head.portalplane );
 		if ( !stack.pass ) {
 			continue;
 		}
@@ -923,10 +885,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 
 #if 1
 		{
-			float d;
-
-			d = DotProduct( thread->base->origin, p->plane.normal );
-			d -= p->plane.dist;
+			const float d = plane3_distance_to_point( p->plane, thread->base->origin );
 			//MrE: vis-bug fix
 			//if (d > p->radius)
 			if ( d > thread->base->radius ) {
@@ -939,7 +898,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 			}
 			else
 			{
-				stack.source = VisChopWinding( prevstack->source, &stack, &backplane );
+				stack.source = VisChopWinding( prevstack->source, &stack, backplane );
 				//FIXME: shouldn't we create a new source origin and radius for fast checks?
 				if ( !stack.source ) {
 					continue;
@@ -947,7 +906,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 			}
 		}
 #else
-		stack.source = VisChopWinding( prevstack->source, &stack, &backplane );
+		stack.source = VisChopWinding( prevstack->source, &stack, backplane );
 		if ( !stack.source ) {
 			continue;
 		}
@@ -966,7 +925,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		if ( stack.numseperators[0] ) {
 			for ( n = 0; n < stack.numseperators[0]; n++ )
 			{
-				stack.pass = VisChopWinding( stack.pass, &stack, &stack.seperators[0][n] );
+				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[0][n] );
 				if ( !stack.pass ) {
 					break;      // target is not visible
 				}
@@ -990,7 +949,7 @@ void RecursivePassagePortalFlow( vportal_t *portal, threaddata_t *thread, pstack
 		if ( stack.numseperators[1] ) {
 			for ( n = 0; n < stack.numseperators[1]; n++ )
 			{
-				stack.pass = VisChopWinding( stack.pass, &stack, &stack.seperators[1][n] );
+				stack.pass = VisChopWinding( stack.pass, &stack, stack.seperators[1][n] );
 				if ( !stack.pass ) {
 					break;      // target is not visible
 				}
@@ -1065,14 +1024,13 @@ void PassagePortalFlow( int portalnum ){
 	 */
 }
 
-fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, visPlane_t *split ){
-	vec_t dists[128];
-	int sides[128];
+fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, const visPlane_t& split ){
+	float dists[128];
+	EPlaneSide sides[128];
 	int counts[3];
-	vec_t dot;
+	float dot;
 	int i, j;
-	vec_t   *p1, *p2;
-	vec3_t mid;
+	Vector3 mid;
 	fixedWinding_t  *neww;
 
 	counts[0] = counts[1] = counts[2] = 0;
@@ -1080,18 +1038,16 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, vis
 	// determine sides for each point
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
-		dot = DotProduct( in->points[i], split->normal );
-		dot -= split->dist;
-		dists[i] = dot;
-		if ( dot > ON_EPSILON ) {
-			sides[i] = SIDE_FRONT;
+		dists[i] = plane3_distance_to_point( split, in->points[i] );
+		if ( dists[i] > ON_EPSILON ) {
+			sides[i] = eSideFront;
 		}
-		else if ( dot < -ON_EPSILON ) {
-			sides[i] = SIDE_BACK;
+		else if ( dists[i] < -ON_EPSILON ) {
+			sides[i] = eSideBack;
 		}
 		else
 		{
-			sides[i] = SIDE_ON;
+			sides[i] = eSideOn;
 		}
 		counts[sides[i]]++;
 	}
@@ -1113,24 +1069,24 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, vis
 
 	for ( i = 0 ; i < in->numpoints ; i++ )
 	{
-		p1 = in->points[i];
+		const Vector3& p1 = in->points[i];
 
 		if ( neww->numpoints == MAX_POINTS_ON_FIXED_WINDING ) {
 			return in;      // can't chop -- fall back to original
 		}
 
-		if ( sides[i] == SIDE_ON ) {
-			VectorCopy( p1, neww->points[neww->numpoints] );
+		if ( sides[i] == eSideOn ) {
+			neww->points[neww->numpoints] = p1;
 			neww->numpoints++;
 			continue;
 		}
 
-		if ( sides[i] == SIDE_FRONT ) {
-			VectorCopy( p1, neww->points[neww->numpoints] );
+		if ( sides[i] == eSideFront ) {
+			neww->points[neww->numpoints] = p1;
 			neww->numpoints++;
 		}
 
-		if ( sides[i + 1] == SIDE_ON || sides[i + 1] == sides[i] ) {
+		if ( sides[i + 1] == eSideOn || sides[i + 1] == sides[i] ) {
 			continue;
 		}
 
@@ -1139,23 +1095,23 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, vis
 		}
 
 		// generate a split point
-		p2 = in->points[( i + 1 ) % in->numpoints];
+		const Vector3& p2 = in->points[( i + 1 ) % in->numpoints];
 
 		dot = dists[i] / ( dists[i] - dists[i + 1] );
 		for ( j = 0 ; j < 3 ; j++ )
 		{   // avoid round off error when possible
-			if ( split->normal[j] == 1 ) {
-				mid[j] = split->dist;
+			if ( split.normal()[j] == 1 ) {
+				mid[j] = split.dist();
 			}
-			else if ( split->normal[j] == -1 ) {
-				mid[j] = -split->dist;
+			else if ( split.normal()[j] == -1 ) {
+				mid[j] = -split.dist();
 			}
 			else{
 				mid[j] = p1[j] + dot * ( p2[j] - p1[j] );
 			}
 		}
 
-		VectorCopy( mid, neww->points[neww->numpoints] );
+		neww->points[neww->numpoints] = mid;
 		neww->numpoints++;
 	}
 
@@ -1169,10 +1125,6 @@ fixedWinding_t *PassageChopWinding( fixedWinding_t *in, fixedWinding_t *out, vis
  */
 int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, visPlane_t *seperators, int maxseperators ){
 	int i, j, k, l;
-	visPlane_t plane;
-	vec3_t v1, v2;
-	float d;
-	vec_t length;
 	int counts[3], numseperators;
 	bool fliptest;
 
@@ -1181,36 +1133,17 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 	for ( i = 0 ; i < source->numpoints ; i++ )
 	{
 		l = ( i + 1 ) % source->numpoints;
-		VectorSubtract( source->points[l], source->points[i], v1 );
 
 		// find a vertex of pass that makes a plane that puts all of the
 		// vertexes of pass on the front side and all of the vertexes of
 		// source on the back side
 		for ( j = 0 ; j < pass->numpoints ; j++ )
 		{
-			VectorSubtract( pass->points[j], source->points[i], v2 );
-
-			plane.normal[0] = v1[1] * v2[2] - v1[2] * v2[1];
-			plane.normal[1] = v1[2] * v2[0] - v1[0] * v2[2];
-			plane.normal[2] = v1[0] * v2[1] - v1[1] * v2[0];
-
+			visPlane_t plane;
 			// if points don't make a valid plane, skip it
-
-			length = plane.normal[0] * plane.normal[0]
-					 + plane.normal[1] * plane.normal[1]
-					 + plane.normal[2] * plane.normal[2];
-
-			if ( length < ON_EPSILON ) {
+			if ( !PlaneFromPoints( plane, source->points[i], pass->points[j], source->points[l] ) ) {
 				continue;
 			}
-
-			length = 1 / sqrt( length );
-
-			plane.normal[0] *= length;
-			plane.normal[1] *= length;
-			plane.normal[2] *= length;
-
-			plane.dist = DotProduct( pass->points[j], plane.normal );
 
 			//
 			// find out which side of the generated seperating plane has the
@@ -1223,7 +1156,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 				if ( k == i || k == l ) {
 					continue;
 				}
-				d = DotProduct( source->points[k], plane.normal ) - plane.dist;
+				const double d = plane3_distance_to_point( plane, source->points[k] );
 				if ( d < -ON_EPSILON ) { // source is on the negative side, so we want all
 					                    // pass and target on the positive side
 					fliptest = false;
@@ -1245,8 +1178,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 			// flip the normal if the source portal is backwards
 			//
 			if ( fliptest ) {
-				VectorSubtract( vec3_origin, plane.normal, plane.normal );
-				plane.dist = -plane.dist;
+				plane = plane3_flipped( plane );
 			}
 #if 1
 			//
@@ -1259,7 +1191,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 				if ( k == j ) {
 					continue;
 				}
-				d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
+				const double d = plane3_distance_to_point( plane, pass->points[k] );
 				if ( d < -ON_EPSILON ) {
 					break;
 				}
@@ -1279,12 +1211,12 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 			}
 #else
 			k = ( j + 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
+			d = vector3_dot( pass->points[k], plane.normal ) - plane.dist;
 			if ( d < -ON_EPSILON ) {
 				continue;
 			}
 			k = ( j + pass->numpoints - 1 ) % pass->numpoints;
-			d = DotProduct( pass->points[k], plane.normal ) - plane.dist;
+			d = vector3_dot( pass->points[k], plane.normal ) - plane.dist;
 			if ( d < -ON_EPSILON ) {
 				continue;
 			}
@@ -1293,8 +1225,7 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
 			// flip the normal if we want the back side
 			//
 			if ( flipclip ) {
-				VectorSubtract( vec3_origin, plane.normal, plane.normal );
-				plane.dist = -plane.dist;
+				plane = plane3_flipped( plane );
 			}
 
 			if ( numseperators >= maxseperators ) {
@@ -1319,7 +1250,6 @@ int AddSeperators( fixedWinding_t *source, fixedWinding_t *pass, bool flipclip, 
  */
 void CreatePassages( int portalnum ){
 	int i, j, k, n, numseperators, numsee;
-	float d;
 	vportal_t       *portal, *p, *target;
 	leaf_t          *leaf;
 	passage_t       *passage, *lastpassage;
@@ -1377,18 +1307,15 @@ void CreatePassages( int portalnum ){
 			}
 			for ( k = 0; k < numseperators; k++ )
 			{
-				//
-				d = DotProduct( p->origin, seperators[k].normal ) - seperators[k].dist;
 				//if completely at the back of the seperator plane
-				if ( d < -p->radius + ON_EPSILON ) {
+				if ( plane3_distance_to_point( seperators[k], p->origin ) < -p->radius + ON_EPSILON ) {
 					break;
 				}
 				w = p->winding;
 				for ( n = 0; n < w->numpoints; n++ )
 				{
-					d = DotProduct( w->points[n], seperators[k].normal ) - seperators[k].dist;
 					//if at the front of the seperator
-					if ( d > ON_EPSILON ) {
+					if ( plane3_distance_to_point( seperators[k], w->points[n] ) > ON_EPSILON ) {
 						break;
 					}
 				}
@@ -1407,7 +1334,7 @@ void CreatePassages( int portalnum ){
 			/* ydnar: prefer correctness to stack overflow  */
 			//% memcpy( &in, p->winding, (int)((fixedWinding_t *)0)->points[p->winding->numpoints] );
 			if ( p->winding->numpoints <= MAX_POINTS_ON_FIXED_WINDING ) {
-				memcpy( &in, p->winding, (size_t)((fixedWinding_t *)0)->points[p->winding->numpoints] );
+				memcpy( &in, p->winding, (size_t)&( ( (fixedWinding_t *)0 )->points[p->winding->numpoints] ) );
 //				memcpy( &in, p->winding, offsetof( fixedWinding_t, points[p->winding->numpoints] ) );
 			}
 			else{
@@ -1423,7 +1350,7 @@ void CreatePassages( int portalnum ){
 					in.numpoints = MAX_POINTS_ON_FIXED_WINDING;
 				}
 
-				res = PassageChopWinding( &in, &out, &seperators[ k ] );
+				res = PassageChopWinding( &in, &out, seperators[ k ] );
 				if ( res == &out ) {
 					memcpy( &in, &out, sizeof( fixedWinding_t ) );
 				}
@@ -1557,9 +1484,7 @@ void SimpleFlood( vportal_t *srcportal, int leafnum ){
 void BasePortalVis( int portalnum ){
 	int j, k;
 	vportal_t   *tp, *p;
-	float d;
 	fixedWinding_t  *w;
-	vec3_t dir;
 
 
 	p = portals + portalnum;
@@ -1593,13 +1518,12 @@ void BasePortalVis( int portalnum ){
 		 */
 
 		if ( !p->sky && !tp->sky && farPlaneDist != 0.0f ) {
-			VectorSubtract( p->origin, tp->origin, dir );
 			if( farPlaneDistMode == 'o' ){
-				if( VectorLength( dir ) > farPlaneDist )
+				if( vector3_length( p->origin - tp->origin ) > farPlaneDist )
 					continue;
 			}
 			else if( farPlaneDistMode == 'e' ){
-				if( VectorLength( dir ) + p->radius + tp->radius > 2.0f * farPlaneDist )
+				if( vector3_length( p->origin - tp->origin ) + p->radius + tp->radius > 2.0f * farPlaneDist )
 					continue;
 			}
 			else if( farPlaneDistMode == 'r' ){
@@ -1607,7 +1531,7 @@ void BasePortalVis( int portalnum ){
 					continue;
 			}
 			else{ /* ydnar: this is known-to-be-working farplane code */
-				if ( VectorLength( dir ) - p->radius - tp->radius > farPlaneDist )
+				if ( vector3_length( p->origin - tp->origin ) - p->radius - tp->radius > farPlaneDist )
 					continue;
 			}
 
@@ -1617,9 +1541,7 @@ void BasePortalVis( int portalnum ){
 		w = tp->winding;
 		for ( k = 0 ; k < w->numpoints ; k++ )
 		{
-			d = DotProduct( w->points[k], p->plane.normal )
-				- p->plane.dist;
-			if ( d > ON_EPSILON ) {
+			if ( plane3_distance_to_point( p->plane, w->points[k] ) > ON_EPSILON ) {
 				break;
 			}
 		}
@@ -1630,9 +1552,7 @@ void BasePortalVis( int portalnum ){
 		w = p->winding;
 		for ( k = 0 ; k < w->numpoints ; k++ )
 		{
-			d = DotProduct( w->points[k], tp->plane.normal )
-				- tp->plane.dist;
-			if ( d < -ON_EPSILON ) {
+			if ( plane3_distance_to_point( tp->plane, w->points[k] ) < -ON_EPSILON ) {
 				break;
 			}
 		}

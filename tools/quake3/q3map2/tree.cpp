@@ -36,15 +36,10 @@
 
 void RemovePortalFromNode( portal_t *portal, node_t *l );
 
-node_t *NodeForPoint( node_t *node, vec3_t origin ){
-	plane_t *plane;
-	vec_t d;
-
+node_t *NodeForPoint( node_t *node, const Vector3& origin ){
 	while ( node->planenum != PLANENUM_LEAF )
 	{
-		plane = &mapplanes[node->planenum];
-		d = DotProduct( origin, plane->normal ) - plane->dist;
-		if ( d >= 0 ) {
+		if ( plane3_distance_to_point( mapplanes[node->planenum].plane, origin ) >= 0 ) {
 			node = node->children[0];
 		}
 		else{
@@ -143,8 +138,8 @@ void PrintTree_r( node_t *node, int depth ){
 
 	plane = &mapplanes[node->planenum];
 	Sys_Printf( "#%d (%5.2f %5.2f %5.2f):%5.2f\n", node->planenum,
-				plane->normal[0], plane->normal[1], plane->normal[2],
-				plane->dist );
+				plane->normal()[0], plane->normal()[1], plane->normal()[2],
+				plane->dist() );
 	PrintTree_r( node->children[0], depth + 1 );
 	PrintTree_r( node->children[1], depth + 1 );
 }

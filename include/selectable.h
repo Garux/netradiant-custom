@@ -281,7 +281,8 @@ inline SelectionTestable* Instance_getSelectionTestable( scene::Instance& instan
 }
 
 
-class Plane3;
+template<typename T> class Plane3___;
+typedef Plane3___<double> Plane3;
 typedef Callback1<const Plane3&> PlaneCallback;
 
 class SelectedPlanes

@@ -73,10 +73,10 @@ void Fur( mapDrawSurface_t *ds ){
 		dv = &ds->verts[ j ];
 
 		/* offset is scaled by original vertex alpha */
-		a = (float) dv->color[ 0 ][ 3 ] / 255.0;
+		a = (float) dv->color[ 0 ].alpha() / 255.0;
 
 		/* offset it */
-		VectorMA( dv->xyz, ( offset * a ), dv->normal, dv->xyz );
+		dv->xyz += dv->normal * ( offset * a );
 	}
 
 	/* wash, rinse, repeat */
@@ -98,27 +98,19 @@ void Fur( mapDrawSurface_t *ds ){
 			dv = &ds->verts[ j ];
 
 			/* offset is scaled by original vertex alpha */
-			a = (float) dv->color[ 0 ][ 3 ] / 255.0;
+			a = (float) dv->color[ 0 ].alpha() / 255.0;
 
 			/* get fur vert */
 			dv = &fur->verts[ j ];
 
 			/* offset it */
-			VectorMA( dv->xyz, ( offset * a * i ), dv->normal, dv->xyz );
+			dv->xyz += dv->normal * ( offset * a * i );
 
 			/* fade alpha */
 			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 			{
-				a = (float) dv->color[ k ][ 3 ] - fade;
-				if ( a > 255.0f ) {
-					dv->color[ k ][ 3 ] = 255;
-				}
-				else if ( a < 0 ) {
-					dv->color[ k ][ 3 ] = 0;
-				}
-				else{
-					dv->color[ k ][ 3 ] = a;
-				}
+				a = (float) dv->color[ k ].alpha() - fade;
+				dv->color[ k ].alpha() = ( a > 255.0f )? 255 : ( a < 0 )? 0 : a;
 			}
 		}
 	}

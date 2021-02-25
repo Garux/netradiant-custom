@@ -41,7 +41,7 @@
 void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 	int i, j, k;
 	float c;
-	vec4_t mult, add;
+	Vector4 mult, add;
 	bspDrawVert_t   *dv;
 	colorMod_t      *cm2;
 
@@ -62,17 +62,16 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 		for ( cm2 = cm; cm2 != NULL; cm2 = cm2->next )
 		{
 			/* default */
-			VectorSet( mult, 1.0f, 1.0f, 1.0f );
-			mult[ 3 ] = 1.0f;
-			VectorSet( add, 0.0f, 0.0f, 0.0f );
-			add[ 3 ] = 0.0f;
+			mult.set( 1 );
+			add.set( 0 );
 
+			const Vector3 cm2_data = vector3_from_array( cm2->data );
 			/* switch on type */
 			switch ( cm2->type )
 			{
 			case EColorMod::ColorSet:
-				VectorClear( mult );
-				VectorScale( cm2->data, 255.0f, add );
+				mult.vec3().set( 0 );
+				add.vec3() = cm2_data * 255.0f;
 				break;
 
 			case EColorMod::AlphaSet:
@@ -81,7 +80,7 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 				break;
 
 			case EColorMod::ColorScale:
-				VectorCopy( cm2->data, mult );
+				mult.vec3() = cm2_data;
 				break;
 
 			case EColorMod::AlphaScale:
@@ -89,46 +88,46 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 				break;
 
 			case EColorMod::ColorDotProduct:
-				c = DotProduct( dv->normal, cm2->data );
-				VectorSet( mult, c, c, c );
+				c = vector3_dot( dv->normal, cm2_data );
+				mult.vec3().set( c );
 				break;
 
 			case EColorMod::ColorDotProductScale:
-				c = DotProduct( dv->normal, cm2->data );
+				c = vector3_dot( dv->normal, cm2_data );
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
-				VectorSet( mult, c, c, c );
+				mult.vec3().set( c );
 				break;
 
 			case EColorMod::AlphaDotProduct:
-				mult[ 3 ] = DotProduct( dv->normal, cm2->data );
+				mult[ 3 ] = vector3_dot( dv->normal, cm2_data );
 				break;
 
 			case EColorMod::AlphaDotProductScale:
-				c = DotProduct( dv->normal, cm2->data );
+				c = vector3_dot( dv->normal, cm2_data );
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
 				mult[ 3 ] = c;
 				break;
 
 			case EColorMod::ColorDotProduct2:
-				c = DotProduct( dv->normal, cm2->data );
+				c = vector3_dot( dv->normal, cm2_data );
 				c *= c;
-				VectorSet( mult, c, c, c );
+				mult.vec3().set( c );
 				break;
 
 			case EColorMod::ColorDotProduct2Scale:
-				c = DotProduct( dv->normal, cm2->data );
+				c = vector3_dot( dv->normal, cm2_data );
 				c *= c;
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
-				VectorSet( mult, c, c, c );
+				mult.vec3().set( c );
 				break;
 
 			case EColorMod::AlphaDotProduct2:
-				mult[ 3 ] = DotProduct( dv->normal, cm2->data );
+				mult[ 3 ] = vector3_dot( dv->normal, cm2_data );
 				mult[ 3 ] *= mult[ 3 ];
 				break;
 
 			case EColorMod::AlphaDotProduct2Scale:
-				c = DotProduct( dv->normal, cm2->data );
+				c = vector3_dot( dv->normal, cm2_data );
 				c *= c;
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
 				mult[ 3 ] = c;
@@ -164,7 +163,7 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
    routines for dealing with a 3x3 texture mod matrix
  */
 
-void TCMod( tcMod_t mod, float st[ 2 ] ){
+void TCMod( tcMod_t mod, Vector2& st ){
 	float old[ 2 ];
 
 
@@ -215,7 +214,7 @@ void TCModRotate( tcMod_t mod, float euler ){
 	memcpy( old, mod, sizeof( tcMod_t ) );
 	TCModIdentity( temp );
 
-	radians = euler / 180 * Q_PI;
+	radians = degrees_to_radians( euler );
 	sinv = sin( radians );
 	cosv = cos( radians );
 
@@ -663,8 +662,7 @@ static shaderInfo_t *AllocShaderInfo( void ){
 
 void FinishShader( shaderInfo_t *si ){
 	int x, y;
-	float st[ 2 ], o[ 2 ], dist, bestDist;
-	vec4_t color, delta;
+	Vector2 st;
 
 
 	/* don't double-dip */
@@ -682,28 +680,26 @@ void FinishShader( shaderInfo_t *si ){
 	if ( si->legacyTerrain && !si->tcGen ) {
 		/* set xy texture projection */
 		si->tcGen = true;
-		VectorSet( si->vecs[ 0 ], ( 1.0f / ( si->shaderWidth * 0.5f ) ), 0, 0 );
-		VectorSet( si->vecs[ 1 ], 0, ( 1.0f / ( si->shaderHeight * 0.5f ) ), 0 );
+		si->vecs[ 0 ] = { ( 1.0f / ( si->shaderWidth * 0.5f ) ), 0, 0 };
+		si->vecs[ 1 ] = { 0, ( 1.0f / ( si->shaderHeight * 0.5f ) ), 0 };
 	}
 
 	/* find pixel coordinates best matching the average color of the image */
-	bestDist = 99999999;
-	o[ 0 ] = 1.0f / si->shaderImage->width;
-	o[ 1 ] = 1.0f / si->shaderImage->height;
+	float bestDist = 99999999;
+	const Vector2 o( 1.0f / si->shaderImage->width, 1.0f / si->shaderImage->height );
 	for ( y = 0, st[ 1 ] = 0.0f; y < si->shaderImage->height; y++, st[ 1 ] += o[ 1 ] )
 	{
 		for ( x = 0, st[ 0 ] = 0.0f; x < si->shaderImage->width; x++, st[ 0 ] += o[ 0 ] )
 		{
 			/* sample the shader image */
+			Color4f color;
 			RadSampleImage( si->shaderImage->pixels, si->shaderImage->width, si->shaderImage->height, st, color );
 
 			/* determine error squared */
-			VectorSubtract( color, si->averageColor, delta );
-			delta[ 3 ] = color[ 3 ] - si->averageColor[ 3 ];
-			dist = delta[ 0 ] * delta[ 0 ] + delta[ 1 ] * delta[ 1 ] + delta[ 2 ] * delta[ 2 ] + delta[ 3 ] * delta[ 3 ];
+			const Color4f delta = color - si->averageColor;
+			const float dist = vector4_dot( delta, delta );
 			if ( dist < bestDist ) {
-				si->stFlat[ 0 ] = st[ 0 ];
-				si->stFlat[ 1 ] = st[ 1 ];
+				si->stFlat = st;
 			}
 		}
 	}
@@ -725,9 +721,6 @@ void FinishShader( shaderInfo_t *si ){
  */
 
 static void LoadShaderImages( shaderInfo_t *si ){
-	int i, count;
-	float color[ 4 ];
-
 
 	/* nodraw shaders don't need images */
 	if ( si->compileFlags & C_NODRAW ) {
@@ -779,10 +772,9 @@ static void LoadShaderImages( shaderInfo_t *si ){
 	}
 
 	/* create default and average colors */
-	count = si->lightImage->width * si->lightImage->height;
-	VectorClear( color );
-	color[ 3 ] = 0.0f;
-	for ( i = 0; i < count; i++ )
+	const int count = si->lightImage->width * si->lightImage->height;
+	Color4f color( 0, 0, 0, 0 );
+	for ( int i = 0; i < count; i++ )
 	{
 		color[ 0 ] += si->lightImage->pixels[ i * 4 + 0 ];
 		color[ 1 ] += si->lightImage->pixels[ i * 4 + 1 ];
@@ -790,15 +782,15 @@ static void LoadShaderImages( shaderInfo_t *si ){
 		color[ 3 ] += si->lightImage->pixels[ i * 4 + 3 ];
 	}
 
-	if ( VectorLength( si->color ) <= 0.0f ) {
-		ColorNormalize( color, si->color );
-		VectorScale( color, ( 1.0f / count ), si->averageColor );
-		si->averageColor[ 3 ] = color[ 3 ] / count;
+	if ( vector3_length( si->color ) == 0.0f ) {
+		si->color = color.rgb();
+		ColorNormalize( si->color );
+		si->averageColor = color / count;
 	}
 	else
 	{
-		VectorCopy( si->color, si->averageColor );
-		si->averageColor[ 3 ] = 1.0f;
+		si->averageColor.rgb() = si->color;
+		si->averageColor.alpha() = 1.0f;
 	}
 }
 
@@ -921,14 +913,12 @@ bool GetTokenAppend( char *buffer, bool crossline ){
 }
 
 
-void Parse1DMatrixAppend( char *buffer, int x, vec_t *m ){
-	int i;
-
+void Parse1DMatrixAppend( char *buffer, int x, float *m ){
 
 	if ( !GetTokenAppend( buffer, true ) || !strEqual( token, "(" ) ) {
 		Error( "Parse1DMatrixAppend(): line %d: ( not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
 	}
-	for ( i = 0; i < x; i++ )
+	for ( int i = 0; i < x; i++ )
 	{
 		if ( !GetTokenAppend( buffer, false ) ) {
 			Error( "Parse1DMatrixAppend(): line %d: Number not found!\nFile location be: %s\n", scriptline, g_strLoadedFileLocation );
@@ -968,7 +958,7 @@ static void ParseShaderFile( const char *filename ){
 		if ( si != NULL && !strEmpty( shaderText ) ) {
 			strcat( shaderText, "\n" );
 			si->shaderText = copystring( shaderText );
-			//%	if( VectorLength( si->vecs[ 0 ] ) )
+			//%	if( vector3_length( si->vecs[ 0 ] ) )
 			//%		Sys_Printf( "%s\n", shaderText );
 		}
 
@@ -1119,7 +1109,7 @@ static void ParseShaderFile( const char *filename ){
 
 				/* deformVertexes move <x> <y> <z> <func> <base> <amplitude> <phase> <freq> (ydnar: for particle studio support) */
 				if ( striEqual( token, "move" ) ) {
-					vec3_t amt, mins, maxs;
+					Vector3 amt;
 					float base, amp;
 
 
@@ -1136,10 +1126,10 @@ static void ParseShaderFile( const char *filename ){
 					GetTokenAppend( shaderText, false );   amp = atof( token );
 
 					/* calculate */
-					VectorScale( amt, base, mins );
-					VectorMA( mins, amp, amt, maxs );
-					VectorAdd( si->mins, mins, si->mins );
-					VectorAdd( si->maxs, maxs, si->maxs );
+					const Vector3 mins = amt * base;
+					const Vector3 maxs = amt * amp + mins;
+					si->minmax.mins += mins;
+					si->minmax.maxs += maxs;
 				}
 			}
 
@@ -1271,7 +1261,7 @@ static void ParseShaderFile( const char *filename ){
 				}
 
 				/* normalize it */
-				ColorNormalize( sun->color, sun->color );
+				ColorNormalize( sun->color );
 
 				/* scale color by brightness */
 				GetTokenAppend( shaderText, false );
@@ -1279,12 +1269,10 @@ static void ParseShaderFile( const char *filename ){
 
 				/* get sun angle/elevation */
 				GetTokenAppend( shaderText, false );
-				a = atof( token );
-				a = a / 180.0f * Q_PI;
+				a = degrees_to_radians( atof( token ) );
 
 				GetTokenAppend( shaderText, false );
-				b = atof( token );
-				b = b / 180.0f * Q_PI;
+				b = degrees_to_radians( atof( token ) );
 
 				sun->direction[ 0 ] = cos( a ) * cos( b );
 				sun->direction[ 1 ] = sin( a ) * cos( b );
@@ -1296,8 +1284,7 @@ static void ParseShaderFile( const char *filename ){
 				/* ydnar: get sun angular deviance/samples */
 				if ( ext && TokenAvailable() ) {
 					GetTokenAppend( shaderText, false );
-					sun->deviance = atof( token );
-					sun->deviance = sun->deviance / 180.0f * Q_PI;
+					sun->deviance = degrees_to_radians( atof( token ) );
 
 					GetTokenAppend( shaderText, false );
 					sun->numSamples = atoi( token );
@@ -1436,7 +1423,7 @@ static void ParseShaderFile( const char *filename ){
 
 				/* wolf: q3map_lightRGB <red> <green> <blue> */
 				else if ( striEqual( token, "q3map_lightRGB" ) ) {
-					VectorClear( si->color );
+					si->color.set( 0 );
 					GetTokenAppend( shaderText, false );
 					si->color[ 0 ] = atof( token );
 					GetTokenAppend( shaderText, false );
@@ -1448,7 +1435,7 @@ static void ParseShaderFile( const char *filename ){
 						si->color[1] = Image_LinearFloatFromsRGBFloat( si->color[1] );
 						si->color[2] = Image_LinearFloatFromsRGBFloat( si->color[2] );
 					}
-					ColorNormalize( si->color, si->color );
+					ColorNormalize( si->color );
 				}
 
 				/* q3map_lightSubdivide <value> */
@@ -1485,7 +1472,7 @@ static void ParseShaderFile( const char *filename ){
 						si->floodlightRGB[1] = Image_LinearFloatFromsRGBFloat( si->floodlightRGB[1] );
 						si->floodlightRGB[2] = Image_LinearFloatFromsRGBFloat( si->floodlightRGB[2] );
 					}
-					ColorNormalize( si->floodlightRGB, si->floodlightRGB );
+					ColorNormalize( si->floodlightRGB );
 				}
 
 				/* jal: q3map_nodirty : skip dirty */
@@ -1517,18 +1504,18 @@ static void ParseShaderFile( const char *filename ){
 				else if ( striEqual( token, "q3map_lightmapAxis" ) ) {
 					GetTokenAppend( shaderText, false );
 					if ( striEqual( token, "x" ) ) {
-						VectorSet( si->lightmapAxis, 1, 0, 0 );
+						si->lightmapAxis = g_vector3_axis_x;
 					}
 					else if ( striEqual( token, "y" ) ) {
-						VectorSet( si->lightmapAxis, 0, 1, 0 );
+						si->lightmapAxis = g_vector3_axis_y;
 					}
 					else if ( striEqual( token, "z" ) ) {
-						VectorSet( si->lightmapAxis, 0, 0, 1 );
+						si->lightmapAxis = g_vector3_axis_z;
 					}
 					else
 					{
 						Sys_Warning( "Unknown value for lightmap axis: %s\n", token );
-						VectorClear( si->lightmapAxis );
+						si->lightmapAxis.set( 0 );
 					}
 				}
 
@@ -1636,7 +1623,7 @@ static void ParseShaderFile( const char *filename ){
 					si->nonplanar = true;
 					si->forceMeta = true;
 					si->shadeAngleDegrees = 179.0f;
-					//%	VectorSet( si->lightmapAxis, 0, 0, 1 );	/* ydnar 2002-09-21: turning this off for better lightmapping of cliff faces */
+					//%	si->lightmapAxis = g_vector3_axis_z;	/* ydnar 2002-09-21: turning this off for better lightmapping of cliff faces */
 				}
 
 				/* ydnar: picomodel: q3map_forceMeta (forces brush faces and/or triangle models to go through the metasurface pipeline) */
@@ -1665,14 +1652,14 @@ static void ParseShaderFile( const char *filename ){
 
 					/* q3map_tcGen vector <s vector> <t vector> */
 					if ( striEqual( token, "vector" ) ) {
-						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 0 ] );
-						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 1 ] );
+						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 0 ].data() );
+						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 1 ].data() );
 					}
 
 					/* q3map_tcGen ivector <1.0/s vector> <1.0/t vector> (inverse vector, easier for mappers to understand) */
 					else if ( striEqual( token, "ivector" ) ) {
-						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 0 ] );
-						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 1 ] );
+						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 0 ].data() );
+						Parse1DMatrixAppend( shaderText, 3, si->vecs[ 1 ].data() );
 						for ( i = 0; i < 3; i++ )
 						{
 							si->vecs[ 0 ][ i ] = si->vecs[ 0 ][ i ] ? 1.0 / si->vecs[ 0 ][ i ] : 0;
@@ -1682,8 +1669,8 @@ static void ParseShaderFile( const char *filename ){
 					else
 					{
 						Sys_Warning( "Unknown q3map_tcGen method: %s\n", token );
-						VectorClear( si->vecs[ 0 ] );
-						VectorClear( si->vecs[ 1 ] );
+						si->vecs[ 0 ].set( 0 );
+						si->vecs[ 1 ].set( 0 );
 					}
 				}
 
@@ -1825,8 +1812,8 @@ static void ParseShaderFile( const char *filename ){
 
 				/* q3map_fogDir (direction a fog shader fades from transparent to opaque) */
 				else if ( striEqual( token, "q3map_fogDir" ) ) {
-					Parse1DMatrixAppend( shaderText, 3, si->fogDir );
-					VectorNormalize( si->fogDir, si->fogDir );
+					Parse1DMatrixAppend( shaderText, 3, si->fogDir.data() );
+					VectorNormalize( si->fogDir );
 				}
 
 				/* q3map_globaltexture */

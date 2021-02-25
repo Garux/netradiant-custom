@@ -57,8 +57,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 
 	/* plane test */
 	{
-		vec4_t plane;
-
+		Plane3f plane;
 
 		/* make a plane */
 		if ( !PlaneFromPoints( plane, tri[ 0 ]->xyz, tri[ 1 ]->xyz, tri[ 2 ]->xyz ) ) {
@@ -66,7 +65,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 		}
 
 		/* if normal is too far off vertical, then don't place an instance */
-		if ( plane[ 2 ] < 0.5f ) {
+		if ( plane.normal().z() < 0.5f ) {
 			return;
 		}
 	}
@@ -74,7 +73,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 	/* subdivide calc */
 	{
 		int i;
-		float               *a, *b, dx, dy, dz, dist, maxDist;
+		float               dx, dy, dz, dist, maxDist;
 		foliageInstance_t   *fi;
 
 
@@ -84,13 +83,13 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 		/* find the longest edge and split it */
 		max = -1;
 		maxDist = 0.0f;
-		VectorClear( fi->xyz );
-		VectorClear( fi->normal );
+		fi->xyz.set( 0 );
+		fi->normal.set( 0 );
 		for ( i = 0; i < 3; i++ )
 		{
 			/* get verts */
-			a = tri[ i ]->xyz;
-			b = tri[ ( i + 1 ) % 3 ]->xyz;
+			const Vector3& a = tri[ i ]->xyz;
+			const Vector3& b = tri[ ( i + 1 ) % 3 ]->xyz;
 
 			/* get dists */
 			dx = a[ 0 ] - b[ 0 ];
@@ -105,8 +104,8 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 			}
 
 			/* add to centroid */
-			VectorAdd( fi->xyz, tri[ i ]->xyz, fi->xyz );
-			VectorAdd( fi->normal, tri[ i ]->normal, fi->normal );
+			fi->xyz += tri[ i ]->xyz;
+			fi->normal += tri[ i ]->normal;
 		}
 
 		/* is the triangle small enough? */
@@ -120,7 +119,7 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 			}
 			else
 			{
-				alpha = ( (float) tri[ 0 ]->color[ 0 ][ 3 ] + (float) tri[ 1 ]->color[ 0 ][ 3 ] + (float) tri[ 2 ]->color[ 0 ][ 3 ] ) / 765.0f;
+				alpha = ( (float) tri[ 0 ]->color[ 0 ].alpha() + (float) tri[ 1 ]->color[ 0 ].alpha() + (float) tri[ 2 ]->color[ 0 ].alpha() ) / 765.0f;
 				if ( foliage.inverseAlpha == 1 ) {
 					alpha = 1.0f - alpha;
 				}
@@ -137,8 +136,8 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 			}
 
 			/* scale centroid */
-			VectorScale( fi->xyz, 0.33333333f, fi->xyz );
-			if ( VectorNormalize( fi->normal, fi->normal ) == 0.0f ) {
+			fi->xyz *= 0.33333333f;
+			if ( VectorNormalize( fi->normal ) == 0.0f ) {
 				return;
 			}
 
@@ -175,8 +174,6 @@ void Foliage( mapDrawSurface_t *src ){
 	shaderInfo_t        *si;
 	mesh_t srcMesh, *subdivided, *mesh;
 	bspDrawVert_t       *verts, *dv[ 3 ], *fi;
-	vec3_t scale;
-	m4x4_t transform;
 
 
 	/* get shader */
@@ -270,12 +267,8 @@ void Foliage( mapDrawSurface_t *src ){
 		/* remember surface count */
 		oldNumMapDrawSurfs = numMapDrawSurfs;
 
-		/* set transform matrix */
-		VectorSet( scale, foliage.scale, foliage.scale, foliage.scale );
-		m4x4_scale_for_vec3( transform, scale );
-
 		/* add the model to the bsp */
-		InsertModel( foliage.model.c_str(), 0, 0, transform, NULL, NULL, src->entityNum, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
+		InsertModel( foliage.model.c_str(), 0, 0, matrix4_scale_for_vec3( Vector3().set( foliage.scale ) ), NULL, NULL, src->entityNum, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
 
 		/* walk each new surface */
 		for ( i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )
@@ -307,16 +300,13 @@ void Foliage( mapDrawSurface_t *src ){
 				fi = &ds->verts[ ds->numVerts + j ];
 
 				/* copy xyz and normal */
-				VectorCopy( foliageInstances[ j ].xyz, fi->xyz );
-				VectorCopy( foliageInstances[ j ].normal, fi->normal );
+				fi->xyz = foliageInstances[ j ].xyz;
+				fi->normal = foliageInstances[ j ].normal;
 
 				/* ydnar: set color */
 				for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 				{
-					fi->color[ k ][ 0 ] = 255;
-					fi->color[ k ][ 1 ] = 255;
-					fi->color[ k ][ 2 ] = 255;
-					fi->color[ k ][ 3 ] = 255;
+					fi->color[ k ].set( 255 );
 				}
 			}
 

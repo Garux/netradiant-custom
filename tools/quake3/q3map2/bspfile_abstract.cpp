@@ -755,7 +755,7 @@ bool entity_t::read_keyvalue_( float &float_value, std::initializer_list<const c
 	}
 	return false;
 }
-bool entity_t::read_keyvalue_( float (&vector3_value)[3], std::initializer_list<const char*>&& keys ) const {
+bool entity_t::read_keyvalue_( Vector3& vector3_value, std::initializer_list<const char*>&& keys ) const {
 	for( const char* key : keys ){
 		const char* value = valueForKey( key );
 		if( !strEmpty( value ) ){

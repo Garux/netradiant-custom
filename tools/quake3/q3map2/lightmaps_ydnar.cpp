@@ -350,23 +350,20 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 		/* scale the vectors and shift the origin */
 		#if 1
 		/* new code that works for arbitrary supersampling values */
-		VectorMA( lm->origin, -0.5, lm->vecs[ 0 ], lm->origin );
-		VectorMA( lm->origin, -0.5, lm->vecs[ 1 ], lm->origin );
-		VectorScale( lm->vecs[ 0 ], is, lm->vecs[ 0 ] );
-		VectorScale( lm->vecs[ 1 ], is, lm->vecs[ 1 ] );
-		VectorMA( lm->origin, is, lm->vecs[ 0 ], lm->origin );
-		VectorMA( lm->origin, is, lm->vecs[ 1 ], lm->origin );
+		lm->origin -= vector3_mid( lm->vecs[ 0 ], lm->vecs[ 1 ] );
+		lm->vecs[ 0 ] *= is;
+		lm->vecs[ 1 ] *= is;
+		lm->origin += ( lm->vecs[ 0 ] + lm->vecs[ 1 ] ) * is;
 		#else
 		/* old code that only worked with a value of 2 */
-		VectorScale( lm->vecs[ 0 ], is, lm->vecs[ 0 ] );
-		VectorScale( lm->vecs[ 1 ], is, lm->vecs[ 1 ] );
-		VectorMA( lm->origin, -is, lm->vecs[ 0 ], lm->origin );
-		VectorMA( lm->origin, -is, lm->vecs[ 1 ], lm->origin );
+		lm->vecs[ 0 ] *= is;
+		lm->vecs[ 1 ] *= is;
+		lm->origin -=  (lm->vecs[ 0 ] + lm->vecs[ 1 ] ) * is;
 		#endif
 	}
 
 	/* allocate bsp lightmap storage */
-	size = lm->w * lm->h * BSP_LUXEL_SIZE * sizeof( float );
+	size = lm->w * lm->h * sizeof( *( lm->bspLuxels[ 0 ] ) );
 	if ( lm->bspLuxels[ 0 ] == NULL ) {
 		lm->bspLuxels[ 0 ] = safe_malloc( size );
 	}
@@ -374,7 +371,7 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 
 	/* allocate radiosity lightmap storage */
 	if ( bounce ) {
-		size = lm->w * lm->h * RAD_LUXEL_SIZE * sizeof( float );
+		size = lm->w * lm->h * sizeof( *lm->radLuxels[ 0 ] );
 		if ( lm->radLuxels[ 0 ] == NULL ) {
 			lm->radLuxels[ 0 ] = safe_malloc( size );
 		}
@@ -382,35 +379,42 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 	}
 
 	/* allocate sampling lightmap storage */
-	size = lm->sw * lm->sh * SUPER_LUXEL_SIZE * sizeof( float );
+	size = lm->sw * lm->sh * sizeof( *lm->superLuxels[ 0 ] );
 	if ( lm->superLuxels[ 0 ] == NULL ) {
 		lm->superLuxels[ 0 ] = safe_malloc( size );
 	}
 	memset( lm->superLuxels[ 0 ], 0, size );
 
 	/* allocate origin map storage */
-	size = lm->sw * lm->sh * SUPER_ORIGIN_SIZE * sizeof( float );
+	size = lm->sw * lm->sh * sizeof( *lm->superOrigins );
 	if ( lm->superOrigins == NULL ) {
 		lm->superOrigins = safe_malloc( size );
 	}
 	memset( lm->superOrigins, 0, size );
 
 	/* allocate normal map storage */
-	size = lm->sw * lm->sh * SUPER_NORMAL_SIZE * sizeof( float );
+	size = lm->sw * lm->sh * sizeof( *lm->superNormals );
 	if ( lm->superNormals == NULL ) {
 		lm->superNormals = safe_malloc( size );
 	}
 	memset( lm->superNormals, 0, size );
 
+	/* allocate dirt map storage */
+	size = lm->sw * lm->sh * sizeof( *lm->superDirt );
+	if ( lm->superDirt == NULL ) {
+		lm->superDirt = safe_malloc( size );
+	}
+	memset( lm->superDirt, 0, size );
+
 	/* allocate floodlight map storage */
-	size = lm->sw * lm->sh * SUPER_FLOODLIGHT_SIZE * sizeof( float );
+	size = lm->sw * lm->sh * sizeof( *lm->superFloodLight );
 	if ( lm->superFloodLight == NULL ) {
 		lm->superFloodLight = safe_malloc( size );
 	}
 	memset( lm->superFloodLight, 0, size );
 
 	/* allocate cluster map storage */
-	size = lm->sw * lm->sh * sizeof( int );
+	size = lm->sw * lm->sh * sizeof( *lm->superClusters );
 	if ( lm->superClusters == NULL ) {
 		lm->superClusters = safe_malloc( size );
 	}
@@ -422,14 +426,14 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 	/* deluxemap allocation */
 	if ( deluxemap ) {
 		/* allocate sampling deluxel storage */
-		size = lm->sw * lm->sh * SUPER_DELUXEL_SIZE * sizeof( float );
+		size = lm->sw * lm->sh * sizeof( *lm->superDeluxels );
 		if ( lm->superDeluxels == NULL ) {
 			lm->superDeluxels = safe_malloc( size );
 		}
 		memset( lm->superDeluxels, 0, size );
 
 		/* allocate bsp deluxel storage */
-		size = lm->w * lm->h * BSP_DELUXEL_SIZE * sizeof( float );
+		size = lm->w * lm->h * sizeof( *lm->bspDeluxels );
 		if ( lm->bspDeluxels == NULL ) {
 			lm->bspDeluxels = safe_malloc( size );
 		}
@@ -455,7 +459,6 @@ bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 	surfaceInfo_t       *info;
 	int x, y;
 	bspDrawVert_t       *verts, *a, *b;
-	vec3_t delta;
 	mesh_t src, *subdivided, *mesh;
 	float sBasis, tBasis, s, t;
 	float length, widthTable[ MAX_EXPANDED_AXIS ] = {0}, heightTable[ MAX_EXPANDED_AXIS ] = {0};
@@ -490,8 +493,7 @@ bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 			if ( x + 1 < mesh->width ) {
 				a = &verts[ ( y * mesh->width ) + x ];
 				b = &verts[ ( y * mesh->width ) + x + 1 ];
-				VectorSubtract( a->xyz, b->xyz, delta );
-				length = VectorLength( delta );
+				length = vector3_length( a->xyz - b->xyz );
 				if ( length > widthTable[ x ] ) {
 					widthTable[ x ] = length;
 				}
@@ -501,8 +503,7 @@ bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 			if ( y + 1 < mesh->height ) {
 				a = &verts[ ( y * mesh->width ) + x ];
 				b = &verts[ ( ( y + 1 ) * mesh->width ) + x ];
-				VectorSubtract( a->xyz, b->xyz, delta );
-				length = VectorLength( delta );
+				length = vector3_length( a->xyz - b->xyz );
 				if ( length > heightTable[ y ] ) {
 					heightTable[ y ] = length;
 				}
@@ -588,9 +589,9 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	bspDrawSurface_t    *ds, *ds2;
 	surfaceInfo_t       *info;
 	int num2, n, i, axisNum;
-	float s, t, d, len, sampleSize;
-	vec3_t mins, maxs, origin, faxis, size, delta, normalized, vecs[ 2 ];
-	vec4_t plane;
+	float s, t, len, sampleSize;
+	Vector3 mins, maxs, origin, faxis, size, delta, normalized, vecs[ 2 ];
+	Plane3f plane;
 	bspDrawVert_t       *verts;
 
 
@@ -622,14 +623,8 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 		}
 
 		/* surface bounds must intersect with raw lightmap bounds */
-		for ( i = 0; i < 3; i++ )
-		{
-			if ( info->mins[ i ] > lm->maxs[ i ] ) {
-				return false;
-			}
-			if ( info->maxs[ i ] < lm->mins[ i ] ) {
-				return false;
-			}
+		if( !info->minmax.test( lm->minmax ) ){
+			return false;
 		}
 
 		/* plane check (fixme: allow merging of nonplanars) */
@@ -639,10 +634,10 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 			}
 
 			/* compare planes */
-			for ( i = 0; i < 4; i++ )
-				if ( fabs( info->plane[ i ] - lm->plane[ i ] ) > EQUAL_EPSILON ) {
-					return false;
-				}
+			if( !vector3_equal_epsilon( info->plane->normal(), lm->plane->normal(), EQUAL_EPSILON )
+			 || !float_equal_epsilon( info->plane->dist(), lm->plane->dist(), EQUAL_EPSILON ) ){
+				return false;
+			 }
 		}
 
 		/* debug code hacking */
@@ -656,8 +651,7 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	}
 
 	/* add surface to lightmap bounds */
-	AddPointToBounds( info->mins, lm->mins, lm->maxs );
-	AddPointToBounds( info->maxs, lm->mins, lm->maxs );
+	lm->minmax.extend( info->minmax );
 
 	/* check to see if this is a non-planar patch */
 	if ( ds->surfaceType == MST_PATCH &&
@@ -671,8 +665,8 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	/* round to the lightmap resolution */
 	for ( i = 0; i < 3; i++ )
 	{
-		mins[ i ] = sampleSize * floor( lm->mins[ i ] / sampleSize );
-		maxs[ i ] = sampleSize * ceil( lm->maxs[ i ] / sampleSize );
+		mins[ i ] = sampleSize * floor( lm->minmax.mins[ i ] / sampleSize );
+		maxs[ i ] = sampleSize * ceil( lm->minmax.maxs[ i ] / sampleSize );
 		size[ i ] = ( maxs[ i ] - mins[ i ] ) / sampleSize + 1.0f;
 
 		/* hack (god this sucks) */
@@ -685,23 +679,23 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	if ( sampleSize != lm->sampleSize && lmLimitSize == 0 ){
 		if ( debugSampleSize == 1 || lm->customWidth > 128 ){
 			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
-						info->mins[0],
-						info->mins[1],
-						info->mins[2],
-						info->maxs[0],
-						info->maxs[1],
-						info->maxs[2],
+						info->minmax.mins[0],
+						info->minmax.mins[1],
+						info->minmax.mins[2],
+						info->minmax.maxs[0],
+						info->minmax.maxs[1],
+						info->minmax.maxs[2],
 						lm->sampleSize,
 						(int) sampleSize );
 		}
 		else if ( debugSampleSize == 0 ){
 			Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: surface at (%6.0f %6.0f %6.0f) (%6.0f %6.0f %6.0f) too large for desired samplesize/lightmapsize/lightmapscale combination, increased samplesize from %d to %d\n",
-						info->mins[0],
-						info->mins[1],
-						info->mins[2],
-						info->maxs[0],
-						info->maxs[1],
-						info->maxs[2],
+						info->minmax.mins[0],
+						info->minmax.mins[1],
+						info->minmax.mins[2],
+						info->minmax.maxs[0],
+						info->minmax.maxs[1],
+						info->minmax.maxs[2],
 						lm->sampleSize,
 						(int) sampleSize );
 			debugSampleSize--;
@@ -716,13 +710,11 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 
 	/* fixme: copy rounded mins/maxes to lightmap record? */
 	if ( lm->plane == NULL ) {
-		VectorCopy( mins, lm->mins );
-		VectorCopy( maxs, lm->maxs );
-		VectorCopy( mins, origin );
+		lm->minmax = { mins, maxs };
 	}
 
 	/* set lightmap origin */
-	VectorCopy( lm->mins, origin );
+	origin = lm->minmax.mins;
 
 	/* make absolute axis */
 	faxis[ 0 ] = fabs( lm->axis[ 0 ] );
@@ -777,9 +769,9 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 		/* set the lightmap texture coordinates in yDrawVerts in [0, superSample * lm->customWidth] space */
 		for ( i = 0; i < ds2->numVerts; i++ )
 		{
-			VectorSubtract( verts[ i ].xyz, origin, delta );
-			s = DotProduct( delta, vecs[ 0 ] ) + 0.5f;
-			t = DotProduct( delta, vecs[ 1 ] ) + 0.5f;
+			delta = verts[ i ].xyz - origin;
+			s = vector3_dot( delta, vecs[ 0 ] ) + 0.5f;
+			t = vector3_dot( delta, vecs[ 1 ] ) + 0.5f;
 			verts[ i ].lightmap[ 0 ][ 0 ] = s * superSample;
 			verts[ i ].lightmap[ 0 ][ 1 ] = t * superSample;
 
@@ -796,36 +788,33 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 	verts = &yDrawVerts[ ds2->firstVert ];
 
 	/* calculate lightmap origin */
-	if ( VectorLength( ds2->lightmapVecs[ 2 ] ) ) {
-		VectorCopy( ds2->lightmapVecs[ 2 ], plane );
+	if ( vector3_length( ds2->lightmapVecs[ 2 ] ) ) {
+		plane.normal() = ds2->lightmapVecs[ 2 ];
 	}
 	else{
-		VectorCopy( lm->axis, plane );
+		plane.normal() = lm->axis;
 	}
-	plane[ 3 ] = DotProduct( verts[ 0 ].xyz, plane );
+	plane.dist() = vector3_dot( verts[ 0 ].xyz, plane.normal() );
 
-	VectorCopy( origin, lm->origin );
-	d = DotProduct( lm->origin, plane ) - plane[ 3 ];
-	d /= plane[ axisNum ];
-	lm->origin[ axisNum ] -= d;
+	lm->origin = origin;
+	lm->origin[ axisNum ] -= plane3_distance_to_point( plane, lm->origin ) / plane.normal()[ axisNum ];
 
 	/* legacy support */
-	VectorCopy( lm->origin, ds->lightmapOrigin );
+	ds->lightmapOrigin = lm->origin;
 
 	/* for planar surfaces, create lightmap vectors for st->xyz conversion */
-	if ( VectorLength( ds->lightmapVecs[ 2 ] ) || 1 ) {  /* ydnar: can't remember what exactly i was thinking here... */
+	if ( vector3_length( ds->lightmapVecs[ 2 ] ) || 1 ) {  /* ydnar: can't remember what exactly i was thinking here... */
 		/* allocate space for the vectors */
-		lm->vecs = safe_calloc( 3 * sizeof( vec3_t ) );
-		VectorCopy( ds->lightmapVecs[ 2 ], lm->vecs[ 2 ] );
+		lm->vecs = safe_calloc( 3 * sizeof( *lm->vecs ) );
+		lm->vecs[ 2 ] = ds->lightmapVecs[ 2 ];
 
 		/* project stepped lightmap blocks and subtract to get planevecs */
 		for ( i = 0; i < 2; i++ )
 		{
-			len = VectorNormalize( vecs[ i ], normalized );
-			VectorScale( normalized, ( 1.0 / len ), lm->vecs[ i ] );
-			d = DotProduct( lm->vecs[ i ], plane );
-			d /= plane[ axisNum ];
-			lm->vecs[ i ][ axisNum ] -= d;
+			normalized = vecs[ i ];
+			len = VectorNormalize( normalized );
+			lm->vecs[ i ] = normalized * ( 1.0 / len );
+			lm->vecs[ i ][ axisNum ] -= vector3_dot( lm->vecs[ i ], plane.normal() ) / plane.normal()[ axisNum ];
 		}
 	}
 	else
@@ -923,24 +912,31 @@ static int CompareSurfaceInfo( const void *a, const void *b ){
 		return -1;
 	}
 	else if ( aInfo->plane != NULL && bInfo->plane != NULL ) {
-		for ( i = 0; i < 4; i++ )
+		for ( i = 0; i < 3; i++ )
 		{
-			if ( aInfo->plane[ i ] < bInfo->plane[ i ] ) {
+			if ( aInfo->plane->normal()[ i ] < bInfo->plane->normal()[ i ] ) {
 				return 1;
 			}
-			else if ( aInfo->plane[ i ] > bInfo->plane[ i ] ) {
+			else if ( aInfo->plane->normal()[ i ] > bInfo->plane->normal()[ i ] ) {
 				return -1;
 			}
 		}
+		if ( aInfo->plane->dist() < bInfo->plane->dist() ) {
+			return 1;
+		}
+		else if ( aInfo->plane->dist() > bInfo->plane->dist() ) {
+			return -1;
+		}
+
 	}
 
 	/* then position in world */
 	for ( i = 0; i < 3; i++ )
 	{
-		if ( aInfo->mins[ i ] < bInfo->mins[ i ] ) {
+		if ( aInfo->minmax.mins[ i ] < bInfo->minmax.mins[ i ] ) {
 			return 1;
 		}
-		else if ( aInfo->mins[ i ] > bInfo->mins[ i ] ) {
+		else if ( aInfo->minmax.mins[ i ] > bInfo->minmax.mins[ i ] ) {
 			return -1;
 		}
 	}
@@ -965,7 +961,6 @@ void SetupSurfaceLightmaps( void ){
 	surfaceInfo_t       *info, *info2;
 	rawLightmap_t       *lm;
 	bool added;
-	vec3_t mapSize, entityOrigin;
 
 
 	/* note it */
@@ -981,7 +976,7 @@ void SetupSurfaceLightmaps( void ){
 	}
 
 	/* clear map bounds */
-	ClearBounds( mapMins, mapMaxs );
+	g_mapMinmax.clear();
 
 	/* allocate a list of surface clusters */
 	numSurfaceClusters = 0;
@@ -1015,14 +1010,6 @@ void SetupSurfaceLightmaps( void ){
 			ds = &bspDrawSurfaces[ num ];
 			info = &surfaceInfos[ num ];
 
-			/* set entity origin */
-			if ( ds->numVerts > 0 ) {
-				VectorSubtract( yDrawVerts[ ds->firstVert ].xyz, bspDrawVerts[ ds->firstVert ].xyz, entityOrigin );
-			}
-			else{
-				VectorClear( entityOrigin );
-			}
-
 			/* basic setup */
 			info->modelindex = i;
 			info->lm = NULL;
@@ -1049,11 +1036,11 @@ void SetupSurfaceLightmaps( void ){
 			}
 
 			/* determine surface bounds */
-			ClearBounds( info->mins, info->maxs );
+			info->minmax.clear();
 			for ( k = 0; k < ds->numVerts; k++ )
 			{
-				AddPointToBounds( yDrawVerts[ ds->firstVert + k ].xyz, mapMins, mapMaxs );
-				AddPointToBounds( yDrawVerts[ ds->firstVert + k ].xyz, info->mins, info->maxs );
+				g_mapMinmax.extend( yDrawVerts[ ds->firstVert + k ].xyz );
+				info->minmax.extend( yDrawVerts[ ds->firstVert + k ].xyz );
 			}
 
 			/* find all the bsp clusters the surface falls into */
@@ -1063,9 +1050,7 @@ void SetupSurfaceLightmaps( void ){
 				leaf = &bspLeafs[ k ];
 
 				/* test bbox */
-				if ( leaf->mins[ 0 ] > info->maxs[ 0 ] || leaf->maxs[ 0 ] < info->mins[ 0 ] ||
-					 leaf->mins[ 1 ] > info->maxs[ 1 ] || leaf->maxs[ 1 ] < info->mins[ 1 ] ||
-					 leaf->mins[ 2 ] > info->maxs[ 2 ] || leaf->maxs[ 2 ] < info->mins[ 2 ] ) {
+				if( !leaf->minmax.test( info->minmax ) ) {
 					continue;
 				}
 
@@ -1084,11 +1069,11 @@ void SetupSurfaceLightmaps( void ){
 			}
 
 			/* determine if surface is planar */
-			if ( VectorLength( ds->lightmapVecs[ 2 ] ) > 0.0f ) {
+			if ( vector3_length( ds->lightmapVecs[ 2 ] ) != 0.0f ) {
 				/* make a plane */
-				info->plane = safe_malloc( 4 * sizeof( float ) );
-				VectorCopy( ds->lightmapVecs[ 2 ], info->plane );
-				info->plane[ 3 ] = DotProduct( yDrawVerts[ ds->firstVert ].xyz, info->plane );
+				info->plane = safe_malloc( sizeof( *( info->plane ) ) );
+				info->plane->normal() = ds->lightmapVecs[ 2 ];
+				info->plane->dist() = vector3_dot( yDrawVerts[ ds->firstVert ].xyz, info->plane->normal() );
 			}
 
 			/* determine if surface requires a lightmap */
@@ -1107,8 +1092,7 @@ void SetupSurfaceLightmaps( void ){
 	}
 
 	/* find longest map distance */
-	VectorSubtract( mapMaxs, mapMins, mapSize );
-	maxMapDistance = VectorLength( mapSize );
+	maxMapDistance = vector3_length( g_mapMinmax.maxs - g_mapMinmax.mins );
 
 	/* sort the surfaces info list */
 	qsort( sortSurfaces, numBSPDrawSurfaces, sizeof( int ), CompareSurfaceInfo );
@@ -1153,14 +1137,13 @@ void SetupSurfaceLightmaps( void ){
 		lm->recvShadows = info->recvShadows;
 		lm->brightness = info->si->lmBrightness;
 		lm->filterRadius = info->si->lmFilterRadius;
-		VectorCopy( info->si->floodlightRGB, lm->floodlightRGB );
+		lm->floodlightRGB = info->si->floodlightRGB;
 		lm->floodlightDistance = info->si->floodlightDistance;
 		lm->floodlightIntensity = info->si->floodlightIntensity;
 		lm->floodlightDirectionScale = info->si->floodlightDirectionScale;
-		VectorCopy( info->axis, lm->axis );
+		lm->axis = info->axis;
 		lm->plane = info->plane;
-		VectorCopy( info->mins, lm->mins );
-		VectorCopy( info->maxs, lm->maxs );
+		lm->minmax = info->minmax;
 
 		lm->customWidth = info->si->lmCustomWidth;
 		lm->customHeight = info->si->lmCustomHeight;
@@ -1209,8 +1192,8 @@ void SetupSurfaceLightmaps( void ){
 	/* allocate vertex luxel storage */
 	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 	{
-		vertexLuxels[ k ] = safe_calloc( numBSPDrawVerts * VERTEX_LUXEL_SIZE * sizeof( float ) );
-		radVertexLuxels[ k ] = safe_calloc( numBSPDrawVerts * VERTEX_LUXEL_SIZE * sizeof( float ) );
+		vertexLuxels[ k ] = safe_calloc( numBSPDrawVerts * sizeof( *vertexLuxels[ 0 ] ) );
+		radVertexLuxels[ k ] = safe_calloc( numBSPDrawVerts * sizeof( *radVertexLuxels[ 0 ] ) );
 	}
 
 	/* emit some stats */
@@ -1236,11 +1219,10 @@ void SetupSurfaceLightmaps( void ){
 #define MAX_STITCH_LUXELS       64
 
 void StitchSurfaceLightmaps( void ){
-	int i, j, x, y, x2, y2, *cluster, *cluster2,
+	int i, j, x, y, x2, y2,
 		numStitched, numCandidates, numLuxels, f, fOld, start;
 	rawLightmap_t   *lm, *a, *b, *c[ MAX_STITCH_CANDIDATES ];
-	float           *luxel, *luxel2, *origin, *origin2, *normal, *normal2,
-					 sampleSize, average[ 3 ], totalColor, ootc;
+	float           sampleSize, totalColor;
 
 
 	/* disabled for now */
@@ -1275,9 +1257,7 @@ void StitchSurfaceLightmaps( void ){
 			b = &rawLightmaps[ j ];
 
 			/* test bounding box */
-			if ( a->mins[ 0 ] > b->maxs[ 0 ] || a->maxs[ 0 ] < b->mins[ 0 ] ||
-				 a->mins[ 1 ] > b->maxs[ 1 ] || a->maxs[ 1 ] < b->mins[ 1 ] ||
-				 a->mins[ 2 ] > b->maxs[ 2 ] || a->maxs[ 2 ] < b->mins[ 2 ] ) {
+			if ( !a->minmax.test( b->minmax ) ) {
 				continue;
 			}
 
@@ -1292,18 +1272,17 @@ void StitchSurfaceLightmaps( void ){
 			{
 				/* ignore unmapped/unlit luxels */
 				lm = a;
-				cluster = SUPER_CLUSTER( x, y );
-				if ( *cluster == CLUSTER_UNMAPPED ) {
+				if ( lm->getSuperCluster( x, y ) == CLUSTER_UNMAPPED ) {
 					continue;
 				}
-				luxel = SUPER_LUXEL( 0, x, y );
-				if ( luxel[ 3 ] <= 0.0f ) {
+				SuperLuxel& luxel = lm->getSuperLuxel( 0, x, y );
+				if ( luxel.count <= 0.0f ) {
 					continue;
 				}
 
 				/* get particulars */
-				origin = SUPER_ORIGIN( x, y );
-				normal = SUPER_NORMAL( x, y );
+				const Vector3& origin = lm->getSuperOrigin( x, y );
+				const Vector3& normal = lm->getSuperNormal( x, y );
 
 				/* walk candidate list */
 				for ( j = 0; j < numCandidates; j++ )
@@ -1313,17 +1292,17 @@ void StitchSurfaceLightmaps( void ){
 					lm = b;
 
 					/* set samplesize to the smaller of the pair */
-					sampleSize = 0.5f * ( a->actualSampleSize < b->actualSampleSize ? a->actualSampleSize : b->actualSampleSize );
+					sampleSize = 0.5f * std::min( a->actualSampleSize, b->actualSampleSize );
 
 					/* test bounding box */
-					if ( origin[ 0 ] < ( b->mins[ 0 ] - sampleSize ) || ( origin[ 0 ] > b->maxs[ 0 ] + sampleSize ) ||
-						 origin[ 1 ] < ( b->mins[ 1 ] - sampleSize ) || ( origin[ 1 ] > b->maxs[ 1 ] + sampleSize ) ||
-						 origin[ 2 ] < ( b->mins[ 2 ] - sampleSize ) || ( origin[ 2 ] > b->maxs[ 2 ] + sampleSize ) ) {
+					if ( origin[ 0 ] < ( b->minmax.mins[ 0 ] - sampleSize ) || ( origin[ 0 ] > b->minmax.maxs[ 0 ] + sampleSize ) ||
+						 origin[ 1 ] < ( b->minmax.mins[ 1 ] - sampleSize ) || ( origin[ 1 ] > b->minmax.maxs[ 1 ] + sampleSize ) ||
+						 origin[ 2 ] < ( b->minmax.mins[ 2 ] - sampleSize ) || ( origin[ 2 ] > b->minmax.maxs[ 2 ] + sampleSize ) ) {
 						continue;
 					}
 
 					/* walk candidate luxels */
-					VectorClear( average );
+					Vector3 average( 0, 0, 0 );
 					numLuxels = 0;
 					totalColor = 0.0f;
 					for ( y2 = 0; y2 < b->sh && numLuxels < MAX_STITCH_LUXELS; y2++ )
@@ -1336,36 +1315,33 @@ void StitchSurfaceLightmaps( void ){
 							}
 
 							/* ignore unmapped/unlit luxels */
-							cluster2 = SUPER_CLUSTER( x2, y2 );
-							if ( *cluster2 == CLUSTER_UNMAPPED ) {
+							if ( lm->getSuperCluster( x2, y2 ) == CLUSTER_UNMAPPED ) {
 								continue;
 							}
-							luxel2 = SUPER_LUXEL( 0, x2, y2 );
-							if ( luxel2[ 3 ] <= 0.0f ) {
+							const SuperLuxel& luxel2 = lm->getSuperLuxel( 0, x2, y2 );
+							if ( luxel2.count <= 0.0f ) {
 								continue;
 							}
 
 							/* get particulars */
-							origin2 = SUPER_ORIGIN( x2, y2 );
-							normal2 = SUPER_NORMAL( x2, y2 );
+							const Vector3& origin2 = lm->getSuperOrigin( x2, y2 );
+							const Vector3& normal2 = lm->getSuperNormal( x2, y2 );
 
 							/* test normal */
-							if ( DotProduct( normal, normal2 ) < 0.5f ) {
+							if ( vector3_dot( normal, normal2 ) < 0.5f ) {
 								continue;
 							}
 
 							/* test bounds */
-							if ( fabs( origin[ 0 ] - origin2[ 0 ] ) > sampleSize ||
-								 fabs( origin[ 1 ] - origin2[ 1 ] ) > sampleSize ||
-								 fabs( origin[ 2 ] - origin2[ 2 ] ) > sampleSize ) {
+							if ( !vector3_equal_epsilon( origin, origin2, sampleSize ) ) {
 								continue;
 							}
 
 							/* add luxel */
-							//%	VectorSet( luxel2, 255, 0, 255 );
+							//%	luxel2.value = { 255, 0, 255 };
 							numLuxels++;
-							VectorAdd( average, luxel2, average );
-							totalColor += luxel2[ 3 ];
+							average += luxel2.value;
+							totalColor += luxel2.count;
 						}
 					}
 
@@ -1375,9 +1351,8 @@ void StitchSurfaceLightmaps( void ){
 					}
 
 					/* scale average */
-					ootc = 1.0f / totalColor;
-					VectorScale( average, ootc, luxel );
-					luxel[ 3 ] = 1.0f;
+					luxel.value = average * ( 1.0f / totalColor );
+					luxel.count = 1.0f;
 					numStitched++;
 				}
 			}
@@ -1401,10 +1376,8 @@ void StitchSurfaceLightmaps( void ){
 #define LUXEL_COLOR_FRAC    0.001302083 /* 1 / 3 / 256 */
 
 static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bNum ){
-	rawLightmap_t   *lm;
 	int x, y;
 	double delta, total, rd, gd, bd;
-	float           *aLuxel, *bLuxel;
 
 
 	/* styled lightmaps will never be collapsed to non-styled lightmaps when there is _minlight */
@@ -1453,8 +1426,8 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 			total += 1.0;
 
 			/* get luxels */
-			lm = a; aLuxel = BSP_LUXEL( aNum, x, y );
-			lm = b; bLuxel = BSP_LUXEL( bNum, x, y );
+			const Vector3& aLuxel = a->getBspLuxel( aNum, x, y );
+			const Vector3& bLuxel = b->getBspLuxel( bNum, x, y );
 
 			/* ignore unused luxels */
 			if ( aLuxel[ 0 ] < 0 || bLuxel[ 0 ] < 0 ) {
@@ -1495,9 +1468,8 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
  */
 
 static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bNum ){
-	rawLightmap_t   *lm;
 	int x, y;
-	float luxel[ 3 ], *aLuxel, *bLuxel;
+	Vector3 luxel;
 
 
 	/* basic tests */
@@ -1511,12 +1483,11 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
 	/* compare solid lightmaps */
 	if ( a->solid[ aNum ] && b->solid[ bNum ] ) {
 		/* average */
-		VectorAdd( a->solidColor[ aNum ], b->solidColor[ bNum ], luxel );
-		VectorScale( luxel, 0.5f, luxel );
+		luxel = vector3_mid( a->solidColor[ aNum ], b->solidColor[ bNum ] );
 
 		/* copy to both */
-		VectorCopy( luxel, a->solidColor[ aNum ] );
-		VectorCopy( luxel, b->solidColor[ bNum ] );
+		a->solidColor[ aNum ] = luxel;
+		b->solidColor[ bNum ] = luxel;
 
 		/* return to sender */
 		return true;
@@ -1533,28 +1504,27 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
 		for ( x = 0; x < a->w; x++ )
 		{
 			/* get luxels */
-			lm = a; aLuxel = BSP_LUXEL( aNum, x, y );
-			lm = b; bLuxel = BSP_LUXEL( bNum, x, y );
+			Vector3& aLuxel = a->getBspLuxel( aNum, x, y );
+			Vector3& bLuxel = b->getBspLuxel( bNum, x, y );
 
 			/* handle occlusion mismatch */
 			if ( aLuxel[ 0 ] < 0.0f ) {
-				VectorCopy( bLuxel, aLuxel );
+				aLuxel = bLuxel;
 			}
 			else if ( bLuxel[ 0 ] < 0.0f ) {
-				VectorCopy( aLuxel, bLuxel );
+				bLuxel = aLuxel;
 			}
 			else
 			{
 				/* average */
-				VectorAdd( aLuxel, bLuxel, luxel );
-				VectorScale( luxel, 0.5f, luxel );
+				luxel = vector3_mid( aLuxel, bLuxel );
 
 				/* debugging code */
 				//%	luxel[ 2 ] += 64.0f;
 
 				/* copy to both */
-				VectorCopy( luxel, aLuxel );
-				VectorCopy( luxel, bLuxel );
+				aLuxel = luxel;
+				bLuxel = luxel;
 			}
 		}
 	}
@@ -1572,9 +1542,6 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
 
 static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
 	int i, x, y, d, lightmapNum;
-	float   *luxel;
-	vec3_t color, vertexColor;
-	byte cb[ 4 ], vcb[ 4 ];
 
 
 	/* find luxel xy coords */
@@ -1602,7 +1569,7 @@ static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
 		}
 
 		/* get luxel */
-		luxel = BSP_LUXEL( lightmapNum, x, y );
+		const Vector3& luxel = lm->getBspLuxel( lightmapNum, x, y );
 
 		/* ignore occluded luxels */
 		if ( luxel[ 0 ] < 0.0f || luxel[ 1 ] < 0.0f || luxel[ 2 ] < 0.0f ) {
@@ -1610,8 +1577,8 @@ static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
 		}
 
 		/* copy, set min color and compare */
-		VectorCopy( luxel, color );
-		VectorCopy( dv->color[ 0 ], vertexColor );
+		Vector3 color = luxel;
+		Vector3 vertexColor = dv->color[ 0 ].rgb();
 
 		/* styles are not affected by minlight */
 		if ( lightmapNum == 0 ) {
@@ -1628,8 +1595,9 @@ static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
 		}
 
 		/* set to bytes */
-		ColorToBytes( color, cb, 1.0f );
-		ColorToBytes( vertexColor, vcb, 1.0f );
+		Color4b cb, vcb;
+		ColorToBytes( color, cb.rgb(), 1.0f );
+		ColorToBytes( vertexColor, vcb.rgb(), 1.0f );
 
 		/* compare */
 		for ( i = 0; i < 3; i++ )
@@ -1674,17 +1642,13 @@ static bool ApproximateTriangle_r( rawLightmap_t *lm, bspDrawVert_t *dv[ 3 ] ){
 	/* subdivide calc */
 	{
 		int i;
-		float dx, dy, dist, maxDist;
-
 
 		/* find the longest edge and split it */
 		max = -1;
-		maxDist = 0;
+		float maxDist = 0;
 		for ( i = 0; i < 3; i++ )
 		{
-			dx = dv[ i ]->lightmap[ 0 ][ 0 ] - dv[ ( i + 1 ) % 3 ]->lightmap[ 0 ][ 0 ];
-			dy = dv[ i ]->lightmap[ 0 ][ 1 ] - dv[ ( i + 1 ) % 3 ]->lightmap[ 0 ][ 1 ];
-			dist = sqrt( ( dx * dx ) + ( dy * dy ) );
+			const float dist = vector2_length( dv[ i ]->lightmap[ 0 ] - dv[ ( i + 1 ) % 3 ]->lightmap[ 0 ] );
 			if ( dist > maxDist ) {
 				maxDist = dist;
 				max = i;
@@ -1778,9 +1742,9 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 		}
 
 		/* assume that surfaces whose bounding boxes is smaller than 2x samplesize will be forced to vertex */
-		if ( ( info->maxs[ 0 ] - info->mins[ 0 ] ) <= ( 2.0f * info->sampleSize ) &&
-			 ( info->maxs[ 1 ] - info->mins[ 1 ] ) <= ( 2.0f * info->sampleSize ) &&
-			 ( info->maxs[ 2 ] - info->mins[ 2 ] ) <= ( 2.0f * info->sampleSize ) ) {
+		if ( ( info->minmax.maxs[ 0 ] - info->minmax.mins[ 0 ] ) <= ( 2.0f * info->sampleSize ) &&
+			 ( info->minmax.maxs[ 1 ] - info->minmax.mins[ 1 ] ) <= ( 2.0f * info->sampleSize ) &&
+			 ( info->minmax.maxs[ 2 ] - info->minmax.mins[ 2 ] ) <= ( 2.0f * info->sampleSize ) ) {
 			info->approximated = true;
 			numSurfsVertexForced++;
 			continue;
@@ -1882,7 +1846,6 @@ static bool ApproximateLightmap( rawLightmap_t *lm ){
 
 static bool TestOutLightmapStamp( rawLightmap_t *lm, int lightmapNum, outLightmap_t *olm, int x, int y ){
 	int sx, sy, ox, oy, offset;
-	float       *luxel;
 
 
 	/* bounds check */
@@ -1905,8 +1868,7 @@ static bool TestOutLightmapStamp( rawLightmap_t *lm, int lightmapNum, outLightma
 		for ( sx = 0; sx < lm->w; sx++ )
 		{
 			/* get luxel */
-			luxel = BSP_LUXEL( lightmapNum, sx, sy );
-			if ( luxel[ 0 ] < 0.0f ) {
+			if ( lm->getBspLuxel( lightmapNum, sx, sy )[ 0 ] < 0.0f ) {
 				continue;
 			}
 
@@ -1963,9 +1925,9 @@ static void SetupOutLightmap( rawLightmap_t *lm, outLightmap_t *olm ){
 
 	/* allocate buffers */
 	olm->lightBits = safe_calloc( ( olm->customWidth * olm->customHeight / 8 ) + 8 );
-	olm->bspLightBytes = safe_calloc( olm->customWidth * olm->customHeight * 3 );
+	olm->bspLightBytes = safe_calloc( olm->customWidth * olm->customHeight * sizeof( *olm->bspLightBytes ) );
 	if ( deluxemap ) {
-		olm->bspDirBytes = safe_calloc( olm->customWidth * olm->customHeight * 3 );
+		olm->bspDirBytes = safe_calloc( olm->customWidth * olm->customHeight * sizeof( *olm->bspDirBytes ) );
 	}
 }
 
@@ -1981,9 +1943,6 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 	int i, j, k, lightmapNum, xMax, yMax, x = -1, y = -1, sx, sy, ox, oy, offset;
 	outLightmap_t       *olm;
 	surfaceInfo_t       *info;
-	float               *luxel, *deluxel;
-	vec3_t color, direction;
-	byte                *pixel;
 	bool ok;
 	int xIncrement, yIncrement;
 
@@ -2235,23 +2194,23 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 			for ( x = 0; x < xMax; x++ )
 			{
 				/* get luxel */
-				luxel = BSP_LUXEL( lightmapNum, x, y );
-				deluxel = BSP_DELUXEL( x, y );
+				const Vector3& luxel = lm->getBspLuxel( lightmapNum, x, y );
 				if ( luxel[ 0 ] < 0.0f && !lm->solid[ lightmapNum ] ) {
 					continue;
 				}
-
+				Vector3 color;
 				/* set minimum light */
 				if ( lm->solid[ lightmapNum ] ) {
 					if ( debug ) {
-						VectorSet( color, 255.0f, 0.0f, 0.0f );
+						color = { 255.0f, 0.0f, 0.0f };
 					}
 					else{
-						VectorCopy( lm->solidColor[ lightmapNum ], color );
+						color = lm->solidColor[ lightmapNum ];
 					}
 				}
 				else{
-					VectorCopy( luxel, color );
+
+					color = luxel;
 				}
 
 				/* styles are not affected by minlight */
@@ -2274,18 +2233,13 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 				olm->freeLuxels--;
 
 				/* store color */
-				pixel = olm->bspLightBytes + ( ( ( oy * olm->customWidth ) + ox ) * 3 );
-				ColorToBytes( color, pixel, lm->brightness );
+				ColorToBytes( color, olm->bspLightBytes[ oy * olm->customWidth + ox], lm->brightness );
 
 				/* store direction */
 				if ( deluxemap ) {
 					/* normalize average light direction */
-					pixel = olm->bspDirBytes + ( ( ( oy * olm->customWidth ) + ox ) * 3 );
-					VectorScale( deluxel, 1000.0f, direction );
-					VectorNormalize( direction, direction );
-					VectorScale( direction, 127.5f, direction );
-					for ( i = 0; i < 3; i++ )
-						pixel[ i ] = (byte)( 127.5f + direction[ i ] );
+					const Vector3 direction = VectorNormalized( lm->getBspDeluxel( x, y ) * 1000.0f ) * 127.5f;
+					olm->bspDirBytes[ oy * olm->customWidth + ox ] = direction + Vector3().set( 127.5f );
 				}
 			}
 		}
@@ -2357,16 +2311,16 @@ static int CompareRawLightmap( const void *a, const void *b ){
 void FillOutLightmap( outLightmap_t *olm ){
 	int x, y;
 	int ofs;
-	vec3_t dir_sum, light_sum;
 	int cnt, filled;
 	byte *lightBitsNew = NULL;
-	byte *lightBytesNew = NULL;
-	byte *dirBytesNew = NULL;
+	Vector3b *lightBytesNew = NULL;
+	Vector3b *dirBytesNew = NULL;
+	const size_t size = olm->customWidth * olm->customHeight * sizeof( Vector3b );
 
 	lightBitsNew = safe_malloc( ( olm->customWidth * olm->customHeight + 8 ) / 8 );
-	lightBytesNew = safe_malloc( olm->customWidth * olm->customHeight * 3 );
+	lightBytesNew = safe_malloc( size );
 	if ( deluxemap ) {
-		dirBytesNew = safe_malloc( olm->customWidth * olm->customHeight * 3 );
+		dirBytesNew = safe_malloc( size );
 	}
 
 	/*
@@ -2379,9 +2333,9 @@ void FillOutLightmap( outLightmap_t *olm ){
 	 */
 
 	memcpy( lightBitsNew, olm->lightBits, ( olm->customWidth * olm->customHeight + 8 ) / 8 );
-	memcpy( lightBytesNew, olm->bspLightBytes, olm->customWidth * olm->customHeight * 3 );
+	memcpy( lightBytesNew, olm->bspLightBytes, size );
 	if ( deluxemap ) {
-		memcpy( dirBytesNew, olm->bspDirBytes, olm->customWidth * olm->customHeight * 3 );
+		memcpy( dirBytesNew, olm->bspDirBytes, size );
 	}
 
 	for (;; )
@@ -2396,43 +2350,42 @@ void FillOutLightmap( outLightmap_t *olm ){
 					continue;
 				}
 				cnt = 0;
-				VectorClear( dir_sum );
-				VectorClear( light_sum );
+				Vector3 dir_sum( 0, 0, 0 ), light_sum( 0, 0, 0 );
 
 				/* try all four neighbors */
 				ofs = ( ( y + olm->customHeight - 1 ) % olm->customHeight ) * olm->customWidth + x;
 				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
 					++cnt;
-					VectorAdd( light_sum, olm->bspLightBytes + ofs * 3, light_sum );
+					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
-						VectorAdd( dir_sum, olm->bspDirBytes + ofs * 3, dir_sum );
+						dir_sum += olm->bspDirBytes[ofs];
 					}
 				}
 
 				ofs = ( ( y + 1 ) % olm->customHeight ) * olm->customWidth + x;
 				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
 					++cnt;
-					VectorAdd( light_sum, olm->bspLightBytes + ofs * 3, light_sum );
+					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
-						VectorAdd( dir_sum, olm->bspDirBytes + ofs * 3, dir_sum );
+						dir_sum += olm->bspDirBytes[ofs];
 					}
 				}
 
 				ofs = y * olm->customWidth + ( x + olm->customWidth - 1 ) % olm->customWidth;
 				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
 					++cnt;
-					VectorAdd( light_sum, olm->bspLightBytes + ofs * 3, light_sum );
+					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
-						VectorAdd( dir_sum, olm->bspDirBytes + ofs * 3, dir_sum );
+						dir_sum += olm->bspDirBytes[ofs];
 					}
 				}
 
 				ofs = y * olm->customWidth + ( x + 1 ) % olm->customWidth;
 				if ( olm->lightBits[ofs >> 3] & ( 1 << ( ofs & 7 ) ) ) { /* already filled */
 					++cnt;
-					VectorAdd( light_sum, olm->bspLightBytes + ofs * 3, light_sum );
+					light_sum += olm->bspLightBytes[ofs];
 					if ( deluxemap ) {
-						VectorAdd( dir_sum, olm->bspDirBytes + ofs * 3, dir_sum );
+						dir_sum += olm->bspDirBytes[ofs];
 					}
 				}
 
@@ -2440,9 +2393,9 @@ void FillOutLightmap( outLightmap_t *olm ){
 					++filled;
 					ofs = y * olm->customWidth + x;
 					lightBitsNew[ofs >> 3] |= ( 1 << ( ofs & 7 ) );
-					VectorScale( light_sum, 1.0 / cnt, lightBytesNew + ofs * 3 );
+					lightBytesNew[ofs] = light_sum * ( 1.0 / cnt );
 					if ( deluxemap ) {
-						VectorScale( dir_sum, 1.0 / cnt, dirBytesNew + ofs * 3 );
+						dirBytesNew[ofs] = dir_sum * ( 1.0 / cnt );
 					}
 				}
 			}
@@ -2453,9 +2406,9 @@ void FillOutLightmap( outLightmap_t *olm ){
 		}
 
 		memcpy( olm->lightBits, lightBitsNew, ( olm->customWidth * olm->customHeight + 8 ) / 8 );
-		memcpy( olm->bspLightBytes, lightBytesNew, olm->customWidth * olm->customHeight * 3 );
+		memcpy( olm->bspLightBytes, lightBytesNew, size );
 		if ( deluxemap ) {
-			memcpy( olm->bspDirBytes, dirBytesNew, olm->customWidth * olm->customHeight * 3 );
+			memcpy( olm->bspDirBytes, dirBytesNew, size );
 		}
 	}
 
@@ -2472,15 +2425,14 @@ void FillOutLightmap( outLightmap_t *olm ){
  */
 
 void StoreSurfaceLightmaps( bool fastAllocate ){
-	int i, j, k, x, y, lx, ly, sx, sy, *cluster, mappedSamples, timer_start;
-	int style, size, lightmapNum, lightmapNum2;
-	float               *normal, *luxel, *bspLuxel, *bspLuxel2, *radLuxel, samples, occludedSamples;
-	vec3_t sample, occludedSample, dirSample, colorMins, colorMaxs;
-	float               *deluxel, *bspDeluxel, *bspDeluxel2;
+	int i, j, k, x, y, lx, ly, sx, sy, mappedSamples, timer_start;
+	int style, lightmapNum, lightmapNum2;
+	float               samples, occludedSamples;
+	Vector3 sample, occludedSample, dirSample;
+	MinMax colorMinmax;
 	byte                *lb;
 	int numUsed, numTwins, numTwinLuxels, numStored;
 	float lmx, lmy, efficiency;
-	vec3_t color;
 	bspDrawSurface_t    *ds, *parent, dsTemp;
 	surfaceInfo_t       *info;
 	rawLightmap_t       *lm, *lm2;
@@ -2535,13 +2487,13 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 			/* allocate bsp luxel storage */
 			if ( lm->bspLuxels[ lightmapNum ] == NULL ) {
-				size = lm->w * lm->h * BSP_LUXEL_SIZE * sizeof( float );
+				const size_t size = lm->w * lm->h * sizeof( *( lm->bspLuxels[ 0 ] ) );
 				lm->bspLuxels[ lightmapNum ] = safe_calloc( size );
 			}
 
 			/* allocate radiosity lightmap storage */
 			if ( bounce ) {
-				size = lm->w * lm->h * RAD_LUXEL_SIZE * sizeof( float );
+				const size_t size = lm->w * lm->h * sizeof( *lm->radLuxels[ 0 ] );
 				if ( lm->radLuxels[ lightmapNum ] == NULL ) {
 					lm->radLuxels[ lightmapNum ] = safe_malloc( size );
 				}
@@ -2557,9 +2509,9 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					samples = 0.0f;
 					occludedSamples = 0.0f;
 					mappedSamples = 0;
-					VectorClear( sample );
-					VectorClear( occludedSample );
-					VectorClear( dirSample );
+					sample.set( 0 );
+					occludedSample.set( 0 );
+					dirSample.set( 0 );
 					for ( ly = 0; ly < superSample; ly++ )
 					{
 						for ( lx = 0; lx < superSample; lx++ )
@@ -2567,60 +2519,58 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 							/* sample luxel */
 							sx = x * superSample + lx;
 							sy = y * superSample + ly;
-							luxel = SUPER_LUXEL( lightmapNum, sx, sy );
-							deluxel = SUPER_DELUXEL( sx, sy );
-							normal = SUPER_NORMAL( sx, sy );
-							cluster = SUPER_CLUSTER( sx, sy );
+							SuperLuxel& luxel = lm->getSuperLuxel( lightmapNum, sx, sy );
+							int& cluster = lm->getSuperCluster( sx, sy );
 
 							/* sample deluxemap */
 							if ( deluxemap && lightmapNum == 0 ) {
-								VectorAdd( dirSample, deluxel, dirSample );
+								dirSample += lm->getSuperDeluxel( sx, sy );
 							}
 
 							/* keep track of used/occluded samples */
-							if ( *cluster != CLUSTER_UNMAPPED ) {
+							if ( cluster != CLUSTER_UNMAPPED ) {
 								mappedSamples++;
 							}
 
 							/* handle lightmap border? */
-							if ( lightmapBorder && ( sx == 0 || sx == ( lm->sw - 1 ) || sy == 0 || sy == ( lm->sh - 1 ) ) && luxel[ 3 ] > 0.0f ) {
-								VectorSet( sample, 255.0f, 0.0f, 0.0f );
+							if ( lightmapBorder && ( sx == 0 || sx == ( lm->sw - 1 ) || sy == 0 || sy == ( lm->sh - 1 ) ) && luxel.count > 0.0f ) {
+								sample = { 255, 0, 0 };
 								samples += 1.0f;
 							}
 
 							/* handle debug */
-							else if ( debug && *cluster < 0 ) {
-								if ( *cluster == CLUSTER_UNMAPPED ) {
-									VectorSet( luxel, 255, 204, 0 );
+							else if ( debug && cluster < 0 ) {
+								if ( cluster == CLUSTER_UNMAPPED ) {
+									luxel.value = { 255, 204, 0 };
 								}
-								else if ( *cluster == CLUSTER_OCCLUDED ) {
-									VectorSet( luxel, 255, 0, 255 );
+								else if ( cluster == CLUSTER_OCCLUDED ) {
+									luxel.value = { 255, 0, 255 };
 								}
-								else if ( *cluster == CLUSTER_FLOODED ) {
-									VectorSet( luxel, 0, 32, 255 );
+								else if ( cluster == CLUSTER_FLOODED ) {
+									luxel.value = { 0, 32, 255 };
 								}
-								VectorAdd( occludedSample, luxel, occludedSample );
+								occludedSample += luxel.value;
 								occludedSamples += 1.0f;
 							}
 
 							/* normal luxel handling */
-							else if ( luxel[ 3 ] > 0.0f ) {
+							else if ( luxel.count > 0.0f ) {
 								/* handle lit or flooded luxels */
-								if ( *cluster > 0 || *cluster == CLUSTER_FLOODED ) {
-									VectorAdd( sample, luxel, sample );
-									samples += luxel[ 3 ];
+								if ( cluster > 0 || cluster == CLUSTER_FLOODED ) {
+									sample += luxel.value;
+									samples += luxel.count;
 								}
 
 								/* handle occluded or unmapped luxels */
 								else
 								{
-									VectorAdd( occludedSample, luxel, occludedSample );
-									occludedSamples += luxel[ 3 ];
+									occludedSample += luxel.value;
+									occludedSamples += luxel.count;
 								}
 
 								/* handle style debugging */
 								if ( debug && lightmapNum > 0 && x < 2 && y < 2 ) {
-									VectorCopy( debugColors[ 0 ], sample );
+									sample = debugColors[ 0 ];
 									samples = 1;
 								}
 							}
@@ -2629,48 +2579,47 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 					/* only use occluded samples if necessary */
 					if ( samples <= 0.0f ) {
-						VectorCopy( occludedSample, sample );
+						sample = occludedSample;
 						samples = occludedSamples;
 					}
 
 					/* get luxels */
-					luxel = SUPER_LUXEL( lightmapNum, x, y );
-					deluxel = SUPER_DELUXEL( x, y );
+					SuperLuxel& luxel = lm->getSuperLuxel( lightmapNum, x, y );
 
 					/* store light direction */
 					if ( deluxemap && lightmapNum == 0 ) {
-						VectorCopy( dirSample, deluxel );
+						lm->getSuperDeluxel( x, y ) = dirSample;
 					}
 
 					/* store the sample back in super luxels */
 					if ( samples > 0.01f ) {
-						VectorScale( sample, ( 1.0f / samples ), luxel );
-						luxel[ 3 ] = 1.0f;
+						luxel.value = sample * ( 1.0f / samples );
+						luxel.count = 1.0f;
 					}
 
 					/* if any samples were mapped in any way, store ambient color */
 					else if ( mappedSamples > 0 ) {
 						if ( lightmapNum == 0 ) {
-							VectorCopy( ambientColor, luxel );
+							luxel.value = ambientColor;
 						}
 						else{
-							VectorClear( luxel );
+							luxel.value.set( 0 );
 						}
-						luxel[ 3 ] = 1.0f;
+						luxel.count = 1.0f;
 					}
 
 					/* store a bogus value to be fixed later */
 					else
 					{
-						VectorClear( luxel );
-						luxel[ 3 ] = -1.0f;
+						luxel.value.set( 0 );
+						luxel.count = -1.0f;
 					}
 				}
 			}
 
 			/* setup */
 			lm->used = 0;
-			ClearBounds( colorMins, colorMaxs );
+			colorMinmax.clear();
 
 			/* clean up and store into bsp luxels */
 			for ( y = 0; y < lm->h; y++ )
@@ -2678,18 +2627,17 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 				for ( x = 0; x < lm->w; x++ )
 				{
 					/* get luxels */
-					luxel = SUPER_LUXEL( lightmapNum, x, y );
-					deluxel = SUPER_DELUXEL( x, y );
+					const SuperLuxel& luxel = lm->getSuperLuxel( lightmapNum, x, y );
 
 					/* copy light direction */
 					if ( deluxemap && lightmapNum == 0 ) {
-						VectorCopy( deluxel, dirSample );
+						dirSample = lm->getSuperDeluxel( x, y );
 					}
 
 					/* is this a valid sample? */
-					if ( luxel[ 3 ] > 0.0f ) {
-						VectorCopy( luxel, sample );
-						samples = luxel[ 3 ];
+					if ( luxel.count > 0.0f ) {
+						sample = luxel.value;
+						samples = luxel.count;
 						numUsed++;
 						lm->used++;
 
@@ -2704,8 +2652,8 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					else
 					{
 						/* nick an average value from the neighbors */
-						VectorClear( sample );
-						VectorClear( dirSample );
+						sample.set( 0 );
+						dirSample.set( 0 );
 						samples = 0.0f;
 
 						/* fixme: why is this disabled?? */
@@ -2722,18 +2670,18 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 								}
 
 								/* get neighbor's particulars */
-								luxel = SUPER_LUXEL( lightmapNum, sx, sy );
-								if ( luxel[ 3 ] < 0.0f ) {
+								const SuperLuxel& luxel = lm->getSuperLuxel( lightmapNum, sx, sy );
+								if ( luxel.count < 0.0f ) {
 									continue;
 								}
-								VectorAdd( sample, luxel, sample );
-								samples += luxel[ 3 ];
+								sample += luxel.value;
+								samples += luxel.count;
 							}
 						}
 
 						/* no samples? */
 						if ( samples == 0.0f ) {
-							VectorSet( sample, -1.0f, -1.0f, -1.0f );
+							sample.set( -1 );
 							samples = 1.0f;
 						}
 						else
@@ -2752,12 +2700,11 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					}
 
 					/* scale the sample */
-					VectorScale( sample, ( 1.0f / samples ), sample );
+					sample *= ( 1.0f / samples );
 
 					/* store the sample in the radiosity luxels */
 					if ( bounce > 0 ) {
-						radLuxel = RAD_LUXEL( lightmapNum, x, y );
-						VectorCopy( sample, radLuxel );
+						lm->getRadLuxel( lightmapNum, x, y ) = sample;
 
 						/* if only storing bounced light, early out here */
 						if ( bounceOnly && !bouncing ) {
@@ -2766,34 +2713,32 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					}
 
 					/* store the sample in the bsp luxels */
-					bspLuxel = BSP_LUXEL( lightmapNum, x, y );
-					bspDeluxel = BSP_DELUXEL( x, y );
+					Vector3& bspLuxel = lm->getBspLuxel( lightmapNum, x, y );
 
-					VectorAdd( bspLuxel, sample, bspLuxel );
+					bspLuxel += sample;
 					if ( deluxemap && lightmapNum == 0 ) {
-						VectorAdd( bspDeluxel, dirSample, bspDeluxel );
+						lm->getBspDeluxel( x, y ) += dirSample;
 					}
 
 					/* add color to bounds for solid checking */
 					if ( samples > 0.0f ) {
-						AddPointToBounds( bspLuxel, colorMins, colorMaxs );
+						colorMinmax.extend( bspLuxel );
 					}
 				}
 			}
 
 			/* set solid color */
 			lm->solid[ lightmapNum ] = false;
-			VectorAdd( colorMins, colorMaxs, lm->solidColor[ lightmapNum ] );
-			VectorScale( lm->solidColor[ lightmapNum ], 0.5f, lm->solidColor[ lightmapNum ] );
+			lm->solidColor[ lightmapNum ] = colorMinmax.origin();
 
 			/* nocollapse prevents solid lightmaps */
 			if ( !noCollapse ) {
 				/* check solid color */
-				VectorSubtract( colorMaxs, colorMins, sample );
+				sample = colorMinmax.maxs - colorMinmax.mins;
 				if ( ( sample[ 0 ] <= SOLID_EPSILON && sample[ 1 ] <= SOLID_EPSILON && sample[ 2 ] <= SOLID_EPSILON ) ||
 					 ( lm->w <= 2 && lm->h <= 2 ) ) { /* small lightmaps get forced to solid color */
 					/* set to solid */
-					VectorCopy( colorMins, lm->solidColor[ lightmapNum ] );
+					lm->solidColor[ lightmapNum ] = colorMinmax.mins;
 					lm->solid[ lightmapNum ] = true;
 					numSolidLightmaps++;
 				}
@@ -2814,34 +2759,27 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 			if ( lm->wrap[ 0 ] ) {
 				for ( y = 0; y < lm->h; y++ )
 				{
-					bspLuxel = BSP_LUXEL( lightmapNum, 0, y );
-					bspLuxel2 = BSP_LUXEL( lightmapNum, lm->w - 1, y );
-					VectorAdd( bspLuxel, bspLuxel2, bspLuxel );
-					VectorScale( bspLuxel, 0.5f, bspLuxel );
-					VectorCopy( bspLuxel, bspLuxel2 );
+					Vector3& bspLuxel = lm->getBspLuxel( lightmapNum, 0, y );
+					Vector3& bspLuxel2 = lm->getBspLuxel( lightmapNum, lm->w - 1, y );
+					bspLuxel = bspLuxel2 = vector3_mid( bspLuxel, bspLuxel2 );
 					if ( deluxemap && lightmapNum == 0 ) {
-						bspDeluxel = BSP_DELUXEL( 0, y );
-						bspDeluxel2 = BSP_DELUXEL( lm->w - 1, y );
-						VectorAdd( bspDeluxel, bspDeluxel2, bspDeluxel );
-						VectorScale( bspDeluxel, 0.5f, bspDeluxel );
-						VectorCopy( bspDeluxel, bspDeluxel2 );
+						Vector3& bspDeluxel = lm->getBspDeluxel( 0, y );
+						Vector3& bspDeluxel2 = lm->getBspDeluxel( lm->w - 1, y );
+						bspDeluxel = bspDeluxel2 = vector3_mid( bspDeluxel, bspDeluxel2 );
 					}
 				}
 			}
 			if ( lm->wrap[ 1 ] ) {
 				for ( x = 0; x < lm->w; x++ )
 				{
-					bspLuxel = BSP_LUXEL( lightmapNum, x, 0 );
-					bspLuxel2 = BSP_LUXEL( lightmapNum, x, lm->h - 1 );
-					VectorAdd( bspLuxel, bspLuxel2, bspLuxel );
-					VectorScale( bspLuxel, 0.5f, bspLuxel );
-					VectorCopy( bspLuxel, bspLuxel2 );
+					Vector3& bspLuxel = lm->getBspLuxel( lightmapNum, x, 0 );
+					Vector3& bspLuxel2 = lm->getBspLuxel( lightmapNum, x, lm->h - 1 );
+					bspLuxel = vector3_mid( bspLuxel, bspLuxel2 );
+					bspLuxel2 = bspLuxel;
 					if ( deluxemap && lightmapNum == 0 ) {
-						bspDeluxel = BSP_DELUXEL( x, 0 );
-						bspDeluxel2 = BSP_DELUXEL( x, lm->h - 1 );
-						VectorAdd( bspDeluxel, bspDeluxel2, bspDeluxel );
-						VectorScale( bspDeluxel, 0.5f, bspDeluxel );
-						VectorCopy( bspDeluxel, bspDeluxel2 );
+						Vector3& bspDeluxel = lm->getBspDeluxel( x, 0 );
+						Vector3& bspDeluxel2 = lm->getBspDeluxel( x, lm->h - 1 );
+						bspDeluxel = bspDeluxel2 = vector3_mid( bspDeluxel, bspDeluxel2 );
 					}
 				}
 			}
@@ -2856,9 +2794,6 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* note it */
 	if ( !bouncing ) {
 		if ( deluxemap && deluxemode == 1 ) {
-			vec3_t worldUp, myNormal, myTangent, myBinormal;
-			float dist;
-
 			timer_start = I_FloatTime();
 
 			Sys_Printf( "converting..." );
@@ -2874,59 +2809,49 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					for ( x = 0; x < lm->sw; x++ )
 					{
 						/* get normal and deluxel */
-						normal = SUPER_NORMAL( x, y );
-						cluster = SUPER_CLUSTER( x, y );
-						bspDeluxel = BSP_DELUXEL( x, y );
-						deluxel = SUPER_DELUXEL( x, y );
+						Vector3& bspDeluxel = lm->getBspDeluxel( x, y );
 
 						/* get normal */
-						VectorSet( myNormal, normal[0], normal[1], normal[2] );
+						const Vector3 myNormal = lm->getSuperNormal( x, y );
 
 						/* get tangent vectors */
+						Vector3 myTangent, myBinormal;
 						if ( myNormal[ 0 ] == 0.0f && myNormal[ 1 ] == 0.0f ) {
-							if ( myNormal[ 2 ] == 1.0f ) {
-								VectorSet( myTangent, 1.0f, 0.0f, 0.0f );
-								VectorSet( myBinormal, 0.0f, 1.0f, 0.0f );
+							if ( myNormal.z() == 1.0f ) {
+								myTangent = g_vector3_axis_x;
+								myBinormal = g_vector3_axis_y;
 							}
-							else if ( myNormal[ 2 ] == -1.0f ) {
-								VectorSet( myTangent, -1.0f, 0.0f, 0.0f );
-								VectorSet( myBinormal,  0.0f, 1.0f, 0.0f );
+							else if ( myNormal.z() == -1.0f ) {
+								myTangent = -g_vector3_axis_x;
+								myBinormal = g_vector3_axis_y;
 							}
 						}
 						else
 						{
-							VectorSet( worldUp, 0.0f, 0.0f, 1.0f );
-							CrossProduct( myNormal, worldUp, myTangent );
-							VectorNormalize( myTangent, myTangent );
-							CrossProduct( myTangent, myNormal, myBinormal );
-							VectorNormalize( myBinormal, myBinormal );
+							myTangent = VectorNormalized( vector3_cross( myNormal, g_vector3_axis_z ) );
+							myBinormal = VectorNormalized( vector3_cross( myTangent, myNormal ) );
 						}
 
 						/* project onto plane */
-						dist = -DotProduct( myTangent, myNormal );
-						VectorMA( myTangent, dist, myNormal, myTangent );
-						dist = -DotProduct( myBinormal, myNormal );
-						VectorMA( myBinormal, dist, myNormal, myBinormal );
+						myTangent -= myNormal * vector3_dot( myTangent, myNormal );
+						myBinormal -= myNormal * vector3_dot( myBinormal, myNormal );
 
 						/* renormalize */
-						VectorNormalize( myTangent, myTangent );
-						VectorNormalize( myBinormal, myBinormal );
+						VectorNormalize( myTangent );
+						VectorNormalize( myBinormal );
 
 						/* convert modelspace deluxel to tangentspace */
-						dirSample[0] = bspDeluxel[0];
-						dirSample[1] = bspDeluxel[1];
-						dirSample[2] = bspDeluxel[2];
-						VectorNormalize( dirSample, dirSample );
+						dirSample = VectorNormalized( bspDeluxel );
 
 						/* fix tangents to world matrix */
-						if ( myNormal[0] > 0 || myNormal[1] < 0 || myNormal[2] < 0 ) {
-							VectorNegate( myTangent, myTangent );
+						if ( myNormal.x() > 0 || myNormal.y() < 0 || myNormal.z() < 0 ) {
+							vector3_negate( myTangent );
 						}
 
 						/* build tangentspace vectors */
-						bspDeluxel[0] = DotProduct( dirSample, myTangent );
-						bspDeluxel[1] = DotProduct( dirSample, myBinormal );
-						bspDeluxel[2] = DotProduct( dirSample, myNormal );
+						bspDeluxel[0] = vector3_dot( dirSample, myTangent );
+						bspDeluxel[1] = vector3_dot( dirSample, myBinormal );
+						bspDeluxel[2] = vector3_dot( dirSample, myNormal );
 					}
 				}
 			}
@@ -2945,7 +2870,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 	for ( i = 0; i < numRawLightmaps; i++ )
 	{
-		vec3_t myColor;
+		Vector3 myColor;
 		float myBrightness;
 
 		/* get lightmap */
@@ -2965,15 +2890,15 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 				for ( x = 0; x < lm->sw; x++ )
 				{
 					/* get luxel */
-					bspLuxel = BSP_LUXEL( lightmapNum, x, y );
+					Vector3& bspLuxel = lm->getBspLuxel( lightmapNum, x, y );
 
 					/* get color */
-					VectorNormalize( bspLuxel, myColor );
-					myBrightness = VectorLength( bspLuxel );
+					myColor = VectorNormalized( bspLuxel );
+					myBrightness = vector3_length( bspLuxel );
 					myBrightness *= ( 1 / 127.0f );
 					myBrightness = myBrightness * myBrightness;
 					myBrightness *= 127.0f;
-					VectorScale( myColor, myBrightness, bspLuxel );
+					bspLuxel = myColor * myBrightness;
 				}
 			}
 		}
@@ -3143,13 +3068,14 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 	/* count the bsp lightmaps and allocate space */
 	free( bspLightBytes );
+	const size_t gameLmSize = game->lightmapSize * game->lightmapSize * sizeof( Vector3b );
 	if ( numBSPLightmaps == 0 || externalLightmaps ) {
 		numBSPLightBytes = 0;
 		bspLightBytes = NULL;
 	}
 	else
 	{
-		numBSPLightBytes = ( numBSPLightmaps * game->lightmapSize * game->lightmapSize * 3 );
+		numBSPLightBytes = numBSPLightmaps * gameLmSize;
 		bspLightBytes = safe_calloc( numBSPLightBytes );
 	}
 
@@ -3166,7 +3092,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		else if( lightmapPink ){
 			for ( x = 0; x < olm->customHeight * olm->customWidth; ++x ){
 				if ( ( olm->lightBits[x >> 3] & ( 1 << ( x & 7 ) ) ) == 0 ) { /* not filled */
-					VectorSet( olm->bspLightBytes + x * 3, 255, 0, 255 );
+					olm->bspLightBytes[x] = { 255, 0, 255 };
 				}
 			}
 		}
@@ -3174,13 +3100,13 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 		/* is this a valid bsp lightmap? */
 		if ( olm->lightmapNum >= 0 && !externalLightmaps ) {
 			/* copy lighting data */
-			lb = bspLightBytes + ( olm->lightmapNum * game->lightmapSize * game->lightmapSize * 3 );
-			memcpy( lb, olm->bspLightBytes, game->lightmapSize * game->lightmapSize * 3 );
+			lb = bspLightBytes + ( olm->lightmapNum * gameLmSize );
+			memcpy( lb, olm->bspLightBytes, gameLmSize );
 
 			/* copy direction data */
 			if ( deluxemap ) {
-				lb = bspLightBytes + ( ( olm->lightmapNum + 1 ) * game->lightmapSize * game->lightmapSize * 3 );
-				memcpy( lb, olm->bspDirBytes, game->lightmapSize * game->lightmapSize * 3 );
+				lb = bspLightBytes + ( ( olm->lightmapNum + 1 ) * gameLmSize );
+				memcpy( lb, olm->bspDirBytes, gameLmSize );
 			}
 		}
 
@@ -3195,14 +3121,14 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 			/* write lightmap */
 			sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, numExtLightmaps );
 			Sys_FPrintf( SYS_VRB, "\nwriting %s", filename );
-			WriteTGA24( filename, olm->bspLightBytes, olm->customWidth, olm->customHeight, true );
+			WriteTGA24( filename, olm->bspLightBytes->data(), olm->customWidth, olm->customHeight, true );
 			numExtLightmaps++;
 
 			/* write deluxemap */
 			if ( deluxemap ) {
 				sprintf( filename, "%s/" EXTERNAL_LIGHTMAP, dirname, numExtLightmaps );
 				Sys_FPrintf( SYS_VRB, "\nwriting %s", filename );
-				WriteTGA24( filename, olm->bspDirBytes, olm->customWidth, olm->customHeight, true );
+				WriteTGA24( filename, olm->bspDirBytes->data(), olm->customWidth, olm->customHeight, true );
 				numExtLightmaps++;
 
 				if ( debugDeluxemap ) {
@@ -3341,15 +3267,15 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 			/* walk lightmaps */
 			for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
 			{
+				Vector3 color;
 				/* handle unused style */
 				if ( ds->vertexStyles[ lightmapNum ] == LS_NONE ) {
-					VectorClear( color );
+					color.set( 0 );
 				}
 				else
 				{
 					/* get vertex color */
-					luxel = VERTEX_LUXEL( lightmapNum, ds->firstVert + j );
-					VectorCopy( luxel, color );
+					color = getVertexLuxel( lightmapNum, ds->firstVert + j );
 
 					/* set minimum light */
 					if ( lightmapNum == 0 ) {
@@ -3362,7 +3288,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 				/* store to bytes */
 				if ( !info->si->noVertexLight ) {
-					ColorToBytes( color, dv[ j ].color[ lightmapNum ], info->si->vertexScale );
+					ColorToBytes( color, dv[ j ].color[ lightmapNum ].rgb(), info->si->vertexScale );
 				}
 			}
 		}
@@ -3428,11 +3354,10 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 				}
 
 				/* calculate st offset */
-				lmx = dv[ 0 ].lightmap[ lightmapNum ][ 0 ] - dv[ 0 ].lightmap[ 0 ][ 0 ];
-				lmy = dv[ 0 ].lightmap[ lightmapNum ][ 1 ] - dv[ 0 ].lightmap[ 0 ][ 1 ];
+				const Vector2 lmxy = dv[ 0 ].lightmap[ lightmapNum ] - dv[ 0 ].lightmap[ 0 ];
 
 				/* create additional stage */
-				if ( lmx == 0.0f && lmy == 0.0f ) {
+				if ( lmxy.x() == 0.0f && lmxy.y() == 0.0f ) {
 					sprintf( styleStage,    "\t{\n"
 											"\t\tmap %s\n"                                      /* lightmap */
 											"\t\tblendFunc GL_SRC_ALPHA GL_ONE\n"
@@ -3461,7 +3386,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 							 ( dfEqual ? "\t\tdepthFunc equal\n" : "" ),
 							 rgbGen,
 							 alphaGen,
-							 lmx, lmy );
+							 lmxy.x(), lmxy.y() );
 
 				}
 
