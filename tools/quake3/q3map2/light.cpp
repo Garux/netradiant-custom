@@ -113,7 +113,7 @@ static void CreateSunLight( sun_t *sun ){
 		light->style = noStyles ? LS_NORMAL : sun->style;
 
 		/* set the light's position out to infinity */
-		light->origin = -direction * ( MAX_WORLD_COORD * 8.0f );    /* MAX_WORLD_COORD * 2.0f */
+		light->origin = direction * ( MAX_WORLD_COORD * 8.0f );    /* MAX_WORLD_COORD * 2.0f */
 
 		/* set the facing to be the inverse of the sun direction */
 		light->normal = -direction;

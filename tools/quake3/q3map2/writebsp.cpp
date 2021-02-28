@@ -560,7 +560,7 @@ void BeginModel( void ){
 	}
 
 	/* ydnar: lightgrid mins/maxs */
-	if ( lgMinmax.mins[ 0 ] < 99999 ) {
+	if ( lgMinmax.valid() ) {
 		/* use lightgrid bounds */
 		mod->minmax = lgMinmax;
 	}
@@ -572,7 +572,8 @@ void BeginModel( void ){
 
 	/* note size */
 	Sys_FPrintf( SYS_VRB, "BSP bounds: { %f %f %f } { %f %f %f }\n", minmax.mins[0], minmax.mins[1], minmax.mins[2], minmax.maxs[0], minmax.maxs[1], minmax.maxs[2] );
-	Sys_FPrintf( SYS_VRB, "Lightgrid bounds: { %f %f %f } { %f %f %f }\n", lgMinmax.mins[0], lgMinmax.mins[1], lgMinmax.mins[2], lgMinmax.maxs[0], lgMinmax.maxs[1], lgMinmax.maxs[2] );
+	if ( lgMinmax.valid() )
+		Sys_FPrintf( SYS_VRB, "Lightgrid bounds: { %f %f %f } { %f %f %f }\n", lgMinmax.mins[0], lgMinmax.mins[1], lgMinmax.mins[2], lgMinmax.maxs[0], lgMinmax.maxs[1], lgMinmax.maxs[2] );
 
 	/* set firsts */
 	mod->firstBSPSurface = numBSPDrawSurfaces;

@@ -27,6 +27,9 @@ struct MinMax___
 		mins.x() = mins.y() = mins.z() = std::numeric_limits<T>::max();
 		maxs.x() = maxs.y() = maxs.z() = std::numeric_limits<T>::lowest();
 	}
+	bool valid() const {
+		return mins.x() < maxs.x() && mins.y() < maxs.y() && mins.z() < maxs.z();
+	}
 	template<typename U>
 	void extend( const BasicVector3<U>& point ){
 		for ( size_t i = 0; i < 3; ++i ){

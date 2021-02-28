@@ -1120,10 +1120,8 @@ static void ParseShaderFile( const char *filename ){
 					GetTokenAppend( shaderText, false );   amp = atof( token );
 
 					/* calculate */
-					const Vector3 mins = amt * base;
-					const Vector3 maxs = amt * amp + mins;
-					si->minmax.mins += mins;
-					si->minmax.maxs += maxs;
+					si->minmax.mins = amt * base;
+					si->minmax.maxs = amt * amp + si->minmax.mins;
 				}
 			}
 

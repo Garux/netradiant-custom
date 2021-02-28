@@ -1999,10 +1999,7 @@ int FilterWindingIntoTree_r( winding_t *w, mapDrawSurface_t *ds, node_t *node ){
 	si = ds->shaderInfo;
 
 	/* ydnar: is this the head node? */
-	if ( node->parent == NULL && si != NULL &&
-		 ( si->minmax.mins[ 0 ] != 0.0f || si->minmax.maxs[ 0 ] != 0.0f ||
-		   si->minmax.mins[ 1 ] != 0.0f || si->minmax.maxs[ 1 ] != 0.0f ||
-		   si->minmax.mins[ 2 ] != 0.0f || si->minmax.maxs[ 2 ] != 0.0f ) ) {
+	if ( node->parent == NULL && si != NULL && si->minmax.valid() ) {
 		static bool warned = false;
 		if ( !warned ) {
 			Sys_Warning( "this map uses the deformVertexes move hack\n" );
