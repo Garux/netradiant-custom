@@ -125,13 +125,9 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 	int triIndex;
 
 	/* detect degenerate triangles fixme: do something proper here */
-	if ( vector3_length( a->xyz - b->xyz ) < 0.125f ) {
-		return -1;
-	}
-	if ( vector3_length( b->xyz - c->xyz ) < 0.125f ) {
-		return -1;
-	}
-	if ( vector3_length( c->xyz - a->xyz ) < 0.125f ) {
+	if ( vector3_length( a->xyz - b->xyz ) < 0.125f
+	  || vector3_length( b->xyz - c->xyz ) < 0.125f
+	  || vector3_length( c->xyz - a->xyz ) < 0.125f ) {
 		return -1;
 	}
 
@@ -989,9 +985,7 @@ void FixMetaTJunctions( void ){
 			/* skip this point if it already exists in the triangle */
 			for ( k = 0; k < 3; k++ )
 			{
-				if ( fabs( pt[ 0 ] - metaVerts[ tri->indexes[ k ] ].xyz[ 0 ] ) <= TJ_POINT_EPSILON &&
-					 fabs( pt[ 1 ] - metaVerts[ tri->indexes[ k ] ].xyz[ 1 ] ) <= TJ_POINT_EPSILON &&
-					 fabs( pt[ 2 ] - metaVerts[ tri->indexes[ k ] ].xyz[ 2 ] ) <= TJ_POINT_EPSILON ) {
+				if ( vector3_equal_epsilon( pt, metaVerts[ tri->indexes[ k ] ].xyz, TJ_POINT_EPSILON ) ) {
 					break;
 				}
 			}
@@ -1106,7 +1100,7 @@ void FixMetaTJunctions( void ){
 
 void SmoothMetaTriangles( void ){
 	int i, j, k, f, fOld, start, numVerts, numVotes, numSmoothed;
-	float shadeAngle, defaultShadeAngle, maxShadeAngle, dot, testAngle;
+	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	metaTriangle_t  *tri;
 	float           *shadeAngles;
 	byte            *smoothed;
@@ -1146,9 +1140,7 @@ void SmoothMetaTriangles( void ){
 			shadeAngle = defaultShadeAngle;
 		}
 
-		if ( shadeAngle > maxShadeAngle ) {
-			maxShadeAngle = shadeAngle;
-		}
+		value_maximize( maxShadeAngle, shadeAngle );
 
 		/* flag its verts */
 		for ( j = 0; j < 3; j++ )
@@ -1207,18 +1199,11 @@ void SmoothMetaTriangles( void ){
 			}
 
 			/* use smallest shade angle */
-			shadeAngle = ( shadeAngles[ i ] < shadeAngles[ j ] ? shadeAngles[ i ] : shadeAngles[ j ] );
+			shadeAngle = std::min( shadeAngles[ i ], shadeAngles[ j ] );
 
 			/* check shade angle */
-			dot = vector3_dot( metaVerts[ i ].normal, metaVerts[ j ].normal );
-			if ( dot > 1.0 ) {
-				dot = 1.0;
-			}
-			else if ( dot < -1.0 ) {
-				dot = -1.0;
-			}
-			testAngle = acos( dot ) + THETA_EPSILON;
-			if ( testAngle >= shadeAngle ) {
+			const double dot = std::clamp( vector3_dot( metaVerts[ i ].normal, metaVerts[ j ].normal ), -1.0, 1.0 );
+			if ( acos( dot ) + THETA_EPSILON >= shadeAngle ) {
 				continue;
 			}
 
@@ -1388,25 +1373,13 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 
 
-	if ( metaMaxBBoxDistance >= 0 ) {
-		if ( ds->numIndexes > 0 ) {
-			const Vector3 mins = ds->minmax.mins - Vector3( metaMaxBBoxDistance, metaMaxBBoxDistance, metaMaxBBoxDistance );
-			const Vector3 maxs = ds->minmax.maxs + Vector3( metaMaxBBoxDistance, metaMaxBBoxDistance, metaMaxBBoxDistance );
-#define CHECK_1D( mins, v, maxs ) ( ( mins ) <= ( v ) && ( v ) <= ( maxs ) )
-#define CHECK_3D( mins, v, maxs ) ( CHECK_1D( ( mins )[0], ( v )[0], ( maxs )[0] ) && CHECK_1D( ( mins )[1], ( v )[1], ( maxs )[1] ) && CHECK_1D( ( mins )[2], ( v )[2], ( maxs )[2] ) )
-			Vector3 p = metaVerts[ tri->indexes[ 0 ] ].xyz;
-			if ( !CHECK_3D( mins, p, maxs ) ) {
-				p = metaVerts[ tri->indexes[ 1 ] ].xyz;
-				if ( !CHECK_3D( mins, p, maxs ) ) {
-					p = metaVerts[ tri->indexes[ 2 ] ].xyz;
-					if ( !CHECK_3D( mins, p, maxs ) ) {
-						return 0;
-					}
-				}
-			}
-#undef CHECK_3D
-#undef CHECK_1D
-		}
+	if ( metaMaxBBoxDistance >= 0 && ds->numIndexes > 0 ) {
+		const MinMax minmax( ds->minmax.mins - Vector3().set( metaMaxBBoxDistance ),
+		                     ds->minmax.maxs + Vector3().set( metaMaxBBoxDistance ) );
+		if( !minmax.test( metaVerts[ tri->indexes[ 0 ] ].xyz )
+		 && !minmax.test( metaVerts[ tri->indexes[ 1 ] ].xyz )
+		 && !minmax.test( metaVerts[ tri->indexes[ 2 ] ].xyz ) )
+			return 0;
 	}
 
 	/* set initial score */
@@ -1707,51 +1680,52 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
    compare function for qsort()
  */
 
-static int CompareMetaTriangles( const void *a, const void *b ){
-	int i, j, av, bv;
+static int CompareMetaTriangles( const void *a_, const void *b_ ){
+	auto a = reinterpret_cast<const metaTriangle_t *>( a_ );
+	auto b = reinterpret_cast<const metaTriangle_t *>( b_ );
 
 	/* shader first */
-	if ( ( (const metaTriangle_t*) a )->si < ( (const metaTriangle_t*) b )->si ) {
+	if ( a->si < b->si ) {
 		return 1;
 	}
-	else if ( ( (const metaTriangle_t*) a )->si > ( (const metaTriangle_t*) b )->si ) {
+	else if ( a->si > b->si ) {
 		return -1;
 	}
 
 	/* then fog */
-	else if ( ( (const metaTriangle_t*) a )->fogNum < ( (const metaTriangle_t*) b )->fogNum ) {
+	else if ( a->fogNum < b->fogNum ) {
 		return 1;
 	}
-	else if ( ( (const metaTriangle_t*) a )->fogNum > ( (const metaTriangle_t*) b )->fogNum ) {
+	else if ( a->fogNum > b->fogNum ) {
 		return -1;
 	}
 
 	/* then plane */
 	#if 0
-	else if ( npDegrees == 0.0f && !( (const metaTriangle_t*) a )->si->nonplanar &&
-			  ( (const metaTriangle_t*) a )->planeNum >= 0 && ( (const metaTriangle_t*) a )->planeNum >= 0 ) {
-		if ( ( (const metaTriangle_t*) a )->plane[ 3 ] < ( (const metaTriangle_t*) b )->plane[ 3 ] ) {
+	else if ( npDegrees == 0.0f && !a->si->nonplanar &&
+			  a->planeNum >= 0 && a->planeNum >= 0 ) {
+		if ( a->plane.dist() < b->plane.dist() ) {
 			return 1;
 		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 3 ] > ( (const metaTriangle_t*) b )->plane[ 3 ] ) {
+		else if ( a->plane.dist() > b->plane.dist() ) {
 			return -1;
 		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 0 ] < ( (const metaTriangle_t*) b )->plane[ 0 ] ) {
+		else if ( a->plane.normal()[ 0 ] < b->plane.normal()[ 0 ] ) {
 			return 1;
 		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 0 ] > ( (const metaTriangle_t*) b )->plane[ 0 ] ) {
+		else if ( a->plane.normal()[ 0 ] > b->plane.normal()[ 0 ] ) {
 			return -1;
 		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 1 ] < ( (const metaTriangle_t*) b )->plane[ 1 ] ) {
+		else if ( a->plane.normal()[ 1 ] < b->plane.normal()[ 1 ] ) {
 			return 1;
 		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 1 ] > ( (const metaTriangle_t*) b )->plane[ 1 ] ) {
+		else if ( a->plane.normal()[ 1 ] > b->plane.normal()[ 1 ] ) {
 			return -1;
 		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 2 ] < ( (const metaTriangle_t*) b )->plane[ 2 ] ) {
+		else if ( a->plane.normal()[ 2 ] < b->plane.normal()[ 2 ] ) {
 			return 1;
 		}
-		else if ( ( (const metaTriangle_t*) a )->plane[ 2 ] > ( (const metaTriangle_t*) b )->plane[ 2 ] ) {
+		else if ( a->plane.normal()[ 2 ] > b->plane.normal()[ 2 ] ) {
 			return -1;
 		}
 	}
@@ -1762,23 +1736,19 @@ static int CompareMetaTriangles( const void *a, const void *b ){
 	/* find mins */
 	Vector3 aMins( 999999, 999999, 999999 );
 	Vector3 bMins( 999999, 999999, 999999 );
-	for ( i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 	{
-		av = ( (const metaTriangle_t*) a )->indexes[ i ];
-		bv = ( (const metaTriangle_t*) b )->indexes[ i ];
-		for ( j = 0; j < 3; j++ )
+		const int av = a->indexes[ i ];
+		const int bv = b->indexes[ i ];
+		for ( int j = 0; j < 3; j++ )
 		{
-			if ( metaVerts[ av ].xyz[ j ] < aMins[ j ] ) {
-				aMins[ j ] = metaVerts[ av ].xyz[ j ];
-			}
-			if ( metaVerts[ bv ].xyz[ j ] < bMins[ j ] ) {
-				bMins[ j ] = metaVerts[ bv ].xyz[ j ];
-			}
+			value_minimize( aMins[ j ], metaVerts[ av ].xyz[ j ] );
+			value_minimize( bMins[ j ], metaVerts[ bv ].xyz[ j ] );
 		}
 	}
 
 	/* test it */
-	for ( i = 0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 	{
 		if ( aMins[ i ] < bMins[ i ] ) {
 			return 1;

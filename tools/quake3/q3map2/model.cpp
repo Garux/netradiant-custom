@@ -212,7 +212,6 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 	picoSurface_t       *surface;
 	shaderInfo_t        *si;
 	mapDrawSurface_t    *ds;
-	bspDrawVert_t       *dv;
 	const char          *picoShaderName;
 	byte                *color;
 	picoIndex_t         *indexes;
@@ -423,46 +422,45 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 		for ( i = 0; i < ds->numVerts; i++ )
 		{
 			/* get vertex */
-			dv = &ds->verts[ i ];
+			bspDrawVert_t& dv = ds->verts[ i ];
 
 			/* xyz and normal */
-			dv->xyz = vector3_from_array( PicoGetSurfaceXYZ( surface, i ) );
-			matrix4_transform_point( transform, dv->xyz );
+			dv.xyz = vector3_from_array( PicoGetSurfaceXYZ( surface, i ) );
+			matrix4_transform_point( transform, dv.xyz );
 
-			dv->normal = vector3_from_array( PicoGetSurfaceNormal( surface, i ) );
-			matrix4_transform_direction( nTransform, dv->normal );
-			VectorNormalize( dv->normal );
+			dv.normal = vector3_from_array( PicoGetSurfaceNormal( surface, i ) );
+			matrix4_transform_direction( nTransform, dv.normal );
+			VectorNormalize( dv.normal );
 
 			/* ydnar: tek-fu celshading support for flat shaded shit */
 			if ( flat ) {
-				dv->st = si->stFlat;
+				dv.st = si->stFlat;
 			}
 
 			/* ydnar: gs mods: added support for explicit shader texcoord generation */
 			else if ( si->tcGen ) {
 				/* project the texture */
-				dv->st[ 0 ] = vector3_dot( si->vecs[ 0 ], dv->xyz );
-				dv->st[ 1 ] = vector3_dot( si->vecs[ 1 ], dv->xyz );
+				dv.st[ 0 ] = vector3_dot( si->vecs[ 0 ], dv.xyz );
+				dv.st[ 1 ] = vector3_dot( si->vecs[ 1 ], dv.xyz );
 			}
 
 			/* normal texture coordinates */
 			else
 			{
-				dv->st = vector2_from_array( PicoGetSurfaceST( surface, 0, i ) );
+				dv.st = vector2_from_array( PicoGetSurfaceST( surface, 0, i ) );
 			}
 
 			/* set lightmap/color bits */
 			color = PicoGetSurfaceColor( surface, 0, i );
 			for ( j = 0; j < MAX_LIGHTMAPS; j++ )
 			{
-				dv->lightmap[ j ][ 0 ] = 0.0f;
-				dv->lightmap[ j ][ 1 ] = 0.0f;
+				dv.lightmap[ j ] = { 0, 0 };
 				if ( spawnFlags & 32 ) { // spawnflag 32: model color -> alpha hack
-					dv->color[ j ] = { 255, 255, 255, RGBTOGRAY( color ) };
+					dv.color[ j ] = { 255, 255, 255, RGBTOGRAY( color ) };
 				}
 				else
 				{
-					dv->color[ j ] = { color[0], color[1], color[2], color[3] };
+					dv.color[ j ] = { color[0], color[1], color[2], color[3] };
 				}
 			}
 		}
@@ -523,8 +521,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 				{
 					for ( j = 0; j < 3; j++ )
 					{
-						dv = &ds->verts[ ds->indexes[ i + j ] ];
-						points[ j ] = dv->xyz;
+						points[ j ] = ds->verts[ ds->indexes[ i + j ] ].xyz;
 					}
 					if ( PlaneFromPoints( plane, points ) ){
 						if ( spawnFlags & 16 )
@@ -557,11 +554,8 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 				/* make points */
 				for ( j = 0; j < 3; j++ )
 				{
-					/* get vertex */
-					dv = &ds->verts[ ds->indexes[ i + j ] ];
-
 					/* copy xyz */
-					points[ j ] = dv->xyz;
+					points[ j ] = ds->verts[ ds->indexes[ i + j ] ].xyz;
 				}
 
 				/* make plane for triangle */
@@ -726,7 +720,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 							}
 							//if ( bestdist == 999999 && bestangle == 1 ) Sys_Printf("default_CLIPMODEL\n");
 							if ( bestdist == 999999 && bestangle == 1 ) goto default_CLIPMODEL;
-							if ( bestdist < mindist ) mindist = bestdist;
+							value_minimize( mindist, bestdist );
 						}
 						if ( (limDepth != 0.0) && (mindist > limDepth) ) goto default_CLIPMODEL;
 
@@ -834,17 +828,13 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 							reverse.dist() = points[0][axis];
 							if ( bestNormal[axis] > 0 ){
 								for ( j = 1; j < 3; j++ ){
-									if ( points[j][axis] < reverse.dist() ){
-										reverse.dist() = points[j][axis];
-									}
+									value_minimize( reverse.dist(), points[j][axis] );
 								}
 								reverse.dist() = -reverse.dist() + clipDepth;
 							}
 							else{
 								for ( j = 1; j < 3; j++ ){
-									if ( points[j][axis] > reverse.dist() ){
-										reverse.dist() = points[j][axis];
-									}
+									value_maximize( reverse.dist(), points[j][axis] );
 								}
 								reverse.dist() += clipDepth;
 							}
@@ -968,10 +958,8 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 						/* get vertex normals */
 						for ( j = 0; j < 3; j++ )
 						{
-							/* get vertex */
-							dv = &ds->verts[ ds->indexes[ i + j ] ];
 							/* copy normal */
-							Vnorm[ j ] = dv->normal;
+							Vnorm[ j ] = ds->verts[ ds->indexes[ i + j ] ].normal;
 						}
 
 						//avg normals for side planes
@@ -1396,25 +1384,19 @@ void AddTriangleModels( entity_t *eparent ){
 		}
 
 		/* jal : entity based _samplesize */
-		int lightmapSampleSize = e->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" );
-		if ( lightmapSampleSize < 0 )
-			lightmapSampleSize = 0;
-		if ( lightmapSampleSize > 0 )
+		const int lightmapSampleSize = std::max( 0, e->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
+		if ( lightmapSampleSize != 0 )
 			Sys_Printf( "misc_model has lightmap sample size of %.d\n", lightmapSampleSize );
 
 		/* get lightmap scale */
-		float lightmapScale = e->floatForKey( "lightmapscale", "_lightmapscale", "_ls" );
-		if ( lightmapScale < 0.0f )
-			lightmapScale = 0.0f;
-		else if ( lightmapScale > 0.0f )
+		const float lightmapScale = std::max( 0.f, e->floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
+		if ( lightmapScale != 0 )
 			Sys_Printf( "misc_model has lightmap scale of %.4f\n", lightmapScale );
 
 		/* jal : entity based _shadeangle */
-		float shadeAngle = e->floatForKey( "_shadeangle",
-							"_smoothnormals", "_sn", "_sa", "_smooth" ); /* vortex' aliases */
-		if ( shadeAngle < 0.0f )
-			shadeAngle = 0.0f;
-		else if ( shadeAngle > 0.0f )
+		const float shadeAngle = std::max( 0.f, e->floatForKey( "_shadeangle",
+		                                        "_smoothnormals", "_sn", "_sa", "_smooth" ) ); /* vortex' aliases */
+		if ( shadeAngle != 0 )
 			Sys_Printf( "misc_model has shading angle of %.4f\n", shadeAngle );
 
 		const int skin = e->intForKey( "_skin", "skin" );

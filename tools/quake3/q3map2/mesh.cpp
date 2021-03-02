@@ -581,7 +581,6 @@ Vector3 ProjectPointOntoVector( const Vector3& point, const Vector3& vStart, con
  */
 mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
 	int i, j, k;
-	float len, maxLength;
 	mesh_t out;
 
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
@@ -597,12 +596,9 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
 	}
 
 	for ( j = 1 ; j < out.width - 1; j++ ) {
-		maxLength = 0;
+		double maxLength = 0;
 		for ( i = 0 ; i < out.height ; i++ ) {
-			len = vector3_length( expand[i][j].xyz - ProjectPointOntoVector( expand[i][j].xyz, expand[i][j - 1].xyz, expand[i][j + 1].xyz ) );
-			if ( len > maxLength ) {
-				maxLength = len;
-			}
+			value_maximize( maxLength, vector3_length( expand[i][j].xyz - ProjectPointOntoVector( expand[i][j].xyz, expand[i][j - 1].xyz, expand[i][j + 1].xyz ) ) );
 		}
 		if ( maxLength < 0.1 ) {
 			out.width--;
@@ -615,12 +611,9 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
 		}
 	}
 	for ( j = 1 ; j < out.height - 1; j++ ) {
-		maxLength = 0;
+		double maxLength = 0;
 		for ( i = 0 ; i < out.width ; i++ ) {
-			len = vector3_length( expand[j][i].xyz - ProjectPointOntoVector( expand[j][i].xyz, expand[j - 1][i].xyz, expand[j + 1][i].xyz ) );
-			if ( len > maxLength ) {
-				maxLength = len;
-			}
+			value_maximize( maxLength, vector3_length( expand[j][i].xyz - ProjectPointOntoVector( expand[j][i].xyz, expand[j - 1][i].xyz, expand[j + 1][i].xyz ) ) );
 		}
 		if ( maxLength < 0.1 ) {
 			out.height--;
@@ -650,7 +643,6 @@ mesh_t *RemoveLinearMeshColumnsRows( mesh_t *in ) {
  */
 mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *widthtable, int *heighttable ){
 	int i, j, k, w, h, maxsubdivisions, subdivisions;
-	float length, maxLength, amount;
 	mesh_t out;
 	bspDrawVert_t expand[MAX_EXPANDED_AXIS][MAX_EXPANDED_AXIS];
 
@@ -672,18 +664,12 @@ mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *width
 	maxsubdivisions = ( maxsize - in->width ) / ( in->width - 1 );
 
 	for ( w = 0, j = 0 ; w < in->width - 1; w++, j += subdivisions + 1 ) {
-		maxLength = 0;
+		double maxLength = 0;
 		for ( i = 0 ; i < out.height ; i++ ) {
-			length = vector3_length( expand[i][j + 1].xyz - expand[i][j].xyz );
-			if ( length > maxLength ) {
-				maxLength = length;
-			}
+			value_maximize( maxLength, vector3_length( expand[i][j + 1].xyz - expand[i][j].xyz ) );
 		}
 
-		subdivisions = (int) ( maxLength / minLength );
-		if ( subdivisions > maxsubdivisions ) {
-			subdivisions = maxsubdivisions;
-		}
+		subdivisions = std::min( (int) ( maxLength / minLength ), maxsubdivisions );
 
 		widthtable[w] = subdivisions + 1;
 		if ( subdivisions <= 0 ) {
@@ -698,7 +684,7 @@ mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *width
 			}
 			for ( k = 1; k <= subdivisions; k++ )
 			{
-				amount = (float) k / ( subdivisions + 1 );
+				const float amount = (float) k / ( subdivisions + 1 );
 				LerpDrawVertAmount( &expand[i][j], &expand[i][j + subdivisions + 1], amount, &expand[i][j + k] );
 			}
 		}
@@ -707,18 +693,12 @@ mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *width
 	maxsubdivisions = ( maxsize - in->height ) / ( in->height - 1 );
 
 	for ( h = 0, j = 0 ; h < in->height - 1; h++, j += subdivisions + 1 ) {
-		maxLength = 0;
+		double maxLength = 0;
 		for ( i = 0 ; i < out.width ; i++ ) {
-			length = vector3_length( expand[j + 1][i].xyz - expand[j][i].xyz );
-			if ( length > maxLength ) {
-				maxLength = length;
-			}
+			value_maximize( maxLength, vector3_length( expand[j + 1][i].xyz - expand[j][i].xyz ) );
 		}
 
-		subdivisions = (int) ( maxLength / minLength );
-		if ( subdivisions > maxsubdivisions ) {
-			subdivisions = maxsubdivisions;
-		}
+		subdivisions = std::min( (int) ( maxLength / minLength ), maxsubdivisions );
 
 		heighttable[h] = subdivisions + 1;
 		if ( subdivisions <= 0 ) {
@@ -733,7 +713,7 @@ mesh_t *SubdivideMeshQuads( mesh_t *in, float minLength, int maxsize, int *width
 			}
 			for ( k = 1; k <= subdivisions; k++ )
 			{
-				amount = (float) k / ( subdivisions + 1 );
+				const float amount = (float) k / ( subdivisions + 1 );
 				LerpDrawVertAmount( &expand[j][i], &expand[j + subdivisions + 1][i], amount, &expand[j + k][i] );
 			}
 		}

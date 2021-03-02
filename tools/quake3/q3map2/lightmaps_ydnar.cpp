@@ -493,20 +493,14 @@ bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 			if ( x + 1 < mesh->width ) {
 				a = &verts[ ( y * mesh->width ) + x ];
 				b = &verts[ ( y * mesh->width ) + x + 1 ];
-				length = vector3_length( a->xyz - b->xyz );
-				if ( length > widthTable[ x ] ) {
-					widthTable[ x ] = length;
-				}
+				value_maximize( widthTable[ x ], (float)vector3_length( a->xyz - b->xyz ) );
 			}
 
 			/* get height */
 			if ( y + 1 < mesh->height ) {
 				a = &verts[ ( y * mesh->width ) + x ];
 				b = &verts[ ( ( y + 1 ) * mesh->width ) + x ];
-				length = vector3_length( a->xyz - b->xyz );
-				if ( length > heightTable[ y ] ) {
-					heightTable[ y ] = length;
-				}
+				value_maximize( heightTable[ y ], (float)vector3_length( a->xyz - b->xyz ) );
 			}
 		}
 	}
@@ -516,12 +510,8 @@ bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 	for ( x = 0; x < ( mesh->width - 1 ); x++ )
 		length += widthTable[ x ];
 	lm->w = lm->sampleSize != 0 ? ceil( length / lm->sampleSize ) + 1 : 0;
-	if ( lm->w < ds->patchWidth ) {
-		lm->w = ds->patchWidth;
-	}
-	if ( lm->w > lm->customWidth ) {
-		lm->w = lm->customWidth;
-	}
+	value_maximize( lm->w, ds->patchWidth );
+	value_minimize( lm->w, lm->customWidth );
 	sBasis = (float) ( lm->w - 1 ) / (float) ( ds->patchWidth - 1 );
 
 	/* determine lightmap height */
@@ -529,12 +519,8 @@ bool AddPatchToRawLightmap( int num, rawLightmap_t *lm ){
 	for ( y = 0; y < ( mesh->height - 1 ); y++ )
 		length += heightTable[ y ];
 	lm->h = lm->sampleSize != 0 ? ceil( length / lm->sampleSize ) + 1 : 0;
-	if ( lm->h < ds->patchHeight ) {
-		lm->h = ds->patchHeight;
-	}
-	if ( lm->h > lm->customHeight ) {
-		lm->h = lm->customHeight;
-	}
+	value_maximize( lm->h, ds->patchHeight );
+	value_minimize( lm->h, lm->customHeight );
 	tBasis = (float) ( lm->h - 1 ) / (float) ( ds->patchHeight - 1 );
 
 	/* free the temporary mesh */
@@ -967,10 +953,8 @@ void SetupSurfaceLightmaps( void ){
 	Sys_FPrintf( SYS_VRB, "--- SetupSurfaceLightmaps ---\n" );
 
 	/* determine supersample amount */
-	if ( superSample < 1 ) {
-		superSample = 1;
-	}
-	else if ( superSample > 8 ) {
+	value_maximize( superSample, 1 );
+	if ( superSample > 8 ) {
 		Sys_Warning( "Insane supersampling amount (%d) detected.\n", superSample );
 		superSample = 8;
 	}
@@ -1295,9 +1279,7 @@ void StitchSurfaceLightmaps( void ){
 					sampleSize = 0.5f * std::min( a->actualSampleSize, b->actualSampleSize );
 
 					/* test bounding box */
-					if ( origin[ 0 ] < ( b->minmax.mins[ 0 ] - sampleSize ) || ( origin[ 0 ] > b->minmax.maxs[ 0 ] + sampleSize ) ||
-						 origin[ 1 ] < ( b->minmax.mins[ 1 ] - sampleSize ) || ( origin[ 1 ] > b->minmax.maxs[ 1 ] + sampleSize ) ||
-						 origin[ 2 ] < ( b->minmax.mins[ 2 ] - sampleSize ) || ( origin[ 2 ] > b->minmax.maxs[ 2 ] + sampleSize ) ) {
+					if ( !MinMax( b->minmax.mins - Vector3().set( sampleSize ), b->minmax.maxs + Vector3().set( sampleSize ) ).test( origin ) ) {
 						continue;
 					}
 
@@ -1541,27 +1523,12 @@ static bool MergeBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bN
  */
 
 static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
-	int i, x, y, d, lightmapNum;
-
-
 	/* find luxel xy coords */
-	x = dv->lightmap[ 0 ][ 0 ] / superSample;
-	y = dv->lightmap[ 0 ][ 1 ] / superSample;
-	if ( x < 0 ) {
-		x = 0;
-	}
-	else if ( x >= lm->w ) {
-		x = lm->w - 1;
-	}
-	if ( y < 0 ) {
-		y = 0;
-	}
-	else if ( y >= lm->h ) {
-		y = lm->h - 1;
-	}
+	const int x = std::clamp( int( dv->lightmap[ 0 ][ 0 ] / superSample ), 0, lm->w - 1 );
+	const int y = std::clamp( int( dv->lightmap[ 0 ][ 1 ] / superSample ), 0, lm->h - 1 );
 
 	/* walk list */
-	for ( lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
+	for ( int lightmapNum = 0; lightmapNum < MAX_LIGHTMAPS; lightmapNum++ )
 	{
 		/* early out */
 		if ( lm->styles[ lightmapNum ] == LS_NONE ) {
@@ -1582,15 +1549,11 @@ static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
 
 		/* styles are not affected by minlight */
 		if ( lightmapNum == 0 ) {
-			for ( i = 0; i < 3; i++ )
+			for ( int i = 0; i < 3; i++ )
 			{
 				/* set min color */
-				if ( color[ i ] < minLight[ i ] ) {
-					color[ i ] = minLight[ i ];
-				}
-				if ( vertexColor[ i ] < minLight[ i ] ) { /* note NOT minVertexLight */
-					vertexColor[ i ] = minLight[ i ];
-				}
+				value_maximize( color[ i ], minLight[ i ] );
+				value_maximize( vertexColor[ i ], minLight[ i ] ); /* note NOT minVertexLight */
 			}
 		}
 
@@ -1600,13 +1563,9 @@ static bool ApproximateLuxel( rawLightmap_t *lm, bspDrawVert_t *dv ){
 		ColorToBytes( vertexColor, vcb.rgb(), 1.0f );
 
 		/* compare */
-		for ( i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; i++ )
 		{
-			d = cb[ i ] - vcb[ i ];
-			if ( d < 0 ) {
-				d *= -1;
-			}
-			if ( d > approximateTolerance ) {
+			if ( abs( cb[ i ] - vcb[ i ] ) > approximateTolerance ) {
 				return false;
 			}
 		}
@@ -2081,8 +2040,8 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 
 				/* if fast allocation, do not test allocation on every pixels, especially for large lightmaps */
 				if ( fastAllocate ) {
-					xIncrement = MAX(1, lm->w / 15);
-					yIncrement = MAX(1, lm->h / 15);
+					xIncrement = std::max( 1, lm->w / 15 );
+					yIncrement = std::max( 1, lm->h / 15 );
 				}
 				else {
 					xIncrement = 1;
@@ -2217,9 +2176,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 				if ( lightmapNum == 0 ) {
 					for ( i = 0; i < 3; i++ )
 					{
-						if ( color[ i ] < minLight[ i ] ) {
-							color[ i ] = minLight[ i ];
-						}
+						value_maximize( color[ i ], minLight[ i ] );
 					}
 				}
 
@@ -2264,7 +2221,7 @@ static int CompareRawLightmap( const void *a, const void *b ){
 	blm = &rawLightmaps[ *( (const int*) b ) ];
 
 	/* get min number of surfaces */
-	min = ( alm->numLightSurfaces < blm->numLightSurfaces ? alm->numLightSurfaces : blm->numLightSurfaces );
+	min = std::min( alm->numLightSurfaces, blm->numLightSurfaces );
 
 //#define allocate_bigger_first
 #ifdef allocate_bigger_first
@@ -2644,9 +2601,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 						/* fix negative samples */
 						for ( j = 0; j < 3; j++ )
 						{
-							if ( sample[ j ] < 0.0f ) {
-								sample[ j ] = 0.0f;
-							}
+							value_maximize( sample[ j ], 0.0f );
 						}
 					}
 					else
@@ -2692,9 +2647,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 							/* fix negative samples */
 							for ( j = 0; j < 3; j++ )
 							{
-								if ( sample[ j ] < 0.0f ) {
-									sample[ j ] = 0.0f;
-								}
+								value_maximize( sample[ j ], 0.0f );
 							}
 						}
 					}
@@ -3280,9 +3233,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 					/* set minimum light */
 					if ( lightmapNum == 0 ) {
 						for ( k = 0; k < 3; k++ )
-							if ( color[ k ] < minVertexLight[ k ] ) {
-								color[ k ] = minVertexLight[ k ];
-							}
+							value_maximize( color[ k ], minVertexLight[ k ] );
 					}
 				}
 

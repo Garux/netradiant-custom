@@ -101,10 +101,7 @@ void ColorToBytes( const Vector3& color, Vector3b& colorBytes, float scale ){
 	/* contrast */
 	if ( lightmapContrast != 1.0f ){
 		for ( i = 0; i < 3; i++ ){
-			sample[i] = lightmapContrast * ( sample[i] - 128 ) + 128;
-			if ( sample[i] < 0 ){
-				sample[i] = 0;
-			}
+			sample[i] = std::max( 0.f, lightmapContrast * ( sample[i] - 128 ) + 128 );
 		}
 		/* clamp with color normalization */
 		max = VectorMax( sample );
@@ -143,7 +140,7 @@ void ColorToBytes( const Vector3& color, Vector3b& colorBytes, float scale ){
 
 void SmoothNormals( void ){
 	int i, j, k, f, numVerts, numVotes, fOld, start;
-	float shadeAngle, defaultShadeAngle, maxShadeAngle, dot, testAngle;
+	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	bspDrawSurface_t    *ds;
 	shaderInfo_t        *si;
 	float               *shadeAngles;
@@ -178,9 +175,7 @@ void SmoothNormals( void ){
 		else{
 			shadeAngle = defaultShadeAngle;
 		}
-		if ( shadeAngle > maxShadeAngle ) {
-			maxShadeAngle = shadeAngle;
-		}
+		value_maximize( maxShadeAngle, shadeAngle );
 
 		/* flag its verts */
 		for ( j = 0; j < ds->numVerts; j++ )
@@ -244,18 +239,11 @@ void SmoothNormals( void ){
 			}
 
 			/* use smallest shade angle */
-			shadeAngle = ( shadeAngles[ i ] < shadeAngles[ j ] ? shadeAngles[ i ] : shadeAngles[ j ] );
+			shadeAngle = std::min( shadeAngles[ i ], shadeAngles[ j ] );
 
 			/* check shade angle */
-			dot = vector3_dot( bspDrawVerts[ i ].normal, bspDrawVerts[ j ].normal );
-			if ( dot > 1.0 ) {
-				dot = 1.0;
-			}
-			else if ( dot < -1.0 ) {
-				dot = -1.0;
-			}
-			testAngle = acos( dot ) + THETA_EPSILON;
-			if ( testAngle >= shadeAngle ) {
+			const double dot = std::clamp( vector3_dot( bspDrawVerts[ i ].normal, bspDrawVerts[ j ].normal ), -1.0, 1.0 );
+			if ( acos( dot ) + THETA_EPSILON >= shadeAngle ) {
 				//Sys_Printf( "F(%3.3f >= %3.3f) ", RAD2DEG( testAngle ), RAD2DEG( shadeAngle ) );
 				continue;
 			}
@@ -410,7 +398,7 @@ static void PerturbNormal( bspDrawVert_t *dv, shaderInfo_t *si, Vector3& pNormal
 #define BOGUS_NUDGE     -99999.0f
 
 static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *dv, const Plane3f* plane, float pass, const Vector3 stv[ 3 ], const Vector3 ttv[ 3 ], const Vector3 worldverts[ 3 ] ){
-	int i, x, y, numClusters, *clusters, pointCluster;
+	int i, numClusters, *clusters, pointCluster;
 	float           lightmapSampleOffset;
 	shaderInfo_t    *si;
 	Vector3 pNormal;
@@ -435,20 +423,8 @@ static int MapSingleLuxel( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t
 
 
 	/* find luxel xy coords (fixme: subtract 0.5?) */
-	x = dv->lightmap[ 0 ][ 0 ];
-	y = dv->lightmap[ 0 ][ 1 ];
-	if ( x < 0 ) {
-		x = 0;
-	}
-	else if ( x >= lm->sw ) {
-		x = lm->sw - 1;
-	}
-	if ( y < 0 ) {
-		y = 0;
-	}
-	else if ( y >= lm->sh ) {
-		y = lm->sh - 1;
-	}
+	const int x = std::clamp( int( dv->lightmap[ 0 ][ 0 ] ), 0, lm->sw - 1 );
+	const int y = std::clamp( int( dv->lightmap[ 0 ][ 1 ] ), 0, lm->sh - 1 );
 
 	/* set shader and cluster list */
 	if ( info != NULL ) {
@@ -1153,9 +1129,7 @@ void MapRawLightmap( int rawLightmapNum ){
 	   ----------------------------------------------------------------- */
 
 	/* walk the luxels */
-	radius = floor( superSample / 2 );
-	radius = radius > 0 ? radius : 1.0f;
-	radius += 1.0f;
+	radius = std::max( 1, superSample / 2 ) + 1;
 	for ( pass = 2.0f; pass <= radius; pass += 1.0f )
 	{
 		for ( y = 0; y < lm->sh; y++ )
@@ -1443,16 +1417,11 @@ float DirtForSample( trace_t *trace ){
 	}
 
 	/* apply gain (does this even do much? heh) */
-	outDirt = pow( gatherDirt / ( numDirtVectors + 1 ), dirtGain );
-	if ( outDirt > 1.0f ) {
-		outDirt = 1.0f;
-	}
+	outDirt = std::min( 1.0, pow( gatherDirt / ( numDirtVectors + 1 ), dirtGain ) );
 
 	/* apply scale */
 	outDirt *= dirtScale;
-	if ( outDirt > 1.0f ) {
-		outDirt = 1.0f;
-	}
+	value_minimize( outDirt, 1.0f );
 
 	/* return to sender */
 	return 1.0f - outDirt;
@@ -1863,7 +1832,6 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 	rawLightmap_t       *lm;
 	surfaceInfo_t       *info;
 	bool filterColor, filterDir;
-	float brightness;
 	float               samples, filterRadius, weight;
 	Vector3 averageColor, averageDir;
 	float tests[ 4 ][ 2 ] = { { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } };
@@ -2005,12 +1973,8 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 				{
 					luxel.value = ambientColor;
 					if ( deluxemap ) {
-						brightness = RGBTOGRAY( ambientColor ) * ( 1.0f / 255.0f );
-
 						// use AT LEAST this amount of contribution from ambient for the deluxemap, fixes points that receive ZERO light
-						if ( brightness < 0.00390625f ) {
-							brightness = 0.00390625f;
-						}
+						const float brightness = std::max( 0.00390625f, RGBTOGRAY( ambientColor ) * ( 1.0f / 255.0f ) );
 
 						lm->getSuperDeluxel( x, y ) = lm->getSuperNormal( x, y ) * brightness;
 					}
@@ -2061,12 +2025,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 			totalLighted = 0;
 
 			/* determine filter radius */
-			filterRadius = lm->filterRadius > trace.light->filterRadius
-						   ? lm->filterRadius
-						   : trace.light->filterRadius;
-			if ( filterRadius < 0.0f ) {
-				filterRadius = 0.0f;
-			}
+			filterRadius = std::max( { 0.f, lm->filterRadius, trace.light->filterRadius } );
 
 			/* set luxel filter radius */
 			luxelFilterRadius = lm->sampleSize != 0 ? superSample * filterRadius / lm->sampleSize : 0;
@@ -2739,9 +2698,7 @@ void IlluminateVertexes( int num ){
 								z1 = ( ( z >> 1 ) ^ ( z & 1 ? -1 : 0 ) ) + ( z & 1 );
 
 								/* nudge origin */
-								trace.origin[ 0 ] = verts[ i ].xyz[ 0 ] + ( VERTEX_NUDGE * x1 );
-								trace.origin[ 1 ] = verts[ i ].xyz[ 1 ] + ( VERTEX_NUDGE * y1 );
-								trace.origin[ 2 ] = verts[ i ].xyz[ 2 ] + ( VERTEX_NUDGE * z1 );
+								trace.origin = verts[ i ].xyz + Vector3( x1, y1, z1 ) * Vector3().set( VERTEX_NUDGE );
 
 								/* try at nudged origin */
 								trace.cluster = ClusterForPointExtFilter( origin, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
@@ -2862,8 +2819,7 @@ void IlluminateVertexes( int num ){
 		ds->vertexStyles[ lightmapNum ] = lm->styles[ lightmapNum ];
 
 	/* get max search radius */
-	maxRadius = lm->sw;
-	maxRadius = maxRadius > lm->sh ? maxRadius : lm->sh;
+	maxRadius = std::max( lm->sw, lm->sh );
 
 	/* walk the surface verts */
 	verts = yDrawVerts + ds->firstVert;
@@ -2878,20 +2834,8 @@ void IlluminateVertexes( int num ){
 			}
 
 			/* get luxel coords */
-			x = verts[ i ].lightmap[ lightmapNum ][ 0 ];
-			y = verts[ i ].lightmap[ lightmapNum ][ 1 ];
-			if ( x < 0 ) {
-				x = 0;
-			}
-			else if ( x >= lm->sw ) {
-				x = lm->sw - 1;
-			}
-			if ( y < 0 ) {
-				y = 0;
-			}
-			else if ( y >= lm->sh ) {
-				y = lm->sh - 1;
-			}
+			x = std::clamp( int( verts[ i ].lightmap[ lightmapNum ][ 0 ] ), 0, lm->sw - 1 );
+			y = std::clamp( int( verts[ i ].lightmap[ lightmapNum ][ 1 ] ), 0, lm->sh - 1 );
 
 			/* get vertex luxels */
 			Vector3& vertLuxel = getVertexLuxel( lightmapNum, ds->firstVert + i );
@@ -3489,13 +3433,8 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 						const Vector3 dir = -light->normal;
 						for ( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
 						{
-							float factor;
-
 							origin = light->origin + light->normal * radius;
-							factor = PointToPolygonFormFactor( origin, dir, light->w );
-							if ( factor < 0.0f ) {
-								factor *= -1.0f;
-							}
+							const float factor = std::abs( PointToPolygonFormFactor( origin, dir, light->w ) );
 							if ( ( factor * light->add ) <= light->falloffTolerance ) {
 								light->envelope = radius;
 								break;
@@ -3608,12 +3547,9 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 					radius = vector3_length( minmax.maxs - light->origin );
 
 					/* if this radius is smaller than the envelope, then set the envelope to it */
-					if ( radius < light->envelope ) {
-						light->envelope = radius;
-						//%	Sys_FPrintf( SYS_VRB, "PVS Cull (%d): culled\n", numLights );
-					}
-					//%	else
-					//%		Sys_FPrintf( SYS_VRB, "PVS Cull (%d): failed (%8.0f > %8.0f)\n", numLights, radius, light->envelope );
+					//% if ( radius < light->envelope ) Sys_FPrintf( SYS_VRB, "PVS Cull (%d): culled\n", numLights );
+					//%	else Sys_FPrintf( SYS_VRB, "PVS Cull (%d): failed (%8.0f > %8.0f)\n", numLights, radius, light->envelope );
+					value_minimize( light->envelope, radius );
 				}
 
 				/* add grid/surface only check */
@@ -3944,7 +3880,6 @@ void SetupFloodLight( void ){
 float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodLightLowQuality ){
 	int i;
 	float contribution;
-	int sub = 0;
 	float gatherLight, outLight;
 	Vector3 myUp, myRt;
 	int vecs = 0;
@@ -4016,10 +3951,7 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodL
 
 				// d=trace->distance;
 				//if (d>256) gatherDirt+=1;
-				contribution = d / dd;
-				if ( contribution > 1 ) {
-					contribution = 1.0f;
-				}
+				contribution = std::min( 1.f, d / dd );
 
 				//gatherDirt += 1.0f - ooDepth * VectorLength( displacement );
 			}
@@ -4033,17 +3965,9 @@ float FloodLightForSample( trace_t *trace, float floodLightDistance, bool floodL
 		return 0.0f;
 	}
 
-	sub = vecs;
+	gatherLight /= std::max( 1, vecs );
 
-	if ( sub < 1 ) {
-		sub = 1;
-	}
-	gatherLight /= ( sub );
-
-	outLight = gatherLight;
-	if ( outLight > 1.0f ) {
-		outLight = 1.0f;
-	}
+	outLight = std::min( 1.f, gatherLight );
 
 	/* return to sender */
 	return outLight;
@@ -4256,12 +4180,8 @@ void FloodlightIlluminateLightmap( rawLightmap_t *lm ){
 
 				/* add to deluxemap */
 				if ( deluxemap && floodlight.scale > 0 ) {
-					float brightness = RGBTOGRAY( floodlight.value ) * ( 1.0f / 255.0f ) * floodlight.scale;
-
 					// use AT LEAST this amount of contribution from ambient for the deluxemap, fixes points that receive ZERO light
-					if ( brightness < 0.00390625f ) {
-						brightness = 0.00390625f;
-					}
+					const float brightness = std::max( 0.00390625f, RGBTOGRAY( floodlight.value ) * ( 1.0f / 255.0f ) * floodlight.scale );
 
 					const Vector3 lightvector = lm->getSuperNormal( x, y ) * brightness;
 					lm->getSuperDeluxel( x, y ) += lightvector;

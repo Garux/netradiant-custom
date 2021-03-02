@@ -142,14 +142,7 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 			{
 				for ( k = 0; k < 4; k++ )
 				{
-					c = ( mult[ k ] * dv->color[ j ][ k ] ) + add[ k ];
-					if ( c < 0 ) {
-						c = 0;
-					}
-					else if ( c > 255 ) {
-						c = 255;
-					}
-					dv->color[ j ][ k ] = c;
+					dv->color[ j ][ k ] = std::clamp( mult[ k ] * dv->color[ j ][ k ] + add[ k ], 0.f, 255.f );
 				}
 			}
 		}
@@ -933,7 +926,7 @@ void Parse1DMatrixAppend( char *buffer, int x, float *m ){
  */
 
 static void ParseShaderFile( const char *filename ){
-	int i, val;
+	int i;
 	shaderInfo_t    *si;
 	char shaderText[ 8192 ];            /* ydnar: fixme (make this bigger?) */
 
@@ -1383,12 +1376,8 @@ static void ParseShaderFile( const char *filename ){
 					si->skyLightIterations = atoi( token );
 
 					/* clamp */
-					if ( si->skyLightValue < 0.0f ) {
-						si->skyLightValue = 0.0f;
-					}
-					if ( si->skyLightIterations < 2 ) {
-						si->skyLightIterations = 2;
-					}
+					value_maximize( si->skyLightValue, 0.0f );
+					value_maximize( si->skyLightIterations, 2 );
 				}
 
 				/* q3map_surfacelight <value> */
@@ -1400,14 +1389,7 @@ static void ParseShaderFile( const char *filename ){
 				/* q3map_lightStyle (sof2/jk2 lightstyle) */
 				else if ( striEqual( token, "q3map_lightStyle" ) ) {
 					GetTokenAppend( shaderText, false );
-					val = atoi( token );
-					if ( val < 0 ) {
-						val = 0;
-					}
-					else if ( val > LS_NONE ) {
-						val = LS_NONE;
-					}
-					si->lightStyle = val;
+					si->lightStyle = std::clamp( atoi( token ), 0, LS_NONE );
 				}
 
 				/* wolf: q3map_lightRGB <red> <green> <blue> */

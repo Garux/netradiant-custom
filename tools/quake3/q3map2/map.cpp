@@ -745,9 +745,7 @@ void AddBrushBevels( void ){
 							if ( d > 0.1f ) {
 								break;  // point in front
 							}
-							if ( d < minBack ) {
-								minBack = d;
-							}
+							value_minimize( minBack, d );
 						}
 						// if some point was at the front
 						if ( l != w2->numpoints ) {
@@ -1699,10 +1697,8 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	GetEntityShadowFlags( mapEnt, NULL, &castShadows, &recvShadows );
 
 	/* ydnar: get lightmap scaling value for this entity */
-	float lightmapScale = mapEnt->floatForKey( "lightmapscale", "_lightmapscale", "_ls" );
-	if ( lightmapScale < 0.0f )
-		lightmapScale = 0.0f;
-	else if ( lightmapScale > 0.0f )
+	const float lightmapScale = std::max( 0.f, mapEnt->floatForKey( "lightmapscale", "_lightmapscale", "_ls" ) );
+	if ( lightmapScale != 0 )
 		Sys_Printf( "Entity %d (%s) has lightmap scale of %.4f\n", mapEnt->mapEntityNum, classname, lightmapScale );
 
 	/* ydnar: get cel shader :) for this entity */
@@ -1718,18 +1714,14 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	}
 
 	/* jal : entity based _shadeangle */
-	float shadeAngle = mapEnt->floatForKey( "_shadeangle",
-						"_smoothnormals", "_sn", "_sa", "_smooth" ); /* vortex' aliases */
-	if ( shadeAngle < 0.0f )
-		shadeAngle = 0.0f;
-	else if ( shadeAngle > 0.0f )
+	const float shadeAngle = std::max( 0.f, mapEnt->floatForKey( "_shadeangle",
+	                                      "_smoothnormals", "_sn", "_sa", "_smooth" ) ); /* vortex' aliases */
+	if ( shadeAngle != 0 )
 		Sys_Printf( "Entity %d (%s) has shading angle of %.4f\n", mapEnt->mapEntityNum, classname, shadeAngle );
 
 	/* jal : entity based _samplesize */
-	int lightmapSampleSize = mapEnt->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" );
-	if ( lightmapSampleSize < 0 )
-		lightmapSampleSize = 0;
-	else if ( lightmapSampleSize > 0 )
+	const int lightmapSampleSize = std::max( 0, mapEnt->intForKey( "_lightmapsamplesize", "_samplesize", "_ss" ) );
+	if ( lightmapSampleSize != 0 )
 		Sys_Printf( "Entity %d (%s) has lightmap sample size of %d\n", mapEnt->mapEntityNum, classname, lightmapSampleSize );
 
 	/* attach stuff to everything in the entity */

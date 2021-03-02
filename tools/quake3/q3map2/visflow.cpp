@@ -102,9 +102,7 @@ fixedWinding_t *AllocStackWinding( pstack_t *stack ){
 }
 
 void FreeStackWinding( fixedWinding_t *w, pstack_t *stack ){
-	int i;
-
-	i = w - stack->windings;
+	const int i = w - stack->windings;
 
 	if ( i < 0 || i > 2 ) {
 		return;     // not from local
@@ -1345,10 +1343,8 @@ void CreatePassages( int portalnum ){
 			for ( k = 0; k < numseperators; k++ )
 			{
 				/* ydnar: this is a shitty crutch */
-				if ( in.numpoints > MAX_POINTS_ON_FIXED_WINDING ) {
-					//% Sys_Printf( "[%d]", p->winding->numpoints );
-					in.numpoints = MAX_POINTS_ON_FIXED_WINDING;
-				}
+				//% if ( in.numpoints > MAX_POINTS_ON_FIXED_WINDING ) Sys_Printf( "[%d]", p->winding->numpoints );
+				value_minimize( in.numpoints, MAX_POINTS_ON_FIXED_WINDING );
 
 				res = PassageChopWinding( &in, &out, seperators[ k ] );
 				if ( res == &out ) {

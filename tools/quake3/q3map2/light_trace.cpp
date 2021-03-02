@@ -638,9 +638,7 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 	}
 
 	/* set max trace depth */
-	if ( depth > maxTraceDepth ) {
-		maxTraceDepth = depth;
-	}
+	value_maximize( maxTraceDepth, depth );
 
 	/* snap the average */
 	dist = floor( average[ type ] / count );
@@ -1431,20 +1429,8 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	t = w * tt->v[ 0 ].st[ 1 ] + u * tt->v[ 1 ].st[ 1 ] + v * tt->v[ 2 ].st[ 1 ];
 	s = s - floor( s );
 	t = t - floor( t );
-	is = s * si->lightImage->width;
-	it = t * si->lightImage->height;
-	if ( is < 0 ) {
-		is = 0;
-	}
-	if ( is > si->lightImage->width - 1 ) {
-		is = si->lightImage->width - 1;
-	}
-	if ( it < 0 ) {
-		it = 0;
-	}
-	if ( it > si->lightImage->height - 1 ) {
-		it = si->lightImage->height - 1;
-	}
+	is = std::clamp( int( s * si->lightImage->width ), 0, si->lightImage->width - 1 );
+	it = std::clamp( int( t * si->lightImage->height ), 0, si->lightImage->height - 1 );
 
 	/* get pixel */
 	pixel = si->lightImage->pixels + 4 * ( it * si->lightImage->width + is );

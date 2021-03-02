@@ -647,12 +647,8 @@ int MiniMapBSPMain( int argc, char **argv ){
 			for ( x = 0; x < minimap.width; ++x )
 			{
 				float v = *q++;
-				if ( v < mi ) {
-					mi = v;
-				}
-				if ( v > ma ) {
-					ma = v;
-				}
+				value_minimize( mi, v );
+				value_maximize( ma, v );
 			}
 		if ( ma > mi ) {
 			s = 1 / ( ma - mi );
@@ -699,16 +695,7 @@ int MiniMapBSPMain( int argc, char **argv ){
 		for ( y = 0; y < minimap.height; ++y )
 			for ( x = 0; x < minimap.width; ++x )
 			{
-				byte b;
-				float v = *q++;
-				if ( v < 0 ) {
-					v = 0;
-				}
-				if ( v > 255.0 / 256.0 ) {
-					v = 255.0 / 256.0;
-				}
-				b = v * 256;
-				*p++ = b;
+				*p++ = std::clamp( *q++, 0.f, 255.f / 256.f ) * 256;
 			}
 		Sys_Printf( " writing to %s...", minimapFilename );
 		WriteTGAGray( minimapFilename, data4b, minimap.width, minimap.height );
@@ -718,19 +705,10 @@ int MiniMapBSPMain( int argc, char **argv ){
 		for ( y = 0; y < minimap.height; ++y )
 			for ( x = 0; x < minimap.width; ++x )
 			{
-				byte b;
-				float v = *q++;
-				if ( v < 0 ) {
-					v = 0;
-				}
-				if ( v > 255.0 / 256.0 ) {
-					v = 255.0 / 256.0;
-				}
-				b = v * 256;
 				*p++ = 0;
 				*p++ = 0;
 				*p++ = 0;
-				*p++ = b;
+				*p++ = std::clamp( *q++, 0.f, 255.f / 256.f ) * 256;
 			}
 		Sys_Printf( " writing to %s...", minimapFilename );
 		WriteTGA( minimapFilename, data4b, minimap.width, minimap.height );
@@ -740,19 +718,10 @@ int MiniMapBSPMain( int argc, char **argv ){
 		for ( y = 0; y < minimap.height; ++y )
 			for ( x = 0; x < minimap.width; ++x )
 			{
-				byte b;
-				float v = *q++;
-				if ( v < 0 ) {
-					v = 0;
-				}
-				if ( v > 255.0 / 256.0 ) {
-					v = 255.0 / 256.0;
-				}
-				b = v * 256;
 				*p++ = 255;
 				*p++ = 255;
 				*p++ = 255;
-				*p++ = b;
+				*p++ = std::clamp( *q++, 0.f, 255.f / 256.f ) * 256;
 			}
 		Sys_Printf( " writing to %s...", minimapFilename );
 		WriteTGA( minimapFilename, data4b, minimap.width, minimap.height );

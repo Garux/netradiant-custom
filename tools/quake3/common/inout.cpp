@@ -325,7 +325,7 @@ void xml_message_push( int flag, const char* characters, size_t length ){
 		}
 		else
 		{
-			size_t size = ( space < ( size_t )( end - characters ) ) ? space : ( size_t )( end - characters );
+			size_t size = std::min( space, static_cast<size_t>( end - characters ) );
 			memcpy( mesege + mesege_len, characters, size );
 			mesege_len += size;
 			characters += size;

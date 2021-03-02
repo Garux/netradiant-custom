@@ -51,9 +51,7 @@ static void CreateSunLight( sun_t *sun ){
 	}
 
 	/* fixup */
-	if ( sun->numSamples < 1 ) {
-		sun->numSamples = 1;
-	}
+	value_maximize( sun->numSamples, 1 );
 
 	/* set photons */
 	photons = sun->photons / sun->numSamples;
@@ -344,18 +342,13 @@ void CreateEntityLights( void ){
 		}
 
 		/* ydnar: get deviance and samples */
-		float deviance = e->floatForKey( "_deviance", "_deviation", "_jitter" );
-		if ( deviance < 0.f )
-			deviance = 0.f;
-		int numSamples = e->intForKey( "_samples" );
-		if ( numSamples < 1 )
-			numSamples = 1;
+		const float deviance = std::max( 0.f, e->floatForKey( "_deviance", "_deviation", "_jitter" ) );
+		const int numSamples = std::max( 1, e->intForKey( "_samples" ) );
 
 		intensity /= numSamples;
 
 		{ /* ydnar: get filter radius */
-			const float filterRadius = e->floatForKey( "_filterradius", "_filteradius", "_filter" );
-			light->filterRadius = filterRadius < 0.f? 0.f : filterRadius;
+			light->filterRadius = std::max( 0.f, e->floatForKey( "_filterradius", "_filteradius", "_filter" ) );
 		}
 
 		/* set light color */
@@ -650,7 +643,7 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
 	int i, j;
 	Vector3 dirs[ MAX_POINTS_ON_WINDING ];
 	float total;
-	float dot, angle, facing;
+	float angle, facing;
 
 
 	/* this is expensive */
@@ -669,18 +662,10 @@ float PointToPolygonFormFactor( const Vector3& point, const Vector3& normal, con
 	{
 		/* get a triangle */
 		j = i + 1;
-		dot = vector3_dot( dirs[ i ], dirs[ j ] );
-
-		/* roundoff can cause slight creep, which gives an IND from acos */
-		if ( dot > 1.0f ) {
-			dot = 1.0f;
-		}
-		else if ( dot < -1.0f ) {
-			dot = -1.0f;
-		}
 
 		/* get the angle */
-		angle = acos( dot );
+		/* roundoff can cause slight creep, which gives an IND from acos, thus clamp */
+		angle = acos( std::clamp( vector3_dot( dirs[ i ], dirs[ j ] ), -1.0, 1.0 ) );
 
 		Vector3 triNormal = vector3_cross( dirs[ i ], dirs[ j ] );
 		if ( VectorFastNormalize( triNormal ) < 0.0001f ) {
@@ -813,10 +798,7 @@ int LightContributionToSample( trace_t *trace ){
 			}
 
 			/* clamp the distance to prevent super hot spots */
-			dist = sqrt( dist * dist + light->extraDist * light->extraDist );
-			if ( dist < 16.0f ) {
-				dist = 16.0f;
-			}
+			dist = std::max( 16.0, sqrt( dist * dist + light->extraDist * light->extraDist ) );
 
 			add = light->photons / ( dist * dist ) * angle;
 
@@ -881,10 +863,7 @@ int LightContributionToSample( trace_t *trace ){
 		}
 
 		/* clamp the distance to prevent super hot spots */
-		dist = sqrt( dist * dist + light->extraDist * light->extraDist );
-		if ( dist < 16.0f ) {
-			dist = 16.0f;
-		}
+		dist = std::max( 16.0, sqrt( dist * dist + light->extraDist * light->extraDist ) );
 
 		/* angle attenuation */
 		if ( light->flags & LightFlags::AttenAngle ) {
@@ -902,9 +881,7 @@ int LightContributionToSample( trace_t *trace ){
 			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
 			if ( lightAngleHL ) {
 				if ( dot > 0.001f ) { // skip coplanar
-					if ( dot > 1.0f ) {
-						dot = 1.0f;
-					}
+					value_minimize( dot, 1.0f );
 					dot = ( dot * 0.5f ) + 0.5f;
 					dot *= dot;
 				}
@@ -921,17 +898,12 @@ int LightContributionToSample( trace_t *trace ){
 
 		if ( light->angleScale != 0.0f ) {
 			angle /= light->angleScale;
-			if ( angle > 1.0f ) {
-				angle = 1.0f;
-			}
+			value_minimize( angle, 1.0f );
 		}
 
 		/* attenuate */
 		if ( light->flags & LightFlags::AttenLinear ) {
-			add = angle * light->photons * linearScale - ( dist * light->fade );
-			if ( add < 0.0f ) {
-				add = 0.0f;
-			}
+			add = std::max( 0.f, angle * light->photons * linearScale - ( dist * light->fade ) );
 
 			if ( deluxemap ) {
 				if ( angledDeluxe ) {
@@ -941,17 +913,12 @@ int LightContributionToSample( trace_t *trace ){
 					addDeluxe = light->photons * linearScale - ( dist * light->fade );
 				}
 
-				if ( addDeluxe < 0.0f ) {
-					addDeluxe = 0.0f;
-				}
+				value_maximize( addDeluxe, 0.0f );
 			}
 		}
 		else
 		{
-			add = ( light->photons / ( dist * dist ) ) * angle;
-			if ( add < 0.0f ) {
-				add = 0.0f;
-			}
+			add = std::max( 0.f, ( light->photons / ( dist * dist ) ) * angle );
 
 			if ( deluxemap ) {
 				if ( angledDeluxe ) {
@@ -962,9 +929,7 @@ int LightContributionToSample( trace_t *trace ){
 				}
 			}
 
-			if ( addDeluxe < 0.0f ) {
-				addDeluxe = 0.0f;
-			}
+			value_maximize( addDeluxe, 0.0f );
 		}
 
 		/* handle spotlights */
@@ -987,15 +952,10 @@ int LightContributionToSample( trace_t *trace ){
 			/* attenuate */
 			if ( sampleRadius > ( radiusAtDist - 32.0f ) ) {
 				add *= ( ( radiusAtDist - sampleRadius ) / 32.0f );
-				if ( add < 0.0f ) {
-					add = 0.0f;
-				}
+				value_maximize( add, 0.0f );
 
 				addDeluxe *= ( ( radiusAtDist - sampleRadius ) / 32.0f );
-
-				if ( addDeluxe < 0.0f ) {
-					addDeluxe = 0.0f;
-				}
+				value_maximize( addDeluxe, 0.0f );
 			}
 		}
 	}
@@ -1022,9 +982,7 @@ int LightContributionToSample( trace_t *trace ){
 			/* jal: optional half Lambert attenuation (http://developer.valvesoftware.com/wiki/Half_Lambert) */
 			if ( lightAngleHL ) {
 				if ( dot > 0.001f ) { // skip coplanar
-					if ( dot > 1.0f ) {
-						dot = 1.0f;
-					}
+					value_minimize( dot, 1.0f );
 					dot = ( dot * 0.5f ) + 0.5f;
 					dot *= dot;
 				}
@@ -1050,9 +1008,7 @@ int LightContributionToSample( trace_t *trace ){
 				addDeluxe = light->photons;
 			}
 
-			if ( addDeluxe < 0.0f ) {
-				addDeluxe = 0.0f;
-			}
+			value_maximize( addDeluxe, 0.0f );
 		}
 
 		if ( add <= 0.0f ) {
@@ -1066,9 +1022,7 @@ int LightContributionToSample( trace_t *trace ){
 
 		if ( bouncing ) {
 			addDeluxe *= addDeluxeBounceScale;
-			if ( addDeluxe < 0.00390625f ) {
-				addDeluxe = 0.00390625f;
-			}
+			value_maximize( addDeluxe, 0.00390625f );
 		}
 
 		trace->directionContribution = trace->direction * addDeluxe;
@@ -1287,10 +1241,7 @@ bool LightContributionToPoint( trace_t *trace ){
 	/* ptpff approximation */
 	if ( light->type == ELightType::Area && faster ) {
 		/* clamp the distance to prevent super hot spots */
-		dist = sqrt( dist * dist + light->extraDist * light->extraDist );
-		if ( dist < 16.0f ) {
-			dist = 16.0f;
-		}
+		dist = std::max( 16.0, sqrt( dist * dist + light->extraDist * light->extraDist ) );
 
 		/* attenuate */
 		add = light->photons / ( dist * dist );
@@ -1338,17 +1289,11 @@ bool LightContributionToPoint( trace_t *trace ){
 	/* point/spot lights */
 	else if ( light->type == ELightType::Point || light->type == ELightType::Spot ) {
 		/* clamp the distance to prevent super hot spots */
-		dist = sqrt( dist * dist + light->extraDist * light->extraDist );
-		if ( dist < 16.0f ) {
-			dist = 16.0f;
-		}
+		dist = std::max( 16.0, sqrt( dist * dist + light->extraDist * light->extraDist ) );
 
 		/* attenuate */
 		if ( light->flags & LightFlags::AttenLinear ) {
-			add = light->photons * linearScale - ( dist * light->fade );
-			if ( add < 0.0f ) {
-				add = 0.0f;
-			}
+			add = std::max( 0.f, light->photons * linearScale - ( dist * light->fade ) );
 		}
 		else{
 			add = light->photons / ( dist * dist );
@@ -1468,20 +1413,10 @@ void TraceGrid( int num ){
 	mod -= y * gridBounds[ 0 ];
 	x = mod;
 
-	trace.origin[ 0 ] = gridMins[ 0 ] + x * gridSize[ 0 ];
-	trace.origin[ 1 ] = gridMins[ 1 ] + y * gridSize[ 1 ];
-	trace.origin[ 2 ] = gridMins[ 2 ] + z * gridSize[ 2 ];
+	trace.origin = gridMins + Vector3( x, y, z ) * gridSize;
 
 	/* set inhibit sphere */
-	if ( gridSize[ 0 ] > gridSize[ 1 ] && gridSize[ 0 ] > gridSize[ 2 ] ) {
-		trace.inhibitRadius = gridSize[ 0 ] * 0.5f;
-	}
-	else if ( gridSize[ 1 ] > gridSize[ 0 ] && gridSize[ 1 ] > gridSize[ 2 ] ) {
-		trace.inhibitRadius = gridSize[ 1 ] * 0.5f;
-	}
-	else{
-		trace.inhibitRadius = gridSize[ 2 ] * 0.5f;
-	}
+	trace.inhibitRadius = gridSize[ vector3_max_abs_component_index( gridSize ) ] * 0.5f;
 
 	/* find point cluster */
 	trace.cluster = ClusterForPointExt( trace.origin, GRID_EPSILON );
@@ -1616,10 +1551,7 @@ void TraceGrid( int num ){
 		/* get relative directed strength */
 		d = vector3_dot( contributions[ i ].dir, thisdir );
 		/* we map 1 to gridDirectionality, and 0 to gridAmbientDirectionality */
-		d = gridAmbientDirectionality + d * ( gridDirectionality - gridAmbientDirectionality );
-		if ( d < 0.0f ) {
-			d = 0.0f;
-		}
+		d = std::max( 0.f, gridAmbientDirectionality + d * ( gridDirectionality - gridAmbientDirectionality ) );
 
 		/* find appropriate style */
 		for ( j = 0; j < numStyles; j++ )
@@ -1686,9 +1618,7 @@ void TraceGrid( int num ){
 		/* set minimum light and copy off to bytes */
 		Vector3 color = gp->ambient[ i ];
 		for ( j = 0; j < 3; j++ )
-			if ( color[ j ] < minGridLight[ j ] ) {
-				color[ j ] = minGridLight[ j ];
-			}
+			value_maximize( color[ j ], minGridLight[ j ] );
 
 		/* vortex: apply gridscale and gridambientscale here */
 		ColorToBytes( color, bgp->ambient[ i ], gridScale * gridAmbientScale );
@@ -1740,7 +1670,7 @@ void SetupGrid( void ){
 	/* quantize it */
 	const Vector3 oldGridSize = gridSize;
 	for ( i = 0; i < 3; i++ )
-		gridSize[ i ] = gridSize[ i ] >= 8.0f ? floor( gridSize[ i ] ) : 8.0f;
+		gridSize[ i ] = std::max( 8.0, floor( gridSize[ i ] ) );
 
 	/* ydnar: increase gridSize until grid count is smaller than max allowed */
 	numRawGridPoints = MAX_MAP_LIGHTGRID + 1;
@@ -1858,7 +1788,7 @@ void LightWorld( bool fastAllocate ){
 
 	/* maxlight */
 	if ( entities[ 0 ].read_keyvalue( f, "_maxlight" ) ) {
-		maxLight = f > 255? 255 : f < 0? 0 : f;
+		maxLight = std::clamp( f, 0.f, 255.f );
 	}
 
 	/* determine the number of grid points */
@@ -2163,13 +2093,12 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( strEqual( argv[ i ], "-backsplash" ) && i < ( argc - 3 ) ) {
-			f = atof( argv[ i + 1 ] );
-			g_backsplashFractionScale = f;
-			Sys_Printf( "Area lights backsplash fraction scaled by %f\n", f, g_backsplashFractionScale );
+			g_backsplashFractionScale = atof( argv[ i + 1 ] );
+			Sys_Printf( "Area lights backsplash fraction scaled by %f\n", g_backsplashFractionScale );
 			f = atof( argv[ i + 2 ] );
 			if ( f >= -900.0f ){
 				g_backsplashDistance = f;
-				Sys_Printf( "Area lights backsplash distance set globally to %f\n", f, g_backsplashDistance );
+				Sys_Printf( "Area lights backsplash distance set globally to %f\n", g_backsplashDistance );
 			}
 			i+=2;
 		}
@@ -2180,14 +2109,7 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( strEqual( argv[ i ], "-bouncecolorratio" ) ) {
-			f = atof( argv[ i + 1 ] );
-			bounceColorRatio *= f;
-			if ( bounceColorRatio > 1 ) {
-				bounceColorRatio = 1;
-			}
-			if ( bounceColorRatio < 0 ) {
-				bounceColorRatio = 0;
-			}
+			bounceColorRatio = std::clamp( atof( argv[ i + 1 ] ), 0.0, 1.0 );
 			Sys_Printf( "Bounce color ratio set to %f\n", bounceColorRatio );
 			i++;
 		}
@@ -2225,28 +2147,16 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( strEqual( argv[ i ], "-griddirectionality" ) ) {
-			f = atof( argv[ i + 1 ] );
-			if ( f > 1 ) {
-				f = 1;
-			}
-			if ( f < gridAmbientDirectionality ) {
-				gridAmbientDirectionality = f;
-			}
-			Sys_Printf( "Grid directionality is %f\n", f );
-			gridDirectionality = f;
+			gridDirectionality = std::min( 1.0, atof( argv[ i + 1 ] ) );
+			value_minimize( gridAmbientDirectionality, gridDirectionality );
+			Sys_Printf( "Grid directionality is %f\n", gridDirectionality );
 			i++;
 		}
 
 		else if ( strEqual( argv[ i ], "-gridambientdirectionality" ) ) {
-			f = atof( argv[ i + 1 ] );
-			if ( f < -1 ) {
-				f = -1;
-			}
-			if ( f > gridDirectionality ) {
-				gridDirectionality = f;
-			}
-			Sys_Printf( "Grid ambient directionality is %f\n", f );
-			gridAmbientDirectionality = f;
+			gridAmbientDirectionality = std::max( -1.0, atof( argv[ i + 1 ] ) );
+			value_maximize( gridDirectionality, gridAmbientDirectionality );
+			Sys_Printf( "Grid ambient directionality is %f\n", gridAmbientDirectionality );
 			i++;
 		}
 
@@ -2331,8 +2241,7 @@ int LightMain( int argc, char **argv ){
 
 		/* Lighting contrast */
 		else if( strEqual( argv[ i ], "-contrast" ) ){
-			f = atof( argv[ i + 1 ] );
-			lightmapContrast = f > 255? 255 : f < -255? -255 : f;
+			lightmapContrast = std::clamp( atof( argv[ i + 1 ] ), -255.0, 255.0 );
 			Sys_Printf( "Lighting contrast set to %f\n", lightmapContrast );
 			i++;
 			/* change to factor in range of 0 to 129.5 */
@@ -2341,22 +2250,16 @@ int LightMain( int argc, char **argv ){
 
 		/* ydnar switches */
 		else if ( strEqual( argv[ i ], "-bounce" ) ) {
-			bounce = atoi( argv[ i + 1 ] );
-			if ( bounce < 0 ) {
-				bounce = 0;
-			}
-			else if ( bounce > 0 ) {
+			bounce = std::max( 0, atoi( argv[ i + 1 ] ) );
+			if ( bounce > 0 ) {
 				Sys_Printf( "Radiosity enabled with %d bounce(s)\n", bounce );
 			}
 			i++;
 		}
 
 		else if ( strEqual( argv[ i ], "-supersample" ) || strEqual( argv[ i ], "-super" ) ) {
-			superSample = atoi( argv[ i + 1 ] );
-			if ( superSample < 1 ) {
-				superSample = 1;
-			}
-			else if ( superSample > 1 ) {
+			superSample = std::max( 1, atoi( argv[ i + 1 ] ) );
+			if ( superSample > 1 ) {
 				Sys_Printf( "Ordered-grid supersampling enabled with %d sample(s) per lightmap texel\n", ( superSample * superSample ) );
 			}
 			i++;
@@ -2369,22 +2272,15 @@ int LightMain( int argc, char **argv ){
 
 		else if ( strEqual( argv[ i ], "-samples" ) ) {
 			lightSamplesInsist = ( *argv[i + 1] == '+' );
-			lightSamples = atoi( argv[ i + 1 ] );
-			if ( lightSamples < 1 ) {
-				lightSamples = 1;
-			}
-			else if ( lightSamples > 1 ) {
+			lightSamples = std::max( 1, atoi( argv[ i + 1 ] ) );
+			if ( lightSamples > 1 ) {
 				Sys_Printf( "Adaptive supersampling enabled with %d sample(s) per lightmap texel\n", lightSamples );
 			}
 			i++;
 		}
 
 		else if ( strEqual( argv[ i ], "-samplessearchboxsize" ) ) {
-			lightSamplesSearchBoxSize = atoi( argv[ i + 1 ] );
-//			lightSamplesSearchBoxSize = MAX( MIN( lightSamplesSearchBoxSize, 4 ), 1 );
-			lightSamplesSearchBoxSize = lightSamplesSearchBoxSize < 1 ? 1
-										: lightSamplesSearchBoxSize > 4 ? 4 /* more makes no sense */
-										: lightSamplesSearchBoxSize;
+			lightSamplesSearchBoxSize = std::clamp( atoi( argv[ i + 1 ] ), 1, 4 ); /* more makes no sense */
 			if ( lightSamplesSearchBoxSize != 1 )
 				Sys_Printf( "Adaptive supersampling uses %f times the normal search box size\n", lightSamplesSearchBoxSize );
 			i++;
@@ -2401,11 +2297,8 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( strEqual( argv[ i ], "-shadeangle" ) ) {
-			shadeAngleDegrees = atof( argv[ i + 1 ] );
-			if ( shadeAngleDegrees < 0.0f ) {
-				shadeAngleDegrees = 0.0f;
-			}
-			else if ( shadeAngleDegrees > 0.0f ) {
+			shadeAngleDegrees = std::max( 0.0, atof( argv[ i + 1 ] ) );
+			if ( shadeAngleDegrees > 0.0f ) {
 				shade = true;
 				Sys_Printf( "Phong shading enabled with a breaking angle of %f degrees\n", shadeAngleDegrees );
 			}
@@ -2424,11 +2317,8 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( strEqual( argv[ i ], "-approx" ) ) {
-			approximateTolerance = atoi( argv[ i + 1 ] );
-			if ( approximateTolerance < 0 ) {
-				approximateTolerance = 0;
-			}
-			else if ( approximateTolerance > 0 ) {
+			approximateTolerance = std::max( 0, atoi( argv[ i + 1 ] ) );
+			if ( approximateTolerance > 0 ) {
 				Sys_Printf( "Approximating lightmaps within a byte tolerance of %d\n", approximateTolerance );
 			}
 			i++;
@@ -2439,7 +2329,7 @@ int LightMain( int argc, char **argv ){
 		}
 		else if ( strEqual( argv[ i ], "-deluxemode" ) ) {
 			deluxemode = atoi( argv[ i + 1 ] );
-			if ( deluxemode == 0 || deluxemode > 1 || deluxemode < 0 ) {
+			if ( deluxemode != 1 ) {
 				Sys_Printf( "Generating modelspace deluxemaps\n" );
 				deluxemode = 0;
 			}
@@ -2518,10 +2408,7 @@ int LightMain( int argc, char **argv ){
 		}
 
 		else if ( strEqual( argv[ i ], "-extradist" ) ) {
-			extraDist = atof( argv[ i + 1 ] );
-			if ( extraDist < 0 ) {
-				extraDist = 0;
-			}
+			extraDist = std::max( 0.0, atof( argv[ i + 1 ] ) );
 			i++;
 			Sys_Printf( "Default extra radius set to %f units\n", extraDist );
 		}
@@ -2694,18 +2581,12 @@ int LightMain( int argc, char **argv ){
 			Sys_Printf( "The -extrawide argument is deprecated, use \"-filter [-super 2]\" instead\n" );
 		}
 		else if ( strEqual( argv[ i ], "-samplesize" ) ) {
-			sampleSize = atoi( argv[ i + 1 ] );
-			if ( sampleSize < 1 ) {
-				sampleSize = 1;
-			}
+			sampleSize = std::max( 1, atoi( argv[ i + 1 ] ) );
 			i++;
 			Sys_Printf( "Default lightmap sample size set to %dx%d units\n", sampleSize, sampleSize );
 		}
 		else if ( strEqual( argv[ i ], "-minsamplesize" ) ) {
-			minSampleSize = atoi( argv[ i + 1 ] );
-			if ( minSampleSize < 1 ) {
-				minSampleSize = 1;
-			}
+			minSampleSize = std::max( 1, atoi( argv[ i + 1 ] ) );
 			i++;
 			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
 		}
@@ -2720,8 +2601,9 @@ int LightMain( int argc, char **argv ){
 		}
 		else if ( strEqual( argv[ i ], "-novertex" ) ) {
 			noVertexLighting = 1;
-			if ( ( atof( argv[ i + 1 ] ) != 0 ) && ( atof( argv[ i + 1 ] )) < 1 ) {
-				noVertexLighting = ( atof( argv[ i + 1 ] ) );
+			f = atof( argv[ i + 1 ] );
+			if ( f != 0 && f < 1 ) {
+				noVertexLighting = f;
 				i++;
 				Sys_Printf( "Setting vertex lighting globally to %f\n", noVertexLighting );
 			}
@@ -2890,10 +2772,7 @@ int LightMain( int argc, char **argv ){
 
 	/* fix up lightmap search power */
 	if ( lightmapMergeSize ) {
-		lightmapSearchBlockSize = ( lightmapMergeSize / lmCustomSizeW ) * ( lightmapMergeSize / lmCustomSizeW ); //? should use min or max( lmCustomSizeW, lmCustomSizeH )? :thinking:
-		if ( lightmapSearchBlockSize < 1 ) {
-			lightmapSearchBlockSize = 1;
-		}
+		lightmapSearchBlockSize = std::max( 1, ( lightmapMergeSize / lmCustomSizeW ) * ( lightmapMergeSize / lmCustomSizeW ) ); //? should use min or max( lmCustomSizeW, lmCustomSizeH )? :thinking:
 
 		Sys_Printf( "Restricted lightmap searching enabled - block size adjusted to %d\n", lightmapSearchBlockSize );
 	}

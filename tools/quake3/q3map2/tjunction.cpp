@@ -78,7 +78,7 @@ int c_natural, c_rotate, c_cant;
 
 // these should be whatever epsilon we actually expect,
 // plus SNAP_INT_TO_FLOAT
-#define LINE_POSITION_EPSILON   0.25
+#define LINE_POSITION_EPSILON   0.25f
 #define POINT_ON_LINE_EPSILON   0.25
 
 /*
@@ -87,13 +87,10 @@ int c_natural, c_rotate, c_cant;
    ====================
  */
 void InsertPointOnEdge( const Vector3 &v, edgeLine_t *e ) {
-	float d;
 	edgePoint_t *p, *scan;
 
-	d = vector3_dot( v - e->origin, e->dir );
-
 	p = safe_malloc( sizeof( edgePoint_t ) );
-	p->intercept = d;
+	p->intercept = vector3_dot( v - e->origin, e->dir );
 	p->xyz = v;
 
 	if ( e->chain->next == e->chain ) {
@@ -103,9 +100,8 @@ void InsertPointOnEdge( const Vector3 &v, edgeLine_t *e ) {
 	}
 
 	scan = e->chain->next;
-	for ( ; scan != e->chain ; scan = scan->next ) {
-		d = p->intercept - scan->intercept;
-		if ( d > -LINE_POSITION_EPSILON && d < LINE_POSITION_EPSILON ) {
+	for ( ; scan != e->chain; scan = scan->next ) {
+		if ( float_equal_epsilon( p->intercept, scan->intercept, LINE_POSITION_EPSILON ) ) {
 			free( p );
 			return;     // the point is already set
 		}
@@ -163,21 +159,10 @@ int AddEdge( bspDrawVert_t& dv1, bspDrawVert_t& dv2, bool createNonAxial ) {
 	for ( i = 0 ; i < numEdgeLines ; i++ ) {
 		e = &edgeLines[i];
 
-		d = vector3_dot( v1, e->normal1 ) - e->dist1;
-		if ( d < -POINT_ON_LINE_EPSILON || d > POINT_ON_LINE_EPSILON ) {
-			continue;
-		}
-		d = vector3_dot( v1, e->normal2 ) - e->dist2;
-		if ( d < -POINT_ON_LINE_EPSILON || d > POINT_ON_LINE_EPSILON ) {
-			continue;
-		}
-
-		d = vector3_dot( v2, e->normal1 ) - e->dist1;
-		if ( d < -POINT_ON_LINE_EPSILON || d > POINT_ON_LINE_EPSILON ) {
-			continue;
-		}
-		d = vector3_dot( v2, e->normal2 ) - e->dist2;
-		if ( d < -POINT_ON_LINE_EPSILON || d > POINT_ON_LINE_EPSILON ) {
+		if ( !float_equal_epsilon( vector3_dot( v1, e->normal1 ), e->dist1, POINT_ON_LINE_EPSILON )
+		  || !float_equal_epsilon( vector3_dot( v1, e->normal2 ), e->dist2, POINT_ON_LINE_EPSILON )
+		  || !float_equal_epsilon( vector3_dot( v2, e->normal1 ), e->dist1, POINT_ON_LINE_EPSILON )
+		  || !float_equal_epsilon( vector3_dot( v2, e->normal2 ), e->dist2, POINT_ON_LINE_EPSILON ) ) {
 			continue;
 		}
 
@@ -581,10 +566,8 @@ bool FixBrokenSurface( mapDrawSurface_t *ds ){
    ================
  */
 int EdgeCompare( const void *elem1, const void *elem2 ) {
-	float d1, d2;
-
-	d1 = ( (const originalEdge_t *)elem1 )->length;
-	d2 = ( (const originalEdge_t *)elem2 )->length;
+	const float d1 = reinterpret_cast<const originalEdge_t *>( elem1 )->length;
+	const float d2 = reinterpret_cast<const originalEdge_t *>( elem2 )->length;
 
 	if ( d1 < d2 ) {
 		return -1;

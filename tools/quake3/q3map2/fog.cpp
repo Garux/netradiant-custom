@@ -338,14 +338,10 @@ winding_t *WindingFromDrawSurf( mapDrawSurface_t *ds ){
 	// we use the first point of the surface, maybe something more clever would be useful
 	// (actually send the whole draw surface would be cool?)
 	if ( ds->numVerts >= MAX_POINTS_ON_WINDING ) {
-		int max = ds->numVerts;
+		const int max = std::min( ds->numVerts, 256 );
 		Vector3 p[256];
 
-		if ( max > 256 ) {
-			max = 256;
-		}
-
-		for ( i = 0 ; i < max ; i++ ) {
+		for ( i = 0; i < max; i++ ) {
 			p[i] = ds->verts[i].xyz;
 		}
 

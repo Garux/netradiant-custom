@@ -599,7 +599,7 @@ void ChopWindingInPlaceAccu( winding_accu_t **inout, const Plane3f& plane, float
 	// 64-bit land inside of the epsilon for all numbers we're dealing with.
 
 	static const double smallestEpsilonAllowed = ( (double) VEC_SMALLEST_EPSILON_AROUND_ONE ) * 0.5;
-	const double fineEpsilon = ( crudeEpsilon < smallestEpsilonAllowed )? smallestEpsilonAllowed : (double) crudeEpsilon;
+	const double fineEpsilon = std::max( smallestEpsilonAllowed, (double) crudeEpsilon );
 
 	in = *inout;
 	counts[0] = counts[1] = counts[2] = 0;
@@ -851,7 +851,7 @@ void CheckWinding( winding_t *w ){
 				Error( "CheckFace: MAX_WORLD_COORD exceeded: %f",p1[j] );
 			}
 
-		j = i + 1 == w->numpoints ? 0 : i + 1;
+		j = ( i + 1 == w->numpoints )? 0 : i + 1;
 
 		// check the point is on the face plane
 		d = plane3_distance_to_point( faceplane, p1 );

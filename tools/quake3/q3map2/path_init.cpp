@@ -532,12 +532,8 @@ void InitPaths( int *argc, char **argv ){
 	}
 
 	/* initialize vfs paths */
-	if ( numBasePaths > MAX_BASE_PATHS ) {
-		numBasePaths = MAX_BASE_PATHS;
-	}
-	if ( numGamePaths > MAX_GAME_PATHS ) {
-		numGamePaths = MAX_GAME_PATHS;
-	}
+	value_minimize( numBasePaths, MAX_BASE_PATHS );
+	value_minimize( numGamePaths, MAX_GAME_PATHS );
 
 	/* walk the list of game paths */
 	for ( j = 0; j < numGamePaths; j++ )
@@ -552,9 +548,7 @@ void InitPaths( int *argc, char **argv ){
 	}
 
 	/* initialize vfs paths */
-	if ( numPakPaths > MAX_PAK_PATHS ) {
-		numPakPaths = MAX_PAK_PATHS;
-	}
+	value_minimize( numPakPaths, MAX_PAK_PATHS );
 
 	/* walk the list of pak paths */
 	for ( i = 0; i < numPakPaths; i++ )

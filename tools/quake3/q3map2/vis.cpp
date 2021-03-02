@@ -369,26 +369,21 @@ void CalcVis( void ){
    ==================
  */
 void SetPortalSphere( vportal_t *p ){
-	int i;
 	Vector3 total( 0, 0, 0 );
 	fixedWinding_t  *w;
-	float r, bestr;
 
 	w = p->winding;
-	for ( i = 0 ; i < w->numpoints ; i++ )
+	for ( int i = 0; i < w->numpoints; i++ )
 	{
 		total += w->points[i];
 	}
 
 	total /= w->numpoints;
 
-	bestr = 0;
-	for ( i = 0 ; i < w->numpoints ; i++ )
+	double bestr = 0;
+	for ( int i = 0; i < w->numpoints; i++ )
 	{
-		r = vector3_length( w->points[i] - total );
-		if ( r > bestr ) {
-			bestr = r;
-		}
+		value_maximize( bestr, vector3_length( w->points[i] - total ) );
 	}
 	p->origin = total;
 	p->radius = bestr;

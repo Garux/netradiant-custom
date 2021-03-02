@@ -804,7 +804,7 @@ bool WindingIsTiny( winding_t *w ){
 
 	for ( i = 0 ; i < w->numpoints ; i++ )
 	{
-		j = i == w->numpoints - 1 ? 0 : i + 1;
+		j = ( i == w->numpoints - 1 )? 0 : i + 1;
 		if ( vector3_length( w->p[j] - w->p[i] ) > EDGE_LENGTH ) {
 			if ( ++edges == 3 ) {
 				return false;
@@ -903,12 +903,12 @@ void SplitBrush( brush_t *brush, int planenum, brush_t **front, brush_t **back )
 		}
 		for ( j = 0 ; j < w->numpoints ; j++ )
 		{
-			const double d = plane3_distance_to_point( plane->plane, w->p[j] );
-			if ( d > 0 && d > d_front ) {
-				d_front = d;
+			const float d = plane3_distance_to_point( plane->plane, w->p[j] );
+			if ( d > 0 ) {
+				value_maximize( d_front, d );
 			}
-			if ( d < 0 && d < d_back ) {
-				d_back = d;
+			if ( d < 0 ) {
+				value_minimize( d_back, d );
 			}
 		}
 	}

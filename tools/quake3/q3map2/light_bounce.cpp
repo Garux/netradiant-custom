@@ -232,7 +232,7 @@ bool RadSampleImage( byte *pixels, int width, int height, const Vector2& st, Col
 #define SAMPLE_GRANULARITY  6
 
 static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm, shaderInfo_t *si, radWinding_t *rw, Vector3& average, Vector3& gradient, int *style ){
-	int i, j, k, l, v, x, y, samples;
+	int i, j, k, l, v, samples;
 	Vector3 color;
 	MinMax minmax;
 	Color4f textureColor;
@@ -313,20 +313,8 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 						}
 
 						/* get lightmap xy coords */
-						x = lightmap[ 0 ] / (float) superSample;
-						y = lightmap[ 1 ] / (float) superSample;
-						if ( x < 0 ) {
-							x = 0;
-						}
-						else if ( x >= lm->w ) {
-							x = lm->w - 1;
-						}
-						if ( y < 0 ) {
-							y = 0;
-						}
-						else if ( y >= lm->h ) {
-							y = lm->h - 1;
-						}
+						const int x = std::clamp( int( lightmap[ 0 ] / superSample ), 0, lm->w - 1 );
+						const int y = std::clamp( int( lightmap[ 1 ] / superSample ), 0, lm->h - 1 );
 
 						/* get radiosity luxel */
 						const Vector3& radLuxel = lm->getRadLuxel( lightmapNum, x, y );

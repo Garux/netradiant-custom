@@ -762,18 +762,12 @@ int BSPMain( int argc, char **argv ){
 			fakemap = true;
 		}
 		else if ( strEqual( argv[ i ],  "-samplesize" ) ) {
-			sampleSize = atoi( argv[ i + 1 ] );
-			if ( sampleSize < 1 ) {
-				sampleSize = 1;
-			}
+			sampleSize = std::max( 1, atoi( argv[ i + 1 ] ) );
 			i++;
 			Sys_Printf( "Lightmap sample size set to %dx%d units\n", sampleSize, sampleSize );
 		}
 		else if ( strEqual( argv[ i ], "-minsamplesize" ) ) {
-			minSampleSize = atoi( argv[ i + 1 ] );
-			if ( minSampleSize < 1 ) {
-				minSampleSize = 1;
-			}
+			minSampleSize = std::max( 1, atoi( argv[ i + 1 ] ) );
 			i++;
 			Sys_Printf( "Minimum lightmap sample size set to %dx%d units\n", minSampleSize, minSampleSize );
 		}
@@ -800,49 +794,32 @@ int BSPMain( int argc, char **argv ){
 			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
 		}
 		else if ( strEqual( argv[ i ],  "-mv" ) ) {
-			maxLMSurfaceVerts = atoi( argv[ i + 1 ] );
-			if ( maxLMSurfaceVerts < 3 ) {
-				maxLMSurfaceVerts = 3;
-			}
-			if ( maxLMSurfaceVerts > maxSurfaceVerts ) {
-				maxSurfaceVerts = maxLMSurfaceVerts;
-			}
+			maxLMSurfaceVerts = std::max( 3, atoi( argv[ i + 1 ] ) );
+			value_maximize( maxSurfaceVerts, maxLMSurfaceVerts );
 			i++;
 			Sys_Printf( "Maximum lightmapped surface vertex count set to %d\n", maxLMSurfaceVerts );
 		}
 		else if ( strEqual( argv[ i ],  "-mi" ) ) {
-			maxSurfaceIndexes = atoi( argv[ i + 1 ] );
-			if ( maxSurfaceIndexes < 3 ) {
-				maxSurfaceIndexes = 3;
-			}
-			i++;
+			maxSurfaceIndexes = std::max( 3, atoi( argv[ i + 1 ] ) );
 			Sys_Printf( "Maximum per-surface index count set to %d\n", maxSurfaceIndexes );
+			i++;
 		}
 		else if ( strEqual( argv[ i ], "-np" ) ) {
-			npDegrees = atof( argv[ i + 1 ] );
-			if ( npDegrees < 0.0f ) {
-				npDegrees = 0.0f;
-			}
-			else if ( npDegrees > 0.0f ) {
+			npDegrees = std::max( 0.0, atof( argv[ i + 1 ] ) );
+			if ( npDegrees > 0.0f ) {
 				Sys_Printf( "Forcing nonplanar surfaces with a breaking angle of %f degrees\n", npDegrees );
 			}
 			i++;
 		}
 		else if ( strEqual( argv[ i ],  "-snap" ) ) {
-			bevelSnap = atoi( argv[ i + 1 ] );
-			if ( bevelSnap < 0 ) {
-				bevelSnap = 0;
-			}
-			i++;
+			bevelSnap = std::max( 0, atoi( argv[ i + 1 ] ) );
 			if ( bevelSnap > 0 ) {
 				Sys_Printf( "Snapping brush bevel planes to %d units\n", bevelSnap );
 			}
+			i++;
 		}
 		else if ( strEqual( argv[ i ],  "-texrange" ) ) {
-			texRange = atoi( argv[ i + 1 ] );
-			if ( texRange < 0 ) {
-				texRange = 0;
-			}
+			texRange = std::max( 0, atoi( argv[ i + 1 ] ) );
 			i++;
 			Sys_Printf( "Limiting per-surface texture range to %d texels\n", texRange );
 		}
@@ -869,20 +846,14 @@ int BSPMain( int argc, char **argv ){
 			meta = true;
 		}
 		else if ( strEqual( argv[ i ], "-metaadequatescore" ) ) {
-			metaAdequateScore = atoi( argv[ i + 1 ] );
-			if ( metaAdequateScore < 0 ) {
-				metaAdequateScore = -1;
-			}
+			metaAdequateScore = std::max( -1, atoi( argv[ i + 1 ] ) );
 			i++;
 			if ( metaAdequateScore >= 0 ) {
 				Sys_Printf( "Setting ADEQUATE meta score to %d (see surface_meta.c)\n", metaAdequateScore );
 			}
 		}
 		else if ( strEqual( argv[ i ], "-metagoodscore" ) ) {
-			metaGoodScore = atoi( argv[ i + 1 ] );
-			if ( metaGoodScore < 0 ) {
-				metaGoodScore = -1;
-			}
+			metaGoodScore = std::max( -1, atoi( argv[ i + 1 ] ) );
 			i++;
 			if ( metaGoodScore >= 0 ) {
 				Sys_Printf( "Setting GOOD meta score to %d (see surface_meta.c)\n", metaGoodScore );

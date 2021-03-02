@@ -115,7 +115,7 @@ static void AddLightGridLumps( FILE *file, rbspHeader_t *header ){
 
 
 	/* allocate temporary buffers */
-	maxGridPoints = ( numBSPGridPoints < MAX_MAP_GRID ) ? numBSPGridPoints : MAX_MAP_GRID;
+	maxGridPoints = std::min( numBSPGridPoints, MAX_MAP_GRID );
 	gridPoints = safe_malloc( maxGridPoints * sizeof( *gridPoints ) );
 	gridArray = safe_malloc( numBSPGridPoints * sizeof( *gridArray ) );
 

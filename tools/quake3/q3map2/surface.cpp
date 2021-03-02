@@ -324,7 +324,6 @@ void TidyEntitySurfaces( entity_t *e ){
 
 bool CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
 	int i, j, v, size[ 2 ];
-	float mins[ 2 ], maxs[ 2 ];
 
 
 	/* try to early out */
@@ -333,20 +332,13 @@ bool CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
 	}
 
 	/* walk the verts and determine min/max st values */
-	mins[ 0 ] = 999999;
-	mins[ 1 ] = 999999;
-	maxs[ 0 ] = -999999;
-	maxs[ 1 ] = -999999;
+	Vector2 mins( 999999, 999999 ), maxs( -999999, -999999 );
 	for ( i = 0; i < ds->numVerts; i++ )
 	{
 		for ( j = 0; j < 2; j++ )
 		{
-			if ( ds->verts[ i ].st[ j ] < mins[ j ] ) {
-				mins[ j ] = ds->verts[ i ].st[ j ];
-			}
-			if ( ds->verts[ i ].st[ j ] > maxs[ j ] ) {
-				maxs[ j ] = ds->verts[ i ].st[ j ];
-			}
+			value_minimize( mins[ j ], ds->verts[ i ].st[ j ] );
+			value_maximize( maxs[ j ], ds->verts[ i ].st[ j ] );
 		}
 	}
 
@@ -366,12 +358,8 @@ bool CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
 		for ( j = 0; j < 2; j++ )
 		{
 			v = ( ds->verts[ i ].st[ j ] + ds->bias[ j ] ) * size[ j ];
-			if ( v < ds->texMins[ j ] ) {
-				ds->texMins[ j ] = v;
-			}
-			if ( v > ds->texMaxs[ j ] ) {
-				ds->texMaxs[ j ] = v;
-			}
+			value_minimize( ds->texMins[ j ], v );
+			value_maximize( ds->texMaxs[ j ], v );
 		}
 	}
 
@@ -514,7 +502,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 			plane = { 0, 0, 0, 0 };
 			for ( i = 0; i < ds->numVerts; i++ )
 			{
-				if ( ds->verts[ i ].normal[ 0 ] != 0.0f && ds->verts[ i ].normal[ 1 ] != 0.0f && ds->verts[ i ].normal[ 2 ] != 0.0f ) {
+				if ( ds->verts[ i ].normal != g_vector3_identity ) {
 					plane.normal() = ds->verts[ i ].normal;
 					plane.dist() = vector3_dot( ds->verts[ i ].xyz, plane.normal() );
 					break;
@@ -630,17 +618,7 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 			ds->lightmapScale = 0; /* applied */
 		}
 
-		if ( ds->sampleSize < minSampleSize ) {
-			ds->sampleSize = minSampleSize;
-		}
-
-		if ( ds->sampleSize < 1 ) {
-			ds->sampleSize = 1;
-		}
-
-		if ( ds->sampleSize > 16384 ) { /* powers of 2 are preferred */
-			ds->sampleSize = 16384;
-		}
+		ds->sampleSize = std::clamp( ds->sampleSize, std::max( minSampleSize, 1 ), 16384 ); /* powers of 2 are preferred */
 	}
 }
 
@@ -677,9 +655,6 @@ void ClassifyEntitySurfaces( entity_t *e ){
  */
 
 byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const Vector3& point ){
-	int x, y;
-
-
 	/* early out if no indexmap */
 	if ( im == NULL ) {
 		return 0;
@@ -697,24 +672,12 @@ byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const 
 	const Vector3 size = maxs - mins;
 
 	/* find st (fixme: support more than just z-axis projection) */
-	float s = floor( point[ 0 ] + 0.1f - mins[ 0 ] ) / size[ 0 ];
-	float t = floor( maxs[ 1 ] - point[ 1 ] + 0.1f ) / size[ 1 ];
-	if ( s < 0.0f ) {
-		s = 0.0f;
-	}
-	else if ( s > 1.0f ) {
-		s = 1.0f;
-	}
-	if ( t < 0.0f ) {
-		t = 0.0f;
-	}
-	else if ( t > 1.0f ) {
-		t = 1.0f;
-	}
+	const float s = std::clamp( floor( point[ 0 ] + 0.1f - mins[ 0 ] ) / size[ 0 ], 0.0, 1.0 );
+	const float t = std::clamp( floor( maxs[ 1 ] - point[ 1 ] + 0.1f ) / size[ 1 ], 0.0, 1.0 );
 
 	/* make xy */
-	x = ( im->w - 1 ) * s;
-	y = ( im->h - 1 ) * t;
+	const int x = ( im->w - 1 ) * s;
+	const int y = ( im->h - 1 ) * t;
 	#else
 	/* get size */
 	const Vector3 size = eMinmax.maxs - eMinmax.mins;
@@ -724,20 +687,8 @@ byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const 
 	const float t = ( eMinmax.maxs[ 1 ] - point[ 1 ] ) / size[ 1 ];
 
 	/* calc xy */
-	x = s * im->w;
-	y = t * im->h;
-	if ( x < 0 ) {
-		x = 0;
-	}
-	else if ( x > ( im->w - 1 ) ) {
-		x = ( im->w - 1 );
-	}
-	if ( y < 0 ) {
-		y = 0;
-	}
-	else if ( y > ( im->h - 1 ) ) {
-		y = ( im->h - 1 );
-	}
+	const int x = std::clamp( int( s * im->w ), 0, im->w - 1 );
+	const int y = std::clamp( int( t * im->h ), 0, im->h - 1 );
 	#endif
 
 	/* return index */
@@ -753,31 +704,22 @@ byte GetShaderIndexForPoint( const indexMap_t *im, const MinMax& eMinmax, const 
  */
 
 shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im, int numPoints, byte *shaderIndexes ){
-	int i;
-	byte minShaderIndex, maxShaderIndex;
-	shaderInfo_t    *si;
-
-
 	/* early out if bad data */
 	if ( im == NULL || numPoints <= 0 || shaderIndexes == NULL ) {
 		return ShaderInfoForShader( "default" );
 	}
 
 	/* determine min/max index */
-	minShaderIndex = 255;
-	maxShaderIndex = 0;
-	for ( i = 0; i < numPoints; i++ )
+	byte minShaderIndex = 255;
+	byte maxShaderIndex = 0;
+	for ( int i = 0; i < numPoints; i++ )
 	{
-		if ( shaderIndexes[ i ] < minShaderIndex ) {
-			minShaderIndex = shaderIndexes[ i ];
-		}
-		if ( shaderIndexes[ i ] > maxShaderIndex ) {
-			maxShaderIndex = shaderIndexes[ i ];
-		}
+		value_minimize( minShaderIndex, shaderIndexes[ i ] );
+		value_maximize( maxShaderIndex, shaderIndexes[ i ] );
 	}
 
 	/* set alpha inline */
-	for ( i = 0; i < numPoints; i++ )
+	for ( int i = 0; i < numPoints; i++ )
 	{
 		/* straight rip from terrain.c */
 		if ( shaderIndexes[ i ] < maxShaderIndex ) {
@@ -789,7 +731,7 @@ shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im
 	}
 
 	/* get the shader */
-	si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )?
+	shaderInfo_t *si = ShaderInfoForShader( ( minShaderIndex == maxShaderIndex )?
 	                            String64()( "textures/", im->shader.c_str(), '_', int(maxShaderIndex) ):
 	                            String64()( "textures/", im->shader.c_str(), '_', int(minShaderIndex), "to", int(maxShaderIndex) ) );
 
@@ -829,8 +771,8 @@ shaderInfo_t *GetIndexedShader( const shaderInfo_t *parent, const indexMap_t *im
    creates a SURF_FACE drawsurface from a given brush side and winding
  */
 
-#define SNAP_FLOAT_TO_INT   8
-#define SNAP_INT_TO_FLOAT   ( 1.0 / SNAP_FLOAT_TO_INT )
+const double SNAP_FLOAT_TO_INT = 8.0;
+const double SNAP_INT_TO_FLOAT = ( 1.0 / SNAP_FLOAT_TO_INT );
 
 mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, winding_t *w ){
 	int i, j, k;
@@ -922,7 +864,7 @@ mapDrawSurface_t *DrawSurfaceForSide( entity_t *e, brush_t *b, side_t *s, windin
 
 		/* round the xyz to a given precision and translate by origin */
 		for ( i = 0 ; i < 3 ; i++ )
-			dv->xyz[ i ] = SNAP_INT_TO_FLOAT * floor( dv->xyz[ i ] * SNAP_FLOAT_TO_INT + 0.5f );
+			dv->xyz[ i ] = SNAP_INT_TO_FLOAT * floor( dv->xyz[ i ] * SNAP_FLOAT_TO_INT + 0.5 );
 		vTranslated = dv->xyz + e->origin;
 
 		/* ydnar: tek-fu celshading support for flat shaded shit */
@@ -1249,11 +1191,8 @@ mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
 
 static void AddSurfaceFlare( mapDrawSurface_t *ds, const Vector3& entityOrigin ){
 	Vector3 origin( 0, 0, 0 );
-	int i;
-
-
 	/* find centroid */
-	for ( i = 0; i < ds->numVerts; i++ )
+	for ( int i = 0; i < ds->numVerts; i++ )
 		origin += ds->verts[ i ].xyz;
 	origin /= ds->numVerts;
 	origin += entityOrigin;
@@ -1408,8 +1347,8 @@ void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
 		}
 
 		/* get subdivisions from shader */
-		if ( si->subdivisions > 0 && si->subdivisions < subdivisions ) {
-			subdivisions = si->subdivisions;
+		if ( si->subdivisions > 0 ) {
+			value_minimize( subdivisions, si->subdivisions );
 		}
 		if ( subdivisions < 1.0f ) {
 			continue;
@@ -1941,10 +1880,6 @@ int FilterPointIntoTree_r( const Vector3& point, mapDrawSurface_t *ds, node_t *n
  */
 
 int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints, mapDrawSurface_t *ds, node_t *node ){
-	float d, dmin, dmax;
-	int refs = 0;
-	int i;
-
 	if ( !points ) {
 		return 0;
 	}
@@ -1954,20 +1889,17 @@ int FilterPointConvexHullIntoTree_r( Vector3 *points[], const int npoints, mapDr
 		/* classify the point in relation to the plane */
 		const Plane3f& plane = mapplanes[ node->planenum ].plane;
 
+		float dmin, dmax;
 		dmin = dmax = plane3_distance_to_point( plane, *points[0] );
-		for ( i = 1; i < npoints; ++i )
+		for ( int i = 1; i < npoints; ++i )
 		{
-			d = plane3_distance_to_point( plane, *points[i] );
-			if ( d > dmax ) {
-				dmax = d;
-			}
-			if ( d < dmin ) {
-				dmin = d;
-			}
+			const float d = plane3_distance_to_point( plane, *points[i] );
+			value_maximize( dmax, d );
+			value_minimize( dmin, d );
 		}
 
 		/* filter by this plane */
-		refs = 0;
+		int refs = 0;
 		if ( dmax >= -ON_EPSILON ) {
 			refs += FilterPointConvexHullIntoTree_r( points, npoints, ds, node->children[ 0 ] );
 		}

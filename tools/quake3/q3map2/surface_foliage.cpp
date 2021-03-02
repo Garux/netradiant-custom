@@ -72,30 +72,17 @@ static void SubdivideFoliageTriangle_r( mapDrawSurface_t *ds, const foliage_t& f
 
 	/* subdivide calc */
 	{
-		int i;
-		float               dx, dy, dz, dist, maxDist;
-		foliageInstance_t   *fi;
-
-
 		/* get instance */
-		fi = &foliageInstances[ numFoliageInstances ];
+		foliageInstance_t *fi = &foliageInstances[ numFoliageInstances ];
 
 		/* find the longest edge and split it */
 		max = -1;
-		maxDist = 0.0f;
+		float maxDist = 0.0f;
 		fi->xyz.set( 0 );
 		fi->normal.set( 0 );
-		for ( i = 0; i < 3; i++ )
+		for ( int i = 0; i < 3; i++ )
 		{
-			/* get verts */
-			const Vector3& a = tri[ i ]->xyz;
-			const Vector3& b = tri[ ( i + 1 ) % 3 ]->xyz;
-
-			/* get dists */
-			dx = a[ 0 ] - b[ 0 ];
-			dy = a[ 1 ] - b[ 1 ];
-			dz = a[ 2 ] - b[ 2 ];
-			dist = ( dx * dx ) + ( dy * dy ) + ( dz * dz );
+			const float dist = vector3_length_squared( tri[ i ]->xyz - tri[ ( i + 1 ) % 3 ]->xyz );
 
 			/* longer? */
 			if ( dist > maxDist ) {

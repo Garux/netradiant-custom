@@ -542,12 +542,8 @@ int ScaleBSPMain( int argc, char **argv ){
 	/* scale drawverts */
 	for ( i = 0; i < numBSPDrawVerts; i++ )
 	{
-		bspDrawVerts[i].xyz[0] *= scale[0];
-		bspDrawVerts[i].xyz[1] *= scale[1];
-		bspDrawVerts[i].xyz[2] *= scale[2];
-		bspDrawVerts[i].normal[0] /= scale[0];
-		bspDrawVerts[i].normal[1] /= scale[1];
-		bspDrawVerts[i].normal[2] /= scale[2];
+		bspDrawVerts[i].xyz *= scale;
+		bspDrawVerts[i].normal /= scale;
 		VectorNormalize( bspDrawVerts[i].normal );
 	}
 

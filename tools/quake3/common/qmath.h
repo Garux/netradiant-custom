@@ -11,6 +11,16 @@
 
 #define VectorFastNormalize VectorNormalize
 
+template<typename T>
+inline void value_maximize( T& value, const T& other ){
+	value = std::max( value, other );
+}
+
+template<typename T>
+inline void value_minimize( T& value, const T& other ){
+	value = std::min( value, other );
+}
+
 
 template<typename T>
 struct MinMax___

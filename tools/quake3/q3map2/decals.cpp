@@ -206,7 +206,7 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 				radians_to_degrees( acos( vector3_dot( dp->texMat[ 0 ].vec3(), dp->texMat[ 1 ].vec3() ) ) ),
 				radians_to_degrees( acos( vector3_dot( axis[ 0 ], axis[ 1 ] ) ) ) );
 
-	Sys_Printf( "XYZ: %f %f %f ST: %f %f ST(t): %f %f\n",
+	Sys_Printf( "XYZ: %f %f %f ST: %f %f ST(t): %lf %lf\n",
 				a->xyz[ 0 ], a->xyz[ 1 ], a->xyz[ 2 ],
 				a->st[ 0 ], a->st[ 1 ],
 				vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ], vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ] );
@@ -498,7 +498,6 @@ void ProcessDecals( void ){
 
 static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds, winding_t *w ){
 	int i, j;
-	float d, d2, alpha;
 	winding_t           *front, *back;
 	mapDrawSurface_t    *ds2;
 	bspDrawVert_t       *dv;
@@ -577,15 +576,9 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		dv = &ds2->verts[ i ];
 
 		/* set alpha */
-		d = plane3_distance_to_point( dp->planes[ 0 ], w->p[ i ] );
-		d2 = plane3_distance_to_point( dp->planes[ 1 ], w->p[ i ] );
-		alpha = 255.0f * d2 / ( d + d2 );
-		if ( alpha > 255 ) {
-			alpha = 255;
-		}
-		else if ( alpha < 0 ) {
-			alpha = 0;
-		}
+		const float d = plane3_distance_to_point( dp->planes[ 0 ], w->p[ i ] );
+		const float d2 = plane3_distance_to_point( dp->planes[ 1 ], w->p[ i ] );
+		const float alpha = std::clamp( 255.0f * d2 / ( d + d2 ), 0.f, 255.f );
 
 		/* set misc */
 		dv->xyz = w->p[ i ] - entityOrigin;

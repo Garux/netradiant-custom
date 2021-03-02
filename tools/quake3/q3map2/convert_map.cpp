@@ -76,13 +76,9 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 			vert[1] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 1]];
 			vert[2] = &bspDrawVerts[s->firstVert + bspDrawIndexes[s->firstIndex + t + 2]];
 			if ( s->surfaceType == MST_PLANAR && VectorCompare( vert[0]->normal, vert[1]->normal ) && VectorCompare( vert[1]->normal, vert[2]->normal ) ) {
-				if ( vector3_length( vert[0]->normal - buildPlane->normal() ) >= normalEpsilon ) {
-					continue;
-				}
-				if ( vector3_length( vert[1]->normal - buildPlane->normal() ) >= normalEpsilon ) {
-					continue;
-				}
-				if ( vector3_length( vert[2]->normal - buildPlane->normal() ) >= normalEpsilon ) {
+				if ( vector3_length( vert[0]->normal - buildPlane->normal() ) >= normalEpsilon
+				  || vector3_length( vert[1]->normal - buildPlane->normal() ) >= normalEpsilon
+				  || vector3_length( vert[2]->normal - buildPlane->normal() ) >= normalEpsilon ) {
 					continue;
 				}
 			}
@@ -97,13 +93,9 @@ void GetBestSurfaceTriangleMatchForBrushside( side_t *buildSide, bspDrawVert_t *
 				}
 			}
 			// fixme? better distance epsilon
-			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[0]->xyz ) ) > 1 ) {
-				continue;
-			}
-			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[1]->xyz ) ) > 1 ) {
-				continue;
-			}
-			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[2]->xyz ) ) > 1 ) {
+			if ( abs( plane3_distance_to_point( buildPlane->plane, vert[0]->xyz ) ) > 1
+			  || abs( plane3_distance_to_point( buildPlane->plane, vert[1]->xyz ) ) > 1
+			  || abs( plane3_distance_to_point( buildPlane->plane, vert[2]->xyz ) ) > 1 ) {
 				continue;
 			}
 			// Okay. Correct surface type, correct shader, correct plane. Let's start with the business...

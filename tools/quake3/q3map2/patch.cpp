@@ -86,9 +86,7 @@ static void ExpandLongestCurve( float *longestCurve, const Vector3& a, const Vec
 	}
 
 	/* longer? */
-	if ( len > *longestCurve ) {
-		*longestCurve = len;
-	}
+	value_maximize( *longestCurve, len );
 }
 
 
@@ -186,9 +184,7 @@ static void ExpandMaxIterations( int *maxIterations, int maxError, const Vector3
 	}
 
 	/* more? */
-	if ( iterations > *maxIterations ) {
-		*maxIterations = iterations;
-	}
+	value_maximize( *maxIterations, iterations );
 }
 
 
@@ -362,12 +358,8 @@ static void GrowGroup_r( parseMesh_t *pm, int patchNum, int patchCount, parseMes
 	row = bordering + patchNum * patchCount;
 
 	/* check maximums */
-	if ( meshes[ patchNum ]->longestCurve > pm->longestCurve ) {
-		pm->longestCurve = meshes[ patchNum ]->longestCurve;
-	}
-	if ( meshes[ patchNum ]->maxIterations > pm->maxIterations ) {
-		pm->maxIterations = meshes[ patchNum ]->maxIterations;
-	}
+	value_maximize( pm->longestCurve, meshes[ patchNum ]->longestCurve );
+	value_maximize( pm->maxIterations, meshes[ patchNum ]->maxIterations );
 
 	/* walk other patches */
 	for ( i = 0; i < patchCount; i++ )
@@ -429,9 +421,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 				c2 = check->mesh.width * check->mesh.height;
 				v2 = check->mesh.verts;
 				for ( j = 0 ; j < c2 ; j++, v2++ ) {
-					if ( fabs( v1->xyz[0] - v2->xyz[0] ) < 1.0
-						 && fabs( v1->xyz[1] - v2->xyz[1] ) < 1.0
-						 && fabs( v1->xyz[2] - v2->xyz[2] ) < 1.0 ) {
+					if ( vector3_equal_epsilon( v1->xyz, v2->xyz, 1.f ) ) {
 						break;
 					}
 				}
