@@ -218,13 +218,13 @@ int pk3BSPMain( int argc, char **argv ){
 
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); ++i ){
-		if ( strEqual( argv[ i ],  "-dbg" ) ) {
+		if ( striEqual( argv[ i ],  "-dbg" ) ) {
 			dbg = true;
 		}
-		else if ( strEqual( argv[ i ],  "-png" ) ) {
+		else if ( striEqual( argv[ i ],  "-png" ) ) {
 			png = true;
 		}
-		else if ( strEqual( argv[ i ],  "-complevel" ) ) {
+		else if ( striEqual( argv[ i ],  "-complevel" ) ) {
 			compLevel = std::clamp( atoi( argv[ i + 1 ] ), -1, 10 );
 			i++;
 			Sys_Printf( "Compression level set to %i\n", compLevel );
@@ -765,16 +765,16 @@ int repackBSPMain( int argc, char **argv ){
 	StringOutputStream stream( 256 );
 	/* process arguments */
 	for ( i = 1; i < ( argc - 1 ); ++i ){
-		if ( strEqual( argv[ i ],  "-dbg" ) ) {
+		if ( striEqual( argv[ i ],  "-dbg" ) ) {
 			dbg = true;
 		}
-		else if ( strEqual( argv[ i ],  "-png" ) ) {
+		else if ( striEqual( argv[ i ],  "-png" ) ) {
 			png = true;
 		}
-		else if ( strEqual( argv[ i ],  "-analyze" ) ) { // only analyze bsps and exit
+		else if ( striEqual( argv[ i ],  "-analyze" ) ) { // only analyze bsps and exit
 			analyze = true;
 		}
-		else if ( strEqual( argv[ i ],  "-complevel" ) ) {
+		else if ( striEqual( argv[ i ],  "-complevel" ) ) {
 			compLevel = std::clamp( atoi( argv[ i + 1 ] ), -1, 10 );
 			i++;
 			Sys_Printf( "Compression level set to %i\n", compLevel );

@@ -82,14 +82,14 @@ int main( int argc, char **argv ){
 	for ( i = 1; i < argc; i++ )
 	{
 		/* -help */
-		if ( strEqual( argv[ i ], "-h" ) || strEqual( argv[ i ], "--help" )
-			|| strEqual( argv[ i ], "-help" ) ) {
+		if ( striEqual( argv[ i ], "-h" ) || striEqual( argv[ i ], "--help" )
+			|| striEqual( argv[ i ], "-help" ) ) {
 			HelpMain( ( i + 1 < argc ) ? argv[ i + 1 ] : NULL );
 			return 0;
 		}
 
 		/* -connect */
-		if ( strEqual( argv[ i ], "-connect" ) ) {
+		if ( striEqual( argv[ i ], "-connect" ) ) {
 			if ( ++i >= argc || !argv[ i ] ) {
 				Error( "Out of arguments: No address specified after %s", argv[ i - 1 ] );
 			}
@@ -99,7 +99,7 @@ int main( int argc, char **argv ){
 		}
 
 		/* verbose */
-		else if ( strEqual( argv[ i ], "-v" ) ) {
+		else if ( striEqual( argv[ i ], "-v" ) ) {
 			if ( !verbose ) {
 				verbose = true;
 				argv[ i ] = NULL;
@@ -107,13 +107,13 @@ int main( int argc, char **argv ){
 		}
 
 		/* force */
-		else if ( strEqual( argv[ i ], "-force" ) ) {
+		else if ( striEqual( argv[ i ], "-force" ) ) {
 			force = true;
 			argv[ i ] = NULL;
 		}
 
 		/* patch subdivisions */
-		else if ( strEqual( argv[ i ], "-subdivisions" ) ) {
+		else if ( striEqual( argv[ i ], "-subdivisions" ) ) {
 			if ( ++i >= argc || !argv[ i ] ) {
 				Error( "Out of arguments: No value specified after %s", argv[ i - 1 ] );
 			}
@@ -126,7 +126,7 @@ int main( int argc, char **argv ){
 		}
 
 		/* threads */
-		else if ( strEqual( argv[ i ], "-threads" ) ) {
+		else if ( striEqual( argv[ i ], "-threads" ) ) {
 			if ( ++i >= argc || !argv[ i ] ) {
 				Error( "Out of arguments: No value specified after %s", argv[ i - 1 ] );
 			}
@@ -135,7 +135,7 @@ int main( int argc, char **argv ){
 			argv[ i ] = NULL;
 		}
 
-		else if( strEqual( argv[ i ], "-nocmdline" ) )
+		else if( striEqual( argv[ i ], "-nocmdline" ) )
 		{
 			Sys_Printf( "noCmdLine\n" );
 			nocmdline = true;
@@ -187,79 +187,79 @@ int main( int argc, char **argv ){
 	}
 
 	/* fixaas */
-	if ( strEqual( argv[ 1 ], "-fixaas" ) ) {
+	if ( striEqual( argv[ 1 ], "-fixaas" ) ) {
 		r = FixAAS( argc - 1, argv + 1 );
 	}
 
 	/* analyze */
-	else if ( strEqual( argv[ 1 ], "-analyze" ) ) {
+	else if ( striEqual( argv[ 1 ], "-analyze" ) ) {
 		r = AnalyzeBSP( argc - 1, argv + 1 );
 	}
 
 	/* info */
-	else if ( strEqual( argv[ 1 ], "-info" ) ) {
+	else if ( striEqual( argv[ 1 ], "-info" ) ) {
 		r = BSPInfo( argc - 2, argv + 2 );
 	}
 
 	/* vis */
-	else if ( strEqual( argv[ 1 ], "-vis" ) ) {
+	else if ( striEqual( argv[ 1 ], "-vis" ) ) {
 		r = VisMain( argc - 1, argv + 1 );
 	}
 
 	/* light */
-	else if ( strEqual( argv[ 1 ], "-light" ) ) {
+	else if ( striEqual( argv[ 1 ], "-light" ) ) {
 		r = LightMain( argc - 1, argv + 1 );
 	}
 
 	/* vlight */
-	else if ( strEqual( argv[ 1 ], "-vlight" ) ) {
+	else if ( striEqual( argv[ 1 ], "-vlight" ) ) {
 		Sys_Warning( "VLight is no longer supported, defaulting to -light -fast instead\n\n" );
 		argv[ 1 ] = "-fast";    /* eek a hack */
 		r = LightMain( argc, argv );
 	}
 
 	/* QBall: export entities */
-	else if ( strEqual( argv[ 1 ], "-exportents" ) ) {
+	else if ( striEqual( argv[ 1 ], "-exportents" ) ) {
 		r = ExportEntitiesMain( argc - 1, argv + 1 );
 	}
 
 	/* ydnar: lightmap export */
-	else if ( strEqual( argv[ 1 ], "-export" ) ) {
+	else if ( striEqual( argv[ 1 ], "-export" ) ) {
 		r = ExportLightmapsMain( argc - 1, argv + 1 );
 	}
 
 	/* ydnar: lightmap import */
-	else if ( strEqual( argv[ 1 ], "-import" ) ) {
+	else if ( striEqual( argv[ 1 ], "-import" ) ) {
 		r = ImportLightmapsMain( argc - 1, argv + 1 );
 	}
 
 	/* ydnar: bsp scaling */
-	else if ( strEqual( argv[ 1 ], "-scale" ) ) {
+	else if ( striEqual( argv[ 1 ], "-scale" ) ) {
 		r = ScaleBSPMain( argc - 1, argv + 1 );
 	}
 
 	/* bsp shifting */
-	else if ( strEqual( argv[ 1 ], "-shift" ) ) {
+	else if ( striEqual( argv[ 1 ], "-shift" ) ) {
 		r = ShiftBSPMain( argc - 1, argv + 1 );
 	}
 
 	/* autopacking */
-	else if ( strEqual( argv[ 1 ], "-pk3" ) ) {
+	else if ( striEqual( argv[ 1 ], "-pk3" ) ) {
 		r = pk3BSPMain( argc - 1, argv + 1 );
 	}
 
 	/* repacker */
-	else if ( strEqual( argv[ 1 ], "-repack" ) ) {
+	else if ( striEqual( argv[ 1 ], "-repack" ) ) {
 		r = repackBSPMain( argc - 1, argv + 1 );
 	}
 
 	/* ydnar: bsp conversion */
-	else if ( strEqual( argv[ 1 ], "-convert" ) ) {
+	else if ( striEqual( argv[ 1 ], "-convert" ) ) {
 		r = ConvertBSPMain( argc - 1, argv + 1 );
 	}
 
 	/* div0: minimap */
-	else if ( strEqual( argv[ 1 ], "-minimap" ) ) {
+	else if ( striEqual( argv[ 1 ], "-minimap" ) ) {
 		r = MiniMapBSPMain( argc - 1, argv + 1 );
 	}
 

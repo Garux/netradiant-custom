@@ -387,7 +387,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -game */
-		if ( strEqual( argv[ i ], "-game" ) ) {
+		if ( striEqual( argv[ i ], "-game" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No game specified after %s", argv[ i - 1 ] );
 			}
@@ -400,7 +400,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -fs_forbiddenpath */
-		else if ( strEqual( argv[ i ], "-fs_forbiddenpath" ) ) {
+		else if ( striEqual( argv[ i ], "-fs_forbiddenpath" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
@@ -414,7 +414,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -fs_basepath */
-		else if ( strEqual( argv[ i ], "-fs_basepath" ) ) {
+		else if ( striEqual( argv[ i ], "-fs_basepath" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
@@ -424,7 +424,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -fs_game */
-		else if ( strEqual( argv[ i ], "-fs_game" ) ) {
+		else if ( striEqual( argv[ i ], "-fs_game" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
@@ -434,7 +434,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -fs_home */
-		else if ( strEqual( argv[ i ], "-fs_home" ) ) {
+		else if ( striEqual( argv[ i ], "-fs_home" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
@@ -444,7 +444,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -fs_homebase */
-		else if ( strEqual( argv[ i ], "-fs_homebase" ) ) {
+		else if ( striEqual( argv[ i ], "-fs_homebase" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
@@ -454,7 +454,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -fs_homepath - sets both of them */
-		else if ( strEqual( argv[ i ], "-fs_homepath" ) ) {
+		else if ( striEqual( argv[ i ], "-fs_homepath" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}
@@ -465,7 +465,7 @@ void InitPaths( int *argc, char **argv ){
 		}
 
 		/* -fs_pakpath */
-		else if ( strEqual( argv[ i ], "-fs_pakpath" ) ) {
+		else if ( striEqual( argv[ i ], "-fs_pakpath" ) ) {
 			if ( ++i >= *argc || !argv[ i ] ) {
 				Error( "Out of arguments: No path specified after %s.", argv[ i - 1 ] );
 			}

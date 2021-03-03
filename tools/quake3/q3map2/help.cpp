@@ -449,7 +449,7 @@ void HelpMain(const char* arg)
 
 		unsigned i;
 		for ( i = 0; i < sizeof(stages)/sizeof(struct HelpOption); i++ )
-			if ( strEqual(arg, stages[i].name+1) )
+			if ( striEqual(arg, stages[i].name+1) )
 			{
 				help_funcs[i]();
 				return;

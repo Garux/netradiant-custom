@@ -1056,40 +1056,40 @@ int VisMain( int argc, char **argv ){
 	/* process arguments */
 	for ( i = 1 ; i < ( argc - 1 ) ; i++ )
 	{
-		if ( strEqual( argv[i], "-fast" ) ) {
+		if ( striEqual( argv[i], "-fast" ) ) {
 			Sys_Printf( "fastvis = true\n" );
 			fastvis = true;
 		}
-		else if ( strEqual( argv[i], "-merge" ) ) {
+		else if ( striEqual( argv[i], "-merge" ) ) {
 			Sys_Printf( "merge = true\n" );
 			mergevis = true;
 		}
-		else if ( strEqual( argv[i], "-mergeportals" ) ) {
+		else if ( striEqual( argv[i], "-mergeportals" ) ) {
 			Sys_Printf( "mergeportals = true\n" );
 			mergevisportals = true;
 		}
-		else if ( strEqual( argv[i], "-nopassage" ) ) {
+		else if ( striEqual( argv[i], "-nopassage" ) ) {
 			Sys_Printf( "nopassage = true\n" );
 			noPassageVis = true;
 		}
-		else if ( strEqual( argv[i], "-passageOnly" ) ) {
+		else if ( striEqual( argv[i], "-passageOnly" ) ) {
 			Sys_Printf( "passageOnly = true\n" );
 			passageVisOnly = true;
 		}
-		else if ( strEqual( argv[i], "-nosort" ) ) {
+		else if ( striEqual( argv[i], "-nosort" ) ) {
 			Sys_Printf( "nosort = true\n" );
 			nosort = true;
 		}
-		else if ( strEqual( argv[i], "-saveprt" ) ) {
+		else if ( striEqual( argv[i], "-saveprt" ) ) {
 			Sys_Printf( "saveprt = true\n" );
 			saveprt = true;
 		}
-		else if ( strEqual( argv[ i ], "-v" ) ) {
+		else if ( striEqual( argv[ i ], "-v" ) ) {
 			debugCluster = true;
 			Sys_Printf( "Extra verbose mode enabled\n" );
 		}
 		/* ydnar: -hint to merge all but hint portals */
-		else if ( strEqual( argv[ i ], "-hint" ) ) {
+		else if ( striEqual( argv[ i ], "-hint" ) ) {
 			Sys_Printf( "hint = true\n" );
 			hint = true;
 			mergevis = true;
