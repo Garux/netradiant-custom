@@ -624,40 +624,25 @@ int ScaleBSPMain( int argc, char **argv ){
  */
 
 int ShiftBSPMain( int argc, char **argv ){
-	int i, j;
-	Vector3 scale;
+	int i;
+	Vector3 shift;
 	Vector3 vec;
 	char str[ 1024 ];
-	float spawn_ref = 0;
 
 
 	/* arg checking */
 	if ( argc < 3 ) {
-		Sys_Printf( "Usage: q3map2 [-v] -shift [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
+		Sys_Printf( "Usage: q3map2 [-v] -shift <value> <mapname>\n" );
 		return 0;
 	}
 
-	for ( i = 1; i < argc - 2; ++i )
-	{
-		if ( striEqual( argv[i], "-tex" ) ) {
-		}
-		else if ( striEqual( argv[i], "-spawn_ref" ) ) {
-			spawn_ref = atof( argv[i + 1] );
-			++i;
-		}
-		else{
-			break;
-		}
-	}
-
 	/* get shift */
-	// if(argc-2 >= i) // always true
-	scale[2] = scale[1] = scale[0] = atof( argv[ argc - 2 ] );
-	if ( argc - 3 >= i ) {
-		scale[1] = scale[0] = atof( argv[ argc - 3 ] );
+	shift[2] = shift[1] = shift[0] = atof( argv[ argc - 2 ] );
+	if ( argc - 3 >= 1 ) {
+		shift[1] = shift[0] = atof( argv[ argc - 3 ] );
 	}
-	if ( argc - 4 >= i ) {
-		scale[0] = atof( argv[ argc - 4 ] );
+	if ( argc - 4 >= 1 ) {
+		shift[0] = atof( argv[ argc - 4 ] );
 	}
 
 
@@ -678,14 +663,8 @@ int ShiftBSPMain( int argc, char **argv ){
 	for ( auto& e : entities )
 	{
 		/* shift origin */
-		if ( e.read_keyvalue( vec, "origin" ) ) {
-			if ( e.classname_prefixed( "info_player_" ) ) {
-				vec[2] += spawn_ref;
-			}
-			vec += scale;
-			if ( e.classname_prefixed( "info_player_" ) ) {
-				vec[2] -= spawn_ref;
-			}
+		if ( e.read_keyvalue( vec, "origin" ) ) { // fixme: this doesn't consider originless point entities; group entities with origin will be wrong too
+			vec += shift;
 			sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 			e.setKeyValue( "origin", str );
 		}
@@ -695,61 +674,38 @@ int ShiftBSPMain( int argc, char **argv ){
 	/* shift models */
 	for ( i = 0; i < numBSPModels; i++ )
 	{
-		bspModels[ i ].minmax.mins += scale;
-		bspModels[ i ].minmax.maxs += scale;
+		bspModels[ i ].minmax.mins += shift;
+		bspModels[ i ].minmax.maxs += shift;
 	}
 
 	/* shift nodes */
 	for ( i = 0; i < numBSPNodes; i++ )
 	{
-		bspNodes[ i ].minmax.mins += scale;
-		bspNodes[ i ].minmax.maxs += scale;
+		bspNodes[ i ].minmax.mins += shift;
+		bspNodes[ i ].minmax.maxs += shift;
 	}
 
 	/* shift leafs */
 	for ( i = 0; i < numBSPLeafs; i++ )
 	{
-		bspLeafs[ i ].minmax.mins += scale;
-		bspLeafs[ i ].minmax.maxs += scale;
+		bspLeafs[ i ].minmax.mins += shift;
+		bspLeafs[ i ].minmax.maxs += shift;
 	}
 
 	/* shift drawverts */
 	for ( i = 0; i < numBSPDrawVerts; i++ )
 	{
-		bspDrawVerts[i].xyz += scale;
+		bspDrawVerts[i].xyz += shift;
 	}
 
 	/* shift planes */
-
 	for ( i = 0; i < numBSPPlanes; i++ )
 	{
-		//find point on plane
-		Vector3 point;
-		for ( j=0; j<3; j++ ){
-			//point[j] = bspPlanes[ i ].dist * bspPlanes[ i ].normal[j];
-			if ( fabs( bspPlanes[ i ].normal()[j] ) > 0.5 ){
-				point[j] = bspPlanes[ i ].dist() / bspPlanes[ i ].normal()[j];
-				point[(j+1)%3] = point[(j+2)%3] = 0;
-				break;
-			}
-		}
-		//shift point
-		point += scale;
-		//calc new plane dist
-		bspPlanes[ i ].dist() = vector3_dot( point, bspPlanes[ i ].normal() );
+		bspPlanes[i].dist() = vector3_dot( bspPlanes[i].normal(), bspPlanes[i].normal() * bspPlanes[i].dist() + shift );
 	}
 
-	/* scale gridsize */
-	/*
-	if ( !entities[ 0 ].read_keyvalue( vec, "gridsize" ) ) {
-		VectorCopy( gridSize, vec );
-	}
-	vec[0] *= scale[0];
-	vec[1] *= scale[1];
-	vec[2] *= scale[2];
-	sprintf( str, "%f %f %f", vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-	entities[ 0 ].setKeyValue( "gridsize", str );
-*/
+	// fixme: engine says 'light grid mismatch', unless translation is multiple of grid size
+
 	/* inject command line parameters */
 	InjectCommandLine( argv, 0, argc - 1 );
 
