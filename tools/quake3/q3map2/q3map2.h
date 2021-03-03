@@ -2128,6 +2128,8 @@ Q_EXTERN int allocatedmapplanes Q_ASSIGN( 0 );
 Q_EXTERN int numMapPatches;
 Q_EXTERN MinMax g_mapMinmax;
 
+inline const MinMax c_worldMinmax( Vector3().set( MIN_WORLD_COORD ), Vector3().set( MAX_WORLD_COORD ) );
+
 Q_EXTERN int defaultFogNum Q_ASSIGN( -1 );                  /* ydnar: cleaner fog handling */
 Q_EXTERN int numMapFogs Q_ASSIGN( 0 );
 Q_EXTERN fog_t mapFogs[ MAX_MAP_FOGS ];

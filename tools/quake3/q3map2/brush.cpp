@@ -175,29 +175,18 @@ brush_t *CopyBrush( const brush_t *brush ){
  */
 
 bool BoundBrush( brush_t *brush ){
-	int i, j;
-	winding_t   *w;
-
-
 	brush->minmax.clear();
-	for ( i = 0; i < brush->numsides; i++ )
+	for ( int i = 0; i < brush->numsides; i++ )
 	{
-		w = brush->sides[ i ].winding;
+		const winding_t *w = brush->sides[ i ].winding;
 		if ( w == NULL ) {
 			continue;
 		}
-		for ( j = 0; j < w->numpoints; j++ )
+		for ( int j = 0; j < w->numpoints; j++ )
 			brush->minmax.extend( w->p[ j ] );
 	}
 
-	for ( i = 0; i < 3; i++ )
-	{
-		if ( brush->minmax.mins[ i ] < MIN_WORLD_COORD || brush->minmax.maxs[ i ] > MAX_WORLD_COORD || brush->minmax.mins[i] >= brush->minmax.maxs[ i ] ) {
-			return false;
-		}
-	}
-
-	return true;
+	return brush->minmax.valid() && c_worldMinmax.surrounds( brush->minmax );
 }
 
 
@@ -823,15 +812,9 @@ bool WindingIsTiny( winding_t *w ){
    ================
  */
 bool WindingIsHuge( winding_t *w ){
-	int i, j;
-
-	for ( i = 0 ; i < w->numpoints ; i++ )
-	{
-		for ( j = 0 ; j < 3 ; j++ )
-			if ( w->p[i][j] <= MIN_WORLD_COORD || w->p[i][j] >= MAX_WORLD_COORD ) {
-				return true;
-			}
-	}
+	for ( int i = 0; i < w->numpoints; i++ )
+		if ( !c_worldMinmax.test( w->p[i] ) )
+			return true;
 	return false;
 }
 

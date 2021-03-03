@@ -57,6 +57,7 @@ struct MinMax___
 		extend( other.mins );
 		extend( other.maxs );
 	}
+	// true, if point is within the bounds
 	template<typename U>
 	bool test( const BasicVector3<U>& point ) const {
 		return point.x() >= mins.x() && point.y() >= mins.y() && point.z() >= mins.z()
@@ -67,6 +68,12 @@ struct MinMax___
 	bool test( const MinMax___<U>& other ) const {
 		return other.maxs.x() >= mins.x() && other.maxs.y() >= mins.y() && other.maxs.z() >= mins.z()
 		    && other.mins.x() <= maxs.x() && other.mins.y() <= maxs.y() && other.mins.z() <= maxs.z();
+	}
+	// true, if other is completely enclosed by this
+	template<typename U>
+	bool surrounds( const MinMax___<U>& other ) const {
+		return other.mins.x() >= mins.x() && other.mins.y() >= mins.y() && other.mins.z() >= mins.z()
+		    && other.maxs.x() <= maxs.x() && other.maxs.y() <= maxs.y() && other.maxs.z() <= maxs.z();
 	}
 	BasicVector3<T> origin() const {
 		return ( mins + maxs ) * 0.5;

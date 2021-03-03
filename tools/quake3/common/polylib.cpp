@@ -819,6 +819,7 @@ winding_t   *ChopWinding( winding_t *in, const Plane3f& plane ){
 }
 
 
+inline const MinMax c_worldMinmax( Vector3().set( MIN_WORLD_COORD ), Vector3().set( MAX_WORLD_COORD ) );
 /*
    =================
    CheckWinding
@@ -827,7 +828,7 @@ winding_t   *ChopWinding( winding_t *in, const Plane3f& plane ){
  */
 void CheckWinding( winding_t *w ){
 	int i, j;
-	float d, edgedist;
+	float edgedist;
 	Vector3 dir, edgenormal;
 	float area;
 
@@ -846,16 +847,14 @@ void CheckWinding( winding_t *w ){
 	{
 		const Vector3& p1 = w->p[i];
 
-		for ( j = 0 ; j < 3 ; j++ )
-			if ( p1[j] > MAX_WORLD_COORD || p1[j] < MIN_WORLD_COORD ) {
-				Error( "CheckFace: MAX_WORLD_COORD exceeded: %f",p1[j] );
-			}
+		if ( !c_worldMinmax.test( p1 ) ) {
+			Error( "CheckFace: MAX_WORLD_COORD exceeded: ( %f %f %f )", p1[0], p1[1], p1[2] );
+		}
 
 		j = ( i + 1 == w->numpoints )? 0 : i + 1;
 
 		// check the point is on the face plane
-		d = plane3_distance_to_point( faceplane, p1 );
-		if ( d < -ON_EPSILON || d > ON_EPSILON ) {
+		if ( fabs( plane3_distance_to_point( faceplane, p1 ) ) > ON_EPSILON ) {
 			Error( "CheckWinding: point off plane" );
 		}
 
@@ -876,8 +875,7 @@ void CheckWinding( winding_t *w ){
 			if ( j == i ) {
 				continue;
 			}
-			d = vector3_dot( w->p[j], edgenormal );
-			if ( d > edgedist ) {
+			if ( vector3_dot( w->p[j], edgenormal ) > edgedist ) {
 				Error( "CheckWinding: non-convex" );
 			}
 		}

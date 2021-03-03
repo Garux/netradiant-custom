@@ -478,10 +478,8 @@ void CalcNodeBounds( node_t *node ){
    ==================
  */
 void MakeTreePortals_r( node_t *node ){
-	int i;
-
 	CalcNodeBounds( node );
-	if ( node->minmax.mins[0] >= node->minmax.maxs[0] ) {
+	if ( !node->minmax.valid() ) {
 		Sys_Warning( "node without a volume\n"
 						"node has %d tiny portals\n"
 						"node reference point %1.2f %1.2f %1.2f\n",
@@ -491,14 +489,9 @@ void MakeTreePortals_r( node_t *node ){
 					node->referencepoint[2] );
 	}
 
-	for ( i = 0 ; i < 3 ; i++ )
-	{
-		if ( node->minmax.mins[i] < MIN_WORLD_COORD || node->minmax.maxs[i] > MAX_WORLD_COORD ) {
-			if ( node->portals && node->portals->winding ) {
-				xml_Winding( "WARNING: Node With Unbounded Volume", node->portals->winding->p, node->portals->winding->numpoints, false );
-			}
-
-			break;
+	if ( !c_worldMinmax.surrounds( node->minmax ) ) {
+		if ( node->portals && node->portals->winding ) {
+			xml_Winding( "WARNING: Node With Unbounded Volume", node->portals->winding->p, node->portals->winding->numpoints, false );
 		}
 	}
 	if ( node->planenum == PLANENUM_LEAF ) {
