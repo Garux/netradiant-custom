@@ -138,7 +138,7 @@ void HelpBsp()
 		{"-texrange <N>", "Limit per-surface texture range to the given number of units, and subdivide surfaces like with `q3map_tessSize` if this is not met"},
 		{"-verboseentities", "Enable `-v` only for map entities, not for the world"},
 	};
-	HelpOptions("BSP Stage", 0, 80, bsp, sizeof(bsp)/sizeof(struct HelpOption));
+	HelpOptions("BSP Stage", 0, 80, bsp, std::size(bsp));
 }
 
 void HelpVis()
@@ -155,7 +155,7 @@ void HelpVis()
 		{"-saveprt", "Keep the Portal file after running vis (so you can run vis again)"},
 		{"-v -v", "Extra verbose mode for cluster debug"}, // q3map2 common takes first -v
 	};
-	HelpOptions("VIS Stage", 0, 80, vis, sizeof(vis)/sizeof(struct HelpOption));
+	HelpOptions("VIS Stage", 0, 80, vis, std::size(vis));
 }
 
 void HelpLight()
@@ -268,7 +268,7 @@ void HelpLight()
 		{"-wolf", "Use linear falloff curve by default (like W:ET)"},
 	};
 
-	HelpOptions("Light Stage", 0, 80, light, sizeof(light)/sizeof(struct HelpOption));
+	HelpOptions("Light Stage", 0, 80, light, std::size(light));
 }
 
 void HelpAnalyze()
@@ -278,7 +278,7 @@ void HelpAnalyze()
 		{"-lumpswap", "Swap byte order in the lumps"},
 	};
 
-	HelpOptions("Analyzing BSP-like file structure", 0, 80, analyze, sizeof(analyze)/sizeof(struct HelpOption));
+	HelpOptions("Analyzing BSP-like file structure", 0, 80, analyze, std::size(analyze));
 }
 
 void HelpScale()
@@ -289,7 +289,7 @@ void HelpScale()
 		{"-tex", "Scale without texture lock"},
 		{"-spawn_ref <F>", "Vertical offset for info_player_* entities (adds spawn_ref, scales, subtracts spawn_ref)"},
 	};
-	HelpOptions("Scaling", 0, 80, scale, sizeof(scale)/sizeof(struct HelpOption));
+	HelpOptions("Scaling", 0, 80, scale, std::size(scale));
 }
 
 void HelpConvert()
@@ -308,7 +308,7 @@ void HelpConvert()
 		{"-shadersasbitmap", "Save shader names as bitmap names in the model so it works as a prefab (only when writing ase and obj)"},
 	};
 
-	HelpOptions("Converting & Decompiling", 0, 80, convert, sizeof(convert)/sizeof(struct HelpOption));
+	HelpOptions("Converting & Decompiling", 0, 80, convert, std::size(convert));
 }
 
 void HelpExport()
@@ -317,7 +317,7 @@ void HelpExport()
 		{"-export <filename.bsp>", "Copies lightmaps from the BSP to `filename/lightmap_0000.tga` ff"}
 	};
 
-	HelpOptions("Exporting lightmaps", 0, 80, exportl, sizeof(exportl)/sizeof(struct HelpOption));
+	HelpOptions("Exporting lightmaps", 0, 80, exportl, std::size(exportl));
 }
 
 void HelpExportEnts()
@@ -325,7 +325,7 @@ void HelpExportEnts()
 	struct HelpOption exportents[] = {
 		{"-exportents <filename.bsp>", "Exports the entities to a text file (.ent)"},
 	};
-	HelpOptions("ExportEnts Stage", 0, 80, exportents, sizeof(exportents)/sizeof(struct HelpOption));
+	HelpOptions("ExportEnts Stage", 0, 80, exportents, std::size(exportents));
 }
 
 void HelpFixaas()
@@ -334,7 +334,7 @@ void HelpFixaas()
 		{"-fixaas <filename.bsp>", "Switch that enters this mode"},
 	};
 
-	HelpOptions("Fixing AAS checksum", 0, 80, fixaas, sizeof(fixaas)/sizeof(struct HelpOption));
+	HelpOptions("Fixing AAS checksum", 0, 80, fixaas, std::size(fixaas));
 }
 
 void HelpInfo()
@@ -343,7 +343,7 @@ void HelpInfo()
 		{"-info <filename.bsp>", "Switch that enters this mode"},
 	};
 
-	HelpOptions("Get info about BSP file", 0, 80, info, sizeof(info)/sizeof(struct HelpOption));
+	HelpOptions("Get info about BSP file", 0, 80, info, std::size(info));
 }
 
 void HelpImport()
@@ -352,7 +352,7 @@ void HelpImport()
 		{"-import <filename.bsp>", "Copies lightmaps from `filename/lightmap_0000.tga` ff into the BSP"},
 	};
 
-	HelpOptions("Importing lightmaps", 0, 80, import, sizeof(import)/sizeof(struct HelpOption));
+	HelpOptions("Importing lightmaps", 0, 80, import, std::size(import));
 }
 
 void HelpMinimap()
@@ -378,7 +378,7 @@ void HelpMinimap()
 		{"-white", "Write the minimap as a white-on-transparency RGBA32 image"},
 	};
 
-	HelpOptions("MiniMap", 0, 80, minimap, sizeof(minimap)/sizeof(struct HelpOption));
+	HelpOptions("MiniMap", 0, 80, minimap, std::size(minimap));
 }
 
 void HelpCommon()
@@ -396,13 +396,13 @@ void HelpCommon()
 		{"-fs_nomagicpath", "Do not try to guess base path magically"},
 		{"-fs_nohomepath", "Do not load home path in VFS"},
 		{"-fs_pakpath <path>", "Specify a package directory (can be used more than once to look in multiple paths)"},
-		{"-game <gamename>", "Load settings for the given game (default: quake3)"},
+		{"-game <gamename>", "Load settings for the given game (default: quake3), -help -game lists available games"},
 		{"-subdivisions <F>", "multiplier for patch subdivisions quality"},
 		{"-threads <N>", "number of threads to use"},
 		{"-v", "Verbose mode"}
 	};
 
-	HelpOptions("Common Options", 0, 80, common, sizeof(common)/sizeof(struct HelpOption));
+	HelpOptions("Common Options", 0, 80, common, std::size(common));
 
 }
 
@@ -448,13 +448,19 @@ void HelpMain(const char* arg)
 			arg++;
 
 		unsigned i;
-		for ( i = 0; i < sizeof(stages)/sizeof(struct HelpOption); i++ )
+		for ( i = 0; i < std::size(stages); i++ )
 			if ( striEqual(arg, stages[i].name+1) )
 			{
 				help_funcs[i]();
 				return;
 			}
+		if( striEqual( arg, "game" ) ){
+			printf( "Available games:\n" );
+			for( game_t *game = games; game->arg != NULL; ++game )
+				printf( "  %s\n", game->arg );
+			return;
+		}
 	}
 
-	HelpOptions("Stages", 0, 80, stages, sizeof(stages)/sizeof(struct HelpOption));
+	HelpOptions("Stages", 0, 80, stages, std::size(stages));
 }
