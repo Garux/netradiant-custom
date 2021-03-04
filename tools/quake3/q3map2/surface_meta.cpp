@@ -1374,11 +1374,9 @@ static int AddMetaTriangleToSurface( mapDrawSurface_t *ds, metaTriangle_t *tri, 
 
 
 	if ( metaMaxBBoxDistance >= 0 && ds->numIndexes > 0 ) {
-		const MinMax minmax( ds->minmax.mins - Vector3().set( metaMaxBBoxDistance ),
-		                     ds->minmax.maxs + Vector3().set( metaMaxBBoxDistance ) );
-		if( !minmax.test( metaVerts[ tri->indexes[ 0 ] ].xyz )
-		 && !minmax.test( metaVerts[ tri->indexes[ 1 ] ].xyz )
-		 && !minmax.test( metaVerts[ tri->indexes[ 2 ] ].xyz ) )
+		if( !ds->minmax.test( metaVerts[ tri->indexes[ 0 ] ].xyz, metaMaxBBoxDistance )
+		 && !ds->minmax.test( metaVerts[ tri->indexes[ 1 ] ].xyz, metaMaxBBoxDistance )
+		 && !ds->minmax.test( metaVerts[ tri->indexes[ 2 ] ].xyz, metaMaxBBoxDistance ) )
 			return 0;
 	}
 

@@ -856,7 +856,6 @@ void GrabSkeletalFrame( char *frame ){
 void GrabModelTransform( char *frame ){
 	char file1[1024];
 	char    *framefile;
-	fmframe_t   *fr;
 
 	framefile = FindFrameFile( frame );
 
@@ -867,7 +866,7 @@ void GrabModelTransform( char *frame ){
 
 //	printf ("grabbing %s\n", file1);
 
-	fr = &g_frames[fmheader.num_frames - 1]; // last frame read in
+	//fmframe_t *fr = &g_frames[fmheader.num_frames - 1]; // last frame read in
 
 	LoadModelTransform( file1 );
 }

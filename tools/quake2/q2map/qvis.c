@@ -75,15 +75,12 @@ void PlaneFromWinding( winding_t *w, plane_t *plane ){
    ==================
  */
 winding_t *NewWinding( int points ){
-	winding_t   *w;
-	int size;
-
 	if ( points > MAX_POINTS_ON_WINDING ) {
 		Error( "NewWinding: %i points", points );
 	}
 
-	size = (int)( (winding_t *)0 )->points[points];
-	w = malloc( size );
+	const size_t size = (size_t)( (winding_t *)0 )->points[points];
+	winding_t *w = malloc( size );
 	memset( w, 0, size );
 
 	return w;

@@ -63,6 +63,12 @@ struct MinMax___
 		return point.x() >= mins.x() && point.y() >= mins.y() && point.z() >= mins.z()
 		    && point.x() <= maxs.x() && point.y() <= maxs.y() && point.z() <= maxs.z();
 	}
+	// true, if point is within the bounds expanded by epsilon
+	template<typename U, typename E>
+	bool test( const BasicVector3<U>& point, const E epsilon ) const {
+		return point.x() >= mins.x() - epsilon && point.y() >= mins.y() - epsilon && point.z() >= mins.z() - epsilon
+		    && point.x() <= maxs.x() + epsilon && point.y() <= maxs.y() + epsilon && point.z() <= maxs.z() + epsilon;
+	}
 	// true, if there is an intersection
 	template<typename U>
 	bool test( const MinMax___<U>& other ) const {
@@ -166,6 +172,7 @@ template<typename P, typename V>
 bool PlaneFromPoints( Plane3___<P>& plane, const BasicVector3<V>& p0, const BasicVector3<V>& p1, const BasicVector3<V>& p2 ) {
 	plane.normal() = vector3_cross( p2 - p0, p1 - p0 );
 	if ( VectorNormalize( plane.normal() ) == 0 ) {
+		plane.dist() = 0;
 		return false;
 	}
 

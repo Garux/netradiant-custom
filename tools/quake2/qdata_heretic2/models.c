@@ -1555,7 +1555,6 @@ void GrabJointedFrame( char *frame ){
 void GrabGlobals( char *frame ){
 	char file1[1024];
 	char    *framefile;
-	frame_t     *fr;
 
 	framefile = FindFrameFile( frame );
 
@@ -1566,7 +1565,7 @@ void GrabGlobals( char *frame ){
 
 	printf( "grabbing %s\n", file1 );
 
-	fr = &g_frames[model.num_frames - 1]; // last frame read in
+	//frame_t *fr = &g_frames[model.num_frames - 1]; // last frame read in
 
 	LoadGlobals( file1 );
 }

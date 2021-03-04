@@ -23,6 +23,7 @@
 #define INCLUDED_DRAGPLANES_H
 
 #include "selectable.h"
+#include "cullable.h"
 #include "selectionlib.h"
 #include "math/aabb.h"
 #include "math/line.h"
@@ -46,41 +47,7 @@ inline Vector3 translation_from_local( const Vector3& translation, const Matrix4
 				   )
 			   );
 }
-#if 0
-namespace{
-// https://www.gamedev.net/forums/topic/230443-initializing-array-member-objects-in-c/?page=2
-class ObservedSelectables6x {
-	ObservedSelectable m_selectable0, m_selectable1, m_selectable2, m_selectable3, m_selectable4, m_selectable5;
 
-	// array of 6 pointers to ObservedSelectable members of ObservedSelectables6x
-	static ObservedSelectable ObservedSelectables6x::* const array[6];
-
-public:
-	ObservedSelectables6x( const SelectionChangeCallback& onchanged ) :
-		m_selectable0( onchanged ),
-		m_selectable1( onchanged ),
-		m_selectable2( onchanged ),
-		m_selectable3( onchanged ),
-		m_selectable4( onchanged ),
-		m_selectable5( onchanged ) {
-	}
-	ObservedSelectable& operator[]( std::size_t idx ) {
-		return this->*array[idx];
-	}
-	const ObservedSelectable& operator[]( std::size_t idx ) const {
-		return this->*array[idx];
-	}
-};
-
-// Parse this
-ObservedSelectable ObservedSelectables6x::* const ObservedSelectables6x::array[6] = { &ObservedSelectables6x::m_selectable0,
-																						&ObservedSelectables6x::m_selectable1,
-																						&ObservedSelectables6x::m_selectable2,
-																						&ObservedSelectables6x::m_selectable3,
-																						&ObservedSelectables6x::m_selectable4,
-																						&ObservedSelectables6x::m_selectable5 };
-} //namespace
-#endif
 
 class DragPlanes
 {
@@ -387,10 +354,7 @@ Matrix4 evaluateTransform( const Vector3& translation ) const {
 class ScaleRadius {
 	ObservedSelectable m_selectable;
 public:
-	static Matrix4& m_model() {
-		static Matrix4 model;
-		return model;
-	}
+	static inline Matrix4 m_model;
 
 	ScaleRadius( const SelectionChangeCallback& onchanged ) :
 		m_selectable( onchanged ) {
@@ -402,7 +366,7 @@ public:
 		m_selectable.setSelected( selected );
 	}
 	void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback& selectedPlaneCallback ) {
-		m_model() = test.getVolume().GetModelview();
+		m_model = test.getVolume().GetModelview();
 		Selector_add( selector, m_selectable );
 		selectedPlaneCallback( Plane3( 2, 0, 0, 0 ) );
 	}
@@ -410,7 +374,7 @@ public:
 		const float len = vector3_length( translation );
 		if( len == 0 )
 			return 0;
-		Vector3 tra = matrix4_transformed_direction( m_model(), translation );
+		Vector3 tra = matrix4_transformed_direction( m_model, translation );
 		vector3_normalise( tra );
 		return tra[0] * len;
 	}

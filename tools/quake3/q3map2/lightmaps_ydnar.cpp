@@ -1279,7 +1279,7 @@ void StitchSurfaceLightmaps( void ){
 					sampleSize = 0.5f * std::min( a->actualSampleSize, b->actualSampleSize );
 
 					/* test bounding box */
-					if ( !MinMax( b->minmax.mins - Vector3().set( sampleSize ), b->minmax.maxs + Vector3().set( sampleSize ) ).test( origin ) ) {
+					if ( !b->minmax.test( origin, sampleSize ) ) {
 						continue;
 					}
 
@@ -2386,7 +2386,6 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	int style, lightmapNum, lightmapNum2;
 	float               samples, occludedSamples;
 	Vector3 sample, occludedSample, dirSample;
-	MinMax colorMinmax;
 	byte                *lb;
 	int numUsed, numTwins, numTwinLuxels, numStored;
 	float lmx, lmy, efficiency;
@@ -2576,7 +2575,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 
 			/* setup */
 			lm->used = 0;
-			colorMinmax.clear();
+			MinMax colorMinmax;
 
 			/* clean up and store into bsp luxels */
 			for ( y = 0; y < lm->h; y++ )

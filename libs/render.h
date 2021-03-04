@@ -1319,11 +1319,10 @@ public:
 
 
 
-namespace {
 ///////////////////////////////////////////////////////////////////////////////
 // check FBO completeness
 ///////////////////////////////////////////////////////////////////////////////
-bool checkFramebufferStatus() {
+inline bool checkFramebufferStatus() {
 	// check FBO status
 	GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
 	switch( status ) {
@@ -1365,7 +1364,6 @@ bool checkFramebufferStatus() {
 	}
 }
 
-} //namespace
 
 class FBO
 {

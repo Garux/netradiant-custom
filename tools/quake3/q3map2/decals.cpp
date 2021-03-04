@@ -736,7 +736,7 @@ static void ProjectDecalOntoTriangles( decalProjector_t *dp, mapDrawSurface_t *d
  */
 
 void MakeEntityDecals( entity_t *e ){
-	int i, j, k, f, fOld, start;
+	int i, j, f, fOld, start;
 	decalProjector_t dp;
 	mapDrawSurface_t    *ds;
 	Vector3 identityAxis[ 3 ] = { g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z };
@@ -780,12 +780,7 @@ void MakeEntityDecals( entity_t *e ){
 			}
 
 			/* bounds check */
-			for ( k = 0; k < 3; k++ )
-				if ( ds->minmax.mins[ k ] >= ( dp.center[ k ] + dp.radius ) ||
-					 ds->minmax.maxs[ k ] <= ( dp.center[ k ] - dp.radius ) ) {
-					break;
-				}
-			if ( k < 3 ) {
+			if ( !ds->minmax.test( dp.center, dp.radius ) ) {
 				continue;
 			}
 

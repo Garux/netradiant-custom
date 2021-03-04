@@ -385,7 +385,6 @@ void PatchMapDrawSurfs( entity_t *e ){
 	mapDrawSurface_t        *ds;
 	int patchCount, groupCount;
 	bspDrawVert_t           *v1, *v2;
-	MinMax bounds;
 	byte                    *bordering;
 
 	parseMesh_t  *meshes[ MAX_MAP_DRAW_SURFS ];
@@ -461,8 +460,7 @@ void PatchMapDrawSurfs( entity_t *e ){
 		GrowGroup_r( scan, i, patchCount, meshes, bordering, group );
 
 		/* bound them */
-
-		bounds.clear();
+		MinMax bounds;
 		for ( j = 0; j < patchCount; j++ )
 		{
 			if ( group[ j ] ) {

@@ -1239,11 +1239,7 @@ void MapRawLightmap( int rawLightmapNum ){
 			{
 				info = &surfaceInfos[ lightSurfaces[ lm->firstLightSurface + n ] ];
 				minmax.extend( info->minmax );
-				MinMax minmax2 = info->minmax;
-				const float TOL = info->sampleSize + 2;
-				minmax2.mins -= Vector3( TOL, TOL, TOL );
-				minmax2.maxs += Vector3( TOL, TOL, TOL );
-				if( minmax2.test( origin ) ){
+				if( info->minmax.test( origin, info->sampleSize + 2 ) ){
 					break;
 				}
 			}

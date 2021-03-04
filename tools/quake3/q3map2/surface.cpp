@@ -1330,7 +1330,7 @@ void SubdivideFaceSurfaces( entity_t *e, tree_t *tree ){
 			range = std::max( ds->texRange[ 0 ], ds->texRange[ 1 ] );
 			size = ds->minmax.maxs[ 0 ] - ds->minmax.mins[ 0 ];
 			for ( j = 1; j < 3; j++ )
-				size = std::max( size, ds->minmax.maxs[ j ] - ds->minmax.mins[ j ] );
+				value_maximize( size, ds->minmax.maxs[ j ] - ds->minmax.mins[ j ] );
 			subdivisions = ( size / range ) * texRange;
 			subdivisions = ceil( subdivisions / 2 ) * 2;
 			for ( j = 1; j < 8; j++ )

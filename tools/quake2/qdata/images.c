@@ -650,7 +650,7 @@ void Cmd_Mip( void ){
 //
 // dword align the size
 //
-	while ( (int)lump_p & 3 )
+	while ( (size_t)lump_p & 3 )
 		*lump_p++ = 0;
 
 //

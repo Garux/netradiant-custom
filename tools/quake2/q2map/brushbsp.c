@@ -318,12 +318,9 @@ node_t *AllocNode( void ){
    ================
  */
 bspbrush_t *AllocBrush( int numsides ){
-	bspbrush_t  *bb;
-	int c;
-
-	c = (int)&( ( (bspbrush_t *)0 )->sides[numsides] );
-	bb = malloc( c );
-	memset( bb, 0, c );
+	const size_t size = (size_t)&( ( (bspbrush_t *)0 )->sides[numsides] );
+	bspbrush_t *bb = malloc( size );
+	memset( bb, 0, size );
 	if ( numthreads == 1 ) {
 		c_active_brushes++;
 	}
@@ -373,16 +370,12 @@ void FreeBrushList( bspbrush_t *brushes ){
    ==================
  */
 bspbrush_t *CopyBrush( bspbrush_t *brush ){
-	bspbrush_t *newbrush;
-	int size;
-	int i;
+	const size_t size = (size_t)&( ( (bspbrush_t *)0 )->sides[brush->numsides] );
 
-	size = (int)&( ( (bspbrush_t *)0 )->sides[brush->numsides] );
-
-	newbrush = AllocBrush( brush->numsides );
+	bspbrush_t *newbrush = AllocBrush( brush->numsides );
 	memcpy( newbrush, brush, size );
 
-	for ( i = 0 ; i < brush->numsides ; i++ )
+	for ( int i = 0 ; i < brush->numsides ; i++ )
 	{
 		if ( brush->sides[i].winding ) {
 			newbrush->sides[i].winding = CopyWinding( brush->sides[i].winding );

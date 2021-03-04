@@ -175,7 +175,6 @@ void PrintPortal( portal_t *p ){
  */
 #define SIDESPACE   8
 void MakeHeadnodePortals( tree_t *tree ){
-	Vector3 bounds[2];
 	int i, j, n;
 	portal_t    *p, *portals[6];
 	plane_t bplanes[6];
@@ -184,13 +183,10 @@ void MakeHeadnodePortals( tree_t *tree ){
 	node = tree->headnode;
 
 // pad with some space so there will never be null volume leafs
-	for ( i = 0 ; i < 3 ; i++ )
-	{
-		bounds[0][i] = tree->minmax.mins[i] - SIDESPACE;
-		bounds[1][i] = tree->minmax.maxs[i] + SIDESPACE;
-		if ( bounds[0][i] >= bounds[1][i] ) {
-			Error( "Backwards tree volume" );
-		}
+	const MinMax bounds( tree->minmax.mins - Vector3().set( SIDESPACE ),
+	                     tree->minmax.maxs + Vector3().set( SIDESPACE ) );
+	if ( !bounds.valid() ) {
+		Error( "Backwards tree volume" );
 	}
 
 	tree->outside_node.planenum = PLANENUM_LEAF;
@@ -210,12 +206,12 @@ void MakeHeadnodePortals( tree_t *tree ){
 			memset( pl, 0, sizeof( *pl ) );
 			if ( j ) {
 				pl->normal()[i] = -1;
-				pl->dist() = -bounds[j][i];
+				pl->dist() = -bounds.maxs[i];
 			}
 			else
 			{
 				pl->normal()[i] = 1;
-				pl->dist() = bounds[j][i];
+				pl->dist() = bounds.mins[i];
 			}
 			p->plane = *pl;
 			p->winding = BaseWindingForPlane( pl->plane );
