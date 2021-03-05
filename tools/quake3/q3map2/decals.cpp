@@ -578,7 +578,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		/* set alpha */
 		const float d = plane3_distance_to_point( dp->planes[ 0 ], w->p[ i ] );
 		const float d2 = plane3_distance_to_point( dp->planes[ 1 ], w->p[ i ] );
-		const float alpha = std::clamp( 255.0f * d2 / ( d + d2 ), 0.f, 255.f );
+		const float alpha = 255.0f * d2 / ( d + d2 );
 
 		/* set misc */
 		dv->xyz = w->p[ i ] - entityOrigin;
@@ -589,7 +589,7 @@ static void ProjectDecalOntoWinding( decalProjector_t *dp, mapDrawSurface_t *ds,
 		/* set color */
 		for ( j = 0; j < MAX_LIGHTMAPS; j++ )
 		{
-			dv->color[ j ] = { 255, 255, 255, alpha };
+			dv->color[ j ] = { 255, 255, 255, color_to_byte( alpha ) };
 		}
 	}
 }

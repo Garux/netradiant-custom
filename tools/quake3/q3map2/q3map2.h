@@ -275,8 +275,6 @@ enum class EBrushType
 #define LIGHTMAP_HEIGHT         128
 
 
-using Vector3b = BasicVector3<byte>;
-
 
 typedef void ( *bspFunc )( const char * );
 
@@ -1812,7 +1810,7 @@ void                        RadFreeLights();
 
 
 /* light_ydnar.c */
-void                        ColorToBytes( const Vector3& color, Vector3b& colorBytes, float scale );
+Vector3b                    ColorToBytes( const Vector3& color, float scale );
 void                        SmoothNormals( void );
 
 void                        MapRawLightmap( int num );

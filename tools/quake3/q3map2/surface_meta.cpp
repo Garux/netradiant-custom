@@ -580,8 +580,8 @@ void MaxAreaFaceSurface( mapDrawSurface_t *ds ){
  */
 
 void FanFaceSurface( mapDrawSurface_t *ds ){
-	int i, j, k, a, b, c;
-	BasicVector4<int> color[ MAX_LIGHTMAPS ];
+	int i, k, a, b, c;
+	Color4f color[ MAX_LIGHTMAPS ];
 	for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 		color[k].set( 0 );
 	bspDrawVert_t   *verts, *centroid, *dv;
@@ -622,11 +622,7 @@ void FanFaceSurface( mapDrawSurface_t *ds ){
 	centroid->st *= iv;
 	for ( k = 0; k < MAX_LIGHTMAPS; k++ ){
 		centroid->lightmap[ k ] *= iv;
-		for ( j = 0; j < 4; j++ )
-		{
-			color[ k ][ j ] /= ds->numVerts;
-			centroid->color[ k ][ j ] = ( color[ k ][ j ] < 255 ? color[ k ][ j ] : 255 );
-		}
+		centroid->color[ k ] = color_to_byte( color[ k ] / ds->numVerts );
 	}
 
 	/* add to vert count */

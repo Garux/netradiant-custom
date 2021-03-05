@@ -113,6 +113,18 @@ struct Color4___ : public BasicVector4<T>
 
 using Color4f = Color4___<float>;
 using Color4b = Color4___<byte>;
+using Vector3b = BasicVector3<byte>;
+
+
+inline byte color_to_byte( float color ){
+	return std::clamp( color, 0.f, 255.f );
+}
+inline Vector3b color_to_byte( const Vector3& color ){
+	return Vector3b( color_to_byte( color.x() ), color_to_byte( color.y() ), color_to_byte( color.z() ) );
+}
+inline Color4b color_to_byte( const Color4f& color ){
+	return Color4b( color_to_byte( color.rgb() ), color_to_byte( color.alpha() ) );
+}
 
 
 

@@ -1621,8 +1621,8 @@ void TraceGrid( int num ){
 			value_maximize( color[ j ], minGridLight[ j ] );
 
 		/* vortex: apply gridscale and gridambientscale here */
-		ColorToBytes( color, bgp->ambient[ i ], gridScale * gridAmbientScale );
-		ColorToBytes( gp->directed[ i ], bgp->directed[ i ], gridScale );
+		bgp->ambient[ i ] = ColorToBytes( color, gridScale * gridAmbientScale );
+		bgp->directed[ i ] = ColorToBytes( gp->directed[ i ], gridScale );
 		/*
 		 * HACK: if there's a non-zero directed component, this
 		 * lightgrid cell is useful. However, q3 skips grid

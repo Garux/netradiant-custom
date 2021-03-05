@@ -3110,11 +3110,7 @@ int AddSurfaceModels( mapDrawSurface_t *ds ){
 				centroid.normal = ds->verts[ 0 ].normal;
 			}
 			centroid.st /= ds->numVerts;
-			alpha /= ds->numVerts;
-			centroid.color[ 0 ][ 0 ] = 0xFF;
-			centroid.color[ 0 ][ 1 ] = 0xFF;
-			//centroid.color[ 0 ][ 2 ] = 0xFF;
-			centroid.color[ 0 ][ 2 ] = ( alpha > 255.0f ? 0xFF : alpha );
+			centroid.color[ 0 ] = { 255, 255, 255, color_to_byte( alpha / ds->numVerts ) };
 
 			/* head vert is centroid */
 			tri[ 0 ] = &centroid;

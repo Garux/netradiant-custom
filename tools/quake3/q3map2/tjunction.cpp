@@ -390,7 +390,7 @@ void FixSurfaceJunctions( mapDrawSurface_t *ds ) {
 					for ( j = 0; j < 4; j++ )
 					{
 						c = (float) v1->color[ k ][ j ] + frac * ( (float) v2->color[ k ][ j ] - (float) v1->color[ k ][ j ] );
-						verts[ numVerts ].color[ k ][ j ] = (byte) ( c < 255.0f ? c : 255 );
+						verts[ numVerts ].color[ k ][ j ] = color_to_byte( c );
 					}
 				}
 

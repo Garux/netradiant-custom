@@ -456,7 +456,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 			{
 				dv.lightmap[ j ] = { 0, 0 };
 				if ( spawnFlags & 32 ) { // spawnflag 32: model color -> alpha hack
-					dv.color[ j ] = { 255, 255, 255, RGBTOGRAY( color ) };
+					dv.color[ j ] = { 255, 255, 255, color_to_byte( RGBTOGRAY( color ) ) };
 				}
 				else
 				{

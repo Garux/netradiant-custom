@@ -39,7 +39,7 @@
    ydnar: moved to here 2001-02-04
  */
 
-void ColorToBytes( const Vector3& color, Vector3b& colorBytes, float scale ){
+Vector3b ColorToBytes( const Vector3& color, float scale ){
 	int i;
 	float max, gamma;
 	float inv, dif;
@@ -118,7 +118,7 @@ void ColorToBytes( const Vector3& color, Vector3b& colorBytes, float scale ){
 	}
 
 	/* store it off */
-	colorBytes = sample;
+	return sample;
 }
 
 
@@ -2794,7 +2794,7 @@ void IlluminateVertexes( int num ){
 					vertLuxel += radVertLuxel;
 				}
 				if ( !info->si->noVertexLight ) {
-					ColorToBytes( vertLuxel, verts[ i ].color[ lightmapNum ].rgb(), info->si->vertexScale );
+					verts[ i ].color[ lightmapNum ].rgb() = ColorToBytes( vertLuxel, info->si->vertexScale );
 				}
 			}
 		}
@@ -2908,7 +2908,7 @@ void IlluminateVertexes( int num ){
 
 			/* store into bytes (for vertex approximation) */
 			if ( !info->si->noVertexLight ) {
-				ColorToBytes( vertLuxel, verts[ i ].color[ lightmapNum ].rgb(), 1.0f );
+				verts[ i ].color[ lightmapNum ].rgb() = ColorToBytes( vertLuxel, 1.0f );
 			}
 		}
 	}

@@ -110,7 +110,7 @@ void Fur( mapDrawSurface_t *ds ){
 			for ( k = 0; k < MAX_LIGHTMAPS; k++ )
 			{
 				a = (float) dv->color[ k ].alpha() - fade;
-				dv->color[ k ].alpha() = ( a > 255.0f )? 255 : ( a < 0 )? 0 : a;
+				dv->color[ k ].alpha() = color_to_byte( a );
 			}
 		}
 	}

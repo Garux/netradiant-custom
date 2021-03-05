@@ -39,9 +39,9 @@
  */
 
 void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
-	int i, j, k;
+	int i, j;
 	float c;
-	Vector4 mult, add;
+	Color4f mult, add;
 	bspDrawVert_t   *dv;
 	colorMod_t      *cm2;
 
@@ -65,72 +65,72 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 			mult.set( 1 );
 			add.set( 0 );
 
-			const Vector3 cm2_data = vector3_from_array( cm2->data );
+			const Vector3 cm2_vec3 = vector3_from_array( cm2->data );
 			/* switch on type */
 			switch ( cm2->type )
 			{
 			case EColorMod::ColorSet:
-				mult.vec3().set( 0 );
-				add.vec3() = cm2_data * 255.0f;
+				mult.rgb().set( 0 );
+				add.rgb() = cm2_vec3 * 255.0f;
 				break;
 
 			case EColorMod::AlphaSet:
-				mult[ 3 ] = 0.0f;
-				add[ 3 ] = cm2->data[ 0 ] * 255.0f;
+				mult.alpha() = 0.0f;
+				add.alpha() = cm2->data[ 0 ] * 255.0f;
 				break;
 
 			case EColorMod::ColorScale:
-				mult.vec3() = cm2_data;
+				mult.rgb() = cm2_vec3;
 				break;
 
 			case EColorMod::AlphaScale:
-				mult[ 3 ] = cm2->data[ 0 ];
+				mult.alpha() = cm2->data[ 0 ];
 				break;
 
 			case EColorMod::ColorDotProduct:
-				c = vector3_dot( dv->normal, cm2_data );
-				mult.vec3().set( c );
+				c = vector3_dot( dv->normal, cm2_vec3 );
+				mult.rgb().set( c );
 				break;
 
 			case EColorMod::ColorDotProductScale:
-				c = vector3_dot( dv->normal, cm2_data );
+				c = vector3_dot( dv->normal, cm2_vec3 );
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
-				mult.vec3().set( c );
+				mult.rgb().set( c );
 				break;
 
 			case EColorMod::AlphaDotProduct:
-				mult[ 3 ] = vector3_dot( dv->normal, cm2_data );
+				mult.alpha() = vector3_dot( dv->normal, cm2_vec3 );
 				break;
 
 			case EColorMod::AlphaDotProductScale:
-				c = vector3_dot( dv->normal, cm2_data );
+				c = vector3_dot( dv->normal, cm2_vec3 );
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
-				mult[ 3 ] = c;
+				mult.alpha() = c;
 				break;
 
 			case EColorMod::ColorDotProduct2:
-				c = vector3_dot( dv->normal, cm2_data );
+				c = vector3_dot( dv->normal, cm2_vec3 );
 				c *= c;
-				mult.vec3().set( c );
+				mult.rgb().set( c );
 				break;
 
 			case EColorMod::ColorDotProduct2Scale:
-				c = vector3_dot( dv->normal, cm2_data );
+				c = vector3_dot( dv->normal, cm2_vec3 );
 				c *= c;
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
-				mult.vec3().set( c );
+				mult.rgb().set( c );
 				break;
 
 			case EColorMod::AlphaDotProduct2:
-				mult[ 3 ] = vector3_dot( dv->normal, cm2_data );
-				mult[ 3 ] *= mult[ 3 ];
+				mult.alpha() = vector3_dot( dv->normal, cm2_vec3 );
+				mult.alpha() *= mult.alpha();
 				break;
 
 			case EColorMod::AlphaDotProduct2Scale:
-				c = vector3_dot( dv->normal, cm2_data );
+				c = vector3_dot( dv->normal, cm2_vec3 );
 				c *= c;
 				c = ( c - cm2->data[3] ) / ( cm2->data[4] - cm2->data[3] );
-				mult[ 3 ] = c;
+				mult.alpha() = c;
 				break;
 
 			default:
@@ -140,10 +140,7 @@ void ColorMod( colorMod_t *cm, int numVerts, bspDrawVert_t *drawVerts ){
 			/* apply mod */
 			for ( j = 0; j < MAX_LIGHTMAPS; j++ )
 			{
-				for ( k = 0; k < 4; k++ )
-				{
-					dv->color[ j ][ k ] = std::clamp( mult[ k ] * dv->color[ j ][ k ] + add[ k ], 0.f, 255.f );
-				}
+				dv->color[ j ] = color_to_byte( mult * static_cast<BasicVector4<byte>>( dv->color[ j ] ) + add );
 			}
 		}
 	}
