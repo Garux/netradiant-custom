@@ -872,12 +872,12 @@ int ConvertBSPMain( int argc, char **argv ){
 		else if ( striEqual( argv[ i ], "-ne" ) ) {
 			normalEpsilon = atof( argv[ i + 1 ] );
 			i++;
-			Sys_Printf( "Normal epsilon set to %f\n", normalEpsilon );
+			Sys_Printf( "Normal epsilon set to %lf\n", normalEpsilon );
 		}
 		else if ( striEqual( argv[ i ], "-de" ) ) {
 			distanceEpsilon = atof( argv[ i + 1 ] );
 			i++;
-			Sys_Printf( "Distance epsilon set to %f\n", distanceEpsilon );
+			Sys_Printf( "Distance epsilon set to %lf\n", distanceEpsilon );
 		}
 		else if ( striEqual( argv[ i ], "-shaderasbitmap" ) || striEqual( argv[ i ], "-shadersasbitmap" ) ) {
 			shadersAsBitmap = true;

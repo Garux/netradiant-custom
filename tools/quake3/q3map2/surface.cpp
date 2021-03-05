@@ -1212,7 +1212,6 @@ static void AddSurfaceFlare( mapDrawSurface_t *ds, const Vector3& entityOrigin )
  */
 
 static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, winding_t *w, int fogNum, float subdivisions ){
-	int i;
 	int axis;
 	MinMax bounds;
 	const float epsilon = 0.1;
@@ -1230,8 +1229,7 @@ static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, winding_
 	}
 
 	/* determine surface bounds */
-	for ( i = 0; i < w->numpoints; i++ )
-		bounds.extend( w->p[ i ] );
+	WindingExtendBounds( w, bounds );
 
 	/* split the face */
 	for ( axis = 0; axis < 3; axis++ )

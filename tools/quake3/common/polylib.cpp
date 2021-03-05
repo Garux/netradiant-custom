@@ -151,13 +151,11 @@ float   WindingArea( const winding_t *w ){
 	return total;
 }
 
-MinMax WindingBounds( const winding_t *w ){
-	MinMax minmax;
-	for ( int i = 0 ; i < w->numpoints ; i++ )
+void WindingExtendBounds( const winding_t *w, MinMax& minmax ){
+	for ( int i = 0 ; i < w->numpoints ; ++i )
 	{
 		minmax.extend( w->p[i] );
 	}
-	return minmax;
 }
 
 /*

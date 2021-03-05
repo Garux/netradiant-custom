@@ -179,11 +179,9 @@ bool BoundBrush( brush_t *brush ){
 	for ( int i = 0; i < brush->numsides; i++ )
 	{
 		const winding_t *w = brush->sides[ i ].winding;
-		if ( w == NULL ) {
-			continue;
+		if ( w != NULL ) {
+			WindingExtendBounds( w, brush->minmax );
 		}
-		for ( int j = 0; j < w->numpoints; j++ )
-			brush->minmax.extend( w->p[ j ] );
 	}
 
 	return brush->minmax.valid() && c_worldMinmax.surrounds( brush->minmax );
@@ -291,7 +289,6 @@ bool FixWinding( winding_t *w ){
 	bool valid = true;
 	int i, j, k;
 	Vector3 vec;
-	float dist;
 
 
 	/* dummy check */
@@ -311,8 +308,7 @@ bool FixWinding( winding_t *w ){
 		j = ( i + 1 ) % w->numpoints;
 
 		/* degenerate edge? */
-		dist = vector3_length( w->p[ i ] - w->p[ j ] );
-		if ( dist < DEGENERATE_EPSILON ) {
+		if ( vector3_length( w->p[ i ] - w->p[ j ] ) < DEGENERATE_EPSILON ) {
 			valid = false;
 			//Sys_FPrintf( SYS_WRN | SYS_VRBflag, "WARNING: Degenerate winding edge found, fixing...\n" );
 

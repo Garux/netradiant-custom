@@ -60,7 +60,7 @@ Plane3f WindingPlane( const winding_t *w );
 void    RemoveColinearPoints( winding_t *w );
 EPlaneSide     WindingOnPlaneSide( const winding_t *w, const Plane3f& plane );
 void    FreeWinding( winding_t *w );
-MinMax  WindingBounds( const winding_t *w );
+void WindingExtendBounds( const winding_t *w, MinMax& minmax );
 
 void    AddWindingToConvexHull( winding_t *w, winding_t **hull, const Vector3& normal );
 

@@ -587,7 +587,7 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			splash_w = AllocWinding( rw->numVerts );
 			splash_w->numpoints = rw->numVerts;
 			for ( i = 0; i < rw->numVerts; i++ )
-				splash_w->p[ i ] = normal * si->backsplashDistance + rw->verts[rw->numVerts - 1 - i].xyz;
+				splash_w->p[ i ] = rw->verts[rw->numVerts - 1 - i].xyz + normal * si->backsplashDistance;
 			splash->w = splash_w;
 
 			splash->origin = normal * si->backsplashDistance + light->origin;

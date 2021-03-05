@@ -456,15 +456,13 @@ void SplitNodePortals( node_t *node ){
 void CalcNodeBounds( node_t *node ){
 	portal_t    *p;
 	int s;
-	int i;
 
 	// calc mins/maxs for both leafs and nodes
 	node->minmax.clear();
 	for ( p = node->portals ; p ; p = p->next[s] )
 	{
 		s = ( p->nodes[1] == node );
-		for ( i = 0 ; i < p->winding->numpoints ; i++ )
-			node->minmax.extend( p->winding->p[i] );
+		WindingExtendBounds( p->winding, node->minmax );
 	}
 }
 
