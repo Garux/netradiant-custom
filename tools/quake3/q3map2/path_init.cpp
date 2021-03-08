@@ -196,9 +196,6 @@ void LokiInitPaths( char *argv0 ){
  */
 
 game_t *GetGame( char *arg ){
-	int i;
-
-
 	/* dummy check */
 	if ( strEmptyOrNull( arg ) ) {
 		return NULL;
@@ -217,7 +214,7 @@ game_t *GetGame( char *arg ){
 	}
 
 	/* test it */
-	i = 0;
+	int i = 0;
 	while ( games[ i ].arg != NULL )
 	{
 		if ( striEqual( arg, games[ i ].arg ) ) {
@@ -227,6 +224,8 @@ game_t *GetGame( char *arg ){
 	}
 
 	/* no matching game */
+	Sys_Warning( "Game \"%s\" is unknown.\n", arg );
+	HelpGames();
 	return NULL;
 }
 

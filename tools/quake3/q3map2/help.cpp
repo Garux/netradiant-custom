@@ -406,6 +406,12 @@ void HelpCommon()
 
 }
 
+void HelpGames(){
+	Sys_Printf( "Available games:\n" );
+	for( game_t *game = games; game->arg != NULL; ++game )
+		Sys_Printf( "  %s\n", game->arg );
+}
+
 void HelpMain(const char* arg)
 {
 	printf("Usage: q3map2 [stage] [common options...] [stage options...] [stage source file]\n");
@@ -455,9 +461,7 @@ void HelpMain(const char* arg)
 				return;
 			}
 		if( striEqual( arg, "game" ) ){
-			printf( "Available games:\n" );
-			for( game_t *game = games; game->arg != NULL; ++game )
-				printf( "  %s\n", game->arg );
+			HelpGames();
 			return;
 		}
 	}
