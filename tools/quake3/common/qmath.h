@@ -130,14 +130,15 @@ inline Color4b color_to_byte( const Color4f& color ){
 
 template<typename T>
 T VectorNormalize( BasicVector3<T>& vector ) {
-	const double length = vector3_length( DoubleVector3( vector ) );
+	DoubleVector3 v( vector ); // intermediate vector to be sure to do in double
+	const double length = vector3_length( v );
 
 	if ( length == 0 ) {
 		vector.set( 0 );
 		return 0;
 	}
 
-	vector /= length;
+	vector = v / length;
 
 	return length;
 }
