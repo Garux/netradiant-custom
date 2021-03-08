@@ -2345,6 +2345,7 @@ Q_EXTERN float lightmapExposure Q_ASSIGN( 0.0f );
 Q_EXTERN float lightmapCompensate Q_ASSIGN( 1.0f );
 Q_EXTERN float lightmapBrightness Q_ASSIGN( 1.0f );
 Q_EXTERN float lightmapContrast Q_ASSIGN( 1.0f );
+inline float g_lightmapSaturation = 1;
 
 /* ydnar: for runtime tweaking of falloff tolerance */
 Q_EXTERN float falloffTolerance Q_ASSIGN( 1.0f );

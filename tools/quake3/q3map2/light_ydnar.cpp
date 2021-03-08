@@ -32,6 +32,21 @@
 #include "q3map2.h"
 
 
+// http://www.graficaobscura.com/matrix/index.html
+static void color_saturate( Vector3& color, float saturation ){
+	/* This is the luminance vector. Notice here that we do not use the standard NTSC weights of 0.299, 0.587, and 0.114.
+	The NTSC weights are only applicable to RGB colors in a gamma 2.2 color space. For linear RGB colors these values are better. */
+	const Vector3 rgb2gray( 0.3086, 0.6094, 0.0820 );
+	Matrix4 tra( g_matrix4_identity );
+	tra.x().vec3().set( rgb2gray.x() * ( 1 - saturation ) );
+	tra.y().vec3().set( rgb2gray.y() * ( 1 - saturation ) );
+	tra.z().vec3().set( rgb2gray.z() * ( 1 - saturation ) );
+	tra.xx() += saturation;
+	tra.yy() += saturation;
+	tra.zz() += saturation;
+	matrix4_transform_direction( tra, color );
+}
+
 
 
 /*
@@ -52,6 +67,9 @@ Vector3b ColorToBytes( const Vector3& color, float scale ){
 
 	/* make a local copy */
 	Vector3 sample = color * scale;
+
+	if( g_lightmapSaturation != 1 )
+		color_saturate( sample, g_lightmapSaturation );
 
 	/* muck with it */
 	gamma = 1.0f / lightmapGamma;

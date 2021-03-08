@@ -583,7 +583,6 @@ $(INSTALLDIR)/q3map2.$(EXE): \
 	libddslib.$(A) \
 	libfilematch.$(A) \
 	libl_net.$(A) \
-	libmathlib.$(A) \
 	libpicomodel.$(A) \
 	$(if $(findstring $(OS),Win32),icons/q3map2.o,) \
 
@@ -749,7 +748,6 @@ $(INSTALLDIR)/radiant.$(EXE): \
 	libcmdlib.$(A) \
 	libgtkutil.$(A) \
 	libl_net.$(A) \
-	libmathlib.$(A) \
 	libprofile.$(A) \
 	libquickhull.$(A) \
 	libxmllib.$(A) \

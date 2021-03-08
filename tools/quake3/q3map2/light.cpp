@@ -2248,6 +2248,13 @@ int LightMain( int argc, char **argv ){
 			lightmapContrast = ( 259 * ( lightmapContrast + 255 ) ) / ( 255 * ( 259 - lightmapContrast ) );
 		}
 
+		/* Lighting saturation */
+		else if( striEqual( argv[ i ], "-saturation" ) ){
+			g_lightmapSaturation = atof( argv[ i + 1 ] );
+			Sys_Printf( "Lighting saturation set to %f\n", g_lightmapSaturation );
+			i++;
+		}
+
 		/* ydnar switches */
 		else if ( striEqual( argv[ i ], "-bounce" ) ) {
 			bounce = std::max( 0, atoi( argv[ i + 1 ] ) );
