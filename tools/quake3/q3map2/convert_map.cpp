@@ -684,13 +684,12 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 		}
 		else
 		{
-			if ( !striEqualPrefix( buildSide->shaderInfo->shader, "textures/common/" ) ) {
-				if ( !strEqual( buildSide->shaderInfo->shader, "noshader" ) ) {
-					if ( !strEqual( buildSide->shaderInfo->shader, "default" ) ) {
-						//fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader );
-						texture = "common/WTF";
-					}
-				}
+			if ( !striEqualPrefix( buildSide->shaderInfo->shader, "textures/common/" )
+			  && !striEqualPrefix( buildSide->shaderInfo->shader, "textures/system/" )
+			  &&        !strEqual( buildSide->shaderInfo->shader, "noshader" )
+			  &&        !strEqual( buildSide->shaderInfo->shader, "default" ) ) {
+				//fprintf( stderr, "no matching triangle for brushside using %s (hopefully nobody can see this side anyway)\n", buildSide->shaderInfo->shader );
+				texture = "common/WTF";
 			}
 
 			if ( brushPrimitives ) {
