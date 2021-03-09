@@ -266,33 +266,6 @@ int ImportLightmapsMain( int argc, char **argv ){
    ------------------------------------------------------------------------------- */
 
 /*
-   CompareLightSurface()
-   compare function for qsort()
- */
-
-static int CompareLightSurface( const void *a, const void *b ){
-	shaderInfo_t    *asi, *bsi;
-
-
-	/* get shaders */
-	asi = surfaceInfos[ *( (const int*) a ) ].si;
-	bsi = surfaceInfos[ *( (const int*) b ) ].si;
-
-	/* dummy check */
-	if ( asi == NULL ) {
-		return -1;
-	}
-	if ( bsi == NULL ) {
-		return 1;
-	}
-
-	/* compare shader names */
-	return strcmp( asi->shader, bsi->shader );
-}
-
-
-
-/*
    FinishRawLightmap()
    allocates a raw lightmap's necessary buffers
  */
@@ -304,7 +277,22 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 
 
 	/* sort light surfaces by shader name */
-	qsort( &lightSurfaces[ lm->firstLightSurface ], lm->numLightSurfaces, sizeof( int ), CompareLightSurface );
+	std::sort( &lightSurfaces[ lm->firstLightSurface ], &lightSurfaces[ lm->firstLightSurface ] + lm->numLightSurfaces, []( const int a, const int b ){
+		/* get shaders */
+		const shaderInfo_t *asi = surfaceInfos[ a ].si;
+		const shaderInfo_t *bsi = surfaceInfos[ b ].si;
+
+		/* dummy check */
+		if ( asi == NULL ) {
+			return true;
+		}
+		if ( bsi == NULL ) {
+			return false;
+		}
+
+		/* compare shader names */
+		return strcmp( asi->shader, bsi->shader ) < 0;
+	} );
 
 	/* count clusters */
 	lm->numLightClusters = 0;
@@ -834,102 +822,101 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 
 /*
    CompareSurfaceInfo()
-   compare function for qsort()
+   compare functor for std::sort()
  */
 
-static int CompareSurfaceInfo( const void *a, const void *b ){
-	surfaceInfo_t   *aInfo, *bInfo;
-	int i;
+struct CompareSurfaceInfo
+{
+	bool operator()( const int a, const int b ) const {
+		/* get surface info */
+		const surfaceInfo_t& aInfo = surfaceInfos[ a ];
+		const surfaceInfo_t& bInfo = surfaceInfos[ b ];
 
-
-	/* get surface info */
-	aInfo = &surfaceInfos[ *( (const int*) a ) ];
-	bInfo = &surfaceInfos[ *( (const int*) b ) ];
-
-	/* model first */
-	if ( aInfo->modelindex < bInfo->modelindex ) {
-		return 1;
-	}
-	else if ( aInfo->modelindex > bInfo->modelindex ) {
-		return -1;
-	}
-
-	/* then lightmap status */
-	if ( aInfo->hasLightmap < bInfo->hasLightmap ) {
-		return 1;
-	}
-	else if ( aInfo->hasLightmap > bInfo->hasLightmap ) {
-		return -1;
-	}
-
-	/* 27: then shader! */
-	if ( aInfo->si < bInfo->si ) {
-		return 1;
-	}
-	else if ( aInfo->si > bInfo->si ) {
-		return -1;
-	}
-
-
-	/* then lightmap sample size */
-	if ( aInfo->sampleSize < bInfo->sampleSize ) {
-		return 1;
-	}
-	else if ( aInfo->sampleSize > bInfo->sampleSize ) {
-		return -1;
-	}
-
-	/* then lightmap axis */
-	for ( i = 0; i < 3; i++ )
-	{
-		if ( aInfo->axis[ i ] < bInfo->axis[ i ] ) {
-			return 1;
+		/* model first */
+		if ( aInfo.modelindex < bInfo.modelindex ) {
+			return false;
 		}
-		else if ( aInfo->axis[ i ] > bInfo->axis[ i ] ) {
-			return -1;
+		else if ( aInfo.modelindex > bInfo.modelindex ) {
+			return true;
 		}
-	}
 
-	/* then plane */
-	if ( aInfo->plane == NULL && bInfo->plane != NULL ) {
-		return 1;
-	}
-	else if ( aInfo->plane != NULL && bInfo->plane == NULL ) {
-		return -1;
-	}
-	else if ( aInfo->plane != NULL && bInfo->plane != NULL ) {
-		for ( i = 0; i < 3; i++ )
+		/* then lightmap status */
+		if ( aInfo.hasLightmap < bInfo.hasLightmap ) {
+			return false;
+		}
+		else if ( aInfo.hasLightmap > bInfo.hasLightmap ) {
+			return true;
+		}
+
+		/* 27: then shader! */
+		if ( aInfo.si < bInfo.si ) {
+			return false;
+		}
+		else if ( aInfo.si > bInfo.si ) {
+			return true;
+		}
+
+
+		/* then lightmap sample size */
+		if ( aInfo.sampleSize < bInfo.sampleSize ) {
+			return false;
+		}
+		else if ( aInfo.sampleSize > bInfo.sampleSize ) {
+			return true;
+		}
+
+		/* then lightmap axis */
+		for ( int i = 0; i < 3; i++ )
 		{
-			if ( aInfo->plane->normal()[ i ] < bInfo->plane->normal()[ i ] ) {
-				return 1;
+			if ( aInfo.axis[ i ] < bInfo.axis[ i ] ) {
+				return false;
 			}
-			else if ( aInfo->plane->normal()[ i ] > bInfo->plane->normal()[ i ] ) {
-				return -1;
+			else if ( aInfo.axis[ i ] > bInfo.axis[ i ] ) {
+				return true;
 			}
 		}
-		if ( aInfo->plane->dist() < bInfo->plane->dist() ) {
-			return 1;
+
+		/* then plane */
+		if ( aInfo.plane == NULL && bInfo.plane != NULL ) {
+			return false;
 		}
-		else if ( aInfo->plane->dist() > bInfo->plane->dist() ) {
-			return -1;
+		else if ( aInfo.plane != NULL && bInfo.plane == NULL ) {
+			return true;
+		}
+		else if ( aInfo.plane != NULL && bInfo.plane != NULL ) {
+			for ( int i = 0; i < 3; i++ )
+			{
+				if ( aInfo.plane->normal()[ i ] < bInfo.plane->normal()[ i ] ) {
+					return false;
+				}
+				else if ( aInfo.plane->normal()[ i ] > bInfo.plane->normal()[ i ] ) {
+					return true;
+				}
+			}
+			if ( aInfo.plane->dist() < bInfo.plane->dist() ) {
+				return false;
+			}
+			else if ( aInfo.plane->dist() > bInfo.plane->dist() ) {
+				return true;
+			}
+
 		}
 
+		/* then position in world */
+		for ( int i = 0; i < 3; i++ )
+		{
+			if ( aInfo.minmax.mins[ i ] < bInfo.minmax.mins[ i ] ) {
+				return false;
+			}
+			else if ( aInfo.minmax.mins[ i ] > bInfo.minmax.mins[ i ] ) {
+				return true;
+			}
+		}
+
+		/* these are functionally identical (this should almost never happen) */
+		return false;
 	}
-
-	/* then position in world */
-	for ( i = 0; i < 3; i++ )
-	{
-		if ( aInfo->minmax.mins[ i ] < bInfo->minmax.mins[ i ] ) {
-			return 1;
-		}
-		else if ( aInfo->minmax.mins[ i ] > bInfo->minmax.mins[ i ] ) {
-			return -1;
-		}
-	}
-
-	/* these are functionally identical (this should almost never happen) */
-	return 0;
-}
+};
 
 
 
@@ -1079,7 +1066,7 @@ void SetupSurfaceLightmaps( void ){
 	maxMapDistance = vector3_length( g_mapMinmax.maxs - g_mapMinmax.mins );
 
 	/* sort the surfaces info list */
-	qsort( sortSurfaces, numBSPDrawSurfaces, sizeof( int ), CompareSurfaceInfo );
+	std::sort( sortSurfaces, sortSurfaces + numBSPDrawSurfaces, CompareSurfaceInfo() );
 
 	/* allocate a list of surfaces that would go into raw lightmaps */
 	numLightSurfaces = 0;
@@ -2205,64 +2192,53 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 
 
 /*
-   CompareRawLightmap()
-   compare function for qsort()
+   CompareRawLightmap
+   compare functor for std::sort()
  */
 
-static int CompareRawLightmap( const void *a, const void *b ){
-	rawLightmap_t   *alm, *blm;
-	surfaceInfo_t   *aInfo, *bInfo;
-	int i, min, diff;
+struct CompareRawLightmap
+{
+	bool operator()( const int a, const int b ) const {
+		int diff;
 
+		/* get lightmaps */
+		const rawLightmap_t& alm = rawLightmaps[ a ];
+		const rawLightmap_t& blm = rawLightmaps[ b ];
 
-	/* get lightmaps */
-	alm = &rawLightmaps[ *( (const int*) a ) ];
-	blm = &rawLightmaps[ *( (const int*) b ) ];
+		/* get min number of surfaces */
+		const int min = std::min( alm.numLightSurfaces, blm.numLightSurfaces );
 
-	/* get min number of surfaces */
-	min = std::min( alm->numLightSurfaces, blm->numLightSurfaces );
+		/* iterate */
+		for ( int i = 0; i < min; i++ )
+		{
+			/* get surface info */
+			const surfaceInfo_t& aInfo = surfaceInfos[ lightSurfaces[ alm.firstLightSurface + i ] ];
+			const surfaceInfo_t& bInfo = surfaceInfos[ lightSurfaces[ blm.firstLightSurface + i ] ];
 
-//#define allocate_bigger_first
-#ifdef allocate_bigger_first
-	/* compare size, allocate bigger first */
-	// fastAllocate commit part: can kick fps by unique lightmap/shader combinations*=~2 + bigger compile time
-	//return -diff; makes packing faster and rough
-	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
-	if ( diff != 0 ) {
-		return diff;
-	}
-#endif
-	/* iterate */
-	for ( i = 0; i < min; i++ )
-	{
-		/* get surface info */
-		aInfo = &surfaceInfos[ lightSurfaces[ alm->firstLightSurface + i ] ];
-		bInfo = &surfaceInfos[ lightSurfaces[ blm->firstLightSurface + i ] ];
-
-		/* compare shader names */
-		diff = strcmp( aInfo->si->shader, bInfo->si->shader );
-		if ( diff != 0 ) {
-			return diff;
+			/* compare shader names */
+			diff = strcmp( aInfo.si->shader, bInfo.si->shader );
+			if ( diff != 0 ) {
+				return diff < 0;
+			}
 		}
-	}
 
-	/* test style count */
-	diff = 0;
-	for ( i = 0; i < MAX_LIGHTMAPS; i++ )
-		diff += blm->styles[ i ] - alm->styles[ i ];
-	if ( diff ) {
-		return diff;
+		/* test style count */
+		diff = 0;
+		for ( int i = 0; i < MAX_LIGHTMAPS; i++ )
+			diff += blm.styles[ i ] - alm.styles[ i ];
+		if ( diff != 0 ) {
+			return diff < 0;
+		}
+
+		/* compare size */
+		diff = ( blm.w * blm.h ) - ( alm.w * alm.h );
+		if ( diff != 0 ) {
+			return diff < 0;
+		}
+		/* must be equivalent */
+		return false;
 	}
-#ifndef allocate_bigger_first
-	/* compare size */
-	diff = ( blm->w * blm->h ) - ( alm->w * alm->h );
-	if ( diff != 0 ) {
-		return diff;
-	}
-#endif
-	/* must be equivalent */
-	return 0;
-}
+};
 
 void FillOutLightmap( outLightmap_t *olm ){
 	int x, y;
@@ -2947,7 +2923,7 @@ void StoreSurfaceLightmaps( bool fastAllocate ){
 	/* fill it out and sort it */
 	for ( i = 0; i < numRawLightmaps; i++ )
 		sortLightmaps[ i ] = i;
-	qsort( sortLightmaps, numRawLightmaps, sizeof( int ), CompareRawLightmap );
+	std::sort( sortLightmaps, sortLightmaps + numRawLightmaps, CompareRawLightmap() );
 
 	Sys_Printf( "%d.", (int) ( I_FloatTime() - timer_start ) );
 

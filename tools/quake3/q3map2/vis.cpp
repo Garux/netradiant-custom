@@ -81,25 +81,15 @@ void prl( leaf_t *l ){
    the earlier information.
    =============
  */
-int PComp( const void *a, const void *b ){
-	if ( ( *(const vportal_t *const *)a )->nummightsee == ( *(const vportal_t *const *)b )->nummightsee ) {
-		return 0;
-	}
-	if ( ( *(const vportal_t *const *)a )->nummightsee < ( *(const vportal_t *const *)b )->nummightsee ) {
-		return -1;
-	}
-	return 1;
-}
 void SortPortals( void ){
-	int i;
-
-	for ( i = 0 ; i < numportals * 2 ; i++ )
+	for ( int i = 0 ; i < numportals * 2 ; i++ )
 		sorted_portals[i] = &portals[i];
 
-	if ( nosort ) {
-		return;
+	if ( !nosort ) {
+		std::sort( sorted_portals, sorted_portals + numportals * 2, []( vportal_t* const & a, vportal_t* const & b ){
+			return a->nummightsee < b->nummightsee;
+		} );
 	}
-	qsort( sorted_portals, numportals * 2, sizeof( sorted_portals[0] ), PComp );
 }
 
 

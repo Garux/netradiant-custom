@@ -1670,91 +1670,91 @@ static void MetaTrianglesToSurface( int numPossibles, metaTriangle_t *possibles,
 
 
 /*
-   CompareMetaTriangles()
-   compare function for qsort()
+   CompareMetaTriangles
+   compare functor for std::sort()
  */
 
-static int CompareMetaTriangles( const void *a_, const void *b_ ){
-	auto a = reinterpret_cast<const metaTriangle_t *>( a_ );
-	auto b = reinterpret_cast<const metaTriangle_t *>( b_ );
+struct CompareMetaTriangles
+{
+	bool operator()( const metaTriangle_t& a, const metaTriangle_t& b ) const {
+		/* shader first */
+		if ( a.si < b.si ) {
+			return false;
+		}
+		else if ( a.si > b.si ) {
+			return true;
+		}
 
-	/* shader first */
-	if ( a->si < b->si ) {
-		return 1;
-	}
-	else if ( a->si > b->si ) {
-		return -1;
-	}
+		/* then fog */
+		else if ( a.fogNum < b.fogNum ) {
+			return false;
+		}
+		else if ( a.fogNum > b.fogNum ) {
+			return true;
+		}
 
-	/* then fog */
-	else if ( a->fogNum < b->fogNum ) {
-		return 1;
-	}
-	else if ( a->fogNum > b->fogNum ) {
-		return -1;
-	}
+		/* then plane */
+		#if 0
+		else if ( npDegrees == 0.0f && !a.si->nonplanar &&
+				  a.planeNum >= 0 && a.planeNum >= 0 ) {
+			if ( a.plane.dist() < b.plane.dist() ) {
+				return false;
+			}
+			else if ( a.plane.dist() > b.plane.dist() ) {
+				return true;
+			}
+			else if ( a.plane.normal()[ 0 ] < b.plane.normal()[ 0 ] ) {
+				return false;
+			}
+			else if ( a.plane.normal()[ 0 ] > b.plane.normal()[ 0 ] ) {
+				return true;
+			}
+			else if ( a.plane.normal()[ 1 ] < b.plane.normal()[ 1 ] ) {
+				return false;
+			}
+			else if ( a.plane.normal()[ 1 ] > b.plane.normal()[ 1 ] ) {
+				return true;
+			}
+			else if ( a.plane.normal()[ 2 ] < b.plane.normal()[ 2 ] ) {
+				return false;
+			}
+			else if ( a.plane.normal()[ 2 ] > b.plane.normal()[ 2 ] ) {
+				return true;
+			}
+		}
+		#endif
 
-	/* then plane */
-	#if 0
-	else if ( npDegrees == 0.0f && !a->si->nonplanar &&
-			  a->planeNum >= 0 && a->planeNum >= 0 ) {
-		if ( a->plane.dist() < b->plane.dist() ) {
-			return 1;
-		}
-		else if ( a->plane.dist() > b->plane.dist() ) {
-			return -1;
-		}
-		else if ( a->plane.normal()[ 0 ] < b->plane.normal()[ 0 ] ) {
-			return 1;
-		}
-		else if ( a->plane.normal()[ 0 ] > b->plane.normal()[ 0 ] ) {
-			return -1;
-		}
-		else if ( a->plane.normal()[ 1 ] < b->plane.normal()[ 1 ] ) {
-			return 1;
-		}
-		else if ( a->plane.normal()[ 1 ] > b->plane.normal()[ 1 ] ) {
-			return -1;
-		}
-		else if ( a->plane.normal()[ 2 ] < b->plane.normal()[ 2 ] ) {
-			return 1;
-		}
-		else if ( a->plane.normal()[ 2 ] > b->plane.normal()[ 2 ] ) {
-			return -1;
-		}
-	}
-	#endif
+		/* then position in world */
 
-	/* then position in world */
-
-	/* find mins */
-	Vector3 aMins( 999999, 999999, 999999 );
-	Vector3 bMins( 999999, 999999, 999999 );
-	for ( int i = 0; i < 3; i++ )
-	{
-		const int av = a->indexes[ i ];
-		const int bv = b->indexes[ i ];
-		for ( int j = 0; j < 3; j++ )
+		/* find mins */
+		Vector3 aMins( 999999, 999999, 999999 );
+		Vector3 bMins( 999999, 999999, 999999 );
+		for ( int i = 0; i < 3; i++ )
 		{
-			value_minimize( aMins[ j ], metaVerts[ av ].xyz[ j ] );
-			value_minimize( bMins[ j ], metaVerts[ bv ].xyz[ j ] );
+			const int av = a.indexes[ i ];
+			const int bv = b.indexes[ i ];
+			for ( int j = 0; j < 3; j++ )
+			{
+				value_minimize( aMins[ j ], metaVerts[ av ].xyz[ j ] );
+				value_minimize( bMins[ j ], metaVerts[ bv ].xyz[ j ] );
+			}
 		}
-	}
 
-	/* test it */
-	for ( int i = 0; i < 3; i++ )
-	{
-		if ( aMins[ i ] < bMins[ i ] ) {
-			return 1;
+		/* test it */
+		for ( int i = 0; i < 3; i++ )
+		{
+			if ( aMins[ i ] < bMins[ i ] ) {
+				return false;
+			}
+			else if ( aMins[ i ] > bMins[ i ] ) {
+				return true;
+			}
 		}
-		else if ( aMins[ i ] > bMins[ i ] ) {
-			return -1;
-		}
-	}
 
-	/* functionally equivalent */
-	return 0;
-}
+		/* functionally equivalent */
+		return false;
+	}
+};
 
 
 
@@ -1777,7 +1777,7 @@ void MergeMetaTriangles( void ){
 	Sys_FPrintf( SYS_VRB, "--- MergeMetaTriangles ---\n" );
 
 	/* sort the triangles by shader major, fognum minor */
-	qsort( metaTriangles, numMetaTriangles, sizeof( metaTriangle_t ), CompareMetaTriangles );
+	std::sort( metaTriangles, metaTriangles + numMetaTriangles, CompareMetaTriangles() );
 
 	/* init pacifier */
 	fOld = -1;

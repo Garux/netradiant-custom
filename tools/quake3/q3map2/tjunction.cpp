@@ -557,29 +557,6 @@ bool FixBrokenSurface( mapDrawSurface_t *ds ){
 
 
 
-
-
-
-/*
-   ================
-   EdgeCompare
-   ================
- */
-int EdgeCompare( const void *elem1, const void *elem2 ) {
-	const float d1 = reinterpret_cast<const originalEdge_t *>( elem1 )->length;
-	const float d2 = reinterpret_cast<const originalEdge_t *>( elem2 )->length;
-
-	if ( d1 < d2 ) {
-		return -1;
-	}
-	if ( d1 > d2 ) {
-		return 1;
-	}
-	return 0;
-}
-
-
-
 /*
    FixTJunctions
    call after the surface list has been pruned
@@ -637,8 +614,10 @@ void FixTJunctions( entity_t *ent ){
 	axialEdgeLines = numEdgeLines;
 
 	// sort the non-axial edges by length
-	qsort( originalEdges, numOriginalEdges, sizeof( originalEdges[0] ), EdgeCompare );
-
+	std::sort( originalEdges, originalEdges + numOriginalEdges, []( const originalEdge_t& a, const originalEdge_t& b ){
+		return a.length < b.length;
+	} );
+	
 	// add the non-axial edges, longest first
 	// this gives the most accurate edge description
 	for ( i = 0 ; i < numOriginalEdges ; i++ ) {
