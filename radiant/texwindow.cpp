@@ -323,7 +323,7 @@ void TextureBrowser_queueDraw( TextureBrowser& textureBrowser ){
 	}
 }
 
-const char* TextureBrowser_getComonShadersName(){
+const char* TextureBrowser_getCommonShadersName(){
 	const char* value = g_pGameDescription->getKeyValue( "common_shaders_name" );
 	if ( !string_empty( value ) ) {
 		return value;
@@ -331,7 +331,7 @@ const char* TextureBrowser_getComonShadersName(){
 	return "Common";
 }
 
-const char* TextureBrowser_getComonShadersDir(){
+const char* TextureBrowser_getCommonShadersDir(){
 	const char* value = g_pGameDescription->getKeyValue( "common_shaders_dir" );
 	if ( !string_empty( value ) ) {
 		return value;
@@ -516,7 +516,7 @@ bool Texture_IsShown( IShader* shader, TextureBrowser& textureBrowser ){
 	}
 
 	if( textureBrowser.m_hideNonShadersInCommon && shader->IsDefault() && !shader->IsInUse() //&& g_TextureBrowser_currentDirectory != ""
-		&& shader_equal_prefix( shader_get_textureName( shader->getName() ), TextureBrowser_getComonShadersDir() ) ){
+		&& shader_equal_prefix( shader_get_textureName( shader->getName() ), TextureBrowser_getCommonShadersDir() ) ){
 		return false;
 	}
 
@@ -844,7 +844,7 @@ void TextureBrowser_SetHideUnused( TextureBrowser& textureBrowser, bool hideUnus
 
 void TextureBrowser_ShowStartupShaders( TextureBrowser& textureBrowser ){
 	if ( textureBrowser.m_startupShaders == STARTUPSHADERS_COMMON ) {
-		TextureBrowser_ShowDirectory( textureBrowser, TextureBrowser_getComonShadersDir() );
+		TextureBrowser_ShowDirectory( textureBrowser, TextureBrowser_getCommonShadersDir() );
 	}
 }
 
@@ -1323,8 +1323,8 @@ gboolean TextureBrowser_button_press( GtkWidget* widget, GdkEventButton* event, 
 		}
 	}
 	else if ( event->type == GDK_2BUTTON_PRESS && event->button == 3 ) {
-		ScopeDisableScreenUpdates disableScreenUpdates( TextureBrowser_getComonShadersDir(), "Loading Textures" );
-		TextureBrowser_ShowDirectory( *textureBrowser, TextureBrowser_getComonShadersDir() );
+		ScopeDisableScreenUpdates disableScreenUpdates( TextureBrowser_getCommonShadersDir(), "Loading Textures" );
+		TextureBrowser_ShowDirectory( *textureBrowser, TextureBrowser_getCommonShadersDir() );
 		TextureBrowser_queueDraw( *textureBrowser );
 	}
 	return FALSE;
@@ -2686,12 +2686,12 @@ void TextureBrowser_constructPreferences( PreferencesPage& page ){
 	page.appendSpinner( "Thumbnails Min Size", GlobalTextureBrowser().m_uniformTextureMinSize, 48.0, 16, 8192 );
 	page.appendEntry( "Mousewheel Increment", GlobalTextureBrowser().m_mouseWheelScrollIncrement );
 	{
-		const char* startup_shaders[] = { "None", TextureBrowser_getComonShadersName() };
+		const char* startup_shaders[] = { "None", TextureBrowser_getCommonShadersName() };
 		page.appendCombo( "Load Shaders at Startup", reinterpret_cast<int&>( GlobalTextureBrowser().m_startupShaders ), STRING_ARRAY_RANGE( startup_shaders ) );
 	}
 	{
 		StringOutputStream sstream( 256 );
-		sstream << "Hide nonShaders in " << TextureBrowser_getComonShadersDir() << " folder";
+		sstream << "Hide nonShaders in " << TextureBrowser_getCommonShadersDir() << " folder";
 		page.appendCheckBox(
 			"", sstream.c_str(),
 			GlobalTextureBrowser().m_hideNonShadersInCommon
