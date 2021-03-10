@@ -85,8 +85,6 @@ Callback g_ActiveShadersChangedNotify;
 
 void FreeShaders();
 void LoadShaderFile( const char *filename );
-qtexture_t *Texture_ForName( const char *filename );
-
 
 /*!
    NOTE TTimo: there is an important distinction between SHADER_NOT_FOUND and SHADER_NOTEX:
