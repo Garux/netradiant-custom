@@ -54,7 +54,7 @@ int c_structural;
    ydnar: replaced with variable epsilon for djbob
  */
 
-bool PlaneEqual( const plane_t *p, const Plane3f& plane ){
+bool PlaneEqual( const plane_t& p, const Plane3f& plane ){
 	/* get local copies */
 	const float ne = normalEpsilon;
 	const float de = distanceEpsilon;
@@ -64,10 +64,10 @@ bool PlaneEqual( const plane_t *p, const Plane3f& plane ){
 	// (the epsilons may be zero).  We want to use '<' instead of '<=' to be
 	// consistent with the true meaning of "epsilon", and also because other
 	// parts of the code uses this inequality.
-	if ( ( p->dist() == plane.dist() || fabs( p->dist() - plane.dist() ) < de ) &&
-		 ( p->normal()[0] == plane.normal()[0] || fabs( p->normal()[0] - plane.normal()[0] ) < ne ) &&
-		 ( p->normal()[1] == plane.normal()[1] || fabs( p->normal()[1] - plane.normal()[1] ) < ne ) &&
-		 ( p->normal()[2] == plane.normal()[2] || fabs( p->normal()[2] - plane.normal()[2] ) < ne ) ) {
+	if ( ( p.dist() == plane.dist() || fabs( p.dist() - plane.dist() ) < de ) &&
+		 ( p.normal()[0] == plane.normal()[0] || fabs( p.normal()[0] - plane.normal()[0] ) < ne ) &&
+		 ( p.normal()[1] == plane.normal()[1] || fabs( p.normal()[1] - plane.normal()[1] ) < ne ) &&
+		 ( p.normal()[2] == plane.normal()[2] || fabs( p.normal()[2] - plane.normal()[2] ) < ne ) ) {
 		return true;
 	}
 
@@ -359,7 +359,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 			plane_t *p = &mapplanes[pidx];
 
 			/* do standard plane compare */
-			if ( !PlaneEqual( p, plane ) ) {
+			if ( !PlaneEqual( *p, plane ) ) {
 				continue;
 			}
 
@@ -405,7 +405,7 @@ int FindFloatPlane( const Plane3f& inplane, int numPoints, const Vector3 *points
 #endif
 	for ( i = 0, p = mapplanes; i < nummapplanes; i++, p++ )
 	{
-		if ( !PlaneEqual( p, plane ) ) {
+		if ( !PlaneEqual( *p, plane ) ) {
 			continue;
 		}
 
@@ -728,7 +728,7 @@ void AddBrushBevels( void ){
 					for ( k = 0; k < buildBrush->numsides; k++ ) {
 
 						// if this plane has allready been used, skip it
-						if ( PlaneEqual( &mapplanes[buildBrush->sides[k].planenum], plane ) ) {
+						if ( PlaneEqual( mapplanes[buildBrush->sides[k].planenum], plane ) ) {
 							if( buildBrush->sides[k].bevel ){ /* handle bevel surfaceflags */
 								buildBrush->sides[k].surfaceFlags |= ( s->surfaceFlags & surfaceFlagsMask );
 							}
@@ -891,31 +891,31 @@ brush_t *FinishBrush( bool noCollapseGroups ){
    (must be identical in radiant!)
  */
 
-Vector3 baseaxis[18] =
+const Vector3 baseaxis[18] =
 {
-	{0,0,1}, {1,0,0}, {0,-1,0},         // floor
-	{0,0,-1}, {1,0,0}, {0,-1,0},        // ceiling
-	{1,0,0}, {0,1,0}, {0,0,-1},         // west wall
-	{-1,0,0}, {0,1,0}, {0,0,-1},        // east wall
-	{0,1,0}, {1,0,0}, {0,0,-1},         // south wall
-	{0,-1,0}, {1,0,0}, {0,0,-1}         // north wall
+	 g_vector3_axis_z, g_vector3_axis_x, -g_vector3_axis_y,        // floor
+	-g_vector3_axis_z, g_vector3_axis_x, -g_vector3_axis_y,        // ceiling
+	 g_vector3_axis_x, g_vector3_axis_y, -g_vector3_axis_z,        // west wall
+	-g_vector3_axis_x, g_vector3_axis_y, -g_vector3_axis_z,        // east wall
+	 g_vector3_axis_y, g_vector3_axis_x, -g_vector3_axis_z,        // south wall
+	-g_vector3_axis_y, g_vector3_axis_x, -g_vector3_axis_z         // north wall
 };
 
-void TextureAxisFromPlane( const plane_t *pln, Vector3& xv, Vector3& yv ){
+std::array<Vector3, 2> TextureAxisFromPlane( const plane_t& plane ){
 	float best = 0;
 	int bestaxis = 0;
 
 	for ( int i = 0 ; i < 6 ; i++ )
 	{
-		const float dot = vector3_dot( pln->normal(), baseaxis[i * 3] );
+		const float dot = vector3_dot( plane.normal(), baseaxis[i * 3] );
 		if ( dot > best + 0.0001f ) { /* ydnar: bug 637 fix, suggested by jmonroe */
 			best = dot;
 			bestaxis = i;
 		}
 	}
 
-	xv = baseaxis[bestaxis * 3 + 1];
-	yv = baseaxis[bestaxis * 3 + 2];
+	return { baseaxis[bestaxis * 3 + 1],
+	         baseaxis[bestaxis * 3 + 2] };
 }
 
 
@@ -925,15 +925,11 @@ void TextureAxisFromPlane( const plane_t *pln, Vector3& xv, Vector3& yv ){
    creates world-to-texture mapping vecs for crappy quake plane arrangements
  */
 
-void QuakeTextureVecs( const plane_t *plane, float shift[ 2 ], float rotate, float scale[ 2 ], Vector4 mappingVecs[ 2 ] ){
-	Vector3 vecs[2];
+void QuakeTextureVecs( const plane_t& plane, float shift[ 2 ], float rotate, float scale[ 2 ], Vector4 mappingVecs[ 2 ] ){
 	int sv, tv;
-	float ang, sinv, cosv;
-	float ns, nt;
-	int i;
+	float sinv, cosv;
+	auto vecs = TextureAxisFromPlane( plane );
 
-
-	TextureAxisFromPlane( plane, vecs[0], vecs[1] );
 
 	if ( !scale[0] ) {
 		scale[0] = 1;
@@ -957,7 +953,7 @@ void QuakeTextureVecs( const plane_t *plane, float shift[ 2 ], float rotate, flo
 	}
 	else
 	{
-		ang = degrees_to_radians( rotate );
+		const double ang = degrees_to_radians( rotate );
 		sinv = sin( ang );
 		cosv = cos( ang );
 	}
@@ -982,15 +978,14 @@ void QuakeTextureVecs( const plane_t *plane, float shift[ 2 ], float rotate, flo
 		tv = 2;
 	}
 
-	for ( i = 0 ; i < 2 ; i++ ) {
-		ns = cosv * vecs[i][sv] - sinv * vecs[i][tv];
-		nt = sinv * vecs[i][sv] +  cosv * vecs[i][tv];
+	for ( int i = 0 ; i < 2 ; i++ ) {
+		const float ns = cosv * vecs[i][sv] - sinv * vecs[i][tv];
+		const float nt = sinv * vecs[i][sv] + cosv * vecs[i][tv];
 		vecs[i][sv] = ns;
 		vecs[i][tv] = nt;
-	}
 
-	for ( i = 0 ; i < 2 ; i++ )
 		mappingVecs[i].vec3() = vecs[i] / scale[i];
+	}
 
 	mappingVecs[0][3] = shift[0];
 	mappingVecs[1][3] = shift[1];
@@ -1181,7 +1176,7 @@ static void ParseRawBrush( bool onlyLights ){
 
 		/* bp: get the texture mapping for this texturedef / plane combination */
 		if ( g_brushType == EBrushType::Quake ) {
-			QuakeTextureVecs( &mapplanes[ planenum ], shift, rotate, scale, side->vecs );
+			QuakeTextureVecs( mapplanes[ planenum ], shift, rotate, scale, side->vecs );
 		}
 	}
 

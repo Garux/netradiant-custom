@@ -1606,7 +1606,7 @@ int                         FindFloatPlane( const Plane3f& plane, int numPoints,
 inline int                  FindFloatPlane( const Vector3& normal, float dist, int numPoints, const Vector3 *points ){
 	return FindFloatPlane( Plane3f( normal, dist ), numPoints, points );
 }
-bool                        PlaneEqual( const plane_t *p, const Plane3f& plane );
+bool                        PlaneEqual( const plane_t& p, const Plane3f& plane );
 void                        AddBrushBevels( void );
 brush_t                     *FinishBrush( bool noCollapseGroups );
 
@@ -1704,7 +1704,7 @@ void                        FinishSurface( mapDrawSurface_t *ds );
 void                        StripFaceSurface( mapDrawSurface_t *ds );
 void                        MaxAreaFaceSurface( mapDrawSurface_t *ds );
 bool                        CalcSurfaceTextureRange( mapDrawSurface_t *ds );
-bool                        CalcLightmapAxis( const Vector3& normal, Vector3& axis );
+Vector3                     CalcLightmapAxis( const Vector3& normal );
 void                        ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds );
 void                        ClassifyEntitySurfaces( entity_t *e );
 void                        TidyEntitySurfaces( entity_t *e );
@@ -1770,7 +1770,7 @@ void                        ProcessDecals( void );
 void                        MakeEntityDecals( entity_t *e );
 
 /* map.c */
-void                        TextureAxisFromPlane( const plane_t *pln, Vector3& xv, Vector3& yv );
+std::array<Vector3, 2>      TextureAxisFromPlane( const plane_t& plane );
 
 /* vis.c */
 fixedWinding_t              *NewFixedWinding( int points );

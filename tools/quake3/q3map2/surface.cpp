@@ -391,50 +391,43 @@ bool CalcSurfaceTextureRange( mapDrawSurface_t *ds ){
    gives closed lightmap axis for a plane normal
  */
 
-bool CalcLightmapAxis( const Vector3& normal, Vector3& axis ){
-	Vector3 absolute;
-
-
+Vector3 CalcLightmapAxis( const Vector3& normal ){
 	/* test */
 	if ( normal == g_vector3_identity ) {
-		axis.set( 0 );
-		return false;
+		return g_vector3_identity;
 	}
 
 	/* get absolute normal */
-	absolute[ 0 ] = fabs( normal[ 0 ] );
-	absolute[ 1 ] = fabs( normal[ 1 ] );
-	absolute[ 2 ] = fabs( normal[ 2 ] );
+	const Vector3 absolute( fabs( normal[ 0 ] ),
+	                        fabs( normal[ 1 ] ),
+	                        fabs( normal[ 2 ] ) );
 
-	/* test and set */
+	/* test and return */
 	if ( absolute[ 2 ] > absolute[ 0 ] - 0.0001f && absolute[ 2 ] > absolute[ 1 ] - 0.0001f ) {
 		if ( normal[ 2 ] > 0.0f ) {
-			axis = g_vector3_axis_z;
+			return g_vector3_axis_z;
 		}
 		else{
-			axis = -g_vector3_axis_z;
+			return -g_vector3_axis_z;
 		}
 	}
 	else if ( absolute[ 0 ] > absolute[ 1 ] - 0.0001f && absolute[ 0 ] > absolute[ 2 ] - 0.0001f ) {
 		if ( normal[ 0 ] > 0.0f ) {
-			axis = g_vector3_axis_x;
+			return g_vector3_axis_x;
 		}
 		else{
-			axis = -g_vector3_axis_x;
+			return -g_vector3_axis_x;
 		}
 	}
 	else
 	{
 		if ( normal[ 1 ] > 0.0f ) {
-			axis = g_vector3_axis_y;
+			return g_vector3_axis_y;
 		}
 		else{
-			axis = -g_vector3_axis_y;
+			return -g_vector3_axis_y;
 		}
 	}
-
-	/* return ok */
-	return true;
 }
 
 
@@ -564,14 +557,14 @@ void ClassifySurfaces( int numSurfs, mapDrawSurface_t *ds ){
 		}
 
 		/* the shader can specify an explicit lightmap axis */
-		if ( si->lightmapAxis[ 0 ] || si->lightmapAxis[ 1 ] || si->lightmapAxis[ 2 ] ) {
+		if ( si->lightmapAxis != g_vector3_identity ) {
 			ds->lightmapAxis = si->lightmapAxis;
 		}
 		else if ( ds->type == ESurfaceType::ForcedMeta ) {
 			ds->lightmapAxis.set( 0 );
 		}
 		else if ( ds->planar ) {
-			CalcLightmapAxis( plane.normal(), ds->lightmapAxis );
+			ds->lightmapAxis = CalcLightmapAxis( plane.normal() );
 		}
 		else
 		{

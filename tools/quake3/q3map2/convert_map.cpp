@@ -349,7 +349,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 	side_t          *buildSide;
 	bspShader_t     *shader;
 	const char      *texture;
-	plane_t         *buildPlane;
 	Vector3 pts[ 3 ];
 	bspDrawVert_t   *vert[3];
 
@@ -437,7 +436,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 		buildSide = &buildBrush->sides[ i ];
 
 		/* get plane */
-		buildPlane = &mapplanes[ buildSide->planenum ];
+		const plane_t& buildPlane = mapplanes[ buildSide->planenum ];
 
 		/* dummy check */
 		if ( buildSide->shaderInfo == NULL || buildSide->winding == NULL ) {
@@ -467,7 +466,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 		/* recheck and fix winding points, fails occur somehow */
 		int match = 0;
 		for ( j = 0; j < buildSide->winding->numpoints; j++ ){
-			if ( fabs( plane3_distance_to_point( buildPlane->plane, buildSide->winding->p[ j ] ) ) >= distanceEpsilon ) {
+			if ( fabs( plane3_distance_to_point( buildPlane.plane, buildSide->winding->p[ j ] ) ) >= distanceEpsilon ) {
 				continue;
 			}
 			else{
@@ -503,8 +502,8 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 		}
 		else{
 			Vector3 vecs[ 2 ];
-			MakeNormalVectors( buildPlane->normal(), vecs[ 0 ], vecs[ 1 ] );
-			pts[ 0 ] = buildPlane->normal() * buildPlane->dist() + origin;
+			MakeNormalVectors( buildPlane.normal(), vecs[ 0 ], vecs[ 1 ] );
+			pts[ 0 ] = buildPlane.normal() * buildPlane.dist() + origin;
 			pts[ 1 ] = pts[ 0 ] + vecs[ 0 ] * 256.0f;
 			pts[ 2 ] = pts[ 0 ] + vecs[ 1 ] * 256.0f;
 			//Sys_Printf( "not\n" );
@@ -518,7 +517,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				Vector2 stI, stJ, stK;
 				float D, D0, D1, D2;
 
-				ComputeAxisBase( buildPlane->normal(), texX, texY );
+				ComputeAxisBase( buildPlane.normal(), texX, texY );
 
 				xyI[0] = vector3_dot( vert[0]->xyz, texX );
 				xyI[1] = vector3_dot( vert[0]->xyz, texY );
@@ -562,7 +561,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				}
 				else{
 					fprintf( stderr, "degenerate triangle found when solving texMat equations for\n(%f %f %f) (%f %f %f) (%f %f %f)\n( %f %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n( %f %f %f ) -> ( %f %f )\n",
-							 buildPlane->normal()[0], buildPlane->normal()[1], buildPlane->normal()[2],
+							 buildPlane.normal()[0], buildPlane.normal()[1], buildPlane.normal()[2],
 							 vert[0]->normal[0], vert[0]->normal[1], vert[0]->normal[2],
 							 texX[0], texX[1], texX[2], texY[0], texY[1], texY[2],
 							 vert[0]->xyz[0], vert[0]->xyz[1], vert[0]->xyz[2], xyI[0], xyI[1],
@@ -587,7 +586,6 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 			{
 				// invert QuakeTextureVecs
 				int i;
-				Vector3 vecs[2];
 				int sv, tv;
 				float stI[2], stJ[2], stK[2];
 				Vector3 sts[2];
@@ -595,7 +593,7 @@ static void ConvertBrush( FILE *f, int num, bspBrush_t *brush, const Vector3& or
 				float rotate;
 				float D, D0, D1, D2;
 
-				TextureAxisFromPlane( buildPlane, vecs[0], vecs[1] );
+				const auto vecs = TextureAxisFromPlane( buildPlane );
 				if ( vecs[0][0] ) {
 					sv = 0;
 				}

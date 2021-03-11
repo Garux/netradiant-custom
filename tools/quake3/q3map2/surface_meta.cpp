@@ -159,15 +159,15 @@ int FindMetaTriangle( metaTriangle_t *src, bspDrawVert_t *a, bspDrawVert_t *b, b
 
 	/* ydnar 2002-10-04: set lightmap axis if not already set */
 	if ( !( src->si->compileFlags & C_VERTEXLIT ) &&
-		 src->lightmapAxis[ 0 ] == 0.0f && src->lightmapAxis[ 1 ] == 0.0f && src->lightmapAxis[ 2 ] == 0.0f ) {
+		 src->lightmapAxis == g_vector3_identity ) {
 		/* the shader can specify an explicit lightmap axis */
-		if ( src->si->lightmapAxis[ 0 ] || src->si->lightmapAxis[ 1 ] || src->si->lightmapAxis[ 2 ] ) {
+		if ( src->si->lightmapAxis != g_vector3_identity ) {
 			src->lightmapAxis = src->si->lightmapAxis;
 		}
 
 		/* new axis-finding code */
 		else{
-			CalcLightmapAxis( src->plane.normal(), src->lightmapAxis );
+			src->lightmapAxis = CalcLightmapAxis( src->plane.normal() );
 		}
 	}
 
