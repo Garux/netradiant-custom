@@ -440,26 +440,23 @@ void ProcessWorldModel( void ){
 	if( emitFlares ){
 		for ( const auto& light : entities )
 		{
-			entity_t    *target;
-			Vector3 origin, targetOrigin, normal, color;
-
 			/* get light */
 			if ( light.classname_is( "light" ) ) {
 				/* get flare shader */
 				const char *flareShader = NULL;
 				if ( light.read_keyvalue( flareShader, "_flareshader" ) || light.boolForKey( "_flare" ) ) {
 					/* get specifics */
-					light.vectorForKey( "origin", origin );
-					light.vectorForKey( "_color", color );
+					const Vector3 origin( light.vectorForKey( "origin" ) );
+					Vector3 color( light.vectorForKey( "_color" ) );
 					const int lightStyle = light.intForKey( "_style", "style" );
+					Vector3 normal;
 
 					/* handle directional spotlights */
 					if ( light.read_keyvalue( value, "target" ) ) {
 						/* get target light */
-						target = FindTargetEntity( value );
+						const entity_t *target = FindTargetEntity( value );
 						if ( target != NULL ) {
-							target->vectorForKey( "origin", targetOrigin );
-							normal = VectorNormalized( targetOrigin - origin );
+							normal = VectorNormalized( target->vectorForKey( "origin" ) - origin );
 						}
 					}
 					else{

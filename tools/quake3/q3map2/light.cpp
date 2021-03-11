@@ -322,7 +322,7 @@ void CreateEntityLights( void ){
 		}
 
 		/* set origin */
-		e->vectorForKey( "origin", light->origin );
+		light->origin = e->vectorForKey( "origin" );
 		e->read_keyvalue( light->style, "_style", "style" );
 		if ( light->style < LS_NORMAL || light->style >= LS_NONE ) {
 			Error( "Invalid lightstyle (%d) on entity %zu", light->style, i );
@@ -394,9 +394,7 @@ void CreateEntityLights( void ){
 				numSpotLights++;
 
 				/* make a spotlight */
-				Vector3 dest;
-				e2->vectorForKey( "origin", dest );
-				light->normal = dest - light->origin;
+				light->normal = e2->vectorForKey( "origin" ) - light->origin;
 				float dist = VectorNormalize( light->normal );
 				float radius = e->floatForKey( "radius" );
 				if ( !radius ) {
@@ -1753,7 +1751,7 @@ void LightWorld( bool fastAllocate ){
 	}
 
 	/* find the optional minimum lighting values */
-	entities[ 0 ].vectorForKey( "_color", color );
+	color = entities[ 0 ].vectorForKey( "_color" );
 	if ( colorsRGB ) {
 		color[0] = Image_LinearFloatFromsRGBFloat( color[0] );
 		color[1] = Image_LinearFloatFromsRGBFloat( color[1] );

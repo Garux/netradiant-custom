@@ -357,12 +357,8 @@ int ConvertBSPToOBJ( char *bspName ){
 		}
 		model = &bspModels[ modelNum ];
 
-		/* get entity origin */
-		Vector3 origin;
-		e->vectorForKey( "origin", origin );
-
 		/* convert model */
-		ConvertModelToOBJ( f, model, modelNum, origin, lmIndices );
+		ConvertModelToOBJ( f, model, modelNum, e->vectorForKey( "origin" ), lmIndices );
 	}
 
 	if ( lightmapsAsTexcoord ) {

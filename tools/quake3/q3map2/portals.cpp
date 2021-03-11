@@ -614,8 +614,7 @@ EFloodEntities FloodEntities( tree_t *tree ){
 		const entity_t& e = entities[ i ];
 
 		/* get origin */
-		Vector3 origin;
-		e.vectorForKey( "origin", origin );
+		Vector3 origin( e.vectorForKey( "origin" ) );
 #if 0 // 0 = allow maps with only point entity@( 0, 0, 0 ); assuming that entities, containing no primitives are point ones
 		/* as a special case, allow origin-less entities */
 		if ( VectorCompare( origin, g_vector3_identity ) ) {

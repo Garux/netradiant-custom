@@ -400,12 +400,8 @@ int ConvertBSPToASE( char *bspName ){
 		}
 		model = &bspModels[ modelNum ];
 
-		/* get entity origin */
-		Vector3 origin;
-		e->vectorForKey( "origin", origin );
-
 		/* convert model */
-		ConvertModel( f, model, modelNum, origin, lmIndices );
+		ConvertModel( f, model, modelNum, e->vectorForKey( "origin" ), lmIndices );
 	}
 
 	/* close the file and return */

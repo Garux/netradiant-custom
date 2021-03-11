@@ -797,9 +797,8 @@ static void MergeOrigin( entity_t *ent, const Vector3& origin ){
 	char string[128];
 
 	/* we have not parsed the brush completely yet... */
-	ent->vectorForKey( "origin", ent->origin );
+	ent->origin = ent->vectorForKey( "origin" ) + origin - ent->originbrush_origin;
 
-	ent->origin += origin - ent->originbrush_origin;
 	ent->originbrush_origin = origin;
 
 	sprintf( string, "%f %f %f", ent->origin[0], ent->origin[1], ent->origin[2] );
@@ -1748,8 +1747,8 @@ static bool ParseMapEntity( bool onlyLights, bool noCollapseGroups ){
 	LoadEntityIndexMap( mapEnt );
 
 	/* get entity origin and adjust brushes */
-	mapEnt->vectorForKey( "origin", mapEnt->origin );
-	if ( mapEnt->originbrush_origin[ 0 ] || mapEnt->originbrush_origin[ 1 ] || mapEnt->originbrush_origin[ 2 ] ) {
+	mapEnt->origin = mapEnt->vectorForKey( "origin" );
+	if ( mapEnt->originbrush_origin != g_vector3_identity ) {
 		AdjustBrushesForOrigin( mapEnt );
 	}
 

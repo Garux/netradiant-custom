@@ -1108,8 +1108,7 @@ static void PopulateTraceNodes( void ){
 		}
 
 		/* get entity origin */
-		Vector3 origin;
-		e->vectorForKey( "origin", origin );
+		const Vector3 origin( e->vectorForKey( "origin" ) );
 
 		/* get scale */
 		Vector3 scale( 1 );

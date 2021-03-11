@@ -1012,12 +1012,8 @@ int ConvertBSPToMap_Ext( char *bspName, bool brushPrimitives ){
 			/* get model */
 			model = &bspModels[ modelNum ];
 
-			/* get entity origin */
-			Vector3 origin;
-			e->vectorForKey( "origin", origin );
-
 			/* convert model */
-			ConvertModel( f, model, modelNum, origin, brushPrimitives );
+			ConvertModel( f, model, modelNum, e->vectorForKey( "origin" ), brushPrimitives );
 		}
 
 		/* end entity */

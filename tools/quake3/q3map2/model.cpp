@@ -1313,9 +1313,7 @@ void AddTriangleModels( entity_t *eparent ){
 		const int spawnFlags = e->intForKey( "spawnflags" );
 
 		/* get origin */
-		Vector3 origin;
-		e->vectorForKey( "origin", origin );
-		origin -= eparent->origin;    /* offset by parent */
+		const Vector3 origin = e->vectorForKey( "origin" ) - eparent->origin;    /* offset by parent */
 
 		/* get scale */
 		Vector3 scale( 1 );

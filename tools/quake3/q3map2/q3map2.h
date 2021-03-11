@@ -1025,9 +1025,10 @@ struct entity_t
 		read_keyvalue_( float_value, { keys ... } );
 		return float_value;
 	}
-	void vectorForKey( const char *key, Vector3& vec ) const {
-		if( !read_keyvalue_( vec, { key } ) )
-			vec.set( 0 );
+	Vector3 vectorForKey( const char *key ) const {
+		Vector3 vec( 0 );
+		read_keyvalue_( vec, { key } );
+		return vec;
 	}
 
 	const char *classname() const {
