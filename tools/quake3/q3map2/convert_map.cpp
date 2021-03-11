@@ -887,7 +887,7 @@ static void ConvertModel( FILE *f, bspModel_t *model, int modelNum, const Vector
 	buildBrush->entityNum = 0;
 	buildBrush->original = buildBrush;
 
-	if ( origin[0] != 0 || origin[1] != 0 || origin[2] != 0 ) {
+	if ( origin != g_vector3_identity ) {
 		ConvertOriginBrush( f, -1, origin, brushPrimitives );
 	}
 

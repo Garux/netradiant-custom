@@ -78,7 +78,7 @@ bool PortalPassable( portal_t *p ){
 	}
 
 	/* both leaves on either side of the portal must be passable */
-	if ( p->nodes[ 0 ]->opaque == false && p->nodes[ 1 ]->opaque == false ) {
+	if ( !p->nodes[ 0 ]->opaque && !p->nodes[ 1 ]->opaque ) {
 		return true;
 	}
 

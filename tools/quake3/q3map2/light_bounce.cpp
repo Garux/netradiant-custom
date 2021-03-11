@@ -514,7 +514,6 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		light->photons = value * area * areaScale;
 		light->add = value * formFactorValueScale * areaScale;
 		light->color = si->color;
-		light->emitColor = light->color * light->add;
 		light->style = noStyles ? LS_NORMAL : si->lightStyle;
 		if ( light->style < LS_NORMAL || light->style >= LS_NONE ) {
 			light->style = LS_NORMAL;
@@ -576,7 +575,6 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 			splash->fade = 1.0f;
 			splash->si = si;
 			splash->color = si->color;
-			splash->emitColor = splash->color * splash->add;
 			splash->falloffTolerance = falloffTolerance;
 			splash->style = noStyles ? LS_NORMAL : si->lightStyle;
 			if ( splash->style < LS_NORMAL || splash->style >= LS_NONE ) {
@@ -606,7 +604,6 @@ static void RadSubdivideDiffuseLight( int lightmapNum, bspDrawSurface_t *ds, raw
 		light->photons = value * area * bounceScale;
 		light->add = value * formFactorValueScale * bounceScale;
 		light->color = color;
-		light->emitColor = light->color * light->add;
 		light->style = noStyles ? LS_NORMAL : style;
 		if ( light->style < LS_NORMAL || light->style >= LS_NONE ) {
 			light->style = LS_NORMAL;
@@ -906,7 +903,6 @@ void RadCreateDiffuseLights( void ){
 	numBrushDiffuseLights = 0;
 	numTriangleDiffuseLights = 0;
 	numPatchDiffuseLights = 0;
-	numAreaLights = 0;
 
 	/* hit every surface (threaded) */
 	RunThreadsOnIndividual( numBSPDrawSurfaces, true, RadLight );

@@ -1271,9 +1271,8 @@ struct light_t
 	int cluster;                        /* ydnar: cluster light falls into */
 
 	winding_t           *w;
-	Vector3 emitColor;                  /* full out-of-gamut value */
 
-	float falloffTolerance;                 /* ydnar: minimum attenuation threshold */
+	float falloffTolerance;             /* ydnar: minimum attenuation threshold */
 	float filterRadius;                 /* ydnar: lightmap filter radius in world units, 0 == default */
 };
 
@@ -1307,7 +1306,6 @@ struct trace_t
 
 	/* input and output */
 	Vector3 color;                      /* starts out at full color, may be reduced if transparent surfaces are crossed */
-	Vector3 colorNoShadow;              /* result color with no shadow casting */
 	Vector3 directionContribution;      /* result contribution to the deluxe map */
 
 	/* output */
@@ -2008,7 +2006,6 @@ Q_EXTERN picoModel_t        *picoModels[ MAX_MODELS ];
 
 Q_EXTERN shaderInfo_t       *shaderInfo Q_ASSIGN( NULL );
 Q_EXTERN int numShaderInfo Q_ASSIGN( 0 );
-Q_EXTERN int numVertexRemaps Q_ASSIGN( 0 );
 
 Q_EXTERN surfaceParm_t custSurfaceParms[ MAX_CUST_SURFACEPARMS ];
 Q_EXTERN int numCustSurfaceParms Q_ASSIGN( 0 );
@@ -2026,9 +2023,7 @@ Q_EXTERN bool doingBSP Q_ASSIGN( false );
 /* commandline arguments */
 Q_EXTERN bool verboseEntities Q_ASSIGN( false );
 Q_EXTERN bool force Q_ASSIGN( false );
-Q_EXTERN bool infoMode Q_ASSIGN( false );
 Q_EXTERN bool useCustomInfoParms Q_ASSIGN( false );
-Q_EXTERN bool noprune Q_ASSIGN( false );
 Q_EXTERN bool leaktest Q_ASSIGN( false );
 Q_EXTERN bool nodetail Q_ASSIGN( false );
 Q_EXTERN bool nosubdivide Q_ASSIGN( false );
@@ -2037,7 +2032,6 @@ Q_EXTERN bool fulldetail Q_ASSIGN( false );
 Q_EXTERN bool nowater Q_ASSIGN( false );
 Q_EXTERN bool noCurveBrushes Q_ASSIGN( false );
 Q_EXTERN bool fakemap Q_ASSIGN( false );
-Q_EXTERN bool coplanar Q_ASSIGN( false );
 Q_EXTERN bool nofog Q_ASSIGN( false );
 Q_EXTERN bool noHint Q_ASSIGN( false );                        /* ydnar */
 Q_EXTERN bool renameModelShaders Q_ASSIGN( false );            /* ydnar */
@@ -2146,7 +2140,6 @@ Q_EXTERN mapDrawSurface_t   *mapDrawSurfs Q_ASSIGN( NULL );
 Q_EXTERN int numMapDrawSurfs;
 
 Q_EXTERN int numSurfacesByType[ static_cast<std::size_t>( ESurfaceType::Shader ) + 1 ];
-Q_EXTERN int numClearedSurfaces;
 Q_EXTERN int numStripSurfaces;
 Q_EXTERN int numMaxAreaSurfaces;
 Q_EXTERN int numFanSurfaces;
@@ -2214,13 +2207,7 @@ Q_EXTERN leaf_t             *faceleafs;
 
 Q_EXTERN int numfaces;
 
-Q_EXTERN byte               *vismap, *vismap_p, *vismap_end;
-
-Q_EXTERN int testlevel;
-
-Q_EXTERN byte               *uncompressed;
-
-Q_EXTERN int leafbytes, leaflongs;
+Q_EXTERN int leafbytes;
 Q_EXTERN int portalbytes, portallongs;
 
 Q_EXTERN vportal_t          *sorted_portals[ MAX_MAP_PORTALS * 2 ];
@@ -2305,16 +2292,12 @@ Q_EXTERN float floodlightDirectionScale Q_ASSIGN( 1.0f );
 
 Q_EXTERN bool dump Q_ASSIGN( false );
 Q_EXTERN bool debug Q_ASSIGN( false );
-Q_EXTERN bool debugUnused Q_ASSIGN( false );
 Q_EXTERN bool debugAxis Q_ASSIGN( false );
 Q_EXTERN bool debugCluster Q_ASSIGN( false );
 Q_EXTERN bool debugOrigin Q_ASSIGN( false );
 Q_EXTERN bool lightmapBorder Q_ASSIGN( false );
 //1=warn; 0=warn if lmsize>128
 Q_EXTERN int debugSampleSize Q_ASSIGN( 0 );
-
-/* longest distance across the map */
-Q_EXTERN float maxMapDistance Q_ASSIGN( 0 );
 
 /* for run time tweaking of light sources */
 Q_EXTERN float pointScale Q_ASSIGN( 7500.0f );
@@ -2362,7 +2345,6 @@ Q_EXTERN light_t            *lights;
 Q_EXTERN int numPointLights;
 Q_EXTERN int numSpotLights;
 Q_EXTERN int numSunLights;
-Q_EXTERN int numAreaLights;
 
 /* ydnar: for luxel placement */
 Q_EXTERN int numSurfaceClusters, maxSurfaceClusters;
@@ -2377,25 +2359,11 @@ Q_EXTERN int numPatchDiffuseLights;
 /* ydnar: general purpose extra copy of drawvert list */
 Q_EXTERN bspDrawVert_t      *yDrawVerts;
 
-/* ydnar: for tracing statistics */
-Q_EXTERN int minSurfacesTested;
-Q_EXTERN int maxSurfacesTested;
-Q_EXTERN int totalSurfacesTested;
-Q_EXTERN int totalTraces;
-
-Q_EXTERN FILE               *dumpFile;
-
 Q_EXTERN int defaultLightSubdivide Q_ASSIGN( 999 );
 
 Q_EXTERN Vector3 ambientColor;
 Q_EXTERN Vector3 minLight, minVertexLight, minGridLight;
 Q_EXTERN float maxLight Q_ASSIGN( 255.f );
-
-Q_EXTERN int                *entitySurface;
-Q_EXTERN Vector3            *surfaceOrigin;
-
-Q_EXTERN Vector3 sunDirection;
-Q_EXTERN Vector3 sunLight;
 
 /* ydnar: light optimization */
 Q_EXTERN float subdivideThreshold Q_ASSIGN( DEFAULT_SUBDIVIDE_THRESHOLD );
@@ -2430,7 +2398,6 @@ Q_EXTERN int numLightSurfaces Q_ASSIGN( 0 );
 Q_EXTERN int                *lightSurfaces Q_ASSIGN( NULL );
 
 /* raw lightmaps */
-Q_EXTERN int numRawSuperLuxels Q_ASSIGN( 0 );
 Q_EXTERN int numRawLightmaps Q_ASSIGN( 0 );
 Q_EXTERN rawLightmap_t      *rawLightmaps Q_ASSIGN( NULL );
 Q_EXTERN int                *sortLightmaps Q_ASSIGN( NULL );
@@ -2538,9 +2505,6 @@ Q_EXTERN bspBrushSide_t*    bspBrushSides Q_ASSIGN( NULL );
 
 Q_EXTERN int numBSPLightBytes Q_ASSIGN( 0 );
 Q_EXTERN byte               *bspLightBytes Q_ASSIGN( NULL );
-
-//%	Q_EXTERN int				numBSPGridPoints Q_ASSIGN( 0 );
-//%	Q_EXTERN byte				*bspGridPoints Q_ASSIGN( NULL );
 
 Q_EXTERN int numBSPGridPoints Q_ASSIGN( 0 );
 Q_EXTERN bspGridPoint_t     *bspGridPoints Q_ASSIGN( NULL );

@@ -708,7 +708,6 @@ int LightContributionToSample( trace_t *trace ){
 	/* clear color */
 	trace->forceSubsampling = 0.0f; /* to make sure */
 	trace->color.set( 0 );
-	trace->colorNoShadow.set( 0 );
 	trace->directionContribution.set( 0 );
 
 	colorBrightness = RGBTOGRAY( light->color ) * ( 1.0f / 255.0f );
@@ -1013,9 +1012,6 @@ int LightContributionToSample( trace_t *trace ){
 			return 0;
 		}
 
-		/* VorteX: set noShadow color */
-		trace->colorNoShadow = light->color * add;
-
 		addDeluxe *= colorBrightness;
 
 		if ( bouncing ) {
@@ -1048,9 +1044,6 @@ int LightContributionToSample( trace_t *trace ){
 	else{
 		Error( "Light of undefined type!" );
 	}
-
-	/* VorteX: set noShadow color */
-	trace->colorNoShadow = light->color * add;
 
 	/* ydnar: changed to a variable number */
 	if ( add <= 0.0f || ( add <= light->falloffTolerance && ( light->flags & LightFlags::FastActual ) ) ) {
@@ -1118,9 +1111,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 
 	/* ydnar: normalmap */
 	if ( normalmap ) {
-		colors[ 0 ][ 0 ] = ( trace->normal[ 0 ] + 1.0f ) * 127.5f;
-		colors[ 0 ][ 1 ] = ( trace->normal[ 1 ] + 1.0f ) * 127.5f;
-		colors[ 0 ][ 2 ] = ( trace->normal[ 2 ] + 1.0f ) * 127.5f;
+		colors[ 0 ] = ( trace->normal + Vector3( 1 ) ) * 127.5f;
 		return;
 	}
 
@@ -1151,7 +1142,7 @@ void LightingAtSample( trace_t *trace, byte styles[ MAX_LIGHTMAPS ], Vector3 (&c
 
 		/* sample light */
 		LightContributionToSample( trace );
-		if ( trace->color[ 0 ] == 0.0f && trace->color[ 1 ] == 0.0f && trace->color[ 2 ] == 0.0f ) {
+		if ( trace->color == g_vector3_identity ) {
 			continue;
 		}
 
@@ -2535,11 +2526,6 @@ int LightMain( int argc, char **argv ){
 		else if ( striEqual( argv[ i ], "-debugsurfaces" ) || striEqual( argv[ i ], "-debugsurface" ) ) {
 			debugSurfaces = true;
 			Sys_Printf( "Lightmap surface debugging enabled\n" );
-		}
-
-		else if ( striEqual( argv[ i ], "-debugunused" ) ) {
-			debugUnused = true;
-			Sys_Printf( "Unused luxel debugging enabled\n" );
 		}
 
 		else if ( striEqual( argv[ i ], "-debugaxis" ) ) {

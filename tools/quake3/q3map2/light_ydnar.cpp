@@ -776,7 +776,7 @@ static bool MapTriangle( rawLightmap_t *lm, surfaceInfo_t *info, bspDrawVert_t *
 		const Vector2& b = dv[ ( i + 1 ) % 3 ]->lightmap[ 0 ];
 
 		/* make degenerate triangles for mapping edges */
-		if ( fabs( a[ 0 ] - b[ 0 ] ) < 0.01f || fabs( a[ 1 ] - b[ 1 ] ) < 0.01f ) {
+		if ( float_equal_epsilon( a[ 0 ], b[ 0 ], 0.01f ) || float_equal_epsilon( a[ 1 ], b[ 1 ], 0.01f ) ) {
 			dv2[ 0 ] = dv[ i ];
 			dv2[ 1 ] = dv[ ( i + 1 ) % 3 ];
 			dv2[ 2 ] = dv[ ( i + 1 ) % 3 ];
@@ -2071,7 +2071,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 #if 0
 					////////// 27's temp hack for testing edge clipping ////
-					if ( origin[0] == 0 && origin[1] == 0 && origin[2] == 0 ) {
+					if ( lm->getSuperOrigin( x, y ) == g_vector3_identity ) {
 						lightLuxel.value[ 1 ] = 255;
 						lightLuxel.count = 1.0f;
 						totalLighted++;
@@ -2102,7 +2102,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 							lm->getSuperFlag( x, y ) |= FLAG_FORCE_SUBSAMPLING; /* force */
 						}
 						/* add to count */
-						else if ( trace.color[ 0 ] || trace.color[ 1 ] || trace.color[ 2 ] ) {
+						else if ( trace.color != g_vector3_identity ) {
 							totalLighted++;
 						}
 					}
@@ -2711,7 +2711,7 @@ void IlluminateVertexes( int num ){
 								z1 = ( ( z >> 1 ) ^ ( z & 1 ? -1 : 0 ) ) + ( z & 1 );
 
 								/* nudge origin */
-								trace.origin = verts[ i ].xyz + Vector3( x1, y1, z1 ) * Vector3( VERTEX_NUDGE );
+								trace.origin = verts[ i ].xyz + Vector3( x1, y1, z1 ) * VERTEX_NUDGE;
 
 								/* try at nudged origin */
 								trace.cluster = ClusterForPointExtFilter( origin, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
@@ -3339,7 +3339,6 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 	int i, x, y, z, x1, y1, z1;
 	light_t     *light, *light2, **owner;
 	bspLeaf_t   *leaf;
-	Vector3 origin;
 	float radius, intensity;
 	light_t     *buckets[ 256 ];
 
@@ -3400,9 +3399,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 							z1 = ( ( z >> 1 ) ^ ( z & 1 ? -1 : 0 ) ) + ( z & 1 );
 
 							/* nudge origin */
-							origin[ 0 ] = light->origin[ 0 ] + ( LIGHT_NUDGE * x1 );
-							origin[ 1 ] = light->origin[ 1 ] + ( LIGHT_NUDGE * y1 );
-							origin[ 2 ] = light->origin[ 2 ] + ( LIGHT_NUDGE * z1 );
+							const Vector3 origin = light->origin + Vector3( x1, y1, z1 ) * LIGHT_NUDGE;
 
 							/* try at nudged origin */
 							light->cluster = ClusterForPointExt( origin, LIGHT_EPSILON );
@@ -3446,7 +3443,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 						const Vector3 dir = -light->normal;
 						for ( radius = 100.0f; radius < MAX_WORLD_COORD * 8.0f; radius += 10.0f )
 						{
-							origin = light->origin + light->normal * radius;
+							const Vector3 origin = light->origin + light->normal * radius;
 							const float factor = std::abs( PointToPolygonFormFactor( origin, dir, light->w ) );
 							if ( ( factor * light->add ) <= light->falloffTolerance ) {
 								light->envelope = radius;
@@ -3649,7 +3646,7 @@ void SetupEnvelopes( bool forGrid, bool fastFlag ){
 void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, int numClusters, int *clusters, LightFlags flags, trace_t *trace ){
 	int i;
 	light_t     *light;
-	float dist, length;
+	float length;
 
 
 	/* potential pre-setup  */
@@ -3717,8 +3714,7 @@ void CreateTraceLightsForBounds( const MinMax& minmax, const Vector3 *normal, in
 			}
 
 			/* if the light's bounding sphere intersects with the bounding sphere then this light needs to be tested */
-			dist = vector3_length( light->origin - origin ) - light->envelope - radius;
-			if ( dist > 0 ) {
+			if ( vector3_length( light->origin - origin ) - light->envelope - radius > 0 ) {
 				lightsEnvelopeCulled++;
 				continue;
 			}

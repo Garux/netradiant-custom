@@ -1307,7 +1307,6 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	float u, v, w, s, t;
 	int is, it;
 	byte            *pixel;
-	float shadow;
 	shaderInfo_t    *si;
 
 
@@ -1437,18 +1436,14 @@ bool TraceTriangle( traceInfo_t *ti, traceTriangle_t *tt, trace_t *trace ){
 	/* ydnar: color filter */
 	if ( si->compileFlags & C_LIGHTFILTER ) {
 		/* filter by texture color */
-		trace->color[ 0 ] *= ( ( 1.0f / 255.0f ) * pixel[ 0 ] );
-		trace->color[ 1 ] *= ( ( 1.0f / 255.0f ) * pixel[ 1 ] );
-		trace->color[ 2 ] *= ( ( 1.0f / 255.0f ) * pixel[ 2 ] );
+		trace->color *= Vector3( pixel[0], pixel[1], pixel[2] ) * ( 1.0f / 255.0f );
 	}
 
 	/* ydnar: alpha filter */
 	if ( si->compileFlags & C_ALPHASHADOW ) {
 		/* filter by inverse texture alpha */
-		shadow = ( 1.0f / 255.0f ) * ( 255 - pixel[ 3 ] );
-		trace->color[ 0 ] *= shadow;
-		trace->color[ 1 ] *= shadow;
-		trace->color[ 2 ] *= shadow;
+		const float shadow = ( 1.0f / 255.0f ) * ( 255 - pixel[ 3 ] );
+		trace->color *= shadow;
 	}
 
 	/* check filter for opaque */

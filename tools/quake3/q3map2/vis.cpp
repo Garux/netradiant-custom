@@ -873,7 +873,6 @@ void LoadPortals( char *name ){
 
 	// these counts should take advantage of 64 bit systems automatically
 	leafbytes = ( ( portalclusters + 63 ) & ~63 ) >> 3;
-	leaflongs = leafbytes / sizeof( long );
 
 	portalbytes = ( ( numportals * 2 + 63 ) & ~63 ) >> 3;
 	portallongs = portalbytes / sizeof( long );
@@ -915,17 +914,10 @@ void LoadPortals( char *name ){
 
 		for ( j = 0 ; j < numpoints ; j++ )
 		{
-			double v[3];
-			int k;
-
-			// scanf into double, then assign to vec_t
-			// so we don't care what size vec_t is
-			if ( fscanf( f, "(%lf %lf %lf ) "
-						 , &v[0], &v[1], &v[2] ) != 3 ) {
+			if ( fscanf( f, "(%f %f %f ) ",
+			             &w->points[j][0], &w->points[j][1], &w->points[j][2] ) != 3 ) {
 				Error( "LoadPortals: reading portal %i", i );
 			}
-			for ( k = 0 ; k < 3 ; k++ )
-				w->points[j][k] = v[k];
 		}
 		if ( fscanf( f, "\n" ) != 0 ) {
 			// silence gcc warning
@@ -989,17 +981,10 @@ void LoadPortals( char *name ){
 
 		for ( j = 0 ; j < numpoints ; j++ )
 		{
-			double v[3];
-			int k;
-
-			// scanf into double, then assign to vec_t
-			// so we don't care what size vec_t is
-			if ( fscanf( f, "(%lf %lf %lf ) "
-						 , &v[0], &v[1], &v[2] ) != 3 ) {
+			if ( fscanf( f, "(%f %f %f ) ",
+			             &w->points[j][0], &w->points[j][1], &w->points[j][2] ) != 3 ) {
 				Error( "LoadPortals: reading portal %i", i );
 			}
-			for ( k = 0 ; k < 3 ; k++ )
-				w->points[j][k] = v[k];
 		}
 		if ( fscanf( f, "\n" ) != 0 ) {
 			// silence gcc warning

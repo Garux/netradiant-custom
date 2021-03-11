@@ -286,9 +286,6 @@ int BSPInfo( int count, char **fileNames ){
 		return -1;
 	}
 
-	/* enable info mode */
-	infoMode = true;
-
 	/* walk file list */
 	for ( i = 0; i < count; i++ )
 	{
@@ -442,7 +439,7 @@ int ScaleBSPMain( int argc, char **argv ){
 
 	uniform = ( ( scale[0] == scale[1] ) && ( scale[1] == scale[2] ) );
 
-	if ( scale[0] == 0.0f || scale[1] == 0.0f || scale[2] == 0.0f ) {
+	if ( scale == g_vector3_identity ) {
 		Sys_Printf( "Usage: q3map2 [-v] -scale [-tex] [-spawn_ref <value>] <value> <mapname>\n" );
 		Sys_Printf( "Non-zero scale value required.\n" );
 		return 0;

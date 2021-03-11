@@ -183,7 +183,6 @@ void HelpLight()
 		{"-debugnormals", "Color the lightmaps according to the direction of the surface normal"},
 		{"-debugorigin", "Color the lightmaps according to the origin of the luxels"},
 		{"-debugsurfaces, -debugsurface", "Color the lightmaps according to the index of the surface"},
-		{"-debugunused", "This option does nothing"},
 		{"-debug", "Mark the lightmaps according to the cluster: unmapped clusters get yellow, occluded ones get pink, flooded ones get blue overlay color, otherwise red"},
 		{"-deluxemode 0", "Use modelspace deluxemaps (DarkPlaces)"},
 		{"-deluxemode 1", "Use tangentspace deluxemaps"},

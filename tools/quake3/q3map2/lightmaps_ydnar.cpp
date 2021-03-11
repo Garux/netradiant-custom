@@ -327,9 +327,6 @@ void FinishRawLightmap( rawLightmap_t *lm ){
 	lm->sw = lm->w * superSample;
 	lm->sh = lm->h * superSample;
 
-	/* add to super luxel count */
-	numRawSuperLuxels += ( lm->sw * lm->sh );
-
 	/* manipulate origin/vecs for supersampling */
 	if ( superSample > 1 && lm->vecs != NULL ) {
 		/* calc inverse supersample */
@@ -629,7 +626,7 @@ bool AddSurfaceToRawLightmap( int num, rawLightmap_t *lm ){
 
 	/* check to see if this is a non-planar patch */
 	if ( ds->surfaceType == MST_PATCH &&
-		 lm->axis[ 0 ] == 0.0f && lm->axis[ 1 ] == 0.0f && lm->axis[ 2 ] == 0.0f ) {
+		 lm->axis == g_vector3_identity ) {
 		return AddPatchToRawLightmap( num, lm );
 	}
 
@@ -1062,9 +1059,6 @@ void SetupSurfaceLightmaps( void ){
 		}
 	}
 
-	/* find longest map distance */
-	maxMapDistance = vector3_length( g_mapMinmax.maxs - g_mapMinmax.mins );
-
 	/* sort the surfaces info list */
 	std::sort( sortSurfaces, sortSurfaces + numBSPDrawSurfaces, CompareSurfaceInfo() );
 
@@ -1073,7 +1067,6 @@ void SetupSurfaceLightmaps( void ){
 	lightSurfaces = safe_calloc( numSurfsLightmapped * sizeof( int ) );
 
 	/* allocate a list of raw lightmaps */
-	numRawSuperLuxels = 0;
 	numRawLightmaps = 0;
 	rawLightmaps = safe_calloc( numSurfsLightmapped * sizeof( *rawLightmaps ) );
 
@@ -1340,18 +1333,14 @@ void StitchSurfaceLightmaps( void ){
    compares two surface lightmaps' bsp luxels, ignoring occluded luxels
  */
 
-#define SOLID_EPSILON       0.0625
+#define SOLID_EPSILON       0.0625f
 #define LUXEL_TOLERANCE     0.0025
 #define LUXEL_COLOR_FRAC    0.001302083 /* 1 / 3 / 256 */
 
 static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int bNum ){
-	int x, y;
-	double delta, total, rd, gd, bd;
-
-
 	/* styled lightmaps will never be collapsed to non-styled lightmaps when there is _minlight */
-	if ( ( minLight[ 0 ] || minLight[ 1 ] || minLight[ 2 ] ) &&
-		 ( ( aNum == 0 && bNum != 0 ) || ( aNum != 0 && bNum == 0 ) ) ) {
+	if ( minLight != g_vector3_identity &&
+		 ( aNum == 0 ) != ( bNum == 0 ) ) {
 		return false;
 	}
 
@@ -1365,13 +1354,8 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 
 	/* compare solid color lightmaps */
 	if ( a->solid[ aNum ] && b->solid[ bNum ] ) {
-		/* get deltas */
-		rd = fabs( a->solidColor[ aNum ][ 0 ] - b->solidColor[ bNum ][ 0 ] );
-		gd = fabs( a->solidColor[ aNum ][ 1 ] - b->solidColor[ bNum ][ 1 ] );
-		bd = fabs( a->solidColor[ aNum ][ 2 ] - b->solidColor[ bNum ][ 2 ] );
-
 		/* compare color */
-		if ( rd > SOLID_EPSILON || gd > SOLID_EPSILON || bd > SOLID_EPSILON ) {
+		if ( !vector3_equal_epsilon( a->solidColor[ aNum ], b->solidColor[ bNum ], SOLID_EPSILON ) ) {
 			return false;
 		}
 
@@ -1385,11 +1369,11 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 	}
 
 	/* compare luxels */
-	delta = 0.0;
-	total = 0.0;
-	for ( y = 0; y < a->h; y++ )
+	double delta = 0.0;
+	double total = 0.0;
+	for ( int y = 0; y < a->h; y++ )
 	{
-		for ( x = 0; x < a->w; x++ )
+		for ( int x = 0; x < a->w; x++ )
 		{
 			/* increment total */
 			total += 1.0;
@@ -1403,20 +1387,16 @@ static bool CompareBSPLuxels( rawLightmap_t *a, int aNum, rawLightmap_t *b, int 
 				continue;
 			}
 
-			/* get deltas */
-			rd = fabs( aLuxel[ 0 ] - bLuxel[ 0 ] );
-			gd = fabs( aLuxel[ 1 ] - bLuxel[ 1 ] );
-			bd = fabs( aLuxel[ 2 ] - bLuxel[ 2 ] );
-
 			/* 2003-09-27: compare individual luxels */
-			if ( rd > 3.0 || gd > 3.0 || bd > 3.0 ) {
+			if ( !vector3_equal_epsilon( aLuxel, bLuxel, 3.f ) ) {
 				return false;
 			}
 
 			/* compare (fixme: take into account perceptual differences) */
-			delta += rd * LUXEL_COLOR_FRAC;
-			delta += gd * LUXEL_COLOR_FRAC;
-			delta += bd * LUXEL_COLOR_FRAC;
+			Vector3 diff = aLuxel - bLuxel;
+			for( int i = 0; i < 3; ++i )
+				diff[i] = fabs( diff[i] );
+			delta += vector3_dot( diff, Vector3( LUXEL_COLOR_FRAC ) );
 
 			/* is the change too high? */
 			if ( total > 0.0 && ( ( delta / total ) > LUXEL_TOLERANCE ) ) {

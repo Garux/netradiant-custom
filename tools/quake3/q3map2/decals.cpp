@@ -215,21 +215,21 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
 	/* test texture matrix */
 	s = vector3_dot( a->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
 	t = vector3_dot( a->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
-	if ( fabs( s - a->st[ 0 ] ) > 0.01 || fabs( t - a->st[ 1 ] ) > 0.01 ) {
+	if ( !float_equal_epsilon( s, a->st[ 0 ], 0.01 ) || !float_equal_epsilon( t, a->st[ 1 ], 0.01 ) ) {
 		Sys_Printf( "Bad texture matrix! (A) (%f, %f) != (%f, %f)\n",
 					s, t, a->st[ 0 ], a->st[ 1 ] );
 		//%	return false;
 	}
 	s = vector3_dot( b->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
 	t = vector3_dot( b->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
-	if ( fabs( s - b->st[ 0 ] ) > 0.01 || fabs( t - b->st[ 1 ] ) > 0.01 ) {
+	if ( !float_equal_epsilon( s, b->st[ 0 ], 0.01 ) || !float_equal_epsilon( t, b->st[ 1 ], 0.01 ) ) {
 		Sys_Printf( "Bad texture matrix! (B) (%f, %f) != (%f, %f)\n",
 					s, t, b->st[ 0 ], b->st[ 1 ] );
 		//%	return false;
 	}
 	s = vector3_dot( c->xyz, dp->texMat[ 0 ].vec3() ) + dp->texMat[ 0 ][ 3 ];
 	t = vector3_dot( c->xyz, dp->texMat[ 1 ].vec3() ) + dp->texMat[ 1 ][ 3 ];
-	if ( fabs( s - c->st[ 0 ] ) > 0.01 || fabs( t - c->st[ 1 ] ) > 0.01 ) {
+	if ( !float_equal_epsilon( s, c->st[ 0 ], 0.01 ) || !float_equal_epsilon( t, c->st[ 1 ], 0.01 ) ) {
 		Sys_Printf( "Bad texture matrix! (C) (%f, %f) != (%f, %f)\n",
 					s, t, c->st[ 0 ], c->st[ 1 ] );
 		//%	return false;

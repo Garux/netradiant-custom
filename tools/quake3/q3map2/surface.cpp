@@ -260,7 +260,6 @@ void ClearSurface( mapDrawSurface_t *ds ){
 	ds->numIndexes = 0;
 	free( ds->indexes );
 	ds->indexes = NULL;
-	numClearedSurfaces++;
 }
 
 
