@@ -605,7 +605,7 @@ void SetEntityOrigins( void ){
 		dm = &bspModels[ modelnum ];
 
 		/* get entity origin */
-		Vector3 origin( 0, 0, 0 );
+		Vector3 origin( 0 );
 		if ( !e.read_keyvalue( origin, "origin" ) ) {
 			continue;
 		}

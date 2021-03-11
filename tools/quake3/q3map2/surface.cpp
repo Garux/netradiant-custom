@@ -1183,7 +1183,7 @@ mapDrawSurface_t *DrawSurfaceForShader( const char *shader ){
  */
 
 static void AddSurfaceFlare( mapDrawSurface_t *ds, const Vector3& entityOrigin ){
-	Vector3 origin( 0, 0, 0 );
+	Vector3 origin( 0 );
 	/* find centroid */
 	for ( int i = 0; i < ds->numVerts; i++ )
 		origin += ds->verts[ i ].xyz;
@@ -1227,7 +1227,7 @@ static void SubdivideFace_r( entity_t *e, brush_t *brush, side_t *side, winding_
 	/* split the face */
 	for ( axis = 0; axis < 3; axis++ )
 	{
-		Vector3 planePoint( 0, 0, 0 );
+		Vector3 planePoint( 0 );
 		Plane3f plane( 0, 0, 0, 0 );
 
 
@@ -2866,8 +2866,8 @@ void MakeFogHullSurfs( entity_t *e, tree_t *tree, const char *shader ){
 	Sys_FPrintf( SYS_VRB, "--- MakeFogHullSurfs ---\n" );
 
 	/* get hull bounds */
-	const Vector3 fogMins = g_mapMinmax.mins - Vector3( 128, 128, 128 );
-	const Vector3 fogMaxs = g_mapMinmax.maxs + Vector3( 128, 128, 128 );
+	const Vector3 fogMins = g_mapMinmax.mins - Vector3( 128 );
+	const Vector3 fogMaxs = g_mapMinmax.maxs + Vector3( 128 );
 
 	/* get foghull shader */
 	si = ShaderInfoForShader( shader );
@@ -2969,7 +2969,7 @@ int AddSurfaceModelsToTriangle_r( mapDrawSurface_t *ds, const surfaceModel_t& mo
 
 			/* calculate scale */
 			r = model.minScale + Random() * ( model.maxScale - model.minScale );
-			const Vector3 scale( r, r, r );
+			const Vector3 scale( r );
 
 			/* calculate angle */
 			angle = model.minAngle + Random() * ( model.maxAngle - model.minAngle );

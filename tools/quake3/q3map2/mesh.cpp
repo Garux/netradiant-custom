@@ -247,7 +247,7 @@ void MakeMeshNormals( mesh_t in ){
 				}
 			}
 
-			Vector3 sum( 0, 0, 0 );
+			Vector3 sum( 0 );
 			for ( k = 0 ; k < 8 ; k++ ) {
 				if ( !good[k] || !good[( k + 1 ) & 7] ) {
 					continue;   // didn't get two points

@@ -359,7 +359,7 @@ void CalcVis( void ){
    ==================
  */
 void SetPortalSphere( vportal_t *p ){
-	Vector3 total( 0, 0, 0 );
+	Vector3 total( 0 );
 	fixedWinding_t  *w;
 
 	w = p->winding;

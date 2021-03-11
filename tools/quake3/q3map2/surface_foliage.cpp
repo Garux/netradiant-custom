@@ -255,7 +255,7 @@ void Foliage( mapDrawSurface_t *src ){
 		oldNumMapDrawSurfs = numMapDrawSurfs;
 
 		/* add the model to the bsp */
-		InsertModel( foliage.model.c_str(), 0, 0, matrix4_scale_for_vec3( Vector3().set( foliage.scale ) ), NULL, NULL, src->entityNum, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
+		InsertModel( foliage.model.c_str(), 0, 0, matrix4_scale_for_vec3( Vector3( foliage.scale ) ), NULL, NULL, src->entityNum, src->castShadows, src->recvShadows, 0, src->lightmapScale, 0, 0, clipDepthGlobal );
 
 		/* walk each new surface */
 		for ( i = oldNumMapDrawSurfs; i < numMapDrawSurfs; i++ )

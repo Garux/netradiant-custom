@@ -305,7 +305,7 @@ void SnapPlaneImproved( Plane3f& plane, int numPoints, const Vector3 *points ){
 	if ( SnapNormal( plane.normal() ) ) {
 		if ( numPoints > 0 ) {
 			// Adjust the dist so that the provided points don't drift away.
-			Vector3 center( 0, 0, 0 );
+			Vector3 center( 0 );
 			for ( int i = 0; i < numPoints; i++ )
 			{
 				center += points[i];

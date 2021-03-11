@@ -247,10 +247,7 @@ static bool MakeTextureMatrix( decalProjector_t *dp, const Plane3f& projection, 
    note: non-normalized axes will screw up the plane transform
  */
 
-static void TransformDecalProjector( decalProjector_t *in, Vector3 axis[ 3 ], const Vector3& origin, decalProjector_t *out ){
-	int i;
-
-
+static void TransformDecalProjector( decalProjector_t *in, const Vector3 (&axis)[ 3 ], const Vector3& origin, decalProjector_t *out ){
 	/* copy misc stuff */
 	out->si = in->si;
 	out->numPlanes = in->numPlanes;
@@ -263,7 +260,7 @@ static void TransformDecalProjector( decalProjector_t *in, Vector3 axis[ 3 ], co
 	out->radius2 = in->radius2;
 
 	/* translate planes */
-	for ( i = 0; i < in->numPlanes; i++ )
+	for ( int i = 0; i < in->numPlanes; i++ )
 	{
 		out->planes[ i ].a = vector3_dot( in->planes[ i ].normal(), axis[ 0 ] );
 		out->planes[ i ].b = vector3_dot( in->planes[ i ].normal(), axis[ 1 ] );
@@ -272,7 +269,7 @@ static void TransformDecalProjector( decalProjector_t *in, Vector3 axis[ 3 ], co
 	}
 
 	/* translate texture matrix */
-	for ( i = 0; i < 2; i++ )
+	for ( int i = 0; i < 2; i++ )
 	{
 		out->texMat[ i ][ 0 ] = vector3_dot( in->texMat[ i ].vec3(), axis[ 0 ] );
 		out->texMat[ i ][ 1 ] = vector3_dot( in->texMat[ i ].vec3(), axis[ 1 ] );
@@ -739,7 +736,6 @@ void MakeEntityDecals( entity_t *e ){
 	int i, j, f, fOld, start;
 	decalProjector_t dp;
 	mapDrawSurface_t    *ds;
-	Vector3 identityAxis[ 3 ] = { g_vector3_axis_x, g_vector3_axis_y, g_vector3_axis_z };
 
 
 	/* note it */
@@ -763,7 +759,7 @@ void MakeEntityDecals( entity_t *e ){
 		}
 
 		/* get projector */
-		TransformDecalProjector( &projectors[ i ], identityAxis, e->origin, &dp );
+		TransformDecalProjector( &projectors[ i ], g_vector3_axes, e->origin, &dp );
 
 		/* walk the list of surfaces in the entity */
 		for ( j = e->firstDrawSurf; j < numMapDrawSurfs; j++ )

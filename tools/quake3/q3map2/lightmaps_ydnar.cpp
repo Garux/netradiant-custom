@@ -1271,7 +1271,7 @@ void StitchSurfaceLightmaps( void ){
 					}
 
 					/* walk candidate luxels */
-					Vector3 average( 0, 0, 0 );
+					Vector3 average( 0 );
 					numLuxels = 0;
 					totalColor = 0.0f;
 					for ( y2 = 0; y2 < b->sh && numLuxels < MAX_STITCH_LUXELS; y2++ )
@@ -2182,7 +2182,7 @@ static void FindOutLightmaps( rawLightmap_t *lm, bool fastAllocate ){
 				if ( deluxemap ) {
 					/* normalize average light direction */
 					const Vector3 direction = VectorNormalized( lm->getBspDeluxel( x, y ) * 1000.0f ) * 127.5f;
-					olm->bspDirBytes[ oy * olm->customWidth + ox ] = direction + Vector3().set( 127.5f );
+					olm->bspDirBytes[ oy * olm->customWidth + ox ] = direction + Vector3( 127.5f );
 				}
 			}
 		}
@@ -2282,7 +2282,7 @@ void FillOutLightmap( outLightmap_t *olm ){
 					continue;
 				}
 				cnt = 0;
-				Vector3 dir_sum( 0, 0, 0 ), light_sum( 0, 0, 0 );
+				Vector3 dir_sum( 0 ), light_sum( 0 );
 
 				/* try all four neighbors */
 				ofs = ( ( y + olm->customHeight - 1 ) % olm->customHeight ) * olm->customWidth + x;

@@ -626,7 +626,7 @@ struct shaderInfo_t
 	bool tcGen;                                         /* ydnar: has explicit texcoord generation */
 	Vector3 vecs[ 2 ];                                  /* ydnar: explicit texture vectors for [0,1] texture space */
 	tcMod_t mod;                                        /* ydnar: q3map_tcMod matrix for djbob :) */
-	Vector3 lightmapAxis = { 0, 0, 0 };                 /* ydnar: explicit lightmap axis projection */
+	Vector3 lightmapAxis{ 0 };                          /* ydnar: explicit lightmap axis projection */
 	colorMod_t          *colorMod;                      /* ydnar: q3map_rgb/color/alpha/Set/Mod support */
 
 	int furNumLayers;                                   /* ydnar: number of fur layers */
@@ -671,7 +671,7 @@ struct shaderInfo_t
 	int skyLightIterations;                             /* ydnar */
 	sun_t               *sun;                           /* ydnar */
 
-	Vector3 color = { 0, 0, 0 };                        /* normalized color */
+	Vector3 color{ 0 };                                 /* normalized color */
 	Color4f averageColor = { 0, 0, 0, 0 };
 	byte lightStyle;
 
@@ -689,7 +689,7 @@ struct shaderInfo_t
 	int shaderWidth, shaderHeight;                      /* ydnar */
 	Vector2 stFlat;
 
-	Vector3 fogDir = { 0, 0, 0 };                       /* ydnar */
+	Vector3 fogDir{ 0 };                                /* ydnar */
 
 	char                *shaderText;                    /* ydnar */
 	bool custom;
@@ -2127,7 +2127,7 @@ Q_EXTERN int allocatedmapplanes Q_ASSIGN( 0 );
 Q_EXTERN int numMapPatches;
 Q_EXTERN MinMax g_mapMinmax;
 
-inline const MinMax c_worldMinmax( Vector3().set( MIN_WORLD_COORD ), Vector3().set( MAX_WORLD_COORD ) );
+inline const MinMax c_worldMinmax( Vector3( MIN_WORLD_COORD ), Vector3( MAX_WORLD_COORD ) );
 
 Q_EXTERN int defaultFogNum Q_ASSIGN( -1 );                  /* ydnar: cleaner fog handling */
 Q_EXTERN int numMapFogs Q_ASSIGN( 0 );

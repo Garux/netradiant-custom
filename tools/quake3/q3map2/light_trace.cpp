@@ -594,7 +594,7 @@ static void SubdivideTraceNode_r( int nodeNum, int depth ){
 
 	/* bound the node */
 	node->minmax.clear();
-	DoubleVector3 average( 0, 0, 0 );
+	DoubleVector3 average( 0 );
 	count = 0;
 	for ( i = 0; i < node->numItems; i++ )
 	{
@@ -1112,13 +1112,13 @@ static void PopulateTraceNodes( void ){
 		e->vectorForKey( "origin", origin );
 
 		/* get scale */
-		Vector3 scale = { 1.f, 1.f, 1.f };
+		Vector3 scale( 1 );
 		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
 			if( e->read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
-		Vector3 angles = { 0.f, 0.f, 0.f };
+		Vector3 angles( 0 );
 		if ( !e->read_keyvalue( value, "angles" ) ||
 			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 			e->read_keyvalue( angles[ 2 ], "angle" );

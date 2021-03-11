@@ -1095,12 +1095,11 @@ void FixMetaTJunctions( void ){
 #define EQUAL_NORMAL_EPSILON    0.01f
 
 void SmoothMetaTriangles( void ){
-	int i, j, k, f, fOld, start, numVerts, numVotes, numSmoothed;
+	int i, j, k, f, fOld, start, numSmoothed;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	metaTriangle_t  *tri;
 	float           *shadeAngles;
 	byte            *smoothed;
-	Vector3 average;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
 
@@ -1177,9 +1176,9 @@ void SmoothMetaTriangles( void ){
 		}
 
 		/* clear */
-		average.set( 0 );
-		numVerts = 0;
-		numVotes = 0;
+		Vector3 average( 0 );
+		int numVerts = 0;
+		int numVotes = 0;
 
 		/* build a table of coincident vertexes */
 		for ( j = i; j < numMetaVerts && numVerts < MAX_SAMPLES; j++ )
@@ -1727,8 +1726,8 @@ struct CompareMetaTriangles
 		/* then position in world */
 
 		/* find mins */
-		Vector3 aMins( 999999, 999999, 999999 );
-		Vector3 bMins( 999999, 999999, 999999 );
+		Vector3 aMins( 999999 );
+		Vector3 bMins( 999999 );
 		for ( int i = 0; i < 3; i++ )
 		{
 			const int av = a.indexes[ i ];

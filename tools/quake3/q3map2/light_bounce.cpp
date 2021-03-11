@@ -265,7 +265,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 				textureColor.alpha() = 255.0f;
 			}
 			const float avgcolor = ( textureColor[ 0 ] + textureColor[ 1 ] + textureColor[ 2 ] ) / 3;
-			color = ( ( textureColor.rgb() * bounceColorRatio + Vector3().set( avgcolor * ( 1 - bounceColorRatio ) ) ) / 255 ) * ( rw->verts[ samples ].color[ lightmapNum ].rgb() / 255.0f );
+			color = ( ( textureColor.rgb() * bounceColorRatio + Vector3( avgcolor * ( 1 - bounceColorRatio ) ) ) / 255 ) * ( rw->verts[ samples ].color[ lightmapNum ].rgb() / 255.0f );
 //			color = ( textureColor.rgb / 255 ) * ( rw->verts[ samples ].color[ lightmapNum ].rgb / 255.0f );
 
 			minmax.extend( color );
@@ -333,7 +333,7 @@ static void RadSample( int lightmapNum, bspDrawSurface_t *ds, rawLightmap_t *lm,
 							textureColor.alpha() = 255;
 						}
 						const float avgcolor = ( textureColor[ 0 ] + textureColor[ 1 ] + textureColor[ 2 ] ) / 3;
-						color = ( ( textureColor.rgb() * bounceColorRatio + Vector3().set( avgcolor * ( 1 - bounceColorRatio ) ) ) / 255 ) * ( radLuxel / 255 );
+						color = ( ( textureColor.rgb() * bounceColorRatio + Vector3( avgcolor * ( 1 - bounceColorRatio ) ) ) / 255 ) * ( radLuxel / 255 );
 						//Sys_Printf( "%i %i %i %i %i \n", (int) textureColor.rgb[ 0 ], (int) textureColor.rgb[ 1 ], (int) textureColor.rgb[ 2 ], (int) avgcolor, (int) color[ i ] );
 						minmax.extend( color );
 						average += color;

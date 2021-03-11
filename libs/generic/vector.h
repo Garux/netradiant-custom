@@ -70,10 +70,9 @@ explicit BasicVector3( const BasicVector2<OtherElement>& vec2 ){
 	y() = static_cast<Element>( vec2.y() );
 	z() = 0;
 }
-BasicVector3( const Element& x_, const Element& y_, const Element& z_ ){
-	x() = x_;
-	y() = y_;
-	z() = z_;
+BasicVector3( const Element& x_, const Element& y_, const Element& z_ ) : m_elements{ x_, y_, z_ }{
+}
+explicit BasicVector3( const Element& value ) : m_elements{ value, value, value }{
 }
 
 Element& x(){
@@ -109,9 +108,8 @@ const Element* data() const {
 	return m_elements;
 }
 
-BasicVector3& set( const Element value ){
+void set( const Element value ){
 	x() = y() = z() = value;
-	return *this;
 }
 };
 
@@ -189,9 +187,8 @@ const BasicVector3<Element>& vec3() const {
 	return reinterpret_cast<const BasicVector3<Element>&>( x() );
 }
 
-BasicVector4& set( const Element value ){
+void set( const Element value ){
 	x() = y() = z() = w() = value;
-	return *this;
 }
 };
 

@@ -183,8 +183,8 @@ void MakeHeadnodePortals( tree_t *tree ){
 	node = tree->headnode;
 
 // pad with some space so there will never be null volume leafs
-	const MinMax bounds( tree->minmax.mins - Vector3().set( SIDESPACE ),
-	                     tree->minmax.maxs + Vector3().set( SIDESPACE ) );
+	const MinMax bounds( tree->minmax.mins - Vector3( SIDESPACE ),
+	                     tree->minmax.maxs + Vector3( SIDESPACE ) );
 	if ( !bounds.valid() ) {
 		Error( "Backwards tree volume" );
 	}
@@ -632,13 +632,13 @@ EFloodEntities FloodEntities( tree_t *tree ){
 			skybox = true;
 
 			/* get scale */
-			Vector3 scale( 64, 64, 64 );
+			Vector3 scale( 64 );
 			if( !e.read_keyvalue( scale, "_scale" ) )
 				if( e.read_keyvalue( scale[0], "_scale" ) )
 					scale[1] = scale[2] = scale[0];
 
 			/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
-			Vector3 angles( 0, 0, 0 );
+			Vector3 angles( 0 );
 			if ( !e.read_keyvalue( value, "angles" ) ||
 				3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 				e.read_keyvalue( angles[ 2 ], "angle" );

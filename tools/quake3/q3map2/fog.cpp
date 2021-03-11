@@ -632,8 +632,8 @@ int FogForBounds( const MinMax& minmax, float epsilon ){
 		brush_t *brush = mapFogs[ i ].brush;
 
 		/* get bounds */
-		const MinMax fogMinmax( brush->minmax.mins - Vector3().set( epsilon ),
-		                        brush->minmax.maxs + Vector3().set( epsilon ) );
+		const MinMax fogMinmax( brush->minmax.mins - Vector3( epsilon ),
+		                        brush->minmax.maxs + Vector3( epsilon ) );
 		/* check against bounds */
 		if( !minmax.test( fogMinmax ) ){
 			continue; /* no overlap */

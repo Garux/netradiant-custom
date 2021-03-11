@@ -164,7 +164,7 @@ void WindingExtendBounds( const winding_t *w, MinMax& minmax ){
    =============
  */
 Vector3 WindingCenter( const winding_t *w ){
-	Vector3 center( 0, 0, 0 );
+	Vector3 center( 0 );
 
 	for ( int i = 0 ; i < w->numpoints ; i++ )
 		center += w->p[i];
@@ -817,7 +817,7 @@ winding_t   *ChopWinding( winding_t *in, const Plane3f& plane ){
 }
 
 
-inline const MinMax c_worldMinmax( Vector3().set( MIN_WORLD_COORD ), Vector3().set( MAX_WORLD_COORD ) );
+inline const MinMax c_worldMinmax( Vector3( MIN_WORLD_COORD ), Vector3( MAX_WORLD_COORD ) );
 /*
    =================
    CheckWinding

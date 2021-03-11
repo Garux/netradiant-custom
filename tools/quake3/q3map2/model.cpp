@@ -500,7 +500,7 @@ void InsertModel( const char *name, int skin, int frame, const Matrix4& transfor
 			double normalEpsilon_save;
 			bool snpd;
 			MinMax minmax;
-			Vector3 avgDirection( 0, 0, 0 );
+			Vector3 avgDirection( 0 );
 			int axis;
 			#define nonax_clip_dbg 0
 
@@ -1318,14 +1318,14 @@ void AddTriangleModels( entity_t *eparent ){
 		origin -= eparent->origin;    /* offset by parent */
 
 		/* get scale */
-		Vector3 scale( 1, 1, 1 );
+		Vector3 scale( 1 );
 		if( !e->read_keyvalue( scale, "modelscale_vec" ) )
 			if( e->read_keyvalue( scale[0], "modelscale" ) )
 				scale[1] = scale[2] = scale[0];
 
 		/* get "angle" (yaw) or "angles" (pitch yaw roll), store as (roll pitch yaw) */
 		const char *value;
-		Vector3 angles( 0, 0, 0 );
+		Vector3 angles( 0 );
 		if ( !e->read_keyvalue( value, "angles" ) ||
 			3 != sscanf( value, "%f %f %f", &angles[ 1 ], &angles[ 2 ], &angles[ 0 ] ) )
 			e->read_keyvalue( angles[ 2 ], "angle" );

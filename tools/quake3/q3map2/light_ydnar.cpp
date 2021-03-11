@@ -157,13 +157,12 @@ Vector3b ColorToBytes( const Vector3& color, float scale ){
 #define EQUAL_NORMAL_EPSILON    0.01f
 
 void SmoothNormals( void ){
-	int i, j, k, f, numVerts, numVotes, fOld, start;
+	int i, j, k, f, fOld, start;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	bspDrawSurface_t    *ds;
 	shaderInfo_t        *si;
 	float               *shadeAngles;
 	byte                *smoothed;
-	Vector3 average;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
 
@@ -239,9 +238,9 @@ void SmoothNormals( void ){
 		}
 
 		/* clear */
-		average.set( 0 );
-		numVerts = 0;
-		numVotes = 0;
+		Vector3 average( 0 );
+		int numVerts = 0;
+		int numVotes = 0;
 
 		/* build a table of coincident vertexes */
 		for ( j = i; j < numBSPDrawVerts && numVerts < MAX_SAMPLES; j++ )
@@ -396,7 +395,7 @@ static void PerturbNormal( bspDrawVert_t *dv, shaderInfo_t *si, Vector3& pNormal
 	}
 
 	/* remap sampled normal from [0,255] to [-1,-1] */
-	bump.rgb() = ( bump.rgb() - Vector3().set( 127.0f ) ) * ( 1.0f / 127.5f );
+	bump.rgb() = ( bump.rgb() - Vector3( 127.0f ) ) * ( 1.0f / 127.5f );
 
 	/* scale tangent vectors and add to original normal */
 	pNormal = dv->normal + stv[ 0 ] * bump[ 0 ] + ttv[ 0 ] * bump[ 1 ] + dv->normal * bump[ 2 ];
@@ -1676,7 +1675,7 @@ static void SubsampleRawLuxel_r( rawLightmap_t *lm, trace_t *trace, const Vector
 	Vector3 deluxel[ 4 ];
 	Vector3 origin[ 4 ], normal[ 4 ];
 	float biasDirs[ 4 ][ 2 ] = { { -1.0f, -1.0f }, { 1.0f, -1.0f }, { -1.0f, 1.0f }, { 1.0f, 1.0f } };
-	Vector3 color, direction( 0, 0, 0 ), total( 0, 0, 0 );
+	Vector3 color, direction( 0 ), total( 0 );
 
 
 	/* limit check */
@@ -1795,7 +1794,7 @@ static void RandomSubsampleRawLuxel( rawLightmap_t *lm, trace_t *trace, const Ve
 	int b, mapped = 0;
 	int cluster;
 	Vector3 origin, normal;
-	Vector3 total( 0, 0, 0 ), totaldirection( 0, 0, 0 );
+	Vector3 total( 0 ), totaldirection( 0 );
 	float dx, dy;
 
 	for ( b = 0; b < lightSamples; ++b )
@@ -1918,7 +1917,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 				/* color the luxel with lightmap axis? */
 				else if ( debugAxis ) {
-					luxel.value = ( lm->axis + Vector3( 1, 1, 1 ) ) * 127.5f;
+					luxel.value = ( lm->axis + Vector3( 1 ) ) * 127.5f;
 				}
 
 				/* color the luxel with luxel cluster? */
@@ -1935,7 +1934,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 
 				/* color the luxel with the normal */
 				else if ( normalmap ) {
-					luxel.value = ( lm->getSuperNormal( x, y ) + Vector3( 1, 1, 1 ) ) * 127.5f;
+					luxel.value = ( lm->getSuperNormal( x, y ) + Vector3( 1 ) ) * 127.5f;
 				}
 
 				/* otherwise clear it */
@@ -2126,7 +2125,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 						/* setup */
 						mapped = 0;
 						lighted = 0;
-						Vector3 total( 0, 0, 0 );
+						Vector3 total( 0 );
 
 						/* test 2x2 stamp */
 						for ( t = 0; t < 4; t++ )
@@ -2372,7 +2371,7 @@ void IlluminateRawLightmap( int rawLightmapNum ){
 					//%	if( lm->getSuperCluster( x, y ) < 0 )
 					//%		continue;
 
-					lm->getSuperLuxel( lightmapNum, x, y ).value = lm->getSuperNormal( x, y ) * 127 + Vector3( 127, 127, 127 );
+					lm->getSuperLuxel( lightmapNum, x, y ).value = lm->getSuperNormal( x, y ) * 127 + Vector3( 127 );
 				}
 			}
 		}
@@ -2634,7 +2633,7 @@ void IlluminateVertexes( int num ){
 
 			/* color the luxel with the normal */
 			else if ( normalmap ) {
-				radVertLuxel = ( verts[ i ].normal + Vector3( 1, 1, 1 ) ) * 127.5f;
+				radVertLuxel = ( verts[ i ].normal + Vector3( 1 ) ) * 127.5f;
 			}
 
 			else if ( info->si->noVertexLight ) {
@@ -2712,7 +2711,7 @@ void IlluminateVertexes( int num ){
 								z1 = ( ( z >> 1 ) ^ ( z & 1 ? -1 : 0 ) ) + ( z & 1 );
 
 								/* nudge origin */
-								trace.origin = verts[ i ].xyz + Vector3( x1, y1, z1 ) * Vector3().set( VERTEX_NUDGE );
+								trace.origin = verts[ i ].xyz + Vector3( x1, y1, z1 ) * Vector3( VERTEX_NUDGE );
 
 								/* try at nudged origin */
 								trace.cluster = ClusterForPointExtFilter( origin, VERTEX_EPSILON, info->numSurfaceClusters, &surfaceClusters[ info->firstSurfaceCluster ] );
@@ -2857,7 +2856,7 @@ void IlluminateVertexes( int num ){
 
 			/* color the luxel with the normal? */
 			if ( normalmap ) {
-				radVertLuxel = ( verts[ i ].normal + Vector3( 1, 1, 1 ) ) * 127.5f;
+				radVertLuxel = ( verts[ i ].normal + Vector3( 1 ) ) * 127.5f;
 			}
 
 			/* color the luxel with surface num? */
