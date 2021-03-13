@@ -1098,8 +1098,6 @@ void SmoothMetaTriangles( void ){
 	int i, j, k, f, fOld, start, numSmoothed;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
 	metaTriangle_t  *tri;
-	float           *shadeAngles;
-	byte            *smoothed;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
 
@@ -1107,10 +1105,10 @@ void SmoothMetaTriangles( void ){
 	Sys_FPrintf( SYS_VRB, "--- SmoothMetaTriangles ---\n" );
 
 	/* allocate shade angle table */
-	shadeAngles = safe_calloc( numMetaVerts * sizeof( float ) );
+	std::vector<float> shadeAngles( numMetaVerts, 0 );
 
 	/* allocate smoothed table */
-	smoothed = safe_calloc( ( numMetaVerts / 8 ) + 1 );
+	std::vector<std::uint8_t> smoothed( numMetaVerts, false );
 
 	/* set default shade angle */
 	defaultShadeAngle = degrees_to_radians( npDegrees );
@@ -1142,7 +1140,7 @@ void SmoothMetaTriangles( void ){
 		{
 			shadeAngles[ tri->indexes[ j ] ] = shadeAngle;
 			if ( shadeAngle <= 0 ) {
-				smoothed[ tri->indexes[ j ] >> 3 ] |= ( 1 << ( tri->indexes[ j ] & 7 ) );
+				smoothed[ tri->indexes[ j ] ] = true;
 			}
 		}
 	}
@@ -1150,8 +1148,6 @@ void SmoothMetaTriangles( void ){
 	/* bail if no surfaces have a shade angle */
 	if ( maxShadeAngle <= 0 ) {
 		Sys_FPrintf( SYS_VRB, "No smoothing angles specified, aborting\n" );
-		free( shadeAngles );
-		free( smoothed );
 		return;
 	}
 
@@ -1171,7 +1167,7 @@ void SmoothMetaTriangles( void ){
 		}
 
 		/* already smoothed? */
-		if ( smoothed[ i >> 3 ] & ( 1 << ( i & 7 ) ) ) {
+		if ( smoothed[ i ] ) {
 			continue;
 		}
 
@@ -1184,7 +1180,7 @@ void SmoothMetaTriangles( void ){
 		for ( j = i; j < numMetaVerts && numVerts < MAX_SAMPLES; j++ )
 		{
 			/* already smoothed? */
-			if ( smoothed[ j >> 3 ] & ( 1 << ( j & 7 ) ) ) {
+			if ( smoothed[ j ] ) {
 				continue;
 			}
 
@@ -1206,7 +1202,7 @@ void SmoothMetaTriangles( void ){
 			indexes[ numVerts++ ] = j;
 
 			/* flag vertex */
-			smoothed[ j >> 3 ] |= ( 1 << ( j & 7 ) );
+			smoothed[ j ] = true;
 
 			/* see if this normal has already been voted */
 			for ( k = 0; k < numVotes; k++ )
@@ -1237,10 +1233,6 @@ void SmoothMetaTriangles( void ){
 			numSmoothed++;
 		}
 	}
-
-	/* free the tables */
-	free( shadeAngles );
-	free( smoothed );
 
 	/* print time */
 	Sys_FPrintf( SYS_VRB, " (%d)\n", (int) ( I_FloatTime() - start ) );

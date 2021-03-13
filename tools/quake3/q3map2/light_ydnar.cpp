@@ -159,19 +159,15 @@ Vector3b ColorToBytes( const Vector3& color, float scale ){
 void SmoothNormals( void ){
 	int i, j, k, f, fOld, start;
 	float shadeAngle, defaultShadeAngle, maxShadeAngle;
-	bspDrawSurface_t    *ds;
-	shaderInfo_t        *si;
-	float               *shadeAngles;
-	byte                *smoothed;
 	int indexes[ MAX_SAMPLES ];
 	Vector3 votes[ MAX_SAMPLES ];
 
 
 	/* allocate shade angle table */
-	shadeAngles = safe_calloc( numBSPDrawVerts * sizeof( float ) );
+	std::vector<float> shadeAngles( numBSPDrawVerts, 0 );
 
 	/* allocate smoothed table */
-	smoothed = safe_calloc( ( numBSPDrawVerts / 8 ) + 1 );
+	std::vector<std::uint8_t> smoothed( numBSPDrawVerts, false );
 
 	/* set default shade angle */
 	defaultShadeAngle = degrees_to_radians( shadeAngleDegrees );
@@ -182,10 +178,10 @@ void SmoothNormals( void ){
 	for ( i = 0; i < numBSPDrawSurfaces; i++ )
 	{
 		/* get drawsurf */
-		ds = &bspDrawSurfaces[ i ];
+		bspDrawSurface_t& ds = bspDrawSurfaces[ i ];
 
 		/* get shader for shade angle */
-		si = surfaceInfos[ i ].si;
+		const shaderInfo_t *si = surfaceInfos[ i ].si;
 		if ( si->shadeAngleDegrees ) {
 			shadeAngle = degrees_to_radians( si->shadeAngleDegrees );
 		}
@@ -195,26 +191,24 @@ void SmoothNormals( void ){
 		value_maximize( maxShadeAngle, shadeAngle );
 
 		/* flag its verts */
-		for ( j = 0; j < ds->numVerts; j++ )
+		for ( j = 0; j < ds.numVerts; j++ )
 		{
-			f = ds->firstVert + j;
+			f = ds.firstVert + j;
 			shadeAngles[ f ] = shadeAngle;
-			if ( ds->surfaceType == MST_TRIANGLE_SOUP ) {
-				smoothed[ f >> 3 ] |= ( 1 << ( f & 7 ) );
+			if ( ds.surfaceType == MST_TRIANGLE_SOUP ) {
+				smoothed[ f ] = true;
 			}
 		}
 
 		/* ydnar: optional force-to-trisoup */
-		if ( trisoup && ds->surfaceType == MST_PLANAR ) {
-			ds->surfaceType = MST_TRIANGLE_SOUP;
-			ds->lightmapNum[ 0 ] = -3;
+		if ( trisoup && ds.surfaceType == MST_PLANAR ) {
+			ds.surfaceType = MST_TRIANGLE_SOUP;
+			ds.lightmapNum[ 0 ] = -3;
 		}
 	}
 
 	/* bail if no surfaces have a shade angle */
 	if ( maxShadeAngle == 0 ) {
-		free( shadeAngles );
-		free( smoothed );
 		return;
 	}
 
@@ -233,7 +227,7 @@ void SmoothNormals( void ){
 		}
 
 		/* already smoothed? */
-		if ( smoothed[ i >> 3 ] & ( 1 << ( i & 7 ) ) ) {
+		if ( smoothed[ i ] ) {
 			continue;
 		}
 
@@ -246,7 +240,7 @@ void SmoothNormals( void ){
 		for ( j = i; j < numBSPDrawVerts && numVerts < MAX_SAMPLES; j++ )
 		{
 			/* already smoothed? */
-			if ( smoothed[ j >> 3 ] & ( 1 << ( j & 7 ) ) ) {
+			if ( smoothed[ j ] ) {
 				continue;
 			}
 
@@ -270,7 +264,7 @@ void SmoothNormals( void ){
 			indexes[ numVerts++ ] = j;
 
 			/* flag vertex */
-			smoothed[ j >> 3 ] |= ( 1 << ( j & 7 ) );
+			smoothed[ j ] = true;
 
 			/* see if this normal has already been voted */
 			for ( k = 0; k < numVotes; k++ )
@@ -300,10 +294,6 @@ void SmoothNormals( void ){
 				yDrawVerts[ indexes[ j ] ].normal = average;
 		}
 	}
-
-	/* free the tables */
-	free( shadeAngles );
-	free( smoothed );
 
 	/* print time */
 	Sys_Printf( " (%i)\n", (int) ( I_FloatTime() - start ) );
