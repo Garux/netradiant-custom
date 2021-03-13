@@ -140,43 +140,38 @@ void PicoSetPrintFunc( void ( *func )( int, const char* ) ){
 
 
 
-picoModel_t *PicoModuleLoadModel( const picoModule_t* pm, const char* fileName, picoByte_t* buffer, int bufSize, int frameNum ){
+picoModel_t *PicoModuleLoadModel( const picoModule_t* pm, const char* fileName, const picoByte_t* buffer, int bufSize, int frameNum ){
 	char                *modelFileName, *remapFileName;
 
 	/* see whether this module can load the model file or not */
 	if ( pm->canload( fileName, buffer, bufSize ) == PICO_PMV_OK ) {
 		/* use loader provided by module to read the model data */
 		picoModel_t* model = pm->load( fileName, frameNum, buffer, bufSize );
-		if ( model == NULL ) {
-			_pico_free_file( buffer );
-			return NULL;
-		}
+		if ( model != NULL ) {
+			/* assign pointer to file format module */
+			model->module = pm;
 
-		/* assign pointer to file format module */
-		model->module = pm;
+			/* get model file name */
+			modelFileName = PicoGetModelFileName( model );
 
-		/* get model file name */
-		modelFileName = PicoGetModelFileName( model );
+			/* apply model remappings from <model>.remap */
+			if ( strlen( modelFileName ) ) {
+				/* alloc copy of model file name */
+				remapFileName = _pico_alloc( strlen( modelFileName ) + 20 );
+				if ( remapFileName != NULL ) {
+					/* copy model file name and change extension */
+					strcpy( remapFileName, modelFileName );
+					_pico_setfext( remapFileName, "remap" );
 
-		/* apply model remappings from <model>.remap */
-		if ( strlen( modelFileName ) ) {
-			/* alloc copy of model file name */
-			remapFileName = _pico_alloc( strlen( modelFileName ) + 20 );
-			if ( remapFileName != NULL ) {
-				/* copy model file name and change extension */
-				strcpy( remapFileName, modelFileName );
-				_pico_setfext( remapFileName, "remap" );
+					/* try to remap model; we don't handle the result */
+					PicoRemapModel( model, remapFileName );
 
-				/* try to remap model; we don't handle the result */
-				PicoRemapModel( model, remapFileName );
-
-				/* free the remap file name string */
-				_pico_free( remapFileName );
+					/* free the remap file name string */
+					_pico_free( remapFileName );
+				}
 			}
+			_pico_deduce_shadernames( model );
 		}
-
-		_pico_deduce_shadernames( model );
-
 		return model;
 	}
 
@@ -239,9 +234,7 @@ picoModel_t *PicoLoadModel( const char *fileName, int frameNum ){
 	}
 
 	/* free memory used by file buffer */
-	if ( buffer ) {
-		_pico_free_file( buffer );
-	}
+	_pico_free_file( buffer );
 
 	/* return */
 	return model;
@@ -273,9 +266,7 @@ picoModel_t *PicoModuleLoadModelStream( const picoModule_t* module, void* inputS
 
 	model = PicoModuleLoadModel( module, fileName, buffer, bufSize, frameNum );
 
-	if ( model != 0 ) {
-		_pico_free( buffer );
-	}
+	_pico_free( buffer );
 
 	/* return */
 	return model;
