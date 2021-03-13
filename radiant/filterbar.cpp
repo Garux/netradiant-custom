@@ -25,7 +25,10 @@ CopiedString GetCommonShader( const char* name ){
 	else{
 		sstream.clear();
 		if( string_empty( g_pGameDescription->getKeyValue( "show_wads" ) ) ){
-			sstream << "textures/common/" << name;
+			const char* commonDir = g_pGameDescription->getKeyValue( "common_shaders_dir" );
+			if( string_empty( commonDir ) )
+				commonDir = "common/";
+			sstream << "textures/" << commonDir << name;
 		}
 		else{
 			sstream << "textures/" << name;
