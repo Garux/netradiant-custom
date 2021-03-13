@@ -727,7 +727,7 @@ static picoModel_t *_obj_load( PM_PARAMS_LOAD ){
 				/* get next vertex index string (different */
 				/* formats are handled below) */
 				str = _pico_parse( p,0 );
-				if ( str == NULL ) {
+				if ( str == NULL || *str == '\0' ) {
 					/* got nuff points */
 					if ( i >= 3 ) {
 						break;
