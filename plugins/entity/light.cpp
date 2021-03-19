@@ -1864,7 +1864,7 @@ void selectPlanes( Selector& selector, SelectionTest& test, const PlaneCallback&
 	if ( g_lightType == LIGHTTYPE_DOOM3 ) {
 		m_dragPlanes.selectPlanes( m_contained.aabb(), selector, test, selectedPlaneCallback, rotation() );
 	}
-	else{
+	else if( g_lightRadii ){ // only scale radius while it is displayed
 		m_scaleRadius.selectPlanes( selector, test, selectedPlaneCallback );
 	}
 }
