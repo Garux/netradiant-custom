@@ -58,6 +58,7 @@ const Type& get() const {
 
 
 /// \brief An adaptor to make std::list into a Unique Sequence - which cannot contain the same value more than once.
+/// It's illegal to modify inserted values directly!
 /// \param Value Uniquely identifies itself. Must provide a copy-constructor and an equality operator.
 template<typename Value>
 class UnsortedSet
@@ -69,6 +70,38 @@ typedef typename Values::iterator iterator;
 typedef typename Values::const_iterator const_iterator;
 typedef typename Values::reverse_iterator reverse_iterator;
 typedef typename Values::const_reverse_iterator const_reverse_iterator;
+private:
+struct Compare{
+	using is_transparent = void;
+
+	bool operator()( const iterator& one, const iterator& other ) const {
+		return *one < *other;
+	}
+	bool operator()( const Value& va, const iterator& it ) const {
+		return va < *it;
+	}
+	bool operator()( const iterator& it, const Value& va ) const {
+		return *it < va;
+	}
+};
+std::set<iterator, Compare> m_set; // store sorted iterators for fast lookup
+void init_set(){ // only load set, when lookup is needed
+	if( m_set.empty() )
+		for( auto it = begin(); it != end(); ++it )
+			m_set.emplace( it );
+}
+public:
+
+UnsortedSet() = default;
+UnsortedSet( const UnsortedSet& other ) : m_values( other.m_values ), m_set(){
+}
+UnsortedSet( UnsortedSet&& ) noexcept = default;
+UnsortedSet& operator=( const UnsortedSet& other ){
+	m_values = other.m_values;
+	m_set.clear();
+	return *this;
+}
+UnsortedSet& operator=( UnsortedSet&& ) noexcept = default;
 
 iterator begin(){
 	return m_values.begin();
@@ -103,23 +136,32 @@ std::size_t size() const {
 }
 void clear(){
 	m_values.clear();
+	m_set.clear();
 }
 
 void swap( UnsortedSet& other ){
 	std::swap( m_values, other.m_values );
+	std::swap( m_set, other.m_set );
 }
+
 iterator insert( const Value& value ){
-	ASSERT_MESSAGE( find( value ) == end(), "UnsortedSet::insert: already added" );
+	init_set();
 	m_values.push_back( value );
+	const bool inserted = m_set.emplace( --end() ).second;
+	ASSERT_MESSAGE( inserted, "UnsortedSet::insert: already added" );
 	return --end();
 }
 void erase( const Value& value ){
-	iterator i = find( value );
-	ASSERT_MESSAGE( i != end(), "UnsortedSet::erase: not found" );
-	m_values.erase( i );
+	init_set();
+	const auto it = m_set.find( value );
+	ASSERT_MESSAGE( it != m_set.end(), "UnsortedSet::erase: not found" );
+	m_values.erase( *it );
+	m_set.erase( it );
 }
 iterator find( const Value& value ){
-	return std::find( begin(), end(), value );
+	init_set();
+	const auto it = m_set.find( value );
+	return it == m_set.end()? m_values.end() : *it;
 }
 };
 
@@ -274,7 +316,7 @@ void erase( const Value& value ){
 	m_values.erase( i );
 }
 iterator find( const Value& value ){
-	return std::find( begin(), end(), value );
+	return m_values.find( value );
 }
 };
 

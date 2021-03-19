@@ -745,6 +745,10 @@ class GraphTreeNode
 {
 typedef std::map<std::pair<CopiedString, scene::Node*>, GraphTreeNode*> ChildNodes;
 ChildNodes m_childnodes;
+
+std::list<char> m_list; // dummy list for child index identification
+std::list<char>::const_iterator m_parentListIterator; // iterator from parent's list
+bool m_searchFromEnd = false; //silly optimization
 public:
 Reference<scene::Instance> m_instance;
 GraphTreeNode* m_parent;
@@ -761,6 +765,11 @@ GraphTreeNode( scene::Instance& instance ) : m_instance( instance ), m_parent( 0
 	m_instance.get().setChildSelectedChangedCallback( Callback() );
 	ASSERT_MESSAGE( empty(), "GraphTreeNode::~GraphTreeNode: memory leak" );
 }
+GraphTreeNode() = delete;
+GraphTreeNode( const GraphTreeNode& ) = delete;
+GraphTreeNode( GraphTreeNode&& ) noexcept = delete;
+GraphTreeNode& operator=( const GraphTreeNode& ) = delete;
+GraphTreeNode& operator=( GraphTreeNode&& ) noexcept = delete;
 
 iterator begin(){
 	return m_childnodes.begin();
@@ -775,23 +784,28 @@ size_type size() const {
 bool empty() const {
 	return m_childnodes.empty();
 }
+// may not be called on the root node!
+int getIndex() const {
+	const int idx = m_parent->m_searchFromEnd?
+	                m_parent->m_list.size() - std::distance( m_parentListIterator, m_parent->m_list.cend() ) :
+	                std::distance( m_parent->m_list.cbegin(), m_parentListIterator );
+	m_parent->m_searchFromEnd = idx * 2 > int( m_parent->size() );
+	return idx;
+}
 
 iterator insert( const value_type& value ){
 	iterator i = m_childnodes.insert( value ).first;
 	( *i ).second->m_parent = this;
+	const auto pos = std::next( i ) == end()? m_list.end() : std::next( i )->second->m_parentListIterator;
+	i->second->m_parentListIterator = m_list.insert( pos, 'a' );
 	return i;
 }
 void erase( iterator i ){
+	m_list.erase( i->second->m_parentListIterator );
 	m_childnodes.erase( i );
 }
 iterator find( const key_type& key ){
 	return m_childnodes.find( key );
-}
-
-void swap( GraphTreeNode& other ){
-	std::swap( m_parent, other.m_parent );
-	std::swap( m_childnodes, other.m_childnodes );
-	std::swap( m_instance, other.m_instance );
 }
 
 void rowChanged(){
@@ -884,15 +898,7 @@ static GtkTreePath* graph_tree_model_get_path( GtkTreeModel* tree_model, GtkTree
 
 	for ( GraphTreeNode* node = ( *graph_iterator_read_tree_iter( iter ) ).second; node != graph; node = node->m_parent )
 	{
-		std::size_t index = 0;
-		for ( GraphTreeNode::iterator i = node->m_parent->begin(); i != node->m_parent->end(); ++i, ++index )
-		{
-			if ( ( *i ).second == node ) {
-				gtk_tree_path_prepend_index( path, gint( index ) );
-				break;
-			}
-		}
-		ASSERT_MESSAGE( index != node->m_parent->size(), "error resolving tree path" );
+		gtk_tree_path_prepend_index( path, gint( node->getIndex() ) );
 	}
 
 	return path;
