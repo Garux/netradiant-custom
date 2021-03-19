@@ -118,18 +118,8 @@ typedef MemberCaller1<SelectableInstance, const Selectable&, &SelectableInstance
 };
 
 
-template<typename Iterator>
-inline bool range_check( Iterator start, Iterator finish, Iterator iter ){
-	for (; start != finish; ++start )
-	{
-		if ( start == iter ) {
-			return true;
-		}
-	}
-	return false;
-}
-
 #include <list>
+#include <set>
 
 template<typename Selected>
 class SelectionList
@@ -139,6 +129,28 @@ List m_selection;
 public:
 typedef typename List::iterator iterator;
 typedef typename List::const_iterator const_iterator;
+private:
+struct Compare{
+	using is_transparent = void;
+
+	bool operator()( const iterator& one, const iterator& other ) const {
+		return *one < *other;
+	}
+	bool operator()( const Selected* va, const iterator& it ) const {
+		return va < *it;
+	}
+	bool operator()( const iterator& it, const Selected* va ) const {
+		return *it < va;
+	}
+};
+std::multiset<iterator, Compare> m_set;
+public:
+
+SelectionList() = default;
+SelectionList( const SelectionList& ) = delete;
+SelectionList( SelectionList&& ) noexcept = delete;
+SelectionList& operator=( const SelectionList& ) = delete;
+SelectionList& operator=( SelectionList&& ) noexcept = delete;
 
 iterator begin(){
 	return m_selection.begin();
@@ -166,12 +178,13 @@ Selected& back() const {
 }
 void append( Selected& selected ){
 	m_selection.push_back( &selected );
+	m_set.emplace( --end() );
 }
 void erase( Selected& selected ){
-	typename List::reverse_iterator i = std::find( m_selection.rbegin(), m_selection.rend(), &selected );
-	ASSERT_MESSAGE( i != m_selection.rend(), "selection-tracking error" );
-	ASSERT_MESSAGE( range_check( m_selection.begin(), m_selection.end(), --i.base() ), "selection-tracking error" );
-	m_selection.erase( --i.base() );
+	auto it = m_set.find( &selected );
+	ASSERT_MESSAGE( it != m_set.end(), "selection-tracking error" );
+	m_selection.erase( *it );
+	m_set.erase( it );
 }
 };
 
