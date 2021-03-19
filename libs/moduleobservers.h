@@ -35,12 +35,12 @@ public:
 	ASSERT_MESSAGE( m_observers.empty(), "ModuleObservers::~ModuleObservers: observers still attached" );
 }
 void attach( ModuleObserver& observer ){
-	ASSERT_MESSAGE( m_observers.find( &observer ) == m_observers.end(), "ModuleObservers::attach: cannot attach observer" );
-	m_observers.insert( &observer );
+	const bool inserted = m_observers.insert( &observer ).second;
+	ASSERT_MESSAGE( inserted, "ModuleObservers::attach: cannot attach observer" );
 }
 void detach( ModuleObserver& observer ){
-	ASSERT_MESSAGE( m_observers.find( &observer ) != m_observers.end(), "ModuleObservers::detach: cannot detach observer" );
-	m_observers.erase( &observer );
+	const bool erased = m_observers.erase( &observer );
+	ASSERT_MESSAGE( erased, "ModuleObservers::detach: cannot detach observer" );
 }
 void realise(){
 	for ( Observers::iterator i = m_observers.begin(); i != m_observers.end(); ++i )

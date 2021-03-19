@@ -118,12 +118,12 @@ void forEachInstance( const scene::Instantiable::Visitor& visitor ){
 }
 
 void insert( scene::Instantiable::Observer* observer, const scene::Path& path, scene::Instance* instance ){
-	ASSERT_MESSAGE( m_instances.find( key_type( observer, PathConstReference( instance->path() ) ) ) == m_instances.end(), "InstanceSet::insert - element already exists" );
-	m_instances.insert( InstanceMap::value_type( key_type( observer, PathConstReference( instance->path() ) ), instance ) );
+	const bool inserted = m_instances.insert( InstanceMap::value_type( key_type( observer, PathConstReference( instance->path() ) ), instance ) ).second;
+	ASSERT_MESSAGE( inserted, "InstanceSet::insert - element already exists" );
 }
 scene::Instance* erase( scene::Instantiable::Observer* observer, const scene::Path& path ){
-	ASSERT_MESSAGE( m_instances.find( key_type( observer, PathConstReference( path ) ) ) != m_instances.end(), "InstanceSet::erase - failed to find element" );
 	InstanceMap::iterator i = m_instances.find( key_type( observer, PathConstReference( path ) ) );
+	ASSERT_MESSAGE( i != m_instances.end(), "InstanceSet::erase - failed to find element" );
 	scene::Instance* instance = i->second;
 	m_instances.erase( i );
 	return instance;

@@ -1437,13 +1437,13 @@ void changed( LightCullable& cullable ){
 	( *i ).second.lightsChanged();
 }
 void attach( RendererLight& light ){
-	ASSERT_MESSAGE( m_lights.find( &light ) == m_lights.end(), "light could not be attached" );
-	m_lights.insert( &light );
+	const bool inserted = m_lights.insert( &light ).second;
+	ASSERT_MESSAGE( inserted, "light could not be attached" );
 	changed( light );
 }
 void detach( RendererLight& light ){
-	ASSERT_MESSAGE( m_lights.find( &light ) != m_lights.end(), "light could not be detached" );
-	m_lights.erase( &light );
+	const bool erased = m_lights.erase( &light );
+	ASSERT_MESSAGE( erased, "light could not be detached" );
 	changed( light );
 }
 void changed( RendererLight& light ){
@@ -1467,13 +1467,13 @@ mutable bool m_traverseRenderablesMutex;
 // renderables
 void attachRenderable( const Renderable& renderable ){
 	ASSERT_MESSAGE( !m_traverseRenderablesMutex, "attaching renderable during traversal" );
-	ASSERT_MESSAGE( m_renderables.find( &renderable ) == m_renderables.end(), "renderable could not be attached" );
-	m_renderables.insert( &renderable );
+	const bool inserted = m_renderables.insert( &renderable ).second;
+	ASSERT_MESSAGE( inserted, "renderable could not be attached" );
 }
 void detachRenderable( const Renderable& renderable ){
 	ASSERT_MESSAGE( !m_traverseRenderablesMutex, "detaching renderable during traversal" );
-	ASSERT_MESSAGE( m_renderables.find( &renderable ) != m_renderables.end(), "renderable could not be detached" );
-	m_renderables.erase( &renderable );
+	const bool erased = m_renderables.erase( &renderable );
+	ASSERT_MESSAGE( erased, "renderable could not be detached" );
 }
 void forEachRenderable( const RenderableCallback& callback ) const {
 	ASSERT_MESSAGE( !m_traverseRenderablesMutex, "for-each during traversal" );

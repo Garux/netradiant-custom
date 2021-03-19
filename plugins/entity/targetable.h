@@ -424,12 +424,12 @@ typedef std::set<TargetableInstance*> TargetableInstances;
 TargetableInstances m_instances;
 public:
 void attach( TargetableInstance& instance ){
-	ASSERT_MESSAGE( m_instances.find( &instance ) == m_instances.end(), "cannot attach instance" );
-	m_instances.insert( &instance );
+	const bool inserted = m_instances.insert( &instance ).second;
+	ASSERT_MESSAGE( inserted, "cannot attach instance" );
 }
 void detach( TargetableInstance& instance ){
-	ASSERT_MESSAGE( m_instances.find( &instance ) != m_instances.end(), "cannot detach instance" );
-	m_instances.erase( &instance );
+	const bool erased = m_instances.erase( &instance );
+	ASSERT_MESSAGE( erased, "cannot detach instance" );
 }
 
 void renderSolid( Renderer& renderer, const VolumeTest& volume ) const {

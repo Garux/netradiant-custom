@@ -340,12 +340,12 @@ void clear(){
 	trackersClear();
 }
 void trackerAttach( UndoTracker& tracker ){
-	ASSERT_MESSAGE( m_trackers.find( &tracker ) == m_trackers.end(), "undo tracker already attached" );
-	m_trackers.insert( &tracker );
+	const bool inserted = m_trackers.insert( &tracker ).second;
+	ASSERT_MESSAGE( inserted, "undo tracker already attached" );
 }
 void trackerDetach( UndoTracker& tracker ){
-	ASSERT_MESSAGE( m_trackers.find( &tracker ) != m_trackers.end(), "undo tracker cannot be detached" );
-	m_trackers.erase( &tracker );
+	const bool erased = m_trackers.erase( &tracker );
+	ASSERT_MESSAGE( erased, "undo tracker cannot be detached" );
 }
 void trackersClear() const {
 	for ( Trackers::const_iterator i = m_trackers.begin(); i != m_trackers.end(); ++i )

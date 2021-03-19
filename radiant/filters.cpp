@@ -96,13 +96,13 @@ void addFilter( Filter& filter, int mask ){
 	g_filters.back().update();
 }
 void registerFilterable( Filterable& filterable ){
-	ASSERT_MESSAGE( g_filterables.find( &filterable ) == g_filterables.end(), "filterable already registered" );
 	filterable.updateFiltered();
-	g_filterables.insert( &filterable );
+	const bool inserted = g_filterables.insert( &filterable ).second;
+	ASSERT_MESSAGE( inserted, "filterable already registered" );
 }
 void unregisterFilterable( Filterable& filterable ){
-	ASSERT_MESSAGE( g_filterables.find( &filterable ) != g_filterables.end(), "filterable not registered" );
-	g_filterables.erase( &filterable );
+	const bool erased = g_filterables.erase( &filterable );
+	ASSERT_MESSAGE( erased, "filterable not registered" );
 }
 };
 
