@@ -121,6 +121,7 @@ typedef MemberCaller1<SelectableInstance, const Selectable&, &SelectableInstance
 #include <list>
 #include <set>
 
+/// It's illegal to modify inserted values directly!
 template<typename Selected>
 class SelectionList
 {
@@ -133,17 +134,17 @@ private:
 struct Compare{
 	using is_transparent = void;
 
-	bool operator()( const iterator& one, const iterator& other ) const {
+	bool operator()( const const_iterator& one, const const_iterator& other ) const {
 		return *one < *other;
 	}
-	bool operator()( const Selected* va, const iterator& it ) const {
+	bool operator()( const Selected* va, const const_iterator& it ) const {
 		return va < *it;
 	}
-	bool operator()( const iterator& it, const Selected* va ) const {
+	bool operator()( const const_iterator& it, const Selected* va ) const {
 		return *it < va;
 	}
 };
-std::multiset<iterator, Compare> m_set;
+std::multiset<const_iterator, Compare> m_set;
 public:
 
 SelectionList() = default;
@@ -181,8 +182,8 @@ void append( Selected& selected ){
 	m_set.emplace( --end() );
 }
 void erase( Selected& selected ){
-	auto it = m_set.find( &selected );
-	ASSERT_MESSAGE( it != m_set.end(), "selection-tracking error" );
+	const auto it = m_set.find( &selected );
+	ASSERT_MESSAGE( it != m_set.cend(), "selection-tracking error" );
 	m_selection.erase( *it );
 	m_set.erase( it );
 }

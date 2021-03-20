@@ -74,20 +74,20 @@ private:
 struct Compare{
 	using is_transparent = void;
 
-	bool operator()( const iterator& one, const iterator& other ) const {
+	bool operator()( const const_iterator& one, const const_iterator& other ) const {
 		return *one < *other;
 	}
-	bool operator()( const Value& va, const iterator& it ) const {
+	bool operator()( const Value& va, const const_iterator& it ) const {
 		return va < *it;
 	}
-	bool operator()( const iterator& it, const Value& va ) const {
+	bool operator()( const const_iterator& it, const Value& va ) const {
 		return *it < va;
 	}
 };
-std::set<iterator, Compare> m_set; // store sorted iterators for fast lookup
+std::set<const_iterator, Compare> m_set; // store sorted iterators for fast lookup
 void init_set(){ // only load set, when lookup is needed
 	if( m_set.empty() )
-		for( auto it = begin(); it != end(); ++it )
+		for( const_iterator it = begin(); it != end(); ++it )
 			m_set.emplace( it );
 }
 public:
@@ -154,14 +154,14 @@ iterator insert( const Value& value ){
 void erase( const Value& value ){
 	init_set();
 	const auto it = m_set.find( value );
-	ASSERT_MESSAGE( it != m_set.end(), "UnsortedSet::erase: not found" );
+	ASSERT_MESSAGE( it != m_set.cend(), "UnsortedSet::erase: not found" );
 	m_values.erase( *it );
 	m_set.erase( it );
 }
-iterator find( const Value& value ){
+const_iterator find( const Value& value ){
 	init_set();
 	const auto it = m_set.find( value );
-	return it == m_set.end()? m_values.end() : *it;
+	return it == m_set.cend()? end() : *it;
 }
 };
 

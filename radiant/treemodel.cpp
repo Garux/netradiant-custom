@@ -743,18 +743,27 @@ void graph_tree_model_row_changed( GraphTreeNode& node );
 
 class GraphTreeNode
 {
-typedef std::map<std::pair<CopiedString, scene::Node*>, GraphTreeNode*> ChildNodes;
+public:
+typedef std::pair<CopiedString, scene::Node*> key_type;
+private:
+struct Compare{
+	bool operator()( const key_type& one, const key_type& other ) const {
+		const int n = string_compare( one.first.c_str(), other.first.c_str() );
+		return n != 0? n < 0 : one.second < other.second;
+	}
+};
+typedef std::map<key_type, GraphTreeNode*, Compare> ChildNodes;
 ChildNodes m_childnodes;
 
-std::list<char> m_list; // dummy list for child index identification
-std::list<char>::const_iterator m_parentListIterator; // iterator from parent's list
+struct Dummy{};
+std::list<Dummy> m_list; // dummy list for child index identification
+std::list<Dummy>::const_iterator m_parentListIterator; // iterator from parent's list
 bool m_searchFromEnd = false; //silly optimization
 public:
 Reference<scene::Instance> m_instance;
 GraphTreeNode* m_parent;
 
 typedef ChildNodes::iterator iterator;
-typedef ChildNodes::key_type key_type;
 typedef ChildNodes::value_type value_type;
 typedef ChildNodes::size_type size_type;
 
@@ -794,10 +803,11 @@ int getIndex() const {
 }
 
 iterator insert( const value_type& value ){
-	iterator i = m_childnodes.insert( value ).first;
+	auto [ i, inserted ] = m_childnodes.insert( value );
+	ASSERT_MESSAGE( inserted, "GraphTreeNode::insert: already added" );
 	( *i ).second->m_parent = this;
 	const auto pos = std::next( i ) == end()? m_list.end() : std::next( i )->second->m_parentListIterator;
-	i->second->m_parentListIterator = m_list.insert( pos, 'a' );
+	i->second->m_parentListIterator = m_list.insert( pos, Dummy() );
 	return i;
 }
 void erase( iterator i ){
