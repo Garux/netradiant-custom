@@ -988,8 +988,11 @@ void EntityAttribute_setTooltip( GtkWidget* widget, const char* name, const char
 	StringOutputStream stream( 256 );
 	if( string_not_empty( name ) )
 		stream << "<b>      " << name << "</b>   ";
-	if( string_not_empty( description ) )
-		stream << "\n" << description;
+	if( string_not_empty( description ) ){
+		gchar *str = g_markup_escape_text( description, -1 );
+		stream << "\n" << str;
+		g_free( str );
+	}
 	if( !stream.empty() )
 		gtk_widget_set_tooltip_markup( widget, stream.c_str() );
 }

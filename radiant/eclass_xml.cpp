@@ -235,7 +235,14 @@ void popElement( const char* elementName ){
 	ERROR_MESSAGE( PARSE_ERROR( elementName, "attribute" ) );
 }
 std::size_t write( const char* data, std::size_t length ){
-	m_attribute->m_description = StringRange( data, data + length );
+	CopiedString& desc = m_attribute->m_description;
+	if( desc.empty() ){
+		desc = StringRange( data, data + length );
+	}
+	else{ // in case of special symbols, e.g. &quot, &apos, &lt, &gt, &amp, xml writes in a few steps
+		desc = StringOutputStream()( desc.c_str(), StringRange( data, data + length ) );
+	}
+
 	return m_comment.write( data, length );
 }
 };
